@@ -20,41 +20,12 @@
     Copyright (C) 2015 (Li, Kwue-Ron) <likwueron@gmail.com>
 */
 
-#ifndef QTLUAQTLIB_HH_
-#define QTLUAQTLIB_HH_
-
-#include <QObject>
-#include <QSizePolicy>
+#include <QMetaType>
+#include "qtluavalue.hh"
 
 namespace QtLua {
-
   class State;
 
-  void qtluaopen_qt(State *ls);
-
-  void create_qmeta_object_table();
-
-  /** Fake QSizePolicy class needed to expose Policy enum */
-  class SizePolicy
-    : public QObject
-  {
-    Q_OBJECT;
-
-    Q_ENUMS(Policy);
-  public:
-    enum Policy
-      {
-	Fixed = ::QSizePolicy::Fixed,
-	Minimum = ::QSizePolicy::Minimum,
-	Maximum = ::QSizePolicy::Maximum,
-	Preferred = ::QSizePolicy::Preferred,
-	Expanding = ::QSizePolicy::Expanding,
-	MinimumExpanding = ::QSizePolicy::MinimumExpanding,
-	Ignored = ::QSizePolicy::Ignored,
-      };
-  };
-
+  typedef Value::List (*FunctionSignature)(State*, const Value::List&);
+#define SIZEOF_ARGT(ARGT) sizeof(ARGT) / sizeof(QMetaType::Type)
 }
-
-#endif
-

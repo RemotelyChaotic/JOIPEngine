@@ -32,6 +32,7 @@ ADD_LIBRARY(qtlua STATIC
             qtluatabletreemodel.cc qtluauserdata.cc
             qtluavaluebase.cc qtluavalue.cc
             qtluavalueref.cc qtluadispatchproxy.cc
+            qtluafunctionwrapperdata.cc qtluastaticfunction.cc
 
             ${MOC_OUTFILES})
 
@@ -73,6 +74,8 @@ INSTALL(FILES
         QtLua/ArrayProxy         QtLua/qtluaarrayproxy.hh      QtLua/qtluaarrayproxy.hxx 
         QtLua/MetaType           QtLua/qtluametatype.hh        QtLua/qtluametatype.hxx 
         QtLua/DispatchProxy      QtLua/qtluadispatchproxy.hh   QtLua/qtluadispatchproxy.hxx
+        QtLua/FunctionSignature  QtLua/qtluafunctionsignature.hh
+        
 
         DESTINATION ${INSTALL_INC}/QtLua)
 

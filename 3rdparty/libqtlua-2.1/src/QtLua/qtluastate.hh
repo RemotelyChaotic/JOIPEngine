@@ -16,6 +16,8 @@
 
     Copyright (C) 2008, Alexandre Becoulet <alexandre.becoulet@free.fr>
 
+    Fork
+    Copyright (C) 2015 (Li, Kwue-Ron) <likwueron@gmail.com>
 */
 
 // __moc_flags__ -fQtLua/State
@@ -27,6 +29,7 @@
 #include <QObject>
 #include <QHash>
 
+#include "qtluafunctionsignature.hh"
 #include "qtluastring.hh"
 #include "qtluavalue.hh"
 #include "qtluavalueref.hh"
@@ -45,6 +48,12 @@ namespace QtLua {
   /** @internal */
   void qtlib_register_meta(const QMetaObject *mo, qobject_creator *creator);
 
+  void qtlib_register_meta(const QMetaObject *mo, const QMetaObject *supreme_mo, bool auto_property, qobject_creator *creator);
+  
+  void qtlib_enable_meta_auto_property(const QMetaObject *mo, bool enable);
+
+  void qtlib_register_static_method(const QMetaObject *mo, const String &name, FunctionSignature func, const QList<String> &argv);
+
   class UserData;
   class QObjectWrapper;
   class TableIterator;
@@ -56,22 +65,28 @@ namespace QtLua {
       with the @ref State::openlib function. */
   enum Library
     {
-      BaseLib,		//< standard lua base library
-      CoroutineLib,	//< standard lua coroutine library, included in base before lua 5.2
-      PackageLib,	//< standard lua package library
-      StringLib,	//< standard lua string library
-      TableLib,		//< standard lua table library
-      MathLib,		//< standard lua math library
-      IoLib,		//< standard lua io library
-      OsLib,		//< standard lua os library
-      DebugLib,		//< standard lua debug library
-      Bit32Lib,		//< standard lua bit library
-      JitLib,		//< luajit jit library
-      FfiLib,		//< luajit ffi library
-      QtLuaLib,		//< lua library with base functions, see the @xref{Predefined lua functions} section.
-      QtLib,		//< lua library with wrapped Qt functions, see the @xref{Qt related functions} section.
-      AllLibs,		//< All libraries wildcard
+      BaseLib = 0x1,      //< standard lua base library
+      CoroutineLib = 0x2, //< standard lua coroutine library, included in base before lua 5.2
+      PackageLib = 0x4,   //< standard lua package library
+      StringLib = 0x8,    //< standard lua string library
+      TableLib = 0x10,    //< standard lua table library
+      MathLib = 0x20,     //< standard lua math library
+      IoLib = 0x40,       //< standard lua io library
+      OsLib = 0x80,       //< standard lua os library
+      DebugLib = 0x100,   //< standard lua debug library
+      Bit32Lib = 0x200,   //< standard lua bit library
+      JitLib = 0x400,     //< luajit jit library
+      FfiLib = 0x800,     //< luajit ffi library
+      QtLuaLib = 0x1000,  //< lua library with base functions, see the @xref{Predefined lua functions} section.
+      QtLib = 0x2000,     //< lua library with wrapped Qt functions, see the @xref{Qt related functions} section.
+      AllLibs =           //< All libraries wildcard
+                BaseLib | CoroutineLib |
+                PackageLib | StringLib | TableLib | MathLib |
+                IoLib | OsLib | DebugLib | Bit32Lib |
+                JitLib | FfiLib |
+                QtLuaLib | QtLib,
     };
+  Q_DECLARE_FLAGS(Librarys, Library);
 
   /**
    * @short Lua interpreter state wrapper class
@@ -197,7 +212,7 @@ public:
    * @see QtLua::Library
    * @xsee{QtLua lua libraries}
    */
-  bool openlib(Library lib);
+  bool openlib(Librarys lib);
 
   /** 
    * Call given function pointer with internal @ref lua_State
@@ -220,6 +235,11 @@ public:
    */
   template <class QObject_T>
   static inline void register_qobject_meta();
+  template <class QObject_T, class Supreme_T>
+  static inline void register_qobject_meta();
+
+  template <class QObject_T>
+  static inline void register_qobject_static_method(const String &name, FunctionSignature func, const QList<String> &argv);
 
   /**
    * @internal @This asserts internal lua stack is empty.
@@ -328,5 +348,6 @@ private:
 };
 
 }
+Q_DECLARE_OPERATORS_FOR_FLAGS(QtLua::Librarys);
 
 #endif

@@ -16,6 +16,8 @@
 
     Copyright (C) 2008, Alexandre Becoulet <alexandre.becoulet@free.fr>
 
+    Fork
+    Copyright (C) 2015 (Li, Kwue-Ron) <likwueron@gmail.com>
 */
 
 #include "config.hh"
@@ -749,6 +751,7 @@ State::State()
   assert(Value::TFunction == LUA_TFUNCTION);
   assert(Value::TUserData == LUA_TUSERDATA);
   assert(Value::TThread == LUA_TTHREAD);
+  create_qmeta_object_table();
 
 #if LUA_VERSION_NUM < 501
   _mst = _lst = lua_open();
@@ -983,104 +986,86 @@ State * State::get_this(lua_State *st)
   lua_pop(st, 1);
 #endif
 
-bool State::openlib(Library lib)
+bool State::openlib(Librarys lib)
 {
-  switch (lib)
-    {
-    case CoroutineLib:
+    bool hasSetted = false;
+    if(lib & CoroutineLib) {
 #if LUA_VERSION_NUM >= 502
       QTLUA_LUA_CALL(_lst, luaopen_coroutine, "coroutine");
-      return true;
+      hasSetted = true;
+#else
+      lib |= BaseLib;
 #endif
-    case BaseLib:
-      QTLUA_LUA_CALL(_lst, luaopen_base, "_G");
-      return true;
+    }
+    if(lib & BaseLib) {
+        QTLUA_LUA_CALL(_lst, luaopen_base, "_G");
+        hasSetted = true;
+    }
 #ifdef HAVE_LUA_PACKAGELIB
-    case PackageLib:
+    if(lib & PackageLib) {
       QTLUA_LUA_CALL(_lst, luaopen_package, "package");
-      return true;
+      hasSetted = true;
+    }
 #endif
-    case StringLib:
+    if(lib & StringLib) {
       QTLUA_LUA_CALL(_lst, luaopen_string, "string");
-      return true;
-    case TableLib:
+      hasSetted = true;
+    }
+    if(lib & TableLib) {
       QTLUA_LUA_CALL(_lst, luaopen_table, "table");
-      return true;
-    case MathLib:
+      hasSetted = true;
+    }
+    if(lib & MathLib) {
       QTLUA_LUA_CALL(_lst, luaopen_math, "math");
-      return true;
-    case IoLib:
+      hasSetted = true;
+    }
+    if(lib & IoLib) {
       QTLUA_LUA_CALL(_lst, luaopen_io, "io");
-      return true;
+      hasSetted = true;
+    }
 #ifdef HAVE_LUA_OSLIB
-    case OsLib:
+    if(lib & OsLib) {
       QTLUA_LUA_CALL(_lst, luaopen_os, "os");
-      return true;
+      hasSetted = true;
+    }
 #endif
-    case DebugLib:
+    if(lib & DebugLib) {
       QTLUA_LUA_CALL(_lst, luaopen_debug, "debug");
-      return true;
-
+      hasSetted = true;
+    }
 #if LUA_VERSION_NUM >= 502 && LUA_VERSION_NUM < 504
-    case Bit32Lib:
+    if(lib & Bit32Lib) {
       QTLUA_LUA_CALL(_lst, luaopen_bit32, "bit32");
-      return true;
+      hasSetted = true;
+    }
 #endif
-
 #ifdef HAVE_LUA_JITLIB
-    case JitLib:
+    if(lib & JitLib) {
       QTLUA_LUA_CALL(_lst, luaopen_jit, "jit");
-      return true;
+      hasSetted = true;
+    }
 #endif
 #ifdef HAVE_LUA_FFILIB
-    case FfiLib:
+    if(lib & FfiLib) {
       QTLUA_LUA_CALL(_lst, luaopen_ffi, "ffi");
-      return true;
+      hasSetted = true;
+    }
 #endif
-
-    case AllLibs:
-#if LUA_VERSION_NUM >= 502
-      QTLUA_LUA_CALL(_lst, luaopen_coroutine, "coroutine");
-#if LUA_VERSION_NUM < 504
-      QTLUA_LUA_CALL(_lst, luaopen_bit32, "bit32");
-#endif
-#endif
-#ifdef HAVE_LUA_OSLIB
-      QTLUA_LUA_CALL(_lst, luaopen_os, "os");
-#endif
-#ifdef HAVE_LUA_PACKAGELIB
-      QTLUA_LUA_CALL(_lst, luaopen_package, "package");
-#endif
-      QTLUA_LUA_CALL(_lst, luaopen_base, "_G");
-      QTLUA_LUA_CALL(_lst, luaopen_string, "string");
-      QTLUA_LUA_CALL(_lst, luaopen_table, "table");
-      QTLUA_LUA_CALL(_lst, luaopen_math, "math");
-      QTLUA_LUA_CALL(_lst, luaopen_io, "io");
-      QTLUA_LUA_CALL(_lst, luaopen_debug, "debug");
-#ifdef HAVE_LUA_JITLIB
-      QTLUA_LUA_CALL(_lst, luaopen_jit, "jit");
-#endif
-#ifdef HAVE_LUA_FFILIB
-      QTLUA_LUA_CALL(_lst, luaopen_ffi, "ffi");
-#endif
-      qtluaopen_qt(this);
-
-    case QtLuaLib:
+    if(lib & QtLuaLib) {
       reg_c_function("print", lua_cmd_print);
       reg_c_function("list", lua_cmd_list);
       reg_c_function("each", lua_cmd_each);
       reg_c_function("help", lua_cmd_help);
       reg_c_function("plugin", lua_cmd_plugin);
       reg_c_function("qtype", lua_cmd_qtype);
-      return true;
-
-    case QtLib:
-      qtluaopen_qt(this);
-      return true;
-
-    default:
-      return false;
+      hasSetted = true;
     }
+    if(lib & QtLib) {
+      qtluaopen_qt(this);
+      hasSetted = true;
+    }
+
+    return hasSetted;
 }
 
 int State::lua_version() const
@@ -1166,7 +1151,7 @@ void State::fill_completion_list_r(String &path, const String &prefix,
 		  default:
 		    break;
 		  }
-	      } catch (String &e) {
+        } catch (String &) {
 		/* can not access value */
 	      }
 
