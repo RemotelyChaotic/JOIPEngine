@@ -1,6 +1,12 @@
 #include "CApplication.h"
+#include "CSettings.h"
 #include <QQmlApplicationEngine>
+#include <QQmlContext>
 
+void InitialiseQmlEngine(CApplication *pApp, QQmlApplicationEngine* pEngine);
+
+//----------------------------------------------------------------------------------------
+//
 int main(int argc, char *argv[])
 {
   QCoreApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
@@ -13,5 +19,16 @@ int main(int argc, char *argv[])
   if (engine.rootObjects().isEmpty())
   { return -1; }
 
+  InitialiseQmlEngine(&app, &engine);
+
   return app.exec();
+}
+
+//----------------------------------------------------------------------------------------
+//
+void InitialiseQmlEngine(CApplication* pApp, QQmlApplicationEngine* pEngine)
+{
+  if (nullptr == pApp || nullptr == pEngine) { return; }
+
+  pEngine->rootContext()->setContextProperty("Settings", pApp->Settings().get());
 }

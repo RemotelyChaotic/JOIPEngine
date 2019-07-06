@@ -1,10 +1,9 @@
 #ifndef CAPPLICATION_H
 #define CAPPLICATION_H
 
+#include "CSettings.h"
 #include <QGuiApplication>
 #include <memory>
-
-class QSettings;
 
 class CApplication : public QGuiApplication
 {
@@ -16,12 +15,10 @@ public:
 
   void Initialize();
 
-  std::shared_ptr<QSettings> Settings() { return m_spSettings; }
+  std::shared_ptr<CSettings> Settings() { return m_spSettings; }
 
 private:
-  void GenerateSettingsIfNotExists();
-
-  std::shared_ptr<QSettings> m_spSettings;
+  std::shared_ptr<CSettings> m_spSettings;
   bool                       m_bInitialized;
 };
 
