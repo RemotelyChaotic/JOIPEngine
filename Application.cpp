@@ -1,4 +1,5 @@
-#include "CApplication.h"
+#include "Application.h"
+#include <cassert>
 
 CApplication::CApplication(int argc, char *argv[]) :
   QGuiApplication(argc, argv),
@@ -11,6 +12,15 @@ CApplication::CApplication(int argc, char *argv[]) :
 CApplication::~CApplication()
 {
 
+}
+
+//----------------------------------------------------------------------------------------
+//
+CApplication* CApplication::Instance()
+{
+  CApplication* pApp = dynamic_cast<CApplication*>(QCoreApplication::instance());
+  assert(nullptr != pApp);
+  return pApp;
 }
 
 //----------------------------------------------------------------------------------------

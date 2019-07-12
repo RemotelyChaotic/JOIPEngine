@@ -1,4 +1,4 @@
-#include "CSettings.h"
+#include "Settings.h"
 #include <QCoreApplication>
 #include <QDir>
 #include <QFileInfo>

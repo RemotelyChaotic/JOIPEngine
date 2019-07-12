@@ -1,7 +1,7 @@
 #ifndef CAPPLICATION_H
 #define CAPPLICATION_H
 
-#include "CSettings.h"
+#include "Settings.h"
 #include <QGuiApplication>
 #include <memory>
 
@@ -12,6 +12,8 @@ class CApplication : public QGuiApplication
 public:
   explicit CApplication(int argc, char *argv[]);
   ~CApplication();
+
+  static CApplication* Instance();
 
   void Initialize();
 
