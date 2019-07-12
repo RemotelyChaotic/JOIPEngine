@@ -22,33 +22,39 @@ DEFINES += QT_DEPRECATED_WARNINGS
 # You can also select to disable deprecated APIs only up to a certain version of Qt.
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
-CONFIG += c++11
+CONFIG += c++14
+
+include(lib/better-enums/_lib_enum.pri)
+
+INCLUDEPATH += \
+    src
 
 SOURCES += \
-    main.cpp \
-    MainWindow.cpp \
-    Settings.cpp \
-    Application.cpp \
-    MainScreen.cpp \
-    SettingsScreen.cpp \
-    SceneScreen.cpp \
-    SceneSelectionScreen.cpp
+    src/main.cpp \
+    src/MainWindow.cpp \
+    src/Settings.cpp \
+    src/Application.cpp \
+    src/MainScreen.cpp \
+    src/SettingsScreen.cpp \
+    src/SceneScreen.cpp \
+    src/SceneSelectionScreen.cpp
 
 HEADERS += \
-    MainWindow.h \
-    Settings.h \
-    Application.h \
-    MainScreen.h \
-    SettingsScreen.h \
-    SceneScreen.h \
-    SceneSelectionScreen.h
+    src/MainWindow.h \
+    src/Settings.h \
+    src/Application.h \
+    src/MainScreen.h \
+    src/SettingsScreen.h \
+    src/SceneScreen.h \
+    src/SceneSelectionScreen.h \
+    src/Enums.h
 
 FORMS += \
-    MainWindow.ui \
-    MainScreen.ui \
-    SettingsScreen.ui \
-    SceneScreen.ui \
-    SceneSelectionScreen.ui
+    src/MainWindow.ui \
+    src/MainScreen.ui \
+    src/SettingsScreen.ui \
+    src/SceneScreen.ui \
+    src/SceneSelectionScreen.ui
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin

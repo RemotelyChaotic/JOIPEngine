@@ -1,4 +1,5 @@
 #include "MainWindow.h"
+#include "Enums.h"
 #include "MainScreen.h"
 #include "SceneScreen.h"
 #include "SceneSelectionScreen.h"
@@ -28,10 +29,10 @@ void CMainWindow::Initialize()
   m_spUi->pMenuBar->setVisible(false);
   m_spUi->pStatusBar->setVisible(false);
 
-  m_spUi->pApplicationStackWidget->addWidget(new CMainScreen(m_spUi->pApplicationStackWidget));
-  m_spUi->pApplicationStackWidget->addWidget(new CSceneSelectionScreen(m_spUi->pApplicationStackWidget));
-  m_spUi->pApplicationStackWidget->addWidget(new CSettingsScreen(m_spUi->pApplicationStackWidget));
-  m_spUi->pApplicationStackWidget->addWidget(new CSceneScreen(m_spUi->pApplicationStackWidget));
+  m_spUi->pApplicationStackWidget->insertWidget(EAppState::eMainScreen, new CMainScreen(m_spUi->pApplicationStackWidget));
+  m_spUi->pApplicationStackWidget->insertWidget(EAppState::eSceneSelectionScreen, new CSceneSelectionScreen(m_spUi->pApplicationStackWidget));
+  m_spUi->pApplicationStackWidget->insertWidget(EAppState::eSettingsScreen,new CSettingsScreen(m_spUi->pApplicationStackWidget));
+  m_spUi->pApplicationStackWidget->insertWidget(EAppState::eSceneScreen,new CSceneScreen(m_spUi->pApplicationStackWidget));
 
   m_bInitialized = true;
 }
