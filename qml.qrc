@@ -1,8 +1,10 @@
 <RCC>
     <qresource prefix="/">
         <file>main.qml</file>
-        <file>HomeForm.ui.qml</file>
-        <file>SettingsPage.qml</file>
+        <file>HomePage.ui.qml</file>
         <file>qtquickcontrols2.conf</file>
+        <file>SettingsPage.ui.qml</file>
+        <file>FileBrowser.qml</file>
+        <file>FileBrowserForm.ui.qml</file>
     </qresource>
 </RCC>

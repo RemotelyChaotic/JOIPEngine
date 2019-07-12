@@ -44,7 +44,7 @@ ApplicationWindow {
                 text: qsTr("Settings")
                 width: parent.width
                 onClicked: {
-                    stackView.push("qrc:/SettingsPage.qml")
+                    stackView.push("qrc:/SettingsPage.ui.qml")
                     drawer.close()
                 }
             }
@@ -53,7 +53,7 @@ ApplicationWindow {
 
     StackView {
         id: stackView
-        initialItem: "qrc:/HomeForm.ui.qml"
+        initialItem: "qrc:/HomePage.ui.qml"
         anchors.fill: parent
 
         pushEnter: Transition {

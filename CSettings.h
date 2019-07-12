@@ -10,7 +10,7 @@ class QSettings;
 class CSettings : public QObject {
 
   Q_OBJECT
-  Q_PROPERTY(QString sContentFolder READ ContentFolder WRITE SetContentFolder NOTIFY ContentFolderChanged)
+  Q_PROPERTY(QString contentFolder READ ContentFolder WRITE SetContentFolder NOTIFY ContentFolderChanged)
 
 public:
   static const QString c_sSettingContentFolder;
