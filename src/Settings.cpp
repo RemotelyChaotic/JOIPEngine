@@ -3,6 +3,7 @@
 #include <QCoreApplication>
 #include <QDir>
 #include <QFileInfo>
+#include <QMutexLocker>
 #include <QSettings>
 
 //----------------------------------------------------------------------------------------
@@ -34,6 +35,7 @@ CSettings::~CSettings()
 //
 void CSettings::SetContentFolder(const QString& sPath)
 {
+  QMutexLocker locker(&m_settingsMutex);
   QString sOldPath = m_spSettings->value(CSettings::c_sSettingContentFolder).toString();
   QFileInfo contentFileInfo(sPath);
 
@@ -48,6 +50,7 @@ void CSettings::SetContentFolder(const QString& sPath)
 //
 QString CSettings::ContentFolder()
 {
+  QMutexLocker locker(&m_settingsMutex);
   return m_spSettings->value(CSettings::c_sSettingContentFolder).toString();
 }
 
@@ -55,6 +58,7 @@ QString CSettings::ContentFolder()
 //
 void CSettings::SetResolution(const QSize& size)
 {
+  QMutexLocker locker(&m_settingsMutex);
   QSize oldValue = m_spSettings->value(CSettings::c_sSettingResolution).toSize();
 
   if (size == oldValue) { return; }
@@ -68,6 +72,7 @@ void CSettings::SetResolution(const QSize& size)
 //
 QSize CSettings::Resolution()
 {
+  QMutexLocker locker(&m_settingsMutex);
   return m_spSettings->value(CSettings::c_sSettingResolution).toSize();
 }
 
@@ -75,6 +80,7 @@ QSize CSettings::Resolution()
 //
 void CSettings::GenerateSettingsIfNotExists()
 {
+  QMutexLocker locker(&m_settingsMutex);
   bool bNeedsSynch = false;
 
   // check content path

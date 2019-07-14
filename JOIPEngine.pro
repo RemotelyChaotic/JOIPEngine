@@ -4,7 +4,7 @@
 #
 #-------------------------------------------------
 
-QT       += core gui opengl
+QT       += core gui opengl script
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
@@ -39,7 +39,12 @@ SOURCES += \
     src/SceneScreen.cpp \
     src/SceneSelectionScreen.cpp \
     src/WindowContext.cpp \
-    src/EditorScreen.cpp
+    src/EditorScreen.cpp \
+    src/Backend/ThreadedSystem.cpp \
+    src/Backend/DatabaseManager.cpp \
+    src/Backend/Project.cpp \
+    src/Backend/Scene.cpp \
+    src/Backend/Resource.cpp
 
 HEADERS += \
     src/MainWindow.h \
@@ -52,7 +57,12 @@ HEADERS += \
     src/Enums.h \
     src/WindowContext.h \
     src/IAppStateScreen.h \
-    src/EditorScreen.h
+    src/EditorScreen.h \
+    src/Backend/ThreadedSystem.h \
+    src/Backend/DatabaseManager.h \
+    src/Backend/Project.h \
+    src/Backend/Scene.h \
+    src/Backend/Resource.h
 
 FORMS += \
     src/MainWindow.ui \

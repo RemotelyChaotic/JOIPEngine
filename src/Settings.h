@@ -1,6 +1,7 @@
 #ifndef CSETTINGS_H
 #define CSETTINGS_H
 
+#include <QMutex>
 #include <QObject>
 #include <QSize>
 #include <QString>
@@ -36,6 +37,7 @@ signals:
 private:
   void GenerateSettingsIfNotExists();
 
+  mutable QMutex             m_settingsMutex;
   std::shared_ptr<QSettings> m_spSettings;
 };
 

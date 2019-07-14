@@ -9,6 +9,9 @@ BETTER_ENUM(EAppState, qint32,
             eSceneSelectionScreen = 1,
             eSettingsScreen = 2,
             eSceneScreen = 3,
-            eEditorScreen = 4)
+            eEditorScreen = 4);
+
+BETTER_ENUM(ECoreSystems, qint32,
+            eDatabaseManager = 0);
 
 #endif // ENUMS_H

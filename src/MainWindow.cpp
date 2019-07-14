@@ -104,5 +104,5 @@ void CMainWindow::ConnectSlots()
           this, &CMainWindow::SlotChangeAppState, Qt::DirectConnection);
 
   connect(m_spSettings.get(), &CSettings::ResolutionChanged,
-          this, &CMainWindow::SlotResolutionChanged, Qt::DirectConnection);
+          this, &CMainWindow::SlotResolutionChanged, Qt::QueuedConnection);
 }
