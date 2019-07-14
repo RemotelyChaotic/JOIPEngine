@@ -37,7 +37,9 @@ SOURCES += \
     src/MainScreen.cpp \
     src/SettingsScreen.cpp \
     src/SceneScreen.cpp \
-    src/SceneSelectionScreen.cpp
+    src/SceneSelectionScreen.cpp \
+    src/WindowContext.cpp \
+    src/EditorScreen.cpp
 
 HEADERS += \
     src/MainWindow.h \
@@ -47,14 +49,18 @@ HEADERS += \
     src/SettingsScreen.h \
     src/SceneScreen.h \
     src/SceneSelectionScreen.h \
-    src/Enums.h
+    src/Enums.h \
+    src/WindowContext.h \
+    src/IAppStateScreen.h \
+    src/EditorScreen.h
 
 FORMS += \
     src/MainWindow.ui \
     src/MainScreen.ui \
     src/SettingsScreen.ui \
     src/SceneScreen.ui \
-    src/SceneSelectionScreen.ui
+    src/SceneSelectionScreen.ui \
+    src/EditorScreen.ui
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin

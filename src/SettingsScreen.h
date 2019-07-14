@@ -1,26 +1,37 @@
 #ifndef SETTINGSSCREEN_H
 #define SETTINGSSCREEN_H
 
+#include "IAppStateScreen.h"
 #include <QWidget>
 #include <memory>
 
+class CSettings;
 namespace Ui {
   class CSettingsScreen;
 }
 
-class CSettingsScreen : public QWidget
+class CSettingsScreen : public QWidget, public IAppStateScreen
 {
   Q_OBJECT
 
 public:
-  explicit CSettingsScreen(QWidget *parent = nullptr);
-  ~CSettingsScreen();
+  explicit CSettingsScreen(const std::shared_ptr<CWindowContext>& spWindowContext,
+                           QWidget* pParent = nullptr);
+  ~CSettingsScreen() override;
 
   void Initialize();
 
-private:
+  void Load() override;
+  void Unload() override;
+
+protected slots:
+  void on_pResolutionComboBox_currentIndexChanged(qint32 iIndex);
+  void on_pFolderLineEdit_editingFinished();
+  void on_pBrowseButton_clicked();
+
+private:  
   std::unique_ptr<Ui::CSettingsScreen> m_spUi;
-  bool                                 m_bInitialized;
+  std::shared_ptr<CSettings>           m_spSettings;
 };
 
 #endif // SETTINGSSCREEN_H

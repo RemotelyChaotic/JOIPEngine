@@ -2,10 +2,10 @@
 #define CAPPLICATION_H
 
 #include "Settings.h"
-#include <QGuiApplication>
+#include <QApplication>
 #include <memory>
 
-class CApplication : public QGuiApplication
+class CApplication : public QApplication
 {
   Q_OBJECT
 

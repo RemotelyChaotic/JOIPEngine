@@ -6,12 +6,12 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>400</width>
-    <height>300</height>
+    <width>800</width>
+    <height>450</height>
    </rect>
   </property>
   <property name="windowTitle">
-   <string>CMainWindow</string>
+   <string>JOIPEngine</string>
   </property>
   <widget class="QWidget" name="centralWidget">
    <layout class="QGridLayout" name="gridLayout">
@@ -40,7 +40,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>400</width>
+     <width>800</width>
      <height>20</height>
     </rect>
    </property>

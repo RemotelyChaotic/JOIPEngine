@@ -1,4 +1,5 @@
 #include "Settings.h"
+#include "Application.h"
 #include <QCoreApplication>
 #include <QDir>
 #include <QFileInfo>
@@ -6,6 +7,7 @@
 
 //----------------------------------------------------------------------------------------
 //
+const QString CSettings::c_sSettingResolution = "Graphics/resolution";
 const QString CSettings::c_sSettingContentFolder = "Content/folder";
 
 const QString CSettings::c_sOrganisation = "Private";
@@ -51,6 +53,26 @@ QString CSettings::ContentFolder()
 
 //----------------------------------------------------------------------------------------
 //
+void CSettings::SetResolution(const QSize& size)
+{
+  QSize oldValue = m_spSettings->value(CSettings::c_sSettingResolution).toSize();
+
+  if (size == oldValue) { return; }
+
+  m_spSettings->setValue(CSettings::c_sSettingResolution, size);
+
+  emit ResolutionChanged();
+}
+
+//----------------------------------------------------------------------------------------
+//
+QSize CSettings::Resolution()
+{
+  return m_spSettings->value(CSettings::c_sSettingResolution).toSize();
+}
+
+//----------------------------------------------------------------------------------------
+//
 void CSettings::GenerateSettingsIfNotExists()
 {
   bool bNeedsSynch = false;
@@ -69,6 +91,14 @@ void CSettings::GenerateSettingsIfNotExists()
     {
       QDir::current().mkdir("data");
     }
+  }
+
+  // check resolution
+  if (!m_spSettings->contains(CSettings::c_sSettingResolution))
+  {
+    bNeedsSynch = true;
+    QSize size = QSize(800, 450);
+    m_spSettings->setValue(CSettings::c_sSettingResolution, size);
   }
 
   // write file if nesseccary

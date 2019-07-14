@@ -1,6 +1,7 @@
 #ifndef MAINSCREEN_H
 #define MAINSCREEN_H
 
+#include "IAppStateScreen.h"
 #include <QWidget>
 #include <memory>
 
@@ -8,19 +9,27 @@ namespace Ui {
   class CMainScreen;
 }
 
-class CMainScreen : public QWidget
+class CMainScreen : public QWidget, public IAppStateScreen
 {
   Q_OBJECT
 
 public:
-  explicit CMainScreen(QWidget *parent = nullptr);
-  ~CMainScreen();
+  explicit CMainScreen(const std::shared_ptr<CWindowContext>& spWindowContext,
+                       QWidget* pParent = nullptr);
+  ~CMainScreen() override;
 
   void Initialize();
 
+  void Load() override;
+  void Unload() override;
+
+protected slots:
+  void on_pSceneSelectButton_clicked();
+  void on_pEdiorButton_clicked();
+  void on_pSettingsButton_clicked();
+
 private:
   std::unique_ptr<Ui::CMainScreen> m_spUi;
-  bool                             m_bInitialized;
 };
 
 #endif // MAINSCREEN_H

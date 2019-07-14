@@ -2,6 +2,7 @@
 #define CSETTINGS_H
 
 #include <QObject>
+#include <QSize>
 #include <QString>
 #include <memory>
 
@@ -11,8 +12,10 @@ class CSettings : public QObject {
 
   Q_OBJECT
   Q_PROPERTY(QString contentFolder READ ContentFolder WRITE SetContentFolder NOTIFY ContentFolderChanged)
+  Q_PROPERTY(QSize resolution READ Resolution WRITE SetResolution NOTIFY ResolutionChanged)
 
 public:
+  static const QString c_sSettingResolution;
   static const QString c_sSettingContentFolder;
 
   static const QString c_sOrganisation;
@@ -23,9 +26,12 @@ public:
 
   void SetContentFolder(const QString& sPath);
   QString ContentFolder();
+  void SetResolution(const QSize& size);
+  QSize Resolution();
 
 signals:
   void ContentFolderChanged();
+  void ResolutionChanged();
 
 private:
   void GenerateSettingsIfNotExists();

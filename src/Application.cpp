@@ -2,7 +2,7 @@
 #include <cassert>
 
 CApplication::CApplication(int argc, char *argv[]) :
-  QGuiApplication(argc, argv),
+  QApplication(argc, argv),
   m_spSettings(nullptr),
   m_bInitialized(false)
 {

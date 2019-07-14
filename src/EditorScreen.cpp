@@ -1,24 +1,24 @@
-#include "SceneScreen.h"
-#include "WindowContext.h"
-#include "ui_SceneScreen.h"
+#include "EditorScreen.h"
+#include "ui_EditorScreen.h"
 
-CSceneScreen::CSceneScreen(const std::shared_ptr<CWindowContext>& spWindowContext,
-                           QWidget* pParent) :
+CEditorScreen::CEditorScreen(const std::shared_ptr<CWindowContext>& spWindowContext,
+                             QWidget* pParent) :
   QWidget(pParent),
   IAppStateScreen(spWindowContext),
-  m_spUi(std::make_unique<Ui::CSceneScreen>())
+  m_spUi(std::make_unique<Ui::CEditorScreen>())
 {
   m_spUi->setupUi(this);
-  Initialize();;
+  Initialize();
 }
 
-CSceneScreen::~CSceneScreen()
+CEditorScreen::~CEditorScreen()
 {
+
 }
 
 //----------------------------------------------------------------------------------------
 //
-void CSceneScreen::Initialize()
+void CEditorScreen::Initialize()
 {
   m_bInitialized = false;
 
@@ -28,14 +28,14 @@ void CSceneScreen::Initialize()
 
 //----------------------------------------------------------------------------------------
 //
-void CSceneScreen::Load()
+void CEditorScreen::Load()
 {
 
 }
 
 //----------------------------------------------------------------------------------------
 //
-void CSceneScreen::Unload()
+void CEditorScreen::Unload()
 {
 
 }
