@@ -1,79 +1,89 @@
 #include "Scene.h"
+#include "Project.h"
 #include <QMutexLocker>
 #include <QScriptEngine>
+#include <cassert>
 
-CScene::CScene() :
-  QObject(),
+SScene::SScene() = default;
+SScene::SScene(const SScene& other) :
+  m_spParent(other.m_spParent),
   m_mutex(),
-  m_data()
+  m_iId(other.m_iId),
+  m_sName(other.m_sName),
+  m_sScript(other.m_sScript),
+  m_vsResourceRefs(other.m_vsResourceRefs)
 {}
 
-CScene::CScene(const CScene& other) :
+//----------------------------------------------------------------------------------------
+//
+CScene::CScene(const std::shared_ptr<SScene>& spScene) :
   QObject(),
-  m_mutex(),
-  m_data(other.m_data)
-{}
+  m_spData(spScene)
+{
+  assert(nullptr != spScene);
+  m_spData->m_mutex.lock();
+}
 
 CScene::~CScene()
-{}
+{
+  m_spData->m_mutex.unlock();
+}
 
 //----------------------------------------------------------------------------------------
 //
 void CScene::SetId(qint32 iValue)
 {
-  QMutexLocker locker(&m_mutex);
-  m_data.m_iId = iValue;
+  m_spData->m_iId = iValue;
 }
 
 //----------------------------------------------------------------------------------------
 //
 qint32 CScene::Id()
 {
-  QMutexLocker locker(&m_mutex);
-  return m_data.m_iId;
+  return m_spData->m_iId;
 }
 
 //----------------------------------------------------------------------------------------
 //
 void CScene::SetName(const QString& sValue)
 {
-  QMutexLocker locker(&m_mutex);
-  m_data.m_sName = sValue;
+  m_spData->m_sName = sValue;
 }
 
 //----------------------------------------------------------------------------------------
 //
 QString CScene::Name()
 {
-  QMutexLocker locker(&m_mutex);
-  return m_data.m_sName;
+  return m_spData->m_sName;
 }
 
 //----------------------------------------------------------------------------------------
 //
 void CScene::SetScript(const QString& sValue)
 {
-  QMutexLocker locker(&m_mutex);
-  m_data.m_sScript = sValue;
+  m_spData->m_sScript = sValue;
 }
 
 //----------------------------------------------------------------------------------------
 //
 QString CScene::Script()
 {
-  QMutexLocker locker(&m_mutex);
-  return m_data.m_sScript;
+  return m_spData->m_sScript;
 }
 
 //----------------------------------------------------------------------------------------
 //
-void CScene::AddResource(const tspResource& spValue)
+void CScene::AddResource(const QString& sValue)
 {
-  QMutexLocker locker(&m_mutex);
-  const QString sPath = spValue->Path();
-  if (m_data.m_resources.find(sPath) != m_data.m_resources.end())
+  if (nullptr != m_spData->m_spParent)
   {
-    m_data.m_resources.insert({sPath, spValue});
+    m_spData->m_spParent->m_mutex.lock();
+    bool bOk = m_spData->m_spParent->m_resources.find(sValue) != m_spData->m_spParent->m_resources.end();
+    m_spData->m_spParent->m_mutex.unlock();
+    if (bOk)
+    {
+      m_spData->m_vsResourceRefs.insert(sValue);
+    }
   }
 }
 
@@ -81,52 +91,58 @@ void CScene::AddResource(const tspResource& spValue)
 //
 void CScene::ClearResources()
 {
-  QMutexLocker locker(&m_mutex);
-  m_data.m_resources.clear();
+  m_spData->m_vsResourceRefs.clear();
 }
 
 //----------------------------------------------------------------------------------------
 //
 qint32 CScene::NumResources()
 {
-  QMutexLocker locker(&m_mutex);
-  return static_cast<qint32>(m_data.m_resources.size());
+  return static_cast<qint32>(m_spData->m_vsResourceRefs.size());
 }
 
 //----------------------------------------------------------------------------------------
 //
 void CScene::RemoveResource(const QString& sValue)
 {
-  QMutexLocker locker(&m_mutex);
-  auto it = m_data.m_resources.find(sValue);
-  if (it != m_data.m_resources.end())
+  auto it = m_spData->m_vsResourceRefs.find(sValue);
+  if (it != m_spData->m_vsResourceRefs.end())
   {
-    m_data.m_resources.erase(it);
+    m_spData->m_vsResourceRefs.erase(it);
   }
 }
 
 //----------------------------------------------------------------------------------------
 //
-tspResource CScene::Resource(const QString& sValue)
+tspResourceRef CScene::Resource(const QString& sValue)
 {
-  QMutexLocker locker(&m_mutex);
-  auto it = m_data.m_resources.find(sValue);
-  if (it != m_data.m_resources.end())
+  if (nullptr != m_spData->m_spParent)
   {
-    return it->second;
+    auto it = m_spData->m_vsResourceRefs.find(sValue);
+    if (it != m_spData->m_vsResourceRefs.end())
+    {
+      QMutexLocker locker(&m_spData->m_spParent->m_mutex);
+      auto itRef = m_spData->m_spParent->m_resources.find(sValue);
+      if (m_spData->m_spParent->m_resources.end() != itRef)
+      {
+        locker.unlock();
+        return tspResourceRef(new CResource(std::make_shared<SResource>(*itRef->second)));
+      }
+      return nullptr;
+    }
   }
-  else
-  {
-    return nullptr;
-  }
+  return nullptr;
 }
 
 //----------------------------------------------------------------------------------------
 //
-SScene CScene::Data()
+tspProjectRef CScene::Project()
 {
-  QMutexLocker locker(&m_mutex);
-  return m_data;
+  if (nullptr != m_spData->m_spParent)
+  {
+    return tspProjectRef(new CProject(std::make_shared<SProject>(*m_spData->m_spParent)));
+  }
+  return nullptr;
 }
 
 //----------------------------------------------------------------------------------------

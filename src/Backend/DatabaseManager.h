@@ -4,6 +4,7 @@
 #include "ThreadedSystem.h"
 
 class CSettings;
+struct SProject;
 
 class CDatabaseManager : public CThreadedObject
 {
@@ -22,7 +23,8 @@ private slots:
   void SlotContentFolderChanged();
 
 private:
-  std::shared_ptr<CSettings>    m_spSettings;
+  std::shared_ptr<CSettings>             m_spSettings;
+  std::vector<std::shared_ptr<SProject>> m_vspProjectDatabase;
 };
 
 #endif // DATABASEMANAGER_H

@@ -1,134 +1,120 @@
 #include "Project.h"
 #include <QMutexLocker>
 #include <QScriptEngine>
+#include <cassert>
 
-CProject::CProject() :
+CProject::CProject(const std::shared_ptr<SProject>& spProject) :
   QObject(),
-  m_mutex(),
-  m_data()
-{}
-
-CProject::CProject(const CProject& other) :
-  QObject(),
-  m_mutex(),
-  m_data(other.m_data)
-{}
+  m_spData(spProject)
+{
+  assert(nullptr != spProject);
+  m_spData->m_mutex.lock();
+}
 
 CProject::~CProject()
-{}
+{
+  m_spData->m_mutex.unlock();
+}
 
 //----------------------------------------------------------------------------------------
 //
 void CProject::SetId(qint32 iValue)
 {
-  QMutexLocker locker(&m_mutex);
-  m_data.m_iId = iValue;
+  m_spData->m_iId = iValue;
 }
 
 //----------------------------------------------------------------------------------------
 //
 qint32 CProject::Id()
 {
-  QMutexLocker locker(&m_mutex);
-  return m_data.m_iId;
+  return m_spData->m_iId;
 }
 
 //----------------------------------------------------------------------------------------
 //
 void CProject::SetVersion(qint32 iValue)
 {
-  QMutexLocker locker(&m_mutex);
-  m_data.m_iVersion = iValue;
+  m_spData->m_iVersion = iValue;
 }
 
 //----------------------------------------------------------------------------------------
 //
 qint32 CProject::Version()
 {
-  QMutexLocker locker(&m_mutex);
-  return m_data.m_iVersion;
+  return m_spData->m_iVersion;
 }
 
 //----------------------------------------------------------------------------------------
 //
 void CProject::SetName(const QString& sValue)
 {
-  QMutexLocker locker(&m_mutex);
-  m_data.m_sName = sValue;
+  m_spData->m_sName = sValue;
 }
 
 //----------------------------------------------------------------------------------------
 //
 QString CProject::Name()
 {
-  QMutexLocker locker(&m_mutex);
-  return m_data.m_sName;
+  return m_spData->m_sName;
 }
 
 //----------------------------------------------------------------------------------------
 //
 void CProject::SetTitleCard(const QString& sValue)
 {
-  QMutexLocker locker(&m_mutex);
-  m_data.m_sTitleCard = sValue;
+  m_spData->m_sTitleCard = sValue;
 }
 
 //----------------------------------------------------------------------------------------
 //
 QString CProject::TitleCard()
 {
-  QMutexLocker locker(&m_mutex);
-  return m_data.m_sTitleCard;
+  return m_spData->m_sTitleCard;
 }
 
 //----------------------------------------------------------------------------------------
 //
 void CProject::SetMap(const QString& sValue)
 {
-  QMutexLocker locker(&m_mutex);
-  m_data.m_sMap = sValue;
+  m_spData->m_sMap = sValue;
 }
 
 //----------------------------------------------------------------------------------------
 //
 QString CProject::Map()
 {
-  QMutexLocker locker(&m_mutex);
-  return m_data.m_sMap;
+  return m_spData->m_sMap;
 }
 
 //----------------------------------------------------------------------------------------
 //
-void CProject::AddScene(const tspScene& sValue)
+void CProject::AddScene(const tspScene& value)
 {
-  QMutexLocker locker(&m_mutex);
-  m_data.m_vsScenes.push_back(sValue);
+  m_spData->m_vsScenes.push_back(value);
 }
 
 //----------------------------------------------------------------------------------------
 //
 void CProject::ClearScenes()
 {
-  QMutexLocker locker(&m_mutex);
-  m_data.m_vsScenes.clear();
+  m_spData->m_vsScenes.clear();
 }
 
 //----------------------------------------------------------------------------------------
 //
-void CProject::InsertScene(qint32 iIndex, const tspScene& sValue)
+void CProject::InsertScene(qint32 iIndex, const tspScene& value)
 {
-  QMutexLocker locker(&m_mutex);
-  if (0 <= iIndex && m_data.m_vsScenes.size() > static_cast<size_t>(iIndex))
+  if (0 <= iIndex && m_spData->m_vsScenes.size() > static_cast<size_t>(iIndex))
   {
-    m_data.m_vsScenes.insert(m_data.m_vsScenes.begin() + iIndex, sValue);
+    m_spData->m_vsScenes.insert(m_spData->m_vsScenes.begin() + iIndex, value);
   }
   else if (0 > iIndex)
   {
-    m_data.m_vsScenes.insert(m_data.m_vsScenes.begin(), sValue);
+    m_spData->m_vsScenes.insert(m_spData->m_vsScenes.begin(), value);
   }
   else
   {
-    m_data.m_vsScenes.push_back(sValue);
+    m_spData->m_vsScenes.push_back(value);
   }
 }
 
@@ -136,39 +122,88 @@ void CProject::InsertScene(qint32 iIndex, const tspScene& sValue)
 //
 qint32 CProject::NumScenes()
 {
-  QMutexLocker locker(&m_mutex);
-  return static_cast<qint32>(m_data.m_vsScenes.size());
+  return static_cast<qint32>(m_spData->m_vsScenes.size());
 }
 
 //----------------------------------------------------------------------------------------
 //
 void CProject::RemoveScene(qint32 iIndex)
 {
-  QMutexLocker locker(&m_mutex);
-  if (0 <= iIndex && m_data.m_vsScenes.size() > static_cast<size_t>(iIndex))
+  if (0 <= iIndex && m_spData->m_vsScenes.size() > static_cast<size_t>(iIndex))
   {
-    m_data.m_vsScenes.erase(m_data.m_vsScenes.begin() + iIndex);
+    m_spData->m_vsScenes.erase(m_spData->m_vsScenes.begin() + iIndex);
   }
 }
 
 //----------------------------------------------------------------------------------------
 //
-tspScene CProject::Scene(qint32 iIndex)
+tspSceneRef CProject::Scene(qint32 iIndex)
 {
-  QMutexLocker locker(&m_mutex);
-  if (0 <= iIndex && m_data.m_vsScenes.size() > static_cast<size_t>(iIndex))
+  if (0 <= iIndex && m_spData->m_vsScenes.size() > static_cast<size_t>(iIndex))
   {
-    return m_data.m_vsScenes[static_cast<size_t>(iIndex)];
+    return tspSceneRef(new CScene(std::make_shared<SScene>(*m_spData->m_vsScenes[static_cast<size_t>(iIndex)])));
   }
   return nullptr;
 }
 
 //----------------------------------------------------------------------------------------
 //
-SProject CProject::Data()
+void CProject::AddResource(const tspResource& value, const QString& sKey)
 {
-  QMutexLocker locker(&m_mutex);
-  return m_data;
+  m_spData->m_resources.insert({sKey, value});
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CProject::ClearResources()
+{
+  m_spData->m_resources.clear();
+  for (const auto& spScene : m_spData->m_vsScenes)
+  {
+    spScene->m_mutex.lock();
+    spScene->m_vsResourceRefs.clear();
+    spScene->m_mutex.unlock();
+  }
+}
+
+//----------------------------------------------------------------------------------------
+//
+qint32 CProject::NumResources()
+{
+  return static_cast<qint32>(m_spData->m_resources.size());
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CProject::RemoveResource(const QString& sValue)
+{
+  auto it = m_spData->m_resources.find(sValue);
+  if (m_spData->m_resources.end() != it)
+  {
+    for (const auto& spScene : m_spData->m_vsScenes)
+    {
+      spScene->m_mutex.lock();
+      auto itRef = spScene->m_vsResourceRefs.find(sValue);
+      if (spScene->m_vsResourceRefs.end() != itRef)
+      {
+        spScene->m_vsResourceRefs.erase(itRef);
+      }
+      spScene->m_mutex.unlock();
+    }
+    m_spData->m_resources.erase(it);
+  }
+}
+
+//----------------------------------------------------------------------------------------
+//
+tspResourceRef CProject::Resource(const QString& sValue)
+{
+  auto it = m_spData->m_resources.find(sValue);
+  if (m_spData->m_resources.end() != it)
+  {
+    return tspResourceRef(new CResource(std::make_shared<SResource>(it->second)));
+  }
+  return nullptr;
 }
 
 //----------------------------------------------------------------------------------------

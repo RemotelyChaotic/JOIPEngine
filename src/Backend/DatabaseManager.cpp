@@ -1,10 +1,12 @@
 #include "DatabaseManager.h"
 #include "Application.h"
+#include "Project.h"
 #include "Settings.h"
 
 CDatabaseManager::CDatabaseManager() :
   CThreadedObject(),
-  m_spSettings(CApplication::Instance()->Settings())
+  m_spSettings(CApplication::Instance()->Settings()),
+  m_vspProjectDatabase()
 {
 }
 

@@ -1,46 +1,42 @@
 #include "Resource.h"
 #include <QMutexLocker>
 #include <QScriptEngine>
+#include <cassert>
 
-CResource::CResource() :
+CResource::CResource(const std::shared_ptr<SResource>& spResource) :
   QObject(),
-  m_mutex(),
-  m_data(EResourceType::eOther)
-{}
-
-CResource::CResource(const CResource& other) :
-  QObject(),
-  m_mutex(),
-  m_data(other.m_data)
-{}
+  m_spData(spResource)
+{
+  assert(nullptr != spResource);
+  m_spData->m_mutex.lock();
+}
 
 CResource::~CResource()
-{}
+{
+  m_spData->m_mutex.unlock();
+}
 
 //----------------------------------------------------------------------------------------
 //
 void CResource::SetPath(const QString& sValue)
 {
-  QMutexLocker locker(&m_mutex);
-  m_data.m_sPath = sValue;
+  m_spData->m_sPath = sValue;
 }
 
 //----------------------------------------------------------------------------------------
 //
 QString CResource::Path()
 {
-  QMutexLocker locker(&m_mutex);
-  return m_data.m_sPath;
+  return m_spData->m_sPath;
 }
 
 //----------------------------------------------------------------------------------------
 //
 void CResource::SetType(qint32 type)
 {
-  QMutexLocker locker(&m_mutex);
   if (0 <= type && EResourceType::_size() > static_cast<size_t>(type))
   {
-    m_data.m_type = EResourceType::_from_index(static_cast<size_t>(type));
+    m_spData->m_type = EResourceType::_from_index(static_cast<size_t>(type));
   }
 }
 
@@ -48,16 +44,7 @@ void CResource::SetType(qint32 type)
 //
 qint32 CResource::Type()
 {
-  QMutexLocker locker(&m_mutex);
-  return m_data.m_type;
-}
-
-//----------------------------------------------------------------------------------------
-//
-SResource CResource::Data()
-{
-  QMutexLocker locker(&m_mutex);
-  return m_data;
+  return m_spData->m_type;
 }
 
 //----------------------------------------------------------------------------------------
