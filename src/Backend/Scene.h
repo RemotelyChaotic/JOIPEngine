@@ -1,9 +1,10 @@
 #ifndef SCENE_H
 #define SCENE_H
 
+#include "ISerializable.h"
 #include "Resource.h"
 #include <QObject>
-#include <QMutex>
+#include <QReadWriteLock>
 #include <QScriptValue>
 #include <QSharedPointer>
 #include <memory>
@@ -13,17 +14,21 @@ class QScriptEngine;
 struct SProject;
 typedef QSharedPointer<CProject> tspProjectRef;
 
-struct SScene
+struct SScene : public ISerializable
 {
   SScene();
   SScene(const SScene& other);
+  ~SScene() override;
 
   std::shared_ptr<SProject> m_spParent;
-  mutable QMutex            m_mutex;
+  mutable QReadWriteLock    m_rwLock;
   qint32                    m_iId;
   QString                   m_sName;
   QString                   m_sScript;
   tvsResourceRefs           m_vsResourceRefs;
+
+  QJsonObject ToJsonObject() override;
+  void FromJsonObject(const QJsonObject& json) override;
 };
 
 //----------------------------------------------------------------------------------------
@@ -33,27 +38,19 @@ class CScene : public QObject
   Q_OBJECT
   Q_DISABLE_COPY(CScene)
   CScene() {}
-  Q_PROPERTY(qint32  id        READ Id          WRITE SetId)
-  Q_PROPERTY(QString name      READ Name        WRITE SetName)
-  Q_PROPERTY(QString script    READ Script      WRITE SetScript)
+  Q_PROPERTY(qint32  id        READ Id    )
+  Q_PROPERTY(QString name      READ Name  )
+  Q_PROPERTY(QString script    READ Script)
 
 public:
   explicit CScene(const std::shared_ptr<SScene>& spScene);
   ~CScene();
 
-  void SetId(qint32 iValue);
   qint32 Id();
-
-  void SetName(const QString& sValue);
   QString Name();
-
-  void SetScript(const QString& sValue);
   QString Script();
 
-  Q_INVOKABLE void AddResource(const QString& sValue);
-  Q_INVOKABLE void ClearResources();
   Q_INVOKABLE qint32 NumResources();
-  Q_INVOKABLE void RemoveResource(const QString& sValue);
   Q_INVOKABLE tspResourceRef Resource(const QString& sValue);
 
   Q_INVOKABLE tspProjectRef Project();

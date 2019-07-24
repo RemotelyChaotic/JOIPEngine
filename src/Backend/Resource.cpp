@@ -3,47 +3,74 @@
 #include <QScriptEngine>
 #include <cassert>
 
+SResource::SResource(EResourceType type) :
+  m_rwLock(QReadWriteLock::Recursive),
+  m_sPath(),
+  m_type(type)
+{}
+
+SResource::SResource(const SResource& other) :
+  m_rwLock(QReadWriteLock::Recursive),
+  m_sPath(other.m_sPath),
+  m_type(other.m_type)
+{}
+
+SResource::~SResource() {}
+
+//----------------------------------------------------------------------------------------
+//
+QJsonObject SResource::ToJsonObject()
+{
+  QWriteLocker locker(&m_rwLock);
+  return {
+    { "sPath", m_sPath },
+    { "type", m_type._value },
+  };
+}
+
+//----------------------------------------------------------------------------------------
+//
+void SResource::FromJsonObject(const QJsonObject& json)
+{
+  QWriteLocker locker(&m_rwLock);
+  auto it = json.find("sPath");
+  if (it != json.end())
+  {
+    m_sPath = it.value().toString();
+  }
+  it = json.find("type");
+  if (it != json.end())
+  {
+    m_type._from_integral(it.value().toInt());
+  }
+}
+
+//----------------------------------------------------------------------------------------
+//
 CResource::CResource(const std::shared_ptr<SResource>& spResource) :
   QObject(),
   m_spData(spResource)
 {
   assert(nullptr != spResource);
-  m_spData->m_mutex.lock();
 }
 
 CResource::~CResource()
 {
-  m_spData->m_mutex.unlock();
-}
-
-//----------------------------------------------------------------------------------------
-//
-void CResource::SetPath(const QString& sValue)
-{
-  m_spData->m_sPath = sValue;
 }
 
 //----------------------------------------------------------------------------------------
 //
 QString CResource::Path()
 {
+  QReadLocker locker(&m_spData->m_rwLock);
   return m_spData->m_sPath;
-}
-
-//----------------------------------------------------------------------------------------
-//
-void CResource::SetType(qint32 type)
-{
-  if (0 <= type && EResourceType::_size() > static_cast<size_t>(type))
-  {
-    m_spData->m_type = EResourceType::_from_index(static_cast<size_t>(type));
-  }
 }
 
 //----------------------------------------------------------------------------------------
 //
 qint32 CResource::Type()
 {
+  QReadLocker locker(&m_spData->m_rwLock);
   return m_spData->m_type;
 }
 

@@ -1,9 +1,10 @@
 #ifndef RESOURCE_H
 #define RESOURCE_H
 
+#include "ISerializable.h"
 #include <enum.h>
 #include <QObject>
-#include <QMutex>
+#include <QReadWriteLock>
 #include <QScriptValue>
 #include <QSharedPointer>
 #include <memory>
@@ -19,22 +20,18 @@ class QScriptEngine;
 
 //----------------------------------------------------------------------------------------
 //
-struct SResource
+struct SResource : public ISerializable
 {
-  explicit SResource(EResourceType type = EResourceType::eOther) :
-    m_mutex(),
-    m_sPath(),
-    m_type(type)
-  {}
-  SResource(const SResource& other) :
-    m_mutex(),
-    m_sPath(other.m_sPath),
-    m_type(other.m_type)
-  {}
+  explicit SResource(EResourceType type = EResourceType::eOther);
+  SResource(const SResource& other);
+  ~SResource() override;
 
-  mutable QMutex          m_mutex;
+  mutable QReadWriteLock  m_rwLock;
   QString                 m_sPath;
   EResourceType           m_type;
+
+  QJsonObject ToJsonObject() override;
+  void FromJsonObject(const QJsonObject& json) override;
 };
 
 //----------------------------------------------------------------------------------------
@@ -44,17 +41,14 @@ class CResource : public QObject
   Q_OBJECT
   Q_DISABLE_COPY(CResource)
   CResource() {}
-  Q_PROPERTY(QString path      READ Path        WRITE SetPath)
-  Q_PROPERTY(qint32  type      READ Type        WRITE SetType)
+  Q_PROPERTY(QString path      READ Path)
+  Q_PROPERTY(qint32  type      READ Type)
 
 public:
   explicit CResource(const std::shared_ptr<SResource>& spResource);
   ~CResource();
 
-  void SetPath(const QString& sValue);
   QString Path();
-
-  void SetType(qint32 type);
   qint32 Type();
 
 private:

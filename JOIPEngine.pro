@@ -25,6 +25,9 @@ DEFINES += QT_DEPRECATED_WARNINGS
 CONFIG += c++14
 
 include(lib/better-enums/_lib_enum.pri)
+CONFIG(debug, debug|release) {
+   include(lib/Fluid_Studios_Memory_Manager/_lib_mmgr.pri)
+}
 
 INCLUDEPATH += \
     src
@@ -64,7 +67,8 @@ HEADERS += \
     src/Backend/Project.h \
     src/Backend/Scene.h \
     src/Backend/Resource.h \
-    src/Backend/DatabaseAccessObject.h
+    src/Backend/DatabaseAccessObject.h \
+    src/Backend/ISerializable.h
 
 FORMS += \
     src/MainWindow.ui \

@@ -1,6 +1,7 @@
 #include "MainScreen.h"
 #include "WindowContext.h"
 #include "ui_MainScreen.h"
+#include <QApplication>
 
 CMainScreen::CMainScreen(const std::shared_ptr<CWindowContext>& spWindowContext,
                          QWidget* pParent) :
@@ -65,4 +66,13 @@ void CMainScreen::on_pSettingsButton_clicked()
   SCREEN_INITIALIZED_GUARD
 
   emit m_spWindowContext->SignalChangeAppState(EAppState::eSettingsScreen);
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CMainScreen::on_pQuitButton_clicked()
+{
+  SCREEN_INITIALIZED_GUARD
+
+  emit QApplication::instance()->quit();
 }
