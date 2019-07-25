@@ -47,8 +47,7 @@ SOURCES += \
     src/Backend/DatabaseManager.cpp \
     src/Backend/Project.cpp \
     src/Backend/Scene.cpp \
-    src/Backend/Resource.cpp \
-    src/Backend/DatabaseAccessObject.cpp
+    src/Backend/Resource.cpp
 
 HEADERS += \
     src/MainWindow.h \
@@ -67,7 +66,6 @@ HEADERS += \
     src/Backend/Project.h \
     src/Backend/Scene.h \
     src/Backend/Resource.h \
-    src/Backend/DatabaseAccessObject.h \
     src/Backend/ISerializable.h
 
 FORMS += \

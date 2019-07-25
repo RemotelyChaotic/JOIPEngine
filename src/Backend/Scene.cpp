@@ -1,5 +1,6 @@
 #include "Scene.h"
 #include "Project.h"
+#include "Resource.h"
 #include <QJsonArray>
 #include <QMutexLocker>
 #include <QScriptEngine>
@@ -109,31 +110,6 @@ QString CScene::Script()
   return m_spData->m_sScript;
 }
 
-/*
-//----------------------------------------------------------------------------------------
-//
-void CScene::AddResource(const QString& sValue)
-{
-  if (nullptr != m_spData->m_spParent)
-  {
-    m_spData->m_spParent->m_mutex.lock();
-    bool bOk = m_spData->m_spParent->m_resources.find(sValue) != m_spData->m_spParent->m_resources.end();
-    m_spData->m_spParent->m_mutex.unlock();
-    if (bOk)
-    {
-      m_spData->m_vsResourceRefs.insert(sValue);
-    }
-  }
-}
-
-//----------------------------------------------------------------------------------------
-//
-void CScene::ClearResources()
-{
-  m_spData->m_vsResourceRefs.clear();
-}
-*/
-
 //----------------------------------------------------------------------------------------
 //
 qint32 CScene::NumResources()
@@ -141,19 +117,6 @@ qint32 CScene::NumResources()
   QReadLocker locker(&m_spData->m_rwLock);
   return static_cast<qint32>(m_spData->m_vsResourceRefs.size());
 }
-
-/*
-//----------------------------------------------------------------------------------------
-//
-void CScene::RemoveResource(const QString& sValue)
-{
-  auto it = m_spData->m_vsResourceRefs.find(sValue);
-  if (it != m_spData->m_vsResourceRefs.end())
-  {
-    m_spData->m_vsResourceRefs.erase(it);
-  }
-}
-*/
 
 //----------------------------------------------------------------------------------------
 //

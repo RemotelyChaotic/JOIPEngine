@@ -2,11 +2,13 @@
 #define PROJECT_H
 
 #include "ISerializable.h"
+#include "Resource.h"
 #include "Scene.h"
 #include <QObject>
 #include <QReadWriteLock>
 #include <QScriptValue>
 #include <QSharedPointer>
+#include <memory>
 
 class QScriptEngine;
 

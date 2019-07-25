@@ -159,40 +159,6 @@ QString CProject::Map()
   return m_spData->m_sMap;
 }
 
-/*
-//----------------------------------------------------------------------------------------
-//
-void CProject::AddScene(const tspScene& value)
-{
-  m_spData->m_vsScenes.push_back(value);
-}
-
-//----------------------------------------------------------------------------------------
-//
-void CProject::ClearScenes()
-{
-  m_spData->m_vsScenes.clear();
-}
-
-//----------------------------------------------------------------------------------------
-//
-void CProject::InsertScene(qint32 iIndex, const tspScene& value)
-{
-  if (0 <= iIndex && m_spData->m_vsScenes.size() > static_cast<size_t>(iIndex))
-  {
-    m_spData->m_vsScenes.insert(m_spData->m_vsScenes.begin() + iIndex, value);
-  }
-  else if (0 > iIndex)
-  {
-    m_spData->m_vsScenes.insert(m_spData->m_vsScenes.begin(), value);
-  }
-  else
-  {
-    m_spData->m_vsScenes.push_back(value);
-  }
-}
-*/
-
 //----------------------------------------------------------------------------------------
 //
 qint32 CProject::NumScenes()
@@ -200,18 +166,6 @@ qint32 CProject::NumScenes()
   QReadLocker locker(&m_spData->m_rwLock);
   return static_cast<qint32>(m_spData->m_vspScenes.size());
 }
-
-/*
-//----------------------------------------------------------------------------------------
-//
-void CProject::RemoveScene(qint32 iIndex)
-{
-  if (0 <= iIndex && m_spData->m_vsScenes.size() > static_cast<size_t>(iIndex))
-  {
-    m_spData->m_vsScenes.erase(m_spData->m_vsScenes.begin() + iIndex);
-  }
-}
-*/
 
 //----------------------------------------------------------------------------------------
 //
@@ -225,28 +179,6 @@ tspSceneRef CProject::Scene(qint32 iIndex)
   return nullptr;
 }
 
-/*
-//----------------------------------------------------------------------------------------
-//
-void CProject::AddResource(const tspResource& value, const QString& sKey)
-{
-  m_spData->m_resources.insert({sKey, value});
-}
-
-//----------------------------------------------------------------------------------------
-//
-void CProject::ClearResources()
-{
-  m_spData->m_resources.clear();
-  for (const auto& spScene : m_spData->m_vsScenes)
-  {
-    spScene->m_mutex.lock();
-    spScene->m_vsResourceRefs.clear();
-    spScene->m_mutex.unlock();
-  }
-}
-*/
-
 //----------------------------------------------------------------------------------------
 //
 qint32 CProject::NumResources()
@@ -254,29 +186,6 @@ qint32 CProject::NumResources()
   QReadLocker locker(&m_spData->m_rwLock);
   return static_cast<qint32>(m_spData->m_spResourcesMap.size());
 }
-
-/*
-//----------------------------------------------------------------------------------------
-//
-void CProject::RemoveResource(const QString& sValue)
-{
-  auto it = m_spData->m_resources.find(sValue);
-  if (m_spData->m_resources.end() != it)
-  {
-    for (const auto& spScene : m_spData->m_vsScenes)
-    {
-      spScene->m_mutex.lock();
-      auto itRef = spScene->m_vsResourceRefs.find(sValue);
-      if (spScene->m_vsResourceRefs.end() != itRef)
-      {
-        spScene->m_vsResourceRefs.erase(itRef);
-      }
-      spScene->m_mutex.unlock();
-    }
-    m_spData->m_resources.erase(it);
-  }
-}
-*/
 
 //----------------------------------------------------------------------------------------
 //

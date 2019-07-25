@@ -2,17 +2,20 @@
 #define SCENE_H
 
 #include "ISerializable.h"
-#include "Resource.h"
 #include <QObject>
 #include <QReadWriteLock>
 #include <QScriptValue>
 #include <QSharedPointer>
 #include <memory>
+#include <set>
 
 class CProject;
+class CResource;
 class QScriptEngine;
 struct SProject;
 typedef QSharedPointer<CProject> tspProjectRef;
+typedef QSharedPointer<CResource>tspResourceRef;
+typedef std::set<QString>        tvsResourceRefs;
 
 struct SScene : public ISerializable
 {
