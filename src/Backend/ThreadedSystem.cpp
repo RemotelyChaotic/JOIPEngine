@@ -18,7 +18,16 @@ CThreadedSystem::CThreadedSystem() :
 
 CThreadedSystem::~CThreadedSystem()
 {
-  m_spSystem.reset();
   m_spThread->quit();
-  m_spThread->wait();
+  while (!m_spThread->isFinished())
+  {
+    m_spThread->wait(5);
+  }
+}
+//----------------------------------------------------------------------------------------
+//
+void CThreadedSystem::Cleanup()
+{
+  m_spSystem->Deinitialize();
+  m_spSystem.reset();
 }

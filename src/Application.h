@@ -2,6 +2,7 @@
 #define CAPPLICATION_H
 
 #include "Settings.h"
+#include "Backend/DatabaseManager.h"
 #include <QApplication>
 #include <map>
 #include <memory>
@@ -28,5 +29,7 @@ private:
   std::shared_ptr<CSettings>                         m_spSettings;
   bool                                               m_bInitialized;
 };
+
+template<> std::weak_ptr<CDatabaseManager> CApplication::System<CDatabaseManager>();
 
 #endif // CAPPLICATION_H

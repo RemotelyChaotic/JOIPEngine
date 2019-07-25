@@ -29,6 +29,8 @@ public:
   // Project
   void AddProject(const QString& sName = "New_Project", qint32 iVersion = 1);
   void ClearProjects();
+  bool DeserializeProject(qint32 iId);
+  bool DeserializeProject(const QString& sName);
   tspProject FindProject(qint32 iId);
   tspProject FindProject(const QString& sName);
   tspProjectRef FindProjectRef(qint32 iId);
@@ -37,6 +39,8 @@ public:
   void RemoveProject(const QString& sName);
   void RenameProject(qint32 iId, const QString& sNewName);
   void RenameProject(const QString& sName, const QString& sNewName);
+  bool SerializeProject(qint32 iId);
+  bool SerializeProject(const QString& sName);
 
   // Scene
   void AddScene(tspProject& spProj, const QString& sName = "New_Scene");
@@ -66,10 +70,12 @@ private slots:
   void SlotContentFolderChanged();
 
 private:
+  bool DeserializeProjectPrivate(tspProject& spProject);
   qint32 FindNewIdFromSet(const std::set<qint32, std::less<qint32>>& ids);
   qint32 FindNewProjectId();
   qint32 FindNewSceneId(tspProject& spProj);
   void LoadDatabase();
+  bool SerializeProjectPrivate(tspProject& spProject);
 
   std::shared_ptr<CSettings>             m_spSettings;
   mutable QMutex                         m_dbMutex;

@@ -122,7 +122,9 @@ void CSettingsScreen::Load()
 //
 void CSettingsScreen::Unload()
 {
+  m_spUi->pResolutionComboBox->blockSignals(true);
   m_spUi->pResolutionComboBox->clear();
+  m_spUi->pResolutionComboBox->blockSignals(false);
 }
 
 //----------------------------------------------------------------------------------------
@@ -163,9 +165,17 @@ void CSettingsScreen::on_pBrowseButton_clicked()
         m_spSettings->ContentFolder(),
         QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks);
 
-  QFileInfo path(m_spUi->pFolderLineEdit->text());
+  QFileInfo path(dir);
   if (!path.exists()) { return; }
   const QString sResultingPath = path.canonicalFilePath();
   m_spUi->pFolderLineEdit->setText(sResultingPath);
   m_spSettings->SetContentFolder(sResultingPath);
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CSettingsScreen::on_pBackButton_clicked()
+{
+  SCREEN_INITIALIZED_GUARD
+  emit m_spWindowContext->SignalChangeAppState(EAppState::eMainScreen);
 }

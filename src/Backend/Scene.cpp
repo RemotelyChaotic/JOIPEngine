@@ -64,6 +64,7 @@ void SScene::FromJsonObject(const QJsonObject& json)
     m_sScript = it.value().toString();
   }
   it = json.find("vsResourceRefs");
+  m_vsResourceRefs.clear();
   if (it != json.end())
   {
     for (QJsonValue val : it.value().toArray())

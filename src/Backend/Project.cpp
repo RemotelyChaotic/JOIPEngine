@@ -43,7 +43,6 @@ QJsonObject SProject::ToJsonObject()
     resources.insert(spResource.first, spResource.second->ToJsonObject());
   }
   return {
-    { "iId", m_iId },
     { "iVersion", m_iVersion },
     { "sName", m_sName },
     { "sTitleCard", m_sTitleCard },
@@ -58,12 +57,7 @@ QJsonObject SProject::ToJsonObject()
 void SProject::FromJsonObject(const QJsonObject& json)
 {
   QWriteLocker locker(&m_rwLock);
-  auto it = json.find("iId");
-  if (it != json.end())
-  {
-    m_iId = it.value().toInt();
-  }
-  it = json.find("iVersion");
+  auto it = json.find("iVersion");
   if (it != json.end())
   {
     m_iVersion = it.value().toInt();
@@ -84,6 +78,7 @@ void SProject::FromJsonObject(const QJsonObject& json)
     m_sMap = it.value().toString();
   }
   it = json.find("vspScenes");
+  m_vspScenes.clear();
   if (it != json.end())
   {
     for (QJsonValue val : it.value().toArray())
@@ -94,6 +89,7 @@ void SProject::FromJsonObject(const QJsonObject& json)
     }
   }
   it = json.find("spResources");
+  m_spResourcesMap.clear();
   if (it != json.end())
   {
     QJsonObject obj = it.value().toObject();

@@ -27,6 +27,7 @@ struct SResource : public ISerializable
   ~SResource() override;
 
   mutable QReadWriteLock  m_rwLock;
+  QString                 m_sName;
   QString                 m_sPath;
   EResourceType           m_type;
 
@@ -41,6 +42,7 @@ class CResource : public QObject
   Q_OBJECT
   Q_DISABLE_COPY(CResource)
   CResource() {}
+  Q_PROPERTY(QString name      READ Name)
   Q_PROPERTY(QString path      READ Path)
   Q_PROPERTY(qint32  type      READ Type)
 
@@ -48,6 +50,7 @@ public:
   explicit CResource(const std::shared_ptr<SResource>& spResource);
   ~CResource();
 
+  QString Name();
   QString Path();
   qint32 Type();
 

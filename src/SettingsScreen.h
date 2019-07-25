@@ -28,6 +28,7 @@ protected slots:
   void on_pResolutionComboBox_currentIndexChanged(qint32 iIndex);
   void on_pFolderLineEdit_editingFinished();
   void on_pBrowseButton_clicked();
+  void on_pBackButton_clicked();
 
 private:  
   std::unique_ptr<Ui::CSettingsScreen> m_spUi;

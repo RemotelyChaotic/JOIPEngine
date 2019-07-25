@@ -4,14 +4,34 @@
 #include "Resource.h"
 #include "Scene.h"
 #include "Settings.h"
-#include <QDebug>
-#include <QFileInfo>
 
+#include <QDebug>
+#include <QDir>
+#include <QDirIterator>
+#include <QFileInfo>
+#include <QJsonDocument>
+
+namespace
+{
+  const QString c_sProjectFileName = "JOIPData.json";
+}
+
+//----------------------------------------------------------------------------------------
+//
 CDatabaseManager::CDatabaseManager() :
   CThreadedObject(),
   m_spSettings(CApplication::Instance()->Settings()),
   m_vspProjectDatabase()
 {
+  qRegisterMetaType<CResource*>();
+  qRegisterMetaType<tspResource>();
+  qRegisterMetaType<tspResourceRef>();
+  qRegisterMetaType<CScene*>();
+  qRegisterMetaType<tspScene>();
+  qRegisterMetaType<tspSceneRef>();
+  qRegisterMetaType<CProject*>();
+  qRegisterMetaType<tspProject>();
+  qRegisterMetaType<tspProjectRef>();
 }
 
 CDatabaseManager::~CDatabaseManager()
@@ -22,6 +42,8 @@ CDatabaseManager::~CDatabaseManager()
 //
 void CDatabaseManager::AddProject(const QString& sName, qint32 iVersion)
 {
+  if (!IsInitialized()) { return; }
+
   qint32 iNewId = FindNewProjectId();
   QString sFinalName = sName;
   qint32 iCounter = 0;
@@ -45,14 +67,46 @@ void CDatabaseManager::AddProject(const QString& sName, qint32 iVersion)
 //
 void CDatabaseManager::ClearProjects()
 {
+  if (!IsInitialized()) { return; }
+
   QMutexLocker locker(&m_dbMutex);
   m_vspProjectDatabase.clear();
 }
 
 //----------------------------------------------------------------------------------------
 //
+bool CDatabaseManager::DeserializeProject(qint32 iId)
+{
+  if (!IsInitialized()) { return false; }
+
+  tspProject spProject = FindProject(iId);
+  if (nullptr != spProject)
+  {
+    return DeserializeProjectPrivate(spProject);
+  }
+  return false;
+}
+
+//----------------------------------------------------------------------------------------
+//
+bool CDatabaseManager::DeserializeProject(const QString& sName)
+{
+  if (!IsInitialized()) { return false; }
+
+  tspProject spProject = FindProject(sName);
+  if (nullptr != spProject)
+  {
+    return DeserializeProjectPrivate(spProject);
+  }
+  return false;
+}
+
+//----------------------------------------------------------------------------------------
+//
 tspProject CDatabaseManager::FindProject(qint32 iId)
 {
+  if (!IsInitialized()) { return nullptr; }
+
   QMutexLocker locker(&m_dbMutex);
   for (tspProject& spProject : m_vspProjectDatabase)
   {
@@ -69,6 +123,8 @@ tspProject CDatabaseManager::FindProject(qint32 iId)
 //
 tspProject CDatabaseManager::FindProject(const QString& sName)
 {
+  if (!IsInitialized()) { return nullptr; }
+
   QMutexLocker locker(&m_dbMutex);
   for (tspProject& spProject : m_vspProjectDatabase)
   {
@@ -85,6 +141,8 @@ tspProject CDatabaseManager::FindProject(const QString& sName)
 //
 tspProjectRef CDatabaseManager::FindProjectRef(qint32 iId)
 {
+  if (!IsInitialized()) { return nullptr; }
+
   QMutexLocker locker(&m_dbMutex);
   for (tspProject& spProject : m_vspProjectDatabase)
   {
@@ -101,6 +159,8 @@ tspProjectRef CDatabaseManager::FindProjectRef(qint32 iId)
 //
 tspProjectRef CDatabaseManager::FindProjectRef(const QString& sName)
 {
+  if (!IsInitialized()) { return nullptr; }
+
   QMutexLocker locker(&m_dbMutex);
   for (tspProject& spProject : m_vspProjectDatabase)
   {
@@ -117,6 +177,8 @@ tspProjectRef CDatabaseManager::FindProjectRef(const QString& sName)
 //
 void CDatabaseManager::RemoveProject(qint32 iId)
 {
+  if (!IsInitialized()) { return; }
+
   QMutexLocker locker(&m_dbMutex);
   for (auto it = m_vspProjectDatabase.begin(); m_vspProjectDatabase.end() != it; ++it)
   {
@@ -133,6 +195,8 @@ void CDatabaseManager::RemoveProject(qint32 iId)
 //
 void CDatabaseManager::RemoveProject(const QString& sName)
 {
+  if (!IsInitialized()) { return; }
+
   QMutexLocker locker(&m_dbMutex);
   for (auto it = m_vspProjectDatabase.begin(); m_vspProjectDatabase.end() != it; ++it)
   {
@@ -149,6 +213,8 @@ void CDatabaseManager::RemoveProject(const QString& sName)
 //
 void CDatabaseManager::RenameProject(qint32 iId, const QString& sNewName)
 {
+  if (!IsInitialized()) { return; }
+
   tspProject spNewProject = FindProject(sNewName);
   if (nullptr == spNewProject)
   {
@@ -163,6 +229,8 @@ void CDatabaseManager::RenameProject(qint32 iId, const QString& sNewName)
 //
 void CDatabaseManager::RenameProject(const QString& sName, const QString& sNewName)
 {
+  if (!IsInitialized()) { return; }
+
   tspProject spNewProject = FindProject(sNewName);
   if (nullptr == spNewProject)
   {
@@ -175,8 +243,38 @@ void CDatabaseManager::RenameProject(const QString& sName, const QString& sNewNa
 
 //----------------------------------------------------------------------------------------
 //
+bool CDatabaseManager::SerializeProject(qint32 iId)
+{
+  if (!IsInitialized()) { return false; }
+
+  tspProject spProject = FindProject(iId);
+  if (nullptr != spProject)
+  {
+    return SerializeProjectPrivate(spProject);
+  }
+  return false;
+}
+
+//----------------------------------------------------------------------------------------
+//
+bool CDatabaseManager::SerializeProject(const QString& sName)
+{
+  if (!IsInitialized()) { return false; }
+
+  tspProject spProject = FindProject(sName);
+  if (nullptr != spProject)
+  {
+    return SerializeProjectPrivate(spProject);
+  }
+  return false;
+}
+
+//----------------------------------------------------------------------------------------
+//
 void CDatabaseManager::AddScene(tspProject& spProj, const QString& sName)
 {
+  if (!IsInitialized()) { return; }
+
   qint32 iNewId = FindNewSceneId(spProj);
   QString sFinalName = sName;
   qint32 iCounter = 0;
@@ -200,6 +298,8 @@ void CDatabaseManager::AddScene(tspProject& spProj, const QString& sName)
 //
 void CDatabaseManager::ClearScenes(tspProject& spProj)
 {
+  if (!IsInitialized()) { return; }
+
   QWriteLocker locker(&spProj->m_rwLock);
   spProj->m_vspScenes.clear();
 }
@@ -208,6 +308,8 @@ void CDatabaseManager::ClearScenes(tspProject& spProj)
 //
 tspScene CDatabaseManager::FindScene(tspProject& spProj, qint32 iId)
 {
+  if (!IsInitialized()) { return nullptr; }
+
   QReadLocker locker(&spProj->m_rwLock);
   for (tspScene& spScene : spProj->m_vspScenes)
   {
@@ -224,6 +326,8 @@ tspScene CDatabaseManager::FindScene(tspProject& spProj, qint32 iId)
 //
 tspScene CDatabaseManager::FindScene(tspProject& spProj, const QString& sName)
 {
+  if (!IsInitialized()) { return nullptr; }
+
   QReadLocker locker(&spProj->m_rwLock);
   for (tspScene& spScene : spProj->m_vspScenes)
   {
@@ -240,6 +344,8 @@ tspScene CDatabaseManager::FindScene(tspProject& spProj, const QString& sName)
 //
 tspSceneRef CDatabaseManager::FindSceneRef(tspProject& spProj, qint32 iId)
 {
+  if (!IsInitialized()) { return nullptr; }
+
   QReadLocker locker(&spProj->m_rwLock);
   for (tspScene& spScene : spProj->m_vspScenes)
   {
@@ -256,6 +362,8 @@ tspSceneRef CDatabaseManager::FindSceneRef(tspProject& spProj, qint32 iId)
 //
 tspSceneRef CDatabaseManager::FindSceneRef(tspProject& spProj, const QString& sName)
 {
+  if (!IsInitialized()) { return nullptr; }
+
   QReadLocker locker(&spProj->m_rwLock);
   for (tspScene& spScene : spProj->m_vspScenes)
   {
@@ -272,6 +380,8 @@ tspSceneRef CDatabaseManager::FindSceneRef(tspProject& spProj, const QString& sN
 //
 void CDatabaseManager::RemoveScene(tspProject& spProj, qint32 iId)
 {
+  if (!IsInitialized()) { return; }
+
   QWriteLocker locker(&spProj->m_rwLock);
   for (auto it = spProj->m_vspScenes.begin(); spProj->m_vspScenes.end() != it; ++it)
   {
@@ -288,6 +398,8 @@ void CDatabaseManager::RemoveScene(tspProject& spProj, qint32 iId)
 //
 void CDatabaseManager::RemoveScene(tspProject& spProj, const QString& sName)
 {
+  if (!IsInitialized()) { return; }
+
   QWriteLocker locker(&spProj->m_rwLock);
   for (auto it = spProj->m_vspScenes.begin(); spProj->m_vspScenes.end() != it; ++it)
   {
@@ -304,6 +416,8 @@ void CDatabaseManager::RemoveScene(tspProject& spProj, const QString& sName)
 //
 void CDatabaseManager::RenameScene(tspProject& spProj, qint32 iId, const QString& sNewName)
 {
+  if (!IsInitialized()) { return; }
+
   tspScene spNewScene = FindScene(spProj, sNewName);
   if (nullptr == spNewScene)
   {
@@ -318,6 +432,8 @@ void CDatabaseManager::RenameScene(tspProject& spProj, qint32 iId, const QString
 //
 void CDatabaseManager::RenameScene(tspProject& spProj, const QString& sName, const QString& sNewName)
 {
+  if (!IsInitialized()) { return; }
+
   tspScene spNewScene = FindScene(spProj, sNewName);
   if (nullptr == spNewScene)
   {
@@ -332,6 +448,8 @@ void CDatabaseManager::RenameScene(tspProject& spProj, const QString& sName, con
 //
 void CDatabaseManager::AddResource(tspProject& spProj, const QString& sPath, const EResourceType& type, const QString& sName)
 {
+  if (!IsInitialized()) { return; }
+
   QString sFinalName = sName;
   if (sName.isNull())
   {
@@ -347,6 +465,7 @@ void CDatabaseManager::AddResource(tspProject& spProj, const QString& sPath, con
 
   QWriteLocker locker(&spProj->m_rwLock);
   std::shared_ptr<SResource> sResource = std::make_shared<SResource>();
+  sResource->m_sName = sFinalName;
   sResource->m_sPath = sPath;
   sResource->m_type = type;
   spProj->m_spResourcesMap.insert({sFinalName, sResource});
@@ -356,6 +475,8 @@ void CDatabaseManager::AddResource(tspProject& spProj, const QString& sPath, con
 //
 void CDatabaseManager::ClearResources(tspProject& spProj)
 {
+  if (!IsInitialized()) { return; }
+
   QWriteLocker locker(&spProj->m_rwLock);
   spProj->m_vspScenes.clear();
   for (tspScene& spScene : spProj->m_vspScenes)
@@ -369,6 +490,8 @@ void CDatabaseManager::ClearResources(tspProject& spProj)
 //
 tspResource CDatabaseManager::FindResource(tspProject& spProj, const QString& sName)
 {
+  if (!IsInitialized()) { return nullptr; }
+
   QReadLocker locker(&spProj->m_rwLock);
   auto it = spProj->m_spResourcesMap.find(sName);
   if (it != spProj->m_spResourcesMap.end())
@@ -382,6 +505,8 @@ tspResource CDatabaseManager::FindResource(tspProject& spProj, const QString& sN
 //
 tspResourceRef CDatabaseManager::FindResourceRef(tspProject& spProj, const QString& sName)
 {
+  if (!IsInitialized()) { return nullptr; }
+
   QReadLocker locker(&spProj->m_rwLock);
   auto it = spProj->m_spResourcesMap.find(sName);
   if (it != spProj->m_spResourcesMap.end())
@@ -395,6 +520,8 @@ tspResourceRef CDatabaseManager::FindResourceRef(tspProject& spProj, const QStri
 //
 void CDatabaseManager::RemoveResource(tspProject& spProj, const QString& sName)
 {
+  if (!IsInitialized()) { return; }
+
   QWriteLocker locker(&spProj->m_rwLock);
   auto it = spProj->m_spResourcesMap.find(sName);
   if (it != spProj->m_spResourcesMap.end())
@@ -416,6 +543,8 @@ void CDatabaseManager::RemoveResource(tspProject& spProj, const QString& sName)
 //
 void CDatabaseManager::RenameResource(tspProject& spProj, const QString& sName, const QString& sNewName)
 {
+  if (!IsInitialized()) { return; }
+
   tspResource spNewResource = FindResource(spProj, sNewName);
   if (nullptr == spNewResource)
   {
@@ -426,6 +555,9 @@ void CDatabaseManager::RenameResource(tspProject& spProj, const QString& sName, 
     if (it != spProj->m_spResourcesMap.end())
     {
       spProj->m_spResourcesMap.erase(it);
+      spResource->m_rwLock.lockForWrite();
+      spResource->m_sName = sNewName;
+      spResource->m_rwLock.unlock();
       spProj->m_spResourcesMap.insert({sNewName, spResource});
       for (tspScene& spScene : spProj->m_vspScenes)
       {
@@ -448,9 +580,9 @@ void CDatabaseManager::Initialize()
   connect(m_spSettings.get(), &CSettings::ContentFolderChanged,
           this, &CDatabaseManager::SlotContentFolderChanged, Qt::QueuedConnection);
 
-  SlotContentFolderChanged();
-
   SetInitialized(true);
+
+  SlotContentFolderChanged();
 }
 
 //----------------------------------------------------------------------------------------
@@ -460,7 +592,7 @@ void CDatabaseManager::Deinitialize()
   disconnect(m_spSettings.get(), &CSettings::ContentFolderChanged,
           this, &CDatabaseManager::SlotContentFolderChanged);
 
-  SlotContentFolderChanged();
+  ClearProjects();
 
   SetInitialized(false);
 }
@@ -471,6 +603,69 @@ void CDatabaseManager::SlotContentFolderChanged()
 {
   ClearProjects();
   LoadDatabase();
+}
+
+//----------------------------------------------------------------------------------------
+//
+bool CDatabaseManager::DeserializeProjectPrivate(tspProject& spProject)
+{
+  spProject->m_rwLock.lockForRead();
+  const QString sName = spProject->m_sName;
+  spProject->m_rwLock.unlock();
+
+  bool bOk = true;
+  QDir sContentFolder(m_spSettings->ContentFolder());
+  if (!QFileInfo(m_spSettings->ContentFolder() + QDir::separator() + sName).exists())
+  {
+    qWarning() << "Could not find project folder: " + m_spSettings->ContentFolder() + QDir::separator() + sName;
+  }
+
+  if (bOk)
+  {
+    QFileInfo jsonInfo(m_spSettings->ContentFolder() + QDir::separator() + sName +
+                       QDir::separator() + c_sProjectFileName);
+    if (jsonInfo.exists())
+    {
+      QFile jsonFile(jsonInfo.absoluteFilePath());
+      if (jsonFile.open(QIODevice::ReadOnly))
+      {
+        QJsonParseError err;
+        QJsonDocument jsonDocument = QJsonDocument::fromJson(jsonFile.readAll(), &err);
+        if (err.error == QJsonParseError::NoError)
+        {
+          spProject->FromJsonObject(jsonDocument.object());
+
+          spProject->m_rwLock.lockForRead();
+          qint32 iOldId = spProject->m_iId;
+          spProject->m_rwLock.unlock();
+          qint32 iNewId = (-1 == iOldId) ? FindNewProjectId() : -1;
+          spProject->m_rwLock.lockForWrite();
+          spProject->m_iId = (-1 == iOldId) ? iNewId : iOldId;
+          spProject->m_rwLock.unlock();
+          return true;
+        }
+        else
+        {
+          qWarning() << err.errorString();
+          return false;
+        }
+      }
+      else
+      {
+        qWarning() << "Could not read project file: " + jsonInfo.absoluteFilePath();
+        return false;
+      }
+    }
+    else
+    {
+      qWarning() << "Could find project file: " + jsonInfo.absoluteFilePath();
+      return false;
+    }
+  }
+  else
+  {
+    return false;
+  }
 }
 
 //----------------------------------------------------------------------------------------
@@ -522,5 +717,62 @@ qint32 CDatabaseManager::FindNewSceneId(tspProject& spProj)
 //
 void CDatabaseManager::LoadDatabase()
 {
-  // TODO:
+  QString sPath = m_spSettings->ContentFolder();
+  QDirIterator it(sPath, QDir::Dirs | QDir::NoDotAndDotDot);
+  while (it.hasNext())
+  {
+    QString sDirName = it.next();
+    qint32 index = sDirName.lastIndexOf("/");
+    sDirName = sDirName.right(sDirName.length() - index - 1);
+    AddProject(sDirName);
+  }
+
+  QMutexLocker locker(&m_dbMutex);
+  for (tspProject spProject : m_vspProjectDatabase)
+  {
+    DeserializeProjectPrivate(spProject);
+  }
+}
+
+//----------------------------------------------------------------------------------------
+//
+bool CDatabaseManager::SerializeProjectPrivate(tspProject& spProject)
+{
+  spProject->m_rwLock.lockForRead();
+  const QString sName = spProject->m_sName;
+  spProject->m_rwLock.unlock();
+
+  QJsonDocument document(spProject->ToJsonObject());
+
+  bool bOk = true;
+  QDir sContentFolder(m_spSettings->ContentFolder());
+  if (!QFileInfo(m_spSettings->ContentFolder() + QDir::separator() + sName).exists())
+  {
+    bOk = sContentFolder.mkdir(sName);
+    if (!bOk)
+    {
+      qWarning() << "Could not create folder: " + m_spSettings->ContentFolder() + QDir::separator() + sName;
+    }
+  }
+
+  if (bOk)
+  {
+    QFileInfo jsonInfo(m_spSettings->ContentFolder() + QDir::separator() + sName +
+                       QDir::separator() + c_sProjectFileName);
+    QFile jsonFile(jsonInfo.absoluteFilePath());
+    if (jsonFile.open(QIODevice::ReadWrite | QIODevice::Truncate))
+    {
+      jsonFile.write(document.toJson(QJsonDocument::Indented));
+      return true;
+    }
+    else
+    {
+      qWarning() << "Could not wirte project file: " + jsonInfo.absoluteFilePath();
+      return false;
+    }
+  }
+  else
+  {
+    return false;
+  }
 }

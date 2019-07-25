@@ -50,11 +50,17 @@ public:
     m_spSystem->moveToThread(m_spThread.get());
 
     connect(m_spThread.get(), &QThread::started, m_spSystem.get(), &CThreadedObject::Initialize);
-    connect(m_spThread.get(), &QThread::finished, m_spSystem.get(), &CThreadedObject::Deinitialize);
-    connect(m_spThread.get(), &QThread::finished, m_spSystem.get(), &QObject::deleteLater);
+    connect(m_spThread.get(), &QThread::finished, this, &CThreadedSystem::Cleanup, Qt::DirectConnection);
 
     m_spThread->start();
+    while (!m_spThread->isRunning())
+    {
+      thread()->wait(5);
+    }
   }
+
+protected slots:
+  void Cleanup();
 
 protected:
   std::unique_ptr<QThread>         m_spThread;

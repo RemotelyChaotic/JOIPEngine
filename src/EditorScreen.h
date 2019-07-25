@@ -23,6 +23,11 @@ public:
   void Load() override;
   void Unload() override;
 
+private slots:
+  void SlotNewClicked(const QString& sNewProjectName);
+  void SlotOpenClicked(qint32 iId);
+  void SlotCancelClicked();
+
 private:
   std::unique_ptr<Ui::CEditorScreen> m_spUi;
 };

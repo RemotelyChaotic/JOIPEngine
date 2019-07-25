@@ -1,6 +1,5 @@
 #include "Application.h"
 #include "Enums.h"
-#include "Backend/DatabaseManager.h"
 #include "Backend/ThreadedSystem.h"
 #include <cassert>
 

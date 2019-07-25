@@ -4,7 +4,7 @@
 #
 #-------------------------------------------------
 
-QT       += core gui opengl script
+QT       += core gui multimedia opengl script
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
@@ -47,7 +47,12 @@ SOURCES += \
     src/Backend/DatabaseManager.cpp \
     src/Backend/Project.cpp \
     src/Backend/Scene.cpp \
-    src/Backend/Resource.cpp
+    src/Backend/Resource.cpp \
+    src/Editor/EditorChoiceScreen.cpp \
+    src/Editor/EditorMainScreen.cpp \
+    src/Editor/ResourceTreeItem.cpp \
+    src/Editor/ResourceTreeItemModel.cpp \
+    src/Editor/EditorResourceWidget.cpp
 
 HEADERS += \
     src/MainWindow.h \
@@ -66,7 +71,12 @@ HEADERS += \
     src/Backend/Project.h \
     src/Backend/Scene.h \
     src/Backend/Resource.h \
-    src/Backend/ISerializable.h
+    src/Backend/ISerializable.h \
+    src/Editor/EditorChoiceScreen.h \
+    src/Editor/EditorMainScreen.h \
+    src/Editor/ResourceTreeItem.h \
+    src/Editor/ResourceTreeItemModel.h \
+    src/Editor/EditorResourceWidget.h
 
 FORMS += \
     src/MainWindow.ui \
@@ -74,7 +84,10 @@ FORMS += \
     src/SettingsScreen.ui \
     src/SceneScreen.ui \
     src/SceneSelectionScreen.ui \
-    src/EditorScreen.ui
+    src/EditorScreen.ui \
+    src/Editor/EditorChoiceScreen.ui \
+    src/Editor/EditorMainScreen.ui \
+    src/Editor/EditorResourceWidget.ui
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin

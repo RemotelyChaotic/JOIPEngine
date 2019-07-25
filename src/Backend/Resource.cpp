@@ -23,6 +23,7 @@ QJsonObject SResource::ToJsonObject()
 {
   QWriteLocker locker(&m_rwLock);
   return {
+    { "sName", m_sName },
     { "sPath", m_sPath },
     { "type", m_type._value },
   };
@@ -33,7 +34,12 @@ QJsonObject SResource::ToJsonObject()
 void SResource::FromJsonObject(const QJsonObject& json)
 {
   QWriteLocker locker(&m_rwLock);
-  auto it = json.find("sPath");
+  auto it = json.find("sName");
+  if (it != json.end())
+  {
+    m_sName = it.value().toString();
+  }
+  it = json.find("sPath");
   if (it != json.end())
   {
     m_sPath = it.value().toString();
@@ -56,6 +62,14 @@ CResource::CResource(const std::shared_ptr<SResource>& spResource) :
 
 CResource::~CResource()
 {
+}
+
+//----------------------------------------------------------------------------------------
+//
+QString CResource::Name()
+{
+  QReadLocker locker(&m_spData->m_rwLock);
+  return m_spData->m_sName;
 }
 
 //----------------------------------------------------------------------------------------
