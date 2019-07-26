@@ -1,0 +1,12 @@
+<RCC>
+    <qresource prefix="/">
+        <file>resources/gif/spinner_transparent.gif</file>
+        <file>resources/fonts/Equestria.otf</file>
+        <file>resources/fonts/Equestria_Bold.otf</file>
+        <file>resources/fonts/Equestria_Bold_Italic.otf</file>
+        <file>resources/fonts/Equestria_Italic.otf</file>
+        <file>resources/fonts/PONY-MLP2-Version2.ttf</file>
+        <file>resources/fonts/PONY-MLP2-VersionDefinitiva6-Kustren.ttf</file>
+        <file>resources/img/TitleCardMissing.png</file>
+    </qresource>
+</RCC>

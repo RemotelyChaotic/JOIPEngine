@@ -23,6 +23,10 @@ public:
   void Load() override;
   void Unload() override;
 
+protected slots:
+  void on_pOpenExistingProjectButton_clicked();
+  void on_pCancelButton_clicked();
+
 private:
   std::unique_ptr<Ui::CSceneSelectionScreen> m_spUi;
 };

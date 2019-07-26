@@ -52,7 +52,9 @@ SOURCES += \
     src/Editor/EditorMainScreen.cpp \
     src/Editor/ResourceTreeItem.cpp \
     src/Editor/ResourceTreeItemModel.cpp \
-    src/Editor/EditorResourceWidget.cpp
+    src/Editor/EditorResourceWidget.cpp \
+    src/Scenes/ProjectCardWidget.cpp \
+    src/Scenes/ProjectCardSelectionWidget.cpp
 
 HEADERS += \
     src/MainWindow.h \
@@ -76,7 +78,9 @@ HEADERS += \
     src/Editor/EditorMainScreen.h \
     src/Editor/ResourceTreeItem.h \
     src/Editor/ResourceTreeItemModel.h \
-    src/Editor/EditorResourceWidget.h
+    src/Editor/EditorResourceWidget.h \
+    src/Scenes/ProjectCardWidget.h \
+    src/Scenes/ProjectCardSelectionWidget.h
 
 FORMS += \
     src/MainWindow.ui \
@@ -87,9 +91,14 @@ FORMS += \
     src/EditorScreen.ui \
     src/Editor/EditorChoiceScreen.ui \
     src/Editor/EditorMainScreen.ui \
-    src/Editor/EditorResourceWidget.ui
+    src/Editor/EditorResourceWidget.ui \
+    src/Scenes/ProjectCardWidget.ui \
+    src/Scenes/ProjectCardSelectionWidget.ui
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin
 else: unix:!android: target.path = /opt/$${TARGET}/bin
 !isEmpty(target.path): INSTALLS += target
+
+RESOURCES += \
+    resources.qrc

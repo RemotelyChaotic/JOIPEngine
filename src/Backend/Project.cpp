@@ -37,10 +37,10 @@ QJsonObject SProject::ToJsonObject()
   {
     scenes.push_back(spScene->ToJsonObject());
   }
-  QJsonObject resources({});
+  QJsonArray resources;
   for (auto& spResource : m_spResourcesMap)
   {
-    resources.insert(spResource.first, spResource.second->ToJsonObject());
+    scenes.push_back(spResource.second->ToJsonObject());
   }
   return {
     { "iVersion", m_iVersion },
@@ -48,7 +48,7 @@ QJsonObject SProject::ToJsonObject()
     { "sTitleCard", m_sTitleCard },
     { "sMap", m_sMap },
     { "vspScenes", scenes },
-    { "spResources", resources },
+    { "vspResources", resources },
   };
 }
 
@@ -92,12 +92,11 @@ void SProject::FromJsonObject(const QJsonObject& json)
   m_spResourcesMap.clear();
   if (it != json.end())
   {
-    QJsonObject obj = it.value().toObject();
-    for (auto objIt = obj.begin(); it != obj.end(); ++it)
+    for (QJsonValue val : it.value().toArray())
     {
-      SResource resource;
-      resource.FromJsonObject(objIt.value().toObject());
-      m_spResourcesMap.insert({objIt.key(), std::make_shared<SResource>(resource)});
+      std::shared_ptr<SResource> spResource = std::make_shared<SResource>();
+      spResource->FromJsonObject(val.toObject());
+      m_spResourcesMap.insert({spResource->m_sName, spResource});
     }
   }
 }

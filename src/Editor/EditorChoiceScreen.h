@@ -18,6 +18,8 @@ public:
   ~CEditorChoiceScreen();
 
   void Initialize();
+  void Load();
+  void Unload();
 
 signals:
   void SignalNewClicked(const QString& sNewProjectName);
@@ -31,10 +33,8 @@ protected slots:
 
   void on_pProjectNameLineEdit_editingFinished();
   void on_pCreateProjectButton_clicked();
-  void on_pCancelCreateButton_clicked();
 
   void on_pOpenExistingProjectButton_clicked();
-  void on_pCancelOpenClicked_clicked();
 
 private:
   std::unique_ptr<Ui::CEditorChoiceScreen> m_spUi;

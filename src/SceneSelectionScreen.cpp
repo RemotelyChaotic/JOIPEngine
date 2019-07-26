@@ -30,12 +30,32 @@ void CSceneSelectionScreen::Initialize()
 //
 void CSceneSelectionScreen::Load()
 {
-
+  m_spUi->pProjectCardSelectionWidget->LoadProjects();
 }
 
 //----------------------------------------------------------------------------------------
 //
 void CSceneSelectionScreen::Unload()
 {
+  m_spUi->pProjectCardSelectionWidget->UnloadProjects();
+}
 
+//----------------------------------------------------------------------------------------
+//
+void CSceneSelectionScreen::on_pOpenExistingProjectButton_clicked()
+{
+  SCREEN_INITIALIZED_GUARD
+
+  // TODO: implement properly
+
+  emit m_spWindowContext->SignalChangeAppState(EAppState::eSceneScreen);
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CSceneSelectionScreen::on_pCancelButton_clicked()
+{
+  SCREEN_INITIALIZED_GUARD
+
+  emit m_spWindowContext->SignalChangeAppState(EAppState::eMainScreen);
 }

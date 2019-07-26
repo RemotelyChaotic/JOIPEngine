@@ -175,6 +175,22 @@ tspProjectRef CDatabaseManager::FindProjectRef(const QString& sName)
 
 //----------------------------------------------------------------------------------------
 //
+std::set<qint32, std::less<qint32>> CDatabaseManager::ProjectIds()
+{
+  if (!IsInitialized()) { return std::set<qint32>(); }
+
+  QMutexLocker locker(&m_dbMutex);
+  std::set<qint32, std::less<qint32>> ids;
+  for (tspProject& spProject : m_vspProjectDatabase)
+  {
+    QReadLocker projLocker(&spProject->m_rwLock);
+    ids.insert(spProject->m_iId);
+  }
+  return ids;
+}
+
+//----------------------------------------------------------------------------------------
+//
 void CDatabaseManager::RemoveProject(qint32 iId)
 {
   if (!IsInitialized()) { return; }
@@ -687,14 +703,7 @@ qint32 CDatabaseManager::FindNewIdFromSet(const std::set<qint32, std::less<qint3
 //
 qint32 CDatabaseManager::FindNewProjectId()
 {
-  QMutexLocker locker(&m_dbMutex);
-  std::set<qint32, std::less<qint32>> ids;
-  for (tspProject& spProject : m_vspProjectDatabase)
-  {
-    QReadLocker projLocker(&spProject->m_rwLock);
-    ids.insert(spProject->m_iId);
-  }
-  locker.unlock();
+  std::set<qint32, std::less<qint32>> ids = ProjectIds();
   return FindNewIdFromSet(ids);
 }
 

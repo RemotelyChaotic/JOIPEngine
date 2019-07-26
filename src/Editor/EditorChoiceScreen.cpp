@@ -42,6 +42,20 @@ void CEditorChoiceScreen::Initialize()
 
 //----------------------------------------------------------------------------------------
 //
+void CEditorChoiceScreen::Load()
+{
+  m_spUi->pProjectCardSelectionWidget->LoadProjects();
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CEditorChoiceScreen::Unload()
+{
+  m_spUi->pProjectCardSelectionWidget->UnloadProjects();
+}
+
+//----------------------------------------------------------------------------------------
+//
 void CEditorChoiceScreen::on_pNewProjectButton_clicked()
 {
   if (!m_bInitialized) { return; }
@@ -61,7 +75,9 @@ void CEditorChoiceScreen::on_pOpenProjectButton_clicked()
 void CEditorChoiceScreen::on_pCancelButton_clicked()
 {
   if (!m_bInitialized) { return; }
+
   emit SignalCancelClicked();
+  m_spUi->pStackedWidget->setCurrentIndex(c_iPageIndexChoice);
 }
 
 //----------------------------------------------------------------------------------------
@@ -109,13 +125,7 @@ void CEditorChoiceScreen::on_pCreateProjectButton_clicked()
       emit SignalNewClicked(sNewName);
     }
   }
-}
 
-//----------------------------------------------------------------------------------------
-//
-void CEditorChoiceScreen::on_pCancelCreateButton_clicked()
-{
-  if (!m_bInitialized) { return; }
   m_spUi->pStackedWidget->setCurrentIndex(c_iPageIndexChoice);
 }
 
@@ -126,13 +136,5 @@ void CEditorChoiceScreen::on_pOpenExistingProjectButton_clicked()
   if (!m_bInitialized) { return; }
 
   // TODO: implement properly
-  m_spUi->pStackedWidget->setCurrentIndex(c_iPageIndexChoice);
-}
-
-//----------------------------------------------------------------------------------------
-//
-void CEditorChoiceScreen::on_pCancelOpenClicked_clicked()
-{
-  if (!m_bInitialized) { return; }
   m_spUi->pStackedWidget->setCurrentIndex(c_iPageIndexChoice);
 }

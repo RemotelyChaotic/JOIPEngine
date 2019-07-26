@@ -35,6 +35,7 @@ public:
   tspProject FindProject(const QString& sName);
   tspProjectRef FindProjectRef(qint32 iId);
   tspProjectRef FindProjectRef(const QString& sName);
+  std::set<qint32, std::less<qint32>> ProjectIds();
   void RemoveProject(qint32 iId);
   void RemoveProject(const QString& sName);
   void RenameProject(qint32 iId, const QString& sNewName);

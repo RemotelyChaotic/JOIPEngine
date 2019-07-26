@@ -46,14 +46,14 @@ void CEditorScreen::Initialize()
 //
 void CEditorScreen::Load()
 {
-
+  m_spUi->pChoiceScreen->Load();
 }
 
 //----------------------------------------------------------------------------------------
 //
 void CEditorScreen::Unload()
 {
-
+  m_spUi->pChoiceScreen->Unload();
 }
 
 //----------------------------------------------------------------------------------------
