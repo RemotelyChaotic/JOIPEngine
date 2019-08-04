@@ -150,6 +150,7 @@ void CSettingsScreen::on_pFolderLineEdit_editingFinished()
   QFileInfo path(m_spUi->pFolderLineEdit->text());
   if (!path.exists()) { return; }
   m_spSettings->SetContentFolder(path.canonicalFilePath());
+  m_spUi->pFolderLineEdit->setText(path.canonicalFilePath());
 }
 
 //----------------------------------------------------------------------------------------

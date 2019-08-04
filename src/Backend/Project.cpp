@@ -11,6 +11,8 @@ SProject::SProject() :
   m_sName(),
   m_sTitleCard(),
   m_sMap(),
+  m_bUsesWeb(false),
+  m_bNeedsCodecs(false),
   m_vspScenes(),
   m_spResourcesMap()
 {}
@@ -21,6 +23,8 @@ SProject::SProject(const SProject& other) :
   m_sName(other.m_sName),
   m_sTitleCard(other.m_sTitleCard),
   m_sMap(other.m_sMap),
+  m_bUsesWeb(other.m_bUsesWeb),
+  m_bNeedsCodecs(other.m_bNeedsCodecs),
   m_vspScenes(other.m_vspScenes),
   m_spResourcesMap(other.m_spResourcesMap)
 {}
@@ -47,6 +51,8 @@ QJsonObject SProject::ToJsonObject()
     { "sName", m_sName },
     { "sTitleCard", m_sTitleCard },
     { "sMap", m_sMap },
+    { "bUsesWeb", m_bUsesWeb },
+    { "bNeedsCodecs", m_bNeedsCodecs },
     { "vspScenes", scenes },
     { "vspResources", resources },
   };
@@ -77,15 +83,26 @@ void SProject::FromJsonObject(const QJsonObject& json)
   {
     m_sMap = it.value().toString();
   }
+  it = json.find("bUsesWeb");
+  if (it != json.end())
+  {
+    m_bUsesWeb = it.value().toBool();
+  }
+  it = json.find("bNeedsCodecs");
+  if (it != json.end())
+  {
+    m_bNeedsCodecs = it.value().toBool();
+  }
   it = json.find("vspScenes");
   m_vspScenes.clear();
   if (it != json.end())
   {
     for (QJsonValue val : it.value().toArray())
     {
-      m_vspScenes.push_back(std::make_shared<SScene>());
-      m_vspScenes.back()->FromJsonObject(val.toObject());
-      m_vspScenes.back()->m_spParent = GetPtr();
+      std::shared_ptr<SScene> spScene = std::make_shared<SScene>();
+      spScene->FromJsonObject(val.toObject());
+      spScene->m_spParent = GetPtr();
+      m_vspScenes.push_back(spScene);
     }
   }
   it = json.find("spResources");
@@ -96,6 +113,7 @@ void SProject::FromJsonObject(const QJsonObject& json)
     {
       std::shared_ptr<SResource> spResource = std::make_shared<SResource>();
       spResource->FromJsonObject(val.toObject());
+      spResource->m_spParent = GetPtr();
       m_spResourcesMap.insert({spResource->m_sName, spResource});
     }
   }
@@ -152,6 +170,22 @@ QString CProject::Map()
 {
   QReadLocker locker(&m_spData->m_rwLock);
   return m_spData->m_sMap;
+}
+
+//----------------------------------------------------------------------------------------
+//
+bool CProject::IsUsingWeb()
+{
+  QReadLocker locker(&m_spData->m_rwLock);
+  return m_spData->m_bUsesWeb;
+}
+
+//----------------------------------------------------------------------------------------
+//
+bool CProject::IsUsingCodecs()
+{
+  QReadLocker locker(&m_spData->m_rwLock);
+  return m_spData->m_bNeedsCodecs;
 }
 
 //----------------------------------------------------------------------------------------

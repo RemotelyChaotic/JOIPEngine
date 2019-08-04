@@ -46,7 +46,17 @@ void CSceneSelectionScreen::on_pOpenExistingProjectButton_clicked()
 {
   SCREEN_INITIALIZED_GUARD
 
-  // TODO: implement properly
+  /*
+  auto spDbManager = m_wpDbManager.lock();
+  if (nullptr != spDbManager)
+  {
+    qint32 iId = m_spUi->pProjectCardSelectionWidget->SelectedId();
+    if (spDbManager->FindProject(iId) == nullptr)
+    {
+      // TODO: implement
+    }
+  }
+  */
 
   emit m_spWindowContext->SignalChangeAppState(EAppState::eSceneScreen);
 }

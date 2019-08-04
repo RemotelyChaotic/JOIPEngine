@@ -134,7 +134,15 @@ void CEditorChoiceScreen::on_pCreateProjectButton_clicked()
 void CEditorChoiceScreen::on_pOpenExistingProjectButton_clicked()
 {
   if (!m_bInitialized) { return; }
+  auto spDbManager = m_wpDbManager.lock();
+  if (nullptr != spDbManager)
+  {
+    qint32 iId = m_spUi->pProjectCardSelectionWidget->SelectedId();
+    if (spDbManager->FindProject(iId) != nullptr)
+    {
+      emit SignalOpenClicked(iId);
+    }
+  }
 
-  // TODO: implement properly
   m_spUi->pStackedWidget->setCurrentIndex(c_iPageIndexChoice);
 }

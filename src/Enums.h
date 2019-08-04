@@ -14,4 +14,10 @@ BETTER_ENUM(EAppState, qint32,
 BETTER_ENUM(ECoreSystems, qint32,
             eDatabaseManager = 0);
 
+BETTER_ENUM(ELoadState, qint32,
+            eUnstarted = 0,
+            eLoading   = 1,
+            eFinished  = 2,
+            eError     = 3);
+
 #endif // ENUMS_H

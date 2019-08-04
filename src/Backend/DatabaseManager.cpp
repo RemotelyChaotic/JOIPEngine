@@ -60,6 +60,8 @@ void CDatabaseManager::AddProject(const QString& sName, qint32 iVersion)
     m_vspProjectDatabase.back()->m_iId = iNewId;
     m_vspProjectDatabase.back()->m_sName = sFinalName;
     m_vspProjectDatabase.back()->m_iVersion = iVersion;
+
+    emit SignalProjectAdded(iNewId);
   }
 }
 
@@ -70,7 +72,15 @@ void CDatabaseManager::ClearProjects()
   if (!IsInitialized()) { return; }
 
   QMutexLocker locker(&m_dbMutex);
-  m_vspProjectDatabase.clear();
+  while (0 < m_vspProjectDatabase.size())
+  {
+    auto it = m_vspProjectDatabase.begin();
+    QReadLocker projLocker(&(*it)->m_rwLock);
+    qint32 iId = (*it)->m_iId;
+    projLocker.unlock();
+    m_vspProjectDatabase.erase(it);
+    emit SignalProjectRemoved(iId);
+  }
 }
 
 //----------------------------------------------------------------------------------------
@@ -199,9 +209,12 @@ void CDatabaseManager::RemoveProject(qint32 iId)
   for (auto it = m_vspProjectDatabase.begin(); m_vspProjectDatabase.end() != it; ++it)
   {
     QReadLocker projLocker(&(*it)->m_rwLock);
-    if ((*it)->m_iId == iId)
+    qint32 iFoundId = (*it)->m_iId;
+    projLocker.unlock();
+    if (iFoundId == iId)
     {
       m_vspProjectDatabase.erase(it);
+      emit SignalProjectRemoved(iFoundId);
       break;
     }
   }
@@ -217,9 +230,12 @@ void CDatabaseManager::RemoveProject(const QString& sName)
   for (auto it = m_vspProjectDatabase.begin(); m_vspProjectDatabase.end() != it; ++it)
   {
     QReadLocker projLocker(&(*it)->m_rwLock);
+    qint32 iFoundId = (*it)->m_iId;
+    projLocker.unlock();
     if ((*it)->m_sName == sName)
     {
       m_vspProjectDatabase.erase(it);
+      emit SignalProjectRemoved(iFoundId);
       break;
     }
   }
@@ -307,6 +323,7 @@ void CDatabaseManager::AddScene(tspProject& spProj, const QString& sName)
     spProj->m_vspScenes.back()->m_iId = iNewId;
     spProj->m_vspScenes.back()->m_sName = sFinalName;
     spProj->m_vspScenes.back()->m_spParent = spProj;
+    emit SignalSceneAdded(spProj->m_iId, iNewId);
   }
 }
 
@@ -317,7 +334,15 @@ void CDatabaseManager::ClearScenes(tspProject& spProj)
   if (!IsInitialized()) { return; }
 
   QWriteLocker locker(&spProj->m_rwLock);
-  spProj->m_vspScenes.clear();
+  while (0 < spProj->m_vspScenes.size())
+  {
+    auto it = spProj->m_vspScenes.begin();
+    QReadLocker sceneLocker(&(*it)->m_rwLock);
+    qint32 iSceneId = (*it)->m_iId;
+    sceneLocker.unlock();
+    spProj->m_vspScenes.erase(it);
+    emit SignalSceneRemoved(spProj->m_iId, iSceneId);
+  }
 }
 
 //----------------------------------------------------------------------------------------
@@ -401,10 +426,13 @@ void CDatabaseManager::RemoveScene(tspProject& spProj, qint32 iId)
   QWriteLocker locker(&spProj->m_rwLock);
   for (auto it = spProj->m_vspScenes.begin(); spProj->m_vspScenes.end() != it; ++it)
   {
-    QReadLocker projLocker(&(*it)->m_rwLock);
-    if ((*it)->m_iId == iId)
+    QReadLocker sceneLocker(&(*it)->m_rwLock);
+    qint32 iSceneId = (*it)->m_iId;
+    sceneLocker.unlock();
+    if (iSceneId == iId)
     {
       spProj->m_vspScenes.erase(it);
+      emit SignalSceneRemoved(spProj->m_iId, iSceneId);
       break;
     }
   }
@@ -419,10 +447,14 @@ void CDatabaseManager::RemoveScene(tspProject& spProj, const QString& sName)
   QWriteLocker locker(&spProj->m_rwLock);
   for (auto it = spProj->m_vspScenes.begin(); spProj->m_vspScenes.end() != it; ++it)
   {
-    QReadLocker projLocker(&(*it)->m_rwLock);
-    if ((*it)->m_sName == sName)
+    QReadLocker sceneLocker(&(*it)->m_rwLock);
+    qint32 iSceneId = (*it)->m_iId;
+    const QString sFoundName = (*it)->m_sName;
+    sceneLocker.unlock();
+    if (sFoundName == sName)
     {
       spProj->m_vspScenes.erase(it);
+      emit SignalSceneRemoved(spProj->m_iId, iSceneId);
       break;
     }
   }
@@ -462,29 +494,40 @@ void CDatabaseManager::RenameScene(tspProject& spProj, const QString& sName, con
 
 //----------------------------------------------------------------------------------------
 //
-void CDatabaseManager::AddResource(tspProject& spProj, const QString& sPath, const EResourceType& type, const QString& sName)
+void CDatabaseManager::AddResource(tspProject& spProj, const QUrl& sPath, const EResourceType& type, const QString& sName)
 {
   if (!IsInitialized()) { return; }
 
   QString sFinalName = sName;
   if (sName.isNull())
   {
-    QFileInfo info(sPath);
-    sFinalName = info.fileName();
+    sFinalName = sPath.fileName();
+    QFileInfo info(sFinalName);
     qint32 iCounter = 0;
     while (FindResource(spProj, sFinalName) != nullptr)
     {
-      sFinalName = info.baseName() + QString::number(iCounter) + info.fileName().replace(info.baseName(), "");
+      sFinalName = info.baseName() + QString::number(iCounter) + sPath.fileName().replace(info.baseName(), "");
       iCounter++;
     }
   }
 
   QWriteLocker locker(&spProj->m_rwLock);
+  if (!sPath.isLocalFile())
+  {
+    spProj->m_bUsesWeb = true;
+  }
+  if (type._to_integral() == EResourceType::eMovie ||
+      type._to_integral() == EResourceType::eSound)
+  {
+    spProj->m_bNeedsCodecs = true;
+  }
   std::shared_ptr<SResource> sResource = std::make_shared<SResource>();
   sResource->m_sName = sFinalName;
   sResource->m_sPath = sPath;
   sResource->m_type = type;
+  sResource->m_spParent = spProj;
   spProj->m_spResourcesMap.insert({sFinalName, sResource});
+  emit SignalResourceAdded(spProj->m_iId, sFinalName);
 }
 
 //----------------------------------------------------------------------------------------
@@ -494,7 +537,14 @@ void CDatabaseManager::ClearResources(tspProject& spProj)
   if (!IsInitialized()) { return; }
 
   QWriteLocker locker(&spProj->m_rwLock);
-  spProj->m_vspScenes.clear();
+  while (0 < spProj->m_spResourcesMap.size())
+  {
+    auto it = spProj->m_spResourcesMap.begin();
+    QString sName = it->first;
+    spProj->m_spResourcesMap.erase(it);
+    emit SignalResourceRemoved(spProj->m_iId, sName);
+  }
+
   for (tspScene& spScene : spProj->m_vspScenes)
   {
     QWriteLocker sceneLocker(&spScene->m_rwLock);
@@ -552,6 +602,7 @@ void CDatabaseManager::RemoveResource(tspProject& spProj, const QString& sName)
         spScene->m_vsResourceRefs.erase(refsIt);
       }
     }
+    emit SignalResourceRemoved(spProj->m_iId, sName);
   }
 }
 
@@ -570,11 +621,23 @@ void CDatabaseManager::RenameResource(tspProject& spProj, const QString& sName, 
     auto it = spProj->m_spResourcesMap.find(sName);
     if (it != spProj->m_spResourcesMap.end())
     {
+      // rename map and titlecard
+      if (spProj->m_sMap == sName)
+      {
+        spProj->m_sMap = sNewName;
+      }
+      if (spProj->m_sTitleCard == sName)
+      {
+        spProj->m_sTitleCard = sNewName;
+      }
+
       spProj->m_spResourcesMap.erase(it);
       spResource->m_rwLock.lockForWrite();
       spResource->m_sName = sNewName;
       spResource->m_rwLock.unlock();
       spProj->m_spResourcesMap.insert({sNewName, spResource});
+
+      // rename refs from scene
       for (tspScene& spScene : spProj->m_vspScenes)
       {
         QWriteLocker sceneLocker(&spScene->m_rwLock);

@@ -56,7 +56,7 @@ public:
   void RenameScene(tspProject& spProj, const QString& sName, const QString& sNewName);
 
   // Resource
-  void AddResource(tspProject& spProj, const QString& sPath, const EResourceType& type, const QString& sName = QString());
+  void AddResource(tspProject& spProj, const QUrl& sPath, const EResourceType& type, const QString& sName = QString());
   void ClearResources(tspProject& spProj);
   tspResource FindResource(tspProject& spProj, const QString& sName);
   tspResourceRef FindResourceRef(tspProject& spProj, const QString& sName);
@@ -66,6 +66,14 @@ public:
 public slots:
   void Initialize() override;
   void Deinitialize() override;
+
+signals:
+  void SignalProjectAdded(qint32 iId);
+  void SignalProjectRemoved(qint32 iId);
+  void SignalSceneAdded(qint32 iProjId, qint32 iId);
+  void SignalSceneRemoved(qint32 iProjId, qint32 iId);
+  void SignalResourceAdded(qint32 iProjId, const QString& sName);
+  void SignalResourceRemoved(qint32 iProjId, const QString& sName);
 
 private slots:
   void SlotContentFolderChanged();

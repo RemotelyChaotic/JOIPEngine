@@ -4,7 +4,17 @@
 #
 #-------------------------------------------------
 
-QT       += core gui multimedia opengl script
+QT       += \
+  core \
+  gui \
+  multimedia \
+  multimediawidgets \
+  network \
+  opengl \
+  script \
+  webengine \
+  webenginewidgets \
+  xml
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
@@ -28,6 +38,7 @@ include(lib/better-enums/_lib_enum.pri)
 CONFIG(debug, debug|release) {
    include(lib/Fluid_Studios_Memory_Manager/_lib_mmgr.pri)
 }
+include (lib/modeltest/modeltest.pri)
 
 INCLUDEPATH += \
     src
@@ -53,8 +64,18 @@ SOURCES += \
     src/Editor/ResourceTreeItem.cpp \
     src/Editor/ResourceTreeItemModel.cpp \
     src/Editor/EditorResourceWidget.cpp \
-    src/Scenes/ProjectCardWidget.cpp \
-    src/Scenes/ProjectCardSelectionWidget.cpp
+    src/Widgets/ProjectCardWidget.cpp \
+    src/Widgets/ProjectCardSelectionWidget.cpp \
+    src/Widgets/OverlayBase.cpp \
+    src/Editor/WebResourceOverlay.cpp \
+    src/Widgets/Player/MediaPlayer.cpp \
+    src/Widgets/Player/MediaPlayerControls.cpp \
+    src/Widgets/Player/MediaPlayerHistogramWidget.cpp \
+    src/Widgets/Player/MediaPlayerVideoWidget.cpp \
+    src/Widgets/ResourceDisplayWidget.cpp \
+    src/Editor/EditorActionBar.cpp \
+    src/Editor/EditorWidgetBase.cpp \
+    src/Editor/EditorResourceDisplayWidget.cpp
 
 HEADERS += \
     src/MainWindow.h \
@@ -79,8 +100,18 @@ HEADERS += \
     src/Editor/ResourceTreeItem.h \
     src/Editor/ResourceTreeItemModel.h \
     src/Editor/EditorResourceWidget.h \
-    src/Scenes/ProjectCardWidget.h \
-    src/Scenes/ProjectCardSelectionWidget.h
+    src/Widgets/ProjectCardWidget.h \
+    src/Widgets/ProjectCardSelectionWidget.h \
+    src/Widgets/OverlayBase.h \
+    src/Editor/WebResourceOverlay.h \
+    src/Widgets/Player/MediaPlayer.h   \
+    src/Widgets/Player/MediaPlayerControls.h   \
+    src/Widgets/Player/MediaPlayerHistogramWidget.h \
+    src/Widgets/Player/MediaPlayerVideoWidget.h \
+    src/Widgets/ResourceDisplayWidget.h \
+    src/Editor/EditorActionBar.h \
+    src/Editor/EditorWidgetBase.h \
+    src/Editor/EditorResourceDisplayWidget.h
 
 FORMS += \
     src/MainWindow.ui \
@@ -92,8 +123,12 @@ FORMS += \
     src/Editor/EditorChoiceScreen.ui \
     src/Editor/EditorMainScreen.ui \
     src/Editor/EditorResourceWidget.ui \
-    src/Scenes/ProjectCardWidget.ui \
-    src/Scenes/ProjectCardSelectionWidget.ui
+    src/Widgets/ProjectCardWidget.ui \
+    src/Widgets/ProjectCardSelectionWidget.ui \
+    src/Editor/WebResourceOverlay.ui \
+    src/Widgets/ResourceDisplayWidget.ui \
+    src/Editor/EditorActionBar.ui \
+    src/Editor/EditorResourceDisplayWidget.ui
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin

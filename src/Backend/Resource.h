@@ -7,6 +7,7 @@
 #include <QReadWriteLock>
 #include <QScriptValue>
 #include <QSharedPointer>
+#include <QUrl>
 #include <memory>
 #include <set>
 
@@ -16,7 +17,10 @@ BETTER_ENUM(EResourceType, qint32,
             eSound = 2,
             eOther = 3);
 
+class CProject;
 class QScriptEngine;
+struct SProject;
+typedef QSharedPointer<CProject> tspProjectRef;
 
 //----------------------------------------------------------------------------------------
 //
@@ -26,10 +30,11 @@ struct SResource : public ISerializable
   SResource(const SResource& other);
   ~SResource() override;
 
-  mutable QReadWriteLock  m_rwLock;
-  QString                 m_sName;
-  QString                 m_sPath;
-  EResourceType           m_type;
+  std::shared_ptr<SProject> m_spParent;
+  mutable QReadWriteLock    m_rwLock;
+  QString                   m_sName;
+  QUrl                      m_sPath;
+  EResourceType             m_type;
 
   QJsonObject ToJsonObject() override;
   void FromJsonObject(const QJsonObject& json) override;
@@ -54,6 +59,8 @@ public:
   QString Path();
   qint32 Type();
 
+  Q_INVOKABLE tspProjectRef Project();
+
 private:
   std::shared_ptr<SResource>m_spData;
 };
@@ -74,5 +81,12 @@ Q_DECLARE_METATYPE(tspResourceRef)
 QScriptValue ResourceToScriptValue(QScriptEngine* pEngine, CResource* const& pIn);
 void ResourceFromScriptValue(const QScriptValue& object, CResource*& pOut);
 
+//----------------------------------------------------------------------------------------
+//
+QStringList AudioFormats();
+QStringList ImageFormats();
+QStringList OtherFormats();
+QString ResourceUrlToAbsolutePath(const QUrl& url, const QString& sProjectName);
+QStringList VideoFormats();
 
 #endif // RESOURCE_H

@@ -24,6 +24,8 @@ struct SProject : public ISerializable, std::enable_shared_from_this<SProject>
   QString                   m_sName;
   QString                   m_sTitleCard;
   QString                   m_sMap;
+  bool                      m_bUsesWeb;
+  bool                      m_bNeedsCodecs;
   tvspScene                 m_vspScenes;
   tspResourceMap            m_spResourcesMap;
 
@@ -43,11 +45,13 @@ class CProject : public QObject
   Q_OBJECT
   Q_DISABLE_COPY(CProject)
   CProject() {}
-  Q_PROPERTY(qint32  id        READ Id       )
-  Q_PROPERTY(qint32  version   READ Version  )
-  Q_PROPERTY(QString name      READ Name     )
-  Q_PROPERTY(QString titleCard READ TitleCard)
-  Q_PROPERTY(QString map       READ Map      )
+  Q_PROPERTY(qint32  id           READ Id            )
+  Q_PROPERTY(qint32  version      READ Version       )
+  Q_PROPERTY(QString name         READ Name          )
+  Q_PROPERTY(QString titleCard    READ TitleCard     )
+  Q_PROPERTY(QString map          READ Map           )
+  Q_PROPERTY(bool    isUsingWeb   READ IsUsingWeb    )
+  Q_PROPERTY(bool    iUsingCodecs READ IsUsingCodecs )
 
 public:
   explicit CProject(const std::shared_ptr<SProject>& spProject);
@@ -58,6 +62,8 @@ public:
   QString Name();
   QString TitleCard();
   QString Map();
+  bool IsUsingWeb();
+  bool IsUsingCodecs();
 
   Q_INVOKABLE qint32 NumScenes();
   Q_INVOKABLE tspSceneRef Scene(qint32 iIndex);

@@ -8,5 +8,11 @@
         <file>resources/fonts/PONY-MLP2-Version2.ttf</file>
         <file>resources/fonts/PONY-MLP2-VersionDefinitiva6-Kustren.ttf</file>
         <file>resources/img/TitleCardMissing.png</file>
+        <file>resources/img/ButtonMap.png</file>
+        <file>resources/img/ButtonMinus.png</file>
+        <file>resources/img/ButtonPlus.png</file>
+        <file>resources/img/ButtonTitleCard.png</file>
+        <file>resources/img/ButtonWeb.png</file>
+        <file>resources/gif/spinner.gif</file>
     </qresource>
 </RCC>
