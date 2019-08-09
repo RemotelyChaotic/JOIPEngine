@@ -64,7 +64,6 @@ SOURCES += \
     src/Editor/ResourceTreeItem.cpp \
     src/Editor/ResourceTreeItemModel.cpp \
     src/Editor/EditorResourceWidget.cpp \
-    src/Widgets/ProjectCardWidget.cpp \
     src/Widgets/ProjectCardSelectionWidget.cpp \
     src/Widgets/OverlayBase.cpp \
     src/Editor/WebResourceOverlay.cpp \
@@ -75,7 +74,8 @@ SOURCES += \
     src/Widgets/ResourceDisplayWidget.cpp \
     src/Editor/EditorActionBar.cpp \
     src/Editor/EditorWidgetBase.cpp \
-    src/Editor/EditorResourceDisplayWidget.cpp
+    src/Editor/EditorResourceDisplayWidget.cpp \
+    src/Editor/ResourceTreeItemSortFilterProxyModel.cpp
 
 HEADERS += \
     src/MainWindow.h \
@@ -100,7 +100,6 @@ HEADERS += \
     src/Editor/ResourceTreeItem.h \
     src/Editor/ResourceTreeItemModel.h \
     src/Editor/EditorResourceWidget.h \
-    src/Widgets/ProjectCardWidget.h \
     src/Widgets/ProjectCardSelectionWidget.h \
     src/Widgets/OverlayBase.h \
     src/Editor/WebResourceOverlay.h \
@@ -111,7 +110,8 @@ HEADERS += \
     src/Widgets/ResourceDisplayWidget.h \
     src/Editor/EditorActionBar.h \
     src/Editor/EditorWidgetBase.h \
-    src/Editor/EditorResourceDisplayWidget.h
+    src/Editor/EditorResourceDisplayWidget.h \
+    src/Editor/ResourceTreeItemSortFilterProxyModel.h
 
 FORMS += \
     src/MainWindow.ui \
@@ -123,7 +123,6 @@ FORMS += \
     src/Editor/EditorChoiceScreen.ui \
     src/Editor/EditorMainScreen.ui \
     src/Editor/EditorResourceWidget.ui \
-    src/Widgets/ProjectCardWidget.ui \
     src/Widgets/ProjectCardSelectionWidget.ui \
     src/Editor/WebResourceOverlay.ui \
     src/Widgets/ResourceDisplayWidget.ui \

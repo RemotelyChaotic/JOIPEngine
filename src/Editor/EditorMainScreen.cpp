@@ -5,6 +5,7 @@
 #include "Backend/DatabaseManager.h"
 #include "Backend/Project.h"
 #include "ui_EditorMainScreen.h"
+#include "ui_EditorActionBar.h"
 
 namespace
 {
@@ -23,7 +24,9 @@ CEditorMainScreen::CEditorMainScreen(QWidget* pParent) :
   m_spWidgetsMap(),
   m_spCurrentProject(nullptr),
   m_wpDbManager(),
-  m_bInitialized(false)
+  m_bInitialized(false),
+  m_iLastLeftIndex(-1),
+  m_iLastRightIndex(-2)
 {
   m_spUi->setupUi(this);
   Initialize();
@@ -41,10 +44,21 @@ void CEditorMainScreen::Initialize()
 
   m_wpDbManager = CApplication::Instance()->System<CDatabaseManager>();
 
-  m_spUi->pActionBar->Initialize();
+  // action Bars
+  m_spUi->pProjectActionBar->Initialize();
+  m_spUi->pProjectActionBar->ShowProjectActionBar();
+  m_spUi->pActionBarLeft->Initialize();
+  m_spUi->pActionBarRight->Initialize();
+
+  connect(m_spUi->pProjectActionBar->m_spUi->pSaveButton, &QPushButton::clicked,
+          this, &CEditorMainScreen::SlotSaveClicked);
+  connect(m_spUi->pProjectActionBar->m_spUi->pTitleLineEdit, &QLineEdit::editingFinished,
+          this, &CEditorMainScreen::SlotProjectNameEditingFinished);
+  connect(m_spUi->pProjectActionBar->m_spUi->pExitButton, &QPushButton::clicked,
+          this, &CEditorMainScreen::SlotExitClicked);
 
   // insert items in map
-  m_spWidgetsMap.insert({EEditorWidget::eResourceWidget, std::make_unique<CEditorResourceWidget>(nullptr, m_spUi->pActionBar)});
+  m_spWidgetsMap.insert({EEditorWidget::eResourceWidget, std::make_unique<CEditorResourceWidget>()});
   m_spWidgetsMap.insert({EEditorWidget::eResourceDisplay, std::make_unique<CEditorResourceDisplayWidget>()});
 
   // initialize widgets
@@ -59,14 +73,23 @@ void CEditorMainScreen::Initialize()
   m_spUi->pLeftComboBox->blockSignals(false);
   m_spUi->pRightComboBox->blockSignals(false);
 
+  // custom stuff
+  connect(GetWidget<CEditorResourceWidget>(), &CEditorResourceWidget::SignalResourceSelected,
+          this, &CEditorMainScreen::SlotDisplayResource);
+
   // initializing done
   m_bInitialized = true;
 
   // init indicees
-  m_spUi->pLeftComboBox->setCurrentIndex(0);
-  on_pLeftComboBox_currentIndexChanged(0);
+  m_spUi->pRightComboBox->blockSignals(true);
   m_spUi->pRightComboBox->setCurrentIndex(1);
   on_pRightComboBox_currentIndexChanged(1);
+  m_spUi->pRightComboBox->blockSignals(false);
+
+  m_spUi->pLeftComboBox->blockSignals(true);
+  m_spUi->pLeftComboBox->setCurrentIndex(0);
+  on_pLeftComboBox_currentIndexChanged(0);
+  m_spUi->pLeftComboBox->blockSignals(false);
 }
 
 //----------------------------------------------------------------------------------------
@@ -84,9 +107,7 @@ void CEditorMainScreen::InitNewProject(const QString& sNewProjectName)
     qint32 iId = m_spCurrentProject->m_iId;
     m_spCurrentProject->m_rwLock.unlock();
     LoadProject(iId);
-
-    // save to create folder structure
-    spDbManager->SerializeProject(iId);
+    SlotSaveClicked(true);
   }
 }
 
@@ -99,6 +120,11 @@ void CEditorMainScreen::LoadProject(qint32 iId)
   if (nullptr != spDbManager)
   {
     m_spCurrentProject = spDbManager->FindProject(iId);
+    if (nullptr != m_spCurrentProject)
+    {
+      QReadLocker locker(&m_spCurrentProject->m_rwLock);
+      m_spUi->pProjectActionBar->m_spUi->pTitleLineEdit->setText(m_spCurrentProject->m_sName);
+    }
   }
 
   CEditorResourceWidget* pWidget = GetWidget<CEditorResourceWidget>();
@@ -128,16 +154,19 @@ void CEditorMainScreen::UnloadProject()
 void CEditorMainScreen::on_pLeftComboBox_currentIndexChanged(qint32 iIndex)
 {
   if (!m_bInitialized) { return; }
+  if (m_iLastLeftIndex == iIndex) { return; }
 
-  qint32 iEnumValue = m_spUi->pLeftComboBox->itemData(iIndex, Qt::UserRole).toInt();
-  QLayout* pLayout = m_spUi->pLeftContainer->layout();
-  while (auto item = pLayout->takeAt(0));
+  ChangeIndex(m_spUi->pLeftComboBox, m_spUi->pLeftContainer, m_spUi->pActionBarLeft, iIndex);
 
-  auto it = m_spWidgetsMap.find(EEditorWidget::_from_integral(iEnumValue));
-  if (m_spWidgetsMap.end() != it)
+  if (iIndex == m_spUi->pRightComboBox->currentIndex())
   {
-    pLayout->addWidget(it->second.get());
+    m_spUi->pRightComboBox->blockSignals(true);
+    m_spUi->pRightComboBox->setCurrentIndex(m_iLastLeftIndex);
+    ChangeIndex(m_spUi->pRightComboBox, m_spUi->pRightContainer, m_spUi->pActionBarRight, m_iLastLeftIndex);
+    m_iLastRightIndex = m_iLastLeftIndex;
+    m_spUi->pRightComboBox->blockSignals(false);
   }
+  m_iLastLeftIndex = iIndex;
 }
 
 //----------------------------------------------------------------------------------------
@@ -145,15 +174,103 @@ void CEditorMainScreen::on_pLeftComboBox_currentIndexChanged(qint32 iIndex)
 void CEditorMainScreen::on_pRightComboBox_currentIndexChanged(qint32 iIndex)
 {
   if (!m_bInitialized) { return; }
+  if (m_iLastRightIndex == iIndex) { return; }
 
-  qint32 iEnumValue = m_spUi->pRightComboBox->itemData(iIndex, Qt::UserRole).toInt();
-  QLayout* pLayout = m_spUi->pRightContainer->layout();
+  ChangeIndex(m_spUi->pRightComboBox, m_spUi->pRightContainer, m_spUi->pActionBarRight, iIndex);
+
+  if (iIndex == m_spUi->pLeftComboBox->currentIndex())
+  {
+    m_spUi->pLeftComboBox->blockSignals(true);
+    m_spUi->pLeftComboBox->setCurrentIndex(m_iLastRightIndex);
+    ChangeIndex(m_spUi->pLeftComboBox, m_spUi->pLeftContainer, m_spUi->pActionBarLeft, m_iLastRightIndex);
+    m_iLastLeftIndex = m_iLastRightIndex;
+    m_spUi->pLeftComboBox->blockSignals(false);
+  }
+  m_iLastRightIndex = iIndex;
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CEditorMainScreen::SlotDisplayResource(const QString& sName)
+{
+  if (!m_bInitialized && nullptr != m_spCurrentProject) { return; }
+
+  CEditorResourceDisplayWidget* pWidget = GetWidget<CEditorResourceDisplayWidget>();
+  auto spDbManager = m_wpDbManager.lock();
+  if (nullptr != spDbManager && nullptr != pWidget)
+  {
+    pWidget->UnloadResource();
+    pWidget->LoadResource(spDbManager->FindResource(m_spCurrentProject, sName));
+  }
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CEditorMainScreen::SlotExitClicked(bool bClick)
+{
+  Q_UNUSED(bClick);
+  if (!m_bInitialized) { return; }
+
+  UnloadProject();
+  emit SignalExitClicked();
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CEditorMainScreen::SlotProjectNameEditingFinished()
+{
+  if (!m_bInitialized && nullptr != m_spCurrentProject) { return; }
+
+  auto spDbManager = m_wpDbManager.lock();
+  if (nullptr != spDbManager)
+  {
+    m_spCurrentProject->m_rwLock.lockForRead();
+    qint32 iId = m_spCurrentProject->m_iId;
+    m_spCurrentProject->m_rwLock.unlock();
+
+    spDbManager->RenameProject(iId, m_spUi->pProjectActionBar->m_spUi->pTitleLineEdit->text());
+
+    m_spCurrentProject->m_rwLock.lockForRead();
+    const QString sName = m_spCurrentProject->m_sName;
+    m_spCurrentProject->m_rwLock.unlock();
+
+    m_spUi->pProjectActionBar->m_spUi->pTitleLineEdit->setText(sName);
+  }
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CEditorMainScreen::SlotSaveClicked(bool bClick)
+{
+  Q_UNUSED(bClick);
+  if (!m_bInitialized && nullptr != m_spCurrentProject) { return; }
+
+  auto spDbManager = m_wpDbManager.lock();
+  if (nullptr != spDbManager)
+  {
+    m_spCurrentProject->m_rwLock.lockForRead();
+    qint32 iId = m_spCurrentProject->m_iId;
+    m_spCurrentProject->m_rwLock.unlock();
+
+    // save to create folder structure
+    spDbManager->SerializeProject(iId);
+  }
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CEditorMainScreen::ChangeIndex(QComboBox* pComboBox, QWidget* pContainer,
+  CEditorActionBar* pActionBar, qint32 iIndex)
+{
+  qint32 iEnumValue = pComboBox->itemData(iIndex, Qt::UserRole).toInt();
+  QLayout* pLayout = pContainer->layout();
   while (auto item = pLayout->takeAt(0));
 
   auto it = m_spWidgetsMap.find(EEditorWidget::_from_integral(iEnumValue));
   if (m_spWidgetsMap.end() != it)
   {
     pLayout->addWidget(it->second.get());
+    it->second->SetActionBar(pActionBar);
   }
 }
 

@@ -16,14 +16,14 @@ class CProjectCardSelectionWidget : public QWidget
 
 public:
   explicit CProjectCardSelectionWidget(QWidget* pParent = nullptr);
-  ~CProjectCardSelectionWidget();
+  ~CProjectCardSelectionWidget() override;
 
   void Initialize();
   void LoadProjects();
   void UnloadProjects();
   qint32 SelectedId() { return m_iSelectedProjectId; }
 
-private slots:
+protected slots:
   void SlotCardClicked();
 
 private:

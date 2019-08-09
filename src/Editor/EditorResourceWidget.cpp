@@ -3,6 +3,7 @@
 #include "EditorActionBar.h"
 #include "ResourceTreeItem.h"
 #include "ResourceTreeItemModel.h"
+#include "ResourceTreeItemSortFilterProxyModel.h"
 #include "WebResourceOverlay.h"
 #include "Backend/DatabaseManager.h"
 #include "Backend/Project.h"
@@ -19,11 +20,12 @@
 #include <QFileInfo>
 #include <QItemSelectionModel>
 #include <QNetworkAccessManager>
+#include <QSortFilterProxyModel>
 
 #include <cassert>
 
-CEditorResourceWidget::CEditorResourceWidget(QWidget* pParent, CEditorActionBar* pActionBar) :
-  CEditorWidgetBase(pParent, pActionBar),
+CEditorResourceWidget::CEditorResourceWidget(QWidget* pParent) :
+  CEditorWidgetBase(pParent),
   m_spUi(std::make_unique<Ui::CEditorResourceWidget>()),
   m_spNAManager(std::make_unique<QNetworkAccessManager>()),
   m_spSettings(CApplication::Instance()->Settings()),
@@ -53,31 +55,21 @@ void CEditorResourceWidget::Initialize()
   m_wpDbManager = CApplication::Instance()->System<CDatabaseManager>();
 
   CResourceTreeItemModel* pModel = new CResourceTreeItemModel(m_spUi->pResourceTree);
-  m_spUi->pResourceTree->setModel(pModel);
+  CResourceTreeItemSortFilterProxyModel* pProxyModel =
+      new CResourceTreeItemSortFilterProxyModel(m_spUi->pResourceTree);
+  pProxyModel->setSourceModel(pModel);
+  pProxyModel->sort(resource_item::c_iColumnName, Qt::DescendingOrder);
+  pProxyModel->setFilterRegExp(QRegExp(".*", Qt::CaseInsensitive, QRegExp::RegExp));
+  m_spUi->pResourceTree->setModel(pProxyModel);
 
   QItemSelectionModel* pSelectionModel = m_spUi->pResourceTree->selectionModel();
   connect(pSelectionModel, &QItemSelectionModel::currentChanged,
           this, &CEditorResourceWidget::SlotCurrentChanged);
 
-  // connections for actionbar
-  if (nullptr != m_pActionBar)
-  {
-    connect(m_pActionBar->m_spUi->pAddButton, &QPushButton::clicked,
-            this, &CEditorResourceWidget::SlotAddButtonClicked);
-    connect(m_pActionBar->m_spUi->pAddWebButton, &QPushButton::clicked,
-            this, &CEditorResourceWidget::SlotAddWebButtonClicked);
-    connect(m_pActionBar->m_spUi->pRemoveButton, &QPushButton::clicked,
-            this, &CEditorResourceWidget::SlotRemoveButtonClicked);
-    connect(m_pActionBar->m_spUi->pTitleCardButton, &QPushButton::clicked,
-            this, &CEditorResourceWidget::SlotTitleCardButtonClicked);
-    connect(m_pActionBar->m_spUi->pMapButton, &QPushButton::clicked,
-            this, &CEditorResourceWidget::SlotMapButtonClicked);
-
-    m_spWebOverlay = std::make_unique<CWebResourceOverlay>(m_pActionBar->m_spUi->pAddWebButton);
-    m_spWebOverlay->Hide();
-    connect(m_spWebOverlay.get(), &CWebResourceOverlay::SignalResourceSelected,
-            this, &CEditorResourceWidget::SlotWebResourceSelected);
-  }
+  m_spWebOverlay = std::make_unique<CWebResourceOverlay>();
+  m_spWebOverlay->Hide();
+  connect(m_spWebOverlay.get(), &CWebResourceOverlay::SignalResourceSelected,
+          this, &CEditorResourceWidget::SlotWebResourceSelected);
 
   m_bInitialized = true;
 }
@@ -94,8 +86,9 @@ void CEditorResourceWidget::LoadProject(tspProject spCurrentProject)
   if (nullptr != m_spCurrentProject)
   {
     // load resource-tree
-    CResourceTreeItemModel* pModel = dynamic_cast<CResourceTreeItemModel*>(m_spUi->pResourceTree->model());
-    pModel->InitializeModel(m_spCurrentProject);
+    CResourceTreeItemSortFilterProxyModel* pModel =
+        dynamic_cast<CResourceTreeItemSortFilterProxyModel*>(m_spUi->pResourceTree->model());
+     pModel->InitializeModel(m_spCurrentProject);
 
     // Testing
     //new ModelTest(pModel, this);
@@ -110,8 +103,50 @@ void CEditorResourceWidget::UnloadProject()
 
   m_spCurrentProject = nullptr;
 
-  CResourceTreeItemModel* pModel = dynamic_cast<CResourceTreeItemModel*>(m_spUi->pResourceTree->model());
+  m_spUi->pResourceTree->reset();
+  CResourceTreeItemSortFilterProxyModel* pModel =
+      dynamic_cast<CResourceTreeItemSortFilterProxyModel*>(m_spUi->pResourceTree->model());
   pModel->DeInitializeModel();
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CEditorResourceWidget::OnActionBarAboutToChange()
+{
+  if (nullptr != ActionBar())
+  {
+    disconnect(ActionBar()->m_spUi->pAddButton, &QPushButton::clicked,
+            this, &CEditorResourceWidget::SlotAddButtonClicked);
+    disconnect(ActionBar()->m_spUi->pAddWebButton, &QPushButton::clicked,
+            this, &CEditorResourceWidget::SlotAddWebButtonClicked);
+    disconnect(ActionBar()->m_spUi->pRemoveButton, &QPushButton::clicked,
+            this, &CEditorResourceWidget::SlotRemoveButtonClicked);
+    disconnect(ActionBar()->m_spUi->pTitleCardButton, &QPushButton::clicked,
+            this, &CEditorResourceWidget::SlotTitleCardButtonClicked);
+    disconnect(ActionBar()->m_spUi->pMapButton, &QPushButton::clicked,
+            this, &CEditorResourceWidget::SlotMapButtonClicked);
+  }
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CEditorResourceWidget::OnActionBarChanged()
+{
+  // connections for actionbar
+  if (nullptr != ActionBar())
+  {
+    ActionBar()->ShowResourceActionBar();
+    connect(ActionBar()->m_spUi->pAddButton, &QPushButton::clicked,
+            this, &CEditorResourceWidget::SlotAddButtonClicked);
+    connect(ActionBar()->m_spUi->pAddWebButton, &QPushButton::clicked,
+            this, &CEditorResourceWidget::SlotAddWebButtonClicked);
+    connect(ActionBar()->m_spUi->pRemoveButton, &QPushButton::clicked,
+            this, &CEditorResourceWidget::SlotRemoveButtonClicked);
+    connect(ActionBar()->m_spUi->pTitleCardButton, &QPushButton::clicked,
+            this, &CEditorResourceWidget::SlotTitleCardButtonClicked);
+    connect(ActionBar()->m_spUi->pMapButton, &QPushButton::clicked,
+            this, &CEditorResourceWidget::SlotMapButtonClicked);
+  }
 }
 
 //----------------------------------------------------------------------------------------
@@ -119,7 +154,18 @@ void CEditorResourceWidget::UnloadProject()
 void CEditorResourceWidget::on_pFilterLineEdit_editingFinished()
 {
   WIDGET_INITIALIZED_GUARD
-  // TODO: implement properly
+  CResourceTreeItemSortFilterProxyModel* pProxyModel =
+      dynamic_cast<CResourceTreeItemSortFilterProxyModel*>(m_spUi->pResourceTree->model());
+
+  const QString sFilter = m_spUi->pFilterLineEdit->text();
+  if (sFilter.isNull() || sFilter.isEmpty())
+  {
+    pProxyModel->setFilterRegExp(QRegExp(".*", Qt::CaseInsensitive, QRegExp::RegExp));
+  }
+  else
+  {
+    pProxyModel->setFilterRegExp(QRegExp(sFilter, Qt::CaseInsensitive, QRegExp::RegExp));
+  }
 }
 
 //----------------------------------------------------------------------------------------
@@ -149,9 +195,7 @@ void CEditorResourceWidget::SlotAddButtonClicked()
 
   // add file to respective category
   QFileInfo info(sFileName);
-  m_spCurrentProject->m_rwLock.lockForRead();
-  const QString sName = m_spCurrentProject->m_sName;
-  m_spCurrentProject->m_rwLock.unlock();
+  const QString sName = PhysicalProjectName(m_spCurrentProject);
 
   QDir projectDir(m_spSettings->ContentFolder() + "/" + sName);
   if (!info.canonicalFilePath().contains(projectDir.absolutePath()))
@@ -202,8 +246,10 @@ void CEditorResourceWidget::SlotRemoveButtonClicked()
   WIDGET_INITIALIZED_GUARD
   if (nullptr == m_spCurrentProject) { return; }
 
+  QSortFilterProxyModel* pProxyModel =
+    dynamic_cast<QSortFilterProxyModel*>(m_spUi->pResourceTree->model());
   CResourceTreeItemModel* pModel =
-      dynamic_cast<CResourceTreeItemModel*>(m_spUi->pResourceTree->model());
+    dynamic_cast<CResourceTreeItemModel*>(pProxyModel->sourceModel());
 
   auto spDbManager = m_wpDbManager.lock();
   if (nullptr != spDbManager && nullptr != pModel)
@@ -212,9 +258,9 @@ void CEditorResourceWidget::SlotRemoveButtonClicked()
     m_spUi->pResourceTree->selectionModel()->clearSelection();
     foreach (QModelIndex index, indexes)
     {
-      if (pModel->IsResourceType(index))
+      if (pModel->IsResourceType(pProxyModel->mapToSource(index)))
       {
-        const QString sName = pModel->data(index, Qt::DisplayRole).toString();
+        const QString sName = pModel->data(pProxyModel->mapToSource(index), Qt::DisplayRole).toString();
         spDbManager->RemoveResource(m_spCurrentProject, sName);
 
         // only interrested in first item which is the actual item we need
@@ -231,8 +277,10 @@ void CEditorResourceWidget::SlotTitleCardButtonClicked()
   WIDGET_INITIALIZED_GUARD
   if (nullptr == m_spCurrentProject) { return; }
 
+  QSortFilterProxyModel* pProxyModel =
+    dynamic_cast<QSortFilterProxyModel*>(m_spUi->pResourceTree->model());
   CResourceTreeItemModel* pModel =
-      dynamic_cast<CResourceTreeItemModel*>(m_spUi->pResourceTree->model());
+    dynamic_cast<CResourceTreeItemModel*>(pProxyModel->sourceModel());
 
   auto spDbManager = m_wpDbManager.lock();
   if (nullptr != spDbManager && nullptr != pModel)
@@ -241,9 +289,9 @@ void CEditorResourceWidget::SlotTitleCardButtonClicked()
     m_spUi->pResourceTree->selectionModel()->clearSelection();
     foreach (QModelIndex index, indexes)
     {
-      if (pModel->IsResourceType(index))
+      if (pModel->IsResourceType(pProxyModel->mapToSource(index)))
       {
-        const QString sName = pModel->data(index, Qt::DisplayRole).toString();
+        const QString sName = pModel->data(pProxyModel->mapToSource(index), Qt::DisplayRole).toString();
         tspResource spResource = spDbManager->FindResource(m_spCurrentProject, sName);
         if (nullptr != spResource)
         {
@@ -264,8 +312,10 @@ void CEditorResourceWidget::SlotMapButtonClicked()
   WIDGET_INITIALIZED_GUARD
   if (nullptr == m_spCurrentProject) { return; }
 
+  QSortFilterProxyModel* pProxyModel =
+    dynamic_cast<QSortFilterProxyModel*>(m_spUi->pResourceTree->model());
   CResourceTreeItemModel* pModel =
-      dynamic_cast<CResourceTreeItemModel*>(m_spUi->pResourceTree->model());
+    dynamic_cast<CResourceTreeItemModel*>(pProxyModel->sourceModel());
 
   auto spDbManager = m_wpDbManager.lock();
   if (nullptr != spDbManager && nullptr != pModel)
@@ -274,9 +324,9 @@ void CEditorResourceWidget::SlotMapButtonClicked()
     m_spUi->pResourceTree->selectionModel()->clearSelection();
     foreach (QModelIndex index, indexes)
     {
-      if (pModel->IsResourceType(index))
+      if (pModel->IsResourceType(pProxyModel->mapToSource(index)))
       {
-        const QString sName = pModel->data(index, Qt::DisplayRole).toString();
+        const QString sName = pModel->data(pProxyModel->mapToSource(index), Qt::DisplayRole).toString();
         tspResource spResource = spDbManager->FindResource(m_spCurrentProject, sName);
         if (nullptr != spResource)
         {
@@ -299,19 +349,16 @@ void CEditorResourceWidget::SlotCurrentChanged(const QModelIndex& current,
   if (nullptr == m_spCurrentProject) { return; }
   Q_UNUSED(previous);
 
+  QSortFilterProxyModel* pProxyModel =
+    dynamic_cast<QSortFilterProxyModel*>(m_spUi->pResourceTree->model());
   CResourceTreeItemModel* pModel =
-      dynamic_cast<CResourceTreeItemModel*>(m_spUi->pResourceTree->model());
+    dynamic_cast<CResourceTreeItemModel*>(pProxyModel->sourceModel());
 
   if (nullptr != pModel)
   {
     const QString sName =
-        pModel->data(current, Qt::DisplayRole, resource_item::c_iColumnName).toString();
-    auto spDbManager = m_wpDbManager.lock();
-    if (nullptr != spDbManager)
-    {
-      //m_spUi->pResourceDisplay->UnloadResource();
-      //m_spUi->pResourceDisplay->LoadResource(spDbManager->FindResource(m_spCurrentProject, sName));
-    }
+        pModel->data(pProxyModel->mapToSource(current), Qt::DisplayRole, resource_item::c_iColumnName).toString();
+    emit SignalResourceSelected(sName);
   }
 }
 

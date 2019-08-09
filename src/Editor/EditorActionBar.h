@@ -19,6 +19,10 @@ public:
 
   void Initialize() override;
 
+  void HideAllBars();
+  void ShowProjectActionBar();
+  void ShowResourceActionBar();
+
   std::unique_ptr<Ui::CEditorActionBar>            m_spUi;
 };
 

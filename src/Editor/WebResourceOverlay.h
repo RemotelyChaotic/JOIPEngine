@@ -15,7 +15,7 @@ class CWebResourceOverlay : public COverlayBase
   Q_OBJECT
 
 public:
-  explicit CWebResourceOverlay(QPushButton* pButtonTarget, QWidget* pParent = nullptr);
+  explicit CWebResourceOverlay(QWidget* pParent = nullptr);
   ~CWebResourceOverlay() override;
 
   void Resize() override;
@@ -28,7 +28,6 @@ protected slots:
 
 private:
   std::unique_ptr<Ui::CWebResourceOverlay> m_spUi;
-  QPointer<QPushButton>                    m_pButtonTarget;
 };
 
 #endif // WEBRESOURCEOVERLAY_H

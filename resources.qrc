@@ -14,5 +14,8 @@
         <file>resources/img/ButtonTitleCard.png</file>
         <file>resources/img/ButtonWeb.png</file>
         <file>resources/gif/spinner.gif</file>
+        <file>resources/img/ButtonSave.png</file>
+        <file>resources/img/ButtonExit.png</file>
+        <file>resources/img/ButtonSearch.png</file>
     </qresource>
 </RCC>

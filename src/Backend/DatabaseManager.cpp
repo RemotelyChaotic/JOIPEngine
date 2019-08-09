@@ -252,6 +252,10 @@ void CDatabaseManager::RenameProject(qint32 iId, const QString& sNewName)
   {
     tspProject spProject = FindProject(iId);
     spProject->m_rwLock.lockForWrite();
+    if (spProject->m_sOldName.isNull())
+    {
+      spProject->m_sOldName = spProject->m_sName;
+    }
     spProject->m_sName = sNewName;
     spProject->m_rwLock.unlock();
   }
@@ -268,6 +272,10 @@ void CDatabaseManager::RenameProject(const QString& sName, const QString& sNewNa
   {
     tspProject spProject = FindProject(sName);
     spProject->m_rwLock.lockForWrite();
+    if (spProject->m_sOldName.isNull())
+    {
+      spProject->m_sOldName = spProject->m_sName;
+    }
     spProject->m_sName = sNewName;
     spProject->m_rwLock.unlock();
   }
@@ -812,13 +820,28 @@ bool CDatabaseManager::SerializeProjectPrivate(tspProject& spProject)
 {
   spProject->m_rwLock.lockForRead();
   const QString sName = spProject->m_sName;
+  const QString sOldName = spProject->m_sOldName;
   spProject->m_rwLock.unlock();
-
-  QJsonDocument document(spProject->ToJsonObject());
 
   bool bOk = true;
   QDir sContentFolder(m_spSettings->ContentFolder());
-  if (!QFileInfo(m_spSettings->ContentFolder() + QDir::separator() + sName).exists())
+
+  // first rename old folder
+  if (!sOldName.isNull())
+  {
+    if (QFileInfo(m_spSettings->ContentFolder() + QDir::separator() + sOldName).exists())
+    {
+      bOk = sContentFolder.rename(sOldName, sName);
+    }
+    else
+    {
+      bOk = false;
+      qWarning() << "Could not rename folder: " + m_spSettings->ContentFolder() + QDir::separator() + sOldName;
+    }
+  }
+
+  // if new doesn't exist -> create
+  if (bOk && !QFileInfo(m_spSettings->ContentFolder() + QDir::separator() + sName).exists())
   {
     bOk = sContentFolder.mkdir(sName);
     if (!bOk)
@@ -826,6 +849,8 @@ bool CDatabaseManager::SerializeProjectPrivate(tspProject& spProject)
       qWarning() << "Could not create folder: " + m_spSettings->ContentFolder() + QDir::separator() + sName;
     }
   }
+
+  QJsonDocument document(spProject->ToJsonObject());
 
   if (bOk)
   {

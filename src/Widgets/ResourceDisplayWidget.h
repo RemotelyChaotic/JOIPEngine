@@ -19,11 +19,20 @@ class CResourceDisplayWidget : public QWidget
 
 public:
   explicit CResourceDisplayWidget(QWidget* pParent = nullptr);
-  ~CResourceDisplayWidget();
+  ~CResourceDisplayWidget() override;
 
   void LoadResource(tspResource spResource);
   ELoadState LoadState() const { return ELoadState::_from_integral(m_iLoadState); }
   void UnloadResource();
+
+  qint32 ProjectId() { return m_iProjectId; }
+  void SetProjectId(qint32 iId) { m_iProjectId = iId; }
+
+signals:
+  void OnClick();
+
+protected:
+  void mousePressEvent(QMouseEvent* pEvent) override;
 
 protected slots:
   void SlotImageLoad(QString sPath);
@@ -37,11 +46,13 @@ private:
   std::unique_ptr<Ui::CResourceDisplayWidget> m_spUi;
   std::unique_ptr<QFutureWatcher<void>>       m_spFutureWatcher;
   std::unique_ptr<QMovie>                     m_spSpinner;
+  std::shared_ptr<QMovie>                     m_spLoadedMovie;
   std::shared_ptr<QPixmap>                    m_spLoadedPixmap;
-  mutable QMutex                              m_pixmapMutex;
+  mutable QMutex                              m_imageMutex;
   QFuture<void>                               m_future;
   tspResource                                 m_spResource;
   QAtomicInt                                  m_iLoadState;
+  QAtomicInt                                  m_iProjectId;
 };
 
 #endif // RESOURCEDISPLAYWIDGET_H

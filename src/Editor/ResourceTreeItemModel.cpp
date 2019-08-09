@@ -7,20 +7,11 @@ using namespace resource_item;
 
 CResourceTreeItemModel::CResourceTreeItemModel(QObject* pParent) :
   QAbstractItemModel(pParent),
-  m_wpDbManager(CApplication::Instance()->System<CDatabaseManager>())
+  m_wpDbManager(CApplication::Instance()->System<CDatabaseManager>()),
+  m_pRootItem(nullptr),
+  m_categoryMap(),
+  m_spProject()
 {
-  m_pRootItem = new CResourceTreeItem(EResourceTreeItemType::eRoot, "Resources");
-
-  for (size_t i = 0; i < EResourceType::_size(); i++)
-  {
-    CResourceTreeItem* pItem =
-        new CResourceTreeItem(EResourceTreeItemType::eCategory,
-                            QString(EResourceType::_from_index(i)._to_string()).remove(0, 1),
-                            nullptr, m_pRootItem);
-    m_categoryMap.insert({EResourceType::_from_index(i), pItem});
-    m_pRootItem->AppendChild(pItem);
-  }
-
   auto spDbManager = m_wpDbManager.lock();
   connect(spDbManager.get(), &CDatabaseManager::SignalResourceAdded,
           this, &CResourceTreeItemModel::SlotResourceAdded, Qt::QueuedConnection);
@@ -30,24 +21,40 @@ CResourceTreeItemModel::CResourceTreeItemModel(QObject* pParent) :
 
 CResourceTreeItemModel::~CResourceTreeItemModel()
 {
-  m_categoryMap.clear();
-  delete m_pRootItem;
+  DeInitializeModel();
 }
 
 //----------------------------------------------------------------------------------------
 //
 void CResourceTreeItemModel::InitializeModel(tspProject spProject)
 {
-  m_spProject = spProject;
-  QReadLocker locker(&m_spProject->m_rwLock);
-  for (auto it = m_spProject->m_spResourcesMap.begin(); m_spProject->m_spResourcesMap.end() != it; ++it)
+  if (nullptr == m_pRootItem)
   {
-    QReadLocker locker(&it->second->m_rwLock);
-    auto categoryIt = m_categoryMap.find(it->second->m_type);
-    if (m_categoryMap.end() != categoryIt)
+    m_pRootItem = new CResourceTreeItem(EResourceTreeItemType::eRoot, "Resources");
+
+    beginInsertRows(QModelIndex(), 0, static_cast<qint32>(EResourceType::_size() - 1));
+    for (size_t i = 0; i < EResourceType::_size(); i++)
     {
-      categoryIt->second->AppendChild(
-            new CResourceTreeItem(EResourceTreeItemType::eResource, QString(), it->second, categoryIt->second));
+      CResourceTreeItem* pItem =
+          new CResourceTreeItem(EResourceTreeItemType::eCategory,
+                              QString(EResourceType::_from_index(i)._to_string()).remove(0, 1),
+                              nullptr, m_pRootItem);
+      m_categoryMap.insert({EResourceType::_from_index(i), pItem});
+      m_pRootItem->AppendChild(pItem);
+    }
+    endInsertRows();
+
+    m_spProject = spProject;
+    QReadLocker locker(&m_spProject->m_rwLock);
+    for (auto it = m_spProject->m_spResourcesMap.begin(); m_spProject->m_spResourcesMap.end() != it; ++it)
+    {
+      QReadLocker locker(&it->second->m_rwLock);
+      auto categoryIt = m_categoryMap.find(it->second->m_type);
+      if (m_categoryMap.end() != categoryIt)
+      {
+        categoryIt->second->AppendChild(
+              new CResourceTreeItem(EResourceTreeItemType::eResource, QString(), it->second, categoryIt->second));
+      }
     }
   }
 }
@@ -56,20 +63,12 @@ void CResourceTreeItemModel::InitializeModel(tspProject spProject)
 //
 void CResourceTreeItemModel::DeInitializeModel()
 {
-  m_spProject = nullptr;
-  m_categoryMap.clear();
-  delete m_pRootItem;
-
-  m_pRootItem = new CResourceTreeItem(EResourceTreeItemType::eRoot, "Resources");
-
-  for (size_t i = 0; i < EResourceType::_size(); i++)
+  if (nullptr != m_pRootItem)
   {
-    CResourceTreeItem* pItem =
-        new CResourceTreeItem(EResourceTreeItemType::eCategory,
-                            QString(EResourceType::_from_index(i)._to_string()).remove(0, 1),
-                            nullptr, m_pRootItem);
-    m_categoryMap.insert({EResourceType::_from_index(i), pItem});
-    m_pRootItem->AppendChild(pItem);
+    m_spProject = nullptr;
+    m_categoryMap.clear();
+    delete m_pRootItem;
+    m_pRootItem = nullptr;
   }
 }
 
@@ -182,7 +181,7 @@ QModelIndex CResourceTreeItemModel::parent(const QModelIndex& index) const
   if (!index.isValid()) { return QModelIndex(); }
 
   CResourceTreeItem* pChildItem = GetItem(index);
-  CResourceTreeItem* pParentItem = nullptr != pChildItem ? pChildItem->Parent() : nullptr;;
+  CResourceTreeItem* pParentItem = nullptr != pChildItem ? pChildItem->Parent() : nullptr;
 
   if (pParentItem == m_pRootItem || nullptr == pParentItem) { return QModelIndex(); }
   return createIndex(pParentItem->Row(), 0, pParentItem);

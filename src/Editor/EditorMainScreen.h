@@ -17,6 +17,7 @@ class CEditorResourceWidget;
 namespace Ui {
   class CEditorMainScreen;
 }
+class QComboBox;
 struct SProject;
 typedef std::shared_ptr<SProject> tspProject;
 
@@ -33,11 +34,20 @@ public:
   void LoadProject(qint32 iId);
   void UnloadProject();
 
+signals:
+  void SignalExitClicked();
+
 protected slots:
   void on_pLeftComboBox_currentIndexChanged(qint32 iIndex);
   void on_pRightComboBox_currentIndexChanged(qint32 iIndex);
+  void SlotDisplayResource(const QString& sName);
+  void SlotExitClicked(bool bClick);
+  void SlotProjectNameEditingFinished();
+  void SlotSaveClicked(bool bClick);
 
 private:
+  void ChangeIndex(QComboBox* pComboBox, QWidget* pContainer,
+                   CEditorActionBar* pActionBar, qint32 iIndex);
   template<class T> T* GetWidget();
 
   std::unique_ptr<Ui::CEditorMainScreen>                      m_spUi;
@@ -45,6 +55,8 @@ private:
   tspProject                                                  m_spCurrentProject;
   std::weak_ptr<CDatabaseManager>                             m_wpDbManager;
   bool                                                        m_bInitialized;
+  qint32                                                      m_iLastLeftIndex;
+  qint32                                                      m_iLastRightIndex;
 };
 
 template<> CEditorResourceWidget* CEditorMainScreen::GetWidget<CEditorResourceWidget>();

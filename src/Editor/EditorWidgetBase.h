@@ -13,14 +13,19 @@ class CEditorWidgetBase : public QWidget
 {
   Q_OBJECT
 public:
-  explicit CEditorWidgetBase(QWidget* pParent = nullptr, CEditorActionBar* pActionBar = nullptr);
+  explicit CEditorWidgetBase(QWidget* pParent = nullptr);
   ~CEditorWidgetBase() override;
 
   virtual void Initialize() = 0;
 
   bool IsInitialized() const { return m_bInitialized; }
+  void SetActionBar(CEditorActionBar* pActionBar);
 
 protected:
+  virtual void OnActionBarAboutToChange() {}
+  virtual void OnActionBarChanged() {}
+
+  CEditorActionBar* ActionBar();
   void SetInitialized(bool bInit) { m_bInitialized = bInit; }
 
   CEditorActionBar*                                m_pActionBar;

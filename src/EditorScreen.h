@@ -27,6 +27,7 @@ private slots:
   void SlotNewClicked(const QString& sNewProjectName);
   void SlotOpenClicked(qint32 iId);
   void SlotCancelClicked();
+  void SlotExitClicked();
 
 private:
   std::unique_ptr<Ui::CEditorScreen> m_spUi;

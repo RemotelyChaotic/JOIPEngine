@@ -9,6 +9,7 @@ SProject::SProject() :
   m_iId(),
   m_iVersion(),
   m_sName(),
+  m_sOldName(),
   m_sTitleCard(),
   m_sMap(),
   m_bUsesWeb(false),
@@ -21,6 +22,7 @@ SProject::SProject(const SProject& other) :
   m_iId(other.m_iId),
   m_iVersion(other.m_iVersion),
   m_sName(other.m_sName),
+  m_sOldName(other.m_sOldName),
   m_sTitleCard(other.m_sTitleCard),
   m_sMap(other.m_sMap),
   m_bUsesWeb(other.m_bUsesWeb),
@@ -36,6 +38,9 @@ SProject::~SProject() {}
 QJsonObject SProject::ToJsonObject()
 {
   QWriteLocker locker(&m_rwLock);
+
+  m_sOldName = QString();
+
   QJsonArray scenes;
   for (auto& spScene : m_vspScenes)
   {
@@ -73,6 +78,7 @@ void SProject::FromJsonObject(const QJsonObject& json)
   {
     m_sName = it.value().toString();
   }
+  m_sOldName = QString();
   it = json.find("sTitleCard");
   if (it != json.end())
   {
@@ -241,4 +247,17 @@ QScriptValue ProjectToScriptValue(QScriptEngine* pEngine, CProject* const& pIn)
 void ProjectFromScriptValue(const QScriptValue& object, CProject*& pOut)
 {
   pOut = qobject_cast<CProject*>(object.toQObject());
+}
+
+//----------------------------------------------------------------------------------------
+//
+QString PhysicalProjectName(const tspProject& spProject)
+{
+  QReadLocker locker(&spProject->m_rwLock);
+  QString sName = spProject->m_sName;
+  if (!spProject->m_sOldName.isNull())
+  {
+    sName = spProject->m_sOldName;
+  }
+  return sName;
 }

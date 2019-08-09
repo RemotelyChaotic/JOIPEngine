@@ -22,13 +22,20 @@ class CEditorResourceWidget : public CEditorWidgetBase
   Q_OBJECT
 
 public:
-  explicit CEditorResourceWidget(QWidget* pParent = nullptr, CEditorActionBar* pActionBar = nullptr);
+  explicit CEditorResourceWidget(QWidget* pParent = nullptr);
   ~CEditorResourceWidget() override;
 
   void Initialize() override;
 
   void LoadProject(tspProject spCurrentProject);
   void UnloadProject();
+
+signals:
+  void SignalResourceSelected(const QString& sName);
+
+protected:
+  void OnActionBarAboutToChange() override;
+  void OnActionBarChanged() override;
 
 protected slots:
   void on_pFilterLineEdit_editingFinished();

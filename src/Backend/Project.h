@@ -22,6 +22,7 @@ struct SProject : public ISerializable, std::enable_shared_from_this<SProject>
   qint32                    m_iId;
   qint32                    m_iVersion;
   QString                   m_sName;
+  QString                   m_sOldName;
   QString                   m_sTitleCard;
   QString                   m_sMap;
   bool                      m_bUsesWeb;
@@ -88,5 +89,9 @@ Q_DECLARE_METATYPE(tspProjectRef)
 // qScriptRegisterMetaType(&engine, ProjectToScriptValue, ProjectFromScriptValue);
 QScriptValue ProjectToScriptValue(QScriptEngine* pEngine, CProject* const& pIn);
 void ProjectFromScriptValue(const QScriptValue& object, CProject*& pOut);
+
+//----------------------------------------------------------------------------------------
+//
+QString PhysicalProjectName(const tspProject& spProject);
 
 #endif // PROJECT_H

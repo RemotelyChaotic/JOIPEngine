@@ -37,6 +37,9 @@ void CEditorScreen::Initialize()
   connect(m_spUi->pChoiceScreen, &CEditorChoiceScreen::SignalCancelClicked,
           this, &CEditorScreen::SlotCancelClicked, Qt::DirectConnection);
 
+  connect(m_spUi->pEditorScreen, &CEditorMainScreen::SignalExitClicked,
+          this, &CEditorScreen::SlotExitClicked, Qt::DirectConnection);
+
   m_spUi->pStackedWidget->setCurrentIndex(c_iPageIndexChoice);
 
   m_bInitialized = true;
@@ -83,5 +86,15 @@ void CEditorScreen::SlotOpenClicked(qint32 iId)
 void CEditorScreen::SlotCancelClicked()
 {
   SCREEN_INITIALIZED_GUARD
+  m_spUi->pStackedWidget->setCurrentIndex(c_iPageIndexChoice);
+  emit m_spWindowContext->SignalChangeAppState(EAppState::eMainScreen);
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CEditorScreen::SlotExitClicked()
+{
+  SCREEN_INITIALIZED_GUARD
+  m_spUi->pStackedWidget->setCurrentIndex(c_iPageIndexChoice);
   emit m_spWindowContext->SignalChangeAppState(EAppState::eMainScreen);
 }

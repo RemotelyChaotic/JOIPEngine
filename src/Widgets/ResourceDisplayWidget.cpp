@@ -3,6 +3,7 @@
 #include "ui_ResourceDisplayWidget.h"
 
 #include <QFileInfo>
+#include <QImageReader>
 #include <QMovie>
 #include <QtConcurrent/QtConcurrent>
 
@@ -21,15 +22,19 @@ CResourceDisplayWidget::CResourceDisplayWidget(QWidget* pParent) :
   m_spUi(std::make_unique<Ui::CResourceDisplayWidget>()),
   m_spFutureWatcher(std::make_unique<QFutureWatcher<void>>()),
   m_spSpinner(std::make_unique<QMovie>("://resources/gif/spinner_transparent.gif")),
+  m_spLoadedMovie(nullptr),
   m_spLoadedPixmap(nullptr),
   m_future(),
   m_spResource(nullptr),
-  m_iLoadState(ELoadState::eUnstarted)
+  m_iLoadState(ELoadState::eUnstarted),
+  m_iProjectId(-1)
 {
   m_spUi->setupUi(this);
 
   m_spSpinner->start();
   m_spUi->pLoadingSpinner->setMovie(m_spSpinner.get());
+
+  m_spUi->pStackedWidget->setCurrentIndex(EResourceDisplayType::eError);
 
   connect(m_spFutureWatcher.get(), &QFutureWatcher<void>::finished,
           this, &CResourceDisplayWidget::SlotLoadFinished);
@@ -53,6 +58,13 @@ CResourceDisplayWidget::~CResourceDisplayWidget()
 //
 void CResourceDisplayWidget::LoadResource(tspResource spResource)
 {
+  if (nullptr == spResource)
+  {
+    m_iLoadState = ELoadState::eError;
+    m_spUi->pStackedWidget->setCurrentIndex(EResourceDisplayType::eError);
+    return;
+  }
+
   m_iLoadState = ELoadState::eFinished;
   m_spUi->pStackedWidget->setCurrentIndex(EResourceDisplayType::eLoading);
 
@@ -60,6 +72,7 @@ void CResourceDisplayWidget::LoadResource(tspResource spResource)
   QReadLocker resourceLocker(&m_spResource->m_rwLock);
   const tspProject& spProject = m_spResource->m_spParent;
   QReadLocker projectLocker(&spProject->m_rwLock);
+  SetProjectId(spProject->m_iId);
   if (m_spResource->m_sPath.isLocalFile())
   {
     QUrl path = m_spResource->m_sPath;
@@ -67,7 +80,8 @@ void CResourceDisplayWidget::LoadResource(tspResource spResource)
     {
       case EResourceType::eImage:
       {
-        QString sPath = ResourceUrlToAbsolutePath(path, spProject->m_sName);
+        projectLocker.unlock();
+        QString sPath = ResourceUrlToAbsolutePath(path, PhysicalProjectName(spProject));
         if (QFileInfo(sPath).exists())
         {
           StartImageLoad(sPath);
@@ -113,23 +127,68 @@ void CResourceDisplayWidget::UnloadResource()
 
 //----------------------------------------------------------------------------------------
 //
+void CResourceDisplayWidget::mousePressEvent(QMouseEvent* pEvent)
+{
+  Q_UNUSED(pEvent);
+  emit OnClick();
+}
+
+//----------------------------------------------------------------------------------------
+//
 void CResourceDisplayWidget::SlotImageLoad(QString sPath)
 {
-  m_pixmapMutex.lock();
-  QImage image;
-  bool bOk = image.load(sPath);
-  if (bOk)
+  m_imageMutex.lock();
+  QImageReader reader(sPath);
+  if (reader.canRead())
   {
-    m_spLoadedPixmap = std::make_shared<QPixmap>(
-          QPixmap::fromImage(image).scaled(m_spUi->pImage->width(), m_spUi->pImage->height(),
-                                           Qt::KeepAspectRatio, Qt::SmoothTransformation));
-    m_iLoadState = ELoadState::eFinished;
+    if (!reader.supportsAnimation())
+    {
+      // QImage
+      QImage image = reader.read();
+      if (!image.isNull())
+      {
+        m_spLoadedPixmap = std::make_shared<QPixmap>(
+              QPixmap::fromImage(image).scaled(width(), height(),
+                                               Qt::KeepAspectRatio, Qt::SmoothTransformation));
+        m_spLoadedMovie = nullptr;
+        m_iLoadState = ELoadState::eFinished;
+      }
+      else
+      {
+        qWarning() << reader.errorString();
+        m_spLoadedMovie = nullptr;
+        m_spLoadedPixmap = nullptr;
+        m_iLoadState = ELoadState::eError;
+      }
+    }
+    else
+    {
+      // QMovie
+      m_spLoadedMovie = std::make_shared<QMovie>(sPath);
+      QSize size = m_spLoadedMovie->scaledSize();
+      QSize resultingSize = size;
+      if (size.width() >= size.height())
+      {
+        double dRatio = static_cast<double>(size.height()) / static_cast<double>(size.width());
+        resultingSize.setWidth(width());
+        resultingSize.setHeight(static_cast<qint32>(height() * dRatio));
+      }
+      else
+      {
+        double dRatio = static_cast<double>(size.width()) / static_cast<double>(size.height());
+        resultingSize.setHeight(height());
+        resultingSize.setWidth(static_cast<qint32>(width() * dRatio));
+      }
+      m_spLoadedMovie->setScaledSize(resultingSize);
+      m_spLoadedPixmap = nullptr;
+      m_iLoadState = ELoadState::eFinished;
+    }
   }
   else
   {
     m_iLoadState = ELoadState::eError;
   }
-  m_pixmapMutex.unlock();
+  m_imageMutex.unlock();
 }
 
 //----------------------------------------------------------------------------------------
@@ -143,9 +202,9 @@ void CResourceDisplayWidget::SlotLoadFinished()
     {
       case EResourceType::eImage:
       {
-        m_pixmapMutex.lock();
+        m_imageMutex.lock();
         m_spUi->pImage->setPixmap(*m_spLoadedPixmap);
-        m_pixmapMutex.unlock();
+        m_imageMutex.unlock();
         m_spUi->pStackedWidget->setCurrentIndex(EResourceDisplayType::eLocalImage);
         break;
       }

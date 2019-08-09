@@ -15,7 +15,7 @@ class CEditorResourceDisplayWidget : public CEditorWidgetBase
   Q_OBJECT
 
 public:
-  explicit CEditorResourceDisplayWidget(QWidget *parent = nullptr);
+  explicit CEditorResourceDisplayWidget(QWidget* pParent = nullptr);
   ~CEditorResourceDisplayWidget() override;
 
   void Initialize() override;
@@ -23,6 +23,10 @@ public:
   void LoadResource(tspResource spResource);
   ELoadState LoadState() const;
   void UnloadResource();
+
+protected:
+  void OnActionBarAboutToChange() override;
+  void OnActionBarChanged() override;
 
 private:
   std::unique_ptr<Ui::CEditorResourceDisplayWidget> m_spUi;

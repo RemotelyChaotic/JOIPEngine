@@ -1,10 +1,9 @@
 #include "WebResourceOverlay.h"
 #include "ui_WebResourceOverlay.h"
 
-CWebResourceOverlay::CWebResourceOverlay(QPushButton* pButtonTarget, QWidget* pParent) :
+CWebResourceOverlay::CWebResourceOverlay(QWidget* pParent) :
   COverlayBase(pParent),
-  m_spUi(new Ui::CWebResourceOverlay),
-  m_pButtonTarget(pButtonTarget)
+  m_spUi(new Ui::CWebResourceOverlay)
 {
   m_spUi->setupUi(this);
 }
@@ -17,13 +16,12 @@ CWebResourceOverlay::~CWebResourceOverlay()
 //
 void CWebResourceOverlay::Resize()
 {
-  if (nullptr != m_pButtonTarget)
-  {
-    QPoint newPos = m_pButtonTarget->pos() +
-        QPoint(m_pButtonTarget->size().width() / 2, m_pButtonTarget->size().height() + 10) -
-        QPoint(size().width() / 2, 0);
-    move(newPos.x(), newPos.y());
-  }
+  QPoint newPos =
+      QPoint(m_pTarget->geometry().width() / 2, m_pTarget->geometry().height() / 2) -
+      QPoint(width() / 2, height() / 2);
+
+  move(newPos.x(), newPos.y());
+  resize(width(), height());
 }
 
 //----------------------------------------------------------------------------------------
