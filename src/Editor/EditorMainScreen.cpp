@@ -2,6 +2,7 @@
 #include "Application.h"
 #include "EditorResourceDisplayWidget.h"
 #include "EditorResourceWidget.h"
+#include "EditorSceneNodeWidget.h"
 #include "Backend/DatabaseManager.h"
 #include "Backend/Project.h"
 #include "ui_EditorMainScreen.h"
@@ -12,7 +13,8 @@ namespace
   const std::map<EEditorWidget, QString> m_sEditorNamesMap =
   {
     { EEditorWidget::eResourceWidget, "Resource Manager" },
-    { EEditorWidget::eResourceDisplay, "Resource View" }
+    { EEditorWidget::eResourceDisplay, "Resource View" },
+    { EEditorWidget::eSceneNodeWidget, "Scene Node Editor" }
   };
 }
 
@@ -60,6 +62,7 @@ void CEditorMainScreen::Initialize()
   // insert items in map
   m_spWidgetsMap.insert({EEditorWidget::eResourceWidget, std::make_unique<CEditorResourceWidget>()});
   m_spWidgetsMap.insert({EEditorWidget::eResourceDisplay, std::make_unique<CEditorResourceDisplayWidget>()});
+  m_spWidgetsMap.insert({EEditorWidget::eSceneNodeWidget, std::make_unique<CEditorSceneNodeWidget>()});
 
   // initialize widgets
   m_spUi->pLeftComboBox->blockSignals(true);
@@ -67,6 +70,7 @@ void CEditorMainScreen::Initialize()
   for (auto it = m_spWidgetsMap.begin(); m_spWidgetsMap.end() != it; ++it)
   {
     it->second->Initialize();
+    it->second->setVisible(false);
     m_spUi->pLeftComboBox->addItem(m_sEditorNamesMap.find(it->first)->second, it->first._to_integral());
     m_spUi->pRightComboBox->addItem(m_sEditorNamesMap.find(it->first)->second, it->first._to_integral());
   }
@@ -107,7 +111,6 @@ void CEditorMainScreen::InitNewProject(const QString& sNewProjectName)
     qint32 iId = m_spCurrentProject->m_iId;
     m_spCurrentProject->m_rwLock.unlock();
     LoadProject(iId);
-    SlotSaveClicked(true);
   }
 }
 
@@ -127,11 +130,19 @@ void CEditorMainScreen::LoadProject(qint32 iId)
     }
   }
 
-  CEditorResourceWidget* pWidget = GetWidget<CEditorResourceWidget>();
-  if (nullptr != pWidget)
+  CEditorResourceWidget* pResourceWidget = GetWidget<CEditorResourceWidget>();
+  if (nullptr != pResourceWidget)
   {
-    pWidget->LoadProject(m_spCurrentProject);
+    pResourceWidget->LoadProject(m_spCurrentProject);
   }
+
+  CEditorSceneNodeWidget* pNodeWidget = GetWidget<CEditorSceneNodeWidget>();
+  if (nullptr != pNodeWidget)
+  {
+    pNodeWidget->LoadProject(m_spCurrentProject);
+  }
+
+  SlotSaveClicked(true);
 }
 
 //----------------------------------------------------------------------------------------
@@ -142,10 +153,16 @@ void CEditorMainScreen::UnloadProject()
 
   m_spCurrentProject = nullptr;
 
-  CEditorResourceWidget* pWidget = GetWidget<CEditorResourceWidget>();
-  if (nullptr != pWidget)
+  CEditorResourceWidget* pResourceWidget = GetWidget<CEditorResourceWidget>();
+  if (nullptr != pResourceWidget)
   {
-    pWidget->UnloadProject();
+    pResourceWidget->UnloadProject();
+  }
+
+  CEditorSceneNodeWidget* pNodeWidget = GetWidget<CEditorSceneNodeWidget>();
+  if (nullptr != pNodeWidget)
+  {
+    pNodeWidget->UnloadProject();
   }
 }
 
@@ -199,8 +216,37 @@ void CEditorMainScreen::SlotDisplayResource(const QString& sName)
   auto spDbManager = m_wpDbManager.lock();
   if (nullptr != spDbManager && nullptr != pWidget)
   {
-    pWidget->UnloadResource();
-    pWidget->LoadResource(spDbManager->FindResource(m_spCurrentProject, sName));
+    QReadLocker locker(&m_spCurrentProject->m_rwLock);
+
+    // scene node model selected?
+    if (m_spCurrentProject->m_sSceneModel == sName)
+    {
+      pWidget->UnloadResource();
+      qint32 iEnumValueLeft = m_spUi->pLeftComboBox->currentData(Qt::UserRole).toInt();
+      qint32 iEnumValueRight = m_spUi->pRightComboBox->currentData(Qt::UserRole).toInt();
+      if (iEnumValueLeft == EEditorWidget::eResourceWidget)
+      {
+        m_spUi->pRightComboBox->blockSignals(true);
+        m_spUi->pRightComboBox->setCurrentIndex(EEditorWidget::eSceneNodeWidget);
+        on_pRightComboBox_currentIndexChanged(EEditorWidget::eSceneNodeWidget);
+        m_spUi->pRightComboBox->blockSignals(false);
+      }
+      else if (iEnumValueRight == EEditorWidget::eResourceWidget)
+      {
+        m_spUi->pLeftComboBox->blockSignals(true);
+        m_spUi->pLeftComboBox->setCurrentIndex(EEditorWidget::eSceneNodeWidget);
+        on_pLeftComboBox_currentIndexChanged(EEditorWidget::eSceneNodeWidget);
+        m_spUi->pLeftComboBox->blockSignals(false);
+      }
+    }
+    // normal resource, just show in resource viewer
+    else
+    {
+      locker.unlock();
+      auto spResource = spDbManager->FindResource(m_spCurrentProject, sName);
+      pWidget->UnloadResource();
+      pWidget->LoadResource(spResource);
+    }
   }
 }
 
@@ -252,6 +298,12 @@ void CEditorMainScreen::SlotSaveClicked(bool bClick)
     qint32 iId = m_spCurrentProject->m_iId;
     m_spCurrentProject->m_rwLock.unlock();
 
+    CEditorSceneNodeWidget* pNodeWidget = GetWidget<CEditorSceneNodeWidget>();
+    if (nullptr != pNodeWidget)
+    {
+      pNodeWidget->SaveNodeLayout();
+    }
+
     // save to create folder structure
     spDbManager->SerializeProject(iId);
   }
@@ -264,11 +316,15 @@ void CEditorMainScreen::ChangeIndex(QComboBox* pComboBox, QWidget* pContainer,
 {
   qint32 iEnumValue = pComboBox->itemData(iIndex, Qt::UserRole).toInt();
   QLayout* pLayout = pContainer->layout();
-  while (auto item = pLayout->takeAt(0));
+  while (auto item = pLayout->takeAt(0))
+  {
+    item->widget()->setVisible(false);
+  }
 
   auto it = m_spWidgetsMap.find(EEditorWidget::_from_integral(iEnumValue));
   if (m_spWidgetsMap.end() != it)
   {
+    it->second->setVisible(true);
     pLayout->addWidget(it->second.get());
     it->second->SetActionBar(pActionBar);
   }
@@ -295,6 +351,18 @@ template<> CEditorResourceDisplayWidget* CEditorMainScreen::GetWidget<CEditorRes
   {
     CEditorResourceDisplayWidget* pWidget =
         dynamic_cast<CEditorResourceDisplayWidget*>(it->second.get());
+    return pWidget;
+  }
+  return nullptr;
+}
+
+template<> CEditorSceneNodeWidget* CEditorMainScreen::GetWidget<CEditorSceneNodeWidget>()
+{
+  auto it = m_spWidgetsMap.find(EEditorWidget::eSceneNodeWidget);
+  if (m_spWidgetsMap.end() != it)
+  {
+    CEditorSceneNodeWidget* pWidget =
+        dynamic_cast<CEditorSceneNodeWidget*>(it->second.get());
     return pWidget;
   }
   return nullptr;

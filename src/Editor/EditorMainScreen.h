@@ -9,11 +9,13 @@
 
 BETTER_ENUM(EEditorWidget, qint32,
             eResourceWidget = 0,
-            eResourceDisplay = 1);
+            eResourceDisplay = 1,
+            eSceneNodeWidget = 2);
 
 class CDatabaseManager;
 class CEditorResourceDisplayWidget;
 class CEditorResourceWidget;
+class CEditorSceneNodeWidget;
 namespace Ui {
   class CEditorMainScreen;
 }
@@ -61,5 +63,6 @@ private:
 
 template<> CEditorResourceWidget* CEditorMainScreen::GetWidget<CEditorResourceWidget>();
 template<> CEditorResourceDisplayWidget* CEditorMainScreen::GetWidget<CEditorResourceDisplayWidget>();
+template<> CEditorSceneNodeWidget* CEditorMainScreen::GetWidget<CEditorSceneNodeWidget>();
 
 #endif // EDITORMAINSCREEN_H

@@ -638,6 +638,10 @@ void CDatabaseManager::RenameResource(tspProject& spProj, const QString& sName, 
       {
         spProj->m_sTitleCard = sNewName;
       }
+      if (spProj->m_sSceneModel == sName)
+      {
+        spProj->m_sSceneModel = sNewName;
+      }
 
       spProj->m_spResourcesMap.erase(it);
       spResource->m_rwLock.lockForWrite();

@@ -25,6 +25,7 @@ struct SProject : public ISerializable, std::enable_shared_from_this<SProject>
   QString                   m_sOldName;
   QString                   m_sTitleCard;
   QString                   m_sMap;
+  QString                   m_sSceneModel;
   bool                      m_bUsesWeb;
   bool                      m_bNeedsCodecs;
   tvspScene                 m_vspScenes;

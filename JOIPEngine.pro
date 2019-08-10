@@ -43,6 +43,7 @@ CONFIG(debug, debug|release) {
    include(lib/Fluid_Studios_Memory_Manager/_lib_mmgr.pri)
 }
 include (lib/modeltest/modeltest.pri)
+include (lib/node/node.pri)
 
 INCLUDEPATH += \
     src
@@ -76,7 +77,13 @@ SOURCES += \
     src/Editor/EditorActionBar.cpp \
     src/Editor/EditorWidgetBase.cpp \
     src/Editor/EditorResourceDisplayWidget.cpp \
-    src/Editor/ResourceTreeItemSortFilterProxyModel.cpp
+    src/Editor/ResourceTreeItemSortFilterProxyModel.cpp \
+    src/Editor/EditorSceneNodeWidget.cpp \
+    src/Editor/NodeEditor/SceneNodeModel.cpp \
+    src/Editor/NodeEditor/SceneTranstitionData.cpp \
+    src/Editor/NodeEditor/SceneNodeModelWidget.cpp \
+    src/Editor/NodeEditor/StartNodeModel.cpp \
+    src/Editor/NodeEditor/EndNodeModel.cpp
 
 HEADERS += \
     src/MainWindow.h \
@@ -109,7 +116,13 @@ HEADERS += \
     src/Editor/EditorActionBar.h \
     src/Editor/EditorWidgetBase.h \
     src/Editor/EditorResourceDisplayWidget.h \
-    src/Editor/ResourceTreeItemSortFilterProxyModel.h
+    src/Editor/ResourceTreeItemSortFilterProxyModel.h \
+    src/Editor/EditorSceneNodeWidget.h \
+    src/Editor/NodeEditor/SceneNodeModel.h \
+    src/Editor/NodeEditor/SceneTranstitionData.h \
+    src/Editor/NodeEditor/SceneNodeModelWidget.h \
+    src/Editor/NodeEditor/StartNodeModel.h \
+    src/Editor/NodeEditor/EndNodeModel.h
 
 FORMS += \
     src/MainWindow.ui \
@@ -125,12 +138,14 @@ FORMS += \
     src/Editor/WebResourceOverlay.ui \
     src/Widgets/ResourceDisplayWidget.ui \
     src/Editor/EditorActionBar.ui \
-    src/Editor/EditorResourceDisplayWidget.ui
+    src/Editor/EditorResourceDisplayWidget.ui \
+    src/Editor/EditorSceneNodeWidget.ui \
+    src/Editor/NodeEditor/SceneNodeModelWidget.ui
+
+RESOURCES += \
+    resources.qrc
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin
 else: unix:!android: target.path = /opt/$${TARGET}/bin
 !isEmpty(target.path): INSTALLS += target
-
-RESOURCES += \
-    resources.qrc

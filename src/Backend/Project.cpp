@@ -12,6 +12,7 @@ SProject::SProject() :
   m_sOldName(),
   m_sTitleCard(),
   m_sMap(),
+  m_sSceneModel(),
   m_bUsesWeb(false),
   m_bNeedsCodecs(false),
   m_vspScenes(),
@@ -25,6 +26,7 @@ SProject::SProject(const SProject& other) :
   m_sOldName(other.m_sOldName),
   m_sTitleCard(other.m_sTitleCard),
   m_sMap(other.m_sMap),
+  m_sSceneModel(other.m_sSceneModel),
   m_bUsesWeb(other.m_bUsesWeb),
   m_bNeedsCodecs(other.m_bNeedsCodecs),
   m_vspScenes(other.m_vspScenes),
@@ -56,6 +58,7 @@ QJsonObject SProject::ToJsonObject()
     { "sName", m_sName },
     { "sTitleCard", m_sTitleCard },
     { "sMap", m_sMap },
+    { "sSceneModel", m_sSceneModel },
     { "bUsesWeb", m_bUsesWeb },
     { "bNeedsCodecs", m_bNeedsCodecs },
     { "vspScenes", scenes },
@@ -88,6 +91,11 @@ void SProject::FromJsonObject(const QJsonObject& json)
   if (it != json.end())
   {
     m_sMap = it.value().toString();
+  }
+  it = json.find("sSceneModel");
+  if (it != json.end())
+  {
+    m_sSceneModel = it.value().toString();
   }
   it = json.find("bUsesWeb");
   if (it != json.end())
