@@ -29,6 +29,8 @@ protected:
   void OnActionBarChanged() override;
 
 private:
+  void UpdateActionBar();
+
   std::unique_ptr<Ui::CEditorResourceDisplayWidget> m_spUi;
 };
 

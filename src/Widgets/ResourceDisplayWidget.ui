@@ -173,6 +173,9 @@
        <property name="spacing">
         <number>0</number>
        </property>
+       <item row="0" column="0">
+        <widget class="CMediaPlayer" name="pMediaPlayer" native="true"/>
+       </item>
       </layout>
      </widget>
      <widget class="QWidget" name="pPageWeb">
@@ -269,6 +272,12 @@
    <class>QWebEngineView</class>
    <extends>QWidget</extends>
    <header location="global">QtWebEngineWidgets/QWebEngineView</header>
+  </customwidget>
+  <customwidget>
+   <class>CMediaPlayer</class>
+   <extends>QWidget</extends>
+   <header>Widgets/Player/MediaPlayer.h</header>
+   <container>1</container>
   </customwidget>
  </customwidgets>
  <resources>

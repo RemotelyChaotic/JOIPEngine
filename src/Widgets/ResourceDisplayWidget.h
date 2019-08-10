@@ -26,7 +26,13 @@ public:
   void UnloadResource();
 
   qint32 ProjectId() { return m_iProjectId; }
+  EResourceType ResourceType();
   void SetProjectId(qint32 iId) { m_iProjectId = iId; }
+
+public slots:
+  void SlotPlayPause();
+  void SlotStop();
+  void SlotSetSliderVisible(bool bVisible);
 
 signals:
   void OnClick();

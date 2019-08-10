@@ -126,7 +126,12 @@ void ResourceFromScriptValue(const QScriptValue& object, CResource*& pOut)
 QStringList AudioFormats()
 {
   // TODO: check codecs
-  return  QStringList() << "*.mp3" << "*.wav" << "*.ogg";
+  return  QStringList() <<
+    "*.wav" << "*.dts" <<
+    "*.mp3" << "*.mp2" <<
+    "*.tta" << "*.tac" <<
+    "*.flac" << "*.dts" << "*.aac" <<
+    "*.xa ";
 }
 
 //----------------------------------------------------------------------------------------
@@ -171,5 +176,10 @@ QString ResourceUrlToAbsolutePath(const QUrl& url, const QString& sProjectName)
 QStringList VideoFormats()
 {
   // TODO: check codecs
-  return QStringList() << "*.mp4" << "*.avi" << "*.mov" << "*.webm";
+  return QStringList()
+      << ".3gp" << "*.asf" << "*.wmv" << "*.mpg" << "*.ts"
+         "*.au" << "*.avi" << "*.flv" << "*.mov" << "*.mp4" << "*.ogm" <<
+         "*.ogg" << "*.mkv" << "*.mka" <<
+         "*.nsc" << "*.nsv" << "*.nut" << "*.a52" <<
+         "*.dv" << "*.vid" << "*.ty" << "*.webm";
 }

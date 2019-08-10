@@ -3,6 +3,7 @@
 #include "EditorActionBar.h"
 #include "Backend/DatabaseManager.h"
 #include "ui_EditorResourceDisplayWidget.h"
+#include "ui_EditorActionBar.h"
 
 CEditorResourceDisplayWidget::CEditorResourceDisplayWidget(QWidget* pParent) :
   CEditorWidgetBase(pParent),
@@ -21,6 +22,8 @@ void CEditorResourceDisplayWidget::Initialize()
 {
   m_bInitialized = false;
 
+  m_spUi->pResourceDisplay->SlotSetSliderVisible(true);
+
   m_bInitialized = true;
 }
 
@@ -29,6 +32,7 @@ void CEditorResourceDisplayWidget::Initialize()
 void CEditorResourceDisplayWidget::LoadResource(tspResource spResource)
 {
   m_spUi->pResourceDisplay->LoadResource(spResource);
+  UpdateActionBar();
 }
 
 //----------------------------------------------------------------------------------------
@@ -49,7 +53,13 @@ void CEditorResourceDisplayWidget::UnloadResource()
 //
 void CEditorResourceDisplayWidget::OnActionBarAboutToChange()
 {
-  // Nothing to do
+  if (nullptr != ActionBar())
+  {
+    disconnect(ActionBar()->m_spUi->pPlayButton, &QPushButton::clicked,
+            m_spUi->pResourceDisplay, &CResourceDisplayWidget::SlotPlayPause);
+    disconnect(ActionBar()->m_spUi->pStopButton, &QPushButton::clicked,
+            m_spUi->pResourceDisplay, &CResourceDisplayWidget::SlotStop);
+  }
 }
 
 //----------------------------------------------------------------------------------------
@@ -59,6 +69,32 @@ void CEditorResourceDisplayWidget::OnActionBarChanged()
   // connections for actionbar
   if (nullptr != ActionBar())
   {
-    ActionBar()->HideAllBars();
+    UpdateActionBar();
+    connect(ActionBar()->m_spUi->pPlayButton, &QPushButton::clicked,
+            m_spUi->pResourceDisplay, &CResourceDisplayWidget::SlotPlayPause);
+    connect(ActionBar()->m_spUi->pStopButton, &QPushButton::clicked,
+            m_spUi->pResourceDisplay, &CResourceDisplayWidget::SlotStop);
+  }
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CEditorResourceDisplayWidget::UpdateActionBar()
+{
+  switch (m_spUi->pResourceDisplay->ResourceType())
+  {
+  case EResourceType::eMovie: // fallthrough
+  case EResourceType::eSound:
+    if (nullptr != ActionBar())
+    {
+      ActionBar()->ShowMediaPlayerActionBar();
+    }
+    break;
+  default:
+    if (nullptr != ActionBar())
+    {
+      ActionBar()->HideAllBars();
+    }
+    break;
   }
 }

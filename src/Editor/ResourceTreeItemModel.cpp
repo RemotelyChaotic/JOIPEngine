@@ -48,7 +48,17 @@ void CResourceTreeItemModel::InitializeModel(tspProject spProject)
     for (auto it = m_spProject->m_spResourcesMap.begin(); m_spProject->m_spResourcesMap.end() != it; ++it)
     {
       QReadLocker locker(&it->second->m_rwLock);
-      const QStringList sPathParts = it->second->m_sPath.toString().split("/");
+      QUrl sPath = it->second->m_sPath;
+      QStringList sPathParts;
+      if (sPath.isLocalFile())
+      {
+        sPathParts = sPath.toString().split("/");
+      }
+      else
+      {
+        sPathParts.push_back(sPath.host());
+        sPathParts << sPath.path().remove(0, 1).split("/");
+      }
 
       // insert item
       auto categoryIt = m_categoryMap.find(it->second->m_type);
@@ -361,8 +371,19 @@ void CResourceTreeItemModel::SlotResourceAdded(qint32 iProjId, const QString& sN
       tspResource spResource = spDbManager->FindResource(m_spProject, sName);
       spResource->m_rwLock.lockForRead();
       EResourceType type = spResource->m_type;
-      const QStringList sPathParts = spResource->m_sPath.toString().split("/");
+      QUrl sPath = spResource->m_sPath;
       spResource->m_rwLock.unlock();
+
+      QStringList sPathParts;
+      if (sPath.isLocalFile())
+      {
+        sPathParts = sPath.toString().split("/");
+      }
+      else
+      {
+        sPathParts.push_back(sPath.host());
+        sPathParts << sPath.path().remove(0, 1).split("/");
+      }
 
       auto itCategoryItem = m_categoryMap.find(type);
       if (m_categoryMap.end() != itCategoryItem)

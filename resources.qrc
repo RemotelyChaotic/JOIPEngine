@@ -17,5 +17,7 @@
         <file>resources/img/ButtonSave.png</file>
         <file>resources/img/ButtonExit.png</file>
         <file>resources/img/ButtonSearch.png</file>
+        <file>resources/img/ButtonPlay.png</file>
+        <file>resources/img/ButtonStop.png</file>
     </qresource>
 </RCC>

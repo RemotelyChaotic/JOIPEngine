@@ -38,8 +38,6 @@ CResourceDisplayWidget::CResourceDisplayWidget(QWidget* pParent) :
 
   connect(m_spFutureWatcher.get(), &QFutureWatcher<void>::finished,
           this, &CResourceDisplayWidget::SlotLoadFinished);
-  //connect(m_spUi->pMediaPlayer, &CMediaPlayer::SignalStatusChanged,
-  //        this, &CResourceDisplayWidget::SlotStatusChanged);
   connect(m_spUi->pWebView, &QWebEngineView::loadFinished,
           this, &CResourceDisplayWidget::SlotWebLoadFinished);
 }
@@ -47,11 +45,7 @@ CResourceDisplayWidget::CResourceDisplayWidget(QWidget* pParent) :
 CResourceDisplayWidget::~CResourceDisplayWidget()
 {
   m_spSpinner->stop();
-  if (m_spFutureWatcher->isRunning())
-  {
-    m_spFutureWatcher->cancel();
-    m_spFutureWatcher->waitForFinished();
-  }
+  UnloadResource();
 }
 
 //----------------------------------------------------------------------------------------
@@ -95,7 +89,10 @@ void CResourceDisplayWidget::LoadResource(tspResource spResource)
       case EResourceType::eMovie: // fallthrough
       case EResourceType::eSound:
       {
-        //m_spUi->pMediaPlayer->SetPlaylist(path);
+        QString sPath = ResourceUrlToAbsolutePath(path, PhysicalProjectName(spProject));
+        m_spUi->pMediaPlayer->OpenMedia(sPath);
+        m_spUi->pStackedWidget->setCurrentIndex(EResourceDisplayType::eLocalMedia);
+        m_iLoadState = ELoadState::eFinished;
         break;
       }
       case EResourceType::eOther:
@@ -116,13 +113,154 @@ void CResourceDisplayWidget::LoadResource(tspResource spResource)
 //
 void CResourceDisplayWidget::UnloadResource()
 {
+  m_iLoadState = ELoadState::eFinished;
   m_spResource = nullptr;
   if (m_spFutureWatcher->isRunning())
   {
     m_spFutureWatcher->cancel();
     m_spFutureWatcher->waitForFinished();
   }
-  m_iLoadState = ELoadState::eFinished;
+  m_imageMutex.lock();
+  if (nullptr != m_spLoadedMovie)
+  {
+    m_spLoadedMovie->stop();
+  }
+  m_imageMutex.unlock();
+  m_spUi->pWebView->stop();
+  m_spUi->pWebView->setUrl(QUrl("about:blank"));
+}
+
+//----------------------------------------------------------------------------------------
+//
+EResourceType CResourceDisplayWidget::ResourceType()
+{
+  if (nullptr != m_spResource)
+  {
+    QReadLocker resourceLocker(&m_spResource->m_rwLock);
+    EResourceType type = m_spResource->m_type;
+    QMutexLocker imageLocker(&m_imageMutex);
+    if (type._to_integral() == EResourceType::eImage)
+    {
+      if (nullptr != m_spLoadedMovie)
+      {
+        type = EResourceType::eMovie;
+      }
+    }
+    return type;
+  }
+  else
+  {
+    return EResourceType::eOther;
+  }
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CResourceDisplayWidget::SlotPlayPause()
+{
+  if (m_iLoadState != ELoadState::eFinished) { return; }
+
+  switch ( m_spUi->pStackedWidget->currentIndex())
+  {
+    case EResourceDisplayType::eLocalImage:
+    {
+      m_imageMutex.lock();
+      if (nullptr != m_spLoadedMovie)
+      {
+        if (m_spLoadedMovie->state() == QMovie::Running)
+        {
+          m_spLoadedMovie->stop();
+        }
+        else
+        {
+          m_spLoadedMovie->start();
+        }
+      }
+      m_imageMutex.unlock();
+      break;
+    }
+    case EResourceDisplayType::eLocalMedia:
+      m_spUi->pMediaPlayer->PlayPause();
+      break;
+    case EResourceDisplayType::eWebResource:
+    {
+      m_spUi->pWebView->page()->runJavaScript(
+            "var video = document.querySelector('video');"
+            "if (video == null) {"
+            "  if (video.paused) { "
+            "    video.play(); "
+            "  } else { "
+            "    video.pause();"
+            "  }"
+            "}"
+            );
+      break;
+    }
+  default: break;
+  }
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CResourceDisplayWidget::SlotStop()
+{
+  switch ( m_spUi->pStackedWidget->currentIndex())
+  {
+    case EResourceDisplayType::eLocalImage:
+    {
+      m_imageMutex.lock();
+      if (nullptr != m_spLoadedMovie)
+      {
+        if (m_spLoadedMovie->state() == QMovie::Running)
+        {
+          m_spLoadedMovie->stop();
+        }
+      }
+      m_imageMutex.unlock();
+      break;
+    }
+    case EResourceDisplayType::eLocalMedia:
+      m_spUi->pMediaPlayer->Stop();
+      break;
+    case EResourceDisplayType::eWebResource:
+    {
+      m_spUi->pWebView->page()->runJavaScript(
+            "var video = document.querySelector('video');"
+            "if (video == null) {"
+            "  if (!video.paused) { "
+            "    video.pause(); "
+            "    video.load(); "
+            "  } else {"
+            "    video.load();"
+            "  }"
+            "}"
+            );
+      break;
+    }
+  default: break;
+  }
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CResourceDisplayWidget::SlotSetSliderVisible(bool bVisible)
+{
+  switch ( m_spUi->pStackedWidget->currentIndex())
+  {
+    case EResourceDisplayType::eLocalMedia:
+      m_spUi->pMediaPlayer->SetSliderVisible(bVisible);
+      break;
+    case EResourceDisplayType::eWebResource:
+    {
+    m_spUi->pWebView->page()->runJavaScript(QString() +
+          "var video = document.querySelector('video');"
+          "if (video == null) {"
+          "  video.controls = " + (bVisible ? "true" : "false") + ";"
+          "}"
+          );
+      break;
+    }
+  }
 }
 
 //----------------------------------------------------------------------------------------
@@ -289,6 +427,12 @@ void CResourceDisplayWidget::SlotWebLoadFinished(bool bOk)
     if (bOk)
     {
       m_iLoadState = ELoadState::eFinished;
+      m_spUi->pWebView->page()->runJavaScript(
+            "var video = document.querySelector('video');"
+            "if (video == null) {"
+            "  video.controls = false;"
+            "}"
+            );
       m_spUi->pStackedWidget->setCurrentIndex(EResourceDisplayType::eWebResource);
     }
     else

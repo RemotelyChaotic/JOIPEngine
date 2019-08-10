@@ -20,6 +20,7 @@ public:
   void Initialize() override;
 
   void HideAllBars();
+  void ShowMediaPlayerActionBar();
   void ShowProjectActionBar();
   void ShowResourceActionBar();
 

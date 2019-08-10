@@ -16,7 +16,11 @@ QT       += \
   webenginewidgets \
   xml
 
-greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
+greaterThan(QT_MAJOR_VERSION, 4) {
+  QT += widgets avwidgets
+} else {
+  CONFIG += avwidgets
+}
 
 TARGET = JOIPEngine
 TEMPLATE = app
@@ -68,9 +72,6 @@ SOURCES += \
     src/Widgets/OverlayBase.cpp \
     src/Editor/WebResourceOverlay.cpp \
     src/Widgets/Player/MediaPlayer.cpp \
-    src/Widgets/Player/MediaPlayerControls.cpp \
-    src/Widgets/Player/MediaPlayerHistogramWidget.cpp \
-    src/Widgets/Player/MediaPlayerVideoWidget.cpp \
     src/Widgets/ResourceDisplayWidget.cpp \
     src/Editor/EditorActionBar.cpp \
     src/Editor/EditorWidgetBase.cpp \
@@ -104,9 +105,6 @@ HEADERS += \
     src/Widgets/OverlayBase.h \
     src/Editor/WebResourceOverlay.h \
     src/Widgets/Player/MediaPlayer.h   \
-    src/Widgets/Player/MediaPlayerControls.h   \
-    src/Widgets/Player/MediaPlayerHistogramWidget.h \
-    src/Widgets/Player/MediaPlayerVideoWidget.h \
     src/Widgets/ResourceDisplayWidget.h \
     src/Editor/EditorActionBar.h \
     src/Editor/EditorWidgetBase.h \
