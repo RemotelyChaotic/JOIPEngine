@@ -42,20 +42,59 @@ void CResourceTreeItemModel::InitializeModel(tspProject spProject)
       m_categoryMap.insert({EResourceType::_from_index(i), pItem});
       m_pRootItem->AppendChild(pItem);
     }
-    endInsertRows();
 
     m_spProject = spProject;
     QReadLocker locker(&m_spProject->m_rwLock);
     for (auto it = m_spProject->m_spResourcesMap.begin(); m_spProject->m_spResourcesMap.end() != it; ++it)
     {
       QReadLocker locker(&it->second->m_rwLock);
+      const QStringList sPathParts = it->second->m_sPath.toString().split("/");
+
+      // insert item
       auto categoryIt = m_categoryMap.find(it->second->m_type);
       if (m_categoryMap.end() != categoryIt)
       {
-        categoryIt->second->AppendChild(
-              new CResourceTreeItem(EResourceTreeItemType::eResource, QString(), it->second, categoryIt->second));
+        // iterate over url subfolders
+        CResourceTreeItem* pItem = categoryIt->second;
+        CResourceTreeItem* pChild = nullptr;
+        if (1 < sPathParts.size())
+        {
+          for (qint32 iCurrentPart = 0; sPathParts.size() > iCurrentPart; ++iCurrentPart)
+          {
+            const QString& sPathPart = sPathParts[iCurrentPart];
+            QUrl sFolderName = QUrl(sPathPart);
+            QString sDisplayFolderName = sFolderName.toString(QUrl::RemoveScheme);
+
+            // iterate over children of current folder
+            bool bFoundFolder = false;
+            for (qint32 i = 0; i < pItem->ChildCount(); ++i)
+            {
+              pChild = pItem->Child(i);
+              if (pChild->Type()._to_integral() == EResourceTreeItemType::eFolder &&
+                  pChild->Data(c_iColumnName).toString() == sDisplayFolderName)
+              {
+                bFoundFolder = true;
+                pItem = pChild;
+                break;
+              }
+            }
+            // folder not found -> create
+            if (!bFoundFolder && iCurrentPart != sPathParts.size() - 1)
+            {
+              CResourceTreeItem* pNewItem =
+                new CResourceTreeItem(EResourceTreeItemType::eFolder,
+                                      sDisplayFolderName, nullptr, pItem);
+              pItem->AppendChild(pNewItem);
+              pItem = pNewItem;
+            }
+          }
+        }
+
+        pItem->AppendChild(
+              new CResourceTreeItem(EResourceTreeItemType::eResource, QString(), it->second, pItem));
       }
     }
+    endInsertRows();
   }
 }
 
@@ -65,10 +104,12 @@ void CResourceTreeItemModel::DeInitializeModel()
 {
   if (nullptr != m_pRootItem)
   {
+    beginRemoveRows(QModelIndex(), 0, static_cast<qint32>(EResourceType::_size() - 1));
     m_spProject = nullptr;
     m_categoryMap.clear();
     delete m_pRootItem;
     m_pRootItem = nullptr;
+    endRemoveRows();
   }
 }
 
@@ -320,24 +361,77 @@ void CResourceTreeItemModel::SlotResourceAdded(qint32 iProjId, const QString& sN
       tspResource spResource = spDbManager->FindResource(m_spProject, sName);
       spResource->m_rwLock.lockForRead();
       EResourceType type = spResource->m_type;
+      const QStringList sPathParts = spResource->m_sPath.toString().split("/");
       spResource->m_rwLock.unlock();
 
       auto itCategoryItem = m_categoryMap.find(type);
-      QModelIndex parent =
-          createIndex(static_cast<qint32>(type._to_index()), 0, m_categoryMap[type]);
-      qint32 iPosition = m_categoryMap[type]->ChildCount();
-
-      // insert item
-      beginInsertRows(parent, iPosition, iPosition);
-      const bool bSuccess = m_categoryMap[type]->InsertChildren(
-            iPosition, 1, m_pRootItem->ColumnCount());
-      if (bSuccess)
+      if (m_categoryMap.end() != itCategoryItem)
       {
-        CResourceTreeItem* pNewItem = m_categoryMap[type]->Child(m_categoryMap[type]->ChildCount() - 1);
-        pNewItem->SetType(EResourceTreeItemType::eResource);
-        pNewItem->SetResource(spResource);
+        // iterate over url subfolders
+        qint32 indexOfItem = m_pRootItem->ChildIndex(itCategoryItem->second);
+        CResourceTreeItem* pItem = itCategoryItem->second;
+        CResourceTreeItem* pChild = nullptr;
+
+        if (1 < sPathParts.size())
+        {
+          for (qint32 iCurrentPart = 0; sPathParts.size() > iCurrentPart; ++iCurrentPart)
+          {
+            const QString& sPathPart = sPathParts[iCurrentPart];
+            QUrl sFolderName = QUrl(sPathPart);
+            QString sDisplayFolderName = sFolderName.toString(QUrl::RemoveScheme);
+
+            // iterate over children of current folder
+            bool bFoundFolder = false;
+            for (qint32 i = 0; i < pItem->ChildCount(); ++i)
+            {
+              pChild = pItem->Child(i);
+              if (pChild->Type()._to_integral() == EResourceTreeItemType::eFolder &&
+                  pChild->Data(c_iColumnName).toString() == sDisplayFolderName)
+              {
+                bFoundFolder = true;
+                indexOfItem = i;
+                pItem = pChild;
+                break;
+              }
+            }
+            // folder not found -> create
+            if (!bFoundFolder && iCurrentPart != sPathParts.size() - 1)
+            {
+              QModelIndex parent =
+                createIndex(indexOfItem, 0, pItem);
+              qint32 iPosition = pItem->ChildCount();
+
+              beginInsertRows(parent, iPosition, iPosition);
+              const bool bSuccess = pItem->InsertChildren(
+                    iPosition, 1, m_pRootItem->ColumnCount());
+              if (bSuccess)
+              {
+                CResourceTreeItem* pNewItem = pItem->Child(pItem->ChildCount() - 1);
+                pNewItem->SetType(EResourceTreeItemType::eFolder);
+                pNewItem->SetLabel(sDisplayFolderName);
+                indexOfItem = iPosition;
+                pItem = pNewItem;
+              }
+              endInsertRows();
+            }
+          }
+        }
+
+        QModelIndex parent =
+          createIndex(indexOfItem, 0, pItem);
+        qint32 iPosition = pItem->ChildCount();
+
+        beginInsertRows(parent, iPosition, iPosition);
+        const bool bSuccess = pItem->InsertChildren(
+              iPosition, 1, m_pRootItem->ColumnCount());
+        if (bSuccess)
+        {
+          CResourceTreeItem* pNewItem = pItem->Child(pItem->ChildCount() - 1);
+          pNewItem->SetType(EResourceTreeItemType::eResource);
+          pNewItem->SetResource(spResource);
+        }
+        endInsertRows();
       }
-      endInsertRows();
     }
   }
 }
@@ -365,12 +459,43 @@ void CResourceTreeItemModel::SlotResourceRemoved(qint32 iProjId, const QString& 
         CResourceTreeItem* pItem = GetItem(indices[0]);
         CResourceTreeItem* pParent = pItem->Parent();
         qint32 iPosition = pParent->ChildIndex(pItem);
+        qint32 iParentIndex = pParent->Parent()->ChildIndex(pParent);
 
         // remove item
-        beginRemoveRows(indices[0], iPosition, iPosition);
+        QModelIndex parentIndex =
+          createIndex(iParentIndex, 0, pParent);
+        beginRemoveRows(parentIndex, iPosition, iPosition);
         const bool bSuccess = pParent->RemoveChildren(iPosition, 1);
         Q_UNUSED(bSuccess);
         endRemoveRows();
+
+        pItem = pParent;
+        pParent = pParent->Parent();
+        iPosition = pParent->ChildIndex(pItem);
+        if (nullptr != pParent->Parent())
+        {
+          iParentIndex = pParent->Parent()->ChildIndex(pParent);
+        }
+        while (pParent != m_pRootItem)
+        {
+
+          if (pItem->ChildCount() == 0)
+          {
+            parentIndex = createIndex(iParentIndex, 0, pParent);
+            beginRemoveRows(parentIndex, iPosition, iPosition);
+            const bool bSuccess = pParent->RemoveChildren(iPosition, 1);
+            Q_UNUSED(bSuccess);
+            endRemoveRows();
+          }
+
+          pItem = pParent;
+          pParent = pParent->Parent();
+          iPosition = pParent->ChildIndex(pItem);
+          if (nullptr != pParent->Parent())
+          {
+            iParentIndex = pParent->Parent()->ChildIndex(pParent);
+          }
+        }
       }
     }
   }

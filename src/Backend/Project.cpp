@@ -49,7 +49,7 @@ QJsonObject SProject::ToJsonObject()
   QJsonArray resources;
   for (auto& spResource : m_spResourcesMap)
   {
-    scenes.push_back(spResource.second->ToJsonObject());
+    resources.push_back(spResource.second->ToJsonObject());
   }
   return {
     { "iVersion", m_iVersion },
@@ -111,7 +111,7 @@ void SProject::FromJsonObject(const QJsonObject& json)
       m_vspScenes.push_back(spScene);
     }
   }
-  it = json.find("spResources");
+  it = json.find("vspResources");
   m_spResourcesMap.clear();
   if (it != json.end())
   {

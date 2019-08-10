@@ -150,12 +150,20 @@ void CResourceDisplayWidget::SlotImageLoad(QString sPath)
         m_spLoadedPixmap = std::make_shared<QPixmap>(
               QPixmap::fromImage(image).scaled(width(), height(),
                                                Qt::KeepAspectRatio, Qt::SmoothTransformation));
+        if (nullptr != m_spLoadedMovie)
+        {
+          m_spLoadedMovie->stop();
+        }
         m_spLoadedMovie = nullptr;
         m_iLoadState = ELoadState::eFinished;
       }
       else
       {
         qWarning() << reader.errorString();
+        if (nullptr != m_spLoadedMovie)
+        {
+          m_spLoadedMovie->stop();
+        }
         m_spLoadedMovie = nullptr;
         m_spLoadedPixmap = nullptr;
         m_iLoadState = ELoadState::eError;
@@ -164,6 +172,10 @@ void CResourceDisplayWidget::SlotImageLoad(QString sPath)
     else
     {
       // QMovie
+      if (nullptr != m_spLoadedMovie)
+      {
+        m_spLoadedMovie->stop();
+      }
       m_spLoadedMovie = std::make_shared<QMovie>(sPath);
       QSize size = m_spLoadedMovie->scaledSize();
       QSize resultingSize = size;
@@ -203,9 +215,23 @@ void CResourceDisplayWidget::SlotLoadFinished()
       case EResourceType::eImage:
       {
         m_imageMutex.lock();
-        m_spUi->pImage->setPixmap(*m_spLoadedPixmap);
+        if (nullptr != m_spLoadedPixmap)
+        {
+          m_spUi->pImage->setPixmap(*m_spLoadedPixmap);
+          m_spUi->pStackedWidget->setCurrentIndex(EResourceDisplayType::eLocalImage);
+        }
+        else if (nullptr != m_spLoadedMovie)
+        {
+          m_spLoadedMovie->start();
+          m_spUi->pImage->setMovie(m_spLoadedMovie.get());
+          m_spUi->pStackedWidget->setCurrentIndex(EResourceDisplayType::eLocalImage);
+        }
+        else
+        {
+          m_iLoadState = ELoadState::eError;
+          m_spUi->pStackedWidget->setCurrentIndex(EResourceDisplayType::eError);
+        }
         m_imageMutex.unlock();
-        m_spUi->pStackedWidget->setCurrentIndex(EResourceDisplayType::eLocalImage);
         break;
       }
       case EResourceType::eOther:
@@ -278,6 +304,11 @@ void CResourceDisplayWidget::SlotWebLoadFinished(bool bOk)
 void CResourceDisplayWidget::StartImageLoad(QString sPath)
 {
   m_iLoadState = ELoadState::eLoading;
+  if (m_spFutureWatcher->isRunning())
+  {
+    m_spFutureWatcher->cancel();
+    m_spFutureWatcher->waitForFinished();
+  }
   m_future = QtConcurrent::run(this, &CResourceDisplayWidget::SlotImageLoad, sPath);
   m_spFutureWatcher->setFuture(m_future);
 }

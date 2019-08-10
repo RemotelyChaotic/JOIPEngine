@@ -16,9 +16,12 @@
 
 #include <QDebug>
 #include <QDomDocument>
+#include <QDragEnterEvent>
+#include <QDropEvent>
 #include <QFileDialog>
 #include <QFileInfo>
 #include <QItemSelectionModel>
+#include <QMimeData>
 #include <QNetworkAccessManager>
 #include <QSortFilterProxyModel>
 
@@ -54,12 +57,13 @@ void CEditorResourceWidget::Initialize()
 
   m_wpDbManager = CApplication::Instance()->System<CDatabaseManager>();
 
+  m_spUi->pResourceTree->header()->setStretchLastSection(true);
+  m_spUi->pResourceTree->header()->setSectionResizeMode(QHeaderView::ResizeToContents);
+
   CResourceTreeItemModel* pModel = new CResourceTreeItemModel(m_spUi->pResourceTree);
   CResourceTreeItemSortFilterProxyModel* pProxyModel =
       new CResourceTreeItemSortFilterProxyModel(m_spUi->pResourceTree);
   pProxyModel->setSourceModel(pModel);
-  pProxyModel->sort(resource_item::c_iColumnName, Qt::DescendingOrder);
-  pProxyModel->setFilterRegExp(QRegExp(".*", Qt::CaseInsensitive, QRegExp::RegExp));
   m_spUi->pResourceTree->setModel(pProxyModel);
 
   QItemSelectionModel* pSelectionModel = m_spUi->pResourceTree->selectionModel();
@@ -70,6 +74,11 @@ void CEditorResourceWidget::Initialize()
   m_spWebOverlay->Hide();
   connect(m_spWebOverlay.get(), &CWebResourceOverlay::SignalResourceSelected,
           this, &CEditorResourceWidget::SlotWebResourceSelected);
+
+  setAcceptDrops(true);
+
+  pProxyModel->sort(resource_item::c_iColumnName, Qt::AscendingOrder);
+  pProxyModel->setFilterRegExp(QRegExp(".*", Qt::CaseInsensitive, QRegExp::RegExp));
 
   m_bInitialized = true;
 }
@@ -151,6 +160,54 @@ void CEditorResourceWidget::OnActionBarChanged()
 
 //----------------------------------------------------------------------------------------
 //
+void CEditorResourceWidget::dragEnterEvent(QDragEnterEvent* pEvent)
+{
+  const QMimeData* pMimeData = pEvent->mimeData();
+
+  // check for our needed mime type, here a file or a list of files
+  if (pMimeData->hasUrls())
+  {
+    pEvent->acceptProposedAction();
+  }
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CEditorResourceWidget::dropEvent(QDropEvent* pEvent)
+{
+  const QMimeData* pMimeData = pEvent->mimeData();
+
+  // check for our needed mime type, here a file or a list of files
+  if (pMimeData->hasUrls())
+  {
+    QStringList imageFormatsList = ImageFormats();
+    QString sImageFormats = imageFormatsList.join(" ");
+
+    QStringList videoFormatsList = VideoFormats();
+    QString sVideoFormats = videoFormatsList.join(" ");
+
+    QStringList audioFormatsList = AudioFormats();
+    QString sAudioFormats = audioFormatsList.join(" ");
+
+    QStringList otherFormatsList = OtherFormats();
+    QString sOtherFormats = otherFormatsList.join(" ");
+
+    QStringList vsFileNames;
+    QList<QUrl> vUrlList = pMimeData->urls();
+
+    // extract the local paths of the files
+    for (qint32 i = 0; i < vUrlList.size(); ++i)
+    {
+      vsFileNames.append(vUrlList.at(i).toLocalFile());
+    }
+
+    // add file to respective category
+    AddFiles(vsFileNames, imageFormatsList, videoFormatsList, audioFormatsList, otherFormatsList);
+  }
+}
+
+//----------------------------------------------------------------------------------------
+//
 void CEditorResourceWidget::on_pFilterLineEdit_editingFinished()
 {
   WIDGET_INITIALIZED_GUARD
@@ -189,45 +246,12 @@ void CEditorResourceWidget::SlotAddButtonClicked()
 
   QString sFormatSelection = "Image Files (%1);;Video Files (%2);;Sound Files (%3);;Other Files (%4)";
   QString sCurrentFolder = CApplication::Instance()->Settings()->ContentFolder();
-  QString sFileName = QFileDialog::getOpenFileName(this,
+  QStringList  vsFileNames = QFileDialog::getOpenFileNames(this,
       tr("Add File"), sCurrentFolder,
       sFormatSelection.arg(sImageFormats).arg(sVideoFormats).arg(sAudioFormats).arg(sOtherFormats));
 
   // add file to respective category
-  QFileInfo info(sFileName);
-  const QString sName = PhysicalProjectName(m_spCurrentProject);
-
-  QDir projectDir(m_spSettings->ContentFolder() + "/" + sName);
-  if (!info.canonicalFilePath().contains(projectDir.absolutePath()))
-  {
-    qWarning() << "File is not in subfolder of Project.";
-  }
-  else
-  {
-    QString sRelativePath = projectDir.relativeFilePath(sFileName);
-    QUrl url = QUrl::fromLocalFile(sRelativePath);
-    const QString sEnding = "*." + info.suffix();
-    auto spDbManager = m_wpDbManager.lock();
-    if (nullptr != spDbManager)
-    {
-      if (imageFormatsList.contains(sEnding))
-      {
-        spDbManager->AddResource(m_spCurrentProject, url, EResourceType::eImage);
-      }
-      else if (videoFormatsList.contains(sEnding))
-      {
-        spDbManager->AddResource(m_spCurrentProject, url, EResourceType::eMovie);
-      }
-      else if (audioFormatsList.contains(sEnding))
-      {
-        spDbManager->AddResource(m_spCurrentProject, url, EResourceType::eSound);
-      }
-      else if (otherFormatsList.contains(sEnding))
-      {
-        spDbManager->AddResource(m_spCurrentProject, url, EResourceType::eOther);
-      }
-    }
-  }
+  AddFiles(vsFileNames, imageFormatsList, videoFormatsList, audioFormatsList, otherFormatsList);
 }
 
 //----------------------------------------------------------------------------------------
@@ -440,6 +464,52 @@ void CEditorResourceWidget::SlotNetworkReplyFinished()
       {
         // TODO: check video
         spDbManager->AddResource(m_spCurrentProject, url, EResourceType::eMovie);
+      }
+    }
+  }
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CEditorResourceWidget::AddFiles(const QStringList& vsFiles, const QStringList& imageFormatsList,
+              const QStringList& videoFormatsList, const QStringList& audioFormatsList,
+              const QStringList& otherFormatsList)
+{
+  // add file to respective category
+  for (QString sFileName : vsFiles)
+  {
+    QFileInfo info(sFileName);
+    const QString sName = PhysicalProjectName(m_spCurrentProject);
+
+    QDir projectDir(m_spSettings->ContentFolder() + "/" + sName);
+    if (!info.canonicalFilePath().contains(projectDir.absolutePath()))
+    {
+      qWarning() << "File is not in subfolder of Project.";
+    }
+    else
+    {
+      QString sRelativePath = projectDir.relativeFilePath(sFileName);
+      QUrl url = QUrl::fromLocalFile(sRelativePath);
+      const QString sEnding = "*." + info.suffix();
+      auto spDbManager = m_wpDbManager.lock();
+      if (nullptr != spDbManager)
+      {
+        if (imageFormatsList.contains(sEnding))
+        {
+          spDbManager->AddResource(m_spCurrentProject, url, EResourceType::eImage);
+        }
+        else if (videoFormatsList.contains(sEnding))
+        {
+          spDbManager->AddResource(m_spCurrentProject, url, EResourceType::eMovie);
+        }
+        else if (audioFormatsList.contains(sEnding))
+        {
+          spDbManager->AddResource(m_spCurrentProject, url, EResourceType::eSound);
+        }
+        else if (otherFormatsList.contains(sEnding))
+        {
+          spDbManager->AddResource(m_spCurrentProject, url, EResourceType::eOther);
+        }
       }
     }
   }

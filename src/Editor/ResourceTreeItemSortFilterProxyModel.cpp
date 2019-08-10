@@ -33,8 +33,10 @@ void CResourceTreeItemSortFilterProxyModel::DeInitializeModel()
 bool CResourceTreeItemSortFilterProxyModel::filterAcceptsRow(int iSourceRow,
                                                              const QModelIndex &sourceParent) const
 {
-  QModelIndex index = sourceModel()->index(iSourceRow, 0, sourceParent);
-  return sourceModel()->data(index).toString().contains(filterRegExp());
+  CResourceTreeItemModel* pSourceModel = dynamic_cast<CResourceTreeItemModel*>(sourceModel());
+  QModelIndex index = pSourceModel->index(iSourceRow, 0, sourceParent);
+  return !pSourceModel->IsResourceType(index) ||
+      pSourceModel->data(index, Qt::DisplayRole, resource_item::c_iColumnName).toString().contains(filterRegExp());
 }
 
 //----------------------------------------------------------------------------------------
