@@ -2,12 +2,17 @@
 #define SCENE_H
 
 #include "ISerializable.h"
+#include <enum.h>
 #include <QObject>
 #include <QReadWriteLock>
 #include <QScriptValue>
 #include <QSharedPointer>
 #include <memory>
 #include <set>
+
+BETTER_ENUM(ESceneTransitionType, qint32,
+            eRandom = 0,
+            eSelection = 1);
 
 class CProject;
 class CResource;
@@ -41,9 +46,9 @@ class CScene : public QObject
   Q_OBJECT
   Q_DISABLE_COPY(CScene)
   CScene() {}
-  Q_PROPERTY(qint32  id        READ Id    )
-  Q_PROPERTY(QString name      READ Name  )
-  Q_PROPERTY(QString script    READ Script)
+  Q_PROPERTY(qint32  id               READ Id    )
+  Q_PROPERTY(QString name             READ Name  )
+  Q_PROPERTY(QString script           READ Script)
 
 public:
   explicit CScene(const std::shared_ptr<SScene>& spScene);

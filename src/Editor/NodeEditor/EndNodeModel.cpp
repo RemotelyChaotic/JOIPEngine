@@ -10,7 +10,7 @@ namespace {
 CEndNodeModel::CEndNodeModel() :
   NodeDataModel(),
   m_modelValidationState(NodeValidationState::Warning),
-  m_modelValidationError(QString(tr("Missing or incorrect inputs")))
+  m_modelValidationError(QString(tr("Missing or incorrect input")))
 {
 }
 
@@ -82,7 +82,7 @@ void CEndNodeModel::setInData(std::shared_ptr<NodeData> data, PortIndex portInde
 
   if (portIndex == 0 && nullptr != newData)
   {
-    m_wpTransition = newData;
+    m_wpInData = newData;
     m_modelValidationState = NodeValidationState::Valid;
     m_modelValidationError = QString();
   }

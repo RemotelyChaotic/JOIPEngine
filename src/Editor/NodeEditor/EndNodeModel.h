@@ -38,7 +38,7 @@ public:
   ConnectionPolicy portOutConnectionPolicy(PortIndex) const override { return ConnectionPolicy::One; }
 
 protected:
-  std::weak_ptr<CSceneTranstitionData> m_wpTransition;
+  std::weak_ptr<CSceneTranstitionData>                m_wpInData;
 
   NodeValidationState m_modelValidationState;
   QString m_modelValidationError;

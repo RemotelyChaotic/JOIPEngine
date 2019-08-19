@@ -1,8 +1,13 @@
 #ifndef SCENENODEMODEL_H
 #define SCENENODEMODEL_H
 
-#include <nodes/NodeDataModel>
+#include "Backend/Project.h"
+#include "Backend/Scene.h"
 
+#include <nodes/NodeDataModel>
+#include <memory>
+
+class CDatabaseManager;
 class CSceneTranstitionData;
 class CSceneNodeModelWidget;
 
@@ -22,6 +27,9 @@ public:
   ~CSceneNodeModel() override {}
 
 public:
+  void SetProjectId(qint32 iId);
+  qint32 ProjectId();
+
   QString caption() const override;
   bool captionVisible() const override { return true; }
   QString name() const override;
@@ -38,18 +46,24 @@ public:
   NodeValidationState validationState() const override;
   QString validationMessage() const override;
 
-  ConnectionPolicy portOutConnectionPolicy(PortIndex) const override { return ConnectionPolicy::Many; }
+  ConnectionPolicy portOutConnectionPolicy(PortIndex) const override { return ConnectionPolicy::One; }
 
 protected:
+  std::weak_ptr<CDatabaseManager>                     m_wpDbManager;
   std::weak_ptr<CSceneTranstitionData>                m_wpInData;
   std::shared_ptr<CSceneTranstitionData>              m_spOutData;
+  tspProject                                          m_spProject;
+  tspScene                                            m_spScene;
   CSceneNodeModelWidget*                              m_pWidget;
 
   NodeValidationState m_modelValidationState;
-  QString m_modelValidationError;
+  QString             m_modelValidationError;
+  QString             m_sSceneName;
+  QString             m_sOldSceneName;
 
 protected slots:
-  void SlotNumberOfOutputsChanged(qint32 iValue);
+  void SlotNameChanged(const QString& sName);
+  void SlotSceneRenamed(qint32 iProjId, qint32 iSceneId);
 };
 
 #endif // SCENENODEMODEL_H

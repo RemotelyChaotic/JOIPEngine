@@ -83,7 +83,11 @@ SOURCES += \
     src/Editor/NodeEditor/SceneTranstitionData.cpp \
     src/Editor/NodeEditor/SceneNodeModelWidget.cpp \
     src/Editor/NodeEditor/StartNodeModel.cpp \
-    src/Editor/NodeEditor/EndNodeModel.cpp
+    src/Editor/NodeEditor/EndNodeModel.cpp \
+    src/Editor/NodeEditor/FlowView.cpp \
+    src/Editor/NodeEditor/PathMergerModel.cpp \
+    src/Editor/NodeEditor/PathSplitterModel.cpp \
+    src/Editor/NodeEditor/PathSplitterModelWidget.cpp
 
 HEADERS += \
     src/MainWindow.h \
@@ -122,7 +126,11 @@ HEADERS += \
     src/Editor/NodeEditor/SceneTranstitionData.h \
     src/Editor/NodeEditor/SceneNodeModelWidget.h \
     src/Editor/NodeEditor/StartNodeModel.h \
-    src/Editor/NodeEditor/EndNodeModel.h
+    src/Editor/NodeEditor/EndNodeModel.h \
+    src/Editor/NodeEditor/FlowView.h \
+    src/Editor/NodeEditor/PathMergerModel.h \
+    src/Editor/NodeEditor/PathSplitterModel.h \
+    src/Editor/NodeEditor/PathSplitterModelWidget.h
 
 FORMS += \
     src/MainWindow.ui \
@@ -140,7 +148,8 @@ FORMS += \
     src/Editor/EditorActionBar.ui \
     src/Editor/EditorResourceDisplayWidget.ui \
     src/Editor/EditorSceneNodeWidget.ui \
-    src/Editor/NodeEditor/SceneNodeModelWidget.ui
+    src/Editor/NodeEditor/SceneNodeModelWidget.ui \
+    src/Editor/NodeEditor/PathSplitterModelWidget.ui
 
 RESOURCES += \
     resources.qrc

@@ -16,9 +16,13 @@ public:
   explicit CSceneNodeModelWidget(QWidget* pParent = nullptr);
   ~CSceneNodeModelWidget();
 
-signals:
+  void SetName(const QString& sName);
 
-protected:
+signals:
+  void SignalNameChanged(const QString& sName);
+
+protected slots:
+  void on_pSceneNameLineEdit_editingFinished();
 
 private:
   std::unique_ptr<Ui::CSceneNodeModelWidget> m_spUi;

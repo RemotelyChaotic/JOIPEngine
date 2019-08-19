@@ -143,6 +143,8 @@ void CEditorMainScreen::LoadProject(qint32 iId)
   }
 
   SlotSaveClicked(true);
+
+  m_spUi->splitter->setSizes({ width() * 1/3 , width() * 2/3 });
 }
 
 //----------------------------------------------------------------------------------------
@@ -150,6 +152,17 @@ void CEditorMainScreen::LoadProject(qint32 iId)
 void CEditorMainScreen::UnloadProject()
 {
   if (!m_bInitialized) { return; }
+
+  // reset to what is in the database
+  auto spDbManager = m_wpDbManager.lock();
+  if (nullptr != spDbManager && nullptr != m_spCurrentProject)
+  {
+    m_spCurrentProject->m_rwLock.lockForRead();
+    qint32 iId = m_spCurrentProject->m_iId;
+    m_spCurrentProject->m_rwLock.unlock();
+
+    spDbManager->DeserializeProject(iId);
+  }
 
   m_spCurrentProject = nullptr;
 
@@ -245,6 +258,24 @@ void CEditorMainScreen::SlotDisplayResource(const QString& sName)
       locker.unlock();
       auto spResource = spDbManager->FindResource(m_spCurrentProject, sName);
       pWidget->UnloadResource();
+
+      qint32 iEnumValueLeft = m_spUi->pLeftComboBox->currentData(Qt::UserRole).toInt();
+      qint32 iEnumValueRight = m_spUi->pRightComboBox->currentData(Qt::UserRole).toInt();
+      if (iEnumValueLeft == EEditorWidget::eResourceWidget)
+      {
+        m_spUi->pRightComboBox->blockSignals(true);
+        m_spUi->pRightComboBox->setCurrentIndex(EEditorWidget::eResourceDisplay);
+        on_pRightComboBox_currentIndexChanged(EEditorWidget::eResourceDisplay);
+        m_spUi->pRightComboBox->blockSignals(false);
+      }
+      else if (iEnumValueRight == EEditorWidget::eResourceWidget)
+      {
+        m_spUi->pLeftComboBox->blockSignals(true);
+        m_spUi->pLeftComboBox->setCurrentIndex(EEditorWidget::eResourceDisplay);
+        on_pLeftComboBox_currentIndexChanged(EEditorWidget::eResourceDisplay);
+        m_spUi->pLeftComboBox->blockSignals(false);
+      }
+
       pWidget->LoadResource(spResource);
     }
   }

@@ -40,9 +40,9 @@ CDatabaseManager::~CDatabaseManager()
 
 //----------------------------------------------------------------------------------------
 //
-void CDatabaseManager::AddProject(const QString& sName, qint32 iVersion)
+qint32 CDatabaseManager::AddProject(const QString& sName, qint32 iVersion)
 {
-  if (!IsInitialized()) { return; }
+  if (!IsInitialized()) { return -1; }
 
   qint32 iNewId = FindNewProjectId();
   QString sFinalName = sName;
@@ -63,6 +63,8 @@ void CDatabaseManager::AddProject(const QString& sName, qint32 iVersion)
 
     emit SignalProjectAdded(iNewId);
   }
+
+  return iNewId;
 }
 
 //----------------------------------------------------------------------------------------
@@ -258,6 +260,8 @@ void CDatabaseManager::RenameProject(qint32 iId, const QString& sNewName)
     }
     spProject->m_sName = sNewName;
     spProject->m_rwLock.unlock();
+
+    emit SignalProjectRenamed(iId);
   }
 }
 
@@ -272,12 +276,15 @@ void CDatabaseManager::RenameProject(const QString& sName, const QString& sNewNa
   {
     tspProject spProject = FindProject(sName);
     spProject->m_rwLock.lockForWrite();
+    qint32 iId = spProject->m_iId;
     if (spProject->m_sOldName.isNull())
     {
       spProject->m_sOldName = spProject->m_sName;
     }
     spProject->m_sName = sNewName;
     spProject->m_rwLock.unlock();
+
+    emit SignalProjectRenamed(iId);
   }
 }
 
@@ -311,9 +318,9 @@ bool CDatabaseManager::SerializeProject(const QString& sName)
 
 //----------------------------------------------------------------------------------------
 //
-void CDatabaseManager::AddScene(tspProject& spProj, const QString& sName)
+qint32 CDatabaseManager::AddScene(tspProject& spProj, const QString& sName)
 {
-  if (!IsInitialized()) { return; }
+  if (!IsInitialized()) { return -1; }
 
   qint32 iNewId = FindNewSceneId(spProj);
   QString sFinalName = sName;
@@ -333,6 +340,7 @@ void CDatabaseManager::AddScene(tspProject& spProj, const QString& sName)
     spProj->m_vspScenes.back()->m_spParent = spProj;
     emit SignalSceneAdded(spProj->m_iId, iNewId);
   }
+  return iNewId;
 }
 
 //----------------------------------------------------------------------------------------
@@ -477,10 +485,16 @@ void CDatabaseManager::RenameScene(tspProject& spProj, qint32 iId, const QString
   tspScene spNewScene = FindScene(spProj, sNewName);
   if (nullptr == spNewScene)
   {
+    spProj->m_rwLock.lockForRead();
+    qint32 iProjId = spProj->m_iId;
+    spProj->m_rwLock.unlock();
+
     tspScene spScene = FindScene(spProj, iId);
     spScene->m_rwLock.lockForWrite();
     spScene->m_sName = sNewName;
     spScene->m_rwLock.unlock();
+
+    emit SignalSceneRenamed(iProjId, iId);
   }
 }
 
@@ -493,18 +507,25 @@ void CDatabaseManager::RenameScene(tspProject& spProj, const QString& sName, con
   tspScene spNewScene = FindScene(spProj, sNewName);
   if (nullptr == spNewScene)
   {
+    spProj->m_rwLock.lockForRead();
+    qint32 iProjId = spProj->m_iId;
+    spProj->m_rwLock.unlock();
+
     tspScene spScene = FindScene(spProj, sName);
     spScene->m_rwLock.lockForWrite();
     spScene->m_sName = sNewName;
+    qint32 iId = spScene->m_iId;
     spScene->m_rwLock.unlock();
+
+    emit SignalSceneRenamed(iProjId, iId);
   }
 }
 
 //----------------------------------------------------------------------------------------
 //
-void CDatabaseManager::AddResource(tspProject& spProj, const QUrl& sPath, const EResourceType& type, const QString& sName)
+QString CDatabaseManager::AddResource(tspProject& spProj, const QUrl& sPath, const EResourceType& type, const QString& sName)
 {
-  if (!IsInitialized()) { return; }
+  if (!IsInitialized()) { return QString(); }
 
   QString sFinalName = sName;
   if (sName.isNull())
@@ -536,6 +557,8 @@ void CDatabaseManager::AddResource(tspProject& spProj, const QUrl& sPath, const 
   sResource->m_spParent = spProj;
   spProj->m_spResourcesMap.insert({sFinalName, sResource});
   emit SignalResourceAdded(spProj->m_iId, sFinalName);
+
+  return sFinalName;
 }
 
 //----------------------------------------------------------------------------------------
@@ -629,6 +652,8 @@ void CDatabaseManager::RenameResource(tspProject& spProj, const QString& sName, 
     auto it = spProj->m_spResourcesMap.find(sName);
     if (it != spProj->m_spResourcesMap.end())
     {
+      qint32 iProjId = spProj->m_iId;
+
       // rename map and titlecard
       if (spProj->m_sMap == sName)
       {
@@ -660,6 +685,8 @@ void CDatabaseManager::RenameResource(tspProject& spProj, const QString& sName, 
           spScene->m_vsResourceRefs.insert(sNewName);
         }
       }
+
+      emit SignalResourceRenamed(iProjId, sName, sNewName);
     }
   }
 }

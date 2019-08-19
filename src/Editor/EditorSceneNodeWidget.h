@@ -5,6 +5,7 @@
 #include <memory>
 
 class CDatabaseManager;
+class CFlowView;
 class CSettings;
 namespace Ui {
   class CEditorSceneNodeWidget;
@@ -12,7 +13,7 @@ namespace Ui {
 namespace QtNodes {
   class DataModelRegistry;
   class FlowScene;
-  class FlowView;
+  class Node;
 }
 struct SProject;
 typedef std::shared_ptr<SProject> tspProject;
@@ -37,6 +38,7 @@ protected:
 
 protected slots:
   void SlotAddSceneButtonClicked();
+  void SlotNodeCreated(QtNodes::Node &n);
   void SlotRemoveNodeButtonClicked();
 
 private:
@@ -45,7 +47,7 @@ private:
   std::shared_ptr<QtNodes::DataModelRegistry>       m_spDataModelRegistry;
   tspProject                                        m_spCurrentProject;
   std::weak_ptr<CDatabaseManager>                   m_wpDbManager;
-  QtNodes::FlowView*                                m_pFlowView;
+  CFlowView*                                        m_pFlowView;
   QtNodes::FlowScene*                               m_pFlowScene;
 };
 

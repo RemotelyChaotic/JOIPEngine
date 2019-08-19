@@ -27,7 +27,7 @@ public:
   ~CDatabaseManager() override;
 
   // Project
-  void AddProject(const QString& sName = "New_Project", qint32 iVersion = 1);
+  qint32 AddProject(const QString& sName = "New_Project", qint32 iVersion = 1);
   void ClearProjects();
   bool DeserializeProject(qint32 iId);
   bool DeserializeProject(const QString& sName);
@@ -44,7 +44,7 @@ public:
   bool SerializeProject(const QString& sName);
 
   // Scene
-  void AddScene(tspProject& spProj, const QString& sName = "New_Scene");
+  qint32 AddScene(tspProject& spProj, const QString& sName = "New_Scene");
   void ClearScenes(tspProject& spProj);
   tspScene FindScene(tspProject& spProj, qint32 iId);
   tspScene FindScene(tspProject& spProj, const QString& sName);
@@ -56,7 +56,7 @@ public:
   void RenameScene(tspProject& spProj, const QString& sName, const QString& sNewName);
 
   // Resource
-  void AddResource(tspProject& spProj, const QUrl& sPath, const EResourceType& type, const QString& sName = QString());
+  QString AddResource(tspProject& spProj, const QUrl& sPath, const EResourceType& type, const QString& sName = QString());
   void ClearResources(tspProject& spProj);
   tspResource FindResource(tspProject& spProj, const QString& sName);
   tspResourceRef FindResourceRef(tspProject& spProj, const QString& sName);
@@ -69,10 +69,13 @@ public slots:
 
 signals:
   void SignalProjectAdded(qint32 iId);
+  void SignalProjectRenamed(qint32 iId);
   void SignalProjectRemoved(qint32 iId);
   void SignalSceneAdded(qint32 iProjId, qint32 iId);
+  void SignalSceneRenamed(qint32 iProjId, qint32 iId);
   void SignalSceneRemoved(qint32 iProjId, qint32 iId);
   void SignalResourceAdded(qint32 iProjId, const QString& sName);
+  void SignalResourceRenamed(qint32 iProjId, const QString& sOldName, const QString& sName);
   void SignalResourceRemoved(qint32 iProjId, const QString& sName);
 
 private slots:

@@ -5,6 +5,9 @@
 #include "Backend/Scene.h"
 #include "Backend/Resource.h"
 #include "NodeEditor/EndNodeModel.h"
+#include "NodeEditor/FlowView.h"
+#include "NodeEditor/PathMergerModel.h"
+#include "NodeEditor/PathSplitterModel.h"
 #include "NodeEditor/SceneNodeModel.h"
 #include "NodeEditor/SceneTranstitionData.h"
 #include "NodeEditor/StartNodeModel.h"
@@ -15,8 +18,10 @@
 #include <nodes/DataModelRegistry>
 #include <nodes/FlowScene>
 #include <nodes/FlowView>
+#include <nodes/Node>
 #include <nodes/NodeData>
 
+#include <QContextMenuEvent>
 #include <QDebug>
 #include <QFile>
 
@@ -26,15 +31,18 @@ using QtNodes::ConnectionStyle;
 using QtNodes::DataModelRegistry;
 using QtNodes::FlowScene;
 using QtNodes::FlowView;
+using QtNodes::Node;
 
 namespace
 {
   std::shared_ptr<DataModelRegistry> RegisterDataModels()
   {
     auto ret = std::make_shared<DataModelRegistry>();
-    ret->registerModel<CStartNodeModel>("Scene");
+    ret->registerModel<CStartNodeModel>("Control");
     ret->registerModel<CSceneNodeModel>("Scene");
-    ret->registerModel<CEndNodeModel>("Scene");
+    ret->registerModel<CEndNodeModel>("Control");
+    ret->registerModel<CPathMergerModel>("Path");
+    ret->registerModel<CPathSplitterModel>("Path");
     return ret;
   }
 
@@ -76,7 +84,8 @@ CEditorSceneNodeWidget::CEditorSceneNodeWidget(QWidget* pParent) :
 
   SetNodeStyle();
 
-  m_pFlowView = new FlowView(this);
+  m_pFlowView = new CFlowView(this);
+  m_pFlowView->setObjectName("FlowView");
   m_pFlowView->setWindowTitle("Node-based flow editor");
   m_pFlowView->show();
   m_pFlowView->setScene(nullptr);
@@ -106,6 +115,9 @@ void CEditorSceneNodeWidget::Initialize()
 
   m_pFlowScene = new FlowScene(m_spDataModelRegistry);
   m_pFlowView->setScene(m_pFlowScene);
+
+  connect(m_pFlowScene, &FlowScene::nodeCreated,
+          this, &CEditorSceneNodeWidget::SlotNodeCreated);
 
   m_bInitialized = true;
 }
@@ -250,6 +262,25 @@ void CEditorSceneNodeWidget::SlotAddSceneButtonClicked()
 {
   WIDGET_INITIALIZED_GUARD
   if (nullptr == m_spCurrentProject) { return; }
+  m_pFlowView->OpenContextMenuAt(QPoint(0, 0),
+                                 QPoint(m_pFlowView->width() / 2, m_pFlowView->height() / 2));
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CEditorSceneNodeWidget::SlotNodeCreated(Node &n)
+{
+  WIDGET_INITIALIZED_GUARD
+  if (nullptr == m_spCurrentProject) { return; }
+
+  CSceneNodeModel* pSceneModel = dynamic_cast<CSceneNodeModel*>(n.nodeDataModel());
+  if (nullptr != pSceneModel)
+  {
+    m_spCurrentProject->m_rwLock.lockForRead();
+    qint32 iId = m_spCurrentProject->m_iId;
+    m_spCurrentProject->m_rwLock.unlock();
+    pSceneModel->SetProjectId(iId);
+  }
 }
 
 //----------------------------------------------------------------------------------------
@@ -258,4 +289,13 @@ void CEditorSceneNodeWidget::SlotRemoveNodeButtonClicked()
 {
   WIDGET_INITIALIZED_GUARD
   if (nullptr == m_spCurrentProject) { return; }
+
+  auto vpNodes = m_pFlowScene->selectedNodes();
+  for (Node* pNode : vpNodes)
+  {
+    if (nullptr != pNode)
+    {
+      m_pFlowScene->removeNode(*pNode);
+    }
+  }
 }
