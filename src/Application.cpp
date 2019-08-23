@@ -1,5 +1,7 @@
 #include "Application.h"
 #include "Enums.h"
+#include "Backend/DatabaseManager.h"
+#include "Backend/ScriptRunner.h"
 #include "Backend/ThreadedSystem.h"
 #include <cassert>
 
@@ -34,9 +36,11 @@ void CApplication::Initialize()
 
   // create subsystems
   m_spSystemsMap.insert({ECoreSystems::eDatabaseManager, std::make_shared<CThreadedSystem>()});
+  m_spSystemsMap.insert({ECoreSystems::eScriptRunner, std::make_shared<CThreadedSystem>()});
 
   // init subsystems
   m_spSystemsMap[ECoreSystems::eDatabaseManager]->RegisterObject<CDatabaseManager>();
+  m_spSystemsMap[ECoreSystems::eScriptRunner]->RegisterObject<CScriptRunner>();
 
   m_bInitialized = true;
 }
@@ -47,5 +51,11 @@ template<>
 std::weak_ptr<CDatabaseManager> CApplication::System<CDatabaseManager>()
 {
   return std::static_pointer_cast<CDatabaseManager>(m_spSystemsMap[ECoreSystems::eDatabaseManager]->Get());
+}
+
+template<>
+std::weak_ptr<CScriptRunner> CApplication::System<CScriptRunner>()
+{
+  return std::static_pointer_cast<CScriptRunner>(m_spSystemsMap[ECoreSystems::eScriptRunner]->Get());
 }
 

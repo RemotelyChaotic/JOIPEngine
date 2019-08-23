@@ -25,6 +25,7 @@ signals:
 
 protected slots:
   void on_pConfirmButton_clicked();
+  void on_pCancelButton_clicked();
 
 private:
   std::unique_ptr<Ui::CWebResourceOverlay> m_spUi;

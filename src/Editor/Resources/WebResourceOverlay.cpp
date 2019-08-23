@@ -31,3 +31,10 @@ void CWebResourceOverlay::on_pConfirmButton_clicked()
   const QString sResource = m_spUi->pUrlLineEdit->text();
   emit SignalResourceSelected(sResource);
 }
+
+//----------------------------------------------------------------------------------------
+//
+void CWebResourceOverlay::on_pCancelButton_clicked()
+{
+  Hide();
+}

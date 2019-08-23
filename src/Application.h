@@ -7,6 +7,7 @@
 #include <map>
 #include <memory>
 
+class CScriptRunner;
 class CThreadedSystem;
 
 class CApplication : public QApplication
@@ -31,5 +32,6 @@ private:
 };
 
 template<> std::weak_ptr<CDatabaseManager> CApplication::System<CDatabaseManager>();
+template<> std::weak_ptr<CScriptRunner> CApplication::System<CScriptRunner>();
 
 #endif // CAPPLICATION_H

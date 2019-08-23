@@ -12,7 +12,8 @@ BETTER_ENUM(EAppState, qint32,
             eEditorScreen = 4);
 
 BETTER_ENUM(ECoreSystems, qint32,
-            eDatabaseManager = 0);
+            eDatabaseManager = 0,
+            eScriptRunner = 1);
 
 BETTER_ENUM(ELoadState, qint32,
             eUnstarted = 0,

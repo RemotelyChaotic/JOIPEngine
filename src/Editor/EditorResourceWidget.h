@@ -26,9 +26,8 @@ public:
   ~CEditorResourceWidget() override;
 
   void Initialize() override;
-
-  void LoadProject(tspProject spCurrentProject);
-  void UnloadProject();
+  void LoadProject(tspProject spCurrentProject) override;
+  void UnloadProject() override;
 
 signals:
   void SignalResourceSelected(const QString& sName);

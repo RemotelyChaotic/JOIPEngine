@@ -24,6 +24,7 @@
 #include <QContextMenuEvent>
 #include <QDebug>
 #include <QFile>
+#include <QFileDialog>
 
 #include <memory>
 
@@ -55,8 +56,8 @@ namespace
         "ConstructionColor": "gray",
         "NormalColor": "black",
         "SelectedColor": "gray",
-        "SelectedHaloColor": "deepskyblue",
-        "HoveredColor": "deepskyblue",
+        "SelectedHaloColor": "darkmagenta",
+        "HoveredColor": "darkmagenta",
 
         "LineWidth": 3.0,
         "ConstructionLineWidth": 2.0,
@@ -273,13 +274,54 @@ void CEditorSceneNodeWidget::SlotNodeCreated(Node &n)
   WIDGET_INITIALIZED_GUARD
   if (nullptr == m_spCurrentProject) { return; }
 
+  auto spDbManager = m_wpDbManager.lock();
   CSceneNodeModel* pSceneModel = dynamic_cast<CSceneNodeModel*>(n.nodeDataModel());
-  if (nullptr != pSceneModel)
+  if (nullptr != pSceneModel && nullptr != spDbManager)
   {
     m_spCurrentProject->m_rwLock.lockForRead();
     qint32 iId = m_spCurrentProject->m_iId;
     m_spCurrentProject->m_rwLock.unlock();
     pSceneModel->SetProjectId(iId);
+
+    qint32 iSceneId = pSceneModel->SceneId();
+    auto spScene = spDbManager->FindScene(m_spCurrentProject, iSceneId);
+    if (nullptr != spScene)
+    {
+      // if there is no script -> create
+      QReadLocker locker(&spScene->m_rwLock);
+      if (spScene->m_sScript.isNull() || spScene->m_sScript.isEmpty())
+      {
+        const QString sName = PhysicalProjectName(m_spCurrentProject);
+        QString sCurrentFolder = CApplication::Instance()->Settings()->ContentFolder();
+        QUrl sUrl = QFileDialog::getSaveFileUrl(this,
+            tr("Create Script File"), QUrl::fromLocalFile(sCurrentFolder + "/" + sName),
+            "Script Files (*.js)");
+
+        QFileInfo info(sUrl.toLocalFile());
+        QDir projectDir(m_spSettings->ContentFolder() + "/" + sName);
+        if (!info.absoluteFilePath().contains(projectDir.absolutePath()))
+        {
+          qWarning() << "File is not in subfolder of Project.";
+        }
+        else
+        {
+          QString sRelativePath = projectDir.relativeFilePath(info.fileName());
+          QUrl sUrlToSave = QUrl::fromLocalFile(sRelativePath);
+          QFile jsFile(info.absoluteFilePath());
+          if (jsFile.open(QIODevice::WriteOnly | QIODevice::Truncate))
+          {
+            jsFile.write(QString("// instert code to control scene").toUtf8());
+            QString sResource = spDbManager->AddResource(m_spCurrentProject, sUrlToSave,
+                                                         EResourceType::eOther);
+            spScene->m_sScript = sResource;
+          }
+          else
+          {
+            qWarning() << "Could not write script file.";
+          }
+        }
+      }
+    }
   }
 }
 

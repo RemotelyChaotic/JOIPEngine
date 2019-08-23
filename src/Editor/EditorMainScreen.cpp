@@ -1,5 +1,6 @@
 #include "EditorMainScreen.h"
 #include "Application.h"
+#include "EditorCodeWidget.h"
 #include "EditorResourceDisplayWidget.h"
 #include "EditorResourceWidget.h"
 #include "EditorSceneNodeWidget.h"
@@ -14,7 +15,8 @@ namespace
   {
     { EEditorWidget::eResourceWidget, "Resource Manager" },
     { EEditorWidget::eResourceDisplay, "Resource View" },
-    { EEditorWidget::eSceneNodeWidget, "Scene Node Editor" }
+    { EEditorWidget::eSceneNodeWidget, "Scene Node Editor" },
+    { EEditorWidget::eSceneCodeEditorWidget, "Scene Code Editor" }
   };
 }
 
@@ -63,6 +65,7 @@ void CEditorMainScreen::Initialize()
   m_spWidgetsMap.insert({EEditorWidget::eResourceWidget, std::make_unique<CEditorResourceWidget>()});
   m_spWidgetsMap.insert({EEditorWidget::eResourceDisplay, std::make_unique<CEditorResourceDisplayWidget>()});
   m_spWidgetsMap.insert({EEditorWidget::eSceneNodeWidget, std::make_unique<CEditorSceneNodeWidget>()});
+  m_spWidgetsMap.insert({EEditorWidget::eSceneCodeEditorWidget, std::make_unique<CEditorCodeWidget>()});
 
   // initialize widgets
   m_spUi->pLeftComboBox->blockSignals(true);
@@ -130,16 +133,9 @@ void CEditorMainScreen::LoadProject(qint32 iId)
     }
   }
 
-  CEditorResourceWidget* pResourceWidget = GetWidget<CEditorResourceWidget>();
-  if (nullptr != pResourceWidget)
+  for (auto it = m_spWidgetsMap.begin(); m_spWidgetsMap.end() != it; ++it)
   {
-    pResourceWidget->LoadProject(m_spCurrentProject);
-  }
-
-  CEditorSceneNodeWidget* pNodeWidget = GetWidget<CEditorSceneNodeWidget>();
-  if (nullptr != pNodeWidget)
-  {
-    pNodeWidget->LoadProject(m_spCurrentProject);
+    it->second->LoadProject(m_spCurrentProject);
   }
 
   SlotSaveClicked(true);
@@ -166,16 +162,9 @@ void CEditorMainScreen::UnloadProject()
 
   m_spCurrentProject = nullptr;
 
-  CEditorResourceWidget* pResourceWidget = GetWidget<CEditorResourceWidget>();
-  if (nullptr != pResourceWidget)
+  for (auto it = m_spWidgetsMap.begin(); m_spWidgetsMap.end() != it; ++it)
   {
-    pResourceWidget->UnloadProject();
-  }
-
-  CEditorSceneNodeWidget* pNodeWidget = GetWidget<CEditorSceneNodeWidget>();
-  if (nullptr != pNodeWidget)
-  {
-    pNodeWidget->UnloadProject();
+    it->second->UnloadProject();
   }
 }
 
@@ -394,6 +383,18 @@ template<> CEditorSceneNodeWidget* CEditorMainScreen::GetWidget<CEditorSceneNode
   {
     CEditorSceneNodeWidget* pWidget =
         dynamic_cast<CEditorSceneNodeWidget*>(it->second.get());
+    return pWidget;
+  }
+  return nullptr;
+}
+
+template<> CEditorCodeWidget* CEditorMainScreen::GetWidget<CEditorCodeWidget>()
+{
+  auto it = m_spWidgetsMap.find(EEditorWidget::eSceneCodeEditorWidget);
+  if (m_spWidgetsMap.end() != it)
+  {
+    CEditorCodeWidget* pWidget =
+        dynamic_cast<CEditorCodeWidget*>(it->second.get());
     return pWidget;
   }
   return nullptr;

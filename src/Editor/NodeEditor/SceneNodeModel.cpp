@@ -79,6 +79,18 @@ qint32 CSceneNodeModel::ProjectId()
 
 //----------------------------------------------------------------------------------------
 //
+qint32 CSceneNodeModel::SceneId()
+{
+  if (nullptr != m_spScene)
+  {
+    QReadLocker locker(&m_spScene->m_rwLock);
+    return m_spScene->m_iId;
+  }
+  return -1;
+}
+
+//----------------------------------------------------------------------------------------
+//
 QString CSceneNodeModel::caption() const
 {
   return QString("Scene");

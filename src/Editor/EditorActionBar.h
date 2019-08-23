@@ -18,6 +18,8 @@ public:
   ~CEditorActionBar() override;
 
   void Initialize() override;
+  void LoadProject(tspProject spProject) override { Q_UNUSED(spProject); }
+  void UnloadProject() override {}
 
   void HideAllBars();
   void ShowNodeEditorActionBar();

@@ -3,7 +3,7 @@
 #include "MainWindow.h"
 
 COverlayBase::COverlayBase(QWidget *parent) :
-  QFrame(parent),
+  QFrame(parent, Qt::FramelessWindowHint | Qt::WindowSystemMenuHint),
   m_pTarget(nullptr)
 {
 }

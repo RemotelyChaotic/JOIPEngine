@@ -4,17 +4,17 @@
 #
 #-------------------------------------------------
 
-QT       += \
-  core \
-  gui \
-  multimedia \
-  multimediawidgets \
-  network \
-  opengl \
-  script \
-  webengine \
-  webenginewidgets \
-  xml
+QT += \
+    core \
+    gui \
+    multimedia \
+    multimediawidgets \
+    network \
+    opengl \
+    script \
+    webengine \
+    webenginewidgets \
+    xml
 
 greaterThan(QT_MAJOR_VERSION, 4) {
   QT += widgets avwidgets
@@ -66,18 +66,18 @@ SOURCES += \
     src/Backend/Resource.cpp \
     src/Editor/EditorChoiceScreen.cpp \
     src/Editor/EditorMainScreen.cpp \
-    src/Editor/ResourceTreeItem.cpp \
-    src/Editor/ResourceTreeItemModel.cpp \
+    src/Editor/Resources/ResourceTreeItem.cpp \
+    src/Editor/Resources/ResourceTreeItemModel.cpp \
     src/Editor/EditorResourceWidget.cpp \
     src/Widgets/ProjectCardSelectionWidget.cpp \
     src/Widgets/OverlayBase.cpp \
-    src/Editor/WebResourceOverlay.cpp \
+    src/Editor/Resources/WebResourceOverlay.cpp \
     src/Widgets/Player/MediaPlayer.cpp \
     src/Widgets/ResourceDisplayWidget.cpp \
     src/Editor/EditorActionBar.cpp \
     src/Editor/EditorWidgetBase.cpp \
     src/Editor/EditorResourceDisplayWidget.cpp \
-    src/Editor/ResourceTreeItemSortFilterProxyModel.cpp \
+    src/Editor/Resources/ResourceTreeItemSortFilterProxyModel.cpp \
     src/Editor/EditorSceneNodeWidget.cpp \
     src/Editor/NodeEditor/SceneNodeModel.cpp \
     src/Editor/NodeEditor/SceneTranstitionData.cpp \
@@ -87,7 +87,9 @@ SOURCES += \
     src/Editor/NodeEditor/FlowView.cpp \
     src/Editor/NodeEditor/PathMergerModel.cpp \
     src/Editor/NodeEditor/PathSplitterModel.cpp \
-    src/Editor/NodeEditor/PathSplitterModelWidget.cpp
+    src/Editor/NodeEditor/PathSplitterModelWidget.cpp \
+    src/Backend/ScriptRunner.cpp \
+    src/Editor/EditorCodeWidget.cpp
 
 HEADERS += \
     src/MainWindow.h \
@@ -109,18 +111,18 @@ HEADERS += \
     src/Backend/ISerializable.h \
     src/Editor/EditorChoiceScreen.h \
     src/Editor/EditorMainScreen.h \
-    src/Editor/ResourceTreeItem.h \
-    src/Editor/ResourceTreeItemModel.h \
+    src/Editor/Resources/ResourceTreeItem.h \
+    src/Editor/Resources/ResourceTreeItemModel.h \
     src/Editor/EditorResourceWidget.h \
     src/Widgets/ProjectCardSelectionWidget.h \
     src/Widgets/OverlayBase.h \
-    src/Editor/WebResourceOverlay.h \
+    src/Editor/Resources/WebResourceOverlay.h \
     src/Widgets/Player/MediaPlayer.h   \
     src/Widgets/ResourceDisplayWidget.h \
     src/Editor/EditorActionBar.h \
     src/Editor/EditorWidgetBase.h \
     src/Editor/EditorResourceDisplayWidget.h \
-    src/Editor/ResourceTreeItemSortFilterProxyModel.h \
+    src/Editor/Resources/ResourceTreeItemSortFilterProxyModel.h \
     src/Editor/EditorSceneNodeWidget.h \
     src/Editor/NodeEditor/SceneNodeModel.h \
     src/Editor/NodeEditor/SceneTranstitionData.h \
@@ -130,7 +132,9 @@ HEADERS += \
     src/Editor/NodeEditor/FlowView.h \
     src/Editor/NodeEditor/PathMergerModel.h \
     src/Editor/NodeEditor/PathSplitterModel.h \
-    src/Editor/NodeEditor/PathSplitterModelWidget.h
+    src/Editor/NodeEditor/PathSplitterModelWidget.h \
+    src/Backend/ScriptRunner.h \
+    src/Editor/EditorCodeWidget.h
 
 FORMS += \
     src/MainWindow.ui \
@@ -143,13 +147,14 @@ FORMS += \
     src/Editor/EditorMainScreen.ui \
     src/Editor/EditorResourceWidget.ui \
     src/Widgets/ProjectCardSelectionWidget.ui \
-    src/Editor/WebResourceOverlay.ui \
+    src/Editor/Resources/WebResourceOverlay.ui \
     src/Widgets/ResourceDisplayWidget.ui \
     src/Editor/EditorActionBar.ui \
     src/Editor/EditorResourceDisplayWidget.ui \
     src/Editor/EditorSceneNodeWidget.ui \
     src/Editor/NodeEditor/SceneNodeModelWidget.ui \
-    src/Editor/NodeEditor/PathSplitterModelWidget.ui
+    src/Editor/NodeEditor/PathSplitterModelWidget.ui \
+    src/Editor/EditorCodeWidget.ui
 
 RESOURCES += \
     resources.qrc

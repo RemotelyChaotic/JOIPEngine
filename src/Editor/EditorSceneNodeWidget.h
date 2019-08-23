@@ -27,9 +27,9 @@ public:
   ~CEditorSceneNodeWidget() override;
 
   void Initialize() override;
+  void LoadProject(tspProject spCurrentProject) override;
+  void UnloadProject() override;
 
-  void LoadProject(tspProject spCurrentProject);
-  void UnloadProject();
   void SaveNodeLayout();
 
 protected:

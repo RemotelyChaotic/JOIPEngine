@@ -29,6 +29,7 @@ public:
 public:
   void SetProjectId(qint32 iId);
   qint32 ProjectId();
+  qint32 SceneId();
 
   QString caption() const override;
   bool captionVisible() const override { return true; }
