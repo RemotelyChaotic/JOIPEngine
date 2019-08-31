@@ -11,7 +11,7 @@ QT += \
     multimediawidgets \
     network \
     opengl \
-    script \
+    qml \
     webengine \
     webenginewidgets \
     xml
@@ -55,8 +55,6 @@ SOURCES += \
     src/Application.cpp \
     src/MainScreen.cpp \
     src/SettingsScreen.cpp \
-    src/SceneScreen.cpp \
-    src/SceneSelectionScreen.cpp \
     src/WindowContext.cpp \
     src/EditorScreen.cpp \
     src/Backend/ThreadedSystem.cpp \
@@ -89,7 +87,21 @@ SOURCES += \
     src/Editor/NodeEditor/PathSplitterModel.cpp \
     src/Editor/NodeEditor/PathSplitterModelWidget.cpp \
     src/Backend/ScriptRunner.cpp \
-    src/Editor/EditorCodeWidget.cpp
+    src/Editor/EditorCodeWidget.cpp \
+    src/Editor/Script/ScriptEditorWidget.cpp \
+    src/Editor/Script/ScriptHighlighter.cpp \
+    src/Backend/ScriptBackground.cpp \
+    src/Backend/ScriptMediaPlayer.cpp \
+    src/Backend/ScriptTextBox.cpp \
+    src/Backend/ScriptTimer.cpp \
+    src/Backend/ScriptThread.cpp \
+    src/Backend/ScriptIcon.cpp \
+    src/SceneScreen.cpp \
+    src/Scenes/SceneMainScreen.cpp \
+    src/Scenes/TextBoxWidget.cpp \
+    src/Scenes/TimerWidget.cpp \
+    src/Scenes/InformationWidget.cpp \
+    src/Scenes/ProjectRunner.cpp
 
 HEADERS += \
     src/MainWindow.h \
@@ -97,8 +109,6 @@ HEADERS += \
     src/Application.h \
     src/MainScreen.h \
     src/SettingsScreen.h \
-    src/SceneScreen.h \
-    src/SceneSelectionScreen.h \
     src/Enums.h \
     src/WindowContext.h \
     src/IAppStateScreen.h \
@@ -134,14 +144,27 @@ HEADERS += \
     src/Editor/NodeEditor/PathSplitterModel.h \
     src/Editor/NodeEditor/PathSplitterModelWidget.h \
     src/Backend/ScriptRunner.h \
-    src/Editor/EditorCodeWidget.h
+    src/Editor/EditorCodeWidget.h \
+    src/Editor/Script/ScriptEditorWidget.h \
+    src/Editor/Script/ScriptHighlighter.h \
+    src/Backend/ScriptBackground.h \
+    src/Backend/ScriptMediaPlayer.h \
+    src/Backend/ScriptTextBox.h \
+    src/Backend/ScriptTimer.h \
+    src/Backend/ScriptThread.h \
+    src/Backend/ScriptIcon.h \
+    src/SceneScreen.h \
+    src/Scenes/SceneMainScreen.h \
+    src/Scenes/TextBoxWidget.h \
+    src/Widgets/IWidgetBaseInterface.h \
+    src/Scenes/TimerWidget.h \
+    src/Scenes/InformationWidget.h \
+    src/Scenes/ProjectRunner.h
 
 FORMS += \
     src/MainWindow.ui \
     src/MainScreen.ui \
     src/SettingsScreen.ui \
-    src/SceneScreen.ui \
-    src/SceneSelectionScreen.ui \
     src/EditorScreen.ui \
     src/Editor/EditorChoiceScreen.ui \
     src/Editor/EditorMainScreen.ui \
@@ -154,7 +177,12 @@ FORMS += \
     src/Editor/EditorSceneNodeWidget.ui \
     src/Editor/NodeEditor/SceneNodeModelWidget.ui \
     src/Editor/NodeEditor/PathSplitterModelWidget.ui \
-    src/Editor/EditorCodeWidget.ui
+    src/Editor/EditorCodeWidget.ui \
+    src/SceneScreen.ui \
+    src/Scenes/SceneMainScreen.ui \
+    src/Scenes/TextBoxWidget.ui \
+    src/Scenes/TimerWidget.ui \
+    src/Scenes/InformationWidget.ui
 
 RESOURCES += \
     resources.qrc

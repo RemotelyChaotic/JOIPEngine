@@ -9,6 +9,8 @@
 #include "ui_EditorMainScreen.h"
 #include "ui_EditorActionBar.h"
 
+#include <QFileInfo>
+
 namespace
 {
   const std::map<EEditorWidget, QString> m_sEditorNamesMap =
@@ -122,6 +124,11 @@ void CEditorMainScreen::InitNewProject(const QString& sNewProjectName)
 void CEditorMainScreen::LoadProject(qint32 iId)
 {
   if (!m_bInitialized) { return; }
+  if (nullptr != m_spCurrentProject)
+  {
+    qWarning() << "Old Project was not unloaded before loading project.";
+  }
+
   auto spDbManager = m_wpDbManager.lock();
   if (nullptr != spDbManager)
   {
@@ -241,6 +248,33 @@ void CEditorMainScreen::SlotDisplayResource(const QString& sName)
         m_spUi->pLeftComboBox->blockSignals(false);
       }
     }
+    // script selected?
+    else if (QFileInfo(sName).suffix() == "js")
+    {
+      locker.unlock();
+      auto spResource = spDbManager->FindResource(m_spCurrentProject, sName);
+      pWidget->UnloadResource();
+
+      qint32 iEnumValueLeft = m_spUi->pLeftComboBox->currentData(Qt::UserRole).toInt();
+      qint32 iEnumValueRight = m_spUi->pRightComboBox->currentData(Qt::UserRole).toInt();
+      if (iEnumValueLeft == EEditorWidget::eResourceWidget)
+      {
+        m_spUi->pRightComboBox->blockSignals(true);
+        m_spUi->pRightComboBox->setCurrentIndex(EEditorWidget::eSceneCodeEditorWidget);
+        on_pRightComboBox_currentIndexChanged(EEditorWidget::eSceneCodeEditorWidget);
+        m_spUi->pRightComboBox->blockSignals(false);
+      }
+      else if (iEnumValueRight == EEditorWidget::eResourceWidget)
+      {
+        m_spUi->pLeftComboBox->blockSignals(true);
+        m_spUi->pLeftComboBox->setCurrentIndex(EEditorWidget::eSceneCodeEditorWidget);
+        on_pLeftComboBox_currentIndexChanged(EEditorWidget::eSceneCodeEditorWidget);
+        m_spUi->pLeftComboBox->blockSignals(false);
+      }
+
+      CEditorCodeWidget* pCodeWidget = GetWidget<CEditorCodeWidget>();
+      pCodeWidget->LoadResource(spResource);
+    }
     // normal resource, just show in resource viewer
     else
     {
@@ -318,10 +352,9 @@ void CEditorMainScreen::SlotSaveClicked(bool bClick)
     qint32 iId = m_spCurrentProject->m_iId;
     m_spCurrentProject->m_rwLock.unlock();
 
-    CEditorSceneNodeWidget* pNodeWidget = GetWidget<CEditorSceneNodeWidget>();
-    if (nullptr != pNodeWidget)
+    for (auto it = m_spWidgetsMap.begin(); m_spWidgetsMap.end() != it; ++it)
     {
-      pNodeWidget->SaveNodeLayout();
+      it->second->SaveProject();
     }
 
     // save to create folder structure

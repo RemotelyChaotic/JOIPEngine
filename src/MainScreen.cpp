@@ -45,16 +45,16 @@ void CMainScreen::Unload()
 //
 void CMainScreen::on_pSceneSelectButton_clicked()
 {
-  SCREEN_INITIALIZED_GUARD
+  WIDGET_INITIALIZED_GUARD
 
-  emit m_spWindowContext->SignalChangeAppState(EAppState::eSceneSelectionScreen);
+  emit m_spWindowContext->SignalChangeAppState(EAppState::eSceneScreen);
 }
 
 //----------------------------------------------------------------------------------------
 //
 void CMainScreen::on_pEdiorButton_clicked()
 {
-  SCREEN_INITIALIZED_GUARD
+  WIDGET_INITIALIZED_GUARD
 
   emit m_spWindowContext->SignalChangeAppState(EAppState::eEditorScreen);
 }
@@ -63,7 +63,7 @@ void CMainScreen::on_pEdiorButton_clicked()
 //
 void CMainScreen::on_pSettingsButton_clicked()
 {
-  SCREEN_INITIALIZED_GUARD
+  WIDGET_INITIALIZED_GUARD
 
   emit m_spWindowContext->SignalChangeAppState(EAppState::eSettingsScreen);
 }
@@ -72,7 +72,7 @@ void CMainScreen::on_pSettingsButton_clicked()
 //
 void CMainScreen::on_pQuitButton_clicked()
 {
-  SCREEN_INITIALIZED_GUARD
+  WIDGET_INITIALIZED_GUARD
 
   emit QApplication::instance()->quit();
 }

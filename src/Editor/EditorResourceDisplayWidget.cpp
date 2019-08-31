@@ -57,6 +57,8 @@ void CEditorResourceDisplayWidget::OnActionBarAboutToChange()
   {
     disconnect(ActionBar()->m_spUi->pPlayButton, &QPushButton::clicked,
             m_spUi->pResourceDisplay, &CResourceDisplayWidget::SlotPlayPause);
+    disconnect(ActionBar()->m_spUi->pPauseButton, &QPushButton::clicked,
+               m_spUi->pResourceDisplay, &CResourceDisplayWidget::SlotPlayPause);
     disconnect(ActionBar()->m_spUi->pStopButton, &QPushButton::clicked,
             m_spUi->pResourceDisplay, &CResourceDisplayWidget::SlotStop);
   }
@@ -71,6 +73,8 @@ void CEditorResourceDisplayWidget::OnActionBarChanged()
   {
     UpdateActionBar();
     connect(ActionBar()->m_spUi->pPlayButton, &QPushButton::clicked,
+            m_spUi->pResourceDisplay, &CResourceDisplayWidget::SlotPlayPause);
+    connect(ActionBar()->m_spUi->pPauseButton, &QPushButton::clicked,
             m_spUi->pResourceDisplay, &CResourceDisplayWidget::SlotPlayPause);
     connect(ActionBar()->m_spUi->pStopButton, &QPushButton::clicked,
             m_spUi->pResourceDisplay, &CResourceDisplayWidget::SlotStop);

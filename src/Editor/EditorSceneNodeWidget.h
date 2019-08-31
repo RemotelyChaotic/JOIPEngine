@@ -15,8 +15,10 @@ namespace QtNodes {
   class FlowScene;
   class Node;
 }
+struct SScene;
 struct SProject;
 typedef std::shared_ptr<SProject> tspProject;
+typedef std::shared_ptr<SScene> tspScene;
 
 class CEditorSceneNodeWidget : public CEditorWidgetBase
 {
@@ -29,8 +31,7 @@ public:
   void Initialize() override;
   void LoadProject(tspProject spCurrentProject) override;
   void UnloadProject() override;
-
-  void SaveNodeLayout();
+  void SaveProject() override;
 
 protected:
   void OnActionBarAboutToChange() override;
@@ -39,9 +40,12 @@ protected:
 protected slots:
   void SlotAddSceneButtonClicked();
   void SlotNodeCreated(QtNodes::Node &n);
+  void SlotNodeDeleted(QtNodes::Node &n);
   void SlotRemoveNodeButtonClicked();
 
 private:
+  void AddNewScriptFile(tspScene spScene);
+
   std::unique_ptr<Ui::CEditorSceneNodeWidget>       m_spUi;
   std::shared_ptr<CSettings>                        m_spSettings;
   std::shared_ptr<QtNodes::DataModelRegistry>       m_spDataModelRegistry;

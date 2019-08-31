@@ -2,7 +2,7 @@
 #define SCRIPTRUNNER_H
 
 #include "ThreadedSystem.h"
-#include <QScriptEngine>
+#include <QJSEngine>
 #include <memory>
 
 class CSettings;
@@ -22,7 +22,7 @@ public slots:
 
 private:
   std::shared_ptr<CSettings>             m_spSettings;
-  std::unique_ptr<QScriptEngine>         m_spScriptEngine;
+  std::unique_ptr<QJSEngine>             m_spScriptEngine;
 };
 
 #endif // SCRIPTRUNNER_H

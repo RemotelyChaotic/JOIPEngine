@@ -131,7 +131,7 @@ void CSettingsScreen::Unload()
 //
 void CSettingsScreen::on_pResolutionComboBox_currentIndexChanged(qint32 iIndex)
 {
-  SCREEN_INITIALIZED_GUARD
+  WIDGET_INITIALIZED_GUARD
   assert(nullptr != m_spSettings);
   if (nullptr == m_spSettings) { return; }
 
@@ -143,7 +143,7 @@ void CSettingsScreen::on_pResolutionComboBox_currentIndexChanged(qint32 iIndex)
 //
 void CSettingsScreen::on_pFolderLineEdit_editingFinished()
 {
-  SCREEN_INITIALIZED_GUARD
+  WIDGET_INITIALIZED_GUARD
   assert(nullptr != m_spSettings);
   if (nullptr == m_spSettings) { return; }
 
@@ -157,7 +157,7 @@ void CSettingsScreen::on_pFolderLineEdit_editingFinished()
 //
 void CSettingsScreen::on_pBrowseButton_clicked()
 {
-  SCREEN_INITIALIZED_GUARD
+  WIDGET_INITIALIZED_GUARD
   assert(nullptr != m_spSettings);
   if (nullptr == m_spSettings) { return; }
 
@@ -177,6 +177,6 @@ void CSettingsScreen::on_pBrowseButton_clicked()
 //
 void CSettingsScreen::on_pBackButton_clicked()
 {
-  SCREEN_INITIALIZED_GUARD
+  WIDGET_INITIALIZED_GUARD
   emit m_spWindowContext->SignalChangeAppState(EAppState::eMainScreen);
 }

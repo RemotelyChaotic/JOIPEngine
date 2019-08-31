@@ -1,7 +1,6 @@
 #include "Project.h"
 #include <QJsonArray>
 #include <QMutexLocker>
-#include <QScriptEngine>
 #include <cassert>
 
 SProject::SProject() :
@@ -148,7 +147,7 @@ CProject::~CProject()
 
 //----------------------------------------------------------------------------------------
 //
-qint32 CProject::Id()
+qint32 CProject::getId()
 {
   QReadLocker locker(&m_spData->m_rwLock);
   return m_spData->m_iId;
@@ -156,7 +155,7 @@ qint32 CProject::Id()
 
 //----------------------------------------------------------------------------------------
 //
-qint32 CProject::Version()
+qint32 CProject::getVersion()
 {
   QReadLocker locker(&m_spData->m_rwLock);
   return m_spData->m_iVersion;
@@ -164,7 +163,7 @@ qint32 CProject::Version()
 
 //----------------------------------------------------------------------------------------
 //
-QString CProject::Name()
+QString CProject::getName()
 {
   QReadLocker locker(&m_spData->m_rwLock);
   return m_spData->m_sName;
@@ -172,7 +171,7 @@ QString CProject::Name()
 
 //----------------------------------------------------------------------------------------
 //
-QString CProject::TitleCard()
+QString CProject::getTitleCard()
 {
   QReadLocker locker(&m_spData->m_rwLock);
   return m_spData->m_sTitleCard;
@@ -180,7 +179,7 @@ QString CProject::TitleCard()
 
 //----------------------------------------------------------------------------------------
 //
-QString CProject::Map()
+QString CProject::getMap()
 {
   QReadLocker locker(&m_spData->m_rwLock);
   return m_spData->m_sMap;
@@ -188,7 +187,7 @@ QString CProject::Map()
 
 //----------------------------------------------------------------------------------------
 //
-bool CProject::IsUsingWeb()
+bool CProject::isUsingWeb()
 {
   QReadLocker locker(&m_spData->m_rwLock);
   return m_spData->m_bUsesWeb;
@@ -196,7 +195,7 @@ bool CProject::IsUsingWeb()
 
 //----------------------------------------------------------------------------------------
 //
-bool CProject::IsUsingCodecs()
+bool CProject::isUsingCodecs()
 {
   QReadLocker locker(&m_spData->m_rwLock);
   return m_spData->m_bNeedsCodecs;
@@ -204,7 +203,7 @@ bool CProject::IsUsingCodecs()
 
 //----------------------------------------------------------------------------------------
 //
-qint32 CProject::NumScenes()
+qint32 CProject::numScenes()
 {
   QReadLocker locker(&m_spData->m_rwLock);
   return static_cast<qint32>(m_spData->m_vspScenes.size());
@@ -212,7 +211,7 @@ qint32 CProject::NumScenes()
 
 //----------------------------------------------------------------------------------------
 //
-tspSceneRef CProject::Scene(qint32 iIndex)
+tspSceneRef CProject::scene(qint32 iIndex)
 {
   QReadLocker locker(&m_spData->m_rwLock);
   if (0 <= iIndex && m_spData->m_vspScenes.size() > static_cast<size_t>(iIndex))
@@ -224,7 +223,7 @@ tspSceneRef CProject::Scene(qint32 iIndex)
 
 //----------------------------------------------------------------------------------------
 //
-qint32 CProject::NumResources()
+qint32 CProject::numResources()
 {
   QReadLocker locker(&m_spData->m_rwLock);
   return static_cast<qint32>(m_spData->m_spResourcesMap.size());
@@ -232,7 +231,7 @@ qint32 CProject::NumResources()
 
 //----------------------------------------------------------------------------------------
 //
-tspResourceRef CProject::Resource(const QString& sValue)
+tspResourceRef CProject::resource(const QString& sValue)
 {
   QReadLocker locker(&m_spData->m_rwLock);
   auto it = m_spData->m_spResourcesMap.find(sValue);
@@ -241,20 +240,6 @@ tspResourceRef CProject::Resource(const QString& sValue)
     return tspResourceRef(new CResource(std::make_shared<SResource>(*it->second)));
   }
   return nullptr;
-}
-
-//----------------------------------------------------------------------------------------
-//
-QScriptValue ProjectToScriptValue(QScriptEngine* pEngine, CProject* const& pIn)
-{
-  return pEngine->newQObject(pIn);
-}
-
-//----------------------------------------------------------------------------------------
-//
-void ProjectFromScriptValue(const QScriptValue& object, CProject*& pOut)
-{
-  pOut = qobject_cast<CProject*>(object.toQObject());
 }
 
 //----------------------------------------------------------------------------------------

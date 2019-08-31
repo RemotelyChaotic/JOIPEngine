@@ -119,6 +119,8 @@ void CEditorSceneNodeWidget::Initialize()
 
   connect(m_pFlowScene, &FlowScene::nodeCreated,
           this, &CEditorSceneNodeWidget::SlotNodeCreated);
+  connect(m_pFlowScene, &FlowScene::nodeDeleted,
+          this, &CEditorSceneNodeWidget::SlotNodeDeleted);
 
   m_bInitialized = true;
 }
@@ -128,6 +130,10 @@ void CEditorSceneNodeWidget::Initialize()
 void CEditorSceneNodeWidget::LoadProject(tspProject spCurrentProject)
 {
   WIDGET_INITIALIZED_GUARD
+  if (nullptr != m_spCurrentProject)
+  {
+    qWarning() << "Old Project was not unloaded before loading project.";
+  }
 
   m_spCurrentProject = spCurrentProject;
 
@@ -139,7 +145,7 @@ void CEditorSceneNodeWidget::LoadProject(tspProject spCurrentProject)
         m_spCurrentProject->m_sSceneModel.isEmpty())
     {
       projectLocker.unlock();
-      SaveNodeLayout();
+      SaveProject();
     }
     else
     {
@@ -186,7 +192,7 @@ void CEditorSceneNodeWidget::UnloadProject()
 
 //----------------------------------------------------------------------------------------
 //
-void CEditorSceneNodeWidget::SaveNodeLayout()
+void CEditorSceneNodeWidget::SaveProject()
 {
   WIDGET_INITIALIZED_GUARD
   if (nullptr == m_spCurrentProject) { return; }
@@ -285,18 +291,62 @@ void CEditorSceneNodeWidget::SlotNodeCreated(Node &n)
 
     qint32 iSceneId = pSceneModel->SceneId();
     auto spScene = spDbManager->FindScene(m_spCurrentProject, iSceneId);
-    if (nullptr != spScene)
-    {
-      // if there is no script -> create
-      QReadLocker locker(&spScene->m_rwLock);
-      if (spScene->m_sScript.isNull() || spScene->m_sScript.isEmpty())
-      {
-        const QString sName = PhysicalProjectName(m_spCurrentProject);
-        QString sCurrentFolder = CApplication::Instance()->Settings()->ContentFolder();
-        QUrl sUrl = QFileDialog::getSaveFileUrl(this,
-            tr("Create Script File"), QUrl::fromLocalFile(sCurrentFolder + "/" + sName),
-            "Script Files (*.js)");
+    AddNewScriptFile(spScene);
+  }
+}
 
+//----------------------------------------------------------------------------------------
+//
+void CEditorSceneNodeWidget::SlotNodeDeleted(QtNodes::Node &n)
+{
+  WIDGET_INITIALIZED_GUARD
+  if (nullptr == m_spCurrentProject) { return; }
+
+  auto spDbManager = m_wpDbManager.lock();
+  CSceneNodeModel* pSceneModel = dynamic_cast<CSceneNodeModel*>(n.nodeDataModel());
+  if (nullptr != pSceneModel && nullptr != spDbManager)
+  {
+    qint32 iSceneId = pSceneModel->SceneId();
+    spDbManager->RemoveScene(m_spCurrentProject, iSceneId);
+  }
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CEditorSceneNodeWidget::SlotRemoveNodeButtonClicked()
+{
+  WIDGET_INITIALIZED_GUARD
+  if (nullptr == m_spCurrentProject) { return; }
+
+  auto vpNodes = m_pFlowScene->selectedNodes();
+  for (Node* pNode : vpNodes)
+  {
+    if (nullptr != pNode)
+    {
+      m_pFlowScene->removeNode(*pNode);
+    }
+  }
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CEditorSceneNodeWidget::AddNewScriptFile(tspScene spScene)
+{
+  auto spDbManager = m_wpDbManager.lock();
+  if (nullptr != spScene && nullptr != spDbManager)
+  {
+    // if there is no script -> create
+    QReadLocker locker(&spScene->m_rwLock);
+    if (spScene->m_sScript.isNull() || spScene->m_sScript.isEmpty())
+    {
+      const QString sName = PhysicalProjectName(m_spCurrentProject);
+      QString sCurrentFolder = CApplication::Instance()->Settings()->ContentFolder();
+      QUrl sUrl = QFileDialog::getSaveFileUrl(this,
+          tr("Create Script File"), QUrl::fromLocalFile(sCurrentFolder + "/" + sName),
+          "Script Files (*.js)");
+
+      if (sUrl.isValid())
+      {
         QFileInfo info(sUrl.toLocalFile());
         QDir projectDir(m_spSettings->ContentFolder() + "/" + sName);
         if (!info.absoluteFilePath().contains(projectDir.absolutePath()))
@@ -321,23 +371,6 @@ void CEditorSceneNodeWidget::SlotNodeCreated(Node &n)
           }
         }
       }
-    }
-  }
-}
-
-//----------------------------------------------------------------------------------------
-//
-void CEditorSceneNodeWidget::SlotRemoveNodeButtonClicked()
-{
-  WIDGET_INITIALIZED_GUARD
-  if (nullptr == m_spCurrentProject) { return; }
-
-  auto vpNodes = m_pFlowScene->selectedNodes();
-  for (Node* pNode : vpNodes)
-  {
-    if (nullptr != pNode)
-    {
-      m_pFlowScene->removeNode(*pNode);
     }
   }
 }

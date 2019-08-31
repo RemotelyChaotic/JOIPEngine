@@ -4,7 +4,6 @@
 
 #include <QImageReader>
 #include <QMutexLocker>
-#include <QScriptEngine>
 #include <cassert>
 
 SResource::SResource(EResourceType type) :
@@ -73,7 +72,7 @@ CResource::~CResource()
 
 //----------------------------------------------------------------------------------------
 //
-QString CResource::Name()
+QString CResource::getName()
 {
   QReadLocker locker(&m_spData->m_rwLock);
   return m_spData->m_sName;
@@ -81,7 +80,7 @@ QString CResource::Name()
 
 //----------------------------------------------------------------------------------------
 //
-QString CResource::Path()
+QString CResource::getPath()
 {
   QReadLocker locker(&m_spData->m_rwLock);
   return m_spData->m_sPath.toString(QUrl::None);
@@ -89,7 +88,7 @@ QString CResource::Path()
 
 //----------------------------------------------------------------------------------------
 //
-qint32 CResource::Type()
+qint32 CResource::getType()
 {
   QReadLocker locker(&m_spData->m_rwLock);
   return m_spData->m_type;
@@ -97,7 +96,7 @@ qint32 CResource::Type()
 
 //----------------------------------------------------------------------------------------
 //
-tspProjectRef CResource::Project()
+tspProjectRef CResource::project()
 {
   QReadLocker locker(&m_spData->m_rwLock);
   if (nullptr != m_spData->m_spParent)
@@ -105,20 +104,6 @@ tspProjectRef CResource::Project()
     return tspProjectRef(new CProject(std::make_shared<SProject>(*m_spData->m_spParent)));
   }
   return nullptr;
-}
-
-//----------------------------------------------------------------------------------------
-//
-QScriptValue ResourceToScriptValue(QScriptEngine* pEngine, CResource* const& pIn)
-{
-  return pEngine->newQObject(pIn);
-}
-
-//----------------------------------------------------------------------------------------
-//
-void ResourceFromScriptValue(const QScriptValue& object, CResource*& pOut)
-{
-  pOut = qobject_cast<CResource*>(object.toQObject());
 }
 
 //----------------------------------------------------------------------------------------

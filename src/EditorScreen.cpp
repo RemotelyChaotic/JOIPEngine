@@ -63,7 +63,7 @@ void CEditorScreen::Unload()
 //
 void CEditorScreen::SlotNewClicked(const QString& sNewProjectName)
 {
-  SCREEN_INITIALIZED_GUARD
+  WIDGET_INITIALIZED_GUARD
 
   m_spUi->pEditorScreen->UnloadProject();
   m_spUi->pEditorScreen->InitNewProject(sNewProjectName);
@@ -74,7 +74,7 @@ void CEditorScreen::SlotNewClicked(const QString& sNewProjectName)
 //
 void CEditorScreen::SlotOpenClicked(qint32 iId)
 {
-  SCREEN_INITIALIZED_GUARD
+  WIDGET_INITIALIZED_GUARD
 
   m_spUi->pEditorScreen->UnloadProject();
   m_spUi->pEditorScreen->LoadProject(iId);
@@ -85,7 +85,7 @@ void CEditorScreen::SlotOpenClicked(qint32 iId)
 //
 void CEditorScreen::SlotCancelClicked()
 {
-  SCREEN_INITIALIZED_GUARD
+  WIDGET_INITIALIZED_GUARD
   m_spUi->pStackedWidget->setCurrentIndex(c_iPageIndexChoice);
   emit m_spWindowContext->SignalChangeAppState(EAppState::eMainScreen);
 }
@@ -94,7 +94,7 @@ void CEditorScreen::SlotCancelClicked()
 //
 void CEditorScreen::SlotExitClicked()
 {
-  SCREEN_INITIALIZED_GUARD
+  WIDGET_INITIALIZED_GUARD
   m_spUi->pStackedWidget->setCurrentIndex(c_iPageIndexChoice);
   emit m_spWindowContext->SignalChangeAppState(EAppState::eMainScreen);
 }

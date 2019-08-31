@@ -6,7 +6,6 @@
 #include "Scene.h"
 #include <QObject>
 #include <QReadWriteLock>
-#include <QScriptValue>
 #include <QSharedPointer>
 #include <memory>
 
@@ -47,31 +46,31 @@ class CProject : public QObject
   Q_OBJECT
   Q_DISABLE_COPY(CProject)
   CProject() {}
-  Q_PROPERTY(qint32  id           READ Id            )
-  Q_PROPERTY(qint32  version      READ Version       )
-  Q_PROPERTY(QString name         READ Name          )
-  Q_PROPERTY(QString titleCard    READ TitleCard     )
-  Q_PROPERTY(QString map          READ Map           )
-  Q_PROPERTY(bool    isUsingWeb   READ IsUsingWeb    )
-  Q_PROPERTY(bool    iUsingCodecs READ IsUsingCodecs )
+  Q_PROPERTY(qint32  id           READ getId            )
+  Q_PROPERTY(qint32  version      READ getVersion       )
+  Q_PROPERTY(QString name         READ getName          )
+  Q_PROPERTY(QString titleCard    READ getTitleCard     )
+  Q_PROPERTY(QString map          READ getMap           )
+  Q_PROPERTY(bool    isUsingWeb   READ isUsingWeb       )
+  Q_PROPERTY(bool    iUsingCodecs READ isUsingCodecs    )
 
 public:
   explicit CProject(const std::shared_ptr<SProject>& spProject);
   ~CProject();
 
-  qint32 Id();
-  qint32 Version();
-  QString Name();
-  QString TitleCard();
-  QString Map();
-  bool IsUsingWeb();
-  bool IsUsingCodecs();
+  qint32 getId();
+  qint32 getVersion();
+  QString getName();
+  QString getTitleCard();
+  QString getMap();
+  bool isUsingWeb();
+  bool isUsingCodecs();
 
-  Q_INVOKABLE qint32 NumScenes();
-  Q_INVOKABLE tspSceneRef Scene(qint32 iIndex);
+  Q_INVOKABLE qint32 numScenes();
+  Q_INVOKABLE tspSceneRef scene(qint32 iIndex);
 
-  Q_INVOKABLE qint32 NumResources();
-  Q_INVOKABLE tspResourceRef Resource(const QString& sValue);
+  Q_INVOKABLE qint32 numResources();
+  Q_INVOKABLE tspResourceRef resource(const QString& sValue);
 
 private:
   std::shared_ptr<SProject>  m_spData;
@@ -86,10 +85,6 @@ typedef std::vector<tspProject>   tvspProject;
 Q_DECLARE_METATYPE(CProject*)
 Q_DECLARE_METATYPE(tspProject)
 Q_DECLARE_METATYPE(tspProjectRef)
-
-// qScriptRegisterMetaType(&engine, ProjectToScriptValue, ProjectFromScriptValue);
-QScriptValue ProjectToScriptValue(QScriptEngine* pEngine, CProject* const& pIn);
-void ProjectFromScriptValue(const QScriptValue& object, CProject*& pOut);
 
 //----------------------------------------------------------------------------------------
 //

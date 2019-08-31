@@ -2,8 +2,8 @@
 
 CEditorWidgetBase::CEditorWidgetBase(QWidget* pParent) :
   QWidget(pParent),
-  m_pActionBar(nullptr),
-  m_bInitialized(false)
+  IWidgetBaseInterface(),
+  m_pActionBar(nullptr)
 {
 
 }

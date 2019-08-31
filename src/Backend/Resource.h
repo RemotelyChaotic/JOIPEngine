@@ -5,7 +5,6 @@
 #include <enum.h>
 #include <QObject>
 #include <QReadWriteLock>
-#include <QScriptValue>
 #include <QSharedPointer>
 #include <QUrl>
 #include <memory>
@@ -47,19 +46,19 @@ class CResource : public QObject
   Q_OBJECT
   Q_DISABLE_COPY(CResource)
   CResource() {}
-  Q_PROPERTY(QString name      READ Name)
-  Q_PROPERTY(QString path      READ Path)
-  Q_PROPERTY(qint32  type      READ Type)
+  Q_PROPERTY(QString name      READ getName)
+  Q_PROPERTY(QString path      READ getPath)
+  Q_PROPERTY(qint32  type      READ getType)
 
 public:
   explicit CResource(const std::shared_ptr<SResource>& spResource);
   ~CResource();
 
-  QString Name();
-  QString Path();
-  qint32 Type();
+  QString getName();
+  QString getPath();
+  qint32 getType();
 
-  Q_INVOKABLE tspProjectRef Project();
+  Q_INVOKABLE tspProjectRef project();
 
 private:
   std::shared_ptr<SResource>m_spData;
@@ -76,10 +75,6 @@ typedef std::map<QString, tspResource>  tspResourceMap;
 Q_DECLARE_METATYPE(CResource*)
 Q_DECLARE_METATYPE(tspResource)
 Q_DECLARE_METATYPE(tspResourceRef)
-
-// qScriptRegisterMetaType(&engine, ProjectToScriptValue, ProjectFromScriptValue);
-QScriptValue ResourceToScriptValue(QScriptEngine* pEngine, CResource* const& pIn);
-void ResourceFromScriptValue(const QScriptValue& object, CResource*& pOut);
 
 //----------------------------------------------------------------------------------------
 //

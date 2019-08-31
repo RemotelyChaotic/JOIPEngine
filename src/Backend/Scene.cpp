@@ -3,7 +3,6 @@
 #include "Resource.h"
 #include <QJsonArray>
 #include <QMutexLocker>
-#include <QScriptEngine>
 #include <cassert>
 
 SScene::SScene() :
@@ -89,7 +88,7 @@ CScene::~CScene()
 
 //----------------------------------------------------------------------------------------
 //
-qint32 CScene::Id()
+qint32 CScene::getId()
 {
   QReadLocker locker(&m_spData->m_rwLock);
   return m_spData->m_iId;
@@ -97,7 +96,7 @@ qint32 CScene::Id()
 
 //----------------------------------------------------------------------------------------
 //
-QString CScene::Name()
+QString CScene::getName()
 {
   QReadLocker locker(&m_spData->m_rwLock);
   return m_spData->m_sName;
@@ -105,7 +104,7 @@ QString CScene::Name()
 
 //----------------------------------------------------------------------------------------
 //
-QString CScene::Script()
+QString CScene::getScript()
 {
   QReadLocker locker(&m_spData->m_rwLock);
   return m_spData->m_sScript;
@@ -113,7 +112,7 @@ QString CScene::Script()
 
 //----------------------------------------------------------------------------------------
 //
-qint32 CScene::NumResources()
+qint32 CScene::numResources()
 {
   QReadLocker locker(&m_spData->m_rwLock);
   return static_cast<qint32>(m_spData->m_vsResourceRefs.size());
@@ -121,7 +120,7 @@ qint32 CScene::NumResources()
 
 //----------------------------------------------------------------------------------------
 //
-tspResourceRef CScene::Resource(const QString& sValue)
+tspResourceRef CScene::resource(const QString& sValue)
 {
   QReadLocker locker(&m_spData->m_rwLock);
   if (nullptr != m_spData->m_spParent)
@@ -144,7 +143,7 @@ tspResourceRef CScene::Resource(const QString& sValue)
 
 //----------------------------------------------------------------------------------------
 //
-tspProjectRef CScene::Project()
+tspProjectRef CScene::project()
 {
   QReadLocker locker(&m_spData->m_rwLock);
   if (nullptr != m_spData->m_spParent)
@@ -152,18 +151,4 @@ tspProjectRef CScene::Project()
     return tspProjectRef(new CProject(std::make_shared<SProject>(*m_spData->m_spParent)));
   }
   return nullptr;
-}
-
-//----------------------------------------------------------------------------------------
-//
-QScriptValue SceneToScriptValue(QScriptEngine* pEngine, CScene* const& pIn)
-{
-  return pEngine->newQObject(pIn);
-}
-
-//----------------------------------------------------------------------------------------
-//
-void SceneFromScriptValue(const QScriptValue& object, CScene*& pOut)
-{
-  pOut = qobject_cast<CScene*>(object.toQObject());
 }

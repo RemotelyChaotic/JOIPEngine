@@ -18,8 +18,7 @@ public:
                        QWidget* pParent = nullptr);
   ~CMainScreen() override;
 
-  void Initialize();
-
+  void Initialize() override;
   void Load() override;
   void Unload() override;
 

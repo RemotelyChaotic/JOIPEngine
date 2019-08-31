@@ -5,7 +5,6 @@
 #include <enum.h>
 #include <QObject>
 #include <QReadWriteLock>
-#include <QScriptValue>
 #include <QSharedPointer>
 #include <memory>
 #include <set>
@@ -46,22 +45,22 @@ class CScene : public QObject
   Q_OBJECT
   Q_DISABLE_COPY(CScene)
   CScene() {}
-  Q_PROPERTY(qint32  id               READ Id    )
-  Q_PROPERTY(QString name             READ Name  )
-  Q_PROPERTY(QString script           READ Script)
+  Q_PROPERTY(qint32  id               READ getId    )
+  Q_PROPERTY(QString name             READ getName  )
+  Q_PROPERTY(QString script           READ getScript)
 
 public:
   explicit CScene(const std::shared_ptr<SScene>& spScene);
   ~CScene();
 
-  qint32 Id();
-  QString Name();
-  QString Script();
+  qint32 getId();
+  QString getName();
+  QString getScript();
 
-  Q_INVOKABLE qint32 NumResources();
-  Q_INVOKABLE tspResourceRef Resource(const QString& sValue);
+  Q_INVOKABLE qint32 numResources();
+  Q_INVOKABLE tspResourceRef resource(const QString& sValue);
 
-  Q_INVOKABLE tspProjectRef Project();
+  Q_INVOKABLE tspProjectRef project();
 
 private:
   std::shared_ptr<SScene>    m_spData;
@@ -76,9 +75,5 @@ typedef std::vector<tspScene>   tvspScene;
 Q_DECLARE_METATYPE(CScene*)
 Q_DECLARE_METATYPE(tspScene)
 Q_DECLARE_METATYPE(tspSceneRef)
-
-// qScriptRegisterMetaType(&engine, SceneToScriptValue, SceneFromScriptValue);
-QScriptValue SceneToScriptValue(QScriptEngine* pEngine, CScene* const& pIn);
-void SceneFromScriptValue(const QScriptValue& object, CScene*& pOut);
 
 #endif // SCENE_H

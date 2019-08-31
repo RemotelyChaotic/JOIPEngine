@@ -15,13 +15,20 @@
   </property>
   <layout class="QGridLayout" name="gridLayout">
    <item row="1" column="0">
-    <widget class="QTextEdit" name="pCodeEdit"/>
+    <widget class="CScriptEditorWidget" name="pCodeEdit"/>
    </item>
    <item row="0" column="0">
     <widget class="QComboBox" name="pSceneComboBox"/>
    </item>
   </layout>
  </widget>
+ <customwidgets>
+  <customwidget>
+   <class>CScriptEditorWidget</class>
+   <extends>QTextEdit</extends>
+   <header>Editor/Script/ScriptEditorWidget.h</header>
+  </customwidget>
+ </customwidgets>
  <resources/>
  <connections/>
 </ui>

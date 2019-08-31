@@ -4,7 +4,7 @@
 #include "EditorScreen.h"
 #include "MainScreen.h"
 #include "SceneScreen.h"
-#include "SceneSelectionScreen.h"
+#include "SceneScreen.h"
 #include "Settings.h"
 #include "SettingsScreen.h"
 #include "WindowContext.h"
@@ -41,12 +41,10 @@ void CMainWindow::Initialize()
   // add all screens
   m_spUi->pApplicationStackWidget->insertWidget(EAppState::eMainScreen,
    new CMainScreen(m_spWindowContext, m_spUi->pApplicationStackWidget));
-  m_spUi->pApplicationStackWidget->insertWidget(EAppState::eSceneSelectionScreen,
-   new CSceneSelectionScreen(m_spWindowContext, m_spUi->pApplicationStackWidget));
-  m_spUi->pApplicationStackWidget->insertWidget(EAppState::eSettingsScreen,
-   new CSettingsScreen(m_spWindowContext, m_spUi->pApplicationStackWidget));
   m_spUi->pApplicationStackWidget->insertWidget(EAppState::eSceneScreen,
    new CSceneScreen(m_spWindowContext, m_spUi->pApplicationStackWidget));
+  m_spUi->pApplicationStackWidget->insertWidget(EAppState::eSettingsScreen,
+   new CSettingsScreen(m_spWindowContext, m_spUi->pApplicationStackWidget));
   m_spUi->pApplicationStackWidget->insertWidget(EAppState::eEditorScreen,
    new CEditorScreen(m_spWindowContext, m_spUi->pApplicationStackWidget));
 
