@@ -12,6 +12,7 @@ QT += \
     network \
     opengl \
     qml \
+    svg \
     webengine \
     webenginewidgets \
     xml
@@ -99,9 +100,13 @@ SOURCES += \
     src/SceneScreen.cpp \
     src/Scenes/SceneMainScreen.cpp \
     src/Scenes/TextBoxWidget.cpp \
-    src/Scenes/TimerWidget.cpp \
     src/Scenes/InformationWidget.cpp \
-    src/Scenes/ProjectRunner.cpp
+    src/Scenes/ProjectRunner.cpp \
+    src/Backend/ScriptRunnerSignalEmiter.cpp \
+    src/Scenes/FlowLayout.cpp \
+    src/Scenes/TimerDisplayWidget.cpp \
+    src/Scenes/TimerWidget.cpp \
+    src/Scenes/BackgroundWidget.cpp
 
 HEADERS += \
     src/MainWindow.h \
@@ -157,9 +162,14 @@ HEADERS += \
     src/Scenes/SceneMainScreen.h \
     src/Scenes/TextBoxWidget.h \
     src/Widgets/IWidgetBaseInterface.h \
-    src/Scenes/TimerWidget.h \
     src/Scenes/InformationWidget.h \
-    src/Scenes/ProjectRunner.h
+    src/Scenes/ProjectRunner.h \
+    src/Backend/ScriptRunnerSignalEmiter.h \
+    src/Scenes/FlowLayout.h \
+    src/Scenes/TimerDisplayWidget.h \
+    src/Scenes/TimerWidget.h \
+    src/Scenes/BackgroundWidget.h \
+    src/Constants.h
 
 FORMS += \
     src/MainWindow.ui \
@@ -181,8 +191,8 @@ FORMS += \
     src/SceneScreen.ui \
     src/Scenes/SceneMainScreen.ui \
     src/Scenes/TextBoxWidget.ui \
-    src/Scenes/TimerWidget.ui \
-    src/Scenes/InformationWidget.ui
+    src/Scenes/InformationWidget.ui \
+    src/Scenes/TimerDisplayWidget.ui
 
 RESOURCES += \
     resources.qrc

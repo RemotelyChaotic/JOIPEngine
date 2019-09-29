@@ -3,6 +3,8 @@
 #include "Backend/DatabaseManager.h"
 #include "Backend/ScriptRunner.h"
 #include "Backend/ThreadedSystem.h"
+
+#include <QFontDatabase>
 #include <cassert>
 
 CApplication::CApplication(int argc, char *argv[]) :
@@ -32,6 +34,9 @@ CApplication* CApplication::Instance()
 //
 void CApplication::Initialize()
 {
+  qint32 iFont = QFontDatabase::addApplicationFont("://resources/fonts/Equestria_Bold.otf");
+  Q_ASSERT(-1 != iFont);
+
   m_spSettings = std::make_shared<CSettings>();
 
   // create subsystems

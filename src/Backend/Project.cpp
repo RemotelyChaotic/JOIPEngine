@@ -134,11 +134,13 @@ void SProject::FromJsonObject(const QJsonObject& json)
 
 //----------------------------------------------------------------------------------------
 //
-CProject::CProject(const std::shared_ptr<SProject>& spProject) :
+CProject::CProject(QJSEngine* pEngine, const std::shared_ptr<SProject>& spProject) :
   QObject(),
-  m_spData(spProject)
+  m_spData(spProject),
+  m_pEngine(pEngine)
 {
   assert(nullptr != spProject);
+  assert(nullptr != pEngine);
 }
 
 CProject::~CProject()
@@ -211,14 +213,16 @@ qint32 CProject::numScenes()
 
 //----------------------------------------------------------------------------------------
 //
-tspSceneRef CProject::scene(qint32 iIndex)
+QJSValue CProject::scene(qint32 iIndex)
 {
   QReadLocker locker(&m_spData->m_rwLock);
   if (0 <= iIndex && m_spData->m_vspScenes.size() > static_cast<size_t>(iIndex))
   {
-    return tspSceneRef(new CScene(std::make_shared<SScene>(*m_spData->m_vspScenes[static_cast<size_t>(iIndex)])));
+    return
+      m_pEngine->newQObject(
+          new CScene(m_pEngine, std::make_shared<SScene>(*m_spData->m_vspScenes[static_cast<size_t>(iIndex)])));
   }
-  return nullptr;
+  return QJSValue();
 }
 
 //----------------------------------------------------------------------------------------
@@ -231,15 +235,17 @@ qint32 CProject::numResources()
 
 //----------------------------------------------------------------------------------------
 //
-tspResourceRef CProject::resource(const QString& sValue)
+QJSValue CProject::resource(const QString& sValue)
 {
   QReadLocker locker(&m_spData->m_rwLock);
   auto it = m_spData->m_spResourcesMap.find(sValue);
   if (m_spData->m_spResourcesMap.end() != it)
   {
-    return tspResourceRef(new CResource(std::make_shared<SResource>(*it->second)));
+    return
+      m_pEngine->newQObject(
+          new CResource(m_pEngine, std::make_shared<SResource>(*it->second)));
   }
-  return nullptr;
+  return QJSValue();
 }
 
 //----------------------------------------------------------------------------------------

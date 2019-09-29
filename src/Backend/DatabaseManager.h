@@ -12,10 +12,8 @@ class CSettings;
 struct SProject;
 struct SScene;
 typedef std::shared_ptr<SProject> tspProject;
-typedef QSharedPointer<CProject>  tspProjectRef;
 typedef std::vector<tspProject>   tvspProject;
 typedef std::shared_ptr<SScene>   tspScene;
-typedef QSharedPointer<CScene>    tspSceneRef;
 
 class CDatabaseManager : public CThreadedObject
 {
@@ -33,8 +31,6 @@ public:
   bool DeserializeProject(const QString& sName);
   tspProject FindProject(qint32 iId);
   tspProject FindProject(const QString& sName);
-  tspProjectRef FindProjectRef(qint32 iId);
-  tspProjectRef FindProjectRef(const QString& sName);
   std::set<qint32, std::less<qint32>> ProjectIds();
   void RemoveProject(qint32 iId);
   void RemoveProject(const QString& sName);
@@ -48,8 +44,6 @@ public:
   void ClearScenes(tspProject& spProj);
   tspScene FindScene(tspProject& spProj, qint32 iId);
   tspScene FindScene(tspProject& spProj, const QString& sName);
-  tspSceneRef FindSceneRef(tspProject& spProj, qint32 iId);
-  tspSceneRef FindSceneRef(tspProject& spProj, const QString& sName);
   void RemoveScene(tspProject& spProj, qint32 iId);
   void RemoveScene(tspProject& spProj, const QString& sName);
   void RenameScene(tspProject& spProj, qint32 iId, const QString& sNewName);
@@ -59,7 +53,6 @@ public:
   QString AddResource(tspProject& spProj, const QUrl& sPath, const EResourceType& type, const QString& sName = QString());
   void ClearResources(tspProject& spProj);
   tspResource FindResource(tspProject& spProj, const QString& sName);
-  tspResourceRef FindResourceRef(tspProject& spProj, const QString& sName);
   void RemoveResource(tspProject& spProj, const QString& sName);
   void RenameResource(tspProject& spProj, const QString& sName, const QString& sNewName);
 

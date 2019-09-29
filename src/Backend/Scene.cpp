@@ -75,11 +75,13 @@ void SScene::FromJsonObject(const QJsonObject& json)
 
 //----------------------------------------------------------------------------------------
 //
-CScene::CScene(const std::shared_ptr<SScene>& spScene) :
+CScene::CScene(QJSEngine* pEngine, const std::shared_ptr<SScene>& spScene) :
   QObject(),
-  m_spData(spScene)
+  m_spData(spScene),
+  m_pEngine(pEngine)
 {
   assert(nullptr != spScene);
+  assert(nullptr != pEngine);
 }
 
 CScene::~CScene()
@@ -120,7 +122,7 @@ qint32 CScene::numResources()
 
 //----------------------------------------------------------------------------------------
 //
-tspResourceRef CScene::resource(const QString& sValue)
+QJSValue CScene::resource(const QString& sValue)
 {
   QReadLocker locker(&m_spData->m_rwLock);
   if (nullptr != m_spData->m_spParent)
@@ -133,22 +135,26 @@ tspResourceRef CScene::resource(const QString& sValue)
       if (m_spData->m_spParent->m_spResourcesMap.end() != itRef)
       {
         locker.unlock();
-        return tspResourceRef(new CResource(std::make_shared<SResource>(*itRef->second)));
+        return
+          m_pEngine->newQObject(
+              new CResource(m_pEngine, std::make_shared<SResource>(*itRef->second)));
       }
-      return nullptr;
+      return QJSValue();
     }
   }
-  return nullptr;
+  return QJSValue();
 }
 
 //----------------------------------------------------------------------------------------
 //
-tspProjectRef CScene::project()
+QJSValue CScene::project()
 {
   QReadLocker locker(&m_spData->m_rwLock);
   if (nullptr != m_spData->m_spParent)
   {
-    return tspProjectRef(new CProject(std::make_shared<SProject>(*m_spData->m_spParent)));
+    return
+      m_pEngine->newQObject(
+          new CProject(m_pEngine, std::make_shared<SProject>(*m_spData->m_spParent)));
   }
-  return nullptr;
+  return QJSValue();
 }

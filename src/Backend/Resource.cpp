@@ -59,11 +59,13 @@ void SResource::FromJsonObject(const QJsonObject& json)
 
 //----------------------------------------------------------------------------------------
 //
-CResource::CResource(const std::shared_ptr<SResource>& spResource) :
+CResource::CResource(QJSEngine* pEngine, const std::shared_ptr<SResource>& spResource) :
   QObject(),
-  m_spData(spResource)
+  m_spData(spResource),
+  m_pEngine(pEngine)
 {
   assert(nullptr != spResource);
+  assert(nullptr != pEngine);
 }
 
 CResource::~CResource()
@@ -96,14 +98,16 @@ qint32 CResource::getType()
 
 //----------------------------------------------------------------------------------------
 //
-tspProjectRef CResource::project()
+QJSValue CResource::project()
 {
   QReadLocker locker(&m_spData->m_rwLock);
   if (nullptr != m_spData->m_spParent)
   {
-    return tspProjectRef(new CProject(std::make_shared<SProject>(*m_spData->m_spParent)));
+    return
+      m_pEngine->newQObject(
+          new CProject(m_pEngine, std::make_shared<SProject>(*m_spData->m_spParent)));
   }
-  return nullptr;
+  return QJSValue();
 }
 
 //----------------------------------------------------------------------------------------

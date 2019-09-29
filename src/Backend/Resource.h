@@ -3,6 +3,7 @@
 
 #include "ISerializable.h"
 #include <enum.h>
+#include <QJSEngine>
 #include <QObject>
 #include <QReadWriteLock>
 #include <QSharedPointer>
@@ -19,7 +20,6 @@ BETTER_ENUM(EResourceType, qint32,
 class CProject;
 class QScriptEngine;
 struct SProject;
-typedef QSharedPointer<CProject> tspProjectRef;
 
 //----------------------------------------------------------------------------------------
 //
@@ -51,30 +51,31 @@ class CResource : public QObject
   Q_PROPERTY(qint32  type      READ getType)
 
 public:
-  explicit CResource(const std::shared_ptr<SResource>& spResource);
+  explicit CResource(QJSEngine* pEngine, const std::shared_ptr<SResource>& spResource);
   ~CResource();
 
   QString getName();
   QString getPath();
   qint32 getType();
 
-  Q_INVOKABLE tspProjectRef project();
+  Q_INVOKABLE QJSValue project();
+
+  std::shared_ptr<SResource> Data() { return m_spData; }
 
 private:
   std::shared_ptr<SResource>m_spData;
+  QJSEngine*                m_pEngine;
 };
 
 //----------------------------------------------------------------------------------------
 //
 typedef std::shared_ptr<SResource>      tspResource;
-typedef QSharedPointer<CResource>       tspResourceRef;
 typedef std::vector<tspResource>        tvspResource;
 typedef std::set<QString>               tvsResourceRefs;
 typedef std::map<QString, tspResource>  tspResourceMap;
 
 Q_DECLARE_METATYPE(CResource*)
 Q_DECLARE_METATYPE(tspResource)
-Q_DECLARE_METATYPE(tspResourceRef)
 
 //----------------------------------------------------------------------------------------
 //

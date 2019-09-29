@@ -3,6 +3,7 @@
 
 #include "ISerializable.h"
 #include <enum.h>
+#include <QJSEngine>
 #include <QObject>
 #include <QReadWriteLock>
 #include <QSharedPointer>
@@ -17,8 +18,6 @@ class CProject;
 class CResource;
 class QScriptEngine;
 struct SProject;
-typedef QSharedPointer<CProject> tspProjectRef;
-typedef QSharedPointer<CResource>tspResourceRef;
 typedef std::set<QString>        tvsResourceRefs;
 
 struct SScene : public ISerializable
@@ -50,7 +49,7 @@ class CScene : public QObject
   Q_PROPERTY(QString script           READ getScript)
 
 public:
-  explicit CScene(const std::shared_ptr<SScene>& spScene);
+  explicit CScene(QJSEngine* pEngine, const std::shared_ptr<SScene>& spScene);
   ~CScene();
 
   qint32 getId();
@@ -58,22 +57,23 @@ public:
   QString getScript();
 
   Q_INVOKABLE qint32 numResources();
-  Q_INVOKABLE tspResourceRef resource(const QString& sValue);
+  Q_INVOKABLE QJSValue resource(const QString& sValue);
 
-  Q_INVOKABLE tspProjectRef project();
+  Q_INVOKABLE QJSValue project();
+
+  std::shared_ptr<SScene> Data() { return m_spData; }
 
 private:
   std::shared_ptr<SScene>    m_spData;
+  QJSEngine*                 m_pEngine;
 };
 
 //----------------------------------------------------------------------------------------
 //
 typedef std::shared_ptr<SScene> tspScene;
-typedef QSharedPointer<CScene>  tspSceneRef;
 typedef std::vector<tspScene>   tvspScene;
 
 Q_DECLARE_METATYPE(CScene*)
 Q_DECLARE_METATYPE(tspScene)
-Q_DECLARE_METATYPE(tspSceneRef)
 
 #endif // SCENE_H

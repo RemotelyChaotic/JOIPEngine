@@ -20,10 +20,11 @@ typedef std::shared_ptr<SScene> tspScene;
 struct SCachedMapItem
 {
   SCachedMapItem() :
-    m_watcher(), m_data(), m_bChanged(false)
+    m_watcher(), m_data(), m_bChanged(false), m_bIgnoreNextModification(false)
   {}
   SCachedMapItem(const SCachedMapItem& other) :
-    m_watcher(), m_data(other.m_data), m_bChanged(other.m_bChanged)
+    m_watcher(), m_data(other.m_data), m_bChanged(other.m_bChanged),
+    m_bIgnoreNextModification(other.m_bIgnoreNextModification)
   {
     m_watcher.addPaths(other.m_watcher.directories() + other.m_watcher.files());
   }
@@ -31,6 +32,7 @@ struct SCachedMapItem
   QFileSystemWatcher  m_watcher;
   QByteArray          m_data;
   bool                m_bChanged;
+  bool                m_bIgnoreNextModification;
 };
 
 class CEditorCodeWidget : public CEditorWidgetBase

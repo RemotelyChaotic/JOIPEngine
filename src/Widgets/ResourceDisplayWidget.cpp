@@ -5,6 +5,7 @@
 #include <QFileInfo>
 #include <QImageReader>
 #include <QMovie>
+#include <QResizeEvent>
 #include <QtConcurrent/QtConcurrent>
 
 BETTER_ENUM(EResourceDisplayType, qint32,
@@ -14,6 +15,12 @@ BETTER_ENUM(EResourceDisplayType, qint32,
             eWebResource = 3,
             eOther = 4,
             eError = 5);
+
+namespace
+{
+  const qint32 c_iSpinnerMinWidth = 128;
+  const qint32 c_iSpinnerHeight = 128;
+}
 
 //----------------------------------------------------------------------------------------
 //
@@ -156,6 +163,51 @@ EResourceType CResourceDisplayWidget::ResourceType()
 
 //----------------------------------------------------------------------------------------
 //
+bool CResourceDisplayWidget::IsRunning()
+{
+  if (m_iLoadState != ELoadState::eFinished) { return false; }
+
+  bool bRunning = false;
+  switch ( m_spUi->pStackedWidget->currentIndex())
+  {
+    case EResourceDisplayType::eLocalImage:
+    {
+      m_imageMutex.lock();
+      if (nullptr != m_spLoadedMovie)
+      {
+        bRunning = m_spLoadedMovie->state() == QMovie::Running;
+      }
+      m_imageMutex.unlock();
+      break;
+    }
+    case EResourceDisplayType::eLocalMedia:
+      bRunning = m_spUi->pMediaPlayer->IsPlaying();
+      break;
+    case EResourceDisplayType::eWebResource:
+    {
+      // TODO:
+      break;
+    }
+  default: break;
+  }
+
+  return bRunning;
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CResourceDisplayWidget::SetMargins(qint32 iLeft, qint32 iTop, qint32 iRight, qint32 iBottom)
+{
+  m_spUi->pPageError->setContentsMargins(iLeft, iTop, iRight, iBottom);
+  m_spUi->pPageImage->setContentsMargins(iLeft, iTop, iRight, iBottom);
+  m_spUi->pPageLoading->setContentsMargins(iLeft, iTop, iRight, iBottom);
+  m_spUi->pPageMedia->setContentsMargins(iLeft, iTop, iRight, iBottom);
+  m_spUi->pPageOther->setContentsMargins(iLeft, iTop, iRight, iBottom);
+  m_spUi->pPageWeb->setContentsMargins(iLeft, iTop, iRight, iBottom);
+}
+
+//----------------------------------------------------------------------------------------
+//
 void CResourceDisplayWidget::SlotPlayPause()
 {
   if (m_iLoadState != ELoadState::eFinished) { return; }
@@ -273,6 +325,24 @@ void CResourceDisplayWidget::mousePressEvent(QMouseEvent* pEvent)
 
 //----------------------------------------------------------------------------------------
 //
+void CResourceDisplayWidget::resizeEvent(QResizeEvent* pEvent)
+{
+  if (nullptr != pEvent)
+  {
+    if (pEvent->size().width() < c_iSpinnerMinWidth ||
+        pEvent->size().height() < c_iSpinnerHeight)
+    {
+      m_spUi->pLoadingSpinner->setFixedSize(pEvent->size().width(), pEvent->size().height());
+    }
+    else
+    {
+      m_spUi->pLoadingSpinner->setFixedSize(c_iSpinnerMinWidth, c_iSpinnerHeight);
+    }
+  }
+}
+
+//----------------------------------------------------------------------------------------
+//
 void CResourceDisplayWidget::SlotImageLoad(QString sPath)
 {
   m_imageMutex.lock();
@@ -357,12 +427,14 @@ void CResourceDisplayWidget::SlotLoadFinished()
         {
           m_spUi->pImage->setPixmap(*m_spLoadedPixmap);
           m_spUi->pStackedWidget->setCurrentIndex(EResourceDisplayType::eLocalImage);
+          emit SignalLoadFinished();
         }
         else if (nullptr != m_spLoadedMovie)
         {
           m_spLoadedMovie->start();
           m_spUi->pImage->setMovie(m_spLoadedMovie.get());
           m_spUi->pStackedWidget->setCurrentIndex(EResourceDisplayType::eLocalImage);
+          emit SignalLoadFinished();
         }
         else
         {
@@ -411,6 +483,7 @@ void CResourceDisplayWidget::SlotStatusChanged(QMediaPlayer::MediaStatus status)
     {
       m_iLoadState = ELoadState::eFinished;
       m_spUi->pStackedWidget->setCurrentIndex(EResourceDisplayType::eLocalMedia);
+      emit SignalLoadFinished();
       break;
     }
     case QMediaPlayer::EndOfMedia:
@@ -434,6 +507,7 @@ void CResourceDisplayWidget::SlotWebLoadFinished(bool bOk)
             "}"
             );
       m_spUi->pStackedWidget->setCurrentIndex(EResourceDisplayType::eWebResource);
+      emit SignalLoadFinished();
     }
     else
     {

@@ -15,21 +15,21 @@
   </property>
   <layout class="QGridLayout" name="gridLayout">
    <property name="leftMargin">
-    <number>0</number>
-   </property>
-   <property name="topMargin">
-    <number>0</number>
-   </property>
-   <property name="rightMargin">
-    <number>0</number>
-   </property>
-   <property name="bottomMargin">
-    <number>0</number>
-   </property>
-   <property name="spacing">
     <number>10</number>
    </property>
-   <item row="2" column="0" colspan="4">
+   <property name="topMargin">
+    <number>10</number>
+   </property>
+   <property name="rightMargin">
+    <number>10</number>
+   </property>
+   <property name="bottomMargin">
+    <number>10</number>
+   </property>
+   <property name="spacing">
+    <number>0</number>
+   </property>
+   <item row="3" column="0" colspan="4">
     <widget class="CTextBoxWidget" name="pTextBoxDisplay" native="true">
      <property name="sizePolicy">
       <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
@@ -44,7 +44,7 @@
      <property name="sizePolicy">
       <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
        <horstretch>0</horstretch>
-       <verstretch>5</verstretch>
+       <verstretch>2</verstretch>
       </sizepolicy>
      </property>
      <layout class="QGridLayout" name="gridLayout_2">
@@ -61,36 +61,79 @@
        <number>0</number>
       </property>
       <property name="horizontalSpacing">
-       <number>10</number>
+       <number>0</number>
       </property>
-      <item row="0" column="1">
+      <item row="0" column="2" rowspan="2">
+       <widget class="CTimerDisplayWidget" name="pTimerDisplay" native="true">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+          <horstretch>1</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="1" rowspan="2">
        <widget class="CResourceDisplayWidget" name="pResourceDisplay" native="true">
         <property name="sizePolicy">
          <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-          <horstretch>3</horstretch>
+          <horstretch>2</horstretch>
           <verstretch>0</verstretch>
          </sizepolicy>
         </property>
        </widget>
       </item>
-      <item row="0" column="2">
-       <widget class="CTimerWidget" name="pTimerDisplay" native="true">
+      <item row="0" column="0" rowspan="2">
+       <widget class="QWidget" name="widget_2" native="true">
         <property name="sizePolicy">
          <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
           <horstretch>1</horstretch>
           <verstretch>0</verstretch>
          </sizepolicy>
         </property>
-       </widget>
-      </item>
-      <item row="0" column="0">
-       <widget class="CInformationWidget" name="pInfoDisplay" native="true">
-        <property name="sizePolicy">
-         <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-          <horstretch>1</horstretch>
-          <verstretch>0</verstretch>
-         </sizepolicy>
-        </property>
+        <layout class="QVBoxLayout" name="verticalLayout">
+         <property name="spacing">
+          <number>0</number>
+         </property>
+         <property name="leftMargin">
+          <number>0</number>
+         </property>
+         <property name="topMargin">
+          <number>0</number>
+         </property>
+         <property name="rightMargin">
+          <number>0</number>
+         </property>
+         <property name="bottomMargin">
+          <number>0</number>
+         </property>
+         <item>
+          <widget class="CInformationWidget" name="pInfoDisplay" native="true">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="CResourceDisplayWidget" name="pSoundEmmiter" native="true">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="maximumSize">
+            <size>
+             <width>16777215</width>
+             <height>0</height>
+            </size>
+           </property>
+          </widget>
+         </item>
+        </layout>
        </widget>
       </item>
      </layout>
@@ -112,9 +155,9 @@
    <container>1</container>
   </customwidget>
   <customwidget>
-   <class>CTimerWidget</class>
+   <class>CTimerDisplayWidget</class>
    <extends>QWidget</extends>
-   <header>TimerWidget.h</header>
+   <header>TimerDisplayWidget.h</header>
    <container>1</container>
   </customwidget>
   <customwidget>

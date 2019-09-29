@@ -35,6 +35,7 @@ public:
   explicit CMediaPlayer(QWidget* pParent = nullptr);
   ~CMediaPlayer() override;
 
+  bool IsPlaying();
   void SetSliderVisible(bool bVisible);
 
 public slots:

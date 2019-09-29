@@ -342,7 +342,8 @@ void CEditorSceneNodeWidget::AddNewScriptFile(tspScene spScene)
       const QString sName = PhysicalProjectName(m_spCurrentProject);
       QString sCurrentFolder = CApplication::Instance()->Settings()->ContentFolder();
       QUrl sUrl = QFileDialog::getSaveFileUrl(this,
-          tr("Create Script File"), QUrl::fromLocalFile(sCurrentFolder + "/" + sName),
+          QString(tr("Create Script File for %1")).arg(spScene->m_sName),
+          QUrl::fromLocalFile(sCurrentFolder + "/" + sName),
           "Script Files (*.js)");
 
       if (sUrl.isValid())
@@ -355,7 +356,7 @@ void CEditorSceneNodeWidget::AddNewScriptFile(tspScene spScene)
         }
         else
         {
-          QString sRelativePath = projectDir.relativeFilePath(info.fileName());
+          QString sRelativePath = projectDir.relativeFilePath(info.absoluteFilePath());
           QUrl sUrlToSave = QUrl::fromLocalFile(sRelativePath);
           QFile jsFile(info.absoluteFilePath());
           if (jsFile.open(QIODevice::WriteOnly | QIODevice::Truncate))

@@ -21,5 +21,9 @@
         <file>resources/img/ButtonStop.png</file>
         <file>resources/img/ButtonPause.png</file>
         <file>resources/img/ButtonEdit.png</file>
+        <file>resources/img/Background.png</file>
+        <file>resources/img/TimerBg.svg</file>
+        <file>resources/img/IconMask.svg</file>
+        <file>resources/img/IconBg.svg</file>
     </qresource>
 </RCC>

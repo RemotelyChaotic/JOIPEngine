@@ -25,13 +25,10 @@ CDatabaseManager::CDatabaseManager() :
 {
   qRegisterMetaType<CResource*>();
   qRegisterMetaType<tspResource>();
-  qRegisterMetaType<tspResourceRef>();
   qRegisterMetaType<CScene*>();
   qRegisterMetaType<tspScene>();
-  qRegisterMetaType<tspSceneRef>();
   qRegisterMetaType<CProject*>();
   qRegisterMetaType<tspProject>();
-  qRegisterMetaType<tspProjectRef>();
 }
 
 CDatabaseManager::~CDatabaseManager()
@@ -148,42 +145,6 @@ tspProject CDatabaseManager::FindProject(const QString& sName)
     if (spProject->m_sName == sName)
     {
       return spProject;
-    }
-  }
-  return nullptr;
-}
-
-//----------------------------------------------------------------------------------------
-//
-tspProjectRef CDatabaseManager::FindProjectRef(qint32 iId)
-{
-  if (!IsInitialized()) { return nullptr; }
-
-  QMutexLocker locker(&m_dbMutex);
-  for (tspProject& spProject : m_vspProjectDatabase)
-  {
-    QReadLocker projLocker(&spProject->m_rwLock);
-    if (spProject->m_iId == iId)
-    {
-      return tspProjectRef(new CProject(spProject));
-    }
-  }
-  return nullptr;
-}
-
-//----------------------------------------------------------------------------------------
-//
-tspProjectRef CDatabaseManager::FindProjectRef(const QString& sName)
-{
-  if (!IsInitialized()) { return nullptr; }
-
-  QMutexLocker locker(&m_dbMutex);
-  for (tspProject& spProject : m_vspProjectDatabase)
-  {
-    QReadLocker projLocker(&spProject->m_rwLock);
-    if (spProject->m_sName == sName)
-    {
-      return tspProjectRef(new CProject(spProject));
     }
   }
   return nullptr;
@@ -412,42 +373,6 @@ tspScene CDatabaseManager::FindScene(tspProject& spProj, const QString& sName)
 
 //----------------------------------------------------------------------------------------
 //
-tspSceneRef CDatabaseManager::FindSceneRef(tspProject& spProj, qint32 iId)
-{
-  if (!IsInitialized() || nullptr == spProj) { return nullptr; }
-
-  QReadLocker locker(&spProj->m_rwLock);
-  for (tspScene& spScene : spProj->m_vspScenes)
-  {
-    QReadLocker projLocker(&spScene->m_rwLock);
-    if (spScene->m_iId == iId)
-    {
-      return tspSceneRef(new CScene(spScene));
-    }
-  }
-  return nullptr;
-}
-
-//----------------------------------------------------------------------------------------
-//
-tspSceneRef CDatabaseManager::FindSceneRef(tspProject& spProj, const QString& sName)
-{
-  if (!IsInitialized() || nullptr == spProj) { return nullptr; }
-
-  QReadLocker locker(&spProj->m_rwLock);
-  for (tspScene& spScene : spProj->m_vspScenes)
-  {
-    QReadLocker projLocker(&spScene->m_rwLock);
-    if (spScene->m_sName == sName)
-    {
-      return tspSceneRef(new CScene(spScene));
-    }
-  }
-  return nullptr;
-}
-
-//----------------------------------------------------------------------------------------
-//
 void CDatabaseManager::RemoveScene(tspProject& spProj, qint32 iId)
 {
   if (!IsInitialized() || nullptr == spProj) { return; }
@@ -616,21 +541,6 @@ tspResource CDatabaseManager::FindResource(tspProject& spProj, const QString& sN
   if (it != spProj->m_spResourcesMap.end())
   {
     return it->second;
-  }
-  return nullptr;
-}
-
-//----------------------------------------------------------------------------------------
-//
-tspResourceRef CDatabaseManager::FindResourceRef(tspProject& spProj, const QString& sName)
-{
-  if (!IsInitialized() || nullptr == spProj) { return nullptr; }
-
-  QReadLocker locker(&spProj->m_rwLock);
-  auto it = spProj->m_spResourcesMap.find(sName);
-  if (it != spProj->m_spResourcesMap.end())
-  {
-    return tspResourceRef(new CResource(it->second));
   }
   return nullptr;
 }

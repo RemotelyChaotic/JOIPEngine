@@ -14,6 +14,21 @@
    <string>Form</string>
   </property>
   <layout class="QGridLayout" name="gridLayout">
+   <property name="leftMargin">
+    <number>0</number>
+   </property>
+   <property name="topMargin">
+    <number>0</number>
+   </property>
+   <property name="rightMargin">
+    <number>0</number>
+   </property>
+   <property name="bottomMargin">
+    <number>0</number>
+   </property>
+   <property name="spacing">
+    <number>0</number>
+   </property>
    <item row="0" column="0">
     <widget class="QScrollArea" name="pScrollArea">
      <property name="frameShape">
@@ -33,10 +48,27 @@
        <rect>
         <x>0</x>
         <y>0</y>
-        <width>382</width>
-        <height>282</height>
+        <width>400</width>
+        <height>300</height>
        </rect>
       </property>
+      <layout class="QVBoxLayout" name="verticalLayout_2">
+       <property name="spacing">
+        <number>10</number>
+       </property>
+       <property name="leftMargin">
+        <number>0</number>
+       </property>
+       <property name="topMargin">
+        <number>0</number>
+       </property>
+       <property name="rightMargin">
+        <number>0</number>
+       </property>
+       <property name="bottomMargin">
+        <number>0</number>
+       </property>
+      </layout>
      </widget>
     </widget>
    </item>

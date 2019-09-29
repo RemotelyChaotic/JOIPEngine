@@ -3,6 +3,9 @@
 
 #include <QJSEngine>
 #include <QJSValue>
+#include <memory>
+
+class CScriptRunnerSignalEmiter;
 
 class CScriptThread : public QObject
 {
@@ -10,13 +13,15 @@ class CScriptThread : public QObject
   Q_DISABLE_COPY(CScriptThread)
 
 public:
-  CScriptThread(QJSEngine* pEngine);
+  CScriptThread(std::shared_ptr<CScriptRunnerSignalEmiter> spEmitter,
+                QJSEngine* pEngine);
   ~CScriptThread();
 
 public slots:
-  void sleep(qint32 iTimeMs);
+  void sleep(qint32 iTimeS, QJSValue bSkippable);
 
 private:
+  std::shared_ptr<CScriptRunnerSignalEmiter> m_spSignalEmitter;
   QJSEngine*               m_pEngine;
 };
 

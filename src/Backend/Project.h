@@ -55,7 +55,7 @@ class CProject : public QObject
   Q_PROPERTY(bool    iUsingCodecs READ isUsingCodecs    )
 
 public:
-  explicit CProject(const std::shared_ptr<SProject>& spProject);
+  explicit CProject(QJSEngine* pEngine, const std::shared_ptr<SProject>& spProject);
   ~CProject();
 
   qint32 getId();
@@ -67,24 +67,25 @@ public:
   bool isUsingCodecs();
 
   Q_INVOKABLE qint32 numScenes();
-  Q_INVOKABLE tspSceneRef scene(qint32 iIndex);
+  Q_INVOKABLE QJSValue scene(qint32 iIndex);
 
   Q_INVOKABLE qint32 numResources();
-  Q_INVOKABLE tspResourceRef resource(const QString& sValue);
+  Q_INVOKABLE QJSValue resource(const QString& sValue);
+
+  std::shared_ptr<SProject> Data() { return m_spData; }
 
 private:
   std::shared_ptr<SProject>  m_spData;
+  QJSEngine*                 m_pEngine;
 };
 
 //----------------------------------------------------------------------------------------
 //
 typedef std::shared_ptr<SProject> tspProject;
-typedef QSharedPointer<CProject>  tspProjectRef;
 typedef std::vector<tspProject>   tvspProject;
 
 Q_DECLARE_METATYPE(CProject*)
 Q_DECLARE_METATYPE(tspProject)
-Q_DECLARE_METATYPE(tspProjectRef)
 
 //----------------------------------------------------------------------------------------
 //

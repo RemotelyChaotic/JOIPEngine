@@ -3,6 +3,9 @@
 
 #include <QJSEngine>
 #include <QJSValue>
+#include <memory>
+
+class CScriptRunnerSignalEmiter;
 
 class CScriptTimer : public QObject
 {
@@ -10,19 +13,20 @@ class CScriptTimer : public QObject
   Q_DISABLE_COPY(CScriptTimer)
 
 public:
-  CScriptTimer(QJSEngine* pEngine);
+  CScriptTimer(std::shared_ptr<CScriptRunnerSignalEmiter> spEmitter, QJSEngine* pEngine);
   ~CScriptTimer();
 
 public slots:
   void hide();
   void setTime(qint32 iTimeS);
-  void setTimeHidden();
-  void setTimeVisible();
+  void setTimeVisible(bool bVisible);
   void show();
   void start();
   void stop();
+  void waitForTimer();
 
 private:
+  std::shared_ptr<CScriptRunnerSignalEmiter> m_spSignalEmitter;
   QJSEngine*               m_pEngine;
 };
 

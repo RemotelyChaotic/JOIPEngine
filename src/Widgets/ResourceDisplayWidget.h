@@ -27,7 +27,10 @@ public:
 
   qint32 ProjectId() { return m_iProjectId; }
   EResourceType ResourceType();
+  bool IsRunning();
+
   void SetProjectId(qint32 iId) { m_iProjectId = iId; }
+  void SetMargins(qint32 iLeft, qint32 iTop, qint32 iRight, qint32 iBottom);
 
 public slots:
   void SlotPlayPause();
@@ -36,9 +39,11 @@ public slots:
 
 signals:
   void OnClick();
+  void SignalLoadFinished();
 
 protected:
   void mousePressEvent(QMouseEvent* pEvent) override;
+  void resizeEvent(QResizeEvent* pEvent) override;
 
 protected slots:
   void SlotImageLoad(QString sPath);

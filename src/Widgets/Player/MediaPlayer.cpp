@@ -65,6 +65,13 @@ CMediaPlayer::~CMediaPlayer()
 
 //----------------------------------------------------------------------------------------
 //
+bool CMediaPlayer::IsPlaying()
+{
+  return m_player->isPlaying();
+}
+
+//----------------------------------------------------------------------------------------
+//
 void CMediaPlayer::SetSliderVisible(bool bVisible)
 {
   m_slider->setVisible(bVisible);

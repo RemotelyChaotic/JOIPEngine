@@ -152,17 +152,16 @@ void CEditorCodeWidget::SaveProject()
             QUrl sPath = spResource->m_sPath;
             const QString sFilePath = ResourceUrlToAbsolutePath(sPath, sProjectName);
 
-            it->second.m_watcher.blockSignals(true);
             QFile file(sFilePath);
             if (file.open(QIODevice::WriteOnly | QIODevice::Truncate))
             {
+              it->second.m_bIgnoreNextModification = true;
               file.write(it->second.m_data);
             }
             else
             {
               qWarning() << "Registered script resource could not be opened.";
             }
-            it->second.m_watcher.blockSignals(false);
           }
         }
       }
@@ -337,26 +336,33 @@ void CEditorCodeWidget::SlotFileChanged(const QString& sPath)
     auto it = m_cachedScriptsMap.find(iId);
     if (m_cachedScriptsMap.end() != it)
     {
-      QMessageBox msgBox;
-      msgBox.setText("The document has been modified on the disc.");
-      msgBox.setInformativeText("Do you want to reload the file or keep the local file?");
-      QPushButton* pReloadButton = msgBox.addButton(tr("Reload"), QMessageBox::AcceptRole);
-      QPushButton* pKeepButton = msgBox.addButton(tr("Keep"), QMessageBox::RejectRole);
-      msgBox.setDefaultButton(pKeepButton);
-      msgBox.exec();
-
-      if (msgBox.clickedButton() == pReloadButton)
+      if (it->second.m_bIgnoreNextModification)
       {
-        it->second.m_data = LoadScriptFile(sPath);
-        m_spUi->pCodeEdit->blockSignals(true);
-        m_spUi->pCodeEdit->clear();
-        m_spUi->pCodeEdit->setPlainText(QString::fromUtf8(m_cachedScriptsMap[iId].m_data));
-        m_spUi->pCodeEdit->blockSignals(false);
-        SetSceneScriptModifiedFlag(iId, false);
+        it->second.m_bIgnoreNextModification = false;
       }
       else
       {
-        SetSceneScriptModifiedFlag(iId, true);
+        QMessageBox msgBox;
+        msgBox.setText("The document has been modified on the disc.");
+        msgBox.setInformativeText("Do you want to reload the file or keep the local file?");
+        QPushButton* pReloadButton = msgBox.addButton(tr("Reload"), QMessageBox::AcceptRole);
+        QPushButton* pKeepButton = msgBox.addButton(tr("Keep"), QMessageBox::RejectRole);
+        msgBox.setDefaultButton(pKeepButton);
+        msgBox.exec();
+
+        if (msgBox.clickedButton() == pReloadButton)
+        {
+          it->second.m_data = LoadScriptFile(sPath);
+          m_spUi->pCodeEdit->blockSignals(true);
+          m_spUi->pCodeEdit->clear();
+          m_spUi->pCodeEdit->setPlainText(QString::fromUtf8(m_cachedScriptsMap[iId].m_data));
+          m_spUi->pCodeEdit->blockSignals(false);
+          SetSceneScriptModifiedFlag(iId, false);
+        }
+        else
+        {
+          SetSceneScriptModifiedFlag(iId, true);
+        }
       }
     }
   }
@@ -447,7 +453,7 @@ void CEditorCodeWidget::AddNewScriptFile(tspScene spScene)
         }
         else
         {
-          QString sRelativePath = projectDir.relativeFilePath(info.fileName());
+          QString sRelativePath = projectDir.relativeFilePath(info.absoluteFilePath());
           QUrl sUrlToSave = QUrl::fromLocalFile(sRelativePath);
           QFile jsFile(info.absoluteFilePath());
           if (jsFile.open(QIODevice::WriteOnly | QIODevice::Truncate))

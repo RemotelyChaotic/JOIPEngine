@@ -5,27 +5,36 @@
 #include <QJSEngine>
 #include <QJSValue>
 
+class CDatabaseManager;
+class CScriptRunnerSignalEmiter;
+struct SProject;
+typedef std::shared_ptr<SProject> tspProject;
+
 class CScriptMediaPlayer : public QObject
 {
   Q_OBJECT
   Q_DISABLE_COPY(CScriptMediaPlayer)
 
 public:
-  CScriptMediaPlayer(QJSEngine* pEngine);
+  CScriptMediaPlayer(std::shared_ptr<CScriptRunnerSignalEmiter> spEmitter,
+                     QJSEngine* pEngine);
   ~CScriptMediaPlayer();
+
+  void SetCurrentProject(tspProject spProject);
 
 public slots:
   void show(QJSValue resource);
   void play(QJSValue resource);
-  void playVideo(QJSValue resource = QJSValue());
   void pauseVideo();
   void stopVideo();
-  void playSound(QJSValue resource = QJSValue());
   void pauseSound();
   void stopSound();
 
 private:
-  QJSEngine*               m_pEngine;
+  std::shared_ptr<CScriptRunnerSignalEmiter> m_spSignalEmitter;
+  tspProject                       m_spProject;
+  std::weak_ptr<CDatabaseManager>  m_wpDbManager;
+  QJSEngine*                       m_pEngine;
 };
 
 #endif // SCRIPTMEDIAPLAYER_H
