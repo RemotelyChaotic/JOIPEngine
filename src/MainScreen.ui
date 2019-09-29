@@ -18,9 +18,25 @@
     <widget class="QWidget" name="widget" native="true">
      <layout class="QVBoxLayout" name="verticalLayout">
       <item>
-       <widget class="QLabel" name="pTitle">
+       <spacer name="verticalSpacer_3">
+        <property name="orientation">
+         <enum>Qt::Vertical</enum>
+        </property>
+        <property name="sizeType">
+         <enum>QSizePolicy::Fixed</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>20</width>
+          <height>20</height>
+         </size>
+        </property>
+       </spacer>
+      </item>
+      <item>
+       <widget class="CTitleLabel" name="pTitle">
         <property name="text">
-         <string>Title</string>
+         <string>Pony JOI</string>
         </property>
         <property name="alignment">
          <set>Qt::AlignCenter</set>
@@ -44,7 +60,7 @@
        </spacer>
       </item>
       <item>
-       <widget class="QPushButton" name="pSceneSelectButton">
+       <widget class="CMenuButton" name="pSceneSelectButton">
         <property name="text">
          <string>Select Scene</string>
         </property>
@@ -54,7 +70,7 @@
        </widget>
       </item>
       <item>
-       <widget class="QPushButton" name="pEdiorButton">
+       <widget class="CMenuButton" name="pEdiorButton">
         <property name="text">
          <string>Editor</string>
         </property>
@@ -64,7 +80,7 @@
        </widget>
       </item>
       <item>
-       <widget class="QPushButton" name="pSettingsButton">
+       <widget class="CMenuButton" name="pSettingsButton">
         <property name="text">
          <string>Settings</string>
         </property>
@@ -74,7 +90,7 @@
        </widget>
       </item>
       <item>
-       <widget class="QPushButton" name="pQuitButton">
+       <widget class="CMenuButton" name="pQuitButton">
         <property name="text">
          <string>Quit</string>
         </property>
@@ -127,6 +143,18 @@
    </item>
   </layout>
  </widget>
+ <customwidgets>
+  <customwidget>
+   <class>CMenuButton</class>
+   <extends>QPushButton</extends>
+   <header>Widgets/MenuButton.h</header>
+  </customwidget>
+  <customwidget>
+   <class>CTitleLabel</class>
+   <extends>QLabel</extends>
+   <header>Widgets/TitleLabel.h</header>
+  </customwidget>
+ </customwidgets>
  <resources/>
  <connections/>
 </ui>

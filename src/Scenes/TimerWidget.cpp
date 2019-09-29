@@ -135,6 +135,7 @@ CTimerWidget::CTimerWidget(QWidget* pParent) :
   m_pTimerBackGround->setFixedSize(width(), height());
   m_pTimerBackGround->setPixmap(m_bgImage);
   m_pTimerBackGround->setScaledContents(true);
+  m_pTimerBackGround->setStyleSheet("background-color: transparent;");
 
   m_pCanvas->setFixedSize(width(), height());
 

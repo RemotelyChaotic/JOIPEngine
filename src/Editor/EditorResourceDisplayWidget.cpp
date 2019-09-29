@@ -10,6 +10,8 @@ CEditorResourceDisplayWidget::CEditorResourceDisplayWidget(QWidget* pParent) :
   m_spUi(std::make_unique<Ui::CEditorResourceDisplayWidget>())
 {
   m_spUi->setupUi(this);
+  connect(m_spUi->pResourceDisplay, &CResourceDisplayWidget::OnClick,
+          m_spUi->pResourceDisplay, &CResourceDisplayWidget::SlotPlayPause);
 }
 
 CEditorResourceDisplayWidget::~CEditorResourceDisplayWidget()

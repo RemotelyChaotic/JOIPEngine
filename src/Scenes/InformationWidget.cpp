@@ -155,16 +155,19 @@ void CInformationWidget::AddIcon(const QString& sName, const tspResource& spReso
   {
     QWidget* pRoot = new QWidget(m_spUi->pIcons);
     pRoot->setFixedSize(c_iIconWidth, c_iIconHeight);
+    pRoot->setStyleSheet("background-color: transparent;");
 
     QLabel* pBackground = new QLabel("", pRoot);
     pBackground->setFixedSize(c_iIconWidth, c_iIconHeight);
     pBackground->setPixmap(QPixmap("://resources/img/IconBg.svg"));
     pBackground->setScaledContents(true);
+    pBackground->setStyleSheet("background-color: transparent;");
 
     CResourceDisplayWidget* pResourceDisplay = new CResourceDisplayWidget(pRoot);
     pResourceDisplay->setFixedSize(c_iIconWidth, c_iIconHeight);
     pResourceDisplay->LoadResource(spResource);
     pResourceDisplay->setMask(m_iconMask);
+    pBackground->setStyleSheet("background-color: transparent;");
 
     pRoot->installEventFilter(this);
     pRoot->setProperty(c_sMapKeyProperty, sName);
@@ -191,11 +194,13 @@ QWidget* CInformationWidget::CreateHeaderIcon(QWidget* pParent, const QString& s
   {
     QWidget* pRoot = new QWidget(pParent);
     pRoot->setFixedSize(c_iIconWidth, c_iIconHeight);
+    pRoot->setStyleSheet("background-color: transparent;");
 
     QLabel* pBackground = new QLabel("", pRoot);
     pBackground->setFixedSize(c_iHeaderFooterIconWidth, c_iHeaderFooterIconHeight);
     pBackground->setPixmap(QPixmap("://resources/img/IconBg.svg"));
     pBackground->setScaledContents(true);
+    pRoot->setStyleSheet("background-color: transparent;");
 
     QLabel* pIcon = new QLabel("", pRoot);
     pIcon->setFixedSize(c_iFixedIconWidth, c_iFixedIconHeight);
@@ -205,6 +210,7 @@ QWidget* CInformationWidget::CreateHeaderIcon(QWidget* pParent, const QString& s
     pIcon->setPixmap(QPixmap(sPath));
     pIcon->setScaledContents(true);
     pIcon->setMask(m_iconMask);
+    pRoot->setStyleSheet("background-color: transparent;");
 
     pRoot->installEventFilter(this);
     pRoot->setProperty(c_sMapKeyProperty, sName);

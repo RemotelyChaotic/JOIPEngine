@@ -15,9 +15,12 @@
   </property>
   <layout class="QGridLayout" name="gridLayout">
    <item row="0" column="0">
-    <widget class="QSplitter" name="pSplitter">
+    <widget class="QSplitter" name="splitter">
      <property name="orientation">
       <enum>Qt::Vertical</enum>
+     </property>
+     <property name="handleWidth">
+      <number>10</number>
      </property>
      <widget class="QWidget" name="widget_4" native="true">
       <property name="sizePolicy">
@@ -118,10 +121,19 @@
        </item>
       </layout>
      </widget>
+     <widget class="CResourceDisplayWidget" name="pResourceDisplayWidget" native="true"/>
     </widget>
    </item>
   </layout>
  </widget>
+ <customwidgets>
+  <customwidget>
+   <class>CResourceDisplayWidget</class>
+   <extends>QWidget</extends>
+   <header>Widgets/ResourceDisplayWidget.h</header>
+   <container>1</container>
+  </customwidget>
+ </customwidgets>
  <resources>
   <include location="../../resources.qrc"/>
  </resources>

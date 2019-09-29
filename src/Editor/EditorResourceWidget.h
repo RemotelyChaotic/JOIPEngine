@@ -41,6 +41,7 @@ protected:
 
 protected slots:
   void on_pFilterLineEdit_editingFinished();
+  void on_pResourceDisplayWidget_OnClick();
   void SlotAddButtonClicked();
   void SlotAddWebButtonClicked();
   void SlotRemoveButtonClicked();

@@ -25,5 +25,11 @@
         <file>resources/img/TimerBg.svg</file>
         <file>resources/img/IconMask.svg</file>
         <file>resources/img/IconBg.svg</file>
+        <file>resources/style_default.css</file>
+        <file>resources/img/ButtonArrowDown.png</file>
+        <file>resources/img/ButtonArrowLeft.png</file>
+        <file>resources/img/ButtonArrowUp.png</file>
+        <file>resources/img/ButtonDotsHoriz.png</file>
+        <file>resources/img/ButtonDotsVert.png</file>
     </qresource>
 </RCC>

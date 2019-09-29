@@ -80,6 +80,8 @@ void CEditorResourceWidget::Initialize()
   pProxyModel->sort(resource_item::c_iColumnName, Qt::AscendingOrder);
   pProxyModel->setFilterRegExp(QRegExp(".*", Qt::CaseInsensitive, QRegExp::RegExp));
 
+  m_spUi->pResourceDisplayWidget->setFixedHeight(256);
+
   m_bInitialized = true;
 }
 
@@ -227,6 +229,15 @@ void CEditorResourceWidget::on_pFilterLineEdit_editingFinished()
   {
     pProxyModel->setFilterRegExp(QRegExp(sFilter, Qt::CaseInsensitive, QRegExp::RegExp));
   }
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CEditorResourceWidget::on_pResourceDisplayWidget_OnClick()
+{
+  WIDGET_INITIALIZED_GUARD
+
+  m_spUi->pResourceDisplayWidget->SlotPlayPause();
 }
 
 //----------------------------------------------------------------------------------------
@@ -387,6 +398,14 @@ void CEditorResourceWidget::SlotCurrentChanged(const QModelIndex& current,
     const QString sName =
         pModel->data(pProxyModel->mapToSource(current), Qt::DisplayRole, resource_item::c_iColumnName).toString();
     emit SignalResourceSelected(sName);
+
+    auto spDbManager = m_wpDbManager.lock();
+    if (nullptr != spDbManager)
+    {
+      auto spResource = spDbManager->FindResource(m_spCurrentProject, sName);
+      m_spUi->pResourceDisplayWidget->UnloadResource();
+      m_spUi->pResourceDisplayWidget->LoadResource(spResource);
+    }
   }
 }
 

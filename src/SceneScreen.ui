@@ -62,48 +62,6 @@
          </property>
         </spacer>
        </item>
-       <item row="1" column="1">
-        <widget class="QWidget" name="widget" native="true">
-         <layout class="QGridLayout" name="gridLayout">
-          <item row="0" column="0" colspan="3">
-           <widget class="CProjectCardSelectionWidget" name="pProjectCardSelectionWidget" native="true"/>
-          </item>
-          <item row="1" column="0">
-           <spacer name="horizontalSpacer_6">
-            <property name="orientation">
-             <enum>Qt::Horizontal</enum>
-            </property>
-            <property name="sizeHint" stdset="0">
-             <size>
-              <width>142</width>
-              <height>20</height>
-             </size>
-            </property>
-           </spacer>
-          </item>
-          <item row="1" column="1">
-           <widget class="QPushButton" name="pOpenExistingProjectButton">
-            <property name="text">
-             <string>Open Project</string>
-            </property>
-           </widget>
-          </item>
-          <item row="1" column="2">
-           <spacer name="horizontalSpacer_5">
-            <property name="orientation">
-             <enum>Qt::Horizontal</enum>
-            </property>
-            <property name="sizeHint" stdset="0">
-             <size>
-              <width>142</width>
-              <height>20</height>
-             </size>
-            </property>
-           </spacer>
-          </item>
-         </layout>
-        </widget>
-       </item>
        <item row="1" column="2">
         <spacer name="horizontalSpacer_2">
          <property name="orientation">
@@ -147,7 +105,7 @@
            </spacer>
           </item>
           <item>
-           <widget class="QPushButton" name="pCancelButton">
+           <widget class="CMenuButton" name="pCancelButton">
             <property name="text">
              <string>Back</string>
             </property>
@@ -161,6 +119,48 @@
             <property name="sizeHint" stdset="0">
              <size>
               <width>40</width>
+              <height>20</height>
+             </size>
+            </property>
+           </spacer>
+          </item>
+         </layout>
+        </widget>
+       </item>
+       <item row="1" column="1">
+        <widget class="QGroupBox" name="groupBox">
+         <layout class="QGridLayout" name="gridLayout">
+          <item row="0" column="0" colspan="3">
+           <widget class="CProjectCardSelectionWidget" name="pProjectCardSelectionWidget" native="true"/>
+          </item>
+          <item row="1" column="0">
+           <spacer name="horizontalSpacer_6">
+            <property name="orientation">
+             <enum>Qt::Horizontal</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>142</width>
+              <height>20</height>
+             </size>
+            </property>
+           </spacer>
+          </item>
+          <item row="1" column="1">
+           <widget class="QPushButton" name="pOpenExistingProjectButton">
+            <property name="text">
+             <string>Open Project</string>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="2">
+           <spacer name="horizontalSpacer_5">
+            <property name="orientation">
+             <enum>Qt::Horizontal</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>142</width>
               <height>20</height>
              </size>
             </property>
@@ -209,6 +209,11 @@
    <extends>QWidget</extends>
    <header>Scenes/SceneMainScreen.h</header>
    <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>CMenuButton</class>
+   <extends>QPushButton</extends>
+   <header>Widgets/MenuButton.h</header>
   </customwidget>
  </customwidgets>
  <resources/>

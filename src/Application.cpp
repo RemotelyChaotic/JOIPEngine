@@ -1,9 +1,11 @@
 #include "Application.h"
 #include "Enums.h"
+#include "Style.h"
 #include "Backend/DatabaseManager.h"
 #include "Backend/ScriptRunner.h"
 #include "Backend/ThreadedSystem.h"
 
+#include <QDebug>
 #include <QFontDatabase>
 #include <cassert>
 
@@ -34,9 +36,19 @@ CApplication* CApplication::Instance()
 //
 void CApplication::Initialize()
 {
-  qint32 iFont = QFontDatabase::addApplicationFont("://resources/fonts/Equestria_Bold.otf");
+  // fonts
+  qint32 iFont = QFontDatabase::addApplicationFont("://resources/fonts/Equestria.otf");
   Q_ASSERT(-1 != iFont);
 
+  QStringList fonts;
+  QFontDatabase fontDb;
+  for(int i=0; i< fontDb.families().size(); i++)
+  {
+    fonts << fontDb.families().at(i);
+  }
+  //qDebug() << QString(tr("Supported font families: %1")).arg(fonts.join(", "));
+
+  // settings
   m_spSettings = std::make_shared<CSettings>();
 
   // create subsystems
@@ -46,6 +58,9 @@ void CApplication::Initialize()
   // init subsystems
   m_spSystemsMap[ECoreSystems::eDatabaseManager]->RegisterObject<CDatabaseManager>();
   m_spSystemsMap[ECoreSystems::eScriptRunner]->RegisterObject<CScriptRunner>();
+
+  // style
+  joip_style::SetStyle(this);
 
   m_bInitialized = true;
 }

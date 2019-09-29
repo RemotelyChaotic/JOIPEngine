@@ -227,51 +227,12 @@ void CEditorMainScreen::SlotDisplayResource(const QString& sName)
   {
     QReadLocker locker(&m_spCurrentProject->m_rwLock);
 
-    // scene node model selected?
-    if (m_spCurrentProject->m_sSceneModel == sName)
-    {
-      pWidget->UnloadResource();
-      qint32 iEnumValueLeft = m_spUi->pLeftComboBox->currentData(Qt::UserRole).toInt();
-      qint32 iEnumValueRight = m_spUi->pRightComboBox->currentData(Qt::UserRole).toInt();
-      if (iEnumValueLeft == EEditorWidget::eResourceWidget)
-      {
-        m_spUi->pRightComboBox->blockSignals(true);
-        m_spUi->pRightComboBox->setCurrentIndex(EEditorWidget::eSceneNodeWidget);
-        on_pRightComboBox_currentIndexChanged(EEditorWidget::eSceneNodeWidget);
-        m_spUi->pRightComboBox->blockSignals(false);
-      }
-      else if (iEnumValueRight == EEditorWidget::eResourceWidget)
-      {
-        m_spUi->pLeftComboBox->blockSignals(true);
-        m_spUi->pLeftComboBox->setCurrentIndex(EEditorWidget::eSceneNodeWidget);
-        on_pLeftComboBox_currentIndexChanged(EEditorWidget::eSceneNodeWidget);
-        m_spUi->pLeftComboBox->blockSignals(false);
-      }
-    }
     // script selected?
-    else if (QFileInfo(sName).suffix() == "js")
+    if (QFileInfo(sName).suffix() == "js")
     {
       locker.unlock();
       auto spResource = spDbManager->FindResource(m_spCurrentProject, sName);
       pWidget->UnloadResource();
-
-      qint32 iEnumValueLeft = m_spUi->pLeftComboBox->currentData(Qt::UserRole).toInt();
-      qint32 iEnumValueRight = m_spUi->pRightComboBox->currentData(Qt::UserRole).toInt();
-      if (iEnumValueLeft == EEditorWidget::eResourceWidget)
-      {
-        m_spUi->pRightComboBox->blockSignals(true);
-        m_spUi->pRightComboBox->setCurrentIndex(EEditorWidget::eSceneCodeEditorWidget);
-        on_pRightComboBox_currentIndexChanged(EEditorWidget::eSceneCodeEditorWidget);
-        m_spUi->pRightComboBox->blockSignals(false);
-      }
-      else if (iEnumValueRight == EEditorWidget::eResourceWidget)
-      {
-        m_spUi->pLeftComboBox->blockSignals(true);
-        m_spUi->pLeftComboBox->setCurrentIndex(EEditorWidget::eSceneCodeEditorWidget);
-        on_pLeftComboBox_currentIndexChanged(EEditorWidget::eSceneCodeEditorWidget);
-        m_spUi->pLeftComboBox->blockSignals(false);
-      }
-
       CEditorCodeWidget* pCodeWidget = GetWidget<CEditorCodeWidget>();
       pCodeWidget->LoadResource(spResource);
     }
@@ -281,24 +242,6 @@ void CEditorMainScreen::SlotDisplayResource(const QString& sName)
       locker.unlock();
       auto spResource = spDbManager->FindResource(m_spCurrentProject, sName);
       pWidget->UnloadResource();
-
-      qint32 iEnumValueLeft = m_spUi->pLeftComboBox->currentData(Qt::UserRole).toInt();
-      qint32 iEnumValueRight = m_spUi->pRightComboBox->currentData(Qt::UserRole).toInt();
-      if (iEnumValueLeft == EEditorWidget::eResourceWidget)
-      {
-        m_spUi->pRightComboBox->blockSignals(true);
-        m_spUi->pRightComboBox->setCurrentIndex(EEditorWidget::eResourceDisplay);
-        on_pRightComboBox_currentIndexChanged(EEditorWidget::eResourceDisplay);
-        m_spUi->pRightComboBox->blockSignals(false);
-      }
-      else if (iEnumValueRight == EEditorWidget::eResourceWidget)
-      {
-        m_spUi->pLeftComboBox->blockSignals(true);
-        m_spUi->pLeftComboBox->setCurrentIndex(EEditorWidget::eResourceDisplay);
-        on_pLeftComboBox_currentIndexChanged(EEditorWidget::eResourceDisplay);
-        m_spUi->pLeftComboBox->blockSignals(false);
-      }
-
       pWidget->LoadResource(spResource);
     }
   }

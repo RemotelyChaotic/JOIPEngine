@@ -106,7 +106,10 @@ SOURCES += \
     src/Scenes/FlowLayout.cpp \
     src/Scenes/TimerDisplayWidget.cpp \
     src/Scenes/TimerWidget.cpp \
-    src/Scenes/BackgroundWidget.cpp
+    src/Scenes/BackgroundWidget.cpp \
+    src/Style.cpp \
+    src/Widgets/MenuButton.cpp \
+    src/Widgets/TitleLabel.cpp
 
 HEADERS += \
     src/MainWindow.h \
@@ -169,7 +172,10 @@ HEADERS += \
     src/Scenes/TimerDisplayWidget.h \
     src/Scenes/TimerWidget.h \
     src/Scenes/BackgroundWidget.h \
-    src/Constants.h
+    src/Constants.h \
+    src/Style.h \
+    src/Widgets/MenuButton.h \
+    src/Widgets/TitleLabel.h
 
 FORMS += \
     src/MainWindow.ui \

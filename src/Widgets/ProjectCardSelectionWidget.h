@@ -1,6 +1,7 @@
 #ifndef PROJECTCARDSELECTIONWIDGET_H
 #define PROJECTCARDSELECTIONWIDGET_H
 
+#include <QPointer>
 #include <QWidget>
 #include <memory>
 
@@ -27,9 +28,12 @@ protected slots:
   void SlotCardClicked();
 
 private:
+  void AddDropShadow(QWidget* pWidget, const QColor& color);
+
   std::unique_ptr<Ui::CProjectCardSelectionWidget> m_spUi;
   std::shared_ptr<QMovie>                          m_spSpinner;
   std::weak_ptr<CDatabaseManager>                  m_wpDbManager;
+  QPointer<QWidget>                                m_pLastSelectedWidget;
   qint32                                           m_iSelectedProjectId;
   bool                                             m_bInitialized;
 };
