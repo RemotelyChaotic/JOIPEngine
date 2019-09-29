@@ -288,6 +288,15 @@ void CSceneMainScreen::SlotQuit()
   if (!m_bInitialized || nullptr == m_spCurrentProject) { return; }
 
   UnloadProject();
+  auto spScriptRunner = m_wpScriptRunner.lock();
+  if (nullptr != spScriptRunner)
+  {
+    auto spSignalEmmiter = spScriptRunner->SignalEmmitter();
+    if (nullptr != spSignalEmmiter)
+    {
+      spSignalEmmiter->SetScriptExecutionStatus(EScriptExecutionStatus::eStopped);
+    }
+  }
   emit SignalExitClicked();
 }
 

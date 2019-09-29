@@ -33,6 +33,9 @@ void CSceneScreen::Initialize()
 
   m_wpDbManager = CApplication::Instance()->System<CDatabaseManager>();
 
+  connect(m_spUi->pMainSceneScreen, &CSceneMainScreen::SignalExitClicked,
+          this, &CSceneScreen::SlotExitClicked, Qt::DirectConnection);
+
   m_spUi->pStackedWidget->setCurrentIndex(c_iPageIndexChoice);
 
   m_bInitialized = true;
@@ -77,6 +80,15 @@ void CSceneScreen::on_pOpenExistingProjectButton_clicked()
 //----------------------------------------------------------------------------------------
 //
 void CSceneScreen::on_pCancelButton_clicked()
+{
+  WIDGET_INITIALIZED_GUARD
+  m_spUi->pStackedWidget->setCurrentIndex(c_iPageIndexChoice);
+  emit m_spWindowContext->SignalChangeAppState(EAppState::eMainScreen);
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CSceneScreen::SlotExitClicked()
 {
   WIDGET_INITIALIZED_GUARD
   m_spUi->pStackedWidget->setCurrentIndex(c_iPageIndexChoice);

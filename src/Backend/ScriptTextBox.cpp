@@ -28,6 +28,8 @@ void CScriptTextBox::SetCurrentProject(tspProject spProject)
 //
 void CScriptTextBox::setBackgroundColors(QJSValue colors)
 {
+  if (!CheckIfScriptCanRun()) { return; }
+
   std::vector<QColor> colorsConverted = GetColors(colors, "setBackgroundColors()");
   emit m_spSignalEmitter->SignalTextBackgroundColorsChanged(colorsConverted);
 }
@@ -36,6 +38,8 @@ void CScriptTextBox::setBackgroundColors(QJSValue colors)
 //
 void CScriptTextBox::setTextColors(QJSValue colors)
 {
+  if (!CheckIfScriptCanRun()) { return; }
+
   std::vector<QColor> colorsConverted = GetColors(colors, "setTextColors()");
   emit m_spSignalEmitter->SignalTextColorsChanged(colorsConverted);
 }
@@ -44,6 +48,8 @@ void CScriptTextBox::setTextColors(QJSValue colors)
 //
 qint32 CScriptTextBox::showButtonPrompts(QJSValue vsLabels)
 {
+  if (!CheckIfScriptCanRun()) { return -1; }
+
   if (vsLabels.isArray())
   {
     QStringList vsStringLabels;
@@ -83,6 +89,8 @@ qint32 CScriptTextBox::showButtonPrompts(QJSValue vsLabels)
 //
 void CScriptTextBox::showText(QString sText)
 {
+  if (!CheckIfScriptCanRun()) { return; }
+
   emit m_spSignalEmitter->SignalShowText(sText);
 }
 
@@ -90,6 +98,8 @@ void CScriptTextBox::showText(QString sText)
 //
 QString CScriptTextBox::showInput()
 {
+  if (!CheckIfScriptCanRun()) { return QString(); }
+
   emit m_spSignalEmitter->SignalShowInput();
 
   // local loop to wait for answer
@@ -113,6 +123,8 @@ QString CScriptTextBox::showInput()
 //
 void CScriptTextBox::clear()
 {
+  if (!CheckIfScriptCanRun()) { return; }
+
   emit m_spSignalEmitter->SignalClearText();
 }
 
@@ -167,4 +179,20 @@ std::vector<QColor> CScriptTextBox::GetColors(const QJSValue& colors, const QStr
   }
 
   return colorsRet;
+}
+
+//----------------------------------------------------------------------------------------
+//
+bool CScriptTextBox::CheckIfScriptCanRun()
+{
+  if (m_spSignalEmitter->ScriptExecutionStatus()._to_integral() == EScriptExecutionStatus::eStopped)
+  {
+    QJSValue val = m_pEngine->evaluate("f();"); //undefined function -> create error
+    Q_UNUSED(val);
+    return false;
+  }
+  else
+  {
+    return true;
+  }
 }

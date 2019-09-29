@@ -31,6 +31,8 @@ public slots:
   void stopSound();
 
 private:
+  bool CheckIfScriptCanRun();
+
   std::shared_ptr<CScriptRunnerSignalEmiter> m_spSignalEmitter;
   tspProject                       m_spProject;
   std::weak_ptr<CDatabaseManager>  m_wpDbManager;

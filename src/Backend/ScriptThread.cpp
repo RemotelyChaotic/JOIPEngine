@@ -24,6 +24,8 @@ CScriptThread::~CScriptThread()
 //
 void CScriptThread::sleep(qint32 iTimeS, QJSValue bSkippable)
 {
+  if (!CheckIfScriptCanRun()) { return; }
+
   bool bSkippableFlag = false;
   if (bSkippable.isBool())
   {
@@ -51,5 +53,21 @@ void CScriptThread::sleep(qint32 iTimeS, QJSValue bSkippable)
     emit m_spSignalEmitter->SignalSkippableWait(iTimeS);
     timer.start();
     loop.exec();
+  }
+}
+
+//----------------------------------------------------------------------------------------
+//
+bool CScriptThread::CheckIfScriptCanRun()
+{
+  if (m_spSignalEmitter->ScriptExecutionStatus()._to_integral() == EScriptExecutionStatus::eStopped)
+  {
+    QJSValue val = m_pEngine->evaluate("f();"); //undefined function -> create error
+    Q_UNUSED(val);
+    return false;
+  }
+  else
+  {
+    return true;
   }
 }

@@ -26,6 +26,7 @@ public:
 protected slots:
   void on_pOpenExistingProjectButton_clicked();
   void on_pCancelButton_clicked();
+  void SlotExitClicked();
 
 private:
   std::unique_ptr<Ui::CSceneScreen>        m_spUi;

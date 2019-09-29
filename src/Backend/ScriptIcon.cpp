@@ -28,6 +28,8 @@ void CScriptIcon::SetCurrentProject(tspProject spProject)
 //
 void CScriptIcon::hide(QJSValue resource)
 {
+  if (!CheckIfScriptCanRun()) { return; }
+
   if (resource.isString())
   {
     const QString sResource = resource.toString();
@@ -59,6 +61,8 @@ void CScriptIcon::hide(QJSValue resource)
 //
 void CScriptIcon::show(QJSValue resource)
 {
+  if (!CheckIfScriptCanRun()) { return; }
+
   auto spDbManager = m_wpDbManager.lock();
   if (nullptr != spDbManager)
   {
@@ -103,5 +107,21 @@ void CScriptIcon::show(QJSValue resource)
       QString sError = tr("Wrong argument-type to show(). String or resource was expected.");
       emit m_spSignalEmitter->SignalShowError(sError, QtMsgType::QtWarningMsg);
     }
+  }
+}
+
+//----------------------------------------------------------------------------------------
+//
+bool CScriptIcon::CheckIfScriptCanRun()
+{
+  if (m_spSignalEmitter->ScriptExecutionStatus()._to_integral() == EScriptExecutionStatus::eStopped)
+  {
+    QJSValue val = m_pEngine->evaluate("f();"); //undefined function -> create error
+    Q_UNUSED(val);
+    return false;
+  }
+  else
+  {
+    return true;
   }
 }

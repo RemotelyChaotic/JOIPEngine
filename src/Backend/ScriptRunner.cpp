@@ -164,6 +164,8 @@ void CScriptRunner::SlotLoadScript(tspScene spScene, tspResource spResource)
       m_pScriptIcon->SetCurrentProject(spResource->m_spParent);
       m_pTextBoxObject->SetCurrentProject(spResource->m_spParent);
 
+      m_spSignalEmitter->SetScriptExecutionStatus(EScriptExecutionStatus::eRunning);
+
       m_runFunction = m_spScriptEngine->evaluate(
         QString("(function() { %1 })").arg(sScript));
 

@@ -36,6 +36,7 @@ signals:
 
 private:
   std::vector<QColor> GetColors(const QJSValue& color, const QString& sSource);
+  bool CheckIfScriptCanRun();
 
   std::shared_ptr<CScriptRunnerSignalEmiter> m_spSignalEmitter;
   tspProject                       m_spProject;

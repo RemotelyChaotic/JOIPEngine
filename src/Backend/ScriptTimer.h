@@ -26,6 +26,8 @@ public slots:
   void waitForTimer();
 
 private:
+  bool CheckIfScriptCanRun();
+
   std::shared_ptr<CScriptRunnerSignalEmiter> m_spSignalEmitter;
   QJSEngine*               m_pEngine;
 };

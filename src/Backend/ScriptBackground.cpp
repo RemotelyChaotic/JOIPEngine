@@ -27,6 +27,8 @@ void CScriptBackground::SetCurrentProject(tspProject spProject)
 //
 void CScriptBackground::setBackgroundColor(QJSValue color)
 {
+  if (!CheckIfScriptCanRun()) { return; }
+
   if (color.isString())
   {
     emit m_spSignalEmitter->SignalBackgroundColorChanged(
@@ -63,6 +65,8 @@ void CScriptBackground::setBackgroundColor(QJSValue color)
 //
 void CScriptBackground::setBackgroundTexture(QJSValue resource)
 {
+  if (!CheckIfScriptCanRun()) { return; }
+
   auto spDbManager = m_wpDbManager.lock();
   if (nullptr != spDbManager)
   {
@@ -109,3 +113,20 @@ void CScriptBackground::setBackgroundTexture(QJSValue resource)
     }
   }
 }
+
+//----------------------------------------------------------------------------------------
+//
+bool CScriptBackground::CheckIfScriptCanRun()
+{
+  if (m_spSignalEmitter->ScriptExecutionStatus()._to_integral() == EScriptExecutionStatus::eStopped)
+  {
+    QJSValue val = m_pEngine->evaluate("f();"); //undefined function -> create error
+    Q_UNUSED(val);
+    return false;
+  }
+  else
+  {
+    return true;
+  }
+}
+

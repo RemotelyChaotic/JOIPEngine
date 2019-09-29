@@ -1,11 +1,16 @@
 #ifndef SCRIPTRUNNERSIGNALEMITER_H
 #define SCRIPTRUNNERSIGNALEMITER_H
 
+#include <enum.h>
 #include <QColor>
 #include <qlogging.h>
 #include <QObject>
 #include <QString>
 #include <memory>
+
+BETTER_ENUM(EScriptExecutionStatus, qint32,
+            eRunning = 0,
+            eStopped = 1);
 
 struct SResource;
 typedef std::shared_ptr<SResource> tspResource;
@@ -17,6 +22,10 @@ class CScriptRunnerSignalEmiter : public QObject
 public:
   CScriptRunnerSignalEmiter();
   ~CScriptRunnerSignalEmiter();
+
+public:
+  void SetScriptExecutionStatus(EScriptExecutionStatus status);
+  EScriptExecutionStatus ScriptExecutionStatus();
 
 signals:
   // generic / controll
@@ -62,6 +71,9 @@ signals:
   // Thread
   void SignalSkippableWait(qint32 iTimeS);
   void SignalWaitSkipped();
+
+private:
+  QAtomicInt     m_bScriptExecutionStatus;
 };
 
 #endif // SCRIPTRUNNERSIGNALEMITER_H

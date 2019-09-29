@@ -27,6 +27,8 @@ void CScriptMediaPlayer::SetCurrentProject(tspProject spProject)
 //
 void CScriptMediaPlayer::show(QJSValue resource)
 {
+  if (!CheckIfScriptCanRun()) { return; }
+
   auto spDbManager = m_wpDbManager.lock();
   if (nullptr != spDbManager)
   {
@@ -78,6 +80,8 @@ void CScriptMediaPlayer::show(QJSValue resource)
 //
 void CScriptMediaPlayer::play(QJSValue resource)
 {
+  if (!CheckIfScriptCanRun()) { return; }
+
   auto spDbManager = m_wpDbManager.lock();
   if (nullptr != spDbManager)
   {
@@ -133,6 +137,7 @@ void CScriptMediaPlayer::play(QJSValue resource)
 //
 void CScriptMediaPlayer::pauseVideo()
 {
+  if (!CheckIfScriptCanRun()) { return; }
   emit m_spSignalEmitter->SignalPauseVideo();
 }
 
@@ -140,6 +145,7 @@ void CScriptMediaPlayer::pauseVideo()
 //
 void CScriptMediaPlayer::stopVideo()
 {
+  if (!CheckIfScriptCanRun()) { return; }
   emit m_spSignalEmitter->SignalStopVideo();
 }
 
@@ -147,6 +153,7 @@ void CScriptMediaPlayer::stopVideo()
 //
 void CScriptMediaPlayer::pauseSound()
 {
+  if (!CheckIfScriptCanRun()) { return; }
   emit m_spSignalEmitter->SignalPauseSound();
 }
 
@@ -154,5 +161,22 @@ void CScriptMediaPlayer::pauseSound()
 //
 void CScriptMediaPlayer::stopSound()
 {
+  if (!CheckIfScriptCanRun()) { return; }
   emit m_spSignalEmitter->SignalStopSound();
+}
+
+//----------------------------------------------------------------------------------------
+//
+bool CScriptMediaPlayer::CheckIfScriptCanRun()
+{
+  if (m_spSignalEmitter->ScriptExecutionStatus()._to_integral() == EScriptExecutionStatus::eStopped)
+  {
+    QJSValue val = m_pEngine->evaluate("f();"); //undefined function -> create error
+    Q_UNUSED(val);
+    return false;
+  }
+  else
+  {
+    return true;
+  }
 }
