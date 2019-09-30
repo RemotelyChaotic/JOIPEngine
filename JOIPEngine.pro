@@ -203,6 +203,9 @@ FORMS += \
 RESOURCES += \
     resources.qrc
 
+RC_ICONS = resources/img/Icon.ico
+RC_FILE = version_win.rc
+
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin
 else: unix:!android: target.path = /opt/$${TARGET}/bin

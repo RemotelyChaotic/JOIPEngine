@@ -53,6 +53,7 @@ private slots:
 private:
   void ConnectAllSignals();
   void DisconnectAllSignals();
+  void NextSkript();
 
 private:
   std::unique_ptr<Ui::CSceneMainScreen>                       m_spUi;

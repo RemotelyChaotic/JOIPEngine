@@ -53,6 +53,8 @@ void CScriptThread::sleep(qint32 iTimeS, QJSValue bSkippable)
     emit m_spSignalEmitter->SignalSkippableWait(iTimeS);
     timer.start();
     loop.exec();
+    timer.disconnect();
+    loop.disconnect();
   }
 }
 

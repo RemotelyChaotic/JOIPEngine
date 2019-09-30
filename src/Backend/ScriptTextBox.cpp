@@ -73,6 +73,7 @@ qint32 CScriptTextBox::showButtonPrompts(QJSValue vsLabels)
       emit this->SignalQuitLoop();
     }, Qt::QueuedConnection);
     loop.exec();
+    loop.disconnect();
 
     return iReturnValue;
   }
@@ -115,6 +116,7 @@ QString CScriptTextBox::showInput()
     emit this->SignalQuitLoop();
   }, Qt::QueuedConnection);
   loop.exec();
+  loop.disconnect();
 
   return sReturnValue;
 }

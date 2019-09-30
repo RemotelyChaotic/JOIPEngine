@@ -152,7 +152,7 @@ void CBackgroundWidget::SlotLoadFinished()
 {
   if (m_iLoadState == ELoadState::eFinished)
   {
-    m_imageMutex.lock();
+    QMutexLocker locker(&m_imageMutex);
     if (nullptr != m_spLoadedPixmap)
     {
       m_backgroundPixmap = *m_spLoadedPixmap;

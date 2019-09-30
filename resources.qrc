@@ -31,5 +31,6 @@
         <file>resources/img/ButtonArrowUp.png</file>
         <file>resources/img/ButtonDotsHoriz.png</file>
         <file>resources/img/ButtonDotsVert.png</file>
+        <file>resources/img/Icon.ico</file>
     </qresource>
 </RCC>

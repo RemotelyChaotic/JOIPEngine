@@ -78,6 +78,7 @@ void CScriptTimer::waitForTimer()
           &loop, &QEventLoop::quit, Qt::QueuedConnection);
   emit m_spSignalEmitter->SignalWaitForTimer();
   loop.exec();
+  loop.disconnect();
 }
 
 //----------------------------------------------------------------------------------------

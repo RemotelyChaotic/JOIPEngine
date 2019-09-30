@@ -106,7 +106,8 @@ tspScene CProjectRunner::NextScene(const QString sName)
 
     if (nullptr != pSceneModel)
     {
-      qint32 iId = pSceneModel->ProjectId();
+      m_pCurrentNode = it->second;
+      qint32 iId = pSceneModel->SceneId();
       auto spDbManager = m_wpDbManager.lock();
       if (nullptr != spDbManager)
       {
@@ -210,7 +211,7 @@ void CProjectRunner::ResolveNextPossibleNodes(Node* pNode, std::vector<QtNodes::
     for (quint32 i = 0; iOutPorts > i; i++)
     {
       auto pConnectionsMap =
-          m_pCurrentNode->nodeState().connections(PortType::Out, static_cast<qint32>(i));
+          pNode->nodeState().connections(PortType::Out, static_cast<qint32>(i));
       for (auto it = pConnectionsMap.begin(); pConnectionsMap.end() != it; ++it)
       {
         QtNodes::Node* pNextNode = it->second->getNode(PortType::In);
@@ -232,14 +233,26 @@ void CProjectRunner::ResolveNextPossibleNodes(Node* pNode, std::vector<QtNodes::
   }
   else
   {
-    std::uniform_int_distribution<> dis(0, static_cast<qint32>(iOutPorts - 1));
+    // check which maps lead to anything
+    std::vector<quint32> viValidIndicees;
+    for (quint32 i = 0; iOutPorts > i; i++)
+    {
+      auto pConnectionsMap =
+          pNode->nodeState().connections(PortType::Out, static_cast<qint32>(i));
+      if (pConnectionsMap.size() > 0)
+      {
+        viValidIndicees.push_back(i);
+      }
+    }
+
+    std::uniform_int_distribution<> dis(0, static_cast<qint32>(viValidIndicees.size() - 1));
 
     auto pConnectionsMap =
-        m_pCurrentNode->nodeState().connections(PortType::Out,
-                                                dis(m_generator));
+        pNode->nodeState().connections(PortType::Out,
+                                       static_cast<qint32>(viValidIndicees[static_cast<quint32>(dis(m_generator))]));
     for (auto it = pConnectionsMap.begin(); pConnectionsMap.end() != it; ++it)
     {
-      QtNodes::Node* pNextNode = it->second->getNode(PortType::Out);
+      QtNodes::Node* pNextNode = it->second->getNode(PortType::In);
       CSceneNodeModel* pSceneModel =
         dynamic_cast<CSceneNodeModel*>(pNextNode->nodeDataModel());
       CEndNodeModel* pEndModel =
@@ -283,7 +296,7 @@ bool CProjectRunner::ResolveNextScene()
 
       if (nullptr != pSceneModel)
       {
-        qint32 iId = pSceneModel->ProjectId();
+        qint32 iId = pSceneModel->SceneId();
         auto spDbManager = m_wpDbManager.lock();
         if (nullptr != spDbManager)
         {

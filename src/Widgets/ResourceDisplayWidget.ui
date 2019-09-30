@@ -13,6 +13,9 @@
   <property name="windowTitle">
    <string>Form</string>
   </property>
+  <property name="styleSheet">
+   <string notr="true">background-color: transparent;</string>
+  </property>
   <layout class="QGridLayout" name="gridLayout">
    <property name="leftMargin">
     <number>0</number>
@@ -32,6 +35,9 @@
    <item row="0" column="0">
     <widget class="QStackedWidget" name="pStackedWidget">
      <widget class="QWidget" name="pPageLoading">
+      <property name="styleSheet">
+       <string notr="true">background-color: transparent;</string>
+      </property>
       <layout class="QGridLayout" name="gridLayout_5">
        <property name="leftMargin">
         <number>0</number>
@@ -94,6 +100,9 @@
            <height>128</height>
           </size>
          </property>
+         <property name="styleSheet">
+          <string notr="true">background-color: transparent;</string>
+         </property>
          <property name="text">
           <string/>
          </property>
@@ -131,6 +140,9 @@
       </layout>
      </widget>
      <widget class="QWidget" name="pPageImage">
+      <property name="styleSheet">
+       <string notr="true">background-color: transparent;</string>
+      </property>
       <layout class="QGridLayout" name="gridLayout_2">
        <property name="leftMargin">
         <number>0</number>
@@ -149,6 +161,9 @@
        </property>
        <item row="0" column="0">
         <widget class="QLabel" name="pImage">
+         <property name="styleSheet">
+          <string notr="true">background-color: transparent;</string>
+         </property>
          <property name="text">
           <string/>
          </property>
@@ -160,6 +175,9 @@
       </layout>
      </widget>
      <widget class="QWidget" name="pPageMedia">
+      <property name="styleSheet">
+       <string notr="true">background-color: transparent;</string>
+      </property>
       <layout class="QGridLayout" name="gridLayout_3">
        <property name="leftMargin">
         <number>0</number>
@@ -177,11 +195,18 @@
         <number>0</number>
        </property>
        <item row="0" column="0">
-        <widget class="CMediaPlayer" name="pMediaPlayer" native="true"/>
+        <widget class="CMediaPlayer" name="pMediaPlayer" native="true">
+         <property name="styleSheet">
+          <string notr="true">background-color: transparent;</string>
+         </property>
+        </widget>
        </item>
       </layout>
      </widget>
      <widget class="QWidget" name="pPageWeb">
+      <property name="styleSheet">
+       <string notr="true">background-color: transparent;</string>
+      </property>
       <layout class="QGridLayout" name="gridLayout_4">
        <property name="leftMargin">
         <number>0</number>
@@ -210,6 +235,9 @@
       </layout>
      </widget>
      <widget class="QWidget" name="pPageOther">
+      <property name="styleSheet">
+       <string notr="true">background-color: transparent;</string>
+      </property>
       <layout class="QGridLayout" name="gridLayout_6">
        <property name="leftMargin">
         <number>0</number>
@@ -227,11 +255,18 @@
         <number>0</number>
        </property>
        <item row="0" column="0">
-        <widget class="QTextEdit" name="pTextEdit"/>
+        <widget class="QTextEdit" name="pTextEdit">
+         <property name="styleSheet">
+          <string notr="true">background-color: transparent;</string>
+         </property>
+        </widget>
        </item>
       </layout>
      </widget>
      <widget class="QWidget" name="pPageError">
+      <property name="styleSheet">
+       <string notr="true">background-color: transparent;</string>
+      </property>
       <layout class="QGridLayout" name="gridLayout_7">
        <property name="leftMargin">
         <number>0</number>
@@ -250,6 +285,9 @@
        </property>
        <item row="0" column="0">
         <widget class="QLabel" name="pErrorImage">
+         <property name="styleSheet">
+          <string notr="true">background-color: transparent;</string>
+         </property>
          <property name="text">
           <string/>
          </property>

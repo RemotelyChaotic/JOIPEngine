@@ -67,10 +67,11 @@ void CTextBoxWidget::Initialize()
 //
 void CTextBoxWidget::SlotClearText()
 {
-  QLayoutItem *item;
-  while ((item = m_spUi->pContent->layout()->takeAt(0)))
+  QLayoutItem* pItem;
+  while ((pItem = m_spUi->pContent->layout()->takeAt(0)))
   {
-    delete item;
+    delete pItem->widget();
+    delete pItem;
   }
 }
 
@@ -134,6 +135,9 @@ void CTextBoxWidget::SlotShowButtonPrompts(QStringList vsLabels)
           .arg(iIndex < m_vCurrentTextColor.size() ? m_vCurrentTextColor[iIndex].green() : 255)
           .arg(iIndex < m_vCurrentTextColor.size() ? m_vCurrentTextColor[iIndex].blue() : 255));
       pButton->setContentsMargins(6,6,6,6);
+      QFont wFont = pButton->font();
+      wFont.setPixelSize(16);
+      pButton->setFont(wFont);
       AddDropShadow(pButton);
 
       connect(pButton, &QAbstractButton::clicked,
@@ -191,6 +195,9 @@ void CTextBoxWidget::SlotShowInput()
          .arg(0 < m_vCurrentTextColor.size() ? m_vCurrentTextColor[0].red() : 255)
          .arg(0 < m_vCurrentTextColor.size() ? m_vCurrentTextColor[0].green() : 255)
          .arg(0 < m_vCurrentTextColor.size() ? m_vCurrentTextColor[0].blue() : 255));
+    QFont wFont = pEdit->font();
+    wFont.setPixelSize(16);
+    pEdit->setFont(wFont);
     pHorizontalLayout2->addWidget(pEdit);
 
     connect(pEdit, &QLineEdit::editingFinished,
@@ -242,6 +249,9 @@ void CTextBoxWidget::SlotShowText(QString sText)
          .arg(0 < m_vCurrentTextColor.size() ? m_vCurrentTextColor[0].red() : 255)
          .arg(0 < m_vCurrentTextColor.size() ? m_vCurrentTextColor[0].green() : 255)
          .arg(0 < m_vCurrentTextColor.size() ? m_vCurrentTextColor[0].blue() : 255));
+    QFont wFont = pLabel->font();
+    wFont.setPixelSize(16);
+    pLabel->setFont(wFont);
     pHorizontalLayout2->addWidget(pLabel);
 
 

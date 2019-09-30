@@ -102,6 +102,14 @@ void CSceneMainScreen::LoadProject(qint32 iId)
   {
     m_spCurrentProject = spDbManager->FindProject(iId);
     m_spProjectRunner->LoadProject(m_spCurrentProject);
+
+    m_spCurrentProject->m_rwLock.lockForRead();
+    QString sTitle = m_spCurrentProject->m_sTitleCard;
+    m_spCurrentProject->m_rwLock.unlock();
+
+    tspResource spTitle = spDbManager->FindResource(m_spCurrentProject, sTitle);
+    m_spUi->pResourceDisplay->UnloadResource();
+    m_spUi->pResourceDisplay->LoadResource(spTitle);
   }
 
   auto spScriptRunner = m_wpScriptRunner.lock();
@@ -113,7 +121,7 @@ void CSceneMainScreen::LoadProject(qint32 iId)
 
   ConnectAllSignals();
   m_pBackground->SetBackgroundTexture("://resources/img/Background.png");
-  SlotNextSkript();
+  NextSkript();
 }
 
 //----------------------------------------------------------------------------------------
@@ -131,6 +139,8 @@ void CSceneMainScreen::UnloadProject()
 
   m_spProjectRunner->UnloadProject();
   m_spCurrentProject = nullptr;
+
+  m_spUi->pTextBoxDisplay->SlotClearText();
 
   DisconnectAllSignals();
 }
@@ -189,37 +199,8 @@ void CSceneMainScreen::SlotNextSkript()
 {
   if (!m_bInitialized || nullptr == m_spCurrentProject) { return; }
 
-  auto spDbManager = m_wpDbManager.lock();
-  if (nullptr == spDbManager) { return; }
-
-  m_spUi->pTextBoxDisplay->SlotClearText();
-
-  QStringList sScenes = m_spProjectRunner->PossibleScenes();
-  if (sScenes.size() > 0)
-  {
-    std::random_device rd;
-    std::mt19937 generator(rd());
-    std::uniform_int_distribution<> dis(0, static_cast<qint32>(sScenes.size() - 1));
-    tspScene spScene = m_spProjectRunner->NextScene(sScenes[dis(generator)]);
-    if (nullptr != spScene)
-    {
-      // load script
-      auto spScriptRunner = m_wpScriptRunner.lock();
-      if (nullptr != spScriptRunner && nullptr != spDbManager)
-      {
-        QReadLocker lockerScene(&spScene->m_rwLock);
-        QString sScript = spScene->m_sScript;
-        lockerScene.unlock();
-        QMetaObject::invokeMethod(spScriptRunner.get(), "SlotLoadScript", Qt::QueuedConnection,
-                                  Q_ARG(tspScene, spScene),
-                                  Q_ARG(tspResource, spDbManager->FindResource(m_spCurrentProject, sScript)));
-      }
-    }
-    else
-    {
-      SlotQuit();
-    }
-  }
+  m_spProjectRunner->ResolveScenes();
+  NextSkript();
 }
 
 //----------------------------------------------------------------------------------------
@@ -295,6 +276,7 @@ void CSceneMainScreen::SlotQuit()
     if (nullptr != spSignalEmmiter)
     {
       spSignalEmmiter->SetScriptExecutionStatus(EScriptExecutionStatus::eStopped);
+      emit spSignalEmmiter->SignalInterruptLoops();
     }
   }
   emit SignalExitClicked();
@@ -513,5 +495,42 @@ void CSceneMainScreen::DisconnectAllSignals()
             m_spUi->pInfoDisplay, &CInformationWidget::SlotShowSkipIcon);
     disconnect(m_spUi->pInfoDisplay, &CInformationWidget::SignalWaitSkipped,
             spSignalEmmiter.get(), &CScriptRunnerSignalEmiter::SignalWaitSkipped);
+  }
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CSceneMainScreen::NextSkript()
+{
+  auto spDbManager = m_wpDbManager.lock();
+  if (nullptr == spDbManager) { return; }
+
+  m_spUi->pTextBoxDisplay->SlotClearText();
+
+  QStringList sScenes = m_spProjectRunner->PossibleScenes();
+  if (sScenes.size() > 0)
+  {
+    std::random_device rd;
+    std::mt19937 generator(rd());
+    std::uniform_int_distribution<> dis(0, static_cast<qint32>(sScenes.size() - 1));
+    tspScene spScene = m_spProjectRunner->NextScene(sScenes[dis(generator)]);
+    if (nullptr != spScene)
+    {
+      // load script
+      auto spScriptRunner = m_wpScriptRunner.lock();
+      if (nullptr != spScriptRunner && nullptr != spDbManager)
+      {
+        QReadLocker lockerScene(&spScene->m_rwLock);
+        QString sScript = spScene->m_sScript;
+        lockerScene.unlock();
+        QMetaObject::invokeMethod(spScriptRunner.get(), "SlotLoadScript", Qt::QueuedConnection,
+                                  Q_ARG(tspScene, spScene),
+                                  Q_ARG(tspResource, spDbManager->FindResource(m_spCurrentProject, sScript)));
+      }
+    }
+    else
+    {
+      SlotQuit();
+    }
   }
 }

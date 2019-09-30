@@ -169,8 +169,8 @@ int CFlowLayout::doLayout(const QRect &rect, bool testOnly) const
     qint32 iNextX = x + pItem->sizeHint().width() + iSpaceX;
     if (iNextX - iSpaceX > effectiveRect.right() && iLineHeight > 0)
     {
-      uiCurrentIndex++;
       viTotalWidth.push_back(0);
+      uiCurrentIndex++;
       x = effectiveRect.x();
       y = y + iLineHeight + iSpaceY;
       viTotalWidth[uiCurrentIndex] += pItem->sizeHint().width() + iSpaceX;
@@ -205,10 +205,13 @@ int CFlowLayout::doLayout(const QRect &rect, bool testOnly) const
     if (iNextX - iSpaceX > effectiveRect.right() && iLineHeight > 0)
     {
       uiCurrentIndex++;
-      x = effectiveRect.x() + effectiveRect.width() / 2 - viTotalWidth[uiCurrentIndex] / 2;
-      y = y + iLineHeight + iSpaceY;
-      iNextX = x + pItem->sizeHint().width() + iSpaceX;
-      iLineHeight = 0;
+      if (m_vpItemList.size() > static_cast<qint32>(uiCurrentIndex))
+      {
+        x = effectiveRect.x() + effectiveRect.width() / 2 - viTotalWidth[uiCurrentIndex] / 2;
+        y = y + iLineHeight + iSpaceY;
+        iNextX = x + pItem->sizeHint().width() + iSpaceX;
+        iLineHeight = 0;
+      }
     }
 
     if (!testOnly)
