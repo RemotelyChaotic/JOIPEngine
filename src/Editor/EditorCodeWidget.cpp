@@ -4,7 +4,12 @@
 #include "Backend/DatabaseManager.h"
 #include "Backend/Project.h"
 #include "Backend/Scene.h"
+#include "Script/BackgroundSnippetOverlay.h"
+#include "Script/IconSnippetOverlay.h"
+#include "Script/ResourceSnippetOverlay.h"
 #include "Script/ScriptHighlighter.h"
+#include "Script/TextSnippetOverlay.h"
+#include "Script/TimerSnippetOverlay.h"
 #include "ui_EditorCodeWidget.h"
 #include "ui_EditorActionBar.h"
 
@@ -23,6 +28,11 @@ namespace
 CEditorCodeWidget::CEditorCodeWidget(QWidget* pParent) :
   CEditorWidgetBase(pParent),
   m_spUi(new Ui::CEditorCodeWidget),
+  m_spBackgroundSnippetOverlay(std::make_unique<CBackgroundSnippetOverlay>()),
+  m_spIconSnippetOverlay(std::make_unique<CIconSnippetOverlay>()),
+  m_spResourceSnippetOverlay(std::make_unique<CResourceSnippetOverlay>()),
+  m_spTextSnippetOverlay(std::make_unique<CTextSnippetOverlay>()),
+  m_spTimerSnippetOverlay(std::make_unique<CTimerSnippetOverlay>()),
   m_spSettings(CApplication::Instance()->Settings()),
   m_spCurrentProject(nullptr),
   m_cachedScriptsMap(),
@@ -54,6 +64,27 @@ void CEditorCodeWidget::Initialize()
     connect(spDbManager.get(), &CDatabaseManager::SignalSceneRenamed,
             this, &CEditorCodeWidget::SlotSceneRenamed);
   }
+
+  m_spBackgroundSnippetOverlay->Initialize(ResourceModel());
+  m_spIconSnippetOverlay->Initialize(ResourceModel());
+  m_spResourceSnippetOverlay->Initialize(ResourceModel());
+
+  m_spBackgroundSnippetOverlay->Hide();
+  m_spIconSnippetOverlay->Hide();
+  m_spResourceSnippetOverlay->Hide();
+  m_spTextSnippetOverlay->Hide();
+  m_spTimerSnippetOverlay->Hide();
+
+  connect(m_spBackgroundSnippetOverlay.get(), &CBackgroundSnippetOverlay::SignalBackgroundCode,
+          this, &CEditorCodeWidget::SlotInsertGeneratedCode);
+  connect(m_spIconSnippetOverlay.get(), &CIconSnippetOverlay::SignalIconCode,
+          this, &CEditorCodeWidget::SlotInsertGeneratedCode);
+  connect(m_spResourceSnippetOverlay.get(), &CResourceSnippetOverlay::SignalResourceCode,
+          this, &CEditorCodeWidget::SlotInsertGeneratedCode);
+  connect(m_spTextSnippetOverlay.get(), &CTextSnippetOverlay::SignalTextSnippetCode,
+          this, &CEditorCodeWidget::SlotInsertGeneratedCode);
+  connect(m_spTimerSnippetOverlay.get(), &CTimerSnippetOverlay::SignalTimerCode,
+          this, &CEditorCodeWidget::SlotInsertGeneratedCode);
 
   m_iLastIndex = m_spUi->pSceneComboBox->currentIndex();
 
@@ -109,6 +140,12 @@ void CEditorCodeWidget::UnloadProject()
 
   m_spUi->pSceneComboBox->clear();
   m_cachedScriptsMap.clear();
+
+  m_spBackgroundSnippetOverlay->Hide();
+  m_spIconSnippetOverlay->Hide();
+  m_spResourceSnippetOverlay->Hide();
+  m_spTextSnippetOverlay->Hide();
+  m_spTimerSnippetOverlay->Hide();
 }
 
 //----------------------------------------------------------------------------------------
@@ -207,11 +244,16 @@ void CEditorCodeWidget::OnActionBarAboutToChange()
 {
   if (nullptr != ActionBar())
   {
-    // TODO: delete connections
-    //disconnect(ActionBar()->m_spUi->pPlayButton, &QPushButton::clicked,
-    //        m_spUi->pResourceDisplay, &CResourceDisplayWidget::SlotPlayPause);
-    //disconnect(ActionBar()->m_spUi->pStopButton, &QPushButton::clicked,
-    //        m_spUi->pResourceDisplay, &CResourceDisplayWidget::SlotStop);
+    disconnect(ActionBar()->m_spUi->pAddShowBackgroundCode, &QPushButton::clicked,
+            m_spBackgroundSnippetOverlay.get(), &CBackgroundSnippetOverlay::Show);
+    disconnect(ActionBar()->m_spUi->pAddShowIconCode, &QPushButton::clicked,
+            m_spIconSnippetOverlay.get(), &CIconSnippetOverlay::Show);
+    disconnect(ActionBar()->m_spUi->pAddShowImageCode, &QPushButton::clicked,
+            m_spResourceSnippetOverlay.get(), &CResourceSnippetOverlay::Show);
+    disconnect(ActionBar()->m_spUi->pAddTextCode, &QPushButton::clicked,
+            m_spTextSnippetOverlay.get(), &CTextSnippetOverlay::Show);
+    disconnect(ActionBar()->m_spUi->pAddTimerCode, &QPushButton::clicked,
+            m_spTimerSnippetOverlay.get(), &CTimerSnippetOverlay::Show);
   }
 }
 
@@ -219,16 +261,19 @@ void CEditorCodeWidget::OnActionBarAboutToChange()
 //
 void CEditorCodeWidget::OnActionBarChanged()
 {
-  // connections for actionbar
   if (nullptr != ActionBar())
   {
-    // TODO: show actions and create connections
-    ActionBar()->HideAllBars();
-    //UpdateActionBar();
-    //connect(ActionBar()->m_spUi->pPlayButton, &QPushButton::clicked,
-    //        m_spUi->pResourceDisplay, &CResourceDisplayWidget::SlotPlayPause);
-    //connect(ActionBar()->m_spUi->pStopButton, &QPushButton::clicked,
-    //        m_spUi->pResourceDisplay, &CResourceDisplayWidget::SlotStop);
+    ActionBar()->ShowCodeActionBar();
+    connect(ActionBar()->m_spUi->pAddShowBackgroundCode, &QPushButton::clicked,
+            m_spBackgroundSnippetOverlay.get(), &CBackgroundSnippetOverlay::Show);
+    connect(ActionBar()->m_spUi->pAddShowIconCode, &QPushButton::clicked,
+            m_spIconSnippetOverlay.get(), &CIconSnippetOverlay::Show);
+    connect(ActionBar()->m_spUi->pAddShowImageCode, &QPushButton::clicked,
+            m_spResourceSnippetOverlay.get(), &CResourceSnippetOverlay::Show);
+    connect(ActionBar()->m_spUi->pAddTextCode, &QPushButton::clicked,
+            m_spTextSnippetOverlay.get(), &CTextSnippetOverlay::Show);
+    connect(ActionBar()->m_spUi->pAddTimerCode, &QPushButton::clicked,
+            m_spTimerSnippetOverlay.get(), &CTimerSnippetOverlay::Show);
   }
 }
 
@@ -366,6 +411,13 @@ void CEditorCodeWidget::SlotFileChanged(const QString& sPath)
       }
     }
   }
+}
+
+void CEditorCodeWidget::SlotInsertGeneratedCode(const QString& sCode)
+{
+  WIDGET_INITIALIZED_GUARD
+  if (nullptr == m_spCurrentProject) { return; }
+  m_spUi->pCodeEdit->insertPlainText(sCode);
 }
 
 //----------------------------------------------------------------------------------------

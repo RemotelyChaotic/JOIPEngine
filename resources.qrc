@@ -32,5 +32,10 @@
         <file>resources/img/ButtonDotsHoriz.png</file>
         <file>resources/img/ButtonDotsVert.png</file>
         <file>resources/img/Icon.ico</file>
+        <file>resources/img/ButtonBackground.png</file>
+        <file>resources/img/ButtonClock.png</file>
+        <file>resources/img/ButtonIcon.png</file>
+        <file>resources/img/ButtonImage.png</file>
+        <file>resources/img/ButtonText.png</file>
     </qresource>
 </RCC>

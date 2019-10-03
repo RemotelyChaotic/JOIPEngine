@@ -6,6 +6,7 @@
 #include "EditorSceneNodeWidget.h"
 #include "Backend/DatabaseManager.h"
 #include "Backend/Project.h"
+#include "Resources/ResourceTreeItemModel.h"
 #include "ui_EditorMainScreen.h"
 #include "ui_EditorActionBar.h"
 
@@ -27,6 +28,7 @@ namespace
 CEditorMainScreen::CEditorMainScreen(QWidget* pParent) :
   QWidget(pParent),
   m_spUi(std::make_unique<Ui::CEditorMainScreen>()),
+  m_spResourceTreeModel(std::make_unique<CResourceTreeItemModel>()),
   m_spWidgetsMap(),
   m_spCurrentProject(nullptr),
   m_wpDbManager(),
@@ -35,6 +37,10 @@ CEditorMainScreen::CEditorMainScreen(QWidget* pParent) :
   m_iLastRightIndex(-2)
 {
   m_spUi->setupUi(this);
+
+  // Testing
+  //new ModelTest(pModel, this);
+
   Initialize();
 }
 
@@ -74,6 +80,7 @@ void CEditorMainScreen::Initialize()
   m_spUi->pRightComboBox->blockSignals(true);
   for (auto it = m_spWidgetsMap.begin(); m_spWidgetsMap.end() != it; ++it)
   {
+    it->second->SetResourceModel(m_spResourceTreeModel.get());
     it->second->Initialize();
     it->second->setVisible(false);
     m_spUi->pLeftComboBox->addItem(m_sEditorNamesMap.find(it->first)->second, it->first._to_integral());
@@ -140,6 +147,8 @@ void CEditorMainScreen::LoadProject(qint32 iId)
     }
   }
 
+  m_spResourceTreeModel->InitializeModel(m_spCurrentProject);
+
   for (auto it = m_spWidgetsMap.begin(); m_spWidgetsMap.end() != it; ++it)
   {
     it->second->LoadProject(m_spCurrentProject);
@@ -173,6 +182,8 @@ void CEditorMainScreen::UnloadProject()
   {
     it->second->UnloadProject();
   }
+
+  m_spResourceTreeModel->DeInitializeModel();
 }
 
 //----------------------------------------------------------------------------------------

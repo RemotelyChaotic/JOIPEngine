@@ -167,7 +167,7 @@ void CScriptRunner::SlotLoadScript(tspScene spScene, tspResource spResource)
       m_spSignalEmitter->SetScriptExecutionStatus(EScriptExecutionStatus::eRunning);
 
       m_runFunction = m_spScriptEngine->evaluate(
-        QString("(function() { %1 })").arg(sScript));
+        QString("(function() { %1 \n })").arg(sScript));
 
       m_spTimer->setSingleShot(true);
       m_spTimer->start(10);

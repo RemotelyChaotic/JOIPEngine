@@ -196,7 +196,7 @@ bool CProjectRunner::LoadFlowScene()
 
 //----------------------------------------------------------------------------------------
 //
-void CProjectRunner::ResolveNextPossibleNodes(Node* pNode, std::vector<QtNodes::Node*>& vpRet)
+void CProjectRunner::ResolveNextPossibleNodes(Node* pNode, std::vector<std::pair<QString, QtNodes::Node*>>& vpRet)
 {
   if (nullptr == pNode) { return; }
 
@@ -222,7 +222,19 @@ void CProjectRunner::ResolveNextPossibleNodes(Node* pNode, std::vector<QtNodes::
 
         if (nullptr != pSceneModel || nullptr != pEndModel)
         {
-          vpRet.push_back(pNextNode);
+          // splitter path name or scene name
+          if (nullptr != pSplitterModel)
+          {
+            vpRet.push_back({pSplitterModel->TransitionLabel(static_cast<qint32>(i)), pNextNode});
+          }
+          else if(nullptr != pEndModel)
+          {
+            vpRet.push_back({"End", pNextNode});
+          }
+          else
+          {
+            vpRet.push_back({pSceneModel->SceneName(), pNextNode});
+          }
         }
         else
         {
@@ -247,9 +259,10 @@ void CProjectRunner::ResolveNextPossibleNodes(Node* pNode, std::vector<QtNodes::
 
     std::uniform_int_distribution<> dis(0, static_cast<qint32>(viValidIndicees.size() - 1));
 
+    qint32 iGeneratedIndex = dis(m_generator);
     auto pConnectionsMap =
         pNode->nodeState().connections(PortType::Out,
-                                       static_cast<qint32>(viValidIndicees[static_cast<quint32>(dis(m_generator))]));
+                                       static_cast<qint32>(viValidIndicees[static_cast<quint32>(iGeneratedIndex)]));
     for (auto it = pConnectionsMap.begin(); pConnectionsMap.end() != it; ++it)
     {
       QtNodes::Node* pNextNode = it->second->getNode(PortType::In);
@@ -260,7 +273,7 @@ void CProjectRunner::ResolveNextPossibleNodes(Node* pNode, std::vector<QtNodes::
 
       if (nullptr != pSceneModel || nullptr != pEndModel)
       {
-        vpRet.push_back(pNextNode);
+        vpRet.push_back({pSplitterModel->TransitionLabel(static_cast<qint32>(iGeneratedIndex)), pNextNode});
       }
       else
       {
@@ -283,16 +296,16 @@ bool CProjectRunner::ResolveNextScene()
   }
 
   m_nodeMap.clear();
-  std::vector<Node*> vpNodes;
+  std::vector<std::pair<QString, Node*>> vpNodes;
   ResolveNextPossibleNodes(m_pCurrentNode, vpNodes);
   if (vpNodes.size() > 0)
   {
-    for (Node* pNode : vpNodes)
+    for (auto pNode : vpNodes)
     {
       CSceneNodeModel* pSceneModel =
-        dynamic_cast<CSceneNodeModel*>(pNode->nodeDataModel());
+        dynamic_cast<CSceneNodeModel*>(pNode.second->nodeDataModel());
       CEndNodeModel* pEndModel =
-        dynamic_cast<CEndNodeModel*>(pNode->nodeDataModel());
+        dynamic_cast<CEndNodeModel*>(pNode.second->nodeDataModel());
 
       if (nullptr != pSceneModel)
       {
@@ -303,14 +316,13 @@ bool CProjectRunner::ResolveNextScene()
           tspScene spScene = spDbManager->FindScene(m_spCurrentProject, iId);
           if (nullptr != spScene)
           {
-            QReadLocker locker(&spScene->m_rwLock);
-            m_nodeMap.insert({spScene->m_sName, pNode});
+            m_nodeMap.insert({pNode.first, pNode.second});
           }
         }
       }
       else if (nullptr != pEndModel)
       {
-        m_nodeMap["End"] = pNode;
+        m_nodeMap["End"] = pNode.second;
       }
     }
   }

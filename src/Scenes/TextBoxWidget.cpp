@@ -25,7 +25,8 @@ CTextBoxWidget::CTextBoxWidget(QWidget* pParent) :
   m_spUi(std::make_unique<Ui::CTextBoxWidget>()),
   m_spSettings(CApplication::Instance()->Settings()),
   m_vCurrentBackgroundColor(),
-  m_vCurrentTextColor()
+  m_vCurrentTextColor(),
+  m_bSceneSelection(false)
 {
   m_vCurrentBackgroundColor.push_back(QColor(BLACK));
   m_vCurrentTextColor.push_back(QColor(WHITE));
@@ -59,6 +60,8 @@ void CTextBoxWidget::Initialize()
     pLayout->addItem(pHorizontalSpacer);
   }
 
+  m_bSceneSelection = false;
+
   // initializing done
   m_bInitialized = true;
 }
@@ -91,7 +94,16 @@ void CTextBoxWidget::SlotOnButtonPromptClicked()
   }
 
   qint32 iIndex = pButton->property(c_sPropertyButtonIndex).toInt();
-  emit SignalShowButtonReturnValue(iIndex);
+
+  if (!SceneSelection())
+  {
+    emit SignalShowButtonReturnValue(iIndex);
+  }
+  else
+  {
+    emit SignalShowSceneSelectReturnValue(iIndex);
+    SetSceneSelection(false);
+  }
 }
 
 //----------------------------------------------------------------------------------------

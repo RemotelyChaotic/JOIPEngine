@@ -30,12 +30,15 @@
 CEditorResourceWidget::CEditorResourceWidget(QWidget* pParent) :
   CEditorWidgetBase(pParent),
   m_spUi(std::make_unique<Ui::CEditorResourceWidget>()),
+  m_spWebOverlay(std::make_unique<CWebResourceOverlay>()),
   m_spNAManager(std::make_unique<QNetworkAccessManager>()),
   m_spSettings(CApplication::Instance()->Settings()),
   m_spCurrentProject(nullptr),
   m_pResponse(nullptr)
 {
   m_spUi->setupUi(this);
+  connect(m_spWebOverlay.get(), &CWebResourceOverlay::SignalResourceSelected,
+          this, &CEditorResourceWidget::SlotWebResourceSelected);
 }
 
 CEditorResourceWidget::~CEditorResourceWidget()
@@ -60,20 +63,16 @@ void CEditorResourceWidget::Initialize()
   m_spUi->pResourceTree->header()->setStretchLastSection(true);
   m_spUi->pResourceTree->header()->setSectionResizeMode(QHeaderView::ResizeToContents);
 
-  CResourceTreeItemModel* pModel = new CResourceTreeItemModel(m_spUi->pResourceTree);
   CResourceTreeItemSortFilterProxyModel* pProxyModel =
       new CResourceTreeItemSortFilterProxyModel(m_spUi->pResourceTree);
-  pProxyModel->setSourceModel(pModel);
+  pProxyModel->setSourceModel(ResourceModel());
   m_spUi->pResourceTree->setModel(pProxyModel);
 
   QItemSelectionModel* pSelectionModel = m_spUi->pResourceTree->selectionModel();
   connect(pSelectionModel, &QItemSelectionModel::currentChanged,
           this, &CEditorResourceWidget::SlotCurrentChanged);
 
-  m_spWebOverlay = std::make_unique<CWebResourceOverlay>();
   m_spWebOverlay->Hide();
-  connect(m_spWebOverlay.get(), &CWebResourceOverlay::SignalResourceSelected,
-          this, &CEditorResourceWidget::SlotWebResourceSelected);
 
   setAcceptDrops(true);
 
@@ -97,17 +96,6 @@ void CEditorResourceWidget::LoadProject(tspProject spCurrentProject)
   }
 
   m_spCurrentProject = spCurrentProject;
-
-  if (nullptr != m_spCurrentProject)
-  {
-    // load resource-tree
-    CResourceTreeItemSortFilterProxyModel* pModel =
-        dynamic_cast<CResourceTreeItemSortFilterProxyModel*>(m_spUi->pResourceTree->model());
-     pModel->InitializeModel(m_spCurrentProject);
-
-    // Testing
-    //new ModelTest(pModel, this);
-  }
 }
 
 //----------------------------------------------------------------------------------------
@@ -118,10 +106,7 @@ void CEditorResourceWidget::UnloadProject()
 
   m_spCurrentProject = nullptr;
 
-  m_spUi->pResourceTree->reset();
-  CResourceTreeItemSortFilterProxyModel* pModel =
-      dynamic_cast<CResourceTreeItemSortFilterProxyModel*>(m_spUi->pResourceTree->model());
-  pModel->DeInitializeModel();
+  m_spWebOverlay->Hide();
 }
 
 //----------------------------------------------------------------------------------------
@@ -214,20 +199,19 @@ void CEditorResourceWidget::dropEvent(QDropEvent* pEvent)
 
 //----------------------------------------------------------------------------------------
 //
-void CEditorResourceWidget::on_pFilterLineEdit_editingFinished()
+void CEditorResourceWidget::on_pFilterLineEdit_textChanged(const QString& sText)
 {
   WIDGET_INITIALIZED_GUARD
   CResourceTreeItemSortFilterProxyModel* pProxyModel =
       dynamic_cast<CResourceTreeItemSortFilterProxyModel*>(m_spUi->pResourceTree->model());
 
-  const QString sFilter = m_spUi->pFilterLineEdit->text();
-  if (sFilter.isNull() || sFilter.isEmpty())
+  if (sText.isNull() || sText.isEmpty())
   {
     pProxyModel->setFilterRegExp(QRegExp(".*", Qt::CaseInsensitive, QRegExp::RegExp));
   }
   else
   {
-    pProxyModel->setFilterRegExp(QRegExp(sFilter, Qt::CaseInsensitive, QRegExp::RegExp));
+    pProxyModel->setFilterRegExp(QRegExp(sText, Qt::CaseInsensitive, QRegExp::RegExp));
   }
 }
 

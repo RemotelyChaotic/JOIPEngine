@@ -31,6 +31,15 @@ void CEditorActionBar::HideAllBars()
   m_spUi->pMediaPlayerActionBar->hide();
   m_spUi->pProjectContainer->hide();
   m_spUi->pResourcesContainer->hide();
+  m_spUi->pCodeEditorContainer->hide();
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CEditorActionBar::ShowCodeActionBar()
+{
+  HideAllBars();
+  m_spUi->pCodeEditorContainer->show();
 }
 
 //----------------------------------------------------------------------------------------

@@ -22,6 +22,8 @@ public:
 
   std::vector<QColor> BackgroundColors() { return m_vCurrentBackgroundColor; }
   std::vector<QColor> TextColors() { return m_vCurrentTextColor; }
+  bool SceneSelection() { return m_bSceneSelection; }
+  void SetSceneSelection(bool bSceneSelection) { m_bSceneSelection = bSceneSelection; }
 
 public slots:
   void SlotClearText();
@@ -36,6 +38,7 @@ public slots:
 signals:
   void SignalShowButtonReturnValue(qint32 iIndex);
   void SignalShowInputReturnValue(QString sValue);
+  void SignalShowSceneSelectReturnValue(qint32 iIndex);
 
 private slots:
   void SlotSliderRangeChanged();
@@ -47,6 +50,7 @@ private:
   std::shared_ptr<CSettings>          m_spSettings;
   std::vector<QColor>                 m_vCurrentBackgroundColor;
   std::vector<QColor>                 m_vCurrentTextColor;
+  bool                                m_bSceneSelection;
 };
 
 #endif // TEXTBOXWIDGET_H

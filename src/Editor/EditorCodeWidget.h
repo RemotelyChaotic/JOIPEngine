@@ -6,6 +6,11 @@
 #include <QPointer>
 #include <memory>
 
+class CBackgroundSnippetOverlay;
+class CIconSnippetOverlay;
+class CResourceSnippetOverlay;
+class CTextSnippetOverlay;
+class CTimerSnippetOverlay;
 class CDatabaseManager;
 class CScriptHighlighter;
 class CSettings;
@@ -17,6 +22,8 @@ struct SScene;
 typedef std::shared_ptr<SResource> tspResource;
 typedef std::shared_ptr<SScene> tspScene;
 
+//----------------------------------------------------------------------------------------
+//
 struct SCachedMapItem
 {
   SCachedMapItem() :
@@ -35,6 +42,8 @@ struct SCachedMapItem
   bool                m_bIgnoreNextModification;
 };
 
+//----------------------------------------------------------------------------------------
+//
 class CEditorCodeWidget : public CEditorWidgetBase
 {
   Q_OBJECT
@@ -58,6 +67,7 @@ protected slots:
   void on_pSceneComboBox_currentIndexChanged(qint32 iIndex);
   void on_pCodeEdit_textChanged();
   void SlotFileChanged(const QString& sPath);
+  void SlotInsertGeneratedCode(const QString& sCode);
   void SlotSceneAdded(qint32 iProjId, qint32 iId);
   void SlotSceneRenamed(qint32 iProjId, qint32 iId);
   void SlotSceneRemoved(qint32 iProjId, qint32 iId);
@@ -69,6 +79,11 @@ private:
   void SetSceneScriptModifiedFlag(qint32 iId, bool bModified);
 
   std::unique_ptr<Ui::CEditorCodeWidget>     m_spUi;
+  std::unique_ptr<CBackgroundSnippetOverlay> m_spBackgroundSnippetOverlay;
+  std::unique_ptr<CIconSnippetOverlay>       m_spIconSnippetOverlay;
+  std::unique_ptr<CResourceSnippetOverlay>   m_spResourceSnippetOverlay;
+  std::unique_ptr<CTextSnippetOverlay>       m_spTextSnippetOverlay;
+  std::unique_ptr<CTimerSnippetOverlay>      m_spTimerSnippetOverlay;
   std::shared_ptr<CSettings>                 m_spSettings;
   tspProject                                 m_spCurrentProject;
   std::weak_ptr<CDatabaseManager>            m_wpDbManager;

@@ -82,6 +82,8 @@ void CSceneMainScreen::Initialize()
           this, &CSceneMainScreen::SlotQuit);
   connect(m_spProjectRunner.get(), &CProjectRunner::SignalError,
           this, &CSceneMainScreen::SlotError);
+  connect(m_spUi->pTextBoxDisplay, &CTextBoxWidget::SignalShowSceneSelectReturnValue,
+          this, &CSceneMainScreen::SlotSceneSelectReturnValue);
 
   // initializing done
   m_bInitialized = true;
@@ -111,6 +113,8 @@ void CSceneMainScreen::LoadProject(qint32 iId)
     m_spUi->pResourceDisplay->UnloadResource();
     m_spUi->pResourceDisplay->LoadResource(spTitle);
   }
+
+  m_spUi->pTextBoxDisplay->SetSceneSelection(false);
 
   auto spScriptRunner = m_wpScriptRunner.lock();
   if (nullptr != spScriptRunner)
@@ -284,6 +288,50 @@ void CSceneMainScreen::SlotQuit()
 
 //----------------------------------------------------------------------------------------
 //
+void CSceneMainScreen::SlotSceneSelectReturnValue(qint32 iIndex)
+{
+  if (!m_bInitialized || nullptr == m_spCurrentProject) { return; }
+  auto spDbManager = m_wpDbManager.lock();
+  if (nullptr == spDbManager) { return; }
+
+  QStringList sScenes = m_spProjectRunner->PossibleScenes();
+  if (0 <= iIndex && sScenes.size() > iIndex)
+  {
+    tspScene spScene = m_spProjectRunner->NextScene(sScenes[iIndex]);
+    if (nullptr != spScene)
+    {
+      // load script
+      auto spScriptRunner = m_wpScriptRunner.lock();
+      if (nullptr != spScriptRunner && nullptr != spDbManager)
+      {
+        QReadLocker lockerScene(&spScene->m_rwLock);
+        QString sScript = spScene->m_sScript;
+        lockerScene.unlock();
+        QMetaObject::invokeMethod(spScriptRunner.get(), "SlotLoadScript", Qt::QueuedConnection,
+                                  Q_ARG(tspScene, spScene),
+                                  Q_ARG(tspResource, spDbManager->FindResource(m_spCurrentProject, sScript)));
+      }
+      else
+      {
+        qWarning() << tr("Script-Runner or Database-Manager missing.");
+        SlotQuit();
+      }
+    }
+    else
+    {
+      qInfo() << tr("Next scene is null or end.");
+      SlotQuit();
+    }
+  }
+  else
+  {
+    qWarning() << tr("No more scenes to load was unexpected.");
+    SlotQuit();
+  }
+}
+
+//----------------------------------------------------------------------------------------
+//
 void CSceneMainScreen::SlotScriptRunFinished(bool bOk)
 {
   if (!m_bInitialized || nullptr == m_spCurrentProject) { return; }
@@ -294,6 +342,7 @@ void CSceneMainScreen::SlotScriptRunFinished(bool bOk)
   }
   else
   {
+    qWarning() << tr("Error in script, unloading project.");
     SlotQuit();
   }
 }
@@ -510,27 +559,43 @@ void CSceneMainScreen::NextSkript()
   QStringList sScenes = m_spProjectRunner->PossibleScenes();
   if (sScenes.size() > 0)
   {
-    std::random_device rd;
-    std::mt19937 generator(rd());
-    std::uniform_int_distribution<> dis(0, static_cast<qint32>(sScenes.size() - 1));
-    tspScene spScene = m_spProjectRunner->NextScene(sScenes[dis(generator)]);
-    if (nullptr != spScene)
+    if (sScenes.size() == 1)
     {
-      // load script
-      auto spScriptRunner = m_wpScriptRunner.lock();
-      if (nullptr != spScriptRunner && nullptr != spDbManager)
+      tspScene spScene = m_spProjectRunner->NextScene(sScenes[0]);
+      if (nullptr != spScene)
       {
-        QReadLocker lockerScene(&spScene->m_rwLock);
-        QString sScript = spScene->m_sScript;
-        lockerScene.unlock();
-        QMetaObject::invokeMethod(spScriptRunner.get(), "SlotLoadScript", Qt::QueuedConnection,
-                                  Q_ARG(tspScene, spScene),
-                                  Q_ARG(tspResource, spDbManager->FindResource(m_spCurrentProject, sScript)));
+        // load script
+        auto spScriptRunner = m_wpScriptRunner.lock();
+        if (nullptr != spScriptRunner && nullptr != spDbManager)
+        {
+          QReadLocker lockerScene(&spScene->m_rwLock);
+          QString sScript = spScene->m_sScript;
+          lockerScene.unlock();
+          QMetaObject::invokeMethod(spScriptRunner.get(), "SlotLoadScript", Qt::QueuedConnection,
+                                    Q_ARG(tspScene, spScene),
+                                    Q_ARG(tspResource, spDbManager->FindResource(m_spCurrentProject, sScript)));
+        }
+        else
+        {
+          qWarning() << tr("Script-Runner or Database-Manager missing.");
+          SlotQuit();
+        }
+      }
+      else
+      {
+        qInfo() << tr("Next scene is null or end.");
+        SlotQuit();
       }
     }
     else
     {
-      SlotQuit();
+      m_spUi->pTextBoxDisplay->SetSceneSelection(true);
+      m_spUi->pTextBoxDisplay->SlotShowButtonPrompts(sScenes);
     }
+  }
+  else
+  {
+    qInfo() << tr("No more scenes to load.");
+    SlotQuit();
   }
 }

@@ -13,7 +13,7 @@ public:
   explicit COverlayBase(QWidget* pParent = nullptr);
   ~COverlayBase() override;
 
-public:
+public slots:
   virtual void Hide();
   virtual void Resize();
   virtual void Show();

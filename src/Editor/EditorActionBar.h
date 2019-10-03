@@ -23,6 +23,7 @@ public:
   void SaveProject() override {}
 
   void HideAllBars();
+  void ShowCodeActionBar();
   void ShowNodeEditorActionBar();
   void ShowMediaPlayerActionBar();
   void ShowProjectActionBar();

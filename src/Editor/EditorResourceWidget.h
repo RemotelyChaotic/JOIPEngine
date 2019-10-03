@@ -40,7 +40,7 @@ protected:
   void dropEvent(QDropEvent* pEvent) override;
 
 protected slots:
-  void on_pFilterLineEdit_editingFinished();
+  void on_pFilterLineEdit_textChanged(const QString& sText);
   void on_pResourceDisplayWidget_OnClick();
   void SlotAddButtonClicked();
   void SlotAddWebButtonClicked();

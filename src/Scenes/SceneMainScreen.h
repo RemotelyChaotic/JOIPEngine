@@ -45,6 +45,7 @@ private slots:
   void SlotPauseSound();
   void SlotPlayMedia(tspResource spResource);
   void SlotQuit();
+  void SlotSceneSelectReturnValue(qint32 iIndex);
   void SlotScriptRunFinished(bool bOk);
   void SlotShowMedia(tspResource spResource);
   void SlotStopVideo();

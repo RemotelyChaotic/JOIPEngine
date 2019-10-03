@@ -35,7 +35,7 @@ signals:
 
 private:
   bool LoadFlowScene();
-  void ResolveNextPossibleNodes(QtNodes::Node* pNode, std::vector<QtNodes::Node*>& vRet);
+  void ResolveNextPossibleNodes(QtNodes::Node* pNode, std::vector<std::pair<QString, QtNodes::Node*>>& vpRet);
   bool ResolveNextScene();
   bool ResolveStart();
 

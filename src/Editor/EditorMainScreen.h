@@ -18,6 +18,7 @@ class CEditorCodeWidget;
 class CEditorResourceDisplayWidget;
 class CEditorResourceWidget;
 class CEditorSceneNodeWidget;
+class CResourceTreeItemModel;
 namespace Ui {
   class CEditorMainScreen;
 }
@@ -55,6 +56,7 @@ private:
   template<class T> T* GetWidget();
 
   std::unique_ptr<Ui::CEditorMainScreen>                      m_spUi;
+  std::unique_ptr<CResourceTreeItemModel>                     m_spResourceTreeModel;
   std::map<EEditorWidget, std::unique_ptr<CEditorWidgetBase>> m_spWidgetsMap;
   tspProject                                                  m_spCurrentProject;
   std::weak_ptr<CDatabaseManager>                             m_wpDbManager;

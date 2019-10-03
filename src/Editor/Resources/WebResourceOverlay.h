@@ -18,6 +18,7 @@ public:
   explicit CWebResourceOverlay(QWidget* pParent = nullptr);
   ~CWebResourceOverlay() override;
 
+public slots:
   void Resize() override;
 
 signals:

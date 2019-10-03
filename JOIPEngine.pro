@@ -109,7 +109,13 @@ SOURCES += \
     src/Scenes/BackgroundWidget.cpp \
     src/Style.cpp \
     src/Widgets/MenuButton.cpp \
-    src/Widgets/TitleLabel.cpp
+    src/Widgets/TitleLabel.cpp \
+    src/Editor/Script/ResourceSnippetOverlay.cpp \
+    src/Editor/Script/IconSnippetOverlay.cpp \
+    src/Editor/Script/BackgroundSnippetOverlay.cpp \
+    src/Editor/Script/TextSnippetOverlay.cpp \
+    src/Editor/Script/TimerSnippetOverlay.cpp \
+    src/Widgets/ColorPicker.cpp
 
 HEADERS += \
     src/MainWindow.h \
@@ -175,7 +181,13 @@ HEADERS += \
     src/Constants.h \
     src/Style.h \
     src/Widgets/MenuButton.h \
-    src/Widgets/TitleLabel.h
+    src/Widgets/TitleLabel.h \
+    src/Editor/Script/ResourceSnippetOverlay.h \
+    src/Editor/Script/IconSnippetOverlay.h \
+    src/Editor/Script/BackgroundSnippetOverlay.h \
+    src/Editor/Script/TextSnippetOverlay.h \
+    src/Editor/Script/TimerSnippetOverlay.h \
+    src/Widgets/ColorPicker.h
 
 FORMS += \
     src/MainWindow.ui \
@@ -198,7 +210,13 @@ FORMS += \
     src/Scenes/SceneMainScreen.ui \
     src/Scenes/TextBoxWidget.ui \
     src/Scenes/InformationWidget.ui \
-    src/Scenes/TimerDisplayWidget.ui
+    src/Scenes/TimerDisplayWidget.ui \
+    src/Editor/Script/ResourceSnippetOverlay.ui \
+    src/Editor/Script/IconSnippetOverlay.ui \
+    src/Editor/Script/BackgroundSnippetOverlay.ui \
+    src/Editor/Script/TextSnippetOverlay.ui \
+    src/Editor/Script/TimerSnippetOverlay.ui \
+    src/Widgets/ColorPicker.ui
 
 RESOURCES += \
     resources.qrc
