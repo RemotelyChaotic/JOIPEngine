@@ -34,7 +34,6 @@ void CEditorResourceDisplayWidget::Initialize()
 void CEditorResourceDisplayWidget::LoadResource(tspResource spResource)
 {
   m_spUi->pResourceDisplay->LoadResource(spResource);
-  UpdateActionBar();
 }
 
 //----------------------------------------------------------------------------------------
@@ -49,6 +48,28 @@ ELoadState CEditorResourceDisplayWidget::LoadState() const
 void CEditorResourceDisplayWidget::UnloadResource()
 {
   m_spUi->pResourceDisplay->UnloadResource();
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CEditorResourceDisplayWidget::UpdateActionBar()
+{
+  switch (m_spUi->pResourceDisplay->ResourceType())
+  {
+  case EResourceType::eMovie: // fallthrough
+  case EResourceType::eSound:
+    if (nullptr != ActionBar())
+    {
+      ActionBar()->ShowMediaPlayerActionBar();
+    }
+    break;
+  default:
+    if (nullptr != ActionBar())
+    {
+      ActionBar()->HideAllBars();
+    }
+    break;
+  }
 }
 
 //----------------------------------------------------------------------------------------
@@ -80,27 +101,5 @@ void CEditorResourceDisplayWidget::OnActionBarChanged()
             m_spUi->pResourceDisplay, &CResourceDisplayWidget::SlotPlayPause);
     connect(ActionBar()->m_spUi->pStopButton, &QPushButton::clicked,
             m_spUi->pResourceDisplay, &CResourceDisplayWidget::SlotStop);
-  }
-}
-
-//----------------------------------------------------------------------------------------
-//
-void CEditorResourceDisplayWidget::UpdateActionBar()
-{
-  switch (m_spUi->pResourceDisplay->ResourceType())
-  {
-  case EResourceType::eMovie: // fallthrough
-  case EResourceType::eSound:
-    if (nullptr != ActionBar())
-    {
-      ActionBar()->ShowMediaPlayerActionBar();
-    }
-    break;
-  default:
-    if (nullptr != ActionBar())
-    {
-      ActionBar()->HideAllBars();
-    }
-    break;
   }
 }

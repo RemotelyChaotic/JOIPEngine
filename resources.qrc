@@ -37,5 +37,13 @@
         <file>resources/img/ButtonIcon.png</file>
         <file>resources/img/ButtonImage.png</file>
         <file>resources/img/ButtonText.png</file>
+        <file>resources/img/ButtonCheckBox.png</file>
+        <file>resources/img/ButtonCheckBoxClick.png</file>
+        <file>resources/img/ButtonCheckBoxEmpty.png</file>
+        <file>resources/img/ButtonCheckBoxEmptyClick.png</file>
+        <file>resources/img/ButtonCheckBoxEmptyHover.png</file>
+        <file>resources/img/ButtonCheckBoxHover.png</file>
+        <file>resources/img/ButtonMinusDisabled.png</file>
+        <file>resources/img/ButtonPlusDisabled.png</file>
     </qresource>
 </RCC>

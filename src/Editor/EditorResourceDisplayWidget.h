@@ -26,13 +26,11 @@ public:
   void LoadResource(tspResource spResource);
   ELoadState LoadState() const;
   void UnloadResource();
+  void UpdateActionBar();
 
 protected:
   void OnActionBarAboutToChange() override;
   void OnActionBarChanged() override;
-
-private:
-  void UpdateActionBar();
 
   std::unique_ptr<Ui::CEditorResourceDisplayWidget> m_spUi;
 };

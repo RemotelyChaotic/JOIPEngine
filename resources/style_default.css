@@ -18,6 +18,60 @@ QSplitter::handle:vertical {
   image: url(://resources/img/ButtonDotsHoriz.png);
 }
 
+/*
+ ----- QCheckBox
+*/
+QCheckBox {
+  color: white;
+  spacing: 5px;
+}
+
+QGroupBox::indicator,
+QCheckBox::indicator {
+  width: 32px;
+  height: 32px;
+}
+
+QCheckBox::indicator:unchecked,
+QCheckBox::indicator:unchecked {
+  image: url(://resources/img/ButtonCheckBoxEmpty.png);
+}
+
+QCheckBox::indicator:unchecked:hover,
+QCheckBox::indicator:unchecked:hover {
+  image: url(://resources/img/ButtonCheckBoxEmptyHover.png);
+}
+
+QCheckBox::indicator:unchecked:pressed,
+QCheckBox::indicator:unchecked:pressed {
+  image: url(://resources/img/ButtonCheckBoxEmptyClick.png);
+}
+
+QCheckBox::indicator:checked,
+QCheckBox::indicator:checked {
+  image: url(://resources/img/ButtonCheckBox.png);
+}
+
+QCheckBox::indicator:checked,
+QCheckBox::indicator:checked {
+  image: url(://resources/img/ButtonCheckBoxHover.png);
+}
+
+QCheckBox::indicator:checked:pressed,
+QCheckBox::indicator:checked:pressed {
+  image: url(://resources/img/ButtonCheckBoxClick.png);
+}
+
+QCheckBox::indicator:indeterminate:hover,
+QCheckBox::indicator:indeterminate:hover {
+  image: url(://resources/img/ButtonCheckBoxHover.png);
+}
+
+QCheckBox::indicator:indeterminate:pressed,
+QCheckBox::indicator:indeterminate:pressed {
+  image: url(://resources/img/ButtonCheckBoxClick.png);
+}
+
 
 /*
  ----- QGroupBox, QTabWidget
@@ -34,11 +88,6 @@ QGroupBox::title {
   subcontrol-origin: margin;
   subcontrol-position: top center; /* position at the top center */
   padding: 0 3px;
-}
-
-QGroupBox::indicator {
-  width: 32px;
-  height: 32px;
 }
 
 QTabWidget::tab-bar {
@@ -99,6 +148,7 @@ QLineEdit {
   border: 2px solid silver;
   border-radius: 10px;
   padding: 5px;
+  min-height: 16px;
   selection-background-color: darkgray;
 }
 
@@ -328,6 +378,92 @@ QComboBox:!editable:on, QComboBox::drop-down:editable:on {
   background: qradialgradient(cx: 0.4, cy: -0.1, fx: 0.4, fy: -0.1, radius: 1.35, stop: 0 #dd00dd, stop: 1 #aa00aa);
 }
 
+
+/*
+ ----- QSpinBox, QDoubleSpinBox, QTimeEdit
+*/
+QDoubleSpinBox,
+QTimeEdit,
+QSpinBox {
+  color: white;
+  background-color: black;
+  padding-right: 16px; /* make room for the arrows */
+  border: 2px solid silver;
+  border-radius: 10px;
+  height: 32px;
+}
+
+QDoubleSpinBox::up-button,
+QTimeEdit::up-button,
+QSpinBox::up-button {
+  subcontrol-origin: border;
+  subcontrol-position: top right; /* position at the top right corner */
+
+  width: 16px; /* 16 + 2*1px border-width = 15px padding + 3px parent border */
+  background: qradialgradient(cx: 0.3, cy: -0.4, fx: 0.3, fy: -0.4, radius: 1.35, stop: 0 #aa00aa, stop: 1 #760076);
+  border: 1px solid silver;
+  border-radius: 2px;
+}
+QDoubleSpinBox::up-button:hover,
+QTimeEdit::up-button:hover,
+QSpinBox::up-button:hover {
+  background: qradialgradient(cx: 0.3, cy: -0.4, fx: 0.3, fy: -0.4, radius: 1.35, stop: 0 #aa00aa, stop: 1 #b900b9);
+}
+QDoubleSpinBox::up-button:pressed,
+QTimeEdit::up-button:pressed,
+QSpinBox::up-button:pressed {
+  background: qradialgradient(cx: 0.4, cy: -0.1, fx: 0.4, fy: -0.1, radius: 1.35, stop: 0 #dd00dd, stop: 1 #aa00aa);
+}
+
+QDoubleSpinBox::up-arrow,
+QTimeEdit::up-arrow,
+QSpinBox::up-arrow {
+  image: url(://resources/img/ButtonPlus.png);
+  width: 16px;
+  height: 16px;
+}
+QDoubleSpinBox::up-arrow:disabled, QDoubleSpinBox::up-arrow:off,
+QTimeEdit::up-arrow:disabled, QTimeEdit::up-arrow:off,
+QSpinBox::up-arrow:disabled, QSpinBox::up-arrow:off { /* off state when value is max */
+   image: url(://resources/img/ButtonPlusDisabled.png);
+}
+
+QDoubleSpinBox::down-button,
+QTimeEdit::down-button,
+QSpinBox::down-button {
+  subcontrol-origin: border;
+  subcontrol-position: bottom right; /* position at bottom right corner */
+
+  width: 16px; /* 16 + 2*1px border-width = 15px padding + 3px parent border */
+  background: qradialgradient(cx: 0.3, cy: -0.4, fx: 0.3, fy: -0.4, radius: 1.35, stop: 0 #aa00aa, stop: 1 #760076);
+  border: 1px solid silver;
+  border-radius: 2px;
+}
+QDoubleSpinBox::down-button:hover,
+QTimeEdit::down-button:hover,
+QSpinBox::down-button:hover {
+  background: qradialgradient(cx: 0.3, cy: -0.4, fx: 0.3, fy: -0.4, radius: 1.35, stop: 0 #aa00aa, stop: 1 #b900b9);
+}
+QDoubleSpinBox::down-button:pressed,
+QTimeEdit::down-button:pressed,
+QSpinBox::down-button:pressed {
+  background: qradialgradient(cx: 0.4, cy: -0.1, fx: 0.4, fy: -0.1, radius: 1.35, stop: 0 #dd00dd, stop: 1 #aa00aa);
+}
+
+QDoubleSpinBox::down-arrow,
+QTimeEdit::down-arrow,
+QSpinBox::down-arrow {
+  image: url(://resources/img/ButtonMinus.png);
+  width: 16px;
+  height: 16px;
+}
+QDoubleSpinBox::down-arrow:disabled,
+QTimeEdit::down-arrow:disabled,
+QSpinBox::down-arrow:disabled,
+QSpinBox::down-arrow:off { /* off state when value in min */
+   image: url(://resources/img/ButtonMinusDisabled.png);
+}
+
 /*
  ----- QMenu
 */
@@ -418,6 +554,20 @@ QListView, QTreeView, QTableView {
 
 QListView, QTreeView, QTableView {
   show-decoration-selected: 1; /* make the selection span the entire width of the view */
+}
+
+QListView::item,
+QTreeView::item,
+QTableView::item {
+  margin: 1px 1px 1px 1px;
+  border: 0px;
+  padding: 0px;
+}
+
+QListView::item::text,
+QTreeView::item::text,
+QTableView::item::text {
+  min-height: 32px;
 }
 
 QListView::item:alternate,

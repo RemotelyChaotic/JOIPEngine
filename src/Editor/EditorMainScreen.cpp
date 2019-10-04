@@ -254,6 +254,11 @@ void CEditorMainScreen::SlotDisplayResource(const QString& sName)
       auto spResource = spDbManager->FindResource(m_spCurrentProject, sName);
       pWidget->UnloadResource();
       pWidget->LoadResource(spResource);
+      if (m_spUi->pRightComboBox->itemData(m_spUi->pRightComboBox->currentIndex(), Qt::UserRole).toInt() == EEditorWidget::eResourceDisplay ||
+          m_spUi->pLeftComboBox->itemData(m_spUi->pLeftComboBox->currentIndex(), Qt::UserRole).toInt() == EEditorWidget::eResourceDisplay)
+      {
+        pWidget->UpdateActionBar();
+      }
     }
   }
 }

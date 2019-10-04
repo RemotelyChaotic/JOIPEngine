@@ -272,7 +272,7 @@ void CTextSnippetOverlay::on_pConfirmButton_clicked()
   }
   if (m_data.m_bShowButtons)
   {
-    QString sText("textBox.showButtonPrompts([%1]);\n");
+    QString sText("var iSelection = textBox.showButtonPrompts([%1]);  // TODO: change variable name\n");
     QStringList vsPrompts;
     for (auto sButton : m_data.m_vsButtons)
     {
