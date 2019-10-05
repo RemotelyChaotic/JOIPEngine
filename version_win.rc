@@ -1,9 +1,10 @@
+#include "version.h"
 
 IDI_ICON1 ICON    DISCARDABLE   "resources/img/Icon.ico"
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION 1,0,0,0
- PRODUCTVERSION 1,0,0,0
+ FILEVERSION VERSION
+ PRODUCTVERSION VERSION
  FILEFLAGSMASK 0x3fL
 #ifdef _DEBUG
  FILEFLAGS 0x29L
@@ -21,14 +22,14 @@ BEGIN
             //VALUE "Comments", "\0"
             VALUE "CompanyName", "Private"
             VALUE "FileDescription", "JOIP Engine"
-            VALUE "FileVersion", "1.0.0.0"
+            VALUE "FileVersion", "VERSION"
             VALUE "InternalName", "JOIPEngine"
             VALUE "LegalCopyright", ""
             //VALUE "LegalTrademarks", "\0"
             VALUE "OriginalFilename", ""
             VALUE "PrivateBuild", "\0"
             VALUE "ProductName", "JOIP Engine"
-            VALUE "ProductVersion", "1.0.0.0"
+            VALUE "ProductVersion", VERSION_DOT
             //VALUE "SpecialBuild", "Stand 07.06.2007\0"
         END
     END

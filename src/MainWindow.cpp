@@ -1,5 +1,6 @@
 #include "MainWindow.h"
 #include "Application.h"
+#include "CreditsScreen.h"
 #include "Enums.h"
 #include "EditorScreen.h"
 #include "MainScreen.h"
@@ -47,6 +48,8 @@ void CMainWindow::Initialize()
    new CSettingsScreen(m_spWindowContext, m_spUi->pApplicationStackWidget));
   m_spUi->pApplicationStackWidget->insertWidget(EAppState::eEditorScreen,
    new CEditorScreen(m_spWindowContext, m_spUi->pApplicationStackWidget));
+  m_spUi->pApplicationStackWidget->insertWidget(EAppState::eCreditsScreen,
+   new CCreditsScreen(m_spWindowContext, m_spUi->pApplicationStackWidget));
 
   ConnectSlots();
 

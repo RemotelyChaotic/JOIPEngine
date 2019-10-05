@@ -26,6 +26,7 @@ protected slots:
   void on_pSceneSelectButton_clicked();
   void on_pEdiorButton_clicked();
   void on_pSettingsButton_clicked();
+  void on_pCreditsButton_clicked();
   void on_pQuitButton_clicked();
 
 private:

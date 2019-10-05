@@ -113,10 +113,10 @@ void CTextBoxWidget::SlotOnInputEditingFinished()
   QLineEdit* pEdit = qobject_cast<QLineEdit*>(sender());
   pEdit->disconnect();
 
+  emit SignalShowInputReturnValue(pEdit->text());
+
   pEdit->setText("> " + pEdit->text());
   pEdit->setReadOnly(true);
-
-  emit SignalShowInputReturnValue(pEdit->text());
 }
 
 //----------------------------------------------------------------------------------------

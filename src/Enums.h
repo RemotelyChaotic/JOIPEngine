@@ -8,7 +8,8 @@ BETTER_ENUM(EAppState, qint32,
             eMainScreen = 0,
             eSceneScreen = 1,
             eSettingsScreen = 2,
-            eEditorScreen = 3);
+            eEditorScreen = 3,
+            eCreditsScreen = 4);
 
 BETTER_ENUM(ECoreSystems, qint32,
             eDatabaseManager = 0,

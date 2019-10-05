@@ -69,6 +69,8 @@ void CBackgroundWidget::SlotBackgroundColorChanged(QColor color)
 //
 void CBackgroundWidget::SlotBackgroundTextureChanged(tspResource spResource)
 {
+  if(nullptr == spResource || nullptr == spResource->m_spParent) { return; }
+
   QReadLocker locker(&spResource->m_rwLock);
   QReadLocker projLocker(&spResource->m_spParent->m_rwLock);
   if (EResourceType::eImage == spResource->m_type._to_integral())

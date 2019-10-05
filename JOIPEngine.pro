@@ -115,7 +115,8 @@ SOURCES += \
     src/Editor/Script/BackgroundSnippetOverlay.cpp \
     src/Editor/Script/TextSnippetOverlay.cpp \
     src/Editor/Script/TimerSnippetOverlay.cpp \
-    src/Widgets/ColorPicker.cpp
+    src/Widgets/ColorPicker.cpp \
+    src/CreditsScreen.cpp
 
 HEADERS += \
     src/MainWindow.h \
@@ -187,7 +188,9 @@ HEADERS += \
     src/Editor/Script/BackgroundSnippetOverlay.h \
     src/Editor/Script/TextSnippetOverlay.h \
     src/Editor/Script/TimerSnippetOverlay.h \
-    src/Widgets/ColorPicker.h
+    src/Widgets/ColorPicker.h \
+    version.h \
+    src/CreditsScreen.h
 
 FORMS += \
     src/MainWindow.ui \
@@ -216,7 +219,8 @@ FORMS += \
     src/Editor/Script/BackgroundSnippetOverlay.ui \
     src/Editor/Script/TextSnippetOverlay.ui \
     src/Editor/Script/TimerSnippetOverlay.ui \
-    src/Widgets/ColorPicker.ui
+    src/Widgets/ColorPicker.ui \
+    src/CreditsScreen.ui
 
 RESOURCES += \
     resources.qrc

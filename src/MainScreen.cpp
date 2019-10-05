@@ -1,4 +1,5 @@
 #include "MainScreen.h"
+#include "version.h"
 #include "WindowContext.h"
 #include "ui_MainScreen.h"
 #include <QApplication>
@@ -23,6 +24,10 @@ void CMainScreen::Initialize()
 {
   m_bInitialized = false;
 
+  m_spUi->pVersionLabel->setText("v" VERSION_DOT);
+  QFont versionFont = m_spUi->pVersionLabel->font();
+  versionFont.setPixelSize(30);
+  m_spUi->pVersionLabel->setFont(versionFont);
 
   m_bInitialized = true;
 }
@@ -66,6 +71,15 @@ void CMainScreen::on_pSettingsButton_clicked()
   WIDGET_INITIALIZED_GUARD
 
   emit m_spWindowContext->SignalChangeAppState(EAppState::eSettingsScreen);
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CMainScreen::on_pCreditsButton_clicked()
+{
+  WIDGET_INITIALIZED_GUARD
+
+  emit m_spWindowContext->SignalChangeAppState(EAppState::eCreditsScreen);
 }
 
 //----------------------------------------------------------------------------------------

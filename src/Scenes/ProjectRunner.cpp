@@ -257,9 +257,11 @@ void CProjectRunner::ResolveNextPossibleNodes(Node* pNode, std::vector<std::pair
       }
     }
 
+    std::random_device rd;
+    std::mt19937 generator(rd());
     std::uniform_int_distribution<> dis(0, static_cast<qint32>(viValidIndicees.size() - 1));
+    qint32 iGeneratedIndex = dis(generator);
 
-    qint32 iGeneratedIndex = dis(m_generator);
     auto pConnectionsMap =
         pNode->nodeState().connections(PortType::Out,
                                        static_cast<qint32>(viValidIndicees[static_cast<quint32>(iGeneratedIndex)]));

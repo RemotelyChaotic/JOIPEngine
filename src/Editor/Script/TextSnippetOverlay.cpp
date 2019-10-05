@@ -305,8 +305,16 @@ void CTextSnippetOverlay::Initialize()
   m_spUi->pButtonsList->clear();
   m_spUi->pSetTextColorsCheckBox->setChecked(false);
   m_spUi->pTextColorsList->clear();
+  while (m_spUi->pTextColorsList->rowCount() > 0)
+  {
+    m_spUi->pTextColorsList->removeRow(0);
+  }
   m_spUi->pSetBGCheckBox->setChecked(false);
   m_spUi->pBGList->clear();
+  while (m_spUi->pBGList->rowCount() > 0)
+  {
+    m_spUi->pBGList->removeRow(0);
+  }
   m_bInitialized = true;
 }
 

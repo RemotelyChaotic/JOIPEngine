@@ -417,38 +417,46 @@ void CResourceDisplayWidget::SlotLoadFinished()
 {
   if (m_iLoadState == ELoadState::eFinished)
   {
-    QReadLocker locker(&m_spResource->m_rwLock);
-    switch (m_spResource->m_type)
+    if (nullptr == m_spResource)
     {
-      case EResourceType::eImage:
+      m_iLoadState = ELoadState::eError;
+      m_spUi->pStackedWidget->setCurrentIndex(EResourceDisplayType::eError);
+    }
+    else
+    {
+      QReadLocker locker(&m_spResource->m_rwLock);
+      switch (m_spResource->m_type)
       {
-        m_imageMutex.lock();
-        if (nullptr != m_spLoadedPixmap)
+        case EResourceType::eImage:
         {
-          m_spUi->pImage->setPixmap(*m_spLoadedPixmap);
-          m_spUi->pStackedWidget->setCurrentIndex(EResourceDisplayType::eLocalImage);
-          emit SignalLoadFinished();
+          m_imageMutex.lock();
+          if (nullptr != m_spLoadedPixmap)
+          {
+            m_spUi->pImage->setPixmap(*m_spLoadedPixmap);
+            m_spUi->pStackedWidget->setCurrentIndex(EResourceDisplayType::eLocalImage);
+            emit SignalLoadFinished();
+          }
+          else if (nullptr != m_spLoadedMovie)
+          {
+            m_spLoadedMovie->start();
+            m_spUi->pImage->setMovie(m_spLoadedMovie.get());
+            m_spUi->pStackedWidget->setCurrentIndex(EResourceDisplayType::eLocalImage);
+            emit SignalLoadFinished();
+          }
+          else
+          {
+            m_iLoadState = ELoadState::eError;
+            m_spUi->pStackedWidget->setCurrentIndex(EResourceDisplayType::eError);
+          }
+          m_imageMutex.unlock();
+          break;
         }
-        else if (nullptr != m_spLoadedMovie)
+        case EResourceType::eOther:
         {
-          m_spLoadedMovie->start();
-          m_spUi->pImage->setMovie(m_spLoadedMovie.get());
-          m_spUi->pStackedWidget->setCurrentIndex(EResourceDisplayType::eLocalImage);
-          emit SignalLoadFinished();
+          break;
         }
-        else
-        {
-          m_iLoadState = ELoadState::eError;
-          m_spUi->pStackedWidget->setCurrentIndex(EResourceDisplayType::eError);
-        }
-        m_imageMutex.unlock();
-        break;
+        default: break;
       }
-      case EResourceType::eOther:
-      {
-        break;
-      }
-      default: break;
     }
   }
   else

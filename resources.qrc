@@ -45,5 +45,6 @@
         <file>resources/img/ButtonCheckBoxHover.png</file>
         <file>resources/img/ButtonMinusDisabled.png</file>
         <file>resources/img/ButtonPlusDisabled.png</file>
+        <file>resources/credits.txt</file>
     </qresource>
 </RCC>

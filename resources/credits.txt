@@ -1,0 +1,23 @@
+Made after a Webtease:
+MLP JOIP by Morexis (https://www.patreon.com/morexis)
+Original Webtease: https://imgur.com/a/4EHJid7
+
+Libraries:
+Qt by "The Qt Company" (https://www.qt.io/)
+QtAV by "The QtAV-Team" (https://www.qtav.org/)
+nodeeditor by "Dmitry Pinaev" (https://github.com/paceholder/nodeeditor)
+
+Software Design & Programming:
+"RemotlyChaotic"
+
+Fonts:
+Equestria by "Pixel Sagas"
+
+Icons:
+By "RemotlyChaotic"
+Save Icon made by "Picol" (www.flaticon.com) edited by RemotlyChaotic
+Equestria map by "Gameloft" (https://derpibooru.org/1553160) edited by cheezedoodle96 and RemotlyChaotic
+Pony Icon made with MLP Pony Creator by "generalzoi" (https://www.deviantart.com/generalzoi) edited RemotlyChaotic
+
+Spinner:
+"Amaan Cheval" 2019 (https://codepen.io/AmaanC/pen/GJqPdX)

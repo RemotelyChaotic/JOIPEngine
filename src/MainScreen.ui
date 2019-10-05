@@ -34,13 +34,41 @@
        </spacer>
       </item>
       <item>
-       <widget class="CTitleLabel" name="pTitle">
-        <property name="text">
-         <string>Pony JOI</string>
-        </property>
-        <property name="alignment">
-         <set>Qt::AlignCenter</set>
-        </property>
+       <widget class="QWidget" name="widget_2" native="true">
+        <layout class="QGridLayout" name="gridLayout_2">
+         <property name="leftMargin">
+          <number>10</number>
+         </property>
+         <property name="topMargin">
+          <number>10</number>
+         </property>
+         <property name="rightMargin">
+          <number>10</number>
+         </property>
+         <property name="bottomMargin">
+          <number>10</number>
+         </property>
+         <item row="0" column="0">
+          <widget class="CTitleLabel" name="pTitle">
+           <property name="text">
+            <string>Pony JOI</string>
+           </property>
+           <property name="alignment">
+            <set>Qt::AlignCenter</set>
+           </property>
+          </widget>
+         </item>
+         <item row="1" column="0">
+          <widget class="CTitleLabel" name="pVersionLabel">
+           <property name="text">
+            <string/>
+           </property>
+           <property name="alignment">
+            <set>Qt::AlignCenter</set>
+           </property>
+          </widget>
+         </item>
+        </layout>
        </widget>
       </item>
       <item>
@@ -83,6 +111,16 @@
        <widget class="CMenuButton" name="pSettingsButton">
         <property name="text">
          <string>Settings</string>
+        </property>
+        <property name="flat">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="CMenuButton" name="pCreditsButton">
+        <property name="text">
+         <string>Credits</string>
         </property>
         <property name="flat">
          <bool>true</bool>
