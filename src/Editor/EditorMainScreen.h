@@ -57,7 +57,7 @@ private:
 
   std::unique_ptr<Ui::CEditorMainScreen>                      m_spUi;
   std::unique_ptr<CResourceTreeItemModel>                     m_spResourceTreeModel;
-  std::map<EEditorWidget, std::unique_ptr<CEditorWidgetBase>> m_spWidgetsMap;
+  std::map<EEditorWidget, QPointer<CEditorWidgetBase>>        m_spWidgetsMap;
   tspProject                                                  m_spCurrentProject;
   std::weak_ptr<CDatabaseManager>                             m_wpDbManager;
   bool                                                        m_bInitialized;

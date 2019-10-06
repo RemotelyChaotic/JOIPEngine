@@ -124,7 +124,7 @@ void SProject::FromJsonObject(const QJsonObject& json)
   {
     for (QJsonValue val : it.value().toArray())
     {
-      std::shared_ptr<SResource> spResource = std::make_shared<SResource>();
+      std::shared_ptr<SResource> spResource = std::make_shared<SResource>(EResourceType::eOther);
       spResource->FromJsonObject(val.toObject());
       spResource->m_spParent = GetPtr();
       m_spResourcesMap.insert({spResource->m_sName, spResource});

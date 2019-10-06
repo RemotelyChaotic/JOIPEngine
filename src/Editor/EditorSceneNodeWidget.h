@@ -48,7 +48,6 @@ private:
 
   std::unique_ptr<Ui::CEditorSceneNodeWidget>       m_spUi;
   std::shared_ptr<CSettings>                        m_spSettings;
-  std::shared_ptr<QtNodes::DataModelRegistry>       m_spDataModelRegistry;
   tspProject                                        m_spCurrentProject;
   std::weak_ptr<CDatabaseManager>                   m_wpDbManager;
   CFlowView*                                        m_pFlowView;

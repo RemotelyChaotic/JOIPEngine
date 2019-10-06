@@ -56,8 +56,8 @@ namespace
         "ConstructionColor": "gray",
         "NormalColor": "black",
         "SelectedColor": "gray",
-        "SelectedHaloColor": "darkmagenta",
-        "HoveredColor": "darkmagenta",
+        "SelectedHaloColor": "deepskyblue",
+        "HoveredColor": "deepskyblue",
 
         "LineWidth": 3.0,
         "ConstructionLineWidth": 2.0,
@@ -76,20 +76,19 @@ CEditorSceneNodeWidget::CEditorSceneNodeWidget(QWidget* pParent) :
   CEditorWidgetBase(pParent),
   m_spUi(new Ui::CEditorSceneNodeWidget),
   m_spSettings(CApplication::Instance()->Settings()),
-  m_spDataModelRegistry(RegisterDataModels()),
   m_spCurrentProject(nullptr),
   m_pFlowView(nullptr),
   m_pFlowScene(nullptr)
 {
   m_spUi->setupUi(this);
 
-  SetNodeStyle();
-
   m_pFlowView = new CFlowView(this);
   m_pFlowView->setObjectName("FlowView");
   m_pFlowView->setWindowTitle("Node-based flow editor");
   m_pFlowView->show();
   m_pFlowView->setScene(nullptr);
+
+  SetNodeStyle();
 
   QLayout* pLayout = m_spUi->pContainerWidget->layout();
   pLayout->addWidget(m_pFlowView);
@@ -98,12 +97,6 @@ CEditorSceneNodeWidget::CEditorSceneNodeWidget(QWidget* pParent) :
 CEditorSceneNodeWidget::~CEditorSceneNodeWidget()
 {
   UnloadProject();
-  // leads to crash on destroying widget, so we let it leak,
-  // should not be a problem, since 'this' is only created once and destroyed only on
-  // application exit, in which case the leak doesn't matter.
-  // TODO: if crash in libarary is fixed, delete it properly
-  // delete m_pFlowScene;
-  delete m_pFlowView;
 }
 
 //----------------------------------------------------------------------------------------
@@ -114,7 +107,7 @@ void CEditorSceneNodeWidget::Initialize()
 
   m_wpDbManager = CApplication::Instance()->System<CDatabaseManager>();
 
-  m_pFlowScene = new FlowScene(m_spDataModelRegistry);
+  m_pFlowScene = new FlowScene(RegisterDataModels(), this);
   m_pFlowView->setScene(m_pFlowScene);
 
   connect(m_pFlowScene, &FlowScene::nodeCreated,

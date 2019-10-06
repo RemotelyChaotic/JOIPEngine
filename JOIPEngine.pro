@@ -40,9 +40,9 @@ DEFINES += QT_DEPRECATED_WARNINGS
 CONFIG += c++14
 
 include(lib/better-enums/_lib_enum.pri)
-CONFIG(debug, debug|release) {
-   include(lib/Fluid_Studios_Memory_Manager/_lib_mmgr.pri)
-}
+#CONFIG(debug, debug|release) {
+#   include(lib/Fluid_Studios_Memory_Manager/_lib_mmgr.pri)
+#}
 include (lib/modeltest/modeltest.pri)
 include (lib/node/node.pri)
 

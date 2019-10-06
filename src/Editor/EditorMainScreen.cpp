@@ -70,10 +70,10 @@ void CEditorMainScreen::Initialize()
           this, &CEditorMainScreen::SlotExitClicked);
 
   // insert items in map
-  m_spWidgetsMap.insert({EEditorWidget::eResourceWidget, std::make_unique<CEditorResourceWidget>()});
-  m_spWidgetsMap.insert({EEditorWidget::eResourceDisplay, std::make_unique<CEditorResourceDisplayWidget>()});
-  m_spWidgetsMap.insert({EEditorWidget::eSceneNodeWidget, std::make_unique<CEditorSceneNodeWidget>()});
-  m_spWidgetsMap.insert({EEditorWidget::eSceneCodeEditorWidget, std::make_unique<CEditorCodeWidget>()});
+  m_spWidgetsMap.insert({EEditorWidget::eResourceWidget, new CEditorResourceWidget(this)});
+  m_spWidgetsMap.insert({EEditorWidget::eResourceDisplay, new CEditorResourceDisplayWidget(this)});
+  m_spWidgetsMap.insert({EEditorWidget::eSceneNodeWidget, new CEditorSceneNodeWidget(this)});
+  m_spWidgetsMap.insert({EEditorWidget::eSceneCodeEditorWidget, new CEditorCodeWidget(this)});
 
   // initialize widgets
   m_spUi->pLeftComboBox->blockSignals(true);
@@ -337,7 +337,7 @@ void CEditorMainScreen::ChangeIndex(QComboBox* pComboBox, QWidget* pContainer,
   if (m_spWidgetsMap.end() != it)
   {
     it->second->setVisible(true);
-    pLayout->addWidget(it->second.get());
+    pLayout->addWidget(it->second);
     it->second->SetActionBar(pActionBar);
   }
 }
@@ -350,7 +350,7 @@ template<> CEditorResourceWidget* CEditorMainScreen::GetWidget<CEditorResourceWi
   if (m_spWidgetsMap.end() != it)
   {
     CEditorResourceWidget* pWidget =
-        dynamic_cast<CEditorResourceWidget*>(it->second.get());
+        dynamic_cast<CEditorResourceWidget*>(it->second.data());
     return pWidget;
   }
   return nullptr;
@@ -362,7 +362,7 @@ template<> CEditorResourceDisplayWidget* CEditorMainScreen::GetWidget<CEditorRes
   if (m_spWidgetsMap.end() != it)
   {
     CEditorResourceDisplayWidget* pWidget =
-        dynamic_cast<CEditorResourceDisplayWidget*>(it->second.get());
+        dynamic_cast<CEditorResourceDisplayWidget*>(it->second.data());
     return pWidget;
   }
   return nullptr;
@@ -374,7 +374,7 @@ template<> CEditorSceneNodeWidget* CEditorMainScreen::GetWidget<CEditorSceneNode
   if (m_spWidgetsMap.end() != it)
   {
     CEditorSceneNodeWidget* pWidget =
-        dynamic_cast<CEditorSceneNodeWidget*>(it->second.get());
+        dynamic_cast<CEditorSceneNodeWidget*>(it->second.data());
     return pWidget;
   }
   return nullptr;
@@ -386,7 +386,7 @@ template<> CEditorCodeWidget* CEditorMainScreen::GetWidget<CEditorCodeWidget>()
   if (m_spWidgetsMap.end() != it)
   {
     CEditorCodeWidget* pWidget =
-        dynamic_cast<CEditorCodeWidget*>(it->second.get());
+        dynamic_cast<CEditorCodeWidget*>(it->second.data());
     return pWidget;
   }
   return nullptr;

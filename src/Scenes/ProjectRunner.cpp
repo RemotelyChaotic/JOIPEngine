@@ -48,19 +48,17 @@ CProjectRunner::CProjectRunner(QObject* pParent) :
   m_pFlowScene(nullptr),
   m_pCurrentNode(nullptr)
 {
-  m_pFlowScene = new FlowScene(RegisterDataModels());
 
-  connect(m_pFlowScene, &FlowScene::nodeCreated,
-          this, &CProjectRunner::SlotNodeCreated);
-
-  std::random_device rd;            //Will be used to obtain a seed for the random number engine
-  m_generator = std::mt19937(rd()); //Standard mersenne_twister_engine seeded with rd()
 }
 
 CProjectRunner::~CProjectRunner()
 {
   UnloadProject();
-  //delete m_pFlowScene;
+  if (nullptr != m_pFlowScene)
+  {
+    m_pFlowScene->clearScene();
+    delete m_pFlowScene;
+  }
 }
 
 //----------------------------------------------------------------------------------------
@@ -73,6 +71,14 @@ void CProjectRunner::LoadProject(tspProject spProject)
   }
 
   m_spCurrentProject = spProject;
+
+  if (nullptr != m_pFlowScene)
+  {
+    m_pFlowScene->clearScene();
+    delete m_pFlowScene;
+  }
+  m_pFlowScene = new FlowScene(RegisterDataModels());
+  connect(m_pFlowScene, &FlowScene::nodeCreated, this, &CProjectRunner::SlotNodeCreated);
 
   bool bOk = LoadFlowScene();
   if (!bOk) { return; }
@@ -91,7 +97,11 @@ void CProjectRunner::UnloadProject()
   m_pCurrentNode = nullptr;
   m_spCurrentProject = nullptr;
   m_nodeMap.clear();
-  m_pFlowScene->clearScene();
+  if (nullptr != m_pFlowScene)
+  {
+    m_pFlowScene->clearScene();
+    delete m_pFlowScene;
+  }
 }
 
 //----------------------------------------------------------------------------------------
