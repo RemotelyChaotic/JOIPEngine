@@ -23,7 +23,7 @@ public:
   explicit CProjectRunner(QObject* pParent = nullptr);
   ~CProjectRunner();
 
-  void LoadProject(tspProject spProject);
+  void LoadProject(tspProject spProject, const QString sStartScene);
   void UnloadProject();
 
   tspScene NextScene(const QString sName);
@@ -37,7 +37,7 @@ private:
   bool LoadFlowScene();
   void ResolveNextPossibleNodes(QtNodes::Node* pNode, std::vector<std::pair<QString, QtNodes::Node*>>& vpRet);
   bool ResolveNextScene();
-  bool ResolveStart();
+  bool ResolveStart(const QString sStartScene);
 
 private slots:
   void SlotNodeCreated(QtNodes::Node &n);

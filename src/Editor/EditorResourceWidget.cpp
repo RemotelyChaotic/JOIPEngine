@@ -12,7 +12,7 @@
 #include "ui_EditorActionBar.h"
 
 // Testing
-#include "modeltest.h"
+//#include "modeltest.h"
 
 #include <QDebug>
 #include <QDomDocument>

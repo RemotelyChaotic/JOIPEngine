@@ -91,7 +91,7 @@ void CSceneMainScreen::Initialize()
 
 //----------------------------------------------------------------------------------------
 //
-void CSceneMainScreen::LoadProject(qint32 iId)
+void CSceneMainScreen::LoadProject(qint32 iId, const QString sStartScene)
 {
   if (!m_bInitialized) { return; }
   if (nullptr != m_spCurrentProject)
@@ -103,7 +103,7 @@ void CSceneMainScreen::LoadProject(qint32 iId)
   if (nullptr != spDbManager)
   {
     m_spCurrentProject = spDbManager->FindProject(iId);
-    m_spProjectRunner->LoadProject(m_spCurrentProject);
+    m_spProjectRunner->LoadProject(m_spCurrentProject, sStartScene);
 
     m_spCurrentProject->m_rwLock.lockForRead();
     QString sTitle = m_spCurrentProject->m_sTitleCard;
@@ -147,6 +147,26 @@ void CSceneMainScreen::UnloadProject()
   m_spUi->pTextBoxDisplay->SlotClearText();
 
   DisconnectAllSignals();
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CSceneMainScreen::SlotQuit()
+{
+  if (!m_bInitialized || nullptr == m_spCurrentProject) { return; }
+
+  UnloadProject();
+  auto spScriptRunner = m_wpScriptRunner.lock();
+  if (nullptr != spScriptRunner)
+  {
+    auto spSignalEmmiter = spScriptRunner->SignalEmmitter();
+    if (nullptr != spSignalEmmiter)
+    {
+      spSignalEmmiter->SetScriptExecutionStatus(EScriptExecutionStatus::eStopped);
+      emit spSignalEmmiter->SignalInterruptLoops();
+    }
+  }
+  emit SignalExitClicked();
 }
 
 //----------------------------------------------------------------------------------------
@@ -264,26 +284,6 @@ void CSceneMainScreen::SlotPlayMedia(tspResource spResource)
       m_spUi->pResourceDisplay->SlotPlayPause();
     }
   }
-}
-
-//----------------------------------------------------------------------------------------
-//
-void CSceneMainScreen::SlotQuit()
-{
-  if (!m_bInitialized || nullptr == m_spCurrentProject) { return; }
-
-  UnloadProject();
-  auto spScriptRunner = m_wpScriptRunner.lock();
-  if (nullptr != spScriptRunner)
-  {
-    auto spSignalEmmiter = spScriptRunner->SignalEmmitter();
-    if (nullptr != spSignalEmmiter)
-    {
-      spSignalEmmiter->SetScriptExecutionStatus(EScriptExecutionStatus::eStopped);
-      emit spSignalEmmiter->SignalInterruptLoops();
-    }
-  }
-  emit SignalExitClicked();
 }
 
 //----------------------------------------------------------------------------------------

@@ -12,22 +12,27 @@ CThreadedObject::~CThreadedObject()
 //
 CThreadedSystem::CThreadedSystem() :
   QObject(nullptr),
-  m_spThread(std::make_unique<QThread>())
+  m_pThread(new QThread(this))
 {
 }
 
 CThreadedSystem::~CThreadedSystem()
 {
-  m_spThread->quit();
-  while (!m_spThread->isFinished())
+  if (nullptr != m_pThread)
   {
-    m_spThread->wait(5);
+    m_pThread->quit();
+    while (!m_pThread->isFinished())
+    {
+      m_pThread->wait(5);
+    }
   }
 }
 //----------------------------------------------------------------------------------------
 //
 void CThreadedSystem::Cleanup()
 {
-  m_spSystem->Deinitialize();
-  m_spSystem.reset();
+  if (nullptr != m_spSystem)
+  {
+    m_spSystem->Deinitialize();
+  }
 }

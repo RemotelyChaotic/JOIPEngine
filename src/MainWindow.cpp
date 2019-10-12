@@ -20,7 +20,6 @@ CMainWindow::CMainWindow(QWidget* pParent) :
 {
   m_spUi->setupUi(this);
   setWindowFlags(Qt::FramelessWindowHint);
-  Initialize();
 }
 
 CMainWindow::~CMainWindow()

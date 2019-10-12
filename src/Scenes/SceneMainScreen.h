@@ -29,8 +29,11 @@ public:
   ~CSceneMainScreen() override;
 
   void Initialize();
-  void LoadProject(qint32 iId);
+  void LoadProject(qint32 iId, const QString sStartScene = QString());
   void UnloadProject();
+
+public slots:
+  void SlotQuit();
 
 signals:
   void SignalExitClicked();
@@ -44,7 +47,6 @@ private slots:
   void SlotPauseVideo();
   void SlotPauseSound();
   void SlotPlayMedia(tspResource spResource);
-  void SlotQuit();
   void SlotSceneSelectReturnValue(qint32 iIndex);
   void SlotScriptRunFinished(bool bOk);
   void SlotShowMedia(tspResource spResource);

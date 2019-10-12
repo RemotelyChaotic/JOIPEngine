@@ -9,7 +9,7 @@
 #include <QFontDatabase>
 #include <cassert>
 
-CApplication::CApplication(int argc, char *argv[]) :
+CApplication::CApplication(int& argc, char *argv[]) :
   QApplication(argc, argv),
   m_spSystemsMap(),
   m_spSettings(nullptr),

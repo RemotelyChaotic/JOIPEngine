@@ -26,6 +26,11 @@ greaterThan(QT_MAJOR_VERSION, 4) {
 TARGET = JOIPEngine
 TEMPLATE = app
 
+CONFIG(release, debug|release) {
+  QMAKE_CXXFLAGS_RELEASE += /Zi
+  QMAKE_LFLAGS_RELEASE += /DEBUG
+}
+
 # The following define makes your compiler emit warnings if you use
 # any feature of Qt which has been marked as deprecated (the exact warnings
 # depend on your compiler). Please consult the documentation of the
@@ -43,7 +48,9 @@ include(lib/better-enums/_lib_enum.pri)
 #CONFIG(debug, debug|release) {
 #   include(lib/Fluid_Studios_Memory_Manager/_lib_mmgr.pri)
 #}
-include (lib/modeltest/modeltest.pri)
+CONFIG(debug, debug|release) {
+  include (lib/modeltest/modeltest.pri)
+}
 include (lib/node/node.pri)
 
 INCLUDEPATH += \

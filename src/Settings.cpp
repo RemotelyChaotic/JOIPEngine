@@ -88,7 +88,7 @@ void CSettings::GenerateSettingsIfNotExists()
   {
     bNeedsSynch = true;
     QString sContentPath = QCoreApplication::instance()->applicationDirPath() +
-        QDir::separator() + "data";
+        QDir::separator() + ".." + QDir::separator() + "data";
     QFileInfo contentFileInfo(sContentPath);
     m_spSettings->setValue(CSettings::c_sSettingContentFolder,
                            contentFileInfo.absoluteFilePath());

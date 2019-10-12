@@ -4,6 +4,7 @@
 #include "Backend/DatabaseManager.h"
 #include "Backend/Project.h"
 #include "Backend/Scene.h"
+#include "Scenes/SceneMainScreen.h"
 #include "Script/BackgroundSnippetOverlay.h"
 #include "Script/IconSnippetOverlay.h"
 #include "Script/ResourceSnippetOverlay.h"
@@ -39,6 +40,7 @@ CEditorCodeWidget::CEditorCodeWidget(QWidget* pParent) :
   m_iLastIndex(-1)
 {
   m_spUi->setupUi(this);
+  m_spUi->pSceneView->setVisible(false);
   m_pHighlighter = new CScriptHighlighter(m_spUi->pCodeEdit->document());
 }
 
@@ -244,6 +246,10 @@ void CEditorCodeWidget::OnActionBarAboutToChange()
 {
   if (nullptr != ActionBar())
   {
+    disconnect(ActionBar()->m_spUi->pDebugButton, &QPushButton::clicked,
+            this, &CEditorCodeWidget::SlotDebugStart);
+    disconnect(ActionBar()->m_spUi->pStopDebugButton, &QPushButton::clicked,
+            this, &CEditorCodeWidget::SlotDebugStop);
     disconnect(ActionBar()->m_spUi->pAddShowBackgroundCode, &QPushButton::clicked,
             m_spBackgroundSnippetOverlay.get(), &CBackgroundSnippetOverlay::Show);
     disconnect(ActionBar()->m_spUi->pAddShowIconCode, &QPushButton::clicked,
@@ -264,6 +270,10 @@ void CEditorCodeWidget::OnActionBarChanged()
   if (nullptr != ActionBar())
   {
     ActionBar()->ShowCodeActionBar();
+    connect(ActionBar()->m_spUi->pDebugButton, &QPushButton::clicked,
+            this, &CEditorCodeWidget::SlotDebugStart);
+    connect(ActionBar()->m_spUi->pStopDebugButton, &QPushButton::clicked,
+            this, &CEditorCodeWidget::SlotDebugStop);
     connect(ActionBar()->m_spUi->pAddShowBackgroundCode, &QPushButton::clicked,
             m_spBackgroundSnippetOverlay.get(), &CBackgroundSnippetOverlay::Show);
     connect(ActionBar()->m_spUi->pAddShowIconCode, &QPushButton::clicked,
@@ -370,6 +380,69 @@ void CEditorCodeWidget::on_pCodeEdit_textChanged()
 
 //----------------------------------------------------------------------------------------
 //
+void CEditorCodeWidget::SlotDebugStart()
+{
+  WIDGET_INITIALIZED_GUARD
+
+  m_spUi->pSceneView->setVisible(true);
+  QLayout* pLayout = m_spUi->pSceneView->layout();
+  if (nullptr != pLayout)
+  {
+    if (nullptr != ActionBar())
+    {
+      ActionBar()->m_spUi->pDebugButton->hide();
+      ActionBar()->m_spUi->pStopDebugButton->show();
+    }
+
+    // get Scene name
+    auto spDbManager = m_wpDbManager.lock();
+    QString sSceneName = QString();
+    if (nullptr != spDbManager)
+    {
+      qint32 iId = m_spUi->pSceneComboBox->itemData(m_iLastIndex).toInt();
+      auto spScene = spDbManager->FindScene(m_spCurrentProject, iId);
+      if (nullptr != spScene)
+      {
+        QReadLocker locker(&spScene->m_rwLock);
+        sSceneName = spScene->m_sName;
+      }
+    }
+
+    m_spCurrentProject->m_rwLock.lockForRead();
+    qint32 iCurrProject = m_spCurrentProject->m_iId;
+    m_spCurrentProject->m_rwLock.unlock();
+    CSceneMainScreen* pMainSceneScreen = new CSceneMainScreen(m_spUi->pSceneView);
+    pMainSceneScreen->LoadProject(iCurrProject, sSceneName);
+
+    pLayout->addWidget(pMainSceneScreen);
+  }
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CEditorCodeWidget::SlotDebugStop()
+{
+  WIDGET_INITIALIZED_GUARD
+
+  QLayout* pLayout = m_spUi->pSceneView->layout();
+  if (nullptr != pLayout)
+  {
+    if (nullptr != ActionBar())
+    {
+      ActionBar()->m_spUi->pDebugButton->show();
+      ActionBar()->m_spUi->pStopDebugButton->hide();
+    }
+
+    CSceneMainScreen* pMainSceneScreen =
+        qobject_cast<CSceneMainScreen*>(pLayout->takeAt(0)->widget());
+    pMainSceneScreen->SlotQuit();
+    delete pMainSceneScreen;
+  }
+  m_spUi->pSceneView->setVisible(false);
+}
+
+//----------------------------------------------------------------------------------------
+//
 void CEditorCodeWidget::SlotFileChanged(const QString& sPath)
 {
   WIDGET_INITIALIZED_GUARD
@@ -413,6 +486,8 @@ void CEditorCodeWidget::SlotFileChanged(const QString& sPath)
   }
 }
 
+//----------------------------------------------------------------------------------------
+//
 void CEditorCodeWidget::SlotInsertGeneratedCode(const QString& sCode)
 {
   WIDGET_INITIALIZED_GUARD

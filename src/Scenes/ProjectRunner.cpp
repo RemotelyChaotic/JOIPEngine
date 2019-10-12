@@ -58,12 +58,13 @@ CProjectRunner::~CProjectRunner()
   {
     m_pFlowScene->clearScene();
     delete m_pFlowScene;
+    m_pFlowScene = nullptr;
   }
 }
 
 //----------------------------------------------------------------------------------------
 //
-void CProjectRunner::LoadProject(tspProject spProject)
+void CProjectRunner::LoadProject(tspProject spProject, const QString sStartScene)
 {
   if (nullptr != m_spCurrentProject)
   {
@@ -83,8 +84,16 @@ void CProjectRunner::LoadProject(tspProject spProject)
   bool bOk = LoadFlowScene();
   if (!bOk) { return; }
 
-  bOk = ResolveStart();
+  bOk = ResolveStart(sStartScene);
   if (!bOk) { return; }
+
+  CSceneNodeModel* pNodeDataModel = dynamic_cast<CSceneNodeModel*>(m_pCurrentNode->nodeDataModel());
+  if (!sStartScene.isNull() && !sStartScene.isEmpty() && nullptr != pNodeDataModel)
+  {
+    m_nodeMap.clear();
+    m_nodeMap.insert({pNodeDataModel->SceneName(), m_pCurrentNode});
+    return;
+  }
 
   bOk = ResolveNextScene();
   if (!bOk) { return; }
@@ -101,6 +110,7 @@ void CProjectRunner::UnloadProject()
   {
     m_pFlowScene->clearScene();
     delete m_pFlowScene;
+    m_pFlowScene = nullptr;
   }
 }
 
@@ -351,7 +361,7 @@ bool CProjectRunner::ResolveNextScene()
 
 //----------------------------------------------------------------------------------------
 //
-bool CProjectRunner::ResolveStart()
+bool CProjectRunner::ResolveStart(const QString sStartScene)
 {
   if (nullptr == m_pFlowScene)
   {
@@ -365,7 +375,16 @@ bool CProjectRunner::ResolveStart()
   auto vpNodes = m_pFlowScene->allNodes();
   for (auto pNode : vpNodes)
   {
+    CSceneNodeModel* pSceneModel = dynamic_cast<CSceneNodeModel*>(pNode->nodeDataModel());
     CStartNodeModel* pStartModel = dynamic_cast<CStartNodeModel*>(pNode->nodeDataModel());
+    if (nullptr != pSceneModel && !sStartScene.isNull() && !sStartScene.isEmpty())
+    {
+      if (pSceneModel->SceneName() == sStartScene)
+      {
+        bFound = true;
+        m_pCurrentNode = pNode;
+      }
+    }
     if (nullptr != pStartModel)
     {
       if (!bFound)

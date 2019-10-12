@@ -2,6 +2,7 @@
 #define THREADEDSYSTEM_H
 
 #include <QObject>
+#include <QPointer>
 #include <QThread>
 #include <atomic>
 #include <functional>
@@ -47,13 +48,14 @@ public:
   void RegisterObject()
   {
     m_spSystem = std::shared_ptr<T>(new T, [](T*){});
-    m_spSystem->moveToThread(m_spThread.get());
+    m_spSystem->moveToThread(m_pThread.data());
 
-    connect(m_spThread.get(), &QThread::started, m_spSystem.get(), &CThreadedObject::Initialize);
-    connect(m_spThread.get(), &QThread::finished, this, &CThreadedSystem::Cleanup, Qt::DirectConnection);
+    connect(m_pThread.data(), &QThread::started, m_spSystem.get(), &CThreadedObject::Initialize);
+    connect(m_pThread.data(), &QThread::finished, this, &CThreadedSystem::Cleanup, Qt::DirectConnection);
+    connect(m_pThread.data(), &QThread::finished, this, &CThreadedObject::deleteLater);
 
-    m_spThread->start();
-    while (!m_spThread->isRunning())
+    m_pThread->start();
+    while (!m_pThread->isRunning())
     {
       thread()->wait(5);
     }
@@ -63,8 +65,8 @@ protected slots:
   void Cleanup();
 
 protected:
-  std::unique_ptr<QThread>         m_spThread;
   std::shared_ptr<CThreadedObject> m_spSystem;
+  QPointer<QThread>                m_pThread;
 };
 
 #endif // THREADEDSYSTEM_H

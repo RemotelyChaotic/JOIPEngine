@@ -227,7 +227,7 @@
         <widget class="QWebEngineView" name="pWebView" native="true">
          <property name="url" stdset="0">
           <url>
-           <string>about:blank</string>
+           <string/>
           </url>
          </property>
         </widget>

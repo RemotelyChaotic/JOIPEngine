@@ -66,6 +66,8 @@ protected:
 protected slots:
   void on_pSceneComboBox_currentIndexChanged(qint32 iIndex);
   void on_pCodeEdit_textChanged();
+  void SlotDebugStart();
+  void SlotDebugStop();
   void SlotFileChanged(const QString& sPath);
   void SlotInsertGeneratedCode(const QString& sCode);
   void SlotSceneAdded(qint32 iProjId, qint32 iId);
