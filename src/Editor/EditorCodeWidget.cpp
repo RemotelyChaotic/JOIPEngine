@@ -4,6 +4,8 @@
 #include "Backend/DatabaseManager.h"
 #include "Backend/Project.h"
 #include "Backend/Scene.h"
+#include "Backend/ScriptRunner.h"
+#include "Backend/ScriptRunnerSignalEmiter.h"
 #include "Scenes/SceneMainScreen.h"
 #include "Script/BackgroundSnippetOverlay.h"
 #include "Script/IconSnippetOverlay.h"
@@ -36,6 +38,8 @@ CEditorCodeWidget::CEditorCodeWidget(QWidget* pParent) :
   m_spTimerSnippetOverlay(std::make_unique<CTimerSnippetOverlay>()),
   m_spSettings(CApplication::Instance()->Settings()),
   m_spCurrentProject(nullptr),
+  m_wpDbManager(),
+  m_wpScriptRunner(),
   m_cachedScriptsMap(),
   m_iLastIndex(-1)
 {
@@ -55,6 +59,7 @@ void CEditorCodeWidget::Initialize()
   m_bInitialized = false;
 
   m_wpDbManager = CApplication::Instance()->System<CDatabaseManager>();
+  m_wpScriptRunner = CApplication::Instance()->System<CScriptRunner>();
 
   auto spDbManager = m_wpDbManager.lock();
   if (nullptr != spDbManager)
@@ -98,6 +103,7 @@ void CEditorCodeWidget::Initialize()
 void CEditorCodeWidget::LoadProject(tspProject spProject)
 {
   WIDGET_INITIALIZED_GUARD
+  if (nullptr == spProject) { return; }
 
   m_spCurrentProject = spProject;
   m_spCurrentProject->m_rwLock.lockForRead();
@@ -130,6 +136,14 @@ void CEditorCodeWidget::LoadProject(tspProject spProject)
     m_spUi->pSceneComboBox->blockSignals(false);
     on_pSceneComboBox_currentIndexChanged(0);
   }
+
+  auto spScriptRunner = m_wpScriptRunner.lock();
+  if (nullptr != spScriptRunner)
+  {
+    auto spSignalEmmiter = spScriptRunner->SignalEmmitter();
+    connect(spSignalEmmiter.get(), &CScriptRunnerSignalEmiter::SignalExecutionError,
+            m_spUi->pCodeEdit, &CScriptEditorWidget::SlotExecutionError, Qt::QueuedConnection);
+  }
 }
 
 //----------------------------------------------------------------------------------------
@@ -137,6 +151,17 @@ void CEditorCodeWidget::LoadProject(tspProject spProject)
 void CEditorCodeWidget::UnloadProject()
 {
   WIDGET_INITIALIZED_GUARD
+
+  SlotDebugStop();
+  m_spUi->pCodeEdit->ResetWidget();
+
+  auto spScriptRunner = m_wpScriptRunner.lock();
+  if (nullptr != spScriptRunner)
+  {
+    auto spSignalEmmiter = spScriptRunner->SignalEmmitter();
+    disconnect(spSignalEmmiter.get(), &CScriptRunnerSignalEmiter::SignalExecutionError,
+            m_spUi->pCodeEdit, &CScriptEditorWidget::SlotExecutionError);
+  }
 
   m_spCurrentProject = nullptr;
 
@@ -365,6 +390,9 @@ void CEditorCodeWidget::on_pSceneComboBox_currentIndexChanged(qint32 iIndex)
     }
   }
 
+  m_spUi->pCodeEdit->ResetWidget();
+  m_spUi->pCodeEdit->update();
+
   m_iLastIndex = m_spUi->pSceneComboBox->currentIndex();
 }
 
@@ -415,6 +443,8 @@ void CEditorCodeWidget::SlotDebugStart()
     pMainSceneScreen->LoadProject(iCurrProject, sSceneName);
 
     pLayout->addWidget(pMainSceneScreen);
+
+    m_spUi->pCodeEdit->ResetWidget();
   }
 }
 
@@ -433,10 +463,14 @@ void CEditorCodeWidget::SlotDebugStop()
       ActionBar()->m_spUi->pStopDebugButton->hide();
     }
 
-    CSceneMainScreen* pMainSceneScreen =
-        qobject_cast<CSceneMainScreen*>(pLayout->takeAt(0)->widget());
-    pMainSceneScreen->SlotQuit();
-    delete pMainSceneScreen;
+    auto pItem = pLayout->takeAt(0);
+    if (nullptr != pItem)
+    {
+      CSceneMainScreen* pMainSceneScreen =
+          qobject_cast<CSceneMainScreen*>(pItem->widget());
+      pMainSceneScreen->SlotQuit();
+      delete pMainSceneScreen;
+    }
   }
   m_spUi->pSceneView->setVisible(false);
 }

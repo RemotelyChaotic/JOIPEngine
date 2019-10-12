@@ -13,6 +13,7 @@ class CTextSnippetOverlay;
 class CTimerSnippetOverlay;
 class CDatabaseManager;
 class CScriptHighlighter;
+class CScriptRunner;
 class CSettings;
 namespace Ui {
   class CEditorCodeWidget;
@@ -89,6 +90,7 @@ private:
   std::shared_ptr<CSettings>                 m_spSettings;
   tspProject                                 m_spCurrentProject;
   std::weak_ptr<CDatabaseManager>            m_wpDbManager;
+  std::weak_ptr<CScriptRunner>               m_wpScriptRunner;
   QPointer<CScriptHighlighter>               m_pHighlighter;
   std::map<qint32, SCachedMapItem>           m_cachedScriptsMap;
   qint32                                     m_iLastIndex;

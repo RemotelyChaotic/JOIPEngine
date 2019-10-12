@@ -198,11 +198,15 @@ void CScriptRunner::SlotRun()
     QJSValue ret = m_runFunction.call();
     if (ret.isError())
     {
-      QString sError = "Uncaught " + ret.property("name").toString() +
-                       " at line" + QString::number(ret.property("lineNumber").toInt()) +
-                       ":" + ret.toString() + "\n" + ret.property("stack").toString();
+      QString sException = ret.property("name").toString();
+      qint32 iLineNr = ret.property("lineNumber").toInt() - 1;
+      QString sStack = ret.property("stack").toString();
+      QString sError = "Uncaught " + sException +
+                       " at line" + QString::number(iLineNr) +
+                       ":" + ret.toString() + "\n" + sStack;
       qCritical() << sError;
       emit m_spSignalEmitter->SignalShowError(sError, QtMsgType::QtCriticalMsg);
+      emit m_spSignalEmitter->SignalExecutionError(sException, iLineNr, sStack);
       return;
     }
 
