@@ -88,7 +88,7 @@ void CBackgroundSnippetOverlay::on_pColorWidget_SignalColorChanged(const QColor&
 
 //----------------------------------------------------------------------------------------
 //
-void CBackgroundSnippetOverlay::on_pFilterLineEdit_2_textChanged(const QString& sText)
+void CBackgroundSnippetOverlay::on_pFilter_SignalFilterChanged(const QString& sText)
 {
   if (!m_bInitialized) { return; }
 

@@ -41,7 +41,7 @@ protected slots:
   void on_pResourceLineEdit_editingFinished();
   void on_pColorCheckBox_toggled(bool bState);
   void on_pColorWidget_SignalColorChanged(const QColor& color);
-  void on_pFilterLineEdit_2_textChanged(const QString& sText);
+  void on_pFilter_SignalFilterChanged(const QString& sText);
   void on_pConfirmButton_clicked();
   void on_pCancelButton_clicked();
   void SlotCurrentChanged(const QModelIndex &current, const QModelIndex &previous);

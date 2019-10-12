@@ -64,7 +64,7 @@ void CResourceSnippetOverlay::on_pResourceLineEdit_editingFinished()
 
 //----------------------------------------------------------------------------------------
 //
-void CResourceSnippetOverlay::on_pFilterLineEdit_2_textChanged(const QString& sText)
+void CResourceSnippetOverlay::on_pFilter_SignalFilterChanged(const QString& sText)
 {
   if (!m_bInitialized) { return; }
 

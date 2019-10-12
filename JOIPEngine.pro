@@ -123,7 +123,8 @@ SOURCES += \
     src/Editor/Script/TextSnippetOverlay.cpp \
     src/Editor/Script/TimerSnippetOverlay.cpp \
     src/Widgets/ColorPicker.cpp \
-    src/CreditsScreen.cpp
+    src/CreditsScreen.cpp \
+    src/Widgets/SearchWidget.cpp
 
 HEADERS += \
     src/MainWindow.h \
@@ -197,7 +198,8 @@ HEADERS += \
     src/Editor/Script/TimerSnippetOverlay.h \
     src/Widgets/ColorPicker.h \
     version.h \
-    src/CreditsScreen.h
+    src/CreditsScreen.h \
+    src/Widgets/SearchWidget.h
 
 FORMS += \
     src/MainWindow.ui \
@@ -227,7 +229,8 @@ FORMS += \
     src/Editor/Script/TextSnippetOverlay.ui \
     src/Editor/Script/TimerSnippetOverlay.ui \
     src/Widgets/ColorPicker.ui \
-    src/CreditsScreen.ui
+    src/CreditsScreen.ui \
+    src/Widgets/SearchWidget.ui
 
 RESOURCES += \
     resources.qrc

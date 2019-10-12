@@ -88,7 +88,7 @@ void CIconSnippetOverlay::on_pHideCheckBox_toggled(bool bState)
 
 //----------------------------------------------------------------------------------------
 //
-void CIconSnippetOverlay::on_pFilterLineEdit_2_textChanged(const QString& sText)
+void CIconSnippetOverlay::on_pFilter_SignalFilterChanged(const QString& sText)
 {
   if (!m_bInitialized) { return; }
 

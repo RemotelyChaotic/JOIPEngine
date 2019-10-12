@@ -199,7 +199,7 @@ void CEditorResourceWidget::dropEvent(QDropEvent* pEvent)
 
 //----------------------------------------------------------------------------------------
 //
-void CEditorResourceWidget::on_pFilterLineEdit_textChanged(const QString& sText)
+void CEditorResourceWidget::on_pFilter_SignalFilterChanged(const QString& sText)
 {
   WIDGET_INITIALIZED_GUARD
   CResourceTreeItemSortFilterProxyModel* pProxyModel =
