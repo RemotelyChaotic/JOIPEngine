@@ -124,7 +124,8 @@ SOURCES += \
     src/Editor/Script/TimerSnippetOverlay.cpp \
     src/Widgets/ColorPicker.cpp \
     src/CreditsScreen.cpp \
-    src/Widgets/SearchWidget.cpp
+    src/Widgets/SearchWidget.cpp \
+    src/Backend/ScriptStorage.cpp
 
 HEADERS += \
     src/MainWindow.h \
@@ -199,7 +200,8 @@ HEADERS += \
     src/Widgets/ColorPicker.h \
     version.h \
     src/CreditsScreen.h \
-    src/Widgets/SearchWidget.h
+    src/Widgets/SearchWidget.h \
+    src/Backend/ScriptStorage.h
 
 FORMS += \
     src/MainWindow.ui \

@@ -10,6 +10,7 @@ class CScriptBackground;
 class CScriptIcon;
 class CScriptMediaPlayer;
 class CScriptRunnerSignalEmiter;
+class CScriptStorage;
 class CScriptTextBox;
 class CScriptTimer;
 class CScriptThread;
@@ -47,6 +48,7 @@ private:
   CScriptBackground*                     m_pBackgroundObject;
   CScriptIcon*                           m_pScriptIcon;
   CScriptMediaPlayer*                    m_pMediaPlayerObject;
+  CScriptStorage*                        m_pStorageObject;
   CScriptTextBox*                        m_pTextBoxObject;
   CScriptTimer*                          m_pTimerObject;
   CScriptThread*                         m_pThreadObject;

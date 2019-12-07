@@ -29,6 +29,7 @@ public:
 
 signals:
   // generic / controll
+  void SignalClearStorage();
   void SignalExecutionError(QString sException, qint32 iLine, QString sStack);
   void SignalInterruptLoops();
   void SignalShowError(QString sError, QtMsgType type);

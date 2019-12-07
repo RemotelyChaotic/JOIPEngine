@@ -7,6 +7,7 @@
 #include "ScriptIcon.h"
 #include "ScriptMediaPlayer.h"
 #include "ScriptRunnerSignalEmiter.h"
+#include "ScriptStorage.h"
 #include "ScriptTextBox.h"
 #include "ScriptTimer.h"
 #include "ScriptThread.h"
@@ -24,6 +25,7 @@ CScriptRunner::CScriptRunner() :
   m_pBackgroundObject(nullptr),
   m_pScriptIcon(nullptr),
   m_pMediaPlayerObject(nullptr),
+  m_pStorageObject(nullptr),
   m_pTextBoxObject(nullptr),
   m_pTimerObject(nullptr),
   m_pThreadObject(nullptr),
@@ -72,6 +74,10 @@ void CScriptRunner::Initialize()
   QJSValue mediaPlayerValue = m_spScriptEngine->newQObject(m_pMediaPlayerObject);
   m_spScriptEngine->globalObject().setProperty("mediaPlayer", mediaPlayerValue);
 
+  m_pStorageObject = new CScriptStorage(m_spSignalEmitter, m_spScriptEngine.get());
+  QJSValue storageValue = m_spScriptEngine->newQObject(m_pStorageObject);
+  m_spScriptEngine->globalObject().setProperty("localStorage", storageValue);
+
   m_pTextBoxObject = new CScriptTextBox(m_spSignalEmitter, m_spScriptEngine.get());
   QJSValue textBoxValue = m_spScriptEngine->newQObject(m_pTextBoxObject);
   m_spScriptEngine->globalObject().setProperty("textBox", textBoxValue);
@@ -98,11 +104,13 @@ void CScriptRunner::Deinitialize()
   m_spTimer->stop();
   m_spTimer = nullptr;
 
+  m_pStorageObject->ClearStorage();
   m_spScriptEngine->collectGarbage();
 
   delete m_pBackgroundObject;
   delete m_pScriptIcon;
   delete m_pMediaPlayerObject;
+  delete m_pStorageObject;
   delete m_pTextBoxObject;
   delete m_pTimerObject;
   delete m_pThreadObject;
@@ -110,6 +118,7 @@ void CScriptRunner::Deinitialize()
   m_pBackgroundObject = nullptr;
   m_pScriptIcon = nullptr;
   m_pMediaPlayerObject = nullptr;
+  m_pStorageObject = nullptr;
   m_pTextBoxObject = nullptr;
   m_pTimerObject = nullptr;
   m_pThreadObject = nullptr;

@@ -144,6 +144,12 @@ void CSceneMainScreen::UnloadProject()
   auto spScriptRunner = m_wpScriptRunner.lock();
   if (nullptr != spScriptRunner)
   {
+    auto spSignalEmmiter = spScriptRunner->SignalEmmitter();
+    if (nullptr != spSignalEmmiter)
+    {
+      emit spSignalEmmiter->SignalClearStorage();
+    }
+
     disconnect(spScriptRunner.get(), &CScriptRunner::SignalScriptRunFinished,
             this, &CSceneMainScreen::SlotScriptRunFinished);
   }
