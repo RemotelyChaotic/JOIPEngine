@@ -14,6 +14,7 @@ class CSettings;
 namespace Ui {
   class CInformationWidget;
 }
+class QPropertyAnimation;
 struct SResource;
 typedef std::shared_ptr<SResource> tspResource;
 
@@ -41,6 +42,10 @@ public slots:
 protected:
   bool eventFilter(QObject* pObject, QEvent* pEvent) override;
 
+private slots:
+  void SlotFadeoutAnimationFinished();
+  void SlotSkipAnimationFinished();
+
 private:
   void AddIcon(const QString& sName, const tspResource& spResource);
   QWidget* CreateHeaderIcon(QWidget* pParent, const QString& sName, const QString sPath);
@@ -51,8 +56,10 @@ private:
   std::shared_ptr<CSettings>              m_spSettings;
   QPointer<QWidget>                       m_pExitWidget;
   QPointer<QWidget>                       m_pSkipWidget;
+  QPointer<QPropertyAnimation>            m_pSkipAnimation;
   std::map<QString, QPointer<QWidget>>    m_iconMap;
   QTimer                                  m_skipTimer;
+  bool                                    m_bSkippable;
   QBitmap                                 m_iconMask;
 };
 

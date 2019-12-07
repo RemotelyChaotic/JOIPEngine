@@ -35,10 +35,16 @@ public slots:
 
 private:
   void AddDropShadow(QWidget* pWidget);
+  void RemoveEffect(QWidget* pWidget);
 
+private slots:
+  void SlotTimerAnimationFinished();
+
+private:
   std::unique_ptr<Ui::CTimerDisplayWidget>   m_spUi;
   std::unique_ptr<QTimer>                    m_spTimer;
   std::shared_ptr<CSettings>                 m_spSettings;
+  bool                                       m_bTimerShown;
 };
 
 #endif // TIMERWIDGET_H

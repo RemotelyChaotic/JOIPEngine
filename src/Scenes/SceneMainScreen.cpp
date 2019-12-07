@@ -87,6 +87,11 @@ void CSceneMainScreen::Initialize()
   connect(m_spUi->pResourceDisplay, &CResourceDisplayWidget::SignalLoadFinished,
           this, &CSceneMainScreen::SlotLoadFinished);
 
+  // filter for skipping text
+  m_pBackground->installEventFilter(m_spUi->pInfoDisplay);
+  m_spUi->pResourceDisplay->installEventFilter(m_spUi->pInfoDisplay);
+  m_spUi->pTextBoxDisplay->installEventFilter(m_spUi->pInfoDisplay);
+
   // initializing done
   m_bInitialized = true;
 }

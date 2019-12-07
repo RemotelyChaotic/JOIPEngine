@@ -2,6 +2,7 @@
 #define TEXTBOXWIDGET_H
 
 #include "Widgets/IWidgetBaseInterface.h"
+#include <QPointer>
 #include <QWidget>
 #include <memory>
 
@@ -9,6 +10,7 @@ class CSettings;
 namespace Ui {
   class CTextBoxWidget;
 }
+class QPropertyAnimation;
 
 class CTextBoxWidget : public QWidget, public IWidgetBaseInterface
 {
@@ -45,9 +47,11 @@ private slots:
 
 private:
   void AddDropShadow(QWidget* pWidget);
+  void ScrollToBottom();
 
   std::unique_ptr<Ui::CTextBoxWidget> m_spUi;
   std::shared_ptr<CSettings>          m_spSettings;
+  QPointer<QPropertyAnimation>        m_pTextSliderValueAnimation;
   std::vector<QColor>                 m_vCurrentBackgroundColor;
   std::vector<QColor>                 m_vCurrentTextColor;
   bool                                m_bSceneSelection;

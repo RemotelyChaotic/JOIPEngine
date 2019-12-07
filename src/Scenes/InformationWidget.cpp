@@ -7,8 +7,10 @@
 #include "ui_InformationWidget.h"
 
 #include <QGraphicsDropShadowEffect>
+#include <QGraphicsOpacityEffect>
 #include <QLabel>
 #include <QPointer>
+#include <QPropertyAnimation>
 
 namespace  {
   const qint32 c_iIconWidth = 96;
@@ -32,6 +34,7 @@ CInformationWidget::CInformationWidget(QWidget *parent) :
   m_pSkipWidget(nullptr),
   m_iconMap(),
   m_skipTimer(),
+  m_bSkippable(false),
   m_iconMask()
 {
   m_spUi->setupUi(this);
@@ -44,12 +47,19 @@ CInformationWidget::CInformationWidget(QWidget *parent) :
       .scaled(c_iIconWidth, c_iIconHeight, Qt::IgnoreAspectRatio, Qt::SmoothTransformation)
       .mask();
 
+  QGraphicsOpacityEffect* pOpacity = new QGraphicsOpacityEffect(m_pSkipWidget);
+  pOpacity->setOpacity(0.00);
+  m_pSkipWidget->setGraphicsEffect(pOpacity);
+  m_pSkipAnimation = new QPropertyAnimation(pOpacity, "opacity", m_pSkipWidget);
+  m_pSkipAnimation->setDuration(200);
+
   connect(&m_skipTimer, &QTimer::timeout, this, &CInformationWidget::SlotSkipTimeout);
 }
 
 CInformationWidget::~CInformationWidget()
 {
   SlotSkipTimeout();
+  m_pSkipAnimation->stop();
 }
 
 //----------------------------------------------------------------------------------------
@@ -104,11 +114,19 @@ void CInformationWidget::SlotShowIcon(tspResource spResource)
 //
 void CInformationWidget::SlotShowSkipIcon(qint32 iTimeS)
 {
+  m_bSkippable = true;
   m_skipTimer.setInterval(iTimeS * 1000);
   m_skipTimer.start();
   if (nullptr != m_pSkipWidget)
   {
+    QGraphicsOpacityEffect* pOpacity =
+      dynamic_cast<QGraphicsOpacityEffect*>(m_pSkipWidget->graphicsEffect());
+
+    m_pSkipAnimation->stop();
+    m_pSkipAnimation->setStartValue((nullptr != pOpacity) ? pOpacity->opacity() : 0.0);
+    m_pSkipAnimation->setEndValue(1.0);
     m_pSkipWidget->show();
+    m_pSkipAnimation->start();
   }
 }
 
@@ -116,10 +134,17 @@ void CInformationWidget::SlotShowSkipIcon(qint32 iTimeS)
 //
 void CInformationWidget::SlotSkipTimeout()
 {
+  m_bSkippable = false;
   m_skipTimer.stop();
   if (nullptr != m_pSkipWidget)
   {
-    m_pSkipWidget->hide();
+    QGraphicsOpacityEffect* pOpacity =
+      dynamic_cast<QGraphicsOpacityEffect*>(m_pSkipWidget->graphicsEffect());
+
+    m_pSkipAnimation->stop();
+    m_pSkipAnimation->setStartValue((nullptr != pOpacity) ? pOpacity->opacity() : 1.0);
+    m_pSkipAnimation->setEndValue(0.0);
+    m_pSkipAnimation->start();
   }
 }
 
@@ -132,11 +157,12 @@ bool CInformationWidget::eventFilter(QObject* pObject, QEvent* pEvent)
   if (pEvent->type() == QEvent::MouseButtonRelease)
   {
     const QString sName = pObject->property(c_sMapKeyProperty).toString();
+
     if (c_sQuitIcon == sName)
     {
       emit SignalQuit();
     }
-    else if (c_sSkipIcon == sName)
+    else if (m_bSkippable || c_sSkipIcon == sName)
     {
       emit SignalWaitSkipped();
       SlotSkipTimeout();
@@ -144,6 +170,32 @@ bool CInformationWidget::eventFilter(QObject* pObject, QEvent* pEvent)
   }
 
   return false;
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CInformationWidget::SlotFadeoutAnimationFinished()
+{
+  QPropertyAnimation* pFadeOutAnim = dynamic_cast<QPropertyAnimation*>(sender());
+  if (nullptr != pFadeOutAnim)
+  {
+    QWidget* pWidget = dynamic_cast<QWidget*>(pFadeOutAnim->parent());
+    if (nullptr != pWidget)
+    {
+      m_spUi->pIcons->layout()->removeWidget(pWidget);
+      pWidget->deleteLater();
+    }
+  }
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CInformationWidget::SlotSkipAnimationFinished()
+{
+  if (m_bSkippable)
+  {
+    m_pSkipWidget->hide();
+  }
 }
 
 //----------------------------------------------------------------------------------------
@@ -248,7 +300,16 @@ void CInformationWidget::RemoveIcon(const QString& sName)
   {
     auto pWidget = it->second;
     m_iconMap.erase(it);
-    m_spUi->pIcons->layout()->removeWidget(pWidget);
-    delete pWidget;
+
+    QGraphicsOpacityEffect* pOpacity = new QGraphicsOpacityEffect(pWidget);
+    pOpacity->setOpacity(1.00);
+    pWidget->setGraphicsEffect(pOpacity);
+    QPropertyAnimation* pFadeOutAnimation = new QPropertyAnimation(pOpacity, "opacity", pWidget);
+    pFadeOutAnimation->setStartValue(1);
+    pFadeOutAnimation->setEndValue(0);
+    pFadeOutAnimation->setDuration(500);
+    connect(pFadeOutAnimation, &QPropertyAnimation::finished,
+            this, &CInformationWidget::SlotFadeoutAnimationFinished);
+    pFadeOutAnimation->start();
   }
 }

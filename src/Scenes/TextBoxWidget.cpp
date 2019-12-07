@@ -10,6 +10,7 @@
 #include <QLabel>
 #include <QLineEdit>
 #include <QPushButton>
+#include <QPropertyAnimation>
 #include <QScrollBar>
 
 namespace
@@ -33,10 +34,33 @@ CTextBoxWidget::CTextBoxWidget(QWidget* pParent) :
 
   m_spUi->setupUi(this);
   m_spUi->pScrollArea->setStyleSheet("background-color:transparent;");
+
+  m_pTextSliderValueAnimation =
+      new QPropertyAnimation(m_spUi->pScrollArea->verticalScrollBar(), "value",
+                             m_spUi->pScrollArea->verticalScrollBar());
+  m_pTextSliderValueAnimation->setDuration(500);
+
+  QLinearGradient alphaGradient(rect().topLeft(),
+                                rect().bottomLeft());
+  alphaGradient.setColorAt(0.0, Qt::transparent);
+  alphaGradient.setColorAt(0.2, Qt::black);
+  alphaGradient.setColorAt(0.8, Qt::black);
+  alphaGradient.setColorAt(1.0, Qt::transparent);
+  QGraphicsOpacityEffect* pOpacityEffect = new QGraphicsOpacityEffect(this);
+  pOpacityEffect->setOpacity(1.0);
+  pOpacityEffect->setOpacityMask(alphaGradient);
+  setGraphicsEffect(pOpacityEffect);
 }
 
 CTextBoxWidget::~CTextBoxWidget()
 {
+  if (!m_pTextSliderValueAnimation.isNull())
+  {
+    m_pTextSliderValueAnimation->stop();
+  }
+
+  m_vCurrentBackgroundColor.clear();
+  m_vCurrentTextColor.clear();
 }
 
 //----------------------------------------------------------------------------------------
@@ -49,6 +73,7 @@ void CTextBoxWidget::Initialize()
   m_spUi->pScrollArea->verticalScrollBar()->hide();
   m_spUi->pScrollArea->setVerticalScrollBarPolicy(Qt::ScrollBarPolicy::ScrollBarAlwaysOff);
   m_spUi->pScrollArea->setHorizontalScrollBarPolicy(Qt::ScrollBarPolicy::ScrollBarAlwaysOff);
+
 
   connect(m_spUi->pScrollArea->verticalScrollBar(), &QAbstractSlider::rangeChanged,
           this, &CTextBoxWidget::SlotSliderRangeChanged, Qt::QueuedConnection);
@@ -164,7 +189,7 @@ void CTextBoxWidget::SlotShowButtonPrompts(QStringList vsLabels)
     pLayout->addWidget(pRoot);
   }
 
-  m_spUi->pScrollArea->verticalScrollBar()->setValue(m_spUi->pScrollArea->verticalScrollBar()->maximum());
+  ScrollToBottom();
 }
 
 //----------------------------------------------------------------------------------------
@@ -223,7 +248,7 @@ void CTextBoxWidget::SlotShowInput()
     pLayout->addWidget(pRoot);
   }
 
-  m_spUi->pScrollArea->verticalScrollBar()->setValue(m_spUi->pScrollArea->verticalScrollBar()->maximum());
+  ScrollToBottom();
 }
 
 //----------------------------------------------------------------------------------------
@@ -275,7 +300,7 @@ void CTextBoxWidget::SlotShowText(QString sText)
     pLayout->addWidget(pRoot);
   }
 
-  m_spUi->pScrollArea->verticalScrollBar()->setValue(m_spUi->pScrollArea->verticalScrollBar()->maximum());
+  ScrollToBottom();
 }
 
 //----------------------------------------------------------------------------------------
@@ -296,8 +321,7 @@ void CTextBoxWidget::SlotTextColorsChanged(std::vector<QColor> vColors)
 //
 void CTextBoxWidget::SlotSliderRangeChanged()
 {
-  m_spUi->pScrollArea->verticalScrollBar()->setValue(
-            m_spUi->pScrollArea->verticalScrollBar()->maximum());
+  ScrollToBottom();
 }
 
 //----------------------------------------------------------------------------------------
@@ -310,4 +334,21 @@ void CTextBoxWidget::AddDropShadow(QWidget* pWidget)
   pShadow->setYOffset(5);
   pShadow->setColor(Qt::black);
   pWidget->setGraphicsEffect(pShadow);
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CTextBoxWidget::ScrollToBottom()
+{
+  if (!m_pTextSliderValueAnimation.isNull())
+  {
+    m_pTextSliderValueAnimation->stop();
+
+    m_pTextSliderValueAnimation->setStartValue(
+          m_spUi->pScrollArea->verticalScrollBar()->value());
+    m_pTextSliderValueAnimation->setEndValue(
+          m_spUi->pScrollArea->verticalScrollBar()->maximum());
+
+    m_pTextSliderValueAnimation->start();
+  }
 }
