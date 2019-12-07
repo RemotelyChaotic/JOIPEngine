@@ -520,6 +520,9 @@ void CResourceDisplayWidget::SlotStatusChanged(QMediaPlayer::MediaStatus status)
     case QMediaPlayer::LoadedMedia:
     {
       m_iLoadState = ELoadState::eFinished;
+      SlotSetSliderVisible(true);
+      SlotVolumeChanged();
+      SlotMutedChanged();
       m_spUi->pStackedWidget->setCurrentIndex(EResourceDisplayType::eLocalMedia);
       emit SignalLoadFinished();
       break;
@@ -564,12 +567,9 @@ void CResourceDisplayWidget::SlotWebLoadFinished(bool bOk)
     if (bOk)
     {
       m_iLoadState = ELoadState::eFinished;
-      m_spUi->pWebView->page()->runJavaScript(
-            "var video = document.querySelector('video');"
-            "if (video !== null) {"
-            "  video.controls = false;"
-            "}"
-            );
+      SlotSetSliderVisible(true);
+      SlotVolumeChanged();
+      SlotMutedChanged();
       m_spUi->pStackedWidget->setCurrentIndex(EResourceDisplayType::eWebResource);
       emit SignalLoadFinished();
     }

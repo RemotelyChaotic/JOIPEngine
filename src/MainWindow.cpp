@@ -53,6 +53,7 @@ void CMainWindow::Initialize()
   ConnectSlots();
 
   SlotResolutionChanged();
+  SlotFullscreenChanged();
 
   m_spUi->pApplicationStackWidget->setCurrentIndex(EAppState::eMainScreen);
   IAppStateScreen* pScreen =
