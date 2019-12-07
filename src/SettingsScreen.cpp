@@ -13,6 +13,8 @@
 #include <map>
 
 namespace  {
+  const double c_dSliderScaling = 10000;
+
   std::map<QString, QSize> possibleDimensionsMap =
   {
     { "16:10 1920x1200", QSize(1920, 1200)},
@@ -70,8 +72,14 @@ void CSettingsScreen::Load()
   QSize currentResolution = m_spSettings->Resolution();
 
   // block signals to prevent settings change
+  m_spUi->pFullscreenCheckBox->blockSignals(true);
   m_spUi->pFolderLineEdit->blockSignals(true);
   m_spUi->pResolutionComboBox->blockSignals(true);
+  m_spUi->pMuteCheckBox->blockSignals(true);
+  m_spUi->pVolumeSlider->blockSignals(true);
+
+  // set fullscreen
+  m_spUi->pFullscreenCheckBox->setCheckState(m_spSettings->Fullscreen() ? Qt::Checked : Qt::Unchecked);
 
   // set lineedit
   m_spUi->pFolderLineEdit->setText(m_spSettings->ContentFolder());
@@ -113,9 +121,16 @@ void CSettingsScreen::Load()
     m_spUi->pResolutionComboBox->setCurrentIndex(m_spUi->pResolutionComboBox->count() - 1);
   }
 
+  // set volume
+  m_spUi->pMuteCheckBox->setCheckState(m_spSettings->Muted() ? Qt::Checked : Qt::Unchecked);
+  m_spUi->pVolumeSlider->setValue(static_cast<qint32>(m_spSettings->Volume() * c_dSliderScaling));
+
   // unblock signals
+  m_spUi->pFullscreenCheckBox->blockSignals(false);
   m_spUi->pResolutionComboBox->blockSignals(false);
   m_spUi->pFolderLineEdit->blockSignals(false);
+  m_spUi->pMuteCheckBox->blockSignals(false);
+  m_spUi->pVolumeSlider->blockSignals(false);
 }
 
 //----------------------------------------------------------------------------------------
@@ -125,6 +140,17 @@ void CSettingsScreen::Unload()
   m_spUi->pResolutionComboBox->blockSignals(true);
   m_spUi->pResolutionComboBox->clear();
   m_spUi->pResolutionComboBox->blockSignals(false);
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CSettingsScreen::on_pFullscreenCheckBox_stateChanged(qint32 iState)
+{
+  WIDGET_INITIALIZED_GUARD
+  assert(nullptr != m_spSettings);
+  if (nullptr == m_spSettings) { return; }
+
+  m_spSettings->SetFullscreen(iState == Qt::Checked);
 }
 
 //----------------------------------------------------------------------------------------
@@ -171,6 +197,29 @@ void CSettingsScreen::on_pBrowseButton_clicked()
   const QString sResultingPath = path.canonicalFilePath();
   m_spUi->pFolderLineEdit->setText(sResultingPath);
   m_spSettings->SetContentFolder(sResultingPath);
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CSettingsScreen::on_pMuteCheckBox_stateChanged(qint32 iState)
+{
+  WIDGET_INITIALIZED_GUARD
+  assert(nullptr != m_spSettings);
+  if (nullptr == m_spSettings) { return; }
+
+  m_spSettings->SetMuted(iState == Qt::Checked);
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CSettingsScreen::on_pVolumeSlider_sliderReleased()
+{
+  WIDGET_INITIALIZED_GUARD
+  assert(nullptr != m_spSettings);
+  if (nullptr == m_spSettings) { return; }
+
+  double dVolume = static_cast<double>(m_spUi->pVolumeSlider->value()) / c_dSliderScaling;
+  m_spSettings->SetVolume(dVolume);
 }
 
 //----------------------------------------------------------------------------------------

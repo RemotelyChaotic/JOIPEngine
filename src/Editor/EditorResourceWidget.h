@@ -51,6 +51,7 @@ protected slots:
   void SlotWebResourceSelected(const QString& sResource);
   void SlotNetworkReplyError(QNetworkReply::NetworkError code);
   void SlotNetworkReplyFinished();
+  void SlotLoadFinished();
 
 private:
   void AddFiles(const QStringList& vsFiles, const QStringList& imageFormatsList,

@@ -88,6 +88,21 @@ void CMainWindow::SlotChangeAppState(EAppState newState)
 
 //----------------------------------------------------------------------------------------
 //
+void CMainWindow::SlotFullscreenChanged()
+{
+  bool bFullscreen = m_spSettings->Fullscreen();
+  if (bFullscreen)
+  {
+    setWindowState(windowState() | Qt::WindowFullScreen);
+  }
+  else
+  {
+    setWindowState(windowState() ^ Qt::WindowFullScreen);
+  }
+}
+
+//----------------------------------------------------------------------------------------
+//
 void CMainWindow::SlotResolutionChanged()
 {
   QSize newResolution = m_spSettings->Resolution();
@@ -102,6 +117,9 @@ void CMainWindow::ConnectSlots()
 {
   connect(m_spWindowContext.get(), &CWindowContext::SignalChangeAppState,
           this, &CMainWindow::SlotChangeAppState, Qt::DirectConnection);
+
+  connect(m_spSettings.get(), &CSettings::FullscreenChanged,
+          this, &CMainWindow::SlotFullscreenChanged, Qt::QueuedConnection);
 
   connect(m_spSettings.get(), &CSettings::ResolutionChanged,
           this, &CMainWindow::SlotResolutionChanged, Qt::QueuedConnection);

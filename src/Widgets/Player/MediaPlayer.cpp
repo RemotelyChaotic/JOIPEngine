@@ -65,6 +65,18 @@ CMediaPlayer::~CMediaPlayer()
 
 //----------------------------------------------------------------------------------------
 //
+bool CMediaPlayer::IsMuted()
+{
+  auto pAudio = m_player->audio();
+  if (nullptr != pAudio)
+  {
+    return pAudio->isMute();
+  }
+  return false;
+}
+
+//----------------------------------------------------------------------------------------
+//
 bool CMediaPlayer::IsPlaying()
 {
   return m_player->isPlaying();
@@ -75,6 +87,29 @@ bool CMediaPlayer::IsPlaying()
 void CMediaPlayer::SetSliderVisible(bool bVisible)
 {
   m_slider->setVisible(bVisible);
+}
+
+//----------------------------------------------------------------------------------------
+//
+double CMediaPlayer::Volume()
+{
+  auto pAudio = m_player->audio();
+  if (nullptr != pAudio)
+  {
+    return pAudio->volume();
+  }
+  return 0.0;
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CMediaPlayer::MuteUnmute(bool bMuted)
+{
+  auto pAudio = m_player->audio();
+  if (nullptr != pAudio)
+  {
+    pAudio->setMute(bMuted);
+  }
 }
 
 //----------------------------------------------------------------------------------------
@@ -112,6 +147,17 @@ void CMediaPlayer::PlayPause()
     return;
   }
   m_player->pause(!m_player->isPaused());
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CMediaPlayer::SetVolume(double dVolume)
+{
+  auto pAudio = m_player->audio();
+  if (nullptr != pAudio)
+  {
+    pAudio->setVolume(dVolume);
+  }
 }
 
 //----------------------------------------------------------------------------------------

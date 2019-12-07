@@ -24,9 +24,12 @@ public:
   void Unload() override;
 
 protected slots:
+  void on_pFullscreenCheckBox_stateChanged(qint32 iState);
   void on_pResolutionComboBox_currentIndexChanged(qint32 iIndex);
   void on_pFolderLineEdit_editingFinished();
   void on_pBrowseButton_clicked();
+  void on_pMuteCheckBox_stateChanged(qint32 iState);
+  void on_pVolumeSlider_sliderReleased();
   void on_pBackButton_clicked();
 
 private:  

@@ -39,6 +39,8 @@ CEditorResourceWidget::CEditorResourceWidget(QWidget* pParent) :
   m_spUi->setupUi(this);
   connect(m_spWebOverlay.get(), &CWebResourceOverlay::SignalResourceSelected,
           this, &CEditorResourceWidget::SlotWebResourceSelected);
+  connect(m_spUi->pResourceDisplayWidget, &CResourceDisplayWidget::SignalLoadFinished,
+          this, &CEditorResourceWidget::SlotLoadFinished);
 }
 
 CEditorResourceWidget::~CEditorResourceWidget()
@@ -106,6 +108,7 @@ void CEditorResourceWidget::UnloadProject()
 
   m_spCurrentProject = nullptr;
 
+  m_spUi->pResourceDisplayWidget->UnloadResource();
   m_spWebOverlay->Hide();
 }
 
@@ -474,6 +477,13 @@ void CEditorResourceWidget::SlotNetworkReplyFinished()
       }
     }
   }
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CEditorResourceWidget::SlotLoadFinished()
+{
+  m_spUi->pResourceDisplayWidget->SlotSetSliderVisible(true);
 }
 
 //----------------------------------------------------------------------------------------

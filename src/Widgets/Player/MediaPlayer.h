@@ -35,14 +35,18 @@ public:
   explicit CMediaPlayer(QWidget* pParent = nullptr);
   ~CMediaPlayer() override;
 
+  bool IsMuted();
   bool IsPlaying();
   void SetSliderVisible(bool bVisible);
+  double Volume();
 
 public slots:
+  void MuteUnmute(bool bMuted);
   void OpenMedia(const QString sPath);
   void SeekBySlider(qint32 value);
   void SeekBySlider();
   void PlayPause();
+  void SetVolume(double dVolume);
   void Stop();
 
 private slots:

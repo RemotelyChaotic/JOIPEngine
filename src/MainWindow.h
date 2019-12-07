@@ -23,6 +23,7 @@ public:
 
 protected slots:
   void SlotChangeAppState(EAppState newState);
+  void SlotFullscreenChanged();
   void SlotResolutionChanged();
 
 private:

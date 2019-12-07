@@ -1,12 +1,15 @@
 #include "ColorPicker.h"
 #include "ui_ColorPicker.h"
 
+#include <QColorDialog>
+
 CColorPicker::CColorPicker(QWidget *parent) :
   QWidget(parent),
   m_spUi(new Ui::CColorPicker),
   m_color(0, 0, 0, 255)
 {
   m_spUi->setupUi(this);
+  m_spUi->pColorDisplay->installEventFilter(this);
 }
 
 CColorPicker::~CColorPicker()
@@ -52,6 +55,31 @@ void CColorPicker::SetAlphaVisible(bool bVisible)
 bool CColorPicker::IsAlphaVisible()
 {
   return m_spUi->pSpinBoxA->isVisible();
+}
+
+//----------------------------------------------------------------------------------------
+//
+bool CColorPicker::eventFilter(QObject* pObject, QEvent* pEvent)
+{
+  if (nullptr != pObject && pObject == m_spUi->pColorDisplay &&
+      nullptr != pEvent && pEvent->type() == QEvent::MouseButtonRelease)
+  {
+    const QColorDialog::ColorDialogOptions options = QColorDialog::ShowAlphaChannel | QColorDialog::DontUseNativeDialog;
+    QColorDialog dlg(this);
+    dlg.setWindowFlag(Qt::FramelessWindowHint);
+    dlg.setWindowTitle("Select Color");
+    dlg.setOptions(options);
+    dlg.setCurrentColor(m_color);
+    dlg.exec();
+    const QColor color = dlg.selectedColor();
+
+    if (color.isValid())
+    {
+      SetColor(color);
+    }
+    return true;
+  }
+  return false;
 }
 
 //----------------------------------------------------------------------------------------

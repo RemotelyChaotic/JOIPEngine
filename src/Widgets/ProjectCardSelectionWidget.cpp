@@ -8,8 +8,10 @@
 
 #include <QGraphicsDropShadowEffect>
 #include <QObject>
+#include <QLabel>
 #include <QMouseEvent>
 #include <QMovie>
+#include <QPropertyAnimation>
 #include <cassert>
 
 CProjectCardSelectionWidget::CProjectCardSelectionWidget(QWidget* pParent) :
@@ -60,6 +62,8 @@ void CProjectCardSelectionWidget::LoadProjects()
         spProject->m_rwLock.lockForRead();
         const QString sName = spProject->m_sTitleCard;
         const qint32 iId = spProject->m_iId;
+        const bool bUsesWeb = spProject->m_bUsesWeb;
+        const bool bUsesCodecs = spProject->m_bNeedsCodecs;
         spProject->m_rwLock.unlock();
 
         auto spResource = spDbManager->FindResource(spProject, sName);
@@ -71,8 +75,14 @@ void CProjectCardSelectionWidget::LoadProjects()
           spResource->m_rwLock.unlock();
         }
 
-        CResourceDisplayWidget* pWidget = new CResourceDisplayWidget(m_spUi->pScrollAreaWidgetContents);
-        pWidget->setFixedSize(QSize(300, 400));
+        // construct a single card
+        QWidget* pRoot = new QWidget(m_spUi->pScrollArea);
+        pRoot->setFixedSize(QSize(320, 420));
+
+        CResourceDisplayWidget* pWidget = new CResourceDisplayWidget(pRoot);
+        pWidget->setMinimumSize(QSize(300, 400));
+        pWidget->setMaximumSize(QSize(300, 400));
+        pWidget->setGeometry(10, 10, 300, 400);
         pWidget->SetProjectId(iId);
         connect(pWidget, &CResourceDisplayWidget::OnClick,
                 this, &CProjectCardSelectionWidget::SlotCardClicked);
@@ -81,15 +91,40 @@ void CProjectCardSelectionWidget::LoadProjects()
           pWidget->LoadResource(spResource);
         }
         pWidget->installEventFilter(this);
-        AddDropShadow(pWidget, Qt::black);
-        pLayout->addWidget(pWidget);
 
+        AddDropShadow(pWidget, Qt::black);
         if (-1 == m_iSelectedProjectId)
         {
           m_iSelectedProjectId = iId;
           m_pLastSelectedWidget = pWidget;
           AddDropShadow(pWidget, QColor(BRIGHT_PURPLE));
+          pWidget->setGeometry(10, 10, 300, 400);
         }
+
+        qint32 iXOffset = 20;
+        if (bUsesWeb)
+        {
+          QLabel* pWebIcon = new QLabel("", pRoot);
+          pWebIcon->setFixedSize(48, 48);
+          pWebIcon->setGeometry(iXOffset, pRoot->size().height() - 68, 48, 48);
+          pWebIcon->setScaledContents(true);
+          pWebIcon->setPixmap(QPixmap("://resources/img/ButtonWeb.png"));
+          pWebIcon->setToolTip(tr("Uses web resources and requires an internet connection."));
+          iXOffset += 58;
+        }
+        if (bUsesCodecs)
+        {
+          QLabel* pMediaIcon = new QLabel("", pRoot);
+          pMediaIcon->setFixedSize(48, 48);
+          pMediaIcon->setGeometry(iXOffset, pRoot->size().height() - 68, 48, 48);
+          pMediaIcon->setScaledContents(true);
+          pMediaIcon->setPixmap(QPixmap("://resources/img/ButtonImage.png"));
+          pMediaIcon->setToolTip(tr("Uses media resources and might be loud."));
+          iXOffset += 58;
+        }
+
+        // add constructed card to layout
+        pLayout->addWidget(pRoot);
       }
     }
   }
@@ -106,7 +141,11 @@ void CProjectCardSelectionWidget::UnloadProjects()
   assert(nullptr != pLayout);
   while (auto item = pLayout->takeAt(0))
   {
-    delete item->widget();
+    if (nullptr != item)
+    {
+      delete item->widget();
+    }
+    delete item;
   }
 }
 
@@ -125,6 +164,8 @@ void CProjectCardSelectionWidget::SlotCardClicked()
 //
 void CProjectCardSelectionWidget::AddDropShadow(QWidget* pWidget, const QColor& color)
 {
+  if (nullptr == pWidget) { return; }
+
   QGraphicsDropShadowEffect* pShadow = new QGraphicsDropShadowEffect(pWidget);
   pShadow->setBlurRadius(5);
   pShadow->setXOffset(0);

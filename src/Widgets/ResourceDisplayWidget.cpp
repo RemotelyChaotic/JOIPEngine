@@ -1,4 +1,6 @@
 #include "ResourceDisplayWidget.h"
+#include "Application.h"
+#include "Settings.h"
 #include "Backend/Project.h"
 #include "ui_ResourceDisplayWidget.h"
 
@@ -29,6 +31,7 @@ CResourceDisplayWidget::CResourceDisplayWidget(QWidget* pParent) :
   m_spUi(std::make_unique<Ui::CResourceDisplayWidget>()),
   m_spFutureWatcher(std::make_unique<QFutureWatcher<void>>()),
   m_spSpinner(std::make_unique<QMovie>("://resources/gif/spinner_transparent.gif")),
+  m_spSettings(CApplication::Instance()->Settings()),
   m_spLoadedMovie(nullptr),
   m_spLoadedPixmap(nullptr),
   m_future(),
@@ -47,6 +50,11 @@ CResourceDisplayWidget::CResourceDisplayWidget(QWidget* pParent) :
           this, &CResourceDisplayWidget::SlotLoadFinished);
   connect(m_spUi->pWebView, &QWebEngineView::loadFinished,
           this, &CResourceDisplayWidget::SlotWebLoadFinished);
+
+  connect(m_spSettings.get(), &CSettings::MutedChanged,
+          this, &CResourceDisplayWidget::SlotMutedChanged, Qt::QueuedConnection);
+  connect(m_spSettings.get(), &CSettings::VolumeChanged,
+          this, &CResourceDisplayWidget::SlotVolumeChanged, Qt::QueuedConnection);
 }
 
 CResourceDisplayWidget::~CResourceDisplayWidget()
@@ -65,6 +73,8 @@ void CResourceDisplayWidget::LoadResource(tspResource spResource)
     m_spUi->pStackedWidget->setCurrentIndex(EResourceDisplayType::eError);
     return;
   }
+
+  SlotStop();
 
   m_iLoadState = ELoadState::eFinished;
   m_spUi->pStackedWidget->setCurrentIndex(EResourceDisplayType::eLoading);
@@ -127,13 +137,7 @@ void CResourceDisplayWidget::UnloadResource()
     m_spFutureWatcher->cancel();
     m_spFutureWatcher->waitForFinished();
   }
-  m_imageMutex.lock();
-  if (nullptr != m_spLoadedMovie)
-  {
-    m_spLoadedMovie->stop();
-  }
-  m_imageMutex.unlock();
-  m_spUi->pWebView->stop();
+  SlotStop();
   m_spUi->pWebView->setUrl(QUrl("about:blank"));
 }
 
@@ -238,7 +242,7 @@ void CResourceDisplayWidget::SlotPlayPause()
     {
       m_spUi->pWebView->page()->runJavaScript(
             "var video = document.querySelector('video');"
-            "if (video == null) {"
+            "if (video !== null) {"
             "  if (video.paused) { "
             "    video.play(); "
             "  } else { "
@@ -278,7 +282,7 @@ void CResourceDisplayWidget::SlotStop()
     {
       m_spUi->pWebView->page()->runJavaScript(
             "var video = document.querySelector('video');"
-            "if (video == null) {"
+            "if (video !== null) {"
             "  if (!video.paused) { "
             "    video.pause(); "
             "    video.load(); "
@@ -306,7 +310,7 @@ void CResourceDisplayWidget::SlotSetSliderVisible(bool bVisible)
     {
     m_spUi->pWebView->page()->runJavaScript(QString() +
           "var video = document.querySelector('video');"
-          "if (video == null) {"
+          "if (video !== null) {"
           "  video.controls = " + (bVisible ? "true" : "false") + ";"
           "}"
           );
@@ -467,6 +471,32 @@ void CResourceDisplayWidget::SlotLoadFinished()
 
 //----------------------------------------------------------------------------------------
 //
+void CResourceDisplayWidget::SlotMutedChanged()
+{
+  if (m_iLoadState == ELoadState::eFinished)
+  {
+    bool bMuted = m_spSettings->Muted();
+    switch ( m_spUi->pStackedWidget->currentIndex())
+    {
+      case EResourceDisplayType::eLocalMedia:
+      {
+        m_spUi->pMediaPlayer->MuteUnmute(bMuted);
+      } break;
+      case EResourceDisplayType::eWebResource:
+      {
+        QString sJs = "var video = document.querySelector('video');"
+                      "if (video !== null) {"
+                      "  video.muted = %1;"
+                      "}";
+        m_spUi->pWebView->page()->runJavaScript(sJs.arg(bMuted ? "true" : "false"));
+      } break;
+    default: break;
+    }
+  }
+}
+
+//----------------------------------------------------------------------------------------
+//
 void CResourceDisplayWidget::SlotStatusChanged(QMediaPlayer::MediaStatus status)
 {
   switch (status)
@@ -501,6 +531,32 @@ void CResourceDisplayWidget::SlotStatusChanged(QMediaPlayer::MediaStatus status)
 
 //----------------------------------------------------------------------------------------
 //
+void CResourceDisplayWidget::SlotVolumeChanged()
+{
+  if (m_iLoadState == ELoadState::eFinished)
+  {
+    double dVolume = m_spSettings->Volume();
+    switch ( m_spUi->pStackedWidget->currentIndex())
+    {
+      case EResourceDisplayType::eLocalMedia:
+      {
+        m_spUi->pMediaPlayer->SetVolume(dVolume);
+      } break;
+      case EResourceDisplayType::eWebResource:
+      {
+        QString sJs = "var video = document.querySelector('video');"
+                      "if (video !== null) {"
+                      "  video.volume = %1;"
+                      "}";
+        m_spUi->pWebView->page()->runJavaScript(sJs.arg(dVolume));
+      } break;
+    default: break;
+    }
+  }
+}
+
+//----------------------------------------------------------------------------------------
+//
 void CResourceDisplayWidget::SlotWebLoadFinished(bool bOk)
 {
   if (ELoadState::eLoading == m_iLoadState)
@@ -510,7 +566,7 @@ void CResourceDisplayWidget::SlotWebLoadFinished(bool bOk)
       m_iLoadState = ELoadState::eFinished;
       m_spUi->pWebView->page()->runJavaScript(
             "var video = document.querySelector('video');"
-            "if (video == null) {"
+            "if (video !== null) {"
             "  video.controls = false;"
             "}"
             );

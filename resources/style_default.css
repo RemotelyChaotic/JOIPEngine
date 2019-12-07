@@ -121,9 +121,14 @@ QTabBar::tab:!selected {
 /*
  ----- QLabel, QToolTip, CTitleLabel
 */
-QLabel, QToolTip {
+QToolTip {
   color: white;
   background-color: rgb(38, 38, 38);
+}
+
+QLabel {
+  color: white;
+  background-color: rgba(0, 0, 0, 0);
 }
 
 QToolTip {
@@ -221,46 +226,61 @@ QProgressBar::chunk {
 /*
  ----- QScrollBar
 */
+QSlider:horizontal,
 QScrollBar:horizontal {
   background: black;
   height: 32px;
   margin-left: 32px;
   margin-right: 32px;
 }
+QSlider:vertical,
 QScrollBar:vertical {
   background: black;
   width: 32px;
   margin-top: 32px;
   margin-bottom: 32px;
 }
+QSlider:horizontal,
+QSlider:vertical {
+  background: transparent;
+}
 
+QSlider::handle,
 QScrollBar::handle {
   background: qradialgradient(cx: 0.3, cy: -0.4, fx: 0.3, fy: -0.4, radius: 1.35, stop: 0 #aa00aa, stop: 1 #760076);
   border: 2px solid silver;
   border-radius: 5px;
 }
+QSlider::handle:vertical,
 QScrollBar::handle:vertical{
   min-height: 32px;
 }
+QSlider::handle:horizontal,
 QScrollBar::handle:horizontal {
   min-width: 32px;
 }
+QSlider::handle:horizontal:hover,
+QSlider::handle:vertical:hover,
 QScrollBar::handle:horizontal:hover,
 QScrollBar::handle:vertical:hover {
   background: qradialgradient(cx: 0.3, cy: -0.4, fx: 0.3, fy: -0.4, radius: 1.35, stop: 0 #aa00aa, stop: 1 #b900b9);
 }
 
+QSlider::handle:horizontal:pressed,
+QSlider::handle:vertical:pressed,
 QScrollBar::handle:horizontal:pressed,
 QScrollBar::handle:vertical:pressed {
   background: qradialgradient(cx: 0.4, cy: -0.1, fx: 0.4, fy: -0.1, radius: 1.35, stop: 0 #dd00dd, stop: 1 #aa00aa);
 }
 
 
+QSlider::add-line:horizontal
 QScrollBar::add-line:horizontal {
   width: 32px;
   subcontrol-position: right;
   subcontrol-origin: margin;
 }
+QSlider::sub-line:horizontal,
 QScrollBar::sub-line:horizontal {
   width: 32px;
   subcontrol-position: left;
@@ -268,11 +288,13 @@ QScrollBar::sub-line:horizontal {
   position: absolute;
   right: 32px;
 }
+QSlider::add-line:vertical,
 QScrollBar::add-line:vertical {
   height: 32px;
   subcontrol-position: bottom;
   subcontrol-origin: margin;
 }
+QSlider::sub-line:vertical,
 QScrollBar::sub-line:vertical {
   height: 32px;
   subcontrol-position: top;
@@ -465,9 +487,10 @@ QSpinBox::down-arrow:off { /* off state when value in min */
 }
 
 /*
- ----- QMenu
+ ----- QMenu, QDialog
 */
-QMenu {
+QMenu,
+QDialog {
 color: white;
   background-color: black;
   border: 2px solid silver;
@@ -475,17 +498,20 @@ color: white;
   padding: 5px;
 }
 
-QMenu::item {
+QMenu::item,
+QDialog::item {
   padding: 2px 25px 2px 20px;
   border: 1px solid transparent; /* reserve space for selection border */
 }
 
-QMenu::item:selected {
+QMenu::item:selected,
+QDialog::item:selected {
   border-color: silver;
   background: rgba(100, 100, 100, 150);
 }
 
-QMenu::icon:checked { /* appearance of a 'checked' icon */
+QMenu::icon:checked,
+QDialog::item:checked{ /* appearance of a 'checked' icon */
   background: gray;
   border: 1px inset gray;
   position: absolute;
@@ -495,14 +521,16 @@ QMenu::icon:checked { /* appearance of a 'checked' icon */
   left: 1px;
 }
 
-QMenu::separator {
+QMenu::separator,
+QDialog::separator {
   height: 2px;
   background: White;
   margin-left: 10px;
   margin-right: 5px;
 }
 
-QMenu::indicator {
+QMenu::indicator,
+QDialog::indicator {
   width: 13px;
   height: 13px;
 }

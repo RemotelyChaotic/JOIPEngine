@@ -12,6 +12,8 @@ CEditorResourceDisplayWidget::CEditorResourceDisplayWidget(QWidget* pParent) :
   m_spUi->setupUi(this);
   connect(m_spUi->pResourceDisplay, &CResourceDisplayWidget::OnClick,
           m_spUi->pResourceDisplay, &CResourceDisplayWidget::SlotPlayPause);
+  connect(m_spUi->pResourceDisplay, &CResourceDisplayWidget::SignalLoadFinished,
+          this, &CEditorResourceDisplayWidget::SlotLoadFinished);
 }
 
 CEditorResourceDisplayWidget::~CEditorResourceDisplayWidget()
@@ -70,6 +72,13 @@ void CEditorResourceDisplayWidget::UpdateActionBar()
     }
     break;
   }
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CEditorResourceDisplayWidget::SlotLoadFinished()
+{
+  m_spUi->pResourceDisplay->SlotSetSliderVisible(true);
 }
 
 //----------------------------------------------------------------------------------------

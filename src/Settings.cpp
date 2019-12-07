@@ -8,8 +8,11 @@
 
 //----------------------------------------------------------------------------------------
 //
-const QString CSettings::c_sSettingResolution = "Graphics/resolution";
 const QString CSettings::c_sSettingContentFolder = "Content/folder";
+const QString CSettings::c_sSettingFullscreen = "Graphics/fullscreen";
+const QString CSettings::c_sSettingMuted = "Audio/muted";
+const QString CSettings::c_sSettingResolution = "Graphics/resolution";
+const QString CSettings::c_sSettingVolume = "Audio/volume";
 
 const QString CSettings::c_sOrganisation = "Private";
 const QString CSettings::c_sApplicationName = "JOIPEngine";
@@ -56,6 +59,52 @@ QString CSettings::ContentFolder()
 
 //----------------------------------------------------------------------------------------
 //
+void CSettings::SetFullscreen(bool bValue)
+{
+  QMutexLocker locker(&m_settingsMutex);
+
+  bool bFullscreen = m_spSettings->value(CSettings::c_sSettingFullscreen).toBool();
+
+  if (bFullscreen == bValue) { return; }
+
+  m_spSettings->setValue(CSettings::c_sSettingFullscreen, bValue);
+
+  emit FullscreenChanged();
+}
+
+//----------------------------------------------------------------------------------------
+//
+bool CSettings::Fullscreen()
+{
+  QMutexLocker locker(&m_settingsMutex);
+  return m_spSettings->value(CSettings::c_sSettingFullscreen).toBool();
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CSettings::SetMuted(bool bValue)
+{
+  QMutexLocker locker(&m_settingsMutex);
+
+  bool bMuted = m_spSettings->value(CSettings::c_sSettingMuted).toBool();
+
+  if (bMuted == bValue) { return; }
+
+  m_spSettings->setValue(CSettings::c_sSettingMuted, bValue);
+
+  emit MutedChanged();
+}
+
+//----------------------------------------------------------------------------------------
+//
+bool CSettings::Muted()
+{
+  QMutexLocker locker(&m_settingsMutex);
+  return m_spSettings->value(CSettings::c_sSettingMuted).toBool();
+}
+
+//----------------------------------------------------------------------------------------
+//
 void CSettings::SetResolution(const QSize& size)
 {
   QMutexLocker locker(&m_settingsMutex);
@@ -74,6 +123,28 @@ QSize CSettings::Resolution()
 {
   QMutexLocker locker(&m_settingsMutex);
   return m_spSettings->value(CSettings::c_sSettingResolution).toSize();
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CSettings::SetVolume(double dVolume)
+{
+  QMutexLocker locker(&m_settingsMutex);
+  double dOldValue = m_spSettings->value(CSettings::c_sSettingVolume).toDouble();
+
+  if (qFuzzyCompare(dVolume, dOldValue)) { return; }
+
+  m_spSettings->setValue(CSettings::c_sSettingVolume, dVolume);
+
+  emit VolumeChanged();
+}
+
+//----------------------------------------------------------------------------------------
+//
+double CSettings::Volume()
+{
+  QMutexLocker locker(&m_settingsMutex);
+  return m_spSettings->value(CSettings::c_sSettingVolume).toDouble();
 }
 
 //----------------------------------------------------------------------------------------
@@ -99,12 +170,33 @@ void CSettings::GenerateSettingsIfNotExists()
     }
   }
 
+  // check fullscreen
+  if (!m_spSettings->contains(CSettings::c_sSettingFullscreen))
+  {
+    bNeedsSynch = true;
+    m_spSettings->setValue(CSettings::c_sSettingFullscreen, false);
+  }
+
   // check resolution
   if (!m_spSettings->contains(CSettings::c_sSettingResolution))
   {
     bNeedsSynch = true;
     QSize size = QSize(800, 450);
     m_spSettings->setValue(CSettings::c_sSettingResolution, size);
+  }
+
+  // check muted
+  if (!m_spSettings->contains(CSettings::c_sSettingMuted))
+  {
+    bNeedsSynch = true;
+    m_spSettings->setValue(CSettings::c_sSettingMuted, false);
+  }
+
+  // check volume
+  if (!m_spSettings->contains(CSettings::c_sSettingVolume))
+  {
+    bNeedsSynch = true;
+    m_spSettings->setValue(CSettings::c_sSettingVolume, 1.0);
   }
 
   // write file if nesseccary

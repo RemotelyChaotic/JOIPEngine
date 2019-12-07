@@ -84,6 +84,8 @@ void CSceneMainScreen::Initialize()
           this, &CSceneMainScreen::SlotError);
   connect(m_spUi->pTextBoxDisplay, &CTextBoxWidget::SignalShowSceneSelectReturnValue,
           this, &CSceneMainScreen::SlotSceneSelectReturnValue);
+  connect(m_spUi->pResourceDisplay, &CResourceDisplayWidget::SignalLoadFinished,
+          this, &CSceneMainScreen::SlotLoadFinished);
 
   // initializing done
   m_bInitialized = true;
@@ -215,6 +217,15 @@ void CSceneMainScreen::SlotError(QString sError, QtMsgType type)
 
   m_spUi->pTextBoxDisplay->SlotTextColorsChanged(vTextColors);
   m_spUi->pTextBoxDisplay->SlotTextBackgroundColorsChanged(vBgColors);
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CSceneMainScreen::SlotLoadFinished()
+{
+  if (!m_bInitialized || nullptr == m_spCurrentProject) { return; }
+
+  m_spUi->pResourceDisplay->SlotSetSliderVisible(false);
 }
 
 //----------------------------------------------------------------------------------------

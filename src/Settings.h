@@ -13,11 +13,17 @@ class CSettings : public QObject {
 
   Q_OBJECT
   Q_PROPERTY(QString contentFolder READ ContentFolder WRITE SetContentFolder NOTIFY ContentFolderChanged)
+  Q_PROPERTY(bool fullscreen READ Fullscreen WRITE SetFullscreen NOTIFY FullscreenChanged)
+  Q_PROPERTY(bool muted READ Muted WRITE SetMuted NOTIFY MutedChanged)
   Q_PROPERTY(QSize resolution READ Resolution WRITE SetResolution NOTIFY ResolutionChanged)
+  Q_PROPERTY(double volume READ Volume WRITE SetVolume NOTIFY VolumeChanged)
 
 public:
-  static const QString c_sSettingResolution;
   static const QString c_sSettingContentFolder;
+  static const QString c_sSettingFullscreen;
+  static const QString c_sSettingMuted;
+  static const QString c_sSettingResolution;
+  static const QString c_sSettingVolume;
 
   static const QString c_sOrganisation;
   static const QString c_sApplicationName;
@@ -27,12 +33,22 @@ public:
 
   void SetContentFolder(const QString& sPath);
   QString ContentFolder();
+  void SetFullscreen(bool bValue);
+  bool Fullscreen();
+  void SetMuted(bool bValue);
+  bool Muted();
   void SetResolution(const QSize& size);
   QSize Resolution();
+  void SetVolume(double dVolume);
+  double Volume();
+
 
 signals:
   void ContentFolderChanged();
+  void FullscreenChanged();
+  void MutedChanged();
   void ResolutionChanged();
+  void VolumeChanged();
 
 private:
   void GenerateSettingsIfNotExists();

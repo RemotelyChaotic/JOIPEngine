@@ -28,6 +28,9 @@ public:
   void UnloadResource();
   void UpdateActionBar();
 
+protected slots:
+  void SlotLoadFinished();
+
 protected:
   void OnActionBarAboutToChange() override;
   void OnActionBarChanged() override;

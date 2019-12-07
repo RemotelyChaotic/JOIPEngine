@@ -26,6 +26,9 @@ public:
 signals:
   void SignalColorChanged(const QColor& color);
 
+protected:
+  bool eventFilter(QObject* pObject, QEvent* pEvent) override;
+
 protected slots:
   void on_pSpinBoxR_valueChanged(int i);
   void on_pSpinBoxG_valueChanged(int i);

@@ -43,6 +43,7 @@ protected:
 
 private slots:
   void SlotError(QString sError, QtMsgType type);
+  void SlotLoadFinished();
   void SlotNextSkript();
   void SlotPauseVideo();
   void SlotPauseSound();
