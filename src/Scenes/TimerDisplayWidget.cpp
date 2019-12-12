@@ -173,6 +173,8 @@ void CTimerDisplayWidget::RemoveEffect(QWidget* pWidget)
       }
     }
   }
+
+  repaint();
 }
 
 //----------------------------------------------------------------------------------------
