@@ -9,6 +9,7 @@
 
 class CScriptRunner;
 class CThreadedSystem;
+class CUISoundEmitter;
 
 class CApplication : public QApplication
 {
@@ -27,6 +28,7 @@ public:
 
 private:
   std::map<qint32, std::shared_ptr<CThreadedSystem>> m_spSystemsMap;
+  std::unique_ptr<CUISoundEmitter>                   m_spSoundEmitter;
   std::shared_ptr<CSettings>                         m_spSettings;
   bool                                               m_bInitialized;
 };

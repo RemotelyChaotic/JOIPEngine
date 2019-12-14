@@ -125,7 +125,8 @@ SOURCES += \
     src/Widgets/ColorPicker.cpp \
     src/CreditsScreen.cpp \
     src/Widgets/SearchWidget.cpp \
-    src/Backend/ScriptStorage.cpp
+    src/Backend/ScriptStorage.cpp \
+    src/UISoundEmitter.cpp
 
 HEADERS += \
     src/MainWindow.h \
@@ -201,7 +202,8 @@ HEADERS += \
     version.h \
     src/CreditsScreen.h \
     src/Widgets/SearchWidget.h \
-    src/Backend/ScriptStorage.h
+    src/Backend/ScriptStorage.h \
+    src/UISoundEmitter.h
 
 FORMS += \
     src/MainWindow.ui \

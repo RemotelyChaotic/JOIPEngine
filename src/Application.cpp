@@ -1,6 +1,7 @@
 #include "Application.h"
 #include "Enums.h"
 #include "Style.h"
+#include "UISoundEmitter.h"
 #include "Backend/DatabaseManager.h"
 #include "Backend/ScriptRunner.h"
 #include "Backend/ThreadedSystem.h"
@@ -12,6 +13,7 @@
 CApplication::CApplication(int& argc, char *argv[]) :
   QApplication(argc, argv),
   m_spSystemsMap(),
+  m_spSoundEmitter(std::make_unique<CUISoundEmitter>()),
   m_spSettings(nullptr),
   m_bInitialized(false)
 {
@@ -36,6 +38,9 @@ CApplication* CApplication::Instance()
 //
 void CApplication::Initialize()
 {
+  // sound
+  installEventFilter(m_spSoundEmitter.get());
+
   // fonts
   qint32 iFont = QFontDatabase::addApplicationFont("://resources/fonts/Equestria.otf");
   Q_ASSERT(-1 != iFont);
@@ -50,6 +55,7 @@ void CApplication::Initialize()
 
   // settings
   m_spSettings = std::make_shared<CSettings>();
+  m_spSoundEmitter->Initialize();
 
   // create subsystems
   m_spSystemsMap.insert({ECoreSystems::eDatabaseManager, std::make_shared<CThreadedSystem>()});

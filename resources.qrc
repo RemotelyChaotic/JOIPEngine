@@ -46,5 +46,9 @@
         <file>resources/img/ButtonMinusDisabled.png</file>
         <file>resources/img/ButtonPlusDisabled.png</file>
         <file>resources/credits.txt</file>
+        <file>resources/sound/menu_click_sharp.wav</file>
+        <file>resources/sound/menu_selection_soft.wav</file>
+        <file>resources/sound/menu_click_soft_main.wav</file>
+        <file>resources/sound/menu_whoosh.wav</file>
     </qresource>
 </RCC>
