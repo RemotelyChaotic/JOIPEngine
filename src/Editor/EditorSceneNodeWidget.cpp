@@ -285,6 +285,8 @@ void CEditorSceneNodeWidget::SlotNodeCreated(Node &n)
     qint32 iSceneId = pSceneModel->SceneId();
     auto spScene = spDbManager->FindScene(m_spCurrentProject, iSceneId);
     AddNewScriptFile(spScene);
+
+    emit SignalProjectEdited();
   }
 }
 
@@ -301,6 +303,8 @@ void CEditorSceneNodeWidget::SlotNodeDeleted(QtNodes::Node &n)
   {
     qint32 iSceneId = pSceneModel->SceneId();
     spDbManager->RemoveScene(m_spCurrentProject, iSceneId);
+
+    emit SignalProjectEdited();
   }
 }
 

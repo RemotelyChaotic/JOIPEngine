@@ -47,12 +47,14 @@ protected slots:
   void on_pRightComboBox_currentIndexChanged(qint32 iIndex);
   void SlotDisplayResource(const QString& sName);
   void SlotExitClicked(bool bClick);
+  void SlotProjectEdited();
   void SlotProjectNameEditingFinished();
   void SlotSaveClicked(bool bClick);
 
 private:
   void ChangeIndex(QComboBox* pComboBox, QWidget* pContainer,
                    CEditorActionBar* pActionBar, qint32 iIndex);
+  void SetModificaitonFlag(bool bModified);
   template<class T> T* GetWidget();
 
   std::unique_ptr<Ui::CEditorMainScreen>                      m_spUi;
@@ -61,6 +63,7 @@ private:
   tspProject                                                  m_spCurrentProject;
   std::weak_ptr<CDatabaseManager>                             m_wpDbManager;
   bool                                                        m_bInitialized;
+  bool                                                        m_bProjectModified;
   qint32                                                      m_iLastLeftIndex;
   qint32                                                      m_iLastRightIndex;
 };

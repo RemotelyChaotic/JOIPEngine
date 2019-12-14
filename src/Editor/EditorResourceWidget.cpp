@@ -289,6 +289,8 @@ void CEditorResourceWidget::SlotRemoveButtonClicked()
         const QString sName = pModel->data(pProxyModel->mapToSource(index), Qt::DisplayRole).toString();
         spDbManager->RemoveResource(m_spCurrentProject, sName);
 
+        emit SignalProjectEdited();
+
         // only interrested in first item which is the actual item we need
         break;
       }
@@ -323,6 +325,9 @@ void CEditorResourceWidget::SlotTitleCardButtonClicked()
         {
           QWriteLocker locker(&m_spCurrentProject->m_rwLock);
           m_spCurrentProject->m_sTitleCard = sName;
+
+          emit SignalProjectEdited();
+
           // only interrested in first item which is the actual item we need
           break;
         }
@@ -358,6 +363,9 @@ void CEditorResourceWidget::SlotMapButtonClicked()
         {
           QWriteLocker locker(&m_spCurrentProject->m_rwLock);
           m_spCurrentProject->m_sMap = sName;
+
+          emit SignalProjectEdited();
+
           // only interrested in first item which is the actual item we need
           break;
         }
@@ -468,12 +476,14 @@ void CEditorResourceWidget::SlotNetworkReplyFinished()
         if (!mPixmap.isNull())
         {
           spDbManager->AddResource(m_spCurrentProject, url, EResourceType::eImage);
+          emit SignalProjectEdited();
         }
       }
       else if (videoFormatsList.contains(sFormat))
       {
         // TODO: check video
         spDbManager->AddResource(m_spCurrentProject, url, EResourceType::eMovie);
+        emit SignalProjectEdited();
       }
     }
   }
@@ -493,6 +503,7 @@ void CEditorResourceWidget::AddFiles(const QStringList& vsFiles, const QStringLi
               const QStringList& otherFormatsList)
 {
   // add file to respective category
+  bool bAddedFiles = false;
   for (QString sFileName : vsFiles)
   {
     QFileInfo info(sFileName);
@@ -514,20 +525,29 @@ void CEditorResourceWidget::AddFiles(const QStringList& vsFiles, const QStringLi
         if (imageFormatsList.contains(sEnding))
         {
           spDbManager->AddResource(m_spCurrentProject, url, EResourceType::eImage);
+          bAddedFiles = true;
         }
         else if (videoFormatsList.contains(sEnding))
         {
           spDbManager->AddResource(m_spCurrentProject, url, EResourceType::eMovie);
+          bAddedFiles = true;
         }
         else if (audioFormatsList.contains(sEnding))
         {
           spDbManager->AddResource(m_spCurrentProject, url, EResourceType::eSound);
+          bAddedFiles = true;
         }
         else if (otherFormatsList.contains(sEnding))
         {
           spDbManager->AddResource(m_spCurrentProject, url, EResourceType::eOther);
+          bAddedFiles = true;
         }
       }
     }
+  }
+
+  if (bAddedFiles)
+  {
+    emit SignalProjectEdited();
   }
 }

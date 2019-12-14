@@ -72,7 +72,7 @@
        <number>0</number>
       </property>
       <item>
-       <widget class="QLabel" name="label">
+       <widget class="QLabel" name="pProjectLabel">
         <property name="text">
          <string>Project</string>
         </property>
@@ -134,7 +134,7 @@
          <string/>
         </property>
         <property name="icon">
-         <iconset>
+         <iconset resource="../../resources.qrc">
           <normaloff>:/resources/img/ButtonSave.png</normaloff>:/resources/img/ButtonSave.png</iconset>
         </property>
         <property name="iconSize">
@@ -166,7 +166,7 @@
          <string/>
         </property>
         <property name="icon">
-         <iconset>
+         <iconset resource="../../resources.qrc">
           <normaloff>:/resources/img/ButtonExit.png</normaloff>:/resources/img/ButtonExit.png</iconset>
         </property>
         <property name="iconSize">
@@ -243,7 +243,7 @@
          <string/>
         </property>
         <property name="icon">
-         <iconset>
+         <iconset resource="../../resources.qrc">
           <normaloff>:/resources/img/ButtonPlus.png</normaloff>:/resources/img/ButtonPlus.png</iconset>
         </property>
         <property name="iconSize">
@@ -281,7 +281,7 @@
          <string/>
         </property>
         <property name="icon">
-         <iconset>
+         <iconset resource="../../resources.qrc">
           <normaloff>:/resources/img/ButtonWeb.png</normaloff>:/resources/img/ButtonWeb.png</iconset>
         </property>
         <property name="iconSize">
@@ -319,7 +319,7 @@
          <string/>
         </property>
         <property name="icon">
-         <iconset>
+         <iconset resource="../../resources.qrc">
           <normaloff>:/resources/img/ButtonMinus.png</normaloff>:/resources/img/ButtonMinus.png</iconset>
         </property>
         <property name="iconSize">
@@ -357,7 +357,7 @@
          <string/>
         </property>
         <property name="icon">
-         <iconset>
+         <iconset resource="../../resources.qrc">
           <normaloff>:/resources/img/ButtonTitleCard.png</normaloff>:/resources/img/ButtonTitleCard.png</iconset>
         </property>
         <property name="iconSize">
@@ -395,7 +395,7 @@
          <string/>
         </property>
         <property name="icon">
-         <iconset>
+         <iconset resource="../../resources.qrc">
           <normaloff>:/resources/img/ButtonMap.png</normaloff>:/resources/img/ButtonMap.png</iconset>
         </property>
         <property name="iconSize">
@@ -454,7 +454,7 @@
          <string/>
         </property>
         <property name="icon">
-         <iconset>
+         <iconset resource="../../resources.qrc">
           <normaloff>:/resources/img/ButtonPlay.png</normaloff>:/resources/img/ButtonPlay.png</iconset>
         </property>
         <property name="iconSize">
@@ -489,7 +489,7 @@
          <string/>
         </property>
         <property name="icon">
-         <iconset>
+         <iconset resource="../../resources.qrc">
           <normaloff>:/resources/img/ButtonPause.png</normaloff>:/resources/img/ButtonPause.png</iconset>
         </property>
         <property name="iconSize">
@@ -527,7 +527,7 @@
          <string/>
         </property>
         <property name="icon">
-         <iconset>
+         <iconset resource="../../resources.qrc">
           <normaloff>:/resources/img/ButtonStop.png</normaloff>:/resources/img/ButtonStop.png</iconset>
         </property>
         <property name="iconSize">
@@ -586,7 +586,7 @@
          <string/>
         </property>
         <property name="icon">
-         <iconset>
+         <iconset resource="../../resources.qrc">
           <normaloff>:/resources/img/ButtonPlus.png</normaloff>:/resources/img/ButtonPlus.png</iconset>
         </property>
         <property name="iconSize">
@@ -624,7 +624,7 @@
          <string/>
         </property>
         <property name="icon">
-         <iconset>
+         <iconset resource="../../resources.qrc">
           <normaloff>:/resources/img/ButtonMinus.png</normaloff>:/resources/img/ButtonMinus.png</iconset>
         </property>
         <property name="iconSize">
@@ -677,7 +677,7 @@
          <string/>
         </property>
         <property name="icon">
-         <iconset>
+         <iconset resource="../../resources.qrc">
           <normaloff>:/resources/img/ButtonPlay.png</normaloff>:/resources/img/ButtonPlay.png</iconset>
         </property>
         <property name="iconSize">
@@ -709,7 +709,7 @@
          <string/>
         </property>
         <property name="icon">
-         <iconset>
+         <iconset resource="../../resources.qrc">
           <normaloff>:/resources/img/ButtonStop.png</normaloff>:/resources/img/ButtonStop.png</iconset>
         </property>
         <property name="iconSize">
@@ -738,7 +738,7 @@
          <string>Add code to display resource</string>
         </property>
         <property name="icon">
-         <iconset>
+         <iconset resource="../../resources.qrc">
           <normaloff>:/resources/img/ButtonImage.png</normaloff>:/resources/img/ButtonImage.png</iconset>
         </property>
         <property name="iconSize">
@@ -770,7 +770,7 @@
          <string/>
         </property>
         <property name="icon">
-         <iconset>
+         <iconset resource="../../resources.qrc">
           <normaloff>:/resources/img/ButtonIcon.png</normaloff>:/resources/img/ButtonIcon.png</iconset>
         </property>
         <property name="iconSize">
@@ -802,7 +802,7 @@
          <string/>
         </property>
         <property name="icon">
-         <iconset>
+         <iconset resource="../../resources.qrc">
           <normaloff>:/resources/img/ButtonBackground.png</normaloff>:/resources/img/ButtonBackground.png</iconset>
         </property>
         <property name="iconSize">
@@ -834,7 +834,7 @@
          <string/>
         </property>
         <property name="icon">
-         <iconset>
+         <iconset resource="../../resources.qrc">
           <normaloff>:/resources/img/ButtonText.png</normaloff>:/resources/img/ButtonText.png</iconset>
         </property>
         <property name="iconSize">
@@ -866,7 +866,7 @@
          <string/>
         </property>
         <property name="icon">
-         <iconset>
+         <iconset resource="../../resources.qrc">
           <normaloff>:/resources/img/ButtonClock.png</normaloff>:/resources/img/ButtonClock.png</iconset>
         </property>
         <property name="iconSize">
@@ -895,6 +895,8 @@
    </item>
   </layout>
  </widget>
- <resources/>
+ <resources>
+  <include location="../../resources.qrc"/>
+ </resources>
  <connections/>
 </ui>

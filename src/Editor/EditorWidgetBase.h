@@ -25,6 +25,9 @@ public:
   void SetActionBar(CEditorActionBar* pActionBar);
   void SetResourceModel(CResourceTreeItemModel* pItemModel);
 
+signals:
+  void SignalProjectEdited();
+
 protected:
   virtual void OnActionBarAboutToChange() {}
   virtual void OnActionBarChanged() {}

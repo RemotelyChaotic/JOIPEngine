@@ -689,5 +689,6 @@ void CEditorCodeWidget::SetSceneScriptModifiedFlag(qint32 iId, bool bModified)
   else
   {
     m_spUi->pSceneComboBox->setItemText(iIndex, sName + " *");
+    emit SignalProjectEdited();
   }
 }

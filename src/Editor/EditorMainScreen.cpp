@@ -11,6 +11,8 @@
 #include "ui_EditorActionBar.h"
 
 #include <QFileInfo>
+#include <QMessageBox>
+#include <QPointer>
 
 namespace
 {
@@ -33,6 +35,7 @@ CEditorMainScreen::CEditorMainScreen(QWidget* pParent) :
   m_spCurrentProject(nullptr),
   m_wpDbManager(),
   m_bInitialized(false),
+  m_bProjectModified(false),
   m_iLastLeftIndex(-1),
   m_iLastRightIndex(-2)
 {
@@ -80,6 +83,9 @@ void CEditorMainScreen::Initialize()
   m_spUi->pRightComboBox->blockSignals(true);
   for (auto it = m_spWidgetsMap.begin(); m_spWidgetsMap.end() != it; ++it)
   {
+    connect(it->second, &CEditorWidgetBase::SignalProjectEdited,
+            this, &CEditorMainScreen::SlotProjectEdited);
+
     it->second->SetResourceModel(m_spResourceTreeModel.get());
     it->second->Initialize();
     it->second->setVisible(false);
@@ -124,6 +130,8 @@ void CEditorMainScreen::InitNewProject(const QString& sNewProjectName)
     m_spCurrentProject->m_rwLock.unlock();
     LoadProject(iId);
   }
+
+  SetModificaitonFlag(false);
 }
 
 //----------------------------------------------------------------------------------------
@@ -155,6 +163,7 @@ void CEditorMainScreen::LoadProject(qint32 iId)
   }
 
   SlotSaveClicked(true);
+  SetModificaitonFlag(false);
 
   m_spUi->splitter->setSizes({ width() * 1/3 , width() * 2/3 });
 }
@@ -184,6 +193,8 @@ void CEditorMainScreen::UnloadProject()
   }
 
   m_spResourceTreeModel->DeInitializeModel();
+
+  SetModificaitonFlag(false);
 }
 
 //----------------------------------------------------------------------------------------
@@ -270,8 +281,47 @@ void CEditorMainScreen::SlotExitClicked(bool bClick)
   Q_UNUSED(bClick);
   if (!m_bInitialized) { return; }
 
+  if (m_bProjectModified)
+  {
+    QMessageBox msgBox;
+    msgBox.setText("The project has been modified.");
+    msgBox.setInformativeText("Do you want to save your changes?");
+    msgBox.setStandardButtons(QMessageBox::Save | QMessageBox::Discard | QMessageBox::Cancel);
+    msgBox.setDefaultButton(QMessageBox::Save);
+    msgBox.setModal(true);
+    msgBox.setWindowFlag(Qt::FramelessWindowHint);
+
+    QPointer<CEditorMainScreen> pMeMyselfMyPointerAndI(this);
+    qint32 iRet = msgBox.exec();
+    if (nullptr == pMeMyselfMyPointerAndI)
+    {
+      return;
+    }
+
+    switch (iRet) {
+      case QMessageBox::Save:
+          SlotSaveClicked(true);
+          break;
+      case QMessageBox::Cancel:
+          return;
+      case QMessageBox::Discard: // fallthrough
+      default:
+          break;
+    }
+  }
+
+  SetModificaitonFlag(false);
   UnloadProject();
   emit SignalExitClicked();
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CEditorMainScreen::SlotProjectEdited()
+{
+  if (!m_bInitialized || nullptr == m_spCurrentProject) { return; }
+
+  SetModificaitonFlag(true);
 }
 
 //----------------------------------------------------------------------------------------
@@ -294,6 +344,8 @@ void CEditorMainScreen::SlotProjectNameEditingFinished()
     m_spCurrentProject->m_rwLock.unlock();
 
     m_spUi->pProjectActionBar->m_spUi->pTitleLineEdit->setText(sName);
+
+    SlotProjectEdited();
   }
 }
 
@@ -319,6 +371,8 @@ void CEditorMainScreen::SlotSaveClicked(bool bClick)
     // save to create folder structure
     spDbManager->SerializeProject(iId);
   }
+
+  SetModificaitonFlag(false);
 }
 
 //----------------------------------------------------------------------------------------
@@ -339,6 +393,17 @@ void CEditorMainScreen::ChangeIndex(QComboBox* pComboBox, QWidget* pContainer,
     it->second->setVisible(true);
     pLayout->addWidget(it->second);
     it->second->SetActionBar(pActionBar);
+  }
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CEditorMainScreen::SetModificaitonFlag(bool bModified)
+{
+  if (m_bProjectModified != bModified)
+  {
+    m_bProjectModified = bModified;
+    m_spUi->pProjectActionBar->m_spUi->pProjectLabel->setText(QString(tr("Project")) + (bModified ? " *" : ""));
   }
 }
 
