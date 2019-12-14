@@ -15,9 +15,9 @@ CUISoundEmitter::CUISoundEmitter(QObject *parent) :
   m_spCklickSoundCheckbox(std::make_unique<QSoundEffect>()),
   m_spCklickSoundDropBox(std::make_unique<QSoundEffect>())
 {
-  m_spCklickSoundButton->setSource(QUrl("qrc:/resources/sound/menu_selection_soft.wav"));
+  m_spCklickSoundButton->setSource(QUrl("qrc:/resources/sound/menu_click_soft_main.wav"));
   m_spHoverSoundButton->setSource(QUrl("qrc:/resources/sound/menu_selection_soft.wav"));
-  m_spCklickSoundCheckbox->setSource(QUrl("qrc:/resources/sound/menu_selection_soft.wav"));
+  m_spCklickSoundCheckbox->setSource(QUrl("qrc:/resources/sound/menu_click_sharp.wav"));
   m_spCklickSoundDropBox->setSource(QUrl("qrc:/resources/sound/menu_whoosh.wav"));
 
   m_spCklickSoundButton->setLoopCount(1);
