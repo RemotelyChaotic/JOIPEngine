@@ -49,7 +49,7 @@ private slots:
   void SlotPauseSound();
   void SlotPlayMedia(tspResource spResource);
   void SlotSceneSelectReturnValue(qint32 iIndex);
-  void SlotScriptRunFinished(bool bOk);
+  void SlotScriptRunFinished(bool bOk, const QString& sRetVal);
   void SlotShowMedia(tspResource spResource);
   void SlotStopVideo();
   void SlotStopSound();

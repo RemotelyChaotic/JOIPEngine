@@ -28,6 +28,7 @@ public:
 
   tspScene NextScene(const QString sName);
   QStringList PossibleScenes();
+  void ResolveFindScenes(const QString sName);
   void ResolveScenes();
 
 signals:

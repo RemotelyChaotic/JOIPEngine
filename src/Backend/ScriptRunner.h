@@ -32,7 +32,7 @@ public:
   std::shared_ptr<CScriptRunnerSignalEmiter> SignalEmmitter();
 
 signals:
-  void SignalScriptRunFinished(bool bOk);
+  void SignalScriptRunFinished(bool bOk, const QString& sRetVal);
 
 public slots:
   void Initialize() override;

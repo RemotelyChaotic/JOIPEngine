@@ -157,6 +157,34 @@ QStringList CProjectRunner::PossibleScenes()
 
 //----------------------------------------------------------------------------------------
 //
+void CProjectRunner::ResolveFindScenes(const QString sName)
+{
+  if (nullptr == m_pFlowScene)
+  {
+    QString sError(tr("Internal error."));
+    qWarning() << sError;
+    emit SignalError(sError, QtMsgType::QtCriticalMsg);
+    return;
+  }
+
+  m_nodeMap.clear();
+
+  auto vpNodes = m_pFlowScene->allNodes();
+  for (auto pNode : vpNodes)
+  {
+    CSceneNodeModel* pSceneModel = dynamic_cast<CSceneNodeModel*>(pNode->nodeDataModel());
+    if (nullptr != pSceneModel && !sName.isNull() && !sName.isEmpty())
+    {
+      if (pSceneModel->SceneName() == sName)
+      {
+        m_nodeMap.insert({pSceneModel->SceneName(), pNode});
+      }
+    }
+  }
+}
+
+//----------------------------------------------------------------------------------------
+//
 void CProjectRunner::ResolveScenes()
 {
   ResolveNextScene();

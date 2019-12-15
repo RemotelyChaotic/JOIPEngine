@@ -226,7 +226,14 @@ void CScriptRunner::SlotRun()
     m_pScriptIcon->SetCurrentProject(nullptr);
     m_pTextBoxObject->SetCurrentProject(nullptr);
 
-    emit SignalScriptRunFinished(true);
+    if (ret.isString())
+    {
+      emit SignalScriptRunFinished(true, ret.toString());
+    }
+    else
+    {
+      emit SignalScriptRunFinished(true, QString());
+    }
   }
   else
   {
@@ -239,6 +246,6 @@ void CScriptRunner::SlotRun()
     m_pScriptIcon->SetCurrentProject(nullptr);
     m_pTextBoxObject->SetCurrentProject(nullptr);
 
-    emit SignalScriptRunFinished(false);
+    emit SignalScriptRunFinished(false, QString());
   }
 }

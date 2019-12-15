@@ -354,13 +354,21 @@ void CSceneMainScreen::SlotSceneSelectReturnValue(qint32 iIndex)
 
 //----------------------------------------------------------------------------------------
 //
-void CSceneMainScreen::SlotScriptRunFinished(bool bOk)
+void CSceneMainScreen::SlotScriptRunFinished(bool bOk, const QString& sRetVal)
 {
   if (!m_bInitialized || nullptr == m_spCurrentProject) { return; }
 
   if (bOk)
   {
-    SlotNextSkript();
+    if (sRetVal.isNull() || sRetVal.isEmpty())
+    {
+      SlotNextSkript();
+    }
+    else
+    {
+      m_spProjectRunner->ResolveFindScenes(sRetVal);
+      NextSkript();
+    }
   }
   else
   {
