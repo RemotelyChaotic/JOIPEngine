@@ -15,7 +15,7 @@
 
 namespace
 {
-  const char* c_sPropertyButtonIndex;
+  const char* c_sPropertyButtonIndex = "Index";
 }
 
 //----------------------------------------------------------------------------------------
