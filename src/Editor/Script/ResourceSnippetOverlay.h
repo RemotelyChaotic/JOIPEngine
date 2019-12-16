@@ -5,10 +5,12 @@
 #include <QPointer>
 #include <memory>
 
+class CDatabaseManager;
 class CResourceTreeItemModel;
 namespace Ui {
   class CResourceSnippetOverlay;
 }
+typedef std::shared_ptr<struct SProject> tspProject;
 
 class CResourceSnippetOverlay : public COverlayBase
 {
@@ -19,6 +21,8 @@ public:
   ~CResourceSnippetOverlay() override;
 
   void Initialize(CResourceTreeItemModel* pResourceTreeModel);
+  void LoadProject(tspProject spProject);
+  void UnloadProject();
 
 signals:
   void SignalResourceCode(const QString& code);
@@ -35,6 +39,8 @@ protected slots:
 
 private:
   std::unique_ptr<Ui::CResourceSnippetOverlay> m_spUi;
+  tspProject                                   m_spCurrentProject;
+  std::weak_ptr<CDatabaseManager>              m_wpDbManager;
   bool                                         m_bInitialized;
 
   QString                                      m_sResource;

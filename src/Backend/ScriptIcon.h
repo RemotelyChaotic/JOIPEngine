@@ -23,6 +23,7 @@ public:
   void SetCurrentProject(tspProject spProject);
 
 public slots:
+  void hide();
   void hide(QJSValue resource);
   void show(QJSValue resource);
 

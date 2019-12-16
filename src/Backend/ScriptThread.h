@@ -18,6 +18,7 @@ public:
   ~CScriptThread();
 
 public slots:
+  void sleep(qint32 iTimeS);
   void sleep(qint32 iTimeS, QJSValue bSkippable);
 
 private:

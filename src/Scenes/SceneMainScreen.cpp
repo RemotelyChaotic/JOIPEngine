@@ -385,6 +385,7 @@ void CSceneMainScreen::SlotShowMedia(tspResource spResource)
 
   m_spUi->pResourceDisplay->UnloadResource();
   m_spUi->pResourceDisplay->LoadResource(spResource);
+  m_spUi->pResourceDisplay->SlotSetSliderVisible(false);
 }
 
 //----------------------------------------------------------------------------------------

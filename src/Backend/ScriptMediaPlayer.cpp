@@ -78,6 +78,13 @@ void CScriptMediaPlayer::show(QJSValue resource)
 
 //----------------------------------------------------------------------------------------
 //
+void CScriptMediaPlayer::play()
+{
+  play(QJSValue::NullValue);
+}
+
+//----------------------------------------------------------------------------------------
+//
 void CScriptMediaPlayer::play(QJSValue resource)
 {
   if (!CheckIfScriptCanRun()) { return; }

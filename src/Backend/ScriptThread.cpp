@@ -22,6 +22,13 @@ CScriptThread::~CScriptThread()
 
 //----------------------------------------------------------------------------------------
 //
+void CScriptThread::sleep(qint32 iTimeS)
+{
+  sleep(iTimeS, false);
+}
+
+//----------------------------------------------------------------------------------------
+//
 void CScriptThread::sleep(qint32 iTimeS, QJSValue bSkippable)
 {
   if (!CheckIfScriptCanRun()) { return; }

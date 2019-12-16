@@ -137,6 +137,8 @@ void CEditorCodeWidget::LoadProject(tspProject spProject)
     on_pSceneComboBox_currentIndexChanged(0);
   }
 
+  m_spResourceSnippetOverlay->LoadProject(m_spCurrentProject);
+
   auto spScriptRunner = m_wpScriptRunner.lock();
   if (nullptr != spScriptRunner)
   {
@@ -162,6 +164,8 @@ void CEditorCodeWidget::UnloadProject()
     disconnect(spSignalEmmiter.get(), &CScriptRunnerSignalEmiter::SignalExecutionError,
             m_spUi->pCodeEdit, &CScriptEditorWidget::SlotExecutionError);
   }
+
+  m_spResourceSnippetOverlay->UnloadProject();
 
   m_spCurrentProject = nullptr;
 

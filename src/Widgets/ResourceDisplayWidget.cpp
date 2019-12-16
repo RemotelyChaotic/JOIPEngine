@@ -288,7 +288,7 @@ void CResourceDisplayWidget::SlotStop()
             "    video.load(); "
             "  } else {"
             "    video.load();"
-            "  }"
+            "  } "
             "}"
             );
       break;
@@ -308,12 +308,12 @@ void CResourceDisplayWidget::SlotSetSliderVisible(bool bVisible)
       break;
     case EResourceDisplayType::eWebResource:
     {
-    m_spUi->pWebView->page()->runJavaScript(QString() +
-          "var video = document.querySelector('video');"
-          "if (video !== null) {"
-          "  video.controls = " + (bVisible ? "true" : "false") + ";"
-          "}"
-          );
+      m_spUi->pWebView->page()->runJavaScript(QString() +
+            "var video = document.querySelector('video');"
+            "if (video !== null) {"
+            "  video.controls = " + (bVisible ? "true" : "false") + ";"
+            "}"
+            );
       break;
     }
   }
@@ -567,6 +567,12 @@ void CResourceDisplayWidget::SlotWebLoadFinished(bool bOk)
     if (bOk)
     {
       m_iLoadState = ELoadState::eFinished;
+      m_spUi->pWebView->page()->runJavaScript(
+            "var video = document.querySelector('video');"
+            "if (video !== null) {"
+            "  video.autoplay = false;"
+            "}"
+            );
       SlotSetSliderVisible(true);
       SlotVolumeChanged();
       SlotMutedChanged();

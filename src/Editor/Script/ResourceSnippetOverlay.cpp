@@ -1,4 +1,8 @@
 #include "ResourceSnippetOverlay.h"
+#include "Application.h"
+#include "Backend/DatabaseManager.h"
+#include "Backend/Resource.h"
+#include "Backend/Scene.h"
 #include "Editor/Resources/ResourceTreeItem.h"
 #include "Editor/Resources/ResourceTreeItemModel.h"
 #include "Editor/Resources/ResourceTreeItemSortFilterProxyModel.h"
@@ -7,6 +11,8 @@
 CResourceSnippetOverlay::CResourceSnippetOverlay(QWidget* pParent) :
   COverlayBase(pParent),
   m_spUi(new Ui::CResourceSnippetOverlay),
+  m_spCurrentProject(nullptr),
+  m_wpDbManager(CApplication::Instance()->System<CDatabaseManager>()),
   m_bInitialized(false),
   m_sResource()
 {
@@ -40,6 +46,20 @@ void CResourceSnippetOverlay::Initialize(CResourceTreeItemModel* pResourceTreeMo
   m_spUi->pResourceSelectTree->header()->setSectionResizeMode(resource_item::c_iColumnName, QHeaderView::Stretch);
   m_spUi->pResourceSelectTree->header()->setSectionResizeMode(resource_item::c_iColumnType, QHeaderView::Interactive);
   m_bInitialized = true;
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CResourceSnippetOverlay::LoadProject(tspProject spProject)
+{
+  m_spCurrentProject = spProject;
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CResourceSnippetOverlay::UnloadProject()
+{
+  m_spCurrentProject = nullptr;
 }
 
 //----------------------------------------------------------------------------------------
@@ -85,10 +105,30 @@ void CResourceSnippetOverlay::on_pFilter_SignalFilterChanged(const QString& sTex
 //
 void CResourceSnippetOverlay::on_pConfirmButton_clicked()
 {
+  EResourceType type = EResourceType::eImage;
+  auto spDbManager = m_wpDbManager.lock();
+  if (nullptr != spDbManager && nullptr != m_spCurrentProject)
+  {
+    tspResource spResource = spDbManager->FindResource(m_spCurrentProject, m_sResource);
+    QReadLocker locker(&spResource->m_rwLock);
+    type = spResource->m_type;
+  }
+
   QString sCode;
   if (!m_sResource.isNull() && !m_sResource.isEmpty())
   {
-    QString sResource("mediaPlayer.show(\"%1\");\n");
+    QString sResource("mediaPlayer.%1(\"%2\");\n");
+    switch (type)
+    {
+      case EResourceType::eImage:
+        sResource = sResource.arg("show");
+        break;
+      case EResourceType::eMovie: // fallthrough
+      case EResourceType::eSound:
+        sResource = sResource.arg("play");
+        break;
+    default: Hide(); return;
+    }
     sCode += sResource.arg(m_sResource);
   }
 

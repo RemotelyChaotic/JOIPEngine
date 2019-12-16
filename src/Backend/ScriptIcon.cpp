@@ -26,6 +26,13 @@ void CScriptIcon::SetCurrentProject(tspProject spProject)
 
 //----------------------------------------------------------------------------------------
 //
+void CScriptIcon::hide()
+{
+  hide("");
+}
+
+//----------------------------------------------------------------------------------------
+//
 void CScriptIcon::hide(QJSValue resource)
 {
   if (!CheckIfScriptCanRun()) { return; }

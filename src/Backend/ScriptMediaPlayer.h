@@ -24,6 +24,7 @@ public:
 
 public slots:
   void show(QJSValue resource);
+  void play();
   void play(QJSValue resource);
   void pauseVideo();
   void stopVideo();
