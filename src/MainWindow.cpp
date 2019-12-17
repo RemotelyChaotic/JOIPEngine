@@ -98,7 +98,7 @@ void CMainWindow::SlotFullscreenChanged()
   }
   else
   {
-    setWindowState(windowState() ^ Qt::WindowFullScreen);
+    setWindowState(windowState() & ~Qt::WindowFullScreen);
   }
 }
 

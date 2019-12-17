@@ -281,14 +281,15 @@ void CResourceDisplayWidget::SlotStop()
     case EResourceDisplayType::eWebResource:
     {
       m_spUi->pWebView->page()->runJavaScript(
-            "var video = document.querySelector('video');"
-            "if (video !== null) {"
+            "var video = document.querySelector('video'); "
+            "if (video !== null) { "
             "  if (!video.paused) { "
             "    video.pause(); "
             "    video.load(); "
-            "  } else {"
-            "    video.load();"
+            "  } else { "
+            "    video.load(); "
             "  } "
+            "  video.pause(); "
             "}"
             );
       break;

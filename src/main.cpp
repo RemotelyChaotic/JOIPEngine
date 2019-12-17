@@ -2,6 +2,7 @@
 #include "Settings.h"
 #include "MainWindow.h"
 #include <QApplication>
+#include <QOpenGLContext>
 #include <QtWebEngine>
 
 int main(int argc, char *argv[])
@@ -12,6 +13,10 @@ int main(int argc, char *argv[])
 
   QtWebEngine::initialize();
   app.Initialize();
+
+  // bugfix on vertain machines
+  QOpenGLContext context;
+  context.create();
 
   CMainWindow w;
   w.Initialize();
