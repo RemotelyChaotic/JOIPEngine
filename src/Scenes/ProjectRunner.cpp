@@ -305,8 +305,9 @@ void CProjectRunner::ResolveNextPossibleNodes(Node* pNode, std::vector<std::pair
       }
     }
 
-    std::random_device rd;
-    std::mt19937 generator(rd());
+    long unsigned int seed =
+      static_cast<long unsigned int>(std::chrono::high_resolution_clock::now().time_since_epoch().count());
+    std::mt19937 generator(static_cast<long unsigned int>(seed));
     std::uniform_int_distribution<> dis(0, static_cast<qint32>(viValidIndicees.size() - 1));
     qint32 iGeneratedIndex = dis(generator);
 
