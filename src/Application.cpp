@@ -15,6 +15,7 @@ CApplication::CApplication(int& argc, char *argv[]) :
   m_spSystemsMap(),
   m_spSoundEmitter(std::make_unique<CUISoundEmitter>()),
   m_spSettings(nullptr),
+  m_bStyleDirty(true),
   m_bInitialized(false)
 {
 
@@ -55,6 +56,11 @@ void CApplication::Initialize()
 
   // settings
   m_spSettings = std::make_shared<CSettings>();
+  connect(m_spSettings.get(), &CSettings::FontChanged,
+          this, &CApplication::MarkStyleDirty, Qt::DirectConnection);
+
+
+  // sound emitter
   m_spSoundEmitter->Initialize();
 
   // create subsystems
@@ -66,7 +72,7 @@ void CApplication::Initialize()
   m_spSystemsMap[ECoreSystems::eScriptRunner]->RegisterObject<CScriptRunner>();
 
   // style
-  joip_style::SetStyle(this);
+  LoadStyle();
 
   m_bInitialized = true;
 }
@@ -83,5 +89,24 @@ template<>
 std::weak_ptr<CScriptRunner> CApplication::System<CScriptRunner>()
 {
   return std::static_pointer_cast<CScriptRunner>(m_spSystemsMap[ECoreSystems::eScriptRunner]->Get());
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CApplication::MarkStyleDirty()
+{
+  m_bStyleDirty = true;
+  QTimer::singleShot(500, this, &CApplication::LoadStyle);
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CApplication::LoadStyle()
+{
+  if (m_bStyleDirty)
+  {
+    m_bStyleDirty = false;
+    joip_style::SetStyle(this);
+  }
 }
 

@@ -26,10 +26,15 @@ public:
   std::shared_ptr<CSettings> Settings() { return m_spSettings; }
   template<typename T> std::weak_ptr<T> System();
 
+private slots:
+  void MarkStyleDirty();
+  void LoadStyle();
+
 private:
   std::map<qint32, std::shared_ptr<CThreadedSystem>> m_spSystemsMap;
   std::unique_ptr<CUISoundEmitter>                   m_spSoundEmitter;
   std::shared_ptr<CSettings>                         m_spSettings;
+  bool                                               m_bStyleDirty;
   bool                                               m_bInitialized;
 };
 

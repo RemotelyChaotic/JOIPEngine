@@ -2,7 +2,9 @@
 #define CTIMERWIDGET_H
 
 #include <QWidget>
+#include <memory>
 
+class CSettings;
 class CTimerWidget;
 class QLabel;
 class QSvgRenderer;
@@ -45,16 +47,21 @@ signals:
 protected:
   void resizeEvent(QResizeEvent* pEvent) override;
 
-  QLabel*       m_pTimerBackGround;
-  CTimerCanvas* m_pCanvas;
-  QLabel*       m_pTimeLabel;
-  QPixmap       m_bgImage;
-  QPixmap       m_doubleBuffer;
-  qint32        m_iTimeMsMax;
-  qint32        m_iTimeMsCurrent;
-  qint32        m_iUpdateInterval;
-  qint32        m_iUpdateCounter;
-  bool          m_bVisible;
+protected slots:
+  void SlotFontChanged();
+
+protected:
+  std::shared_ptr<CSettings>m_spSettings;
+  QLabel*                   m_pTimerBackGround;
+  CTimerCanvas*             m_pCanvas;
+  QLabel*                   m_pTimeLabel;
+  QPixmap                   m_bgImage;
+  QPixmap                   m_doubleBuffer;
+  qint32                    m_iTimeMsMax;
+  qint32                    m_iTimeMsCurrent;
+  qint32                    m_iUpdateInterval;
+  qint32                    m_iUpdateCounter;
+  bool                      m_bVisible;
 };
 
 #endif // CTIMERWIDGET_H

@@ -72,11 +72,16 @@ void CSettingsScreen::Load()
   QSize currentResolution = m_spSettings->Resolution();
 
   // block signals to prevent settings change
+  m_spUi->pFontComboBox->blockSignals(true);
   m_spUi->pFullscreenCheckBox->blockSignals(true);
   m_spUi->pFolderLineEdit->blockSignals(true);
   m_spUi->pResolutionComboBox->blockSignals(true);
   m_spUi->pMuteCheckBox->blockSignals(true);
   m_spUi->pVolumeSlider->blockSignals(true);
+
+  // set font
+  QFont font(m_spSettings->Font());
+  m_spUi->pFontComboBox->setCurrentFont(font);
 
   // set fullscreen
   m_spUi->pFullscreenCheckBox->setCheckState(m_spSettings->Fullscreen() ? Qt::Checked : Qt::Unchecked);
@@ -126,6 +131,7 @@ void CSettingsScreen::Load()
   m_spUi->pVolumeSlider->setValue(static_cast<qint32>(m_spSettings->Volume() * c_dSliderScaling));
 
   // unblock signals
+  m_spUi->pFontComboBox->blockSignals(false);
   m_spUi->pFullscreenCheckBox->blockSignals(false);
   m_spUi->pResolutionComboBox->blockSignals(false);
   m_spUi->pFolderLineEdit->blockSignals(false);
@@ -163,6 +169,17 @@ void CSettingsScreen::on_pResolutionComboBox_currentIndexChanged(qint32 iIndex)
 
   QSize size = m_spUi->pResolutionComboBox->itemData(iIndex, Qt::UserRole).toSize();
   m_spSettings->SetResolution(size);
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CSettingsScreen::on_pFontComboBox_currentFontChanged(const QFont& font)
+{
+  WIDGET_INITIALIZED_GUARD
+  assert(nullptr != m_spSettings);
+  if (nullptr == m_spSettings) { return; }
+
+  m_spSettings->SetFont(font.family());
 }
 
 //----------------------------------------------------------------------------------------

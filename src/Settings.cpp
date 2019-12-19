@@ -9,6 +9,7 @@
 //----------------------------------------------------------------------------------------
 //
 const QString CSettings::c_sSettingContentFolder = "Content/folder";
+const QString CSettings::c_sSettingFont = "Graphics/font";
 const QString CSettings::c_sSettingFullscreen = "Graphics/fullscreen";
 const QString CSettings::c_sSettingMuted = "Audio/muted";
 const QString CSettings::c_sSettingResolution = "Graphics/resolution";
@@ -55,6 +56,28 @@ QString CSettings::ContentFolder()
 {
   QMutexLocker locker(&m_settingsMutex);
   return m_spSettings->value(CSettings::c_sSettingContentFolder).toString();
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CSettings::SetFont(const QString& sFont)
+{
+  QMutexLocker locker(&m_settingsMutex);
+  QString sOldFont = m_spSettings->value(CSettings::c_sSettingFont).toString();
+
+  if (sOldFont == sFont) { return; }
+
+  m_spSettings->setValue(CSettings::c_sSettingContentFolder, sFont);
+
+  emit FontChanged();
+}
+
+//----------------------------------------------------------------------------------------
+//
+QString CSettings::Font()
+{
+  QMutexLocker locker(&m_settingsMutex);
+  return m_spSettings->value(CSettings::c_sSettingFont).toString();
 }
 
 //----------------------------------------------------------------------------------------
@@ -168,6 +191,13 @@ void CSettings::GenerateSettingsIfNotExists()
     {
       QDir::current().mkdir("data");
     }
+  }
+
+  // check fullscreen
+  if (!m_spSettings->contains(CSettings::c_sSettingFont))
+  {
+    bNeedsSynch = true;
+    m_spSettings->setValue(CSettings::c_sSettingFont, "Arial");
   }
 
   // check fullscreen

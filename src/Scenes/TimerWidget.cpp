@@ -1,5 +1,8 @@
 #include "TimerWidget.h"
+
+#include "Application.h"
 #include "Constants.h"
+#include "Settings.h"
 
 #include <QLabel>
 #include <QPainter>
@@ -122,6 +125,7 @@ void CTimerCanvas::paintEvent(QPaintEvent* /*pEvent*/)
 //
 CTimerWidget::CTimerWidget(QWidget* pParent) :
   QWidget(pParent),
+  m_spSettings(CApplication::Instance()->Settings()),
   m_pTimerBackGround(new QLabel("", this)),
   m_pCanvas(new CTimerCanvas(this)),
   m_pTimeLabel(new QLabel("00:00", this)),
@@ -140,12 +144,11 @@ CTimerWidget::CTimerWidget(QWidget* pParent) :
   m_pCanvas->setFixedSize(width(), height());
 
   m_pTimeLabel->setAlignment(Qt::AlignHCenter | Qt::AlignVCenter);
-  QFont font = m_pTimeLabel->font();
-  font.setPointSize(24);
-  font.setBold(true);
-  font.setFamily("Equestria");
-  m_pTimeLabel->setFont(font);
+  SlotFontChanged();
   m_pTimeLabel->setStyleSheet("QLabel { background-color : black; color : " WHITE_QML "; }");
+
+  connect(m_spSettings.get(), &CSettings::FontChanged,
+          this, &CTimerWidget::SlotFontChanged, Qt::QueuedConnection);
 }
 
 CTimerWidget::~CTimerWidget()
@@ -210,4 +213,15 @@ void CTimerWidget::resizeEvent(QResizeEvent* pEvent)
                              pEvent->size().height() / 3);
 
   m_doubleBuffer = m_doubleBuffer.scaled(pEvent->size().width(), pEvent->size().height());
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CTimerWidget::SlotFontChanged()
+{
+  QFont font = m_pTimeLabel->font();
+  font.setPointSize(24);
+  font.setBold(true);
+  font.setFamily(m_spSettings->Font());
+  m_pTimeLabel->setFont(font);
 }

@@ -1,5 +1,8 @@
 #include "Style.h"
 
+#include "Application.h"
+#include "Settings.h"
+
 #include <QDebug>
 #include <QFileInfo>
 #include <QFont>
@@ -14,6 +17,8 @@ namespace
 //
 void joip_style::SetStyle(QApplication* pApp)
 {
+  auto spSettings = dynamic_cast<CApplication*>(pApp)->Settings();
+
   QFileInfo info(c_sDefaultStyle);
   if (info.exists())
   {
@@ -42,7 +47,7 @@ void joip_style::SetStyle(QApplication* pApp)
     }
   }
 
-  QFont font("Equestria", 10);
+  QFont font(spSettings->Font(), 10);
   pApp->setFont(font);
 }
 

@@ -20,6 +20,9 @@
 #include <QDebug>
 #include <QFile>
 
+#include <random>
+#include <chrono>
+
 using QtNodes::DataModelRegistry;
 using QtNodes::FlowScene;
 using QtNodes::Node;
