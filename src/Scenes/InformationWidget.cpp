@@ -40,8 +40,8 @@ CInformationWidget::CInformationWidget(QWidget *parent) :
   m_spUi->setupUi(this);
   m_spUi->pIcons->setLayout(new CFlowLayout(m_spUi->pIcons, 10, 10, 10));
 
-  m_pExitWidget = CreateHeaderIcon(m_spUi->pHeader, c_sQuitIcon, "://resources/img/ButtonExit.png");
-  m_pSkipWidget = CreateHeaderIcon(m_spUi->pFooter, c_sSkipIcon, "://resources/img/ButtonPlay.png");
+  m_pExitWidget = CreateHeaderIcon(m_spUi->pHeader, c_sQuitIcon, "ExitButton");
+  m_pSkipWidget = CreateHeaderIcon(m_spUi->pFooter, c_sSkipIcon, "PlayButton");
 
   m_iconMask = QPixmap("://resources/img/IconMask.svg")
       .scaled(c_iIconWidth, c_iIconHeight, Qt::IgnoreAspectRatio, Qt::SmoothTransformation)
@@ -239,7 +239,7 @@ void CInformationWidget::AddIcon(const QString& sName, const tspResource& spReso
 //----------------------------------------------------------------------------------------
 //
 QWidget* CInformationWidget::CreateHeaderIcon(QWidget* pParent, const QString& sName,
-                                              const QString sPath)
+                                              const QString sObjName)
 {
   QLayout* pLayout = pParent->layout();
   if (nullptr != pLayout)
@@ -259,7 +259,7 @@ QWidget* CInformationWidget::CreateHeaderIcon(QWidget* pParent, const QString& s
     pIcon->setGeometry((c_iHeaderFooterIconWidth - c_iFixedIconWidth) / 2,
                        (c_iHeaderFooterIconHeight - c_iFixedIconHeight) / 2,
                        c_iFixedIconWidth, c_iFixedIconHeight);
-    pIcon->setPixmap(QPixmap(sPath));
+    pIcon->setObjectName(sObjName);
     pIcon->setScaledContents(true);
     pIcon->setMask(m_iconMask);
     pRoot->setStyleSheet("background-color: transparent;");

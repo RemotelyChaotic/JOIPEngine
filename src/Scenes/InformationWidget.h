@@ -48,7 +48,7 @@ private slots:
 
 private:
   void AddIcon(const QString& sName, const tspResource& spResource);
-  QWidget* CreateHeaderIcon(QWidget* pParent, const QString& sName, const QString sPath);
+  QWidget* CreateHeaderIcon(QWidget* pParent, const QString& sName, const QString sObjName);
   void RemoveAllIcons();
   void RemoveIcon(const QString& sName);
 

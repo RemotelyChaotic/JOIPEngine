@@ -87,11 +87,11 @@ void CEditorResourceDisplayWidget::OnActionBarAboutToChange()
 {
   if (nullptr != ActionBar())
   {
-    disconnect(ActionBar()->m_spUi->pPlayButton, &QPushButton::clicked,
+    disconnect(ActionBar()->m_spUi->PlayButton, &QPushButton::clicked,
             m_spUi->pResourceDisplay, &CResourceDisplayWidget::SlotPlayPause);
-    disconnect(ActionBar()->m_spUi->pPauseButton, &QPushButton::clicked,
+    disconnect(ActionBar()->m_spUi->PauseButton, &QPushButton::clicked,
                m_spUi->pResourceDisplay, &CResourceDisplayWidget::SlotPlayPause);
-    disconnect(ActionBar()->m_spUi->pStopButton, &QPushButton::clicked,
+    disconnect(ActionBar()->m_spUi->StopButton, &QPushButton::clicked,
             m_spUi->pResourceDisplay, &CResourceDisplayWidget::SlotStop);
   }
 }
@@ -104,11 +104,11 @@ void CEditorResourceDisplayWidget::OnActionBarChanged()
   if (nullptr != ActionBar())
   {
     UpdateActionBar();
-    connect(ActionBar()->m_spUi->pPlayButton, &QPushButton::clicked,
+    connect(ActionBar()->m_spUi->PlayButton, &QPushButton::clicked,
             m_spUi->pResourceDisplay, &CResourceDisplayWidget::SlotPlayPause);
-    connect(ActionBar()->m_spUi->pPauseButton, &QPushButton::clicked,
+    connect(ActionBar()->m_spUi->PauseButton, &QPushButton::clicked,
             m_spUi->pResourceDisplay, &CResourceDisplayWidget::SlotPlayPause);
-    connect(ActionBar()->m_spUi->pStopButton, &QPushButton::clicked,
+    connect(ActionBar()->m_spUi->StopButton, &QPushButton::clicked,
             m_spUi->pResourceDisplay, &CResourceDisplayWidget::SlotStop);
   }
 }

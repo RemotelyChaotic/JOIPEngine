@@ -119,15 +119,15 @@ void CEditorResourceWidget::OnActionBarAboutToChange()
 {
   if (nullptr != ActionBar())
   {
-    disconnect(ActionBar()->m_spUi->pAddButton, &QPushButton::clicked,
+    disconnect(ActionBar()->m_spUi->AddResourceButton, &QPushButton::clicked,
             this, &CEditorResourceWidget::SlotAddButtonClicked);
-    disconnect(ActionBar()->m_spUi->pAddWebButton, &QPushButton::clicked,
+    disconnect(ActionBar()->m_spUi->AddWebResourceButton, &QPushButton::clicked,
             this, &CEditorResourceWidget::SlotAddWebButtonClicked);
-    disconnect(ActionBar()->m_spUi->pRemoveButton, &QPushButton::clicked,
+    disconnect(ActionBar()->m_spUi->RemoveResourceButton, &QPushButton::clicked,
             this, &CEditorResourceWidget::SlotRemoveButtonClicked);
-    disconnect(ActionBar()->m_spUi->pTitleCardButton, &QPushButton::clicked,
+    disconnect(ActionBar()->m_spUi->TitleCardButton, &QPushButton::clicked,
             this, &CEditorResourceWidget::SlotTitleCardButtonClicked);
-    disconnect(ActionBar()->m_spUi->pMapButton, &QPushButton::clicked,
+    disconnect(ActionBar()->m_spUi->MapButton, &QPushButton::clicked,
             this, &CEditorResourceWidget::SlotMapButtonClicked);
   }
 }
@@ -140,15 +140,15 @@ void CEditorResourceWidget::OnActionBarChanged()
   if (nullptr != ActionBar())
   {
     ActionBar()->ShowResourceActionBar();
-    connect(ActionBar()->m_spUi->pAddButton, &QPushButton::clicked,
+    connect(ActionBar()->m_spUi->AddResourceButton, &QPushButton::clicked,
             this, &CEditorResourceWidget::SlotAddButtonClicked);
-    connect(ActionBar()->m_spUi->pAddWebButton, &QPushButton::clicked,
+    connect(ActionBar()->m_spUi->AddWebResourceButton, &QPushButton::clicked,
             this, &CEditorResourceWidget::SlotAddWebButtonClicked);
-    connect(ActionBar()->m_spUi->pRemoveButton, &QPushButton::clicked,
+    connect(ActionBar()->m_spUi->RemoveResourceButton, &QPushButton::clicked,
             this, &CEditorResourceWidget::SlotRemoveButtonClicked);
-    connect(ActionBar()->m_spUi->pTitleCardButton, &QPushButton::clicked,
+    connect(ActionBar()->m_spUi->TitleCardButton, &QPushButton::clicked,
             this, &CEditorResourceWidget::SlotTitleCardButtonClicked);
-    connect(ActionBar()->m_spUi->pMapButton, &QPushButton::clicked,
+    connect(ActionBar()->m_spUi->MapButton, &QPushButton::clicked,
             this, &CEditorResourceWidget::SlotMapButtonClicked);
   }
 }

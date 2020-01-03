@@ -275,19 +275,19 @@ void CEditorCodeWidget::OnActionBarAboutToChange()
 {
   if (nullptr != ActionBar())
   {
-    disconnect(ActionBar()->m_spUi->pDebugButton, &QPushButton::clicked,
+    disconnect(ActionBar()->m_spUi->DebugButton, &QPushButton::clicked,
             this, &CEditorCodeWidget::SlotDebugStart);
-    disconnect(ActionBar()->m_spUi->pStopDebugButton, &QPushButton::clicked,
+    disconnect(ActionBar()->m_spUi->StopDebugButton, &QPushButton::clicked,
             this, &CEditorCodeWidget::SlotDebugStop);
-    disconnect(ActionBar()->m_spUi->pAddShowBackgroundCode, &QPushButton::clicked,
+    disconnect(ActionBar()->m_spUi->AddShowBackgroundCode, &QPushButton::clicked,
             m_spBackgroundSnippetOverlay.get(), &CBackgroundSnippetOverlay::Show);
-    disconnect(ActionBar()->m_spUi->pAddShowIconCode, &QPushButton::clicked,
+    disconnect(ActionBar()->m_spUi->AddShowIconCode, &QPushButton::clicked,
             m_spIconSnippetOverlay.get(), &CIconSnippetOverlay::Show);
-    disconnect(ActionBar()->m_spUi->pAddShowImageCode, &QPushButton::clicked,
+    disconnect(ActionBar()->m_spUi->AddShowImageCode, &QPushButton::clicked,
             m_spResourceSnippetOverlay.get(), &CResourceSnippetOverlay::Show);
-    disconnect(ActionBar()->m_spUi->pAddTextCode, &QPushButton::clicked,
+    disconnect(ActionBar()->m_spUi->AddTextCode, &QPushButton::clicked,
             m_spTextSnippetOverlay.get(), &CTextSnippetOverlay::Show);
-    disconnect(ActionBar()->m_spUi->pAddTimerCode, &QPushButton::clicked,
+    disconnect(ActionBar()->m_spUi->AddTimerCode, &QPushButton::clicked,
             m_spTimerSnippetOverlay.get(), &CTimerSnippetOverlay::Show);
   }
 }
@@ -299,19 +299,19 @@ void CEditorCodeWidget::OnActionBarChanged()
   if (nullptr != ActionBar())
   {
     ActionBar()->ShowCodeActionBar();
-    connect(ActionBar()->m_spUi->pDebugButton, &QPushButton::clicked,
+    connect(ActionBar()->m_spUi->DebugButton, &QPushButton::clicked,
             this, &CEditorCodeWidget::SlotDebugStart);
-    connect(ActionBar()->m_spUi->pStopDebugButton, &QPushButton::clicked,
+    connect(ActionBar()->m_spUi->StopDebugButton, &QPushButton::clicked,
             this, &CEditorCodeWidget::SlotDebugStop);
-    connect(ActionBar()->m_spUi->pAddShowBackgroundCode, &QPushButton::clicked,
+    connect(ActionBar()->m_spUi->AddShowBackgroundCode, &QPushButton::clicked,
             m_spBackgroundSnippetOverlay.get(), &CBackgroundSnippetOverlay::Show);
-    connect(ActionBar()->m_spUi->pAddShowIconCode, &QPushButton::clicked,
+    connect(ActionBar()->m_spUi->AddShowIconCode, &QPushButton::clicked,
             m_spIconSnippetOverlay.get(), &CIconSnippetOverlay::Show);
-    connect(ActionBar()->m_spUi->pAddShowImageCode, &QPushButton::clicked,
+    connect(ActionBar()->m_spUi->AddShowImageCode, &QPushButton::clicked,
             m_spResourceSnippetOverlay.get(), &CResourceSnippetOverlay::Show);
-    connect(ActionBar()->m_spUi->pAddTextCode, &QPushButton::clicked,
+    connect(ActionBar()->m_spUi->AddTextCode, &QPushButton::clicked,
             m_spTextSnippetOverlay.get(), &CTextSnippetOverlay::Show);
-    connect(ActionBar()->m_spUi->pAddTimerCode, &QPushButton::clicked,
+    connect(ActionBar()->m_spUi->AddTimerCode, &QPushButton::clicked,
             m_spTimerSnippetOverlay.get(), &CTimerSnippetOverlay::Show);
   }
 }
@@ -422,8 +422,8 @@ void CEditorCodeWidget::SlotDebugStart()
   {
     if (nullptr != ActionBar())
     {
-      ActionBar()->m_spUi->pDebugButton->hide();
-      ActionBar()->m_spUi->pStopDebugButton->show();
+      ActionBar()->m_spUi->DebugButton->hide();
+      ActionBar()->m_spUi->StopDebugButton->show();
     }
 
     // get Scene name
@@ -463,8 +463,8 @@ void CEditorCodeWidget::SlotDebugStop()
   {
     if (nullptr != ActionBar())
     {
-      ActionBar()->m_spUi->pDebugButton->show();
-      ActionBar()->m_spUi->pStopDebugButton->hide();
+      ActionBar()->m_spUi->DebugButton->show();
+      ActionBar()->m_spUi->StopDebugButton->hide();
     }
 
     auto pItem = pLayout->takeAt(0);

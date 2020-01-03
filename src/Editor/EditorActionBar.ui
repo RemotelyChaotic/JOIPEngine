@@ -114,7 +114,7 @@
        </spacer>
       </item>
       <item>
-       <widget class="QPushButton" name="pSaveButton">
+       <widget class="QPushButton" name="SaveButton">
         <property name="sizePolicy">
          <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
           <horstretch>48</horstretch>
@@ -133,10 +133,6 @@
         <property name="text">
          <string/>
         </property>
-        <property name="icon">
-         <iconset resource="../../resources.qrc">
-          <normaloff>:/resources/img/ButtonSave.png</normaloff>:/resources/img/ButtonSave.png</iconset>
-        </property>
         <property name="iconSize">
          <size>
           <width>48</width>
@@ -146,7 +142,7 @@
        </widget>
       </item>
       <item>
-       <widget class="QPushButton" name="pExitButton">
+       <widget class="QPushButton" name="ExitButton">
         <property name="sizePolicy">
          <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
           <horstretch>48</horstretch>
@@ -164,10 +160,6 @@
         </property>
         <property name="text">
          <string/>
-        </property>
-        <property name="icon">
-         <iconset resource="../../resources.qrc">
-          <normaloff>:/resources/img/ButtonExit.png</normaloff>:/resources/img/ButtonExit.png</iconset>
         </property>
         <property name="iconSize">
          <size>
@@ -217,7 +209,7 @@
        <number>0</number>
       </property>
       <item>
-       <widget class="QPushButton" name="pAddButton">
+       <widget class="QPushButton" name="AddResourceButton">
         <property name="sizePolicy">
          <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
           <horstretch>0</horstretch>
@@ -242,10 +234,6 @@
         <property name="text">
          <string/>
         </property>
-        <property name="icon">
-         <iconset resource="../../resources.qrc">
-          <normaloff>:/resources/img/ButtonPlus.png</normaloff>:/resources/img/ButtonPlus.png</iconset>
-        </property>
         <property name="iconSize">
          <size>
           <width>48</width>
@@ -255,7 +243,7 @@
        </widget>
       </item>
       <item>
-       <widget class="QPushButton" name="pAddWebButton">
+       <widget class="QPushButton" name="AddWebResourceButton">
         <property name="sizePolicy">
          <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
           <horstretch>0</horstretch>
@@ -280,10 +268,6 @@
         <property name="text">
          <string/>
         </property>
-        <property name="icon">
-         <iconset resource="../../resources.qrc">
-          <normaloff>:/resources/img/ButtonWeb.png</normaloff>:/resources/img/ButtonWeb.png</iconset>
-        </property>
         <property name="iconSize">
          <size>
           <width>48</width>
@@ -293,7 +277,7 @@
        </widget>
       </item>
       <item>
-       <widget class="QPushButton" name="pRemoveButton">
+       <widget class="QPushButton" name="RemoveResourceButton">
         <property name="sizePolicy">
          <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
           <horstretch>0</horstretch>
@@ -318,10 +302,6 @@
         <property name="text">
          <string/>
         </property>
-        <property name="icon">
-         <iconset resource="../../resources.qrc">
-          <normaloff>:/resources/img/ButtonMinus.png</normaloff>:/resources/img/ButtonMinus.png</iconset>
-        </property>
         <property name="iconSize">
          <size>
           <width>48</width>
@@ -331,7 +311,7 @@
        </widget>
       </item>
       <item>
-       <widget class="QPushButton" name="pTitleCardButton">
+       <widget class="QPushButton" name="TitleCardButton">
         <property name="sizePolicy">
          <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
           <horstretch>0</horstretch>
@@ -356,10 +336,6 @@
         <property name="text">
          <string/>
         </property>
-        <property name="icon">
-         <iconset resource="../../resources.qrc">
-          <normaloff>:/resources/img/ButtonTitleCard.png</normaloff>:/resources/img/ButtonTitleCard.png</iconset>
-        </property>
         <property name="iconSize">
          <size>
           <width>48</width>
@@ -369,7 +345,7 @@
        </widget>
       </item>
       <item>
-       <widget class="QPushButton" name="pMapButton">
+       <widget class="QPushButton" name="MapButton">
         <property name="sizePolicy">
          <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
           <horstretch>0</horstretch>
@@ -393,10 +369,6 @@
         </property>
         <property name="text">
          <string/>
-        </property>
-        <property name="icon">
-         <iconset resource="../../resources.qrc">
-          <normaloff>:/resources/img/ButtonMap.png</normaloff>:/resources/img/ButtonMap.png</iconset>
         </property>
         <property name="iconSize">
          <size>
@@ -428,7 +400,7 @@
        <number>0</number>
       </property>
       <item>
-       <widget class="QPushButton" name="pPlayButton">
+       <widget class="QPushButton" name="PlayButton">
         <property name="sizePolicy">
          <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
           <horstretch>0</horstretch>
@@ -453,10 +425,6 @@
         <property name="text">
          <string/>
         </property>
-        <property name="icon">
-         <iconset resource="../../resources.qrc">
-          <normaloff>:/resources/img/ButtonPlay.png</normaloff>:/resources/img/ButtonPlay.png</iconset>
-        </property>
         <property name="iconSize">
          <size>
           <width>48</width>
@@ -466,7 +434,7 @@
        </widget>
       </item>
       <item>
-       <widget class="QPushButton" name="pPauseButton">
+       <widget class="QPushButton" name="PauseButton">
         <property name="sizePolicy">
          <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
           <horstretch>0</horstretch>
@@ -488,10 +456,6 @@
         <property name="text">
          <string/>
         </property>
-        <property name="icon">
-         <iconset resource="../../resources.qrc">
-          <normaloff>:/resources/img/ButtonPause.png</normaloff>:/resources/img/ButtonPause.png</iconset>
-        </property>
         <property name="iconSize">
          <size>
           <width>48</width>
@@ -501,7 +465,7 @@
        </widget>
       </item>
       <item>
-       <widget class="QPushButton" name="pStopButton">
+       <widget class="QPushButton" name="StopButton">
         <property name="sizePolicy">
          <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
           <horstretch>0</horstretch>
@@ -525,10 +489,6 @@
         </property>
         <property name="text">
          <string/>
-        </property>
-        <property name="icon">
-         <iconset resource="../../resources.qrc">
-          <normaloff>:/resources/img/ButtonStop.png</normaloff>:/resources/img/ButtonStop.png</iconset>
         </property>
         <property name="iconSize">
          <size>
@@ -560,7 +520,7 @@
        <number>0</number>
       </property>
       <item>
-       <widget class="QPushButton" name="pAddNodeButton">
+       <widget class="QPushButton" name="AddNodeButton">
         <property name="sizePolicy">
          <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
           <horstretch>0</horstretch>
@@ -585,10 +545,6 @@
         <property name="text">
          <string/>
         </property>
-        <property name="icon">
-         <iconset resource="../../resources.qrc">
-          <normaloff>:/resources/img/ButtonPlus.png</normaloff>:/resources/img/ButtonPlus.png</iconset>
-        </property>
         <property name="iconSize">
          <size>
           <width>48</width>
@@ -598,7 +554,7 @@
        </widget>
       </item>
       <item>
-       <widget class="QPushButton" name="pRemoveNodeButton">
+       <widget class="QPushButton" name="RemoveNodeButton">
         <property name="sizePolicy">
          <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
           <horstretch>0</horstretch>
@@ -622,10 +578,6 @@
         </property>
         <property name="text">
          <string/>
-        </property>
-        <property name="icon">
-         <iconset resource="../../resources.qrc">
-          <normaloff>:/resources/img/ButtonMinus.png</normaloff>:/resources/img/ButtonMinus.png</iconset>
         </property>
         <property name="iconSize">
          <size>
@@ -657,7 +609,7 @@
        <number>0</number>
       </property>
       <item>
-       <widget class="QPushButton" name="pDebugButton">
+       <widget class="QPushButton" name="DebugButton">
         <property name="minimumSize">
          <size>
           <width>48</width>
@@ -676,10 +628,6 @@
         <property name="text">
          <string/>
         </property>
-        <property name="icon">
-         <iconset resource="../../resources.qrc">
-          <normaloff>:/resources/img/ButtonPlay.png</normaloff>:/resources/img/ButtonPlay.png</iconset>
-        </property>
         <property name="iconSize">
          <size>
           <width>48</width>
@@ -689,7 +637,7 @@
        </widget>
       </item>
       <item>
-       <widget class="QPushButton" name="pStopDebugButton">
+       <widget class="QPushButton" name="StopDebugButton">
         <property name="minimumSize">
          <size>
           <width>48</width>
@@ -708,10 +656,6 @@
         <property name="text">
          <string/>
         </property>
-        <property name="icon">
-         <iconset resource="../../resources.qrc">
-          <normaloff>:/resources/img/ButtonStop.png</normaloff>:/resources/img/ButtonStop.png</iconset>
-        </property>
         <property name="iconSize">
          <size>
           <width>48</width>
@@ -721,7 +665,7 @@
        </widget>
       </item>
       <item>
-       <widget class="QPushButton" name="pAddShowImageCode">
+       <widget class="QPushButton" name="AddShowImageCode">
         <property name="minimumSize">
          <size>
           <width>48</width>
@@ -737,10 +681,6 @@
         <property name="toolTip">
          <string>Add code to display resource</string>
         </property>
-        <property name="icon">
-         <iconset resource="../../resources.qrc">
-          <normaloff>:/resources/img/ButtonImage.png</normaloff>:/resources/img/ButtonImage.png</iconset>
-        </property>
         <property name="iconSize">
          <size>
           <width>48</width>
@@ -750,7 +690,7 @@
        </widget>
       </item>
       <item>
-       <widget class="QPushButton" name="pAddShowIconCode">
+       <widget class="QPushButton" name="AddShowIconCode">
         <property name="minimumSize">
          <size>
           <width>48</width>
@@ -769,10 +709,6 @@
         <property name="text">
          <string/>
         </property>
-        <property name="icon">
-         <iconset resource="../../resources.qrc">
-          <normaloff>:/resources/img/ButtonIcon.png</normaloff>:/resources/img/ButtonIcon.png</iconset>
-        </property>
         <property name="iconSize">
          <size>
           <width>48</width>
@@ -782,7 +718,7 @@
        </widget>
       </item>
       <item>
-       <widget class="QPushButton" name="pAddShowBackgroundCode">
+       <widget class="QPushButton" name="AddShowBackgroundCode">
         <property name="minimumSize">
          <size>
           <width>48</width>
@@ -801,10 +737,6 @@
         <property name="text">
          <string/>
         </property>
-        <property name="icon">
-         <iconset resource="../../resources.qrc">
-          <normaloff>:/resources/img/ButtonBackground.png</normaloff>:/resources/img/ButtonBackground.png</iconset>
-        </property>
         <property name="iconSize">
          <size>
           <width>48</width>
@@ -814,7 +746,7 @@
        </widget>
       </item>
       <item>
-       <widget class="QPushButton" name="pAddTextCode">
+       <widget class="QPushButton" name="AddTextCode">
         <property name="minimumSize">
          <size>
           <width>48</width>
@@ -833,10 +765,6 @@
         <property name="text">
          <string/>
         </property>
-        <property name="icon">
-         <iconset resource="../../resources.qrc">
-          <normaloff>:/resources/img/ButtonText.png</normaloff>:/resources/img/ButtonText.png</iconset>
-        </property>
         <property name="iconSize">
          <size>
           <width>48</width>
@@ -846,7 +774,7 @@
        </widget>
       </item>
       <item>
-       <widget class="QPushButton" name="pAddTimerCode">
+       <widget class="QPushButton" name="AddTimerCode">
         <property name="minimumSize">
          <size>
           <width>48</width>
@@ -864,10 +792,6 @@
         </property>
         <property name="text">
          <string/>
-        </property>
-        <property name="icon">
-         <iconset resource="../../resources.qrc">
-          <normaloff>:/resources/img/ButtonClock.png</normaloff>:/resources/img/ButtonClock.png</iconset>
         </property>
         <property name="iconSize">
          <size>
@@ -895,8 +819,6 @@
    </item>
   </layout>
  </widget>
- <resources>
-  <include location="../../resources.qrc"/>
- </resources>
+ <resources/>
  <connections/>
 </ui>

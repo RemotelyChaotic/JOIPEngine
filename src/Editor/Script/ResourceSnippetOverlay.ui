@@ -120,25 +120,7 @@
           </widget>
          </item>
          <item row="1" column="0">
-          <widget class="CSearchWidget" name="pFilter" native="true">
-           <layout class="QHBoxLayout" name="horizontalLayout_3">
-            <property name="spacing">
-             <number>10</number>
-            </property>
-            <property name="leftMargin">
-             <number>0</number>
-            </property>
-            <property name="topMargin">
-             <number>0</number>
-            </property>
-            <property name="rightMargin">
-             <number>0</number>
-            </property>
-            <property name="bottomMargin">
-             <number>0</number>
-            </property>
-           </layout>
-          </widget>
+          <widget class="CSearchWidget" name="pFilter" native="true"/>
          </item>
         </layout>
        </widget>

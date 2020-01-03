@@ -313,6 +313,8 @@ void CProjectRunner::ResolveNextPossibleNodes(Node* pNode, std::vector<std::pair
     std::mt19937 generator(static_cast<long unsigned int>(seed));
     std::uniform_int_distribution<> dis(0, static_cast<qint32>(viValidIndicees.size() - 1));
     qint32 iGeneratedIndex = dis(generator);
+    qDebug() << "Seed:" << seed << "casted:" << static_cast<long unsigned int>(seed);
+    qDebug() << "Generated value:" << iGeneratedIndex << "from 0 -" << static_cast<qint32>(viValidIndicees.size() - 1);
 
     auto pConnectionsMap =
         pNode->nodeState().connections(PortType::Out,

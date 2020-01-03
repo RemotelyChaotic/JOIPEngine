@@ -1,8 +1,10 @@
 #include "SettingsScreen.h"
 #include "Application.h"
 #include "Settings.h"
+#include "Style.h"
 #include "WindowContext.h"
 #include "ui_SettingsScreen.h"
+
 #include <QApplication>
 #include <QDesktopWidget>
 #include <QFileDialog>
@@ -72,22 +74,16 @@ void CSettingsScreen::Load()
   QSize currentResolution = m_spSettings->Resolution();
 
   // block signals to prevent settings change
-  m_spUi->pFontComboBox->blockSignals(true);
   m_spUi->pFullscreenCheckBox->blockSignals(true);
   m_spUi->pFolderLineEdit->blockSignals(true);
+  m_spUi->pFontComboBox->blockSignals(true);
+  m_spUi->pStyleComboBox->blockSignals(true);
   m_spUi->pResolutionComboBox->blockSignals(true);
   m_spUi->pMuteCheckBox->blockSignals(true);
   m_spUi->pVolumeSlider->blockSignals(true);
 
-  // set font
-  QFont font(m_spSettings->Font());
-  m_spUi->pFontComboBox->setCurrentFont(font);
-
   // set fullscreen
   m_spUi->pFullscreenCheckBox->setCheckState(m_spSettings->Fullscreen() ? Qt::Checked : Qt::Unchecked);
-
-  // set lineedit
-  m_spUi->pFolderLineEdit->setText(m_spSettings->ContentFolder());
 
   // find available screen dimensions
   qint32 iIndex = 0;
@@ -126,14 +122,26 @@ void CSettingsScreen::Load()
     m_spUi->pResolutionComboBox->setCurrentIndex(m_spUi->pResolutionComboBox->count() - 1);
   }
 
+  // set font
+  QFont font(m_spSettings->Font());
+  m_spUi->pFontComboBox->setCurrentFont(font);
+
+  // setStyle
+  m_spUi->pStyleComboBox->addItems(joip_style::AvailableStyles());
+  m_spUi->pStyleComboBox->setCurrentText(m_spSettings->Style());
+
   // set volume
   m_spUi->pMuteCheckBox->setCheckState(m_spSettings->Muted() ? Qt::Checked : Qt::Unchecked);
   m_spUi->pVolumeSlider->setValue(static_cast<qint32>(m_spSettings->Volume() * c_dSliderScaling));
 
+  // set lineedit
+  m_spUi->pFolderLineEdit->setText(m_spSettings->ContentFolder());
+
   // unblock signals
-  m_spUi->pFontComboBox->blockSignals(false);
   m_spUi->pFullscreenCheckBox->blockSignals(false);
   m_spUi->pResolutionComboBox->blockSignals(false);
+  m_spUi->pFontComboBox->blockSignals(false);
+  m_spUi->pStyleComboBox->blockSignals(false);
   m_spUi->pFolderLineEdit->blockSignals(false);
   m_spUi->pMuteCheckBox->blockSignals(false);
   m_spUi->pVolumeSlider->blockSignals(false);
@@ -144,8 +152,13 @@ void CSettingsScreen::Load()
 void CSettingsScreen::Unload()
 {
   m_spUi->pResolutionComboBox->blockSignals(true);
+  m_spUi->pStyleComboBox->blockSignals(true);
+
   m_spUi->pResolutionComboBox->clear();
+  m_spUi->pStyleComboBox->clear();
+
   m_spUi->pResolutionComboBox->blockSignals(false);
+  m_spUi->pStyleComboBox->blockSignals(false);
 }
 
 //----------------------------------------------------------------------------------------
@@ -180,6 +193,17 @@ void CSettingsScreen::on_pFontComboBox_currentFontChanged(const QFont& font)
   if (nullptr == m_spSettings) { return; }
 
   m_spSettings->SetFont(font.family());
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CSettingsScreen::on_pStyleComboBox_currentIndexChanged(qint32 iIndex)
+{
+  WIDGET_INITIALIZED_GUARD
+  assert(nullptr != m_spSettings);
+  if (nullptr == m_spSettings) { return; }
+
+  m_spSettings->SetStyle(m_spUi->pStyleComboBox->itemText(iIndex));
 }
 
 //----------------------------------------------------------------------------------------

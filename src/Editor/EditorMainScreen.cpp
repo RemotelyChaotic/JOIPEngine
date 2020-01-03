@@ -66,11 +66,11 @@ void CEditorMainScreen::Initialize()
   m_spUi->pActionBarLeft->Initialize();
   m_spUi->pActionBarRight->Initialize();
 
-  connect(m_spUi->pProjectActionBar->m_spUi->pSaveButton, &QPushButton::clicked,
+  connect(m_spUi->pProjectActionBar->m_spUi->SaveButton, &QPushButton::clicked,
           this, &CEditorMainScreen::SlotSaveClicked);
   connect(m_spUi->pProjectActionBar->m_spUi->pTitleLineEdit, &QLineEdit::editingFinished,
           this, &CEditorMainScreen::SlotProjectNameEditingFinished);
-  connect(m_spUi->pProjectActionBar->m_spUi->pExitButton, &QPushButton::clicked,
+  connect(m_spUi->pProjectActionBar->m_spUi->ExitButton, &QPushButton::clicked,
           this, &CEditorMainScreen::SlotExitClicked);
 
   // insert items in map

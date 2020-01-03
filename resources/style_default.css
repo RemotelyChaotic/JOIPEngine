@@ -131,6 +131,19 @@ QLabel {
   background-color: rgba(0, 0, 0, 0);
 }
 
+QLabel#SearchIcon {
+  border-image: url(://resources/img/ButtonSearch.png);
+}
+QLabel#PlayButton {
+  border-image: url(://resources/img/ButtonPlay.png);
+}
+QLabel#ExitButton {
+  border-image: url(://resources/img/ButtonExit.png);
+}
+QLabel#ErrorIcon {
+  border-image: url(://resources/img/ButtonIcon.png);
+}
+
 QToolTip {
   border: 2px solid silver;
   border-radius: 10px;
@@ -175,6 +188,83 @@ QPushButton, QToolButton {
   padding: 5px;
   background: qradialgradient(cx: 0.3, cy: -0.4, fx: 0.3, fy: -0.4, radius: 1.35, stop: 0 #aa00aa, stop: 1 #760076);
   min-width: 64px;
+}
+
+QPushButton#AddShowBackgroundCode {
+  qproperty-icon: url(://resources/img/ButtonBackground.png) off,
+                  url(://resources/img/ButtonBackground.png) on;
+}
+QPushButton#AddShowIconCode {
+  qproperty-icon: url(://resources/img/ButtonIcon.png) off,
+                  url(://resources/img/ButtonIcon.png) on;
+}
+QPushButton#AddShowImageCode {
+  qproperty-icon: url(://resources/img/ButtonImage.png) off,
+                  url(://resources/img/ButtonImage.png) on;
+}
+QPushButton#AddTextCode {
+  qproperty-icon: url(://resources/img/ButtonText.png) off,
+                  url(://resources/img/ButtonText.png) on;
+}
+QPushButton#AddTimerCode {
+  qproperty-icon: url(://resources/img/ButtonClock.png) off,
+                  url(://resources/img/ButtonClock.png) on;
+}
+QPushButton#DebugButton {
+  qproperty-icon: url(://resources/img/ButtonPlay.png) off,
+                  url(://resources/img/ButtonPlay.png) on;
+}
+QPushButton#StopDebugButton {
+  qproperty-icon: url(://resources/img/ButtonStop.png) off,
+                  url(://resources/img/ButtonStop.png) on;
+}
+QPushButton#PauseButton {
+  qproperty-icon: url(://resources/img/ButtonPause.png) off,
+                  url(://resources/img/ButtonPause.png) on;
+}
+QPushButton#PlayButton {
+  qproperty-icon: url(://resources/img/ButtonPlay.png) off,
+                  url(://resources/img/ButtonPlay.png) on;
+}
+QPushButton#StopButton {
+  qproperty-icon: url(://resources/img/ButtonStop.png) off,
+                  url(://resources/img/ButtonStop.png) on;
+}
+QPushButton#ExitButton {
+  qproperty-icon: url(://resources/img/ButtonExit.png) off,
+                  url(://resources/img/ButtonExit.png) on;
+}
+QPushButton#SaveButton {
+  qproperty-icon: url(://resources/img/ButtonSave.png) off,
+                  url(://resources/img/ButtonSave.png) on;
+}
+QPushButton#AddResourceButton {
+  qproperty-icon: url(://resources/img/ButtonPlusDisabled.png) off,
+                  url(://resources/img/ButtonPlus.png) on;
+}
+QPushButton#AddWebResourceButton {
+  qproperty-icon: url(://resources/img/ButtonWeb.png) off,
+                  url(://resources/img/ButtonWeb.png) on;
+}
+QPushButton#MapButton {
+  qproperty-icon: url(://resources/img/ButtonMap.png) off,
+                  url(://resources/img/ButtonMap.png) on;
+}
+QPushButton#RemoveResourceButton {
+  qproperty-icon: url(://resources/img/ButtonMinusDisabled.png) off,
+                  url(://resources/img/ButtonMinus.png) on;
+}
+QPushButton#TitleCardButton {
+  qproperty-icon: url(://resources/img/ButtonTitleCard.png) off,
+                  url(://resources/img/ButtonTitleCard.png) on;
+}
+QPushButton#AddNodeButton {
+  qproperty-icon: url(://resources/img/ButtonPlusDisabled.png) off,
+                  url(://resources/img/ButtonPlus.png) on;
+}
+QPushButton#RemoveNodeButton {
+  qproperty-icon: url(://resources/img/ButtonMinusDisabled.png) off,
+                  url(://resources/img/ButtonMinus.png) on;
 }
 
 QPushButton:hover,

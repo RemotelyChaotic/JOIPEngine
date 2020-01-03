@@ -292,7 +292,7 @@ void CWidgetArea::AddError(QString sException, qint32 iLine, QString sStack)
   pLabel->setVisible(false);
   pLabel->setFixedSize(m_pCodeEditor->WidgetAreaWidth(),m_pCodeEditor->WidgetAreaWidth());
   pLabel->setScaledContents(true);
-  pLabel->setPixmap(QPixmap("://resources/img/ButtonIcon.png"));
+  pLabel->setObjectName("ErrorIcon");
   pLabel->setToolTip(sException + ": " + sStack);
   pLabel->installEventFilter(this);
   m_errorLabelMap.insert({ iLine, pLabel });

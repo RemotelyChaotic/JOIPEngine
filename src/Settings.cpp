@@ -1,5 +1,7 @@
 #include "Settings.h"
 #include "Application.h"
+#include "Style.h"
+
 #include <QCoreApplication>
 #include <QDir>
 #include <QFileInfo>
@@ -249,7 +251,7 @@ void CSettings::GenerateSettingsIfNotExists()
   if (!m_spSettings->contains(CSettings::c_sSettingStyle))
   {
     bNeedsSynch = true;
-    m_spSettings->setValue(CSettings::c_sSettingStyle, "default");
+    m_spSettings->setValue(CSettings::c_sSettingStyle, joip_style::c_sDefaultStyle);
   }
 
   // check volume

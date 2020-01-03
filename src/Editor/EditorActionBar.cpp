@@ -40,8 +40,8 @@ void CEditorActionBar::ShowCodeActionBar()
 {
   HideAllBars();
   m_spUi->pCodeEditorContainer->show();
-  m_spUi->pDebugButton->show();
-  m_spUi->pStopDebugButton->hide();
+  m_spUi->DebugButton->show();
+  m_spUi->StopDebugButton->hide();
 }
 
 //----------------------------------------------------------------------------------------

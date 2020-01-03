@@ -5,14 +5,15 @@
 
 #include <QDebug>
 #include <QDir>
+#include <QDirIterator>
 #include <QFileInfo>
 #include <QFont>
+#include <QLibraryInfo>
 #include <QString>
 
 namespace
 {
   const QString c_sStyleFolder = "styles";
-  const QString c_sDefaultStyle = "default";
   const QString c_sDefaultStyleFile = "://resources/style_default.css";
   const QString c_sStyleFile = "style.css";
 
@@ -40,22 +41,13 @@ namespace
 //
   void ResolveStyle(QApplication* pApp, const QString& sName)
   {
-    QFileInfo info(QApplication::applicationDirPath() + QDir::separator() + ".." +
+    QFileInfo info(QLibraryInfo::location(QLibraryInfo::PrefixPath) +
                    QDir::separator() + c_sStyleFolder + QDir::separator() + sName +
                    QDir::separator() + c_sStyleFile);
     if (info.exists())
     {
       QFile styleFile(info.absoluteFilePath());
-      if (styleFile.open(QIODevice::ReadOnly))
-      {
-        pApp->setStyleSheet(QString::fromUtf8(styleFile.readAll()));
-      }
-      else
-      {
-        qWarning() << QString(QT_TR_NOOP("Could not open stylesheet with the name: %1."))
-                      .arg(info.absoluteFilePath());
-        LoadDefaultStyle(pApp);
-      }
+      pApp->setStyleSheet("file:///" + info.absoluteFilePath());
     }
     else
     {
@@ -64,6 +56,24 @@ namespace
       LoadDefaultStyle(pApp);
     }
   }
+}
+
+//----------------------------------------------------------------------------------------
+//
+QStringList joip_style::AvailableStyles()
+{
+  const QString sStyleFolder = QLibraryInfo::location(QLibraryInfo::PrefixPath) +
+      QDir::separator() + c_sStyleFolder;
+  QDirIterator iter(sStyleFolder, QDir::NoDotAndDotDot | QDir::Dirs, QDirIterator::NoIteratorFlags);
+
+  QStringList out;
+  out << c_sDefaultStyle;
+  while (iter.hasNext())
+  {
+    out << QDir(iter.next()).dirName();
+  }
+
+  return out;
 }
 
 //----------------------------------------------------------------------------------------

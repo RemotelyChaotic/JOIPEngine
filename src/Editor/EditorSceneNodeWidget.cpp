@@ -18,8 +18,10 @@
 #include <nodes/DataModelRegistry>
 #include <nodes/FlowScene>
 #include <nodes/FlowView>
+#include <nodes/FlowViewStyle>
 #include <nodes/Node>
 #include <nodes/NodeData>
+#include <nodes/NodeStyle>
 
 #include <QContextMenuEvent>
 #include <QDebug>
@@ -32,7 +34,9 @@ using QtNodes::ConnectionStyle;
 using QtNodes::DataModelRegistry;
 using QtNodes::FlowScene;
 using QtNodes::FlowView;
+using QtNodes::FlowViewStyle;
 using QtNodes::Node;
+using QtNodes::NodeStyle;
 
 namespace
 {
@@ -49,6 +53,41 @@ namespace
 
   void SetNodeStyle()
   {
+    /*
+    NodeStyle::setNodeStyle(
+    R"(
+    {
+      "NodeStyle": {
+        "NormalBoundaryColor": "darkgray",
+        "SelectedBoundaryColor": "deepskyblue",
+        "GradientColor0": "mintcream",
+        "GradientColor1": "mintcream",
+        "GradientColor2": "mintcream",
+        "GradientColor3": "mintcream",
+        "ShadowColor": [200, 200, 200],
+        "FontColor": [10, 10, 10],
+        "FontColorFaded": [100, 100, 100],
+        "ConnectionPointColor": "white",
+        "PenWidth": 2.0,
+        "HoveredPenWidth": 2.5,
+        "ConnectionPointDiameter": 10.0,
+        "Opacity": 1.0
+      }
+    }
+    )");
+
+    FlowViewStyle::setStyle(
+    R"(
+    {
+      "FlowViewStyle": {
+        "BackgroundColor": gray,
+        "FineGridColor": black,
+        "CoarseGridColor": black
+      }
+    }
+    )");
+    */
+
     ConnectionStyle::setConnectionStyle(
     R"(
     {
@@ -63,7 +102,7 @@ namespace
         "ConstructionLineWidth": 2.0,
         "PointDiameter": 10.0,
 
-        "UseDataDefinedColors": true
+        "UseDataDefinedColors": false
       }
     }
     )");
@@ -234,9 +273,9 @@ void CEditorSceneNodeWidget::OnActionBarAboutToChange()
 {
   if (nullptr != ActionBar())
   {
-    disconnect(ActionBar()->m_spUi->pAddNodeButton, &QPushButton::clicked,
+    disconnect(ActionBar()->m_spUi->AddNodeButton, &QPushButton::clicked,
             this, &CEditorSceneNodeWidget::SlotAddSceneButtonClicked);
-    disconnect(ActionBar()->m_spUi->pRemoveNodeButton, &QPushButton::clicked,
+    disconnect(ActionBar()->m_spUi->RemoveNodeButton, &QPushButton::clicked,
             this, &CEditorSceneNodeWidget::SlotRemoveNodeButtonClicked);
   }
 }
@@ -249,9 +288,9 @@ void CEditorSceneNodeWidget::OnActionBarChanged()
   if (nullptr != ActionBar())
   {
     ActionBar()->ShowNodeEditorActionBar();
-    connect(ActionBar()->m_spUi->pAddNodeButton, &QPushButton::clicked,
+    connect(ActionBar()->m_spUi->AddNodeButton, &QPushButton::clicked,
             this, &CEditorSceneNodeWidget::SlotAddSceneButtonClicked);
-    connect(ActionBar()->m_spUi->pRemoveNodeButton, &QPushButton::clicked,
+    connect(ActionBar()->m_spUi->RemoveNodeButton, &QPushButton::clicked,
             this, &CEditorSceneNodeWidget::SlotRemoveNodeButtonClicked);
   }
 }

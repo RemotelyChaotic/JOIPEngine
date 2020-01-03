@@ -59,7 +59,8 @@ void CApplication::Initialize()
   m_spSettings = std::make_shared<CSettings>();
   connect(m_spSettings.get(), &CSettings::FontChanged,
           this, &CApplication::MarkStyleDirty, Qt::DirectConnection);
-
+  connect(m_spSettings.get(), &CSettings::StyleChanged,
+          this, &CApplication::MarkStyleDirty, Qt::DirectConnection);
 
   // sound emitter
   m_spSoundEmitter->Initialize();
