@@ -63,6 +63,7 @@ private:
   tspProject                                                  m_spCurrentProject;
   std::weak_ptr<CDatabaseManager>                             m_wpDbManager;
   bool                                                        m_bInitialized;
+  bool                                                        m_bInitializingNewProject;
   bool                                                        m_bProjectModified;
   qint32                                                      m_iLastLeftIndex;
   qint32                                                      m_iLastRightIndex;

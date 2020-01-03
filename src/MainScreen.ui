@@ -90,7 +90,7 @@
       <item>
        <widget class="CMenuButton" name="pSceneSelectButton">
         <property name="text">
-         <string>Select Scene</string>
+         <string>Play</string>
         </property>
         <property name="flat">
          <bool>true</bool>

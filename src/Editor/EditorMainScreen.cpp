@@ -35,6 +35,7 @@ CEditorMainScreen::CEditorMainScreen(QWidget* pParent) :
   m_spCurrentProject(nullptr),
   m_wpDbManager(),
   m_bInitialized(false),
+  m_bInitializingNewProject(false),
   m_bProjectModified(false),
   m_iLastLeftIndex(-1),
   m_iLastRightIndex(-2)
@@ -119,6 +120,8 @@ void CEditorMainScreen::Initialize()
 void CEditorMainScreen::InitNewProject(const QString& sNewProjectName)
 {
   if (!m_bInitialized) { return; }
+  m_bInitializingNewProject = true;
+
   auto spDbManager = m_wpDbManager.lock();
   if (nullptr != spDbManager)
   {
@@ -132,6 +135,7 @@ void CEditorMainScreen::InitNewProject(const QString& sNewProjectName)
   }
 
   SetModificaitonFlag(false);
+  m_bInitializingNewProject = false;
 }
 
 //----------------------------------------------------------------------------------------
@@ -139,7 +143,7 @@ void CEditorMainScreen::InitNewProject(const QString& sNewProjectName)
 void CEditorMainScreen::LoadProject(qint32 iId)
 {
   if (!m_bInitialized) { return; }
-  if (nullptr != m_spCurrentProject)
+  if (nullptr != m_spCurrentProject && !m_bInitializingNewProject)
   {
     qWarning() << "Old Project was not unloaded before loading project.";
   }

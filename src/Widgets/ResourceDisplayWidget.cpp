@@ -390,7 +390,8 @@ void CResourceDisplayWidget::SlotImageLoad(QString sPath)
         m_spLoadedMovie->stop();
       }
       m_spLoadedMovie = std::make_shared<QMovie>(sPath);
-      QSize size = m_spLoadedMovie->scaledSize();
+      QImage image = reader.read();
+      QSize size = image.size();
       QSize resultingSize = size;
       if (size.width() >= size.height())
       {

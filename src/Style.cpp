@@ -4,13 +4,66 @@
 #include "Settings.h"
 
 #include <QDebug>
+#include <QDir>
 #include <QFileInfo>
 #include <QFont>
 #include <QString>
 
 namespace
 {
-  const QString c_sDefaultStyle = "style.css";
+  const QString c_sStyleFolder = "styles";
+  const QString c_sDefaultStyle = "default";
+  const QString c_sDefaultStyleFile = "://resources/style_default.css";
+  const QString c_sStyleFile = "style.css";
+
+//----------------------------------------------------------------------------------------
+//
+  void LoadDefaultStyle(QApplication* pApp)
+  {
+    QFileInfo info(c_sDefaultStyleFile);
+    if (info.exists())
+    {
+      QFile styleFile(c_sDefaultStyleFile);
+      if (styleFile.open(QIODevice::ReadOnly))
+      {
+        pApp->setStyleSheet(QString::fromUtf8(styleFile.readAll()));
+      }
+      else
+      {
+        qWarning() << QString(QT_TR_NOOP("Could not open stylesheet from resources: %1."))
+                      .arg(info.absoluteFilePath());
+      }
+    }
+  }
+
+//----------------------------------------------------------------------------------------
+//
+  void ResolveStyle(QApplication* pApp, const QString& sName)
+  {
+    QFileInfo info(QApplication::applicationDirPath() + QDir::separator() + ".." +
+                   QDir::separator() + c_sStyleFolder + QDir::separator() + sName +
+                   QDir::separator() + c_sStyleFile);
+    if (info.exists())
+    {
+      QFile styleFile(info.absoluteFilePath());
+      if (styleFile.open(QIODevice::ReadOnly))
+      {
+        pApp->setStyleSheet(QString::fromUtf8(styleFile.readAll()));
+      }
+      else
+      {
+        qWarning() << QString(QT_TR_NOOP("Could not open stylesheet with the name: %1."))
+                      .arg(info.absoluteFilePath());
+        LoadDefaultStyle(pApp);
+      }
+    }
+    else
+    {
+      qWarning() << QString(QT_TR_NOOP("Could not find stylesheet with the name: %1."))
+                    .arg(info.absoluteFilePath());
+      LoadDefaultStyle(pApp);
+    }
+  }
 }
 
 //----------------------------------------------------------------------------------------
@@ -19,32 +72,14 @@ void joip_style::SetStyle(QApplication* pApp)
 {
   auto spSettings = dynamic_cast<CApplication*>(pApp)->Settings();
 
-  QFileInfo info(c_sDefaultStyle);
-  if (info.exists())
+  QString sStyle = spSettings->Style();
+  if (sStyle == c_sDefaultStyle)
   {
-    QFile styleFile(info.absoluteFilePath());
-    if (styleFile.open(QIODevice::ReadOnly))
-    {
-      pApp->setStyleSheet(QString::fromUtf8(styleFile.readAll()));
-    }
-    else
-    {
-      qWarning() << QString(QT_TR_NOOP("Could not open stylesheet with the name: %1."))
-                    .arg(info.absoluteFilePath());
-    }
+    LoadDefaultStyle(pApp);
   }
   else
   {
-    QFile styleFile("://resources/style_default.css");
-    if (styleFile.open(QIODevice::ReadOnly))
-    {
-      pApp->setStyleSheet(QString::fromUtf8(styleFile.readAll()));
-    }
-    else
-    {
-      qWarning() << QString(QT_TR_NOOP("Could not open stylesheet from resources: %1."))
-                    .arg(info.absoluteFilePath());
-    }
+    ResolveStyle(pApp, sStyle);
   }
 
   QFont font(spSettings->Font(), 10);

@@ -45,7 +45,7 @@ CTextBoxWidget::CTextBoxWidget(QWidget* pParent) :
   alphaGradient.setColorAt(0.0, Qt::transparent);
   alphaGradient.setColorAt(0.2, Qt::black);
   alphaGradient.setColorAt(0.8, Qt::black);
-  alphaGradient.setColorAt(1.0, Qt::transparent);
+  alphaGradient.setColorAt(1.0, Qt::black);
   QGraphicsOpacityEffect* pOpacityEffect = new QGraphicsOpacityEffect(this);
   pOpacityEffect->setOpacity(1.0);
   pOpacityEffect->setOpacityMask(alphaGradient);

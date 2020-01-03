@@ -45,6 +45,7 @@ void CApplication::Initialize()
   // fonts
   qint32 iFont = QFontDatabase::addApplicationFont("://resources/fonts/Equestria.otf");
   Q_ASSERT(-1 != iFont);
+  Q_UNUSED(iFont)
 
   QStringList fonts;
   QFontDatabase fontDb;

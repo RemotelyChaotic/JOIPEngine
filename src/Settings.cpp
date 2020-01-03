@@ -13,6 +13,7 @@ const QString CSettings::c_sSettingFont = "Graphics/font";
 const QString CSettings::c_sSettingFullscreen = "Graphics/fullscreen";
 const QString CSettings::c_sSettingMuted = "Audio/muted";
 const QString CSettings::c_sSettingResolution = "Graphics/resolution";
+const QString CSettings::c_sSettingStyle = "Graphics/style";
 const QString CSettings::c_sSettingVolume = "Audio/volume";
 
 const QString CSettings::c_sOrganisation = "Private";
@@ -150,6 +151,28 @@ QSize CSettings::Resolution()
 
 //----------------------------------------------------------------------------------------
 //
+void CSettings::SetStyle(const QString& sStyle)
+{
+  QMutexLocker locker(&m_settingsMutex);
+  QString sOldStyle = m_spSettings->value(CSettings::c_sSettingStyle).toString();
+
+  if (sOldStyle == sStyle) { return; }
+
+  m_spSettings->setValue(CSettings::c_sSettingStyle, sStyle);
+
+  emit StyleChanged();
+}
+
+//----------------------------------------------------------------------------------------
+//
+QString CSettings::Style()
+{
+  QMutexLocker locker(&m_settingsMutex);
+  return m_spSettings->value(CSettings::c_sSettingStyle).toString();
+}
+
+//----------------------------------------------------------------------------------------
+//
 void CSettings::SetVolume(double dVolume)
 {
   QMutexLocker locker(&m_settingsMutex);
@@ -220,6 +243,13 @@ void CSettings::GenerateSettingsIfNotExists()
   {
     bNeedsSynch = true;
     m_spSettings->setValue(CSettings::c_sSettingMuted, false);
+  }
+
+  // check style
+  if (!m_spSettings->contains(CSettings::c_sSettingStyle))
+  {
+    bNeedsSynch = true;
+    m_spSettings->setValue(CSettings::c_sSettingStyle, "default");
   }
 
   // check volume

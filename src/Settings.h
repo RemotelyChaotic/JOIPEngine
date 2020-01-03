@@ -17,6 +17,7 @@ class CSettings : public QObject {
   Q_PROPERTY(bool fullscreen READ Fullscreen WRITE SetFullscreen NOTIFY FullscreenChanged)
   Q_PROPERTY(bool muted READ Muted WRITE SetMuted NOTIFY MutedChanged)
   Q_PROPERTY(QSize resolution READ Resolution WRITE SetResolution NOTIFY ResolutionChanged)
+  Q_PROPERTY(QString style READ Style WRITE SetStyle NOTIFY StyleChanged)
   Q_PROPERTY(double volume READ Volume WRITE SetVolume NOTIFY VolumeChanged)
 
 public:
@@ -25,6 +26,7 @@ public:
   static const QString c_sSettingFullscreen;
   static const QString c_sSettingMuted;
   static const QString c_sSettingResolution;
+  static const QString c_sSettingStyle;
   static const QString c_sSettingVolume;
 
   static const QString c_sOrganisation;
@@ -43,6 +45,8 @@ public:
   bool Muted();
   void SetResolution(const QSize& size);
   QSize Resolution();
+  void SetStyle(const QString& sStyle);
+  QString Style();
   void SetVolume(double dVolume);
   double Volume();
 
@@ -53,6 +57,7 @@ signals:
   void FullscreenChanged();
   void MutedChanged();
   void ResolutionChanged();
+  void StyleChanged();
   void VolumeChanged();
 
 private:
