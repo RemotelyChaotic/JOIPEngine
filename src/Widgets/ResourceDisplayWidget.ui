@@ -284,18 +284,9 @@
         <number>10</number>
        </property>
        <item row="0" column="0">
-        <widget class="QLabel" name="pErrorImage">
-         <property name="styleSheet">
-          <string notr="true">background-color: transparent;</string>
-         </property>
+        <widget class="CTitleLabel" name="pErrorLabel">
          <property name="text">
-          <string/>
-         </property>
-         <property name="pixmap">
-          <pixmap resource="../../resources.qrc">:/resources/img/TitleCardMissing.png</pixmap>
-         </property>
-         <property name="scaledContents">
-          <bool>false</bool>
+          <string>404</string>
          </property>
          <property name="alignment">
           <set>Qt::AlignCenter</set>
@@ -320,9 +311,12 @@
    <header>Widgets/Player/MediaPlayer.h</header>
    <container>1</container>
   </customwidget>
+  <customwidget>
+   <class>CTitleLabel</class>
+   <extends>QLabel</extends>
+   <header>Widgets/TitleLabel.h</header>
+  </customwidget>
  </customwidgets>
- <resources>
-  <include location="../../resources.qrc"/>
- </resources>
+ <resources/>
  <connections/>
 </ui>
