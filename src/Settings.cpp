@@ -251,7 +251,7 @@ void CSettings::GenerateSettingsIfNotExists()
   if (!m_spSettings->contains(CSettings::c_sSettingStyle))
   {
     bNeedsSynch = true;
-    m_spSettings->setValue(CSettings::c_sSettingStyle, joip_style::c_sDefaultStyle);
+    m_spSettings->setValue(CSettings::c_sSettingStyle, "Blue Night");
   }
 
   // check volume

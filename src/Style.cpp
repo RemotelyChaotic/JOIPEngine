@@ -67,7 +67,6 @@ QStringList joip_style::AvailableStyles()
   QDirIterator iter(sStyleFolder, QDir::NoDotAndDotDot | QDir::Dirs, QDirIterator::NoIteratorFlags);
 
   QStringList out;
-  out << c_sDefaultStyle;
   while (iter.hasNext())
   {
     out << QDir(iter.next()).dirName();
