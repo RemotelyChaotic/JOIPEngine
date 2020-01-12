@@ -19,6 +19,7 @@ CProjectCardSelectionWidget::CProjectCardSelectionWidget(QWidget* pParent) :
   m_spUi(std::make_unique<Ui::CProjectCardSelectionWidget>()),
   m_spSpinner(std::make_shared<QMovie>("://resources/gif/spinner_transparent.gif")),
   m_pLastSelectedWidget(nullptr),
+  m_selectionColor(Qt::white),
   m_iSelectedProjectId(-1)
 {
   m_spUi->setupUi(this);
@@ -97,7 +98,7 @@ void CProjectCardSelectionWidget::LoadProjects()
         {
           m_iSelectedProjectId = iId;
           m_pLastSelectedWidget = pWidget;
-          AddDropShadow(pWidget, QColor(BRIGHT_PURPLE));
+          AddDropShadow(pWidget, m_selectionColor);
           pWidget->setGeometry(10, 10, 300, 400);
         }
 
@@ -151,13 +152,30 @@ void CProjectCardSelectionWidget::UnloadProjects()
 
 //----------------------------------------------------------------------------------------
 //
+void CProjectCardSelectionWidget::SetSelectionColor(const QColor& color)
+{
+  if (m_selectionColor != color)
+  {
+    m_selectionColor = color;
+  }
+}
+
+//----------------------------------------------------------------------------------------
+//
+const QColor& CProjectCardSelectionWidget::SelectionColor()
+{
+  return m_selectionColor;
+}
+
+//----------------------------------------------------------------------------------------
+//
 void CProjectCardSelectionWidget::SlotCardClicked()
 {
   AddDropShadow(m_pLastSelectedWidget, Qt::black);
   CResourceDisplayWidget* pCardWidget = dynamic_cast<CResourceDisplayWidget*>(sender());
   m_iSelectedProjectId = pCardWidget->ProjectId();
   m_pLastSelectedWidget = pCardWidget;
-  AddDropShadow(pCardWidget, QColor(BRIGHT_PURPLE));
+  AddDropShadow(pCardWidget, m_selectionColor);
 }
 
 //----------------------------------------------------------------------------------------

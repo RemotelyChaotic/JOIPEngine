@@ -250,7 +250,8 @@ QWidget* CInformationWidget::CreateHeaderIcon(QWidget* pParent, const QString& s
 
     QLabel* pBackground = new QLabel("", pRoot);
     pBackground->setFixedSize(c_iHeaderFooterIconWidth, c_iHeaderFooterIconHeight);
-    pBackground->setPixmap(QPixmap("://resources/img/IconBg.svg"));
+    //pBackground->setPixmap(QPixmap("://resources/img/IconBg.svg"));
+    pBackground->setObjectName("IconBackground");
     pBackground->setScaledContents(true);
     pRoot->setStyleSheet("background-color: transparent;");
 

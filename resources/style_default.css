@@ -2,6 +2,16 @@ QMainWindow {
   background-image: url(://resources/img/Background.png);
 }
 
+CProjectCardSelectionWidget {
+  qproperty-selectionColor: rgb(236, 0, 236);
+}
+
+CTimerWidget {
+  qproperty-primaryColor: rgb(118, 0, 118);
+  qproperty-secondaryColor: rgb(185, 0, 100);
+  qproperty-tertiaryColor: rgb(236, 0, 236);
+}
+
 /*
  ----- QSplitter
 */
@@ -143,6 +153,9 @@ QLabel#ExitButton {
 QLabel#ErrorIcon {
   border-image: url(://resources/img/ButtonIcon.png);
 }
+QLabel#IconBackground {
+  qproperty-pixmap: url(://resources/img/IconBg.svg);
+}
 
 QToolTip {
   border: 2px solid silver;
@@ -153,6 +166,7 @@ QToolTip {
 CTitleLabel {
   color: rgb(255, 0, 255);
   background-color: transparent;
+  qproperty-outlineColor: rgba(255, 255, 255, 255);
   border: 0px;
   border-radius: 0px;
 }

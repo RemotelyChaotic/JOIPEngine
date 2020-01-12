@@ -2,10 +2,6 @@
 #define CONSTANTS_H
 
 // default colors
-#define DARK_PURPLE 118, 0, 118
-#define MEDIUM_PURPLE 185, 0, 100
-#define BRIGHT_PURPLE 236, 0, 236
-
 #define BLACK 0, 0, 0
 #define BLACK_QML "black"
 

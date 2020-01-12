@@ -31,10 +31,8 @@ CTimerCanvas::~CTimerCanvas()
 void CTimerCanvas::paintEvent(QPaintEvent* /*pEvent*/)
 {
   // variables
-  static const QColor segmentColor(BRIGHT_PURPLE);
-  static const QColor progressFront(DARK_PURPLE, 0);
-  static const QColor progressBack(BRIGHT_PURPLE);
-  static const QColor progressBubble(MEDIUM_PURPLE);
+  QColor progressFront = m_pParent->m_primaryColor;
+  progressFront.setAlpha(0);
 
   qint32 iMinimalDimension = std::min(width(), height());
 
@@ -50,7 +48,7 @@ void CTimerCanvas::paintEvent(QPaintEvent* /*pEvent*/)
   // draw segments
   painterDb.save();
   painterDb.translate(width() / 2, height() / 2);
-  painterDb.setPen(segmentColor);
+  painterDb.setPen(m_pParent->m_tertiaryColor);
   for (int i = 0; i < 12; ++i)
   {
     painterDb.drawLine(iMinimalDimension / 2 - c_iBorderWidth - c_iGroveWidth, 0, iMinimalDimension / 2 - c_iBorderWidth, 0);
@@ -79,7 +77,7 @@ void CTimerCanvas::paintEvent(QPaintEvent* /*pEvent*/)
                                      static_cast<double>(iMinimalDimension) / 2.0),
                              iConeAngle);
     conGrad.setColorAt(1, progressFront);
-    conGrad.setColorAt(0, progressBack);
+    conGrad.setColorAt(0, m_pParent->m_tertiaryColor);
 
     painterDb.setBrush(conGrad);
     painterDb.setPen(Qt::NoPen);
@@ -113,8 +111,8 @@ void CTimerCanvas::paintEvent(QPaintEvent* /*pEvent*/)
   {
     painterDb.save();
     painterDb.translate(iMinimalDimension / 2, iMinimalDimension / 2);
-    painterDb.setPen(progressBubble);
-    painterDb.setBrush(progressBubble);
+    painterDb.setPen(m_pParent->m_secondaryColor);
+    painterDb.setBrush(m_pParent->m_secondaryColor);
     painterDb.rotate(currentPosition - 90 - 2);
     painterDb.drawEllipse(QRect(iMinimalDimension / 2 - (c_iBorderWidth + c_iGroveWidth), 0, c_iGroveWidth, c_iGroveWidth));
     painterDb.restore();
@@ -131,6 +129,9 @@ CTimerWidget::CTimerWidget(QWidget* pParent) :
   m_pTimeLabel(new QLabel("00:00", this)),
   m_bgImage("://resources/img/TimerBg.svg"),
   m_doubleBuffer(128, 128),
+  m_primaryColor(Qt::white),
+  m_secondaryColor(Qt::white),
+  m_tertiaryColor(Qt::white),
   m_iTimeMsMax(0),
   m_iTimeMsCurrent(0),
   m_iUpdateInterval(200),
@@ -177,6 +178,57 @@ void CTimerWidget::SetTimerVisible(bool bVisible)
 void CTimerWidget::SetUpdateInterval(qint32 iTimeMs)
 {
   m_iUpdateInterval = iTimeMs;
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CTimerWidget::SetPrimaryColor(const QColor& color)
+{
+  if (m_primaryColor != color)
+  {
+    m_primaryColor = color;
+  }
+}
+
+//----------------------------------------------------------------------------------------
+//
+const QColor& CTimerWidget::PrimaryColor()
+{
+  return m_primaryColor;
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CTimerWidget::SetSecondaryColor(const QColor& color)
+{
+  if (m_secondaryColor != color)
+  {
+    m_secondaryColor = color;
+  }
+}
+
+//----------------------------------------------------------------------------------------
+//
+const QColor& CTimerWidget::SecondaryColor()
+{
+  return m_secondaryColor;
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CTimerWidget::SetTertiaryColor(const QColor& color)
+{
+  if (m_tertiaryColor != color)
+  {
+    m_tertiaryColor = color;
+  }
+}
+
+//----------------------------------------------------------------------------------------
+//
+const QColor& CTimerWidget::TertiaryColor()
+{
+  return m_tertiaryColor;
 }
 
 //----------------------------------------------------------------------------------------

@@ -29,8 +29,8 @@ CTextBoxWidget::CTextBoxWidget(QWidget* pParent) :
   m_vCurrentTextColor(),
   m_bSceneSelection(false)
 {
-  m_vCurrentBackgroundColor.push_back(QColor(BLACK));
-  m_vCurrentTextColor.push_back(QColor(WHITE));
+  m_vCurrentBackgroundColor.push_back(Qt::black);
+  m_vCurrentTextColor.push_back(Qt::white);
 
   m_spUi->setupUi(this);
   m_spUi->pScrollArea->setStyleSheet("background-color:transparent;");

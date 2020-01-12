@@ -28,6 +28,9 @@ private:
 class CTimerWidget : public QWidget
 {
   Q_OBJECT
+  Q_PROPERTY(QColor primaryColor READ PrimaryColor WRITE SetPrimaryColor)
+  Q_PROPERTY(QColor secondaryColor READ SecondaryColor WRITE SetSecondaryColor)
+  Q_PROPERTY(QColor tertiaryColor READ TertiaryColor WRITE SetTertiaryColor)
   friend class CTimerCanvas;
 
 public:
@@ -37,6 +40,13 @@ public:
   void SetTimer(qint32 iTimeMs);
   void SetTimerVisible(bool bVisible);
   void SetUpdateInterval(qint32 iTimeMs);
+
+  void SetPrimaryColor(const QColor& color);
+  const QColor& PrimaryColor();
+  void SetSecondaryColor(const QColor& color);
+  const QColor& SecondaryColor();
+  void SetTertiaryColor(const QColor& color);
+  const QColor& TertiaryColor();
 
 public slots:
   void Update();
@@ -57,6 +67,9 @@ protected:
   QLabel*                   m_pTimeLabel;
   QPixmap                   m_bgImage;
   QPixmap                   m_doubleBuffer;
+  QColor                    m_primaryColor;
+  QColor                    m_secondaryColor;
+  QColor                    m_tertiaryColor;
   qint32                    m_iTimeMsMax;
   qint32                    m_iTimeMsCurrent;
   qint32                    m_iUpdateInterval;

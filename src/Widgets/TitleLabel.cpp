@@ -105,12 +105,35 @@ public:
   CTitleProxyStyle() :
     QProxyStyle(),
     m_bDirty(true),
-    m_backgroundImage()
+    m_backgroundImage(),
+    m_outlineColor(Qt::white)
   {}
 
+  //--------------------------------------------------------------------------------------
+  //
   void SetDirty() { m_bDirty = true; }
 
+  //--------------------------------------------------------------------------------------
+  //
+  void SetOutlineColor(const QColor& color)
+  {
+    if (m_outlineColor != color)
+    {
+      m_outlineColor = color;
+      m_bDirty = true;
+    }
+  }
+
+  //--------------------------------------------------------------------------------------
+  //
+  const QColor& OutlineColor()
+  {
+    return m_outlineColor;
+  }
+
 protected:
+  //--------------------------------------------------------------------------------------
+  //
   virtual void drawItemText(QPainter* pPainter, const QRect &rect,
       int flags, const QPalette &pal, bool enabled,
       const QString &text, QPalette::ColorRole textRole) const
@@ -127,13 +150,13 @@ protected:
 
       QPainter offscreenPainter(&offScreenBuffer);
       offscreenPainter.initFrom(pPainter->device());
-      offscreenPainter.setPen(QColor(WHITE));
+      offscreenPainter.setPen(m_outlineColor);
       offscreenPainter.setBrush(pal.text());
       offscreenPainter.drawText(rect, flags, text);
 
       // process background
       QImage dilatedPixmap;
-      DilationBorder(offScreenBuffer, dilatedPixmap, c_iKernelSize, qRgba(255, 255, 255, 255));
+      DilationBorder(offScreenBuffer, dilatedPixmap, c_iKernelSize, m_outlineColor.rgba());
       // debug
       //dilatedPixmap.save("bla.png");
       Gauss15x15(dilatedPixmap, ptr->m_backgroundImage);
@@ -145,8 +168,8 @@ protected:
 
     // draw background
     pPainter->save();
-    pPainter->setPen(QColor(WHITE));
-    pPainter->setBrush(QColor(WHITE));
+    pPainter->setPen(m_outlineColor);
+    pPainter->setBrush(m_outlineColor);
     pPainter->drawImage(m_backgroundImage.rect(), m_backgroundImage, m_backgroundImage.rect());
     pPainter->restore();
 
@@ -169,6 +192,7 @@ protected:
 
   bool   m_bDirty;
   QImage m_backgroundImage;
+  QColor m_outlineColor;
 };
 
 //----------------------------------------------------------------------------------------
@@ -179,7 +203,9 @@ CTitleLabel::CTitleLabel(QWidget* pParent) :
   QFont thisFont = font();
   thisFont.setPixelSize(60);
   setFont(thisFont);
-  setStyle(new CTitleProxyStyle());
+  m_pStyle = new CTitleProxyStyle();
+  m_pStyle->setParent(this);
+  setStyle(m_pStyle);
   QFontMetrics fontMetrics(thisFont);
   setFixedHeight(fontMetrics.height() + c_iKernelSize + static_cast<qint32>(c_iOffsetBorder));
   AddEffects();
@@ -191,10 +217,26 @@ CTitleLabel::CTitleLabel(QString sText, QWidget* pParent) :
   QFont thisFont = font();
   thisFont.setPixelSize(60);
   setFont(thisFont);
-  setStyle(new CTitleProxyStyle());
+  m_pStyle = new CTitleProxyStyle();
+  m_pStyle->setParent(this);
+  setStyle(m_pStyle);
   QFontMetrics fontMetrics(thisFont);
   setFixedHeight(fontMetrics.height() + c_iKernelSize + static_cast<qint32>(c_iOffsetBorder));
   AddEffects();
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CTitleLabel::SetOutlineColor(const QColor& color)
+{
+  m_pStyle->SetOutlineColor(color);
+}
+
+//----------------------------------------------------------------------------------------
+//
+const QColor& CTitleLabel::OutlineColor()
+{
+  return m_pStyle->OutlineColor();
 }
 
 //----------------------------------------------------------------------------------------
