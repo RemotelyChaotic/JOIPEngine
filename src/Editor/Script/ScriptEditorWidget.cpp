@@ -8,7 +8,11 @@ namespace
 }
 
 CScriptEditorWidget::CScriptEditorWidget(QWidget* pParent) :
-  QPlainTextEdit(pParent)
+  QPlainTextEdit(pParent),
+  m_lineNumberBackgroundColor(24, 24, 24),
+  m_lineNumberTextColor(Qt::white),
+  m_highlightLineColor(68, 71, 90),
+  m_widgetsBackgroundColor(24, 24, 24)
 {
   setAttribute(Qt::WA_NoMousePropagation, false);
 
@@ -27,12 +31,6 @@ CScriptEditorWidget::CScriptEditorWidget(QWidget* pParent) :
   UpdateLeftAreaWidth(0);
   HighlightCurrentLine();
 
-  QPalette pCode = palette();
-  pCode.setColor(QPalette::Active, QPalette::Base, QColor(38, 38, 38));
-  pCode.setColor(QPalette::Inactive, QPalette::Base, QColor(38, 38, 38));
-  pCode.setColor(QPalette::Text, Qt::white);
-  setPalette(pCode);
-
   QFont font;
   font.setFamily("Courier");
   font.setStyleHint(QFont::Monospace);
@@ -49,7 +47,7 @@ CScriptEditorWidget::CScriptEditorWidget(QWidget* pParent) :
 void CScriptEditorWidget::LineNumberAreaPaintEvent(QPaintEvent* pEvent)
 {
   QPainter painter(m_pLineNumberArea);
-  painter.fillRect(pEvent->rect(), QColor(24, 24, 24));
+  painter.fillRect(pEvent->rect(), m_lineNumberBackgroundColor);
 
   QTextBlock block = firstVisibleBlock();
   qint32 iBlockNumber = block.blockNumber();
@@ -61,7 +59,7 @@ void CScriptEditorWidget::LineNumberAreaPaintEvent(QPaintEvent* pEvent)
     if (block.isVisible() && iBottom >= pEvent->rect().top())
     {
       QString number = QString::number(iBlockNumber + 1);
-      painter.setPen(Qt::white);
+      painter.setPen(m_lineNumberTextColor);
       painter.drawText(0, iTop, m_pLineNumberArea->width(), fontMetrics().height(),
                        Qt::AlignRight, number);
     }
@@ -103,7 +101,7 @@ void CScriptEditorWidget::WidgetAreaPaintEvent(QPaintEvent* pEvent)
   m_pWidgetArea->HideAllErrors();
 
   QPainter painter(m_pWidgetArea);
-  painter.fillRect(pEvent->rect(), QColor(24, 24, 24));
+  painter.fillRect(pEvent->rect(), m_widgetsBackgroundColor);
 
   QTextBlock block = firstVisibleBlock();
   qint32 iBlockNumber = block.blockNumber();
@@ -146,10 +144,7 @@ void CScriptEditorWidget::HighlightCurrentLine()
   if (!isReadOnly())
   {
     QTextEdit::ExtraSelection selection;
-
-    QColor lineColor = QColor(68, 71, 90);
-
-    selection.format.setBackground(lineColor);
+    selection.format.setBackground(m_highlightLineColor);
     selection.format.setProperty(QTextFormat::FullWidthSelection, true);
     selection.cursor = textCursor();
     selection.cursor.clearSelection();

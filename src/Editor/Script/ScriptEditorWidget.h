@@ -19,9 +19,22 @@ class QWidget;
 class CScriptEditorWidget : public QPlainTextEdit
 {
   Q_OBJECT
+  Q_PROPERTY(QColor lineNumberBackgroundColor READ LineNumberBackgroundColor WRITE SetLineNumberBackgroundColor)
+  Q_PROPERTY(QColor lineNumberTextColor       READ LineNumberTextColor       WRITE SetLineNumberTextColor      )
+  Q_PROPERTY(QColor highlightLineColor        READ HighlightLineColor        WRITE SetHighlightLineColor       )
+  Q_PROPERTY(QColor widgetsBackgroundColor    READ WidgetsBackgroundColor    WRITE SetWidgetsBackgroundColor   )
 
 public:
   CScriptEditorWidget(QWidget* pParent = nullptr);
+
+  void SetLineNumberBackgroundColor(const QColor& color) { m_lineNumberBackgroundColor = color; }
+  const QColor& LineNumberBackgroundColor() { return m_lineNumberBackgroundColor; }
+  void SetLineNumberTextColor(const QColor& color) { m_lineNumberTextColor = color; }
+  const QColor& LineNumberTextColor() { return m_lineNumberTextColor; }
+  void SetHighlightLineColor(const QColor& color) { m_highlightLineColor = color; }
+  const QColor& HighlightLineColor() { return m_highlightLineColor; }
+  void SetWidgetsBackgroundColor(const QColor& color) { m_widgetsBackgroundColor = color; }
+  const QColor& WidgetsBackgroundColor() { return m_widgetsBackgroundColor; }
 
   void LineNumberAreaPaintEvent(QPaintEvent* pEvent);
   qint32 LineNumberAreaWidth();
@@ -45,6 +58,10 @@ private slots:
 private:
   CLineNumberArea* m_pLineNumberArea;
   CWidgetArea*     m_pWidgetArea;
+  QColor           m_lineNumberBackgroundColor;
+  QColor           m_lineNumberTextColor;
+  QColor           m_highlightLineColor;
+  QColor           m_widgetsBackgroundColor;
 };
 
 //----------------------------------------------------------------------------------------
