@@ -72,17 +72,29 @@ void CScriptBackground::setBackgroundTexture(QJSValue resource)
   {
     if (resource.isString())
     {
-      tspResource spResource = spDbManager->FindResource(m_spProject, resource.toString());
-      if (nullptr != spResource)
+      QString sResource = resource.toString();
+      if (sResource.isNull() || sResource.isEmpty())
       {
-        emit m_spSignalEmitter->SignalBackgroundTextureChanged(spResource);
+        emit m_spSignalEmitter->SignalBackgroundTextureChanged(nullptr);
       }
       else
       {
-        QString sError = tr("Resource %1 not found");
-        emit m_spSignalEmitter->SignalShowError(sError.arg(resource.toString()),
-                                                QtMsgType::QtWarningMsg);
+        tspResource spResource = spDbManager->FindResource(m_spProject, sResource);
+        if (nullptr != spResource)
+        {
+          emit m_spSignalEmitter->SignalBackgroundTextureChanged(spResource);
+        }
+        else
+        {
+          QString sError = tr("Resource %1 not found");
+          emit m_spSignalEmitter->SignalShowError(sError.arg(resource.toString()),
+                                                  QtMsgType::QtWarningMsg);
+        }
       }
+    }
+    else if (resource.isNull())
+    {
+      emit m_spSignalEmitter->SignalBackgroundTextureChanged(nullptr);
     }
     else if (resource.isQObject())
     {
@@ -102,13 +114,13 @@ void CScriptBackground::setBackgroundTexture(QJSValue resource)
       }
       else
       {
-        QString sError = tr("Wrong argument-type to setBackgroundTexture(). String or resource was expected.");
+        QString sError = tr("Wrong argument-type to setBackgroundTexture(). String, resource or null was expected.");
         emit m_spSignalEmitter->SignalShowError(sError, QtMsgType::QtWarningMsg);
       }
     }
     else
     {
-      QString sError = tr("Wrong argument-type to setBackgroundTexture(). String or resource was expected.");
+      QString sError = tr("Wrong argument-type to setBackgroundTexture(). String, resource or null was expected.");
       emit m_spSignalEmitter->SignalShowError(sError, QtMsgType::QtWarningMsg);
     }
   }

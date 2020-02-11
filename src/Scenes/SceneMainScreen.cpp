@@ -131,7 +131,6 @@ void CSceneMainScreen::LoadProject(qint32 iId, const QString sStartScene)
   }
 
   ConnectAllSignals();
-  m_pBackground->SetBackgroundTexture("://resources/img/Background.png");
   NextSkript();
 }
 

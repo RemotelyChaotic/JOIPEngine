@@ -41,7 +41,7 @@ void CTimerCanvas::paintEvent(QPaintEvent* /*pEvent*/)
   painterDb.setRenderHints(QPainter::Antialiasing | QPainter::SmoothPixmapTransform |
                            QPainter::TextAntialiasing, true);
 
-  //// draw background
+  // draw background
   QRect cr = contentsRect();
   painterDb.fillRect(cr, Qt::transparent);
 

@@ -52,9 +52,9 @@ void CBackgroundWidget::SetBackgroundTexture(const QString& sTexture)
   }
   else
   {
-    QString sError(tr("Background texture file does not exist."));
-    qWarning() << sError;
-    emit SignalError(sError, QtMsgType::QtWarningMsg);
+    m_imageMutex.lock();
+    m_backgroundPixmap = QPixmap();
+    m_imageMutex.unlock();
   }
 }
 
@@ -69,28 +69,33 @@ void CBackgroundWidget::SlotBackgroundColorChanged(QColor color)
 //
 void CBackgroundWidget::SlotBackgroundTextureChanged(tspResource spResource)
 {
-  if(nullptr == spResource || nullptr == spResource->m_spParent) { return; }
-
-  QReadLocker locker(&spResource->m_rwLock);
-  QReadLocker projLocker(&spResource->m_spParent->m_rwLock);
-  if (EResourceType::eImage == spResource->m_type._to_integral())
+  if (nullptr == spResource || nullptr == spResource->m_spParent)
   {
-    if (spResource->m_sPath.isLocalFile())
-    {
-      SetBackgroundTexture(ResourceUrlToAbsolutePath(spResource->m_sPath, spResource->m_spParent->m_sName));
-    }
-    else
-    {
-      QString sError(tr("Background texture must be a local file."));
-      qWarning() << sError;
-      emit SignalError(sError, QtMsgType::QtWarningMsg);
-    }
+    SetBackgroundTexture(QString());
   }
   else
   {
-    QString sError(tr("Resource must be of image type for backgrounds."));
-    qWarning() << sError;
-    emit SignalError(sError, QtMsgType::QtWarningMsg);
+    QReadLocker locker(&spResource->m_rwLock);
+    QReadLocker projLocker(&spResource->m_spParent->m_rwLock);
+    if (EResourceType::eImage == spResource->m_type._to_integral())
+    {
+      if (spResource->m_sPath.isLocalFile())
+      {
+        SetBackgroundTexture(ResourceUrlToAbsolutePath(spResource->m_sPath, spResource->m_spParent->m_sName));
+      }
+      else
+      {
+        QString sError(tr("Background texture must be a local file."));
+        qWarning() << sError;
+        emit SignalError(sError, QtMsgType::QtWarningMsg);
+      }
+    }
+    else
+    {
+      QString sError(tr("Resource must be of image type for backgrounds."));
+      qWarning() << sError;
+      emit SignalError(sError, QtMsgType::QtWarningMsg);
+    }
   }
 }
 

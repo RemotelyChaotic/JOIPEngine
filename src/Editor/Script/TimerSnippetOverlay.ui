@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>450</width>
-    <height>200</height>
+    <height>300</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -35,63 +35,7 @@
       <string/>
      </property>
      <layout class="QGridLayout" name="gridLayout_2">
-      <item row="0" column="0">
-       <widget class="QCheckBox" name="pSetTimeCheckBox">
-        <property name="text">
-         <string>Set time</string>
-        </property>
-       </widget>
-      </item>
-      <item row="0" column="1">
-       <widget class="QTimeEdit" name="pTimeEdit">
-        <property name="displayFormat">
-         <string>mm:ss</string>
-        </property>
-       </widget>
-      </item>
-      <item row="1" column="0">
-       <widget class="QCheckBox" name="pShowCheckBox">
-        <property name="text">
-         <string>Show timer</string>
-        </property>
-       </widget>
-      </item>
-      <item row="1" column="1">
-       <widget class="QCheckBox" name="pHideCheckBox">
-        <property name="text">
-         <string>Hide timer</string>
-        </property>
-       </widget>
-      </item>
-      <item row="1" column="2">
-       <widget class="QCheckBox" name="pDisplayCheckBox">
-        <property name="text">
-         <string>Display time</string>
-        </property>
-       </widget>
-      </item>
-      <item row="2" column="0">
-       <widget class="QCheckBox" name="pStartCheckBox">
-        <property name="text">
-         <string>Start</string>
-        </property>
-       </widget>
-      </item>
-      <item row="2" column="1">
-       <widget class="QCheckBox" name="pStopCheckBox">
-        <property name="text">
-         <string>Stop</string>
-        </property>
-       </widget>
-      </item>
-      <item row="2" column="2">
-       <widget class="QCheckBox" name="pWaitCheckBox">
-        <property name="text">
-         <string>Wait for finish</string>
-        </property>
-       </widget>
-      </item>
-      <item row="3" column="0" colspan="3">
+      <item row="4" column="0" colspan="3">
        <widget class="QWidget" name="widget" native="true">
         <layout class="QGridLayout" name="gridLayout_10">
          <item row="2" column="2">
@@ -152,6 +96,75 @@
          </item>
         </layout>
        </widget>
+      </item>
+      <item row="1" column="2">
+       <widget class="QCheckBox" name="pDisplayCheckBox">
+        <property name="text">
+         <string>Display time</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="0">
+       <widget class="QCheckBox" name="pShowCheckBox">
+        <property name="text">
+         <string>Show timer</string>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="0">
+       <widget class="QCheckBox" name="pSetTimeCheckBox">
+        <property name="text">
+         <string>Set time</string>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="1">
+       <widget class="QTimeEdit" name="pTimeEdit">
+        <property name="displayFormat">
+         <string>mm:ss</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="1">
+       <widget class="QCheckBox" name="pHideCheckBox">
+        <property name="text">
+         <string>Hide timer</string>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="2">
+       <widget class="QCheckBox" name="pWaitCheckBox">
+        <property name="text">
+         <string>Wait for finish</string>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="0">
+       <widget class="QCheckBox" name="pStartCheckBox">
+        <property name="text">
+         <string>Start</string>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="1">
+       <widget class="QCheckBox" name="pStopCheckBox">
+        <property name="text">
+         <string>Stop</string>
+        </property>
+       </widget>
+      </item>
+      <item row="3" column="1">
+       <spacer name="verticalSpacer">
+        <property name="orientation">
+         <enum>Qt::Vertical</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>20</width>
+          <height>40</height>
+         </size>
+        </property>
+       </spacer>
       </item>
      </layout>
     </widget>
