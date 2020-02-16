@@ -8,64 +8,74 @@ QSplitter {
 }
 
 QSplitter::handle:horizontal {
-  image: url(icons/ButtonDotsVert.png);
+  image: url(://resources/img/ButtonDotsVert.png);
 }
 QSplitter::handle:vertical {
-  image: url(icons/ButtonDotsHoriz.png);
+  image: url(://resources/img/ButtonDotsHoriz.png);
 }
 
 /*
- ----- QCheckBox
+ ----- QCheckBox, QRadioButton
 */
-QCheckBox {
+QCheckBox,
+QRadioButton {
   color: white;
   spacing: 5px;
 }
 
+QRadioButton::indicator,
 QGroupBox::indicator,
 QCheckBox::indicator {
   width: 32px;
   height: 32px;
 }
 
-QCheckBox::indicator:unchecked,
+QRadioButton::indicator::unchecked,
+QGroupBox::indicator:unchecked,
 QCheckBox::indicator:unchecked {
-  image: url(icons/ButtonCheckBoxEmpty.png);
+  image: url(://resources/img/ButtonCheckBoxEmpty.png);
 }
 
-QCheckBox::indicator:unchecked:hover,
+QRadioButton::indicator:unchecked:hover,
+QGroupBox::indicator:unchecked:hover,
 QCheckBox::indicator:unchecked:hover {
-  image: url(icons/ButtonCheckBoxEmptyHover.png);
+  image: url(://resources/img/ButtonCheckBoxEmptyHover.png);
 }
 
-QCheckBox::indicator:unchecked:pressed,
+QRadioButton::indicator:unchecked:pressed,
+QGroupBox::indicator:unchecked:pressed,
 QCheckBox::indicator:unchecked:pressed {
-  image: url(icons/ButtonCheckBoxEmptyClick.png);
+  image: url(://resources/img/ButtonCheckBoxEmptyClick.png);
 }
 
-QCheckBox::indicator:checked,
+QRadioButton::indicator:checked,
+QGroupBox::indicator:checked,
 QCheckBox::indicator:checked {
-  image: url(icons/ButtonCheckBox.png);
+  image: url(://resources/img/ButtonCheckBox.png);
 }
 
-QCheckBox::indicator:checked,
+QRadioButton::indicator:checked,
+QGroupBox::indicator:checked,
 QCheckBox::indicator:checked {
-  image: url(icons/ButtonCheckBoxHover.png);
+  image: url(://resources/img/ButtonCheckBoxHover.png);
 }
 
-QCheckBox::indicator:checked:pressed,
+QRadioButton::indicator:checked:pressed,
+QGroupBox::indicator:checked:pressed,
 QCheckBox::indicator:checked:pressed {
-  image: url(icons/ButtonCheckBoxClick.png);
+  image: url(://resources/img/ButtonCheckBoxClick.png);
 }
 
-QCheckBox::indicator:indeterminate:hover,
+QRadioButton::indicator:indeterminate:hover,
+QGroupBox::indicator:indeterminate:hover,
 QCheckBox::indicator:indeterminate:hover {
-  image: url(icons/ButtonCheckBoxHover.png);
+  image: url(://resources/img/ButtonCheckBoxHover.png);
 }
 
-QCheckBox::indicator:indeterminate:pressed,
+QRadioButton::indicator:indeterminate:pressed,
+QGroupBox::indicator:indeterminate:pressed,
 QCheckBox::indicator:indeterminate:pressed {
-  image: url(icons/ButtonCheckBoxClick.png);
+  image: url(://resources/img/ButtonCheckBoxClick.png);
 }
 
 
@@ -128,19 +138,19 @@ QLabel {
 }
 
 QLabel#SearchIcon {
-  border-image: url(icons/ButtonSearch.png);
+  border-image: url(://resources/img/ButtonSearch.png);
 }
 QLabel#PlayButton {
-  border-image: url(icons/ButtonPlay.png);
+  border-image: url(://resources/img/ButtonPlay.png);
 }
 QLabel#ExitButton {
-  border-image: url(icons/ButtonExit.png);
+  border-image: url(://resources/img/ButtonExit.png);
 }
 QLabel#ErrorIcon {
-  border-image: url(icons/ButtonIcon.png);
+  border-image: url(://resources/img/ButtonIcon.png);
 }
 QLabel#IconBackground {
-  qproperty-pixmap: url(icons/IconBg.svg);
+  qproperty-pixmap: url(://resources/img/IconBg.svg);
 }
 
 QToolTip {
@@ -191,80 +201,80 @@ QPushButton, QToolButton {
 }
 
 QPushButton#AddShowBackgroundCode {
-  qproperty-icon: url(icons/ButtonBackground.png) off,
-                  url(icons/ButtonBackground.png) on;
+  qproperty-icon: url(://resources/img/ButtonBackground.png) off,
+                  url(://resources/img/ButtonBackground.png) on;
 }
 QPushButton#AddShowIconCode {
-  qproperty-icon: url(icons/ButtonIcon.png) off,
-                  url(icons/ButtonIcon.png) on;
+  qproperty-icon: url(://resources/img/ButtonIcon.png) off,
+                  url(://resources/img/ButtonIcon.png) on;
 }
 QPushButton#AddShowImageCode {
-  qproperty-icon: url(icons/ButtonImage.png) off,
-                  url(icons/ButtonImage.png) on;
+  qproperty-icon: url(://resources/img/ButtonImage.png) off,
+                  url(://resources/img/ButtonImage.png) on;
 }
 QPushButton#AddTextCode {
-  qproperty-icon: url(icons/ButtonText.png) off,
-                  url(icons/ButtonText.png) on;
+  qproperty-icon: url(://resources/img/ButtonText.png) off,
+                  url(://resources/img/ButtonText.png) on;
 }
 QPushButton#AddTimerCode {
-  qproperty-icon: url(icons/ButtonClock.png) off,
-                  url(icons/ButtonClock.png) on;
+  qproperty-icon: url(://resources/img/ButtonClock.png) off,
+                  url(://resources/img/ButtonClock.png) on;
 }
 QPushButton#DebugButton {
-  qproperty-icon: url(icons/ButtonPlay.png) off,
-                  url(icons/ButtonPlay.png) on;
+  qproperty-icon: url(://resources/img/ButtonPlay.png) off,
+                  url(://resources/img/ButtonPlay.png) on;
 }
 QPushButton#StopDebugButton {
-  qproperty-icon: url(icons/ButtonStop.png) off,
-                  url(icons/ButtonStop.png) on;
+  qproperty-icon: url(://resources/img/ButtonStop.png) off,
+                  url(://resources/img/ButtonStop.png) on;
 }
 QPushButton#PauseButton {
-  qproperty-icon: url(icons/ButtonPause.png) off,
-                  url(icons/ButtonPause.png) on;
+  qproperty-icon: url(://resources/img/ButtonPause.png) off,
+                  url(://resources/img/ButtonPause.png) on;
 }
 QPushButton#PlayButton {
-  qproperty-icon: url(icons/ButtonPlay.png) off,
-                  url(icons/ButtonPlay.png) on;
+  qproperty-icon: url(://resources/img/ButtonPlay.png) off,
+                  url(://resources/img/ButtonPlay.png) on;
 }
 QPushButton#StopButton {
-  qproperty-icon: url(icons/ButtonStop.png) off,
-                  url(icons/ButtonStop.png) on;
+  qproperty-icon: url(://resources/img/ButtonStop.png) off,
+                  url(://resources/img/ButtonStop.png) on;
 }
 QPushButton#ExitButton {
-  qproperty-icon: url(icons/ButtonExit.png) off,
-                  url(icons/ButtonExit.png) on;
+  qproperty-icon: url(://resources/img/ButtonExit.png) off,
+                  url(://resources/img/ButtonExit.png) on;
 }
 QPushButton#SaveButton {
-  qproperty-icon: url(icons/ButtonSave.png) off,
-                  url(icons/ButtonSave.png) on;
+  qproperty-icon: url(://resources/img/ButtonSave.png) off,
+                  url(://resources/img/ButtonSave.png) on;
 }
 QPushButton#AddResourceButton {
-  qproperty-icon: url(icons/ButtonPlusDisabled.png) off,
-                  url(icons/ButtonPlus.png) on;
+  qproperty-icon: url(://resources/img/ButtonPlusDisabled.png) off,
+                  url(://resources/img/ButtonPlus.png) on;
 }
 QPushButton#AddWebResourceButton {
-  qproperty-icon: url(icons/ButtonWeb.png) off,
-                  url(icons/ButtonWeb.png) on;
+  qproperty-icon: url(://resources/img/ButtonWeb.png) off,
+                  url(://resources/img/ButtonWeb.png) on;
 }
 QPushButton#MapButton {
-  qproperty-icon: url(icons/ButtonMap.png) off,
-                  url(icons/ButtonMap.png) on;
+  qproperty-icon: url(://resources/img/ButtonMap.png) off,
+                  url(://resources/img/ButtonMap.png) on;
 }
 QPushButton#RemoveResourceButton {
-  qproperty-icon: url(icons/ButtonMinusDisabled.png) off,
-                  url(icons/ButtonMinus.png) on;
+  qproperty-icon: url(://resources/img/ButtonMinusDisabled.png) off,
+                  url(://resources/img/ButtonMinus.png) on;
 }
 QPushButton#TitleCardButton {
-  qproperty-icon: url(icons/ButtonTitleCard.png) off,
-                  url(icons/ButtonTitleCard.png) on;
+  qproperty-icon: url(://resources/img/ButtonTitleCard.png) off,
+                  url(://resources/img/ButtonTitleCard.png) on;
 }
 QPushButton#AddNodeButton {
-  qproperty-icon: url(icons/ButtonPlusDisabled.png) off,
-                  url(icons/ButtonPlus.png) on;
+  qproperty-icon: url(://resources/img/ButtonPlusDisabled.png) off,
+                  url(://resources/img/ButtonPlus.png) on;
 }
 QPushButton#RemoveNodeButton {
-  qproperty-icon: url(icons/ButtonMinusDisabled.png) off,
-                  url(icons/ButtonMinus.png) on;
+  qproperty-icon: url(://resources/img/ButtonMinusDisabled.png) off,
+                  url(://resources/img/ButtonMinus.png) on;
 }
 
 QPushButton:hover,
@@ -295,6 +305,53 @@ background: qlineargradient(x1:0, y1:0, x2:1, y2:0,
 CMenuButton:pressed {
 background: qlineargradient(x1:0, y1:0, x2:1, y2:0,
   stop: 0 rgba(200, 0, 200, 0), stop: 0.3 rgba(200, 0, 200, 255), stop: 0.7 rgba(200, 0, 200, 255), stop: 1 rgba(200, 0, 200, 0));
+}
+
+/*
+ ----- QToolButton in QTabBar
+*/
+
+/* the scroll buttons are tool buttons */
+QTabBar QToolButton,
+QTabBar QToolButton::menu-button,
+QTabBar QToolButton::menu-arrow {
+  border: 2px solid silver;
+  border-radius: 10px;
+  padding: 5px;
+  background: qradialgradient(cx: 0.3, cy: -0.4, fx: 0.3, fy: -0.4, radius: 1.35, stop: 0 #aa00aa, stop: 1 #760076);
+}
+
+QToolButton:hover,
+QToolButton::menu-button:hover,
+QTabBar QToolButton::menu-arrow:hover {
+  background: qradialgradient(cx: 0.3, cy: -0.4, fx: 0.3, fy: -0.4, radius: 1.35, stop: 0 #aa00aa, stop: 1 #b900b9);
+}
+
+QTabBar QToolButton:pressed,
+QTabBar QToolButton::menu-button:pressed,
+QTabBar QToolButton::menu-arrow:pressed {
+  background: qradialgradient(cx: 0.4, cy: -0.1, fx: 0.4, fy: -0.1, radius: 1.35, stop: 0 #dd00dd, stop: 1 #aa00aa);
+}
+
+/* the arrow mark in the tool buttons */
+QTabBar QToolButton::right-arrow {
+  image: url(://resources/img/ButtonPlay.png);
+}
+QTabBar QToolButton::right-arrow:hover {
+  image: url(://resources/img/ButtonPlay.png);
+}
+QTabBar QToolButton::right-arrow:selected {
+  image: url(://resources/img/ButtonPlay.png);
+}
+
+QTabBar QToolButton::left-arrow {
+  image: url(://resources/img/ButtonArrowLeft.png);
+}
+QTabBar QToolButton::left-arrow:hover {
+  image: url(://resources/img/ButtonArrowLeft.png);
+}
+QTabBar QToolButton::left-arrow:selected {
+  image: url(://resources/img/ButtonArrowLeft.png);
 }
 
 /*
@@ -364,7 +421,7 @@ QScrollBar::handle:vertical:pressed {
 }
 
 
-QSlider::add-line:horizontal
+QSlider::add-line:horizontal,
 QScrollBar::add-line:horizontal {
   width: 32px;
   subcontrol-position: right;
@@ -402,16 +459,16 @@ QScrollBar::down-arrow:vertical {
   background: qradialgradient(cx: 0.3, cy: -0.4, fx: 0.3, fy: -0.4, radius: 1.35, stop: 0 #aa00aa, stop: 1 #760076);
 }
 QScrollBar:left-arrow:horizontal {
-  image: url(icons/ButtonArrowLeft.png);
+  image: url(://resources/img/ButtonArrowLeft.png);
 }
 QScrollBar:right-arrow:horizontal {
-  image: url(icons/ButtonPlay.png);
+  image: url(://resources/img/ButtonPlay.png);
 }
 QScrollBar:up-arrow:vertical {
-  image: url(icons/ButtonArrowUp.png);
+  image: url(://resources/img/ButtonArrowUp.png);
 }
 QScrollBar:down-arrow:vertical {
-  image: url(icons/ButtonArrowDown.png);
+  image: url(://resources/img/ButtonArrowDown.png);
 }
 
 QScrollBar::add-page:horizontal,
@@ -480,7 +537,7 @@ QComboBox::drop-down {
 }
 
 QComboBox::down-arrow {
-  border-image: url(icons/ButtonArrowDown.png);
+  border-image: url(://resources/img/ButtonArrowDown.png);
   min-height: 32px;
   min-width: 32px;
 }
@@ -530,14 +587,14 @@ QSpinBox::up-button:pressed {
 QDoubleSpinBox::up-arrow,
 QTimeEdit::up-arrow,
 QSpinBox::up-arrow {
-  image: url(icons/ButtonPlus.png);
+  image: url(://resources/img/ButtonPlus.png);
   width: 16px;
   height: 16px;
 }
 QDoubleSpinBox::up-arrow:disabled, QDoubleSpinBox::up-arrow:off,
 QTimeEdit::up-arrow:disabled, QTimeEdit::up-arrow:off,
 QSpinBox::up-arrow:disabled, QSpinBox::up-arrow:off { /* off state when value is max */
-   image: url(icons/ButtonPlusDisabled.png);
+   image: url(://resources/img/ButtonPlusDisabled.png);
 }
 
 QDoubleSpinBox::down-button,
@@ -565,7 +622,7 @@ QSpinBox::down-button:pressed {
 QDoubleSpinBox::down-arrow,
 QTimeEdit::down-arrow,
 QSpinBox::down-arrow {
-  image: url(icons/ButtonMinus.png);
+  image: url(://resources/img/ButtonMinus.png);
   width: 16px;
   height: 16px;
 }
@@ -573,7 +630,7 @@ QDoubleSpinBox::down-arrow:disabled,
 QTimeEdit::down-arrow:disabled,
 QSpinBox::down-arrow:disabled,
 QSpinBox::down-arrow:off { /* off state when value in min */
-   image: url(icons/ButtonMinusDisabled.png);
+   image: url(://resources/img/ButtonMinusDisabled.png);
 }
 
 /*
@@ -642,7 +699,7 @@ QHeaderView::section:checked
 
 /* style the sort indicator */
 QHeaderView::down-arrow {
-  image: url(icons/ButtonArrowDown.png);
+  image: url(://resources/img/ButtonArrowDown.png);
   min-width: 16px;
   min-height: 16px;
   max-width: 16px;
@@ -652,7 +709,7 @@ QHeaderView::down-arrow {
 }
 
 QHeaderView::up-arrow {
-  image: url(icons/ButtonArrowUp.png);
+  image: url(://resources/img/ButtonArrowUp.png);
   min-width: 16px;
   min-height: 16px;
   max-width: 16px;
@@ -711,7 +768,7 @@ QTableView::item:hover {
 
 QTreeView::branch:has-children:!has-siblings:closed,
 QTreeView::branch:closed:has-children:has-siblings {
-  image: url(icons/ButtonPlay.png);
+  image: url(://resources/img/ButtonPlay.png);
   min-width: 16px;
   min-height: 16px;
   max-width: 16px;
@@ -720,7 +777,7 @@ QTreeView::branch:closed:has-children:has-siblings {
 
 QTreeView::branch:open:has-children:!has-siblings,
 QTreeView::branch:open:has-children:has-siblings  {
-  image: url(icons/ButtonArrowDown.png);
+  image: url(://resources/img/ButtonArrowDown.png);
   min-width: 16px;
   min-height: 16px;
   max-width: 16px;
@@ -742,7 +799,7 @@ QPlainTextEdit {
  ----- Specific
 */
 QMainWindow {
-  background-image: url(icons/Background.png);
+  background-image: url(://resources/img/Background.png);
 }
 
 CProjectCardSelectionWidget {
