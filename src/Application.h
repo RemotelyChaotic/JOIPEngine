@@ -26,6 +26,9 @@ public:
   std::shared_ptr<CSettings> Settings() { return m_spSettings; }
   template<typename T> std::weak_ptr<T> System();
 
+signals:
+  void StyleLoaded();
+
 private slots:
   void MarkStyleDirty();
   void LoadStyle();

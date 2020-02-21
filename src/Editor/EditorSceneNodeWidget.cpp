@@ -51,52 +51,86 @@ namespace
     return ret;
   }
 
-  void SetNodeStyle()
+  QString ColorToString(const QColor& color)
   {
-    /*
-    NodeStyle::setNodeStyle(
+    return QString("[%1,%2,%3]").arg(color.red()).arg(color.green()).arg(color.blue());
+  }
+
+  void SetNodeStyle(
+    const QColor& normalBoundaryColor,
+    const QColor& selectedBoundaryColor,
+    const QColor& gradientColor0,
+    const QColor& gradientColor1,
+    const QColor& gradientColor2,
+    const QColor& gradientColor3,
+    const QColor& shadowColor,
+    const QColor& fontColor,
+    const QColor& fontColorFaded,
+    const QColor& connectionPointColor,
+    const QColor& backgroundColor,
+    const QColor& fineGridColor,
+    const QColor& coarseGridColor,
+    const QColor& normalColor,
+    const QColor& selectedColor,
+    const QColor& selectedHaloColor,
+    const QColor& hoveredColor)
+  {
+    QString sStyleNode(QStringLiteral(
     R"(
     {
       "NodeStyle": {
-        "NormalBoundaryColor": "darkgray",
-        "SelectedBoundaryColor": "deepskyblue",
-        "GradientColor0": "mintcream",
-        "GradientColor1": "mintcream",
-        "GradientColor2": "mintcream",
-        "GradientColor3": "mintcream",
-        "ShadowColor": [200, 200, 200],
-        "FontColor": [10, 10, 10],
-        "FontColorFaded": [100, 100, 100],
-        "ConnectionPointColor": "white",
+        "NormalBoundaryColor": %1,
+        "SelectedBoundaryColor": %2,
+        "GradientColor0": %3,
+        "GradientColor1": %4,
+        "GradientColor2": %5,
+        "GradientColor3": %6,
+        "ShadowColor": %7,
+        "FontColor": %8,
+        "FontColorFaded": %9,
+        "ConnectionPointColor": %10,
         "PenWidth": 2.0,
         "HoveredPenWidth": 2.5,
         "ConnectionPointDiameter": 10.0,
         "Opacity": 1.0
       }
     }
-    )");
+    )"));
+    NodeStyle::setNodeStyle(sStyleNode.arg(ColorToString(normalBoundaryColor),
+                                           ColorToString(selectedBoundaryColor),
+                                           ColorToString(gradientColor0),
+                                           ColorToString(gradientColor1),
+                                           ColorToString(gradientColor2),
+                                           ColorToString(gradientColor3),
+                                           ColorToString(shadowColor),
+                                           ColorToString(fontColor),
+                                           ColorToString(fontColorFaded))
+                                      .arg(ColorToString(connectionPointColor)));
 
-    FlowViewStyle::setStyle(
-    R"(
-    {
-      "FlowViewStyle": {
-        "BackgroundColor": gray,
-        "FineGridColor": black,
-        "CoarseGridColor": black
+    QString sStyleView(QStringLiteral(
+      R"(
+      {
+        "FlowViewStyle": {
+            "BackgroundColor": %1,
+            "FineGridColor": %2,
+            "CoarseGridColor": %3
+        }
       }
-    }
-    )");
-    */
+      )"
+    ));
+    FlowViewStyle::setStyle(sStyleView.arg(ColorToString(backgroundColor),
+                                           ColorToString(fineGridColor),
+                                           ColorToString(coarseGridColor)));
 
-    ConnectionStyle::setConnectionStyle(
+    QString sStyleConnection(QStringLiteral(
     R"(
     {
       "ConnectionStyle": {
         "ConstructionColor": "gray",
-        "NormalColor": "black",
-        "SelectedColor": "gray",
-        "SelectedHaloColor": "deepskyblue",
-        "HoveredColor": "deepskyblue",
+        "NormalColor": %1,
+        "SelectedColor": %2,
+        "SelectedHaloColor": %3,
+        "HoveredColor": %4,
 
         "LineWidth": 3.0,
         "ConstructionLineWidth": 2.0,
@@ -105,7 +139,11 @@ namespace
         "UseDataDefinedColors": false
       }
     }
-    )");
+    )"));
+    ConnectionStyle::setConnectionStyle(sStyleConnection.arg(ColorToString(normalColor),
+                                                             ColorToString(selectedColor),
+                                                             ColorToString(selectedHaloColor),
+                                                             ColorToString(hoveredColor)));
   }
 }
 
@@ -127,8 +165,6 @@ CEditorSceneNodeWidget::CEditorSceneNodeWidget(QWidget* pParent) :
   m_pFlowView->show();
   m_pFlowView->setScene(nullptr);
 
-  SetNodeStyle();
-
   QLayout* pLayout = m_spUi->pContainerWidget->layout();
   pLayout->addWidget(m_pFlowView);
 }
@@ -149,10 +185,30 @@ void CEditorSceneNodeWidget::Initialize()
   m_pFlowScene = new FlowScene(RegisterDataModels(), this);
   m_pFlowView->setScene(m_pFlowScene);
 
+  SetNodeStyle(m_normalBoundaryColor,
+               m_selectedBoundaryColor,
+               m_gradientColor0,
+               m_gradientColor1,
+               m_gradientColor2,
+               m_gradientColor3,
+               m_shadowColor,
+               m_fontColor,
+               m_fontColorFaded,
+               m_connectionPointColor,
+               m_backgroundColor,
+               m_fineGridColor,
+               m_coarseGridColor,
+               m_normalColor,
+               m_selectedColor,
+               m_selectedHaloColor,
+               m_hoveredColor);
+
   connect(m_pFlowScene, &FlowScene::nodeCreated,
           this, &CEditorSceneNodeWidget::SlotNodeCreated);
   connect(m_pFlowScene, &FlowScene::nodeDeleted,
           this, &CEditorSceneNodeWidget::SlotNodeDeleted);
+  connect(CApplication::Instance(), &CApplication::StyleLoaded,
+          this, &CEditorSceneNodeWidget::SlotStyleChanged);
 
   m_bInitialized = true;
 }
@@ -166,6 +222,24 @@ void CEditorSceneNodeWidget::LoadProject(tspProject spCurrentProject)
   {
     qWarning() << "Old Project was not unloaded before loading project.";
   }
+
+  SetNodeStyle(m_normalBoundaryColor,
+               m_selectedBoundaryColor,
+               m_gradientColor0,
+               m_gradientColor1,
+               m_gradientColor2,
+               m_gradientColor3,
+               m_shadowColor,
+               m_fontColor,
+               m_fontColorFaded,
+               m_connectionPointColor,
+               m_backgroundColor,
+               m_fineGridColor,
+               m_coarseGridColor,
+               m_normalColor,
+               m_selectedColor,
+               m_selectedHaloColor,
+               m_hoveredColor);
 
   m_spCurrentProject = spCurrentProject;
 
@@ -362,6 +436,31 @@ void CEditorSceneNodeWidget::SlotRemoveNodeButtonClicked()
       m_pFlowScene->removeNode(*pNode);
     }
   }
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CEditorSceneNodeWidget::SlotStyleChanged()
+{
+  WIDGET_INITIALIZED_GUARD
+
+  SetNodeStyle(m_normalBoundaryColor,
+               m_selectedBoundaryColor,
+               m_gradientColor0,
+               m_gradientColor1,
+               m_gradientColor2,
+               m_gradientColor3,
+               m_shadowColor,
+               m_fontColor,
+               m_fontColorFaded,
+               m_connectionPointColor,
+               m_backgroundColor,
+               m_fineGridColor,
+               m_coarseGridColor,
+               m_normalColor,
+               m_selectedColor,
+               m_selectedHaloColor,
+               m_hoveredColor);
 }
 
 //----------------------------------------------------------------------------------------

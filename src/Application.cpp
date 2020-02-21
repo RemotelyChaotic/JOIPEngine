@@ -109,6 +109,7 @@ void CApplication::LoadStyle()
   {
     m_bStyleDirty = false;
     joip_style::SetStyle(this);
+    emit StyleLoaded();
   }
 }
 
