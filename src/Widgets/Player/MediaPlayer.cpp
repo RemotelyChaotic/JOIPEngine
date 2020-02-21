@@ -39,6 +39,10 @@ CMediaPlayer::CMediaPlayer(QWidget* pParent) :
       qWarning() << tr("Can not create video renderer");
       return;
   }
+  m_vo->setBackgroundColor(Qt::transparent);
+  m_vo->widget()->setAttribute(Qt::WA_TranslucentBackground);
+  m_vo->widget()->setAttribute(Qt::WA_AlwaysStackOnTop);
+  m_vo->widget()->setWindowFlag(Qt::FramelessWindowHint);
   m_player->setRenderer(m_vo);
   vl->addWidget(m_vo->widget());
   m_slider = new QSlider();
