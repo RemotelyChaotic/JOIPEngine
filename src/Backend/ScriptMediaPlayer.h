@@ -30,6 +30,7 @@ public slots:
   void stopVideo();
   void pauseSound();
   void stopSound();
+  void waitForPlayback();
 
 private:
   bool CheckIfScriptCanRun();

@@ -40,8 +40,6 @@ CEditorResourceWidget::CEditorResourceWidget(QWidget* pParent) :
   m_spUi->setupUi(this);
   connect(m_spWebOverlay.get(), &CWebResourceOverlay::SignalResourceSelected,
           this, &CEditorResourceWidget::SlotWebResourceSelected);
-  connect(m_spUi->pResourceDisplayWidget, &CResourceDisplayWidget::SignalLoadFinished,
-          this, &CEditorResourceWidget::SlotLoadFinished);
 }
 
 CEditorResourceWidget::~CEditorResourceWidget()
@@ -226,6 +224,15 @@ void CEditorResourceWidget::on_pResourceDisplayWidget_OnClick()
   WIDGET_INITIALIZED_GUARD
 
   m_spUi->pResourceDisplayWidget->SlotPlayPause();
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CEditorResourceWidget::on_pResourceDisplayWidget_SignalLoadFinished()
+{
+  WIDGET_INITIALIZED_GUARD
+
+  m_spUi->pResourceDisplayWidget->SlotSetSliderVisible(true);
 }
 
 //----------------------------------------------------------------------------------------
@@ -488,13 +495,6 @@ void CEditorResourceWidget::SlotNetworkReplyFinished()
       }
     }
   }
-}
-
-//----------------------------------------------------------------------------------------
-//
-void CEditorResourceWidget::SlotLoadFinished()
-{
-  m_spUi->pResourceDisplayWidget->SlotSetSliderVisible(true);
 }
 
 //----------------------------------------------------------------------------------------

@@ -39,25 +39,24 @@ void CScriptThread::sleep(qint32 iTimeS, QJSValue bSkippable)
     bSkippableFlag = bSkippable.toBool();
   }
 
-  if (!bSkippableFlag)
-  {
-    if (0 < iTimeS)
-    {
-      thread()->sleep(static_cast<unsigned long>(iTimeS));
-    }
-  }
-  else
+  if (0 < iTimeS)
   {
     QTimer timer;
     timer.setSingleShot(true);
     timer.setInterval(iTimeS * 1000);
     QEventLoop loop;
-    connect(m_spSignalEmitter.get(), &CScriptRunnerSignalEmiter::SignalWaitSkipped,
-            &loop, &QEventLoop::quit, Qt::QueuedConnection);
+    if (bSkippableFlag)
+    {
+      connect(m_spSignalEmitter.get(), &CScriptRunnerSignalEmiter::SignalWaitSkipped,
+              &loop, &QEventLoop::quit, Qt::QueuedConnection);
+    }
     connect(m_spSignalEmitter.get(), &CScriptRunnerSignalEmiter::SignalInterruptLoops,
             &loop, &QEventLoop::quit, Qt::QueuedConnection);
     connect(&timer, &QTimer::timeout, &loop, &QEventLoop::quit);
-    emit m_spSignalEmitter->SignalSkippableWait(iTimeS);
+    if (bSkippableFlag)
+    {
+      emit m_spSignalEmitter->SignalSkippableWait(iTimeS);
+    }
     timer.start();
     loop.exec();
     timer.disconnect();

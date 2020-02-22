@@ -42,6 +42,7 @@ protected:
 protected slots:
   void on_pFilter_SignalFilterChanged(const QString& sText);
   void on_pResourceDisplayWidget_OnClick();
+  void on_pResourceDisplayWidget_SignalLoadFinished();
   void SlotAddButtonClicked();
   void SlotAddWebButtonClicked();
   void SlotRemoveButtonClicked();
@@ -51,7 +52,6 @@ protected slots:
   void SlotWebResourceSelected(const QString& sResource);
   void SlotNetworkReplyError(QNetworkReply::NetworkError code);
   void SlotNetworkReplyFinished();
-  void SlotLoadFinished();
 
 private:
   void AddFiles(const QStringList& vsFiles, const QStringList& imageFormatsList,

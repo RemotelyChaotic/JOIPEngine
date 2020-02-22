@@ -14,6 +14,8 @@
 #include <QGraphicsDropShadowEffect>
 #include <QResizeEvent>
 
+#include <assert.h>
+
 CSceneMainScreen::CSceneMainScreen(QWidget* pParent) :
   QWidget(pParent),
   m_spUi(std::make_unique<Ui::CSceneMainScreen>()),
@@ -383,8 +385,8 @@ void CSceneMainScreen::SlotShowMedia(tspResource spResource)
   if (!m_bInitialized || nullptr == m_spCurrentProject || nullptr == spResource) { return; }
 
   m_spUi->pResourceDisplay->UnloadResource();
-  m_spUi->pResourceDisplay->LoadResource(spResource);
   m_spUi->pResourceDisplay->SlotSetSliderVisible(false);
+  m_spUi->pResourceDisplay->LoadResource(spResource);
 }
 
 //----------------------------------------------------------------------------------------
@@ -427,10 +429,6 @@ void CSceneMainScreen::ConnectAllSignals()
             m_spUi->pInfoDisplay, &CInformationWidget::SlotShowIcon, Qt::QueuedConnection);
 
     // Media Player
-    connect(m_spUi->pResourceDisplay, &CResourceDisplayWidget::SignalLoadFinished,
-            m_spUi->pResourceDisplay, &CResourceDisplayWidget::SlotPlayPause, Qt::QueuedConnection);
-    connect(m_spUi->pSoundEmmiter, &CResourceDisplayWidget::SignalLoadFinished,
-            m_spUi->pSoundEmmiter, &CResourceDisplayWidget::SlotPlayPause, Qt::QueuedConnection);
     connect(spSignalEmmiter.get(), &CScriptRunnerSignalEmiter::SignalPauseVideo,
             this, &CSceneMainScreen::SlotPauseVideo, Qt::QueuedConnection);
     connect(spSignalEmmiter.get(), &CScriptRunnerSignalEmiter::SignalPauseSound,
@@ -443,6 +441,9 @@ void CSceneMainScreen::ConnectAllSignals()
             this, &CSceneMainScreen::SlotStopVideo, Qt::QueuedConnection);
     connect(spSignalEmmiter.get(), &CScriptRunnerSignalEmiter::SignalStopSound,
             this, &CSceneMainScreen::SlotStopSound, Qt::QueuedConnection);
+    connect(m_spUi->pResourceDisplay, &CResourceDisplayWidget::SignalPlaybackFinished,
+            spSignalEmmiter.get(), &CScriptRunnerSignalEmiter::SignalPlaybackFinished, Qt::QueuedConnection);
+
 
     // TextBox
     connect(spSignalEmmiter.get(), &CScriptRunnerSignalEmiter::SignalClearText,
@@ -601,9 +602,14 @@ void CSceneMainScreen::NextSkript()
           QReadLocker lockerScene(&spScene->m_rwLock);
           QString sScript = spScene->m_sScript;
           lockerScene.unlock();
-          QMetaObject::invokeMethod(spScriptRunner.get(), "SlotLoadScript", Qt::QueuedConnection,
-                                    Q_ARG(tspScene, spScene),
-                                    Q_ARG(tspResource, spDbManager->FindResource(m_spCurrentProject, sScript)));
+          bool bOk = QMetaObject::invokeMethod(spScriptRunner.get(), "SlotLoadScript", Qt::QueuedConnection,
+                                               Q_ARG(tspScene, spScene),
+                                               Q_ARG(tspResource, spDbManager->FindResource(m_spCurrentProject, sScript)));
+          assert(bOk);
+          if (!bOk)
+          {
+            qWarning() << tr("LoadScript could not be called.");
+          }
         }
         else
         {

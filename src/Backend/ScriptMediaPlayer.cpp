@@ -2,6 +2,7 @@
 #include "Application.h"
 #include "DatabaseManager.h"
 #include "ScriptRunnerSignalEmiter.h"
+#include <QTimer>
 
 CScriptMediaPlayer::CScriptMediaPlayer(std::shared_ptr<CScriptRunnerSignalEmiter> spEmitter,
                                        QJSEngine* pEngine) :
@@ -170,6 +171,21 @@ void CScriptMediaPlayer::stopSound()
 {
   if (!CheckIfScriptCanRun()) { return; }
   emit m_spSignalEmitter->SignalStopSound();
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CScriptMediaPlayer::waitForPlayback()
+{
+  if (!CheckIfScriptCanRun()) { return; }
+
+  QEventLoop loop;
+  connect(m_spSignalEmitter.get(), &CScriptRunnerSignalEmiter::SignalPlaybackFinished,
+          &loop, &QEventLoop::quit, Qt::QueuedConnection);
+  connect(m_spSignalEmitter.get(), &CScriptRunnerSignalEmiter::SignalInterruptLoops,
+          &loop, &QEventLoop::quit, Qt::QueuedConnection);
+  loop.exec();
+  loop.disconnect();
 }
 
 //----------------------------------------------------------------------------------------

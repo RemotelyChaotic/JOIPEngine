@@ -49,6 +49,7 @@ signals:
   void SignalShowMedia(tspResource spResource);
   void SignalStopVideo();
   void SignalStopSound();
+  void SignalPlaybackFinished();
 
   // TextBox
   void SignalClearText();

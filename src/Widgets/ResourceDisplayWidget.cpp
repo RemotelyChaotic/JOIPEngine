@@ -321,6 +321,11 @@ void CResourceDisplayWidget::SlotSetSliderVisible(bool bVisible)
             );
       break;
     }
+    default:
+    {
+      m_spUi->pMediaPlayer->SetSliderVisible(bVisible);
+      break;
+    }
   }
 }
 
@@ -509,7 +514,7 @@ void CResourceDisplayWidget::SlotStatusChanged(QtAV::MediaStatus status)
     case QtAV::LoadedMedia:
     {
       m_iLoadState = ELoadState::eFinished;
-      SlotSetSliderVisible(true);
+      SlotSetSliderVisible(false);
       SlotVolumeChanged();
       SlotMutedChanged();
       m_spUi->pStackedWidget->setCurrentIndex(EResourceDisplayType::eLocalMedia);
@@ -569,7 +574,7 @@ void CResourceDisplayWidget::SlotWebLoadFinished(bool bOk)
             "  video.autoplay = false;"
             "}"
             );
-      SlotSetSliderVisible(true);
+      SlotSetSliderVisible(false);
       SlotVolumeChanged();
       SlotMutedChanged();
       m_spUi->pStackedWidget->setCurrentIndex(EResourceDisplayType::eWebResource);
