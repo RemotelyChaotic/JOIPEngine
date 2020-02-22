@@ -56,8 +56,8 @@ CMediaPlayer::CMediaPlayer(QWidget* pParent) :
           this, static_cast<void (CMediaPlayer::*)(qint64)>(&CMediaPlayer::UpdateSlider));
   connect(m_player, &AVPlayer::started,
           this, static_cast<void (CMediaPlayer::*)(void)>(&CMediaPlayer::UpdateSlider));
-  connect(m_player, &AVPlayer::notifyIntervalChanged,
-          this, &CMediaPlayer::UpdateSliderUnit);
+  connect(m_player, &AVPlayer::notifyIntervalChanged, this, &CMediaPlayer::UpdateSliderUnit);
+  connect(m_player, &AVPlayer::mediaStatusChanged, this, &CMediaPlayer::MediaStatusChanged);
 
   vl->addWidget(m_slider);
   QHBoxLayout *hb = new QHBoxLayout();

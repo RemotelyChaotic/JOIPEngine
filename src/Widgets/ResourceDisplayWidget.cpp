@@ -56,6 +56,9 @@ CResourceDisplayWidget::CResourceDisplayWidget(QWidget* pParent) :
           this, &CResourceDisplayWidget::SlotMutedChanged, Qt::QueuedConnection);
   connect(m_spSettings.get(), &CSettings::VolumeChanged,
           this, &CResourceDisplayWidget::SlotVolumeChanged, Qt::QueuedConnection);
+
+  connect(m_spUi->pMediaPlayer, &CMediaPlayer::MediaStatusChanged,
+          this, &CResourceDisplayWidget::SlotStatusChanged, Qt::DirectConnection);
 }
 
 CResourceDisplayWidget::~CResourceDisplayWidget()
@@ -485,27 +488,25 @@ void CResourceDisplayWidget::SlotMutedChanged()
 
 //----------------------------------------------------------------------------------------
 //
-void CResourceDisplayWidget::SlotStatusChanged(QMediaPlayer::MediaStatus status)
+void CResourceDisplayWidget::SlotStatusChanged(QtAV::MediaStatus status)
 {
   switch (status)
   {
-    case QMediaPlayer::InvalidMedia:
-    case QMediaPlayer::UnknownMediaStatus:
-    case QMediaPlayer::NoMedia:
+    case QtAV::InvalidMedia:
+    case QtAV::UnknownMediaStatus:
+    case QtAV::NoMedia:
     {
       m_iLoadState = ELoadState::eError;
       m_spUi->pStackedWidget->setCurrentIndex(EResourceDisplayType::eError);
       break;
     }
-    case QMediaPlayer::BufferingMedia:
-    case QMediaPlayer::BufferedMedia:
-    case QMediaPlayer::StalledMedia:
-    case QMediaPlayer::LoadingMedia:
+    case QtAV::LoadingMedia:
     {
       m_iLoadState = ELoadState::eLoading;
+      m_spUi->pStackedWidget->setCurrentIndex(EResourceDisplayType::eLoading);
       break;
     }
-    case QMediaPlayer::LoadedMedia:
+    case QtAV::LoadedMedia:
     {
       m_iLoadState = ELoadState::eFinished;
       SlotSetSliderVisible(true);
@@ -515,7 +516,14 @@ void CResourceDisplayWidget::SlotStatusChanged(QMediaPlayer::MediaStatus status)
       emit SignalLoadFinished();
       break;
     }
-    case QMediaPlayer::EndOfMedia:
+    case QtAV::EndOfMedia:
+    {
+      emit SignalPlaybackFinished();
+      break;
+    }
+    case QtAV::BufferingMedia:
+    case QtAV::BufferedMedia:
+    case QtAV::StalledMedia:
     default: break;
   }
 }

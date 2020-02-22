@@ -40,6 +40,9 @@ public:
   void SetSliderVisible(bool bVisible);
   double Volume();
 
+signals:
+  void MediaStatusChanged(QtAV::MediaStatus status);
+
 public slots:
   void MuteUnmute(bool bMuted);
   void OpenMedia(const QString sPath);

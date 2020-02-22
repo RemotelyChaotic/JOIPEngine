@@ -3,6 +3,7 @@
 
 #include "Enums.h"
 #include "Backend/Resource.h"
+#include <QtAV/QtAV_Global.h>
 #include <QFutureWatcher>
 #include <QMediaPlayer>
 #include <QWidget>
@@ -41,6 +42,7 @@ public slots:
 signals:
   void OnClick();
   void SignalLoadFinished();
+  void SignalPlaybackFinished();
 
 protected:
   void mousePressEvent(QMouseEvent* pEvent) override;
@@ -50,7 +52,7 @@ protected slots:
   void SlotImageLoad(QString sPath);
   void SlotLoadFinished();
   void SlotMutedChanged();
-  void SlotStatusChanged(QMediaPlayer::MediaStatus status);
+  void SlotStatusChanged(QtAV::MediaStatus status);
   void SlotVolumeChanged();
   void SlotWebLoadFinished(bool bOk);
 
