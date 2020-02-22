@@ -40,6 +40,7 @@ CResourceDisplayWidget::CResourceDisplayWidget(QWidget* pParent) :
   m_iProjectId(-1)
 {
   m_spUi->setupUi(this);
+  m_spUi->pWebView->page()->setBackgroundColor(Qt::transparent);
 
   m_spSpinner->start();
   m_spUi->pLoadingSpinner->setMovie(m_spSpinner.get());
