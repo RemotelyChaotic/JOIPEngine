@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>450</width>
-    <height>400</height>
+    <height>450</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -35,6 +35,54 @@
       <string/>
      </property>
      <layout class="QGridLayout" name="gridLayout_5">
+      <item row="2" column="1">
+       <widget class="QWidget" name="widget_2" native="true">
+        <layout class="QHBoxLayout" name="horizontalLayout">
+         <property name="leftMargin">
+          <number>0</number>
+         </property>
+         <property name="topMargin">
+          <number>0</number>
+         </property>
+         <property name="rightMargin">
+          <number>0</number>
+         </property>
+         <property name="bottomMargin">
+          <number>0</number>
+         </property>
+         <item>
+          <widget class="QRadioButton" name="pPlayRadioButton">
+           <property name="text">
+            <string>Show / Play</string>
+           </property>
+           <attribute name="buttonGroup">
+            <string notr="true">pButtonGroup</string>
+           </attribute>
+          </widget>
+         </item>
+         <item>
+          <widget class="QRadioButton" name="pPauseRadioButton">
+           <property name="text">
+            <string>Pause</string>
+           </property>
+           <attribute name="buttonGroup">
+            <string notr="true">pButtonGroup</string>
+           </attribute>
+          </widget>
+         </item>
+         <item>
+          <widget class="QRadioButton" name="pStopRadioButton">
+           <property name="text">
+            <string>Stop</string>
+           </property>
+           <attribute name="buttonGroup">
+            <string notr="true">pButtonGroup</string>
+           </attribute>
+          </widget>
+         </item>
+        </layout>
+       </widget>
+      </item>
       <item row="1" column="1">
        <widget class="QWidget" name="widget_5" native="true">
         <layout class="QGridLayout" name="gridLayout_6">
@@ -76,7 +124,7 @@
         </layout>
        </widget>
       </item>
-      <item row="2" column="1">
+      <item row="4" column="1">
        <widget class="QWidget" name="widget_4" native="true">
         <property name="sizePolicy">
          <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
@@ -125,7 +173,7 @@
         </layout>
        </widget>
       </item>
-      <item row="3" column="1">
+      <item row="5" column="1">
        <widget class="QWidget" name="widget" native="true">
         <layout class="QGridLayout" name="gridLayout">
          <item row="2" column="2">
@@ -187,6 +235,13 @@
         </layout>
        </widget>
       </item>
+      <item row="3" column="1">
+       <widget class="QCheckBox" name="pWaitForFinishedCheckBox">
+        <property name="text">
+         <string>Wait for finish</string>
+        </property>
+       </widget>
+      </item>
      </layout>
     </widget>
    </item>
@@ -194,18 +249,21 @@
  </widget>
  <customwidgets>
   <customwidget>
-   <class>CSearchWidget</class>
-   <extends>QWidget</extends>
-   <header>Widgets/SearchWidget.h</header>
-   <container>1</container>
-  </customwidget>
-  <customwidget>
    <class>COverlayBase</class>
    <extends>QWidget</extends>
    <header>Widgets/OverlayBase.h</header>
    <container>1</container>
   </customwidget>
+  <customwidget>
+   <class>CSearchWidget</class>
+   <extends>QWidget</extends>
+   <header>Widgets/SearchWidget.h</header>
+   <container>1</container>
+  </customwidget>
  </customwidgets>
  <resources/>
  <connections/>
+ <buttongroups>
+  <buttongroup name="pButtonGroup"/>
+ </buttongroups>
 </ui>

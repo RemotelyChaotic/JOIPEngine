@@ -14,7 +14,7 @@ CResourceSnippetOverlay::CResourceSnippetOverlay(QWidget* pParent) :
   m_spCurrentProject(nullptr),
   m_wpDbManager(CApplication::Instance()->System<CDatabaseManager>()),
   m_bInitialized(false),
-  m_sResource()
+  m_data()
 {
   m_spUi->setupUi(this);
 }
@@ -79,8 +79,52 @@ void CResourceSnippetOverlay::Resize()
 void CResourceSnippetOverlay::on_pResourceLineEdit_editingFinished()
 {
   if (!m_bInitialized) { return; }
-  m_sResource = m_spUi->pResourceLineEdit->text();
+  m_data.m_sResource = m_spUi->pResourceLineEdit->text();
 }
+
+//----------------------------------------------------------------------------------------
+//
+void CResourceSnippetOverlay::on_pPlayRadioButton_toggled(bool bChecked)
+{
+  if (!m_bInitialized) { return; }
+  if (bChecked)
+  {
+    m_data.m_displayMode = EDisplayMode::ePlayShow;
+  }
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CResourceSnippetOverlay::on_pPauseRadioButton_toggled(bool bChecked)
+{
+  if (!m_bInitialized) { return; }
+  if (bChecked)
+  {
+    m_data.m_displayMode = EDisplayMode::ePause;
+  }
+}
+
+
+//----------------------------------------------------------------------------------------
+//
+void CResourceSnippetOverlay::on_pStopRadioButton_toggled(bool bChecked)
+{
+  if (!m_bInitialized) { return; }
+  if (bChecked)
+  {
+    m_data.m_displayMode = EDisplayMode::eStop;
+  }
+}
+
+
+//----------------------------------------------------------------------------------------
+//
+void CResourceSnippetOverlay::on_pWaitForFinishedCheckBox_toggled(bool bChecked)
+{
+  if (!m_bInitialized) { return; }
+  m_data.m_bWaitForFinished = bChecked;
+}
+
 
 //----------------------------------------------------------------------------------------
 //
@@ -109,27 +153,55 @@ void CResourceSnippetOverlay::on_pConfirmButton_clicked()
   auto spDbManager = m_wpDbManager.lock();
   if (nullptr != spDbManager && nullptr != m_spCurrentProject)
   {
-    tspResource spResource = spDbManager->FindResource(m_spCurrentProject, m_sResource);
+    tspResource spResource = spDbManager->FindResource(m_spCurrentProject, m_data.m_sResource);
     QReadLocker locker(&spResource->m_rwLock);
     type = spResource->m_type;
   }
 
   QString sCode;
-  if (!m_sResource.isNull() && !m_sResource.isEmpty())
+  if (!m_data.m_sResource.isNull() && !m_data.m_sResource.isEmpty())
   {
-    QString sResource("mediaPlayer.%1(\"%2\");\n");
+    QString sMainCommand("mediaPlayer.%1(\"%2\");\n");
     switch (type)
     {
       case EResourceType::eImage:
-        sResource = sResource.arg("show");
+        sMainCommand = sMainCommand.arg("show");
         break;
       case EResourceType::eMovie: // fallthrough
       case EResourceType::eSound:
-        sResource = sResource.arg("play");
+        sMainCommand = sMainCommand.arg("play");
         break;
     default: Hide(); return;
     }
-    sCode += sResource.arg(m_sResource);
+    sMainCommand = sMainCommand.arg(m_data.m_sResource);
+
+    if (type._to_integral() == EResourceType::eMovie)
+    {
+      switch (m_data.m_displayMode)
+      {
+      case EDisplayMode::ePlayShow: break;
+      case EDisplayMode::ePause: sMainCommand = "mediaPlayer.pauseVideo();\n"; break;
+      case EDisplayMode::eStop: sMainCommand = "mediaPlayer.stopVideo();\n"; break;
+      default: break;
+      }
+    }
+    if (type._to_integral() == EResourceType::eSound)
+    {
+      switch (m_data.m_displayMode)
+      {
+      case EDisplayMode::ePlayShow: break;
+      case EDisplayMode::ePause: sMainCommand = "mediaPlayer.pauseSound();\n"; break;
+      case EDisplayMode::eStop: sMainCommand = "mediaPlayer.stopSound();\n"; break;
+      default: break;
+      }
+    }
+
+    sCode += sMainCommand;
+  }
+
+  if (type._to_integral() == EResourceType::eMovie && m_data.m_bWaitForFinished)
+  {
+    sCode += "mediaPlayer.waitForPlayback();\n";
   }
 
   emit SignalResourceCode(sCode);

@@ -12,6 +12,23 @@ namespace Ui {
 }
 typedef std::shared_ptr<struct SProject> tspProject;
 
+
+enum class EDisplayMode : qint32
+{
+  ePlayShow,
+  ePause,
+  eStop
+};
+
+struct SResourceSnippetData
+{
+  QString m_sResource;
+  EDisplayMode m_displayMode = EDisplayMode::ePlayShow;
+  bool m_bWaitForFinished = false;
+};
+
+//----------------------------------------------------------------------------------------
+//
 class CResourceSnippetOverlay : public COverlayBase
 {
   Q_OBJECT
@@ -32,6 +49,10 @@ public slots:
 
 protected slots:
   void on_pResourceLineEdit_editingFinished();
+  void on_pPlayRadioButton_toggled(bool bChecked);
+  void on_pPauseRadioButton_toggled(bool bChecked);
+  void on_pStopRadioButton_toggled(bool bChecked);
+  void on_pWaitForFinishedCheckBox_toggled(bool bChecked);
   void on_pFilter_SignalFilterChanged(const QString& sText);
   void on_pConfirmButton_clicked();
   void on_pCancelButton_clicked();
@@ -43,7 +64,7 @@ private:
   std::weak_ptr<CDatabaseManager>              m_wpDbManager;
   bool                                         m_bInitialized;
 
-  QString                                      m_sResource;
+  SResourceSnippetData                         m_data;
 };
 
 #endif // RESOURCESNIPPETOVERLAY_H
