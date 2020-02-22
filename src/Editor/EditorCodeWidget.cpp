@@ -13,6 +13,7 @@
 #include "Script/ScriptHighlighter.h"
 #include "Script/TextSnippetOverlay.h"
 #include "Script/TimerSnippetOverlay.h"
+#include "Script/ThreadSnippetOverlay.h"
 #include "ui_EditorCodeWidget.h"
 #include "ui_EditorActionBar.h"
 
@@ -36,6 +37,7 @@ CEditorCodeWidget::CEditorCodeWidget(QWidget* pParent) :
   m_spResourceSnippetOverlay(std::make_unique<CResourceSnippetOverlay>()),
   m_spTextSnippetOverlay(std::make_unique<CTextSnippetOverlay>()),
   m_spTimerSnippetOverlay(std::make_unique<CTimerSnippetOverlay>()),
+  m_spThreadSnippetOverlay(std::make_unique<CThreadSnippetOverlay>()),
   m_spSettings(CApplication::Instance()->Settings()),
   m_spCurrentProject(nullptr),
   m_wpDbManager(),
@@ -81,6 +83,7 @@ void CEditorCodeWidget::Initialize()
   m_spResourceSnippetOverlay->Hide();
   m_spTextSnippetOverlay->Hide();
   m_spTimerSnippetOverlay->Hide();
+  m_spThreadSnippetOverlay->Hide();
 
   connect(m_spBackgroundSnippetOverlay.get(), &CBackgroundSnippetOverlay::SignalBackgroundCode,
           this, &CEditorCodeWidget::SlotInsertGeneratedCode);
@@ -91,6 +94,8 @@ void CEditorCodeWidget::Initialize()
   connect(m_spTextSnippetOverlay.get(), &CTextSnippetOverlay::SignalTextSnippetCode,
           this, &CEditorCodeWidget::SlotInsertGeneratedCode);
   connect(m_spTimerSnippetOverlay.get(), &CTimerSnippetOverlay::SignalTimerCode,
+          this, &CEditorCodeWidget::SlotInsertGeneratedCode);
+  connect(m_spThreadSnippetOverlay.get(), &CThreadSnippetOverlay::SignalThreadCode,
           this, &CEditorCodeWidget::SlotInsertGeneratedCode);
 
   m_iLastIndex = m_spUi->pSceneComboBox->currentIndex();
@@ -177,6 +182,7 @@ void CEditorCodeWidget::UnloadProject()
   m_spResourceSnippetOverlay->Hide();
   m_spTextSnippetOverlay->Hide();
   m_spTimerSnippetOverlay->Hide();
+  m_spThreadSnippetOverlay->Hide();
 }
 
 //----------------------------------------------------------------------------------------
@@ -289,6 +295,8 @@ void CEditorCodeWidget::OnActionBarAboutToChange()
             m_spTextSnippetOverlay.get(), &CTextSnippetOverlay::Show);
     disconnect(ActionBar()->m_spUi->AddTimerCode, &QPushButton::clicked,
             m_spTimerSnippetOverlay.get(), &CTimerSnippetOverlay::Show);
+    disconnect(ActionBar()->m_spUi->AddThreadCode, &QPushButton::clicked,
+            m_spThreadSnippetOverlay.get(), &CThreadSnippetOverlay::Show);
   }
 }
 
@@ -313,6 +321,8 @@ void CEditorCodeWidget::OnActionBarChanged()
             m_spTextSnippetOverlay.get(), &CTextSnippetOverlay::Show);
     connect(ActionBar()->m_spUi->AddTimerCode, &QPushButton::clicked,
             m_spTimerSnippetOverlay.get(), &CTimerSnippetOverlay::Show);
+    connect(ActionBar()->m_spUi->AddThreadCode, &QPushButton::clicked,
+            m_spThreadSnippetOverlay.get(), &CThreadSnippetOverlay::Show);
   }
 }
 

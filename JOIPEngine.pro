@@ -126,7 +126,8 @@ SOURCES += \
     src/CreditsScreen.cpp \
     src/Widgets/SearchWidget.cpp \
     src/Backend/ScriptStorage.cpp \
-    src/UISoundEmitter.cpp
+    src/UISoundEmitter.cpp \
+    src/Editor/Script/ThreadSnippetOverlay.cpp
 
 HEADERS += \
     src/MainWindow.h \
@@ -203,7 +204,8 @@ HEADERS += \
     src/CreditsScreen.h \
     src/Widgets/SearchWidget.h \
     src/Backend/ScriptStorage.h \
-    src/UISoundEmitter.h
+    src/UISoundEmitter.h \
+    src/Editor/Script/ThreadSnippetOverlay.h
 
 FORMS += \
     src/MainWindow.ui \
@@ -234,7 +236,8 @@ FORMS += \
     src/Editor/Script/TimerSnippetOverlay.ui \
     src/Widgets/ColorPicker.ui \
     src/CreditsScreen.ui \
-    src/Widgets/SearchWidget.ui
+    src/Widgets/SearchWidget.ui \
+    src/Editor/Script/ThreadSnippetOverlay.ui
 
 RESOURCES += \
     resources.qrc

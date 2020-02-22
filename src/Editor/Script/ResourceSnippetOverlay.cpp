@@ -10,7 +10,7 @@
 
 CResourceSnippetOverlay::CResourceSnippetOverlay(QWidget* pParent) :
   COverlayBase(pParent),
-  m_spUi(new Ui::CResourceSnippetOverlay),
+  m_spUi(std::make_unique<Ui::CResourceSnippetOverlay>()),
   m_spCurrentProject(nullptr),
   m_wpDbManager(CApplication::Instance()->System<CDatabaseManager>()),
   m_bInitialized(false),

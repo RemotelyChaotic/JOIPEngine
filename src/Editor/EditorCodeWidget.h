@@ -11,6 +11,7 @@ class CIconSnippetOverlay;
 class CResourceSnippetOverlay;
 class CTextSnippetOverlay;
 class CTimerSnippetOverlay;
+class CThreadSnippetOverlay;
 class CDatabaseManager;
 class CScriptHighlighter;
 class CScriptRunner;
@@ -87,6 +88,7 @@ private:
   std::unique_ptr<CResourceSnippetOverlay>   m_spResourceSnippetOverlay;
   std::unique_ptr<CTextSnippetOverlay>       m_spTextSnippetOverlay;
   std::unique_ptr<CTimerSnippetOverlay>      m_spTimerSnippetOverlay;
+  std::unique_ptr<CThreadSnippetOverlay>     m_spThreadSnippetOverlay;
   std::shared_ptr<CSettings>                 m_spSettings;
   tspProject                                 m_spCurrentProject;
   std::weak_ptr<CDatabaseManager>            m_wpDbManager;
