@@ -79,7 +79,7 @@ void CTextSnippetOverlay::on_pShowButtonsCheckBox_toggled(bool bStatus)
 
 //----------------------------------------------------------------------------------------
 //
-void CTextSnippetOverlay::on_pAddButtonButton_clicked()
+void CTextSnippetOverlay::on_AddButtonButton_clicked()
 {
   if (!m_bInitialized) { return; }
   const QString sButtonText = "New Button";
@@ -91,7 +91,7 @@ void CTextSnippetOverlay::on_pAddButtonButton_clicked()
 
 //----------------------------------------------------------------------------------------
 //
-void CTextSnippetOverlay::on_pRemoveButtonButton_clicked()
+void CTextSnippetOverlay::on_RemoveButtonButton_clicked()
 {
   if (!m_bInitialized) { return; }
   QModelIndex index = m_spUi->pButtonsList->currentIndex();
@@ -133,7 +133,7 @@ void CTextSnippetOverlay::on_pSetTextColorsCheckBox_toggled(bool bStatus)
 
 //----------------------------------------------------------------------------------------
 //
-void CTextSnippetOverlay::on_pAddTextColorButton_clicked()
+void CTextSnippetOverlay::on_AddTextColorButton_clicked()
 {
   if (!m_bInitialized) { return; }
 
@@ -152,7 +152,7 @@ void CTextSnippetOverlay::on_pAddTextColorButton_clicked()
 
 //----------------------------------------------------------------------------------------
 //
-void CTextSnippetOverlay::on_pRemoveTextColorButton_clicked()
+void CTextSnippetOverlay::on_RemoveTextColorButton_clicked()
 {
   if (!m_bInitialized) { return; }
 
@@ -186,7 +186,7 @@ void CTextSnippetOverlay::on_pSetBGCheckBox_toggled(bool bStatus)
 
 //----------------------------------------------------------------------------------------
 //
-void CTextSnippetOverlay::on_pAddBGColorButton_clicked()
+void CTextSnippetOverlay::on_AddBGColorButton_clicked()
 {
   if (!m_bInitialized) { return; }
 
@@ -205,7 +205,7 @@ void CTextSnippetOverlay::on_pAddBGColorButton_clicked()
 
 //----------------------------------------------------------------------------------------
 //
-void CTextSnippetOverlay::on_pRemoveBGColorButton_clicked()
+void CTextSnippetOverlay::on_RemoveBGColorButton_clicked()
 {
   if (!m_bInitialized) { return; }
 

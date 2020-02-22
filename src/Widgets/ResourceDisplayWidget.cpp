@@ -386,26 +386,11 @@ void CResourceDisplayWidget::SlotImageLoad(QString sPath)
     else
     {
       // QMovie
-      if (nullptr != m_spLoadedMovie)
-      {
-        m_spLoadedMovie->stop();
-      }
-      m_spLoadedMovie = std::make_shared<QMovie>(sPath);
+      m_spLoadedMovie->setFileName(sPath);
+      m_spLoadedMovie->setBackgroundColor(Qt::transparent);
       QImage image = reader.read();
       QSize size = image.size();
-      QSize resultingSize = size;
-      if (size.width() >= size.height())
-      {
-        double dRatio = static_cast<double>(size.height()) / static_cast<double>(size.width());
-        resultingSize.setWidth(width());
-        resultingSize.setHeight(static_cast<qint32>(height() * dRatio));
-      }
-      else
-      {
-        double dRatio = static_cast<double>(size.width()) / static_cast<double>(size.height());
-        resultingSize.setHeight(height());
-        resultingSize.setWidth(static_cast<qint32>(width() * dRatio));
-      }
+      QSize resultingSize = size.scaled(width(), height(), Qt::KeepAspectRatio);
       m_spLoadedMovie->setScaledSize(resultingSize);
       m_spLoadedPixmap = nullptr;
       m_iLoadState = ELoadState::eFinished;
@@ -600,6 +585,13 @@ void CResourceDisplayWidget::StartImageLoad(QString sPath)
     m_spFutureWatcher->cancel();
     m_spFutureWatcher->waitForFinished();
   }
+  m_imageMutex.lock();
+  if (nullptr != m_spLoadedMovie)
+  {
+    m_spLoadedMovie->stop();
+  }
+  m_spLoadedMovie = std::make_shared<QMovie>();
+  m_imageMutex.unlock();
   m_future = QtConcurrent::run(this, &CResourceDisplayWidget::SlotImageLoad, sPath);
   m_spFutureWatcher->setFuture(m_future);
 }
