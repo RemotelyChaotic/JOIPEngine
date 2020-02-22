@@ -211,7 +211,8 @@ void CInformationWidget::AddIcon(const QString& sName, const tspResource& spReso
 
     QLabel* pBackground = new QLabel("", pRoot);
     pBackground->setFixedSize(c_iIconWidth, c_iIconHeight);
-    pBackground->setPixmap(QPixmap("://resources/img/IconBg.svg"));
+    //pBackground->setPixmap(QPixmap("://resources/img/IconBg.svg"));
+    pBackground->setObjectName("IconBackground");
     pBackground->setScaledContents(true);
     pBackground->setStyleSheet("background-color: transparent;");
 
