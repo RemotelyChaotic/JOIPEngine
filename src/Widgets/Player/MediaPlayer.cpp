@@ -24,6 +24,7 @@
 #include <QLayout>
 #include <QMessageBox>
 #include <QFileDialog>
+#include <limits>
 
 using namespace QtAV;
 
@@ -121,6 +122,9 @@ void CMediaPlayer::MuteUnmute(bool bMuted)
 void CMediaPlayer::OpenMedia(const QString sPath)
 {
   if (sPath.isEmpty()) { return; }
+  m_player->setStartPosition(0);
+  m_player->setStopPosition();
+  m_player->setRepeat(std::numeric_limits<int>::max());
   m_player->play(sPath);
 }
 
@@ -147,6 +151,9 @@ void CMediaPlayer::PlayPause()
 {
   if (!m_player->isPlaying())
   {
+    m_player->setStartPosition(0);
+    m_player->setStopPosition();
+    m_player->setRepeat(std::numeric_limits<int>::max());
     m_player->play();
     return;
   }
