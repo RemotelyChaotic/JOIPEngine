@@ -179,6 +179,9 @@ void CScriptMediaPlayer::waitForPlayback()
 {
   if (!CheckIfScriptCanRun()) { return; }
 
+  connect(m_spSignalEmitter.get(), &CScriptRunnerSignalEmiter::SignalPlaybackFinished,
+          m_spSignalEmitter.get(), &CScriptRunnerSignalEmiter::SignalStopVideo, Qt::DirectConnection);
+
   QEventLoop loop;
   connect(m_spSignalEmitter.get(), &CScriptRunnerSignalEmiter::SignalPlaybackFinished,
           &loop, &QEventLoop::quit, Qt::QueuedConnection);
@@ -186,6 +189,9 @@ void CScriptMediaPlayer::waitForPlayback()
           &loop, &QEventLoop::quit, Qt::QueuedConnection);
   loop.exec();
   loop.disconnect();
+
+  disconnect(m_spSignalEmitter.get(), &CScriptRunnerSignalEmiter::SignalPlaybackFinished,
+             m_spSignalEmitter.get(), &CScriptRunnerSignalEmiter::SignalStopVideo);
 }
 
 //----------------------------------------------------------------------------------------

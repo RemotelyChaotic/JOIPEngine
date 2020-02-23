@@ -158,7 +158,10 @@ void CSceneMainScreen::UnloadProject()
   m_spProjectRunner->UnloadProject();
   m_spCurrentProject = nullptr;
 
+  m_spUi->pInfoDisplay->SlotHideIcon(QString());
   m_spUi->pTextBoxDisplay->SlotClearText();
+  m_spUi->pTimerDisplay->SlotStopTimer();
+  m_spUi->pTimerDisplay->SlotHideTimer();
 
   DisconnectAllSignals();
 }

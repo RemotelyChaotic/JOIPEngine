@@ -175,10 +175,8 @@ void CMediaPlayer::SetVolume(double dVolume)
 //
 void CMediaPlayer::Stop()
 {
-  if (m_player->isPlaying())
-  {
-    m_player->stop();
-  }
+  m_player->setRepeat(0);
+  m_player->stop();
 }
 
 //----------------------------------------------------------------------------------------
