@@ -44,6 +44,7 @@ void CEditorChoiceScreen::Initialize()
 //
 void CEditorChoiceScreen::Load()
 {
+  m_spUi->pProjectCardSelectionWidget->UnloadProjects();
   m_spUi->pProjectCardSelectionWidget->LoadProjects();
 }
 

@@ -1,4 +1,5 @@
 #include "CreditsScreen.h"
+#include "Application.h"
 #include "ui_CreditsScreen.h"
 #include <QFile>
 #include <QFont>
@@ -22,6 +23,9 @@ CCreditsScreen::~CCreditsScreen()
 void CCreditsScreen::Initialize()
 {
   m_bInitialized = false;
+
+  connect(CApplication::Instance(), &CApplication::StyleLoaded,
+          this, &CCreditsScreen::SlotStyleLoaded, Qt::QueuedConnection);
 
   QFont font = m_spUi->pText->font();
   font.setPixelSize(20);
@@ -55,4 +59,14 @@ void CCreditsScreen::on_pBackButton_clicked()
 {
   WIDGET_INITIALIZED_GUARD
   emit m_spWindowContext->SignalChangeAppState(EAppState::eMainScreen);
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CCreditsScreen::SlotStyleLoaded()
+{
+  QFont font = m_spUi->pText->font();
+  font.setPixelSize(20);
+  font.setFamily(CApplication::Instance()->Settings()->Font());
+  m_spUi->pText->setFont(font);
 }

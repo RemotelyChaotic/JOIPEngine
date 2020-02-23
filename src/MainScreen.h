@@ -28,6 +28,7 @@ protected slots:
   void on_pSettingsButton_clicked();
   void on_pCreditsButton_clicked();
   void on_pQuitButton_clicked();
+  void SlotStyleLoaded();
 
 private:
   std::unique_ptr<Ui::CMainScreen> m_spUi;

@@ -66,6 +66,11 @@ void CEditorCodeWidget::Initialize()
   auto spDbManager = m_wpDbManager.lock();
   if (nullptr != spDbManager)
   {
+    // needs to be queued, so there's a chance to register script files to the scenes
+    // after adding them and name resolution
+    connect(spDbManager.get(), &CDatabaseManager::SignalResourceAdded,
+            this, &CEditorCodeWidget::SlotResourceAdded, Qt::QueuedConnection);
+
     connect(spDbManager.get(), &CDatabaseManager::SignalSceneAdded,
             this, &CEditorCodeWidget::SlotSceneAdded);
     connect(spDbManager.get(), &CDatabaseManager::SignalSceneRemoved,
@@ -541,6 +546,39 @@ void CEditorCodeWidget::SlotInsertGeneratedCode(const QString& sCode)
   WIDGET_INITIALIZED_GUARD
   if (nullptr == m_spCurrentProject) { return; }
   m_spUi->pCodeEdit->insertPlainText(sCode);
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CEditorCodeWidget::SlotResourceAdded(qint32 iProjId, const QString& sName)
+{
+  WIDGET_INITIALIZED_GUARD
+  if (nullptr == m_spCurrentProject) { return; }
+  m_spCurrentProject->m_rwLock.lockForRead();
+  qint32 iCurrentId = m_spCurrentProject->m_iId;
+  m_spCurrentProject->m_rwLock.unlock();
+
+  if (iCurrentId != iProjId) { return; }
+
+  qint32 iCurrentSceneId =
+      m_spUi->pSceneComboBox->itemData(m_spUi->pSceneComboBox->currentIndex()).toInt();
+
+  auto spDbManager = m_wpDbManager.lock();
+  if (nullptr != spDbManager)
+  {
+    auto spScene = spDbManager->FindScene(m_spCurrentProject, iCurrentSceneId);
+    if (nullptr != spScene)
+    {
+      spScene->m_rwLock.lockForRead();
+      bool bIsScriptForCurrentScene = spScene->m_sScript == sName;
+      spScene->m_rwLock.unlock();
+
+      if (bIsScriptForCurrentScene)
+      {
+        on_pSceneComboBox_currentIndexChanged(iCurrentSceneId);
+      }
+    }
+  }
 }
 
 //----------------------------------------------------------------------------------------

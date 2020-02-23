@@ -72,6 +72,7 @@ protected slots:
   void SlotDebugStop();
   void SlotFileChanged(const QString& sPath);
   void SlotInsertGeneratedCode(const QString& sCode);
+  void SlotResourceAdded(qint32 iProjId, const QString& sName);
   void SlotSceneAdded(qint32 iProjId, qint32 iId);
   void SlotSceneRenamed(qint32 iProjId, qint32 iId);
   void SlotSceneRemoved(qint32 iProjId, qint32 iId);

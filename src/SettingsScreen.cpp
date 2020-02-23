@@ -56,7 +56,8 @@ void CSettingsScreen::Initialize()
 {
   m_bInitialized = false;
 
-  m_spSettings = CApplication::Instance()->Settings();
+  CApplication* pApp = CApplication::Instance();
+  m_spSettings = pApp->Settings();
 
   m_bInitialized = true;
 }

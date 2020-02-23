@@ -24,6 +24,7 @@ public:
 
 protected slots:
   void on_pBackButton_clicked();
+  void SlotStyleLoaded();
 
 private:
   std::unique_ptr<Ui::CCreditsScreen> m_spUi;

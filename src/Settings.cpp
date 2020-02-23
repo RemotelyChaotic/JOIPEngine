@@ -70,7 +70,7 @@ void CSettings::SetFont(const QString& sFont)
 
   if (sOldFont == sFont) { return; }
 
-  m_spSettings->setValue(CSettings::c_sSettingContentFolder, sFont);
+  m_spSettings->setValue(CSettings::c_sSettingFont, sFont);
 
   emit FontChanged();
 }

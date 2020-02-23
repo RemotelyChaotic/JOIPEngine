@@ -1,4 +1,5 @@
 #include "TitleLabel.h"
+#include "Application.h"
 #include "Constants.h"
 
 #include <QFont>
@@ -200,6 +201,9 @@ protected:
 CTitleLabel::CTitleLabel(QWidget* pParent) :
   QLabel(pParent)
 {
+  connect(CApplication::Instance(), &CApplication::StyleLoaded,
+          this, &CTitleLabel::SlotStyleLoaded, Qt::QueuedConnection);
+
   QFont thisFont = font();
   thisFont.setPixelSize(60);
   setFont(thisFont);
@@ -214,6 +218,9 @@ CTitleLabel::CTitleLabel(QWidget* pParent) :
 CTitleLabel::CTitleLabel(QString sText, QWidget* pParent) :
   QLabel(sText, pParent)
 {
+  connect(CApplication::Instance(), &CApplication::StyleLoaded,
+          this, &CTitleLabel::SlotStyleLoaded, Qt::QueuedConnection);
+
   QFont thisFont = font();
   thisFont.setPixelSize(60);
   setFont(thisFont);
@@ -237,6 +244,17 @@ void CTitleLabel::SetOutlineColor(const QColor& color)
 const QColor& CTitleLabel::OutlineColor()
 {
   return m_pStyle->OutlineColor();
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CTitleLabel::SlotStyleLoaded()
+{
+  QFont thisFont = font();
+  thisFont.setPixelSize(60);
+  thisFont.setFamily(CApplication::Instance()->Settings()->Font());
+  setFont(thisFont);
+  m_pStyle->SetDirty();
 }
 
 //----------------------------------------------------------------------------------------

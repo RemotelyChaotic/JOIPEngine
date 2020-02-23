@@ -1,4 +1,5 @@
 #include "MainScreen.h"
+#include "Application.h"
 #include "version.h"
 #include "WindowContext.h"
 #include "ui_MainScreen.h"
@@ -23,6 +24,9 @@ CMainScreen::~CMainScreen()
 void CMainScreen::Initialize()
 {
   m_bInitialized = false;
+
+  connect(CApplication::Instance(), &CApplication::StyleLoaded,
+          this, &CMainScreen::SlotStyleLoaded, Qt::QueuedConnection);
 
   m_spUi->pVersionLabel->setText("v" VERSION_DOT);
   QFont versionFont = m_spUi->pVersionLabel->font();
@@ -89,4 +93,14 @@ void CMainScreen::on_pQuitButton_clicked()
   WIDGET_INITIALIZED_GUARD
 
   emit QApplication::instance()->quit();
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CMainScreen::SlotStyleLoaded()
+{
+  QFont versionFont = m_spUi->pVersionLabel->font();
+  versionFont.setPixelSize(30);
+  versionFont.setFamily(CApplication::Instance()->Settings()->Font());
+  m_spUi->pVersionLabel->setFont(versionFont);
 }

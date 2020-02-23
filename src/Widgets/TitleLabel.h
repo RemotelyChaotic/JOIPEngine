@@ -18,6 +18,9 @@ public:
   void SetOutlineColor(const QColor& color);
   const QColor& OutlineColor();
 
+protected slots:
+  void SlotStyleLoaded();
+
 private:
   void AddEffects();
 

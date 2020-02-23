@@ -27,6 +27,7 @@ namespace
       QFile styleFile(c_sDefaultStyleFile);
       if (styleFile.open(QIODevice::ReadOnly))
       {
+        pApp->setStyleSheet(QString());
         pApp->setStyleSheet(QString::fromUtf8(styleFile.readAll()));
       }
       else
@@ -47,6 +48,7 @@ namespace
     if (info.exists())
     {
       QFile styleFile(info.absoluteFilePath());
+      pApp->setStyleSheet(QString());
       pApp->setStyleSheet("file:///" + info.absoluteFilePath());
     }
     else

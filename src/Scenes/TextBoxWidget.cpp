@@ -162,6 +162,7 @@ void CTextBoxWidget::SlotShowButtonPrompts(QStringList vsLabels)
       pButton->setProperty(c_sPropertyButtonIndex, iIndex);
       pButton->setStyleSheet(QString("QPushButton { background-color: rgb(%1, %2, %3); "
                                      "color : rgb(%4, %5, %6); "
+                                     "border-image: none;"
                                      "border: 1px solid " SILVER_QML "; "
                                      "border-radius: 10px; "
                                      "padding: 6px;}")
@@ -174,6 +175,7 @@ void CTextBoxWidget::SlotShowButtonPrompts(QStringList vsLabels)
       pButton->setContentsMargins(6,6,6,6);
       QFont wFont = pButton->font();
       wFont.setPixelSize(16);
+      wFont.setFamily(m_spSettings->Font());
       pButton->setFont(wFont);
       AddDropShadow(pButton);
 
@@ -234,6 +236,7 @@ void CTextBoxWidget::SlotShowInput()
          .arg(0 < m_vCurrentTextColor.size() ? m_vCurrentTextColor[0].blue() : 255));
     QFont wFont = pEdit->font();
     wFont.setPixelSize(16);
+    wFont.setFamily(m_spSettings->Font());
     pEdit->setFont(wFont);
     pHorizontalLayout2->addWidget(pEdit);
 
@@ -288,6 +291,7 @@ void CTextBoxWidget::SlotShowText(QString sText)
          .arg(0 < m_vCurrentTextColor.size() ? m_vCurrentTextColor[0].blue() : 255));
     QFont wFont = pLabel->font();
     wFont.setPixelSize(16);
+    wFont.setFamily(m_spSettings->Font());
     pLabel->setFont(wFont);
     pHorizontalLayout2->addWidget(pLabel);
 
