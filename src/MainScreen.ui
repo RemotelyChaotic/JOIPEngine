@@ -165,7 +165,7 @@
          </sizepolicy>
         </property>
         <property name="text">
-         <string>Pony JOI</string>
+         <string>JOIP Engine</string>
         </property>
         <property name="alignment">
          <set>Qt::AlignCenter</set>
