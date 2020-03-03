@@ -7,6 +7,7 @@ SProject::SProject() :
   m_rwLock(QReadWriteLock::Recursive),
   m_iId(),
   m_iVersion(),
+  m_iTargetVersion(),
   m_sName(),
   m_sOldName(),
   m_sTitleCard(),
@@ -21,6 +22,7 @@ SProject::SProject(const SProject& other) :
   m_rwLock(QReadWriteLock::Recursive),
   m_iId(other.m_iId),
   m_iVersion(other.m_iVersion),
+  m_iTargetVersion(other.m_iTargetVersion),
   m_sName(other.m_sName),
   m_sOldName(other.m_sOldName),
   m_sTitleCard(other.m_sTitleCard),
@@ -53,7 +55,8 @@ QJsonObject SProject::ToJsonObject()
     resources.push_back(spResource.second->ToJsonObject());
   }
   return {
-    { "iVersion", m_iVersion },
+    { "iVersion", static_cast<qint32>(m_iVersion) },
+    { "iTargetVersion", static_cast<qint32>(m_iTargetVersion) },
     { "sName", m_sName },
     { "sTitleCard", m_sTitleCard },
     { "sMap", m_sMap },
@@ -74,6 +77,11 @@ void SProject::FromJsonObject(const QJsonObject& json)
   if (it != json.end())
   {
     m_iVersion = it.value().toInt();
+  }
+  it = json.find("iTargetVersion");
+  if (it != json.end())
+  {
+    m_iTargetVersion = it.value().toInt();
   }
   it = json.find("sName");
   if (it != json.end())
@@ -161,6 +169,14 @@ qint32 CProject::getVersion()
 {
   QReadLocker locker(&m_spData->m_rwLock);
   return m_spData->m_iVersion;
+}
+
+//----------------------------------------------------------------------------------------
+//
+qint32 CProject::getTargetVersion()
+{
+  QReadLocker locker(&m_spData->m_rwLock);
+  return m_spData->m_iTargetVersion;
 }
 
 //----------------------------------------------------------------------------------------

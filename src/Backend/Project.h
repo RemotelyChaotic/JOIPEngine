@@ -4,6 +4,7 @@
 #include "ISerializable.h"
 #include "Resource.h"
 #include "Scene.h"
+#include "version.h"
 #include <QObject>
 #include <QReadWriteLock>
 #include <QSharedPointer>
@@ -19,7 +20,8 @@ struct SProject : public ISerializable, std::enable_shared_from_this<SProject>
 
   mutable QReadWriteLock    m_rwLock;
   qint32                    m_iId;
-  qint32                    m_iVersion;
+  SVersion                  m_iVersion;
+  SVersion                  m_iTargetVersion;
   QString                   m_sName;
   QString                   m_sOldName;
   QString                   m_sTitleCard;
@@ -48,6 +50,7 @@ class CProject : public QObject
   CProject() {}
   Q_PROPERTY(qint32  id           READ getId            )
   Q_PROPERTY(qint32  version      READ getVersion       )
+  Q_PROPERTY(qint32  targetVersion READ getTargetVersion)
   Q_PROPERTY(QString name         READ getName          )
   Q_PROPERTY(QString titleCard    READ getTitleCard     )
   Q_PROPERTY(QString map          READ getMap           )
@@ -60,6 +63,7 @@ public:
 
   qint32 getId();
   qint32 getVersion();
+  qint32 getTargetVersion();
   QString getName();
   QString getTitleCard();
   QString getMap();
