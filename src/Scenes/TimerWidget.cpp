@@ -159,6 +159,7 @@ CTimerWidget::~CTimerWidget()
 //
 void CTimerWidget::SetTimer(qint32 iTimeMs)
 {
+  m_lastUpdateTime = std::chrono::steady_clock::now();
   m_iTimeMsMax = iTimeMs;
   m_iTimeMsCurrent = iTimeMs;
   m_iUpdateCounter = 0;
@@ -238,7 +239,9 @@ void CTimerWidget::Update()
   m_iUpdateCounter++;
   if (0 < m_iTimeMsCurrent)
   {
-    m_iTimeMsCurrent -= m_iUpdateInterval;
+    auto timeElapsed = std::chrono::duration_cast<std::chrono::milliseconds>(
+          std::chrono::steady_clock::now() - m_lastUpdateTime);
+    m_iTimeMsCurrent -= static_cast<qint32>(timeElapsed.count());
     QTime time(0, 0, 0, 0);
     m_pTimeLabel->setText(m_bVisible ? time.addMSecs(m_iTimeMsCurrent).toString("mm:ss") : "?");
     m_pCanvas->repaint();
@@ -248,6 +251,8 @@ void CTimerWidget::Update()
   {
     emit SignalTimerFinished();
   }
+
+  m_lastUpdateTime = std::chrono::steady_clock::now();
 }
 
 //----------------------------------------------------------------------------------------

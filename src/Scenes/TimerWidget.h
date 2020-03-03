@@ -2,6 +2,7 @@
 #define CTIMERWIDGET_H
 
 #include <QWidget>
+#include <chrono>
 #include <memory>
 
 class CSettings;
@@ -61,6 +62,8 @@ protected slots:
   void SlotFontChanged();
 
 protected:
+  using Timestamp = std::chrono::steady_clock::time_point;
+
   std::shared_ptr<CSettings>m_spSettings;
   QLabel*                   m_pTimerBackGround;
   CTimerCanvas*             m_pCanvas;
@@ -70,6 +73,7 @@ protected:
   QColor                    m_primaryColor;
   QColor                    m_secondaryColor;
   QColor                    m_tertiaryColor;
+  Timestamp                 m_lastUpdateTime;
   qint32                    m_iTimeMsMax;
   qint32                    m_iTimeMsCurrent;
   qint32                    m_iUpdateInterval;
