@@ -7,7 +7,6 @@
 #include "EditorSceneNodeWidget.h"
 #include "Backend/DatabaseManager.h"
 #include "Backend/Project.h"
-#include "Resources/ResourceTreeItemModel.h"
 #include "ui_EditorMainScreen.h"
 #include "ui_EditorActionBar.h"
 
@@ -32,7 +31,6 @@ CEditorMainScreen::CEditorMainScreen(QWidget* pParent) :
   QWidget(pParent),
   m_spUi(std::make_unique<Ui::CEditorMainScreen>()),
   m_spEditorModel(std::make_unique<CEditorModel>()),
-  m_spResourceTreeModel(std::make_unique<CResourceTreeItemModel>()),
   m_spWidgetsMap(),
   m_spCurrentProject(nullptr),
   m_wpDbManager(),
@@ -61,6 +59,9 @@ void CEditorMainScreen::Initialize()
 
   m_wpDbManager = CApplication::Instance()->System<CDatabaseManager>();
 
+  connect(m_spEditorModel.get(), &CEditorModel::SignalProjectEdited,
+          this, &CEditorMainScreen::SlotProjectEdited);
+
   // action Bars
   m_spUi->pProjectActionBar->Initialize();
   m_spUi->pProjectActionBar->ShowProjectActionBar();
@@ -88,7 +89,7 @@ void CEditorMainScreen::Initialize()
     connect(it->second, &CEditorWidgetBase::SignalProjectEdited,
             this, &CEditorMainScreen::SlotProjectEdited);
 
-    it->second->SetResourceModel(m_spResourceTreeModel.get());
+    it->second->SetEditorModel(m_spEditorModel.get());
     it->second->Initialize();
     it->second->setVisible(false);
     m_spUi->pLeftComboBox->addItem(m_sEditorNamesMap.find(it->first)->second, it->first._to_integral());
@@ -146,15 +147,13 @@ void CEditorMainScreen::UnloadProject()
 {
   if (!m_bInitialized) { return; }
 
-  m_spEditorModel->UnloadProject();
-  m_spCurrentProject = nullptr;
-
   for (auto it = m_spWidgetsMap.begin(); m_spWidgetsMap.end() != it; ++it)
   {
     it->second->UnloadProject();
   }
 
-  m_spResourceTreeModel->DeInitializeModel();
+  m_spCurrentProject = nullptr;
+  m_spEditorModel->UnloadProject();
 
   SetModificaitonFlag(false);
 }
@@ -346,8 +345,6 @@ void CEditorMainScreen::ProjectLoaded()
     QReadLocker locker(&m_spCurrentProject->m_rwLock);
     m_spUi->pProjectActionBar->m_spUi->pTitleLineEdit->setText(m_spCurrentProject->m_sName);
   }
-
-  m_spResourceTreeModel->InitializeModel(m_spCurrentProject);
 
   for (auto it = m_spWidgetsMap.begin(); m_spWidgetsMap.end() != it; ++it)
   {

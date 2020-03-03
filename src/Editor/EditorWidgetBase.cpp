@@ -1,4 +1,6 @@
 #include "EditorWidgetBase.h"
+#include "EditorModel.h"
+#include "Resources/ResourceTreeItemModel.h"
 
 CEditorWidgetBase::CEditorWidgetBase(QWidget* pParent) :
   QWidget(pParent),
@@ -24,21 +26,28 @@ void CEditorWidgetBase::SetActionBar(CEditorActionBar* pActionBar)
 
 //----------------------------------------------------------------------------------------
 //
-void CEditorWidgetBase::SetResourceModel(CResourceTreeItemModel* pItemModel)
+void CEditorWidgetBase::SetEditorModel(CEditorModel* pItemModel)
 {
-  m_pResourceTreeModel = pItemModel;
+  m_pEditorModel = pItemModel;
 }
 
 //----------------------------------------------------------------------------------------
 //
-CEditorActionBar* CEditorWidgetBase::ActionBar()
+CEditorActionBar* CEditorWidgetBase::ActionBar() const
 {
   return m_pActionBar;
 }
 
 //----------------------------------------------------------------------------------------
 //
-CResourceTreeItemModel* CEditorWidgetBase::ResourceModel()
+CEditorModel* CEditorWidgetBase::EditorModel() const
 {
-  return m_pResourceTreeModel;
+  return m_pEditorModel;
+}
+
+//----------------------------------------------------------------------------------------
+//
+CResourceTreeItemModel* CEditorWidgetBase::ResourceTreeModel() const
+{
+  return m_pEditorModel->ResourceTreeModel();
 }

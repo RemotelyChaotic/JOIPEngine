@@ -6,6 +6,7 @@
 #include <memory>
 
 class CEditorActionBar;
+class CEditorModel;
 class CResourceTreeItemModel;
 struct SProject;
 typedef std::shared_ptr<SProject> tspProject;
@@ -23,7 +24,7 @@ public:
   virtual void SaveProject() = 0;
 
   void SetActionBar(CEditorActionBar* pActionBar);
-  void SetResourceModel(CResourceTreeItemModel* pItemModel);
+  void SetEditorModel(CEditorModel* pItemModel);
 
 signals:
   void SignalProjectEdited();
@@ -32,11 +33,12 @@ protected:
   virtual void OnActionBarAboutToChange() {}
   virtual void OnActionBarChanged() {}
 
-  CEditorActionBar* ActionBar();
-  CResourceTreeItemModel* ResourceModel();
+  CEditorActionBar* ActionBar() const;
+  CEditorModel* EditorModel() const;
+  CResourceTreeItemModel* ResourceTreeModel() const;
 
   CEditorActionBar*                                m_pActionBar;
-  CResourceTreeItemModel*                          m_pResourceTreeModel;
+  CEditorModel*                                    m_pEditorModel;
 };
 
 #endif // EDITORWIDGETBASE_H

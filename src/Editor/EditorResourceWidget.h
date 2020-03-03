@@ -54,10 +54,6 @@ protected slots:
   void SlotNetworkReplyFinished();
 
 private:
-  void AddFiles(const QStringList& vsFiles, const QStringList& imageFormatsList,
-                const QStringList& videoFormatsList, const QStringList& audioFormatsList,
-                const QStringList& otherFormatsList);
-
   std::unique_ptr<Ui::CEditorResourceWidget> m_spUi;
   std::unique_ptr<CWebResourceOverlay>       m_spWebOverlay;
   std::unique_ptr<QNetworkAccessManager>     m_spNAManager;

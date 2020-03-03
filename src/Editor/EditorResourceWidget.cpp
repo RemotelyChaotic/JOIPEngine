@@ -1,6 +1,7 @@
 #include "EditorResourceWidget.h"
 #include "Application.h"
 #include "EditorActionBar.h"
+#include "EditorModel.h"
 #include "Backend/DatabaseManager.h"
 #include "Backend/Project.h"
 #include "Resources/ResourceTreeItem.h"
@@ -66,7 +67,7 @@ void CEditorResourceWidget::Initialize()
 
   CResourceTreeItemSortFilterProxyModel* pProxyModel =
       new CResourceTreeItemSortFilterProxyModel(m_spUi->pResourceTree);
-  pProxyModel->setSourceModel(ResourceModel());
+  pProxyModel->setSourceModel(ResourceTreeModel());
   m_spUi->pResourceTree->setModel(pProxyModel);
 
   QItemSelectionModel* pSelectionModel = m_spUi->pResourceTree->selectionModel();
@@ -195,7 +196,8 @@ void CEditorResourceWidget::dropEvent(QDropEvent* pEvent)
     }
 
     // add file to respective category
-    AddFiles(vsFileNames, imageFormatsList, videoFormatsList, audioFormatsList, otherFormatsList);
+    EditorModel()->AddFilesToProjectResources(
+          this, vsFileNames, imageFormatsList, videoFormatsList, audioFormatsList, otherFormatsList);
   }
 }
 
@@ -240,7 +242,6 @@ void CEditorResourceWidget::on_pResourceDisplayWidget_SignalLoadFinished()
 void CEditorResourceWidget::SlotAddButtonClicked()
 {
   WIDGET_INITIALIZED_GUARD
-  if (nullptr == m_spCurrentProject) { return; }
 
   QStringList imageFormatsList = ImageFormats();
   QString sImageFormats = imageFormatsList.join(" ");
@@ -261,7 +262,8 @@ void CEditorResourceWidget::SlotAddButtonClicked()
       sFormatSelection.arg(sImageFormats).arg(sVideoFormats).arg(sAudioFormats).arg(sOtherFormats));
 
   // add file to respective category
-  AddFiles(vsFileNames, imageFormatsList, videoFormatsList, audioFormatsList, otherFormatsList);
+  EditorModel()->AddFilesToProjectResources(
+        this, vsFileNames, imageFormatsList, videoFormatsList, audioFormatsList, otherFormatsList);
 }
 
 //----------------------------------------------------------------------------------------
@@ -493,136 +495,6 @@ void CEditorResourceWidget::SlotNetworkReplyFinished()
         spDbManager->AddResource(m_spCurrentProject, url, EResourceType::eMovie);
         emit SignalProjectEdited();
       }
-    }
-  }
-}
-
-//----------------------------------------------------------------------------------------
-//
-void CEditorResourceWidget::AddFiles(const QStringList& vsFiles, const QStringList& imageFormatsList,
-              const QStringList& videoFormatsList, const QStringList& audioFormatsList,
-              const QStringList& otherFormatsList)
-{
-  // add file to respective category
-  bool bAddedFiles = false;
-  QStringList vsNeedsToMove;
-  const QString sName = PhysicalProjectName(m_spCurrentProject);
-  const QDir projectDir(m_spSettings->ContentFolder() + "/" + sName);
-  for (QString sFileName : vsFiles)
-  {
-    QFileInfo info(sFileName);
-    if (!info.canonicalFilePath().contains(projectDir.absolutePath()))
-    {
-      vsNeedsToMove.push_back(sFileName);
-    }
-    else
-    {
-      QString sRelativePath = projectDir.relativeFilePath(sFileName);
-      QUrl url = QUrl::fromLocalFile(sRelativePath);
-      const QString sEnding = "*." + info.suffix();
-      auto spDbManager = m_wpDbManager.lock();
-      if (nullptr != spDbManager)
-      {
-        if (imageFormatsList.contains(sEnding))
-        {
-          spDbManager->AddResource(m_spCurrentProject, url, EResourceType::eImage);
-          bAddedFiles = true;
-        }
-        else if (videoFormatsList.contains(sEnding))
-        {
-          spDbManager->AddResource(m_spCurrentProject, url, EResourceType::eMovie);
-          bAddedFiles = true;
-        }
-        else if (audioFormatsList.contains(sEnding))
-        {
-          spDbManager->AddResource(m_spCurrentProject, url, EResourceType::eSound);
-          bAddedFiles = true;
-        }
-        else if (otherFormatsList.contains(sEnding))
-        {
-          spDbManager->AddResource(m_spCurrentProject, url, EResourceType::eOther);
-          bAddedFiles = true;
-        }
-      }
-    }
-  }
-
-  // handle action
-  if (bAddedFiles)
-  {
-    emit SignalProjectEdited();
-  }
-  if (!vsNeedsToMove.isEmpty())
-  {
-    QMessageBox msgBox;
-    msgBox.setText(tr("At least one file is not in the subfolder of project."));
-    msgBox.setInformativeText(tr("Do you want to move or copy the file(s)?"));
-    QPushButton* pMove = msgBox.addButton(tr("Move"), QMessageBox::AcceptRole);
-    QPushButton* pCopy = msgBox.addButton(tr("Copy"), QMessageBox::ActionRole);
-    QPushButton* pCancel = msgBox.addButton(QMessageBox::Cancel);
-    msgBox.setDefaultButton(pCancel);
-    msgBox.setModal(true);
-    msgBox.setWindowFlag(Qt::FramelessWindowHint);
-
-    QPointer<CEditorResourceWidget> pMeMyselfMyPointerAndI(this);
-    msgBox.exec();
-    if (nullptr == pMeMyselfMyPointerAndI)
-    {
-      return;
-    }
-
-    QStringList filesToAdd;
-    if (msgBox.clickedButton() == pMove)
-    {
-      // Move the Files
-      const QString sDirToMoveTo = QFileDialog::getExistingDirectory(this,
-          tr("Select Destination"), projectDir.absolutePath());
-      for (QString sFileName : vsFiles)
-      {
-        QFileInfo info(sFileName);
-        QFile file(info.absoluteFilePath());
-        const QString sNewName = sDirToMoveTo + "/" + info.fileName();
-        if (!file.rename(sNewName))
-        {
-          qWarning() << QString(tr("Renaming file '%1' failed.")).arg(sNewName);
-        }
-        else
-        {
-          if (sNewName.contains(projectDir.absolutePath()))
-          {
-            filesToAdd.push_back(sNewName);
-          }
-        }
-      }
-      AddFiles(filesToAdd, imageFormatsList, videoFormatsList, audioFormatsList, otherFormatsList);
-    }
-    else if (msgBox.clickedButton() == pCopy)
-    {
-      // copy the Files
-      const QString sDirToCopyTo = QFileDialog::getExistingDirectory(this,
-          tr("Select Destination"), projectDir.absolutePath());
-      for (QString sFileName : vsFiles)
-      {
-        QFileInfo info(sFileName);
-        QFile file(info.absoluteFilePath());
-        const QString sNewName = sDirToCopyTo + "/" + info.fileName();
-        if (!file.copy(sNewName))
-        {
-          qWarning() << QString(tr("Copying file '%1' failed.")).arg(sNewName);
-        }
-        else
-        {
-          if (sNewName.contains(projectDir.absolutePath()))
-          {
-            filesToAdd.push_back(sNewName);
-          }
-        }
-      }
-      AddFiles(filesToAdd, imageFormatsList, videoFormatsList, audioFormatsList, otherFormatsList);
-    }
-    else if (msgBox.clickedButton() == pCancel)
-    {
-      // nothing to do
     }
   }
 }

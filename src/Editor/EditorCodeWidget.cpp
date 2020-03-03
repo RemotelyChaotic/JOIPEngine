@@ -79,9 +79,9 @@ void CEditorCodeWidget::Initialize()
             this, &CEditorCodeWidget::SlotSceneRenamed);
   }
 
-  m_spBackgroundSnippetOverlay->Initialize(ResourceModel());
-  m_spIconSnippetOverlay->Initialize(ResourceModel());
-  m_spResourceSnippetOverlay->Initialize(ResourceModel());
+  m_spBackgroundSnippetOverlay->Initialize(ResourceTreeModel());
+  m_spIconSnippetOverlay->Initialize(ResourceTreeModel());
+  m_spResourceSnippetOverlay->Initialize(ResourceTreeModel());
 
   m_spBackgroundSnippetOverlay->Hide();
   m_spIconSnippetOverlay->Hide();
