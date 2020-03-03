@@ -15,6 +15,7 @@ BETTER_ENUM(EEditorWidget, qint32,
 
 class CDatabaseManager;
 class CEditorCodeWidget;
+class CEditorModel;
 class CEditorResourceDisplayWidget;
 class CEditorResourceWidget;
 class CEditorSceneNodeWidget;
@@ -54,16 +55,17 @@ protected slots:
 private:
   void ChangeIndex(QComboBox* pComboBox, QWidget* pContainer,
                    CEditorActionBar* pActionBar, qint32 iIndex);
+  void ProjectLoaded();
   void SetModificaitonFlag(bool bModified);
   template<class T> T* GetWidget();
 
   std::unique_ptr<Ui::CEditorMainScreen>                      m_spUi;
+  std::unique_ptr<CEditorModel>                               m_spEditorModel;
   std::unique_ptr<CResourceTreeItemModel>                     m_spResourceTreeModel;
   std::map<EEditorWidget, QPointer<CEditorWidgetBase>>        m_spWidgetsMap;
   tspProject                                                  m_spCurrentProject;
   std::weak_ptr<CDatabaseManager>                             m_wpDbManager;
   bool                                                        m_bInitialized;
-  bool                                                        m_bInitializingNewProject;
   bool                                                        m_bProjectModified;
   qint32                                                      m_iLastLeftIndex;
   qint32                                                      m_iLastRightIndex;

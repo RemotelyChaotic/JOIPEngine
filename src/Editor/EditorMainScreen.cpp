@@ -1,6 +1,7 @@
 #include "EditorMainScreen.h"
 #include "Application.h"
 #include "EditorCodeWidget.h"
+#include "EditorModel.h"
 #include "EditorResourceDisplayWidget.h"
 #include "EditorResourceWidget.h"
 #include "EditorSceneNodeWidget.h"
@@ -30,12 +31,12 @@ namespace
 CEditorMainScreen::CEditorMainScreen(QWidget* pParent) :
   QWidget(pParent),
   m_spUi(std::make_unique<Ui::CEditorMainScreen>()),
+  m_spEditorModel(std::make_unique<CEditorModel>()),
   m_spResourceTreeModel(std::make_unique<CResourceTreeItemModel>()),
   m_spWidgetsMap(),
   m_spCurrentProject(nullptr),
   m_wpDbManager(),
   m_bInitialized(false),
-  m_bInitializingNewProject(false),
   m_bProjectModified(false),
   m_iLastLeftIndex(-1),
   m_iLastRightIndex(-2)
@@ -120,22 +121,11 @@ void CEditorMainScreen::Initialize()
 void CEditorMainScreen::InitNewProject(const QString& sNewProjectName)
 {
   if (!m_bInitialized) { return; }
-  m_bInitializingNewProject = true;
 
-  auto spDbManager = m_wpDbManager.lock();
-  if (nullptr != spDbManager)
-  {
-    spDbManager->AddProject(sNewProjectName);
-    m_spCurrentProject = spDbManager->FindProject(sNewProjectName);
+  m_spEditorModel->InitNewProject(sNewProjectName);
+  m_spCurrentProject = m_spEditorModel->CurrentProject();
 
-    m_spCurrentProject->m_rwLock.lockForRead();
-    qint32 iId = m_spCurrentProject->m_iId;
-    m_spCurrentProject->m_rwLock.unlock();
-    LoadProject(iId);
-  }
-
-  SetModificaitonFlag(false);
-  m_bInitializingNewProject = false;
+  ProjectLoaded();
 }
 
 //----------------------------------------------------------------------------------------
@@ -143,33 +133,11 @@ void CEditorMainScreen::InitNewProject(const QString& sNewProjectName)
 void CEditorMainScreen::LoadProject(qint32 iId)
 {
   if (!m_bInitialized) { return; }
-  if (nullptr != m_spCurrentProject && !m_bInitializingNewProject)
-  {
-    qWarning() << "Old Project was not unloaded before loading project.";
-  }
 
-  auto spDbManager = m_wpDbManager.lock();
-  if (nullptr != spDbManager)
-  {
-    m_spCurrentProject = spDbManager->FindProject(iId);
-    if (nullptr != m_spCurrentProject)
-    {
-      QReadLocker locker(&m_spCurrentProject->m_rwLock);
-      m_spUi->pProjectActionBar->m_spUi->pTitleLineEdit->setText(m_spCurrentProject->m_sName);
-    }
-  }
+  m_spEditorModel->LoadProject(iId);
+  m_spCurrentProject = m_spEditorModel->CurrentProject();
 
-  m_spResourceTreeModel->InitializeModel(m_spCurrentProject);
-
-  for (auto it = m_spWidgetsMap.begin(); m_spWidgetsMap.end() != it; ++it)
-  {
-    it->second->LoadProject(m_spCurrentProject);
-  }
-
-  SlotSaveClicked(true);
-  SetModificaitonFlag(false);
-
-  m_spUi->splitter->setSizes({ width() * 1/3 , width() * 2/3 });
+  ProjectLoaded();
 }
 
 //----------------------------------------------------------------------------------------
@@ -178,17 +146,7 @@ void CEditorMainScreen::UnloadProject()
 {
   if (!m_bInitialized) { return; }
 
-  // reset to what is in the database
-  auto spDbManager = m_wpDbManager.lock();
-  if (nullptr != spDbManager && nullptr != m_spCurrentProject)
-  {
-    m_spCurrentProject->m_rwLock.lockForRead();
-    qint32 iId = m_spCurrentProject->m_iId;
-    m_spCurrentProject->m_rwLock.unlock();
-
-    spDbManager->DeserializeProject(iId);
-  }
-
+  m_spEditorModel->UnloadProject();
   m_spCurrentProject = nullptr;
 
   for (auto it = m_spWidgetsMap.begin(); m_spWidgetsMap.end() != it; ++it)
@@ -323,7 +281,7 @@ void CEditorMainScreen::SlotExitClicked(bool bClick)
 //
 void CEditorMainScreen::SlotProjectEdited()
 {
-  if (!m_bInitialized || nullptr == m_spCurrentProject) { return; }
+  if (!m_bInitialized) { return; }
 
   SetModificaitonFlag(true);
 }
@@ -332,25 +290,13 @@ void CEditorMainScreen::SlotProjectEdited()
 //
 void CEditorMainScreen::SlotProjectNameEditingFinished()
 {
-  if (!m_bInitialized && nullptr != m_spCurrentProject) { return; }
+  if (!m_bInitialized) { return; }
 
-  auto spDbManager = m_wpDbManager.lock();
-  if (nullptr != spDbManager)
-  {
-    m_spCurrentProject->m_rwLock.lockForRead();
-    qint32 iId = m_spCurrentProject->m_iId;
-    m_spCurrentProject->m_rwLock.unlock();
+  const QString sFinalName =
+      m_spEditorModel->RenameProject(m_spUi->pProjectActionBar->m_spUi->pTitleLineEdit->text());
+  m_spUi->pProjectActionBar->m_spUi->pTitleLineEdit->setText(sFinalName);
 
-    spDbManager->RenameProject(iId, m_spUi->pProjectActionBar->m_spUi->pTitleLineEdit->text());
-
-    m_spCurrentProject->m_rwLock.lockForRead();
-    const QString sName = m_spCurrentProject->m_sName;
-    m_spCurrentProject->m_rwLock.unlock();
-
-    m_spUi->pProjectActionBar->m_spUi->pTitleLineEdit->setText(sName);
-
-    SlotProjectEdited();
-  }
+  SlotProjectEdited();
 }
 
 //----------------------------------------------------------------------------------------
@@ -358,23 +304,14 @@ void CEditorMainScreen::SlotProjectNameEditingFinished()
 void CEditorMainScreen::SlotSaveClicked(bool bClick)
 {
   Q_UNUSED(bClick);
-  if (!m_bInitialized && nullptr != m_spCurrentProject) { return; }
+  if (!m_bInitialized) { return; }
 
-  auto spDbManager = m_wpDbManager.lock();
-  if (nullptr != spDbManager)
+  for (auto it = m_spWidgetsMap.begin(); m_spWidgetsMap.end() != it; ++it)
   {
-    m_spCurrentProject->m_rwLock.lockForRead();
-    qint32 iId = m_spCurrentProject->m_iId;
-    m_spCurrentProject->m_rwLock.unlock();
-
-    for (auto it = m_spWidgetsMap.begin(); m_spWidgetsMap.end() != it; ++it)
-    {
-      it->second->SaveProject();
-    }
-
-    // save to create folder structure
-    spDbManager->SerializeProject(iId);
+    it->second->SaveProject();
   }
+
+  m_spEditorModel->SerializeProject();
 
   SetModificaitonFlag(false);
 }
@@ -398,6 +335,29 @@ void CEditorMainScreen::ChangeIndex(QComboBox* pComboBox, QWidget* pContainer,
     pLayout->addWidget(it->second);
     it->second->SetActionBar(pActionBar);
   }
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CEditorMainScreen::ProjectLoaded()
+{
+  if (nullptr != m_spCurrentProject)
+  {
+    QReadLocker locker(&m_spCurrentProject->m_rwLock);
+    m_spUi->pProjectActionBar->m_spUi->pTitleLineEdit->setText(m_spCurrentProject->m_sName);
+  }
+
+  m_spResourceTreeModel->InitializeModel(m_spCurrentProject);
+
+  for (auto it = m_spWidgetsMap.begin(); m_spWidgetsMap.end() != it; ++it)
+  {
+    it->second->LoadProject(m_spCurrentProject);
+  }
+
+  SlotSaveClicked(true);
+  SetModificaitonFlag(false);
+
+  m_spUi->splitter->setSizes({ width() * 1/3 , width() * 2/3 });
 }
 
 //----------------------------------------------------------------------------------------

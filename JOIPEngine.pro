@@ -127,7 +127,8 @@ SOURCES += \
     src/Widgets/SearchWidget.cpp \
     src/Backend/ScriptStorage.cpp \
     src/UISoundEmitter.cpp \
-    src/Editor/Script/ThreadSnippetOverlay.cpp
+    src/Editor/Script/ThreadSnippetOverlay.cpp \
+    src/Editor/EditorModel.cpp
 
 HEADERS += \
     src/MainWindow.h \
@@ -205,7 +206,8 @@ HEADERS += \
     src/Widgets/SearchWidget.h \
     src/Backend/ScriptStorage.h \
     src/UISoundEmitter.h \
-    src/Editor/Script/ThreadSnippetOverlay.h
+    src/Editor/Script/ThreadSnippetOverlay.h \
+    src/Editor/EditorModel.h
 
 FORMS += \
     src/MainWindow.ui \
