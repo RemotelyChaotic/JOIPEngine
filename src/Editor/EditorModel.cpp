@@ -286,10 +286,17 @@ void CEditorModel::InitNewProject(const QString& sNewProjectName)
       m_spCurrentProject->m_rwLock.lockForRead();
       qint32 iId = m_spCurrentProject->m_iId;
       m_spCurrentProject->m_rwLock.unlock();
+
+      // load project
       LoadProject(iId);
+      // serialize base project after init
+      SerializeProject();
+      // save changes (flow, etc)...
+      SaveProject();
+      // ...and serialize again to write the changes
+      SerializeProject();
     }
   }
-
   m_bInitializingNewProject = false;
 }
 
@@ -302,8 +309,6 @@ void CEditorModel::LoadProject(qint32 iId)
     qWarning() << "Old Project was not unloaded before loading project.";
   }
 
-  bool bRequiresSaveAfterLoading = false;
-
   auto spDbManager = m_wpDbManager.lock();
   if (nullptr != spDbManager)
   {
@@ -315,13 +320,8 @@ void CEditorModel::LoadProject(qint32 iId)
 
 
     QReadLocker projectLocker(&m_spCurrentProject->m_rwLock);
-    if (m_spCurrentProject->m_sSceneModel.isNull() ||
-        m_spCurrentProject->m_sSceneModel.isEmpty())
-    {
-      projectLocker.unlock();
-      bRequiresSaveAfterLoading = true;
-    }
-    else
+    if (!m_spCurrentProject->m_sSceneModel.isNull() &&
+        !m_spCurrentProject->m_sSceneModel.isEmpty())
     {
       const QString sModelName = m_spCurrentProject->m_sSceneModel;
       projectLocker.unlock();
@@ -346,11 +346,6 @@ void CEditorModel::LoadProject(qint32 iId)
         }
       }
     }
-  }
-
-  if (bRequiresSaveAfterLoading)
-  {
-    SaveProject();
   }
 
   m_spResourceTreeModel->InitializeModel(m_spCurrentProject);
@@ -387,7 +382,7 @@ QString CEditorModel::RenameProject(const QString& sNewProjectName)
 //
 void CEditorModel::SaveProject()
 {
-  if (nullptr == m_spCurrentProject)
+  if (nullptr == m_spCurrentProject && !m_bInitializingNewProject)
   {
     qWarning() << "Trying to save null-project.";
     return;
@@ -454,7 +449,7 @@ void CEditorModel::UnloadProject()
 //
 void CEditorModel::SerializeProject()
 {
-  if (nullptr != m_spCurrentProject)
+  if (nullptr != m_spCurrentProject && !m_bInitializingNewProject)
   {
     qWarning() << "Trying to serialize null-project.";
     return;
