@@ -15,6 +15,8 @@ CIconSnippetOverlay::CIconSnippetOverlay(QWidget* pParent) :
 
 CIconSnippetOverlay::~CIconSnippetOverlay()
 {
+  dynamic_cast<CResourceTreeItemSortFilterProxyModel*>(m_spUi->pResourceSelectTree->model())
+      ->setSourceModel(nullptr);
 }
 
 //----------------------------------------------------------------------------------------

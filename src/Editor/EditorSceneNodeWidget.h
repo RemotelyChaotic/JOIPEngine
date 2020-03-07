@@ -56,20 +56,15 @@ protected:
 
 protected slots:
   void SlotAddSceneButtonClicked();
-  void SlotNodeCreated(QtNodes::Node &n);
-  void SlotNodeDeleted(QtNodes::Node &n);
   void SlotRemoveNodeButtonClicked();
   void SlotStyleChanged();
 
 private:
-  void AddNewScriptFile(tspScene spScene);
-
   std::unique_ptr<Ui::CEditorSceneNodeWidget>       m_spUi;
   std::shared_ptr<CSettings>                        m_spSettings;
   tspProject                                        m_spCurrentProject;
   std::weak_ptr<CDatabaseManager>                   m_wpDbManager;
   CFlowView*                                        m_pFlowView;
-  QtNodes::FlowScene*                               m_pFlowScene;
 
   QColor                                            m_normalBoundaryColor;
   QColor                                            m_selectedBoundaryColor;

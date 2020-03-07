@@ -52,6 +52,9 @@ CEditorResourceWidget::~CEditorResourceWidget()
     delete m_pResponse;
     m_pResponse = nullptr;
   }
+
+  dynamic_cast<CResourceTreeItemSortFilterProxyModel*>(m_spUi->pResourceTree->model())
+      ->setSourceModel(nullptr);
 }
 
 //----------------------------------------------------------------------------------------

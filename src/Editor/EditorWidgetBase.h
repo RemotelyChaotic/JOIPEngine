@@ -8,6 +8,9 @@
 class CEditorActionBar;
 class CEditorModel;
 class CResourceTreeItemModel;
+namespace QtNodes {
+  class FlowScene;
+}
 struct SProject;
 typedef std::shared_ptr<SProject> tspProject;
 
@@ -35,6 +38,7 @@ protected:
 
   CEditorActionBar* ActionBar() const;
   CEditorModel* EditorModel() const;
+  QtNodes::FlowScene* FlowSceneModel() const;
   CResourceTreeItemModel* ResourceTreeModel() const;
 
   CEditorActionBar*                                m_pActionBar;

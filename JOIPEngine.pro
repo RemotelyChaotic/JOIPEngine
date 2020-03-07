@@ -207,7 +207,8 @@ HEADERS += \
     src/Backend/ScriptStorage.h \
     src/UISoundEmitter.h \
     src/Editor/Script/ThreadSnippetOverlay.h \
-    src/Editor/EditorModel.h
+    src/Editor/EditorModel.h \
+    src/SVersion.h
 
 FORMS += \
     src/MainWindow.ui \

@@ -305,6 +305,8 @@ void CEditorMainScreen::SlotSaveClicked(bool bClick)
   Q_UNUSED(bClick);
   if (!m_bInitialized) { return; }
 
+  m_spEditorModel->SaveProject();
+
   for (auto it = m_spWidgetsMap.begin(); m_spWidgetsMap.end() != it; ++it)
   {
     it->second->SaveProject();

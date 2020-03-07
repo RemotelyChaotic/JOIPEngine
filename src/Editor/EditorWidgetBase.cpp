@@ -47,6 +47,13 @@ CEditorModel* CEditorWidgetBase::EditorModel() const
 
 //----------------------------------------------------------------------------------------
 //
+QtNodes::FlowScene* CEditorWidgetBase::FlowSceneModel() const
+{
+  return m_pEditorModel->FlowSceneModel();
+}
+
+//----------------------------------------------------------------------------------------
+//
 CResourceTreeItemModel* CEditorWidgetBase::ResourceTreeModel() const
 {
   return m_pEditorModel->ResourceTreeModel();

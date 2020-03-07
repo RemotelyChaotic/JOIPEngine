@@ -3,6 +3,19 @@
 #include "Backend/DatabaseManager.h"
 #include "Backend/Project.h"
 #include "Resources/ResourceTreeItemModel.h"
+#include "NodeEditor/EndNodeModel.h"
+#include "NodeEditor/PathMergerModel.h"
+#include "NodeEditor/PathSplitterModel.h"
+#include "NodeEditor/SceneNodeModel.h"
+#include "NodeEditor/SceneTranstitionData.h"
+#include "NodeEditor/StartNodeModel.h"
+
+#include <nodes/ConnectionStyle>
+#include <nodes/DataModelRegistry>
+#include <nodes/FlowScene>
+#include <nodes/Node>
+#include <nodes/NodeData>
+#include <nodes/NodeDataModel>
 
 #include <QDebug>
 #include <QFileDialog>
@@ -10,15 +23,41 @@
 #include <QPushButton>
 #include <QWidget>
 
+using QtNodes::DataModelRegistry;
+using QtNodes::FlowScene;
+using QtNodes::Node;
+
+namespace
+{
+  std::shared_ptr<DataModelRegistry> RegisterDataModels()
+  {
+    auto ret = std::make_shared<DataModelRegistry>();
+    ret->registerModel<CStartNodeModel>("Control");
+    ret->registerModel<CSceneNodeModel>("Scene");
+    ret->registerModel<CEndNodeModel>("Control");
+    ret->registerModel<CPathMergerModel>("Path");
+    ret->registerModel<CPathSplitterModel>("Path");
+    return ret;
+  }
+}
+
+//----------------------------------------------------------------------------------------
+//
 CEditorModel::CEditorModel(QObject* pParent) :
   QObject(pParent),
   m_spResourceTreeModel(std::make_unique<CResourceTreeItemModel>()),
+  m_spFlowSceneModel(std::make_unique<FlowScene>(RegisterDataModels(), nullptr)),
   m_spSettings(CApplication::Instance()->Settings()),
   m_spCurrentProject(nullptr),
   m_wpDbManager(CApplication::Instance()->System<CDatabaseManager>()),
   m_bInitializingNewProject(false)
 {
+  connect(m_spFlowSceneModel.get(), &FlowScene::nodeCreated,
+          this, &CEditorModel::SlotNodeCreated);
+  connect(m_spFlowSceneModel.get(), &FlowScene::nodeDeleted,
+          this, &CEditorModel::SlotNodeDeleted);
 }
+
 CEditorModel::~CEditorModel()
 {
 
@@ -29,6 +68,13 @@ CEditorModel::~CEditorModel()
 const tspProject& CEditorModel::CurrentProject() const
 {
   return m_spCurrentProject;
+}
+
+//----------------------------------------------------------------------------------------
+//
+QtNodes::FlowScene* CEditorModel::FlowSceneModel() const
+{
+  return m_spFlowSceneModel.get();
 }
 
 //----------------------------------------------------------------------------------------
@@ -175,6 +221,56 @@ void CEditorModel::AddFilesToProjectResources(QPointer<QWidget> pParentForDialog
 
 //----------------------------------------------------------------------------------------
 //
+void CEditorModel::AddNewScriptFile(QPointer<QWidget> pParentForDialog,
+                                    tspScene spScene)
+{
+  auto spDbManager = m_wpDbManager.lock();
+  if (nullptr != spScene && nullptr != spDbManager)
+  {
+    // if there is no script -> create
+    QReadLocker locker(&spScene->m_rwLock);
+    if (spScene->m_sScript.isNull() || spScene->m_sScript.isEmpty())
+    {
+      const QString sName = PhysicalProjectName(m_spCurrentProject);
+      QString sCurrentFolder = CApplication::Instance()->Settings()->ContentFolder();
+      QUrl sUrl = QFileDialog::getSaveFileUrl(pParentForDialog,
+          QString(tr("Create Script File for %1")).arg(spScene->m_sName),
+          QUrl::fromLocalFile(sCurrentFolder + "/" + sName),
+          "Script Files (*.js)");
+
+      if (sUrl.isValid())
+      {
+        QFileInfo info(sUrl.toLocalFile());
+        QDir projectDir(m_spSettings->ContentFolder() + "/" + sName);
+        if (!info.absoluteFilePath().contains(projectDir.absolutePath()))
+        {
+          qWarning() << "File is not in subfolder of Project.";
+        }
+        else
+        {
+          QString sRelativePath = projectDir.relativeFilePath(info.absoluteFilePath());
+          QUrl sUrlToSave = QUrl::fromLocalFile(sRelativePath);
+          QFile jsFile(info.absoluteFilePath());
+          if (jsFile.open(QIODevice::WriteOnly | QIODevice::Truncate))
+          {
+            jsFile.write(QString("// instert code to control scene").toUtf8());
+            QString sResource = spDbManager->AddResource(m_spCurrentProject, sUrlToSave,
+                                                         EResourceType::eOther);
+            spScene->m_sScript = sResource;
+          }
+          else
+          {
+            qWarning() << "Could not write script file.";
+          }
+        }
+      }
+    }
+  }
+}
+
+
+//----------------------------------------------------------------------------------------
+//
 void CEditorModel::InitNewProject(const QString& sNewProjectName)
 {
   m_bInitializingNewProject = true;
@@ -206,6 +302,8 @@ void CEditorModel::LoadProject(qint32 iId)
     qWarning() << "Old Project was not unloaded before loading project.";
   }
 
+  bool bRequiresSaveAfterLoading = false;
+
   auto spDbManager = m_wpDbManager.lock();
   if (nullptr != spDbManager)
   {
@@ -214,6 +312,45 @@ void CEditorModel::LoadProject(qint32 iId)
     {
       qWarning() << QString("Project id %1 not found.").arg(iId);
     }
+
+
+    QReadLocker projectLocker(&m_spCurrentProject->m_rwLock);
+    if (m_spCurrentProject->m_sSceneModel.isNull() ||
+        m_spCurrentProject->m_sSceneModel.isEmpty())
+    {
+      projectLocker.unlock();
+      bRequiresSaveAfterLoading = true;
+    }
+    else
+    {
+      const QString sModelName = m_spCurrentProject->m_sSceneModel;
+      projectLocker.unlock();
+
+      auto spResource = spDbManager->FindResource(m_spCurrentProject, sModelName);
+      if (nullptr != spResource)
+      {
+        QReadLocker resourceLocker(&spResource->m_rwLock);
+        QUrl path = spResource->m_sPath;
+        resourceLocker.unlock();
+
+        QString sPath = ResourceUrlToAbsolutePath(path, PhysicalProjectName(m_spCurrentProject));
+        QFile modelFile(sPath);
+        if (modelFile.open(QIODevice::ReadOnly))
+        {
+          QByteArray arr = modelFile.readAll();
+          m_spFlowSceneModel->loadFromMemory(arr);
+        }
+        else
+        {
+          qWarning() << tr("Could not open save scene model file.");
+        }
+      }
+    }
+  }
+
+  if (bRequiresSaveAfterLoading)
+  {
+    SaveProject();
   }
 
   m_spResourceTreeModel->InitializeModel(m_spCurrentProject);
@@ -248,9 +385,58 @@ QString CEditorModel::RenameProject(const QString& sNewProjectName)
 
 //----------------------------------------------------------------------------------------
 //
+void CEditorModel::SaveProject()
+{
+  if (nullptr == m_spCurrentProject)
+  {
+    qWarning() << "Trying to save null-project.";
+    return;
+  }
+
+  QByteArray arr = m_spFlowSceneModel->saveToMemory();
+
+  auto spDbManager = m_wpDbManager.lock();
+  if (nullptr != spDbManager)
+  {
+    QReadLocker projectLocker(&m_spCurrentProject->m_rwLock);
+    if (m_spCurrentProject->m_sSceneModel.isNull() ||
+        m_spCurrentProject->m_sSceneModel.isEmpty())
+    {
+      projectLocker.unlock();
+      spDbManager->AddResource(m_spCurrentProject, QUrl::fromLocalFile("SceneModel.flow"),
+                               EResourceType::eOther, "SceneModel.flow");
+      projectLocker.relock();
+      m_spCurrentProject->m_sSceneModel = "SceneModel.flow";
+    }
+    projectLocker.unlock();
+
+    auto spResource = spDbManager->FindResource(m_spCurrentProject, "SceneModel.flow");
+    if (nullptr != spResource)
+    {
+      QReadLocker resourceLocker(&spResource->m_rwLock);
+      QUrl path = spResource->m_sPath;
+      resourceLocker.unlock();
+
+      QString sPath = ResourceUrlToAbsolutePath(path, PhysicalProjectName(m_spCurrentProject));
+      QFile modelFile(sPath);
+      if (modelFile.open(QIODevice::WriteOnly | QIODevice::Truncate))
+      {
+        modelFile.write(arr);
+      }
+      else
+      {
+        qWarning() << tr("Could not open save scene model file.");
+      }
+    }
+  }
+}
+
+//----------------------------------------------------------------------------------------
+//
 void CEditorModel::UnloadProject()
 {
   m_spResourceTreeModel->DeInitializeModel();
+  m_spFlowSceneModel->clearScene();
 
   // reset to what is in the database
   auto spDbManager = m_wpDbManager.lock();
@@ -285,3 +471,53 @@ void CEditorModel::SerializeProject()
     spDbManager->SerializeProject(iId);
   }
 }
+
+//----------------------------------------------------------------------------------------
+//
+void CEditorModel::SlotNodeCreated(Node &n)
+{
+  if (nullptr == m_spCurrentProject)
+  {
+    qWarning() << "Node created in null-project.";
+    return;
+  }
+
+  auto spDbManager = m_wpDbManager.lock();
+  CSceneNodeModel* pSceneModel = dynamic_cast<CSceneNodeModel*>(n.nodeDataModel());
+  if (nullptr != pSceneModel && nullptr != spDbManager)
+  {
+    m_spCurrentProject->m_rwLock.lockForRead();
+    qint32 iId = m_spCurrentProject->m_iId;
+    m_spCurrentProject->m_rwLock.unlock();
+    pSceneModel->SetProjectId(iId);
+
+    qint32 iSceneId = pSceneModel->SceneId();
+    auto spScene = spDbManager->FindScene(m_spCurrentProject, iSceneId);
+    // TODO: Add widget
+    AddNewScriptFile(nullptr, spScene);
+
+    emit SignalProjectEdited();
+  }
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CEditorModel::SlotNodeDeleted(QtNodes::Node &n)
+{
+  if (nullptr == m_spCurrentProject)
+  {
+    qWarning() << "Node created in null-project.";
+    return;
+  }
+
+  auto spDbManager = m_wpDbManager.lock();
+  CSceneNodeModel* pSceneModel = dynamic_cast<CSceneNodeModel*>(n.nodeDataModel());
+  if (nullptr != pSceneModel && nullptr != spDbManager)
+  {
+    qint32 iSceneId = pSceneModel->SceneId();
+    spDbManager->RemoveScene(m_spCurrentProject, iSceneId);
+
+    emit SignalProjectEdited();
+  }
+}
+

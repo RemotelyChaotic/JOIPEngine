@@ -21,6 +21,8 @@ CResourceSnippetOverlay::CResourceSnippetOverlay(QWidget* pParent) :
 
 CResourceSnippetOverlay::~CResourceSnippetOverlay()
 {
+  dynamic_cast<CResourceTreeItemSortFilterProxyModel*>(m_spUi->pResourceSelectTree->model())
+      ->setSourceModel(nullptr);
 }
 
 //----------------------------------------------------------------------------------------

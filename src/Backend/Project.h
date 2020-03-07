@@ -4,7 +4,7 @@
 #include "ISerializable.h"
 #include "Resource.h"
 #include "Scene.h"
-#include "version.h"
+#include "SVersion.h"
 #include <QObject>
 #include <QReadWriteLock>
 #include <QSharedPointer>
