@@ -10,6 +10,7 @@
 #include "Script/BackgroundSnippetOverlay.h"
 #include "Script/IconSnippetOverlay.h"
 #include "Script/ResourceSnippetOverlay.h"
+#include "Script/ScriptEditorModel.h"
 #include "Script/ScriptHighlighter.h"
 #include "Script/TextSnippetOverlay.h"
 #include "Script/TimerSnippetOverlay.h"
@@ -18,13 +19,11 @@
 #include "ui_EditorActionBar.h"
 
 #include <QDebug>
-#include <QFileDialog>
-#include <QFileInfo>
-#include <QMessageBox>
+#include <QStandardItemModel>
 
-namespace
-{
-  const char c_sIdProperty[] = "ID";
+namespace {
+  const qint32 c_iIndexNoScripts = 0;
+  const qint32 c_iIndexScripts   = 1;
 }
 
 //----------------------------------------------------------------------------------------
@@ -42,7 +41,7 @@ CEditorCodeWidget::CEditorCodeWidget(QWidget* pParent) :
   m_spCurrentProject(nullptr),
   m_wpDbManager(),
   m_wpScriptRunner(),
-  m_cachedScriptsMap(),
+  m_pDummyModel(new QStandardItemModel(this)),
   m_iLastIndex(-1)
 {
   m_spUi->setupUi(this);
@@ -62,22 +61,6 @@ void CEditorCodeWidget::Initialize()
 
   m_wpDbManager = CApplication::Instance()->System<CDatabaseManager>();
   m_wpScriptRunner = CApplication::Instance()->System<CScriptRunner>();
-
-  auto spDbManager = m_wpDbManager.lock();
-  if (nullptr != spDbManager)
-  {
-    // needs to be queued, so there's a chance to register script files to the scenes
-    // after adding them and name resolution
-    connect(spDbManager.get(), &CDatabaseManager::SignalResourceAdded,
-            this, &CEditorCodeWidget::SlotResourceAdded, Qt::QueuedConnection);
-
-    connect(spDbManager.get(), &CDatabaseManager::SignalSceneAdded,
-            this, &CEditorCodeWidget::SlotSceneAdded);
-    connect(spDbManager.get(), &CDatabaseManager::SignalSceneRemoved,
-            this, &CEditorCodeWidget::SlotSceneRemoved);
-    connect(spDbManager.get(), &CDatabaseManager::SignalSceneRenamed,
-            this, &CEditorCodeWidget::SlotSceneRenamed);
-  }
 
   m_spBackgroundSnippetOverlay->Initialize(ResourceTreeModel());
   m_spIconSnippetOverlay->Initialize(ResourceTreeModel());
@@ -103,7 +86,12 @@ void CEditorCodeWidget::Initialize()
   connect(m_spThreadSnippetOverlay.get(), &CThreadSnippetOverlay::SignalThreadCode,
           this, &CEditorCodeWidget::SlotInsertGeneratedCode);
 
-  m_iLastIndex = m_spUi->pSceneComboBox->currentIndex();
+  m_spUi->pResourceComboBox->setModel(m_pDummyModel);
+
+  connect(ScriptEditorModel(), &CScriptEditorModel::SignalFileChangedExternally,
+          this, &CEditorCodeWidget::SlotFileChangedExternally);
+
+  m_spUi->pStackedWidget->setCurrentIndex(c_iIndexNoScripts);
 
   m_bInitialized = true;
 }
@@ -115,39 +103,25 @@ void CEditorCodeWidget::LoadProject(tspProject spProject)
   WIDGET_INITIALIZED_GUARD
   if (nullptr == spProject) { return; }
 
+  auto pModel = ScriptEditorModel();
+  m_spUi->pResourceComboBox->setModel(pModel);
+  connect(pModel, &CScriptEditorModel::rowsInserted,
+          this, &CEditorCodeWidget::SlotRowsInserted, Qt::QueuedConnection);
+  connect(pModel, &CScriptEditorModel::rowsRemoved,
+          this, &CEditorCodeWidget::SlotRowsRemoved, Qt::QueuedConnection);
+
   m_spCurrentProject = spProject;
-  m_spCurrentProject->m_rwLock.lockForRead();
-  auto vspScenes = m_spCurrentProject->m_vspScenes;
-  m_spCurrentProject->m_rwLock.unlock();
-
-  for (auto spScene : vspScenes)
-  {
-    qint32 iId = -1;
-    QString sName;
-    if (nullptr != spScene)
-    {
-      QReadLocker locker(&spScene->m_rwLock);
-      sName = spScene->m_sName;
-      iId = spScene->m_iId;
-    }
-
-    if (-1 != iId)
-    {
-      m_spUi->pSceneComboBox->blockSignals(true);
-      m_spUi->pSceneComboBox->addItem(sName, iId);
-      m_spUi->pSceneComboBox->blockSignals(false);
-    }
-  }
-
-  if (m_spUi->pSceneComboBox->count() > 0)
-  {
-    m_spUi->pSceneComboBox->blockSignals(true);
-    m_spUi->pSceneComboBox->setCurrentIndex(0);
-    m_spUi->pSceneComboBox->blockSignals(false);
-    on_pSceneComboBox_currentIndexChanged(0);
-  }
-
   m_spResourceSnippetOverlay->LoadProject(m_spCurrentProject);
+
+  if (0 < ScriptEditorModel()->rowCount())
+  {
+    on_pResourceComboBox_currentIndexChanged(0);
+    m_spUi->pStackedWidget->setCurrentIndex(c_iIndexScripts);
+  }
+  else
+  {
+    m_spUi->pStackedWidget->setCurrentIndex(c_iIndexNoScripts);
+  }
 
   auto spScriptRunner = m_wpScriptRunner.lock();
   if (nullptr != spScriptRunner)
@@ -165,7 +139,11 @@ void CEditorCodeWidget::UnloadProject()
   WIDGET_INITIALIZED_GUARD
 
   SlotDebugStop();
+
+  m_spUi->pCodeEdit->blockSignals(true);
   m_spUi->pCodeEdit->ResetWidget();
+  m_spUi->pCodeEdit->clear();
+  m_spUi->pCodeEdit->blockSignals(false);
 
   auto spScriptRunner = m_wpScriptRunner.lock();
   if (nullptr != spScriptRunner)
@@ -179,8 +157,16 @@ void CEditorCodeWidget::UnloadProject()
 
   m_spCurrentProject = nullptr;
 
-  m_spUi->pSceneComboBox->clear();
-  m_cachedScriptsMap.clear();
+  m_iLastIndex = -1;
+
+  auto pModel = ScriptEditorModel();
+  disconnect(pModel, &CScriptEditorModel::rowsInserted,
+             this, &CEditorCodeWidget::SlotRowsInserted);
+  disconnect(pModel, &CScriptEditorModel::rowsRemoved,
+             this, &CEditorCodeWidget::SlotRowsRemoved);
+
+  m_spUi->pResourceComboBox->setModel(m_pDummyModel);
+  m_spUi->pResourceComboBox->clear();
 
   m_spBackgroundSnippetOverlay->Hide();
   m_spIconSnippetOverlay->Hide();
@@ -201,50 +187,11 @@ void CEditorCodeWidget::SaveProject()
   m_spCurrentProject->m_rwLock.unlock();
 
   // save current contents
-  qint32 iId = m_spUi->pSceneComboBox->itemData(m_spUi->pSceneComboBox->currentIndex()).toInt();
-  auto itMap = m_cachedScriptsMap.find(iId);
-  if (m_cachedScriptsMap.end() != itMap)
+  auto pScriptItem = ScriptEditorModel()->CachedScript(m_spUi->pResourceComboBox->currentIndex());
+  if (nullptr != pScriptItem)
   {
-    itMap->second.m_data = m_spUi->pCodeEdit->toPlainText().toUtf8();
-  }
-
-  // iterate through and save content
-  for (auto it = m_cachedScriptsMap.begin(); m_cachedScriptsMap.end() != it; ++it)
-  {
-    if (it->second.m_bChanged)
-    {
-      SetSceneScriptModifiedFlag(it->first, false);
-
-      auto spDbManager = m_wpDbManager.lock();
-      if (nullptr != spDbManager)
-      {
-        auto spScene = spDbManager->FindScene(m_spCurrentProject, it->first);
-        if (nullptr != spScene)
-        {
-          QReadLocker lockerScene(&spScene->m_rwLock);
-          QString sScriptName = spScene->m_sScript;
-
-          auto spResource = spDbManager->FindResource(m_spCurrentProject, sScriptName);
-          if (nullptr != spResource)
-          {
-            QReadLocker lockerResource(&spResource->m_rwLock);
-            QUrl sPath = spResource->m_sPath;
-            const QString sFilePath = ResourceUrlToAbsolutePath(sPath, sProjectName);
-
-            QFile file(sFilePath);
-            if (file.open(QIODevice::WriteOnly | QIODevice::Truncate))
-            {
-              it->second.m_bIgnoreNextModification = true;
-              file.write(it->second.m_data);
-            }
-            else
-            {
-              qWarning() << "Registered script resource could not be opened.";
-            }
-          }
-        }
-      }
-    }
+    pScriptItem->m_data = m_spUi->pCodeEdit->toPlainText().toUtf8();
+    ScriptEditorModel()->SetSceneScriptModifiedFlag(pScriptItem->m_sId, pScriptItem->m_bChanged);
   }
 }
 
@@ -259,24 +206,11 @@ void CEditorCodeWidget::LoadResource(tspResource spResource)
   const QString sName = spResource->m_sName;
   spResource->m_rwLock.unlock();
 
-  qint32 iId = -1;
-  QReadLocker projectLocker(&m_spCurrentProject->m_rwLock);
-  for (tspScene spScene : m_spCurrentProject->m_vspScenes)
+  qint32 index = ScriptEditorModel()->ScriptIndex(sName);
+  if (-1 != index)
   {
-    QReadLocker sceneLocker(&spScene->m_rwLock);
-    if (spScene->m_sScript == sName)
-    {
-      iId = spScene->m_iId;
-      break;
-    }
-  }
-  projectLocker.unlock();
-
-  if (-1 != iId)
-  {
-    qint32 iIndex = m_spUi->pSceneComboBox->findData(iId);
-    m_spUi->pSceneComboBox->setCurrentIndex(iIndex);
-    on_pSceneComboBox_currentIndexChanged(iIndex);
+    m_spUi->pResourceComboBox->setCurrentIndex(index);
+    on_pResourceComboBox_currentIndexChanged(index);
   }
 }
 
@@ -333,7 +267,7 @@ void CEditorCodeWidget::OnActionBarChanged()
 
 //----------------------------------------------------------------------------------------
 //
-void CEditorCodeWidget::on_pSceneComboBox_currentIndexChanged(qint32 iIndex)
+void CEditorCodeWidget::on_pResourceComboBox_currentIndexChanged(qint32 iIndex)
 {
   WIDGET_INITIALIZED_GUARD
   if (nullptr == m_spCurrentProject) { return; }
@@ -342,77 +276,33 @@ void CEditorCodeWidget::on_pSceneComboBox_currentIndexChanged(qint32 iIndex)
   m_spCurrentProject->m_rwLock.unlock();
 
   // save old contents
-  qint32 iId = m_spUi->pSceneComboBox->itemData(m_iLastIndex).toInt();
-  auto itMap = m_cachedScriptsMap.find(iId);
-  if (m_cachedScriptsMap.end() != itMap)
+  auto pScriptItem = ScriptEditorModel()->CachedScript(m_iLastIndex);
+  if (nullptr != pScriptItem)
   {
-    itMap->second.m_data = m_spUi->pCodeEdit->toPlainText().toUtf8();
+    pScriptItem->m_data = m_spUi->pCodeEdit->toPlainText().toUtf8();
+    ScriptEditorModel()->SetSceneScriptModifiedFlag(pScriptItem->m_sId, pScriptItem->m_bChanged);
   }
 
-  // handle new scene content
-  iId = m_spUi->pSceneComboBox->itemData(iIndex).toInt();
-  itMap = m_cachedScriptsMap.find(iId);
-  if (m_cachedScriptsMap.end() != itMap)
+  m_spUi->pCodeEdit->blockSignals(true);
+  m_spUi->pCodeEdit->ResetWidget();
+  m_spUi->pCodeEdit->clear();
+  m_spUi->pCodeEdit->blockSignals(false);
+
+  // load new contents
+  pScriptItem = ScriptEditorModel()->CachedScript(iIndex);
+  if (nullptr != pScriptItem)
   {
+    if (nullptr != ActionBar())
+    {
+      ActionBar()->m_spUi->DebugButton->setEnabled(nullptr != pScriptItem->m_spScene);
+    }
     m_spUi->pCodeEdit->blockSignals(true);
-    m_spUi->pCodeEdit->clear();
-    m_spUi->pCodeEdit->setPlainText(QString::fromUtf8(m_cachedScriptsMap[iId].m_data));
+    m_spUi->pCodeEdit->setPlainText(QString::fromUtf8(pScriptItem->m_data));
     m_spUi->pCodeEdit->blockSignals(false);
   }
-  else
-  {
-    auto spDbManager = m_wpDbManager.lock();
-    if (nullptr != spDbManager)
-    {
-      auto spScene = spDbManager->FindScene(m_spCurrentProject, iId);
-      if (nullptr != spScene)
-      {
-        QReadLocker lockerScene(&spScene->m_rwLock);
-        QString sScriptName = spScene->m_sScript;
-
-        // create new script ptompt
-        if (sScriptName.isNull() || sScriptName.isEmpty())
-        {
-          AddNewScriptFile(spScene);
-          sScriptName = spScene->m_sScript;
-        }
-
-        auto spResource = spDbManager->FindResource(m_spCurrentProject, sScriptName);
-        if (nullptr != spResource)
-        {
-          QReadLocker lockerResource(&spResource->m_rwLock);
-          QUrl sPath = spResource->m_sPath;
-          const QString sFilePath = ResourceUrlToAbsolutePath(sPath, sProjectName);
-
-          if (QFileInfo(sFilePath).exists())
-          {
-            m_cachedScriptsMap.insert({iId, SCachedMapItem()});
-            m_cachedScriptsMap[iId].m_data = LoadScriptFile(sFilePath);
-            m_cachedScriptsMap[iId].m_watcher.removePaths(m_cachedScriptsMap[iId].m_watcher.files());
-            m_cachedScriptsMap[iId].m_watcher.removePaths(m_cachedScriptsMap[iId].m_watcher.directories());
-            m_cachedScriptsMap[iId].m_watcher.addPath(QFileInfo(sFilePath).absoluteFilePath());
-            m_cachedScriptsMap[iId].m_watcher.setProperty(c_sIdProperty, iId);
-            connect(&m_cachedScriptsMap[iId].m_watcher, &QFileSystemWatcher::fileChanged,
-                    this, &CEditorCodeWidget::SlotFileChanged, Qt::UniqueConnection);
-
-            m_spUi->pCodeEdit->blockSignals(true);
-            m_spUi->pCodeEdit->clear();
-            m_spUi->pCodeEdit->setPlainText(QString::fromUtf8(m_cachedScriptsMap[iId].m_data));
-            m_spUi->pCodeEdit->blockSignals(false);
-          }
-          else
-          {
-            qWarning() << "Registered script resource does not exist.";
-          }
-        }
-      }
-    }
-  }
-
-  m_spUi->pCodeEdit->ResetWidget();
   m_spUi->pCodeEdit->update();
 
-  m_iLastIndex = m_spUi->pSceneComboBox->currentIndex();
+  m_iLastIndex = iIndex;
 }
 
 //----------------------------------------------------------------------------------------
@@ -421,8 +311,14 @@ void CEditorCodeWidget::on_pCodeEdit_textChanged()
 {
   WIDGET_INITIALIZED_GUARD
 
-  qint32 iId = m_spUi->pSceneComboBox->itemData(m_spUi->pSceneComboBox->currentIndex()).toInt();
-  SetSceneScriptModifiedFlag(iId, true);
+  qint32 index = m_spUi->pResourceComboBox->currentIndex();
+  auto pScriptItem = ScriptEditorModel()->CachedScript(index);
+  if (nullptr != pScriptItem)
+  {
+    pScriptItem->m_bChanged = true;
+    pScriptItem->m_data = m_spUi->pCodeEdit->toPlainText().toUtf8();
+    ScriptEditorModel()->SetSceneScriptModifiedFlag(pScriptItem->m_sId, true);
+  }
 }
 
 //----------------------------------------------------------------------------------------
@@ -442,12 +338,12 @@ void CEditorCodeWidget::SlotDebugStart()
     }
 
     // get Scene name
-    auto spDbManager = m_wpDbManager.lock();
     QString sSceneName = QString();
-    if (nullptr != spDbManager)
+    qint32 index = m_spUi->pResourceComboBox->currentIndex();
+    auto pScriptItem = ScriptEditorModel()->CachedScript(index);
+    if (nullptr != pScriptItem)
     {
-      qint32 iId = m_spUi->pSceneComboBox->itemData(m_iLastIndex).toInt();
-      auto spScene = spDbManager->FindScene(m_spCurrentProject, iId);
+      auto spScene = pScriptItem->m_spScene;
       if (nullptr != spScene)
       {
         QReadLocker locker(&spScene->m_rwLock);
@@ -496,46 +392,24 @@ void CEditorCodeWidget::SlotDebugStop()
 
 //----------------------------------------------------------------------------------------
 //
-void CEditorCodeWidget::SlotFileChanged(const QString& sPath)
+void CEditorCodeWidget::SlotFileChangedExternally(const QString& sName)
 {
-  WIDGET_INITIALIZED_GUARD
-
-  QFileSystemWatcher* pWatcher = qobject_cast<QFileSystemWatcher*>(sender());
-  if (nullptr != pWatcher)
+  qint32 index = m_spUi->pResourceComboBox->currentIndex();
+  auto pScriptItem = ScriptEditorModel()->CachedScript(sName);
+  if (index == ScriptEditorModel()->ScriptIndex(sName) && nullptr != pScriptItem)
   {
-    qint32 iId = pWatcher->property(c_sIdProperty).toInt();
-    auto it = m_cachedScriptsMap.find(iId);
-    if (m_cachedScriptsMap.end() != it)
-    {
-      if (it->second.m_bIgnoreNextModification)
-      {
-        it->second.m_bIgnoreNextModification = false;
-      }
-      else
-      {
-        QMessageBox msgBox;
-        msgBox.setText("The document has been modified on the disc.");
-        msgBox.setInformativeText("Do you want to reload the file or keep the local file?");
-        QPushButton* pReloadButton = msgBox.addButton(tr("Reload"), QMessageBox::AcceptRole);
-        QPushButton* pKeepButton = msgBox.addButton(tr("Keep"), QMessageBox::RejectRole);
-        msgBox.setDefaultButton(pKeepButton);
-        msgBox.exec();
+    m_spUi->pCodeEdit->blockSignals(true);
+    m_spUi->pCodeEdit->ResetWidget();
+    m_spUi->pCodeEdit->clear();
+    m_spUi->pCodeEdit->blockSignals(false);
 
-        if (msgBox.clickedButton() == pReloadButton)
-        {
-          it->second.m_data = LoadScriptFile(sPath);
-          m_spUi->pCodeEdit->blockSignals(true);
-          m_spUi->pCodeEdit->clear();
-          m_spUi->pCodeEdit->setPlainText(QString::fromUtf8(m_cachedScriptsMap[iId].m_data));
-          m_spUi->pCodeEdit->blockSignals(false);
-          SetSceneScriptModifiedFlag(iId, false);
-        }
-        else
-        {
-          SetSceneScriptModifiedFlag(iId, true);
-        }
-      }
-    }
+    // load new contents
+    ActionBar()->m_spUi->DebugButton->setEnabled(nullptr != pScriptItem->m_spScene);
+    m_spUi->pCodeEdit->blockSignals(true);
+    m_spUi->pCodeEdit->setPlainText(QString::fromUtf8(pScriptItem->m_data));
+    m_spUi->pCodeEdit->blockSignals(false);
+
+    m_spUi->pCodeEdit->update();
   }
 }
 
@@ -550,197 +424,23 @@ void CEditorCodeWidget::SlotInsertGeneratedCode(const QString& sCode)
 
 //----------------------------------------------------------------------------------------
 //
-void CEditorCodeWidget::SlotResourceAdded(qint32 iProjId, const QString& sName)
+void CEditorCodeWidget::SlotRowsInserted(const QModelIndex& parent, int iFirst, int iLast)
 {
-  WIDGET_INITIALIZED_GUARD
-  if (nullptr == m_spCurrentProject) { return; }
-  m_spCurrentProject->m_rwLock.lockForRead();
-  qint32 iCurrentId = m_spCurrentProject->m_iId;
-  m_spCurrentProject->m_rwLock.unlock();
-
-  if (iCurrentId != iProjId) { return; }
-
-  qint32 iCurrentSceneId =
-      m_spUi->pSceneComboBox->itemData(m_spUi->pSceneComboBox->currentIndex()).toInt();
-
-  auto spDbManager = m_wpDbManager.lock();
-  if (nullptr != spDbManager)
+  Q_UNUSED(parent) Q_UNUSED(iFirst) Q_UNUSED(iLast)
+  if (0 < ScriptEditorModel()->rowCount())
   {
-    auto spScene = spDbManager->FindScene(m_spCurrentProject, iCurrentSceneId);
-    if (nullptr != spScene)
-    {
-      spScene->m_rwLock.lockForRead();
-      bool bIsScriptForCurrentScene = spScene->m_sScript == sName;
-      spScene->m_rwLock.unlock();
-
-      if (bIsScriptForCurrentScene)
-      {
-        on_pSceneComboBox_currentIndexChanged(iCurrentSceneId);
-      }
-    }
+    on_pResourceComboBox_currentIndexChanged(0);
+    m_spUi->pStackedWidget->setCurrentIndex(c_iIndexScripts);
   }
 }
 
 //----------------------------------------------------------------------------------------
 //
-void CEditorCodeWidget::SlotSceneAdded(qint32 iProjId, qint32 iId)
+void CEditorCodeWidget::SlotRowsRemoved(const QModelIndex& parent, int iFirst, int iLast)
 {
-  WIDGET_INITIALIZED_GUARD
-  if (nullptr == m_spCurrentProject) { return; }
-  m_spCurrentProject->m_rwLock.lockForRead();
-  qint32 iCurrentId = m_spCurrentProject->m_iId;
-  m_spCurrentProject->m_rwLock.unlock();
-
-  if (iCurrentId != iProjId) { return; }
-
-  QString sName = FindSceneName(iId);
-  m_spUi->pSceneComboBox->blockSignals(true);
-  m_spUi->pSceneComboBox->addItem(sName, iId);
-  m_spUi->pSceneComboBox->blockSignals(false);
-}
-
-//----------------------------------------------------------------------------------------
-//
-void CEditorCodeWidget::SlotSceneRenamed(qint32 iProjId, qint32 iId)
-{
-  WIDGET_INITIALIZED_GUARD
-  if (nullptr == m_spCurrentProject) { return; }
-  m_spCurrentProject->m_rwLock.lockForRead();
-  qint32 iCurrentId = m_spCurrentProject->m_iId;
-  m_spCurrentProject->m_rwLock.unlock();
-
-  if (iCurrentId != iProjId) { return; }
-
-  QString sName = FindSceneName(iId);
-  qint32 iIndex = m_spUi->pSceneComboBox->findData(iId);
-  m_spUi->pSceneComboBox->setItemText(iIndex, sName);
-}
-
-//----------------------------------------------------------------------------------------
-//
-void CEditorCodeWidget::SlotSceneRemoved(qint32 iProjId, qint32 iId)
-{
-  WIDGET_INITIALIZED_GUARD
-  if (nullptr == m_spCurrentProject) { return; }
-  m_spCurrentProject->m_rwLock.lockForRead();
-  qint32 iCurrentId = m_spCurrentProject->m_iId;
-  m_spCurrentProject->m_rwLock.unlock();
-
-  if (iCurrentId != iProjId) { return; }
-
-  qint32 iIndex = m_spUi->pSceneComboBox->findData(iId);
-  m_spUi->pSceneComboBox->removeItem(iIndex);
-
-  // delete cached script
-  auto it = m_cachedScriptsMap.find(iId);
-  if (m_cachedScriptsMap.end() != it)
+  Q_UNUSED(parent) Q_UNUSED(iFirst) Q_UNUSED(iLast)
+  if (0 >= ScriptEditorModel()->rowCount())
   {
-    m_cachedScriptsMap.erase(it);
-  }
-}
-
-//----------------------------------------------------------------------------------------
-//
-void CEditorCodeWidget::AddNewScriptFile(tspScene spScene)
-{
-  auto spDbManager = m_wpDbManager.lock();
-  if (nullptr != spScene && nullptr != spDbManager)
-  {
-    // if there is no script -> create
-    QReadLocker locker(&spScene->m_rwLock);
-    if (spScene->m_sScript.isNull() || spScene->m_sScript.isEmpty())
-    {
-      const QString sName = PhysicalProjectName(m_spCurrentProject);
-      QString sCurrentFolder = CApplication::Instance()->Settings()->ContentFolder();
-      QUrl sUrl = QFileDialog::getSaveFileUrl(this,
-          tr("Create Script File"), QUrl::fromLocalFile(sCurrentFolder + "/" + sName),
-          "Script Files (*.js)");
-
-      if (sUrl.isValid())
-      {
-        QFileInfo info(sUrl.toLocalFile());
-        QDir projectDir(m_spSettings->ContentFolder() + "/" + sName);
-        if (!info.absoluteFilePath().contains(projectDir.absolutePath()))
-        {
-          qWarning() << "File is not in subfolder of Project.";
-        }
-        else
-        {
-          QString sRelativePath = projectDir.relativeFilePath(info.absoluteFilePath());
-          QUrl sUrlToSave = QUrl::fromLocalFile(sRelativePath);
-          QFile jsFile(info.absoluteFilePath());
-          if (jsFile.open(QIODevice::WriteOnly | QIODevice::Truncate))
-          {
-            jsFile.write(QString("// instert code to control scene").toUtf8());
-            QString sResource = spDbManager->AddResource(m_spCurrentProject, sUrlToSave,
-                                                         EResourceType::eOther);
-            spScene->m_sScript = sResource;
-          }
-          else
-          {
-            qWarning() << "Could not write script file.";
-          }
-        }
-      }
-    }
-  }
-}
-
-//----------------------------------------------------------------------------------------
-//
-QString CEditorCodeWidget::FindSceneName(qint32 iId)
-{
-  QString sName;
-  auto spDbManager = m_wpDbManager.lock();
-  if (nullptr != spDbManager)
-  {
-    auto spScene = spDbManager->FindScene(m_spCurrentProject, iId);
-    if (nullptr != spScene)
-    {
-      QReadLocker locker(&spScene->m_rwLock);
-      sName = spScene->m_sName;
-    }
-  }
-  return sName;
-}
-
-//----------------------------------------------------------------------------------------
-//
-QByteArray CEditorCodeWidget::LoadScriptFile(const QString& sFile)
-{
-  QByteArray scriptContents;
-  QFile scriptFile(sFile);
-  if (scriptFile.open(QIODevice::ReadOnly))
-  {
-    scriptContents = scriptFile.readAll();
-  }
-  else
-  {
-    qWarning() << "Registered script resource could not be opened.";
-  }
-  return scriptContents;
-}
-
-//----------------------------------------------------------------------------------------
-//
-void CEditorCodeWidget::SetSceneScriptModifiedFlag(qint32 iId, bool bModified)
-{
-  auto it = m_cachedScriptsMap.find(iId);
-  if (m_cachedScriptsMap.end() != it && it->second.m_bChanged == bModified) return;
-  if (m_cachedScriptsMap.end() != it)
-  {
-    it->second.m_bChanged = bModified;
-  }
-
-  QString sName = FindSceneName(iId);
-  qint32 iIndex = m_spUi->pSceneComboBox->findData(iId);
-  if (!bModified)
-  {
-    m_spUi->pSceneComboBox->setItemText(iIndex, sName);
-  }
-  else
-  {
-    m_spUi->pSceneComboBox->setItemText(iIndex, sName + " *");
-    emit SignalProjectEdited();
+    m_spUi->pStackedWidget->setCurrentIndex(c_iIndexNoScripts);
   }
 }

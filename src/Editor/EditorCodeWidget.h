@@ -2,7 +2,6 @@
 #define EDITORCODEWIDGET_H
 
 #include "EditorWidgetBase.h"
-#include <QFileSystemWatcher>
 #include <QPointer>
 #include <memory>
 
@@ -16,6 +15,7 @@ class CDatabaseManager;
 class CScriptHighlighter;
 class CScriptRunner;
 class CSettings;
+class QStandardItemModel;
 namespace Ui {
   class CEditorCodeWidget;
 }
@@ -23,26 +23,6 @@ struct SResource;
 struct SScene;
 typedef std::shared_ptr<SResource> tspResource;
 typedef std::shared_ptr<SScene> tspScene;
-
-//----------------------------------------------------------------------------------------
-//
-struct SCachedMapItem
-{
-  SCachedMapItem() :
-    m_watcher(), m_data(), m_bChanged(false), m_bIgnoreNextModification(false)
-  {}
-  SCachedMapItem(const SCachedMapItem& other) :
-    m_watcher(), m_data(other.m_data), m_bChanged(other.m_bChanged),
-    m_bIgnoreNextModification(other.m_bIgnoreNextModification)
-  {
-    m_watcher.addPaths(other.m_watcher.directories() + other.m_watcher.files());
-  }
-
-  QFileSystemWatcher  m_watcher;
-  QByteArray          m_data;
-  bool                m_bChanged;
-  bool                m_bIgnoreNextModification;
-};
 
 //----------------------------------------------------------------------------------------
 //
@@ -66,22 +46,17 @@ protected:
   void OnActionBarChanged() override;
 
 protected slots:
-  void on_pSceneComboBox_currentIndexChanged(qint32 iIndex);
+  void on_pResourceComboBox_currentIndexChanged(qint32 iIndex);
   void on_pCodeEdit_textChanged();
   void SlotDebugStart();
   void SlotDebugStop();
-  void SlotFileChanged(const QString& sPath);
+  void SlotFileChangedExternally(const QString& sName);
   void SlotInsertGeneratedCode(const QString& sCode);
-  void SlotResourceAdded(qint32 iProjId, const QString& sName);
-  void SlotSceneAdded(qint32 iProjId, qint32 iId);
-  void SlotSceneRenamed(qint32 iProjId, qint32 iId);
-  void SlotSceneRemoved(qint32 iProjId, qint32 iId);
+  void SlotRowsInserted(const QModelIndex& parent, int iFirst, int iLast);
+  void SlotRowsRemoved(const QModelIndex& parent, int iFirst, int iLast);
 
 private:
-  void AddNewScriptFile(tspScene spScene);
   QString FindSceneName(qint32 iId);
-  QByteArray LoadScriptFile(const QString& sFile);
-  void SetSceneScriptModifiedFlag(qint32 iId, bool bModified);
 
   std::unique_ptr<Ui::CEditorCodeWidget>     m_spUi;
   std::unique_ptr<CBackgroundSnippetOverlay> m_spBackgroundSnippetOverlay;
@@ -95,7 +70,7 @@ private:
   std::weak_ptr<CDatabaseManager>            m_wpDbManager;
   std::weak_ptr<CScriptRunner>               m_wpScriptRunner;
   QPointer<CScriptHighlighter>               m_pHighlighter;
-  std::map<qint32, SCachedMapItem>           m_cachedScriptsMap;
+  QPointer<QStandardItemModel>               m_pDummyModel;
   qint32                                     m_iLastIndex;
 };
 
