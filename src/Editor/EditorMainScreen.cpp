@@ -30,7 +30,7 @@ namespace
 CEditorMainScreen::CEditorMainScreen(QWidget* pParent) :
   QWidget(pParent),
   m_spUi(std::make_unique<Ui::CEditorMainScreen>()),
-  m_spEditorModel(std::make_unique<CEditorModel>()),
+  m_spEditorModel(std::make_unique<CEditorModel>(this)),
   m_spWidgetsMap(),
   m_spCurrentProject(nullptr),
   m_wpDbManager(),

@@ -8,6 +8,7 @@
 class CEditorActionBar;
 class CEditorModel;
 class CResourceTreeItemModel;
+class CScriptEditorModel;
 namespace QtNodes {
   class FlowScene;
 }
@@ -40,6 +41,7 @@ protected:
   CEditorModel* EditorModel() const;
   QtNodes::FlowScene* FlowSceneModel() const;
   CResourceTreeItemModel* ResourceTreeModel() const;
+  CScriptEditorModel* ScriptEditorModel() const;
 
   CEditorActionBar*                                m_pActionBar;
   CEditorModel*                                    m_pEditorModel;

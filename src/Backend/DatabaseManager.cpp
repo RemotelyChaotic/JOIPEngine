@@ -793,7 +793,7 @@ bool CDatabaseManager::SerializeProjectPrivate(tspProject& spProject)
   QDir sContentFolder(m_spSettings->ContentFolder());
 
   // first rename old folder
-  if (!sOldName.isNull())
+  if (!sOldName.isEmpty())
   {
     if (QFileInfo(m_spSettings->ContentFolder() + QDir::separator() + sOldName).exists())
     {

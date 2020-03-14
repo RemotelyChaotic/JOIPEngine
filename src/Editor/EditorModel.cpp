@@ -2,13 +2,14 @@
 #include "Application.h"
 #include "Backend/DatabaseManager.h"
 #include "Backend/Project.h"
-#include "Resources/ResourceTreeItemModel.h"
 #include "NodeEditor/EndNodeModel.h"
 #include "NodeEditor/PathMergerModel.h"
 #include "NodeEditor/PathSplitterModel.h"
 #include "NodeEditor/SceneNodeModel.h"
 #include "NodeEditor/SceneTranstitionData.h"
 #include "NodeEditor/StartNodeModel.h"
+#include "Resources/ResourceTreeItemModel.h"
+#include "Script/ScriptEditorModel.h"
 
 #include <nodes/ConnectionStyle>
 #include <nodes/DataModelRegistry>
@@ -43,15 +44,19 @@ namespace
 
 //----------------------------------------------------------------------------------------
 //
-CEditorModel::CEditorModel(QObject* pParent) :
-  QObject(pParent),
+CEditorModel::CEditorModel(QWidget* pParent) :
+  QObject(nullptr),
   m_spResourceTreeModel(std::make_unique<CResourceTreeItemModel>()),
+  m_spScriptEditorModel(std::make_unique<CScriptEditorModel>(pParent)),
   m_spFlowSceneModel(std::make_unique<FlowScene>(RegisterDataModels(), nullptr)),
   m_spSettings(CApplication::Instance()->Settings()),
   m_spCurrentProject(nullptr),
   m_wpDbManager(CApplication::Instance()->System<CDatabaseManager>()),
+  m_pParentWidget(pParent),
   m_bInitializingNewProject(false)
 {
+  connect(m_spScriptEditorModel.get(), &CScriptEditorModel::SignalProjectEdited,
+          this, &CEditorModel::SignalProjectEdited, Qt::DirectConnection);
   connect(m_spFlowSceneModel.get(), &FlowScene::nodeCreated,
           this, &CEditorModel::SlotNodeCreated);
   connect(m_spFlowSceneModel.get(), &FlowScene::nodeDeleted,
@@ -82,6 +87,13 @@ QtNodes::FlowScene* CEditorModel::FlowSceneModel() const
 CResourceTreeItemModel* CEditorModel::ResourceTreeModel() const
 {
   return m_spResourceTreeModel.get();
+}
+
+//----------------------------------------------------------------------------------------
+//
+CScriptEditorModel* CEditorModel::ScriptEditorModel() const
+{
+  return m_spScriptEditorModel.get();
 }
 
 //----------------------------------------------------------------------------------------
@@ -221,8 +233,8 @@ void CEditorModel::AddFilesToProjectResources(QPointer<QWidget> pParentForDialog
 
 //----------------------------------------------------------------------------------------
 //
-void CEditorModel::AddNewScriptFile(QPointer<QWidget> pParentForDialog,
-                                    tspScene spScene)
+void CEditorModel::AddNewScriptFileToScene(QPointer<QWidget> pParentForDialog,
+                                           tspScene spScene)
 {
   auto spDbManager = m_wpDbManager.lock();
   if (nullptr != spScene && nullptr != spDbManager)
@@ -319,6 +331,7 @@ void CEditorModel::LoadProject(qint32 iId)
     }
 
 
+    // nodes
     QReadLocker projectLocker(&m_spCurrentProject->m_rwLock);
     if (!m_spCurrentProject->m_sSceneModel.isNull() &&
         !m_spCurrentProject->m_sSceneModel.isEmpty())
@@ -349,6 +362,7 @@ void CEditorModel::LoadProject(qint32 iId)
   }
 
   m_spResourceTreeModel->InitializeModel(m_spCurrentProject);
+  m_spScriptEditorModel->InitializeModel(m_spCurrentProject);
 }
 
 //----------------------------------------------------------------------------------------
@@ -388,6 +402,7 @@ void CEditorModel::SaveProject()
     return;
   }
 
+  // nodes
   QByteArray arr = m_spFlowSceneModel->saveToMemory();
 
   auto spDbManager = m_wpDbManager.lock();
@@ -430,6 +445,7 @@ void CEditorModel::SaveProject()
 //
 void CEditorModel::UnloadProject()
 {
+  m_spScriptEditorModel->DeInitializeModel();
   m_spResourceTreeModel->DeInitializeModel();
   m_spFlowSceneModel->clearScene();
 
@@ -449,11 +465,13 @@ void CEditorModel::UnloadProject()
 //
 void CEditorModel::SerializeProject()
 {
-  if (nullptr != m_spCurrentProject && !m_bInitializingNewProject)
+  if (nullptr == m_spCurrentProject && !m_bInitializingNewProject)
   {
     qWarning() << "Trying to serialize null-project.";
     return;
   }
+
+  m_spScriptEditorModel->SerializeProject();
 
   auto spDbManager = m_wpDbManager.lock();
   if (nullptr != spDbManager)
@@ -478,19 +496,20 @@ void CEditorModel::SlotNodeCreated(Node &n)
   }
 
   auto spDbManager = m_wpDbManager.lock();
-  CSceneNodeModel* pSceneModel = dynamic_cast<CSceneNodeModel*>(n.nodeDataModel());
-  if (nullptr != pSceneModel && nullptr != spDbManager)
+  if (nullptr != spDbManager)
   {
-    m_spCurrentProject->m_rwLock.lockForRead();
-    qint32 iId = m_spCurrentProject->m_iId;
-    m_spCurrentProject->m_rwLock.unlock();
-    pSceneModel->SetProjectId(iId);
+    CSceneNodeModel* pSceneModel = dynamic_cast<CSceneNodeModel*>(n.nodeDataModel());
+    if (nullptr != pSceneModel)
+    {
+      m_spCurrentProject->m_rwLock.lockForRead();
+      qint32 iId = m_spCurrentProject->m_iId;
+      m_spCurrentProject->m_rwLock.unlock();
+      pSceneModel->SetProjectId(iId);
 
-    qint32 iSceneId = pSceneModel->SceneId();
-    auto spScene = spDbManager->FindScene(m_spCurrentProject, iSceneId);
-    // TODO: Add widget
-    AddNewScriptFile(nullptr, spScene);
-
+      qint32 iSceneId = pSceneModel->SceneId();
+      auto spScene = spDbManager->FindScene(m_spCurrentProject, iSceneId);
+      AddNewScriptFileToScene(m_pParentWidget, spScene);
+    }
     emit SignalProjectEdited();
   }
 }
@@ -506,12 +525,14 @@ void CEditorModel::SlotNodeDeleted(QtNodes::Node &n)
   }
 
   auto spDbManager = m_wpDbManager.lock();
-  CSceneNodeModel* pSceneModel = dynamic_cast<CSceneNodeModel*>(n.nodeDataModel());
-  if (nullptr != pSceneModel && nullptr != spDbManager)
+  if (nullptr != spDbManager)
   {
-    qint32 iSceneId = pSceneModel->SceneId();
-    spDbManager->RemoveScene(m_spCurrentProject, iSceneId);
-
+    CSceneNodeModel* pSceneModel = dynamic_cast<CSceneNodeModel*>(n.nodeDataModel());
+    if (nullptr != pSceneModel)
+    {
+      qint32 iSceneId = pSceneModel->SceneId();
+      spDbManager->RemoveScene(m_spCurrentProject, iSceneId);
+    }
     emit SignalProjectEdited();
   }
 }

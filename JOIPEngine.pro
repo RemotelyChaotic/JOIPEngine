@@ -128,7 +128,8 @@ SOURCES += \
     src/Backend/ScriptStorage.cpp \
     src/UISoundEmitter.cpp \
     src/Editor/Script/ThreadSnippetOverlay.cpp \
-    src/Editor/EditorModel.cpp
+    src/Editor/EditorModel.cpp \
+    src/Editor/Script/ScriptEditorModel.cpp
 
 HEADERS += \
     src/MainWindow.h \
@@ -208,7 +209,8 @@ HEADERS += \
     src/UISoundEmitter.h \
     src/Editor/Script/ThreadSnippetOverlay.h \
     src/Editor/EditorModel.h \
-    src/SVersion.h
+    src/SVersion.h \
+    src/Editor/Script/ScriptEditorModel.h
 
 FORMS += \
     src/MainWindow.ui \

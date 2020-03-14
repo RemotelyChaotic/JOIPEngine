@@ -92,7 +92,6 @@ qint32 CScriptEditorWidget::LineNumberAreaWidth()
 void CScriptEditorWidget::ResetWidget()
 {
   m_pWidgetArea->ClearAllErrors();
-  clear();
 }
 
 //----------------------------------------------------------------------------------------

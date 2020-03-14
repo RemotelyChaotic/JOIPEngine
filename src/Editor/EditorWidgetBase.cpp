@@ -58,3 +58,10 @@ CResourceTreeItemModel* CEditorWidgetBase::ResourceTreeModel() const
 {
   return m_pEditorModel->ResourceTreeModel();
 }
+
+//----------------------------------------------------------------------------------------
+//
+CScriptEditorModel* CEditorWidgetBase::ScriptEditorModel() const
+{
+  return m_pEditorModel->ScriptEditorModel();
+}
