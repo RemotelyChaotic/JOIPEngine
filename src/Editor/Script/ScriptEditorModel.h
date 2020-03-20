@@ -1,7 +1,7 @@
 #ifndef SCRIPTEDITORMODEL_H
 #define SCRIPTEDITORMODEL_H
 
-#include "Backend/Project.h"
+#include "Systems/Project.h"
 #include <QFileSystemWatcher>
 #include <QStandardItemModel>
 

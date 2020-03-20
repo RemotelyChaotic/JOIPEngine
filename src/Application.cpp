@@ -2,9 +2,10 @@
 #include "Enums.h"
 #include "Style.h"
 #include "UISoundEmitter.h"
-#include "Backend/DatabaseManager.h"
-#include "Backend/ScriptRunner.h"
-#include "Backend/ThreadedSystem.h"
+#include "Systems/DatabaseManager.h"
+#include "Systems/HelpFactory.h"
+#include "Systems/ScriptRunner.h"
+#include "Systems/ThreadedSystem.h"
 
 #include <QDebug>
 #include <QFontDatabase>
@@ -14,6 +15,7 @@ CApplication::CApplication(int& argc, char *argv[]) :
   QApplication(argc, argv),
   m_spSystemsMap(),
   m_spSoundEmitter(std::make_unique<CUISoundEmitter>()),
+  m_spHelpFactory(std::make_unique<CHelpFactory>()),
   m_spSettings(nullptr),
   m_bStyleDirty(true),
   m_bInitialized(false)
@@ -23,7 +25,7 @@ CApplication::CApplication(int& argc, char *argv[]) :
 
 CApplication::~CApplication()
 {
-
+  m_spHelpFactory->Deinitialize();
 }
 
 //----------------------------------------------------------------------------------------
@@ -65,6 +67,9 @@ void CApplication::Initialize()
   // sound emitter
   m_spSoundEmitter->Initialize();
 
+  // help factory
+  m_spHelpFactory->Initialize();
+
   // create subsystems
   m_spSystemsMap.insert({ECoreSystems::eDatabaseManager, std::make_shared<CThreadedSystem>()});
   m_spSystemsMap.insert({ECoreSystems::eScriptRunner, std::make_shared<CThreadedSystem>()});
@@ -85,6 +90,12 @@ template<>
 std::weak_ptr<CDatabaseManager> CApplication::System<CDatabaseManager>()
 {
   return std::static_pointer_cast<CDatabaseManager>(m_spSystemsMap[ECoreSystems::eDatabaseManager]->Get());
+}
+
+template<>
+std::weak_ptr<CHelpFactory> CApplication::System<CHelpFactory>()
+{
+  return m_spHelpFactory;
 }
 
 template<>

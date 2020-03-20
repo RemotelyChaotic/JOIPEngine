@@ -1,7 +1,5 @@
 #include "EditorModel.h"
 #include "Application.h"
-#include "Backend/DatabaseManager.h"
-#include "Backend/Project.h"
 #include "NodeEditor/EndNodeModel.h"
 #include "NodeEditor/PathMergerModel.h"
 #include "NodeEditor/PathSplitterModel.h"
@@ -10,6 +8,8 @@
 #include "NodeEditor/StartNodeModel.h"
 #include "Resources/ResourceTreeItemModel.h"
 #include "Script/ScriptEditorModel.h"
+#include "Systems/DatabaseManager.h"
+#include "Systems/Project.h"
 
 #include <nodes/ConnectionStyle>
 #include <nodes/DataModelRegistry>

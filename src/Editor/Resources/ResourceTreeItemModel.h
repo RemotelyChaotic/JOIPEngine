@@ -1,7 +1,7 @@
 #ifndef RESOURCETREEITEMMODEL_H
 #define RESOURCETREEITEMMODEL_H
 
-#include "Backend/Project.h"
+#include "Systems/Project.h"
 #include <QAbstractItemModel>
 #include <QModelIndex>
 #include <QVariant>

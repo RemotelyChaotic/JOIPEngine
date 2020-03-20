@@ -1,11 +1,11 @@
 #include "ResourceSnippetOverlay.h"
 #include "Application.h"
-#include "Backend/DatabaseManager.h"
-#include "Backend/Resource.h"
-#include "Backend/Scene.h"
 #include "Editor/Resources/ResourceTreeItem.h"
 #include "Editor/Resources/ResourceTreeItemModel.h"
 #include "Editor/Resources/ResourceTreeItemSortFilterProxyModel.h"
+#include "Systems/DatabaseManager.h"
+#include "Systems/Resource.h"
+#include "Systems/Scene.h"
 #include "ui_ResourceSnippetOverlay.h"
 
 CResourceSnippetOverlay::CResourceSnippetOverlay(QWidget* pParent) :
@@ -66,10 +66,17 @@ void CResourceSnippetOverlay::UnloadProject()
 
 //----------------------------------------------------------------------------------------
 //
+void CResourceSnippetOverlay::Climb()
+{
+  ClimbToFirstInstanceOf("CEditorMainScreen", false);
+}
+
+//----------------------------------------------------------------------------------------
+//
 void CResourceSnippetOverlay::Resize()
 {
   QPoint newPos =
-      QPoint(m_pTarget->geometry().width() / 2, m_pTarget->geometry().height() / 2) -
+      QPoint(m_pTargetWidget->geometry().width() / 2, m_pTargetWidget->geometry().height() / 2) -
       QPoint(width() / 2, height() / 2);
 
   move(newPos.x(), newPos.y());

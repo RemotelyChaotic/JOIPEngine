@@ -19,7 +19,7 @@ namespace
 //----------------------------------------------------------------------------------------
 //
 CDatabaseManager::CDatabaseManager() :
-  CThreadedObject(),
+  CSystemBase(),
   m_spSettings(CApplication::Instance()->Settings()),
   m_vspProjectDatabase()
 {

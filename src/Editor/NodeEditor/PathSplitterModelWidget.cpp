@@ -1,5 +1,5 @@
 #include "PathSplitterModelWidget.h"
-#include "Backend/Scene.h"
+#include "Systems/Scene.h"
 #include "ui_PathSplitterModelWidget.h"
 
 CPathSplitterModelWidget::CPathSplitterModelWidget(QWidget* pParent) :

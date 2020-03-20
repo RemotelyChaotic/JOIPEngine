@@ -1,8 +1,8 @@
 #include "ProjectCardSelectionWidget.h"
 #include "Application.h"
 #include "Constants.h"
-#include "Backend/DatabaseManager.h"
-#include "Backend/Project.h"
+#include "Systems/DatabaseManager.h"
+#include "Systems/Project.h"
 #include "Widgets/ResourceDisplayWidget.h"
 #include "ui_ProjectCardSelectionWidget.h"
 

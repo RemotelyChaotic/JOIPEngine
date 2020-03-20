@@ -1,7 +1,7 @@
 #include "EditorResourceDisplayWidget.h"
 #include "Application.h"
 #include "EditorActionBar.h"
-#include "Backend/DatabaseManager.h"
+#include "Systems/DatabaseManager.h"
 #include "ui_EditorResourceDisplayWidget.h"
 #include "ui_EditorActionBar.h"
 

@@ -2,7 +2,7 @@
 #include "Application.h"
 #include "FlowLayout.h"
 #include "Settings.h"
-#include "Backend/Resource.h"
+#include "Systems/Resource.h"
 #include "Widgets/ResourceDisplayWidget.h"
 #include "ui_InformationWidget.h"
 

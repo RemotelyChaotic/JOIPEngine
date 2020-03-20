@@ -20,7 +20,7 @@ struct SScene;
 typedef std::shared_ptr<SResource> tspResource;
 typedef std::shared_ptr<SScene> tspScene;
 
-class CScriptRunner : public CThreadedObject
+class CScriptRunner : public CSystemBase
 {
   Q_OBJECT
   Q_DISABLE_COPY(CScriptRunner)

@@ -15,7 +15,7 @@ typedef std::shared_ptr<SProject> tspProject;
 typedef std::vector<tspProject>   tvspProject;
 typedef std::shared_ptr<SScene>   tspScene;
 
-class CDatabaseManager : public CThreadedObject
+class CDatabaseManager : public CSystemBase
 {
   Q_OBJECT
   Q_DISABLE_COPY(CDatabaseManager)

@@ -214,7 +214,7 @@
   <customwidget>
    <class>CSceneMainScreen</class>
    <extends>QWidget</extends>
-   <header>Scenes/SceneMainScreen.h</header>
+   <header>Player/SceneMainScreen.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

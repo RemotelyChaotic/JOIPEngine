@@ -1,7 +1,7 @@
 #ifndef PATHSPLITTERMODEL_H
 #define PATHSPLITTERMODEL_H
 
-#include "Backend/Scene.h"
+#include "Systems/Scene.h"
 #include <nodes/NodeDataModel>
 
 class CPathSplitterModelWidget;

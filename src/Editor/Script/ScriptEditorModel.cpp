@@ -1,8 +1,8 @@
 #include "ScriptEditorModel.h"
 #include "Application.h"
-#include "Backend/DatabaseManager.h"
-#include "Backend/Resource.h"
-#include "Backend/Scene.h"
+#include "Systems/DatabaseManager.h"
+#include "Systems/Resource.h"
+#include "Systems/Scene.h"
 
 #include <QPushButton>
 #include <QMessageBox>

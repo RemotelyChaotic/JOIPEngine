@@ -1,11 +1,11 @@
 #include "ThreadedSystem.h"
 
-CThreadedObject::CThreadedObject() :
+CSystemBase::CSystemBase() :
   QObject(nullptr),
   m_bInitialized(false)
 {}
 
-CThreadedObject::~CThreadedObject()
+CSystemBase::~CSystemBase()
 {}
 
 //----------------------------------------------------------------------------------------

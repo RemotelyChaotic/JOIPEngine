@@ -15,10 +15,18 @@ CTimerSnippetOverlay::~CTimerSnippetOverlay()
 
 //----------------------------------------------------------------------------------------
 //
+void CTimerSnippetOverlay::Climb()
+{
+  ClimbToFirstInstanceOf("CEditorMainScreen", false);
+}
+
+
+//----------------------------------------------------------------------------------------
+//
 void CTimerSnippetOverlay::Resize()
 {
   QPoint newPos =
-      QPoint(m_pTarget->geometry().width() / 2, m_pTarget->geometry().height() / 2) -
+      QPoint(m_pTargetWidget->geometry().width() / 2, m_pTargetWidget->geometry().height() / 2) -
       QPoint(width() / 2, height() / 2);
 
   move(newPos.x(), newPos.y());

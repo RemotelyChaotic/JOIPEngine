@@ -1,8 +1,8 @@
 #ifndef SCENENODEMODEL_H
 #define SCENENODEMODEL_H
 
-#include "Backend/Project.h"
-#include "Backend/Scene.h"
+#include "Systems/Project.h"
+#include "Systems/Scene.h"
 
 #include <nodes/NodeDataModel>
 #include <memory>

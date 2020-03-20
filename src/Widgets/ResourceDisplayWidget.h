@@ -2,7 +2,7 @@
 #define RESOURCEDISPLAYWIDGET_H
 
 #include "Enums.h"
-#include "Backend/Resource.h"
+#include "Systems/Resource.h"
 #include <QtAV/QtAV_Global.h>
 #include <QFutureWatcher>
 #include <QMediaPlayer>

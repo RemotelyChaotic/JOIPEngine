@@ -9,14 +9,14 @@
 #include <memory>
 #include <type_traits>
 
-class CThreadedObject : public QObject
+class CSystemBase : public QObject
 {
   Q_OBJECT
-  Q_DISABLE_COPY(CThreadedObject)
+  Q_DISABLE_COPY(CSystemBase)
 
 public:
-  CThreadedObject();
-  virtual ~CThreadedObject();
+  CSystemBase();
+  virtual ~CSystemBase();
 
   bool IsInitialized() const { return m_bInitialized; }
 
@@ -41,18 +41,18 @@ public:
   CThreadedSystem();
   ~CThreadedSystem();
 
-  std::shared_ptr<CThreadedObject> Get() { return m_spSystem; }
+  std::shared_ptr<CSystemBase> Get() { return m_spSystem; }
 
   template<typename T,
-           typename = std::enable_if<std::is_base_of<CThreadedObject, T>::value>>
+           typename = std::enable_if<std::is_base_of<CSystemBase, T>::value>>
   void RegisterObject()
   {
     m_spSystem = std::shared_ptr<T>(new T, [](T*){});
     m_spSystem->moveToThread(m_pThread.data());
 
-    connect(m_pThread.data(), &QThread::started, m_spSystem.get(), &CThreadedObject::Initialize);
+    connect(m_pThread.data(), &QThread::started, m_spSystem.get(), &CSystemBase::Initialize);
     connect(m_pThread.data(), &QThread::finished, this, &CThreadedSystem::Cleanup, Qt::DirectConnection);
-    connect(m_pThread.data(), &QThread::finished, this, &CThreadedObject::deleteLater);
+    connect(m_pThread.data(), &QThread::finished, this, &CSystemBase::deleteLater);
 
     m_pThread->start();
     while (!m_pThread->isRunning())
@@ -65,8 +65,8 @@ protected slots:
   void Cleanup();
 
 protected:
-  std::shared_ptr<CThreadedObject> m_spSystem;
-  QPointer<QThread>                m_pThread;
+  std::shared_ptr<CSystemBase> m_spSystem;
+  QPointer<QThread>            m_pThread;
 };
 
 #endif // THREADEDSYSTEM_H

@@ -36,6 +36,7 @@ signals:
   void SignalTimerCode(const QString& code);
 
 public slots:
+  void Climb() override;
   void Resize() override;
 
 protected slots:

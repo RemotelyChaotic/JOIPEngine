@@ -1,7 +1,7 @@
 #include "ResourceDisplayWidget.h"
 #include "Application.h"
 #include "Settings.h"
-#include "Backend/Project.h"
+#include "Systems/Project.h"
 #include "ui_ResourceDisplayWidget.h"
 
 #include <QFileInfo>

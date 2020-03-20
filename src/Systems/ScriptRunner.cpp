@@ -17,7 +17,7 @@
 #include <QFileInfo>
 
 CScriptRunner::CScriptRunner() :
-  CThreadedObject(),
+  CSystemBase(),
   m_spSettings(CApplication::Instance()->Settings()),
   m_spScriptEngine(std::make_unique<QJSEngine>()),
   m_spSignalEmitter(std::make_shared<CScriptRunnerSignalEmiter>()),

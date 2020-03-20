@@ -5,8 +5,8 @@
 #include "EditorResourceDisplayWidget.h"
 #include "EditorResourceWidget.h"
 #include "EditorSceneNodeWidget.h"
-#include "Backend/DatabaseManager.h"
-#include "Backend/Project.h"
+#include "Systems/DatabaseManager.h"
+#include "Systems/Project.h"
 #include "ui_EditorMainScreen.h"
 #include "ui_EditorActionBar.h"
 

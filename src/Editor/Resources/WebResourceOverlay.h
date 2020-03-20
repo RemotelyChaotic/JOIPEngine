@@ -19,6 +19,7 @@ public:
   ~CWebResourceOverlay() override;
 
 public slots:
+  void Climb() override;
   void Resize() override;
 
 signals:

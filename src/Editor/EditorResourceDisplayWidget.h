@@ -3,7 +3,7 @@
 
 #include "EditorWidgetBase.h"
 #include "Enums.h"
-#include "Backend/Resource.h"
+#include "Systems/Resource.h"
 #include <memory>
 
 namespace Ui {

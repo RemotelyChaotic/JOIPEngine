@@ -2,10 +2,10 @@
 #include "Application.h"
 #include "EditorActionBar.h"
 #include "EditorModel.h"
-#include "Backend/Project.h"
-#include "Backend/Scene.h"
-#include "Backend/Resource.h"
 #include "NodeEditor/FlowView.h"
+#include "Systems/Project.h"
+#include "Systems/Scene.h"
+#include "Systems/Resource.h"
 #include "ui_EditorSceneNodeWidget.h"
 #include "ui_EditorActionBar.h"
 

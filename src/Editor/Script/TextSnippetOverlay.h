@@ -37,6 +37,7 @@ signals:
   void SignalTextSnippetCode(const QString& code);
 
 public slots:
+  void Climb() override;
   void Resize() override;
   void Show() override;
   

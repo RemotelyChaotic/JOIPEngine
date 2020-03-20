@@ -1,7 +1,7 @@
 #ifndef RESOURCETREEITEM_H
 #define RESOURCETREEITEM_H
 
-#include "Backend/Resource.h"
+#include "Systems/Resource.h"
 #include <QVariant>
 #include <QVector>
 

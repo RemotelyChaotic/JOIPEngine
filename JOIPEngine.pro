@@ -65,11 +65,11 @@ SOURCES += \
     src/SettingsScreen.cpp \
     src/WindowContext.cpp \
     src/EditorScreen.cpp \
-    src/Backend/ThreadedSystem.cpp \
-    src/Backend/DatabaseManager.cpp \
-    src/Backend/Project.cpp \
-    src/Backend/Scene.cpp \
-    src/Backend/Resource.cpp \
+    src/Systems/ThreadedSystem.cpp \
+    src/Systems/DatabaseManager.cpp \
+    src/Systems/Project.cpp \
+    src/Systems/Scene.cpp \
+    src/Systems/Resource.cpp \
     src/Editor/EditorChoiceScreen.cpp \
     src/Editor/EditorMainScreen.cpp \
     src/Editor/Resources/ResourceTreeItem.cpp \
@@ -94,26 +94,26 @@ SOURCES += \
     src/Editor/NodeEditor/PathMergerModel.cpp \
     src/Editor/NodeEditor/PathSplitterModel.cpp \
     src/Editor/NodeEditor/PathSplitterModelWidget.cpp \
-    src/Backend/ScriptRunner.cpp \
+    src/Systems/ScriptRunner.cpp \
     src/Editor/EditorCodeWidget.cpp \
     src/Editor/Script/ScriptEditorWidget.cpp \
     src/Editor/Script/ScriptHighlighter.cpp \
-    src/Backend/ScriptBackground.cpp \
-    src/Backend/ScriptMediaPlayer.cpp \
-    src/Backend/ScriptTextBox.cpp \
-    src/Backend/ScriptTimer.cpp \
-    src/Backend/ScriptThread.cpp \
-    src/Backend/ScriptIcon.cpp \
+    src/Systems/ScriptBackground.cpp \
+    src/Systems/ScriptMediaPlayer.cpp \
+    src/Systems/ScriptTextBox.cpp \
+    src/Systems/ScriptTimer.cpp \
+    src/Systems/ScriptThread.cpp \
+    src/Systems/ScriptIcon.cpp \
     src/SceneScreen.cpp \
-    src/Scenes/SceneMainScreen.cpp \
-    src/Scenes/TextBoxWidget.cpp \
-    src/Scenes/InformationWidget.cpp \
-    src/Scenes/ProjectRunner.cpp \
-    src/Backend/ScriptRunnerSignalEmiter.cpp \
-    src/Scenes/FlowLayout.cpp \
-    src/Scenes/TimerDisplayWidget.cpp \
-    src/Scenes/TimerWidget.cpp \
-    src/Scenes/BackgroundWidget.cpp \
+    src/Player/SceneMainScreen.cpp \
+    src/Player/TextBoxWidget.cpp \
+    src/Player/InformationWidget.cpp \
+    src/Player/ProjectRunner.cpp \
+    src/Systems/ScriptRunnerSignalEmiter.cpp \
+    src/Player/FlowLayout.cpp \
+    src/Player/TimerDisplayWidget.cpp \
+    src/Player/TimerWidget.cpp \
+    src/Player/BackgroundWidget.cpp \
     src/Style.cpp \
     src/Widgets/MenuButton.cpp \
     src/Widgets/TitleLabel.cpp \
@@ -125,11 +125,13 @@ SOURCES += \
     src/Widgets/ColorPicker.cpp \
     src/CreditsScreen.cpp \
     src/Widgets/SearchWidget.cpp \
-    src/Backend/ScriptStorage.cpp \
+    src/Systems/ScriptStorage.cpp \
     src/UISoundEmitter.cpp \
     src/Editor/Script/ThreadSnippetOverlay.cpp \
     src/Editor/EditorModel.cpp \
-    src/Editor/Script/ScriptEditorModel.cpp
+    src/Editor/Script/ScriptEditorModel.cpp \
+    src/Widgets/HelpOverlay.cpp \
+    src/Systems/HelpFactory.cpp
 
 HEADERS += \
     src/MainWindow.h \
@@ -141,12 +143,12 @@ HEADERS += \
     src/WindowContext.h \
     src/IAppStateScreen.h \
     src/EditorScreen.h \
-    src/Backend/ThreadedSystem.h \
-    src/Backend/DatabaseManager.h \
-    src/Backend/Project.h \
-    src/Backend/Scene.h \
-    src/Backend/Resource.h \
-    src/Backend/ISerializable.h \
+    src/Systems/ThreadedSystem.h \
+    src/Systems/DatabaseManager.h \
+    src/Systems/Project.h \
+    src/Systems/Scene.h \
+    src/Systems/Resource.h \
+    src/Systems/ISerializable.h \
     src/Editor/EditorChoiceScreen.h \
     src/Editor/EditorMainScreen.h \
     src/Editor/Resources/ResourceTreeItem.h \
@@ -171,27 +173,27 @@ HEADERS += \
     src/Editor/NodeEditor/PathMergerModel.h \
     src/Editor/NodeEditor/PathSplitterModel.h \
     src/Editor/NodeEditor/PathSplitterModelWidget.h \
-    src/Backend/ScriptRunner.h \
+    src/Systems/ScriptRunner.h \
     src/Editor/EditorCodeWidget.h \
     src/Editor/Script/ScriptEditorWidget.h \
     src/Editor/Script/ScriptHighlighter.h \
-    src/Backend/ScriptBackground.h \
-    src/Backend/ScriptMediaPlayer.h \
-    src/Backend/ScriptTextBox.h \
-    src/Backend/ScriptTimer.h \
-    src/Backend/ScriptThread.h \
-    src/Backend/ScriptIcon.h \
+    src/Systems/ScriptBackground.h \
+    src/Systems/ScriptMediaPlayer.h \
+    src/Systems/ScriptTextBox.h \
+    src/Systems/ScriptTimer.h \
+    src/Systems/ScriptThread.h \
+    src/Systems/ScriptIcon.h \
     src/SceneScreen.h \
-    src/Scenes/SceneMainScreen.h \
-    src/Scenes/TextBoxWidget.h \
+    src/Player/SceneMainScreen.h \
+    src/Player/TextBoxWidget.h \
     src/Widgets/IWidgetBaseInterface.h \
-    src/Scenes/InformationWidget.h \
-    src/Scenes/ProjectRunner.h \
-    src/Backend/ScriptRunnerSignalEmiter.h \
-    src/Scenes/FlowLayout.h \
-    src/Scenes/TimerDisplayWidget.h \
-    src/Scenes/TimerWidget.h \
-    src/Scenes/BackgroundWidget.h \
+    src/Player/InformationWidget.h \
+    src/Player/ProjectRunner.h \
+    src/Systems/ScriptRunnerSignalEmiter.h \
+    src/Player/FlowLayout.h \
+    src/Player/TimerDisplayWidget.h \
+    src/Player/TimerWidget.h \
+    src/Player/BackgroundWidget.h \
     src/Constants.h \
     src/Style.h \
     src/Widgets/MenuButton.h \
@@ -205,12 +207,14 @@ HEADERS += \
     version.h \
     src/CreditsScreen.h \
     src/Widgets/SearchWidget.h \
-    src/Backend/ScriptStorage.h \
+    src/Systems/ScriptStorage.h \
     src/UISoundEmitter.h \
     src/Editor/Script/ThreadSnippetOverlay.h \
     src/Editor/EditorModel.h \
     src/SVersion.h \
-    src/Editor/Script/ScriptEditorModel.h
+    src/Editor/Script/ScriptEditorModel.h \
+    src/Widgets/HelpOverlay.h \
+    src/Systems/HelpFactory.h
 
 FORMS += \
     src/MainWindow.ui \
@@ -230,10 +234,10 @@ FORMS += \
     src/Editor/NodeEditor/PathSplitterModelWidget.ui \
     src/Editor/EditorCodeWidget.ui \
     src/SceneScreen.ui \
-    src/Scenes/SceneMainScreen.ui \
-    src/Scenes/TextBoxWidget.ui \
-    src/Scenes/InformationWidget.ui \
-    src/Scenes/TimerDisplayWidget.ui \
+    src/Player/SceneMainScreen.ui \
+    src/Player/TextBoxWidget.ui \
+    src/Player/InformationWidget.ui \
+    src/Player/TimerDisplayWidget.ui \
     src/Editor/Script/ResourceSnippetOverlay.ui \
     src/Editor/Script/IconSnippetOverlay.ui \
     src/Editor/Script/BackgroundSnippetOverlay.ui \
@@ -242,7 +246,8 @@ FORMS += \
     src/Widgets/ColorPicker.ui \
     src/CreditsScreen.ui \
     src/Widgets/SearchWidget.ui \
-    src/Editor/Script/ThreadSnippetOverlay.ui
+    src/Editor/Script/ThreadSnippetOverlay.ui \
+    src/Widgets/HelpOverlay.ui
 
 RESOURCES += \
     resources.qrc

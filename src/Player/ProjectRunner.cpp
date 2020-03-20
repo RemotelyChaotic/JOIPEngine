@@ -1,9 +1,5 @@
 #include "ProjectRunner.h"
 #include "Application.h"
-#include "Backend/DatabaseManager.h"
-#include "Backend/Project.h"
-#include "Backend/Resource.h"
-#include "Backend/Scene.h"
 #include "Editor/NodeEditor/EndNodeModel.h"
 #include "Editor/NodeEditor/FlowView.h"
 #include "Editor/NodeEditor/PathMergerModel.h"
@@ -11,6 +7,10 @@
 #include "Editor/NodeEditor/SceneNodeModel.h"
 #include "Editor/NodeEditor/SceneTranstitionData.h"
 #include "Editor/NodeEditor/StartNodeModel.h"
+#include "Systems/DatabaseManager.h"
+#include "Systems/Project.h"
+#include "Systems/Resource.h"
+#include "Systems/Scene.h"
 
 #include <nodes/DataModelRegistry>
 #include <nodes/FlowScene>

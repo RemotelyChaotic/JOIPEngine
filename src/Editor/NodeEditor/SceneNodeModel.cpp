@@ -2,8 +2,8 @@
 #include "Application.h"
 #include "SceneNodeModelWidget.h"
 #include "SceneTranstitionData.h"
-#include "Backend/DatabaseManager.h"
-#include "Backend/Project.h"
+#include "Systems/DatabaseManager.h"
+#include "Systems/Project.h"
 
 namespace {
   const qint32 c_iInPorts = 1;

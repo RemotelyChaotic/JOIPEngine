@@ -4,10 +4,10 @@
 #include "Constants.h"
 #include "ProjectRunner.h"
 #include "Settings.h"
-#include "Backend/DatabaseManager.h"
-#include "Backend/Project.h"
-#include "Backend/ScriptRunner.h"
-#include "Backend/ScriptRunnerSignalEmiter.h"
+#include "Systems/DatabaseManager.h"
+#include "Systems/Project.h"
+#include "Systems/ScriptRunner.h"
+#include "Systems/ScriptRunnerSignalEmiter.h"
 #include "ui_SceneMainScreen.h"
 
 #include <QAction>

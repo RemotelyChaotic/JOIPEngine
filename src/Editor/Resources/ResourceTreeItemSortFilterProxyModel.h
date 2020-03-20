@@ -1,7 +1,7 @@
 #ifndef RESOURCETREEITEMSORTFILTERPROXYMODEL_H
 #define RESOURCETREEITEMSORTFILTERPROXYMODEL_H
 
-#include "Backend/Project.h"
+#include "Systems/Project.h"
 #include <QSortFilterProxyModel>
 
 class CResourceTreeItemSortFilterProxyModel : public QSortFilterProxyModel
