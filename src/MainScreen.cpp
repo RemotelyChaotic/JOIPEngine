@@ -3,8 +3,16 @@
 #include "version.h"
 #include "WindowContext.h"
 #include "ui_MainScreen.h"
+#include "Systems/HelpFactory.h"
+#include "Widgets/HelpOverlay.h"
 #include <QApplication>
 
+namespace {
+  const QString c_sPlayHelpId = "MainScreen/Play";
+}
+
+//----------------------------------------------------------------------------------------
+//
 CMainScreen::CMainScreen(const std::shared_ptr<CWindowContext>& spWindowContext,
                          QWidget* pParent) :
   QWidget(pParent),
@@ -24,6 +32,13 @@ CMainScreen::~CMainScreen()
 void CMainScreen::Initialize()
 {
   m_bInitialized = false;
+
+  auto wpHelpFactory = CApplication::Instance()->System<CHelpFactory>().lock();
+  if (nullptr != wpHelpFactory)
+  {
+    m_spUi->pSceneSelectButton->setProperty(helpOverlay::c_sHelpPagePropertyName, c_sPlayHelpId);
+    wpHelpFactory->RegisterHelp(c_sPlayHelpId, ":/resources/help/play_button_help.html");
+  }
 
   connect(CApplication::Instance(), &CApplication::StyleLoaded,
           this, &CMainScreen::SlotStyleLoaded, Qt::QueuedConnection);

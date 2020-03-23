@@ -2,7 +2,7 @@
 #include "ui_WebResourceOverlay.h"
 
 CWebResourceOverlay::CWebResourceOverlay(QWidget* pParent) :
-  COverlayBase(pParent),
+  COverlayBase(0, pParent),
   m_spUi(new Ui::CWebResourceOverlay)
 {
   m_spUi->setupUi(this);

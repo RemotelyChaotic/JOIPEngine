@@ -31,12 +31,12 @@ namespace {
 CEditorCodeWidget::CEditorCodeWidget(QWidget* pParent) :
   CEditorWidgetBase(pParent),
   m_spUi(new Ui::CEditorCodeWidget),
-  m_spBackgroundSnippetOverlay(std::make_unique<CBackgroundSnippetOverlay>()),
-  m_spIconSnippetOverlay(std::make_unique<CIconSnippetOverlay>()),
-  m_spResourceSnippetOverlay(std::make_unique<CResourceSnippetOverlay>()),
-  m_spTextSnippetOverlay(std::make_unique<CTextSnippetOverlay>()),
-  m_spTimerSnippetOverlay(std::make_unique<CTimerSnippetOverlay>()),
-  m_spThreadSnippetOverlay(std::make_unique<CThreadSnippetOverlay>()),
+  m_spBackgroundSnippetOverlay(std::make_unique<CBackgroundSnippetOverlay>(this)),
+  m_spIconSnippetOverlay(std::make_unique<CIconSnippetOverlay>(this)),
+  m_spResourceSnippetOverlay(std::make_unique<CResourceSnippetOverlay>(this)),
+  m_spTextSnippetOverlay(std::make_unique<CTextSnippetOverlay>(this)),
+  m_spTimerSnippetOverlay(std::make_unique<CTimerSnippetOverlay>(this)),
+  m_spThreadSnippetOverlay(std::make_unique<CThreadSnippetOverlay>(this)),
   m_spSettings(CApplication::Instance()->Settings()),
   m_spCurrentProject(nullptr),
   m_wpDbManager(),
@@ -51,6 +51,13 @@ CEditorCodeWidget::CEditorCodeWidget(QWidget* pParent) :
 
 CEditorCodeWidget::~CEditorCodeWidget()
 {
+  m_spThreadSnippetOverlay.reset();
+  m_spTimerSnippetOverlay.reset();
+  m_spTimerSnippetOverlay.reset();
+  m_spTextSnippetOverlay.reset();
+  m_spResourceSnippetOverlay.reset();
+  m_spIconSnippetOverlay.reset();
+  m_spBackgroundSnippetOverlay.reset();
 }
 
 //----------------------------------------------------------------------------------------

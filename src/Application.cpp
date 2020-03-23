@@ -4,6 +4,7 @@
 #include "UISoundEmitter.h"
 #include "Systems/DatabaseManager.h"
 #include "Systems/HelpFactory.h"
+#include "Systems/OverlayManager.h"
 #include "Systems/ScriptRunner.h"
 #include "Systems/ThreadedSystem.h"
 
@@ -16,6 +17,7 @@ CApplication::CApplication(int& argc, char *argv[]) :
   m_spSystemsMap(),
   m_spSoundEmitter(std::make_unique<CUISoundEmitter>()),
   m_spHelpFactory(std::make_unique<CHelpFactory>()),
+  m_spOverlayManager(std::make_shared<COverlayManager>()),
   m_spSettings(nullptr),
   m_bStyleDirty(true),
   m_bInitialized(false)
@@ -25,6 +27,7 @@ CApplication::CApplication(int& argc, char *argv[]) :
 
 CApplication::~CApplication()
 {
+  m_spOverlayManager->Deinitialize();
   m_spHelpFactory->Deinitialize();
 }
 
@@ -70,6 +73,9 @@ void CApplication::Initialize()
   // help factory
   m_spHelpFactory->Initialize();
 
+  // Overlay Manager
+  m_spOverlayManager->Initialize();
+
   // create subsystems
   m_spSystemsMap.insert({ECoreSystems::eDatabaseManager, std::make_shared<CThreadedSystem>()});
   m_spSystemsMap.insert({ECoreSystems::eScriptRunner, std::make_shared<CThreadedSystem>()});
@@ -96,6 +102,12 @@ template<>
 std::weak_ptr<CHelpFactory> CApplication::System<CHelpFactory>()
 {
   return m_spHelpFactory;
+}
+
+template<>
+std::weak_ptr<COverlayManager> CApplication::System<COverlayManager>()
+{
+  return m_spOverlayManager;
 }
 
 template<>

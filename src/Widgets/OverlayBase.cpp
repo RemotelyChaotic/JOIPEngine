@@ -1,19 +1,30 @@
 #include "OverlayBase.h"
 #include "Application.h"
 #include "MainWindow.h"
+#include "Systems/OverlayManager.h"
 
-COverlayBase::COverlayBase(QWidget* pParent) :
+COverlayBase::COverlayBase(qint32 iZOrder, QWidget* pParent) :
   QFrame(pParent, Qt::FramelessWindowHint | Qt::WindowSystemMenuHint),
+  m_wpOverlayManager(CApplication::Instance()->System<COverlayManager>()),
   m_pOriginalParent(pParent),
   m_pTargetWidget(pParent),
+  m_iZOrder(iZOrder),
   m_bReachedDestination(false),
   m_bShowCalled(false)
 {
   setVisible(false);
+  if (auto spManager = m_wpOverlayManager.lock())
+  {
+    spManager->RegisterOverlay(this);
+  }
 }
 
 COverlayBase::~COverlayBase()
 {
+  if (auto spManager = m_wpOverlayManager.lock())
+  {
+    spManager->RemoveOverlay(this);
+  }
 }
 
 //----------------------------------------------------------------------------------------
@@ -62,6 +73,23 @@ void COverlayBase::Show()
 bool COverlayBase::IsInPlace() const
 {
   return m_bReachedDestination;
+}
+
+//---------------------------------------------------------------------------------------
+//
+qint32 COverlayBase::ZOrder() const
+{
+  return m_iZOrder;
+}
+
+//---------------------------------------------------------------------------------------
+//
+void COverlayBase::RebuildZOrder()
+{
+  if (auto spManager = m_wpOverlayManager.lock())
+  {
+    spManager->RebuildOverlayOrder();
+  }
 }
 
 //---------------------------------------------------------------------------------------

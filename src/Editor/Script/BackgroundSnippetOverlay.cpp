@@ -5,7 +5,7 @@
 #include "ui_BackgroundSnippetOverlay.h"
 
 CBackgroundSnippetOverlay::CBackgroundSnippetOverlay(QWidget* pParent) :
-  COverlayBase(pParent),
+  COverlayBase(0, pParent),
   m_spUi(new Ui::CBackgroundSnippetOverlay),
   m_bInitialized(false),
   m_data()

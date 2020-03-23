@@ -51,5 +51,6 @@
         <file>resources/sound/menu_click_soft_main.wav</file>
         <file>resources/sound/menu_whoosh.wav</file>
         <file>resources/img/ButtonThread.png</file>
+        <file>resources/help/play_button_help.html</file>
     </qresource>
 </RCC>

@@ -2,7 +2,7 @@
 #include "ui_TimerSnippetOverlay.h"
 
 CTimerSnippetOverlay::CTimerSnippetOverlay(QWidget* pParent) :
-  COverlayBase(pParent),
+  COverlayBase(0, pParent),
   m_spUi(new Ui::CTimerSnippetOverlay),
   m_data()
 {

@@ -131,7 +131,8 @@ SOURCES += \
     src/Editor/EditorModel.cpp \
     src/Editor/Script/ScriptEditorModel.cpp \
     src/Widgets/HelpOverlay.cpp \
-    src/Systems/HelpFactory.cpp
+    src/Systems/HelpFactory.cpp \
+    src/Systems/OverlayManager.cpp
 
 HEADERS += \
     src/MainWindow.h \
@@ -214,7 +215,8 @@ HEADERS += \
     src/SVersion.h \
     src/Editor/Script/ScriptEditorModel.h \
     src/Widgets/HelpOverlay.h \
-    src/Systems/HelpFactory.h
+    src/Systems/HelpFactory.h \
+    src/Systems/OverlayManager.h
 
 FORMS += \
     src/MainWindow.ui \

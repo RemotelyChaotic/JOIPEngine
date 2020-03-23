@@ -11,7 +11,7 @@ namespace  {
 //----------------------------------------------------------------------------------------
 //
 CTextSnippetOverlay::CTextSnippetOverlay(QWidget* pParent) :
-  COverlayBase(pParent),
+  COverlayBase(0, pParent),
   m_spUi(new Ui::CTextSnippetOverlay),
   m_bInitialized(true),
   m_data()

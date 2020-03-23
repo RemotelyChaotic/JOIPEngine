@@ -32,7 +32,7 @@
 CEditorResourceWidget::CEditorResourceWidget(QWidget* pParent) :
   CEditorWidgetBase(pParent),
   m_spUi(std::make_unique<Ui::CEditorResourceWidget>()),
-  m_spWebOverlay(std::make_unique<CWebResourceOverlay>()),
+  m_spWebOverlay(std::make_unique<CWebResourceOverlay>(this)),
   m_spNAManager(std::make_unique<QNetworkAccessManager>()),
   m_spSettings(CApplication::Instance()->Settings()),
   m_spCurrentProject(nullptr),
@@ -55,6 +55,8 @@ CEditorResourceWidget::~CEditorResourceWidget()
 
   dynamic_cast<CResourceTreeItemSortFilterProxyModel*>(m_spUi->pResourceTree->model())
       ->setSourceModel(nullptr);
+
+  m_spWebOverlay.reset();
 }
 
 //----------------------------------------------------------------------------------------

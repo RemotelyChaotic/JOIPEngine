@@ -13,6 +13,7 @@ public:
 
 signals:
   void SignalChangeAppState(EAppState newState);
+  void SignalSetHelpButtonVisible(bool bVisible);
 };
 
 #endif // WINDOWCONTEXT_H

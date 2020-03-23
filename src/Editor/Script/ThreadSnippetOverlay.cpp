@@ -2,7 +2,7 @@
 #include "ui_ThreadSnippetOverlay.h"
 
 CThreadSnippetOverlay::CThreadSnippetOverlay(QWidget* pParent) :
-  COverlayBase(pParent),
+  COverlayBase(0, pParent),
   m_spUi(std::make_unique<Ui::CThreadSnippetOverlay>())
 {
   m_spUi->setupUi(this);

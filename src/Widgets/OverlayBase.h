@@ -6,12 +6,14 @@
 #include <QMainWindow>
 #include <memory>
 
+class COverlayManager;
+
 class COverlayBase : public QFrame
 {
   Q_OBJECT
 
 public:
-  explicit COverlayBase(QWidget* pParent = nullptr);
+  explicit COverlayBase(qint32 iZOrder, QWidget* pParent = nullptr);
   ~COverlayBase() override;
 
 public slots:
@@ -21,9 +23,10 @@ public slots:
   virtual void Show();
 
   bool IsInPlace() const;
+  qint32 ZOrder() const;
 
 protected:
-  virtual void RebuildZOrder() {}
+  virtual void RebuildZOrder();
 
   void ClimbToCentralWidget();
   void ClimbToFirstInstanceOf(const QString& sClassName, bool bToParentOfFound);
@@ -36,8 +39,10 @@ private:
   QMainWindow* FindMainWindow();
 
 protected:
+  std::weak_ptr<COverlayManager>                    m_wpOverlayManager;
   QPointer<QWidget>                                 m_pOriginalParent;
   QPointer<QWidget>                                 m_pTargetWidget;
+  qint32                                            m_iZOrder;
   bool                                              m_bReachedDestination;
   bool                                              m_bShowCalled;
 };

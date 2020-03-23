@@ -2,25 +2,126 @@
 #define HELPOVERLAY_H
 
 #include "OverlayBase.h"
+#include <QPaintEvent>
+#include <QPointer>
+#include <QTimer>
 #include <QWidget>
 #include <memory>
 
+class CHelpButtonOverlay;
 class CHelpFactory;
 namespace Ui {
   class CHelpOverlay;
 }
+class QPushButton;
+class QPropertyAnimation;
+class QTextBrowser;
 
+namespace helpOverlay {
+  extern const char* const c_sHelpPagePropertyName;
+}
+
+//----------------------------------------------------------------------------------------
+//
+class CHelpOverlayBackGround : public QWidget
+{
+  Q_OBJECT
+  Q_PROPERTY(qint32 circleRadius MEMBER m_iCircleRadius)
+  friend class CHelpOverlay;
+
+public:
+  explicit CHelpOverlayBackGround(QWidget* pParent = nullptr);
+  ~CHelpOverlayBackGround() override;
+
+  void Reset();
+  void StartAnimation(const QPoint& origin, qint32 iEndValue);
+
+public slots:
+  void SlotCircleAnimationFinished();
+  void SlotUpdate();
+
+signals:
+  void SignalCircleAnimationFinished();
+
+protected:
+  void mouseMoveEvent(QMouseEvent* pEvt) override;
+  void paintEvent(QPaintEvent* pEvt) override;
+
+  bool                                        m_bOpened;
+  QPoint                                      m_circleOrigin;
+  qint32                                      m_iCircleRadius;
+
+private:
+  void MousePositionCheck();
+
+  QPointer<QPropertyAnimation>                m_pCircleAnimation;
+  std::map<QString, std::pair<QRect, QImage>> m_shownIconImages;
+  QPoint                                      m_cursor;
+  QTimer                                      m_updateTimer;
+};
+
+//----------------------------------------------------------------------------------------
+//
 class CHelpOverlay : public COverlayBase
+{
+  Q_OBJECT
+  friend class CHelpOverlayBackGround;
+
+public:
+  explicit CHelpOverlay(QPointer<CHelpButtonOverlay> pHelpButton, QWidget* pParent = nullptr);
+  ~CHelpOverlay() override;
+
+  static QPointer<CHelpOverlay> Instance();
+
+public slots:
+  void Climb() override;
+  void Hide() override;
+  void Resize() override;
+  void Show(const QPoint& animationOrigin, QWidget* pRootToSearch);
+
+protected slots:
+  void Show() override;
+  void SlotCircleAnimationFinished();
+  void on_pCloseButton_clicked();
+
+protected:
+  bool eventFilter(QObject* pObj, QEvent* pEvt) override;
+
+  std::vector<QPointer<QWidget>>    m_vpHelpWidgets;
+
+private:
+  void ShowHelp(const QString sKey);
+
+  static QPointer<CHelpOverlay> m_pHelpOverlay;
+
+  std::unique_ptr<Ui::CHelpOverlay> m_spUi;
+  std::weak_ptr<CHelpFactory>       m_wpHelpFactory;
+  QPointer<CHelpButtonOverlay>      m_pHelpButton;
+  QPointer<CHelpOverlayBackGround>  m_pBackground;
+};
+
+//----------------------------------------------------------------------------------------
+//
+class CHelpButtonOverlay : public COverlayBase
 {
   Q_OBJECT
 
 public:
-  explicit CHelpOverlay(QWidget* pParent = nullptr);
-  ~CHelpOverlay() override;
+  explicit CHelpButtonOverlay(QWidget* pParent = nullptr);
+  ~CHelpButtonOverlay() override;
+
+  void Initialize();
+
+  void Climb() override;
+  void Resize() override;
+
+signals:
+  void SignalButtonClicked();
 
 private:
-  std::unique_ptr<Ui::CHelpOverlay> m_spUi;
-  std::weak_ptr<CHelpFactory>       m_wpHelpFactory;
+  void retranslateUi(QWidget* pHelpOverlay);
+
+  QPointer<QPushButton> m_pButton;
 };
 
 #endif // HELPOVERLAY_H

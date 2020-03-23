@@ -9,21 +9,27 @@
 #include "Settings.h"
 #include "SettingsScreen.h"
 #include "WindowContext.h"
+#include "Widgets/HelpOverlay.h"
 #include "ui_MainWindow.h"
 #include <QDesktopWidget>
 
 CMainWindow::CMainWindow(QWidget* pParent) :
   QMainWindow(pParent),
   m_spUi(std::make_unique<Ui::CMainWindow>()),
+  m_spHelpButtonOverlay(std::make_unique<CHelpButtonOverlay>(this)),
+  m_spHelpOverlay(nullptr),
   m_spWindowContext(std::make_shared<CWindowContext>()),
   m_bInitialized(false)
 {
+  m_spHelpOverlay.reset(new CHelpOverlay(m_spHelpButtonOverlay.get(), this));
   m_spUi->setupUi(this);
   setWindowFlags(Qt::FramelessWindowHint);
 }
 
 CMainWindow::~CMainWindow()
 {
+  m_spHelpOverlay.reset();
+  m_spHelpButtonOverlay.reset();
 }
 
 //----------------------------------------------------------------------------------------
@@ -63,6 +69,11 @@ void CMainWindow::Initialize()
     pScreen->Load();
   }
 
+  m_spHelpButtonOverlay->Initialize();
+  connect(m_spHelpButtonOverlay.get(), &CHelpButtonOverlay::SignalButtonClicked,
+          this, &CMainWindow::SlotHelpButtonClicked);
+  m_spHelpButtonOverlay->Show();
+
   m_bInitialized = true;
 }
 
@@ -81,10 +92,12 @@ void CMainWindow::SlotChangeAppState(EAppState newState)
 
   pScreen =
       dynamic_cast<IAppStateScreen*>(m_spUi->pApplicationStackWidget->currentWidget());
-    if (nullptr != pScreen)
-    {
-      pScreen->Load();
-    }
+  if (nullptr != pScreen)
+  {
+    pScreen->Load();
+  }
+
+  m_spHelpButtonOverlay->Show();
 }
 
 //----------------------------------------------------------------------------------------
@@ -114,10 +127,35 @@ void CMainWindow::SlotResolutionChanged()
 
 //----------------------------------------------------------------------------------------
 //
+void CMainWindow::SlotSetHelpButtonVisible(bool bVisible)
+{
+  if (bVisible)
+  {
+    m_spHelpButtonOverlay->Show();
+  }
+  else
+  {
+    m_spHelpButtonOverlay->Hide();
+  }
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CMainWindow::SlotHelpButtonClicked()
+{
+  m_spHelpOverlay->Show(mapToGlobal(m_spHelpButtonOverlay->geometry().center()),
+                        m_spUi->pApplicationStackWidget->currentWidget());
+}
+
+//----------------------------------------------------------------------------------------
+//
 void CMainWindow::ConnectSlots()
 {
   connect(m_spWindowContext.get(), &CWindowContext::SignalChangeAppState,
           this, &CMainWindow::SlotChangeAppState, Qt::DirectConnection);
+
+  connect(m_spWindowContext.get(), &CWindowContext::SignalSetHelpButtonVisible,
+          this, &CMainWindow::SlotSetHelpButtonVisible, Qt::DirectConnection);
 
   connect(m_spSettings.get(), &CSettings::FullscreenChanged,
           this, &CMainWindow::SlotFullscreenChanged, Qt::QueuedConnection);

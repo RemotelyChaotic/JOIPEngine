@@ -5,7 +5,7 @@
 #include "ui_IconSnippetOverlay.h"
 
 CIconSnippetOverlay::CIconSnippetOverlay(QWidget* pParent) :
-  COverlayBase(pParent),
+  COverlayBase(0, pParent),
   m_spUi(new Ui::CIconSnippetOverlay),
   m_bInitialized(false),
   m_data()
