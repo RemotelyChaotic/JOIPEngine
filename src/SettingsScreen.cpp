@@ -3,6 +3,8 @@
 #include "Settings.h"
 #include "Style.h"
 #include "WindowContext.h"
+#include "Systems/HelpFactory.h"
+#include "Widgets/HelpOverlay.h"
 #include "ui_SettingsScreen.h"
 
 #include <QApplication>
@@ -16,6 +18,15 @@
 
 namespace  {
   const double c_dSliderScaling = 10000;
+
+  const QString c_sFullscreenHelpId = "Settings/Fullscreen";
+  const QString c_sDataFolderHelpId = "Settings/DataFolder";
+  const QString c_sFontHelpId = "Settings/Font";
+  const QString c_sStyleHelpId = "Settings/Style";
+  const QString c_sResolutionHelpId = "Settings/Resolution";
+  const QString c_sMuteHelpId = "Settings/Mute";
+  const QString c_sVolumeHelpId = "Settings/Volume";
+  const QString c_sCancelHelpId = "MainScreen/Cancel";
 
   std::map<QString, QSize> possibleDimensionsMap =
   {
@@ -58,6 +69,27 @@ void CSettingsScreen::Initialize()
 
   CApplication* pApp = CApplication::Instance();
   m_spSettings = pApp->Settings();
+
+  auto wpHelpFactory = CApplication::Instance()->System<CHelpFactory>().lock();
+  if (nullptr != wpHelpFactory)
+  {
+    m_spUi->pFullScreenContainer->setProperty(helpOverlay::c_sHelpPagePropertyName, c_sFullscreenHelpId);
+    wpHelpFactory->RegisterHelp(c_sFullscreenHelpId, ":/resources/help/settings/fullscreen_setting_help.html");
+    m_spUi->pContentContainer->setProperty(helpOverlay::c_sHelpPagePropertyName, c_sDataFolderHelpId);
+    wpHelpFactory->RegisterHelp(c_sDataFolderHelpId, ":/resources/help/settings/datafolder_setting_help.html");
+    m_spUi->pFontContainer->setProperty(helpOverlay::c_sHelpPagePropertyName, c_sFontHelpId);
+    wpHelpFactory->RegisterHelp(c_sFontHelpId, ":/resources/help/settings/font_setting_help.html");
+    m_spUi->pStyleContainer->setProperty(helpOverlay::c_sHelpPagePropertyName, c_sStyleHelpId);
+    wpHelpFactory->RegisterHelp(c_sStyleHelpId, ":/resources/help/settings/style_setting_help.html");
+    m_spUi->pResolutionContainer->setProperty(helpOverlay::c_sHelpPagePropertyName, c_sResolutionHelpId);
+    wpHelpFactory->RegisterHelp(c_sResolutionHelpId, ":/resources/help/settings/resolution_setting_help.html");
+    m_spUi->pMuteContainer->setProperty(helpOverlay::c_sHelpPagePropertyName, c_sMuteHelpId);
+    wpHelpFactory->RegisterHelp(c_sMuteHelpId, ":/resources/help/settings/mute_setting_help.html");
+    m_spUi->pVolumeContainer->setProperty(helpOverlay::c_sHelpPagePropertyName, c_sVolumeHelpId);
+    wpHelpFactory->RegisterHelp(c_sVolumeHelpId, ":/resources/help/settings/volume_setting_help.html");
+    m_spUi->pBackButton->setProperty(helpOverlay::c_sHelpPagePropertyName, c_sCancelHelpId);
+    wpHelpFactory->RegisterHelp(c_sCancelHelpId, ":/resources/help/player/cancel_button_help.html");
+  }
 
   m_bInitialized = true;
 }

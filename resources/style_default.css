@@ -286,6 +286,27 @@ QPushButton#RemoveNodeButton {
   qproperty-icon: url(:/resources/img/ButtonMinusDisabled.png) off,
                   url(:/resources/img/ButtonMinus.png) on;
 }
+QPushButton#HelpButton {
+  padding: 0px;
+  qproperty-icon: url(:/resources/img/ButtonHelp.png) off,
+                  url(:/resources/img/ButtonHelp.png) on;
+}
+QPushButton#ForardButton {
+  qproperty-icon: url(:/resources/img/ButtonPlay.png) off,
+                  url(:/resources/img/ButtonPlay.png) on;
+}
+QPushButton#BackButton {
+  qproperty-icon: url(:/resources/img/ButtonArrowLeft.png) off,
+                  url(:/resources/img/ButtonArrowLeft.png) on;
+}
+QPushButton#HomeButton {
+  qproperty-icon: url(:/resources/img/ButtonHome.png) off,
+                  url(:/resources/img/ButtonHome.png) on;
+}
+QPushButton#CloseButton {
+  qproperty-icon: url(:/resources/img/ButtonX.png) off,
+                  url(:/resources/img/ButtonX.png) on;
+}
 
 QPushButton:hover,
 QToolButton:hover {
@@ -295,6 +316,11 @@ QToolButton:hover {
 QPushButton:pressed,
 QToolButton:pressed {
   background: qradialgradient(cx: 0.4, cy: -0.1, fx: 0.4, fy: -0.1, radius: 1.35, stop: 0 #dd00dd, stop: 1 #aa00aa);
+}
+
+QPushButton:disabled,
+QToolButton:disabled {
+  background: qradialgradient(cx: 0.4, cy: -0.1, fx: 0.4, fy: -0.1, radius: 1.35, stop: 0 rgb(38, 38, 38), stop: 1 rgb(38, 38, 38));
 }
 
 CMenuButton {
@@ -648,7 +674,7 @@ QSpinBox::down-arrow:off { /* off state when value in min */
 */
 QMenu,
 QDialog {
-color: white;
+  color: white;
   background-color: black;
   border: 2px solid silver;
   border-radius: 10px;
@@ -690,6 +716,24 @@ QMenu::indicator,
 QDialog::indicator {
   width: 13px;
   height: 13px;
+}
+
+/*
+  ---- COverlayBase
+*/
+COverlayBase {
+  color: white;
+  background-color: black;
+  border: 2px solid silver;
+  border-radius: 10px;
+  padding: 5px;
+}
+COverlayBase#HelpButtonOverlay {
+  color: transparent;
+  background-color: transparent;
+  border: none;
+  border-radius: 0px;
+  padding: 0;
 }
 
 /*
@@ -797,7 +841,8 @@ QTreeView::branch:open:has-children:has-siblings  {
 /*
  ----- QPlainTextEdit
 */
-QPlainTextEdit {
+QPlainTextEdit,
+QTextBrowser {
     background-color: rgb(38, 38, 38);
     color: white;
     border: 1px solid;

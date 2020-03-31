@@ -6,7 +6,9 @@
 #include "EditorResourceWidget.h"
 #include "EditorSceneNodeWidget.h"
 #include "Systems/DatabaseManager.h"
+#include "Systems/HelpFactory.h"
 #include "Systems/Project.h"
+#include "Widgets/HelpOverlay.h"
 #include "ui_EditorMainScreen.h"
 #include "ui_EditorActionBar.h"
 
@@ -23,6 +25,8 @@ namespace
     { EEditorWidget::eSceneNodeWidget, "Scene Node Editor" },
     { EEditorWidget::eSceneCodeEditorWidget, "Scene Code Editor" }
   };
+
+  const QString c_sViewSelectorHelpId =  "Editor/ViewSelector";
 }
 
 //----------------------------------------------------------------------------------------
@@ -68,10 +72,12 @@ void CEditorMainScreen::Initialize()
   m_spUi->pActionBarLeft->Initialize();
   m_spUi->pActionBarRight->Initialize();
 
-  connect(m_spUi->pProjectActionBar->m_spUi->SaveButton, &QPushButton::clicked,
-          this, &CEditorMainScreen::SlotSaveClicked);
   connect(m_spUi->pProjectActionBar->m_spUi->pTitleLineEdit, &QLineEdit::editingFinished,
           this, &CEditorMainScreen::SlotProjectNameEditingFinished);
+  connect(m_spUi->pProjectActionBar->m_spUi->SaveButton, &QPushButton::clicked,
+          this, &CEditorMainScreen::SlotSaveClicked);
+  connect(m_spUi->pProjectActionBar->m_spUi->HelpButton, &QPushButton::clicked,
+          this, &CEditorMainScreen::SlotHelpClicked);
   connect(m_spUi->pProjectActionBar->m_spUi->ExitButton, &QPushButton::clicked,
           this, &CEditorMainScreen::SlotExitClicked);
 
@@ -101,6 +107,15 @@ void CEditorMainScreen::Initialize()
   // custom stuff
   connect(GetWidget<CEditorResourceWidget>(), &CEditorResourceWidget::SignalResourceSelected,
           this, &CEditorMainScreen::SlotDisplayResource);
+
+  // help
+  auto wpHelpFactory = CApplication::Instance()->System<CHelpFactory>().lock();
+  if (nullptr != wpHelpFactory)
+  {
+    m_spUi->pLeftComboBox->setProperty(helpOverlay::c_sHelpPagePropertyName, c_sViewSelectorHelpId);
+    wpHelpFactory->RegisterHelp(c_sViewSelectorHelpId, ":/resources/help/editor/selection_combobox_help.html");
+    m_spUi->pRightComboBox->setProperty(helpOverlay::c_sHelpPagePropertyName, c_sViewSelectorHelpId);
+  }
 
   // initializing done
   m_bInitialized = true;
@@ -274,6 +289,16 @@ void CEditorMainScreen::SlotExitClicked(bool bClick)
   SetModificaitonFlag(false);
   UnloadProject();
   emit SignalExitClicked();
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CEditorMainScreen::SlotHelpClicked(bool bClick)
+{
+  Q_UNUSED(bClick)
+  CHelpOverlay::Instance()->Show(
+        mapToGlobal(m_spUi->pProjectActionBar->m_spUi->HelpButton->geometry().center()),
+        this);
 }
 
 //----------------------------------------------------------------------------------------

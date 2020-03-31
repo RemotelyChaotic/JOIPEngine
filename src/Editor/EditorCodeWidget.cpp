@@ -11,10 +11,12 @@
 #include "Script/TimerSnippetOverlay.h"
 #include "Script/ThreadSnippetOverlay.h"
 #include "Systems/DatabaseManager.h"
+#include "Systems/HelpFactory.h"
 #include "Systems/Project.h"
 #include "Systems/Scene.h"
 #include "Systems/ScriptRunner.h"
 #include "Systems/ScriptRunnerSignalEmiter.h"
+#include "Widgets/HelpOverlay.h"
 #include "ui_EditorCodeWidget.h"
 #include "ui_EditorActionBar.h"
 
@@ -24,6 +26,9 @@
 namespace {
   const qint32 c_iIndexNoScripts = 0;
   const qint32 c_iIndexScripts   = 1;
+
+  const QString c_sScriptSelectionHelpId =  "Editor/ScriptSelection";
+  const QString c_sSciptEditorHelpId =      "Editor/SciptEditor";
 }
 
 //----------------------------------------------------------------------------------------
@@ -92,6 +97,15 @@ void CEditorCodeWidget::Initialize()
           this, &CEditorCodeWidget::SlotInsertGeneratedCode);
   connect(m_spThreadSnippetOverlay.get(), &CThreadSnippetOverlay::SignalThreadCode,
           this, &CEditorCodeWidget::SlotInsertGeneratedCode);
+
+  auto wpHelpFactory = CApplication::Instance()->System<CHelpFactory>().lock();
+  if (nullptr != wpHelpFactory)
+  {
+    m_spUi->pResourceComboBox->setProperty(helpOverlay::c_sHelpPagePropertyName, c_sScriptSelectionHelpId);
+    wpHelpFactory->RegisterHelp(c_sScriptSelectionHelpId, ":/resources/help/editor/code/scriptselection_combobox_help.html");
+    m_spUi->pCodeEdit->setProperty(helpOverlay::c_sHelpPagePropertyName, c_sSciptEditorHelpId);
+    wpHelpFactory->RegisterHelp(c_sSciptEditorHelpId, ":/resources/help/editor/code/script_editor_help.html");
+  }
 
   m_spUi->pResourceComboBox->setModel(m_pDummyModel);
 

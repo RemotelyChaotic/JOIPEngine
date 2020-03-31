@@ -2,12 +2,17 @@
 #include "Application.h"
 #include "WindowContext.h"
 #include "Systems/DatabaseManager.h"
+#include "Systems/HelpFactory.h"
+#include "Widgets/HelpOverlay.h"
 #include "ui_SceneScreen.h"
 
 namespace
 {
   const qint32 c_iPageIndexChoice = 0;
   const qint32 c_iPageIndexScene = 1;
+
+  const QString c_sOpenHelpId = "Player/Open";
+  const QString c_sCancelHelpId = "MainScreen/Cancel";
 }
 
 CSceneScreen::CSceneScreen(const std::shared_ptr<CWindowContext>& spWindowContext,
@@ -32,6 +37,15 @@ void CSceneScreen::Initialize()
   m_bInitialized = false;
 
   m_wpDbManager = CApplication::Instance()->System<CDatabaseManager>();
+
+  auto wpHelpFactory = CApplication::Instance()->System<CHelpFactory>().lock();
+  if (nullptr != wpHelpFactory)
+  {
+    m_spUi->pOpenExistingProjectButton->setProperty(helpOverlay::c_sHelpPagePropertyName, c_sOpenHelpId);
+    wpHelpFactory->RegisterHelp(c_sOpenHelpId, ":/resources/help/player/open_button_help.html");
+    m_spUi->pCancelButton->setProperty(helpOverlay::c_sHelpPagePropertyName, c_sCancelHelpId);
+    wpHelpFactory->RegisterHelp(c_sCancelHelpId, ":/resources/help/cancel_button_help.html");
+  }
 
   connect(m_spUi->pMainSceneScreen, &CSceneMainScreen::SignalExitClicked,
           this, &CSceneScreen::SlotExitClicked, Qt::DirectConnection);

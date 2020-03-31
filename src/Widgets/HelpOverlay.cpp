@@ -136,8 +136,7 @@ void CHelpOverlayBackGround::SlotUpdate()
   {
     for (auto pWidget : pHelpwidget->m_vpHelpWidgets)
     {
-      QString sKey = pWidget->property(helpOverlay::c_sHelpPagePropertyName).toString();
-      auto it = m_shownIconImages.find(sKey);
+      auto it = m_shownIconImages.find(pWidget.data());
       QRect widgetGeometry = pWidget->geometry();
       widgetGeometry.moveTopLeft(pWidget->parentWidget()->mapToGlobal(widgetGeometry.topLeft()));
       float fCircleRadius = static_cast<float>(m_iCircleRadius);
@@ -152,9 +151,15 @@ void CHelpOverlayBackGround::SlotUpdate()
       {
         if (m_shownIconImages.end() == it)
         {
-          m_shownIconImages.insert({sKey,
+          QImage bitmap(pWidget->size(), QImage::Format_ARGB32);
+          bitmap.fill(Qt::transparent);
+          QPainter painter(&bitmap);
+          pWidget->render(&painter, QPoint(), QRegion(), QWidget::DrawChildren);
+          painter.end();
+
+          m_shownIconImages.insert({pWidget.data(),
                                     { QRect(tl.toPoint(), br.toPoint()),
-                                      pWidget->grab().toImage()}});
+                                      bitmap}});
         }
       }
       else
@@ -200,6 +205,9 @@ void CHelpOverlayBackGround::paintEvent(QPaintEvent* pEvt)
   painter.drawEllipse(m_circleOrigin, m_iCircleRadius, m_iCircleRadius);
   painter.restore();
 
+  bool bSomethingSelected = false;
+  QRect selection;
+
   // draw widgets on top with border to highlight them
   QStyleOptionFrame option;
   QPalette originalpalette = option.palette;
@@ -209,30 +217,39 @@ void CHelpOverlayBackGround::paintEvent(QPaintEvent* pEvt)
   for (auto it = m_shownIconImages.begin(); m_shownIconImages.end() != it; ++it)
   {
     painter.save();
+    painter.setBrush(Qt::transparent);
+    painter.setBackgroundMode(Qt::OpaqueMode);
     painter.drawImage(it->second.first, it->second.second, it->second.second.rect());
     option.rect = it->second.first;
     style()->drawPrimitive(QStyle::PE_Frame, &option, &painter, this);
 
     if (it->second.first.contains(m_cursor))
     {
-      painter.save();
-      QPainterPath path;
-      double dRad =
-          static_cast<double>(static_cast<qint32>(static_cast<double>
-             (QDateTime::currentDateTime().toMSecsSinceEpoch() % 1000000) / 5.0) % 360) / 180.0 * 3.1415;
-      double dMultiplyer = std::sin(dRad);
-      path.addRect(it->second.first.adjusted(static_cast<qint32>(-20 -10 * dMultiplyer),
-                                             static_cast<qint32>(-20 -10 * dMultiplyer),
-                                             static_cast<qint32>(20 + 10 * dMultiplyer),
-                                             static_cast<qint32>(20 + 10 * dMultiplyer)));
-
-      QPen pen(QColor(255, 0, 0), 5, Qt::DashLine, Qt::FlatCap, Qt::MiterJoin);
-      pen.setDashOffset(std::cos(dRad) * 10);
-      painter.setPen(pen);
-      painter.setBrush(Qt::transparent);
-      painter.drawPath(path);
-      painter.restore();
+      bSomethingSelected = true;
+      selection = it->second.first;
     }
+    painter.restore();
+  }
+
+  // draw selection
+  if (bSomethingSelected)
+  {
+    painter.save();
+    QPainterPath path;
+    double dRad =
+        static_cast<double>(static_cast<qint32>(static_cast<double>
+           (QDateTime::currentDateTime().toMSecsSinceEpoch() % 1000000) / 5.0) % 360) / 180.0 * 3.1415;
+    double dMultiplyer = std::sin(dRad);
+    path.addRect(selection.adjusted(static_cast<qint32>(-20 -10 * dMultiplyer),
+                                    static_cast<qint32>(-20 -10 * dMultiplyer),
+                                    static_cast<qint32>(20 + 10 * dMultiplyer),
+                                    static_cast<qint32>(20 + 10 * dMultiplyer)));
+
+    QPen pen(QColor(255, 0, 0), 5, Qt::DashLine, Qt::FlatCap, Qt::MiterJoin);
+    pen.setDashOffset(std::cos(dRad) * 10);
+    painter.setPen(pen);
+    painter.setBrush(Qt::transparent);
+    painter.drawPath(path);
     painter.restore();
   }
 }
@@ -367,8 +384,44 @@ void CHelpOverlay::SlotCircleAnimationFinished()
 
 //----------------------------------------------------------------------------------------
 //
-void CHelpOverlay::on_pCloseButton_clicked()
+void CHelpOverlay::on_pHtmlBrowser_backwardAvailable(bool bAvailable)
 {
+  m_spUi->BackButton->setEnabled(bAvailable);
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CHelpOverlay::on_pHtmlBrowser_forwardAvailable(bool bAvailable)
+{
+  m_spUi->ForardButton->setEnabled(bAvailable);
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CHelpOverlay::on_BackButton_clicked()
+{
+  m_spUi->pHtmlBrowser->backward();
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CHelpOverlay::on_HomeButton_clicked()
+{
+  m_spUi->pHtmlBrowser->home();
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CHelpOverlay::on_ForardButton_clicked()
+{
+  m_spUi->pHtmlBrowser->forward();
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CHelpOverlay::on_CloseButton_clicked()
+{
+  m_spUi->pHtmlBrowser->clearHistory();
   m_spUi->pHtmlBrowserBox->hide();
 }
 
@@ -426,6 +479,9 @@ void CHelpOverlay::ShowHelp(const QString sKey)
   if (auto spFactory = m_wpHelpFactory.lock())
   {
     m_spUi->pHtmlBrowser->setSource(QUrl::fromLocalFile(spFactory->GetHelp(sKey)));
+    m_spUi->pHtmlBrowser->clearHistory();
+    m_spUi->BackButton->setEnabled(m_spUi->pHtmlBrowser->isBackwardAvailable());
+    m_spUi->ForardButton->setEnabled(m_spUi->pHtmlBrowser->isForwardAvailable());
     m_spUi->pHtmlBrowserBox->show();
   }
 }

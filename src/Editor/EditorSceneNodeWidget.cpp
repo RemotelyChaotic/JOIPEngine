@@ -3,9 +3,11 @@
 #include "EditorActionBar.h"
 #include "EditorModel.h"
 #include "NodeEditor/FlowView.h"
+#include "Systems/HelpFactory.h"
 #include "Systems/Project.h"
 #include "Systems/Scene.h"
 #include "Systems/Resource.h"
+#include "Widgets/HelpOverlay.h"
 #include "ui_EditorSceneNodeWidget.h"
 #include "ui_EditorActionBar.h"
 
@@ -13,6 +15,7 @@
 #include <nodes/FlowScene>
 #include <nodes/FlowView>
 #include <nodes/FlowViewStyle>
+#include <nodes/Node>
 #include <nodes/NodeStyle>
 
 #include <QContextMenuEvent>
@@ -31,6 +34,8 @@ using QtNodes::NodeStyle;
 
 namespace
 {
+  const QString c_sNodeHelpId =      "Editor/NodeHelp";
+
   QString ColorToString(const QColor& color)
   {
     return QString("[%1,%2,%3]").arg(color.red()).arg(color.green()).arg(color.blue());
@@ -164,27 +169,15 @@ void CEditorSceneNodeWidget::Initialize()
 
   m_pFlowView->setScene(FlowSceneModel());
 
-  SetNodeStyle(m_normalBoundaryColor,
-               m_selectedBoundaryColor,
-               m_gradientColor0,
-               m_gradientColor1,
-               m_gradientColor2,
-               m_gradientColor3,
-               m_shadowColor,
-               m_fontColor,
-               m_fontColorFaded,
-               m_connectionPointColor,
-               m_backgroundColor,
-               m_fineGridColor,
-               m_coarseGridColor,
-               m_normalColor,
-               m_selectedColor,
-               m_selectedHaloColor,
-               m_hoveredColor);
-
-
   connect(CApplication::Instance(), &CApplication::StyleLoaded,
           this, &CEditorSceneNodeWidget::SlotStyleChanged);
+
+  auto wpHelpFactory = CApplication::Instance()->System<CHelpFactory>().lock();
+  if (nullptr != wpHelpFactory)
+  {
+    m_pFlowView->setProperty(helpOverlay::c_sHelpPagePropertyName, c_sNodeHelpId);
+    wpHelpFactory->RegisterHelp(c_sNodeHelpId, ":/resources/help/editor/resources/resources_tree_help.html");
+  }
 
   m_bInitialized = true;
 }
@@ -199,23 +192,7 @@ void CEditorSceneNodeWidget::LoadProject(tspProject spCurrentProject)
     qWarning() << "Old Project was not unloaded before loading project.";
   }
 
-  SetNodeStyle(m_normalBoundaryColor,
-               m_selectedBoundaryColor,
-               m_gradientColor0,
-               m_gradientColor1,
-               m_gradientColor2,
-               m_gradientColor3,
-               m_shadowColor,
-               m_fontColor,
-               m_fontColorFaded,
-               m_connectionPointColor,
-               m_backgroundColor,
-               m_fineGridColor,
-               m_coarseGridColor,
-               m_normalColor,
-               m_selectedColor,
-               m_selectedHaloColor,
-               m_hoveredColor);
+  QMetaObject::invokeMethod(this, "SlotStyleChanged", Qt::QueuedConnection);
 
   m_spCurrentProject = spCurrentProject;
 }
@@ -278,7 +255,6 @@ void CEditorSceneNodeWidget::SlotAddSceneButtonClicked()
   m_pFlowView->OpenContextMenuAt(QPoint(0, 0),
                                  QPoint(m_pFlowView->width() / 2, m_pFlowView->height() / 2));
 }
-
 
 //----------------------------------------------------------------------------------------
 //

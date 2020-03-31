@@ -90,14 +90,14 @@ void CMainWindow::SlotChangeAppState(EAppState newState)
 
   m_spUi->pApplicationStackWidget->setCurrentIndex(newState);
 
+  m_spHelpButtonOverlay->Show();
+
   pScreen =
       dynamic_cast<IAppStateScreen*>(m_spUi->pApplicationStackWidget->currentWidget());
   if (nullptr != pScreen)
   {
     pScreen->Load();
   }
-
-  m_spHelpButtonOverlay->Show();
 }
 
 //----------------------------------------------------------------------------------------

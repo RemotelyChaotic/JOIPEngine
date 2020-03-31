@@ -52,5 +52,52 @@
         <file>resources/sound/menu_whoosh.wav</file>
         <file>resources/img/ButtonThread.png</file>
         <file>resources/help/play_button_help.html</file>
+        <file>resources/help/template.html</file>
+        <file>resources/help/credits_button_help.html</file>
+        <file>resources/help/editor_button_help.html</file>
+        <file>resources/help/exit_button_help.html</file>
+        <file>resources/help/settings_button_help.html</file>
+        <file>resources/help/project/joi_project_help.html</file>
+        <file>resources/help/player/card_button_help.html</file>
+        <file>resources/help/player/open_button_help.html</file>
+        <file>resources/help/cancel_button_help.html</file>
+        <file>resources/help/settings/datafolder_setting_help.html</file>
+        <file>resources/help/settings/font_setting_help.html</file>
+        <file>resources/help/settings/fullscreen_setting_help.html</file>
+        <file>resources/help/settings/mute_setting_help.html</file>
+        <file>resources/help/settings/resolution_setting_help.html</file>
+        <file>resources/help/settings/style_setting_help.html</file>
+        <file>resources/help/settings/volume_setting_help.html</file>
+        <file>resources/help/editor/createproject_button_help.html</file>
+        <file>resources/help/editor/newproject_button_help.html</file>
+        <file>resources/help/editor/openproject_button_help.html</file>
+        <file>resources/help/editor/project_name_help.html</file>
+        <file>resources/help/editor/addnode_button_help.html</file>
+        <file>resources/help/editor/addresource_button_help.html</file>
+        <file>resources/help/editor/addshowbg_button_help.html</file>
+        <file>resources/help/editor/addshowicon_button_help.html</file>
+        <file>resources/help/editor/addshowimage_button_help.html</file>
+        <file>resources/help/editor/addtext_button_help.html</file>
+        <file>resources/help/editor/addthread_button_help.html</file>
+        <file>resources/help/editor/addtimer_button_help.html</file>
+        <file>resources/help/editor/addwebresource_button_help.html</file>
+        <file>resources/help/editor/exitproject_button_help.html</file>
+        <file>resources/help/editor/map_button_help.html</file>
+        <file>resources/help/editor/removenode_button_help.html</file>
+        <file>resources/help/editor/removeresource_button_help.html</file>
+        <file>resources/help/editor/renameproject_button_help.html</file>
+        <file>resources/help/editor/saveproject_button_help.html</file>
+        <file>resources/help/editor/startdebug_button_help.html</file>
+        <file>resources/help/editor/stopdebug_button_help.html</file>
+        <file>resources/help/editor/titlecard_button_help.html</file>
+        <file>resources/help/editor/pause_button_help.html</file>
+        <file>resources/help/editor/play_button_help.html</file>
+        <file>resources/help/editor/stop_button_help.html</file>
+        <file>resources/help/editor/selection_combobox_help.html</file>
+        <file>resources/help/editor/resources/filter_widget_help.html</file>
+        <file>resources/help/editor/resources/resources_tree_help.html</file>
+        <file>resources/help/editor/nodes/node_help.html</file>
+        <file>resources/help/editor/code/script_editor_help.html</file>
+        <file>resources/help/editor/code/scriptselection_combobox_help.html</file>
     </qresource>
 </RCC>

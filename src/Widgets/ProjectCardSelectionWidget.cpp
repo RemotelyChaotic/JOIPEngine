@@ -2,7 +2,9 @@
 #include "Application.h"
 #include "Constants.h"
 #include "Systems/DatabaseManager.h"
+#include "Systems/HelpFactory.h"
 #include "Systems/Project.h"
+#include "Widgets/HelpOverlay.h"
 #include "Widgets/ResourceDisplayWidget.h"
 #include "ui_ProjectCardSelectionWidget.h"
 
@@ -14,6 +16,12 @@
 #include <QPropertyAnimation>
 #include <cassert>
 
+namespace  {
+  const QString c_sCardHelpId = "Player/Card";
+}
+
+//----------------------------------------------------------------------------------------
+//
 CProjectCardSelectionWidget::CProjectCardSelectionWidget(QWidget* pParent) :
   QWidget(pParent),
   m_spUi(std::make_unique<Ui::CProjectCardSelectionWidget>()),
@@ -38,6 +46,12 @@ void CProjectCardSelectionWidget::Initialize()
 
   m_wpDbManager = CApplication::Instance()->System<CDatabaseManager>();
 
+  auto wpHelpFactory = CApplication::Instance()->System<CHelpFactory>().lock();
+  if (nullptr != wpHelpFactory)
+  {
+    wpHelpFactory->RegisterHelp(c_sCardHelpId, ":/resources/help/player/card_button_help.html");
+  }
+
   m_bInitialized = true;
 }
 
@@ -48,6 +62,7 @@ void CProjectCardSelectionWidget::LoadProjects()
   m_iSelectedProjectId = -1;
   m_pLastSelectedWidget = nullptr;
 
+  auto wpHelpFactory = CApplication::Instance()->System<CHelpFactory>().lock();
   auto spDbManager = m_wpDbManager.lock();
   if (nullptr != spDbManager)
   {
@@ -92,6 +107,10 @@ void CProjectCardSelectionWidget::LoadProjects()
           pWidget->LoadResource(spResource);
         }
         pWidget->installEventFilter(this);
+        if (nullptr != wpHelpFactory)
+        {
+          pWidget->setProperty(helpOverlay::c_sHelpPagePropertyName, c_sCardHelpId);
+        }
 
         AddDropShadow(pWidget, Qt::black);
         if (-1 == m_iSelectedProjectId)

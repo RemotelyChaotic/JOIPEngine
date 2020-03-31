@@ -47,6 +47,7 @@ protected slots:
   void on_pRightComboBox_currentIndexChanged(qint32 iIndex);
   void SlotDisplayResource(const QString& sName);
   void SlotExitClicked(bool bClick);
+  void SlotHelpClicked(bool bClick);
   void SlotProjectEdited();
   void SlotProjectNameEditingFinished();
   void SlotSaveClicked(bool bClick);

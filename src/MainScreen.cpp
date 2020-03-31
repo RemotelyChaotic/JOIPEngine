@@ -9,6 +9,10 @@
 
 namespace {
   const QString c_sPlayHelpId = "MainScreen/Play";
+  const QString c_sEditorHelpId = "MainScreen/Editor";
+  const QString c_sSettingsHelpId = "MainScreen/Settings";
+  const QString c_sCreditsHelpId = "MainScreen/Credits";
+  const QString c_sExitHelpId = "MainScreen/Exit";
 }
 
 //----------------------------------------------------------------------------------------
@@ -38,6 +42,14 @@ void CMainScreen::Initialize()
   {
     m_spUi->pSceneSelectButton->setProperty(helpOverlay::c_sHelpPagePropertyName, c_sPlayHelpId);
     wpHelpFactory->RegisterHelp(c_sPlayHelpId, ":/resources/help/play_button_help.html");
+    m_spUi->pEdiorButton->setProperty(helpOverlay::c_sHelpPagePropertyName, c_sEditorHelpId);
+    wpHelpFactory->RegisterHelp(c_sEditorHelpId, ":/resources/help/editor_button_help.html");
+    m_spUi->pSettingsButton->setProperty(helpOverlay::c_sHelpPagePropertyName, c_sSettingsHelpId);
+    wpHelpFactory->RegisterHelp(c_sSettingsHelpId, ":/resources/help/settings_button_help.html");
+    m_spUi->pCreditsButton->setProperty(helpOverlay::c_sHelpPagePropertyName, c_sCreditsHelpId);
+    wpHelpFactory->RegisterHelp(c_sCreditsHelpId, ":/resources/help/credits_button_help.html");
+    m_spUi->pQuitButton->setProperty(helpOverlay::c_sHelpPagePropertyName, c_sExitHelpId);
+    wpHelpFactory->RegisterHelp(c_sExitHelpId, ":/resources/help/exit_button_help.html");
   }
 
   connect(CApplication::Instance(), &CApplication::StyleLoaded,

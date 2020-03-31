@@ -7,7 +7,9 @@
 #include "Resources/ResourceTreeItemSortFilterProxyModel.h"
 #include "Resources/WebResourceOverlay.h"
 #include "Systems/DatabaseManager.h"
+#include "Systems/HelpFactory.h"
 #include "Systems/Project.h"
+#include "Widgets/HelpOverlay.h"
 #include "Widgets/ResourceDisplayWidget.h"
 #include "ui_EditorResourceWidget.h"
 #include "ui_EditorActionBar.h"
@@ -29,6 +31,14 @@
 
 #include <cassert>
 
+namespace
+{
+  const QString c_sResourceTreeHelpId =   "Editor/ResourceTree";
+  const QString c_sSearchBarHelpId =      "Editor/SearchBar";
+}
+
+//----------------------------------------------------------------------------------------
+//
 CEditorResourceWidget::CEditorResourceWidget(QWidget* pParent) :
   CEditorWidgetBase(pParent),
   m_spUi(std::make_unique<Ui::CEditorResourceWidget>()),
@@ -87,6 +97,16 @@ void CEditorResourceWidget::Initialize()
   pProxyModel->setFilterRegExp(QRegExp(".*", Qt::CaseInsensitive, QRegExp::RegExp));
 
   m_spUi->pResourceDisplayWidget->setFixedHeight(256);
+
+  // help
+  auto wpHelpFactory = CApplication::Instance()->System<CHelpFactory>().lock();
+  if (nullptr != wpHelpFactory)
+  {
+    m_spUi->pResourceTree->setProperty(helpOverlay::c_sHelpPagePropertyName, c_sResourceTreeHelpId);
+    wpHelpFactory->RegisterHelp(c_sResourceTreeHelpId, ":/resources/help/editor/resources/resources_tree_help.html");
+    m_spUi->pFilter->setProperty(helpOverlay::c_sHelpPagePropertyName, c_sSearchBarHelpId);
+    wpHelpFactory->RegisterHelp(c_sSearchBarHelpId, ":/resources/help/editor/resources/filter_widget_help.html");
+  }
 
   m_bInitialized = true;
 }

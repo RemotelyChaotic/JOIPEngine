@@ -54,10 +54,10 @@ protected:
 private:
   void MousePositionCheck();
 
-  QPointer<QPropertyAnimation>                m_pCircleAnimation;
-  std::map<QString, std::pair<QRect, QImage>> m_shownIconImages;
-  QPoint                                      m_cursor;
-  QTimer                                      m_updateTimer;
+  QPointer<QPropertyAnimation>                  m_pCircleAnimation;
+  std::map<QWidget*, std::pair<QRect, QImage>>  m_shownIconImages;
+  QPoint                                        m_cursor;
+  QTimer                                        m_updateTimer;
 };
 
 //----------------------------------------------------------------------------------------
@@ -82,7 +82,12 @@ public slots:
 protected slots:
   void Show() override;
   void SlotCircleAnimationFinished();
-  void on_pCloseButton_clicked();
+  void on_pHtmlBrowser_backwardAvailable(bool bAvailable);
+  void on_pHtmlBrowser_forwardAvailable(bool bAvailable);
+  void on_BackButton_clicked();
+  void on_HomeButton_clicked();
+  void on_ForardButton_clicked();
+  void on_CloseButton_clicked();
 
 protected:
   bool eventFilter(QObject* pObj, QEvent* pEvt) override;
