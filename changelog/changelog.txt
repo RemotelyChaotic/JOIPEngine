@@ -1,0 +1,28 @@
+================================================================================
+Version 1.0.0.0
+================================================================================
+
+- First release
+
+================================================================================
+Version 1.0.1.0
+================================================================================
+
+Fixed Bugs:
+- Timer interval bug fixed; the timer doesn't run longer than expected anymore.
+- Fixed OpenGL issues that prevented menus to be opened.
+
+New Features:
+- Target verision and project version added to project configuration describing
+  the project's version and the engine version the project was saved in.
+- Help overlay added that can interactively display help based on clicked engine 
+  component.
+
+Updated Features:
+- 
+
+Changes:
+- In-Game title changed to JOIP Engine.
+- Reworked editor models to work more consistently.
+- Code editor displays special info-text if no scripts are available.
+- Reworked overlays. Overlays are using a manager to determine z-order.
