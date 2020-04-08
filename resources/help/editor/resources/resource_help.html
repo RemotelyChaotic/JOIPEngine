@@ -1,0 +1,96 @@
+<!doctype html>
+<html class="no-js" lang="">
+
+<head>
+  <meta charset="utf-8">
+  <title>Resource</title>
+  <meta name="description" content="">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <style>
+    h1 {
+      text-align: center;
+    }
+    div.container {
+      min-height: 10em;
+      display: table-cell;
+      margin-left: auto;
+      margin-right: auto;
+      width: 0.6em
+    }
+  </style>
+</head>
+
+
+<body>
+  <h1>Resource</h1>
+
+  <hr>
+
+  <div class="container">
+    <p>Resources are the content files of a <a href="qrc:/resources/help/project/joi_project_help.html">JOI-Project</a>
+    and must reside in the folder directory. Files outside the project directory cannot be used.
+    Resources can represent files of different formats and types and are referenced in the application by their
+    internal name / identifier, which does not need to equal the file name.</p>
+
+    <br>
+
+    <p>Resources can be renamed by double-clicking the name field in the
+    <a href="qrc:/resources/help/editor/resources/resources_tree_help.html">Resource Tree</a>.
+    Renaming a resource changes it's internal identifier, but not the file name.</p>
+
+    <br>
+
+    <p>There's currently four differnt resource types:<br>
+      <ul>
+        <li><b>Image</b>: Images can be animated or static and are used for the
+        <a href="qrc:/resources/help/player/card_button_help.html">Title Card</a> and to display
+        in the player via <a href="qrc:/resources/help/editor/code/script_reference_help.html">Media Player</a>
+        or as an <a href="qrc:/resources/help/editor/code/script_reference_help.html">Icon</a>.
+        Images can be online or offline. For online resources, the link must point to the image or video url directly.
+        Links gated behind logins will not work. These Resources
+        will <i>not</i> be downloaded and instead loaded and displayed when needed.<br>
+        <i>Supported image formats are</i>: bmp, cur, gif, icns, ico, jpeg, jpg, pbm, pgm, png, ppm,
+        svg, svgz, tga, tif, tiff, wbmp, webp, xbm, xpm
+        <br></li>
+
+        <li><b>Video</b>: Videos can be displayed in the player via
+        <a href="qrc:/resources/help/editor/code/script_reference_help.html">Media Player</a>.
+        Videos can be online or offline. Online videos only support a subset of the formats.
+        For online resources, the link must point to the image or video url directly.
+        Links gated behind logins will not work. These Resources
+        will <i>not</i> be downloaded and instead loaded and displayed when needed.<br>
+        <i>Supported video formats are</i>: 3gp, asf, wmv, mpg, ts, au, avi, flv, mov, mp4 (online available), ogm, ogg, mkv,
+        mka, nsc, nsv, nut, a52, dv, vid, ty, webm (online available)
+        <br></li>
+
+        <li><b>Audio</b>: Audio files can be played in the player via
+        <a href="qrc:/resources/help/editor/code/script_reference_help.html">Media Player</a>.<br>
+        <i>Supported audio formats are</i>: wav, dts, mp3, mp2, tta, tac, flac, dts, aac, xa
+        <br></li>
+
+        <li><b>Other Formats</b>: This resource type is used for various things in the project.
+        The flow file is used as storage for the <a href="qrc:/resources/help/editor/nodes/nodeeditor_help.html">Node Editor's</a>
+        content, the js files are used for the <a href="qrc:/resources/help/editor/nodes/node_help.html">Scene Scripts</a>
+        and the <a href="qrc:/resources/help/project/joi_project_help.html">Project</a> data is stored
+        in json files. One thing they have in common is that all of them can be opened in
+        any external text editor to edit the contents.<br>
+        <i>Supported other formats are</i>: json, xml (currently unused), js, flow
+        <br></li>
+      </ul>
+    </p>
+
+    <br>
+
+    <table width="100%" class="warning">
+      <tr>
+        <td width="10%"><img src="qrc:/resources/help/icons/WarningIcon.png" width="64" height="64" alt="Warning"></td>
+        <td width="90%"><br>Online of resource will disable the <a href="qrc:/resources/help/project/joi_project_help.html">JOI-Project</a>
+        in offline mode and can cause player experience to drop if the internet connection is slow.
+        This type of resource is not recommended to use.</td>
+      </tr>
+    </table>
+  </div>
+</body>
+
+</html>

@@ -3,7 +3,7 @@
 
 <head>
   <meta charset="utf-8">
-  <title>Template</title>
+  <title>Node</title>
   <meta name="description" content="">
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
@@ -23,12 +23,81 @@
 
 
 <body>
-  <h1>Template</h1>
+  <h1>Node</h1>
 
   <hr>
 
   <div class="container">
-    <p>Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet.</p>
+    <p>A <a href="qrc:/resources/help/project/joi_project_help.html">JOI-Project</a> consists
+    of nodes of different types, that dictate the flow of a project in the player.<br>
+    Nodes have their own settings and a set of connectors on the sides.
+    There's five different types of nodes:</p>
+
+    <p>
+      <ul>
+        <li><b>Entry Point</b>: The start of a <a href="qrc:/resources/help/project/joi_project_help.html">JOI-Project</a>
+        in the player is allways an "Entry Point" node. There must allways be exactly one "Entry Point" node in a Project, otherwise
+        the behavior is undefined and the Project can start at any "Entry Point" node.<br>This is not a scene, and no script
+        is associated with an "Entry Point" node.<br></li>
+
+        <li><b>Exit Point</b>: The end of a <a href="qrc:/resources/help/project/joi_project_help.html">JOI-Project</a>
+        in the player is allways an "Exit Point" node. There's no limit on the number of
+        "Exit Point" nodes per Project. One thing to consider is:
+        every path in the project should allways eventually lead to an "Exit Point".<br>
+        This is not a scene, and no script is associated with an "Exit Point" node.<br></li>
+
+        <li><b>Scene</b>: Scene nodes represent logical units, that contain a set of instructions
+        that the player will execute. When you create a "Scene" node,
+        you will be prompted to create the associated script <a href="qrc:/resources/help/editor/resources/resource_help.html">Resource</a> file
+        (it helps to have the same name as the "Scene" node,
+        but it's not neccessary; just make sure it's in the project folder.)<br>
+        There's no limit on the number of "Scene" nodes in a project.<br>
+        The line edit shows the internal id of a scene. This is <i>not</i> user visible, must be unique, and
+        can be used in <a href="qrc:/resources/help/editor/code/script_reference_help.html">Scripts</a>
+        to jump to the scene ignoring the flow.<br></li>
+
+        <li><b>Path Splitters</b>: These nodes split the flow of a project into up to four
+        possible paths. Depending on the type of the "Path Splitter" node the flow in the player will either continue
+        with a <i>random</i> node, or prompt the user to <i>select</i> the path.<br>
+        "Path Splitter" and "Path Merger" nodes can be combined and chained freely to cerate more path alternatives and
+        a mix between <i>random</i> and <i>selectable</i> flow.
+        Any empty connectors will be ignored during playing and you do not need to worry about them.<br>
+        The four line edits are for the user visible path names if the node is of type <i>selectable</i>.
+        They corespond to the user visible button labels in the editor.<br>
+        </li>
+
+        <li><b>Path Merger</b>: These nodes merge the flow of a project from up to four
+        possible paths.<br>
+        "Path Splitter" and "Path Merger" nodes can be combined and chained freely to cerate more path alternatives and
+        a mix between <i>random</i> and <i>selectable</i> flow.
+        Any empty connectors will be ignored during playing and you do not need to worry about them.<br></li>
+      </tr>
+    </p>
+
+    <br>
+
+    <p><img src="qrc:/resources/help/editor/images/node_types.png"><br><i>Node types</i></p>
+
+    <br>
+
+    <p>Scene nodes are linked together by paths, splitters and mergers.
+    The entry point of a <a href="qrc:/resources/help/project/joi_project_help.html">JOI-Project</a>
+    is allways an "Entry Point" node and the Project ends with an "Exit Point" node.
+    "Scenes" are the scripted part of a project and "Path Splitters" and "Path Mergers" link together other nodes.</p>
+
+    <br>
+
+    <p><img src="qrc:/resources/help/editor/images/simple_project_flow.png"><br><i>Simple project flow</i></p>
+
+    <br>
+
+    <p>A more dynamic flow would be to have the splitter linked to two different
+    scenes like below.</p>
+
+    <br>
+
+    <p><img src="qrc:/resources/help/editor/images/complex_project_flow.png"><br><i>Complex project flow</i></p>
+
   </div>
 </body>
 

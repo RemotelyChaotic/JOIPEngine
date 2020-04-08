@@ -99,5 +99,19 @@
         <file>resources/help/editor/nodes/node_help.html</file>
         <file>resources/help/editor/code/script_editor_help.html</file>
         <file>resources/help/editor/code/scriptselection_combobox_help.html</file>
+        <file>resources/help/icons/WarningIcon.png</file>
+        <file>resources/help/settings/images/custom_style_folder.png</file>
+        <file>resources/help/editor/images/node_selector.png</file>
+        <file>resources/help/editor/nodes/nodeeditor_help.html</file>
+        <file>resources/help/editor/images/simple_project_flow.png</file>
+        <file>resources/help/editor/resources/resource_help.html</file>
+        <file>resources/help/editor/code/script_reference_help.html</file>
+        <file>resources/help/editor/images/node_types.png</file>
+        <file>resources/help/editor/images/complex_project_flow.png</file>
+        <file>resources/help/editor/images/file_type_selection.png</file>
+        <file>resources/help/editor/images/web_resource_overlay.png</file>
+        <file>resources/help/editor/images/file_copy_dialog.png</file>
+        <file>resources/help/editor/images/project_modified_dialog.png</file>
+        <file>resources/help/editor/images/file_changed_prompt.png</file>
     </qresource>
 </RCC>

@@ -3,13 +3,19 @@
 
 <head>
   <meta charset="utf-8">
-  <title>Template</title>
+  <title>Set Map</title>
   <meta name="description" content="">
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
   <style>
     h1 {
       text-align: center;
+    }
+    table.warning {
+      color: black;
+      background-color: #cccc44;
+      border-color: yellow;
+      border-style: solid;
     }
     div.container {
       min-height: 10em;
@@ -23,12 +29,25 @@
 
 
 <body>
-  <h1>Template</h1>
+  <h1>Set Map</h1>
 
   <hr>
 
   <div class="container">
-    <p>Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet.</p>
+    <p>Sets the currently selected <a href="qrc:/resources/help/editor/resources/resource_help.html">Resource</a>
+    as the <a href="qrc:/resources/help/project/joi_project_help.html">JOI-Project's</a>
+    map.<br>
+    This feature is currently unused.</p>
+
+    <br>
+
+    <table width="100%" class="warning">
+      <tr>
+        <td width="10%"><img src="qrc:/resources/help/icons/WarningIcon.png" width="64" height="64" alt="Warning"></td>
+        <td width="90%"><br>Only image type offline <a href="qrc:/resources/help/editor/resources/resource_help.html">Resources</a>
+        can be set as the map.</td>
+      </tr>
+    </table>
   </div>
 </body>
 

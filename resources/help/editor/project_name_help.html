@@ -3,7 +3,7 @@
 
 <head>
   <meta charset="utf-8">
-  <title>Template</title>
+  <title>Project Name</title>
   <meta name="description" content="">
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
@@ -23,12 +23,35 @@
 
 
 <body>
-  <h1>Template</h1>
+  <h1>Project Name</h1>
 
   <hr>
 
   <div class="container">
-    <p>Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet.</p>
+    <p>This text field lets you edit the <a href="qrc:/resources/help/project/joi_project_help.html">JOI-Project's</a>
+    name. The project name is the same as the project folder name and thus must conform
+    to the operating system's folder naming rules and some application specific rules:</p>
+
+    <br>
+
+    <ul>
+      <li>Project names are case-sensitive.</li>
+      <li>Project names must be no more than 255 characters in length.</li>
+      <li>Project names must not be empty and must contain at least one non-whitespace character.</li>
+      <li>The following characters are not allowed: " \ / : | &lt; &gt; * ? &amp; ( ) &#59; + [ ]</li>
+      <li>Illegal URL path characters not allowed. Code points like \uE000, are not valid Unicode characters. In addition, some ASCII or Unicode characters, like control characters (0x00 to 0x1F, 0x7f, 0x81, etc.), are also not allowed.</li>
+      <li>The following project names are not allowed: LPT1, LPT2, LPT3, LPT4, LPT5, LPT6, LPT7, LPT8, LPT9, COM1, COM2, COM3, COM4, COM5, COM6, COM7, COM8, COM9, PRN, AUX, NUL, CON, CLOCK$, dot character (.), and two dot characters (..).</li>
+    </ul>
+
+    <br>
+
+    <p>Generally sticking with letters, numbers, - and _ is the safest bet. The project name is not visible
+    outside the editor, so it doesn't have to look nice, just be somewhat describtive.</p>
+
+    <br>
+
+    <p>On editing the project name, the folder will <i>not</i> be renamed. It will be renamed, once
+    the project is <a href="qrc:/resources/help/editor/saveproject_button_help.html">saved</a>.</p>
   </div>
 </body>
 

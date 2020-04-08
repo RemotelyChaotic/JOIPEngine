@@ -176,7 +176,7 @@ void CEditorSceneNodeWidget::Initialize()
   if (nullptr != wpHelpFactory)
   {
     m_pFlowView->setProperty(helpOverlay::c_sHelpPagePropertyName, c_sNodeHelpId);
-    wpHelpFactory->RegisterHelp(c_sNodeHelpId, ":/resources/help/editor/resources/resources_tree_help.html");
+    wpHelpFactory->RegisterHelp(c_sNodeHelpId, ":/resources/help/editor/nodes/nodeeditor_help.html");
   }
 
   m_bInitialized = true;

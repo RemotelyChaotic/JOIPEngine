@@ -18,17 +18,53 @@
       margin-right: auto;
       width: 0.6em
     }
+    table.warning {
+      color: black;
+      background-color: #cccc44;
+      border-color: yellow;
+      border-style: solid;
+    }
+    div.container {
+      min-height: 10em;
+      display: table-cell;
+      margin-left: auto;
+      margin-right: auto;
+      width: 0.6em
+    }
   </style>
 </head>
 
 
 <body>
-  <h1>Template</h1>
+  <h1>Add Online Resource</h1>
 
   <hr>
 
   <div class="container">
-    <p>Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet.</p>
+    <p>Open the web-overlay to add an <a href="qrc:/resources/help/editor/resources/resource_help.html">Online Resource</a> to the
+    <a href="qrc:/resources/help/project/joi_project_help.html">JOI-Project</a>.</p>
+
+    <br>
+
+    <p><img src="qrc:/resources/help/editor/images/web_resource_overlay.png"><br><i>Web resource overlay</i></p>
+
+    <br>
+
+    <p>Only image and video type <a href="qrc:/resources/help/editor/resources/resource_help.html">Online Resources</a>
+    can be handled, and the link must point to the image or video url directly. Links gated behind
+    logins will not work. These <a href="qrc:/resources/help/editor/resources/resource_help.html">Resources</a>
+    will <i>not</i> be downloaded and instead loaded and displayed when needed.</p>
+
+    <br>
+
+    <table width="100%" class="warning">
+      <tr>
+        <td width="10%"><img src="qrc:/resources/help/icons/WarningIcon.png" width="64" height="64" alt="Warning"></td>
+        <td width="90%"><br>This type of resource will disable this <a href="qrc:/resources/help/project/joi_project_help.html">JOI-Project</a>
+        in offline mode and can cause player experience to drop if the internet connection is slow.
+        This type of resource is not recommended to use.</td>
+      </tr>
+    </table>
   </div>
 </body>
 

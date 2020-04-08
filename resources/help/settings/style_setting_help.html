@@ -3,7 +3,7 @@
 
 <head>
   <meta charset="utf-8">
-  <title>Template</title>
+  <title>Style</title>
   <meta name="description" content="">
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
@@ -18,18 +18,171 @@
       margin-right: auto;
       width: 0.6em
     }
+    table.warning {
+      color: black;
+      background-color: #cccc44;
+      border-color: yellow;
+      border-style: solid;
+    }
   </style>
 </head>
 
 
 <body>
-  <h1>Template</h1>
+  <h1>Style</h1>
 
   <hr>
 
   <div class="container">
-    <p>Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet.</p>
+    <p>Select the application style. The available styles are in the <i>.\styles</i>
+    subdirectory of the application.</p>
+
+    <br>
+
+    <table width="100%" class="warning">
+      <tr>
+        <td width="10%"><img src="qrc:/resources/help/icons/WarningIcon.png" width="64" height="64" alt="Warning"></td>
+        <td width="90%"><br>Multiple instances of the application share the same configuration file.<br>
+        If you use different versions of the application, your settings for all instances will change.</td>
+      </tr>
+    </table>
+
+    <br>
+
+    <p>Styles can be extended with custom styles by sinply adding a folder to the <i>.\styles</i> subrirectory.
+    The style name coresponds to the folder's name. Every style needs a <i>style.css</i> file that
+    needs to be located in the style's root folder (e.g. <i>.\styles\621 Hexagons\style.css</i>).
+    This file can reference resources like images relatively to its own location or absolutely,
+    though absolute paths should not be used.</p>
+
+    <br>
+
+    <p><img src="qrc:/resources/help/settings/images/custom_style_folder.png"></p>
+
+    <br>
+
+    <p>For general help with custom stylesheets please refer to the qt documentation:
+      <ul>
+        <li>https://doc.qt.io/qt-5/stylesheet-reference.html</li>
+        <li>https://doc.qt.io/qt-5/stylesheet-examples.html</li>
+      </ul>
+    </p>
+
+    <h2>Additional classes that are useful in a style</h2>
+
+    <p>
+      <ul>
+        <li><b>CMenuButton:</b> The button used in the main menu and primary sub-menus.
+        It's allways drawn directly on the main window background.</li>
+        <li><b>COverlayBase:</b> Class for overlays, that work like non-modal dialogs and should be styled
+        similarly as a QDialog, as they will be drawn ontop of other widgets.</li>
+        <li><b>CProjectCardSelectionWidget:</b> The widget displaying the title card of a JOI-Project.
+        Has unique properties:<br>
+          <ul>
+            <li><i>qproperty-selectionColor:</i> The color of the glow of the currently selected card.</li>
+          </ul>
+          <br>
+        </li>
+        <li><b>CTimerWidget:</b> The timer during playing. Has unique properties:<br>
+          <ul>
+            <li><i>qproperty-primaryColor:</i> Color of the clock segments and the back of the passed time.</li>
+            <li><i>qproperty-secondaryColor:</i> Color of the clock hand.</li>
+            <li><i>qproperty-tertiaryColor:</i> Color of the front of the passed time.</li>
+          </ul>
+          <br>
+        </li>
+        <li><b>CScriptEditorWidget:</b> The text editor for scripts. Has unique properties:<br>
+          <ul>
+            <li><i>qproperty-lineNumberBackgroundColor:</i> Background color of the bar with the line numbers.</li>
+            <li><i>qproperty-lineNumberTextColor:</i> Text color of the line numbers.</li>
+            <li><i>qproperty-highlightLineColor:</i> Background color of the line currently containing the cursor.</li>
+            <li><i>qproperty-widgetsBackgroundColor:</i> Background color of the bar with the error icons to the
+            right of the line number bar.</li>
+          </ul>
+          <br>
+        </li>
+        <li><b>CEditorSceneNodeWidget:</b> The node editor. Has unique properties:
+          <ul>
+            <li><i>qproperty-normalBoundaryColor:</i> Boundry (border) color of non-selected nodes.</li>
+            <li><i>qproperty-selectedBoundaryColor:</i> Boundry (border) color of selected nodes.</li>
+            <li><i>qproperty-gradientColor0:</i> Top color of nodes.</li>
+            <li><i>qproperty-gradientColor1:</i> Top half backgound color of nodes.</li>
+            <li><i>qproperty-gradientColor2:</i> Bottom half backgound color of nodes.</li>
+            <li><i>qproperty-gradientColor3:</i> Bottom color of nodes.</li>
+            <li><i>qproperty-shadowColor:</i> Shadow color of nodes.</li>
+            <li><i>qproperty-fontColor:</i> Font color of nodes.</li>
+            <li><i>qproperty-fontColorFaded:</i> Secondary font color of nodes.</li>
+            <li><i>qproperty-connectionPointColor:</i> Color of the connection indicator of nodes.</li>
+            <li><i>qproperty-backgroundColor:</i> Background of the node editor (currently non-functional).</li>
+            <li><i>qproperty-fineGridColor:</i> Color if the fine grid lines of the node editor.</li>
+            <li><i>qproperty-coarseGridColor:</i> Color if the coarse grid lines of the node editor.</li>
+            <li><i>qproperty-normalConnectionColor:</i> Default color of unselected connections.</li>
+            <li><i>qproperty-selectedConnectionColor:</i> Color of selected connections.</li>
+            <li><i>qproperty-selectedConnectionHaloColor:</i> Glow color of selected connections.</li>
+            <li><i>qproperty-hoveredConnectionColor:</i> Color of hovered connections.</li>
+          </ul>
+          <br>
+        </li>
+      </ul>
+    </p>
+
+    <h2>Ids of icons / Buttons for styling</h2>
+
+    <p>
+      <ul>
+        <li><b>QLabel:</b><br>
+          <ul>
+            <li><i>#SearchIcon:</i> Search icon next to the bar of the "Resource manager" in the editor.</li>
+            <li><i>#PlayButton:</i> The skip-wait button during playing.</li>
+            <li><i>#ExitButton:</i> The exit button during playing.</li>
+            <li><i>#ErrorIcon:</i> The error indicator of the "Scene Code editor".</li>
+            <li><i>#IconBackground:</i> The background image of icons displayed by a project during gameplay.</li>
+          </ul>
+          <br>
+        </li>
+        <li><b>QPushButton:</b> The following are all buttons that are used in the editor.<br>
+          <ul>
+            <li><i>#AddShowBackgroundCode</i></li>
+            <li><i>#AddShowIconCode</i></li>
+            <li><i>#AddShowImageCode</i></li>
+            <li><i>#AddTextCode</i></li>
+            <li><i>#AddTimerCode</i></li>
+            <li><i>#DebugButton</i></li>
+            <li><i>#StopDebugButton</i></li>
+            <li><i>#PauseButton</i></li>
+            <li><i>#PlayButton</i></li>
+            <li><i>#StopButton</i></li>
+            <li><i>#AddThreadCode</i></li>
+            <li><i>#ExitButton</i></li>
+            <li><i>#SaveButton</i></li>
+            <li><i>#AddResourceButton</i></li>
+            <li><i>#AddButtonButton</i></li>
+            <li><i>#AddTextColorButton</i></li>
+            <li><i>#AddBGColorButton</i></li>
+            <li><i>#AddWebResourceButton</i></li>
+            <li><i>#MapButton</i></li>
+            <li><i>#RemoveResourceButton</i></li>
+            <li><i>#RemoveButtonButton</i></li>
+            <li><i>#RemoveTextColorButton</i></li>
+            <li><i>#RemoveBGColorButton</i></li>
+            <li><i>#TitleCardButton</i></li>
+            <li><i>#AddNodeButton</i></li>
+            <li><i>#RemoveNodeButton</i></li>
+          </ul>
+        <br><br>Additionally The following buttons are used for this overlay.<br>
+          <ul>
+            <li><i>#HelpButton</i></li>
+            <li><i>#BackButton</i></li>
+            <li><i>#HomeButton</i></li>
+            <li><i>#CloseButton</i></li>
+          </ul>
+        <br>
+        </li>
+      </ul>
+    </p>
   </div>
+
+  <br>
 </body>
 
 </html>

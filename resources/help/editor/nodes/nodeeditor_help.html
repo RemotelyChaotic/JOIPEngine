@@ -1,0 +1,69 @@
+<!doctype html>
+<html class="no-js" lang="">
+
+<head>
+  <meta charset="utf-8">
+  <title>Node Editor</title>
+  <meta name="description" content="">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <style>
+    h1 {
+      text-align: center;
+    }
+    div.container {
+      min-height: 10em;
+      display: table-cell;
+      margin-left: auto;
+      margin-right: auto;
+      width: 0.6em
+    }
+  </style>
+</head>
+
+
+<body>
+  <h1>Node Editor</h1>
+
+  <hr>
+
+  <div class="container">
+    <p>The node editor containing all the <a href="qrc:/resources/help/editor/nodes/node_help.html">Project Nodes</a>.
+    This flow is stored in a JSON format in the <i>SceneModel.flow</i>
+    <a href="qrc:/resources/help/editor/resources/resource_help.html">Resource</a> file of the project.</p>
+
+    <br>
+
+    <p>
+      <ul>
+        <li>The <a href="qrc:/resources/help/editor/addnode_button_help.html">Add Node</a> button,
+        or clicking RMB in the node editor lets you add a new <a href="qrc:/resources/help/editor/nodes/node_help.html">Node</a>.</li>
+        <li>The <a href="qrc:/resources/help/editor/removenode_button_help.html">Remove Node</a>
+        button will delete the currently selected <a href="qrc:/resources/help/editor/nodes/node_help.html">Node</a> and all paths linked to it.</li>
+        <li>To select a <a href="qrc:/resources/help/editor/nodes/node_help.html">Node</a>, simply click it with LMB.</li>
+        <li>To create a path between <a href="qrc:/resources/help/editor/nodes/node_help.html">Nodes</a>, click the connector of a node and drag the mouse to the opposite connector of a
+        different <a href="qrc:/resources/help/editor/nodes/node_help.html">Node</a>.</li>
+      </ul>
+    </p>
+
+    <br>
+
+    <p>When you create a <a href="qrc:/resources/help/editor/nodes/node_help.html">Scene-Node</a>,
+    you will be prompted to create the associated script <a href="qrc:/resources/help/editor/resources/resource_help.html">Resource</a> file
+    (it helps to have the same name as the <a href="qrc:/resources/help/editor/nodes/node_help.html">Scene-Node</a>,
+    but it's not neccessary; just make sure it's in the project folder.)<br>
+    The <a href="qrc:/resources/help/editor/nodes/node_help.html">Nodes</a> of a
+    project might look like this for example:</p>
+
+    <br>
+
+    <p><img src="qrc:/resources/help/editor/images/simple_project_flow.png"><br><i>Simple project flow</i></p>
+
+    <p>The above pictured flow would be a very linear flow.
+    A more dynamic flow would be to have the splitter linked to two different
+    scenes or even another splitter to split the flow of the project up even more.</p>
+
+  </div>
+</body>
+
+</html>
