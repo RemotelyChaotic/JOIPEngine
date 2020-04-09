@@ -121,7 +121,7 @@ void CScriptEditorModel::SerializeProject()
       if (nullptr != spDbManager)
       {
         QReadLocker projLocker(&m_spProject->m_rwLock);
-        const QString sProjectName = m_spProject->m_sName;
+        const QString sProjectName = m_spProject->m_sFolderName;
         projLocker.unlock();
 
         auto spResource = spDbManager->FindResource(m_spProject, it->first);
@@ -291,6 +291,7 @@ void CScriptEditorModel::SlotResourceAdded(qint32 iProjId, const QString& sName)
   if (nullptr == m_spProject) { return; }
   m_spProject->m_rwLock.lockForRead();
   qint32 iCurrentId = m_spProject->m_iId;
+  QString sProjectFolder = m_spProject->m_sFolderName;
   m_spProject->m_rwLock.unlock();
 
   if (iCurrentId != iProjId) { return; }
@@ -301,6 +302,11 @@ void CScriptEditorModel::SlotResourceAdded(qint32 iProjId, const QString& sName)
     auto spResource = spDbManager->FindResource(m_spProject, sName);
     if (nullptr != spResource)
     {
+      QReadLocker locker(&spResource->m_rwLock);
+      if (QFileInfo(ResourceUrlToAbsolutePath(spResource->m_sPath, sProjectFolder)).suffix() != "js")
+      { return; }
+      locker.unlock();
+
       // find new index
       std::vector<QString> vsNamesInOrder;
       vsNamesInOrder.reserve(m_cachedScriptsMap.size());
@@ -503,7 +509,7 @@ void CScriptEditorModel::LoadScriptFile(const QString& sName)
     if (nullptr != spDbManager)
     {
       QReadLocker projLocker(&m_spProject->m_rwLock);
-      const QString sProjectName = m_spProject->m_sName;
+      const QString sProjectName = m_spProject->m_sFolderName;
       projLocker.unlock();
 
       auto spResource = spDbManager->FindResource(m_spProject, sName);
