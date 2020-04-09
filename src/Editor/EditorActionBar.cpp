@@ -55,7 +55,7 @@ void CEditorActionBar::Initialize()
   if (nullptr != wpHelpFactory)
   {
     m_spUi->pTitleLineEdit->setProperty(helpOverlay::c_sHelpPagePropertyName, c_sRenameProjectHelpId);
-    wpHelpFactory->RegisterHelp(c_sRenameProjectHelpId, ":/resources/help/editor/renameproject_button_help.html");
+    wpHelpFactory->RegisterHelp(c_sRenameProjectHelpId, ":/resources/help/editor/project_name_help.html");
     m_spUi->SaveButton->setProperty(helpOverlay::c_sHelpPagePropertyName, c_sSaveProjectHelpId);
     wpHelpFactory->RegisterHelp(c_sSaveProjectHelpId, ":/resources/help/editor/saveproject_button_help.html");
     m_spUi->ExitButton->setProperty(helpOverlay::c_sHelpPagePropertyName, c_sExitProjectHelpId);

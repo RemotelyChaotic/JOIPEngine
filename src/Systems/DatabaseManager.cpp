@@ -37,25 +37,31 @@ CDatabaseManager::~CDatabaseManager()
 
 //----------------------------------------------------------------------------------------
 //
-qint32 CDatabaseManager::AddProject(const QString& sName, qint32 iVersion)
+qint32 CDatabaseManager::AddProject(const QString& sDirName, qint32 iVersion)
 {
   if (!IsInitialized()) { return -1; }
 
   qint32 iNewId = FindNewProjectId();
-  QString sFinalName = sName;
-  qint32 iCounter = 0;
-  while (FindProject(sFinalName) != nullptr)
+
+  QString sName = sDirName;
+  QString sError;
+  if (!ProjectNameCheck(sDirName, &sError))
   {
-    sFinalName = sName + QString::number(iCounter);
-    iCounter++;
+    sName = ToValidProjectName(sDirName);
   }
+  else
+  {
+    sName = sDirName;
+  }
+
 
   QMutexLocker locker(&m_dbMutex);
   if (0 <= iNewId)
   {
     m_vspProjectDatabase.push_back(std::make_shared<SProject>());
     m_vspProjectDatabase.back()->m_iId = iNewId;
-    m_vspProjectDatabase.back()->m_sName = sFinalName;
+    m_vspProjectDatabase.back()->m_sName = sName;
+    m_vspProjectDatabase.back()->m_sFolderName = sDirName;
     m_vspProjectDatabase.back()->m_iVersion = iVersion;
 
     locker.unlock();
@@ -219,14 +225,10 @@ void CDatabaseManager::RenameProject(qint32 iId, const QString& sNewName)
   if (!IsInitialized()) { return; }
 
   tspProject spNewProject = FindProject(sNewName);
-  if (nullptr == spNewProject)
+  if (nullptr == spNewProject && ProjectNameCheck(sNewName))
   {
     tspProject spProject = FindProject(iId);
     spProject->m_rwLock.lockForWrite();
-    if (spProject->m_sOldName.isNull())
-    {
-      spProject->m_sOldName = spProject->m_sName;
-    }
     spProject->m_sName = sNewName;
     spProject->m_rwLock.unlock();
 
@@ -241,15 +243,11 @@ void CDatabaseManager::RenameProject(const QString& sName, const QString& sNewNa
   if (!IsInitialized()) { return; }
 
   tspProject spNewProject = FindProject(sNewName);
-  if (nullptr == spNewProject)
+  if (nullptr == spNewProject && ProjectNameCheck(sNewName))
   {
     tspProject spProject = FindProject(sName);
     spProject->m_rwLock.lockForWrite();
     qint32 iId = spProject->m_iId;
-    if (spProject->m_sOldName.isNull())
-    {
-      spProject->m_sOldName = spProject->m_sName;
-    }
     spProject->m_sName = sNewName;
     spProject->m_rwLock.unlock();
 
@@ -786,23 +784,23 @@ bool CDatabaseManager::SerializeProjectPrivate(tspProject& spProject)
 {
   spProject->m_rwLock.lockForRead();
   const QString sName = spProject->m_sName;
-  const QString sOldName = spProject->m_sOldName;
+  const QString sFolderName = spProject->m_sFolderName;
   spProject->m_rwLock.unlock();
 
   bool bOk = true;
   QDir sContentFolder(m_spSettings->ContentFolder());
 
   // first rename old folder
-  if (!sOldName.isEmpty())
+  if (!sFolderName.isEmpty())
   {
-    if (QFileInfo(m_spSettings->ContentFolder() + QDir::separator() + sOldName).exists())
+    if (QFileInfo(m_spSettings->ContentFolder() + QDir::separator() + sFolderName).exists())
     {
-      bOk = sContentFolder.rename(sOldName, sName);
+      bOk = sContentFolder.rename(sFolderName, sName);
     }
     else
     {
       bOk = false;
-      qWarning() << "Could not rename folder: " + m_spSettings->ContentFolder() + QDir::separator() + sOldName;
+      qWarning() << "Could not rename folder: " + m_spSettings->ContentFolder() + QDir::separator() + sFolderName;
     }
   }
 
@@ -816,6 +814,13 @@ bool CDatabaseManager::SerializeProjectPrivate(tspProject& spProject)
     }
   }
 
+  if (bOk)
+  {
+    spProject->m_rwLock.lockForWrite();
+    spProject->m_sFolderName = sName;
+    spProject->m_rwLock.unlock();
+  }
+
   QJsonDocument document(spProject->ToJsonObject());
 
   if (bOk)
@@ -826,16 +831,14 @@ bool CDatabaseManager::SerializeProjectPrivate(tspProject& spProject)
     if (jsonFile.open(QIODevice::ReadWrite | QIODevice::Truncate))
     {
       jsonFile.write(document.toJson(QJsonDocument::Indented));
-      return true;
+      bOk = true;
     }
     else
     {
       qWarning() << "Could not wirte project file: " + jsonInfo.absoluteFilePath();
-      return false;
+      bOk =  false;
     }
   }
-  else
-  {
-    return false;
-  }
+
+  return bOk;
 }

@@ -382,7 +382,15 @@ QString CEditorModel::RenameProject(const QString& sNewProjectName)
     qint32 iId = m_spCurrentProject->m_iId;
     m_spCurrentProject->m_rwLock.unlock();
 
-    spDbManager->RenameProject(iId, sNewProjectName);
+    QString sError;
+    if (ProjectNameCheck(sNewProjectName, &sError))
+    {
+      spDbManager->RenameProject(iId, sNewProjectName);
+    }
+    else
+    {
+      qWarning() << sError;
+    }
 
     m_spCurrentProject->m_rwLock.lockForRead();
     const QString sName = m_spCurrentProject->m_sName;

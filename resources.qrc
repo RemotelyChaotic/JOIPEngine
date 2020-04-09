@@ -85,7 +85,6 @@
         <file>resources/help/editor/map_button_help.html</file>
         <file>resources/help/editor/removenode_button_help.html</file>
         <file>resources/help/editor/removeresource_button_help.html</file>
-        <file>resources/help/editor/renameproject_button_help.html</file>
         <file>resources/help/editor/saveproject_button_help.html</file>
         <file>resources/help/editor/startdebug_button_help.html</file>
         <file>resources/help/editor/stopdebug_button_help.html</file>

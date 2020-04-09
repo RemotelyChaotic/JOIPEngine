@@ -25,7 +25,7 @@ public:
   ~CDatabaseManager() override;
 
   // Project
-  qint32 AddProject(const QString& sName = "New_Project", qint32 iVersion = 1);
+  qint32 AddProject(const QString& sDirName = "New_Project", qint32 iVersion = 1);
   void ClearProjects();
   bool DeserializeProject(qint32 iId);
   bool DeserializeProject(const QString& sName);

@@ -316,11 +316,14 @@ void CEditorMainScreen::SlotProjectNameEditingFinished()
 {
   if (!m_bInitialized) { return; }
 
-  const QString sFinalName =
-      m_spEditorModel->RenameProject(m_spUi->pProjectActionBar->m_spUi->pTitleLineEdit->text());
+  QString sNewName = m_spUi->pProjectActionBar->m_spUi->pTitleLineEdit->text();
+  const QString sFinalName = m_spEditorModel->RenameProject(sNewName);
   m_spUi->pProjectActionBar->m_spUi->pTitleLineEdit->setText(sFinalName);
 
-  SlotProjectEdited();
+  if (sFinalName == sNewName)
+  {
+    SlotProjectEdited();
+  }
 }
 
 //----------------------------------------------------------------------------------------

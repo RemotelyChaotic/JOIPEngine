@@ -23,7 +23,7 @@ struct SProject : public ISerializable, std::enable_shared_from_this<SProject>
   SVersion                  m_iVersion;
   SVersion                  m_iTargetVersion;
   QString                   m_sName;
-  QString                   m_sOldName;
+  QString                   m_sFolderName;
   QString                   m_sTitleCard;
   QString                   m_sMap;
   QString                   m_sSceneModel;
@@ -52,6 +52,7 @@ class CProject : public QObject
   Q_PROPERTY(qint32  version      READ getVersion       )
   Q_PROPERTY(qint32  targetVersion READ getTargetVersion)
   Q_PROPERTY(QString name         READ getName          )
+  Q_PROPERTY(QString folderName   READ getFolderName    )
   Q_PROPERTY(QString titleCard    READ getTitleCard     )
   Q_PROPERTY(QString map          READ getMap           )
   Q_PROPERTY(bool    isUsingWeb   READ isUsingWeb       )
@@ -65,6 +66,7 @@ public:
   qint32 getVersion();
   qint32 getTargetVersion();
   QString getName();
+  QString getFolderName();
   QString getTitleCard();
   QString getMap();
   bool isUsingWeb();
@@ -94,5 +96,13 @@ Q_DECLARE_METATYPE(tspProject)
 //----------------------------------------------------------------------------------------
 //
 QString PhysicalProjectName(const tspProject& spProject);
+
+//----------------------------------------------------------------------------------------
+//
+bool ProjectNameCheck(const QString& sProjectName, QString* sErrorText = nullptr);
+
+//----------------------------------------------------------------------------------------
+//
+QString ToValidProjectName(const QString& sProjectName);
 
 #endif // PROJECT_H

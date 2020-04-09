@@ -1,15 +1,24 @@
 #include "Project.h"
+#include "Application.h"
+#include "DatabaseManager.h"
+#include <QApplication>
 #include <QJsonArray>
 #include <QMutexLocker>
 #include <cassert>
 
+namespace  {
+  const QRegExp c_rxExcludedNames("^(LPT1|LPT2|LPT3|LPT4|LPT5|LPT6|LPT7|LPT8|LPT9|COM1|COM2|COM3|COM4|COM5|COM6|COM7|COM8|COM9|PRN|AUX|NUL|CON|CLOCK\\$|\\.|\\.\\.)$");
+}
+
+//----------------------------------------------------------------------------------------
+//
 SProject::SProject() :
   m_rwLock(QReadWriteLock::Recursive),
   m_iId(),
   m_iVersion(),
   m_iTargetVersion(),
   m_sName(),
-  m_sOldName(),
+  m_sFolderName(),
   m_sTitleCard(),
   m_sMap(),
   m_sSceneModel(),
@@ -24,7 +33,7 @@ SProject::SProject(const SProject& other) :
   m_iVersion(other.m_iVersion),
   m_iTargetVersion(other.m_iTargetVersion),
   m_sName(other.m_sName),
-  m_sOldName(other.m_sOldName),
+  m_sFolderName(other.m_sFolderName),
   m_sTitleCard(other.m_sTitleCard),
   m_sMap(other.m_sMap),
   m_sSceneModel(other.m_sSceneModel),
@@ -41,8 +50,6 @@ SProject::~SProject() {}
 QJsonObject SProject::ToJsonObject()
 {
   QWriteLocker locker(&m_rwLock);
-
-  m_sOldName = QString();
 
   QJsonArray scenes;
   for (auto& spScene : m_vspScenes)
@@ -88,7 +95,6 @@ void SProject::FromJsonObject(const QJsonObject& json)
   {
     m_sName = it.value().toString();
   }
-  m_sOldName = QString();
   it = json.find("sTitleCard");
   if (it != json.end())
   {
@@ -189,6 +195,14 @@ QString CProject::getName()
 
 //----------------------------------------------------------------------------------------
 //
+QString CProject::getFolderName()
+{
+  QReadLocker locker(&m_spData->m_rwLock);
+  return m_spData->m_sFolderName;
+}
+
+//----------------------------------------------------------------------------------------
+//
 QString CProject::getTitleCard()
 {
   QReadLocker locker(&m_spData->m_rwLock);
@@ -270,9 +284,154 @@ QString PhysicalProjectName(const tspProject& spProject)
 {
   QReadLocker locker(&spProject->m_rwLock);
   QString sName = spProject->m_sName;
-  if (!spProject->m_sOldName.isNull())
+  if (!spProject->m_sFolderName.isNull())
   {
-    sName = spProject->m_sOldName;
+    sName = spProject->m_sFolderName;
   }
   return sName;
+}
+
+//----------------------------------------------------------------------------------------
+//
+bool ProjectNameCheck(const QString& sProjectName, QString* sErrorText)
+{
+  auto spDbManager = CApplication::Instance()->System<CDatabaseManager>().lock();
+  if (nullptr == spDbManager) { return false; }
+
+  if (sProjectName.isEmpty() || sProjectName.isNull())
+  {
+    if (nullptr != sErrorText)
+    {
+      *sErrorText = QString(QApplication::translate("ProjectNameCheck",
+                                                    QT_TR_NOOP("Project name cannot be empty.")));
+    }
+    return false;
+  }
+  else if (255 < sProjectName.length())
+  {
+    if (nullptr != sErrorText)
+    {
+      *sErrorText = QString(QApplication::translate("ProjectNameCheck",
+                                                    QT_TR_NOOP("Project name must have at most 255 characters.")));
+    }
+    return false;
+  }
+  else if (QRegExp("^\\s*$").exactMatch(sProjectName))
+  {
+    if (nullptr != sErrorText)
+    {
+      *sErrorText = QString(QApplication::translate("ProjectNameCheck",
+                                                    QT_TR_NOOP("Project name must contain at least one non-whitespace character.")));
+    }
+    return false;
+  }
+  else if (sProjectName.contains(QRegExp("\"|\\\\|\\/|:|\\||\\<|\\>|\\*|\\?|&|\\(|\\)|\\+|\\[|\\]|;")))
+  {
+    if (nullptr != sErrorText)
+    {
+      *sErrorText = QString(QApplication::translate("ProjectNameCheck",
+                                                    QT_TR_NOOP("Characters: \" \\ / : | < > * ? & ( ) ; + [ ] not allowed in project name.")));
+    }
+    return false;
+  }
+  else if (!sProjectName[0].isLetterOrNumber())
+  {
+    if (nullptr != sErrorText)
+    {
+      *sErrorText = QString(QApplication::translate("ProjectNameCheck",
+                                                    QT_TR_NOOP("Project name must begin with a letter or number.")));
+    }
+    return false;
+  }
+  else if (sProjectName.contains(c_rxExcludedNames))
+  {
+    if (nullptr != sErrorText)
+    {
+      *sErrorText = QString(QApplication::translate("ProjectNameCheck",
+                                                    QT_TR_NOOP("The following project names are not allowed: LPT1, LPT2, LPT3, LPT4, LPT5, LPT6, LPT7, LPT8, LPT9, COM1, COM2, COM3, COM4, COM5, COM6, COM7, COM8, COM9, PRN, AUX, NUL, CON, CLOCK$, dot character (.), and two dot characters (..)")));
+    }
+    return false;
+  }
+  else if (nullptr != spDbManager && spDbManager->FindProject(sProjectName) != nullptr)
+  {
+    if (nullptr != sErrorText)
+    {
+      *sErrorText = QString(QApplication::translate("ProjectNameCheck",
+                                                    QT_TR_NOOP("Project with the name '%1' allready exists.")));
+    }
+    return false;
+  }
+  else
+  {
+    QString sIllegalChars;
+    for (const QChar& c : sProjectName)
+    {
+      if (0x1f > c.unicode() || 0x80 <= c.unicode() ||
+          !(c.isLetterOrNumber() || c.isSymbol() || c.isMark() || c.isSpace() || c.isPunct()))
+      {
+        sIllegalChars += c;
+      }
+    }
+    if (0 < sIllegalChars.length())
+    {
+      if (nullptr != sErrorText)
+      {
+        *sErrorText = QString(QApplication::translate("ProjectNameCheck",
+                                                      QT_TR_NOOP("Illegal unicode character(s) '%1' in project name."))).arg(sIllegalChars);
+      }
+      return false;
+    }
+  }
+
+  return true;
+}
+
+//----------------------------------------------------------------------------------------
+//
+QString ToValidProjectName(const QString& sProjectName)
+{
+  auto spDbManager = CApplication::Instance()->System<CDatabaseManager>().lock();
+  if (nullptr == spDbManager) { return QString(); }
+  QString sFinalName = sProjectName;
+
+  if (sProjectName.isEmpty() || sProjectName.isNull() || QRegExp("^\\s*$").exactMatch(sProjectName))
+  {
+    sFinalName = "UnnamedPoject";
+  }
+  else
+  {
+    sFinalName = sProjectName;
+  }
+  if (255 < sFinalName.length())
+  {
+    sFinalName = sFinalName.mid(0, 255);
+  }
+  if (!sFinalName[0].isLetterOrNumber())
+  {
+    sFinalName.replace(0, 1, '0');
+  }
+  if (sFinalName.contains(c_rxExcludedNames) ||
+      (nullptr != spDbManager && spDbManager->FindProject(sProjectName) != nullptr))
+  {
+    QString sOrigName = sFinalName;
+    qint32 iCounter = 0;
+    while (sFinalName.contains(c_rxExcludedNames) ||
+           (nullptr != spDbManager && spDbManager->FindProject(sFinalName) != nullptr))
+    {
+      sFinalName = sOrigName + QString::number(iCounter);
+      iCounter++;
+    }
+  }
+
+  for (qint32 i = 0; sFinalName.length() > i; ++i)
+  {
+    QChar c = sFinalName[i];
+    if (0x1f > c.unicode() || 0x80 <= c.unicode() ||
+        !(c.isLetterOrNumber() || c.isSymbol() || c.isMark() || c.isSpace() || c.isPunct()))
+    {
+      sFinalName.replace(i, 1, '0');
+    }
+  }
+
+  return sFinalName;
 }

@@ -2,6 +2,7 @@
 #include "Application.h"
 #include "Systems/DatabaseManager.h"
 #include "Systems/HelpFactory.h"
+#include "Systems/Project.h"
 #include "Widgets/HelpOverlay.h"
 #include "ui_EditorChoiceScreen.h"
 
@@ -114,24 +115,16 @@ void CEditorChoiceScreen::on_pProjectNameLineEdit_editingFinished()
   auto spDbManager = m_wpDbManager.lock();
   if (nullptr != spDbManager)
   {
-    const QString sNewName = m_spUi->pProjectNameLineEdit->text();
-    if (sNewName.isEmpty() || sNewName.isNull())
+    QString sNewName = m_spUi->pProjectNameLineEdit->text();
+    QString sErrorText;
+    if (!ProjectNameCheck(sNewName, &sErrorText))
     {
-      m_spUi->pErrorLabel->setText(QString("Cannot create a Project with an empty name."));
+      m_spUi->pErrorLabel->setText(sErrorText);
       m_spUi->pErrorLabel->setVisible(true);
     }
     else
     {
-      if (spDbManager->FindProject(sNewName) != nullptr)
-      {
-        m_spUi->pErrorLabel->setText(QString("Project with the name '%1' allready exists.\n"
-                                             "Please chose a different name.").arg(sNewName));
-        m_spUi->pErrorLabel->setVisible(true);
-      }
-      else
-      {
-        m_spUi->pErrorLabel->setVisible(false);
-      }
+      m_spUi->pErrorLabel->setVisible(false);
     }
   }
 }
@@ -144,14 +137,20 @@ void CEditorChoiceScreen::on_pCreateProjectButton_clicked()
   auto spDbManager = m_wpDbManager.lock();
   if (nullptr != spDbManager)
   {
-    const QString sNewName = m_spUi->pProjectNameLineEdit->text();
-    if (spDbManager->FindProject(sNewName) == nullptr)
+    QString sNewName = m_spUi->pProjectNameLineEdit->text();
+    QString sErrorText;
+    if (!ProjectNameCheck(sNewName, &sErrorText))
     {
+      m_spUi->pErrorLabel->setText(sErrorText);
+      m_spUi->pErrorLabel->setVisible(true);
+    }
+    else
+    {
+      m_spUi->pErrorLabel->setVisible(false);
       emit SignalNewClicked(sNewName);
+      m_spUi->pStackedWidget->setCurrentIndex(c_iPageIndexChoice);
     }
   }
-
-  m_spUi->pStackedWidget->setCurrentIndex(c_iPageIndexChoice);
 }
 
 //----------------------------------------------------------------------------------------
