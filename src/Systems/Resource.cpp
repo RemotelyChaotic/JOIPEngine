@@ -143,13 +143,13 @@ QStringList OtherFormats()
 
 //----------------------------------------------------------------------------------------
 //
-QString ResourceUrlToAbsolutePath(const QUrl& url, const QString& sProjectName)
+QString ResourceUrlToAbsolutePath(const QUrl& url, const QString& sProjectFolder)
 {
   if (url.isLocalFile())
   {
     QUrl urlCopy(url);
     QUrl baseUrl = QUrl::fromLocalFile(CApplication::Instance()->Settings()->ContentFolder() +
-      "/" + sProjectName + "/");
+      "/" + sProjectFolder + "/");
     urlCopy.setScheme(QString());
     QUrl sFullPath = baseUrl.resolved(urlCopy);
     return sFullPath.toLocalFile();

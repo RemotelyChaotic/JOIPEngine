@@ -150,7 +150,7 @@ void CScriptRunner::SlotLoadScript(tspScene spScene, tspResource spResource)
   }
 
   QString sPath = ResourceUrlToAbsolutePath(spResource->m_sPath,
-                                            spResource->m_spParent->m_sName);
+                                            spResource->m_spParent->m_sFolderName);
   resourceLocker.unlock();
   projectLocker.unlock();
 

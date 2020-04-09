@@ -82,7 +82,7 @@ Q_DECLARE_METATYPE(tspResource)
 QStringList AudioFormats();
 QStringList ImageFormats();
 QStringList OtherFormats();
-QString ResourceUrlToAbsolutePath(const QUrl& url, const QString& sProjectName);
+QString ResourceUrlToAbsolutePath(const QUrl& url, const QString& sProjectFolder);
 QStringList VideoFormats();
 
 #endif // RESOURCE_H
