@@ -79,6 +79,10 @@ void CEditorResourceDisplayWidget::UpdateActionBar()
 void CEditorResourceDisplayWidget::SlotLoadFinished()
 {
   m_spUi->pResourceDisplay->SlotSetSliderVisible(true);
+  if (!isVisible())
+  {
+    m_spUi->pResourceDisplay->SlotStop();
+  }
 }
 
 //----------------------------------------------------------------------------------------
