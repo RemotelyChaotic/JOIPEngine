@@ -168,9 +168,13 @@ void CEditorSceneNodeWidget::Initialize()
   m_wpDbManager = CApplication::Instance()->System<CDatabaseManager>();
 
   m_pFlowView->setScene(FlowSceneModel());
+  m_pFlowView->resetTransform();
+  m_pFlowView->scale(0.8, 0.8);
+  m_pFlowView->centerOn(0,0);
 
   connect(CApplication::Instance(), &CApplication::StyleLoaded,
           this, &CEditorSceneNodeWidget::SlotStyleChanged);
+  QMetaObject::invokeMethod(this, "SlotStyleChanged", Qt::QueuedConnection);
 
   auto wpHelpFactory = CApplication::Instance()->System<CHelpFactory>().lock();
   if (nullptr != wpHelpFactory)
@@ -192,9 +196,8 @@ void CEditorSceneNodeWidget::LoadProject(tspProject spCurrentProject)
     qWarning() << "Old Project was not unloaded before loading project.";
   }
 
-  QMetaObject::invokeMethod(this, "SlotStyleChanged", Qt::QueuedConnection);
-
   m_spCurrentProject = spCurrentProject;
+  SlotStyleChanged();
 }
 
 //----------------------------------------------------------------------------------------
