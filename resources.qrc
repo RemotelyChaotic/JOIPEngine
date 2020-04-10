@@ -112,5 +112,11 @@
         <file>resources/help/editor/images/file_copy_dialog.png</file>
         <file>resources/help/editor/images/project_modified_dialog.png</file>
         <file>resources/help/editor/images/file_changed_prompt.png</file>
+        <file>resources/help/editor/addfetish_button_help.html</file>
+        <file>resources/help/editor/removefetish_button_help.html</file>
+        <file>resources/help/editor/projectsettings/engineversion_help.html</file>
+        <file>resources/help/editor/projectsettings/fetish_tree_help.html</file>
+        <file>resources/help/editor/projectsettings/projectversion_help.html</file>
+        <file>resources/data/Kink_Information_Data.csv</file>
     </qresource>
 </RCC>

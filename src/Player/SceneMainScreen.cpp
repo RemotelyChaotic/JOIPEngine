@@ -447,7 +447,6 @@ void CSceneMainScreen::ConnectAllSignals()
     connect(m_spUi->pResourceDisplay, &CResourceDisplayWidget::SignalPlaybackFinished,
             spSignalEmmiter.get(), &CScriptRunnerSignalEmiter::SignalPlaybackFinished, Qt::QueuedConnection);
 
-
     // TextBox
     connect(spSignalEmmiter.get(), &CScriptRunnerSignalEmiter::SignalClearText,
             m_spUi->pTextBoxDisplay, &CTextBoxWidget::SlotClearText, Qt::QueuedConnection);

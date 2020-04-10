@@ -55,6 +55,8 @@ CEditorModel::CEditorModel(QWidget* pParent) :
   m_pParentWidget(pParent),
   m_bInitializingNewProject(false)
 {
+  connect(m_spResourceTreeModel.get(), &CResourceTreeItemModel::SignalProjectEdited,
+          this, &CEditorModel::SignalProjectEdited, Qt::DirectConnection);
   connect(m_spScriptEditorModel.get(), &CScriptEditorModel::SignalProjectEdited,
           this, &CEditorModel::SignalProjectEdited, Qt::DirectConnection);
   connect(m_spFlowSceneModel.get(), &FlowScene::nodeCreated,

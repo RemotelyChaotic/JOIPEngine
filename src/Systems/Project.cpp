@@ -1,6 +1,8 @@
 #include "Project.h"
 #include "Application.h"
 #include "DatabaseManager.h"
+#include "SVersion.h"
+#include "version.h"
 #include <QApplication>
 #include <QJsonArray>
 #include <QMutexLocker>
@@ -15,8 +17,8 @@ namespace  {
 SProject::SProject() :
   m_rwLock(QReadWriteLock::Recursive),
   m_iId(),
-  m_iVersion(),
-  m_iTargetVersion(),
+  m_iVersion(SVersion(1, 0, 0)),
+  m_iTargetVersion(SVersion(MAJOR_VERSION, MINOR_VERSION, PATCH_VERSION)),
   m_sName(),
   m_sFolderName(),
   m_sTitleCard(),
@@ -24,6 +26,7 @@ SProject::SProject() :
   m_sSceneModel(),
   m_bUsesWeb(false),
   m_bNeedsCodecs(false),
+  m_vsKinks(),
   m_vspScenes(),
   m_spResourcesMap()
 {}
@@ -39,6 +42,7 @@ SProject::SProject(const SProject& other) :
   m_sSceneModel(other.m_sSceneModel),
   m_bUsesWeb(other.m_bUsesWeb),
   m_bNeedsCodecs(other.m_bNeedsCodecs),
+  m_vsKinks(other.m_vsKinks),
   m_vspScenes(other.m_vspScenes),
   m_spResourcesMap(other.m_spResourcesMap)
 {}
@@ -51,6 +55,11 @@ QJsonObject SProject::ToJsonObject()
 {
   QWriteLocker locker(&m_rwLock);
 
+  QJsonArray kinks;
+  for (const QString& sKink : m_vsKinks)
+  {
+    kinks.push_back(sKink);
+  }
   QJsonArray scenes;
   for (auto& spScene : m_vspScenes)
   {
@@ -62,14 +71,15 @@ QJsonObject SProject::ToJsonObject()
     resources.push_back(spResource.second->ToJsonObject());
   }
   return {
-    { "iVersion", static_cast<qint32>(m_iVersion) },
-    { "iTargetVersion", static_cast<qint32>(m_iTargetVersion) },
+    { "iVersion", static_cast<qint32>(static_cast<quint32>(m_iVersion)) },
+    { "iTargetVersion", static_cast<qint32>(static_cast<quint32>(m_iTargetVersion)) },
     { "sName", m_sName },
     { "sTitleCard", m_sTitleCard },
     { "sMap", m_sMap },
     { "sSceneModel", m_sSceneModel },
     { "bUsesWeb", m_bUsesWeb },
     { "bNeedsCodecs", m_bNeedsCodecs },
+    { "vsKinks", kinks },
     { "vspScenes", scenes },
     { "vspResources", resources },
   };
@@ -83,12 +93,12 @@ void SProject::FromJsonObject(const QJsonObject& json)
   auto it = json.find("iVersion");
   if (it != json.end())
   {
-    m_iVersion = it.value().toInt();
+    m_iVersion = static_cast<quint32>(it.value().toInt());
   }
   it = json.find("iTargetVersion");
   if (it != json.end())
   {
-    m_iTargetVersion = it.value().toInt();
+    m_iTargetVersion = static_cast<quint32>(it.value().toInt());
   }
   it = json.find("sName");
   if (it != json.end())
@@ -119,6 +129,16 @@ void SProject::FromJsonObject(const QJsonObject& json)
   if (it != json.end())
   {
     m_bNeedsCodecs = it.value().toBool();
+  }
+  it = json.find("vsKinks");
+  m_vsKinks.clear();
+  if (it != json.end())
+  {
+    for (QJsonValue val : it.value().toArray())
+    {
+      QString sKink = val.toString();
+      m_vsKinks.push_back(sKink);
+    }
   }
   it = json.find("vspScenes");
   m_vspScenes.clear();
@@ -174,7 +194,7 @@ qint32 CProject::getId()
 qint32 CProject::getVersion()
 {
   QReadLocker locker(&m_spData->m_rwLock);
-  return m_spData->m_iVersion;
+  return static_cast<qint32>(static_cast<quint32>(m_spData->m_iVersion));
 }
 
 //----------------------------------------------------------------------------------------
@@ -182,7 +202,7 @@ qint32 CProject::getVersion()
 qint32 CProject::getTargetVersion()
 {
   QReadLocker locker(&m_spData->m_rwLock);
-  return m_spData->m_iTargetVersion;
+  return static_cast<qint32>(static_cast<quint32>(m_spData->m_iTargetVersion));
 }
 
 //----------------------------------------------------------------------------------------
@@ -215,6 +235,14 @@ QString CProject::getMap()
 {
   QReadLocker locker(&m_spData->m_rwLock);
   return m_spData->m_sMap;
+}
+
+//----------------------------------------------------------------------------------------
+//
+QStringList CProject::getKinks()
+{
+  QReadLocker locker(&m_spData->m_rwLock);
+  return m_spData->m_vsKinks;
 }
 
 //----------------------------------------------------------------------------------------

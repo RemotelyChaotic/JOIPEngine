@@ -791,16 +791,19 @@ bool CDatabaseManager::SerializeProjectPrivate(tspProject& spProject)
   QDir sContentFolder(m_spSettings->ContentFolder());
 
   // first rename old folder
-  if (!sFolderName.isEmpty())
+  if (sFolderName != sName)
   {
-    if (QFileInfo(m_spSettings->ContentFolder() + QDir::separator() + sFolderName).exists())
+    if (!sFolderName.isEmpty())
     {
-      bOk = sContentFolder.rename(sFolderName, sName);
-    }
-    else
-    {
-      bOk = false;
-      qWarning() << "Could not rename folder: " + m_spSettings->ContentFolder() + QDir::separator() + sFolderName;
+      if (QFileInfo(m_spSettings->ContentFolder() + QDir::separator() + sFolderName).exists())
+      {
+        bOk = sContentFolder.rename(sFolderName, sName);
+      }
+      else
+      {
+        bOk = false;
+        qWarning() << "Could not rename folder: " + m_spSettings->ContentFolder() + QDir::separator() + sFolderName;
+      }
     }
   }
 

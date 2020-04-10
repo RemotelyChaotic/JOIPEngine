@@ -29,6 +29,7 @@ struct SProject : public ISerializable, std::enable_shared_from_this<SProject>
   QString                   m_sSceneModel;
   bool                      m_bUsesWeb;
   bool                      m_bNeedsCodecs;
+  QStringList               m_vsKinks;
   tvspScene                 m_vspScenes;
   tspResourceMap            m_spResourcesMap;
 
@@ -48,15 +49,16 @@ class CProject : public QObject
   Q_OBJECT
   Q_DISABLE_COPY(CProject)
   CProject() {}
-  Q_PROPERTY(qint32  id           READ getId            )
-  Q_PROPERTY(qint32  version      READ getVersion       )
+  Q_PROPERTY(qint32  id            READ getId            )
+  Q_PROPERTY(qint32  version       READ getVersion       )
   Q_PROPERTY(qint32  targetVersion READ getTargetVersion)
-  Q_PROPERTY(QString name         READ getName          )
-  Q_PROPERTY(QString folderName   READ getFolderName    )
-  Q_PROPERTY(QString titleCard    READ getTitleCard     )
-  Q_PROPERTY(QString map          READ getMap           )
-  Q_PROPERTY(bool    isUsingWeb   READ isUsingWeb       )
-  Q_PROPERTY(bool    iUsingCodecs READ isUsingCodecs    )
+  Q_PROPERTY(QString name          READ getName          )
+  Q_PROPERTY(QString folderName    READ getFolderName    )
+  Q_PROPERTY(QString titleCard     READ getTitleCard     )
+  Q_PROPERTY(QString map           READ getMap           )
+  Q_PROPERTY(QStringList kinks     READ getKinks         )
+  Q_PROPERTY(bool    isUsingWeb    READ isUsingWeb       )
+  Q_PROPERTY(bool    isUsingCodecs READ isUsingCodecs    )
 
 public:
   explicit CProject(QJSEngine* pEngine, const std::shared_ptr<SProject>& spProject);
@@ -69,6 +71,7 @@ public:
   QString getFolderName();
   QString getTitleCard();
   QString getMap();
+  QStringList getKinks();
   bool isUsingWeb();
   bool isUsingCodecs();
 

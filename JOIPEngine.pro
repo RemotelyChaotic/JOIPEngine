@@ -132,7 +132,8 @@ SOURCES += \
     src/Editor/Script/ScriptEditorModel.cpp \
     src/Widgets/HelpOverlay.cpp \
     src/Systems/HelpFactory.cpp \
-    src/Systems/OverlayManager.cpp
+    src/Systems/OverlayManager.cpp \
+    src/Editor/EditorProjectSettingsWidget.cpp
 
 HEADERS += \
     src/MainWindow.h \
@@ -216,7 +217,8 @@ HEADERS += \
     src/Editor/Script/ScriptEditorModel.h \
     src/Widgets/HelpOverlay.h \
     src/Systems/HelpFactory.h \
-    src/Systems/OverlayManager.h
+    src/Systems/OverlayManager.h \
+    src/Editor/EditorProjectSettingsWidget.h
 
 FORMS += \
     src/MainWindow.ui \
@@ -249,7 +251,8 @@ FORMS += \
     src/CreditsScreen.ui \
     src/Widgets/SearchWidget.ui \
     src/Editor/Script/ThreadSnippetOverlay.ui \
-    src/Widgets/HelpOverlay.ui
+    src/Widgets/HelpOverlay.ui \
+    src/Editor/EditorProjectSettingsWidget.ui
 
 RESOURCES += \
     resources.qrc

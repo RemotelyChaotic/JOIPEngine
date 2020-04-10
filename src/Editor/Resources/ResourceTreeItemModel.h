@@ -50,6 +50,9 @@ public:
   // convenience-function
   bool IsResourceType(const QModelIndex& index = QModelIndex());
 
+signals:
+  void SignalProjectEdited();
+
 private slots:
   void SlotResourceAdded(qint32 iProjId, const QString& sName);
   void SlotResourceRemoved(qint32 iProjId, const QString& sName);

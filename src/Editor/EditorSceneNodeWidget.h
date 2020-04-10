@@ -45,6 +45,7 @@ public:
   explicit CEditorSceneNodeWidget(QWidget* pParent = nullptr);
   ~CEditorSceneNodeWidget() override;
 
+  void EditedProject() override {}
   void Initialize() override;
   void LoadProject(tspProject spCurrentProject) override;
   void UnloadProject() override;

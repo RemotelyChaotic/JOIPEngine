@@ -23,6 +23,7 @@ public:
   ~CEditorWidgetBase() override;
 
   void Initialize() override = 0;
+  virtual void EditedProject() = 0;
   virtual void LoadProject(tspProject spProject) = 0;
   virtual void UnloadProject() = 0;
   virtual void SaveProject() = 0;

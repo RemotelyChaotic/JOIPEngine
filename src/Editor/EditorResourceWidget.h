@@ -25,6 +25,7 @@ public:
   explicit CEditorResourceWidget(QWidget* pParent = nullptr);
   ~CEditorResourceWidget() override;
 
+  void EditedProject() override {}
   void Initialize() override;
   void LoadProject(tspProject spCurrentProject) override;
   void UnloadProject() override;

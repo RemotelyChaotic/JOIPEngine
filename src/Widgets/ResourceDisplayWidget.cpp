@@ -434,6 +434,7 @@ void CResourceDisplayWidget::SlotLoadFinished()
           {
             m_spUi->pImage->setPixmap(*m_spLoadedPixmap);
             m_spUi->pStackedWidget->setCurrentIndex(EResourceDisplayType::eLocalImage);
+            m_imageMutex.unlock();
             emit SignalLoadFinished();
           }
           else if (nullptr != m_spLoadedMovie)
@@ -441,14 +442,15 @@ void CResourceDisplayWidget::SlotLoadFinished()
             m_spLoadedMovie->start();
             m_spUi->pImage->setMovie(m_spLoadedMovie.get());
             m_spUi->pStackedWidget->setCurrentIndex(EResourceDisplayType::eLocalImage);
+            m_imageMutex.unlock();
             emit SignalLoadFinished();
           }
           else
           {
+            m_imageMutex.unlock();
             m_iLoadState = ELoadState::eError;
             m_spUi->pStackedWidget->setCurrentIndex(EResourceDisplayType::eError);
           }
-          m_imageMutex.unlock();
           break;
         }
         case EResourceType::eOther:

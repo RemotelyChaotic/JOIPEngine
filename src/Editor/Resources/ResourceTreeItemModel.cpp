@@ -271,6 +271,7 @@ bool CResourceTreeItemModel::setData(const QModelIndex& index, const QVariant& v
   if (bResult)
   {
     emit dataChanged(index, index, {Qt::DisplayRole, Qt::EditRole});
+    emit SignalProjectEdited();
   }
 
   return bResult;

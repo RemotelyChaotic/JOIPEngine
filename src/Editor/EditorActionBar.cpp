@@ -30,6 +30,9 @@ namespace {
   const QString c_sAddTextHelpId =        "Editor/AddTextCode";
   const QString c_sAddTimerHelpId =       "Editor/AddTimerCode";
   const QString c_sAddThreadHelpId =      "Editor/AddThreadCode";
+
+  const QString c_sAddFetishHelpId =      "Editor/AddFetish";
+  const QString c_sRemoveFetishHelpId =   "Editor/RemoveFetish";
 }
 
 CEditorActionBar::CEditorActionBar(QWidget* pParent) :
@@ -100,6 +103,11 @@ void CEditorActionBar::Initialize()
     wpHelpFactory->RegisterHelp(c_sAddTimerHelpId, ":/resources/help/editor/addtimer_button_help.html");
     m_spUi->AddThreadCode->setProperty(helpOverlay::c_sHelpPagePropertyName, c_sAddThreadHelpId);
     wpHelpFactory->RegisterHelp(c_sAddThreadHelpId, ":/resources/help/editor/addthread_button_help.html");
+
+    m_spUi->AddNodeButton->setProperty(helpOverlay::c_sHelpPagePropertyName, c_sAddFetishHelpId);
+    wpHelpFactory->RegisterHelp(c_sAddFetishHelpId, ":/resources/help/editor/addfetish_button_help.html");
+    m_spUi->RemoveNodeButton->setProperty(helpOverlay::c_sHelpPagePropertyName, c_sRemoveFetishHelpId);
+    wpHelpFactory->RegisterHelp(c_sRemoveFetishHelpId, ":/resources/help/editor/removefetish_button_help.html");
   }
 
   SetInitialized(true);
@@ -114,6 +122,7 @@ void CEditorActionBar::HideAllBars()
   m_spUi->pProjectContainer->hide();
   m_spUi->pResourcesContainer->hide();
   m_spUi->pCodeEditorContainer->hide();
+  m_spUi->pProjectSettingsEditorContainer->hide();
 }
 
 //----------------------------------------------------------------------------------------
@@ -148,6 +157,14 @@ void CEditorActionBar::ShowProjectActionBar()
 {
   HideAllBars();
   m_spUi->pProjectContainer->show();
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CEditorActionBar::ShowProjectSettingsActionBar()
+{
+  HideAllBars();
+  m_spUi->pProjectSettingsEditorContainer->show();
 }
 
 //----------------------------------------------------------------------------------------

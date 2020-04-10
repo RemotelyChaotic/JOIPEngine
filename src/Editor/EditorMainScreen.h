@@ -10,12 +10,14 @@
 BETTER_ENUM(EEditorWidget, qint32,
             eResourceWidget = 0,
             eResourceDisplay = 1,
-            eSceneNodeWidget = 2,
-            eSceneCodeEditorWidget = 3);
+            eProjectSettings = 2,
+            eSceneNodeWidget = 3,
+            eSceneCodeEditorWidget = 4);
 
 class CDatabaseManager;
 class CEditorCodeWidget;
 class CEditorModel;
+class CEditorProjectSettingsWidget;
 class CEditorResourceDisplayWidget;
 class CEditorResourceWidget;
 class CEditorSceneNodeWidget;
@@ -50,6 +52,7 @@ protected slots:
   void SlotHelpClicked(bool bClick);
   void SlotProjectEdited();
   void SlotProjectNameEditingFinished();
+  void SlotProjectRenamed(qint32 iId);
   void SlotSaveClicked(bool bClick);
 
 private:
@@ -72,6 +75,7 @@ private:
 
 template<> CEditorResourceWidget* CEditorMainScreen::GetWidget<CEditorResourceWidget>();
 template<> CEditorResourceDisplayWidget* CEditorMainScreen::GetWidget<CEditorResourceDisplayWidget>();
+template<> CEditorProjectSettingsWidget* CEditorMainScreen::GetWidget<CEditorProjectSettingsWidget>();
 template<> CEditorSceneNodeWidget* CEditorMainScreen::GetWidget<CEditorSceneNodeWidget>();
 template<> CEditorCodeWidget* CEditorMainScreen::GetWidget<CEditorCodeWidget>();
 

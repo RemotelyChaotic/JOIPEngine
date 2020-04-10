@@ -34,6 +34,7 @@ public:
   explicit CEditorCodeWidget(QWidget* pParent = nullptr);
   ~CEditorCodeWidget() override;
 
+  void EditedProject() override {}
   void Initialize() override;
   void LoadProject(tspProject spProject) override;
   void UnloadProject() override;

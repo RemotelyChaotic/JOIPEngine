@@ -2,6 +2,7 @@
 #include "Application.h"
 #include "EditorCodeWidget.h"
 #include "EditorModel.h"
+#include "EditorProjectSettingsWidget.h"
 #include "EditorResourceDisplayWidget.h"
 #include "EditorResourceWidget.h"
 #include "EditorSceneNodeWidget.h"
@@ -22,6 +23,7 @@ namespace
   {
     { EEditorWidget::eResourceWidget, "Resource Manager" },
     { EEditorWidget::eResourceDisplay, "Resource View" },
+    { EEditorWidget::eProjectSettings, "Project Settings" },
     { EEditorWidget::eSceneNodeWidget, "Scene Node Editor" },
     { EEditorWidget::eSceneCodeEditorWidget, "Scene Code Editor" }
   };
@@ -84,6 +86,7 @@ void CEditorMainScreen::Initialize()
   // insert items in map
   m_spWidgetsMap.insert({EEditorWidget::eResourceWidget, new CEditorResourceWidget(this)});
   m_spWidgetsMap.insert({EEditorWidget::eResourceDisplay, new CEditorResourceDisplayWidget(this)});
+  m_spWidgetsMap.insert({EEditorWidget::eProjectSettings, new CEditorProjectSettingsWidget(this)});
   m_spWidgetsMap.insert({EEditorWidget::eSceneNodeWidget, new CEditorSceneNodeWidget(this)});
   m_spWidgetsMap.insert({EEditorWidget::eSceneCodeEditorWidget, new CEditorCodeWidget(this)});
 
@@ -116,14 +119,21 @@ void CEditorMainScreen::Initialize()
     wpHelpFactory->RegisterHelp(c_sViewSelectorHelpId, ":/resources/help/editor/selection_combobox_help.html");
     m_spUi->pRightComboBox->setProperty(helpOverlay::c_sHelpPagePropertyName, c_sViewSelectorHelpId);
   }
+  // db manager
+  auto spDataBaseManager = m_wpDbManager.lock();
+  if (nullptr != spDataBaseManager)
+  {
+    connect(spDataBaseManager.get(), &CDatabaseManager::SignalProjectRenamed,
+            this, &CEditorMainScreen::SlotProjectRenamed, Qt::QueuedConnection);
+  }
 
   // initializing done
   m_bInitialized = true;
 
   // init indicees
   m_spUi->pRightComboBox->blockSignals(true);
-  m_spUi->pRightComboBox->setCurrentIndex(1);
-  on_pRightComboBox_currentIndexChanged(1);
+  m_spUi->pRightComboBox->setCurrentIndex(2);
+  on_pRightComboBox_currentIndexChanged(2);
   m_spUi->pRightComboBox->blockSignals(false);
 
   m_spUi->pLeftComboBox->blockSignals(true);
@@ -308,6 +318,10 @@ void CEditorMainScreen::SlotProjectEdited()
   if (!m_bInitialized) { return; }
 
   SetModificaitonFlag(true);
+  for (auto it = m_spWidgetsMap.begin(); m_spWidgetsMap.end() != it; ++it)
+  {
+    it->second->EditedProject();
+  }
 }
 
 //----------------------------------------------------------------------------------------
@@ -318,10 +332,28 @@ void CEditorMainScreen::SlotProjectNameEditingFinished()
 
   QString sNewName = m_spUi->pProjectActionBar->m_spUi->pTitleLineEdit->text();
   const QString sFinalName = m_spEditorModel->RenameProject(sNewName);
+  m_spUi->pProjectActionBar->m_spUi->pTitleLineEdit->blockSignals(true);
   m_spUi->pProjectActionBar->m_spUi->pTitleLineEdit->setText(sFinalName);
+  m_spUi->pProjectActionBar->m_spUi->pTitleLineEdit->blockSignals(false);
+}
 
-  if (sFinalName == sNewName)
+//----------------------------------------------------------------------------------------
+//
+void CEditorMainScreen::SlotProjectRenamed(qint32 iId)
+{
+  if (!m_bInitialized) { return; }
+  if (nullptr == m_spCurrentProject) { return; }
+
+  QReadLocker locker(&m_spCurrentProject->m_rwLock);
+  qint32 iThisId = m_spCurrentProject->m_iId;
+  QString sName = m_spCurrentProject->m_sName;
+  locker.unlock();
+
+  if (iId == iThisId)
   {
+    m_spUi->pProjectActionBar->m_spUi->pTitleLineEdit->blockSignals(true);
+    m_spUi->pProjectActionBar->m_spUi->pTitleLineEdit->setText(sName);
+    m_spUi->pProjectActionBar->m_spUi->pTitleLineEdit->blockSignals(false);
     SlotProjectEdited();
   }
 }
@@ -419,6 +451,18 @@ template<> CEditorResourceDisplayWidget* CEditorMainScreen::GetWidget<CEditorRes
   {
     CEditorResourceDisplayWidget* pWidget =
         dynamic_cast<CEditorResourceDisplayWidget*>(it->second.data());
+    return pWidget;
+  }
+  return nullptr;
+}
+
+template<> CEditorProjectSettingsWidget* CEditorMainScreen::GetWidget<CEditorProjectSettingsWidget>()
+{
+  auto it = m_spWidgetsMap.find(EEditorWidget::eProjectSettings);
+  if (m_spWidgetsMap.end() != it)
+  {
+    CEditorProjectSettingsWidget* pWidget =
+        dynamic_cast<CEditorProjectSettingsWidget*>(it->second.data());
     return pWidget;
   }
   return nullptr;
