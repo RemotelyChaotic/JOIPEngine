@@ -133,7 +133,11 @@ SOURCES += \
     src/Widgets/HelpOverlay.cpp \
     src/Systems/HelpFactory.cpp \
     src/Systems/OverlayManager.cpp \
-    src/Editor/EditorProjectSettingsWidget.cpp
+    src/Editor/EditorProjectSettingsWidget.cpp \
+    src/Systems/Kink.cpp \
+    src/Editor/Project/KinkTreeModel.cpp \
+    src/Editor/Project/KinkSelectionOverlay.cpp \
+    src/Editor/Project/KinkTreeItem.cpp
 
 HEADERS += \
     src/MainWindow.h \
@@ -218,7 +222,11 @@ HEADERS += \
     src/Widgets/HelpOverlay.h \
     src/Systems/HelpFactory.h \
     src/Systems/OverlayManager.h \
-    src/Editor/EditorProjectSettingsWidget.h
+    src/Editor/EditorProjectSettingsWidget.h \
+    src/Systems/Kink.h \
+    src/Editor/Project/KinkTreeModel.h \
+    src/Editor/Project/KinkSelectionOverlay.h \
+    src/Editor/Project/KinkTreeItem.h
 
 FORMS += \
     src/MainWindow.ui \
@@ -252,7 +260,8 @@ FORMS += \
     src/Widgets/SearchWidget.ui \
     src/Editor/Script/ThreadSnippetOverlay.ui \
     src/Widgets/HelpOverlay.ui \
-    src/Editor/EditorProjectSettingsWidget.ui
+    src/Editor/EditorProjectSettingsWidget.ui \
+    src/Editor/Project/KinkSelectionOverlay.ui
 
 RESOURCES += \
     resources.qrc

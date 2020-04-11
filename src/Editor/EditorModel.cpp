@@ -6,6 +6,7 @@
 #include "NodeEditor/SceneNodeModel.h"
 #include "NodeEditor/SceneTranstitionData.h"
 #include "NodeEditor/StartNodeModel.h"
+#include "Project/KinkTreeModel.h"
 #include "Resources/ResourceTreeItemModel.h"
 #include "Script/ScriptEditorModel.h"
 #include "Systems/DatabaseManager.h"
@@ -46,6 +47,7 @@ namespace
 //
 CEditorModel::CEditorModel(QWidget* pParent) :
   QObject(nullptr),
+  m_spKinkTreeModel(std::make_unique<CKinkTreeModel>()),
   m_spResourceTreeModel(std::make_unique<CResourceTreeItemModel>()),
   m_spScriptEditorModel(std::make_unique<CScriptEditorModel>(pParent)),
   m_spFlowSceneModel(std::make_unique<FlowScene>(RegisterDataModels(), nullptr)),
@@ -82,6 +84,13 @@ const tspProject& CEditorModel::CurrentProject() const
 QtNodes::FlowScene* CEditorModel::FlowSceneModel() const
 {
   return m_spFlowSceneModel.get();
+}
+
+//----------------------------------------------------------------------------------------
+//
+CKinkTreeModel* CEditorModel::KinkTreeModel() const
+{
+  return m_spKinkTreeModel.get();
 }
 
 //----------------------------------------------------------------------------------------

@@ -4,11 +4,14 @@
 #include "EditorModel.h"
 #include "SVersion.h"
 #include "version.h"
+#include "Project/KinkSelectionOverlay.h"
+#include "Project/KinkTreeModel.h"
 #include "Systems/DatabaseManager.h"
 #include "Systems/HelpFactory.h"
 #include "Systems/Project.h"
 #include "Widgets/HelpOverlay.h"
 #include "ui_EditorProjectSettingsWidget.h"
+#include "ui_EditorActionBar.h"
 
 #include <QDebug>
 
@@ -25,6 +28,7 @@ namespace
 CEditorProjectSettingsWidget::CEditorProjectSettingsWidget(QWidget *parent) :
   CEditorWidgetBase(parent),
   m_spUi(std::make_unique<Ui::CEditorProjectSettingsWidget>()),
+  m_spKinkSelectionOverlay(std::make_unique<CKinkSelectionOverlay>(this)),
   m_spCurrentProject(nullptr)
 {
   m_spUi->setupUi(this);
@@ -32,7 +36,7 @@ CEditorProjectSettingsWidget::CEditorProjectSettingsWidget(QWidget *parent) :
 
 CEditorProjectSettingsWidget::~CEditorProjectSettingsWidget()
 {
-
+  m_spKinkSelectionOverlay.reset();
 }
 
 //----------------------------------------------------------------------------------------
@@ -52,10 +56,12 @@ void CEditorProjectSettingsWidget::Initialize()
 {
   m_bInitialized = false;
 
+  m_spKinkSelectionOverlay->Initialize(KinkModel());
+
   auto wpHelpFactory = CApplication::Instance()->System<CHelpFactory>().lock();
   if (nullptr != wpHelpFactory)
   {
-    m_spUi->pProjectLabel->setProperty(helpOverlay::c_sHelpPagePropertyName, c_sRenameProjectHelpId);
+    m_spUi->pTitleLineEdit->setProperty(helpOverlay::c_sHelpPagePropertyName, c_sRenameProjectHelpId);
     wpHelpFactory->RegisterHelp(c_sRenameProjectHelpId, ":/resources/help/editor/project_name_help.html");
     m_spUi->pProjectVersionContainer->setProperty(helpOverlay::c_sHelpPagePropertyName, c_sProjectVersionHelpId);
     wpHelpFactory->RegisterHelp(c_sProjectVersionHelpId, ":/resources/help/editor/projectsettings/projectversion_help.html");
@@ -220,6 +226,15 @@ void CEditorProjectSettingsWidget::on_pProjectPatchVersion_valueChanged(qint32 i
 
 //----------------------------------------------------------------------------------------
 //
+void CEditorProjectSettingsWidget::SlotAddKinksClicked()
+{
+  WIDGET_INITIALIZED_GUARD
+  if (nullptr == m_spCurrentProject) { return; }
+  m_spKinkSelectionOverlay->Show();
+}
+
+//----------------------------------------------------------------------------------------
+//
 void CEditorProjectSettingsWidget::SlotProjectRenamed(qint32 iId)
 {
   WIDGET_INITIALIZED_GUARD
@@ -245,7 +260,8 @@ void CEditorProjectSettingsWidget::OnActionBarAboutToChange()
 {
   if (nullptr != ActionBar())
   {
-
+    disconnect(ActionBar()->m_spUi->AddFetishButton, &QPushButton::clicked,
+            this, &CEditorProjectSettingsWidget::SlotAddKinksClicked);
   }
 }
 
@@ -256,5 +272,7 @@ void CEditorProjectSettingsWidget::OnActionBarChanged()
   if (nullptr != ActionBar())
   {
     ActionBar()->ShowProjectSettingsActionBar();
+    connect(ActionBar()->m_spUi->AddFetishButton, &QPushButton::clicked,
+            this, &CEditorProjectSettingsWidget::SlotAddKinksClicked);
   }
 }

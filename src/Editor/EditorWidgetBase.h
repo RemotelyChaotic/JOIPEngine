@@ -7,6 +7,7 @@
 
 class CEditorActionBar;
 class CEditorModel;
+class CKinkTreeModel;
 class CResourceTreeItemModel;
 class CScriptEditorModel;
 namespace QtNodes {
@@ -41,6 +42,7 @@ protected:
   CEditorActionBar* ActionBar() const;
   CEditorModel* EditorModel() const;
   QtNodes::FlowScene* FlowSceneModel() const;
+  CKinkTreeModel* KinkModel() const;
   CResourceTreeItemModel* ResourceTreeModel() const;
   CScriptEditorModel* ScriptEditorModel() const;
 

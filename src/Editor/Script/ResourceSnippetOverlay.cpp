@@ -17,6 +17,9 @@ CResourceSnippetOverlay::CResourceSnippetOverlay(QWidget* pParent) :
   m_data()
 {
   m_spUi->setupUi(this);
+  CResourceTreeItemSortFilterProxyModel* pProxyModel =
+      new CResourceTreeItemSortFilterProxyModel(m_spUi->pResourceSelectTree);
+  m_spUi->pResourceSelectTree->setModel(pProxyModel);
 }
 
 CResourceSnippetOverlay::~CResourceSnippetOverlay()
@@ -32,9 +35,8 @@ void CResourceSnippetOverlay::Initialize(CResourceTreeItemModel* pResourceTreeMo
   m_bInitialized = false;
 
   CResourceTreeItemSortFilterProxyModel* pProxyModel =
-      new CResourceTreeItemSortFilterProxyModel(m_spUi->pResourceSelectTree);
+      dynamic_cast<CResourceTreeItemSortFilterProxyModel*>(m_spUi->pResourceSelectTree->model());
   pProxyModel->setSourceModel(pResourceTreeModel);
-  m_spUi->pResourceSelectTree->setModel(pProxyModel);
 
   QItemSelectionModel* pSelectionModel = m_spUi->pResourceSelectTree->selectionModel();
   connect(pSelectionModel, &QItemSelectionModel::currentChanged,

@@ -6,6 +6,7 @@
 #include <memory>
 
 class CDatabaseManager;
+class CKinkTreeModel;
 class CResourceTreeItemModel;
 class CScriptEditorModel;
 class CSettings;
@@ -27,6 +28,7 @@ public:
 
   const tspProject& CurrentProject() const;
   QtNodes::FlowScene* FlowSceneModel() const;
+  CKinkTreeModel* KinkTreeModel() const;
   CResourceTreeItemModel* ResourceTreeModel() const;
   CScriptEditorModel* ScriptEditorModel() const;
 
@@ -52,6 +54,7 @@ signals:
   void SignalProjectEdited();
 
 private:
+  std::unique_ptr<CKinkTreeModel>                             m_spKinkTreeModel;
   std::unique_ptr<CResourceTreeItemModel>                     m_spResourceTreeModel;
   std::unique_ptr<CScriptEditorModel>                         m_spScriptEditorModel;
   std::unique_ptr<QtNodes::FlowScene>                         m_spFlowSceneModel;

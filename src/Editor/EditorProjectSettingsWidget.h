@@ -6,6 +6,7 @@
 #include "Systems/Resource.h"
 #include <memory>
 
+class CKinkSelectionOverlay;
 namespace Ui {
   class CEditorProjectSettingsWidget;
 }
@@ -29,7 +30,9 @@ protected slots:
   void on_pProjectMajorVersion_valueChanged(qint32 iValue);
   void on_pProjectMinorVersion_valueChanged(qint32 iValue);
   void on_pProjectPatchVersion_valueChanged(qint32 iValue);
+  void SlotAddKinksClicked();
   void SlotProjectRenamed(qint32 iId);
+
 
 protected:
   void OnActionBarAboutToChange() override;
@@ -37,6 +40,7 @@ protected:
 
 private:
   std::unique_ptr<Ui::CEditorProjectSettingsWidget> m_spUi;
+  std::unique_ptr<CKinkSelectionOverlay>            m_spKinkSelectionOverlay;
   tspProject                                        m_spCurrentProject;
   bool                                              m_bProjectHasBeenEdited;
 };

@@ -37,7 +37,7 @@ CDatabaseManager::~CDatabaseManager()
 
 //----------------------------------------------------------------------------------------
 //
-qint32 CDatabaseManager::AddProject(const QString& sDirName, qint32 iVersion)
+qint32 CDatabaseManager::AddProject(const QString& sDirName, quint32 iVersion)
 {
   if (!IsInitialized()) { return -1; }
 
@@ -626,6 +626,74 @@ void CDatabaseManager::RenameResource(tspProject& spProj, const QString& sName, 
 
 //----------------------------------------------------------------------------------------
 //
+tspKink CDatabaseManager::FindKink(QString sName)
+{
+  QMutexLocker locker(&m_dbMutex);
+  tspKink kink = nullptr;
+  for (auto itCategory = m_kinkKategoryMap.begin(); m_kinkKategoryMap.end() != itCategory; ++itCategory)
+  {
+    for (auto it = itCategory->second.begin(); itCategory->second.end() != it; ++it)
+    {
+      if (it->first == sName)
+      {
+        kink = it->second;
+        goto foundKinkLblBreakOut;
+      }
+    }
+  }
+foundKinkLblBreakOut:
+  return kink;
+}
+
+//----------------------------------------------------------------------------------------
+//
+tspKink CDatabaseManager::FindKink(QString sCategory, QString sName)
+{
+  QMutexLocker locker(&m_dbMutex);
+  auto itCategory = m_kinkKategoryMap.find(sCategory);
+  if (m_kinkKategoryMap.end() != itCategory)
+  {
+    auto itKink = itCategory->second.find(sName);
+    if (itCategory->second.end() != itKink)
+    {
+      return itKink->second;
+    }
+  }
+  return nullptr;
+}
+
+//----------------------------------------------------------------------------------------
+//
+QStringList CDatabaseManager::FindKinks(QString sCategory)
+{
+  QMutexLocker locker(&m_dbMutex);
+  QStringList vsRet;
+  auto itCategory = m_kinkKategoryMap.find(sCategory);
+  if (m_kinkKategoryMap.end() != itCategory)
+  {
+    for (auto it = itCategory->second.begin(); itCategory->second.end() != it; ++it)
+    {
+      vsRet << it->first;
+    }
+  }
+  return vsRet;
+}
+
+//----------------------------------------------------------------------------------------
+//
+QStringList CDatabaseManager::KinkCategories()
+{
+  QMutexLocker locker(&m_dbMutex);
+  QStringList vsRet;
+  for (auto it = m_kinkKategoryMap.begin(); m_kinkKategoryMap.end() != it; ++it)
+  {
+    vsRet << it->first;
+  }
+  return vsRet;
+}
+
+//----------------------------------------------------------------------------------------
+//
 void CDatabaseManager::Initialize()
 {
   connect(m_spSettings.get(), &CSettings::ContentFolderChanged,
@@ -761,6 +829,7 @@ qint32 CDatabaseManager::FindNewSceneId(tspProject& spProj)
 //
 void CDatabaseManager::LoadDatabase()
 {
+  // load projects
   QString sPath = m_spSettings->ContentFolder();
   QDirIterator it(sPath, QDir::Dirs | QDir::NoDotAndDotDot);
   while (it.hasNext())
@@ -771,10 +840,34 @@ void CDatabaseManager::LoadDatabase()
     AddProject(sDirName);
   }
 
+  // store projects
   QMutexLocker locker(&m_dbMutex);
   for (tspProject spProject : m_vspProjectDatabase)
   {
     DeserializeProjectPrivate(spProject);
+  }
+
+  // load kinks
+  QFile kinkData(":/resources/data/Kink_Information_Data.csv");
+  if (kinkData.exists() && kinkData.open(QIODevice::ReadOnly))
+  {
+    QTextStream stream(&kinkData);
+    stream.setCodec("UTF-8");
+
+    QString sLine;
+    while (stream.readLineInto(&sLine))
+    {
+      QStringList vsLineData = sLine.split(";");
+      if (vsLineData.size() == 3)
+      {
+        tKinks& kinks = m_kinkKategoryMap[vsLineData[0]];
+        tspKink spKink = std::make_shared<SKink>();
+        spKink->m_sType = vsLineData[0];
+        spKink->m_sName = vsLineData[1];
+        spKink->m_sDescribtion = vsLineData[2];
+        kinks.insert({vsLineData[1], spKink});
+      }
+    }
   }
 }
 

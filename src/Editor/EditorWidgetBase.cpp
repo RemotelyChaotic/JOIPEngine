@@ -54,6 +54,13 @@ QtNodes::FlowScene* CEditorWidgetBase::FlowSceneModel() const
 
 //----------------------------------------------------------------------------------------
 //
+CKinkTreeModel* CEditorWidgetBase::KinkModel() const
+{
+  return  m_pEditorModel->KinkTreeModel();
+}
+
+//----------------------------------------------------------------------------------------
+//
 CResourceTreeItemModel* CEditorWidgetBase::ResourceTreeModel() const
 {
   return m_pEditorModel->ResourceTreeModel();

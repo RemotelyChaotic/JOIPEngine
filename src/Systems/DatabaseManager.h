@@ -2,6 +2,7 @@
 #define DATABASEMANAGER_H
 
 #include "ThreadedSystem.h"
+#include "Kink.h"
 #include "Resource.h"
 #include <QMutex>
 #include <set>
@@ -25,7 +26,7 @@ public:
   ~CDatabaseManager() override;
 
   // Project
-  qint32 AddProject(const QString& sDirName = "New_Project", qint32 iVersion = 1);
+  qint32 AddProject(const QString& sDirName = "New_Project", quint32 iVersion = 1);
   void ClearProjects();
   bool DeserializeProject(qint32 iId);
   bool DeserializeProject(const QString& sName);
@@ -56,6 +57,13 @@ public:
   void RemoveResource(tspProject& spProj, const QString& sName);
   void RenameResource(tspProject& spProj, const QString& sName, const QString& sNewName);
 
+  // Kinks
+  tspKink FindKink(QString sName);
+  tspKink FindKink(QString sCategory, QString sName);
+  QStringList FindKinks(QString sCategory);
+  QStringList KinkCategories();
+
+
 public slots:
   void Initialize() override;
   void Deinitialize() override;
@@ -85,6 +93,7 @@ private:
   std::shared_ptr<CSettings>             m_spSettings;
   mutable QMutex                         m_dbMutex;
   tvspProject                            m_vspProjectDatabase;
+  tKinkKategories                        m_kinkKategoryMap;
 };
 
 #endif // DATABASEMANAGER_H
