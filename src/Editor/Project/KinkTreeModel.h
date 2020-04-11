@@ -1,6 +1,7 @@
 #ifndef KINKTREEMODEL_H
 #define KINKTREEMODEL_H
 
+#include "Systems/Kink.h"
 #include <QAbstractItemModel>
 #include <memory>
 
@@ -15,9 +16,14 @@ public:
   explicit CKinkTreeModel(QObject* pParent = nullptr);
   ~CKinkTreeModel() override;
 
-  void Initialize();
+  void InitializeModel();
   void DeInitializeModel();
+  void ResetSelections();
+  void ResetSelections(QStringList vsUnselectedKinks);
+  void SetSelections(QStringList vsSelectedKinks);
+  std::vector<tspKink> SelectedItems();
 
+  // read-only functions
   QVariant data(const QModelIndex& index, int iRole) const override;
   Qt::ItemFlags flags(const QModelIndex& index) const override;
   QVariant headerData(int iSection, Qt::Orientation orientation,
@@ -27,6 +33,10 @@ public:
   QModelIndex parent(const QModelIndex& index) const override;
   int rowCount(const QModelIndex& parent = QModelIndex()) const override;
   int columnCount(const QModelIndex& parent = QModelIndex()) const override;
+
+  // write functions
+  bool setData(const QModelIndex& index, const QVariant& value,
+               qint32 iRole = Qt::EditRole) override;
 
 private:
   CKinkTreeItem* GetItem(const QModelIndex& index) const;

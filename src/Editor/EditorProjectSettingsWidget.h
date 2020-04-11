@@ -31,8 +31,9 @@ protected slots:
   void on_pProjectMinorVersion_valueChanged(qint32 iValue);
   void on_pProjectPatchVersion_valueChanged(qint32 iValue);
   void SlotAddKinksClicked();
+  void SlotKinkOverlayClosed(bool bAccepted);
   void SlotProjectRenamed(qint32 iId);
-
+  void SlotRemoveKinksClicked();
 
 protected:
   void OnActionBarAboutToChange() override;

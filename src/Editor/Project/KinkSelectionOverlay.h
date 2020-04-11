@@ -19,6 +19,9 @@ public:
 
   void Initialize(CKinkTreeModel* pKinkTreeModel);
 
+signals:
+  void SignalOverlayClosed(bool bAccepted);
+
 public slots:
   void Climb() override;
   void Resize() override;

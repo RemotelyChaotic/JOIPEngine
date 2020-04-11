@@ -57,6 +57,8 @@ void CEditorProjectSettingsWidget::Initialize()
   m_bInitialized = false;
 
   m_spKinkSelectionOverlay->Initialize(KinkModel());
+  connect(m_spKinkSelectionOverlay.get(), &CKinkSelectionOverlay::SignalOverlayClosed,
+          this, &CEditorProjectSettingsWidget::SlotKinkOverlayClosed);
 
   auto wpHelpFactory = CApplication::Instance()->System<CHelpFactory>().lock();
   if (nullptr != wpHelpFactory)
@@ -77,6 +79,8 @@ void CEditorProjectSettingsWidget::Initialize()
     connect(spDataBaseManager.get(), &CDatabaseManager::SignalProjectRenamed,
             this, &CEditorProjectSettingsWidget::SlotProjectRenamed, Qt::QueuedConnection);
   }
+
+  m_spUi->pFetishListWidget->setSelectionMode(QAbstractItemView::MultiSelection);
 
   m_spUi->pEngineMajorVersion->setValue(MAJOR_VERSION);
   m_spUi->pEngineMinorVersion->setValue(MINOR_VERSION);
@@ -125,6 +129,7 @@ void CEditorProjectSettingsWidget::LoadProject(tspProject spProject)
 
     m_spUi->pFetishListWidget->addItems(m_spCurrentProject->m_vsKinks);
     m_spUi->pFetishListWidget->sortItems();
+    KinkModel()->SetSelections(m_spCurrentProject->m_vsKinks);
   }
 
   m_bProjectHasBeenEdited = false;
@@ -144,6 +149,7 @@ void CEditorProjectSettingsWidget::UnloadProject()
   m_spUi->WarningIcon->setVisible(false);
 
   m_spUi->pFetishListWidget->clear();
+  KinkModel()->ResetSelections();
 
   m_bProjectHasBeenEdited = false;
 }
@@ -235,6 +241,27 @@ void CEditorProjectSettingsWidget::SlotAddKinksClicked()
 
 //----------------------------------------------------------------------------------------
 //
+void CEditorProjectSettingsWidget::SlotKinkOverlayClosed(bool bAccepted)
+{
+  WIDGET_INITIALIZED_GUARD
+  if (nullptr == m_spCurrentProject) { return; }
+  if (bAccepted)
+  {
+    m_spUi->pFetishListWidget->clear();
+    std::vector<tspKink> vspKinks = KinkModel()->SelectedItems();
+    for (const tspKink& spKink : vspKinks)
+    {
+      QReadLocker locker(&spKink->m_rwLock);
+      m_spUi->pFetishListWidget->addItem(spKink->m_sName);
+    }
+    m_spUi->pFetishListWidget->sortItems();
+
+    emit SignalProjectEdited();
+  }
+}
+
+//----------------------------------------------------------------------------------------
+//
 void CEditorProjectSettingsWidget::SlotProjectRenamed(qint32 iId)
 {
   WIDGET_INITIALIZED_GUARD
@@ -256,12 +283,31 @@ void CEditorProjectSettingsWidget::SlotProjectRenamed(qint32 iId)
 
 //----------------------------------------------------------------------------------------
 //
+void CEditorProjectSettingsWidget::SlotRemoveKinksClicked()
+{
+  auto vpItems = m_spUi->pFetishListWidget->selectedItems();
+  m_spUi->pFetishListWidget->clearSelection();
+  QStringList vsRemovedSelections;
+  for (QListWidgetItem* pItem : qAsConst(vpItems))
+  {
+    vsRemovedSelections << pItem->text();
+    delete pItem;
+  }
+
+  KinkModel()->ResetSelections(vsRemovedSelections);
+  emit SignalProjectEdited();
+}
+
+//----------------------------------------------------------------------------------------
+//
 void CEditorProjectSettingsWidget::OnActionBarAboutToChange()
 {
   if (nullptr != ActionBar())
   {
     disconnect(ActionBar()->m_spUi->AddFetishButton, &QPushButton::clicked,
             this, &CEditorProjectSettingsWidget::SlotAddKinksClicked);
+    disconnect(ActionBar()->m_spUi->RemoveFetishButton, &QPushButton::clicked,
+            this, &CEditorProjectSettingsWidget::SlotRemoveKinksClicked);
   }
 }
 
@@ -274,5 +320,7 @@ void CEditorProjectSettingsWidget::OnActionBarChanged()
     ActionBar()->ShowProjectSettingsActionBar();
     connect(ActionBar()->m_spUi->AddFetishButton, &QPushButton::clicked,
             this, &CEditorProjectSettingsWidget::SlotAddKinksClicked);
+    connect(ActionBar()->m_spUi->RemoveFetishButton, &QPushButton::clicked,
+            this, &CEditorProjectSettingsWidget::SlotRemoveKinksClicked);
   }
 }

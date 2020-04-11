@@ -12,7 +12,7 @@ CKinkTreeModel::CKinkTreeModel(QObject* pParent) :
   m_wpDbManager(CApplication::Instance()->System<CDatabaseManager>()),
   m_pRootItem(nullptr)
 {
-  Initialize();
+  InitializeModel();
 }
 CKinkTreeModel::~CKinkTreeModel()
 {
@@ -21,7 +21,7 @@ CKinkTreeModel::~CKinkTreeModel()
 
 //----------------------------------------------------------------------------------------
 //
-void CKinkTreeModel::Initialize()
+void CKinkTreeModel::InitializeModel()
 {
   if (nullptr == m_pRootItem)
   {
@@ -64,10 +64,88 @@ void CKinkTreeModel::DeInitializeModel()
 
 //----------------------------------------------------------------------------------------
 //
+void CKinkTreeModel::ResetSelections()
+{
+  if (nullptr != m_pRootItem)
+  {
+    for (qint32 i = 0; m_pRootItem->ChildCount() > i; ++i)
+    {
+      for (qint32 j = 0; m_pRootItem->Child(i)->ChildCount() > j; ++j)
+      {
+        m_pRootItem->SetData(Qt::Unchecked, Qt::CheckStateRole);
+      }
+    }
+  }
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CKinkTreeModel::ResetSelections(QStringList vsUnselectedKinks)
+{
+  if (nullptr != m_pRootItem)
+  {
+    for (qint32 i = 0; m_pRootItem->ChildCount() > i; ++i)
+    {
+      for (qint32 j = 0; m_pRootItem->Child(i)->ChildCount() > j; ++j)
+      {
+        CKinkTreeItem* pItem = m_pRootItem->Child(i)->Child(j);
+        if (vsUnselectedKinks.contains(pItem->Data(Qt::DisplayRole).toString()))
+        {
+          pItem->SetData(Qt::Unchecked, Qt::CheckStateRole);
+        }
+      }
+    }
+  }
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CKinkTreeModel::SetSelections(QStringList vsSelectedKinks)
+{
+  if (nullptr != m_pRootItem)
+  {
+    for (qint32 i = 0; m_pRootItem->ChildCount() > i; ++i)
+    {
+      for (qint32 j = 0; m_pRootItem->Child(i)->ChildCount() > j; ++j)
+      {
+        CKinkTreeItem* pItem = m_pRootItem->Child(i)->Child(j);
+        if (vsSelectedKinks.contains(pItem->Data(Qt::DisplayRole).toString()))
+        {
+          pItem->SetData(Qt::Checked, Qt::CheckStateRole);
+        }
+      }
+    }
+  }
+}
+
+//----------------------------------------------------------------------------------------
+//
+std::vector<tspKink> CKinkTreeModel::SelectedItems()
+{
+  std::vector<tspKink> vspKinks;
+  if (nullptr != m_pRootItem)
+  {
+    for (qint32 i = 0; m_pRootItem->ChildCount() > i; ++i)
+    {
+      for (qint32 j = 0; m_pRootItem->Child(i)->ChildCount() > j; ++j)
+      {
+        CKinkTreeItem* pItem = m_pRootItem->Child(i)->Child(j);
+        if (pItem->IsChecked())
+        {
+          vspKinks.push_back(pItem->KinkData());
+        }
+      }
+    }
+  }
+  return vspKinks;
+}
+
+//----------------------------------------------------------------------------------------
+//
 QVariant CKinkTreeModel::data(const QModelIndex& index, int iRole) const
 {
   if (!index.isValid()) { return QVariant(); }
-  if (Qt::DisplayRole == iRole || Qt::ToolTipRole == iRole)
+  if (Qt::DisplayRole == iRole || Qt::ToolTipRole == iRole || Qt::CheckStateRole == iRole)
   {
     CKinkTreeItem* item = static_cast<CKinkTreeItem*>(index.internalPointer());
     return item->Data(iRole);
@@ -83,7 +161,13 @@ QVariant CKinkTreeModel::data(const QModelIndex& index, int iRole) const
 Qt::ItemFlags CKinkTreeModel::flags(const QModelIndex& index) const
 {
   if (!index.isValid()) { return Qt::NoItemFlags; }
-  else { return Qt::ItemIsSelectable | Qt::ItemIsEnabled; }
+  else
+  {
+    CKinkTreeItem* pChildItem = GetItem(index);
+    CKinkTreeItem* pParentItem = nullptr != pChildItem ? pChildItem->Parent() : nullptr;
+    if (pParentItem == m_pRootItem || nullptr == pParentItem) { return Qt::ItemIsSelectable | Qt::ItemIsEnabled; }
+    else { return Qt::ItemIsSelectable | Qt::ItemIsEnabled | Qt::ItemIsUserCheckable; }
+  }
 }
 
 //----------------------------------------------------------------------------------------
@@ -144,6 +228,32 @@ int CKinkTreeModel::columnCount(const QModelIndex& parent) const
 {
   Q_UNUSED(parent);
   return c_iNumberCols;
+}
+
+//----------------------------------------------------------------------------------------
+//
+bool CKinkTreeModel::setData(const QModelIndex& index, const QVariant& value,
+                             qint32 iRole)
+{
+  if (!index.isValid()) { return false; }
+
+  CKinkTreeItem* pChildItem = GetItem(index);
+  CKinkTreeItem* pParentItem = nullptr != pChildItem ? pChildItem->Parent() : nullptr;
+  if (pParentItem == m_pRootItem || nullptr == pParentItem) { return false; }
+
+  if (Qt::CheckStateRole == iRole)
+  {
+    bool bChanged = pChildItem->SetData(value, iRole);
+    if (bChanged)
+    {
+      emit dataChanged(index, index, {Qt::CheckStateRole});
+    }
+    return bChanged;
+  }
+  else
+  {
+    return false;
+  }
 }
 
 //----------------------------------------------------------------------------------------

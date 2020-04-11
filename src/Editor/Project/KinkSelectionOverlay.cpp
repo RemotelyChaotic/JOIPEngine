@@ -1,5 +1,6 @@
 #include "KinkSelectionOverlay.h"
 #include "KinkTreeModel.h"
+#include "KinkTreeSortFilterProxyModel.h"
 #include "ui_KinkSelectionOverlay.h"
 #include <QSortFilterProxyModel>
 
@@ -9,13 +10,13 @@ CKinkSelectionOverlay::CKinkSelectionOverlay(QWidget* pParent) :
   m_bInitialized(false)
 {
   m_spUi->setupUi(this);
-  QSortFilterProxyModel* pProxyModel = new QSortFilterProxyModel(m_spUi->pKinkTree);
+  CKinkTreeSortFilterProxyModel* pProxyModel = new CKinkTreeSortFilterProxyModel(m_spUi->pKinkTree);
   m_spUi->pKinkTree->setModel(pProxyModel);
 }
 
 CKinkSelectionOverlay::~CKinkSelectionOverlay()
 {
-  dynamic_cast<QSortFilterProxyModel*>(m_spUi->pKinkTree->model())
+  dynamic_cast<CKinkTreeSortFilterProxyModel*>(m_spUi->pKinkTree->model())
       ->setSourceModel(nullptr);
 }
 
@@ -25,8 +26,8 @@ void CKinkSelectionOverlay::Initialize(CKinkTreeModel* pKinkTreeModel)
 {
   m_bInitialized = false;
 
-  QSortFilterProxyModel* pProxyModel =
-      dynamic_cast<QSortFilterProxyModel*>(m_spUi->pKinkTree->model());
+  CKinkTreeSortFilterProxyModel* pProxyModel =
+      dynamic_cast<CKinkTreeSortFilterProxyModel*>(m_spUi->pKinkTree->model());
   pProxyModel->setSourceModel(pKinkTreeModel);
 
   pProxyModel->sort(0, Qt::AscendingOrder);
@@ -79,12 +80,14 @@ void CKinkSelectionOverlay::on_pFilter_SignalFilterChanged(const QString& sText)
 //
 void CKinkSelectionOverlay::on_pConfirmButton_clicked()
 {
-  // TODO:
+  emit SignalOverlayClosed(true);
+  Hide();
 }
 
 //----------------------------------------------------------------------------------------
 //
 void CKinkSelectionOverlay::on_pCancelButton_clicked()
 {
+  emit SignalOverlayClosed(false);
   Hide();
 }

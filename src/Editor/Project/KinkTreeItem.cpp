@@ -4,7 +4,8 @@ CKinkTreeItem::CKinkTreeItem(QString sKinkCategory, tspKink spKink, CKinkTreeIte
   m_vpChildItems(),
   m_pParentItem(pParentItem),
   m_spKink(spKink),
-  m_sKinkCategory(sKinkCategory)
+  m_sKinkCategory(sKinkCategory),
+  m_bChecked(false)
 {
 }
 
@@ -18,6 +19,21 @@ CKinkTreeItem::~CKinkTreeItem()
 void CKinkTreeItem::AppendChild(CKinkTreeItem* pChild)
 {
   m_vpChildItems.append(pChild);
+}
+
+//----------------------------------------------------------------------------------------
+//
+QString CKinkTreeItem::Categroy()
+{
+  if (nullptr == m_spKink)
+  {
+    return m_sKinkCategory;
+  }
+  else
+  {
+    QReadLocker locker(&m_spKink->m_rwLock);
+    return m_spKink->m_sType;
+  }
 }
 
 //----------------------------------------------------------------------------------------
@@ -67,9 +83,40 @@ QVariant CKinkTreeItem::Data(qint32 iRole) const
         QReadLocker locker(&m_spKink->m_rwLock);
         return m_spKink->m_sDescribtion;
       }
+    case Qt::CheckStateRole: return m_bChecked ? Qt::Checked : Qt::Unchecked;
       default: return QVariant();
     }
   }
+}
+
+//----------------------------------------------------------------------------------------
+//
+QString CKinkTreeItem::Kink()
+{
+  if (nullptr == m_spKink)
+  {
+    return QString();
+  }
+  else
+  {
+    QReadLocker locker(&m_spKink->m_rwLock);
+    return m_spKink->m_sName;
+  }
+}
+
+//----------------------------------------------------------------------------------------
+//
+bool CKinkTreeItem::SetData(const QVariant& value, qint32 iRole)
+{
+  if (nullptr != m_spKink)
+  {
+    switch (iRole)
+    {
+      case Qt::CheckStateRole: m_bChecked = value.toInt() == Qt::Checked; return true;
+      default: break;
+    }
+  }
+  return false;
 }
 
 //----------------------------------------------------------------------------------------

@@ -137,7 +137,8 @@ SOURCES += \
     src/Systems/Kink.cpp \
     src/Editor/Project/KinkTreeModel.cpp \
     src/Editor/Project/KinkSelectionOverlay.cpp \
-    src/Editor/Project/KinkTreeItem.cpp
+    src/Editor/Project/KinkTreeItem.cpp \
+    src/Editor/Project/KinkTreeSortFilterProxyModel.cpp
 
 HEADERS += \
     src/MainWindow.h \
@@ -226,7 +227,8 @@ HEADERS += \
     src/Systems/Kink.h \
     src/Editor/Project/KinkTreeModel.h \
     src/Editor/Project/KinkSelectionOverlay.h \
-    src/Editor/Project/KinkTreeItem.h
+    src/Editor/Project/KinkTreeItem.h \
+    src/Editor/Project/KinkTreeSortFilterProxyModel.h
 
 FORMS += \
     src/MainWindow.ui \
