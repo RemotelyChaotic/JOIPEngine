@@ -21,6 +21,7 @@ SProject::SProject() :
   m_iTargetVersion(SVersion(MAJOR_VERSION, MINOR_VERSION, PATCH_VERSION)),
   m_sName(),
   m_sFolderName(),
+  m_sDescribtion(),
   m_sTitleCard(),
   m_sMap(),
   m_sSceneModel(),
@@ -37,6 +38,7 @@ SProject::SProject(const SProject& other) :
   m_iTargetVersion(other.m_iTargetVersion),
   m_sName(other.m_sName),
   m_sFolderName(other.m_sFolderName),
+  m_sDescribtion(other.m_sDescribtion),
   m_sTitleCard(other.m_sTitleCard),
   m_sMap(other.m_sMap),
   m_sSceneModel(other.m_sSceneModel),
@@ -74,6 +76,7 @@ QJsonObject SProject::ToJsonObject()
     { "iVersion", static_cast<qint32>(static_cast<quint32>(m_iVersion)) },
     { "iTargetVersion", static_cast<qint32>(static_cast<quint32>(m_iTargetVersion)) },
     { "sName", m_sName },
+    { "sDescribtion", m_sDescribtion },
     { "sTitleCard", m_sTitleCard },
     { "sMap", m_sMap },
     { "sSceneModel", m_sSceneModel },
@@ -104,6 +107,11 @@ void SProject::FromJsonObject(const QJsonObject& json)
   if (it != json.end())
   {
     m_sName = it.value().toString();
+  }
+  it = json.find("sDescribtion");
+  if (it != json.end())
+  {
+    m_sDescribtion = it.value().toString();
   }
   it = json.find("sTitleCard");
   if (it != json.end())
@@ -219,6 +227,14 @@ QString CProject::getFolderName()
 {
   QReadLocker locker(&m_spData->m_rwLock);
   return m_spData->m_sFolderName;
+}
+
+//----------------------------------------------------------------------------------------
+//
+QString CProject::getDescribtion()
+{
+  QReadLocker locker(&m_spData->m_rwLock);
+  return m_spData->m_sDescribtion;
 }
 
 //----------------------------------------------------------------------------------------

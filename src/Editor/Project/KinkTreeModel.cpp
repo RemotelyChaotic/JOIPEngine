@@ -178,7 +178,7 @@ QVariant CKinkTreeModel::headerData(int iSection, Qt::Orientation orientation,
   if (Qt::Horizontal == orientation && Qt::DisplayRole == iRole &&
       0 == iSection)
   {
-    return tr("Kink");
+    return tr("Fetish / Kink");
   }
   return QVariant();
 }

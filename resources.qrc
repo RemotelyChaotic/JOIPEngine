@@ -118,5 +118,7 @@
         <file>resources/help/editor/projectsettings/fetish_tree_help.html</file>
         <file>resources/help/editor/projectsettings/projectversion_help.html</file>
         <file>resources/data/Kink_Information_Data.csv</file>
+        <file>resources/help/editor/projectsettings/describtion_textedit_help.html</file>
+        <file>resources/help/editor/images/kink_overlay.png</file>
     </qresource>
 </RCC>

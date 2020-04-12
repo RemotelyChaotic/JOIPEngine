@@ -30,6 +30,7 @@ protected slots:
   void on_pProjectMajorVersion_valueChanged(qint32 iValue);
   void on_pProjectMinorVersion_valueChanged(qint32 iValue);
   void on_pProjectPatchVersion_valueChanged(qint32 iValue);
+  void on_pDescribtionTextEdit_textChanged();
   void SlotAddKinksClicked();
   void SlotKinkOverlayClosed(bool bAccepted);
   void SlotProjectRenamed(qint32 iId);

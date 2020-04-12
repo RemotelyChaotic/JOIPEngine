@@ -20,6 +20,7 @@ namespace
   const QString c_sRenameProjectHelpId =    "Editor/RenameProject";
   const QString c_sProjectVersionHelpId =   "Editor/ProjectVersion";
   const QString c_sEngineVersionHelpId =    "Editor/EngineVersion";
+  const QString c_sProjectDescribtionHelpId="Editor/ProjectDescribtion";
   const QString c_sFetishListHelpId =       "Editor/FetishList";
 }
 
@@ -69,6 +70,8 @@ void CEditorProjectSettingsWidget::Initialize()
     wpHelpFactory->RegisterHelp(c_sProjectVersionHelpId, ":/resources/help/editor/projectsettings/projectversion_help.html");
     m_spUi->pEngineVersionContainer->setProperty(helpOverlay::c_sHelpPagePropertyName, c_sEngineVersionHelpId);
     wpHelpFactory->RegisterHelp(c_sEngineVersionHelpId, ":/resources/help/editor/projectsettings/engineversion_help.html");
+    m_spUi->pDescribtionTextEdit->setProperty(helpOverlay::c_sHelpPagePropertyName, c_sProjectDescribtionHelpId);
+    wpHelpFactory->RegisterHelp(c_sProjectDescribtionHelpId, ":/resources/help/editor/projectsettings/describtion_textedit_help.html");
     m_spUi->pFetishListWidget->setProperty(helpOverlay::c_sHelpPagePropertyName, c_sFetishListHelpId);
     wpHelpFactory->RegisterHelp(c_sFetishListHelpId, ":/resources/help/editor/projectsettings/fetish_tree_help.html");
   }
@@ -127,6 +130,8 @@ void CEditorProjectSettingsWidget::LoadProject(tspProject spProject)
     m_spUi->pProjectMinorVersion->blockSignals(false);
     m_spUi->pProjectPatchVersion->blockSignals(false);
 
+    m_spUi->pDescribtionTextEdit->setPlainText(m_spCurrentProject->m_sDescribtion);
+
     m_spUi->pFetishListWidget->addItems(m_spCurrentProject->m_vsKinks);
     m_spUi->pFetishListWidget->sortItems();
     KinkModel()->SetSelections(m_spCurrentProject->m_vsKinks);
@@ -147,6 +152,8 @@ void CEditorProjectSettingsWidget::UnloadProject()
   m_spUi->pEngineMinorVersion->setValue(MINOR_VERSION);
   m_spUi->pEnginePatchVersion->setValue(PATCH_VERSION);
   m_spUi->WarningIcon->setVisible(false);
+
+  m_spUi->pDescribtionTextEdit->clear();
 
   m_spUi->pFetishListWidget->clear();
   KinkModel()->ResetSelections();
@@ -176,6 +183,8 @@ void CEditorProjectSettingsWidget::SaveProject()
                                                     static_cast<quint32>(m_spUi->pEnginePatchVersion->value()));
     m_spUi->WarningIcon->setVisible(false);
   }
+
+  m_spCurrentProject->m_sDescribtion = m_spUi->pDescribtionTextEdit->toPlainText();
 
   m_spCurrentProject->m_vsKinks.clear();
   for (qint32 i = 0; m_spUi->pFetishListWidget->count() > i; ++i)
@@ -227,6 +236,15 @@ void CEditorProjectSettingsWidget::on_pProjectPatchVersion_valueChanged(qint32 i
   WIDGET_INITIALIZED_GUARD
   if (nullptr == m_spCurrentProject) { return; }
   Q_UNUSED(iValue)
+  emit SignalProjectEdited();
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CEditorProjectSettingsWidget::on_pDescribtionTextEdit_textChanged()
+{
+  WIDGET_INITIALIZED_GUARD
+  if (nullptr == m_spCurrentProject) { return; }
   emit SignalProjectEdited();
 }
 

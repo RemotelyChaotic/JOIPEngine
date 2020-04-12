@@ -24,6 +24,7 @@ struct SProject : public ISerializable, std::enable_shared_from_this<SProject>
   SVersion                  m_iTargetVersion;
   QString                   m_sName;
   QString                   m_sFolderName;
+  QString                   m_sDescribtion;
   QString                   m_sTitleCard;
   QString                   m_sMap;
   QString                   m_sSceneModel;
@@ -51,9 +52,10 @@ class CProject : public QObject
   CProject() {}
   Q_PROPERTY(qint32  id            READ getId            )
   Q_PROPERTY(qint32  version       READ getVersion       )
-  Q_PROPERTY(qint32  targetVersion READ getTargetVersion)
+  Q_PROPERTY(qint32  targetVersion READ getTargetVersion )
   Q_PROPERTY(QString name          READ getName          )
   Q_PROPERTY(QString folderName    READ getFolderName    )
+  Q_PROPERTY(QString describtion   READ getDescribtion   )
   Q_PROPERTY(QString titleCard     READ getTitleCard     )
   Q_PROPERTY(QString map           READ getMap           )
   Q_PROPERTY(QStringList kinks     READ getKinks         )
@@ -69,6 +71,7 @@ public:
   qint32 getTargetVersion();
   QString getName();
   QString getFolderName();
+  QString getDescribtion();
   QString getTitleCard();
   QString getMap();
   QStringList getKinks();

@@ -918,7 +918,7 @@
          </size>
         </property>
         <property name="toolTip">
-         <string>Remove the selected fetish / kink from the project</string>
+         <string>Remove the selected fetish / kink tags from the project</string>
         </property>
         <property name="text">
          <string/>
