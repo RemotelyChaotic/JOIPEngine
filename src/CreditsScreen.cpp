@@ -3,6 +3,7 @@
 #include "ui_CreditsScreen.h"
 #include <QFile>
 #include <QFont>
+#include <QMessageBox>
 
 CCreditsScreen::CCreditsScreen(const std::shared_ptr<CWindowContext>& spWindowContext,
                                QWidget* pParent) :
@@ -59,6 +60,14 @@ void CCreditsScreen::on_pBackButton_clicked()
 {
   WIDGET_INITIALIZED_GUARD
   emit m_spWindowContext->SignalChangeAppState(EAppState::eMainScreen);
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CCreditsScreen::on_pAboutQtButton_clicked()
+{
+  WIDGET_INITIALIZED_GUARD
+  QMessageBox::aboutQt(this, tr("About Qt"));
 }
 
 //----------------------------------------------------------------------------------------

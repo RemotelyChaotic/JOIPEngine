@@ -24,6 +24,7 @@ public:
 
 protected slots:
   void on_pBackButton_clicked();
+  void on_pAboutQtButton_clicked();
   void SlotStyleLoaded();
 
 private:
