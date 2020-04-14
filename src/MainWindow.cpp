@@ -12,6 +12,7 @@
 #include "Widgets/HelpOverlay.h"
 #include "ui_MainWindow.h"
 #include <QDesktopWidget>
+#include <QStyle>
 
 CMainWindow::CMainWindow(QWidget* pParent) :
   QMainWindow(pParent),

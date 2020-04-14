@@ -5,6 +5,8 @@
 #-------------------------------------------------
 
 QT += \
+    av \
+    avwidgets \
     core \
     gui \
     multimedia \
@@ -13,15 +15,10 @@ QT += \
     opengl \
     qml \
     svg \
+    widgets \
     webengine \
     webenginewidgets \
     xml
-
-greaterThan(QT_MAJOR_VERSION, 4) {
-  QT += widgets avwidgets
-} else {
-  CONFIG += avwidgets
-}
 
 TARGET = JOIPEngine
 TEMPLATE = app
@@ -267,6 +264,15 @@ FORMS += \
 
 RESOURCES += \
     resources.qrc
+
+win32{
+  CONFIG(release, debug|release) {
+    LIBS += -L$$QT.core.libs -lQtAV1 -lQtAVWidgets1
+  }
+  CONFIG(debug, debug|release) {
+    LIBS += -L$$QT.core.libs -lQtAVd1 -lQtAVWidgetsd1
+  }
+}
 
 RC_ICONS = resources/img/Icon.ico
 RC_FILE = version_win.rc

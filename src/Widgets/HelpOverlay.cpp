@@ -10,6 +10,8 @@
 #include <QPainter>
 #include <QPushButton>
 #include <QPropertyAnimation>
+#include <QStyle>
+#include <QStyleOptionFrame>
 #include <QVBoxLayout>
 #include <QTextBrowser>
 

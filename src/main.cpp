@@ -7,6 +7,7 @@
 #endif
 
 #include <QApplication>
+#include <QtAVWidgets>
 #include <QOpenGLContext>
 #include <QtWebEngine>
 
@@ -14,9 +15,12 @@ int main(int argc, char *argv[])
 {
   QCoreApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
   QCoreApplication::setAttribute(Qt::AA_UseOpenGLES);
-  CApplication app(argc, argv);
 
   QtWebEngine::initialize();
+  QtAV::Widgets::registerRenderers();
+
+  CApplication app(argc, argv);
+
   app.Initialize();
 
   // bugfix on vertain machines

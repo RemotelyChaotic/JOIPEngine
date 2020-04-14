@@ -77,30 +77,29 @@ void CScriptEditorModel::InitializeModel(tspProject spProject)
 {
   m_spProject = spProject;
 
+  beginResetModel();
+
   // need to cache it, so the actual model can be updated between beginInsertRows and endInsertRows
   // otherwise beginInsertRows checks the wrong number of existing elements
-  std::map<QString, SCachedMapItem> tempMap;
   if (nullptr != m_spProject)
   {
     QReadLocker projectLocker(&m_spProject->m_rwLock);
     for (auto it = m_spProject->m_spResourcesMap.begin(); m_spProject->m_spResourcesMap.end() != it; ++it)
     {
-      AddResourceTo(it->second, tempMap);
+      AddResourceTo(it->second, m_cachedScriptsMap);
     }
   }
 
-  beginInsertRows(QModelIndex(), 0, static_cast<qint32>(tempMap.size()));
-  m_cachedScriptsMap = tempMap;
-  endInsertRows();
+  endResetModel();
 }
 
 //----------------------------------------------------------------------------------------
 //
 void CScriptEditorModel::DeInitializeModel()
 {
-  beginRemoveRows(QModelIndex(), 0, static_cast<qint32>(m_cachedScriptsMap.size()));
+  beginResetModel();
   m_cachedScriptsMap.clear();
-  endRemoveRows();
+  endResetModel();
   m_spProject = nullptr;
 }
 

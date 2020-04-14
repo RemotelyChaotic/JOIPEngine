@@ -22,7 +22,8 @@ New Features:
   the project's version and the engine version the project was saved in.
 
 Updated Features:
-- 
+- Upgrade to Qt5.14.2 with msvc2017 for more QJSEngine and QML features.
+  -> Recompiled dependant libraries.
 
 Changes:
 - In-Game title changed to JOIP Engine.
