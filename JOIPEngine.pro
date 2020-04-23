@@ -54,6 +54,7 @@ INCLUDEPATH += \
     src
 
 SOURCES += \
+    src/Widgets/ShortcutButton.cpp \
     src/main.cpp \
     src/MainWindow.cpp \
     src/Settings.cpp \
@@ -138,12 +139,14 @@ SOURCES += \
     src/Editor/Project/KinkTreeSortFilterProxyModel.cpp
 
 HEADERS += \
+    src/Editor/EditorWidgetTypes.h \
     src/MainWindow.h \
     src/Settings.h \
     src/Application.h \
     src/MainScreen.h \
     src/SettingsScreen.h \
     src/Enums.h \
+    src/Widgets/ShortcutButton.h \
     src/WindowContext.h \
     src/IAppStateScreen.h \
     src/EditorScreen.h \

@@ -1,18 +1,11 @@
 #ifndef EDITORMAINSCREEN_H
 #define EDITORMAINSCREEN_H
 
-#include "enum.h"
 #include "EditorWidgetBase.h"
+#include "EditorWidgetTypes.h"
 #include <QWidget>
 #include <map>
 #include <memory>
-
-BETTER_ENUM(EEditorWidget, qint32,
-            eResourceWidget = 0,
-            eResourceDisplay = 1,
-            eProjectSettings = 2,
-            eSceneNodeWidget = 3,
-            eSceneCodeEditorWidget = 4);
 
 class CDatabaseManager;
 class CEditorCodeWidget;
@@ -50,6 +43,7 @@ protected slots:
   void SlotDisplayResource(const QString& sName);
   void SlotExitClicked(bool bClick);
   void SlotHelpClicked(bool bClick);
+  void SlotKeyBindingsChanged();
   void SlotProjectEdited();
   void SlotProjectNameEditingFinished();
   void SlotProjectRenamed(qint32 iId);
@@ -64,6 +58,7 @@ private:
 
   std::unique_ptr<Ui::CEditorMainScreen>                      m_spUi;
   std::unique_ptr<CEditorModel>                               m_spEditorModel;
+  std::vector<QPointer<QAction>>                              m_vpKeyBindingActions;
   std::map<EEditorWidget, QPointer<CEditorWidgetBase>>        m_spWidgetsMap;
   tspProject                                                  m_spCurrentProject;
   std::weak_ptr<CDatabaseManager>                             m_wpDbManager;

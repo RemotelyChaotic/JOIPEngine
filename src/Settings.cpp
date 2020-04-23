@@ -7,12 +7,75 @@
 #include <QFileInfo>
 #include <QMutexLocker>
 #include <QSettings>
+#include <map>
+
+namespace {
+  QStringList c_vsKeyBindings = {
+    "Pause",
+    "Skip",
+    "Save",
+    "Help",
+    "Exit",
+
+    "Answer_1",
+    "Answer_2",
+    "Answer_3",
+    "Answer_4",
+    "Answer_5",
+    "Answer_6",
+    "Answer_7",
+    "Answer_8",
+    "Answer_9",
+
+    "Left_1",
+    "Left_2",
+    "Left_3",
+    "Left_4",
+    "Left_5",
+    "Left_6",
+    "Left_7",
+    "Left_8",
+    "Left_9",
+
+    "Right_1",
+    "Right_2",
+    "Right_3",
+    "Right_4",
+    "Right_5",
+    "Right_6",
+    "Right_7",
+    "Right_8",
+    "Right_9",
+
+    "LeftTab_Resource",
+    "LeftTab_MediaPlayer",
+    "LeftTab_Settings",
+    "LeftTab_Nodes",
+    "LeftTab_Code",
+
+    "RightTab_Resource",
+    "RightTab_MediaPlayer",
+    "RightTab_Settings",
+    "RightTab_Nodes",
+    "RightTab_Code",
+
+    "Cut",
+    "Copy",
+    "Pase",
+    "Undo",
+    "Redo",
+    "Search",
+    "Backward",
+    "Foreward"
+  };
+}
 
 //----------------------------------------------------------------------------------------
 //
 const QString CSettings::c_sSettingContentFolder = "Content/folder";
 const QString CSettings::c_sSettingFont = "Graphics/font";
 const QString CSettings::c_sSettingFullscreen = "Graphics/fullscreen";
+const QString CSettings::c_sSettingKeyBindings = "KeyBindings/";
 const QString CSettings::c_sSettingMuted = "Audio/muted";
 const QString CSettings::c_sSettingResolution = "Graphics/resolution";
 const QString CSettings::c_sSettingStyle = "Graphics/style";
@@ -26,7 +89,66 @@ const QString CSettings::c_sApplicationName = "JOIPEngine";
 CSettings::CSettings(QObject* pParent) :
   QObject (pParent),
   m_spSettings(std::make_shared<QSettings>(QSettings::IniFormat, QSettings::UserScope,
-     CSettings::c_sOrganisation, CSettings::c_sApplicationName))
+     CSettings::c_sOrganisation, CSettings::c_sApplicationName)),
+
+  c_sDefaultKeyBindings({
+      { "Pause",      QKeySequence(Qt::Key_P)            },
+      { "Skip",       QKeySequence(Qt::Key_Space)        },
+      { "Save",       QKeySequence(QKeySequence::Save)   },
+      { "Help",       QKeySequence(Qt::Key_H)            },
+      { "Exit",       QKeySequence(Qt::Key_Escape)       },
+
+      { "Answer_1",   QKeySequence(Qt::Key_1)            },
+      { "Answer_2",   QKeySequence(Qt::Key_2)            },
+      { "Answer_3",   QKeySequence(Qt::Key_3)            },
+      { "Answer_4",   QKeySequence(Qt::Key_4)            },
+      { "Answer_5",   QKeySequence(Qt::Key_5)            },
+      { "Answer_6",   QKeySequence(Qt::Key_6)            },
+      { "Answer_7",   QKeySequence(Qt::Key_7)            },
+      { "Answer_8",   QKeySequence(Qt::Key_8)            },
+      { "Answer_9",   QKeySequence(Qt::Key_9)            },
+
+      { "Left_1",     QKeySequence(Qt::Key_1)            },
+      { "Left_2",     QKeySequence(Qt::Key_2)            },
+      { "Left_3",     QKeySequence(Qt::Key_3)            },
+      { "Left_4",     QKeySequence(Qt::Key_4)            },
+      { "Left_5",     QKeySequence(Qt::Key_5)            },
+      { "Left_6",     QKeySequence(Qt::Key_6)            },
+      { "Left_7",     QKeySequence(Qt::Key_7)            },
+      { "Left_8",     QKeySequence(Qt::Key_8)            },
+      { "Left_9",     QKeySequence(Qt::Key_9)            },
+
+      { "Right_1",    QKeySequence(Qt::CTRL + Qt::Key_1) },
+      { "Right_2",    QKeySequence(Qt::CTRL + Qt::Key_2) },
+      { "Right_3",    QKeySequence(Qt::CTRL + Qt::Key_3) },
+      { "Right_4",    QKeySequence(Qt::CTRL + Qt::Key_4) },
+      { "Right_5",    QKeySequence(Qt::CTRL + Qt::Key_5) },
+      { "Right_6",    QKeySequence(Qt::CTRL + Qt::Key_6) },
+      { "Right_7",    QKeySequence(Qt::CTRL + Qt::Key_7) },
+      { "Right_8",    QKeySequence(Qt::CTRL + Qt::Key_8) },
+      { "Right_9",    QKeySequence(Qt::CTRL + Qt::Key_9) },
+
+      { "LeftTab_Resource",     QKeySequence(Qt::CTRL + Qt::Key_R) },
+      { "LeftTab_MediaPlayer",  QKeySequence(Qt::CTRL + Qt::Key_M) },
+      { "LeftTab_Settings",     QKeySequence(Qt::CTRL + Qt::Key_T) },
+      { "LeftTab_Nodes",        QKeySequence(Qt::CTRL + Qt::Key_N) },
+      { "LeftTab_Code",         QKeySequence(Qt::CTRL + Qt::Key_D) },
+
+      { "RightTab_Resource",    QKeySequence(Qt::ALT + Qt::Key_R)  },
+      { "RightTab_MediaPlayer", QKeySequence(Qt::ALT + Qt::Key_M)  },
+      { "RightTab_Settings",    QKeySequence(Qt::ALT + Qt::Key_T)  },
+      { "RightTab_Nodes",       QKeySequence(Qt::ALT + Qt::Key_N)  },
+      { "RightTab_Code",        QKeySequence(Qt::ALT + Qt::Key_D)  },
+
+      { "Cut",        QKeySequence(QKeySequence::Cut)    },
+      { "Copy",       QKeySequence(QKeySequence::Copy)   },
+      { "Pase",       QKeySequence(QKeySequence::Paste)  },
+      { "Undo",       QKeySequence(QKeySequence::Undo)   },
+      { "Redo",       QKeySequence(QKeySequence::Redo)   },
+      { "Search",     QKeySequence(QKeySequence::Find)   },
+      { "Backward",   QKeySequence(QKeySequence::Back)   },
+      { "Foreward",   QKeySequence(QKeySequence::Forward)}
+    })
 {
   GenerateSettingsIfNotExists();
 }
@@ -104,6 +226,51 @@ bool CSettings::Fullscreen()
 {
   QMutexLocker locker(&m_settingsMutex);
   return m_spSettings->value(CSettings::c_sSettingFullscreen).toBool();
+}
+
+//----------------------------------------------------------------------------------------
+//
+QStringList CSettings::KeyBindings()
+{
+  return c_vsKeyBindings;
+}
+
+//----------------------------------------------------------------------------------------
+//
+QKeySequence CSettings::KeyBinding(const QString& sRole)
+{
+  QMutexLocker locker(&m_settingsMutex);
+
+  // dur wenn in den defaults ein Eintrag existiert, kann dies verwendet werden
+  auto it = c_sDefaultKeyBindings.find(sRole);
+  if (c_sDefaultKeyBindings.end() != it)
+  {
+    return QKeySequence(m_spSettings->value(CSettings::c_sSettingKeyBindings + sRole,
+                                            it->second.toString()).toString());
+  }
+  else
+  {
+    return QKeySequence();
+  }
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CSettings::SetKeyBinding(const QKeySequence& sKeySequence, const QString& sRole)
+{
+  QMutexLocker locker(&m_settingsMutex);
+
+  auto it = c_sDefaultKeyBindings.find(sRole);
+  if (c_sDefaultKeyBindings.end() != it && IsAllowedToOverwriteKeyBinding(sRole))
+  {
+    QString sOldBinding = m_spSettings->value(CSettings::c_sSettingKeyBindings + sRole,
+                                              it->second.toString()).toString();
+    if (sOldBinding != sKeySequence.toString())
+    {
+      m_spSettings->setValue(CSettings::c_sSettingKeyBindings + sRole, sKeySequence.toString());
+      emit KeyBindingsChanged();
+    }
+  }
 }
 
 //----------------------------------------------------------------------------------------
@@ -197,6 +364,24 @@ double CSettings::Volume()
 
 //----------------------------------------------------------------------------------------
 //
+bool CSettings::IsAllowedToOverwriteKeyBinding(const QString& sRole)
+{
+  if (sRole == "Cut" ||
+      sRole == "Copy" ||
+      sRole == "Pase" ||
+      sRole == "Undo" ||
+      sRole == "Redo" ||
+      sRole == "Search" ||
+      sRole == "Backward" ||
+      sRole == "Foreward")
+  {
+    return false;
+  }
+  return true;
+}
+
+//----------------------------------------------------------------------------------------
+//
 void CSettings::GenerateSettingsIfNotExists()
 {
   QMutexLocker locker(&m_settingsMutex);
@@ -230,6 +415,18 @@ void CSettings::GenerateSettingsIfNotExists()
   {
     bNeedsSynch = true;
     m_spSettings->setValue(CSettings::c_sSettingFullscreen, false);
+  }
+
+  // Keybindings
+  for (const QString& sKeyBindingIdx : qAsConst(c_vsKeyBindings))
+  {
+    auto it = c_sDefaultKeyBindings.find(sKeyBindingIdx);
+    if (!m_spSettings->contains(CSettings::c_sSettingKeyBindings + sKeyBindingIdx) &&
+        c_sDefaultKeyBindings.end() != it)
+    {
+      m_spSettings->setValue(CSettings::c_sSettingKeyBindings + sKeyBindingIdx,
+                             it->second.toString());
+    }
   }
 
   // check resolution

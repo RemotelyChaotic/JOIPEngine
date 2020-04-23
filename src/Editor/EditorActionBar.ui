@@ -114,7 +114,7 @@
        </spacer>
       </item>
       <item>
-       <widget class="QPushButton" name="SaveButton">
+       <widget class="CShortcutButton" name="SaveButton">
         <property name="sizePolicy">
          <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
           <horstretch>48</horstretch>
@@ -142,7 +142,7 @@
        </widget>
       </item>
       <item>
-       <widget class="QPushButton" name="HelpButton">
+       <widget class="CShortcutButton" name="HelpButton">
         <property name="minimumSize">
          <size>
           <width>48</width>
@@ -170,7 +170,7 @@
        </widget>
       </item>
       <item>
-       <widget class="QPushButton" name="ExitButton">
+       <widget class="CShortcutButton" name="ExitButton">
         <property name="sizePolicy">
          <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
           <horstretch>48</horstretch>
@@ -237,7 +237,7 @@
        <number>0</number>
       </property>
       <item>
-       <widget class="QPushButton" name="AddResourceButton">
+       <widget class="CShortcutButton" name="AddResourceButton">
         <property name="sizePolicy">
          <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
           <horstretch>0</horstretch>
@@ -271,7 +271,7 @@
        </widget>
       </item>
       <item>
-       <widget class="QPushButton" name="AddWebResourceButton">
+       <widget class="CShortcutButton" name="AddWebResourceButton">
         <property name="sizePolicy">
          <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
           <horstretch>0</horstretch>
@@ -305,7 +305,7 @@
        </widget>
       </item>
       <item>
-       <widget class="QPushButton" name="RemoveResourceButton">
+       <widget class="CShortcutButton" name="RemoveResourceButton">
         <property name="sizePolicy">
          <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
           <horstretch>0</horstretch>
@@ -339,7 +339,7 @@
        </widget>
       </item>
       <item>
-       <widget class="QPushButton" name="TitleCardButton">
+       <widget class="CShortcutButton" name="TitleCardButton">
         <property name="sizePolicy">
          <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
           <horstretch>0</horstretch>
@@ -373,7 +373,7 @@
        </widget>
       </item>
       <item>
-       <widget class="QPushButton" name="MapButton">
+       <widget class="CShortcutButton" name="MapButton">
         <property name="sizePolicy">
          <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
           <horstretch>0</horstretch>
@@ -428,7 +428,7 @@
        <number>0</number>
       </property>
       <item>
-       <widget class="QPushButton" name="PlayButton">
+       <widget class="CShortcutButton" name="PlayButton">
         <property name="sizePolicy">
          <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
           <horstretch>0</horstretch>
@@ -462,7 +462,7 @@
        </widget>
       </item>
       <item>
-       <widget class="QPushButton" name="PauseButton">
+       <widget class="CShortcutButton" name="PauseButton">
         <property name="sizePolicy">
          <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
           <horstretch>0</horstretch>
@@ -493,7 +493,7 @@
        </widget>
       </item>
       <item>
-       <widget class="QPushButton" name="StopButton">
+       <widget class="CShortcutButton" name="StopButton">
         <property name="sizePolicy">
          <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
           <horstretch>0</horstretch>
@@ -548,7 +548,7 @@
        <number>0</number>
       </property>
       <item>
-       <widget class="QPushButton" name="AddNodeButton">
+       <widget class="CShortcutButton" name="AddNodeButton">
         <property name="sizePolicy">
          <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
           <horstretch>0</horstretch>
@@ -582,7 +582,7 @@
        </widget>
       </item>
       <item>
-       <widget class="QPushButton" name="RemoveNodeButton">
+       <widget class="CShortcutButton" name="RemoveNodeButton">
         <property name="sizePolicy">
          <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
           <horstretch>0</horstretch>
@@ -637,7 +637,7 @@
        <number>0</number>
       </property>
       <item>
-       <widget class="QPushButton" name="DebugButton">
+       <widget class="CShortcutButton" name="DebugButton">
         <property name="minimumSize">
          <size>
           <width>48</width>
@@ -665,7 +665,7 @@
        </widget>
       </item>
       <item>
-       <widget class="QPushButton" name="StopDebugButton">
+       <widget class="CShortcutButton" name="StopDebugButton">
         <property name="minimumSize">
          <size>
           <width>48</width>
@@ -693,7 +693,7 @@
        </widget>
       </item>
       <item>
-       <widget class="QPushButton" name="AddShowImageCode">
+       <widget class="CShortcutButton" name="AddShowImageCode">
         <property name="minimumSize">
          <size>
           <width>48</width>
@@ -718,7 +718,7 @@
        </widget>
       </item>
       <item>
-       <widget class="QPushButton" name="AddShowIconCode">
+       <widget class="CShortcutButton" name="AddShowIconCode">
         <property name="minimumSize">
          <size>
           <width>48</width>
@@ -746,7 +746,7 @@
        </widget>
       </item>
       <item>
-       <widget class="QPushButton" name="AddShowBackgroundCode">
+       <widget class="CShortcutButton" name="AddShowBackgroundCode">
         <property name="minimumSize">
          <size>
           <width>48</width>
@@ -774,7 +774,7 @@
        </widget>
       </item>
       <item>
-       <widget class="QPushButton" name="AddTextCode">
+       <widget class="CShortcutButton" name="AddTextCode">
         <property name="minimumSize">
          <size>
           <width>48</width>
@@ -802,7 +802,7 @@
        </widget>
       </item>
       <item>
-       <widget class="QPushButton" name="AddTimerCode">
+       <widget class="CShortcutButton" name="AddTimerCode">
         <property name="minimumSize">
          <size>
           <width>48</width>
@@ -830,7 +830,7 @@
        </widget>
       </item>
       <item>
-       <widget class="QPushButton" name="AddThreadCode">
+       <widget class="CShortcutButton" name="AddThreadCode">
         <property name="minimumSize">
          <size>
           <width>48</width>
@@ -876,7 +876,7 @@
        <number>0</number>
       </property>
       <item>
-       <widget class="QPushButton" name="AddFetishButton">
+       <widget class="CShortcutButton" name="AddFetishButton">
         <property name="minimumSize">
          <size>
           <width>48</width>
@@ -904,7 +904,7 @@
        </widget>
       </item>
       <item>
-       <widget class="QPushButton" name="RemoveFetishButton">
+       <widget class="CShortcutButton" name="RemoveFetishButton">
         <property name="minimumSize">
          <size>
           <width>48</width>
@@ -949,6 +949,13 @@
    </item>
   </layout>
  </widget>
+ <customwidgets>
+  <customwidget>
+   <class>CShortcutButton</class>
+   <extends>QPushButton</extends>
+   <header>Widgets/ShortcutButton.h</header>
+  </customwidget>
+ </customwidgets>
  <resources/>
  <connections/>
 </ui>

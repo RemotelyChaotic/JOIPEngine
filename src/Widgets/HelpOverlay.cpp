@@ -1,7 +1,9 @@
 #include "HelpOverlay.h"
 #include "Application.h"
+#include "Settings.h"
 #include "ui_HelpOverlay.h"
 #include "Systems/HelpFactory.h"
+#include "Widgets/ShortcutButton.h"
 
 #include <QCursor>
 #include <QDateTime>
@@ -507,7 +509,7 @@ CHelpButtonOverlay::CHelpButtonOverlay(QWidget* pParent) :
   pLayout->setSpacing(0);
   pLayout->setContentsMargins(0, 0, 0, 0);
 
-  m_pButton = new QPushButton(this);
+  m_pButton = new CShortcutButton(this);
   m_pButton->setObjectName(QStringLiteral("HelpButton"));
   QSizePolicy sizePolicy2(QSizePolicy::Fixed, QSizePolicy::Fixed);
   sizePolicy2.setHorizontalStretch(48);
@@ -517,6 +519,10 @@ CHelpButtonOverlay::CHelpButtonOverlay(QWidget* pParent) :
   m_pButton->setMinimumSize(QSize(48, 48));
   m_pButton->setMaximumSize(QSize(48, 48));
   m_pButton->setIconSize(QSize(48, 48));
+
+  auto spSettings = CApplication::Instance()->Settings();
+  connect(spSettings.get(), &CSettings::KeyBindingsChanged, this, &CHelpButtonOverlay::SlotKeyBindingsChanged);
+  m_pButton->SetShortcut(spSettings->KeyBinding("Help"));
 
   pLayout->addWidget(m_pButton);
 
@@ -551,6 +557,14 @@ void CHelpButtonOverlay::Resize()
 {
   QSize parentSize = m_pTargetWidget->size();
   move(parentSize.width() - 50 - width(), 50);
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CHelpButtonOverlay::SlotKeyBindingsChanged()
+{
+  auto spSettings = CApplication::Instance()->Settings();
+  m_pButton->SetShortcut(spSettings->KeyBinding("Help"));
 }
 
 //----------------------------------------------------------------------------------------

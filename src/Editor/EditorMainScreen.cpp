@@ -10,9 +10,10 @@
 #include "Systems/HelpFactory.h"
 #include "Systems/Project.h"
 #include "Widgets/HelpOverlay.h"
-#include "ui_EditorMainScreen.h"
 #include "ui_EditorActionBar.h"
+#include "ui_EditorMainScreen.h"
 
+#include <QAction>
 #include <QFileInfo>
 #include <QMessageBox>
 #include <QPointer>
@@ -21,12 +22,29 @@ namespace
 {
   const std::map<EEditorWidget, QString> m_sEditorNamesMap =
   {
-    { EEditorWidget::eResourceWidget, "Resource Manager" },
-    { EEditorWidget::eResourceDisplay, "Resource View" },
-    { EEditorWidget::eProjectSettings, "Project Settings" },
-    { EEditorWidget::eSceneNodeWidget, "Scene Node Editor" },
-    { EEditorWidget::eSceneCodeEditorWidget, "Scene Code Editor" }
+    { EEditorWidget::eResourceWidget, "Resource Manager (%1)" },
+    { EEditorWidget::eResourceDisplay, "Resource View (%1)" },
+    { EEditorWidget::eProjectSettings, "Project Settings (%1)" },
+    { EEditorWidget::eSceneNodeWidget, "Scene Node Editor (%1)" },
+    { EEditorWidget::eSceneCodeEditorWidget, "Scene Code Editor (%1)" }
   };
+
+  const std::map<EEditorWidget, QString> m_sEditorKeyBindingMap =
+  {
+    { EEditorWidget::eResourceWidget, "Resource" },
+    { EEditorWidget::eResourceDisplay, "MediaPlayer" },
+    { EEditorWidget::eProjectSettings, "Settings" },
+    { EEditorWidget::eSceneNodeWidget, "Nodes" },
+    { EEditorWidget::eSceneCodeEditorWidget, "Code" }
+  };
+  const std::map<CEditorActionBar::EActionBarPosition, QString> m_sSideKeyBindingMap =
+  {
+    { CEditorActionBar::eLeft, "LeftTab" },
+    { CEditorActionBar::eRight, "RightTab" }
+  };
+
+  const char* c_sEditorProperty = "Editor";
+  const char* c_sSideProperty = "Side";
 
   const QString c_sViewSelectorHelpId =  "Editor/ViewSelector";
 }
@@ -37,6 +55,7 @@ CEditorMainScreen::CEditorMainScreen(QWidget* pParent) :
   QWidget(pParent),
   m_spUi(std::make_unique<Ui::CEditorMainScreen>()),
   m_spEditorModel(std::make_unique<CEditorModel>(this)),
+  m_vpKeyBindingActions(),
   m_spWidgetsMap(),
   m_spCurrentProject(nullptr),
   m_wpDbManager(),
@@ -55,6 +74,7 @@ CEditorMainScreen::CEditorMainScreen(QWidget* pParent) :
 
 CEditorMainScreen::~CEditorMainScreen()
 {
+  m_vpKeyBindingActions.clear();
 }
 
 //----------------------------------------------------------------------------------------
@@ -69,9 +89,12 @@ void CEditorMainScreen::Initialize()
           this, &CEditorMainScreen::SlotProjectEdited);
 
   // action Bars
+  m_spUi->pProjectActionBar->SetActionBarPosition(CEditorActionBar::eTop);
   m_spUi->pProjectActionBar->Initialize();
   m_spUi->pProjectActionBar->ShowProjectActionBar();
+  m_spUi->pActionBarLeft->SetActionBarPosition(CEditorActionBar::eLeft);
   m_spUi->pActionBarLeft->Initialize();
+  m_spUi->pActionBarRight->SetActionBarPosition(CEditorActionBar::eRight);
   m_spUi->pActionBarRight->Initialize();
 
   connect(m_spUi->pProjectActionBar->m_spUi->pTitleLineEdit, &QLineEdit::editingFinished,
@@ -90,6 +113,20 @@ void CEditorMainScreen::Initialize()
   m_spWidgetsMap.insert({EEditorWidget::eSceneNodeWidget, new CEditorSceneNodeWidget(this)});
   m_spWidgetsMap.insert({EEditorWidget::eSceneCodeEditorWidget, new CEditorCodeWidget(this)});
 
+  // initialize action map
+  for (qint32 i = CEditorActionBar::eLeft; CEditorActionBar::eRight+1 > i; ++i)
+  {
+    for (EEditorWidget eval : EEditorWidget::_values())
+    {
+      QAction* pAction = new QAction(this);
+      pAction->setProperty(c_sEditorProperty, eval._to_integral());
+      pAction->setProperty(c_sSideProperty, static_cast<qint32>(i));
+      m_vpKeyBindingActions.push_back(pAction);
+      addAction(pAction);
+    }
+  }
+
+
   // initialize widgets
   m_spUi->pLeftComboBox->blockSignals(true);
   m_spUi->pRightComboBox->blockSignals(true);
@@ -101,8 +138,12 @@ void CEditorMainScreen::Initialize()
     it->second->SetEditorModel(m_spEditorModel.get());
     it->second->Initialize();
     it->second->setVisible(false);
-    m_spUi->pLeftComboBox->addItem(m_sEditorNamesMap.find(it->first)->second, it->first._to_integral());
-    m_spUi->pRightComboBox->addItem(m_sEditorNamesMap.find(it->first)->second, it->first._to_integral());
+
+    // Key-bindings werden später sowieso gesetzt
+    m_spUi->pLeftComboBox->addItem(m_sEditorNamesMap.find(it->first)->second.arg(""),
+                                   it->first._to_integral());
+    m_spUi->pRightComboBox->addItem(m_sEditorNamesMap.find(it->first)->second.arg(""),
+                                    it->first._to_integral());
   }
   m_spUi->pLeftComboBox->blockSignals(false);
   m_spUi->pRightComboBox->blockSignals(false);
@@ -179,6 +220,12 @@ void CEditorMainScreen::UnloadProject()
 
   m_spCurrentProject = nullptr;
   m_spEditorModel->UnloadProject();
+
+  // disconnect shortcuts
+  for (QAction* pAction : m_vpKeyBindingActions)
+  {
+    pAction->disconnect();
+  }
 
   SetModificaitonFlag(false);
 }
@@ -313,6 +360,46 @@ void CEditorMainScreen::SlotHelpClicked(bool bClick)
 
 //----------------------------------------------------------------------------------------
 //
+void CEditorMainScreen::SlotKeyBindingsChanged()
+{
+  auto spSettings = CApplication::Instance()->Settings();
+  for (QAction* pAction : m_vpKeyBindingActions)
+  {
+    EEditorWidget widget =
+        EEditorWidget::_from_integral(pAction->property(c_sEditorProperty).toInt());
+    CEditorActionBar::EActionBarPosition position =
+        static_cast<CEditorActionBar::EActionBarPosition>(pAction->property(c_sSideProperty).toInt());
+
+    pAction->disconnect();
+
+    auto itSide = m_sSideKeyBindingMap.find(position);
+    auto itKey = m_sEditorKeyBindingMap.find(widget);
+    if (m_sSideKeyBindingMap.end() != itSide && m_sEditorKeyBindingMap.end() != itKey)
+    {
+      qint32 iIndex = std::distance(m_spWidgetsMap.begin(), m_spWidgetsMap.find(widget));
+
+      QKeySequence seq = spSettings->KeyBinding(QString("%1_%2").arg(itSide->second).arg(itKey->second));
+      pAction->setShortcut(seq);
+      if (position == CEditorActionBar::eLeft)
+      {
+        m_spUi->pLeftComboBox->setItemText(iIndex, m_sEditorNamesMap.find(widget)->second.arg(seq.toString()));
+        connect(pAction, &QAction::triggered, this, [this, iIndex](){
+          m_spUi->pLeftComboBox->setCurrentIndex(iIndex);
+        });
+      }
+      else if (position == CEditorActionBar::eRight)
+      {
+        m_spUi->pRightComboBox->setItemText(iIndex, m_sEditorNamesMap.find(widget)->second.arg(seq.toString()));
+        connect(pAction, &QAction::triggered, this, [this, iIndex](){
+          m_spUi->pRightComboBox->setCurrentIndex(iIndex);
+        });
+      }
+    }
+  }
+}
+
+//----------------------------------------------------------------------------------------
+//
 void CEditorMainScreen::SlotProjectEdited()
 {
   if (!m_bInitialized) { return; }
@@ -402,6 +489,8 @@ void CEditorMainScreen::ChangeIndex(QComboBox* pComboBox, QWidget* pContainer,
 //
 void CEditorMainScreen::ProjectLoaded()
 {
+  SlotKeyBindingsChanged();
+
   if (nullptr != m_spCurrentProject)
   {
     QReadLocker locker(&m_spCurrentProject->m_rwLock);

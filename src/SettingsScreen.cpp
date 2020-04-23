@@ -11,6 +11,7 @@
 #include <QDesktopWidget>
 #include <QFileDialog>
 #include <QFileInfo>
+#include <QKeySequenceEdit>
 #include <QScreen>
 #include <QSize>
 #include <cassert>
@@ -27,6 +28,8 @@ namespace  {
   const QString c_sMuteHelpId = "Settings/Mute";
   const QString c_sVolumeHelpId = "Settings/Volume";
   const QString c_sCancelHelpId = "MainScreen/Cancel";
+
+  const char* c_sPropertyKeySequence = "KeyBinding";
 
   std::map<QString, QSize> possibleDimensionsMap =
   {
@@ -158,6 +161,35 @@ void CSettingsScreen::Load()
   // set font
   QFont font(m_spSettings->Font());
   m_spUi->pFontComboBox->setCurrentFont(font);
+
+  // set key bindings
+  QStringList vsKeyBindings = m_spSettings->KeyBindings();
+  for (const QString& sKeyBinding : qAsConst(vsKeyBindings))
+  {
+    QWidget* pKeyBindingContainer = new QWidget(m_spUi->pInputContainer);
+    QHBoxLayout* pLayout = new QHBoxLayout();
+    pLayout->setContentsMargins(0, 0, 0, 0);
+    pKeyBindingContainer->setLayout(pLayout);
+
+    QSizePolicy sizePolicy(QSizePolicy::Preferred, QSizePolicy::Preferred);
+    sizePolicy.setHorizontalStretch(1);
+    sizePolicy.setVerticalStretch(0);
+
+    QLabel* pKeyLabel = new QLabel(sKeyBinding, pKeyBindingContainer);
+    pKeyLabel->setSizePolicy(sizePolicy);
+    pLayout->addWidget(pKeyLabel);
+
+    QKeySequenceEdit* pKeySequenceEdit = new QKeySequenceEdit(m_spSettings->KeyBinding(sKeyBinding),
+                                                              pKeyBindingContainer);
+    pKeySequenceEdit->setSizePolicy(sizePolicy);
+    pKeySequenceEdit->setProperty(c_sPropertyKeySequence, sKeyBinding);
+    pKeySequenceEdit->setEnabled(CSettings::IsAllowedToOverwriteKeyBinding(sKeyBinding));
+    connect(pKeySequenceEdit, &QKeySequenceEdit::keySequenceChanged,
+            this, &CSettingsScreen::SlotKeySequenceChanged);
+    pLayout->addWidget(pKeySequenceEdit);
+
+    m_spUi->pInputContainer->layout()->addWidget(pKeyBindingContainer);
+  }
 
   // setStyle
   m_spUi->pStyleComboBox->addItems(joip_style::AvailableStyles());
@@ -302,4 +334,13 @@ void CSettingsScreen::on_pBackButton_clicked()
 {
   WIDGET_INITIALIZED_GUARD
   emit m_spWindowContext->SignalChangeAppState(EAppState::eMainScreen);
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CSettingsScreen::SlotKeySequenceChanged(const QKeySequence& keySequence)
+{
+  WIDGET_INITIALIZED_GUARD
+  QString sKeyBinding = sender()->property(c_sPropertyKeySequence).toString();
+  m_spSettings->SetKeyBinding(keySequence, sKeyBinding);
 }

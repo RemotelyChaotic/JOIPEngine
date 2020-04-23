@@ -6,6 +6,7 @@
 #include <memory>
 
 class CSettings;
+class QKeySequence;
 namespace Ui {
   class CSettingsScreen;
 }
@@ -33,8 +34,9 @@ protected slots:
   void on_pMuteCheckBox_stateChanged(qint32 iState);
   void on_pVolumeSlider_sliderReleased();
   void on_pBackButton_clicked();
+  void SlotKeySequenceChanged(const QKeySequence& keySequence);
 
-private:  
+private:
   std::unique_ptr<Ui::CSettingsScreen> m_spUi;
   std::shared_ptr<CSettings>           m_spSettings;
 };

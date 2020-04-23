@@ -230,7 +230,7 @@
   <customwidget>
    <class>CEditorActionBar</class>
    <extends>QWidget</extends>
-   <header>EditorActionBar.h</header>
+   <header>Editor/EditorActionBar.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

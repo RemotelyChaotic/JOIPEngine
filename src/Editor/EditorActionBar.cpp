@@ -1,5 +1,7 @@
 #include "EditorActionBar.h"
 #include "Application.h"
+#include "EditorWidgetTypes.h"
+#include "Settings.h"
 #include "ui_EditorActionBar.h"
 #include "Systems/HelpFactory.h"
 #include "Widgets/HelpOverlay.h"
@@ -37,7 +39,10 @@ namespace {
 
 CEditorActionBar::CEditorActionBar(QWidget* pParent) :
   CEditorWidgetBase(pParent),
-  m_spUi(std::make_unique<Ui::CEditorActionBar>())
+  m_spUi(std::make_unique<Ui::CEditorActionBar>()),
+  m_spSettings(CApplication::Instance()->Settings()),
+  m_position(eNone),
+  m_iCurrentDisplayType(-1)
 {
   m_spUi->setupUi(this);
 }
@@ -48,11 +53,22 @@ CEditorActionBar::~CEditorActionBar()
 
 //----------------------------------------------------------------------------------------
 //
+void CEditorActionBar::SetActionBarPosition(EActionBarPosition position)
+{
+  if (!IsInitialized())
+  {
+    m_position = position;
+  }
+}
+
+//----------------------------------------------------------------------------------------
+//
 void CEditorActionBar::Initialize()
 {
   SetInitialized(false);
 
   HideAllBars();
+  SlotKeyBindingsChanged();
 
   auto wpHelpFactory = CApplication::Instance()->System<CHelpFactory>().lock();
   if (nullptr != wpHelpFactory)
@@ -110,6 +126,9 @@ void CEditorActionBar::Initialize()
     wpHelpFactory->RegisterHelp(c_sRemoveFetishHelpId, ":/resources/help/editor/removefetish_button_help.html");
   }
 
+  connect(m_spSettings.get(), &CSettings::KeyBindingsChanged,
+          this, &CEditorActionBar::SlotKeyBindingsChanged);
+
   SetInitialized(true);
 }
 
@@ -123,6 +142,8 @@ void CEditorActionBar::HideAllBars()
   m_spUi->pResourcesContainer->hide();
   m_spUi->pCodeEditorContainer->hide();
   m_spUi->pProjectSettingsEditorContainer->hide();
+
+  m_iCurrentDisplayType = -1;
 }
 
 //----------------------------------------------------------------------------------------
@@ -133,6 +154,8 @@ void CEditorActionBar::ShowCodeActionBar()
   m_spUi->pCodeEditorContainer->show();
   m_spUi->DebugButton->show();
   m_spUi->StopDebugButton->hide();
+
+  m_iCurrentDisplayType = EEditorWidget::eSceneCodeEditorWidget;
 }
 
 //----------------------------------------------------------------------------------------
@@ -141,6 +164,8 @@ void CEditorActionBar::ShowNodeEditorActionBar()
 {
   HideAllBars();
   m_spUi->pSceneNodeEditorContainer->show();
+
+  m_iCurrentDisplayType = EEditorWidget::eSceneNodeWidget;
 }
 
 //----------------------------------------------------------------------------------------
@@ -149,6 +174,8 @@ void CEditorActionBar::ShowMediaPlayerActionBar()
 {
   HideAllBars();
   m_spUi->pMediaPlayerActionBar->show();
+
+  m_iCurrentDisplayType = EEditorWidget::eResourceDisplay;
 }
 
 //----------------------------------------------------------------------------------------
@@ -157,6 +184,8 @@ void CEditorActionBar::ShowProjectActionBar()
 {
   HideAllBars();
   m_spUi->pProjectContainer->show();
+
+  m_iCurrentDisplayType = -1;
 }
 
 //----------------------------------------------------------------------------------------
@@ -165,6 +194,8 @@ void CEditorActionBar::ShowProjectSettingsActionBar()
 {
   HideAllBars();
   m_spUi->pProjectSettingsEditorContainer->show();
+
+  m_iCurrentDisplayType = EEditorWidget::eProjectSettings;
 }
 
 //----------------------------------------------------------------------------------------
@@ -173,4 +204,63 @@ void CEditorActionBar::ShowResourceActionBar()
 {
   HideAllBars();
   m_spUi->pResourcesContainer->show();
+
+  m_iCurrentDisplayType = EEditorWidget::eResourceWidget;
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CEditorActionBar::SlotKeyBindingsChanged()
+{
+  // set bindings
+  QString sKey;
+  switch (m_position)
+  {
+    case eLeft:
+    {
+      sKey = QString("Left_%1");
+      break;
+    }
+    case eRight:
+    {
+      sKey = QString("Right_%1");
+      break;
+    }
+  default: break;
+  }
+
+  // connect actions
+  if (m_position == eTop)
+  {
+    m_spUi->ExitButton->SetShortcut(m_spSettings->KeyBinding("Exit"));
+    m_spUi->HelpButton->SetShortcut(m_spSettings->KeyBinding("Help"));
+    m_spUi->SaveButton->SetShortcut(m_spSettings->KeyBinding("Save"));
+  }
+  else
+  {
+    m_spUi->AddResourceButton->SetShortcut(m_spSettings->KeyBinding(sKey.arg(1)));
+    m_spUi->AddWebResourceButton->SetShortcut(m_spSettings->KeyBinding(sKey.arg(2)));
+    m_spUi->RemoveResourceButton->SetShortcut(m_spSettings->KeyBinding(sKey.arg(3)));
+    m_spUi->TitleCardButton->SetShortcut(m_spSettings->KeyBinding(sKey.arg(4)));
+    m_spUi->MapButton->SetShortcut(m_spSettings->KeyBinding(sKey.arg(5)));
+
+    m_spUi->PlayButton->SetShortcut(m_spSettings->KeyBinding(sKey.arg(1)));
+    m_spUi->PauseButton->SetShortcut(m_spSettings->KeyBinding(sKey.arg(2)));
+    m_spUi->StopButton->SetShortcut(m_spSettings->KeyBinding(sKey.arg(3)));
+
+    m_spUi->AddFetishButton->SetShortcut(m_spSettings->KeyBinding(sKey.arg(1)));
+    m_spUi->RemoveFetishButton->SetShortcut(m_spSettings->KeyBinding(sKey.arg(2)));
+
+    m_spUi->AddNodeButton->SetShortcut(m_spSettings->KeyBinding(sKey.arg(1)));
+    m_spUi->RemoveNodeButton->SetShortcut(m_spSettings->KeyBinding(sKey.arg(2)));
+
+    m_spUi->DebugButton->SetShortcut(m_spSettings->KeyBinding(sKey.arg(1)));
+    m_spUi->StopDebugButton->SetShortcut(m_spSettings->KeyBinding(sKey.arg(1)));
+    m_spUi->AddShowImageCode->SetShortcut(m_spSettings->KeyBinding(sKey.arg(2)));
+    m_spUi->AddShowIconCode->SetShortcut(m_spSettings->KeyBinding(sKey.arg(3)));
+    m_spUi->AddShowBackgroundCode->SetShortcut(m_spSettings->KeyBinding(sKey.arg(4)));
+    m_spUi->AddTextCode->SetShortcut(m_spSettings->KeyBinding(sKey.arg(5)));
+    m_spUi->AddTimerCode->SetShortcut(m_spSettings->KeyBinding(sKey.arg(6)));
+    m_spUi->AddThreadCode->SetShortcut(m_spSettings->KeyBinding(sKey.arg(7)));
+  }
 }

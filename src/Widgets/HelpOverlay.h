@@ -2,6 +2,7 @@
 #define HELPOVERLAY_H
 
 #include "OverlayBase.h"
+#include <QAction>
 #include <QPaintEvent>
 #include <QPointer>
 #include <QTimer>
@@ -10,10 +11,10 @@
 
 class CHelpButtonOverlay;
 class CHelpFactory;
+class CShortcutButton;
 namespace Ui {
   class CHelpOverlay;
 }
-class QPushButton;
 class QPropertyAnimation;
 class QTextBrowser;
 
@@ -123,10 +124,13 @@ public:
 signals:
   void SignalButtonClicked();
 
+protected:
+  void SlotKeyBindingsChanged();
+
 private:
   void retranslateUi(QWidget* pHelpOverlay);
 
-  QPointer<QPushButton> m_pButton;
+  QPointer<CShortcutButton> m_pButton;
 };
 
 #endif // HELPOVERLAY_H
