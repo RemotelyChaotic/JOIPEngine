@@ -20,6 +20,7 @@ New Features:
   project.
 - Target verision and project version added to project configuration describing
   the project's version and the engine version the project was saved in.
+- Support for key bindings added and settings expanded.
 
 Updated Features:
 - Upgrade to Qt5.14.2 with msvc2017 for more QJSEngine and QML features.
