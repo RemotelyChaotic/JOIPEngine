@@ -1,7 +1,7 @@
 #include "ScriptTextBox.h"
 #include "Application.h"
-#include "DatabaseManager.h"
 #include "ScriptRunnerSignalEmiter.h"
+#include "Systems/DatabaseManager.h"
 #include <QEventLoop>
 
 CScriptTextBox::CScriptTextBox(std::shared_ptr<CScriptRunnerSignalEmiter> spEmitter,

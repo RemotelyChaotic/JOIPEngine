@@ -1,8 +1,8 @@
 #include "ScriptIcon.h"
 #include "Application.h"
-#include "DatabaseManager.h"
-#include "Project.h"
 #include "ScriptRunnerSignalEmiter.h"
+#include "Systems/DatabaseManager.h"
+#include "Systems/Project.h"
 
 CScriptIcon::CScriptIcon(std::shared_ptr<CScriptRunnerSignalEmiter> spEmitter,
                          QJSEngine* pEngine) :

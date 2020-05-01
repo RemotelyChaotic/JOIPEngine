@@ -7,7 +7,7 @@
 #include "Systems/DatabaseManager.h"
 #include "Systems/Project.h"
 #include "Systems/ScriptRunner.h"
-#include "Systems/ScriptRunnerSignalEmiter.h"
+#include "Systems/Script/ScriptRunnerSignalEmiter.h"
 #include "ui_SceneMainScreen.h"
 
 #include <QAction>

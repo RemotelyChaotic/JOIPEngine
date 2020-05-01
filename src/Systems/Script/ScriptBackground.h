@@ -1,7 +1,7 @@
 #ifndef SCRIPTBACKGROUND_H
 #define SCRIPTBACKGROUND_H
 
-#include "Resource.h"
+#include "Systems/Resource.h"
 #include <QColor>
 #include <QJSEngine>
 

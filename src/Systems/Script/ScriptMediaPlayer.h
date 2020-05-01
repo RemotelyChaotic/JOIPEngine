@@ -1,7 +1,7 @@
 #ifndef SCRIPTMEDIAPLAYER_H
 #define SCRIPTMEDIAPLAYER_H
 
-#include "Resource.h"
+#include "Systems/Resource.h"
 #include <QJSEngine>
 #include <QJSValue>
 

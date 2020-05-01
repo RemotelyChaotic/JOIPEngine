@@ -102,18 +102,18 @@ SOURCES += \
     src/Editor/EditorCodeWidget.cpp \
     src/Editor/Script/ScriptEditorWidget.cpp \
     src/Editor/Script/ScriptHighlighter.cpp \
-    src/Systems/ScriptBackground.cpp \
-    src/Systems/ScriptMediaPlayer.cpp \
-    src/Systems/ScriptTextBox.cpp \
-    src/Systems/ScriptTimer.cpp \
-    src/Systems/ScriptThread.cpp \
-    src/Systems/ScriptIcon.cpp \
+    src/Systems/Script/ScriptBackground.cpp \
+    src/Systems/Script/ScriptMediaPlayer.cpp \
+    src/Systems/Script/ScriptTextBox.cpp \
+    src/Systems/Script/ScriptTimer.cpp \
+    src/Systems/Script/ScriptThread.cpp \
+    src/Systems/Script/ScriptIcon.cpp \
     src/SceneScreen.cpp \
     src/Player/SceneMainScreen.cpp \
     src/Player/TextBoxWidget.cpp \
     src/Player/InformationWidget.cpp \
     src/Player/ProjectRunner.cpp \
-    src/Systems/ScriptRunnerSignalEmiter.cpp \
+    src/Systems/Script/ScriptRunnerSignalEmiter.cpp \
     src/Player/FlowLayout.cpp \
     src/Player/TimerDisplayWidget.cpp \
     src/Player/TimerWidget.cpp \
@@ -129,7 +129,7 @@ SOURCES += \
     src/Widgets/ColorPicker.cpp \
     src/CreditsScreen.cpp \
     src/Widgets/SearchWidget.cpp \
-    src/Systems/ScriptStorage.cpp \
+    src/Systems/Script/ScriptStorage.cpp \
     src/UISoundEmitter.cpp \
     src/Editor/Script/ThreadSnippetOverlay.cpp \
     src/Editor/EditorModel.cpp \
@@ -191,19 +191,19 @@ HEADERS += \
     src/Editor/EditorCodeWidget.h \
     src/Editor/Script/ScriptEditorWidget.h \
     src/Editor/Script/ScriptHighlighter.h \
-    src/Systems/ScriptBackground.h \
-    src/Systems/ScriptMediaPlayer.h \
-    src/Systems/ScriptTextBox.h \
-    src/Systems/ScriptTimer.h \
-    src/Systems/ScriptThread.h \
-    src/Systems/ScriptIcon.h \
+    src/Systems/Script/ScriptBackground.h \
+    src/Systems/Script/ScriptMediaPlayer.h \
+    src/Systems/Script/ScriptTextBox.h \
+    src/Systems/Script/ScriptTimer.h \
+    src/Systems/Script/ScriptThread.h \
+    src/Systems/Script/ScriptIcon.h \
     src/SceneScreen.h \
     src/Player/SceneMainScreen.h \
     src/Player/TextBoxWidget.h \
     src/Widgets/IWidgetBaseInterface.h \
     src/Player/InformationWidget.h \
     src/Player/ProjectRunner.h \
-    src/Systems/ScriptRunnerSignalEmiter.h \
+    src/Systems/Script/ScriptRunnerSignalEmiter.h \
     src/Player/FlowLayout.h \
     src/Player/TimerDisplayWidget.h \
     src/Player/TimerWidget.h \
@@ -221,7 +221,7 @@ HEADERS += \
     version.h \
     src/CreditsScreen.h \
     src/Widgets/SearchWidget.h \
-    src/Systems/ScriptStorage.h \
+    src/Systems/Script/ScriptStorage.h \
     src/UISoundEmitter.h \
     src/Editor/Script/ThreadSnippetOverlay.h \
     src/Editor/EditorModel.h \

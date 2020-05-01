@@ -1,7 +1,7 @@
 #ifndef SCRIPTTEXTBOX_H
 #define SCRIPTTEXTBOX_H
 
-#include "Resource.h"
+#include "Systems/Resource.h"
 #include <QColor>
 #include <QJSEngine>
 #include <QJSValue>

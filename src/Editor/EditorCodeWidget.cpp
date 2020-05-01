@@ -15,7 +15,7 @@
 #include "Systems/Project.h"
 #include "Systems/Scene.h"
 #include "Systems/ScriptRunner.h"
-#include "Systems/ScriptRunnerSignalEmiter.h"
+#include "Systems/Script/ScriptRunnerSignalEmiter.h"
 #include "Widgets/HelpOverlay.h"
 #include "ui_EditorCodeWidget.h"
 #include "ui_EditorActionBar.h"

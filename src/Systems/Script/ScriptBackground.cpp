@@ -1,7 +1,8 @@
 #include "ScriptBackground.h"
 #include "Application.h"
-#include "DatabaseManager.h"
 #include "ScriptRunnerSignalEmiter.h"
+#include "Systems/DatabaseManager.h"
+
 
 CScriptBackground::CScriptBackground(std::shared_ptr<CScriptRunnerSignalEmiter> spEmitter,
                                      QJSEngine* pEngine) :

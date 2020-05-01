@@ -1,7 +1,7 @@
 #include "ScriptMediaPlayer.h"
 #include "Application.h"
-#include "DatabaseManager.h"
 #include "ScriptRunnerSignalEmiter.h"
+#include "Systems/DatabaseManager.h"
 #include <QTimer>
 
 CScriptMediaPlayer::CScriptMediaPlayer(std::shared_ptr<CScriptRunnerSignalEmiter> spEmitter,
