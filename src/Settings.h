@@ -6,21 +6,22 @@
 #include <QObject>
 #include <QSize>
 #include <QString>
+#include <QUrl>
 #include <memory>
 
 class QSettings;
 
-class CSettings : public QObject {
-
+class CSettings : public QObject
+{
   Q_OBJECT
-  Q_PROPERTY(QString contentFolder READ ContentFolder WRITE SetContentFolder NOTIFY ContentFolderChanged)
-  Q_PROPERTY(QString font READ Font WRITE SetFont NOTIFY FontChanged)
-  Q_PROPERTY(bool fullscreen READ Fullscreen WRITE SetFullscreen NOTIFY FullscreenChanged)
+  Q_PROPERTY(QString contentFolder READ ContentFolder WRITE SetContentFolder NOTIFY contentFolderChanged)
+  Q_PROPERTY(QString font READ Font WRITE SetFont NOTIFY fontChanged)
+  Q_PROPERTY(bool fullscreen READ Fullscreen WRITE SetFullscreen NOTIFY fullscreenChanged)
   Q_PROPERTY(QStringList keyBindings READ KeyBindings)
-  Q_PROPERTY(bool muted READ Muted WRITE SetMuted NOTIFY MutedChanged)
-  Q_PROPERTY(QSize resolution READ Resolution WRITE SetResolution NOTIFY ResolutionChanged)
-  Q_PROPERTY(QString style READ Style WRITE SetStyle NOTIFY StyleChanged)
-  Q_PROPERTY(double volume READ Volume WRITE SetVolume NOTIFY VolumeChanged)
+  Q_PROPERTY(bool muted READ Muted WRITE SetMuted NOTIFY mutedChanged)
+  Q_PROPERTY(QSize resolution READ Resolution WRITE SetResolution NOTIFY resolutionChanged)
+  Q_PROPERTY(QString style READ Style WRITE SetStyle NOTIFY styleChanged)
+  Q_PROPERTY(double volume READ Volume WRITE SetVolume NOTIFY volumeChanged)
 
 public:
   static const QString c_sSettingContentFolder;
@@ -45,28 +46,30 @@ public:
   void SetFullscreen(bool bValue);
   bool Fullscreen();
   QStringList KeyBindings();
-  Q_INVOKABLE QKeySequence KeyBinding(const QString& sRole);
-  Q_INVOKABLE void SetKeyBinding(const QKeySequence& sKeySequence, const QString& sRole);
+  Q_INVOKABLE QKeySequence keyBinding(const QString& sRole);
+  Q_INVOKABLE void setKeyBinding(const QKeySequence& sKeySequence, const QString& sRole);
   void SetMuted(bool bValue);
   bool Muted();
   void SetResolution(const QSize& size);
   QSize Resolution();
   void SetStyle(const QString& sStyle);
   QString Style();
+  Q_INVOKABLE QUrl styleFolder();
+  Q_INVOKABLE QUrl styleFolderQml();
   void SetVolume(double dVolume);
   double Volume();
 
   static bool IsAllowedToOverwriteKeyBinding(const QString& sRole);
 
 signals:
-  void ContentFolderChanged();
-  void FontChanged();
-  void FullscreenChanged();
-  void KeyBindingsChanged();
-  void MutedChanged();
-  void ResolutionChanged();
-  void StyleChanged();
-  void VolumeChanged();
+  void contentFolderChanged();
+  void fontChanged();
+  void fullscreenChanged();
+  void keyBindingsChanged();
+  void mutedChanged();
+  void resolutionChanged();
+  void styleChanged();
+  void volumeChanged();
 
 private:
   void GenerateSettingsIfNotExists();
@@ -76,5 +79,7 @@ private:
 
   const std::map<QString, QKeySequence> c_sDefaultKeyBindings;
 };
+
+Q_DECLARE_METATYPE(CSettings*)
 
 #endif // CSETTINGS_H

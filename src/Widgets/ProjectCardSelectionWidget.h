@@ -2,14 +2,18 @@
 #define PROJECTCARDSELECTIONWIDGET_H
 
 #include <QPointer>
+#include <QQuickWidget>
 #include <QWidget>
 #include <memory>
+#include <vector>
 
+class CDatabaseImageProvider;
 class CDatabaseManager;
+class CProject;
 namespace Ui {
   class CProjectCardSelectionWidget;
 }
-class QMovie;
+class QResizeEvent;
 
 class CProjectCardSelectionWidget : public QWidget
 {
@@ -29,15 +33,22 @@ public:
   const QColor& SelectionColor();
 
 protected slots:
-  void SlotCardClicked();
+  void on_pSearchWidget_SignalFilterChanged(const QString& sText);
+  void on_pQmlWidget_statusChanged(QQuickWidget::Status);
+  void on_pQmlWidget_sceneGraphError(QQuickWindow::SceneGraphError error, const QString &message);
+  void SlotCardClicked(int iProjId);
+  void SlotResizeDone();
+  void SlotTriedToLoadMovie(const QString& sMovie);
+
+protected:
+  void resizeEvent(QResizeEvent* pEvent) override;
 
 private:
-  void AddDropShadow(QWidget* pWidget, const QColor& color);
+  void InitQmlMain();
 
   std::unique_ptr<Ui::CProjectCardSelectionWidget> m_spUi;
-  std::shared_ptr<QMovie>                          m_spSpinner;
   std::weak_ptr<CDatabaseManager>                  m_wpDbManager;
-  QPointer<QWidget>                                m_pLastSelectedWidget;
+  std::vector<QPointer<CProject>>                  m_vpProjects;
   QColor                                           m_selectionColor;
   qint32                                           m_iSelectedProjectId;
   bool                                             m_bInitialized;

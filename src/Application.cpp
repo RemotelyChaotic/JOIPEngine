@@ -5,11 +5,21 @@
 #include "Systems/DatabaseManager.h"
 #include "Systems/HelpFactory.h"
 #include "Systems/OverlayManager.h"
+#include "Systems/Project.h"
+#include "Systems/Resource.h"
+#include "Systems/Scene.h"
 #include "Systems/ScriptRunner.h"
 #include "Systems/ThreadedSystem.h"
 
+#include <filters/regexpfilter.h>
+#include <sorters/stringsorter.h>
+#include <qqmlsortfilterproxymodel.h>
+
 #include <QDebug>
 #include <QFontDatabase>
+#include <QQmlContext>
+#include <QQmlEngine>
+#include <QQuickItem>
 #include <cassert>
 
 CApplication::CApplication(int& argc, char *argv[]) :
@@ -62,9 +72,9 @@ void CApplication::Initialize()
 
   // settings
   m_spSettings = std::make_shared<CSettings>();
-  connect(m_spSettings.get(), &CSettings::FontChanged,
+  connect(m_spSettings.get(), &CSettings::fontChanged,
           this, &CApplication::MarkStyleDirty, Qt::DirectConnection);
-  connect(m_spSettings.get(), &CSettings::StyleChanged,
+  connect(m_spSettings.get(), &CSettings::styleChanged,
           this, &CApplication::MarkStyleDirty, Qt::DirectConnection);
 
   // sound emitter
@@ -83,6 +93,9 @@ void CApplication::Initialize()
   // init subsystems
   m_spSystemsMap[ECoreSystems::eDatabaseManager]->RegisterObject<CDatabaseManager>();
   m_spSystemsMap[ECoreSystems::eScriptRunner]->RegisterObject<CScriptRunner>();
+
+  // qml
+  RegisterQmlTypes();
 
   // style
   LoadStyle();
@@ -134,5 +147,29 @@ void CApplication::LoadStyle()
     joip_style::SetStyle(this);
     emit StyleLoaded();
   }
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CApplication::RegisterQmlTypes()
+{
+  qmlRegisterSingletonType<CSettings>("JOIP.core", 1, 1, "Settings",
+                                      [this](QQmlEngine *engine, QJSEngine *scriptEngine) -> QObject*
+  {
+      Q_UNUSED(scriptEngine)
+      std::shared_ptr<CSettings> spSettings = Settings();
+      engine->setObjectOwnership(spSettings.get(), QQmlEngine::CppOwnership);
+      return spSettings.get();
+  });
+
+  qmlRegisterUncreatableType<CProject>("JOIP.db", 1, 1, "Project", "");
+  qmlRegisterUncreatableType<CScene>("JOIP.db", 1, 1, "Scene", "");
+  qmlRegisterUncreatableType<CResource>("JOIP.db", 1, 1, "Resource", "");
+
+  qmlRegisterUncreatableType<qqsfpm::Filter>("SortFilterProxyModel", 0, 2, "Filter", "Filter is abstract and cannot be created.");
+  qmlRegisterUncreatableType<qqsfpm::Sorter>("SortFilterProxyModel", 0, 2, "Sorter", "Sorter is abstract and cannot be created.");
+  qmlRegisterType<qqsfpm::RegExpFilter>("SortFilterProxyModel", 0, 2, "RegExpFilter");
+  qmlRegisterType<qqsfpm::StringSorter>("SortFilterProxyModel", 0, 2, "StringSorter");
+  qmlRegisterType<qqsfpm::QQmlSortFilterProxyModel>("SortFilterProxyModel", 0, 2, "SortFilterProxyModel");
 }
 

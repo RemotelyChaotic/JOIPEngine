@@ -521,8 +521,8 @@ CHelpButtonOverlay::CHelpButtonOverlay(QWidget* pParent) :
   m_pButton->setIconSize(QSize(48, 48));
 
   auto spSettings = CApplication::Instance()->Settings();
-  connect(spSettings.get(), &CSettings::KeyBindingsChanged, this, &CHelpButtonOverlay::SlotKeyBindingsChanged);
-  m_pButton->SetShortcut(spSettings->KeyBinding("Help"));
+  connect(spSettings.get(), &CSettings::keyBindingsChanged, this, &CHelpButtonOverlay::SlotKeyBindingsChanged);
+  m_pButton->SetShortcut(spSettings->keyBinding("Help"));
 
   pLayout->addWidget(m_pButton);
 
@@ -564,7 +564,7 @@ void CHelpButtonOverlay::Resize()
 void CHelpButtonOverlay::SlotKeyBindingsChanged()
 {
   auto spSettings = CApplication::Instance()->Settings();
-  m_pButton->SetShortcut(spSettings->KeyBinding("Help"));
+  m_pButton->SetShortcut(spSettings->keyBinding("Help"));
 }
 
 //----------------------------------------------------------------------------------------

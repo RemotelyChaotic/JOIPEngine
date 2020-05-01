@@ -23,6 +23,7 @@ QRadioButton {
   spacing: 5px;
 }
 
+QTreeView::indicator,
 QRadioButton::indicator,
 QGroupBox::indicator,
 QCheckBox::indicator {
@@ -30,48 +31,56 @@ QCheckBox::indicator {
   height: 32px;
 }
 
+QTreeView::indicator::unchecked,
 QRadioButton::indicator::unchecked,
 QGroupBox::indicator:unchecked,
 QCheckBox::indicator:unchecked {
   image: url(:/resources/img/ButtonCheckBoxEmpty.png);
 }
 
+QTreeView::indicator:unchecked:hover,
 QRadioButton::indicator:unchecked:hover,
 QGroupBox::indicator:unchecked:hover,
 QCheckBox::indicator:unchecked:hover {
   image: url(:/resources/img/ButtonCheckBoxEmptyHover.png);
 }
 
+QTreeView::indicator:unchecked:pressed,
 QRadioButton::indicator:unchecked:pressed,
 QGroupBox::indicator:unchecked:pressed,
 QCheckBox::indicator:unchecked:pressed {
   image: url(:/resources/img/ButtonCheckBoxEmptyClick.png);
 }
 
+QTreeView::indicator:checked,
 QRadioButton::indicator:checked,
 QGroupBox::indicator:checked,
 QCheckBox::indicator:checked {
   image: url(:/resources/img/ButtonCheckBox.png);
 }
 
+QTreeView::indicator:checked,
 QRadioButton::indicator:checked,
 QGroupBox::indicator:checked,
 QCheckBox::indicator:checked {
   image: url(:/resources/img/ButtonCheckBoxHover.png);
 }
 
+QTreeView::indicator:checked:pressed,
 QRadioButton::indicator:checked:pressed,
 QGroupBox::indicator:checked:pressed,
 QCheckBox::indicator:checked:pressed {
   image: url(:/resources/img/ButtonCheckBoxClick.png);
 }
 
+QTreeView::indicator:indeterminate:hover,
 QRadioButton::indicator:indeterminate:hover,
 QGroupBox::indicator:indeterminate:hover,
 QCheckBox::indicator:indeterminate:hover {
   image: url(:/resources/img/ButtonCheckBoxHover.png);
 }
 
+QTreeView::indicator:indeterminate:pressed,
 QRadioButton::indicator:indeterminate:pressed,
 QGroupBox::indicator:indeterminate:pressed,
 QCheckBox::indicator:indeterminate:pressed {
@@ -146,6 +155,9 @@ QLabel#PlayButton {
 QLabel#ExitButton {
   border-image: url(:/resources/img/ButtonExit.png);
 }
+QLabel#WarningIcon {
+  border-image: url(:/resources/img/WarningIcon.png);
+}
 QLabel#ErrorIcon {
   border-image: url(:/resources/img/ButtonIcon.png);
 }
@@ -184,6 +196,7 @@ QLineEdit[echoMode="2"] {
   lineedit-password-character: 9679;
 }
 
+QLineEdit:disabled,
 QLineEdit:read-only {
   background-color: black;
 }
@@ -255,7 +268,8 @@ QPushButton#SaveButton {
 QPushButton#AddResourceButton,
 QPushButton#AddButtonButton,
 QPushButton#AddTextColorButton,
-QPushButton#AddBGColorButton {
+QPushButton#AddBGColorButton,
+QPushButton#AddFetishButton {
   qproperty-icon: url(:/resources/img/ButtonPlusDisabled.png) off,
                   url(:/resources/img/ButtonPlus.png) on;
 }
@@ -270,7 +284,8 @@ QPushButton#MapButton {
 QPushButton#RemoveResourceButton,
 QPushButton#RemoveButtonButton,
 QPushButton#RemoveTextColorButton,
-QPushButton#RemoveBGColorButton {
+QPushButton#RemoveBGColorButton,
+QPushButton#RemoveFetishButton  {
   qproperty-icon: url(:/resources/img/ButtonMinusDisabled.png) off,
                   url(:/resources/img/ButtonMinus.png) on;
 }
@@ -597,6 +612,12 @@ QSpinBox {
   border-radius: 10px;
   height: 32px;
 }
+QDoubleSpinBox:disabled,
+QTimeEdit:disabled,
+QSpinBox:disabled {
+  color: silver;
+  background: black;
+}
 
 QDoubleSpinBox::up-button,
 QTimeEdit::up-button,
@@ -631,6 +652,7 @@ QDoubleSpinBox::up-arrow:disabled, QDoubleSpinBox::up-arrow:off,
 QTimeEdit::up-arrow:disabled, QTimeEdit::up-arrow:off,
 QSpinBox::up-arrow:disabled, QSpinBox::up-arrow:off { /* off state when value is max */
    image: url(:/resources/img/ButtonPlusDisabled.png);
+   background: qradialgradient(cx: 0.4, cy: -0.1, fx: 0.4, fy: -0.1, radius: 1.35, stop: 0 rgb(38, 38, 38), stop: 1 rgb(38, 38, 38));
 }
 
 QDoubleSpinBox::down-button,
@@ -665,8 +687,11 @@ QSpinBox::down-arrow {
 QDoubleSpinBox::down-arrow:disabled,
 QTimeEdit::down-arrow:disabled,
 QSpinBox::down-arrow:disabled,
+QDoubleSpinBox::down-arrow:off,
+QTimeEdit::down-arrow:off,
 QSpinBox::down-arrow:off { /* off state when value in min */
    image: url(:/resources/img/ButtonMinusDisabled.png);
+   background: qradialgradient(cx: 0.4, cy: -0.1, fx: 0.4, fy: -0.1, radius: 1.35, stop: 0 rgb(38, 38, 38), stop: 1 rgb(38, 38, 38));
 }
 
 /*
@@ -841,6 +866,7 @@ QTreeView::branch:open:has-children:has-siblings  {
 /*
  ----- QPlainTextEdit
 */
+QTextEdit,
 QPlainTextEdit,
 QTextBrowser {
     background-color: rgb(38, 38, 38);

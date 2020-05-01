@@ -126,7 +126,7 @@ void CEditorActionBar::Initialize()
     wpHelpFactory->RegisterHelp(c_sRemoveFetishHelpId, ":/resources/help/editor/removefetish_button_help.html");
   }
 
-  connect(m_spSettings.get(), &CSettings::KeyBindingsChanged,
+  connect(m_spSettings.get(), &CSettings::keyBindingsChanged,
           this, &CEditorActionBar::SlotKeyBindingsChanged);
 
   SetInitialized(true);
@@ -232,35 +232,35 @@ void CEditorActionBar::SlotKeyBindingsChanged()
   // connect actions
   if (m_position == eTop)
   {
-    m_spUi->ExitButton->SetShortcut(m_spSettings->KeyBinding("Exit"));
-    m_spUi->HelpButton->SetShortcut(m_spSettings->KeyBinding("Help"));
-    m_spUi->SaveButton->SetShortcut(m_spSettings->KeyBinding("Save"));
+    m_spUi->ExitButton->SetShortcut(m_spSettings->keyBinding("Exit"));
+    m_spUi->HelpButton->SetShortcut(m_spSettings->keyBinding("Help"));
+    m_spUi->SaveButton->SetShortcut(m_spSettings->keyBinding("Save"));
   }
   else
   {
-    m_spUi->AddResourceButton->SetShortcut(m_spSettings->KeyBinding(sKey.arg(1)));
-    m_spUi->AddWebResourceButton->SetShortcut(m_spSettings->KeyBinding(sKey.arg(2)));
-    m_spUi->RemoveResourceButton->SetShortcut(m_spSettings->KeyBinding(sKey.arg(3)));
-    m_spUi->TitleCardButton->SetShortcut(m_spSettings->KeyBinding(sKey.arg(4)));
-    m_spUi->MapButton->SetShortcut(m_spSettings->KeyBinding(sKey.arg(5)));
+    m_spUi->AddResourceButton->SetShortcut(m_spSettings->keyBinding(sKey.arg(1)));
+    m_spUi->AddWebResourceButton->SetShortcut(m_spSettings->keyBinding(sKey.arg(2)));
+    m_spUi->RemoveResourceButton->SetShortcut(m_spSettings->keyBinding(sKey.arg(3)));
+    m_spUi->TitleCardButton->SetShortcut(m_spSettings->keyBinding(sKey.arg(4)));
+    m_spUi->MapButton->SetShortcut(m_spSettings->keyBinding(sKey.arg(5)));
 
-    m_spUi->PlayButton->SetShortcut(m_spSettings->KeyBinding(sKey.arg(1)));
-    m_spUi->PauseButton->SetShortcut(m_spSettings->KeyBinding(sKey.arg(2)));
-    m_spUi->StopButton->SetShortcut(m_spSettings->KeyBinding(sKey.arg(3)));
+    m_spUi->PlayButton->SetShortcut(m_spSettings->keyBinding(sKey.arg(1)));
+    m_spUi->PauseButton->SetShortcut(m_spSettings->keyBinding(sKey.arg(2)));
+    m_spUi->StopButton->SetShortcut(m_spSettings->keyBinding(sKey.arg(3)));
 
-    m_spUi->AddFetishButton->SetShortcut(m_spSettings->KeyBinding(sKey.arg(1)));
-    m_spUi->RemoveFetishButton->SetShortcut(m_spSettings->KeyBinding(sKey.arg(2)));
+    m_spUi->AddFetishButton->SetShortcut(m_spSettings->keyBinding(sKey.arg(1)));
+    m_spUi->RemoveFetishButton->SetShortcut(m_spSettings->keyBinding(sKey.arg(2)));
 
-    m_spUi->AddNodeButton->SetShortcut(m_spSettings->KeyBinding(sKey.arg(1)));
-    m_spUi->RemoveNodeButton->SetShortcut(m_spSettings->KeyBinding(sKey.arg(2)));
+    m_spUi->AddNodeButton->SetShortcut(m_spSettings->keyBinding(sKey.arg(1)));
+    m_spUi->RemoveNodeButton->SetShortcut(m_spSettings->keyBinding(sKey.arg(2)));
 
-    m_spUi->DebugButton->SetShortcut(m_spSettings->KeyBinding(sKey.arg(1)));
-    m_spUi->StopDebugButton->SetShortcut(m_spSettings->KeyBinding(sKey.arg(1)));
-    m_spUi->AddShowImageCode->SetShortcut(m_spSettings->KeyBinding(sKey.arg(2)));
-    m_spUi->AddShowIconCode->SetShortcut(m_spSettings->KeyBinding(sKey.arg(3)));
-    m_spUi->AddShowBackgroundCode->SetShortcut(m_spSettings->KeyBinding(sKey.arg(4)));
-    m_spUi->AddTextCode->SetShortcut(m_spSettings->KeyBinding(sKey.arg(5)));
-    m_spUi->AddTimerCode->SetShortcut(m_spSettings->KeyBinding(sKey.arg(6)));
-    m_spUi->AddThreadCode->SetShortcut(m_spSettings->KeyBinding(sKey.arg(7)));
+    m_spUi->DebugButton->SetShortcut(m_spSettings->keyBinding(sKey.arg(1)));
+    m_spUi->StopDebugButton->SetShortcut(m_spSettings->keyBinding(sKey.arg(1)));
+    m_spUi->AddShowImageCode->SetShortcut(m_spSettings->keyBinding(sKey.arg(2)));
+    m_spUi->AddShowIconCode->SetShortcut(m_spSettings->keyBinding(sKey.arg(3)));
+    m_spUi->AddShowBackgroundCode->SetShortcut(m_spSettings->keyBinding(sKey.arg(4)));
+    m_spUi->AddTextCode->SetShortcut(m_spSettings->keyBinding(sKey.arg(5)));
+    m_spUi->AddTimerCode->SetShortcut(m_spSettings->keyBinding(sKey.arg(6)));
+    m_spUi->AddThreadCode->SetShortcut(m_spSettings->keyBinding(sKey.arg(7)));
   }
 }

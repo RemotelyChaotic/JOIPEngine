@@ -94,6 +94,8 @@ void CSettingsScreen::Initialize()
     wpHelpFactory->RegisterHelp(c_sCancelHelpId, ":/resources/help/player/cancel_button_help.html");
   }
 
+  m_spUi->WarningIcon->hide();
+
   m_bInitialized = true;
 }
 
@@ -179,7 +181,7 @@ void CSettingsScreen::Load()
     pKeyLabel->setSizePolicy(sizePolicy);
     pLayout->addWidget(pKeyLabel);
 
-    QKeySequenceEdit* pKeySequenceEdit = new QKeySequenceEdit(m_spSettings->KeyBinding(sKeyBinding),
+    QKeySequenceEdit* pKeySequenceEdit = new QKeySequenceEdit(m_spSettings->keyBinding(sKeyBinding),
                                                               pKeyBindingContainer);
     pKeySequenceEdit->setSizePolicy(sizePolicy);
     pKeySequenceEdit->setProperty(c_sPropertyKeySequence, sKeyBinding);
@@ -269,6 +271,7 @@ void CSettingsScreen::on_pStyleComboBox_currentIndexChanged(qint32 iIndex)
   if (nullptr == m_spSettings) { return; }
 
   m_spSettings->SetStyle(m_spUi->pStyleComboBox->itemText(iIndex));
+  m_spUi->WarningIcon->show();
 }
 
 //----------------------------------------------------------------------------------------
@@ -342,5 +345,5 @@ void CSettingsScreen::SlotKeySequenceChanged(const QKeySequence& keySequence)
 {
   WIDGET_INITIALIZED_GUARD
   QString sKeyBinding = sender()->property(c_sPropertyKeySequence).toString();
-  m_spSettings->SetKeyBinding(keySequence, sKeyBinding);
+  m_spSettings->setKeyBinding(keySequence, sKeyBinding);
 }

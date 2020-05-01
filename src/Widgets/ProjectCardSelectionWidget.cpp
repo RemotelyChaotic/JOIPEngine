@@ -2,22 +2,22 @@
 #include "Application.h"
 #include "Constants.h"
 #include "Systems/DatabaseManager.h"
+#include "Systems/DatabaseImageProvider.h"
 #include "Systems/HelpFactory.h"
 #include "Systems/Project.h"
 #include "Widgets/HelpOverlay.h"
-#include "Widgets/ResourceDisplayWidget.h"
 #include "ui_ProjectCardSelectionWidget.h"
 
-#include <QGraphicsDropShadowEffect>
 #include <QObject>
-#include <QLabel>
-#include <QMouseEvent>
-#include <QMovie>
-#include <QPropertyAnimation>
+#include <QQmlContext>
+#include <QQmlEngine>
+#include <QQuickItem>
+#include <QUrl>
 #include <cassert>
 
 namespace  {
-  const QString c_sCardHelpId = "Player/Card";
+  const QString c_sCardHelpId =           "Player/Card";
+  const QString c_sSearchBarHelpId =      "Player/SearchBar";
 }
 
 //----------------------------------------------------------------------------------------
@@ -25,8 +25,6 @@ namespace  {
 CProjectCardSelectionWidget::CProjectCardSelectionWidget(QWidget* pParent) :
   QWidget(pParent),
   m_spUi(std::make_unique<Ui::CProjectCardSelectionWidget>()),
-  m_spSpinner(std::make_shared<QMovie>("://resources/gif/spinner_transparent.gif")),
-  m_pLastSelectedWidget(nullptr),
   m_selectionColor(Qt::white),
   m_iSelectedProjectId(-1)
 {
@@ -36,6 +34,9 @@ CProjectCardSelectionWidget::CProjectCardSelectionWidget(QWidget* pParent) :
 
 CProjectCardSelectionWidget::~CProjectCardSelectionWidget()
 {
+  UnloadProjects();
+
+  delete m_spUi->pQmlWidget;
 }
 
 //----------------------------------------------------------------------------------------
@@ -50,7 +51,12 @@ void CProjectCardSelectionWidget::Initialize()
   if (nullptr != wpHelpFactory)
   {
     wpHelpFactory->RegisterHelp(c_sCardHelpId, ":/resources/help/player/card_button_help.html");
+    m_spUi->pQmlWidget->setProperty(helpOverlay::c_sHelpPagePropertyName, c_sCardHelpId);
+    wpHelpFactory->RegisterHelp(c_sSearchBarHelpId, ":/resources/help/editor/resources/filter_widget_help.html");
+    m_spUi->pSearchWidget->setProperty(helpOverlay::c_sHelpPagePropertyName, c_sSearchBarHelpId);
   }
+
+  InitQmlMain();
 
   m_bInitialized = true;
 }
@@ -60,9 +66,17 @@ void CProjectCardSelectionWidget::Initialize()
 void CProjectCardSelectionWidget::LoadProjects()
 {
   m_iSelectedProjectId = -1;
-  m_pLastSelectedWidget = nullptr;
 
-  auto wpHelpFactory = CApplication::Instance()->System<CHelpFactory>().lock();
+  m_spUi->pQmlWidget->setSource(QUrl("qrc:/qml/resources/qml/ProjectCardSelection.qml"));
+
+  connect(m_spUi->pQmlWidget->rootObject(), SIGNAL(selectedProjectIndex(int)),
+          this, SLOT(SlotCardClicked(int)));
+
+  QQuickItem* pRootObject =  m_spUi->pQmlWidget->rootObject();
+  pRootObject->setProperty("selectionColor", QVariant::fromValue(m_selectionColor));
+
+  QJSEngine* pEngine = m_spUi->pQmlWidget->engine();
+
   auto spDbManager = m_wpDbManager.lock();
   if (nullptr != spDbManager)
   {
@@ -72,79 +86,10 @@ void CProjectCardSelectionWidget::LoadProjects()
       tspProject spProject = spDbManager->FindProject(*it);
       if (nullptr != spProject)
       {
-        QLayout* pLayout = m_spUi->pScrollAreaWidgetContents->layout();
-        assert(nullptr != pLayout);
-
-        spProject->m_rwLock.lockForRead();
-        const QString sName = spProject->m_sTitleCard;
-        const qint32 iId = spProject->m_iId;
-        const bool bUsesWeb = spProject->m_bUsesWeb;
-        const bool bUsesCodecs = spProject->m_bNeedsCodecs;
-        spProject->m_rwLock.unlock();
-
-        auto spResource = spDbManager->FindResource(spProject, sName);
-        bool bIsImage = true;
-        if (nullptr != spResource)
-        {
-          spResource->m_rwLock.lockForRead();
-          bIsImage = spResource->m_type._to_integral() == EResourceType::eImage;
-          spResource->m_rwLock.unlock();
-        }
-
-        // construct a single card
-        QWidget* pRoot = new QWidget(m_spUi->pScrollArea);
-        pRoot->setFixedSize(QSize(320, 420));
-
-        CResourceDisplayWidget* pWidget = new CResourceDisplayWidget(pRoot);
-        pWidget->setMinimumSize(QSize(300, 400));
-        pWidget->setMaximumSize(QSize(300, 400));
-        pWidget->setGeometry(10, 10, 300, 400);
-        pWidget->SetProjectId(iId);
-        connect(pWidget, &CResourceDisplayWidget::OnClick,
-                this, &CProjectCardSelectionWidget::SlotCardClicked);
-        if (bIsImage)
-        {
-          pWidget->LoadResource(spResource);
-        }
-        pWidget->installEventFilter(this);
-        if (nullptr != wpHelpFactory)
-        {
-          pWidget->setProperty(helpOverlay::c_sHelpPagePropertyName, c_sCardHelpId);
-        }
-
-        AddDropShadow(pWidget, Qt::black);
-        if (-1 == m_iSelectedProjectId)
-        {
-          m_iSelectedProjectId = iId;
-          m_pLastSelectedWidget = pWidget;
-          AddDropShadow(pWidget, m_selectionColor);
-          pWidget->setGeometry(10, 10, 300, 400);
-        }
-
-        qint32 iXOffset = 20;
-        if (bUsesWeb)
-        {
-          QLabel* pWebIcon = new QLabel("", pRoot);
-          pWebIcon->setFixedSize(48, 48);
-          pWebIcon->setGeometry(iXOffset, pRoot->size().height() - 68, 48, 48);
-          pWebIcon->setScaledContents(true);
-          pWebIcon->setPixmap(QPixmap("://resources/img/ButtonWeb.png"));
-          pWebIcon->setToolTip(tr("Uses web resources and requires an internet connection."));
-          iXOffset += 58;
-        }
-        if (bUsesCodecs)
-        {
-          QLabel* pMediaIcon = new QLabel("", pRoot);
-          pMediaIcon->setFixedSize(48, 48);
-          pMediaIcon->setGeometry(iXOffset, pRoot->size().height() - 68, 48, 48);
-          pMediaIcon->setScaledContents(true);
-          pMediaIcon->setPixmap(QPixmap("://resources/img/ButtonImage.png"));
-          pMediaIcon->setToolTip(tr("Uses media resources and might be loud."));
-          iXOffset += 58;
-        }
-
-        // add constructed card to layout
-        pLayout->addWidget(pRoot);
+        CProject* pValue = new CProject(pEngine, spProject);
+        m_spUi->pQmlWidget->rootObject()->setProperty("currentlyAddedProject", QVariant::fromValue(pValue));
+        QMetaObject::invokeMethod(pRootObject, "onAddProject");
+        m_vpProjects.push_back(pValue);
       }
     }
   }
@@ -155,18 +100,21 @@ void CProjectCardSelectionWidget::LoadProjects()
 void CProjectCardSelectionWidget::UnloadProjects()
 {
   m_iSelectedProjectId = -1;
-  m_pLastSelectedWidget = nullptr;
 
-  QLayout* pLayout = m_spUi->pScrollAreaWidgetContents->layout();
-  assert(nullptr != pLayout);
-  while (auto item = pLayout->takeAt(0))
+  QQuickItem* pRootObject =  m_spUi->pQmlWidget->rootObject();
+  QMetaObject::invokeMethod(pRootObject, "onUnLoad");
+
+  m_spUi->pQmlWidget->engine()->clearComponentCache();
+  m_spUi->pQmlWidget->engine()->collectGarbage();
+
+  for (CProject* pProject : qAsConst(m_vpProjects))
   {
-    if (nullptr != item)
-    {
-      delete item->widget();
-    }
-    delete item;
+    delete pProject;
   }
+  m_vpProjects.clear();
+
+  disconnect(m_spUi->pQmlWidget->rootObject(), SIGNAL(selectedProjectIndex(int)),
+             this, SLOT(SlotCardClicked(int)));
 }
 
 //----------------------------------------------------------------------------------------
@@ -176,6 +124,12 @@ void CProjectCardSelectionWidget::SetSelectionColor(const QColor& color)
   if (m_selectionColor != color)
   {
     m_selectionColor = color;
+
+    QQuickItem* pRootObject =  m_spUi->pQmlWidget->rootObject();
+    if (nullptr != pRootObject)
+    {
+      pRootObject->setProperty("selectionColor", QVariant::fromValue(m_selectionColor));
+    }
   }
 }
 
@@ -188,25 +142,100 @@ const QColor& CProjectCardSelectionWidget::SelectionColor()
 
 //----------------------------------------------------------------------------------------
 //
-void CProjectCardSelectionWidget::SlotCardClicked()
+void CProjectCardSelectionWidget::on_pSearchWidget_SignalFilterChanged(const QString& sText)
 {
-  AddDropShadow(m_pLastSelectedWidget, Qt::black);
-  CResourceDisplayWidget* pCardWidget = dynamic_cast<CResourceDisplayWidget*>(sender());
-  m_iSelectedProjectId = pCardWidget->ProjectId();
-  m_pLastSelectedWidget = pCardWidget;
-  AddDropShadow(pCardWidget, m_selectionColor);
+  QQuickItem* pRootObject =  m_spUi->pQmlWidget->rootObject();
+  if (nullptr != pRootObject)
+  {
+    pRootObject->setProperty("filter", sText);
+  }
 }
 
 //----------------------------------------------------------------------------------------
 //
-void CProjectCardSelectionWidget::AddDropShadow(QWidget* pWidget, const QColor& color)
+void CProjectCardSelectionWidget::on_pQmlWidget_statusChanged(QQuickWidget::Status status)
 {
-  if (nullptr == pWidget) { return; }
-
-  QGraphicsDropShadowEffect* pShadow = new QGraphicsDropShadowEffect(pWidget);
-  pShadow->setBlurRadius(5);
-  pShadow->setXOffset(0);
-  pShadow->setYOffset(0);
-  pShadow->setColor(color);
-  pWidget->setGraphicsEffect(pShadow);
+  if (QQuickWidget::Error == status)
+  {
+    QStringList errors;
+    const auto widgetErrors = m_spUi->pQmlWidget->errors();
+    for (const QQmlError &error : widgetErrors)
+    {
+      errors.append(error.toString());
+    }
+    QString sErrors = errors.join(QStringLiteral(", "));
+    qWarning() << sErrors;
+  }
 }
+
+//----------------------------------------------------------------------------------------
+//
+void CProjectCardSelectionWidget::on_pQmlWidget_sceneGraphError(QQuickWindow::SceneGraphError /*error*/,
+                                                                const QString &message)
+{
+  qWarning() << message;
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CProjectCardSelectionWidget::SlotCardClicked(int iProjId)
+{
+  m_iSelectedProjectId = iProjId;
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CProjectCardSelectionWidget::SlotResizeDone()
+{
+  // set size properties manually setzen, since this isn't done automatically
+  QQuickItem* pRootObject =  m_spUi->pQmlWidget->rootObject();
+  QSize newSize = size() -
+      QSize(contentsMargins().left() +
+            contentsMargins().right(),
+            contentsMargins().top() +
+            contentsMargins().bottom()) -
+      QSize(0, m_spUi->pSearchWidget->size().height() + layout()->spacing());
+  if (nullptr != pRootObject)
+  {
+    pRootObject->setProperty("width", QVariant::fromValue(newSize.width()));
+    pRootObject->setProperty("height",QVariant::fromValue(newSize.height()));
+    QMetaObject::invokeMethod(pRootObject, "onResize");
+  }
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CProjectCardSelectionWidget::SlotTriedToLoadMovie(const QString& sMovie)
+{
+  Q_UNUSED(sMovie);
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CProjectCardSelectionWidget::resizeEvent(QResizeEvent* pEvent)
+{
+  if (nullptr != pEvent)
+  {
+    QMetaObject::invokeMethod(this, "SlotResizeDone", Qt::QueuedConnection);
+  }
+  pEvent->accept();
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CProjectCardSelectionWidget::InitQmlMain()
+{
+  m_spUi->pQmlWidget->setAttribute(Qt::WA_AlwaysStackOnTop, true);
+  m_spUi->pQmlWidget->setAttribute(Qt::WA_TranslucentBackground, true);
+  m_spUi->pQmlWidget->setClearColor(Qt::transparent);
+  m_spUi->pQmlWidget->setStyleSheet("background-color: transparent;");
+
+  QQmlEngine::setObjectOwnership(m_spUi->pQmlWidget->engine(), QQmlEngine::CppOwnership);
+
+  // engine will allways take owership of this object
+  CDatabaseImageProvider* pProvider = new CDatabaseImageProvider(m_wpDbManager);
+  connect(pProvider, &CDatabaseImageProvider::SignalTriedToLoadMovie,
+          this, &CProjectCardSelectionWidget::SlotTriedToLoadMovie, Qt::QueuedConnection);
+  m_spUi->pQmlWidget->engine()->addImageProvider("DataBaseImageProivider", pProvider);
+}
+

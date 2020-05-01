@@ -38,9 +38,9 @@ void CUISoundEmitter::Initialize()
   m_spSettings = CApplication::Instance()->Settings();
   if (nullptr != m_spSettings)
   {
-    connect(m_spSettings.get(), &CSettings::MutedChanged,
+    connect(m_spSettings.get(), &CSettings::mutedChanged,
             this, &CUISoundEmitter::SlotMutedChanged, Qt::QueuedConnection);
-    connect(m_spSettings.get(), &CSettings::VolumeChanged,
+    connect(m_spSettings.get(), &CSettings::volumeChanged,
             this, &CUISoundEmitter::SlotVolumeChanged, Qt::QueuedConnection);
 
     SlotVolumeChanged();

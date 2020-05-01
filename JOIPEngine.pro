@@ -14,6 +14,9 @@ QT += \
     network \
     opengl \
     qml \
+    quick \
+    quickcontrols2 \
+    quickwidgets \
     svg \
     widgets \
     webengine \
@@ -50,10 +53,13 @@ CONFIG(debug, debug|release) {
 }
 include (lib/node/node.pri)
 
+include (src/Qml/SortFilterProxyModel/SortFilterProxyModel.pri)
+
 INCLUDEPATH += \
     src
 
 SOURCES += \
+    src/Systems/DatabaseImageProvider.cpp \
     src/Widgets/ShortcutButton.cpp \
     src/main.cpp \
     src/MainWindow.cpp \
@@ -146,6 +152,7 @@ HEADERS += \
     src/MainScreen.h \
     src/SettingsScreen.h \
     src/Enums.h \
+    src/Systems/DatabaseImageProvider.h \
     src/Widgets/ShortcutButton.h \
     src/WindowContext.h \
     src/IAppStateScreen.h \

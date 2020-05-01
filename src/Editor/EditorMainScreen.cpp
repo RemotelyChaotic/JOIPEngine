@@ -378,7 +378,7 @@ void CEditorMainScreen::SlotKeyBindingsChanged()
     {
       qint32 iIndex = std::distance(m_spWidgetsMap.begin(), m_spWidgetsMap.find(widget));
 
-      QKeySequence seq = spSettings->KeyBinding(QString("%1_%2").arg(itSide->second).arg(itKey->second));
+      QKeySequence seq = spSettings->keyBinding(QString("%1_%2").arg(itSide->second).arg(itKey->second));
       pAction->setShortcut(seq);
       if (position == CEditorActionBar::eLeft)
       {

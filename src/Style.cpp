@@ -9,11 +9,11 @@
 #include <QFileInfo>
 #include <QFont>
 #include <QLibraryInfo>
+#include <QQuickStyle>
 #include <QString>
 
 namespace
 {
-  const QString c_sStyleFolder = "styles";
   const QString c_sDefaultStyleFile = "://resources/style_default.css";
   const QString c_sStyleFile = "style.css";
 
@@ -29,6 +29,8 @@ namespace
       {
         pApp->setStyleSheet(QString());
         pApp->setStyleSheet(QString::fromUtf8(styleFile.readAll()));
+
+        QQuickStyle::setStyle("Material");
       }
       else
       {
@@ -43,13 +45,28 @@ namespace
   void ResolveStyle(QApplication* pApp, const QString& sName)
   {
     QFileInfo info(QLibraryInfo::location(QLibraryInfo::PrefixPath) +
-                   QDir::separator() + c_sStyleFolder + QDir::separator() + sName +
+                   QDir::separator() + joip_style::c_sStyleFolder +
+                   QDir::separator() + sName +
                    QDir::separator() + c_sStyleFile);
     if (info.exists())
     {
       QFile styleFile(info.absoluteFilePath());
       pApp->setStyleSheet(QString());
       pApp->setStyleSheet("file:///" + info.absoluteFilePath());
+
+      QFileInfo qmlStyle(QLibraryInfo::location(QLibraryInfo::PrefixPath) +
+                         QDir::separator() + joip_style::c_sStyleFolder +
+                         QDir::separator() + sName +
+                         QDir::separator() + joip_style::c_sQmlStyleSubFolder);
+      if (qmlStyle.exists())
+      {
+        QQuickStyle::setStyle(QUrl::fromLocalFile(qmlStyle.absoluteFilePath()).toString());
+        QQuickStyle::setFallbackStyle("Material");
+      }
+      else
+      {
+        QQuickStyle::setStyle("Material");
+      }
     }
     else
     {

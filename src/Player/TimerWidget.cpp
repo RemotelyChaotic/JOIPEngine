@@ -148,7 +148,7 @@ CTimerWidget::CTimerWidget(QWidget* pParent) :
   SlotFontChanged();
   m_pTimeLabel->setStyleSheet("QLabel { background-color : black; color : " WHITE_QML "; }");
 
-  connect(m_spSettings.get(), &CSettings::FontChanged,
+  connect(m_spSettings.get(), &CSettings::fontChanged,
           this, &CTimerWidget::SlotFontChanged, Qt::QueuedConnection);
 }
 

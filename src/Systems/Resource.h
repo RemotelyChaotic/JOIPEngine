@@ -46,17 +46,29 @@ class CResource : public QObject
   Q_OBJECT
   Q_DISABLE_COPY(CResource)
   CResource() {}
-  Q_PROPERTY(QString name      READ getName)
-  Q_PROPERTY(QString path      READ getPath)
-  Q_PROPERTY(qint32  type      READ getType)
+  Q_PROPERTY(bool          isAnimated READ isAnimatedImpl)
+  Q_PROPERTY(bool          isLocal    READ isLocalPath)
+  Q_PROPERTY(QString       name       READ getName)
+  Q_PROPERTY(QUrl          path       READ getPath)
+  Q_PROPERTY(ResourceType  type       READ getType)
 
 public:
+  enum ResourceType {
+    eImage = EResourceType::eImage,
+    eMovie = EResourceType::eMovie,
+    eSound = EResourceType::eSound,
+    eOther = EResourceType::eOther,
+  };
+  Q_ENUM(ResourceType)
+
   explicit CResource(QJSEngine* pEngine, const std::shared_ptr<SResource>& spResource);
   ~CResource();
 
+  bool isAnimatedImpl();
+  bool isLocalPath();
   QString getName();
-  QString getPath();
-  qint32 getType();
+  QUrl getPath();
+  ResourceType getType();
 
   Q_INVOKABLE QJSValue project();
 

@@ -9,6 +9,7 @@
 SResource::SResource(EResourceType type) :
   m_spParent(nullptr),
   m_rwLock(QReadWriteLock::Recursive),
+  m_sName(),
   m_sPath(),
   m_type(type)
 {}
@@ -16,6 +17,7 @@ SResource::SResource(EResourceType type) :
 SResource::SResource(const SResource& other) :
   m_spParent(other.m_spParent),
   m_rwLock(QReadWriteLock::Recursive),
+  m_sName(other.m_sName),
   m_sPath(other.m_sPath),
   m_type(other.m_type)
 {}
@@ -74,6 +76,49 @@ CResource::~CResource()
 
 //----------------------------------------------------------------------------------------
 //
+bool CResource::isAnimatedImpl()
+{
+  QReadLocker locker(&m_spData->m_rwLock);
+  switch (m_spData->m_type)
+  {
+    case EResourceType::eImage:
+    {
+      QReadLocker projLocker(&m_spData->m_spParent->m_rwLock);
+      const QString sProjectName = m_spData->m_spParent->m_sFolderName;
+      projLocker.unlock();
+
+      if (m_spData->m_sPath.isLocalFile())
+      {
+        QImageReader reader(ResourceUrlToAbsolutePath(m_spData->m_sPath, sProjectName));
+        if (reader.canRead())
+        {
+          return reader.supportsAnimation();
+        }
+        else
+        {
+          return false;
+        }
+      }
+      else
+      {
+        return false;
+      }
+    }
+    case EResourceType::eMovie: return true;
+    default: return false;
+  }
+}
+
+//----------------------------------------------------------------------------------------
+//
+bool CResource::isLocalPath()
+{
+  QReadLocker locker(&m_spData->m_rwLock);
+  return m_spData->m_sPath.isLocalFile();
+}
+
+//----------------------------------------------------------------------------------------
+//
 QString CResource::getName()
 {
   QReadLocker locker(&m_spData->m_rwLock);
@@ -82,18 +127,34 @@ QString CResource::getName()
 
 //----------------------------------------------------------------------------------------
 //
-QString CResource::getPath()
+QUrl CResource::getPath()
 {
+  QReadLocker projLocker(&m_spData->m_spParent->m_rwLock);
+  const QString sProjectName = m_spData->m_spParent->m_sFolderName;
+  projLocker.unlock();
+
   QReadLocker locker(&m_spData->m_rwLock);
-  return m_spData->m_sPath.toString(QUrl::None);
+  if (m_spData->m_sPath.isLocalFile())
+  {
+    QUrl urlCopy(m_spData->m_sPath);
+    QUrl baseUrl = QUrl::fromLocalFile(CApplication::Instance()->Settings()->ContentFolder() +
+      "/" + sProjectName + "/");
+    urlCopy.setScheme(QString());
+    QUrl sFullPath = baseUrl.resolved(urlCopy);
+    return sFullPath;
+  }
+  else
+  {
+    return m_spData->m_sPath;
+  }
 }
 
 //----------------------------------------------------------------------------------------
 //
-qint32 CResource::getType()
+CResource::ResourceType CResource::getType()
 {
   QReadLocker locker(&m_spData->m_rwLock);
-  return m_spData->m_type;
+  return ResourceType(m_spData->m_type._to_integral());
 }
 
 //----------------------------------------------------------------------------------------

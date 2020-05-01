@@ -59,6 +59,7 @@ void CSceneScreen::Initialize()
 //
 void CSceneScreen::Load()
 {
+  m_spUi->pProjectCardSelectionWidget->setFixedHeight(geometry().height() / 2);
   m_spUi->pProjectCardSelectionWidget->LoadProjects();
 }
 

@@ -1,0 +1,276 @@
+<!doctype html>
+<html class="no-js" lang="">
+
+<head>
+  <meta charset="utf-8">
+  <title>Resource Filter</title>
+  <meta name="description" content="">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <style>
+    h1 {
+      text-align: center;
+    }
+    div.container {
+      min-height: 10em;
+      display: table-cell;
+      margin-left: auto;
+      margin-right: auto;
+      width: 0.6em
+    }
+  </style>
+</head>
+
+
+<body>
+  <h1>Resource Filter</h1>
+
+  <hr>
+
+  <div class="container">
+    <p>Filters the <a href="qrc:/resources/help/editor/resources/resources_tree_help.html">Resource Tree</a>
+    by name. Filters entered can be regex expressions and are case insensitive.</p>
+
+    <br>
+
+    <p>For full regex help please refer to the qt documentation:
+      <ul>
+        <li>https://doc-snapshots.qt.io/qt5-5.9/qregexp.html</li>
+      </ul>
+    </p>
+
+    <br>
+
+    <h2>Characters and Abbreviations for Sets of Characters</h2>
+
+    <br>
+
+    <table>
+      <tr>
+        <th>Element</th>
+        <th>Meaning</th>
+      <tr>
+      <tr>
+        <td>c</td>
+        <td>A character represents itself unless it has a special regexp meaning. e.g. c matches the character c.</td>
+      <tr>
+      <tr>
+        <td>\c</td>
+        <td>A character that follows a backslash matches the character itself, except as specified below. e.g., To match a literal caret at the beginning of a string, write \^.</td>
+      <tr>
+      <tr>
+        <td>\a</td>
+        <td>Matches the ASCII bell (BEL, 0x07).</td>
+      <tr>
+      <tr>
+        <td>\f</td>
+        <td>Matches the ASCII form feed (FF, 0x0C).</td>
+      <tr>
+      <tr>
+        <td>\n</td>
+        <td>Matches the ASCII line feed (LF, 0x0A, Unix newline).</td>
+      <tr>
+      <tr>
+        <td>\r</td>
+        <td>Matches the ASCII carriage return (CR, 0x0D).</td>
+      <tr>
+      <tr>
+        <td>\t</td>
+        <td>Matches the ASCII horizontal tab (HT, 0x09).</td>
+      <tr>
+      <tr>
+        <td>\v</td>
+        <td>Matches the ASCII vertical tab (VT, 0x0B).</td>
+      <tr>
+      <tr>
+        <td>\xhhhh</td>
+        <td>Matches the Unicode character corresponding to the hexadecimal number hhhh (between 0x0000 and 0xFFFF).</td>
+      <tr>
+      <tr>
+        <td>\0ooo (i.e., \zero ooo)</td>
+        <td>matches the ASCII/Latin1 character for the octal number ooo (between 0 and 0377).</td>
+      <tr>
+      <tr>
+        <td>. (dot)</td>
+        <td>Matches any character (including newline).</td>
+      <tr>
+      <tr>
+        <td>\d</td>
+        <td>Matches a digit.</td>
+      <tr>
+      <tr>
+        <td>\D</td>
+        <td>Matches a non-digit.</td>
+      <tr>
+      <tr>
+        <td>\s</td>
+        <td>Matches a whitespace character.</td>
+      <tr>
+      <tr>
+        <td>\S</td>
+        <td>Matches a non-whitespace character.</td>
+      <tr>
+      <tr>
+        <td>\w</td>
+        <td>Matches a word character (QChar::isLetterOrNumber(), QChar::isMark(), or '_').</td>
+      <tr>
+      <tr>
+        <td>\W</td>
+        <td>Matches a non-word character.</td>
+      <tr>
+      <tr>
+        <td>\<i>n</i></td>
+        <td>The <i>n</i>-th backreference, e.g. \1, \2, etc.</td>
+      <tr>
+    </table>
+
+    <br>
+
+    <h2>Sets of Characters</h2>
+
+    <br>
+
+    <p>Square brackets mean match any character contained in the square brackets.
+    The character set abbreviations described above can appear in a character set in square brackets.
+    Except for the character set abbreviations and the following two exceptions, characters do not have special meanings in square brackets.</p>
+
+    <br>
+
+    <table>
+      <tr>
+        <td>^</td>
+        <td>The caret negates the character set if it occurs as the first character (i.e. immediately after the opening square bracket).
+        <b>[abc]</b> matches 'a' or 'b' or 'c', but <b>[^abc]</b> matches anything but 'a' or 'b' or 'c'.</td>
+      <tr>
+      <tr>
+        <td>-</td>
+        <td>The dash indicates a range of characters. <b>[W-Z]</b> matches 'W' or 'X' or 'Y' or 'Z'.</td>
+      <tr>
+    </table>
+
+    <br>
+
+    <p>Using the predefined character set abbreviations is more portable than using character ranges across platforms and languages.
+    For example, <b>[0-9]</b> matches a digit in Western alphabets but <b>\d</b> matches a digit in <i>any</i> alphabet.
+    <br>
+    Note: In other regexp documentation, sets of characters are often called "character classes".</p>
+
+    <br>
+
+    <h2>Quantifiers</h2>
+
+    <br>
+
+    <p>By default, an expression is automatically quantified by <b>{1,1}</b>, i.e. it should occur exactly once.
+    In the following list, <b>E</b> stands for expression. An expression is a character, or an abbreviation for a set of characters,
+    or a set of characters in square brackets, or an expression in parentheses.</p>
+
+    <br>
+
+    <table>
+      <tr>
+        <td>E?</td>
+        <td>Matches zero or one occurrences of E. This quantifier means The previous expression is optional, because it will match whether or not the expression is found. E? is the same as E{0,1}. e.g., dents? matches 'dent' or 'dents'.</td>
+      <tr>
+      <tr>
+        <td>E+</td>
+        <td>Matches one or more occurrences of E. E+ is the same as E{1,}. e.g., 0+ matches '0', '00', '000', etc.</td>
+      <tr>
+      <tr>
+        <td>E*</td>
+        <td>Matches zero or more occurrences of E. It is the same as E{0,}. The * quantifier is often used in error where + should be used. For example, if \s*$ is used in an expression to match strings that end in whitespace, it will match every string because \s*$ means Match zero or more whitespaces followed by end of string. The correct regexp to match strings that have at least one trailing whitespace character is \s+$.</td>
+      <tr>
+      <tr>
+        <td>E{n}</td>
+        <td>Matches exactly n occurrences of E. E{n} is the same as repeating E n times. For example, x{5} is the same as xxxxx. It is also the same as E{n,n}, e.g. x{5,5}.</td>
+      <tr>
+      <tr>
+        <td>E{n,}</td>
+        <td>Matches at least n occurrences of E.</td>
+      <tr>
+      <tr>
+        <td>E{,m}</td>
+        <td>Matches at most m occurrences of E. E{,m} is the same as E{0,m}.</td>
+      <tr>
+      <tr>
+        <td>E{n,m}</td>
+        <td>Matches at least n and at most m occurrences of E.</td>
+      <tr>
+    </table>
+
+    <br>
+
+    <p>To apply a quantifier to more than just the preceding character,
+    use parentheses to group characters together in an expression.
+    For example, <b>tag+</b> matches a 't' followed by an 'a' followed by at least one 'g', whereas <b>(tag)+</b> matches at least one occurrence of 'tag'.
+    <br>
+    Note: Quantifiers are normally "greedy". They always match as much text as they can.
+    For example, <b>0+</b> matches the first zero it finds and all the consecutive zeros after the first zero.
+    Applied to '20005', it matches '2<u>000</u>5'.</p>
+
+    <br>
+
+    <h2>Assertions</h2>
+
+    <br>
+
+    <p>Assertions make some statement about the text at the point where they occur in the
+    regexp but they do not match any characters. In the following list <b>E</b> stands for any expression.</p>
+
+    <br>
+
+    <table>
+      <tr>
+        <td>^</td>
+        <td>The caret signifies the beginning of the string. If you wish to match a literal ^ you must escape it by writing \\^. For example, ^#include will only match strings which begin with the characters '#include'. (When the caret is the first character of a character set it has a special meaning.)</td>
+      </tr>
+      <tr>
+        <td>$</td>
+        <td>The dollar signifies the end of the string. For example \d\s*$ will match strings which end with a digit optionally followed by whitespace. If you wish to match a literal $ you must escape it by writing \\$.</td>
+      </tr>
+      <tr>
+        <td>\b</td>
+        <td>A word boundary. For example the regexp \bOK\b means match immediately after a word boundary (e.g. start of string or whitespace) the letter 'O' then the letter 'K' immediately before another word boundary (e.g. end of string or whitespace). But note that the assertion does not actually match any whitespace so if we write (\bOK\b) and we have a match it will only contain 'OK' even if the string is "It's OK now".</td>
+      </tr>
+      <tr>
+        <td>\B</td>
+        <td>A non-word boundary. This assertion is true wherever \b is false. For example if we searched for \Bon\B in "Left on" the match would fail (space and end of string aren't non-word boundaries), but it would match in "tonne".</td>
+      </tr>
+      <tr>
+        <td>(?=E)</td>
+        <td>Positive lookahead. This assertion is true if the expression matches at this point in the regexp. For example, const(?=\s+char) matches 'const' whenever it is followed by 'char', as in 'static const char *'. (Compare with const\s+char, which matches 'static const char *'.)</td>
+      </tr>
+      <tr>
+        <td>(?!E)</td>
+        <td>Negative lookahead. This assertion is true if the expression does not match at this point in the regexp. For example, const(?!\s+char) matches 'const' except when it is followed by 'char'.</td>
+      </tr>
+    </table>
+
+    <br>
+
+    <h2>Wildcard Matching</h2>
+
+    <br>
+
+    <table>
+      <tr>
+        <td>c</td>
+        <td>Any character represents itself apart from those mentioned below. Thus c matches the character c.</td>
+      </tr>
+      <tr>
+        <td>?</td>
+        <td>Matches any single character. It is the same as . in full regexps.</td>
+      </tr>
+      <tr>
+        <td>*</td>
+        <td>Matches zero or more of any characters. It is the same as .* in full regexps.</td>
+      </tr>
+      <tr>
+        <td>[...]</td>
+        <td>Sets of characters can be represented in square brackets, similar to full regexps. Within the character class, like outside, backslash has no special meaning.</td>
+      </tr>
+    </table>
+  </div>
+</body>
+
+</html>

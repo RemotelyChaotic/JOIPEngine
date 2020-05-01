@@ -52,9 +52,9 @@ CResourceDisplayWidget::CResourceDisplayWidget(QWidget* pParent) :
   connect(m_spUi->pWebView, &QWebEngineView::loadFinished,
           this, &CResourceDisplayWidget::SlotWebLoadFinished);
 
-  connect(m_spSettings.get(), &CSettings::MutedChanged,
+  connect(m_spSettings.get(), &CSettings::mutedChanged,
           this, &CResourceDisplayWidget::SlotMutedChanged, Qt::QueuedConnection);
-  connect(m_spSettings.get(), &CSettings::VolumeChanged,
+  connect(m_spSettings.get(), &CSettings::volumeChanged,
           this, &CResourceDisplayWidget::SlotVolumeChanged, Qt::QueuedConnection);
 
   connect(m_spUi->pMediaPlayer, &CMediaPlayer::MediaStatusChanged,

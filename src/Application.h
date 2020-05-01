@@ -36,6 +36,8 @@ private slots:
   void LoadStyle();
 
 private:
+  void RegisterQmlTypes();
+
   std::map<qint32, std::shared_ptr<CThreadedSystem>> m_spSystemsMap;
   std::unique_ptr<CUISoundEmitter>                   m_spSoundEmitter;
   std::shared_ptr<CHelpFactory>                      m_spHelpFactory;

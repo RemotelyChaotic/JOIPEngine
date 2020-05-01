@@ -158,9 +158,9 @@ void CMainWindow::ConnectSlots()
   connect(m_spWindowContext.get(), &CWindowContext::SignalSetHelpButtonVisible,
           this, &CMainWindow::SlotSetHelpButtonVisible, Qt::DirectConnection);
 
-  connect(m_spSettings.get(), &CSettings::FullscreenChanged,
+  connect(m_spSettings.get(), &CSettings::fullscreenChanged,
           this, &CMainWindow::SlotFullscreenChanged, Qt::QueuedConnection);
 
-  connect(m_spSettings.get(), &CSettings::ResolutionChanged,
+  connect(m_spSettings.get(), &CSettings::resolutionChanged,
           this, &CMainWindow::SlotResolutionChanged, Qt::QueuedConnection);
 }

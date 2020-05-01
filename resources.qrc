@@ -120,5 +120,12 @@
         <file>resources/data/Kink_Information_Data.csv</file>
         <file>resources/help/editor/projectsettings/describtion_textedit_help.html</file>
         <file>resources/help/editor/images/kink_overlay.png</file>
+        <file>resources/help/player/filter_widget_help.html</file>
+        <file>resources/img/WarningIcon.png</file>
+    </qresource>
+    <qresource prefix="/qml">
+        <file>resources/qml/ProjectCardSelection.qml</file>
+        <file>resources/qml/ImageResourceView.qml</file>
+        <file>resources/qml/ProjectCardDelegate.qml</file>
     </qresource>
 </RCC>

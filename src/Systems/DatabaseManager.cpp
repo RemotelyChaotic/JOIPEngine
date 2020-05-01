@@ -696,7 +696,7 @@ QStringList CDatabaseManager::KinkCategories()
 //
 void CDatabaseManager::Initialize()
 {
-  connect(m_spSettings.get(), &CSettings::ContentFolderChanged,
+  connect(m_spSettings.get(), &CSettings::contentFolderChanged,
           this, &CDatabaseManager::SlotContentFolderChanged, Qt::QueuedConnection);
 
   SetInitialized(true);
@@ -708,7 +708,7 @@ void CDatabaseManager::Initialize()
 //
 void CDatabaseManager::Deinitialize()
 {
-  disconnect(m_spSettings.get(), &CSettings::ContentFolderChanged,
+  disconnect(m_spSettings.get(), &CSettings::contentFolderChanged,
           this, &CDatabaseManager::SlotContentFolderChanged);
 
   ClearProjects();

@@ -5,6 +5,7 @@
 #include <QCoreApplication>
 #include <QDir>
 #include <QFileInfo>
+#include <QLibraryInfo>
 #include <QMutexLocker>
 #include <QSettings>
 #include <map>
@@ -172,7 +173,7 @@ void CSettings::SetContentFolder(const QString& sPath)
 
   m_spSettings->setValue(CSettings::c_sSettingContentFolder, sPath);
 
-  emit ContentFolderChanged();
+  emit contentFolderChanged();
 }
 
 //----------------------------------------------------------------------------------------
@@ -194,7 +195,7 @@ void CSettings::SetFont(const QString& sFont)
 
   m_spSettings->setValue(CSettings::c_sSettingFont, sFont);
 
-  emit FontChanged();
+  emit fontChanged();
 }
 
 //----------------------------------------------------------------------------------------
@@ -217,7 +218,7 @@ void CSettings::SetFullscreen(bool bValue)
 
   m_spSettings->setValue(CSettings::c_sSettingFullscreen, bValue);
 
-  emit FullscreenChanged();
+  emit fullscreenChanged();
 }
 
 //----------------------------------------------------------------------------------------
@@ -237,7 +238,7 @@ QStringList CSettings::KeyBindings()
 
 //----------------------------------------------------------------------------------------
 //
-QKeySequence CSettings::KeyBinding(const QString& sRole)
+QKeySequence CSettings::keyBinding(const QString& sRole)
 {
   QMutexLocker locker(&m_settingsMutex);
 
@@ -256,7 +257,7 @@ QKeySequence CSettings::KeyBinding(const QString& sRole)
 
 //----------------------------------------------------------------------------------------
 //
-void CSettings::SetKeyBinding(const QKeySequence& sKeySequence, const QString& sRole)
+void CSettings::setKeyBinding(const QKeySequence& sKeySequence, const QString& sRole)
 {
   QMutexLocker locker(&m_settingsMutex);
 
@@ -268,7 +269,7 @@ void CSettings::SetKeyBinding(const QKeySequence& sKeySequence, const QString& s
     if (sOldBinding != sKeySequence.toString())
     {
       m_spSettings->setValue(CSettings::c_sSettingKeyBindings + sRole, sKeySequence.toString());
-      emit KeyBindingsChanged();
+      emit keyBindingsChanged();
     }
   }
 }
@@ -285,7 +286,7 @@ void CSettings::SetMuted(bool bValue)
 
   m_spSettings->setValue(CSettings::c_sSettingMuted, bValue);
 
-  emit MutedChanged();
+  emit mutedChanged();
 }
 
 //----------------------------------------------------------------------------------------
@@ -307,7 +308,7 @@ void CSettings::SetResolution(const QSize& size)
 
   m_spSettings->setValue(CSettings::c_sSettingResolution, size);
 
-  emit ResolutionChanged();
+  emit resolutionChanged();
 }
 
 //----------------------------------------------------------------------------------------
@@ -329,7 +330,7 @@ void CSettings::SetStyle(const QString& sStyle)
 
   m_spSettings->setValue(CSettings::c_sSettingStyle, sStyle);
 
-  emit StyleChanged();
+  emit styleChanged();
 }
 
 //----------------------------------------------------------------------------------------
@@ -338,6 +339,45 @@ QString CSettings::Style()
 {
   QMutexLocker locker(&m_settingsMutex);
   return m_spSettings->value(CSettings::c_sSettingStyle).toString();
+}
+
+//----------------------------------------------------------------------------------------
+//
+QUrl CSettings::styleFolder()
+{
+  QMutexLocker locker(&m_settingsMutex);
+  QString sStyle = m_spSettings->value(CSettings::c_sSettingStyle).toString();
+  QFileInfo info(QLibraryInfo::location(QLibraryInfo::PrefixPath) +
+                 QDir::separator() + joip_style::c_sStyleFolder +
+                 QDir::separator() + sStyle);
+  if (info.exists())
+  {
+    return QUrl::fromLocalFile(info.absoluteFilePath());
+  }
+  else
+  {
+    return QUrl();
+  }
+}
+
+//----------------------------------------------------------------------------------------
+//
+QUrl CSettings::styleFolderQml()
+{
+  QMutexLocker locker(&m_settingsMutex);
+  QString sStyle = m_spSettings->value(CSettings::c_sSettingStyle).toString();
+  QFileInfo info(QLibraryInfo::location(QLibraryInfo::PrefixPath) +
+                 QDir::separator() + joip_style::c_sStyleFolder +
+                 QDir::separator() + sStyle +
+                 QDir::separator() + joip_style::c_sQmlStyleSubFolder);
+  if (info.exists())
+  {
+    return QUrl::fromLocalFile(info.absoluteFilePath());
+  }
+  else
+  {
+    return QUrl();
+  }
 }
 
 //----------------------------------------------------------------------------------------
@@ -351,7 +391,7 @@ void CSettings::SetVolume(double dVolume)
 
   m_spSettings->setValue(CSettings::c_sSettingVolume, dVolume);
 
-  emit VolumeChanged();
+  emit volumeChanged();
 }
 
 //----------------------------------------------------------------------------------------

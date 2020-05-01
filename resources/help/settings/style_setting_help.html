@@ -42,6 +42,15 @@
     <table width="100%" class="warning">
       <tr>
         <td width="10%"><img src="qrc:/resources/help/icons/WarningIcon.png" width="64" height="64" alt="Warning"></td>
+        <td width="90%"><br>Application needs to be restarted for this to properly take effect.</td>
+      </tr>
+    </table>
+
+    <br>
+
+    <table width="100%" class="warning">
+      <tr>
+        <td width="10%"><img src="qrc:/resources/help/icons/WarningIcon.png" width="64" height="64" alt="Warning"></td>
         <td width="90%"><br>Multiple instances of the application share the same configuration file.<br>
         If you use different versions of the application, your settings for all instances will change.</td>
       </tr>
@@ -61,6 +70,10 @@
 
     <br>
 
+    <h2>Stylesheet Style</h2>
+
+    <br>
+
     <p>For general help with custom stylesheets please refer to the qt documentation:
       <ul>
         <li>https://doc.qt.io/qt-5/stylesheet-reference.html</li>
@@ -68,7 +81,7 @@
       </ul>
     </p>
 
-    <h2>Additional classes that are useful in a style</h2>
+    <h3>Additional classes that are useful in a style</h3>
 
     <p>
       <ul>
@@ -126,7 +139,7 @@
       </ul>
     </p>
 
-    <h2>Ids of icons / Buttons for styling</h2>
+    <h3>Ids of icons / Buttons for styling</h3>
 
     <p>
       <ul>
@@ -180,9 +193,45 @@
         </li>
       </ul>
     </p>
+
+    <br>
+
+    <h2>Qml Style</h2>
+
+    <br>
+
+    <p>Aditionally the qml style of the application (<a href="qrc:/resources/help/player/card_button_help.html">Title Cards</a> and player)
+    can be styled by placing the Control .qml files into the <i>.\qml</i> subfolder inside the style folder.
+    (e.g. <i>.\styles\621 Hexagons\qml\</i>)</p>
+
+    <br>
+
+    <p>For general help with qml styling please refer to the qt documentation:
+      <ul>
+        <li>https://doc.qt.io/qt-5/qtquickcontrols2-customize.html</li>
+      </ul>
+    </p>
+
+    <br>
+
+    <p>There's a set of qml style files, that are required for the application to display properly:<br>
+      <ul>
+        <li><b>ButtonArrowDown.svg</b>: Image used by the <a href="qrc:/resources/help/player/card_button_help.html">Title Cards</a>
+        to display arrow to close the detailed view.</li>
+        <li><b>ButtonArrowUp.svg</b>: Image used by the <a href="qrc:/resources/help/player/card_button_help.html">Title Cards</a>
+        to display arrow to open the detailed view.</li>
+        <li><b>MediaIcon.svg</b>: Image used by the <a href="qrc:/resources/help/player/card_button_help.html">Title Cards</a>
+        to display that a <a href="qrc:/resources/help/project/joi_project_help.html">JOI-Project</a> requres video or audio
+        <a href="qrc:/resources/help/editor/resources/resource_help.html">Resources</a>.</li>
+        <li><b>WebIcon.svg</b>: Image used by the <a href="qrc:/resources/help/player/card_button_help.html">Title Cards</a>
+        to display that a <a href="qrc:/resources/help/project/joi_project_help.html">JOI-Project</a> requres web-based
+        <a href="qrc:/resources/help/editor/resources/resource_help.html">Resources</a></li>
+      </ul>
+    </p>
+
+    <br>
   </div>
 
-  <br>
 </body>
 
 </html>
