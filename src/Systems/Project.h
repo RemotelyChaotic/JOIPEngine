@@ -50,17 +50,19 @@ class CProject : public QObject
   Q_OBJECT
   Q_DISABLE_COPY(CProject)
   CProject() {}
-  Q_PROPERTY(qint32  id            READ getId            )
-  Q_PROPERTY(qint32  version       READ getVersion       )
-  Q_PROPERTY(qint32  targetVersion READ getTargetVersion )
-  Q_PROPERTY(QString name          READ getName          )
-  Q_PROPERTY(QString folderName    READ getFolderName    )
-  Q_PROPERTY(QString describtion   READ getDescribtion   )
-  Q_PROPERTY(QString titleCard     READ getTitleCard     )
-  Q_PROPERTY(QString map           READ getMap           )
-  Q_PROPERTY(QStringList kinks     READ getKinks         )
-  Q_PROPERTY(bool    isUsingWeb    READ isUsingWeb       )
-  Q_PROPERTY(bool    isUsingCodecs READ isUsingCodecs    )
+  Q_PROPERTY(qint32  id                READ getId                )
+  Q_PROPERTY(qint32  version           READ getVersion           )
+  Q_PROPERTY(QString versionText       READ getVersionText       )
+  Q_PROPERTY(qint32  targetVersion     READ getTargetVersion     )
+  Q_PROPERTY(QString targetVersionText READ getTargetVersionText )
+  Q_PROPERTY(QString name              READ getName              )
+  Q_PROPERTY(QString folderName        READ getFolderName        )
+  Q_PROPERTY(QString describtion       READ getDescribtion       )
+  Q_PROPERTY(QString titleCard         READ getTitleCard         )
+  Q_PROPERTY(QString map               READ getMap               )
+  Q_PROPERTY(QStringList kinks         READ getKinks             )
+  Q_PROPERTY(bool    isUsingWeb        READ isUsingWeb           )
+  Q_PROPERTY(bool    isUsingCodecs     READ isUsingCodecs        )
 
 public:
   explicit CProject(QJSEngine* pEngine, const std::shared_ptr<SProject>& spProject);
@@ -68,7 +70,9 @@ public:
 
   qint32 getId();
   qint32 getVersion();
+  QString getVersionText();
   qint32 getTargetVersion();
+  QString getTargetVersionText();
   QString getName();
   QString getFolderName();
   QString getDescribtion();

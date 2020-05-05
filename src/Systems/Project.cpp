@@ -202,7 +202,15 @@ qint32 CProject::getId()
 qint32 CProject::getVersion()
 {
   QReadLocker locker(&m_spData->m_rwLock);
-  return static_cast<qint32>(static_cast<quint32>(m_spData->m_iVersion));
+  return static_cast<qint32>(m_spData->m_iVersion);
+}
+
+//----------------------------------------------------------------------------------------
+//
+QString CProject::getVersionText()
+{
+  QReadLocker locker(&m_spData->m_rwLock);
+  return static_cast<QString>(m_spData->m_iVersion);
 }
 
 //----------------------------------------------------------------------------------------
@@ -210,7 +218,15 @@ qint32 CProject::getVersion()
 qint32 CProject::getTargetVersion()
 {
   QReadLocker locker(&m_spData->m_rwLock);
-  return static_cast<qint32>(static_cast<quint32>(m_spData->m_iTargetVersion));
+  return static_cast<qint32>(m_spData->m_iTargetVersion);
+}
+
+//----------------------------------------------------------------------------------------
+//
+QString CProject::getTargetVersionText()
+{
+  QReadLocker locker(&m_spData->m_rwLock);
+  return static_cast<QString>(m_spData->m_iTargetVersion);
 }
 
 //----------------------------------------------------------------------------------------

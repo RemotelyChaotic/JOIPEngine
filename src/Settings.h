@@ -21,6 +21,7 @@ class CSettings : public QObject
   Q_PROPERTY(bool muted READ Muted WRITE SetMuted NOTIFY mutedChanged)
   Q_PROPERTY(QSize resolution READ Resolution WRITE SetResolution NOTIFY resolutionChanged)
   Q_PROPERTY(QString style READ Style WRITE SetStyle NOTIFY styleChanged)
+  Q_PROPERTY(qint32 version READ Version)
   Q_PROPERTY(double volume READ Volume WRITE SetVolume NOTIFY volumeChanged)
 
 public:
@@ -56,6 +57,7 @@ public:
   QString Style();
   Q_INVOKABLE QUrl styleFolder();
   Q_INVOKABLE QUrl styleFolderQml();
+  qint32 Version();
   void SetVolume(double dVolume);
   double Volume();
 

@@ -131,62 +131,95 @@ Rectangle {
                         spacing: 0
 
                         // icons
-                        RowLayout {
-                            id: icons
-
+                        Rectangle {
                             Layout.preferredHeight: 42
                             Layout.preferredWidth: parent.width - 20
                             Layout.alignment: Qt.AlignHCenter
+                            color: "transparent"
 
-                            spacing: 5
-                            layoutDirection: Qt.RightToLeft
-
-                            Button {
-                                id: iconUsesCodecsRect
-                                Layout.preferredWidth: visible ? 32 : 0
-                                Layout.preferredHeight: 32
-                                Layout.alignment: Qt.AlignVCenter
-                                visible: false
-                                hoverEnabled: visible
-
-                                background: Rectangle {
-                                    color: "transparent"
-                                }
-
-                                Image {
-                                    id: iconUsesCodecs
-                                    anchors.fill: parent
-                                    source: Settings.styleFolderQml() + "/MediaIcon.svg"
-                                }
-
-                                onHoveredChanged: isHovered = true
-                            }
-                            Button {
-                                id: iconUsesWebRect
-                                Layout.preferredWidth: visible ? 32 : 0
-                                Layout.preferredHeight: 32
-                                Layout.alignment: Qt.AlignVCenter
-                                visible: false
-
-                                background: Rectangle {
-                                    color: "transparent"
-                                }
-
-                                Image {
-                                    id: iconUsesWeb
-                                    anchors.fill: parent
-                                    source: Settings.styleFolderQml() + "/WebIcon.svg"
-                                }
-
-                                onHoveredChanged: isHovered = true
+                            Text {
+                                id: versionText
+                                anchors.left: parent.left
+                                anchors.verticalCenter: parent.verticalCenter
+                                text: ""
+                                color: "white"
                             }
 
-                            Rectangle {
-                                id: spacerVert
-                                Layout.preferredWidth: 1
-                                Layout.preferredHeight: 32
-                                Layout.alignment: Qt.AlignVCenter
-                                color: "transparent"
+                            RowLayout {
+                                id: icons
+                                anchors.fill: parent
+
+                                spacing: 0
+                                layoutDirection: Qt.RightToLeft
+
+                                Button {
+                                    id: iconUsesCodecsRect
+                                    Layout.preferredWidth: visible ? 32 : 0
+                                    Layout.preferredHeight: 32
+                                    Layout.alignment: Qt.AlignVCenter
+                                    visible: false
+                                    hoverEnabled: visible
+
+                                    background: Rectangle {
+                                        color: "transparent"
+                                    }
+
+                                    Image {
+                                        id: iconUsesCodecs
+                                        anchors.fill: parent
+                                        source: Settings.styleFolderQml() + "/MediaIcon.svg"
+                                    }
+
+                                    onHoveredChanged: isHovered = true
+                                }
+                                Button {
+                                    id: iconUsesWebRect
+                                    Layout.preferredWidth: visible ? 32 : 0
+                                    Layout.preferredHeight: 32
+                                    Layout.alignment: Qt.AlignVCenter
+                                    visible: false
+                                    hoverEnabled: visible
+
+                                    background: Rectangle {
+                                        color: "transparent"
+                                    }
+
+                                    Image {
+                                        id: iconUsesWeb
+                                        anchors.fill: parent
+                                        source: Settings.styleFolderQml() + "/WebIcon.svg"
+                                    }
+
+                                    onHoveredChanged: isHovered = true
+                                }
+                                Button {
+                                    id: iconWarningVersionRect
+                                    Layout.preferredWidth: visible ? 32 : 0
+                                    Layout.preferredHeight: 32
+                                    Layout.alignment: Qt.AlignVCenter
+                                    visible: false
+                                    hoverEnabled: visible
+
+                                    background: Rectangle {
+                                        color: "transparent"
+                                    }
+
+                                    Image {
+                                        id: iconWarningVersion
+                                        anchors.fill: parent
+                                        source: Settings.styleFolderQml() + "/WarningIcon.svg"
+                                    }
+
+                                    onHoveredChanged: isHovered = true
+                                }
+
+                                Rectangle {
+                                    id: spacerVert
+                                    Layout.preferredWidth: parent.width
+                                    Layout.preferredHeight: 32
+                                    Layout.alignment: Qt.AlignVCenter
+                                    color: "transparent"
+                                }
                             }
                         }
 
@@ -269,9 +302,14 @@ Rectangle {
             sFetishes += "<li>" + dto.kinks[i] + "</li>";
         }
 
+        versionText.text = dto.versionText + " / " + dto.targetVersionText;
         describtion.text = (dto.describtion.length > 0 ? dto.describtion : qsTr("<i>No describtion</i>")) +
                 "<br><br>" +
                 (dto.kinks.length > 0 ? sFetishesElem.arg(sFetishes) : "");
+        if (dto.targetVersion !== Settings.version)
+        {
+            iconWarningVersionRect.visible = true
+        }
         if (dto.isUsingCodecs)
         {
             iconUsesCodecsRect.visible = true;
@@ -282,6 +320,11 @@ Rectangle {
         }
     }
 
+    ToolTip {
+        parent: iconWarningVersionRect
+        visible: iconWarningVersionRect.hovered
+        text: qsTr("Target engine version and application version differ, project may not play properly.")
+    }
     ToolTip {
         parent: iconUsesCodecsRect
         visible: iconUsesCodecsRect.hovered

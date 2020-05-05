@@ -1,6 +1,7 @@
 #include "Settings.h"
 #include "Application.h"
 #include "Style.h"
+#include "SVersion.h"
 
 #include <QCoreApplication>
 #include <QDir>
@@ -378,6 +379,13 @@ QUrl CSettings::styleFolderQml()
   {
     return QUrl();
   }
+}
+
+//----------------------------------------------------------------------------------------
+//
+qint32 CSettings::Version()
+{
+  return QT_VERSION_CHECK(MAJOR_VERSION, MINOR_VERSION, PATCH_VERSION);
 }
 
 //----------------------------------------------------------------------------------------
