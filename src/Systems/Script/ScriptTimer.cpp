@@ -4,10 +4,8 @@
 #include <QEventLoop>
 
 CScriptTimer::CScriptTimer(std::shared_ptr<CScriptRunnerSignalEmiter> spEmitter,
-                           QJSEngine* pEngine) :
-  QObject(),
-  m_spSignalEmitter(spEmitter),
-  m_pEngine(pEngine)
+                           QPointer<QJSEngine> pEngine) :
+  CScriptObjectBase(spEmitter, pEngine)
 {
 
 }
@@ -79,20 +77,4 @@ void CScriptTimer::waitForTimer()
   emit m_spSignalEmitter->SignalWaitForTimer();
   loop.exec();
   loop.disconnect();
-}
-
-//----------------------------------------------------------------------------------------
-//
-bool CScriptTimer::CheckIfScriptCanRun()
-{
-  if (m_spSignalEmitter->ScriptExecutionStatus()._to_integral() == EScriptExecutionStatus::eStopped)
-  {
-    QJSValue val = m_pEngine->evaluate("f();"); //undefined function -> create error
-    Q_UNUSED(val);
-    return false;
-  }
-  else
-  {
-    return true;
-  }
 }

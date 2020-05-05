@@ -2,26 +2,19 @@
 #include "Application.h"
 #include "ScriptRunnerSignalEmiter.h"
 #include "Systems/DatabaseManager.h"
+#include "Systems/Project.h"
+#include "Systems/Resource.h"
 #include <QEventLoop>
 
 CScriptTextBox::CScriptTextBox(std::shared_ptr<CScriptRunnerSignalEmiter> spEmitter,
-                               QJSEngine* pEngine) :
-  QObject(),
-  m_spSignalEmitter(spEmitter),
-  m_wpDbManager(CApplication::Instance()->System<CDatabaseManager>()),
-  m_pEngine(pEngine)
+                               QPointer<QJSEngine> pEngine) :
+  CScriptObjectBase(spEmitter, pEngine),
+  m_wpDbManager(CApplication::Instance()->System<CDatabaseManager>())
 {
 }
 
 CScriptTextBox::~CScriptTextBox()
 {
-}
-
-//----------------------------------------------------------------------------------------
-//
-void CScriptTextBox::SetCurrentProject(tspProject spProject)
-{
-  m_spProject = spProject;
 }
 
 //----------------------------------------------------------------------------------------
@@ -181,20 +174,4 @@ std::vector<QColor> CScriptTextBox::GetColors(const QJSValue& colors, const QStr
   }
 
   return colorsRet;
-}
-
-//----------------------------------------------------------------------------------------
-//
-bool CScriptTextBox::CheckIfScriptCanRun()
-{
-  if (m_spSignalEmitter->ScriptExecutionStatus()._to_integral() == EScriptExecutionStatus::eStopped)
-  {
-    QJSValue val = m_pEngine->evaluate("f();"); //undefined function -> create error
-    Q_UNUSED(val);
-    return false;
-  }
-  else
-  {
-    return true;
-  }
 }

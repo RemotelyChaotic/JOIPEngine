@@ -6,14 +6,8 @@
 #include <QTimer>
 #include <memory>
 
-class CScriptBackground;
-class CScriptIcon;
-class CScriptMediaPlayer;
+class CScriptObjectBase;
 class CScriptRunnerSignalEmiter;
-class CScriptStorage;
-class CScriptTextBox;
-class CScriptTimer;
-class CScriptThread;
 class CSettings;
 struct SResource;
 struct SScene;
@@ -41,18 +35,13 @@ public slots:
   void SlotRun();
 
 private:
-  std::shared_ptr<CSettings>             m_spSettings;
-  std::unique_ptr<QJSEngine>             m_spScriptEngine;
-  std::shared_ptr<CScriptRunnerSignalEmiter> m_spSignalEmitter;
-  std::shared_ptr<QTimer>                m_spTimer;
-  CScriptBackground*                     m_pBackgroundObject;
-  CScriptIcon*                           m_pScriptIcon;
-  CScriptMediaPlayer*                    m_pMediaPlayerObject;
-  CScriptStorage*                        m_pStorageObject;
-  CScriptTextBox*                        m_pTextBoxObject;
-  CScriptTimer*                          m_pTimerObject;
-  CScriptThread*                         m_pThreadObject;
-  QJSValue                               m_runFunction;
+  std::shared_ptr<CSettings>                     m_spSettings;
+  std::unique_ptr<QJSEngine>                     m_spScriptEngine;
+  std::shared_ptr<CScriptRunnerSignalEmiter>     m_spSignalEmitter;
+  std::shared_ptr<QTimer>                        m_spTimer;
+  std::map<QString /*name*/,
+           std::shared_ptr<CScriptObjectBase>>   m_objectMap;
+  QJSValue                                       m_runFunction;
 };
 
 #endif // SCRIPTRUNNER_H

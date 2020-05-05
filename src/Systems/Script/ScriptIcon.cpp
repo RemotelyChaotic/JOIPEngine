@@ -5,11 +5,9 @@
 #include "Systems/Project.h"
 
 CScriptIcon::CScriptIcon(std::shared_ptr<CScriptRunnerSignalEmiter> spEmitter,
-                         QJSEngine* pEngine) :
-  QObject(),
-  m_spSignalEmitter(spEmitter),
-  m_wpDbManager(CApplication::Instance()->System<CDatabaseManager>()),
-  m_pEngine(pEngine)
+                         QPointer<QJSEngine> pEngine) :
+  CScriptObjectBase(spEmitter, pEngine),
+  m_wpDbManager(CApplication::Instance()->System<CDatabaseManager>())
 {
 
 }
@@ -17,11 +15,6 @@ CScriptIcon::CScriptIcon(std::shared_ptr<CScriptRunnerSignalEmiter> spEmitter,
 CScriptIcon::~CScriptIcon()
 {
 
-}
-
-void CScriptIcon::SetCurrentProject(tspProject spProject)
-{
-  m_spProject = spProject;
 }
 
 //----------------------------------------------------------------------------------------
@@ -114,21 +107,5 @@ void CScriptIcon::show(QJSValue resource)
       QString sError = tr("Wrong argument-type to show(). String or resource was expected.");
       emit m_spSignalEmitter->SignalShowError(sError, QtMsgType::QtWarningMsg);
     }
-  }
-}
-
-//----------------------------------------------------------------------------------------
-//
-bool CScriptIcon::CheckIfScriptCanRun()
-{
-  if (m_spSignalEmitter->ScriptExecutionStatus()._to_integral() == EScriptExecutionStatus::eStopped)
-  {
-    QJSValue val = m_pEngine->evaluate("f();"); //undefined function -> create error
-    Q_UNUSED(val);
-    return false;
-  }
-  else
-  {
-    return true;
   }
 }

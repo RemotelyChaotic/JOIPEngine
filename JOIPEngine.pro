@@ -60,6 +60,7 @@ INCLUDEPATH += \
 
 SOURCES += \
     src/Systems/DatabaseImageProvider.cpp \
+    src/Systems/Script/ScriptObjectBase.cpp \
     src/Widgets/ShortcutButton.cpp \
     src/main.cpp \
     src/MainWindow.cpp \
@@ -153,6 +154,7 @@ HEADERS += \
     src/SettingsScreen.h \
     src/Enums.h \
     src/Systems/DatabaseImageProvider.h \
+    src/Systems/Script/ScriptObjectBase.h \
     src/Widgets/ShortcutButton.h \
     src/WindowContext.h \
     src/IAppStateScreen.h \

@@ -3,10 +3,8 @@
 #include <QDebug>
 
 CScriptStorage::CScriptStorage(std::shared_ptr<CScriptRunnerSignalEmiter> spEmitter,
-                               QJSEngine* pEngine) :
-  QObject(),
-  m_spSignalEmitter(spEmitter),
-  m_pEngine(pEngine),
+                               QPointer<QJSEngine> pEngine) :
+  CScriptObjectBase(spEmitter, pEngine),
   m_storage()
 {
   connect(m_spSignalEmitter.get(), &CScriptRunnerSignalEmiter::SignalClearStorage,
@@ -14,13 +12,6 @@ CScriptStorage::CScriptStorage(std::shared_ptr<CScriptRunnerSignalEmiter> spEmit
 }
 
 CScriptStorage::~CScriptStorage()
-{
-  SlotClearStorage();
-}
-
-//----------------------------------------------------------------------------------------
-//
-void CScriptStorage::ClearStorage()
 {
   SlotClearStorage();
 }
@@ -57,18 +48,9 @@ void CScriptStorage::store(QString sId, QJSValue value)
 
 //----------------------------------------------------------------------------------------
 //
-bool CScriptStorage::CheckIfScriptCanRun()
+void CScriptStorage::Cleanup_Impl()
 {
-  if (m_spSignalEmitter->ScriptExecutionStatus()._to_integral() == EScriptExecutionStatus::eStopped)
-  {
-    QJSValue val = m_pEngine->evaluate("f();"); //undefined function -> create error
-    Q_UNUSED(val);
-    return false;
-  }
-  else
-  {
-    return true;
-  }
+  SlotClearStorage();
 }
 
 //----------------------------------------------------------------------------------------

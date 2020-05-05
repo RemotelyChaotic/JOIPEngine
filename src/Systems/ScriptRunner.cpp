@@ -22,13 +22,7 @@ CScriptRunner::CScriptRunner() :
   m_spScriptEngine(std::make_unique<QJSEngine>()),
   m_spSignalEmitter(std::make_shared<CScriptRunnerSignalEmiter>()),
   m_spTimer(nullptr),
-  m_pBackgroundObject(nullptr),
-  m_pScriptIcon(nullptr),
-  m_pMediaPlayerObject(nullptr),
-  m_pStorageObject(nullptr),
-  m_pTextBoxObject(nullptr),
-  m_pTimerObject(nullptr),
-  m_pThreadObject(nullptr),
+  m_objectMap(),
   m_runFunction()
 {
   qRegisterMetaType<QColor>();
@@ -66,33 +60,19 @@ void CScriptRunner::Initialize()
   m_spTimer = std::make_shared<QTimer>();
   connect(m_spTimer.get(), &QTimer::timeout, this, &CScriptRunner::SlotRun);
 
-  m_pBackgroundObject = new CScriptBackground(m_spSignalEmitter, m_spScriptEngine.get());
-  QJSValue backgroundValue = m_spScriptEngine->newQObject(m_pBackgroundObject);
-  m_spScriptEngine->globalObject().setProperty("background", backgroundValue);
+  m_objectMap.insert({"background", std::make_shared<CScriptBackground>(m_spSignalEmitter, m_spScriptEngine.get()) });
+  m_objectMap.insert({"mediaPlayer", std::make_shared<CScriptMediaPlayer>(m_spSignalEmitter, m_spScriptEngine.get()) });
+  m_objectMap.insert({"localStorage", std::make_shared<CScriptStorage>(m_spSignalEmitter, m_spScriptEngine.get()) });
+  m_objectMap.insert({"textBox", std::make_shared<CScriptTextBox>(m_spSignalEmitter, m_spScriptEngine.get()) });
+  m_objectMap.insert({"timer", std::make_shared<CScriptTimer>(m_spSignalEmitter, m_spScriptEngine.get()) });
+  m_objectMap.insert({"thread", std::make_shared<CScriptThread>(m_spSignalEmitter, m_spScriptEngine.get()) });
+  m_objectMap.insert({"icon", std::make_shared<CScriptIcon>(m_spSignalEmitter, m_spScriptEngine.get()) });
 
-  m_pMediaPlayerObject = new CScriptMediaPlayer(m_spSignalEmitter, m_spScriptEngine.get());
-  QJSValue mediaPlayerValue = m_spScriptEngine->newQObject(m_pMediaPlayerObject);
-  m_spScriptEngine->globalObject().setProperty("mediaPlayer", mediaPlayerValue);
-
-  m_pStorageObject = new CScriptStorage(m_spSignalEmitter, m_spScriptEngine.get());
-  QJSValue storageValue = m_spScriptEngine->newQObject(m_pStorageObject);
-  m_spScriptEngine->globalObject().setProperty("localStorage", storageValue);
-
-  m_pTextBoxObject = new CScriptTextBox(m_spSignalEmitter, m_spScriptEngine.get());
-  QJSValue textBoxValue = m_spScriptEngine->newQObject(m_pTextBoxObject);
-  m_spScriptEngine->globalObject().setProperty("textBox", textBoxValue);
-
-  m_pTimerObject = new CScriptTimer(m_spSignalEmitter, m_spScriptEngine.get());
-  QJSValue timerValue = m_spScriptEngine->newQObject(m_pTimerObject);
-  m_spScriptEngine->globalObject().setProperty("timer", timerValue);
-
-  m_pThreadObject = new CScriptThread(m_spSignalEmitter, m_spScriptEngine.get());
-  QJSValue threadValue = m_spScriptEngine->newQObject(m_pThreadObject);
-  m_spScriptEngine->globalObject().setProperty("thread", threadValue);
-
-  m_pScriptIcon = new CScriptIcon(m_spSignalEmitter, m_spScriptEngine.get());
-  QJSValue iconValue = m_spScriptEngine->newQObject(m_pScriptIcon);
-  m_spScriptEngine->globalObject().setProperty("icon", iconValue);
+  for (auto it = m_objectMap.begin(); m_objectMap.end() != it; ++it)
+  {
+    QJSValue scriptValue = m_spScriptEngine->newQObject(it->second.get());
+    m_spScriptEngine->globalObject().setProperty(it->first, scriptValue);
+  }
 
   SetInitialized(true);
 }
@@ -104,24 +84,14 @@ void CScriptRunner::Deinitialize()
   m_spTimer->stop();
   m_spTimer = nullptr;
 
-  m_pStorageObject->ClearStorage();
+  for (auto it = m_objectMap.begin(); m_objectMap.end() != it; ++it)
+  {
+    it->second->Cleanup();
+  }
+
   m_spScriptEngine->collectGarbage();
 
-  delete m_pBackgroundObject;
-  delete m_pScriptIcon;
-  delete m_pMediaPlayerObject;
-  delete m_pStorageObject;
-  delete m_pTextBoxObject;
-  delete m_pTimerObject;
-  delete m_pThreadObject;
-
-  m_pBackgroundObject = nullptr;
-  m_pScriptIcon = nullptr;
-  m_pMediaPlayerObject = nullptr;
-  m_pStorageObject = nullptr;
-  m_pTextBoxObject = nullptr;
-  m_pTimerObject = nullptr;
-  m_pThreadObject = nullptr;
+  m_objectMap.clear();
 
   SetInitialized(false);
 }
@@ -168,10 +138,10 @@ void CScriptRunner::SlotLoadScript(tspScene spScene, tspResource spResource)
       m_spScriptEngine->globalObject().setProperty("scene", sceneValue);
 
       // set current Project
-      m_pBackgroundObject->SetCurrentProject(spResource->m_spParent);
-      m_pMediaPlayerObject->SetCurrentProject(spResource->m_spParent);
-      m_pScriptIcon->SetCurrentProject(spResource->m_spParent);
-      m_pTextBoxObject->SetCurrentProject(spResource->m_spParent);
+      for (auto it = m_objectMap.begin(); m_objectMap.end() != it; ++it)
+      {
+        it->second->SetCurrentProject(spResource->m_spParent);
+      }
 
       m_spSignalEmitter->SetScriptExecutionStatus(EScriptExecutionStatus::eRunning);
 
@@ -221,10 +191,10 @@ void CScriptRunner::SlotRun()
 
     emit m_spSignalEmitter->SignalInterruptLoops();
 
-    m_pBackgroundObject->SetCurrentProject(nullptr);
-    m_pMediaPlayerObject->SetCurrentProject(nullptr);
-    m_pScriptIcon->SetCurrentProject(nullptr);
-    m_pTextBoxObject->SetCurrentProject(nullptr);
+    for (auto it = m_objectMap.begin(); m_objectMap.end() != it; ++it)
+    {
+      it->second->SetCurrentProject(nullptr);
+    }
 
     if (ret.isString())
     {
@@ -241,10 +211,10 @@ void CScriptRunner::SlotRun()
 
     emit m_spSignalEmitter->SignalInterruptLoops();
 
-    m_pBackgroundObject->SetCurrentProject(nullptr);
-    m_pMediaPlayerObject->SetCurrentProject(nullptr);
-    m_pScriptIcon->SetCurrentProject(nullptr);
-    m_pTextBoxObject->SetCurrentProject(nullptr);
+    for (auto it = m_objectMap.begin(); m_objectMap.end() != it; ++it)
+    {
+      it->second->SetCurrentProject(nullptr);
+    }
 
     emit SignalScriptRunFinished(false, QString());
   }

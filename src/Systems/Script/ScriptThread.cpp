@@ -7,10 +7,8 @@
 
 
 CScriptThread::CScriptThread(std::shared_ptr<CScriptRunnerSignalEmiter> spEmitter,
-                             QJSEngine* pEngine) :
-  QObject(),
-  m_spSignalEmitter(spEmitter),
-  m_pEngine(pEngine)
+                             QPointer<QJSEngine> pEngine) :
+  CScriptObjectBase(spEmitter, pEngine)
 {
 
 }
@@ -61,21 +59,5 @@ void CScriptThread::sleep(qint32 iTimeS, QJSValue bSkippable)
     loop.exec();
     timer.disconnect();
     loop.disconnect();
-  }
-}
-
-//----------------------------------------------------------------------------------------
-//
-bool CScriptThread::CheckIfScriptCanRun()
-{
-  if (m_spSignalEmitter->ScriptExecutionStatus()._to_integral() == EScriptExecutionStatus::eStopped)
-  {
-    QJSValue val = m_pEngine->evaluate("f();"); //undefined function -> create error
-    Q_UNUSED(val);
-    return false;
-  }
-  else
-  {
-    return true;
   }
 }

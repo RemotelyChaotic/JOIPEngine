@@ -2,26 +2,19 @@
 #include "Application.h"
 #include "ScriptRunnerSignalEmiter.h"
 #include "Systems/DatabaseManager.h"
+#include "Systems/Project.h"
+#include "Systems/Resource.h"
 #include <QTimer>
 
 CScriptMediaPlayer::CScriptMediaPlayer(std::shared_ptr<CScriptRunnerSignalEmiter> spEmitter,
-                                       QJSEngine* pEngine) :
-  QObject(),
-  m_spSignalEmitter(spEmitter),
-  m_wpDbManager(CApplication::Instance()->System<CDatabaseManager>()),
-  m_pEngine(pEngine)
+                                       QPointer<QJSEngine> pEngine) :
+  CScriptObjectBase(spEmitter, pEngine),
+  m_wpDbManager(CApplication::Instance()->System<CDatabaseManager>())
 {
 }
 
 CScriptMediaPlayer::~CScriptMediaPlayer()
 {
-}
-
-//----------------------------------------------------------------------------------------
-//
-void CScriptMediaPlayer::SetCurrentProject(tspProject spProject)
-{
-  m_spProject = spProject;
 }
 
 //----------------------------------------------------------------------------------------
@@ -192,20 +185,4 @@ void CScriptMediaPlayer::waitForPlayback()
 
   disconnect(m_spSignalEmitter.get(), &CScriptRunnerSignalEmiter::SignalPlaybackFinished,
              m_spSignalEmitter.get(), &CScriptRunnerSignalEmiter::SignalStopVideo);
-}
-
-//----------------------------------------------------------------------------------------
-//
-bool CScriptMediaPlayer::CheckIfScriptCanRun()
-{
-  if (m_spSignalEmitter->ScriptExecutionStatus()._to_integral() == EScriptExecutionStatus::eStopped)
-  {
-    QJSValue val = m_pEngine->evaluate("f();"); //undefined function -> create error
-    Q_UNUSED(val);
-    return false;
-  }
-  else
-  {
-    return true;
-  }
 }

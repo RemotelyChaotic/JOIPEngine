@@ -1,19 +1,18 @@
 #ifndef SCRIPTTIMER_H
 #define SCRIPTTIMER_H
 
-#include <QJSEngine>
+#include "ScriptObjectBase.h"
 #include <QJSValue>
 #include <memory>
 
-class CScriptRunnerSignalEmiter;
-
-class CScriptTimer : public QObject
+class CScriptTimer : public CScriptObjectBase
 {
   Q_OBJECT
   Q_DISABLE_COPY(CScriptTimer)
 
 public:
-  CScriptTimer(std::shared_ptr<CScriptRunnerSignalEmiter> spEmitter, QJSEngine* pEngine);
+  CScriptTimer(std::shared_ptr<CScriptRunnerSignalEmiter> spEmitter,
+               QPointer<QJSEngine> pEngine);
   ~CScriptTimer();
 
 public slots:
@@ -24,12 +23,6 @@ public slots:
   void start();
   void stop();
   void waitForTimer();
-
-private:
-  bool CheckIfScriptCanRun();
-
-  std::shared_ptr<CScriptRunnerSignalEmiter> m_spSignalEmitter;
-  QJSEngine*               m_pEngine;
 };
 
 #endif // SCRIPTTIMER_H
