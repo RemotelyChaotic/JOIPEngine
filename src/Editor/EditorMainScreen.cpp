@@ -192,7 +192,7 @@ void CEditorMainScreen::InitNewProject(const QString& sNewProjectName)
   m_spEditorModel->InitNewProject(sNewProjectName);
   m_spCurrentProject = m_spEditorModel->CurrentProject();
 
-  ProjectLoaded();
+  ProjectLoaded(true);
 }
 
 //----------------------------------------------------------------------------------------
@@ -204,7 +204,7 @@ void CEditorMainScreen::LoadProject(qint32 iId)
   m_spEditorModel->LoadProject(iId);
   m_spCurrentProject = m_spEditorModel->CurrentProject();
 
-  ProjectLoaded();
+  ProjectLoaded(false);
 }
 
 //----------------------------------------------------------------------------------------
@@ -487,7 +487,7 @@ void CEditorMainScreen::ChangeIndex(QComboBox* pComboBox, QWidget* pContainer,
 
 //----------------------------------------------------------------------------------------
 //
-void CEditorMainScreen::ProjectLoaded()
+void CEditorMainScreen::ProjectLoaded(bool bNewProject)
 {
   SlotKeyBindingsChanged();
 
@@ -502,7 +502,11 @@ void CEditorMainScreen::ProjectLoaded()
     it->second->LoadProject(m_spCurrentProject);
   }
 
-  SlotSaveClicked(true);
+  if (bNewProject)
+  {
+    SlotSaveClicked(true);
+  }
+
   SetModificaitonFlag(false);
 
   m_spUi->splitter->setSizes({ width() * 1/3 , width() * 2/3 });

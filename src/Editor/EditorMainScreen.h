@@ -52,7 +52,7 @@ protected slots:
 private:
   void ChangeIndex(QComboBox* pComboBox, QWidget* pContainer,
                    CEditorActionBar* pActionBar, qint32 iIndex);
-  void ProjectLoaded();
+  void ProjectLoaded(bool bNewProject);
   void SetModificaitonFlag(bool bModified);
   template<class T> T* GetWidget();
 

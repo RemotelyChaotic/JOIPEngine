@@ -42,17 +42,6 @@ CEditorProjectSettingsWidget::~CEditorProjectSettingsWidget()
 
 //----------------------------------------------------------------------------------------
 //
-void CEditorProjectSettingsWidget::EditedProject()
-{
-  WIDGET_INITIALIZED_GUARD
-  if (nullptr != m_spCurrentProject)
-  {
-    m_bProjectHasBeenEdited = true;
-  }
-}
-
-//----------------------------------------------------------------------------------------
-//
 void CEditorProjectSettingsWidget::Initialize()
 {
   m_bInitialized = false;
@@ -136,8 +125,6 @@ void CEditorProjectSettingsWidget::LoadProject(tspProject spProject)
     m_spUi->pFetishListWidget->sortItems();
     KinkModel()->SetSelections(m_spCurrentProject->m_vsKinks);
   }
-
-  m_bProjectHasBeenEdited = false;
 }
 
 //----------------------------------------------------------------------------------------
@@ -157,8 +144,6 @@ void CEditorProjectSettingsWidget::UnloadProject()
 
   m_spUi->pFetishListWidget->clear();
   KinkModel()->ResetSelections();
-
-  m_bProjectHasBeenEdited = false;
 }
 
 //----------------------------------------------------------------------------------------
@@ -173,16 +158,13 @@ void CEditorProjectSettingsWidget::SaveProject()
                                             static_cast<quint32>(m_spUi->pProjectMinorVersion->value()),
                                             static_cast<quint32>(m_spUi->pProjectPatchVersion->value()));
 
-  if (m_bProjectHasBeenEdited)
-  {
-    m_spUi->pEngineMajorVersion->setValue(MAJOR_VERSION);
-    m_spUi->pEngineMinorVersion->setValue(MINOR_VERSION);
-    m_spUi->pEnginePatchVersion->setValue(PATCH_VERSION);
-    m_spCurrentProject->m_iTargetVersion = SVersion(static_cast<quint32>(m_spUi->pEngineMajorVersion->value()),
-                                                    static_cast<quint32>(m_spUi->pEngineMinorVersion->value()),
-                                                    static_cast<quint32>(m_spUi->pEnginePatchVersion->value()));
-    m_spUi->WarningIcon->setVisible(false);
-  }
+  m_spUi->pEngineMajorVersion->setValue(MAJOR_VERSION);
+  m_spUi->pEngineMinorVersion->setValue(MINOR_VERSION);
+  m_spUi->pEnginePatchVersion->setValue(PATCH_VERSION);
+  m_spCurrentProject->m_iTargetVersion = SVersion(static_cast<quint32>(m_spUi->pEngineMajorVersion->value()),
+                                                  static_cast<quint32>(m_spUi->pEngineMinorVersion->value()),
+                                                  static_cast<quint32>(m_spUi->pEnginePatchVersion->value()));
+  m_spUi->WarningIcon->setVisible(false);
 
   m_spCurrentProject->m_sDescribtion = m_spUi->pDescribtionTextEdit->toPlainText();
 
@@ -191,8 +173,6 @@ void CEditorProjectSettingsWidget::SaveProject()
   {
     m_spCurrentProject->m_vsKinks.push_back(m_spUi->pFetishListWidget->item(i)->text());
   }
-
-  m_bProjectHasBeenEdited = false;
 }
 
 //----------------------------------------------------------------------------------------

@@ -19,7 +19,7 @@ public:
   explicit CEditorProjectSettingsWidget(QWidget *parent = nullptr);
   ~CEditorProjectSettingsWidget() override;
 
-  void EditedProject() override;
+  void EditedProject() override {}
   void Initialize() override;
   void LoadProject(tspProject spProject) override;
   void UnloadProject() override;
@@ -44,7 +44,6 @@ private:
   std::unique_ptr<Ui::CEditorProjectSettingsWidget> m_spUi;
   std::unique_ptr<CKinkSelectionOverlay>            m_spKinkSelectionOverlay;
   tspProject                                        m_spCurrentProject;
-  bool                                              m_bProjectHasBeenEdited;
 };
 
 #endif // EDITORPROJECTSETTINGSWIDGET_H
