@@ -123,7 +123,7 @@ void CScriptEditorModel::SerializeProject()
         const QString sProjectName = m_spProject->m_sFolderName;
         projLocker.unlock();
 
-        auto spResource = spDbManager->FindResource(m_spProject, it->first);
+        auto spResource = spDbManager->FindResourceInProject(m_spProject, it->first);
         if (nullptr != spResource)
         {
           QReadLocker lockerResource(&spResource->m_rwLock);
@@ -298,7 +298,7 @@ void CScriptEditorModel::SlotResourceAdded(qint32 iProjId, const QString& sName)
   auto spDbManager = m_wpDbManager.lock();
   if (nullptr != spDbManager)
   {
-    auto spResource = spDbManager->FindResource(m_spProject, sName);
+    auto spResource = spDbManager->FindResourceInProject(m_spProject, sName);
     if (nullptr != spResource)
     {
       QReadLocker locker(&spResource->m_rwLock);
@@ -344,7 +344,7 @@ void CScriptEditorModel::SlotResourceRemoved(qint32 iProjId, const QString& sNam
   auto spDbManager = m_wpDbManager.lock();
   if (nullptr != spDbManager)
   {
-    auto spResource = spDbManager->FindResource(m_spProject, sName);
+    auto spResource = spDbManager->FindResourceInProject(m_spProject, sName);
     if (nullptr != spResource)
     {
       auto it = m_cachedScriptsMap.find(sName);
@@ -511,7 +511,7 @@ void CScriptEditorModel::LoadScriptFile(const QString& sName)
       const QString sProjectName = m_spProject->m_sFolderName;
       projLocker.unlock();
 
-      auto spResource = spDbManager->FindResource(m_spProject, sName);
+      auto spResource = spDbManager->FindResourceInProject(m_spProject, sName);
       if (nullptr != spResource)
       {
         QReadLocker lockerResource(&spResource->m_rwLock);

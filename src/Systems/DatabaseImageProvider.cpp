@@ -29,7 +29,7 @@ QImage CDatabaseImageProvider::requestImage(const QString& id, QSize* pSize,
     if (auto spDbManager = m_wpDatabase.lock())
     {
       auto spProject = spDbManager->FindProject(vsParts[0].toInt());
-      auto spResource = spDbManager->FindResource(spProject, vsParts[1]);
+      auto spResource = spDbManager->FindResourceInProject(spProject, vsParts[1]);
       if (nullptr != spResource)
       {
         QReadLocker locker(&spResource->m_rwLock);

@@ -1,82 +1,79 @@
 #ifndef SCRIPTRUNNERSIGNALEMITER_H
 #define SCRIPTRUNNERSIGNALEMITER_H
 
-#include <enum.h>
 #include <QColor>
 #include <qlogging.h>
+#include <QPointer>
 #include <QObject>
 #include <QString>
 #include <memory>
 
-BETTER_ENUM(EScriptExecutionStatus, qint32,
-            eRunning = 0,
-            eStopped = 1);
+class CScriptRunnerSignalContext;
+class CScriptObjectBase;
+class QJSEngine;
 
-struct SResource;
-typedef std::shared_ptr<SResource> tspResource;
-
+//----------------------------------------------------------------------------------------
+//
 class CScriptRunnerSignalEmiter : public QObject
 {
   Q_OBJECT
 
 public:
+  enum ScriptExecStatus {
+    eRunning = 0,
+    eStopped,
+  };
+  Q_ENUM(ScriptExecStatus)
+
   CScriptRunnerSignalEmiter();
+  CScriptRunnerSignalEmiter(const CScriptRunnerSignalEmiter& other);
   ~CScriptRunnerSignalEmiter();
 
-public:
-  void SetScriptExecutionStatus(EScriptExecutionStatus status);
-  EScriptExecutionStatus ScriptExecutionStatus();
+  virtual std::shared_ptr<CScriptObjectBase> CreateNewScriptObject(QPointer<QJSEngine>);
+
+  void Initialize(std::shared_ptr<CScriptRunnerSignalContext> spContext);
+  void SetScriptExecutionStatus(ScriptExecStatus status);
+  ScriptExecStatus ScriptExecutionStatus();
 
 signals:
   // generic / controll
-  void SignalClearStorage();
-  void SignalExecutionError(QString sException, qint32 iLine, QString sStack);
-  void SignalInterruptLoops();
-  void SignalShowError(QString sError, QtMsgType type);
+  void clearStorage();
+  void executionError(QString sException, qint32 iLine, QString sStack);
+  void interrupt();
+  void showError(QString sError, QtMsgType type);
 
-  // background
-  void SignalBackgroundColorChanged(QColor color);
-  void SignalBackgroundTextureChanged(tspResource spResource);
+protected:
+  std::shared_ptr<CScriptRunnerSignalContext> m_spContext;
+};
 
-  // icon
-  void SignalHideIcon(QString sIconIdentifier);
-  void SignalShowIcon(tspResource spResource);
+Q_DECLARE_METATYPE(CScriptRunnerSignalEmiter)
 
-  // media Player
-  void SignalPauseVideo();
-  void SignalPauseSound();
-  void SignalPlayMedia(tspResource spResource);
-  void SignalShowMedia(tspResource spResource);
-  void SignalStopVideo();
-  void SignalStopSound();
-  void SignalPlaybackFinished();
 
-  // TextBox
-  void SignalClearText();
-  void SignalShowButtonPrompts(QStringList vsLabels);
-  void SignalShowButtonReturnValue(qint32 iIndex);
-  void SignalShowInput();
-  void SignalShowInputReturnValue(QString sValue);
-  void SignalShowText(QString sText);
-  void SignalTextBackgroundColorsChanged(std::vector<QColor> vColors);
-  void SignalTextColorsChanged(std::vector<QColor> vColors);
+//----------------------------------------------------------------------------------------
+//
+class CScriptRunnerSignalContext : public QObject
+{
+  Q_OBJECT
+  friend class CScriptRunnerSignalEmiter;
 
-  // Timer
-  void SignalHideTimer();
-  void SignalSetTime(qint32 iTimeS);
-  void SignalSetTimeVisible(bool bVisible);
-  void SignalShowTimer();
-  void SignalStartTimer();
-  void SignalStopTimer();
-  void SignalWaitForTimer();
-  void SignalTimerFinished();
+public:
+  CScriptRunnerSignalContext();
+  ~CScriptRunnerSignalContext();
 
-  // Thread
-  void SignalSkippableWait(qint32 iTimeS);
-  void SignalWaitSkipped();
+public:
+  void SetScriptExecutionStatus(CScriptRunnerSignalEmiter::ScriptExecStatus status);
+  CScriptRunnerSignalEmiter::ScriptExecStatus ScriptExecutionStatus();
 
-private:
+signals:
+  // generic / controll
+  void clearStorage();
+  void executionError(QString sException, qint32 iLine, QString sStack);
+  void interrupt();
+  void showError(QString sError, QtMsgType type);
+
+protected:
   QAtomicInt     m_bScriptExecutionStatus;
 };
+
 
 #endif // SCRIPTRUNNERSIGNALEMITER_H

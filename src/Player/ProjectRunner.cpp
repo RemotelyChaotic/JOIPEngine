@@ -207,7 +207,7 @@ bool CProjectRunner::LoadFlowScene()
       const QString sModelName = m_spCurrentProject->m_sSceneModel;
       projectLocker.unlock();
 
-      auto spResource = spDbManager->FindResource(m_spCurrentProject, sModelName);
+      auto spResource = spDbManager->FindResourceInProject(m_spCurrentProject, sModelName);
       if (nullptr != spResource)
       {
         QReadLocker resourceLocker(&spResource->m_rwLock);

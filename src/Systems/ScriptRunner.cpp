@@ -16,12 +16,19 @@
 #include <QDebug>
 #include <QFileInfo>
 
+namespace {
+
+}
+
+//----------------------------------------------------------------------------------------
+//
 CScriptRunner::CScriptRunner() :
   CSystemBase(),
   m_spSettings(CApplication::Instance()->Settings()),
   m_spScriptEngine(std::make_unique<QJSEngine>()),
-  m_spSignalEmitter(std::make_shared<CScriptRunnerSignalEmiter>()),
+  m_spSignalEmitterContext(std::make_shared<CScriptRunnerSignalContext>()),
   m_spTimer(nullptr),
+  m_objectMapMutex(),
   m_objectMap(),
   m_runFunction()
 {
@@ -48,9 +55,9 @@ CScriptRunner::~CScriptRunner()
 
 //----------------------------------------------------------------------------------------
 //
-std::shared_ptr<CScriptRunnerSignalEmiter> CScriptRunner::SignalEmmitter()
+std::shared_ptr<CScriptRunnerSignalContext> CScriptRunner::SignalEmmitterContext()
 {
-  return m_spSignalEmitter;
+  return m_spSignalEmitterContext;
 }
 
 //----------------------------------------------------------------------------------------
@@ -59,20 +66,6 @@ void CScriptRunner::Initialize()
 {
   m_spTimer = std::make_shared<QTimer>();
   connect(m_spTimer.get(), &QTimer::timeout, this, &CScriptRunner::SlotRun);
-
-  m_objectMap.insert({"background", std::make_shared<CScriptBackground>(m_spSignalEmitter, m_spScriptEngine.get()) });
-  m_objectMap.insert({"mediaPlayer", std::make_shared<CScriptMediaPlayer>(m_spSignalEmitter, m_spScriptEngine.get()) });
-  m_objectMap.insert({"localStorage", std::make_shared<CScriptStorage>(m_spSignalEmitter, m_spScriptEngine.get()) });
-  m_objectMap.insert({"textBox", std::make_shared<CScriptTextBox>(m_spSignalEmitter, m_spScriptEngine.get()) });
-  m_objectMap.insert({"timer", std::make_shared<CScriptTimer>(m_spSignalEmitter, m_spScriptEngine.get()) });
-  m_objectMap.insert({"thread", std::make_shared<CScriptThread>(m_spSignalEmitter, m_spScriptEngine.get()) });
-  m_objectMap.insert({"icon", std::make_shared<CScriptIcon>(m_spSignalEmitter, m_spScriptEngine.get()) });
-
-  for (auto it = m_objectMap.begin(); m_objectMap.end() != it; ++it)
-  {
-    QJSValue scriptValue = m_spScriptEngine->newQObject(it->second.get());
-    m_spScriptEngine->globalObject().setProperty(it->first, scriptValue);
-  }
 
   SetInitialized(true);
 }
@@ -84,28 +77,21 @@ void CScriptRunner::Deinitialize()
   m_spTimer->stop();
   m_spTimer = nullptr;
 
-  for (auto it = m_objectMap.begin(); m_objectMap.end() != it; ++it)
-  {
-    it->second->Cleanup();
-  }
-
-  m_spScriptEngine->collectGarbage();
-
-  m_objectMap.clear();
+  unregisterComponents();
 
   SetInitialized(false);
 }
 
 //----------------------------------------------------------------------------------------
 //
-void CScriptRunner::SlotLoadScript(tspScene spScene, tspResource spResource)
+void CScriptRunner::loadScript(tspScene spScene, tspResource spResource)
 {
   if (nullptr == spResource || nullptr == spScene ||
       nullptr == spResource->m_spParent)
   {
     QString sError = tr("Script file, Scene or Project is null");
     qCritical() << sError;
-    emit m_spSignalEmitter->SignalShowError(sError, QtMsgType::QtCriticalMsg);
+    emit m_spSignalEmitterContext->showError(sError, QtMsgType::QtCriticalMsg);
     return;
   }
 
@@ -115,7 +101,7 @@ void CScriptRunner::SlotLoadScript(tspScene spScene, tspResource spResource)
   {
     QString sError = tr("Script resource is of wrong type.");
     qCritical() << sError;
-    emit m_spSignalEmitter->SignalShowError(sError, QtMsgType::QtCriticalMsg);
+    emit m_spSignalEmitterContext->showError(sError, QtMsgType::QtCriticalMsg);
     return;
   }
 
@@ -138,12 +124,14 @@ void CScriptRunner::SlotLoadScript(tspScene spScene, tspResource spResource)
       m_spScriptEngine->globalObject().setProperty("scene", sceneValue);
 
       // set current Project
+      m_objectMapMutex.lock();
       for (auto it = m_objectMap.begin(); m_objectMap.end() != it; ++it)
       {
         it->second->SetCurrentProject(spResource->m_spParent);
       }
+      m_objectMapMutex.unlock();
 
-      m_spSignalEmitter->SetScriptExecutionStatus(EScriptExecutionStatus::eRunning);
+      m_spSignalEmitterContext->SetScriptExecutionStatus(CScriptRunnerSignalEmiter::eRunning);
 
       m_runFunction = m_spScriptEngine->evaluate(
         QString("(function() { %1 \n })").arg(sScript));
@@ -155,7 +143,7 @@ void CScriptRunner::SlotLoadScript(tspScene spScene, tspResource spResource)
     {
       QString sError = tr("Script resource file could not be opened.");
       qCritical() << sError;
-      emit m_spSignalEmitter->SignalShowError(sError, QtMsgType::QtCriticalMsg);
+      emit m_spSignalEmitterContext->showError(sError, QtMsgType::QtCriticalMsg);
       return;
     }
   }
@@ -163,9 +151,53 @@ void CScriptRunner::SlotLoadScript(tspScene spScene, tspResource spResource)
   {
     QString sError = tr("Script resource file does not exist.");
     qCritical() << sError;
-    emit m_spSignalEmitter->SignalShowError(sError, QtMsgType::QtCriticalMsg);
+    emit m_spSignalEmitterContext->showError(sError, QtMsgType::QtCriticalMsg);
     return;
   }
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CScriptRunner::registerNewComponent(const QString sName, QJSValue signalEmitter)
+{
+  QMutexLocker locker(&m_objectMapMutex);
+  auto it = m_objectMap.find(sName);
+  if (m_objectMap.end() == it)
+  {
+    if (signalEmitter.isObject())
+    {
+      CScriptRunnerSignalEmiter* pObject =
+          qobject_cast<CScriptRunnerSignalEmiter*>(signalEmitter.toQObject());
+      pObject->Initialize(m_spSignalEmitterContext);
+      std::shared_ptr<CScriptObjectBase> spObject =
+          pObject->CreateNewScriptObject(m_spScriptEngine.get());
+      if (spObject->thread() != thread())
+      {
+        spObject->moveToThread(thread());
+      }
+      m_objectMap.insert({ sName, spObject });
+      QMetaObject::invokeMethod(this, "SlotRegisterObject", Qt::QueuedConnection,
+                                Q_ARG(QString, sName));
+    }
+  }
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CScriptRunner::unregisterComponents()
+{
+  m_objectMapMutex.lock();
+  for (auto it = m_objectMap.begin(); m_objectMap.end() != it; ++it)
+  {
+    it->second->Cleanup();
+  }
+  m_objectMapMutex.unlock();
+
+  m_spScriptEngine->collectGarbage();
+
+  m_objectMapMutex.lock();
+  m_objectMap.clear();
+  m_objectMapMutex.unlock();
 }
 
 //----------------------------------------------------------------------------------------
@@ -184,17 +216,19 @@ void CScriptRunner::SlotRun()
                        " at line" + QString::number(iLineNr) +
                        ":" + ret.toString() + "\n" + sStack;
       qCritical() << sError;
-      emit m_spSignalEmitter->SignalShowError(sError, QtMsgType::QtCriticalMsg);
-      emit m_spSignalEmitter->SignalExecutionError(sException, iLineNr, sStack);
+      emit m_spSignalEmitterContext->showError(sError, QtMsgType::QtCriticalMsg);
+      emit m_spSignalEmitterContext->executionError(sException, iLineNr, sStack);
       return;
     }
 
-    emit m_spSignalEmitter->SignalInterruptLoops();
+    emit m_spSignalEmitterContext->interrupt();
 
+    m_objectMapMutex.lock();
     for (auto it = m_objectMap.begin(); m_objectMap.end() != it; ++it)
     {
       it->second->SetCurrentProject(nullptr);
     }
+    m_objectMapMutex.unlock();
 
     if (ret.isString())
     {
@@ -209,13 +243,28 @@ void CScriptRunner::SlotRun()
   {
     qDebug() << tr("Cannot call java-script.");
 
-    emit m_spSignalEmitter->SignalInterruptLoops();
+    emit m_spSignalEmitterContext->interrupt();
 
+    m_objectMapMutex.lock();
     for (auto it = m_objectMap.begin(); m_objectMap.end() != it; ++it)
     {
       it->second->SetCurrentProject(nullptr);
     }
+    m_objectMapMutex.unlock();
 
     emit SignalScriptRunFinished(false, QString());
+  }
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CScriptRunner::SlotRegisterObject(const QString& sObject)
+{
+  QMutexLocker locker(&m_objectMapMutex);
+  auto it = m_objectMap.find(sObject);
+  if (m_objectMap.end() != it)
+  {
+    QJSValue scriptValue = m_spScriptEngine->newQObject(it->second.get());
+    m_spScriptEngine->globalObject().setProperty(it->first, scriptValue);
   }
 }

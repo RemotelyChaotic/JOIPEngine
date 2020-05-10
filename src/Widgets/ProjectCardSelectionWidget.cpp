@@ -86,6 +86,12 @@ void CProjectCardSelectionWidget::LoadProjects()
       tspProject spProject = spDbManager->FindProject(*it);
       if (nullptr != spProject)
       {
+        if (-1 == m_iSelectedProjectId)
+        {
+          QReadLocker locker(&spProject->m_rwLock);
+          m_iSelectedProjectId = spProject->m_iId;
+        }
+
         CProject* pValue = new CProject(pEngine, spProject);
         m_spUi->pQmlWidget->rootObject()->setProperty("currentlyAddedProject", QVariant::fromValue(pValue));
         QMetaObject::invokeMethod(pRootObject, "onAddProject");

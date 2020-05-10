@@ -2,23 +2,21 @@
 #define SCENEMAINSCREEN_H
 
 #include <QPointer>
+#include <QQuickWidget>
 #include <QWidget>
 #include <memory>
 
 class CBackgroundWidget;
 class CDatabaseManager;
+class CProject;
 class CProjectRunner;
 class CScriptRunner;
 class CSettings;
 namespace Ui {
   class CSceneMainScreen;
 }
-class QGraphicsScene;
-class QGraphicsView;
 struct SProject;
-struct SResource;
 typedef std::shared_ptr<SProject> tspProject;
-typedef std::shared_ptr<SResource> tspResource;
 
 class CSceneMainScreen : public QWidget
 {
@@ -42,21 +40,18 @@ protected:
   void resizeEvent(QResizeEvent* pEvent) override;
 
 private slots:
+  void on_pQmlWidget_statusChanged(QQuickWidget::Status);
+  void on_pQmlWidget_sceneGraphError(QQuickWindow::SceneGraphError error, const QString &message);
   void SlotError(QString sError, QtMsgType type);
-  void SlotLoadFinished();
   void SlotNextSkript();
-  void SlotPauseVideo();
-  void SlotPauseSound();
-  void SlotPlayMedia(tspResource spResource);
-  void SlotSceneSelectReturnValue(qint32 iIndex);
+  void SlotResizeDone();
   void SlotScriptRunFinished(bool bOk, const QString& sRetVal);
-  void SlotShowMedia(tspResource spResource);
-  void SlotStopVideo();
-  void SlotStopSound();
+  void SlotStartLoadingSkript();
 
 private:
   void ConnectAllSignals();
   void DisconnectAllSignals();
+  void InitQmlMain();
   void NextSkript();
 
 private:
@@ -64,9 +59,9 @@ private:
   std::unique_ptr<CProjectRunner>                             m_spProjectRunner;
   std::shared_ptr<CSettings>                                  m_spSettings;
   tspProject                                                  m_spCurrentProject;
+  QPointer<CProject>                                          m_pCurrentProjectWrapper;
   std::weak_ptr<CDatabaseManager>                             m_wpDbManager;
   std::weak_ptr<CScriptRunner>                                m_wpScriptRunner;
-  QPointer<CBackgroundWidget>                                 m_pBackground;
   QPointer<QAction>                                           m_pActionSkip;
   QPointer<QAction>                                           m_pActionQuit;
   bool                                                        m_bInitialized;

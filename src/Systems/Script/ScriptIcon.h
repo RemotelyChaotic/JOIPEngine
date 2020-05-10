@@ -2,18 +2,39 @@
 #define SCRIPTICON_H
 
 #include "ScriptObjectBase.h"
+#include "ScriptRunnerSignalEmiter.h"
 #include <QJSValue>
 #include <memory>
 
 class CDatabaseManager;
+struct SResource;
+typedef std::shared_ptr<SResource> tspResource;
 
+
+class CIconSignalEmitter : public CScriptRunnerSignalEmiter
+{
+  Q_OBJECT
+public:
+  CIconSignalEmitter();
+  ~CIconSignalEmitter();
+
+  virtual std::shared_ptr<CScriptObjectBase> CreateNewScriptObject(QPointer<QJSEngine> pEngine);
+
+signals:
+  void hideIcon(QString sIconIdentifier);
+  void showIcon(tspResource spResource);
+};
+Q_DECLARE_METATYPE(CIconSignalEmitter)
+
+//----------------------------------------------------------------------------------------
+//
 class CScriptIcon : public CScriptObjectBase
 {
   Q_OBJECT
   Q_DISABLE_COPY(CScriptIcon)
 
 public:
-  CScriptIcon(std::shared_ptr<CScriptRunnerSignalEmiter> spEmitter,
+  CScriptIcon(QPointer<CScriptRunnerSignalEmiter> pEmitter,
               QPointer<QJSEngine> pEngine);
   ~CScriptIcon();
 

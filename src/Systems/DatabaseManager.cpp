@@ -473,7 +473,7 @@ QString CDatabaseManager::AddResource(tspProject& spProj, const QUrl& sPath, con
     sFinalName = sPath.fileName();
     QFileInfo info(sFinalName);
     qint32 iCounter = 0;
-    while (FindResource(spProj, sFinalName) != nullptr)
+    while (FindResourceInProject(spProj, sFinalName) != nullptr)
     {
       sFinalName = info.baseName() + QString::number(iCounter) + sPath.fileName().replace(info.baseName(), "");
       iCounter++;
@@ -530,7 +530,7 @@ void CDatabaseManager::ClearResources(tspProject& spProj)
 
 //----------------------------------------------------------------------------------------
 //
-tspResource CDatabaseManager::FindResource(tspProject& spProj, const QString& sName)
+tspResource CDatabaseManager::FindResourceInProject(tspProject& spProj, const QString& sName)
 {
   if (!IsInitialized() || nullptr == spProj) { return nullptr; }
 
@@ -575,10 +575,10 @@ void CDatabaseManager::RenameResource(tspProject& spProj, const QString& sName, 
 {
   if (!IsInitialized() || nullptr == spProj) { return; }
 
-  tspResource spNewResource = FindResource(spProj, sNewName);
+  tspResource spNewResource = FindResourceInProject(spProj, sNewName);
   if (nullptr == spNewResource)
   {
-    tspResource spResource = FindResource(spProj, sName);
+    tspResource spResource = FindResourceInProject(spProj, sName);
 
     QWriteLocker locker(&spProj->m_rwLock);
     auto it = spProj->m_spResourcesMap.find(sName);

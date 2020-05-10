@@ -355,7 +355,7 @@ void CEditorResourceWidget::SlotTitleCardButtonClicked()
       if (pModel->IsResourceType(pProxyModel->mapToSource(index)))
       {
         const QString sName = pModel->data(pProxyModel->mapToSource(index), Qt::DisplayRole).toString();
-        tspResource spResource = spDbManager->FindResource(m_spCurrentProject, sName);
+        tspResource spResource = spDbManager->FindResourceInProject(m_spCurrentProject, sName);
         if (nullptr != spResource)
         {
           QWriteLocker locker(&m_spCurrentProject->m_rwLock);
@@ -393,7 +393,7 @@ void CEditorResourceWidget::SlotMapButtonClicked()
       if (pModel->IsResourceType(pProxyModel->mapToSource(index)))
       {
         const QString sName = pModel->data(pProxyModel->mapToSource(index), Qt::DisplayRole).toString();
-        tspResource spResource = spDbManager->FindResource(m_spCurrentProject, sName);
+        tspResource spResource = spDbManager->FindResourceInProject(m_spCurrentProject, sName);
         if (nullptr != spResource)
         {
           QWriteLocker locker(&m_spCurrentProject->m_rwLock);
@@ -432,7 +432,7 @@ void CEditorResourceWidget::SlotCurrentChanged(const QModelIndex& current,
     auto spDbManager = m_wpDbManager.lock();
     if (nullptr != spDbManager)
     {
-      auto spResource = spDbManager->FindResource(m_spCurrentProject, sName);
+      auto spResource = spDbManager->FindResourceInProject(m_spCurrentProject, sName);
       m_spUi->pResourceDisplayWidget->UnloadResource();
       m_spUi->pResourceDisplayWidget->LoadResource(spResource);
     }

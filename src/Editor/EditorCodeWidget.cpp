@@ -147,8 +147,8 @@ void CEditorCodeWidget::LoadProject(tspProject spProject)
   auto spScriptRunner = m_wpScriptRunner.lock();
   if (nullptr != spScriptRunner)
   {
-    auto spSignalEmmiter = spScriptRunner->SignalEmmitter();
-    connect(spSignalEmmiter.get(), &CScriptRunnerSignalEmiter::SignalExecutionError,
+    auto spSignalEmmiter = spScriptRunner->SignalEmmitterContext();
+    connect(spSignalEmmiter.get(), &CScriptRunnerSignalContext::executionError,
             m_spUi->pCodeEdit, &CScriptEditorWidget::SlotExecutionError, Qt::QueuedConnection);
   }
 }
@@ -169,8 +169,8 @@ void CEditorCodeWidget::UnloadProject()
   auto spScriptRunner = m_wpScriptRunner.lock();
   if (nullptr != spScriptRunner)
   {
-    auto spSignalEmmiter = spScriptRunner->SignalEmmitter();
-    disconnect(spSignalEmmiter.get(), &CScriptRunnerSignalEmiter::SignalExecutionError,
+    auto spSignalEmmiter = spScriptRunner->SignalEmmitterContext();
+    disconnect(spSignalEmmiter.get(), &CScriptRunnerSignalContext::executionError,
             m_spUi->pCodeEdit, &CScriptEditorWidget::SlotExecutionError);
   }
 

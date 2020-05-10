@@ -3,15 +3,18 @@
 
 #include "Enums.h"
 #include <QMainWindow>
+#include <QPointer>
 #include <memory>
 
 class CHelpButtonOverlay;
 class CHelpOverlay;
+class CBackgroundWidget;
 class CSettings;
 class CWindowContext;
 namespace Ui {
   class CMainWindow;
 }
+class QResizeEvent;
 
 class CMainWindow : public QMainWindow
 {
@@ -30,6 +33,9 @@ protected slots:
   void SlotResolutionChanged();
   void SlotSetHelpButtonVisible(bool bVisible);
 
+protected:
+  void resizeEvent(QResizeEvent* pEvt) override;
+
 private:
   void ConnectSlots();
 
@@ -38,6 +44,7 @@ private:
   std::unique_ptr<CHelpOverlay>       m_spHelpOverlay;
   std::shared_ptr<CWindowContext>     m_spWindowContext;
   std::shared_ptr<CSettings>          m_spSettings;
+  QPointer<CBackgroundWidget>         m_pBackground;
   bool                                m_bInitialized;
 };
 

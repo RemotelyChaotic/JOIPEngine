@@ -1,14 +1,32 @@
 #include "ScriptTextBox.h"
 #include "Application.h"
-#include "ScriptRunnerSignalEmiter.h"
 #include "Systems/DatabaseManager.h"
 #include "Systems/Project.h"
 #include "Systems/Resource.h"
 #include <QEventLoop>
 
-CScriptTextBox::CScriptTextBox(std::shared_ptr<CScriptRunnerSignalEmiter> spEmitter,
+CTextBoxSignalEmitter::CTextBoxSignalEmitter() :
+  CScriptRunnerSignalEmiter()
+{
+
+}
+CTextBoxSignalEmitter::~CTextBoxSignalEmitter()
+{
+
+}
+
+//----------------------------------------------------------------------------------------
+//
+std::shared_ptr<CScriptObjectBase> CTextBoxSignalEmitter::CreateNewScriptObject(QPointer<QJSEngine> pEngine)
+{
+  return std::make_shared<CScriptTextBox>(this, pEngine);
+}
+
+//----------------------------------------------------------------------------------------
+//
+CScriptTextBox::CScriptTextBox(QPointer<CScriptRunnerSignalEmiter> pEmitter,
                                QPointer<QJSEngine> pEngine) :
-  CScriptObjectBase(spEmitter, pEngine),
+  CScriptObjectBase(pEmitter, pEngine),
   m_wpDbManager(CApplication::Instance()->System<CDatabaseManager>())
 {
 }
@@ -24,7 +42,7 @@ void CScriptTextBox::setBackgroundColors(QJSValue colors)
   if (!CheckIfScriptCanRun()) { return; }
 
   std::vector<QColor> colorsConverted = GetColors(colors, "setBackgroundColors()");
-  emit m_spSignalEmitter->SignalTextBackgroundColorsChanged(colorsConverted);
+  emit SignalEmitter<CTextBoxSignalEmitter>()->textBackgroundColorsChanged(colorsConverted);
 }
 
 //----------------------------------------------------------------------------------------
@@ -34,7 +52,7 @@ void CScriptTextBox::setTextColors(QJSValue colors)
   if (!CheckIfScriptCanRun()) { return; }
 
   std::vector<QColor> colorsConverted = GetColors(colors, "setTextColors()");
-  emit m_spSignalEmitter->SignalTextColorsChanged(colorsConverted);
+  emit SignalEmitter<CTextBoxSignalEmitter>()->textColorsChanged(colorsConverted);
 }
 
 //----------------------------------------------------------------------------------------
@@ -43,6 +61,7 @@ qint32 CScriptTextBox::showButtonPrompts(QJSValue vsLabels)
 {
   if (!CheckIfScriptCanRun()) { return -1; }
 
+  auto pSignalEmitter = SignalEmitter<CTextBoxSignalEmitter>();
   if (vsLabels.isArray())
   {
     QStringList vsStringLabels;
@@ -51,15 +70,15 @@ qint32 CScriptTextBox::showButtonPrompts(QJSValue vsLabels)
     {
       vsStringLabels << vsLabels.property(static_cast<quint32>(iIndex)).toString();
     }
-    emit m_spSignalEmitter->SignalShowButtonPrompts(vsStringLabels);
+    emit pSignalEmitter->showButtonPrompts(vsStringLabels);
 
     // local loop to wait for answer
     qint32 iReturnValue = -1;
     QEventLoop loop;
     connect(this, &CScriptTextBox::SignalQuitLoop, &loop, &QEventLoop::quit);
-    connect(m_spSignalEmitter.get(), &CScriptRunnerSignalEmiter::SignalInterruptLoops,
+    connect(pSignalEmitter, &CTextBoxSignalEmitter::interrupt,
             &loop, &QEventLoop::quit, Qt::QueuedConnection);
-    connect(m_spSignalEmitter.get(), &CScriptRunnerSignalEmiter::SignalShowButtonReturnValue,
+    connect(pSignalEmitter, &CTextBoxSignalEmitter::showButtonReturnValue,
             this, [this, &iReturnValue](qint32 iIndexSelected)
     {
       iReturnValue = iIndexSelected;
@@ -73,7 +92,7 @@ qint32 CScriptTextBox::showButtonPrompts(QJSValue vsLabels)
   else
   {
     QString sError = tr("Wrong argument-type to showButtonPrompts(). String-array was expected.");
-    emit m_spSignalEmitter->SignalShowError(sError, QtMsgType::QtWarningMsg);
+    emit m_pSignalEmitter->showError(sError, QtMsgType::QtWarningMsg);
   }
 
   return -1;
@@ -85,7 +104,7 @@ void CScriptTextBox::showText(QString sText)
 {
   if (!CheckIfScriptCanRun()) { return; }
 
-  emit m_spSignalEmitter->SignalShowText(sText);
+  emit SignalEmitter<CTextBoxSignalEmitter>()->showText(sText);
 }
 
 //----------------------------------------------------------------------------------------
@@ -94,15 +113,16 @@ QString CScriptTextBox::showInput()
 {
   if (!CheckIfScriptCanRun()) { return QString(); }
 
-  emit m_spSignalEmitter->SignalShowInput();
+  auto pSignalEmitter = SignalEmitter<CTextBoxSignalEmitter>();
+  emit pSignalEmitter->showInput();
 
   // local loop to wait for answer
   QString sReturnValue = QString();
   QEventLoop loop;
   connect(this, &CScriptTextBox::SignalQuitLoop, &loop, &QEventLoop::quit);
-  connect(m_spSignalEmitter.get(), &CScriptRunnerSignalEmiter::SignalInterruptLoops,
+  connect(pSignalEmitter, &CTextBoxSignalEmitter::interrupt,
           &loop, &QEventLoop::quit, Qt::QueuedConnection);
-  connect(m_spSignalEmitter.get(), &CScriptRunnerSignalEmiter::SignalShowInputReturnValue,
+  connect(pSignalEmitter, &CTextBoxSignalEmitter::showInputReturnValue,
           this, [this, &sReturnValue](QString sInput)
   {
     sReturnValue = sInput;
@@ -120,7 +140,7 @@ void CScriptTextBox::clear()
 {
   if (!CheckIfScriptCanRun()) { return; }
 
-  emit m_spSignalEmitter->SignalClearText();
+  emit SignalEmitter<CTextBoxSignalEmitter>()->clearText();
 }
 
 //----------------------------------------------------------------------------------------
@@ -152,7 +172,7 @@ std::vector<QColor> CScriptTextBox::GetColors(const QJSValue& colors, const QStr
         if (viColorComponents.size() != 3)
         {
           QString sError = tr("Argument error in %1. Array of three numbers or string was expected.");
-          emit m_spSignalEmitter->SignalShowError(sError.arg(sSource), QtMsgType::QtWarningMsg);
+          emit m_pSignalEmitter->showError(sError.arg(sSource), QtMsgType::QtWarningMsg);
         }
         else
         {
@@ -163,14 +183,14 @@ std::vector<QColor> CScriptTextBox::GetColors(const QJSValue& colors, const QStr
       else
       {
         QString sError = tr("Wrong argument-type to %1. Array of three numbers or string was expected.");
-        emit m_spSignalEmitter->SignalShowError(sError.arg(sSource), QtMsgType::QtWarningMsg);
+        emit m_pSignalEmitter->showError(sError.arg(sSource), QtMsgType::QtWarningMsg);
       }
     }
   }
   else
   {
     QString sError = tr("Wrong argument-type to %1. Array of arrays of three numbers or array of strings was expected.");
-    emit m_spSignalEmitter->SignalShowError(sError.arg(sSource), QtMsgType::QtWarningMsg);
+    emit m_pSignalEmitter->showError(sError.arg(sSource), QtMsgType::QtWarningMsg);
   }
 
   return colorsRet;

@@ -53,7 +53,7 @@ public:
   // Resource
   QString AddResource(tspProject& spProj, const QUrl& sPath, const EResourceType& type, const QString& sName = QString());
   void ClearResources(tspProject& spProj);
-  tspResource FindResource(tspProject& spProj, const QString& sName);
+  tspResource FindResourceInProject(tspProject& spProj, const QString& sName);
   void RemoveResource(tspProject& spProj, const QString& sName);
   void RenameResource(tspProject& spProj, const QString& sName, const QString& sNewName);
 

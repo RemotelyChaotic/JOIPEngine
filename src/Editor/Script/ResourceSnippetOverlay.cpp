@@ -164,7 +164,7 @@ void CResourceSnippetOverlay::on_pConfirmButton_clicked()
   auto spDbManager = m_wpDbManager.lock();
   if (nullptr != spDbManager && nullptr != m_spCurrentProject)
   {
-    tspResource spResource = spDbManager->FindResource(m_spCurrentProject, m_data.m_sResource);
+    tspResource spResource = spDbManager->FindResourceInProject(m_spCurrentProject, m_data.m_sResource);
     QReadLocker locker(&spResource->m_rwLock);
     type = spResource->m_type;
   }

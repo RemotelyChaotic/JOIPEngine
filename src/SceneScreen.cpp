@@ -87,6 +87,8 @@ void CSceneScreen::on_pOpenExistingProjectButton_clicked()
     }
   }
 
+  emit m_spWindowContext->SignalSetHelpButtonVisible(false);
+
   m_spUi->pMainSceneScreen->UnloadProject();
   m_spUi->pMainSceneScreen->LoadProject(iId);
   m_spUi->pStackedWidget->setCurrentIndex(c_iPageIndexScene);

@@ -286,7 +286,7 @@ void CEditorMainScreen::SlotDisplayResource(const QString& sName)
     if (QFileInfo(sName).suffix() == "js")
     {
       locker.unlock();
-      auto spResource = spDbManager->FindResource(m_spCurrentProject, sName);
+      auto spResource = spDbManager->FindResourceInProject(m_spCurrentProject, sName);
       pWidget->UnloadResource();
       CEditorCodeWidget* pCodeWidget = GetWidget<CEditorCodeWidget>();
       pCodeWidget->LoadResource(spResource);
@@ -295,7 +295,7 @@ void CEditorMainScreen::SlotDisplayResource(const QString& sName)
     else
     {
       locker.unlock();
-      auto spResource = spDbManager->FindResource(m_spCurrentProject, sName);
+      auto spResource = spDbManager->FindResourceInProject(m_spCurrentProject, sName);
       pWidget->UnloadResource();
       pWidget->LoadResource(spResource);
       if (m_spUi->pRightComboBox->itemData(m_spUi->pRightComboBox->currentIndex(), Qt::UserRole).toInt() == EEditorWidget::eResourceDisplay ||

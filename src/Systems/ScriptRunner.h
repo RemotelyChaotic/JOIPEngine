@@ -2,12 +2,13 @@
 #define SCRIPTRUNNER_H
 
 #include "ThreadedSystem.h"
+#include <QMutex>
 #include <QJSEngine>
 #include <QTimer>
 #include <memory>
 
 class CScriptObjectBase;
-class CScriptRunnerSignalEmiter;
+class CScriptRunnerSignalContext;
 class CSettings;
 struct SResource;
 struct SScene;
@@ -23,7 +24,7 @@ public:
   CScriptRunner();
   ~CScriptRunner() override;
 
-  std::shared_ptr<CScriptRunnerSignalEmiter> SignalEmmitter();
+  std::shared_ptr<CScriptRunnerSignalContext> SignalEmmitterContext();
 
 signals:
   void SignalScriptRunFinished(bool bOk, const QString& sRetVal);
@@ -31,14 +32,21 @@ signals:
 public slots:
   void Initialize() override;
   void Deinitialize() override;
-  void SlotLoadScript(tspScene spScene, tspResource spResource);
+
+  void loadScript(tspScene spScene, tspResource spResource);
+  void registerNewComponent(const QString sName, QJSValue signalEmitter);
+  void unregisterComponents();
+
+private slots:
   void SlotRun();
+  void SlotRegisterObject(const QString& sObject);
 
 private:
   std::shared_ptr<CSettings>                     m_spSettings;
   std::unique_ptr<QJSEngine>                     m_spScriptEngine;
-  std::shared_ptr<CScriptRunnerSignalEmiter>     m_spSignalEmitter;
+  std::shared_ptr<CScriptRunnerSignalContext>    m_spSignalEmitterContext;
   std::shared_ptr<QTimer>                        m_spTimer;
+  mutable QMutex                                 m_objectMapMutex;
   std::map<QString /*name*/,
            std::shared_ptr<CScriptObjectBase>>   m_objectMap;
   QJSValue                                       m_runFunction;

@@ -118,7 +118,7 @@ SOURCES += \
     src/Player/FlowLayout.cpp \
     src/Player/TimerDisplayWidget.cpp \
     src/Player/TimerWidget.cpp \
-    src/Player/BackgroundWidget.cpp \
+    src/Widgets/BackgroundWidget.cpp \
     src/Style.cpp \
     src/Widgets/MenuButton.cpp \
     src/Widgets/TitleLabel.cpp \
@@ -209,7 +209,7 @@ HEADERS += \
     src/Player/FlowLayout.h \
     src/Player/TimerDisplayWidget.h \
     src/Player/TimerWidget.h \
-    src/Player/BackgroundWidget.h \
+    src/Widgets/BackgroundWidget.h \
     src/Constants.h \
     src/Style.h \
     src/Widgets/MenuButton.h \

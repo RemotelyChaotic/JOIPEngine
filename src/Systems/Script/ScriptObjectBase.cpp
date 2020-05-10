@@ -2,11 +2,11 @@
 #include "ScriptRunnerSignalEmiter.h"
 #include "Systems/Project.h"
 
-CScriptObjectBase::CScriptObjectBase(std::shared_ptr<CScriptRunnerSignalEmiter> spEmitter,
+CScriptObjectBase::CScriptObjectBase(QPointer<CScriptRunnerSignalEmiter> pEmitter,
                                      QPointer<QJSEngine> pEngine) :
   QObject(nullptr),
-  m_spSignalEmitter(spEmitter),
   m_spProject(nullptr),
+  m_pSignalEmitter(pEmitter),
   m_pEngine(pEngine)
 {
 
@@ -35,7 +35,12 @@ void CScriptObjectBase::SetCurrentProject(tspProject spProject)
 //
 bool CScriptObjectBase::CheckIfScriptCanRun()
 {
-  if (m_spSignalEmitter->ScriptExecutionStatus()._to_integral() == EScriptExecutionStatus::eStopped)
+  if (nullptr == m_pSignalEmitter)
+  {
+    return false;
+  }
+
+  if (m_pSignalEmitter->ScriptExecutionStatus() == CScriptRunnerSignalEmiter::eStopped)
   {
     return false;
   }

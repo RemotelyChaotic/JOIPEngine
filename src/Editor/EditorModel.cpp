@@ -350,7 +350,7 @@ void CEditorModel::LoadProject(qint32 iId)
       const QString sModelName = m_spCurrentProject->m_sSceneModel;
       projectLocker.unlock();
 
-      auto spResource = spDbManager->FindResource(m_spCurrentProject, sModelName);
+      auto spResource = spDbManager->FindResourceInProject(m_spCurrentProject, sModelName);
       if (nullptr != spResource)
       {
         QReadLocker resourceLocker(&spResource->m_rwLock);
@@ -439,7 +439,7 @@ void CEditorModel::SaveProject()
     }
     projectLocker.unlock();
 
-    auto spResource = spDbManager->FindResource(m_spCurrentProject, "SceneModel.flow");
+    auto spResource = spDbManager->FindResourceInProject(m_spCurrentProject, "SceneModel.flow");
     if (nullptr != spResource)
     {
       QReadLocker resourceLocker(&spResource->m_rwLock);

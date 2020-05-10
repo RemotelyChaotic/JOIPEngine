@@ -127,5 +127,8 @@
         <file>resources/qml/ProjectCardSelection.qml</file>
         <file>resources/qml/ImageResourceView.qml</file>
         <file>resources/qml/ProjectCardDelegate.qml</file>
+        <file>resources/qml/PlayerMain.qml</file>
+        <file>resources/qml/PlayerBackground.qml</file>
+        <file>resources/qml/PlayerComponentRegistrator.qml</file>
     </qresource>
 </RCC>

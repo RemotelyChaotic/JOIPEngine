@@ -9,6 +9,7 @@
 #include "Settings.h"
 #include "SettingsScreen.h"
 #include "WindowContext.h"
+#include "Widgets/BackgroundWidget.h"
 #include "Widgets/HelpOverlay.h"
 #include "ui_MainWindow.h"
 #include <QDesktopWidget>
@@ -20,11 +21,15 @@ CMainWindow::CMainWindow(QWidget* pParent) :
   m_spHelpButtonOverlay(std::make_unique<CHelpButtonOverlay>(this)),
   m_spHelpOverlay(nullptr),
   m_spWindowContext(std::make_shared<CWindowContext>()),
+  m_pBackground(new CBackgroundWidget(this)),
   m_bInitialized(false)
 {
   m_spHelpOverlay.reset(new CHelpOverlay(m_spHelpButtonOverlay.get(), this));
   m_spUi->setupUi(this);
   setWindowFlags(Qt::FramelessWindowHint);
+
+  m_pBackground->setFixedSize(size());
+  m_pBackground->lower();
 }
 
 CMainWindow::~CMainWindow()
@@ -138,6 +143,14 @@ void CMainWindow::SlotSetHelpButtonVisible(bool bVisible)
   {
     m_spHelpButtonOverlay->Hide();
   }
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CMainWindow::resizeEvent(QResizeEvent* pEvent)
+{
+  m_pBackground->setFixedSize(pEvent->size());
+  m_pBackground->setGeometry(0, 0, pEvent->size().width(), pEvent->size().height());
 }
 
 //----------------------------------------------------------------------------------------

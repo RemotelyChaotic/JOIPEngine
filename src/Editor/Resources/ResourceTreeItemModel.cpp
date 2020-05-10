@@ -369,7 +369,7 @@ void CResourceTreeItemModel::SlotResourceAdded(qint32 iProjId, const QString& sN
     if (iProjId == iThisId)
     {
       auto spDbManager = m_wpDbManager.lock();
-      tspResource spResource = spDbManager->FindResource(m_spProject, sName);
+      tspResource spResource = spDbManager->FindResourceInProject(m_spProject, sName);
       spResource->m_rwLock.lockForRead();
       EResourceType type = spResource->m_type;
       QUrl sPath = spResource->m_sPath;

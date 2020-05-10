@@ -1,11 +1,31 @@
 #include "ScriptTimer.h"
-#include "ScriptRunnerSignalEmiter.h"
 
 #include <QEventLoop>
 
-CScriptTimer::CScriptTimer(std::shared_ptr<CScriptRunnerSignalEmiter> spEmitter,
+CTimerSignalEmitter::CTimerSignalEmitter() :
+  CScriptRunnerSignalEmiter()
+{
+
+}
+CTimerSignalEmitter::~CTimerSignalEmitter()
+{
+
+}
+
+
+//----------------------------------------------------------------------------------------
+//
+std::shared_ptr<CScriptObjectBase> CTimerSignalEmitter::CreateNewScriptObject(QPointer<QJSEngine> pEngine)
+{
+  return std::make_shared<CScriptTimer>(this, pEngine);
+}
+
+
+//----------------------------------------------------------------------------------------
+//
+CScriptTimer::CScriptTimer(QPointer<CScriptRunnerSignalEmiter> pEmitter,
                            QPointer<QJSEngine> pEngine) :
-  CScriptObjectBase(spEmitter, pEngine)
+  CScriptObjectBase(pEmitter, pEngine)
 {
 
 }
@@ -20,7 +40,7 @@ CScriptTimer::~CScriptTimer()
 void CScriptTimer::hide()
 {
   if (!CheckIfScriptCanRun()) { return; }
-  emit m_spSignalEmitter->SignalHideTimer();
+  emit SignalEmitter<CTimerSignalEmitter>()->hideTimer();
 }
 
 //----------------------------------------------------------------------------------------
@@ -28,7 +48,7 @@ void CScriptTimer::hide()
 void CScriptTimer::setTime(qint32 iTimeS)
 {
   if (!CheckIfScriptCanRun()) { return; }
-  emit m_spSignalEmitter->SignalSetTime(iTimeS);
+  emit SignalEmitter<CTimerSignalEmitter>()->setTime(iTimeS);
 }
 
 //----------------------------------------------------------------------------------------
@@ -36,7 +56,7 @@ void CScriptTimer::setTime(qint32 iTimeS)
 void CScriptTimer::setTimeVisible(bool bVisible)
 {
   if (!CheckIfScriptCanRun()) { return; }
-  emit m_spSignalEmitter->SignalSetTimeVisible(bVisible);
+  emit SignalEmitter<CTimerSignalEmitter>()->setTimeVisible(bVisible);
 }
 
 //----------------------------------------------------------------------------------------
@@ -44,7 +64,7 @@ void CScriptTimer::setTimeVisible(bool bVisible)
 void CScriptTimer::show()
 {
   if (!CheckIfScriptCanRun()) { return; }
-  emit m_spSignalEmitter->SignalShowTimer();
+  emit SignalEmitter<CTimerSignalEmitter>()->showTimer();
 }
 
 //----------------------------------------------------------------------------------------
@@ -52,7 +72,7 @@ void CScriptTimer::show()
 void CScriptTimer::start()
 {
   if (!CheckIfScriptCanRun()) { return; }
-  emit m_spSignalEmitter->SignalStartTimer();
+  emit SignalEmitter<CTimerSignalEmitter>()->startTimer();
 }
 
 //----------------------------------------------------------------------------------------
@@ -60,7 +80,7 @@ void CScriptTimer::start()
 void CScriptTimer::stop()
 {
   if (!CheckIfScriptCanRun()) { return; }
-  emit m_spSignalEmitter->SignalStopTimer();
+  emit SignalEmitter<CTimerSignalEmitter>()->stopTimer();
 }
 
 //----------------------------------------------------------------------------------------
@@ -69,12 +89,13 @@ void CScriptTimer::waitForTimer()
 {
   if (!CheckIfScriptCanRun()) { return; }
 
+  auto pSignalEmitter = SignalEmitter<CTimerSignalEmitter>();
   QEventLoop loop;
-  connect(m_spSignalEmitter.get(), &CScriptRunnerSignalEmiter::SignalTimerFinished,
+  connect(pSignalEmitter, &CTimerSignalEmitter::timerFinished,
           &loop, &QEventLoop::quit, Qt::QueuedConnection);
-  connect(m_spSignalEmitter.get(), &CScriptRunnerSignalEmiter::SignalInterruptLoops,
+  connect(pSignalEmitter, &CTimerSignalEmitter::interrupt,
           &loop, &QEventLoop::quit, Qt::QueuedConnection);
-  emit m_spSignalEmitter->SignalWaitForTimer();
+  emit pSignalEmitter->waitForTimer();
   loop.exec();
   loop.disconnect();
 }

@@ -11,6 +11,15 @@
 #include "Systems/ScriptRunner.h"
 #include "Systems/ThreadedSystem.h"
 
+// needed to register to qml
+#include "Systems/Script/ScriptBackground.h"
+#include "Systems/Script/ScriptIcon.h"
+#include "Systems/Script/ScriptMediaPlayer.h"
+#include "Systems/Script/ScriptStorage.h"
+#include "Systems/Script/ScriptTextBox.h"
+#include "Systems/Script/ScriptThread.h"
+#include "Systems/Script/ScriptTimer.h"
+// needed to register to qml
 #include <filters/regexpfilter.h>
 #include <sorters/stringsorter.h>
 #include <qqmlsortfilterproxymodel.h>
@@ -162,9 +171,26 @@ void CApplication::RegisterQmlTypes()
       return spSettings.get();
   });
 
+  qmlRegisterSingletonType<CScriptRunner>("JOIP.core", 1, 1, "ScriptRunner",
+                                      [this](QQmlEngine *engine, QJSEngine *scriptEngine) -> QObject*
+  {
+      Q_UNUSED(scriptEngine)
+      std::shared_ptr<CScriptRunner> spScriptRunner = System<CScriptRunner>().lock();
+      engine->setObjectOwnership(spScriptRunner.get(), QQmlEngine::CppOwnership);
+      return spScriptRunner.get();
+  });
+
   qmlRegisterUncreatableType<CProject>("JOIP.db", 1, 1, "Project", "");
   qmlRegisterUncreatableType<CScene>("JOIP.db", 1, 1, "Scene", "");
   qmlRegisterUncreatableType<CResource>("JOIP.db", 1, 1, "Resource", "");
+
+  qmlRegisterType<CBackgroundSignalEmitter>("JOIP.script", 1, 1, "BackgroundSignalEmitter");
+  qmlRegisterType<CIconSignalEmitter>("JOIP.script", 1, 1, "IconSignalEmitter");
+  qmlRegisterType<CMediaPlayerSignalEmitter>("JOIP.script", 1, 1, "MediaPlayerSignalEmitter");
+  qmlRegisterType<CStorageSignalEmitter>("JOIP.script", 1, 1, "StorageSignalEmitter");
+  qmlRegisterType<CTextBoxSignalEmitter>("JOIP.script", 1, 1, "TextBoxSignalEmitter");
+  qmlRegisterType<CThreadSignalEmitter>("JOIP.script", 1, 1, "ThreadSignalEmitter");
+  qmlRegisterType<CTimerSignalEmitter>("JOIP.script", 1, 1, "TimerSignalEmitter");
 
   qmlRegisterUncreatableType<qqsfpm::Filter>("SortFilterProxyModel", 0, 2, "Filter", "Filter is abstract and cannot be created.");
   qmlRegisterUncreatableType<qqsfpm::Sorter>("SortFilterProxyModel", 0, 2, "Sorter", "Sorter is abstract and cannot be created.");

@@ -2,12 +2,31 @@
 #include "ScriptRunnerSignalEmiter.h"
 #include <QDebug>
 
-CScriptStorage::CScriptStorage(std::shared_ptr<CScriptRunnerSignalEmiter> spEmitter,
+CStorageSignalEmitter::CStorageSignalEmitter() :
+  CScriptRunnerSignalEmiter()
+{
+
+}
+CStorageSignalEmitter::~CStorageSignalEmitter()
+{
+
+}
+
+//----------------------------------------------------------------------------------------
+//
+std::shared_ptr<CScriptObjectBase> CStorageSignalEmitter::CreateNewScriptObject(QPointer<QJSEngine> pEngine)
+{
+  return std::make_shared<CScriptStorage>(this, pEngine);
+}
+
+//----------------------------------------------------------------------------------------
+//
+CScriptStorage::CScriptStorage(QPointer<CScriptRunnerSignalEmiter> pEmitter,
                                QPointer<QJSEngine> pEngine) :
-  CScriptObjectBase(spEmitter, pEngine),
+  CScriptObjectBase(pEmitter, pEngine),
   m_storage()
 {
-  connect(m_spSignalEmitter.get(), &CScriptRunnerSignalEmiter::SignalClearStorage,
+  connect(m_pSignalEmitter, &CScriptRunnerSignalEmiter::clearStorage,
           this, &CScriptStorage::SlotClearStorage, Qt::QueuedConnection);
 }
 
@@ -40,7 +59,7 @@ void CScriptStorage::store(QString sId, QJSValue value)
   {
     QString sError = tr("Storing 'null' or 'undefined' object as '%1'.");
     qWarning() << sError.arg(sId);
-    emit m_spSignalEmitter->SignalShowError(sError.arg(sId), QtMsgType::QtWarningMsg);
+    emit m_pSignalEmitter->showError(sError.arg(sId), QtMsgType::QtWarningMsg);
   }
 
   m_storage.insert({sId, value});

@@ -16,20 +16,25 @@ class CScriptObjectBase : public QObject
   Q_DISABLE_COPY(CScriptObjectBase)
 
 public:
-  CScriptObjectBase(std::shared_ptr<CScriptRunnerSignalEmiter> spEmitter,
+  CScriptObjectBase(QPointer<CScriptRunnerSignalEmiter> pEmitter,
                     QPointer<QJSEngine> pEngine);
   ~CScriptObjectBase();
 
   void Cleanup();
   void SetCurrentProject(tspProject spProject);
 
+  template<typename T> T* SignalEmitter()
+  {
+    return qobject_cast<T*>(m_pSignalEmitter);
+  }
+
 protected:
   bool CheckIfScriptCanRun();
 
   virtual void Cleanup_Impl();
 
-  std::shared_ptr<CScriptRunnerSignalEmiter> m_spSignalEmitter;
   tspProject                                 m_spProject;
+  QPointer<CScriptRunnerSignalEmiter>        m_pSignalEmitter;
   QPointer<QJSEngine>                        m_pEngine;
 };
 
