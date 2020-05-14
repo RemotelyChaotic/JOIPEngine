@@ -23,12 +23,7 @@ CDatabaseManager::CDatabaseManager() :
   m_spSettings(CApplication::Instance()->Settings()),
   m_vspProjectDatabase()
 {
-  qRegisterMetaType<CResource*>();
-  qRegisterMetaType<tspResource>();
-  qRegisterMetaType<CScene*>();
-  qRegisterMetaType<tspScene>();
-  qRegisterMetaType<CProject*>();
-  qRegisterMetaType<tspProject>();
+
 }
 
 CDatabaseManager::~CDatabaseManager()

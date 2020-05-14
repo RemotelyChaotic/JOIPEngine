@@ -4,6 +4,7 @@
 #include "Systems/Project.h"
 #include "Systems/Resource.h"
 #include <QEventLoop>
+#include <QDebug>
 
 CTextBoxSignalEmitter::CTextBoxSignalEmitter() :
   CScriptRunnerSignalEmiter()

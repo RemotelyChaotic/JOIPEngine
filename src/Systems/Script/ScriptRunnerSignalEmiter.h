@@ -47,6 +47,7 @@ protected:
 };
 
 Q_DECLARE_METATYPE(CScriptRunnerSignalEmiter)
+Q_DECLARE_METATYPE(QtMsgType)
 
 
 //----------------------------------------------------------------------------------------

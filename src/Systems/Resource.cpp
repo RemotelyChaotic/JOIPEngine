@@ -199,7 +199,7 @@ QStringList ImageFormats()
 //
 QStringList OtherFormats()
 {
-  return QStringList() << "*.json" << "*.xml" << "*.js" << "*.flow";
+  return QStringList() << "*.json" << "*.xml" << "*.js" << ".proj" << "*.flow" << ".layout";
 }
 
 //----------------------------------------------------------------------------------------

@@ -28,6 +28,7 @@ struct SProject : public ISerializable, std::enable_shared_from_this<SProject>
   QString                   m_sTitleCard;
   QString                   m_sMap;
   QString                   m_sSceneModel;
+  QString                   m_sPlayerLayout;
   bool                      m_bUsesWeb;
   bool                      m_bNeedsCodecs;
   QStringList               m_vsKinks;
@@ -60,6 +61,8 @@ class CProject : public QObject
   Q_PROPERTY(QString describtion       READ getDescribtion       )
   Q_PROPERTY(QString titleCard         READ getTitleCard         )
   Q_PROPERTY(QString map               READ getMap               )
+  Q_PROPERTY(QString sceneModel        READ getSceneModel        )
+  Q_PROPERTY(QString playerLayout      READ getPlayerLayout      )
   Q_PROPERTY(QStringList kinks         READ getKinks             )
   Q_PROPERTY(bool    isUsingWeb        READ isUsingWeb           )
   Q_PROPERTY(bool    isUsingCodecs     READ isUsingCodecs        )
@@ -78,6 +81,8 @@ public:
   QString getDescribtion();
   QString getTitleCard();
   QString getMap();
+  QString getSceneModel();
+  QString getPlayerLayout();
   QStringList getKinks();
   bool isUsingWeb();
   bool isUsingCodecs();

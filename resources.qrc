@@ -130,5 +130,14 @@
         <file>resources/qml/PlayerMain.qml</file>
         <file>resources/qml/PlayerBackground.qml</file>
         <file>resources/qml/PlayerComponentRegistrator.qml</file>
+        <file>resources/qml/PlayerIcons.qml</file>
+        <file>resources/qml/PlayerMediaPlayer.qml</file>
+        <file>resources/qml/PlayerTextBox.qml</file>
+        <file>resources/qml/PlayerTimer.qml</file>
+        <file>resources/qml/PlayerDefaultLayout.qml</file>
+        <file>resources/qml/TextBoxButtonsDelegate.qml</file>
+        <file>resources/qml/TextBoxInputDelegate.qml</file>
+        <file>resources/qml/TextBoxTextDelegate.qml</file>
+        <file>resources/qml/TextBoxSpacerDelegate.qml</file>
     </qresource>
 </RCC>

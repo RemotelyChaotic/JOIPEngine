@@ -432,14 +432,14 @@ void CEditorModel::SaveProject()
         m_spCurrentProject->m_sSceneModel.isEmpty())
     {
       projectLocker.unlock();
-      spDbManager->AddResource(m_spCurrentProject, QUrl::fromLocalFile("SceneModel.flow"),
-                               EResourceType::eOther, "SceneModel.flow");
+      spDbManager->AddResource(m_spCurrentProject, QUrl::fromLocalFile(joip_resource::c_sSceneModelFile),
+                               EResourceType::eOther, joip_resource::c_sSceneModelFile);
       projectLocker.relock();
-      m_spCurrentProject->m_sSceneModel = "SceneModel.flow";
+      m_spCurrentProject->m_sSceneModel = joip_resource::c_sSceneModelFile;
     }
     projectLocker.unlock();
 
-    auto spResource = spDbManager->FindResourceInProject(m_spCurrentProject, "SceneModel.flow");
+    auto spResource = spDbManager->FindResourceInProject(m_spCurrentProject, joip_resource::c_sSceneModelFile);
     if (nullptr != spResource)
     {
       QReadLocker resourceLocker(&spResource->m_rwLock);

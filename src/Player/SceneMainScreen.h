@@ -43,8 +43,10 @@ private slots:
   void on_pQmlWidget_statusChanged(QQuickWidget::Status);
   void on_pQmlWidget_sceneGraphError(QQuickWindow::SceneGraphError error, const QString &message);
   void SlotError(QString sError, QtMsgType type);
+  void SlotExecutionError(QString sException, qint32 iLine, QString sStack);
   void SlotNextSkript();
   void SlotResizeDone();
+  void SlotSceneSelectReturnValue(int iIndex);
   void SlotScriptRunFinished(bool bOk, const QString& sRetVal);
   void SlotStartLoadingSkript();
 

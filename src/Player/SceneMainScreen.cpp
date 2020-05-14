@@ -1,6 +1,5 @@
 #include "SceneMainScreen.h"
 #include "Application.h"
-#include "BackgroundWidget.h"
 #include "Constants.h"
 #include "ProjectRunner.h"
 #include "Settings.h"
@@ -9,6 +8,7 @@
 #include "Systems/Project.h"
 #include "Systems/ScriptRunner.h"
 #include "Systems/Script/ScriptRunnerSignalEmiter.h"
+#include "Widgets/BackgroundWidget.h"
 #include "ui_SceneMainScreen.h"
 
 #include <QAction>
@@ -73,12 +73,6 @@ void CSceneMainScreen::Initialize()
   //m_spUi->pResourceDisplay->SetMargins(10, 10, 10, 10);
   //m_spUi->pSoundEmmiter->setVisible(false);
   //
-  //QGraphicsDropShadowEffect* pShadow = new QGraphicsDropShadowEffect(m_spUi->pResourceDisplay);
-  //pShadow->setBlurRadius(5);
-  //pShadow->setXOffset(5);
-  //pShadow->setYOffset(5);
-  //pShadow->setColor(Qt::black);
-  //m_spUi->pResourceDisplay->setGraphicsEffect(pShadow);
   //
   //// signals from widgets
   //connect(m_pBackground, &CBackgroundWidget::SignalError,
@@ -87,8 +81,8 @@ void CSceneMainScreen::Initialize()
   //        this, &CSceneMainScreen::SlotError);
   //connect(m_spUi->pInfoDisplay, &CInformationWidget::SignalQuit,
   //        this, &CSceneMainScreen::SlotQuit);
-  //connect(m_spProjectRunner.get(), &CProjectRunner::SignalError,
-  //        this, &CSceneMainScreen::SlotError);
+  connect(m_spProjectRunner.get(), &CProjectRunner::SignalError,
+          this, &CSceneMainScreen::SlotError);
   //connect(m_spUi->pTextBoxDisplay, &CTextBoxWidget::SignalShowSceneSelectReturnValue,
   //        this, &CSceneMainScreen::SlotSceneSelectReturnValue);
   //connect(m_spUi->pResourceDisplay, &CResourceDisplayWidget::SignalLoadFinished,
@@ -211,12 +205,6 @@ void CSceneMainScreen::resizeEvent(QResizeEvent* pEvent)
     QMetaObject::invokeMethod(this, "SlotResizeDone", Qt::QueuedConnection);
   }
   pEvent->accept();
-
-  //m_spUi->pResourceDisplay->setFixedSize(pEvent->size().width() * 2 / 4,
-  //                                       pEvent->size().height() * 2 / 3);
-  //
-  //m_pBackground->setFixedSize(pEvent->size());
-  //m_pBackground->setGeometry(0, 0, pEvent->size().width(), pEvent->size().height());
 }
 
 //----------------------------------------------------------------------------------------
@@ -250,35 +238,45 @@ void CSceneMainScreen::SlotError(QString sError, QtMsgType type)
 {
   if (!m_bInitialized || nullptr == m_spCurrentProject) { return; }
 
-  //std::vector<QColor> vBgColors = m_spUi->pTextBoxDisplay->BackgroundColors();
-  //std::vector<QColor> vTextColors = m_spUi->pTextBoxDisplay->TextColors();
-  //
-  //QString sPrefix;
-  //switch(type)
-  //{
-  //case QtMsgType::QtInfoMsg:
-  //case QtMsgType::QtDebugMsg:
-  //  sPrefix = tr("Info");
-  //  m_spUi->pTextBoxDisplay->SlotTextColorsChanged({QColor(WHITE)});
-  //  m_spUi->pTextBoxDisplay->SlotTextBackgroundColorsChanged({QColor(BLACK)});
-  //  break;
-  //case QtMsgType::QtWarningMsg:
-  //  sPrefix = tr("Warning");
-  //  m_spUi->pTextBoxDisplay->SlotTextColorsChanged({QColor(YELLOW)});
-  //  m_spUi->pTextBoxDisplay->SlotTextBackgroundColorsChanged({QColor(BLACK)});
-  //  break;
-  //case QtMsgType::QtCriticalMsg:
-  //case QtMsgType::QtFatalMsg:
-  //  sPrefix = tr("Error");
-  //  m_spUi->pTextBoxDisplay->SlotTextColorsChanged({QColor(RED)});
-  //  m_spUi->pTextBoxDisplay->SlotTextBackgroundColorsChanged({QColor(RED)});
-  //  break;
-  //}
-  //
-  //m_spUi->pTextBoxDisplay->SlotShowText(QString("%1: %2").arg(sPrefix).arg(sError));
-  //
-  //m_spUi->pTextBoxDisplay->SlotTextColorsChanged(vTextColors);
-  //m_spUi->pTextBoxDisplay->SlotTextBackgroundColorsChanged(vBgColors);
+  std::vector<QColor> vBgColors;
+  std::vector<QColor> vTextColors;
+
+  QString sPrefix;
+  switch(type)
+  {
+  case QtMsgType::QtInfoMsg:
+  case QtMsgType::QtDebugMsg:
+    sPrefix = tr("Info");
+    vTextColors.push_back({QColor(WHITE)});
+    vBgColors.push_back({QColor(BLACK)});
+    break;
+  case QtMsgType::QtWarningMsg:
+    sPrefix = tr("Warning");
+    vTextColors.push_back({QColor(YELLOW)});
+    vBgColors.push_back({QColor(BLACK)});
+    break;
+  case QtMsgType::QtCriticalMsg:
+  case QtMsgType::QtFatalMsg:
+    sPrefix = tr("Error");
+    vTextColors.push_back({QColor(RED)});
+    vBgColors.push_back({QColor(RED)});
+    break;
+  }
+
+  QQuickItem* pRootObject =  m_spUi->pQmlWidget->rootObject();
+  QMetaObject::invokeMethod(pRootObject, "showText",
+                            Q_ARG(QVariant, QVariant(QString("%1: %2").arg(sPrefix).arg(sError))),
+                            Q_ARG(QVariant, QVariant::fromValue(vTextColors)),
+                            Q_ARG(QVariant, QVariant::fromValue(vBgColors)));
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CSceneMainScreen::SlotExecutionError(QString sException, qint32 iLine, QString sStack)
+{
+  if (!m_bInitialized || nullptr == m_spCurrentProject) { return; }
+
+  SlotError(QString(tr("%1 on line %2 (%3)")).arg(sException).arg(iLine).arg(sStack), QtMsgType::QtCriticalMsg);
 }
 
 //----------------------------------------------------------------------------------------
@@ -380,47 +378,47 @@ void CSceneMainScreen::SlotResizeDone()
 
 //----------------------------------------------------------------------------------------
 //
-//void CSceneMainScreen::SlotSceneSelectReturnValue(qint32 iIndex)
-//{
-//  if (!m_bInitialized || nullptr == m_spCurrentProject) { return; }
-//  auto spDbManager = m_wpDbManager.lock();
-//  if (nullptr == spDbManager) { return; }
-//
-//  QStringList sScenes = m_spProjectRunner->PossibleScenes();
-//  if (0 <= iIndex && sScenes.size() > iIndex)
-//  {
-//    tspScene spScene = m_spProjectRunner->NextScene(sScenes[iIndex]);
-//    if (nullptr != spScene)
-//    {
-//      // load script
-//      auto spScriptRunner = m_wpScriptRunner.lock();
-//      if (nullptr != spScriptRunner && nullptr != spDbManager)
-//      {
-//        QReadLocker lockerScene(&spScene->m_rwLock);
-//        QString sScript = spScene->m_sScript;
-//        lockerScene.unlock();
-//        QMetaObject::invokeMethod(spScriptRunner.get(), "loadScript", Qt::QueuedConnection,
-//                                  Q_ARG(tspScene, spScene),
-//                                  Q_ARG(tspResource, spDbManager->FindResourceInProject(m_spCurrentProject, sScript)));
-//      }
-//      else
-//      {
-//        qWarning() << tr("Script-Runner or Database-Manager missing.");
-//        SlotQuit();
-//      }
-//    }
-//    else
-//    {
-//      qInfo() << tr("Next scene is null or end.");
-//      SlotQuit();
-//    }
-//  }
-//  else
-//  {
-//    qWarning() << tr("No more scenes to load was unexpected.");
-//    SlotQuit();
-//  }
-//}
+void CSceneMainScreen::SlotSceneSelectReturnValue(int iIndex)
+{
+  if (!m_bInitialized || nullptr == m_spCurrentProject) { return; }
+  auto spDbManager = m_wpDbManager.lock();
+  if (nullptr == spDbManager) { return; }
+
+  QStringList sScenes = m_spProjectRunner->PossibleScenes();
+  if (0 <= iIndex && sScenes.size() > iIndex)
+  {
+    tspScene spScene = m_spProjectRunner->NextScene(sScenes[iIndex]);
+    if (nullptr != spScene)
+    {
+      // load script
+      auto spScriptRunner = m_wpScriptRunner.lock();
+      if (nullptr != spScriptRunner && nullptr != spDbManager)
+      {
+        QReadLocker lockerScene(&spScene->m_rwLock);
+        QString sScript = spScene->m_sScript;
+        lockerScene.unlock();
+        QMetaObject::invokeMethod(spScriptRunner.get(), "loadScript", Qt::QueuedConnection,
+                                  Q_ARG(tspScene, spScene),
+                                  Q_ARG(tspResource, spDbManager->FindResourceInProject(m_spCurrentProject, sScript)));
+      }
+      else
+      {
+        qWarning() << tr("Script-Runner or Database-Manager missing.");
+        SlotQuit();
+      }
+    }
+    else
+    {
+      qInfo() << tr("Next scene is null or end.");
+      SlotQuit();
+    }
+  }
+  else
+  {
+    qWarning() << tr("No more scenes to load was unexpected.");
+    SlotQuit();
+  }
+}
 
 //----------------------------------------------------------------------------------------
 //
@@ -487,16 +485,23 @@ void CSceneMainScreen::SlotStartLoadingSkript()
 //
 void CSceneMainScreen::ConnectAllSignals()
 {
-  connect(m_spUi->pQmlWidget->rootObject(), SIGNAL(startLoadingSkript()),
-          this, SLOT(SlotStartLoadingSkript()));
+  QQuickItem* pRootObject =  m_spUi->pQmlWidget->rootObject();
+  connect(pRootObject, SIGNAL(startLoadingSkript()), this, SLOT(SlotStartLoadingSkript()));
 
   auto spScriptRunner = m_wpScriptRunner.lock();
   if (nullptr != spScriptRunner)
   {
     auto spSignalEmmiterContext = spScriptRunner->SignalEmmitterContext();
 
+    connect(spSignalEmmiterContext.get(), &CScriptRunnerSignalContext::showError,
+            this, &CSceneMainScreen::SlotError, Qt::QueuedConnection);
+    connect(spSignalEmmiterContext.get(), &CScriptRunnerSignalContext::executionError,
+            this, &CSceneMainScreen::SlotExecutionError, Qt::QueuedConnection);
     connect(spScriptRunner.get(), &CScriptRunner::SignalScriptRunFinished,
             this, &CSceneMainScreen::SlotScriptRunFinished, Qt::QueuedConnection);
+
+    bool bOk = true;
+    Q_UNUSED(bOk)
 
     // Backgrounds
     //connect(spSignalEmmiter.get(), &CScriptRunnerSignalEmiter::SignalBackgroundColorChanged,
@@ -526,14 +531,14 @@ void CSceneMainScreen::ConnectAllSignals()
     //connect(m_spUi->pResourceDisplay, &CResourceDisplayWidget::SignalPlaybackFinished,
     //        spSignalEmmiter.get(), &CScriptRunnerSignalEmiter::SignalPlaybackFinished, Qt::QueuedConnection);
     //
-    //// TextBox
+    // TextBox
     //connect(spSignalEmmiter.get(), &CScriptRunnerSignalEmiter::SignalClearText,
     //        m_spUi->pTextBoxDisplay, &CTextBoxWidget::SlotClearText, Qt::QueuedConnection);
     //connect(spSignalEmmiter.get(), &CScriptRunnerSignalEmiter::SignalShowButtonPrompts,
     //        m_spUi->pTextBoxDisplay, &CTextBoxWidget::SlotShowButtonPrompts, Qt::QueuedConnection);
-    //connect(m_spUi->pTextBoxDisplay, &CTextBoxWidget::SignalShowButtonReturnValue,
-    //        spSignalEmmiter.get(), &CScriptRunnerSignalEmiter::SignalShowButtonReturnValue,
-    //        Qt::QueuedConnection);
+    bOk = connect(pRootObject, SIGNAL(sceneSelectionReturnValue(int)),
+                  this, SLOT(SlotSceneSelectReturnValue(int)), Qt::QueuedConnection);
+    assert(bOk);
     //connect(spSignalEmmiter.get(), &CScriptRunnerSignalEmiter::SignalShowInput,
     //        m_spUi->pTextBoxDisplay, &CTextBoxWidget::SlotShowInput, Qt::QueuedConnection);
     //connect(m_spUi->pTextBoxDisplay, &CTextBoxWidget::SignalShowInputReturnValue,
@@ -578,14 +583,18 @@ void CSceneMainScreen::ConnectAllSignals()
 //
 void CSceneMainScreen::DisconnectAllSignals()
 {
-  disconnect(m_spUi->pQmlWidget->rootObject(), SIGNAL(startLoadingSkript()),
-             this, SLOT(SlotStartLoadingSkript()));
+  QQuickItem* pRootObject =  m_spUi->pQmlWidget->rootObject();
+  disconnect(pRootObject, SIGNAL(startLoadingSkript()), this, SLOT(SlotStartLoadingSkript()));
 
   auto spScriptRunner = m_wpScriptRunner.lock();
   if (nullptr != spScriptRunner)
   {
     auto spSignalEmmiterContext = spScriptRunner->SignalEmmitterContext();
 
+    disconnect(spSignalEmmiterContext.get(), &CScriptRunnerSignalContext::showError,
+            this, &CSceneMainScreen::SlotError);
+    disconnect(spSignalEmmiterContext.get(), &CScriptRunnerSignalContext::executionError,
+            this, &CSceneMainScreen::SlotExecutionError);
     disconnect(spScriptRunner.get(), &CScriptRunner::SignalScriptRunFinished,
             this, &CSceneMainScreen::SlotScriptRunFinished);
 
@@ -624,8 +633,8 @@ void CSceneMainScreen::DisconnectAllSignals()
     //        m_spUi->pTextBoxDisplay, &CTextBoxWidget::SlotClearText);
     //disconnect(spSignalEmmiter.get(), &CScriptRunnerSignalEmiter::SignalShowButtonPrompts,
     //        m_spUi->pTextBoxDisplay, &CTextBoxWidget::SlotShowButtonPrompts);
-    //disconnect(m_spUi->pTextBoxDisplay, &CTextBoxWidget::SignalShowButtonReturnValue,
-    //        spSignalEmmiter.get(), &CScriptRunnerSignalEmiter::SignalShowButtonReturnValue);
+    disconnect(pRootObject, SIGNAL(sceneSelectionReturnValue(int)),
+               this, SLOT(SlotSceneSelectReturnValue(int)));
     //disconnect(spSignalEmmiter.get(), &CScriptRunnerSignalEmiter::SignalShowInput,
     //        m_spUi->pTextBoxDisplay, &CTextBoxWidget::SlotShowInput);
     //disconnect(m_spUi->pTextBoxDisplay, &CTextBoxWidget::SignalShowInputReturnValue,
@@ -687,7 +696,8 @@ void CSceneMainScreen::NextSkript()
   auto spDbManager = m_wpDbManager.lock();
   if (nullptr == spDbManager) { return; }
 
-  //m_spUi->pTextBoxDisplay->SlotClearText();
+  QQuickItem* pRootObject =  m_spUi->pQmlWidget->rootObject();
+  QMetaObject::invokeMethod(pRootObject, "clearTextBox");
 
   QStringList sScenes = m_spProjectRunner->PossibleScenes();
   if (sScenes.size() > 0)
@@ -727,8 +737,8 @@ void CSceneMainScreen::NextSkript()
     }
     else
     {
-      //m_spUi->pTextBoxDisplay->SetSceneSelection(true);
-      //m_spUi->pTextBoxDisplay->SlotShowButtonPrompts(sScenes);
+      QMetaObject::invokeMethod(pRootObject, "showSceneSelection",
+                                Q_ARG(QVariant, sScenes));
     }
   }
   else

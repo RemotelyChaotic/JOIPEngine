@@ -162,6 +162,18 @@ void CApplication::LoadStyle()
 //
 void CApplication::RegisterQmlTypes()
 {
+  qRegisterMetaType<QColor>();
+  qRegisterMetaType<std::vector<QColor>>();
+  qRegisterMetaType<QStringList>();
+  qRegisterMetaType<QtMsgType>();
+
+  qRegisterMetaType<CResource*>();
+  qRegisterMetaType<tspResource>();
+  qRegisterMetaType<CScene*>();
+  qRegisterMetaType<tspScene>();
+  qRegisterMetaType<CProject*>();
+  qRegisterMetaType<tspProject>();
+
   qmlRegisterSingletonType<CSettings>("JOIP.core", 1, 1, "Settings",
                                       [this](QQmlEngine *engine, QJSEngine *scriptEngine) -> QObject*
   {

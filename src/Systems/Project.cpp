@@ -25,6 +25,7 @@ SProject::SProject() :
   m_sTitleCard(),
   m_sMap(),
   m_sSceneModel(),
+  m_sPlayerLayout(),
   m_bUsesWeb(false),
   m_bNeedsCodecs(false),
   m_vsKinks(),
@@ -42,6 +43,7 @@ SProject::SProject(const SProject& other) :
   m_sTitleCard(other.m_sTitleCard),
   m_sMap(other.m_sMap),
   m_sSceneModel(other.m_sSceneModel),
+  m_sPlayerLayout(other.m_sPlayerLayout),
   m_bUsesWeb(other.m_bUsesWeb),
   m_bNeedsCodecs(other.m_bNeedsCodecs),
   m_vsKinks(other.m_vsKinks),
@@ -80,6 +82,7 @@ QJsonObject SProject::ToJsonObject()
     { "sTitleCard", m_sTitleCard },
     { "sMap", m_sMap },
     { "sSceneModel", m_sSceneModel },
+    { "sPlayerLayout", m_sPlayerLayout },
     { "bUsesWeb", m_bUsesWeb },
     { "bNeedsCodecs", m_bNeedsCodecs },
     { "vsKinks", kinks },
@@ -127,6 +130,11 @@ void SProject::FromJsonObject(const QJsonObject& json)
   if (it != json.end())
   {
     m_sSceneModel = it.value().toString();
+  }
+  it = json.find("sPlayerLayout");
+  if (it != json.end())
+  {
+    m_sPlayerLayout = it.value().toString();
   }
   it = json.find("bUsesWeb");
   if (it != json.end())
@@ -267,6 +275,22 @@ QString CProject::getMap()
 {
   QReadLocker locker(&m_spData->m_rwLock);
   return m_spData->m_sMap;
+}
+
+//----------------------------------------------------------------------------------------
+//
+QString CProject::getSceneModel()
+{
+  QReadLocker locker(&m_spData->m_rwLock);
+  return m_spData->m_sSceneModel;
+}
+
+//----------------------------------------------------------------------------------------
+//
+QString CProject::getPlayerLayout()
+{
+  QReadLocker locker(&m_spData->m_rwLock);
+  return m_spData->m_sPlayerLayout;
 }
 
 //----------------------------------------------------------------------------------------

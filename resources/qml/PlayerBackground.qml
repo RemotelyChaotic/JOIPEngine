@@ -58,7 +58,6 @@ Rectangle {
         id: signalEmitter
 
         onBackgroundColorChanged: {
-            console.log(color);
             colorOverlay.color = color;
         }
 

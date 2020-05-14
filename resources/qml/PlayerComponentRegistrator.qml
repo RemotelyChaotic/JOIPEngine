@@ -7,4 +7,9 @@ Item {
     {
         root.numReadyComponents += 1;
     }
+
+    function registerTextBox(item)
+    {
+        root.registeredTextBox = item;
+    }
 }

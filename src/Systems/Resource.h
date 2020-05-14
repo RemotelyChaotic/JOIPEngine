@@ -21,6 +21,11 @@ class CProject;
 class QScriptEngine;
 struct SProject;
 
+namespace joip_resource {
+  const QString c_sSceneModelFile   = "SceneModel.flow";
+  const QString c_sPlayerLayoutFile = "Player.layout";
+}
+
 //----------------------------------------------------------------------------------------
 //
 struct SResource : public ISerializable

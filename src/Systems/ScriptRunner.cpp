@@ -32,17 +32,6 @@ CScriptRunner::CScriptRunner() :
   m_objectMap(),
   m_runFunction()
 {
-  qRegisterMetaType<QColor>();
-  qRegisterMetaType<std::vector<QColor>>();
-  qRegisterMetaType<QStringList>();
-
-  qRegisterMetaType<CResource*>();
-  qRegisterMetaType<tspResource>();
-  qRegisterMetaType<CScene*>();
-  qRegisterMetaType<tspScene>();
-  qRegisterMetaType<CProject*>();
-  qRegisterMetaType<tspProject>();
-
   m_spScriptEngine->installExtensions(QJSEngine::TranslationExtension |
                                       QJSEngine::ConsoleExtension |
                                       QJSEngine::GarbageCollectionExtension);
