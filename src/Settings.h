@@ -19,6 +19,7 @@ class CSettings : public QObject
   Q_PROPERTY(bool fullscreen READ Fullscreen WRITE SetFullscreen NOTIFY fullscreenChanged)
   Q_PROPERTY(QStringList keyBindings READ KeyBindings)
   Q_PROPERTY(bool muted READ Muted WRITE SetMuted NOTIFY mutedChanged)
+  Q_PROPERTY(bool offline READ Offline WRITE SetOffline NOTIFY offlineChanged)
   Q_PROPERTY(QSize resolution READ Resolution WRITE SetResolution NOTIFY resolutionChanged)
   Q_PROPERTY(QString style READ Style WRITE SetStyle NOTIFY styleChanged)
   Q_PROPERTY(qint32 version READ Version)
@@ -30,6 +31,7 @@ public:
   static const QString c_sSettingFullscreen;
   static const QString c_sSettingKeyBindings;
   static const QString c_sSettingMuted;
+  static const QString c_sSettingOffline;
   static const QString c_sSettingResolution;
   static const QString c_sSettingStyle;
   static const QString c_sSettingVolume;
@@ -51,6 +53,8 @@ public:
   Q_INVOKABLE void setKeyBinding(const QKeySequence& sKeySequence, const QString& sRole);
   void SetMuted(bool bValue);
   bool Muted();
+  void SetOffline(bool bValue);
+  bool Offline();
   void SetResolution(const QSize& size);
   QSize Resolution();
   void SetStyle(const QString& sStyle);
@@ -69,6 +73,7 @@ signals:
   void fullscreenChanged();
   void keyBindingsChanged();
   void mutedChanged();
+  void offlineChanged();
   void resolutionChanged();
   void styleChanged();
   void volumeChanged();

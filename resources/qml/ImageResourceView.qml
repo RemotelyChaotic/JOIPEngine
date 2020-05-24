@@ -5,58 +5,48 @@ import JOIP.core 1.1
 import JOIP.db 1.1
 
 Rectangle {
+    id: imageResource
     color: "transparent"
 
     property Resource resource: null
-    property alias fontSize: text404.font.pixelSize
-
+    property int state: Resource.Null
     property bool animated: false
-    property bool startedLoad: false
-    property bool loadingOk: true
 
-    function startLoad(newResource)
-    {
-        loadingOk = true;
-        startedLoad = true;
-        if (null !== newResource && undefined !== newResource)
+    onResourceChanged: {
+        if (null !== resource && undefined !== resource)
         {
-            if (newResource.isLocal)
+            state = Resource.Loading;
+            if (resource.isLocal)
             {
-                if (newResource.isAnimated)
+                if (resource.isAnimated)
                 {
-                    animatedImage.source = newResource.path;
-                    animated = true
+                    animated = true;
+                    image.source = "";
+                    animatedImage.source = resource.path;
                 }
                 else
                 {
-                    image.source = "image://DataBaseImageProivider/" + newResource.project().id + "/" + newResource.name;
-                    animated = false
+                    animated = false;
+                    animatedImage.source = "";
+                    image.source = "image://DataBaseImageProivider/" + resource.project().id + "/" + resource.name;
                 }
             }
             else
             {
-                // TODO: Webview
+                state = Resource.Null;
             }
         }
         else
         {
-            loadingOk = false;
+            state = Resource.Null;
         }
-    }
-
-    AnimatedImage {
-        id: animation
-        anchors.fill: parent
-        visible: animatedImage.status === Image.Loading || image.status === Image.Loading || !startedLoad
-        source: "qrc:/resources/gif/spinner_transparent.gif"
-        fillMode: Image.Pad
     }
 
     Image {
         id: image
         anchors.centerIn: parent
-        width: (status === Image.Ready && startedLoad && loadingOk) ? parent.width : 0
-        height: (status === Image.Ready && startedLoad && loadingOk) ? parent.height : 0
+        width: (!imageResource.animated && imageResource.state === Resource.Loaded) ? parent.width : 0
+        height: (!imageResource.animated && imageResource.state === Resource.Loaded) ? parent.height : 0
 
         Behavior on height {
             animation: ParallelAnimation {
@@ -70,11 +60,23 @@ Rectangle {
         }
 
         onStatusChanged: {
-            if (startedLoad)
+            if (!imageResource.animated)
             {
-                if (status === Image.Error || status === Image.Null)
+                if (status === Image.Error)
                 {
-                    loadingOk = false;
+                    imageResource.state = Resource.Error;
+                }
+                else if (status === Image.Ready)
+                {
+                    imageResource.state = Resource.Loaded;
+                }
+                else if (status === Image.Loading)
+                {
+                    imageResource.state = Resource.Loading;
+                }
+                else if (status === Image.Null)
+                {
+                    imageResource.state = Resource.Null;
                 }
             }
         }
@@ -86,8 +88,8 @@ Rectangle {
     AnimatedImage {
         id: animatedImage
         anchors.centerIn: parent
-        width: (status === Image.Ready && startedLoad && loadingOk) ? parent.width : 0
-        height: (status === Image.Ready && startedLoad && loadingOk) ? parent.height : 0
+        width: (imageResource.animated && imageResource.state === Resource.Loaded) ? parent.width : 0
+        height: (imageResource.animated && imageResource.state === Resource.Loaded) ? parent.height : 0
 
         Behavior on height {
             animation: ParallelAnimation {
@@ -101,57 +103,28 @@ Rectangle {
         }
 
         onStatusChanged: {
-            if (startedLoad)
+            if (imageResource.animated)
             {
-                if (status === Image.Error || status === Image.Null)
+                if (status === Image.Error)
                 {
-                    loadingOk = false;
+                    imageResource.state = Resource.Error;
+                }
+                else if (status === Image.Ready)
+                {
+                    imageResource.state = Resource.Loaded;
+                }
+                else if (status === Image.Loading)
+                {
+                    imageResource.state = Resource.Loading;
+                }
+                else if (status === Image.Null)
+                {
+                    imageResource.state = Resource.Null;
                 }
             }
         }
 
         fillMode: Image.PreserveAspectFit
         source: ""
-    }
-
-    Rectangle {
-        id: text404Rect
-        anchors.centerIn: parent
-        visible: !loadingOk
-        width: visible ? parent.width : 0
-        height: visible ? parent.height : 0
-
-        color: "transparent"
-
-        Behavior on height {
-            animation: ParallelAnimation {
-                NumberAnimation { duration: 100; easing.type: Easing.InOutQuad }
-            }
-        }
-        Behavior on width {
-            animation: ParallelAnimation {
-                NumberAnimation { duration: 100; easing.type: Easing.InOutQuad }
-            }
-        }
-
-        Text {
-            id: text404
-            text: "404"
-            anchors.fill: parent
-            color: "black"
-            font.family: Settings.font
-            font.pixelSize: 100
-            horizontalAlignment: Text.AlignHCenter
-            verticalAlignment: Text.AlignVCenter
-
-            layer.enabled: true
-            layer.effect: Glow {
-                radius: 10
-                samples: 17
-                spread: 0.5
-                color: "white"
-                transparentBorder: false
-            }
-        }
     }
 }

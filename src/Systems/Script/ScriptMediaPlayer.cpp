@@ -47,10 +47,11 @@ void CScriptMediaPlayer::show(QJSValue resource)
   {
     if (resource.isString())
     {
-      tspResource spResource = spDbManager->FindResourceInProject(m_spProject, resource.toString());
+      QString sResource = resource.toString();
+      tspResource spResource = spDbManager->FindResourceInProject(m_spProject, sResource);
       if (nullptr != spResource)
       {
-        emit spSignalEmitter->showMedia(spResource);
+        emit spSignalEmitter->showMedia(sResource);
       }
       else
       {
@@ -64,10 +65,9 @@ void CScriptMediaPlayer::show(QJSValue resource)
       CResource* pResource = dynamic_cast<CResource*>(resource.toQObject());
       if (nullptr != pResource)
       {
-        tspResource spResource = pResource->Data();
-        if (nullptr != spResource)
+        if (nullptr != pResource->Data())
         {
-          emit spSignalEmitter->showMedia(spResource);
+          emit spSignalEmitter->showMedia(pResource->getName());
         }
         else
         {
@@ -80,6 +80,10 @@ void CScriptMediaPlayer::show(QJSValue resource)
         QString sError = tr("Wrong argument-type to show(). String or resource was expected.");
         emit m_pSignalEmitter->showError(sError, QtMsgType::QtWarningMsg);
       }
+    }
+    else if (resource.isNull())
+    {
+      emit spSignalEmitter->showMedia(QString());
     }
     else
     {
@@ -108,10 +112,11 @@ void CScriptMediaPlayer::play(QJSValue resource)
   {
     if (resource.isString())
     {
-      tspResource spResource = spDbManager->FindResourceInProject(m_spProject, resource.toString());
+      QString sResource = resource.toString();
+      tspResource spResource = spDbManager->FindResourceInProject(m_spProject, sResource);
       if (nullptr != spResource)
       {
-        emit pSignalEmitter->playMedia(spResource);
+        emit pSignalEmitter->playMedia(sResource);
       }
       else
       {
@@ -125,10 +130,9 @@ void CScriptMediaPlayer::play(QJSValue resource)
       CResource* pResource = dynamic_cast<CResource*>(resource.toQObject());
       if (nullptr != pResource)
       {
-        tspResource spResource = pResource->Data();
-        if (nullptr != spResource)
+        if (nullptr != pResource->Data())
         {
-          emit pSignalEmitter->playMedia(spResource);
+          emit pSignalEmitter->playMedia(pResource->getName());
         }
         else
         {
@@ -144,7 +148,7 @@ void CScriptMediaPlayer::play(QJSValue resource)
     }
     else if (resource.isNull())
     {
-      emit pSignalEmitter->playMedia(nullptr);
+      emit pSignalEmitter->playMedia(QString());
     }
     else
     {
@@ -152,6 +156,15 @@ void CScriptMediaPlayer::play(QJSValue resource)
       emit m_pSignalEmitter->showError(sError, QtMsgType::QtWarningMsg);
     }
   }
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CScriptMediaPlayer::playVideo()
+{
+  if (!CheckIfScriptCanRun()) { return; }
+
+  emit SignalEmitter<CMediaPlayerSignalEmitter>()->playVideo();
 }
 
 //----------------------------------------------------------------------------------------
@@ -168,6 +181,16 @@ void CScriptMediaPlayer::stopVideo()
 {
   if (!CheckIfScriptCanRun()) { return; }
   emit SignalEmitter<CMediaPlayerSignalEmitter>()->stopVideo();
+}
+
+
+//----------------------------------------------------------------------------------------
+//
+void CScriptMediaPlayer::playSound()
+{
+  if (!CheckIfScriptCanRun()) { return; }
+
+  emit SignalEmitter<CMediaPlayerSignalEmitter>()->playSound();
 }
 
 //----------------------------------------------------------------------------------------
@@ -196,15 +219,68 @@ void CScriptMediaPlayer::waitForPlayback()
 
   connect(pSignalEmitter, &CMediaPlayerSignalEmitter::playbackFinished,
           pSignalEmitter, &CMediaPlayerSignalEmitter::stopVideo, Qt::DirectConnection);
+  connect(pSignalEmitter, &CMediaPlayerSignalEmitter::playbackFinished,
+          pSignalEmitter, &CMediaPlayerSignalEmitter::stopSound, Qt::DirectConnection);
 
   QEventLoop loop;
   connect(pSignalEmitter, &CMediaPlayerSignalEmitter::playbackFinished,
           &loop, &QEventLoop::quit, Qt::QueuedConnection);
   connect(pSignalEmitter, &CMediaPlayerSignalEmitter::interrupt,
           &loop, &QEventLoop::quit, Qt::QueuedConnection);
+  emit pSignalEmitter->startPlaybackWait();
   loop.exec();
   loop.disconnect();
 
   disconnect(pSignalEmitter, &CMediaPlayerSignalEmitter::playbackFinished,
              pSignalEmitter, &CMediaPlayerSignalEmitter::stopVideo);
+  disconnect(pSignalEmitter, &CMediaPlayerSignalEmitter::playbackFinished,
+             pSignalEmitter, &CMediaPlayerSignalEmitter::stopSound);
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CScriptMediaPlayer::waitForVideo()
+{
+  if (!CheckIfScriptCanRun()) { return; }
+
+  auto pSignalEmitter = SignalEmitter<CMediaPlayerSignalEmitter>();
+
+  connect(pSignalEmitter, &CMediaPlayerSignalEmitter::videoFinished,
+          pSignalEmitter, &CMediaPlayerSignalEmitter::stopVideo, Qt::DirectConnection);
+
+  QEventLoop loop;
+  connect(pSignalEmitter, &CMediaPlayerSignalEmitter::videoFinished,
+          &loop, &QEventLoop::quit, Qt::QueuedConnection);
+  connect(pSignalEmitter, &CMediaPlayerSignalEmitter::interrupt,
+          &loop, &QEventLoop::quit, Qt::QueuedConnection);
+  emit pSignalEmitter->startVideoWait();
+  loop.exec();
+  loop.disconnect();
+
+  disconnect(pSignalEmitter, &CMediaPlayerSignalEmitter::videoFinished,
+             pSignalEmitter, &CMediaPlayerSignalEmitter::stopVideo);
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CScriptMediaPlayer::waitForSound()
+{
+  if (!CheckIfScriptCanRun()) { return; }
+
+  auto pSignalEmitter = SignalEmitter<CMediaPlayerSignalEmitter>();
+
+  connect(pSignalEmitter, &CMediaPlayerSignalEmitter::soundFinished,
+          pSignalEmitter, &CMediaPlayerSignalEmitter::stopSound, Qt::DirectConnection);
+
+  QEventLoop loop;
+  connect(pSignalEmitter, &CMediaPlayerSignalEmitter::soundFinished,
+          &loop, &QEventLoop::quit, Qt::QueuedConnection);
+  connect(pSignalEmitter, &CMediaPlayerSignalEmitter::interrupt,
+          &loop, &QEventLoop::quit, Qt::QueuedConnection);
+  emit pSignalEmitter->startSoundWait();
+  loop.exec();
+  loop.disconnect();
+
+  disconnect(pSignalEmitter, &CMediaPlayerSignalEmitter::soundFinished,
+             pSignalEmitter, &CMediaPlayerSignalEmitter::stopSound);
 }

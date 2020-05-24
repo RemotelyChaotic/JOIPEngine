@@ -139,5 +139,10 @@
         <file>resources/qml/TextBoxInputDelegate.qml</file>
         <file>resources/qml/TextBoxTextDelegate.qml</file>
         <file>resources/qml/TextBoxSpacerDelegate.qml</file>
+        <file>resources/qml/MovieResourceView.qml</file>
+        <file>resources/qml/ErrorResourceView.qml</file>
+        <file>resources/qml/SoundResourceView.qml</file>
+        <file>resources/qml/WebResourceView.qml</file>
+        <file>resources/qml/WebResourceComponent.qml</file>
     </qresource>
 </RCC>

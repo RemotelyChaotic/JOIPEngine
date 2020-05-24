@@ -59,12 +59,20 @@ class CResource : public QObject
 
 public:
   enum ResourceType {
-    eImage = EResourceType::eImage,
-    eMovie = EResourceType::eMovie,
-    eSound = EResourceType::eSound,
-    eOther = EResourceType::eOther,
+    Image = EResourceType::eImage,
+    Movie = EResourceType::eMovie,
+    Sound = EResourceType::eSound,
+    Other = EResourceType::eOther,
   };
   Q_ENUM(ResourceType)
+
+  enum ResourceLoadState {
+    Null = 0,
+    Loading,
+    Loaded,
+    Error,
+  };
+  Q_ENUM(ResourceLoadState)
 
   explicit CResource(QJSEngine* pEngine, const std::shared_ptr<SResource>& spResource);
   ~CResource();

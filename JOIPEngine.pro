@@ -19,8 +19,10 @@ QT += \
     quickwidgets \
     svg \
     widgets \
+    webchannel \
     webengine \
     webenginewidgets \
+    webview \
     xml
 
 TARGET = JOIPEngine

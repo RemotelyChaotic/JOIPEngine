@@ -79,6 +79,7 @@ const QString CSettings::c_sSettingFont = "Graphics/font";
 const QString CSettings::c_sSettingFullscreen = "Graphics/fullscreen";
 const QString CSettings::c_sSettingKeyBindings = "KeyBindings/";
 const QString CSettings::c_sSettingMuted = "Audio/muted";
+const QString CSettings::c_sSettingOffline = "Content/offline";
 const QString CSettings::c_sSettingResolution = "Graphics/resolution";
 const QString CSettings::c_sSettingStyle = "Graphics/style";
 const QString CSettings::c_sSettingVolume = "Audio/volume";
@@ -300,6 +301,29 @@ bool CSettings::Muted()
 
 //----------------------------------------------------------------------------------------
 //
+void CSettings::SetOffline(bool bValue)
+{
+  QMutexLocker locker(&m_settingsMutex);
+
+  bool bOffline = m_spSettings->value(CSettings::c_sSettingOffline).toBool();
+
+  if (bOffline == bValue) { return; }
+
+  m_spSettings->setValue(CSettings::c_sSettingOffline, bValue);
+
+  emit offlineChanged();
+}
+
+//----------------------------------------------------------------------------------------
+//
+bool CSettings::Offline()
+{
+  QMutexLocker locker(&m_settingsMutex);
+  return m_spSettings->value(CSettings::c_sSettingOffline).toBool();
+}
+
+//----------------------------------------------------------------------------------------
+//
 void CSettings::SetResolution(const QSize& size)
 {
   QMutexLocker locker(&m_settingsMutex);
@@ -490,6 +514,13 @@ void CSettings::GenerateSettingsIfNotExists()
   {
     bNeedsSynch = true;
     m_spSettings->setValue(CSettings::c_sSettingMuted, false);
+  }
+
+  // check offline
+  if (!m_spSettings->contains(CSettings::c_sSettingOffline))
+  {
+    bNeedsSynch = true;
+    m_spSettings->setValue(CSettings::c_sSettingOffline, false);
   }
 
   // check style

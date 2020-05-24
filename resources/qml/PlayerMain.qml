@@ -13,6 +13,7 @@ Rectangle {
     property Project currentlyLoadedProject: null
     property PlayerTextBox registeredTextBox: null
     property int numReadyComponents: 0
+    property var componentsRegistered: []
     signal startLoadingSkript()
 
     //------------------------------------------------------------------------------------

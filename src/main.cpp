@@ -9,15 +9,22 @@
 #include <QApplication>
 #include <QtAVWidgets>
 #include <QOpenGLContext>
+#include <QSslSocket>
 #include <QtWebEngine>
+#include <QtWebView/QtWebView>
 
 int main(int argc, char *argv[])
 {
   QCoreApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
   QCoreApplication::setAttribute(Qt::AA_UseOpenGLES);
 
-  QtWebEngine::initialize();
+  //QtWebEngine::initialize();
+  QtWebView::initialize();
   QtAV::Widgets::registerRenderers();
+
+#ifndef NDEBU
+  qDebug() << "SSL suport: " << QSslSocket::supportsSsl() << QSslSocket::sslLibraryBuildVersionString() << QSslSocket::sslLibraryVersionString();
+#endif
 
   CApplication app(argc, argv);
 

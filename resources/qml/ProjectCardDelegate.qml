@@ -63,13 +63,26 @@ Rectangle {
                 transparentBorder: false
             }
 
+            AnimatedImage {
+                id: loadingAnimation
+                anchors.fill: parent
+                visible: resource.state === Resource.Loading
+                source: "qrc:/resources/gif/spinner_transparent.gif"
+                fillMode: Image.Pad
+            }
+
             ImageResourceView {
                 id: resource
                 anchors.centerIn: parent
                 width: parent.width - 10
                 height: parent.height - 10
-                fontSize: describtionDelegate.isHovered ? 100 : 90
                 resource: null
+            }
+
+            ErrorResourceView {
+                id: errorResource
+                visible: resource.state === Resource.Null || resource.state === Resource.Error
+                fontSize: describtionDelegate.isHovered ? 100 : 90
             }
         }
 
@@ -293,7 +306,10 @@ Rectangle {
 
     Component.onCompleted: {
         var pResource = dto.resource(dto.titleCard);
-        resource.startLoad(pResource);
+        if (null !== pResource && undefined !== pResource)
+        {
+            resource.resource = pResource;
+        }
 
         var sFetishesElem = qsTr("Fetishes:") + "<ul>%1</ul>";
         var sFetishes = "";
