@@ -9,6 +9,7 @@ import SortFilterProxyModel 0.2
 Rectangle {
     id: root
     color: "transparent"
+    property var style: null;
 
     property Project currentlyAddedProject: null
     property var selectionColor: "white"
@@ -92,5 +93,16 @@ Rectangle {
     ListModel {
         id: listModel
         dynamicRoles: false
+    }
+
+    Component.onCompleted: {
+        var styleComponent = Qt.createComponent(Settings.styleFolderQml() + "/Style.qml");
+        if (styleComponent.status === Component.Ready)
+        {
+            root.style = styleComponent.createObject(root);
+            if (root.style === null) {
+                console.error(qsTr("Error creating Style object"));
+            }
+        }
     }
 }

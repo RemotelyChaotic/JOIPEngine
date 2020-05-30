@@ -19,12 +19,19 @@ Rectangle {
             spacing: 5
 
 
-            PlayerIcons {
-                id: icon
+            Rectangle {
                 Layout.preferredWidth: (parent.width - parent.spacing * 2) / 4
                 Layout.preferredHeight: parent.height
                 Layout.alignment: Qt.AlignVCenter
-                userName: "icon"
+                color: "transparent"
+
+                PlayerIcons {
+                    id: icon
+                    width: parent.width - 20
+                    height: parent.height - 20
+                    anchors.centerIn: parent
+                    userName: "icon"
+                }
             }
 
             PlayerMediaPlayer {
@@ -35,12 +42,20 @@ Rectangle {
                 userName: "mediaPlayer"
             }
 
-            PlayerTimer {
-                id: timer
+
+            Rectangle {
                 Layout.preferredWidth: (parent.width - parent.spacing * 2) / 4
                 Layout.preferredHeight: parent.height
                 Layout.alignment: Qt.AlignVCenter
-                userName: "timer"
+                color: "transparent"
+
+                PlayerTimer {
+                    id: timer
+                    anchors.centerIn: parent
+                    width: 138
+                    height: 138
+                    userName: "timer"
+                }
             }
         }
 

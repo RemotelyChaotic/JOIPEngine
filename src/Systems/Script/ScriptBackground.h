@@ -12,6 +12,7 @@ class CResource;
 class CBackgroundSignalEmitter : public CScriptRunnerSignalEmiter
 {
   Q_OBJECT
+
 public:
   CBackgroundSignalEmitter();
   ~CBackgroundSignalEmitter();

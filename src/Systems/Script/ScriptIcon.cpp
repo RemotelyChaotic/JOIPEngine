@@ -89,10 +89,11 @@ void CScriptIcon::show(QJSValue resource)
   {
     if (resource.isString())
     {
-      tspResource spResource = spDbManager->FindResourceInProject(m_spProject, resource.toString());
+      QString sResourceName = resource.toString();
+      tspResource spResource = spDbManager->FindResourceInProject(m_spProject, sResourceName);
       if (nullptr != spResource)
       {
-        emit spSignalEmitter->showIcon(spResource);
+        emit spSignalEmitter->showIcon(sResourceName);
       }
       else
       {
@@ -109,7 +110,7 @@ void CScriptIcon::show(QJSValue resource)
         tspResource spResource = pResource->Data();
         if (nullptr != spResource)
         {
-          emit spSignalEmitter->showIcon(spResource);
+          emit spSignalEmitter->showIcon(pResource->getName());
         }
         else
         {

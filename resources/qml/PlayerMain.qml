@@ -9,6 +9,7 @@ import JOIP.script 1.1
 Rectangle {
     id: root
     color: "transparent"
+    property var style: null;
 
     property Project currentlyLoadedProject: null
     property PlayerTextBox registeredTextBox: null
@@ -150,6 +151,15 @@ Rectangle {
     }
 
     Component.onCompleted: {
+        var styleComponent = Qt.createComponent(Settings.styleFolderQml() + "/Style.qml");
+        if (styleComponent.status === Component.Ready)
+        {
+            root.style = styleComponent.createObject(root);
+            if (root.style === null) {
+                console.error(qsTr("Error creating Style object"));
+            }
+        }
+
         ScriptRunner.registerNewComponent(thread.userName, thread);
         ScriptRunner.registerNewComponent(storage.userName, storage);
         numReadyComponents += 2;

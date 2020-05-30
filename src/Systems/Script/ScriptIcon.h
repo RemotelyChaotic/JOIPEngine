@@ -21,8 +21,8 @@ public:
   virtual std::shared_ptr<CScriptObjectBase> CreateNewScriptObject(QPointer<QJSEngine> pEngine);
 
 signals:
-  void hideIcon(QString sIconIdentifier);
-  void showIcon(tspResource spResource);
+  void hideIcon(QString sResource);
+  void showIcon(QString sResource);
 };
 Q_DECLARE_METATYPE(CIconSignalEmitter)
 

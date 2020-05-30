@@ -144,5 +144,6 @@
         <file>resources/qml/SoundResourceView.qml</file>
         <file>resources/qml/WebResourceView.qml</file>
         <file>resources/qml/WebResourceComponent.qml</file>
+        <file>resources/qml/TimedItem.qml</file>
     </qresource>
 </RCC>

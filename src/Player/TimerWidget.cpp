@@ -13,7 +13,184 @@
 namespace  {
   const qint32 c_iBorderWidth = 2;
   const qint32 c_iGroveWidth = 10;
+
+  //--------------------------------------------------------------------------------------
+  //
+  void paintTimer(QPainter* pPainter, QColor primaryColor, QColor secondaryColor, QColor tertiaryColor,
+                  qint32 iBorderWidth, qint32 iGroveWidth,
+                  qint32 iWidth, qint32 iHeight, QRect contentsRect,
+                  qint32 iTimeMsMax, qint32 iTimeMsCurrent, qint32 iUpdateCounter, bool bVisibleCounter)
+  {
+    // variables
+    QColor progressFront = primaryColor;
+    progressFront.setAlpha(0);
+
+    qint32 iMinimalDimension = std::min(iWidth, iHeight);
+
+    pPainter->setBackgroundMode(Qt::BGMode::TransparentMode);
+    pPainter->setRenderHints(QPainter::Antialiasing | QPainter::SmoothPixmapTransform |
+                             QPainter::TextAntialiasing, true);
+
+    // draw background
+    pPainter->fillRect(contentsRect, Qt::transparent);
+
+    // draw segments
+    pPainter->save();
+    pPainter->translate(iWidth / 2, iHeight / 2);
+    pPainter->setPen(tertiaryColor);
+    for (int i = 0; i < 12; ++i)
+    {
+      pPainter->drawLine(iMinimalDimension / 2 - iBorderWidth - iGroveWidth, 0, iMinimalDimension / 2 - c_iBorderWidth, 0);
+      pPainter->rotate(30.0);
+    }
+    pPainter->restore();
+
+    // draw "hand"
+    pPainter->save();
+    double currentPosition = 0.0;
+    if (0 != iTimeMsMax)
+    {
+      qint32 iConeAngle = 0;
+      if (bVisibleCounter)
+      {
+        currentPosition = 360 -
+            360 * static_cast<double>(iTimeMsCurrent) /
+            static_cast<double>(iTimeMsMax);
+      }
+      else
+      {
+        currentPosition = 360 + iUpdateCounter % 360;
+      }
+      iConeAngle = static_cast<qint32>(360 + 90 - currentPosition) % 360;
+      QConicalGradient conGrad(QPointF(static_cast<double>(iMinimalDimension) / 2.0,
+                                       static_cast<double>(iMinimalDimension) / 2.0),
+                               iConeAngle);
+      conGrad.setColorAt(1, progressFront);
+      conGrad.setColorAt(0, tertiaryColor);
+
+      pPainter->setBrush(conGrad);
+      pPainter->setPen(Qt::NoPen);
+      if (bVisibleCounter)
+      {
+        pPainter->drawPie(QRect(iBorderWidth, iBorderWidth,
+                                iMinimalDimension - iBorderWidth * 2,
+                                iHeight - iBorderWidth * 2),
+                        90 * 16, -static_cast<qint32>(currentPosition) * 16);
+      }
+      else
+      {
+        pPainter->drawPie(QRect(iBorderWidth, iBorderWidth,
+                              iMinimalDimension - iBorderWidth * 2,
+                              iHeight - iBorderWidth * 2),
+                        -static_cast<qint32>(currentPosition - 90) * 16, -static_cast<qint32>(currentPosition) * 16);
+      }
+    }
+
+    // draw overlay
+    pPainter->setBrush(QColor(BLACK));
+    pPainter->setPen(Qt::NoPen);
+    pPainter->drawEllipse(QRect(iBorderWidth + iGroveWidth, iBorderWidth + iGroveWidth,
+                                iMinimalDimension - (iBorderWidth + iGroveWidth) * 2,
+                                iMinimalDimension - (iBorderWidth + iGroveWidth) * 2));
+
+    pPainter->restore();
+
+    // draw progress dot
+    if (0 != iTimeMsMax)
+    {
+      pPainter->save();
+      pPainter->translate(iMinimalDimension / 2, iMinimalDimension / 2);
+      pPainter->setPen(secondaryColor);
+      pPainter->setBrush(secondaryColor);
+      pPainter->rotate(currentPosition - 90 - 2);
+      pPainter->drawEllipse(QRect(iMinimalDimension / 2 - (iBorderWidth + iGroveWidth), 0, iGroveWidth, iGroveWidth));
+      pPainter->restore();
+    }
+  }
 }
+
+//----------------------------------------------------------------------------------------
+//
+CTimerCanvasQml::CTimerCanvasQml(QQuickItem* pParent) :
+  QQuickPaintedItem(pParent),
+  m_primaryColor(Qt::white),
+  m_secondaryColor(Qt::white),
+  m_tertiaryColor(Qt::white),
+  m_iTimeMsMax(0),
+  m_iTimeMsCurrent(0),
+  m_bVisibleCounter(true)
+{
+}
+
+CTimerCanvasQml::~CTimerCanvasQml()
+{
+
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CTimerCanvasQml::paint(QPainter* pPainter)
+{
+  paintTimer(pPainter, m_primaryColor, m_secondaryColor, m_tertiaryColor,
+             m_iBorderWidth, m_iGroveWidth,
+             width(), height(), QRect({0,0}, textureSize()),
+             m_iTimeMsMax, m_iTimeMsCurrent, m_iUpdateCounter, m_bVisibleCounter);
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CTimerCanvasQml::SetPrimaryColor(const QColor& color)
+{
+  if (m_primaryColor != color)
+  {
+    m_primaryColor = color;
+    emit primaryColorChanged();
+  }
+}
+
+//----------------------------------------------------------------------------------------
+//
+const QColor& CTimerCanvasQml::PrimaryColor()
+{
+  return m_primaryColor;
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CTimerCanvasQml::SetSecondaryColor(const QColor& color)
+{
+  if (m_secondaryColor != color)
+  {
+    m_secondaryColor = color;
+    emit secondaryColorChanged();
+  }
+}
+
+//----------------------------------------------------------------------------------------
+//
+const QColor& CTimerCanvasQml::SecondaryColor()
+{
+  return m_secondaryColor;
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CTimerCanvasQml::SetTertiaryColor(const QColor& color)
+{
+  if (m_tertiaryColor != color)
+  {
+    m_tertiaryColor = color;
+    emit tertiaryColorColorChanged();
+  }
+}
+
+//----------------------------------------------------------------------------------------
+//
+const QColor& CTimerCanvasQml::TertiaryColor()
+{
+  return m_tertiaryColor;
+}
+
 
 //----------------------------------------------------------------------------------------
 //
@@ -30,93 +207,12 @@ CTimerCanvas::~CTimerCanvas()
 //
 void CTimerCanvas::paintEvent(QPaintEvent* /*pEvent*/)
 {
-  // variables
-  QColor progressFront = m_pParent->m_primaryColor;
-  progressFront.setAlpha(0);
-
-  qint32 iMinimalDimension = std::min(width(), height());
-
-  QPainter painterDb(this);
-  painterDb.setBackgroundMode(Qt::BGMode::TransparentMode);
-  painterDb.setRenderHints(QPainter::Antialiasing | QPainter::SmoothPixmapTransform |
-                           QPainter::TextAntialiasing, true);
-
-  // draw background
-  QRect cr = contentsRect();
-  painterDb.fillRect(cr, Qt::transparent);
-
-  // draw segments
-  painterDb.save();
-  painterDb.translate(width() / 2, height() / 2);
-  painterDb.setPen(m_pParent->m_tertiaryColor);
-  for (int i = 0; i < 12; ++i)
-  {
-    painterDb.drawLine(iMinimalDimension / 2 - c_iBorderWidth - c_iGroveWidth, 0, iMinimalDimension / 2 - c_iBorderWidth, 0);
-    painterDb.rotate(30.0);
-  }
-  painterDb.restore();
-
-  // draw "hand"
-  painterDb.save();
-  double currentPosition = 0.0;
-  if (0 != m_pParent->m_iTimeMsMax)
-  {
-    qint32 iConeAngle = 0;
-    if (m_pParent->m_bVisible)
-    {
-      currentPosition = 360 -
-          360 * static_cast<double>(m_pParent->m_iTimeMsCurrent) /
-          static_cast<double>(m_pParent->m_iTimeMsMax);
-    }
-    else
-    {
-      currentPosition = 360 + m_pParent->m_iUpdateCounter % 360;
-    }
-    iConeAngle = static_cast<qint32>(360 + 90 - currentPosition) % 360;
-    QConicalGradient conGrad(QPointF(static_cast<double>(iMinimalDimension) / 2.0,
-                                     static_cast<double>(iMinimalDimension) / 2.0),
-                             iConeAngle);
-    conGrad.setColorAt(1, progressFront);
-    conGrad.setColorAt(0, m_pParent->m_tertiaryColor);
-
-    painterDb.setBrush(conGrad);
-    painterDb.setPen(Qt::NoPen);
-    if (m_pParent->m_bVisible)
-    {
-      painterDb.drawPie(QRect(c_iBorderWidth, c_iBorderWidth,
-                              iMinimalDimension - c_iBorderWidth * 2,
-                              height() - c_iBorderWidth * 2),
-                      90 * 16, -static_cast<qint32>(currentPosition) * 16);
-    }
-    else
-    {
-      painterDb.drawPie(QRect(c_iBorderWidth, c_iBorderWidth,
-                            iMinimalDimension - c_iBorderWidth * 2,
-                            height() - c_iBorderWidth * 2),
-                      -static_cast<qint32>(currentPosition - 90) * 16, -static_cast<qint32>(currentPosition) * 16);
-    }
-  }
-
-  // draw overlay
-  painterDb.setBrush(QColor(BLACK));
-  painterDb.setPen(Qt::NoPen);
-  painterDb.drawEllipse(QRect(c_iBorderWidth + c_iGroveWidth, c_iBorderWidth + c_iGroveWidth,
-                              iMinimalDimension - (c_iBorderWidth + c_iGroveWidth) * 2,
-                              iMinimalDimension - (c_iBorderWidth + c_iGroveWidth) * 2));
-
-  painterDb.restore();
-
-  // draw progress dot
-  if (0 != m_pParent->m_iTimeMsMax)
-  {
-    painterDb.save();
-    painterDb.translate(iMinimalDimension / 2, iMinimalDimension / 2);
-    painterDb.setPen(m_pParent->m_secondaryColor);
-    painterDb.setBrush(m_pParent->m_secondaryColor);
-    painterDb.rotate(currentPosition - 90 - 2);
-    painterDb.drawEllipse(QRect(iMinimalDimension / 2 - (c_iBorderWidth + c_iGroveWidth), 0, c_iGroveWidth, c_iGroveWidth));
-    painterDb.restore();
-  }
+  QPainter painter(this);
+  paintTimer(&painter, m_pParent->m_primaryColor, m_pParent->m_secondaryColor, m_pParent->m_tertiaryColor,
+             c_iBorderWidth, c_iGroveWidth,
+             width(), height(), contentsRect(),
+             m_pParent->m_iTimeMsMax, m_pParent->m_iTimeMsCurrent, m_pParent->m_iUpdateCounter,
+             m_pParent->m_bVisible);
 }
 
 //----------------------------------------------------------------------------------------

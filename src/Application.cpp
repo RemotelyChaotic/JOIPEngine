@@ -2,6 +2,10 @@
 #include "Enums.h"
 #include "Style.h"
 #include "UISoundEmitter.h"
+
+// needed to register to qml
+#include "Player/TimerWidget.h"
+
 #include "Systems/DatabaseManager.h"
 #include "Systems/HelpFactory.h"
 #include "Systems/OverlayManager.h"
@@ -29,6 +33,7 @@
 #include <QQmlContext>
 #include <QQmlEngine>
 #include <QQuickItem>
+#include <QQmlWebChannel>
 #include <cassert>
 
 CApplication::CApplication(int& argc, char *argv[]) :
@@ -174,6 +179,8 @@ void CApplication::RegisterQmlTypes()
   qRegisterMetaType<CProject*>();
   qRegisterMetaType<tspProject>();
 
+  qRegisterMetaType<QQmlWebChannel*>();
+
   qmlRegisterSingletonType<CSettings>("JOIP.core", 1, 1, "Settings",
                                       [this](QQmlEngine *engine, QJSEngine *scriptEngine) -> QObject*
   {
@@ -203,6 +210,8 @@ void CApplication::RegisterQmlTypes()
   qmlRegisterType<CTextBoxSignalEmitter>("JOIP.script", 1, 1, "TextBoxSignalEmitter");
   qmlRegisterType<CThreadSignalEmitter>("JOIP.script", 1, 1, "ThreadSignalEmitter");
   qmlRegisterType<CTimerSignalEmitter>("JOIP.script", 1, 1, "TimerSignalEmitter");
+
+  qmlRegisterType<CTimerCanvasQml>("JOIP.ui", 1, 1, "TimerDisplay");
 
   qmlRegisterUncreatableType<qqsfpm::Filter>("SortFilterProxyModel", 0, 2, "Filter", "Filter is abstract and cannot be created.");
   qmlRegisterUncreatableType<qqsfpm::Sorter>("SortFilterProxyModel", 0, 2, "Sorter", "Sorter is abstract and cannot be created.");
