@@ -9,6 +9,13 @@ Rectangle {
     height: parent.ListView.view.height
     color: "transparent"
 
+    MouseArea {
+        anchors.fill: parent
+        onClicked: {
+            root.skipWait();
+        }
+    }
+
     Component.onCompleted: {
         textDelegate.parent.ListView.view.delegateComponentLoaded();
     }

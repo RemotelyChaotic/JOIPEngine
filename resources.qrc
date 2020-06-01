@@ -145,5 +145,6 @@
         <file>resources/qml/WebResourceView.qml</file>
         <file>resources/qml/WebResourceComponent.qml</file>
         <file>resources/qml/TimedItem.qml</file>
+        <file>resources/qml/PlayerControls.qml</file>
     </qresource>
 </RCC>

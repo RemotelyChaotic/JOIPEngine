@@ -9,6 +9,13 @@ Rectangle {
     height: 40 + 40
     color: "transparent"
 
+    MouseArea {
+        anchors.fill: parent
+        onClicked: {
+            root.skipWait();
+        }
+    }
+
     Rectangle {
         id: textBackground
         anchors.centerIn: parent

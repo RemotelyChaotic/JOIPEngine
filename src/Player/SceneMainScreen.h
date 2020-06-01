@@ -64,8 +64,6 @@ private:
   QPointer<CProject>                                          m_pCurrentProjectWrapper;
   std::weak_ptr<CDatabaseManager>                             m_wpDbManager;
   std::weak_ptr<CScriptRunner>                                m_wpScriptRunner;
-  QPointer<QAction>                                           m_pActionSkip;
-  QPointer<QAction>                                           m_pActionQuit;
   bool                                                        m_bInitialized;
 };
 

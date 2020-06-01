@@ -2,6 +2,7 @@ import QtQuick 2.14
 import QtQuick.Controls 2.14
 import QtQuick.Layouts 1.14
 import QtGraphicalEffects 1.12
+import QtMultimedia 5.14
 import JOIP.core 1.1
 import JOIP.db 1.1
 import JOIP.script 1.1
@@ -11,11 +12,16 @@ Rectangle {
     color: "transparent"
     property var style: null;
 
+    // make globally accessible for now
+    property alias soundEffects: playerSoundEffects
+
     property Project currentlyLoadedProject: null
     property PlayerTextBox registeredTextBox: null
+    property PlayerMediaPlayer registeredMediaPlayer: null
     property int numReadyComponents: 0
     property var componentsRegistered: []
     signal startLoadingSkript()
+    signal quit()
 
     //------------------------------------------------------------------------------------
     //
@@ -97,6 +103,47 @@ Rectangle {
         }
     }
 
+    //------------------------------------------------------------------------------------
+    //
+    // MediaPlayer access
+    function showMedia(sName)
+    {
+        if (null !== registeredMediaPlayer && undefined !== registeredMediaPlayer)
+        {
+            registeredMediaPlayer.showOrPlayMedia(sName);
+        }
+    }
+    Connections {
+        target: root
+        onStartLoadingSkript: {
+            if (null !== currentlyLoadedProject && undefined !== currentlyLoadedProject)
+            {
+                showMedia(currentlyLoadedProject.titleCard);
+            }
+        }
+    }
+
+    //------------------------------------------------------------------------------------
+    //
+    // Sound
+    Item {
+        id: playerSoundEffects
+        property alias hoverSound: hoverSound
+        property alias clickSound: clickSound
+
+        SoundEffect {
+            id: hoverSound
+            source: "qrc:/resources/sound/menu_selection_soft.wav"
+            volume: Settings.volume
+            muted: Settings.muted
+        }
+        SoundEffect {
+            id: clickSound
+            source: "qrc:/resources/sound/menu_click_soft_main.wav"
+            volume: Settings.volume
+            muted: Settings.muted
+        }
+    }
 
     //------------------------------------------------------------------------------------
     //
@@ -104,6 +151,16 @@ Rectangle {
     ThreadSignalEmitter {
         id: thread
         property string userName: "thread"
+
+        onSkippableWait: {
+            for (var i = 0; root.componentsRegistered.length > i; ++i)
+            {
+                if (null !== root.componentsRegistered[i] && undefined !== root.componentsRegistered[i])
+                {
+                    root.componentsRegistered[i].skippableWait(iTimeS);
+                }
+            }
+        }
     }
     StorageSignalEmitter {
         id: storage
@@ -114,7 +171,28 @@ Rectangle {
         anchors.fill: parent
     }
 
-    // this is the project specific dynamic layout
+    function skipWait()
+    {
+        for (var i = 0; root.componentsRegistered.length > i; ++i)
+        {
+            if (null !== root.componentsRegistered[i] && undefined !== root.componentsRegistered[i])
+            {
+                root.componentsRegistered[i].skippableWaitFinished();
+            }
+        }
+        thread.waitSkipped();
+    }
+
+    Shortcut {
+        sequence: Settings.keyBinding("Skip")
+        onActivated: {
+            root.skipWait();
+        }
+    }
+
+    //------------------------------------------------------------------------------------
+    //
+    // UI
     AnimatedImage {
         id: animation
         anchors.fill: parent
@@ -132,6 +210,14 @@ Rectangle {
             verticalOffset: 8
         }
 
+        MouseArea {
+            anchors.fill: parent
+            onClicked: {
+                root.skipWait();
+            }
+        }
+
+        // this is the project specific dynamic layout
         Loader {
             id: layoutLoader
             anchors.fill: parent
@@ -148,8 +234,23 @@ Rectangle {
                 }
             }
         }
+
+        PlayerControls {
+            id: sceneControl
+            color: "transparent"
+            anchors.top: parent.top
+            anchors.horizontalCenter: parent.horizontalCenter
+            anchors.topMargin: 50
+            width: parent.width - 100
+            height: 64
+
+            soundEffects: playerSoundEffects
+        }
     }
 
+    //------------------------------------------------------------------------------------
+    //
+    // Loadtime initialization
     Component.onCompleted: {
         var styleComponent = Qt.createComponent(Settings.styleFolderQml() + "/Style.qml");
         if (styleComponent.status === Component.Ready)

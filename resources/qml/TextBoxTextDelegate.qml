@@ -12,20 +12,48 @@ Rectangle {
     Rectangle {
         id: textBackground
         anchors.centerIn: parent
-        width: text.width + 20
-        height: text.height + 20
+        width: layoutText.width + 20
+        height: layoutText.height + 20
         color: backgroundColor
         radius: 5
 
-        Text {
-            id: text
+        RowLayout {
+            id: layoutText
             anchors.centerIn: parent
-            font.family: Settings.font;
-            font.pointSize: 14
-            elide: Text.ElideNone
-            text: textContent
-            wrapMode: Text.WordWrap
-            color: textColor
+
+            Text {
+                id: text
+                font.family: Settings.font;
+                font.pointSize: 14
+                elide: Text.ElideNone
+                text: textContent
+                wrapMode: Text.WordWrap
+                color: textColor
+            }
+
+            Image {
+                id: imageSkip
+                Layout.preferredHeight: 24
+                Layout.preferredWidth: bShow ? 24 : 0
+                Layout.alignment: Qt.AlignVCenter
+                source: Settings.styleFolderQml() + "/ButtonPlay.svg";
+                smooth: true
+
+                property bool bIsLast: index+1 < textDelegate.parent.ListView.view.count ? false : true
+                property bool bShow: bIsLast && textDelegate.parent.ListView.view.skippable
+
+                opacity: bShow ? 1.0 : 0.0
+                Behavior on opacity {
+                    NumberAnimation { duration: 500; easing.type: Easing.InOutQuad }
+                }
+            }
+        }
+    }
+
+    MouseArea {
+        anchors.fill: parent
+        onClicked: {
+            root.skipWait();
         }
     }
 

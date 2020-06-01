@@ -20,6 +20,13 @@ Rectangle {
         text: "testText here"
     }
 
+    MouseArea {
+        anchors.fill: parent
+        onClicked: {
+            root.skipWait();
+        }
+    }
+
     Flow {
         id: tableView
         spacing: 20
@@ -63,8 +70,16 @@ Rectangle {
                     id: button
                     anchors.fill: parent
                     text: textDelegate.buttonTexts[index];
+                    z: 1
 
+                    onHoveredChanged: {
+                        if (hovered)
+                        {
+                            root.soundEffects.hoverSound.play();
+                        }
+                    }
                     onClicked: {
+                        root.soundEffects.clickSound.play();
                         textDelegate.parent.ListView.view.buttonPressed(index);
                     }
 

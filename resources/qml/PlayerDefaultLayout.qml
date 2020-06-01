@@ -27,9 +27,10 @@ Rectangle {
 
                 PlayerIcons {
                     id: icon
-                    width: parent.width - 20
-                    height: parent.height - 20
-                    anchors.centerIn: parent
+                    width: parent.width - 50
+                    height: parent.height - 50
+                    anchors.right: parent.right
+                    anchors.bottom: parent.bottom
                     userName: "icon"
                 }
             }
@@ -40,6 +41,7 @@ Rectangle {
                 Layout.preferredHeight: parent.height
                 Layout.alignment: Qt.AlignVCenter
                 userName: "mediaPlayer"
+                mainMediaPlayer: true
             }
 
 
@@ -65,6 +67,7 @@ Rectangle {
             Layout.preferredHeight: parent.height / 3 - parent.spacing / 2
             Layout.alignment: Qt.AlignHCenter
             userName: "textBox"
+            mainTextBox: true
         }
     }
 }

@@ -9,6 +9,7 @@ Rectangle {
     id: mediaPlayer
     color: "transparent"
     property string userName: "mediaPlayer"
+    property bool mainMediaPlayer: false
 
     function showOrPlayMedia(sName)
     {
@@ -212,6 +213,10 @@ Rectangle {
 
     Component.onCompleted: {
         ScriptRunner.registerNewComponent(userName, signalEmitter);
+        if (mainMediaPlayer)
+        {
+            registrator.registerMediaPlayer(mediaPlayer);
+        }
         registrator.componentLoaded();
     }
 }

@@ -40,6 +40,10 @@ Rectangle {
         anchors.fill: img
         source: img
         color: "#00000000"
+
+        Behavior on color {
+            ColorAnimation { duration: 1000 }
+        }
     }
 
     Rectangle {

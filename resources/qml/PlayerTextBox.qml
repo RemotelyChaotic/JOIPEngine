@@ -9,6 +9,7 @@ Rectangle {
     id: textBox
     color: "transparent"
     property string userName: "textBox"
+    property bool mainTextBox: false
 
     function clearTextBox()
     {
@@ -107,6 +108,13 @@ Rectangle {
 
     PlayerComponentRegistrator {
         id: registrator
+
+        onSkippableWait: {
+            textLog.skippable = true;
+        }
+        onSkippableWaitFinished: {
+            textLog.skippable = false;
+        }
     }
 
     // gui
@@ -124,6 +132,7 @@ Rectangle {
         property var textColors: [ "#ffffffff" ]
         property var buttonTexts: []
         property bool sceneSelection: false
+        property bool skippable: false
 
         function inputEditingFinished(sInput)
         {
@@ -174,7 +183,10 @@ Rectangle {
     Component.onCompleted: {
         ScriptRunner.registerNewComponent(userName, signalEmitter);
         textBox.clearTextBox();
-        registrator.registerTextBox(textBox);
+        if (mainTextBox)
+        {
+            registrator.registerTextBox(textBox);
+        }
         registrator.componentLoaded();
     }
 }
