@@ -81,6 +81,7 @@ Rectangle {
             }
         }
 
+        smooth: true
         fillMode: Image.PreserveAspectFit
         source: ""
     }

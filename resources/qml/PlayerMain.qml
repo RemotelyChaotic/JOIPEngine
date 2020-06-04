@@ -164,7 +164,7 @@ Rectangle {
     }
     StorageSignalEmitter {
         id: storage
-        property string userName: "storage"
+        property string userName: "localStorage"
     }
     PlayerBackground {
         id: background

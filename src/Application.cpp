@@ -182,12 +182,18 @@ void CApplication::RegisterQmlTypes()
   qRegisterMetaType<QQmlWebChannel*>();
 
   qmlRegisterSingletonType<CSettings>("JOIP.core", 1, 1, "Settings",
-                                      [this](QQmlEngine *engine, QJSEngine *scriptEngine) -> QObject*
+                                      [](QQmlEngine *engine, QJSEngine *scriptEngine) -> QObject*
   {
       Q_UNUSED(scriptEngine)
-      std::shared_ptr<CSettings> spSettings = Settings();
-      engine->setObjectOwnership(spSettings.get(), QQmlEngine::CppOwnership);
-      return spSettings.get();
+      if (nullptr != engine)
+      {
+        return new CSettings(engine);
+      }
+      else if (nullptr != scriptEngine)
+      {
+        return new CSettings(scriptEngine);
+      }
+      return nullptr;
   });
 
   qmlRegisterSingletonType<CScriptRunner>("JOIP.core", 1, 1, "ScriptRunner",

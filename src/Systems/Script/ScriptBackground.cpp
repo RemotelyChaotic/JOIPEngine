@@ -55,9 +55,9 @@ void CScriptBackground::setBackgroundColor(QJSValue color)
       viColorComponents.push_back(color.property(static_cast<quint32>(iIndex)).toInt());
     }
 
-    if (viColorComponents.size() != 4)
+    if (viColorComponents.size() != 4 && viColorComponents.size() != 3)
     {
-      QString sError = tr("Argument error in setBackgroundColor(). Array of four numbers or string was expected.");
+      QString sError = tr("Argument error in setBackgroundColor(). Array of three or four numbers or string was expected.");
       emit m_pSignalEmitter->showError(sError, QtMsgType::QtWarningMsg);
     }
     else
@@ -68,7 +68,7 @@ void CScriptBackground::setBackgroundColor(QJSValue color)
   }
   else
   {
-    QString sError = tr("Wrong argument-type to setBackgroundColor(). Array of three numbers or string was expected.");
+    QString sError = tr("Wrong argument-type to setBackgroundColor(). Array of three or four numbers or string was expected.");
     emit m_pSignalEmitter->showError(sError, QtMsgType::QtWarningMsg);
   }
 }

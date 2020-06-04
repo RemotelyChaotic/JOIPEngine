@@ -21,6 +21,7 @@ Rectangle {
             "numButtons": "",
             "type": "TextBoxSpacerDelegate.qml"
         });
+        textLog.flick(0,-1000);
     }
 
     function showButtonPrompts(vsLabels)
@@ -33,6 +34,7 @@ Rectangle {
             "numButtons": vsLabels.length,
             "type": "TextBoxButtonsDelegate.qml"
         });
+        textLog.flick(0,-1000);
     }
 
     signal sceneSelectionRetVal(int iValue)
@@ -51,6 +53,7 @@ Rectangle {
             "numButtons": "",
             "type": "TextBoxInputDelegate.qml"
         });
+        textLog.flick(0,-1000);
     }
 
     function showText(sText)
@@ -62,6 +65,7 @@ Rectangle {
             "numButtons": "",
             "type": "TextBoxTextDelegate.qml"
         });
+        textLog.flick(0,-1000);
     }
 
     function backgroundColors()
@@ -153,7 +157,7 @@ Rectangle {
 
         signal delegateComponentLoaded()
         onDelegateComponentLoaded: {
-            flick(0,-1000);
+            // nothing to do anymore
         }
 
         model: ListModel {
@@ -171,11 +175,6 @@ Rectangle {
         ScrollBar.vertical: ScrollBar {
             id: textScrollBar
             visible: true
-        }
-
-        add: Transition {
-            NumberAnimation { property: "opacity"; from: 0; to: 1.0; duration: 500 }
-            NumberAnimation { property: "scale"; from: 0; to: 1.0; duration: 500 }
         }
     }
 

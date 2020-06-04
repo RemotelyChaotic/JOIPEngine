@@ -54,6 +54,7 @@ Rectangle {
         Repeater {
             id: repeater
             model: 0
+
             Item {
                 id: repeaterItem
                 width: localTextMetrics.boundingRect.width + 20
@@ -103,6 +104,7 @@ Rectangle {
                     }
                 }
             }
+
         }
     }
 

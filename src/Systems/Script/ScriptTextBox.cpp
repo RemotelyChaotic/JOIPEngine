@@ -170,9 +170,9 @@ std::vector<QColor> CScriptTextBox::GetColors(const QJSValue& colors, const QStr
           viColorComponents.push_back(color.property(static_cast<quint32>(iIndex)).toInt());
         }
 
-        if (viColorComponents.size() != 3)
+        if (viColorComponents.size() != 4 && viColorComponents.size() != 3)
         {
-          QString sError = tr("Argument error in %1. Array of three numbers or string was expected.");
+          QString sError = tr("Argument error in %1. Array of three or four numbers or string was expected.");
           emit m_pSignalEmitter->showError(sError.arg(sSource), QtMsgType::QtWarningMsg);
         }
         else
@@ -183,14 +183,14 @@ std::vector<QColor> CScriptTextBox::GetColors(const QJSValue& colors, const QStr
       }
       else
       {
-        QString sError = tr("Wrong argument-type to %1. Array of three numbers or string was expected.");
+        QString sError = tr("Wrong argument-type to %1. Array of three or four numbers or string was expected.");
         emit m_pSignalEmitter->showError(sError.arg(sSource), QtMsgType::QtWarningMsg);
       }
     }
   }
   else
   {
-    QString sError = tr("Wrong argument-type to %1. Array of arrays of three numbers or array of strings was expected.");
+    QString sError = tr("Wrong argument-type to %1. Array of arrays of three or four numbers or array of strings was expected.");
     emit m_pSignalEmitter->showError(sError.arg(sSource), QtMsgType::QtWarningMsg);
   }
 

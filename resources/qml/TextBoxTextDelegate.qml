@@ -25,9 +25,10 @@ Rectangle {
                 id: text
                 font.family: Settings.font;
                 font.pointSize: 14
+                horizontalAlignment: Text.AlignHCenter
                 elide: Text.ElideNone
                 text: textContent
-                wrapMode: Text.WordWrap
+                wrapMode: Text.Wrap
                 color: textColor
             }
 

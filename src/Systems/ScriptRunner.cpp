@@ -15,6 +15,7 @@
 
 #include <QDebug>
 #include <QFileInfo>
+#include <QQmlEngine>
 
 namespace {
 
@@ -25,16 +26,14 @@ namespace {
 CScriptRunner::CScriptRunner() :
   CSystemBase(),
   m_spSettings(CApplication::Instance()->Settings()),
-  m_spScriptEngine(std::make_unique<QJSEngine>()),
-  m_spSignalEmitterContext(std::make_shared<CScriptRunnerSignalContext>()),
+  m_spScriptEngine(nullptr),
+  m_spSignalEmitterContext(nullptr),
   m_spTimer(nullptr),
   m_objectMapMutex(),
   m_objectMap(),
+  m_pCurrentScene(nullptr),
   m_runFunction()
 {
-  m_spScriptEngine->installExtensions(QJSEngine::TranslationExtension |
-                                      QJSEngine::ConsoleExtension |
-                                      QJSEngine::GarbageCollectionExtension);
 }
 
 CScriptRunner::~CScriptRunner()
@@ -53,6 +52,13 @@ std::shared_ptr<CScriptRunnerSignalContext> CScriptRunner::SignalEmmitterContext
 //
 void CScriptRunner::Initialize()
 {
+  m_spScriptEngine.reset(new QJSEngine());
+
+  m_spScriptEngine->installExtensions(QJSEngine::TranslationExtension |
+                                      QJSEngine::ConsoleExtension |
+                                      QJSEngine::GarbageCollectionExtension);
+
+  m_spSignalEmitterContext = std::make_shared<CScriptRunnerSignalContext>();
   m_spTimer = std::make_shared<QTimer>();
   connect(m_spTimer.get(), &QTimer::timeout, this, &CScriptRunner::SlotRun);
 
@@ -67,6 +73,9 @@ void CScriptRunner::Deinitialize()
   m_spTimer = nullptr;
 
   unregisterComponents();
+
+  m_spSignalEmitterContext = nullptr;
+  m_spScriptEngine.reset();
 
   SetInitialized(false);
 }
@@ -108,8 +117,14 @@ void CScriptRunner::loadScript(tspScene spScene, tspResource spResource)
       QString sScript = QString::fromUtf8(scriptFile.readAll());
 
       // set scene
-      CScene* pSceneIcon = new CScene(m_spScriptEngine.get(), spScene);
-      QJSValue sceneValue = m_spScriptEngine->newQObject(pSceneIcon);
+      if (nullptr != m_pCurrentScene)
+      {
+        delete m_pCurrentScene;
+      }
+      m_pCurrentScene = new CScene(m_spScriptEngine.get(), spScene);
+      // yes we need to call the static method of QQmlEngine, not QJSEngine, WHY Qt, WHY???
+      QQmlEngine::setObjectOwnership(m_pCurrentScene, QQmlEngine::CppOwnership);
+      QJSValue sceneValue = m_spScriptEngine->newQObject(m_pCurrentScene);
       m_spScriptEngine->globalObject().setProperty("scene", sceneValue);
 
       // set current Project
@@ -122,8 +137,23 @@ void CScriptRunner::loadScript(tspScene spScene, tspResource spResource)
 
       m_spSignalEmitterContext->SetScriptExecutionStatus(CScriptRunnerSignalEmiter::eRunning);
 
-      m_runFunction = m_spScriptEngine->evaluate(
-        QString("(function() { %1 \n })").arg(sScript));
+      // create wrapper function to make syntax of scripts easier
+      QString sSkript = QString("(function() { %1 \n })").arg(sScript);
+      m_runFunction = m_spScriptEngine->evaluate(sSkript);
+
+      if (m_runFunction.isError())
+      {
+        QString sException = m_runFunction.property("name").toString();
+        qint32 iLineNr = m_runFunction.property("lineNumber").toInt() - 1;
+        QString sStack = m_runFunction.property("stack").toString();
+        QString sError = "Uncaught " + sException +
+                         " at line" + QString::number(iLineNr) +
+                         ":" + m_runFunction.toString() + "\n" + sStack;
+        qCritical() << sError;
+        emit m_spSignalEmitterContext->showError(sError, QtMsgType::QtCriticalMsg);
+        emit m_spSignalEmitterContext->executionError(sException, iLineNr, sStack);
+        return;
+      }
 
       m_spTimer->setSingleShot(true);
       m_spTimer->start(10);
@@ -175,14 +205,22 @@ void CScriptRunner::registerNewComponent(const QString sName, QJSValue signalEmi
 //
 void CScriptRunner::unregisterComponents()
 {
+  m_spScriptEngine->globalObject().setProperty("scene", QJSValue());
+
   m_objectMapMutex.lock();
   for (auto it = m_objectMap.begin(); m_objectMap.end() != it; ++it)
   {
+    m_spScriptEngine->globalObject().setProperty(it->first, QJSValue());
     it->second->Cleanup();
   }
   m_objectMapMutex.unlock();
 
   m_spScriptEngine->collectGarbage();
+
+  if (nullptr != m_pCurrentScene)
+  {
+    delete m_pCurrentScene;
+  }
 
   m_objectMapMutex.lock();
   m_objectMap.clear();
@@ -193,7 +231,7 @@ void CScriptRunner::unregisterComponents()
 //
 void CScriptRunner::SlotRun()
 {
-  if (!m_runFunction.isNull() && m_runFunction.isCallable())
+  if (m_runFunction.isCallable())
   {
     QJSValue ret = m_runFunction.call();
     if (ret.isError())
@@ -208,6 +246,15 @@ void CScriptRunner::SlotRun()
       emit m_spSignalEmitterContext->showError(sError, QtMsgType::QtCriticalMsg);
       emit m_spSignalEmitterContext->executionError(sException, iLineNr, sStack);
       return;
+    }
+
+    m_spScriptEngine->globalObject().setProperty("scene", QJSValue());
+
+    m_spScriptEngine->collectGarbage();
+
+    if (nullptr != m_pCurrentScene)
+    {
+      delete m_pCurrentScene;
     }
 
     emit m_spSignalEmitterContext->interrupt();
@@ -230,7 +277,19 @@ void CScriptRunner::SlotRun()
   }
   else
   {
-    qDebug() << tr("Cannot call java-script.");
+    QString sError =  tr("Cannot call java-script.");
+    qCritical() << sError;
+    emit m_spSignalEmitterContext->showError(sError, QtMsgType::QtCriticalMsg);
+    emit m_spSignalEmitterContext->executionError(sError, 0, "");
+
+    m_spScriptEngine->globalObject().setProperty("scene", QJSValue());
+
+    m_spScriptEngine->collectGarbage();
+
+    if (nullptr != m_pCurrentScene)
+    {
+      delete m_pCurrentScene;
+    }
 
     emit m_spSignalEmitterContext->interrupt();
 
@@ -253,6 +312,8 @@ void CScriptRunner::SlotRegisterObject(const QString& sObject)
   auto it = m_objectMap.find(sObject);
   if (m_objectMap.end() != it)
   {
+    // yes we need to call the static method of QQmlEngine, not QJSEngine, WHY Qt, WHY???
+    QQmlEngine::setObjectOwnership(it->second.get(), QQmlEngine::CppOwnership);
     QJSValue scriptValue = m_spScriptEngine->newQObject(it->second.get());
     m_spScriptEngine->globalObject().setProperty(it->first, scriptValue);
   }

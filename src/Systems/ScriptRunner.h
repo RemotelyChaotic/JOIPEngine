@@ -3,12 +3,14 @@
 
 #include "ThreadedSystem.h"
 #include <QMutex>
+#include <QPointer>
 #include <QJSEngine>
 #include <QTimer>
 #include <memory>
 
 class CScriptObjectBase;
 class CScriptRunnerSignalContext;
+class CScene;
 class CSettings;
 struct SResource;
 struct SScene;
@@ -49,6 +51,7 @@ private:
   mutable QMutex                                 m_objectMapMutex;
   std::map<QString /*name*/,
            std::shared_ptr<CScriptObjectBase>>   m_objectMap;
+  QPointer<CScene>                               m_pCurrentScene;
   QJSValue                                       m_runFunction;
 };
 
