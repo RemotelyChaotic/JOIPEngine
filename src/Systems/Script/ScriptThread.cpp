@@ -1,6 +1,7 @@
 #include "ScriptThread.h"
 
 #include <QEventLoop>
+#include <QDateTime>
 #include <QThread>
 #include <QTimer>
 
@@ -58,24 +59,44 @@ void CScriptThread::sleep(qint32 iTimeS, QJSValue bSkippable)
 
   if (0 < iTimeS)
   {
+    QDateTime lastTime = QDateTime::currentDateTime();
+    qint32 iTimeLeft = iTimeS * 1000;
+
     QTimer timer;
-    timer.setSingleShot(true);
-    timer.setInterval(iTimeS * 1000);
+    timer.setSingleShot(false);
+    timer.setInterval(20);
     QEventLoop loop;
+    connect(pSignalEmitter, &CThreadSignalEmitter::interrupt,
+            &loop, &QEventLoop::quit, Qt::QueuedConnection);
+
+    // connect lambdas in loop context, so events are processed, but capture timer,
+    // to start / stop
+    connect(pSignalEmitter, &CThreadSignalEmitter::pauseExecution, &loop, [&timer]() {
+      timer.stop();
+    }, Qt::QueuedConnection);
+    connect(pSignalEmitter, &CThreadSignalEmitter::resumeExecution, &loop, [&timer]() {
+      timer.start();
+    }, Qt::QueuedConnection);
+
+    connect(&timer, &QTimer::timeout, &loop, [&loop, &iTimeLeft, &lastTime]() {
+      QDateTime newTime = QDateTime::currentDateTime();
+      iTimeLeft -= newTime.toMSecsSinceEpoch() - lastTime.toMSecsSinceEpoch();
+      lastTime = newTime;
+      if (0 >= iTimeLeft)
+      {
+        emit loop.exit();
+      }
+    });
+
     if (bSkippableFlag)
     {
       connect(pSignalEmitter, &CThreadSignalEmitter::waitSkipped,
               &loop, &QEventLoop::quit, Qt::QueuedConnection);
-    }
-    connect(pSignalEmitter, &CThreadSignalEmitter::interrupt,
-            &loop, &QEventLoop::quit, Qt::QueuedConnection);
-    connect(&timer, &QTimer::timeout, &loop, &QEventLoop::quit);
-    if (bSkippableFlag)
-    {
       emit pSignalEmitter->skippableWait(iTimeS);
     }
     timer.start();
     loop.exec();
+    timer.stop();
     timer.disconnect();
     loop.disconnect();
   }

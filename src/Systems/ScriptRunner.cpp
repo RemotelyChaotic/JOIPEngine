@@ -17,10 +17,6 @@
 #include <QFileInfo>
 #include <QQmlEngine>
 
-namespace {
-
-}
-
 //----------------------------------------------------------------------------------------
 //
 CScriptRunner::CScriptRunner() :
@@ -31,6 +27,7 @@ CScriptRunner::CScriptRunner() :
   m_spTimer(nullptr),
   m_objectMapMutex(),
   m_objectMap(),
+  m_pScriptUtils(nullptr),
   m_pCurrentScene(nullptr),
   m_runFunction()
 {
@@ -62,6 +59,15 @@ void CScriptRunner::Initialize()
   m_spTimer = std::make_shared<QTimer>();
   connect(m_spTimer.get(), &QTimer::timeout, this, &CScriptRunner::SlotRun);
 
+  m_pScriptUtils = new CScriptRunnerUtils(this, this);
+  connect(m_pScriptUtils, &CScriptRunnerUtils::finishedScript,
+          this, &CScriptRunner::SlotFinishedScript);
+
+  // yes we need to call the static method of QQmlEngine, not QJSEngine, WHY Qt, WHY???
+  QQmlEngine::setObjectOwnership(m_pScriptUtils, QQmlEngine::CppOwnership);
+  QJSValue scriptValueUtils = m_spScriptEngine->newQObject(m_pScriptUtils);
+  m_spScriptEngine->globalObject().setProperty("utils", scriptValueUtils);
+
   SetInitialized(true);
 }
 
@@ -69,6 +75,10 @@ void CScriptRunner::Initialize()
 //
 void CScriptRunner::Deinitialize()
 {
+  m_spScriptEngine->globalObject().setProperty("utils", QJSValue());
+  delete m_pScriptUtils;
+  m_pScriptUtils = nullptr;
+
   m_spTimer->stop();
   m_spTimer = nullptr;
 
@@ -137,8 +147,14 @@ void CScriptRunner::LoadScript(tspScene spScene, tspResource spResource)
 
       m_spSignalEmitterContext->SetScriptExecutionStatus(CScriptRunnerSignalEmiter::eRunning);
 
-      // create wrapper function to make syntax of scripts easier
-      QString sSkript = QString("(function() { %1 \n })").arg(sScript);
+      // create wrapper function to make syntax of scripts easier and handle return value
+      // and be able to emit signal on finished
+      QString sSkript = QString("(function() { "
+                                "var fn = function() { %1 }; "
+                                "var ret = fn(); "
+                                "utils.finishedScript(ret); \n "
+                                "})")
+          .arg(sScript);
       m_runFunction = m_spScriptEngine->evaluate(sSkript);
 
       if (m_runFunction.isError())
@@ -177,6 +193,30 @@ void CScriptRunner::LoadScript(tspScene spScene, tspResource spResource)
 
 //----------------------------------------------------------------------------------------
 //
+void CScriptRunner::PauseExecution()
+{
+  if (CScriptRunnerSignalEmiter::ePaused != m_spSignalEmitterContext->ScriptExecutionStatus())
+  {
+    m_spSignalEmitterContext->SetScriptExecutionStatus(CScriptRunnerSignalEmiter::ePaused);
+    emit m_spSignalEmitterContext->pauseExecution();
+    emit SignalRunningChanged(false);
+  }
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CScriptRunner::ResumeExecution()
+{
+  if (CScriptRunnerSignalEmiter::ePaused == m_spSignalEmitterContext->ScriptExecutionStatus())
+  {
+    m_spSignalEmitterContext->SetScriptExecutionStatus(CScriptRunnerSignalEmiter::eRunning);
+    emit m_spSignalEmitterContext->resumeExecution();
+    emit SignalRunningChanged(true);
+  }
+}
+
+//----------------------------------------------------------------------------------------
+//
 void CScriptRunner::RegisterNewComponent(const QString sName, QJSValue signalEmitter)
 {
   QMutexLocker locker(&m_objectMapMutex);
@@ -205,6 +245,10 @@ void CScriptRunner::RegisterNewComponent(const QString sName, QJSValue signalEmi
 //
 void CScriptRunner::UnregisterComponents()
 {
+  // interrupt, in case of infinite loop
+  m_spScriptEngine->setInterrupted(true);
+  m_spScriptEngine->setInterrupted(false);
+
   m_spScriptEngine->globalObject().setProperty("scene", QJSValue());
 
   m_objectMapMutex.lock();
@@ -229,50 +273,58 @@ void CScriptRunner::UnregisterComponents()
 
 //----------------------------------------------------------------------------------------
 //
+void CScriptRunner::SlotFinishedScript(const QVariant& sRetVal)
+{
+  m_spScriptEngine->globalObject().setProperty("scene", QJSValue());
+
+  m_spScriptEngine->collectGarbage();
+
+  if (nullptr != m_pCurrentScene)
+  {
+    delete m_pCurrentScene;
+  }
+
+  emit m_spSignalEmitterContext->interrupt();
+
+  m_objectMapMutex.lock();
+  for (auto it = m_objectMap.begin(); m_objectMap.end() != it; ++it)
+  {
+    it->second->SetCurrentProject(nullptr);
+  }
+  m_objectMapMutex.unlock();
+
+  if (QVariant::String == sRetVal.type())
+  {
+    emit SignalScriptRunFinished(true, sRetVal.toString());
+  }
+  else
+  {
+    emit SignalScriptRunFinished(true, QString());
+  }
+}
+
+//----------------------------------------------------------------------------------------
+//
 void CScriptRunner::SlotRun()
 {
   if (m_runFunction.isCallable())
   {
     QJSValue ret = m_runFunction.call();
-    if (ret.isError())
+    if (!m_spScriptEngine->isInterrupted())
     {
-      QString sException = ret.property("name").toString();
-      qint32 iLineNr = ret.property("lineNumber").toInt() - 1;
-      QString sStack = ret.property("stack").toString();
-      QString sError = "Uncaught " + sException +
-                       " at line " + QString::number(iLineNr) +
-                       ": " + ret.toString() + "\n" + sStack;
-      qCritical() << sError;
-      emit m_spSignalEmitterContext->showError(sError, QtMsgType::QtCriticalMsg);
-      emit m_spSignalEmitterContext->executionError(sException, iLineNr, sStack);
-      return;
-    }
-
-    m_spScriptEngine->globalObject().setProperty("scene", QJSValue());
-
-    m_spScriptEngine->collectGarbage();
-
-    if (nullptr != m_pCurrentScene)
-    {
-      delete m_pCurrentScene;
-    }
-
-    emit m_spSignalEmitterContext->interrupt();
-
-    m_objectMapMutex.lock();
-    for (auto it = m_objectMap.begin(); m_objectMap.end() != it; ++it)
-    {
-      it->second->SetCurrentProject(nullptr);
-    }
-    m_objectMapMutex.unlock();
-
-    if (ret.isString())
-    {
-      emit SignalScriptRunFinished(true, ret.toString());
-    }
-    else
-    {
-      emit SignalScriptRunFinished(true, QString());
+      if (ret.isError())
+      {
+        QString sException = ret.property("name").toString();
+        qint32 iLineNr = ret.property("lineNumber").toInt() - 1;
+        QString sStack = ret.property("stack").toString();
+        QString sError = "Uncaught " + sException +
+                         " at line " + QString::number(iLineNr) +
+                         ": " + ret.toString() + "\n" + sStack;
+        qCritical() << sError;
+        emit m_spSignalEmitterContext->showError(sError, QtMsgType::QtCriticalMsg);
+        emit m_spSignalEmitterContext->executionError(sException, iLineNr, sStack);
+        return;
+      }
     }
   }
   else
@@ -321,15 +373,39 @@ void CScriptRunner::SlotRegisterObject(const QString& sObject)
 
 //----------------------------------------------------------------------------------------
 //
+CScriptRunnerUtils::CScriptRunnerUtils(QObject* pParent, QPointer<CScriptRunner> pScriptRunner) :
+  QObject(pParent),
+  m_pScriptRunner(pScriptRunner)
+{
+
+}
+CScriptRunnerUtils::~CScriptRunnerUtils()
+{
+
+}
+
+//----------------------------------------------------------------------------------------
+//
 CScriptRunnerWrapper::CScriptRunnerWrapper(QObject* pParent, std::weak_ptr<CScriptRunner> wpRunner) :
   QObject(pParent),
   m_wpRunner(wpRunner)
 {
-
+  connect(wpRunner.lock().get(), &CScriptRunner::SignalRunningChanged,
+          this, &CScriptRunnerWrapper::runningChanged, Qt::QueuedConnection);
 }
 CScriptRunnerWrapper::~CScriptRunnerWrapper()
 {
 
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CScriptRunnerWrapper::pauseExecution()
+{
+  if (auto spRunner = m_wpRunner.lock())
+  {
+    spRunner->PauseExecution();
+  }
 }
 
 //----------------------------------------------------------------------------------------
@@ -339,5 +415,15 @@ void CScriptRunnerWrapper::registerNewComponent(const QString sName, QJSValue si
   if (auto spRunner = m_wpRunner.lock())
   {
     spRunner->RegisterNewComponent(sName, signalEmitter);
+  }
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CScriptRunnerWrapper::resumeExecution()
+{
+  if (auto spRunner = m_wpRunner.lock())
+  {
+    spRunner->ResumeExecution();
   }
 }

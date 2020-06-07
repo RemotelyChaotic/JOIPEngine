@@ -68,4 +68,19 @@ Rectangle {
         ScriptRunner.registerNewComponent(userName, signalEmitter);
         registrator.componentLoaded();
     }
+
+    // handle interrupt
+    Connections {
+        target: ScriptRunner
+        onRunningChanged: {
+            if (!bRunning)
+            {
+                timerDisplay.pause();
+            }
+            else
+            {
+                timerDisplay.resume();
+            }
+        }
+    }
 }

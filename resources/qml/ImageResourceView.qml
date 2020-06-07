@@ -12,6 +12,22 @@ Rectangle {
     property int state: Resource.Null
     property bool animated: false
 
+    function play()
+    {
+        if (animated)
+        {
+            animatedImage.paused = false;
+        }
+    }
+
+    function pause()
+    {
+        if (animated)
+        {
+            animatedImage.paused = true;
+        }
+    }
+
     onResourceChanged: {
         if (null !== resource && undefined !== resource)
         {
@@ -23,6 +39,7 @@ Rectangle {
                     animated = true;
                     image.source = "";
                     animatedImage.source = resource.path;
+                    play();
                 }
                 else
                 {

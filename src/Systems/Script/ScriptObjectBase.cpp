@@ -1,6 +1,7 @@
 #include "ScriptObjectBase.h"
 #include "ScriptRunnerSignalEmiter.h"
 #include "Systems/Project.h"
+#include <QEventLoop>
 
 CScriptObjectBase::CScriptObjectBase(QPointer<CScriptRunnerSignalEmiter> pEmitter,
                                      QPointer<QJSEngine> pEngine) :
@@ -40,13 +41,34 @@ bool CScriptObjectBase::CheckIfScriptCanRun()
     return false;
   }
 
-  if (m_pSignalEmitter->ScriptExecutionStatus() == CScriptRunnerSignalEmiter::eStopped)
+  switch (m_pSignalEmitter->ScriptExecutionStatus())
   {
-    return false;
-  }
-  else
-  {
-    return true;
+    case CScriptRunnerSignalEmiter::eStopped:
+    {
+      return false;
+    }
+    case CScriptRunnerSignalEmiter::eRunning:
+    {
+      return true;
+    }
+    case CScriptRunnerSignalEmiter::ePaused:
+    {
+      QEventLoop loop;
+      connect(m_pSignalEmitter, &CScriptRunnerSignalEmiter::interrupt,
+              &loop, &QEventLoop::quit, Qt::QueuedConnection);
+      connect(m_pSignalEmitter, &CScriptRunnerSignalEmiter::resumeExecution,
+              &loop, &QEventLoop::quit, Qt::QueuedConnection);
+      loop.exec();
+      if (m_pSignalEmitter->ScriptExecutionStatus() == CScriptRunnerSignalEmiter::eStopped)
+      {
+        return false;
+      }
+      else
+      {
+        return true;
+      }
+    }
+    default: return false;
   }
 }
 

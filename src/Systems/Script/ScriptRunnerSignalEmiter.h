@@ -21,6 +21,7 @@ class CScriptRunnerSignalEmiter : public QObject
 public:
   enum ScriptExecStatus {
     eRunning = 0,
+    ePaused,
     eStopped,
   };
   Q_ENUM(ScriptExecStatus)
@@ -40,6 +41,8 @@ signals:
   void clearStorage();
   void executionError(QString sException, qint32 iLine, QString sStack);
   void interrupt();
+  void pauseExecution();
+  void resumeExecution();
   void showError(QString sError, QtMsgType type);
 
 protected:
@@ -70,6 +73,8 @@ signals:
   void clearStorage();
   void executionError(QString sException, qint32 iLine, QString sStack);
   void interrupt();
+  void pauseExecution();
+  void resumeExecution();
   void showError(QString sError, QtMsgType type);
 
 protected:

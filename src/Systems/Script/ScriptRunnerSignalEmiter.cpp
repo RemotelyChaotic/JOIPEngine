@@ -63,6 +63,10 @@ void CScriptRunnerSignalEmiter::Initialize(std::shared_ptr<CScriptRunnerSignalCo
             spContext.get(), &CScriptRunnerSignalContext::executionError, Qt::DirectConnection);
     connect(spContext.get(), &CScriptRunnerSignalContext::interrupt,
             this, &CScriptRunnerSignalEmiter::interrupt, Qt::DirectConnection);
+    connect(spContext.get(), &CScriptRunnerSignalContext::pauseExecution,
+            this, &CScriptRunnerSignalEmiter::pauseExecution, Qt::DirectConnection);
+    connect(spContext.get(), &CScriptRunnerSignalContext::resumeExecution,
+            this, &CScriptRunnerSignalEmiter::resumeExecution, Qt::DirectConnection);
     connect(this, &CScriptRunnerSignalEmiter::showError,
             spContext.get(), &CScriptRunnerSignalContext::showError, Qt::DirectConnection);
   }

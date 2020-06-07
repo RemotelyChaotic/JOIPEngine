@@ -150,6 +150,43 @@ Rectangle {
                         }
                     }
 
+                    // handle interrupt
+                    Connections {
+                        target: ScriptRunner
+                        onRunningChanged: {
+                            if (!bRunning)
+                            {
+                                if (imgResource.state === Resource.Loaded)
+                                {
+                                    imgResource.pause();
+                                }
+                                if (movieResource.state === Resource.Loaded)
+                                {
+                                    movieResource.pause();
+                                }
+                                if (webResource.state === Resource.Loaded)
+                                {
+                                    webResource.pause();
+                                }
+                            }
+                            else
+                            {
+                                if (imgResource.state === Resource.Loaded)
+                                {
+                                    imgResource.play();
+                                }
+                                if (movieResource.state === Resource.Loaded)
+                                {
+                                    movieResource.play();
+                                }
+                                if (webResource.state === Resource.Loaded)
+                                {
+                                    webResource.play();
+                                }
+                            }
+                        }
+                    }
+
                     Rectangle {
                         id: uiRootOfItem
                         anchors.centerIn: parent

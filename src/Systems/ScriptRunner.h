@@ -10,6 +10,7 @@
 
 class CScriptObjectBase;
 class CScriptRunnerSignalContext;
+class CScriptRunnerUtils;
 class CScene;
 class CSettings;
 struct SResource;
@@ -17,19 +18,25 @@ struct SScene;
 typedef std::shared_ptr<SResource> tspResource;
 typedef std::shared_ptr<SScene> tspScene;
 
-
+//----------------------------------------------------------------------------------------
+//
 class CScriptRunner : public CSystemBase
 {
   Q_OBJECT
   Q_DISABLE_COPY(CScriptRunner)
+  friend class CScriptRunnerUtils;
 
 public:
   CScriptRunner();
   ~CScriptRunner() override;
 
+  void PauseExecution();
+  void ResumeExecution();
+
   std::shared_ptr<CScriptRunnerSignalContext> SignalEmmitterContext();
 
 signals:
+  void SignalRunningChanged(bool bRunning);
   void SignalScriptRunFinished(bool bOk, const QString& sRetVal);
 
 public slots:
@@ -41,6 +48,7 @@ public slots:
   void UnregisterComponents();
 
 private slots:
+  void SlotFinishedScript(const QVariant& sRetVal);
   void SlotRun();
   void SlotRegisterObject(const QString& sObject);
 
@@ -52,8 +60,27 @@ private:
   mutable QMutex                                 m_objectMapMutex;
   std::map<QString /*name*/,
            std::shared_ptr<CScriptObjectBase>>   m_objectMap;
+  QPointer<CScriptRunnerUtils>                   m_pScriptUtils;
   QPointer<CScene>                               m_pCurrentScene;
   QJSValue                                       m_runFunction;
+};
+
+//----------------------------------------------------------------------------------------
+//
+class CScriptRunnerUtils : public QObject
+{
+  Q_OBJECT
+  Q_DISABLE_COPY(CScriptRunnerUtils)
+
+public:
+  CScriptRunnerUtils(QObject* pParent, QPointer<CScriptRunner> pScriptRunner);
+  ~CScriptRunnerUtils() override;
+
+signals:
+  void finishedScript(const QVariant& sRetVal);
+
+private:
+  QPointer<CScriptRunner>                         m_pScriptRunner;
 };
 
 //----------------------------------------------------------------------------------------
@@ -67,7 +94,12 @@ public:
   CScriptRunnerWrapper(QObject* pParent, std::weak_ptr<CScriptRunner> wpRunner);
   ~CScriptRunnerWrapper() override;
 
+  Q_INVOKABLE void pauseExecution();
   Q_INVOKABLE void registerNewComponent(const QString sName, QJSValue signalEmitter);
+  Q_INVOKABLE void resumeExecution();
+
+signals:
+  void runningChanged(bool bRunning);
 
 private:
   std::weak_ptr<CScriptRunner>                    m_wpRunner;

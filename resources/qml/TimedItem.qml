@@ -25,6 +25,23 @@ Rectangle {
         counter.start();
     }
 
+    function resume()
+    {
+        if (!counter.running)
+        {
+            counter.lastDateMs = new Date().getTime();
+            counter.start();
+        }
+    }
+
+    function pause()
+    {
+        if (counter.running)
+        {
+            counter.stop();
+        }
+    }
+
     function stop()
     {
         counter.updateCounter = 0;

@@ -90,7 +90,14 @@ Rectangle {
             property bool paused: false
             function pausePlayScene()
             {
-                // TODO:
+                if (pauseButton.paused)
+                {
+                    ScriptRunner.resumeExecution();
+                }
+                else
+                {
+                    ScriptRunner.pauseExecution();
+                }
             }
 
             Image {
@@ -112,14 +119,12 @@ Rectangle {
             onClicked: {
                 soundEffects.clickSound.play();
                 pausePlayScene();
-                pauseButton.paused = !pauseButton.paused;
             }
 
             Shortcut {
                 sequence: Settings.keyBinding("Pause")
                 onActivated: {
                     pauseButton.pausePlayScene();
-                    pauseButton.paused = !pauseButton.paused;
                 }
             }
         }
@@ -130,6 +135,13 @@ Rectangle {
             Layout.preferredHeight: parent.height
             Layout.alignment: Qt.AlignVCenter
             color: "transparent"
+        }
+    }
+
+    Connections {
+        target: ScriptRunner
+        onRunningChanged: {
+            pauseButton.paused = !bRunning;
         }
     }
 }

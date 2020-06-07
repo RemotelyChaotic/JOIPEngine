@@ -86,8 +86,8 @@ void CSceneMainScreen::LoadProject(qint32 iId, const QString sStartScene)
     m_spCurrentProject = spDbManager->FindProject(iId);
     m_spProjectRunner->LoadProject(m_spCurrentProject, sStartScene);
 
-    ConnectAllSignals();
     LoadQml();
+    ConnectAllSignals();
   }
 }
 
@@ -117,8 +117,8 @@ void CSceneMainScreen::UnloadProject()
 
   m_spProjectRunner->UnloadProject();
 
-  UnloadQml();
   DisconnectAllSignals();
+  UnloadQml();
 }
 
 //----------------------------------------------------------------------------------------
@@ -329,8 +329,13 @@ void CSceneMainScreen::SlotStartLoadingSkript()
 void CSceneMainScreen::ConnectAllSignals()
 {
   QQuickItem* pRootObject =  m_spUi->pQmlWidget->rootObject();
-  connect(pRootObject, SIGNAL(startLoadingSkript()), this, SLOT(SlotStartLoadingSkript()));
-  connect(pRootObject, SIGNAL(quit()), this, SLOT(SlotQuit()));
+  bool bOk = true;
+  Q_UNUSED(bOk)
+
+  bOk = connect(pRootObject, SIGNAL(startLoadingSkript()), this, SLOT(SlotStartLoadingSkript()));
+  assert(bOk);
+  bOk = connect(pRootObject, SIGNAL(quit()), this, SLOT(SlotQuit()));
+  assert(bOk);
 
   auto spSignalEmmiterContext = m_spScriptRunner->SignalEmmitterContext();
 
@@ -338,9 +343,6 @@ void CSceneMainScreen::ConnectAllSignals()
           this, &CSceneMainScreen::SlotError, Qt::QueuedConnection);
   connect(m_spScriptRunner.get(), &CScriptRunner::SignalScriptRunFinished,
           this, &CSceneMainScreen::SlotScriptRunFinished, Qt::QueuedConnection);
-
-  bool bOk = true;
-  Q_UNUSED(bOk)
 
   bOk = connect(pRootObject, SIGNAL(sceneSelectionReturnValue(int)),
                 this, SLOT(SlotSceneSelectReturnValue(int)), Qt::QueuedConnection);

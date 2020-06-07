@@ -211,6 +211,51 @@ Rectangle {
         }
     }
 
+    // handle interrupt
+    Connections {
+        target: ScriptRunner
+        onRunningChanged: {
+            if (!bRunning)
+            {
+                if (imgResource.state === Resource.Loaded)
+                {
+                    imgResource.pause();
+                }
+                if (movieResource.state === Resource.Loaded)
+                {
+                    movieResource.pause();
+                }
+                if (webResource.state === Resource.Loaded)
+                {
+                    webResource.pause();
+                }
+                if (soundResource.state === Resource.Loaded)
+                {
+                    soundResource.pause();
+                }
+            }
+            else
+            {
+                if (imgResource.state === Resource.Loaded)
+                {
+                    imgResource.play();
+                }
+                if (movieResource.state === Resource.Loaded)
+                {
+                    movieResource.play();
+                }
+                if (webResource.state === Resource.Loaded)
+                {
+                    webResource.play();
+                }
+                if (soundResource.state === Resource.Loaded)
+                {
+                    soundResource.play();
+                }
+            }
+        }
+    }
+
     Component.onCompleted: {
         ScriptRunner.registerNewComponent(userName, signalEmitter);
         if (mainMediaPlayer)
