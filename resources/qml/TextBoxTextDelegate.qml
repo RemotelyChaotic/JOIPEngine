@@ -12,17 +12,21 @@ Rectangle {
     Rectangle {
         id: textBackground
         anchors.centerIn: parent
-        width: layoutText.width + 20
+        width: layoutText.width + imageSkip.width + 30
         height: layoutText.height + 20
         color: backgroundColor
         radius: 5
 
-        RowLayout {
+        Rectangle {
             id: layoutText
             anchors.centerIn: parent
+            width: text.contentWidth
+            height: text.contentHeight
+            color: "transparent"
 
             Text {
                 id: text
+                anchors.centerIn: parent
                 font.family: Settings.font;
                 font.pointSize: 14
                 horizontalAlignment: Text.AlignHCenter
@@ -31,22 +35,24 @@ Rectangle {
                 wrapMode: Text.Wrap
                 color: textColor
             }
+        }
 
-            Image {
-                id: imageSkip
-                Layout.preferredHeight: 24
-                Layout.preferredWidth: bShow ? 24 : 0
-                Layout.alignment: Qt.AlignVCenter
-                source: Settings.styleFolderQml() + "/ButtonPlay.svg";
-                smooth: true
+        Image {
+            id: imageSkip
+            x: -20
+            height: 24
+            width: bShow ? 24 : 0
+            anchors.right: parent.right
+            anchors.verticalCenter: parent.verticalCenter
 
-                property bool bIsLast: index+1 < textDelegate.parent.ListView.view.count ? false : true
-                property bool bShow: bIsLast && textDelegate.parent.ListView.view.skippable
+            source: Settings.styleFolderQml() + "/ButtonPlay.svg";
 
-                opacity: bShow ? 1.0 : 0.0
-                Behavior on opacity {
-                    NumberAnimation { duration: 500; easing.type: Easing.InOutQuad }
-                }
+            property bool bIsLast: index+1 < textDelegate.parent.ListView.view.count ? false : true
+            property bool bShow: bIsLast && textDelegate.parent.ListView.view.skippable
+
+            opacity: bShow ? 1.0 : 0.0
+            Behavior on opacity {
+                NumberAnimation { duration: 500; easing.type: Easing.InOutQuad }
             }
         }
     }

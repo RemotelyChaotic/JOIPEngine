@@ -6,7 +6,7 @@ import JOIP.core 1.1
 Rectangle {
     id: textDelegate
     width: parent.ListView.view.width
-    height: textMetrics.boundingRect.height * tableView.rowCount + 40
+    height: tableView.itemHeight * (tableView.rowCount+1) + tableView.spacing * tableView.rowCount + 40
     color: "transparent"
 
     property var backgroundColors: []
@@ -27,38 +27,67 @@ Rectangle {
         }
     }
 
-    Flow {
+    Rectangle {
         id: tableView
-        spacing: 20
+        color: "transparent"
+        x: 20
+        width: parent.width - 40
+        height: itemHeight * (rowCount+1) + spacing * rowCount
 
+        property int spacing: 20
         property int itemHeight: textMetrics.boundingRect.height + 10
-        property int itemWithEstimate: textMetrics.boundingRect.width
-
-        property int rowMaxCount: parent.width / (itemWithEstimate + spacing)
-        property int rowCount: rowMaxCount > numButtons ? numButtons : rowMaxCount
-        property int rowWidth: rowCount * itemWithEstimate + (rowCount - 1) * spacing
-        property int rowMar: (parent.width - rowWidth) / 2
-        property int colMaxCount: parent.height / (itemHeight + spacing)
-        property int colCount: numButtons / rowMaxCount + 1
-        property int colHeight: colCount * itemHeight + (colCount - 1) * spacing
-        property int colMar: (parent.height - colHeight) / 2
+        property int rowCount: repeater.rowCount
 
         anchors {
-            fill: parent
-            leftMargin: rowMar
-            rightMargin: rowMar
-            topMargin: colMar
-            bottomMargin: colMar
+            left: parent.left
+            verticalCenter: parent.verticalCenter
         }
 
         Repeater {
             id: repeater
             model: 0
 
+            property int currentRowWidth: 0
+            property int numAddedItems: 0
+            property int rowCount: 0
+            property var rowSizes: []
+
+            // we need to calculate positions manually
+            onItemAdded: {
+                numAddedItems++;
+                item.x = currentRowWidth;
+                if (currentRowWidth + item.width + tableView.spacing > tableView.width)
+                {
+                    rowSizes[rowCount] = currentRowWidth - tableView.spacing;
+                    rowCount++;
+                    item.x = 0;
+                    currentRowWidth = item.width + tableView.spacing;
+                }
+                else
+                {
+                    currentRowWidth += item.width + tableView.spacing;
+                }
+                item.y = rowCount * tableView.itemHeight + rowCount * tableView.spacing;
+                item.rowIndex = rowCount;
+                rowSizes[rowCount] = currentRowWidth - tableView.spacing;
+
+                // all items added
+                if (numAddedItems === model.length)
+                {
+                    for (var i = 0; i < model.length; ++i)
+                    {
+                        var pItem = itemAt(i);
+                        var iRowWidth = rowSizes[pItem.rowIndex];
+                        pItem.x = pItem.x + (tableView.width - iRowWidth) / 2 + tableView.spacing;
+                    }
+                }
+            }
+
             Item {
                 id: repeaterItem
                 width: localTextMetrics.boundingRect.width + 20
                 height: tableView.itemHeight
+                property int rowIndex: 0
 
                 TextMetrics {
                     id: localTextMetrics
@@ -94,7 +123,7 @@ Rectangle {
                         id: text
                         anchors.centerIn: parent
                         font.family: Settings.font;
-                        font.pointSize: 14
+                        font.pointSize: textMetrics.font.pointSize
                         elide: Text.ElideNone
                         text: textDelegate.buttonTexts[index]
                         wrapMode: Text.WordWrap

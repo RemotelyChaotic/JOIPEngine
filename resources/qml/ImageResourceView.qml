@@ -81,6 +81,8 @@ Rectangle {
             }
         }
 
+        antialiasing: true
+        mipmap: true
         smooth: true
         fillMode: Image.PreserveAspectFit
         source: ""
