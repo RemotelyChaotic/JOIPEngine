@@ -4,6 +4,7 @@
 #include "UISoundEmitter.h"
 
 // needed to register to qml
+#include "Player/SceneMainScreen.h"
 #include "Player/TimerWidget.h"
 
 #include "Systems/DatabaseManager.h"
@@ -34,6 +35,7 @@
 #include <QQmlEngine>
 #include <QQuickItem>
 #include <QQmlWebChannel>
+#include <QTimer>
 #include <cassert>
 
 CApplication::CApplication(int& argc, char *argv[]) :
@@ -102,11 +104,9 @@ void CApplication::Initialize()
 
   // create subsystems
   m_spSystemsMap.insert({ECoreSystems::eDatabaseManager, std::make_shared<CThreadedSystem>()});
-  m_spSystemsMap.insert({ECoreSystems::eScriptRunner, std::make_shared<CThreadedSystem>()});
 
   // init subsystems
   m_spSystemsMap[ECoreSystems::eDatabaseManager]->RegisterObject<CDatabaseManager>();
-  m_spSystemsMap[ECoreSystems::eScriptRunner]->RegisterObject<CScriptRunner>();
 
   // qml
   RegisterQmlTypes();
@@ -135,12 +135,6 @@ template<>
 std::weak_ptr<COverlayManager> CApplication::System<COverlayManager>()
 {
   return m_spOverlayManager;
-}
-
-template<>
-std::weak_ptr<CScriptRunner> CApplication::System<CScriptRunner>()
-{
-  return std::static_pointer_cast<CScriptRunner>(m_spSystemsMap[ECoreSystems::eScriptRunner]->Get());
 }
 
 //----------------------------------------------------------------------------------------
@@ -195,14 +189,27 @@ void CApplication::RegisterQmlTypes()
       }
       return nullptr;
   });
-
-  qmlRegisterSingletonType<CScriptRunner>("JOIP.core", 1, 1, "ScriptRunner",
-                                      [this](QQmlEngine *engine, QJSEngine *scriptEngine) -> QObject*
+  qmlRegisterSingletonType<CScriptRunnerWrapper>("JOIP.core", 1, 1, "ScriptRunner",
+                                                 [](QQmlEngine *engine, QJSEngine *scriptEngine) -> QObject*
   {
       Q_UNUSED(scriptEngine)
-      std::shared_ptr<CScriptRunner> spScriptRunner = System<CScriptRunner>().lock();
-      engine->setObjectOwnership(spScriptRunner.get(), QQmlEngine::CppOwnership);
-      return spScriptRunner.get();
+      if (nullptr != engine)
+      {
+        CSceneMainScreen* pMainScreen = engine->property(player::c_sMainPlayerProperty).value<CSceneMainScreen*>();
+        if (nullptr != pMainScreen)
+        {
+          return new CScriptRunnerWrapper(engine, pMainScreen->ScriptRunner());
+        }
+      }
+      else if (nullptr != scriptEngine)
+      {
+        CSceneMainScreen* pMainScreen = engine->property(player::c_sMainPlayerProperty).value<CSceneMainScreen*>();
+        if (nullptr != pMainScreen)
+        {
+          return new CScriptRunnerWrapper(scriptEngine, pMainScreen->ScriptRunner());
+        }
+      }
+      return nullptr;
   });
 
   qmlRegisterUncreatableType<CProject>("JOIP.db", 1, 1, "Project", "");

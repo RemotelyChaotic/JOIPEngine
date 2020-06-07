@@ -72,7 +72,6 @@ void CEditorCodeWidget::Initialize()
   m_bInitialized = false;
 
   m_wpDbManager = CApplication::Instance()->System<CDatabaseManager>();
-  m_wpScriptRunner = CApplication::Instance()->System<CScriptRunner>();
 
   m_spBackgroundSnippetOverlay->Initialize(ResourceTreeModel());
   m_spIconSnippetOverlay->Initialize(ResourceTreeModel());
@@ -143,14 +142,6 @@ void CEditorCodeWidget::LoadProject(tspProject spProject)
   {
     m_spUi->pStackedWidget->setCurrentIndex(c_iIndexNoScripts);
   }
-
-  auto spScriptRunner = m_wpScriptRunner.lock();
-  if (nullptr != spScriptRunner)
-  {
-    auto spSignalEmmiter = spScriptRunner->SignalEmmitterContext();
-    connect(spSignalEmmiter.get(), &CScriptRunnerSignalContext::executionError,
-            m_spUi->pCodeEdit, &CScriptEditorWidget::SlotExecutionError, Qt::QueuedConnection);
-  }
 }
 
 //----------------------------------------------------------------------------------------
@@ -165,14 +156,6 @@ void CEditorCodeWidget::UnloadProject()
   m_spUi->pCodeEdit->ResetWidget();
   m_spUi->pCodeEdit->clear();
   m_spUi->pCodeEdit->blockSignals(false);
-
-  auto spScriptRunner = m_wpScriptRunner.lock();
-  if (nullptr != spScriptRunner)
-  {
-    auto spSignalEmmiter = spScriptRunner->SignalEmmitterContext();
-    disconnect(spSignalEmmiter.get(), &CScriptRunnerSignalContext::executionError,
-            m_spUi->pCodeEdit, &CScriptEditorWidget::SlotExecutionError);
-  }
 
   m_spResourceSnippetOverlay->UnloadProject();
 
@@ -376,6 +359,15 @@ void CEditorCodeWidget::SlotDebugStart()
     qint32 iCurrProject = m_spCurrentProject->m_iId;
     m_spCurrentProject->m_rwLock.unlock();
     CSceneMainScreen* pMainSceneScreen = new CSceneMainScreen(m_spUi->pSceneView);
+
+    auto spScriptRunner = pMainSceneScreen->ScriptRunner().lock();
+    if (nullptr != spScriptRunner)
+    {
+      auto spSignalEmmiter = spScriptRunner->SignalEmmitterContext();
+      connect(spSignalEmmiter.get(), &CScriptRunnerSignalContext::executionError,
+              m_spUi->pCodeEdit, &CScriptEditorWidget::SlotExecutionError, Qt::QueuedConnection);
+    }
+
     pMainSceneScreen->LoadProject(iCurrProject, sSceneName);
 
     pLayout->addWidget(pMainSceneScreen);
@@ -404,7 +396,17 @@ void CEditorCodeWidget::SlotDebugStop()
     {
       CSceneMainScreen* pMainSceneScreen =
           qobject_cast<CSceneMainScreen*>(pItem->widget());
+
+      auto spScriptRunner = m_wpScriptRunner.lock();
+      if (nullptr != spScriptRunner)
+      {
+        auto spSignalEmmiter = spScriptRunner->SignalEmmitterContext();
+        disconnect(spSignalEmmiter.get(), &CScriptRunnerSignalContext::executionError,
+                m_spUi->pCodeEdit, &CScriptEditorWidget::SlotExecutionError);
+      }
+
       pMainSceneScreen->SlotQuit();
+
       delete pMainSceneScreen;
     }
   }

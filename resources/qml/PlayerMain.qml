@@ -10,7 +10,7 @@ import JOIP.script 1.1
 Rectangle {
     id: root
     color: "transparent"
-    property var style: null;
+    property var style: null
 
     // make globally accessible for now
     property alias soundEffects: playerSoundEffects

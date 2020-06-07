@@ -8,6 +8,7 @@
 #include "Systems/Project.h"
 #include "Systems/ScriptRunner.h"
 #include "Systems/Script/ScriptRunnerSignalEmiter.h"
+#include "Systems/ThreadedSystem.h"
 #include "Widgets/BackgroundWidget.h"
 #include "ui_SceneMainScreen.h"
 
@@ -20,15 +21,20 @@
 
 #include <assert.h>
 
+const char* player::c_sMainPlayerProperty = "MainPlayer";
+
+//----------------------------------------------------------------------------------------
+//
 CSceneMainScreen::CSceneMainScreen(QWidget* pParent) :
   QWidget(pParent),
   m_spUi(std::make_unique<Ui::CSceneMainScreen>()),
   m_spProjectRunner(std::make_unique<CProjectRunner>()),
+  m_spScriptRunnerSystem(std::make_shared<CThreadedSystem>()),
+  m_spScriptRunner(nullptr),
   m_spSettings(CApplication::Instance()->Settings()),
   m_spCurrentProject(nullptr),
   m_pCurrentProjectWrapper(nullptr),
   m_wpDbManager(),
-  m_wpScriptRunner(),
   m_bInitialized(false)
 {
   m_spUi->setupUi(this);
@@ -46,8 +52,12 @@ void CSceneMainScreen::Initialize()
 {
   m_bInitialized = false;
 
+  m_spScriptRunnerSystem->RegisterObject<CScriptRunner>();
+  m_spScriptRunner = std::dynamic_pointer_cast<CScriptRunner>(m_spScriptRunnerSystem->Get());
+  assert(m_spScriptRunner != nullptr);
+  QQmlEngine::setObjectOwnership(m_spScriptRunner.get(), QQmlEngine::CppOwnership);
+
   m_wpDbManager = CApplication::Instance()->System<CDatabaseManager>();
-  m_wpScriptRunner = CApplication::Instance()->System<CScriptRunner>();
 
   InitQmlMain();
 
@@ -76,14 +86,16 @@ void CSceneMainScreen::LoadProject(qint32 iId, const QString sStartScene)
     m_spCurrentProject = spDbManager->FindProject(iId);
     m_spProjectRunner->LoadProject(m_spCurrentProject, sStartScene);
 
-    m_pCurrentProjectWrapper = new CProject(m_spUi->pQmlWidget->engine(), m_spCurrentProject);
-    QQuickItem* pRootObject =  m_spUi->pQmlWidget->rootObject();
-    pRootObject->setProperty("currentlyLoadedProject", QVariant::fromValue(m_pCurrentProjectWrapper.data()));
-
     ConnectAllSignals();
-
-    QMetaObject::invokeMethod(pRootObject, "onLoadProject");
+    LoadQml();
   }
+}
+
+//----------------------------------------------------------------------------------------
+//
+std::weak_ptr<CScriptRunner> CSceneMainScreen::ScriptRunner()
+{
+  return m_spScriptRunner;
 }
 
 //----------------------------------------------------------------------------------------
@@ -92,34 +104,20 @@ void CSceneMainScreen::UnloadProject()
 {
   if (!m_bInitialized) { return; }
 
-  auto spScriptRunner = m_wpScriptRunner.lock();
-  if (nullptr != spScriptRunner)
+  auto spSignalEmmiterContext = m_spScriptRunner->SignalEmmitterContext();
+  if (nullptr != spSignalEmmiterContext)
   {
-    auto spSignalEmmiterContext = spScriptRunner->SignalEmmitterContext();
-    if (nullptr != spSignalEmmiterContext)
-    {
-      emit spSignalEmmiterContext->clearStorage();
-    }
-
-    disconnect(spScriptRunner.get(), &CScriptRunner::SignalScriptRunFinished,
-            this, &CSceneMainScreen::SlotScriptRunFinished);
-
-    spScriptRunner->unregisterComponents();
+    emit spSignalEmmiterContext->clearStorage();
   }
+
+  disconnect(m_spScriptRunner.get(), &CScriptRunner::SignalScriptRunFinished,
+          this, &CSceneMainScreen::SlotScriptRunFinished);
+
+  m_spScriptRunner->UnregisterComponents();
 
   m_spProjectRunner->UnloadProject();
 
-  QQuickItem* pRootObject =  m_spUi->pQmlWidget->rootObject();
-  QMetaObject::invokeMethod(pRootObject, "onUnLoadProject");
-
-  m_spUi->pQmlWidget->engine()->clearComponentCache();
-  m_spUi->pQmlWidget->engine()->collectGarbage();
-
-
-  delete m_pCurrentProjectWrapper;
-  m_spCurrentProject = nullptr;
-
-
+  UnloadQml();
   DisconnectAllSignals();
 }
 
@@ -130,16 +128,14 @@ void CSceneMainScreen::SlotQuit()
   if (!m_bInitialized || nullptr == m_spCurrentProject) { return; }
 
   UnloadProject();
-  auto spScriptRunner = m_wpScriptRunner.lock();
-  if (nullptr != spScriptRunner)
+
+  auto spSignalEmmiterContext = m_spScriptRunner->SignalEmmitterContext();
+  if (nullptr != spSignalEmmiterContext)
   {
-    auto spSignalEmmiterContext = spScriptRunner->SignalEmmitterContext();
-    if (nullptr != spSignalEmmiterContext)
-    {
-      spSignalEmmiterContext->SetScriptExecutionStatus(CScriptRunnerSignalEmiter::eStopped);
-      emit spSignalEmmiterContext->interrupt();
-    }
+    spSignalEmmiterContext->SetScriptExecutionStatus(CScriptRunnerSignalEmiter::eStopped);
+    emit spSignalEmmiterContext->interrupt();
   }
+
   emit SignalExitClicked();
 }
 
@@ -206,7 +202,7 @@ void CSceneMainScreen::SlotError(QString sError, QtMsgType type)
   case QtMsgType::QtFatalMsg:
     sPrefix = tr("Error");
     vTextColors.push_back({QColor(RED)});
-    vBgColors.push_back({QColor(RED)});
+    vBgColors.push_back({QColor(BLACK)});
     break;
   }
 
@@ -270,19 +266,16 @@ void CSceneMainScreen::SlotSceneSelectReturnValue(int iIndex)
     if (nullptr != spScene)
     {
       // load script
-      auto spScriptRunner = m_wpScriptRunner.lock();
-      if (nullptr != spScriptRunner && nullptr != spDbManager)
+      QReadLocker lockerScene(&spScene->m_rwLock);
+      QString sScript = spScene->m_sScript;
+      lockerScene.unlock();
+      bool bOk = QMetaObject::invokeMethod(m_spScriptRunner.get(), "LoadScript", Qt::QueuedConnection,
+                                           Q_ARG(tspScene, spScene),
+                                           Q_ARG(tspResource, spDbManager->FindResourceInProject(m_spCurrentProject, sScript)));
+      assert(bOk);
+      if (!bOk)
       {
-        QReadLocker lockerScene(&spScene->m_rwLock);
-        QString sScript = spScene->m_sScript;
-        lockerScene.unlock();
-        QMetaObject::invokeMethod(spScriptRunner.get(), "loadScript", Qt::QueuedConnection,
-                                  Q_ARG(tspScene, spScene),
-                                  Q_ARG(tspResource, spDbManager->FindResourceInProject(m_spCurrentProject, sScript)));
-      }
-      else
-      {
-        qWarning() << tr("Script-Runner or Database-Manager missing.");
+        qWarning() << tr("LoadScript could not be called.");
         SlotQuit();
       }
     }
@@ -339,25 +332,19 @@ void CSceneMainScreen::ConnectAllSignals()
   connect(pRootObject, SIGNAL(startLoadingSkript()), this, SLOT(SlotStartLoadingSkript()));
   connect(pRootObject, SIGNAL(quit()), this, SLOT(SlotQuit()));
 
-  auto spScriptRunner = m_wpScriptRunner.lock();
-  if (nullptr != spScriptRunner)
-  {
-    auto spSignalEmmiterContext = spScriptRunner->SignalEmmitterContext();
+  auto spSignalEmmiterContext = m_spScriptRunner->SignalEmmitterContext();
 
-    connect(spSignalEmmiterContext.get(), &CScriptRunnerSignalContext::showError,
-            this, &CSceneMainScreen::SlotError, Qt::QueuedConnection);
-    connect(spSignalEmmiterContext.get(), &CScriptRunnerSignalContext::executionError,
-            this, &CSceneMainScreen::SlotExecutionError, Qt::QueuedConnection);
-    connect(spScriptRunner.get(), &CScriptRunner::SignalScriptRunFinished,
-            this, &CSceneMainScreen::SlotScriptRunFinished, Qt::QueuedConnection);
+  connect(spSignalEmmiterContext.get(), &CScriptRunnerSignalContext::showError,
+          this, &CSceneMainScreen::SlotError, Qt::QueuedConnection);
+  connect(m_spScriptRunner.get(), &CScriptRunner::SignalScriptRunFinished,
+          this, &CSceneMainScreen::SlotScriptRunFinished, Qt::QueuedConnection);
 
-    bool bOk = true;
-    Q_UNUSED(bOk)
+  bool bOk = true;
+  Q_UNUSED(bOk)
 
-    bOk = connect(pRootObject, SIGNAL(sceneSelectionReturnValue(int)),
-                  this, SLOT(SlotSceneSelectReturnValue(int)), Qt::QueuedConnection);
-    assert(bOk);
-  }
+  bOk = connect(pRootObject, SIGNAL(sceneSelectionReturnValue(int)),
+                this, SLOT(SlotSceneSelectReturnValue(int)), Qt::QueuedConnection);
+  assert(bOk);
 }
 
 //----------------------------------------------------------------------------------------
@@ -368,21 +355,15 @@ void CSceneMainScreen::DisconnectAllSignals()
   disconnect(pRootObject, SIGNAL(startLoadingSkript()), this, SLOT(SlotStartLoadingSkript()));
   disconnect(pRootObject, SIGNAL(quit()), this, SLOT(SlotQuit()));
 
-  auto spScriptRunner = m_wpScriptRunner.lock();
-  if (nullptr != spScriptRunner)
-  {
-    auto spSignalEmmiterContext = spScriptRunner->SignalEmmitterContext();
+  auto spSignalEmmiterContext = m_spScriptRunner->SignalEmmitterContext();
 
-    disconnect(spSignalEmmiterContext.get(), &CScriptRunnerSignalContext::showError,
-            this, &CSceneMainScreen::SlotError);
-    disconnect(spSignalEmmiterContext.get(), &CScriptRunnerSignalContext::executionError,
-            this, &CSceneMainScreen::SlotExecutionError);
-    disconnect(spScriptRunner.get(), &CScriptRunner::SignalScriptRunFinished,
-            this, &CSceneMainScreen::SlotScriptRunFinished);
+  disconnect(spSignalEmmiterContext.get(), &CScriptRunnerSignalContext::showError,
+          this, &CSceneMainScreen::SlotError);
+  disconnect(m_spScriptRunner.get(), &CScriptRunner::SignalScriptRunFinished,
+          this, &CSceneMainScreen::SlotScriptRunFinished);
 
-    disconnect(pRootObject, SIGNAL(sceneSelectionReturnValue(int)),
-               this, SLOT(SlotSceneSelectReturnValue(int)));
-  }
+  disconnect(pRootObject, SIGNAL(sceneSelectionReturnValue(int)),
+             this, SLOT(SlotSceneSelectReturnValue(int)));
 }
 
 //----------------------------------------------------------------------------------------
@@ -394,10 +375,27 @@ void CSceneMainScreen::InitQmlMain()
   m_spUi->pQmlWidget->setClearColor(Qt::transparent);
   m_spUi->pQmlWidget->setStyleSheet("background-color: transparent;");
 
+  m_spUi->pQmlWidget->engine()->setProperty(player::c_sMainPlayerProperty, QVariant::fromValue(this));
+
   QQmlEngine::setObjectOwnership(m_spUi->pQmlWidget->engine(), QQmlEngine::CppOwnership);
   // engine will allways take owership of this object
   CDatabaseImageProvider* pProvider = new CDatabaseImageProvider(m_wpDbManager);
   m_spUi->pQmlWidget->engine()->addImageProvider("DataBaseImageProivider", pProvider);
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CSceneMainScreen::LoadQml()
+{
+  QQuickItem* pRootObject =  m_spUi->pQmlWidget->rootObject();
+  if (nullptr != pRootObject)
+  {
+    m_pCurrentProjectWrapper = new CProject(m_spUi->pQmlWidget->engine(), m_spCurrentProject);
+    QQmlEngine::setObjectOwnership(m_pCurrentProjectWrapper, QQmlEngine::CppOwnership);
+    pRootObject->setProperty("currentlyLoadedProject", QVariant::fromValue(m_pCurrentProjectWrapper.data()));
+
+    QMetaObject::invokeMethod(pRootObject, "onLoadProject");
+  }
 }
 
 //----------------------------------------------------------------------------------------
@@ -419,24 +417,16 @@ void CSceneMainScreen::NextSkript()
       if (nullptr != spScene)
       {
         // load script
-        auto spScriptRunner = m_wpScriptRunner.lock();
-        if (nullptr != spScriptRunner && nullptr != spDbManager)
+        QReadLocker lockerScene(&spScene->m_rwLock);
+        QString sScript = spScene->m_sScript;
+        lockerScene.unlock();
+        bool bOk = QMetaObject::invokeMethod(m_spScriptRunner.get(), "LoadScript", Qt::QueuedConnection,
+                                             Q_ARG(tspScene, spScene),
+                                             Q_ARG(tspResource, spDbManager->FindResourceInProject(m_spCurrentProject, sScript)));
+        assert(bOk);
+        if (!bOk)
         {
-          QReadLocker lockerScene(&spScene->m_rwLock);
-          QString sScript = spScene->m_sScript;
-          lockerScene.unlock();
-          bool bOk = QMetaObject::invokeMethod(spScriptRunner.get(), "loadScript", Qt::QueuedConnection,
-                                               Q_ARG(tspScene, spScene),
-                                               Q_ARG(tspResource, spDbManager->FindResourceInProject(m_spCurrentProject, sScript)));
-          assert(bOk);
-          if (!bOk)
-          {
-            qWarning() << tr("loadScript could not be called.");
-          }
-        }
-        else
-        {
-          qWarning() << tr("Script-Runner or Database-Manager missing.");
+          qWarning() << tr("LoadScript could not be called.");
           SlotQuit();
         }
       }
@@ -448,8 +438,14 @@ void CSceneMainScreen::NextSkript()
     }
     else
     {
-      QMetaObject::invokeMethod(pRootObject, "showSceneSelection",
-                                Q_ARG(QVariant, sScenes));
+      bool bOk = QMetaObject::invokeMethod(pRootObject, "showSceneSelection",
+                                           Q_ARG(QVariant, sScenes));
+      assert(bOk);
+      if (!bOk)
+      {
+        qWarning() << tr("showSceneSelection could not be called.");
+        SlotQuit();
+      }
     }
   }
   else
@@ -458,3 +454,21 @@ void CSceneMainScreen::NextSkript()
     SlotQuit();
   }
 }
+
+//----------------------------------------------------------------------------------------
+//
+void CSceneMainScreen::UnloadQml()
+{
+  QQuickItem* pRootObject =  m_spUi->pQmlWidget->rootObject();
+  if (nullptr != pRootObject)
+  {
+    QMetaObject::invokeMethod(pRootObject, "onUnLoadProject");
+
+    m_spUi->pQmlWidget->engine()->clearComponentCache();
+    m_spUi->pQmlWidget->engine()->collectGarbage();
+
+    delete m_pCurrentProjectWrapper;
+    m_spCurrentProject = nullptr;
+  }
+}
+

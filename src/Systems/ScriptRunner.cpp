@@ -72,7 +72,7 @@ void CScriptRunner::Deinitialize()
   m_spTimer->stop();
   m_spTimer = nullptr;
 
-  unregisterComponents();
+  UnregisterComponents();
 
   m_spSignalEmitterContext = nullptr;
   m_spScriptEngine.reset();
@@ -82,7 +82,7 @@ void CScriptRunner::Deinitialize()
 
 //----------------------------------------------------------------------------------------
 //
-void CScriptRunner::loadScript(tspScene spScene, tspResource spResource)
+void CScriptRunner::LoadScript(tspScene spScene, tspResource spResource)
 {
   if (nullptr == spResource || nullptr == spScene ||
       nullptr == spResource->m_spParent)
@@ -147,8 +147,8 @@ void CScriptRunner::loadScript(tspScene spScene, tspResource spResource)
         qint32 iLineNr = m_runFunction.property("lineNumber").toInt() - 1;
         QString sStack = m_runFunction.property("stack").toString();
         QString sError = "Uncaught " + sException +
-                         " at line" + QString::number(iLineNr) +
-                         ":" + m_runFunction.toString() + "\n" + sStack;
+                         " at line " + QString::number(iLineNr) +
+                         ": " + m_runFunction.toString() + "\n" + sStack;
         qCritical() << sError;
         emit m_spSignalEmitterContext->showError(sError, QtMsgType::QtCriticalMsg);
         emit m_spSignalEmitterContext->executionError(sException, iLineNr, sStack);
@@ -177,7 +177,7 @@ void CScriptRunner::loadScript(tspScene spScene, tspResource spResource)
 
 //----------------------------------------------------------------------------------------
 //
-void CScriptRunner::registerNewComponent(const QString sName, QJSValue signalEmitter)
+void CScriptRunner::RegisterNewComponent(const QString sName, QJSValue signalEmitter)
 {
   QMutexLocker locker(&m_objectMapMutex);
   auto it = m_objectMap.find(sName);
@@ -203,7 +203,7 @@ void CScriptRunner::registerNewComponent(const QString sName, QJSValue signalEmi
 
 //----------------------------------------------------------------------------------------
 //
-void CScriptRunner::unregisterComponents()
+void CScriptRunner::UnregisterComponents()
 {
   m_spScriptEngine->globalObject().setProperty("scene", QJSValue());
 
@@ -240,8 +240,8 @@ void CScriptRunner::SlotRun()
       qint32 iLineNr = ret.property("lineNumber").toInt() - 1;
       QString sStack = ret.property("stack").toString();
       QString sError = "Uncaught " + sException +
-                       " at line" + QString::number(iLineNr) +
-                       ":" + ret.toString() + "\n" + sStack;
+                       " at line " + QString::number(iLineNr) +
+                       ": " + ret.toString() + "\n" + sStack;
       qCritical() << sError;
       emit m_spSignalEmitterContext->showError(sError, QtMsgType::QtCriticalMsg);
       emit m_spSignalEmitterContext->executionError(sException, iLineNr, sStack);
@@ -316,5 +316,28 @@ void CScriptRunner::SlotRegisterObject(const QString& sObject)
     QQmlEngine::setObjectOwnership(it->second.get(), QQmlEngine::CppOwnership);
     QJSValue scriptValue = m_spScriptEngine->newQObject(it->second.get());
     m_spScriptEngine->globalObject().setProperty(it->first, scriptValue);
+  }
+}
+
+//----------------------------------------------------------------------------------------
+//
+CScriptRunnerWrapper::CScriptRunnerWrapper(QObject* pParent, std::weak_ptr<CScriptRunner> wpRunner) :
+  QObject(pParent),
+  m_wpRunner(wpRunner)
+{
+
+}
+CScriptRunnerWrapper::~CScriptRunnerWrapper()
+{
+
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CScriptRunnerWrapper::registerNewComponent(const QString sName, QJSValue signalEmitter)
+{
+  if (auto spRunner = m_wpRunner.lock())
+  {
+    spRunner->RegisterNewComponent(sName, signalEmitter);
   }
 }

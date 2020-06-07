@@ -9,7 +9,6 @@
 
 class CHelpFactory;
 class COverlayManager;
-class CScriptRunner;
 class CThreadedSystem;
 class CUISoundEmitter;
 
@@ -50,6 +49,5 @@ private:
 template<> std::weak_ptr<CDatabaseManager> CApplication::System<CDatabaseManager>();
 template<> std::weak_ptr<CHelpFactory> CApplication::System<CHelpFactory>();
 template<> std::weak_ptr<COverlayManager> CApplication::System<COverlayManager>();
-template<> std::weak_ptr<CScriptRunner> CApplication::System<CScriptRunner>();
 
 #endif // CAPPLICATION_H

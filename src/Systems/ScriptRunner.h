@@ -17,6 +17,7 @@ struct SScene;
 typedef std::shared_ptr<SResource> tspResource;
 typedef std::shared_ptr<SScene> tspScene;
 
+
 class CScriptRunner : public CSystemBase
 {
   Q_OBJECT
@@ -35,9 +36,9 @@ public slots:
   void Initialize() override;
   void Deinitialize() override;
 
-  void loadScript(tspScene spScene, tspResource spResource);
-  void registerNewComponent(const QString sName, QJSValue signalEmitter);
-  void unregisterComponents();
+  void LoadScript(tspScene spScene, tspResource spResource);
+  void RegisterNewComponent(const QString sName, QJSValue signalEmitter);
+  void UnregisterComponents();
 
 private slots:
   void SlotRun();
@@ -53,6 +54,23 @@ private:
            std::shared_ptr<CScriptObjectBase>>   m_objectMap;
   QPointer<CScene>                               m_pCurrentScene;
   QJSValue                                       m_runFunction;
+};
+
+//----------------------------------------------------------------------------------------
+//
+class CScriptRunnerWrapper : public QObject
+{
+  Q_OBJECT
+  Q_DISABLE_COPY(CScriptRunnerWrapper)
+
+public:
+  CScriptRunnerWrapper(QObject* pParent, std::weak_ptr<CScriptRunner> wpRunner);
+  ~CScriptRunnerWrapper() override;
+
+  Q_INVOKABLE void registerNewComponent(const QString sName, QJSValue signalEmitter);
+
+private:
+  std::weak_ptr<CScriptRunner>                    m_wpRunner;
 };
 
 #endif // SCRIPTRUNNER_H

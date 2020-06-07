@@ -12,11 +12,16 @@ class CProject;
 class CProjectRunner;
 class CScriptRunner;
 class CSettings;
+class CThreadedSystem;
 namespace Ui {
   class CSceneMainScreen;
 }
 struct SProject;
 typedef std::shared_ptr<SProject> tspProject;
+
+namespace player {
+  extern const char* c_sMainPlayerProperty;
+}
 
 class CSceneMainScreen : public QWidget
 {
@@ -28,6 +33,7 @@ public:
 
   void Initialize();
   void LoadProject(qint32 iId, const QString sStartScene = QString());
+  std::weak_ptr<CScriptRunner> ScriptRunner();
   void UnloadProject();
 
 public slots:
@@ -54,16 +60,19 @@ private:
   void ConnectAllSignals();
   void DisconnectAllSignals();
   void InitQmlMain();
+  void LoadQml();
   void NextSkript();
+  void UnloadQml();
 
 private:
   std::unique_ptr<Ui::CSceneMainScreen>                       m_spUi;
   std::unique_ptr<CProjectRunner>                             m_spProjectRunner;
+  std::shared_ptr<CThreadedSystem>                            m_spScriptRunnerSystem;
+  std::shared_ptr<CScriptRunner>                              m_spScriptRunner;
   std::shared_ptr<CSettings>                                  m_spSettings;
   tspProject                                                  m_spCurrentProject;
   QPointer<CProject>                                          m_pCurrentProjectWrapper;
   std::weak_ptr<CDatabaseManager>                             m_wpDbManager;
-  std::weak_ptr<CScriptRunner>                                m_wpScriptRunner;
   bool                                                        m_bInitialized;
 };
 
