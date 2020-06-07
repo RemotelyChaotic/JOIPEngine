@@ -22,6 +22,7 @@ New Features:
   the project's version and the engine version the project was saved in.
 - Support for key bindings added and settings expanded.
 - Changed card selection backend to QML and greatly improved card display.
+- Changed Project-Player backend to QML and improved overall look.
 
 Updated Features:
 - Upgrade to Qt5.14.2 with msvc2017 for more QJSEngine and QML features.
