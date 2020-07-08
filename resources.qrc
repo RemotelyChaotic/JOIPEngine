@@ -122,6 +122,17 @@
         <file>resources/help/editor/images/kink_overlay.png</file>
         <file>resources/help/player/filter_widget_help.html</file>
         <file>resources/img/WarningIcon.png</file>
+        <file>resources/help/editor/images/addshowbg_dialog.png</file>
+        <file>resources/help/editor/images/addshowicon_dialog.png</file>
+        <file>resources/help/editor/images/addshowimage_dialog.png</file>
+        <file>resources/help/editor/images/addtext_dialog_bgcolor.png</file>
+        <file>resources/help/editor/images/addtext_dialog_buttons.png</file>
+        <file>resources/help/editor/images/addtext_dialog_text.png</file>
+        <file>resources/help/editor/images/addtext_dialog_textcolor.png</file>
+        <file>resources/help/editor/images/addthread_dialog.png</file>
+        <file>resources/help/editor/images/addtimer_dialog.png</file>
+        <file>resources/help/editor/images/colorwheel_dialog.png</file>
+        <file>resources/help/editor/images/error_display.png</file>
     </qresource>
     <qresource prefix="/qml">
         <file>resources/qml/ProjectCardSelection.qml</file>

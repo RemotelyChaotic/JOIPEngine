@@ -3,7 +3,7 @@
 
 <head>
   <meta charset="utf-8">
-  <title>Template</title>
+  <title>Add Text Code</title>
   <meta name="description" content="">
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
@@ -18,17 +18,101 @@
       margin-right: auto;
       width: 0.6em
     }
+    table.warning {
+      color: black;
+      background-color: #cccc44;
+      border-color: yellow;
+      border-style: solid;
+    }
   </style>
 </head>
 
 
 <body>
-  <h1>Template</h1>
+  <h1>Add Text Code</h1>
 
   <hr>
 
   <div class="container">
-    <p>Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet.</p>
+    <p>This button opens an overlay to add code snippets to the currently opened script in
+    the <a href="qrc:/resources/help/editor/code/script_editor_help.html">Script Editor</a>,
+    to show text or prompt user input.</p>
+
+    <br>
+
+    <p>For more information about the script API, please see the <a href="qrc:/resources/help/editor/code/script_reference_help.html">API Reference</a>.</p>
+
+    <br>
+
+    <p>The overlay has four tabs that each serve to insert different peices of code.</p>
+
+    <br>
+
+    <p><img src="qrc:/resources/help/editor/images/addtext_dialog_text.png"><br><i>Add Text Code Dialog (Text Tab)</i></p>
+
+    <br>
+
+    <p>The first tab contains a text editor that lets you enter the text to be displayed. Anything entered
+    will generate code to show the text in a single textbox if the <i>Show text</i> check box is checked.
+    If <i>Show user input</i> is checked, code will be generated to prompt for user input instead.<br>
+      <ul>
+        <li><b>Generated code example for <i>Show text</i>:</b> textBox.showText("Hello World!");</li>
+        <li><b>Generated code example for <i>Show user input</i>:</b> var sInput = textBox.showInput(); // TODO: change variable name"</li>
+      </ul>
+    </p>
+
+    <br>
+
+    <p><img src="qrc:/resources/help/editor/images/addtext_dialog_buttons.png"><br><i>Add Text Code Dialog (Buttons Tab)</i></p>
+
+    <br>
+
+    <p>The second tab contains a list that can be modified with the "+" and "-" buttons on the side.
+    Clicking "+" will add a new button to the list and clicking "-" will remove the currently
+    selected one. Double clicking the button name allows for changing the button text. If
+    <i>Show buttons</i> is checked this will generate code for a set of buttons with the
+    configured button texts.<br>
+      <ul>
+        <li><b>Generated code example for <i>Show buttons</i>:</b> var iSelection = textBox.showButtonPrompts(["Yes","No"]);  // TODO: change variable name</li>
+      </ul>
+    </p>
+
+    <br>
+
+    <p><img src="qrc:/resources/help/editor/images/addtext_dialog_textcolor.png"><br><i>Add Text Code Dialog (Text Color Tab)</i></p>
+
+    <br>
+
+    <p>The third tab contains a list that can be modified with the "+" and "-" buttons on the side.
+    Clicking "+" will add a new color to the list and clicking "-" will remove the currently
+    selected one. The color components are in the order red, green and blue.
+    Clicking the color itself on the right will open a color wheel to freely select the color.
+    If <i>Set text colors</i> is checked this will generate code to change the text colors.<br>
+      <ul>
+        <li><b>Generated code example:</b> textBox.setTextColors([[255,0,0][0,255,0]]);</li>
+      </ul>
+    </p>
+
+    <br>
+
+    <p><img src="qrc:/resources/help/editor/images/addtext_dialog_bgcolor.png"><br><i>Add Text Code Dialog (Background Color Tab)</i></p>
+
+    <br>
+
+    <p>The fourth tab contains a list that can be modified with the "+" and "-" buttons on the side.
+    Clicking "+" will add a new color to the list and clicking "-" will remove the currently
+    selected one. The color components are in the order red, green and blue.
+    Clicking the color itself on the right will open a color wheel to freely select the color.
+    If <i>Set text background colors</i> is checked this will generate code to change the text and button
+    background colors.<br>
+      <ul>
+        <li><b>Generated code example:</b> textBox.setBackgroundColors([[255,255,255][255,255,255]]);</li>
+      </ul>
+    </p>
+
+    <br>
+
+    <p><img src="qrc:/resources/help/editor/images/colorwheel_dialog.png"><br><i>Color Wheel Dialog</i></p>
   </div>
 </body>
 

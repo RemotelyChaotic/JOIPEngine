@@ -147,14 +147,21 @@ void CScriptRunner::LoadScript(tspScene spScene, tspResource spResource)
 
       m_spSignalEmitterContext->SetScriptExecutionStatus(CScriptRunnerSignalEmiter::eRunning);
 
+      // get scene name and set it as function, so error messages show the scene name in the error
+      QReadLocker locker(&spScene->m_rwLock);
+      const QString sSceneName = spScene->m_sName;
+      locker.unlock();
+
       // create wrapper function to make syntax of scripts easier and handle return value
       // and be able to emit signal on finished
       QString sSkript = QString("(function() { "
-                                "var fn = function() { %1 }; "
-                                "var ret = fn(); "
+                                "var %1 = function() { %2 }; "
+                                "var ret = %3(); "
                                 "utils.finishedScript(ret); \n "
                                 "})")
-          .arg(sScript);
+          .arg(sSceneName)
+          .arg(sScript)
+          .arg(sSceneName);
       m_runFunction = m_spScriptEngine->evaluate(sSkript);
 
       if (m_runFunction.isError())
@@ -167,7 +174,7 @@ void CScriptRunner::LoadScript(tspScene spScene, tspResource spResource)
                          ": " + m_runFunction.toString() + "\n" + sStack;
         qCritical() << sError;
         emit m_spSignalEmitterContext->showError(sError, QtMsgType::QtCriticalMsg);
-        emit m_spSignalEmitterContext->executionError(sException, iLineNr, sStack);
+        emit m_spSignalEmitterContext->executionError(m_runFunction.toString(), iLineNr, sStack);
         return;
       }
 
@@ -310,7 +317,8 @@ void CScriptRunner::SlotRun()
   if (m_runFunction.isCallable())
   {
     QJSValue ret = m_runFunction.call();
-    if (!m_spScriptEngine->isInterrupted())
+    if (!m_spScriptEngine->isInterrupted() &&
+        CScriptRunnerSignalEmiter::ScriptExecStatus::eRunning == m_spSignalEmitterContext->ScriptExecutionStatus())
     {
       if (ret.isError())
       {
@@ -322,7 +330,7 @@ void CScriptRunner::SlotRun()
                          ": " + ret.toString() + "\n" + sStack;
         qCritical() << sError;
         emit m_spSignalEmitterContext->showError(sError, QtMsgType::QtCriticalMsg);
-        emit m_spSignalEmitterContext->executionError(sException, iLineNr, sStack);
+        emit m_spSignalEmitterContext->executionError(ret.toString(), iLineNr, sStack);
         return;
       }
     }

@@ -210,7 +210,8 @@ void CResourceSnippetOverlay::on_pConfirmButton_clicked()
     sCode += sMainCommand;
   }
 
-  if (type._to_integral() == EResourceType::eMovie && m_data.m_bWaitForFinished)
+  if ((type._to_integral() == EResourceType::eMovie || type._to_integral() == EResourceType::eSound)
+      && m_data.m_bWaitForFinished)
   {
     sCode += "mediaPlayer.waitForPlayback();\n";
   }

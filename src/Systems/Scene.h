@@ -57,6 +57,7 @@ public:
   QString getScript();
 
   Q_INVOKABLE qint32 numResources();
+  Q_INVOKABLE QStringList resources();
   Q_INVOKABLE QJSValue resource(const QString& sValue);
 
   Q_INVOKABLE QJSValue project();

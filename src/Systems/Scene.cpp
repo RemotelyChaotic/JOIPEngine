@@ -122,6 +122,19 @@ qint32 CScene::numResources()
 
 //----------------------------------------------------------------------------------------
 //
+QStringList CScene::resources()
+{
+  QReadLocker locker(&m_spData->m_rwLock);
+  QStringList ret;
+  for (auto it = m_spData->m_vsResourceRefs.begin(); m_spData->m_vsResourceRefs.end() != it; ++it)
+  {
+    ret << *it;
+  }
+  return ret;
+}
+
+//----------------------------------------------------------------------------------------
+//
 QJSValue CScene::resource(const QString& sValue)
 {
   QReadLocker locker(&m_spData->m_rwLock);

@@ -3,7 +3,7 @@
 
 <head>
   <meta charset="utf-8">
-  <title>Template</title>
+  <title>Script Reference</title>
   <meta name="description" content="">
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
@@ -18,17 +18,589 @@
       margin-right: auto;
       width: 0.6em
     }
+    table.warning {
+      color: black;
+      background-color: #cccc44;
+      border-color: yellow;
+      border-style: solid;
+    }
   </style>
 </head>
 
 
 <body>
-  <h1>Template</h1>
+  <h1>Script Reference</h1>
 
   <hr>
 
   <div class="container">
-    <p>Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet.</p>
+    <p>Below you can find a full script interface reference for the custom JavaScript objects registered
+    by the JOIP-Engine. For general JavaScript reference please see:<br>
+      <ul>
+        <li><b>Qt-Script Reference:</b> https://doc.qt.io/qt-5/ecmascript.html</li>
+        <li><b>JavaScript Help:</b> https://www.w3schools.com/js/</li>
+      </ul>
+    </p>
+
+    <br>
+
+    <p>Javascript Objects are registered in the Player by the currently loaded
+    <a href="">Layout</a>. The name of the registered objects is defined in the layout file.
+    In the reference below, the default names of the registered objects are listed.</p>
+
+    <br>
+
+    <h2>PlayerBackground (default name: <i>background</i>)</h2>
+
+    <br>
+
+    <p>This object is automatically registered by the JOIP-Engine on loading a
+    <a href="qrc:/resources/help/project/joi_project_help.html">JOI-Project</a> but
+    can also be placed in the <a href="">Layout</a> manually. The default object is allways registered
+    under the name <i>background</i> and spans the entire background. It only has a few callable
+    functions:<br>
+      <ul>
+        <li><b>setBackgroundColor ( string | int[3 | 4] ):</b><br>
+        As the name implies, this will set the background color, which is overlayed over the
+        background texture. The given argument can be an html-style color string ("#argb")
+        or an array of 3 or 4 numbers ranging from 0 - 255
+        representing red, green, blue and alpha in this order.<br>
+        <i>Example Usage:</i><br>
+        background.setBackgroundColor("#88ff0000"); /* will set background to a 50% transparent red */<br>
+        background.setBackgroundColor("red"); /* will set background to a 0% transparent red */<br>
+        background.setBackgroundColor([255, 0, 0, 128]); /* will set background to a 50% transparent red */<br>
+        <br></li>
+
+        <li><b>setBackgroundTexture ( string | Resource | null ):</b><br>
+        As the name implies, this will set the background texture. The texture is repeated as often as
+        neccessary to fill the entire object. The argument can either be the name of a
+        <a href="qrc:/resources/help/editor/resources/resource_help.html">Resource</a>
+        or a resource object obtained from the current Scene object. In any case, it has to be of the
+        <i>Image</i> type. A null argument will reset the background to the style-defined application background.<br>
+        <i>Example Usage:</i><br>
+        background.setBackgroundTexture("tiledBg");<br>
+        background.setBackgroundTexture(null);<br>
+        background.setBackgroundTexture(bgObject); /* note: in this example bgObject is a var */<br>
+        <br></li>
+      </ul>
+    </p>
+
+    <br>
+
+    <h2>PlayerIcons (default name: <i>icon</i>)</h2>
+
+    <br>
+
+    <p>This object is registered by the JOIP-Engine if it is present in the current <a href="">Layout</a>.
+    It is a container for a list of icons that can be shown or hidden at will.
+    <br>
+      <ul>
+        <li><b>show ( string | Resource ):</b><br>
+        This function will add a new icon to the list, where the resource argument will be the shown
+        icon. The <a href="qrc:/resources/help/editor/resources/resource_help.html">Resource</a> has
+        to be of the <i>Image</i> or <i>Movie</i> type and can either be the name of a Resource or a resource
+        object obtained from the current Scene object.<br>
+        <i>Example Usage:</i><br>
+        icon.show("myIcon");<br>
+        icon.show(myIconVar); /* note: in this example myIconVar is a var */<br>
+        <br></li>
+
+        <li><b>hide ( [ string ] ):</b><br>
+        This function will remove the icon with the name given in the input. An empty input,
+        no input or the input string: "~all" will remove all icons.<br>
+        <i>Example Usage:</i><br>
+        icon.hide("myIcon"); // hides myIcon<br>
+        icon.hide(); // hides all icons<br>
+        icon.hide(""); // hides all icons<br>
+        icon.hide("~all"); // hides all icons<br>
+        <br></li>
+      </ul>
+    </p>
+
+    <br>
+
+    <h2>PlayerMediaPlayer (default name: <i>mediaPlayer</i>)</h2>
+
+    <br>
+
+    <p>This object is registered by the JOIP-Engine if it is present in the current <a href="">Layout</a>.
+    This is the main way to display or play media <a href="qrc:/resources/help/editor/resources/resource_help.html">Resources</a>
+    of types <i>Image</i>, <i>Movie</i> or <i>Sound</i>.<br>
+      <ul>
+        <li><b>show ( string | Resource ):</b><br>
+        This function shows an <i>Image</i> type Resource. Calling this will stop any
+        currently running playback. The Resource can be the name of a Resource or a Resource
+        object obtained from the current Scene object.<br>
+        <i>Example Usage:</i><br>
+        mediaPlayer.show("myIcon");<br>
+        mediaPlayer.show(myMediaVar); /* note: in this example myMediaVar is a var */<br>
+        <br></li>
+
+        <li><b>play ( [ string | Resource ] ):</b><br>
+        This function can be called with or without arguments. Calling it with arguments
+        plays a <i>Movie</i> or <i>Sound</i> type Resource. When doing this, it will stop any
+        currently running playback and start replay of the new media.
+        The Resource can be the name of a Resource or a Resource object obtained from the
+        current Scene object. When calling this without any argument, it will continue playing
+        the last paused or stopped sound and video.<br>
+        <i>Example Usage:</i><br>
+        mediaPlayer.play("myVideoOrSound"); // plays myVideoOrSound<br>
+        mediaPlayer.play(myVideoOrSoundVar); /* note: in this example myVideoOrSoundVar is a var */<br>
+        mediaPlayer.play(); // continues playing the last played media<br>
+        <mediaPlayer></li>
+
+        <li><b>playVideo ( ):</b><br>
+        This function does the same as if you call <i>play</i> without arguments, but will
+        allways continue playing the last paused or stopped video instead of all media.<br>
+        <i>Example Usage:</i><br>
+        mediaPlayer.playVideo(); // continues playing the last played video<br>
+        <br></li>
+
+        <li><b>pauseVideo ( ):</b><br>
+        This function will pause the currently playing video Resource. A paused video
+        can never stop the wait in <i>waitForVideo</i> or <i>waitForPlayback</i> since the video
+        is not considered finished yet.<br>
+        <i>Example Usage:</i><br>
+        mediaPlayer.pauseVideo(); // pauses playing the last played video<br>
+        <br></li>
+
+        <li><b>stopVideo (  ):</b><br>
+        This function will stop the currently playing video Resource.<br>
+        <i>Example Usage:</i><br>
+        mediaPlayer.stopVideo(); // stops playing the last played video<br>
+        <br></li>
+
+        <li><b>playSound (  ):</b><br>
+        This function does the same as if you call <i>play</i> without arguments, but will
+        allways continue playing the last paused or stopped sound instead of all media.<br>
+        <i>Example Usage:</i><br>
+        mediaPlayer.playSound(); // continues playing the last played sound<br>
+        <br></li>
+
+        <li><b>pauseSound (  ):</b><br>
+        This function will pause the currently playing sound Resource. A paused sound
+        can never stop the wait in <i>waitForSound</i> or <i>waitForPlayback</i> since the sound
+        is not considered finished yet.<br>
+        <i>Example Usage:</i><br>
+        mediaPlayer.pauseSound(); // pauses playing the last played sound<br>
+        <br></li>
+
+        <li><b>stopSound (  ):</b><br>
+        This function will stop the currently playing sound Resource.<br>
+        <i>Example Usage:</i><br>
+        mediaPlayer.stopVideo(); // stops playing the last played video<br>
+        <br></li>
+
+        <li><b>waitForPlayback (  ):</b><br>
+        Blocks and waits until either the currently running video or sound Resource stopps
+        playing. If no sound or video is playing this function will return immediately. If
+        both sound and video are paused this function will never return.<br>
+        <i>Example Usage:</i><br>
+        mediaPlayer.waitForPlayback();<br>
+        <br></li>
+
+        <li><b>waitForVideo (  ):</b><br>
+        Blocks and waits until the currently running video Resource stopps
+        playing. If no video is playing this function will return immediately. If
+        the video Resouce is paused this function will never return.<br>
+        <i>Example Usage:</i><br>
+        mediaPlayer.waitForVideo();<br>
+        <br></li>
+
+        <li><b>waitForSound (  ):</b><br>
+        Blocks and waits until the currently running sound Resource stopps
+        playing. If no sound is playing this function will return immediately. If
+        the sound Resouce is paused this function will never return.<br>
+        <i>Example Usage:</i><br>
+        mediaPlayer.waitForVideo();<br>
+        <br></li>
+      </ul>
+    </p>
+
+    <br>
+
+    <h2>PlayerStorage (name: <i>localStorage</i>)</h2>
+
+    <br>
+
+    <p>This object is automatically registered by the JOIP-Engine on loading a
+    <a href="qrc:/resources/help/project/joi_project_help.html">JOI-Project</a> and
+    should not be placed in the <a href="">Layout</a> manually. Similarly to the local storage of a browser,
+    this object stores values that can be retrieved at any time.
+    The storage will remain until the currently running
+    <a href="qrc:/resources/help/project/joi_project_help.html">JOI-Project</a> finishes
+    playing.<br>
+      <ul>
+        <li><b>store ( string id, var value ):</b><br>
+        Stores a value with the given id in the storage. Any value can be stored and loaded, even complex objects.<br>
+        <i>Example Usage:</i><br>
+        localStorage.store("value", 5);<br>
+        <br></li>
+
+        <li><b>load ( string id ): value:</b><br>
+        Loads a value with the given id from the storage. Any value can be stored and loaded, even complex objects.<br>
+        <i>Example Usage:</i><br>
+        var value = localStorage.load("value");<br>
+        <br></li>
+      </ul>
+    </p>
+
+    <br>
+
+    <h2>PlayerTextBox (default name: <i>textBox</i>)</h2>
+
+    <br>
+
+    <p>This object is registered by the JOIP-Engine if it is present in the current <a href="">Layout</a>.
+    This is the main way to display text or recieve player input.<br>
+      <ul>
+        <li><b>setBackgroundColors ( string[] | int[][3 | 4] ):</b><br>
+        As the name implies, this will set the background color of elements in the text box.
+        The given argument can be an array of html-style color strings ("#argb")
+        or an array of arrays of 3 or 4 numbers ranging from 0 - 255
+        representing red, green, blue and alpha in this order. The input takes an array of colors,
+        since multiple buttons can be shown simultaniously and those need to be able to be colored
+        individually.<br>
+        <i>Example Usage:</i><br>
+        textBox.setBackgroundColors(["#88ff0000", "red"]); /* will set background of text to a 50% transparent red.
+        In case of two buttons the background of the first one will be 50% transparent red and the second will be 0% transparent red */<br>
+        textBox.setBackgroundColors([[255, 0, 0, 128], [255, 0, 0]]); /* same as above example */<br>
+        textBox.setBackgroundColors([[255, 0, 0, 128], "red"]); /* same as above example */<br>
+        <br></li>
+
+        <li><b>setTextColors ( string[] | int[][3 | 4] ):</b><br>
+        As the name implies, this will set the text color of elements in the text box.
+        The given argument can be an array of html-style color strings ("#argb")
+        or an array of arrays of 3 or 4 numbers ranging from 0 - 255
+        representing red, green, blue and alpha in this order. The input takes an array of colors,
+        since multiple buttons can be shown simultaniously and those need to be able to be colored
+        individually.<br>
+        <i>Example Usage:</i><br>
+        textBox.setTextColors(["#ffff0000", "green"]); /* will set text color to a 0% transparent red.
+        In case of two buttons the text color of the first one will be 0% transparent red and the second will be 0% transparent green */<br>
+        textBox.setTextColors([[255, 0, 0, 255], [0, 255, 0]]); /* same as above example */<br>
+        textBox.setTextColors([[255, 0, 0, 255], "green"]); /* same as above example */<br>
+        <br></li>
+
+        <li><b>showButtonPrompts ( string[] ):</b><br>
+        Shows a set of buttons. The array of input strings will be used for the button
+        texts and the colors set by setBackgroundColors and setTextColors will be used for
+        text and background coloring. This function blocks until the player clicks a
+        button, upon which the index of the pressed button will be returned (the returned values
+        are 0 indexed). It is possible to use a subset of html tags in the buton texts
+        (see https://doc.qt.io/qt-5/richtext-html-subset.html for the supported subset).<br>
+        <i>Example Usage:</i><br>
+        var choice = textBox.showButtonPrompts(["Yes","No"]); /* Will return 0 if the player presses "Yes" and 1 if the player presses "No". */<br>
+        <br></li>
+
+        <li><b>showInput (  ): string:</b><br>
+        Shows a text input editor. The colors set by setBackgroundColors and setTextColors will be used for
+        text and background coloring. This function blocks until the player enters a
+        text, upon which the text will be returned.<br>
+        <i>Example Usage:</i><br>
+        var input = textBox.showInput();<br>
+        <br></li>
+
+        <li><b>showText ( string ):</b><br>
+        Shows text. The input string will be used for the text content and the first colors
+        set by setBackgroundColors and setTextColors will be used for
+        text and background coloring. It is possible to use a subset of html tags in the text
+        (see https://doc.qt.io/qt-5/richtext-html-subset.html for the supported subset).<br>
+        <i>Example Usage:</i><br>
+        textBox.showText("Hello world!");<br>
+        textBox.showText("Hello&lt;br&gt;world!"); /* Will insert a newline between Hello and world! */<br>
+        <br></li>
+
+        <li><b>clear (  ):</b><br>
+        Clears the log of the textbox. This will not clear any previously set colors.<br>
+        <i>Example Usage:</i><br>
+        textBox.clear();<br>
+        <br></li>
+      </ul>
+    </p>
+
+    <br>
+
+    <h2>PlayerTimer (default name: <i>timer</i>)</h2>
+
+    <br>
+
+    <p>This object is registered by the JOIP-Engine if it is present in the current <a href="">Layout</a>.
+    This object is for displaying a timer that can be shown or hidden on demand.<br>
+      <ul>
+        <li><b>hide (  ):</b><br>
+        Hides the timer completely, but does not stop any running timer.<br>
+        <i>Example Usage:</i><br>
+        timer.hide();<br>
+        <br></li>
+
+        <li><b>setTime ( int ):</b><br>
+        Sets the counter of the timer to the input. The input is given in seconds. Setting
+        the time during a running timer will reset the timer.<br>
+        <i>Example Usage:</i><br>
+        timer.setTime(120); /* Sets the timer to 2 min */<br>
+        <br></li>
+
+        <li><b>setTimeVisible ( bool ):</b><br>
+        Sets the counter of the timer visible or invisible. A timer with an invisible counter
+        will display a question mark instead of the remaining time. This setting will persist,
+        even if the timer ends.<br>
+        <i>Example Usage:</i><br>
+        timer.setTimeVisible(true);<br>
+        <br></li>
+
+        <li><b>show (  ):</b><br>
+        Shows the timer, but does not stop any running timer.<br>
+        <i>Example Usage:</i><br>
+        timer.show();<br>
+        <br></li>
+
+        <li><b>start (  ):</b><br>
+        Starts the timer.<br>
+        <i>Example Usage:</i><br>
+        timer.start();<br>
+        <br></li>
+
+        <li><b>stop (  ):</b><br>
+        Stops the timer.<br>
+        <i>Example Usage:</i><br>
+        timer.stop();<br>
+        <br></li>
+
+        <li><b>waitForTimer (  ):</b><br>
+        Blocks and waits until the timer finishes. If no timer is running, this function will
+        return immediately.<br>
+        <i>Example Usage:</i><br>
+        timer.waitForTimer();<br>
+        <br></li>
+      </ul>
+    </p>
+
+    <br>
+
+    <h2>PlayerThread (name: <i>thread</i>)</h2>
+
+    <br>
+
+    <p>This object is automatically registered by the JOIP-Engine on loading a
+    <a href="qrc:/resources/help/project/joi_project_help.html">JOI-Project</a> and
+    should not be placed in the <a href="">Layout</a> manually. This object is only used to idle the script for
+    a certain time.<br>
+      <ul>
+        <li><b>sleep ( int timeout [, bool skippable ] ):</b><br>
+        Blocks and waits for <i>timeout</i> seconds. <i>Skippable</i> is optional and if
+        it is set to true, the wait can by skipped by the player.<br>
+        <i>Example Usage:</i><br>
+        thread.sleep(10,true); /* Skippable 10s wait */<br>
+        thread.sleep(10,false); /* Unskippable 10s wait */<br>
+        thread.sleep(10); /* Unskippable 10s wait */<br>
+      <br></li>
+      </ul>
+    </p>
+
+    <br>
+
+    <h2>Project</h2>
+
+    <br>
+
+    <p>A reference to the current Project object can be retrieved from the currently playing
+    Scene object. This object can be used to retrieve resources and data about
+    the current <a href="qrc:/resources/help/project/joi_project_help.html">JOI-Project</a>.
+    This object should not be placed in the <a href="">Layout</a> manually.<br>
+      <ul>
+        <li><b>id: int:</b><br>
+        This property lets you read the internal Project id.<br></li>
+
+        <li><b>version: int:</b><br>
+        This reads the project version. Useful, if you need to have your scripts be compatible
+        with different JOIP-Engine versions. The version is a number with bits 16-23
+        being major, bits 8-15 being minor and the last eight being the patch version (0x00MMmmPP).<br>
+        <i>Example Usage:</i><br>
+        var major = (project.version &amp; 0x00ff0000) &gt;&gt; 16; /* read major version */<br>
+        var minor = (project.version &amp; 0x0000ff00) &gt;&gt; 8; /* read minor version */<br>
+        var path = project.version &amp; 0x000000ff; /* read path version */<br></li>
+
+        <li><b>versionText: string:</b><br>
+        This property reads the project version as a formated user-readable string.<br></li>
+
+        <li><b>targetVersion: int:</b><br>
+        This reads the target engine version. Useful, if you need to have your scripts be compatible
+        with different JOIP-Engine versions. The version is a number with bits 16-23
+        being major, bits 8-15 being minor and the last eight being the patch version (0x00MMmmPP).<br>
+        <i>Example Usage:</i><br>
+        var major = (project.version &amp; 0x00ff0000) &gt;&gt; 16; /* read major version */<br>
+        var minor = (project.version &amp; 0x0000ff00) &gt;&gt; 8; /* read minor version */<br>
+        var path = project.version &amp; 0x000000ff; /* read path version */<br></li>
+
+        <li><b>targetVersionText: string:</b><br>
+        This property reads the target engine version as a formated user-readable string.<br></li>
+
+        <li><b>name: string:</b><br>
+        This property lets you read the Project name.<br></li>
+
+        <li><b>folderName: string:</b><br>
+        This property lets you read the Project's folder name.<br></li>
+
+        <li><b>describtion: string:</b><br>
+        This property lets you read the Project's describtion.<br></li>
+
+        <li><b>titleCard: string:</b><br>
+        This property lets you read the <a href="qrc:/resources/help/editor/resources/resource_help.html">Resources</a>
+        name representing the title card of the
+        <a href="qrc:/resources/help/project/joi_project_help.html">JOI-Project</a>.<br>
+        <i>Example Usage:</i><br>
+        mediaPlayer.show(project.titleCard);<br></li>
+
+        <li><b>map: string:</b><br>
+        This property lets you read the <a href="qrc:/resources/help/editor/resources/resource_help.html">Resources</a>
+        name representing the map of the
+        <a href="qrc:/resources/help/project/joi_project_help.html">JOI-Project</a>.
+        Because this is a currently unused and not fully implemented functionality,
+        this property shouldn't be accessed.<br></li>
+
+        <li><b>sceneModel: string:</b><br>
+        This property lets you read the <a href="qrc:/resources/help/editor/resources/resource_help.html">Resources</a>
+        name representing the scene model of the
+        <a href="qrc:/resources/help/project/joi_project_help.html">JOI-Project</a>.
+        This property is only useful for manually parsing the file.<br></li>
+
+        <li><b>playerLayout: string:</b><br>
+        This property lets you read the <a href="qrc:/resources/help/editor/resources/resource_help.html">Resources</a>
+        name representing the <a href="">Layout</a> file of the
+        <a href="qrc:/resources/help/project/joi_project_help.html">JOI-Project</a>.
+        This property is only useful for manually parsing the file.<br></li>
+
+        <li><b>kinks: string[]:</b><br>
+        This property lets you read the kinks, that the application has been tagged with.<br></li>
+
+        <li><b>isUsingWeb: bool:</b><br>
+        This property lets you read the using-web-flag that is set, if the project
+        contains any remote <a href="qrc:/resources/help/editor/resources/resource_help.html">Resources</a>.<br></li>
+
+        <li><b>isUsingCodecs: bool:</b><br>
+        This property lets you read the using-codecs-flag that is set, if the project
+        contains any video or sound <a href="qrc:/resources/help/editor/resources/resource_help.html">Resources</a>.<br></li>
+
+        <li><b>numScenes (  ): int:</b><br>
+        Returns the number of scenes in the project. Usefull for iteration.<br></li>
+
+        <li><b>scenes (  ): string[]:</b><br>
+        Returns all scene names. Useful for iteration.<br></li>
+
+        <li><b>scene ( int index | string name ): Scene:</b><br>
+        Returns a Scene object at index index or with the name <i>name</i>. Useful if you
+        need to read scene specific properties.<br>
+        <i>Example Usage:</i><br>
+        var myScene = project.scene("myScene");<br>
+        var myScene = project.scene(0);<br></li>
+
+        <li><b>numResources (  ): int:</b><br>
+        Returns the number of Resources in the project. Usefull for iteration.<br></li>
+
+        <li><b>resources (  ): string[]:</b><br>
+        Returns all Resource names. Useful for iteration.<br></li>
+
+        <li><b>resource ( int index | string name ): Resource:</b><br>
+        Returns a Resource object at index index or with the name <i>name</i>. Useful if you
+        need to read Resource specific properties.<br>
+        <i>Example Usage:</i><br>
+        var myResource = project.resource("myScene");<br>
+        var myResource = project.resource(0);<br></li>
+      <br></li>
+      </ul>
+    </p>
+
+    <br>
+
+    <h2>Scene (name: <i>scene</i>)</h2>
+
+    <br>
+
+    <p>This object is automatically registered by the JOIP-Engine on loading a
+    <a href="qrc:/resources/help/project/joi_project_help.html">JOI-Project</a> and
+    should not be placed in the <a href="">Layout</a> manually. This object should not be placed in the Layout manually.<br>
+      <ul>
+        <li><b>id: int</b><br>
+        This property lets you read the internal Scene id.<br></li>
+
+        <li><b>name: string:</b><br>
+        This property lets you read the Scene name.<br></li>
+
+        <li><b>script: string</b><br>
+        Gets the script file name that is associated with the scene.<br></li>
+
+        <li><b>numResources (  ): int:</b><br>
+        Returns the number of Resources in the project. Currently unused and will allways return 0.<br></li>
+
+        <li><b>resources (  ): string[]:</b><br>
+        Returns all Resource names. Currently unused and will allways return an empty list.<br></li>
+
+        <li><b>resource ( string name ): Resource:</b><br>
+        Returns a Resource object with the name <i>name</i>.
+        Currently unused and will allways return <i>undefined</i>.<br></li>
+
+        <li><b>project (  ): Project:</b><br>
+        Returns the Project object that contains this Scene. Useful for getting information
+        about the Project itself, or about Resources.<br>
+        <i>Example Usage:</i><br>
+        var project = scene.project();<br></li>
+      <br></li>
+      </ul>
+    </p>
+
+    <br>
+
+    <h2>Resource</h2>
+
+    <br>
+
+    <p>This type of object can be returned by a Project object and contains information
+    about the <a href="qrc:/resources/help/editor/resources/resource_help.html">Resource</a>.
+    It can also be used as argument in the PlayerBackground, PlayerIcons, PlayerMediaPlayer etc.
+    This object should not be placed in the <a href="">Layout</a> manually.<br>
+      <ul>
+        <li><b>isAnimated: bool</b><br>
+        This property lets you read if the resource is animated (gif image or video
+        <a href="qrc:/resources/help/editor/resources/resource_help.html">Resource</a>).
+        An animated Resource can be played or paused and video Resources
+        can be waited on with <i>waitForVideo</i> or <i>waitForPlayback</i>.<br></li>
+
+        <li><b>isLocal: bool</b><br>
+        This property lets you read if the Resource is local or online.
+        For online resources, the <i>path</i> points to the image or video url directly and for
+        local resources it contains the local file relave to the
+        <a href="qrc:/resources/help/project/joi_project_help.html">JOI-Project</a>
+        root folder.<br></li>
+
+        <li><b>name: string</b><br>
+        This property lets you read the Resource name. This also serves as the Resource identifier.<br>
+
+        <li><b>path: url</b><br>
+        This property lets you read the path to the Resource.For online resources,
+        the <i>path</i> points to the image or video url directly and for
+        local resources it contains the local file relave to the
+        <a href="qrc:/resources/help/project/joi_project_help.html">JOI-Project</a>
+        root folder.<br></li>
+
+        <li><b>type: ResourceType</b><br>
+        This property lets you read the resource type. The values are:<br>
+        <i>ResourceType.Image (0)</i>: Image Resource<br>
+        <i>ResourceType.Movie (1)</i>: Movie Resource<br>
+        <i>ResourceType.Sound (2)</i>: Sound Resource<br>
+        <i>ResourceType.Other (3)</i>: Flow file, <a href="qrc:/resources/help/project/joi_project_help.html">Project</a> file,
+        <a href="qrc:/resources/help/editor/nodes/node_help.html">Scene Script</a> files and <a href="">Layout</a> file<br>
+        </li>
+
+        <li><b>project (  ): Project:</b><br>
+        Returns the Project object that contains this Resource. Useful for getting information
+        about the Project itself, or about other Resources or Scenes.<br>
+        <i>Example Usage:</i><br>
+        var project = resource.project();<br></li>
+      <br></li>
+      </ul>
+    </p>
+
   </div>
 </body>
 

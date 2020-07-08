@@ -91,22 +91,24 @@ qint32 CScriptEditorWidget::LineNumberAreaWidth()
 //
 void CScriptEditorWidget::ResetWidget()
 {
+  m_pWidgetArea->HideAllErrors();
   m_pWidgetArea->ClearAllErrors();
+  m_pWidgetArea->repaint();
 }
 
 //----------------------------------------------------------------------------------------
 //
 void CScriptEditorWidget::WidgetAreaPaintEvent(QPaintEvent* pEvent)
 {
-  m_pWidgetArea->HideAllErrors();
-
   QPainter painter(m_pWidgetArea);
   painter.fillRect(pEvent->rect(), m_widgetsBackgroundColor);
 
   QTextBlock block = firstVisibleBlock();
   qint32 iBlockNumber = block.blockNumber();
   qint32 iTop = static_cast<qint32>(blockBoundingGeometry(block).translated(contentOffset()).top());
-  qint32 iBottom = iTop + static_cast<qint32>(blockBoundingRect(block).height());
+  const QRectF blockRect = blockBoundingRect(block);
+  qint32 iBlockHeight = static_cast<qint32>(blockRect.height());
+  qint32 iBottom = iTop + iBlockHeight;
 
   while (block.isValid() && iTop <= pEvent->rect().bottom())
   {
@@ -116,8 +118,8 @@ void CScriptEditorWidget::WidgetAreaPaintEvent(QPaintEvent* pEvent)
       if (nullptr != pWidget)
       {
         pWidget->setGeometry(0, iTop, pWidget->width(), pWidget->height());
-        pWidget->setVisible(true);
-        pWidget->raise();
+        QPixmap pixmap = pWidget->grab();
+        painter.drawPixmap(pWidget->geometry(), pixmap, pixmap.rect());
       }
     }
 
@@ -283,13 +285,14 @@ void CScriptEditorWidget::resizeEvent(QResizeEvent* pEvent)
 void CWidgetArea::AddError(QString sException, qint32 iLine, QString sStack)
 {
   QLabel* pLabel = new QLabel(this);
-  pLabel->setAttribute(Qt::WA_TranslucentBackground);
-  pLabel->setVisible(false);
+  pLabel->setVisible(true);
   pLabel->setFixedSize(m_pCodeEditor->WidgetAreaWidth(),m_pCodeEditor->WidgetAreaWidth());
-  pLabel->setScaledContents(true);
-  pLabel->setObjectName("ErrorIcon");
+  pLabel->setObjectName(QString::fromUtf8("ErrorIcon"));
+  pLabel->setAccessibleName(QString::fromUtf8("ErrorIcon"));
   pLabel->setToolTip(sException + ": " + sStack);
   pLabel->installEventFilter(this);
+  pLabel->raise();
+  pLabel->style()->polish(pLabel);
   m_errorLabelMap.insert({ iLine, pLabel });
 }
 
@@ -297,6 +300,13 @@ void CWidgetArea::AddError(QString sException, qint32 iLine, QString sStack)
 //
 void CWidgetArea::ClearAllErrors()
 {
+  for (auto it = m_errorLabelMap.begin(); m_errorLabelMap.end() != it; ++it)
+  {
+    if (nullptr != it->second)
+    {
+      delete it->second;
+    }
+  }
   m_errorLabelMap.clear();
 }
 

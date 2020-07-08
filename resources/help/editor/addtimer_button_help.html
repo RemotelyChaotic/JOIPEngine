@@ -3,7 +3,7 @@
 
 <head>
   <meta charset="utf-8">
-  <title>Template</title>
+  <title>Add Timer Code</title>
   <meta name="description" content="">
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
@@ -18,17 +18,75 @@
       margin-right: auto;
       width: 0.6em
     }
+    table.warning {
+      color: black;
+      background-color: #cccc44;
+      border-color: yellow;
+      border-style: solid;
+    }
   </style>
 </head>
 
 
 <body>
-  <h1>Template</h1>
+  <h1>Add Timer Code</h1>
 
   <hr>
 
   <div class="container">
-    <p>Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet.</p>
+    <p>This button opens an overlay to add code snippets to the currently opened script in
+    the <a href="qrc:/resources/help/editor/code/script_editor_help.html">Script Editor</a>,
+    to manipulate the timer.</p>
+
+    <br>
+
+    <p>For more information about the script API, please see the <a href="qrc:/resources/help/editor/code/script_reference_help.html">API Reference</a>.</p>
+
+    <br>
+
+    <p><img src="qrc:/resources/help/editor/images/addtimer_dialog.png"><br><i>Add Timer Code Dialog</i></p>
+
+    <br>
+
+    <p>Checking the <i>Set time</i> check box will generate code to set the timer to
+    the amount configured in the spin box next to the check box.<br>
+    <ul><li><b>Generated code example:</b> timer.setTime(120);</li></ul></p>
+
+    <br>
+
+    <p>Checking the <i>Show timer</i> or <i>Hide timer</i> check box will generate code to show or hide the timer
+    respectively.<br>
+      <ul>
+        <li><b>Generated code example for <i>Show timer</i>:</b> timer.show();</li>
+        <li><b>Generated code example for <i>Hide timer</i>:</b> timer.hide();</li>
+      </ul>
+    </p>
+
+    <br>
+
+    <p>Checking or unchecking the <i>Display time</i> check box will generate code to show or hide the time
+    display on the timer respectively.<br>
+      <ul>
+        <li><b>Generated code example:</b> timer.setTimeVisible(true);</li>
+        <li><b>Generated code example:</b> timer.setTimeVisible(false);</li>
+      </ul>
+    </p>
+
+    <br>
+
+    <p>Checking the <i>Start</i> or <i>Stop</i> check box will generate code to stop or start the timer
+    respectively.<br>
+      <ul>
+        <li><b>Generated code example for <i>Start</i>:</b> timer.start();</li>
+        <li><b>Generated code example for <i>Stop</i>:</b> timer.stop();</li>
+      </ul>
+    </p>
+
+    <br>
+
+    <p>Checking the <i>Wait for finish</i> check box will generate code to wait on the timer,
+    blocking and sleeping until the timer finishes.<br>
+    <ul><li><b>Generated code example:</b> timer.waitForTimer();</li></ul></p>
   </div>
 </body>
 

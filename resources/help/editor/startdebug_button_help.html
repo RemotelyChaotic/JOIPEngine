@@ -3,7 +3,7 @@
 
 <head>
   <meta charset="utf-8">
-  <title>Template</title>
+  <title>Start Debugging</title>
   <meta name="description" content="">
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
@@ -18,17 +18,45 @@
       margin-right: auto;
       width: 0.6em
     }
+    table.warning {
+      color: black;
+      background-color: #cccc44;
+      border-color: yellow;
+      border-style: solid;
+    }
   </style>
 </head>
 
 
 <body>
-  <h1>Template</h1>
+  <h1>Start Debugging</h1>
 
   <hr>
 
   <div class="container">
-    <p>Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet.</p>
+    <p>Clicking the <i>Start Debugging</i> button will start a debuigging session with
+    the currently opened <a href="qrc:/resources/help/editor/nodes/node_help.html">Scene</a> script
+    in the <a href="qrc:/resources/help/editor/code/script_editor_help.html">Script Editor</a>.</p>
+
+    <br>
+
+    <table width="100%" class="warning">
+      <tr>
+        <td width="10%"><img src="qrc:/resources/help/icons/WarningIcon.png" width="64" height="64" alt="Warning"></td>
+        <td width="90%"><br>The <a href="qrc:/resources/help/project/joi_project_help.html">JOI-Project</a> needs to be saved for debugging.</td>
+      </tr>
+    </table>
+
+    <br>
+
+    <p>This allows to test Scripts for functionality and to resolve exceptions. Exceptions that occur will
+    be displayed next to the line number on the line that the exception occured. The exception
+    reason will be displayed in red next to the code as well as text in the player. Keep in mind that
+    the PlayerStorage will most likely not be populated, if a different script does it.</p>
+
+    <br>
+
+    <p><img src="qrc:/resources/help/editor/images/error_display.png"><br><i>Error Display</i></p>
   </div>
 </body>
 

@@ -39,6 +39,7 @@ protected slots:
   void on_pShowCheckBox_toggled(bool bState);
   void on_pHideCheckBox_toggled(bool bState);
   void on_pFilter_SignalFilterChanged(const QString& sText);
+  void on_CloseButton_clicked();
   void on_pConfirmButton_clicked();
   void on_pCancelButton_clicked();
   void SlotCurrentChanged(const QModelIndex &current, const QModelIndex &previous);

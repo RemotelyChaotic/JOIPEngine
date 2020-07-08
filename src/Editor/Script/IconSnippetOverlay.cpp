@@ -116,6 +116,16 @@ void CIconSnippetOverlay::on_pFilter_SignalFilterChanged(const QString& sText)
 
 //----------------------------------------------------------------------------------------
 //
+void CIconSnippetOverlay::on_CloseButton_clicked()
+{
+  if (!m_bInitialized) { return; }
+
+  m_data.m_sCurrentResource = QString();
+  m_spUi->pResourceLineEdit->setText(QString());
+}
+
+//----------------------------------------------------------------------------------------
+//
 void CIconSnippetOverlay::on_pConfirmButton_clicked()
 {
   QString sCode;
@@ -133,7 +143,7 @@ void CIconSnippetOverlay::on_pConfirmButton_clicked()
     }
     else
     {
-      QString sResource("icon.hide(~all);\n");
+      QString sResource("icon.hide(\"~all\");\n");
       sCode += sResource;
     }
   }

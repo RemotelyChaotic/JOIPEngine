@@ -88,10 +88,14 @@ public:
   bool isUsingCodecs();
 
   Q_INVOKABLE qint32 numScenes();
+  Q_INVOKABLE QStringList scenes();
+  Q_INVOKABLE QJSValue scene(const QString& sName);
   Q_INVOKABLE QJSValue scene(qint32 iIndex);
 
   Q_INVOKABLE qint32 numResources();
+  Q_INVOKABLE QStringList resources();
   Q_INVOKABLE QJSValue resource(const QString& sValue);
+  Q_INVOKABLE QJSValue resource(qint32 iIndex);
 
   std::shared_ptr<SProject> Data() { return m_spData; }
 

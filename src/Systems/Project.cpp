@@ -327,6 +327,38 @@ qint32 CProject::numScenes()
 
 //----------------------------------------------------------------------------------------
 //
+QStringList CProject::scenes()
+{
+  QStringList outList;
+  QReadLocker locker(&m_spData->m_rwLock);
+  for (qint32 iIndex = 0; m_spData->m_vspScenes.size() > static_cast<size_t>(iIndex); ++iIndex)
+  {
+    QReadLocker sceneLocker(&m_spData->m_vspScenes[static_cast<size_t>(iIndex)]->m_rwLock);
+    outList << m_spData->m_vspScenes[static_cast<size_t>(iIndex)]->m_sName;
+  }
+  return outList;
+}
+
+//----------------------------------------------------------------------------------------
+//
+QJSValue CProject::scene(const QString& sName)
+{
+  QReadLocker locker(&m_spData->m_rwLock);
+  for (qint32 iIndex = 0; m_spData->m_vspScenes.size() > static_cast<size_t>(iIndex); ++iIndex)
+  {
+    QReadLocker sceneLocker(&m_spData->m_vspScenes[static_cast<size_t>(iIndex)]->m_rwLock);
+    if (m_spData->m_vspScenes[static_cast<size_t>(iIndex)]->m_sName == sName)
+    {
+      return
+        m_pEngine->newQObject(
+            new CScene(m_pEngine, std::make_shared<SScene>(*m_spData->m_vspScenes[static_cast<size_t>(iIndex)])));
+    }
+  }
+  return QJSValue();
+}
+
+//----------------------------------------------------------------------------------------
+//
 QJSValue CProject::scene(qint32 iIndex)
 {
   QReadLocker locker(&m_spData->m_rwLock);
@@ -349,6 +381,19 @@ qint32 CProject::numResources()
 
 //----------------------------------------------------------------------------------------
 //
+QStringList CProject::resources()
+{
+  QReadLocker locker(&m_spData->m_rwLock);
+  QStringList ret;
+  for (auto it = m_spData->m_spResourcesMap.begin(); m_spData->m_spResourcesMap.end() != it; ++it)
+  {
+    ret << it->first;
+  }
+  return ret;
+}
+
+//----------------------------------------------------------------------------------------
+//
 QJSValue CProject::resource(const QString& sValue)
 {
   QReadLocker locker(&m_spData->m_rwLock);
@@ -358,6 +403,25 @@ QJSValue CProject::resource(const QString& sValue)
     return
       m_pEngine->newQObject(
           new CResource(m_pEngine, std::make_shared<SResource>(*it->second)));
+  }
+  return QJSValue();
+}
+
+//----------------------------------------------------------------------------------------
+//
+QJSValue CProject::resource(qint32 iIndex)
+{
+  QReadLocker locker(&m_spData->m_rwLock);
+  auto it = m_spData->m_spResourcesMap.begin();
+  if (0 <= iIndex && m_spData->m_spResourcesMap.size() > static_cast<size_t>(iIndex))
+  {
+    std::advance(it, iIndex);
+    if (m_spData->m_spResourcesMap.end() != it)
+    {
+      return
+        m_pEngine->newQObject(
+            new CResource(m_pEngine, std::make_shared<SResource>(*it->second)));
+    }
   }
   return QJSValue();
 }
