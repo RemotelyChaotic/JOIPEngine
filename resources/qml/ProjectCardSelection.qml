@@ -40,6 +40,12 @@ Rectangle {
         listModel.clear();
     }
 
+    function showWarning(sWarnString)
+    {
+        warningPopup.text = sWarnString;
+        warningPopup.open();
+    }
+
     ListView {
         id: listView
         anchors.centerIn: parent
@@ -87,6 +93,15 @@ Rectangle {
         // Set the highlight delegate. Note we must also set highlightFollowsCurrentItem
         // to false so the highlight delegate can control how the highlight is moved.
         focus: true
+    }
+
+    ToolTip {
+        id: warningPopup
+        anchors.centerIn: parent
+        modal: false
+        focus: true
+        text: ""
+        closePolicy: Popup.CloseOnEscape | Popup.CloseOnPressOutside
     }
 
 

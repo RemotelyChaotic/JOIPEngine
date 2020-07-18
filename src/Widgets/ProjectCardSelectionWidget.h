@@ -28,6 +28,7 @@ public:
   void LoadProjects();
   void UnloadProjects();
   qint32 SelectedId() { return m_iSelectedProjectId; }
+  void ShowWarning(const QString& sWarning);
 
   void SetSelectionColor(const QColor& color);
   const QColor& SelectionColor();

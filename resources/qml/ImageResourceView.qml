@@ -41,9 +41,17 @@ Rectangle {
             }
             else
             {
-                animated = false;
-                animatedImage.source = "";
-                image.source = "image://DataBaseImageProivider/" + resource.project().id + "/" + resource.name;
+                if (!resource.isLocal && Settings.offline)
+                {
+                    animated = false;
+                    state = Resource.Null;
+                }
+                else
+                {
+                    animated = false;
+                    animatedImage.source = "";
+                    image.source = "image://DataBaseImageProivider/" + resource.project().id + "/" + resource.name;
+                }
             }
         }
         else

@@ -79,6 +79,13 @@ Rectangle {
                 resource: null
             }
 
+            Desaturate {
+                id: desaturateEffect
+                anchors.fill: resource
+                source: resource
+                desaturation: 0.0
+            }
+
             ErrorResourceView {
                 id: errorResource
                 visible: resource.state === Resource.Null || resource.state === Resource.Error
@@ -333,6 +340,7 @@ Rectangle {
         if (dto.isUsingWeb)
         {
             iconUsesWebRect.visible = true;
+            desaturateEffect.desaturation = (Settings.offline && dto.isUsingWeb) ? 0.9 : 0.0;
         }
     }
 

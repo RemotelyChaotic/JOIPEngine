@@ -130,6 +130,18 @@ void CProjectCardSelectionWidget::UnloadProjects()
 
 //----------------------------------------------------------------------------------------
 //
+void CProjectCardSelectionWidget::ShowWarning(const QString& sWarning)
+{
+  QQuickItem* pRootObject =  m_spUi->pQmlWidget->rootObject();
+  if (nullptr != pRootObject)
+  {
+    bool bOk = QMetaObject::invokeMethod(pRootObject, "showWarning", Q_ARG(QVariant, sWarning));
+    assert(bOk); Q_UNUSED(bOk)
+  }
+}
+
+//----------------------------------------------------------------------------------------
+//
 void CProjectCardSelectionWidget::SetSelectionColor(const QColor& color)
 {
   if (m_selectionColor != color)

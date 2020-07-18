@@ -1,8 +1,10 @@
 #include "SceneScreen.h"
 #include "Application.h"
+#include "Settings.h"
 #include "WindowContext.h"
 #include "Systems/DatabaseManager.h"
 #include "Systems/HelpFactory.h"
+#include "Systems/Project.h"
 #include "Widgets/HelpOverlay.h"
 #include "ui_SceneScreen.h"
 
@@ -77,21 +79,32 @@ void CSceneScreen::on_pOpenExistingProjectButton_clicked()
   WIDGET_INITIALIZED_GUARD
 
   qint32 iId = -1;
+  tspProject spProject = nullptr;
   auto spDbManager = m_wpDbManager.lock();
   if (nullptr != spDbManager)
   {
     iId = m_spUi->pProjectCardSelectionWidget->SelectedId();
-    if (spDbManager->FindProject(iId) == nullptr)
+    spProject = spDbManager->FindProject(iId);
+    if (nullptr == spProject)
     {
       return;
     }
   }
 
-  emit m_spWindowContext->SignalSetHelpButtonVisible(false);
+  QReadLocker locker(&spProject->m_rwLock);
+  if (spProject->m_bUsesWeb && CApplication::Instance()->Settings()->Offline())
+  {
+    m_spUi->pProjectCardSelectionWidget->ShowWarning(
+          tr("Can't open JOIP-Project that requires online resources in offline mode in the player."));
+  }
+  else
+  {
+    emit m_spWindowContext->SignalSetHelpButtonVisible(false);
 
-  m_spUi->pMainSceneScreen->UnloadProject();
-  m_spUi->pMainSceneScreen->LoadProject(iId);
-  m_spUi->pStackedWidget->setCurrentIndex(c_iPageIndexScene);
+    m_spUi->pMainSceneScreen->UnloadProject();
+    m_spUi->pMainSceneScreen->LoadProject(iId);
+    m_spUi->pStackedWidget->setCurrentIndex(c_iPageIndexScene);
+  }
 }
 
 //----------------------------------------------------------------------------------------

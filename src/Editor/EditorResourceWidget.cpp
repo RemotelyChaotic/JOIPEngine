@@ -166,8 +166,16 @@ void CEditorResourceWidget::OnActionBarChanged()
     ActionBar()->ShowResourceActionBar();
     connect(ActionBar()->m_spUi->AddResourceButton, &QPushButton::clicked,
             this, &CEditorResourceWidget::SlotAddButtonClicked);
-    connect(ActionBar()->m_spUi->AddWebResourceButton, &QPushButton::clicked,
-            this, &CEditorResourceWidget::SlotAddWebButtonClicked);
+    if (!m_spSettings->Offline())
+    {
+      ActionBar()->m_spUi->AddWebResourceButton->show();
+      connect(ActionBar()->m_spUi->AddWebResourceButton, &QPushButton::clicked,
+              this, &CEditorResourceWidget::SlotAddWebButtonClicked);
+    }
+    else
+    {
+      ActionBar()->m_spUi->AddWebResourceButton->hide();
+    }
     connect(ActionBar()->m_spUi->RemoveResourceButton, &QPushButton::clicked,
             this, &CEditorResourceWidget::SlotRemoveButtonClicked);
     connect(ActionBar()->m_spUi->TitleCardButton, &QPushButton::clicked,

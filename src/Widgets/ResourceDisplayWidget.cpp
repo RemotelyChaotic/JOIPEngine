@@ -124,7 +124,8 @@ void CResourceDisplayWidget::LoadResource(tspResource spResource)
       default: break;
     }
   }
-  else
+  // if offline mode is on, we don't want to use web content
+  else if(!m_spSettings->Offline())
   {
     switch (m_spResource->m_type)
     {

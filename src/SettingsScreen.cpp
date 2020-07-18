@@ -27,6 +27,7 @@ namespace  {
   const QString c_sResolutionHelpId = "Settings/Resolution";
   const QString c_sMuteHelpId = "Settings/Mute";
   const QString c_sVolumeHelpId = "Settings/Volume";
+  const QString c_sOfflineHelpId = "Settings/Offline";
   const QString c_sCancelHelpId = "MainScreen/Cancel";
 
   const char* c_sPropertyKeySequence = "KeyBinding";
@@ -90,6 +91,8 @@ void CSettingsScreen::Initialize()
     wpHelpFactory->RegisterHelp(c_sMuteHelpId, ":/resources/help/settings/mute_setting_help.html");
     m_spUi->pVolumeContainer->setProperty(helpOverlay::c_sHelpPagePropertyName, c_sVolumeHelpId);
     wpHelpFactory->RegisterHelp(c_sVolumeHelpId, ":/resources/help/settings/volume_setting_help.html");
+    m_spUi->pOfflineContainer->setProperty(helpOverlay::c_sHelpPagePropertyName, c_sOfflineHelpId);
+    wpHelpFactory->RegisterHelp(c_sOfflineHelpId, ":/resources/help/settings/offline_setting_help.html");
     m_spUi->pBackButton->setProperty(helpOverlay::c_sHelpPagePropertyName, c_sCancelHelpId);
     wpHelpFactory->RegisterHelp(c_sCancelHelpId, ":/resources/help/player/cancel_button_help.html");
   }
@@ -119,6 +122,7 @@ void CSettingsScreen::Load()
   m_spUi->pResolutionComboBox->blockSignals(true);
   m_spUi->pMuteCheckBox->blockSignals(true);
   m_spUi->pVolumeSlider->blockSignals(true);
+  m_spUi->pOfflineModeCheckBox->blockSignals(true);
 
   // set fullscreen
   m_spUi->pFullscreenCheckBox->setCheckState(m_spSettings->Fullscreen() ? Qt::Checked : Qt::Unchecked);
@@ -204,6 +208,9 @@ void CSettingsScreen::Load()
   // set lineedit
   m_spUi->pFolderLineEdit->setText(m_spSettings->ContentFolder());
 
+  // set offline mode
+  m_spUi->pOfflineModeCheckBox->setChecked(m_spSettings->Offline());
+
   // unblock signals
   m_spUi->pFullscreenCheckBox->blockSignals(false);
   m_spUi->pResolutionComboBox->blockSignals(false);
@@ -212,6 +219,7 @@ void CSettingsScreen::Load()
   m_spUi->pFolderLineEdit->blockSignals(false);
   m_spUi->pMuteCheckBox->blockSignals(false);
   m_spUi->pVolumeSlider->blockSignals(false);
+  m_spUi->pOfflineModeCheckBox->blockSignals(false);
 }
 
 //----------------------------------------------------------------------------------------
@@ -329,6 +337,17 @@ void CSettingsScreen::on_pVolumeSlider_sliderReleased()
 
   double dVolume = static_cast<double>(m_spUi->pVolumeSlider->value()) / c_dSliderScaling;
   m_spSettings->SetVolume(dVolume);
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CSettingsScreen::on_pOfflineModeCheckBox_stateChanged(qint32 iState)
+{
+  WIDGET_INITIALIZED_GUARD
+  assert(nullptr != m_spSettings);
+  if (nullptr == m_spSettings) { return; }
+
+  m_spSettings->SetOffline(iState == Qt::Checked);
 }
 
 //----------------------------------------------------------------------------------------

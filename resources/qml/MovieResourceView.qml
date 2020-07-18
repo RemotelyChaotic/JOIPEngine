@@ -40,8 +40,15 @@ Rectangle {
         mediaPlayer.stop();
         if (null !== resource && undefined !== resource)
         {
-            state = Resource.Loading;
-            player.source = resource.path;
+            if (!resource.isLocal && Settings.offline)
+            {
+                state = Resource.Null;
+            }
+            else
+            {
+                state = Resource.Loading;
+                player.source = resource.path;
+            }
         }
         else
         {

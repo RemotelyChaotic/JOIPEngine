@@ -1,0 +1,58 @@
+<!doctype html>
+<html class="no-js" lang="">
+
+<head>
+  <meta charset="utf-8">
+  <title>Offline Mode</title>
+  <meta name="description" content="">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <style>
+    h1 {
+      text-align: center;
+    }
+    div.container {
+      min-height: 10em;
+      display: table-cell;
+      margin-left: auto;
+      margin-right: auto;
+      width: 0.6em
+    }
+    table.warning {
+      color: black;
+      background-color: #cccc44;
+      border-color: yellow;
+      border-style: solid;
+    }
+  </style>
+</head>
+
+
+<body>
+  <h1>Offline Mode</h1>
+
+<hr>
+
+  <div class="container">
+    <p>If this setting is active, no component of the application will try to use online resources.
+    Aditionally all <a href="qrc:/resources/help/player/card_button_help.html">Project Title Cards</a>
+    that use online resources will be disabled and won't be able to be opened in the player. While
+    the <a href="qrc:/resources/help/editor_button_help.html">Editor</a> will open those
+    <a href="qrc:/resources/help/project/joi_project_help.html">Projects</a>,
+    the online <a href="qrc:/resources/help/editor/resources/resource_help.html">Resources</a> will not be possible to access.</p>
+  </div>
+
+  <br>
+
+  <div class="container">
+    <table width="100%" class="warning">
+      <tr>
+        <td width="10%"><img src="qrc:/resources/help/icons/WarningIcon.png" width="64" height="64" alt="Warning"></td>
+        <td width="90%"><br>Multiple instances of the application share the same configuration file.<br>
+        If you use different versions of the application, your settings for all instances will change.</td>
+      </tr>
+    </table>
+  </div>
+</body>
+
+</html>

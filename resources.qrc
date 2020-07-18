@@ -134,6 +134,7 @@
         <file>resources/help/editor/images/colorwheel_dialog.png</file>
         <file>resources/help/editor/images/error_display.png</file>
         <file>resources/help/layout/layout_help.html</file>
+        <file>resources/help/settings/offline_setting_help.html</file>
     </qresource>
     <qresource prefix="/qml">
         <file>resources/qml/ProjectCardSelection.qml</file>
