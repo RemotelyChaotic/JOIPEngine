@@ -18,7 +18,7 @@ int main(int argc, char *argv[])
   QCoreApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
   QCoreApplication::setAttribute(Qt::AA_UseOpenGLES);
 
-  //QtWebEngine::initialize();
+  // WebView or Webengine is not used anymore, but we'll keep this for now
   QtWebView::initialize();
   QtAV::Widgets::registerRenderers();
 

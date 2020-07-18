@@ -34,6 +34,9 @@
    </property>
    <item row="0" column="0">
     <widget class="QStackedWidget" name="pStackedWidget">
+     <property name="currentIndex">
+      <number>0</number>
+     </property>
      <widget class="QWidget" name="pPageLoading">
       <property name="styleSheet">
        <string notr="true">background-color: transparent;</string>
@@ -203,37 +206,6 @@
        </item>
       </layout>
      </widget>
-     <widget class="QWidget" name="pPageWeb">
-      <property name="styleSheet">
-       <string notr="true">background-color: transparent;</string>
-      </property>
-      <layout class="QGridLayout" name="gridLayout_4">
-       <property name="leftMargin">
-        <number>0</number>
-       </property>
-       <property name="topMargin">
-        <number>0</number>
-       </property>
-       <property name="rightMargin">
-        <number>0</number>
-       </property>
-       <property name="bottomMargin">
-        <number>0</number>
-       </property>
-       <property name="spacing">
-        <number>0</number>
-       </property>
-       <item row="0" column="0">
-        <widget class="QWebEngineView" name="pWebView" native="true">
-         <property name="url" stdset="0">
-          <url>
-           <string/>
-          </url>
-         </property>
-        </widget>
-       </item>
-      </layout>
-     </widget>
      <widget class="QWidget" name="pPageOther">
       <property name="styleSheet">
        <string notr="true">background-color: transparent;</string>
@@ -370,11 +342,6 @@
   </layout>
  </widget>
  <customwidgets>
-  <customwidget>
-   <class>QWebEngineView</class>
-   <extends>QWidget</extends>
-   <header location="global">QtWebEngineWidgets/QWebEngineView</header>
-  </customwidget>
   <customwidget>
    <class>CMediaPlayer</class>
    <extends>QWidget</extends>

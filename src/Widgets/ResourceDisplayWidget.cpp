@@ -15,9 +15,8 @@ BETTER_ENUM(EResourceDisplayType, qint32,
             eLoading = 0,
             eLocalImage = 1,
             eLocalMedia = 2,
-            eWebResource = 3,
-            eOther = 4,
-            eError = 5);
+            eOther = 3,
+            eError = 4);
 
 namespace
 {
@@ -43,7 +42,6 @@ CResourceDisplayWidget::CResourceDisplayWidget(QWidget* pParent) :
   m_iProjectId(-1)
 {
   m_spUi->setupUi(this);
-  m_spUi->pWebView->page()->setBackgroundColor(Qt::transparent);
 
   m_spSpinner->start();
   m_spUi->pLoadingSpinner->setMovie(m_spSpinner.get());
@@ -52,8 +50,6 @@ CResourceDisplayWidget::CResourceDisplayWidget(QWidget* pParent) :
 
   connect(m_spFutureWatcher.get(), &QFutureWatcher<void>::finished,
           this, &CResourceDisplayWidget::SlotLoadFinished);
-  connect(m_spUi->pWebView, &QWebEngineView::loadFinished,
-          this, &CResourceDisplayWidget::SlotWebLoadFinished);
 
   connect(m_spSettings.get(), &CSettings::mutedChanged,
           this, &CResourceDisplayWidget::SlotMutedChanged, Qt::QueuedConnection);
@@ -163,6 +159,7 @@ void CResourceDisplayWidget::LoadResource(tspResource spResource)
       case EResourceType::eMovie: // fallthrough
       case EResourceType::eSound:
       {
+        // Sound is not officially supported yet, but could easilly be
         m_spUi->pMediaPlayer->OpenMedia(path.toString());
         m_spUi->pStackedWidget->setCurrentIndex(EResourceDisplayType::eLocalMedia);
         m_iLoadState = ELoadState::eFinished;
@@ -170,9 +167,8 @@ void CResourceDisplayWidget::LoadResource(tspResource spResource)
       }
       default:
       {
-        m_spUi->pWebView->setUrl(path);
-        m_spUi->pStackedWidget->setCurrentIndex(EResourceDisplayType::eLoading);
-        m_iLoadState = ELoadState::eLoading;
+        m_spUi->pStackedWidget->setCurrentIndex(EResourceDisplayType::eError);
+        m_iLoadState = ELoadState::eError;
       } break;
     }
   }
@@ -190,7 +186,6 @@ void CResourceDisplayWidget::UnloadResource()
     m_spFutureWatcher->waitForFinished();
   }
   SlotStop();
-  m_spUi->pWebView->setUrl(QUrl("about:blank"));
 }
 
 //----------------------------------------------------------------------------------------
@@ -239,11 +234,6 @@ bool CResourceDisplayWidget::IsRunning()
     case EResourceDisplayType::eLocalMedia:
       bRunning = m_spUi->pMediaPlayer->IsPlaying();
       break;
-    case EResourceDisplayType::eWebResource:
-    {
-      // TODO:
-      break;
-    }
   default: break;
   }
 
@@ -259,7 +249,6 @@ void CResourceDisplayWidget::SetMargins(qint32 iLeft, qint32 iTop, qint32 iRight
   m_spUi->pPageLoading->setContentsMargins(iLeft, iTop, iRight, iBottom);
   m_spUi->pPageMedia->setContentsMargins(iLeft, iTop, iRight, iBottom);
   m_spUi->pPageOther->setContentsMargins(iLeft, iTop, iRight, iBottom);
-  m_spUi->pPageWeb->setContentsMargins(iLeft, iTop, iRight, iBottom);
 }
 
 //----------------------------------------------------------------------------------------
@@ -290,20 +279,6 @@ void CResourceDisplayWidget::SlotPlayPause()
     case EResourceDisplayType::eLocalMedia:
       m_spUi->pMediaPlayer->PlayPause();
       break;
-    case EResourceDisplayType::eWebResource:
-    {
-      m_spUi->pWebView->page()->runJavaScript(
-            "var video = document.querySelector('video');"
-            "if (video !== null) {"
-            "  if (video.paused) { "
-            "    video.play(); "
-            "  } else { "
-            "    video.pause();"
-            "  }"
-            "}"
-            );
-      break;
-    }
   default: break;
   }
 }
@@ -330,22 +305,6 @@ void CResourceDisplayWidget::SlotStop()
     case EResourceDisplayType::eLocalMedia:
       m_spUi->pMediaPlayer->Stop();
       break;
-    case EResourceDisplayType::eWebResource:
-    {
-      m_spUi->pWebView->page()->runJavaScript(
-            "var video = document.querySelector('video'); "
-            "if (video !== null) { "
-            "  if (!video.paused) { "
-            "    video.pause(); "
-            "    video.load(); "
-            "  } else { "
-            "    video.load(); "
-            "  } "
-            "  video.pause(); "
-            "}"
-            );
-      break;
-    }
   default: break;
   }
 }
@@ -359,16 +318,6 @@ void CResourceDisplayWidget::SlotSetSliderVisible(bool bVisible)
     case EResourceDisplayType::eLocalMedia:
       m_spUi->pMediaPlayer->SetSliderVisible(bVisible);
       break;
-    case EResourceDisplayType::eWebResource:
-    {
-      m_spUi->pWebView->page()->runJavaScript(QString() +
-            "var video = document.querySelector('video');"
-            "if (video !== null) {"
-            "  video.controls = " + (bVisible ? "true" : "false") + ";"
-            "}"
-            );
-      break;
-    }
     default:
     {
       m_spUi->pMediaPlayer->SetSliderVisible(bVisible);
@@ -529,14 +478,6 @@ void CResourceDisplayWidget::SlotMutedChanged()
       {
         m_spUi->pMediaPlayer->MuteUnmute(bMuted);
       } break;
-      case EResourceDisplayType::eWebResource:
-      {
-        QString sJs = "var video = document.querySelector('video');"
-                      "if (video !== null) {"
-                      "  video.muted = %1;"
-                      "}";
-        m_spUi->pWebView->page()->runJavaScript(sJs.arg(bMuted ? "true" : "false"));
-      } break;
     default: break;
     }
   }
@@ -666,45 +607,7 @@ void CResourceDisplayWidget::SlotVolumeChanged()
       {
         m_spUi->pMediaPlayer->SetVolume(dVolume);
       } break;
-      case EResourceDisplayType::eWebResource:
-      {
-        QString sJs = "var video = document.querySelector('video');"
-                      "if (video !== null) {"
-                      "  video.volume = %1;"
-                      "}";
-        m_spUi->pWebView->page()->runJavaScript(sJs.arg(dVolume));
-      } break;
     default: break;
-    }
-  }
-}
-
-//----------------------------------------------------------------------------------------
-//
-void CResourceDisplayWidget::SlotWebLoadFinished(bool bOk)
-{
-  if (ELoadState::eLoading == m_iLoadState)
-  {
-    if (bOk)
-    {
-      m_iLoadState = ELoadState::eFinished;
-      m_spUi->pWebView->page()->runJavaScript(
-            "var video = document.querySelector('video');"
-            "if (video !== null) {"
-            "  video.autoplay = false;"
-            "}"
-            );
-      SlotSetSliderVisible(false);
-      SlotVolumeChanged();
-      SlotMutedChanged();
-      m_spUi->pStackedWidget->setCurrentIndex(EResourceDisplayType::eWebResource);
-      emit SignalLoadFinished();
-    }
-    else
-    {
-      m_iLoadState = ELoadState::eError;
-      m_spUi->pStackedWidget->setCurrentIndex(EResourceDisplayType::eError);
-      emit SignalLoadFinished();
     }
   }
 }

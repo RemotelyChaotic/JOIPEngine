@@ -58,7 +58,6 @@ protected slots:
   void SlotNetworkReplyFinished();
   void SlotStatusChanged(QtAV::MediaStatus status);
   void SlotVolumeChanged();
-  void SlotWebLoadFinished(bool bOk);
 
 private:
   void StartImageLoad(QString sPath);
