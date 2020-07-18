@@ -27,17 +27,8 @@ Rectangle {
                     break;
 
                 case Resource.Movie:
-                    if (pResource.isLocal)
-                    {
-                        imgResource.resource = null;
-                        movieResource.resource = pResource;
-                    }
-                    else
-                    {
-                        imgResource.resource = null;
-                        movieResource.resource = null;
-                        webResource.resource = pResource;
-                    }
+                    imgResource.resource = null;
+                    movieResource.resource = pResource;
                     break;
 
                 case Resource.Sound:
@@ -136,10 +127,8 @@ Rectangle {
                                webResource.state === Resource.Loading
         property bool error: imgResource.state === Resource.Null &&
                              movieResource.state === Resource.Null &&
-                             webResource.state === Resource.Null ||
                              imgResource.state === Resource.Error ||
-                             movieResource.state === Resource.Error ||
-                             webResource.state === Resource.Error
+                             movieResource.state === Resource.Error
 
         AnimatedImage {
             id: loadingAnimation
@@ -163,18 +152,6 @@ Rectangle {
             anchors.fill: parent
             resource: null
             visible: movieResource.state === Resource.Loaded
-
-            onFinishedPlaying: {
-                signalEmitter.playbackFinished();
-                signalEmitter.videoFinished();
-            }
-        }
-
-        WebResourceView {
-            id: webResource
-            anchors.fill: parent
-            resource: null
-            visible: webResource.state === Resource.Loaded
 
             onFinishedPlaying: {
                 signalEmitter.playbackFinished();
@@ -216,10 +193,6 @@ Rectangle {
                 {
                     movieResource.pause();
                 }
-                if (webResource.state === Resource.Loaded)
-                {
-                    webResource.pause();
-                }
                 if (soundResource.state === Resource.Loaded)
                 {
                     soundResource.pause();
@@ -234,10 +207,6 @@ Rectangle {
                 if (movieResource.state === Resource.Loaded)
                 {
                     movieResource.play();
-                }
-                if (webResource.state === Resource.Loaded)
-                {
-                    webResource.play();
                 }
                 if (soundResource.state === Resource.Loaded)
                 {

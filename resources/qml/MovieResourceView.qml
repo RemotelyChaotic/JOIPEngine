@@ -41,14 +41,7 @@ Rectangle {
         if (null !== resource && undefined !== resource)
         {
             state = Resource.Loading;
-            if (resource.isLocal)
-            {
-                player.source = resource.path;
-            }
-            else
-            {
-                state = Resource.Null;
-            }
+            player.source = resource.path;
         }
         else
         {

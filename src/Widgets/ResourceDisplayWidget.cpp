@@ -160,6 +160,14 @@ void CResourceDisplayWidget::LoadResource(tspResource spResource)
           emit SignalLoadFinished();
         }
       } break;
+      case EResourceType::eMovie: // fallthrough
+      case EResourceType::eSound:
+      {
+        m_spUi->pMediaPlayer->OpenMedia(path.toString());
+        m_spUi->pStackedWidget->setCurrentIndex(EResourceDisplayType::eLocalMedia);
+        m_iLoadState = ELoadState::eFinished;
+        break;
+      }
       default:
       {
         m_spUi->pWebView->setUrl(path);
