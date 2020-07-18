@@ -120,9 +120,9 @@ void CEditorActionBar::Initialize()
     m_spUi->AddThreadCode->setProperty(helpOverlay::c_sHelpPagePropertyName, c_sAddThreadHelpId);
     wpHelpFactory->RegisterHelp(c_sAddThreadHelpId, ":/resources/help/editor/addthread_button_help.html");
 
-    m_spUi->AddNodeButton->setProperty(helpOverlay::c_sHelpPagePropertyName, c_sAddFetishHelpId);
+    m_spUi->AddFetishButton->setProperty(helpOverlay::c_sHelpPagePropertyName, c_sAddFetishHelpId);
     wpHelpFactory->RegisterHelp(c_sAddFetishHelpId, ":/resources/help/editor/addfetish_button_help.html");
-    m_spUi->RemoveNodeButton->setProperty(helpOverlay::c_sHelpPagePropertyName, c_sRemoveFetishHelpId);
+    m_spUi->RemoveFetishButton->setProperty(helpOverlay::c_sHelpPagePropertyName, c_sRemoveFetishHelpId);
     wpHelpFactory->RegisterHelp(c_sRemoveFetishHelpId, ":/resources/help/editor/removefetish_button_help.html");
   }
 

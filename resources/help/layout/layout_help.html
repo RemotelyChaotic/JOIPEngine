@@ -1,0 +1,443 @@
+<!doctype html>
+<html class="no-js" lang="">
+
+<head>
+  <meta charset="utf-8">
+  <title>Layout File WIP</title>
+  <meta name="description" content="">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <style>
+    h1 {
+      text-align: center;
+    }
+    div.container {
+      min-height: 10em;
+      display: table-cell;
+      margin-left: auto;
+      margin-right: auto;
+      width: 0.6em
+    }
+    table.warning {
+      color: black;
+      background-color: #cccc44;
+      border-color: yellow;
+      border-style: solid;
+    }
+  </style>
+</head>
+
+
+<body>
+  <h1>Layout File WIP</h1>
+
+  <hr>
+
+  <div class="container">
+    <p>Layout files are Qml files which define the ui of the player. If a
+    <a href="qrc:/resources/help/project/joi_project_help.html">JOI-Project</a> contains no Layout file,
+    a default Layout file will be used</p>
+
+    <br>
+
+    <table width="100%" class="warning">
+      <tr>
+        <td width="10%"><img src="qrc:/resources/help/icons/WarningIcon.png" width="64" height="64" alt="Warning"></td>
+        <td width="90%"><br>Layouts have no editor <b>so far</b>, must be edited in an external editor,
+        and are very WIP.<br>if you plan on using custom Layouts you will have to update on each new engine release.</td>
+      </tr>
+    </table>
+
+    <br>
+
+    <p>For general Qml help, please see the Qt documentation:<br>
+    <i>https://doc-snapshots.qt.io/qt5-5.14/qmlreference.html</i></p>
+
+    <br>
+
+    <p>The JOIP-Engine extends the default Qml types with a few own types to streamline
+    ui look and implementation.<br>
+
+    <br>
+
+    <h2>Settings (JOIP.core 1.1)</h2>
+
+    <br>
+
+    <p>The Settings singleton object contains the application <a href="qrc:/resources/help/settings_button_help.html">Settings</a>.
+    It has the following properties:<br>
+
+      <ul>
+        <li><b>contentFolder: string</b><br>
+        This property contains the <a href="qrc:/resources/help/settings/datafolder_setting_help.html">Content Folder</a> setting.
+        It lets you access the used content folder path. Since direct file access in Qml
+        is not available, this is only accessable for completions sake.<br>
+        </li>
+
+        <li><b>font: string</b><br>
+        This property contains the <a href="qrc:/resources/help/settings/font_setting_help.html">Application Font</a> setting.<br>
+        </li>
+
+        <li><b>fullscreen: bool</b><br>
+        This property contains the <a href="qrc:/resources/help/settings/fullscreen_setting_help.html">Fullscreen</a> setting.
+        Useful in combination with the <i>resolution</i> property to create dynamic layouts.<br>
+        </li>
+
+        <li><b>keyBindings: string[]</b><br>
+        This property lets you access all keys, that can be used as argument to the <i>keyBinding( )</i> function.<br>
+        </li>
+
+        <li><b>muted: bool</b><br>
+        This property contains the <a href="qrc:/resources/help/settings/mute_setting_help.html">Mute</a> setting.
+        It lets you check if the application is muted or not.<br>
+        </li>
+
+        <li><b>offline: bool</b><br>
+        This property contains the Offline setting. If it returns <i>false</i> the application is
+        in offline mode and can't access online <a href="qrc:/resources/help/editor/resources/resource_help.html">Resources</a>.<br>
+        </li>
+
+        <li><b>resolution: size</b><br>
+        This property contains the <a href="qrc:/resources/help/settings/resolution_setting_help.html">Resolution</a> setting.
+        Useful in combination with the <i>fullscreen</i> property to create dynamic layouts.<br>
+        </li>
+
+        <li><b>style: string</b><br>
+        This property contains the <a href="qrc:/resources/help/settings/style_setting_help.html">Style Name</a> setting.
+        It is useful for styling your Layout in a custom way depending on the selected style.<br>
+        </li>
+
+        <li><b>version: int</b><br>
+        This property contains the <a href="qrc:/resources/help/editor/projectsettings/engineversion_help.html">JOIP-Engine Version</a> setting,
+        which is in the same format, as the <a href="qrc:/resources/help/editor/projectsettings/projectversion_help.html">Project Version</a>.
+        Useful for making projects compatible with multiple Engine Versions.<br>
+        </li>
+
+        <li><b>volume: real</b><br>
+        This property contains the <a href="qrc:/resources/help/settings/volume_setting_help.html">Volume</a> setting.<br>
+        </li>
+
+        <li><b>keyBinding( string ): keysequence</b><br>
+        This function can retrieve a key binding from the configured bindings. The argument needs
+        to be an element from the <i>keyBindings</i> property. Useful for overloading
+        existing key bindings with custom functionality (e.g Buttons).<br>
+        </li>
+
+        <li><b>styleFolder(  ): url</b><br>
+        This property contains a path to the <a href="qrc:/resources/help/settings/style_setting_help.html">Application Style</a>
+        subfolder. Should not be used in Layouts, but can be accessed for for completions sake.
+        Use <i>styleFolderQml()</i> instead.<br>
+        </li>
+
+        <li><b>styleFolderQml(  ): url</b><br>
+        This property contains a path to the <a href="qrc:/resources/help/settings/style_setting_help.html">Qml Style</a> subfolder.
+        This let's you access the Qml specific images and settings of the currently selected style.<br>
+        </li>
+      </ul>
+    </p>
+
+    <br>
+
+    <h2>ScriptRunner (JOIP.core 1.1)</h2>
+
+    <br>
+
+    <p>The ScriptRunner singleton object controls execution of <a href="qrc:/resources/help/editor/code/script_reference_help.html">Scripts</a>
+    to a degree and is responsible for registering new script objects that can be used in the scripts.<br>
+
+      <ul>
+        <li><b>pauseExecution(  ):</b><br>
+        This function will cause the execution of the current script to pause. If the script was in a running state before,
+        this will lead to a <i>runningChanged</i> signal being emitted by the ScriptRunner.
+        A paused script will pause timers and all execution as soon as possible until resumed.<br>
+        </li>
+
+        <li><b>registerNewComponent( string sName, var signalEmitter ):</b><br>
+        Registers a new component in the script engine under <i>sName</i>. This should currently
+        <b>not</b> be used in custom components, as for now, only built in components are supported.<br>
+        </li>
+
+        <li><b>resumeExecution(  ):</b><br>
+        This function will cause the execution of the current script to resume. If the script was in a paused state before,
+        this will lead to a <i>runningChanged</i> signal being emitted by the ScriptRunner.<br>
+        </li>
+
+        <li><b>signal runningChanged( bool bRunning ):</b><br>
+        This signal is emitted, if the execution status changes. The bool <i>bRunning</i> contains
+        the new execution status. The signal can be connected to handle pause or resume signals
+        in custom components.<br>
+        <i>Example Usage:</i><br>
+        Connections {<br>
+        &nbsp;&nbsp;&nbsp;&nbsp;target: ScriptRunner<br>
+        &nbsp;&nbsp;&nbsp;&nbsp;onRunningChanged: {<br>
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;if (!bRunning) {<br>
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;// do something<br>
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}<br>
+        &nbsp;&nbsp;&nbsp;&nbsp;}<br>
+        }<br>
+        </li>
+      </ul>
+    </p>
+
+    <br>
+
+    <h2>Project (JOIP.db 1.1)</h2>
+
+    <br>
+
+    <p>A reference to the current Project object can be retrieved from the currently playing
+    Scene object. This object can be used to retrieve resources and data about
+    the current <a href="qrc:/resources/help/project/joi_project_help.html">JOI-Project</a>.
+    This object should not be placed in the Layout manually.<br>
+      <ul>
+        <li><b>id: int:</b><br>
+        This property lets you read the internal Project id.<br></li>
+
+        <li><b>version: int:</b><br>
+        This reads the project version. Useful, if you need to have your scripts be compatible
+        with different JOIP-Engine versions. The version is a number with bits 16-23
+        being major, bits 8-15 being minor and the last eight being the patch version (0x00MMmmPP).<br>
+        <i>Example Usage:</i><br>
+        var major = (project.version &amp; 0x00ff0000) &gt;&gt; 16; /* read major version */<br>
+        var minor = (project.version &amp; 0x0000ff00) &gt;&gt; 8; /* read minor version */<br>
+        var path = project.version &amp; 0x000000ff; /* read path version */<br></li>
+
+        <li><b>versionText: string:</b><br>
+        This property reads the project version as a formated user-readable string.<br></li>
+
+        <li><b>targetVersion: int:</b><br>
+        This reads the target engine version. Useful, if you need to have your scripts be compatible
+        with different JOIP-Engine versions. The version is a number with bits 16-23
+        being major, bits 8-15 being minor and the last eight being the patch version (0x00MMmmPP).<br>
+        <i>Example Usage:</i><br>
+        var major = (project.version &amp; 0x00ff0000) &gt;&gt; 16; /* read major version */<br>
+        var minor = (project.version &amp; 0x0000ff00) &gt;&gt; 8; /* read minor version */<br>
+        var path = project.version &amp; 0x000000ff; /* read path version */<br></li>
+
+        <li><b>targetVersionText: string:</b><br>
+        This property reads the target engine version as a formated user-readable string.<br></li>
+
+        <li><b>name: string:</b><br>
+        This property lets you read the Project name.<br></li>
+
+        <li><b>folderName: string:</b><br>
+        This property lets you read the Project's folder name.<br></li>
+
+        <li><b>describtion: string:</b><br>
+        This property lets you read the Project's describtion.<br></li>
+
+        <li><b>titleCard: string:</b><br>
+        This property lets you read the <a href="qrc:/resources/help/editor/resources/resource_help.html">Resources</a>
+        name representing the title card of the
+        <a href="qrc:/resources/help/project/joi_project_help.html">JOI-Project</a>.<br>
+        <i>Example Usage:</i><br>
+        mediaPlayer.show(project.titleCard);<br></li>
+
+        <li><b>map: string:</b><br>
+        This property lets you read the <a href="qrc:/resources/help/editor/resources/resource_help.html">Resources</a>
+        name representing the map of the
+        <a href="qrc:/resources/help/project/joi_project_help.html">JOI-Project</a>.
+        Because this is a currently unused and not fully implemented functionality,
+        this property shouldn't be accessed.<br></li>
+
+        <li><b>sceneModel: string:</b><br>
+        This property lets you read the <a href="qrc:/resources/help/editor/resources/resource_help.html">Resources</a>
+        name representing the scene model of the
+        <a href="qrc:/resources/help/project/joi_project_help.html">JOI-Project</a>.
+        This property is only useful for manually parsing the file.<br></li>
+
+        <li><b>playerLayout: string:</b><br>
+        This property lets you read the <a href="qrc:/resources/help/editor/resources/resource_help.html">Resources</a>
+        name representing the <a href="qrc:/resources/help/layout/layout_help.html">Layout</a> file of the
+        <a href="qrc:/resources/help/project/joi_project_help.html">JOI-Project</a>.
+        This property is only useful for manually parsing the file.<br></li>
+
+        <li><b>kinks: string[]:</b><br>
+        This property lets you read the kinks, that the application has been tagged with.<br></li>
+
+        <li><b>isUsingWeb: bool:</b><br>
+        This property lets you read the using-web-flag that is set, if the project
+        contains any remote <a href="qrc:/resources/help/editor/resources/resource_help.html">Resources</a>.<br></li>
+
+        <li><b>isUsingCodecs: bool:</b><br>
+        This property lets you read the using-codecs-flag that is set, if the project
+        contains any video or sound <a href="qrc:/resources/help/editor/resources/resource_help.html">Resources</a>.<br></li>
+
+        <li><b>numScenes (  ): int:</b><br>
+        Returns the number of scenes in the project. Usefull for iteration.<br></li>
+
+        <li><b>scenes (  ): string[]:</b><br>
+        Returns all scene names. Useful for iteration.<br></li>
+
+        <li><b>scene ( int index | string name ): Scene:</b><br>
+        Returns a Scene object at index index or with the name <i>name</i>. Useful if you
+        need to read scene specific properties.<br>
+        <i>Example Usage:</i><br>
+        var myScene = project.scene("myScene");<br>
+        var myScene = project.scene(0);<br></li>
+
+        <li><b>numResources (  ): int:</b><br>
+        Returns the number of Resources in the project. Usefull for iteration.<br></li>
+
+        <li><b>resources (  ): string[]:</b><br>
+        Returns all Resource names. Useful for iteration.<br></li>
+
+        <li><b>resource ( int index | string name ): Resource:</b><br>
+        Returns a Resource object at index index or with the name <i>name</i>. Useful if you
+        need to read Resource specific properties.<br>
+        <i>Example Usage:</i><br>
+        var myResource = project.resource("myScene");<br>
+        var myResource = project.resource(0);<br></li>
+      <br></li>
+      </ul>
+    </p>
+
+    <br>
+
+    <h2>Scene (JOIP.db 1.1)</h2>
+
+    <br>
+
+    <p>This object is automatically registered by the JOIP-Engine on loading a
+    <a href="qrc:/resources/help/project/joi_project_help.html">JOI-Project</a> and
+    should not be placed in the Layout manually. This object should not be placed in the Layout manually.<br>
+      <ul>
+        <li><b>id: int</b><br>
+        This property lets you read the internal Scene id.<br></li>
+
+        <li><b>name: string:</b><br>
+        This property lets you read the Scene name.<br></li>
+
+        <li><b>script: string</b><br>
+        Gets the script file name that is associated with the scene.<br></li>
+
+        <li><b>numResources (  ): int:</b><br>
+        Returns the number of Resources in the project. Currently unused and will allways return 0.<br></li>
+
+        <li><b>resources (  ): string[]:</b><br>
+        Returns all Resource names. Currently unused and will allways return an empty list.<br></li>
+
+        <li><b>resource ( string name ): Resource:</b><br>
+        Returns a Resource object with the name <i>name</i>.
+        Currently unused and will allways return <i>undefined</i>.<br></li>
+
+        <li><b>project (  ): Project:</b><br>
+        Returns the Project object that contains this Scene. Useful for getting information
+        about the Project itself, or about Resources.<br>
+        <i>Example Usage:</i><br>
+        var project = scene.project();<br></li>
+      <br></li>
+      </ul>
+    </p>
+
+    <br>
+
+    <h2>Resource (JOIP.db 1.1)</h2>
+
+    <br>
+
+    <p>This type of object can be returned by a Project object and contains information
+    about the <a href="qrc:/resources/help/editor/resources/resource_help.html">Resource</a>.
+    It can also be used as argument in the PlayerBackground, PlayerIcons, PlayerMediaPlayer etc.
+    This object should not be placed in the Layout manually.<br>
+      <ul>
+        <li><b>isAnimated: bool</b><br>
+        This property lets you read if the resource is animated (gif image or video
+        <a href="qrc:/resources/help/editor/resources/resource_help.html">Resource</a>).
+        An animated Resource can be played or paused and video Resources
+        can be waited on with <i>waitForVideo</i> or <i>waitForPlayback</i>.<br></li>
+
+        <li><b>isLocal: bool</b><br>
+        This property lets you read if the Resource is local or online.
+        For online resources, the <i>path</i> points to the image or video url directly and for
+        local resources it contains the local file relave to the
+        <a href="qrc:/resources/help/project/joi_project_help.html">JOI-Project</a>
+        root folder.<br></li>
+
+        <li><b>name: string</b><br>
+        This property lets you read the Resource name. This also serves as the Resource identifier.<br>
+
+        <li><b>path: url</b><br>
+        This property lets you read the path to the Resource.For online resources,
+        the <i>path</i> points to the image or video url directly and for
+        local resources it contains the local file relave to the
+        <a href="qrc:/resources/help/project/joi_project_help.html">JOI-Project</a>
+        root folder.<br></li>
+
+        <li><b>type: ResourceType</b><br>
+        This property lets you read the resource type. The values are:<br>
+        <i>ResourceType.Image (0)</i>: Image Resource<br>
+        <i>ResourceType.Movie (1)</i>: Movie Resource<br>
+        <i>ResourceType.Sound (2)</i>: Sound Resource<br>
+        <i>ResourceType.Other (3)</i>: Flow file, <a href="qrc:/resources/help/project/joi_project_help.html">Project</a> file,
+        <a href="qrc:/resources/help/editor/nodes/node_help.html">Scene Script</a> files and <a href="qrc:/resources/help/layout/layout_help.html">Layout</a> file<br>
+        </li>
+
+        <li><b>project (  ): Project:</b><br>
+        Returns the Project object that contains this Resource. Useful for getting information
+        about the Project itself, or about other Resources or Scenes.<br>
+        <i>Example Usage:</i><br>
+        var project = resource.project();<br></li>
+      <br></li>
+      </ul>
+    </p>
+
+    <br>
+
+    <h2>TimerDisplay (JOIP.ui 1.1)</h2>
+
+    <br>
+
+    <p>This is a helper component for the PlayerTimer component. It draws the dynamic elements
+    of the timer (progress "tail", segments, leading marker "head").
+    Not made to be usable by anything else.</p>
+
+    <br>
+
+    <h2>Custom Components (no include needed)</h2>
+
+    <br>
+
+    <p>There's a few custom components, which are the Qml representation of the respective
+    <a href="qrc:/resources/help/editor/code/script_reference_help.html">Script Objects</a>.
+    Placing any in the Layout will register an instance of that object automatically in the
+    script engine. They can be referenced from scripts by the value in the <i>userName</i> property.<br>
+    <i>Example Usage:</i><br><br>
+    PlayerMediaPlayer {<br>
+    &nbsp;&nbsp;&nbsp;&nbsp;id: mediaPlayer<br>
+    &nbsp;&nbsp;&nbsp;&nbsp;Layout.preferredWidth: (parent.width - parent.spacing * 2) / 2<br>
+    &nbsp;&nbsp;&nbsp;&nbsp;Layout.preferredHeight: parent.height<br>
+    &nbsp;&nbsp;&nbsp;&nbsp;Layout.alignment: Qt.AlignVCenter<br>
+    &nbsp;&nbsp;&nbsp;&nbsp;userName: "mediaPlayer"<br>
+    &nbsp;&nbsp;&nbsp;&nbsp;mainMediaPlayer: true<br>
+    }<br><br>
+    PlayerMediaPlayer and PlayerTextBox have each a custom property that declares them as
+    the "main" object of their type (<i>mainMediaPlayer</i> and <i>mainTextBox</i>).
+    The <i>mainMediaPlayer</i> is used for the title image, while the <i>mainTextBox</i>
+    is used for debug messages and <a href="qrc:/resources/help/editor/nodes/node_help.html">Scene Transition</a> buttons.<br>
+    The list of components is:<br>
+      <ul>
+        <li>PlayerBackground</li>
+        <li>PlayerComponentRegistrator (Do not use)</li>
+        <li>PlayerControls (Do not use)</li>
+        <li>PlayerDefaultLayout (The full default layout)</li>
+        <li>PlayerIcons</li>
+        <li>PlayerMediaPlayer</li>
+        <li>PlayerTextBox</li>
+        <li>PlayerTimer</li>
+      </ul>
+    </p>
+
+    <br>
+
+    <h2>SortFilterProxyModel Components (SortFilterProxyModel 0.2)</h2>
+
+    <br>
+
+    <p>These are external library components from:<br>
+    https://github.com/oKcerG/SortFilterProxyModel<br>
+    Please see their documentation if you whish to use the components.</p>
+  </div>
+</body>
+
+</html>

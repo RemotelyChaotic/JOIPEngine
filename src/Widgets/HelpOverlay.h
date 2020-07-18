@@ -11,6 +11,7 @@
 
 class CHelpButtonOverlay;
 class CHelpFactory;
+class CSettings;
 class CShortcutButton;
 namespace Ui {
   class CHelpOverlay;
@@ -80,9 +81,14 @@ public slots:
   void Resize() override;
   void Show(const QPoint& animationOrigin, QWidget* pRootToSearch);
 
+signals:
+  void SignalOverlayOpened();
+  void SignalOverlayClosed();
+
 protected slots:
   void Show() override;
   void SlotCircleAnimationFinished();
+  void SlotKeyBindingsChanged();
   void on_pHtmlBrowser_backwardAvailable(bool bAvailable);
   void on_pHtmlBrowser_forwardAvailable(bool bAvailable);
   void on_BackButton_clicked();
@@ -101,6 +107,7 @@ private:
   static QPointer<CHelpOverlay> m_pHelpOverlay;
 
   std::unique_ptr<Ui::CHelpOverlay> m_spUi;
+  std::shared_ptr<CSettings>        m_spSettings;
   std::weak_ptr<CHelpFactory>       m_wpHelpFactory;
   QPointer<CHelpButtonOverlay>      m_pHelpButton;
   QPointer<CHelpOverlayBackGround>  m_pBackground;

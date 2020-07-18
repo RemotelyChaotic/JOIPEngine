@@ -294,6 +294,7 @@ CHelpOverlay::CHelpOverlay(QPointer<CHelpButtonOverlay> pHelpButton, QWidget* pP
   COverlayBase(1, pParent),
   m_vpHelpWidgets(),
   m_spUi(std::make_unique<Ui::CHelpOverlay>()),
+  m_spSettings(CApplication::Instance()->Settings()),
   m_wpHelpFactory(CApplication::Instance()->System<CHelpFactory>()),
   m_pHelpButton(pHelpButton)
 {
@@ -309,6 +310,10 @@ CHelpOverlay::CHelpOverlay(QPointer<CHelpButtonOverlay> pHelpButton, QWidget* pP
 
   connect(m_pBackground, &CHelpOverlayBackGround::SignalCircleAnimationFinished,
           this, &CHelpOverlay::SlotCircleAnimationFinished, Qt::DirectConnection);
+  connect(m_spSettings.get(), &CSettings::keyBindingsChanged,
+          this, &CHelpOverlay::SlotKeyBindingsChanged);
+
+  SlotKeyBindingsChanged();
 }
 
 CHelpOverlay::~CHelpOverlay()
@@ -338,6 +343,8 @@ void CHelpOverlay::Hide()
   m_spUi->pHtmlBrowserBox->hide();
   m_pBackground->Reset();
   m_vpHelpWidgets.clear();
+
+  emit SignalOverlayClosed();
 }
 
 //----------------------------------------------------------------------------------------
@@ -359,6 +366,8 @@ void CHelpOverlay::Show()
   COverlayBase::Show();
   m_spUi->pHtmlBrowserBox->hide();
   m_spUi->pHtmlBrowserBox->raise();
+
+  emit SignalOverlayOpened();
 }
 
 //----------------------------------------------------------------------------------------
@@ -384,6 +393,16 @@ void CHelpOverlay::SlotCircleAnimationFinished()
   {
     Hide();
   }
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CHelpOverlay::SlotKeyBindingsChanged()
+{
+  m_spUi->CloseButton->SetShortcut(m_spSettings->keyBinding("Exit"));
+  m_spUi->BackButton->SetShortcut(m_spSettings->keyBinding("Backward"));
+  m_spUi->HomeButton->SetShortcut(m_spSettings->keyBinding("Help"));
+  m_spUi->ForardButton->SetShortcut(m_spSettings->keyBinding("Foreward"));
 }
 
 //----------------------------------------------------------------------------------------

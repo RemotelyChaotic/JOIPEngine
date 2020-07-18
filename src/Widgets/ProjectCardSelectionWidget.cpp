@@ -58,6 +58,11 @@ void CProjectCardSelectionWidget::Initialize()
 
   InitQmlMain();
 
+  connect(CHelpOverlay::Instance(), &CHelpOverlay::SignalOverlayOpened,
+          this, &CProjectCardSelectionWidget::SlotOverlayOpened);
+  connect(CHelpOverlay::Instance(), &CHelpOverlay::SignalOverlayClosed,
+          this, &CProjectCardSelectionWidget::SlotOverlayClosed);
+
   m_bInitialized = true;
 }
 
@@ -191,6 +196,26 @@ void CProjectCardSelectionWidget::SlotCardClicked(int iProjId)
 
 //----------------------------------------------------------------------------------------
 //
+void CProjectCardSelectionWidget::SlotOverlayOpened()
+{
+  m_spUi->pQmlWidget->setAttribute(Qt::WA_AlwaysStackOnTop, false);
+  m_spUi->pQmlWidget->setAttribute(Qt::WA_TranslucentBackground, false);
+  m_spUi->pQmlWidget->setStyleSheet(styleSheet());
+  m_spUi->pQmlWidget->setClearColor(m_spUi->pQmlWidget->palette().background().color());
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CProjectCardSelectionWidget::SlotOverlayClosed()
+{
+  m_spUi->pQmlWidget->setAttribute(Qt::WA_AlwaysStackOnTop, true);
+  m_spUi->pQmlWidget->setAttribute(Qt::WA_TranslucentBackground, true);
+  m_spUi->pQmlWidget->setClearColor(Qt::transparent);
+  m_spUi->pQmlWidget->setStyleSheet("background-color: transparent;");
+}
+
+//----------------------------------------------------------------------------------------
+//
 void CProjectCardSelectionWidget::SlotResizeDone()
 {
   // set size properties manually setzen, since this isn't done automatically
@@ -231,10 +256,7 @@ void CProjectCardSelectionWidget::resizeEvent(QResizeEvent* pEvent)
 //
 void CProjectCardSelectionWidget::InitQmlMain()
 {
-  m_spUi->pQmlWidget->setAttribute(Qt::WA_AlwaysStackOnTop, true);
-  m_spUi->pQmlWidget->setAttribute(Qt::WA_TranslucentBackground, true);
-  m_spUi->pQmlWidget->setClearColor(Qt::transparent);
-  m_spUi->pQmlWidget->setStyleSheet("background-color: transparent;");
+  SlotOverlayClosed();
 
   QQmlEngine::setObjectOwnership(m_spUi->pQmlWidget->engine(), QQmlEngine::CppOwnership);
 

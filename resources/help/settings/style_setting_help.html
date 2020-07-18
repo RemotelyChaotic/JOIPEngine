@@ -96,7 +96,8 @@
           </ul>
           <br>
         </li>
-        <li><b>CTimerWidget:</b> The timer during playing. Has unique properties:<br>
+        <li><b>CTimerWidget:</b> The timer during playing. Note that this is a legacy objetct and
+        not actually in use anymore. Has unique properties:<br>
           <ul>
             <li><i>qproperty-primaryColor:</i> Color of the clock segments and the back of the passed time.</li>
             <li><i>qproperty-secondaryColor:</i> Color of the clock hand.</li>
@@ -201,8 +202,9 @@
     <br>
 
     <p>Aditionally the qml style of the application (<a href="qrc:/resources/help/player/card_button_help.html">Title Cards</a> and player)
-    can be styled by placing the Control .qml files into the <i>.\qml</i> subfolder inside the style folder.
-    (e.g. <i>.\styles\621 Hexagons\qml\</i>)</p>
+    can be styled by placing the Control .qml files into the <i>.\qml</i> subfolder inside the style folder
+    (e.g. <i>.\styles\621 Hexagons\qml\</i>). The <i>.\qml</i> subfolder also contains a special configuration file similar to <i>style.css</i>: <i>Style.qml</i>.
+    The <i>Style.qml</i> file is loaded dynamically in qml for style specific configuration.</p>
 
     <br>
 
@@ -214,18 +216,36 @@
 
     <br>
 
-    <p>There's a set of qml style files, that are required for the application to display properly:<br>
+    <p>Aditionally, there's a set of qml style files, that are required for the application to display properly:<br>
       <ul>
+        <li><b>Background.png</b>: Background image used by the Player for the default
+        background.</li>
+        <li><b>TimerBg.svg</b>: Background image used by the Player for the
+        <a href="qrc:/resources/help/layout/layout_help.html">PlayerTimer</a> component.</li>
+        <li><b>IconBg.svg / IconBgHover.svg</b>: Background images used by the Player for the
+        <a href="qrc:/resources/help/layout/layout_help.html">PlayerIcons</a> component.</li>
+        <li><b>IconBgMask.png</b>: Image used by the Player for masking
+        <a href="qrc:/resources/help/editor/resources/resource_help.html">Resources</a> in the
+        <a href="qrc:/resources/help/layout/layout_help.html">PlayerIcons</a> component.</li>
+        <li><b>ButtonExit.svg / ButtonExitHover.svg<b>: Images used by the Player to quit the currently running
+        <a href="qrc:/resources/help/project/joi_project_help.html">JOI-Project</a>.</li>
+        <li><b>ButtonPause.svg / ButtonPauseHover.svg</b>: Images used by the Player to pause a running
+        <a href="qrc:/resources/help/project/joi_project_help.html">JOI-Project</a>.</li>
+        <li><b>ButtonPlay.svg / ButtonPlayHover.svg<b>: Images used by the Player to resume a paused
+        <a href="qrc:/resources/help/project/joi_project_help.html">JOI-Project</a>.</li>
         <li><b>ButtonArrowDown.svg</b>: Image used by the <a href="qrc:/resources/help/player/card_button_help.html">Title Cards</a>
         to display arrow to close the detailed view.</li>
         <li><b>ButtonArrowUp.svg</b>: Image used by the <a href="qrc:/resources/help/player/card_button_help.html">Title Cards</a>
         to display arrow to open the detailed view.</li>
+        <li><b>WarningIcon.svg<b>:  Image used by the <a href="qrc:/resources/help/player/card_button_help.html">Title Cards</a>
+        to display that a <a href="qrc:/resources/help/project/joi_project_help.html">JOI-Project</a>
+        was created in an incompatible <a href="qrc:/resources/help/editor/projectsettings/engineversion_help.html">Engine Version</a>.</li>
         <li><b>MediaIcon.svg</b>: Image used by the <a href="qrc:/resources/help/player/card_button_help.html">Title Cards</a>
         to display that a <a href="qrc:/resources/help/project/joi_project_help.html">JOI-Project</a> requres video or audio
         <a href="qrc:/resources/help/editor/resources/resource_help.html">Resources</a>.</li>
         <li><b>WebIcon.svg</b>: Image used by the <a href="qrc:/resources/help/player/card_button_help.html">Title Cards</a>
         to display that a <a href="qrc:/resources/help/project/joi_project_help.html">JOI-Project</a> requres web-based
-        <a href="qrc:/resources/help/editor/resources/resource_help.html">Resources</a></li>
+        <a href="qrc:/resources/help/editor/resources/resource_help.html">Resources</a>.</li>
       </ul>
     </p>
 

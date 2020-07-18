@@ -45,7 +45,7 @@
     <br>
 
     <p>Javascript Objects are registered in the Player by the currently loaded
-    <a href="">Layout</a>. The name of the registered objects is defined in the layout file.
+    <a href="qrc:/resources/help/layout/layout_help.html">Layout</a>. The name of the registered objects is defined in the layout file.
     In the reference below, the default names of the registered objects are listed.</p>
 
     <br>
@@ -56,7 +56,7 @@
 
     <p>This object is automatically registered by the JOIP-Engine on loading a
     <a href="qrc:/resources/help/project/joi_project_help.html">JOI-Project</a> but
-    can also be placed in the <a href="">Layout</a> manually. The default object is allways registered
+    can also be placed in the <a href="qrc:/resources/help/layout/layout_help.html">Layout</a> manually. The default object is allways registered
     under the name <i>background</i> and spans the entire background. It only has a few callable
     functions:<br>
       <ul>
@@ -91,7 +91,7 @@
 
     <br>
 
-    <p>This object is registered by the JOIP-Engine if it is present in the current <a href="">Layout</a>.
+    <p>This object is registered by the JOIP-Engine if it is present in the current <a href="qrc:/resources/help/layout/layout_help.html">Layout</a>.
     It is a container for a list of icons that can be shown or hidden at will.
     <br>
       <ul>
@@ -123,7 +123,7 @@
 
     <br>
 
-    <p>This object is registered by the JOIP-Engine if it is present in the current <a href="">Layout</a>.
+    <p>This object is registered by the JOIP-Engine if it is present in the current <a href="qrc:/resources/help/layout/layout_help.html">Layout</a>.
     This is the main way to display or play media <a href="qrc:/resources/help/editor/resources/resource_help.html">Resources</a>
     of types <i>Image</i>, <i>Movie</i> or <i>Sound</i>.<br>
       <ul>
@@ -225,7 +225,7 @@
 
     <p>This object is automatically registered by the JOIP-Engine on loading a
     <a href="qrc:/resources/help/project/joi_project_help.html">JOI-Project</a> and
-    should not be placed in the <a href="">Layout</a> manually. Similarly to the local storage of a browser,
+    should not be placed in the <a href="qrc:/resources/help/layout/layout_help.html">Layout</a> manually. Similarly to the local storage of a browser,
     this object stores values that can be retrieved at any time.
     The storage will remain until the currently running
     <a href="qrc:/resources/help/project/joi_project_help.html">JOI-Project</a> finishes
@@ -251,7 +251,7 @@
 
     <br>
 
-    <p>This object is registered by the JOIP-Engine if it is present in the current <a href="">Layout</a>.
+    <p>This object is registered by the JOIP-Engine if it is present in the current <a href="qrc:/resources/help/layout/layout_help.html">Layout</a>.
     This is the main way to display text or recieve player input.<br>
       <ul>
         <li><b>setBackgroundColors ( string[] | int[][3 | 4] ):</b><br>
@@ -325,7 +325,7 @@
 
     <br>
 
-    <p>This object is registered by the JOIP-Engine if it is present in the current <a href="">Layout</a>.
+    <p>This object is registered by the JOIP-Engine if it is present in the current <a href="qrc:/resources/help/layout/layout_help.html">Layout</a>.
     This object is for displaying a timer that can be shown or hidden on demand.<br>
       <ul>
         <li><b>hide (  ):</b><br>
@@ -384,7 +384,7 @@
 
     <p>This object is automatically registered by the JOIP-Engine on loading a
     <a href="qrc:/resources/help/project/joi_project_help.html">JOI-Project</a> and
-    should not be placed in the <a href="">Layout</a> manually. This object is only used to idle the script for
+    should not be placed in the <a href="qrc:/resources/help/layout/layout_help.html">Layout</a> manually. This object is only used to idle the script for
     a certain time.<br>
       <ul>
         <li><b>sleep ( int timeout [, bool skippable ] ):</b><br>
@@ -407,7 +407,7 @@
     <p>A reference to the current Project object can be retrieved from the currently playing
     Scene object. This object can be used to retrieve resources and data about
     the current <a href="qrc:/resources/help/project/joi_project_help.html">JOI-Project</a>.
-    This object should not be placed in the <a href="">Layout</a> manually.<br>
+    This object should not be placed in the <a href="qrc:/resources/help/layout/layout_help.html">Layout</a> manually.<br>
       <ul>
         <li><b>id: int:</b><br>
         This property lets you read the internal Project id.<br></li>
@@ -467,7 +467,7 @@
 
         <li><b>playerLayout: string:</b><br>
         This property lets you read the <a href="qrc:/resources/help/editor/resources/resource_help.html">Resources</a>
-        name representing the <a href="">Layout</a> file of the
+        name representing the <a href="qrc:/resources/help/layout/layout_help.html">Layout</a> file of the
         <a href="qrc:/resources/help/project/joi_project_help.html">JOI-Project</a>.
         This property is only useful for manually parsing the file.<br></li>
 
@@ -519,7 +519,7 @@
 
     <p>This object is automatically registered by the JOIP-Engine on loading a
     <a href="qrc:/resources/help/project/joi_project_help.html">JOI-Project</a> and
-    should not be placed in the <a href="">Layout</a> manually. This object should not be placed in the Layout manually.<br>
+    should not be placed in the <a href="qrc:/resources/help/layout/layout_help.html">Layout</a> manually. This object should not be placed in the Layout manually.<br>
       <ul>
         <li><b>id: int</b><br>
         This property lets you read the internal Scene id.<br></li>
@@ -558,7 +558,7 @@
     <p>This type of object can be returned by a Project object and contains information
     about the <a href="qrc:/resources/help/editor/resources/resource_help.html">Resource</a>.
     It can also be used as argument in the PlayerBackground, PlayerIcons, PlayerMediaPlayer etc.
-    This object should not be placed in the <a href="">Layout</a> manually.<br>
+    This object should not be placed in the <a href="qrc:/resources/help/layout/layout_help.html">Layout</a> manually.<br>
       <ul>
         <li><b>isAnimated: bool</b><br>
         This property lets you read if the resource is animated (gif image or video
@@ -589,7 +589,7 @@
         <i>ResourceType.Movie (1)</i>: Movie Resource<br>
         <i>ResourceType.Sound (2)</i>: Sound Resource<br>
         <i>ResourceType.Other (3)</i>: Flow file, <a href="qrc:/resources/help/project/joi_project_help.html">Project</a> file,
-        <a href="qrc:/resources/help/editor/nodes/node_help.html">Scene Script</a> files and <a href="">Layout</a> file<br>
+        <a href="qrc:/resources/help/editor/nodes/node_help.html">Scene Script</a> files and <a href="qrc:/resources/help/layout/layout_help.html">Layout</a> file<br>
         </li>
 
         <li><b>project (  ): Project:</b><br>
@@ -599,6 +599,19 @@
         var project = resource.project();<br></li>
       <br></li>
       </ul>
+    </p>
+
+    <br>
+
+    <h2>return</h2>
+
+    <br>
+
+    <p>While not an actual object, this JavaScript language feature is used to "skip"
+    to a Scene directly without a normal <a href="qrc:/resources/help/editor/nodes/node_help.html">Scene Transition</a>.
+    The value to be returned is the Scene name as a string.<br>
+    <i>Example Usage:</i><br>
+    return "SceneB"; // skipps to "SceneB" and terminates current script<br></li>
     </p>
 
   </div>

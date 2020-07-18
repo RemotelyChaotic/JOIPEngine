@@ -37,6 +37,8 @@ protected slots:
   void on_pQmlWidget_statusChanged(QQuickWidget::Status);
   void on_pQmlWidget_sceneGraphError(QQuickWindow::SceneGraphError error, const QString &message);
   void SlotCardClicked(int iProjId);
+  void SlotOverlayOpened();
+  void SlotOverlayClosed();
   void SlotResizeDone();
   void SlotTriedToLoadMovie(const QString& sMovie);
 

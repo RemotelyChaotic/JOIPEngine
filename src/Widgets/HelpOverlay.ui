@@ -27,7 +27,7 @@
    </property>
    <layout class="QGridLayout" name="gridLayout">
     <item row="0" column="5">
-     <widget class="QPushButton" name="CloseButton">
+     <widget class="CShortcutButton" name="CloseButton">
       <property name="sizePolicy">
        <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
         <horstretch>0</horstretch>
@@ -64,7 +64,7 @@
      <widget class="QTextBrowser" name="pHtmlBrowser"/>
     </item>
     <item row="0" column="1">
-     <widget class="QPushButton" name="BackButton">
+     <widget class="CShortcutButton" name="BackButton">
       <property name="minimumSize">
        <size>
         <width>32</width>
@@ -92,7 +92,7 @@
      </widget>
     </item>
     <item row="0" column="3">
-     <widget class="QPushButton" name="ForardButton">
+     <widget class="CShortcutButton" name="ForardButton">
       <property name="minimumSize">
        <size>
         <width>32</width>
@@ -120,7 +120,7 @@
      </widget>
     </item>
     <item row="0" column="2">
-     <widget class="QPushButton" name="HomeButton">
+     <widget class="CShortcutButton" name="HomeButton">
       <property name="minimumSize">
        <size>
         <width>32</width>
@@ -164,6 +164,11 @@
   </widget>
  </widget>
  <customwidgets>
+  <customwidget>
+   <class>CShortcutButton</class>
+   <extends>QPushButton</extends>
+   <header>Widgets/ShortcutButton.h</header>
+  </customwidget>
   <customwidget>
    <class>COverlayBase</class>
    <extends>QWidget</extends>
