@@ -32,25 +32,18 @@ Rectangle {
         if (null !== resource && undefined !== resource)
         {
             state = Resource.Loading;
-            if (resource.isLocal)
+            if (resource.isAnimated)
             {
-                if (resource.isAnimated)
-                {
-                    animated = true;
-                    image.source = "";
-                    animatedImage.source = resource.path;
-                    play();
-                }
-                else
-                {
-                    animated = false;
-                    animatedImage.source = "";
-                    image.source = "image://DataBaseImageProivider/" + resource.project().id + "/" + resource.name;
-                }
+                animated = true;
+                image.source = "";
+                animatedImage.source = resource.path;
+                play();
             }
             else
             {
-                state = Resource.Null;
+                animated = false;
+                animatedImage.source = "";
+                image.source = "image://DataBaseImageProivider/" + resource.project().id + "/" + resource.name;
             }
         }
         else

@@ -6,6 +6,7 @@
 #include <memory>
 
 class CDatabaseManager;
+class QNetworkAccessManager;
 
 class CDatabaseImageProvider : public QObject, public QQuickImageProvider
 {
@@ -23,7 +24,7 @@ signals:
 private:
   QImage LoadImage(const QString& sPath);
 
-  std::weak_ptr<CDatabaseManager> m_wpDatabase;
+  std::weak_ptr<CDatabaseManager>        m_wpDatabase;
 };
 
 #endif // CDATABASEIMAGEPROVIDER_H

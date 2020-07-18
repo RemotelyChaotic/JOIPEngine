@@ -7,6 +7,7 @@
 #include <QFileInfo>
 #include <QImageReader>
 #include <QMovie>
+#include <QNetworkAccessManager>
 #include <QResizeEvent>
 #include <QtConcurrent/QtConcurrent>
 
@@ -31,9 +32,11 @@ CResourceDisplayWidget::CResourceDisplayWidget(QWidget* pParent) :
   m_spUi(std::make_unique<Ui::CResourceDisplayWidget>()),
   m_spFutureWatcher(std::make_unique<QFutureWatcher<void>>()),
   m_spSpinner(std::make_unique<QMovie>("://resources/gif/spinner_transparent.gif")),
+  m_spNAManager(std::make_unique<QNetworkAccessManager>()),
   m_spSettings(CApplication::Instance()->Settings()),
   m_spLoadedMovie(nullptr),
   m_spLoadedPixmap(nullptr),
+  m_pResponse(nullptr),
   m_future(),
   m_spResource(nullptr),
   m_iLoadState(ELoadState::eUnstarted),
@@ -75,6 +78,7 @@ void CResourceDisplayWidget::LoadResource(tspResource spResource)
   {
     m_iLoadState = ELoadState::eError;
     m_spUi->pStackedWidget->setCurrentIndex(EResourceDisplayType::eError);
+    emit SignalLoadFinished();
     return;
   }
 
@@ -88,9 +92,10 @@ void CResourceDisplayWidget::LoadResource(tspResource spResource)
   const tspProject& spProject = m_spResource->m_spParent;
   QReadLocker projectLocker(&spProject->m_rwLock);
   SetProjectId(spProject->m_iId);
+
+  QUrl path = m_spResource->m_sPath;
   if (m_spResource->m_sPath.isLocalFile())
   {
-    QUrl path = m_spResource->m_sPath;
     switch (m_spResource->m_type)
     {
       case EResourceType::eImage:
@@ -125,8 +130,43 @@ void CResourceDisplayWidget::LoadResource(tspResource spResource)
   }
   else
   {
-    m_spUi->pWebView->setUrl(m_spResource->m_sPath);
-    m_iLoadState = ELoadState::eLoading;
+    switch (m_spResource->m_type)
+    {
+      case EResourceType::eImage:
+      {
+        if (path.isValid())
+        {
+          if (nullptr != m_pResponse)
+          {
+            m_pResponse->abort();
+            m_pResponse->disconnect();
+            delete m_pResponse;
+            m_pResponse = nullptr;
+          }
+          m_pResponse = m_spNAManager->get(QNetworkRequest(path));
+          connect(m_pResponse, QOverload<QNetworkReply::NetworkError>::of(&QNetworkReply::error),
+                  this, &CResourceDisplayWidget::SlotNetworkReplyError);
+          connect(m_pResponse, &QNetworkReply::finished,
+                  this, &CResourceDisplayWidget::SlotNetworkReplyFinished);
+
+          m_spUi->pStackedWidget->setCurrentIndex(EResourceDisplayType::eLoading);
+          m_iLoadState = ELoadState::eLoading;
+        }
+        else
+        {
+          qWarning() << "Non-valid url.";
+          m_spUi->pStackedWidget->setCurrentIndex(EResourceDisplayType::eError);
+          m_iLoadState = ELoadState::eError;
+          emit SignalLoadFinished();
+        }
+      } break;
+      default:
+      {
+        m_spUi->pWebView->setUrl(path);
+        m_spUi->pStackedWidget->setCurrentIndex(EResourceDisplayType::eLoading);
+        m_iLoadState = ELoadState::eLoading;
+      } break;
+    }
   }
 }
 
@@ -435,7 +475,6 @@ void CResourceDisplayWidget::SlotLoadFinished()
             m_spUi->pImage->setPixmap(*m_spLoadedPixmap);
             m_spUi->pStackedWidget->setCurrentIndex(EResourceDisplayType::eLocalImage);
             m_imageMutex.unlock();
-            emit SignalLoadFinished();
           }
           else if (nullptr != m_spLoadedMovie)
           {
@@ -443,7 +482,6 @@ void CResourceDisplayWidget::SlotLoadFinished()
             m_spUi->pImage->setMovie(m_spLoadedMovie.get());
             m_spUi->pStackedWidget->setCurrentIndex(EResourceDisplayType::eLocalImage);
             m_imageMutex.unlock();
-            emit SignalLoadFinished();
           }
           else
           {
@@ -460,10 +498,13 @@ void CResourceDisplayWidget::SlotLoadFinished()
         default: break;
       }
     }
+
+    emit SignalLoadFinished();
   }
   else
   {
     m_spUi->pStackedWidget->setCurrentIndex(EResourceDisplayType::eError);
+    emit SignalLoadFinished();
   }
 }
 
@@ -491,6 +532,75 @@ void CResourceDisplayWidget::SlotMutedChanged()
     default: break;
     }
   }
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CResourceDisplayWidget::SlotNetworkReplyError(QNetworkReply::NetworkError code)
+{
+  QNetworkReply* pReply = dynamic_cast<QNetworkReply*>(sender());
+  assert(nullptr != pReply);
+  if (nullptr != pReply)
+  {
+    qWarning() << code << pReply->errorString();
+  }
+  m_spUi->pStackedWidget->setCurrentIndex(EResourceDisplayType::eError);
+  m_iLoadState = ELoadState::eError;
+  emit SignalLoadFinished();
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CResourceDisplayWidget::SlotNetworkReplyFinished()
+{
+  QNetworkReply* pReply = dynamic_cast<QNetworkReply*>(sender());
+  assert(nullptr != pReply);
+  if (nullptr != pReply)
+  {
+    QUrl url = pReply->url();
+    QByteArray arr = pReply->readAll();
+    if (nullptr != m_pResponse)
+    {
+      m_pResponse->disconnect();
+      m_pResponse->deleteLater();
+    }
+
+    QStringList imageFormatsList = ImageFormats();
+
+    qint32 iLastIndex = url.fileName().lastIndexOf('.');
+    const QString sFileName = url.fileName();
+    QString sFormat = "*" + sFileName.mid(iLastIndex, sFileName.size() - iLastIndex);
+    auto spDbManager = CApplication::Instance()->System<CDatabaseManager>().lock();
+    if (nullptr != spDbManager)
+    {
+      if (imageFormatsList.contains(sFormat))
+      {
+        QMutexLocker locker(&m_imageMutex);
+        m_spLoadedPixmap = std::make_shared<QPixmap>();
+        m_spLoadedPixmap->loadFromData(arr);
+        if (!m_spLoadedPixmap->isNull())
+        {
+          m_spUi->pImage->setPixmap(
+                m_spLoadedPixmap->scaled(width(), height(),
+                                         Qt::KeepAspectRatio, Qt::SmoothTransformation));
+          m_spUi->pStackedWidget->setCurrentIndex(EResourceDisplayType::eLocalImage);
+          m_iLoadState = ELoadState::eFinished;
+        }
+        else
+        {
+          m_spUi->pStackedWidget->setCurrentIndex(EResourceDisplayType::eError);
+          m_iLoadState = ELoadState::eError;
+        }
+      }
+      else
+      {
+        m_spUi->pStackedWidget->setCurrentIndex(EResourceDisplayType::eError);
+        m_iLoadState = ELoadState::eError;
+      }
+    }
+  }
+
+  emit SignalLoadFinished();
 }
 
 //----------------------------------------------------------------------------------------
@@ -586,6 +696,7 @@ void CResourceDisplayWidget::SlotWebLoadFinished(bool bOk)
     {
       m_iLoadState = ELoadState::eError;
       m_spUi->pStackedWidget->setCurrentIndex(EResourceDisplayType::eError);
+      emit SignalLoadFinished();
     }
   }
 }

@@ -22,17 +22,8 @@ Rectangle {
                 switch (pResource.type)
                 {
                 case Resource.Image:
-                    if (pResource.isLocal)
-                    {
-                        movieResource.resource = null;
-                        imgResource.resource = pResource;
-                    }
-                    else
-                    {
-                        imgResource.resource = null;
-                        movieResource.resource = null;
-                        webResource.resource = pResource;
-                    }
+                    movieResource.resource = null;
+                    imgResource.resource = pResource;
                     break;
 
                 case Resource.Movie:

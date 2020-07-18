@@ -4,6 +4,8 @@
 #include "Systems/Resource.h"
 #include <QFileInfo>
 #include <QImageReader>
+#include <QNetworkAccessManager>
+#include <QNetworkReply>
 
 CDatabaseImageProvider::CDatabaseImageProvider(const std::weak_ptr<CDatabaseManager>& wpDatabase) :
   QObject(nullptr),
@@ -35,6 +37,7 @@ QImage CDatabaseImageProvider::requestImage(const QString& id, QSize* pSize,
         QReadLocker locker(&spResource->m_rwLock);
         if (spResource->m_type._to_integral() == EResourceType::eImage)
         {
+          // local file
           if (spResource->m_sPath.isLocalFile())
           {
             QString sPath = ResourceUrlToAbsolutePath(spResource->m_sPath,
@@ -53,6 +56,69 @@ QImage CDatabaseImageProvider::requestImage(const QString& id, QSize* pSize,
                                   Qt::KeepAspectRatio, Qt::SmoothTransformation);
               }
             }
+          }
+          // remote resource
+          else
+          {
+            QImage img;
+            QEventLoop loop;
+            std::shared_ptr<QNetworkAccessManager> spManager = std::make_shared<QNetworkAccessManager>();
+            QPointer<QNetworkReply> pReply = spManager->get(QNetworkRequest(spResource->m_sPath));
+            connect(pReply, &QNetworkReply::finished,
+                    this, [pReply, &spDbManager, &img, &loop](){
+              if(nullptr != pReply)
+              {
+                QUrl url = pReply->url();
+                QByteArray arr = pReply->readAll();
+
+                qint32 iLastIndex = url.fileName().lastIndexOf('.');
+                const QString sFileName = url.fileName();
+                QString sFormat = "*" + sFileName.mid(iLastIndex, sFileName.size() - iLastIndex);
+
+                QStringList imageFormatsList = ImageFormats();
+                if (nullptr != spDbManager)
+                {
+                  if (imageFormatsList.contains(sFormat))
+                  {
+                    QPixmap mPixmap;
+                    mPixmap.loadFromData(arr);
+                    if (!mPixmap.isNull())
+                    {
+                      img = mPixmap.toImage();
+                    }
+                  }
+                }
+                bool bOk = QMetaObject::invokeMethod(&loop, "quit", Qt::QueuedConnection);
+                assert(bOk); Q_UNUSED(bOk)
+              }
+              else
+              {
+                qCritical() << "QNetworkReply object was destroyed too early.";
+              }
+            });
+            connect(pReply, QOverload<QNetworkReply::NetworkError>::of(&QNetworkReply::error),
+                    this, [pReply, &loop](QNetworkReply::NetworkError error){
+              Q_UNUSED(error)
+              if (nullptr != pReply)
+              {
+                qWarning() << tr(QT_TR_NOOP("Error fetching remote resource: %1"))
+                              .arg(pReply->errorString());
+                bool bOk = QMetaObject::invokeMethod(&loop, "quit", Qt::QueuedConnection);
+                assert(bOk); Q_UNUSED(bOk)
+              }
+              else
+              {
+                qCritical() << "QNetworkReply object was destroyed too early.";
+              }
+            });
+
+            loop.exec();
+
+            if (nullptr != pReply) { delete pReply; }
+
+            return img.scaled(0 < requestedSize.width() ? requestedSize.width() : img.width(),
+                              0 < requestedSize.height() ? requestedSize.height() : img.height(),
+                              Qt::KeepAspectRatio, Qt::SmoothTransformation);
           }
         }
       }

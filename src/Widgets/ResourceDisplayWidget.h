@@ -6,6 +6,8 @@
 #include <QtAV/QtAV_Global.h>
 #include <QFutureWatcher>
 #include <QMediaPlayer>
+#include <QNetworkReply>
+#include <QPointer>
 #include <QWidget>
 #include <memory>
 
@@ -52,6 +54,8 @@ protected slots:
   void SlotImageLoad(QString sPath);
   void SlotLoadFinished();
   void SlotMutedChanged();
+  void SlotNetworkReplyError(QNetworkReply::NetworkError code);
+  void SlotNetworkReplyFinished();
   void SlotStatusChanged(QtAV::MediaStatus status);
   void SlotVolumeChanged();
   void SlotWebLoadFinished(bool bOk);
@@ -62,9 +66,11 @@ private:
   std::unique_ptr<Ui::CResourceDisplayWidget> m_spUi;
   std::unique_ptr<QFutureWatcher<void>>       m_spFutureWatcher;
   std::unique_ptr<QMovie>                     m_spSpinner;
+  std::unique_ptr<QNetworkAccessManager>      m_spNAManager;
   std::shared_ptr<CSettings>                  m_spSettings;
   std::shared_ptr<QMovie>                     m_spLoadedMovie;
   std::shared_ptr<QPixmap>                    m_spLoadedPixmap;
+  QPointer<QNetworkReply>                     m_pResponse;
   mutable QMutex                              m_imageMutex;
   QFuture<void>                               m_future;
   tspResource                                 m_spResource;
