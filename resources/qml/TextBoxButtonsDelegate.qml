@@ -131,6 +131,14 @@ Rectangle {
                         verticalAlignment: Text.AlignVCenter
                         color: textDelegate.textColors.length > index ? textDelegate.textColors[index] : "#FFFFFFFF"
                     }
+
+                    Shortcut {
+                        sequence: Settings.keyBinding("Answer_" + index);
+                        onActivated: {
+                            root.soundEffects.clickSound.play();
+                            textDelegate.parent.ListView.view.buttonPressed(index);
+                        }
+                    }
                 }
             }
 
