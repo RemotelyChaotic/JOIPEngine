@@ -53,19 +53,26 @@ bool CScriptObjectBase::CheckIfScriptCanRun()
     }
     case CScriptRunnerSignalEmiter::ePaused:
     {
-      QEventLoop loop;
-      connect(m_pSignalEmitter, &CScriptRunnerSignalEmiter::interrupt,
-              &loop, &QEventLoop::quit, Qt::QueuedConnection);
-      connect(m_pSignalEmitter, &CScriptRunnerSignalEmiter::resumeExecution,
-              &loop, &QEventLoop::quit, Qt::QueuedConnection);
-      loop.exec();
-      if (m_pSignalEmitter->ScriptExecutionStatus() == CScriptRunnerSignalEmiter::eStopped)
+      if (!m_pSignalEmitter.isNull())
       {
-        return false;
+        QEventLoop loop;
+        connect(m_pSignalEmitter, &CScriptRunnerSignalEmiter::interrupt,
+                &loop, &QEventLoop::quit, Qt::QueuedConnection);
+        connect(m_pSignalEmitter, &CScriptRunnerSignalEmiter::resumeExecution,
+                &loop, &QEventLoop::quit, Qt::QueuedConnection);
+        loop.exec();
+        if (m_pSignalEmitter->ScriptExecutionStatus() == CScriptRunnerSignalEmiter::eStopped)
+        {
+          return false;
+        }
+        else
+        {
+          return true;
+        }
       }
       else
       {
-        return true;
+        return false;
       }
     }
     default: return false;

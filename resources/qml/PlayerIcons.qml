@@ -213,6 +213,8 @@ Rectangle {
                             source: Settings.styleFolderQml() + "/IconBg.svg";
                             sourceSize: Qt.size(parent.width, parent.height)
                             smooth: true
+                            antialiasing: true
+                            mipmap: true
                         }
 
                         Image {
@@ -221,6 +223,8 @@ Rectangle {
                             source: Settings.styleFolderQml() + "/IconBgMask.png";
                             sourceSize: Qt.size(parent.width, parent.height)
                             visible: false
+                            antialiasing: true
+                            mipmap: true
                         }
 
                         Rectangle {

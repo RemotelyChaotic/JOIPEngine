@@ -119,11 +119,6 @@ void CEditorActionBar::Initialize()
     wpHelpFactory->RegisterHelp(c_sAddTimerHelpId, ":/resources/help/editor/addtimer_button_help.html");
     m_spUi->AddThreadCode->setProperty(helpOverlay::c_sHelpPagePropertyName, c_sAddThreadHelpId);
     wpHelpFactory->RegisterHelp(c_sAddThreadHelpId, ":/resources/help/editor/addthread_button_help.html");
-
-    m_spUi->AddFetishButton->setProperty(helpOverlay::c_sHelpPagePropertyName, c_sAddFetishHelpId);
-    wpHelpFactory->RegisterHelp(c_sAddFetishHelpId, ":/resources/help/editor/addfetish_button_help.html");
-    m_spUi->RemoveFetishButton->setProperty(helpOverlay::c_sHelpPagePropertyName, c_sRemoveFetishHelpId);
-    wpHelpFactory->RegisterHelp(c_sRemoveFetishHelpId, ":/resources/help/editor/removefetish_button_help.html");
   }
 
   connect(m_spSettings.get(), &CSettings::keyBindingsChanged,
@@ -193,7 +188,8 @@ void CEditorActionBar::ShowProjectActionBar()
 void CEditorActionBar::ShowProjectSettingsActionBar()
 {
   HideAllBars();
-  m_spUi->pProjectSettingsEditorContainer->show();
+  // No buttons needed
+  //m_spUi->pProjectSettingsEditorContainer->show();
 
   m_iCurrentDisplayType = EEditorWidget::eProjectSettings;
 }
@@ -247,9 +243,6 @@ void CEditorActionBar::SlotKeyBindingsChanged()
     m_spUi->PlayButton->SetShortcut(m_spSettings->keyBinding(sKey.arg(1)));
     m_spUi->PauseButton->SetShortcut(m_spSettings->keyBinding(sKey.arg(2)));
     m_spUi->StopButton->SetShortcut(m_spSettings->keyBinding(sKey.arg(3)));
-
-    m_spUi->AddFetishButton->SetShortcut(m_spSettings->keyBinding(sKey.arg(1)));
-    m_spUi->RemoveFetishButton->SetShortcut(m_spSettings->keyBinding(sKey.arg(2)));
 
     m_spUi->AddNodeButton->SetShortcut(m_spSettings->keyBinding(sKey.arg(1)));
     m_spUi->RemoveNodeButton->SetShortcut(m_spSettings->keyBinding(sKey.arg(2)));

@@ -10,6 +10,8 @@ class CKinkSelectionOverlay;
 namespace Ui {
   class CEditorProjectSettingsWidget;
 }
+struct SKink;
+typedef std::shared_ptr<SKink>      tspKink;
 
 class CEditorProjectSettingsWidget : public CEditorWidgetBase
 {
@@ -31,18 +33,23 @@ protected slots:
   void on_pProjectMinorVersion_valueChanged(qint32 iValue);
   void on_pProjectPatchVersion_valueChanged(qint32 iValue);
   void on_pDescribtionTextEdit_textChanged();
-  void SlotAddKinksClicked();
-  void SlotKinkOverlayClosed(bool bAccepted);
+  void on_pFetishLineEdit_editingFinished();
+  void on_FetishOverlayButton_clicked();
+  void SlotKinkChecked(const QModelIndex& index, bool bChecked);
   void SlotProjectRenamed(qint32 iId);
-  void SlotRemoveKinksClicked();
+  void SlotRemoveKinkClicked();
 
 protected:
+  void AddKinks(QStringList vsKinks);
+  void AddKinks(std::vector<tspKink> vspKinks);
+  void RemoveKinks(QStringList vsKinks);
   void OnActionBarAboutToChange() override;
   void OnActionBarChanged() override;
 
 private:
   std::unique_ptr<Ui::CEditorProjectSettingsWidget> m_spUi;
   std::unique_ptr<CKinkSelectionOverlay>            m_spKinkSelectionOverlay;
+  std::vector<tspKink>                              m_vspKinks;
   tspProject                                        m_spCurrentProject;
 };
 

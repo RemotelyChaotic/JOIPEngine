@@ -80,14 +80,5 @@ void CKinkSelectionOverlay::on_pFilter_SignalFilterChanged(const QString& sText)
 //
 void CKinkSelectionOverlay::on_pConfirmButton_clicked()
 {
-  emit SignalOverlayClosed(true);
-  Hide();
-}
-
-//----------------------------------------------------------------------------------------
-//
-void CKinkSelectionOverlay::on_pCancelButton_clicked()
-{
-  emit SignalOverlayClosed(false);
   Hide();
 }

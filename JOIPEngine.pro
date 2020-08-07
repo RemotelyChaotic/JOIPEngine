@@ -61,6 +61,7 @@ INCLUDEPATH += \
     src
 
 SOURCES += \
+    src/Editor/Project/KinkCompleter.cpp \
     src/Systems/DatabaseImageProvider.cpp \
     src/Systems/Script/ScriptObjectBase.cpp \
     src/Widgets/ShortcutButton.cpp \
@@ -117,7 +118,7 @@ SOURCES += \
     src/Player/InformationWidget.cpp \
     src/Player/ProjectRunner.cpp \
     src/Systems/Script/ScriptRunnerSignalEmiter.cpp \
-    src/Player/FlowLayout.cpp \
+    src/Widgets/FlowLayout.cpp \
     src/Player/TimerDisplayWidget.cpp \
     src/Player/TimerWidget.cpp \
     src/Widgets/BackgroundWidget.cpp \
@@ -149,6 +150,7 @@ SOURCES += \
 
 HEADERS += \
     src/Editor/EditorWidgetTypes.h \
+    src/Editor/Project/KinkCompleter.h \
     src/MainWindow.h \
     src/Settings.h \
     src/Application.h \
@@ -208,7 +210,7 @@ HEADERS += \
     src/Player/InformationWidget.h \
     src/Player/ProjectRunner.h \
     src/Systems/Script/ScriptRunnerSignalEmiter.h \
-    src/Player/FlowLayout.h \
+    src/Widgets/FlowLayout.h \
     src/Player/TimerDisplayWidget.h \
     src/Player/TimerWidget.h \
     src/Widgets/BackgroundWidget.h \

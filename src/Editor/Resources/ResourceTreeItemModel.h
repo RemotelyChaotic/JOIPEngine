@@ -6,6 +6,7 @@
 #include <QModelIndex>
 #include <QVariant>
 #include <map>
+#include <memory>
 
 class CDatabaseManager;
 class CResourceTreeItem;

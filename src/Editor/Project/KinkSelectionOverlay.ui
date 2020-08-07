@@ -23,22 +23,6 @@
    <item row="2" column="0">
     <widget class="QWidget" name="widget" native="true">
      <layout class="QGridLayout" name="gridLayout">
-      <item row="2" column="2">
-       <spacer name="horizontalSpacer_3">
-        <property name="orientation">
-         <enum>Qt::Horizontal</enum>
-        </property>
-        <property name="sizeType">
-         <enum>QSizePolicy::Fixed</enum>
-        </property>
-        <property name="sizeHint" stdset="0">
-         <size>
-          <width>20</width>
-          <height>20</height>
-         </size>
-        </property>
-       </spacer>
-      </item>
       <item row="2" column="1">
        <widget class="QPushButton" name="pConfirmButton">
         <property name="text">
@@ -59,7 +43,7 @@
         </property>
        </spacer>
       </item>
-      <item row="2" column="5">
+      <item row="2" column="3">
        <spacer name="horizontalSpacer">
         <property name="orientation">
          <enum>Qt::Horizontal</enum>
@@ -71,13 +55,6 @@
          </size>
         </property>
        </spacer>
-      </item>
-      <item row="2" column="3">
-       <widget class="QPushButton" name="pCancelButton">
-        <property name="text">
-         <string>Cancel</string>
-        </property>
-       </widget>
       </item>
      </layout>
     </widget>

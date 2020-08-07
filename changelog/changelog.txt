@@ -16,7 +16,7 @@ New Features:
 - Help overlay added that can interactively display help based on clicked engine 
   component.
 - Editor has a new view to configure project properties
-- Kink list added to project configuration describing all kinks used in the 
+- Kink tag list added to project configuration describing all kinks used in the 
   project.
 - Target verision and project version added to project configuration describing
   the project's version and the engine version the project was saved in.

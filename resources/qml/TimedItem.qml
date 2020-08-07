@@ -84,6 +84,8 @@ Rectangle {
             source: Settings.styleFolderQml() + "/TimerBg.svg"
             fillMode: Image.Stretch
             smooth: true
+            antialiasing: true
+            mipmap: true
         }
     }
 

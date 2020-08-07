@@ -38,6 +38,9 @@ public:
   bool setData(const QModelIndex& index, const QVariant& value,
                qint32 iRole = Qt::EditRole) override;
 
+signals:
+  void SignalCheckedItem(const QModelIndex& index, bool bChecked);
+
 private:
   CKinkTreeItem* GetItem(const QModelIndex& index) const;
 

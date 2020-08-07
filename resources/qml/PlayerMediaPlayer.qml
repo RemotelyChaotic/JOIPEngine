@@ -123,8 +123,7 @@ Rectangle {
         color: "transparent"
 
         property bool loading: movieResource.state === Resource.Loading ||
-                               imgResource.state === Resource.Loading ||
-                               webResource.state === Resource.Loading
+                               imgResource.state === Resource.Loading
         property bool error: imgResource.state === Resource.Null &&
                              movieResource.state === Resource.Null &&
                              imgResource.state === Resource.Error ||

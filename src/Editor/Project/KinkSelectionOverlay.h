@@ -19,9 +19,6 @@ public:
 
   void Initialize(CKinkTreeModel* pKinkTreeModel);
 
-signals:
-  void SignalOverlayClosed(bool bAccepted);
-
 public slots:
   void Climb() override;
   void Resize() override;
@@ -29,7 +26,6 @@ public slots:
 protected slots:
   void on_pFilter_SignalFilterChanged(const QString& sText);
   void on_pConfirmButton_clicked();
-  void on_pCancelButton_clicked();
 
 private:
   std::unique_ptr<Ui::CKinkSelectionOverlay> m_spUi;

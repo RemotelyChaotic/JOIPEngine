@@ -247,6 +247,7 @@ bool CKinkTreeModel::setData(const QModelIndex& index, const QVariant& value,
     if (bChanged)
     {
       emit dataChanged(index, index, {Qt::CheckStateRole});
+      emit SignalCheckedItem(index, value.toInt() == Qt::Checked);
     }
     return bChanged;
   }
