@@ -14,11 +14,6 @@ CPathSplitterModelWidget::CPathSplitterModelWidget(QWidget* pParent) :
   setAttribute(Qt::WA_OpaquePaintEvent);
   setAttribute(Qt::WA_NoSystemBackground);
   setAutoFillBackground(false);
-
-  m_spUi->pLabel1->setStyleSheet("{ background: rgb(0, 255, 255); selection-background-color: rgb(233, 99, 0); }");
-  m_spUi->pLabel2->setStyleSheet("{ background: rgb(0, 255, 255); selection-background-color: rgb(233, 99, 0); }");
-  m_spUi->pLabel3->setStyleSheet("{ background: rgb(0, 255, 255); selection-background-color: rgb(233, 99, 0); }");
-  m_spUi->pLabel4->setStyleSheet("{ background: rgb(0, 255, 255); selection-background-color: rgb(233, 99, 0); }");
 }
 
 CPathSplitterModelWidget::~CPathSplitterModelWidget()

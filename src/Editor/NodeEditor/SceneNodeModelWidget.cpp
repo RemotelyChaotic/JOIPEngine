@@ -12,8 +12,6 @@ CSceneNodeModelWidget::CSceneNodeModelWidget(QWidget* pParent) :
   setAttribute(Qt::WA_OpaquePaintEvent);
   setAttribute(Qt::WA_NoSystemBackground);
   setAutoFillBackground(false);
-
-  m_spUi->pSceneNameLineEdit->setStyleSheet("{ background: rgb(0, 255, 255); selection-background-color: rgb(233, 99, 0); }");
 }
 
 CSceneNodeModelWidget::~CSceneNodeModelWidget()
