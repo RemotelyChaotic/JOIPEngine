@@ -149,7 +149,7 @@ void CScriptRunner::LoadScript(tspScene spScene, tspResource spResource)
 
       // get scene name and set it as function, so error messages show the scene name in the error
       QReadLocker locker(&spScene->m_rwLock);
-      const QString sSceneName = spScene->m_sName;
+      const QString sSceneName = QString(spScene->m_sName).replace(QRegExp("\\W"), "_");
       locker.unlock();
 
       // create wrapper function to make syntax of scripts easier and handle return value
