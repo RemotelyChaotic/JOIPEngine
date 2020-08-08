@@ -219,6 +219,12 @@ void CEditorResourceWidget::dropEvent(QDropEvent* pEvent)
     QStringList otherFormatsList = OtherFormats();
     QString sOtherFormats = otherFormatsList.join(" ");
 
+    QStringList scriptFormatsList = ScriptFormats();
+    QString sScriptFormats = scriptFormatsList.join(" ");
+
+    QStringList databaseFormatsList = DatabaseFormats();
+    QString sDbFormats = databaseFormatsList.join(" ");
+
     QStringList vsFileNames;
     QList<QUrl> vUrlList = pMimeData->urls();
 
@@ -230,7 +236,8 @@ void CEditorResourceWidget::dropEvent(QDropEvent* pEvent)
 
     // add file to respective category
     EditorModel()->AddFilesToProjectResources(
-          this, vsFileNames, imageFormatsList, videoFormatsList, audioFormatsList, otherFormatsList);
+          this, vsFileNames, imageFormatsList, videoFormatsList, audioFormatsList,
+          otherFormatsList, scriptFormatsList, databaseFormatsList);
   }
 }
 
@@ -288,6 +295,12 @@ void CEditorResourceWidget::SlotAddButtonClicked()
   QStringList otherFormatsList = OtherFormats();
   QString sOtherFormats = otherFormatsList.join(" ");
 
+  QStringList scriptFormatsList = ScriptFormats();
+  QString sScriptFormats = scriptFormatsList.join(" ");
+
+  QStringList databaseFormatsList = DatabaseFormats();
+  QString sDbFormats = databaseFormatsList.join(" ");
+
   QString sFormatSelection = "Image Files (%1);;Video Files (%2);;Sound Files (%3);;Other Files (%4)";
   QString sCurrentFolder = CApplication::Instance()->Settings()->ContentFolder();
   QStringList  vsFileNames = QFileDialog::getOpenFileNames(this,
@@ -296,7 +309,8 @@ void CEditorResourceWidget::SlotAddButtonClicked()
 
   // add file to respective category
   EditorModel()->AddFilesToProjectResources(
-        this, vsFileNames, imageFormatsList, videoFormatsList, audioFormatsList, otherFormatsList);
+        this, vsFileNames, imageFormatsList, videoFormatsList, audioFormatsList,
+        otherFormatsList, scriptFormatsList, databaseFormatsList);
 }
 
 //----------------------------------------------------------------------------------------

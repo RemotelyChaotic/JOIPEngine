@@ -163,8 +163,8 @@ void SProject::FromJsonObject(const QJsonObject& json)
     for (QJsonValue val : it.value().toArray())
     {
       std::shared_ptr<SScene> spScene = std::make_shared<SScene>();
-      spScene->FromJsonObject(val.toObject());
       spScene->m_spParent = GetPtr();
+      spScene->FromJsonObject(val.toObject());
       m_vspScenes.push_back(spScene);
     }
   }
@@ -175,8 +175,8 @@ void SProject::FromJsonObject(const QJsonObject& json)
     for (QJsonValue val : it.value().toArray())
     {
       std::shared_ptr<SResource> spResource = std::make_shared<SResource>(EResourceType::eOther);
-      spResource->FromJsonObject(val.toObject());
       spResource->m_spParent = GetPtr();
+      spResource->FromJsonObject(val.toObject());
       m_spResourcesMap.insert({spResource->m_sName, spResource});
     }
   }

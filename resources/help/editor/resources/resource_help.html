@@ -47,7 +47,7 @@
 
     <br>
 
-    <p>There's currently four differnt Resource types:<br>
+    <p>There's currently six differnt Resource types:<br>
       <ul>
         <li><b>Image</b>: Images can be animated or static and are used for the
         <a href="qrc:/resources/help/player/card_button_help.html">Title Card</a> and to display
@@ -75,13 +75,26 @@
         <i>Supported audio formats are</i>: wav, dts, mp3, mp2, tta, tac, flac, dts, aac, xa
         <br></li>
 
+        <li><b>Scripts</b>: This Resource type is used for the
+        <a href="qrc:/resources/help/editor/nodes/node_help.html">Scene Scripts</a>.
+        They can be opened in any external text editor to edit the contents.<br>
+        <i>Supported script formats are</i>: js
+        <br></li>
+
+        <li><b>Databases (currently unused)</b>: This Resource type is used for various things in a project.
+        One thing all types have in common is that all of them can be opened in
+        any external text editor to edit the contents.<br>
+        <i>Supported database formats are</i>: json, xml
+        <br></li>
+
         <li><b>Other Formats</b>: This Resource type is used for various things in the project.
         The flow file is used as storage for the <a href="qrc:/resources/help/editor/nodes/nodeeditor_help.html">Node Editor's</a>
-        content, the js files are used for the <a href="qrc:/resources/help/editor/nodes/node_help.html">Scene Scripts</a>
-        and the <a href="qrc:/resources/help/project/joi_project_help.html">Project</a> data is stored
-        in json files. One thing they have in common is that all of them can be opened in
+        content, the layout file is used for the Player
+        <a href="qrc:/resources/help/layout/layout_help.html">Layouts</a> and the
+        <a href="qrc:/resources/help/project/joi_project_help.html">Project</a> data is stored
+        in the <i>JOIPData.json</i> file. One thing they have in common is that all of them can be opened in
         any external text editor to edit the contents.<br>
-        <i>Supported other formats are</i>: json, xml (currently unused), js, flow
+        <i>Supported other formats are</i>: json, flow, layout
         <br></li>
       </ul>
     </p>

@@ -12,16 +12,19 @@
 #include <set>
 
 BETTER_ENUM(EResourceType, qint32,
-            eImage = 0,
-            eMovie = 1,
-            eSound = 2,
-            eOther = 3);
+            eImage      = 0,
+            eMovie      = 1,
+            eSound      = 2,
+            eOther      = 3,
+            eScript     = 4,
+            eDatabase   = 5);
 
 class CProject;
 class QScriptEngine;
 struct SProject;
 
 namespace joip_resource {
+  const QString c_sProjectFileName  = "JOIPData.json";
   const QString c_sSceneModelFile   = "SceneModel.flow";
   const QString c_sPlayerLayoutFile = "Player.layout";
 }
@@ -59,10 +62,12 @@ class CResource : public QObject
 
 public:
   enum ResourceType {
-    Image = EResourceType::eImage,
-    Movie = EResourceType::eMovie,
-    Sound = EResourceType::eSound,
-    Other = EResourceType::eOther,
+    Image    = EResourceType::eImage,
+    Movie    = EResourceType::eMovie,
+    Sound    = EResourceType::eSound,
+    Other    = EResourceType::eOther,
+    Script   = EResourceType::eScript,
+    Database = EResourceType::eDatabase
   };
   Q_ENUM(ResourceType)
 
@@ -105,9 +110,11 @@ Q_DECLARE_METATYPE(tspResource)
 //----------------------------------------------------------------------------------------
 //
 QStringList AudioFormats();
+QStringList DatabaseFormats();
 QStringList ImageFormats();
 QStringList OtherFormats();
 QString ResourceUrlToAbsolutePath(const QUrl& url, const QString& sProjectFolder);
+QStringList ScriptFormats();
 QStringList VideoFormats();
 
 #endif // RESOURCE_H

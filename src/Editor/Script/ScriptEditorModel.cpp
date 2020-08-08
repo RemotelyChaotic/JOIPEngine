@@ -302,7 +302,7 @@ void CScriptEditorModel::SlotResourceAdded(qint32 iProjId, const QString& sName)
     if (nullptr != spResource)
     {
       QReadLocker locker(&spResource->m_rwLock);
-      if (QFileInfo(ResourceUrlToAbsolutePath(spResource->m_sPath, sProjectFolder)).suffix() != "js")
+      if (spResource->m_type._to_integral() != EResourceType::eScript)
       { return; }
       locker.unlock();
 
@@ -458,14 +458,14 @@ void CScriptEditorModel::AddResourceTo(tspResource spResource, std::map<QString,
 
   QReadLocker resourceLocker(&spResource->m_rwLock);
   const QString sResourceName = spResource->m_sName;
-  if (spResource->m_type._to_integral() != EResourceType::eOther)
+  if (spResource->m_type._to_integral() != EResourceType::eScript)
   {
     return;
   }
 
   QString sPath = ResourceUrlToAbsolutePath(spResource->m_sPath, m_spProject->m_sName);
   QFileInfo scriptFileInfo(sPath);
-  if (scriptFileInfo.exists() && scriptFileInfo.suffix() == "js")
+  if (scriptFileInfo.exists())
   {
     auto itMap = mpToAddTo.find(sResourceName);
     if (mpToAddTo.end() == itMap)

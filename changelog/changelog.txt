@@ -24,6 +24,9 @@ New Features:
 - Changed card selection backend to QML and greatly improved card display.
 - Changed Project-Player backend to QML and improved overall look.
 - Project-Player can be paused.
+- New resource types added: Script and Database
+  -> Resources of type Other in old projects will be reassigned on project
+     load if needed.
 
 Updated Features:
 - Upgrade to Qt5.14.2 with msvc2017 for more QJSEngine and QML features.

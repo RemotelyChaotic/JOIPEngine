@@ -1,8 +1,8 @@
 #include "TextBoxWidget.h"
 #include "Application.h"
 #include "Constants.h"
-#include "FlowLayout.h"
 #include "Settings.h"
+#include "Widgets/FlowLayout.h"
 #include "ui_TextBoxWidget.h"
 
 #include <QGraphicsDropShadowEffect>

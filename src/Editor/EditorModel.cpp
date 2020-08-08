@@ -110,9 +110,13 @@ CScriptEditorModel* CEditorModel::ScriptEditorModel() const
 //----------------------------------------------------------------------------------------
 //
 void CEditorModel::AddFilesToProjectResources(QPointer<QWidget> pParentForDialog,
-  const QStringList& vsFiles, const QStringList& imageFormatsList,
-  const QStringList& videoFormatsList, const QStringList& audioFormatsList,
-  const QStringList& otherFormatsList)
+  const QStringList& vsFiles,
+  const QStringList& imageFormatsList,
+  const QStringList& videoFormatsList,
+  const QStringList& audioFormatsList,
+  const QStringList& otherFormatsList,
+  const QStringList& scriptFormatsList,
+  const QStringList& databaseFormatsList)
 {
   if (nullptr == m_spCurrentProject) { return; }
 
@@ -154,6 +158,16 @@ void CEditorModel::AddFilesToProjectResources(QPointer<QWidget> pParentForDialog
         else if (otherFormatsList.contains(sEnding))
         {
           spDbManager->AddResource(m_spCurrentProject, url, EResourceType::eOther);
+          bAddedFiles = true;
+        }
+        else if (scriptFormatsList.contains(sEnding))
+        {
+          spDbManager->AddResource(m_spCurrentProject, url, EResourceType::eScript);
+          bAddedFiles = true;
+        }
+        else if (databaseFormatsList.contains(sEnding))
+        {
+          spDbManager->AddResource(m_spCurrentProject, url, EResourceType::eDatabase);
           bAddedFiles = true;
         }
       }
@@ -208,7 +222,8 @@ void CEditorModel::AddFilesToProjectResources(QPointer<QWidget> pParentForDialog
         }
       }
       AddFilesToProjectResources(pParentForDialog, filesToAdd, imageFormatsList,
-                                 videoFormatsList, audioFormatsList, otherFormatsList);
+                                 videoFormatsList, audioFormatsList, otherFormatsList,
+                                 scriptFormatsList, databaseFormatsList);
     }
     else if (msgBox.clickedButton() == pCopy)
     {
@@ -233,7 +248,8 @@ void CEditorModel::AddFilesToProjectResources(QPointer<QWidget> pParentForDialog
         }
       }
       AddFilesToProjectResources(pParentForDialog, filesToAdd, imageFormatsList,
-                                 videoFormatsList, audioFormatsList, otherFormatsList);
+                                 videoFormatsList, audioFormatsList, otherFormatsList,
+                                 scriptFormatsList, databaseFormatsList);
     }
     else if (msgBox.clickedButton() == pCancel)
     {
@@ -259,7 +275,7 @@ void CEditorModel::AddNewScriptFileToScene(QPointer<QWidget> pParentForDialog,
       QUrl sUrl = QFileDialog::getSaveFileUrl(pParentForDialog,
           QString(tr("Create Script File for %1")).arg(spScene->m_sName),
           QUrl::fromLocalFile(sCurrentFolder + "/" + sName),
-          "Script Files (*.js)");
+          QString("Script Files (%1)").arg(ScriptFormats().join(" ")));
 
       if (sUrl.isValid())
       {
@@ -278,7 +294,7 @@ void CEditorModel::AddNewScriptFileToScene(QPointer<QWidget> pParentForDialog,
           {
             jsFile.write(QString("// instert code to control scene").toUtf8());
             QString sResource = spDbManager->AddResource(m_spCurrentProject, sUrlToSave,
-                                                         EResourceType::eOther);
+                                                         EResourceType::eScript);
             spScene->m_sScript = sResource;
           }
           else

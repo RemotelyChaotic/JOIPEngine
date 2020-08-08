@@ -105,7 +105,7 @@ void CScriptRunner::LoadScript(tspScene spScene, tspResource spResource)
 
   QReadLocker projectLocker(&spResource->m_spParent->m_rwLock);
   QReadLocker resourceLocker(&spResource->m_rwLock);
-  if (spResource->m_type._to_integral() != EResourceType::eOther)
+  if (spResource->m_type._to_integral() != EResourceType::eScript)
   {
     QString sError = tr("Script resource is of wrong type.");
     qCritical() << sError;
@@ -119,7 +119,7 @@ void CScriptRunner::LoadScript(tspScene spScene, tspResource spResource)
   projectLocker.unlock();
 
   QFileInfo scriptFileInfo(sPath);
-  if (scriptFileInfo.exists() && scriptFileInfo.suffix() == "js")
+  if (scriptFileInfo.exists())
   {
     QFile scriptFile(sPath);
     if (scriptFile.open(QIODevice::ReadOnly))

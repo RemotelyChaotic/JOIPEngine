@@ -33,9 +33,13 @@ public:
   CScriptEditorModel* ScriptEditorModel() const;
 
   void AddFilesToProjectResources(QPointer<QWidget> pParentForDialog,
-    const QStringList& vsFiles, const QStringList& imageFormatsList,
-    const QStringList& videoFormatsList, const QStringList& audioFormatsList,
-    const QStringList& otherFormatsList);
+                                  const QStringList& vsFiles,
+                                  const QStringList& imageFormatsList,
+                                  const QStringList& videoFormatsList,
+                                  const QStringList& audioFormatsList,
+                                  const QStringList& otherFormatsList,
+                                  const QStringList& scriptFormatsList,
+                                  const QStringList& databaseFormatsList);
   void AddNewScriptFileToScene(QPointer<QWidget> pParentForDialog,
                                tspScene spScene);
 

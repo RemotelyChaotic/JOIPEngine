@@ -11,11 +11,6 @@
 #include <QFileInfo>
 #include <QJsonDocument>
 
-namespace
-{
-  const QString c_sProjectFileName = "JOIPData.json";
-}
-
 //----------------------------------------------------------------------------------------
 //
 CDatabaseManager::CDatabaseManager() :
@@ -737,7 +732,7 @@ bool CDatabaseManager::DeserializeProjectPrivate(tspProject& spProject)
   if (bOk)
   {
     QFileInfo jsonInfo(m_spSettings->ContentFolder() + QDir::separator() + sName +
-                       QDir::separator() + c_sProjectFileName);
+                       QDir::separator() + joip_resource::c_sProjectFileName);
     if (jsonInfo.exists())
     {
       QFile jsonFile(jsonInfo.absoluteFilePath());
@@ -917,7 +912,7 @@ bool CDatabaseManager::SerializeProjectPrivate(tspProject& spProject)
   if (bOk)
   {
     QFileInfo jsonInfo(m_spSettings->ContentFolder() + QDir::separator() + sName +
-                       QDir::separator() + c_sProjectFileName);
+                       QDir::separator() + joip_resource::c_sProjectFileName);
     QFile jsonFile(jsonInfo.absoluteFilePath());
     if (jsonFile.open(QIODevice::ReadWrite | QIODevice::Truncate))
     {

@@ -2,6 +2,7 @@
 #include "Application.h"
 #include "Project.h"
 
+#include <QFileInfo>
 #include <QImageReader>
 #include <QMutexLocker>
 #include <cassert>
@@ -54,8 +55,30 @@ void SResource::FromJsonObject(const QJsonObject& json)
   it = json.find("type");
   if (it != json.end())
   {
+    // needed for compatibility with older versions
+    QString sProject;
+    if (nullptr != m_spParent)
+    {
+      // no lock needed here, WARNING not very safe way of doing this
+      sProject = m_spParent->m_sName;
+    }
+    const QString sSuffix = QFileInfo(ResourceUrlToAbsolutePath(m_sPath, sProject)).suffix();
+
     qint32 iValue = it.value().toInt();
-    m_type = EResourceType::_from_integral(iValue);
+    if (iValue == EResourceType::eOther &&
+        DatabaseFormats().contains("*." + sSuffix))
+    {
+      m_type = EResourceType::eDatabase;
+    }
+    else if (iValue == EResourceType::eOther &&
+        ScriptFormats().contains("*." + sSuffix))
+    {
+      m_type = EResourceType::eScript;
+    }
+    else
+    {
+      m_type = EResourceType::_from_integral(iValue);
+    }
   }
 }
 
@@ -186,6 +209,13 @@ QStringList AudioFormats()
 
 //----------------------------------------------------------------------------------------
 //
+QStringList DatabaseFormats()
+{
+   return QStringList() << "*.json" << "*.xml";
+}
+
+//----------------------------------------------------------------------------------------
+//
 QStringList ImageFormats()
 {
   QList<QByteArray> imageFormats = QImageReader::supportedImageFormats();
@@ -199,7 +229,7 @@ QStringList ImageFormats()
 //
 QStringList OtherFormats()
 {
-  return QStringList() << "*.json" << "*.xml" << "*.js" << ".proj" << "*.flow" << ".layout";
+  return QStringList() << ".proj" << "*.flow" << ".layout";
 }
 
 //----------------------------------------------------------------------------------------
@@ -219,6 +249,13 @@ QString ResourceUrlToAbsolutePath(const QUrl& url, const QString& sProjectFolder
   {
     return QString();
   }
+}
+
+//----------------------------------------------------------------------------------------
+//
+QStringList ScriptFormats()
+{
+  return QStringList() << "*.js";
 }
 
 //----------------------------------------------------------------------------------------
