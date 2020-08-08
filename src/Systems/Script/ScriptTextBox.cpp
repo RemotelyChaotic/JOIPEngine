@@ -177,8 +177,16 @@ std::vector<QColor> CScriptTextBox::GetColors(const QJSValue& colors, const QStr
         }
         else
         {
-          colorsRet.push_back(
-                QColor(viColorComponents[0], viColorComponents[1], viColorComponents[2]));
+          if (viColorComponents.size() == 4)
+          {
+            colorsRet.push_back(
+                  QColor(viColorComponents[0], viColorComponents[1], viColorComponents[2], viColorComponents[3]));
+          }
+          else
+          {
+            colorsRet.push_back(
+                  QColor(viColorComponents[0], viColorComponents[1], viColorComponents[2]));
+          }
         }
       }
       else

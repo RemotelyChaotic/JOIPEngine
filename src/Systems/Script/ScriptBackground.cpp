@@ -62,8 +62,17 @@ void CScriptBackground::setBackgroundColor(QJSValue color)
     }
     else
     {
-      emit spSignalEmitter->backgroundColorChanged(
-            QColor(viColorComponents[0], viColorComponents[1], viColorComponents[2], viColorComponents[3]));
+      if (viColorComponents.size() == 4)
+      {
+        emit spSignalEmitter->backgroundColorChanged(
+              QColor(viColorComponents[0], viColorComponents[1], viColorComponents[2], viColorComponents[3]));
+      }
+      else
+      {
+        // if no alpha is given, make it half transparent
+        emit spSignalEmitter->backgroundColorChanged(
+              QColor(viColorComponents[0], viColorComponents[1], viColorComponents[2], 128));
+      }
     }
   }
   else
