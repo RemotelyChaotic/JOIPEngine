@@ -84,6 +84,9 @@ void CSceneMainScreen::LoadProject(qint32 iId, const QString sStartScene)
   if (nullptr != spDbManager)
   {
     m_spCurrentProject = spDbManager->FindProject(iId);
+    if (nullptr == m_spCurrentProject) { return; }
+
+    CDatabaseManager::LoadProject(m_spCurrentProject);
     m_spProjectRunner->LoadProject(m_spCurrentProject, sStartScene);
 
     LoadQml();
@@ -119,6 +122,9 @@ void CSceneMainScreen::UnloadProject()
 
   DisconnectAllSignals();
   UnloadQml();
+
+  CDatabaseManager::UnloadProject(m_spCurrentProject);
+  m_spCurrentProject = nullptr;
 }
 
 //----------------------------------------------------------------------------------------

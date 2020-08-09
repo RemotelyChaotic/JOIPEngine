@@ -10,9 +10,15 @@ namespace  {
 CKinkTreeModel::CKinkTreeModel(QObject* pParent) :
   QAbstractItemModel (pParent),
   m_wpDbManager(CApplication::Instance()->System<CDatabaseManager>()),
-  m_pRootItem(nullptr)
+  m_pRootItem(nullptr),
+  m_bReadOnly(false)
 {
-  InitializeModel();
+  if (auto spDbManager = m_wpDbManager.lock())
+  {
+    connect(spDbManager.get(), &CDatabaseManager::SignalReloadFinished,
+            this, &CKinkTreeModel::SlotDbReloadFinished, Qt::QueuedConnection);
+    InitializeModel();
+  }
 }
 CKinkTreeModel::~CKinkTreeModel()
 {
@@ -23,6 +29,14 @@ CKinkTreeModel::~CKinkTreeModel()
 //
 void CKinkTreeModel::InitializeModel()
 {
+  if (auto spDbManager = m_wpDbManager.lock())
+  {
+    if (!spDbManager->IsDbLoaded())
+    {
+      return;
+    }
+  }
+
   if (nullptr == m_pRootItem)
   {
     m_pRootItem = new CKinkTreeItem("", nullptr, nullptr);
@@ -243,6 +257,8 @@ bool CKinkTreeModel::setData(const QModelIndex& index, const QVariant& value,
 
   if (Qt::CheckStateRole == iRole)
   {
+    if (m_bReadOnly) { return true; }
+
     bool bChanged = pChildItem->SetData(value, iRole);
     if (bChanged)
     {
@@ -255,6 +271,14 @@ bool CKinkTreeModel::setData(const QModelIndex& index, const QVariant& value,
   {
     return false;
   }
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CKinkTreeModel::SlotDbReloadFinished()
+{
+  DeInitializeModel();
+  InitializeModel();
 }
 
 //----------------------------------------------------------------------------------------

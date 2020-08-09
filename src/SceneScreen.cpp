@@ -99,6 +99,8 @@ void CSceneScreen::on_pOpenExistingProjectButton_clicked()
   }
   else
   {
+    locker.unlock();
+
     emit m_spWindowContext->SignalSetHelpButtonVisible(false);
 
     m_spUi->pMainSceneScreen->UnloadProject();

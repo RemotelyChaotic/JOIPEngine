@@ -18,6 +18,8 @@ public:
   ~CKinkSelectionOverlay() override;
 
   void Initialize(CKinkTreeModel* pKinkTreeModel);
+  void LoadProject(bool bReadOnly);
+  void UnloadProject();
 
 public slots:
   void Climb() override;

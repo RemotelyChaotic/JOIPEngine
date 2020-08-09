@@ -4,6 +4,7 @@
 #include "ThreadedSystem.h"
 #include "Kink.h"
 #include "Resource.h"
+#include <QAtomicInt>
 #include <QMutex>
 #include <set>
 
@@ -25,8 +26,11 @@ public:
   CDatabaseManager();
   ~CDatabaseManager() override;
 
+  static bool LoadProject(tspProject& spProject);
+  static bool UnloadProject(tspProject& spProject);
+
   // Project
-  qint32 AddProject(const QString& sDirName = "New_Project", quint32 iVersion = 1);
+  qint32 AddProject(const QString& sDirName = "New_Project", quint32 iVersion = 1, bool bBundled = false);
   void ClearProjects();
   bool DeserializeProject(qint32 iId);
   bool DeserializeProject(const QString& sName);
@@ -63,6 +67,7 @@ public:
   QStringList FindKinks(QString sCategory);
   QStringList KinkCategories();
 
+  bool IsDbLoaded() { return m_bLoadedDb == 1; }
 
 public slots:
   void Initialize() override;
@@ -75,6 +80,8 @@ signals:
   void SignalSceneAdded(qint32 iProjId, qint32 iId);
   void SignalSceneRenamed(qint32 iProjId, qint32 iId);
   void SignalSceneRemoved(qint32 iProjId, qint32 iId);
+  void SignalReloadFinished();
+  void SignalReloadStarted();
   void SignalResourceAdded(qint32 iProjId, const QString& sName);
   void SignalResourceRenamed(qint32 iProjId, const QString& sOldName, const QString& sName);
   void SignalResourceRemoved(qint32 iProjId, const QString& sName);
@@ -92,6 +99,7 @@ private:
 
   std::shared_ptr<CSettings>             m_spSettings;
   mutable QMutex                         m_dbMutex;
+  QAtomicInt                             m_bLoadedDb;
   tvspProject                            m_vspProjectDatabase;
   tKinkKategories                        m_kinkKategoryMap;
 };

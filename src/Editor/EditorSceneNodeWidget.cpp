@@ -198,6 +198,8 @@ void CEditorSceneNodeWidget::LoadProject(tspProject spCurrentProject)
 
   m_spCurrentProject = spCurrentProject;
   SlotStyleChanged();
+
+  m_pFlowView->SetReadOnly(EditorModel()->IsReadOnly());
 }
 
 //----------------------------------------------------------------------------------------
@@ -211,6 +213,8 @@ void CEditorSceneNodeWidget::UnloadProject()
   m_pFlowView->resetTransform();
   m_pFlowView->scale(0.8, 0.8);
   m_pFlowView->centerOn(0,0);
+
+  m_pFlowView->SetReadOnly(false);
 }
 
 //----------------------------------------------------------------------------------------
@@ -231,6 +235,9 @@ void CEditorSceneNodeWidget::OnActionBarAboutToChange()
             this, &CEditorSceneNodeWidget::SlotAddSceneButtonClicked);
     disconnect(ActionBar()->m_spUi->RemoveNodeButton, &QPushButton::clicked,
             this, &CEditorSceneNodeWidget::SlotRemoveNodeButtonClicked);
+
+    ActionBar()->m_spUi->AddNodeButton->setEnabled(true);
+    ActionBar()->m_spUi->RemoveNodeButton->setEnabled(true);
   }
 }
 
@@ -246,6 +253,12 @@ void CEditorSceneNodeWidget::OnActionBarChanged()
             this, &CEditorSceneNodeWidget::SlotAddSceneButtonClicked);
     connect(ActionBar()->m_spUi->RemoveNodeButton, &QPushButton::clicked,
             this, &CEditorSceneNodeWidget::SlotRemoveNodeButtonClicked);
+
+    if (EditorModel()->IsReadOnly())
+    {
+      ActionBar()->m_spUi->AddNodeButton->setEnabled(false);
+      ActionBar()->m_spUi->RemoveNodeButton->setEnabled(false);
+    }
   }
 }
 

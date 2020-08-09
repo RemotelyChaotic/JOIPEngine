@@ -1,6 +1,7 @@
 #include "EditorCodeWidget.h"
 #include "Application.h"
 #include "EditorActionBar.h"
+#include "EditorModel.h"
 #include "Player/SceneMainScreen.h"
 #include "Script/BackgroundSnippetOverlay.h"
 #include "Script/IconSnippetOverlay.h"
@@ -142,6 +143,8 @@ void CEditorCodeWidget::LoadProject(tspProject spProject)
   {
     m_spUi->pStackedWidget->setCurrentIndex(c_iIndexNoScripts);
   }
+
+  m_spUi->pCodeEdit->setReadOnly(EditorModel()->IsReadOnly());
 }
 
 //----------------------------------------------------------------------------------------
@@ -156,6 +159,7 @@ void CEditorCodeWidget::UnloadProject()
   m_spUi->pCodeEdit->ResetWidget();
   m_spUi->pCodeEdit->clear();
   m_spUi->pCodeEdit->blockSignals(false);
+  m_spUi->pCodeEdit->setReadOnly(false);
 
   m_spResourceSnippetOverlay->UnloadProject();
 
@@ -240,6 +244,13 @@ void CEditorCodeWidget::OnActionBarAboutToChange()
             m_spTimerSnippetOverlay.get(), &CTimerSnippetOverlay::Show);
     disconnect(ActionBar()->m_spUi->AddThreadCode, &QPushButton::clicked,
             m_spThreadSnippetOverlay.get(), &CThreadSnippetOverlay::Show);
+
+    ActionBar()->m_spUi->AddShowBackgroundCode->setEnabled(true);
+    ActionBar()->m_spUi->AddShowIconCode->setEnabled(true);
+    ActionBar()->m_spUi->AddShowImageCode->setEnabled(true);
+    ActionBar()->m_spUi->AddTextCode->setEnabled(true);
+    ActionBar()->m_spUi->AddTimerCode->setEnabled(true);
+    ActionBar()->m_spUi->AddThreadCode->setEnabled(true);
   }
 }
 
@@ -266,6 +277,16 @@ void CEditorCodeWidget::OnActionBarChanged()
             m_spTimerSnippetOverlay.get(), &CTimerSnippetOverlay::Show);
     connect(ActionBar()->m_spUi->AddThreadCode, &QPushButton::clicked,
             m_spThreadSnippetOverlay.get(), &CThreadSnippetOverlay::Show);
+
+    if (EditorModel()->IsReadOnly())
+    {
+      ActionBar()->m_spUi->AddShowBackgroundCode->setEnabled(false);
+      ActionBar()->m_spUi->AddShowIconCode->setEnabled(false);
+      ActionBar()->m_spUi->AddShowImageCode->setEnabled(false);
+      ActionBar()->m_spUi->AddTextCode->setEnabled(false);
+      ActionBar()->m_spUi->AddTimerCode->setEnabled(false);
+      ActionBar()->m_spUi->AddThreadCode->setEnabled(false);
+    }
   }
 }
 

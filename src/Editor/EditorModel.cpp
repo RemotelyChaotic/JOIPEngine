@@ -23,6 +23,8 @@
 #include <QFileDialog>
 #include <QMessageBox>
 #include <QPushButton>
+#include <QStandardPaths>
+#include <QTextStream>
 #include <QWidget>
 
 using QtNodes::DataModelRegistry;
@@ -41,6 +43,8 @@ namespace
     ret->registerModel<CPathSplitterModel>("Path");
     return ret;
   }
+
+  const char c_sTemporaryRccFileProperty[] = "RccFile";
 }
 
 //----------------------------------------------------------------------------------------
@@ -51,11 +55,13 @@ CEditorModel::CEditorModel(QWidget* pParent) :
   m_spResourceTreeModel(std::make_unique<CResourceTreeItemModel>()),
   m_spScriptEditorModel(std::make_unique<CScriptEditorModel>(pParent)),
   m_spFlowSceneModel(std::make_unique<FlowScene>(RegisterDataModels(), nullptr)),
+  m_spExportProcess(std::make_unique<QProcess>()),
   m_spSettings(CApplication::Instance()->Settings()),
   m_spCurrentProject(nullptr),
   m_wpDbManager(CApplication::Instance()->System<CDatabaseManager>()),
   m_pParentWidget(pParent),
-  m_bInitializingNewProject(false)
+  m_bInitializingNewProject(false),
+  m_bReadOnly(false)
 {
   connect(m_spResourceTreeModel.get(), &CResourceTreeItemModel::SignalProjectEdited,
           this, &CEditorModel::SignalProjectEdited, Qt::DirectConnection);
@@ -65,11 +71,26 @@ CEditorModel::CEditorModel(QWidget* pParent) :
           this, &CEditorModel::SlotNodeCreated);
   connect(m_spFlowSceneModel.get(), &FlowScene::nodeDeleted,
           this, &CEditorModel::SlotNodeDeleted);
+  connect(m_spExportProcess.get(), &QProcess::errorOccurred,
+          this, &CEditorModel::SlotExportErrorOccurred);
+  connect(m_spExportProcess.get(), qOverload<int,QProcess::ExitStatus>(&QProcess::finished),
+          this, &CEditorModel::SlotExportFinished);
+  connect(m_spExportProcess.get(), &QProcess::started,
+          this, &CEditorModel::SlotExportStarted);
+  connect(m_spExportProcess.get(), &QProcess::stateChanged,
+          this, &CEditorModel::SlotExportStateChanged);
 }
 
 CEditorModel::~CEditorModel()
 {
-
+  // warte auf export
+  if (m_spExportProcess->state() != QProcess::ProcessState::NotRunning)
+  {
+    if (!m_spExportProcess->waitForFinished())
+    {
+      m_spExportProcess->kill();
+    }
+  }
 }
 
 //----------------------------------------------------------------------------------------
@@ -84,6 +105,13 @@ const tspProject& CEditorModel::CurrentProject() const
 QtNodes::FlowScene* CEditorModel::FlowSceneModel() const
 {
   return m_spFlowSceneModel.get();
+}
+
+//----------------------------------------------------------------------------------------
+//
+bool CEditorModel::IsReadOnly() const
+{
+  return m_bReadOnly;
 }
 
 //----------------------------------------------------------------------------------------
@@ -348,6 +376,15 @@ void CEditorModel::LoadProject(qint32 iId)
     qWarning() << "Old Project was not unloaded before loading project.";
   }
 
+  // warte auf export
+  if (m_spExportProcess->state() != QProcess::ProcessState::NotRunning)
+  {
+    if (!m_spExportProcess->waitForFinished())
+    {
+      m_spExportProcess->kill();
+    }
+  }
+
   auto spDbManager = m_wpDbManager.lock();
   if (nullptr != spDbManager)
   {
@@ -355,11 +392,17 @@ void CEditorModel::LoadProject(qint32 iId)
     if (nullptr == m_spCurrentProject)
     {
       qWarning() << QString("Project id %1 not found.").arg(iId);
+      return;
+    }
+    else
+    {
+      CDatabaseManager::LoadProject(m_spCurrentProject);
     }
 
+    QReadLocker projectLocker(&m_spCurrentProject->m_rwLock);
+    m_bReadOnly = m_spCurrentProject->m_bBundled;
 
     // nodes
-    QReadLocker projectLocker(&m_spCurrentProject->m_rwLock);
     if (!m_spCurrentProject->m_sSceneModel.isNull() &&
         !m_spCurrentProject->m_sSceneModel.isEmpty())
     {
@@ -369,11 +412,11 @@ void CEditorModel::LoadProject(qint32 iId)
       auto spResource = spDbManager->FindResourceInProject(m_spCurrentProject, sModelName);
       if (nullptr != spResource)
       {
+        QString sPath = ResourceUrlToAbsolutePath(spResource);
         QReadLocker resourceLocker(&spResource->m_rwLock);
         QUrl path = spResource->m_sPath;
         resourceLocker.unlock();
 
-        QString sPath = ResourceUrlToAbsolutePath(path, PhysicalProjectName(m_spCurrentProject));
         QFile modelFile(sPath);
         if (modelFile.open(QIODevice::ReadOnly))
         {
@@ -437,6 +480,15 @@ void CEditorModel::SaveProject()
     return;
   }
 
+  // warte auf export
+  if (m_spExportProcess->state() != QProcess::ProcessState::NotRunning)
+  {
+    if (!m_spExportProcess->waitForFinished())
+    {
+      m_spExportProcess->kill();
+    }
+  }
+
   // nodes
   QByteArray arr = m_spFlowSceneModel->saveToMemory();
 
@@ -458,11 +510,11 @@ void CEditorModel::SaveProject()
     auto spResource = spDbManager->FindResourceInProject(m_spCurrentProject, joip_resource::c_sSceneModelFile);
     if (nullptr != spResource)
     {
+      QString sPath = ResourceUrlToAbsolutePath(spResource);
       QReadLocker resourceLocker(&spResource->m_rwLock);
       QUrl path = spResource->m_sPath;
       resourceLocker.unlock();
 
-      QString sPath = ResourceUrlToAbsolutePath(path, PhysicalProjectName(m_spCurrentProject));
       QFile modelFile(sPath);
       if (modelFile.open(QIODevice::WriteOnly | QIODevice::Truncate))
       {
@@ -480,6 +532,15 @@ void CEditorModel::SaveProject()
 //
 void CEditorModel::UnloadProject()
 {
+  // warte auf export
+  if (m_spExportProcess->state() != QProcess::ProcessState::NotRunning)
+  {
+    if (!m_spExportProcess->waitForFinished())
+    {
+      m_spExportProcess->kill();
+    }
+  }
+
   m_spScriptEditorModel->DeInitializeModel();
   m_spResourceTreeModel->DeInitializeModel();
   m_spFlowSceneModel->clearScene();
@@ -494,6 +555,11 @@ void CEditorModel::UnloadProject()
 
     spDbManager->DeserializeProject(iId);
   }
+
+  CDatabaseManager::UnloadProject(m_spCurrentProject);
+  m_spCurrentProject = nullptr;
+
+  m_bReadOnly = false;
 }
 
 //----------------------------------------------------------------------------------------
@@ -517,6 +583,69 @@ void CEditorModel::SerializeProject()
 
     // save to create folder structure
     spDbManager->SerializeProject(iId);
+  }
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CEditorModel::ExportProject()
+{
+  if (nullptr == m_spCurrentProject)
+  {
+    return;
+  }
+
+  const QString sName = PhysicalProjectName(m_spCurrentProject);
+  const QString sFolder =
+      CApplication::Instance()->Settings()->ContentFolder() + "/" + sName;
+
+  QFile rccFile(sFolder + "/" + "JOIPEngineExport.qrc");
+  if (!rccFile.open(QIODevice::WriteOnly | QIODevice::Truncate))
+  {
+    QString sError =  tr("Could not write temporary resource file '%1'").arg(rccFile.fileName());
+    qWarning() << sError;
+    emit SignalProjectExportError(EExportError::eWriteFailed, sError);
+    return;
+  }
+
+  QTextStream outStream(&rccFile);
+  outStream.setCodec("UTF-8");
+  outStream << "<!DOCTYPE RCC><RCC version=\"1.0\">" << "<qresource prefix=\"/\">";
+  m_spCurrentProject->m_rwLock.lockForRead();
+  for (auto spResourcePair : m_spCurrentProject->m_spResourcesMap)
+  {
+    spResourcePair.second->m_rwLock.lockForRead();
+    if (spResourcePair.second->m_sPath.isLocalFile())
+    {
+      outStream << QString("<file alias=\"%2\">%1</file>")
+                   .arg(spResourcePair.second->m_sPath.toLocalFile())
+                   .arg(spResourcePair.second->m_sName);
+    }
+    spResourcePair.second->m_rwLock.unlock();
+  }
+  m_spCurrentProject->m_rwLock.unlock();
+  outStream << QString("<file alias=\"%2\">%1</file>")
+               .arg(joip_resource::c_sProjectFileName)
+               .arg(joip_resource::c_sProjectFileName);
+  outStream << "</qresource>" << "</RCC>";
+
+  rccFile.close();
+
+  if (m_spExportProcess->state() == QProcess::ProcessState::NotRunning)
+  {
+    m_spExportProcess->setProperty(c_sTemporaryRccFileProperty, rccFile.fileName());
+    m_spExportProcess->setWorkingDirectory(sFolder);
+    m_spExportProcess->start("rcc",
+                             QStringList() << "--binary" << "--no-compress"
+                             << rccFile.fileName()
+                             << "--output" << sFolder + "/" + sName + ".proj");
+  }
+  else
+  {
+    QString sError = tr("Export is allready running.");
+    qWarning() << sError;
+    emit SignalProjectExportError(EExportError::eProcessError, sError);
+    emit SignalProjectExportFinished();
   }
 }
 
@@ -569,6 +698,68 @@ void CEditorModel::SlotNodeDeleted(QtNodes::Node &n)
       spDbManager->RemoveScene(m_spCurrentProject, iSceneId);
     }
     emit SignalProjectEdited();
+  }
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CEditorModel::SlotExportErrorOccurred(QProcess::ProcessError error)
+{
+  switch (error)
+  {
+  case QProcess::ProcessError::Crashed: qWarning() << tr("Export process crashed."); break;
+  case QProcess::ProcessError::Timedout: qWarning() << tr("Export process timed out."); break;
+  case QProcess::ProcessError::ReadError: qWarning() << tr("Export process read error."); break;
+  case QProcess::ProcessError::WriteError: qWarning() << tr("Export process write error."); break;
+  case QProcess::ProcessError::UnknownError: qWarning() << tr("Unknown error in export process."); break;
+  case QProcess::ProcessError::FailedToStart: qWarning() << tr("Export process failed to start."); break;
+  default: break;
+  }
+
+  qWarning() << m_spExportProcess->errorString();
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CEditorModel::SlotExportFinished(int exitCode, QProcess::ExitStatus exitStatus)
+{
+  if (exitStatus == QProcess::ExitStatus::CrashExit)
+  {
+    QString sError = tr("Export process crashed with code %1 (%2).")
+        .arg(exitCode).arg(m_spExportProcess->errorString());
+    qWarning() << sError;
+    emit SignalProjectExportError(EExportError::eProcessError, sError);
+  }
+
+  QFile rccFile(m_spExportProcess->property(c_sTemporaryRccFileProperty).toString());
+  if (!rccFile.remove())
+  {
+    QString sError = tr("Could not remove temporary qrc file '%1'.")
+        .arg(rccFile.fileName());
+    qWarning() << sError;
+    emit SignalProjectExportError(EExportError::eCleanupFailed, sError);
+  }
+
+  emit SignalProjectExportFinished();
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CEditorModel::SlotExportStarted()
+{
+  emit SignalProjectExportStarted();
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CEditorModel::SlotExportStateChanged(QProcess::ProcessState newState)
+{
+  switch (newState)
+  {
+  case QProcess::ProcessState::Running: qDebug() << tr("Running export."); break;
+  case QProcess::ProcessState::Starting: qDebug() << tr("Starting export."); break;
+  case QProcess::ProcessState::NotRunning: qDebug() << tr("Export finished."); break;
+  default: break;
   }
 }
 

@@ -2,6 +2,7 @@
 #define EDITORMAINSCREEN_H
 
 #include "EditorWidgetBase.h"
+#include "EditorModel.h"
 #include "EditorWidgetTypes.h"
 #include <QWidget>
 #include <map>
@@ -9,7 +10,6 @@
 
 class CDatabaseManager;
 class CEditorCodeWidget;
-class CEditorModel;
 class CEditorProjectSettingsWidget;
 class CEditorResourceDisplayWidget;
 class CEditorResourceWidget;
@@ -42,9 +42,13 @@ protected slots:
   void on_pRightComboBox_currentIndexChanged(qint32 iIndex);
   void SlotDisplayResource(const QString& sName);
   void SlotExitClicked(bool bClick);
+  void SlotExportClicked(bool bClick);
   void SlotHelpClicked(bool bClick);
   void SlotKeyBindingsChanged();
   void SlotProjectEdited();
+  void SlotProjectExportStarted();
+  void SlotProjectExportError(CEditorModel::EExportError error, const QString& sErrorString);
+  void SlotProjectExportFinished();
   void SlotProjectNameEditingFinished();
   void SlotProjectRenamed(qint32 iId);
   void SlotSaveClicked(bool bClick);

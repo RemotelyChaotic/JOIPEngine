@@ -16,13 +16,15 @@ using QtNodes::FlowScene;
 using QtNodes::Node;
 
 CFlowView::CFlowView(QWidget* pParent) :
-  FlowView(pParent)
+  FlowView(pParent),
+  m_bReadOnly(false)
 {
 
 }
 
 CFlowView::CFlowView(FlowScene* pScene, QWidget* pParent) :
-  FlowView(pScene, pParent)
+  FlowView(pScene, pParent),
+  m_bReadOnly(false)
 {
 }
 
@@ -32,6 +34,8 @@ CFlowView::~CFlowView() {}
 //
 void CFlowView::OpenContextMenuAt(const QPoint& localPoint, const QPoint& createPoint)
 {
+  if (m_bReadOnly) { return; }
+
   QMenu modelMenu;
 
   auto skipText = QStringLiteral("skip me");
@@ -127,4 +131,39 @@ void CFlowView::OpenContextMenuAt(const QPoint& localPoint, const QPoint& create
   txtBox->setFocus();
 
   modelMenu.exec(mapToGlobal(localPoint));
+}
+
+//----------------------------------------------------------------------------------------
+//
+bool CFlowView::IsReadOnly() { return m_bReadOnly; }
+
+//----------------------------------------------------------------------------------------
+//
+void CFlowView::SetReadOnly(bool bReadOnly)
+{
+  if (m_bReadOnly != bReadOnly)
+  {
+    m_bReadOnly = bReadOnly;
+    QtNodes::FlowScene* pScene = scene();
+    if (nullptr != pScene)
+    {
+      pScene->iterateOverNodes([&bReadOnly](QtNodes::Node* pNode) {
+        if (nullptr != pNode)
+        {
+          QtNodes::NodeGraphicsObject& pObj = pNode->nodeGraphicsObject();
+          pObj.setEnabled(!bReadOnly);
+        }
+      });
+    }
+  }
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CFlowView::contextMenuEvent(QContextMenuEvent* pEvent)
+{
+  if (!m_bReadOnly)
+  {
+    FlowView::contextMenuEvent(pEvent);
+  }
 }

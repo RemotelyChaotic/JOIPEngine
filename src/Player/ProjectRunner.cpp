@@ -210,11 +210,11 @@ bool CProjectRunner::LoadFlowScene()
       auto spResource = spDbManager->FindResourceInProject(m_spCurrentProject, sModelName);
       if (nullptr != spResource)
       {
+        QString sPath = ResourceUrlToAbsolutePath(spResource);
         QReadLocker resourceLocker(&spResource->m_rwLock);
         QUrl path = spResource->m_sPath;
         resourceLocker.unlock();
 
-        QString sPath = ResourceUrlToAbsolutePath(path, PhysicalProjectName(m_spCurrentProject));
         QFile modelFile(sPath);
         if (modelFile.open(QIODevice::ReadOnly))
         {

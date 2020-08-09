@@ -126,9 +126,9 @@ void CScriptEditorModel::SerializeProject()
         auto spResource = spDbManager->FindResourceInProject(m_spProject, it->first);
         if (nullptr != spResource)
         {
+          const QString sFilePath = ResourceUrlToAbsolutePath(spResource);
           QReadLocker lockerResource(&spResource->m_rwLock);
           QUrl sPath = spResource->m_sPath;
-          const QString sFilePath = ResourceUrlToAbsolutePath(sPath, sProjectName);
 
           QFile file(sFilePath);
           if (file.open(QIODevice::WriteOnly | QIODevice::Truncate))
@@ -456,6 +456,7 @@ void CScriptEditorModel::AddResourceTo(tspResource spResource, std::map<QString,
 {
   if (nullptr == m_spProject) { return; }
 
+  QString sPath = ResourceUrlToAbsolutePath(spResource);
   QReadLocker resourceLocker(&spResource->m_rwLock);
   const QString sResourceName = spResource->m_sName;
   if (spResource->m_type._to_integral() != EResourceType::eScript)
@@ -463,7 +464,6 @@ void CScriptEditorModel::AddResourceTo(tspResource spResource, std::map<QString,
     return;
   }
 
-  QString sPath = ResourceUrlToAbsolutePath(spResource->m_sPath, m_spProject->m_sName);
   QFileInfo scriptFileInfo(sPath);
   if (scriptFileInfo.exists())
   {
@@ -514,9 +514,9 @@ void CScriptEditorModel::LoadScriptFile(const QString& sName)
       auto spResource = spDbManager->FindResourceInProject(m_spProject, sName);
       if (nullptr != spResource)
       {
+        const QString sFilePath = ResourceUrlToAbsolutePath(spResource);
         QReadLocker lockerResource(&spResource->m_rwLock);
         QUrl sPath = spResource->m_sPath;
-        const QString sFilePath = ResourceUrlToAbsolutePath(sPath, sProjectName);
 
         QFile file(sFilePath);
         if (file.open(QIODevice::ReadOnly))

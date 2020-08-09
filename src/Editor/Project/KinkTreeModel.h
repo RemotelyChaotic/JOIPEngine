@@ -23,6 +23,8 @@ public:
   void SetSelections(QStringList vsSelectedKinks);
   std::vector<tspKink> SelectedItems();
 
+  void SetReadOnly(bool bReadOnly) { m_bReadOnly = bReadOnly; }
+
   // read-only functions
   QVariant data(const QModelIndex& index, int iRole) const override;
   Qt::ItemFlags flags(const QModelIndex& index) const override;
@@ -41,11 +43,15 @@ public:
 signals:
   void SignalCheckedItem(const QModelIndex& index, bool bChecked);
 
+private slots:
+  void SlotDbReloadFinished();
+
 private:
   CKinkTreeItem* GetItem(const QModelIndex& index) const;
 
   std::weak_ptr<CDatabaseManager> m_wpDbManager;
   CKinkTreeItem*                  m_pRootItem;
+  bool                            m_bReadOnly;
 };
 
 #endif // KINKTREEMODEL_H

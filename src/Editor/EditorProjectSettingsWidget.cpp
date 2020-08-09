@@ -121,8 +121,11 @@ void CEditorProjectSettingsWidget::LoadProject(tspProject spProject)
   {
     QReadLocker locker(&m_spCurrentProject->m_rwLock);
 
+    bool bReadOnly = EditorModel()->IsReadOnly();
+
     m_spUi->pTitleLineEdit->blockSignals(true);
     m_spUi->pTitleLineEdit->setText(m_spCurrentProject->m_sName);
+    m_spUi->pTitleLineEdit->setReadOnly(bReadOnly);
     m_spUi->pTitleLineEdit->blockSignals(false);
 
     SVersion targetVersion(m_spCurrentProject->m_iTargetVersion);
@@ -139,14 +142,23 @@ void CEditorProjectSettingsWidget::LoadProject(tspProject spProject)
     m_spUi->pProjectMajorVersion->setValue(static_cast<qint32>(projVersion.m_iMajor));
     m_spUi->pProjectMinorVersion->setValue(static_cast<qint32>(projVersion.m_iMinor));
     m_spUi->pProjectPatchVersion->setValue(static_cast<qint32>(projVersion.m_iPatch));
+    m_spUi->pProjectMajorVersion->setEnabled(!bReadOnly);
+    m_spUi->pProjectMinorVersion->setEnabled(!bReadOnly);
+    m_spUi->pProjectPatchVersion->setEnabled(!bReadOnly);
     m_spUi->pProjectMajorVersion->blockSignals(false);
     m_spUi->pProjectMinorVersion->blockSignals(false);
     m_spUi->pProjectPatchVersion->blockSignals(false);
 
     m_spUi->pDescribtionTextEdit->setPlainText(m_spCurrentProject->m_sDescribtion);
+    m_spUi->pDescribtionTextEdit->setReadOnly(bReadOnly);
+
+    m_spUi->pFetishLineEdit->setEnabled(!bReadOnly);
+    m_spUi->pFetishListWidget->setEnabled(!bReadOnly);
 
     AddKinks(m_spCurrentProject->m_vsKinks);
     KinkModel()->SetSelections(m_spCurrentProject->m_vsKinks);
+
+    m_spKinkSelectionOverlay->LoadProject(bReadOnly);
   }
 }
 
@@ -158,15 +170,27 @@ void CEditorProjectSettingsWidget::UnloadProject()
 
   m_spCurrentProject = nullptr;
 
+  m_spUi->pTitleLineEdit->setReadOnly(false);
+
   m_spUi->pEngineMajorVersion->setValue(MAJOR_VERSION);
   m_spUi->pEngineMinorVersion->setValue(MINOR_VERSION);
   m_spUi->pEnginePatchVersion->setValue(PATCH_VERSION);
+  m_spUi->pProjectMajorVersion->setEnabled(true);
+  m_spUi->pProjectMinorVersion->setEnabled(true);
+  m_spUi->pProjectPatchVersion->setEnabled(true);
   m_spUi->WarningIcon->setVisible(false);
 
   m_spUi->pDescribtionTextEdit->clear();
+  m_spUi->pDescribtionTextEdit->setReadOnly(false);
+
+  m_spUi->pFetishLineEdit->setEnabled(true);
+  m_spUi->pFetishListWidget->setEnabled(true);
 
   m_vspKinks.clear();
   KinkModel()->ResetSelections();
+
+  m_spKinkSelectionOverlay->Hide();
+  m_spKinkSelectionOverlay->UnloadProject();
 }
 
 //----------------------------------------------------------------------------------------

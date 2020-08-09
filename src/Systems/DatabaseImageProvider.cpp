@@ -31,6 +31,10 @@ QImage CDatabaseImageProvider::requestImage(const QString& id, QSize* pSize,
     if (auto spDbManager = m_wpDatabase.lock())
     {
       auto spProject = spDbManager->FindProject(vsParts[0].toInt());
+      QReadLocker projLocker(&spProject->m_rwLock);
+      bool bLoadedBefore = spProject->m_bLoaded;
+      projLocker.unlock();
+
       auto spResource = spDbManager->FindResourceInProject(spProject, vsParts[1]);
       if (nullptr != spResource)
       {
@@ -40,8 +44,11 @@ QImage CDatabaseImageProvider::requestImage(const QString& id, QSize* pSize,
           // local file
           if (spResource->m_sPath.isLocalFile())
           {
-            QString sPath = ResourceUrlToAbsolutePath(spResource->m_sPath,
-                                                      PhysicalProjectName(spProject));
+            locker.unlock();
+            QString sPath = ResourceUrlToAbsolutePath(spResource);
+            locker.relock();
+
+            CDatabaseManager::LoadProject(spProject);
             if (QFileInfo(sPath).exists())
             {
               QImage img = LoadImage(sPath);
@@ -51,11 +58,15 @@ QImage CDatabaseImageProvider::requestImage(const QString& id, QSize* pSize,
                 {
                   *pSize = img.size();
                 }
+
+                if (!bLoadedBefore) { CDatabaseManager::UnloadProject(spProject); }
                 return img.scaled(0 < requestedSize.width() ? requestedSize.width() : img.width(),
                                   0 < requestedSize.height() ? requestedSize.height() : img.height(),
                                   Qt::KeepAspectRatio, Qt::SmoothTransformation);
               }
             }
+
+            if (!bLoadedBefore) { CDatabaseManager::UnloadProject(spProject); }
           }
           // remote resource
           else

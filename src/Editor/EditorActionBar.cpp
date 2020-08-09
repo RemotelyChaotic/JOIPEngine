@@ -231,6 +231,7 @@ void CEditorActionBar::SlotKeyBindingsChanged()
     m_spUi->ExitButton->SetShortcut(m_spSettings->keyBinding("Exit"));
     m_spUi->HelpButton->SetShortcut(m_spSettings->keyBinding("Help"));
     m_spUi->SaveButton->SetShortcut(m_spSettings->keyBinding("Save"));
+    m_spUi->ExportButton->SetShortcut(m_spSettings->keyBinding("Export"));
   }
   else
   {

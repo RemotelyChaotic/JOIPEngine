@@ -16,6 +16,7 @@ namespace {
     "Pause",
     "Skip",
     "Save",
+    "Export",
     "Help",
     "Exit",
 
@@ -95,11 +96,12 @@ CSettings::CSettings(QObject* pParent) :
      CSettings::c_sOrganisation, CSettings::c_sApplicationName)),
 
   c_sDefaultKeyBindings({
-      { "Pause",      QKeySequence(Qt::Key_P)            },
-      { "Skip",       QKeySequence(Qt::Key_Space)        },
-      { "Save",       QKeySequence(QKeySequence::Save)   },
-      { "Help",       QKeySequence(Qt::Key_H)            },
-      { "Exit",       QKeySequence(Qt::Key_Escape)       },
+      { "Pause",      QKeySequence(Qt::Key_P)                        },
+      { "Skip",       QKeySequence(Qt::Key_Space)                    },
+      { "Save",       QKeySequence(QKeySequence::Save)               },
+      { "Export",     QKeySequence(Qt::CTRL + Qt::SHIFT + Qt::Key_S) },
+      { "Help",       QKeySequence(Qt::Key_H)                        },
+      { "Exit",       QKeySequence(Qt::Key_Escape)                   },
 
       { "Answer_1",   QKeySequence(Qt::Key_1)            },
       { "Answer_2",   QKeySequence(Qt::Key_2)            },
@@ -248,8 +250,15 @@ QKeySequence CSettings::keyBinding(const QString& sRole)
   auto it = c_sDefaultKeyBindings.find(sRole);
   if (c_sDefaultKeyBindings.end() != it)
   {
-    return QKeySequence(m_spSettings->value(CSettings::c_sSettingKeyBindings + sRole,
-                                            it->second.toString()).toString());
+    if (m_spSettings->contains(CSettings::c_sSettingKeyBindings + sRole))
+    {
+      return QKeySequence(m_spSettings->value(CSettings::c_sSettingKeyBindings + sRole,
+                                              it->second.toString()).toString());
+    }
+    else
+    {
+      return it->second;
+    }
   }
   else
   {

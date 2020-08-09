@@ -7,6 +7,8 @@
 #include <QMutexLocker>
 #include <cassert>
 
+//----------------------------------------------------------------------------------------
+//
 SResource::SResource(EResourceType type) :
   m_spParent(nullptr),
   m_rwLock(QReadWriteLock::Recursive),
@@ -57,12 +59,16 @@ void SResource::FromJsonObject(const QJsonObject& json)
   {
     // needed for compatibility with older versions
     QString sProject;
+    bool bBundled = false;
     if (nullptr != m_spParent)
     {
       // no lock needed here, WARNING not very safe way of doing this
       sProject = m_spParent->m_sName;
+      bBundled = m_spParent->m_bBundled;
     }
-    const QString sSuffix = QFileInfo(ResourceUrlToAbsolutePath(m_sPath, sProject)).suffix();
+    locker.unlock();
+    const QString sSuffix = QFileInfo(ResourceUrlToAbsolutePath(GetPtr())).suffix();
+    locker.relock();
 
     qint32 iValue = it.value().toInt();
     if (iValue == EResourceType::eOther &&
@@ -106,13 +112,10 @@ bool CResource::isAnimatedImpl()
   {
     case EResourceType::eImage:
     {
-      QReadLocker projLocker(&m_spData->m_spParent->m_rwLock);
-      const QString sProjectName = m_spData->m_spParent->m_sFolderName;
-      projLocker.unlock();
-
       if (m_spData->m_sPath.isLocalFile())
       {
-        QImageReader reader(ResourceUrlToAbsolutePath(m_spData->m_sPath, sProjectName));
+        locker.unlock();
+        QImageReader reader(ResourceUrlToAbsolutePath(m_spData));
         if (reader.canRead())
         {
           return reader.supportsAnimation();
@@ -152,19 +155,32 @@ QString CResource::getName()
 //
 QUrl CResource::getPath()
 {
-  QReadLocker projLocker(&m_spData->m_spParent->m_rwLock);
-  const QString sProjectName = m_spData->m_spParent->m_sFolderName;
-  projLocker.unlock();
+  if (nullptr == m_spData->m_spParent)
+  {
+    return m_spData->m_sPath;
+  }
+
+  const QString sTruePathName = PhysicalProjectName(m_spData->m_spParent);
+  QReadLocker projectLocker(&m_spData->m_spParent->m_rwLock);
+  bool bBundled = m_spData->m_spParent->m_bBundled;
+  projectLocker.unlock();
 
   QReadLocker locker(&m_spData->m_rwLock);
   if (m_spData->m_sPath.isLocalFile())
   {
-    QUrl urlCopy(m_spData->m_sPath);
-    QUrl baseUrl = QUrl::fromLocalFile(CApplication::Instance()->Settings()->ContentFolder() +
-      "/" + sProjectName + "/");
-    urlCopy.setScheme(QString());
-    QUrl sFullPath = baseUrl.resolved(urlCopy);
-    return sFullPath;
+    if (!bBundled)
+    {
+      QUrl urlCopy(m_spData->m_sPath);
+      QUrl baseUrl = QUrl::fromLocalFile(CApplication::Instance()->Settings()->ContentFolder() +
+        "/" + sTruePathName + "/");
+      urlCopy.setScheme(QString());
+      QUrl sFullPath = baseUrl.resolved(urlCopy);
+      return sFullPath;
+    }
+    else
+    {
+      return QUrl("qrc:/" + sTruePathName + "/" + m_spData->m_sName);
+    }
   }
   else
   {
@@ -229,21 +245,39 @@ QStringList ImageFormats()
 //
 QStringList OtherFormats()
 {
-  return QStringList() << ".proj" << "*.flow" << ".layout";
+  return QStringList() << "*.json" << "*.proj" << "*.flow" << ".layout";
 }
 
 //----------------------------------------------------------------------------------------
 //
-QString ResourceUrlToAbsolutePath(const QUrl& url, const QString& sProjectFolder)
+QString ResourceUrlToAbsolutePath(const tspResource& spResource)
 {
-  if (url.isLocalFile())
+  if (nullptr == spResource || nullptr == spResource->m_spParent)
   {
-    QUrl urlCopy(url);
-    QUrl baseUrl = QUrl::fromLocalFile(CApplication::Instance()->Settings()->ContentFolder() +
-      "/" + sProjectFolder + "/");
-    urlCopy.setScheme(QString());
-    QUrl sFullPath = baseUrl.resolved(urlCopy);
-    return sFullPath.toLocalFile();
+    return QString();
+  }
+
+  const QString sTruePathName = PhysicalProjectName(spResource->m_spParent);
+  QReadLocker projectLocker(&spResource->m_spParent->m_rwLock);
+  bool bBundled = spResource->m_spParent->m_bBundled;
+  projectLocker.unlock();
+
+  QReadLocker locker(&spResource->m_rwLock);
+  if (spResource->m_sPath.isLocalFile())
+  {
+    if (!bBundled)
+    {
+      QUrl urlCopy(spResource->m_sPath);
+      QUrl baseUrl = QUrl::fromLocalFile(CApplication::Instance()->Settings()->ContentFolder() +
+        "/" + sTruePathName + "/");
+      urlCopy.setScheme(QString());
+      QUrl sFullPath = baseUrl.resolved(urlCopy);
+      return sFullPath.toLocalFile();
+    }
+    else
+    {
+      return ":/" + sTruePathName + "/" + spResource->m_sName;
+    }
   }
   else
   {

@@ -10,12 +10,18 @@
 #include <QDirIterator>
 #include <QFileInfo>
 #include <QJsonDocument>
+#include <QResource>
+
+namespace  {
+  const char c_sProjectBundleFileEnding[] = ".proj";
+}
 
 //----------------------------------------------------------------------------------------
 //
 CDatabaseManager::CDatabaseManager() :
   CSystemBase(),
   m_spSettings(CApplication::Instance()->Settings()),
+  m_bLoadedDb(0),
   m_vspProjectDatabase()
 {
 
@@ -27,7 +33,51 @@ CDatabaseManager::~CDatabaseManager()
 
 //----------------------------------------------------------------------------------------
 //
-qint32 CDatabaseManager::AddProject(const QString& sDirName, quint32 iVersion)
+bool CDatabaseManager::LoadProject(tspProject& spProject)
+{
+  if (nullptr == spProject) { return false; }
+
+  const QString sProjectName = PhysicalProjectName(spProject);
+  QWriteLocker locker(&spProject->m_rwLock);
+  if (spProject->m_bBundled && !spProject->m_bLoaded)
+  {
+    spProject->m_bLoaded =
+        QResource::registerResource(CApplication::Instance()->Settings()->ContentFolder() + "/" +
+                                    sProjectName + c_sProjectBundleFileEnding,
+                                    "/" + spProject->m_sName);
+    return spProject->m_bLoaded;
+  }
+  else
+  {
+    return true;
+  }
+}
+
+//----------------------------------------------------------------------------------------
+//
+bool CDatabaseManager::UnloadProject(tspProject& spProject)
+{
+  if (nullptr == spProject) { return false; }
+
+  const QString sProjectName = PhysicalProjectName(spProject);
+  QWriteLocker locker(&spProject->m_rwLock);
+  if (spProject->m_bBundled && spProject->m_bLoaded)
+  {
+    spProject->m_bLoaded =
+        !QResource::unregisterResource(CApplication::Instance()->Settings()->ContentFolder() + "/" +
+                                       sProjectName + c_sProjectBundleFileEnding,
+                                       "/" + spProject->m_sName);
+    return !spProject->m_bLoaded;
+  }
+  else
+  {
+    return true;
+  }
+}
+
+//----------------------------------------------------------------------------------------
+//
+qint32 CDatabaseManager::AddProject(const QString& sDirName, quint32 iVersion, bool bBundled)
 {
   if (!IsInitialized()) { return -1; }
 
@@ -53,6 +103,7 @@ qint32 CDatabaseManager::AddProject(const QString& sDirName, quint32 iVersion)
     m_vspProjectDatabase.back()->m_sName = sName;
     m_vspProjectDatabase.back()->m_sFolderName = sDirName;
     m_vspProjectDatabase.back()->m_iVersion = iVersion;
+    m_vspProjectDatabase.back()->m_bBundled = bBundled;
 
     locker.unlock();
     emit SignalProjectAdded(iNewId);
@@ -73,13 +124,19 @@ void CDatabaseManager::ClearProjects()
     auto it = m_vspProjectDatabase.begin();
     QReadLocker projLocker(&(*it)->m_rwLock);
     qint32 iId = (*it)->m_iId;
+    QString sName = (*it)->m_sName;
     projLocker.unlock();
+
+    UnloadProject(*it);
+
     m_vspProjectDatabase.erase(it);
 
     locker.unlock();
     emit SignalProjectRemoved(iId);
     locker.relock();
   }
+
+  m_bLoadedDb = 0;
 }
 
 //----------------------------------------------------------------------------------------
@@ -710,8 +767,10 @@ void CDatabaseManager::Deinitialize()
 //
 void CDatabaseManager::SlotContentFolderChanged()
 {
+  emit SignalReloadStarted();
   ClearProjects();
   LoadDatabase();
+  emit SignalReloadFinished();
 }
 
 //----------------------------------------------------------------------------------------
@@ -720,19 +779,42 @@ bool CDatabaseManager::DeserializeProjectPrivate(tspProject& spProject)
 {
   spProject->m_rwLock.lockForRead();
   const QString sName = spProject->m_sName;
+  bool bBundled = spProject->m_bBundled;
   spProject->m_rwLock.unlock();
 
   bool bOk = true;
   QDir sContentFolder(m_spSettings->ContentFolder());
-  if (!QFileInfo(m_spSettings->ContentFolder() + QDir::separator() + sName).exists())
+  if (!bBundled)
   {
-    qWarning() << "Could not find project folder: " + m_spSettings->ContentFolder() + QDir::separator() + sName;
+    if (!QFileInfo(m_spSettings->ContentFolder() + QDir::separator() + sName).exists())
+    {
+      qWarning() << "Could not find project folder: " + m_spSettings->ContentFolder() + QDir::separator() + sName;
+    }
   }
+  else
+  {
+    if (!QFileInfo(m_spSettings->ContentFolder() + QDir::separator() + sName + c_sProjectBundleFileEnding).exists())
+    {
+      qWarning() << "Could not find project bundle file: " + m_spSettings->ContentFolder() + QDir::separator() + sName + c_sProjectBundleFileEnding;
+    }
+  }
+
+  bOk &= LoadProject(spProject);
 
   if (bOk)
   {
-    QFileInfo jsonInfo(m_spSettings->ContentFolder() + QDir::separator() + sName +
-                       QDir::separator() + joip_resource::c_sProjectFileName);
+    QString jsonFile;
+    if (!bBundled)
+    {
+      jsonFile = m_spSettings->ContentFolder() + QDir::separator() + sName +
+          QDir::separator() + joip_resource::c_sProjectFileName;
+    }
+    else
+    {
+      jsonFile = ":/" + sName + "/" + joip_resource::c_sProjectFileName;
+    }
+
+    QFileInfo jsonInfo(jsonFile);
     if (jsonInfo.exists())
     {
       QFile jsonFile(jsonInfo.absoluteFilePath());
@@ -751,30 +833,28 @@ bool CDatabaseManager::DeserializeProjectPrivate(tspProject& spProject)
           spProject->m_rwLock.lockForWrite();
           spProject->m_iId = (-1 == iOldId) ? iNewId : iOldId;
           spProject->m_rwLock.unlock();
-          return true;
+          bOk = true;
         }
         else
         {
           qWarning() << err.errorString();
-          return false;
+          bOk = false;
         }
       }
       else
       {
         qWarning() << "Could not read project file: " + jsonInfo.absoluteFilePath();
-        return false;
+        bOk = false;
       }
     }
     else
     {
       qWarning() << "Could find project file: " + jsonInfo.absoluteFilePath();
-      return false;
+      bOk = false;
     }
   }
-  else
-  {
-    return false;
-  }
+
+  return bOk & UnloadProject(spProject);
 }
 
 //----------------------------------------------------------------------------------------
@@ -830,6 +910,14 @@ void CDatabaseManager::LoadDatabase()
     AddProject(sDirName);
   }
 
+  QDirIterator itBundle(sPath, QStringList() << QString("*") + c_sProjectBundleFileEnding,
+                        QDir::Files | QDir::NoDotAndDotDot, QDirIterator::NoIteratorFlags);
+  while (itBundle.hasNext())
+  {
+    QString sFileName = QFileInfo(itBundle.next()).baseName();
+    AddProject(sFileName, 1, true);
+  }
+
   // store projects
   QMutexLocker locker(&m_dbMutex);
   for (tspProject spProject : m_vspProjectDatabase)
@@ -859,6 +947,8 @@ void CDatabaseManager::LoadDatabase()
       }
     }
   }
+
+  m_bLoadedDb = 1;
 }
 
 //----------------------------------------------------------------------------------------
@@ -868,7 +958,11 @@ bool CDatabaseManager::SerializeProjectPrivate(tspProject& spProject)
   spProject->m_rwLock.lockForRead();
   const QString sName = spProject->m_sName;
   const QString sFolderName = spProject->m_sFolderName;
+  bool bBundled = spProject->m_bBundled;
   spProject->m_rwLock.unlock();
+
+  // cannot serialize bundled projects, since these are read only
+  if (bBundled) { return true; }
 
   bool bOk = true;
   QDir sContentFolder(m_spSettings->ContentFolder());

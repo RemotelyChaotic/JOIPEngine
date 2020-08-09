@@ -113,10 +113,9 @@ void CScriptRunner::LoadScript(tspScene spScene, tspResource spResource)
     return;
   }
 
-  QString sPath = ResourceUrlToAbsolutePath(spResource->m_sPath,
-                                            spResource->m_spParent->m_sFolderName);
   resourceLocker.unlock();
   projectLocker.unlock();
+  QString sPath = ResourceUrlToAbsolutePath(spResource);
 
   QFileInfo scriptFileInfo(sPath);
   if (scriptFileInfo.exists())

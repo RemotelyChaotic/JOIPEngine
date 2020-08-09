@@ -17,6 +17,14 @@ public:
   ~CFlowView() override;
 
   void OpenContextMenuAt(const QPoint& localPoint, const QPoint& createPoint = QPoint());
+
+  bool IsReadOnly();
+  void SetReadOnly(bool bReadOnly);
+
+protected:
+  void contextMenuEvent(QContextMenuEvent* pEvent) override;
+
+  bool m_bReadOnly;
 };
 
 #endif // FLOWVIEW_H

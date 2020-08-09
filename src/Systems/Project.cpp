@@ -28,6 +28,8 @@ SProject::SProject() :
   m_sPlayerLayout(),
   m_bUsesWeb(false),
   m_bNeedsCodecs(false),
+  m_bBundled(false),
+  m_bLoaded(false),
   m_vsKinks(),
   m_vspScenes(),
   m_spResourcesMap()
@@ -46,6 +48,8 @@ SProject::SProject(const SProject& other) :
   m_sPlayerLayout(other.m_sPlayerLayout),
   m_bUsesWeb(other.m_bUsesWeb),
   m_bNeedsCodecs(other.m_bNeedsCodecs),
+  m_bBundled(other.m_bBundled),
+  m_bLoaded(other.m_bLoaded),
   m_vsKinks(other.m_vsKinks),
   m_vspScenes(other.m_vspScenes),
   m_spResourcesMap(other.m_spResourcesMap)
@@ -164,7 +168,9 @@ void SProject::FromJsonObject(const QJsonObject& json)
     {
       std::shared_ptr<SScene> spScene = std::make_shared<SScene>();
       spScene->m_spParent = GetPtr();
+      locker.unlock();
       spScene->FromJsonObject(val.toObject());
+      locker.relock();
       m_vspScenes.push_back(spScene);
     }
   }
@@ -176,7 +182,9 @@ void SProject::FromJsonObject(const QJsonObject& json)
     {
       std::shared_ptr<SResource> spResource = std::make_shared<SResource>(EResourceType::eOther);
       spResource->m_spParent = GetPtr();
+      locker.unlock();
       spResource->FromJsonObject(val.toObject());
+      locker.relock();
       m_spResourcesMap.insert({spResource->m_sName, spResource});
     }
   }
@@ -315,6 +323,22 @@ bool CProject::isUsingCodecs()
 {
   QReadLocker locker(&m_spData->m_rwLock);
   return m_spData->m_bNeedsCodecs;
+}
+
+//----------------------------------------------------------------------------------------
+//
+bool CProject::isBundled()
+{
+  QReadLocker locker(&m_spData->m_rwLock);
+  return m_spData->m_bBundled;
+}
+
+//----------------------------------------------------------------------------------------
+//
+bool CProject::isLoaded()
+{
+  QReadLocker locker(&m_spData->m_rwLock);
+  return m_spData->m_bLoaded;
 }
 
 //----------------------------------------------------------------------------------------

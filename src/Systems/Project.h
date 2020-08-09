@@ -31,6 +31,8 @@ struct SProject : public ISerializable, std::enable_shared_from_this<SProject>
   QString                   m_sPlayerLayout;
   bool                      m_bUsesWeb;
   bool                      m_bNeedsCodecs;
+  bool                      m_bBundled;
+  bool                      m_bLoaded;
   QStringList               m_vsKinks;
   tvspScene                 m_vspScenes;
   tspResourceMap            m_spResourcesMap;
@@ -66,6 +68,8 @@ class CProject : public QObject
   Q_PROPERTY(QStringList kinks         READ getKinks             )
   Q_PROPERTY(bool    isUsingWeb        READ isUsingWeb           )
   Q_PROPERTY(bool    isUsingCodecs     READ isUsingCodecs        )
+  Q_PROPERTY(bool    isBundled         READ isBundled            )
+  Q_PROPERTY(bool    isLoaded          READ isLoaded             )
 
 public:
   explicit CProject(QJSEngine* pEngine, const std::shared_ptr<SProject>& spProject);
@@ -86,6 +90,8 @@ public:
   QStringList getKinks();
   bool isUsingWeb();
   bool isUsingCodecs();
+  bool isBundled();
+  bool isLoaded();
 
   Q_INVOKABLE qint32 numScenes();
   Q_INVOKABLE QStringList scenes();

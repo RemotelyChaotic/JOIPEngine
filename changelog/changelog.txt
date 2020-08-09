@@ -27,6 +27,8 @@ New Features:
 - New resource types added: Script and Database
   -> Resources of type Other in old projects will be reassigned on project
      load if needed.
+- Projects can now be exported as a bundle, packing all resources in a single
+  file.
 
 Updated Features:
 - Upgrade to Qt5.14.2 with msvc2017 for more QJSEngine and QML features.

@@ -123,6 +123,9 @@ void CEditorResourceWidget::LoadProject(tspProject spCurrentProject)
   }
 
   m_spCurrentProject = spCurrentProject;
+  m_spUi->pResourceTree->setEditTriggers(
+        EditorModel()->IsReadOnly() ? QAbstractItemView::NoEditTriggers :
+                                      QAbstractItemView::DoubleClicked | QAbstractItemView::EditKeyPressed);
 }
 
 //----------------------------------------------------------------------------------------
@@ -135,6 +138,8 @@ void CEditorResourceWidget::UnloadProject()
 
   m_spUi->pResourceDisplayWidget->UnloadResource();
   m_spWebOverlay->Hide();
+
+  m_spUi->pResourceTree->setEditTriggers(QAbstractItemView::DoubleClicked | QAbstractItemView::EditKeyPressed);
 }
 
 //----------------------------------------------------------------------------------------
@@ -153,6 +158,13 @@ void CEditorResourceWidget::OnActionBarAboutToChange()
             this, &CEditorResourceWidget::SlotTitleCardButtonClicked);
     disconnect(ActionBar()->m_spUi->MapButton, &QPushButton::clicked,
             this, &CEditorResourceWidget::SlotMapButtonClicked);
+
+    // read only mode reset
+    ActionBar()->m_spUi->AddResourceButton->setEnabled(true);
+    ActionBar()->m_spUi->AddWebResourceButton->setEnabled(true);
+    ActionBar()->m_spUi->RemoveResourceButton->setEnabled(true);
+    ActionBar()->m_spUi->TitleCardButton->setEnabled(true);
+    ActionBar()->m_spUi->MapButton->setEnabled(true);
   }
 }
 
@@ -182,6 +194,16 @@ void CEditorResourceWidget::OnActionBarChanged()
             this, &CEditorResourceWidget::SlotTitleCardButtonClicked);
     connect(ActionBar()->m_spUi->MapButton, &QPushButton::clicked,
             this, &CEditorResourceWidget::SlotMapButtonClicked);
+
+    // read only mode -> grey out some options
+    if (EditorModel()->IsReadOnly())
+    {
+      ActionBar()->m_spUi->AddResourceButton->setEnabled(false);
+      ActionBar()->m_spUi->AddWebResourceButton->setEnabled(false);
+      ActionBar()->m_spUi->RemoveResourceButton->setEnabled(false);
+      ActionBar()->m_spUi->TitleCardButton->setEnabled(false);
+      ActionBar()->m_spUi->MapButton->setEnabled(false);
+    }
   }
 }
 
@@ -189,6 +211,8 @@ void CEditorResourceWidget::OnActionBarChanged()
 //
 void CEditorResourceWidget::dragEnterEvent(QDragEnterEvent* pEvent)
 {
+  if (EditorModel()->IsReadOnly()) { return; }
+
   const QMimeData* pMimeData = pEvent->mimeData();
 
   // check for our needed mime type, here a file or a list of files
@@ -202,6 +226,8 @@ void CEditorResourceWidget::dragEnterEvent(QDragEnterEvent* pEvent)
 //
 void CEditorResourceWidget::dropEvent(QDropEvent* pEvent)
 {
+  if (EditorModel()->IsReadOnly()) { return; }
+
   const QMimeData* pMimeData = pEvent->mimeData();
 
   // check for our needed mime type, here a file or a list of files

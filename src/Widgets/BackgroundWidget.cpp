@@ -81,7 +81,9 @@ void CBackgroundWidget::SlotBackgroundTextureChanged(tspResource spResource)
     {
       if (spResource->m_sPath.isLocalFile())
       {
-        SetBackgroundTexture(ResourceUrlToAbsolutePath(spResource->m_sPath, spResource->m_spParent->m_sFolderName));
+        locker.unlock();
+        projLocker.unlock();
+        SetBackgroundTexture(ResourceUrlToAbsolutePath(spResource));
       }
       else
       {

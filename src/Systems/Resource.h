@@ -31,7 +31,7 @@ namespace joip_resource {
 
 //----------------------------------------------------------------------------------------
 //
-struct SResource : public ISerializable
+struct SResource : public ISerializable, public std::enable_shared_from_this<SResource>
 {
   explicit SResource(EResourceType type = EResourceType::eOther);
   SResource(const SResource& other);
@@ -45,6 +45,11 @@ struct SResource : public ISerializable
 
   QJsonObject ToJsonObject() override;
   void FromJsonObject(const QJsonObject& json) override;
+
+  std::shared_ptr<SResource> GetPtr()
+  {
+    return shared_from_this();
+  }
 };
 
 //----------------------------------------------------------------------------------------
@@ -113,7 +118,7 @@ QStringList AudioFormats();
 QStringList DatabaseFormats();
 QStringList ImageFormats();
 QStringList OtherFormats();
-QString ResourceUrlToAbsolutePath(const QUrl& url, const QString& sProjectFolder);
+QString ResourceUrlToAbsolutePath(const tspResource& spResource);
 QStringList ScriptFormats();
 QStringList VideoFormats();
 

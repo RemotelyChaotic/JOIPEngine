@@ -97,7 +97,9 @@ void CResourceDisplayWidget::LoadResource(tspResource spResource)
       case EResourceType::eImage:
       {
         projectLocker.unlock();
-        QString sPath = ResourceUrlToAbsolutePath(path, PhysicalProjectName(spProject));
+        resourceLocker.unlock();
+        QString sPath = ResourceUrlToAbsolutePath(m_spResource);
+        resourceLocker.relock();
         if (QFileInfo(sPath).exists())
         {
           StartImageLoad(sPath);
@@ -111,7 +113,9 @@ void CResourceDisplayWidget::LoadResource(tspResource spResource)
       case EResourceType::eMovie: // fallthrough
       case EResourceType::eSound:
       {
-        QString sPath = ResourceUrlToAbsolutePath(path, PhysicalProjectName(spProject));
+        resourceLocker.unlock();
+        QString sPath = ResourceUrlToAbsolutePath(m_spResource);
+        resourceLocker.relock();
         m_spUi->pMediaPlayer->OpenMedia(sPath);
         m_spUi->pStackedWidget->setCurrentIndex(EResourceDisplayType::eLocalMedia);
         m_iLoadState = ELoadState::eFinished;

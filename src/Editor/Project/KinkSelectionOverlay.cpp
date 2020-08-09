@@ -40,6 +40,26 @@ void CKinkSelectionOverlay::Initialize(CKinkTreeModel* pKinkTreeModel)
 
 //----------------------------------------------------------------------------------------
 //
+void CKinkSelectionOverlay::LoadProject(bool bReadOnly)
+{
+  CKinkTreeSortFilterProxyModel* pProxyModel =
+      dynamic_cast<CKinkTreeSortFilterProxyModel*>(m_spUi->pKinkTree->model());
+  CKinkTreeModel* pSourceModel = dynamic_cast<CKinkTreeModel*>(pProxyModel->sourceModel());
+  pSourceModel->SetReadOnly(bReadOnly);
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CKinkSelectionOverlay::UnloadProject()
+{
+  CKinkTreeSortFilterProxyModel* pProxyModel =
+      dynamic_cast<CKinkTreeSortFilterProxyModel*>(m_spUi->pKinkTree->model());
+  CKinkTreeModel* pSourceModel = dynamic_cast<CKinkTreeModel*>(pProxyModel->sourceModel());
+  pSourceModel->SetReadOnly(false);
+}
+
+//----------------------------------------------------------------------------------------
+//
 void CKinkSelectionOverlay::Climb()
 {
   ClimbToFirstInstanceOf("CEditorMainScreen", false);

@@ -1,7 +1,6 @@
 #include "EditorMainScreen.h"
 #include "Application.h"
 #include "EditorCodeWidget.h"
-#include "EditorModel.h"
 #include "EditorProjectSettingsWidget.h"
 #include "EditorResourceDisplayWidget.h"
 #include "EditorResourceWidget.h"
@@ -101,6 +100,8 @@ void CEditorMainScreen::Initialize()
           this, &CEditorMainScreen::SlotProjectNameEditingFinished);
   connect(m_spUi->pProjectActionBar->m_spUi->SaveButton, &QPushButton::clicked,
           this, &CEditorMainScreen::SlotSaveClicked);
+  connect(m_spUi->pProjectActionBar->m_spUi->ExportButton, &QPushButton::clicked,
+          this, &CEditorMainScreen::SlotExportClicked);
   connect(m_spUi->pProjectActionBar->m_spUi->HelpButton, &QPushButton::clicked,
           this, &CEditorMainScreen::SlotHelpClicked);
   connect(m_spUi->pProjectActionBar->m_spUi->ExitButton, &QPushButton::clicked,
@@ -228,6 +229,10 @@ void CEditorMainScreen::UnloadProject()
   }
 
   SetModificaitonFlag(false);
+
+  m_spUi->pProjectActionBar->m_spUi->pTitleLineEdit->setReadOnly(false);
+  m_spUi->pProjectActionBar->m_spUi->SaveButton->setEnabled(true);
+  m_spUi->pProjectActionBar->m_spUi->ExportButton->setEnabled(true);
 }
 
 //----------------------------------------------------------------------------------------
@@ -350,6 +355,16 @@ void CEditorMainScreen::SlotExitClicked(bool bClick)
 
 //----------------------------------------------------------------------------------------
 //
+void CEditorMainScreen::SlotExportClicked(bool bClick)
+{
+  Q_UNUSED(bClick);
+  if (!m_bInitialized) { return; }
+  SlotSaveClicked(bClick);
+  m_spEditorModel->ExportProject();
+}
+
+//----------------------------------------------------------------------------------------
+//
 void CEditorMainScreen::SlotHelpClicked(bool bClick)
 {
   Q_UNUSED(bClick)
@@ -409,6 +424,76 @@ void CEditorMainScreen::SlotProjectEdited()
   {
     it->second->EditedProject();
   }
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CEditorMainScreen::SlotProjectExportStarted()
+{
+  m_spUi->pProjectActionBar->m_spUi->SaveButton->setEnabled(false);
+  m_spUi->pProjectActionBar->m_spUi->ExportButton->setEnabled(false);
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CEditorMainScreen::SlotProjectExportError(CEditorModel::EExportError error, const QString& sErrorString)
+{
+  QMessageBox msgBox;
+  msgBox.setText("Export error.");
+
+  switch (error)
+  {
+    case CEditorModel::EExportError::eWriteFailed:
+    msgBox.setInformativeText(sErrorString + "\n"
+                              + tr("Please move the data directory to a writable location and try again."));
+    msgBox.setStandardButtons(QMessageBox::Ok);
+    msgBox.setDefaultButton(QMessageBox::Ok);
+    break;
+
+    case CEditorModel::EExportError::eProcessError:
+    msgBox.setInformativeText(sErrorString + "\n");
+    msgBox.setStandardButtons(QMessageBox::Ok);
+    msgBox.setDefaultButton(QMessageBox::Ok);
+    break;
+
+    case CEditorModel::EExportError::eCleanupFailed:
+    msgBox.setInformativeText(sErrorString + "\n"
+                              + tr("Please delete the file manually."));
+    msgBox.setStandardButtons(QMessageBox::Ok);
+    msgBox.setDefaultButton(QMessageBox::Ok);
+    break;
+
+    default:
+    msgBox.setInformativeText(sErrorString);
+    msgBox.setStandardButtons(QMessageBox::Ok);
+    msgBox.setDefaultButton(QMessageBox::Ok);
+    break;
+  }
+
+  msgBox.setModal(true);
+  msgBox.setWindowFlag(Qt::FramelessWindowHint);
+
+  QPointer<CEditorMainScreen> pMeMyselfMyPointerAndI(this);
+  qint32 iRet = msgBox.exec();
+  if (nullptr == pMeMyselfMyPointerAndI)
+  {
+    return;
+  }
+
+  switch (iRet) {
+    case QMessageBox::Ok:
+        break;
+    default:
+        break;
+  }
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CEditorMainScreen::SlotProjectExportFinished()
+{
+  m_spUi->pProjectActionBar->m_spUi->SaveButton->setEnabled(true);
+  m_spUi->pProjectActionBar->m_spUi->ExportButton->setEnabled(true);
 }
 
 //----------------------------------------------------------------------------------------
@@ -509,7 +594,19 @@ void CEditorMainScreen::ProjectLoaded(bool bNewProject)
 
   SetModificaitonFlag(false);
 
+  // reload action bars
+  ChangeIndex(m_spUi->pRightComboBox, m_spUi->pRightContainer, m_spUi->pActionBarRight, 2);
+  ChangeIndex(m_spUi->pLeftComboBox, m_spUi->pLeftContainer, m_spUi->pActionBarLeft, 0);
+
   m_spUi->splitter->setSizes({ width() * 1/3 , width() * 2/3 });
+
+  // read only
+  if (m_spEditorModel->IsReadOnly())
+  {
+    m_spUi->pProjectActionBar->m_spUi->pTitleLineEdit->setReadOnly(true);
+    m_spUi->pProjectActionBar->m_spUi->SaveButton->setEnabled(false);
+    m_spUi->pProjectActionBar->m_spUi->ExportButton->setEnabled(false);
+  }
 }
 
 //----------------------------------------------------------------------------------------
