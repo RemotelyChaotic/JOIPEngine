@@ -9,6 +9,7 @@
 namespace {
   const QString c_sRenameProjectHelpId =  "Editor/RenameProject";
   const QString c_sSaveProjectHelpId =    "Editor/SaveProject";
+  const QString c_sExportProjectHelpId =  "Editor/ExportProject";
   const QString c_sExitProjectHelpId =    "Editor/ExitProject";
 
   const QString c_sAddResourceHelpId =    "Editor/AddResource";
@@ -77,6 +78,8 @@ void CEditorActionBar::Initialize()
     wpHelpFactory->RegisterHelp(c_sRenameProjectHelpId, ":/resources/help/editor/project_name_help.html");
     m_spUi->SaveButton->setProperty(helpOverlay::c_sHelpPagePropertyName, c_sSaveProjectHelpId);
     wpHelpFactory->RegisterHelp(c_sSaveProjectHelpId, ":/resources/help/editor/saveproject_button_help.html");
+    m_spUi->ExportButton->setProperty(helpOverlay::c_sHelpPagePropertyName, c_sExportProjectHelpId);
+    wpHelpFactory->RegisterHelp(c_sExportProjectHelpId, ":/resources/help/editor/exportproject_button_help.html");
     m_spUi->ExitButton->setProperty(helpOverlay::c_sHelpPagePropertyName, c_sExitProjectHelpId);
     wpHelpFactory->RegisterHelp(c_sExitProjectHelpId, ":/resources/help/editor/exitproject_button_help.html");
 

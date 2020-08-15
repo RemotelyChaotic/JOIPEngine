@@ -1,0 +1,68 @@
+<!doctype html>
+<html class="no-js" lang="">
+
+<head>
+  <meta charset="utf-8">
+  <title>Export Project</title>
+  <meta name="description" content="">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <style>
+    h1 {
+      text-align: center;
+    }
+    div.container {
+      min-height: 10em;
+      display: table-cell;
+      margin-left: auto;
+      margin-right: auto;
+      width: 0.6em
+    }
+    table.warning {
+      color: black;
+      background-color: #cccc44;
+      border-color: yellow;
+      border-style: solid;
+    }
+  </style>
+</head>
+
+
+<body>
+  <h1>Export Project</h1>
+
+  <hr>
+
+  <div class="container">
+    <p>Saves the current <a href="qrc:/resources/help/project/joi_project_help.html">JOI-Project</a> in a bundled
+    format, which creates a <i>.proj</i> file in the project directory. This file
+    is <a href="qrc:/resources/help/editor/project_name_help.html">named</a> after the project
+    and contains all project resources in a single bundled binary file.
+    This file can then be distributed instead of the loose files in the project folder.
+    Performing this action will <b>not</b> delete the opened project nor change any of it's
+    properties, as the exported file is only a copy of the project.</p>
+
+    <br>
+
+    <p>Exporting a project has the important advantage of making the project read only
+    (when loaded via the <i>.proj</i> file instead of the loose files), preventing other users
+    from easily copying files from the project or making modifications to it.</p>
+
+    <br>
+
+    <div class="container">
+      <table width="100%" class="warning">
+        <tr>
+          <td width="10%"><img src="qrc:/resources/help/icons/WarningIcon.png" width="64" height="64" alt="Warning"></td>
+          <td width="90%"><br>Due to an exported project being in a binary format, they currently need
+          to be loaded into memory all at once.<br>
+          This means exported projects should be kept to a reasonable size, as too big projects
+          will not be loadable by every pc.</td>
+        </tr>
+      </table>
+    </div>
+
+  </div>
+</body>
+
+</html>

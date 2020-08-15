@@ -96,6 +96,8 @@ void CEditorMainScreen::Initialize()
   m_spUi->pActionBarRight->SetActionBarPosition(CEditorActionBar::eRight);
   m_spUi->pActionBarRight->Initialize();
 
+  m_spUi->pProjectActionBar->m_spUi->ReadOnly->setVisible(false);
+
   connect(m_spUi->pProjectActionBar->m_spUi->pTitleLineEdit, &QLineEdit::editingFinished,
           this, &CEditorMainScreen::SlotProjectNameEditingFinished);
   connect(m_spUi->pProjectActionBar->m_spUi->SaveButton, &QPushButton::clicked,
@@ -230,6 +232,7 @@ void CEditorMainScreen::UnloadProject()
 
   SetModificaitonFlag(false);
 
+  m_spUi->pProjectActionBar->m_spUi->ReadOnly->setVisible(false);
   m_spUi->pProjectActionBar->m_spUi->pTitleLineEdit->setReadOnly(false);
   m_spUi->pProjectActionBar->m_spUi->SaveButton->setEnabled(true);
   m_spUi->pProjectActionBar->m_spUi->ExportButton->setEnabled(true);
@@ -603,6 +606,7 @@ void CEditorMainScreen::ProjectLoaded(bool bNewProject)
   // read only
   if (m_spEditorModel->IsReadOnly())
   {
+    m_spUi->pProjectActionBar->m_spUi->ReadOnly->setVisible(true);
     m_spUi->pProjectActionBar->m_spUi->pTitleLineEdit->setReadOnly(true);
     m_spUi->pProjectActionBar->m_spUi->SaveButton->setEnabled(false);
     m_spUi->pProjectActionBar->m_spUi->ExportButton->setEnabled(false);
