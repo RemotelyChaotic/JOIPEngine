@@ -2,7 +2,7 @@
 #include "Application.h"
 #include "DatabaseManager.h"
 #include "SVersion.h"
-#include "version.h"
+#include "out_Version.h"
 #include <QApplication>
 #include <QJsonArray>
 #include <QMutexLocker>
@@ -18,7 +18,7 @@ SProject::SProject() :
   m_rwLock(QReadWriteLock::Recursive),
   m_iId(),
   m_iVersion(SVersion(1, 0, 0)),
-  m_iTargetVersion(SVersion(MAJOR_VERSION, MINOR_VERSION, PATCH_VERSION)),
+  m_iTargetVersion(SVersion(VERSION_XYZ)),
   m_sName(),
   m_sFolderName(),
   m_sDescribtion(),

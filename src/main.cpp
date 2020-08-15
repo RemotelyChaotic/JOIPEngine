@@ -10,8 +10,8 @@
 #include <QtAVWidgets>
 #include <QOpenGLContext>
 #include <QSslSocket>
-#include <QtWebEngine>
-#include <QtWebView/QtWebView>
+//#include <QtWebEngine>
+//#include <QtWebView/QtWebView>
 
 int main(int argc, char *argv[])
 {
@@ -19,7 +19,7 @@ int main(int argc, char *argv[])
   QCoreApplication::setAttribute(Qt::AA_UseOpenGLES);
 
   // WebView or Webengine is not used anymore, but we'll keep this for now
-  QtWebView::initialize();
+  //QtWebView::initialize();
   QtAV::Widgets::registerRenderers();
 
 #ifndef NDEBU

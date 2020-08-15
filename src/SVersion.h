@@ -1,7 +1,7 @@
 #ifndef SVERSION_H
 #define SVERSION_H
 
-#include "version.h"
+#include "out_Version.h"
 #include <QRegularExpression>
 #include <QString>
 #include <QStringList>

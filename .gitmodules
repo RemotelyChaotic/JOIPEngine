@@ -1,0 +1,15 @@
+[submodule "3rdparty/better-enums"]
+	path = 3rdparty/better-enums
+	url = https://github.com/RemotelyChaotic/better-enums.git
+[submodule "3rdparty/SortFilterProxyModel"]
+	path = 3rdparty/SortFilterProxyModel
+	url = https://github.com/RemotelyChaotic/SortFilterProxyModel.git
+[submodule "3rdparty/nodeeditor"]
+	path = 3rdparty/nodeeditor
+	url = https://github.com/RemotelyChaotic/nodeeditor.git
+[submodule "3rdparty/syntax-highlighting"]
+	path = 3rdparty/syntax-highlighting
+	url = https://github.com/RemotelyChaotic/syntax-highlighting.git
+[submodule "cmake/extra-cmake-modules"]
+	path = cmake/extra-cmake-modules
+	url = https://github.com/RemotelyChaotic/extra-cmake-modules.git

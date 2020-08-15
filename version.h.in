@@ -1,0 +1,19 @@
+#ifndef QRVERSION_H
+#define QRVERSION_H
+
+// --- ascii only, fuer {*.cpp / *.h / *.rc} ---
+#define APPNAME "${APPNAME}"
+#cmakedefine SETICONPATH
+#define OUTPUT_BASENAME "${OUTPUT_BASENAME}"
+#define OUTPUT_FILENAME "${OUTPUT_FILENAME}"
+#define FILENAME "${APPNAME}.exe"
+#define COMPANY "Private"
+#define YEAR "$ENV{GIT_YEAR}"
+#define REVISION "$ENV{GIT_REVISION}"
+#define GITHASH "$ENV{GIT_HASH}"
+#define COPYRIGHT ""
+#define VERSION_RES ${VERSION_COMMA}
+#define VERSION_XYZ "${VERSION_DOT}"
+#define VERSION "${VERSION_DOT}.$ENV{GIT_REVISION}"
+
+#endif

@@ -3,7 +3,7 @@
 #include "EditorActionBar.h"
 #include "EditorModel.h"
 #include "SVersion.h"
-#include "version.h"
+#include "out_Version.h"
 #include "Project/KinkCompleter.h"
 #include "Project/KinkSelectionOverlay.h"
 #include "Project/KinkTreeModel.h"
@@ -98,9 +98,10 @@ void CEditorProjectSettingsWidget::Initialize()
   CFlowLayout* pFlow = new CFlowLayout(m_spUi->pFetishListWidget, 9, 6, 6);
   m_spUi->pFetishListWidget->setLayout(pFlow);
 
-  m_spUi->pEngineMajorVersion->setValue(MAJOR_VERSION);
-  m_spUi->pEngineMinorVersion->setValue(MINOR_VERSION);
-  m_spUi->pEnginePatchVersion->setValue(PATCH_VERSION);
+  SVersion version(VERSION_XYZ);
+  m_spUi->pEngineMajorVersion->setValue(version.m_iMajor);
+  m_spUi->pEngineMinorVersion->setValue(version.m_iMinor);
+  m_spUi->pEnginePatchVersion->setValue(version.m_iPatch);
   m_spUi->WarningIcon->setVisible(false);
 
   m_bInitialized = true;
@@ -129,7 +130,7 @@ void CEditorProjectSettingsWidget::LoadProject(tspProject spProject)
     m_spUi->pTitleLineEdit->blockSignals(false);
 
     SVersion targetVersion(m_spCurrentProject->m_iTargetVersion);
-    SVersion engineVersion(MAJOR_VERSION, MINOR_VERSION, PATCH_VERSION);
+    SVersion engineVersion(VERSION_XYZ);
     m_spUi->pEngineMajorVersion->setValue(static_cast<qint32>(targetVersion.m_iMajor));
     m_spUi->pEngineMinorVersion->setValue(static_cast<qint32>(targetVersion.m_iMinor));
     m_spUi->pEnginePatchVersion->setValue(static_cast<qint32>(targetVersion.m_iPatch));
@@ -172,9 +173,10 @@ void CEditorProjectSettingsWidget::UnloadProject()
 
   m_spUi->pTitleLineEdit->setReadOnly(false);
 
-  m_spUi->pEngineMajorVersion->setValue(MAJOR_VERSION);
-  m_spUi->pEngineMinorVersion->setValue(MINOR_VERSION);
-  m_spUi->pEnginePatchVersion->setValue(PATCH_VERSION);
+  SVersion version(VERSION_XYZ);
+  m_spUi->pEngineMajorVersion->setValue(version.m_iMajor);
+  m_spUi->pEngineMinorVersion->setValue(version.m_iMinor);
+  m_spUi->pEnginePatchVersion->setValue(version.m_iPatch);
   m_spUi->pProjectMajorVersion->setEnabled(true);
   m_spUi->pProjectMinorVersion->setEnabled(true);
   m_spUi->pProjectPatchVersion->setEnabled(true);
@@ -205,9 +207,10 @@ void CEditorProjectSettingsWidget::SaveProject()
                                             static_cast<quint32>(m_spUi->pProjectMinorVersion->value()),
                                             static_cast<quint32>(m_spUi->pProjectPatchVersion->value()));
 
-  m_spUi->pEngineMajorVersion->setValue(MAJOR_VERSION);
-  m_spUi->pEngineMinorVersion->setValue(MINOR_VERSION);
-  m_spUi->pEnginePatchVersion->setValue(PATCH_VERSION);
+  SVersion version(VERSION_XYZ);
+  m_spUi->pEngineMajorVersion->setValue(version.m_iMajor);
+  m_spUi->pEngineMinorVersion->setValue(version.m_iMinor);
+  m_spUi->pEnginePatchVersion->setValue(version.m_iPatch);
   m_spCurrentProject->m_iTargetVersion = SVersion(static_cast<quint32>(m_spUi->pEngineMajorVersion->value()),
                                                   static_cast<quint32>(m_spUi->pEngineMinorVersion->value()),
                                                   static_cast<quint32>(m_spUi->pEnginePatchVersion->value()));

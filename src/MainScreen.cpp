@@ -1,6 +1,6 @@
 #include "MainScreen.h"
 #include "Application.h"
-#include "version.h"
+#include "out_Version.h"
 #include "WindowContext.h"
 #include "ui_MainScreen.h"
 #include "Systems/HelpFactory.h"
@@ -55,7 +55,7 @@ void CMainScreen::Initialize()
   connect(CApplication::Instance(), &CApplication::StyleLoaded,
           this, &CMainScreen::SlotStyleLoaded, Qt::QueuedConnection);
 
-  m_spUi->pVersionLabel->setText("v" VERSION_DOT);
+  m_spUi->pVersionLabel->setText("v" VERSION_XYZ);
   QFont versionFont = m_spUi->pVersionLabel->font();
   versionFont.setPixelSize(30);
   m_spUi->pVersionLabel->setFont(versionFont);

@@ -1,0 +1,42 @@
+#include "out_Version.h"
+
+#ifdef SETICONPATH
+1 ICON DISCARDABLE "${ICONPATH}"
+#endif
+
+1 VERSIONINFO
+ FILEVERSION VERSION_RES
+ PRODUCTVERSION VERSION_RES
+ FILEFLAGSMASK 0x3fL
+#ifdef _DEBUG
+ FILEFLAGS 0x29L
+#else
+ FILEFLAGS 0x28L
+#endif
+ FILEOS 0x4L
+ FILETYPE 0x1L
+ FILESUBTYPE 0x0L
+BEGIN
+    BLOCK "StringFileInfo"
+    BEGIN
+        BLOCK "080704b0"
+        BEGIN
+            //VALUE "Comments", "\0"
+            VALUE "CompanyName", COMPANY
+            VALUE "FileDescription", OUTPUT_BASENAME
+            VALUE "FileVersion", VERSION
+            VALUE "InternalName", OUTPUT_BASENAME
+            VALUE "LegalCopyright", COPYRIGHT
+            //VALUE "LegalTrademarks", "\0"
+            VALUE "OriginalFilename", OUTPUT_FILENAME
+            VALUE "PrivateBuild", "\0"
+            VALUE "ProductName", APPNAME
+            VALUE "ProductVersion", VERSION
+            //VALUE "SpecialBuild", "Stand 07.06.2007\0"
+        END
+    END
+    BLOCK "VarFileInfo"
+    BEGIN
+        VALUE "Translation", 0x807, 1200
+    END
+END

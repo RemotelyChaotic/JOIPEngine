@@ -418,7 +418,8 @@ QUrl CSettings::styleFolderQml()
 //
 qint32 CSettings::Version()
 {
-  return QT_VERSION_CHECK(MAJOR_VERSION, MINOR_VERSION, PATCH_VERSION);
+  SVersion version(VERSION_XYZ);
+  return QT_VERSION_CHECK(version.m_iMajor, version.m_iMinor, version.m_iPatch);
 }
 
 //----------------------------------------------------------------------------------------
