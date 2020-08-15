@@ -1,4 +1,8 @@
 #include "ScriptEditorWidget.h"
+#include <syntaxhighlighter.h>
+#include <definition.h>
+#include <theme.h>
+#include <repository.h>
 #include <QtWidgets>
 #include <QFontMetrics>
 
@@ -9,12 +13,17 @@ namespace
 
 CScriptEditorWidget::CScriptEditorWidget(QWidget* pParent) :
   QPlainTextEdit(pParent),
+  m_spRepository(std::make_unique<KSyntaxHighlighting::Repository>()),
+  m_pHighlighter(nullptr),
   m_lineNumberBackgroundColor(24, 24, 24),
   m_lineNumberTextColor(Qt::white),
   m_highlightLineColor(68, 71, 90),
   m_widgetsBackgroundColor(24, 24, 24)
 {
   setAttribute(Qt::WA_NoMousePropagation, false);
+
+  m_pHighlighter = new KSyntaxHighlighting::SyntaxHighlighter(document());
+  m_pHighlighter->setTheme(m_spRepository->theme(m_sTheme));
 
   m_pLineNumberArea = new CLineNumberArea(this);
   m_pWidgetArea = new CWidgetArea(this);
@@ -40,6 +49,22 @@ CScriptEditorWidget::CScriptEditorWidget(QWidget* pParent) :
 
   QFontMetrics metrics(font);
   setTabStopWidth(c_iTabStop * metrics.width(' '));
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CScriptEditorWidget::SetHighlightDefinition(const QString& sType)
+{
+  const auto def = m_spRepository->definitionForName(sType);
+  m_pHighlighter->setDefinition(def);
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CScriptEditorWidget::SetTheme(const QString& sTheme)
+{
+  m_sTheme = sTheme;
+  m_pHighlighter->setTheme(m_spRepository->theme(m_sTheme));
 }
 
 //----------------------------------------------------------------------------------------

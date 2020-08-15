@@ -52,7 +52,6 @@ CEditorCodeWidget::CEditorCodeWidget(QWidget* pParent) :
 {
   m_spUi->setupUi(this);
   m_spUi->pSceneView->setVisible(false);
-  m_pHighlighter = new CScriptHighlighter(m_spUi->pCodeEdit->document());
 }
 
 CEditorCodeWidget::~CEditorCodeWidget()
@@ -322,6 +321,7 @@ void CEditorCodeWidget::on_pResourceComboBox_currentIndexChanged(qint32 iIndex)
       ActionBar()->m_spUi->DebugButton->setEnabled(nullptr != pScriptItem->m_spScene);
     }
     m_spUi->pCodeEdit->blockSignals(true);
+    m_spUi->pCodeEdit->SetHighlightDefinition("JavaScript");
     m_spUi->pCodeEdit->setPlainText(QString::fromUtf8(pScriptItem->m_data));
     m_spUi->pCodeEdit->blockSignals(false);
   }

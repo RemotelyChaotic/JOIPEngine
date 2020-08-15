@@ -8,6 +8,11 @@
 #include <map>
 
 class CLineNumberArea;
+namespace KSyntaxHighlighting
+{
+  class Repository;
+  class SyntaxHighlighter;
+}
 class CWidgetArea;
 class QPaintEvent;
 class QResizeEvent;
@@ -19,13 +24,16 @@ class QWidget;
 class CScriptEditorWidget : public QPlainTextEdit
 {
   Q_OBJECT
-  Q_PROPERTY(QColor lineNumberBackgroundColor READ LineNumberBackgroundColor WRITE SetLineNumberBackgroundColor)
-  Q_PROPERTY(QColor lineNumberTextColor       READ LineNumberTextColor       WRITE SetLineNumberTextColor      )
-  Q_PROPERTY(QColor highlightLineColor        READ HighlightLineColor        WRITE SetHighlightLineColor       )
-  Q_PROPERTY(QColor widgetsBackgroundColor    READ WidgetsBackgroundColor    WRITE SetWidgetsBackgroundColor   )
+  Q_PROPERTY(QColor  lineNumberBackgroundColor READ LineNumberBackgroundColor WRITE SetLineNumberBackgroundColor)
+  Q_PROPERTY(QColor  lineNumberTextColor       READ LineNumberTextColor       WRITE SetLineNumberTextColor      )
+  Q_PROPERTY(QColor  highlightLineColor        READ HighlightLineColor        WRITE SetHighlightLineColor       )
+  Q_PROPERTY(QString theme                     READ Theme                     WRITE SetTheme                    )
+  Q_PROPERTY(QColor  widgetsBackgroundColor    READ WidgetsBackgroundColor    WRITE SetWidgetsBackgroundColor   )
 
 public:
   CScriptEditorWidget(QWidget* pParent = nullptr);
+
+  void SetHighlightDefinition(const QString& sPath);
 
   void SetLineNumberBackgroundColor(const QColor& color) { m_lineNumberBackgroundColor = color; }
   const QColor& LineNumberBackgroundColor() { return m_lineNumberBackgroundColor; }
@@ -33,6 +41,8 @@ public:
   const QColor& LineNumberTextColor() { return m_lineNumberTextColor; }
   void SetHighlightLineColor(const QColor& color) { m_highlightLineColor = color; }
   const QColor& HighlightLineColor() { return m_highlightLineColor; }
+  void SetTheme(const QString& sTheme);
+  const QString& Theme() { return m_sTheme; }
   void SetWidgetsBackgroundColor(const QColor& color) { m_widgetsBackgroundColor = color; }
   const QColor& WidgetsBackgroundColor() { return m_widgetsBackgroundColor; }
 
@@ -56,12 +66,15 @@ private slots:
   void UpdateWidgetArea(const QRect&, qint32);
 
 private:
-  CLineNumberArea* m_pLineNumberArea;
-  CWidgetArea*     m_pWidgetArea;
-  QColor           m_lineNumberBackgroundColor;
-  QColor           m_lineNumberTextColor;
-  QColor           m_highlightLineColor;
-  QColor           m_widgetsBackgroundColor;
+  std::unique_ptr<KSyntaxHighlighting::Repository> m_spRepository;
+  QPointer<KSyntaxHighlighting::SyntaxHighlighter> m_pHighlighter;
+  CLineNumberArea*                                 m_pLineNumberArea;
+  CWidgetArea*                                     m_pWidgetArea;
+  QString                                          m_sTheme;
+  QColor                                           m_lineNumberBackgroundColor;
+  QColor                                           m_lineNumberTextColor;
+  QColor                                           m_highlightLineColor;
+  QColor                                           m_widgetsBackgroundColor;
 };
 
 //----------------------------------------------------------------------------------------

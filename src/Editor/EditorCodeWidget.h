@@ -70,7 +70,6 @@ private:
   tspProject                                 m_spCurrentProject;
   std::weak_ptr<CDatabaseManager>            m_wpDbManager;
   std::weak_ptr<CScriptRunner>               m_wpScriptRunner;
-  QPointer<CScriptHighlighter>               m_pHighlighter;
   QPointer<QStandardItemModel>               m_pDummyModel;
   qint32                                     m_iLastIndex;
 };
