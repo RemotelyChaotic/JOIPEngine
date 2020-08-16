@@ -9,7 +9,20 @@
 
 class CDatabaseManager;
 
+namespace TextAlignment
+{
+  Q_NAMESPACE
+  enum ETextAlignment
+  {
+    AlignLeft = Qt::AlignLeft,
+    AlignRight = Qt::AlignRight,
+    AlignCenter = Qt::AlignHCenter
+  };
+  Q_ENUM_NS(ETextAlignment)
+}
 
+//----------------------------------------------------------------------------------------
+//
 class CTextBoxSignalEmitter : public CScriptRunnerSignalEmiter
 {
   Q_OBJECT
@@ -26,8 +39,10 @@ signals:
   void showInput();
   void showInputReturnValue(QString sValue);
   void showText(QString sText);
+  void textAlignmentChanged(qint32 alignment);
   void textBackgroundColorsChanged(std::vector<QColor> vColors);
   void textColorsChanged(std::vector<QColor> vColors);
+  void textPortraitChanged(QString sResource);
 };
 Q_DECLARE_METATYPE(CTextBoxSignalEmitter)
 
@@ -45,7 +60,9 @@ public:
 
 public slots:
   void setBackgroundColors(QJSValue color);
+  void setTextAlignment(qint32 alignment);
   void setTextColors(QJSValue color);
+  void setTextPortrait(QJSValue resource);
   qint32 showButtonPrompts(QJSValue vsLabels);
   QString showInput();
   void showText(QString sText);

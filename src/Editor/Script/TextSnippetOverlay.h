@@ -6,15 +6,23 @@
 #include <QPointer>
 #include <memory>
 
+class CDatabaseManager;
+class CResourceTreeItemModel;
 namespace Ui {
   class CTextSnippetOverlay;
 }
+typedef std::shared_ptr<struct SProject> tspProject;
+
 
 struct STextSnippetCode
 {
   bool m_bShowText = false;
   bool m_bShowUserInput = false;
   QString m_sText = QString();
+  bool m_bSetAlignment = false;
+  Qt::AlignmentFlag m_textAlignment = Qt::AlignHCenter;
+  bool m_bShowIcon = false;
+  QString m_sTextIcon = QString();
   bool m_bShowButtons = false;
   std::vector<QString> m_vsButtons;
   bool m_bSetTextColors = false;
@@ -33,6 +41,10 @@ public:
   explicit CTextSnippetOverlay(QWidget* pParent = nullptr);
   ~CTextSnippetOverlay() override;
 
+  void Initialize(CResourceTreeItemModel* pResourceTreeModel);
+  void LoadProject(tspProject spProject);
+  void UnloadProject();
+
 signals:
   void SignalTextSnippetCode(const QString& code);
 
@@ -44,7 +56,13 @@ public slots:
 protected slots:
   void on_pShowTextCheckBox_toggled(bool bStatus);
   void on_pShowUserInputCheckBox_toggled(bool bStatus);
+  void on_pSetTextOrientation_toggled(bool bStatus);
+  void on_pOrientationComboBox_currentIndexChanged(qint32 iIndex);
   void on_pTextEdit_textChanged();
+  void on_pShowIconCheckBox_toggled(bool bStatus);
+  void on_pResourceLineEdit_editingFinished();
+  void on_pFilter_SignalFilterChanged(const QString& sText);
+  void SlotCurrentChanged(const QModelIndex &current, const QModelIndex &previous);
   void on_pShowButtonsCheckBox_toggled(bool bStatus);
   void on_AddButtonButton_clicked();
   void on_RemoveButtonButton_clicked();
@@ -64,6 +82,8 @@ private:
   void Initialize();
 
   std::unique_ptr<Ui::CTextSnippetOverlay> m_spUi;
+  tspProject                               m_spCurrentProject;
+  std::weak_ptr<CDatabaseManager>          m_wpDbManager;
   bool                                     m_bInitialized;
   STextSnippetCode                         m_data;
 };

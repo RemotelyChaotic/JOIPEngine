@@ -29,6 +29,9 @@ New Features:
      load if needed.
 - Projects can now be exported as a bundle, packing all resources in a single
   file.
+- PlayerTextBox text alignment can now be set to either Left, Right or Center.
+- PlayerTextBox can now display a portrait next to the text. This portrait
+  can be any Image or Movie type Resource.
 
 Updated Features:
 - Upgrade to Qt5.14.2 with msvc2017 for more QJSEngine and QML features.

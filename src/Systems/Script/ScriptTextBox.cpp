@@ -48,12 +48,79 @@ void CScriptTextBox::setBackgroundColors(QJSValue colors)
 
 //----------------------------------------------------------------------------------------
 //
+void CScriptTextBox::setTextAlignment(qint32 alignment)
+{
+  if (!CheckIfScriptCanRun()) { return; }
+  emit SignalEmitter<CTextBoxSignalEmitter>()->textAlignmentChanged(alignment);
+}
+
+//----------------------------------------------------------------------------------------
+//
 void CScriptTextBox::setTextColors(QJSValue colors)
 {
   if (!CheckIfScriptCanRun()) { return; }
 
   std::vector<QColor> colorsConverted = GetColors(colors, "setTextColors()");
   emit SignalEmitter<CTextBoxSignalEmitter>()->textColorsChanged(colorsConverted);
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CScriptTextBox::setTextPortrait(QJSValue resource)
+{
+  if (!CheckIfScriptCanRun()) { return; }
+
+  auto spSignalEmitter = SignalEmitter<CTextBoxSignalEmitter>();
+  auto spDbManager = m_wpDbManager.lock();
+  if (nullptr != spDbManager)
+  {
+    if (resource.isString())
+    {
+      QString sResourceName = resource.toString();
+      tspResource spResource = spDbManager->FindResourceInProject(m_spProject, sResourceName);
+      if (nullptr != spResource)
+      {
+        emit spSignalEmitter->textPortraitChanged(sResourceName);
+      }
+      else
+      {
+        QString sError = tr("Resource %1 not found");
+        emit m_pSignalEmitter->showError(sError.arg(resource.toString()),
+                                                QtMsgType::QtWarningMsg);
+      }
+    }
+    else if (resource.isQObject())
+    {
+      CResource* pResource = dynamic_cast<CResource*>(resource.toQObject());
+      if (nullptr != pResource)
+      {
+        tspResource spResource = pResource->Data();
+        if (nullptr != spResource)
+        {
+          emit spSignalEmitter->textPortraitChanged(pResource->getName());
+        }
+        else
+        {
+          QString sError = tr("Resource in show() holds no data.");
+          emit m_pSignalEmitter->showError(sError, QtMsgType::QtWarningMsg);
+        }
+      }
+      else
+      {
+        QString sError = tr("Wrong argument-type to show(). String or resource was expected.");
+        emit m_pSignalEmitter->showError(sError, QtMsgType::QtWarningMsg);
+      }
+    }
+    else if (resource.isNull() || resource.isUndefined())
+    {
+      emit spSignalEmitter->textPortraitChanged(QString());
+    }
+    else
+    {
+      QString sError = tr("Wrong argument-type to show(). String or resource was expected.");
+      emit m_pSignalEmitter->showError(sError, QtMsgType::QtWarningMsg);
+    }
+  }
 }
 
 //----------------------------------------------------------------------------------------

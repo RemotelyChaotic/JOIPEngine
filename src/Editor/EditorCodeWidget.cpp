@@ -76,6 +76,7 @@ void CEditorCodeWidget::Initialize()
   m_spBackgroundSnippetOverlay->Initialize(ResourceTreeModel());
   m_spIconSnippetOverlay->Initialize(ResourceTreeModel());
   m_spResourceSnippetOverlay->Initialize(ResourceTreeModel());
+  m_spTextSnippetOverlay->Initialize(ResourceTreeModel());
 
   m_spBackgroundSnippetOverlay->Hide();
   m_spIconSnippetOverlay->Hide();
@@ -132,6 +133,7 @@ void CEditorCodeWidget::LoadProject(tspProject spProject)
 
   m_spCurrentProject = spProject;
   m_spResourceSnippetOverlay->LoadProject(m_spCurrentProject);
+  m_spTextSnippetOverlay->LoadProject(m_spCurrentProject);
 
   if (0 < ScriptEditorModel()->rowCount())
   {
@@ -161,6 +163,7 @@ void CEditorCodeWidget::UnloadProject()
   m_spUi->pCodeEdit->setReadOnly(false);
 
   m_spResourceSnippetOverlay->UnloadProject();
+  m_spTextSnippetOverlay->UnloadProject();
 
   m_spCurrentProject = nullptr;
 

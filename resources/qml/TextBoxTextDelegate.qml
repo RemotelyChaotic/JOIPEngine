@@ -2,6 +2,7 @@ import QtQuick 2.14
 import QtQuick.Controls 2.14
 import QtQuick.Layouts 1.14
 import JOIP.core 1.1
+import JOIP.script 1.1
 
 Rectangle {
     id: textDelegate
@@ -11,7 +12,16 @@ Rectangle {
 
     Rectangle {
         id: textBackground
-        anchors.centerIn: parent
+        anchors.verticalCenter: parent.verticalCenter
+        x: {
+            switch (textAlignment)
+            {
+                case TextAlignment.AlignCenter: return textDelegate.width / 2 - width / 2;
+                case TextAlignment.AlignLeft: return 20; // a little bit of a margin looks better
+                case TextAlignment.AlignRight: return textDelegate.width - width - 20;
+            }
+            return textDelegate.width / 2 - width / 2;
+        }
         width: layoutText.width + imageSkip.width + 30
         height: layoutText.height + 20
         color: backgroundColor
@@ -35,6 +45,32 @@ Rectangle {
                 wrapMode: Text.Wrap
                 color: textColor
             }
+        }
+
+        IconResourceDelegate {
+            id: portrait
+            x: {
+                switch (textAlignment)
+                {
+                    case TextAlignment.AlignCenter: return parent.width / 2 - width / 2;
+                    case TextAlignment.AlignLeft: return parent.width - width / 5;
+                    case TextAlignment.AlignRight: return -width * 4 / 5;
+                }
+                return parent.width / 2 - width / 2;
+            }
+            y: {
+                switch (textAlignment)
+                {
+                    case TextAlignment.AlignCenter: return -height * 3 / 4;
+                    case TextAlignment.AlignLeft: return parent.height / 2 - height / 2;
+                    case TextAlignment.AlignRight: return parent.height / 2 - height / 2;
+                }
+                return -height * 3 / 4;
+            }
+            width: pResource === null ? 0 : 64
+            height: 64
+
+            pResource: model.portrait
         }
 
         Image {

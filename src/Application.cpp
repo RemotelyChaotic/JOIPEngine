@@ -224,6 +224,9 @@ void CApplication::RegisterQmlTypes()
   qmlRegisterType<CThreadSignalEmitter>("JOIP.script", 1, 1, "ThreadSignalEmitter");
   qmlRegisterType<CTimerSignalEmitter>("JOIP.script", 1, 1, "TimerSignalEmitter");
 
+  qmlRegisterUncreatableMetaObject(
+    TextAlignment::staticMetaObject, "JOIP.script", 1, 1, "TextAlignment", "");
+
   qmlRegisterType<CTimerCanvasQml>("JOIP.ui", 1, 1, "TimerDisplay");
 
   qmlRegisterUncreatableType<qqsfpm::Filter>("SortFilterProxyModel", 0, 2, "Filter", "Filter is abstract and cannot be created.");

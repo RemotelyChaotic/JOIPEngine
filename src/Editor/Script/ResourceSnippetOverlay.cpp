@@ -165,8 +165,11 @@ void CResourceSnippetOverlay::on_pConfirmButton_clicked()
   if (nullptr != spDbManager && nullptr != m_spCurrentProject)
   {
     tspResource spResource = spDbManager->FindResourceInProject(m_spCurrentProject, m_data.m_sResource);
-    QReadLocker locker(&spResource->m_rwLock);
-    type = spResource->m_type;
+    if (nullptr != spResource)
+    {
+      QReadLocker locker(&spResource->m_rwLock);
+      type = spResource->m_type;
+    }
   }
 
   QString sCode;
@@ -182,7 +185,7 @@ void CResourceSnippetOverlay::on_pConfirmButton_clicked()
       case EResourceType::eSound:
         sMainCommand = sMainCommand.arg("play");
         break;
-    default: Hide(); return;
+    default: break;
     }
     sMainCommand = sMainCommand.arg(m_data.m_sResource);
 

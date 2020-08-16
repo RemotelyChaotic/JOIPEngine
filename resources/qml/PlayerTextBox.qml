@@ -15,10 +15,12 @@ Rectangle {
     {
         textLogModel.clear();
         textLogModel.append({
+            "textAlignment": "",
             "textContent": "",
             "backgroundColor": "",
             "textColor": "",
             "numButtons": "",
+            "portrait": null,
             "type": "TextBoxSpacerDelegate.qml"
         });
         textLog.flick(0,-1000);
@@ -28,10 +30,12 @@ Rectangle {
     {
         textLog.buttonTexts = vsLabels;
         textLogModel.append({
+            "textAlignment": "",
             "textContent": "",
             "backgroundColor": "",
             "textColor": "",
             "numButtons": vsLabels.length,
+            "portrait": null,
             "type": "TextBoxButtonsDelegate.qml"
         });
         textLog.flick(0,-1000);
@@ -47,10 +51,12 @@ Rectangle {
     function showInput()
     {
         textLogModel.append({
+            "textAlignment": "",
             "textContent": "",
             "backgroundColor": undefined !== textLog.backgroundColors  && textLog.backgroundColors.length > 0 ? textLog.backgroundColors[0] : "#ff000000",
             "textColor": undefined !== textLog.textColors  && textLog.textColors.length > 0 ? textLog.textColors[0] : "#ffffffff",
             "numButtons": "",
+            "portrait": null,
             "type": "TextBoxInputDelegate.qml"
         });
         textLog.flick(0,-1000);
@@ -59,13 +65,39 @@ Rectangle {
     function showText(sText)
     {
         textLogModel.append({
+            "textAlignment": textLog.textAlignment,
             "textContent": sText,
             "backgroundColor": undefined !== textLog.backgroundColors  && textLog.backgroundColors.length > 0 ? textLog.backgroundColors[0] : "#ff000000",
             "textColor": undefined !== textLog.textColors  && textLog.textColors.length > 0 ? textLog.textColors[0] : "#ffffffff",
             "numButtons": "",
+            "portrait": textLog.portrait,
             "type": "TextBoxTextDelegate.qml"
         });
         textLog.flick(0,-1000);
+    }
+
+    function setPortrait(sName)
+    {
+        if (null !== registrator.currentlyLoadedProject &&
+            undefined !== registrator.currentlyLoadedProject)
+        {
+            if (sName === "")
+            {
+                textLog.portrait = null;
+            }
+            else
+            {
+                var pResource = registrator.currentlyLoadedProject.resource(sName);
+                if (null !== pResource && undefined !== pResource)
+                {
+                    textLog.portrait = pResource;
+                }
+                else
+                {
+                    textLog.portrait = null;
+                }
+            }
+        }
     }
 
     function backgroundColors()
@@ -102,11 +134,17 @@ Rectangle {
         onShowText: {
             textBox.showText(sText);
         }
+        onTextAlignmentChanged: {
+            textLog.textAlignment = alignment;
+        }
         onTextBackgroundColorsChanged: {
             setBackgroundColors(vColors);
         }
         onTextColorsChanged: {
             setTextColors(vColors);
+        }
+        onTextPortraitChanged: {
+            setPortrait(sResource);
         }
     }
 
@@ -135,6 +173,8 @@ Rectangle {
         property var backgroundColors: [ "#ff000000" ]
         property var textColors: [ "#ffffffff" ]
         property var buttonTexts: []
+        property var textAlignment: TextAlignment.AlignCenter
+        property Resource portrait: null
         property bool sceneSelection: false
         property bool skippable: false
 

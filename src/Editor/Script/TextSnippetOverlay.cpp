@@ -1,4 +1,9 @@
 #include "TextSnippetOverlay.h"
+#include "Application.h"
+#include "Editor/Resources/ResourceTreeItem.h"
+#include "Editor/Resources/ResourceTreeItemModel.h"
+#include "Editor/Resources/ResourceTreeItemSortFilterProxyModel.h"
+#include "Systems/DatabaseManager.h"
 #include "Widgets/ColorPicker.h"
 #include "ui_TextSnippetOverlay.h"
 
@@ -6,6 +11,9 @@
 
 namespace  {
   const char* c_sIndexProperty = "Index";
+  const qint32 c_iAlignLeftIndex = 0;
+  const qint32 c_iAlignRightIndex = 1;
+  const qint32 c_iAlignHCenterIndex = 2;
 }
 
 //----------------------------------------------------------------------------------------
@@ -13,17 +21,62 @@ namespace  {
 CTextSnippetOverlay::CTextSnippetOverlay(QWidget* pParent) :
   COverlayBase(0, pParent),
   m_spUi(new Ui::CTextSnippetOverlay),
+  m_spCurrentProject(nullptr),
+  m_wpDbManager(CApplication::Instance()->System<CDatabaseManager>()),
   m_bInitialized(true),
   m_data()
 {
   m_spUi->setupUi(this);
   connect(m_spUi->pButtonsList->itemDelegate(), &QAbstractItemDelegate::commitData,
           this, &CTextSnippetOverlay::SlotItemListCommitData);
+
+  CResourceTreeItemSortFilterProxyModel* pProxyModel =
+      new CResourceTreeItemSortFilterProxyModel(m_spUi->pResourceSelectTree);
+  m_spUi->pResourceSelectTree->setModel(pProxyModel);
 }
 
 CTextSnippetOverlay::~CTextSnippetOverlay()
 {
 }
+
+//----------------------------------------------------------------------------------------
+//
+void CTextSnippetOverlay::Initialize(CResourceTreeItemModel* pResourceTreeModel)
+{
+  m_bInitialized = false;
+
+  CResourceTreeItemSortFilterProxyModel* pProxyModel =
+      dynamic_cast<CResourceTreeItemSortFilterProxyModel*>(m_spUi->pResourceSelectTree->model());
+  pProxyModel->setSourceModel(pResourceTreeModel);
+
+  QItemSelectionModel* pSelectionModel = m_spUi->pResourceSelectTree->selectionModel();
+  connect(pSelectionModel, &QItemSelectionModel::currentChanged,
+          this, &CTextSnippetOverlay::SlotCurrentChanged);
+
+  pProxyModel->sort(resource_item::c_iColumnName, Qt::AscendingOrder);
+  pProxyModel->setFilterRegExp(QRegExp(".*", Qt::CaseInsensitive, QRegExp::RegExp));
+
+  // setup Tree
+  m_spUi->pResourceSelectTree->setColumnHidden(resource_item::c_iColumnPath, true);
+  m_spUi->pResourceSelectTree->header()->setSectionResizeMode(resource_item::c_iColumnName, QHeaderView::Stretch);
+  m_spUi->pResourceSelectTree->header()->setSectionResizeMode(resource_item::c_iColumnType, QHeaderView::Interactive);
+  m_bInitialized = true;
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CTextSnippetOverlay::LoadProject(tspProject spProject)
+{
+  m_spCurrentProject = spProject;
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CTextSnippetOverlay::UnloadProject()
+{
+  m_spCurrentProject = nullptr;
+}
+
 //----------------------------------------------------------------------------------------
 //
 void CTextSnippetOverlay::Climb()
@@ -69,10 +122,89 @@ void CTextSnippetOverlay::on_pShowUserInputCheckBox_toggled(bool bStatus)
 
 //----------------------------------------------------------------------------------------
 //
+void CTextSnippetOverlay::on_pSetTextOrientation_toggled(bool bStatus)
+{
+  if (!m_bInitialized) { return; }
+  m_data.m_bSetAlignment = bStatus;
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CTextSnippetOverlay::on_pOrientationComboBox_currentIndexChanged(qint32 iIndex)
+{
+  if (!m_bInitialized) { return; }
+  switch (iIndex)
+  {
+  case c_iAlignLeftIndex: m_data.m_textAlignment = Qt::AlignLeft; break;
+  case c_iAlignRightIndex: m_data.m_textAlignment = Qt::AlignRight; break;
+  case c_iAlignHCenterIndex: m_data.m_textAlignment = Qt::AlignHCenter; break;
+  default: break;
+  }
+}
+
+//----------------------------------------------------------------------------------------
+//
 void CTextSnippetOverlay::on_pTextEdit_textChanged()
 {
   if (!m_bInitialized) { return; }
   m_data.m_sText = m_spUi->pTextEdit->toPlainText();
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CTextSnippetOverlay::on_pShowIconCheckBox_toggled(bool bStatus)
+{
+  if (!m_bInitialized) { return; }
+  m_data.m_bShowIcon = bStatus;
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CTextSnippetOverlay::on_pResourceLineEdit_editingFinished()
+{
+  if (!m_bInitialized) { return; }
+  m_data.m_sTextIcon = m_spUi->pResourceLineEdit->text();
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CTextSnippetOverlay::on_pFilter_SignalFilterChanged(const QString& sText)
+{
+  if (!m_bInitialized) { return; }
+
+  CResourceTreeItemSortFilterProxyModel* pProxyModel =
+      dynamic_cast<CResourceTreeItemSortFilterProxyModel*>(m_spUi->pResourceSelectTree->model());
+
+  if (sText.isNull() || sText.isEmpty())
+  {
+    pProxyModel->setFilterRegExp(QRegExp(".*", Qt::CaseInsensitive, QRegExp::RegExp));
+  }
+  else
+  {
+    pProxyModel->setFilterRegExp(QRegExp(sText, Qt::CaseInsensitive, QRegExp::RegExp));
+  }
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CTextSnippetOverlay::SlotCurrentChanged(const QModelIndex& current,
+                                             const QModelIndex& previous)
+{
+  if (!m_bInitialized) { return; }
+  Q_UNUSED(previous);
+
+  QSortFilterProxyModel* pProxyModel =
+    dynamic_cast<QSortFilterProxyModel*>(m_spUi->pResourceSelectTree->model());
+  CResourceTreeItemModel* pModel =
+    dynamic_cast<CResourceTreeItemModel*>(pProxyModel->sourceModel());
+
+  if (nullptr != pModel)
+  {
+    const QString sName =
+        pModel->data(pProxyModel->mapToSource(current), Qt::DisplayRole, resource_item::c_iColumnName).toString();
+    m_spUi->pResourceLineEdit->setText(sName);
+    on_pResourceLineEdit_editingFinished();
+  }
 }
 
 //----------------------------------------------------------------------------------------
@@ -266,6 +398,46 @@ void CTextSnippetOverlay::on_pConfirmButton_clicked()
     }
     sCode += sText.arg(vsColors.join(","));
   }
+  if (m_data.m_bSetAlignment)
+  {
+    QString sText("textBox.setTextAlignment(TextAlignment.%1);\n");
+    switch (m_data.m_textAlignment)
+    {
+    case Qt::AlignLeft: sText = sText.arg("AlignLeft"); break;
+    case Qt::AlignRight: sText = sText.arg("AlignRight"); break;
+    case Qt::AlignHCenter: sText = sText.arg("AlignCenter"); break;
+    default: break;
+    }
+    sCode += sText;
+  }
+  if (m_data.m_bShowIcon)
+  {
+    EResourceType type = EResourceType::eImage;
+    auto spDbManager = m_wpDbManager.lock();
+    if (nullptr != spDbManager && nullptr != m_spCurrentProject)
+    {
+      tspResource spResource = spDbManager->FindResourceInProject(m_spCurrentProject, m_data.m_sTextIcon);
+      if (nullptr != spResource)
+      {
+        QReadLocker locker(&spResource->m_rwLock);
+        type = spResource->m_type;
+      }
+    }
+
+    QString sText("textBox.setTextPortrait(%2);\n");
+    switch (type)
+    {
+      case EResourceType::eMovie: // fallthrough
+      case EResourceType::eImage:
+        sText = sText.arg(m_data.m_sTextIcon.isEmpty() ? "null" :
+                                                         ("\"" + m_data.m_sTextIcon + "\""));
+        break;
+      case EResourceType::eSound: // fallthrough
+    default: sText = ""; break;
+    }
+
+    sCode += sText;
+  }
   if (m_data.m_bShowText)
   {
     QString sText("textBox.showText(\"%1\");\n");
@@ -306,7 +478,11 @@ void CTextSnippetOverlay::Initialize()
   m_data = STextSnippetCode();
   m_spUi->pShowTextCheckBox->setChecked(false);
   m_spUi->pShowUserInputCheckBox->setChecked(false);
+  m_spUi->pSetTextOrientation->setChecked(false);
+  m_spUi->pOrientationComboBox->setCurrentIndex(c_iAlignHCenterIndex);
   m_spUi->pTextEdit->clear();
+  m_spUi->pShowIconCheckBox->setChecked(false);
+  m_spUi->pResourceLineEdit->clear();
   m_spUi->pShowButtonsCheckBox->setChecked(false);
   m_spUi->pButtonsList->clear();
   m_spUi->pSetTextColorsCheckBox->setChecked(false);

@@ -92,8 +92,9 @@ void CScriptThread::sleep(qint32 iTimeS, QJSValue bSkippable)
     {
       connect(pSignalEmitter, &CThreadSignalEmitter::waitSkipped,
               &loop, &QEventLoop::quit, Qt::QueuedConnection);
-      emit pSignalEmitter->skippableWait(iTimeS);
     }
+    emit pSignalEmitter->skippableWait(bSkippableFlag ? iTimeS : 0);
+
     timer.start();
     loop.exec();
     timer.stop();

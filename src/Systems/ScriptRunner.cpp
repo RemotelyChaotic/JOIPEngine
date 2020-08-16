@@ -68,6 +68,9 @@ void CScriptRunner::Initialize()
   QJSValue scriptValueUtils = m_spScriptEngine->newQObject(m_pScriptUtils);
   m_spScriptEngine->globalObject().setProperty("utils", scriptValueUtils);
 
+  QJSValue enumTextObjectValue = m_spScriptEngine->newQMetaObject(&TextAlignment::staticMetaObject);
+  m_spScriptEngine->globalObject().setProperty("TextAlignment", enumTextObjectValue);
+
   SetInitialized(true);
 }
 

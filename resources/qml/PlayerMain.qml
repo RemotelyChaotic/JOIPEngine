@@ -157,7 +157,14 @@ Rectangle {
             {
                 if (null !== root.componentsRegistered[i] && undefined !== root.componentsRegistered[i])
                 {
-                    root.componentsRegistered[i].skippableWait(iTimeS);
+                    if (0 !== iTimeS)
+                    {
+                        root.componentsRegistered[i].skippableWait(iTimeS);
+                    }
+                    else
+                    {
+                        root.componentsRegistered[i].skippableWaitFinished();
+                    }
                 }
             }
         }
