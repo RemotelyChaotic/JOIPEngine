@@ -113,31 +113,13 @@ Rectangle {
                             switch (pResource.type)
                             {
                             case Resource.Image:
-                                if (pResource.isLocal)
-                                {
-                                    movieResource.resource = null;
-                                    imgResource.resource = pResource;
-                                }
-                                else
-                                {
-                                    imgResource.resource = null;
-                                    movieResource.resource = null;
-                                    webResource.resource = pResource;
-                                }
+                                movieResource.resource = null;
+                                imgResource.resource = pResource;
                                 break;
 
                             case Resource.Movie:
-                                if (pResource.isLocal)
-                                {
-                                    imgResource.resource = null;
-                                    movieResource.resource = pResource;
-                                }
-                                else
-                                {
-                                    imgResource.resource = null;
-                                    movieResource.resource = null;
-                                    webResource.resource = pResource;
-                                }
+                                imgResource.resource = null;
+                                movieResource.resource = pResource;
                                 break;
 
                             default:
@@ -164,10 +146,6 @@ Rectangle {
                                 {
                                     movieResource.pause();
                                 }
-                                if (webResource.state === Resource.Loaded)
-                                {
-                                    webResource.pause();
-                                }
                             }
                             else
                             {
@@ -178,10 +156,6 @@ Rectangle {
                                 if (movieResource.state === Resource.Loaded)
                                 {
                                     movieResource.play();
-                                }
-                                if (webResource.state === Resource.Loaded)
-                                {
-                                    webResource.play();
                                 }
                             }
                         }
@@ -234,14 +208,11 @@ Rectangle {
                             visible: false
 
                             property bool loading: movieResource.state === Resource.Loading ||
-                                                   imgResource.state === Resource.Loading ||
-                                                   webResource.state === Resource.Loading
+                                                   imgResource.state === Resource.Loading
                             property bool error: imgResource.state === Resource.Null &&
-                                                 movieResource.state === Resource.Null &&
-                                                 webResource.state === Resource.Null ||
+                                                 movieResource.state === Resource.Null ||
                                                  imgResource.state === Resource.Error ||
-                                                 movieResource.state === Resource.Error ||
-                                                 webResource.state === Resource.Error
+                                                 movieResource.state === Resource.Error
 
                             AnimatedImage {
                                 id: loadingAnimation
@@ -268,17 +239,6 @@ Rectangle {
 
                                 onFinishedPlaying: {
                                     movieResource.play();
-                                }
-                            }
-
-                            WebResourceView {
-                                id: webResource
-                                anchors.fill: parent
-                                resource: null
-                                visible: true
-
-                                onFinishedPlaying: {
-                                    webResource.play();
                                 }
                             }
                         }
