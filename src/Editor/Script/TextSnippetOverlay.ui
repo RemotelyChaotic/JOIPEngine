@@ -90,7 +90,7 @@
           <item row="1" column="0">
            <widget class="QCheckBox" name="pSetTextOrientation">
             <property name="text">
-             <string>Set Text Orientation</string>
+             <string>Set text alignment</string>
             </property>
            </widget>
           </item>
@@ -129,7 +129,7 @@
              <item row="0" column="0">
               <widget class="QCheckBox" name="pShowIconCheckBox">
                <property name="text">
-                <string>Set Portrait</string>
+                <string>Set portrait</string>
                </property>
               </widget>
              </item>

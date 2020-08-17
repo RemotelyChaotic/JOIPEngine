@@ -54,10 +54,31 @@
 
     <p>The first tab contains a text editor that lets you enter the text to be displayed. Anything entered
     will generate code to show the text in a single textbox if the <i>Show text</i> check box is checked.
-    If <i>Show user input</i> is checked, code will be generated to prompt for user input instead.<br>
+    If <i>Show user input</i> is checked, code will be generated to prompt for user input instead.
+    If <i>Set Text Alignment</i> is set, code will be generated to set text alignment.<br>
       <ul>
         <li><b>Generated code example for <i>Show text</i>:</b> textBox.showText("Hello World!");</li>
-        <li><b>Generated code example for <i>Show user input</i>:</b> var sInput = textBox.showInput(); // TODO: change variable name"</li>
+        <li><b>Generated code example for <i>Show user input</i>:</b> var sInput = textBox.showInput(); // TODO: change variable name</li>
+        <li><b>Generated code example for <i>Set text alignment</i>:</b> textBox.setTextAlignment(TextAlignment.AlignCenter);</li>
+      </ul>
+    </p>
+
+    <br>
+
+    <p><img src="qrc:/resources/help/editor/images/addtext_dialog_textportrait.png"><br><i>Add Text Code Dialog (Text Tab)</i></p>
+
+    <br>
+
+    <p>The second tab contains a tree to browse <a href="qrc:/resources/help/editor/resources/resource_help.html">Resources</a>
+    including a search bar similar to the <a href="qrc:/resources/help/editor/resources/resources_tree_help.html">Resource Tree</a>
+    in the <a href="qrc:/resources/help/editor/selection_combobox_help.html">Resource Manager</a>.
+    Clicking a tree item will select the resource for the generated code snippet. Checking
+    <i>Set portrait</i> will generate code to set the currently selected Resource as a portrait for
+    future calls to <i>showText</i>. If no <i>Image</i> or <i>Movie</i> type resource is selected,
+    checking the checkbox will generate code to remove the portrait.<br>
+      <ul>
+        <li><b>Generated code example for <i>Set portrait</i>:</b> textBox.setTextPortrait("thing"); // valid resource selected</li>
+        <li><b>Generated code example for <i>Set portrait</i>:</b> textBox.setTextPortrait(null); // invalid or no resource selected</li>
       </ul>
     </p>
 

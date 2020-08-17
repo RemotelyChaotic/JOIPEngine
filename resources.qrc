@@ -137,6 +137,7 @@
         <file>resources/help/settings/offline_setting_help.html</file>
         <file>resources/help/editor/images/removefetish_button.png</file>
         <file>resources/help/editor/exportproject_button_help.html</file>
+        <file>resources/help/editor/images/addtext_dialog_textportrait.png</file>
     </qresource>
     <qresource prefix="/qml">
         <file>resources/qml/ProjectCardSelection.qml</file>
