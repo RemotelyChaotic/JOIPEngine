@@ -133,7 +133,7 @@ Rectangle {
                     }
 
                     Shortcut {
-                        sequence: Settings.keyBinding("Answer_" + index);
+                        sequence: Settings.keyBinding("Answer_" + (index+1));
                         onActivated: {
                             root.soundEffects.clickSound.play();
                             textDelegate.parent.ListView.view.buttonPressed(index);
