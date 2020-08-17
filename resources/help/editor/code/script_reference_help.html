@@ -268,6 +268,23 @@
         textBox.setBackgroundColors([[255, 0, 0, 128], "red"]); /* same as above example */<br>
         <br></li>
 
+        <li><b>setTextAlignment ( enum:TextAlignment  ):</b><br>
+        This will set the text alignment of texts resulting from <i>showText</i> calls in the text box.
+        Once set, all future <i>showText</i> calls will display text with the set alignment.
+        The given argument needs to be one of the enum values: <i>TextAlignment.AlignLeft</i>,
+        <i>TextAlignment.AlignRight</i>, <i>TextAlignment.AlignCenter</i> or their coresponding nummerical
+        values (<i>1</i>, <i>2</i>, <i>4</i> respectively).<br>
+        Changing the alignment will change the position of portraits set by <i>setTextPortrait</i>.<br>
+        This will <b>not</b> influence calls to <i>showButtonPrompts</i> or <i>showInput</i>.<br>
+        <i>Example Usage:</i><br>
+        textBox.setTextAlignment(TextAlignment.AlignLeft); /* text will be left aligned with portraits to the right */<br>
+        textBox.setTextAlignment(1); /* same as above */<br>
+        textBox.setTextAlignment(TextAlignment.AlignRight); /* text will be right aligned with portraits to the left */<br>
+        textBox.setTextAlignment(2); /* same as above */<br>
+        textBox.setTextAlignment(TextAlignment.AlignCenter); /* text will be left aligned with portraits centered above the text */<br>
+        textBox.setTextAlignment(4); /* same as above */<br>
+        <br></li>
+
         <li><b>setTextColors ( string[] | int[][3 | 4] ):</b><br>
         As the name implies, this will set the text color of elements in the text box.
         The given argument can be an array of html-style color strings ("#argb")
@@ -280,6 +297,17 @@
         In case of two buttons the text color of the first one will be 0% transparent red and the second will be 0% transparent green */<br>
         textBox.setTextColors([[255, 0, 0, 255], [0, 255, 0]]); /* same as above example */<br>
         textBox.setTextColors([[255, 0, 0, 255], "green"]); /* same as above example */<br>
+        <br></li>
+
+        <li><b>setTextPortrait ( string | Resource | null ):</b><br>
+        This will set an <i>Image</i> or <i>Movie</i> type <a href="qrc:/resources/help/editor/resources/resource_help.html">Resource</a>
+        to be shown besides text resulting from <i>showText</i> calls.
+        The Resource can be the name of a Resource, a Resource object obtained from the
+        current Scene object or null. Calling the function with null will
+        remove the portraits from future texts resulting from <i>showText</i> calls.<br>
+        <i>Example Usage:</i><br>
+        textBox.setTextPortrait("myIcon");<br>
+        textBox.setTextPortrait(myIconVar); /* note: in this example myIconVar is a var */<br>
         <br></li>
 
         <li><b>showButtonPrompts ( string[] ):</b><br>
