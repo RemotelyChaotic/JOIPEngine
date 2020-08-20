@@ -13,3 +13,6 @@
 [submodule "cmake/extra-cmake-modules"]
 	path = cmake/extra-cmake-modules
 	url = https://github.com/RemotelyChaotic/extra-cmake-modules.git
+[submodule "3rdparty/QtAV"]
+	path = 3rdparty/QtAV
+	url = https://github.com/RemotelyChaotic/QtAV.git
