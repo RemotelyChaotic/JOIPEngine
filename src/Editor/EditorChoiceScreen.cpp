@@ -62,6 +62,9 @@ void CEditorChoiceScreen::Initialize()
   m_spUi->pStackedWidget->setCurrentIndex(c_iPageIndexChoice);
   m_spUi->pErrorLabel->setVisible(false);
 
+  connect(m_spUi->pProjectCardSelectionWidget, &CProjectCardSelectionWidget::SignalUnloadFinished,
+          this, &CEditorChoiceScreen::SignalUnloadFinished);
+
   m_bInitialized = true;
 }
 
@@ -70,7 +73,6 @@ void CEditorChoiceScreen::Initialize()
 void CEditorChoiceScreen::Load()
 {
   m_spUi->pProjectCardSelectionWidget->setFixedHeight(geometry().height() / 2);
-  m_spUi->pProjectCardSelectionWidget->UnloadProjects();
   m_spUi->pProjectCardSelectionWidget->LoadProjects();
 }
 

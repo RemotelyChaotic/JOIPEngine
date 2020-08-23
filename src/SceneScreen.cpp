@@ -51,6 +51,8 @@ void CSceneScreen::Initialize()
 
   connect(m_spUi->pMainSceneScreen, &CSceneMainScreen::SignalExitClicked,
           this, &CSceneScreen::SlotExitClicked, Qt::DirectConnection);
+  connect(m_spUi->pProjectCardSelectionWidget, &CProjectCardSelectionWidget::SignalUnloadFinished,
+          this, &CSceneScreen::SlotCardsUnloadFinished);
 
   m_spUi->pStackedWidget->setCurrentIndex(c_iPageIndexChoice);
 
@@ -101,6 +103,9 @@ void CSceneScreen::on_pOpenExistingProjectButton_clicked()
   {
     locker.unlock();
 
+    // will eventually emit a signal but we can ignore that
+    Unload();
+
     emit m_spWindowContext->SignalSetHelpButtonVisible(false);
 
     m_spUi->pMainSceneScreen->UnloadProject();
@@ -125,4 +130,12 @@ void CSceneScreen::SlotExitClicked()
   WIDGET_INITIALIZED_GUARD
   m_spUi->pStackedWidget->setCurrentIndex(c_iPageIndexChoice);
   emit m_spWindowContext->SignalChangeAppState(EAppState::eMainScreen);
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CSceneScreen::SlotCardsUnloadFinished()
+{
+  WIDGET_INITIALIZED_GUARD
+  emit UnloadFinished();
 }

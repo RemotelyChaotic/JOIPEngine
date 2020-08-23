@@ -25,6 +25,7 @@ signals:
   void SignalNewClicked(const QString& sNewProjectName);
   void SignalOpenClicked(qint32 iId);
   void SignalCancelClicked();
+  void SignalUnloadFinished();
 
 protected slots:
   void on_pNewProjectButton_clicked();

@@ -26,7 +26,8 @@ CProjectCardSelectionWidget::CProjectCardSelectionWidget(QWidget* pParent) :
   QWidget(pParent),
   m_spUi(std::make_unique<Ui::CProjectCardSelectionWidget>()),
   m_selectionColor(Qt::white),
-  m_iSelectedProjectId(-1)
+  m_iSelectedProjectId(-1),
+  m_bLoadedQml(false)
 {
   m_spUi->setupUi(this);
   Initialize();
@@ -35,6 +36,7 @@ CProjectCardSelectionWidget::CProjectCardSelectionWidget(QWidget* pParent) :
 CProjectCardSelectionWidget::~CProjectCardSelectionWidget()
 {
   UnloadProjects();
+  FinishUnloadPrivate();
 
   delete m_spUi->pQmlWidget;
 }
@@ -43,7 +45,7 @@ CProjectCardSelectionWidget::~CProjectCardSelectionWidget()
 //
 void CProjectCardSelectionWidget::Initialize()
 {
-  m_bInitialized = false;
+  m_bLoadedQml = false;
 
   m_wpDbManager = CApplication::Instance()->System<CDatabaseManager>();
 
@@ -62,8 +64,6 @@ void CProjectCardSelectionWidget::Initialize()
           this, &CProjectCardSelectionWidget::SlotOverlayOpened);
   connect(CHelpOverlay::Instance(), &CHelpOverlay::SignalOverlayClosed,
           this, &CProjectCardSelectionWidget::SlotOverlayClosed);
-
-  m_bInitialized = true;
 }
 
 //----------------------------------------------------------------------------------------
@@ -72,37 +72,17 @@ void CProjectCardSelectionWidget::LoadProjects()
 {
   m_iSelectedProjectId = -1;
 
-  m_spUi->pQmlWidget->setSource(QUrl("qrc:/qml/resources/qml/ProjectCardSelection.qml"));
-
-  connect(m_spUi->pQmlWidget->rootObject(), SIGNAL(selectedProjectIndex(int)),
-          this, SLOT(SlotCardClicked(int)));
-
-  QQuickItem* pRootObject =  m_spUi->pQmlWidget->rootObject();
-  pRootObject->setProperty("selectionColor", QVariant::fromValue(m_selectionColor));
-
-  QJSEngine* pEngine = m_spUi->pQmlWidget->engine();
-
-  auto spDbManager = m_wpDbManager.lock();
-  if (nullptr != spDbManager)
+  if (!IsLoaded())
   {
-    std::set<qint32, std::less<qint32>> ids = spDbManager->ProjectIds();
-    for (auto it = ids.begin(); ids.end() != it; ++it)
-    {
-      tspProject spProject = spDbManager->FindProject(*it);
-      if (nullptr != spProject)
-      {
-        if (-1 == m_iSelectedProjectId)
-        {
-          QReadLocker locker(&spProject->m_rwLock);
-          m_iSelectedProjectId = spProject->m_iId;
-        }
-
-        CProject* pValue = new CProject(pEngine, spProject);
-        m_spUi->pQmlWidget->rootObject()->setProperty("currentlyAddedProject", QVariant::fromValue(pValue));
-        QMetaObject::invokeMethod(pRootObject, "onAddProject");
-        m_vpProjects.push_back(pValue);
-      }
-    }
+    // load everything directly
+    SlotLoadProjectsPrivate();
+  }
+  else
+  {
+    // not unloaded yet, queue loading after everything is unloaded
+    bool bOk = QMetaObject::invokeMethod(this, "SlotLoadProjectsPrivate", Qt::QueuedConnection);
+    assert(bOk);
+    Q_UNUSED(bOk);
   }
 }
 
@@ -115,23 +95,20 @@ void CProjectCardSelectionWidget::UnloadProjects()
   QQuickItem* pRootObject =  m_spUi->pQmlWidget->rootObject();
   QMetaObject::invokeMethod(pRootObject, "onUnLoad");
 
-  m_spUi->pQmlWidget->engine()->clearComponentCache();
-  m_spUi->pQmlWidget->engine()->collectGarbage();
-
-  for (CProject* pProject : qAsConst(m_vpProjects))
-  {
-    delete pProject;
-  }
-  m_vpProjects.clear();
-
   disconnect(m_spUi->pQmlWidget->rootObject(), SIGNAL(selectedProjectIndex(int)),
              this, SLOT(SlotCardClicked(int)));
+
+  bool bOk = QMetaObject::invokeMethod(this, "SlotUnloadFinished", Qt::QueuedConnection);
+  assert(bOk);
+  Q_UNUSED(bOk);
 }
 
 //----------------------------------------------------------------------------------------
 //
 void CProjectCardSelectionWidget::ShowWarning(const QString& sWarning)
 {
+  if (!m_bLoadedQml) { return; }
+
   QQuickItem* pRootObject =  m_spUi->pQmlWidget->rootObject();
   if (nullptr != pRootObject)
   {
@@ -147,6 +124,8 @@ void CProjectCardSelectionWidget::SetSelectionColor(const QColor& color)
   if (m_selectionColor != color)
   {
     m_selectionColor = color;
+
+    if (!m_bLoadedQml) { return; }
 
     QQuickItem* pRootObject =  m_spUi->pQmlWidget->rootObject();
     if (nullptr != pRootObject)
@@ -167,6 +146,8 @@ const QColor& CProjectCardSelectionWidget::SelectionColor()
 //
 void CProjectCardSelectionWidget::on_pSearchWidget_SignalFilterChanged(const QString& sText)
 {
+  if (!m_bLoadedQml) { return; }
+
   QQuickItem* pRootObject =  m_spUi->pQmlWidget->rootObject();
   if (nullptr != pRootObject)
   {
@@ -208,6 +189,46 @@ void CProjectCardSelectionWidget::SlotCardClicked(int iProjId)
 
 //----------------------------------------------------------------------------------------
 //
+void CProjectCardSelectionWidget::SlotLoadProjectsPrivate()
+{
+  m_spUi->pQmlWidget->setSource(QUrl("qrc:/qml/resources/qml/ProjectCardSelection.qml"));
+
+  connect(m_spUi->pQmlWidget->rootObject(), SIGNAL(selectedProjectIndex(int)),
+          this, SLOT(SlotCardClicked(int)));
+
+  QQuickItem* pRootObject =  m_spUi->pQmlWidget->rootObject();
+  pRootObject->setProperty("selectionColor", QVariant::fromValue(m_selectionColor));
+
+  QJSEngine* pEngine = m_spUi->pQmlWidget->engine();
+
+  auto spDbManager = m_wpDbManager.lock();
+  if (nullptr != spDbManager)
+  {
+    std::set<qint32, std::less<qint32>> ids = spDbManager->ProjectIds();
+    for (auto it = ids.begin(); ids.end() != it; ++it)
+    {
+      tspProject spProject = spDbManager->FindProject(*it);
+      if (nullptr != spProject)
+      {
+        if (-1 == m_iSelectedProjectId)
+        {
+          QReadLocker locker(&spProject->m_rwLock);
+          m_iSelectedProjectId = spProject->m_iId;
+        }
+
+        CProject* pValue = new CProject(pEngine, spProject);
+        m_spUi->pQmlWidget->rootObject()->setProperty("currentlyAddedProject", QVariant::fromValue(pValue));
+        QMetaObject::invokeMethod(pRootObject, "onAddProject");
+        m_vpProjects.push_back(pValue);
+      }
+    }
+  }
+
+  m_bLoadedQml = true;
+}
+
+//----------------------------------------------------------------------------------------
+//
 void CProjectCardSelectionWidget::SlotOverlayOpened()
 {
   m_spUi->pQmlWidget->setAttribute(Qt::WA_AlwaysStackOnTop, false);
@@ -230,6 +251,8 @@ void CProjectCardSelectionWidget::SlotOverlayClosed()
 //
 void CProjectCardSelectionWidget::SlotResizeDone()
 {
+  if (!m_bLoadedQml) { return; }
+
   // set size properties manually setzen, since this isn't done automatically
   QQuickItem* pRootObject =  m_spUi->pQmlWidget->rootObject();
   QSize newSize = size() -
@@ -255,6 +278,14 @@ void CProjectCardSelectionWidget::SlotTriedToLoadMovie(const QString& sMovie)
 
 //----------------------------------------------------------------------------------------
 //
+void CProjectCardSelectionWidget::SlotUnloadFinished()
+{
+  FinishUnloadPrivate();
+  emit SignalUnloadFinished();
+}
+
+//----------------------------------------------------------------------------------------
+//
 void CProjectCardSelectionWidget::resizeEvent(QResizeEvent* pEvent)
 {
   if (nullptr != pEvent)
@@ -262,6 +293,32 @@ void CProjectCardSelectionWidget::resizeEvent(QResizeEvent* pEvent)
     QMetaObject::invokeMethod(this, "SlotResizeDone", Qt::QueuedConnection);
   }
   pEvent->accept();
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CProjectCardSelectionWidget::FinishUnloadPrivate()
+{
+  m_spUi->pQmlWidget->engine()->collectGarbage();
+  m_spUi->pQmlWidget->engine()->clearComponentCache();
+
+  m_spUi->pQmlWidget->setSource(QUrl());
+  QQuickWidget::Status status = m_spUi->pQmlWidget->status();
+  assert(status == QQuickWidget::Null);
+  Q_UNUSED(status);
+
+  for (CProject* pProject : qAsConst(m_vpProjects))
+  {
+    if (!pProject->isLoaded())
+    {
+      tspProject spProject = pProject->Data();
+      CDatabaseManager::UnloadProject(spProject);
+    }
+    delete pProject;
+  }
+  m_vpProjects.clear();
+
+  m_bLoadedQml = false;
 }
 
 //----------------------------------------------------------------------------------------
@@ -278,4 +335,3 @@ void CProjectCardSelectionWidget::InitQmlMain()
           this, &CProjectCardSelectionWidget::SlotTriedToLoadMovie, Qt::QueuedConnection);
   m_spUi->pQmlWidget->engine()->addImageProvider("DataBaseImageProivider", pProvider);
 }
-

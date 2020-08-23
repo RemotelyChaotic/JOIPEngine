@@ -28,6 +28,7 @@ public:
 
 protected slots:
   void SlotChangeAppState(EAppState newState);
+  void SlotCurrentAppStateUnloadFinished();
   void SlotFullscreenChanged();
   void SlotHelpButtonClicked();
   void SlotResolutionChanged();
@@ -46,6 +47,7 @@ private:
   std::shared_ptr<CSettings>          m_spSettings;
   QPointer<CBackgroundWidget>         m_pBackground;
   bool                                m_bInitialized;
+  EAppState                           m_nextState;
 };
 
 #endif // MAINWINDOW_H

@@ -32,21 +32,29 @@ public:
 
   void SetSelectionColor(const QColor& color);
   const QColor& SelectionColor();
+  bool IsLoaded() { return m_bLoadedQml; }
+
+signals:
+  void SignalUnloadFinished();
 
 protected slots:
   void on_pSearchWidget_SignalFilterChanged(const QString& sText);
   void on_pQmlWidget_statusChanged(QQuickWidget::Status);
   void on_pQmlWidget_sceneGraphError(QQuickWindow::SceneGraphError error, const QString &message);
   void SlotCardClicked(int iProjId);
+  void SlotLoadProjectsPrivate();
   void SlotOverlayOpened();
   void SlotOverlayClosed();
   void SlotResizeDone();
   void SlotTriedToLoadMovie(const QString& sMovie);
+  void SlotUnloadFinished();
+
 
 protected:
   void resizeEvent(QResizeEvent* pEvent) override;
 
 private:
+  void FinishUnloadPrivate();
   void InitQmlMain();
 
   std::unique_ptr<Ui::CProjectCardSelectionWidget> m_spUi;
@@ -54,7 +62,7 @@ private:
   std::vector<QPointer<CProject>>                  m_vpProjects;
   QColor                                           m_selectionColor;
   qint32                                           m_iSelectedProjectId;
-  bool                                             m_bInitialized;
+  bool                                             m_bLoadedQml;
 };
 
 #endif // PROJECTCARDSELECTIONWIDGET_H

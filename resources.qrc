@@ -169,5 +169,6 @@
         <file>resources/qml/IconResourceDelegate.qml</file>
         <file>resources/qml/PlayerMetronome.qml</file>
         <file>resources/qml/MetronomeItem.qml</file>
+        <file>resources/qml/EmptyDummy.qml</file>
     </qresource>
 </RCC>

@@ -13,6 +13,7 @@ namespace Ui {
 class CSceneScreen : public QWidget, public IAppStateScreen
 {
   Q_OBJECT
+  Q_INTERFACES(IAppStateScreen)
 
 public:
   explicit CSceneScreen(const std::shared_ptr<CWindowContext>& spWindowContext,
@@ -23,9 +24,13 @@ public:
   void Load() override;
   void Unload() override;
 
+signals:
+  void UnloadFinished() override;
+
 protected slots:
   void on_pOpenExistingProjectButton_clicked();
   void on_pCancelButton_clicked();
+  void SlotCardsUnloadFinished();
   void SlotExitClicked();
 
 private:

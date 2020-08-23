@@ -14,6 +14,7 @@ namespace Ui {
 class CSettingsScreen : public QWidget, public IAppStateScreen
 {
   Q_OBJECT
+  Q_INTERFACES(IAppStateScreen)
 
 public:
   explicit CSettingsScreen(const std::shared_ptr<CWindowContext>& spWindowContext,
@@ -23,6 +24,9 @@ public:
   void Initialize() override;
   void Load() override;
   void Unload() override;
+
+signals:
+  void UnloadFinished() override;
 
 protected slots:
   void on_pFullscreenCheckBox_stateChanged(qint32 iState);

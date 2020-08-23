@@ -12,6 +12,7 @@ namespace Ui {
 class CMainScreen : public QWidget, public IAppStateScreen
 {
   Q_OBJECT
+  Q_INTERFACES(IAppStateScreen)
 
 public:
   explicit CMainScreen(const std::shared_ptr<CWindowContext>& spWindowContext,
@@ -21,6 +22,9 @@ public:
   void Initialize() override;
   void Load() override;
   void Unload() override;
+
+signals:
+  void UnloadFinished() override;
 
 protected slots:
   void on_pSceneSelectButton_clicked();

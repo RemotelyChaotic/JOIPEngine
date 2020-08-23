@@ -19,8 +19,13 @@ public:
   virtual void Load() = 0;
   virtual void Unload() = 0;
 
+signals:
+  virtual void UnloadFinished() = 0;
+
 protected:
   std::shared_ptr<CWindowContext>  m_spWindowContext;
 };
+
+Q_DECLARE_INTERFACE(IAppStateScreen, "IAppStateScreen")
 
 #endif // IAPPSTATESCREEN_H

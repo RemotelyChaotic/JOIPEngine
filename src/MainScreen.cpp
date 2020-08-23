@@ -74,7 +74,7 @@ void CMainScreen::Load()
 //
 void CMainScreen::Unload()
 {
-
+  emit UnloadFinished();
 }
 
 //----------------------------------------------------------------------------------------

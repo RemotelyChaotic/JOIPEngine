@@ -51,7 +51,7 @@ void CCreditsScreen::Load()
 //
 void CCreditsScreen::Unload()
 {
-
+  emit UnloadFinished();
 }
 
 //----------------------------------------------------------------------------------------

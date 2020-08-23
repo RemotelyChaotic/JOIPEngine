@@ -59,7 +59,14 @@ QImage CDatabaseImageProvider::requestImage(const QString& id, QSize* pSize,
                   *pSize = img.size();
                 }
 
-                if (!bLoadedBefore) { CDatabaseManager::UnloadProject(spProject); }
+                if (!bLoadedBefore)
+                {
+                  // unload resources again to save memory
+                  if (!CDatabaseManager::UnloadProject(spProject))
+                  {
+                    qWarning() << tr("Unload of resources failed:") << id;
+                  }
+                }
                 return img.scaled(0 < requestedSize.width() ? requestedSize.width() : img.width(),
                                   0 < requestedSize.height() ? requestedSize.height() : img.height(),
                                   Qt::KeepAspectRatio, Qt::SmoothTransformation);

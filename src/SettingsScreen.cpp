@@ -234,6 +234,8 @@ void CSettingsScreen::Unload()
 
   m_spUi->pResolutionComboBox->blockSignals(false);
   m_spUi->pStyleComboBox->blockSignals(false);
+
+  emit UnloadFinished();
 }
 
 //----------------------------------------------------------------------------------------

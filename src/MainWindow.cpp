@@ -22,7 +22,8 @@ CMainWindow::CMainWindow(QWidget* pParent) :
   m_spHelpOverlay(nullptr),
   m_spWindowContext(std::make_shared<CWindowContext>()),
   m_pBackground(new CBackgroundWidget(this)),
-  m_bInitialized(false)
+  m_bInitialized(false),
+  m_nextState(EAppState::eMainScreen)
 {
   m_spHelpOverlay.reset(new CHelpOverlay(m_spHelpButtonOverlay.get(), this));
   m_spUi->setupUi(this);
@@ -87,14 +88,35 @@ void CMainWindow::Initialize()
 //
 void CMainWindow::SlotChangeAppState(EAppState newState)
 {
+  m_nextState = newState;
+
   IAppStateScreen* pScreen =
     dynamic_cast<IAppStateScreen*>(m_spUi->pApplicationStackWidget->currentWidget());
   if (nullptr != pScreen)
   {
+    bool bOk = connect(dynamic_cast<QWidget*>(pScreen), SIGNAL(UnloadFinished()),
+                       this, SLOT(SlotCurrentAppStateUnloadFinished()));
+    assert(bOk);
+    Q_UNUSED(bOk);
     pScreen->Unload();
   }
+}
 
-  m_spUi->pApplicationStackWidget->setCurrentIndex(newState);
+//----------------------------------------------------------------------------------------
+//
+void CMainWindow::SlotCurrentAppStateUnloadFinished()
+{
+  IAppStateScreen* pScreen =
+    dynamic_cast<IAppStateScreen*>(m_spUi->pApplicationStackWidget->currentWidget());
+  if (nullptr != pScreen)
+  {
+    bool bOk = disconnect(dynamic_cast<QWidget*>(pScreen), SIGNAL(UnloadFinished()),
+                       this, SLOT(SlotCurrentAppStateUnloadFinished()));
+    assert(bOk);
+    Q_UNUSED(bOk);
+  }
+
+  m_spUi->pApplicationStackWidget->setCurrentIndex(m_nextState);
 
   m_spHelpButtonOverlay->Show();
 

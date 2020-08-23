@@ -38,6 +38,8 @@ Rectangle {
     function onUnLoad()
     {
         listModel.clear();
+        currentlyAddedProject = null;
+        gc();
     }
 
     function showWarning(sWarnString)

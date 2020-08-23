@@ -36,6 +36,8 @@ void CEditorScreen::Initialize()
           this, &CEditorScreen::SlotOpenClicked, Qt::DirectConnection);
   connect(m_spUi->pChoiceScreen, &CEditorChoiceScreen::SignalCancelClicked,
           this, &CEditorScreen::SlotCancelClicked, Qt::DirectConnection);
+  connect(m_spUi->pChoiceScreen, &CEditorChoiceScreen::SignalUnloadFinished,
+          this, &CEditorScreen::UnloadFinished, Qt::DirectConnection);
 
   connect(m_spUi->pEditorScreen, &CEditorMainScreen::SignalExitClicked,
           this, &CEditorScreen::SlotExitClicked, Qt::DirectConnection);
@@ -65,6 +67,8 @@ void CEditorScreen::SlotNewClicked(const QString& sNewProjectName)
 {
   WIDGET_INITIALIZED_GUARD
 
+  m_spUi->pChoiceScreen->Unload();
+
   emit m_spWindowContext->SignalSetHelpButtonVisible(false);
 
   m_spUi->pEditorScreen->UnloadProject();
@@ -77,6 +81,8 @@ void CEditorScreen::SlotNewClicked(const QString& sNewProjectName)
 void CEditorScreen::SlotOpenClicked(qint32 iId)
 {
   WIDGET_INITIALIZED_GUARD
+
+  m_spUi->pChoiceScreen->Unload();
 
   emit m_spWindowContext->SignalSetHelpButtonVisible(false);
 
