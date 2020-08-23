@@ -13,6 +13,10 @@
   <property name="windowTitle">
    <string>JOIPEngine</string>
   </property>
+  <property name="windowIcon">
+   <iconset resource="../resources.qrc">
+    <normaloff>:/resources/img/Icon.ico</normaloff>:/resources/img/Icon.ico</iconset>
+  </property>
   <widget class="QWidget" name="centralWidget">
    <layout class="QGridLayout" name="gridLayout">
     <property name="leftMargin">
@@ -56,6 +60,8 @@
   <widget class="QStatusBar" name="pStatusBar"/>
  </widget>
  <layoutdefault spacing="6" margin="11"/>
- <resources/>
+ <resources>
+  <include location="../resources.qrc"/>
+ </resources>
  <connections/>
 </ui>
