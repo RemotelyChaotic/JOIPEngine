@@ -5,6 +5,8 @@
 #include <QStyledItemDelegate>
 #include <QPointer>
 #include <memory>
+#include <map>
+#include <vector>
 
 class CDatabaseManager;
 class CResourceTreeItemModel;
@@ -26,9 +28,9 @@ struct STextSnippetCode
   bool m_bShowButtons = false;
   std::vector<QString> m_vsButtons;
   bool m_bSetTextColors = false;
-  std::vector<QColor> m_vTextColors;
+  std::map<qint32, QColor> m_vTextColors;
   bool m_bSetBGColors = false;
-  std::vector<QColor> m_vBGColors;
+  std::map<qint32, QColor> m_vBGColors;
 };
 
 //----------------------------------------------------------------------------------------

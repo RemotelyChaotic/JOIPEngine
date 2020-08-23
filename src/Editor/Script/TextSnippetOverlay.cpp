@@ -280,9 +280,17 @@ void CTextSnippetOverlay::on_AddTextColorButton_clicked()
   connect(pItem, &CColorPicker::SignalColorChanged,
           this, &CTextSnippetOverlay::SlotTextColorChanged);
 
-  m_data.m_vTextColors.push_back(QColor(0, 0, 0, 255));
+  qint32 iIndex = 0;
+  if (m_data.m_vTextColors.size() == 0)
+  {
+    iIndex = 0;
+  }
+  else
+  {
+    iIndex = std::next(m_data.m_vTextColors.end(), -1)->first + 1;
+  }
+  m_data.m_vTextColors.insert({iIndex, QColor(0, 0, 0, 255)});
 
-  qint32 iIndex = m_spUi->pTextColorsList->rowCount();
   m_spUi->pTextColorsList->insertRow(iIndex);
   m_spUi->pTextColorsList->setCellWidget(iIndex, 0, pItem);
   pItem->setProperty(c_sIndexProperty, iIndex);
@@ -298,8 +306,19 @@ void CTextSnippetOverlay::on_RemoveTextColorButton_clicked()
   if (index.row() >= 0 &&
       m_data.m_vTextColors.size() > static_cast<size_t>(index.row()))
   {
-    m_data.m_vTextColors.erase(m_data.m_vTextColors.begin() + index.row());
-    m_spUi->pTextColorsList->removeRow(index.row());
+    CColorPicker* pItem = dynamic_cast<CColorPicker*>(
+      m_spUi->pTextColorsList->cellWidget(index.row(), index.column()));
+
+    if (nullptr != pItem)
+    {
+      qint32 iIndex = pItem->property(c_sIndexProperty).toInt();
+      auto it = m_data.m_vTextColors.find(iIndex);
+      if (m_data.m_vTextColors.end() != it)
+      {
+        m_data.m_vTextColors.erase(it);
+        m_spUi->pTextColorsList->removeRow(index.row());
+      }
+    }
   }
 }
 
@@ -333,9 +352,17 @@ void CTextSnippetOverlay::on_AddBGColorButton_clicked()
   connect(pItem, &CColorPicker::SignalColorChanged,
           this, &CTextSnippetOverlay::SlotBGColorChanged);
 
-  m_data.m_vBGColors.push_back(QColor(0, 0, 0, 255));
+  qint32 iIndex = 0;
+  if (m_data.m_vBGColors.size() == 0)
+  {
+    iIndex = 0;
+  }
+  else
+  {
+    iIndex = std::next(m_data.m_vBGColors.end(), -1)->first + 1;
+  }
+  m_data.m_vBGColors.insert({iIndex, QColor(0, 0, 0, 255)});
 
-  qint32 iIndex = m_spUi->pBGList->rowCount();
   m_spUi->pBGList->insertRow(iIndex);
   m_spUi->pBGList->setCellWidget(iIndex, 0, pItem);
   pItem->setProperty(c_sIndexProperty, iIndex);
@@ -351,8 +378,19 @@ void CTextSnippetOverlay::on_RemoveBGColorButton_clicked()
   if (index.row() >= 0 &&
       m_data.m_vBGColors.size() > static_cast<size_t>(index.row()))
   {
-    m_data.m_vBGColors.erase(m_data.m_vBGColors.begin() + index.row());
-    m_spUi->pBGList->removeRow(index.row());
+    CColorPicker* pItem = dynamic_cast<CColorPicker*>(
+      m_spUi->pBGList->cellWidget(index.row(), index.column()));
+
+    if (nullptr != pItem)
+    {
+      qint32 iIndex = pItem->property(c_sIndexProperty).toInt();
+      auto it = m_data.m_vBGColors.find(iIndex);
+      if (m_data.m_vBGColors.end() != it)
+      {
+        m_data.m_vBGColors.erase(it);
+        m_spUi->pBGList->removeRow(index.row());
+      }
+    }
   }
 }
 
@@ -376,11 +414,11 @@ void CTextSnippetOverlay::on_pConfirmButton_clicked()
   {
     QString sText("textBox.setTextColors([%1]);\n");
     QStringList vsColors;
-    for (auto color : m_data.m_vTextColors)
+    for (auto it : m_data.m_vTextColors)
     {
-      QString sColor = "[" + QString::number(color.red()) + "," +
-          QString::number(color.green()) + "," +
-          QString::number(color.blue()) + "]";
+      QString sColor = "[" + QString::number(it.second.red()) + "," +
+          QString::number(it.second.green()) + "," +
+          QString::number(it.second.blue()) + "]";
       vsColors << sColor;
     }
     sCode += sText.arg(vsColors.join(","));
@@ -389,11 +427,11 @@ void CTextSnippetOverlay::on_pConfirmButton_clicked()
   {
     QString sText("textBox.setBackgroundColors([%1]);\n");
     QStringList vsColors;
-    for (auto color : m_data.m_vBGColors)
+    for (auto it : m_data.m_vBGColors)
     {
-      QString sColor = "[" + QString::number(color.red()) + "," +
-          QString::number(color.green()) + "," +
-          QString::number(color.blue()) + "]";
+      QString sColor = "[" + QString::number(it.second.red()) + "," +
+          QString::number(it.second.green()) + "," +
+          QString::number(it.second.blue()) + "]";
       vsColors << sColor;
     }
     sCode += sText.arg(vsColors.join(","));
