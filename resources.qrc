@@ -138,6 +138,10 @@
         <file>resources/help/editor/images/removefetish_button.png</file>
         <file>resources/help/editor/exportproject_button_help.html</file>
         <file>resources/help/editor/images/addtext_dialog_textportrait.png</file>
+        <file>resources/sound/metronome_default.wav</file>
+        <file>resources/help/editor/addmetronome_button_help.html</file>
+        <file>resources/help/editor/images/addmetronome_dialog_beatsound.png</file>
+        <file>resources/help/editor/images/addmetronome_dialog_general.png</file>
     </qresource>
     <qresource prefix="/qml">
         <file>resources/qml/ProjectCardSelection.qml</file>
@@ -163,5 +167,7 @@
         <file>resources/qml/TimedItem.qml</file>
         <file>resources/qml/PlayerControls.qml</file>
         <file>resources/qml/IconResourceDelegate.qml</file>
+        <file>resources/qml/PlayerMetronome.qml</file>
+        <file>resources/qml/MetronomeItem.qml</file>
     </qresource>
 </RCC>

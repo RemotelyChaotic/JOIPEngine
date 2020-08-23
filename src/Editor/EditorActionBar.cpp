@@ -31,6 +31,7 @@ namespace {
   const QString c_sAddShowIconHelpId =    "Editor/AddShowIconCode";
   const QString c_sAddShowBGHelpId =      "Editor/AddShowBGCode";
   const QString c_sAddTextHelpId =        "Editor/AddTextCode";
+  const QString c_sAddMetronomeHelpId =   "Editor/AddMetronomeCode";
   const QString c_sAddTimerHelpId =       "Editor/AddTimerCode";
   const QString c_sAddThreadHelpId =      "Editor/AddThreadCode";
 
@@ -118,6 +119,8 @@ void CEditorActionBar::Initialize()
     wpHelpFactory->RegisterHelp(c_sAddShowBGHelpId, ":/resources/help/editor/addshowbg_button_help.html");
     m_spUi->AddTextCode->setProperty(helpOverlay::c_sHelpPagePropertyName, c_sAddTextHelpId);
     wpHelpFactory->RegisterHelp(c_sAddTextHelpId, ":/resources/help/editor/addtext_button_help.html");
+    m_spUi->AddMetronomeCode->setProperty(helpOverlay::c_sHelpPagePropertyName, c_sAddMetronomeHelpId);
+    wpHelpFactory->RegisterHelp(c_sAddMetronomeHelpId, ":/resources/help/editor/addmetronome_button_help.html");
     m_spUi->AddTimerCode->setProperty(helpOverlay::c_sHelpPagePropertyName, c_sAddTimerHelpId);
     wpHelpFactory->RegisterHelp(c_sAddTimerHelpId, ":/resources/help/editor/addtimer_button_help.html");
     m_spUi->AddThreadCode->setProperty(helpOverlay::c_sHelpPagePropertyName, c_sAddThreadHelpId);
@@ -257,7 +260,8 @@ void CEditorActionBar::SlotKeyBindingsChanged()
     m_spUi->AddShowIconCode->SetShortcut(m_spSettings->keyBinding(sKey.arg(3)));
     m_spUi->AddShowBackgroundCode->SetShortcut(m_spSettings->keyBinding(sKey.arg(4)));
     m_spUi->AddTextCode->SetShortcut(m_spSettings->keyBinding(sKey.arg(5)));
-    m_spUi->AddTimerCode->SetShortcut(m_spSettings->keyBinding(sKey.arg(6)));
-    m_spUi->AddThreadCode->SetShortcut(m_spSettings->keyBinding(sKey.arg(7)));
+    m_spUi->AddMetronomeCode->SetShortcut(m_spSettings->keyBinding(sKey.arg(6)));
+    m_spUi->AddTimerCode->SetShortcut(m_spSettings->keyBinding(sKey.arg(7)));
+    m_spUi->AddThreadCode->SetShortcut(m_spSettings->keyBinding(sKey.arg(8)));
   }
 }

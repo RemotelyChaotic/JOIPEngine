@@ -103,6 +103,9 @@ set(Sources
   Editor/Script/IconSnippetOverlay.cpp 
   Editor/Script/IconSnippetOverlay.h 
   Editor/Script/IconSnippetOverlay.ui 
+  Editor/Script/MetronomeSnippetOverlay.cpp
+  Editor/Script/MetronomeSnippetOverlay.h
+  Editor/Script/MetronomeSnippetOverlay.ui
   Editor/Script/ResourceSnippetOverlay.cpp 
   Editor/Script/ResourceSnippetOverlay.h 
   Editor/Script/ResourceSnippetOverlay.ui 
@@ -135,6 +138,8 @@ set(Sources
   Player/InformationWidget.cpp 
   Player/InformationWidget.h 
   Player/InformationWidget.ui 
+  Player/MetronomePaintedWidget.cpp
+  Player/MetronomePaintedWidget.h
   Player/ProjectRunner.cpp 
   Player/ProjectRunner.h 
   Player/SceneMainScreen.cpp 
@@ -182,6 +187,8 @@ set(Sources
   Systems/Script/ScriptIcon.h 
   Systems/Script/ScriptMediaPlayer.cpp 
   Systems/Script/ScriptMediaPlayer.h 
+  Systems/Script/ScriptMetronome.cpp
+  Systems/Script/ScriptMetronome.h
   Systems/Script/ScriptObjectBase.cpp 
   Systems/Script/ScriptObjectBase.h 
   Systems/Script/ScriptRunnerSignalEmiter.cpp 
@@ -281,6 +288,8 @@ target_include_directories(${PROJECT_NAME}
 
 target_compile_definitions(${PROJECT_NAME}
   PRIVATE
+    $<$<OR:$<CONFIG:Debug>,$<CONFIG:RelWithDebInfo>>:QT_QML_DEBUG>
+    $<$<OR:$<CONFIG:Debug>,$<CONFIG:RelWithDebInfo>>:QT_DECLARATIVE_DEBUG>
     ${NodeEditor_DEFINITIONS})
 
 #-----------------------------------------------------------------------------------------

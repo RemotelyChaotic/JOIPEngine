@@ -42,6 +42,15 @@ Rectangle {
                 Layout.alignment: Qt.AlignVCenter
                 userName: "mediaPlayer"
                 mainMediaPlayer: true
+
+                PlayerMetronome {
+                    id: metronome
+                    anchors.bottom: parent.bottom
+                    anchors.horizontalCenter: parent.horizontalCenter
+                    width: parent.width
+                    height: parent.height / 6
+                    userName: "metronome"
+                }
             }
 
 

@@ -142,7 +142,7 @@ void CScriptMediaPlayer::play(QJSValue resource)
       }
       else
       {
-        QString sError = tr("Wrong argument-type to play(). String or resource was expected.");
+        QString sError = tr("Wrong argument-type to play(). String, resource or null was expected.");
         emit m_pSignalEmitter->showError(sError, QtMsgType::QtWarningMsg);
       }
     }
@@ -152,7 +152,7 @@ void CScriptMediaPlayer::play(QJSValue resource)
     }
     else
     {
-      QString sError = tr("Wrong argument-type to play(). String or resource was expected.");
+      QString sError = tr("Wrong argument-type to play(). String, resource or null was expected.");
       emit m_pSignalEmitter->showError(sError, QtMsgType::QtWarningMsg);
     }
   }

@@ -219,6 +219,60 @@
 
     <br>
 
+    <h2>PlayerMetronome (default name: <i>metronome</i>)</h2>
+
+    <br>
+
+    <p>This object is registered by the JOIP-Engine if it is present in the current <a href="qrc:/resources/help/layout/layout_help.html">Layout</a>.
+    It is a metronome, that will play a beat sound effect in a user-determined pattern with
+    a certain frequency.
+    <br>
+      <ul>
+        <li><b>setBpm ( int ):</b><br>
+        This function will set the frequency of beats, or bpm (beats per minute).<br>
+        <i>Example Usage:</i><br>
+        metronome.setBpm(60);<br>
+        <br></li>
+
+        <li><b>setBeatResource ( string | Resource | null ):</b><br>
+        This function will set the sound effect that is played on each beat reaching the center.
+        The <a href="qrc:/resources/help/editor/resources/resource_help.html">Resource</a> can only
+        be of the <i>Sound</i> type and can either be the name of a Resource, a resource
+        object obtained from the current Scene object or <i>null<i>. Calling the function with null will
+        reset the sound effect to the default sound effect.<br>
+        <i>Example Usage:</i><br>
+        metronome.setBeatResource("myBeat");<br>
+        metronome.setBeatResource(myBeatVar); /* note: in this example myIconVar is a var */<br>
+        metronome.setBeatResource(null);<br>
+        <br></li>
+
+        <li><b>setPattern ( real[] ):</b><br>
+        This function is used to set the pattern of the beat. This pattern will repeat until
+        the metronome is playing and will determine, how the intervals between beats are streched.
+        If this is called with an array of zero elements, the default pattern ( [1] ) will be set.<br>
+        <i>Example Usage:</i><br>
+        metronome.setPattern([1]); /* bpm of 60: default pattern; will make the metronome beat every second */<br>
+        metronome.setPattern([1,2,2]); /* bpm of 60: will make the metronome beat after 1, 2 and 2 seconds (repeating pattern) */<br>
+        metronome.setPattern([2,0.5,1]); /* bpm of 120: will make the metronome beat after 1, 0.25 and 0.5 seconds (repeating pattern) */<br>
+        <br></li>
+
+        <li><b>start ( ):</b><br>
+        This function will start the metronome. The metronome won't stop until <i>stop</i>
+        is called explicitly. The first beat will play two seconds after starting the metronome.<br>
+        <i>Example Usage:</i><br>
+        metronome.start();<br>
+        <br></li>
+
+        <li><b>stop ( ):</b><br>
+        This function will stop the currently running the metronome.<br>
+        <i>Example Usage:</i><br>
+        metronome.stop();<br>
+        <br></li>
+      </ul>
+    </p>
+
+    <br>
+
     <h2>PlayerStorage (name: <i>localStorage</i>)</h2>
 
     <br>

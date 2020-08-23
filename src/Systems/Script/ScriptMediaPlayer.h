@@ -7,8 +7,6 @@
 #include <memory>
 
 class CDatabaseManager;
-struct SResource;
-typedef std::shared_ptr<SResource> tspResource;
 
 
 class CMediaPlayerSignalEmitter : public CScriptRunnerSignalEmiter

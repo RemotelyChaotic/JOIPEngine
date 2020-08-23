@@ -16,8 +16,8 @@ Rectangle {
         source: ""
         anchors.fill: parent
         border { left: 0; top: 0; right: 0; bottom: 0 }
-        horizontalTileMode: BorderImage.Round
-        verticalTileMode: BorderImage.Round
+        horizontalTileMode: root.style.backgroundDisplay.horizontalTileMode
+        verticalTileMode: root.style.backgroundDisplay.verticalTileMode
 
         onStatusChanged: {
             if (startedBackgroundLoad)

@@ -5,6 +5,7 @@
 #include "Player/SceneMainScreen.h"
 #include "Script/BackgroundSnippetOverlay.h"
 #include "Script/IconSnippetOverlay.h"
+#include "Script/MetronomeSnippetOverlay.h"
 #include "Script/ResourceSnippetOverlay.h"
 #include "Script/ScriptEditorModel.h"
 #include "Script/ScriptHighlighter.h"
@@ -39,6 +40,7 @@ CEditorCodeWidget::CEditorCodeWidget(QWidget* pParent) :
   m_spUi(new Ui::CEditorCodeWidget),
   m_spBackgroundSnippetOverlay(std::make_unique<CBackgroundSnippetOverlay>(this)),
   m_spIconSnippetOverlay(std::make_unique<CIconSnippetOverlay>(this)),
+  m_spMetronomeSnippetOverlay(std::make_unique<CMetronomeSnippetOverlay>(this)),
   m_spResourceSnippetOverlay(std::make_unique<CResourceSnippetOverlay>(this)),
   m_spTextSnippetOverlay(std::make_unique<CTextSnippetOverlay>(this)),
   m_spTimerSnippetOverlay(std::make_unique<CTimerSnippetOverlay>(this)),
@@ -58,9 +60,9 @@ CEditorCodeWidget::~CEditorCodeWidget()
 {
   m_spThreadSnippetOverlay.reset();
   m_spTimerSnippetOverlay.reset();
-  m_spTimerSnippetOverlay.reset();
   m_spTextSnippetOverlay.reset();
   m_spResourceSnippetOverlay.reset();
+  m_spMetronomeSnippetOverlay.reset();
   m_spIconSnippetOverlay.reset();
   m_spBackgroundSnippetOverlay.reset();
 }
@@ -75,11 +77,13 @@ void CEditorCodeWidget::Initialize()
 
   m_spBackgroundSnippetOverlay->Initialize(ResourceTreeModel());
   m_spIconSnippetOverlay->Initialize(ResourceTreeModel());
+  m_spMetronomeSnippetOverlay->Initialize(ResourceTreeModel());
   m_spResourceSnippetOverlay->Initialize(ResourceTreeModel());
   m_spTextSnippetOverlay->Initialize(ResourceTreeModel());
 
   m_spBackgroundSnippetOverlay->Hide();
   m_spIconSnippetOverlay->Hide();
+  m_spMetronomeSnippetOverlay->Hide();
   m_spResourceSnippetOverlay->Hide();
   m_spTextSnippetOverlay->Hide();
   m_spTimerSnippetOverlay->Hide();
@@ -88,6 +92,8 @@ void CEditorCodeWidget::Initialize()
   connect(m_spBackgroundSnippetOverlay.get(), &CBackgroundSnippetOverlay::SignalBackgroundCode,
           this, &CEditorCodeWidget::SlotInsertGeneratedCode);
   connect(m_spIconSnippetOverlay.get(), &CIconSnippetOverlay::SignalIconCode,
+          this, &CEditorCodeWidget::SlotInsertGeneratedCode);
+  connect(m_spMetronomeSnippetOverlay.get(), &CMetronomeSnippetOverlay::SignalMetronomeSnippetCode,
           this, &CEditorCodeWidget::SlotInsertGeneratedCode);
   connect(m_spResourceSnippetOverlay.get(), &CResourceSnippetOverlay::SignalResourceCode,
           this, &CEditorCodeWidget::SlotInsertGeneratedCode);
@@ -133,6 +139,7 @@ void CEditorCodeWidget::LoadProject(tspProject spProject)
 
   m_spCurrentProject = spProject;
   m_spResourceSnippetOverlay->LoadProject(m_spCurrentProject);
+  m_spMetronomeSnippetOverlay->LoadProject(m_spCurrentProject);
   m_spTextSnippetOverlay->LoadProject(m_spCurrentProject);
 
   if (0 < ScriptEditorModel()->rowCount())
@@ -163,6 +170,7 @@ void CEditorCodeWidget::UnloadProject()
   m_spUi->pCodeEdit->setReadOnly(false);
 
   m_spResourceSnippetOverlay->UnloadProject();
+  m_spMetronomeSnippetOverlay->UnloadProject();
   m_spTextSnippetOverlay->UnloadProject();
 
   m_spCurrentProject = nullptr;
@@ -180,6 +188,7 @@ void CEditorCodeWidget::UnloadProject()
 
   m_spBackgroundSnippetOverlay->Hide();
   m_spIconSnippetOverlay->Hide();
+  m_spMetronomeSnippetOverlay->Hide();
   m_spResourceSnippetOverlay->Hide();
   m_spTextSnippetOverlay->Hide();
   m_spTimerSnippetOverlay->Hide();
@@ -242,6 +251,8 @@ void CEditorCodeWidget::OnActionBarAboutToChange()
             m_spResourceSnippetOverlay.get(), &CResourceSnippetOverlay::Show);
     disconnect(ActionBar()->m_spUi->AddTextCode, &QPushButton::clicked,
             m_spTextSnippetOverlay.get(), &CTextSnippetOverlay::Show);
+    disconnect(ActionBar()->m_spUi->AddMetronomeCode, &QPushButton::clicked,
+            m_spMetronomeSnippetOverlay.get(), &CMetronomeSnippetOverlay::Show);
     disconnect(ActionBar()->m_spUi->AddTimerCode, &QPushButton::clicked,
             m_spTimerSnippetOverlay.get(), &CTimerSnippetOverlay::Show);
     disconnect(ActionBar()->m_spUi->AddThreadCode, &QPushButton::clicked,
@@ -251,6 +262,7 @@ void CEditorCodeWidget::OnActionBarAboutToChange()
     ActionBar()->m_spUi->AddShowIconCode->setEnabled(true);
     ActionBar()->m_spUi->AddShowImageCode->setEnabled(true);
     ActionBar()->m_spUi->AddTextCode->setEnabled(true);
+    ActionBar()->m_spUi->AddMetronomeCode->setEnabled(true);
     ActionBar()->m_spUi->AddTimerCode->setEnabled(true);
     ActionBar()->m_spUi->AddThreadCode->setEnabled(true);
   }
@@ -275,6 +287,8 @@ void CEditorCodeWidget::OnActionBarChanged()
             m_spResourceSnippetOverlay.get(), &CResourceSnippetOverlay::Show);
     connect(ActionBar()->m_spUi->AddTextCode, &QPushButton::clicked,
             m_spTextSnippetOverlay.get(), &CTextSnippetOverlay::Show);
+    connect(ActionBar()->m_spUi->AddMetronomeCode, &QPushButton::clicked,
+            m_spMetronomeSnippetOverlay.get(), &CMetronomeSnippetOverlay::Show);
     connect(ActionBar()->m_spUi->AddTimerCode, &QPushButton::clicked,
             m_spTimerSnippetOverlay.get(), &CTimerSnippetOverlay::Show);
     connect(ActionBar()->m_spUi->AddThreadCode, &QPushButton::clicked,
@@ -286,6 +300,7 @@ void CEditorCodeWidget::OnActionBarChanged()
       ActionBar()->m_spUi->AddShowIconCode->setEnabled(false);
       ActionBar()->m_spUi->AddShowImageCode->setEnabled(false);
       ActionBar()->m_spUi->AddTextCode->setEnabled(false);
+      ActionBar()->m_spUi->AddMetronomeCode->setEnabled(false);
       ActionBar()->m_spUi->AddTimerCode->setEnabled(false);
       ActionBar()->m_spUi->AddThreadCode->setEnabled(false);
     }

@@ -9,6 +9,9 @@
 #include <QApplication>
 #include <QtAVWidgets>
 #include <QOpenGLContext>
+#if defined(QT_QML_DEBUG)
+#include <QQmlDebuggingEnabler>
+#endif
 #include <QSslSocket>
 //#include <QtWebEngine>
 //#include <QtWebView/QtWebView>
@@ -27,6 +30,10 @@ int main(int argc, char *argv[])
 #endif
 
   CApplication app(argc, argv);
+
+#if defined(QT_QML_DEBUG)
+  QQmlDebuggingEnabler enabler;
+#endif
 
   app.Initialize();
 

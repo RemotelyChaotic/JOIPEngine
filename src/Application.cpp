@@ -4,6 +4,7 @@
 #include "UISoundEmitter.h"
 
 // needed to register to qml
+#include "Player/MetronomePaintedWidget.h"
 #include "Player/SceneMainScreen.h"
 #include "Player/TimerWidget.h"
 
@@ -20,6 +21,7 @@
 #include "Systems/Script/ScriptBackground.h"
 #include "Systems/Script/ScriptIcon.h"
 #include "Systems/Script/ScriptMediaPlayer.h"
+#include "Systems/Script/ScriptMetronome.h"
 #include "Systems/Script/ScriptStorage.h"
 #include "Systems/Script/ScriptTextBox.h"
 #include "Systems/Script/ScriptThread.h"
@@ -164,6 +166,7 @@ void CApplication::RegisterQmlTypes()
   qRegisterMetaType<QColor>();
   qRegisterMetaType<std::vector<QColor>>();
   qRegisterMetaType<QStringList>();
+  qRegisterMetaType<QList<int>>();
   qRegisterMetaType<QtMsgType>();
 
   qRegisterMetaType<CResource*>();
@@ -219,6 +222,7 @@ void CApplication::RegisterQmlTypes()
   qmlRegisterType<CBackgroundSignalEmitter>("JOIP.script", 1, 1, "BackgroundSignalEmitter");
   qmlRegisterType<CIconSignalEmitter>("JOIP.script", 1, 1, "IconSignalEmitter");
   qmlRegisterType<CMediaPlayerSignalEmitter>("JOIP.script", 1, 1, "MediaPlayerSignalEmitter");
+  qmlRegisterType<CMetronomeSignalEmitter>("JOIP.script", 1, 1, "MetronomeSignalEmitter");
   qmlRegisterType<CStorageSignalEmitter>("JOIP.script", 1, 1, "StorageSignalEmitter");
   qmlRegisterType<CTextBoxSignalEmitter>("JOIP.script", 1, 1, "TextBoxSignalEmitter");
   qmlRegisterType<CThreadSignalEmitter>("JOIP.script", 1, 1, "ThreadSignalEmitter");
@@ -227,6 +231,7 @@ void CApplication::RegisterQmlTypes()
   qmlRegisterUncreatableMetaObject(
     TextAlignment::staticMetaObject, "JOIP.script", 1, 1, "TextAlignment", "");
 
+  qmlRegisterType<CMetronomeCanvasQml>("JOIP.ui", 1, 1, "MetronomeDisplay");
   qmlRegisterType<CTimerCanvasQml>("JOIP.ui", 1, 1, "TimerDisplay");
 
   qmlRegisterUncreatableType<qqsfpm::Filter>("SortFilterProxyModel", 0, 2, "Filter", "Filter is abstract and cannot be created.");
