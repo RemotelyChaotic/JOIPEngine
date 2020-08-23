@@ -5,12 +5,8 @@ Version 1.0.0.0
 - First release
 
 ================================================================================
-Version 1.0.1.0
+Version 1.1.0.0
 ================================================================================
-
-Fixed Bugs:
-- Timer interval bug fixed; the timer doesn't run longer than expected anymore.
-- Fixed OpenGL issues that prevented menus to be opened.
 
 New Features:
 - Help overlay added that can interactively display help based on clicked engine 
@@ -21,26 +17,37 @@ New Features:
 - Target verision and project version added to project configuration describing
   the project's version and the engine version the project was saved in.
 - Support for key bindings added and settings expanded.
+- Project-Player can be paused.
+- Projects can now be exported as a bundle, packing all resources in a single
+  file.
+- Added PlayerMetronome component to player and editor.
+
+Updated Features:
+- Upgrade to Qt5.14.2 with msvc2017 for more QJSEngine and QML features.
+  -> Recompiled dependant libraries.
 - Changed card selection backend to QML and greatly improved card display.
 - Changed Project-Player backend to QML and improved overall look.
-- Project-Player can be paused.
 - New resource types added: Script and Database
   -> Resources of type Other in old projects will be reassigned on project
      load if needed.
-- Projects can now be exported as a bundle, packing all resources in a single
-  file.
 - Changed syntax highlighting in editor to new backend.
   -> Highlighter can now be styled.
 - PlayerTextBox text alignment can now be set to either Left, Right or Center.
 - PlayerTextBox can now display a portrait next to the text. This portrait
   can be any Image or Movie type Resource.
-
-Updated Features:
-- Upgrade to Qt5.14.2 with msvc2017 for more QJSEngine and QML features.
-  -> Recompiled dependant libraries.
+- Styles have been updated.
 
 Changes:
 - In-Game title changed to JOIP Engine.
 - Reworked editor models to work more consistently.
+- Reworked project naming restrictions to work on all future supported
+  systems.
 - Code editor displays special info-text if no scripts are available.
+- Removed WebEngine because of the overhead of using it.
+- Changed build system from QMake to CMake.
 - Reworked overlays. Overlays are using a manager to determine z-order.
+
+Fixed Bugs:
+- Timer interval bug fixed; the timer doesn't run longer than expected anymore.
+- Fixed OpenGL issues that prevented menus to be opened.
+- Fixed multiple issues with editor code overlays.
