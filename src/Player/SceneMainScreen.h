@@ -41,6 +41,7 @@ public slots:
 
 signals:
   void SignalExitClicked();
+  void SignalUnloadFinished();
 
 protected:
   void resizeEvent(QResizeEvent* pEvent) override;
@@ -55,6 +56,7 @@ private slots:
   void SlotSceneSelectReturnValue(int iIndex);
   void SlotScriptRunFinished(bool bOk, const QString& sRetVal);
   void SlotStartLoadingSkript();
+  void SlotUnloadFinished();
 
 private:
   void ConnectAllSignals();

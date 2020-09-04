@@ -43,21 +43,37 @@ Rectangle {
                 var resource = currentlyLoadedProject.resource(currentlyLoadedProject.playerLayout);
                 if (null !== resource && undefined !== resource)
                 {
-                    layoutLoader.source = resource.path;
+                    layoutLoader.setSource(resource.path);
                     bFoundLayout = true;
                 }
             }
 
             if (!bFoundLayout)
             {
-                layoutLoader.source = "qrc:/qml/resources/qml/PlayerDefaultLayout.qml";
+                layoutLoader.setSource("qrc:/qml/resources/qml/PlayerDefaultLayout.qml");
             }
+        }
+        else
+        {
+            console.error(qsTr("Could not load project, project is null or undefined."));
         }
     }
 
     function onUnLoadProject()
     {
+        registeredTextBox = null;
+        registeredMediaPlayer = null;
+
+        numReadyComponents = 0;
+        componentsRegistered = [];
+
+        layoutLoader.setSource("");
+
         currentlyLoadedProject = null;
+
+        style = null;
+
+        gc();
     }
 
     //------------------------------------------------------------------------------------
@@ -229,16 +245,30 @@ Rectangle {
             id: layoutLoader
             anchors.fill: parent
             asynchronous: true
-            onStatusChanged: {
+            active: true
+            onLoaded: {
                 if (status === Loader.Ready)
                 {
-                    startLoadingSkript();
+                    root.startLoadingSkript();
                 }
-                else if (status === Loader.Error)
+            }
+            onStatusChanged: {
+                switch(status)
+                {
+                  case Loader.Null: console.log("The loader is inactive or no QML source has been set"); break;
+                  case Loader.Ready: console.log("The QML source has been loaded"); break;
+                  case Loader.Loading: console.log("The QML source is currently being loaded"); break;
+                  case Loader.Error: console.log("An error occurred while loading the QML source"); break;
+                }
+
+                if (status === Loader.Error)
                 {
                     console.error(qsTr("Could not load layout."));
-                    layoutLoader.source = "qrc:/qml/resources/qml/PlayerDefaultLayout.qml";
+                    layoutLoader.setSource("qrc:/qml/resources/qml/PlayerDefaultLayout.qml");
                 }
+            }
+            onProgressChanged: {
+                console.log("Loading Layout: " + progress + "%");
             }
         }
 

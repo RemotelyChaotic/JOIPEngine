@@ -211,10 +211,6 @@ bool CProjectRunner::LoadFlowScene()
       if (nullptr != spResource)
       {
         QString sPath = ResourceUrlToAbsolutePath(spResource);
-        QReadLocker resourceLocker(&spResource->m_rwLock);
-        QUrl path = spResource->m_sPath;
-        resourceLocker.unlock();
-
         QFile modelFile(sPath);
         if (modelFile.open(QIODevice::ReadOnly))
         {

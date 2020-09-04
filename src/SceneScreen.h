@@ -32,6 +32,7 @@ protected slots:
   void on_pCancelButton_clicked();
   void SlotCardsUnloadFinished();
   void SlotExitClicked();
+  void SlotSceneUnloadFinished();
 
 private:
   std::unique_ptr<Ui::CSceneScreen>        m_spUi;

@@ -89,8 +89,8 @@ void CSceneMainScreen::LoadProject(qint32 iId, const QString sStartScene)
     CDatabaseManager::LoadProject(m_spCurrentProject);
     m_spProjectRunner->LoadProject(m_spCurrentProject, sStartScene);
 
-    LoadQml();
     ConnectAllSignals();
+    LoadQml();
   }
 }
 
@@ -107,24 +107,14 @@ void CSceneMainScreen::UnloadProject()
 {
   if (!m_bInitialized) { return; }
 
-  auto spSignalEmmiterContext = m_spScriptRunner->SignalEmmitterContext();
-  if (nullptr != spSignalEmmiterContext)
-  {
-    emit spSignalEmmiterContext->clearStorage();
-  }
+  DisconnectAllSignals();
+  UnloadQml();
 
   disconnect(m_spScriptRunner.get(), &CScriptRunner::SignalScriptRunFinished,
           this, &CSceneMainScreen::SlotScriptRunFinished);
 
-  m_spScriptRunner->UnregisterComponents();
-
-  m_spProjectRunner->UnloadProject();
-
-  DisconnectAllSignals();
-  UnloadQml();
-
-  CDatabaseManager::UnloadProject(m_spCurrentProject);
-  m_spCurrentProject = nullptr;
+  bool bOk = QMetaObject::invokeMethod(this, "SlotUnloadFinished", Qt::QueuedConnection);
+  assert(bOk); Q_UNUSED(bOk)
 }
 
 //----------------------------------------------------------------------------------------
@@ -133,14 +123,14 @@ void CSceneMainScreen::SlotQuit()
 {
   if (!m_bInitialized || nullptr == m_spCurrentProject) { return; }
 
-  UnloadProject();
-
   auto spSignalEmmiterContext = m_spScriptRunner->SignalEmmitterContext();
   if (nullptr != spSignalEmmiterContext)
   {
     spSignalEmmiterContext->SetScriptExecutionStatus(CScriptRunnerSignalEmiter::eStopped);
     emit spSignalEmmiterContext->interrupt();
   }
+
+  UnloadProject();
 
   emit SignalExitClicked();
 }
@@ -332,6 +322,32 @@ void CSceneMainScreen::SlotStartLoadingSkript()
 
 //----------------------------------------------------------------------------------------
 //
+void CSceneMainScreen::SlotUnloadFinished()
+{
+  m_spUi->pQmlWidget->engine()->clearComponentCache();
+  m_spUi->pQmlWidget->engine()->collectGarbage();
+  m_spUi->pQmlWidget->setSource(QUrl());
+
+  delete m_pCurrentProjectWrapper;
+  m_spCurrentProject = nullptr;
+
+  auto spSignalEmmiterContext = m_spScriptRunner->SignalEmmitterContext();
+  if (nullptr != spSignalEmmiterContext)
+  {
+    emit spSignalEmmiterContext->clearStorage();
+  }
+
+  m_spScriptRunner->UnregisterComponents();
+  m_spProjectRunner->UnloadProject();
+
+  CDatabaseManager::UnloadProject(m_spCurrentProject);
+  m_spCurrentProject = nullptr;
+
+  emit SignalUnloadFinished();
+}
+
+//----------------------------------------------------------------------------------------
+//
 void CSceneMainScreen::ConnectAllSignals()
 {
   QQuickItem* pRootObject =  m_spUi->pQmlWidget->rootObject();
@@ -471,12 +487,6 @@ void CSceneMainScreen::UnloadQml()
   if (nullptr != pRootObject)
   {
     QMetaObject::invokeMethod(pRootObject, "onUnLoadProject");
-
-    m_spUi->pQmlWidget->engine()->clearComponentCache();
-    m_spUi->pQmlWidget->engine()->collectGarbage();
-
-    delete m_pCurrentProjectWrapper;
-    m_spCurrentProject = nullptr;
   }
 }
 
