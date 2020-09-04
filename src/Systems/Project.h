@@ -6,8 +6,10 @@
 #include "Scene.h"
 #include "SVersion.h"
 #include <QObject>
+#include <QPointer>
 #include <QReadWriteLock>
 #include <QSharedPointer>
+#include <map>
 #include <memory>
 
 class QScriptEngine;
@@ -106,8 +108,10 @@ public:
   std::shared_ptr<SProject> Data() { return m_spData; }
 
 private:
-  std::shared_ptr<SProject>  m_spData;
-  QJSEngine*                 m_pEngine;
+  std::shared_ptr<SProject>              m_spData;
+  QJSEngine*                             m_pEngine;
+  std::map<QString, QPointer<CScene>>    m_vpLoadedScenes;
+  std::map<QString, QPointer<CResource>> m_vpLoadedResources;
 };
 
 //----------------------------------------------------------------------------------------

@@ -299,10 +299,10 @@ void CProjectCardSelectionWidget::resizeEvent(QResizeEvent* pEvent)
 //
 void CProjectCardSelectionWidget::FinishUnloadPrivate()
 {
-  m_spUi->pQmlWidget->engine()->collectGarbage();
   m_spUi->pQmlWidget->engine()->clearComponentCache();
-
+  m_spUi->pQmlWidget->engine()->collectGarbage();
   m_spUi->pQmlWidget->setSource(QUrl());
+
   QQuickWidget::Status status = m_spUi->pQmlWidget->status();
   assert(status == QQuickWidget::Null);
   Q_UNUSED(status);

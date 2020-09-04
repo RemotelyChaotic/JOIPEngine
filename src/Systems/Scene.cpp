@@ -78,7 +78,9 @@ void SScene::FromJsonObject(const QJsonObject& json)
 CScene::CScene(QJSEngine* pEngine, const std::shared_ptr<SScene>& spScene) :
   QObject(),
   m_spData(spScene),
-  m_pEngine(pEngine)
+  m_pEngine(pEngine),
+  m_pLoadedProject(nullptr),
+  m_vpLoadedResources()
 {
   assert(nullptr != spScene);
   assert(nullptr != pEngine);
@@ -86,6 +88,17 @@ CScene::CScene(QJSEngine* pEngine, const std::shared_ptr<SScene>& spScene) :
 
 CScene::~CScene()
 {
+  if (nullptr != m_pLoadedProject)
+  {
+    delete m_pLoadedProject;
+  }
+  for (auto& resource : m_vpLoadedResources)
+  {
+    if (nullptr != resource.second)
+    {
+      delete resource.second;
+    }
+  }
 }
 
 //----------------------------------------------------------------------------------------
@@ -148,9 +161,20 @@ QJSValue CScene::resource(const QString& sValue)
       if (m_spData->m_spParent->m_spResourcesMap.end() != itRef)
       {
         locker.unlock();
-        return
-          m_pEngine->newQObject(
-              new CResource(m_pEngine, std::make_shared<SResource>(*itRef->second)));
+
+        CResource* pResource = nullptr;
+        auto itScene = m_vpLoadedResources.find(sValue);
+        if (itScene != m_vpLoadedResources.end())
+        {
+          pResource = itScene->second;
+        }
+        else
+        {
+          pResource = new CResource(m_pEngine, std::make_shared<SResource>(*itRef->second));
+          m_vpLoadedResources.insert({sValue, pResource});
+        }
+
+        return m_pEngine->newQObject(pResource);
       }
       return QJSValue();
     }
@@ -165,9 +189,14 @@ QJSValue CScene::project()
   QReadLocker locker(&m_spData->m_rwLock);
   if (nullptr != m_spData->m_spParent)
   {
+    if (nullptr == m_pLoadedProject)
+    {
+      m_pLoadedProject =
+          new CProject(m_pEngine, std::make_shared<SProject>(*m_spData->m_spParent));
+    }
+
     return
-      m_pEngine->newQObject(
-          new CProject(m_pEngine, std::make_shared<SProject>(*m_spData->m_spParent)));
+      m_pEngine->newQObject(m_pLoadedProject);
   }
   return QJSValue();
 }

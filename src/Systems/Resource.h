@@ -5,6 +5,7 @@
 #include <enum.h>
 #include <QJSEngine>
 #include <QObject>
+#include <QPointer>
 #include <QReadWriteLock>
 #include <QSharedPointer>
 #include <QUrl>
@@ -98,8 +99,9 @@ public:
   std::shared_ptr<SResource> Data() { return m_spData; }
 
 private:
-  std::shared_ptr<SResource>m_spData;
-  QJSEngine*                m_pEngine;
+  std::shared_ptr<SResource>    m_spData;
+  QJSEngine*                    m_pEngine;
+  QPointer<CProject>            m_pLoadedProject;
 };
 
 //----------------------------------------------------------------------------------------

@@ -147,7 +147,6 @@ CEditorSceneNodeWidget::CEditorSceneNodeWidget(QWidget* pParent) :
   m_pFlowView->setObjectName("FlowView");
   m_pFlowView->setWindowTitle("Node-based flow editor");
   m_pFlowView->show();
-  m_pFlowView->setScene(nullptr);
 
   QLayout* pLayout = m_spUi->pContainerWidget->layout();
   pLayout->addWidget(m_pFlowView);

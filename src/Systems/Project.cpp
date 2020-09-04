@@ -195,7 +195,9 @@ void SProject::FromJsonObject(const QJsonObject& json)
 CProject::CProject(QJSEngine* pEngine, const std::shared_ptr<SProject>& spProject) :
   QObject(),
   m_spData(spProject),
-  m_pEngine(pEngine)
+  m_pEngine(pEngine),
+  m_vpLoadedScenes(),
+  m_vpLoadedResources()
 {
   assert(nullptr != spProject);
   assert(nullptr != pEngine);
@@ -203,6 +205,20 @@ CProject::CProject(QJSEngine* pEngine, const std::shared_ptr<SProject>& spProjec
 
 CProject::~CProject()
 {
+  for (auto& scene : m_vpLoadedScenes)
+  {
+    if (nullptr != scene.second)
+    {
+      delete scene.second;
+    }
+  }
+  for (auto& resource : m_vpLoadedResources)
+  {
+    if (nullptr != resource.second)
+    {
+      delete resource.second;
+    }
+  }
 }
 
 //----------------------------------------------------------------------------------------
@@ -373,9 +389,19 @@ QJSValue CProject::scene(const QString& sName)
     QReadLocker sceneLocker(&m_spData->m_vspScenes[static_cast<size_t>(iIndex)]->m_rwLock);
     if (m_spData->m_vspScenes[static_cast<size_t>(iIndex)]->m_sName == sName)
     {
-      return
-        m_pEngine->newQObject(
-            new CScene(m_pEngine, std::make_shared<SScene>(*m_spData->m_vspScenes[static_cast<size_t>(iIndex)])));
+      CScene* pScene = nullptr;
+      auto itScene = m_vpLoadedScenes.find(sName);
+      if (itScene != m_vpLoadedScenes.end())
+      {
+        pScene = itScene->second;
+      }
+      else
+      {
+        pScene = new CScene(m_pEngine, std::make_shared<SScene>(*m_spData->m_vspScenes[static_cast<size_t>(iIndex)]));
+        m_vpLoadedScenes.insert({sName, pScene});
+      }
+
+      return m_pEngine->newQObject(pScene);
     }
   }
   return QJSValue();
@@ -388,9 +414,23 @@ QJSValue CProject::scene(qint32 iIndex)
   QReadLocker locker(&m_spData->m_rwLock);
   if (0 <= iIndex && m_spData->m_vspScenes.size() > static_cast<size_t>(iIndex))
   {
-    return
-      m_pEngine->newQObject(
-          new CScene(m_pEngine, std::make_shared<SScene>(*m_spData->m_vspScenes[static_cast<size_t>(iIndex)])));
+    QReadLocker sceneLocker(&m_spData->m_vspScenes[static_cast<size_t>(iIndex)]->m_rwLock);
+    QString sName = m_spData->m_vspScenes[static_cast<size_t>(iIndex)]->m_sName;
+    sceneLocker.unlock();
+
+    CScene* pScene = nullptr;
+    auto itScene = m_vpLoadedScenes.find(sName);
+    if (itScene != m_vpLoadedScenes.end())
+    {
+      pScene = itScene->second;
+    }
+    else
+    {
+      pScene = new CScene(m_pEngine, std::make_shared<SScene>(*m_spData->m_vspScenes[static_cast<size_t>(iIndex)]));
+      m_vpLoadedScenes.insert({sName, pScene});
+    }
+
+    return m_pEngine->newQObject(pScene);
   }
   return QJSValue();
 }
@@ -424,9 +464,19 @@ QJSValue CProject::resource(const QString& sValue)
   auto it = m_spData->m_spResourcesMap.find(sValue);
   if (m_spData->m_spResourcesMap.end() != it)
   {
-    return
-      m_pEngine->newQObject(
-          new CResource(m_pEngine, std::make_shared<SResource>(*it->second)));
+    CResource* pResource = nullptr;
+    auto itScene = m_vpLoadedResources.find(sValue);
+    if (itScene != m_vpLoadedResources.end())
+    {
+      pResource = itScene->second;
+    }
+    else
+    {
+      pResource = new CResource(m_pEngine, std::make_shared<SResource>(*it->second));
+      m_vpLoadedResources.insert({sValue, pResource});
+    }
+
+    return m_pEngine->newQObject(pResource);
   }
   return QJSValue();
 }
@@ -442,9 +492,19 @@ QJSValue CProject::resource(qint32 iIndex)
     std::advance(it, iIndex);
     if (m_spData->m_spResourcesMap.end() != it)
     {
-      return
-        m_pEngine->newQObject(
-            new CResource(m_pEngine, std::make_shared<SResource>(*it->second)));
+      CResource* pResource = nullptr;
+      auto itScene = m_vpLoadedResources.find(it->first);
+      if (itScene != m_vpLoadedResources.end())
+      {
+        pResource = itScene->second;
+      }
+      else
+      {
+        pResource = new CResource(m_pEngine, std::make_shared<SResource>(*it->second));
+        m_vpLoadedResources.insert({it->first, pResource});
+      }
+
+      return m_pEngine->newQObject(pResource);
     }
   }
   return QJSValue();
