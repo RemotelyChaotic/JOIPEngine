@@ -199,6 +199,8 @@ void CEditorSceneNodeWidget::LoadProject(tspProject spCurrentProject)
   SlotStyleChanged();
 
   m_pFlowView->SetReadOnly(EditorModel()->IsReadOnly());
+
+  SetLoaded(true);
 }
 
 //----------------------------------------------------------------------------------------
@@ -214,6 +216,8 @@ void CEditorSceneNodeWidget::UnloadProject()
   m_pFlowView->centerOn(0,0);
 
   m_pFlowView->SetReadOnly(false);
+
+  SetLoaded(false);
 }
 
 //----------------------------------------------------------------------------------------

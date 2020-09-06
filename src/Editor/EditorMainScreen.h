@@ -36,6 +36,7 @@ public:
 
 signals:
   void SignalExitClicked();
+  void SignalUnloadFinished();
 
 protected slots:
   void on_pLeftComboBox_currentIndexChanged(qint32 iIndex);
@@ -52,6 +53,7 @@ protected slots:
   void SlotProjectNameEditingFinished();
   void SlotProjectRenamed(qint32 iId);
   void SlotSaveClicked(bool bClick);
+  void SlotUnloadFinished();
 
 private:
   void ChangeIndex(QComboBox* pComboBox, QWidget* pContainer,

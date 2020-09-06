@@ -5,7 +5,8 @@
 CEditorWidgetBase::CEditorWidgetBase(QWidget* pParent) :
   QWidget(pParent),
   IWidgetBaseInterface(),
-  m_pActionBar(nullptr)
+  m_pActionBar(nullptr),
+  m_bLoaded(false)
 {
 
 }
@@ -71,4 +72,18 @@ CResourceTreeItemModel* CEditorWidgetBase::ResourceTreeModel() const
 CScriptEditorModel* CEditorWidgetBase::ScriptEditorModel() const
 {
   return m_pEditorModel->ScriptEditorModel();
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CEditorWidgetBase::SetLoaded(bool bLoaded)
+{
+  if (m_bLoaded != bLoaded)
+  {
+    m_bLoaded = bLoaded;
+    if (!bLoaded)
+    {
+      emit SignalUnloadFinished();
+    }
+  }
 }

@@ -43,6 +43,9 @@ public:
 
   void LoadResource(tspResource spResource);
 
+signals:
+  void SignalDebugFinished();
+
 protected:
   void OnActionBarAboutToChange() override;
   void OnActionBarChanged() override;
@@ -52,6 +55,7 @@ protected slots:
   void on_pCodeEdit_textChanged();
   void SlotDebugStart();
   void SlotDebugStop();
+  void SlotDebugUnloadFinished();
   void SlotFileChangedExternally(const QString& sName);
   void SlotInsertGeneratedCode(const QString& sCode);
   void SlotRowsInserted(const QModelIndex& parent, int iFirst, int iLast);
@@ -73,6 +77,8 @@ private:
   std::weak_ptr<CDatabaseManager>            m_wpDbManager;
   std::weak_ptr<CScriptRunner>               m_wpScriptRunner;
   QPointer<QStandardItemModel>               m_pDummyModel;
+  QMetaObject::Connection                    m_debugFinishedConnection;
+  bool                                       m_bDebugging;
   qint32                                     m_iLastIndex;
 };
 

@@ -137,6 +137,8 @@ void CEditorMainScreen::Initialize()
   {
     connect(it->second, &CEditorWidgetBase::SignalProjectEdited,
             this, &CEditorMainScreen::SlotProjectEdited);
+    connect(it->second, &CEditorWidgetBase::SignalUnloadFinished,
+            this, &CEditorMainScreen::SlotUnloadFinished);
 
     it->second->SetEditorModel(m_spEditorModel.get());
     it->second->Initialize();
@@ -550,6 +552,21 @@ void CEditorMainScreen::SlotSaveClicked(bool bClick)
   m_spEditorModel->SerializeProject();
 
   SetModificaitonFlag(false);
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CEditorMainScreen::SlotUnloadFinished()
+{
+  bool bAllUnloaded = true;
+  for (auto it = m_spWidgetsMap.begin(); m_spWidgetsMap.end() != it; ++it)
+  {
+    bAllUnloaded &= !it->second->IsLoaded();
+  }
+  if (bAllUnloaded)
+  {
+    emit SignalUnloadFinished();
+  }
 }
 
 //----------------------------------------------------------------------------------------

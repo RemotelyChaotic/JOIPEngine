@@ -126,6 +126,8 @@ void CEditorResourceWidget::LoadProject(tspProject spCurrentProject)
   m_spUi->pResourceTree->setEditTriggers(
         EditorModel()->IsReadOnly() ? QAbstractItemView::NoEditTriggers :
                                       QAbstractItemView::DoubleClicked | QAbstractItemView::EditKeyPressed);
+
+  SetLoaded(true);
 }
 
 //----------------------------------------------------------------------------------------
@@ -140,6 +142,8 @@ void CEditorResourceWidget::UnloadProject()
   m_spWebOverlay->Hide();
 
   m_spUi->pResourceTree->setEditTriggers(QAbstractItemView::DoubleClicked | QAbstractItemView::EditKeyPressed);
+
+  SetLoaded(false);
 }
 
 //----------------------------------------------------------------------------------------

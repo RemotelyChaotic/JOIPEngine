@@ -160,6 +160,8 @@ void CEditorProjectSettingsWidget::LoadProject(tspProject spProject)
     KinkModel()->SetSelections(m_spCurrentProject->m_vsKinks);
 
     m_spKinkSelectionOverlay->LoadProject(bReadOnly);
+
+    SetLoaded(true);
   }
 }
 
@@ -193,6 +195,8 @@ void CEditorProjectSettingsWidget::UnloadProject()
 
   m_spKinkSelectionOverlay->Hide();
   m_spKinkSelectionOverlay->UnloadProject();
+
+  SetLoaded(false);
 }
 
 //----------------------------------------------------------------------------------------

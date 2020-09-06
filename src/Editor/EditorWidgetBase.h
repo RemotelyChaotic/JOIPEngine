@@ -29,11 +29,13 @@ public:
   virtual void UnloadProject() = 0;
   virtual void SaveProject() = 0;
 
+  bool IsLoaded() { return m_bLoaded; }
   void SetActionBar(CEditorActionBar* pActionBar);
   void SetEditorModel(CEditorModel* pItemModel);
 
 signals:
   void SignalProjectEdited();
+  void SignalUnloadFinished();
 
 protected:
   virtual void OnActionBarAboutToChange() {}
@@ -46,8 +48,11 @@ protected:
   CResourceTreeItemModel* ResourceTreeModel() const;
   CScriptEditorModel* ScriptEditorModel() const;
 
+  void SetLoaded(bool bLoaded);
+
   CEditorActionBar*                                m_pActionBar;
   CEditorModel*                                    m_pEditorModel;
+  bool                                             m_bLoaded;
 };
 
 #endif // EDITORWIDGETBASE_H

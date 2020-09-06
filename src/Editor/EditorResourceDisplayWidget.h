@@ -20,8 +20,8 @@ public:
 
   void EditedProject() override {}
   void Initialize() override;
-  void LoadProject(tspProject spProject) override { Q_UNUSED(spProject); }
-  void UnloadProject() override {}
+  void LoadProject(tspProject spProject) override { Q_UNUSED(spProject); SetLoaded(true); }
+  void UnloadProject() override { SetLoaded(false); }
   void SaveProject() override {}
 
   void LoadResource(tspResource spResource);

@@ -50,6 +50,8 @@ CEditorCodeWidget::CEditorCodeWidget(QWidget* pParent) :
   m_wpDbManager(),
   m_wpScriptRunner(),
   m_pDummyModel(new QStandardItemModel(this)),
+  m_debugFinishedConnection(),
+  m_bDebugging(false),
   m_iLastIndex(-1)
 {
   m_spUi->setupUi(this);
@@ -153,6 +155,8 @@ void CEditorCodeWidget::LoadProject(tspProject spProject)
   }
 
   m_spUi->pCodeEdit->setReadOnly(EditorModel()->IsReadOnly());
+
+  SetLoaded(true);
 }
 
 //----------------------------------------------------------------------------------------
@@ -161,7 +165,17 @@ void CEditorCodeWidget::UnloadProject()
 {
   WIDGET_INITIALIZED_GUARD
 
-  SlotDebugStop();
+  if (m_bDebugging)
+  {
+    m_debugFinishedConnection =
+        connect(this, &CEditorCodeWidget::SignalDebugFinished, this,
+                [this](){
+      disconnect(m_debugFinishedConnection);
+      SetLoaded(false);
+    }, Qt::QueuedConnection);
+
+    SlotDebugStop();
+  }
 
   m_spUi->pCodeEdit->blockSignals(true);
   m_spUi->pCodeEdit->ResetWidget();
@@ -193,6 +207,11 @@ void CEditorCodeWidget::UnloadProject()
   m_spTextSnippetOverlay->Hide();
   m_spTimerSnippetOverlay->Hide();
   m_spThreadSnippetOverlay->Hide();
+
+  if (!m_bDebugging)
+  {
+    SetLoaded(false);
+  }
 }
 
 //----------------------------------------------------------------------------------------
@@ -258,6 +277,7 @@ void CEditorCodeWidget::OnActionBarAboutToChange()
     disconnect(ActionBar()->m_spUi->AddThreadCode, &QPushButton::clicked,
             m_spThreadSnippetOverlay.get(), &CThreadSnippetOverlay::Show);
 
+    ActionBar()->m_spUi->StopDebugButton->setEnabled(true);
     ActionBar()->m_spUi->AddShowBackgroundCode->setEnabled(true);
     ActionBar()->m_spUi->AddShowIconCode->setEnabled(true);
     ActionBar()->m_spUi->AddShowImageCode->setEnabled(true);
@@ -377,6 +397,7 @@ void CEditorCodeWidget::SlotDebugStart()
     if (nullptr != ActionBar())
     {
       ActionBar()->m_spUi->DebugButton->hide();
+      ActionBar()->m_spUi->StopDebugButton->setEnabled(true);
       ActionBar()->m_spUi->StopDebugButton->show();
     }
 
@@ -399,6 +420,9 @@ void CEditorCodeWidget::SlotDebugStart()
     m_spCurrentProject->m_rwLock.unlock();
     CSceneMainScreen* pMainSceneScreen = new CSceneMainScreen(m_spUi->pSceneView);
 
+    connect(pMainSceneScreen, &CSceneMainScreen::SignalUnloadFinished,
+            this, &CEditorCodeWidget::SlotDebugUnloadFinished);
+
     auto spScriptRunner = pMainSceneScreen->ScriptRunner().lock();
     if (nullptr != spScriptRunner)
     {
@@ -412,6 +436,8 @@ void CEditorCodeWidget::SlotDebugStart()
     pLayout->addWidget(pMainSceneScreen);
 
     m_spUi->pCodeEdit->ResetWidget();
+
+    m_bDebugging = true;
   }
 }
 
@@ -421,16 +447,15 @@ void CEditorCodeWidget::SlotDebugStop()
 {
   WIDGET_INITIALIZED_GUARD
 
+  if (nullptr != ActionBar())
+  {
+    ActionBar()->m_spUi->StopDebugButton->setEnabled(false);
+  }
+
   QLayout* pLayout = m_spUi->pSceneView->layout();
   if (nullptr != pLayout)
   {
-    if (nullptr != ActionBar())
-    {
-      ActionBar()->m_spUi->DebugButton->show();
-      ActionBar()->m_spUi->StopDebugButton->hide();
-    }
-
-    auto pItem = pLayout->takeAt(0);
+    auto pItem = pLayout->itemAt(0);
     if (nullptr != pItem)
     {
       CSceneMainScreen* pMainSceneScreen =
@@ -445,11 +470,43 @@ void CEditorCodeWidget::SlotDebugStop()
       }
 
       pMainSceneScreen->SlotQuit();
-
-      delete pMainSceneScreen;
     }
   }
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CEditorCodeWidget::SlotDebugUnloadFinished()
+{
+  WIDGET_INITIALIZED_GUARD
+
+  if (nullptr != ActionBar())
+  {
+    ActionBar()->m_spUi->DebugButton->show();
+    ActionBar()->m_spUi->StopDebugButton->setEnabled(true);
+    ActionBar()->m_spUi->StopDebugButton->hide();
+  }
+
+  QLayout* pLayout = m_spUi->pSceneView->layout();
+  if (nullptr != pLayout)
+  {
+    auto pItem = pLayout->takeAt(0);
+    if (nullptr != pItem)
+    {
+      CSceneMainScreen* pMainSceneScreen =
+          qobject_cast<CSceneMainScreen*>(pItem->widget());
+
+      disconnect(pMainSceneScreen, &CSceneMainScreen::SignalUnloadFinished,
+                 this, &CEditorCodeWidget::SlotDebugUnloadFinished);
+
+      delete pMainSceneScreen;
+      delete pItem;
+    }
+  }
+
   m_spUi->pSceneView->setVisible(false);
+  m_bDebugging = false;
+  emit SignalDebugFinished();
 }
 
 //----------------------------------------------------------------------------------------
