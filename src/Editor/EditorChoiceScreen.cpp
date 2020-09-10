@@ -150,7 +150,7 @@ void CEditorChoiceScreen::on_pCreateProjectButton_clicked()
     else
     {
       m_spUi->pErrorLabel->setVisible(false);
-      emit SignalNewClicked(sNewName);
+      emit SignalNewClicked(sNewName, m_spUi->pEnableTutorialCheckBox->isChecked());
       m_spUi->pStackedWidget->setCurrentIndex(c_iPageIndexChoice);
     }
   }

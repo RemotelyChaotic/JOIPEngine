@@ -30,7 +30,7 @@ public:
   ~CEditorMainScreen();
 
   void Initialize();
-  void InitNewProject(const QString& sNewProjectName);
+  void InitNewProject(const QString& sNewProjectName, bool bTutorial);
   void LoadProject(qint32 iId);
   void UnloadProject();
 

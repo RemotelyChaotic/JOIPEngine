@@ -22,7 +22,7 @@ public:
   void Unload();
 
 signals:
-  void SignalNewClicked(const QString& sNewProjectName);
+  void SignalNewClicked(const QString& sNewProjectName, bool bTutorial);
   void SignalOpenClicked(qint32 iId);
   void SignalCancelClicked();
   void SignalUnloadFinished();

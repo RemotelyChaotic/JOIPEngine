@@ -338,7 +338,7 @@ void CEditorModel::AddNewScriptFileToScene(QPointer<QWidget> pParentForDialog,
 
 //----------------------------------------------------------------------------------------
 //
-void CEditorModel::InitNewProject(const QString& sNewProjectName)
+void CEditorModel::InitNewProject(const QString& sNewProjectName, bool bTutorial)
 {
   m_bInitializingNewProject = true;
 
@@ -352,6 +352,10 @@ void CEditorModel::InitNewProject(const QString& sNewProjectName)
     {
       m_spCurrentProject->m_rwLock.lockForRead();
       qint32 iId = m_spCurrentProject->m_iId;
+      if (bTutorial)
+      {
+        m_spCurrentProject->m_tutorialState = ETutorialState::eUnstarted;
+      }
       m_spCurrentProject->m_rwLock.unlock();
 
       // load project

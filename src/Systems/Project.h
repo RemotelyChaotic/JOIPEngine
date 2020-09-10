@@ -2,6 +2,7 @@
 #define PROJECT_H
 
 #include "ISerializable.h"
+#include "Enums.h"
 #include "Resource.h"
 #include "Scene.h"
 #include "SVersion.h"
@@ -31,6 +32,7 @@ struct SProject : public ISerializable, std::enable_shared_from_this<SProject>
   QString                   m_sMap;
   QString                   m_sSceneModel;
   QString                   m_sPlayerLayout;
+  ETutorialState            m_tutorialState;
   bool                      m_bUsesWeb;
   bool                      m_bNeedsCodecs;
   bool                      m_bBundled;

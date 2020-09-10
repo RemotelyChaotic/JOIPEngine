@@ -27,7 +27,7 @@ signals:
   void UnloadFinished() override;
 
 private slots:
-  void SlotNewClicked(const QString& sNewProjectName);
+  void SlotNewClicked(const QString& sNewProjectName, bool bTutorial);
   void SlotOpenClicked(qint32 iId);
   void SlotCancelClicked();
   void SlotExitClicked();

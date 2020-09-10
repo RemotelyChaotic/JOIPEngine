@@ -190,11 +190,11 @@ void CEditorMainScreen::Initialize()
 
 //----------------------------------------------------------------------------------------
 //
-void CEditorMainScreen::InitNewProject(const QString& sNewProjectName)
+void CEditorMainScreen::InitNewProject(const QString& sNewProjectName, bool bTutorial)
 {
   if (!m_bInitialized) { return; }
 
-  m_spEditorModel->InitNewProject(sNewProjectName);
+  m_spEditorModel->InitNewProject(sNewProjectName, bTutorial);
   m_spCurrentProject = m_spEditorModel->CurrentProject();
 
   ProjectLoaded(true);

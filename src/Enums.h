@@ -3,6 +3,7 @@
 
 #include <QtGlobal>
 #include <enum.h>
+#include <limits>
 
 BETTER_ENUM(EAppState, qint32,
             eMainScreen = 0,
@@ -19,5 +20,9 @@ BETTER_ENUM(ELoadState, qint32,
             eLoading   = 1,
             eFinished  = 2,
             eError     = 3);
+
+BETTER_ENUM(ETutorialState, qint32,
+            eUnstarted = 0,
+            eFinished  = std::numeric_limits<qint32>::max());
 
 #endif // ENUMS_H

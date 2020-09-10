@@ -65,7 +65,7 @@ void CEditorScreen::Unload()
 
 //----------------------------------------------------------------------------------------
 //
-void CEditorScreen::SlotNewClicked(const QString& sNewProjectName)
+void CEditorScreen::SlotNewClicked(const QString& sNewProjectName, bool bTutorial)
 {
   WIDGET_INITIALIZED_GUARD
 
@@ -73,7 +73,7 @@ void CEditorScreen::SlotNewClicked(const QString& sNewProjectName)
 
   emit m_spWindowContext->SignalSetHelpButtonVisible(false);
 
-  m_spUi->pEditorScreen->InitNewProject(sNewProjectName);
+  m_spUi->pEditorScreen->InitNewProject(sNewProjectName, bTutorial);
   m_spUi->pStackedWidget->setCurrentIndex(c_iPageIndexEditor);
 }
 

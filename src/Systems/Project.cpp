@@ -26,6 +26,7 @@ SProject::SProject() :
   m_sMap(),
   m_sSceneModel(),
   m_sPlayerLayout(),
+  m_tutorialState(ETutorialState::eFinished),
   m_bUsesWeb(false),
   m_bNeedsCodecs(false),
   m_bBundled(false),
@@ -46,6 +47,7 @@ SProject::SProject(const SProject& other) :
   m_sMap(other.m_sMap),
   m_sSceneModel(other.m_sSceneModel),
   m_sPlayerLayout(other.m_sPlayerLayout),
+  m_tutorialState(other.m_tutorialState),
   m_bUsesWeb(other.m_bUsesWeb),
   m_bNeedsCodecs(other.m_bNeedsCodecs),
   m_bBundled(other.m_bBundled),
@@ -87,6 +89,7 @@ QJsonObject SProject::ToJsonObject()
     { "sMap", m_sMap },
     { "sSceneModel", m_sSceneModel },
     { "sPlayerLayout", m_sPlayerLayout },
+    { "tutorialState", m_tutorialState._to_integral() },
     { "bUsesWeb", m_bUsesWeb },
     { "bNeedsCodecs", m_bNeedsCodecs },
     { "vsKinks", kinks },
@@ -139,6 +142,11 @@ void SProject::FromJsonObject(const QJsonObject& json)
   if (it != json.end())
   {
     m_sPlayerLayout = it.value().toString();
+  }
+  it = json.find("tutorialState");
+  if (it != json.end())
+  {
+    m_tutorialState = ETutorialState::_from_integral(it.value().toInt());
   }
   it = json.find("bUsesWeb");
   if (it != json.end())

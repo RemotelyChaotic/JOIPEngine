@@ -52,7 +52,7 @@ public:
   void AddNewScriptFileToScene(QPointer<QWidget> pParentForDialog,
                                tspScene spScene);
 
-  void InitNewProject(const QString& sNewProjectName);
+  void InitNewProject(const QString& sNewProjectName, bool bTutorial);
   void LoadProject(qint32 iId);
   QString RenameProject(const QString& sNewProjectName);
   void SaveProject();
