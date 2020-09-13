@@ -124,6 +124,20 @@ set(Sources
   Editor/Script/TimerSnippetOverlay.cpp 
   Editor/Script/TimerSnippetOverlay.h 
   Editor/Script/TimerSnippetOverlay.ui 
+  Editor/Tutorial/CodeWidgetTutorialStateSwitchHandler.cpp
+  Editor/Tutorial/CodeWidgetTutorialStateSwitchHandler.h
+  Editor/Tutorial/ITutorialStateSwitchHandler.cpp
+  Editor/Tutorial/ITutorialStateSwitchHandler.h
+  Editor/Tutorial/MainScreenTutorialStateSwitchHandler.cpp
+  Editor/Tutorial/MainScreenTutorialStateSwitchHandler.h
+  Editor/Tutorial/ProjectSettingsTutorialStateSwitchHandler.cpp
+  Editor/Tutorial/ProjectSettingsTutorialStateSwitchHandler.h
+  Editor/Tutorial/ResourceDisplayTutorialStateSwitchHandler.cpp
+  Editor/Tutorial/ResourceDisplayTutorialStateSwitchHandler.h
+  Editor/Tutorial/ResourceTutorialStateSwitchHandler.cpp
+  Editor/Tutorial/ResourceTutorialStateSwitchHandler.h
+  Editor/Tutorial/SceneNodeWidgetTutorialStateSwitchHandler.cpp
+  Editor/Tutorial/SceneNodeWidgetTutorialStateSwitchHandler.h
   EditorScreen.cpp 
   EditorScreen.h 
   EditorScreen.ui 

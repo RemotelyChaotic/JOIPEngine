@@ -2,10 +2,13 @@
 #define EDITORCODEWIDGET_H
 
 #include "EditorWidgetBase.h"
+#include "ui_EditorCodeWidget.h"
+#include "ui_EditorActionBar.h"
 #include <QPointer>
 #include <memory>
 
 class CBackgroundSnippetOverlay;
+class CCodeWidgetTutorialStateSwitchHandler;
 class CIconSnippetOverlay;
 class CMetronomeSnippetOverlay;
 class CResourceSnippetOverlay;
@@ -64,22 +67,23 @@ protected slots:
 private:
   QString FindSceneName(qint32 iId);
 
-  std::unique_ptr<Ui::CEditorCodeWidget>     m_spUi;
-  std::unique_ptr<CBackgroundSnippetOverlay> m_spBackgroundSnippetOverlay;
-  std::unique_ptr<CIconSnippetOverlay>       m_spIconSnippetOverlay;
-  std::unique_ptr<CMetronomeSnippetOverlay>  m_spMetronomeSnippetOverlay;
-  std::unique_ptr<CResourceSnippetOverlay>   m_spResourceSnippetOverlay;
-  std::unique_ptr<CTextSnippetOverlay>       m_spTextSnippetOverlay;
-  std::unique_ptr<CTimerSnippetOverlay>      m_spTimerSnippetOverlay;
-  std::unique_ptr<CThreadSnippetOverlay>     m_spThreadSnippetOverlay;
-  std::shared_ptr<CSettings>                 m_spSettings;
-  tspProject                                 m_spCurrentProject;
-  std::weak_ptr<CDatabaseManager>            m_wpDbManager;
-  std::weak_ptr<CScriptRunner>               m_wpScriptRunner;
-  QPointer<QStandardItemModel>               m_pDummyModel;
-  QMetaObject::Connection                    m_debugFinishedConnection;
-  bool                                       m_bDebugging;
-  qint32                                     m_iLastIndex;
+  std::unique_ptr<CBackgroundSnippetOverlay>             m_spBackgroundSnippetOverlay;
+  std::unique_ptr<CIconSnippetOverlay>                   m_spIconSnippetOverlay;
+  std::unique_ptr<CMetronomeSnippetOverlay>              m_spMetronomeSnippetOverlay;
+  std::unique_ptr<CResourceSnippetOverlay>               m_spResourceSnippetOverlay;
+  std::unique_ptr<CTextSnippetOverlay>                   m_spTextSnippetOverlay;
+  std::unique_ptr<CTimerSnippetOverlay>                  m_spTimerSnippetOverlay;
+  std::unique_ptr<CThreadSnippetOverlay>                 m_spThreadSnippetOverlay;
+  std::shared_ptr<Ui::CEditorCodeWidget>                 m_spUi;
+  std::shared_ptr<CCodeWidgetTutorialStateSwitchHandler> m_spTutorialStateSwitchHandler;
+  std::shared_ptr<CSettings>                             m_spSettings;
+  tspProject                                             m_spCurrentProject;
+  std::weak_ptr<CDatabaseManager>                        m_wpDbManager;
+  std::weak_ptr<CScriptRunner>                           m_wpScriptRunner;
+  QPointer<QStandardItemModel>                           m_pDummyModel;
+  QMetaObject::Connection                                m_debugFinishedConnection;
+  bool                                                   m_bDebugging;
+  qint32                                                 m_iLastIndex;
 };
 
 #endif // EDITORCODEWIDGET_H

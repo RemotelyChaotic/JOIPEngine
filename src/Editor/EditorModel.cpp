@@ -11,6 +11,7 @@
 #include "Script/ScriptEditorModel.h"
 #include "Systems/DatabaseManager.h"
 #include "Systems/Project.h"
+#include "Tutorial/ITutorialStateSwitchHandler.h"
 
 #include <nodes/ConnectionStyle>
 #include <nodes/DataModelRegistry>
@@ -59,6 +60,7 @@ CEditorModel::CEditorModel(QWidget* pParent) :
   m_spSettings(CApplication::Instance()->Settings()),
   m_spCurrentProject(nullptr),
   m_wpDbManager(CApplication::Instance()->System<CDatabaseManager>()),
+  m_vwpTutorialStateSwitchHandlers(),
   m_pParentWidget(pParent),
   m_bInitializingNewProject(false),
   m_bReadOnly(false)
@@ -338,6 +340,56 @@ void CEditorModel::AddNewScriptFileToScene(QPointer<QWidget> pParentForDialog,
 
 //----------------------------------------------------------------------------------------
 //
+void CEditorModel::AddTutorialStateSwitchHandler(std::weak_ptr<ITutorialStateSwitchHandler> wpSwitcher)
+{
+  m_vwpTutorialStateSwitchHandlers.push_back(wpSwitcher);
+}
+
+
+//----------------------------------------------------------------------------------------
+//
+void CEditorModel::NextTutorialState()
+{
+  if (nullptr == m_spCurrentProject) { return; }
+
+  QWriteLocker locker(&m_spCurrentProject->m_rwLock);
+
+  if (ETutorialState::eFinished == m_spCurrentProject->m_tutorialState._to_integral()) { return; }
+
+  ETutorialState oldState = m_spCurrentProject->m_tutorialState;
+  size_t iIndex = m_spCurrentProject->m_tutorialState._to_index();
+  ETutorialState newState = ETutorialState::_from_index(++iIndex);
+
+  m_spCurrentProject->m_tutorialState = newState;
+
+  locker.unlock();
+
+  for (auto& wpSwitcher : m_vwpTutorialStateSwitchHandlers)
+  {
+    if (auto spSwitcher = wpSwitcher.lock())
+    {
+      spSwitcher->OnStateSwitch(newState, oldState);
+    }
+  }
+}
+
+
+//----------------------------------------------------------------------------------------
+//
+void CEditorModel::NextResetTutorialState()
+{
+  for (auto& wpSwitcher : m_vwpTutorialStateSwitchHandlers)
+  {
+    if (auto spSwitcher = wpSwitcher.lock())
+    {
+      spSwitcher->OnResetStates();
+    }
+  }
+}
+
+
+//----------------------------------------------------------------------------------------
+//
 void CEditorModel::InitNewProject(const QString& sNewProjectName, bool bTutorial)
 {
   m_bInitializingNewProject = true;
@@ -405,6 +457,7 @@ void CEditorModel::LoadProject(qint32 iId)
 
     QReadLocker projectLocker(&m_spCurrentProject->m_rwLock);
     m_bReadOnly = m_spCurrentProject->m_bBundled;
+    ETutorialState tutorialState = m_spCurrentProject->m_tutorialState;
 
     // nodes
     if (!m_spCurrentProject->m_sSceneModel.isNull() &&
@@ -432,6 +485,15 @@ void CEditorModel::LoadProject(qint32 iId)
           qWarning() << tr("Could not open save scene model file.");
         }
       }
+    }
+    else
+    {
+      projectLocker.unlock();
+    }
+
+    if (tutorialState._to_integral() != ETutorialState::eFinished)
+    {
+      NextTutorialState();
     }
   }
 
@@ -562,6 +624,8 @@ void CEditorModel::UnloadProject()
 
   CDatabaseManager::UnloadProject(m_spCurrentProject);
   m_spCurrentProject = nullptr;
+
+  NextResetTutorialState();
 
   m_bReadOnly = false;
 }

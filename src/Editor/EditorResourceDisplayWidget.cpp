@@ -2,12 +2,11 @@
 #include "Application.h"
 #include "EditorActionBar.h"
 #include "Systems/DatabaseManager.h"
-#include "ui_EditorResourceDisplayWidget.h"
-#include "ui_EditorActionBar.h"
 
 CEditorResourceDisplayWidget::CEditorResourceDisplayWidget(QWidget* pParent) :
   CEditorWidgetBase(pParent),
-  m_spUi(std::make_unique<Ui::CEditorResourceDisplayWidget>())
+  m_spUi(std::make_shared<Ui::CEditorResourceDisplayWidget>()),
+  m_spTutorialStateSwitchHandler(nullptr)
 {
   m_spUi->setupUi(this);
   connect(m_spUi->pResourceDisplay, &CResourceDisplayWidget::OnClick,

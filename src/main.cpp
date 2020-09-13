@@ -25,7 +25,7 @@ int main(int argc, char *argv[])
   //QtWebView::initialize();
   QtAV::Widgets::registerRenderers();
 
-#ifndef NDEBU
+#ifndef NDEBUG
   qDebug() << "SSL suport: " << QSslSocket::supportsSsl() << QSslSocket::sslLibraryBuildVersionString() << QSslSocket::sslLibraryVersionString();
 #endif
 

@@ -2,11 +2,14 @@
 #define EDITORRESOURCEWIDGET_H
 
 #include "EditorWidgetBase.h"
+#include "ui_EditorResourceWidget.h"
+#include "ui_EditorActionBar.h"
 #include <QNetworkReply>
 #include <QPointer>
 #include <memory>
 
 
+class CResourceTutorialStateSwitchHandler;
 namespace Ui {
   class CEditorResourceWidget;
 }
@@ -55,13 +58,14 @@ protected slots:
   void SlotNetworkReplyFinished();
 
 private:
-  std::unique_ptr<Ui::CEditorResourceWidget> m_spUi;
-  std::unique_ptr<CWebResourceOverlay>       m_spWebOverlay;
-  std::unique_ptr<QNetworkAccessManager>     m_spNAManager;
-  std::shared_ptr<CSettings>                 m_spSettings;
-  tspProject                                 m_spCurrentProject;
-  std::weak_ptr<CDatabaseManager>            m_wpDbManager;
-  QPointer<QNetworkReply>                    m_pResponse;
+  std::unique_ptr<CWebResourceOverlay>                 m_spWebOverlay;
+  std::unique_ptr<QNetworkAccessManager>               m_spNAManager;
+  std::shared_ptr<Ui::CEditorResourceWidget>           m_spUi;
+  std::shared_ptr<CResourceTutorialStateSwitchHandler> m_spTutorialStateSwitchHandler;
+  std::shared_ptr<CSettings>                           m_spSettings;
+  tspProject                                           m_spCurrentProject;
+  std::weak_ptr<CDatabaseManager>                      m_wpDbManager;
+  QPointer<QNetworkReply>                              m_pResponse;
 };
 
 #endif // EDITORRESOURCEWIDGET_H

@@ -4,9 +4,12 @@
 #include "EditorWidgetBase.h"
 #include "Enums.h"
 #include "Systems/Resource.h"
+#include "ui_EditorProjectSettingsWidget.h"
+#include "ui_EditorActionBar.h"
 #include <memory>
 
 class CKinkSelectionOverlay;
+class CProjectSettingsTutorialStateSwitchHandler;
 namespace Ui {
   class CEditorProjectSettingsWidget;
 }
@@ -47,10 +50,11 @@ protected:
   void OnActionBarChanged() override;
 
 private:
-  std::unique_ptr<Ui::CEditorProjectSettingsWidget> m_spUi;
-  std::unique_ptr<CKinkSelectionOverlay>            m_spKinkSelectionOverlay;
-  std::vector<tspKink>                              m_vspKinks;
-  tspProject                                        m_spCurrentProject;
+  std::unique_ptr<CKinkSelectionOverlay>                      m_spKinkSelectionOverlay;
+  std::shared_ptr<Ui::CEditorProjectSettingsWidget>           m_spUi;
+  std::shared_ptr<CProjectSettingsTutorialStateSwitchHandler> m_spTutorialStateSwitchHandler;
+  std::vector<tspKink>                                        m_vspKinks;
+  tspProject                                                  m_spCurrentProject;
 };
 
 #endif // EDITORPROJECTSETTINGSWIDGET_H

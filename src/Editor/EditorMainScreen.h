@@ -4,6 +4,8 @@
 #include "EditorWidgetBase.h"
 #include "EditorModel.h"
 #include "EditorWidgetTypes.h"
+#include "ui_EditorMainScreen.h" // we need to include this in the header for the tutorial
+#include "ui_EditorActionBar.h"  // state switch handler to be able to access the ui
 #include <QWidget>
 #include <map>
 #include <memory>
@@ -14,6 +16,7 @@ class CEditorProjectSettingsWidget;
 class CEditorResourceDisplayWidget;
 class CEditorResourceWidget;
 class CEditorSceneNodeWidget;
+class CMainScreenTutorialStateSwitchHandler;
 namespace Ui {
   class CEditorMainScreen;
 }
@@ -24,6 +27,7 @@ typedef std::shared_ptr<SProject> tspProject;
 class CEditorMainScreen : public QWidget
 {
   Q_OBJECT
+  friend class CMainScreenTutorialStateSwitchHandler;
 
 public:
   explicit CEditorMainScreen(QWidget* pParent = nullptr);
@@ -62,8 +66,9 @@ private:
   void SetModificaitonFlag(bool bModified);
   template<class T> T* GetWidget();
 
-  std::unique_ptr<Ui::CEditorMainScreen>                      m_spUi;
   std::unique_ptr<CEditorModel>                               m_spEditorModel;
+  std::shared_ptr<Ui::CEditorMainScreen>                      m_spUi;
+  std::shared_ptr<CMainScreenTutorialStateSwitchHandler>      m_spStateSwitchHandler;
   std::vector<QPointer<QAction>>                              m_vpKeyBindingActions;
   std::map<EEditorWidget, QPointer<CEditorWidgetBase>>        m_spWidgetsMap;
   tspProject                                                  m_spCurrentProject;

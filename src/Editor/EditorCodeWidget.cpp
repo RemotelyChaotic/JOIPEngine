@@ -18,9 +18,8 @@
 #include "Systems/Scene.h"
 #include "Systems/ScriptRunner.h"
 #include "Systems/Script/ScriptRunnerSignalEmiter.h"
+#include "Tutorial/CodeWidgetTutorialStateSwitchHandler.h"
 #include "Widgets/HelpOverlay.h"
-#include "ui_EditorCodeWidget.h"
-#include "ui_EditorActionBar.h"
 
 #include <QDebug>
 #include <QStandardItemModel>
@@ -37,7 +36,6 @@ namespace {
 //
 CEditorCodeWidget::CEditorCodeWidget(QWidget* pParent) :
   CEditorWidgetBase(pParent),
-  m_spUi(new Ui::CEditorCodeWidget),
   m_spBackgroundSnippetOverlay(std::make_unique<CBackgroundSnippetOverlay>(this)),
   m_spIconSnippetOverlay(std::make_unique<CIconSnippetOverlay>(this)),
   m_spMetronomeSnippetOverlay(std::make_unique<CMetronomeSnippetOverlay>(this)),
@@ -45,6 +43,8 @@ CEditorCodeWidget::CEditorCodeWidget(QWidget* pParent) :
   m_spTextSnippetOverlay(std::make_unique<CTextSnippetOverlay>(this)),
   m_spTimerSnippetOverlay(std::make_unique<CTimerSnippetOverlay>(this)),
   m_spThreadSnippetOverlay(std::make_unique<CThreadSnippetOverlay>(this)),
+  m_spUi(std::make_shared<Ui::CEditorCodeWidget>()),
+  m_spTutorialStateSwitchHandler(nullptr),
   m_spSettings(CApplication::Instance()->Settings()),
   m_spCurrentProject(nullptr),
   m_wpDbManager(),
@@ -74,6 +74,10 @@ CEditorCodeWidget::~CEditorCodeWidget()
 void CEditorCodeWidget::Initialize()
 {
   m_bInitialized = false;
+
+  m_spTutorialStateSwitchHandler =
+      std::make_shared<CCodeWidgetTutorialStateSwitchHandler>(this, m_spUi);
+  EditorModel()->AddTutorialStateSwitchHandler(m_spTutorialStateSwitchHandler);
 
   m_wpDbManager = CApplication::Instance()->System<CDatabaseManager>();
 

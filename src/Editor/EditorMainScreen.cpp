@@ -8,9 +8,8 @@
 #include "Systems/DatabaseManager.h"
 #include "Systems/HelpFactory.h"
 #include "Systems/Project.h"
+#include "Tutorial/MainScreenTutorialStateSwitchHandler.h"
 #include "Widgets/HelpOverlay.h"
-#include "ui_EditorActionBar.h"
-#include "ui_EditorMainScreen.h"
 
 #include <QAction>
 #include <QFileInfo>
@@ -52,8 +51,9 @@ namespace
 //
 CEditorMainScreen::CEditorMainScreen(QWidget* pParent) :
   QWidget(pParent),
-  m_spUi(std::make_unique<Ui::CEditorMainScreen>()),
   m_spEditorModel(std::make_unique<CEditorModel>(this)),
+  m_spUi(std::make_shared<Ui::CEditorMainScreen>()),
+  m_spStateSwitchHandler(nullptr),
   m_vpKeyBindingActions(),
   m_spWidgetsMap(),
   m_spCurrentProject(nullptr),
@@ -83,6 +83,10 @@ void CEditorMainScreen::Initialize()
   m_bInitialized = false;
 
   m_wpDbManager = CApplication::Instance()->System<CDatabaseManager>();
+
+  // state switch handler
+  m_spStateSwitchHandler = std::make_shared<CMainScreenTutorialStateSwitchHandler>(this, m_spUi);
+  m_spEditorModel->AddTutorialStateSwitchHandler(m_spStateSwitchHandler);
 
   connect(m_spEditorModel.get(), &CEditorModel::SignalProjectEdited,
           this, &CEditorMainScreen::SlotProjectEdited);

@@ -7,9 +7,8 @@
 #include "Systems/Project.h"
 #include "Systems/Scene.h"
 #include "Systems/Resource.h"
+#include "Tutorial/SceneNodeWidgetTutorialStateSwitchHandler.h"
 #include "Widgets/HelpOverlay.h"
-#include "ui_EditorSceneNodeWidget.h"
-#include "ui_EditorActionBar.h"
 
 #include <nodes/ConnectionStyle>
 #include <nodes/FlowScene>
@@ -136,7 +135,8 @@ namespace
 //
 CEditorSceneNodeWidget::CEditorSceneNodeWidget(QWidget* pParent) :
   CEditorWidgetBase(pParent),
-  m_spUi(new Ui::CEditorSceneNodeWidget),
+  m_spUi(std::make_shared<Ui::CEditorSceneNodeWidget>()),
+  m_spStateSwitchHandler(nullptr),
   m_spSettings(CApplication::Instance()->Settings()),
   m_spCurrentProject(nullptr),
   m_pFlowView(nullptr)
@@ -163,6 +163,10 @@ CEditorSceneNodeWidget::~CEditorSceneNodeWidget()
 void CEditorSceneNodeWidget::Initialize()
 {
   m_bInitialized = false;
+
+  m_spStateSwitchHandler =
+      std::make_shared<CSceneNodeWidgetTutorialStateSwitchHandler>(this, m_spUi);
+  EditorModel()->AddTutorialStateSwitchHandler(m_spStateSwitchHandler);
 
   m_wpDbManager = CApplication::Instance()->System<CDatabaseManager>();
 

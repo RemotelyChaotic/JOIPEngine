@@ -10,10 +10,9 @@
 #include "Systems/DatabaseManager.h"
 #include "Systems/HelpFactory.h"
 #include "Systems/Project.h"
+#include "Tutorial/ProjectSettingsTutorialStateSwitchHandler.h"
 #include "Widgets/FlowLayout.h"
 #include "Widgets/HelpOverlay.h"
-#include "ui_EditorProjectSettingsWidget.h"
-#include "ui_EditorActionBar.h"
 
 #include <QCompleter>
 #include <QCryptographicHash>
@@ -36,8 +35,9 @@ namespace
 //
 CEditorProjectSettingsWidget::CEditorProjectSettingsWidget(QWidget *parent) :
   CEditorWidgetBase(parent),
-  m_spUi(std::make_unique<Ui::CEditorProjectSettingsWidget>()),
   m_spKinkSelectionOverlay(std::make_unique<CKinkSelectionOverlay>(this)),
+  m_spUi(std::make_shared<Ui::CEditorProjectSettingsWidget>()),
+  m_spTutorialStateSwitchHandler(nullptr),
   m_vspKinks(),
   m_spCurrentProject(nullptr)
 {
@@ -55,6 +55,10 @@ CEditorProjectSettingsWidget::~CEditorProjectSettingsWidget()
 void CEditorProjectSettingsWidget::Initialize()
 {
   m_bInitialized = false;
+
+  m_spTutorialStateSwitchHandler =
+      std::make_shared<CProjectSettingsTutorialStateSwitchHandler>(this, m_spUi);
+  EditorModel()->AddTutorialStateSwitchHandler(m_spTutorialStateSwitchHandler);
 
   m_spKinkSelectionOverlay->Initialize(KinkModel());
   connect(KinkModel(), &CKinkTreeModel::SignalCheckedItem,

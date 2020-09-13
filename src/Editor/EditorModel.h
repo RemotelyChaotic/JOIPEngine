@@ -11,6 +11,7 @@ class CKinkTreeModel;
 class CResourceTreeItemModel;
 class CScriptEditorModel;
 class CSettings;
+class ITutorialStateSwitchHandler;
 namespace QtNodes {
   class FlowScene;
   class Node;
@@ -52,6 +53,10 @@ public:
   void AddNewScriptFileToScene(QPointer<QWidget> pParentForDialog,
                                tspScene spScene);
 
+  void AddTutorialStateSwitchHandler(std::weak_ptr<ITutorialStateSwitchHandler> wpSwitcher);
+  void NextTutorialState();
+  void NextResetTutorialState();
+
   void InitNewProject(const QString& sNewProjectName, bool bTutorial);
   void LoadProject(qint32 iId);
   QString RenameProject(const QString& sNewProjectName);
@@ -86,6 +91,7 @@ private:
   std::shared_ptr<CSettings>                                  m_spSettings;
   tspProject                                                  m_spCurrentProject;
   std::weak_ptr<CDatabaseManager>                             m_wpDbManager;
+  std::vector<std::weak_ptr<ITutorialStateSwitchHandler>>     m_vwpTutorialStateSwitchHandlers;
   QPointer<QWidget>                                           m_pParentWidget;
   bool                                                        m_bInitializingNewProject;
   bool                                                        m_bReadOnly;

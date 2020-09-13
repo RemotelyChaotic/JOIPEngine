@@ -4,8 +4,11 @@
 #include "EditorWidgetBase.h"
 #include "Enums.h"
 #include "Systems/Resource.h"
+#include "ui_EditorResourceDisplayWidget.h"
+#include "ui_EditorActionBar.h"
 #include <memory>
 
+class CResourceDisplayTutorialStateSwitchHandler;
 namespace Ui {
   class CEditorResourceDisplayWidget;
 }
@@ -36,7 +39,8 @@ protected:
   void OnActionBarAboutToChange() override;
   void OnActionBarChanged() override;
 
-  std::unique_ptr<Ui::CEditorResourceDisplayWidget> m_spUi;
+  std::shared_ptr<Ui::CEditorResourceDisplayWidget>           m_spUi;
+  std::shared_ptr<CResourceDisplayTutorialStateSwitchHandler> m_spTutorialStateSwitchHandler;
 };
 
 #endif // EDITORRESOURCEDISPLAYWIDGET_H

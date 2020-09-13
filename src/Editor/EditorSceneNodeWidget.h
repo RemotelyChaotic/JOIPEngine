@@ -2,10 +2,13 @@
 #define SCENENODEWIDGET_H
 
 #include "EditorWidgetBase.h"
+#include "ui_EditorSceneNodeWidget.h"
+#include "ui_EditorActionBar.h"
 #include <memory>
 
 class CDatabaseManager;
 class CFlowView;
+class CSceneNodeWidgetTutorialStateSwitchHandler;
 class CSettings;
 namespace Ui {
   class CEditorSceneNodeWidget;
@@ -61,31 +64,32 @@ protected slots:
   void SlotStyleChanged();
 
 private:
-  std::unique_ptr<Ui::CEditorSceneNodeWidget>       m_spUi;
-  std::shared_ptr<CSettings>                        m_spSettings;
-  tspProject                                        m_spCurrentProject;
-  std::weak_ptr<CDatabaseManager>                   m_wpDbManager;
-  CFlowView*                                        m_pFlowView;
+  std::shared_ptr<Ui::CEditorSceneNodeWidget>                 m_spUi;
+  std::shared_ptr<CSceneNodeWidgetTutorialStateSwitchHandler> m_spStateSwitchHandler;
+  std::shared_ptr<CSettings>                                  m_spSettings;
+  tspProject                                                  m_spCurrentProject;
+  std::weak_ptr<CDatabaseManager>                             m_wpDbManager;
+  CFlowView*                                                  m_pFlowView;
 
-  QColor                                            m_normalBoundaryColor;
-  QColor                                            m_selectedBoundaryColor;
-  QColor                                            m_gradientColor0;
-  QColor                                            m_gradientColor1;
-  QColor                                            m_gradientColor2;
-  QColor                                            m_gradientColor3;
-  QColor                                            m_shadowColor;
-  QColor                                            m_fontColor;
-  QColor                                            m_fontColorFaded;
-  QColor                                            m_connectionPointColor;
+  QColor                                                      m_normalBoundaryColor;
+  QColor                                                      m_selectedBoundaryColor;
+  QColor                                                      m_gradientColor0;
+  QColor                                                      m_gradientColor1;
+  QColor                                                      m_gradientColor2;
+  QColor                                                      m_gradientColor3;
+  QColor                                                      m_shadowColor;
+  QColor                                                      m_fontColor;
+  QColor                                                      m_fontColorFaded;
+  QColor                                                      m_connectionPointColor;
 
-  QColor                                            m_backgroundColor;
-  QColor                                            m_fineGridColor;
-  QColor                                            m_coarseGridColor;
+  QColor                                                      m_backgroundColor;
+  QColor                                                      m_fineGridColor;
+  QColor                                                      m_coarseGridColor;
 
-  QColor                                            m_normalColor;
-  QColor                                            m_selectedColor;
-  QColor                                            m_selectedHaloColor;
-  QColor                                            m_hoveredColor;
+  QColor                                                      m_normalColor;
+  QColor                                                      m_selectedColor;
+  QColor                                                      m_selectedHaloColor;
+  QColor                                                      m_hoveredColor;
 };
 
 #endif // SCENENODEWIDGET_H

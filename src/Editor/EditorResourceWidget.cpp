@@ -9,10 +9,9 @@
 #include "Systems/DatabaseManager.h"
 #include "Systems/HelpFactory.h"
 #include "Systems/Project.h"
+#include "Tutorial/ResourceTutorialStateSwitchHandler.h"
 #include "Widgets/HelpOverlay.h"
 #include "Widgets/ResourceDisplayWidget.h"
-#include "ui_EditorResourceWidget.h"
-#include "ui_EditorActionBar.h"
 
 // Testing
 //#include "modeltest.h"
@@ -41,9 +40,10 @@ namespace
 //
 CEditorResourceWidget::CEditorResourceWidget(QWidget* pParent) :
   CEditorWidgetBase(pParent),
-  m_spUi(std::make_unique<Ui::CEditorResourceWidget>()),
   m_spWebOverlay(std::make_unique<CWebResourceOverlay>(this)),
   m_spNAManager(std::make_unique<QNetworkAccessManager>()),
+  m_spUi(std::make_shared<Ui::CEditorResourceWidget>()),
+  m_spTutorialStateSwitchHandler(nullptr),
   m_spSettings(CApplication::Instance()->Settings()),
   m_spCurrentProject(nullptr),
   m_pResponse(nullptr)
@@ -74,6 +74,10 @@ CEditorResourceWidget::~CEditorResourceWidget()
 void CEditorResourceWidget::Initialize()
 {
   m_bInitialized = false;
+
+  m_spTutorialStateSwitchHandler =
+      std::make_shared<CResourceTutorialStateSwitchHandler>(this, m_spUi);
+  EditorModel()->AddTutorialStateSwitchHandler(m_spTutorialStateSwitchHandler);
 
   m_wpDbManager = CApplication::Instance()->System<CDatabaseManager>();
 
