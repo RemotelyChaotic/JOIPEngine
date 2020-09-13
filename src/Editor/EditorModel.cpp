@@ -491,9 +491,19 @@ void CEditorModel::LoadProject(qint32 iId)
       projectLocker.unlock();
     }
 
-    if (tutorialState._to_integral() != ETutorialState::eFinished)
+    if (tutorialState._to_integral() == ETutorialState::eUnstarted)
     {
       NextTutorialState();
+    }
+    else
+    {
+      for (auto& wpSwitcher : m_vwpTutorialStateSwitchHandlers)
+      {
+        if (auto spSwitcher = wpSwitcher.lock())
+        {
+          spSwitcher->OnStateSwitch(tutorialState, ETutorialState::eUnstarted);
+        }
+      }
     }
   }
 

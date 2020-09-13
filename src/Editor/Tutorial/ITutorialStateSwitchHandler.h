@@ -6,11 +6,13 @@
 class ITutorialStateSwitchHandler
 {
 public:
-  ITutorialStateSwitchHandler();
   virtual ~ITutorialStateSwitchHandler() {}
 
   virtual void OnResetStates() = 0;
   virtual void OnStateSwitch(ETutorialState newState, ETutorialState oldstate) = 0;
+
+protected:
+  ITutorialStateSwitchHandler();
 };
 
 #endif // ITUTORIALSTATESWITCHER_H

@@ -8,6 +8,7 @@
 #include "Systems/DatabaseManager.h"
 #include "Systems/HelpFactory.h"
 #include "Systems/Project.h"
+#include "Tutorial/EditorTutorialOverlay.h"
 #include "Tutorial/MainScreenTutorialStateSwitchHandler.h"
 #include "Widgets/HelpOverlay.h"
 
@@ -55,6 +56,7 @@ CEditorMainScreen::CEditorMainScreen(QWidget* pParent) :
   m_spUi(std::make_shared<Ui::CEditorMainScreen>()),
   m_spStateSwitchHandler(nullptr),
   m_vpKeyBindingActions(),
+  m_pTutorialOverlay(new CEditorTutorialOverlay(this)),
   m_spWidgetsMap(),
   m_spCurrentProject(nullptr),
   m_wpDbManager(),
@@ -85,11 +87,15 @@ void CEditorMainScreen::Initialize()
   m_wpDbManager = CApplication::Instance()->System<CDatabaseManager>();
 
   // state switch handler
-  m_spStateSwitchHandler = std::make_shared<CMainScreenTutorialStateSwitchHandler>(this, m_spUi);
+  m_spStateSwitchHandler =
+      std::make_shared<CMainScreenTutorialStateSwitchHandler>(this, m_spUi, m_pTutorialOverlay);
   m_spEditorModel->AddTutorialStateSwitchHandler(m_spStateSwitchHandler);
 
   connect(m_spEditorModel.get(), &CEditorModel::SignalProjectEdited,
           this, &CEditorMainScreen::SlotProjectEdited);
+
+  m_pTutorialOverlay->Initialize(m_spEditorModel.get());
+  m_pTutorialOverlay->Hide();
 
   // action Bars
   m_spUi->pProjectActionBar->SetActionBarPosition(CEditorActionBar::eTop);

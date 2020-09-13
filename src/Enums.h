@@ -23,6 +23,7 @@ BETTER_ENUM(ELoadState, qint32,
 
 BETTER_ENUM(ETutorialState, qint32,
             eUnstarted = 0,
+            eBeginTutorial,
             eFinished  = std::numeric_limits<qint32>::max());
 
 #endif // ENUMS_H

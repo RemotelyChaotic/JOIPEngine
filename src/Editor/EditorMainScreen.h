@@ -16,6 +16,7 @@ class CEditorProjectSettingsWidget;
 class CEditorResourceDisplayWidget;
 class CEditorResourceWidget;
 class CEditorSceneNodeWidget;
+class CEditorTutorialOverlay;
 class CMainScreenTutorialStateSwitchHandler;
 namespace Ui {
   class CEditorMainScreen;
@@ -70,6 +71,7 @@ private:
   std::shared_ptr<Ui::CEditorMainScreen>                      m_spUi;
   std::shared_ptr<CMainScreenTutorialStateSwitchHandler>      m_spStateSwitchHandler;
   std::vector<QPointer<QAction>>                              m_vpKeyBindingActions;
+  QPointer<CEditorTutorialOverlay>                            m_pTutorialOverlay;
   std::map<EEditorWidget, QPointer<CEditorWidgetBase>>        m_spWidgetsMap;
   tspProject                                                  m_spCurrentProject;
   std::weak_ptr<CDatabaseManager>                             m_wpDbManager;
