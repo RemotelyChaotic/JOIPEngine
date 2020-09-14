@@ -39,7 +39,7 @@ void CCreditsScreen::Initialize()
 //
 void CCreditsScreen::Load()
 {
-  QFile creditsFile("://resources/credits.txt");
+  QFile creditsFile(":/resources/data/credits.txt");
   if (creditsFile.open(QIODevice::ReadOnly))
   {
     QString sCredits = QString::fromUtf8(creditsFile.readAll());

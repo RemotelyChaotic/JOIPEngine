@@ -25,7 +25,6 @@
         <file>resources/img/TimerBg.svg</file>
         <file>resources/img/IconMask.svg</file>
         <file>resources/img/IconBg.svg</file>
-        <file>resources/style_default.css</file>
         <file>resources/img/ButtonArrowDown.png</file>
         <file>resources/img/ButtonArrowLeft.png</file>
         <file>resources/img/ButtonArrowUp.png</file>
@@ -45,7 +44,6 @@
         <file>resources/img/ButtonCheckBoxHover.png</file>
         <file>resources/img/ButtonMinusDisabled.png</file>
         <file>resources/img/ButtonPlusDisabled.png</file>
-        <file>resources/credits.txt</file>
         <file>resources/sound/menu_click_sharp.wav</file>
         <file>resources/sound/menu_selection_soft.wav</file>
         <file>resources/sound/menu_click_soft_main.wav</file>
@@ -142,6 +140,8 @@
         <file>resources/help/editor/addmetronome_button_help.html</file>
         <file>resources/help/editor/images/addmetronome_dialog_beatsound.png</file>
         <file>resources/help/editor/images/addmetronome_dialog_general.png</file>
+        <file>resources/style/style_default.css</file>
+        <file>resources/data/credits.txt</file>
     </qresource>
     <qresource prefix="/qml">
         <file>resources/qml/ProjectCardSelection.qml</file>
