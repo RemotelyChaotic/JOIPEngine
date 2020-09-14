@@ -496,7 +496,7 @@ void CSettings::GenerateSettingsIfNotExists()
   if (!m_spSettings->contains(CSettings::c_sSettingFullscreen))
   {
     bNeedsSynch = true;
-    m_spSettings->setValue(CSettings::c_sSettingFullscreen, false);
+    m_spSettings->setValue(CSettings::c_sSettingFullscreen, true);
   }
 
   // Keybindings

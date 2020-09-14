@@ -46,6 +46,7 @@ Changes:
 - Removed WebEngine because of the overhead of using it.
 - Changed build system from QMake to CMake.
 - Reworked overlays. Overlays are using a manager to determine z-order.
+- Fullscreen mode is on by default.
 
 Fixed Bugs:
 - Timer interval bug fixed; the timer doesn't run longer than expected anymore.
