@@ -64,7 +64,7 @@
         <property name="handleWidth">
          <number>10</number>
         </property>
-        <widget class="QGroupBox" name="groupBox">
+        <widget class="QGroupBox" name="pLeftPanelGroupBox">
          <property name="sizePolicy">
           <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
            <horstretch>0</horstretch>
@@ -126,7 +126,7 @@
           </item>
          </layout>
         </widget>
-        <widget class="QGroupBox" name="groupBox_2">
+        <widget class="QGroupBox" name="pRightPanelGroupBox">
          <property name="sizePolicy">
           <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
            <horstretch>0</horstretch>

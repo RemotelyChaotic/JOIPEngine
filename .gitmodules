@@ -16,3 +16,9 @@
 [submodule "3rdparty/QtAV"]
 	path = 3rdparty/QtAV
 	url = https://github.com/RemotelyChaotic/QtAV.git
+[submodule "3rdparty/json"]
+	path = 3rdparty/json
+	url = https://github.com/RemotelyChaotic/json.git
+[submodule "3rdparty/json-schema-validator"]
+	path = 3rdparty/json-schema-validator
+	url = https://github.com/RemotelyChaotic/json-schema-validator.git

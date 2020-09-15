@@ -197,6 +197,10 @@ set(Sources
   Systems/Resource.h 
   Systems/Scene.cpp 
   Systems/Scene.h 
+  Systems/JSON/JsonInstructionSetParser.cpp
+  Systems/JSON/JsonInstructionSetParser.h
+  Systems/JSON/JsonInstructionSetRunner.cpp
+  Systems/JSON/JsonInstructionSetRunner.h
   Systems/Script/ScriptBackground.cpp 
   Systems/Script/ScriptBackground.h 
   Systems/Script/ScriptIcon.cpp 
@@ -289,6 +293,7 @@ target_link_libraries(${PROJECT_NAME}
     NodeEditor::nodes
     KF5SyntaxHighlighting
     better_enums
+    nlohmann_json_schema_validator
     physfs-static)
 
 target_sources(${PROJECT_NAME}
