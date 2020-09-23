@@ -49,6 +49,7 @@ protected:
 private slots:
   void on_pQmlWidget_statusChanged(QQuickWidget::Status);
   void on_pQmlWidget_sceneGraphError(QQuickWindow::SceneGraphError error, const QString &message);
+  void SlotApplicationStateChanged(Qt::ApplicationState state);
   void SlotError(QString sError, QtMsgType type);
   void SlotExecutionError(QString sException, qint32 iLine, QString sStack);
   void SlotNextSkript();
@@ -75,6 +76,7 @@ private:
   tspProject                                                  m_spCurrentProject;
   QPointer<CProject>                                          m_pCurrentProjectWrapper;
   std::weak_ptr<CDatabaseManager>                             m_wpDbManager;
+  qint32                                                      m_lastScriptExecutionStatus;
   bool                                                        m_bInitialized;
 };
 

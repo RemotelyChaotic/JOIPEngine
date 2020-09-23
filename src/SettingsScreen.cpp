@@ -28,6 +28,7 @@ namespace  {
   const QString c_sMuteHelpId = "Settings/Mute";
   const QString c_sVolumeHelpId = "Settings/Volume";
   const QString c_sOfflineHelpId = "Settings/Offline";
+  const QString c_sPauseWhenInactiveHelpId = "Settings/PauseWhenInactive";
   const QString c_sCancelHelpId = "MainScreen/Cancel";
 
   const char* c_sPropertyKeySequence = "KeyBinding";
@@ -93,6 +94,8 @@ void CSettingsScreen::Initialize()
     wpHelpFactory->RegisterHelp(c_sVolumeHelpId, ":/resources/help/settings/volume_setting_help.html");
     m_spUi->pOfflineContainer->setProperty(helpOverlay::c_sHelpPagePropertyName, c_sOfflineHelpId);
     wpHelpFactory->RegisterHelp(c_sOfflineHelpId, ":/resources/help/settings/offline_setting_help.html");
+    m_spUi->pPauseWhenNotActive->setProperty(helpOverlay::c_sHelpPagePropertyName, c_sPauseWhenInactiveHelpId);
+    wpHelpFactory->RegisterHelp(c_sPauseWhenInactiveHelpId, ":/resources/help/settings/pausewheninactive_setting_help.html");
     m_spUi->pBackButton->setProperty(helpOverlay::c_sHelpPagePropertyName, c_sCancelHelpId);
     wpHelpFactory->RegisterHelp(c_sCancelHelpId, ":/resources/help/player/cancel_button_help.html");
   }
@@ -123,6 +126,7 @@ void CSettingsScreen::Load()
   m_spUi->pMuteCheckBox->blockSignals(true);
   m_spUi->pVolumeSlider->blockSignals(true);
   m_spUi->pOfflineModeCheckBox->blockSignals(true);
+  m_spUi->pPauseWhenNotActiveCheckBox->blockSignals(true);
 
   // set fullscreen
   m_spUi->pFullscreenCheckBox->setCheckState(m_spSettings->Fullscreen() ? Qt::Checked : Qt::Unchecked);
@@ -211,6 +215,9 @@ void CSettingsScreen::Load()
   // set offline mode
   m_spUi->pOfflineModeCheckBox->setChecked(m_spSettings->Offline());
 
+  // set pause when app is inactive
+  m_spUi->pPauseWhenNotActiveCheckBox->setChecked(m_spSettings->PauseWhenInactive());
+
   // unblock signals
   m_spUi->pFullscreenCheckBox->blockSignals(false);
   m_spUi->pResolutionComboBox->blockSignals(false);
@@ -220,6 +227,7 @@ void CSettingsScreen::Load()
   m_spUi->pMuteCheckBox->blockSignals(false);
   m_spUi->pVolumeSlider->blockSignals(false);
   m_spUi->pOfflineModeCheckBox->blockSignals(false);
+  m_spUi->pPauseWhenNotActiveCheckBox->blockSignals(false);
 }
 
 //----------------------------------------------------------------------------------------

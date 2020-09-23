@@ -20,12 +20,14 @@ class CSettings : public QObject
   Q_PROPERTY(QStringList keyBindings READ KeyBindings)
   Q_PROPERTY(bool muted READ Muted WRITE SetMuted NOTIFY mutedChanged)
   Q_PROPERTY(bool offline READ Offline WRITE SetOffline NOTIFY offlineChanged)
+  Q_PROPERTY(bool pauseWhenInactive READ PauseWhenInactive WRITE SetPauseWhenInactive NOTIFY pauseWhenInactiveChanged)
   Q_PROPERTY(QSize resolution READ Resolution WRITE SetResolution NOTIFY resolutionChanged)
   Q_PROPERTY(QString style READ Style WRITE SetStyle NOTIFY styleChanged)
   Q_PROPERTY(qint32 version READ Version)
   Q_PROPERTY(double volume READ Volume WRITE SetVolume NOTIFY volumeChanged)
 
 public:
+  static const QString c_sSettingAutoPauseInactive;
   static const QString c_sSettingContentFolder;
   static const QString c_sSettingFont;
   static const QString c_sSettingFullscreen;
@@ -55,6 +57,8 @@ public:
   bool Muted();
   void SetOffline(bool bValue);
   bool Offline();
+  void SetPauseWhenInactive(bool bValue);
+  bool PauseWhenInactive();
   void SetResolution(const QSize& size);
   QSize Resolution();
   void SetStyle(const QString& sStyle);
@@ -74,6 +78,7 @@ signals:
   void keyBindingsChanged();
   void mutedChanged();
   void offlineChanged();
+  void pauseWhenInactiveChanged();
   void resolutionChanged();
   void styleChanged();
   void volumeChanged();

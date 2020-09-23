@@ -168,6 +168,7 @@ void CApplication::RegisterQmlTypes()
   qRegisterMetaType<QStringList>();
   qRegisterMetaType<QList<int>>();
   qRegisterMetaType<QtMsgType>();
+  qRegisterMetaType<Qt::ApplicationState>();
 
   qRegisterMetaType<CResource*>();
   qRegisterMetaType<tspResource>();

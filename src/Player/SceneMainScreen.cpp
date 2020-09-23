@@ -35,6 +35,7 @@ CSceneMainScreen::CSceneMainScreen(QWidget* pParent) :
   m_spCurrentProject(nullptr),
   m_pCurrentProjectWrapper(nullptr),
   m_wpDbManager(),
+  m_lastScriptExecutionStatus(static_cast<qint32>(CScriptRunnerSignalEmiter::ScriptExecStatus::eRunning)),
   m_bInitialized(false)
 {
   m_spUi->setupUi(this);
@@ -51,6 +52,9 @@ CSceneMainScreen::~CSceneMainScreen()
 void CSceneMainScreen::Initialize()
 {
   m_bInitialized = false;
+
+  connect(CApplication::Instance(), &QGuiApplication::applicationStateChanged,
+          this, &CSceneMainScreen::SlotApplicationStateChanged);
 
   m_spScriptRunnerSystem->RegisterObject<CScriptRunner>();
   m_spScriptRunner = std::dynamic_pointer_cast<CScriptRunner>(m_spScriptRunnerSystem->Get());
@@ -169,6 +173,32 @@ void CSceneMainScreen::on_pQmlWidget_sceneGraphError(QQuickWindow::SceneGraphErr
                                                      const QString &message)
 {
   qWarning() << message;
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CSceneMainScreen::SlotApplicationStateChanged(Qt::ApplicationState state)
+{
+  const bool bPauseWhenInactive = m_spSettings->PauseWhenInactive();
+  if (state != Qt::ApplicationActive && bPauseWhenInactive)
+  {
+    auto spSignalEmmiterContext = m_spScriptRunner->SignalEmmitterContext();
+    if (nullptr != spSignalEmmiterContext)
+    {
+      m_lastScriptExecutionStatus =
+          static_cast<qint32>(spSignalEmmiterContext->ScriptExecutionStatus());
+    }
+
+    m_spScriptRunner->PauseExecution();
+  }
+  else if (state == Qt::ApplicationActive && bPauseWhenInactive)
+  {
+    if (m_lastScriptExecutionStatus ==
+        static_cast<qint32>(CScriptRunnerSignalEmiter::ScriptExecStatus::eRunning))
+    {
+      m_spScriptRunner->ResumeExecution();
+    }
+  }
 }
 
 //----------------------------------------------------------------------------------------

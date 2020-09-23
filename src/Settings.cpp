@@ -75,6 +75,7 @@ namespace {
 
 //----------------------------------------------------------------------------------------
 //
+const QString CSettings::c_sSettingAutoPauseInactive = "Content/pauseinactive";
 const QString CSettings::c_sSettingContentFolder = "Content/folder";
 const QString CSettings::c_sSettingFont = "Graphics/font";
 const QString CSettings::c_sSettingFullscreen = "Graphics/fullscreen";
@@ -333,6 +334,29 @@ bool CSettings::Offline()
 
 //----------------------------------------------------------------------------------------
 //
+void CSettings::SetPauseWhenInactive(bool bValue)
+{
+  QMutexLocker locker(&m_settingsMutex);
+
+  bool bOffline = m_spSettings->value(CSettings::c_sSettingAutoPauseInactive).toBool();
+
+  if (bOffline == bValue) { return; }
+
+  m_spSettings->setValue(CSettings::c_sSettingAutoPauseInactive, bValue);
+
+  emit pauseWhenInactiveChanged();
+}
+
+//----------------------------------------------------------------------------------------
+//
+bool CSettings::PauseWhenInactive()
+{
+  QMutexLocker locker(&m_settingsMutex);
+  return m_spSettings->value(CSettings::c_sSettingAutoPauseInactive).toBool();
+}
+
+//----------------------------------------------------------------------------------------
+//
 void CSettings::SetResolution(const QSize& size)
 {
   QMutexLocker locker(&m_settingsMutex);
@@ -468,6 +492,13 @@ void CSettings::GenerateSettingsIfNotExists()
 {
   QMutexLocker locker(&m_settingsMutex);
   bool bNeedsSynch = false;
+
+  // check offline
+  if (!m_spSettings->contains(CSettings::c_sSettingAutoPauseInactive))
+  {
+    bNeedsSynch = true;
+    m_spSettings->setValue(CSettings::c_sSettingAutoPauseInactive, true);
+  }
 
   // check content path
   if (!m_spSettings->contains(CSettings::c_sSettingContentFolder))
