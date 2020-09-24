@@ -1,6 +1,10 @@
 #include "MainScreenTutorialStateSwitchHandler.h"
 #include "EditorTutorialOverlay.h"
 #include "Editor/EditorMainScreen.h"
+#include "Systems/JSON/JsonInstructionSetParser.h"
+#include "Systems/JSON/JsonInstructionSetRunner.h"
+#include <QDebug>
+#include <QFile>
 #include <QTimer>
 
 CMainScreenTutorialStateSwitchHandler::CMainScreenTutorialStateSwitchHandler(
@@ -8,11 +12,27 @@ CMainScreenTutorialStateSwitchHandler::CMainScreenTutorialStateSwitchHandler(
     const std::shared_ptr<Ui::CEditorMainScreen>& spUi,
     QPointer<CEditorTutorialOverlay> pTutorialOverlay) :
   ITutorialStateSwitchHandler(),
+  m_spTutorialParser(std::make_unique<CJsonInstructionSetParser>()),
   m_spUi(spUi),
+  m_spTutorialRunner(nullptr),
   m_ParentWidget(pParentWidget),
   m_pTutorialOverlay(pTutorialOverlay)
 {
+  QFile schemaFile(":/resources/data/TutorialScheme.json");
+  QFile tutorialFile(":/resources/help/tutorial/Tutorial.json");
+  if (schemaFile.open(QIODevice::ReadOnly) && tutorialFile.open(QIODevice::ReadOnly))
+  {
+    m_spTutorialParser->SetJsonBaseSchema(schemaFile.readAll());
+    m_spTutorialRunner =
+      m_spTutorialParser->ParseJson(tutorialFile.readAll());
 
+    // Test:
+    m_spTutorialRunner->Run();
+  }
+  else
+  {
+    qCritical() << QT_TR_NOOP("Could not open tutorial files.");
+  }
 }
 
 CMainScreenTutorialStateSwitchHandler::~CMainScreenTutorialStateSwitchHandler()

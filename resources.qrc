@@ -144,6 +144,7 @@
         <file>resources/data/credits.txt</file>
         <file>resources/help/tutorial/Tutorial.json</file>
         <file>resources/help/settings/pausewheninactive_setting_help.html</file>
+        <file>resources/data/TutorialScheme.json</file>
     </qresource>
     <qresource prefix="/qml">
         <file>resources/qml/ProjectCardSelection.qml</file>

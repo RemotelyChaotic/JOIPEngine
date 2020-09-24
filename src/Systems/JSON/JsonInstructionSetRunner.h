@@ -1,14 +1,22 @@
 #ifndef CJSONINSTRUCTIONSETRUNNER_H
 #define CJSONINSTRUCTIONSETRUNNER_H
 
-#include <QObject>
+#include <memory>
 
-class CJsonInstructionSetRunner : public QObject
+class CJsonInstructionSetRunnerPrivate;
+
+class CJsonInstructionSetRunner
 {
-  Q_OBJECT
+  friend class CJsonInstructionSetParserPrivate;
+
 public:
-  explicit CJsonInstructionSetRunner(QObject* pParent = nullptr);
+  explicit CJsonInstructionSetRunner();
   ~CJsonInstructionSetRunner();
+
+  bool Run();
+
+protected:
+  std::unique_ptr<CJsonInstructionSetRunnerPrivate> m_pPrivate;
 };
 
 #endif // CJSONINSTRUCTIONSETRUNNER_H

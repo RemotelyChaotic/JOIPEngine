@@ -7,6 +7,8 @@
 
 class CEditorMainScreen;
 class CEditorTutorialOverlay;
+class CJsonInstructionSetParser;
+class CJsonInstructionSetRunner;
 namespace Ui {
   class CEditorMainScreen;
 }
@@ -23,9 +25,11 @@ public:
   void OnStateSwitch(ETutorialState newState, ETutorialState oldState) override;
 
 private:
-  std::shared_ptr<Ui::CEditorMainScreen>   m_spUi;
-  QPointer<CEditorMainScreen>              m_ParentWidget;
-  QPointer<CEditorTutorialOverlay>         m_pTutorialOverlay;
+  std::unique_ptr<CJsonInstructionSetParser> m_spTutorialParser;
+  std::shared_ptr<Ui::CEditorMainScreen>     m_spUi;
+  std::shared_ptr<CJsonInstructionSetRunner> m_spTutorialRunner;
+  QPointer<CEditorMainScreen>                m_ParentWidget;
+  QPointer<CEditorTutorialOverlay>           m_pTutorialOverlay;
 };
 
 #endif // CMAINSCREENTUTORIALSTATESWITCHER_H

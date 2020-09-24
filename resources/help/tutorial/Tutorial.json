@@ -2,123 +2,104 @@
   "eBeginTutorial": {
     "commands": [
       {
-        "command": "background",
-        "args": [{"showBg" : 1}, { "onCliCkAdvance": 1}]
+        "background": [{"showBg" : 1}, { "onCliCkAdvance": 1}]
       },
       {
-        "command": "text",
-        "args": [
+        "text": [
           {"centerX" : 0.5}, { "centerY": 0.5},
           { "text": "Welcome to the editor tutorial.<br>This tutorial will walk you through the JOIP editor's main features.<br>In order to continue, just click the grey background or the <b>Continue</b> button of this popup." }
         ]
       },
       {
-        "command": "text",
-        "args": [
+        "text": [
           {"centerX" : 0.5}, { "centerY": 0.1},
           { "text": "As you can see, the editor screen is divided into 3 sections." }
         ]
       },
       {
-        "command": "highlight",
-        "args": [
+        "highlight": [
           { "items" : ["pProjectActionBar"]}
         ]
       },
       {
-        "command": "text",
-        "args": [
+        "text": [
           {"centerX" : 0.5}, { "centerY": 0.2},
           { "text": "This is the toolbar containing basic project functionaliy such as..." }
         ]
       },
       {
-        "command": "highlight",
-        "args": [
+        "highlight": [
           { "items" : ["pTitleLineEdit"]}
         ]
       },
       {
-        "command": "text",
-        "args": [
+        "text": [
           {"centerX" : 0.5}, { "centerY": 0.2},
           { "text": "...renaming the JOIP-Project..." }
         ]
       },
       {
-        "command": "highlight",
-        "args": [
+        "highlight": [
           { "items" : ["SaveButton", "ExportButton"]}
         ]
       },
       {
-        "command": "text",
-        "args": [
+        "text": [
           {"centerX" : 0.5}, { "centerY": 0.2},
           { "text": "...saving or exporting the JOIP-Project..." }
         ]
       },
       {
-        "command": "highlight",
-        "args": [
+        "highlight": [
           { "items" : ["HelpButton"]}
         ]
       },
       {
-        "command": "text",
-        "args": [
+        "text": [
           {"centerX" : 0.5}, { "centerY": 0.2},
           { "text": "...opening the help overlay..." }
         ]
       },
       {
-        "command": "highlight",
-        "args": [
+        "highlight": [
           { "items" : ["ExitButton"]}
         ]
       },
       {
-        "command": "text",
-        "args": [
+        "text": [
           {"centerX" : 0.5}, { "centerY": 0.2},
           { "text": "...and exiting the editor." }
         ]
       },
       {
-        "command": "highlight",
-        "args": [
+        "highlight": [
           { "items" : ["pLeftPanelGroupBox"]}
         ]
       },
       {
-        "command": "text",
-        "args": [
+        "text": [
           {"centerX" : 0.7}, { "centerY": 0.5},
           { "text": "This is the left editor panel.<br>A number of views can be displayed here." }
         ]
       },
       {
-        "command": "highlight",
-        "args": [
+        "highlight": [
           { "items" : ["pRightPanelGroupBox"]}
         ]
       },
       {
-        "command": "text",
-        "args": [
+        "text": [
           {"centerX" : 0.3}, { "centerY": 0.5},
           { "text": "The same goes for the right panel." }
         ]
       },
       {
-        "command": "highlight",
-        "args": [
+        "highlight": [
           { "items" : ["pLeftComboBox", "pRightComboBox"]}
         ]
       },
       {
-        "command": "text",
-        "args": [
+        "text": [
           {"centerX" : 0.5}, { "centerY": 0.5},
           { "text": "The views in the panels can be switched via the toggle above the respective panel." }
         ]
@@ -128,35 +109,29 @@
   "eSwitchRightPanelToProjectSettings": {
     "commands": [
       {
-        "command": "background",
-        "args": [{"showBg" : 1}, { "onCliCkAdvance": 1}]
+        "background": [{"showBg" : 1}, { "onCliCkAdvance": 1}]
       },
       {
-        "command": "text",
-        "args": [
+        "text": [
           {"centerX" : 0.5}, { "centerY": 0.5},
           { "text": "First let's switch the right panel to show the Project Settings view." }
         ]
       },
       {
-        "command": "background",
-        "args": [{"showBg" : 1}, { "onCliCkAdvance": 0}]
+        "background": [{"showBg" : 1}, { "onCliCkAdvance": 0}]
       },
       {
-        "command": "highlight",
-        "args": [
+        "highlight": [
           { "items" : ["pRightComboBox"]}
         ]
       },
       {
-        "command": "clickTransparency",
-        "args": [
+        "clickTransparency": [
           { "x": 0.5, "y": 0.2, "x2": 1.0, "y2": 0.4}
         ]
       },
       {
-        "command": "text",
-        "args": [
+        "text": [
           {"centerX" : 0.2}, { "centerY": 0.3},
           { "text": "To do that, simply open the right panel..." }
         ]

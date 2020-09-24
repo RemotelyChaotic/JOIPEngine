@@ -197,9 +197,9 @@ set(Sources
   Systems/Resource.h 
   Systems/Scene.cpp 
   Systems/Scene.h 
+  Systems/JSON/JsonInstructionBase.h
   Systems/JSON/JsonInstructionSetParser.cpp
   Systems/JSON/JsonInstructionSetParser.h
-  Systems/JSON/JsonInstructionSetRunner.cpp
   Systems/JSON/JsonInstructionSetRunner.h
   Systems/Script/ScriptBackground.cpp 
   Systems/Script/ScriptBackground.h 

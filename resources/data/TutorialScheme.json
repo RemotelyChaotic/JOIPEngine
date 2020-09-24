@@ -1,0 +1,16 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "qrc:/resources/data/TutorialScheme.json",
+  "title": "TutorialSchema",
+  "description": "Base schema for a tutorial json istruction set.",
+  "type": "object",
+  "properties": {
+    "eBeginTutorial":                     { "type": "object" },
+    "eSwitchRightPanelToProjectSettings": { "type": "object" }
+  },
+  "required": [
+    "eBeginTutorial",
+    "eSwitchRightPanelToProjectSettings"
+  ],
+  "additionalProperties": false
+}
