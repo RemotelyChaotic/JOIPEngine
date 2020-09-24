@@ -21,6 +21,7 @@ New Features:
 - Projects can now be exported as a bundle, packing all resources in a single
   file.
 - Added PlayerMetronome component to player and editor.
+- Option to pause Player automativally if app is not currently active.
 
 Updated Features:
 - Upgrade to Qt5.14.2 with msvc2017 for more QJSEngine and QML features.
