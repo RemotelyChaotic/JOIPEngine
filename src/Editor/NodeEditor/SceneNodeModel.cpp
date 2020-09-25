@@ -27,10 +27,18 @@ CSceneNodeModel::CSceneNodeModel() :
   {
     connect(spDbManager.get(), &CDatabaseManager::SignalSceneRenamed,
             this, &CSceneNodeModel::SlotSceneRenamed);
+    connect(spDbManager.get(), &CDatabaseManager::SignalResourceAdded,
+            this, &CSceneNodeModel::SlotResourceAdded);
+    connect(spDbManager.get(), &CDatabaseManager::SignalResourceRemoved,
+            this, &CSceneNodeModel::SlotResourceRemoved);
   }
 
   connect(m_pWidget, &CSceneNodeModelWidget::SignalNameChanged,
           this, &CSceneNodeModel::SlotNameChanged);
+  connect(m_pWidget, &CSceneNodeModelWidget::SignalAddScriptFileClicked,
+          this, &CSceneNodeModel::SignalAddScriptFileRequested);
+
+  m_pWidget->SetScriptButtonEnabled(false);
 }
 
 //----------------------------------------------------------------------------------------
@@ -56,6 +64,16 @@ void CSceneNodeModel::SetProjectId(qint32 iId)
     else
     {
       m_spScene = spDbManager->FindScene(m_spProject, m_sSceneName);
+    }
+
+    m_pWidget->SetScriptButtonEnabled(true);
+    if (nullptr != m_spScene)
+    {
+      QReadLocker locker(&m_spScene->m_rwLock);
+      if (!m_spScene->m_sScript.isEmpty())
+      {
+        m_pWidget->SetScriptButtonEnabled(false);
+      }
     }
   }
 
@@ -243,6 +261,35 @@ void CSceneNodeModel::SlotSceneRenamed(qint32 iProjId, qint32 iSceneId)
     {
       m_sOldSceneName = sNewName;
       m_pWidget->SetName(sNewName);
+    }
+  }
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CSceneNodeModel::SlotResourceAdded(qint32 iProjId, const QString& sName)
+{
+  if (ProjectId() == iProjId && nullptr != m_spScene)
+  {
+    QReadLocker locker(&m_spScene->m_rwLock);
+    if (m_spScene->m_sScript == sName)
+    {
+      m_pWidget->SetScriptButtonEnabled(false);
+    }
+  }
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CSceneNodeModel::SlotResourceRemoved(qint32 iProjId, const QString& sName)
+{
+  Q_UNUSED(sName)
+  if (ProjectId() == iProjId && nullptr != m_spScene)
+  {
+    QReadLocker locker(&m_spScene->m_rwLock);
+    if (m_spScene->m_sScript.isEmpty())
+    {
+      m_pWidget->SetScriptButtonEnabled(true);
     }
   }
 }

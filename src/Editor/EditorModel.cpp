@@ -4,6 +4,7 @@
 #include "NodeEditor/PathMergerModel.h"
 #include "NodeEditor/PathSplitterModel.h"
 #include "NodeEditor/SceneNodeModel.h"
+#include "NodeEditor/SceneNodeModelWidget.h"
 #include "NodeEditor/SceneTranstitionData.h"
 #include "NodeEditor/StartNodeModel.h"
 #include "Project/KinkTreeModel.h"
@@ -751,6 +752,9 @@ void CEditorModel::SlotNodeCreated(Node &n)
       qint32 iSceneId = pSceneModel->SceneId();
       auto spScene = spDbManager->FindScene(m_spCurrentProject, iSceneId);
       AddNewScriptFileToScene(m_pParentWidget, spScene);
+
+      connect(pSceneModel, &CSceneNodeModel::SignalAddScriptFileRequested,
+              this, &CEditorModel::SlotAddNewScriptFileToScene, Qt::UniqueConnection);
     }
     emit SignalProjectEdited();
   }
@@ -776,6 +780,34 @@ void CEditorModel::SlotNodeDeleted(QtNodes::Node &n)
       spDbManager->RemoveScene(m_spCurrentProject, iSceneId);
     }
     emit SignalProjectEdited();
+  }
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CEditorModel::SlotAddNewScriptFileToScene()
+{
+  if (nullptr == m_spCurrentProject)
+  {
+    qWarning() << "Node created in null-project.";
+    return;
+  }
+
+  auto spDbManager = m_wpDbManager.lock();
+  if (nullptr != spDbManager)
+  {
+    CSceneNodeModel* pSceneModel = dynamic_cast<CSceneNodeModel*>(sender());
+    if (nullptr != pSceneModel)
+    {
+      m_spCurrentProject->m_rwLock.lockForRead();
+      qint32 iId = m_spCurrentProject->m_iId;
+      m_spCurrentProject->m_rwLock.unlock();
+      pSceneModel->SetProjectId(iId);
+
+      qint32 iSceneId = pSceneModel->SceneId();
+      auto spScene = spDbManager->FindScene(m_spCurrentProject, iSceneId);
+      AddNewScriptFileToScene(m_pParentWidget, spScene);
+    }
   }
 }
 

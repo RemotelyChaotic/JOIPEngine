@@ -76,6 +76,7 @@ signals:
   void SignalProjectExportFinished();
 
 private slots:
+  void SlotAddNewScriptFileToScene();
   void SlotExportErrorOccurred(QProcess::ProcessError error);
   void SlotExportFinished(int exitCode, QProcess::ExitStatus exitStatus);
   void SlotExportStarted();

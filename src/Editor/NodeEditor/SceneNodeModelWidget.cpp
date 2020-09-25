@@ -29,6 +29,20 @@ void CSceneNodeModelWidget::SetName(const QString& sName)
 
 //----------------------------------------------------------------------------------------
 //
+void CSceneNodeModelWidget::SetScriptButtonEnabled(bool bEnabled)
+{
+  m_spUi->AddScriptFile->setEnabled(bEnabled);
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CSceneNodeModelWidget::on_AddScriptFile_clicked()
+{
+  emit SignalAddScriptFileClicked();
+}
+
+//----------------------------------------------------------------------------------------
+//
 void CSceneNodeModelWidget::on_pSceneNameLineEdit_editingFinished()
 {
   emit SignalNameChanged(m_spUi->pSceneNameLineEdit->text());

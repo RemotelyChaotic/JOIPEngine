@@ -50,6 +50,9 @@ public:
 
   ConnectionPolicy portOutConnectionPolicy(PortIndex) const override { return ConnectionPolicy::One; }
 
+signals:
+  void SignalAddScriptFileRequested();
+
 protected:
   std::weak_ptr<CDatabaseManager>                     m_wpDbManager;
   std::weak_ptr<CSceneTranstitionData>                m_wpInData;
@@ -66,6 +69,8 @@ protected:
 protected slots:
   void SlotNameChanged(const QString& sName);
   void SlotSceneRenamed(qint32 iProjId, qint32 iSceneId);
+  void SlotResourceAdded(qint32 iProjId, const QString& sName);
+  void SlotResourceRemoved(qint32 iProjId, const QString& sName);
 };
 
 #endif // SCENENODEMODEL_H

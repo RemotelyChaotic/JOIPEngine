@@ -37,6 +37,8 @@ Updated Features:
 - PlayerTextBox can now display a portrait next to the text. This portrait
   can be any Image or Movie type Resource.
 - Styles have been updated.
+- New button to Script type nodes added which allows to add scripts to the
+  scene.
 
 Changes:
 - In-Game title changed to JOIP Engine.
