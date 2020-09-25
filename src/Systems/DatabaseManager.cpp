@@ -563,15 +563,19 @@ void CDatabaseManager::ClearResources(tspProject& spProj)
     QString sName = it->first;
     spProj->m_spResourcesMap.erase(it);
 
+    for (tspScene& spScene : spProj->m_vspScenes)
+    {
+      QWriteLocker sceneLocker(&spScene->m_rwLock);
+      spScene->m_vsResourceRefs.clear();
+      if (spScene->m_sScript == sName)
+      {
+        spScene->m_sScript = QString();
+      }
+    }
+
     locker.unlock();
     emit SignalResourceRemoved(spProj->m_iId, sName);
     locker.relock();
-  }
-
-  for (tspScene& spScene : spProj->m_vspScenes)
-  {
-    QWriteLocker sceneLocker(&spScene->m_rwLock);
-    spScene->m_vsResourceRefs.clear();
   }
 }
 
@@ -608,6 +612,10 @@ void CDatabaseManager::RemoveResource(tspProject& spProj, const QString& sName)
       if (refsIt != spScene->m_vsResourceRefs.end())
       {
         spScene->m_vsResourceRefs.erase(refsIt);
+      }
+      if (spScene->m_sScript == sName)
+      {
+        spScene->m_sScript = QString();
       }
     }
 
