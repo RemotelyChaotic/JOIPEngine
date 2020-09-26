@@ -15,6 +15,7 @@ CMainScreenTutorialStateSwitchHandler::CMainScreenTutorialStateSwitchHandler(
     QPointer<CEditorMainScreen> pParentWidget,
     const std::shared_ptr<Ui::CEditorMainScreen>& spUi,
     QPointer<CEditorTutorialOverlay> pTutorialOverlay) :
+  QObject(nullptr),
   ITutorialStateSwitchHandler(),
   m_spTutorialParser(std::make_unique<CJsonInstructionSetParser>()),
   m_spUi(spUi),
@@ -22,16 +23,22 @@ CMainScreenTutorialStateSwitchHandler::CMainScreenTutorialStateSwitchHandler(
   m_ParentWidget(pParentWidget),
   m_pTutorialOverlay(pTutorialOverlay)
 {
+  connect(pTutorialOverlay, &CEditorTutorialOverlay::SignalOverlayNextInstructionTriggered,
+          this, &CMainScreenTutorialStateSwitchHandler::SlotOverlayNextInstructionTriggered,
+          Qt::QueuedConnection);
+
   QFile schemaFile(":/resources/data/TutorialScheme.json");
   QFile tutorialFile(":/resources/help/tutorial/Tutorial.json");
   if (schemaFile.open(QIODevice::ReadOnly) && tutorialFile.open(QIODevice::ReadOnly))
   {
     m_spTutorialParser->SetJsonBaseSchema(schemaFile.readAll());
     m_spTutorialParser->RegisterInstructionSetPath("Tutorial", "/");
-    m_spTutorialParser->RegisterInstruction<CCommandBackground>("background");
-    m_spTutorialParser->RegisterInstruction<CCommandClickTransparency>("clickTransparency");
-    m_spTutorialParser->RegisterInstruction<CCommandHighlight>("highlight");
-    m_spTutorialParser->RegisterInstruction<CCommandText>("text");
+
+    m_spTutorialParser->RegisterInstruction("background", std::make_shared<CCommandBackground>(m_pTutorialOverlay));
+    m_spTutorialParser->RegisterInstruction("clickTransparency", std::make_shared<CCommandClickTransparency>(m_pTutorialOverlay));
+    m_spTutorialParser->RegisterInstruction("highlight",  std::make_shared<CCommandHighlight>(m_pTutorialOverlay));
+    m_spTutorialParser->RegisterInstruction("text",  std::make_shared<CCommandText>(m_pTutorialOverlay));
+
     m_spTutorialRunner =
       m_spTutorialParser->ParseJson(tutorialFile.readAll());
 
@@ -78,8 +85,22 @@ void CMainScreenTutorialStateSwitchHandler::OnStateSwitch(ETutorialState newStat
   default: break;
   }
 
+  // run json script for the new state
   if (nullptr != m_spTutorialRunner)
   {
     m_spTutorialRunner->Run(newState._to_string());
+  }
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CMainScreenTutorialStateSwitchHandler::SlotOverlayNextInstructionTriggered()
+{
+  if (nullptr != m_spTutorialRunner)
+  {
+    if (!m_spTutorialRunner->CallNextCommand())
+    {
+      m_pTutorialOverlay->NextTutorialState();
+    }
   }
 }

@@ -1,9 +1,10 @@
 #include "CommandClickTransparency.h"
 
-CCommandClickTransparency::CCommandClickTransparency() :
+CCommandClickTransparency::CCommandClickTransparency(QPointer<CEditorTutorialOverlay> pTutorialOverlay) :
   IJsonInstructionBase(),
   m_argTypes({{"x", QVariant::Double}, {"y", QVariant::Double},
-              {"x2", QVariant::Double}, {"y2", QVariant::Double}})
+              {"x2", QVariant::Double}, {"y2", QVariant::Double}}),
+  m_pTutorialOverlay(pTutorialOverlay)
 {
 
 }

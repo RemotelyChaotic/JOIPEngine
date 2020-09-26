@@ -2,11 +2,13 @@
 #define CCOMMANDTEXT_H
 
 #include "Systems/JSON/JsonInstructionBase.h"
+#include "EditorTutorialOverlay.h"
+#include <QPointer>
 
 class CCommandText : public IJsonInstructionBase
 {
 public:
-  CCommandText();
+  CCommandText(QPointer<CEditorTutorialOverlay> pTutorialOverlay);
   ~CCommandText() override;
 
   const std::map<QString, QVariant::Type>& ArgList() const override;
@@ -14,6 +16,7 @@ public:
 
 private:
   const std::map<QString, QVariant::Type> m_argTypes;
+  QPointer<CEditorTutorialOverlay>        m_pTutorialOverlay;
 };
 
 #endif // CCOMMANDTEXT_H

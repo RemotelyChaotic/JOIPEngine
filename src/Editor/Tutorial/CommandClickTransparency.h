@@ -2,11 +2,13 @@
 #define CCOMMANDCLICKTRANSPARENCY_H
 
 #include "Systems/JSON/JsonInstructionBase.h"
+#include "EditorTutorialOverlay.h"
+#include <QPointer>
 
 class CCommandClickTransparency : public IJsonInstructionBase
 {
 public:
-  CCommandClickTransparency();
+  CCommandClickTransparency(QPointer<CEditorTutorialOverlay> pTutorialOverlay);
   ~CCommandClickTransparency() override;
 
   const std::map<QString, QVariant::Type>& ArgList() const override;
@@ -14,6 +16,7 @@ public:
 
 private:
   const std::map<QString, QVariant::Type> m_argTypes;
+  QPointer<CEditorTutorialOverlay>        m_pTutorialOverlay;
 };
 
 #endif // CCOMMANDCLICKTRANSPARENCY_H

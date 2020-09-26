@@ -13,8 +13,10 @@ namespace Ui {
   class CEditorMainScreen;
 }
 
-class CMainScreenTutorialStateSwitchHandler : public ITutorialStateSwitchHandler
+class CMainScreenTutorialStateSwitchHandler : public QObject, public ITutorialStateSwitchHandler
 {
+  Q_OBJECT
+
 public:
   CMainScreenTutorialStateSwitchHandler(QPointer<CEditorMainScreen> pParentWidget,
                                         const std::shared_ptr<Ui::CEditorMainScreen>& spUi,
@@ -23,6 +25,9 @@ public:
 
   void OnResetStates() override;
   void OnStateSwitch(ETutorialState newState, ETutorialState oldState) override;
+
+private slots:
+  void SlotOverlayNextInstructionTriggered();
 
 private:
   std::unique_ptr<CJsonInstructionSetParser> m_spTutorialParser;
