@@ -126,6 +126,14 @@ set(Sources
   Editor/Script/TimerSnippetOverlay.ui 
   Editor/Tutorial/CodeWidgetTutorialStateSwitchHandler.cpp
   Editor/Tutorial/CodeWidgetTutorialStateSwitchHandler.h
+  Editor/Tutorial/CommandBackground.cpp
+  Editor/Tutorial/CommandBackground.h
+  Editor/Tutorial/CommandClickTransparency.cpp
+  Editor/Tutorial/CommandClickTransparency.h
+  Editor/Tutorial/CommandHighlight.cpp
+  Editor/Tutorial/CommandHighlight.h
+  Editor/Tutorial/CommandText.cpp
+  Editor/Tutorial/CommandText.h
   Editor/Tutorial/EditorTutorialOverlay.cpp
   Editor/Tutorial/EditorTutorialOverlay.h
   Editor/Tutorial/ITutorialStateSwitchHandler.cpp
@@ -198,6 +206,7 @@ set(Sources
   Systems/Scene.cpp 
   Systems/Scene.h 
   Systems/JSON/JsonInstructionBase.h
+  Systems/JSON/JsonInstructionNode.h
   Systems/JSON/JsonInstructionSetParser.cpp
   Systems/JSON/JsonInstructionSetParser.h
   Systems/JSON/JsonInstructionSetRunner.h

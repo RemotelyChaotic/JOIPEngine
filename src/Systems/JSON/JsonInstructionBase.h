@@ -1,17 +1,17 @@
 #ifndef JSONINSTRUCTIONBASE_H
 #define JSONINSTRUCTIONBASE_H
 
-#include <QJsonObject>
+#include <QVariant>
+#include <map>
 
-class JsonInstructionBase
+class IJsonInstructionBase
 {
 public:
-  JsonInstructionBase() {}
-  virtual ~JsonInstructionBase() {}
+  IJsonInstructionBase() {}
+  virtual ~IJsonInstructionBase() {}
 
-  virtual QJsonObject GetSchema() = 0;
-
-  virtual void operator()(const QJsonObject& instruction) = 0;
+  virtual const std::map<QString /*sName*/, QVariant::Type /*type*/>& ArgList() const = 0;
+  virtual void Call(const QVariantMap& args) = 0;
 };
 
 #endif // JSONINSTRUCTIONBASE_H

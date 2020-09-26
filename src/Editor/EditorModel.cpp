@@ -496,6 +496,7 @@ void CEditorModel::LoadProject(qint32 iId)
     {
       NextTutorialState();
     }
+    else if (ETutorialState::eFinished == m_spCurrentProject->m_tutorialState._to_integral());
     else
     {
       for (auto& wpSwitcher : m_vwpTutorialStateSwitchHandlers)

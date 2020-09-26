@@ -5,6 +5,7 @@
 #include <QJsonDocument>
 #include <QObject>
 #include <memory>
+#include <type_traits>
 
 class CJsonInstructionSetRunner;
 class CJsonInstructionSetParserPrivate;
@@ -17,7 +18,15 @@ public:
   ~CJsonInstructionSetParser() override;
 
   std::shared_ptr<CJsonInstructionSetRunner> ParseJson(const QByteArray& json);
-  void RegisterInstructionSchema(const QString& sId, const JsonInstructionBase& instructionDefinition);
+  template<typename T,
+           typename = typename std::enable_if<std::is_base_of<IJsonInstructionBase, T>::value, void>::type>
+  void RegisterInstruction(const QString& sId)
+  {
+    RegisterInstruction(sId, std::make_shared<T>());
+  }
+  void RegisterInstruction(const QString& sId,
+                           const std::shared_ptr<IJsonInstructionBase>& spInstructionDefinition);
+  void RegisterInstructionSetPath(const QString& sId, const QString& sInstructionSetPath);
   void SetJsonBaseSchema(const QByteArray& schema);
 
 private:

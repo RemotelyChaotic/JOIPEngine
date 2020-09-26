@@ -1,6 +1,7 @@
 #ifndef CJSONINSTRUCTIONSETRUNNER_H
 #define CJSONINSTRUCTIONSETRUNNER_H
 
+#include <QString>
 #include <memory>
 
 class CJsonInstructionSetRunnerPrivate;
@@ -13,7 +14,8 @@ public:
   explicit CJsonInstructionSetRunner();
   ~CJsonInstructionSetRunner();
 
-  bool Run();
+  bool CallNextCommand();
+  bool Run(const QString& sInstructionSet);
 
 protected:
   std::unique_ptr<CJsonInstructionSetRunnerPrivate> m_pPrivate;

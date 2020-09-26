@@ -1,4 +1,8 @@
 #include "MainScreenTutorialStateSwitchHandler.h"
+#include "CommandBackground.h"
+#include "CommandClickTransparency.h"
+#include "CommandHighlight.h"
+#include "CommandText.h"
 #include "EditorTutorialOverlay.h"
 #include "Editor/EditorMainScreen.h"
 #include "Systems/JSON/JsonInstructionSetParser.h"
@@ -23,11 +27,18 @@ CMainScreenTutorialStateSwitchHandler::CMainScreenTutorialStateSwitchHandler(
   if (schemaFile.open(QIODevice::ReadOnly) && tutorialFile.open(QIODevice::ReadOnly))
   {
     m_spTutorialParser->SetJsonBaseSchema(schemaFile.readAll());
+    m_spTutorialParser->RegisterInstructionSetPath("Tutorial", "/");
+    m_spTutorialParser->RegisterInstruction<CCommandBackground>("background");
+    m_spTutorialParser->RegisterInstruction<CCommandClickTransparency>("clickTransparency");
+    m_spTutorialParser->RegisterInstruction<CCommandHighlight>("highlight");
+    m_spTutorialParser->RegisterInstruction<CCommandText>("text");
     m_spTutorialRunner =
       m_spTutorialParser->ParseJson(tutorialFile.readAll());
 
-    // Test:
-    m_spTutorialRunner->Run();
+    if (nullptr == m_spTutorialRunner)
+    {
+      qCritical() << QT_TR_NOOP("Could not create tutorial JSON runner object.");
+    }
   }
   else
   {
@@ -65,5 +76,10 @@ void CMainScreenTutorialStateSwitchHandler::OnStateSwitch(ETutorialState newStat
 
     } break;
   default: break;
+  }
+
+  if (nullptr != m_spTutorialRunner)
+  {
+    m_spTutorialRunner->Run(newState._to_string());
   }
 }
