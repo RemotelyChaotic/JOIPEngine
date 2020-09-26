@@ -143,17 +143,24 @@ qint32 CScriptTextBox::showButtonPrompts(QJSValue vsLabels)
     // local loop to wait for answer
     qint32 iReturnValue = -1;
     QEventLoop loop;
-    connect(this, &CScriptTextBox::SignalQuitLoop, &loop, &QEventLoop::quit);
-    connect(pSignalEmitter, &CTextBoxSignalEmitter::interrupt,
-            &loop, &QEventLoop::quit, Qt::QueuedConnection);
-    connect(pSignalEmitter, &CTextBoxSignalEmitter::showButtonReturnValue,
-            this, [this, &iReturnValue](qint32 iIndexSelected)
+    QMetaObject::Connection quitLoop =
+      connect(this, &CScriptTextBox::SignalQuitLoop, &loop, &QEventLoop::quit);
+    QMetaObject::Connection interruptLoop =
+      connect(pSignalEmitter, &CTextBoxSignalEmitter::interrupt,
+              &loop, &QEventLoop::quit, Qt::QueuedConnection);
+    QMetaObject::Connection showRetValLoop =
+      connect(pSignalEmitter, &CTextBoxSignalEmitter::showButtonReturnValue,
+              this, [this, &iReturnValue](qint32 iIndexSelected)
     {
       iReturnValue = iIndexSelected;
       emit this->SignalQuitLoop();
     }, Qt::QueuedConnection);
     loop.exec();
     loop.disconnect();
+
+    disconnect(quitLoop);
+    disconnect(interruptLoop);
+    disconnect(showRetValLoop);
 
     return iReturnValue;
   }
@@ -187,17 +194,24 @@ QString CScriptTextBox::showInput()
   // local loop to wait for answer
   QString sReturnValue = QString();
   QEventLoop loop;
-  connect(this, &CScriptTextBox::SignalQuitLoop, &loop, &QEventLoop::quit);
-  connect(pSignalEmitter, &CTextBoxSignalEmitter::interrupt,
-          &loop, &QEventLoop::quit, Qt::QueuedConnection);
-  connect(pSignalEmitter, &CTextBoxSignalEmitter::showInputReturnValue,
-          this, [this, &sReturnValue](QString sInput)
+  QMetaObject::Connection quitLoop =
+    connect(this, &CScriptTextBox::SignalQuitLoop, &loop, &QEventLoop::quit);
+  QMetaObject::Connection interruptLoop =
+    connect(pSignalEmitter, &CTextBoxSignalEmitter::interrupt,
+            &loop, &QEventLoop::quit, Qt::QueuedConnection);
+  QMetaObject::Connection showRetValLoop =
+    connect(pSignalEmitter, &CTextBoxSignalEmitter::showInputReturnValue,
+            this, [this, &sReturnValue](QString sInput)
   {
     sReturnValue = sInput;
     emit this->SignalQuitLoop();
   }, Qt::QueuedConnection);
   loop.exec();
   loop.disconnect();
+
+  disconnect(quitLoop);
+  disconnect(interruptLoop);
+  disconnect(showRetValLoop);
 
   return sReturnValue;
 }

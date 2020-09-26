@@ -91,11 +91,15 @@ void CScriptTimer::waitForTimer()
 
   auto pSignalEmitter = SignalEmitter<CTimerSignalEmitter>();
   QEventLoop loop;
-  connect(pSignalEmitter, &CTimerSignalEmitter::timerFinished,
-          &loop, &QEventLoop::quit, Qt::QueuedConnection);
-  connect(pSignalEmitter, &CTimerSignalEmitter::interrupt,
-          &loop, &QEventLoop::quit, Qt::QueuedConnection);
+  QMetaObject::Connection timeoutLoop =
+    connect(pSignalEmitter, &CTimerSignalEmitter::timerFinished,
+            &loop, &QEventLoop::quit, Qt::QueuedConnection);
+  QMetaObject::Connection quitLoop =
+    connect(pSignalEmitter, &CTimerSignalEmitter::interrupt,
+            &loop, &QEventLoop::quit, Qt::QueuedConnection);
   emit pSignalEmitter->waitForTimer();
   loop.exec();
   loop.disconnect();
+  disconnect(timeoutLoop);
+  disconnect(quitLoop);
 }
