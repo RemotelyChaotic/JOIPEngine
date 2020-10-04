@@ -82,6 +82,10 @@ void CMainScreenTutorialStateSwitchHandler::OnStateSwitch(ETutorialState newStat
     {
 
     } break;
+    case ETutorialState::eSwitchRightPanelToProjectSettings:
+    {
+      m_spUi->pRightComboBox->setCurrentIndex(EEditorWidget::eResourceDisplay);
+    } break;
   default: break;
   }
 

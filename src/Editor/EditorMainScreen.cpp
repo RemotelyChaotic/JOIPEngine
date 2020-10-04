@@ -188,13 +188,13 @@ void CEditorMainScreen::Initialize()
 
   // init indicees
   m_spUi->pRightComboBox->blockSignals(true);
-  m_spUi->pRightComboBox->setCurrentIndex(2);
-  on_pRightComboBox_currentIndexChanged(2);
+  m_spUi->pRightComboBox->setCurrentIndex(EEditorWidget::eProjectSettings);
+  on_pRightComboBox_currentIndexChanged(EEditorWidget::eProjectSettings);
   m_spUi->pRightComboBox->blockSignals(false);
 
   m_spUi->pLeftComboBox->blockSignals(true);
-  m_spUi->pLeftComboBox->setCurrentIndex(0);
-  on_pLeftComboBox_currentIndexChanged(0);
+  m_spUi->pLeftComboBox->setCurrentIndex(EEditorWidget::eResourceWidget);
+  on_pLeftComboBox_currentIndexChanged(EEditorWidget::eResourceWidget);
   m_spUi->pLeftComboBox->blockSignals(false);
 }
 

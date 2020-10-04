@@ -77,6 +77,8 @@ CEditorTutorialOverlay::CEditorTutorialOverlay(QWidget* pParent) :
           this, &CEditorTutorialOverlay::SlotAlphaAnimationFinished, Qt::DirectConnection);
 
   installEventFilter(this);
+  Climb();
+  Resize();
 }
 
 CEditorTutorialOverlay::~CEditorTutorialOverlay()
@@ -110,6 +112,7 @@ void CEditorTutorialOverlay::NextTutorialState()
 void CEditorTutorialOverlay::SetClickToAdvanceEnabled(bool bEnabled)
 {
   m_bClickToAdvanceEnabled = bEnabled;
+  setAttribute(Qt::WA_TransparentForMouseEvents, !bEnabled);
 }
 
 //----------------------------------------------------------------------------------------
@@ -155,7 +158,8 @@ void CEditorTutorialOverlay::SetHighlightedWidgets(const QStringList& vsWidgetNa
 
 //----------------------------------------------------------------------------------------
 //
-void CEditorTutorialOverlay::ShowTutorialText(double dCenterX, double dCenterY, QString sText)
+void CEditorTutorialOverlay::ShowTutorialText(EAnchors anchor, double dPosX, double dPosY,
+                                              QString sText)
 {
   if (nullptr != m_pTutorialTextLabel)
   {
@@ -164,8 +168,47 @@ void CEditorTutorialOverlay::ShowTutorialText(double dCenterX, double dCenterY, 
     m_pTutorialTextBox->show();
     m_pTutorialTextBox->updateGeometry();
     QSize thisSize = size();
-    m_pTutorialTextBox->move(dCenterX * thisSize.width() - m_pTutorialTextBox->width() / 2,
-                             dCenterY * thisSize.height() - m_pTutorialTextBox->height() / 2);
+
+    switch(anchor)
+    {
+    case EAnchors::eCenter:
+      m_pTutorialTextBox->move(dPosX * thisSize.width() - m_pTutorialTextBox->width() / 2,
+                               dPosY * thisSize.height() - m_pTutorialTextBox->height() / 2);
+      break;
+    case EAnchors::eLeft:
+      m_pTutorialTextBox->move(dPosX * thisSize.width(),
+                               dPosY * thisSize.height() - m_pTutorialTextBox->height() / 2);
+      break;
+    case EAnchors::eRight:
+      m_pTutorialTextBox->move(dPosX * thisSize.width() - m_pTutorialTextBox->width(),
+                               dPosY * thisSize.height() - m_pTutorialTextBox->height() / 2);
+      break;
+    case EAnchors::eTop:
+      m_pTutorialTextBox->move(dPosX * thisSize.width() - m_pTutorialTextBox->width() / 2,
+                               dPosY * thisSize.height());
+      break;
+    case EAnchors::eBottom:
+      m_pTutorialTextBox->move(dPosX * thisSize.width() - m_pTutorialTextBox->width() / 2,
+                               dPosY * thisSize.height() - m_pTutorialTextBox->height());
+      break;
+    case EAnchors::eTopLeft:
+      m_pTutorialTextBox->move(dPosX * thisSize.width(),
+                               dPosY * thisSize.height());
+      break;
+    case EAnchors::eTopRight:
+      m_pTutorialTextBox->move(dPosX * thisSize.width() - m_pTutorialTextBox->width(),
+                               dPosY * thisSize.height());
+      break;
+    case EAnchors::eBottomLeft:
+      m_pTutorialTextBox->move(dPosX * thisSize.width(),
+                               dPosY * thisSize.height() - m_pTutorialTextBox->height());
+      break;
+    case EAnchors::eBottomRight:
+      m_pTutorialTextBox->move(dPosX * thisSize.width() - m_pTutorialTextBox->width(),
+                               dPosY * thisSize.height() - m_pTutorialTextBox->height());
+      break;
+    default: break;
+    }
   }
 }
 
@@ -270,6 +313,8 @@ void CEditorTutorialOverlay::SlotAlphaAnimationFinished()
 {
   // do a last update
   SlotUpdate();
+
+  SlotTriggerNextInstruction();
 
   m_pAlphaAnimation->stop();
   m_updateTimer.stop();

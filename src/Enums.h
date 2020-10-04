@@ -27,4 +27,15 @@ BETTER_ENUM(ETutorialState, qint32,
             eSwitchRightPanelToProjectSettings,
             eFinished  = 63); // maximum value for Better-Enum
 
+BETTER_ENUM(EAnchors, qint32,
+            eCenter = 0,
+            eLeft = 1,
+            eRight = 2,
+            eTop = 3,
+            eBottom = 4,
+            eTopLeft = 5,
+            eTopRight = 6,
+            eBottomLeft = 7,
+            eBottomRight = 8);
+
 #endif // ENUMS_H

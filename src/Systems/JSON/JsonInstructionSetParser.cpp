@@ -184,7 +184,8 @@ public:
     {
       bool bOk = CallCommand();
       if (!bOk) { return false; }
-      return NextCommand();
+      NextCommand();
+      return bOk;
     }
     return false;
   }

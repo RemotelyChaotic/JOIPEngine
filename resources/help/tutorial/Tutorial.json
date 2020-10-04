@@ -6,13 +6,13 @@
       },
       {
         "text": [
-          {"centerX" : 0.5}, { "centerY": 0.5},
+          {"posX" : 0.5}, { "posY": 0.5},
           { "text": "Welcome to the editor tutorial.<br>This tutorial will walk you through the JOIP editor's main features.<br>In order to continue, just click the grey background or the <b>Continue</b> button of this popup." }
         ]
       },
       {
         "text": [
-          {"centerX" : 0.5}, { "centerY": 0.1},
+          {"posX" : 0.5}, { "posY": 0.1},
           { "text": "As you can see, the editor screen is divided into 3 sections." }
         ]
       },
@@ -23,7 +23,7 @@
       },
       {
         "text": [
-          {"centerX" : 0.5}, { "centerY": 0.2},
+          {"posX" : 0.5}, { "posY": 0.2},
           { "text": "This is the toolbar containing basic project functionaliy such as..." }
         ]
       },
@@ -34,7 +34,7 @@
       },
       {
         "text": [
-          {"centerX" : 0.5}, { "centerY": 0.2},
+          {"posX" : 0.5}, { "posY": 0.2},
           { "text": "...renaming the JOIP-Project..." }
         ]
       },
@@ -45,7 +45,7 @@
       },
       {
         "text": [
-          {"centerX" : 0.5}, { "centerY": 0.2},
+          {"posX" : 0.5}, { "posY": 0.2},
           { "text": "...saving or exporting the JOIP-Project..." }
         ]
       },
@@ -56,7 +56,7 @@
       },
       {
         "text": [
-          {"centerX" : 0.5}, { "centerY": 0.2},
+          {"posX" : 0.5}, { "posY": 0.2},
           { "text": "...opening the help overlay..." }
         ]
       },
@@ -67,7 +67,7 @@
       },
       {
         "text": [
-          {"centerX" : 0.5}, { "centerY": 0.2},
+          {"posX" : 0.5}, { "posY": 0.2},
           { "text": "...and exiting the editor." }
         ]
       },
@@ -78,7 +78,7 @@
       },
       {
         "text": [
-          {"centerX" : 0.7}, { "centerY": 0.5},
+          {"posX" : 0.4}, { "posY": 0.5}, {"anchor": "eLeft"},
           { "text": "This is the left editor panel.<br>A number of views can be displayed here." }
         ]
       },
@@ -89,7 +89,7 @@
       },
       {
         "text": [
-          {"centerX" : 0.3}, { "centerY": 0.5},
+          {"posX" : 0.3}, { "posY": 0.5}, {"anchor": "eRight"},
           { "text": "The same goes for the right panel." }
         ]
       },
@@ -100,7 +100,7 @@
       },
       {
         "text": [
-          {"centerX" : 0.5}, { "centerY": 0.5},
+          {"posX" : 0.5}, { "posY": 0.5},
           { "text": "The views in the panels can be switched via the toggle above the respective panel." }
         ]
       }
@@ -113,7 +113,7 @@
       },
       {
         "text": [
-          {"centerX" : 0.5}, { "centerY": 0.5},
+          {"posX" : 0.5}, { "posY": 0.5},
           { "text": "First let's switch the right panel to show the Project Settings view." }
         ]
       },
@@ -132,7 +132,7 @@
       },
       {
         "text": [
-          {"centerX" : 0.2}, { "centerY": 0.3},
+          {"posX" : 0.2}, { "posY": 0.3},
           { "text": "To do that, simply open the right panel..." }
         ]
       }

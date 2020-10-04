@@ -27,13 +27,16 @@ void CCommandBackground::Call(const QVariantMap& args)
   {
     auto itShowBg = args.find("showBg");
     auto itClickToAdvance = args.find("onCliCkAdvance");
+    bool bIsVisible = m_pTutorialOverlay->isVisible();
+    bool bShowRequested = false;
     if (args.end() != itShowBg)
     {
-      if (itShowBg.value().toBool())
+      bShowRequested = itShowBg.value().toBool();
+      if (bShowRequested && !bIsVisible)
       {
         m_pTutorialOverlay->Show();
       }
-      else
+      else if (!bShowRequested && bIsVisible)
       {
         m_pTutorialOverlay->Hide();
       }
@@ -41,6 +44,10 @@ void CCommandBackground::Call(const QVariantMap& args)
     if (args.end() != itClickToAdvance)
     {
       m_pTutorialOverlay->SetClickToAdvanceEnabled(itClickToAdvance.value().toBool());
+    }
+
+    if ((bShowRequested && bIsVisible) || (!bShowRequested && !bIsVisible))
+    {
       m_pTutorialOverlay->SlotTriggerNextInstruction();
     }
   }

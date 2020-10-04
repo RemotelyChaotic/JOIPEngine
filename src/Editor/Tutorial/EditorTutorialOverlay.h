@@ -2,6 +2,7 @@
 #define CEDITORTUTORIALOVERLAY_H
 
 #include "Widgets/OverlayBase.h"
+#include "Enums.h"
 #include <QPointer>
 #include <QTimer>
 
@@ -11,6 +12,7 @@ class CShortcutButton;
 class QGroupBox;
 class QLabel;
 class QPropertyAnimation;
+
 
 class CEditorTutorialOverlay : public COverlayBase
 {
@@ -25,7 +27,7 @@ public:
   void NextTutorialState();
   void SetClickToAdvanceEnabled(bool bEnabled);
   void SetHighlightedWidgets(const QStringList& vsWidgetNames);
-  void ShowTutorialText(double dCenterX, double dCenterY, QString sText);
+  void ShowTutorialText(EAnchors anchor, double dPosX, double dPosY, QString sText);
 
 public slots:
   void Climb() override;
