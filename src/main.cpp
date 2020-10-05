@@ -1,6 +1,8 @@
 #include "Application.h"
 #include "Settings.h"
 #include "MainWindow.h"
+#include "Systems/PhysFs/PhysFsFileEngine.h"
+#include "Systems/PhysFs/PhysFsQtAVIntegration.h"
 
 #if defined(Q_OS_WIN)
 #include <QtPlatformHeaders/QWindowsWindowFunctions>
@@ -30,6 +32,9 @@ int main(int argc, char *argv[])
               "SLL Library version:" << QSslSocket::sslLibraryVersionString();
 
   CApplication app(argc, argv);
+  CPhysFsFileEngine::init(argv[0]);
+  CPhysFsFileEngineHandler engine;
+  QtAV::RegisterPhysFsFileHandler();
 
 #if defined(QT_QML_DEBUG)
   QQmlDebuggingEnabler enabler;
@@ -51,5 +56,9 @@ int main(int argc, char *argv[])
   QWindowsWindowFunctions::setHasBorderInFullScreen(w.windowHandle(), true);
 #endif
 
-  return app.exec();
+  qint32 iRetVal = app.exec();
+
+  // uninitialize logic
+  CPhysFsFileEngine::deInit();
+  return iRetVal;
 }

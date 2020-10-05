@@ -2,6 +2,7 @@
 #include "Application.h"
 #include "ResourceTreeItem.h"
 #include "Systems/DatabaseManager.h"
+#include "Systems/Resource.h"
 
 using namespace resource_item;
 
@@ -50,9 +51,11 @@ void CResourceTreeItemModel::InitializeModel(tspProject spProject)
       QReadLocker locker(&it->second->m_rwLock);
       QUrl sPath = it->second->m_sPath;
       QStringList sPathParts;
-      if (sPath.isLocalFile())
+      if (IsLocalFile(sPath))
       {
-        sPathParts = sPath.toString().split("/");
+        locker.unlock();
+        sPathParts =  ResourceUrlToRelativePath(it->second).split("/");
+        locker.relock();
       }
       else
       {
@@ -381,9 +384,9 @@ void CResourceTreeItemModel::SlotResourceAdded(qint32 iProjId, const QString& sN
       spResource->m_rwLock.unlock();
 
       QStringList sPathParts;
-      if (sPath.isLocalFile())
+      if (IsLocalFile(sPath))
       {
-        sPathParts = sPath.toString().split("/");
+        sPathParts = ResourceUrlToRelativePath(spResource).split("/");
       }
       else
       {

@@ -1,5 +1,6 @@
 #include "Resource.h"
 #include "Application.h"
+#include "PhysFs/PhysFsFileEngine.h"
 #include "Project.h"
 
 #include <QFileInfo>
@@ -120,7 +121,7 @@ bool CResource::isAnimatedImpl()
   {
     case EResourceType::eImage:
     {
-      if (m_spData->m_sPath.isLocalFile())
+      if (IsLocalFile(m_spData->m_sPath))
       {
         locker.unlock();
         QImageReader reader(ResourceUrlToAbsolutePath(m_spData));
@@ -148,7 +149,7 @@ bool CResource::isAnimatedImpl()
 bool CResource::isLocalPath()
 {
   QReadLocker locker(&m_spData->m_rwLock);
-  return m_spData->m_sPath.isLocalFile();
+  return IsLocalFile(m_spData->m_sPath);
 }
 
 //----------------------------------------------------------------------------------------
@@ -174,16 +175,14 @@ QUrl CResource::getPath()
   projectLocker.unlock();
 
   QReadLocker locker(&m_spData->m_rwLock);
-  if (m_spData->m_sPath.isLocalFile())
+  if (IsLocalFile(m_spData->m_sPath))
   {
     if (!bBundled)
     {
       QUrl urlCopy(m_spData->m_sPath);
-      QUrl baseUrl = QUrl::fromLocalFile(CApplication::Instance()->Settings()->ContentFolder() +
-        "/" + sTruePathName + "/");
       urlCopy.setScheme(QString());
-      QUrl sFullPath = baseUrl.resolved(urlCopy);
-      return sFullPath;
+      QString sBasePath = CPhysFsFileEngineHandler::c_sScheme;
+      return QUrl(sBasePath + QUrl().resolved(urlCopy).toString());
     }
     else
     {
@@ -259,6 +258,14 @@ QStringList ImageFormats()
 
 //----------------------------------------------------------------------------------------
 //
+bool IsLocalFile(const QUrl& url)
+{
+  return url.isLocalFile() ||
+      CPhysFsFileEngineHandler::c_sScheme.contains(url.scheme());
+}
+
+//----------------------------------------------------------------------------------------
+//
 QStringList OtherFormats()
 {
   return QStringList() << "*.json" << "*.proj" << "*.flow" << ".layout";
@@ -279,26 +286,67 @@ QString ResourceUrlToAbsolutePath(const tspResource& spResource)
   projectLocker.unlock();
 
   QReadLocker locker(&spResource->m_rwLock);
-  if (spResource->m_sPath.isLocalFile())
+  if (IsLocalFile(spResource->m_sPath))
   {
     if (!bBundled)
     {
       QUrl urlCopy(spResource->m_sPath);
-      QUrl baseUrl = QUrl::fromLocalFile(CApplication::Instance()->Settings()->ContentFolder() +
-        "/" + sTruePathName + "/");
       urlCopy.setScheme(QString());
-      QUrl sFullPath = baseUrl.resolved(urlCopy);
-      return sFullPath.toLocalFile();
+      QString sBasePath = CPhysFsFileEngineHandler::c_sScheme;
+      return sBasePath + QUrl().resolved(urlCopy).toString();
     }
     else
     {
-      return ":/" + sTruePathName + "/" + spResource->m_sName;
+      return "qrc:/" + sTruePathName + "/" + spResource->m_sName;
     }
   }
   else
   {
     return QString();
   }
+}
+
+//----------------------------------------------------------------------------------------
+//
+QString ResourceUrlToRelativePath(const tspResource& spResource)
+{
+  if (nullptr == spResource || nullptr == spResource->m_spParent)
+  {
+    return QString();
+  }
+
+  const QString sTruePathName = PhysicalProjectName(spResource->m_spParent);
+  QReadLocker projectLocker(&spResource->m_spParent->m_rwLock);
+  bool bBundled = spResource->m_spParent->m_bBundled;
+  projectLocker.unlock();
+
+  QReadLocker locker(&spResource->m_rwLock);
+  if (IsLocalFile(spResource->m_sPath))
+  {
+    if (!bBundled)
+    {
+      QUrl urlCopy(spResource->m_sPath);
+      urlCopy.setScheme(QString());
+      return QUrl().resolved(urlCopy).toString();
+    }
+    else
+    {
+      return spResource->m_sName;
+    }
+  }
+  else
+  {
+    return QString();
+  }
+}
+
+//----------------------------------------------------------------------------------------
+//
+QUrl ResourceUrlFromLocalFile(const QString& sPath)
+{
+  QUrl url = QUrl::fromLocalFile(sPath);
+  url.setScheme(QString(CPhysFsFileEngineHandler::c_sScheme).replace(":/", ""));
+  return url;
 }
 
 //----------------------------------------------------------------------------------------

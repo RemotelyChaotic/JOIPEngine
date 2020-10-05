@@ -32,6 +32,14 @@ void CEditorResourceDisplayWidget::Initialize()
 
 //----------------------------------------------------------------------------------------
 //
+void CEditorResourceDisplayWidget::UnloadProject()
+{
+  m_spUi->pResourceDisplay->UnloadPlayer();
+  SetLoaded(false);
+}
+
+//----------------------------------------------------------------------------------------
+//
 void CEditorResourceDisplayWidget::LoadResource(tspResource spResource)
 {
   m_spUi->pResourceDisplay->LoadResource(spResource);

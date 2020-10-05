@@ -95,3 +95,17 @@ Fixed Bugs:
   new buttons are created.
 - Fixed Sounds in PlayerMetronome not playing if the metronome was too fast.
 - On reloading a Project in the Editor the tags will not show up multiple times.
+
+
+================================================================================
+Version 1.2.0.0
+================================================================================
+
+New Features:
+- The use of PhysFS makes it possible to use archived files transparently and
+  archives can be added as a new type of pseudo-Resource, which can contain
+  multiple resources.
+
+Changes:
+- JOIP-Engine uses PhysFS to allow restricted acces to files only, making it
+  impossible to write or read outside of the currently loaded project folder.

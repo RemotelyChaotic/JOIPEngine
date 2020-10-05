@@ -42,7 +42,7 @@ QImage CDatabaseImageProvider::requestImage(const QString& id, QSize* pSize,
         if (spResource->m_type._to_integral() == EResourceType::eImage)
         {
           // local file
-          if (spResource->m_sPath.isLocalFile())
+          if (IsLocalFile(spResource->m_sPath))
           {
             locker.unlock();
             QString sPath = ResourceUrlToAbsolutePath(spResource);

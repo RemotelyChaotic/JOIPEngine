@@ -35,6 +35,7 @@ public:
   explicit CMediaPlayer(QWidget* pParent = nullptr);
   ~CMediaPlayer() override;
 
+  bool IsLoaded() { return m_bLoaded; }
   bool IsMuted();
   bool IsPlaying();
   void SetSliderVisible(bool bVisible);
@@ -44,11 +45,13 @@ signals:
   void MediaStatusChanged(QtAV::MediaStatus status);
 
 public slots:
+  void Load();
   void MuteUnmute(bool bMuted);
   void OpenMedia(const QString sPath);
   void SeekBySlider(qint32 value);
   void SeekBySlider();
   void PlayPause();
+  void Unload();
   void SetVolume(double dVolume);
   void Stop();
 
@@ -58,10 +61,11 @@ private slots:
   void UpdateSliderUnit();
 
 private:
-  QtAV::VideoOutput* m_vo;
-  QtAV::AVPlayer* m_player;
-  QSlider* m_slider;
+  QtAV::VideoOutput* m_vo = nullptr;
+  QtAV::AVPlayer* m_player = nullptr;
+  QSlider* m_slider = nullptr;
   int m_unit;
+  bool m_bLoaded = false;
 };
 
 #endif // PLAYERWINDOW_H

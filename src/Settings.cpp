@@ -200,7 +200,14 @@ void CSettings::SetContentFolder(const QString& sPath)
 QString CSettings::ContentFolder()
 {
   QMutexLocker locker(&m_settingsMutex);
-  return m_spSettings->value(CSettings::c_sSettingContentFolder).toString();
+  QString sPath = m_spSettings->value(CSettings::c_sSettingContentFolder).toString();
+  QFileInfo infoPath(sPath);
+  sPath = infoPath.absoluteFilePath();
+  if (sPath.lastIndexOf("/") == sPath.size() - 1)
+  {
+    sPath = sPath.left(sPath.size()-1);
+  }
+  return sPath;
 }
 
 //----------------------------------------------------------------------------------------

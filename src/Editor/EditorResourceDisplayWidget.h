@@ -24,7 +24,7 @@ public:
   void EditedProject() override {}
   void Initialize() override;
   void LoadProject(tspProject spProject) override { Q_UNUSED(spProject); SetLoaded(true); }
-  void UnloadProject() override { SetLoaded(false); }
+  void UnloadProject() override;
   void SaveProject() override {}
   void OnHidden() override {}
   void OnShown() override {}

@@ -11,6 +11,7 @@
 #include "Resources/ResourceTreeItemModel.h"
 #include "Script/ScriptEditorModel.h"
 #include "Systems/DatabaseManager.h"
+#include "Systems/PhysFs/PhysFsFileEngine.h"
 #include "Systems/Project.h"
 #include "Tutorial/ITutorialStateSwitchHandler.h"
 
@@ -166,7 +167,7 @@ void CEditorModel::AddFilesToProjectResources(QPointer<QWidget> pParentForDialog
     else
     {
       QString sRelativePath = projectDir.relativeFilePath(sFileName);
-      QUrl url = QUrl::fromLocalFile(sRelativePath);
+      QUrl url = ResourceUrlFromLocalFile(sRelativePath);
       const QString sEnding = "*." + info.suffix();
       auto spDbManager = m_wpDbManager.lock();
       if (nullptr != spDbManager)
@@ -302,43 +303,63 @@ void CEditorModel::AddNewScriptFileToScene(QPointer<QWidget> pParentForDialog,
     if (spScene->m_sScript.isNull() || spScene->m_sScript.isEmpty())
     {
       const QString sName = PhysicalProjectName(m_spCurrentProject);
-      QString sCurrentFolder = CApplication::Instance()->Settings()->ContentFolder();
-      QUrl sUrl = QFileDialog::getSaveFileUrl(pParentForDialog,
-          QString(tr("Create Script File for %1")).arg(spScene->m_sName),
-          QUrl::fromLocalFile(sCurrentFolder + "/" + sName),
-          QString("Script Files (%1)").arg(ScriptFormats().join(" ")));
+      QPointer<CEditorModel> pThisGuard(this);
+      QFileDialog* dlg = new QFileDialog(pParentForDialog,
+                                         tr("Create Script File for %1").arg(spScene->m_sName));
+      dlg->setViewMode(QFileDialog::Detail);
+      dlg->setFileMode(QFileDialog::AnyFile);
+      dlg->setAcceptMode(QFileDialog::AcceptSave);
+      dlg->setOptions(QFileDialog::DontUseCustomDirectoryIcons);
+      dlg->setSupportedSchemes(QStringList() << QString(CPhysFsFileEngineHandler::c_sScheme).replace(":/", ""));
+      dlg->setDirectoryUrl(QUrl(CPhysFsFileEngineHandler::c_sScheme));
+      dlg->setFilter(QDir::AllDirs);
+      dlg->setNameFilter(QString("Script Files (%1)").arg(ScriptFormats().join(" ")));
+      dlg->setDefaultSuffix(ScriptFormats().first());
 
-      if (sUrl.isValid())
+      if (dlg->exec())
       {
-        QFileInfo info(sUrl.toLocalFile());
-        QDir projectDir(m_spSettings->ContentFolder() + "/" + sName);
-        if (!info.absoluteFilePath().contains(projectDir.absolutePath()))
+        if (nullptr == pThisGuard) { return; }
+        QList<QUrl> urls = dlg->selectedUrls();
+        delete dlg;
+
+        QUrl url = 1 == urls.size() ? urls[0] : QUrl();
+        if (url.isValid())
         {
-          qWarning() << "File is not in subfolder of Project.";
-        }
-        else
-        {
-          QString sRelativePath = projectDir.relativeFilePath(info.absoluteFilePath());
-          QUrl sUrlToSave = QUrl::fromLocalFile(sRelativePath);
-          QFile jsFile(info.absoluteFilePath());
-          if (jsFile.open(QIODevice::WriteOnly | QIODevice::Truncate))
+          QFileInfo info(url.toLocalFile());
+          QDir projectDir(m_spSettings->ContentFolder() + "/" + sName);
+          if (!info.absoluteFilePath().contains(projectDir.absolutePath()))
           {
-            jsFile.write(QString("// instert code to control scene").toUtf8());
-
-            tvfnActionsResource vfnActions = {[&spScene](const tspResource& spNewResource){
-              QWriteLocker locker(&spNewResource->m_rwLock);
-              spScene->m_sScript = spNewResource->m_sName;
-            }};
-
-            QString sResource = spDbManager->AddResource(m_spCurrentProject, sUrlToSave,
-                                                         EResourceType::eScript, QString(),
-                                                         vfnActions);
+            qWarning() << "File is not in subfolder of Project.";
           }
           else
           {
-            qWarning() << "Could not write script file.";
+            QString sRelativePath = projectDir.relativeFilePath(info.absoluteFilePath());
+            QUrl sUrlToSave = ResourceUrlFromLocalFile(sRelativePath);
+            QFile jsFile(info.absoluteFilePath());
+            if (jsFile.open(QIODevice::WriteOnly | QIODevice::Truncate))
+            {
+              jsFile.write(QString("// insert code to control scene").toUtf8());
+
+              tvfnActionsResource vfnActions = {[&spScene](const tspResource& spNewResource){
+                QWriteLocker locker(&spNewResource->m_rwLock);
+                spScene->m_sScript = spNewResource->m_sName;
+              }};
+
+              QString sResource = spDbManager->AddResource(m_spCurrentProject, sUrlToSave,
+                                                           EResourceType::eScript, QString(),
+                                                           vfnActions);
+            }
+            else
+            {
+              qWarning() << "Could not write script file.";
+            }
           }
         }
+      }
+      else
+      {
+        if (nullptr == pThisGuard) { return; }
+        delete dlg;
       }
     }
   }
@@ -406,6 +427,7 @@ void CEditorModel::InitNewProject(const QString& sNewProjectName, bool bTutorial
   {
     spDbManager->AddProject(sNewProjectName);
     m_spCurrentProject = spDbManager->FindProject(sNewProjectName);
+    const QString sProjName = PhysicalProjectName(m_spCurrentProject);
 
     if (nullptr != m_spCurrentProject)
     {
@@ -417,9 +439,17 @@ void CEditorModel::InitNewProject(const QString& sNewProjectName, bool bTutorial
       }
       m_spCurrentProject->m_rwLock.unlock();
 
+      // create project Folder
+      spDbManager->PrepareNewProject(iId);
       // load project
       LoadProject(iId);
-      // serialize base project after init
+      // serialize pre-created data (project file only so far) also tries to create project
+      // if it failed before
+      spDbManager->SerializeProject(iId);
+      // set write dir to allow project to save files
+      CPhysFsFileEngine::setWriteDir(
+            QString(m_spSettings->ContentFolder() + "/" + sProjName).toStdString().data());
+      // serialize base project again after init (this time including all editor data)
       SerializeProject();
       // save changes (flow, etc)...
       SaveProject();
@@ -459,7 +489,10 @@ void CEditorModel::LoadProject(qint32 iId)
     }
     else
     {
+      const QString sProjName = PhysicalProjectName(m_spCurrentProject);
       CDatabaseManager::LoadProject(m_spCurrentProject);
+      CPhysFsFileEngine::setWriteDir(
+            QString(m_spSettings->ContentFolder() + "/" + sProjName).toStdString().data());
     }
 
     QReadLocker projectLocker(&m_spCurrentProject->m_rwLock);
@@ -584,7 +617,7 @@ void CEditorModel::SaveProject()
         m_spCurrentProject->m_sSceneModel.isEmpty())
     {
       projectLocker.unlock();
-      spDbManager->AddResource(m_spCurrentProject, QUrl::fromLocalFile(joip_resource::c_sSceneModelFile),
+      spDbManager->AddResource(m_spCurrentProject, ResourceUrlFromLocalFile(joip_resource::c_sSceneModelFile),
                                EResourceType::eOther, joip_resource::c_sSceneModelFile);
       projectLocker.relock();
       m_spCurrentProject->m_sSceneModel = joip_resource::c_sSceneModelFile;
@@ -596,7 +629,6 @@ void CEditorModel::SaveProject()
     {
       QString sPath = ResourceUrlToAbsolutePath(spResource);
       QReadLocker resourceLocker(&spResource->m_rwLock);
-      QUrl path = spResource->m_sPath;
       resourceLocker.unlock();
 
       QFile modelFile(sPath);
@@ -641,6 +673,7 @@ void CEditorModel::UnloadProject()
   }
 
   CDatabaseManager::UnloadProject(m_spCurrentProject);
+  CPhysFsFileEngine::setWriteDir(nullptr);
   m_spCurrentProject = nullptr;
 
   NextResetTutorialState();
@@ -682,8 +715,7 @@ void CEditorModel::ExportProject()
   }
 
   const QString sName = PhysicalProjectName(m_spCurrentProject);
-  const QString sFolder =
-      CApplication::Instance()->Settings()->ContentFolder() + "/" + sName;
+  const QString sFolder = CPhysFsFileEngineHandler::c_sScheme + sName;
 
   QFile rccFile(sFolder + "/" + "JOIPEngineExport.qrc");
   if (!rccFile.open(QIODevice::WriteOnly | QIODevice::Truncate))

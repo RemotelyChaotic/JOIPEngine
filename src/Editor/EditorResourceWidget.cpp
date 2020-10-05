@@ -149,6 +149,7 @@ void CEditorResourceWidget::UnloadProject()
   m_spCurrentProject = nullptr;
 
   m_spUi->pResourceDisplayWidget->UnloadResource();
+  m_spUi->pResourceDisplayWidget->UnloadPlayer();
   m_spSourceOverlay->Hide();
   m_spWebOverlay->Hide();
 

@@ -42,6 +42,8 @@ public:
   tspProject FindProject(qint32 iId);
   tspProject FindProject(const QString& sName);
   std::set<qint32, std::less<qint32>> ProjectIds();
+  bool PrepareNewProject(qint32 iId);
+  bool PrepareNewProject(const QString& sName);
   void RemoveProject(qint32 iId);
   void RemoveProject(const QString& sName);
   void RenameProject(qint32 iId, const QString& sNewName);
@@ -102,7 +104,11 @@ private:
   qint32 FindNewProjectId();
   qint32 FindNewSceneId(tspProject& spProj);
   void LoadDatabase();
+  bool PrepareProjectPrivate(tspProject& spProject);
   bool SerializeProjectPrivate(tspProject& spProject);
+
+  static bool MountProject(tspProject& spProject);
+  static bool UnmountProject(tspProject& spProject);
 
   std::shared_ptr<CSettings>             m_spSettings;
   mutable QMutex                         m_dbMutex;

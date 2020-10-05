@@ -1,6 +1,7 @@
 #include "ResourceDisplayWidget.h"
 #include "Application.h"
 #include "Settings.h"
+#include "Systems/PhysFs/PhysFsFileEngine.h"
 #include "Systems/Project.h"
 #include "ui_ResourceDisplayWidget.h"
 
@@ -64,6 +65,7 @@ CResourceDisplayWidget::~CResourceDisplayWidget()
 {
   m_spSpinner->stop();
   UnloadResource();
+  m_spUi->pMediaPlayer->Unload();
 }
 
 //----------------------------------------------------------------------------------------
@@ -78,6 +80,8 @@ void CResourceDisplayWidget::LoadResource(tspResource spResource)
     return;
   }
 
+  if (!m_spUi->pMediaPlayer->IsLoaded()) { m_spUi->pMediaPlayer->Load(); }
+
   SlotStop();
 
   m_iLoadState = ELoadState::eFinished;
@@ -90,7 +94,7 @@ void CResourceDisplayWidget::LoadResource(tspResource spResource)
   SetProjectId(spProject->m_iId);
 
   QUrl path = m_spResource->m_sPath;
-  if (m_spResource->m_sPath.isLocalFile())
+  if (IsLocalFile(m_spResource->m_sPath))
   {
     switch (m_spResource->m_type)
     {
@@ -176,6 +180,17 @@ void CResourceDisplayWidget::LoadResource(tspResource spResource)
         m_iLoadState = ELoadState::eError;
       } break;
     }
+  }
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CResourceDisplayWidget::UnloadPlayer()
+{
+  UnloadResource();
+  if (m_spUi->pMediaPlayer->IsLoaded())
+  {
+    m_spUi->pMediaPlayer->Unload();
   }
 }
 

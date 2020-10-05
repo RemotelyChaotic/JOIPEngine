@@ -490,10 +490,10 @@ void CScriptEditorModel::AddResourceTo(tspResource spResource, std::map<QString,
       mpToAddTo.insert({sResourceName, SCachedMapItem()});
       auto& script = mpToAddTo[sResourceName];
       script.m_sId = sResourceName;
-      if (!script.m_spWatcher->addPath(scriptFileInfo.absoluteFilePath()))
+      if (!script.m_spWatcher->addPath(sPath))
       {
         qWarning() << QString(tr("Could not add %1 to the watched paths."))
-                      .arg(scriptFileInfo.absoluteFilePath());
+                      .arg(sPath);
       }
       script.m_spWatcher->setProperty(c_sIdProperty, sResourceName);
       connect(script.m_spWatcher.get(), &QFileSystemWatcher::fileChanged,

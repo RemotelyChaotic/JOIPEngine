@@ -27,6 +27,7 @@ public:
 
   void LoadResource(tspResource spResource);
   ELoadState LoadState() const { return ELoadState::_from_integral(m_iLoadState); }
+  void UnloadPlayer();
   void UnloadResource();
 
   qint32 ProjectId() { return m_iProjectId; }

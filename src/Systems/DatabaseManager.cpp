@@ -1,6 +1,7 @@
 #include "DatabaseManager.h"
 #include "Application.h"
 #include "Project.h"
+#include "PhysFs/PhysFsFileEngine.h"
 #include "Resource.h"
 #include "Scene.h"
 #include "Settings.h"
@@ -49,7 +50,16 @@ bool CDatabaseManager::LoadProject(tspProject& spProject)
   }
   else
   {
-    return true;
+    locker.unlock();
+    if (!spProject->m_bLoaded)
+    {
+      spProject->m_bLoaded = MountProject(spProject);
+      return spProject->m_bLoaded;
+    }
+    else
+    {
+      return true;
+    }
   }
 }
 
@@ -71,7 +81,16 @@ bool CDatabaseManager::UnloadProject(tspProject& spProject)
   }
   else
   {
-    return true;
+    locker.unlock();
+    if (spProject->m_bLoaded)
+    {
+      spProject->m_bLoaded = !UnmountProject(spProject);
+      return !spProject->m_bLoaded;
+    }
+    else
+    {
+      return true;
+    }
   }
 }
 
@@ -105,7 +124,6 @@ qint32 CDatabaseManager::AddProject(const QString& sDirName, quint32 iVersion, b
     m_vspProjectDatabase.back()->m_sFolderName = sDirName;
     m_vspProjectDatabase.back()->m_iVersion = iVersion;
     m_vspProjectDatabase.back()->m_bBundled = bBundled;
-
     locker.unlock();
 
     for (auto fn : vfnActionsAfterAdding)
@@ -139,6 +157,7 @@ void CDatabaseManager::ClearProjects()
     m_vspProjectDatabase.erase(it);
 
     locker.unlock();
+
     emit SignalProjectRemoved(iId);
     locker.relock();
   }
@@ -228,6 +247,34 @@ std::set<qint32, std::less<qint32>> CDatabaseManager::ProjectIds()
 
 //----------------------------------------------------------------------------------------
 //
+bool CDatabaseManager::PrepareNewProject(qint32 iId)
+{
+  if (!IsInitialized()) { return false; }
+
+  tspProject spProject = FindProject(iId);
+  if (nullptr != spProject)
+  {
+    return PrepareProjectPrivate(spProject);
+  }
+  return false;
+}
+
+//----------------------------------------------------------------------------------------
+//
+bool CDatabaseManager::PrepareNewProject(const QString& sName)
+{
+  if (!IsInitialized()) { return false; }
+
+  tspProject spProject = FindProject(sName);
+  if (nullptr != spProject)
+  {
+    return PrepareProjectPrivate(spProject);
+  }
+  return false;
+}
+
+//----------------------------------------------------------------------------------------
+//
 void CDatabaseManager::RemoveProject(qint32 iId)
 {
   if (!IsInitialized()) { return; }
@@ -236,13 +283,17 @@ void CDatabaseManager::RemoveProject(qint32 iId)
   for (auto it = m_vspProjectDatabase.begin(); m_vspProjectDatabase.end() != it; ++it)
   {
     QReadLocker projLocker(&(*it)->m_rwLock);
+    QString sName = (*it)->m_sName;
     qint32 iFoundId = (*it)->m_iId;
     projLocker.unlock();
     if (iFoundId == iId)
     {
+      UnloadProject(*it);
+
       m_vspProjectDatabase.erase(it);
 
       locker.unlock();
+
       emit SignalProjectRemoved(iFoundId);
       break;
     }
@@ -263,9 +314,12 @@ void CDatabaseManager::RemoveProject(const QString& sName)
     projLocker.unlock();
     if ((*it)->m_sName == sName)
     {
+      UnloadProject(*it);
+
       m_vspProjectDatabase.erase(it);
 
       locker.unlock();
+
       emit SignalProjectRemoved(iFoundId);
       break;
     }
@@ -282,9 +336,18 @@ void CDatabaseManager::RenameProject(qint32 iId, const QString& sNewName)
   if (nullptr == spNewProject && ProjectNameCheck(sNewName))
   {
     tspProject spProject = FindProject(iId);
+
+    QReadLocker locker(&spProject->m_rwLock);
+    bool bLoadedBefore = spProject->m_bLoaded;
+    locker.unlock();
+
+    UnloadProject(spProject);
+
     spProject->m_rwLock.lockForWrite();
     spProject->m_sName = sNewName;
     spProject->m_rwLock.unlock();
+
+    if (bLoadedBefore) { LoadProject(spProject); }
 
     emit SignalProjectRenamed(iId);
   }
@@ -300,10 +363,19 @@ void CDatabaseManager::RenameProject(const QString& sName, const QString& sNewNa
   if (nullptr == spNewProject && ProjectNameCheck(sNewName))
   {
     tspProject spProject = FindProject(sName);
+
+    QReadLocker locker(&spProject->m_rwLock);
+    bool bLoadedBefore = spProject->m_bLoaded;
+    locker.unlock();
+
+    UnloadProject(spProject);
+
     spProject->m_rwLock.lockForWrite();
     qint32 iId = spProject->m_iId;
     spProject->m_sName = sNewName;
     spProject->m_rwLock.unlock();
+
+    if (bLoadedBefore) { LoadProject(spProject); }
 
     emit SignalProjectRenamed(iId);
   }
@@ -986,6 +1058,40 @@ void CDatabaseManager::LoadDatabase()
 
 //----------------------------------------------------------------------------------------
 //
+bool CDatabaseManager::MountProject(tspProject& spProject)
+{
+  const QString sName = PhysicalProjectName(spProject);
+  QString sFinalPath = CApplication::Instance()->Settings()->ContentFolder() + "/" + sName;
+  bool bOk = CPhysFsFileEngine::mount(sFinalPath.toStdString().data(), "", true);
+  if (!bOk)
+  {
+    qWarning() << tr("Failed to mount %1: reason: %2").arg(sFinalPath)
+                  .arg(CPhysFsFileEngine::errorString());
+  }
+  return bOk;
+}
+
+//----------------------------------------------------------------------------------------
+//
+bool CDatabaseManager::PrepareProjectPrivate(tspProject& spProject)
+{
+  const QString sFolderName = PhysicalProjectName(spProject);
+  QDir sContentFolder(m_spSettings->ContentFolder());
+
+  if (!QFileInfo(m_spSettings->ContentFolder() + QDir::separator() + sFolderName).exists())
+  {
+    bool bOk = sContentFolder.mkdir(sFolderName);
+    if (!bOk)
+    {
+      qWarning() << "Could not create folder: " + m_spSettings->ContentFolder() + QDir::separator() + sFolderName;
+    }
+    return bOk;
+  }
+  return true;
+}
+
+//----------------------------------------------------------------------------------------
+//
 bool CDatabaseManager::SerializeProjectPrivate(tspProject& spProject)
 {
   spProject->m_rwLock.lockForRead();
@@ -1053,5 +1159,20 @@ bool CDatabaseManager::SerializeProjectPrivate(tspProject& spProject)
     }
   }
 
+  return bOk;
+}
+
+//----------------------------------------------------------------------------------------
+//
+bool CDatabaseManager::UnmountProject(tspProject& spProject)
+{
+  const QString sName = PhysicalProjectName(spProject);
+  QString sFinalPath = CApplication::Instance()->Settings()->ContentFolder() + "/" + sName;
+  bool bOk = CPhysFsFileEngine::unmount(sFinalPath.toStdString().data());
+  if (!bOk)
+  {
+    qWarning() << tr("Failed to unmount %1: reason: %2").arg(sFinalPath)
+                  .arg(CPhysFsFileEngine::errorString());
+  }
   return bOk;
 }

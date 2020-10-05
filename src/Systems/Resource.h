@@ -121,8 +121,11 @@ Q_DECLARE_METATYPE(tspResource)
 QStringList AudioFormats();
 QStringList DatabaseFormats();
 QStringList ImageFormats();
+bool IsLocalFile(const QUrl& url);
 QStringList OtherFormats();
 QString ResourceUrlToAbsolutePath(const tspResource& spResource);
+QString ResourceUrlToRelativePath(const tspResource& spResource);
+QUrl ResourceUrlFromLocalFile(const QString& sPath);
 QStringList ScriptFormats();
 QStringList VideoFormats();
 
