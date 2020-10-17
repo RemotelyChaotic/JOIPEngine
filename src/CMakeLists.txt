@@ -128,8 +128,8 @@ set(Sources
   Editor/Tutorial/CodeWidgetTutorialStateSwitchHandler.h
   Editor/Tutorial/CommandBackground.cpp
   Editor/Tutorial/CommandBackground.h
-  Editor/Tutorial/CommandClickTransparency.cpp
-  Editor/Tutorial/CommandClickTransparency.h
+  Editor/Tutorial/CommandClickFilter.cpp
+  Editor/Tutorial/CommandClickFilter.h
   Editor/Tutorial/CommandHighlight.cpp
   Editor/Tutorial/CommandHighlight.h
   Editor/Tutorial/CommandText.cpp

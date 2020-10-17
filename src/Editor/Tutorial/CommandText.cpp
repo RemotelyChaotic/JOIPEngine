@@ -4,7 +4,8 @@
 CCommandText::CCommandText(QPointer<CEditorTutorialOverlay> pTutorialOverlay) :
   IJsonInstructionBase(),
   m_argTypes({{"posX", QVariant::Double}, {"posY", QVariant::Double},
-              {"text", QVariant::String}, {"anchor", QVariant::String}}),
+              {"text", QVariant::String}, {"anchor", QVariant::String},
+              {"hideButtons", QVariant::Bool}}),
   m_pTutorialOverlay(pTutorialOverlay)
 {
 
@@ -29,6 +30,7 @@ void CCommandText::Call(const QVariantMap& instruction)
   double dPosY = 0.0;
   QString sText;
   EAnchors anchor = EAnchors::eCenter;
+  bool bHideButtons = false;
   for (auto it = instruction.begin(); instruction.end() != it; ++it)
   {
     if (it.key() == "posX")
@@ -47,10 +49,14 @@ void CCommandText::Call(const QVariantMap& instruction)
     {
       anchor = EAnchors::_from_string(it.value().toString().toStdString().data());
     }
+    else if (it.key() == "hideButtons")
+    {
+      bHideButtons = it.value().toBool();
+    }
   }
 
   if (nullptr != m_pTutorialOverlay)
   {
-    m_pTutorialOverlay->ShowTutorialText(anchor, dPosX, dPosY, sText);
+    m_pTutorialOverlay->ShowTutorialText(anchor, dPosX, dPosY, bHideButtons, sText);
   }
 }

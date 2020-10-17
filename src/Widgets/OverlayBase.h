@@ -17,7 +17,7 @@ public:
   ~COverlayBase() override;
 
 public slots:
-  virtual void Climb() = 0;
+  virtual void Climb() {};
   virtual void Hide();
   virtual void Resize();
   virtual void Show();

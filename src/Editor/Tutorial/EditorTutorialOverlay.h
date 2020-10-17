@@ -9,6 +9,7 @@
 class CEditorModel;
 class CSettings;
 class CShortcutButton;
+class QDialogButtonBox;
 class QGroupBox;
 class QLabel;
 class QPropertyAnimation;
@@ -26,8 +27,11 @@ public:
   void Initialize(QPointer<CEditorModel> pEditorModel);
   void NextTutorialState();
   void SetClickToAdvanceEnabled(bool bEnabled);
-  void SetHighlightedWidgets(const QStringList& vsWidgetNames);
-  void ShowTutorialText(EAnchors anchor, double dPosX, double dPosY, QString sText);
+  void SetClickFilterWidgets(const QStringList& vsWidgetNames);
+  void SetHighlightedWidgets(const QStringList& vsWidgetNames, bool bAllwaysOnTop);
+  void SetMouseTransparecny(bool bEnabled);
+  void ShowTutorialText(EAnchors anchor, double dPosX, double dPosY,
+                        bool bHideButtons, QString sText);
 
 public slots:
   void Climb() override;
@@ -49,12 +53,16 @@ protected slots:
   void SlotUpdate();
 
 private:
+  QPointer<QWidget> ClickedFilterChild(const QPoint& locClicked);
+  QList<QPointer<QWidget>> FindWidgetsByName(const QStringList& vsWidgetNames);
   void Reset();
 
   std::map<QWidget*, std::pair<QRect, QImage>>  m_highlightedImages;
+  QList<QPointer<QWidget>>                      m_vpClickFilterWidgets;
   std::shared_ptr<CSettings>   m_spSettings;
-  QPointer<QGroupBox>          m_pTutorialTextBox;
+  QPointer<COverlayBase>       m_pTutorialTextBox;
   QPointer<QLabel>             m_pTutorialTextLabel;
+  QPointer<QDialogButtonBox>   m_pTutorialpButtonBox;
   QPointer<CShortcutButton>    m_pNextButton;
   QPointer<CEditorModel>       m_pEditorModel;
   QPointer<QPropertyAnimation> m_pAlphaAnimation;

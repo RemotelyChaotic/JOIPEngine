@@ -5,7 +5,7 @@
 #include <QSortFilterProxyModel>
 
 CKinkSelectionOverlay::CKinkSelectionOverlay(QWidget* pParent) :
-  COverlayBase(0, pParent),
+  COverlayBase(2, pParent),
   m_spUi(std::make_unique<Ui::CKinkSelectionOverlay>()),
   m_bInitialized(false)
 {

@@ -2,6 +2,7 @@
 #define EDITORWIDGETTYPES_H
 
 #include "enum.h"
+#include <QMetaType>
 #include <QtGlobal>
 
 BETTER_ENUM(EEditorWidget, qint32,

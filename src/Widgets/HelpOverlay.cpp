@@ -291,7 +291,7 @@ void CHelpOverlayBackGround::MousePositionCheck()
 //----------------------------------------------------------------------------------------
 //
 CHelpOverlay::CHelpOverlay(QPointer<CHelpButtonOverlay> pHelpButton, QWidget* pParent) :
-  COverlayBase(1, pParent),
+  COverlayBase(100, pParent),
   m_vpHelpWidgets(),
   m_spUi(std::make_unique<Ui::CHelpOverlay>()),
   m_spSettings(CApplication::Instance()->Settings()),

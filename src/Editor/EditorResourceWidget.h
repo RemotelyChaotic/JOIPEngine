@@ -23,6 +23,7 @@ typedef std::shared_ptr<SProject> tspProject;
 class CEditorResourceWidget : public CEditorWidgetBase
 {
   Q_OBJECT
+  friend class CResourceTutorialStateSwitchHandler;
 
 public:
   explicit CEditorResourceWidget(QWidget* pParent = nullptr);

@@ -309,7 +309,7 @@ Saving will overwrite old target version.</string>
         </spacer>
        </item>
        <item row="8" column="2">
-        <widget class="QWidget" name="widget_2" native="true">
+        <widget class="QWidget" name="pFetishInput" native="true">
          <layout class="QHBoxLayout" name="horizontalLayout_4">
           <property name="leftMargin">
            <number>0</number>

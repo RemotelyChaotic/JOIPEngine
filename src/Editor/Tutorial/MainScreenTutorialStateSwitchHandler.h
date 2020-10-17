@@ -27,6 +27,8 @@ public:
   void OnStateSwitch(ETutorialState newState, ETutorialState oldState) override;
 
 private slots:
+  void SlotSwitchRightPanel(qint32 iNewIndex);
+  void SlotRightPanelSwitched(qint32 iNewIndex);
   void SlotOverlayNextInstructionTriggered();
 
 private:
@@ -35,6 +37,7 @@ private:
   std::shared_ptr<CJsonInstructionSetRunner> m_spTutorialRunner;
   QPointer<CEditorMainScreen>                m_ParentWidget;
   QPointer<CEditorTutorialOverlay>           m_pTutorialOverlay;
+  ETutorialState                             m_currentState;
 };
 
 #endif // CMAINSCREENTUTORIALSTATESWITCHER_H

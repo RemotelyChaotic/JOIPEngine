@@ -1,6 +1,6 @@
 #include "MainScreenTutorialStateSwitchHandler.h"
 #include "CommandBackground.h"
-#include "CommandClickTransparency.h"
+#include "CommandClickFilter.h"
 #include "CommandHighlight.h"
 #include "CommandText.h"
 #include "EditorTutorialOverlay.h"
@@ -9,6 +9,7 @@
 #include "Systems/JSON/JsonInstructionSetRunner.h"
 #include <QDebug>
 #include <QFile>
+#include <QListView>
 #include <QTimer>
 
 CMainScreenTutorialStateSwitchHandler::CMainScreenTutorialStateSwitchHandler(
@@ -21,8 +22,11 @@ CMainScreenTutorialStateSwitchHandler::CMainScreenTutorialStateSwitchHandler(
   m_spUi(spUi),
   m_spTutorialRunner(nullptr),
   m_ParentWidget(pParentWidget),
-  m_pTutorialOverlay(pTutorialOverlay)
+  m_pTutorialOverlay(pTutorialOverlay),
+  m_currentState(ETutorialState::eFinished)
 {
+  connect(m_spUi->pRightComboBox, qOverload<qint32>(&QComboBox::currentIndexChanged),
+          this, &CMainScreenTutorialStateSwitchHandler::SlotRightPanelSwitched);
   connect(pTutorialOverlay, &CEditorTutorialOverlay::SignalOverlayNextInstructionTriggered,
           this, &CMainScreenTutorialStateSwitchHandler::SlotOverlayNextInstructionTriggered,
           Qt::QueuedConnection);
@@ -35,7 +39,7 @@ CMainScreenTutorialStateSwitchHandler::CMainScreenTutorialStateSwitchHandler(
     m_spTutorialParser->RegisterInstructionSetPath("Tutorial", "/");
 
     m_spTutorialParser->RegisterInstruction("background", std::make_shared<CCommandBackground>(m_pTutorialOverlay));
-    m_spTutorialParser->RegisterInstruction("clickTransparency", std::make_shared<CCommandClickTransparency>(m_pTutorialOverlay));
+    m_spTutorialParser->RegisterInstruction("clickFilter", std::make_shared<CCommandClickFilter>(m_pTutorialOverlay));
     m_spTutorialParser->RegisterInstruction("highlight",  std::make_shared<CCommandHighlight>(m_pTutorialOverlay));
     m_spTutorialParser->RegisterInstruction("text",  std::make_shared<CCommandText>(m_pTutorialOverlay));
 
@@ -70,6 +74,8 @@ void CMainScreenTutorialStateSwitchHandler::OnResetStates()
 void CMainScreenTutorialStateSwitchHandler::OnStateSwitch(ETutorialState newState,
                                                           ETutorialState oldState)
 {
+  m_currentState = newState;
+
   if (oldState._to_integral() == ETutorialState::eUnstarted)
   {
     // deleay showing a bit, so the user can see the UI pop up
@@ -78,13 +84,45 @@ void CMainScreenTutorialStateSwitchHandler::OnStateSwitch(ETutorialState newStat
 
   switch (newState)
   {
-    case ETutorialState::eBeginTutorial:
-    {
-
-    } break;
+    case ETutorialState::eBeginTutorial: // fallthrough
     case ETutorialState::eSwitchRightPanelToProjectSettings:
     {
-      m_spUi->pRightComboBox->setCurrentIndex(EEditorWidget::eResourceDisplay);
+      bool bOk = QMetaObject::invokeMethod(this, "SlotSwitchRightPanel",
+                                           Qt::QueuedConnection,
+                                           Q_ARG(qint32, EEditorWidget::eResourceDisplay));
+      assert(bOk);
+      Q_UNUSED(bOk);
+      for (EEditorWidget val : EEditorWidget::_values())
+      {
+        if (EEditorWidget::eProjectSettings != val._to_integral())
+        {
+          qobject_cast<QListView*>(m_spUi->pRightComboBox->view())
+              ->setRowHidden(val, true);
+        }
+      }
+    } break;
+    case ETutorialState::eProjectSettings:
+    {
+      for (EEditorWidget val : EEditorWidget::_values())
+      {
+        qobject_cast<QListView*>(m_spUi->pRightComboBox->view())
+            ->setRowHidden(val, false);
+      }
+
+      m_spUi->pLeftComboBox->setEnabled(false);
+      m_spUi->pRightComboBox->setEnabled(false);
+      m_spUi->pLeftPanelGroupBox->setEnabled(false);
+    } break;
+    case ETutorialState::eResourcePanel:
+    {
+      m_spUi->pLeftComboBox->setEnabled(false);
+      m_spUi->pRightComboBox->setEnabled(false);
+      m_spUi->pLeftPanelGroupBox->setEnabled(true);
+    } break;
+    case ETutorialState::eImageResourceSelected:
+    {
+      m_spUi->pLeftComboBox->setEnabled(false);
+      m_spUi->pRightComboBox->setEnabled(false);
     } break;
   default: break;
   }
@@ -93,6 +131,27 @@ void CMainScreenTutorialStateSwitchHandler::OnStateSwitch(ETutorialState newStat
   if (nullptr != m_spTutorialRunner)
   {
     m_spTutorialRunner->Run(newState._to_string());
+  }
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CMainScreenTutorialStateSwitchHandler::SlotSwitchRightPanel(qint32 iNewIndex)
+{
+  m_spUi->pRightComboBox->setCurrentIndex(iNewIndex);
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CMainScreenTutorialStateSwitchHandler::SlotRightPanelSwitched(qint32 iNewIndex)
+{
+  if (ETutorialState::eSwitchRightPanelToProjectSettings == m_currentState._to_integral() &&
+      EEditorWidget::eProjectSettings == iNewIndex)
+  {
+    bool bOk = QMetaObject::invokeMethod(this, "SlotOverlayNextInstructionTriggered",
+                                         Qt::QueuedConnection);
+    assert(bOk);
+    Q_UNUSED(bOk);
   }
 }
 

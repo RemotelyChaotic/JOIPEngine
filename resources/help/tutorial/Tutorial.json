@@ -7,7 +7,7 @@
       {
         "text": [
           {"posX" : 0.5}, { "posY": 0.5},
-          { "text": "Welcome to the editor tutorial.<br>This tutorial will walk you through the JOIP editor's main features.<br>In order to continue, just click the grey background or the <b>Continue</b> button of this popup." }
+          { "text": "Welcome to the editor tutorial.<br>This tutorial will walk you through the JOIP editor's main features.<br>In order to continue, just click the grey background or the button of this popup." }
         ]
       },
       {
@@ -103,6 +103,11 @@
           {"posX" : 0.5}, { "posY": 0.5},
           { "text": "The views in the panels can be switched via the toggle above the respective panel." }
         ]
+      },
+      {
+        "highlight": [
+          { "items" : []}
+        ]
       }
     ]
   },
@@ -118,22 +123,390 @@
         ]
       },
       {
-        "background": [{"showBg" : 1}, { "onCliCkAdvance": 0}]
-      },
-      {
         "highlight": [
           { "items" : ["pRightComboBox"]}
         ]
       },
       {
-        "clickTransparency": [
-          { "x": 0.5}, {"y": 0.2}, {"x2": 1.0}, {"y2": 0.4}
+        "background": [{"showBg" : 1}, { "onCliCkAdvance": 0}]
+      },
+      {
+        "clickFilter": [
+          { "items": ["pRightComboBox"] }
         ]
       },
       {
         "text": [
-          {"posX" : 0.2}, { "posY": 0.3},
+          {"posX" : 0.3}, { "posY": 0.15}, {"anchor": "eRight"}, {"hideButtons": 1},
           { "text": "To do that, simply open the right panel..." }
+        ]
+      },
+      {
+        "text": [
+          {"posX" : 0.3}, { "posY": 0.15}, {"anchor": "eRight"}, {"hideButtons": 1},
+          { "text": "...and click the <i>Project Settings</i> item." }
+        ]
+      },
+      {
+        "clickFilter": [
+          { "items": [] }
+        ]
+      }
+    ]
+  },
+  "eProjectSettings": {
+    "commands": [
+      {
+        "background": [{"showBg" : 1}, { "onCliCkAdvance": 1}]
+      },
+      {
+        "highlight": [
+          { "items" : ["pRightPanelGroupBox"]}
+        ]
+      },
+      {
+        "text": [
+          {"posX" : 0.3}, { "posY": 0.5}, {"anchor": "eRight"},
+          { "text": "Here you can change the general JOIP-Project settings." }
+        ]
+      },
+      {
+        "highlight": [
+          { "items" : ["pProjectVersionContainer"]}
+        ]
+      },
+      {
+        "text": [
+          {"posX" : 0.5}, { "posY": 0.5}, {"anchor": "eCenter"},
+          { "text": "This is the JOIP-Project version.<br>Feel free to change this as you wish as it is not used by the Application." }
+        ]
+      },
+      {
+        "highlight": [
+          { "items" : ["pEngineVersionContainer"]}
+        ]
+      },
+      {
+        "text": [
+          {"posX" : 0.5}, { "posY": 0.5}, {"anchor": "eCenter"},
+          { "text": "Below that is the engine version this JOIP-Project was last saved with." }
+        ]
+      },
+      {
+        "highlight": [
+          { "items" : ["pDescribtionTextEdit"] }
+        ]
+      },
+      {
+        "text": [
+          {"posX" : 0.5}, { "posY": 0.2}, {"anchor": "eCenter"},
+          { "text": "This textbox lets you change the JOIP-Project describtion.<br>It is visible on the title card, so it should contain a short and fitting describtion." }
+        ]
+      },
+      {
+        "highlight": [
+          { "items" : ["pDescribtionTextEdit"] },
+          { "allwaysOnTop": 1 }
+        ]
+      },
+      {
+        "background": [{"showBg" : 1}, {"onCliCkAdvance": 0}, {"mouseTransparent": 1}]
+      },
+      {
+        "text": [
+          {"posX" : 0.3}, { "posY": 0.5}, {"anchor": "eRight"},
+          { "text": "Feel free to change the describtion now.<br>If you are done, click the button to continue the tutorial." }
+        ]
+      },
+      {
+        "background": [{"showBg" : 1}, {"onCliCkAdvance": 1}, {"mouseTransparent": 0}]
+      },
+      {
+        "highlight": [
+          { "items" : ["pFetishListWidget", "pFetishInput"] }
+        ]
+      },
+      {
+        "text": [
+          {"posX" : 0.5}, { "posY": 0.5}, {"anchor": "eCenter"},
+          { "text": "And now to the last part of the JOIP-Project configuration." }
+        ]
+      },
+      {
+        "text": [
+          {"posX" : 0.5}, { "posY": 0.5}, {"anchor": "eCenter"},
+          { "text": "This is the list of fetishes this JOIP-Project was tagged with." }
+        ]
+      },
+      {
+        "text": [
+          {"posX" : 0.5}, { "posY": 0.5}, {"anchor": "eCenter"},
+          { "text": "These tags help players to identify which JOIP-Projects they might be interrested in<br>and which to avoid." }
+        ]
+      },
+      {
+        "highlight": [
+          { "items" : ["FetishOverlayButton"] }
+        ]
+      },
+      {
+        "text": [
+          {"posX" : 0.5}, { "posY": 0.5}, {"anchor": "eCenter"},
+          { "text": "Tags can be added by either browsing the list..." }
+        ]
+      },
+      {
+        "highlight": [
+          { "items" : ["pFetishLineEdit"] }
+        ]
+      },
+      {
+        "text": [
+          {"posX" : 0.5}, { "posY": 0.5}, {"anchor": "eCenter"},
+          { "text": "...or entering specific tags into the text editor.<br>(You need to enter a category first, followed by a <b>&#47;</b> and the fetish name.)" }
+        ]
+      },
+      {
+        "background": [{"showBg" : 1}, {"onCliCkAdvance": 0}, {"mouseTransparent": 1}]
+      },
+      {
+        "highlight": [
+          { "items" : ["pFetishListWidget", "pFetishInput"] },
+          { "allwaysOnTop": 1 }
+        ]
+      },
+      {
+        "text": [
+          {"posX" : 0.3}, { "posY": 0.5}, {"anchor": "eCenter"},
+          { "text": "Feel free to select some tags.<br>If you are done, click the button to continue the tutorial." }
+        ]
+      },
+      {
+        "background": [{"showBg" : 1}, {"onCliCkAdvance": 1}, {"mouseTransparent": 0}]
+      },
+      {
+        "text": [
+          {"posX" : 0.3}, { "posY": 0.5}, {"anchor": "eCenter"},
+          { "text": "To remove tags, simply click the <b>X</b> on the tag itself." }
+        ]
+      }
+    ]
+  },
+  "eResourcePanel": {
+    "commands": [
+      {
+        "background": [{"showBg" : 1}, { "onCliCkAdvance": 1}]
+      },
+      {
+        "text": [
+          {"posX" : 0.5}, { "posY": 0.5},
+          { "text": "Let's now move on to the next view..." }
+        ]
+      },
+      {
+        "highlight": [
+          { "items" : ["pLeftPanelGroupBox"]}
+        ]
+      },
+      {
+        "text": [
+          {"posX" : 0.4}, { "posY": 0.5}, {"anchor": "eLeft"},
+          { "text": "...the Resource Manager View." }
+        ]
+      },
+      {
+        "text": [
+          {"posX" : 0.4}, { "posY": 0.5}, {"anchor": "eLeft"},
+          { "text": "As the name implies, this is where you can manage your Project's resources: <br>Images, Movies, Sounds, Scripts etc." }
+        ]
+      },
+      {
+        "highlight": [
+          { "items" : ["pResourceTree"]}
+        ]
+      },
+      {
+        "text": [
+          {"posX" : 0.4}, { "posY": 0.5}, {"anchor": "eLeft"},
+          { "text": "All Resources that are used in a JOIP-Project can be found in the Resource Tree.<br>(Sorted by category and folders.)" }
+        ]
+      },
+      {
+        "text": [
+          {"posX" : 0.4}, { "posY": 0.5}, {"anchor": "eLeft"},
+          { "text": "So far the tree only contains two Resources:<br><ul><li>JOIPData.json</li><li>SceneModel.flow</li></ul>" }
+        ]
+      },
+      {
+        "text": [
+          {"posX" : 0.4}, { "posY": 0.5}, {"anchor": "eLeft"},
+          { "text": "These are base resources that every project has.<br>The first is used for all Project data while the second contains Scene Flow (more about that later)." }
+        ]
+      },
+      {
+        "text": [
+          {"posX" : 0.4}, { "posY": 0.5}, {"anchor": "eLeft"},
+          { "text": "You will never need to edit these two files manually." }
+        ]
+      },
+      {
+        "highlight": [
+          { "items" : ["pLeftPanelGroupBox"]}
+        ]
+      },
+      {
+        "text": [
+          {"posX" : 0.4}, { "posY": 0.5}, {"anchor": "eLeft"},
+          { "text": "Let's now add some Resources for later use." }
+        ]
+      },
+      {
+        "background": [{"showBg" : 1}, { "onCliCkAdvance": 0}]
+      },
+      {
+        "highlight": [
+          { "items" : ["AddResourceButton"]}
+        ]
+      },
+      {
+        "clickFilter": [
+          { "items": ["AddResourceButton"] }
+        ]
+      },
+      {
+        "text": [
+          {"posX" : 0.1}, { "posY": 0.2}, {"anchor": "eLeft"}, {"hideButtons": 1},
+          { "text": "To do that click the <b>Add local resource</b> button<br>and select some images from your pc." }
+        ]
+      },
+      {
+        "clickFilter": [
+          { "items": [] }
+        ]
+      },
+      {
+        "background": [{"showBg" : 1}, { "onCliCkAdvance": 1}]
+      },
+      {
+        "text": [
+          {"posX" : 0.1}, { "posY": 0.2}, {"anchor": "eLeft"},
+          { "text": "If the resource is outside the project directory you will be asked to copy or move it into the project folder.<br>Otherwise the JOIP-Engine won't be able to access the resource." }
+        ]
+      },
+      {
+        "highlight": [
+          { "items" : ["pResourceTree"]}
+        ]
+      },
+      {
+        "text": [
+          {"posX" : 0.4}, { "posY": 0.5}, {"anchor": "eLeft"},
+          { "text": "You can also drag-and-drop the files from the explorer into the tree directly." }
+        ]
+      },
+      {
+        "text": [
+          {"posX" : 0.4}, { "posY": 0.5}, {"anchor": "eLeft"},
+          { "text": "To remove Resources select them in the tree..." }
+        ]
+      },
+      {
+        "highlight": [
+          { "items" : ["RemoveResourceButton"]}
+        ]
+      },
+      {
+        "text": [
+          {"posX" : 0.1}, { "posY": 0.3}, {"anchor": "eLeft"},
+          { "text": "...and click the <b>Remove resource</b> button." }
+        ]
+      },
+      {
+        "text": [
+          {"posX" : 0.1}, { "posY": 0.3}, {"anchor": "eLeft"},
+          { "text": "This will <i>not</i> delete the file, only remove the reference from the Project." }
+        ]
+      },
+      {
+        "highlight": [
+          { "items" : ["AddWebResourceButton"]}
+        ]
+      },
+      {
+        "text": [
+          {"posX" : 0.1}, { "posY": 0.2}, {"anchor": "eLeft"},
+          { "text": "You can also add Web-Resources by clicking the <b>Add web-resource</b> button." }
+        ]
+      },
+      {
+        "text": [
+          {"posX" : 0.1}, { "posY": 0.2}, {"anchor": "eLeft"},
+          { "text": "Doing this will mean your project can only played in online mode though." }
+        ]
+      },
+      {
+        "highlight": [
+          { "items" : []}
+        ]
+      },
+      {
+        "text": [
+          {"posX" : 0.5}, { "posY": 0.5}, {"anchor": "eCenter"},
+          { "text": "Let's now select a title card for the JOIP-Project." }
+        ]
+      },
+      {
+        "background": [{"showBg" : 1}, {"onCliCkAdvance": 0}, {"mouseTransparent": 1}]
+      },
+      {
+        "highlight": [
+          { "items" : ["pResourceTree", "AddResourceButton"]},
+          { "allwaysOnTop": 1 }
+        ]
+      },
+      {
+        "text": [
+          {"posX" : 0.4}, { "posY": 0.5}, {"anchor": "eLeft"}, {"hideButtons": 1},
+          { "text": "First select an image in the Resource Tree..." }
+        ]
+      }
+    ]
+  },
+  "eImageResourceSelected": {
+    "commands": [
+      {
+        "background": [{"showBg" : 1}, { "onCliCkAdvance": 0}, {"mouseTransparent": 0}]
+      },
+      {
+        "highlight": [
+          { "items" : ["TitleCardButton"]}
+        ]
+      },
+      {
+        "clickFilter": [
+          { "items": ["TitleCardButton"] }
+        ]
+      },
+      {
+        "text": [
+          {"posX" : 0.1}, { "posY": 0.3}, {"anchor": "eLeft"}, {"hideButtons": 1},
+          { "text": "...and click the <b>Set image as title card</b> button." }
+        ]
+      },
+      {
+        "clickFilter": [
+          { "items": [] }
+        ]
+      },
+      {
+        "highlight": [
+          { "items" : ["pResourceDisplayWidget"]}
+        ]
+      },
+      {
+        "text": [
+          {"posX" : 0.4}, { "posY": 0.8}, {"anchor": "eLeft"},
+          { "text": "As you can see, if you select an Image, Movie or Sound type Resource,<br>you can see a preview down here." }
         ]
       }
     ]

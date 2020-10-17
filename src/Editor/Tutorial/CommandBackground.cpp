@@ -2,7 +2,7 @@
 
 CCommandBackground::CCommandBackground(QPointer<CEditorTutorialOverlay> pTutorialOverlay) :
   IJsonInstructionBase(),
-  m_argTypes({{"showBg", QVariant::Bool}, {"onCliCkAdvance", QVariant::Bool}}),
+  m_argTypes({{"showBg", QVariant::Bool}, {"onCliCkAdvance", QVariant::Bool}, {"mouseTransparent", QVariant::Bool}}),
   m_pTutorialOverlay(pTutorialOverlay)
 {
 }
@@ -27,8 +27,11 @@ void CCommandBackground::Call(const QVariantMap& args)
   {
     auto itShowBg = args.find("showBg");
     auto itClickToAdvance = args.find("onCliCkAdvance");
+    auto itMouseTransparent = args.find("mouseTransparent");
     bool bIsVisible = m_pTutorialOverlay->isVisible();
     bool bShowRequested = false;
+    bool bClickToAdvance = false;
+    bool bMouseTransparent = false;
     if (args.end() != itShowBg)
     {
       bShowRequested = itShowBg.value().toBool();
@@ -43,10 +46,16 @@ void CCommandBackground::Call(const QVariantMap& args)
     }
     if (args.end() != itClickToAdvance)
     {
-      m_pTutorialOverlay->SetClickToAdvanceEnabled(itClickToAdvance.value().toBool());
+      bClickToAdvance = itClickToAdvance.value().toBool();
+      m_pTutorialOverlay->SetClickToAdvanceEnabled(bClickToAdvance);
+    }
+    if (args.end() != itMouseTransparent)
+    {
+      bMouseTransparent = itMouseTransparent.value().toBool();
+      m_pTutorialOverlay->SetMouseTransparecny(bMouseTransparent);
     }
 
-    if ((bShowRequested && bIsVisible) || (!bShowRequested && !bIsVisible))
+    if ((bShowRequested && bIsVisible) || (!bShowRequested && !bIsVisible) || !bClickToAdvance)
     {
       m_pTutorialOverlay->SlotTriggerNextInstruction();
     }

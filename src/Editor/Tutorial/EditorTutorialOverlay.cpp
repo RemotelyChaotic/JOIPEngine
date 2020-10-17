@@ -28,9 +28,11 @@ namespace {
 CEditorTutorialOverlay::CEditorTutorialOverlay(QWidget* pParent) :
   COverlayBase(1, pParent),
   m_highlightedImages(),
+  m_vpClickFilterWidgets(),
   m_spSettings(CApplication::Instance()->Settings()),
   m_pTutorialTextBox(nullptr),
   m_pTutorialTextLabel(nullptr),
+  m_pTutorialpButtonBox(nullptr),
   m_pNextButton(nullptr),
   m_pEditorModel(nullptr),
   m_pAlphaAnimation(nullptr),
@@ -42,27 +44,6 @@ CEditorTutorialOverlay::CEditorTutorialOverlay(QWidget* pParent) :
   setAttribute(Qt::WA_TranslucentBackground);
   connect(m_spSettings.get(), &CSettings::keyBindingsChanged,
           this, &CEditorTutorialOverlay::SlotKeyBindingsChanged);
-
-  // create message dialog
-  m_pTutorialTextBox = new QGroupBox(this);
-  QGridLayout* pLayout = new QGridLayout(m_pTutorialTextBox);
-  m_pTutorialTextBox->setLayout(pLayout);
-
-  m_pTutorialTextLabel = new QLabel(m_pTutorialTextBox);
-  pLayout->addWidget(m_pTutorialTextLabel, 0, 0);
-
-  m_pNextButton = new CShortcutButton(m_pTutorialTextBox);
-  m_pNextButton->setObjectName("ForardButton");
-  m_pNextButton->SetShortcut(m_spSettings->keyBinding("Skip"));
-  m_pNextButton->setAutoDefault(true);
-  connect(m_pNextButton, &QPushButton::clicked,
-          this, &CEditorTutorialOverlay::SlotTriggerNextInstruction);
-  QDialogButtonBox* pButtonBox = new QDialogButtonBox(Qt::Horizontal, m_pTutorialTextBox);
-  pButtonBox->addButton(m_pNextButton, QDialogButtonBox::ActionRole);
-  pLayout->addWidget(pButtonBox, 1, 0);
-
-  m_pTutorialTextBox->hide();
-
 
   // animation
   m_updateTimer.setInterval(c_iUpdateInterval);
@@ -76,9 +57,35 @@ CEditorTutorialOverlay::CEditorTutorialOverlay(QWidget* pParent) :
   connect(m_pAlphaAnimation.data(), &QPropertyAnimation::finished,
           this, &CEditorTutorialOverlay::SlotAlphaAnimationFinished, Qt::DirectConnection);
 
+  // filter
   installEventFilter(this);
+
+  // Overlay Logic
   Climb();
   Resize();
+
+  // create message dialog
+  m_pTutorialTextBox = new COverlayBase(ZOrder()+1, this);
+  m_pTutorialTextBox->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Preferred);
+  QGridLayout* pLayout = new QGridLayout(m_pTutorialTextBox);
+  m_pTutorialTextBox->setLayout(pLayout);
+
+  m_pTutorialTextLabel = new QLabel(m_pTutorialTextBox);
+  m_pTutorialTextLabel->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Minimum);
+  pLayout->addWidget(m_pTutorialTextLabel, 0, 0);
+
+  m_pNextButton = new CShortcutButton(m_pTutorialTextBox);
+  m_pNextButton->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Minimum);
+  m_pNextButton->setObjectName("ForardButton");
+  m_pNextButton->SetShortcut(m_spSettings->keyBinding("Skip"));
+  m_pNextButton->setAutoDefault(true);
+  connect(m_pNextButton, &QPushButton::clicked,
+          this, &CEditorTutorialOverlay::SlotTriggerNextInstruction);
+  m_pTutorialpButtonBox = new QDialogButtonBox(Qt::Horizontal, m_pTutorialTextBox);
+  m_pTutorialpButtonBox->addButton(m_pNextButton, QDialogButtonBox::ActionRole);
+  pLayout->addWidget(m_pTutorialpButtonBox, 1, 0);
+
+  m_pTutorialTextBox->hide();
 }
 
 CEditorTutorialOverlay::~CEditorTutorialOverlay()
@@ -112,31 +119,24 @@ void CEditorTutorialOverlay::NextTutorialState()
 void CEditorTutorialOverlay::SetClickToAdvanceEnabled(bool bEnabled)
 {
   m_bClickToAdvanceEnabled = bEnabled;
-  setAttribute(Qt::WA_TransparentForMouseEvents, !bEnabled);
 }
 
 //----------------------------------------------------------------------------------------
 //
-void CEditorTutorialOverlay::SetHighlightedWidgets(const QStringList& vsWidgetNames)
+void CEditorTutorialOverlay::SetClickFilterWidgets(const QStringList& vsWidgetNames)
 {
+  m_vpClickFilterWidgets.clear();
+  m_vpClickFilterWidgets = FindWidgetsByName(vsWidgetNames);
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CEditorTutorialOverlay::SetHighlightedWidgets(const QStringList& vsWidgetNames, bool bAllwaysOnTop)
+{
+  m_updateTimer.stop();
   m_highlightedImages.clear();
 
-  QList<QWidget*> vpList;
-  if (nullptr != parentWidget())
-  {
-    for (const QString& sName : qAsConst(vsWidgetNames))
-    {
-      QList<QWidget*> vpFoundList =
-        parentWidget()->findChildren<QWidget*>(sName);
-      for (QWidget* pWidget : qAsConst(vpFoundList))
-      {
-        if (pWidget->isVisibleTo(this) && !vpList.contains(pWidget))
-        {
-          vpList.push_back(pWidget);
-        }
-      }
-    }
-  }
+  QList<QPointer<QWidget>> vpList = FindWidgetsByName(vsWidgetNames);
 
   for (QWidget* pWidget : qAsConst(vpList))
   {
@@ -154,16 +154,29 @@ void CEditorTutorialOverlay::SetHighlightedWidgets(const QStringList& vsWidgetNa
   }
 
   repaint();
+
+  if (bAllwaysOnTop)
+  {
+    m_updateTimer.start();
+  }
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CEditorTutorialOverlay::SetMouseTransparecny(bool bEnabled)
+{
+  setAttribute(Qt::WA_TransparentForMouseEvents, bEnabled);
 }
 
 //----------------------------------------------------------------------------------------
 //
 void CEditorTutorialOverlay::ShowTutorialText(EAnchors anchor, double dPosX, double dPosY,
-                                              QString sText)
+                                              bool bHideButtons, QString sText)
 {
-  if (nullptr != m_pTutorialTextLabel)
+  if (nullptr != m_pTutorialTextBox)
   {
     m_pTutorialTextLabel->setText(sText);
+    m_pTutorialpButtonBox->setVisible(!bHideButtons);
 
     m_pTutorialTextBox->show();
     m_pTutorialTextBox->updateGeometry();
@@ -209,6 +222,10 @@ void CEditorTutorialOverlay::ShowTutorialText(EAnchors anchor, double dPosX, dou
       break;
     default: break;
     }
+
+    m_pTutorialTextBox->setParent(m_pTargetWidget);
+    m_pTutorialTextBox->raise();
+    m_pTutorialTextBox->show();
   }
 }
 
@@ -252,6 +269,7 @@ void CEditorTutorialOverlay::Show()
 //
 void CEditorTutorialOverlay::SlotTriggerNextInstruction()
 {
+  m_pTutorialTextBox->setParent(this);
   m_pTutorialTextBox->hide();
   emit SignalOverlayNextInstructionTriggered();
 }
@@ -260,18 +278,38 @@ void CEditorTutorialOverlay::SlotTriggerNextInstruction()
 //
 bool CEditorTutorialOverlay::eventFilter(QObject* pObj, QEvent* pEvt)
 {
-  if (nullptr != pObj && this == pObj && nullptr != pEvt && isVisible())
+  if (nullptr != pObj && nullptr != pEvt && isVisible())
   {
-    switch (pEvt->type())
+    if (this == pObj)
     {
-      case QEvent::MouseButtonRelease:
+      switch (pEvt->type())
       {
-        if (m_bClickToAdvanceEnabled)
+        case QEvent::MouseButtonRelease:
         {
-          SlotTriggerNextInstruction();
-        }
-      } break;
-      default: break;
+          QMouseEvent* pMouseEvt = static_cast<QMouseEvent*>(pEvt);
+          if (m_bClickToAdvanceEnabled && this == pObj)
+          {
+            SlotTriggerNextInstruction();
+          }
+          else if (auto pWidget = ClickedFilterChild(pMouseEvt->globalPos()))
+          {
+            QMouseEvent mouseEvent(QEvent::MouseButtonPress,
+                                   pWidget->mapFromGlobal(pMouseEvt->globalPos()),
+                                   pMouseEvt->windowPos(), pMouseEvt->screenPos(),
+                                   Qt::LeftButton, Qt::LeftButton,
+                                   Qt::NoModifier);
+            QApplication::sendEvent(pWidget, &mouseEvent);
+            QMouseEvent mouseEvent2(QEvent::MouseButtonRelease,
+                                   pWidget->mapFromGlobal(pMouseEvt->globalPos()),
+                                   pMouseEvt->windowPos(), pMouseEvt->screenPos(),
+                                   Qt::LeftButton, Qt::LeftButton,
+                                   Qt::NoModifier);
+            QApplication::sendEvent(pWidget, &mouseEvent2);
+            SlotTriggerNextInstruction();
+          }
+        } break;
+        default: break;
+      }
     }
   }
 
@@ -334,7 +372,68 @@ void CEditorTutorialOverlay::SlotKeyBindingsChanged()
 //
 void CEditorTutorialOverlay::SlotUpdate()
 {
+  for (auto it = m_highlightedImages.begin(); m_highlightedImages.end() != it; ++it)
+  {
+    if (nullptr != it->first)
+    {
+      QRect widgetGeometry = it->first->geometry();
+      QPoint tl = it->first->parentWidget()->mapToGlobal(widgetGeometry.topLeft());
+      widgetGeometry.moveTopLeft(mapFromGlobal(tl));
+
+      QImage bitmap(it->first->size(), QImage::Format_ARGB32);
+      bitmap.fill(Qt::transparent);
+      QPainter painter(&bitmap);
+      it->first->render(&painter, QPoint(), QRegion(), QWidget::DrawChildren);
+      painter.end();
+
+      it->second.second = bitmap;
+    }
+  }
+
   repaint();
+}
+
+//----------------------------------------------------------------------------------------
+//
+QPointer<QWidget> CEditorTutorialOverlay::ClickedFilterChild(const QPoint& locClicked)
+{
+  for (const QPointer<QWidget>& pWidget : qAsConst(m_vpClickFilterWidgets))
+  {
+    QWidget* pParent = pWidget->parentWidget();
+    if (nullptr != pParent)
+    {
+      QPoint tl = pParent->mapToGlobal(pWidget->geometry().topLeft());
+      QPoint br = pParent->mapToGlobal(pWidget->geometry().bottomRight());
+      if (QRect(tl, br).contains(locClicked))
+      {
+        return pWidget;
+      }
+    }
+  }
+  return nullptr;
+}
+
+//----------------------------------------------------------------------------------------
+//
+QList<QPointer<QWidget>> CEditorTutorialOverlay::FindWidgetsByName(const QStringList& vsWidgetNames)
+{
+  QList<QPointer<QWidget>> vpList;
+  if (nullptr != parentWidget())
+  {
+    for (const QString& sName : qAsConst(vsWidgetNames))
+    {
+      QList<QWidget*> vpFoundList =
+        parentWidget()->findChildren<QWidget*>(sName);
+      for (QWidget* pWidget : qAsConst(vpFoundList))
+      {
+        if (pWidget->isVisibleTo(this) && !vpList.contains(pWidget))
+        {
+          vpList.push_back(pWidget);
+        }
+      }
+    }
+  }
+  return vpList;
 }
 
 //----------------------------------------------------------------------------------------
@@ -344,4 +443,7 @@ void CEditorTutorialOverlay::Reset()
   m_pAlphaAnimation->stop();
   m_updateTimer.stop();
   m_iAnimatedAlpha = 0;
+
+  SetClickFilterWidgets(QStringList());
+  SetHighlightedWidgets(QStringList(), false);
 }

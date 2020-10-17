@@ -5,14 +5,14 @@
 #include "EditorTutorialOverlay.h"
 #include <QPointer>
 
-class CCommandClickTransparency : public IJsonInstructionBase
+class CCommandClickFilter : public IJsonInstructionBase
 {
 public:
-  CCommandClickTransparency(QPointer<CEditorTutorialOverlay> pTutorialOverlay);
-  ~CCommandClickTransparency() override;
+  CCommandClickFilter(QPointer<CEditorTutorialOverlay> pTutorialOverlay);
+  ~CCommandClickFilter() override;
 
   const std::map<QString, QVariant::Type>& ArgList() const override;
-  void Call(const QVariantMap& instruction) override;
+  void Call(const QVariantMap& args) override;
 
 private:
   const std::map<QString, QVariant::Type> m_argTypes;
