@@ -31,7 +31,7 @@ CMainScreenTutorialStateSwitchHandler::CMainScreenTutorialStateSwitchHandler(
           this, &CMainScreenTutorialStateSwitchHandler::SlotOverlayNextInstructionTriggered,
           Qt::QueuedConnection);
 
-  QFile schemaFile(":/resources/data/TutorialScheme.json");
+  QFile schemaFile(":/resources/help/tutorial/TutorialScheme.json");
   QFile tutorialFile(":/resources/help/tutorial/Tutorial.json");
   if (schemaFile.open(QIODevice::ReadOnly) && tutorialFile.open(QIODevice::ReadOnly))
   {
@@ -150,7 +150,10 @@ void CMainScreenTutorialStateSwitchHandler::OnStateSwitch(ETutorialState newStat
         qobject_cast<QListView*>(m_spUi->pRightComboBox->view())
             ->setRowHidden(val, false);
       }
-
+    } // fallthrough
+    case ETutorialState::eNodePanelAdvanced: // fallthrough
+    case ETutorialState::eNodePanelDone:
+    {
       bool bOk = QMetaObject::invokeMethod(this, "SlotSwitchRightPanel",
                                            Qt::QueuedConnection,
                                            Q_ARG(qint32, EEditorWidget::eSceneNodeWidget));
@@ -161,11 +164,11 @@ void CMainScreenTutorialStateSwitchHandler::OnStateSwitch(ETutorialState newStat
       m_spUi->pRightComboBox->setEnabled(false);
       m_spUi->pLeftPanelGroupBox->setEnabled(false);
     } break;
-    case ETutorialState::eNodePanelAdvanced:
+    case ETutorialState::eCodePanel:
     {
       bool bOk = QMetaObject::invokeMethod(this, "SlotSwitchRightPanel",
                                            Qt::QueuedConnection,
-                                           Q_ARG(qint32, EEditorWidget::eSceneNodeWidget));
+                                           Q_ARG(qint32, EEditorWidget::eSceneCodeEditorWidget));
       assert(bOk);
       Q_UNUSED(bOk);
 
@@ -204,6 +207,14 @@ void CMainScreenTutorialStateSwitchHandler::SlotRightPanelSwitched(qint32 iNewIn
   }
   else if (ETutorialState::eSwitchRightPanelToNodeSettings == m_currentState._to_integral() &&
            EEditorWidget::eSceneNodeWidget == iNewIndex)
+  {
+    bool bOk = QMetaObject::invokeMethod(this, "SlotOverlayNextInstructionTriggered",
+                                         Qt::QueuedConnection);
+    assert(bOk);
+    Q_UNUSED(bOk);
+  }
+  else if (ETutorialState::eNodePanelDone == m_currentState._to_integral() &&
+           EEditorWidget::eSceneCodeEditorWidget == iNewIndex)
   {
     bool bOk = QMetaObject::invokeMethod(this, "SlotOverlayNextInstructionTriggered",
                                          Qt::QueuedConnection);

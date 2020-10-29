@@ -1,0 +1,151 @@
+{
+    "connections": [
+        {
+            "in_id": "{0fcebf64-b8c1-4493-bd7b-556b24dd9869}",
+            "in_index": 1,
+            "out_id": "{1dab30bb-8cfc-4760-828c-9043bb1221db}",
+            "out_index": 0
+        },
+        {
+            "in_id": "{0fcebf64-b8c1-4493-bd7b-556b24dd9869}",
+            "in_index": 2,
+            "out_id": "{f52f8c5c-0948-4049-9f78-328a436611f9}",
+            "out_index": 0
+        },
+        {
+            "in_id": "{050c35ff-231d-4dd4-b111-350600bf2d7d}",
+            "in_index": 0,
+            "out_id": "{b8f296fd-e85e-4f64-9dad-6e957ccbbf67}",
+            "out_index": 2
+        },
+        {
+            "in_id": "{0fcebf64-b8c1-4493-bd7b-556b24dd9869}",
+            "in_index": 0,
+            "out_id": "{8090a116-993d-47eb-be77-ae198d080af6}",
+            "out_index": 0
+        },
+        {
+            "in_id": "{b8f296fd-e85e-4f64-9dad-6e957ccbbf67}",
+            "in_index": 0,
+            "out_id": "{0fcebf64-b8c1-4493-bd7b-556b24dd9869}",
+            "out_index": 0
+        },
+        {
+            "in_id": "{f52f8c5c-0948-4049-9f78-328a436611f9}",
+            "in_index": 0,
+            "out_id": "{b8f296fd-e85e-4f64-9dad-6e957ccbbf67}",
+            "out_index": 0
+        },
+        {
+            "in_id": "{1dab30bb-8cfc-4760-828c-9043bb1221db}",
+            "in_index": 0,
+            "out_id": "{b8f296fd-e85e-4f64-9dad-6e957ccbbf67}",
+            "out_index": 1
+        },
+        {
+            "in_id": "{f65683d8-149a-4781-9ed6-6d2c7cb50b47}",
+            "in_index": 0,
+            "out_id": "{050c35ff-231d-4dd4-b111-350600bf2d7d}",
+            "out_index": 0
+        },
+        {
+            "in_id": "{8090a116-993d-47eb-be77-ae198d080af6}",
+            "in_index": 0,
+            "out_id": "{41c2611c-5f8e-4e4f-abfb-b2932a5f06af}",
+            "out_index": 0
+        }
+    ],
+    "nodes": [
+        {
+            "id": "{f65683d8-149a-4781-9ed6-6d2c7cb50b47}",
+            "model": {
+                "name": "Exit Point"
+            },
+            "position": {
+                "x": 1265.4699999999998,
+                "y": 864.3999999999996
+            }
+        },
+        {
+            "id": "{b8f296fd-e85e-4f64-9dad-6e957ccbbf67}",
+            "model": {
+                "name": "Path Splitter",
+                "transitonType": 1,
+                "vsLabelNames": [
+                    "GIFs",
+                    "Videos",
+                    "Finish demo",
+                    ""
+                ]
+            },
+            "position": {
+                "x": 268.7499999999999,
+                "y": 732.7500000000002
+            }
+        },
+        {
+            "id": "{050c35ff-231d-4dd4-b111-350600bf2d7d}",
+            "model": {
+                "name": "Scene",
+                "sName": "ending"
+            },
+            "position": {
+                "x": 787.5,
+                "y": 866.25
+            }
+        },
+        {
+            "id": "{41c2611c-5f8e-4e4f-abfb-b2932a5f06af}",
+            "model": {
+                "name": "Entry Point"
+            },
+            "position": {
+                "x": 392.99999999999983,
+                "y": 545.25
+            }
+        },
+        {
+            "id": "{8090a116-993d-47eb-be77-ae198d080af6}",
+            "model": {
+                "name": "Scene",
+                "sName": "images"
+            },
+            "position": {
+                "x": 803.5,
+                "y": 371.25
+            }
+        },
+        {
+            "id": "{f52f8c5c-0948-4049-9f78-328a436611f9}",
+            "model": {
+                "name": "Scene",
+                "sName": "gifs"
+            },
+            "position": {
+                "x": 795.0000000000001,
+                "y": 708.7500000000001
+            }
+        },
+        {
+            "id": "{0fcebf64-b8c1-4493-bd7b-556b24dd9869}",
+            "model": {
+                "name": "Path Merger"
+            },
+            "position": {
+                "x": 1274.7500000000002,
+                "y": 522.5000000000003
+            }
+        },
+        {
+            "id": "{1dab30bb-8cfc-4760-828c-9043bb1221db}",
+            "model": {
+                "name": "Scene",
+                "sName": "videos"
+            },
+            "position": {
+                "x": 793.4999999999995,
+                "y": 535.2500000000001
+            }
+        }
+    ]
+}

@@ -119,17 +119,32 @@ void CSceneNodeWidgetTutorialStateSwitchHandler::OnStateSwitch(ETutorialState ne
 
     case ETutorialState::eNodePanelAdvanced:
     {
+      QtNodes::FlowScene* pScene = m_pParentWidget->FlowSceneModel();
+      m_savedFlow = pScene->saveToMemory();
+      pScene->clearScene();
+      QFile demoFlow(":/resources/help/tutorial/DemoSceneModel.flow");
+      if (demoFlow.exists() && demoFlow.open(QIODevice::ReadOnly))
+      {
+        pScene->loadFromMemory(demoFlow.readAll());
+        m_pParentWidget->FlowView()->FitAllNodesInView();
+      }
       auto registryMap =
           m_pParentWidget->FlowSceneModel()->registry().registeredModelCreators();
       for (auto it = registryMap.begin(); registryMap.end() != it; ++it)
       {
         m_pParentWidget->FlowView()->SetModelHiddenInContextMenu(it->first, false);
       }
+    } break;
 
+    case ETutorialState::eNodePanelDone:
+    {
       QtNodes::FlowScene* pScene = m_pParentWidget->FlowSceneModel();
-      m_connectionAddedConnection =
-          connect(pScene, &QtNodes::FlowScene::connectionCreated,
-                  this, &CSceneNodeWidgetTutorialStateSwitchHandler::SlotConnectionCreated);
+      pScene->clearScene();
+      if (m_savedFlow.isEmpty())
+      {
+        pScene->loadFromMemory(m_savedFlow);
+        m_pParentWidget->FlowView()->FitAllNodesInView();
+      }
     } break;
     default: break;
   }

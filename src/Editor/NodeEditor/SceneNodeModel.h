@@ -65,6 +65,7 @@ protected:
   tspProject                                          m_spProject;
   tspScene                                            m_spScene;
   CSceneNodeModelWidget*                              m_pWidget;
+  bool                                                m_bOutConnected;
 
   NodeValidationState m_modelValidationState;
   QString             m_modelValidationError;

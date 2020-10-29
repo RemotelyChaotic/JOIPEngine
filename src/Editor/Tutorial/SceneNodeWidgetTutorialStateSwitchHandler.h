@@ -50,6 +50,7 @@ private:
   QMetaObject::Connection                           m_nodeCreatedConnection;
   QMetaObject::Connection                           m_resourceAddedConnection;
   QMetaObject::Connection                           m_connectionAddedConnection;
+  QByteArray                                        m_savedFlow;
 };
 
 #endif // CSCENENODEWIDGETTUTORIALSTATESWITCHHANDLER_H

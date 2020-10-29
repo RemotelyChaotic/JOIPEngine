@@ -514,7 +514,15 @@ QPoint CEditorTutorialOverlay::MapPosToGlobal(const QPointer<QWidget> pWidget,
 
     QGraphicsView* pView = vpViews[0];
 
-    QPoint windowPos = pWidget->parentWidget()->mapTo(pWindow, pos);
+    QPoint windowPos;
+    if (nullptr != pWidget->parentWidget())
+    {
+      windowPos = pWidget->parentWidget()->mapTo(pWindow, pos);
+    }
+    else
+    {
+      windowPos = pWidget->mapTo(pWindow, pos);
+    }
     QPointF proxyPosF = QPointF(windowPos.x(), windowPos.y());
     QPointF scenePosF = pGpw->mapToScene(proxyPosF);
     QPoint viewPos = pView->mapFromScene(scenePosF);

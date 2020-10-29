@@ -35,6 +35,30 @@ CFlowView::~CFlowView() {}
 
 //----------------------------------------------------------------------------------------
 //
+void CFlowView::FitAllNodesInView()
+{
+  resetTransform();
+  scale(0.8, 0.8);
+  centerOn(0,0);
+
+  QtNodes::FlowScene* pScene = scene();
+  if (nullptr != pScene)
+  {
+    QRectF nodeRects;
+    const auto& nodes = pScene->nodes();
+    for (auto it = nodes.begin(); nodes.end() != it; ++it)
+    {
+      nodeRects = nodeRects.united({it->second->nodeGraphicsObject().pos(),
+                                    QSizeF{static_cast<qreal>(it->second->nodeGeometry().width()),
+                                           static_cast<qreal>(it->second->nodeGeometry().height())}});
+    }
+    setSceneRect(nodeRects);
+    update();
+  }
+}
+
+//----------------------------------------------------------------------------------------
+//
 // Taken from FlowView::contextMenuEvent and modified slightly
 void CFlowView::OpenContextMenuAt(const QPoint& localPoint, const QPoint& createPoint)
 {

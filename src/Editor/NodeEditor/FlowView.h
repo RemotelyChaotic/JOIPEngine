@@ -17,6 +17,7 @@ public:
 
   ~CFlowView() override;
 
+  void FitAllNodesInView();
   void OpenContextMenuAt(const QPoint& localPoint, const QPoint& createPoint = QPoint());
 
   bool IsReadOnly();

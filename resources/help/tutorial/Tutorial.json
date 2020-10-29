@@ -672,12 +672,24 @@
         ]
       },
       {
+        "text": [
+          {"posX" : 0.3}, { "posY": 0.5}, {"anchor": "eRight"},
+          { "text": "Finally, to have a simple JOI-Project, you need to add a <i>Scene</i> node." }
+        ]
+      },
+      {
+        "text": [
+          {"posX" : 0.3}, { "posY": 0.5}, {"anchor": "eRight"},
+          { "text": "<i>Scene</i> nodes are the scriptable part of a JOI-Project.<br>These scripts tell the engine to show images, text, etc." }
+        ]
+      },
+      {
         "background": [{"showBg" : 1}, { "onCliCkAdvance": 0}, {"mouseTransparent": 1}]
       },
       {
         "text": [
           {"posX" : 0.3}, { "posY": 0.5}, {"anchor": "eRight"}, {"hideButtons": 1},
-          { "text": "Finally, to have a simple JOI-Project, you need to add a <i>Scene</i> node." }
+          { "text": "Add a <i>Scene</i> node the same way you added the other nodes." }
         ]
       },
       {
@@ -777,9 +789,132 @@
         "background": [{"showBg" : 1}, { "onCliCkAdvance": 1}]
       },
       {
+        "text": [
+          {"posX" : 0.3}, { "posY": 0.5}, {"anchor": "eRight"},
+          { "text": "There's two more types of nodes that weren't used yet:<br><ul><li>Path Splitter</li><li>Path Merger</li></ul><br>These allow you to create more complex flows with branching paths." }
+        ]
+      },
+      {
         "highlight": [
           { "items" : ["FlowView"]}
         ]
+      },
+      {
+        "text": [
+          {"posX" : 0.3}, { "posY": 0.5}, {"anchor": "eRight"},
+          { "text": "A pre-created flow has been loaded to explain these." }
+        ]
+      },
+      {
+        "text": [
+          {"posX" : 0.3}, { "posY": 0.5}, {"anchor": "eRight"},
+          { "text": "<i>Path Splitter</i> nodes split the flow into up to four alternatives." }
+        ]
+      },
+      {
+        "highlight": [
+          { "items" : ["pRandomRadio"]}
+        ]
+      },
+      {
+        "text": [
+          {"posX" : 0.3}, { "posY": 0.5}, {"anchor": "eRight"},
+          { "text": "<i>Path Splitter</i> nodes can be configured to select a path at random..." }
+        ]
+      },
+      {
+        "highlight": [
+          { "items" : ["pSelectionRadio"]}
+        ]
+      },
+      {
+        "text": [
+          {"posX" : 0.3}, { "posY": 0.5}, {"anchor": "eRight"},
+          { "text": "...or present the player with a choice which should be the next scene." }
+        ]
+      },
+      {
+        "highlight": [
+          { "items" : ["pButtonLabelsGroupBox"]}
+        ]
+      },
+      {
+        "text": [
+          {"posX" : 0.3}, { "posY": 0.5}, {"anchor": "eRight"},
+          { "text": "The labels of the buttons will be the ones configured here." }
+        ]
+      },
+      {
+        "highlight": [
+          { "items" : ["FlowView"]}
+        ]
+      },
+      {
+        "text": [
+          {"posX" : 0.3}, { "posY": 0.5}, {"anchor": "eRight"},
+          { "text": "<i>Path Merger</i> nodes merge the flow from up to four paths into one." }
+        ]
+      },
+      {
+        "text": [
+          {"posX" : 0.3}, { "posY": 0.5}, {"anchor": "eRight"},
+          { "text": "<i>Path Splitter</i> and <i>Path Merger</i> nodes can be combined at will<br>(even in succession)." }
+        ]
+      }
+    ]
+  },
+  "eNodePanelDone": {
+    "commands": [
+      {
+        "background": [{"showBg" : 1}, { "onCliCkAdvance": 1}]
+      },
+      {
+        "text": [
+          {"posX" : 0.3}, { "posY": 0.5}, {"anchor": "eRight"},
+          { "text": "The previously created flow has now been restored to continue the tutorial." }
+        ]
+      },
+      {
+        "highlight": [
+          { "items" : ["FlowView"]}
+        ]
+      },
+      {
+        "text": [
+          {"posX" : 0.5}, { "posY": 0.5},
+          { "text": "For the last part, let's switch the right panel to show the Scene Code Editor view." }
+        ]
+      },
+      {
+        "background": [{"showBg" : 1}, { "onCliCkAdvance": 0}]
+      },
+      {
+        "highlight": [
+          { "items" : ["pRightComboBox"]}
+        ]
+      },
+      {
+        "clickFilter": [
+          { "items": ["pRightComboBox"] }, {"triggerNext": 0}
+        ]
+      },
+      {
+        "text": [
+          {"posX" : 0.3}, { "posY": 0.15}, {"anchor": "eRight"}, {"hideButtons": 1},
+          { "text": "Click the <i>Scene Code Editor</i> item." }
+        ]
+      },
+      {
+        "clickFilter": [
+          { "items": [] }
+        ]
+      }
+    ]
+  },
+  "eCodePanel": {
+    "commands": [
+      {
+        "background": [{"showBg" : 1}, { "onCliCkAdvance": 1}]
       }
     ]
   }

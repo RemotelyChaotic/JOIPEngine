@@ -17,6 +17,7 @@ CSceneNodeModel::CSceneNodeModel() :
   m_spProject(nullptr),
   m_spScene(nullptr),
   m_pWidget(new CSceneNodeModelWidget()),
+  m_bOutConnected(false),
   m_modelValidationState(NodeValidationState::Warning),
   m_modelValidationError(QString(tr("Missing or incorrect inputs or output"))),
   m_sSceneName(),
@@ -194,7 +195,7 @@ void CSceneNodeModel::setInData(std::shared_ptr<NodeData> data, PortIndex portIn
 
     m_wpInData = newData;
 
-    if (nullptr == m_spOutData)
+    if (m_bOutConnected)
     {
       m_modelValidationState = NodeValidationState::Valid;
       m_modelValidationError = QString();
@@ -235,6 +236,7 @@ QString CSceneNodeModel::validationMessage() const
 void CSceneNodeModel::outputConnectionCreated(QtNodes::Connection const& c)
 {
   Q_UNUSED(c)
+  m_bOutConnected = true;
   if (m_wpInData.expired())
   {
     m_modelValidationState = NodeValidationState::Warning;
@@ -252,6 +254,7 @@ void CSceneNodeModel::outputConnectionCreated(QtNodes::Connection const& c)
 void CSceneNodeModel::outputConnectionDeleted(QtNodes::Connection const& c)
 {
   Q_UNUSED(c)
+  m_bOutConnected = false;
   m_modelValidationState = NodeValidationState::Warning;
   m_modelValidationError = QString(tr("Missing or incorrect inputs or output"));
 }
