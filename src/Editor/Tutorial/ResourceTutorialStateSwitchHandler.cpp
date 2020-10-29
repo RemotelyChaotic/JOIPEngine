@@ -32,7 +32,11 @@ CResourceTutorialStateSwitchHandler::~CResourceTutorialStateSwitchHandler()
 //
 void CResourceTutorialStateSwitchHandler::OnResetStates()
 {
-
+  m_currentState = ETutorialState::eFinished;
+  if (m_connection)
+  {
+    disconnect(m_connection);
+  }
 }
 
 //----------------------------------------------------------------------------------------
@@ -86,10 +90,13 @@ void CResourceTutorialStateSwitchHandler::SlotCurrentChanged(const QModelIndex& 
       if (nullptr != spDbManager)
       {
         auto spResource = spDbManager->FindResourceInProject(spCurrentProject, sName);
-        QReadLocker locker(&spResource->m_rwLock);
-        if (EResourceType::eImage == spResource->m_type._to_integral())
+        if (nullptr != spResource)
         {
-          m_pParentWidget->EditorModel()->NextTutorialState();
+          QReadLocker locker(&spResource->m_rwLock);
+          if (EResourceType::eImage == spResource->m_type._to_integral())
+          {
+            m_pParentWidget->EditorModel()->NextTutorialState();
+          }
         }
       }
     }

@@ -18,11 +18,11 @@ CPathMergerModel::CPathMergerModel() :
 //----------------------------------------------------------------------------------------
 //
 QString CPathMergerModel::caption() const
-{ return QStringLiteral("Path Merger"); }
+{ return staticCaption(); }
 bool CPathMergerModel::captionVisible() const
 { return true; }
 QString CPathMergerModel::name() const
-{ return tr("Path Merger"); }
+{ return staticCaption(); }
 
 //----------------------------------------------------------------------------------------
 //

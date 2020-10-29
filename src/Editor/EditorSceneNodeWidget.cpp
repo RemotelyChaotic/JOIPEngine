@@ -164,16 +164,16 @@ void CEditorSceneNodeWidget::Initialize()
 {
   m_bInitialized = false;
 
-  m_spStateSwitchHandler =
-      std::make_shared<CSceneNodeWidgetTutorialStateSwitchHandler>(this, m_spUi);
-  EditorModel()->AddTutorialStateSwitchHandler(m_spStateSwitchHandler);
-
   m_wpDbManager = CApplication::Instance()->System<CDatabaseManager>();
 
   m_pFlowView->setScene(FlowSceneModel());
   m_pFlowView->resetTransform();
   m_pFlowView->scale(0.8, 0.8);
   m_pFlowView->centerOn(0,0);
+
+  m_spStateSwitchHandler =
+      std::make_shared<CSceneNodeWidgetTutorialStateSwitchHandler>(this, m_spUi);
+  EditorModel()->AddTutorialStateSwitchHandler(m_spStateSwitchHandler);
 
   connect(CApplication::Instance(), &CApplication::StyleLoaded,
           this, &CEditorSceneNodeWidget::SlotStyleChanged);

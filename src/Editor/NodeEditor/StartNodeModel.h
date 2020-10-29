@@ -19,6 +19,8 @@ public:
   CStartNodeModel();
   ~CStartNodeModel() override {}
 
+  static QString staticCaption() { return QStringLiteral("Entry Point"); }
+
   QString caption() const override;
   bool captionVisible() const override;
   QString name() const override;
@@ -31,11 +33,18 @@ public:
   std::shared_ptr<NodeData> outData(PortIndex port) override;
   void setInData(std::shared_ptr<NodeData>, int) override { }
   QWidget* embeddedWidget() override { return nullptr; }
+  NodeValidationState validationState() const override;
+  QString validationMessage() const override;
+
+  void outputConnectionCreated(QtNodes::Connection const&) override;
+  void outputConnectionDeleted(QtNodes::Connection const&) override;
 
   ConnectionPolicy portOutConnectionPolicy(PortIndex) const override { return ConnectionPolicy::One; }
 
 protected:
   std::shared_ptr<CSceneTranstitionData> m_spTransition;
+  NodeValidationState                    m_modelValidationState;
+  QString                                m_modelValidationError;
 };
 
 #endif // STARTNODEMODEL_H

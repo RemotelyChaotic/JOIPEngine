@@ -24,6 +24,8 @@ public:
   ESceneTransitionType TransitionType() { return m_transitonType; }
   QString TransitionLabel(PortIndex port);
 
+  static QString staticCaption() { return QStringLiteral("Path Splitter"); }
+
   QString caption() const override;
   bool captionVisible() const override;
   QString name() const override;

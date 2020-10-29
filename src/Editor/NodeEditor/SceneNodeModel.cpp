@@ -111,14 +111,14 @@ qint32 CSceneNodeModel::SceneId()
 //
 QString CSceneNodeModel::caption() const
 {
-  return QString("Scene");
+  return staticCaption();
 }
 
 //----------------------------------------------------------------------------------------
 //
 QString CSceneNodeModel::name() const
 {
-  return QString("Scene");
+  return staticCaption();
 }
 
 //----------------------------------------------------------------------------------------
@@ -193,8 +193,17 @@ void CSceneNodeModel::setInData(std::shared_ptr<NodeData> data, PortIndex portIn
     PortIndex const outPortIndex = 0;
 
     m_wpInData = newData;
-    m_modelValidationState = NodeValidationState::Valid;
-    m_modelValidationError = QString();
+
+    if (nullptr == m_spOutData)
+    {
+      m_modelValidationState = NodeValidationState::Valid;
+      m_modelValidationError = QString();
+    }
+    else
+    {
+      m_modelValidationState = NodeValidationState::Warning;
+      m_modelValidationError = QString(tr("Missing or incorrect inputs or output"));
+    }
 
     emit dataUpdated(outPortIndex);
   }
@@ -219,6 +228,32 @@ NodeValidationState CSceneNodeModel::validationState() const
 QString CSceneNodeModel::validationMessage() const
 {
   return m_modelValidationError;
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CSceneNodeModel::outputConnectionCreated(QtNodes::Connection const& c)
+{
+  Q_UNUSED(c)
+  if (m_wpInData.expired())
+  {
+    m_modelValidationState = NodeValidationState::Warning;
+    m_modelValidationError = QString(tr("Missing or incorrect inputs or output"));
+  }
+  else
+  {
+    m_modelValidationState = NodeValidationState::Valid;
+    m_modelValidationError = QString();
+  }
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CSceneNodeModel::outputConnectionDeleted(QtNodes::Connection const& c)
+{
+  Q_UNUSED(c)
+  m_modelValidationState = NodeValidationState::Warning;
+  m_modelValidationError = QString(tr("Missing or incorrect inputs or output"));
 }
 
 //----------------------------------------------------------------------------------------

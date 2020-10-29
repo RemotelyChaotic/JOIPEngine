@@ -24,10 +24,12 @@ public:
   explicit CEditorTutorialOverlay(QWidget* pParent = nullptr);
   ~CEditorTutorialOverlay() override;
 
+  static QPointer<CEditorTutorialOverlay> Instance();
+
   void Initialize(QPointer<CEditorModel> pEditorModel);
   void NextTutorialState();
   void SetClickToAdvanceEnabled(bool bEnabled);
-  void SetClickFilterWidgets(const QStringList& vsWidgetNames);
+  void SetClickFilterWidgets(const QStringList& vsWidgetNames, bool bTriggerNextAfterClick = true);
   void SetHighlightedWidgets(const QStringList& vsWidgetNames, bool bAllwaysOnTop);
   void SetMouseTransparecny(bool bEnabled);
   void ShowTutorialText(EAnchors anchor, double dPosX, double dPosY,
@@ -55,21 +57,24 @@ protected slots:
 private:
   QPointer<QWidget> ClickedFilterChild(const QPoint& locClicked);
   QList<QPointer<QWidget>> FindWidgetsByName(const QStringList& vsWidgetNames);
+  QPoint MapPosToGlobal(const QPointer<QWidget> pWidget, const QPoint& pos);
   void Reset();
 
+  static CEditorTutorialOverlay*                m_pInstance;
   std::map<QWidget*, std::pair<QRect, QImage>>  m_highlightedImages;
   QList<QPointer<QWidget>>                      m_vpClickFilterWidgets;
-  std::shared_ptr<CSettings>   m_spSettings;
-  QPointer<COverlayBase>       m_pTutorialTextBox;
-  QPointer<QLabel>             m_pTutorialTextLabel;
-  QPointer<QDialogButtonBox>   m_pTutorialpButtonBox;
-  QPointer<CShortcutButton>    m_pNextButton;
-  QPointer<CEditorModel>       m_pEditorModel;
-  QPointer<QPropertyAnimation> m_pAlphaAnimation;
-  QTimer                       m_updateTimer;
-  bool                         m_bInitialized;
-  bool                         m_bClickToAdvanceEnabled;
-  qint32                       m_iAnimatedAlpha;
+  std::shared_ptr<CSettings>                    m_spSettings;
+  QPointer<COverlayBase>                        m_pTutorialTextBox;
+  QPointer<QLabel>                              m_pTutorialTextLabel;
+  QPointer<QDialogButtonBox>                    m_pTutorialpButtonBox;
+  QPointer<CShortcutButton>                     m_pNextButton;
+  QPointer<CEditorModel>                        m_pEditorModel;
+  QPointer<QPropertyAnimation>                  m_pAlphaAnimation;
+  QTimer                                        m_updateTimer;
+  bool                                          m_bInitialized;
+  bool                                          m_bClickToAdvanceEnabled;
+  bool                                          m_bTriggerNextAfterWidgetClick;
+  qint32                                        m_iAnimatedAlpha;
 };
 
 #endif // CEDITORTUTORIALOVERLAY_H

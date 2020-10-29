@@ -28,6 +28,9 @@ BETTER_ENUM(ETutorialState, qint32,
             eProjectSettings,
             eResourcePanel,
             eImageResourceSelected,
+            eSwitchRightPanelToNodeSettings,
+            eNodePanel,
+            eNodePanelAdvanced,
             eFinished  = 63); // maximum value for Better-Enum
 
 BETTER_ENUM(EAnchors, qint32,

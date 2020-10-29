@@ -8,18 +8,20 @@ namespace {
 
 CStartNodeModel::CStartNodeModel() :
   NodeDataModel(),
-  m_spTransition(std::make_shared<CSceneTranstitionData>())
+  m_spTransition(std::make_shared<CSceneTranstitionData>()),
+  m_modelValidationState(NodeValidationState::Warning),
+  m_modelValidationError(QString(tr("Missing output")))
 {
 }
 
 //----------------------------------------------------------------------------------------
 //
 QString CStartNodeModel::caption() const
-{ return QStringLiteral("Entry Point"); }
+{ return staticCaption(); }
 bool CStartNodeModel::captionVisible() const
 { return true; }
 QString CStartNodeModel::name() const
-{ return tr("Entry Point"); }
+{ return staticCaption(); }
 
 //----------------------------------------------------------------------------------------
 //
@@ -69,4 +71,36 @@ std::shared_ptr<NodeData> CStartNodeModel::outData(PortIndex port)
 {
   Q_UNUSED(port)
   return std::static_pointer_cast<NodeData>(m_spTransition);
+}
+
+//----------------------------------------------------------------------------------------
+//
+NodeValidationState CStartNodeModel::validationState() const
+{
+  return m_modelValidationState;
+}
+
+//----------------------------------------------------------------------------------------
+//
+QString CStartNodeModel::validationMessage() const
+{
+  return m_modelValidationError;
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CStartNodeModel::outputConnectionCreated(QtNodes::Connection const& c)
+{
+  Q_UNUSED(c)
+  m_modelValidationState = NodeValidationState::Valid;
+  m_modelValidationError = QString();
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CStartNodeModel::outputConnectionDeleted(QtNodes::Connection const& c)
+{
+  Q_UNUSED(c)
+  m_modelValidationState = NodeValidationState::Warning;
+  m_modelValidationError = QString(tr("Missing output"));
 }

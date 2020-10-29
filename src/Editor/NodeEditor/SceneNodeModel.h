@@ -32,6 +32,8 @@ public:
   qint32 SceneId();
   QString SceneName() { return m_sSceneName; }
 
+  static QString staticCaption() { return QStringLiteral("Scene"); }
+
   QString caption() const override;
   bool captionVisible() const override { return true; }
   QString name() const override;
@@ -47,6 +49,9 @@ public:
   QWidget* embeddedWidget() override;
   NodeValidationState validationState() const override;
   QString validationMessage() const override;
+
+  void outputConnectionCreated(QtNodes::Connection const&) override;
+  void outputConnectionDeleted(QtNodes::Connection const&) override;
 
   ConnectionPolicy portOutConnectionPolicy(PortIndex) const override { return ConnectionPolicy::One; }
 

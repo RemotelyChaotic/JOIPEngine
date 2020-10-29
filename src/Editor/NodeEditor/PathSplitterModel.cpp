@@ -44,11 +44,11 @@ QString CPathSplitterModel::TransitionLabel(PortIndex port)
 //----------------------------------------------------------------------------------------
 //
 QString CPathSplitterModel::caption() const
-{ return QStringLiteral("Path Splitter"); }
+{ return staticCaption(); }
 bool CPathSplitterModel::captionVisible() const
 { return true; }
 QString CPathSplitterModel::name() const
-{ return tr("Path Splitter"); }
+{ return staticCaption(); }
 
 //----------------------------------------------------------------------------------------
 //

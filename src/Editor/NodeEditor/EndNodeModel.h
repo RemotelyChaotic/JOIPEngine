@@ -20,6 +20,8 @@ public:
   CEndNodeModel();
    ~CEndNodeModel() override {}
 
+  static QString staticCaption() { return QStringLiteral("Exit Point"); }
+
   QString caption() const override;
   bool captionVisible() const override;
   QString name() const override;

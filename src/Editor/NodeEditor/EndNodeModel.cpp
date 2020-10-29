@@ -10,18 +10,18 @@ namespace {
 CEndNodeModel::CEndNodeModel() :
   NodeDataModel(),
   m_modelValidationState(NodeValidationState::Warning),
-  m_modelValidationError(QString(tr("Missing or incorrect input")))
+  m_modelValidationError(QString(tr("Missing input")))
 {
 }
 
 //----------------------------------------------------------------------------------------
 //
 QString CEndNodeModel::caption() const
-{ return QStringLiteral("Exit Point"); }
+{ return staticCaption(); }
 bool CEndNodeModel::captionVisible() const
 { return true; }
 QString CEndNodeModel::name() const
-{ return tr("Exit Point"); }
+{ return staticCaption(); }
 
 //----------------------------------------------------------------------------------------
 //
@@ -85,6 +85,11 @@ void CEndNodeModel::setInData(std::shared_ptr<NodeData> data, PortIndex portInde
     m_wpInData = newData;
     m_modelValidationState = NodeValidationState::Valid;
     m_modelValidationError = QString();
+  }
+  else
+  {
+    m_modelValidationState = NodeValidationState::Warning;
+    m_modelValidationError = QString(tr("Missing input"));
   }
 }
 

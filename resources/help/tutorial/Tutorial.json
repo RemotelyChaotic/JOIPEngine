@@ -7,7 +7,7 @@
       {
         "text": [
           {"posX" : 0.5}, { "posY": 0.5},
-          { "text": "Welcome to the editor tutorial.<br>This tutorial will walk you through the JOIP editor's main features.<br>In order to continue, just click the grey background or the button of this popup." }
+          { "text": "Welcome to the editor tutorial.<br>This tutorial will walk you through the JOIP editor's basic features.<br>In order to continue, just click the grey background or the button of this popup." }
         ]
       },
       {
@@ -139,6 +139,11 @@
         "text": [
           {"posX" : 0.3}, { "posY": 0.15}, {"anchor": "eRight"}, {"hideButtons": 1},
           { "text": "To do that, simply open the right panel..." }
+        ]
+      },
+      {
+        "clickFilter": [
+          { "items": ["pRightComboBox"] }, {"triggerNext": 0}
         ]
       },
       {
@@ -499,6 +504,9 @@
         ]
       },
       {
+        "background": [{"showBg" : 1}, { "onCliCkAdvance": 1}]
+      },
+      {
         "highlight": [
           { "items" : ["pResourceDisplayWidget"]}
         ]
@@ -507,6 +515,270 @@
         "text": [
           {"posX" : 0.4}, { "posY": 0.8}, {"anchor": "eLeft"},
           { "text": "As you can see, if you select an Image, Movie or Sound type Resource,<br>you can see a preview down here." }
+        ]
+      },
+      {
+        "text": [
+          {"posX" : 0.4}, { "posY": 0.8}, {"anchor": "eLeft"},
+          { "text": "For Movie and Sound type Resources, you can click the preview to play or pause the playback." }
+        ]
+      }
+    ]
+  },
+  "eSwitchRightPanelToNodeSettings": {
+    "commands": [
+      {
+        "background": [{"showBg" : 1}, { "onCliCkAdvance": 1}]
+      },
+      {
+        "text": [
+          {"posX" : 0.5}, { "posY": 0.5},
+          { "text": "Now let's switch the right panel to show the Scene Node Editor view." }
+        ]
+      },
+      {
+        "background": [{"showBg" : 1}, { "onCliCkAdvance": 0}]
+      },
+      {
+        "highlight": [
+          { "items" : ["pRightComboBox"]}
+        ]
+      },
+      {
+        "clickFilter": [
+          { "items": ["pRightComboBox"] }, {"triggerNext": 0}
+        ]
+      },
+      {
+        "text": [
+          {"posX" : 0.3}, { "posY": 0.15}, {"anchor": "eRight"}, {"hideButtons": 1},
+          { "text": "Click the <i>Scene Node Editor</i> item." }
+        ]
+      },
+      {
+        "clickFilter": [
+          { "items": [] }
+        ]
+      }
+    ]
+  },
+  "eNodePanel": {
+    "commands": [
+      {
+        "background": [{"showBg" : 1}, { "onCliCkAdvance": 1}]
+      },
+      {
+        "highlight": [
+          { "items" : ["pRightPanelGroupBox"]}
+        ]
+      },
+      {
+        "text": [
+          {"posX" : 0.3}, { "posY": 0.5}, {"anchor": "eRight"},
+          { "text": "The <i>Node Editor View</i> lets you edit the JOI-Projects <i>Scene-Flow</i>." }
+        ]
+      },
+      {
+        "highlight": [
+          { "items" : ["FlowView"]}
+        ]
+      },
+      {
+        "text": [
+          {"posX" : 0.3}, { "posY": 0.5}, {"anchor": "eRight"},
+          { "text": "This is the graphical editor to edit the Scene-Flow." }
+        ]
+      },
+      {
+        "text": [
+          {"posX" : 0.3}, { "posY": 0.5}, {"anchor": "eRight"},
+          { "text": "To start let's create a basic Scene-Flow." }
+        ]
+      },
+      {
+        "text": [
+          {"posX" : 0.3}, { "posY": 0.5}, {"anchor": "eRight"},
+          { "text": "A Flow is made up of connectable elements called <i>Nodes</i>." }
+        ]
+      },
+      {
+        "highlight": [
+          { "items" : ["AddNodeButton"]}
+        ]
+      },
+      {
+        "text": [
+          {"posX" : 0.9}, { "posY": 0.2}, {"anchor": "eRight"},
+          { "text": "To add a Node, simply click the <i>Add Node</i> button..." }
+        ]
+      },
+      {
+        "highlight": [
+          { "items" : ["FlowView"]}
+        ]
+      },
+      {
+        "text": [
+          {"posX" : 0.3}, { "posY": 0.5}, {"anchor": "eRight"},
+          { "text": "...or right click the graphical editor anywhere." }
+        ]
+      },
+      {
+        "background": [{"showBg" : 1}, { "onCliCkAdvance": 0}, {"mouseTransparent": 1}]
+      },
+      {
+        "highlight": [
+          { "items" : ["AddNodeButton", "FlowView"]},
+          { "allwaysOnTop": 1 }
+        ]
+      },
+      {
+        "text": [
+          {"posX" : 0.3}, { "posY": 0.5}, {"anchor": "eRight"}, {"hideButtons": 1},
+          { "text": "Now open the Node menu by right clicking the editor<br>or clicking the <i>Add Node</i> Button..." }
+        ]
+      },
+      {
+        "text": [
+          {"posX" : 0.3}, { "posY": 0.5}, {"anchor": "eRight"}, {"hideButtons": 1},
+          { "text": "...and add an <i>Entry Point</i> node." }
+        ]
+      },
+      {
+        "background": [{"showBg" : 1}, { "onCliCkAdvance": 1}, {"mouseTransparent": 0}]
+      },
+      {
+        "text": [
+          {"posX" : 0.3}, { "posY": 0.5}, {"anchor": "eRight"},
+          { "text": "<i>Entry Point</i> nodes are the entry point of a JOI-Project.<br>Each JOI-Project needs exactly one." }
+        ]
+      },
+      {
+        "background": [{"showBg" : 1}, { "onCliCkAdvance": 0}, {"mouseTransparent": 1}]
+      },
+      {
+        "text": [
+          {"posX" : 0.3}, { "posY": 0.5}, {"anchor": "eRight"}, {"hideButtons": 1},
+          { "text": "Next add an <i>Exit Point</i> node." }
+        ]
+      },
+      {
+        "background": [{"showBg" : 1}, { "onCliCkAdvance": 1}, {"mouseTransparent": 0}]
+      },
+      {
+        "text": [
+          {"posX" : 0.3}, { "posY": 0.5}, {"anchor": "eRight"},
+          { "text": "<i>Exit Point</i> nodes are the end point of a JOI-Project.<br>A JOI-Project can have multiple exit points." }
+        ]
+      },
+      {
+        "background": [{"showBg" : 1}, { "onCliCkAdvance": 0}, {"mouseTransparent": 1}]
+      },
+      {
+        "text": [
+          {"posX" : 0.3}, { "posY": 0.5}, {"anchor": "eRight"}, {"hideButtons": 1},
+          { "text": "Finally, to have a simple JOI-Project, you need to add a <i>Scene</i> node." }
+        ]
+      },
+      {
+        "text": [
+          {"posX" : 0.3}, { "posY": 0.5}, {"anchor": "eRight"}, {"hideButtons": 1},
+          { "text": "After adding a <i>Scene</i> node,<br>you will be asked to create the associated <i>Script Resource</i> file." }
+        ]
+      },
+      {
+        "background": [{"showBg" : 1}, { "onCliCkAdvance": 1}, {"mouseTransparent": 0}]
+      },
+      {
+        "highlight": [
+          { "items" : ["FlowView"]},
+          { "allwaysOnTop": 1 }
+        ]
+      },
+      {
+        "text": [
+          {"posX" : 0.3}, { "posY": 0.5}, {"anchor": "eRight"},
+          { "text": "Every Scene needs a Scene-Script to be able to be used." }
+        ]
+      },
+      {
+        "highlight": [
+          { "items" : ["AddScriptFile"]}
+        ]
+      },
+      {
+        "text": [
+          {"posX" : 0.3}, { "posY": 0.5}, {"anchor": "eRight"},
+          { "text": "If you don't add a Script immediately, you can do so later,<br>by clicking the <i>Add script file</i> icon on the node." }
+        ]
+      },
+      {
+        "highlight": [
+          { "items" : ["FlowView"]}
+        ]
+      },
+      {
+        "text": [
+          {"posX" : 0.3}, { "posY": 0.5}, {"anchor": "eRight"},
+          { "text": "There's no limit on the number of Scene nodes in a project." }
+        ]
+      },
+      {
+        "highlight": [
+          { "items" : ["pSceneNameLineEdit"]}
+        ]
+      },
+      {
+        "text": [
+          {"posX" : 0.3}, { "posY": 0.5}, {"anchor": "eRight"},
+          { "text": "Every Scene Node has an internal id.<br>You can change it by entering the new name in the editor on the node." }
+        ]
+      },
+      {
+        "highlight": [
+          { "items" : ["FlowView"]},
+          { "allwaysOnTop": 1 }
+        ]
+      },
+      {
+        "text": [
+          {"posX" : 0.3}, { "posY": 0.5}, {"anchor": "eRight"},
+          { "text": "The basic setup is almost done.<br>The only thing left for the Flow to work, is to connect the nodes." }
+        ]
+      },
+      {
+        "background": [{"showBg" : 1}, { "onCliCkAdvance": 0}, {"mouseTransparent": 1}]
+      },
+      {
+        "text": [
+          {"posX" : 0.3}, { "posY": 0.5}, {"anchor": "eRight"}, {"hideButtons": 1},
+          { "text": "To connect two nodes, drag the node connectors (little circle on the side)<br>of two nodes together." }
+        ]
+      },
+      {
+        "background": [{"showBg" : 1}, { "onCliCkAdvance": 1}, {"mouseTransparent": 0}]
+      },
+      {
+        "highlight": [
+          { "items" : ["FlowView"]}
+        ]
+      },
+      {
+        "text": [
+          {"posX" : 0.3}, { "posY": 0.5}, {"anchor": "eRight"},
+          { "text": "Good job, your JOI-Project flow is now fully functional." }
+        ]
+      }
+    ]
+  },
+  "eNodePanelAdvanced": {
+    "commands": [
+      {
+        "background": [{"showBg" : 1}, { "onCliCkAdvance": 1}]
+      },
+      {
+        "highlight": [
+          { "items" : ["FlowView"]}
         ]
       }
     ]

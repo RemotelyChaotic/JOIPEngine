@@ -66,6 +66,7 @@ CMainScreenTutorialStateSwitchHandler::~CMainScreenTutorialStateSwitchHandler()
 //
 void CMainScreenTutorialStateSwitchHandler::OnResetStates()
 {
+  m_currentState = ETutorialState::eFinished;
   m_pTutorialOverlay->Hide();
 }
 
@@ -109,6 +110,12 @@ void CMainScreenTutorialStateSwitchHandler::OnStateSwitch(ETutorialState newStat
             ->setRowHidden(val, false);
       }
 
+      bool bOk = QMetaObject::invokeMethod(this, "SlotSwitchRightPanel",
+                                           Qt::QueuedConnection,
+                                           Q_ARG(qint32, EEditorWidget::eProjectSettings));
+      assert(bOk);
+      Q_UNUSED(bOk);
+
       m_spUi->pLeftComboBox->setEnabled(false);
       m_spUi->pRightComboBox->setEnabled(false);
       m_spUi->pLeftPanelGroupBox->setEnabled(false);
@@ -123,6 +130,48 @@ void CMainScreenTutorialStateSwitchHandler::OnStateSwitch(ETutorialState newStat
     {
       m_spUi->pLeftComboBox->setEnabled(false);
       m_spUi->pRightComboBox->setEnabled(false);
+    } break;
+    case ETutorialState::eSwitchRightPanelToNodeSettings:
+    {
+      for (EEditorWidget val : EEditorWidget::_values())
+      {
+        if (EEditorWidget::eSceneNodeWidget != val._to_integral() &&
+            EEditorWidget::eProjectSettings != val._to_integral())
+        {
+          qobject_cast<QListView*>(m_spUi->pRightComboBox->view())
+              ->setRowHidden(val, true);
+        }
+      }
+    } break;
+    case ETutorialState::eNodePanel:
+    {
+      for (EEditorWidget val : EEditorWidget::_values())
+      {
+        qobject_cast<QListView*>(m_spUi->pRightComboBox->view())
+            ->setRowHidden(val, false);
+      }
+
+      bool bOk = QMetaObject::invokeMethod(this, "SlotSwitchRightPanel",
+                                           Qt::QueuedConnection,
+                                           Q_ARG(qint32, EEditorWidget::eSceneNodeWidget));
+      assert(bOk);
+      Q_UNUSED(bOk);
+
+      m_spUi->pLeftComboBox->setEnabled(false);
+      m_spUi->pRightComboBox->setEnabled(false);
+      m_spUi->pLeftPanelGroupBox->setEnabled(false);
+    } break;
+    case ETutorialState::eNodePanelAdvanced:
+    {
+      bool bOk = QMetaObject::invokeMethod(this, "SlotSwitchRightPanel",
+                                           Qt::QueuedConnection,
+                                           Q_ARG(qint32, EEditorWidget::eSceneNodeWidget));
+      assert(bOk);
+      Q_UNUSED(bOk);
+
+      m_spUi->pLeftComboBox->setEnabled(false);
+      m_spUi->pRightComboBox->setEnabled(false);
+      m_spUi->pLeftPanelGroupBox->setEnabled(false);
     } break;
   default: break;
   }
@@ -147,6 +196,14 @@ void CMainScreenTutorialStateSwitchHandler::SlotRightPanelSwitched(qint32 iNewIn
 {
   if (ETutorialState::eSwitchRightPanelToProjectSettings == m_currentState._to_integral() &&
       EEditorWidget::eProjectSettings == iNewIndex)
+  {
+    bool bOk = QMetaObject::invokeMethod(this, "SlotOverlayNextInstructionTriggered",
+                                         Qt::QueuedConnection);
+    assert(bOk);
+    Q_UNUSED(bOk);
+  }
+  else if (ETutorialState::eSwitchRightPanelToNodeSettings == m_currentState._to_integral() &&
+           EEditorWidget::eSceneNodeWidget == iNewIndex)
   {
     bool bOk = QMetaObject::invokeMethod(this, "SlotOverlayNextInstructionTriggered",
                                          Qt::QueuedConnection);

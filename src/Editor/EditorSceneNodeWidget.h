@@ -44,6 +44,8 @@ class CEditorSceneNodeWidget : public CEditorWidgetBase
   Q_PROPERTY(QColor selectedConnectionHaloColor MEMBER m_selectedHaloColor)
   Q_PROPERTY(QColor hoveredConnectionColor      MEMBER m_hoveredColor)
 
+  friend class CSceneNodeWidgetTutorialStateSwitchHandler;
+
 public:
   explicit CEditorSceneNodeWidget(QWidget* pParent = nullptr);
   ~CEditorSceneNodeWidget() override;
@@ -57,6 +59,8 @@ public:
 protected:
   void OnActionBarAboutToChange() override;
   void OnActionBarChanged() override;
+
+  CFlowView* FlowView() { return m_pFlowView; }
 
 protected slots:
   void SlotAddSceneButtonClicked();

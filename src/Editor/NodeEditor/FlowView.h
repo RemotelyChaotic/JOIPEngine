@@ -2,6 +2,7 @@
 #define FLOWVIEW_H
 
 #include <nodes/FlowView>
+#include <map>
 
 class CFlowView : public QtNodes::FlowView
 {
@@ -21,10 +22,17 @@ public:
   bool IsReadOnly();
   void SetReadOnly(bool bReadOnly);
 
+  void SetModelHiddenInContextMenu(const QString& sId, bool bHidden);
+  bool IsModelHiddenInContextMenu(const QString& sId);
+
+  using QtNodes::FlowView::scene;
+
 protected:
   void contextMenuEvent(QContextMenuEvent* pEvent) override;
 
-  bool m_bReadOnly;
+private:
+  bool                     m_bReadOnly;
+  std::map<QString, bool>  m_contextMenuItemVisibility;
 };
 
 #endif // FLOWVIEW_H

@@ -4,6 +4,7 @@
 #include <nodes/NodeGeometry>
 #include <nodes/Node>
 
+#include <QContextMenuEvent>
 #include <QDebug>
 #include <QHeaderView>
 #include <QLineEdit>
@@ -17,14 +18,16 @@ using QtNodes::Node;
 
 CFlowView::CFlowView(QWidget* pParent) :
   FlowView(pParent),
-  m_bReadOnly(false)
+  m_bReadOnly(false),
+  m_contextMenuItemVisibility()
 {
 
 }
 
 CFlowView::CFlowView(FlowScene* pScene, QWidget* pParent) :
   FlowView(pScene, pParent),
-  m_bReadOnly(false)
+  m_bReadOnly(false),
+  m_contextMenuItemVisibility()
 {
 }
 
@@ -32,6 +35,7 @@ CFlowView::~CFlowView() {}
 
 //----------------------------------------------------------------------------------------
 //
+// Taken from FlowView::contextMenuEvent and modified slightly
 void CFlowView::OpenContextMenuAt(const QPoint& localPoint, const QPoint& createPoint)
 {
   if (m_bReadOnly) { return; }
@@ -41,7 +45,7 @@ void CFlowView::OpenContextMenuAt(const QPoint& localPoint, const QPoint& create
   auto skipText = QStringLiteral("skip me");
 
   //Add filterbox to the context menu
-  auto* txtBox = new QLineEdit(&modelMenu);
+  auto *txtBox = new QLineEdit(&modelMenu);
 
   txtBox->setPlaceholderText(QStringLiteral("Filter"));
   txtBox->setClearButtonEnabled(true);
@@ -75,6 +79,10 @@ void CFlowView::OpenContextMenuAt(const QPoint& localPoint, const QPoint& create
     auto item   = new QTreeWidgetItem(parent);
     item->setText(0, assoc.first);
     item->setData(0, Qt::UserRole, assoc.first);
+    if (IsModelHiddenInContextMenu(assoc.first))
+    {
+      item->setFlags(item->flags() & ~Qt::ItemFlag::ItemIsEnabled);
+    }
   }
 
   treeView->expandAll();
@@ -88,20 +96,21 @@ void CFlowView::OpenContextMenuAt(const QPoint& localPoint, const QPoint& create
       return;
     }
 
+    if (IsModelHiddenInContextMenu(modelName))
+    {
+      return;
+    }
+
     auto type = scene()->registry().create(modelName);
 
     if (type)
     {
       auto& node = scene()->createNode(std::move(type));
 
-      QPoint finalCreatPoint = createPoint;
-      if (createPoint.isNull())
-      {
-        finalCreatPoint = localPoint;
-      }
+      QPointF posView = this->mapToScene(localPoint);
 
-      QPointF posView = this->mapToScene(finalCreatPoint);
       node.nodeGraphicsObject().setPos(posView);
+
       scene()->nodePlaced(node);
     }
     else
@@ -130,7 +139,7 @@ void CFlowView::OpenContextMenuAt(const QPoint& localPoint, const QPoint& create
   // make sure the text box gets focus so the user doesn't have to click on it
   txtBox->setFocus();
 
-  modelMenu.exec(mapToGlobal(localPoint));
+  modelMenu.exec(createPoint);
 }
 
 //----------------------------------------------------------------------------------------
@@ -160,10 +169,38 @@ void CFlowView::SetReadOnly(bool bReadOnly)
 
 //----------------------------------------------------------------------------------------
 //
+void CFlowView::SetModelHiddenInContextMenu(const QString& sId, bool bHidden)
+{
+  m_contextMenuItemVisibility[sId] = bHidden;
+}
+
+//----------------------------------------------------------------------------------------
+//
+bool CFlowView::IsModelHiddenInContextMenu(const QString& sId)
+{
+  auto it = m_contextMenuItemVisibility.find(sId);
+  if (m_contextMenuItemVisibility.end() != it)
+  {
+    return it->second;
+  }
+  else
+  {
+    return false;
+  }
+}
+
+//----------------------------------------------------------------------------------------
+//
 void CFlowView::contextMenuEvent(QContextMenuEvent* pEvent)
 {
   if (!m_bReadOnly)
   {
-    FlowView::contextMenuEvent(pEvent);
+    if (itemAt(pEvent->pos()))
+    {
+      QGraphicsView::contextMenuEvent(pEvent);
+      return;
+    }
+
+    OpenContextMenuAt(pEvent->pos(), pEvent->globalPos());
   }
 }

@@ -2,10 +2,15 @@
 #include "Application.h"
 #include "Settings.h"
 #include "Editor/EditorModel.h"
+#include "Editor/NodeEditor/FlowView.h"
 #include "Widgets/ShortcutButton.h"
+
+#include <nodes/FlowScene>
+#include <nodes/Node>
 
 #include <QDialogButtonBox>
 #include <QEvent>
+#include <QGraphicsProxyWidget>
 #include <QGridLayout>
 #include <QGroupBox>
 #include <QLabel>
@@ -23,6 +28,8 @@ namespace {
   const QColor c_backgroundColor = QColor(30, 30, 30);
 }
 
+CEditorTutorialOverlay* CEditorTutorialOverlay::m_pInstance = nullptr;
+
 //----------------------------------------------------------------------------------------
 //
 CEditorTutorialOverlay::CEditorTutorialOverlay(QWidget* pParent) :
@@ -39,8 +46,10 @@ CEditorTutorialOverlay::CEditorTutorialOverlay(QWidget* pParent) :
   m_updateTimer(),
   m_bInitialized(false),
   m_bClickToAdvanceEnabled(true),
+  m_bTriggerNextAfterWidgetClick(true),
   m_iAnimatedAlpha(0)
 {
+  m_pInstance = this;
   setAttribute(Qt::WA_TranslucentBackground);
   connect(m_spSettings.get(), &CSettings::keyBindingsChanged,
           this, &CEditorTutorialOverlay::SlotKeyBindingsChanged);
@@ -90,7 +99,15 @@ CEditorTutorialOverlay::CEditorTutorialOverlay(QWidget* pParent) :
 
 CEditorTutorialOverlay::~CEditorTutorialOverlay()
 {
+  m_pInstance = nullptr;
   Reset();
+}
+
+//----------------------------------------------------------------------------------------
+//
+QPointer<CEditorTutorialOverlay> CEditorTutorialOverlay::Instance()
+{
+  return m_pInstance;
 }
 
 //----------------------------------------------------------------------------------------
@@ -123,10 +140,12 @@ void CEditorTutorialOverlay::SetClickToAdvanceEnabled(bool bEnabled)
 
 //----------------------------------------------------------------------------------------
 //
-void CEditorTutorialOverlay::SetClickFilterWidgets(const QStringList& vsWidgetNames)
+void CEditorTutorialOverlay::SetClickFilterWidgets(const QStringList& vsWidgetNames,
+                                                   bool bTriggerNextAfterClick)
 {
   m_vpClickFilterWidgets.clear();
   m_vpClickFilterWidgets = FindWidgetsByName(vsWidgetNames);
+  m_bTriggerNextAfterWidgetClick = bTriggerNextAfterClick;
 }
 
 //----------------------------------------------------------------------------------------
@@ -141,7 +160,7 @@ void CEditorTutorialOverlay::SetHighlightedWidgets(const QStringList& vsWidgetNa
   for (QWidget* pWidget : qAsConst(vpList))
   {
     QRect widgetGeometry = pWidget->geometry();
-    QPoint tl = pWidget->parentWidget()->mapToGlobal(widgetGeometry.topLeft());
+    QPoint tl = MapPosToGlobal(pWidget, widgetGeometry.topLeft());
     widgetGeometry.moveTopLeft(mapFromGlobal(tl));
 
     QImage bitmap(pWidget->size(), QImage::Format_ARGB32);
@@ -305,7 +324,10 @@ bool CEditorTutorialOverlay::eventFilter(QObject* pObj, QEvent* pEvt)
                                    Qt::LeftButton, Qt::LeftButton,
                                    Qt::NoModifier);
             QApplication::sendEvent(pWidget, &mouseEvent2);
-            SlotTriggerNextInstruction();
+            if (m_bTriggerNextAfterWidgetClick)
+            {
+              SlotTriggerNextInstruction();
+            }
           }
         } break;
         default: break;
@@ -431,9 +453,78 @@ QList<QPointer<QWidget>> CEditorTutorialOverlay::FindWidgetsByName(const QString
           vpList.push_back(pWidget);
         }
       }
+
+      // if this is a flow view check all node widgets as well
+      CFlowView* pFlowWidget = parentWidget()->findChild<CFlowView*>();
+      if (nullptr != pFlowWidget)
+      {
+        if (nullptr != pFlowWidget->scene())
+        {
+          const auto& nodeMap = pFlowWidget->scene()->nodes();
+          for (auto it = nodeMap.begin(); nodeMap.end() != it; ++it)
+          {
+            if (it->second->nodeDataModel())
+            {
+              QWidget* pEmbedWidget = it->second->nodeDataModel()->embeddedWidget();
+              if (nullptr != pEmbedWidget)
+              {
+                if (pEmbedWidget->isVisibleTo(this))
+                {
+                  if (pEmbedWidget->objectName() == sName && !vpList.contains(pEmbedWidget))
+                  {
+                    vpList.push_back(pEmbedWidget);
+                  }
+                  QList<QWidget*> vpFoundSubList =
+                      pEmbedWidget->findChildren<QWidget*>(sName);
+                  for (QWidget* pFoundWidget : qAsConst(vpFoundSubList))
+                  {
+                    if (pFoundWidget->isVisibleTo(this) && !vpList.contains(pFoundWidget))
+                    {
+                      vpList.push_back(pFoundWidget);
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
     }
   }
   return vpList;
+}
+
+//----------------------------------------------------------------------------------------
+//
+// see <https://bugreports.qt.io/browse/QTBUG-41135> for why this is needed
+QPoint CEditorTutorialOverlay::MapPosToGlobal(const QPointer<QWidget> pWidget,
+                                              const QPoint& pos)
+{
+  QWidget* pWindow = pWidget->window();
+  QGraphicsProxyWidget* pGpw = pWindow->graphicsProxyWidget ();
+
+  if (nullptr != pGpw)
+  {
+    QGraphicsScene* pScene = pGpw->scene();
+    QList<QGraphicsView *> vpViews = pScene->views();
+    if (vpViews.count() != 1)
+    {
+      return pWidget->mapToGlobal(pos);
+    }
+
+    QGraphicsView* pView = vpViews[0];
+
+    QPoint windowPos = pWidget->parentWidget()->mapTo(pWindow, pos);
+    QPointF proxyPosF = QPointF(windowPos.x(), windowPos.y());
+    QPointF scenePosF = pGpw->mapToScene(proxyPosF);
+    QPoint viewPos = pView->mapFromScene(scenePosF);
+
+    return pView->mapToGlobal(viewPos);
+  }
+  else
+  {
+    return pWidget->parentWidget()->mapToGlobal(pos);
+  }
 }
 
 //----------------------------------------------------------------------------------------
