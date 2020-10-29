@@ -141,6 +141,17 @@ void CSceneNodeWidgetTutorialStateSwitchHandler::SlotConnectionCreated(
     QtNodes::Connection const& c)
 {
   Q_UNUSED(c)
+  bool bOk = QMetaObject::invokeMethod(this,
+                                       "SlotConnectionCheck",
+                                       Qt::QueuedConnection);
+  assert(bOk);
+  Q_UNUSED(bOk);
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CSceneNodeWidgetTutorialStateSwitchHandler::SlotConnectionCheck()
+{
   QtNodes::FlowScene* pScene = m_pParentWidget->FlowSceneModel();
   if (nullptr != pScene && !m_bCompleteConnectionCreated)
   {

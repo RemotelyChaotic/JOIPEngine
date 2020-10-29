@@ -28,6 +28,7 @@ public:
 
 protected slots:
   void SlotConnectionCreated(QtNodes::Connection const &c);
+  void SlotConnectionCheck();
   void SlotNodeCreated(QtNodes::Node& node);
   void SlotResourceAdded(qint32 iProjId, const QString& sName);
 
