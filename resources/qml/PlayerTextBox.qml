@@ -167,6 +167,7 @@ Rectangle {
         width: parent.width
         height: parent.height
 
+        cacheBuffer: 0
         orientation: ListView.Vertical
         clip: true
 

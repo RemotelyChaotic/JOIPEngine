@@ -59,6 +59,7 @@ Rectangle {
         height: parent.height - 20
         clip: true
 
+        cacheBuffer: 0
         layoutDirection: Qt.LeftToRight
         orientation: ListView.Horizontal
         spacing: 50
