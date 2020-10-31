@@ -164,6 +164,9 @@ QLabel#ErrorIcon {
 QLabel#IconBackground {
   qproperty-pixmap: url(:/resources/img/IconBg.svg);
 }
+QLabel#ReadOnly {
+  border-image: url(:/resources/img/ButtonReadOnly.png);
+}
 
 QToolTip {
   border: 2px solid silver;
@@ -229,6 +232,10 @@ QPushButton#AddTextCode {
   qproperty-icon: url(:/resources/img/ButtonText.png) off,
                   url(:/resources/img/ButtonText.png) on;
 }
+QPushButton#AddMetronomeCode {
+  qproperty-icon: url(:/resources/img/ButtonMetronome.png) off,
+                  url(:/resources/img/ButtonMetronome.png) on;
+}
 QPushButton#AddTimerCode {
   qproperty-icon: url(:/resources/img/ButtonClock.png) off,
                   url(:/resources/img/ButtonClock.png) on;
@@ -265,6 +272,7 @@ QPushButton#SaveButton {
   qproperty-icon: url(:/resources/img/ButtonSave.png) off,
                   url(:/resources/img/ButtonSave.png) on;
 }
+QPushButton#AddPatternElemButton,
 QPushButton#AddResourceButton,
 QPushButton#AddButtonButton,
 QPushButton#AddTextColorButton,
@@ -281,6 +289,7 @@ QPushButton#MapButton {
   qproperty-icon: url(:/resources/img/ButtonMap.png) off,
                   url(:/resources/img/ButtonMap.png) on;
 }
+QPushButton#RemovePatternElemButton,
 QPushButton#RemoveResourceButton,
 QPushButton#RemoveButtonButton,
 QPushButton#RemoveTextColorButton,
@@ -321,6 +330,19 @@ QPushButton#HomeButton {
 QPushButton#CloseButton {
   qproperty-icon: url(:/resources/img/ButtonX.png) off,
                   url(:/resources/img/ButtonX.png) on;
+}
+QPushButton#FetishOverlayButton {
+  qproperty-icon: url(:/resources/img/ButtonDotsHoriz.png) off,
+                  url(:/resources/img/ButtonDotsHoriz.png) on;
+}
+QPushButton#ExportButton {
+  qproperty-icon: url(:/resources/img/ButtonExport.png) off,
+                  url(:/resources/img/ButtonExport.png) on;
+}
+QPushButton#AddScriptFile {
+  min-width: 32px;
+  qproperty-icon: url(:/resources/img/ButtonCode.png) off,
+                  url(:/resources/img/ButtonCode.png) on;
 }
 
 QPushButton:hover,
@@ -845,6 +867,12 @@ QTableView::item:hover {
   background: qradialgradient(cx: 0.3, cy: -0.4, fx: 0.3, fy: -0.4, radius: 1.35, stop: 0 #aa00aa, stop: 1 #b900b9);
 }
 
+QListView::item:disabled,
+QTreeView::item:disabled,
+QTableView::item:disabled {
+  color: silver;
+}
+
 QTreeView::branch:has-children:!has-siblings:closed,
 QTreeView::branch:closed:has-children:has-siblings {
   image: url(:/resources/img/ButtonPlay.png);
@@ -883,6 +911,10 @@ QMainWindow {
   background-image: url(:/resources/img/Background.png);
 }
 
+QQuickWidget {
+  background-color: rgb(38, 38, 38);
+}
+
 CProjectCardSelectionWidget {
   qproperty-selectionColor: rgb(236, 0, 236);
 }
@@ -898,6 +930,7 @@ CScriptEditorWidget {
   qproperty-lineNumberTextColor: rgb(36, 52, 77);
   qproperty-highlightLineColor: rgb(52, 69, 97);
   qproperty-widgetsBackgroundColor: rgb(52, 69, 97);
+  qproperty-theme: "Breeze Dark";
 }
 
 CEditorSceneNodeWidget {
