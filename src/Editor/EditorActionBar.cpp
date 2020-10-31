@@ -69,6 +69,9 @@ void CEditorActionBar::Initialize()
 {
   SetInitialized(false);
 
+  // Unused, so don't show
+  m_spUi->MapButton->hide();
+
   HideAllBars();
   SlotKeyBindingsChanged();
 
