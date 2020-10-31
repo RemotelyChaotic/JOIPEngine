@@ -876,7 +876,7 @@
       },
       {
         "highlight": [
-          { "items" : ["FlowView"]}
+          { "items" : []}
         ]
       },
       {
@@ -915,6 +915,177 @@
     "commands": [
       {
         "background": [{"showBg" : 1}, { "onCliCkAdvance": 1}]
+      },
+      {
+        "highlight": [
+          { "items" : ["pCodeEdit"]}
+        ]
+      },
+      {
+        "text": [
+          {"posX" : 0.3}, { "posY": 0.5}, {"anchor": "eRight"},
+          { "text": "This is the code editor.<br>Here is where you can create the logic of your Scene nodes." }
+        ]
+      },
+      {
+        "text": [
+          {"posX" : 0.3}, { "posY": 0.5}, {"anchor": "eRight"},
+          { "text": "It works like any text editor, but provides you with syntactic code highlighting." }
+        ]
+      },
+      {
+        "highlight": [
+          { "items" : ["pResourceComboBox"]}
+        ]
+      },
+      {
+        "text": [
+          {"posX" : 0.3}, { "posY": 0.5}, {"anchor": "eRight"},
+          { "text": "This selector shows you every script in your JOI-Project and let's you switch to it at will..." }
+        ]
+      },
+      {
+        "highlight": [
+          { "items" : ["pResourceTree"]}
+        ]
+      },
+      {
+        "text": [
+          {"posX" : 0.4}, { "posY": 0.5}, {"anchor": "eLeft"},
+          { "text": "...alternatively click the Script Resource in the tree." }
+        ]
+      },
+      {
+        "highlight": [
+          { "items" : []}
+        ]
+      },
+      {
+        "text": [
+          {"posX" : 0.5}, { "posY": 0.5},
+          { "text": "The code is JavaScript code, but if you don't know javascript,<br>don't fret. You won't <i>have</i> to write a lot of code on your own." }
+        ]
+      },
+      {
+        "highlight": [
+          { "items" : ["AddMetronomeCode", "AddShowBackgroundCode", "AddShowIconCode", "AddShowImageCode", "AddTextCode", "AddThreadCode", "AddTimerCode"]}
+        ]
+      },
+      {
+        "text": [
+          {"posX" : 0.9}, { "posY": 0.5}, {"anchor": "eRight"},
+          { "text": "These buttons will show a ui that let you generate code snippets<br>at your cursor position for most things you need." }
+        ]
+      },
+      {
+        "highlight": [
+          { "items" : ["AddShowImageCode"]}
+        ]
+      },
+      {
+        "text": [
+          {"posX" : 0.9}, { "posY": 0.2}, {"anchor": "eRight"},
+          { "text": "Here you can generate code to show media Resources and manipulate them..." }
+        ]
+      },
+      {
+        "highlight": [
+          { "items" : ["AddShowIconCode"]}
+        ]
+      },
+      {
+        "text": [
+          {"posX" : 0.9}, { "posY": 0.2}, {"anchor": "eRight"},
+          { "text": "...this will let you generate code to show icons..." }
+        ]
+      },
+      {
+        "highlight": [
+          { "items" : ["AddShowBackgroundCode"]}
+        ]
+      },
+      {
+        "text": [
+          {"posX" : 0.9}, { "posY": 0.3}, {"anchor": "eRight"},
+          { "text": "...while this will let you generate code to change the background..." }
+        ]
+      },
+      {
+        "highlight": [
+          { "items" : ["AddTextCode"]}
+        ]
+      },
+      {
+        "text": [
+          {"posX" : 0.9}, { "posY": 0.3}, {"anchor": "eRight"},
+          { "text": "...show text..." }
+        ]
+      },
+      {
+        "highlight": [
+          { "items" : ["AddMetronomeCode"]}
+        ]
+      },
+      {
+        "text": [
+          {"posX" : 0.9}, { "posY": 0.4}, {"anchor": "eRight"},
+          { "text": "...set a metronome..." }
+        ]
+      },
+      {
+        "highlight": [
+          { "items" : ["AddTimerCode"]}
+        ]
+      },
+      {
+        "text": [
+          {"posX" : 0.9}, { "posY": 0.4}, {"anchor": "eRight"},
+          { "text": "...or a timer..." }
+        ]
+      },
+      {
+        "highlight": [
+          { "items" : ["AddThreadCode"]}
+        ]
+      },
+      {
+        "text": [
+          {"posX" : 0.9}, { "posY": 0.5}, {"anchor": "eRight"},
+          { "text": "...and last but not least, let you simply wait." }
+        ]
+      },
+      {
+        "highlight": [
+          { "items" : ["HelpButton"]}
+        ]
+      },
+      {
+        "text": [
+          {"posX" : 0.5}, { "posY": 0.2},
+          { "text": "If you need more detailed information, please check out the interactive help." }
+        ]
+      },
+      {
+        "highlight": [
+          { "items" : ["SaveButton"]}
+        ]
+      },
+      {
+        "text": [
+          {"posX" : 0.5}, { "posY": 0.2},
+          { "text": "Lastly, don't forget to save the project before exiting the editor." }
+        ]
+      },
+      {
+        "highlight": [
+          { "items" : []}
+        ]
+      },
+      {
+        "text": [
+          {"posX" : 0.5}, { "posY": 0.5},
+          { "text": "Happy creating." }
+        ]
       }
     ]
   }

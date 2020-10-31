@@ -142,6 +142,7 @@ void CMainScreenTutorialStateSwitchHandler::OnStateSwitch(ETutorialState newStat
               ->setRowHidden(val, true);
         }
       }
+      m_spUi->pRightComboBox->setEnabled(true);
     } break;
     case ETutorialState::eNodePanel:
     {
@@ -161,20 +162,35 @@ void CMainScreenTutorialStateSwitchHandler::OnStateSwitch(ETutorialState newStat
       Q_UNUSED(bOk);
 
       m_spUi->pLeftComboBox->setEnabled(false);
-      m_spUi->pRightComboBox->setEnabled(false);
+      m_spUi->pRightComboBox->setEnabled(newState._to_integral() == ETutorialState::eNodePanelDone);
       m_spUi->pLeftPanelGroupBox->setEnabled(false);
     } break;
     case ETutorialState::eCodePanel:
     {
-      bool bOk = QMetaObject::invokeMethod(this, "SlotSwitchRightPanel",
+      bool bOk = QMetaObject::invokeMethod(this, "SlotSwitchLeftPanel",
                                            Qt::QueuedConnection,
-                                           Q_ARG(qint32, EEditorWidget::eSceneCodeEditorWidget));
+                                           Q_ARG(qint32, EEditorWidget::eResourceWidget));
+      bOk &= QMetaObject::invokeMethod(this, "SlotSwitchRightPanel",
+                                       Qt::QueuedConnection,
+                                       Q_ARG(qint32, EEditorWidget::eSceneCodeEditorWidget));
       assert(bOk);
       Q_UNUSED(bOk);
 
       m_spUi->pLeftComboBox->setEnabled(false);
       m_spUi->pRightComboBox->setEnabled(false);
-      m_spUi->pLeftPanelGroupBox->setEnabled(false);
+      m_spUi->pLeftPanelGroupBox->setEnabled(true);
+    } break;
+    case ETutorialState::eFinished:
+    {
+      if (ETutorialState::eCodePanel == oldState._to_integral())
+      {
+        m_spUi->pLeftComboBox->setEnabled(true);
+        m_spUi->pRightComboBox->setEnabled(true);
+        m_spUi->pLeftPanelGroupBox->setEnabled(true);
+        m_spUi->pRightPanelGroupBox->setEnabled(true);
+
+        QTimer::singleShot(500, m_pTutorialOverlay, SLOT(Hide()));
+      }
     } break;
   default: break;
   }
@@ -184,6 +200,13 @@ void CMainScreenTutorialStateSwitchHandler::OnStateSwitch(ETutorialState newStat
   {
     m_spTutorialRunner->Run(newState._to_string());
   }
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CMainScreenTutorialStateSwitchHandler::SlotSwitchLeftPanel(qint32 iNewIndex)
+{
+  m_spUi->pLeftComboBox->setCurrentIndex(iNewIndex);
 }
 
 //----------------------------------------------------------------------------------------

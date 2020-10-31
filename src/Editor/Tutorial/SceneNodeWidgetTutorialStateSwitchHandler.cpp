@@ -140,7 +140,7 @@ void CSceneNodeWidgetTutorialStateSwitchHandler::OnStateSwitch(ETutorialState ne
     {
       QtNodes::FlowScene* pScene = m_pParentWidget->FlowSceneModel();
       pScene->clearScene();
-      if (m_savedFlow.isEmpty())
+      if (!m_savedFlow.isEmpty())
       {
         pScene->loadFromMemory(m_savedFlow);
         m_pParentWidget->FlowView()->FitAllNodesInView();

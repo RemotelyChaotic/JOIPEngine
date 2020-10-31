@@ -300,22 +300,24 @@ void CEditorMainScreen::SlotDisplayResource(const QString& sName)
   auto spDbManager = m_wpDbManager.lock();
   if (nullptr != spDbManager && nullptr != pWidget)
   {
-    QReadLocker locker(&m_spCurrentProject->m_rwLock);
+    // get resource type
+    auto spResource = spDbManager->FindResourceInProject(m_spCurrentProject, sName);
+    EResourceType type = EResourceType::eOther;
+    if (nullptr != spResource)
+    {
+      QReadLocker rcLocker(&spResource->m_rwLock);
+      type = spResource->m_type;
+    }
 
     // script selected?
-    if (QFileInfo(sName).suffix() == "js")
+    if (EResourceType::eScript == type._to_integral())
     {
-      locker.unlock();
-      auto spResource = spDbManager->FindResourceInProject(m_spCurrentProject, sName);
-      pWidget->UnloadResource();
       CEditorCodeWidget* pCodeWidget = GetWidget<CEditorCodeWidget>();
       pCodeWidget->LoadResource(spResource);
     }
     // normal resource, just show in resource viewer
     else
     {
-      locker.unlock();
-      auto spResource = spDbManager->FindResourceInProject(m_spCurrentProject, sName);
       pWidget->UnloadResource();
       pWidget->LoadResource(spResource);
       if (m_spUi->pRightComboBox->itemData(m_spUi->pRightComboBox->currentIndex(), Qt::UserRole).toInt() == EEditorWidget::eResourceDisplay ||

@@ -27,6 +27,7 @@ public:
   void OnStateSwitch(ETutorialState newState, ETutorialState oldState) override;
 
 private slots:
+  void SlotSwitchLeftPanel(qint32 iNewIndex);
   void SlotSwitchRightPanel(qint32 iNewIndex);
   void SlotRightPanelSwitched(qint32 iNewIndex);
   void SlotOverlayNextInstructionTriggered();
