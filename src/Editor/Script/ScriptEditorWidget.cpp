@@ -1,4 +1,6 @@
 #include "ScriptEditorWidget.h"
+#include "ScriptSearchBar.h"
+#include "ScriptHighlighter.h"
 #include <syntaxhighlighter.h>
 #include <definition.h>
 #include <theme.h>
@@ -18,15 +20,27 @@ CScriptEditorWidget::CScriptEditorWidget(QWidget* pParent) :
   m_lineNumberBackgroundColor(24, 24, 24),
   m_lineNumberTextColor(Qt::white),
   m_highlightLineColor(68, 71, 90),
-  m_widgetsBackgroundColor(24, 24, 24)
+  m_widgetsBackgroundColor(24, 24, 24),
+  m_highlightCursor(),
+  m_sLastSearch()
 {
   setAttribute(Qt::WA_NoMousePropagation, false);
+  installEventFilter(this);
 
-  m_pHighlighter = new KSyntaxHighlighting::SyntaxHighlighter(document());
+  m_pHighlighter = new CScriptHighlighter(document());
   m_pHighlighter->setTheme(m_spRepository->theme(m_sTheme));
 
   m_pLineNumberArea = new CLineNumberArea(this);
   m_pWidgetArea = new CWidgetArea(this);
+  m_pSearchBar = new CScriptSearchBar(this);
+  m_pSearchBar->Climb();
+  m_pSearchBar->Resize();
+
+  // reset things after closing search bar
+  connect(m_pSearchBar, &CScriptSearchBar::SignalHidden,
+          this, &CScriptEditorWidget::SearchAreaHidden);
+  connect(m_pSearchBar, &CScriptSearchBar::SignalFilterChanged,
+          this, &CScriptEditorWidget::SlotSearchFilterChanged);
 
   connect(this, &CScriptEditorWidget::blockCountChanged,
           this, &CScriptEditorWidget::UpdateLeftAreaWidth);
@@ -57,6 +71,30 @@ void CScriptEditorWidget::SetHighlightDefinition(const QString& sType)
 {
   const auto def = m_spRepository->definitionForName(sType);
   m_pHighlighter->setDefinition(def);
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CScriptEditorWidget::SetHighlightSearchBackgroundColor(const QColor& color)
+{
+  if (m_highlightSearchBackgroundColor != color)
+  {
+    m_highlightSearchBackgroundColor = color;
+    m_pHighlighter->SetSearchColors(m_highlightSearchBackgroundColor,
+                                    m_highlightSearchColor);
+  }
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CScriptEditorWidget::SetHighlightSearchColor(const QColor& color)
+{
+  if (m_highlightSearchColor != color)
+  {
+    m_highlightSearchColor = color;
+    m_pHighlighter->SetSearchColors(m_highlightSearchBackgroundColor,
+                                    m_highlightSearchColor);
+  }
 }
 
 //----------------------------------------------------------------------------------------
@@ -229,6 +267,20 @@ void CScriptEditorWidget::UpdateWidgetArea(const QRect& rect, qint32 iDy)
 
 //----------------------------------------------------------------------------------------
 //
+void CScriptEditorWidget::SearchAreaHidden()
+{
+  if (!m_highlightCursor.isNull())
+  {
+    setTextCursor(m_highlightCursor);
+  }
+  m_highlightCursor = QTextCursor();
+  m_sLastSearch = QString();
+  m_pHighlighter->SetSearchExpression(QString());
+  setFocus();
+}
+
+//----------------------------------------------------------------------------------------
+//
 void CScriptEditorWidget::SlotExecutionError(QString sException, qint32 iLine, QString sStack)
 {
   m_pWidgetArea->ClearAllErrors();
@@ -238,6 +290,198 @@ void CScriptEditorWidget::SlotExecutionError(QString sException, qint32 iLine, Q
   QTextCursor cursor(document()->findBlockByLineNumber(iLine));
   moveCursor(QTextCursor::End);
   setTextCursor(cursor);
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CScriptEditorWidget::SlotShowHideSearchFilter()
+{
+  if (m_pSearchBar->isVisible())
+  {
+    m_pSearchBar->Hide();
+  }
+  else
+  {
+    m_pSearchBar->Show();
+  }
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CScriptEditorWidget::SlotSearchFilterChanged(bool bForward, const QString& sText)
+{
+  QTextDocument* pDocument = document();
+
+  if (!sText.isEmpty())
+  {
+    QTextCursor highlightCursor = m_highlightCursor;
+    if (m_highlightCursor.isNull() || m_sLastSearch.isEmpty() || m_sLastSearch != sText)
+    {
+      highlightCursor = QTextCursor(pDocument);
+    }
+
+    // update highlighting
+    if (m_sLastSearch != sText)
+    {
+      m_pHighlighter->SetSearchExpression(sText);
+    }
+
+    m_sLastSearch = sText;
+    highlightCursor =
+        pDocument->find(sText, highlightCursor, bForward ? QTextDocument::FindFlags() :
+                                                           QTextDocument::FindBackward);
+    if (!highlightCursor.isNull())
+    {
+      setTextCursor(highlightCursor);
+      m_highlightCursor = highlightCursor;
+    }
+  }
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CScriptEditorWidget::contextMenuEvent(QContextMenuEvent* pEvent)
+{
+  if (nullptr != pEvent)
+  {
+    QPointer<CScriptEditorWidget> pThisGuard(this);
+    QMenu* pMenu = createStandardContextMenu();
+    pMenu->addAction(tr("Search"), this, SLOT(SlotShowHideSearchFilter()),
+                     QKeySequence::Find);
+    pMenu->exec(pEvent->globalPos());
+    if (nullptr == pThisGuard) { return; }
+    delete pMenu;
+  }
+}
+
+//----------------------------------------------------------------------------------------
+//
+bool CScriptEditorWidget::eventFilter(QObject* pTarget, QEvent* pEvent)
+{
+  if (nullptr != pEvent && this == pTarget)
+  {
+    if (QEvent::KeyPress == pEvent->type())
+    {
+      QKeyEvent* pKeyEvent = static_cast<QKeyEvent*>(pEvent);
+      // Ctrl+F
+      if (pKeyEvent->modifiers().testFlag(Qt::ControlModifier) && pKeyEvent->key() == Qt::Key_F)
+      {
+        SlotShowHideSearchFilter();
+      }
+      // Enter
+      else if (pKeyEvent->key() == Qt::Key_Enter || pKeyEvent->key() == Qt::Key_Return)
+      {
+        if (m_pSearchBar->isVisible() && !m_sLastSearch.isEmpty() && focusWidget() != this)
+        {
+          SlotSearchFilterChanged(m_pSearchBar->IsSearchingForward(), m_sLastSearch);
+          // don't insert line break, just jump to next search result
+          pEvent->ignore();
+          return true;
+        }
+        else
+        {
+          // get indentation of current line, and mimic for new line
+          QTextCursor cursor = textCursor();
+          cursor.movePosition(QTextCursor::StartOfLine);
+          cursor.select(QTextCursor::SelectionType::LineUnderCursor);
+          QString sSelectedText = cursor.selectedText();
+          QString sIndentation;
+          for (qint32 i = 0; i < sSelectedText.length(); ++i)
+          {
+            if (sSelectedText[i].isSpace())
+            {
+              sIndentation += sSelectedText[i];
+            }
+            else
+            {
+              break;
+            }
+          }
+          insertPlainText(QString("\n") + sIndentation);
+          pEvent->ignore();
+          return true;
+        }
+      }
+      // Tab
+      else if (pKeyEvent->key() == Qt::Key_Tab)
+      {
+        QTextCursor cursor = textCursor();
+        qint32 iSelectedLines = 0;
+        QString sSelection;
+        if(cursor.hasSelection())
+        {
+            sSelection = cursor.selection().toPlainText();
+            iSelectedLines = sSelection.count("\n")+1;
+        }
+
+        if (2 > iSelectedLines)
+        {
+          insertPlainText(QString("").leftJustified(4, ' ', false));
+          pEvent->ignore();
+        }
+        else
+        {
+          QStringList vsLines = sSelection.split("\n");
+          for (QString& sLine : vsLines)
+          {
+            sLine.prepend(QString("").leftJustified(4, ' ', false));
+          }
+          insertPlainText(vsLines.join("\n"));
+          pEvent->ignore();
+        }
+        return true;
+      }
+      // brackets
+      else if (pKeyEvent->key() == Qt::Key_BraceLeft)
+      {
+        insertPlainText(QString("{  }"));
+        QTextCursor cursor = textCursor();
+        cursor.movePosition(QTextCursor::Left, QTextCursor::MoveAnchor, 2);
+        setTextCursor(cursor);
+        pEvent->ignore();
+        return true;
+      }
+      else if (pKeyEvent->key() == Qt::Key_ParenLeft)
+      {
+        insertPlainText(QString("()"));
+        QTextCursor cursor = textCursor();
+        cursor.movePosition(QTextCursor::Left, QTextCursor::MoveAnchor, 1);
+        setTextCursor(cursor);
+        pEvent->ignore();
+        return true;
+      }
+      else if (pKeyEvent->key() == Qt::Key_BracketLeft)
+      {
+        insertPlainText(QString("[]"));
+        QTextCursor cursor = textCursor();
+        cursor.movePosition(QTextCursor::Left, QTextCursor::MoveAnchor, 1);
+        setTextCursor(cursor);
+        pEvent->ignore();
+        return true;
+      }
+      // quotes
+      else if (pKeyEvent->key() == Qt::Key_Apostrophe)
+      {
+        insertPlainText(QString("''"));
+        QTextCursor cursor = textCursor();
+        cursor.movePosition(QTextCursor::Left, QTextCursor::MoveAnchor, 1);
+        setTextCursor(cursor);
+        pEvent->ignore();
+        return true;
+      }
+      else if (pKeyEvent->key() == Qt::Key_QuoteDbl)
+      {
+        insertPlainText(QString("\"\""));
+        QTextCursor cursor = textCursor();
+        cursor.movePosition(QTextCursor::Left, QTextCursor::MoveAnchor, 1);
+        setTextCursor(cursor);
+        pEvent->ignore();
+        return true;
+      }
+    }
+  }
+
+  return QPlainTextEdit::eventFilter(pTarget, pEvent);
 }
 
 //----------------------------------------------------------------------------------------

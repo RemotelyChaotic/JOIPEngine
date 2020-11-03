@@ -1,40 +1,30 @@
 #ifndef SCRIPTHIGHLIGHTER_H
 #define SCRIPTHIGHLIGHTER_H
 
-#include <QSyntaxHighlighter>
+#include <syntaxhighlighter.h>
 #include <QTextCharFormat>
 #include <QRegularExpression>
 #include <vector>
 
 class QTextDocument;
 
-class CScriptHighlighter : public QSyntaxHighlighter
+class CScriptHighlighter : public KSyntaxHighlighting::SyntaxHighlighter
 {
   Q_OBJECT
 
 public:
   CScriptHighlighter(QTextDocument* pParent = nullptr);
+  ~CScriptHighlighter() override;
+
+  void SetSearchColors(const QColor& background, const QColor& foreground);
+  void SetSearchExpression(const QString& sExpresion);
 
 protected:
   void highlightBlock(const QString& sText) override;
 
 private:
-  struct SHighlightingRule
-  {
-    QRegularExpression m_pattern;
-    QTextCharFormat m_format;
-  };
-  std::vector<SHighlightingRule> m_vHighlightingRules;
-
-  QRegularExpression m_commentStartExpression;
-  QRegularExpression m_commentEndExpression;
-
-  QTextCharFormat m_keywordFormat;
-  QTextCharFormat m_singleLineCommentFormat;
-  QTextCharFormat m_multiLineCommentFormat;
-  QTextCharFormat m_quotationFormat;
-  QTextCharFormat m_functionFormat;
-  QTextCharFormat m_variableFormat;
+  QRegularExpression m_searchExpression;
+  QTextCharFormat    m_searchFormat;
 };
 
 #endif // SCRIPTHIGHLIGHTER_H

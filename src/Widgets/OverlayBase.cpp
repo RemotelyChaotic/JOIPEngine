@@ -172,10 +172,13 @@ bool COverlayBase::eventFilter(QObject* pObject, QEvent* pEvent)
       }
       break;
     case QEvent::Show:
-      Show();
+      if (m_bShowCalled)
+      {
+        Show();
+      }
       break;
     case QEvent::Hide:
-      Hide();
+      hide();
       break;
     default:
       break;

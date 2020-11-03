@@ -115,6 +115,8 @@ set(Sources
   Editor/Script/ScriptEditorWidget.h 
   Editor/Script/ScriptHighlighter.cpp 
   Editor/Script/ScriptHighlighter.h 
+  Editor/Script/ScriptSearchBar.cpp
+  Editor/Script/ScriptSearchBar.h
   Editor/Script/TextSnippetOverlay.cpp 
   Editor/Script/TextSnippetOverlay.h 
   Editor/Script/TextSnippetOverlay.ui 

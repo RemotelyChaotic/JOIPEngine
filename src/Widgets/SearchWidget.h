@@ -16,10 +16,16 @@ public:
   explicit CSearchWidget(QWidget* pParent = nullptr);
   ~CSearchWidget();
 
+  void SetFilter(const QString& sFilter);
+  QString Filter();
+
+  void SetFocus();
+
 signals:
   void SignalFilterChanged(const QString& sText);
 
 protected slots:
+  void on_pFilterLineEdit_editingFinished();
   void on_pFilterLineEdit_textChanged(const QString& sText);
 
 private:

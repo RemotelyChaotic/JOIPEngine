@@ -926,10 +926,12 @@ CTimerWidget {
 }
 
 CScriptEditorWidget {
-  qproperty-lineNumberBackgroundColor: rgb(19, 28, 40);
-  qproperty-lineNumberTextColor: rgb(36, 52, 77);
-  qproperty-highlightLineColor: rgb(52, 69, 97);
-  qproperty-widgetsBackgroundColor: rgb(52, 69, 97);
+  qproperty-lineNumberBackgroundColor: black;
+  qproperty-lineNumberTextColor: white;
+  qproperty-highlightLineColor: rgb(20, 20, 20);
+  qproperty-highlightSearchBackgroundColor: black;
+  qproperty-highlightSearchColor: silver;
+  qproperty-widgetsBackgroundColor: black;
   qproperty-theme: "Breeze Dark";
 }
 

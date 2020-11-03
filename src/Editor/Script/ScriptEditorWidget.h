@@ -8,12 +8,13 @@
 #include <map>
 
 class CLineNumberArea;
+class CScriptSearchBar;
+class CScriptHighlighter;
+class CWidgetArea;
 namespace KSyntaxHighlighting
 {
   class Repository;
-  class SyntaxHighlighter;
 }
-class CWidgetArea;
 class QPaintEvent;
 class QResizeEvent;
 class QSize;
@@ -27,6 +28,8 @@ class CScriptEditorWidget : public QPlainTextEdit
   Q_PROPERTY(QColor  lineNumberBackgroundColor READ LineNumberBackgroundColor WRITE SetLineNumberBackgroundColor)
   Q_PROPERTY(QColor  lineNumberTextColor       READ LineNumberTextColor       WRITE SetLineNumberTextColor      )
   Q_PROPERTY(QColor  highlightLineColor        READ HighlightLineColor        WRITE SetHighlightLineColor       )
+  Q_PROPERTY(QColor  highlightSearchBackgroundColor READ HighlightSearchBackgroundColor WRITE SetHighlightSearchBackgroundColor )
+  Q_PROPERTY(QColor  highlightSearchColor      READ HighlightSearchColor      WRITE SetHighlightSearchColor     )
   Q_PROPERTY(QString theme                     READ Theme                     WRITE SetTheme                    )
   Q_PROPERTY(QColor  widgetsBackgroundColor    READ WidgetsBackgroundColor    WRITE SetWidgetsBackgroundColor   )
 
@@ -41,6 +44,10 @@ public:
   const QColor& LineNumberTextColor() { return m_lineNumberTextColor; }
   void SetHighlightLineColor(const QColor& color) { m_highlightLineColor = color; }
   const QColor& HighlightLineColor() { return m_highlightLineColor; }
+  void SetHighlightSearchBackgroundColor(const QColor& color);
+  const QColor& HighlightSearchBackgroundColor() { return m_highlightSearchBackgroundColor; }
+  void SetHighlightSearchColor(const QColor& color);
+  const QColor& HighlightSearchColor() { return m_highlightSearchColor; }
   void SetTheme(const QString& sTheme);
   const QString& Theme() { return m_sTheme; }
   void SetWidgetsBackgroundColor(const QColor& color) { m_widgetsBackgroundColor = color; }
@@ -54,8 +61,12 @@ public:
 
 public slots:
   void SlotExecutionError(QString sException, qint32 iLine, QString sStack);
+  void SlotShowHideSearchFilter();
+  void SlotSearchFilterChanged(bool bForward, const QString& sText);
 
 protected:
+  void contextMenuEvent(QContextMenuEvent* pEvent) override;
+  bool eventFilter(QObject* pTarget, QEvent* pEvent) override;
   void paintEvent(QPaintEvent* pEvent) override;
   void resizeEvent(QResizeEvent* pEvent) override;
 
@@ -64,17 +75,23 @@ private slots:
   void UpdateLeftAreaWidth(qint32 iNewBlockCount);
   void UpdateLineNumberArea(const QRect&, qint32);
   void UpdateWidgetArea(const QRect&, qint32);
+  void SearchAreaHidden();
 
 private:
   std::unique_ptr<KSyntaxHighlighting::Repository> m_spRepository;
-  QPointer<KSyntaxHighlighting::SyntaxHighlighter> m_pHighlighter;
+  QPointer<CScriptHighlighter>                     m_pHighlighter;
   CLineNumberArea*                                 m_pLineNumberArea;
   CWidgetArea*                                     m_pWidgetArea;
+  CScriptSearchBar*                                m_pSearchBar;
   QString                                          m_sTheme;
   QColor                                           m_lineNumberBackgroundColor;
   QColor                                           m_lineNumberTextColor;
   QColor                                           m_highlightLineColor;
+  QColor                                           m_highlightSearchBackgroundColor;
+  QColor                                           m_highlightSearchColor;
   QColor                                           m_widgetsBackgroundColor;
+  QTextCursor                                      m_highlightCursor;
+  QString                                          m_sLastSearch;
 };
 
 //----------------------------------------------------------------------------------------
