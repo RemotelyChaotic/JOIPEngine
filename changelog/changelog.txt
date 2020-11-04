@@ -22,6 +22,7 @@ New Features:
   file.
 - Added PlayerMetronome component to player and editor.
 - Option to pause Player automativally if app is not currently active.
+- Optional tutorial for the editor.
 
 Updated Features:
 - Upgrade to Qt5.14.2 with msvc2017 for more QJSEngine and QML features.
@@ -39,6 +40,8 @@ Updated Features:
 - Styles have been updated.
 - New button to Script type nodes added which allows to add scripts to the
   scene.
+- Code Editor has a Search functionality and behaves more akin to other
+  code editors (completion of brackets, quotes, tab-behavior, etc.)
 
 Changes:
 - In-Game title changed to JOIP Engine.
@@ -50,6 +53,7 @@ Changes:
 - Changed build system from QMake to CMake.
 - Reworked overlays. Overlays are using a manager to determine z-order.
 - Fullscreen mode is on by default.
+- Removed map button for now, since it is not implemented yet.
 
 Fixed Bugs:
 - Timer interval bug fixed; the timer doesn't run longer than expected anymore.
