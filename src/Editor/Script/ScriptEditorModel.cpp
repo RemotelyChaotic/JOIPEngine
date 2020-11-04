@@ -344,17 +344,13 @@ void CScriptEditorModel::SlotResourceRemoved(qint32 iProjId, const QString& sNam
   auto spDbManager = m_wpDbManager.lock();
   if (nullptr != spDbManager)
   {
-    auto spResource = spDbManager->FindResourceInProject(m_spProject, sName);
-    if (nullptr != spResource)
+    auto it = m_cachedScriptsMap.find(sName);
+    if (m_cachedScriptsMap.end() != it)
     {
-      auto it = m_cachedScriptsMap.find(sName);
-      if (m_cachedScriptsMap.end() != it)
-      {
-        qint32 iTargetIndex = static_cast<qint32>(std::distance(m_cachedScriptsMap.begin(), it));
-        beginRemoveRows(QModelIndex(), iTargetIndex, iTargetIndex);
-        m_cachedScriptsMap.erase(it);
-        endRemoveRows();
-      }
+      qint32 iTargetIndex = static_cast<qint32>(std::distance(m_cachedScriptsMap.begin(), it));
+      beginRemoveRows(QModelIndex(), iTargetIndex, iTargetIndex);
+      m_cachedScriptsMap.erase(it);
+      endRemoveRows();
     }
   }
 }
