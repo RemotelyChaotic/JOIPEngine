@@ -17,6 +17,10 @@ typedef std::shared_ptr<SProject> tspProject;
 typedef std::vector<tspProject>   tvspProject;
 typedef std::shared_ptr<SScene>   tspScene;
 
+typedef std::vector<std::function<void(const tspProject&)>> tvfnActionsProject;
+typedef std::vector<std::function<void(const tspScene&)>> tvfnActionsScene;
+typedef std::vector<std::function<void(const tspResource&)>> tvfnActionsResource;
+
 class CDatabaseManager : public CSystemBase
 {
   Q_OBJECT
@@ -30,7 +34,8 @@ public:
   static bool UnloadProject(tspProject& spProject);
 
   // Project
-  qint32 AddProject(const QString& sDirName = "New_Project", quint32 iVersion = 1, bool bBundled = false);
+  qint32 AddProject(const QString& sDirName = "New_Project", quint32 iVersion = 1, bool bBundled = false,
+                    const tvfnActionsProject& vfnActionsAfterAdding = tvfnActionsProject());
   void ClearProjects();
   bool DeserializeProject(qint32 iId);
   bool DeserializeProject(const QString& sName);
@@ -45,7 +50,8 @@ public:
   bool SerializeProject(const QString& sName);
 
   // Scene
-  qint32 AddScene(tspProject& spProj, const QString& sName = "New_Scene");
+  qint32 AddScene(tspProject& spProj, const QString& sName = "New_Scene",
+                  const tvfnActionsScene& vfnActionsAfterAdding = tvfnActionsScene());
   void ClearScenes(tspProject& spProj);
   tspScene FindScene(tspProject& spProj, qint32 iId);
   tspScene FindScene(tspProject& spProj, const QString& sName);
@@ -55,7 +61,8 @@ public:
   void RenameScene(tspProject& spProj, const QString& sName, const QString& sNewName);
 
   // Resource
-  QString AddResource(tspProject& spProj, const QUrl& sPath, const EResourceType& type, const QString& sName = QString());
+  QString AddResource(tspProject& spProj, const QUrl& sPath, const EResourceType& type, const QString& sName = QString(),
+                      const tvfnActionsResource& vfnActionsAfterAdding = tvfnActionsResource());
   void ClearResources(tspProject& spProj);
   tspResource FindResourceInProject(tspProject& spProj, const QString& sName);
   void RemoveResource(tspProject& spProj, const QString& sName);

@@ -77,7 +77,8 @@ bool CDatabaseManager::UnloadProject(tspProject& spProject)
 
 //----------------------------------------------------------------------------------------
 //
-qint32 CDatabaseManager::AddProject(const QString& sDirName, quint32 iVersion, bool bBundled)
+qint32 CDatabaseManager::AddProject(const QString& sDirName, quint32 iVersion, bool bBundled,
+                                    const tvfnActionsProject& vfnActionsAfterAdding)
 {
   if (!IsInitialized()) { return -1; }
 
@@ -106,6 +107,12 @@ qint32 CDatabaseManager::AddProject(const QString& sDirName, quint32 iVersion, b
     m_vspProjectDatabase.back()->m_bBundled = bBundled;
 
     locker.unlock();
+
+    for (auto fn : vfnActionsAfterAdding)
+    {
+      if (nullptr != fn) { fn(m_vspProjectDatabase.back()); }
+    }
+
     emit SignalProjectAdded(iNewId);
   }
 
@@ -332,7 +339,8 @@ bool CDatabaseManager::SerializeProject(const QString& sName)
 
 //----------------------------------------------------------------------------------------
 //
-qint32 CDatabaseManager::AddScene(tspProject& spProj, const QString& sName)
+qint32 CDatabaseManager::AddScene(tspProject& spProj, const QString& sName,
+                                  const tvfnActionsScene& vfnActionsAfterAdding)
 {
   if (!IsInitialized() || nullptr == spProj) { return -1; }
 
@@ -354,6 +362,12 @@ qint32 CDatabaseManager::AddScene(tspProject& spProj, const QString& sName)
     spProj->m_vspScenes.back()->m_spParent = spProj;
 
     locker.unlock();
+
+    for (auto fn : vfnActionsAfterAdding)
+    {
+      if (nullptr != fn) { fn(spProj->m_vspScenes.back()); }
+    }
+
     emit SignalSceneAdded(spProj->m_iId, iNewId);
   }
   return iNewId;
@@ -510,7 +524,9 @@ void CDatabaseManager::RenameScene(tspProject& spProj, const QString& sName, con
 
 //----------------------------------------------------------------------------------------
 //
-QString CDatabaseManager::AddResource(tspProject& spProj, const QUrl& sPath, const EResourceType& type, const QString& sName)
+QString CDatabaseManager::AddResource(tspProject& spProj, const QUrl& sPath,
+                                      const EResourceType& type, const QString& sName,
+                                      const tvfnActionsResource& vfnActionsAfterAdding)
 {
   if (!IsInitialized() || nullptr == spProj) { return QString(); }
 
@@ -537,14 +553,20 @@ QString CDatabaseManager::AddResource(tspProject& spProj, const QUrl& sPath, con
   {
     spProj->m_bNeedsCodecs = true;
   }
-  std::shared_ptr<SResource> sResource = std::make_shared<SResource>();
-  sResource->m_sName = sFinalName;
-  sResource->m_sPath = sPath;
-  sResource->m_type = type;
-  sResource->m_spParent = spProj;
-  spProj->m_spResourcesMap.insert({sFinalName, sResource});
+  std::shared_ptr<SResource> spResource = std::make_shared<SResource>();
+  spResource->m_sName = sFinalName;
+  spResource->m_sPath = sPath;
+  spResource->m_type = type;
+  spResource->m_spParent = spProj;
+  spProj->m_spResourcesMap.insert({sFinalName, spResource});
 
   locker.unlock();
+
+  for (auto fn : vfnActionsAfterAdding)
+  {
+    if (nullptr != fn) { fn(spResource); }
+  }
+
   emit SignalResourceAdded(spProj->m_iId, sFinalName);
 
   return sFinalName;

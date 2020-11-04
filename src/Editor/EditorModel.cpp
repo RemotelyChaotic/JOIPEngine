@@ -324,9 +324,15 @@ void CEditorModel::AddNewScriptFileToScene(QPointer<QWidget> pParentForDialog,
           if (jsFile.open(QIODevice::WriteOnly | QIODevice::Truncate))
           {
             jsFile.write(QString("// instert code to control scene").toUtf8());
+
+            tvfnActionsResource vfnActions = {[&spScene](const tspResource& spNewResource){
+              QWriteLocker locker(&spNewResource->m_rwLock);
+              spScene->m_sScript = spNewResource->m_sName;
+            }};
+
             QString sResource = spDbManager->AddResource(m_spCurrentProject, sUrlToSave,
-                                                         EResourceType::eScript);
-            spScene->m_sScript = sResource;
+                                                         EResourceType::eScript, QString(),
+                                                         vfnActions);
           }
           else
           {
