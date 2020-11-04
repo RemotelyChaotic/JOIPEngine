@@ -9,6 +9,7 @@ Rectangle {
 
     property Resource resource: null
     property int state: Resource.Null
+    property int playbackState: player.playbackState
 
     signal finishedPlaying();
 
@@ -37,6 +38,7 @@ Rectangle {
     }
 
     onResourceChanged: {
+        state = Resource.Null;
         mediaPlayer.stop();
         if (null !== resource && undefined !== resource)
         {
@@ -154,8 +156,14 @@ Rectangle {
         //        pageLoader.item.internalSubtitleTracks = player.internalSubtitleTracks
         //}
 
+        onPlaying: {
+            mediaPlayer.state = Resource.Loaded;
+        }
         onStopped: {
-            mediaPlayer.finishedPlaying();
+            if (mediaPlayer.state === Resource.Loaded)
+            {
+                mediaPlayer.finishedPlaying();
+            }
         }
         //onPaused: control.setPauseState()
         onError: {
@@ -176,17 +184,8 @@ Rectangle {
             {
                 mediaPlayer.state = Resource.Loading;
             }
-            else if (status === MediaPlayer.Buffering)
-            {
-                mediaPlayer.state = Resource.Loaded;
-            }
-            else if (status === MediaPlayer.Buffered)
-            {
-                mediaPlayer.state = Resource.Loaded;
-            }
             else if (status === MediaPlayer.EndOfMedia)
             {
-                mediaPlayer.state = Resource.Loaded;
                 player.stop();
             }
             else if (status === MediaPlayer.InvalidMedia)

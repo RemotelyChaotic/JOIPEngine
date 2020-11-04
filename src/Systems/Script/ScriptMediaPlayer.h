@@ -20,19 +20,19 @@ public:
 
 signals:
   void playVideo();
-  void playSound();
+  void playSound(const QString& sResource);
   void pauseVideo();
-  void pauseSound();
+  void pauseSound(const QString& sResource);
   void playMedia(const QString& sResource);
   void showMedia(const QString& sResource);
   void stopVideo();
-  void stopSound();
-  void startPlaybackWait();
+  void stopSound(const QString& sResource);
+  void startPlaybackWait(const QString& sResource);
   void startVideoWait();
-  void startSoundWait();
-  void playbackFinished();
+  void startSoundWait(const QString& sResource);
+  void playbackFinished(const QString& sResource);
   void videoFinished();
-  void soundFinished();
+  void soundFinished(const QString& sResource);
 };
 Q_DECLARE_METATYPE(CMediaPlayerSignalEmitter)
 
@@ -55,14 +55,20 @@ public slots:
   void playVideo();
   void pauseVideo();
   void stopVideo();
-  void playSound();
-  void pauseSound();
-  void stopSound();
+  void playSound(QJSValue resource);
+  void pauseSound(QJSValue resource);
+  void stopSound(QJSValue resource);
   void waitForPlayback();
+  void waitForPlayback(QJSValue resource);
   void waitForVideo();
   void waitForSound();
+  void waitForSound(QJSValue resource);
 
 private:
+  QString GetResourceName(const QJSValue& resource, bool* pbError = nullptr);
+  void WaitForPlayBackImpl(const QString& sResource);
+  void WaitForSoundImpl(const QString& sResource);
+
   std::weak_ptr<CDatabaseManager>  m_wpDbManager;
 };
 

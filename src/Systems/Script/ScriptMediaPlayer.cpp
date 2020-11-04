@@ -42,62 +42,20 @@ void CScriptMediaPlayer::show(QJSValue resource)
   if (!CheckIfScriptCanRun()) { return; }
 
   auto spSignalEmitter = SignalEmitter<CMediaPlayerSignalEmitter>();
-  auto spDbManager = m_wpDbManager.lock();
-  if (nullptr != spDbManager)
-  {
-    if (resource.isString())
-    {
-      QString sResource = resource.toString();
-      tspResource spResource = spDbManager->FindResourceInProject(m_spProject, sResource);
-      if (nullptr != spResource)
-      {
-        emit spSignalEmitter->showMedia(sResource);
-      }
-      else
-      {
-        QString sError = tr("Resource %1 not found");
-        emit m_pSignalEmitter->showError(sError.arg(resource.toString()),
-                                                QtMsgType::QtWarningMsg);
-      }
-    }
-    else if (resource.isQObject())
-    {
-      CResource* pResource = dynamic_cast<CResource*>(resource.toQObject());
-      if (nullptr != pResource)
-      {
-        if (nullptr != pResource->Data())
-        {
-          emit spSignalEmitter->showMedia(pResource->getName());
-        }
-        else
-        {
-          QString sError = tr("Resource in show() holds no data.");
-          emit m_pSignalEmitter->showError(sError, QtMsgType::QtWarningMsg);
-        }
-      }
-      else
-      {
-        QString sError = tr("Wrong argument-type to show(). String or resource was expected.");
-        emit m_pSignalEmitter->showError(sError, QtMsgType::QtWarningMsg);
-      }
-    }
-    else if (resource.isNull())
-    {
-      emit spSignalEmitter->showMedia(QString());
-    }
-    else
-    {
-      QString sError = tr("Wrong argument-type to show(). String or resource was expected.");
-      emit m_pSignalEmitter->showError(sError, QtMsgType::QtWarningMsg);
-    }
-  }
+
+  bool bError = false;
+  QString sResource = GetResourceName(resource, &bError);
+  if (bError) { return; }
+
+  emit spSignalEmitter->showMedia(sResource);
 }
 
 //----------------------------------------------------------------------------------------
 //
 void CScriptMediaPlayer::play()
 {
-  play(QJSValue::NullValue);
+  if (!CheckIfScriptCanRun()) { return; }
+  emit SignalEmitter<CMediaPlayerSignalEmitter>()->playMedia(QString());
 }
 
 //----------------------------------------------------------------------------------------
@@ -107,55 +65,11 @@ void CScriptMediaPlayer::play(QJSValue resource)
   if (!CheckIfScriptCanRun()) { return; }
 
   auto pSignalEmitter = SignalEmitter<CMediaPlayerSignalEmitter>();
-  auto spDbManager = m_wpDbManager.lock();
-  if (nullptr != spDbManager)
-  {
-    if (resource.isString())
-    {
-      QString sResource = resource.toString();
-      tspResource spResource = spDbManager->FindResourceInProject(m_spProject, sResource);
-      if (nullptr != spResource)
-      {
-        emit pSignalEmitter->playMedia(sResource);
-      }
-      else
-      {
-        QString sError = tr("Resource %1 not found");
-        emit m_pSignalEmitter->showError(sError.arg(resource.toString()),
-                                          QtMsgType::QtWarningMsg);
-      }
-    }
-    else if (resource.isQObject())
-    {
-      CResource* pResource = dynamic_cast<CResource*>(resource.toQObject());
-      if (nullptr != pResource)
-      {
-        if (nullptr != pResource->Data())
-        {
-          emit pSignalEmitter->playMedia(pResource->getName());
-        }
-        else
-        {
-          QString sError = tr("Resource in play() holds no data.");
-          emit m_pSignalEmitter->showError(sError, QtMsgType::QtWarningMsg);
-        }
-      }
-      else
-      {
-        QString sError = tr("Wrong argument-type to play(). String, resource or null was expected.");
-        emit m_pSignalEmitter->showError(sError, QtMsgType::QtWarningMsg);
-      }
-    }
-    else if (resource.isNull())
-    {
-      emit pSignalEmitter->playMedia(QString());
-    }
-    else
-    {
-      QString sError = tr("Wrong argument-type to play(). String, resource or null was expected.");
-      emit m_pSignalEmitter->showError(sError, QtMsgType::QtWarningMsg);
-    }
-  }
+  bool bError = false;
+  QString sResource = GetResourceName(resource, &bError);
+  if (bError) { return; }
+
+  emit pSignalEmitter->playMedia(sResource);
 }
 
 //----------------------------------------------------------------------------------------
@@ -186,27 +100,41 @@ void CScriptMediaPlayer::stopVideo()
 
 //----------------------------------------------------------------------------------------
 //
-void CScriptMediaPlayer::playSound()
+void CScriptMediaPlayer::playSound(QJSValue resource)
 {
   if (!CheckIfScriptCanRun()) { return; }
 
-  emit SignalEmitter<CMediaPlayerSignalEmitter>()->playSound();
+  bool bError = false;
+  QString sResource = GetResourceName(resource, &bError);
+  if (bError) { return; }
+
+  emit SignalEmitter<CMediaPlayerSignalEmitter>()->playSound(sResource);
 }
 
 //----------------------------------------------------------------------------------------
 //
-void CScriptMediaPlayer::pauseSound()
+void CScriptMediaPlayer::pauseSound(QJSValue resource)
 {
   if (!CheckIfScriptCanRun()) { return; }
-  emit SignalEmitter<CMediaPlayerSignalEmitter>()->pauseSound();
+
+  bool bError = false;
+  QString sResource = GetResourceName(resource, &bError);
+  if (bError) { return; }
+
+  emit SignalEmitter<CMediaPlayerSignalEmitter>()->pauseSound(sResource);
 }
 
 //----------------------------------------------------------------------------------------
 //
-void CScriptMediaPlayer::stopSound()
+void CScriptMediaPlayer::stopSound(QJSValue resource)
 {
   if (!CheckIfScriptCanRun()) { return; }
-  emit SignalEmitter<CMediaPlayerSignalEmitter>()->stopSound();
+
+  bool bError = false;
+  QString sResource = GetResourceName(resource, &bError);
+  if (bError) { return; }
+
+  emit SignalEmitter<CMediaPlayerSignalEmitter>()->stopSound(sResource);
 }
 
 //----------------------------------------------------------------------------------------
@@ -214,32 +142,20 @@ void CScriptMediaPlayer::stopSound()
 void CScriptMediaPlayer::waitForPlayback()
 {
   if (!CheckIfScriptCanRun()) { return; }
+  WaitForPlayBackImpl(QString());
+}
 
-  auto pSignalEmitter = SignalEmitter<CMediaPlayerSignalEmitter>();
+//----------------------------------------------------------------------------------------
+//
+void CScriptMediaPlayer::waitForPlayback(QJSValue resource)
+{
+  if (!CheckIfScriptCanRun()) { return; }
 
-  connect(pSignalEmitter, &CMediaPlayerSignalEmitter::playbackFinished,
-          pSignalEmitter, &CMediaPlayerSignalEmitter::stopVideo, Qt::DirectConnection);
-  connect(pSignalEmitter, &CMediaPlayerSignalEmitter::playbackFinished,
-          pSignalEmitter, &CMediaPlayerSignalEmitter::stopSound, Qt::DirectConnection);
+  bool bError = false;
+  QString sResource = GetResourceName(resource, &bError);
+  if (bError) { return; }
 
-  QEventLoop loop;
-  connect(pSignalEmitter, &CMediaPlayerSignalEmitter::playbackFinished,
-          &loop, &QEventLoop::quit, Qt::QueuedConnection);
-  connect(pSignalEmitter, &CMediaPlayerSignalEmitter::interrupt,
-          &loop, &QEventLoop::quit, Qt::QueuedConnection);
-  emit pSignalEmitter->startPlaybackWait();
-  loop.exec();
-
-  disconnect(pSignalEmitter, &CMediaPlayerSignalEmitter::playbackFinished,
-             &loop, &QEventLoop::quit);
-  disconnect(pSignalEmitter, &CMediaPlayerSignalEmitter::interrupt,
-             &loop, &QEventLoop::quit);
-  loop.disconnect();
-
-  disconnect(pSignalEmitter, &CMediaPlayerSignalEmitter::playbackFinished,
-             pSignalEmitter, &CMediaPlayerSignalEmitter::stopVideo);
-  disconnect(pSignalEmitter, &CMediaPlayerSignalEmitter::playbackFinished,
-             pSignalEmitter, &CMediaPlayerSignalEmitter::stopSound);
+  WaitForPlayBackImpl(sResource);
 }
 
 //----------------------------------------------------------------------------------------
@@ -276,26 +192,156 @@ void CScriptMediaPlayer::waitForVideo()
 void CScriptMediaPlayer::waitForSound()
 {
   if (!CheckIfScriptCanRun()) { return; }
+  WaitForSoundImpl(QString());
+}
 
+//----------------------------------------------------------------------------------------
+//
+void CScriptMediaPlayer::waitForSound(QJSValue resource)
+{
+  if (!CheckIfScriptCanRun()) { return; }
+
+  bool bError = false;
+  QString sResource = GetResourceName(resource, &bError);
+  if (bError) { return; }
+
+  WaitForSoundImpl(sResource);
+}
+
+//----------------------------------------------------------------------------------------
+//
+QString CScriptMediaPlayer::GetResourceName(const QJSValue& resource, bool* pbError)
+{
+  auto spDbManager = m_wpDbManager.lock();
+  if (nullptr != pbError) { *pbError = false; }
+  QString sResource;
+  if (nullptr != spDbManager)
+  {
+    if (resource.isString())
+    {
+      sResource = resource.toString();
+      tspResource spResource = spDbManager->FindResourceInProject(m_spProject, sResource);
+      if (nullptr == spResource)
+      {
+        QString sError = tr("Resource %1 not found");
+        emit m_pSignalEmitter->showError(sError.arg(resource.toString()),
+                                          QtMsgType::QtWarningMsg);
+        if (nullptr != pbError) { *pbError = true; }
+      }
+    }
+    else if (resource.isQObject())
+    {
+      CResource* pResource = dynamic_cast<CResource*>(resource.toQObject());
+      if (nullptr != pResource)
+      {
+        if (nullptr != pResource->Data())
+        {
+          sResource = pResource->getName();
+        }
+        else
+        {
+          QString sError = tr("Resource in play() holds no data.");
+          emit m_pSignalEmitter->showError(sError, QtMsgType::QtWarningMsg);
+          if (nullptr != pbError) { *pbError = true; }
+        }
+      }
+      else
+      {
+        QString sError = tr("Wrong argument-type to play(). String, resource or null was expected.");
+        emit m_pSignalEmitter->showError(sError, QtMsgType::QtWarningMsg);
+        if (nullptr != pbError) { *pbError = true; }
+      }
+    }
+    else
+    {
+      QString sError = tr("Wrong argument-type to play(). String, resource or null was expected.");
+      emit m_pSignalEmitter->showError(sError, QtMsgType::QtWarningMsg);
+      if (nullptr != pbError) { *pbError = true; }
+    }
+  }
+
+  return sResource;
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CScriptMediaPlayer::WaitForPlayBackImpl(const QString& sResource)
+{
   auto pSignalEmitter = SignalEmitter<CMediaPlayerSignalEmitter>();
 
-  connect(pSignalEmitter, &CMediaPlayerSignalEmitter::soundFinished,
-          pSignalEmitter, &CMediaPlayerSignalEmitter::stopSound, Qt::DirectConnection);
+  QMetaObject::Connection connStopPlayback =
+    connect(pSignalEmitter, &CMediaPlayerSignalEmitter::playbackFinished,
+            pSignalEmitter, [pSignalEmitter](const QString& sResourceRet) {
+    if (sResourceRet.isEmpty())
+    {
+      emit pSignalEmitter->stopVideo();
+    }
+  }, Qt::DirectConnection);
+  QMetaObject::Connection connStopSound =
+    connect(pSignalEmitter, &CMediaPlayerSignalEmitter::playbackFinished,
+            pSignalEmitter, [pSignalEmitter, &sResource](const QString& sResourceRet) {
+    if (sResource == sResourceRet && !sResourceRet.isEmpty())
+    {
+      emit pSignalEmitter->stopSound(sResourceRet);
+    }
+  }, Qt::DirectConnection);
 
   QEventLoop loop;
-  connect(pSignalEmitter, &CMediaPlayerSignalEmitter::soundFinished,
-          &loop, &QEventLoop::quit, Qt::QueuedConnection);
+  QMetaObject::Connection connQuit =
+    connect(pSignalEmitter, &CMediaPlayerSignalEmitter::playbackFinished,
+          &loop, [&loop, &sResource](const QString& sResourceRet) {
+    if (sResource == sResourceRet || sResourceRet.isEmpty())
+    {
+      loop.quit();
+    }
+  }, Qt::QueuedConnection);
   connect(pSignalEmitter, &CMediaPlayerSignalEmitter::interrupt,
           &loop, &QEventLoop::quit, Qt::QueuedConnection);
-  emit pSignalEmitter->startSoundWait();
+  emit pSignalEmitter->startPlaybackWait(sResource);
   loop.exec();
 
-  disconnect(pSignalEmitter, &CMediaPlayerSignalEmitter::soundFinished,
-             &loop, &QEventLoop::quit);
+  disconnect(connQuit);
   disconnect(pSignalEmitter, &CMediaPlayerSignalEmitter::interrupt,
              &loop, &QEventLoop::quit);
   loop.disconnect();
 
-  disconnect(pSignalEmitter, &CMediaPlayerSignalEmitter::soundFinished,
-             pSignalEmitter, &CMediaPlayerSignalEmitter::stopSound);
+  disconnect(connStopPlayback);
+  disconnect(connStopSound);
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CScriptMediaPlayer::WaitForSoundImpl(const QString& sResource)
+{
+  auto pSignalEmitter = SignalEmitter<CMediaPlayerSignalEmitter>();
+
+  QMetaObject::Connection connStop =
+    connect(pSignalEmitter, &CMediaPlayerSignalEmitter::soundFinished,
+            pSignalEmitter, [pSignalEmitter, &sResource](const QString& sResourceRet) {
+    if (sResource == sResourceRet && !sResourceRet.isEmpty())
+    {
+      emit pSignalEmitter->stopSound(sResourceRet);
+    }
+  }, Qt::DirectConnection);
+
+  QEventLoop loop;
+  QMetaObject::Connection connQuit =
+      connect(pSignalEmitter, &CMediaPlayerSignalEmitter::soundFinished,
+          &loop, [&loop, &sResource](const QString& sResourceRet) {
+    if (sResource == sResourceRet || sResourceRet.isEmpty())
+    {
+      loop.quit();
+    }
+  }, Qt::QueuedConnection);
+  connect(pSignalEmitter, &CMediaPlayerSignalEmitter::interrupt,
+          &loop, &QEventLoop::quit, Qt::QueuedConnection);
+  emit pSignalEmitter->startSoundWait(sResource);
+  loop.exec();
+
+  disconnect(connQuit);
+  disconnect(pSignalEmitter, &CMediaPlayerSignalEmitter::interrupt,
+             &loop, &QEventLoop::quit);
+  loop.disconnect();
+
+  disconnect(connStop);
 }

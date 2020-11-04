@@ -138,26 +138,35 @@
 
         <li><b>play ( [ string | Resource ] ):</b><br>
         This function can be called with or without arguments. Calling it with arguments
-        plays a <i>Movie</i> or <i>Sound</i> type Resource. When doing this, it will stop any
-        currently running playback and start replay of the new media.
-        The Resource can be the name of a Resource or a Resource object obtained from the
-        current Scene object. When calling this without any argument, it will continue playing
-        the last paused or stopped sound and video.<br>
+        plays a <i>Movie</i> or <i>Sound</i> type Resource.
+        The Resource input can be the name of a Resource or a Resource object obtained from the
+        current Scene object.<br>
+        When playing a <i>Movie</i>, it will
+        stop the currently running <i>Movie</i>.<br>
+        When playing a <i>Sound</i>, it will try to either find the emiter, that has the <i>Sound</i>
+        already loaded and resume or restart it or find an available sound emitter
+        and play it. If there's no available sound emitters,
+        it will not play the sound. The number of maximum available sound emitters is
+        hard coded to 5 for now, meaning at most 5 Sound type Resources can play simultaniously.<br>
+        When calling this without any argument, it will continue playing
+        the last used <i>Movie</i> and all loaded <i>Sound</i> resources. This is provided
+        for compatibility and should not be used. Use the specific functions instead.<br>
         <i>Example Usage:</i><br>
         mediaPlayer.play("myVideoOrSound"); // plays myVideoOrSound<br>
+        mediaPlayer.play("mySound"); // continues or starts playing the sound Resource<br>
         mediaPlayer.play(myVideoOrSoundVar); /* note: in this example myVideoOrSoundVar is a var */<br>
-        mediaPlayer.play(); // continues playing the last played media<br>
+        mediaPlayer.play(); // only for compatibility<br>
         <mediaPlayer></li>
 
         <li><b>playVideo ( ):</b><br>
-        This function does the same as if you call <i>play</i> without arguments, but will
-        allways continue playing the last paused or stopped video instead of all media.<br>
+        This function does the same as if you call <i>play</i> without arguments, but
+        will only play the last played <i>Movie</i>.<br>
         <i>Example Usage:</i><br>
-        mediaPlayer.playVideo(); // continues playing the last played video<br>
+        mediaPlayer.playVideo(); // continues playing the last played movie<br>
         <br></li>
 
         <li><b>pauseVideo ( ):</b><br>
-        This function will pause the currently playing video Resource. A paused video
+        This function will pause the currently playing <i>Movie</i> Resource. A paused <i>Movie</i>
         can never stop the wait in <i>waitForVideo</i> or <i>waitForPlayback</i> since the video
         is not considered finished yet.<br>
         <i>Example Usage:</i><br>
@@ -165,54 +174,69 @@
         <br></li>
 
         <li><b>stopVideo (  ):</b><br>
-        This function will stop the currently playing video Resource.<br>
-        <i>Example Usage:</i><br>
-        mediaPlayer.stopVideo(); // stops playing the last played video<br>
-        <br></li>
-
-        <li><b>playSound (  ):</b><br>
-        This function does the same as if you call <i>play</i> without arguments, but will
-        allways continue playing the last paused or stopped sound instead of all media.<br>
-        <i>Example Usage:</i><br>
-        mediaPlayer.playSound(); // continues playing the last played sound<br>
-        <br></li>
-
-        <li><b>pauseSound (  ):</b><br>
-        This function will pause the currently playing sound Resource. A paused sound
-        can never stop the wait in <i>waitForSound</i> or <i>waitForPlayback</i> since the sound
+        This function will stop the currently playing video Resource. A stopped <i>Movie</i>
+        can never stop the wait in <i>waitForVideo</i> or <i>waitForPlayback</i> since the video
         is not considered finished yet.<br>
         <i>Example Usage:</i><br>
-        mediaPlayer.pauseSound(); // pauses playing the last played sound<br>
-        <br></li>
-
-        <li><b>stopSound (  ):</b><br>
-        This function will stop the currently playing sound Resource.<br>
-        <i>Example Usage:</i><br>
         mediaPlayer.stopVideo(); // stops playing the last played video<br>
         <br></li>
 
-        <li><b>waitForPlayback (  ):</b><br>
-        Blocks and waits until either the currently running video or sound Resource stopps
-        playing. If no sound or video is playing this function will return immediately. If
+        <li><b>playSound ( [ string | Resource ] ):</b><br>
+        This function does the same as if you call <i>play</i> with the selected arguments,
+        but will not work play <i>Movie</i> type resources.<br>
+        <i>Example Usage:</i><br>
+        mediaPlayer.playSound("mySound"); // continues or starts playing the sound Resource<br>
+        mediaPlayer.playSound(); // continues playing all sounds sound<br>
+        <br></li>
+
+        <li><b>pauseSound ( [ string | Resource ] ):</b><br>
+        This function can be called with or without arguments. Calling it with arguments
+        will pause the given <i>Sound</i> Resource. A paused <i>Sound</i>
+        can never stop the wait in <i>waitForSound</i> or <i>waitForPlayback</i> since the sound
+        is not considered finished yet.<br>
+        Without arguments, it will pause all <i>Sound</i> Resource playbacks.<br>
+        <i>Example Usage:</i><br>
+        mediaPlayer.pauseSound("mySound"); // pauses playing the sound<br>
+        mediaPlayer.pauseSound(); // pauses playing all sounds<br>
+        <br></li>
+
+        <li><b>stopSound ( [ string | Resource ] ):</b><br>
+        This function can be called with or without arguments. Calling it with arguments
+        will stop the given <i>Sound</i> Resource. A stopped <i>Sound</i>
+        can never stop the wait in <i>waitForSound</i> or <i>waitForPlayback</i> since the sound
+        is not considered finished yet.<br>
+        Without arguments, it will stop all <i>Sound</i> Resource playbacks.<br>
+        <i>Example Usage:</i><br>
+        mediaPlayer.stopSound("mySound"); // stops playing the sound<br>
+        mediaPlayer.stopSound(); // stops playing all sounds<br>
+        <br></li>
+
+        <li><b>waitForPlayback ( [ string | Resource ] ):</b><br>
+        This function can be called with or without arguments.
+        The Resource input can be the name of a Resource or a Resource object obtained from the
+        current Scene object.<br>
+        With arguments, it blocks and waits until the given <i>Sound</i> Resource stopps
+        playing.<br>
+        Without arguments, it blocks and waits until current <i>Movie</i> Resource stopps
+        playing.<br>
+        If no sound or video is playing this function will return immediately. If
         both sound and video are paused this function will never return.<br>
         <i>Example Usage:</i><br>
-        mediaPlayer.waitForPlayback();<br>
+        mediaPlayer.waitForPlayback("mySound"); // to wait for sound<br>
+        mediaPlayer.waitForPlayback(); // to wait for movie<br>
         <br></li>
 
         <li><b>waitForVideo (  ):</b><br>
-        Blocks and waits until the currently running video Resource stopps
-        playing. If no video is playing this function will return immediately. If
-        the video Resouce is paused this function will never return.<br>
+        This function does the same as if you call <i>waitForPlayback</i> without arguments.<br>
         <i>Example Usage:</i><br>
         mediaPlayer.waitForVideo();<br>
         <br></li>
 
-        <li><b>waitForSound (  ):</b><br>
-        Blocks and waits until the currently running sound Resource stopps
-        playing. If no sound is playing this function will return immediately. If
-        the sound Resouce is paused this function will never return.<br>
+        <li><b>waitForSound ( [ string | Resource ] ):</b><br>
+        This function does the same as if you call <i>waitForPlayback</i> with the given arguments arguments.<br>
+        If given no argument, it will do nothing.<br>
         <i>Example Usage:</i><br>
-        mediaPlayer.waitForVideo();<br>
+        mediaPlayer.waitForSound("mySound");<br>
         <br></li>
       </ul>
     </p>
