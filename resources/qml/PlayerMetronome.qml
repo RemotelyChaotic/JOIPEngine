@@ -16,6 +16,7 @@ Rectangle {
         onStart: {
             metronomeDisplay.start();
             metronomeDisplay.opacity = 1.0;
+            metronomeDisplay.requestedRun = true;
         }
         onSetBpm: {
             metronomeDisplay.bpm = iBpm;
@@ -47,6 +48,7 @@ Rectangle {
         onStop: {
             metronomeDisplay.opacity = 0.0;
             metronomeDisplay.stop();
+            metronomeDisplay.requestedRun = false;
         }
     }
 
@@ -59,6 +61,8 @@ Rectangle {
         anchors.centerIn: parent
         width: parent.width - 10
         height: parent.height - 10
+
+        property bool requestedRun: false
 
         opacity: 0.0
         Behavior on opacity {
@@ -76,7 +80,10 @@ Rectangle {
             }
             else
             {
-                metronomeDisplay.resume();
+                if (metronomeDisplay.requestedRun)
+                {
+                    metronomeDisplay.resume();
+                }
             }
         }
     }

@@ -10,7 +10,15 @@
   },
   "required": [
     "eBeginTutorial",
-    "eSwitchRightPanelToProjectSettings"
+    "eSwitchRightPanelToProjectSettings",
+    "eCodePanel",
+    "eImageResourceSelected",
+    "eNodePanel",
+    "eNodePanelAdvanced",
+    "eNodePanelDone",
+    "eProjectSettings",
+    "eResourcePanel",
+    "eSwitchRightPanelToNodeSettings"
   ],
   "additionalProperties": false
 }
