@@ -50,6 +50,7 @@ public slots:
 
 protected slots:
   void on_pResourceLineEdit_editingFinished();
+  void on_CloseButton_clicked();
   void on_pPlayRadioButton_toggled(bool bChecked);
   void on_pPauseRadioButton_toggled(bool bChecked);
   void on_pStopRadioButton_toggled(bool bChecked);

@@ -95,6 +95,15 @@ void CResourceSnippetOverlay::on_pResourceLineEdit_editingFinished()
 
 //----------------------------------------------------------------------------------------
 //
+void CResourceSnippetOverlay::on_CloseButton_clicked()
+{
+  if (!m_bInitialized) { return; }
+  m_spUi->pResourceLineEdit->clear();
+  m_data.m_sResource = QString();
+}
+
+//----------------------------------------------------------------------------------------
+//
 void CResourceSnippetOverlay::on_pPlayRadioButton_toggled(bool bChecked)
 {
   if (!m_bInitialized) { return; }
@@ -173,50 +182,93 @@ void CResourceSnippetOverlay::on_pConfirmButton_clicked()
   }
 
   QString sCode;
-  if (!m_data.m_sResource.isNull() && !m_data.m_sResource.isEmpty())
+  if (!m_data.m_sResource.isEmpty())
   {
-    QString sMainCommand("mediaPlayer.%1(\"%2\");\n");
-    switch (type)
+    if (EDisplayMode::ePlayShow == m_data.m_displayMode)
     {
-      case EResourceType::eImage:
-        sMainCommand = sMainCommand.arg("show");
-        break;
-      case EResourceType::eMovie: // fallthrough
-      case EResourceType::eSound:
-        sMainCommand = sMainCommand.arg("play");
-        break;
-    default: break;
-    }
-    sMainCommand = sMainCommand.arg(m_data.m_sResource);
-
-    if (type._to_integral() == EResourceType::eMovie)
-    {
-      switch (m_data.m_displayMode)
+      QString sMainCommand("mediaPlayer.%1(\"%2\");\n");
+      switch (type)
       {
-      case EDisplayMode::ePlayShow: break;
-      case EDisplayMode::ePause: sMainCommand = "mediaPlayer.pauseVideo();\n"; break;
-      case EDisplayMode::eStop: sMainCommand = "mediaPlayer.stopVideo();\n"; break;
-      default: break;
+        case EResourceType::eImage:
+          sMainCommand = sMainCommand.arg("show");
+          break;
+        case EResourceType::eMovie:
+          sMainCommand = sMainCommand.arg("play");
+          break;
+        case EResourceType::eSound:
+          sMainCommand = sMainCommand.arg("playSound");
+          break;
+        default: break;
+      }
+      sMainCommand = sMainCommand.arg(m_data.m_sResource);
+      sCode += sMainCommand;
+    }
+    else if (EDisplayMode::ePause == m_data.m_displayMode)
+    {
+      switch (type)
+      {
+        case EResourceType::eImage: break;
+        case EResourceType::eMovie: sCode += "mediaPlayer.pauseVideo();\n"; break;
+        case EResourceType::eSound:
+          sCode += QString("mediaPlayer.pauseSound(\"%1\");\n").arg(m_data.m_sResource);
+          break;
+        default: break;
       }
     }
-    if (type._to_integral() == EResourceType::eSound)
+    else if (EDisplayMode::eStop == m_data.m_displayMode)
     {
-      switch (m_data.m_displayMode)
+      switch (type)
       {
-      case EDisplayMode::ePlayShow: break;
-      case EDisplayMode::ePause: sMainCommand = "mediaPlayer.pauseSound();\n"; break;
-      case EDisplayMode::eStop: sMainCommand = "mediaPlayer.stopSound();\n"; break;
-      default: break;
+        case EResourceType::eImage: break;
+        case EResourceType::eMovie: sCode += "mediaPlayer.stopVideo();\n"; break;
+        case EResourceType::eSound:
+          sCode += QString("mediaPlayer.stopSound(\"%1\");\n").arg(m_data.m_sResource);
+          break;
+        default: break;
       }
     }
-
-    sCode += sMainCommand;
+  }
+  else
+  {
+    if (EDisplayMode::ePlayShow == m_data.m_displayMode)
+    {
+      sCode += "mediaPlayer.play();\n";
+    }
+    else if (EDisplayMode::ePause == m_data.m_displayMode)
+    {
+      sCode += "mediaPlayer.pauseVideo();\n";
+      sCode += "mediaPlayer.pauseSound();\n";
+    }
+    else if (EDisplayMode::eStop == m_data.m_displayMode)
+    {
+      sCode +="mediaPlayer.stopVideo();\n";
+      sCode +="mediaPlayer.stopSound();\n";
+    }
   }
 
   if ((type._to_integral() == EResourceType::eMovie || type._to_integral() == EResourceType::eSound)
       && m_data.m_bWaitForFinished)
   {
-    sCode += "mediaPlayer.waitForPlayback();\n";
+    if (!m_data.m_sResource.isEmpty())
+    {
+      switch (type)
+      {
+        case EResourceType::eImage:
+          sCode += QString("mediaPlayer.waitForPlayback(\"%1\");\n").arg(m_data.m_sResource);
+          break;
+        case EResourceType::eMovie:
+          sCode += QString("mediaPlayer.waitForVideo();\n").arg(m_data.m_sResource);
+          break;
+        case EResourceType::eSound:
+          sCode += QString("mediaPlayer.waitForSound(\"%1\");\n").arg(m_data.m_sResource);
+          break;
+        default: break;
+      }
+    }
+    else
+    {
+      sCode += "mediaPlayer.waitForPlayback();\n";
+    }
   }
 
   emit SignalResourceCode(sCode);
