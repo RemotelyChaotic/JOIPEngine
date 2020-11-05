@@ -157,7 +157,7 @@
         mediaPlayer.play("mySound"); // continues or starts playing the sound Resource<br>
         mediaPlayer.play(myVideoOrSoundVar); /* note: in this example myVideoOrSoundVar is a var */<br>
         mediaPlayer.play(); // only for compatibility<br>
-        <mediaPlayer></li>
+        <br></li>
 
         <li><b>playVideo ( ):</b><br>
         This function does the same as if you call <i>play</i> without arguments, but
@@ -715,6 +715,22 @@
 
     <br>
 
+    <h2>include( string | Resource ): var</h2>
+
+    <p>This is a function that lets you use a different script as a library or module
+    to prevent code duplication. It can be called with a string or Resource argument. In any case
+    the input has to reference a <i>Script</i> type <a href="qrc:/resources/help/editor/resources/resource_help.html">Resource</a>.
+    It will return an access object, that let's you access the functions and properties
+    of the library.
+    <br>
+    <i>Example Usage:</i><br>
+    var Lib = include("myLib.js"); // loads the library script myLib.js into Lib for later access<br>
+    Lib.myFunction(); // calls the function myFunction from Lib<br>
+    <br></li>
+    </p>
+
+    <br>
+
     <h2>return</h2>
 
     <br>
@@ -723,7 +739,8 @@
     to a Scene directly without a normal <a href="qrc:/resources/help/editor/nodes/node_help.html">Scene Transition</a>.
     The value to be returned is the Scene name as a string.<br>
     <i>Example Usage:</i><br>
-    return "SceneB"; // skipps to "SceneB" and terminates current script<br></li>
+    return "SceneB"; // skipps to "SceneB" and terminates current script<br>
+    <br></li>
     </p>
 
   </div>

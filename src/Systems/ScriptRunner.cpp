@@ -147,6 +147,8 @@ void CScriptRunner::LoadScript(tspScene spScene, tspResource spResource)
       }
       m_objectMapMutex.unlock();
 
+      m_pScriptUtils->SetCurrentProject(spResource->m_spParent);
+
       m_spSignalEmitterContext->SetScriptExecutionStatus(CScriptRunnerSignalEmiter::eRunning);
 
       // get scene name and set it as function, so error messages show the scene name in the error
@@ -157,6 +159,7 @@ void CScriptRunner::LoadScript(tspScene spScene, tspResource spResource)
       // create wrapper function to make syntax of scripts easier and handle return value
       // and be able to emit signal on finished
       QString sSkript = QString("(function() { "
+                                "function include(resource) { return eval(utils.include(resource)); };"
                                 "var %1 = function() { %2 }; "
                                 "var ret = %3(); "
                                 "utils.finishedScript(ret); \n "
@@ -295,6 +298,8 @@ void CScriptRunner::SlotFinishedScript(const QVariant& sRetVal)
 
   emit m_spSignalEmitterContext->interrupt();
 
+  m_pScriptUtils->SetCurrentProject(nullptr);
+
   m_objectMapMutex.lock();
   for (auto it = m_objectMap.begin(); m_objectMap.end() != it; ++it)
   {
@@ -355,6 +360,8 @@ void CScriptRunner::SlotRun()
 
     emit m_spSignalEmitterContext->interrupt();
 
+    m_pScriptUtils->SetCurrentProject(nullptr);
+
     m_objectMapMutex.lock();
     for (auto it = m_objectMap.begin(); m_objectMap.end() != it; ++it)
     {
@@ -392,6 +399,80 @@ CScriptRunnerUtils::CScriptRunnerUtils(QObject* pParent, QPointer<CScriptRunner>
 CScriptRunnerUtils::~CScriptRunnerUtils()
 {
 
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CScriptRunnerUtils::SetCurrentProject(tspProject spProject)
+{
+  m_spProject = spProject;
+}
+
+//----------------------------------------------------------------------------------------
+//
+QString CScriptRunnerUtils::include(QJSValue resource)
+{
+  auto spDbManager = CApplication::Instance()->System<CDatabaseManager>().lock();
+  tspResource spResource;
+  if (nullptr != spDbManager)
+  {
+    if (resource.isString())
+    {
+      QString sResource = resource.toString();
+      spResource = spDbManager->FindResourceInProject(m_spProject, sResource);
+      if (nullptr == spResource)
+      {
+        QString sError = tr("Resource %1 not found");
+        emit m_pScriptRunner->SignalEmmitterContext()
+            ->showError(sError.arg(resource.toString()),QtMsgType::QtWarningMsg);
+      }
+    }
+    else if (resource.isQObject())
+    {
+      CResource* pResource = dynamic_cast<CResource*>(resource.toQObject());
+      if (nullptr != pResource)
+      {
+        if (nullptr != pResource->Data())
+        {
+          spResource = pResource->Data();
+        }
+        else
+        {
+          QString sError = tr("Resource in include() holds no data.");
+          emit m_pScriptRunner->SignalEmmitterContext()
+              ->showError(sError.arg(resource.toString()),QtMsgType::QtWarningMsg);
+        }
+      }
+      else
+      {
+        QString sError = tr("Wrong argument-type to include(). String or resource was expected.");
+        emit m_pScriptRunner->SignalEmmitterContext()
+            ->showError(sError.arg(resource.toString()),QtMsgType::QtWarningMsg);
+      }
+    }
+    else
+    {
+      QString sError = tr("Wrong argument-type to include(). String or resource was expected.");
+      emit m_pScriptRunner->SignalEmmitterContext()
+          ->showError(sError.arg(resource.toString()),QtMsgType::QtWarningMsg);
+    }
+  }
+
+
+  if (nullptr != spResource)
+  {
+    QReadLocker locker(&spResource->m_rwLock);
+    if (EResourceType::eScript == spResource->m_type._to_integral())
+    {
+      QString sPath = ResourceUrlToAbsolutePath(spResource);
+      QFile sciptFile(sPath);
+      if (sciptFile.exists() && sciptFile.open(QIODevice::ReadOnly))
+      {
+        return "(" + QString::fromUtf8(sciptFile.readAll()) + ")";
+      }
+    }
+  }
+  return QString("({})");
 }
 
 //----------------------------------------------------------------------------------------

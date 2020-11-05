@@ -13,8 +13,10 @@ class CScriptRunnerSignalContext;
 class CScriptRunnerUtils;
 class CScene;
 class CSettings;
+struct SProject;
 struct SResource;
 struct SScene;
+typedef std::shared_ptr<SProject> tspProject;
 typedef std::shared_ptr<SResource> tspResource;
 typedef std::shared_ptr<SScene> tspScene;
 
@@ -76,11 +78,17 @@ public:
   CScriptRunnerUtils(QObject* pParent, QPointer<CScriptRunner> pScriptRunner);
   ~CScriptRunnerUtils() override;
 
+  void SetCurrentProject(tspProject spProject);
+
+public slots:
+  QString include(QJSValue resource);
+
 signals:
   void finishedScript(const QVariant& sRetVal);
 
 private:
   QPointer<CScriptRunner>                         m_pScriptRunner;
+  tspProject                                      m_spProject;
 };
 
 //----------------------------------------------------------------------------------------

@@ -335,11 +335,11 @@ void CEditorResourceWidget::SlotAddButtonClicked()
   QStringList databaseFormatsList = DatabaseFormats();
   QString sDbFormats = databaseFormatsList.join(" ");
 
-  QString sFormatSelection = "Image Files (%1);;Video Files (%2);;Sound Files (%3);;Other Files (%4)";
+  QString sFormatSelection = "Image Files (%1);;Video Files (%2);;Sound Files (%3);;Script Files (%4);;Other Files (%5)";
   QString sCurrentFolder = CApplication::Instance()->Settings()->ContentFolder();
   QStringList  vsFileNames = QFileDialog::getOpenFileNames(this,
       tr("Add File"), sCurrentFolder,
-      sFormatSelection.arg(sImageFormats).arg(sVideoFormats).arg(sAudioFormats).arg(sOtherFormats));
+      sFormatSelection.arg(sImageFormats).arg(sVideoFormats).arg(sAudioFormats).arg(sScriptFormats).arg(sOtherFormats));
 
   // add file to respective category
   EditorModel()->AddFilesToProjectResources(

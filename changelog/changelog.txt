@@ -23,6 +23,8 @@ New Features:
 - Added PlayerMetronome component to player and editor.
 - Option to pause Player automativally if app is not currently active.
 - Optional tutorial for the editor.
+- Scripts can now include other scripts to provide some modularisation
+  to the JOI-Projects.
 
 Updated Features:
 - Upgrade to Qt5.14.2 with msvc2017 for more QJSEngine and QML features.
