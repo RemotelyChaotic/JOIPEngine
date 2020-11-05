@@ -60,11 +60,11 @@ class CResource : public QObject
   Q_OBJECT
   Q_DISABLE_COPY(CResource)
   CResource() {}
-  Q_PROPERTY(bool          isAnimated READ isAnimatedImpl)
-  Q_PROPERTY(bool          isLocal    READ isLocalPath)
-  Q_PROPERTY(QString       name       READ getName)
-  Q_PROPERTY(QUrl          path       READ getPath)
-  Q_PROPERTY(ResourceType  type       READ getType)
+  Q_PROPERTY(bool          isAnimated READ isAnimatedImpl CONSTANT)
+  Q_PROPERTY(bool          isLocal    READ isLocalPath CONSTANT)
+  Q_PROPERTY(QString       name       READ getName CONSTANT)
+  Q_PROPERTY(QUrl          path       READ getPath CONSTANT)
+  Q_PROPERTY(ResourceType  type       READ getType CONSTANT)
 
 public:
   enum ResourceType {

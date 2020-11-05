@@ -45,9 +45,9 @@ class CScene : public QObject
   Q_OBJECT
   Q_DISABLE_COPY(CScene)
   CScene() {}
-  Q_PROPERTY(qint32  id               READ getId    )
-  Q_PROPERTY(QString name             READ getName  )
-  Q_PROPERTY(QString script           READ getScript)
+  Q_PROPERTY(qint32  id               READ getId     CONSTANT)
+  Q_PROPERTY(QString name             READ getName   CONSTANT)
+  Q_PROPERTY(QString script           READ getScript CONSTANT)
 
 public:
   explicit CScene(QJSEngine* pEngine, const std::shared_ptr<SScene>& spScene);
