@@ -92,6 +92,7 @@ private:
   QColor                                           m_widgetsBackgroundColor;
   QTextCursor                                      m_highlightCursor;
   QString                                          m_sLastSearch;
+  Qt::Key                                          m_previouslyClickedKey;
 };
 
 //----------------------------------------------------------------------------------------
