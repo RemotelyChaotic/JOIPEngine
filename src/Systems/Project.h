@@ -33,6 +33,7 @@ struct SProject : public ISerializable, std::enable_shared_from_this<SProject>
   QString                   m_sSceneModel;
   QString                   m_sPlayerLayout;
   ETutorialState            m_tutorialState;
+  qint32                    m_iNumberOfSoundEmitters;
   bool                      m_bUsesWeb;
   bool                      m_bNeedsCodecs;
   bool                      m_bBundled;
@@ -69,6 +70,7 @@ class CProject : public QObject
   Q_PROPERTY(QString map               READ getMap               )
   Q_PROPERTY(QString sceneModel        READ getSceneModel        )
   Q_PROPERTY(QString playerLayout      READ getPlayerLayout      )
+  Q_PROPERTY(qint32  numberOfSoundEmitters READ getNumberOfSoundEmitters)
   Q_PROPERTY(QStringList kinks         READ getKinks             )
   Q_PROPERTY(bool    isUsingWeb        READ isUsingWeb           )
   Q_PROPERTY(bool    isUsingCodecs     READ isUsingCodecs        )
@@ -91,6 +93,7 @@ public:
   QString getMap();
   QString getSceneModel();
   QString getPlayerLayout();
+  qint32 getNumberOfSoundEmitters();
   QStringList getKinks();
   bool isUsingWeb();
   bool isUsingCodecs();

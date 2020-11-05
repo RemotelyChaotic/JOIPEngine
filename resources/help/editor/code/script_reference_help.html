@@ -146,8 +146,9 @@
         When playing a <i>Sound</i>, it will try to either find the emiter, that has the <i>Sound</i>
         already loaded and resume or restart it or find an available sound emitter
         and play it. If there's no available sound emitters,
-        it will not play the sound. The number of maximum available sound emitters is
-        hard coded to 5 for now, meaning at most 5 Sound type Resources can play simultaniously.<br>
+        it will not play the sound. The number of maximum available sound emitters can be
+        configured in the <a href="qrc:/resources/help/editor/resources/resource_help.html">Project Settings</a>.
+        The number describes the maximum number of Sound type Resources can play simultaniously.<br>
         When calling this without any argument, it will continue playing
         the last used <i>Movie</i> and all loaded <i>Sound</i> resources. This is provided
         for compatibility and should not be used. Use the specific functions instead.<br>

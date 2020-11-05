@@ -27,6 +27,7 @@ SProject::SProject() :
   m_sSceneModel(),
   m_sPlayerLayout(),
   m_tutorialState(ETutorialState::eFinished),
+  m_iNumberOfSoundEmitters(5),
   m_bUsesWeb(false),
   m_bNeedsCodecs(false),
   m_bBundled(false),
@@ -48,6 +49,7 @@ SProject::SProject(const SProject& other) :
   m_sSceneModel(other.m_sSceneModel),
   m_sPlayerLayout(other.m_sPlayerLayout),
   m_tutorialState(other.m_tutorialState),
+  m_iNumberOfSoundEmitters(other.m_iNumberOfSoundEmitters),
   m_bUsesWeb(other.m_bUsesWeb),
   m_bNeedsCodecs(other.m_bNeedsCodecs),
   m_bBundled(other.m_bBundled),
@@ -90,6 +92,7 @@ QJsonObject SProject::ToJsonObject()
     { "sSceneModel", m_sSceneModel },
     { "sPlayerLayout", m_sPlayerLayout },
     { "tutorialState", m_tutorialState._to_integral() },
+    { "iNumberOfSoundEmitters", m_iNumberOfSoundEmitters },
     { "bUsesWeb", m_bUsesWeb },
     { "bNeedsCodecs", m_bNeedsCodecs },
     { "vsKinks", kinks },
@@ -147,6 +150,11 @@ void SProject::FromJsonObject(const QJsonObject& json)
   if (it != json.end())
   {
     m_tutorialState = ETutorialState::_from_integral(it.value().toInt());
+  }
+  it = json.find("iNumberOfSoundEmitters");
+  if (it != json.end())
+  {
+    m_iNumberOfSoundEmitters = it.value().toInt();
   }
   it = json.find("bUsesWeb");
   if (it != json.end())
@@ -323,6 +331,14 @@ QString CProject::getPlayerLayout()
 {
   QReadLocker locker(&m_spData->m_rwLock);
   return m_spData->m_sPlayerLayout;
+}
+
+//----------------------------------------------------------------------------------------
+//
+qint32 CProject::getNumberOfSoundEmitters()
+{
+  QReadLocker locker(&m_spData->m_rwLock);
+  return m_spData->m_iNumberOfSoundEmitters;
 }
 
 //----------------------------------------------------------------------------------------

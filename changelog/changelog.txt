@@ -42,6 +42,9 @@ Updated Features:
   scene.
 - Code Editor has a Search functionality and behaves more akin to other
   code editors (completion of brackets, quotes, tab-behavior, etc.)
+- Support for multiple Sound Resources playing simultaniously and
+  the number of Sound Resources that can be played simultaniously can
+  be configured on a Project level.
 
 Changes:
 - In-Game title changed to JOIP Engine.

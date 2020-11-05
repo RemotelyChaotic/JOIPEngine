@@ -314,7 +314,7 @@ Rectangle {
 
     Repeater {
         id: soundRepeater
-        model: 5 // this should be configurable in project settings
+        model: registrator.currentlyLoadedProject.numberOfSoundEmitters
 
         SoundResourceView {
             width: 0
