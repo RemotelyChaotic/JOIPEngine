@@ -159,8 +159,8 @@ void CScriptRunner::LoadScript(tspScene spScene, tspResource spResource)
       // create wrapper function to make syntax of scripts easier and handle return value
       // and be able to emit signal on finished
       QString sSkript = QString("(function() { "
-                                "function include(resource) { return eval(utils.include(resource)); };"
-                                "var %1 = function() { %2 }; "
+                                "function include(resource) { return eval(utils.include(resource)); }; "
+                                "var %1 = function() { %2\n}; "
                                 "var ret = %3(); "
                                 "utils.finishedScript(ret); \n "
                                 "})")
