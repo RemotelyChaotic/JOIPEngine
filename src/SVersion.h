@@ -23,7 +23,7 @@ struct SVersion
   }
   SVersion(QString sVersion)
   {
-    QStringList list = sVersion.split(QRegExp(";|,|."));
+    QStringList list = sVersion.split(QRegExp("\\;|\\,|\\."));
     for(qint32 i = 0; list.length() > i; ++i)
     {
       if (0 == i) { m_iMajor = list[i].toUInt(); }
