@@ -147,6 +147,7 @@
         <file>resources/help/tutorial/DemoSceneModel.flow</file>
         <file>resources/help/tutorial/TutorialScheme.json</file>
         <file>resources/help/editor/projectsettings/number_soundemitters_help.html</file>
+        <file>resources/fonts/CloisterBlack.ttf</file>
     </qresource>
     <qresource prefix="/qml">
         <file>resources/qml/ProjectCardSelection.qml</file>

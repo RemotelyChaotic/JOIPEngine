@@ -76,9 +76,8 @@ void CApplication::Initialize()
   installEventFilter(m_spSoundEmitter.get());
 
   // fonts
-  qint32 iFont = QFontDatabase::addApplicationFont("://resources/fonts/Equestria.otf");
-  Q_ASSERT(-1 != iFont);
-  Q_UNUSED(iFont)
+  QFontDatabase::addApplicationFont(":/resources/fonts/Equestria.otf");
+  QFontDatabase::addApplicationFont(":/resources/fonts/CloisterBlack.ttf");
 
   QStringList fonts;
   QFontDatabase fontDb;

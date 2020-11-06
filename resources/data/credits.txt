@@ -21,6 +21,7 @@ Software Design & Programming:
 
 Custom Fonts:
 Equestria by "Pixel Sagas"
+Cloister Black Font by Dieter Steffmann (https://www.dafont.com/)
 
 Icons:
 By "RemotlyChaotic"
