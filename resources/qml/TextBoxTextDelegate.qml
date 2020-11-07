@@ -42,8 +42,9 @@ Rectangle {
                 horizontalAlignment: Text.AlignHCenter
                 elide: Text.ElideNone
                 text: textContent
-                wrapMode: Text.Wrap
+                wrapMode: Text.WordWrap
                 color: textColor
+                textFormat: Text.RichText
             }
         }
 

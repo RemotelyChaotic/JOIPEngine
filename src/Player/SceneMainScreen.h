@@ -65,6 +65,7 @@ private:
   void InitQmlMain();
   void LoadQml();
   void NextSkript();
+  void UnloadRunner();
   void UnloadQml();
 
 private:
@@ -78,6 +79,7 @@ private:
   std::weak_ptr<CDatabaseManager>                             m_wpDbManager;
   qint32                                                      m_lastScriptExecutionStatus;
   bool                                                        m_bInitialized;
+  bool                                                        m_bShuttingDown;
 };
 
 #endif // SCENEMAINSCREEN_H

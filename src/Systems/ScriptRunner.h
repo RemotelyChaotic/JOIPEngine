@@ -32,6 +32,7 @@ public:
   CScriptRunner();
   ~CScriptRunner() override;
 
+  void InterruptExecution();
   void PauseExecution();
   void ResumeExecution();
 
@@ -55,6 +56,9 @@ private slots:
   void SlotRegisterObject(const QString& sObject);
 
 private:
+  void HandleError(QJSValue& value);
+  void HandleScriptFinish(bool bSuccess, const QVariant& sRetVal);
+
   std::shared_ptr<CSettings>                     m_spSettings;
   std::unique_ptr<QJSEngine>                     m_spScriptEngine;
   std::shared_ptr<CScriptRunnerSignalContext>    m_spSignalEmitterContext;

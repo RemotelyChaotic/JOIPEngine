@@ -36,7 +36,8 @@ CSceneMainScreen::CSceneMainScreen(QWidget* pParent) :
   m_pCurrentProjectWrapper(nullptr),
   m_wpDbManager(),
   m_lastScriptExecutionStatus(static_cast<qint32>(CScriptRunnerSignalEmiter::ScriptExecStatus::eRunning)),
-  m_bInitialized(false)
+  m_bInitialized(false),
+  m_bShuttingDown(false)
 {
   m_spUi->setupUi(this);
 
@@ -95,6 +96,8 @@ void CSceneMainScreen::LoadProject(qint32 iId, const QString sStartScene)
 
     ConnectAllSignals();
     LoadQml();
+
+    m_bShuttingDown = false;
   }
 }
 
@@ -111,14 +114,8 @@ void CSceneMainScreen::UnloadProject()
 {
   if (!m_bInitialized) { return; }
 
-  DisconnectAllSignals();
-  UnloadQml();
-
-  disconnect(m_spScriptRunner.get(), &CScriptRunner::SignalScriptRunFinished,
-          this, &CSceneMainScreen::SlotScriptRunFinished);
-
-  bool bOk = QMetaObject::invokeMethod(this, "SlotUnloadFinished", Qt::QueuedConnection);
-  assert(bOk); Q_UNUSED(bOk)
+  m_bShuttingDown = true;
+  m_spScriptRunner->InterruptExecution();
 }
 
 //----------------------------------------------------------------------------------------
@@ -324,22 +321,40 @@ void CSceneMainScreen::SlotScriptRunFinished(bool bOk, const QString& sRetVal)
 {
   if (!m_bInitialized || nullptr == m_spCurrentProject) { return; }
 
-  if (bOk)
+  // normal handling
+  if (!m_bShuttingDown)
   {
-    if (sRetVal.isNull() || sRetVal.isEmpty())
+    if (bOk)
     {
-      SlotNextSkript();
+      if (sRetVal.isNull() || sRetVal.isEmpty())
+      {
+        SlotNextSkript();
+      }
+      else
+      {
+        m_spProjectRunner->ResolveFindScenes(sRetVal);
+        NextSkript();
+      }
     }
     else
     {
-      m_spProjectRunner->ResolveFindScenes(sRetVal);
-      NextSkript();
+      qWarning() << tr("Error in script, unloading project.");
+      SlotQuit();
     }
   }
+
+  // during shutdown this slot is called, when the engine has unloaded safely
   else
   {
-    qWarning() << tr("Error in script, unloading project.");
-    SlotQuit();
+    DisconnectAllSignals();
+    UnloadRunner();
+    UnloadQml();
+
+    disconnect(m_spScriptRunner.get(), &CScriptRunner::SignalScriptRunFinished,
+            this, &CSceneMainScreen::SlotScriptRunFinished);
+
+    bool bOk = QMetaObject::invokeMethod(this, "SlotUnloadFinished", Qt::QueuedConnection);
+    assert(bOk); Q_UNUSED(bOk)
   }
 }
 
@@ -360,15 +375,6 @@ void CSceneMainScreen::SlotUnloadFinished()
 
   delete m_pCurrentProjectWrapper;
   m_spCurrentProject = nullptr;
-
-  auto spSignalEmmiterContext = m_spScriptRunner->SignalEmmitterContext();
-  if (nullptr != spSignalEmmiterContext)
-  {
-    emit spSignalEmmiterContext->clearStorage();
-  }
-
-  m_spScriptRunner->UnregisterComponents();
-  m_spProjectRunner->UnloadProject();
 
   CDatabaseManager::UnloadProject(m_spCurrentProject);
   m_spCurrentProject = nullptr;
@@ -507,6 +513,20 @@ void CSceneMainScreen::NextSkript()
     qInfo() << tr("No more scenes to load.");
     SlotQuit();
   }
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CSceneMainScreen::UnloadRunner()
+{
+  auto spSignalEmmiterContext = m_spScriptRunner->SignalEmmitterContext();
+  if (nullptr != spSignalEmmiterContext)
+  {
+    emit spSignalEmmiterContext->clearStorage();
+  }
+
+  m_spScriptRunner->UnregisterComponents();
+  m_spProjectRunner->UnloadProject();
 }
 
 //----------------------------------------------------------------------------------------

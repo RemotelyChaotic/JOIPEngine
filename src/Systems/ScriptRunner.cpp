@@ -78,6 +78,8 @@ void CScriptRunner::Initialize()
 //
 void CScriptRunner::Deinitialize()
 {
+  InterruptExecution();
+
   m_spScriptEngine->globalObject().setProperty("utils", QJSValue());
   delete m_pScriptUtils;
   m_pScriptUtils = nullptr;
@@ -149,6 +151,8 @@ void CScriptRunner::LoadScript(tspScene spScene, tspResource spResource)
 
       m_pScriptUtils->SetCurrentProject(spResource->m_spParent);
 
+      // resume engine if interrupetd
+      m_spScriptEngine->setInterrupted(false);
       m_spSignalEmitterContext->SetScriptExecutionStatus(CScriptRunnerSignalEmiter::eRunning);
 
       // get scene name and set it as function, so error messages show the scene name in the error
@@ -171,15 +175,7 @@ void CScriptRunner::LoadScript(tspScene spScene, tspResource spResource)
 
       if (m_runFunction.isError())
       {
-        QString sException = m_runFunction.property("name").toString();
-        qint32 iLineNr = m_runFunction.property("lineNumber").toInt() - 1;
-        QString sStack = m_runFunction.property("stack").toString();
-        QString sError = "Uncaught " + sException +
-                         " at line " + QString::number(iLineNr) +
-                         ": " + m_runFunction.toString() + "\n" + sStack;
-        qCritical() << sError;
-        emit m_spSignalEmitterContext->showError(sError, QtMsgType::QtCriticalMsg);
-        emit m_spSignalEmitterContext->executionError(m_runFunction.toString(), iLineNr, sStack);
+        HandleError(m_runFunction);
         return;
       }
 
@@ -201,6 +197,14 @@ void CScriptRunner::LoadScript(tspScene spScene, tspResource spResource)
     emit m_spSignalEmitterContext->showError(sError, QtMsgType::QtCriticalMsg);
     return;
   }
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CScriptRunner::InterruptExecution()
+{
+  // interrupt, in case of infinite loop
+  m_spScriptEngine->setInterrupted(true);
 }
 
 //----------------------------------------------------------------------------------------
@@ -257,10 +261,6 @@ void CScriptRunner::RegisterNewComponent(const QString sName, QJSValue signalEmi
 //
 void CScriptRunner::UnregisterComponents()
 {
-  // interrupt, in case of infinite loop
-  m_spScriptEngine->setInterrupted(true);
-  m_spScriptEngine->setInterrupted(false);
-
   m_spScriptEngine->globalObject().setProperty("scene", QJSValue());
 
   m_objectMapMutex.lock();
@@ -287,6 +287,73 @@ void CScriptRunner::UnregisterComponents()
 //
 void CScriptRunner::SlotFinishedScript(const QVariant& sRetVal)
 {
+  HandleScriptFinish(true, sRetVal);
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CScriptRunner::SlotRun()
+{
+  if (m_runFunction.isCallable())
+  {
+    QJSValue ret = m_runFunction.call();
+    if (!m_spScriptEngine->isInterrupted())
+    {
+      if (ret.isError())
+      {
+        HandleError(ret);
+      }
+    }
+    else
+    {
+      HandleScriptFinish(false, QString());
+    }
+  }
+  else
+  {
+    QString sError =  tr("Cannot call java-script.");
+    qCritical() << sError;
+    emit m_spSignalEmitterContext->showError(sError, QtMsgType::QtCriticalMsg);
+    emit m_spSignalEmitterContext->executionError(sError, 0, "");
+
+    HandleScriptFinish(false, QString());
+  }
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CScriptRunner::SlotRegisterObject(const QString& sObject)
+{
+  QMutexLocker locker(&m_objectMapMutex);
+  auto it = m_objectMap.find(sObject);
+  if (m_objectMap.end() != it)
+  {
+    // yes we need to call the static method of QQmlEngine, not QJSEngine, WHY Qt, WHY???
+    QQmlEngine::setObjectOwnership(it->second.get(), QQmlEngine::CppOwnership);
+    QJSValue scriptValue = m_spScriptEngine->newQObject(it->second.get());
+    m_spScriptEngine->globalObject().setProperty(it->first, scriptValue);
+  }
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CScriptRunner::HandleError(QJSValue& value)
+{
+  QString sException = value.property("name").toString();
+  qint32 iLineNr = value.property("lineNumber").toInt() - 1;
+  QString sStack = value.property("stack").toString();
+  QString sError = "Uncaught " + sException +
+                   " at line " + QString::number(iLineNr) +
+                   ": " + value.toString() + "\n" + sStack;
+  qCritical() << sError;
+  emit m_spSignalEmitterContext->showError(sError, QtMsgType::QtCriticalMsg);
+  emit m_spSignalEmitterContext->executionError(value.toString(), iLineNr, sStack);
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CScriptRunner::HandleScriptFinish(bool bSuccess, const QVariant& sRetVal)
+{
   m_spScriptEngine->globalObject().setProperty("scene", QJSValue());
 
   m_spScriptEngine->collectGarbage();
@@ -309,82 +376,11 @@ void CScriptRunner::SlotFinishedScript(const QVariant& sRetVal)
 
   if (QVariant::String == sRetVal.type())
   {
-    emit SignalScriptRunFinished(true, sRetVal.toString());
+    emit SignalScriptRunFinished(bSuccess, sRetVal.toString());
   }
   else
   {
-    emit SignalScriptRunFinished(true, QString());
-  }
-}
-
-//----------------------------------------------------------------------------------------
-//
-void CScriptRunner::SlotRun()
-{
-  if (m_runFunction.isCallable())
-  {
-    QJSValue ret = m_runFunction.call();
-    if (!m_spScriptEngine->isInterrupted() &&
-        CScriptRunnerSignalEmiter::ScriptExecStatus::eRunning == m_spSignalEmitterContext->ScriptExecutionStatus())
-    {
-      if (ret.isError())
-      {
-        QString sException = ret.property("name").toString();
-        qint32 iLineNr = ret.property("lineNumber").toInt() - 1;
-        QString sStack = ret.property("stack").toString();
-        QString sError = "Uncaught " + sException +
-                         " at line " + QString::number(iLineNr) +
-                         ": " + ret.toString() + "\n" + sStack;
-        qCritical() << sError;
-        emit m_spSignalEmitterContext->showError(sError, QtMsgType::QtCriticalMsg);
-        emit m_spSignalEmitterContext->executionError(ret.toString(), iLineNr, sStack);
-        return;
-      }
-    }
-  }
-  else
-  {
-    QString sError =  tr("Cannot call java-script.");
-    qCritical() << sError;
-    emit m_spSignalEmitterContext->showError(sError, QtMsgType::QtCriticalMsg);
-    emit m_spSignalEmitterContext->executionError(sError, 0, "");
-
-    m_spScriptEngine->globalObject().setProperty("scene", QJSValue());
-
-    m_spScriptEngine->collectGarbage();
-
-    if (nullptr != m_pCurrentScene)
-    {
-      delete m_pCurrentScene;
-    }
-
-    emit m_spSignalEmitterContext->interrupt();
-
-    m_pScriptUtils->SetCurrentProject(nullptr);
-
-    m_objectMapMutex.lock();
-    for (auto it = m_objectMap.begin(); m_objectMap.end() != it; ++it)
-    {
-      it->second->SetCurrentProject(nullptr);
-    }
-    m_objectMapMutex.unlock();
-
-    emit SignalScriptRunFinished(false, QString());
-  }
-}
-
-//----------------------------------------------------------------------------------------
-//
-void CScriptRunner::SlotRegisterObject(const QString& sObject)
-{
-  QMutexLocker locker(&m_objectMapMutex);
-  auto it = m_objectMap.find(sObject);
-  if (m_objectMap.end() != it)
-  {
-    // yes we need to call the static method of QQmlEngine, not QJSEngine, WHY Qt, WHY???
-    QQmlEngine::setObjectOwnership(it->second.get(), QQmlEngine::CppOwnership);
-    QJSValue scriptValue = m_spScriptEngine->newQObject(it->second.get());
-    m_spScriptEngine->globalObject().setProperty(it->first, scriptValue);
+    emit SignalScriptRunFinished(bSuccess, QString());
   }
 }
 
