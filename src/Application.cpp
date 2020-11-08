@@ -37,9 +37,27 @@
 #include <QQmlEngine>
 #include <QQuickItem>
 #include <QQmlWebChannel>
+#include <QTextDocument>
 #include <QTimer>
 #include <cassert>
 
+CQmlApplicationQtNamespaceWrapper::CQmlApplicationQtNamespaceWrapper(QObject* eParent) :
+  QObject(eParent)
+{
+}
+CQmlApplicationQtNamespaceWrapper::~CQmlApplicationQtNamespaceWrapper()
+{
+}
+
+//----------------------------------------------------------------------------------------
+//
+bool CQmlApplicationQtNamespaceWrapper::mightBeRichtext(const QString& sString)
+{
+  return Qt::mightBeRichText(sString);
+}
+
+//----------------------------------------------------------------------------------------
+//
 CApplication::CApplication(int& argc, char *argv[]) :
   QApplication(argc, argv),
   m_spSystemsMap(),
@@ -178,6 +196,21 @@ void CApplication::RegisterQmlTypes()
 
   qRegisterMetaType<QQmlWebChannel*>();
 
+  qmlRegisterSingletonType<CQmlApplicationQtNamespaceWrapper>(
+        "JOIP.core", 1, 1, "QtApp",
+        [](QQmlEngine *engine, QJSEngine *scriptEngine) -> QObject*
+  {
+      Q_UNUSED(scriptEngine)
+      if (nullptr != engine)
+      {
+        return new CQmlApplicationQtNamespaceWrapper(engine);
+      }
+      else if (nullptr != scriptEngine)
+      {
+        return new CQmlApplicationQtNamespaceWrapper(scriptEngine);
+      }
+      return nullptr;
+  });
   qmlRegisterSingletonType<CSettings>("JOIP.core", 1, 1, "Settings",
                                       [](QQmlEngine *engine, QJSEngine *scriptEngine) -> QObject*
   {

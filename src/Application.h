@@ -11,7 +11,22 @@ class CHelpFactory;
 class COverlayManager;
 class CThreadedSystem;
 class CUISoundEmitter;
+class QQmlEngine;
 
+class CQmlApplicationQtNamespaceWrapper : public QObject
+{
+  Q_OBJECT
+
+public:
+  explicit CQmlApplicationQtNamespaceWrapper(QObject* eParent = nullptr);
+  ~CQmlApplicationQtNamespaceWrapper();
+
+public slots:
+  bool mightBeRichtext(const QString& sString);
+};
+
+//----------------------------------------------------------------------------------------
+//
 class CApplication : public QApplication
 {
   Q_OBJECT

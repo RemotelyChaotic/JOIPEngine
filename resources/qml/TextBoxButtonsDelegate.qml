@@ -130,7 +130,7 @@ Rectangle {
                         horizontalAlignment: Text.AlignHCenter
                         verticalAlignment: Text.AlignVCenter
                         color: textDelegate.textColors.length > index ? textDelegate.textColors[index] : "#FFFFFFFF"
-                        textFormat: Text.RichText
+                        textFormat: QtApp.mightBeRichtext(text) ? Text.RichText : Text.PlainText
                     }
 
                     Shortcut {

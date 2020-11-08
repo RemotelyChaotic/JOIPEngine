@@ -30,8 +30,8 @@ Rectangle {
         Rectangle {
             id: layoutText
             anchors.centerIn: parent
-            width: text.contentWidth
-            height: text.contentHeight
+            width: text.implicitWidth
+            height: text.implicitHeight
             color: "transparent"
 
             Text {
@@ -44,7 +44,7 @@ Rectangle {
                 text: textContent
                 wrapMode: Text.WordWrap
                 color: textColor
-                textFormat: Text.RichText
+                textFormat: QtApp.mightBeRichtext(textContent) ? Text.RichText : Text.PlainText
             }
         }
 
