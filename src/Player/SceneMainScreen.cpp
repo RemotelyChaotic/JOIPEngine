@@ -124,9 +124,12 @@ void CSceneMainScreen::SlotQuit()
 {
   if (!m_bInitialized || nullptr == m_spCurrentProject) { return; }
 
+  CScriptRunnerSignalEmiter::ScriptExecStatus statusBefore =
+      CScriptRunnerSignalEmiter::ScriptExecStatus::eStopped;
   auto spSignalEmmiterContext = m_spScriptRunner->SignalEmmitterContext();
   if (nullptr != spSignalEmmiterContext)
   {
+    statusBefore = spSignalEmmiterContext->ScriptExecutionStatus();
     spSignalEmmiterContext->SetScriptExecutionStatus(CScriptRunnerSignalEmiter::eStopped);
     emit spSignalEmmiterContext->interrupt();
   }
@@ -134,6 +137,16 @@ void CSceneMainScreen::SlotQuit()
   UnloadProject();
 
   emit SignalExitClicked();
+
+  // no signal is giong to be emitted
+  if (CScriptRunnerSignalEmiter::ScriptExecStatus::eStopped == statusBefore)
+  {
+    bool bOk =
+        QMetaObject::invokeMethod(this, "SlotScriptRunFinished", Qt::QueuedConnection,
+                                  Q_ARG(bool, false), Q_ARG(QString, QString()));
+    assert(bOk);
+    Q_UNUSED(bOk);
+  }
 }
 
 //----------------------------------------------------------------------------------------
@@ -519,12 +532,6 @@ void CSceneMainScreen::NextSkript()
 //
 void CSceneMainScreen::UnloadRunner()
 {
-  auto spSignalEmmiterContext = m_spScriptRunner->SignalEmmitterContext();
-  if (nullptr != spSignalEmmiterContext)
-  {
-    emit spSignalEmmiterContext->clearStorage();
-  }
-
   m_spScriptRunner->UnregisterComponents();
   m_spProjectRunner->UnloadProject();
 }

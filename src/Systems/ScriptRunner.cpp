@@ -175,6 +175,7 @@ void CScriptRunner::LoadScript(tspScene spScene, tspResource spResource)
 
       if (m_runFunction.isError())
       {
+        m_spSignalEmitterContext->SetScriptExecutionStatus(CScriptRunnerSignalEmiter::eStopped);
         HandleError(m_runFunction);
         return;
       }
@@ -204,6 +205,7 @@ void CScriptRunner::LoadScript(tspScene spScene, tspResource spResource)
 void CScriptRunner::InterruptExecution()
 {
   // interrupt, in case of infinite loop
+  m_spSignalEmitterContext->SetScriptExecutionStatus(CScriptRunnerSignalEmiter::eStopped);
   m_spScriptEngine->setInterrupted(true);
 }
 
@@ -297,6 +299,7 @@ void CScriptRunner::SlotRun()
   if (m_runFunction.isCallable())
   {
     QJSValue ret = m_runFunction.call();
+    m_spSignalEmitterContext->SetScriptExecutionStatus(CScriptRunnerSignalEmiter::eStopped);
     if (!m_spScriptEngine->isInterrupted())
     {
       if (ret.isError())
@@ -311,6 +314,8 @@ void CScriptRunner::SlotRun()
   }
   else
   {
+    m_spSignalEmitterContext->SetScriptExecutionStatus(CScriptRunnerSignalEmiter::eStopped);
+
     QString sError =  tr("Cannot call java-script.");
     qCritical() << sError;
     emit m_spSignalEmitterContext->showError(sError, QtMsgType::QtCriticalMsg);
@@ -354,6 +359,8 @@ void CScriptRunner::HandleError(QJSValue& value)
 //
 void CScriptRunner::HandleScriptFinish(bool bSuccess, const QVariant& sRetVal)
 {
+  m_spSignalEmitterContext->SetScriptExecutionStatus(CScriptRunnerSignalEmiter::eStopped);
+
   m_spScriptEngine->globalObject().setProperty("scene", QJSValue());
 
   m_spScriptEngine->collectGarbage();

@@ -44,7 +44,7 @@ QJSValue CScriptStorage::load(QString sId)
   auto it = m_storage.find(sId);
   if (m_storage.end() != it)
   {
-    return m_pEngine->toScriptValue(it->second);
+    return it->second;
   }
   return QJSValue();
 }
@@ -62,7 +62,7 @@ void CScriptStorage::store(QString sId, QJSValue value)
     emit m_pSignalEmitter->showError(sError.arg(sId), QtMsgType::QtWarningMsg);
   }
 
-  m_storage.insert({sId, value});
+  m_storage[sId] = value;
 }
 
 //----------------------------------------------------------------------------------------
