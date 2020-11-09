@@ -1,6 +1,7 @@
 import QtQuick 2.14
 import QtQuick.Controls 2.14
 import QtGraphicalEffects 1.14
+import QtGui 5.14
 import JOIP.core 1.1
 import JOIP.db 1.1
 import JOIP.script 1.1
@@ -22,11 +23,13 @@ Rectangle {
                 switch (pResource.type)
                 {
                 case Resource.Image:
+                    resourceDisplay.source = pResource.source
                     movieResource.resource = null;
                     imgResource.resource = pResource;
                     break;
 
                 case Resource.Movie:
+                    resourceDisplay.source = pResource.source
                     imgResource.resource = null;
                     if (null !== movieResource.resource &&
                         sName === movieResource.resource.name)
@@ -275,6 +278,7 @@ Rectangle {
                              movieResource.state === Resource.Null &&
                              imgResource.state === Resource.Error ||
                              movieResource.state === Resource.Error
+        property string source: ""
 
         AnimatedImage {
             id: loadingAnimation
@@ -309,6 +313,32 @@ Rectangle {
             id: errorResource
             visible: resourceDisplay.error
             fontSize: 100
+        }
+
+        Button {
+            id: iconSourceInfoRect
+            anchors.right: parent.right
+            anchors.top: parent.top
+            width: 32
+            height: 32
+            visible: !resourceDisplay.loading && !resourceDisplay.error
+            hoverEnabled: true
+
+            background: Rectangle {
+                color: "transparent"
+            }
+
+            Image {
+                id: iconWarningVersion
+                anchors.fill: parent
+                source: Settings.styleFolderQml() + "/InfoIcon.svg"
+                opacity: iconSourceInfoRect.hovered ? 1.0 : 0.5
+            }
+
+            onClicked: {
+                clipboard.text = resourceDisplay.source;
+                iconSourceInfoRect.copied = true;
+            }
         }
     }
 
@@ -384,5 +414,28 @@ Rectangle {
             registrator.registerMediaPlayer(mediaPlayer);
         }
         registrator.componentLoaded();
+    }
+
+    // Misc components
+    ToolTip {
+        parent: iconSourceInfoRect
+        visible: "" !== resourceDisplay.source && iconSourceInfoRect.hovered
+        text: qsTr("Source: ") + resourceDisplay.source + (copied ? "\nCopied to clipboard" : "")
+        property bool copied: false
+        onCopiedChanged: {
+            copyTimer.start();
+        }
+    }
+
+    Timer {
+        id: copyTimer
+        interval: 2000; running: false; repeat: false
+        onTriggered: {
+            iconSourceInfoRect.copied = false;
+        }
+    }
+
+    Clipboard {
+        id: clipboard
     }
 }

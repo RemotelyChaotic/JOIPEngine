@@ -148,6 +148,7 @@
         <file>resources/help/tutorial/TutorialScheme.json</file>
         <file>resources/help/editor/projectsettings/number_soundemitters_help.html</file>
         <file>resources/fonts/CloisterBlack.ttf</file>
+        <file>resources/help/editor/source_button_help.html</file>
     </qresource>
     <qresource prefix="/qml">
         <file>resources/qml/ProjectCardSelection.qml</file>

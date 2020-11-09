@@ -71,7 +71,10 @@ qint32 CResourceTreeItem::ColumnCount() const
 //
 QVariant CResourceTreeItem::Data(qint32 iColumn) const
 {
-  if (iColumn < 0 || iColumn >= c_iNumColumns)
+  if (iColumn < 0 ||
+      (iColumn >= c_iNumColumns && EResourceTreeItemType::eResource != m_type._to_integral()) ||
+      ((iColumn > c_iColumnToolTip || iColumn == c_iNumColumns) &&
+       EResourceTreeItemType::eResource == m_type._to_integral()))
   {
     return QVariant();
   }
@@ -104,6 +107,9 @@ QVariant CResourceTreeItem::Data(qint32 iColumn) const
             return m_spResource->m_sPath;
           case c_iColumnType:
             return m_spResource->m_type._to_integral();
+          case c_iColumnToolTip:
+            return m_spResource->m_sSource.isEmpty() ?
+                  QVariant() : QString("Source: ") + m_spResource->m_sSource.toString();
         default: return QVariant();
         }
       }

@@ -161,6 +161,11 @@ QVariant CResourceTreeItemModel::data(const QModelIndex& index, int iRole) const
     CResourceTreeItem* item = static_cast<CResourceTreeItem*>(index.internalPointer());
     return QString(item->Type()._to_string()) + ";" + item->Data(c_iColumnName).toString();
   }
+  else if (Qt::ToolTipRole == iRole)
+  {
+    CResourceTreeItem* item = static_cast<CResourceTreeItem*>(index.internalPointer());
+    return item->Data(c_iColumnToolTip);
+  }
   else
   {
     return QVariant();

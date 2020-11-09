@@ -522,6 +522,23 @@
           {"posX" : 0.4}, { "posY": 0.8}, {"anchor": "eLeft"},
           { "text": "For Movie and Sound type Resources, you can click the preview to play or pause the playback." }
         ]
+      },
+      {
+        "highlight": [
+          { "items" : ["SourceButton"]}
+        ]
+      },
+      {
+        "text": [
+          {"posX" : 0.1}, { "posY": 0.2}, {"anchor": "eLeft"},
+          { "text": "After adding resources you can optionally add a source for the image<br>which is visible in the player.<br>Make sure to source the images used if possible." }
+        ]
+      },
+      {
+        "text": [
+          {"posX" : 0.1}, { "posY": 0.2}, {"anchor": "eLeft"},
+          { "text": "Web-Resources allways automatically add the address as source." }
+        ]
       }
     ]
   },

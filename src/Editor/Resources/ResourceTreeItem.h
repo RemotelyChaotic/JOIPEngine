@@ -13,11 +13,13 @@ BETTER_ENUM(EResourceTreeItemType, qint32,
 
 namespace resource_item
 {
-  const qint32 c_iColumnName  = 0;
-  const qint32 c_iColumnType  = 1;
-  const qint32 c_iColumnPath  = 2;
+  const qint32 c_iColumnName    = 0;
+  const qint32 c_iColumnType    = 1;
+  const qint32 c_iColumnPath    = 2;
 
-  const qint32 c_iNumColumns  = 3;
+  const qint32 c_iNumColumns    = 3;
+
+  const qint32 c_iColumnToolTip = 4;
 }
 
 class CResourceTreeItem

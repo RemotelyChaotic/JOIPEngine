@@ -14,6 +14,7 @@ SResource::SResource(EResourceType type) :
   m_rwLock(QReadWriteLock::Recursive),
   m_sName(),
   m_sPath(),
+  m_sSource(),
   m_type(type)
 {}
 
@@ -22,6 +23,7 @@ SResource::SResource(const SResource& other) :
   m_rwLock(QReadWriteLock::Recursive),
   m_sName(other.m_sName),
   m_sPath(other.m_sPath),
+  m_sSource(other.m_sSource),
   m_type(other.m_type)
 {}
 
@@ -35,6 +37,7 @@ QJsonObject SResource::ToJsonObject()
   return {
     { "sName", m_sName },
     { "sPath", m_sPath.toString(QUrl::None) },
+    { "sSource", m_sSource.toString(QUrl::None) },
     { "type", m_type._value },
   };
 }
@@ -53,6 +56,11 @@ void SResource::FromJsonObject(const QJsonObject& json)
   if (it != json.end())
   {
     m_sPath = QUrl(it.value().toString());
+  }
+  it = json.find("sSource");
+  if (it != json.end())
+  {
+    m_sSource = QUrl(it.value().toString());
   }
   it = json.find("type");
   if (it != json.end())
@@ -191,6 +199,14 @@ QUrl CResource::getPath()
   {
     return m_spData->m_sPath;
   }
+}
+
+//----------------------------------------------------------------------------------------
+//
+QUrl CResource::getSource()
+{
+  QReadLocker locker(&m_spData->m_rwLock);
+  return m_spData->m_sSource;
 }
 
 //----------------------------------------------------------------------------------------

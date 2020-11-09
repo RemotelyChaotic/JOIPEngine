@@ -51,14 +51,17 @@ protected slots:
   void SlotAddButtonClicked();
   void SlotAddWebButtonClicked();
   void SlotRemoveButtonClicked();
+  void SlotSetSourceButtonClicked();
   void SlotTitleCardButtonClicked();
   void SlotMapButtonClicked();
   void SlotCurrentChanged(const QModelIndex &current, const QModelIndex &previous);
   void SlotWebResourceSelected(const QString& sResource);
+  void SlotWebSourceSelected(const QString& sResource);
   void SlotNetworkReplyError(QNetworkReply::NetworkError code);
   void SlotNetworkReplyFinished();
 
 private:
+  std::unique_ptr<CWebResourceOverlay>                 m_spSourceOverlay;
   std::unique_ptr<CWebResourceOverlay>                 m_spWebOverlay;
   std::unique_ptr<QNetworkAccessManager>               m_spNAManager;
   std::shared_ptr<Ui::CEditorResourceWidget>           m_spUi;

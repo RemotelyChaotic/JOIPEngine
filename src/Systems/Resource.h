@@ -42,6 +42,7 @@ struct SResource : public ISerializable, public std::enable_shared_from_this<SRe
   mutable QReadWriteLock    m_rwLock;
   QString                   m_sName;
   QUrl                      m_sPath;
+  QUrl                      m_sSource;
   EResourceType             m_type;
 
   QJsonObject ToJsonObject() override;
@@ -64,6 +65,7 @@ class CResource : public QObject
   Q_PROPERTY(bool          isLocal    READ isLocalPath CONSTANT)
   Q_PROPERTY(QString       name       READ getName CONSTANT)
   Q_PROPERTY(QUrl          path       READ getPath CONSTANT)
+  Q_PROPERTY(QUrl          source     READ getSource CONSTANT)
   Q_PROPERTY(ResourceType  type       READ getType CONSTANT)
 
 public:
@@ -92,6 +94,7 @@ public:
   bool isLocalPath();
   QString getName();
   QUrl getPath();
+  QUrl getSource();
   ResourceType getType();
 
   Q_INVOKABLE QJSValue project();

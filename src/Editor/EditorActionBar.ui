@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>520</width>
-    <height>1254</height>
+    <height>1268</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -385,6 +385,40 @@
         </property>
         <property name="toolTip">
          <string>Remove resource</string>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+        <property name="iconSize">
+         <size>
+          <width>48</width>
+          <height>48</height>
+         </size>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="CShortcutButton" name="SourceButton">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="minimumSize">
+         <size>
+          <width>48</width>
+          <height>48</height>
+         </size>
+        </property>
+        <property name="maximumSize">
+         <size>
+          <width>48</width>
+          <height>48</height>
+         </size>
+        </property>
+        <property name="toolTip">
+         <string>Add source to image</string>
         </property>
         <property name="text">
          <string/>

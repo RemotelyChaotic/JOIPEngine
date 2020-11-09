@@ -220,7 +220,8 @@ QPushButton#AddShowBackgroundCode {
   qproperty-icon: url(:/resources/img/ButtonBackground.png) off,
                   url(:/resources/img/ButtonBackground.png) on;
 }
-QPushButton#AddShowIconCode {
+QPushButton#AddShowIconCode,
+QPushButton#SourceButton {
   qproperty-icon: url(:/resources/img/ButtonIcon.png) off,
                   url(:/resources/img/ButtonIcon.png) on;
 }

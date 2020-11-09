@@ -15,6 +15,7 @@ namespace {
   const QString c_sAddResourceHelpId =    "Editor/AddResource";
   const QString c_sAddWebResourceHelpId = "Editor/AddWebResource";
   const QString c_sRemoveResourceHelpId = "Editor/RemoveResource";
+  const QString c_sImageSourceHelpId =    "Editor/ImageSource";
   const QString c_sTitleCardHelpId =      "Editor/TitleCard";
   const QString c_sMapHelpId =            "Editor/Map";
 
@@ -93,6 +94,8 @@ void CEditorActionBar::Initialize()
     wpHelpFactory->RegisterHelp(c_sAddWebResourceHelpId, ":/resources/help/editor/addwebresource_button_help.html");
     m_spUi->RemoveResourceButton->setProperty(helpOverlay::c_sHelpPagePropertyName, c_sRemoveResourceHelpId);
     wpHelpFactory->RegisterHelp(c_sRemoveResourceHelpId, ":/resources/help/editor/removeresource_button_help.html");
+    m_spUi->SourceButton->setProperty(helpOverlay::c_sHelpPagePropertyName, c_sImageSourceHelpId);
+    wpHelpFactory->RegisterHelp(c_sImageSourceHelpId, ":/resources/help/editor/source_button_help.html");
     m_spUi->TitleCardButton->setProperty(helpOverlay::c_sHelpPagePropertyName, c_sTitleCardHelpId);
     wpHelpFactory->RegisterHelp(c_sTitleCardHelpId, ":/resources/help/editor/titlecard_button_help.html");
     m_spUi->MapButton->setProperty(helpOverlay::c_sHelpPagePropertyName, c_sMapHelpId);
@@ -247,8 +250,9 @@ void CEditorActionBar::SlotKeyBindingsChanged()
     m_spUi->AddResourceButton->SetShortcut(m_spSettings->keyBinding(sKey.arg(1)));
     m_spUi->AddWebResourceButton->SetShortcut(m_spSettings->keyBinding(sKey.arg(2)));
     m_spUi->RemoveResourceButton->SetShortcut(m_spSettings->keyBinding(sKey.arg(3)));
-    m_spUi->TitleCardButton->SetShortcut(m_spSettings->keyBinding(sKey.arg(4)));
-    m_spUi->MapButton->SetShortcut(m_spSettings->keyBinding(sKey.arg(5)));
+    m_spUi->SourceButton->SetShortcut(m_spSettings->keyBinding(sKey.arg(4)));
+    m_spUi->TitleCardButton->SetShortcut(m_spSettings->keyBinding(sKey.arg(5)));
+    m_spUi->MapButton->SetShortcut(m_spSettings->keyBinding(sKey.arg(6)));
 
     m_spUi->PlayButton->SetShortcut(m_spSettings->keyBinding(sKey.arg(1)));
     m_spUi->PauseButton->SetShortcut(m_spSettings->keyBinding(sKey.arg(2)));

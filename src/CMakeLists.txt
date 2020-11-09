@@ -28,6 +28,8 @@ set(Sources
   CreditsScreen.cpp 
   CreditsScreen.h 
   CreditsScreen.ui 
+  ClipboardQmlWrapper.cpp
+  ClipboardQmlWrapper.h
   Editor/EditorActionBar.cpp 
   Editor/EditorActionBar.h 
   Editor/EditorActionBar.ui 

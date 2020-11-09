@@ -34,12 +34,15 @@ namespace
 {
   const QString c_sResourceTreeHelpId =   "Editor/ResourceTree";
   const QString c_sSearchBarHelpId =      "Editor/SearchBar";
+
+  const char c_sProperty[] = "SelectedResource";
 }
 
 //----------------------------------------------------------------------------------------
 //
 CEditorResourceWidget::CEditorResourceWidget(QWidget* pParent) :
   CEditorWidgetBase(pParent),
+  m_spSourceOverlay(std::make_unique<CWebResourceOverlay>(this)),
   m_spWebOverlay(std::make_unique<CWebResourceOverlay>(this)),
   m_spNAManager(std::make_unique<QNetworkAccessManager>()),
   m_spUi(std::make_shared<Ui::CEditorResourceWidget>()),
@@ -49,6 +52,8 @@ CEditorResourceWidget::CEditorResourceWidget(QWidget* pParent) :
   m_pResponse(nullptr)
 {
   m_spUi->setupUi(this);
+  connect(m_spSourceOverlay.get(), &CWebResourceOverlay::SignalResourceSelected,
+          this, &CEditorResourceWidget::SlotWebSourceSelected);
   connect(m_spWebOverlay.get(), &CWebResourceOverlay::SignalResourceSelected,
           this, &CEditorResourceWidget::SlotWebResourceSelected);
 }
@@ -67,6 +72,7 @@ CEditorResourceWidget::~CEditorResourceWidget()
       ->setSourceModel(nullptr);
 
   m_spWebOverlay.reset();
+  m_spSourceOverlay.reset();
 }
 
 //----------------------------------------------------------------------------------------
@@ -143,6 +149,7 @@ void CEditorResourceWidget::UnloadProject()
   m_spCurrentProject = nullptr;
 
   m_spUi->pResourceDisplayWidget->UnloadResource();
+  m_spSourceOverlay->Hide();
   m_spWebOverlay->Hide();
 
   m_spUi->pResourceTree->setEditTriggers(QAbstractItemView::DoubleClicked | QAbstractItemView::EditKeyPressed);
@@ -162,6 +169,8 @@ void CEditorResourceWidget::OnActionBarAboutToChange()
             this, &CEditorResourceWidget::SlotAddWebButtonClicked);
     disconnect(ActionBar()->m_spUi->RemoveResourceButton, &QPushButton::clicked,
             this, &CEditorResourceWidget::SlotRemoveButtonClicked);
+    disconnect(ActionBar()->m_spUi->SourceButton, &QPushButton::clicked,
+            this, &CEditorResourceWidget::SlotSetSourceButtonClicked);
     disconnect(ActionBar()->m_spUi->TitleCardButton, &QPushButton::clicked,
             this, &CEditorResourceWidget::SlotTitleCardButtonClicked);
     disconnect(ActionBar()->m_spUi->MapButton, &QPushButton::clicked,
@@ -171,6 +180,7 @@ void CEditorResourceWidget::OnActionBarAboutToChange()
     ActionBar()->m_spUi->AddResourceButton->setEnabled(true);
     ActionBar()->m_spUi->AddWebResourceButton->setEnabled(true);
     ActionBar()->m_spUi->RemoveResourceButton->setEnabled(true);
+    ActionBar()->m_spUi->SourceButton->setEnabled(true);
     ActionBar()->m_spUi->TitleCardButton->setEnabled(true);
     ActionBar()->m_spUi->MapButton->setEnabled(true);
   }
@@ -198,6 +208,8 @@ void CEditorResourceWidget::OnActionBarChanged()
     }
     connect(ActionBar()->m_spUi->RemoveResourceButton, &QPushButton::clicked,
             this, &CEditorResourceWidget::SlotRemoveButtonClicked);
+    connect(ActionBar()->m_spUi->SourceButton, &QPushButton::clicked,
+            this, &CEditorResourceWidget::SlotSetSourceButtonClicked);
     connect(ActionBar()->m_spUi->TitleCardButton, &QPushButton::clicked,
             this, &CEditorResourceWidget::SlotTitleCardButtonClicked);
     connect(ActionBar()->m_spUi->MapButton, &QPushButton::clicked,
@@ -209,6 +221,7 @@ void CEditorResourceWidget::OnActionBarChanged()
       ActionBar()->m_spUi->AddResourceButton->setEnabled(false);
       ActionBar()->m_spUi->AddWebResourceButton->setEnabled(false);
       ActionBar()->m_spUi->RemoveResourceButton->setEnabled(false);
+      ActionBar()->m_spUi->SourceButton->setEnabled(false);
       ActionBar()->m_spUi->TitleCardButton->setEnabled(false);
       ActionBar()->m_spUi->MapButton->setEnabled(false);
     }
@@ -391,6 +404,39 @@ void CEditorResourceWidget::SlotRemoveButtonClicked()
 
 //----------------------------------------------------------------------------------------
 //
+void CEditorResourceWidget::SlotSetSourceButtonClicked()
+{
+  WIDGET_INITIALIZED_GUARD
+  if (nullptr == m_spCurrentProject) { return; }
+
+  QSortFilterProxyModel* pProxyModel =
+    dynamic_cast<QSortFilterProxyModel*>(m_spUi->pResourceTree->model());
+  CResourceTreeItemModel* pModel =
+    dynamic_cast<CResourceTreeItemModel*>(pProxyModel->sourceModel());
+
+  auto spDbManager = m_wpDbManager.lock();
+  if (nullptr != spDbManager && nullptr != pModel)
+  {
+    QModelIndexList indexes = m_spUi->pResourceTree->selectionModel()->selectedIndexes();
+    m_spUi->pResourceTree->selectionModel()->clearSelection();
+    foreach (QModelIndex index, indexes)
+    {
+      if (pModel->IsResourceType(pProxyModel->mapToSource(index)))
+      {
+        const QString sName = pModel->data(pProxyModel->mapToSource(index), Qt::DisplayRole).toString();
+
+        m_spSourceOverlay->setProperty(c_sProperty, sName);
+        m_spSourceOverlay->Show();
+
+        // only interrested in first item which is the actual item we need
+        break;
+      }
+    }
+  }
+}
+
+//----------------------------------------------------------------------------------------
+//
 void CEditorResourceWidget::SlotTitleCardButtonClicked()
 {
   WIDGET_INITIALIZED_GUARD
@@ -524,6 +570,27 @@ void CEditorResourceWidget::SlotWebResourceSelected(const QString& sResource)
 
 //----------------------------------------------------------------------------------------
 //
+void CEditorResourceWidget::SlotWebSourceSelected(const QString& sResource)
+{
+  QString sName = m_spSourceOverlay->property(c_sProperty).toString();
+  m_spSourceOverlay->Hide();
+
+  auto spDbManager = m_wpDbManager.lock();
+  if (nullptr != spDbManager)
+  {
+    tspResource spResource = spDbManager->FindResourceInProject(m_spCurrentProject, sName);
+    if (nullptr != spResource)
+    {
+      QWriteLocker locker(&spResource->m_rwLock);
+      spResource->m_sSource = sResource;
+
+      emit SignalProjectEdited();
+    }
+  }
+}
+
+//----------------------------------------------------------------------------------------
+//
 void CEditorResourceWidget::SlotNetworkReplyError(QNetworkReply::NetworkError code)
 {
   QNetworkReply* pReply = dynamic_cast<QNetworkReply*>(sender());
@@ -566,15 +633,31 @@ void CEditorResourceWidget::SlotNetworkReplyFinished()
         mPixmap.loadFromData(arr);
         if (!mPixmap.isNull())
         {
-          spDbManager->AddResource(m_spCurrentProject, url, EResourceType::eImage);
-          emit SignalProjectEdited();
+          QString sName =
+            spDbManager->AddResource(m_spCurrentProject, url, EResourceType::eImage);
+          tspResource spResource = spDbManager->FindResourceInProject(m_spCurrentProject, sName);
+          if (nullptr != spResource)
+          {
+            QWriteLocker locker(&spResource->m_rwLock);
+            spResource->m_sSource = url;
+
+            emit SignalProjectEdited();
+          }
         }
       }
       else if (videoFormatsList.contains(sFormat))
       {
         // TODO: check video
-        spDbManager->AddResource(m_spCurrentProject, url, EResourceType::eMovie);
-        emit SignalProjectEdited();
+        QString sName =
+            spDbManager->AddResource(m_spCurrentProject, url, EResourceType::eMovie);
+        tspResource spResource = spDbManager->FindResourceInProject(m_spCurrentProject, sName);
+        if (nullptr != spResource)
+        {
+          QWriteLocker locker(&spResource->m_rwLock);
+          spResource->m_sSource = url;
+
+          emit SignalProjectEdited();
+        }
       }
     }
   }

@@ -1,4 +1,5 @@
 #include "Application.h"
+#include "ClipboardQmlWrapper.h"
 #include "Enums.h"
 #include "Style.h"
 #include "UISoundEmitter.h"
@@ -195,6 +196,8 @@ void CApplication::RegisterQmlTypes()
   qRegisterMetaType<tspProject>();
 
   qRegisterMetaType<QQmlWebChannel*>();
+
+  qmlRegisterType<CClipboardQmlWrapper>("QtGui", 5, 14, "Clipboard");
 
   qmlRegisterSingletonType<CQmlApplicationQtNamespaceWrapper>(
         "JOIP.core", 1, 1, "QtApp",
