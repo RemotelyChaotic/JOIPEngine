@@ -150,7 +150,7 @@ QVariant CResourceTreeItemModel::data(const QModelIndex& index, int iRole, int i
 QVariant CResourceTreeItemModel::data(const QModelIndex& index, int iRole) const
 {
   if (!index.isValid()) { return QVariant(); }
-  if (Qt::DisplayRole == iRole)
+  if (Qt::DisplayRole == iRole || Qt::EditRole == iRole)
   {
     CResourceTreeItem* item = static_cast<CResourceTreeItem*>(index.internalPointer());
     return item->Data(index.column());
