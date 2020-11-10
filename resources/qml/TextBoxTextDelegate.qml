@@ -30,8 +30,8 @@ Rectangle {
         Rectangle {
             id: layoutText
             anchors.centerIn: parent
-            width: text.implicitWidth
-            height: text.implicitHeight
+            width: text.contentWidth
+            height: text.contentHeight
             color: "transparent"
 
             Text {
@@ -41,10 +41,13 @@ Rectangle {
                 font.pointSize: 14
                 horizontalAlignment: Text.AlignHCenter
                 elide: Text.ElideNone
-                text: textContent
+                text: textContent.replace("<html>","").replace("</html>","")
                 wrapMode: Text.WordWrap
                 color: textColor
-                textFormat: QtApp.mightBeRichtext(textContent) ? Text.RichText : Text.PlainText
+                textFormat: (textContent.startsWith("<html>") && textContent.endsWith("</html>")) ?
+                                Text.RichText :
+                                (QtApp.mightBeRichtext(textContent) ?
+                                     Text.StyledText : Text.PlainText)
             }
         }
 

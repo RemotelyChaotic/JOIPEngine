@@ -100,6 +100,7 @@ Item {
             source: Settings.styleFolderQml() + "/IconBgMask.png";
             sourceSize: Qt.size(parent.width, parent.height)
             visible: false
+            smooth: true
             antialiasing: true
             mipmap: true
         }

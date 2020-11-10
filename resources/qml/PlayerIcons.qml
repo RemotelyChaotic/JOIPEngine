@@ -95,7 +95,7 @@ Rectangle {
             id: iconsFlow
             anchors.fill: parent
             spacing: 20
-            flow: Flow.TopToBottom
+            flow: Flow.LeftToRight
             layoutDirection: Qt.LeftToRight
 
             Repeater {

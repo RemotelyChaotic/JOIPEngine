@@ -411,11 +411,14 @@
         <li><b>showText ( string ):</b><br>
         Shows text. The input string will be used for the text content and the first colors
         set by setBackgroundColors and setTextColors will be used for
-        text and background coloring. It is possible to use a subset of html tags in the text
-        (see https://doc.qt.io/qt-5/richtext-html-subset.html for the supported subset).<br>
+        text and background coloring. It is allways possible to use HTML 3.2 tags in text.
+        If you need more, you can surround the text with &lt;html&gt;...&lt;/html&gt; to
+        use a subset of html HTML 4 tags in the text (see
+        https://doc.qt.io/qt-5/richtext-html-subset.html for the supported subset).<br>
         <i>Example Usage:</i><br>
-        textBox.showText("Hello world!");<br>
+        textBox.showText("Hello world!"); /* default text */<br>
         textBox.showText("Hello&lt;br&gt;world!"); /* Will insert a newline between Hello and world! */<br>
+        textBox.showText(&lt;html&gt;&lt;span style='font-weight:bold;font-size:large'&gt;Settings&lt;/span&gt;&lt;/html&gt;); /*styled text*/<br>
         <br></li>
 
         <li><b>clear (  ):</b><br>
