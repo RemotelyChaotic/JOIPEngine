@@ -69,7 +69,7 @@ Rectangle {
             if (sResource !== "")
             {
                 startedBackgroundLoad = true;
-                img.source =  "image://DataBaseImageProivider/" + sResource;
+                img.source =  "image://DataBaseImageProivider/" +  + registrator.currentlyLoadedProject.id + "/" + sResource;
             }
             else
             {
