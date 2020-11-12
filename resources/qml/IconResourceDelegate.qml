@@ -74,9 +74,6 @@ Item {
         rotation: 0
         transformOrigin: Item.Center
 
-        Behavior on rotation {
-            SpringAnimation { spring: 2; damping: 0.2 }
-        }
         Behavior on width {
             NumberAnimation { duration: 500; easing.type: Easing.InOutQuad }
         }

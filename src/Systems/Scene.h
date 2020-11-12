@@ -68,8 +68,6 @@ public:
 private:
   std::shared_ptr<SScene>                m_spData;
   QJSEngine*                             m_pEngine;
-  QPointer<CProject>                     m_pLoadedProject;
-  std::map<QString, QPointer<CResource>> m_vpLoadedResources;
 };
 
 //----------------------------------------------------------------------------------------

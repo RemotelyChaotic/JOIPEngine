@@ -104,7 +104,6 @@ public:
 private:
   std::shared_ptr<SResource>    m_spData;
   QJSEngine*                    m_pEngine;
-  QPointer<CProject>            m_pLoadedProject;
 };
 
 //----------------------------------------------------------------------------------------
