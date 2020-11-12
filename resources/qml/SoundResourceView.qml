@@ -13,6 +13,16 @@ Rectangle {
 
     signal finishedPlaying();
 
+    /*
+    onPlaybackStateChanged: {
+        var states =[];
+        states[MediaPlayer.PlayingState] = "PlayingState";
+        states[MediaPlayer.PausedState] = "PausedState";
+        states[MediaPlayer.StoppedState] = "StoppedState";
+        console.log("--------- playbackState: " + resource.name + ": " + states[playbackState]);
+    }
+    */
+
     function pause()
     {
         if (player.playbackState === MediaPlayer.PlayingState)
@@ -33,13 +43,13 @@ Rectangle {
     {
         if (player.playbackState === MediaPlayer.PlayingState || player.playbackState === MediaPlayer.PausedState)
         {
-            player.stop();
+            player.stoppedTargetState = true;
         }
     }
 
     onResourceChanged: {
         state = Resource.Null;
-        mediaPlayer.stop();
+        player.stop();
         if (null !== resource && undefined !== resource)
         {
             state = Resource.Loading;
@@ -66,6 +76,7 @@ Rectangle {
         videoCodecPriority: ["FFmpeg"]
 
         onPlaying: {
+            player.stoppedTargetState = false;
             mediaPlayer.state = Resource.Loaded;
         }
         onStopped: {
@@ -81,8 +92,22 @@ Rectangle {
                 mediaPlayer.state = Resource.Error;
             }
         }
+
+        property bool stoppedTargetState: true
         muted: Settings.muted
-        volume: Settings.volume
+        volume: stoppedTargetState ? 0 : Settings.volume
+
+        Behavior on volume {
+            animation: NumberAnimation {
+                id:audiofadeout; duration: 1000; easing.type: Easing.InOutQuad
+                onRunningChanged: {
+                    if (!running && player.stoppedTargetState) {
+                        player.stop();
+                    }
+                }
+            }
+        }
+
 
         onStatusChanged: {
             if (status === MediaPlayer.Loading)

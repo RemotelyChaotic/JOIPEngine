@@ -378,7 +378,8 @@ Rectangle {
                 {
                     player = soundRepeater.itemAt(i);
                     if (null !== player && undefined !== player &&
-                        player.state === Resource.Loaded)
+                        player.state === Resource.Loaded &&
+                        player.playbackState === MediaPlayer.PlayingState)
                     {
                         player.pause();
                     }
@@ -398,7 +399,8 @@ Rectangle {
                 {
                     player = soundRepeater.itemAt(j);
                     if (null !== player && undefined !== player &&
-                        player.state === Resource.Loaded)
+                        player.state === Resource.Loaded &&
+                        player.playbackState === MediaPlayer.PausedState)
                     {
                         player.play();
                     }
