@@ -15,6 +15,7 @@ public:
   ~CScriptSearchBar() override;
 
   bool IsSearchingForward() { return m_bForward; }
+  void SetFilter(const QString& sString);
 
 public slots:
   void Climb() override;

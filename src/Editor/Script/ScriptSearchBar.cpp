@@ -41,6 +41,15 @@ CScriptSearchBar::~CScriptSearchBar()
 
 //----------------------------------------------------------------------------------------
 //
+void CScriptSearchBar::SetFilter(const QString& sString)
+{
+  m_pSearchWidget->blockSignals(true);
+  m_pSearchWidget->SetFilter(sString);
+  m_pSearchWidget->blockSignals(false);
+}
+
+//----------------------------------------------------------------------------------------
+//
 void CScriptSearchBar::Climb()
 {
   ClimbToFirstInstanceOf("CScriptEditorWidget", false);

@@ -303,6 +303,8 @@ void CScriptEditorWidget::SlotShowHideSearchFilter()
   }
   else
   {
+    QTextCursor cursor = textCursor();
+    m_pSearchBar->SetFilter(cursor.selectedText());
     m_pSearchBar->Show();
   }
 }
