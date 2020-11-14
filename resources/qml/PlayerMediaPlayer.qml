@@ -25,7 +25,11 @@ Rectangle {
                 case Resource.Image:
                     resourceDisplay.source = pResource.source
                     movieResource.resource = null;
-                    imgResource.resource = pResource;
+                    if (null === imgResource.resource ||
+                        sName !== imgResource.resource.name)
+                    {
+                        imgResource.resource = pResource;
+                    }
                     break;
 
                 case Resource.Movie:
