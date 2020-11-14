@@ -185,17 +185,6 @@ void CEditorMainScreen::Initialize()
 
   // initializing done
   m_bInitialized = true;
-
-  // init indicees
-  m_spUi->pRightComboBox->blockSignals(true);
-  m_spUi->pRightComboBox->setCurrentIndex(EEditorWidget::eProjectSettings);
-  on_pRightComboBox_currentIndexChanged(EEditorWidget::eProjectSettings);
-  m_spUi->pRightComboBox->blockSignals(false);
-
-  m_spUi->pLeftComboBox->blockSignals(true);
-  m_spUi->pLeftComboBox->setCurrentIndex(EEditorWidget::eResourceWidget);
-  on_pLeftComboBox_currentIndexChanged(EEditorWidget::eResourceWidget);
-  m_spUi->pLeftComboBox->blockSignals(false);
 }
 
 //----------------------------------------------------------------------------------------
@@ -606,6 +595,17 @@ void CEditorMainScreen::ChangeIndex(QComboBox* pComboBox, QWidget* pContainer,
 //
 void CEditorMainScreen::ProjectLoaded(bool bNewProject)
 {
+  // init indicees
+  m_spUi->pRightComboBox->blockSignals(true);
+  m_spUi->pRightComboBox->setCurrentIndex(EEditorWidget::eProjectSettings);
+  on_pRightComboBox_currentIndexChanged(EEditorWidget::eProjectSettings);
+  m_spUi->pRightComboBox->blockSignals(false);
+
+  m_spUi->pLeftComboBox->blockSignals(true);
+  m_spUi->pLeftComboBox->setCurrentIndex(EEditorWidget::eResourceWidget);
+  on_pLeftComboBox_currentIndexChanged(EEditorWidget::eResourceWidget);
+  m_spUi->pLeftComboBox->blockSignals(false);
+
   SlotKeyBindingsChanged();
 
   if (nullptr != m_spCurrentProject)
