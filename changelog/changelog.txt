@@ -25,6 +25,8 @@ New Features:
 - Optional tutorial for the editor.
 - Scripts can now include other scripts to provide some modularisation
   to the JOI-Projects.
+- Resources can have a source link attached to them. This is visible
+  in various places.
 
 Updated Features:
 - Upgrade to Qt5.14.2 with msvc2017 for more QJSEngine and QML features.
@@ -47,6 +49,7 @@ Updated Features:
 - Support for multiple Sound Resources playing simultaniously and
   the number of Sound Resources that can be played simultaniously can
   be configured on a Project level.
+- Sound Resources fade out when stopped instead of abruptly stopping.
 
 Changes:
 - In-Game title changed to JOIP Engine.
