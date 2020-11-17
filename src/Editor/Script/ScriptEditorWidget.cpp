@@ -64,6 +64,10 @@ CScriptEditorWidget::CScriptEditorWidget(QWidget* pParent) :
 
   QFontMetrics metrics(font);
   setTabStopWidth(c_iTabStop * metrics.width(' '));
+
+  QTextOption option = document()->defaultTextOption();
+  option.setFlags(QTextOption::ShowTabsAndSpaces);
+  document()->setDefaultTextOption(option);
 }
 
 //----------------------------------------------------------------------------------------
