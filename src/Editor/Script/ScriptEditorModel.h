@@ -49,8 +49,8 @@ public:
   explicit CScriptEditorModel(QWidget* pParent = nullptr);
   ~CScriptEditorModel() override;
 
-  SCachedMapItem* CachedScript(qint32 iIndex);
   SCachedMapItem* CachedScript(const QString& sName);
+  QString CachedScriptName(qint32 iName);
   void InitializeModel(tspProject spProject);
   void DeInitializeModel();
   void SerializeProject();

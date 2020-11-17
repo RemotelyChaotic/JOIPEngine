@@ -52,7 +52,8 @@ CEditorCodeWidget::CEditorCodeWidget(QWidget* pParent) :
   m_pDummyModel(new QStandardItemModel(this)),
   m_debugFinishedConnection(),
   m_bDebugging(false),
-  m_iLastIndex(-1)
+  m_bChangingIndex(false),
+  m_sLastCachedScript(QString())
 {
   m_spUi->setupUi(this);
   m_spUi->pSceneView->setVisible(false);
@@ -198,7 +199,7 @@ void CEditorCodeWidget::UnloadProject()
 
   m_spCurrentProject = nullptr;
 
-  m_iLastIndex = -1;
+  m_sLastCachedScript = QString();
 
   auto pModel = ScriptEditorModel();
   disconnect(pModel, &CScriptEditorModel::rowsInserted,
@@ -234,7 +235,8 @@ void CEditorCodeWidget::SaveProject()
   m_spCurrentProject->m_rwLock.unlock();
 
   // save current contents
-  auto pScriptItem = ScriptEditorModel()->CachedScript(m_spUi->pResourceComboBox->currentIndex());
+  auto pScriptItem = ScriptEditorModel()->CachedScript(
+        ScriptEditorModel()->CachedScriptName(m_spUi->pResourceComboBox->currentIndex()));
   if (nullptr != pScriptItem)
   {
     pScriptItem->m_data = m_spUi->pCodeEdit->toPlainText().toUtf8();
@@ -346,37 +348,34 @@ void CEditorCodeWidget::on_pResourceComboBox_currentIndexChanged(qint32 iIndex)
   const QString sProjectName = m_spCurrentProject->m_sName;
   m_spCurrentProject->m_rwLock.unlock();
 
+  m_bChangingIndex = true;
+
   // save old contents
-  auto pScriptItem = ScriptEditorModel()->CachedScript(m_iLastIndex);
+  auto pScriptItem = ScriptEditorModel()->CachedScript(m_sLastCachedScript);
   if (nullptr != pScriptItem)
   {
     pScriptItem->m_data = m_spUi->pCodeEdit->toPlainText().toUtf8();
     ScriptEditorModel()->SetSceneScriptModifiedFlag(pScriptItem->m_sId, pScriptItem->m_bChanged);
   }
 
-  m_spUi->pCodeEdit->blockSignals(true);
-  m_spUi->pCodeEdit->document()->blockSignals(true);
   m_spUi->pCodeEdit->ResetWidget();
   m_spUi->pCodeEdit->clear();
-  m_spUi->pCodeEdit->document()->blockSignals(false);
-  m_spUi->pCodeEdit->blockSignals(false);
 
   // load new contents
-  pScriptItem = ScriptEditorModel()->CachedScript(iIndex);
+  m_sLastCachedScript = ScriptEditorModel()->CachedScriptName(iIndex);
+  pScriptItem = ScriptEditorModel()->CachedScript(m_sLastCachedScript);
   if (nullptr != pScriptItem)
   {
     if (nullptr != ActionBar())
     {
       ActionBar()->m_spUi->DebugButton->setEnabled(nullptr != pScriptItem->m_spScene);
     }
-    m_spUi->pCodeEdit->blockSignals(true);
-    m_spUi->pCodeEdit->SetHighlightDefinition("JavaScript");
     m_spUi->pCodeEdit->setPlainText(QString::fromUtf8(pScriptItem->m_data));
-    m_spUi->pCodeEdit->blockSignals(false);
+    m_spUi->pCodeEdit->SetHighlightDefinition("JavaScript");
   }
   m_spUi->pCodeEdit->update();
 
-  m_iLastIndex = iIndex;
+  m_bChangingIndex = false;
 }
 
 //----------------------------------------------------------------------------------------
@@ -387,10 +386,11 @@ void CEditorCodeWidget::SlotCodeEditContentsChange(qint32 iPos, qint32 iDel, qin
   WIDGET_INITIALIZED_GUARD
 
   // nothing changed
-  if (0 == iDel && 0 == iAdd) { return; }
+  if ((0 == iDel && 0 == iAdd) || m_bChangingIndex) { return; }
 
-  qint32 index = m_spUi->pResourceComboBox->currentIndex();
-  auto pScriptItem = ScriptEditorModel()->CachedScript(index);
+  QString sCachedScript = ScriptEditorModel()->CachedScriptName(
+        m_spUi->pResourceComboBox->currentIndex());
+  auto pScriptItem = ScriptEditorModel()->CachedScript(sCachedScript);
   if (nullptr != pScriptItem)
   {
     pScriptItem->m_bChanged = true;
@@ -418,8 +418,9 @@ void CEditorCodeWidget::SlotDebugStart()
 
     // get Scene name
     QString sSceneName = QString();
-    qint32 index = m_spUi->pResourceComboBox->currentIndex();
-    auto pScriptItem = ScriptEditorModel()->CachedScript(index);
+    QString sCachedScript = ScriptEditorModel()->CachedScriptName(
+          m_spUi->pResourceComboBox->currentIndex());
+    auto pScriptItem = ScriptEditorModel()->CachedScript(sCachedScript);
     if (nullptr != pScriptItem)
     {
       auto spScene = pScriptItem->m_spScene;

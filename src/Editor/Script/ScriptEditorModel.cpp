@@ -44,19 +44,6 @@ CScriptEditorModel::~CScriptEditorModel()
 
 //----------------------------------------------------------------------------------------
 //
-SCachedMapItem* CScriptEditorModel::CachedScript(qint32 iIndex)
-{
-  if (static_cast<qint32>(m_cachedScriptsMap.size()) > iIndex && 0 <= iIndex)
-  {
-    auto it = m_cachedScriptsMap.begin();
-    std::advance(it, iIndex);
-    return CachedScript(it->first);
-  }
-  return nullptr;
-}
-
-//----------------------------------------------------------------------------------------
-//
 SCachedMapItem* CScriptEditorModel::CachedScript(const QString& sName)
 {
   auto it = m_cachedScriptsMap.find(sName);
@@ -67,6 +54,19 @@ SCachedMapItem* CScriptEditorModel::CachedScript(const QString& sName)
       LoadScriptFile(it->first);
     }
     return &it->second;
+  }
+  return nullptr;
+}
+
+//----------------------------------------------------------------------------------------
+//
+QString CScriptEditorModel::CachedScriptName(qint32 iIndex)
+{
+  if (static_cast<qint32>(m_cachedScriptsMap.size()) > iIndex && 0 <= iIndex)
+  {
+    auto it = m_cachedScriptsMap.begin();
+    std::advance(it, iIndex);
+    return it->first;
   }
   return nullptr;
 }

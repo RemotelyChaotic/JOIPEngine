@@ -83,7 +83,8 @@ private:
   QPointer<QStandardItemModel>                           m_pDummyModel;
   QMetaObject::Connection                                m_debugFinishedConnection;
   bool                                                   m_bDebugging;
-  qint32                                                 m_iLastIndex;
+  bool                                                   m_bChangingIndex;
+  QString                                                m_sLastCachedScript;
 };
 
 #endif // EDITORCODEWIDGET_H
