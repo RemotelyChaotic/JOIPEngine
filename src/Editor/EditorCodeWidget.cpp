@@ -56,6 +56,9 @@ CEditorCodeWidget::CEditorCodeWidget(QWidget* pParent) :
 {
   m_spUi->setupUi(this);
   m_spUi->pSceneView->setVisible(false);
+
+  connect(m_spUi->pCodeEdit->document(), &QTextDocument::contentsChange,
+          this, &CEditorCodeWidget::SlotCodeEditContentsChange);
 }
 
 CEditorCodeWidget::~CEditorCodeWidget()
@@ -182,8 +185,10 @@ void CEditorCodeWidget::UnloadProject()
   }
 
   m_spUi->pCodeEdit->blockSignals(true);
+  m_spUi->pCodeEdit->document()->blockSignals(true);
   m_spUi->pCodeEdit->ResetWidget();
   m_spUi->pCodeEdit->clear();
+  m_spUi->pCodeEdit->document()->blockSignals(false);
   m_spUi->pCodeEdit->blockSignals(false);
   m_spUi->pCodeEdit->setReadOnly(false);
 
@@ -350,8 +355,10 @@ void CEditorCodeWidget::on_pResourceComboBox_currentIndexChanged(qint32 iIndex)
   }
 
   m_spUi->pCodeEdit->blockSignals(true);
+  m_spUi->pCodeEdit->document()->blockSignals(true);
   m_spUi->pCodeEdit->ResetWidget();
   m_spUi->pCodeEdit->clear();
+  m_spUi->pCodeEdit->document()->blockSignals(false);
   m_spUi->pCodeEdit->blockSignals(false);
 
   // load new contents
@@ -374,9 +381,13 @@ void CEditorCodeWidget::on_pResourceComboBox_currentIndexChanged(qint32 iIndex)
 
 //----------------------------------------------------------------------------------------
 //
-void CEditorCodeWidget::on_pCodeEdit_textChanged()
+void CEditorCodeWidget::SlotCodeEditContentsChange(qint32 iPos, qint32 iDel, qint32 iAdd)
 {
+  Q_UNUSED(iPos)
   WIDGET_INITIALIZED_GUARD
+
+  // nothing changed
+  if (0 == iDel && 0 == iAdd) { return; }
 
   qint32 index = m_spUi->pResourceComboBox->currentIndex();
   auto pScriptItem = ScriptEditorModel()->CachedScript(index);
@@ -522,14 +533,18 @@ void CEditorCodeWidget::SlotFileChangedExternally(const QString& sName)
   if (index == ScriptEditorModel()->ScriptIndex(sName) && nullptr != pScriptItem)
   {
     m_spUi->pCodeEdit->blockSignals(true);
+    m_spUi->pCodeEdit->document()->blockSignals(true);
     m_spUi->pCodeEdit->ResetWidget();
     m_spUi->pCodeEdit->clear();
+    m_spUi->pCodeEdit->document()->blockSignals(false);
     m_spUi->pCodeEdit->blockSignals(false);
 
     // load new contents
     ActionBar()->m_spUi->DebugButton->setEnabled(nullptr != pScriptItem->m_spScene);
     m_spUi->pCodeEdit->blockSignals(true);
+    m_spUi->pCodeEdit->document()->blockSignals(true);
     m_spUi->pCodeEdit->setPlainText(QString::fromUtf8(pScriptItem->m_data));
+    m_spUi->pCodeEdit->document()->blockSignals(false);
     m_spUi->pCodeEdit->blockSignals(false);
 
     m_spUi->pCodeEdit->update();

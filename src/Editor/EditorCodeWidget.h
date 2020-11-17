@@ -55,7 +55,7 @@ protected:
 
 protected slots:
   void on_pResourceComboBox_currentIndexChanged(qint32 iIndex);
-  void on_pCodeEdit_textChanged();
+  void SlotCodeEditContentsChange(qint32 iPos, qint32 iDel, qint32 iAdd);
   void SlotDebugStart();
   void SlotDebugStop();
   void SlotDebugUnloadFinished();

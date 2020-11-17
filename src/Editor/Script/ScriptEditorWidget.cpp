@@ -435,6 +435,8 @@ bool CScriptEditorWidget::eventFilter(QObject* pTarget, QEvent* pEvent)
           insertPlainText(vsLines.join("\n"));
           pEvent->ignore();
         }
+        // workaround for losing focus after blocking tab
+        QMetaObject::invokeMethod(this, "setFocus", Qt::QueuedConnection);
         return true;
       }
       // brackets
