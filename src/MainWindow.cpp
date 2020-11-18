@@ -147,10 +147,15 @@ void CMainWindow::SlotFullscreenChanged()
 //
 void CMainWindow::SlotResolutionChanged()
 {
+  QPoint globalCursorPos = QCursor::pos();
+  QDesktopWidget* pDesktop = QApplication::desktop();
+  QRect availableGeometry =
+      pDesktop->availableGeometry(pDesktop->screenNumber(globalCursorPos));
+
   QSize newResolution = m_spSettings->Resolution();
   setGeometry(
       QStyle::alignedRect(Qt::LeftToRight, Qt::AlignCenter,
-          newResolution, QApplication::desktop()->availableGeometry()));
+          newResolution, availableGeometry));
 }
 
 //----------------------------------------------------------------------------------------
