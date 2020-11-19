@@ -498,7 +498,7 @@ void CScriptEditorModel::LoadScriptFile(const QString& sName)
   if (nullptr == m_spProject) { return; }
 
   auto it = m_cachedScriptsMap.find(sName);
-  if (m_cachedScriptsMap.end() != it && !it->second.m_bInitialized)
+  if (m_cachedScriptsMap.end() != it)
   {
     auto spDbManager = m_wpDbManager.lock();
     if (nullptr != spDbManager)

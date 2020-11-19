@@ -533,22 +533,17 @@ void CEditorCodeWidget::SlotFileChangedExternally(const QString& sName)
   auto pScriptItem = ScriptEditorModel()->CachedScript(sName);
   if (index == ScriptEditorModel()->ScriptIndex(sName) && nullptr != pScriptItem)
   {
-    m_spUi->pCodeEdit->blockSignals(true);
-    m_spUi->pCodeEdit->document()->blockSignals(true);
+    m_bChangingIndex = true;
+
     m_spUi->pCodeEdit->ResetWidget();
     m_spUi->pCodeEdit->clear();
-    m_spUi->pCodeEdit->document()->blockSignals(false);
-    m_spUi->pCodeEdit->blockSignals(false);
-
     // load new contents
     ActionBar()->m_spUi->DebugButton->setEnabled(nullptr != pScriptItem->m_spScene);
-    m_spUi->pCodeEdit->blockSignals(true);
-    m_spUi->pCodeEdit->document()->blockSignals(true);
     m_spUi->pCodeEdit->setPlainText(QString::fromUtf8(pScriptItem->m_data));
-    m_spUi->pCodeEdit->document()->blockSignals(false);
-    m_spUi->pCodeEdit->blockSignals(false);
 
     m_spUi->pCodeEdit->update();
+
+    m_bChangingIndex = false;
   }
 }
 
