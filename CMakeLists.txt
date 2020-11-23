@@ -45,3 +45,6 @@ endif()
 
 add_subdirectory(3rdparty)
 add_subdirectory(src)
+if(WIN32 AND MSVC)
+add_subdirectory(src/Launcher)
+endif()

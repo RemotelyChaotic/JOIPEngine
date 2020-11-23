@@ -27,3 +27,18 @@ Open src_dir/CMakeList.txt in QtCreator -> Run CMake and build
 cmake -GNinja -DCMAKE_BUILD_TYPE=RelWithDebInfo -DQTDIR=C:\Qt\5.14.2\msvc2017 src_dir
 ninja
 ```
+
+#### Deploying
+First you need to run the following command (assuming Qt is installed in the default install directory)
+```
+> C:\Qt\Qt5.14.2\5.14.2\msvc2017_64\bin\windeployqt.exe --no-patchqt --release --qmldir "%SOURCE_DIR%\resources\qml" --no-webenginecore --no-webengine --no-webenginewidgets --no-webview --angle JOIPEngine.exe
+```
+
+Next:
+- copy QtAV binaries including all ffmpeg libraries to bin
+- copy Qt5OpenGL.dll to bin
+- remove the folders resources, position, QtWebEngine, QtWebView
+- Then move the transplations folder up once
+- copy qt.conf from <SOURCE_DIR> to bin
+- copy all license files from the sources to license
+- copy compiler libraries to bin (e.g vcruntime140.dll)
