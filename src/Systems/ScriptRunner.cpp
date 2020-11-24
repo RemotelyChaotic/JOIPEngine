@@ -213,7 +213,8 @@ void CScriptRunner::InterruptExecution()
 //
 void CScriptRunner::PauseExecution()
 {
-  if (CScriptRunnerSignalEmiter::ePaused != m_spSignalEmitterContext->ScriptExecutionStatus())
+  if (CScriptRunnerSignalEmiter::ePaused != m_spSignalEmitterContext->ScriptExecutionStatus() &&
+      CScriptRunnerSignalEmiter::eStopped != m_spSignalEmitterContext->ScriptExecutionStatus())
   {
     m_spSignalEmitterContext->SetScriptExecutionStatus(CScriptRunnerSignalEmiter::ePaused);
     emit m_spSignalEmitterContext->pauseExecution();
@@ -225,7 +226,8 @@ void CScriptRunner::PauseExecution()
 //
 void CScriptRunner::ResumeExecution()
 {
-  if (CScriptRunnerSignalEmiter::ePaused == m_spSignalEmitterContext->ScriptExecutionStatus())
+  if (CScriptRunnerSignalEmiter::ePaused == m_spSignalEmitterContext->ScriptExecutionStatus() &&
+      CScriptRunnerSignalEmiter::eStopped != m_spSignalEmitterContext->ScriptExecutionStatus())
   {
     m_spSignalEmitterContext->SetScriptExecutionStatus(CScriptRunnerSignalEmiter::eRunning);
     emit m_spSignalEmitterContext->resumeExecution();
