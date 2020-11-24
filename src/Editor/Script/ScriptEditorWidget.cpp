@@ -504,27 +504,7 @@ bool CScriptEditorWidget::eventFilter(QObject* pTarget, QEvent* pEvent)
         pEvent->ignore();
         return true;
       }
-      // quotes
-      else if (pKeyEvent->key() == Qt::Key_Apostrophe)
-      {
-        if (Qt::Key_Apostrophe != m_previouslyClickedKey)
-        {
-          insertPlainText(QString("''"));
-          QTextCursor cursor = textCursor();
-          cursor.movePosition(QTextCursor::Left, QTextCursor::MoveAnchor, 1);
-          setTextCursor(cursor);
-          m_previouslyClickedKey = Qt::Key(pKeyEvent->key());
-        }
-        else
-        {
-          QTextCursor cursor = textCursor();
-          cursor.movePosition(QTextCursor::Right, QTextCursor::MoveAnchor, 1);
-          setTextCursor(cursor);
-          m_previouslyClickedKey = Qt::Key(0);
-        }
-        pEvent->ignore();
-        return true;
-      }
+      // Quotes
       else if (pKeyEvent->key() == Qt::Key_QuoteDbl)
       {
         if (Qt::Key_QuoteDbl != m_previouslyClickedKey)
