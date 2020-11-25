@@ -6,19 +6,27 @@
   "type": "object",
   "properties": {
     "eBeginTutorial":                     { "type": "object" },
-    "eSwitchRightPanelToProjectSettings": { "type": "object" }
+    "eSwitchRightPanelToProjectSettings": { "type": "object" },
+    "eProjectSettings":                   { "type": "object" },
+    "eResourcePanel":                     { "type": "object" },
+    "eImageResourceSelected":             { "type": "object" },
+    "eSwitchRightPanelToNodeSettings":    { "type": "object" },
+    "eNodePanel":                         { "type": "object" },
+    "eNodePanelAdvanced":                 { "type": "object" },
+    "eNodePanelDone":                     { "type": "object" },
+    "eCodePanel":                         { "type": "object" }
   },
   "required": [
     "eBeginTutorial",
     "eSwitchRightPanelToProjectSettings",
-    "eCodePanel",
+    "eProjectSettings",
+    "eResourcePanel",
     "eImageResourceSelected",
+    "eSwitchRightPanelToNodeSettings",
     "eNodePanel",
     "eNodePanelAdvanced",
     "eNodePanelDone",
-    "eProjectSettings",
-    "eResourcePanel",
-    "eSwitchRightPanelToNodeSettings"
+    "eCodePanel"
   ],
   "additionalProperties": false
 }
