@@ -27,10 +27,12 @@ Rectangle {
             timerDisplay.opacity = 1.0;
         }
         onStartTimer: {
+            timerDisplay.bStarted = true;
             timerDisplay.start();
         }
         onStopTimer: {
             timerDisplay.stop();
+            timerDisplay.bStarted = false;
         }
         onWaitForTimer: {
             if (!timerDisplay.running)
@@ -53,8 +55,11 @@ Rectangle {
 
         showTimeNumber: true
 
+        property bool bStarted: false
+
         onTimeout: {
             signalEmitter.timerFinished();
+            bStarted = false;
             opacity = 0.0;
         }
 
@@ -73,13 +78,15 @@ Rectangle {
     Connections {
         target: ScriptRunner
         onRunningChanged: {
-            if (!bRunning)
-            {
-                timerDisplay.pause();
-            }
-            else
-            {
-                timerDisplay.resume();
+            if (timerDisplay.bStarted) {
+                if (!bRunning)
+                {
+                    timerDisplay.pause();
+                }
+                else
+                {
+                    timerDisplay.resume();
+                }
             }
         }
     }
