@@ -204,6 +204,7 @@ QString CScriptTextBox::showInput()
             this, [this, &sReturnValue](QString sInput)
   {
     sReturnValue = sInput;
+    sReturnValue.detach(); // fixes some crashes with QJSEngine
     emit this->SignalQuitLoop();
   }, Qt::QueuedConnection);
   loop.exec();
