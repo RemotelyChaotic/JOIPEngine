@@ -27,6 +27,7 @@ New Features:
   to the JOI-Projects.
 - Resources can have a source link attached to them. This is visible
   in various places.
+- PREVIEW: Changeable Layouts in Player implemented
 
 Updated Features:
 - Upgrade to Qt5.14.2 with msvc2017 for more QJSEngine and QML features.
