@@ -438,7 +438,7 @@ void CEditorProjectSettingsWidget::AddKinks(std::vector<tspKink> vspKinks)
 
       QReadLocker locker(&spKink->m_rwLock);
       QWidget* pRoot = new QWidget(m_spUi->pFetishListWidget);
-      QSizePolicy sizePolicy(QSizePolicy::Minimum, QSizePolicy::Minimum);
+      QSizePolicy sizePolicy(QSizePolicy::Preferred, QSizePolicy::Minimum);
       sizePolicy.setHorizontalStretch(0);
       sizePolicy.setVerticalStretch(0);
       sizePolicy.setHeightForWidth(pRoot->sizePolicy().hasHeightForWidth());
@@ -458,7 +458,7 @@ void CEditorProjectSettingsWidget::AddKinks(std::vector<tspKink> vspKinks)
       pRootLayout->addWidget(pLabel);
 
       QPushButton* pRemove = new QPushButton(pRoot);
-      //pRemove->setObjectName("CloseButton");
+      pRemove->setObjectName("RemoveFetishButtonX");
       pRemove->setText("X");
       pRemove->setFlat(true);
       QSizePolicy sizePolicy3(QSizePolicy::Fixed, QSizePolicy::Fixed);
@@ -466,10 +466,10 @@ void CEditorProjectSettingsWidget::AddKinks(std::vector<tspKink> vspKinks)
       sizePolicy3.setVerticalStretch(0);
       sizePolicy3.setHeightForWidth(pRemove->sizePolicy().hasHeightForWidth());
       pRemove->setSizePolicy(sizePolicy3);
-      pRemove->setMinimumSize(QSize(24, 24));
-      pRemove->setMaximumSize(QSize(24, 24));
+      //pRemove->setMinimumSize(QSize(24, 24));
+      //pRemove->setMaximumSize(QSize(24, 24));
       pRemove->setStyleSheet(QString("QPushButton { background-color: transparent; color: %1;"
-                                     "border: none; }")
+                                     "border: none; padding: 2px; min-width: 1px; min-height: 1px; border-image: none; }")
                              .arg(foregroundColor.name()));
       pRemove->setProperty(c_sKinkRootWidgetProperty, spKink->m_sName);
       connect(pRemove, &QPushButton::clicked,
