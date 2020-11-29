@@ -206,7 +206,8 @@ QString CScriptTextBox::showInput()
     sReturnValue = sInput;
     sReturnValue.detach(); // fixes some crashes with QJSEngine
     emit this->SignalQuitLoop();
-  }, Qt::QueuedConnection);
+    // direct connection to fix cross thread issues with QString content being deleted
+  }, Qt::DirectConnection);
   loop.exec();
   loop.disconnect();
 
