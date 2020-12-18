@@ -160,7 +160,8 @@ void CEditorTutorialOverlay::SetHighlightedWidgets(const QStringList& vsWidgetNa
   for (QWidget* pWidget : qAsConst(vpList))
   {
     QRect widgetGeometry = pWidget->geometry();
-    QPoint tl = MapPosToGlobal(pWidget, widgetGeometry.topLeft());
+    QPoint tl = parentWidget()->mapFromGlobal(
+          MapPosToGlobal(pWidget, widgetGeometry.topLeft()));
     widgetGeometry.moveTopLeft(mapFromGlobal(tl));
 
     QImage bitmap(pWidget->size(), QImage::Format_ARGB32);
@@ -399,7 +400,8 @@ void CEditorTutorialOverlay::SlotUpdate()
     if (nullptr != it->first)
     {
       QRect widgetGeometry = it->first->geometry();
-      QPoint tl = it->first->parentWidget()->mapToGlobal(widgetGeometry.topLeft());
+      QPoint tl = parentWidget()->mapFromGlobal(
+            it->first->parentWidget()->mapToGlobal(widgetGeometry.topLeft()));
       widgetGeometry.moveTopLeft(mapFromGlobal(tl));
 
       QImage bitmap(it->first->size(), QImage::Format_ARGB32);
@@ -424,8 +426,10 @@ QPointer<QWidget> CEditorTutorialOverlay::ClickedFilterChild(const QPoint& locCl
     QWidget* pParent = pWidget->parentWidget();
     if (nullptr != pParent)
     {
-      QPoint tl = pParent->mapToGlobal(pWidget->geometry().topLeft());
-      QPoint br = pParent->mapToGlobal(pWidget->geometry().bottomRight());
+      QPoint tl = parentWidget()->mapFromGlobal(
+            pParent->mapToGlobal(pWidget->geometry().topLeft()));
+      QPoint br = parentWidget()->mapFromGlobal(
+            pParent->mapToGlobal(pWidget->geometry().bottomRight()));
       if (QRect(tl, br).contains(locClicked))
       {
         return pWidget;

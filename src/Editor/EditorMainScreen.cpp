@@ -375,7 +375,8 @@ void CEditorMainScreen::SlotHelpClicked(bool bClick)
 {
   Q_UNUSED(bClick)
   CHelpOverlay::Instance()->Show(
-        mapToGlobal(m_spUi->pProjectActionBar->m_spUi->HelpButton->geometry().center()),
+        m_spUi->pProjectActionBar->m_spUi->HelpButton->parentWidget()->mapFromGlobal(
+          mapToGlobal(m_spUi->pProjectActionBar->m_spUi->HelpButton->geometry().center())),
         this);
 }
 
