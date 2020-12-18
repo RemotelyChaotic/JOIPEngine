@@ -142,7 +142,9 @@ void CHelpOverlayBackGround::SlotUpdate()
     {
       auto it = m_shownIconImages.find(pWidget.data());
       QRect widgetGeometry = pWidget->geometry();
-      widgetGeometry.moveTopLeft(pWidget->parentWidget()->mapToGlobal(widgetGeometry.topLeft()));
+      widgetGeometry.moveTopLeft(parentWidget()->mapFromGlobal(
+            pWidget->parentWidget()->mapToGlobal(
+              widgetGeometry.topLeft())));
       float fCircleRadius = static_cast<float>(m_iCircleRadius);
       QVector2D tl(widgetGeometry.topLeft());
       QVector2D tr(widgetGeometry.topRight());
@@ -186,7 +188,7 @@ void CHelpOverlayBackGround::mouseMoveEvent(QMouseEvent* pEvt)
 {
   if (nullptr != pEvt)
   {
-    m_cursor = pEvt->globalPos();
+    m_cursor = parentWidget()->mapFromGlobal(pEvt->globalPos());
     MousePositionCheck();
   }
 }

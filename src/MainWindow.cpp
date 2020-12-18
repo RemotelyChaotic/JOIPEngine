@@ -184,7 +184,9 @@ void CMainWindow::resizeEvent(QResizeEvent* pEvent)
 //
 void CMainWindow::SlotHelpButtonClicked()
 {
-  m_spHelpOverlay->Show(mapToGlobal(m_spHelpButtonOverlay->geometry().center()),
+  m_spHelpOverlay->Show(mapFromGlobal(
+                          m_spHelpButtonOverlay->parentWidget()->mapToGlobal(
+                              m_spHelpButtonOverlay->geometry().center())),
                         m_spUi->pApplicationStackWidget->currentWidget());
 }
 
