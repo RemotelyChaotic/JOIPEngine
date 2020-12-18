@@ -325,7 +325,7 @@ Rectangle {
             anchors.top: parent.top
             width: 32
             height: 32
-            visible: !resourceDisplay.loading && !resourceDisplay.error
+            visible: !resourceDisplay.loading && !resourceDisplay.error && "" !== resourceDisplay.source
             hoverEnabled: true
 
             background: Rectangle {
