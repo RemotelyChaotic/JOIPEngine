@@ -16,6 +16,7 @@ class CShortcutButton;
 namespace Ui {
   class CHelpOverlay;
 }
+class QPixmapDropShadowFilter;
 class QPropertyAnimation;
 class QTextBrowser;
 
@@ -56,6 +57,7 @@ protected:
 private:
   void MousePositionCheck();
 
+  //QPointer<QPixmapDropShadowFilter>             m_pDropShadowFilter;
   QPointer<QPropertyAnimation>                  m_pCircleAnimation;
   std::map<QWidget*, std::pair<QRect, QImage>>  m_shownIconImages;
   QPoint                                        m_cursor;

@@ -5,6 +5,8 @@
 #include "Systems/HelpFactory.h"
 #include "Widgets/ShortcutButton.h"
 
+//#include <private/qpixmapfilter_p.h>
+
 #include <QCursor>
 #include <QDateTime>
 #include <QDebug>
@@ -64,10 +66,15 @@ CHelpOverlayBackGround::CHelpOverlayBackGround(QWidget* pParent) :
   m_bOpened(false),
   m_circleOrigin(0, 0),
   m_iCircleRadius(0),
+  //m_pDropShadowFilter(new QPixmapDropShadowFilter(this)),
   m_shownIconImages(),
   m_cursor(-1, -1),
   m_updateTimer()
 {
+  //m_pDropShadowFilter->setOffset(0, 0);
+  //m_pDropShadowFilter->setBlurRadius(8);
+  //m_pDropShadowFilter->setColor(QColor(255, 255, 255, 100));
+
   m_pCircleAnimation = new QPropertyAnimation(this, "circleRadius");
   m_pCircleAnimation->setDuration(c_iAnimationTime);
   m_pCircleAnimation->setEasingCurve(QEasingCurve::InQuart);
@@ -213,6 +220,7 @@ void CHelpOverlayBackGround::paintEvent(QPaintEvent* pEvt)
 
   bool bSomethingSelected = false;
   QRect selection;
+  QPixmap selectionImage;
 
   // draw widgets on top with border to highlight them
   QStyleOptionFrame option;
@@ -225,37 +233,39 @@ void CHelpOverlayBackGround::paintEvent(QPaintEvent* pEvt)
     painter.save();
     painter.setBrush(Qt::transparent);
     painter.setBackgroundMode(Qt::OpaqueMode);
-    painter.drawImage(it->second.first, it->second.second, it->second.second.rect());
-    option.rect = it->second.first;
-    style()->drawPrimitive(QStyle::PE_Frame, &option, &painter, this);
+
+    QRect rectOfItem = it->second.first;
 
     if (it->second.first.contains(m_cursor))
     {
       bSomethingSelected = true;
       selection = it->second.first;
+
+      double dRad =
+          static_cast<double>(static_cast<qint32>(static_cast<double>
+             (QDateTime::currentDateTime().toMSecsSinceEpoch() % 1000000) / 5.0) % 360) / 180.0 * 3.1415;
+      double dMultiplyer = std::sin(dRad);
+      double dWToHeight = static_cast<double>(rectOfItem.width()) / rectOfItem.height();
+      rectOfItem = selection.adjusted(static_cast<qint32>(-20 -10 * dMultiplyer),
+                                      static_cast<qint32>((-20 -10 * dMultiplyer) / dWToHeight),
+                                      static_cast<qint32>(20 + 10 * dMultiplyer),
+                                      static_cast<qint32>((20 + 10 * dMultiplyer) / dWToHeight));
+      selection = rectOfItem;
+      selectionImage = QPixmap(rectOfItem.width(), rectOfItem.height());
     }
-    painter.restore();
-  }
 
-  // draw selection
-  if (bSomethingSelected)
-  {
-    painter.save();
-    QPainterPath path;
-    double dRad =
-        static_cast<double>(static_cast<qint32>(static_cast<double>
-           (QDateTime::currentDateTime().toMSecsSinceEpoch() % 1000000) / 5.0) % 360) / 180.0 * 3.1415;
-    double dMultiplyer = std::sin(dRad);
-    path.addRect(selection.adjusted(static_cast<qint32>(-20 -10 * dMultiplyer),
-                                    static_cast<qint32>(-20 -10 * dMultiplyer),
-                                    static_cast<qint32>(20 + 10 * dMultiplyer),
-                                    static_cast<qint32>(20 + 10 * dMultiplyer)));
+    // draw selection
+    //if (bSomethingSelected)
+    //{
+    //  painter.save();
+    //  m_pDropShadowFilter->draw(&painter, selection.topLeft(), selectionImage, selection);
+    //  painter.restore();
+    //}
 
-    QPen pen(QColor(255, 0, 0), 5, Qt::DashLine, Qt::FlatCap, Qt::MiterJoin);
-    pen.setDashOffset(std::cos(dRad) * 10);
-    painter.setPen(pen);
-    painter.setBrush(Qt::transparent);
-    painter.drawPath(path);
+    painter.drawImage(rectOfItem, it->second.second, it->second.second.rect());
+    option.rect = rectOfItem;
+    style()->drawPrimitive(QStyle::PE_Frame, &option, &painter, this);
+
     painter.restore();
   }
 }
