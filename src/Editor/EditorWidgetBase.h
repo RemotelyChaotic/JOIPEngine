@@ -28,6 +28,8 @@ public:
   virtual void LoadProject(tspProject spProject) = 0;
   virtual void UnloadProject() = 0;
   virtual void SaveProject() = 0;
+  virtual void OnHidden() = 0;
+  virtual void OnShown() = 0;
 
   bool IsLoaded() { return m_bLoaded; }
   void SetActionBar(CEditorActionBar* pActionBar);

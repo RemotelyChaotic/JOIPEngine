@@ -82,6 +82,7 @@ void CEditorCodeWidget::Initialize()
   m_spTutorialStateSwitchHandler =
       std::make_shared<CCodeWidgetTutorialStateSwitchHandler>(this, m_spUi);
   EditorModel()->AddTutorialStateSwitchHandler(m_spTutorialStateSwitchHandler);
+  ScriptEditorModel()->SetReloadFileWithoutQuestion(true);
 
   m_wpDbManager = CApplication::Instance()->System<CDatabaseManager>();
 
@@ -246,6 +247,21 @@ void CEditorCodeWidget::SaveProject()
 
 //----------------------------------------------------------------------------------------
 //
+void CEditorCodeWidget::OnHidden()
+{
+  ScriptEditorModel()->SetReloadFileWithoutQuestion(true);
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CEditorCodeWidget::OnShown()
+{
+  ScriptEditorModel()->SetReloadFileWithoutQuestion(false);
+  ReloadEditor(m_spUi->pResourceComboBox->currentIndex());
+}
+
+//----------------------------------------------------------------------------------------
+//
 void CEditorCodeWidget::LoadResource(tspResource spResource)
 {
   WIDGET_INITIALIZED_GUARD
@@ -358,22 +374,7 @@ void CEditorCodeWidget::on_pResourceComboBox_currentIndexChanged(qint32 iIndex)
     ScriptEditorModel()->SetSceneScriptModifiedFlag(pScriptItem->m_sId, pScriptItem->m_bChanged);
   }
 
-  m_spUi->pCodeEdit->ResetWidget();
-  m_spUi->pCodeEdit->clear();
-
-  // load new contents
-  m_sLastCachedScript = ScriptEditorModel()->CachedScriptName(iIndex);
-  pScriptItem = ScriptEditorModel()->CachedScript(m_sLastCachedScript);
-  if (nullptr != pScriptItem)
-  {
-    if (nullptr != ActionBar())
-    {
-      ActionBar()->m_spUi->DebugButton->setEnabled(nullptr != pScriptItem->m_spScene);
-    }
-    m_spUi->pCodeEdit->setPlainText(QString::fromUtf8(pScriptItem->m_data));
-    m_spUi->pCodeEdit->SetHighlightDefinition("JavaScript");
-  }
-  m_spUi->pCodeEdit->update();
+  ReloadEditor(iIndex);
 
   m_bChangingIndex = false;
 }
@@ -577,4 +578,30 @@ void CEditorCodeWidget::SlotRowsRemoved(const QModelIndex& parent, int iFirst, i
   {
     m_spUi->pStackedWidget->setCurrentIndex(c_iIndexNoScripts);
   }
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CEditorCodeWidget::ReloadEditor(qint32 iIndex)
+{
+  m_bChangingIndex = true;
+
+  m_spUi->pCodeEdit->ResetWidget();
+  m_spUi->pCodeEdit->clear();
+
+  // load new contents
+  m_sLastCachedScript = ScriptEditorModel()->CachedScriptName(iIndex);
+  auto  pScriptItem = ScriptEditorModel()->CachedScript(m_sLastCachedScript);
+  if (nullptr != pScriptItem)
+  {
+    if (nullptr != ActionBar())
+    {
+      ActionBar()->m_spUi->DebugButton->setEnabled(nullptr != pScriptItem->m_spScene);
+    }
+    m_spUi->pCodeEdit->setPlainText(QString::fromUtf8(pScriptItem->m_data));
+    m_spUi->pCodeEdit->SetHighlightDefinition("JavaScript");
+  }
+  m_spUi->pCodeEdit->update();
+
+  m_bChangingIndex = false;
 }

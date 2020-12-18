@@ -580,7 +580,9 @@ void CEditorMainScreen::ChangeIndex(QComboBox* pComboBox, QWidget* pContainer,
   QLayout* pLayout = pContainer->layout();
   while (auto item = pLayout->takeAt(0))
   {
-    item->widget()->setVisible(false);
+    CEditorWidgetBase* pEditor = qobject_cast<CEditorWidgetBase*>(item->widget());
+    pEditor->OnHidden();
+    pEditor->setVisible(false);
   }
 
   auto it = m_spWidgetsMap.find(EEditorWidget::_from_integral(iEnumValue));
@@ -588,6 +590,7 @@ void CEditorMainScreen::ChangeIndex(QComboBox* pComboBox, QWidget* pContainer,
   {
     it->second->setVisible(true);
     pLayout->addWidget(it->second);
+    it->second->OnShown();
     it->second->SetActionBar(pActionBar);
   }
 }

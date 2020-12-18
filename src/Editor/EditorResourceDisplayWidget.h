@@ -26,6 +26,8 @@ public:
   void LoadProject(tspProject spProject) override { Q_UNUSED(spProject); SetLoaded(true); }
   void UnloadProject() override { SetLoaded(false); }
   void SaveProject() override {}
+  void OnHidden() override {}
+  void OnShown() override {}
 
   void LoadResource(tspResource spResource);
   ELoadState LoadState() const;

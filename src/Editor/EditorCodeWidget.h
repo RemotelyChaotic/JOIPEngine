@@ -43,6 +43,8 @@ public:
   void LoadProject(tspProject spProject) override;
   void UnloadProject() override;
   void SaveProject() override;
+  void OnHidden() override;
+  void OnShown() override;
 
   void LoadResource(tspResource spResource);
 
@@ -65,7 +67,7 @@ protected slots:
   void SlotRowsRemoved(const QModelIndex& parent, int iFirst, int iLast);
 
 private:
-  QString FindSceneName(qint32 iId);
+  void ReloadEditor(qint32 iIndex);
 
   std::unique_ptr<CBackgroundSnippetOverlay>             m_spBackgroundSnippetOverlay;
   std::unique_ptr<CIconSnippetOverlay>                   m_spIconSnippetOverlay;

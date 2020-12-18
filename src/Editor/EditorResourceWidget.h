@@ -34,6 +34,8 @@ public:
   void LoadProject(tspProject spCurrentProject) override;
   void UnloadProject() override;
   void SaveProject() override {}
+  void OnHidden() override {}
+  void OnShown() override {}
 
 signals:
   void SignalResourceSelected(const QString& sName);

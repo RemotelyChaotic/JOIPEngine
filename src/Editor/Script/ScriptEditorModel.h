@@ -18,7 +18,7 @@ struct SCachedMapItem
 {
   SCachedMapItem() :
     m_spScene(), m_spWatcher(std::make_shared<QFileSystemWatcher>()), m_data(), m_sId(),
-    m_bChanged(false), m_bIgnoreNextModification(false), m_bInitialized(false)
+    m_bChanged(false), m_bIgnoreNextModification(false), m_bAllreadyAsked(false), m_bInitialized(false)
   {}
   SCachedMapItem(const SCachedMapItem& other) :
     m_spScene(other.m_spScene),
@@ -26,6 +26,7 @@ struct SCachedMapItem
     m_sId(other.m_sId),
     m_bChanged(other.m_bChanged),
     m_bIgnoreNextModification(other.m_bIgnoreNextModification),
+    m_bAllreadyAsked(other.m_bAllreadyAsked),
     m_bInitialized(other.m_bInitialized)
   {
   }
@@ -36,6 +37,7 @@ struct SCachedMapItem
   QString                              m_sId;
   bool                                 m_bChanged;
   bool                                 m_bIgnoreNextModification;
+  bool                                 m_bAllreadyAsked;
   bool                                 m_bInitialized;
 };
 
@@ -55,6 +57,7 @@ public:
   void DeInitializeModel();
   void SerializeProject();
   qint32 ScriptIndex(const QString& sName);
+  void SetReloadFileWithoutQuestion(bool bReload);
   void SetSceneScriptModifiedFlag(const QString& sName, bool bModified);
 
   Q_INVOKABLE QModelIndex index(int iRow, int iCol, const QModelIndex& parent = QModelIndex()) const override;
@@ -83,6 +86,7 @@ private:
   tspProject                                  m_spProject;
   QPointer<QWidget>                           m_pParentWidget;
   std::map<QString, SCachedMapItem>           m_cachedScriptsMap;
+  bool                                        m_bReloadFileWithoutQuestion;
 };
 
 #endif // SCRIPTEDITORMODEL_H

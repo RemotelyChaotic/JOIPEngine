@@ -29,6 +29,8 @@ public:
   void LoadProject(tspProject spProject) override;
   void UnloadProject() override;
   void SaveProject() override;
+  void OnHidden() override {};
+  void OnShown() override {};
 
 protected slots:
   void on_pTitleLineEdit_editingFinished();

@@ -21,7 +21,8 @@ CScriptEditorModel::CScriptEditorModel(QWidget* pParent) :
   m_wpDbManager(CApplication::Instance()->System<CDatabaseManager>()),
   m_spProject(),
   m_pParentWidget(pParent),
-  m_cachedScriptsMap()
+  m_cachedScriptsMap(),
+  m_bReloadFileWithoutQuestion(false)
 {
   auto spDbManager = m_wpDbManager.lock();
   connect(spDbManager.get(), &CDatabaseManager::SignalResourceAdded,
@@ -160,6 +161,13 @@ qint32 CScriptEditorModel::ScriptIndex(const QString& sName)
 
 //----------------------------------------------------------------------------------------
 //
+void CScriptEditorModel::SetReloadFileWithoutQuestion(bool bReload)
+{
+  m_bReloadFileWithoutQuestion = bReload;
+}
+
+//----------------------------------------------------------------------------------------
+//
 void CScriptEditorModel::SetSceneScriptModifiedFlag(const QString& sName, bool bModified)
 {
   auto it = m_cachedScriptsMap.find(sName);
@@ -262,22 +270,35 @@ void CScriptEditorModel::SlotFileChanged(const QString& sPath)
       }
       else
       {
-        it->second.m_bIgnoreNextModification = true;
-        QMessageBox msgBox(m_pParentWidget);
-        msgBox.setText("The document has been modified on the disc.");
-        msgBox.setInformativeText("Do you want to reload the file or keep the local file?");
-        QPushButton* pReloadButton = msgBox.addButton(tr("Reload"), QMessageBox::AcceptRole);
-        QPushButton* pKeepButton = msgBox.addButton(tr("Keep"), QMessageBox::RejectRole);
-        msgBox.setDefaultButton(pKeepButton);
-        msgBox.exec();
-
-        SetSceneScriptModifiedFlag(it->first, msgBox.clickedButton() == pKeepButton);
-        if (msgBox.clickedButton() == pReloadButton)
+        if (!it->second.m_bAllreadyAsked)
         {
-          LoadScriptFile(sId);
-          emit SignalFileChangedExternally(sId);
+          it->second.m_bIgnoreNextModification = true;
+          it->second.m_bAllreadyAsked = true;
+          if (!m_bReloadFileWithoutQuestion)
+          {
+            QMessageBox msgBox(m_pParentWidget);
+            msgBox.setText("The document has been modified on the disc.");
+            msgBox.setInformativeText("Do you want to reload the file or keep the local file?");
+            QPushButton* pReloadButton = msgBox.addButton(tr("Reload"), QMessageBox::AcceptRole);
+            QPushButton* pKeepButton = msgBox.addButton(tr("Keep"), QMessageBox::RejectRole);
+            msgBox.setDefaultButton(pKeepButton);
+            msgBox.exec();
+
+            SetSceneScriptModifiedFlag(it->first, msgBox.clickedButton() == pKeepButton);
+
+            if (msgBox.clickedButton() == pReloadButton)
+            {
+              LoadScriptFile(sId);
+              emit SignalFileChangedExternally(sId);
+            }
+          }
+          else
+          {
+            LoadScriptFile(sId);
+          }
+          it->second.m_bAllreadyAsked = false;
+          it->second.m_bIgnoreNextModification = false;
         }
-        it->second.m_bIgnoreNextModification = false;
       }
     }
   }
