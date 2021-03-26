@@ -68,3 +68,16 @@ Fixed Bugs:
 - Timer interval bug fixed; the timer doesn't run longer than expected anymore.
 - Fixed OpenGL issues that prevented menus to be opened.
 - Fixed multiple issues with editor code overlays.
+
+
+================================================================================
+Version 1.1.1.0
+================================================================================
+
+Changes:
+- Resource tree filtering is more consistent with other trees and hides
+  folders whose contents do not match the filter.
+
+Fixed Bugs:
+- Metronome not accepting null or empty string to reset beat sound was fixed.
+- Fixed Metronome not clearing on stop.
