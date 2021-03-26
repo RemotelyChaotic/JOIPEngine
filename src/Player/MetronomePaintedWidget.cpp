@@ -55,7 +55,7 @@ const QString& CMetronomeCanvasQml::BeatResource() const
 //
 void CMetronomeCanvasQml::SetBeatResource(const QString& sResource)
 {
-  if (m_sBeatResource != sResource && QFileInfo(m_sBeatResource).exists())
+  if (m_sBeatResource != sResource && (sResource.isEmpty() || QFileInfo(m_sBeatResource).exists()))
   {
     if (sResource.isEmpty())
     {
@@ -85,6 +85,17 @@ void CMetronomeCanvasQml::SetTickColor(const QColor& color)
   {
     m_tickColor = color;
     emit tickColorChanged();
+  }
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CMetronomeCanvasQml::clear()
+{
+  m_vdTickmap.clear();
+  if (m_player->isPlaying())
+  {
+    m_player->stop();
   }
 }
 

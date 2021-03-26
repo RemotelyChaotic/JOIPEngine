@@ -27,6 +27,7 @@ public:
   void SetTickColor(const QColor& color);
 
 public slots:
+  void clear();
   void spawnNewMetronomeTicks();
   void update(double dIntervalMs);
 

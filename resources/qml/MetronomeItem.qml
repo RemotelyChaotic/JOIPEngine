@@ -43,6 +43,7 @@ Rectangle {
         counter.stop();
         counter.currentInterval = 0.0;
         counter.currentPatternIndex = 0;
+        metronomeDisplay.clear();
     }
 
     Timer {
