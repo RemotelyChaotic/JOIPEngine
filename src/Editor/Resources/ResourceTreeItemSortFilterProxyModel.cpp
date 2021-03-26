@@ -17,7 +17,10 @@ CResourceTreeItemSortFilterProxyModel::~CResourceTreeItemSortFilterProxyModel()
 void CResourceTreeItemSortFilterProxyModel::InitializeModel(tspProject spProject)
 {
   CResourceTreeItemModel* pModel = dynamic_cast<CResourceTreeItemModel*>(sourceModel());
-  pModel->InitializeModel(spProject);
+  if (nullptr != pModel)
+  {
+    pModel->InitializeModel(spProject);
+  }
 }
 
 //----------------------------------------------------------------------------------------
@@ -25,7 +28,10 @@ void CResourceTreeItemSortFilterProxyModel::InitializeModel(tspProject spProject
 void CResourceTreeItemSortFilterProxyModel::DeInitializeModel()
 {
   CResourceTreeItemModel* pModel = dynamic_cast<CResourceTreeItemModel*>(sourceModel());
-  pModel->DeInitializeModel();
+  if (nullptr != pModel)
+  {
+    pModel->DeInitializeModel();
+  }
 }
 
 //----------------------------------------------------------------------------------------
@@ -34,9 +40,31 @@ bool CResourceTreeItemSortFilterProxyModel::filterAcceptsRow(int iSourceRow,
                                                              const QModelIndex &sourceParent) const
 {
   CResourceTreeItemModel* pSourceModel = dynamic_cast<CResourceTreeItemModel*>(sourceModel());
-  QModelIndex index = pSourceModel->index(iSourceRow, 0, sourceParent);
-  return !pSourceModel->IsResourceType(index) ||
-      pSourceModel->data(index, Qt::DisplayRole, resource_item::c_iColumnName).toString().contains(filterRegExp());
+  if (nullptr != pSourceModel)
+  {
+    if(!filterRegExp().isEmpty())
+    {
+        // get source-model index for current row
+        QModelIndex sourceIndex = pSourceModel->index(iSourceRow, 0, sourceParent);
+        if(sourceIndex.isValid())
+        {
+          // if any of children matches the filter, then current index matches the filter as well
+          qint32 iNb = pSourceModel->rowCount(sourceIndex) ;
+          for(qint32 i = 0; i < iNb; ++i)
+          {
+            if(filterAcceptsRow(i, sourceIndex))
+            {
+              return true;
+            }
+          }
+          // check current index itself :
+          QString key = pSourceModel->data(sourceIndex, Qt::DisplayRole, resource_item::c_iColumnName).toString();
+          return key.contains(filterRegExp()) ;
+        }
+    }
+  }
+
+  return QSortFilterProxyModel::filterAcceptsRow(iSourceRow, sourceParent);
 }
 
 //----------------------------------------------------------------------------------------
