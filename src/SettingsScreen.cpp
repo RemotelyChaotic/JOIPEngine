@@ -351,6 +351,17 @@ void CSettingsScreen::on_pVolumeSlider_sliderReleased()
 
 //----------------------------------------------------------------------------------------
 //
+void CSettingsScreen::on_pPauseWhenNotActiveCheckBox_stateChanged(qint32 iState)
+{
+  WIDGET_INITIALIZED_GUARD
+  assert(nullptr != m_spSettings);
+  if (nullptr == m_spSettings) { return; }
+
+  m_spSettings->SetPauseWhenInactive(iState == Qt::Checked);
+}
+
+//----------------------------------------------------------------------------------------
+//
 void CSettingsScreen::on_pOfflineModeCheckBox_stateChanged(qint32 iState)
 {
   WIDGET_INITIALIZED_GUARD

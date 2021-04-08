@@ -83,3 +83,4 @@ Changes:
 Fixed Bugs:
 - Metronome not accepting null or empty string to reset beat sound was fixed.
 - Fixed Metronome not clearing on stop.
+- "Pause Player when app is not active" setting can now be actually toggled.
