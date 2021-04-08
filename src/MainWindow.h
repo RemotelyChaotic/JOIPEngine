@@ -37,6 +37,9 @@ protected slots:
 protected:
   void resizeEvent(QResizeEvent* pEvt) override;
 
+private slots:
+  void OldSettingsDetected();
+
 private:
   void ConnectSlots();
 

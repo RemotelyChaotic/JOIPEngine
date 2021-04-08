@@ -75,6 +75,7 @@ namespace {
 
 //----------------------------------------------------------------------------------------
 //
+const QString CSettings::c_sVersion = "General/version";
 const QString CSettings::c_sSettingAutoPauseInactive = "Content/pauseinactive";
 const QString CSettings::c_sSettingContentFolder = "Content/folder";
 const QString CSettings::c_sSettingFont = "Graphics/font";
@@ -95,7 +96,7 @@ CSettings::CSettings(QObject* pParent) :
   QObject (pParent),
   m_spSettings(std::make_shared<QSettings>(QSettings::IniFormat, QSettings::UserScope,
      CSettings::c_sOrganisation, CSettings::c_sApplicationName)),
-
+  m_bOldVersionSaved(false),
   c_sDefaultKeyBindings({
       { "Pause",      QKeySequence(Qt::Key_P)                        },
       { "Skip",       QKeySequence(Qt::Key_Space)                    },
@@ -156,6 +157,19 @@ CSettings::CSettings(QObject* pParent) :
       { "Foreward",   QKeySequence(QKeySequence::Forward)}
     })
 {
+  if (!m_spSettings->contains(CSettings::c_sVersion))
+  {
+    m_bOldVersionSaved = true;
+  }
+  else
+  {
+    quint32 iVersion = SettingsVersion();
+    SVersion version(VERSION_XYZ);
+    if (QT_VERSION_CHECK(version.m_iMajor, version.m_iMinor, version.m_iPatch) > iVersion)
+    {
+       m_bOldVersionSaved = true;
+    }
+  }
   GenerateSettingsIfNotExists();
 }
 
@@ -375,6 +389,36 @@ QSize CSettings::Resolution()
 {
   QMutexLocker locker(&m_settingsMutex);
   return m_spSettings->value(CSettings::c_sSettingResolution).toSize();
+}
+
+//----------------------------------------------------------------------------------------
+//
+bool CSettings::HasOldSettingsVersion()
+{
+  QMutexLocker locker(&m_settingsMutex);
+  return m_bOldVersionSaved;
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CSettings::SetSettingsVersion(quint32 iVersion)
+{
+  QMutexLocker locker(&m_settingsMutex);
+
+  quint32 iOldVersion = m_spSettings->value(CSettings::c_sVersion).toUInt();
+
+  if (iOldVersion == iVersion) { return; }
+
+  m_spSettings->setValue(CSettings::c_sVersion, iVersion);
+  m_bOldVersionSaved = false;
+}
+
+//----------------------------------------------------------------------------------------
+//
+quint32 CSettings::SettingsVersion()
+{
+  QMutexLocker locker(&m_settingsMutex);
+  return m_spSettings->value(CSettings::c_sVersion).toUInt();
 }
 
 //----------------------------------------------------------------------------------------

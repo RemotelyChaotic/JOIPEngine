@@ -8,11 +8,14 @@
 #include "SceneScreen.h"
 #include "Settings.h"
 #include "SettingsScreen.h"
+#include "SVersion.h"
 #include "WindowContext.h"
 #include "Widgets/BackgroundWidget.h"
 #include "Widgets/HelpOverlay.h"
 #include "ui_MainWindow.h"
 #include <QDesktopWidget>
+#include <QDir>
+#include <QMessageBox>
 #include <QStyle>
 
 CMainWindow::CMainWindow(QWidget* pParent) :
@@ -80,6 +83,12 @@ void CMainWindow::Initialize()
   connect(m_spHelpButtonOverlay.get(), &CHelpButtonOverlay::SignalButtonClicked,
           this, &CMainWindow::SlotHelpButtonClicked);
   m_spHelpButtonOverlay->Show();
+
+  if (m_spSettings->HasOldSettingsVersion())
+  {
+    bool bOk = QMetaObject::invokeMethod(this, "OldSettingsDetected", Qt::QueuedConnection);
+    assert(bOk); Q_UNUSED(bOk)
+  }
 
   m_bInitialized = true;
 }
@@ -188,6 +197,38 @@ void CMainWindow::SlotHelpButtonClicked()
                           m_spHelpButtonOverlay->parentWidget()->mapToGlobal(
                               m_spHelpButtonOverlay->geometry().center())),
                         m_spUi->pApplicationStackWidget->currentWidget());
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CMainWindow::OldSettingsDetected()
+{
+  SVersion version(VERSION_XYZ);
+  QString sContentPath = QCoreApplication::instance()->applicationDirPath() +
+      QDir::separator() + ".." + QDir::separator() + "data";
+  QFileInfo contentFileInfo(sContentPath);
+
+  if (m_spSettings->ContentFolder() != contentFileInfo.absoluteFilePath())
+  {
+    QPointer pThis(this);
+    QMessageBox msgBox;
+    msgBox.setText(tr("Settings for old version found."));
+    msgBox.setInformativeText(tr("Do you want to set the content folder to this applications data folder "
+                                 "(You will have to move over any JOI-Projects from the old folder to access them)?"));
+    msgBox.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
+    msgBox.setDefaultButton(QMessageBox::Yes);
+    qint32 iRetVal = msgBox.exec();
+    if (pThis.isNull()) { return; }
+    if (QMessageBox::Yes == iRetVal)
+    {
+      m_spSettings->SetContentFolder(contentFileInfo.absoluteFilePath());
+      m_spSettings->SetSettingsVersion(QT_VERSION_CHECK(version.m_iMajor, version.m_iMinor, version.m_iPatch));
+    }
+  }
+  else
+  {
+    m_spSettings->SetSettingsVersion(QT_VERSION_CHECK(version.m_iMajor, version.m_iMinor, version.m_iPatch));
+  }
 }
 
 //----------------------------------------------------------------------------------------

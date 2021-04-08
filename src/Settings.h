@@ -27,6 +27,7 @@ class CSettings : public QObject
   Q_PROPERTY(double volume READ Volume WRITE SetVolume NOTIFY volumeChanged)
 
 public:
+  static const QString c_sVersion;
   static const QString c_sSettingAutoPauseInactive;
   static const QString c_sSettingContentFolder;
   static const QString c_sSettingFont;
@@ -61,6 +62,9 @@ public:
   bool PauseWhenInactive();
   void SetResolution(const QSize& size);
   QSize Resolution();
+  bool HasOldSettingsVersion();
+  void SetSettingsVersion(quint32 uiVersion);
+  quint32 SettingsVersion();
   void SetStyle(const QString& sStyle);
   QString Style();
   Q_INVOKABLE QUrl styleFolder();
@@ -88,6 +92,7 @@ private:
 
   mutable QMutex             m_settingsMutex;
   std::shared_ptr<QSettings> m_spSettings;
+  bool                       m_bOldVersionSaved;
 
   const std::map<QString, QKeySequence> c_sDefaultKeyBindings;
 };

@@ -77,6 +77,8 @@ Version 1.1.1.0
 Changes:
 - Resource tree filtering is more consistent with other trees and hides
   folders whose contents do not match the filter.
+- Application auto-detects old version and asks to overwrite content
+  folder with own content folder.
 
 Fixed Bugs:
 - Metronome not accepting null or empty string to reset beat sound was fixed.
