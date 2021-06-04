@@ -88,6 +88,23 @@ Rectangle {
                 width: localTextMetrics.boundingRect.width + 20
                 height: tableView.itemHeight
                 property int rowIndex: 0
+                property string textForButton: ""
+                property string bgColor: "#FF000000"
+                property string fgColor: "#FFFFFFFF"
+
+                Component.onCompleted: {
+                    // don't connect properties directly otherwise all buttons will
+                    // have the same text and on new buttons all texts on all buttons change
+                    if (textDelegate.buttonTexts.length > index) {
+                        repeaterItem.textForButton = textDelegate.buttonTexts[index];
+                    }
+                    if (textDelegate.backgroundColors.length > index) {
+                        repeaterItem.bgColor = textDelegate.backgroundColors[index];
+                    }
+                    if (textDelegate.textColors.length > index) {
+                        repeaterItem.fgColor = textDelegate.textColors[index];
+                    }
+                }
 
                 TextMetrics {
                     id: localTextMetrics
@@ -99,7 +116,7 @@ Rectangle {
                 Button {
                     id: button
                     anchors.fill: parent
-                    text: textDelegate.buttonTexts[index];
+                    text: repeaterItem.textForButton;
                     z: 1
 
                     onHoveredChanged: {
@@ -115,7 +132,7 @@ Rectangle {
 
                     background: Rectangle {
                         anchors.fill: parent
-                        color: textDelegate.backgroundColors.length > index ? textDelegate.backgroundColors[index] : "#FF000000"
+                        color: repeaterItem.bgColor
                         radius: 5
                     }
 
@@ -125,11 +142,11 @@ Rectangle {
                         font.family: Settings.font;
                         font.pointSize: textMetrics.font.pointSize
                         elide: Text.ElideNone
-                        text: textDelegate.buttonTexts[index]
+                        text: repeaterItem.textForButton
                         wrapMode: Text.WordWrap
                         horizontalAlignment: Text.AlignHCenter
                         verticalAlignment: Text.AlignVCenter
-                        color: textDelegate.textColors.length > index ? textDelegate.textColors[index] : "#FFFFFFFF"
+                        color: repeaterItem.fgColor
                         textFormat: QtApp.mightBeRichtext(text) ? Text.RichText : Text.PlainText
                     }
 

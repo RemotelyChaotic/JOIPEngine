@@ -86,3 +86,5 @@ Fixed Bugs:
 - "Pause Player when app is not active" setting can now be actually toggled.
 - Filtered Resource tree updates when a Resource is added or removed.
 - Wildly jumping PlayerTextBox fixed.
+- Fixed buttons in Player not accepting shortcuts and changing their text when
+  new buttons are created.
