@@ -13,9 +13,15 @@ public:
   void InitializeModel(tspProject spProject);
   void DeInitializeModel();
 
+  void setSourceModel(QAbstractItemModel* pSourceModel) override;
+
 protected:
-    bool filterAcceptsRow(int iSourceRow, const QModelIndex& sourceParent) const override;
-    bool lessThan(const QModelIndex& left, const QModelIndex& right) const override;
+  bool filterAcceptsRow(int iSourceRow, const QModelIndex& sourceParent) const override;
+  bool lessThan(const QModelIndex& left, const QModelIndex& right) const override;
+
+private:
+  void SlotResourceAdded();
+  void SlotResourceRemoved();
 };
 
 #endif // RESOURCETREEITEMSORTFILTERPROXYMODEL_H

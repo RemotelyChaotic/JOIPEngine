@@ -36,6 +36,29 @@ void CResourceTreeItemSortFilterProxyModel::DeInitializeModel()
 
 //----------------------------------------------------------------------------------------
 //
+void CResourceTreeItemSortFilterProxyModel::setSourceModel(QAbstractItemModel* pSourceModel)
+{
+  if (nullptr != sourceModel())
+  {
+    disconnect(sourceModel(), &CResourceTreeItemModel::rowsInserted,
+               this, &CResourceTreeItemSortFilterProxyModel::SlotResourceAdded);
+    disconnect(sourceModel(), &CResourceTreeItemModel::rowsRemoved,
+               this, &CResourceTreeItemSortFilterProxyModel::SlotResourceRemoved);
+  }
+
+  QSortFilterProxyModel::setSourceModel(pSourceModel);
+
+  if (nullptr != pSourceModel)
+  {
+    connect(pSourceModel, &CResourceTreeItemModel::rowsInserted,
+            this, &CResourceTreeItemSortFilterProxyModel::SlotResourceAdded);
+    connect(pSourceModel, &CResourceTreeItemModel::rowsRemoved,
+            this, &CResourceTreeItemSortFilterProxyModel::SlotResourceRemoved);
+  }
+}
+
+//----------------------------------------------------------------------------------------
+//
 bool CResourceTreeItemSortFilterProxyModel::filterAcceptsRow(int iSourceRow,
                                                              const QModelIndex &sourceParent) const
 {
@@ -93,4 +116,18 @@ bool CResourceTreeItemSortFilterProxyModel::lessThan(const QModelIndex& left,
   }
 
   return QSortFilterProxyModel::lessThan(left, right);
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CResourceTreeItemSortFilterProxyModel::SlotResourceAdded()
+{
+  invalidateFilter();
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CResourceTreeItemSortFilterProxyModel::SlotResourceRemoved()
+{
+  invalidateFilter();
 }
