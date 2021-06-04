@@ -85,3 +85,4 @@ Fixed Bugs:
 - Fixed Metronome not clearing on stop.
 - "Pause Player when app is not active" setting can now be actually toggled.
 - Filtered Resource tree updates when a Resource is added or removed.
+- Wildly jumping PlayerTextBox fixed.

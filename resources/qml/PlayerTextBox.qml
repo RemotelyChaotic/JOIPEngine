@@ -23,6 +23,7 @@ Rectangle {
             "portrait": null,
             "type": "TextBoxSpacerDelegate.qml"
         });
+        textLog.cancelFlick();
         textLog.flick(0,-1000);
     }
 
@@ -38,6 +39,7 @@ Rectangle {
             "portrait": null,
             "type": "TextBoxButtonsDelegate.qml"
         });
+        textLog.cancelFlick();
         textLog.flick(0,-1000);
     }
 
@@ -59,6 +61,7 @@ Rectangle {
             "portrait": null,
             "type": "TextBoxInputDelegate.qml"
         });
+        textLog.cancelFlick();
         textLog.flick(0,-1000);
     }
 
@@ -73,6 +76,7 @@ Rectangle {
             "portrait": textLog.portrait,
             "type": "TextBoxTextDelegate.qml"
         });
+        textLog.cancelFlick();
         textLog.flick(0,-1000);
     }
 
