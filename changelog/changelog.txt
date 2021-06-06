@@ -88,3 +88,4 @@ Fixed Bugs:
 - Wildly jumping PlayerTextBox fixed.
 - Fixed buttons in Player not accepting shortcuts and changing their text when
   new buttons are created.
+- Fixed Sounds in PlayerMetronome not playing if the metronome was too fast.

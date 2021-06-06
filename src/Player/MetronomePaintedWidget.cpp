@@ -6,17 +6,23 @@
 
 namespace  {
   const double c_dTickWidth = 5.0;
+  const qint32 c_iNumAutioEmitters = 5;
 }
 
 CMetronomeCanvasQml::CMetronomeCanvasQml(QQuickItem* pParent) :
   QQuickPaintedItem(pParent),
-  m_player(std::make_unique<QtAV::AVPlayer>()),
+  m_vspPlayers(),
   m_sBeatResource(":/resources/sound/metronome_default.wav"),
   m_tickColor(Qt::white),
-  m_vdTickmap()
+  m_vdTickmap(),
+  m_iLastAutioPlayer(0)
 {
-  m_player->setRepeat(0);
-  m_player->setFile(m_sBeatResource);
+  for (qint32 i = 0; c_iNumAutioEmitters > i; ++i)
+  {
+    m_vspPlayers.push_back(std::make_unique<QtAV::AVPlayer>());
+    m_vspPlayers.back()->setRepeat(0);
+    m_vspPlayers.back()->setFile(m_sBeatResource);
+  }
 }
 
 CMetronomeCanvasQml::~CMetronomeCanvasQml()
@@ -65,7 +71,10 @@ void CMetronomeCanvasQml::SetBeatResource(const QString& sResource)
     {
       m_sBeatResource = sResource;
     }
-    m_player->setFile(m_sBeatResource);
+    for (qint32 i = 0; static_cast<qint32>(m_vspPlayers.size()) > i; ++i)
+    {
+      m_vspPlayers[i]->setFile(m_sBeatResource);
+    }
     emit beatResourceChanged();
   }
 }
@@ -93,9 +102,12 @@ void CMetronomeCanvasQml::SetTickColor(const QColor& color)
 void CMetronomeCanvasQml::clear()
 {
   m_vdTickmap.clear();
-  if (m_player->isPlaying())
+  for (qint32 i = 0; static_cast<qint32>(m_vspPlayers.size()) > i; ++i)
   {
-    m_player->stop();
+    if (m_vspPlayers[i]->isPlaying())
+    {
+      m_vspPlayers[i]->stop();
+    }
   }
 }
 
@@ -120,11 +132,20 @@ void CMetronomeCanvasQml::update(double dIntervalMs)
       it = m_vdTickmap.erase(it);
 
       // play sound
-      if (m_player->isPlaying())
+      if (-1 < m_iLastAutioPlayer && static_cast<qint32>(m_vspPlayers.size()) > m_iLastAutioPlayer)
       {
-        m_player->stop();
+        if (m_vspPlayers[m_iLastAutioPlayer]->isPlaying())
+        {
+          m_vspPlayers[m_iLastAutioPlayer]->stop();
+        }
+        m_vspPlayers[m_iLastAutioPlayer]->play();
       }
-      m_player->play();
+
+      // next audio player
+      if (static_cast<qint32>(m_vspPlayers.size()) <= ++m_iLastAutioPlayer)
+      {
+        m_iLastAutioPlayer = 0;
+      }
 
       emit tickReachedCenter();
     }

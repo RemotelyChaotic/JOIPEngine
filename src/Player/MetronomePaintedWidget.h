@@ -37,10 +37,11 @@ signals:
   void tickReachedCenter();
 
 private:
-  std::unique_ptr<QtAV::AVPlayer> m_player;
-  QString                         m_sBeatResource;
-  QColor                          m_tickColor;
-  std::vector<double>             m_vdTickmap;
+  std::vector<std::unique_ptr<QtAV::AVPlayer>> m_vspPlayers;
+  QString                                      m_sBeatResource;
+  QColor                                       m_tickColor;
+  std::vector<double>                          m_vdTickmap;
+  qint32                                       m_iLastAutioPlayer;
 };
 
 #endif // CMETRONOMEPAINTEDWIDGET_H
