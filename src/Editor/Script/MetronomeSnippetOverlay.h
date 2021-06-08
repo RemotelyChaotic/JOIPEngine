@@ -20,6 +20,7 @@ struct SMetronomeSnippetCode
   qint32 m_iBpm = 60;
   bool m_bSetPattern = false;
   std::map<qint32, double> m_vdPatternElems;
+  bool m_bSetMute = false;
   bool m_bSetBeatSound = false;
   QString m_sBeatSound = QString();
 };
@@ -55,6 +56,7 @@ protected slots:
   void on_AddPatternElemButton_clicked();
   void on_RemovePatternElemButton_clicked();
   void SlotPatternValueChanged(double dValue);
+  void on_pMuteCheckBox_toggled(bool bValue);
   void on_pSetBeatSoundCheckBox_toggled(bool bState);
   void on_pResourceLineEdit_editingFinished();
   void on_pFilter_SignalFilterChanged(const QString& sText);

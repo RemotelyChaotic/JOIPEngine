@@ -21,6 +21,7 @@ public:
 signals:
   void setBpm(qint32 iBpm);
   void setBeatResource(const QString& sResource);
+  void setMuted(bool bMuted);
   void setPattern(const QList<double>& vdPattern);
   void start();
   void stop();
@@ -42,6 +43,7 @@ public:
 public slots:
   void setBpm(qint32 iBpm);
   void setBeatResource(QJSValue resource);
+  void setMuted(bool bMuted);
   void setPattern(const QList<double>& vdPattern);
   void start();
   void stop();

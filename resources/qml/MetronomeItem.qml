@@ -12,6 +12,7 @@ Rectangle {
     property int bpm: 60
     property var pattern: [ 1 ]
     property bool running: counter.running
+    property bool muted: false
 
     function start()
     {
@@ -107,6 +108,7 @@ Rectangle {
         height: parent.height
 
         beatResource: metronomeItem.beatResource
+        muted: metronomeItem.muted
         tickColor: root.style.metronomeDisplay.ticksColor
 
         onTickReachedCenter: {

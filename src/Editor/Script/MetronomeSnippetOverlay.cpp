@@ -208,6 +208,14 @@ void CMetronomeSnippetOverlay::SlotPatternValueChanged(double dValue)
 
 //----------------------------------------------------------------------------------------
 //
+void CMetronomeSnippetOverlay::on_pMuteCheckBox_toggled(bool bValue)
+{
+  if (!m_bInitialized) { return; }
+  m_data.m_bSetMute = bValue;
+}
+
+//----------------------------------------------------------------------------------------
+//
 void CMetronomeSnippetOverlay::on_pSetBeatSoundCheckBox_toggled(bool bState)
 {
   if (!m_bInitialized) { return; }
@@ -272,6 +280,10 @@ void CMetronomeSnippetOverlay::on_pConfirmButton_clicked()
     }
     sCode += sText.arg(vsPatternElems.join(","));
   }
+
+  sCode += QString("metronome.setMuted(%1);\n")
+      .arg(m_data.m_bSetMute ? "true" : "false");
+
   if (m_data.m_bSetBeatSound)
   {
     EResourceType type = EResourceType::eSound;

@@ -15,7 +15,8 @@ CMetronomeCanvasQml::CMetronomeCanvasQml(QQuickItem* pParent) :
   m_sBeatResource(":/resources/sound/metronome_default.wav"),
   m_tickColor(Qt::white),
   m_vdTickmap(),
-  m_iLastAutioPlayer(0)
+  m_iLastAutioPlayer(0),
+  m_bMuted(false)
 {
   for (qint32 i = 0; c_iNumAutioEmitters > i; ++i)
   {
@@ -81,6 +82,33 @@ void CMetronomeCanvasQml::SetBeatResource(const QString& sResource)
 
 //----------------------------------------------------------------------------------------
 //
+bool CMetronomeCanvasQml::Muted() const
+{
+  return m_bMuted;
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CMetronomeCanvasQml::SetMuted(bool bMuted)
+{
+  if (m_bMuted != bMuted)
+  {
+    m_bMuted = bMuted;
+    if (m_bMuted)
+    {
+      for (qint32 i = 0; static_cast<qint32>(m_vspPlayers.size()) > i; ++i)
+      {
+        if (m_vspPlayers[i]->isPlaying())
+        {
+          m_vspPlayers[i]->stop();
+        }
+      }
+    }
+  }
+}
+
+//----------------------------------------------------------------------------------------
+//
 const QColor& CMetronomeCanvasQml::TickColor() const
 {
   return m_tickColor;
@@ -131,20 +159,23 @@ void CMetronomeCanvasQml::update(double dIntervalMs)
       *it = 1.0;
       it = m_vdTickmap.erase(it);
 
-      // play sound
-      if (-1 < m_iLastAutioPlayer && static_cast<qint32>(m_vspPlayers.size()) > m_iLastAutioPlayer)
+      if (!m_bMuted)
       {
-        if (m_vspPlayers[m_iLastAutioPlayer]->isPlaying())
+        // play sound
+        if (-1 < m_iLastAutioPlayer && static_cast<qint32>(m_vspPlayers.size()) > m_iLastAutioPlayer)
         {
-          m_vspPlayers[m_iLastAutioPlayer]->stop();
+          if (m_vspPlayers[m_iLastAutioPlayer]->isPlaying())
+          {
+            m_vspPlayers[m_iLastAutioPlayer]->stop();
+          }
+          m_vspPlayers[m_iLastAutioPlayer]->play();
         }
-        m_vspPlayers[m_iLastAutioPlayer]->play();
-      }
 
-      // next audio player
-      if (static_cast<qint32>(m_vspPlayers.size()) <= ++m_iLastAutioPlayer)
-      {
-        m_iLastAutioPlayer = 0;
+        // next audio player
+        if (static_cast<qint32>(m_vspPlayers.size()) <= ++m_iLastAutioPlayer)
+        {
+          m_iLastAutioPlayer = 0;
+        }
       }
 
       emit tickReachedCenter();

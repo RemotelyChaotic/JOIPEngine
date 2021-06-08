@@ -74,6 +74,9 @@ Fixed Bugs:
 Version 1.1.1.0
 ================================================================================
 
+New Features:
+- PlayerMetronome can be muted with the function "setMuted".
+
 Changes:
 - Resource tree filtering is more consistent with other trees and hides
   folders whose contents do not match the filter.

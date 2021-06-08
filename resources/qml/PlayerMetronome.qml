@@ -42,6 +42,9 @@ Rectangle {
                 }
             }
         }
+        onSetMuted: {
+            metronomeDisplay.muted = bMuted;
+        }
         onSetPattern: {
             metronomeDisplay.pattern = vdPattern;
         }

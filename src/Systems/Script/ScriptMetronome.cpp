@@ -100,6 +100,14 @@ void CScriptMetronome::setBeatResource(QJSValue resource)
 
 //----------------------------------------------------------------------------------------
 //
+void CScriptMetronome::setMuted(bool bMuted)
+{
+  if (!CheckIfScriptCanRun()) { return; }
+  emit SignalEmitter<CMetronomeSignalEmitter>()->setMuted(bMuted);
+}
+
+//----------------------------------------------------------------------------------------
+//
 void CScriptMetronome::setPattern(const QList<double>& vdPattern)
 {
   if (!CheckIfScriptCanRun()) { return; }

@@ -13,6 +13,7 @@ class CMetronomeCanvasQml : public QQuickPaintedItem
 {
   Q_OBJECT
   Q_PROPERTY(QString beatResource READ BeatResource WRITE SetBeatResource NOTIFY beatResourceChanged)
+  Q_PROPERTY(bool  muted READ Muted WRITE SetMuted NOTIFY mutedChanged)
   Q_PROPERTY(QColor  tickColor READ TickColor WRITE SetTickColor NOTIFY tickColorChanged)
 
 public:
@@ -23,6 +24,8 @@ public:
 
   const QString& BeatResource() const;
   void SetBeatResource(const QString& sResource);
+  bool Muted() const;
+  void SetMuted(bool bMuted);
   const QColor& TickColor() const;
   void SetTickColor(const QColor& color);
 
@@ -33,6 +36,7 @@ public slots:
 
 signals:
   void beatResourceChanged();
+  void mutedChanged();
   void tickColorChanged();
   void tickReachedCenter();
 
@@ -42,6 +46,7 @@ private:
   QColor                                       m_tickColor;
   std::vector<double>                          m_vdTickmap;
   qint32                                       m_iLastAutioPlayer;
+  bool                                         m_bMuted;
 };
 
 #endif // CMETRONOMEPAINTEDWIDGET_H
