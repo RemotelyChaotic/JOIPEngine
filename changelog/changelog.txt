@@ -76,6 +76,7 @@ Version 1.1.1.0
 
 New Features:
 - PlayerMetronome can be muted with the function "setMuted".
+- PCX and DCX image format support.
 
 Changes:
 - Resource tree filtering is more consistent with other trees and hides

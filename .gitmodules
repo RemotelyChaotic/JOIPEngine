@@ -22,3 +22,6 @@
 [submodule "3rdparty/json-schema-validator"]
 	path = 3rdparty/json-schema-validator
 	url = https://github.com/RemotelyChaotic/json-schema-validator.git
+[submodule "3rdparty/libqpcx"]
+	path = 3rdparty/libqpcx
+	url = https://github.com/RemotelyChaotic/libqpcx.git
