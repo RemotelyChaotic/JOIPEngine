@@ -384,16 +384,33 @@ void CEditorProjectSettingsWidget::AddKinks(QStringList vsKinks)
   auto spDbManager = CApplication::Instance()->System<CDatabaseManager>().lock();
   if (nullptr!= spDbManager)
   {
+    std::vector<tspKink> vspKinksAdded;
     for (const QString& sKing : qAsConst(vsKinks))
     {
-      AddKinks({spDbManager->FindKink(sKing)});
+      tspKink spKink = spDbManager->FindKink(sKing);
+      if (m_vspKinks.end() != std::find_if(m_vspKinks.begin(), m_vspKinks.end(),
+        [&spKink](const tspKink& left) -> bool {
+        QReadLocker lockerLeft(&left->m_rwLock);
+        QReadLocker lockerRight(&spKink->m_rwLock);
+        return left->m_sName == spKink->m_sName && left->m_sType == spKink->m_sType;
+      })) continue;
+      m_vspKinks.push_back(spKink);
+      vspKinksAdded.push_back(spKink);
     }
+
+    std::sort(m_vspKinks.begin(), m_vspKinks.end(), [](const tspKink& left, const tspKink& right) {
+      QReadLocker lockerLeft(&left->m_rwLock);
+      QReadLocker lockerRight(&right->m_rwLock);
+      return left->m_iIdForOrdering < right->m_iIdForOrdering;
+    });
+
+    AddKinksToView(vspKinksAdded);
   }
 }
 
 //----------------------------------------------------------------------------------------
 //
-void CEditorProjectSettingsWidget::AddKinks(std::vector<tspKink> vspKinks)
+void CEditorProjectSettingsWidget::AddKinksToView(const std::vector<tspKink>& vspKinks)
 {
   WIDGET_INITIALIZED_GUARD
   if (nullptr == m_spCurrentProject) { return; }
@@ -405,14 +422,9 @@ void CEditorProjectSettingsWidget::AddKinks(std::vector<tspKink> vspKinks)
     {
       if (nullptr == spKink) { continue; }
 
-      if (m_vspKinks.end() != std::find_if(m_vspKinks.begin(), m_vspKinks.end(),
-        [&spKink](const tspKink& left) -> bool {
-        QReadLocker lockerLeft(&left->m_rwLock);
-        QReadLocker lockerRight(&spKink->m_rwLock);
-        return left->m_sName == spKink->m_sName && left->m_sType == spKink->m_sType;
-      })) continue;
+      qint32 iIndexOfNewElem =
+          std::find(m_vspKinks.begin(), m_vspKinks.end(), spKink) - m_vspKinks.begin();
 
-      m_vspKinks.push_back(spKink);
       m_spUi->pFetishLineEdit->setText("");
 
       // Farbe für Kategorie ausrechnen
@@ -455,6 +467,7 @@ void CEditorProjectSettingsWidget::AddKinks(std::vector<tspKink> vspKinks)
       QLabel* pLabel = new QLabel(spKink->m_sName, pRoot);
       pLabel->setStyleSheet(QString("QLabel { background-color: transparent; color: %1; }")
                             .arg(foregroundColor.name()));
+      pLabel->setSizePolicy(QSizePolicy(QSizePolicy::Minimum, QSizePolicy::Minimum));
       pRootLayout->addWidget(pLabel);
 
       QPushButton* pRemove = new QPushButton(pRoot);
@@ -476,7 +489,7 @@ void CEditorProjectSettingsWidget::AddKinks(std::vector<tspKink> vspKinks)
               this, &::CEditorProjectSettingsWidget::SlotRemoveKinkClicked);
       pRootLayout->addWidget(pRemove);
 
-      pLayout->addWidget(pRoot);
+      pLayout->insertWidget(iIndexOfNewElem, pRoot);
 
       KinkModel()->SetSelections(QStringList() << spKink->m_sName);
     }

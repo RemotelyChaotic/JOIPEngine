@@ -1,5 +1,6 @@
 #include "FlowLayout.h"
 #include <QtWidgets>
+#include <QtWidgets/private/qlayout_p.h>
 
 
 CFlowLayout::CFlowLayout(QWidget* pParent, int iMargin, int iHSpacing, int iVSpacing) :
@@ -85,6 +86,32 @@ QLayoutItem* CFlowLayout::takeAt(int index)
 
 //----------------------------------------------------------------------------------------
 //
+void CFlowLayout::insertItem(int index, QLayoutItem* pItem)
+{
+  if (0 > index)
+  {
+    index = m_vpItemList.count();
+  }
+
+  m_vpItemList.insert(index, pItem);
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CFlowLayout::insertWidget(int index, QWidget* pWidget)
+{
+  if (0 > index)
+  {
+    index = m_vpItemList.count();
+  }
+
+  addChildWidget(pWidget);
+  QWidgetItem* pItem = QLayoutPrivate::createWidgetItem(this, pWidget);
+  insertItem(index, pItem);
+}
+
+//----------------------------------------------------------------------------------------
+//
 Qt::Orientations CFlowLayout::expandingDirections() const
 {
   return 0;
@@ -156,13 +183,13 @@ int CFlowLayout::doLayout(const QRect &rect, bool testOnly) const
     if (iSpaceX == -1)
     {
       iSpaceX = pWid->style()->layoutSpacing(
-          QSizePolicy::PushButton, QSizePolicy::PushButton, Qt::Horizontal);
+          QSizePolicy::Frame, QSizePolicy::Frame, Qt::Horizontal);
     }
     qint32 iSpaceY = verticalSpacing();
     if (iSpaceY == -1)
     {
       iSpaceY = pWid->style()->layoutSpacing(
-          QSizePolicy::PushButton, QSizePolicy::PushButton, Qt::Vertical);
+          QSizePolicy::Frame, QSizePolicy::Frame, Qt::Vertical);
     }
 
     viTotalWidth[uiCurrentIndex] += pItem->sizeHint().width() + iSpaceX;
@@ -192,13 +219,13 @@ int CFlowLayout::doLayout(const QRect &rect, bool testOnly) const
     if (iSpaceX == -1)
     {
       iSpaceX = pWid->style()->layoutSpacing(
-          QSizePolicy::PushButton, QSizePolicy::PushButton, Qt::Horizontal);
+          QSizePolicy::Frame, QSizePolicy::Frame, Qt::Horizontal);
     }
     qint32 iSpaceY = verticalSpacing();
     if (iSpaceY == -1)
     {
       iSpaceY = pWid->style()->layoutSpacing(
-          QSizePolicy::PushButton, QSizePolicy::PushButton, Qt::Vertical);
+          QSizePolicy::Frame, QSizePolicy::Frame, Qt::Vertical);
     }
 
     qint32 iNextX = x + pItem->sizeHint().width() + iSpaceX;

@@ -25,6 +25,8 @@ public:
     QSize sizeHint() const override;
     QLayoutItem* takeAt(int index) override;
 
+    void insertItem(int index, QLayoutItem* pItem);
+    void insertWidget(int index, QWidget* pWidget);
 private:
     qint32 doLayout(const QRect& rect, bool testOnly) const;
     qint32 smartSpacing(QStyle::PixelMetric pm) const;

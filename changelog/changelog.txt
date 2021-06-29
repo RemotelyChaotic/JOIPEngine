@@ -83,6 +83,7 @@ Changes:
   folders whose contents do not match the filter.
 - Application auto-detects old version and asks to overwrite content
   folder with own content folder.
+- Kink / Fetish tags are sorted.
 
 Fixed Bugs:
 - Metronome not accepting null or empty string to reset beat sound was fixed.

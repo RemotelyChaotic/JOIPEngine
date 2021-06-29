@@ -13,11 +13,12 @@
 struct SKink
 {
   SKink();
-  SKink(QString sType, QString sName, QString sDescribtion);
+  SKink(qint32 iId, QString sType, QString sName, QString sDescribtion);
   SKink(const SKink& other);
   ~SKink();
 
   mutable QReadWriteLock  m_rwLock;
+  qint32                  m_iIdForOrdering;
   QString                 m_sType;
   QString                 m_sName;
   QString                 m_sDescribtion;

@@ -316,7 +316,7 @@ target_sources(${PROJECT_NAME}
 
 target_include_directories(${PROJECT_NAME}
   PRIVATE
-    #${Qt5Widgets_PRIVATE_INCLUDE_DIRS}
+    ${Qt5Widgets_PRIVATE_INCLUDE_DIRS}
     ${QTAVWIDGETS_INCLUDE_DIRS}
     ${NodeEditor_INCLUDE_DIRS}
     ${PhysicsFS_INCLUDE_DIRS}

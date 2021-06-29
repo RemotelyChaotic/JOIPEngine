@@ -956,6 +956,7 @@ void CDatabaseManager::LoadDatabase()
   }
 
   // load kinks
+  qint32 iKinkIdCounter = 0;
   QFile kinkData(":/resources/data/Kink_Information_Data.csv");
   if (kinkData.exists() && kinkData.open(QIODevice::ReadOnly))
   {
@@ -970,11 +971,13 @@ void CDatabaseManager::LoadDatabase()
       {
         tKinks& kinks = m_kinkKategoryMap[vsLineData[0]];
         tspKink spKink = std::make_shared<SKink>();
+        spKink->m_iIdForOrdering = iKinkIdCounter;
         spKink->m_sType = vsLineData[0];
         spKink->m_sName = vsLineData[1];
         spKink->m_sDescribtion = vsLineData[2];
         kinks.insert({vsLineData[1], spKink});
       }
+      ++iKinkIdCounter;
     }
   }
 
