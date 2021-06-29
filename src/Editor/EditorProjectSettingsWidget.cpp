@@ -180,6 +180,7 @@ void CEditorProjectSettingsWidget::UnloadProject()
 {
   WIDGET_INITIALIZED_GUARD
 
+  m_vspKinks.clear();
   m_spCurrentProject = nullptr;
 
   m_spUi->pTitleLineEdit->setReadOnly(false);
@@ -199,8 +200,8 @@ void CEditorProjectSettingsWidget::UnloadProject()
   m_spUi->pFetishLineEdit->setEnabled(true);
   m_spUi->pFetishListWidget->setEnabled(true);
 
-  m_vspKinks.clear();
   KinkModel()->ResetSelections();
+  ClearKinkTagView();
 
   m_spKinkSelectionOverlay->Hide();
   m_spKinkSelectionOverlay->UnloadProject();
@@ -383,7 +384,6 @@ void CEditorProjectSettingsWidget::AddKinks(QStringList vsKinks)
   auto spDbManager = CApplication::Instance()->System<CDatabaseManager>().lock();
   if (nullptr!= spDbManager)
   {
-    std::vector<tspKink> vspKinks;
     for (const QString& sKing : qAsConst(vsKinks))
     {
       AddKinks({spDbManager->FindKink(sKing)});
@@ -484,6 +484,28 @@ void CEditorProjectSettingsWidget::AddKinks(std::vector<tspKink> vspKinks)
   else
   {
     qWarning() << tr("pFetishListWidget has no FlowLayout.");
+  }
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CEditorProjectSettingsWidget::ClearKinkTagView()
+{
+  WIDGET_INITIALIZED_GUARD
+
+  CFlowLayout* pLayout = dynamic_cast<CFlowLayout*>(m_spUi->pFetishListWidget->layout());
+  if (nullptr != pLayout)
+  {
+    while (QLayoutItem* pItem = pLayout->takeAt(0))
+    {
+      if (nullptr != pItem->widget())
+      {
+        delete pItem->widget();
+        delete pItem;
+      }
+    }
+
+    pLayout->update();
   }
 }
 

@@ -48,6 +48,7 @@ protected slots:
 protected:
   void AddKinks(QStringList vsKinks);
   void AddKinks(std::vector<tspKink> vspKinks);
+  void ClearKinkTagView();
   void RemoveKinks(QStringList vsKinks);
   void OnActionBarAboutToChange() override;
   void OnActionBarChanged() override;

@@ -93,3 +93,4 @@ Fixed Bugs:
 - Fixed buttons in Player not accepting shortcuts and changing their text when
   new buttons are created.
 - Fixed Sounds in PlayerMetronome not playing if the metronome was too fast.
+- On reloading a Project in the Editor the tags will not show up multiple times.
