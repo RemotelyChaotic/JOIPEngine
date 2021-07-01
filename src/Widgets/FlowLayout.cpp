@@ -172,6 +172,8 @@ int CFlowLayout::doLayout(const QRect &rect, bool testOnly) const
   qint32 x = effectiveRect.x();
   qint32 y = effectiveRect.y();
   qint32 iLineHeight = 0;
+  qint32 iSpaceX = horizontalSpacing();
+  qint32 iSpaceY = verticalSpacing();
 
   std::vector<qint32> viTotalWidth;
   viTotalWidth.push_back(0);
@@ -179,13 +181,11 @@ int CFlowLayout::doLayout(const QRect &rect, bool testOnly) const
   for (QLayoutItem* pItem : qAsConst(m_vpItemList))
   {
     const QWidget* pWid = pItem->widget();
-    qint32 iSpaceX = horizontalSpacing();
     if (iSpaceX == -1)
     {
       iSpaceX = pWid->style()->layoutSpacing(
           QSizePolicy::Frame, QSizePolicy::Frame, Qt::Horizontal);
     }
-    qint32 iSpaceY = verticalSpacing();
     if (iSpaceY == -1)
     {
       iSpaceY = pWid->style()->layoutSpacing(
@@ -196,6 +196,7 @@ int CFlowLayout::doLayout(const QRect &rect, bool testOnly) const
     qint32 iNextX = x + pItem->sizeHint().width() + iSpaceX;
     if (iNextX - iSpaceX > effectiveRect.right() && iLineHeight > 0)
     {
+      viTotalWidth[uiCurrentIndex] -= pItem->sizeHint().width() + iSpaceX;
       viTotalWidth.push_back(0);
       uiCurrentIndex++;
       x = effectiveRect.x();
@@ -210,18 +211,16 @@ int CFlowLayout::doLayout(const QRect &rect, bool testOnly) const
   }
 
   uiCurrentIndex = 0;
-  x = effectiveRect.x() + effectiveRect.width() / 2 - viTotalWidth[uiCurrentIndex] / 2;
+  x = effectiveRect.x() + (effectiveRect.width() - viTotalWidth[uiCurrentIndex]) / 2;
   y = effectiveRect.y();
   for (QLayoutItem* pItem : qAsConst(m_vpItemList))
   {
     const QWidget* pWid = pItem->widget();
-    qint32 iSpaceX = horizontalSpacing();
     if (iSpaceX == -1)
     {
       iSpaceX = pWid->style()->layoutSpacing(
           QSizePolicy::Frame, QSizePolicy::Frame, Qt::Horizontal);
     }
-    qint32 iSpaceY = verticalSpacing();
     if (iSpaceY == -1)
     {
       iSpaceY = pWid->style()->layoutSpacing(
@@ -234,7 +233,7 @@ int CFlowLayout::doLayout(const QRect &rect, bool testOnly) const
       uiCurrentIndex++;
       if (m_vpItemList.size() > static_cast<qint32>(uiCurrentIndex))
       {
-        x = effectiveRect.x() + effectiveRect.width() / 2 - viTotalWidth[uiCurrentIndex] / 2;
+        x = effectiveRect.x() + (effectiveRect.width() - viTotalWidth[uiCurrentIndex]) / 2;
         y = y + iLineHeight + iSpaceY;
         iNextX = x + pItem->sizeHint().width() + iSpaceX;
         iLineHeight = 0;
@@ -243,7 +242,7 @@ int CFlowLayout::doLayout(const QRect &rect, bool testOnly) const
 
     if (!testOnly)
     {
-      pItem->setGeometry(QRect(QPoint(x, y), pItem->sizeHint()));
+      pItem->setGeometry(QRect(QPoint(x, y), pWid->sizeHint()));
     }
 
     x = iNextX;
