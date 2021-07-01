@@ -29,7 +29,7 @@ Rectangle {
             listModel.append({
                 "project": currentlyAddedProject,
                 "name": currentlyAddedProject.name,
-                "filter": currentlyAddedProject.name + "-" + currentlyAddedProject.describtion + "-" + currentlyAddedProject.kinks,
+                "filter": currentlyAddedProject.name + "-" + currentlyAddedProject.describtion + "-" + currentlyAddedProject.kinks(),
                 "type": "ProjectCardDelegate.qml"
             });
         }

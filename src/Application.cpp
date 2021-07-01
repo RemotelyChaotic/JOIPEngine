@@ -251,6 +251,7 @@ void CApplication::RegisterQmlTypes()
       return nullptr;
   });
 
+  qmlRegisterUncreatableType<CKink>("JOIP.db", 1, 1, "Kink", "");
   qmlRegisterUncreatableType<CProject>("JOIP.db", 1, 1, "Project", "");
   qmlRegisterUncreatableType<CScene>("JOIP.db", 1, 1, "Scene", "");
   qmlRegisterUncreatableType<CResource>("JOIP.db", 1, 1, "Resource", "");

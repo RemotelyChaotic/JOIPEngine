@@ -250,7 +250,7 @@ Rectangle {
                             color: "transparent"
                         }
 
-                        // Describtion
+                        // Detailed View
                         Flickable {
                              id: flick
 
@@ -259,7 +259,7 @@ Rectangle {
                              Layout.alignment: Qt.AlignHCenter
 
                              contentWidth: describtion.paintedWidth
-                             contentHeight: describtion.paintedHeight
+                             contentHeight: describtion.paintedHeight + kinkFlow.height
                              clip: true
 
                              visible: openedDetails
@@ -276,6 +276,7 @@ Rectangle {
                                      contentY = r.y+r.height-height;
                              }
 
+                             // Describtion
                              TextEdit {
                                  id: describtion
 
@@ -302,9 +303,127 @@ Rectangle {
                                     onExited: isHovered = true
                                  }
                             }
+
+                             // Tags
+                             Rectangle {
+                                id: kinkFlow
+                                color: "transparent"
+                                y: describtion.height
+                                width: flick.width
+                                height: itemHeight * (rowCount+1) + spacing * rowCount
+
+                                property int spacing: 5
+                                property int itemHeight: textMetrics.boundingRect.height + 5
+                                property int rowCount: repeater.rowCount
+
+                                TextMetrics {
+                                    id: textMetrics
+                                    font.family: Settings.font
+                                    font.pointSize: 9
+                                    text: "testText here"
+                                }
+
+                                onWidthChanged: {
+                                    repeater.currentRowWidth = 0;
+                                    repeater.numAddedItems = 0;
+                                    repeater.rowCount = 0;
+                                    repeater.rowSizes = [];
+                                    for (var i = 0; dto.numKinks() > i; ++i)
+                                    {
+                                        repeater.relayout(repeater.itemAt(i));
+                                    }
+                                }
+
+                                Repeater {
+                                    id: repeater
+                                    model: dto.numKinks()
+
+                                    property int currentRowWidth: 0
+                                    property int numAddedItems: 0
+                                    property int rowCount: 0
+                                    property var rowSizes: []
+
+                                    function relayout(item) {
+                                        numAddedItems++;
+                                        item.x = currentRowWidth;
+                                        if (currentRowWidth + item.width + parent.spacing > parent.width)
+                                        {
+                                            rowSizes[rowCount] = currentRowWidth - parent.spacing;
+                                            rowCount++;
+                                            item.x = 0;
+                                            currentRowWidth = item.width + parent.spacing;
+                                        }
+                                        else
+                                        {
+                                            currentRowWidth += item.width + parent.spacing;
+                                        }
+                                        item.y = rowCount * parent.itemHeight + rowCount * parent.spacing;
+                                        item.rowIndex = rowCount;
+                                        rowSizes[rowCount] = currentRowWidth - parent.spacing;
+
+                                        // all items added
+                                        if (numAddedItems === dto.numKinks())
+                                        {
+                                            for (var i = 0; i < dto.numKinks(); ++i)
+                                            {
+                                                var pItem = itemAt(i);
+                                                var iRowWidth = rowSizes[pItem.rowIndex];
+                                                pItem.x = pItem.x + (parent.width - iRowWidth) / 2;
+                                            }
+                                        }
+                                    }
+
+                                    // we need to calculate positions manually
+                                    onItemAdded: {
+                                        relayout(item);
+                                    }
+
+                                    Item {
+                                        id: repeaterItem
+                                        width: localTextMetrics.boundingRect.width + 20
+                                        height: kinkFlow.itemHeight
+                                        property int rowIndex: 0
+                                        property Kink kink: dto.kink(dto.kinks()[index])
+                                        property color kinkColor: kink.color()
+
+                                        TextMetrics {
+                                            id: localTextMetrics
+                                            font.family: text.font.family
+                                            font.pointSize: text.font.pointSize
+                                            text: text.text
+                                        }
+
+                                        Rectangle {
+                                            width: parent.width
+                                            height: parent.height
+                                            color: repeaterItem.kinkColor
+                                            radius: 5
+                                            border.color: "transparent"
+
+                                            Text {
+                                                id: text
+                                                anchors.centerIn: parent
+                                                font.family: Settings.font;
+                                                font.pointSize: 9
+                                                elide: Text.ElideNone
+                                                text: repeaterItem.kink.name
+                                                wrapMode: Text.WordWrap
+                                                horizontalAlignment: Text.AlignHCenter
+                                                verticalAlignment: Text.AlignVCenter
+                                                color: {
+                                                    var dluminance =
+                                                            (repeaterItem.kinkColor.r * 0.299 +
+                                                             repeaterItem.kinkColor.g * 0.587 +
+                                                             repeaterItem.kinkColor.b * 0.114);
+                                                    return dluminance < 0.5 ? Qt.rgba(1,1,1,1) :  Qt.rgba(0,0,0,1);
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
                         }
                     }
-
                 }
             }
         }
@@ -318,17 +437,9 @@ Rectangle {
             resource.resource = pResource;
         }
 
-        var sFetishesElem = qsTr("Fetishes:") + "<ul>%1</ul>";
-        var sFetishes = "";
-        for (var i = 0; i < dto.kinks.length; i++)
-        {
-            sFetishes += "<li>" + dto.kinks[i] + "</li>";
-        }
-
         versionText.text = dto.versionText + " / " + dto.targetVersionText;
         describtion.text = (dto.describtion.length > 0 ? dto.describtion : qsTr("<i>No describtion</i>")) +
-                "<br><br>" +
-                (dto.kinks.length > 0 ? sFetishesElem.arg(sFetishes) : "");
+                "<br><br>";
         if (dto.targetVersion !== Settings.version)
         {
             iconWarningVersionRect.visible = true
