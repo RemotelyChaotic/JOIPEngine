@@ -589,9 +589,6 @@
         <a href="qrc:/resources/help/project/joi_project_help.html">JOI-Project</a>.
         This property is only useful for manually parsing the file.<br></li>
 
-        <li><b>kinks: string[]:</b><br>
-        This property lets you read the kinks, that the application has been tagged with.<br></li>
-
         <li><b>isUsingWeb: bool:</b><br>
         This property lets you read the using-web-flag that is set, if the project
         contains any remote <a href="qrc:/resources/help/editor/resources/resource_help.html">Resources</a>.<br></li>
@@ -604,6 +601,18 @@
         This property lets you read the bundled-flag that is set, if the project
         was <a href="qrc:/resources/help/editor/exportproject_button_help.html">exported</a>
         and is thus read-only.<br></li>
+
+        <li><b>numKinks (  ): int:</b><br>
+        This property lets you read the number of kinks, that the application has been tagged with.<br></li>
+
+        <li><b>kinks: string[]:</b><br>
+        This property lets you read the kinks, that the application has been tagged with.<br></li>
+
+        <li><b>kink ( string name ): Kink:</b><br>
+        Returns a Kink object with the name <i>name</i>. Useful if you
+        need to read Kink specific properties.<br>
+        <i>Example Usage:</i><br>
+        var myScene = project.kink("Vaginal Sex (Giving)");<br></li>
 
         <li><b>numScenes (  ): int:</b><br>
         Returns the number of scenes in the project. Usefull for iteration.<br></li>
@@ -720,6 +729,37 @@
         about the Project itself, or about other Resources or Scenes.<br>
         <i>Example Usage:</i><br>
         var project = resource.project();<br></li>
+      <br></li>
+      </ul>
+    </p>
+
+    <br>
+
+    <h2>Kink</h2>
+
+    <br>
+
+    <p>This type of object can be returned by a Project object and contains information
+    about the specific Kink registered in the database. It is used internally to visualize the kinks
+    associated with a Project.<br>
+      <ul>
+        <li><b>idForOrdering: int</b><br>
+        This property lets you read the internal index of the Kink, which is used for sorting.<br></li>
+
+        <li><b>type: string</b><br>
+        This property lets you read the kink category.<br></li>
+
+        <li><b>name: string</b><br>
+        This property lets you read the Kink name. This also serves as the Kink identifier.<br>
+
+        <li><b>describtion: string</b><br>
+        This property lets you read the describtion of the Kink.<br></li>
+
+        <li><b>color ( ): color</b><br>
+        This property lets you read the color of the Tink that is used in the UI.
+        The red green and blue values are generated from an MD4 Hash of the category where
+        red is the first byte green the second and blue the third.<br>
+        </li>
       <br></li>
       </ul>
     </p>
