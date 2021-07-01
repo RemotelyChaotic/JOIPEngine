@@ -17,7 +17,7 @@ BETTER_ENUM(ESceneTransitionType, qint32,
 
 class CProject;
 class CResource;
-class QScriptEngine;
+class QJSEngine;
 struct SProject;
 typedef std::set<QString>        tvsResourceRefs;
 

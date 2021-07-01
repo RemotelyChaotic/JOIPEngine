@@ -21,7 +21,7 @@ BETTER_ENUM(EResourceType, qint32,
             eDatabase   = 5);
 
 class CProject;
-class QScriptEngine;
+class QJSEngine;
 struct SProject;
 
 namespace joip_resource {

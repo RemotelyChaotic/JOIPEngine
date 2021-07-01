@@ -327,14 +327,6 @@ qint32 CProject::getNumberOfSoundEmitters()
 
 //----------------------------------------------------------------------------------------
 //
-QStringList CProject::getKinks()
-{
-  QReadLocker locker(&m_spData->m_rwLock);
-  return m_spData->m_vsKinks;
-}
-
-//----------------------------------------------------------------------------------------
-//
 bool CProject::isUsingWeb()
 {
   QReadLocker locker(&m_spData->m_rwLock);
@@ -363,6 +355,44 @@ bool CProject::isLoaded()
 {
   QReadLocker locker(&m_spData->m_rwLock);
   return m_spData->m_bLoaded;
+}
+
+//----------------------------------------------------------------------------------------
+//
+qint32 CProject::numKinks()
+{
+  QReadLocker locker(&m_spData->m_rwLock);
+  return static_cast<qint32>(m_spData->m_vsKinks.size());
+}
+
+//----------------------------------------------------------------------------------------
+//
+QStringList CProject::kinks()
+{
+  QReadLocker locker(&m_spData->m_rwLock);
+  return m_spData->m_vsKinks;
+}
+
+//----------------------------------------------------------------------------------------
+//
+QJSValue CProject::kink(const QString& sName)
+{
+  QReadLocker locker(&m_spData->m_rwLock);
+  auto it = std::find(m_spData->m_vsKinks.begin(), m_spData->m_vsKinks.end(), sName);
+  if (m_spData->m_vsKinks.end() != it)
+  {
+    auto wpDbManager = CApplication::Instance()->System<CDatabaseManager>().lock();
+    if (nullptr != wpDbManager)
+    {
+      tspKink spKink = wpDbManager->FindKink(sName);
+      if (nullptr != spKink)
+      {
+        CKink* pKink = new CKink(m_pEngine, spKink);
+        return m_pEngine->newQObject(pKink);
+      }
+    }
+  }
+  return QJSValue();
 }
 
 //----------------------------------------------------------------------------------------

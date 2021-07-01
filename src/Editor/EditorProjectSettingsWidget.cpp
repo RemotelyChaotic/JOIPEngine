@@ -15,8 +15,6 @@
 #include "Widgets/HelpOverlay.h"
 
 #include <QCompleter>
-#include <QCryptographicHash>
-#include <QDataStream>
 #include <QDebug>
 
 namespace
@@ -428,15 +426,7 @@ void CEditorProjectSettingsWidget::AddKinksToView(const std::vector<tspKink>& vs
       m_spUi->pFetishLineEdit->setText("");
 
       // Farbe für Kategorie ausrechnen
-      QCryptographicHash hasher(QCryptographicHash::Md4);
-      hasher.addData(spKink->m_sType.toUtf8());
-      QByteArray hashedArr = hasher.result();
-      QDataStream ds(hashedArr);
-      unsigned short r = 0;
-      unsigned short g = 0;
-      unsigned short b = 0;
-      ds >> r >> g >> b;
-      QColor hashColor(r & 0xFF, g & 0xFF, b & 0xFF);
+      QColor hashColor = CalculateKinkColor(*spKink);
 
       // calculate foreground / text color
       double dLuminance = (0.299 * hashColor.red() +

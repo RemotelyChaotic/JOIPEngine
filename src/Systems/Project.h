@@ -3,6 +3,7 @@
 
 #include "ISerializable.h"
 #include "Enums.h"
+#include "Kink.h"
 #include "Resource.h"
 #include "Scene.h"
 #include "SVersion.h"
@@ -13,7 +14,7 @@
 #include <map>
 #include <memory>
 
-class QScriptEngine;
+class QJSEngine;
 
 struct SProject : public ISerializable, std::enable_shared_from_this<SProject>
 {
@@ -71,7 +72,6 @@ class CProject : public QObject
   Q_PROPERTY(QString sceneModel        READ getSceneModel        CONSTANT)
   Q_PROPERTY(QString playerLayout      READ getPlayerLayout      CONSTANT)
   Q_PROPERTY(qint32  numberOfSoundEmitters READ getNumberOfSoundEmitters CONSTANT)
-  Q_PROPERTY(QStringList kinks         READ getKinks             CONSTANT)
   Q_PROPERTY(bool    isUsingWeb        READ isUsingWeb           CONSTANT)
   Q_PROPERTY(bool    isUsingCodecs     READ isUsingCodecs        CONSTANT)
   Q_PROPERTY(bool    isBundled         READ isBundled            CONSTANT)
@@ -94,11 +94,14 @@ public:
   QString getSceneModel();
   QString getPlayerLayout();
   qint32 getNumberOfSoundEmitters();
-  QStringList getKinks();
   bool isUsingWeb();
   bool isUsingCodecs();
   bool isBundled();
   bool isLoaded();
+
+  Q_INVOKABLE qint32 numKinks();
+  Q_INVOKABLE QStringList kinks();
+  Q_INVOKABLE QJSValue kink(const QString& sName);
 
   Q_INVOKABLE qint32 numScenes();
   Q_INVOKABLE QStringList scenes();
