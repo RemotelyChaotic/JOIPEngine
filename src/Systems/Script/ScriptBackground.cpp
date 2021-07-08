@@ -40,11 +40,23 @@ void CScriptBackground::setBackgroundColor(QJSValue color)
 {
   if (!CheckIfScriptCanRun()) { return; }
 
+  // old version compatibility
+  double dAlphaMultiplierFromOldVersion = 1.0;
+  if (nullptr != m_spProject)
+  {
+    QReadLocker locker(&m_spProject->m_rwLock);
+    if (m_spProject->m_iTargetVersion < SVersion(1,1,0))
+    {
+      dAlphaMultiplierFromOldVersion = 0.5;
+    }
+  }
+
   auto spSignalEmitter = SignalEmitter<CBackgroundSignalEmitter>();
   if (color.isString())
   {
-    emit spSignalEmitter->backgroundColorChanged(
-          QColor(color.toString()));
+    QColor col(color.toString());
+    col.setAlpha(col.alpha()*dAlphaMultiplierFromOldVersion);
+    emit spSignalEmitter->backgroundColorChanged(col);
   }
   else if (color.isArray())
   {
@@ -64,8 +76,9 @@ void CScriptBackground::setBackgroundColor(QJSValue color)
     {
       if (viColorComponents.size() == 4)
       {
-        emit spSignalEmitter->backgroundColorChanged(
-              QColor(viColorComponents[0], viColorComponents[1], viColorComponents[2], viColorComponents[3]));
+        QColor col(viColorComponents[0], viColorComponents[1], viColorComponents[2], viColorComponents[3]);
+        col.setAlpha(col.alpha()*dAlphaMultiplierFromOldVersion);
+        emit spSignalEmitter->backgroundColorChanged(col);
       }
       else
       {
