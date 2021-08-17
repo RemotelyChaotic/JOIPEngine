@@ -1002,6 +1002,7 @@ qint32 CDatabaseManager::FindNewSceneId(tspProject& spProj)
 void CDatabaseManager::LoadDatabase()
 {
   // load projects
+  // first load folders
   QString sPath = m_spSettings->ContentFolder();
   QDirIterator it(sPath, QDir::Dirs | QDir::NoDotAndDotDot);
   while (it.hasNext())
@@ -1012,7 +1013,27 @@ void CDatabaseManager::LoadDatabase()
     AddProject(sDirName);
   }
 
-  QDirIterator itBundle(sPath, QStringList() << QString("*") + c_sProjectBundleFileEnding,
+  // next load archives
+  QStringList vsFileEndings;
+  for (const QString& sEnding : CPhysFsFileEngineHandler::SupportedFileTypes())
+  {
+    vsFileEndings << QStringLiteral("*.") + sEnding.toLower();
+  }
+  QDirIterator itCompressed(sPath, vsFileEndings,
+                        QDir::Files | QDir::NoDotAndDotDot, QDirIterator::NoIteratorFlags);
+  while (itCompressed.hasNext())
+  {
+    QString sFileName = QFileInfo(itCompressed.next()).baseName();
+    AddProject(sFileName);
+  }
+
+  // finally load packed projects
+  vsFileEndings = QStringList() << c_sProjectBundleFileEnding;
+  for (const QString& sEnding : CPhysFsFileEngineHandler::SupportedFileTypes())
+  {
+    vsFileEndings << QStringLiteral("*.") + sEnding.toLower();
+  }
+  QDirIterator itBundle(sPath, vsFileEndings,
                         QDir::Files | QDir::NoDotAndDotDot, QDirIterator::NoIteratorFlags);
   while (itBundle.hasNext())
   {

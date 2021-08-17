@@ -9,6 +9,7 @@
 #endif
 
 #include <QApplication>
+#include <QImageReader>
 #include <QtAVWidgets>
 #include <QOpenGLContext>
 #if defined(QT_QML_DEBUG)
@@ -28,13 +29,16 @@ int main(int argc, char *argv[])
   QtAV::Widgets::registerRenderers();
 
   qDebug() << "SSL suport:" << QSslSocket::supportsSsl() <<
-              "SLL Build version:" << QSslSocket::sslLibraryBuildVersionString() <<
-              "SLL Library version:" << QSslSocket::sslLibraryVersionString();
+              "- SLL Build version:" << QSslSocket::sslLibraryBuildVersionString() <<
+              "- SLL Library version:" << QSslSocket::sslLibraryVersionString();
+  qDebug() << "Supported image formats:" << QImageReader::supportedImageFormats();
 
   CApplication app(argc, argv);
   CPhysFsFileEngine::init(argv[0]);
   CPhysFsFileEngineHandler engine;
   QtAV::RegisterPhysFsFileHandler();
+
+  qDebug() << "Supported archive formats:" << CPhysFsFileEngineHandler::SupportedFileTypes();
 
 #if defined(QT_QML_DEBUG)
   QQmlDebuggingEnabler enabler;

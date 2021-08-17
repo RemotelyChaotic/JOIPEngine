@@ -297,6 +297,8 @@ bool CPhysFsFileEngine::setWriteDir(const char* sNewDir)
   return PHYSFS_setWriteDir(sNewDir) != 0;
 }
 
+//----------------------------------------------------------------------------------------
+//
 QAbstractFileEngine* CPhysFsFileEngineHandler::create(const QString &filename) const
 {
   if (filename.startsWith(c_sScheme))
@@ -305,4 +307,18 @@ QAbstractFileEngine* CPhysFsFileEngineHandler::create(const QString &filename) c
   }
 
   return nullptr;
+}
+
+QStringList CPhysFsFileEngineHandler::SupportedFileTypes()
+{
+  static QStringList vsSupportedTypes;
+  if (vsSupportedTypes.isEmpty())
+  {
+    const PHYSFS_ArchiveInfo **i;
+    for (i = PHYSFS_supportedArchiveTypes(); *i != NULL; i++)
+    {
+      vsSupportedTypes << QString::fromUtf8((*i)->extension);
+    }
+  }
+  return vsSupportedTypes;
 }
