@@ -56,7 +56,7 @@
         Images can be online or offline. For online Resources, the link must point to the image or video url directly.
         Links gated behind logins will not work. These Resources
         will <i>not</i> be saved on your disk and instead (down-)loaded into memory and displayed when needed.<br>
-        <i>Supported image formats are</i>: bmp, cur, gif, icns, ico, jpeg, jpg, pbm, pgm, png, ppm,
+        <i>Supported image formats are</i>: bmp, cur, gif, icns, ico, jpeg, jpg, pbm, pcx, pgm, png, ppm,
         svg, svgz, tga, tif, tiff, wbmp, webp, xbm, xpm
         <br></li>
 
@@ -95,6 +95,16 @@
         in the <i>JOIPData.json</i> file. One thing they have in common is that all of them can be opened in
         any external text editor to edit the contents.<br>
         <i>Supported other formats are</i>: json, flow, layout
+        <br></li>
+
+        <li><b>(Archives)</b>: This is not an actual resource type but a container
+        containing various resources in a bundle. You can include archived resources
+        in a project to include the contents of said archive in the project as if you had included the separately.
+        Be aware that packing large files in an archive may increase load time when playing the
+        <a href="qrc:/resources/help/project/joi_project_help.html">Project</a>.<br>
+        <i>Supported archive formats are</i>: zip, 7z, grp, pak, hog, mvl, wad, slb, iso, vdf<br>
+        Note: These are the only currently supported archives due to the application requiring
+        fast random access. This list may be extended in future for non-random-access formats.
         <br></li>
       </ul>
     </p>

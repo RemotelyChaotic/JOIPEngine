@@ -35,13 +35,18 @@
 
   <div class="container">
     <p>JOI-Projects are a collection of <a href="qrc:/resources/help/editor/resources/resource_help.html">Resource</a> files,
-    a <i>JOIPData.json</i>, a <a href="qrc:/resources/help/editor/nodes/node_help.html">SceneModel.flow</a> file
+    a <i>JOIPData.json</i> (must be in the root folder of the project e.g.: <i>\data\myproject\JOIPData.json</i> or <i>\data\myproject.zip\JOIPData.json</i>),
+    a <a href="qrc:/resources/help/editor/nodes/node_help.html">SceneModel.flow</a> file
     and optionally a <a href="qrc:/resources/help/layout/layout_help.html">Layout</a> file (if a project contains no Layout file,
     a default Layout file will be used). With the help of script <a href="qrc:/resources/help/editor/resources/resource_help.html">Resources</a>
     the application can display media <a href="qrc:/resources/help/editor/resources/resource_help.html">Resources</a> according to user defined
     logic.<br>
     A JOI-Project can be played from <a href="qrc:/resources/help/play_button_help.html">Play</a>
-    and edited from <a href="qrc:/resources/help/editor_button_help.html">Editor</a> in the main menu.</p>
+    and edited from <a href="qrc:/resources/help/editor_button_help.html">Editor</a> in the main menu.<br>
+    JOI-Projects can be opened from various formats. The default is to just have a Folder in your <a href="qrc:/resources/help/settings/datafolder_setting_help.html">Data Folder</a> but
+    projects also support the following archive formats: zip, 7z, grp, pak, hog, mvl, wad, slb, iso, vdf and
+    the proj <a href="qrc:/resources/help/editor/exportproject_button_help.html">Export Format</a>.
+    However archived and exported projects can not be edited in the <a href="qrc:/resources/help/editor_button_help.html">Editor</a>.</p>
 
     <br>
 
@@ -64,6 +69,9 @@
         Opening JOI-Projects with a newer engine version in the player or editor might mean, some features are not working correctly, while
         opening JOI-Projects with an older engine version is not an issue.<br></li>
 
+        <li><b>Sound Emitter Count</b>: The <a href="qrc:/resources/help/editor/projectsettings/number_soundemitters_help.html">Sound emitter count</a> configured for this
+        JOI-Project.<br></li>
+
         <li><b>Describtion</b>: The <a href="qrc:/resources/help/editor/projectsettings/describtion_textedit_help.html">Describtion</a> can contain html tags for formating and is visible to users in the
         project selection.<br></li>
 
@@ -80,6 +88,8 @@
       <ul>
         <li><b>Bundled</b>: A bundled project is a project, that was <a href="qrc:/resources/help/editor/exportproject_button_help.html">Exported</a>
         and can only be played or viewed but not edited in the <a href="qrc:/resources/help/editor_button_help.html">Editor</a>.<br></li>
+        <li><b>Read-Only</b>: This JOI-Project was loaded from an Archive and can not be modified.
+        It can only be played or viewed but not edited in the <a href="qrc:/resources/help/editor_button_help.html">Editor</a>.<br></li>
       </ul>
     </p>
   </div>
