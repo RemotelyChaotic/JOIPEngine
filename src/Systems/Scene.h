@@ -2,11 +2,11 @@
 #define SCENE_H
 
 #include "ISerializable.h"
+#include "Lockable.h"
 #include <enum.h>
 #include <QJSEngine>
 #include <QObject>
 #include <QPointer>
-#include <QReadWriteLock>
 #include <QSharedPointer>
 #include <memory>
 #include <set>
@@ -15,8 +15,8 @@ BETTER_ENUM(ESceneTransitionType, qint32,
             eRandom = 0,
             eSelection = 1);
 
-class CProject;
-class CResource;
+class CProjectScriptWrapper;
+class CResourceScriptWrapper;
 class QJSEngine;
 struct SProject;
 typedef std::set<QString>        tvsResourceRefs;
@@ -40,18 +40,18 @@ struct SScene : public ISerializable
 
 //----------------------------------------------------------------------------------------
 //
-class CScene : public QObject
+class CSceneScriptWrapper : public QObject, public CLockable
 {
   Q_OBJECT
-  Q_DISABLE_COPY(CScene)
-  CScene() {}
+  Q_DISABLE_COPY(CSceneScriptWrapper)
+  CSceneScriptWrapper() = delete;
   Q_PROPERTY(qint32  id               READ getId     CONSTANT)
   Q_PROPERTY(QString name             READ getName   CONSTANT)
   Q_PROPERTY(QString script           READ getScript CONSTANT)
 
 public:
-  explicit CScene(QJSEngine* pEngine, const std::shared_ptr<SScene>& spScene);
-  ~CScene();
+  explicit CSceneScriptWrapper(QJSEngine* pEngine, const std::shared_ptr<SScene>& spScene);
+  ~CSceneScriptWrapper();
 
   qint32 getId();
   QString getName();
@@ -75,7 +75,7 @@ private:
 typedef std::shared_ptr<SScene> tspScene;
 typedef std::vector<tspScene>   tvspScene;
 
-Q_DECLARE_METATYPE(CScene*)
+Q_DECLARE_METATYPE(CSceneScriptWrapper*)
 Q_DECLARE_METATYPE(tspScene)
 
 #endif // SCENE_H

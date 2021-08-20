@@ -99,8 +99,9 @@ void SResource::FromJsonObject(const QJsonObject& json)
 
 //----------------------------------------------------------------------------------------
 //
-CResource::CResource(QJSEngine* pEngine, const std::shared_ptr<SResource>& spResource) :
+CResourceScriptWrapper::CResourceScriptWrapper(QJSEngine* pEngine, const std::shared_ptr<SResource>& spResource) :
   QObject(),
+  CLockable(&spResource->m_rwLock),
   m_spData(spResource),
   m_pEngine(pEngine)
 {
@@ -108,13 +109,13 @@ CResource::CResource(QJSEngine* pEngine, const std::shared_ptr<SResource>& spRes
   assert(nullptr != pEngine);
 }
 
-CResource::~CResource()
+CResourceScriptWrapper::~CResourceScriptWrapper()
 {
 }
 
 //----------------------------------------------------------------------------------------
 //
-bool CResource::isAnimatedImpl()
+bool CResourceScriptWrapper::isAnimatedImpl()
 {
   QReadLocker locker(&m_spData->m_rwLock);
   switch (m_spData->m_type)
@@ -146,7 +147,7 @@ bool CResource::isAnimatedImpl()
 
 //----------------------------------------------------------------------------------------
 //
-bool CResource::isLocalPath()
+bool CResourceScriptWrapper::isLocalPath()
 {
   QReadLocker locker(&m_spData->m_rwLock);
   return IsLocalFile(m_spData->m_sPath);
@@ -154,7 +155,7 @@ bool CResource::isLocalPath()
 
 //----------------------------------------------------------------------------------------
 //
-QString CResource::getName()
+QString CResourceScriptWrapper::getName()
 {
   QReadLocker locker(&m_spData->m_rwLock);
   return m_spData->m_sName;
@@ -162,7 +163,7 @@ QString CResource::getName()
 
 //----------------------------------------------------------------------------------------
 //
-QUrl CResource::getPath()
+QUrl CResourceScriptWrapper::getPath()
 {
   if (nullptr == m_spData->m_spParent)
   {
@@ -197,7 +198,7 @@ QUrl CResource::getPath()
 
 //----------------------------------------------------------------------------------------
 //
-QUrl CResource::getSource()
+QUrl CResourceScriptWrapper::getSource()
 {
   QReadLocker locker(&m_spData->m_rwLock);
   return m_spData->m_sSource;
@@ -205,7 +206,7 @@ QUrl CResource::getSource()
 
 //----------------------------------------------------------------------------------------
 //
-CResource::ResourceType CResource::getType()
+CResourceScriptWrapper::ResourceType CResourceScriptWrapper::getType()
 {
   QReadLocker locker(&m_spData->m_rwLock);
   return ResourceType(m_spData->m_type._to_integral());
@@ -213,13 +214,13 @@ CResource::ResourceType CResource::getType()
 
 //----------------------------------------------------------------------------------------
 //
-QJSValue CResource::project()
+QJSValue CResourceScriptWrapper::project()
 {
   QReadLocker locker(&m_spData->m_rwLock);
   if (nullptr != m_spData->m_spParent)
   {
-    CProject* pProject =
-        new CProject(m_pEngine, std::make_shared<SProject>(*m_spData->m_spParent));
+    CProjectScriptWrapper* pProject =
+        new CProjectScriptWrapper(m_pEngine, std::make_shared<SProject>(*m_spData->m_spParent));
     return m_pEngine->newQObject(pProject);
   }
   return QJSValue();

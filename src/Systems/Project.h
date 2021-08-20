@@ -4,12 +4,12 @@
 #include "ISerializable.h"
 #include "Enums.h"
 #include "Kink.h"
+#include "Lockable.h"
 #include "Resource.h"
 #include "Scene.h"
 #include "SVersion.h"
 #include <QObject>
 #include <QPointer>
-#include <QReadWriteLock>
 #include <QSharedPointer>
 #include <map>
 #include <memory>
@@ -57,11 +57,11 @@ struct SProject : public ISerializable, std::enable_shared_from_this<SProject>
 
 //----------------------------------------------------------------------------------------
 //
-class CProject : public QObject
+class CProjectScriptWrapper : public QObject, public CLockable
 {
   Q_OBJECT
-  Q_DISABLE_COPY(CProject)
-  CProject() {}
+  Q_DISABLE_COPY(CProjectScriptWrapper)
+  CProjectScriptWrapper() = delete;
   Q_PROPERTY(qint32  id                READ getId                CONSTANT)
   Q_PROPERTY(qint32  version           READ getVersion           CONSTANT)
   Q_PROPERTY(QString versionText       READ getVersionText       CONSTANT)
@@ -82,8 +82,8 @@ class CProject : public QObject
   Q_PROPERTY(bool    isLoaded          READ isLoaded             CONSTANT)
 
 public:
-  explicit CProject(QJSEngine* pEngine, const std::shared_ptr<SProject>& spProject);
-  ~CProject();
+  explicit CProjectScriptWrapper(QJSEngine* pEngine, const std::shared_ptr<SProject>& spProject);
+  ~CProjectScriptWrapper();
 
   qint32 getId();
   qint32 getVersion();
@@ -130,7 +130,7 @@ private:
 typedef std::shared_ptr<SProject> tspProject;
 typedef std::vector<tspProject>   tvspProject;
 
-Q_DECLARE_METATYPE(CProject*)
+Q_DECLARE_METATYPE(CProjectScriptWrapper*)
 Q_DECLARE_METATYPE(tspProject)
 
 //----------------------------------------------------------------------------------------

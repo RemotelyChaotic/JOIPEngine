@@ -216,7 +216,7 @@ void CProjectCardSelectionWidget::SlotLoadProjectsPrivate()
           m_iSelectedProjectId = spProject->m_iId;
         }
 
-        CProject* pValue = new CProject(pEngine, spProject);
+        CProjectScriptWrapper* pValue = new CProjectScriptWrapper(pEngine, spProject);
         m_spUi->pQmlWidget->rootObject()->setProperty("currentlyAddedProject", QVariant::fromValue(pValue));
         QMetaObject::invokeMethod(pRootObject, "onAddProject");
         m_vpProjects.push_back(pValue);
@@ -307,7 +307,7 @@ void CProjectCardSelectionWidget::FinishUnloadPrivate()
   assert(status == QQuickWidget::Null);
   Q_UNUSED(status);
 
-  for (CProject* pProject : qAsConst(m_vpProjects))
+  for (CProjectScriptWrapper* pProject : qAsConst(m_vpProjects))
   {
     if (!pProject->isLoaded())
     {

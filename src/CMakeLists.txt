@@ -201,6 +201,7 @@ set(Sources
   Systems/ISerializable.h 
   Systems/Kink.cpp 
   Systems/Kink.h 
+  Systems/Lockable.h
   Systems/OverlayManager.cpp 
   Systems/OverlayManager.h 
   Systems/PhysFs/PhysFsFileEngine.cpp

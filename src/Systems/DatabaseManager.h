@@ -8,8 +8,8 @@
 #include <QMutex>
 #include <set>
 
-class CProject;
-class CScene;
+class CProjectScriptWrapper;
+class CSceneScriptWrapper;
 class CSettings;
 struct SProject;
 struct SScene;

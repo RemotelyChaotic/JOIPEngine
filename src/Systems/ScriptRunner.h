@@ -11,7 +11,7 @@
 class CScriptObjectBase;
 class CScriptRunnerSignalContext;
 class CScriptRunnerUtils;
-class CScene;
+class CSceneScriptWrapper;
 class CSettings;
 struct SProject;
 struct SResource;
@@ -67,7 +67,7 @@ private:
   std::map<QString /*name*/,
            std::shared_ptr<CScriptObjectBase>>   m_objectMap;
   QPointer<CScriptRunnerUtils>                   m_pScriptUtils;
-  QPointer<CScene>                               m_pCurrentScene;
+  QPointer<CSceneScriptWrapper>                               m_pCurrentScene;
   QJSValue                                       m_runFunction;
 };
 

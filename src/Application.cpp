@@ -188,11 +188,11 @@ void CApplication::RegisterQmlTypes()
   qRegisterMetaType<QtMsgType>();
   qRegisterMetaType<Qt::ApplicationState>();
 
-  qRegisterMetaType<CResource*>();
+  qRegisterMetaType<CResourceScriptWrapper*>();
   qRegisterMetaType<tspResource>();
-  qRegisterMetaType<CScene*>();
+  qRegisterMetaType<CSceneScriptWrapper*>();
   qRegisterMetaType<tspScene>();
-  qRegisterMetaType<CProject*>();
+  qRegisterMetaType<CProjectScriptWrapper*>();
   qRegisterMetaType<tspProject>();
 
   qRegisterMetaType<QQmlWebChannel*>();
@@ -252,9 +252,9 @@ void CApplication::RegisterQmlTypes()
   });
 
   qmlRegisterUncreatableType<CKink>("JOIP.db", 1, 1, "Kink", "");
-  qmlRegisterUncreatableType<CProject>("JOIP.db", 1, 1, "Project", "");
-  qmlRegisterUncreatableType<CScene>("JOIP.db", 1, 1, "Scene", "");
-  qmlRegisterUncreatableType<CResource>("JOIP.db", 1, 1, "Resource", "");
+  qmlRegisterUncreatableType<CProjectScriptWrapper>("JOIP.db", 1, 1, "Project", "");
+  qmlRegisterUncreatableType<CSceneScriptWrapper>("JOIP.db", 1, 1, "Scene", "");
+  qmlRegisterUncreatableType<CResourceScriptWrapper>("JOIP.db", 1, 1, "Resource", "");
 
   qmlRegisterType<CBackgroundSignalEmitter>("JOIP.script", 1, 1, "BackgroundSignalEmitter");
   qmlRegisterType<CIconSignalEmitter>("JOIP.script", 1, 1, "IconSignalEmitter");

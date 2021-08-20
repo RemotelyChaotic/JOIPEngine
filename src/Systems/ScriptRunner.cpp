@@ -135,7 +135,7 @@ void CScriptRunner::LoadScript(tspScene spScene, tspResource spResource)
       {
         delete m_pCurrentScene;
       }
-      m_pCurrentScene = new CScene(m_spScriptEngine.get(), spScene);
+      m_pCurrentScene = new CSceneScriptWrapper(m_spScriptEngine.get(), spScene);
       // yes we need to call the static method of QQmlEngine, not QJSEngine, WHY Qt, WHY???
       QQmlEngine::setObjectOwnership(m_pCurrentScene, QQmlEngine::CppOwnership);
       QJSValue sceneValue = m_spScriptEngine->newQObject(m_pCurrentScene);
@@ -434,7 +434,7 @@ QString CScriptRunnerUtils::include(QJSValue resource)
     }
     else if (resource.isQObject())
     {
-      CResource* pResource = dynamic_cast<CResource*>(resource.toQObject());
+      CResourceScriptWrapper* pResource = dynamic_cast<CResourceScriptWrapper*>(resource.toQObject());
       if (nullptr != pResource)
       {
         if (nullptr != pResource->Data())

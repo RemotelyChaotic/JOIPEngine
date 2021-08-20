@@ -228,8 +228,9 @@ void SProject::FromJsonObject(const QJsonObject& json)
 
 //----------------------------------------------------------------------------------------
 //
-CProject::CProject(QJSEngine* pEngine, const std::shared_ptr<SProject>& spProject) :
+CProjectScriptWrapper::CProjectScriptWrapper(QJSEngine* pEngine, const std::shared_ptr<SProject>& spProject) :
   QObject(),
+  CLockable(&spProject->m_rwLock),
   m_spData(spProject),
   m_pEngine(pEngine)
 {
@@ -237,13 +238,13 @@ CProject::CProject(QJSEngine* pEngine, const std::shared_ptr<SProject>& spProjec
   assert(nullptr != pEngine);
 }
 
-CProject::~CProject()
+CProjectScriptWrapper::~CProjectScriptWrapper()
 {
 }
 
 //----------------------------------------------------------------------------------------
 //
-qint32 CProject::getId()
+qint32 CProjectScriptWrapper::getId()
 {
   QReadLocker locker(&m_spData->m_rwLock);
   return m_spData->m_iId;
@@ -251,7 +252,7 @@ qint32 CProject::getId()
 
 //----------------------------------------------------------------------------------------
 //
-qint32 CProject::getVersion()
+qint32 CProjectScriptWrapper::getVersion()
 {
   QReadLocker locker(&m_spData->m_rwLock);
   return static_cast<qint32>(m_spData->m_iVersion);
@@ -259,7 +260,7 @@ qint32 CProject::getVersion()
 
 //----------------------------------------------------------------------------------------
 //
-QString CProject::getVersionText()
+QString CProjectScriptWrapper::getVersionText()
 {
   QReadLocker locker(&m_spData->m_rwLock);
   return static_cast<QString>(m_spData->m_iVersion);
@@ -267,7 +268,7 @@ QString CProject::getVersionText()
 
 //----------------------------------------------------------------------------------------
 //
-qint32 CProject::getTargetVersion()
+qint32 CProjectScriptWrapper::getTargetVersion()
 {
   QReadLocker locker(&m_spData->m_rwLock);
   return static_cast<qint32>(m_spData->m_iTargetVersion);
@@ -275,7 +276,7 @@ qint32 CProject::getTargetVersion()
 
 //----------------------------------------------------------------------------------------
 //
-QString CProject::getTargetVersionText()
+QString CProjectScriptWrapper::getTargetVersionText()
 {
   QReadLocker locker(&m_spData->m_rwLock);
   return static_cast<QString>(m_spData->m_iTargetVersion);
@@ -283,7 +284,7 @@ QString CProject::getTargetVersionText()
 
 //----------------------------------------------------------------------------------------
 //
-QString CProject::getName()
+QString CProjectScriptWrapper::getName()
 {
   QReadLocker locker(&m_spData->m_rwLock);
   return m_spData->m_sName;
@@ -291,7 +292,7 @@ QString CProject::getName()
 
 //----------------------------------------------------------------------------------------
 //
-QString CProject::getFolderName()
+QString CProjectScriptWrapper::getFolderName()
 {
   QReadLocker locker(&m_spData->m_rwLock);
   return m_spData->m_sFolderName;
@@ -299,7 +300,7 @@ QString CProject::getFolderName()
 
 //----------------------------------------------------------------------------------------
 //
-QString CProject::getDescribtion()
+QString CProjectScriptWrapper::getDescribtion()
 {
   QReadLocker locker(&m_spData->m_rwLock);
   return m_spData->m_sDescribtion;
@@ -307,7 +308,7 @@ QString CProject::getDescribtion()
 
 //----------------------------------------------------------------------------------------
 //
-QString CProject::getTitleCard()
+QString CProjectScriptWrapper::getTitleCard()
 {
   QReadLocker locker(&m_spData->m_rwLock);
   return m_spData->m_sTitleCard;
@@ -315,7 +316,7 @@ QString CProject::getTitleCard()
 
 //----------------------------------------------------------------------------------------
 //
-QString CProject::getMap()
+QString CProjectScriptWrapper::getMap()
 {
   QReadLocker locker(&m_spData->m_rwLock);
   return m_spData->m_sMap;
@@ -323,7 +324,7 @@ QString CProject::getMap()
 
 //----------------------------------------------------------------------------------------
 //
-QString CProject::getSceneModel()
+QString CProjectScriptWrapper::getSceneModel()
 {
   QReadLocker locker(&m_spData->m_rwLock);
   return m_spData->m_sSceneModel;
@@ -331,7 +332,7 @@ QString CProject::getSceneModel()
 
 //----------------------------------------------------------------------------------------
 //
-QString CProject::getPlayerLayout()
+QString CProjectScriptWrapper::getPlayerLayout()
 {
   QReadLocker locker(&m_spData->m_rwLock);
   return m_spData->m_sPlayerLayout;
@@ -339,7 +340,7 @@ QString CProject::getPlayerLayout()
 
 //----------------------------------------------------------------------------------------
 //
-qint32 CProject::getNumberOfSoundEmitters()
+qint32 CProjectScriptWrapper::getNumberOfSoundEmitters()
 {
   QReadLocker locker(&m_spData->m_rwLock);
   return m_spData->m_iNumberOfSoundEmitters;
@@ -347,7 +348,7 @@ qint32 CProject::getNumberOfSoundEmitters()
 
 //----------------------------------------------------------------------------------------
 //
-bool CProject::isUsingWeb()
+bool CProjectScriptWrapper::isUsingWeb()
 {
   QReadLocker locker(&m_spData->m_rwLock);
   return m_spData->m_bUsesWeb;
@@ -355,7 +356,7 @@ bool CProject::isUsingWeb()
 
 //----------------------------------------------------------------------------------------
 //
-bool CProject::isUsingCodecs()
+bool CProjectScriptWrapper::isUsingCodecs()
 {
   QReadLocker locker(&m_spData->m_rwLock);
   return m_spData->m_bNeedsCodecs;
@@ -363,7 +364,7 @@ bool CProject::isUsingCodecs()
 
 //----------------------------------------------------------------------------------------
 //
-bool CProject::isBundled()
+bool CProjectScriptWrapper::isBundled()
 {
   QReadLocker locker(&m_spData->m_rwLock);
   return m_spData->m_bBundled;
@@ -371,7 +372,7 @@ bool CProject::isBundled()
 
 //----------------------------------------------------------------------------------------
 //
-bool CProject::isReadOnly()
+bool CProjectScriptWrapper::isReadOnly()
 {
   QReadLocker locker(&m_spData->m_rwLock);
   return m_spData->m_bReadOnly;
@@ -379,7 +380,7 @@ bool CProject::isReadOnly()
 
 //----------------------------------------------------------------------------------------
 //
-bool CProject::isLoaded()
+bool CProjectScriptWrapper::isLoaded()
 {
   QReadLocker locker(&m_spData->m_rwLock);
   return m_spData->m_bLoaded;
@@ -387,7 +388,7 @@ bool CProject::isLoaded()
 
 //----------------------------------------------------------------------------------------
 //
-qint32 CProject::numKinks()
+qint32 CProjectScriptWrapper::numKinks()
 {
   QReadLocker locker(&m_spData->m_rwLock);
   return static_cast<qint32>(m_spData->m_vsKinks.size());
@@ -395,7 +396,7 @@ qint32 CProject::numKinks()
 
 //----------------------------------------------------------------------------------------
 //
-QStringList CProject::kinks()
+QStringList CProjectScriptWrapper::kinks()
 {
   QReadLocker locker(&m_spData->m_rwLock);
   return m_spData->m_vsKinks;
@@ -403,7 +404,7 @@ QStringList CProject::kinks()
 
 //----------------------------------------------------------------------------------------
 //
-QJSValue CProject::kink(const QString& sName)
+QJSValue CProjectScriptWrapper::kink(const QString& sName)
 {
   QReadLocker locker(&m_spData->m_rwLock);
   auto it = std::find(m_spData->m_vsKinks.begin(), m_spData->m_vsKinks.end(), sName);
@@ -425,7 +426,7 @@ QJSValue CProject::kink(const QString& sName)
 
 //----------------------------------------------------------------------------------------
 //
-qint32 CProject::numScenes()
+qint32 CProjectScriptWrapper::numScenes()
 {
   QReadLocker locker(&m_spData->m_rwLock);
   return static_cast<qint32>(m_spData->m_vspScenes.size());
@@ -433,7 +434,7 @@ qint32 CProject::numScenes()
 
 //----------------------------------------------------------------------------------------
 //
-QStringList CProject::scenes()
+QStringList CProjectScriptWrapper::scenes()
 {
   QStringList outList;
   QReadLocker locker(&m_spData->m_rwLock);
@@ -447,7 +448,7 @@ QStringList CProject::scenes()
 
 //----------------------------------------------------------------------------------------
 //
-QJSValue CProject::scene(const QString& sName)
+QJSValue CProjectScriptWrapper::scene(const QString& sName)
 {
   QReadLocker locker(&m_spData->m_rwLock);
   for (qint32 iIndex = 0; m_spData->m_vspScenes.size() > static_cast<size_t>(iIndex); ++iIndex)
@@ -455,8 +456,8 @@ QJSValue CProject::scene(const QString& sName)
     QReadLocker sceneLocker(&m_spData->m_vspScenes[static_cast<size_t>(iIndex)]->m_rwLock);
     if (m_spData->m_vspScenes[static_cast<size_t>(iIndex)]->m_sName == sName)
     {
-      CScene* pScene =
-        new CScene(m_pEngine, std::make_shared<SScene>(*m_spData->m_vspScenes[static_cast<size_t>(iIndex)]));
+      CSceneScriptWrapper* pScene =
+        new CSceneScriptWrapper(m_pEngine, std::make_shared<SScene>(*m_spData->m_vspScenes[static_cast<size_t>(iIndex)]));
       return m_pEngine->newQObject(pScene);
     }
   }
@@ -465,7 +466,7 @@ QJSValue CProject::scene(const QString& sName)
 
 //----------------------------------------------------------------------------------------
 //
-QJSValue CProject::scene(qint32 iIndex)
+QJSValue CProjectScriptWrapper::scene(qint32 iIndex)
 {
   QReadLocker locker(&m_spData->m_rwLock);
   if (0 <= iIndex && m_spData->m_vspScenes.size() > static_cast<size_t>(iIndex))
@@ -474,8 +475,8 @@ QJSValue CProject::scene(qint32 iIndex)
     QString sName = m_spData->m_vspScenes[static_cast<size_t>(iIndex)]->m_sName;
     sceneLocker.unlock();
 
-    CScene* pScene =
-      new CScene(m_pEngine, std::make_shared<SScene>(*m_spData->m_vspScenes[static_cast<size_t>(iIndex)]));
+    CSceneScriptWrapper* pScene =
+      new CSceneScriptWrapper(m_pEngine, std::make_shared<SScene>(*m_spData->m_vspScenes[static_cast<size_t>(iIndex)]));
     return m_pEngine->newQObject(pScene);
   }
   return QJSValue();
@@ -483,7 +484,7 @@ QJSValue CProject::scene(qint32 iIndex)
 
 //----------------------------------------------------------------------------------------
 //
-qint32 CProject::numResources()
+qint32 CProjectScriptWrapper::numResources()
 {
   QReadLocker locker(&m_spData->m_rwLock);
   return static_cast<qint32>(m_spData->m_spResourcesMap.size());
@@ -491,7 +492,7 @@ qint32 CProject::numResources()
 
 //----------------------------------------------------------------------------------------
 //
-QStringList CProject::resources()
+QStringList CProjectScriptWrapper::resources()
 {
   QReadLocker locker(&m_spData->m_rwLock);
   QStringList ret;
@@ -504,14 +505,14 @@ QStringList CProject::resources()
 
 //----------------------------------------------------------------------------------------
 //
-QJSValue CProject::resource(const QString& sValue)
+QJSValue CProjectScriptWrapper::resource(const QString& sValue)
 {
   QReadLocker locker(&m_spData->m_rwLock);
   auto it = m_spData->m_spResourcesMap.find(sValue);
   if (m_spData->m_spResourcesMap.end() != it)
   {
-    CResource* pResource =
-      pResource = new CResource(m_pEngine, std::make_shared<SResource>(*it->second));
+    CResourceScriptWrapper* pResource =
+      pResource = new CResourceScriptWrapper(m_pEngine, std::make_shared<SResource>(*it->second));
     return m_pEngine->newQObject(pResource);
   }
   return QJSValue();
@@ -519,7 +520,7 @@ QJSValue CProject::resource(const QString& sValue)
 
 //----------------------------------------------------------------------------------------
 //
-QJSValue CProject::resource(qint32 iIndex)
+QJSValue CProjectScriptWrapper::resource(qint32 iIndex)
 {
   QReadLocker locker(&m_spData->m_rwLock);
   auto it = m_spData->m_spResourcesMap.begin();
@@ -528,8 +529,8 @@ QJSValue CProject::resource(qint32 iIndex)
     std::advance(it, iIndex);
     if (m_spData->m_spResourcesMap.end() != it)
     {
-      CResource* pResource =
-        pResource = new CResource(m_pEngine, std::make_shared<SResource>(*it->second));
+      CResourceScriptWrapper* pResource =
+        pResource = new CResourceScriptWrapper(m_pEngine, std::make_shared<SResource>(*it->second));
       return m_pEngine->newQObject(pResource);
     }
   }

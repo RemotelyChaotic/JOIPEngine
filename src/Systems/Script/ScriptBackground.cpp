@@ -133,7 +133,7 @@ void CScriptBackground::setBackgroundTexture(QJSValue resource)
     }
     else if (resource.isQObject())
     {
-      CResource* pResource = dynamic_cast<CResource*>(resource.toQObject());
+      CResourceScriptWrapper* pResource = dynamic_cast<CResourceScriptWrapper*>(resource.toQObject());
       if (nullptr != pResource)
       {
         tspResource spResource = pResource->Data();

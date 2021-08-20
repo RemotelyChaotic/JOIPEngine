@@ -2,11 +2,11 @@
 #define RESOURCE_H
 
 #include "ISerializable.h"
+#include "Lockable.h"
 #include <enum.h>
 #include <QJSEngine>
 #include <QObject>
 #include <QPointer>
-#include <QReadWriteLock>
 #include <QSharedPointer>
 #include <QUrl>
 #include <memory>
@@ -20,7 +20,7 @@ BETTER_ENUM(EResourceType, qint32,
             eScript     = 4,
             eDatabase   = 5);
 
-class CProject;
+class CProjectScriptWrapper;
 class QJSEngine;
 struct SProject;
 
@@ -56,11 +56,11 @@ struct SResource : public ISerializable, public std::enable_shared_from_this<SRe
 
 //----------------------------------------------------------------------------------------
 //
-class CResource : public QObject
+class CResourceScriptWrapper : public QObject, public CLockable
 {
   Q_OBJECT
-  Q_DISABLE_COPY(CResource)
-  CResource() {}
+  Q_DISABLE_COPY(CResourceScriptWrapper)
+  CResourceScriptWrapper() = delete;
   Q_PROPERTY(bool          isAnimated READ isAnimatedImpl CONSTANT)
   Q_PROPERTY(bool          isLocal    READ isLocalPath CONSTANT)
   Q_PROPERTY(QString       name       READ getName CONSTANT)
@@ -87,8 +87,8 @@ public:
   };
   Q_ENUM(ResourceLoadState)
 
-  explicit CResource(QJSEngine* pEngine, const std::shared_ptr<SResource>& spResource);
-  ~CResource();
+  explicit CResourceScriptWrapper(QJSEngine* pEngine, const std::shared_ptr<SResource>& spResource);
+  ~CResourceScriptWrapper();
 
   bool isAnimatedImpl();
   bool isLocalPath();
@@ -113,7 +113,7 @@ typedef std::vector<tspResource>        tvspResource;
 typedef std::set<QString>               tvsResourceRefs;
 typedef std::map<QString, tspResource>  tspResourceMap;
 
-Q_DECLARE_METATYPE(CResource*)
+Q_DECLARE_METATYPE(CResourceScriptWrapper*)
 Q_DECLARE_METATYPE(tspResource)
 
 //----------------------------------------------------------------------------------------

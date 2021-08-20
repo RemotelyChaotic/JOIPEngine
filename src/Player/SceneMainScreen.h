@@ -8,7 +8,7 @@
 
 class CBackgroundWidget;
 class CDatabaseManager;
-class CProject;
+class CProjectScriptWrapper;
 class CProjectRunner;
 class CScriptRunner;
 class CSettings;
@@ -75,7 +75,7 @@ private:
   std::shared_ptr<CScriptRunner>                              m_spScriptRunner;
   std::shared_ptr<CSettings>                                  m_spSettings;
   tspProject                                                  m_spCurrentProject;
-  QPointer<CProject>                                          m_pCurrentProjectWrapper;
+  QPointer<CProjectScriptWrapper>                                          m_pCurrentProjectWrapper;
   std::weak_ptr<CDatabaseManager>                             m_wpDbManager;
   qint32                                                      m_lastScriptExecutionStatus;
   bool                                                        m_bInitialized;

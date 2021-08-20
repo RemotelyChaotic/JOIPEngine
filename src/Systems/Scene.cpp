@@ -75,8 +75,9 @@ void SScene::FromJsonObject(const QJsonObject& json)
 
 //----------------------------------------------------------------------------------------
 //
-CScene::CScene(QJSEngine* pEngine, const std::shared_ptr<SScene>& spScene) :
+CSceneScriptWrapper::CSceneScriptWrapper(QJSEngine* pEngine, const std::shared_ptr<SScene>& spScene) :
   QObject(),
+  CLockable(&spScene->m_rwLock),
   m_spData(spScene),
   m_pEngine(pEngine)
 {
@@ -84,13 +85,13 @@ CScene::CScene(QJSEngine* pEngine, const std::shared_ptr<SScene>& spScene) :
   assert(nullptr != pEngine);
 }
 
-CScene::~CScene()
+CSceneScriptWrapper::~CSceneScriptWrapper()
 {
 }
 
 //----------------------------------------------------------------------------------------
 //
-qint32 CScene::getId()
+qint32 CSceneScriptWrapper::getId()
 {
   QReadLocker locker(&m_spData->m_rwLock);
   return m_spData->m_iId;
@@ -98,7 +99,7 @@ qint32 CScene::getId()
 
 //----------------------------------------------------------------------------------------
 //
-QString CScene::getName()
+QString CSceneScriptWrapper::getName()
 {
   QReadLocker locker(&m_spData->m_rwLock);
   return m_spData->m_sName;
@@ -106,7 +107,7 @@ QString CScene::getName()
 
 //----------------------------------------------------------------------------------------
 //
-QString CScene::getScript()
+QString CSceneScriptWrapper::getScript()
 {
   QReadLocker locker(&m_spData->m_rwLock);
   return m_spData->m_sScript;
@@ -114,7 +115,7 @@ QString CScene::getScript()
 
 //----------------------------------------------------------------------------------------
 //
-qint32 CScene::numResources()
+qint32 CSceneScriptWrapper::numResources()
 {
   QReadLocker locker(&m_spData->m_rwLock);
   return static_cast<qint32>(m_spData->m_vsResourceRefs.size());
@@ -122,7 +123,7 @@ qint32 CScene::numResources()
 
 //----------------------------------------------------------------------------------------
 //
-QStringList CScene::resources()
+QStringList CSceneScriptWrapper::resources()
 {
   QReadLocker locker(&m_spData->m_rwLock);
   QStringList ret;
@@ -135,7 +136,7 @@ QStringList CScene::resources()
 
 //----------------------------------------------------------------------------------------
 //
-QJSValue CScene::resource(const QString& sValue)
+QJSValue CSceneScriptWrapper::resource(const QString& sValue)
 {
   QReadLocker locker(&m_spData->m_rwLock);
   if (nullptr != m_spData->m_spParent)
@@ -149,8 +150,8 @@ QJSValue CScene::resource(const QString& sValue)
       {
         locker.unlock();
 
-        CResource* pResource = nullptr;
-            pResource = new CResource(m_pEngine, std::make_shared<SResource>(*itRef->second));
+        CResourceScriptWrapper* pResource = nullptr;
+            pResource = new CResourceScriptWrapper(m_pEngine, std::make_shared<SResource>(*itRef->second));
         return m_pEngine->newQObject(pResource);
       }
       return QJSValue();
@@ -161,13 +162,13 @@ QJSValue CScene::resource(const QString& sValue)
 
 //----------------------------------------------------------------------------------------
 //
-QJSValue CScene::project()
+QJSValue CSceneScriptWrapper::project()
 {
   QReadLocker locker(&m_spData->m_rwLock);
   if (nullptr != m_spData->m_spParent)
   {
-      CProject* pProject =
-          new CProject(m_pEngine, std::make_shared<SProject>(*m_spData->m_spParent));
+      CProjectScriptWrapper* pProject =
+          new CProjectScriptWrapper(m_pEngine, std::make_shared<SProject>(*m_spData->m_spParent));
     return m_pEngine->newQObject(pProject);
   }
   return QJSValue();
