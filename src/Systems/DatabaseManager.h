@@ -34,7 +34,8 @@ public:
   static bool UnloadProject(tspProject& spProject);
 
   // Project
-  qint32 AddProject(const QString& sDirName = "New_Project", quint32 iVersion = 1, bool bBundled = false,
+  qint32 AddProject(const QString& sDirName = "New_Project", quint32 iVersion = 1,
+                    bool bBundled = false, bool bReadOnly = false,
                     const tvfnActionsProject& vfnActionsAfterAdding = tvfnActionsProject());
   void ClearProjects();
   bool DeserializeProject(qint32 iId);
@@ -63,6 +64,7 @@ public:
   void RenameScene(tspProject& spProj, const QString& sName, const QString& sNewName);
 
   // Resource
+  bool AddResourceArchive(tspProject& spProj, const QUrl& sPath);
   QString AddResource(tspProject& spProj, const QUrl& sPath, const EResourceType& type, const QString& sName = QString(),
                       const tvfnActionsResource& vfnActionsAfterAdding = tvfnActionsResource());
   void ClearResources(tspProject& spProj);

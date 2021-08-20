@@ -81,12 +81,12 @@ void SResource::FromJsonObject(const QJsonObject& json)
 
     qint32 iValue = it.value().toInt();
     if (iValue == EResourceType::eOther &&
-        DatabaseFormats().contains("*." + sSuffix))
+        SResourceFormats::DatabaseFormats().contains("*." + sSuffix))
     {
       m_type = EResourceType::eDatabase;
     }
     else if (iValue == EResourceType::eOther &&
-        ScriptFormats().contains("*." + sSuffix))
+        SResourceFormats::ScriptFormats().contains("*." + sSuffix))
     {
       m_type = EResourceType::eScript;
     }
@@ -227,7 +227,7 @@ QJSValue CResource::project()
 
 //----------------------------------------------------------------------------------------
 //
-QStringList AudioFormats()
+QStringList SResourceFormats::AudioFormats()
 {
   // TODO: check codecs
   return  QStringList() <<
@@ -238,23 +238,6 @@ QStringList AudioFormats()
     "*.xa ";
 }
 
-//----------------------------------------------------------------------------------------
-//
-QStringList DatabaseFormats()
-{
-   return QStringList() << "*.json" << "*.xml";
-}
-
-//----------------------------------------------------------------------------------------
-//
-QStringList ImageFormats()
-{
-  QList<QByteArray> imageFormats = QImageReader::supportedImageFormats();
-  QStringList imageFormatsList;
-  QString sImageFormats;
-  for (QByteArray arr : imageFormats) { imageFormatsList += "*." + QString::fromUtf8(arr); }
-  return imageFormatsList;
-}
 
 //----------------------------------------------------------------------------------------
 //
@@ -262,13 +245,6 @@ bool IsLocalFile(const QUrl& url)
 {
   return url.isLocalFile() ||
       CPhysFsFileEngineHandler::c_sScheme.contains(url.scheme());
-}
-
-//----------------------------------------------------------------------------------------
-//
-QStringList OtherFormats()
-{
-  return QStringList() << "*.json" << "*.proj" << "*.flow" << ".layout";
 }
 
 //----------------------------------------------------------------------------------------
@@ -344,27 +320,94 @@ QString ResourceUrlToRelativePath(const tspResource& spResource)
 //
 QUrl ResourceUrlFromLocalFile(const QString& sPath)
 {
-  QUrl url = QUrl::fromLocalFile(sPath);
+  QUrl url;
+  if (sPath.startsWith(CPhysFsFileEngineHandler::c_sScheme))
+  {
+    url = QUrl(QString(sPath).replace(CPhysFsFileEngineHandler::c_sScheme, ""));
+  }
+  else
+  {
+    url = QUrl::fromLocalFile(sPath);
+  }
   url.setScheme(QString(CPhysFsFileEngineHandler::c_sScheme).replace(":/", ""));
   return url;
 }
 
 //----------------------------------------------------------------------------------------
 //
-QStringList ScriptFormats()
+QStringList SResourceFormats::ArchiveFormats()
 {
-  return QStringList() << "*.js";
+  QStringList vsFormats = CPhysFsFileEngineHandler::SupportedFileTypes();
+  static QStringList vsReturn;
+  if (vsReturn.isEmpty())
+  {
+    for (const QString& sFormat : vsFormats) { vsReturn <<  QStringLiteral("*.") + sFormat.toLower(); }
+  }
+  return vsReturn;
 }
 
 //----------------------------------------------------------------------------------------
 //
-QStringList VideoFormats()
+QStringList SResourceFormats::DatabaseFormats()
+{
+  static QStringList vsFormats = QStringList() << "*.json" << "*.xml";
+  return vsFormats;
+}
+
+//----------------------------------------------------------------------------------------
+//
+QStringList SResourceFormats::ImageFormats()
+{
+  QList<QByteArray> imageFormats = QImageReader::supportedImageFormats();
+  static QStringList imageFormatsList;
+  if (imageFormatsList.isEmpty())
+  {
+    QString sImageFormats;
+    for (const QByteArray& arr : imageFormats) { imageFormatsList += "*." + QString::fromUtf8(arr); }
+  }
+  return imageFormatsList;
+}
+
+//----------------------------------------------------------------------------------------
+//
+QStringList SResourceFormats::OtherFormats()
+{
+  static QStringList vsFormats = QStringList() << "*.json" << "*.proj" << "*.flow" << ".layout";
+  return vsFormats;
+}
+
+//----------------------------------------------------------------------------------------
+//
+QStringList SResourceFormats::ScriptFormats()
+{
+  static QStringList vsFormats = QStringList() << "*.js";
+  return vsFormats;
+}
+
+//----------------------------------------------------------------------------------------
+//
+QStringList SResourceFormats::VideoFormats()
 {
   // TODO: check codecs
-  return QStringList()
+  static QStringList vsFormats = QStringList()
       << ".3gp" << "*.asf" << "*.wmv" << "*.mpg" << "*.ts"
          "*.au" << "*.avi" << "*.flv" << "*.mov" << "*.mp4" << "*.ogm" <<
          "*.ogg" << "*.mkv" << "*.mka" <<
          "*.nsc" << "*.nsv" << "*.nut" << "*.a52" <<
          "*.dv" << "*.vid" << "*.ty" << "*.webm";
+  return vsFormats;
+}
+
+
+//----------------------------------------------------------------------------------------
+//
+QString SResourceFormats::JoinedFormatsForFilePicker()
+{
+  QString sFormatSelection = "Image Files (%1);;Video Files (%2);;Sound Files (%3);;Script Files (%4);;Archives (%5);;Other Files (%6)";
+  return sFormatSelection.arg(ImageFormats().join(" "))
+                         .arg(VideoFormats().join(" "))
+                         .arg(AudioFormats().join(" "))
+                         .arg(ScriptFormats().join(" "))
+                         .arg(ArchiveFormats().join(" "))
+                         .arg(OtherFormats().join(" "));
 }

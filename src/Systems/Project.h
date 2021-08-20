@@ -38,10 +38,13 @@ struct SProject : public ISerializable, std::enable_shared_from_this<SProject>
   bool                      m_bUsesWeb;
   bool                      m_bNeedsCodecs;
   bool                      m_bBundled;
+  bool                      m_bReadOnly;
   bool                      m_bLoaded;
   QStringList               m_vsKinks;
   tvspScene                 m_vspScenes;
   tspResourceMap            m_spResourcesMap;
+  QStringList               m_vsMountPoints;          // Archives need to be mounted via physFS to access content
+                                                      // WARNING: root is NOT included in this list
 
   QJsonObject ToJsonObject() override;
   void FromJsonObject(const QJsonObject& json) override;
@@ -75,6 +78,7 @@ class CProject : public QObject
   Q_PROPERTY(bool    isUsingWeb        READ isUsingWeb           CONSTANT)
   Q_PROPERTY(bool    isUsingCodecs     READ isUsingCodecs        CONSTANT)
   Q_PROPERTY(bool    isBundled         READ isBundled            CONSTANT)
+  Q_PROPERTY(bool    isReadOnly        READ isReadOnly           CONSTANT)
   Q_PROPERTY(bool    isLoaded          READ isLoaded             CONSTANT)
 
 public:
@@ -97,6 +101,7 @@ public:
   bool isUsingWeb();
   bool isUsingCodecs();
   bool isBundled();
+  bool isReadOnly();
   bool isLoaded();
 
   Q_INVOKABLE qint32 numKinks();

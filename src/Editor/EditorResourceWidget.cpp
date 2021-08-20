@@ -255,24 +255,6 @@ void CEditorResourceWidget::dropEvent(QDropEvent* pEvent)
   // check for our needed mime type, here a file or a list of files
   if (pMimeData->hasUrls())
   {
-    QStringList imageFormatsList = ImageFormats();
-    QString sImageFormats = imageFormatsList.join(" ");
-
-    QStringList videoFormatsList = VideoFormats();
-    QString sVideoFormats = videoFormatsList.join(" ");
-
-    QStringList audioFormatsList = AudioFormats();
-    QString sAudioFormats = audioFormatsList.join(" ");
-
-    QStringList otherFormatsList = OtherFormats();
-    QString sOtherFormats = otherFormatsList.join(" ");
-
-    QStringList scriptFormatsList = ScriptFormats();
-    QString sScriptFormats = scriptFormatsList.join(" ");
-
-    QStringList databaseFormatsList = DatabaseFormats();
-    QString sDbFormats = databaseFormatsList.join(" ");
-
     QStringList vsFileNames;
     QList<QUrl> vUrlList = pMimeData->urls();
 
@@ -283,9 +265,7 @@ void CEditorResourceWidget::dropEvent(QDropEvent* pEvent)
     }
 
     // add file to respective category
-    EditorModel()->AddFilesToProjectResources(
-          this, vsFileNames, imageFormatsList, videoFormatsList, audioFormatsList,
-          otherFormatsList, scriptFormatsList, databaseFormatsList);
+    EditorModel()->AddFilesToProjectResources(this, vsFileNames);
   }
 }
 
@@ -331,34 +311,12 @@ void CEditorResourceWidget::SlotAddButtonClicked()
 {
   WIDGET_INITIALIZED_GUARD
 
-  QStringList imageFormatsList = ImageFormats();
-  QString sImageFormats = imageFormatsList.join(" ");
-
-  QStringList videoFormatsList = VideoFormats();
-  QString sVideoFormats = videoFormatsList.join(" ");
-
-  QStringList audioFormatsList = AudioFormats();
-  QString sAudioFormats = audioFormatsList.join(" ");
-
-  QStringList otherFormatsList = OtherFormats();
-  QString sOtherFormats = otherFormatsList.join(" ");
-
-  QStringList scriptFormatsList = ScriptFormats();
-  QString sScriptFormats = scriptFormatsList.join(" ");
-
-  QStringList databaseFormatsList = DatabaseFormats();
-  QString sDbFormats = databaseFormatsList.join(" ");
-
-  QString sFormatSelection = "Image Files (%1);;Video Files (%2);;Sound Files (%3);;Script Files (%4);;Other Files (%5)";
   QString sCurrentFolder = CApplication::Instance()->Settings()->ContentFolder();
   QStringList  vsFileNames = QFileDialog::getOpenFileNames(this,
-      tr("Add File"), sCurrentFolder,
-      sFormatSelection.arg(sImageFormats).arg(sVideoFormats).arg(sAudioFormats).arg(sScriptFormats).arg(sOtherFormats));
+      tr("Add File"), sCurrentFolder, SResourceFormats::JoinedFormatsForFilePicker());
 
   // add file to respective category
-  EditorModel()->AddFilesToProjectResources(
-        this, vsFileNames, imageFormatsList, videoFormatsList, audioFormatsList,
-        otherFormatsList, scriptFormatsList, databaseFormatsList);
+  EditorModel()->AddFilesToProjectResources(this, vsFileNames);
 }
 
 //----------------------------------------------------------------------------------------
@@ -618,9 +576,9 @@ void CEditorResourceWidget::SlotNetworkReplyFinished()
       m_pResponse->deleteLater();
     }
 
-    QStringList imageFormatsList = ImageFormats();
-    QStringList videoFormatsList = VideoFormats();
-    QStringList audioFormatsList = AudioFormats();
+    QStringList imageFormatsList = SResourceFormats::ImageFormats();
+    QStringList videoFormatsList = SResourceFormats::VideoFormats();
+    QStringList audioFormatsList = SResourceFormats::AudioFormats();
 
     qint32 iLastIndex = url.fileName().lastIndexOf('.');
     const QString sFileName = url.fileName();

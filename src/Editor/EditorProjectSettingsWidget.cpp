@@ -156,12 +156,14 @@ void CEditorProjectSettingsWidget::LoadProject(tspProject spProject)
     m_spUi->pProjectPatchVersion->blockSignals(false);
 
     m_spUi->pSoundEmitterCount->setValue(m_spCurrentProject->m_iNumberOfSoundEmitters);
+    m_spUi->pSoundEmitterCount->setEnabled(!bReadOnly);
 
     m_spUi->pDescribtionTextEdit->setPlainText(m_spCurrentProject->m_sDescribtion);
     m_spUi->pDescribtionTextEdit->setReadOnly(bReadOnly);
 
     m_spUi->pFetishLineEdit->setEnabled(!bReadOnly);
     m_spUi->pFetishListWidget->setEnabled(!bReadOnly);
+
 
     AddKinks(m_spCurrentProject->m_vsKinks);
     KinkModel()->SetSelections(m_spCurrentProject->m_vsKinks);

@@ -31,10 +31,12 @@ SProject::SProject() :
   m_bUsesWeb(false),
   m_bNeedsCodecs(false),
   m_bBundled(false),
+  m_bReadOnly(false),
   m_bLoaded(false),
   m_vsKinks(),
   m_vspScenes(),
-  m_spResourcesMap()
+  m_spResourcesMap(),
+  m_vsMountPoints()
 {}
 SProject::SProject(const SProject& other) :
   m_rwLock(QReadWriteLock::Recursive),
@@ -53,10 +55,12 @@ SProject::SProject(const SProject& other) :
   m_bUsesWeb(other.m_bUsesWeb),
   m_bNeedsCodecs(other.m_bNeedsCodecs),
   m_bBundled(other.m_bBundled),
+  m_bReadOnly(other.m_bReadOnly),
   m_bLoaded(other.m_bLoaded),
   m_vsKinks(other.m_vsKinks),
   m_vspScenes(other.m_vspScenes),
-  m_spResourcesMap(other.m_spResourcesMap)
+  m_spResourcesMap(other.m_spResourcesMap),
+  m_vsMountPoints(other.m_vsMountPoints)
 {}
 
 SProject::~SProject() {}
@@ -82,6 +86,11 @@ QJsonObject SProject::ToJsonObject()
   {
     resources.push_back(spResource.second->ToJsonObject());
   }
+  QJsonArray mountPoints;
+  for (auto& sMountPoint : m_vsMountPoints)
+  {
+    mountPoints.push_back(sMountPoint);
+  }
   return {
     { "iVersion", static_cast<qint32>(static_cast<quint32>(m_iVersion)) },
     { "iTargetVersion", static_cast<qint32>(static_cast<quint32>(m_iTargetVersion)) },
@@ -98,6 +107,7 @@ QJsonObject SProject::ToJsonObject()
     { "vsKinks", kinks },
     { "vspScenes", scenes },
     { "vspResources", resources },
+    { "m_vsMountPoints", mountPoints },
   };
 }
 
@@ -202,6 +212,16 @@ void SProject::FromJsonObject(const QJsonObject& json)
       spResource->FromJsonObject(val.toObject());
       locker.relock();
       m_spResourcesMap.insert({spResource->m_sName, spResource});
+    }
+  }
+  it = json.find("m_vsMountPoints");
+  m_vsMountPoints.clear();
+  if (it != json.end())
+  {
+    for (QJsonValue val : it.value().toArray())
+    {
+      QString sMountPoint = val.toString();
+      m_vsMountPoints.push_back(sMountPoint);
     }
   }
 }
@@ -347,6 +367,14 @@ bool CProject::isBundled()
 {
   QReadLocker locker(&m_spData->m_rwLock);
   return m_spData->m_bBundled;
+}
+
+//----------------------------------------------------------------------------------------
+//
+bool CProject::isReadOnly()
+{
+  QReadLocker locker(&m_spData->m_rwLock);
+  return m_spData->m_bReadOnly;
 }
 
 //----------------------------------------------------------------------------------------

@@ -10,6 +10,62 @@ const QString CPhysFsFileEngineHandler::c_sScheme = "pfs:/";
 const CPhysFsFileEngine::FileFlags CPhysFsFileEngine::allFileFlags = FileFlags(FileFlag::FileInfoAll);
 
 
+CPhysFsFileEngineIterator::CPhysFsFileEngineIterator(const QString& sPath, QDir::Filters filters, const QStringList& vsNameFilters) :
+  QAbstractFileEngineIterator(filters, vsNameFilters),
+  vsEntries(CPhysFsFileEngine::entryListStatic(sPath, filters, vsNameFilters)),
+  iCurent(0)
+{
+  nextInfo = QFileInfo(vsEntries[iCurent]);
+}
+CPhysFsFileEngineIterator::~CPhysFsFileEngineIterator()
+{
+}
+
+QString CPhysFsFileEngineIterator::next()
+{
+  if (!hasNext())
+  {
+    return QString();
+  }
+
+  advance();
+  return currentFilePath();
+}
+
+bool CPhysFsFileEngineIterator::hasNext() const
+{
+  return iCurent < vsEntries.size();
+}
+
+QString CPhysFsFileEngineIterator::currentFileName() const
+{
+  return currentInfo.fileName();
+}
+
+QFileInfo CPhysFsFileEngineIterator::currentFileInfo() const
+{
+  return currentInfo;
+}
+
+void CPhysFsFileEngineIterator::advance()
+{
+  currentInfo = nextInfo;
+  if (hasNext())
+  {
+    ++iCurent;
+    if (vsEntries.size() > iCurent)
+    {
+      nextInfo = QFileInfo(vsEntries[iCurent]);
+    }
+    else
+    {
+      nextInfo = QFileInfo();
+    }
+  }
+}
+
+//----------------------------------------------------------------------------------------
+//
 CPhysFsFileEngine::CPhysFsFileEngine(const QString& sFilename) :
   m_pHandler(nullptr),
   m_flags(static_cast<FileFlag>(0))
@@ -121,14 +177,15 @@ bool CPhysFsFileEngine::isRelativePath() const
   return true;
 }
 
-QStringList CPhysFsFileEngine::entryList(QDir::Filters filters, const QStringList& vsFilterNames) const
+QStringList CPhysFsFileEngine::entryListStatic(const QString& sPath, QDir::Filters filters, const QStringList& vsFilterNames)
 {
   // TODO: support QDir filters
   Q_UNUSED(filters)
 
   QString file;
   QStringList result;
-  char **files = PHYSFS_enumerateFiles("");
+  QByteArray baPath = sPath.toLocal8Bit();
+  char **files = PHYSFS_enumerateFiles(baPath.constData());
 
   PHYSFS_Stat stat;
   for (char **i = files; *i != nullptr; i++)
@@ -143,15 +200,21 @@ QStringList CPhysFsFileEngine::entryList(QDir::Filters filters, const QStringLis
       PHYSFS_stat(*i, &stat);
       if (filters.testFlag(QDir::Filter::Writable) && stat.readonly) { continue; }
 
-      result << file;
+      result << CPhysFsFileEngineHandler::c_sScheme + sPath + "/" + file;
     }
   }
 
   PHYSFS_freeList(files);
 
-  if (filters.testFlag(QDir::Filter::NoDot)) { result.removeAll("."); }
-  if (filters.testFlag(QDir::Filter::NoDotDot)) { result.removeAll(".."); }
+  // Dot and DotDot are not supported by PhysFs
+  //if (filters.testFlag(QDir::Filter::NoDot)) { result.removeAll("."); }
+  //if (filters.testFlag(QDir::Filter::NoDotDot)) { result.removeAll(".."); }
   return result;
+}
+
+QStringList CPhysFsFileEngine::entryList(QDir::Filters filters, const QStringList& vsFilterNames) const
+{
+  return entryListStatic(m_sFilename, filters, vsFilterNames);
 }
 
 CPhysFsFileEngine::FileFlags CPhysFsFileEngine::fileFlags(FileFlags type) const
@@ -181,7 +244,13 @@ QDateTime CPhysFsFileEngine::fileTime(FileTime time) const
 
 void CPhysFsFileEngine::setFileName(const QString& sFile)
 {
-  m_sFilename = sFile;
+  QString sFileName = sFile;
+  if (sFile.startsWith(CPhysFsFileEngineHandler::c_sScheme))
+  {
+    sFileName = "/" + sFile.right(sFile.size() - CPhysFsFileEngineHandler::c_sScheme.size());
+  }
+
+  m_sFilename = sFileName;
   PHYSFS_Stat stat;
   if (PHYSFS_stat(m_sFilename.toUtf8().constData(), &stat) != 0)
   {
@@ -212,6 +281,17 @@ void CPhysFsFileEngine::setFileName(const QString& sFile)
 bool CPhysFsFileEngine::atEnd() const
 {
   return PHYSFS_eof(m_pHandler) != 0;
+}
+
+CPhysFsFileEngine::Iterator* CPhysFsFileEngine::beginEntryList(QDir::Filters filters,
+                                                               const QStringList &filterNames)
+{
+  return new CPhysFsFileEngine::Iterator(m_sFilename, filters, filterNames);
+}
+
+CPhysFsFileEngine::Iterator*CPhysFsFileEngine::endEntryList()
+{
+  return nullptr;
 }
 
 qint64 CPhysFsFileEngine::read(char *data, qint64 iMaxlen)
@@ -303,7 +383,7 @@ QAbstractFileEngine* CPhysFsFileEngineHandler::create(const QString &filename) c
 {
   if (filename.startsWith(c_sScheme))
   {
-    return new CPhysFsFileEngine("/" + filename.right(filename.size() - c_sScheme.size()));
+    return new CPhysFsFileEngine(filename);
   }
 
   return nullptr;

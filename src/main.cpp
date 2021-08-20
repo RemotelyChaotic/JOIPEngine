@@ -28,17 +28,17 @@ int main(int argc, char *argv[])
   //QtWebView::initialize();
   QtAV::Widgets::registerRenderers();
 
-  qDebug() << "SSL suport:" << QSslSocket::supportsSsl() <<
-              "- SLL Build version:" << QSslSocket::sslLibraryBuildVersionString() <<
-              "- SLL Library version:" << QSslSocket::sslLibraryVersionString();
-  qDebug() << "Supported image formats:" << QImageReader::supportedImageFormats();
-
-  CApplication app(argc, argv);
   CPhysFsFileEngine::init(argv[0]);
   CPhysFsFileEngineHandler engine;
   QtAV::RegisterPhysFsFileHandler();
 
+  qDebug() << "SSL suport:" << QSslSocket::supportsSsl() <<
+              "- SLL Build version:" << QSslSocket::sslLibraryBuildVersionString() <<
+              "- SLL Library version:" << QSslSocket::sslLibraryVersionString();
+  qDebug() << "Supported image formats:" << QImageReader::supportedImageFormats();
   qDebug() << "Supported archive formats:" << CPhysFsFileEngineHandler::SupportedFileTypes();
+
+  CApplication app(argc, argv);
 
 #if defined(QT_QML_DEBUG)
   QQmlDebuggingEnabler enabler;

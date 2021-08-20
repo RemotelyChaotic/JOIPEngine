@@ -534,7 +534,7 @@ void CResourceDisplayWidget::SlotNetworkReplyFinished()
       m_pResponse->deleteLater();
     }
 
-    QStringList imageFormatsList = ImageFormats();
+    QStringList imageFormatsList = SResourceFormats::ImageFormats();
 
     qint32 iLastIndex = url.fileName().lastIndexOf('.');
     const QString sFileName = url.fileName();

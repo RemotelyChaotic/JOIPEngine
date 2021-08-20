@@ -23,6 +23,7 @@
 #include <nodes/NodeDataModel>
 
 #include <QDebug>
+#include <QDirIterator>
 #include <QFileDialog>
 #include <QMessageBox>
 #include <QPushButton>
@@ -142,13 +143,7 @@ CScriptEditorModel* CEditorModel::ScriptEditorModel() const
 //----------------------------------------------------------------------------------------
 //
 void CEditorModel::AddFilesToProjectResources(QPointer<QWidget> pParentForDialog,
-  const QStringList& vsFiles,
-  const QStringList& imageFormatsList,
-  const QStringList& videoFormatsList,
-  const QStringList& audioFormatsList,
-  const QStringList& otherFormatsList,
-  const QStringList& scriptFormatsList,
-  const QStringList& databaseFormatsList)
+                                              const QStringList& vsFiles)
 {
   if (nullptr == m_spCurrentProject) { return; }
 
@@ -160,7 +155,8 @@ void CEditorModel::AddFilesToProjectResources(QPointer<QWidget> pParentForDialog
   for (QString sFileName : vsFiles)
   {
     QFileInfo info(sFileName);
-    if (!info.canonicalFilePath().contains(projectDir.absolutePath()))
+    if (!info.canonicalFilePath().contains(projectDir.absolutePath()) &&
+        !sFileName.startsWith(CPhysFsFileEngineHandler::c_sScheme))
     {
       vsNeedsToMove.push_back(sFileName);
     }
@@ -172,35 +168,57 @@ void CEditorModel::AddFilesToProjectResources(QPointer<QWidget> pParentForDialog
       auto spDbManager = m_wpDbManager.lock();
       if (nullptr != spDbManager)
       {
-        if (imageFormatsList.contains(sEnding))
+        if (SResourceFormats::ImageFormats().contains(sEnding))
         {
           spDbManager->AddResource(m_spCurrentProject, url, EResourceType::eImage);
           bAddedFiles = true;
         }
-        else if (videoFormatsList.contains(sEnding))
+        else if (SResourceFormats::VideoFormats().contains(sEnding))
         {
           spDbManager->AddResource(m_spCurrentProject, url, EResourceType::eMovie);
           bAddedFiles = true;
         }
-        else if (audioFormatsList.contains(sEnding))
+        else if (SResourceFormats::AudioFormats().contains(sEnding))
         {
           spDbManager->AddResource(m_spCurrentProject, url, EResourceType::eSound);
           bAddedFiles = true;
         }
-        else if (otherFormatsList.contains(sEnding))
+        else if (SResourceFormats::OtherFormats().contains(sEnding))
         {
           spDbManager->AddResource(m_spCurrentProject, url, EResourceType::eOther);
           bAddedFiles = true;
         }
-        else if (scriptFormatsList.contains(sEnding))
+        else if (SResourceFormats::ScriptFormats().contains(sEnding))
         {
           spDbManager->AddResource(m_spCurrentProject, url, EResourceType::eScript);
           bAddedFiles = true;
         }
-        else if (databaseFormatsList.contains(sEnding))
+        else if (SResourceFormats::DatabaseFormats().contains(sEnding))
         {
           spDbManager->AddResource(m_spCurrentProject, url, EResourceType::eDatabase);
           bAddedFiles = true;
+        }
+        else if (SResourceFormats::ArchiveFormats().contains(sEnding))
+        {
+          if (spDbManager->AddResourceArchive(m_spCurrentProject, url))
+          {
+            QStringList vsCompressedFiles;
+            QDirIterator itCompressed(CPhysFsFileEngineHandler::c_sScheme + sRelativePath,
+                                      QStringList() <<
+                                        SResourceFormats::ImageFormats() <<
+                                        SResourceFormats::VideoFormats() <<
+                                        SResourceFormats::AudioFormats() <<
+                                        SResourceFormats::OtherFormats() <<
+                                        SResourceFormats::ScriptFormats() <<
+                                        SResourceFormats::DatabaseFormats(),
+                                      QDir::Files | QDir::NoDotAndDotDot,
+                                      QDirIterator::Subdirectories);
+            while (itCompressed.hasNext())
+            {
+              vsCompressedFiles << itCompressed.next();
+            }
+            AddFilesToProjectResources(pParentForDialog, vsCompressedFiles);
+          }
         }
       }
     }
@@ -253,9 +271,7 @@ void CEditorModel::AddFilesToProjectResources(QPointer<QWidget> pParentForDialog
           }
         }
       }
-      AddFilesToProjectResources(pParentForDialog, filesToAdd, imageFormatsList,
-                                 videoFormatsList, audioFormatsList, otherFormatsList,
-                                 scriptFormatsList, databaseFormatsList);
+      AddFilesToProjectResources(pParentForDialog, filesToAdd);
     }
     else if (msgBox.clickedButton() == pCopy)
     {
@@ -279,9 +295,7 @@ void CEditorModel::AddFilesToProjectResources(QPointer<QWidget> pParentForDialog
           }
         }
       }
-      AddFilesToProjectResources(pParentForDialog, filesToAdd, imageFormatsList,
-                                 videoFormatsList, audioFormatsList, otherFormatsList,
-                                 scriptFormatsList, databaseFormatsList);
+      AddFilesToProjectResources(pParentForDialog, filesToAdd);
     }
     else if (msgBox.clickedButton() == pCancel)
     {
@@ -313,8 +327,8 @@ void CEditorModel::AddNewScriptFileToScene(QPointer<QWidget> pParentForDialog,
       dlg->setSupportedSchemes(QStringList() << QString(CPhysFsFileEngineHandler::c_sScheme).replace(":/", ""));
       dlg->setDirectoryUrl(QUrl(CPhysFsFileEngineHandler::c_sScheme));
       dlg->setFilter(QDir::AllDirs);
-      dlg->setNameFilter(QString("Script Files (%1)").arg(ScriptFormats().join(" ")));
-      dlg->setDefaultSuffix(ScriptFormats().first());
+      dlg->setNameFilter(QString("Script Files (%1)").arg(SResourceFormats::ScriptFormats().join(" ")));
+      dlg->setDefaultSuffix(SResourceFormats::ScriptFormats().first());
 
       if (dlg->exec())
       {
@@ -487,17 +501,19 @@ void CEditorModel::LoadProject(qint32 iId)
       qWarning() << QString("Project id %1 not found.").arg(iId);
       return;
     }
-    else
+
+    const QString sProjName = PhysicalProjectName(m_spCurrentProject);
+    CDatabaseManager::LoadProject(m_spCurrentProject);
+
+    QReadLocker projectLocker(&m_spCurrentProject->m_rwLock);
+    m_bReadOnly = m_spCurrentProject->m_bBundled | m_spCurrentProject->m_bReadOnly;
+    ETutorialState tutorialState = m_spCurrentProject->m_tutorialState;
+
+    if (!m_bReadOnly)
     {
-      const QString sProjName = PhysicalProjectName(m_spCurrentProject);
-      CDatabaseManager::LoadProject(m_spCurrentProject);
       CPhysFsFileEngine::setWriteDir(
             QString(m_spSettings->ContentFolder() + "/" + sProjName).toStdString().data());
     }
-
-    QReadLocker projectLocker(&m_spCurrentProject->m_rwLock);
-    m_bReadOnly = m_spCurrentProject->m_bBundled;
-    ETutorialState tutorialState = m_spCurrentProject->m_tutorialState;
 
     // nodes
     if (!m_spCurrentProject->m_sSceneModel.isNull() &&
@@ -672,8 +688,8 @@ void CEditorModel::UnloadProject()
     spDbManager->DeserializeProject(iId);
   }
 
-  CDatabaseManager::UnloadProject(m_spCurrentProject);
   CPhysFsFileEngine::setWriteDir(nullptr);
+  CDatabaseManager::UnloadProject(m_spCurrentProject);
   m_spCurrentProject = nullptr;
 
   NextResetTutorialState();

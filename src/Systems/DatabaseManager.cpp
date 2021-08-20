@@ -43,9 +43,9 @@ bool CDatabaseManager::LoadProject(tspProject& spProject)
   if (spProject->m_bBundled && !spProject->m_bLoaded)
   {
     spProject->m_bLoaded =
-        QResource::registerResource(CApplication::Instance()->Settings()->ContentFolder() + "/" +
+        QResource::registerResource(CApplication::Instance()->Settings()->ContentFolder() + QDir::separator() +
                                     sProjectName + c_sProjectBundleFileEnding,
-                                    "/" + spProject->m_sName);
+                                    QDir::separator() + spProject->m_sName);
     return spProject->m_bLoaded;
   }
   else
@@ -74,9 +74,9 @@ bool CDatabaseManager::UnloadProject(tspProject& spProject)
   if (spProject->m_bBundled && spProject->m_bLoaded)
   {
     spProject->m_bLoaded =
-        !QResource::unregisterResource(CApplication::Instance()->Settings()->ContentFolder() + "/" +
+        !QResource::unregisterResource(CApplication::Instance()->Settings()->ContentFolder() + QDir::separator() +
                                        sProjectName + c_sProjectBundleFileEnding,
-                                       "/" + spProject->m_sName);
+                                       QDir::separator() + spProject->m_sName);
     return !spProject->m_bLoaded;
   }
   else
@@ -96,22 +96,24 @@ bool CDatabaseManager::UnloadProject(tspProject& spProject)
 
 //----------------------------------------------------------------------------------------
 //
-qint32 CDatabaseManager::AddProject(const QString& sDirName, quint32 iVersion, bool bBundled,
+qint32 CDatabaseManager::AddProject(const QString& sDirName, quint32 iVersion,
+                                    bool bBundled, bool bReadOnly,
                                     const tvfnActionsProject& vfnActionsAfterAdding)
 {
   if (!IsInitialized()) { return -1; }
 
   qint32 iNewId = FindNewProjectId();
 
-  QString sName = sDirName;
+  const QString sBaseName = QFileInfo(sDirName).completeBaseName();
+  QString sName = sBaseName;
   QString sError;
-  if (!ProjectNameCheck(sDirName, &sError))
+  if (!ProjectNameCheck(sBaseName, &sError))
   {
-    sName = ToValidProjectName(sDirName);
+    sName = ToValidProjectName(sBaseName);
   }
   else
   {
-    sName = sDirName;
+    sName = sBaseName;
   }
 
 
@@ -124,6 +126,7 @@ qint32 CDatabaseManager::AddProject(const QString& sDirName, quint32 iVersion, b
     m_vspProjectDatabase.back()->m_sFolderName = sDirName;
     m_vspProjectDatabase.back()->m_iVersion = iVersion;
     m_vspProjectDatabase.back()->m_bBundled = bBundled;
+    m_vspProjectDatabase.back()->m_bReadOnly = bReadOnly;
     locker.unlock();
 
     for (auto fn : vfnActionsAfterAdding)
@@ -596,6 +599,30 @@ void CDatabaseManager::RenameScene(tspProject& spProj, const QString& sName, con
 
 //----------------------------------------------------------------------------------------
 //
+bool CDatabaseManager::AddResourceArchive(tspProject& spProj, const QUrl& sPath)
+{
+  if (!IsInitialized() || nullptr == spProj) { return false; }
+
+  const QString sName = PhysicalProjectName(spProj);
+  QString sProjPath = CApplication::Instance()->Settings()->ContentFolder() + QDir::separator() + sName;
+  QString sMountPoint = sPath.path();
+  QWriteLocker locker(&spProj->m_rwLock);
+  spProj->m_vsMountPoints << sMountPoint;
+  if (spProj->m_bLoaded)
+  {
+    bool bOk = CPhysFsFileEngine::mount((sProjPath + "/" + sMountPoint).toStdString().data(), sMountPoint.toStdString().data());
+    if (!bOk)
+    {
+      qWarning() << tr("Failed to mount %1: reason: %2").arg(sMountPoint)
+                    .arg(CPhysFsFileEngine::errorString());
+    }
+    return bOk;
+  }
+  return true;
+}
+
+//----------------------------------------------------------------------------------------
+//
 QString CDatabaseManager::AddResource(tspProject& spProj, const QUrl& sPath,
                                       const EResourceType& type, const QString& sName,
                                       const tvfnActionsResource& vfnActionsAfterAdding)
@@ -881,6 +908,7 @@ bool CDatabaseManager::DeserializeProjectPrivate(tspProject& spProject)
 {
   spProject->m_rwLock.lockForRead();
   const QString sName = spProject->m_sName;
+  const QString sFolderName = spProject->m_sFolderName;
   bool bBundled = spProject->m_bBundled;
   spProject->m_rwLock.unlock();
 
@@ -888,16 +916,9 @@ bool CDatabaseManager::DeserializeProjectPrivate(tspProject& spProject)
   QDir sContentFolder(m_spSettings->ContentFolder());
   if (!bBundled)
   {
-    if (!QFileInfo(m_spSettings->ContentFolder() + QDir::separator() + sName).exists())
+    if (!QFileInfo(m_spSettings->ContentFolder() + QDir::separator() + sFolderName).exists())
     {
-      qWarning() << "Could not find project folder: " + m_spSettings->ContentFolder() + QDir::separator() + sName;
-    }
-  }
-  else
-  {
-    if (!QFileInfo(m_spSettings->ContentFolder() + QDir::separator() + sName + c_sProjectBundleFileEnding).exists())
-    {
-      qWarning() << "Could not find project bundle file: " + m_spSettings->ContentFolder() + QDir::separator() + sName + c_sProjectBundleFileEnding;
+      qWarning() << "Deserialize: Could not find project at: " + m_spSettings->ContentFolder() + QDir::separator() + sName;
     }
   }
 
@@ -905,21 +926,20 @@ bool CDatabaseManager::DeserializeProjectPrivate(tspProject& spProject)
 
   if (bOk)
   {
-    QString jsonFile;
+    QString sJsonFile;
     if (!bBundled)
     {
-      jsonFile = m_spSettings->ContentFolder() + QDir::separator() + sName +
-          QDir::separator() + joip_resource::c_sProjectFileName;
+      sJsonFile = CPhysFsFileEngineHandler::c_sScheme + joip_resource::c_sProjectFileName;
     }
     else
     {
-      jsonFile = ":/" + sName + "/" + joip_resource::c_sProjectFileName;
+      sJsonFile = ":/" + sName + QDir::separator() + joip_resource::c_sProjectFileName;
     }
 
-    QFileInfo jsonInfo(jsonFile);
+    QFileInfo jsonInfo(sJsonFile);
     if (jsonInfo.exists())
     {
-      QFile jsonFile(jsonInfo.absoluteFilePath());
+      QFile jsonFile(sJsonFile);
       if (jsonFile.open(QIODevice::ReadOnly))
       {
         QJsonParseError err;
@@ -945,13 +965,13 @@ bool CDatabaseManager::DeserializeProjectPrivate(tspProject& spProject)
       }
       else
       {
-        qWarning() << "Could not read project file: " + jsonInfo.absoluteFilePath();
+        qWarning() << "Could not read project file: " + sJsonFile;
         bOk = false;
       }
     }
     else
     {
-      qWarning() << "Could find project file: " + jsonInfo.absoluteFilePath();
+      qWarning() << "Could not find project file: " + sJsonFile;
       bOk = false;
     }
   }
@@ -1007,9 +1027,7 @@ void CDatabaseManager::LoadDatabase()
   QDirIterator it(sPath, QDir::Dirs | QDir::NoDotAndDotDot);
   while (it.hasNext())
   {
-    QString sDirName = it.next();
-    qint32 index = sDirName.lastIndexOf("/");
-    sDirName = sDirName.right(sDirName.length() - index - 1);
+    QString sDirName = QFileInfo(it.next()).fileName();
     AddProject(sDirName);
   }
 
@@ -1023,22 +1041,18 @@ void CDatabaseManager::LoadDatabase()
                         QDir::Files | QDir::NoDotAndDotDot, QDirIterator::NoIteratorFlags);
   while (itCompressed.hasNext())
   {
-    QString sFileName = QFileInfo(itCompressed.next()).baseName();
-    AddProject(sFileName);
+    QString sFileName = QFileInfo(itCompressed.next()).fileName();
+    AddProject(sFileName, 1, false, true);
   }
 
   // finally load packed projects
   vsFileEndings = QStringList() << c_sProjectBundleFileEnding;
-  for (const QString& sEnding : CPhysFsFileEngineHandler::SupportedFileTypes())
-  {
-    vsFileEndings << QStringLiteral("*.") + sEnding.toLower();
-  }
   QDirIterator itBundle(sPath, vsFileEndings,
                         QDir::Files | QDir::NoDotAndDotDot, QDirIterator::NoIteratorFlags);
   while (itBundle.hasNext())
   {
-    QString sFileName = QFileInfo(itBundle.next()).baseName();
-    AddProject(sFileName, 1, true);
+    QString sFileName = QFileInfo(itBundle.next()).fileName();
+    AddProject(sFileName, 1, true, true);
   }
 
   // store projects
@@ -1079,21 +1093,6 @@ void CDatabaseManager::LoadDatabase()
 
 //----------------------------------------------------------------------------------------
 //
-bool CDatabaseManager::MountProject(tspProject& spProject)
-{
-  const QString sName = PhysicalProjectName(spProject);
-  QString sFinalPath = CApplication::Instance()->Settings()->ContentFolder() + "/" + sName;
-  bool bOk = CPhysFsFileEngine::mount(sFinalPath.toStdString().data(), "", true);
-  if (!bOk)
-  {
-    qWarning() << tr("Failed to mount %1: reason: %2").arg(sFinalPath)
-                  .arg(CPhysFsFileEngine::errorString());
-  }
-  return bOk;
-}
-
-//----------------------------------------------------------------------------------------
-//
 bool CDatabaseManager::PrepareProjectPrivate(tspProject& spProject)
 {
   const QString sFolderName = PhysicalProjectName(spProject);
@@ -1118,6 +1117,8 @@ bool CDatabaseManager::SerializeProjectPrivate(tspProject& spProject)
   spProject->m_rwLock.lockForRead();
   const QString sName = spProject->m_sName;
   const QString sFolderName = spProject->m_sFolderName;
+  const QString sBaseName = QFileInfo(sFolderName).completeBaseName();
+  const QString sSuffix = QFileInfo(sFolderName).suffix();
   bool bBundled = spProject->m_bBundled;
   spProject->m_rwLock.unlock();
 
@@ -1128,46 +1129,47 @@ bool CDatabaseManager::SerializeProjectPrivate(tspProject& spProject)
   QDir sContentFolder(m_spSettings->ContentFolder());
 
   // first rename old folder
-  if (sFolderName != sName)
+  QString sNewFolderName = sFolderName;
+  if (sBaseName != sName)
   {
-    if (!sFolderName.isEmpty())
+    if (!sBaseName.isEmpty())
     {
       if (QFileInfo(m_spSettings->ContentFolder() + QDir::separator() + sFolderName).exists())
       {
-        bOk = sContentFolder.rename(sFolderName, sName);
+        sNewFolderName = sName + "." + sSuffix;
+        bOk = sContentFolder.rename(sFolderName, sName + "." + sSuffix);
       }
       else
       {
         bOk = false;
-        qWarning() << "Could not rename folder: " + m_spSettings->ContentFolder() + QDir::separator() + sFolderName;
+        qWarning() << "Serialize: Could not rename folder: " + m_spSettings->ContentFolder() + QDir::separator() + sFolderName;
       }
     }
   }
 
   // if new doesn't exist -> create
-  if (bOk && !QFileInfo(m_spSettings->ContentFolder() + QDir::separator() + sName).exists())
+  if (bOk && !QFileInfo(m_spSettings->ContentFolder() + QDir::separator() + sFolderName).exists())
   {
-    bOk = sContentFolder.mkdir(sName);
+    bOk = sContentFolder.mkdir(sFolderName);
     if (!bOk)
     {
-      qWarning() << "Could not create folder: " + m_spSettings->ContentFolder() + QDir::separator() + sName;
+      qWarning() << "Serialize: Could not create folder: " + m_spSettings->ContentFolder() + QDir::separator() + sFolderName;
     }
   }
 
   if (bOk)
   {
     spProject->m_rwLock.lockForWrite();
-    spProject->m_sFolderName = sName;
+    spProject->m_sFolderName = sNewFolderName;
     spProject->m_rwLock.unlock();
   }
 
-  QJsonDocument document(spProject->ToJsonObject());
+  bOk &= LoadProject(spProject);
 
   if (bOk)
   {
-    QFileInfo jsonInfo(m_spSettings->ContentFolder() + QDir::separator() + sName +
-                       QDir::separator() + joip_resource::c_sProjectFileName);
-    QFile jsonFile(jsonInfo.absoluteFilePath());
+    QJsonDocument document(spProject->ToJsonObject());
+    QFile jsonFile(CPhysFsFileEngineHandler::c_sScheme + joip_resource::c_sProjectFileName);
     if (jsonFile.open(QIODevice::ReadWrite | QIODevice::Truncate))
     {
       jsonFile.write(document.toJson(QJsonDocument::Indented));
@@ -1175,7 +1177,7 @@ bool CDatabaseManager::SerializeProjectPrivate(tspProject& spProject)
     }
     else
     {
-      qWarning() << "Could not wirte project file: " + jsonInfo.absoluteFilePath();
+      qWarning() << "Could not wirte project file: " + jsonFile.fileName();
       bOk =  false;
     }
   }
@@ -1185,15 +1187,61 @@ bool CDatabaseManager::SerializeProjectPrivate(tspProject& spProject)
 
 //----------------------------------------------------------------------------------------
 //
+bool CDatabaseManager::MountProject(tspProject& spProject)
+{
+  const QString sName = PhysicalProjectName(spProject);
+  QString sFinalPath = CApplication::Instance()->Settings()->ContentFolder() + QDir::separator() + sName;
+  bool bOk = CPhysFsFileEngine::mount(sFinalPath.toStdString().data(), "");
+  if (!bOk)
+  {
+    qWarning() << tr("Failed to mount %1: reason: %2").arg(sFinalPath)
+                  .arg(CPhysFsFileEngine::errorString());
+  }
+  else
+  {
+    QReadLocker locker(&spProject->m_rwLock);
+    for (const QString& sMountPoint : qAsConst(spProject->m_vsMountPoints))
+    {
+      bOk &= CPhysFsFileEngine::mount((sFinalPath + "/" + sMountPoint).toStdString().data(), sMountPoint.toStdString().data());
+      if (!bOk)
+      {
+        qWarning() << tr("Failed to mount %1: reason: %2").arg(sFinalPath)
+                      .arg(CPhysFsFileEngine::errorString());
+        break;
+      }
+    }
+  }
+  return bOk;
+}
+
+//----------------------------------------------------------------------------------------
+//
 bool CDatabaseManager::UnmountProject(tspProject& spProject)
 {
   const QString sName = PhysicalProjectName(spProject);
-  QString sFinalPath = CApplication::Instance()->Settings()->ContentFolder() + "/" + sName;
-  bool bOk = CPhysFsFileEngine::unmount(sFinalPath.toStdString().data());
+  QString sFinalPath = CApplication::Instance()->Settings()->ContentFolder() + QDir::separator() + sName;
+  bool bOk = true;
+  {
+    QReadLocker locker(&spProject->m_rwLock);
+    for (const QString& sMountPoint : qAsConst(spProject->m_vsMountPoints))
+    {
+      bOk &= CPhysFsFileEngine::unmount((sFinalPath + "/" + sMountPoint).toStdString().data());
+      if (!bOk)
+      {
+        qWarning() << tr("Failed to unmount %1: reason: %2").arg(sFinalPath)
+                      .arg(CPhysFsFileEngine::errorString());
+        break;
+      }
+    }
+  }
+  if (!bOk) { return bOk; }
+
+  bOk &= CPhysFsFileEngine::unmount(sFinalPath.toStdString().data());
   if (!bOk)
   {
     qWarning() << tr("Failed to unmount %1: reason: %2").arg(sFinalPath)
                   .arg(CPhysFsFileEngine::errorString());
   }
+
   return bOk;
 }

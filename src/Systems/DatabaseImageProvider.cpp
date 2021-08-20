@@ -93,7 +93,7 @@ QImage CDatabaseImageProvider::requestImage(const QString& id, QSize* pSize,
                 const QString sFileName = url.fileName();
                 QString sFormat = "*" + sFileName.mid(iLastIndex, sFileName.size() - iLastIndex);
 
-                QStringList imageFormatsList = ImageFormats();
+                QStringList imageFormatsList = SResourceFormats::ImageFormats();
                 if (nullptr != spDbManager)
                 {
                   if (imageFormatsList.contains(sFormat))
