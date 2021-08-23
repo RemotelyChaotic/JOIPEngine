@@ -13,6 +13,7 @@ class CScriptEditorModel;
 namespace QtNodes {
   class FlowScene;
 }
+class QUndoStack;
 struct SProject;
 typedef std::shared_ptr<SProject> tspProject;
 
@@ -49,6 +50,7 @@ protected:
   CKinkTreeModel* KinkModel() const;
   CResourceTreeItemModel* ResourceTreeModel() const;
   CScriptEditorModel* ScriptEditorModel() const;
+  QUndoStack* UndoStack() const;
 
   void SetLoaded(bool bLoaded);
 

@@ -44,6 +44,7 @@ protected slots:
   void SlotKinkChecked(const QModelIndex& index, bool bChecked);
   void SlotProjectRenamed(qint32 iId);
   void SlotRemoveKinkClicked();
+  void SlotUndoForDescribtionAdded();
 
 protected:
   void AddKinks(QStringList vsKinks);

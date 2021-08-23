@@ -76,6 +76,13 @@ CScriptEditorModel* CEditorWidgetBase::ScriptEditorModel() const
 
 //----------------------------------------------------------------------------------------
 //
+QUndoStack* CEditorWidgetBase::UndoStack() const
+{
+  return m_pEditorModel->UndoStack();
+}
+
+//----------------------------------------------------------------------------------------
+//
 void CEditorWidgetBase::SetLoaded(bool bLoaded)
 {
   if (m_bLoaded != bLoaded)

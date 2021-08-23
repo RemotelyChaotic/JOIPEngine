@@ -256,6 +256,8 @@ set(Sources
   Systems/ThreadedSystem.h 
   UISoundEmitter.cpp 
   UISoundEmitter.h 
+  Utils/UndoRedoFilter.cpp
+  Utils/UndoRedoFilter.h
   Widgets/BackgroundWidget.cpp 
   Widgets/BackgroundWidget.h 
   Widgets/ColorPicker.cpp 

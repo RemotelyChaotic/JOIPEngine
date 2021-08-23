@@ -9,6 +9,8 @@
 namespace {
   const QString c_sRenameProjectHelpId =  "Editor/RenameProject";
   const QString c_sSaveProjectHelpId =    "Editor/SaveProject";
+  const QString c_sUndoHelpId =           "Editor/Undo";
+  const QString c_sRedoHelpId =           "Editor/Redo";
   const QString c_sExportProjectHelpId =  "Editor/ExportProject";
   const QString c_sExitProjectHelpId =    "Editor/ExitProject";
 
@@ -83,6 +85,10 @@ void CEditorActionBar::Initialize()
     wpHelpFactory->RegisterHelp(c_sRenameProjectHelpId, ":/resources/help/editor/project_name_help.html");
     m_spUi->SaveButton->setProperty(helpOverlay::c_sHelpPagePropertyName, c_sSaveProjectHelpId);
     wpHelpFactory->RegisterHelp(c_sSaveProjectHelpId, ":/resources/help/editor/saveproject_button_help.html");
+    m_spUi->UndoButton->setProperty(helpOverlay::c_sHelpPagePropertyName, c_sUndoHelpId);
+    wpHelpFactory->RegisterHelp(c_sUndoHelpId, ":/resources/help/editor/undo_button_help.html");
+    m_spUi->RedoButton->setProperty(helpOverlay::c_sHelpPagePropertyName, c_sRedoHelpId);
+    wpHelpFactory->RegisterHelp(c_sRedoHelpId, ":/resources/help/editor/redo_button_help.html");
     m_spUi->ExportButton->setProperty(helpOverlay::c_sHelpPagePropertyName, c_sExportProjectHelpId);
     wpHelpFactory->RegisterHelp(c_sExportProjectHelpId, ":/resources/help/editor/exportproject_button_help.html");
     m_spUi->ExitButton->setProperty(helpOverlay::c_sHelpPagePropertyName, c_sExitProjectHelpId);
@@ -243,6 +249,8 @@ void CEditorActionBar::SlotKeyBindingsChanged()
     m_spUi->ExitButton->SetShortcut(m_spSettings->keyBinding("Exit"));
     m_spUi->HelpButton->SetShortcut(m_spSettings->keyBinding("Help"));
     m_spUi->SaveButton->SetShortcut(m_spSettings->keyBinding("Save"));
+    m_spUi->UndoButton->SetShortcut(m_spSettings->keyBinding("Undo"));
+    m_spUi->RedoButton->SetShortcut(m_spSettings->keyBinding("Redo"));
     m_spUi->ExportButton->SetShortcut(m_spSettings->keyBinding("Export"));
   }
   else

@@ -20,6 +20,7 @@ public:
 
 protected:
   QPointer<QTextDocument> m_pDescribtionDocument;
+  bool                    m_bAddedRedoCommand;
 };
 
 #endif // CCOMMANDCHANGEDESCRIBTION_H

@@ -16,6 +16,7 @@
 #include <QFileInfo>
 #include <QMessageBox>
 #include <QPointer>
+#include <QUndoStack>
 
 namespace
 {
@@ -112,6 +113,10 @@ void CEditorMainScreen::Initialize()
           this, &CEditorMainScreen::SlotProjectNameEditingFinished);
   connect(m_spUi->pProjectActionBar->m_spUi->SaveButton, &QPushButton::clicked,
           this, &CEditorMainScreen::SlotSaveClicked);
+  connect(m_spUi->pProjectActionBar->m_spUi->UndoButton, &QPushButton::clicked,
+          m_spEditorModel->UndoStack(), &QUndoStack::undo);
+  connect(m_spUi->pProjectActionBar->m_spUi->RedoButton, &QPushButton::clicked,
+          m_spEditorModel->UndoStack(), &QUndoStack::redo);
   connect(m_spUi->pProjectActionBar->m_spUi->ExportButton, &QPushButton::clicked,
           this, &CEditorMainScreen::SlotExportClicked);
   connect(m_spUi->pProjectActionBar->m_spUi->HelpButton, &QPushButton::clicked,

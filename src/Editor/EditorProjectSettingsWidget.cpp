@@ -4,6 +4,11 @@
 #include "EditorModel.h"
 #include "SVersion.h"
 #include "out_Version.h"
+#include "Project/CommandChangeDescribtion.h"
+#include "Project/CommandChangeEmitterCount.h"
+#include "Project/CommandChangeFetishes.h"
+#include "Project/CommandChangeProjectName.h"
+#include "Project/CommandChangeVersion.h"
 #include "Project/KinkCompleter.h"
 #include "Project/KinkSelectionOverlay.h"
 #include "Project/KinkTreeModel.h"
@@ -11,11 +16,15 @@
 #include "Systems/HelpFactory.h"
 #include "Systems/Project.h"
 #include "Tutorial/ProjectSettingsTutorialStateSwitchHandler.h"
+#include "Utils/UndoRedoFilter.h"
 #include "Widgets/FlowLayout.h"
 #include "Widgets/HelpOverlay.h"
 
 #include <QCompleter>
 #include <QDebug>
+#include <QMenu>
+#include <QTextDocument>
+#include <QUndoStack>
 
 namespace
 {
@@ -108,6 +117,15 @@ void CEditorProjectSettingsWidget::Initialize()
   m_spUi->pEngineMinorVersion->setValue(version.m_iMinor);
   m_spUi->pEnginePatchVersion->setValue(version.m_iPatch);
   m_spUi->WarningIcon->setVisible(false);
+
+  auto pFilter =
+      new CUndoRedoFilter(m_spUi->pDescribtionTextEdit,
+                          std::bind(static_cast<QMenu*(QPlainTextEdit::*)(void)>(&QPlainTextEdit::createStandardContextMenu),
+                                    m_spUi->pDescribtionTextEdit));
+  connect(m_spUi->pDescribtionTextEdit->document(), &QTextDocument::undoCommandAdded,
+          this, &CEditorProjectSettingsWidget::SlotUndoForDescribtionAdded);
+  connect(pFilter, &CUndoRedoFilter::UndoTriggered, this, [this]() { UndoStack()->undo(); });
+  connect(pFilter, &CUndoRedoFilter::RedoTriggered, this, [this]() { UndoStack()->redo(); });
 
   m_bInitialized = true;
 }
@@ -249,11 +267,7 @@ void CEditorProjectSettingsWidget::on_pTitleLineEdit_editingFinished()
   WIDGET_INITIALIZED_GUARD
   if (nullptr == m_spCurrentProject) { return; }
 
-  QString sNewName = m_spUi->pTitleLineEdit->text();
-  const QString sFinalName = EditorModel()->RenameProject(sNewName);
-  m_spUi->pTitleLineEdit->blockSignals(true);
-  m_spUi->pTitleLineEdit->setText(sFinalName);
-  m_spUi->pTitleLineEdit->blockSignals(false);
+  UndoStack()->push(new CCommandChangeProjectName(m_spUi->pTitleLineEdit, EditorModel()));
 }
 
 //----------------------------------------------------------------------------------------
@@ -263,6 +277,10 @@ void CEditorProjectSettingsWidget::on_pProjectMajorVersion_valueChanged(qint32 i
   WIDGET_INITIALIZED_GUARD
   if (nullptr == m_spCurrentProject) { return; }
   Q_UNUSED(iValue)
+
+  UndoStack()->push(new CCommandChangeVersion(m_spUi->pProjectMajorVersion,
+                                              m_spUi->pProjectMinorVersion,
+                                              m_spUi->pProjectPatchVersion));
   emit SignalProjectEdited();
 }
 
@@ -273,6 +291,10 @@ void CEditorProjectSettingsWidget::on_pProjectMinorVersion_valueChanged(qint32 i
   WIDGET_INITIALIZED_GUARD
   if (nullptr == m_spCurrentProject) { return; }
   Q_UNUSED(iValue)
+
+  UndoStack()->push(new CCommandChangeVersion(m_spUi->pProjectMajorVersion,
+                                              m_spUi->pProjectMinorVersion,
+                                              m_spUi->pProjectPatchVersion));
   emit SignalProjectEdited();
 }
 
@@ -283,6 +305,10 @@ void CEditorProjectSettingsWidget::on_pProjectPatchVersion_valueChanged(qint32 i
   WIDGET_INITIALIZED_GUARD
   if (nullptr == m_spCurrentProject) { return; }
   Q_UNUSED(iValue)
+
+  UndoStack()->push(new CCommandChangeVersion(m_spUi->pProjectMajorVersion,
+                                              m_spUi->pProjectMinorVersion,
+                                              m_spUi->pProjectPatchVersion));
   emit SignalProjectEdited();
 }
 
@@ -293,6 +319,8 @@ void CEditorProjectSettingsWidget::on_pSoundEmitterCount_valueChanged(qint32 iVa
   WIDGET_INITIALIZED_GUARD
   if (nullptr == m_spCurrentProject) { return; }
   Q_UNUSED(iValue)
+
+  UndoStack()->push(new CCommandChangeEmitterCount(m_spUi->pSoundEmitterCount));
   emit SignalProjectEdited();
 }
 
@@ -302,6 +330,7 @@ void CEditorProjectSettingsWidget::on_pDescribtionTextEdit_textChanged()
 {
   WIDGET_INITIALIZED_GUARD
   if (nullptr == m_spCurrentProject) { return; }
+
   emit SignalProjectEdited();
 }
 
@@ -312,7 +341,12 @@ void CEditorProjectSettingsWidget::on_pFetishLineEdit_editingFinished()
   WIDGET_INITIALIZED_GUARD
   if (nullptr == m_spCurrentProject) { return; }
   QString sKink = m_spUi->pFetishLineEdit->text();
-  AddKinks({sKink});
+
+  UndoStack()->push(
+        new CCommandAddFetishes(this,
+                                std::bind(&CEditorProjectSettingsWidget::AddKinks, this, std::placeholders::_1),
+                                std::bind(&CEditorProjectSettingsWidget::RemoveKinks, this, std::placeholders::_1),
+                                {sKink}));
   emit SignalProjectEdited();
 }
 
@@ -334,11 +368,19 @@ void CEditorProjectSettingsWidget::SlotKinkChecked(const QModelIndex& index, boo
   QString sKink = KinkModel()->data(index, Qt::DisplayRole).toString();
   if (bChecked)
   {
-    AddKinks({sKink});
+    UndoStack()->push(
+          new CCommandAddFetishes(this,
+                                  std::bind(&CEditorProjectSettingsWidget::AddKinks, this, std::placeholders::_1),
+                                  std::bind(&CEditorProjectSettingsWidget::RemoveKinks, this, std::placeholders::_1),
+                                  {sKink}));
   }
   else
   {
-    RemoveKinks({sKink});
+    UndoStack()->push(
+          new CCommandRemoveFetishes(this,
+                                     std::bind(&CEditorProjectSettingsWidget::AddKinks, this, std::placeholders::_1),
+                                     std::bind(&CEditorProjectSettingsWidget::RemoveKinks, this, std::placeholders::_1),
+                                     {sKink}));
   }
 }
 
@@ -371,7 +413,22 @@ void CEditorProjectSettingsWidget::SlotRemoveKinkClicked()
   if (nullptr == m_spCurrentProject) { return; }
 
   QString sKink = sender()->property(c_sKinkRootWidgetProperty).toString();
-  RemoveKinks({sKink});
+
+  UndoStack()->push(
+        new CCommandRemoveFetishes(this,
+                                   std::bind(&CEditorProjectSettingsWidget::AddKinks, this, std::placeholders::_1),
+                                   std::bind(&CEditorProjectSettingsWidget::RemoveKinks, this, std::placeholders::_1),
+                                   {sKink}));
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CEditorProjectSettingsWidget::SlotUndoForDescribtionAdded()
+{
+  WIDGET_INITIALIZED_GUARD
+  if (nullptr == m_spCurrentProject) { return; }
+
+  UndoStack()->push(new CCommandChangeDescribtion(m_spUi->pDescribtionTextEdit->document()));
 }
 
 //----------------------------------------------------------------------------------------
