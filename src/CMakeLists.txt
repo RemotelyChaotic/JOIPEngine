@@ -36,6 +36,7 @@ set(Sources
   Editor/EditorChoiceScreen.cpp 
   Editor/EditorChoiceScreen.h 
   Editor/EditorChoiceScreen.ui 
+  Editor/EditorCommandIds.h
   Editor/EditorCodeWidget.cpp 
   Editor/EditorCodeWidget.h 
   Editor/EditorCodeWidget.ui 
@@ -79,6 +80,16 @@ set(Sources
   Editor/NodeEditor/SceneTranstitionData.h 
   Editor/NodeEditor/StartNodeModel.cpp 
   Editor/NodeEditor/StartNodeModel.h 
+  Editor/Project/CommandChangeDescribtion.cpp
+  Editor/Project/CommandChangeDescribtion.h
+  Editor/Project/CommandChangeEmitterCount.cpp
+  Editor/Project/CommandChangeEmitterCount.h
+  Editor/Project/CommandChangeFetishes.cpp
+  Editor/Project/CommandChangeFetishes.h
+  Editor/Project/CommandChangeProjectName.cpp
+  Editor/Project/CommandChangeProjectName.h
+  Editor/Project/CommandChangeVersion.cpp
+  Editor/Project/CommandChangeVersion.h
   Editor/Project/KinkCompleter.cpp 
   Editor/Project/KinkCompleter.h 
   Editor/Project/KinkSelectionOverlay.cpp 

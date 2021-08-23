@@ -16,6 +16,7 @@ namespace QtNodes {
   class FlowScene;
   class Node;
 }
+class QUndoStack;
 struct SScene;
 struct SProject;
 typedef std::shared_ptr<SProject> tspProject;
@@ -41,6 +42,7 @@ public:
   CKinkTreeModel* KinkTreeModel() const;
   CResourceTreeItemModel* ResourceTreeModel() const;
   CScriptEditorModel* ScriptEditorModel() const;
+  QUndoStack* UndoStack() const;
 
   void AddFilesToProjectResources(QPointer<QWidget> pParentForDialog,
                                   const QStringList& vsFiles);
@@ -82,6 +84,7 @@ private:
   std::unique_ptr<CResourceTreeItemModel>                     m_spResourceTreeModel;
   std::unique_ptr<CScriptEditorModel>                         m_spScriptEditorModel;
   std::unique_ptr<QtNodes::FlowScene>                         m_spFlowSceneModel;
+  std::unique_ptr<QUndoStack>                                 m_spUndoStack;
   std::unique_ptr<QProcess>                                   m_spExportProcess;
   std::shared_ptr<CSettings>                                  m_spSettings;
   tspProject                                                  m_spCurrentProject;

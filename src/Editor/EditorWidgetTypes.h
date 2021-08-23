@@ -12,4 +12,8 @@ BETTER_ENUM(EEditorWidget, qint32,
             eSceneNodeWidget = 3,
             eSceneCodeEditorWidget = 4);
 
+namespace editor {
+  inline const char* c_sPropertyOldValue = "OldValue";
+}
+
 #endif // EDITORWIDGETTYPES_H

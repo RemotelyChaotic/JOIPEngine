@@ -29,6 +29,7 @@
 #include <QPushButton>
 #include <QStandardPaths>
 #include <QTextStream>
+#include <QUndoStack>
 #include <QWidget>
 
 using QtNodes::DataModelRegistry;
@@ -59,6 +60,7 @@ CEditorModel::CEditorModel(QWidget* pParent) :
   m_spResourceTreeModel(std::make_unique<CResourceTreeItemModel>()),
   m_spScriptEditorModel(std::make_unique<CScriptEditorModel>(pParent)),
   m_spFlowSceneModel(std::make_unique<FlowScene>(RegisterDataModels(), nullptr)),
+  m_spUndoStack(std::make_unique<QUndoStack>()),
   m_spExportProcess(std::make_unique<QProcess>()),
   m_spSettings(CApplication::Instance()->Settings()),
   m_spCurrentProject(nullptr),
@@ -138,6 +140,13 @@ CResourceTreeItemModel* CEditorModel::ResourceTreeModel() const
 CScriptEditorModel* CEditorModel::ScriptEditorModel() const
 {
   return m_spScriptEditorModel.get();
+}
+
+//----------------------------------------------------------------------------------------
+//
+QUndoStack* CEditorModel::UndoStack() const
+{
+  return m_spUndoStack.get();
 }
 
 //----------------------------------------------------------------------------------------
@@ -676,6 +685,7 @@ void CEditorModel::UnloadProject()
   m_spScriptEditorModel->DeInitializeModel();
   m_spResourceTreeModel->DeInitializeModel();
   m_spFlowSceneModel->clearScene();
+  m_spUndoStack->clear();
 
   // reset to what is in the database
   auto spDbManager = m_wpDbManager.lock();
