@@ -57,7 +57,7 @@ protected slots:
 private:
   QPointer<QWidget> ClickedFilterChild(const QPoint& locClicked);
   QList<QPointer<QWidget>> FindWidgetsByName(const QStringList& vsWidgetNames);
-  QPoint MapPosToGlobal(const QPointer<QWidget> pWidget, const QPoint& pos);
+  QPoint MapPosToGlobal(const QPointer<QWidget> pWidget, const QPoint& widgetPos);
   void Reset();
 
   static CEditorTutorialOverlay*                m_pInstance;

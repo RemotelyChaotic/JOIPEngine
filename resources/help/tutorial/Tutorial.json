@@ -706,7 +706,7 @@
       {
         "text": [
           {"posX" : 0.3}, { "posY": 0.5}, {"anchor": "eRight"}, {"hideButtons": 1},
-          { "text": "Add a <i>Scene</i> node the same way you added the other nodes." }
+          { "text": "Add a <i>Scene</i> node the same way you added the other nodes.<br>Feel free to drag the nodes around for more room if you need it." }
         ]
       },
       {
@@ -980,7 +980,7 @@
       {
         "text": [
           {"posX" : 0.5}, { "posY": 0.5},
-          { "text": "The code is JavaScript code, but if you don't know javascript,<br>don't fret. You won't <i>have</i> to write a lot of code on your own." }
+          { "text": "The code is JavaScript code (more precisely ECMAScript), but if you don't know JavaScript,<br>don't fret. You won't <i>have</i> to write a lot of code on your own." }
         ]
       },
       {

@@ -26,7 +26,7 @@ namespace  {
         {
           for (qint32 j = y - iKernel / 2; j < y + iKernel / 2 + 1; j++)
           {
-            if (std::sqrt(std::abs(x-i) * std::abs(x-i) + std::abs(y-j) * std::abs(y-j)) <= iKernel / 2)
+            if (std::abs(x-i) * std::abs(x-i) + std::abs(y-j) * std::abs(y-j) <= iKernel*iKernel / 4)
             {
               if (dims.x() < i && dims.width() > i &&
                   dims.y() < j && dims.height() > j)
@@ -85,10 +85,10 @@ namespace  {
             QRgb currentPixels = (dims.x() < i && dims.width() > i &&
                 dims.y() < j && dims.height() > j) ? in.pixel(i, j) : 0;
             pixel += qRgba(
-                static_cast<qint32>(static_cast<double>(qRed(currentPixels)) * kernel[iKernelIndex]),
-                static_cast<qint32>(static_cast<double>(qGreen(currentPixels)) * kernel[iKernelIndex]),
-                static_cast<qint32>(static_cast<double>(qBlue(currentPixels)) * kernel[iKernelIndex]),
-                static_cast<qint32>(static_cast<double>(qAlpha(currentPixels)) * kernel[iKernelIndex]));
+                static_cast<qint32>(kernel[iKernelIndex] * qRed(currentPixels)),
+                static_cast<qint32>(kernel[iKernelIndex] * qGreen(currentPixels)),
+                static_cast<qint32>(kernel[iKernelIndex] * qBlue(currentPixels)),
+                static_cast<qint32>(kernel[iKernelIndex] * qAlpha(currentPixels)));
             iKernelIndex++;
           }
         }
