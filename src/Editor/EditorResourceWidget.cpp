@@ -2,6 +2,12 @@
 #include "Application.h"
 #include "EditorActionBar.h"
 #include "EditorModel.h"
+#include "Resources/CommandAddResource.h"
+#include "Resources/CommandChangeCurrentResource.h"
+#include "Resources/CommandChangeFilter.h"
+#include "Resources/CommandChangeSource.h"
+#include "Resources/CommandChangeTitleCard.h"
+#include "Resources/CommandRemoveResource.h"
 #include "Resources/ResourceTreeItem.h"
 #include "Resources/ResourceTreeItemModel.h"
 #include "Resources/ResourceTreeItemSortFilterProxyModel.h"
@@ -27,6 +33,7 @@
 #include <QMimeData>
 #include <QNetworkAccessManager>
 #include <QSortFilterProxyModel>
+#include <QUndoStack>
 
 #include <cassert>
 
@@ -107,6 +114,8 @@ void CEditorResourceWidget::Initialize()
   pProxyModel->setFilterRegExp(QRegExp(".*", Qt::CaseInsensitive, QRegExp::RegExp));
 
   m_spUi->pResourceDisplayWidget->setFixedHeight(256);
+
+  m_spUi->pFilter->SetFilterUndo(true);
 
   // help
   auto wpHelpFactory = CApplication::Instance()->System<CHelpFactory>().lock();
@@ -264,8 +273,10 @@ void CEditorResourceWidget::dropEvent(QDropEvent* pEvent)
       vsFileNames.append(vUrlList.at(i).toLocalFile());
     }
 
-    // add file to respective category
-    EditorModel()->AddFilesToProjectResources(this, vsFileNames);
+    std::map<QUrl, QByteArray> vsFiles;
+    for (const QString& sPath : qAsConst(vsFileNames)) { vsFiles.insert({sPath, QByteArray()}); }
+    UndoStack()->push(new CCommandAddResource(m_spCurrentProject, this, vsFiles));
+    emit SignalProjectEdited();
   }
 }
 
@@ -277,14 +288,8 @@ void CEditorResourceWidget::on_pFilter_SignalFilterChanged(const QString& sText)
   CResourceTreeItemSortFilterProxyModel* pProxyModel =
       dynamic_cast<CResourceTreeItemSortFilterProxyModel*>(m_spUi->pResourceTree->model());
 
-  if (sText.isNull() || sText.isEmpty())
-  {
-    pProxyModel->setFilterRegExp(QRegExp(".*", Qt::CaseInsensitive, QRegExp::RegExp));
-  }
-  else
-  {
-    pProxyModel->setFilterRegExp(QRegExp(sText, Qt::CaseInsensitive, QRegExp::RegExp));
-  }
+  Q_UNUSED(sText)
+  UndoStack()->push(new CCommandChangeFilter(pProxyModel, m_spUi->pFilter));
 }
 
 //----------------------------------------------------------------------------------------
@@ -315,8 +320,10 @@ void CEditorResourceWidget::SlotAddButtonClicked()
   QStringList  vsFileNames = QFileDialog::getOpenFileNames(this,
       tr("Add File"), sCurrentFolder, SResourceFormats::JoinedFormatsForFilePicker());
 
-  // add file to respective category
-  EditorModel()->AddFilesToProjectResources(this, vsFileNames);
+  std::map<QUrl, QByteArray> vsFiles;
+  for (const QString& sPath : qAsConst(vsFileNames)) { vsFiles.insert({sPath, QByteArray()}); }
+  UndoStack()->push(new CCommandAddResource(m_spCurrentProject, this, vsFiles));
+  emit SignalProjectEdited();
 }
 
 //----------------------------------------------------------------------------------------
@@ -345,19 +352,21 @@ void CEditorResourceWidget::SlotRemoveButtonClicked()
   {
     QModelIndexList indexes = m_spUi->pResourceTree->selectionModel()->selectedIndexes();
     m_spUi->pResourceTree->selectionModel()->clearSelection();
+    QStringList vsRemovedResources;
     foreach (QModelIndex index, indexes)
     {
       if (pModel->IsResourceType(pProxyModel->mapToSource(index)))
       {
         const QString sName = pModel->data(pProxyModel->mapToSource(index), Qt::DisplayRole).toString();
-        spDbManager->RemoveResource(m_spCurrentProject, sName);
-
-        emit SignalProjectEdited();
+        vsRemovedResources << sName;
 
         // only interrested in first item which is the actual item we need
         break;
       }
     }
+
+    UndoStack()->push(new CCommandRemoveResource(m_spCurrentProject, vsRemovedResources));
+    emit SignalProjectEdited();
   }
 }
 
@@ -416,17 +425,14 @@ void CEditorResourceWidget::SlotTitleCardButtonClicked()
       if (pModel->IsResourceType(pProxyModel->mapToSource(index)))
       {
         const QString sName = pModel->data(pProxyModel->mapToSource(index), Qt::DisplayRole).toString();
-        tspResource spResource = spDbManager->FindResourceInProject(m_spCurrentProject, sName);
-        if (nullptr != spResource)
-        {
-          QWriteLocker locker(&m_spCurrentProject->m_rwLock);
-          m_spCurrentProject->m_sTitleCard = sName;
+        QWriteLocker locker(&m_spCurrentProject->m_rwLock);
+        const QString sOldTitleCard = m_spCurrentProject->m_sTitleCard;
 
-          emit SignalProjectEdited();
+        UndoStack()->push(new CCommandChangeTitleCard(m_spCurrentProject, sOldTitleCard, sName));
+        emit SignalProjectEdited();
 
-          // only interrested in first item which is the actual item we need
-          break;
-        }
+        // only interrested in first item which is the actual item we need
+        break;
       }
     }
   }
@@ -486,17 +492,23 @@ void CEditorResourceWidget::SlotCurrentChanged(const QModelIndex& current,
 
   if (nullptr != pModel)
   {
+    const QString sPrevious =
+        pModel->data(pProxyModel->mapToSource(previous), Qt::DisplayRole, resource_item::c_iColumnName).toString();
     const QString sName =
         pModel->data(pProxyModel->mapToSource(current), Qt::DisplayRole, resource_item::c_iColumnName).toString();
-    emit SignalResourceSelected(sName);
 
-    auto spDbManager = m_wpDbManager.lock();
-    if (nullptr != spDbManager)
-    {
-      auto spResource = spDbManager->FindResourceInProject(m_spCurrentProject, sName);
-      m_spUi->pResourceDisplayWidget->UnloadResource();
-      m_spUi->pResourceDisplayWidget->LoadResource(spResource);
-    }
+    QPointer<CEditorResourceWidget> pThis(this);
+    UndoStack()->push(
+          new CCommandChangeCurrentResource(m_spCurrentProject,
+                                            m_spUi->pResourceDisplayWidget,
+                                            m_spUi->pResourceTree->selectionModel(),
+                                            pProxyModel, sPrevious, sName,
+                                            [this, pThis](const QString& sName){
+      if (nullptr != pThis)
+      {
+        emit SignalResourceSelected(sName);
+      }
+    }));
   }
 }
 
@@ -541,7 +553,10 @@ void CEditorResourceWidget::SlotWebSourceSelected(const QString& sResource)
     if (nullptr != spResource)
     {
       QWriteLocker locker(&spResource->m_rwLock);
-      spResource->m_sSource = sResource;
+      UndoStack()->push(new CCommandChangeSource(m_spCurrentProject,
+                                                 sName,
+                                                 spResource->m_sSource,
+                                                 sResource));
 
       emit SignalProjectEdited();
     }
@@ -570,54 +585,13 @@ void CEditorResourceWidget::SlotNetworkReplyFinished()
   {
     QUrl url = pReply->url();
     QByteArray arr = pReply->readAll();
+
     if (nullptr != m_pResponse)
     {
       m_pResponse->disconnect();
       m_pResponse->deleteLater();
     }
 
-    QStringList imageFormatsList = SResourceFormats::ImageFormats();
-    QStringList videoFormatsList = SResourceFormats::VideoFormats();
-    QStringList audioFormatsList = SResourceFormats::AudioFormats();
-
-    qint32 iLastIndex = url.fileName().lastIndexOf('.');
-    const QString sFileName = url.fileName();
-    QString sFormat = "*" + sFileName.mid(iLastIndex, sFileName.size() - iLastIndex);
-    auto spDbManager = m_wpDbManager.lock();
-    if (nullptr != spDbManager)
-    {
-      if (imageFormatsList.contains(sFormat))
-      {
-        QPixmap mPixmap;
-        mPixmap.loadFromData(arr);
-        if (!mPixmap.isNull())
-        {
-          QString sName =
-            spDbManager->AddResource(m_spCurrentProject, url, EResourceType::eImage);
-          tspResource spResource = spDbManager->FindResourceInProject(m_spCurrentProject, sName);
-          if (nullptr != spResource)
-          {
-            QWriteLocker locker(&spResource->m_rwLock);
-            spResource->m_sSource = url;
-
-            emit SignalProjectEdited();
-          }
-        }
-      }
-      else if (videoFormatsList.contains(sFormat))
-      {
-        // TODO: check video
-        QString sName =
-            spDbManager->AddResource(m_spCurrentProject, url, EResourceType::eMovie);
-        tspResource spResource = spDbManager->FindResourceInProject(m_spCurrentProject, sName);
-        if (nullptr != spResource)
-        {
-          QWriteLocker locker(&spResource->m_rwLock);
-          spResource->m_sSource = url;
-
-          emit SignalProjectEdited();
-        }
-      }
-    }
+    UndoStack()->push(new CCommandAddResource(m_spCurrentProject, this, {{url, arr}}));
   }
 }

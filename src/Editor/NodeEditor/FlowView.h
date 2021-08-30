@@ -2,6 +2,8 @@
 #define FLOWVIEW_H
 
 #include <nodes/FlowView>
+#include <QPointer>
+#include <QUndoStack>
 #include <map>
 
 class CFlowView : public QtNodes::FlowView
@@ -17,6 +19,11 @@ public:
 
   ~CFlowView() override;
 
+  void setScene(QtNodes::FlowScene* pScene);
+
+  void SetUndoStack(QPointer<QUndoStack> pUndoStack);
+  QPointer<QUndoStack> UndoStack();
+
   void FitAllNodesInView();
   void OpenContextMenuAt(const QPoint& localPoint, const QPoint& createPoint = QPoint());
 
@@ -29,11 +36,16 @@ public:
   using QtNodes::FlowView::scene;
 
 protected:
+  void SlotClearSelectionTriggered();
+  void SlotDeleteTriggered();
+
+protected:
   void contextMenuEvent(QContextMenuEvent* pEvent) override;
 
 private:
   bool                     m_bReadOnly;
   std::map<QString, bool>  m_contextMenuItemVisibility;
+  QPointer<QUndoStack>     m_pUndoStack;
 };
 
 #endif // FLOWVIEW_H

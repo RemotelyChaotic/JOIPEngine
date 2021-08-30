@@ -366,6 +366,37 @@ bool CResourceTreeItemModel::IsResourceType(const QModelIndex& index)
 
 //----------------------------------------------------------------------------------------
 //
+QModelIndex CResourceTreeItemModel::IndexForResource(const tspResource& spResource)
+{
+  if (nullptr == m_spProject || nullptr == spResource) { return QModelIndex(); }
+
+  m_spProject->m_rwLock.lockForRead();
+  qint32 iThisId = m_spProject->m_iId;
+  m_spProject->m_rwLock.unlock();
+
+  spResource->m_rwLock.lockForRead();
+  const QString sName = spResource->m_sName;
+  spResource->m_spParent->m_rwLock.lockForRead();
+  qint32 iResourceId = spResource->m_spParent->m_iId;
+  spResource->m_spParent->m_rwLock.unlock();
+  spResource->m_rwLock.unlock();
+
+  if (iResourceId != iThisId) { return QModelIndex(); }
+
+  QModelIndexList indices =
+    QAbstractItemModel::match(createIndex(0, 0, m_pRootItem), Qt::UserRole,
+                              QString(EResourceTreeItemType((EResourceTreeItemType::eResource))._to_string()) +
+                                ";" + sName, 1,
+                              Qt::MatchStartsWith | Qt::MatchWrap | Qt::MatchRecursive);
+  if (0 < indices.size())
+  {
+    return indices.first();
+  }
+  return QModelIndex();
+}
+
+//----------------------------------------------------------------------------------------
+//
 void CResourceTreeItemModel::SlotResourceAdded(qint32 iProjId, const QString& sName)
 {
   if (nullptr!= m_spProject)

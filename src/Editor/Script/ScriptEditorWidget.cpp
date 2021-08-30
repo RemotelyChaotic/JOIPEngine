@@ -207,6 +207,16 @@ qint32 CScriptEditorWidget::WidgetAreaWidth()
 
 //----------------------------------------------------------------------------------------
 //
+QMenu* CScriptEditorWidget::CreateContextMenu()
+{
+  QMenu* pMenu = createStandardContextMenu();
+  pMenu->addAction(tr("Search"), this, SLOT(SlotShowHideSearchFilter()),
+                   QKeySequence::Find);
+  return pMenu;
+}
+
+//----------------------------------------------------------------------------------------
+//
 void CScriptEditorWidget::HighlightCurrentLine()
 {
   QList<QTextEdit::ExtraSelection> vExtraSelections;
@@ -352,9 +362,7 @@ void CScriptEditorWidget::contextMenuEvent(QContextMenuEvent* pEvent)
   if (nullptr != pEvent)
   {
     QPointer<CScriptEditorWidget> pThisGuard(this);
-    QMenu* pMenu = createStandardContextMenu();
-    pMenu->addAction(tr("Search"), this, SLOT(SlotShowHideSearchFilter()),
-                     QKeySequence::Find);
+    QMenu* pMenu = CreateContextMenu();
     pMenu->exec(pEvent->globalPos());
     if (nullptr == pThisGuard) { return; }
     delete pMenu;

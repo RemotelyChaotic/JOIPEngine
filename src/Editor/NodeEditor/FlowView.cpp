@@ -1,15 +1,25 @@
 #include "FlowView.h"
+#include "CommandConnectionAdded.h"
+#include "CommandConnectionEdited.h"
+#include "CommandConnectionRemoved.h"
+#include "CommandNodeAdded.h"
+#include "CommandNodeEdited.h"
+#include "CommandNodeMoved.h"
+#include "CommandNodeRemoved.h"
 
+#include <nodes/Connection>
 #include <nodes/FlowScene>
 #include <nodes/NodeGeometry>
 #include <nodes/Node>
 
 #include <QContextMenuEvent>
 #include <QDebug>
+#include <QGraphicsItem>
 #include <QHeaderView>
 #include <QLineEdit>
 #include <QMenu>
 #include <QTreeWidget>
+#include <QUndoStack>
 #include <QWidgetAction>
 
 using QtNodes::FlowView;
@@ -19,7 +29,8 @@ using QtNodes::Node;
 CFlowView::CFlowView(QWidget* pParent) :
   FlowView(pParent),
   m_bReadOnly(false),
-  m_contextMenuItemVisibility()
+  m_contextMenuItemVisibility(),
+  m_pUndoStack(new QUndoStack(this))
 {
 
 }
@@ -27,11 +38,38 @@ CFlowView::CFlowView(QWidget* pParent) :
 CFlowView::CFlowView(FlowScene* pScene, QWidget* pParent) :
   FlowView(pScene, pParent),
   m_bReadOnly(false),
-  m_contextMenuItemVisibility()
+  m_contextMenuItemVisibility(),
+  m_pUndoStack(new QUndoStack(this))
 {
 }
 
 CFlowView::~CFlowView() {}
+
+//----------------------------------------------------------------------------------------
+//
+void CFlowView::setScene(QtNodes::FlowScene* pScene)
+{
+  FlowView::setScene(pScene);
+  clearSelectionAction()->disconnect();
+  deleteSelectionAction()->disconnect();
+  connect(clearSelectionAction(), &QAction::triggered, this, &CFlowView::SlotClearSelectionTriggered);
+  connect(deleteSelectionAction(), &QAction::triggered, this, &CFlowView::SlotDeleteTriggered);
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CFlowView::SetUndoStack(QPointer<QUndoStack> pUndoStack)
+{
+  if (nullptr != m_pUndoStack) { delete m_pUndoStack; }
+  m_pUndoStack = pUndoStack;
+}
+
+//----------------------------------------------------------------------------------------
+//
+QPointer<QUndoStack> CFlowView::UndoStack()
+{
+  return m_pUndoStack;
+}
 
 //----------------------------------------------------------------------------------------
 //
@@ -120,26 +158,13 @@ void CFlowView::OpenContextMenuAt(const QPoint& localPoint, const QPoint& create
       return;
     }
 
-    if (IsModelHiddenInContextMenu(modelName))
+    if (nullptr != m_pUndoStack)
     {
-      return;
-    }
-
-    auto type = scene()->registry().create(modelName);
-
-    if (type)
-    {
-      auto& node = scene()->createNode(std::move(type));
-
-      QPointF posView = this->mapToScene(localPoint);
-
-      node.nodeGraphicsObject().setPos(posView);
-
-      scene()->nodePlaced(node);
+      UndoStack()->push(new CCommandNodeAdded(this, modelName, localPoint));
     }
     else
     {
-      qDebug() << "Model not found";
+      assert(false && "QUndoStack must never be null.");
     }
 
     modelMenu.close();
@@ -210,6 +235,49 @@ bool CFlowView::IsModelHiddenInContextMenu(const QString& sId)
   else
   {
     return false;
+  }
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CFlowView::SlotClearSelectionTriggered()
+{
+
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CFlowView::SlotDeleteTriggered()
+{
+  if (nullptr != scene())
+  {
+    // HACK HACK HACK: since ConnectionGraphicsObject is private, we check the class name
+    // and iterate over all connections. We then get the connectionGraphicsObject of those and just
+    // cast them to graphicsitems to compare the pointer vlues
+    // TODO: Change library, so we have a getGraphicsObject method that returns a Qt-Object
+    // instead of a private type
+    const auto& mapConnecitons = scene()->connections();
+    for (QGraphicsItem* pItem : scene()->selectedItems())
+    {
+      QGraphicsObject* pGraphicsObj = qgraphicsitem_cast<QGraphicsObject*>(pItem);
+      if (nullptr != pGraphicsObj && pGraphicsObj->metaObject()->className() ==
+          QString("ConnectionGraphicsObject"))
+      {
+        for (auto& connectionPair : mapConnecitons)
+        {
+          if (&reinterpret_cast<QGraphicsObject&>(connectionPair.second->getConnectionGraphicsObject()) ==
+              pGraphicsObj)
+          {
+            scene()->deleteConnection(*connectionPair.second);
+          }
+        }
+      }
+    }
+
+    for (Node* pNode : scene()->selectedNodes())
+    {
+      scene()->removeNode(*pNode);
+    }
   }
 }
 

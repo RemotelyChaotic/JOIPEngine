@@ -25,6 +25,7 @@ void CCommandChangeProjectName::undo()
 {
   m_sOldName = m_pEditorModel->RenameProject(m_sOldName);
   m_pNameLineEdit->blockSignals(true);
+  m_pNameLineEdit->setProperty(editor::c_sPropertyOldValue, m_sOldName);
   m_pNameLineEdit->setText(m_sOldName);
   m_pNameLineEdit->blockSignals(false);
 }
@@ -35,6 +36,7 @@ void CCommandChangeProjectName::redo()
 {
   m_sNewName = m_pEditorModel->RenameProject(m_sNewName);
   m_pNameLineEdit->blockSignals(true);
+  m_pNameLineEdit->setProperty(editor::c_sPropertyOldValue, m_sNewName);
   m_pNameLineEdit->setText(m_sNewName);
   m_pNameLineEdit->blockSignals(false);
 }

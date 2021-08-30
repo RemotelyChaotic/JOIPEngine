@@ -44,8 +44,6 @@ public:
   CScriptEditorModel* ScriptEditorModel() const;
   QUndoStack* UndoStack() const;
 
-  void AddFilesToProjectResources(QPointer<QWidget> pParentForDialog,
-                                  const QStringList& vsFiles);
   void AddNewScriptFileToScene(QPointer<QWidget> pParentForDialog,
                                tspScene spScene);
 

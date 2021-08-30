@@ -18,8 +18,8 @@ CCommandChangeEmitterCount::~CCommandChangeEmitterCount()
 void CCommandChangeEmitterCount::CCommandChangeEmitterCount::undo()
 {
   m_pEmitterCount->blockSignals(true);
-  m_pEmitterCount->setValue(m_iOriginalValue);
   m_pEmitterCount->setProperty(editor::c_sPropertyOldValue, m_iOriginalValue);
+  m_pEmitterCount->setValue(m_iOriginalValue);
   m_pEmitterCount->blockSignals(false);
 }
 
@@ -28,8 +28,8 @@ void CCommandChangeEmitterCount::CCommandChangeEmitterCount::undo()
 void CCommandChangeEmitterCount::CCommandChangeEmitterCount::redo()
 {
   m_pEmitterCount->blockSignals(true);
-  m_pEmitterCount->setValue(m_iNewValue);
   m_pEmitterCount->setProperty(editor::c_sPropertyOldValue, m_iNewValue);
+  m_pEmitterCount->setValue(m_iNewValue);
   m_pEmitterCount->blockSignals(false);
 }
 

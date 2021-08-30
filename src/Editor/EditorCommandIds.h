@@ -7,10 +7,23 @@
 
 BETTER_ENUM(EEditorCommandId, qint32,
             eNone               = -1,
+
             eChangeEmitterCount = 0,
             eAddFetishes,
             eRemoveFetishes,
             eChangeProjectName,
-            eChangeVersion);
+            eChangeVersion,
+
+            eAddResource,
+            eChangeCurrentResource,
+            eChangeFilter,
+            eChangeSource,
+            eChangeTitleCard,
+            eRemoveResource,
+
+            eChangeOpenedScript,
+
+            eMoveNodeItem
+            );
 
 #endif // EDITORCOMMANDIDS_H

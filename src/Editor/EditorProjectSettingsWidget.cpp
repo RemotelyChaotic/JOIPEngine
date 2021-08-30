@@ -4,6 +4,7 @@
 #include "EditorModel.h"
 #include "SVersion.h"
 #include "out_Version.h"
+#include "Editor/EditorWidgetTypes.h"
 #include "Project/CommandChangeDescribtion.h"
 #include "Project/CommandChangeEmitterCount.h"
 #include "Project/CommandChangeFetishes.h"
@@ -118,6 +119,12 @@ void CEditorProjectSettingsWidget::Initialize()
   m_spUi->pEnginePatchVersion->setValue(version.m_iPatch);
   m_spUi->WarningIcon->setVisible(false);
 
+  new CUndoRedoFilter(m_spUi->pTitleLineEdit, nullptr);
+  new CUndoRedoFilter(m_spUi->pProjectMajorVersion, nullptr);
+  new CUndoRedoFilter(m_spUi->pProjectMinorVersion, nullptr);
+  new CUndoRedoFilter(m_spUi->pProjectPatchVersion, nullptr);
+  new CUndoRedoFilter(m_spUi->pFetishLineEdit, nullptr);
+
   auto pFilter =
       new CUndoRedoFilter(m_spUi->pDescribtionTextEdit,
                           std::bind(static_cast<QMenu*(QPlainTextEdit::*)(void)>(&QPlainTextEdit::createStandardContextMenu),
@@ -149,6 +156,7 @@ void CEditorProjectSettingsWidget::LoadProject(tspProject spProject)
 
     m_spUi->pTitleLineEdit->blockSignals(true);
     m_spUi->pTitleLineEdit->setText(m_spCurrentProject->m_sName);
+    m_spUi->pTitleLineEdit->setProperty(editor::c_sPropertyOldValue, m_spCurrentProject->m_sName);
     m_spUi->pTitleLineEdit->setReadOnly(bReadOnly);
     m_spUi->pTitleLineEdit->blockSignals(false);
 
@@ -163,6 +171,9 @@ void CEditorProjectSettingsWidget::LoadProject(tspProject spProject)
     m_spUi->pProjectMajorVersion->blockSignals(true);
     m_spUi->pProjectMinorVersion->blockSignals(true);
     m_spUi->pProjectPatchVersion->blockSignals(true);
+    m_spUi->pProjectMajorVersion->setProperty(editor::c_sPropertyOldValue, static_cast<qint32>(projVersion.m_iMajor));
+    m_spUi->pProjectMinorVersion->setProperty(editor::c_sPropertyOldValue, static_cast<qint32>(projVersion.m_iMinor));
+    m_spUi->pProjectPatchVersion->setProperty(editor::c_sPropertyOldValue, static_cast<qint32>(projVersion.m_iPatch));
     m_spUi->pProjectMajorVersion->setValue(static_cast<qint32>(projVersion.m_iMajor));
     m_spUi->pProjectMinorVersion->setValue(static_cast<qint32>(projVersion.m_iMinor));
     m_spUi->pProjectPatchVersion->setValue(static_cast<qint32>(projVersion.m_iPatch));
@@ -174,6 +185,7 @@ void CEditorProjectSettingsWidget::LoadProject(tspProject spProject)
     m_spUi->pProjectPatchVersion->blockSignals(false);
 
     m_spUi->pSoundEmitterCount->setValue(m_spCurrentProject->m_iNumberOfSoundEmitters);
+    m_spUi->pSoundEmitterCount->setProperty(editor::c_sPropertyOldValue, m_spCurrentProject->m_iNumberOfSoundEmitters);
     m_spUi->pSoundEmitterCount->setEnabled(!bReadOnly);
 
     m_spUi->pDescribtionTextEdit->setPlainText(m_spCurrentProject->m_sDescribtion);

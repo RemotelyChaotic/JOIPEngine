@@ -4,6 +4,8 @@
 #include "EditorModel.h"
 #include "Player/SceneMainScreen.h"
 #include "Script/BackgroundSnippetOverlay.h"
+#include "Script/CommandChangeOpenedScript.h"
+#include "Script/CommandScriptContentChange.h"
 #include "Script/IconSnippetOverlay.h"
 #include "Script/MetronomeSnippetOverlay.h"
 #include "Script/ResourceSnippetOverlay.h"
@@ -19,10 +21,12 @@
 #include "Systems/ScriptRunner.h"
 #include "Systems/Script/ScriptRunnerSignalEmiter.h"
 #include "Tutorial/CodeWidgetTutorialStateSwitchHandler.h"
+#include "Utils/UndoRedoFilter.h"
 #include "Widgets/HelpOverlay.h"
 
 #include <QDebug>
 #include <QStandardItemModel>
+#include <QUndoStack>
 
 namespace {
   const qint32 c_iIndexNoScripts = 0;
@@ -128,6 +132,14 @@ void CEditorCodeWidget::Initialize()
 
   connect(ScriptEditorModel(), &CScriptEditorModel::SignalFileChangedExternally,
           this, &CEditorCodeWidget::SlotFileChangedExternally);
+
+  CUndoRedoFilter* pFilter =
+      new CUndoRedoFilter(m_spUi->pCodeEdit,
+                          std::bind(&CScriptEditorWidget::CreateContextMenu, m_spUi->pCodeEdit));
+  connect(m_spUi->pCodeEdit->document(), &QTextDocument::undoCommandAdded,
+          this, &CEditorCodeWidget::SlotUndoForDescribtionAdded);
+  connect(pFilter, &CUndoRedoFilter::UndoTriggered, this, [this]() { UndoStack()->undo(); });
+  connect(pFilter, &CUndoRedoFilter::RedoTriggered, this, [this]() { UndoStack()->redo(); });
 
   m_spUi->pStackedWidget->setCurrentIndex(c_iIndexNoScripts);
 
@@ -360,23 +372,13 @@ void CEditorCodeWidget::on_pResourceComboBox_currentIndexChanged(qint32 iIndex)
 {
   WIDGET_INITIALIZED_GUARD
   if (nullptr == m_spCurrentProject) { return; }
-  m_spCurrentProject->m_rwLock.lockForRead();
-  const QString sProjectName = m_spCurrentProject->m_sName;
-  m_spCurrentProject->m_rwLock.unlock();
 
-  m_bChangingIndex = true;
-
-  // save old contents
-  auto pScriptItem = ScriptEditorModel()->CachedScript(m_sLastCachedScript);
-  if (nullptr != pScriptItem)
-  {
-    pScriptItem->m_data = m_spUi->pCodeEdit->toPlainText().toUtf8();
-    ScriptEditorModel()->SetSceneScriptModifiedFlag(pScriptItem->m_sId, pScriptItem->m_bChanged);
-  }
-
-  ReloadEditor(iIndex);
-
-  m_bChangingIndex = false;
+  UndoStack()->push(new CCommandChangeOpenedScript(m_spUi->pResourceComboBox,
+                                                   m_spUi->pCodeEdit,
+                                                   this, std::bind(&CEditorCodeWidget::ReloadEditor, this, std::placeholders::_1),
+                                                   &m_bChangingIndex, &m_sLastCachedScript,
+                                                   m_sLastCachedScript,
+                                                   ScriptEditorModel()->CachedScriptName(iIndex)));
 }
 
 //----------------------------------------------------------------------------------------
@@ -578,6 +580,16 @@ void CEditorCodeWidget::SlotRowsRemoved(const QModelIndex& parent, int iFirst, i
   {
     m_spUi->pStackedWidget->setCurrentIndex(c_iIndexNoScripts);
   }
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CEditorCodeWidget::SlotUndoForDescribtionAdded()
+{
+  WIDGET_INITIALIZED_GUARD
+  if (nullptr == m_spCurrentProject) { return; }
+
+  UndoStack()->push(new CCommandScriptContentChange(m_spUi->pCodeEdit->document()));
 }
 
 //----------------------------------------------------------------------------------------

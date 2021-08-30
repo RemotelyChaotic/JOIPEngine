@@ -59,6 +59,8 @@ public:
   void WidgetAreaPaintEvent(QPaintEvent* pEvent);
   qint32 WidgetAreaWidth();
 
+  QMenu* CreateContextMenu();
+
 public slots:
   void SlotExecutionError(QString sException, qint32 iLine, QString sStack);
   void SlotShowHideSearchFilter();

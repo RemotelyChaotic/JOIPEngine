@@ -68,22 +68,22 @@ void CCommandChangeVersion::ApplyValue(const SVersion& value)
   if (nullptr != m_pProjectMajorVersion)
   {
     m_pProjectMajorVersion->blockSignals(true);
-    m_pProjectMajorVersion->setValue(value.m_iMajor);
     m_pProjectMajorVersion->setProperty(editor::c_sPropertyOldValue, value.m_iMajor);
+    m_pProjectMajorVersion->setValue(value.m_iMajor);
     m_pProjectMajorVersion->blockSignals(false);
   }
   if (nullptr != m_pProjectMinorVersion)
   {
     m_pProjectMinorVersion->blockSignals(true);
+    m_pProjectMajorVersion->setProperty(editor::c_sPropertyOldValue, value.m_iMinor);
     m_pProjectMinorVersion->setValue(value.m_iMinor);
-     m_pProjectMajorVersion->setProperty(editor::c_sPropertyOldValue, value.m_iMinor);
     m_pProjectMinorVersion->blockSignals(false);
   }
   if (nullptr != m_pProjectPatchVersion)
   {
     m_pProjectPatchVersion->blockSignals(true);
+    m_pProjectMajorVersion->setProperty(editor::c_sPropertyOldValue, value.m_iPatch);
     m_pProjectPatchVersion->setValue(value.m_iPatch);
-     m_pProjectMajorVersion->setProperty(editor::c_sPropertyOldValue, value.m_iPatch);
     m_pProjectPatchVersion->blockSignals(false);
   }
 }

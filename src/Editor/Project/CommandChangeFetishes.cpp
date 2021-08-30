@@ -60,6 +60,7 @@ bool CCommandAddFetishes::mergeWith(const QUndoCommand* pOther)
   if (nullptr == pOtherCasted) { return false; }
 
   m_vsAddedKinks << pOtherCasted->m_vsAddedKinks;
+  m_vsAddedKinks.removeDuplicates();
   setText(QString("Added %1 kinks").arg(m_vsAddedKinks.size()));
   return true;
 }
@@ -123,6 +124,7 @@ bool CCommandRemoveFetishes::mergeWith(const QUndoCommand* pOther)
   if (nullptr == pOtherCasted) { return false; }
 
   m_vsRemovedKinks << pOtherCasted->m_vsRemovedKinks;
+  m_vsRemovedKinks.removeDuplicates();
   setText(QString("Removed %1 kinks").arg(m_vsRemovedKinks.size()));
   return true;
 }

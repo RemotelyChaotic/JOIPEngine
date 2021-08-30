@@ -48,8 +48,9 @@ public:
   bool removeRows(qint32 iPosition, qint32 iRows,
                   const QModelIndex& parent = QModelIndex()) override;
 
-  // convenience-function
+  // convenience-functions
   bool IsResourceType(const QModelIndex& index = QModelIndex());
+  QModelIndex IndexForResource(const tspResource& spResource);
 
 signals:
   void SignalProjectEdited();

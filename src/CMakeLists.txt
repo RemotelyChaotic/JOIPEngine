@@ -60,6 +60,22 @@ set(Sources
   Editor/EditorWidgetBase.cpp 
   Editor/EditorWidgetBase.h 
   Editor/EditorWidgetTypes.h 
+  Editor/NodeEditor/CommandChangeSelection.cpp
+  Editor/NodeEditor/CommandChangeSelection.h
+  Editor/NodeEditor/CommandConnectionAdded.cpp
+  Editor/NodeEditor/CommandConnectionAdded.h
+  Editor/NodeEditor/CommandConnectionEdited.cpp
+  Editor/NodeEditor/CommandConnectionEdited.h
+  Editor/NodeEditor/CommandConnectionRemoved.cpp
+  Editor/NodeEditor/CommandConnectionRemoved.h
+  Editor/NodeEditor/CommandNodeAdded.cpp
+  Editor/NodeEditor/CommandNodeAdded.h
+  Editor/NodeEditor/CommandNodeEdited.cpp
+  Editor/NodeEditor/CommandNodeEdited.h
+  Editor/NodeEditor/CommandNodeMoved.cpp
+  Editor/NodeEditor/CommandNodeMoved.h
+  Editor/NodeEditor/CommandNodeRemoved.cpp
+  Editor/NodeEditor/CommandNodeRemoved.h
   Editor/NodeEditor/EndNodeModel.cpp 
   Editor/NodeEditor/EndNodeModel.h 
   Editor/NodeEditor/FlowView.cpp 
@@ -101,6 +117,18 @@ set(Sources
   Editor/Project/KinkTreeModel.h 
   Editor/Project/KinkTreeSortFilterProxyModel.cpp
   Editor/Project/KinkTreeSortFilterProxyModel.h
+  Editor/Resources/CommandAddResource.cpp
+  Editor/Resources/CommandAddResource.h
+  Editor/Resources/CommandChangeCurrentResource.cpp
+  Editor/Resources/CommandChangeCurrentResource.h
+  Editor/Resources/CommandChangeFilter.cpp
+  Editor/Resources/CommandChangeFilter.h
+  Editor/Resources/CommandChangeSource.cpp
+  Editor/Resources/CommandChangeSource.h
+  Editor/Resources/CommandChangeTitleCard.cpp
+  Editor/Resources/CommandChangeTitleCard.h
+  Editor/Resources/CommandRemoveResource.cpp
+  Editor/Resources/CommandRemoveResource.h
   Editor/Resources/ResourceTreeItem.cpp 
   Editor/Resources/ResourceTreeItem.h 
   Editor/Resources/ResourceTreeItemModel.cpp 
@@ -113,6 +141,10 @@ set(Sources
   Editor/Script/BackgroundSnippetOverlay.cpp 
   Editor/Script/BackgroundSnippetOverlay.h 
   Editor/Script/BackgroundSnippetOverlay.ui 
+  Editor/Script/CommandChangeOpenedScript.cpp
+  Editor/Script/CommandChangeOpenedScript.h
+  Editor/Script/CommandScriptContentChange.cpp
+  Editor/Script/CommandScriptContentChange.h
   Editor/Script/IconSnippetOverlay.cpp 
   Editor/Script/IconSnippetOverlay.h 
   Editor/Script/IconSnippetOverlay.ui 
