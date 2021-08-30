@@ -160,9 +160,8 @@ void CEditorTutorialOverlay::SetHighlightedWidgets(const QStringList& vsWidgetNa
   for (QWidget* pWidget : qAsConst(vpList))
   {
     QRect widgetGeometry = pWidget->geometry();
-    QPoint tl = parentWidget()->mapFromGlobal(
-          MapPosToGlobal(pWidget, widgetGeometry.topLeft()));
-    widgetGeometry.moveTopLeft(mapFromGlobal(tl));
+    QPoint tlGlobal =  MapPosToGlobal(pWidget, widgetGeometry.topLeft());
+    widgetGeometry.moveTopLeft(mapFromGlobal(tlGlobal));
 
     QImage bitmap(pWidget->size(), QImage::Format_ARGB32);
     bitmap.fill(Qt::transparent);
@@ -400,9 +399,8 @@ void CEditorTutorialOverlay::SlotUpdate()
     if (nullptr != it->first)
     {
       QRect widgetGeometry = it->first->geometry();
-      QPoint tl = parentWidget()->mapFromGlobal(
-            it->first->parentWidget()->mapToGlobal(widgetGeometry.topLeft()));
-      widgetGeometry.moveTopLeft(mapFromGlobal(tl));
+      QPoint tlGlobal =  MapPosToGlobal(it->first, widgetGeometry.topLeft());
+      widgetGeometry.moveTopLeft(mapFromGlobal(tlGlobal));
 
       QImage bitmap(it->first->size(), QImage::Format_ARGB32);
       bitmap.fill(Qt::transparent);
@@ -419,21 +417,15 @@ void CEditorTutorialOverlay::SlotUpdate()
 
 //----------------------------------------------------------------------------------------
 //
-QPointer<QWidget> CEditorTutorialOverlay::ClickedFilterChild(const QPoint& locClicked)
+QPointer<QWidget> CEditorTutorialOverlay::ClickedFilterChild(const QPoint& locClickedGlobal)
 {
   for (const QPointer<QWidget>& pWidget : qAsConst(m_vpClickFilterWidgets))
   {
-    QWidget* pParent = pWidget->parentWidget();
-    if (nullptr != pParent)
+    QPoint tl = MapPosToGlobal(pWidget, pWidget->geometry().topLeft());
+    QPoint br = MapPosToGlobal(pWidget, pWidget->geometry().bottomRight());
+    if (QRect(tl, br).contains(locClickedGlobal))
     {
-      QPoint tl = parentWidget()->mapFromGlobal(
-            pParent->mapToGlobal(pWidget->geometry().topLeft()));
-      QPoint br = parentWidget()->mapFromGlobal(
-            pParent->mapToGlobal(pWidget->geometry().bottomRight()));
-      if (QRect(tl, br).contains(locClicked))
-      {
-        return pWidget;
-      }
+      return pWidget;
     }
   }
   return nullptr;
@@ -502,7 +494,7 @@ QList<QPointer<QWidget>> CEditorTutorialOverlay::FindWidgetsByName(const QString
 //
 // see <https://bugreports.qt.io/browse/QTBUG-41135> for why this is needed
 QPoint CEditorTutorialOverlay::MapPosToGlobal(const QPointer<QWidget> pWidget,
-                                              const QPoint& pos)
+                                              const QPoint& widgetPos)
 {
   QWidget* pWindow = pWidget->window();
   QGraphicsProxyWidget* pGpw = pWindow->graphicsProxyWidget ();
@@ -513,7 +505,7 @@ QPoint CEditorTutorialOverlay::MapPosToGlobal(const QPointer<QWidget> pWidget,
     QList<QGraphicsView *> vpViews = pScene->views();
     if (vpViews.count() != 1)
     {
-      return pWidget->mapToGlobal(pos);
+      return pWidget->mapToGlobal(widgetPos);
     }
 
     QGraphicsView* pView = vpViews[0];
@@ -521,11 +513,11 @@ QPoint CEditorTutorialOverlay::MapPosToGlobal(const QPointer<QWidget> pWidget,
     QPoint windowPos;
     if (nullptr != pWidget->parentWidget())
     {
-      windowPos = pWidget->parentWidget()->mapTo(pWindow, pos);
+      windowPos = pWidget->parentWidget()->mapTo(pWindow, widgetPos);
     }
     else
     {
-      windowPos = pWidget->mapTo(pWindow, pos);
+      windowPos = pWidget->mapTo(pWindow, widgetPos);
     }
     QPointF proxyPosF = QPointF(windowPos.x(), windowPos.y());
     QPointF scenePosF = pGpw->mapToScene(proxyPosF);
@@ -535,7 +527,14 @@ QPoint CEditorTutorialOverlay::MapPosToGlobal(const QPointer<QWidget> pWidget,
   }
   else
   {
-    return pWidget->parentWidget()->mapToGlobal(pos);
+    if (nullptr == pWidget->parentWidget())
+    {
+      return pWidget->mapToGlobal(widgetPos - pWidget->geometry().topLeft());
+    }
+    else
+    {
+      return pWidget->parentWidget()->mapToGlobal(widgetPos);
+    }
   }
 }
 
