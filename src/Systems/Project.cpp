@@ -587,7 +587,8 @@ bool ProjectNameCheck(const QString& sProjectName, QString* sErrorText)
     if (nullptr != sErrorText)
     {
       *sErrorText = QString(QApplication::translate("ProjectNameCheck",
-                                                    QT_TR_NOOP("Project with the name '%1' allready exists.")));
+                                                    QT_TR_NOOP("Project with the name '%1' allready exists.")))
+                      .arg(sProjectName);
     }
     return false;
   }
