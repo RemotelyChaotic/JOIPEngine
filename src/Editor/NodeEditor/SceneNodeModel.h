@@ -1,10 +1,9 @@
 #ifndef SCENENODEMODEL_H
 #define SCENENODEMODEL_H
 
+#include "EditorNodeModelBase.h"
 #include "Systems/Project.h"
 #include "Systems/Scene.h"
-
-#include <nodes/NodeDataModel>
 #include <memory>
 
 class CDatabaseManager;
@@ -15,10 +14,9 @@ using QtNodes::PortType;
 using QtNodes::PortIndex;
 using QtNodes::NodeData;
 using QtNodes::NodeDataType;
-using QtNodes::NodeDataModel;
 using QtNodes::NodeValidationState;
 
-class CSceneNodeModel : public NodeDataModel
+class CSceneNodeModel : public CEditorNodeModelBase
 {
   Q_OBJECT
 
@@ -59,12 +57,14 @@ signals:
   void SignalAddScriptFileRequested();
 
 protected:
+  void OnUndoStackSet() override;
+
   std::weak_ptr<CDatabaseManager>                     m_wpDbManager;
   std::weak_ptr<CSceneTranstitionData>                m_wpInData;
   std::shared_ptr<CSceneTranstitionData>              m_spOutData;
   tspProject                                          m_spProject;
   tspScene                                            m_spScene;
-  CSceneNodeModelWidget*                              m_pWidget;
+  QPointer<CSceneNodeModelWidget>                     m_pWidget;
   bool                                                m_bOutConnected;
 
   NodeValidationState m_modelValidationState;

@@ -1,8 +1,9 @@
 #ifndef PATHSPLITTERMODEL_H
 #define PATHSPLITTERMODEL_H
 
+#include "EditorNodeModelBase.h"
 #include "Systems/Scene.h"
-#include <nodes/NodeDataModel>
+#include <QPointer>
 
 class CPathSplitterModelWidget;
 class CSceneTranstitionData;
@@ -11,12 +12,12 @@ using QtNodes::PortType;
 using QtNodes::PortIndex;
 using QtNodes::NodeData;
 using QtNodes::NodeDataType;
-using QtNodes::NodeDataModel;
 using QtNodes::NodeValidationState;
 
-class CPathSplitterModel : public NodeDataModel
+class CPathSplitterModel : public CEditorNodeModelBase
 {
   Q_OBJECT
+
 public:
   CPathSplitterModel();
    ~CPathSplitterModel() override {}
@@ -44,9 +45,11 @@ public:
   ConnectionPolicy portOutConnectionPolicy(PortIndex) const override { return ConnectionPolicy::One; }
 
 protected:
+  void OnUndoStackSet() override;
+
   std::weak_ptr<CSceneTranstitionData>                m_wpInData;
   std::shared_ptr<CSceneTranstitionData>              m_spOutData;
-  CPathSplitterModelWidget*                           m_pWidget;
+  QPointer<CPathSplitterModelWidget>                  m_pWidget;
 
   NodeValidationState m_modelValidationState;
   QString m_modelValidationError;

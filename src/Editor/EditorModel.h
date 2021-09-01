@@ -7,13 +7,13 @@
 #include <memory>
 
 class CDatabaseManager;
+class CFlowScene;
 class CKinkTreeModel;
 class CResourceTreeItemModel;
 class CScriptEditorModel;
 class CSettings;
 class ITutorialStateSwitchHandler;
 namespace QtNodes {
-  class FlowScene;
   class Node;
 }
 class QUndoStack;
@@ -37,7 +37,7 @@ public:
   Q_ENUM(EExportError)
 
   const tspProject& CurrentProject() const;
-  QtNodes::FlowScene* FlowSceneModel() const;
+  CFlowScene* FlowSceneModel() const;
   bool IsReadOnly() const;
   CKinkTreeModel* KinkTreeModel() const;
   CResourceTreeItemModel* ResourceTreeModel() const;
@@ -81,7 +81,7 @@ private:
   std::unique_ptr<CKinkTreeModel>                             m_spKinkTreeModel;
   std::unique_ptr<CResourceTreeItemModel>                     m_spResourceTreeModel;
   std::unique_ptr<CScriptEditorModel>                         m_spScriptEditorModel;
-  std::unique_ptr<QtNodes::FlowScene>                         m_spFlowSceneModel;
+  std::unique_ptr<CFlowScene>                                 m_spFlowSceneModel;
   std::unique_ptr<QUndoStack>                                 m_spUndoStack;
   std::unique_ptr<QProcess>                                   m_spExportProcess;
   std::shared_ptr<CSettings>                                  m_spSettings;

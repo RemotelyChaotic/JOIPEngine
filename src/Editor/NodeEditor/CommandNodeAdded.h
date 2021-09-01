@@ -7,10 +7,8 @@
 #include <QUndoCommand>
 #include <QUuid>
 
+class CFlowScene;
 class CFlowView;
-namespace QtNodes {
-  class FlowScene;
-}
 
 class CCommandNodeAdded : public QUndoCommand
 {
@@ -18,6 +16,7 @@ public:
   CCommandNodeAdded(QPointer<CFlowView> pFlowView,
                     const QString& sModelName,
                     const QPoint& addPoint,
+                    QPointer<QUndoStack> pUndoStack,
                     QUndoCommand* pParent = nullptr);
   ~CCommandNodeAdded();
 
@@ -29,7 +28,8 @@ public:
 
 protected:
   QPointer<CFlowView>          m_pFlowView;
-  QPointer<QtNodes::FlowScene> m_pScene;
+  QPointer<CFlowScene>         m_pScene;
+  QPointer<QUndoStack>         m_pUndoStack;
   QString                      m_sModelName;
   QPoint                       m_addPoint;
   QUuid                        m_nodeId;

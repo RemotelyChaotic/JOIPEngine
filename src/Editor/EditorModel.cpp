@@ -1,6 +1,7 @@
 #include "EditorModel.h"
 #include "Application.h"
 #include "NodeEditor/EndNodeModel.h"
+#include "NodeEditor/FlowScene.h"
 #include "NodeEditor/PathMergerModel.h"
 #include "NodeEditor/PathSplitterModel.h"
 #include "NodeEditor/SceneNodeModel.h"
@@ -29,7 +30,6 @@
 #include <QWidget>
 
 using QtNodes::DataModelRegistry;
-using QtNodes::FlowScene;
 using QtNodes::Node;
 
 namespace
@@ -55,7 +55,7 @@ CEditorModel::CEditorModel(QWidget* pParent) :
   m_spKinkTreeModel(std::make_unique<CKinkTreeModel>()),
   m_spResourceTreeModel(std::make_unique<CResourceTreeItemModel>()),
   m_spScriptEditorModel(std::make_unique<CScriptEditorModel>(pParent)),
-  m_spFlowSceneModel(std::make_unique<FlowScene>(RegisterDataModels(), nullptr)),
+  m_spFlowSceneModel(std::make_unique<CFlowScene>(RegisterDataModels(), nullptr)),
   m_spUndoStack(std::make_unique<QUndoStack>()),
   m_spExportProcess(std::make_unique<QProcess>()),
   m_spSettings(CApplication::Instance()->Settings()),
@@ -70,9 +70,9 @@ CEditorModel::CEditorModel(QWidget* pParent) :
           this, &CEditorModel::SignalProjectEdited, Qt::DirectConnection);
   connect(m_spScriptEditorModel.get(), &CScriptEditorModel::SignalProjectEdited,
           this, &CEditorModel::SignalProjectEdited, Qt::DirectConnection);
-  connect(m_spFlowSceneModel.get(), &FlowScene::nodeCreated,
+  connect(m_spFlowSceneModel.get(), &CFlowScene::nodeCreated,
           this, &CEditorModel::SlotNodeCreated);
-  connect(m_spFlowSceneModel.get(), &FlowScene::nodeDeleted,
+  connect(m_spFlowSceneModel.get(), &CFlowScene::nodeDeleted,
           this, &CEditorModel::SlotNodeDeleted);
   connect(m_spExportProcess.get(), &QProcess::errorOccurred,
           this, &CEditorModel::SlotExportErrorOccurred);
@@ -105,7 +105,7 @@ const tspProject& CEditorModel::CurrentProject() const
 
 //----------------------------------------------------------------------------------------
 //
-QtNodes::FlowScene* CEditorModel::FlowSceneModel() const
+CFlowScene* CEditorModel::FlowSceneModel() const
 {
   return m_spFlowSceneModel.get();
 }

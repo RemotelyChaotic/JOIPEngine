@@ -6,20 +6,23 @@
 #include <QUndoStack>
 #include <map>
 
+class CFlowScene;
+
 class CFlowView : public QtNodes::FlowView
 {
   Q_OBJECT
 
 public:
   CFlowView(QWidget* pParent = nullptr);
-  CFlowView(QtNodes::FlowScene* pScene, QWidget* pParent = nullptr);
+  CFlowView(CFlowScene* pScene, QWidget* pParent = nullptr);
 
   CFlowView(const CFlowView&) = delete;
   CFlowView operator=(const CFlowView&) = delete;
 
   ~CFlowView() override;
 
-  void setScene(QtNodes::FlowScene* pScene);
+  void SetScene(CFlowScene* pScene);
+  CFlowScene* Scene();
 
   void SetUndoStack(QPointer<QUndoStack> pUndoStack);
   QPointer<QUndoStack> UndoStack();
@@ -32,8 +35,6 @@ public:
 
   void SetModelHiddenInContextMenu(const QString& sId, bool bHidden);
   bool IsModelHiddenInContextMenu(const QString& sId);
-
-  using QtNodes::FlowView::scene;
 
 protected:
   void SlotClearSelectionTriggered();

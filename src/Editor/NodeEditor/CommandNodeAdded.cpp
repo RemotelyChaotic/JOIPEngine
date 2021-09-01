@@ -1,4 +1,5 @@
 #include "CommandNodeAdded.h"
+#include "FlowScene.h"
 #include "FlowView.h"
 #include "Editor/EditorCommandIds.h"
 #include <nodes/FlowScene>
@@ -8,10 +9,12 @@
 CCommandNodeAdded::CCommandNodeAdded(QPointer<CFlowView> pFlowView,
                                      const QString& sModelName,
                                      const QPoint& addPoint,
+                                     QPointer<QUndoStack> pUndoStack,
                                      QUndoCommand* pParent) :
   QUndoCommand("Added node: " + sModelName, pParent),
   m_pFlowView(pFlowView),
-  m_pScene(nullptr != pFlowView ? pFlowView->scene() : nullptr),
+  m_pScene(nullptr != pFlowView ? pFlowView->Scene() : nullptr),
+  m_pUndoStack(pUndoStack),
   m_sModelName(sModelName),
   m_addPoint(addPoint)
 {
@@ -48,11 +51,11 @@ void CCommandNodeAdded::redo()
       return;
     }
 
-    auto type = m_pScene->registry().create(m_sModelName);
-
-    if (type)
+    if (m_nodeId.isNull())
     {
-      if (m_nodeId.isNull())
+      auto type = m_pScene->registry().create(m_sModelName);
+
+      if (type)
       {
         auto& node = m_pScene->createNode(std::move(type));
 
@@ -67,12 +70,12 @@ void CCommandNodeAdded::redo()
       }
       else
       {
-        m_pScene->restoreNode(m_node);
+        qWarning() << "Model not found.";
       }
     }
     else
     {
-      qDebug() << "Model not found";
+      m_pScene->restoreNode(m_node);
     }
   }
 }

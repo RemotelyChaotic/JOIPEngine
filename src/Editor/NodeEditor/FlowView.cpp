@@ -1,11 +1,11 @@
 #include "FlowView.h"
 #include "CommandConnectionAdded.h"
-#include "CommandConnectionEdited.h"
 #include "CommandConnectionRemoved.h"
 #include "CommandNodeAdded.h"
 #include "CommandNodeEdited.h"
 #include "CommandNodeMoved.h"
 #include "CommandNodeRemoved.h"
+#include "FlowScene.h"
 
 #include <nodes/Connection>
 #include <nodes/FlowScene>
@@ -23,7 +23,6 @@
 #include <QWidgetAction>
 
 using QtNodes::FlowView;
-using QtNodes::FlowScene;
 using QtNodes::Node;
 
 CFlowView::CFlowView(QWidget* pParent) :
@@ -32,10 +31,9 @@ CFlowView::CFlowView(QWidget* pParent) :
   m_contextMenuItemVisibility(),
   m_pUndoStack(new QUndoStack(this))
 {
-
 }
 
-CFlowView::CFlowView(FlowScene* pScene, QWidget* pParent) :
+CFlowView::CFlowView(CFlowScene* pScene, QWidget* pParent) :
   FlowView(pScene, pParent),
   m_bReadOnly(false),
   m_contextMenuItemVisibility(),
@@ -47,8 +45,12 @@ CFlowView::~CFlowView() {}
 
 //----------------------------------------------------------------------------------------
 //
-void CFlowView::setScene(QtNodes::FlowScene* pScene)
+void CFlowView::SetScene(CFlowScene* pScene)
 {
+  if (nullptr != pScene)
+  {
+    pScene->SetUndoStack(m_pUndoStack);
+  }
   FlowView::setScene(pScene);
   clearSelectionAction()->disconnect();
   deleteSelectionAction()->disconnect();
@@ -58,10 +60,21 @@ void CFlowView::setScene(QtNodes::FlowScene* pScene)
 
 //----------------------------------------------------------------------------------------
 //
+CFlowScene* CFlowView::Scene()
+{
+  return dynamic_cast<CFlowScene*>(scene());
+}
+
+//----------------------------------------------------------------------------------------
+//
 void CFlowView::SetUndoStack(QPointer<QUndoStack> pUndoStack)
 {
   if (nullptr != m_pUndoStack) { delete m_pUndoStack; }
   m_pUndoStack = pUndoStack;
+  if (CFlowScene* pScene = dynamic_cast<CFlowScene*>(scene()))
+  {
+    pScene->SetUndoStack(m_pUndoStack);
+  }
 }
 
 //----------------------------------------------------------------------------------------
@@ -79,7 +92,7 @@ void CFlowView::FitAllNodesInView()
   scale(0.8, 0.8);
   centerOn(0,0);
 
-  QtNodes::FlowScene* pScene = scene();
+  CFlowScene* pScene = Scene();
   if (nullptr != pScene)
   {
     QRectF nodeRects;
@@ -160,7 +173,7 @@ void CFlowView::OpenContextMenuAt(const QPoint& localPoint, const QPoint& create
 
     if (nullptr != m_pUndoStack)
     {
-      UndoStack()->push(new CCommandNodeAdded(this, modelName, localPoint));
+      UndoStack()->push(new CCommandNodeAdded(this, modelName, localPoint, UndoStack()));
     }
     else
     {
@@ -202,7 +215,7 @@ void CFlowView::SetReadOnly(bool bReadOnly)
   if (m_bReadOnly != bReadOnly)
   {
     m_bReadOnly = bReadOnly;
-    QtNodes::FlowScene* pScene = scene();
+    CFlowScene* pScene = Scene();
     if (nullptr != pScene)
     {
       pScene->iterateOverNodes([&bReadOnly](QtNodes::Node* pNode) {
@@ -274,9 +287,19 @@ void CFlowView::SlotDeleteTriggered()
       }
     }
 
+    std::vector<QUuid> vIds;
     for (Node* pNode : scene()->selectedNodes())
     {
-      scene()->removeNode(*pNode);
+      vIds.push_back(pNode->id());
+    }
+
+    if (nullptr != m_pUndoStack)
+    {
+      UndoStack()->push(new CCommandNodesRemoved(this, vIds, UndoStack()));
+    }
+    else
+    {
+      assert(false && "QUndoStack must never be null.");
     }
   }
 }

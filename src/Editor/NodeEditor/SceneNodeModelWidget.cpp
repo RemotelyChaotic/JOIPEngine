@@ -1,5 +1,6 @@
 #include "SceneNodeModelWidget.h"
 #include "ui_SceneNodeModelWidget.h"
+#include "Utils/UndoRedoFilter.h"
 
 CSceneNodeModelWidget::CSceneNodeModelWidget(QWidget* pParent) :
   QWidget(pParent),
@@ -12,6 +13,8 @@ CSceneNodeModelWidget::CSceneNodeModelWidget(QWidget* pParent) :
   setAttribute(Qt::WA_OpaquePaintEvent);
   setAttribute(Qt::WA_NoSystemBackground);
   setAutoFillBackground(false);
+
+  new CUndoRedoFilter(m_spUi->pSceneNameLineEdit, nullptr);
 }
 
 CSceneNodeModelWidget::~CSceneNodeModelWidget()

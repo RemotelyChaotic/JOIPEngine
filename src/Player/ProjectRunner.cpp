@@ -1,6 +1,7 @@
 #include "ProjectRunner.h"
 #include "Application.h"
 #include "Editor/NodeEditor/EndNodeModel.h"
+#include "Editor/NodeEditor/FlowScene.h"
 #include "Editor/NodeEditor/FlowView.h"
 #include "Editor/NodeEditor/PathMergerModel.h"
 #include "Editor/NodeEditor/PathSplitterModel.h"
@@ -13,7 +14,6 @@
 #include "Systems/Scene.h"
 
 #include <nodes/DataModelRegistry>
-#include <nodes/FlowScene>
 #include <nodes/Node>
 #include <nodes/NodeData>
 
@@ -24,7 +24,6 @@
 #include <chrono>
 
 using QtNodes::DataModelRegistry;
-using QtNodes::FlowScene;
 using QtNodes::Node;
 
 namespace
@@ -81,8 +80,8 @@ void CProjectRunner::LoadProject(tspProject spProject, const QString sStartScene
     m_pFlowScene->clearScene();
     delete m_pFlowScene;
   }
-  m_pFlowScene = new FlowScene(RegisterDataModels());
-  connect(m_pFlowScene, &FlowScene::nodeCreated, this, &CProjectRunner::SlotNodeCreated);
+  m_pFlowScene = new CFlowScene(RegisterDataModels());
+  connect(m_pFlowScene, &CFlowScene::nodeCreated, this, &CProjectRunner::SlotNodeCreated);
 
   bool bOk = LoadFlowScene();
   if (!bOk) { return; }

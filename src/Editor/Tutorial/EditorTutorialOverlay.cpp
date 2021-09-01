@@ -2,10 +2,10 @@
 #include "Application.h"
 #include "Settings.h"
 #include "Editor/EditorModel.h"
+#include "Editor/NodeEditor/FlowScene.h"
 #include "Editor/NodeEditor/FlowView.h"
 #include "Widgets/ShortcutButton.h"
 
-#include <nodes/FlowScene>
 #include <nodes/Node>
 
 #include <QDialogButtonBox>
@@ -454,9 +454,9 @@ QList<QPointer<QWidget>> CEditorTutorialOverlay::FindWidgetsByName(const QString
       CFlowView* pFlowWidget = parentWidget()->findChild<CFlowView*>();
       if (nullptr != pFlowWidget)
       {
-        if (nullptr != pFlowWidget->scene())
+        if (nullptr != pFlowWidget->Scene())
         {
-          const auto& nodeMap = pFlowWidget->scene()->nodes();
+          const auto& nodeMap = pFlowWidget->Scene()->nodes();
           for (auto it = nodeMap.begin(); nodeMap.end() != it; ++it)
           {
             if (it->second->nodeDataModel())

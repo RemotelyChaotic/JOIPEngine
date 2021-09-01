@@ -1,5 +1,6 @@
 #include "SceneNodeModel.h"
 #include "Application.h"
+#include "CommandNodeEdited.h"
 #include "SceneNodeModelWidget.h"
 #include "SceneTranstitionData.h"
 #include "Systems/DatabaseManager.h"
@@ -11,7 +12,7 @@ namespace {
 }
 
 CSceneNodeModel::CSceneNodeModel() :
-  NodeDataModel(),
+  CEditorNodeModelBase(),
   m_wpDbManager(CApplication::Instance()->System<CDatabaseManager>()),
   m_spOutData(std::make_shared<CSceneTranstitionData>()),
   m_spProject(nullptr),
@@ -261,8 +262,19 @@ void CSceneNodeModel::outputConnectionDeleted(QtNodes::Connection const& c)
 
 //----------------------------------------------------------------------------------------
 //
+void CSceneNodeModel::OnUndoStackSet()
+{
+  if (nullptr != m_pWidget)
+  {
+    m_pWidget->SetUndoStack(m_pUndoStack);
+  }
+}
+
+//----------------------------------------------------------------------------------------
+//
 void CSceneNodeModel::SlotNameChanged(const QString& sName)
 {
+  QJsonObject oldState = save();
   auto spDbManager = m_wpDbManager.lock();
   if (nullptr != spDbManager)
   {
@@ -280,6 +292,12 @@ void CSceneNodeModel::SlotNameChanged(const QString& sName)
 
       m_pWidget->SetName(sSceneNameAfterChange);
       m_sSceneName = sSceneNameAfterChange;
+
+      QJsonObject newState = save();
+      if (nullptr != UndoStack())
+      {
+        UndoStack()->push(new CCommandNodeEdited(m_pScene, m_id, oldState, newState));
+      }
     }
   }
 }

@@ -7,7 +7,7 @@ namespace {
 }
 
 CStartNodeModel::CStartNodeModel() :
-  NodeDataModel(),
+  CEditorNodeModelBase(),
   m_spTransition(std::make_shared<CSceneTranstitionData>()),
   m_modelValidationState(NodeValidationState::Warning),
   m_modelValidationError(QString(tr("Missing output")))

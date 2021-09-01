@@ -8,7 +8,7 @@ namespace {
 
 
 CPathMergerModel::CPathMergerModel() :
-  NodeDataModel(),
+  CEditorNodeModelBase(),
   m_spOutData(std::make_shared<CSceneTranstitionData>()),
   m_modelValidationState(NodeValidationState::Warning),
   m_modelValidationError(QString(tr("Missing or incorrect input")))

@@ -1,8 +1,9 @@
 #include "PathSplitterModel.h"
 #include "PathSplitterModelWidget.h"
+#include "CommandNodeEdited.h"
 #include "SceneTranstitionData.h"
 
-#include "QJsonArray"
+#include <QJsonArray>
 
 namespace {
   const qint32 c_iInPorts = 1;
@@ -11,7 +12,7 @@ namespace {
 
 
 CPathSplitterModel::CPathSplitterModel() :
-  NodeDataModel(),
+  CEditorNodeModelBase(),
   m_spOutData(std::make_shared<CSceneTranstitionData>()),
   m_pWidget(new CPathSplitterModelWidget()),
   m_modelValidationState(NodeValidationState::Warning),
@@ -165,17 +166,41 @@ QString CPathSplitterModel::validationMessage() const
 
 //----------------------------------------------------------------------------------------
 //
+void CPathSplitterModel::OnUndoStackSet()
+{
+  if (nullptr != m_pWidget)
+  {
+    m_pWidget->SetUndoStack(m_pUndoStack);
+  }
+}
+
+//----------------------------------------------------------------------------------------
+//
 void CPathSplitterModel::SlotTransitionTypeChanged(qint32 iType)
 {
+  QJsonObject oldState = save();
   m_transitonType = ESceneTransitionType::_from_integral(iType);
+  QJsonObject newState = save();
+
+  if (nullptr != UndoStack())
+  {
+    UndoStack()->push(new CCommandNodeEdited(m_pScene, m_id, oldState, newState));
+  }
 }
 
 //----------------------------------------------------------------------------------------
 //
 void CPathSplitterModel::SlotTransitionLabelChanged(PortIndex index, const QString& sLabelValue)
 {
+  QJsonObject oldState = save();
   if (-1 < index && m_vsLabelNames.size() > static_cast<size_t>(index))
   {
     m_vsLabelNames[static_cast<size_t>(index)] = sLabelValue;
+  }
+  QJsonObject newState = save();
+
+  if (nullptr != UndoStack())
+  {
+    UndoStack()->push(new CCommandNodeEdited(m_pScene, m_id, oldState, newState));
   }
 }

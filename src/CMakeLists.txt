@@ -64,8 +64,6 @@ set(Sources
   Editor/NodeEditor/CommandChangeSelection.h
   Editor/NodeEditor/CommandConnectionAdded.cpp
   Editor/NodeEditor/CommandConnectionAdded.h
-  Editor/NodeEditor/CommandConnectionEdited.cpp
-  Editor/NodeEditor/CommandConnectionEdited.h
   Editor/NodeEditor/CommandConnectionRemoved.cpp
   Editor/NodeEditor/CommandConnectionRemoved.h
   Editor/NodeEditor/CommandNodeAdded.cpp
@@ -76,10 +74,15 @@ set(Sources
   Editor/NodeEditor/CommandNodeMoved.h
   Editor/NodeEditor/CommandNodeRemoved.cpp
   Editor/NodeEditor/CommandNodeRemoved.h
+  Editor/NodeEditor/EditorNodeModelBase.cpp
+  Editor/NodeEditor/EditorNodeModelBase.h
   Editor/NodeEditor/EndNodeModel.cpp 
   Editor/NodeEditor/EndNodeModel.h 
+  Editor/NodeEditor/FlowScene.cpp
+  Editor/NodeEditor/FlowScene.h
   Editor/NodeEditor/FlowView.cpp 
   Editor/NodeEditor/FlowView.h 
+  Editor/NodeEditor/IUndoStackAwareModel.h
   Editor/NodeEditor/PathMergerModel.cpp 
   Editor/NodeEditor/PathMergerModel.h 
   Editor/NodeEditor/PathSplitterModel.cpp 

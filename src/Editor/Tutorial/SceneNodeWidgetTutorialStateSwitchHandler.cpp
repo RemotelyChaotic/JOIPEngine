@@ -3,12 +3,12 @@
 #include "EditorTutorialOverlay.h"
 #include "Editor/EditorSceneNodeWidget.h"
 #include "Editor/NodeEditor/EndNodeModel.h"
+#include "Editor/NodeEditor/FlowScene.h"
 #include "Editor/NodeEditor/FlowView.h"
 #include "Editor/NodeEditor/SceneNodeModel.h"
 #include "Editor/NodeEditor/StartNodeModel.h"
 #include "Systems/DatabaseManager.h"
 
-#include <nodes/FlowScene>
 #include <nodes/Node>
 #include <QMouseEvent>
 
@@ -99,7 +99,7 @@ void CSceneNodeWidgetTutorialStateSwitchHandler::OnStateSwitch(ETutorialState ne
       }
       m_pParentWidget->FlowView()->SetModelHiddenInContextMenu(CStartNodeModel::staticCaption(), false);
 
-      QtNodes::FlowScene* pScene = m_pParentWidget->FlowSceneModel();
+      CFlowScene* pScene = m_pParentWidget->FlowSceneModel();
       m_connectionAddedConnection =
           connect(pScene, &QtNodes::FlowScene::connectionCreated,
                   this, &CSceneNodeWidgetTutorialStateSwitchHandler::SlotConnectionCreated);
@@ -119,7 +119,7 @@ void CSceneNodeWidgetTutorialStateSwitchHandler::OnStateSwitch(ETutorialState ne
 
     case ETutorialState::eNodePanelAdvanced:
     {
-      QtNodes::FlowScene* pScene = m_pParentWidget->FlowSceneModel();
+      CFlowScene* pScene = m_pParentWidget->FlowSceneModel();
       m_savedFlow = pScene->saveToMemory();
       pScene->clearScene();
       QFile demoFlow(":/resources/help/tutorial/DemoSceneModel.flow");
@@ -138,7 +138,7 @@ void CSceneNodeWidgetTutorialStateSwitchHandler::OnStateSwitch(ETutorialState ne
 
     case ETutorialState::eNodePanelDone:
     {
-      QtNodes::FlowScene* pScene = m_pParentWidget->FlowSceneModel();
+      CFlowScene* pScene = m_pParentWidget->FlowSceneModel();
       pScene->clearScene();
       if (!m_savedFlow.isEmpty())
       {
@@ -167,7 +167,7 @@ void CSceneNodeWidgetTutorialStateSwitchHandler::SlotConnectionCreated(
 //
 void CSceneNodeWidgetTutorialStateSwitchHandler::SlotConnectionCheck()
 {
-  QtNodes::FlowScene* pScene = m_pParentWidget->FlowSceneModel();
+  CFlowScene* pScene = m_pParentWidget->FlowSceneModel();
   if (nullptr != pScene && !m_bCompleteConnectionCreated)
   {
     bool bAllOk = true;

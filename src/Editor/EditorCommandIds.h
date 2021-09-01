@@ -23,7 +23,8 @@ BETTER_ENUM(EEditorCommandId, qint32,
 
             eChangeOpenedScript,
 
-            eMoveNodeItem
+            eMoveNodeItem,
+            eChangeNodeItem
             );
 
 #endif // EDITORCOMMANDIDS_H

@@ -2,6 +2,7 @@
 #include "Application.h"
 #include "EditorActionBar.h"
 #include "EditorModel.h"
+#include "NodeEditor/FlowScene.h"
 #include "NodeEditor/FlowView.h"
 #include "Systems/HelpFactory.h"
 #include "Systems/Project.h"
@@ -11,7 +12,6 @@
 #include "Widgets/HelpOverlay.h"
 
 #include <nodes/ConnectionStyle>
-#include <nodes/FlowScene>
 #include <nodes/FlowView>
 #include <nodes/FlowViewStyle>
 #include <nodes/Node>
@@ -25,7 +25,6 @@
 #include <memory>
 
 using QtNodes::ConnectionStyle;
-using QtNodes::FlowScene;
 using QtNodes::FlowView;
 using QtNodes::FlowViewStyle;
 using QtNodes::Node;
@@ -167,7 +166,7 @@ void CEditorSceneNodeWidget::Initialize()
   m_wpDbManager = CApplication::Instance()->System<CDatabaseManager>();
 
   m_pFlowView->SetUndoStack(UndoStack());
-  m_pFlowView->setScene(FlowSceneModel());
+  m_pFlowView->SetScene(FlowSceneModel());
   m_pFlowView->resetTransform();
   m_pFlowView->scale(0.8, 0.8);
   m_pFlowView->centerOn(0,0);

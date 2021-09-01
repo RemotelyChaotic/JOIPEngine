@@ -1,6 +1,7 @@
 #ifndef PATHMERGERMODEL_H
 #define PATHMERGERMODEL_H
 
+#include "EditorNodeModelBase.h"
 #include <nodes/NodeDataModel>
 #include <map>
 
@@ -10,10 +11,9 @@ using QtNodes::PortType;
 using QtNodes::PortIndex;
 using QtNodes::NodeData;
 using QtNodes::NodeDataType;
-using QtNodes::NodeDataModel;
 using QtNodes::NodeValidationState;
 
-class CPathMergerModel : public NodeDataModel
+class CPathMergerModel : public CEditorNodeModelBase
 {
   Q_OBJECT
 public:

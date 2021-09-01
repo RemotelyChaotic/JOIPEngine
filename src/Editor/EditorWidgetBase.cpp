@@ -48,7 +48,7 @@ CEditorModel* CEditorWidgetBase::EditorModel() const
 
 //----------------------------------------------------------------------------------------
 //
-QtNodes::FlowScene* CEditorWidgetBase::FlowSceneModel() const
+CFlowScene* CEditorWidgetBase::FlowSceneModel() const
 {
   return m_pEditorModel->FlowSceneModel();
 }

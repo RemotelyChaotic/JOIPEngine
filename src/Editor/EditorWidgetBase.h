@@ -6,13 +6,11 @@
 #include <memory>
 
 class CEditorActionBar;
+class CFlowScene;
 class CEditorModel;
 class CKinkTreeModel;
 class CResourceTreeItemModel;
 class CScriptEditorModel;
-namespace QtNodes {
-  class FlowScene;
-}
 class QUndoStack;
 struct SProject;
 typedef std::shared_ptr<SProject> tspProject;
@@ -46,7 +44,7 @@ protected:
 
   CEditorActionBar* ActionBar() const;
   CEditorModel* EditorModel() const;
-  QtNodes::FlowScene* FlowSceneModel() const;
+  CFlowScene* FlowSceneModel() const;
   CKinkTreeModel* KinkModel() const;
   CResourceTreeItemModel* ResourceTreeModel() const;
   CScriptEditorModel* ScriptEditorModel() const;

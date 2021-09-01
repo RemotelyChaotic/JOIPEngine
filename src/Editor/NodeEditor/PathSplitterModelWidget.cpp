@@ -1,6 +1,7 @@
 #include "PathSplitterModelWidget.h"
-#include "Systems/Scene.h"
 #include "ui_PathSplitterModelWidget.h"
+#include "Systems/Scene.h"
+#include "Utils/UndoRedoFilter.h"
 
 CPathSplitterModelWidget::CPathSplitterModelWidget(QWidget* pParent) :
   QWidget(pParent),
@@ -14,6 +15,11 @@ CPathSplitterModelWidget::CPathSplitterModelWidget(QWidget* pParent) :
   setAttribute(Qt::WA_OpaquePaintEvent);
   setAttribute(Qt::WA_NoSystemBackground);
   setAutoFillBackground(false);
+
+  new CUndoRedoFilter(m_spUi->pLabel1, nullptr);
+  new CUndoRedoFilter(m_spUi->pLabel2, nullptr);
+  new CUndoRedoFilter(m_spUi->pLabel3, nullptr);
+  new CUndoRedoFilter(m_spUi->pLabel4, nullptr);
 }
 
 CPathSplitterModelWidget::~CPathSplitterModelWidget()

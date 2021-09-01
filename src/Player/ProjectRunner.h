@@ -6,8 +6,8 @@
 #include <random>
 
 class CDatabaseManager;
+class CFlowScene;
 namespace QtNodes {
-  class FlowScene;
   class Node;
 }
 struct SProject;
@@ -47,7 +47,7 @@ private:
   tspProject                        m_spCurrentProject;
   std::weak_ptr<CDatabaseManager>   m_wpDbManager;
   std::map<QString, QtNodes::Node*> m_nodeMap;
-  QtNodes::FlowScene*               m_pFlowScene;
+  CFlowScene*                       m_pFlowScene;
   QtNodes::Node*                    m_pCurrentNode;
   std::mt19937                      m_generator;
 };

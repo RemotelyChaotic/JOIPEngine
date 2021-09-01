@@ -5,17 +5,17 @@
 #include <QPointF>
 #include <QUndoCommand>
 #include <QUuid>
+#include <vector>
 
+class CFlowScene;
 class CFlowView;
-namespace QtNodes {
-  class FlowScene;
-}
 
 class CCommandNodesRemoved : public QUndoCommand
 {
 public:
   CCommandNodesRemoved(QPointer<CFlowView> pFlowView,
                        const std::vector<QUuid>& vIds,
+                       QPointer<QUndoStack> pUndoStack,
                        QUndoCommand* pParent = nullptr);
   ~CCommandNodesRemoved();
 
@@ -27,8 +27,10 @@ public:
 
 protected:
   QPointer<CFlowView>          m_pFlowView;
-  QPointer<QtNodes::FlowScene> m_pScene;
+  QPointer<CFlowScene>         m_pScene;
+  QPointer<QUndoStack>         m_pUndoStack;
   std::vector<QUuid>           m_vIds;
+  std::map<QUuid, QJsonObject> m_nodesSaved;
 };
 
 #endif // CCOMMANDNODEREMOVED_H
