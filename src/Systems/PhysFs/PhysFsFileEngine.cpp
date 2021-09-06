@@ -1,6 +1,5 @@
 #include "PhysFsFileEngine.h"
 #include <physfs.h>
-#include <QApplication>
 #include <QDir>
 #include <QDebug>
 #include <QIODevice>

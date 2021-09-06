@@ -291,6 +291,8 @@ set(Sources
   Systems/ThreadedSystem.h 
   UISoundEmitter.cpp 
   UISoundEmitter.h 
+  Utils/RaiiFunctionCaller.cpp
+  Utils/RaiiFunctionCaller.h
   Utils/UndoRedoFilter.cpp
   Utils/UndoRedoFilter.h
   Widgets/BackgroundWidget.cpp 
