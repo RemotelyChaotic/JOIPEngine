@@ -473,13 +473,10 @@ void CEditorModel::SaveProject()
     if (m_spCurrentProject->m_sSceneModel.isNull() ||
         m_spCurrentProject->m_sSceneModel.isEmpty())
     {
-      projectLocker.unlock();
       spDbManager->AddResource(m_spCurrentProject, ResourceUrlFromLocalFile(joip_resource::c_sSceneModelFile),
                                EResourceType::eOther, joip_resource::c_sSceneModelFile);
-      projectLocker.relock();
       m_spCurrentProject->m_sSceneModel = joip_resource::c_sSceneModelFile;
     }
-    projectLocker.unlock();
 
     auto spResource = spDbManager->FindResourceInProject(m_spCurrentProject, joip_resource::c_sSceneModelFile);
     if (nullptr != spResource)
@@ -495,9 +492,22 @@ void CEditorModel::SaveProject()
       }
       else
       {
-        qWarning() << tr("Could not open save scene model file.");
+        qWarning() << tr("Could not save scene model file.");
       }
     }
+
+    // check if flags for media or remote are needed
+    bool bHasRemoteResources = false;
+    bool bNeedsMedia = false;
+    for (const auto& it : m_spCurrentProject->m_spResourcesMap)
+    {
+      QReadLocker resourceLocker(&it.second->m_rwLock);
+      bHasRemoteResources |= !IsLocalFile(it.second->m_sPath);
+      bNeedsMedia |= (it.second->m_type._to_integral() == EResourceType::eMovie ||
+                      it.second->m_type._to_integral() == EResourceType::eSound);
+    }
+    m_spCurrentProject->m_bUsesWeb = bHasRemoteResources;
+    m_spCurrentProject->m_bNeedsCodecs = bNeedsMedia;
   }
 }
 

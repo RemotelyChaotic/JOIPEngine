@@ -643,7 +643,7 @@ QString CDatabaseManager::AddResource(tspProject& spProj, const QUrl& sPath,
   }
 
   QWriteLocker locker(&spProj->m_rwLock);
-  if (!sPath.isLocalFile())
+  if (!IsLocalFile(sPath))
   {
     spProj->m_bUsesWeb = true;
   }
