@@ -465,7 +465,7 @@ QUrl CSettings::styleFolder()
   }
   else
   {
-    return QUrl();
+    return QUrl(QString(joip_style::c_sDefaultStyleFolder));
   }
 }
 
@@ -485,7 +485,7 @@ QUrl CSettings::styleFolderQml()
   }
   else
   {
-    return QUrl();
+    return QUrl(QString("qrc") + joip_style::c_sDefaultStyleFolder + joip_style::c_sQmlStyleSubFolder);
   }
 }
 

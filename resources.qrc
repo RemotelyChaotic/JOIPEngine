@@ -7,48 +7,11 @@
         <file>resources/fonts/Equestria_Italic.otf</file>
         <file>resources/fonts/PONY-MLP2-Version2.ttf</file>
         <file>resources/fonts/PONY-MLP2-VersionDefinitiva6-Kustren.ttf</file>
-        <file>resources/img/TitleCardMissing.png</file>
-        <file>resources/img/ButtonMap.png</file>
-        <file>resources/img/ButtonMinus.png</file>
-        <file>resources/img/ButtonPlus.png</file>
-        <file>resources/img/ButtonTitleCard.png</file>
-        <file>resources/img/ButtonWeb.png</file>
         <file>resources/gif/spinner.gif</file>
-        <file>resources/img/ButtonSave.png</file>
-        <file>resources/img/ButtonExit.png</file>
-        <file>resources/img/ButtonSearch.png</file>
-        <file>resources/img/ButtonPlay.png</file>
-        <file>resources/img/ButtonStop.png</file>
-        <file>resources/img/ButtonPause.png</file>
-        <file>resources/img/ButtonEdit.png</file>
-        <file>resources/img/Background.png</file>
-        <file>resources/img/TimerBg.svg</file>
-        <file>resources/img/IconMask.svg</file>
-        <file>resources/img/IconBg.svg</file>
-        <file>resources/img/ButtonArrowDown.png</file>
-        <file>resources/img/ButtonArrowLeft.png</file>
-        <file>resources/img/ButtonArrowUp.png</file>
-        <file>resources/img/ButtonDotsHoriz.png</file>
-        <file>resources/img/ButtonDotsVert.png</file>
-        <file>resources/img/Icon.ico</file>
-        <file>resources/img/ButtonBackground.png</file>
-        <file>resources/img/ButtonClock.png</file>
-        <file>resources/img/ButtonIcon.png</file>
-        <file>resources/img/ButtonImage.png</file>
-        <file>resources/img/ButtonText.png</file>
-        <file>resources/img/ButtonCheckBox.png</file>
-        <file>resources/img/ButtonCheckBoxClick.png</file>
-        <file>resources/img/ButtonCheckBoxEmpty.png</file>
-        <file>resources/img/ButtonCheckBoxEmptyClick.png</file>
-        <file>resources/img/ButtonCheckBoxEmptyHover.png</file>
-        <file>resources/img/ButtonCheckBoxHover.png</file>
-        <file>resources/img/ButtonMinusDisabled.png</file>
-        <file>resources/img/ButtonPlusDisabled.png</file>
         <file>resources/sound/menu_click_sharp.wav</file>
         <file>resources/sound/menu_selection_soft.wav</file>
         <file>resources/sound/menu_click_soft_main.wav</file>
         <file>resources/sound/menu_whoosh.wav</file>
-        <file>resources/img/ButtonThread.png</file>
         <file>resources/help/play_button_help.html</file>
         <file>resources/help/template.html</file>
         <file>resources/help/credits_button_help.html</file>
@@ -119,7 +82,6 @@
         <file>resources/help/editor/projectsettings/describtion_textedit_help.html</file>
         <file>resources/help/editor/images/kink_overlay.png</file>
         <file>resources/help/player/filter_widget_help.html</file>
-        <file>resources/img/WarningIcon.png</file>
         <file>resources/help/editor/images/addshowbg_dialog.png</file>
         <file>resources/help/editor/images/addshowicon_dialog.png</file>
         <file>resources/help/editor/images/addshowimage_dialog.png</file>
@@ -151,6 +113,74 @@
         <file>resources/help/editor/source_button_help.html</file>
         <file>resources/help/editor/redo_button_help.html</file>
         <file>resources/help/editor/undo_button_help.html</file>
+        <file>resources/style/img/Background.png</file>
+        <file>resources/style/img/ButtonArrowDown.png</file>
+        <file>resources/style/img/ButtonArrowLeft.png</file>
+        <file>resources/style/img/ButtonArrowUp.png</file>
+        <file>resources/style/img/ButtonBackground.png</file>
+        <file>resources/style/img/ButtonCheckBox.png</file>
+        <file>resources/style/img/ButtonCheckBoxClick.png</file>
+        <file>resources/style/img/ButtonCheckBoxEmpty.png</file>
+        <file>resources/style/img/ButtonCheckBoxEmptyClick.png</file>
+        <file>resources/style/img/ButtonCheckBoxEmptyHover.png</file>
+        <file>resources/style/img/ButtonCheckBoxHover.png</file>
+        <file>resources/style/img/ButtonClock.png</file>
+        <file>resources/style/img/ButtonCode.png</file>
+        <file>resources/style/img/ButtonDotsHoriz.png</file>
+        <file>resources/style/img/ButtonDotsVert.png</file>
+        <file>resources/style/img/ButtonEdit.png</file>
+        <file>resources/style/img/ButtonExit.png</file>
+        <file>resources/style/img/ButtonExport.png</file>
+        <file>resources/style/img/ButtonHelp.png</file>
+        <file>resources/style/img/ButtonHome.png</file>
+        <file>resources/style/img/ButtonIcon.png</file>
+        <file>resources/style/img/ButtonImage.png</file>
+        <file>resources/style/img/ButtonMap.png</file>
+        <file>resources/style/img/ButtonMetronome.png</file>
+        <file>resources/style/img/ButtonMinus.png</file>
+        <file>resources/style/img/ButtonMinusDisabled.png</file>
+        <file>resources/style/img/ButtonPause.png</file>
+        <file>resources/style/img/ButtonPlay.png</file>
+        <file>resources/style/img/ButtonPlus.png</file>
+        <file>resources/style/img/ButtonPlusDisabled.png</file>
+        <file>resources/style/img/ButtonReadOnly.png</file>
+        <file>resources/style/img/ButtonSave.png</file>
+        <file>resources/style/img/ButtonSearch.png</file>
+        <file>resources/style/img/ButtonStop.png</file>
+        <file>resources/style/img/ButtonText.png</file>
+        <file>resources/style/img/ButtonThread.png</file>
+        <file>resources/style/img/ButtonTitleCard.png</file>
+        <file>resources/style/img/ButtonWarning.png</file>
+        <file>resources/style/img/ButtonWeb.png</file>
+        <file>resources/style/img/ButtonX.png</file>
+        <file>resources/style/img/IconBg.svg</file>
+        <file>resources/style/img/IconMask.svg</file>
+        <file>resources/style/img/TimerBg.svg</file>
+        <file>resources/style/img/TitleCardMissing.png</file>
+        <file>resources/style/img/WarningIcon.png</file>
+        <file>resources/style/qml/Background.png</file>
+        <file>resources/style/qml/Button.qml</file>
+        <file>resources/style/qml/ButtonArrowDown.svg</file>
+        <file>resources/style/qml/ButtonArrowUp.svg</file>
+        <file>resources/style/qml/ButtonExit.svg</file>
+        <file>resources/style/qml/ButtonExitHover.svg</file>
+        <file>resources/style/qml/ButtonPause.svg</file>
+        <file>resources/style/qml/ButtonPauseHover.svg</file>
+        <file>resources/style/qml/ButtonPlay.svg</file>
+        <file>resources/style/qml/ButtonPlayHover.svg</file>
+        <file>resources/style/qml/IconBg.svg</file>
+        <file>resources/style/qml/IconBgHover.svg</file>
+        <file>resources/style/qml/IconBgMask.png</file>
+        <file>resources/style/qml/InfoIcon.svg</file>
+        <file>resources/style/qml/MediaIcon.svg</file>
+        <file>resources/style/qml/Popup.qml</file>
+        <file>resources/style/qml/Style.qml</file>
+        <file>resources/style/qml/Text.qml</file>
+        <file>resources/style/qml/TimerBg.svg</file>
+        <file>resources/style/qml/ToolTip.qml</file>
+        <file>resources/style/qml/WarningIcon.svg</file>
+        <file>resources/style/qml/WebIcon.svg</file>
+        <file>resources/img/Icon.ico</file>
     </qresource>
     <qresource prefix="/qml">
         <file>resources/qml/ProjectCardSelection.qml</file>

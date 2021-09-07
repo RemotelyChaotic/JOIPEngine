@@ -14,7 +14,7 @@
 
 namespace
 {
-  const QString c_sDefaultStyleFile = ":/resources/style/style_default.css";
+  const QString c_sDefaultStyleFile = QString(joip_style::c_sDefaultStyleFolder) + "style_default.css";
   const QString c_sStyleFile = "style.css";
 
 //----------------------------------------------------------------------------------------

@@ -4,9 +4,10 @@
 #include <QApplication>
 
 namespace joip_style {
-  const QString c_sStyleFolder = "styles";
-  const QString c_sQmlStyleSubFolder = "qml";
-  const QString c_sDefaultStyle = "Default";
+  inline const char* c_sDefaultStyleFolder = ":/resources/style/";
+  inline const char* c_sStyleFolder = "styles";
+  inline const char* c_sQmlStyleSubFolder = "qml";
+  inline const char* c_sDefaultStyle = "Default";
 
   QStringList AvailableStyles();
   void SetStyle(QApplication* pApp);
