@@ -333,7 +333,7 @@ void CCommandAddResource::redo()
     tspResourceMap remoteResources = AddUrlsToProjectResources(m_spCurrentProject,
                                                                m_wpDbManager,
                                                                remoteFiles);
-    m_addedResources.insert(remoteResources.begin(), m_addedResources.end());
+    m_addedResources.insert(remoteResources.begin(), remoteResources.end());
 
     // clear byearrays to not use too much memory if not nesseccary
     for (auto& file : m_vsFiles)
