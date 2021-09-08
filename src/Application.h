@@ -4,6 +4,7 @@
 #include "Settings.h"
 #include "Systems/DatabaseManager.h"
 #include <QApplication>
+#include <QFileSystemWatcher>
 #include <map>
 #include <memory>
 
@@ -48,6 +49,7 @@ signals:
 private slots:
   void MarkStyleDirty();
   void LoadStyle();
+  void StyleHotloadChanged();
 
 private:
   void RegisterQmlTypes();
@@ -57,6 +59,7 @@ private:
   std::shared_ptr<CHelpFactory>                      m_spHelpFactory;
   std::shared_ptr<COverlayManager>                   m_spOverlayManager;
   std::shared_ptr<CSettings>                         m_spSettings;
+  QFileSystemWatcher                                 m_styleWatcher;
   bool                                               m_bStyleDirty;
   bool                                               m_bInitialized;
 };

@@ -33,6 +33,7 @@
 #include <qqmlsortfilterproxymodel.h>
 
 #include <QDebug>
+#include <QFileInfo>
 #include <QFontDatabase>
 #include <QQmlContext>
 #include <QQmlEngine>
@@ -66,6 +67,7 @@ CApplication::CApplication(int& argc, char *argv[]) :
   m_spHelpFactory(std::make_unique<CHelpFactory>()),
   m_spOverlayManager(std::make_shared<COverlayManager>()),
   m_spSettings(nullptr),
+  m_styleWatcher(),
   m_bStyleDirty(true),
   m_bInitialized(false)
 {
@@ -112,6 +114,8 @@ void CApplication::Initialize()
           this, &CApplication::MarkStyleDirty, Qt::DirectConnection);
   connect(m_spSettings.get(), &CSettings::styleChanged,
           this, &CApplication::MarkStyleDirty, Qt::DirectConnection);
+  connect(m_spSettings.get(), &CSettings::styleHotLoadChanged,
+          this, &CApplication::StyleHotloadChanged, Qt::DirectConnection);
 
   // sound emitter
   m_spSoundEmitter->Initialize();
@@ -133,6 +137,8 @@ void CApplication::Initialize()
 
   // style
   LoadStyle();
+
+  StyleHotloadChanged();
 
   m_bInitialized = true;
 }
@@ -174,6 +180,28 @@ void CApplication::LoadStyle()
     m_bStyleDirty = false;
     joip_style::SetStyle(this);
     emit StyleLoaded();
+  }
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CApplication::StyleHotloadChanged()
+{
+  if (m_spSettings->StyleHotLoad())
+  {
+    const QString sString = joip_style::StyleFile(m_spSettings->Style());
+    if (QFileInfo(sString).exists())
+    {
+      m_styleWatcher.addPath(sString);
+      connect(&m_styleWatcher, &QFileSystemWatcher::fileChanged,
+              this, &CApplication::MarkStyleDirty, Qt::DirectConnection);
+    }
+  }
+  else
+  {
+    m_styleWatcher.removePaths(m_styleWatcher.files());
+    disconnect(&m_styleWatcher, &QFileSystemWatcher::fileChanged,
+               this, &CApplication::MarkStyleDirty);
   }
 }
 

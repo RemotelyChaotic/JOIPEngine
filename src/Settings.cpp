@@ -85,6 +85,7 @@ const QString CSettings::c_sSettingMuted = "Audio/muted";
 const QString CSettings::c_sSettingOffline = "Content/offline";
 const QString CSettings::c_sSettingResolution = "Graphics/resolution";
 const QString CSettings::c_sSettingStyle = "Graphics/style";
+const QString CSettings::c_sSettingStyleHotLoad = "Debug/stylehotload";
 const QString CSettings::c_sSettingVolume = "Audio/volume";
 
 const QString CSettings::c_sOrganisation = "Private";
@@ -94,6 +95,7 @@ const QString CSettings::c_sApplicationName = "JOIPEngine";
 //
 CSettings::CSettings(QObject* pParent) :
   QObject (pParent),
+  m_settingsMutex(QMutex::Recursive),
   m_spSettings(std::make_shared<QSettings>(QSettings::IniFormat, QSettings::UserScope,
      CSettings::c_sOrganisation, CSettings::c_sApplicationName)),
   m_bOldVersionSaved(false),
@@ -452,6 +454,28 @@ QString CSettings::Style()
 
 //----------------------------------------------------------------------------------------
 //
+void CSettings::SetStyleHotLoad(bool bValue)
+{
+  QMutexLocker locker(&m_settingsMutex);
+  bool iOldValue = m_spSettings->value(CSettings::c_sSettingStyleHotLoad).toBool();
+
+  if (iOldValue == bValue) { return; }
+
+  m_spSettings->setValue(CSettings::c_sSettingStyleHotLoad, bValue);
+
+  emit styleHotLoadChanged();
+}
+
+//----------------------------------------------------------------------------------------
+//
+bool CSettings::StyleHotLoad()
+{
+  QMutexLocker locker(&m_settingsMutex);
+  return m_spSettings->value(CSettings::c_sSettingStyleHotLoad).toBool();
+}
+
+//----------------------------------------------------------------------------------------
+//
 QUrl CSettings::styleFolder()
 {
   QMutexLocker locker(&m_settingsMutex);
@@ -620,6 +644,13 @@ void CSettings::GenerateSettingsIfNotExists()
   {
     bNeedsSynch = true;
     m_spSettings->setValue(CSettings::c_sSettingStyle, "Blue Night");
+  }
+
+  // check style HotLoad
+  if (!m_spSettings->contains(CSettings::c_sSettingStyleHotLoad))
+  {
+    bNeedsSynch = true;
+    m_spSettings->setValue(CSettings::c_sSettingStyleHotLoad, false);
   }
 
   // check volume

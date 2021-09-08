@@ -181,6 +181,7 @@
         <file>resources/style/qml/WarningIcon.svg</file>
         <file>resources/style/qml/WebIcon.svg</file>
         <file>resources/img/Icon.ico</file>
+        <file>resources/help/settings/hotloadstyle_setting_help.html</file>
     </qresource>
     <qresource prefix="/qml">
         <file>resources/qml/ProjectCardSelection.qml</file>

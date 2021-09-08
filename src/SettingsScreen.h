@@ -39,6 +39,7 @@ protected slots:
   void on_pVolumeSlider_sliderReleased();
   void on_pPauseWhenNotActiveCheckBox_stateChanged(qint32 iState);
   void on_pOfflineModeCheckBox_stateChanged(qint32 iState);
+  void on_pStyleHotoadCheckBox_stateChanged(qint32 iState);
   void on_pBackButton_clicked();
   void SlotKeySequenceChanged(const QKeySequence& keySequence);
 

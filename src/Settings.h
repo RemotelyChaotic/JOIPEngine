@@ -23,6 +23,7 @@ class CSettings : public QObject
   Q_PROPERTY(bool pauseWhenInactive READ PauseWhenInactive WRITE SetPauseWhenInactive NOTIFY pauseWhenInactiveChanged)
   Q_PROPERTY(QSize resolution READ Resolution WRITE SetResolution NOTIFY resolutionChanged)
   Q_PROPERTY(QString style READ Style WRITE SetStyle NOTIFY styleChanged)
+  Q_PROPERTY(double styleHotLoad READ StyleHotLoad WRITE SetStyleHotLoad NOTIFY styleHotLoadChanged)
   Q_PROPERTY(qint32 version READ Version)
   Q_PROPERTY(double volume READ Volume WRITE SetVolume NOTIFY volumeChanged)
 
@@ -37,6 +38,7 @@ public:
   static const QString c_sSettingOffline;
   static const QString c_sSettingResolution;
   static const QString c_sSettingStyle;
+  static const QString c_sSettingStyleHotLoad;
   static const QString c_sSettingVolume;
 
   static const QString c_sOrganisation;
@@ -67,6 +69,8 @@ public:
   quint32 SettingsVersion();
   void SetStyle(const QString& sStyle);
   QString Style();
+  void SetStyleHotLoad(bool bValue);
+  bool StyleHotLoad();
   Q_INVOKABLE QUrl styleFolder();
   Q_INVOKABLE QUrl styleFolderQml();
   qint32 Version();
@@ -85,6 +89,7 @@ signals:
   void pauseWhenInactiveChanged();
   void resolutionChanged();
   void styleChanged();
+  void styleHotLoadChanged();
   void volumeChanged();
 
 private:

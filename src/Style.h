@@ -10,6 +10,7 @@ namespace joip_style {
   inline const char* c_sDefaultStyle = "Default";
 
   QStringList AvailableStyles();
+  QString StyleFile(const QString& sStyle);
   void SetStyle(QApplication* pApp);
 }
 

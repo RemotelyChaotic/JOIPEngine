@@ -96,6 +96,17 @@ QStringList joip_style::AvailableStyles()
 
 //----------------------------------------------------------------------------------------
 //
+QString joip_style::StyleFile(const QString& sStyle)
+{
+  QFileInfo info(QLibraryInfo::location(QLibraryInfo::PrefixPath) +
+                 QDir::separator() + joip_style::c_sStyleFolder +
+                 QDir::separator() + sStyle +
+                 QDir::separator() + c_sStyleFile);
+  return info.absoluteFilePath();
+}
+
+//----------------------------------------------------------------------------------------
+//
 void joip_style::SetStyle(QApplication* pApp)
 {
   auto spSettings = dynamic_cast<CApplication*>(pApp)->Settings();
