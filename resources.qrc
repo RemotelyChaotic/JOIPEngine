@@ -182,6 +182,7 @@
         <file>resources/style/qml/WebIcon.svg</file>
         <file>resources/img/Icon.ico</file>
         <file>resources/help/settings/hotloadstyle_setting_help.html</file>
+        <file>changelog/changelog.txt</file>
     </qresource>
     <qresource prefix="/qml">
         <file>resources/qml/ProjectCardSelection.qml</file>

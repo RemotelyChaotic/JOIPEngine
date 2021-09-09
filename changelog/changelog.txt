@@ -114,7 +114,16 @@ New Features:
 - The use of PhysFS makes it possible to use archived files transparently and
   archives can be added as a new type of pseudo-Resource, which can contain
   multiple resources.
+- Updated Node Editor with copy-paste functionality.
+- Undo and Redo functionality implemented for the entire editor.
+- Hotload for styles implemented for developping new application styles.
 
 Changes:
 - JOIP-Engine uses PhysFS to allow restricted acces to files only, making it
   impossible to write or read outside of the currently loaded project folder.
+- Loading on startup is significantly faster because the logo loads in a
+  worker thread.
+- Changelog visible in the "About" menu.
+
+Fixed Bugs:
+- Default style is fixed. Qml and icons look no longer broken.

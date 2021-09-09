@@ -1,6 +1,7 @@
 #include "CreditsScreen.h"
 #include "Application.h"
 #include "ui_CreditsScreen.h"
+#include <QtAV>
 #include <QFile>
 #include <QFont>
 #include <QMessageBox>
@@ -28,9 +29,13 @@ void CCreditsScreen::Initialize()
   connect(CApplication::Instance(), &CApplication::StyleLoaded,
           this, &CCreditsScreen::SlotStyleLoaded, Qt::QueuedConnection);
 
-  QFont font = m_spUi->pText->font();
+  QFont font = m_spUi->pTextCredits->font();
   font.setPixelSize(20);
-  m_spUi->pText->setFont(font);
+  m_spUi->pTextCredits->setFont(font);
+
+  font = m_spUi->pTextChangelog->font();
+  font.setPixelSize(20);
+  m_spUi->pTextChangelog->setFont(font);
 
   m_bInitialized = true;
 }
@@ -43,7 +48,14 @@ void CCreditsScreen::Load()
   if (creditsFile.open(QIODevice::ReadOnly))
   {
     QString sCredits = QString::fromUtf8(creditsFile.readAll());
-    m_spUi->pText->setText(sCredits);
+    m_spUi->pTextCredits->setText(sCredits);
+  }
+
+  QFile changelogFile(":/changelog/changelog.txt");
+  if (changelogFile.open(QIODevice::ReadOnly))
+  {
+    QString sChangelog = QString::fromUtf8(changelogFile.readAll());
+    m_spUi->pTextChangelog->setText(sChangelog);
   }
 }
 
@@ -74,8 +86,13 @@ void CCreditsScreen::on_pAboutQtButton_clicked()
 //
 void CCreditsScreen::SlotStyleLoaded()
 {
-  QFont font = m_spUi->pText->font();
+  QFont font = m_spUi->pTextCredits->font();
   font.setPixelSize(20);
   font.setFamily(CApplication::Instance()->Settings()->Font());
-  m_spUi->pText->setFont(font);
+  m_spUi->pTextCredits->setFont(font);
+
+  font = m_spUi->pTextChangelog->font();
+  font.setPixelSize(20);
+  font.setFamily(CApplication::Instance()->Settings()->Font());
+  m_spUi->pTextChangelog->setFont(font);
 }
