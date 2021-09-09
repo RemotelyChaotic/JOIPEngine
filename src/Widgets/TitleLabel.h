@@ -3,6 +3,7 @@
 
 #include <QLabel>
 #include <QPointer>
+#include <QTimer>
 
 class CTitleProxyStyle;
 
@@ -20,11 +21,16 @@ public:
 
 protected slots:
   void SlotStyleLoaded();
+  void SlotUpdate();
+
+protected:
+  void resizeEvent(QResizeEvent* pEvt) override;
 
 private:
   void AddEffects();
 
   QPointer<CTitleProxyStyle> m_pStyle;
+  QTimer                     m_updateTimer;
 };
 
 #endif // TITLELABEL_H

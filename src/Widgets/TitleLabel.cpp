@@ -3,13 +3,18 @@
 #include "Constants.h"
 
 #include <QFont>
+#include <QFutureWatcher>
 #include <QGraphicsDropShadowEffect>
 #include <QPainter>
+#include <QPropertyAnimation>
 #include <QProxyStyle>
+#include <QtConcurrent/QtConcurrent>
 
 namespace  {
   const static qint32 c_iKernelSize = 19;
   const double c_iOffsetBorder = 5.0;
+  const qint32 c_iAnimationTime = 1500;
+  const qint32 c_iUpdateInterval = 5;
 
   //--------------------------------------------------------------------------------------
   //
@@ -102,17 +107,58 @@ namespace  {
 //
 class CTitleProxyStyle : public QProxyStyle
 {
+  Q_OBJECT
+  Q_PROPERTY(double progress MEMBER m_dProgress)
+  Q_PROPERTY(double progress2 MEMBER m_dProgress2)
+
 public:
   CTitleProxyStyle() :
     QProxyStyle(),
+    m_spFutureWatcher(std::make_unique<QFutureWatcher<void>>()),
+    m_bRendering(false),
     m_bDirty(true),
     m_backgroundImage(),
-    m_outlineColor(Qt::white)
-  {}
+    m_outlineColor(Qt::white),
+    m_dProgress(0.0)
+  {
+    m_pProgressAnimation = new QPropertyAnimation(this, "progress");
+    m_pProgressAnimation->setDuration(c_iAnimationTime);
+    m_pProgressAnimation->setEasingCurve(QEasingCurve::InQuad);
+    m_pProgressAnimation->setLoopCount(1);
+
+    m_pProgress2Animation = new QPropertyAnimation(this, "progress2");
+    m_pProgress2Animation->setDuration(c_iAnimationTime);
+    m_pProgress2Animation->setEasingCurve(QEasingCurve::InQuad);
+    m_pProgress2Animation->setLoopCount(1);
+    connect(m_pProgress2Animation, &QPropertyAnimation::finished,
+            this, &CTitleProxyStyle::AnimationsFinished);
+  }
 
   //--------------------------------------------------------------------------------------
   //
-  void SetDirty() { m_bDirty = true; }
+  void SetDirty()
+  {
+    m_pProgressAnimation->stop();
+    m_pProgress2Animation->stop();
+
+    if (m_spFutureWatcher->isRunning())
+    {
+      m_spFutureWatcher->cancel();
+      m_spFutureWatcher->waitForFinished();
+    }
+
+    m_bDirty = true;
+    m_bRendering = false;
+    m_dProgress = 0.0;
+    m_dProgress2 = 0.0;
+
+    m_pProgressAnimation->setStartValue(m_dProgress);
+    m_pProgressAnimation->setEndValue(1.0);
+    m_pProgressAnimation->start();
+
+    m_pProgress2Animation->setStartValue(m_dProgress2);
+    m_pProgress2Animation->setEndValue(1.0);
+  }
 
   //--------------------------------------------------------------------------------------
   //
@@ -132,47 +178,75 @@ public:
     return m_outlineColor;
   }
 
+signals:
+  void AnimationsFinished();
+  void LoadingFinished();
+
+protected slots:
+  void SlotImageLoad(const QBrush &textBrush, const QRect &rect,
+                     int flags, const QString& sText, const QFont& font)
+  {
+    QImage offScreenBuffer(rect.size(), QImage::Format_ARGB32);
+    offScreenBuffer.fill(Qt::transparent);
+
+    QPainter offscreenPainter(&offScreenBuffer);
+    offscreenPainter.setPen(m_outlineColor);
+    offscreenPainter.setBrush(textBrush);
+    offscreenPainter.setFont(font);
+    offscreenPainter.drawText(rect, flags, sText);
+
+    // process background
+    QImage dilatedPixmap;
+    DilationBorder(offScreenBuffer, dilatedPixmap, c_iKernelSize, m_outlineColor.rgba());
+    // debug
+    //dilatedPixmap.save("bla.png");
+    Gauss15x15(dilatedPixmap, m_backgroundImage);
+    // debug
+    //gaussFiltered.save("bla.png");
+
+    m_bDirty = false;
+    m_bRendering = false;
+    emit LoadingFinished();
+    QMetaObject::invokeMethod(m_pProgress2Animation, "start", Qt::QueuedConnection);
+  }
+
 protected:
+  void StartLoad(const QBrush &textBrush, const QRect &rect,
+                 int flags, const QString& sText, const QFont& font)
+  {
+    m_bRendering = true;
+    m_future = QtConcurrent::run(this, &CTitleProxyStyle::SlotImageLoad,
+                                 textBrush, rect, flags, sText, font);
+    m_spFutureWatcher->setFuture(m_future);
+  }
+
   //--------------------------------------------------------------------------------------
   //
   virtual void drawItemText(QPainter* pPainter, const QRect &rect,
-      int flags, const QPalette &pal, bool enabled,
-      const QString &text, QPalette::ColorRole textRole) const
+      int flags, const QPalette &pal, bool /*enabled*/,
+      const QString &text, QPalette::ColorRole /*textRole*/) const
   {
     // draw background to offscreen buffer
     if (m_bDirty)
     {
-      // hack to un-const cast the pointer, since we want to cache the render
-      // this prevents unnessesarily long draw calls
-      CTitleProxyStyle* ptr = const_cast<CTitleProxyStyle*>(this);
-
-      QImage offScreenBuffer(rect.size(), QImage::Format_ARGB32);
-      offScreenBuffer.fill(Qt::transparent);
-
-      QPainter offscreenPainter(&offScreenBuffer);
-      offscreenPainter.initFrom(pPainter->device());
-      offscreenPainter.setPen(m_outlineColor);
-      offscreenPainter.setBrush(pal.text());
-      offscreenPainter.drawText(rect, flags, text);
-
-      // process background
-      QImage dilatedPixmap;
-      DilationBorder(offScreenBuffer, dilatedPixmap, c_iKernelSize, m_outlineColor.rgba());
-      // debug
-      //dilatedPixmap.save("bla.png");
-      Gauss15x15(dilatedPixmap, ptr->m_backgroundImage);
-      // debug
-      //gaussFiltered.save("bla.png");
-
-      ptr->m_bDirty = false;
+      if (!m_bRendering)
+      {
+        // hack to un-const cast the pointer, since we want to cache the render
+        // this prevents unnessesarily long draw calls
+        CTitleProxyStyle* ptr = const_cast<CTitleProxyStyle*>(this);
+        ptr->StartLoad(pal.text(), rect, flags, text, pPainter->font());
+      }
     }
-
-    // draw background
-    pPainter->save();
-    pPainter->setPen(m_outlineColor);
-    pPainter->setBrush(m_outlineColor);
-    pPainter->drawImage(m_backgroundImage.rect(), m_backgroundImage, m_backgroundImage.rect());
-    pPainter->restore();
+    else
+    {
+      // draw background
+      pPainter->save();
+      pPainter->setOpacity(m_dProgress);
+      pPainter->setPen(m_outlineColor);
+      pPainter->setBrush(m_outlineColor);
+      pPainter->drawImage(m_backgroundImage.rect(), m_backgroundImage, m_backgroundImage.rect());
+      pPainter->restore();
+    }
 
     // draw shadow
     pPainter->save();
@@ -181,6 +255,7 @@ protected:
       QRect translatedRect =
           rect.translated(static_cast<qint32>(i), static_cast<qint32>(i));
       QColor shadowColor(pal.text().color());
+      shadowColor.setAlpha(m_dProgress*255);
       pPainter->setPen(shadowColor.darker(200));
       pPainter->setBrush(pal.text());
       pPainter->drawText(translatedRect, flags, text);
@@ -188,12 +263,23 @@ protected:
     pPainter->restore();
 
     // draw text
-    QProxyStyle::drawItemText(pPainter, rect, flags, pal, enabled, text, textRole);
+    QColor col = pal.text().color();
+    col.setAlpha(m_dProgress*255);
+    pPainter->setPen(col);
+    pPainter->setBrush(pal.text());
+    pPainter->drawText(rect, flags, text);
   }
 
-  bool   m_bDirty;
-  QImage m_backgroundImage;
-  QColor m_outlineColor;
+  std::unique_ptr<QFutureWatcher<void>> m_spFutureWatcher;
+  QFuture<void>                         m_future;
+  QAtomicInt                            m_bRendering;
+  QAtomicInt                            m_bDirty;
+  QImage                                m_backgroundImage;
+  QColor                                m_outlineColor;
+  QPointer<QPropertyAnimation>          m_pProgressAnimation;
+  double                                m_dProgress;
+  QPointer<QPropertyAnimation>          m_pProgress2Animation;
+  double                                m_dProgress2;
 };
 
 //----------------------------------------------------------------------------------------
@@ -210,9 +296,19 @@ CTitleLabel::CTitleLabel(QWidget* pParent) :
   m_pStyle = new CTitleProxyStyle();
   m_pStyle->setParent(this);
   setStyle(m_pStyle);
+  connect(m_pStyle, &CTitleProxyStyle::LoadingFinished,
+          this, &CTitleLabel::SlotUpdate, Qt::QueuedConnection);
+  connect(m_pStyle, &CTitleProxyStyle::AnimationsFinished,
+          this, [this](){ SlotUpdate(); m_updateTimer.stop(); });
+
   QFontMetrics fontMetrics(thisFont);
   setFixedHeight(fontMetrics.height() + c_iKernelSize + static_cast<qint32>(c_iOffsetBorder));
   AddEffects();
+
+  m_updateTimer.setInterval(c_iUpdateInterval);
+  m_updateTimer.setSingleShot(false);
+  connect(&m_updateTimer, &QTimer::timeout,
+          this, &CTitleLabel::SlotUpdate, Qt::DirectConnection);
 }
 
 CTitleLabel::CTitleLabel(QString sText, QWidget* pParent) :
@@ -227,9 +323,20 @@ CTitleLabel::CTitleLabel(QString sText, QWidget* pParent) :
   m_pStyle = new CTitleProxyStyle();
   m_pStyle->setParent(this);
   setStyle(m_pStyle);
+  connect(m_pStyle, &CTitleProxyStyle::LoadingFinished,
+          this, &CTitleLabel::SlotUpdate, Qt::QueuedConnection);
+  connect(m_pStyle, &CTitleProxyStyle::AnimationsFinished,
+          this, [this](){ SlotUpdate(); m_updateTimer.stop(); });
+
   QFontMetrics fontMetrics(thisFont);
   setFixedHeight(fontMetrics.height() + c_iKernelSize + static_cast<qint32>(c_iOffsetBorder));
   AddEffects();
+
+  m_updateTimer.setInterval(c_iUpdateInterval);
+  m_updateTimer.setSingleShot(false);
+  connect(&m_updateTimer, &QTimer::timeout,
+          this, &CTitleLabel::SlotUpdate, Qt::DirectConnection);
+  m_updateTimer.start();
 }
 
 //----------------------------------------------------------------------------------------
@@ -255,6 +362,23 @@ void CTitleLabel::SlotStyleLoaded()
   thisFont.setFamily(CApplication::Instance()->Settings()->Font());
   setFont(thisFont);
   m_pStyle->SetDirty();
+  m_updateTimer.start();
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CTitleLabel::SlotUpdate()
+{
+  repaint();
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CTitleLabel::resizeEvent(QResizeEvent* pEvt)
+{
+  Q_UNUSED(pEvt)
+  m_pStyle->SetDirty();
+  m_updateTimer.start();
 }
 
 //----------------------------------------------------------------------------------------
@@ -268,3 +392,5 @@ void CTitleLabel::AddEffects()
   pShadow->setColor(Qt::black);
   setGraphicsEffect(pShadow);
 }
+
+#include "TitleLabel.moc"
