@@ -6,12 +6,14 @@
 CCommandChangeTitleCard::CCommandChangeTitleCard(const tspProject& spCurrentProject,
                                                  const QString& sOldTitleCard,
                                                  const QString& sNewTitleCard,
+                                                 const std::function<void(void)>& fnOnChanged,
                                                  QUndoCommand* pParent) :
   QUndoCommand("Title card -> " + sNewTitleCard, pParent),
   m_spCurrentProject(spCurrentProject),
   m_wpDbManager(CApplication::Instance()->System<CDatabaseManager>()),
   m_sOldTitleCard(sOldTitleCard),
-  m_sNewTitleCard(sNewTitleCard)
+  m_sNewTitleCard(sNewTitleCard),
+  m_fnOnChanged(fnOnChanged)
 {
 }
 
@@ -66,8 +68,12 @@ void CCommandChangeTitleCard::DoUndoRedo(const QString& sTitleCard)
     tspResource spResource = spDbManager->FindResourceInProject(m_spCurrentProject, sTitleCard);
     if (nullptr != spResource)
     {
-      QWriteLocker locker(&m_spCurrentProject->m_rwLock);
-      m_spCurrentProject->m_sTitleCard = sTitleCard;
+      {
+        QWriteLocker locker(&m_spCurrentProject->m_rwLock);
+        m_spCurrentProject->m_sTitleCard = sTitleCard;
+      }
+
+      if (nullptr != m_fnOnChanged) { m_fnOnChanged(); }
     }
   }
 }

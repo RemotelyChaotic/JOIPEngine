@@ -33,7 +33,8 @@ namespace  {
     for (QString sFileName : vsFiles)
     {
       QFileInfo info(sFileName);
-      if (!info.canonicalFilePath().contains(projectDir.absolutePath()) &&
+      const QString sTest = info.absoluteFilePath();
+      if (!info.absoluteFilePath().contains(projectDir.absolutePath()) &&
           !sFileName.startsWith(CPhysFsFileEngineHandler::c_sScheme))
       {
         vsNeedsToMove.push_back(sFileName);
@@ -323,7 +324,10 @@ void CCommandAddResource::redo()
     std::map<QUrl, QByteArray> remoteFiles;
     for (const auto& file : qAsConst(m_vsFiles))
     {
-      if (IsLocalFile(file.first)) { vsLocalFiles << file.first.toString(); }
+      if (IsLocalFile(file.first))
+      {
+        vsLocalFiles << file.first.toString(QUrl::PreferLocalFile);
+      }
       else { remoteFiles.insert(file); }
     }
 

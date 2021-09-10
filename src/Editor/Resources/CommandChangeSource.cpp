@@ -7,13 +7,15 @@ CCommandChangeSource::CCommandChangeSource(const tspProject& spCurrentProject,
                                            const QString& sNameOfResource,
                                            const QUrl& sOldSource,
                                            const QUrl& sNewSource,
+                                           const std::function<void(void)>& fnOnChanged,
                                            QUndoCommand* pParent) :
   QUndoCommand(QString("Source of %1 changed").arg(sNameOfResource), pParent),
   m_spCurrentProject(spCurrentProject),
   m_wpDbManager(CApplication::Instance()->System<CDatabaseManager>()),
   m_sNameOfResource(sNameOfResource),
   m_sOldSource(sOldSource),
-  m_sNewSource(sNewSource)
+  m_sNewSource(sNewSource),
+  m_fnOnChanged(fnOnChanged)
 {
 }
 CCommandChangeSource::~CCommandChangeSource()
@@ -68,8 +70,12 @@ void CCommandChangeSource::DoUndoRedo(const QUrl& sSource)
     tspResource spResource = spDbManager->FindResourceInProject(m_spCurrentProject, m_sNameOfResource);
     if (nullptr != spResource)
     {
-      QWriteLocker locker(&spResource->m_rwLock);
-      spResource->m_sSource = sSource;
+      {
+        QWriteLocker locker(&spResource->m_rwLock);
+        spResource->m_sSource = sSource;
+      }
+
+      if (nullptr != m_fnOnChanged) { m_fnOnChanged(); }
     }
   }
 }

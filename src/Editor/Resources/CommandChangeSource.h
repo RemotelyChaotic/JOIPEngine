@@ -14,6 +14,7 @@ public:
                        const QString& sNameOfResource,
                        const QUrl& sOldSource,
                        const QUrl& sNewSource,
+                       const std::function<void(void)>& fnOnChanged,
                        QUndoCommand* pParent = nullptr);
   ~CCommandChangeSource();
 
@@ -29,6 +30,7 @@ protected:
   QString m_sNameOfResource;
   QUrl m_sOldSource;
   QUrl m_sNewSource;
+  std::function<void(void)> m_fnOnChanged;
 
 private:
   void DoUndoRedo(const QUrl& sSource);

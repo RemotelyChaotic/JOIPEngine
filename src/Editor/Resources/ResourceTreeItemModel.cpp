@@ -1,14 +1,18 @@
 #include "ResourceTreeItemModel.h"
 #include "Application.h"
+#include "CommandChangeResourceData.h"
 #include "ResourceTreeItem.h"
 #include "Systems/DatabaseManager.h"
 #include "Systems/Resource.h"
+#include <QUndoStack>
 
 using namespace resource_item;
 
-CResourceTreeItemModel::CResourceTreeItemModel(QObject* pParent) :
+CResourceTreeItemModel::CResourceTreeItemModel(QPointer<QUndoStack> pUndoStack,
+                                               QObject* pParent) :
   QAbstractItemModel(pParent),
   m_wpDbManager(CApplication::Instance()->System<CDatabaseManager>()),
+  m_pUndoStack(pUndoStack),
   m_pRootItem(nullptr),
   m_categoryMap(),
   m_spProject()
@@ -274,15 +278,31 @@ bool CResourceTreeItemModel::setData(const QModelIndex& index, const QVariant& v
   if (iRole != Qt::EditRole) { return false; }
 
   CResourceTreeItem* pItem = GetItem(index);
-  bool bResult = pItem->SetData(index.column(), value);
 
-  if (bResult)
+  if (nullptr != m_pUndoStack)
   {
-    emit dataChanged(index, index, {Qt::DisplayRole, Qt::EditRole});
-    emit SignalProjectEdited();
+    m_pUndoStack->push(
+          new CCommandChangeResourceData(this, m_spProject,
+                                         pItem->Data(resource_item::c_iColumnName).toString(),
+                                         index.column(),
+                                         value));
+
+    return true;
+  }
+  else
+  {
+    bool bResult = pItem->SetData(index.column(), value);
+
+    if (bResult)
+    {
+      emit dataChanged(index, index, {Qt::DisplayRole, Qt::EditRole});
+      emit SignalProjectEdited();
+    }
+
+    return bResult;
   }
 
-  return bResult;
+  return false;
 }
 
 //----------------------------------------------------------------------------------------
@@ -393,6 +413,18 @@ QModelIndex CResourceTreeItemModel::IndexForResource(const tspResource& spResour
     return indices.first();
   }
   return QModelIndex();
+}
+
+//----------------------------------------------------------------------------------------
+//
+CResourceTreeItem* CResourceTreeItemModel::CResourceTreeItemModel::GetItem(const QModelIndex& index) const
+{
+  if (index.isValid())
+  {
+    CResourceTreeItem* pItem = static_cast<CResourceTreeItem*>(index.internalPointer());
+    if (nullptr != pItem) { return pItem; }
+  }
+  return m_pRootItem;
 }
 
 //----------------------------------------------------------------------------------------
@@ -560,16 +592,4 @@ void CResourceTreeItemModel::SlotResourceRemoved(qint32 iProjId, const QString& 
       }
     }
   }
-}
-
-//----------------------------------------------------------------------------------------
-//
-CResourceTreeItem* CResourceTreeItemModel::CResourceTreeItemModel::GetItem(const QModelIndex& index) const
-{
-  if (index.isValid())
-  {
-    CResourceTreeItem* pItem = static_cast<CResourceTreeItem*>(index.internalPointer());
-    if (nullptr != pItem) { return pItem; }
-  }
-  return m_pRootItem;
 }

@@ -4,6 +4,7 @@
 #include "Systems/Project.h"
 #include <QPointer>
 #include <QUndoCommand>
+#include <functional>
 #include <memory>
 
 class CDatabaseManager;
@@ -14,6 +15,7 @@ public:
   CCommandChangeTitleCard(const tspProject& spCurrentProject,
                           const QString& sOldTitleCard,
                           const QString& sNewTitleCard,
+                          const std::function<void(void)>& fnOnChanged,
                           QUndoCommand* pParent = nullptr);
   ~CCommandChangeTitleCard();
 
@@ -28,6 +30,7 @@ protected:
   std::weak_ptr<CDatabaseManager> m_wpDbManager;
   QString m_sOldTitleCard;
   QString m_sNewTitleCard;
+  std::function<void(void)> m_fnOnChanged;
 
 private:
   void DoUndoRedo(const QString& sTitleCard);

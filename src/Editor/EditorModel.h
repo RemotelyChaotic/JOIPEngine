@@ -79,10 +79,10 @@ private slots:
 
 private:
   std::unique_ptr<CKinkTreeModel>                             m_spKinkTreeModel;
-  std::unique_ptr<CResourceTreeItemModel>                     m_spResourceTreeModel;
   std::unique_ptr<CScriptEditorModel>                         m_spScriptEditorModel;
   std::unique_ptr<CFlowScene>                                 m_spFlowSceneModel;
   std::unique_ptr<QUndoStack>                                 m_spUndoStack;
+  std::unique_ptr<CResourceTreeItemModel>                     m_spResourceTreeModel;
   std::unique_ptr<QProcess>                                   m_spExportProcess;
   std::shared_ptr<CSettings>                                  m_spSettings;
   tspProject                                                  m_spCurrentProject;

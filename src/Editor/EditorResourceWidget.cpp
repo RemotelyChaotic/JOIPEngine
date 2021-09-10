@@ -16,6 +16,7 @@
 #include "Systems/HelpFactory.h"
 #include "Systems/Project.h"
 #include "Tutorial/ResourceTutorialStateSwitchHandler.h"
+#include "Utils/UndoRedoFilter.h"
 #include "Widgets/HelpOverlay.h"
 #include "Widgets/ResourceDisplayWidget.h"
 
@@ -105,6 +106,11 @@ void CEditorResourceWidget::Initialize()
   QItemSelectionModel* pSelectionModel = m_spUi->pResourceTree->selectionModel();
   connect(pSelectionModel, &QItemSelectionModel::currentChanged,
           this, &CEditorResourceWidget::SlotCurrentChanged);
+
+  auto pFilter =
+      new CUndoRedoFilter(m_spUi->pResourceTree, nullptr);
+  connect(pFilter, &CUndoRedoFilter::UndoTriggered, this, [this]() { UndoStack()->undo(); });
+  connect(pFilter, &CUndoRedoFilter::RedoTriggered, this, [this]() { UndoStack()->redo(); });
 
   m_spWebOverlay->Hide();
 
@@ -266,15 +272,8 @@ void CEditorResourceWidget::dropEvent(QDropEvent* pEvent)
   {
     QStringList vsFileNames;
     QList<QUrl> vUrlList = pMimeData->urls();
-
-    // extract the local paths of the files
-    for (qint32 i = 0; i < vUrlList.size(); ++i)
-    {
-      vsFileNames.append(vUrlList.at(i).toLocalFile());
-    }
-
     std::map<QUrl, QByteArray> vsFiles;
-    for (const QString& sPath : qAsConst(vsFileNames)) { vsFiles.insert({sPath, QByteArray()}); }
+    for (const QUrl& sPath : qAsConst(vUrlList)) { vsFiles.insert({sPath, QByteArray()}); }
     UndoStack()->push(new CCommandAddResource(m_spCurrentProject, this, vsFiles));
     emit SignalProjectEdited();
   }
@@ -321,7 +320,10 @@ void CEditorResourceWidget::SlotAddButtonClicked()
       tr("Add File"), sCurrentFolder, SResourceFormats::JoinedFormatsForFilePicker());
 
   std::map<QUrl, QByteArray> vsFiles;
-  for (const QString& sPath : qAsConst(vsFileNames)) { vsFiles.insert({sPath, QByteArray()}); }
+  for (const QString& sPath : qAsConst(vsFileNames))
+  {
+    vsFiles.insert({ QUrl::fromLocalFile(sPath), QByteArray()});
+  }
   UndoStack()->push(new CCommandAddResource(m_spCurrentProject, this, vsFiles));
   emit SignalProjectEdited();
 }
@@ -427,9 +429,17 @@ void CEditorResourceWidget::SlotTitleCardButtonClicked()
         const QString sName = pModel->data(pProxyModel->mapToSource(index), Qt::DisplayRole).toString();
         QWriteLocker locker(&m_spCurrentProject->m_rwLock);
         const QString sOldTitleCard = m_spCurrentProject->m_sTitleCard;
+        locker.unlock();
 
-        UndoStack()->push(new CCommandChangeTitleCard(m_spCurrentProject, sOldTitleCard, sName));
-        emit SignalProjectEdited();
+        QPointer<CEditorResourceWidget> pThis(this);
+        UndoStack()->push(
+              new CCommandChangeTitleCard(m_spCurrentProject, sOldTitleCard, sName,
+                                          [pThis]() {
+                if (nullptr != pThis)
+                {
+                  emit pThis->SignalProjectEdited();
+                }
+              }));
 
         // only interrested in first item which is the actual item we need
         break;
@@ -553,12 +563,17 @@ void CEditorResourceWidget::SlotWebSourceSelected(const QString& sResource)
     if (nullptr != spResource)
     {
       QWriteLocker locker(&spResource->m_rwLock);
+      QPointer<CEditorResourceWidget> pThis(this);
       UndoStack()->push(new CCommandChangeSource(m_spCurrentProject,
                                                  sName,
                                                  spResource->m_sSource,
-                                                 sResource));
-
-      emit SignalProjectEdited();
+                                                 sResource,
+                                                 [pThis]() {
+        if (nullptr != pThis)
+        {
+          emit pThis->SignalProjectEdited();
+        }
+      }));
     }
   }
 }

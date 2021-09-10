@@ -73,30 +73,48 @@ bool CCommandChangeCurrentResource::mergeWith(const QUndoCommand* pOther)
 //
 void CCommandChangeCurrentResource::RunDoOrUndo(const QString& sResource)
 {
-  auto spDbManager = m_wpDbManager.lock();
-  if (nullptr != spDbManager)
+  if (!sResource.isEmpty())
   {
-    auto spResource = spDbManager->FindResourceInProject(m_spCurrentProject, sResource);
-    if (nullptr != spResource)
+    auto spDbManager = m_wpDbManager.lock();
+    if (nullptr != spDbManager)
     {
-      m_pResourceDisplayWidget->UnloadResource();
-      m_pResourceDisplayWidget->LoadResource(spResource);
-
-      CResourceTreeItemModel* pModel =
-        dynamic_cast<CResourceTreeItemModel*>(m_pProxyModel->sourceModel());
-
-      if (nullptr != pModel)
+      auto spResource = spDbManager->FindResourceInProject(m_spCurrentProject, sResource);
+      if (nullptr != spResource)
       {
-        m_pSelectionModel->blockSignals(true);
-        m_pSelectionModel->select(m_pProxyModel->mapFromSource(pModel->IndexForResource(spResource)),
-                                  QItemSelectionModel::Clear | QItemSelectionModel::SelectCurrent |
-                                  QItemSelectionModel::Rows);
-        m_pSelectionModel->blockSignals(false);
+        m_pResourceDisplayWidget->UnloadResource();
+        m_pResourceDisplayWidget->LoadResource(spResource);
 
-        if (nullptr != m_fnOnSelectionChanged)
+        CResourceTreeItemModel* pModel =
+          dynamic_cast<CResourceTreeItemModel*>(m_pProxyModel->sourceModel());
+
+        if (nullptr != pModel)
         {
-          m_fnOnSelectionChanged(sResource);
+          m_pSelectionModel->blockSignals(true);
+          m_pSelectionModel->select(m_pProxyModel->mapFromSource(pModel->IndexForResource(spResource)),
+                                    QItemSelectionModel::Clear | QItemSelectionModel::SelectCurrent |
+                                    QItemSelectionModel::Rows);
+          m_pSelectionModel->blockSignals(false);
+
+          if (nullptr != m_fnOnSelectionChanged)
+          {
+            m_fnOnSelectionChanged(sResource);
+          }
         }
+      }
+    }
+  }
+  else
+  {
+    CResourceTreeItemModel* pModel =
+      dynamic_cast<CResourceTreeItemModel*>(m_pProxyModel->sourceModel());
+    if (nullptr != pModel)
+    {
+      m_pSelectionModel->blockSignals(true);
+      m_pSelectionModel->clearSelection();
+      m_pSelectionModel->blockSignals(false);
+      if (nullptr != m_fnOnSelectionChanged)
+      {
+        m_fnOnSelectionChanged(sResource);
       }
     }
   }

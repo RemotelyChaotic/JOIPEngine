@@ -4,19 +4,23 @@
 #include "Systems/Project.h"
 #include <QAbstractItemModel>
 #include <QModelIndex>
+#include <QPointer>
 #include <QVariant>
 #include <map>
 #include <memory>
 
 class CDatabaseManager;
 class CResourceTreeItem;
+class QUndoStack;
 
 class CResourceTreeItemModel : public QAbstractItemModel
 {
   Q_OBJECT
+  friend class CCommandChangeResourceData;
 
 public:
-  explicit CResourceTreeItemModel(QObject* pParent = nullptr);
+  explicit CResourceTreeItemModel(QPointer<QUndoStack> pUndoStack,
+                                  QObject* pParent = nullptr);
   ~CResourceTreeItemModel() override;
 
   void InitializeModel(tspProject spProject);
@@ -55,14 +59,16 @@ public:
 signals:
   void SignalProjectEdited();
 
+protected:
+  CResourceTreeItem* GetItem(const QModelIndex& index) const;
+
 private slots:
   void SlotResourceAdded(qint32 iProjId, const QString& sName);
   void SlotResourceRemoved(qint32 iProjId, const QString& sName);
 
 private:
-  CResourceTreeItem* GetItem(const QModelIndex& index) const;
-
   std::weak_ptr<CDatabaseManager>             m_wpDbManager;
+  QPointer<QUndoStack>                        m_pUndoStack;
   CResourceTreeItem*                          m_pRootItem;
   std::map<EResourceType, CResourceTreeItem*> m_categoryMap;
   tspProject                                  m_spProject;

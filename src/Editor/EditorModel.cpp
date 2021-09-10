@@ -53,10 +53,10 @@ namespace
 CEditorModel::CEditorModel(QWidget* pParent) :
   QObject(nullptr),
   m_spKinkTreeModel(std::make_unique<CKinkTreeModel>()),
-  m_spResourceTreeModel(std::make_unique<CResourceTreeItemModel>()),
   m_spScriptEditorModel(std::make_unique<CScriptEditorModel>(pParent)),
   m_spFlowSceneModel(std::make_unique<CFlowScene>(RegisterDataModels(), nullptr)),
   m_spUndoStack(std::make_unique<QUndoStack>()),
+  m_spResourceTreeModel(std::make_unique<CResourceTreeItemModel>(m_spUndoStack.get())),
   m_spExportProcess(std::make_unique<QProcess>()),
   m_spSettings(CApplication::Instance()->Settings()),
   m_spCurrentProject(nullptr),

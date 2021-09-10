@@ -126,6 +126,8 @@ set(Sources
   Editor/Resources/CommandChangeCurrentResource.h
   Editor/Resources/CommandChangeFilter.cpp
   Editor/Resources/CommandChangeFilter.h
+  Editor/Resources/CommandChangeResourceData.cpp
+  Editor/Resources/CommandChangeResourceData.h
   Editor/Resources/CommandChangeSource.cpp
   Editor/Resources/CommandChangeSource.h
   Editor/Resources/CommandChangeTitleCard.cpp
