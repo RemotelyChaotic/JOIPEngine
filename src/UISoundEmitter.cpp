@@ -1,29 +1,33 @@
 #include "UISoundEmitter.h"
 #include "Application.h"
 #include "Settings.h"
+#include "Utils/MultiEmitterSoundPlayer.h"
 #include <QEvent>
 #include <QAbstractButton>
 #include <QAbstractItemDelegate>
 #include <QCheckBox>
 #include <QComboBox>
-#include <QSoundEffect>
+
+namespace
+{
+  const qint32 c_iUiSoundEmitterCount = 3;
+}
 
 CUISoundEmitter::CUISoundEmitter(QObject *parent) :
   QObject(parent),
-  m_spCklickSoundButton(std::make_unique<QSoundEffect>()),
-  m_spHoverSoundButton(std::make_unique<QSoundEffect>()),
-  m_spCklickSoundCheckbox(std::make_unique<QSoundEffect>()),
-  m_spCklickSoundDropBox(std::make_unique<QSoundEffect>())
+  m_spCklickSoundButton(
+    std::make_unique<CMultiEmitterSoundPlayer>(c_iUiSoundEmitterCount,
+                                               ":/resources/sound/menu_click_soft_main.wav")),
+  m_spHoverSoundButton(
+    std::make_unique<CMultiEmitterSoundPlayer>(c_iUiSoundEmitterCount,
+                                               ":/resources/sound/menu_selection_soft.wav")),
+  m_spCklickSoundCheckbox(
+    std::make_unique<CMultiEmitterSoundPlayer>(c_iUiSoundEmitterCount,
+                                               ":/resources/sound/menu_selection_soft.wav")),
+  m_spCklickSoundDropBox(
+    std::make_unique<CMultiEmitterSoundPlayer>(c_iUiSoundEmitterCount,
+                                               ":/resources/sound/menu_whoosh.wav"))
 {
-  m_spCklickSoundButton->setSource(QUrl("qrc:/resources/sound/menu_click_soft_main.wav"));
-  m_spHoverSoundButton->setSource(QUrl("qrc:/resources/sound/menu_selection_soft.wav"));
-  m_spCklickSoundCheckbox->setSource(QUrl("qrc:/resources/sound/menu_selection_soft.wav"));
-  m_spCklickSoundDropBox->setSource(QUrl("qrc:/resources/sound/menu_whoosh.wav"));
-
-  m_spCklickSoundButton->setLoopCount(1);
-  m_spHoverSoundButton->setLoopCount(1);
-  m_spCklickSoundCheckbox->setLoopCount(1);
-  m_spCklickSoundDropBox->setLoopCount(1);
 }
 
 CUISoundEmitter::~CUISoundEmitter()
@@ -62,18 +66,15 @@ bool CUISoundEmitter::eventFilter(QObject* pObject, QEvent* pEvent)
     {
       if (nullptr != qobject_cast<QComboBox*>(pObject))
       {
-        m_spHoverSoundButton->stop();
-        m_spHoverSoundButton->play();
+        m_spHoverSoundButton->Play();
       }
       else if (nullptr != qobject_cast<QAbstractButton*>(pObject))
       {
-        m_spHoverSoundButton->stop();
-        m_spHoverSoundButton->play();
+        m_spHoverSoundButton->Play();
       }
       else if (nullptr != qobject_cast<QAbstractItemDelegate*>(pObject))
       {
-        m_spHoverSoundButton->stop();
-        m_spHoverSoundButton->play();
+        m_spHoverSoundButton->Play();
       }
     } break;
     case QEvent::HoverLeave:
@@ -83,23 +84,19 @@ bool CUISoundEmitter::eventFilter(QObject* pObject, QEvent* pEvent)
     {
       if (nullptr != qobject_cast<QCheckBox*>(pObject))
       {
-        m_spCklickSoundCheckbox->stop();
-        m_spCklickSoundCheckbox->play();
+        m_spCklickSoundCheckbox->Play();
       }
       else if (nullptr != qobject_cast<QComboBox*>(pObject))
       {
-        m_spCklickSoundButton->stop();
-        m_spCklickSoundButton->play();
+        m_spCklickSoundButton->Play();
       }
       else if (nullptr != qobject_cast<QAbstractButton*>(pObject))
       {
-        m_spCklickSoundButton->stop();
-        m_spCklickSoundButton->play();
+        m_spCklickSoundButton->Play();
       }
       else if (nullptr != qobject_cast<QAbstractItemDelegate*>(pObject))
       {
-        m_spCklickSoundButton->stop();
-        m_spCklickSoundButton->play();
+        m_spCklickSoundButton->Play();
       }
     } break;
   default: break;
@@ -132,8 +129,8 @@ void CUISoundEmitter::SlotVolumeChanged()
 //
 void CUISoundEmitter::SetVolume(double dVolume)
 {
-  m_spCklickSoundButton->setVolume(dVolume);
-  m_spHoverSoundButton->setVolume(dVolume);
-  m_spCklickSoundCheckbox->setVolume(dVolume);
-  m_spCklickSoundDropBox->setVolume(dVolume);
+  m_spCklickSoundButton->SetVolume(dVolume);
+  m_spHoverSoundButton->SetVolume(dVolume);
+  m_spCklickSoundCheckbox->SetVolume(dVolume);
+  m_spCklickSoundDropBox->SetVolume(dVolume);
 }

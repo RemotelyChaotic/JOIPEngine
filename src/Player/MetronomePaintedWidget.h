@@ -5,6 +5,8 @@
 #include <memory>
 #include <vector>
 
+class CMultiEmitterSoundPlayer;
+class CSettings;
 namespace QtAV { class AVPlayer; }
 struct SResource;
 typedef std::shared_ptr<SResource>      tspResource;
@@ -40,12 +42,16 @@ signals:
   void tickColorChanged();
   void tickReachedCenter();
 
+private slots:
+  void SlotMutedChanged();
+  void SlotVolumeChanged();
+
 private:
-  std::vector<std::unique_ptr<QtAV::AVPlayer>> m_vspPlayers;
+  std::unique_ptr<CMultiEmitterSoundPlayer>    m_spSoundEmitters;
+  std::shared_ptr<CSettings>                   m_spSettings;
   QString                                      m_sBeatResource;
   QColor                                       m_tickColor;
   std::vector<double>                          m_vdTickmap;
-  qint32                                       m_iLastAutioPlayer;
   bool                                         m_bMuted;
 };
 

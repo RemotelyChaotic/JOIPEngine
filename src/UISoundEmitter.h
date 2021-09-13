@@ -4,8 +4,8 @@
 #include <QObject>
 #include <memory>
 
+class CMultiEmitterSoundPlayer;
 class CSettings;
-class QSoundEffect;
 
 class CUISoundEmitter : public QObject
 {
@@ -26,11 +26,11 @@ private slots:
 private:
   void SetVolume(double dVolume);
 
-  std::unique_ptr<QSoundEffect>     m_spCklickSoundButton;
-  std::unique_ptr<QSoundEffect>     m_spHoverSoundButton;
-  std::unique_ptr<QSoundEffect>     m_spCklickSoundCheckbox;
-  std::unique_ptr<QSoundEffect>     m_spCklickSoundDropBox;
-  std::shared_ptr<CSettings>        m_spSettings;
+  std::unique_ptr<CMultiEmitterSoundPlayer> m_spCklickSoundButton;
+  std::unique_ptr<CMultiEmitterSoundPlayer> m_spHoverSoundButton;
+  std::unique_ptr<CMultiEmitterSoundPlayer> m_spCklickSoundCheckbox;
+  std::unique_ptr<CMultiEmitterSoundPlayer> m_spCklickSoundDropBox;
+  std::shared_ptr<CSettings>                m_spSettings;
 };
 
 #endif // UISOUNDEMITTER_H

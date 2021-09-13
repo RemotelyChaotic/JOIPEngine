@@ -293,6 +293,8 @@ set(Sources
   Systems/ThreadedSystem.h 
   UISoundEmitter.cpp 
   UISoundEmitter.h 
+  Utils/MultiEmitterSoundPlayer.cpp
+  Utils/MultiEmitterSoundPlayer.h
   Utils/RaiiFunctionCaller.cpp
   Utils/RaiiFunctionCaller.h
   Utils/UndoRedoFilter.cpp
