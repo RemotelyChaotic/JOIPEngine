@@ -58,6 +58,34 @@ CEditorActionBar::~CEditorActionBar()
 
 //----------------------------------------------------------------------------------------
 //
+qint32 CEditorActionBar::Spacing() const
+{
+  return m_iSpacing;
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CEditorActionBar::SetSpacing(qint32 iValue)
+{
+  m_iSpacing = iValue;
+
+  auto fnSetSpacing = [&iValue](QLayout* pLayout) {
+    if (nullptr != pLayout)
+    {
+      pLayout->setSpacing(iValue);
+    }
+  };
+
+  fnSetSpacing(m_spUi->pSceneNodeEditorContainer->layout());
+  fnSetSpacing(m_spUi->pMediaPlayerActionBar->layout());
+  fnSetSpacing(m_spUi->pProjectContainer->layout());
+  fnSetSpacing(m_spUi->pResourcesContainer->layout());
+  fnSetSpacing(m_spUi->pCodeEditorContainer->layout());
+  fnSetSpacing(m_spUi->pProjectSettingsEditorContainer->layout());
+}
+
+//----------------------------------------------------------------------------------------
+//
 void CEditorActionBar::SetActionBarPosition(EActionBarPosition position)
 {
   if (!IsInitialized())

@@ -550,6 +550,7 @@ CHelpButtonOverlay::CHelpButtonOverlay(QWidget* pParent) :
   m_pButton->setMinimumSize(QSize(48, 48));
   m_pButton->setMaximumSize(QSize(48, 48));
   m_pButton->setIconSize(QSize(48, 48));
+  m_pButton->EnableShortcutAsText(true);
 
   auto spSettings = CApplication::Instance()->Settings();
   connect(spSettings.get(), &CSettings::keyBindingsChanged, this, &CHelpButtonOverlay::SlotKeyBindingsChanged);

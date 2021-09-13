@@ -13,6 +13,7 @@ namespace Ui {
 class CEditorActionBar : public CEditorWidgetBase
 {
   Q_OBJECT
+  Q_PROPERTY(qint32 spacing READ Spacing WRITE SetSpacing)
 
 public:
   explicit CEditorActionBar(QWidget* pParent = nullptr);
@@ -25,6 +26,9 @@ public:
     eLeft,
     eRight
   };
+
+  qint32 Spacing() const;
+  void SetSpacing(qint32 iValue);
 
   void SetActionBarPosition(EActionBarPosition position);
 
@@ -53,6 +57,7 @@ private:
   std::shared_ptr<CSettings>                       m_spSettings;
   EActionBarPosition                               m_position;
   qint32                                           m_iCurrentDisplayType; // EEditorWidget
+  qint32                                           m_iSpacing;
 };
 
 #endif // EDITORACTIONBAR_H

@@ -28,21 +28,27 @@ namespace
 //
 CShortcutButton::CShortcutButton(QWidget* pParent) :
   QPushButton(pParent),
-  m_pAction(new QAction(this))
+  m_pAction(new QAction(this)),
+  m_sBaseToolTip(),
+  m_bShortCutAsTextEnabled(false)
 {
   connect(m_pAction, &QAction::triggered, this, &QPushButton::clicked, Qt::DirectConnection);
   addAction(m_pAction);
 }
 CShortcutButton::CShortcutButton(const QString& text, QWidget* pParent) :
   QPushButton(text, pParent),
-  m_pAction(new QAction(this))
+  m_pAction(new QAction(this)),
+  m_sBaseToolTip(),
+  m_bShortCutAsTextEnabled(false)
 {
   connect(m_pAction, &QAction::triggered, this, &QPushButton::clicked, Qt::DirectConnection);
   addAction(m_pAction);
 }
 CShortcutButton::CShortcutButton(const QIcon& icon, const QString& text, QWidget* pParent) :
   QPushButton(icon, text, pParent),
-  m_pAction(new QAction(this))
+  m_pAction(new QAction(this)),
+  m_sBaseToolTip(),
+  m_bShortCutAsTextEnabled(false)
 {
   connect(m_pAction, &QAction::triggered, this, &QPushButton::clicked, Qt::DirectConnection);
   addAction(m_pAction);
@@ -55,6 +61,33 @@ CShortcutButton::~CShortcutButton() {}
 void CShortcutButton::SetShortcut(const QKeySequence& sequence)
 {
   m_pAction->setShortcut(sequence);
+  QPushButton::setToolTip(m_sBaseToolTip + "<br><i>" + m_pAction->shortcut().toString() + "</i>");
+}
+
+//----------------------------------------------------------------------------------------
+//
+bool CShortcutButton::IsShortcutAsTextEnabled() const
+{
+  return m_bShortCutAsTextEnabled;
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CShortcutButton::EnableShortcutAsText(bool bEnabled)
+{
+  if (m_bShortCutAsTextEnabled != bEnabled)
+  {
+    m_bShortCutAsTextEnabled = bEnabled;
+    emit shortcutAsTextChanged();
+  }
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CShortcutButton::setToolTip(const QString& sText)
+{
+  m_sBaseToolTip = sText;
+  QPushButton::setToolTip(m_sBaseToolTip + "<br><i>" + m_pAction->shortcut().toString() + "</i>");
 }
 
 //----------------------------------------------------------------------------------------
@@ -63,19 +96,22 @@ void CShortcutButton::paintEvent(QPaintEvent* pEvt)
 {
   QPushButton::paintEvent(pEvt);
 
-  QPainter painter(this);
-  QFont painterFont = painter.font();
-  painterFont.setPixelSize(10);
-  painter.setFont(painterFont);
+  if (m_bShortCutAsTextEnabled)
+  {
+    QPainter painter(this);
+    QFont painterFont = painter.font();
+    painterFont.setPixelSize(10);
+    painter.setFont(painterFont);
 
-  const QString sText = m_pAction->shortcut().toString();
+    const QString sText = m_pAction->shortcut().toString();
 
-  QFontMetrics fontMetrics(font(), this);
-  QRect textRect = fontMetrics.boundingRect(sText);
-  if (sText.length() == 1) textRect.setWidth(textRect.width()*2);
+    QFontMetrics fontMetrics(font(), this);
+    QRect textRect = fontMetrics.boundingRect(sText);
+    if (sText.length() == 1) textRect.setWidth(textRect.width()*2);
 
-  drawText(painter,
-           rect().x() + rect().width() - textRect.width(),
-           rect().y() + rect().height() - textRect.height(),
-           Qt::AlignLeft | Qt::AlignTop, sText);
+    drawText(painter,
+             rect().x() + rect().width() - textRect.width(),
+             rect().y() + rect().height() - textRect.height(),
+             Qt::AlignLeft | Qt::AlignTop, sText);
+  }
 }
