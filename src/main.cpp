@@ -11,6 +11,7 @@
 #include <QApplication>
 #include <QImageReader>
 #include <QtAVWidgets>
+#include <QtAV\QtAV_Global.h>
 #include <QOpenGLContext>
 #if defined(QT_QML_DEBUG)
 #include <QQmlDebuggingEnabler>
@@ -27,6 +28,13 @@ int main(int argc, char *argv[])
   // WebView or Webengine is not used anymore, but we'll keep this for now
   //QtWebView::initialize();
   QtAV::Widgets::registerRenderers();
+
+  // Too many debug messages in debug, if needed set to debug temporarilly
+#ifndef NDEBUG
+  QtAV::setLogLevel(QtAV::LogLevel::LogWarning);
+#else
+  QtAV::setLogLevel(QtAV::LogLevel::LogCritical);
+#endif
 
   CPhysFsFileEngine::init(argv[0]);
   CPhysFsFileEngineHandler engine;
