@@ -477,7 +477,7 @@ bool CHelpOverlay::eventFilter(QObject* pObj, QEvent* pEvt)
           // find clicked widget
           for (auto pWidget : m_vpHelpWidgets)
           {
-            QVector2D center(m_pBackground->m_circleOrigin);
+            QVector2D center(m_pBackground->mapToGlobal(m_pBackground->m_circleOrigin));
             QRect widgetGeometry = pWidget->geometry();
             widgetGeometry.moveTopLeft(pWidget->parentWidget()->mapToGlobal(widgetGeometry.topLeft()));
             float fCircleRadius = static_cast<float>(m_pBackground->m_iCircleRadius);
@@ -485,11 +485,12 @@ bool CHelpOverlay::eventFilter(QObject* pObj, QEvent* pEvt)
             QVector2D tr(widgetGeometry.topRight());
             QVector2D bl(widgetGeometry.bottomLeft());
             QVector2D br(widgetGeometry.bottomRight());
+            QPoint mousePos = pMouseEvt->globalPos();
             if (center.distanceToPoint(tl) < fCircleRadius &&
                 center.distanceToPoint(tr) < fCircleRadius &&
                 center.distanceToPoint(bl) < fCircleRadius &&
                 center.distanceToPoint(br) < fCircleRadius &&
-                widgetGeometry.contains(pMouseEvt->globalPos()))
+                widgetGeometry.contains(mousePos))
             {
               // found -> open ui
               ShowHelp(pWidget->property(helpOverlay::c_sHelpPagePropertyName).toString());
