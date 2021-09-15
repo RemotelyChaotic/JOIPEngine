@@ -163,10 +163,6 @@ set(Sources
   Editor/Script/ScriptEditorModel.h 
   Editor/Script/ScriptEditorWidget.cpp 
   Editor/Script/ScriptEditorWidget.h 
-  Editor/Script/ScriptHighlighter.cpp 
-  Editor/Script/ScriptHighlighter.h 
-  Editor/Script/ScriptSearchBar.cpp
-  Editor/Script/ScriptSearchBar.h
   Editor/Script/TextSnippetOverlay.cpp 
   Editor/Script/TextSnippetOverlay.h 
   Editor/Script/TextSnippetOverlay.ui 
@@ -304,6 +300,10 @@ set(Sources
   Widgets/ColorPicker.cpp 
   Widgets/ColorPicker.h 
   Widgets/ColorPicker.ui 
+  Widgets/Editor/EditorHighlighter.cpp
+  Widgets/Editor/EditorHighlighter.h
+  Widgets/Editor/EditorSearchBar.cpp
+  Widgets/Editor/EditorSearchBar.h
   Widgets/FlowLayout.cpp 
   Widgets/FlowLayout.h 
   Widgets/HelpOverlay.cpp 
