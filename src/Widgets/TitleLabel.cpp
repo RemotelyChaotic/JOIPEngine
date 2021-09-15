@@ -133,6 +133,11 @@ public:
     connect(m_pProgress2Animation, &QPropertyAnimation::finished,
             this, &CTitleProxyStyle::AnimationsFinished);
   }
+  ~CTitleProxyStyle()
+  {
+    m_future.cancel();
+    m_future.waitForFinished();
+  }
 
   //--------------------------------------------------------------------------------------
   //
