@@ -1,6 +1,7 @@
 #include "ScriptEditorWidget.h"
 #include "Widgets/Editor/EditorSearchBar.h"
 #include "Widgets/Editor/EditorHighlighter.h"
+#include "Widgets/Editor/HighlightedSearchableTextEdit.h"
 #include <syntaxhighlighter.h>
 #include <definition.h>
 #include <theme.h>
@@ -16,32 +17,21 @@ namespace
 CScriptEditorWidget::CScriptEditorWidget(QWidget* pParent) :
   QPlainTextEdit(pParent),
   m_spRepository(std::make_unique<KSyntaxHighlighting::Repository>()),
-  m_pHighlighter(nullptr),
+  m_pHighlightedSearchableEdit(nullptr),
   m_lineNumberBackgroundColor(24, 24, 24),
   m_lineNumberTextColor(Qt::white),
   m_highlightLineColor(68, 71, 90),
   m_widgetsBackgroundColor(24, 24, 24),
-  m_highlightCursor(),
-  m_sLastSearch(),
   m_previouslyClickedKey(Qt::Key(0))
 {
   setAttribute(Qt::WA_NoMousePropagation, false);
   installEventFilter(this);
 
-  m_pHighlighter = new CEditorHighlighter(document());
-  m_pHighlighter->setTheme(m_spRepository->theme(m_sTheme));
+  m_pHighlightedSearchableEdit = new CHighlightedSearchableTextEdit(this);
+  m_pHighlightedSearchableEdit->Highlighter()->setTheme(m_spRepository->theme(m_sTheme));
 
   m_pLineNumberArea = new CLineNumberArea(this);
   m_pWidgetArea = new CWidgetArea(this);
-  m_pSearchBar = new CEditorSearchBar(this);
-  m_pSearchBar->Climb();
-  m_pSearchBar->Resize();
-
-  // reset things after closing search bar
-  connect(m_pSearchBar, &CEditorSearchBar::SignalHidden,
-          this, &CScriptEditorWidget::SearchAreaHidden);
-  connect(m_pSearchBar, &CEditorSearchBar::SignalFilterChanged,
-          this, &CScriptEditorWidget::SlotSearchFilterChanged);
 
   connect(this, &CScriptEditorWidget::blockCountChanged,
           this, &CScriptEditorWidget::UpdateLeftAreaWidth);
@@ -75,7 +65,7 @@ CScriptEditorWidget::CScriptEditorWidget(QWidget* pParent) :
 void CScriptEditorWidget::SetHighlightDefinition(const QString& sType)
 {
   const auto def = m_spRepository->definitionForName(sType);
-  m_pHighlighter->setDefinition(def);
+  m_pHighlightedSearchableEdit->Highlighter()->setDefinition(def);
 }
 
 //----------------------------------------------------------------------------------------
@@ -85,8 +75,8 @@ void CScriptEditorWidget::SetHighlightSearchBackgroundColor(const QColor& color)
   if (m_highlightSearchBackgroundColor != color)
   {
     m_highlightSearchBackgroundColor = color;
-    m_pHighlighter->SetSearchColors(m_highlightSearchBackgroundColor,
-                                    m_highlightSearchColor);
+    m_pHighlightedSearchableEdit->Highlighter()->SetSearchColors(m_highlightSearchBackgroundColor,
+                                                                 m_highlightSearchColor);
   }
 }
 
@@ -97,8 +87,8 @@ void CScriptEditorWidget::SetHighlightSearchColor(const QColor& color)
   if (m_highlightSearchColor != color)
   {
     m_highlightSearchColor = color;
-    m_pHighlighter->SetSearchColors(m_highlightSearchBackgroundColor,
-                                    m_highlightSearchColor);
+    m_pHighlightedSearchableEdit->Highlighter()->SetSearchColors(m_highlightSearchBackgroundColor,
+                                                                 m_highlightSearchColor);
   }
 }
 
@@ -107,7 +97,7 @@ void CScriptEditorWidget::SetHighlightSearchColor(const QColor& color)
 void CScriptEditorWidget::SetTheme(const QString& sTheme)
 {
   m_sTheme = sTheme;
-  m_pHighlighter->setTheme(m_spRepository->theme(m_sTheme));
+  m_pHighlightedSearchableEdit->Highlighter()->setTheme(m_spRepository->theme(m_sTheme));
 }
 
 //----------------------------------------------------------------------------------------
@@ -209,10 +199,7 @@ qint32 CScriptEditorWidget::WidgetAreaWidth()
 //
 QMenu* CScriptEditorWidget::CreateContextMenu()
 {
-  QMenu* pMenu = createStandardContextMenu();
-  pMenu->addAction(tr("Search"), this, SLOT(SlotShowHideSearchFilter()),
-                   QKeySequence::Find);
-  return pMenu;
+  return m_pHighlightedSearchableEdit->CreateContextMenu();
 }
 
 //----------------------------------------------------------------------------------------
@@ -282,20 +269,6 @@ void CScriptEditorWidget::UpdateWidgetArea(const QRect& rect, qint32 iDy)
 
 //----------------------------------------------------------------------------------------
 //
-void CScriptEditorWidget::SearchAreaHidden()
-{
-  if (!m_highlightCursor.isNull())
-  {
-    setTextCursor(m_highlightCursor);
-  }
-  m_highlightCursor = QTextCursor();
-  m_sLastSearch = QString();
-  m_pHighlighter->SetSearchExpression(QString());
-  setFocus();
-}
-
-//----------------------------------------------------------------------------------------
-//
 void CScriptEditorWidget::SlotExecutionError(QString sException, qint32 iLine, QString sStack)
 {
   m_pWidgetArea->ClearAllErrors();
@@ -309,68 +282,6 @@ void CScriptEditorWidget::SlotExecutionError(QString sException, qint32 iLine, Q
 
 //----------------------------------------------------------------------------------------
 //
-void CScriptEditorWidget::SlotShowHideSearchFilter()
-{
-  if (m_pSearchBar->isVisible())
-  {
-    m_pSearchBar->Hide();
-  }
-  else
-  {
-    QTextCursor cursor = textCursor();
-    m_pSearchBar->SetFilter(cursor.selectedText());
-    m_pSearchBar->Show();
-  }
-}
-
-//----------------------------------------------------------------------------------------
-//
-void CScriptEditorWidget::SlotSearchFilterChanged(bool bForward, const QString& sText)
-{
-  QTextDocument* pDocument = document();
-
-  if (!sText.isEmpty())
-  {
-    QTextCursor highlightCursor = m_highlightCursor;
-    if (m_highlightCursor.isNull() || m_sLastSearch.isEmpty() || m_sLastSearch != sText)
-    {
-      highlightCursor = QTextCursor(pDocument);
-    }
-
-    // update highlighting
-    if (m_sLastSearch != sText)
-    {
-      m_pHighlighter->SetSearchExpression(sText);
-    }
-
-    m_sLastSearch = sText;
-    highlightCursor =
-        pDocument->find(sText, highlightCursor, bForward ? QTextDocument::FindFlags() :
-                                                           QTextDocument::FindBackward);
-    if (!highlightCursor.isNull())
-    {
-      setTextCursor(highlightCursor);
-      m_highlightCursor = highlightCursor;
-    }
-  }
-}
-
-//----------------------------------------------------------------------------------------
-//
-void CScriptEditorWidget::contextMenuEvent(QContextMenuEvent* pEvent)
-{
-  if (nullptr != pEvent)
-  {
-    QPointer<CScriptEditorWidget> pThisGuard(this);
-    QMenu* pMenu = CreateContextMenu();
-    pMenu->exec(pEvent->globalPos());
-    if (nullptr == pThisGuard) { return; }
-    delete pMenu;
-  }
-}
-
-//----------------------------------------------------------------------------------------
-//
 bool CScriptEditorWidget::eventFilter(QObject* pTarget, QEvent* pEvent)
 {
   if (nullptr != pEvent && this == pTarget)
@@ -378,46 +289,30 @@ bool CScriptEditorWidget::eventFilter(QObject* pTarget, QEvent* pEvent)
     if (QEvent::KeyPress == pEvent->type())
     {
       QKeyEvent* pKeyEvent = static_cast<QKeyEvent*>(pEvent);
-      // Ctrl+F
-      if (pKeyEvent->modifiers().testFlag(Qt::ControlModifier) && pKeyEvent->key() == Qt::Key_F)
-      {
-        SlotShowHideSearchFilter();
-      }
       // Enter
-      else if (pKeyEvent->key() == Qt::Key_Enter || pKeyEvent->key() == Qt::Key_Return)
+      if (pKeyEvent->key() == Qt::Key_Enter || pKeyEvent->key() == Qt::Key_Return)
       {
-        if (m_pSearchBar->isVisible() && !m_sLastSearch.isEmpty() && focusWidget() != this)
+        // get indentation of current line, and mimic for new line
+        QTextCursor cursor = textCursor();
+        cursor.movePosition(QTextCursor::StartOfLine);
+        cursor.select(QTextCursor::SelectionType::LineUnderCursor);
+        QString sSelectedText = cursor.selectedText();
+        QString sIndentation;
+        for (qint32 i = 0; i < sSelectedText.length(); ++i)
         {
-          SlotSearchFilterChanged(m_pSearchBar->IsSearchingForward(), m_sLastSearch);
-          // don't insert line break, just jump to next search result
-          m_previouslyClickedKey = Qt::Key(pKeyEvent->key());
-          pEvent->ignore();
-          return true;
-        }
-        else
-        {
-          // get indentation of current line, and mimic for new line
-          QTextCursor cursor = textCursor();
-          cursor.movePosition(QTextCursor::StartOfLine);
-          cursor.select(QTextCursor::SelectionType::LineUnderCursor);
-          QString sSelectedText = cursor.selectedText();
-          QString sIndentation;
-          for (qint32 i = 0; i < sSelectedText.length(); ++i)
+          if (sSelectedText[i].isSpace())
           {
-            if (sSelectedText[i].isSpace())
-            {
-              sIndentation += sSelectedText[i];
-            }
-            else
-            {
-              break;
-            }
+            sIndentation += sSelectedText[i];
           }
-          insertPlainText(QString("\n") + sIndentation);
-          m_previouslyClickedKey = Qt::Key(pKeyEvent->key());
-          pEvent->ignore();
-          return true;
+          else
+          {
+            break;
+          }
         }
+        insertPlainText(QString("\n") + sIndentation);
+        m_previouslyClickedKey = Qt::Key(pKeyEvent->key());
+        pEvent->ignore();
+        return true;
       }
       // Tab
       else if (pKeyEvent->key() == Qt::Key_Tab)

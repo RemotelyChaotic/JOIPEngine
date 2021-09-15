@@ -32,6 +32,8 @@ CEditorSearchBar::CEditorSearchBar(QWidget* pParent) :
   m_pForward->setToolTip("Close search");
   connect(m_pCloseButton, &QPushButton::clicked, this, &CEditorSearchBar::Hide);
   pLayout->addWidget(m_pCloseButton);
+
+  pParent->metaObject()->className();
 }
 
 CEditorSearchBar::~CEditorSearchBar()
@@ -52,7 +54,7 @@ void CEditorSearchBar::SetFilter(const QString& sString)
 //
 void CEditorSearchBar::Climb()
 {
-  ClimbToFirstInstanceOf("CScriptEditorWidget", false);
+  ClimbToFirstInstanceOf(m_pOriginalParent->metaObject()->className(), false);
 }
 
 //----------------------------------------------------------------------------------------
@@ -72,7 +74,8 @@ void CEditorSearchBar::Resize()
   if (nullptr != m_pTargetWidget)
   {
     QSize target = m_pTargetWidget->size();
-    move((target.width() - width()) / 2, 9);
+    qint32 iXOffset = (target.width() - sizeHint().width()) / 2;
+    move(iXOffset, target.height() - 9 - sizeHint().height());
   }
 }
 

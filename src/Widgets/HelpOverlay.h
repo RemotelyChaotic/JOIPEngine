@@ -6,11 +6,13 @@
 #include <QPaintEvent>
 #include <QPointer>
 #include <QTimer>
+#include <QTextCursor>
 #include <QWidget>
 #include <memory>
 
 class CHelpButtonOverlay;
 class CHelpFactory;
+class CHighlightedSearchableTextEdit;
 class CSettings;
 class CShortcutButton;
 namespace Ui {
@@ -116,6 +118,7 @@ private:
   std::unique_ptr<Ui::CHelpOverlay> m_spUi;
   std::shared_ptr<CSettings>        m_spSettings;
   std::weak_ptr<CHelpFactory>       m_wpHelpFactory;
+  QPointer<CHighlightedSearchableTextEdit> m_pHighlightedSearchableEdit;
   QPointer<CHelpButtonOverlay>      m_pHelpButton;
   QPointer<CHelpOverlayBackGround>  m_pBackground;
 };

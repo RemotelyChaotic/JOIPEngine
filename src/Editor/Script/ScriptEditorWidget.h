@@ -8,8 +8,7 @@
 #include <map>
 
 class CLineNumberArea;
-class CEditorSearchBar;
-class CEditorHighlighter;
+class CHighlightedSearchableTextEdit;
 class CWidgetArea;
 namespace KSyntaxHighlighting
 {
@@ -63,11 +62,8 @@ public:
 
 public slots:
   void SlotExecutionError(QString sException, qint32 iLine, QString sStack);
-  void SlotShowHideSearchFilter();
-  void SlotSearchFilterChanged(bool bForward, const QString& sText);
 
 protected:
-  void contextMenuEvent(QContextMenuEvent* pEvent) override;
   bool eventFilter(QObject* pTarget, QEvent* pEvent) override;
   void paintEvent(QPaintEvent* pEvent) override;
   void resizeEvent(QResizeEvent* pEvent) override;
@@ -77,14 +73,12 @@ private slots:
   void UpdateLeftAreaWidth(qint32 iNewBlockCount);
   void UpdateLineNumberArea(const QRect&, qint32);
   void UpdateWidgetArea(const QRect&, qint32);
-  void SearchAreaHidden();
 
 private:
   std::unique_ptr<KSyntaxHighlighting::Repository> m_spRepository;
-  QPointer<CEditorHighlighter>                     m_pHighlighter;
+  QPointer<CHighlightedSearchableTextEdit>         m_pHighlightedSearchableEdit;
   CLineNumberArea*                                 m_pLineNumberArea;
   CWidgetArea*                                     m_pWidgetArea;
-  CEditorSearchBar*                                m_pSearchBar;
   QString                                          m_sTheme;
   QColor                                           m_lineNumberBackgroundColor;
   QColor                                           m_lineNumberTextColor;
@@ -92,8 +86,6 @@ private:
   QColor                                           m_highlightSearchBackgroundColor;
   QColor                                           m_highlightSearchColor;
   QColor                                           m_widgetsBackgroundColor;
-  QTextCursor                                      m_highlightCursor;
-  QString                                          m_sLastSearch;
   Qt::Key                                          m_previouslyClickedKey;
 };
 

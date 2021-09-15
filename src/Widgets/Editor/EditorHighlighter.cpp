@@ -4,7 +4,8 @@
 //----------------------------------------------------------------------------------------
 //
 CEditorHighlighter::CEditorHighlighter(QTextDocument* pParent) :
-  KSyntaxHighlighting::SyntaxHighlighter(pParent)
+  KSyntaxHighlighting::SyntaxHighlighter(pParent),
+  m_bSyntaxHighlightingEnabled(true)
 {
 }
 
@@ -30,10 +31,24 @@ void CEditorHighlighter::SetSearchExpression(const QString& sExpresion)
 
 //----------------------------------------------------------------------------------------
 //
+void CEditorHighlighter::SetSyntaxHighlightingEnabled(bool bEnabled)
+{
+  if (m_bSyntaxHighlightingEnabled != bEnabled)
+  {
+    m_bSyntaxHighlightingEnabled = bEnabled;
+    rehighlight();
+  }
+}
+
+//----------------------------------------------------------------------------------------
+//
 void CEditorHighlighter::highlightBlock(const QString& sText)
 {
   // default highlighting
-  KSyntaxHighlighting::SyntaxHighlighter::highlightBlock(sText);
+  if (m_bSyntaxHighlightingEnabled)
+  {
+    KSyntaxHighlighting::SyntaxHighlighter::highlightBlock(sText);
+  }
 
   if (m_searchExpression.isValid())
   {
@@ -46,5 +61,15 @@ void CEditorHighlighter::highlightBlock(const QString& sText)
       QRegularExpressionMatch match = matchIterator.next();
       setFormat(match.capturedStart(), match.capturedLength(), m_searchFormat);
     }
+  }
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CEditorHighlighter::applyFormat(int offset, int length, const KSyntaxHighlighting::Format &format)
+{
+  if (m_bSyntaxHighlightingEnabled)
+  {
+    KSyntaxHighlighting::SyntaxHighlighter::applyFormat(offset, length, format);
   }
 }

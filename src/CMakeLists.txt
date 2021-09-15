@@ -304,6 +304,8 @@ set(Sources
   Widgets/Editor/EditorHighlighter.h
   Widgets/Editor/EditorSearchBar.cpp
   Widgets/Editor/EditorSearchBar.h
+  Widgets/Editor/HighlightedSearchableTextEdit.cpp
+  Widgets/Editor/HighlightedSearchableTextEdit.h
   Widgets/FlowLayout.cpp 
   Widgets/FlowLayout.h 
   Widgets/HelpOverlay.cpp 

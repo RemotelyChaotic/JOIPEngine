@@ -3,6 +3,7 @@
 #include "Settings.h"
 #include "ui_HelpOverlay.h"
 #include "Systems/HelpFactory.h"
+#include "Widgets/Editor/HighlightedSearchableTextEdit.h"
 #include "Widgets/ShortcutButton.h"
 
 //#include <private/qpixmapfilter_p.h>
@@ -310,12 +311,18 @@ CHelpOverlay::CHelpOverlay(QPointer<CHelpButtonOverlay> pHelpButton, QWidget* pP
   m_spUi(std::make_unique<Ui::CHelpOverlay>()),
   m_spSettings(CApplication::Instance()->Settings()),
   m_wpHelpFactory(CApplication::Instance()->System<CHelpFactory>()),
+  m_pHighlightedSearchableEdit(nullptr),
   m_pHelpButton(pHelpButton)
 {
   setAttribute(Qt::WA_TranslucentBackground);
 
   m_spUi->setupUi(this);
   m_pHelpOverlay = this;
+
+  m_spUi->pHtmlBrowser->setUndoRedoEnabled(false);
+
+  m_pHighlightedSearchableEdit = new CHighlightedSearchableTextEdit(m_spUi->pHtmlBrowser);
+  m_pHighlightedSearchableEdit->SetSyntaxHighlightingEnabled(false);
 
   m_pBackground = new CHelpOverlayBackGround(this);
   m_pBackground->installEventFilter(this);
