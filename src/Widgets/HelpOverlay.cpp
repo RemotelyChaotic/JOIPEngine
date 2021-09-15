@@ -14,6 +14,8 @@
 #include <QPainter>
 #include <QPushButton>
 #include <QPropertyAnimation>
+#include <QStandardItemModel>
+#include <QSortFilterProxyModel>
 #include <QStyle>
 #include <QStyleOptionFrame>
 #include <QVBoxLayout>
@@ -320,6 +322,15 @@ CHelpOverlay::CHelpOverlay(QPointer<CHelpButtonOverlay> pHelpButton, QWidget* pP
   m_spUi->pHtmlBrowserBox->hide();
   m_spUi->pHtmlBrowserBox->raise();
 
+  QStandardItemModel* pModel = new QStandardItemModel(m_spUi->pHelpSearchTree);
+  QSortFilterProxyModel* pProxy = new QSortFilterProxyModel(m_spUi->pHelpSearchTree);
+  pProxy->setSourceModel(pModel);
+  m_spUi->pHelpSearchTree->setModel(pProxy);
+  pModel->setColumnCount(1);
+  pModel->setHorizontalHeaderLabels(QStringList() << "Topic");
+  connect(m_spUi->pHelpSearchTree->selectionModel(), &QItemSelectionModel::currentChanged,
+          this, &CHelpOverlay::SlotCurrentIndexChanged);
+
   connect(m_pBackground, &CHelpOverlayBackGround::SignalCircleAnimationFinished,
           this, &CHelpOverlay::SlotCircleAnimationFinished, Qt::DirectConnection);
   connect(m_spSettings.get(), &CSettings::keyBindingsChanged,
@@ -369,6 +380,9 @@ void CHelpOverlay::Resize()
   m_spUi->pHtmlBrowserBox->resize(parentSize.width() - c_iOffsetOfHelpWindow * 2,
                                   parentSize.height() - c_iOffsetOfHelpWindow * 2);
   m_spUi->pHtmlBrowserBox->move(c_iOffsetOfHelpWindow, c_iOffsetOfHelpWindow);
+
+  m_spUi->pSplitter->setSizes({m_spUi->pHtmlBrowserBox->width() / 5,
+                               m_spUi->pHtmlBrowserBox->width() * 4 / 5});
 }
 
 //----------------------------------------------------------------------------------------
@@ -462,6 +476,95 @@ void CHelpOverlay::on_CloseButton_clicked()
 
 //----------------------------------------------------------------------------------------
 //
+void CHelpOverlay::on_pHtmlBrowser_sourceChanged(const QUrl& source)
+{
+  if (auto spFactory = m_wpHelpFactory.lock())
+  {
+    QString sSource = source.toLocalFile();
+    if (sSource.startsWith("qrc")) { sSource = sSource.mid(3); }
+
+    for (const auto& pair : spFactory->HelpMap())
+    {
+      if (pair.second == sSource)
+      {
+        QStringList vsList = pair.first.split("/");
+        QSortFilterProxyModel* pProxy =
+            dynamic_cast<QSortFilterProxyModel*>(m_spUi->pHelpSearchTree->model());
+        if (nullptr != pProxy)
+        {
+          QStandardItemModel* pModel = dynamic_cast<QStandardItemModel*>(pProxy->sourceModel());
+          if (nullptr != pModel)
+          {
+            QList<QStandardItem*> vpItems = pModel->findItems(vsList.last(),
+                                                              Qt::MatchRecursive | Qt::MatchFixedString);
+
+            QStandardItem* pItemFound = nullptr;
+            for (QStandardItem* pItem : qAsConst(vpItems))
+            {
+              QStandardItem* pItemParent = pItem->parent();
+              for (qint32 i = vsList.size() - 2; -1 < i; --i)
+              {
+                if (nullptr != pItemParent)
+                {
+                  if (pItemParent->data(Qt::DisplayRole) != vsList[i])
+                  {
+                    break;
+                  }
+                  else
+                  {
+                    pItemParent = pItemParent->parent();
+                    if (nullptr == pItemParent || pItemParent == pModel->invisibleRootItem())
+                    {
+                      pItemFound = pItem;
+                      goto loopEnd;
+                    }
+                  }
+                }
+              }
+            }
+            loopEnd:
+
+            if (nullptr != pItemFound)
+            {
+              QModelIndex index = pProxy->mapFromSource(pModel->indexFromItem(pItemFound));
+              m_spUi->pHelpSearchTree->selectionModel()->blockSignals(true);
+              m_spUi->pHelpSearchTree->selectionModel()->select(index,
+                    QItemSelectionModel::ClearAndSelect | QItemSelectionModel::Rows);
+              m_spUi->pHelpSearchTree->scrollTo(index);
+              m_spUi->pHelpSearchTree->selectionModel()->blockSignals(false);
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CHelpOverlay::SlotCurrentIndexChanged(const QModelIndex& current,
+                                           const QModelIndex& previous)
+{
+  Q_UNUSED(previous)
+  QSortFilterProxyModel* pProxy =
+      dynamic_cast<QSortFilterProxyModel*>(m_spUi->pHelpSearchTree->model());
+  if (nullptr != pProxy)
+  {
+    QStandardItemModel* pModel = dynamic_cast<QStandardItemModel*>(pProxy->sourceModel());
+    if (nullptr != pModel)
+    {
+      QStandardItem* pItem = pModel->itemFromIndex(pProxy->mapToSource(current));
+      if (nullptr != pItem)
+      {
+        const QString sPath = pItem->data().toString();
+        m_spUi->pHtmlBrowser->setSource(QUrl::fromLocalFile(sPath));
+      }
+    }
+  }
+}
+
+//----------------------------------------------------------------------------------------
+//
 bool CHelpOverlay::eventFilter(QObject* pObj, QEvent* pEvt)
 {
   if (nullptr != pObj && nullptr != pEvt)
@@ -510,10 +613,69 @@ bool CHelpOverlay::eventFilter(QObject* pObj, QEvent* pEvt)
 
 //----------------------------------------------------------------------------------------
 //
+void CHelpOverlay::InitTree()
+{
+  if (auto spFactory = m_wpHelpFactory.lock())
+  {
+    QSortFilterProxyModel* pProxy =
+        dynamic_cast<QSortFilterProxyModel*>(m_spUi->pHelpSearchTree->model());
+    if (nullptr != pProxy)
+    {
+      QStandardItemModel* pModel = dynamic_cast<QStandardItemModel*>(pProxy->sourceModel());
+      if (nullptr != pModel)
+      {
+        QStandardItem* pRoot = pModel->invisibleRootItem();
+        if (nullptr != pRoot)
+        {
+          // clear model
+          pModel->removeRows(0, pRoot->rowCount(), pModel->indexFromItem(pRoot));
+          m_spUi->pHelpSearchTree->setUpdatesEnabled(false);
+          auto map = spFactory->HelpMap();
+          for (const auto& pair : map)
+          {
+            QStringList vsCategorySplit = pair.first.split("/");
+            InitTreeBranch(pRoot, vsCategorySplit, pair.second);
+          }
+          m_spUi->pHelpSearchTree->setUpdatesEnabled(true);
+        }
+      }
+    }
+  }
+  m_spUi->pHelpSearchTree->expandAll();
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CHelpOverlay::InitTreeBranch(QStandardItem* pParent, const QStringList& vsData,
+                                  const QString& sPath)
+{
+  if (nullptr != pParent && vsData.size() > 0)
+  {
+    QStandardItem* pChild = nullptr;
+    for (qint32 i = 0; pParent->rowCount() > i; ++i)
+    {
+      if (pParent->child(i)->data(Qt::DisplayRole).toString() == vsData.first())
+      {
+        pChild = pParent->child(i);
+      }
+    }
+    if (nullptr == pChild)
+    {
+      pChild = new QStandardItem(vsData.first());
+      pChild->setData(sPath);
+      pParent->appendRow(pChild);
+    }
+    InitTreeBranch(pChild, vsData.mid(1), sPath);
+  }
+}
+
+//----------------------------------------------------------------------------------------
+//
 void CHelpOverlay::ShowHelp(const QString sKey)
 {
   if (auto spFactory = m_wpHelpFactory.lock())
   {
+    InitTree();
     m_spUi->pHtmlBrowser->setSource(QUrl::fromLocalFile(spFactory->GetHelp(sKey)));
     m_spUi->pHtmlBrowser->clearHistory();
     m_spUi->BackButton->setEnabled(m_spUi->pHtmlBrowser->isBackwardAvailable());

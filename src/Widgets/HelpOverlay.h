@@ -18,6 +18,7 @@ namespace Ui {
 }
 class QPixmapDropShadowFilter;
 class QPropertyAnimation;
+class QStandardItem;
 class QTextBrowser;
 
 namespace helpOverlay {
@@ -97,6 +98,8 @@ protected slots:
   void on_HomeButton_clicked();
   void on_ForardButton_clicked();
   void on_CloseButton_clicked();
+  void on_pHtmlBrowser_sourceChanged(const QUrl& source);
+  void SlotCurrentIndexChanged(const QModelIndex& current, const QModelIndex& previous);
 
 protected:
   bool eventFilter(QObject* pObj, QEvent* pEvt) override;
@@ -104,6 +107,8 @@ protected:
   std::vector<QPointer<QWidget>>    m_vpHelpWidgets;
 
 private:
+  void InitTree();
+  void InitTreeBranch(QStandardItem* pParent, const QStringList& vsData, const QString& sPath);
   void ShowHelp(const QString sKey);
 
   static QPointer<CHelpOverlay> m_pHelpOverlay;

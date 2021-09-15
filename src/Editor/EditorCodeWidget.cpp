@@ -34,6 +34,7 @@ namespace {
 
   const QString c_sScriptSelectionHelpId =  "Editor/ScriptSelection";
   const QString c_sSciptEditorHelpId =      "Editor/SciptEditor";
+  const QString c_sSciptAPIHelpId =         "Editor/SciptAPI/Editor";
 }
 
 //----------------------------------------------------------------------------------------
@@ -126,6 +127,8 @@ void CEditorCodeWidget::Initialize()
     wpHelpFactory->RegisterHelp(c_sScriptSelectionHelpId, ":/resources/help/editor/code/scriptselection_combobox_help.html");
     m_spUi->pCodeEdit->setProperty(helpOverlay::c_sHelpPagePropertyName, c_sSciptEditorHelpId);
     wpHelpFactory->RegisterHelp(c_sSciptEditorHelpId, ":/resources/help/editor/code/script_editor_help.html");
+
+    wpHelpFactory->RegisterHelp(c_sSciptAPIHelpId, ":/resources/help/editor/code/script_reference_help.html");
   }
 
   m_spUi->pResourceComboBox->setModel(m_pDummyModel);

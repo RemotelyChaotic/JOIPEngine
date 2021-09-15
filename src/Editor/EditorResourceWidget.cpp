@@ -42,6 +42,7 @@ namespace
 {
   const QString c_sResourceTreeHelpId =   "Editor/ResourceTree";
   const QString c_sSearchBarHelpId =      "Editor/SearchBar";
+  const QString c_sResourceHelpId =       "Editor/Resource/Resource";
 
   const char c_sProperty[] = "SelectedResource";
 }
@@ -131,6 +132,8 @@ void CEditorResourceWidget::Initialize()
     wpHelpFactory->RegisterHelp(c_sResourceTreeHelpId, ":/resources/help/editor/resources/resources_tree_help.html");
     m_spUi->pFilter->setProperty(helpOverlay::c_sHelpPagePropertyName, c_sSearchBarHelpId);
     wpHelpFactory->RegisterHelp(c_sSearchBarHelpId, ":/resources/help/editor/resources/filter_widget_help.html");
+
+    wpHelpFactory->RegisterHelp(c_sResourceHelpId, ":/resources/help/editor/resources/resource_help.html");
   }
 
   m_bInitialized = true;

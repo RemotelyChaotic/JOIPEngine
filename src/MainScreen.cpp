@@ -7,12 +7,14 @@
 #include "Widgets/HelpOverlay.h"
 #include <QApplication>
 
-namespace {
+namespace
+{
   const QString c_sPlayHelpId = "MainScreen/Play";
   const QString c_sEditorHelpId = "MainScreen/Editor";
   const QString c_sSettingsHelpId = "MainScreen/Settings";
   const QString c_sCreditsHelpId = "MainScreen/Credits";
   const QString c_sExitHelpId = "MainScreen/Exit";
+  const QString c_sProjectHelpId = "Project/JOIPProject";
 }
 
 //----------------------------------------------------------------------------------------
@@ -50,6 +52,8 @@ void CMainScreen::Initialize()
     wpHelpFactory->RegisterHelp(c_sCreditsHelpId, ":/resources/help/credits_button_help.html");
     m_spUi->pQuitButton->setProperty(helpOverlay::c_sHelpPagePropertyName, c_sExitHelpId);
     wpHelpFactory->RegisterHelp(c_sExitHelpId, ":/resources/help/exit_button_help.html");
+
+    wpHelpFactory->RegisterHelp(c_sProjectHelpId, ":/resources/help/project/joi_project_help.html");
   }
 
   connect(CApplication::Instance(), &CApplication::StyleLoaded,

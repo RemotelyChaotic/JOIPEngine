@@ -33,6 +33,7 @@ using QtNodes::NodeStyle;
 namespace
 {
   const QString c_sNodeHelpId =      "Editor/NodeHelp";
+  const QString c_sNodeNodeHelpId =  "Editor/Node/Node";
 
   QString ColorToString(const QColor& color)
   {
@@ -184,6 +185,8 @@ void CEditorSceneNodeWidget::Initialize()
   {
     m_pFlowView->setProperty(helpOverlay::c_sHelpPagePropertyName, c_sNodeHelpId);
     wpHelpFactory->RegisterHelp(c_sNodeHelpId, ":/resources/help/editor/nodes/nodeeditor_help.html");
+
+    wpHelpFactory->RegisterHelp(c_sNodeNodeHelpId, ":/resources/help/editor/nodes/node_help.html");
   }
 
   m_bInitialized = true;
