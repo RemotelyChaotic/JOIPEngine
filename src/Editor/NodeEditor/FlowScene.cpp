@@ -18,7 +18,8 @@ CFlowScene::CFlowScene(std::shared_ptr<QtNodes::DataModelRegistry> spRegistry,
                        QObject* pParent) :
   QtNodes::FlowScene(spRegistry, pParent),
   m_pUndoStack(nullptr),
-  m_bUndoRedoOperationInProgress(false)
+  m_bUndoRedoOperationInProgress(false),
+  m_bLoading(false)
 {
   connect(this, &FlowScene::connectionCreated, this, &CFlowScene::SlotConnectionCreated, Qt::DirectConnection);
   connect(this, &FlowScene::connectionDeleted, this, &CFlowScene::SlotConnectionDeleted, Qt::DirectConnection);
@@ -46,10 +47,20 @@ QPointer<QUndoStack> CFlowScene::UndoStack()
 
 //----------------------------------------------------------------------------------------
 //
+void CFlowScene::loadFromMemory(const QByteArray& data)
+{
+  m_bLoading = true;
+  QtNodes::FlowScene::loadFromMemory(data);
+  m_bLoading = false;
+}
+
+//----------------------------------------------------------------------------------------
+//
 void CFlowScene::SlotConnectionCreated(QtNodes::Connection const &c)
 {
   if (nullptr != UndoStack() &&
-      !m_bUndoRedoOperationInProgress)
+      !m_bUndoRedoOperationInProgress &&
+      !m_bLoading)
   {
     UndoStack()->push(new CCommandConnectionAdded(this, c.id(), c.save()));
   }
@@ -60,7 +71,8 @@ void CFlowScene::SlotConnectionCreated(QtNodes::Connection const &c)
 void CFlowScene::SlotConnectionDeleted(QtNodes::Connection const &c)
 {
   if (nullptr != UndoStack() &&
-      !m_bUndoRedoOperationInProgress)
+      !m_bUndoRedoOperationInProgress &&
+      !m_bLoading)
   {
     UndoStack()->push(new CCommandConnectionRemoved(this, c.id(), c.save()));
   }
@@ -70,6 +82,7 @@ void CFlowScene::SlotConnectionDeleted(QtNodes::Connection const &c)
 //
 void CFlowScene::SlotNodeCreated(QtNodes::Node& node)
 {
+  if (m_bLoading) { return; }
   if (auto pTypeUndoAware = dynamic_cast<CEditorNodeModelBase*>(node.nodeDataModel()))
   {
     pTypeUndoAware->SetUndoStack(m_pUndoStack);
@@ -88,6 +101,7 @@ void CFlowScene::SlotNodePlaced(QtNodes::Node& node)
 //
 void CFlowScene::SlotNodeMoved(QtNodes::Node& node, const QPointF& newPosition)
 {
+  if (m_bLoading) { return; }
   if (node.nodeGraphicsObject().pos().x() != newPosition.x() &&
       node.nodeGraphicsObject().pos().y() != newPosition.y() &&
       !m_bUndoRedoOperationInProgress)

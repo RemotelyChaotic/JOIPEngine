@@ -18,6 +18,9 @@ public:
   void SetUndoOperationInProgress(bool bValue) { m_bUndoRedoOperationInProgress = bValue; }
   QPointer<QUndoStack> UndoStack();
 
+  // shadow
+  void loadFromMemory(const QByteArray& data);
+
 protected:
   void SlotConnectionCreated(QtNodes::Connection const &c);
   void SlotConnectionDeleted(QtNodes::Connection const &c);
@@ -28,6 +31,7 @@ protected:
 private:
   QPointer<QUndoStack>     m_pUndoStack;
   bool                     m_bUndoRedoOperationInProgress;
+  bool                     m_bLoading;
 };
 
 //----------------------------------------------------------------------------------------
