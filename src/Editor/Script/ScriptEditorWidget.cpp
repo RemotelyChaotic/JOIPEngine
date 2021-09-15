@@ -1,6 +1,6 @@
 #include "ScriptEditorWidget.h"
-#include "ScriptSearchBar.h"
-#include "ScriptHighlighter.h"
+#include "Widgets/Editor/EditorSearchBar.h"
+#include "Widgets/Editor/EditorHighlighter.h"
 #include <syntaxhighlighter.h>
 #include <definition.h>
 #include <theme.h>
@@ -28,19 +28,19 @@ CScriptEditorWidget::CScriptEditorWidget(QWidget* pParent) :
   setAttribute(Qt::WA_NoMousePropagation, false);
   installEventFilter(this);
 
-  m_pHighlighter = new CScriptHighlighter(document());
+  m_pHighlighter = new CEditorHighlighter(document());
   m_pHighlighter->setTheme(m_spRepository->theme(m_sTheme));
 
   m_pLineNumberArea = new CLineNumberArea(this);
   m_pWidgetArea = new CWidgetArea(this);
-  m_pSearchBar = new CScriptSearchBar(this);
+  m_pSearchBar = new CEditorSearchBar(this);
   m_pSearchBar->Climb();
   m_pSearchBar->Resize();
 
   // reset things after closing search bar
-  connect(m_pSearchBar, &CScriptSearchBar::SignalHidden,
+  connect(m_pSearchBar, &CEditorSearchBar::SignalHidden,
           this, &CScriptEditorWidget::SearchAreaHidden);
-  connect(m_pSearchBar, &CScriptSearchBar::SignalFilterChanged,
+  connect(m_pSearchBar, &CEditorSearchBar::SignalFilterChanged,
           this, &CScriptEditorWidget::SlotSearchFilterChanged);
 
   connect(this, &CScriptEditorWidget::blockCountChanged,

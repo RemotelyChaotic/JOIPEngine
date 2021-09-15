@@ -8,13 +8,13 @@
 
 class QTextDocument;
 
-class CScriptHighlighter : public KSyntaxHighlighting::SyntaxHighlighter
+class CEditorHighlighter : public KSyntaxHighlighting::SyntaxHighlighter
 {
   Q_OBJECT
 
 public:
-  CScriptHighlighter(QTextDocument* pParent = nullptr);
-  ~CScriptHighlighter() override;
+  CEditorHighlighter(QTextDocument* pParent = nullptr);
+  ~CEditorHighlighter() override;
 
   void SetSearchColors(const QColor& background, const QColor& foreground);
   void SetSearchExpression(const QString& sExpresion);

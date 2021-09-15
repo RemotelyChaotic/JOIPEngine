@@ -16,7 +16,7 @@ class CTextSnippetOverlay;
 class CTimerSnippetOverlay;
 class CThreadSnippetOverlay;
 class CDatabaseManager;
-class CScriptHighlighter;
+class CEditorHighlighter;
 class CScriptRunner;
 class CSettings;
 class QStandardItemModel;

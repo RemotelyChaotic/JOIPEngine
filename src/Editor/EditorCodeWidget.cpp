@@ -10,7 +10,6 @@
 #include "Script/MetronomeSnippetOverlay.h"
 #include "Script/ResourceSnippetOverlay.h"
 #include "Script/ScriptEditorModel.h"
-#include "Script/ScriptHighlighter.h"
 #include "Script/TextSnippetOverlay.h"
 #include "Script/TimerSnippetOverlay.h"
 #include "Script/ThreadSnippetOverlay.h"

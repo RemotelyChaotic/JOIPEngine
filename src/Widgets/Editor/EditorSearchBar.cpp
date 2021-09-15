@@ -1,47 +1,47 @@
-#include "ScriptSearchBar.h"
+#include "EditorSearchBar.h"
 #include "Widgets/SearchWidget.h"
 #include <QHBoxLayout>
 #include <QPushButton>
 
-CScriptSearchBar::CScriptSearchBar(QWidget* pParent) :
+CEditorSearchBar::CEditorSearchBar(QWidget* pParent) :
   COverlayBase(0, pParent),
   m_bForward(true)
 {
   QHBoxLayout* pLayout = new QHBoxLayout(this);
   m_pSearchWidget = new CSearchWidget(this);
   connect(m_pSearchWidget, &CSearchWidget::SignalFilterChanged,
-          this, &CScriptSearchBar::SlotFilterChanged);
+          this, &CEditorSearchBar::SlotFilterChanged);
   pLayout->addWidget(m_pSearchWidget);
 
   m_pBack = new QPushButton(this);
   m_pBack->setObjectName("BackButton");
   m_pBack->setToolTip("Search backwards");
   connect(m_pBack, &QPushButton::clicked,
-          this, &CScriptSearchBar::SlotBackClicked);
+          this, &CEditorSearchBar::SlotBackClicked);
   pLayout->addWidget(m_pBack);
 
   m_pForward = new QPushButton(this);
   m_pForward->setObjectName("ForardButton");
   m_pForward->setToolTip("Search forwards");
   connect(m_pForward, &QPushButton::clicked,
-          this, &CScriptSearchBar::SlotForwardClicked);
+          this, &CEditorSearchBar::SlotForwardClicked);
   pLayout->addWidget(m_pForward);
 
   m_pCloseButton = new QPushButton(this);
   m_pCloseButton->setObjectName("CloseButton");
   m_pForward->setToolTip("Close search");
-  connect(m_pCloseButton, &QPushButton::clicked, this, &CScriptSearchBar::Hide);
+  connect(m_pCloseButton, &QPushButton::clicked, this, &CEditorSearchBar::Hide);
   pLayout->addWidget(m_pCloseButton);
 }
 
-CScriptSearchBar::~CScriptSearchBar()
+CEditorSearchBar::~CEditorSearchBar()
 {
 
 }
 
 //----------------------------------------------------------------------------------------
 //
-void CScriptSearchBar::SetFilter(const QString& sString)
+void CEditorSearchBar::SetFilter(const QString& sString)
 {
   m_pSearchWidget->blockSignals(true);
   m_pSearchWidget->SetFilter(sString);
@@ -50,14 +50,14 @@ void CScriptSearchBar::SetFilter(const QString& sString)
 
 //----------------------------------------------------------------------------------------
 //
-void CScriptSearchBar::Climb()
+void CEditorSearchBar::Climb()
 {
   ClimbToFirstInstanceOf("CScriptEditorWidget", false);
 }
 
 //----------------------------------------------------------------------------------------
 //
-void CScriptSearchBar::Hide()
+void CEditorSearchBar::Hide()
 {
   m_pSearchWidget->blockSignals(true);
   COverlayBase::Hide();
@@ -67,7 +67,7 @@ void CScriptSearchBar::Hide()
 
 //----------------------------------------------------------------------------------------
 //
-void CScriptSearchBar::Resize()
+void CEditorSearchBar::Resize()
 {
   if (nullptr != m_pTargetWidget)
   {
@@ -78,7 +78,7 @@ void CScriptSearchBar::Resize()
 
 //----------------------------------------------------------------------------------------
 //
-void CScriptSearchBar::Show()
+void CEditorSearchBar::Show()
 {
   COverlayBase::Show();
   m_pSearchWidget->SetFocus();
@@ -86,7 +86,7 @@ void CScriptSearchBar::Show()
 
 //----------------------------------------------------------------------------------------
 //
-void CScriptSearchBar::SlotBackClicked()
+void CEditorSearchBar::SlotBackClicked()
 {
   m_bForward = false;
   emit SignalFilterChanged(false, m_pSearchWidget->Filter());
@@ -94,7 +94,7 @@ void CScriptSearchBar::SlotBackClicked()
 
 //----------------------------------------------------------------------------------------
 //
-void CScriptSearchBar::SlotForwardClicked()
+void CEditorSearchBar::SlotForwardClicked()
 {
   m_bForward = true;
   emit SignalFilterChanged(true, m_pSearchWidget->Filter());
@@ -102,7 +102,7 @@ void CScriptSearchBar::SlotForwardClicked()
 
 //----------------------------------------------------------------------------------------
 //
-void CScriptSearchBar::SlotFilterChanged(const QString& sText)
+void CEditorSearchBar::SlotFilterChanged(const QString& sText)
 {
   emit SignalFilterChanged(m_bForward, sText);
 }

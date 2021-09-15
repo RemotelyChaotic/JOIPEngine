@@ -7,12 +7,12 @@
 class CSearchWidget;
 class QPushButton;
 
-class CScriptSearchBar : public COverlayBase
+class CEditorSearchBar : public COverlayBase
 {
   Q_OBJECT
 public:
-  explicit CScriptSearchBar(QWidget* pParent = nullptr);
-  ~CScriptSearchBar() override;
+  explicit CEditorSearchBar(QWidget* pParent = nullptr);
+  ~CEditorSearchBar() override;
 
   bool IsSearchingForward() { return m_bForward; }
   void SetFilter(const QString& sString);

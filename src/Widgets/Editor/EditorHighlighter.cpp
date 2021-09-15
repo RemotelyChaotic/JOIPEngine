@@ -1,19 +1,19 @@
-#include "ScriptHighlighter.h"
+#include "EditorHighlighter.h"
 
 
 //----------------------------------------------------------------------------------------
 //
-CScriptHighlighter::CScriptHighlighter(QTextDocument* pParent) :
+CEditorHighlighter::CEditorHighlighter(QTextDocument* pParent) :
   KSyntaxHighlighting::SyntaxHighlighter(pParent)
 {
 }
 
-CScriptHighlighter::~CScriptHighlighter()
+CEditorHighlighter::~CEditorHighlighter()
 {}
 
 //----------------------------------------------------------------------------------------
 //
-void CScriptHighlighter::SetSearchColors(const QColor& background,
+void CEditorHighlighter::SetSearchColors(const QColor& background,
                                          const QColor& foreground)
 {
   m_searchFormat.setBackground(background);
@@ -22,7 +22,7 @@ void CScriptHighlighter::SetSearchColors(const QColor& background,
 
 //----------------------------------------------------------------------------------------
 //
-void CScriptHighlighter::SetSearchExpression(const QString& sExpresion)
+void CEditorHighlighter::SetSearchExpression(const QString& sExpresion)
 {
   m_searchExpression = QRegularExpression(sExpresion);
   rehighlight(); // Restart the backlight
@@ -30,7 +30,7 @@ void CScriptHighlighter::SetSearchExpression(const QString& sExpresion)
 
 //----------------------------------------------------------------------------------------
 //
-void CScriptHighlighter::highlightBlock(const QString& sText)
+void CEditorHighlighter::highlightBlock(const QString& sText)
 {
   // default highlighting
   KSyntaxHighlighting::SyntaxHighlighter::highlightBlock(sText);

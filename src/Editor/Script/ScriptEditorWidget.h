@@ -8,8 +8,8 @@
 #include <map>
 
 class CLineNumberArea;
-class CScriptSearchBar;
-class CScriptHighlighter;
+class CEditorSearchBar;
+class CEditorHighlighter;
 class CWidgetArea;
 namespace KSyntaxHighlighting
 {
@@ -81,10 +81,10 @@ private slots:
 
 private:
   std::unique_ptr<KSyntaxHighlighting::Repository> m_spRepository;
-  QPointer<CScriptHighlighter>                     m_pHighlighter;
+  QPointer<CEditorHighlighter>                     m_pHighlighter;
   CLineNumberArea*                                 m_pLineNumberArea;
   CWidgetArea*                                     m_pWidgetArea;
-  CScriptSearchBar*                                m_pSearchBar;
+  CEditorSearchBar*                                m_pSearchBar;
   QString                                          m_sTheme;
   QColor                                           m_lineNumberBackgroundColor;
   QColor                                           m_lineNumberTextColor;
