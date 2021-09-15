@@ -124,8 +124,11 @@ Changes:
 - Loading on startup is significantly faster because the logo loads in a
   worker thread.
 - Changelog visible in the "About" menu.
+- Help has a tree view containing all topics and pages can be searched.
 
 Fixed Bugs:
 - Default style is fixed. Qml and icons look no longer broken.
 - Application sounds don't cut off when a new sound effect starts playing.
 - Metronome honors application settings (muted and volume).
+- Help UI works on all screens, not just the primary one.
+- UI sound effects don't cut off anymore.
