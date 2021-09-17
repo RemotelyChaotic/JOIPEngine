@@ -18,11 +18,15 @@ CScriptEditorWidget::CScriptEditorWidget(QWidget* pParent) :
   QPlainTextEdit(pParent),
   m_spRepository(std::make_unique<KSyntaxHighlighting::Repository>()),
   m_pHighlightedSearchableEdit(nullptr),
+  m_foldedIcon(":/resources/style/img/ButtonPlay.png"),
+  m_unfoldedIcon(":/resources/style/img/ButtonArrowDown.png"),
+  m_foldAreaBackgroundColor(24, 24, 24),
   m_lineNumberBackgroundColor(24, 24, 24),
   m_lineNumberTextColor(Qt::white),
   m_highlightLineColor(68, 71, 90),
   m_widgetsBackgroundColor(24, 24, 24),
-  m_previouslyClickedKey(Qt::Key(0))
+  m_previouslyClickedKey(Qt::Key(0)),
+  m_foldSelection()
 {
   setAttribute(Qt::WA_NoMousePropagation, false);
   installEventFilter(this);
@@ -32,6 +36,7 @@ CScriptEditorWidget::CScriptEditorWidget(QWidget* pParent) :
 
   m_pLineNumberArea = new CLineNumberArea(this);
   m_pWidgetArea = new CWidgetArea(this);
+  m_pFoldBlockArea = new CFoldBlockArea(this);
 
   connect(this, &CScriptEditorWidget::blockCountChanged,
           this, &CScriptEditorWidget::UpdateLeftAreaWidth);
@@ -39,6 +44,8 @@ CScriptEditorWidget::CScriptEditorWidget(QWidget* pParent) :
           this, &CScriptEditorWidget::UpdateLineNumberArea);
   connect(this, &CScriptEditorWidget::updateRequest,
           this, &CScriptEditorWidget::UpdateWidgetArea);
+  connect(this, &CScriptEditorWidget::updateRequest,
+          this, &CScriptEditorWidget::UpdateFoldBlockArea);
   connect(this, &CScriptEditorWidget::cursorPositionChanged,
           this, &CScriptEditorWidget::HighlightCurrentLine);
 
@@ -53,7 +60,7 @@ CScriptEditorWidget::CScriptEditorWidget(QWidget* pParent) :
   setFont(font);
 
   QFontMetrics metrics(font);
-  setTabStopWidth(c_iTabStop * metrics.width(' '));
+  setTabStopDistance(c_iTabStop * metrics.boundingRect(' ').width());
 
   QTextOption option = document()->defaultTextOption();
   option.setFlags(QTextOption::ShowTabsAndSpaces);
@@ -102,6 +109,150 @@ void CScriptEditorWidget::SetTheme(const QString& sTheme)
 
 //----------------------------------------------------------------------------------------
 //
+QPointer<CEditorHighlighter> CScriptEditorWidget::Highlighter() const
+{ return m_pHighlightedSearchableEdit->Highlighter(); }
+QPointer<CEditorSearchBar>   CScriptEditorWidget::SearchBar() const
+{ return m_pHighlightedSearchableEdit->SearchBar(); }
+
+//----------------------------------------------------------------------------------------
+//
+void CScriptEditorWidget::FoldBlockAreaMouseEvent(QMouseEvent* pEvt)
+{
+  QTextBlock block = firstVisibleBlock();
+  qint32 iBlockNumber = block.blockNumber();
+  qint32 iTop = static_cast<qint32>(blockBoundingGeometry(block).translated(contentOffset()).top());
+  qint32 iBottom = iTop + static_cast<qint32>(blockBoundingRect(block).height());
+
+  while (block.isValid() && iTop <= rect().bottom())
+  {
+    if (iBottom >= rect().top() &&
+        m_pHighlightedSearchableEdit->Highlighter()->startsFoldingRegion(block))
+    {
+      QTextBlock blockEnd = m_pHighlightedSearchableEdit->Highlighter()->findFoldingRegionEnd(block);
+      bool bToggleFolding = false;
+      if (block.isVisible())
+      {
+        QRectF iconBox = QRectF(0, iTop, m_pFoldBlockArea->width(), fontMetrics().height());
+        if (iconBox.contains(pEvt->localPos()))
+        {
+          bToggleFolding = true;
+        }
+      }
+      else
+      {
+        qint32 iEndTop = static_cast<qint32>(blockBoundingGeometry(blockEnd).translated(contentOffset()).top());
+        QRectF iconBox = QRectF(0, iEndTop, m_pFoldBlockArea->width(), fontMetrics().height());
+
+        if (iconBox.contains(pEvt->localPos()))
+        {
+          bToggleFolding = true;
+        }
+      }
+
+      if (bToggleFolding)
+      {
+        QTextBlock current = block;
+        while (blockEnd != current)
+        {
+          current = current.next();
+          current.setVisible(!current.isVisible());
+        }
+
+        LineNumberArea()->update(0, viewport()->rect().y(),
+                                 LineNumberAreaWidth(),
+                                 viewport()->rect().height());
+        WidgetArea()->update(0, viewport()->rect().y(),
+                             WidgetAreaWidth(),
+                             viewport()->rect().height());
+        update(viewport()->rect());
+      }
+    }
+
+    block = block.next();
+    iTop = iBottom;
+    iBottom = iTop + static_cast<qint32>(blockBoundingRect(block).height());
+    ++iBlockNumber;
+  }
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CScriptEditorWidget::FoldBlockAreaPaintEvent(QPaintEvent* pEvent)
+{
+  QPainter painter(m_pFoldBlockArea);
+  painter.fillRect(pEvent->rect(), m_foldAreaBackgroundColor);
+
+  bool bNeedsRepaintOfContent = false;
+  if (!m_foldSelection.isNull())
+  {
+    m_foldSelection = QRect();
+    bNeedsRepaintOfContent = true;
+  }
+
+  double dLuminance = (0.299 * m_foldAreaBackgroundColor.red() +
+                       0.587 * m_foldAreaBackgroundColor.green() +
+                       0.114 * m_foldAreaBackgroundColor.blue()) / 255;
+  QColor selection = dLuminance > 0.5 ? m_lineNumberBackgroundColor.darker() :
+                                        m_lineNumberBackgroundColor.lighter();
+
+  QTextBlock block = firstVisibleBlock();
+  qint32 iBlockNumber = block.blockNumber();
+  qint32 iTop = static_cast<qint32>(blockBoundingGeometry(block).translated(contentOffset()).top());
+  qint32 iBottom = iTop + static_cast<qint32>(blockBoundingRect(block).height());
+
+  while (block.isValid() && iTop <= pEvent->rect().bottom())
+  {
+    if (iBottom >= pEvent->rect().top() &&
+        m_pHighlightedSearchableEdit->Highlighter()->startsFoldingRegion(block))
+    {
+      if (block.isVisible())
+      {
+        QPoint globalCursorPos = QCursor::pos();
+        QRect iconBox = QRect(0, iTop, m_pFoldBlockArea->width(), fontMetrics().height());
+        QPoint localPos = m_pFoldBlockArea->mapFromGlobal(globalCursorPos);
+        if (iconBox.contains(localPos))
+        {
+          QTextBlock blockEnd = m_pHighlightedSearchableEdit->Highlighter()->findFoldingRegionEnd(block);
+          qint32 iFoldingBlockEnd = 0;
+          iFoldingBlockEnd =
+              static_cast<qint32>(blockBoundingGeometry(blockEnd).translated(contentOffset()).top())+
+                  fontMetrics().height();
+          QRect foldingBlockRect = QRect(iconBox); foldingBlockRect.setHeight(iFoldingBlockEnd-iTop);
+          painter.fillRect(foldingBlockRect, selection);
+          m_foldSelection = foldingBlockRect;
+          bNeedsRepaintOfContent = true;
+        }
+        m_unfoldedIcon.paint(&painter, iconBox);
+      }
+      else
+      {
+        m_foldedIcon.paint(&painter,
+                           QRect(0, iTop, m_pFoldBlockArea->width(), m_pFoldBlockArea->width()));
+      }
+    }
+
+    block = block.next();
+    iTop = iBottom;
+    iBottom = iTop + static_cast<qint32>(blockBoundingRect(block).height());
+    ++iBlockNumber;
+  }
+
+  if (bNeedsRepaintOfContent)
+  {
+    // make sure to repaint content and don't clip this widget (danger of recursive painting)
+    update(viewport()->rect());
+  }
+}
+
+//----------------------------------------------------------------------------------------
+//
+qint32 CScriptEditorWidget::FoldBlockAreaWidth() const
+{
+  return 16;
+}
+
+//----------------------------------------------------------------------------------------
+//
 void CScriptEditorWidget::LineNumberAreaPaintEvent(QPaintEvent* pEvent)
 {
   QPainter painter(m_pLineNumberArea);
@@ -131,7 +282,7 @@ void CScriptEditorWidget::LineNumberAreaPaintEvent(QPaintEvent* pEvent)
 
 //----------------------------------------------------------------------------------------
 //
-qint32 CScriptEditorWidget::LineNumberAreaWidth()
+qint32 CScriptEditorWidget::LineNumberAreaWidth() const
 {
   qint32 iDigits = 1;
   qint32 iMax = qMax(1, blockCount());
@@ -190,7 +341,7 @@ void CScriptEditorWidget::WidgetAreaPaintEvent(QPaintEvent* pEvent)
 
 //----------------------------------------------------------------------------------------
 //
-qint32 CScriptEditorWidget::WidgetAreaWidth()
+qint32 CScriptEditorWidget::WidgetAreaWidth() const
 {
   return 16;
 }
@@ -226,7 +377,26 @@ void CScriptEditorWidget::HighlightCurrentLine()
 void CScriptEditorWidget::UpdateLeftAreaWidth(qint32 iNewBlockCount)
 {
   Q_UNUSED(iNewBlockCount)
-  setViewportMargins(LineNumberAreaWidth() + WidgetAreaWidth(), 0, 0, 0);
+  setViewportMargins(WidgetAreaWidth() + LineNumberAreaWidth() + FoldBlockAreaWidth(), 0, 0, 0);
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CScriptEditorWidget::UpdateFoldBlockArea(const QRect& rect, qint32 iDy)
+{
+  if (0 != iDy)
+  {
+    m_pFoldBlockArea->scroll(0, iDy);
+  }
+  else
+  {
+    m_pFoldBlockArea->update(0, 0, m_pFoldBlockArea->width(), m_pFoldBlockArea->height());
+  }
+
+  if (rect.contains(viewport()->rect()))
+  {
+    UpdateLeftAreaWidth(0);
+  }
 }
 
 //----------------------------------------------------------------------------------------
@@ -443,6 +613,19 @@ void CScriptEditorWidget::paintEvent(QPaintEvent* pEvent)
   QPlainTextEdit::paintEvent(pEvent);
 
   QPainter painter(viewport());
+  if (!m_foldSelection.isNull())
+  {
+    painter.save();
+    QRect rectToDarkenTop = pEvent->rect();
+    QRect rectToDarkenBottom = pEvent->rect();
+
+    rectToDarkenTop.setBottom(m_foldSelection.y());
+    rectToDarkenBottom.setTop(m_foldSelection.y() + m_foldSelection.height());
+
+    painter.fillRect(rectToDarkenTop, QColor(100, 100, 100, 100));
+    painter.fillRect(rectToDarkenBottom, QColor(100, 100, 100, 100));
+    painter.restore();
+  }
 
   QTextBlock block = firstVisibleBlock();
   qint32 iBlockNumber = block.blockNumber();
@@ -454,8 +637,35 @@ void CScriptEditorWidget::paintEvent(QPaintEvent* pEvent)
 
   while (block.isValid() && iTop <= pEvent->rect().bottom())
   {
-    if (block.isVisible() && iBottom >= pEvent->rect().top())
+    const bool bTopEventOk = iBottom >= pEvent->rect().top();
+    if (block.isVisible() && bTopEventOk)
     {
+      if (Highlighter()->startsFoldingRegion(block))
+      {
+        if (!Highlighter()->findFoldingRegionEnd(block).isVisible())
+        {
+          QRectF blockRect = blockBoundingRect(block);
+          blockRect.setHeight(fontMetrics().height()-4);
+          blockRect.translate(0, iTop+2);
+
+          QString sText = block.text();
+          const qint32 iTextWidth = fontMetrics().boundingRect(sText).width();
+          blockRect.setLeft(blockRect.left() + iTextWidth + 10);
+          const qint32 iDotWidth = fontMetrics().boundingRect("...").width();
+          blockRect.setWidth(iDotWidth + 10);
+
+          painter.save();
+          painter.setBrush(QColor(200, 200, 200, 200));
+          painter.setPen(QColor(50, 50, 50, 100));
+          painter.drawRoundedRect(blockRect, 4, 4);
+          painter.restore();
+          painter.save();
+          painter.setPen(QColor(50, 50, 50, 255));
+          painter.drawText(blockRect.adjusted(5, 0, 5, 0), "...");
+          painter.restore();
+        }
+      }
+
       QPointer<QLabel> pWidget = m_pWidgetArea->Widget(iBlockNumber);
       if (nullptr != pWidget)
       {
@@ -497,8 +707,10 @@ void CScriptEditorWidget::resizeEvent(QResizeEvent* pEvent)
   QPlainTextEdit::resizeEvent(pEvent);
 
   QRect cr = contentsRect();
-  m_pLineNumberArea->setGeometry(QRect(cr.left(), cr.top(), LineNumberAreaWidth(), cr.height()));
-  m_pWidgetArea->setGeometry(QRect(cr.left() + LineNumberAreaWidth(), cr.top(), WidgetAreaWidth(), cr.height()));
+  m_pWidgetArea->setGeometry(QRect(cr.left(), cr.top(), WidgetAreaWidth(), cr.height()));
+  m_pLineNumberArea->setGeometry(QRect(cr.left() + WidgetAreaWidth(), cr.top(), LineNumberAreaWidth(), cr.height()));
+  m_pFoldBlockArea->setGeometry(QRect(cr.left() + WidgetAreaWidth() + LineNumberAreaWidth(),
+                                      cr.top(), FoldBlockAreaWidth(), cr.height()));
 }
 
 //----------------------------------------------------------------------------------------
@@ -581,3 +793,21 @@ void CWidgetArea::paintEvent(QPaintEvent *event)
 {
   m_pCodeEditor->WidgetAreaPaintEvent(event);
 }
+
+//----------------------------------------------------------------------------------------
+//
+void CFoldBlockArea::mousePressEvent(QMouseEvent* pEvt)
+{
+  if (nullptr != pEvt)
+  {
+    m_pCodeEditor->FoldBlockAreaMouseEvent(pEvt);
+  }
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CFoldBlockArea::paintEvent(QPaintEvent *event)
+{
+  m_pCodeEditor->FoldBlockAreaPaintEvent(event);
+}
+
