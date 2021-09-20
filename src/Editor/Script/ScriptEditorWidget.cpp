@@ -164,7 +164,7 @@ void CScriptEditorWidget::FoldBlockAreaMouseEvent(QMouseEvent* pEvt)
         WidgetArea()->update(0, viewport()->rect().y(),
                              WidgetAreaWidth(),
                              viewport()->rect().height());
-        update(viewport()->rect());
+        update();
       }
     }
 
@@ -239,8 +239,7 @@ void CScriptEditorWidget::FoldBlockAreaPaintEvent(QPaintEvent* pEvent)
 
   if (bNeedsRepaintOfContent)
   {
-    // make sure to repaint content and don't clip this widget (danger of recursive painting)
-    update(viewport()->rect());
+    update();
   }
 }
 
