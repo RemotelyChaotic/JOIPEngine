@@ -16,14 +16,7 @@ BETTER_ENUM(EResourceDisplayType, qint32,
             eLoading = 0,
             eLocalImage = 1,
             eLocalMedia = 2,
-            eOther = 3,
-            eError = 4);
-
-namespace
-{
-  const qint32 c_iSpinnerMinWidth = 128;
-  const qint32 c_iSpinnerHeight = 128;
-}
+            eError = 3);
 
 //----------------------------------------------------------------------------------------
 //
@@ -262,17 +255,6 @@ bool CResourceDisplayWidget::IsRunning()
 
 //----------------------------------------------------------------------------------------
 //
-void CResourceDisplayWidget::SetMargins(qint32 iLeft, qint32 iTop, qint32 iRight, qint32 iBottom)
-{
-  m_spUi->pPageError->setContentsMargins(iLeft, iTop, iRight, iBottom);
-  m_spUi->pPageImage->setContentsMargins(iLeft, iTop, iRight, iBottom);
-  m_spUi->pPageLoading->setContentsMargins(iLeft, iTop, iRight, iBottom);
-  m_spUi->pPageMedia->setContentsMargins(iLeft, iTop, iRight, iBottom);
-  m_spUi->pPageOther->setContentsMargins(iLeft, iTop, iRight, iBottom);
-}
-
-//----------------------------------------------------------------------------------------
-//
 void CResourceDisplayWidget::SlotPlayPause()
 {
   if (m_iLoadState != ELoadState::eFinished) { return; }
@@ -360,15 +342,7 @@ void CResourceDisplayWidget::resizeEvent(QResizeEvent* pEvent)
 {
   if (nullptr != pEvent)
   {
-    if (pEvent->size().width() < c_iSpinnerMinWidth ||
-        pEvent->size().height() < c_iSpinnerHeight)
-    {
-      m_spUi->pLoadingSpinner->setFixedSize(pEvent->size().width(), pEvent->size().height());
-    }
-    else
-    {
-      m_spUi->pLoadingSpinner->setFixedSize(c_iSpinnerMinWidth, c_iSpinnerHeight);
-    }
+    Q_UNUSED(pEvent)
   }
 }
 

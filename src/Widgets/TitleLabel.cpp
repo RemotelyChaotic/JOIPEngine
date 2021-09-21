@@ -11,7 +11,8 @@
 #include <QtConcurrent/QtConcurrent>
 
 namespace  {
-  const static qint32 c_iKernelSize = 19;
+  const qint32 c_iKernelSize = 19;
+  const qint32 c_iHalfKernelSize = 7;
   const double c_iOffsetBorder = 5.0;
   const qint32 c_iAnimationTime = 1500;
   const qint32 c_iUpdateInterval = 5;
@@ -55,7 +56,6 @@ namespace  {
   //
   void Gauss15x15(const QImage& in, QImage& out)
   {
-    static const qint32 iHalfKernelSize = 7;
     static const double kernel[] = {
       0, 0, 0, 0, 0, 0.000001, 0.000001, 0.000002, 0.000001, 0.000001, 0, 0, 0, 0, 0,
       0, 0, 0, 0.000001, 0.000004, 0.000013, 0.000024, 0.00003, 0.000024, 0.000013, 0.000004, 0.000001, 0, 0, 0,
@@ -83,9 +83,9 @@ namespace  {
       {
         QRgb pixel = 0;
         qint32 iKernelIndex = 0;
-        for (qint32 i = x - iHalfKernelSize; i < x + iHalfKernelSize + 1; i++)
+        for (qint32 i = x - c_iHalfKernelSize; i < x + c_iHalfKernelSize + 1; i++)
         {
-          for (qint32 j = y - iHalfKernelSize; j < y + iHalfKernelSize + 1; j++)
+          for (qint32 j = y - c_iHalfKernelSize; j < y + c_iHalfKernelSize + 1; j++)
           {
             QRgb currentPixels = (dims.x() < i && dims.width() > i &&
                 dims.y() < j && dims.height() > j) ? in.pixel(i, j) : 0;
@@ -188,17 +188,23 @@ signals:
   void LoadingFinished();
 
 protected slots:
-  void SlotImageLoad(const QBrush &textBrush, const QRect &rect,
-                     int flags, const QString& sText, const QFont& font)
+  void SlotImageLoad(const QBrush &textBrush, const QRect& /*rect*/,
+                     int /*flags*/, const QString& sText, const QFont& font)
   {
-    QImage offScreenBuffer(rect.size(), QImage::Format_ARGB32);
+    QFontMetrics info(font);
+    QRect rectBuffer = info.boundingRect(sText)
+                            .adjusted(-c_iKernelSize+1, -c_iKernelSize+1,
+                                      c_iKernelSize+1, c_iKernelSize+1).normalized();
+    rectBuffer = QRect({0, 0}, rectBuffer.size());
+
+    QImage offScreenBuffer(rectBuffer.size(), QImage::Format_ARGB32);
     offScreenBuffer.fill(Qt::transparent);
 
     QPainter offscreenPainter(&offScreenBuffer);
     offscreenPainter.setPen(m_outlineColor);
     offscreenPainter.setBrush(textBrush);
     offscreenPainter.setFont(font);
-    offscreenPainter.drawText(rect, flags, sText);
+    offscreenPainter.drawText(rectBuffer, Qt::AlignCenter, sText);
 
     // process background
     QImage dilatedPixmap;
@@ -207,7 +213,7 @@ protected slots:
     //dilatedPixmap.save("bla.png");
     Gauss15x15(dilatedPixmap, m_backgroundImage);
     // debug
-    //gaussFiltered.save("bla.png");
+    //m_backgroundImage.save("bla.png");
 
     m_bDirty = false;
     m_bRendering = false;
@@ -249,7 +255,10 @@ protected:
       pPainter->setOpacity(m_dProgress);
       pPainter->setPen(m_outlineColor);
       pPainter->setBrush(m_outlineColor);
-      pPainter->drawImage(m_backgroundImage.rect(), m_backgroundImage, m_backgroundImage.rect());
+      QSize sizeDiff(rect.size() - m_backgroundImage.rect().size());
+      pPainter->drawImage(
+            m_backgroundImage.rect().translated(sizeDiff.width()/2, sizeDiff.height()/2),
+            m_backgroundImage, m_backgroundImage.rect());
       pPainter->restore();
     }
 
@@ -349,6 +358,8 @@ CTitleLabel::CTitleLabel(QString sText, QWidget* pParent) :
 void CTitleLabel::SetOutlineColor(const QColor& color)
 {
   m_pStyle->SetOutlineColor(color);
+  m_pStyle->SetDirty();
+  m_updateTimer.start();
 }
 
 //----------------------------------------------------------------------------------------
@@ -382,8 +393,6 @@ void CTitleLabel::SlotUpdate()
 void CTitleLabel::resizeEvent(QResizeEvent* pEvt)
 {
   Q_UNUSED(pEvt)
-  m_pStyle->SetDirty();
-  m_updateTimer.start();
 }
 
 //----------------------------------------------------------------------------------------

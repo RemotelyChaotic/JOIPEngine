@@ -120,8 +120,6 @@ void CEditorResourceWidget::Initialize()
   pProxyModel->sort(resource_item::c_iColumnName, Qt::AscendingOrder);
   pProxyModel->setFilterRegExp(QRegExp(".*", Qt::CaseInsensitive, QRegExp::RegExp));
 
-  m_spUi->pResourceDisplayWidget->setFixedHeight(256);
-
   m_spUi->pFilter->SetFilterUndo(true);
 
   // help
