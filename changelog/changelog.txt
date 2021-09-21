@@ -125,6 +125,7 @@ Changes:
   worker thread.
 - Changelog visible in the "About" menu.
 - Help has a tree view containing all topics and pages can be searched.
+- Code editor allows folding blocks.
 
 Fixed Bugs:
 - Default style is fixed. Qml and icons look no longer broken.
@@ -132,3 +133,5 @@ Fixed Bugs:
 - Metronome honors application settings (muted and volume).
 - Help UI works on all screens, not just the primary one.
 - UI sound effects don't cut off anymore.
+- Performance fixes for title in menu and 404 text.
+- Resource view is properly resizable now.
