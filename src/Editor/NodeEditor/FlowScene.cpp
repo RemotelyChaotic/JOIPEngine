@@ -102,9 +102,9 @@ void CFlowScene::SlotNodePlaced(QtNodes::Node& node)
 void CFlowScene::SlotNodeMoved(QtNodes::Node& node, const QPointF& newPosition)
 {
   if (m_bLoading) { return; }
-  if (node.nodeGraphicsObject().pos().x() != newPosition.x() &&
-      node.nodeGraphicsObject().pos().y() != newPosition.y() &&
-      !m_bUndoRedoOperationInProgress)
+  if (!m_bUndoRedoOperationInProgress &&
+      node.nodeGraphicsObject().pos().x() != newPosition.x() &&
+      node.nodeGraphicsObject().pos().y() != newPosition.y())
   {
     if (nullptr != UndoStack() && views().size() > 0)
     {

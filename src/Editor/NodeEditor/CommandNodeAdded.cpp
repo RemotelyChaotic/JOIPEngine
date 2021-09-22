@@ -75,7 +75,9 @@ void CCommandNodeAdded::redo()
     }
     else
     {
+      m_pScene->SetUndoOperationInProgress(true);
       m_pScene->restoreNode(m_node);
+      m_pScene->SetUndoOperationInProgress(false);
     }
   }
 }

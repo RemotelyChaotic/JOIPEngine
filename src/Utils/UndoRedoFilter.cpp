@@ -62,9 +62,6 @@ bool CUndoRedoFilter::eventFilter(QObject* pTarget, QEvent* pEvent)
         bool bIsUndo = pKeyEvent->matches(QKeySequence::Undo);
         bool bIsRedo = pKeyEvent->matches(QKeySequence::Redo);
 
-        if (bIsUndo) { emit UndoTriggered(); }
-        if (bIsRedo) { emit RedoTriggered(); }
-
         return bIsUndo || bIsRedo;
     }
     default: break;

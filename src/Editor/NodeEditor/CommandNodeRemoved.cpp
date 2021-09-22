@@ -33,7 +33,9 @@ void CCommandNodesRemoved::undo()
 
       if (m_nodesSaved.end() != it)
       {
+        m_pScene->SetUndoOperationInProgress(true);
         auto& node = m_pScene->restoreNode(it->second);
+        m_pScene->SetUndoOperationInProgress(false);
 
         node.nodeGraphicsObject().setSelected(true);
       }
