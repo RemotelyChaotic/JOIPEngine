@@ -134,6 +134,8 @@ void CEditorResourceWidget::Initialize()
     wpHelpFactory->RegisterHelp(c_sResourceHelpId, ":/resources/help/editor/resources/resource_help.html");
   }
 
+  m_spUi->splitter->setSizes({height() *4/5, height() / 5});
+
   m_bInitialized = true;
 }
 
