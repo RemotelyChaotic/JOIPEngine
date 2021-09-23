@@ -183,6 +183,8 @@
         <file>resources/img/Icon.ico</file>
         <file>resources/help/settings/hotloadstyle_setting_help.html</file>
         <file>changelog/changelog.txt</file>
+        <file>resources/style/img/ButtonRedo.png</file>
+        <file>resources/style/img/ButtonUndo.png</file>
     </qresource>
     <qresource prefix="/qml">
         <file>resources/qml/ProjectCardSelection.qml</file>

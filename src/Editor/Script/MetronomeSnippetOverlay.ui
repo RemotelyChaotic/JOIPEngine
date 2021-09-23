@@ -141,18 +141,6 @@
              </item>
              <item row="0" column="3">
               <widget class="QPushButton" name="AddPatternElemButton">
-               <property name="minimumSize">
-                <size>
-                 <width>32</width>
-                 <height>32</height>
-                </size>
-               </property>
-               <property name="maximumSize">
-                <size>
-                 <width>32</width>
-                 <height>32</height>
-                </size>
-               </property>
                <property name="toolTip">
                 <string>Add button</string>
                </property>
@@ -169,18 +157,6 @@
              </item>
              <item row="0" column="4">
               <widget class="QPushButton" name="RemovePatternElemButton">
-               <property name="minimumSize">
-                <size>
-                 <width>32</width>
-                 <height>32</height>
-                </size>
-               </property>
-               <property name="maximumSize">
-                <size>
-                 <width>32</width>
-                 <height>32</height>
-                </size>
-               </property>
                <property name="toolTip">
                 <string>Remove button</string>
                </property>
@@ -300,18 +276,6 @@
              </item>
              <item row="1" column="3">
               <widget class="QPushButton" name="CloseButton">
-               <property name="minimumSize">
-                <size>
-                 <width>24</width>
-                 <height>24</height>
-                </size>
-               </property>
-               <property name="maximumSize">
-                <size>
-                 <width>24</width>
-                 <height>24</height>
-                </size>
-               </property>
                <property name="toolTip">
                 <string>Clear media selection</string>
                </property>
@@ -390,15 +354,15 @@
  </widget>
  <customwidgets>
   <customwidget>
-   <class>COverlayBase</class>
-   <extends>QWidget</extends>
-   <header>Widgets/OverlayBase.h</header>
-   <container>1</container>
-  </customwidget>
-  <customwidget>
    <class>CSearchWidget</class>
    <extends>QWidget</extends>
    <header>Widgets/SearchWidget.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>COverlayBase</class>
+   <extends>QWidget</extends>
+   <header>Widgets/OverlayBase.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

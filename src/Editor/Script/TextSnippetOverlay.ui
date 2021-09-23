@@ -207,18 +207,6 @@
           </item>
           <item row="0" column="3">
            <widget class="QPushButton" name="RemoveButtonButton">
-            <property name="minimumSize">
-             <size>
-              <width>32</width>
-              <height>32</height>
-             </size>
-            </property>
-            <property name="maximumSize">
-             <size>
-              <width>32</width>
-              <height>32</height>
-             </size>
-            </property>
             <property name="toolTip">
              <string>Remove button</string>
             </property>
@@ -235,18 +223,6 @@
           </item>
           <item row="0" column="2">
            <widget class="QPushButton" name="AddButtonButton">
-            <property name="minimumSize">
-             <size>
-              <width>32</width>
-              <height>32</height>
-             </size>
-            </property>
-            <property name="maximumSize">
-             <size>
-              <width>32</width>
-              <height>32</height>
-             </size>
-            </property>
             <property name="toolTip">
              <string>Add button</string>
             </property>
@@ -313,18 +289,6 @@
           </item>
           <item row="0" column="2">
            <widget class="QPushButton" name="AddTextColorButton">
-            <property name="minimumSize">
-             <size>
-              <width>32</width>
-              <height>32</height>
-             </size>
-            </property>
-            <property name="maximumSize">
-             <size>
-              <width>32</width>
-              <height>32</height>
-             </size>
-            </property>
             <property name="toolTip">
              <string>Add button</string>
             </property>
@@ -341,18 +305,6 @@
           </item>
           <item row="0" column="3">
            <widget class="QPushButton" name="RemoveTextColorButton">
-            <property name="minimumSize">
-             <size>
-              <width>32</width>
-              <height>32</height>
-             </size>
-            </property>
-            <property name="maximumSize">
-             <size>
-              <width>32</width>
-              <height>32</height>
-             </size>
-            </property>
             <property name="toolTip">
              <string>Remove button</string>
             </property>
@@ -400,18 +352,6 @@
           </property>
           <item row="0" column="2">
            <widget class="QPushButton" name="AddBGColorButton">
-            <property name="minimumSize">
-             <size>
-              <width>32</width>
-              <height>32</height>
-             </size>
-            </property>
-            <property name="maximumSize">
-             <size>
-              <width>32</width>
-              <height>32</height>
-             </size>
-            </property>
             <property name="toolTip">
              <string>Add button</string>
             </property>
@@ -441,18 +381,6 @@
           </item>
           <item row="0" column="3">
            <widget class="QPushButton" name="RemoveBGColorButton">
-            <property name="minimumSize">
-             <size>
-              <width>32</width>
-              <height>32</height>
-             </size>
-            </property>
-            <property name="maximumSize">
-             <size>
-              <width>32</width>
-              <height>32</height>
-             </size>
-            </property>
             <property name="toolTip">
              <string>Remove button</string>
             </property>
@@ -569,15 +497,15 @@ background colors</string>
  </widget>
  <customwidgets>
   <customwidget>
-   <class>COverlayBase</class>
-   <extends>QWidget</extends>
-   <header>Widgets/OverlayBase.h</header>
-   <container>1</container>
-  </customwidget>
-  <customwidget>
    <class>CSearchWidget</class>
    <extends>QWidget</extends>
    <header>Widgets/SearchWidget.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>COverlayBase</class>
+   <extends>QWidget</extends>
+   <header>Widgets/OverlayBase.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

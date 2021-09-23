@@ -2,8 +2,10 @@
  ----- QSplitter
 */
 QSplitter {
-  min-height: 32px;
-  min-width: 32px;
+  min-height: 18px;
+  min-width: 18px;
+  max-height: 18px;
+  max-width: 18px;
   background: transparent;
 }
 
@@ -27,8 +29,10 @@ QTreeView::indicator,
 QRadioButton::indicator,
 QGroupBox::indicator,
 QCheckBox::indicator {
-  width: 32px;
-  height: 32px;
+  min-height: 18px;
+  min-width: 18px;
+  max-height: 18px;
+  max-width: 18px;
 }
 
 QTreeView::indicator::unchecked,
@@ -96,7 +100,7 @@ QTabWidget::pane {
   background-color: rgb(38, 38, 38);
   border: 1px solid silver;
   border-radius: 20px;
-  padding: 10px;
+  padding: 6px;
 }
 
 QGroupBox::title {
@@ -148,6 +152,10 @@ QLabel {
 
 QLabel#SearchIcon {
   border-image: url(:/resources/style/img/ButtonSearch.png);
+  min-width: 20px;
+  min-height: 20px;
+  max-width: 20px;
+  max-height: 20px;
 }
 QLabel#PlayButton {
   border-image: url(:/resources/style/img/ButtonPlay.png);
@@ -166,11 +174,15 @@ QLabel#IconBackground {
 }
 QLabel#ReadOnly {
   border-image: url(:/resources/style/img/ButtonReadOnly.png);
+  min-width: 20px;
+  min-height: 20px;
+  max-width: 20px;
+  max-height: 20px;
 }
 
 QToolTip {
   border: 2px solid silver;
-  border-radius: 10px;
+  border-radius: 0px;
   padding: 5px;
 }
 
@@ -190,7 +202,7 @@ QLineEdit {
   background-color: rgb(0, 0, 0);
   border: 2px solid silver;
   border-radius: 10px;
-  padding: 5px;
+  padding: 3px;
   min-height: 16px;
   selection-background-color: darkgray;
 }
@@ -205,15 +217,39 @@ QLineEdit:read-only {
 }
 
 /*
- ----- QPushButton, QToolButton
+ ----- QPushButton, QToolButton, CShortcutButton
 */
 QPushButton, QToolButton {
   color: white;
   border: 2px solid silver;
   border-radius: 10px;
-  padding: 5px;
   background: qradialgradient(cx: 0.3, cy: -0.4, fx: 0.3, fy: -0.4, radius: 1.35, stop: 0 #aa00aa, stop: 1 #760076);
+  padding: 6px;
   min-width: 64px;
+}
+
+QPushButton[styleSmall="true"] {
+  padding: 0px;
+  min-width: 24px;
+}
+
+CShortcutButton,
+CEditorSearchBar>QPushButton {
+  padding: 0px;
+  min-width: 24px;
+  min-height: 24px;
+  max-width: 24px;
+  max-height: 24px;
+  qproperty-iconSize: 24px;
+}
+
+CHelpButtonOverlay>CShortcutButton {
+  min-width: 64px;
+  min-height: 48px;
+  max-width: 64px;
+  max-height: 48px;
+  padding: -2px;
+  qproperty-iconSize: 48px;
 }
 
 QPushButton#AddShowBackgroundCode {
@@ -279,7 +315,13 @@ QPushButton#AddButtonButton,
 QPushButton#AddTextColorButton,
 QPushButton#AddBGColorButton,
 QPushButton#AddFetishButton {
-  qproperty-icon: url(:/resources/style/img/ButtonPlusDisabled.png) off,
+  padding: 0px;
+  min-width: 24px;
+  min-height: 24px;
+  max-width: 24px;
+  max-height: 24px;
+  qproperty-iconSize: 24px;
+  qproperty-icon: url(:/resources/style/img/ButtonPlus.png) off,
                   url(:/resources/style/img/ButtonPlus.png) on;
 }
 QPushButton#AddWebResourceButton {
@@ -296,7 +338,13 @@ QPushButton#RemoveButtonButton,
 QPushButton#RemoveTextColorButton,
 QPushButton#RemoveBGColorButton,
 QPushButton#RemoveFetishButton  {
-  qproperty-icon: url(:/resources/style/img/ButtonMinusDisabled.png) off,
+  padding: 0px;
+  min-width: 24px;
+  min-height: 24px;
+  max-width: 24px;
+  max-height: 24px;
+  qproperty-iconSize: 24px;
+  qproperty-icon: url(:/resources/style/img/ButtonMinus.png) off,
                   url(:/resources/style/img/ButtonMinus.png) on;
 }
 QPushButton#TitleCardButton {
@@ -308,11 +356,10 @@ QPushButton#AddNodeButton {
                   url(:/resources/style/img/ButtonPlus.png) on;
 }
 QPushButton#RemoveNodeButton {
-  qproperty-icon: url(:/resources/style/img/ButtonMinusDisabled.png) off,
+  qproperty-icon: url(:/resources/style/img/ButtonMinus.png) off,
                   url(:/resources/style/img/ButtonMinus.png) on;
 }
 QPushButton#HelpButton {
-  padding: 0px;
   qproperty-icon: url(:/resources/style/img/ButtonHelp.png) off,
                   url(:/resources/style/img/ButtonHelp.png) on;
 }
@@ -329,6 +376,12 @@ QPushButton#HomeButton {
                   url(:/resources/style/img/ButtonHome.png) on;
 }
 QPushButton#CloseButton {
+  padding: 0px;
+  min-width: 24px;
+  min-height: 24px;
+  max-width: 24px;
+  max-height: 24px;
+  qproperty-iconSize: 24px;
   qproperty-icon: url(:/resources/style/img/ButtonX.png) off,
                   url(:/resources/style/img/ButtonX.png) on;
 }
@@ -341,9 +394,17 @@ QPushButton#ExportButton {
                   url(:/resources/style/img/ButtonExport.png) on;
 }
 QPushButton#AddScriptFile {
-  min-width: 32px;
+  min-width: 24px;
   qproperty-icon: url(:/resources/style/img/ButtonCode.png) off,
                   url(:/resources/style/img/ButtonCode.png) on;
+}
+QPushButton#UndoButton {
+  qproperty-icon: url(:/resources/style/img/ButtonUndo.png) off,
+                  url(:/resources/style/img/ButtonUndo.png) on;
+}
+QPushButton#RedoButton {
+  qproperty-icon: url(:/resources/style/img/ButtonRedo.png) off,
+                  url(:/resources/style/img/ButtonRedo.png) on;
 }
 
 QPushButton:hover,
@@ -450,16 +511,16 @@ QProgressBar::chunk {
 QSlider:horizontal,
 QScrollBar:horizontal {
   background: black;
-  height: 32px;
-  margin-left: 32px;
-  margin-right: 32px;
+  height: 24px;
+  margin-left: 24px;
+  margin-right: 24px;
 }
 QSlider:vertical,
 QScrollBar:vertical {
   background: black;
-  width: 32px;
-  margin-top: 32px;
-  margin-bottom: 32px;
+  width: 24px;
+  margin-top: 24px;
+  margin-bottom: 24px;
 }
 QSlider:horizontal,
 QSlider:vertical {
@@ -474,11 +535,11 @@ QScrollBar::handle {
 }
 QSlider::handle:vertical,
 QScrollBar::handle:vertical{
-  min-height: 32px;
+  min-height: 24px;
 }
 QSlider::handle:horizontal,
 QScrollBar::handle:horizontal {
-  min-width: 32px;
+  min-width: 24px;
 }
 QSlider::handle:horizontal:hover,
 QSlider::handle:vertical:hover,
@@ -497,31 +558,31 @@ QScrollBar::handle:vertical:pressed {
 
 QSlider::add-line:horizontal,
 QScrollBar::add-line:horizontal {
-  width: 32px;
+  width: 24px;
   subcontrol-position: right;
   subcontrol-origin: margin;
 }
 QSlider::sub-line:horizontal,
 QScrollBar::sub-line:horizontal {
-  width: 32px;
+  width: 24px;
   subcontrol-position: left;
   subcontrol-origin: margin;
   position: absolute;
-  right: 32px;
+  right: 24px;
 }
 QSlider::add-line:vertical,
 QScrollBar::add-line:vertical {
-  height: 32px;
+  height: 24px;
   subcontrol-position: bottom;
   subcontrol-origin: margin;
 }
 QSlider::sub-line:vertical,
 QScrollBar::sub-line:vertical {
-  height: 32px;
+  height: 24px;
   subcontrol-position: top;
   subcontrol-origin: margin;
   position: absolute;
-  bottom: 32px;
+  bottom: 24px;
 }
 
 
@@ -575,7 +636,7 @@ QComboBox {
   color: white;
   border: 2px solid silver;
   border-radius: 10px;
-  padding: 5px;
+  padding: 3px;
   background: qradialgradient(cx: 0.3, cy: -0.4, fx: 0.3, fy: -0.4, radius: 1.35, stop: 0 #aa00aa, stop: 1 #760076);
   min-width: 64px;
 }
@@ -595,25 +656,25 @@ QComboBox QAbstractItemView {
 
 /* shift the text when the popup opens */
 QComboBox:on {
-  padding-left: 10px;
+  padding-left: 5px;
 }
 
 QComboBox::drop-down {
   subcontrol-origin: padding;
   subcontrol-position: top right;
-  width: 32px;
+  width: 24px;
 
   border-left-width: 1px;
   border-left-color: darkgray;
   border-left-style: solid; /* just a single line */
-  border-top-right-radius: 3px; /* same radius as the QComboBox */
-  border-bottom-right-radius: 3px;
+  border-top-right-radius: 0px; /* same radius as the QComboBox */
+  border-bottom-right-radius: 0px;
 }
 
 QComboBox::down-arrow {
   border-image: url(:/resources/style/img/ButtonArrowDown.png);
-  min-height: 32px;
-  min-width: 32px;
+  min-height: 24px;
+  min-width: 24px;
 }
 
 /* QComboBox gets the "on" state when the popup is open */
@@ -633,7 +694,7 @@ QSpinBox {
   padding-right: 16px; /* make room for the arrows */
   border: 2px solid silver;
   border-radius: 10px;
-  height: 32px;
+  height: 24px;
 }
 QDoubleSpinBox:disabled,
 QTimeEdit:disabled,
@@ -648,7 +709,7 @@ QSpinBox::up-button {
   subcontrol-origin: border;
   subcontrol-position: top right; /* position at the top right corner */
 
-  width: 16px; /* 16 + 2*1px border-width = 15px padding + 3px parent border */
+  width: 12px; /* 16 + 2*1px border-width = 15px padding + 3px parent border */
   background: qradialgradient(cx: 0.3, cy: -0.4, fx: 0.3, fy: -0.4, radius: 1.35, stop: 0 #aa00aa, stop: 1 #760076);
   border: 1px solid silver;
   border-radius: 2px;
@@ -668,8 +729,8 @@ QDoubleSpinBox::up-arrow,
 QTimeEdit::up-arrow,
 QSpinBox::up-arrow {
   image: url(:/resources/style/img/ButtonPlus.png);
-  width: 16px;
-  height: 16px;
+  width: 12px;
+  height: 12px;
 }
 QDoubleSpinBox::up-arrow:disabled, QDoubleSpinBox::up-arrow:off,
 QTimeEdit::up-arrow:disabled, QTimeEdit::up-arrow:off,
@@ -684,7 +745,7 @@ QSpinBox::down-button {
   subcontrol-origin: border;
   subcontrol-position: bottom right; /* position at bottom right corner */
 
-  width: 16px; /* 16 + 2*1px border-width = 15px padding + 3px parent border */
+  width: 12px; /* 16 + 2*1px border-width = 15px padding + 3px parent border */
   background: qradialgradient(cx: 0.3, cy: -0.4, fx: 0.3, fy: -0.4, radius: 1.35, stop: 0 #aa00aa, stop: 1 #760076);
   border: 1px solid silver;
   border-radius: 2px;
@@ -704,8 +765,8 @@ QDoubleSpinBox::down-arrow,
 QTimeEdit::down-arrow,
 QSpinBox::down-arrow {
   image: url(:/resources/style/img/ButtonMinus.png);
-  width: 16px;
-  height: 16px;
+  width: 12px;
+  height: 12px;
 }
 QDoubleSpinBox::down-arrow:disabled,
 QTimeEdit::down-arrow:disabled,
@@ -790,8 +851,9 @@ COverlayBase#HelpButtonOverlay {
 QHeaderView::section {
   background: qradialgradient(cx: 0.3, cy: -0.4, fx: 0.3, fy: -0.4, radius: 1.35, stop: 0 #aa00aa, stop: 1 #760076);
   color: white;
-  padding: 10px;
-  border: 2px solid silver;
+  padding: 0px;
+  padding-left: 3px;
+  border: 1px solid silver;
 }
 
 QHeaderView::section:checked
@@ -833,18 +895,25 @@ QListView, QTreeView, QTableView {
   show-decoration-selected: 1; /* make the selection span the entire width of the view */
 }
 
+QTreeView#pHelpSearchTree {
+  min-width: 100px;
+  width: 100px;
+}
+
 QListView::item,
 QTreeView::item,
 QTableView::item {
-  margin: 1px 1px 1px 1px;
+  margin: 0px 0px 0px 0px;
   border: 0px;
   padding: 0px;
+  padding-right: 3px;
+  padding-left: 3px;
 }
 
 QListView::item::text,
 QTreeView::item::text,
 QTableView::item::text {
-  min-height: 32px;
+  min-height: 18px;
 }
 
 QListView::item:alternate,
@@ -927,6 +996,9 @@ CTimerWidget {
 }
 
 CScriptEditorWidget {
+  qproperty-iconFolded: url(:/resources/style/img/ButtonPlay.png);
+  qproperty-iconUnfolded: url(:/resources/style/img/ButtonArrowDown.png);
+  qproperty-foldAreaBackgroundColor: black;
   qproperty-lineNumberBackgroundColor: black;
   qproperty-lineNumberTextColor: white;
   qproperty-highlightLineColor: rgb(20, 20, 20);
@@ -955,4 +1027,8 @@ CEditorSceneNodeWidget {
   qproperty-selectedConnectionColor: rgb(118, 0, 118);
   qproperty-selectedConnectionHaloColor: rgb(236, 0, 236);
   qproperty-hoveredConnectionColor: rgb(118, 0, 118);
+}
+
+CEditorActionBar {
+  qproperty-spacing: 1;
 }
