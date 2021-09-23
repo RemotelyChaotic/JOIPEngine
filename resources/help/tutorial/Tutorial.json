@@ -29,17 +29,6 @@
       },
       {
         "highlight": [
-          { "items" : ["pTitleLineEdit"]}
-        ]
-      },
-      {
-        "text": [
-          {"posX" : 0.5}, { "posY": 0.2},
-          { "text": "...renaming the JOIP-Project..." }
-        ]
-      },
-      {
-        "highlight": [
           { "items" : ["SaveButton", "ExportButton"]}
         ]
       },
@@ -47,6 +36,28 @@
         "text": [
           {"posX" : 0.5}, { "posY": 0.2},
           { "text": "...saving or exporting the JOIP-Project..." }
+        ]
+      },
+      {
+        "highlight": [
+          { "items" : ["UndoButton", "RedoButton"]}
+        ]
+      },
+      {
+        "text": [
+          {"posX" : 0.5}, { "posY": 0.2},
+          { "text": "...undoing and redoing actions..." }
+        ]
+      },
+      {
+        "highlight": [
+          { "items" : ["pTitleLineEdit"]}
+        ]
+      },
+      {
+        "text": [
+          {"posX" : 0.5}, { "posY": 0.2},
+          { "text": "...renaming the JOIP-Project..." }
         ]
       },
       {
