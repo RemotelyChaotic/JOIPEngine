@@ -23,7 +23,7 @@ namespace
   const std::map<EEditorWidget, QString> m_sEditorNamesMap =
   {
     { EEditorWidget::eResourceWidget, "Resource Manager (%1)" },
-    { EEditorWidget::eResourceDisplay, "Resource View (%1)" },
+    { EEditorWidget::eResourceDisplay, "Resource View & Undo Stack (%1)" },
     { EEditorWidget::eProjectSettings, "Project Settings (%1)" },
     { EEditorWidget::eSceneNodeWidget, "Scene Node Editor (%1)" },
     { EEditorWidget::eSceneCodeEditorWidget, "Scene Code Editor (%1)" }

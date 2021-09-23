@@ -2,6 +2,7 @@
 #include "Application.h"
 #include "EditorActionBar.h"
 #include "Systems/DatabaseManager.h"
+#include <QUndoView>
 
 CEditorResourceDisplayWidget::CEditorResourceDisplayWidget(QWidget* pParent) :
   CEditorWidgetBase(pParent),
@@ -26,6 +27,10 @@ void CEditorResourceDisplayWidget::Initialize()
   m_bInitialized = false;
 
   m_spUi->pResourceDisplay->SlotSetSliderVisible(true);
+
+  QUndoView* pView = new QUndoView(this);
+  pView->setStack(UndoStack());
+  layout()->addWidget(pView);
 
   m_bInitialized = true;
 }
