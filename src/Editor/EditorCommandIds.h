@@ -24,6 +24,7 @@ BETTER_ENUM(EEditorCommandId, qint32,
 
             eChangeOpenedScript,
 
+            eAddNodeItem,
             eMoveNodeItem,
             eChangeNodeItem
             );

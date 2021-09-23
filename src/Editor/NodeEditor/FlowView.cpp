@@ -319,3 +319,26 @@ void CFlowView::contextMenuEvent(QContextMenuEvent* pEvent)
     OpenContextMenuAt(pEvent->pos(), pEvent->globalPos());
   }
 }
+
+//----------------------------------------------------------------------------------------
+//
+void CFlowView::keyPressEvent(QKeyEvent *event)
+{
+  switch (event->key())
+  {
+    case Qt::Key_V:
+       if (event->modifiers() & Qt::ControlModifier)
+       {
+         Scene()->SetUndoOperationInProgress(true);
+         QtNodes::FlowView::keyPressEvent(event);
+         Scene()->SetUndoOperationInProgress(false);
+         return;
+       }
+       break;
+
+    default:
+      break;
+  }
+
+  QtNodes::FlowView::keyPressEvent(event);
+}

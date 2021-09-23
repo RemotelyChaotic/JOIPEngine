@@ -56,7 +56,7 @@ bool CCommandNodeMoved::mergeWith(const QUndoCommand* pOther)
 
   const CCommandNodeMoved* pOtherCasted = dynamic_cast<const CCommandNodeMoved*>(pOther);
   if (nullptr == pOtherCasted) { return false; }
-  if (m_nodeId == pOtherCasted->m_nodeId) { return false; }
+  if (m_nodeId != pOtherCasted->m_nodeId) { return false; }
 
   m_to = pOtherCasted->m_to;
   setText(QString("Node %1 moved -> %2")

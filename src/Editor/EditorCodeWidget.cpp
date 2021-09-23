@@ -375,12 +375,15 @@ void CEditorCodeWidget::on_pResourceComboBox_currentIndexChanged(qint32 iIndex)
   WIDGET_INITIALIZED_GUARD
   if (nullptr == m_spCurrentProject) { return; }
 
-  UndoStack()->push(new CCommandChangeOpenedScript(m_spUi->pResourceComboBox,
-                                                   m_spUi->pCodeEdit,
-                                                   this, std::bind(&CEditorCodeWidget::ReloadEditor, this, std::placeholders::_1),
-                                                   &m_bChangingIndex, &m_sLastCachedScript,
-                                                   m_sLastCachedScript,
-                                                   ScriptEditorModel()->CachedScriptName(iIndex)));
+  if (ScriptEditorModel()->CachedScriptName(iIndex) != m_sLastCachedScript)
+  {
+    UndoStack()->push(new CCommandChangeOpenedScript(m_spUi->pResourceComboBox,
+                                                     m_spUi->pCodeEdit,
+                                                     this, std::bind(&CEditorCodeWidget::ReloadEditor, this, std::placeholders::_1),
+                                                     &m_bChangingIndex, &m_sLastCachedScript,
+                                                     m_sLastCachedScript,
+                                                     ScriptEditorModel()->CachedScriptName(iIndex)));
+  }
 }
 
 //----------------------------------------------------------------------------------------
@@ -568,7 +571,10 @@ void CEditorCodeWidget::SlotRowsInserted(const QModelIndex& parent, int iFirst, 
   Q_UNUSED(parent) Q_UNUSED(iFirst) Q_UNUSED(iLast)
   if (0 < ScriptEditorModel()->rowCount())
   {
-    on_pResourceComboBox_currentIndexChanged(0);
+    if (m_spUi->pResourceComboBox->currentIndex() < 0)
+    {
+      on_pResourceComboBox_currentIndexChanged(0);
+    }
     m_spUi->pStackedWidget->setCurrentIndex(c_iIndexScripts);
   }
 }

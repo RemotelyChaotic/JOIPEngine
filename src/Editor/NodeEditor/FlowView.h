@@ -42,6 +42,7 @@ protected:
 
 protected:
   void contextMenuEvent(QContextMenuEvent* pEvent) override;
+  void keyPressEvent(QKeyEvent *event) override;
 
 private:
   bool                     m_bReadOnly;

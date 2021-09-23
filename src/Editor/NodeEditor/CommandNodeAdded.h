@@ -15,7 +15,11 @@ class CCommandNodeAdded : public QUndoCommand
 public:
   CCommandNodeAdded(QPointer<CFlowView> pFlowView,
                     const QString& sModelName,
-                    const QPoint& addPoint,
+                    const QPointF& addPoint,
+                    QPointer<QUndoStack> pUndoStack,
+                    QUndoCommand* pParent = nullptr);
+  CCommandNodeAdded(QPointer<CFlowView> pFlowView,
+                    QUuid nodeId,
                     QPointer<QUndoStack> pUndoStack,
                     QUndoCommand* pParent = nullptr);
   ~CCommandNodeAdded();
@@ -31,9 +35,10 @@ protected:
   QPointer<CFlowScene>         m_pScene;
   QPointer<QUndoStack>         m_pUndoStack;
   QString                      m_sModelName;
-  QPoint                       m_addPoint;
+  QPointF                      m_addPoint;
   QUuid                        m_nodeId;
   QJsonObject                  m_node;
+  bool                         m_bFirstRedo;
 };
 
 #endif // CCOMMANDNODEADDED_H

@@ -1,12 +1,14 @@
 #include "FlowScene.h"
 #include "CommandConnectionAdded.h"
 #include "CommandConnectionRemoved.h"
+#include "CommandNodeAdded.h"
 #include "CommandNodeMoved.h"
 #include "EditorNodeModelBase.h"
 #include "FlowView.h"
 #include "Editor/EditorWidgetTypes.h"
 
 #include <nodes/Node>
+#include <QKeyEvent>
 
 using QtNodes::FlowScene;
 
@@ -101,20 +103,19 @@ void CFlowScene::SlotNodePlaced(QtNodes::Node& node)
 //
 void CFlowScene::SlotNodeMoved(QtNodes::Node& node, const QPointF& newPosition)
 {
-  if (m_bLoading) { return; }
-  if (!m_bUndoRedoOperationInProgress &&
-      node.nodeGraphicsObject().pos().x() != newPosition.x() &&
-      node.nodeGraphicsObject().pos().y() != newPosition.y())
+  if (!m_bLoading && !m_bUndoRedoOperationInProgress)
   {
-    if (nullptr != UndoStack() && views().size() > 0)
+    QPointF oldPos =
+        node.nodeGraphicsObject().property(editor::c_sPropertyOldValue).value<QPointF>();
+    if (oldPos.x() != newPosition.x() && oldPos.y() != newPosition.y() &&
+        nullptr != UndoStack() && views().size() > 0)
     {
       for (auto pView : views())
       {
         if (CFlowView* pViewCasted = dynamic_cast<CFlowView*>(pView))
         {
           UndoStack()->push(new CCommandNodeMoved(pViewCasted, node.id(),
-                                                  node.nodeGraphicsObject().property(editor::c_sPropertyOldValue).value<QPointF>(),
-                                                  newPosition));
+                                                  oldPos, newPosition));
         }
       }
     }
