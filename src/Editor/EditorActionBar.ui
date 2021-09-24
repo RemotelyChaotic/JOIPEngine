@@ -228,7 +228,7 @@
        <verstretch>0</verstretch>
       </sizepolicy>
      </property>
-     <layout class="QVBoxLayout" name="verticalLayout_2">
+     <layout class="QGridLayout" name="gridLayout">
       <property name="leftMargin">
        <number>0</number>
       </property>
@@ -241,8 +241,8 @@
       <property name="bottomMargin">
        <number>0</number>
       </property>
-      <item>
-       <widget class="CShortcutButton" name="AddResourceButton">
+      <item row="5" column="0">
+       <widget class="CShortcutButton" name="MapButton">
         <property name="sizePolicy">
          <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
           <horstretch>0</horstretch>
@@ -250,46 +250,14 @@
          </sizepolicy>
         </property>
         <property name="toolTip">
-         <string>Add local resource</string>
+         <string>Set image as map</string>
         </property>
         <property name="text">
          <string/>
         </property>
        </widget>
       </item>
-      <item>
-       <widget class="CShortcutButton" name="AddWebResourceButton">
-        <property name="sizePolicy">
-         <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-          <horstretch>0</horstretch>
-          <verstretch>0</verstretch>
-         </sizepolicy>
-        </property>
-        <property name="toolTip">
-         <string>Add web-resource</string>
-        </property>
-        <property name="text">
-         <string/>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="CShortcutButton" name="RemoveResourceButton">
-        <property name="sizePolicy">
-         <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-          <horstretch>0</horstretch>
-          <verstretch>0</verstretch>
-         </sizepolicy>
-        </property>
-        <property name="toolTip">
-         <string>Remove resource</string>
-        </property>
-        <property name="text">
-         <string/>
-        </property>
-       </widget>
-      </item>
-      <item>
+      <item row="3" column="0">
        <widget class="CShortcutButton" name="SourceButton">
         <property name="sizePolicy">
          <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
@@ -305,7 +273,39 @@
         </property>
        </widget>
       </item>
-      <item>
+      <item row="2" column="0">
+       <widget class="CShortcutButton" name="RemoveResourceButton">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="toolTip">
+         <string>Remove resource</string>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="0">
+       <widget class="CShortcutButton" name="AddResourceButton">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="toolTip">
+         <string>Add local resource</string>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+       </widget>
+      </item>
+      <item row="3" column="1">
        <widget class="CShortcutButton" name="TitleCardButton">
         <property name="sizePolicy">
          <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
@@ -321,8 +321,8 @@
         </property>
        </widget>
       </item>
-      <item>
-       <widget class="CShortcutButton" name="MapButton">
+      <item row="0" column="1">
+       <widget class="CShortcutButton" name="AddWebResourceButton">
         <property name="sizePolicy">
          <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
           <horstretch>0</horstretch>
@@ -330,7 +330,7 @@
          </sizepolicy>
         </property>
         <property name="toolTip">
-         <string>Set image as map</string>
+         <string>Add web-resource</string>
         </property>
         <property name="text">
          <string/>
@@ -455,7 +455,7 @@
    </item>
    <item>
     <widget class="QWidget" name="pCodeEditorContainer" native="true">
-     <layout class="QVBoxLayout" name="verticalLayout_5">
+     <layout class="QGridLayout" name="gridLayout_2">
       <property name="leftMargin">
        <number>0</number>
       </property>
@@ -468,8 +468,8 @@
       <property name="bottomMargin">
        <number>0</number>
       </property>
-      <item>
-       <widget class="CShortcutButton" name="DebugButton">
+      <item row="5" column="0">
+       <widget class="CShortcutButton" name="AddTextCode">
         <property name="sizePolicy">
          <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
           <horstretch>0</horstretch>
@@ -477,14 +477,43 @@
          </sizepolicy>
         </property>
         <property name="toolTip">
-         <string>Debug scene</string>
+         <string>Add code to show text or input</string>
         </property>
         <property name="text">
          <string/>
         </property>
        </widget>
       </item>
-      <item>
+      <item row="8" column="0">
+       <widget class="CShortcutButton" name="AddThreadCode">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="toolTip">
+         <string>Add code to influence thread flow</string>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+       </widget>
+      </item>
+      <item row="3" column="0">
+       <widget class="CShortcutButton" name="AddShowImageCode">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="toolTip">
+         <string>Add code to display resource</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="0">
        <widget class="CShortcutButton" name="StopDebugButton">
         <property name="sizePolicy">
          <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
@@ -506,8 +535,8 @@
         </property>
        </widget>
       </item>
-      <item>
-       <widget class="CShortcutButton" name="AddShowImageCode">
+      <item row="0" column="0">
+       <widget class="CShortcutButton" name="DebugButton">
         <property name="sizePolicy">
          <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
           <horstretch>0</horstretch>
@@ -515,27 +544,14 @@
          </sizepolicy>
         </property>
         <property name="toolTip">
-         <string>Add code to display resource</string>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="CShortcutButton" name="AddShowIconCode">
-        <property name="sizePolicy">
-         <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-          <horstretch>0</horstretch>
-          <verstretch>0</verstretch>
-         </sizepolicy>
-        </property>
-        <property name="toolTip">
-         <string>Add code to display icon</string>
+         <string>Debug scene</string>
         </property>
         <property name="text">
          <string/>
         </property>
        </widget>
       </item>
-      <item>
+      <item row="3" column="1">
        <widget class="CShortcutButton" name="AddShowBackgroundCode">
         <property name="sizePolicy">
          <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
@@ -551,23 +567,7 @@
         </property>
        </widget>
       </item>
-      <item>
-       <widget class="CShortcutButton" name="AddTextCode">
-        <property name="sizePolicy">
-         <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-          <horstretch>0</horstretch>
-          <verstretch>0</verstretch>
-         </sizepolicy>
-        </property>
-        <property name="toolTip">
-         <string>Add code to show text or input</string>
-        </property>
-        <property name="text">
-         <string/>
-        </property>
-       </widget>
-      </item>
-      <item>
+      <item row="6" column="1">
        <widget class="CShortcutButton" name="AddMetronomeCode">
         <property name="sizePolicy">
          <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
@@ -583,7 +583,7 @@
         </property>
        </widget>
       </item>
-      <item>
+      <item row="6" column="0">
        <widget class="CShortcutButton" name="AddTimerCode">
         <property name="sizePolicy">
          <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
@@ -599,8 +599,8 @@
         </property>
        </widget>
       </item>
-      <item>
-       <widget class="CShortcutButton" name="AddThreadCode">
+      <item row="5" column="1">
+       <widget class="CShortcutButton" name="AddShowIconCode">
         <property name="sizePolicy">
          <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
           <horstretch>0</horstretch>
@@ -608,7 +608,7 @@
          </sizepolicy>
         </property>
         <property name="toolTip">
-         <string>Add code to influence thread flow</string>
+         <string>Add code to display icon</string>
         </property>
         <property name="text">
          <string/>
