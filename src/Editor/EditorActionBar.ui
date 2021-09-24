@@ -241,7 +241,39 @@
       <property name="bottomMargin">
        <number>0</number>
       </property>
-      <item row="5" column="0">
+      <item row="1" column="1">
+       <widget class="CShortcutButton" name="AddWebResourceButton">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="toolTip">
+         <string>Add web-resource</string>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="0">
+       <widget class="CShortcutButton" name="AddResourceButton">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="toolTip">
+         <string>Add local resource</string>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+       </widget>
+      </item>
+      <item row="6" column="0">
        <widget class="CShortcutButton" name="MapButton">
         <property name="sizePolicy">
          <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
@@ -258,22 +290,6 @@
        </widget>
       </item>
       <item row="3" column="0">
-       <widget class="CShortcutButton" name="SourceButton">
-        <property name="sizePolicy">
-         <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-          <horstretch>0</horstretch>
-          <verstretch>0</verstretch>
-         </sizepolicy>
-        </property>
-        <property name="toolTip">
-         <string>Add source to image</string>
-        </property>
-        <property name="text">
-         <string/>
-        </property>
-       </widget>
-      </item>
-      <item row="2" column="0">
        <widget class="CShortcutButton" name="RemoveResourceButton">
         <property name="sizePolicy">
          <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
@@ -289,8 +305,8 @@
         </property>
        </widget>
       </item>
-      <item row="0" column="0">
-       <widget class="CShortcutButton" name="AddResourceButton">
+      <item row="4" column="0">
+       <widget class="CShortcutButton" name="SourceButton">
         <property name="sizePolicy">
          <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
           <horstretch>0</horstretch>
@@ -298,14 +314,14 @@
          </sizepolicy>
         </property>
         <property name="toolTip">
-         <string>Add local resource</string>
+         <string>Add source to image</string>
         </property>
         <property name="text">
          <string/>
         </property>
        </widget>
       </item>
-      <item row="3" column="1">
+      <item row="4" column="1">
        <widget class="CShortcutButton" name="TitleCardButton">
         <property name="sizePolicy">
          <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
@@ -321,16 +337,20 @@
         </property>
        </widget>
       </item>
-      <item row="0" column="1">
-       <widget class="CShortcutButton" name="AddWebResourceButton">
-        <property name="sizePolicy">
-         <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-          <horstretch>0</horstretch>
-          <verstretch>0</verstretch>
-         </sizepolicy>
-        </property>
+      <item row="0" column="0">
+       <widget class="CShortcutButton" name="TreeViewButton">
         <property name="toolTip">
-         <string>Add web-resource</string>
+         <string>Show resources as a tree</string>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="1">
+       <widget class="CShortcutButton" name="ExplorerViewButton">
+        <property name="toolTip">
+         <string>Show resources as icons (explorer-like)</string>
         </property>
         <property name="text">
          <string/>

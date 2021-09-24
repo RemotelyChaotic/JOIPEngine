@@ -4,10 +4,11 @@
 #include "Editor/EditorResourceWidget.h"
 #include "Editor/Resources/ResourceTreeItem.h"
 #include "Editor/Resources/ResourceTreeItemModel.h"
+#include "Editor/Resources/ResourceTreeItemSortFilterProxyModel.h"
 #include "Systems/DatabaseManager.h"
 #include "Systems/Project.h"
 #include "Systems/Resource.h"
-
+#include <QItemSelectionModel>
 #include <QSortFilterProxyModel>
 
 CResourceTutorialStateSwitchHandler::
@@ -56,7 +57,7 @@ void CResourceTutorialStateSwitchHandler::OnStateSwitch(ETutorialState newState,
   {
     case ETutorialState::eResourcePanel:
     {
-      QItemSelectionModel* pSelectionModel = m_spUi->pResourceTree->selectionModel();
+      QItemSelectionModel* pSelectionModel = m_spUi->pResourceModelView->CurrentSelectionModel();
       m_connection =
           connect(pSelectionModel, &QItemSelectionModel::currentChanged,
                   this, &CResourceTutorialStateSwitchHandler::SlotCurrentChanged);
@@ -77,7 +78,7 @@ void CResourceTutorialStateSwitchHandler::SlotCurrentChanged(const QModelIndex& 
     Q_UNUSED(previous);
 
     QSortFilterProxyModel* pProxyModel =
-      dynamic_cast<QSortFilterProxyModel*>(m_spUi->pResourceTree->model());
+      m_spUi->pResourceModelView->Proxy().data();
     CResourceTreeItemModel* pModel =
       dynamic_cast<CResourceTreeItemModel*>(pProxyModel->sourceModel());
 

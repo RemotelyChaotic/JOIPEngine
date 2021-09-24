@@ -33,24 +33,24 @@
        <property name="bottomMargin">
         <number>0</number>
        </property>
-       <property name="spacing">
+       <property name="horizontalSpacing">
         <number>10</number>
        </property>
-       <item row="0" column="0">
-        <widget class="QTreeView" name="pResourceTree">
-         <property name="alternatingRowColors">
-          <bool>true</bool>
-         </property>
-         <property name="sortingEnabled">
-          <bool>true</bool>
-         </property>
-         <property name="animated">
-          <bool>true</bool>
-         </property>
-        </widget>
-       </item>
+       <property name="verticalSpacing">
+        <number>0</number>
+       </property>
        <item row="1" column="0">
         <widget class="CSearchWidget" name="pFilter" native="true"/>
+       </item>
+       <item row="0" column="0">
+        <widget class="CResourceModelView" name="pResourceModelView" native="true">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+        </widget>
        </item>
       </layout>
      </widget>
@@ -70,6 +70,12 @@
    <class>CSearchWidget</class>
    <extends>QWidget</extends>
    <header>Widgets/SearchWidget.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>CResourceModelView</class>
+   <extends>QWidget</extends>
+   <header>Editor/Resources/ResourceModelView.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

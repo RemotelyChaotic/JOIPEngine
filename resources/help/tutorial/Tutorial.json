@@ -338,7 +338,7 @@
       },
       {
         "highlight": [
-          { "items" : ["pResourceTree"]}
+          { "items" : ["pResourceModelView"]}
         ]
       },
       {
@@ -411,7 +411,7 @@
       },
       {
         "highlight": [
-          { "items" : ["pResourceTree"]}
+          { "items" : ["pResourceModelView"]}
         ]
       },
       {
@@ -476,7 +476,7 @@
       },
       {
         "highlight": [
-          { "items" : ["pResourceTree", "AddResourceButton"]},
+          { "items" : ["pResourceModelView", "AddResourceButton"]},
           { "allwaysOnTop": 1 }
         ]
       },
@@ -974,7 +974,7 @@
       },
       {
         "highlight": [
-          { "items" : ["pResourceTree"]}
+          { "items" : ["pResourceModelView"]}
         ]
       },
       {

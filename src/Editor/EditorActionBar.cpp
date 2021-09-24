@@ -283,12 +283,14 @@ void CEditorActionBar::SlotKeyBindingsChanged()
   }
   else
   {
-    m_spUi->AddResourceButton->SetShortcut(m_spSettings->keyBinding(sKey.arg(1)));
-    m_spUi->AddWebResourceButton->SetShortcut(m_spSettings->keyBinding(sKey.arg(2)));
-    m_spUi->RemoveResourceButton->SetShortcut(m_spSettings->keyBinding(sKey.arg(3)));
-    m_spUi->SourceButton->SetShortcut(m_spSettings->keyBinding(sKey.arg(4)));
-    m_spUi->TitleCardButton->SetShortcut(m_spSettings->keyBinding(sKey.arg(5)));
-    m_spUi->MapButton->SetShortcut(m_spSettings->keyBinding(sKey.arg(6)));
+    m_spUi->TreeViewButton->SetShortcut(m_spSettings->keyBinding(sKey.arg(1)));
+    m_spUi->ExplorerViewButton->SetShortcut(m_spSettings->keyBinding(sKey.arg(2)));
+    m_spUi->AddResourceButton->SetShortcut(m_spSettings->keyBinding(sKey.arg(3)));
+    m_spUi->AddWebResourceButton->SetShortcut(m_spSettings->keyBinding(sKey.arg(4)));
+    m_spUi->RemoveResourceButton->SetShortcut(m_spSettings->keyBinding(sKey.arg(5)));
+    m_spUi->SourceButton->SetShortcut(m_spSettings->keyBinding(sKey.arg(6)));
+    m_spUi->TitleCardButton->SetShortcut(m_spSettings->keyBinding(sKey.arg(7)));
+    m_spUi->MapButton->SetShortcut(m_spSettings->keyBinding(sKey.arg(8)));
 
     m_spUi->PlayButton->SetShortcut(m_spSettings->keyBinding(sKey.arg(1)));
     m_spUi->PauseButton->SetShortcut(m_spSettings->keyBinding(sKey.arg(2)));
@@ -298,13 +300,13 @@ void CEditorActionBar::SlotKeyBindingsChanged()
     m_spUi->RemoveNodeButton->SetShortcut(m_spSettings->keyBinding(sKey.arg(2)));
 
     m_spUi->DebugButton->SetShortcut(m_spSettings->keyBinding(sKey.arg(1)));
-    m_spUi->StopDebugButton->SetShortcut(m_spSettings->keyBinding(sKey.arg(1)));
-    m_spUi->AddShowImageCode->SetShortcut(m_spSettings->keyBinding(sKey.arg(2)));
-    m_spUi->AddShowIconCode->SetShortcut(m_spSettings->keyBinding(sKey.arg(3)));
+    m_spUi->StopDebugButton->SetShortcut(m_spSettings->keyBinding(sKey.arg(2)));
+    m_spUi->AddShowImageCode->SetShortcut(m_spSettings->keyBinding(sKey.arg(3)));
     m_spUi->AddShowBackgroundCode->SetShortcut(m_spSettings->keyBinding(sKey.arg(4)));
     m_spUi->AddTextCode->SetShortcut(m_spSettings->keyBinding(sKey.arg(5)));
-    m_spUi->AddMetronomeCode->SetShortcut(m_spSettings->keyBinding(sKey.arg(6)));
+    m_spUi->AddShowIconCode->SetShortcut(m_spSettings->keyBinding(sKey.arg(6)));
     m_spUi->AddTimerCode->SetShortcut(m_spSettings->keyBinding(sKey.arg(7)));
-    m_spUi->AddThreadCode->SetShortcut(m_spSettings->keyBinding(sKey.arg(8)));
+    m_spUi->AddMetronomeCode->SetShortcut(m_spSettings->keyBinding(sKey.arg(8)));
+    m_spUi->AddThreadCode->SetShortcut(m_spSettings->keyBinding(sKey.arg(9)));
   }
 }

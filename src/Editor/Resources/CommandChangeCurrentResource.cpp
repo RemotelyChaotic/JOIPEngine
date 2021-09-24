@@ -2,14 +2,12 @@
 #include "Application.h"
 #include "ResourceTreeItemModel.h"
 #include "Editor/EditorCommandIds.h"
-#include "Widgets/ResourceDisplayWidget.h"
 #include <QItemSelectionModel>
 #include <QSortFilterProxyModel>
 
 CCommandChangeCurrentResource::CCommandChangeCurrentResource(
     std::shared_ptr<SProject> spCurrentProject,
-    QPointer<CResourceDisplayWidget> pResourceDisplayWidget,
-    QPointer<QItemSelectionModel> pSelectionModel,
+    std::vector<QPointer<QItemSelectionModel>> vpSelectionModel,
     QPointer<QSortFilterProxyModel> pProxyModel,
     const QString& sOld,
     const QString& sNew,
@@ -18,8 +16,7 @@ CCommandChangeCurrentResource::CCommandChangeCurrentResource(
   QUndoCommand("Selected resource: " + sNew, pParent),
   m_spCurrentProject(spCurrentProject),
   m_wpDbManager(CApplication::Instance()->System<CDatabaseManager>()),
-  m_pResourceDisplayWidget(pResourceDisplayWidget),
-  m_pSelectionModel(pSelectionModel),
+  m_vpSelectionModel(vpSelectionModel),
   m_pProxyModel(pProxyModel),
   m_sOldResource(sOld),
   m_sNewResource(sNew),
@@ -81,19 +78,22 @@ void CCommandChangeCurrentResource::RunDoOrUndo(const QString& sResource)
       auto spResource = spDbManager->FindResourceInProject(m_spCurrentProject, sResource);
       if (nullptr != spResource)
       {
-        m_pResourceDisplayWidget->UnloadResource();
-        m_pResourceDisplayWidget->LoadResource(spResource);
-
         CResourceTreeItemModel* pModel =
           dynamic_cast<CResourceTreeItemModel*>(m_pProxyModel->sourceModel());
 
         if (nullptr != pModel)
         {
-          m_pSelectionModel->blockSignals(true);
-          m_pSelectionModel->select(m_pProxyModel->mapFromSource(pModel->IndexForResource(spResource)),
-                                    QItemSelectionModel::Clear | QItemSelectionModel::SelectCurrent |
-                                    QItemSelectionModel::Rows);
-          m_pSelectionModel->blockSignals(false);
+          for (QPointer<QItemSelectionModel> pSelectionModel : m_vpSelectionModel)
+          {
+            if (nullptr != pSelectionModel)
+            {
+              pSelectionModel->blockSignals(true);
+              pSelectionModel->select(m_pProxyModel->mapFromSource(pModel->IndexForResource(spResource)),
+                                      QItemSelectionModel::Clear | QItemSelectionModel::SelectCurrent |
+                                      QItemSelectionModel::Rows);
+              pSelectionModel->blockSignals(false);
+            }
+          }
 
           if (nullptr != m_fnOnSelectionChanged)
           {
@@ -109,9 +109,15 @@ void CCommandChangeCurrentResource::RunDoOrUndo(const QString& sResource)
       dynamic_cast<CResourceTreeItemModel*>(m_pProxyModel->sourceModel());
     if (nullptr != pModel)
     {
-      m_pSelectionModel->blockSignals(true);
-      m_pSelectionModel->clearSelection();
-      m_pSelectionModel->blockSignals(false);
+      for (QPointer<QItemSelectionModel> pSelectionModel : m_vpSelectionModel)
+      {
+        if (nullptr != pSelectionModel)
+        {
+          pSelectionModel->blockSignals(true);
+          pSelectionModel->clearSelection();
+          pSelectionModel->blockSignals(false);
+        }
+      }
       if (nullptr != m_fnOnSelectionChanged)
       {
         m_fnOnSelectionChanged(sResource);

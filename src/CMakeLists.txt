@@ -134,6 +134,11 @@ set(Sources
   Editor/Resources/CommandChangeTitleCard.h
   Editor/Resources/CommandRemoveResource.cpp
   Editor/Resources/CommandRemoveResource.h
+  Editor/Resources/ResourceDetailView.cpp
+  Editor/Resources/ResourceDetailView.h
+  Editor/Resources/ResourceModelView.cpp
+  Editor/Resources/ResourceModelView.h
+  Editor/Resources/ResourceModelView.ui
   Editor/Resources/ResourceTreeItem.cpp 
   Editor/Resources/ResourceTreeItem.h 
   Editor/Resources/ResourceTreeItemModel.cpp 

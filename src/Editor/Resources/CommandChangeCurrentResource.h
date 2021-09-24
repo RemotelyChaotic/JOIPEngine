@@ -6,8 +6,8 @@
 #include <QPointer>
 #include <functional>
 #include <memory>
+#include <vector>
 
-class CResourceDisplayWidget;
 class QItemSelectionModel;
 class QSortFilterProxyModel;
 
@@ -15,8 +15,7 @@ class CCommandChangeCurrentResource : public QUndoCommand
 {
 public:
   CCommandChangeCurrentResource(std::shared_ptr<SProject> spCurrentProject,
-                                QPointer<CResourceDisplayWidget> pResourceDisplayWidget,
-                                QPointer<QItemSelectionModel> pSelectionModel,
+                                std::vector<QPointer<QItemSelectionModel>> vpSelectionModel,
                                 QPointer<QSortFilterProxyModel> pProxyModel,
                                 const QString& sOld,
                                 const QString& sNew,
@@ -33,8 +32,7 @@ public:
 protected:
   std::shared_ptr<SProject>       m_spCurrentProject;
   std::weak_ptr<CDatabaseManager> m_wpDbManager;
-  QPointer<CResourceDisplayWidget> m_pResourceDisplayWidget;
-  QPointer<QItemSelectionModel>    m_pSelectionModel;
+  std::vector<QPointer<QItemSelectionModel>> m_vpSelectionModel;
   QPointer<QSortFilterProxyModel>  m_pProxyModel;
   QString m_sOldResource;
   QString m_sNewResource;
