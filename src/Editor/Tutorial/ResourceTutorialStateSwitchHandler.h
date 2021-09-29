@@ -29,7 +29,7 @@ private:
   QPointer<CEditorResourceWidget>                  m_pParentWidget;
   std::shared_ptr<Ui::CEditorResourceWidget>       m_spUi;
   ETutorialState                                   m_currentState;
-  QMetaObject::Connection                          m_connection;
+  std::vector<QMetaObject::Connection>             m_vConnections;
 };
 
 #endif // CRESOURCETUTORIALSTATESWITCHHANDLER_H

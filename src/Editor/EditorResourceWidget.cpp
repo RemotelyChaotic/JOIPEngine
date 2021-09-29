@@ -2,6 +2,7 @@
 #include "Application.h"
 #include "EditorActionBar.h"
 #include "EditorModel.h"
+#include "EditorWidgetTypes.h"
 #include "Resources/CommandAddResource.h"
 #include "Resources/CommandChangeCurrentResource.h"
 #include "Resources/CommandChangeFilter.h"
@@ -33,6 +34,7 @@
 #include <QMimeData>
 #include <QNetworkAccessManager>
 #include <QSortFilterProxyModel>
+#include <QStyle>
 #include <QUndoStack>
 
 #include <cassert>
@@ -114,11 +116,10 @@ void CEditorResourceWidget::Initialize()
     wpHelpFactory->RegisterHelp(c_sResourceHelpId, ":/resources/help/editor/resources/resource_help.html");
   }
 
-  m_spUi->splitter->setSizes({height() *4/5, height() / 5});
+  m_spUi->splitter->setSizes({height() *5/7, height() * 2/7});
 
   m_bInitialized = true;
 }
-
 
 //----------------------------------------------------------------------------------------
 //
@@ -163,8 +164,8 @@ void CEditorResourceWidget::OnActionBarAboutToChange()
   {
     disconnect(ActionBar()->m_spUi->TreeViewButton, &QPushButton::clicked,
             this, &CEditorResourceWidget::SlotChangeViewButtonClicked);
-    disconnect(ActionBar()->m_spUi->ExplorerViewButton, &QPushButton::clicked,
-            this, &CEditorResourceWidget::SlotChangeViewButtonClicked);
+    disconnect(ActionBar()->m_spUi->CdUpButton, &QPushButton::clicked,
+            this, &CEditorResourceWidget::SlotCdUpClicked);
     disconnect(ActionBar()->m_spUi->AddResourceButton, &QPushButton::clicked,
             this, &CEditorResourceWidget::SlotAddButtonClicked);
     disconnect(ActionBar()->m_spUi->AddWebResourceButton, &QPushButton::clicked,
@@ -199,8 +200,8 @@ void CEditorResourceWidget::OnActionBarChanged()
 
     connect(ActionBar()->m_spUi->TreeViewButton, &QPushButton::clicked,
             this, &CEditorResourceWidget::SlotChangeViewButtonClicked);
-    connect(ActionBar()->m_spUi->ExplorerViewButton, &QPushButton::clicked,
-            this, &CEditorResourceWidget::SlotChangeViewButtonClicked);
+    connect(ActionBar()->m_spUi->CdUpButton, &QPushButton::clicked,
+            this, &CEditorResourceWidget::SlotCdUpClicked);
     connect(ActionBar()->m_spUi->AddResourceButton, &QPushButton::clicked,
             this, &CEditorResourceWidget::SlotAddButtonClicked);
     if (!m_spSettings->Offline())
@@ -232,6 +233,8 @@ void CEditorResourceWidget::OnActionBarChanged()
       ActionBar()->m_spUi->TitleCardButton->setEnabled(false);
       ActionBar()->m_spUi->MapButton->setEnabled(false);
     }
+
+    HandleResize();
   }
 }
 
@@ -272,6 +275,14 @@ void CEditorResourceWidget::dropEvent(QDropEvent* pEvent)
 
 //----------------------------------------------------------------------------------------
 //
+void CEditorResourceWidget::resizeEvent(QResizeEvent* pEvent)
+{
+  CEditorWidgetBase::resizeEvent(pEvent);
+  HandleResize();
+}
+
+//----------------------------------------------------------------------------------------
+//
 void CEditorResourceWidget::on_pFilter_SignalFilterChanged(const QString& sText)
 {
   WIDGET_INITIALIZED_GUARD
@@ -305,22 +316,6 @@ void CEditorResourceWidget::on_pResourceDisplayWidget_SignalLoadFinished()
 
 //----------------------------------------------------------------------------------------
 //
-void CEditorResourceWidget::SlotChangeViewButtonClicked()
-{
-  WIDGET_INITIALIZED_GUARD
-
-  if (sender() == ActionBar()->m_spUi->TreeViewButton)
-  {
-    m_spUi->pResourceModelView->SetView(CResourceModelView::eTree);
-  }
-  else if (sender() == ActionBar()->m_spUi->ExplorerViewButton)
-  {
-    m_spUi->pResourceModelView->SetView(CResourceModelView::eExplorer);
-  }
-}
-
-//----------------------------------------------------------------------------------------
-//
 void CEditorResourceWidget::SlotAddButtonClicked()
 {
   WIDGET_INITIALIZED_GUARD
@@ -345,6 +340,41 @@ void CEditorResourceWidget::SlotAddWebButtonClicked()
   WIDGET_INITIALIZED_GUARD
   if (nullptr == m_spCurrentProject) { return; }
   m_spWebOverlay->Show();
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CEditorResourceWidget::SlotChangeViewButtonClicked()
+{
+  WIDGET_INITIALIZED_GUARD
+
+  // do nothing in case that both views are visible, since this shouldn't get triggered in
+  // that case
+  if (m_spUi->pResourceModelView->View() == CResourceModelView::eExplorer)
+  {
+    m_spUi->pResourceModelView->SetView(CResourceModelView::eTree);
+    ActionBar()->m_spUi->TreeViewButton->setObjectName(QStringLiteral("TreeViewButton"));
+    ActionBar()->m_spUi->TreeViewButton->setToolTip(QStringLiteral("Show resources as a tree"));
+    ActionBar()->m_spUi->TreeViewButton->style()->unpolish(ActionBar()->m_spUi->TreeViewButton);
+    ActionBar()->m_spUi->TreeViewButton->style()->polish(ActionBar()->m_spUi->TreeViewButton);
+  }
+  else if (m_spUi->pResourceModelView->View() == CResourceModelView::eTree)
+  {
+    m_spUi->pResourceModelView->SetView(CResourceModelView::eExplorer);
+    ActionBar()->m_spUi->TreeViewButton->setObjectName(QStringLiteral("ExplorerViewButton"));
+    ActionBar()->m_spUi->TreeViewButton->setToolTip(QStringLiteral("Show resources in a file explorer"));
+    ActionBar()->m_spUi->TreeViewButton->style()->unpolish(ActionBar()->m_spUi->TreeViewButton);
+    ActionBar()->m_spUi->TreeViewButton->style()->polish(ActionBar()->m_spUi->TreeViewButton);
+  }
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CEditorResourceWidget::SlotCdUpClicked()
+{
+  WIDGET_INITIALIZED_GUARD
+
+  m_spUi->pResourceModelView->CdUp();
 }
 
 //----------------------------------------------------------------------------------------
@@ -541,4 +571,28 @@ void CEditorResourceWidget::SlotViewResourceSelected(const QString& sResource)
   }
 
   emit SignalResourceSelected(sResource);
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CEditorResourceWidget::HandleResize()
+{
+  bool bLandscape = width() > height();
+  if (nullptr != ActionBar() && ActionBar()->CurrentActionBar() == EEditorWidget::eResourceWidget)
+  {
+    ActionBar()->m_spUi->TreeViewButton->setObjectName(QStringLiteral("TreeViewButton"));
+    ActionBar()->m_spUi->TreeViewButton->setToolTip(QStringLiteral("Show resources as a tree"));
+
+    ActionBar()->m_spUi->TreeViewButton->setVisible(!bLandscape);
+    ActionBar()->m_spUi->CdUpButton->setVisible(!bLandscape);
+    m_spUi->pResourceModelView->SetView(bLandscape ? CResourceModelView::eBoth :
+                                                     CResourceModelView::eTree);
+    m_spUi->pResourceModelView->SetLandscape(bLandscape);
+
+    ActionBar()->m_spUi->TreeViewButton->style()->unpolish(ActionBar()->m_spUi->TreeViewButton);
+    ActionBar()->m_spUi->TreeViewButton->style()->polish(ActionBar()->m_spUi->TreeViewButton);
+
+    m_spUi->splitter->setOrientation(bLandscape ? Qt::Orientation::Horizontal :
+                                                  Qt::Orientation::Vertical);
+  }
 }

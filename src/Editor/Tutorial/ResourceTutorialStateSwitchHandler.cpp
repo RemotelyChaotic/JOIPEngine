@@ -19,7 +19,7 @@ CResourceTutorialStateSwitchHandler(QPointer<CEditorResourceWidget> pParentWidge
   m_pParentWidget(pParentWidget),
   m_spUi(spUi),
   m_currentState(ETutorialState::eFinished),
-  m_connection()
+  m_vConnections()
 {
 
 }
@@ -34,10 +34,14 @@ CResourceTutorialStateSwitchHandler::~CResourceTutorialStateSwitchHandler()
 void CResourceTutorialStateSwitchHandler::OnResetStates()
 {
   m_currentState = ETutorialState::eFinished;
-  if (m_connection)
+  for (QMetaObject::Connection conn : m_vConnections)
   {
-    disconnect(m_connection);
+    if (conn)
+    {
+      disconnect(conn);
+    }
   }
+  m_vConnections.clear();
 }
 
 //----------------------------------------------------------------------------------------
@@ -48,19 +52,25 @@ void CResourceTutorialStateSwitchHandler::OnStateSwitch(ETutorialState newState,
   Q_UNUSED(oldstate)
   m_currentState = newState;
 
-  if (m_connection)
+  for (QMetaObject::Connection conn : m_vConnections)
   {
-    disconnect(m_connection);
+    if (conn)
+    {
+      disconnect(conn);
+    }
   }
+  m_vConnections.clear();
 
   switch (newState)
   {
     case ETutorialState::eResourcePanel:
     {
-      QItemSelectionModel* pSelectionModel = m_spUi->pResourceModelView->CurrentSelectionModel();
-      m_connection =
-          connect(pSelectionModel, &QItemSelectionModel::currentChanged,
-                  this, &CResourceTutorialStateSwitchHandler::SlotCurrentChanged);
+      for (QPointer<QItemSelectionModel> pSelectionModel : m_spUi->pResourceModelView->SelectionModels())
+      {
+        m_vConnections.push_back(
+            connect(pSelectionModel, &QItemSelectionModel::currentChanged,
+                    this, &CResourceTutorialStateSwitchHandler::SlotCurrentChanged));
+      }
     } break;
     default: break;
   }

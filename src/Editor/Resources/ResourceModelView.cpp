@@ -8,6 +8,7 @@
 #include <QItemSelectionModel>
 #include <QListView>
 #include <QUndoStack>
+#include <limits>
 
 CResourceModelView::CResourceModelView(QWidget *parent) :
   QWidget(parent),
@@ -16,10 +17,10 @@ CResourceModelView::CResourceModelView(QWidget *parent) :
   m_pProxy(new CResourceTreeItemSortFilterProxyModel(this)),
   m_pModel(nullptr),
   m_pStack(nullptr),
-  m_bInitializing(false)
+  m_bInitializing(false),
+  m_bLandscape(false)
 {
   m_spUi->setupUi(this);
-  m_spUi->pTabWidget->tabBar()->setVisible(false);
 }
 
 CResourceModelView::~CResourceModelView()
@@ -57,6 +58,11 @@ void CResourceModelView::Initialize(QUndoStack* pStack,
   pSelectionModel = m_spUi->pDetailView->selectionModel();
   connect(pSelectionModel, &QItemSelectionModel::currentChanged,
           this, &CResourceModelView::SlotCurrentChanged);
+
+  connect(m_spUi->pDetailView, &CResourceDetailView::Expanded,
+          this, &CResourceModelView::SlotExpanded);
+  connect(m_spUi->pDetailView, &CResourceDetailView::Collapsed,
+          this, &CResourceModelView::SlotCollapsed);
 
   auto pFilter =
       new CUndoRedoFilter(m_spUi->pTreeView, nullptr);
@@ -101,16 +107,17 @@ void CResourceModelView::ProjectUnloaded()
 
 //----------------------------------------------------------------------------------------
 //
-QItemSelectionModel* CResourceModelView::CurrentSelectionModel() const
+void CResourceModelView::CdUp()
 {
-  if (m_spUi->pTabWidget->currentIndex() == CResourceModelView::eTree)
-  {
-    return m_spUi->pTreeView->selectionModel();
-  }
-  else
-  {
-    return m_spUi->pDetailView->selectionModel();
-  }
+  for (auto pModel : SelectionModels()) { pModel->clearSelection(); }
+  m_spUi->pDetailView->Collapse(m_spUi->pDetailView->rootIndex());
+}
+
+//----------------------------------------------------------------------------------------
+//
+std::vector<QPointer<QItemSelectionModel>> CResourceModelView::SelectionModels() const
+{
+  return {m_spUi->pTreeView->selectionModel(), m_spUi->pDetailView->selectionModel()};
 }
 
 //----------------------------------------------------------------------------------------
@@ -118,20 +125,24 @@ QItemSelectionModel* CResourceModelView::CurrentSelectionModel() const
 QStringList CResourceModelView::SelectedResources() const
 {
   QStringList vsResources;
-  QItemSelectionModel* pSelectionModel = CurrentSelectionModel();
-  if (nullptr != m_pProxy && nullptr != m_pModel && nullptr != pSelectionModel)
+  for (QPointer<QItemSelectionModel> pSelectionModel : SelectionModels())
   {
-    QModelIndexList indexes = pSelectionModel->selectedIndexes();
-    pSelectionModel->clearSelection();
-    foreach (QModelIndex index, indexes)
+    if (nullptr != m_pProxy && nullptr != m_pModel && nullptr != pSelectionModel)
     {
-      if (m_pModel->IsResourceType(m_pProxy->mapToSource(index)))
+      QModelIndexList indexes = pSelectionModel->selectedIndexes();
+      pSelectionModel->clearSelection();
+      foreach (QModelIndex index, indexes)
       {
-        const QString sName = m_pModel->data(m_pProxy->mapToSource(index), Qt::DisplayRole).toString();
-        vsResources << sName;
-
-        // only interrested in first item which is the actual item we need
-        break;
+        if (m_pModel->IsResourceType(m_pProxy->mapToSource(index)))
+        {
+          const QString sName = m_pModel->data(m_pProxy->mapToSource(index), Qt::DisplayRole).toString();
+          if (!vsResources.contains(sName))
+          {
+            vsResources << sName;
+          }
+          // only interrested in first item which is the actual item we need
+          break;
+        }
       }
     }
   }
@@ -142,21 +153,109 @@ QStringList CResourceModelView::SelectedResources() const
 //
 void CResourceModelView::SetView(CResourceModelView::EView view)
 {
-  m_spUi->pTabWidget->setCurrentIndex(view);
+  switch(view)
+  {
+    case CResourceModelView::eTree:
+      m_spUi->pTreeView->setVisible(true);
+      m_spUi->pDetailView->setVisible(false);
+      break;
+    case CResourceModelView::eExplorer:
+      m_spUi->pTreeView->setVisible(false);
+      m_spUi->pDetailView->setVisible(true);
+      break;
+    case CResourceModelView::eBoth:
+      m_spUi->pTreeView->setVisible(true);
+      m_spUi->pDetailView->setVisible(true);
+      break;
+  }
 }
 
 //----------------------------------------------------------------------------------------
 //
 CResourceModelView::EView CResourceModelView::View() const
 {
-  if (m_spUi->pTabWidget->currentIndex() == CResourceModelView::eTree)
+  if (m_spUi->pTreeView->isVisible() && !m_spUi->pDetailView->isVisible())
   {
     return CResourceModelView::eTree;
   }
-  else
+  else if (m_spUi->pDetailView->isVisible() && !m_spUi->pTreeView->isVisible())
   {
     return CResourceModelView::eExplorer;
   }
+  else
+  {
+    return CResourceModelView::eBoth;
+  }
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CResourceModelView::SetLandscape(bool bLandscape)
+{
+  if (m_bLandscape != bLandscape)
+  {
+    m_bLandscape = bLandscape;
+    QLayout* pLayout = layout();
+    if (nullptr != pLayout)
+    {
+      QList<QWidget*> vpWidgets;
+      while (auto pItm = pLayout->takeAt(0))
+      {
+        if (pItm->widget())
+        {
+          vpWidgets << pItm->widget();
+        }
+        delete pItm;
+      }
+
+      delete pLayout;
+      if (m_bLandscape)
+      {
+        pLayout = new QHBoxLayout(this);
+      }
+      else
+      {
+        pLayout = new QVBoxLayout(this);
+      }
+      pLayout->setContentsMargins(0, 0, 0, 0);
+      setLayout(pLayout);
+      for (QWidget* pWidget : vpWidgets)
+      {
+        pLayout->addWidget(pWidget);
+      }
+    }
+  }
+}
+
+//----------------------------------------------------------------------------------------
+//
+bool CResourceModelView::Landscape()
+{
+  return m_bLandscape;
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CResourceModelView::SlotExpanded(const QModelIndex& index)
+{
+  // handle selection internally
+  for (auto pModel : SelectionModels()) { pModel->blockSignals(true); }
+  auto parent = index;
+  while (parent.isValid())
+  {
+    m_spUi->pTreeView->expand(parent);
+    parent = parent.parent();
+  }
+  m_spUi->pTreeView->selectionModel()->select(
+        index, QItemSelectionModel::SelectionFlag::ClearAndSelect);
+  for (auto pModel : SelectionModels()) { pModel->blockSignals(false); }
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CResourceModelView::SlotCollapsed(const QModelIndex& index)
+{
+  Q_UNUSED(index)
 }
 
 //----------------------------------------------------------------------------------------
@@ -167,6 +266,28 @@ void CResourceModelView::SlotCurrentChanged(const QModelIndex& current,
   if (m_bInitializing) { return; }
   Q_UNUSED(previous);
 
+  // handle selection internally
+  for (auto pModel : SelectionModels()) { pModel->blockSignals(true); }
+  if (sender() == m_spUi->pTreeView->selectionModel())
+  {
+    m_spUi->pDetailView->Expand(current.parent());
+    m_spUi->pDetailView->selectionModel()->select(
+          current, QItemSelectionModel::SelectionFlag::ClearAndSelect);
+  }
+  else if (sender() == m_spUi->pDetailView->selectionModel())
+  {
+    auto parent = current.parent();
+    while (parent.isValid())
+    {
+      m_spUi->pTreeView->expand(parent);
+      parent = parent.parent();
+    }
+    m_spUi->pTreeView->selectionModel()->select(
+          current, QItemSelectionModel::SelectionFlag::ClearAndSelect);
+  }
+  for (auto pModel : SelectionModels()) { pModel->blockSignals(false); }
+
+  // create undo command
   if (nullptr != m_pModel && nullptr != m_pProxy && nullptr != m_pStack)
   {
     const QString sPrevious =
@@ -186,5 +307,22 @@ void CResourceModelView::SlotCurrentChanged(const QModelIndex& current,
         emit SignalResourceSelected(sName);
       }
     }));
+  }
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CResourceModelView::resizeEvent(QResizeEvent* pEvent)
+{
+  QWidget::resizeEvent(pEvent);
+  if (m_bLandscape)
+  {
+    m_spUi->pTreeView->setMinimumWidth(0);
+    m_spUi->pTreeView->setMaximumWidth(std::min(200,width()/3));
+  }
+  else
+  {
+    m_spUi->pTreeView->setMinimumWidth(0);
+    m_spUi->pTreeView->setMaximumWidth(QWIDGETSIZE_MAX);
   }
 }

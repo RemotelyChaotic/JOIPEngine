@@ -45,14 +45,16 @@ protected:
   void OnActionBarChanged() override;
   void dragEnterEvent(QDragEnterEvent* pEvent) override;
   void dropEvent(QDropEvent* pEvent) override;
+  void resizeEvent(QResizeEvent* pEvent) override;
 
 protected slots:
   void on_pFilter_SignalFilterChanged(const QString& sText);
   void on_pResourceDisplayWidget_OnClick();
   void on_pResourceDisplayWidget_SignalLoadFinished();
-  void SlotChangeViewButtonClicked();
   void SlotAddButtonClicked();
   void SlotAddWebButtonClicked();
+  void SlotChangeViewButtonClicked();
+  void SlotCdUpClicked();
   void SlotRemoveButtonClicked();
   void SlotSetSourceButtonClicked();
   void SlotTitleCardButtonClicked();
@@ -64,6 +66,8 @@ protected slots:
   void SlotViewResourceSelected(const QString& sResource);
 
 private:
+  void HandleResize();
+
   std::unique_ptr<CWebResourceOverlay>                 m_spSourceOverlay;
   std::unique_ptr<CWebResourceOverlay>                 m_spWebOverlay;
   std::unique_ptr<QNetworkAccessManager>               m_spNAManager;

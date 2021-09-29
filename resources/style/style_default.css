@@ -103,12 +103,6 @@ QTabWidget::pane {
   padding: 6px;
 }
 
-CResourceModelView>QTabWidget::pane {
-  border: 0;
-  border-radius: 0px;
-  padding: 0px;
-}
-
 QGroupBox::title {
   subcontrol-origin: margin;
   subcontrol-position: top center; /* position at the top center */
@@ -412,6 +406,19 @@ QPushButton#RedoButton {
   qproperty-icon: url(:/resources/style/img/ButtonRedo.png) off,
                   url(:/resources/style/img/ButtonRedo.png) on;
 }
+QPushButton#TreeViewButton {
+  qproperty-icon: url(:/resources/style/img/ButtonTree.png) off,
+                  url(:/resources/style/img/ButtonTree.png) on;
+}
+QPushButton#ExplorerViewButton {
+  qproperty-icon: url(:/resources/style/img/FolderIcon.png) off,
+                  url(:/resources/style/img/FolderIcon.png) on;
+}
+QPushButton#CdUpButton {
+  qproperty-icon: url(:/resources/style/img/ButtonDotDot.png) off,
+                  url(:/resources/style/img/ButtonDotDot.png) on;
+}
+
 
 QPushButton:hover,
 QToolButton:hover {
@@ -967,6 +974,13 @@ QTreeView::branch:open:has-children:has-siblings  {
   max-height: 16px;
 }
 
+CResourceDetailView {
+  color: white;
+  background-color: transparent;
+  qproperty-iconSize: 48px;
+  qproperty-spacing: 10px;
+}
+
 /*
  ----- QPlainTextEdit
 */
@@ -1037,4 +1051,9 @@ CEditorSceneNodeWidget {
 
 CEditorActionBar {
   qproperty-spacing: 1;
+}
+
+CResourceDetailView {
+  qproperty-iconFile: url(:/resources/style/img/FileIcon.png);
+  qproperty-iconFolder: url(:/resources/style/img/FolderIcon.png);
 }

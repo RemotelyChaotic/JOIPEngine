@@ -24,7 +24,8 @@ public:
   enum EView
   {
     eTree = 0,
-    eExplorer = 1
+    eExplorer,
+    eBoth
   };
 
   explicit CResourceModelView(QWidget *parent = nullptr);
@@ -33,20 +34,28 @@ public:
   void Initialize(QUndoStack* pStack, CResourceTreeItemModel* pModel);
   void ProjectLoaded(tspProject spCurrentProject, bool bReadOnly);
   void ProjectUnloaded();
+  void CdUp();
 
-  QItemSelectionModel* CurrentSelectionModel() const;
+  std::vector<QPointer<QItemSelectionModel>> SelectionModels() const;
   QPointer<CResourceTreeItemSortFilterProxyModel> Proxy() const { return m_pProxy; }
   QStringList SelectedResources() const;
 
   void SetView(EView view);
   EView View() const;
+  void SetLandscape(bool bLandscape);
+  bool Landscape();
 
 signals:
   void SignalResourceSelected(const QString& sName);
 
 protected slots:
+  void SlotExpanded(const QModelIndex& index);
+  void SlotCollapsed(const QModelIndex& index);
   void SlotCurrentChanged(const QModelIndex& current,
                           const QModelIndex& previous);
+
+protected:
+  void resizeEvent(QResizeEvent* pEvent) override;
 
 private:
   std::unique_ptr<Ui::CResourceModelView>         m_spUi;
@@ -55,6 +64,7 @@ private:
   QPointer<CResourceTreeItemModel>                m_pModel;
   QPointer<QUndoStack>                            m_pStack;
   bool                                            m_bInitializing;
+  bool                                            m_bLandscape;
 };
 
 #endif // RESOURCEMODELVIEW_H

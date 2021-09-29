@@ -46,7 +46,6 @@ protected slots:
   void SlotOverlayOpened();
   void SlotOverlayClosed();
   void SlotResizeDone();
-  void SlotTriedToLoadMovie(const QString& sMovie);
   void SlotUnloadFinished();
 
 

@@ -29,6 +29,7 @@ public:
 
   qint32 Spacing() const;
   void SetSpacing(qint32 iValue);
+  qint32 CurrentActionBar();
 
   void SetActionBarPosition(EActionBarPosition position);
 

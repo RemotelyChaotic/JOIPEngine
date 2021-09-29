@@ -86,7 +86,7 @@ QVariant CResourceTreeItem::Data(qint32 iColumn) const
       case EResourceTreeItemType::eCategory:// fallthrough
       case EResourceTreeItemType::eFolder:
       {
-        if (iColumn == 0)
+        if (iColumn == c_iColumnName)
         {
           return QT_TR_NOOP(m_sLabel);
         }

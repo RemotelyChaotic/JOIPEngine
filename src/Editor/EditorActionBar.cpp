@@ -65,6 +65,13 @@ qint32 CEditorActionBar::Spacing() const
 
 //----------------------------------------------------------------------------------------
 //
+qint32 CEditorActionBar::CurrentActionBar()
+{
+  return m_iCurrentDisplayType;
+}
+
+//----------------------------------------------------------------------------------------
+//
 void CEditorActionBar::SetSpacing(qint32 iValue)
 {
   m_iSpacing = iValue;
@@ -284,7 +291,7 @@ void CEditorActionBar::SlotKeyBindingsChanged()
   else
   {
     m_spUi->TreeViewButton->SetShortcut(m_spSettings->keyBinding(sKey.arg(1)));
-    m_spUi->ExplorerViewButton->SetShortcut(m_spSettings->keyBinding(sKey.arg(2)));
+    m_spUi->CdUpButton->SetShortcut(m_spSettings->keyBinding(sKey.arg(2)));
     m_spUi->AddResourceButton->SetShortcut(m_spSettings->keyBinding(sKey.arg(3)));
     m_spUi->AddWebResourceButton->SetShortcut(m_spSettings->keyBinding(sKey.arg(4)));
     m_spUi->RemoveResourceButton->SetShortcut(m_spSettings->keyBinding(sKey.arg(5)));

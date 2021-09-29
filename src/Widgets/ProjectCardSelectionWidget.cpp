@@ -271,13 +271,6 @@ void CProjectCardSelectionWidget::SlotResizeDone()
 
 //----------------------------------------------------------------------------------------
 //
-void CProjectCardSelectionWidget::SlotTriedToLoadMovie(const QString& sMovie)
-{
-  Q_UNUSED(sMovie);
-}
-
-//----------------------------------------------------------------------------------------
-//
 void CProjectCardSelectionWidget::SlotUnloadFinished()
 {
   FinishUnloadPrivate();
@@ -331,7 +324,5 @@ void CProjectCardSelectionWidget::InitQmlMain()
 
   // engine will allways take owership of this object
   CDatabaseImageProvider* pProvider = new CDatabaseImageProvider(m_wpDbManager);
-  connect(pProvider, &CDatabaseImageProvider::SignalTriedToLoadMovie,
-          this, &CProjectCardSelectionWidget::SlotTriedToLoadMovie, Qt::QueuedConnection);
   m_spUi->pQmlWidget->engine()->addImageProvider("DataBaseImageProivider", pProvider);
 }

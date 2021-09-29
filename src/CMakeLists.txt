@@ -136,6 +136,8 @@ set(Sources
   Editor/Resources/CommandRemoveResource.h
   Editor/Resources/ResourceDetailView.cpp
   Editor/Resources/ResourceDetailView.h
+  Editor/Resources/ResourceDetailViewFetcherThread.cpp
+  Editor/Resources/ResourceDetailViewFetcherThread.h
   Editor/Resources/ResourceModelView.cpp
   Editor/Resources/ResourceModelView.h
   Editor/Resources/ResourceModelView.ui

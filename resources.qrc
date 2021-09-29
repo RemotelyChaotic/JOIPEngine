@@ -185,6 +185,10 @@
         <file>changelog/changelog.txt</file>
         <file>resources/style/img/ButtonRedo.png</file>
         <file>resources/style/img/ButtonUndo.png</file>
+        <file>resources/style/img/ButtonDotDot.png</file>
+        <file>resources/style/img/ButtonTree.png</file>
+        <file>resources/style/img/FileIcon.png</file>
+        <file>resources/style/img/FolderIcon.png</file>
     </qresource>
     <qresource prefix="/qml">
         <file>resources/qml/ProjectCardSelection.qml</file>
