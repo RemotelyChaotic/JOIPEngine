@@ -8,9 +8,6 @@
 
 class CDatabaseManager;
 class QNetworkAccessManager;
-namespace QtAV {
-  class VideoFrameExtractor;
-}
 struct SProject;
 struct SResource;
 typedef std::shared_ptr<SProject> tspProject;
@@ -40,7 +37,6 @@ private:
                            bool bLoadedBefore,
                            QReadLocker& locker);
 
-  std::unique_ptr<QtAV::VideoFrameExtractor> spExtractor;
   std::weak_ptr<CDatabaseManager>            m_wpDatabase;
 };
 

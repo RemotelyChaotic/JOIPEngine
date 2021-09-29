@@ -73,7 +73,7 @@ public:
         else
         {
           QFont modedFont = pPainter->font();
-          modedFont.setPointSize(m_pView->iconSize().height() / 2);
+          modedFont.setPointSize(m_pView->iconSize().height() / 3);
           pPainter->save();
           pPainter->setFont(modedFont);
           switch(EResourceType::_from_integral(vType.toInt()))
@@ -88,6 +88,9 @@ public:
               }
               else
               {
+                qint32 iXAdjust = (rectIcon.width()-px.width())/2;
+                qint32 iYAdjust = (rectIcon.height()-px.height())/2;
+                rectIcon.adjust(iXAdjust, iYAdjust, -iXAdjust, -iYAdjust);
                 pPainter->drawPixmap(rectIcon, px, px.rect());
               }
             } break;
@@ -101,6 +104,9 @@ public:
               }
               else
               {
+                qint32 iXAdjust = (rectIcon.width()-px.width())/2;
+                qint32 iYAdjust = (rectIcon.height()-px.height())/2;
+                rectIcon.adjust(iXAdjust, iYAdjust, -iXAdjust, -iYAdjust);
                 pPainter->drawPixmap(rectIcon, px, px.rect());
               }
             } break;
@@ -133,7 +139,7 @@ public:
 
         // and finally draw text below icon
         QRect rectText = opt.rect.adjusted(0, m_pView->iconSize().height(), 0, 0);
-        pStyle->drawItemText(pPainter, rectText, opt.displayAlignment | Qt::TextWordWrap,
+        pStyle->drawItemText(pPainter, rectText, opt.displayAlignment | Qt::TextWrapAnywhere,
                              opt.palette, true, opt.text);
       }
     }
@@ -148,23 +154,14 @@ public:
     QStyleOptionViewItem opt = option;
     initStyleOption(&opt, index);
 
-    qint32 iFlags = Qt::TextWordWrap;
-    if (opt.displayAlignment & Qt::AlignLeft) iFlags |= Qt::AlignLeft;
-    if (opt.displayAlignment & Qt::AlignRight) iFlags |= Qt::AlignRight;
-    if (opt.displayAlignment & Qt::AlignHCenter) iFlags |= Qt::AlignHCenter;
-    if (opt.displayAlignment & Qt::AlignJustify) iFlags |= Qt::AlignJustify;
-    if (opt.displayAlignment & Qt::AlignTop) iFlags |= Qt::AlignTop;
-    if (opt.displayAlignment & Qt::AlignBottom) iFlags |= Qt::AlignBottom;
-    if (opt.displayAlignment & Qt::AlignVCenter) iFlags |= Qt::AlignVCenter;
-
     QSize size(m_pView->iconSize());
     QRect rectTextBounds{0, 0, size.width()*2, size.height()};
     QSize textSize =
-        opt.fontMetrics.boundingRect(rectTextBounds, iFlags, opt.text).size();
+        opt.fontMetrics.boundingRect(rectTextBounds, Qt::TextWrapAnywhere, opt.text).size();
     qint32 iTargetWidth =
         std::min({std::max({size.width(), textSize.width()}), size.width()*2});
 
-    size.setWidth(iTargetWidth + m_pView->spacing());
+    size.setWidth(iTargetWidth);
     size.setHeight(size.height() + textSize.height());
     return size;
   }
@@ -206,6 +203,8 @@ CResourceDetailView::CResourceDetailView(QWidget* pParent) :
   setLayoutMode(QListView::Batched);
   setUniformItemSizes(false);
   setViewMode(QListView::IconMode);
+  setWordWrap(true);
+  setResizeMode(QListView::Adjust);
 
   setItemDelegate(new CResourceDetailViewDelegate(this));
   connect(this, &QListView::doubleClicked, this, &CResourceDetailView::SlotDoubleClicked);
@@ -372,6 +371,41 @@ void CResourceDetailView::SlotResourceLoadFinished(const QString& sResource, con
 
 //----------------------------------------------------------------------------------------
 //
+void CResourceDetailView::dataChanged(const QModelIndex& topLeft,
+                                      const QModelIndex& bottomRight,
+                                      const QVector<int>& viRoles)
+{
+  QListView::dataChanged(topLeft, bottomRight, viRoles);
+
+  qint32 iProject = -1;
+  if (nullptr != m_spProject)
+  {
+    QReadLocker locker(&m_spProject->m_rwLock);
+    iProject = m_spProject->m_iId;
+  }
+
+  QAbstractItemModel* pModel = model();
+  QStringList vsResourcesToRequest;
+  if (nullptr != pModel)
+  {
+    const QModelIndex idxName = pModel->index(topLeft.row(), resource_item::c_iColumnName, topLeft.parent());
+    const QModelIndex idxType = pModel->index(topLeft.row(), resource_item::c_iColumnType, topLeft.parent());
+    const QVariant varType = pModel->data(idxType);
+    if (!varType.isNull())
+    {
+      qint32 type = varType.toInt();
+      if (EResourceType::eImage == type || EResourceType::eMovie == type)
+      {
+        vsResourcesToRequest << pModel->data(idxName).toString();
+      }
+    }
+  }
+
+  ResourceFetcher()->RequestResources(iProject, vsResourcesToRequest, iconSize());
+}
+
+//----------------------------------------------------------------------------------------
+//
 bool CResourceDetailView::edit(const QModelIndex& index, EditTrigger trigger, QEvent* pEvent)
 {
   if (!ReadOnly())
@@ -388,11 +422,11 @@ void CResourceDetailView::RequestResourcesFromCurrentFolder()
   ResourceFetcher()->AbortLoading();
   m_imageCache.clear();
 
-  QString sProject;
+  qint32 iProject = -1;
   if (nullptr != m_spProject)
   {
     QReadLocker locker(&m_spProject->m_rwLock);
-    sProject = m_spProject->m_sName;
+    iProject = m_spProject->m_iId;
   }
 
   QAbstractItemModel* pModel = model();
@@ -418,7 +452,7 @@ void CResourceDetailView::RequestResourcesFromCurrentFolder()
       }
     }
 
-    ResourceFetcher()->RequestResources(sProject, vsResourcesToRequest, iconSize());
+    ResourceFetcher()->RequestResources(iProject, vsResourcesToRequest, iconSize());
   }
 }
 

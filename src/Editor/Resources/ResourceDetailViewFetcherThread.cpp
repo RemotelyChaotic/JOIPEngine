@@ -20,16 +20,19 @@ void CResourceDetailViewFetcherThread::AbortLoading()
 
 //----------------------------------------------------------------------------------------
 //
-void CResourceDetailViewFetcherThread::RequestResources(const QString& sProject,
+void CResourceDetailViewFetcherThread::RequestResources(qint32 iProject,
                                                         const QStringList& vsResources,
                                                         const QSize& imageSize)
 {
   AbortLoading();
-  bool bOk = QMetaObject::invokeMethod(this, "SlotResourcesRequested", Qt::QueuedConnection,
-                                       Q_ARG(QString, sProject),
-                                       Q_ARG(QStringList, vsResources),
-                                       Q_ARG(QSize, imageSize));
-  assert(bOk); Q_UNUSED(bOk);
+  if (vsResources.size() > 0)
+  {
+    bool bOk = QMetaObject::invokeMethod(this, "SlotResourcesRequested", Qt::QueuedConnection,
+                                         Q_ARG(qint32, iProject),
+                                         Q_ARG(QStringList, vsResources),
+                                         Q_ARG(QSize, imageSize));
+    assert(bOk); Q_UNUSED(bOk);
+  }
 }
 
 //----------------------------------------------------------------------------------------
@@ -60,7 +63,7 @@ void CResourceDetailViewFetcherThread::Deinitialize()
 
 //----------------------------------------------------------------------------------------
 //
-void CResourceDetailViewFetcherThread::SlotResourcesRequested(const QString& sProject,
+void CResourceDetailViewFetcherThread::SlotResourcesRequested(qint32 iProject,
                                                               const QStringList& vsResources,
                                                               const QSize& imageSize)
 {
@@ -71,8 +74,8 @@ void CResourceDetailViewFetcherThread::SlotResourcesRequested(const QString& sPr
   {
     QSize actualSize;
     QImage img =
-      m_spDbImageProvider->requestImage(sProject + "/" + sResource, &actualSize,
-                                         imageSize);
+      m_spDbImageProvider->requestImage(QString::number(iProject) + "/" + sResource,
+                                        &actualSize, imageSize);
 
     if (!img.isNull() && m_bLoading)
     {

@@ -192,7 +192,15 @@ Qt::ItemFlags CResourceTreeItemModel::flags(const QModelIndex& index) const
     {
       switch (index.column())
       {
-        case c_iColumnName: return Qt::ItemIsEditable | QAbstractItemModel::flags(index);
+        case c_iColumnName:
+        {
+          Qt::ItemFlags iFlags = QAbstractItemModel::flags(index);
+          if (pItem->Type()._to_integral() == EResourceTreeItemType::eResource)
+          {
+            iFlags |= Qt::ItemIsEditable;
+          }
+          return iFlags;
+        }
         default: return QAbstractItemModel::flags(index);
       }
     }

@@ -11,10 +11,8 @@
 CDatabaseImageProvider::CDatabaseImageProvider(const std::weak_ptr<CDatabaseManager>& wpDatabase) :
   QObject(nullptr),
   QQuickImageProvider(QQuickImageProvider::Image, QQmlImageProviderBase::ForceAsynchronousImageLoading),
-  spExtractor(std::make_unique<QtAV::VideoFrameExtractor>()),
   m_wpDatabase(wpDatabase)
 {
-  spExtractor->setAsync(false);
 }
 
 CDatabaseImageProvider::~CDatabaseImageProvider()
@@ -192,6 +190,10 @@ QImage CDatabaseImageProvider::RequestMovieFrame(tspProject spProject,
                                                  bool bLoadedBefore,
                                                  QReadLocker& locker)
 {
+  std::shared_ptr<QtAV::VideoFrameExtractor> spExtractor =
+      std::make_shared<QtAV::VideoFrameExtractor>();
+  spExtractor->setAsync(false);
+
   // local file
   bool bOk = true;
   if (IsLocalFile(spResource->m_sPath))

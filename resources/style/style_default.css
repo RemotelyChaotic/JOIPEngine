@@ -103,6 +103,12 @@ QTabWidget::pane {
   padding: 6px;
 }
 
+CResourceModelView>QTabWidget::pane {
+  border: 0;
+  border-radius: 0px;
+  padding: 0px;
+}
+
 QGroupBox::title {
   subcontrol-origin: margin;
   subcontrol-position: top center; /* position at the top center */
@@ -977,7 +983,7 @@ QTreeView::branch:open:has-children:has-siblings  {
 CResourceDetailView {
   color: white;
   background-color: transparent;
-  qproperty-iconSize: 48px;
+  qproperty-iconSize: 64px;
   qproperty-spacing: 10px;
 }
 
@@ -1056,4 +1062,5 @@ CEditorActionBar {
 CResourceDetailView {
   qproperty-iconFile: url(:/resources/style/img/FileIcon.png);
   qproperty-iconFolder: url(:/resources/style/img/FolderIcon.png);
+  qproperty-spacing: 6;
 }

@@ -13,7 +13,7 @@ public:
   ~CResourceDetailViewFetcherThread() override;
 
   void AbortLoading();
-  void RequestResources(const QString& sProject,
+  void RequestResources(qint32 iProject,
                         const QStringList& vsResources,
                         const QSize& imageSize);
   bool IsLoading() const;
@@ -27,7 +27,7 @@ public slots:
   void Deinitialize() override;
 
 private slots:
-  void SlotResourcesRequested(const QString& sProject,
+  void SlotResourcesRequested(qint32 iProject,
                               const QStringList& vsResources,
                               const QSize& imageSize);
 

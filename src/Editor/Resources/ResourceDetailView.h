@@ -46,7 +46,8 @@ protected slots:
   void SlotResourceLoadFinished(const QString& sResource, const QPixmap& pixmap);
 
 protected:
-   bool edit(const QModelIndex& index, EditTrigger trigger, QEvent* pEvent) override;
+  void dataChanged(const QModelIndex& topLeft, const QModelIndex& bottomRight, const QVector<int>& viRoles = QVector<int>()) override;
+  bool edit(const QModelIndex& index, EditTrigger trigger, QEvent* pEvent) override;
 
 private:
   void RequestResourcesFromCurrentFolder();

@@ -92,6 +92,7 @@ void CResourceModelView::ProjectLoaded(tspProject spCurrentProject, bool bReadOn
           bReadOnly ? QAbstractItemView::NoEditTriggers :
                       QAbstractItemView::DoubleClicked | QAbstractItemView::EditKeyPressed);
     m_spUi->pDetailView->SetReadOnly(bReadOnly);
+    m_spUi->pDetailView->Initialize(m_spCurrentProject);
   }
 }
 
@@ -103,6 +104,7 @@ void CResourceModelView::ProjectUnloaded()
         QAbstractItemView::DoubleClicked | QAbstractItemView::EditKeyPressed);
   m_spUi->pDetailView->setEditTriggers(QAbstractItemView::DoubleClicked | QAbstractItemView::EditKeyPressed);
   m_spUi->pDetailView->SetReadOnly(false);
+  m_spUi->pDetailView->DeInitilaze();
 }
 
 //----------------------------------------------------------------------------------------
@@ -287,6 +289,9 @@ void CResourceModelView::SlotCurrentChanged(const QModelIndex& current,
   }
   for (auto pModel : SelectionModels()) { pModel->blockSignals(false); }
 
+  m_spUi->pTreeView->viewport()->repaint();
+  m_spUi->pDetailView->viewport()->repaint();
+
   // create undo command
   if (nullptr != m_pModel && nullptr != m_pProxy && nullptr != m_pStack)
   {
@@ -318,7 +323,7 @@ void CResourceModelView::resizeEvent(QResizeEvent* pEvent)
   if (m_bLandscape)
   {
     m_spUi->pTreeView->setMinimumWidth(0);
-    m_spUi->pTreeView->setMaximumWidth(std::min(200,width()/3));
+    m_spUi->pTreeView->setMaximumWidth(std::max(200,width()/3));
   }
   else
   {
