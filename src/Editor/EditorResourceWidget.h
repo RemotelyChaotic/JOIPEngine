@@ -66,7 +66,7 @@ protected slots:
   void SlotViewResourceSelected(const QString& sResource);
 
 private:
-  void HandleResize();
+  void HandleResize(bool bForceUpdate);
 
   std::unique_ptr<CWebResourceOverlay>                 m_spSourceOverlay;
   std::unique_ptr<CWebResourceOverlay>                 m_spWebOverlay;

@@ -117,6 +117,8 @@ New Features:
 - Updated Node Editor with copy-paste functionality.
 - Undo and Redo functionality implemented for the entire editor.
 - Hotload for styles implemented for developping new application styles.
+- Resource Viewer has an alternate Explorer View and can display Tree and 
+  Explorer View next to each other.
 
 Changes:
 - JOIP-Engine uses PhysFS to allow restricted acces to files only, making it

@@ -4,6 +4,7 @@
 #include "Systems/ThreadedSystem.h"
 #include <QApplication>
 #include <QPainter>
+#include <QPlainTextEdit>
 #include <QStyledItemDelegate>
 #include <QMovie>
 #include <QDebug>
@@ -155,15 +156,22 @@ public:
     initStyleOption(&opt, index);
 
     QSize size(m_pView->iconSize());
-    QRect rectTextBounds{0, 0, size.width()*2, size.height()};
-    QSize textSize =
-        opt.fontMetrics.boundingRect(rectTextBounds, Qt::TextWrapAnywhere, opt.text).size();
-    qint32 iTargetWidth =
-        std::min({std::max({size.width(), textSize.width()}), size.width()*2});
+    QRect rectTextBounds = CalculateTextRect(opt);
+    return QSize(rectTextBounds.size().width(), rectTextBounds.height() + size.height());
+  }
 
-    size.setWidth(iTargetWidth);
-    size.setHeight(size.height() + textSize.height());
-    return size;
+  //--------------------------------------------------------------------------------------
+  //
+  void updateEditorGeometry(QWidget* pEditor, const QStyleOptionViewItem& option,
+                            const QModelIndex& index) const override
+  {
+    QStyleOptionViewItem opt = option;
+    initStyleOption(&opt, index);
+
+    QRect rectTextBounds = CalculateTextRect(opt);
+    pEditor->setFixedSize(rectTextBounds.size());
+    pEditor->move(rectTextBounds.x(),
+                  rectTextBounds.y());
   }
 
   //--------------------------------------------------------------------------------------
@@ -181,6 +189,21 @@ public:
   }
 
 private:
+  QRect CalculateTextRect(const QStyleOptionViewItem& opt) const
+  {
+    QSize size(m_pView->iconSize());
+    QRect rectTextBounds{0, 0, size.width()*2, size.height()};
+    QSize textSize =
+        opt.fontMetrics.boundingRect(rectTextBounds, Qt::TextWrapAnywhere, opt.text).size();
+    qint32 iTargetWidth =
+        std::min({std::max({size.width(), textSize.width()}), size.width()*2});
+
+    size.setWidth(iTargetWidth);
+    size.setHeight(textSize.height());
+
+    return QRect{{0, m_pView->iconSize().height()}, size};
+  }
+
   CResourceDetailView* m_pView;
   QMovie               m_pLoading;
 };

@@ -14,6 +14,8 @@ namespace {
   const QString c_sExportProjectHelpId =  "Editor/ExportProject";
   const QString c_sExitProjectHelpId =    "Editor/ExitProject";
 
+  const QString c_sChangeViewHelpId =     "Editor/ChangeResourceView";
+  const QString c_sCdUpHelpId =           "Editor/CdUp";
   const QString c_sAddResourceHelpId =    "Editor/AddResource";
   const QString c_sAddWebResourceHelpId = "Editor/AddWebResource";
   const QString c_sRemoveResourceHelpId = "Editor/RemoveResource";
@@ -129,6 +131,10 @@ void CEditorActionBar::Initialize()
     m_spUi->ExitButton->setProperty(helpOverlay::c_sHelpPagePropertyName, c_sExitProjectHelpId);
     wpHelpFactory->RegisterHelp(c_sExitProjectHelpId, ":/resources/help/editor/exitproject_button_help.html");
 
+    m_spUi->AddResourceButton->setProperty(helpOverlay::c_sHelpPagePropertyName, c_sChangeViewHelpId);
+    wpHelpFactory->RegisterHelp(c_sChangeViewHelpId, ":/resources/help/editor/changetotreefolderview_button_help.html");
+    m_spUi->AddWebResourceButton->setProperty(helpOverlay::c_sHelpPagePropertyName, c_sCdUpHelpId);
+    wpHelpFactory->RegisterHelp(c_sCdUpHelpId, ":/resources/help/editor/cdup_button_help.html");
     m_spUi->AddResourceButton->setProperty(helpOverlay::c_sHelpPagePropertyName, c_sAddResourceHelpId);
     wpHelpFactory->RegisterHelp(c_sAddResourceHelpId, ":/resources/help/editor/addresource_button_help.html");
     m_spUi->AddWebResourceButton->setProperty(helpOverlay::c_sHelpPagePropertyName, c_sAddWebResourceHelpId);

@@ -189,6 +189,8 @@
         <file>resources/style/img/ButtonTree.png</file>
         <file>resources/style/img/FileIcon.png</file>
         <file>resources/style/img/FolderIcon.png</file>
+        <file>resources/help/editor/cdup_button_help.html</file>
+        <file>resources/help/editor/changetotreefolderview_button_help.html</file>
     </qresource>
     <qresource prefix="/qml">
         <file>resources/qml/ProjectCardSelection.qml</file>
