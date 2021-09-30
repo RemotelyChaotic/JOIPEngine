@@ -21,6 +21,7 @@ class CSettings : public QObject
   Q_PROPERTY(bool muted READ Muted WRITE SetMuted NOTIFY mutedChanged)
   Q_PROPERTY(bool offline READ Offline WRITE SetOffline NOTIFY offlineChanged)
   Q_PROPERTY(bool pauseWhenInactive READ PauseWhenInactive WRITE SetPauseWhenInactive NOTIFY pauseWhenInactiveChanged)
+  Q_PROPERTY(EditorType preferedEditorLayout READ PreferedEditorLayout WRITE SetPreferedEditorLayout NOTIFY preferedEditorLayoutChanged)
   Q_PROPERTY(QSize resolution READ Resolution WRITE SetResolution NOTIFY resolutionChanged)
   Q_PROPERTY(QString style READ Style WRITE SetStyle NOTIFY styleChanged)
   Q_PROPERTY(double styleHotLoad READ StyleHotLoad WRITE SetStyleHotLoad NOTIFY styleHotLoadChanged)
@@ -31,6 +32,7 @@ public:
   static const QString c_sVersion;
   static const QString c_sSettingAutoPauseInactive;
   static const QString c_sSettingContentFolder;
+  static const QString c_sSettingEditorLayout;
   static const QString c_sSettingFont;
   static const QString c_sSettingFullscreen;
   static const QString c_sSettingKeyBindings;
@@ -43,6 +45,14 @@ public:
 
   static const QString c_sOrganisation;
   static const QString c_sApplicationName;
+
+  enum EditorType {
+    eNone    = 0,
+    eClassic = 1,
+    eModern  = 2,
+    eCompact = 3
+  };
+  Q_ENUM(EditorType)
 
   explicit CSettings(QObject* pParent = nullptr);
   ~CSettings() override;
@@ -62,6 +72,8 @@ public:
   bool Offline();
   void SetPauseWhenInactive(bool bValue);
   bool PauseWhenInactive();
+  void SetPreferedEditorLayout(const EditorType& eType);
+  EditorType PreferedEditorLayout();
   void SetResolution(const QSize& size);
   QSize Resolution();
   bool HasOldSettingsVersion();
@@ -87,6 +99,7 @@ signals:
   void mutedChanged();
   void offlineChanged();
   void pauseWhenInactiveChanged();
+  void preferedEditorLayoutChanged();
   void resolutionChanged();
   void styleChanged();
   void styleHotLoadChanged();

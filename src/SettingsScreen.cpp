@@ -34,7 +34,7 @@ namespace  {
 
   const char* c_sPropertyKeySequence = "KeyBinding";
 
-  std::map<QString, QSize> possibleDimensionsMap =
+  std::map<QString, QSize> c_possibleDimensionsMap =
   {
     { "16:10 1920x1200", QSize(1920, 1200)},
     { "16:10 1680x1050", QSize(1680, 1050)},
@@ -47,6 +47,14 @@ namespace  {
     { "4:3 1024x768"   , QSize(1024, 768)},
     { "4:3 800x600"    , QSize(800, 600)},
     { "4:3 640x480"    , QSize(640, 480)}
+  };
+
+  std::map<CSettings::EditorType, QString> c_editorTypeStrings =
+  {
+    { CSettings::eNone,     QString("None (Not Configured)")},
+    { CSettings::eClassic,  QString("Classic (2 Views)")},
+    { CSettings::eModern ,  QString("Modern (3 Views)")},
+    { CSettings::eCompact , QString("Compact (Mobile Layout)")}
   };
 }
 
@@ -105,6 +113,12 @@ void CSettingsScreen::Initialize()
 
   m_spUi->WarningIcon->hide();
 
+  m_spUi->pEditorLayoutComboBox->clear();
+  for (auto it = c_editorTypeStrings.begin(); c_editorTypeStrings.end() != it; ++it)
+  {
+    m_spUi->pEditorLayoutComboBox->addItem(it->second, static_cast<qint32>(it->first));
+  }
+
   m_bInitialized = true;
 }
 
@@ -125,6 +139,7 @@ void CSettingsScreen::Load()
   m_spUi->pFolderLineEdit->blockSignals(true);
   m_spUi->pFontComboBox->blockSignals(true);
   m_spUi->pStyleComboBox->blockSignals(true);
+  m_spUi->pEditorLayoutComboBox->blockSignals(true);
   m_spUi->pResolutionComboBox->blockSignals(true);
   m_spUi->pMuteCheckBox->blockSignals(true);
   m_spUi->pVolumeSlider->blockSignals(true);
@@ -138,7 +153,7 @@ void CSettingsScreen::Load()
   // find available screen dimensions
   qint32 iIndex = 0;
   bool bFoundResolution = false;
-  for (auto it = possibleDimensionsMap.begin(); possibleDimensionsMap.end() != it; ++it)
+  for (auto it = c_possibleDimensionsMap.begin(); c_possibleDimensionsMap.end() != it; ++it)
   {
     if (it->second.width() <= screenSize.width() &&
         it->second.height() <= screenSize.height())
@@ -209,6 +224,11 @@ void CSettingsScreen::Load()
   m_spUi->pStyleComboBox->addItems(joip_style::AvailableStyles());
   m_spUi->pStyleComboBox->setCurrentText(m_spSettings->Style());
 
+  // editor layout
+  iIndex = m_spUi->pEditorLayoutComboBox->findData(
+        static_cast<qint32>(m_spSettings->PreferedEditorLayout()));
+  m_spUi->pEditorLayoutComboBox->setCurrentIndex(iIndex);
+
   // set volume
   m_spUi->pMuteCheckBox->setCheckState(m_spSettings->Muted() ? Qt::Checked : Qt::Unchecked);
   m_spUi->pVolumeSlider->setValue(static_cast<qint32>(m_spSettings->Volume() * c_dSliderScaling));
@@ -230,6 +250,7 @@ void CSettingsScreen::Load()
   m_spUi->pResolutionComboBox->blockSignals(false);
   m_spUi->pFontComboBox->blockSignals(false);
   m_spUi->pStyleComboBox->blockSignals(false);
+  m_spUi->pEditorLayoutComboBox->blockSignals(false);
   m_spUi->pFolderLineEdit->blockSignals(false);
   m_spUi->pMuteCheckBox->blockSignals(false);
   m_spUi->pVolumeSlider->blockSignals(false);
@@ -298,6 +319,20 @@ void CSettingsScreen::on_pStyleComboBox_currentIndexChanged(qint32 iIndex)
 
   m_spSettings->SetStyle(m_spUi->pStyleComboBox->itemText(iIndex));
   m_spUi->WarningIcon->show();
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CSettingsScreen::on_pEditorLayoutComboBox_currentIndexChanged(qint32 iIndex)
+{
+  Q_UNUSED(iIndex)
+  WIDGET_INITIALIZED_GUARD
+  assert(nullptr != m_spSettings);
+  if (nullptr == m_spSettings) { return; }
+
+  m_spSettings->SetPreferedEditorLayout(
+        static_cast<CSettings::EditorType>(
+          m_spUi->pEditorLayoutComboBox->currentData().toInt()));
 }
 
 //----------------------------------------------------------------------------------------

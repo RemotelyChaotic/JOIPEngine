@@ -33,6 +33,7 @@ protected slots:
   void on_pResolutionComboBox_currentIndexChanged(qint32 iIndex);
   void on_pFontComboBox_currentFontChanged(const QFont& font);
   void on_pStyleComboBox_currentIndexChanged(qint32 iIndex);
+  void on_pEditorLayoutComboBox_currentIndexChanged(qint32 iIndex);
   void on_pFolderLineEdit_editingFinished();
   void on_pBrowseButton_clicked();
   void on_pMuteCheckBox_stateChanged(qint32 iState);

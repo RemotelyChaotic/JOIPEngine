@@ -78,6 +78,7 @@ namespace {
 const QString CSettings::c_sVersion = "General/version";
 const QString CSettings::c_sSettingAutoPauseInactive = "Content/pauseinactive";
 const QString CSettings::c_sSettingContentFolder = "Content/folder";
+const QString CSettings::c_sSettingEditorLayout = "Content/preferededitorlayout";
 const QString CSettings::c_sSettingFont = "Graphics/font";
 const QString CSettings::c_sSettingFullscreen = "Graphics/fullscreen";
 const QString CSettings::c_sSettingKeyBindings = "KeyBindings/";
@@ -159,6 +160,8 @@ CSettings::CSettings(QObject* pParent) :
       { "Foreward",   QKeySequence(QKeySequence::Forward)}
     })
 {
+  qRegisterMetaType<CSettings::EditorType>();
+
   if (!m_spSettings->contains(CSettings::c_sVersion))
   {
     m_bOldVersionSaved = true;
@@ -380,6 +383,31 @@ bool CSettings::PauseWhenInactive()
 
 //----------------------------------------------------------------------------------------
 //
+void CSettings::SetPreferedEditorLayout(const EditorType& eType)
+{
+  QMutexLocker locker(&m_settingsMutex);
+
+  CSettings::EditorType value = static_cast<CSettings::EditorType>(
+        m_spSettings->value(CSettings::c_sSettingEditorLayout).toInt());
+
+  if (value == eType) { return; }
+
+  m_spSettings->setValue(CSettings::c_sSettingEditorLayout, static_cast<qint32>(eType));
+
+  emit preferedEditorLayoutChanged();
+}
+
+//----------------------------------------------------------------------------------------
+//
+CSettings::EditorType CSettings::PreferedEditorLayout()
+{
+  QMutexLocker locker(&m_settingsMutex);
+  return static_cast<CSettings::EditorType>(
+        m_spSettings->value(CSettings::c_sSettingEditorLayout).toInt());
+}
+
+//----------------------------------------------------------------------------------------
+//
 void CSettings::SetResolution(const QSize& size)
 {
   QMutexLocker locker(&m_settingsMutex);
@@ -596,6 +624,13 @@ void CSettings::GenerateSettingsIfNotExists()
   {
     bNeedsSynch = true;
     m_spSettings->setValue(CSettings::c_sSettingFont, "Arial");
+  }
+
+  // check editor Layout
+  if (!m_spSettings->contains(CSettings::c_sSettingEditorLayout))
+  {
+    bNeedsSynch = true;
+    m_spSettings->setValue(CSettings::c_sSettingEditorLayout, CSettings::eNone);
   }
 
   // check fullscreen
