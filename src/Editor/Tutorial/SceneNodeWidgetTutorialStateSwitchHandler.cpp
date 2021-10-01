@@ -1,7 +1,7 @@
 #include "SceneNodeWidgetTutorialStateSwitchHandler.h"
 #include "Application.h"
 #include "EditorTutorialOverlay.h"
-#include "Editor/EditorSceneNodeWidget.h"
+#include "Editor/EditorWidgets/EditorSceneNodeWidget.h"
 #include "Editor/NodeEditor/EndNodeModel.h"
 #include "Editor/NodeEditor/FlowScene.h"
 #include "Editor/NodeEditor/FlowView.h"

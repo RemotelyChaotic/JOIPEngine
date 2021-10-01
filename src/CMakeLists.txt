@@ -37,9 +37,6 @@ set(Sources
   Editor/EditorChoiceScreen.h 
   Editor/EditorChoiceScreen.ui 
   Editor/EditorCommandIds.h
-  Editor/EditorCodeWidget.cpp 
-  Editor/EditorCodeWidget.h 
-  Editor/EditorCodeWidget.ui 
   Editor/EditorLayouts/EditorLayoutBase.cpp
   Editor/EditorLayouts/EditorLayoutBase.h
   Editor/EditorLayouts/EditorLayoutClassic.cpp
@@ -51,20 +48,23 @@ set(Sources
   Editor/EditorMainScreen.ui 
   Editor/EditorModel.cpp 
   Editor/EditorModel.h 
-  Editor/EditorProjectSettingsWidget.cpp 
-  Editor/EditorProjectSettingsWidget.h 
-  Editor/EditorProjectSettingsWidget.ui 
-  Editor/EditorResourceDisplayWidget.cpp 
-  Editor/EditorResourceDisplayWidget.h 
-  Editor/EditorResourceDisplayWidget.ui 
-  Editor/EditorResourceWidget.cpp 
-  Editor/EditorResourceWidget.h 
-  Editor/EditorResourceWidget.ui 
-  Editor/EditorSceneNodeWidget.cpp 
-  Editor/EditorSceneNodeWidget.h 
-  Editor/EditorSceneNodeWidget.ui 
-  Editor/EditorWidgetBase.cpp 
-  Editor/EditorWidgetBase.h 
+  Editor/EditorWidgets/EditorCodeWidget.cpp
+  Editor/EditorWidgets/EditorCodeWidget.h
+  Editor/EditorWidgets/EditorCodeWidget.ui
+  Editor/EditorWidgets/EditorProjectSettingsWidget.cpp
+  Editor/EditorWidgets/EditorProjectSettingsWidget.h
+  Editor/EditorWidgets/EditorProjectSettingsWidget.ui
+  Editor/EditorWidgets/EditorResourceDisplayWidget.cpp
+  Editor/EditorWidgets/EditorResourceDisplayWidget.h
+  Editor/EditorWidgets/EditorResourceDisplayWidget.ui
+  Editor/EditorWidgets/EditorResourceWidget.cpp
+  Editor/EditorWidgets/EditorResourceWidget.h
+  Editor/EditorWidgets/EditorResourceWidget.ui
+  Editor/EditorWidgets/EditorSceneNodeWidget.cpp
+  Editor/EditorWidgets/EditorSceneNodeWidget.h
+  Editor/EditorWidgets/EditorSceneNodeWidget.ui
+  Editor/EditorWidgets/EditorWidgetBase.cpp
+  Editor/EditorWidgets/EditorWidgetBase.h
   Editor/EditorWidgetRegistry.h
   Editor/EditorWidgetTypes.h 
   Editor/NodeEditor/CommandChangeSelection.cpp
