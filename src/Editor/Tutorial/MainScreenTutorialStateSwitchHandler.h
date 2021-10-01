@@ -5,21 +5,17 @@
 #include <QPointer>
 #include <memory>
 
-class CEditorMainScreen;
 class CEditorTutorialOverlay;
 class CJsonInstructionSetParser;
 class CJsonInstructionSetRunner;
-namespace Ui {
-  class CEditorMainScreen;
-}
+class CEditorLayoutClassic;
 
 class CMainScreenTutorialStateSwitchHandler : public QObject, public ITutorialStateSwitchHandler
 {
   Q_OBJECT
 
 public:
-  CMainScreenTutorialStateSwitchHandler(QPointer<CEditorMainScreen> pParentWidget,
-                                        const std::shared_ptr<Ui::CEditorMainScreen>& spUi,
+  CMainScreenTutorialStateSwitchHandler(QPointer<CEditorLayoutClassic> pParentWidget,
                                         QPointer<CEditorTutorialOverlay> pTutorialOverlay);
   ~CMainScreenTutorialStateSwitchHandler() override;
 
@@ -34,9 +30,8 @@ private slots:
 
 private:
   std::unique_ptr<CJsonInstructionSetParser> m_spTutorialParser;
-  std::shared_ptr<Ui::CEditorMainScreen>     m_spUi;
   std::shared_ptr<CJsonInstructionSetRunner> m_spTutorialRunner;
-  QPointer<CEditorMainScreen>                m_ParentWidget;
+  QPointer<CEditorLayoutClassic>             m_ParentWidget;
   QPointer<CEditorTutorialOverlay>           m_pTutorialOverlay;
   ETutorialState                             m_currentState;
 };

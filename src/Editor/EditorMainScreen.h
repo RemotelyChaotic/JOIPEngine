@@ -11,24 +11,18 @@
 #include <memory>
 
 class CDatabaseManager;
-class CEditorCodeWidget;
-class CEditorProjectSettingsWidget;
-class CEditorResourceDisplayWidget;
-class CEditorResourceWidget;
-class CEditorSceneNodeWidget;
+class CEditorLayoutViewProvider;
 class CEditorTutorialOverlay;
-class CMainScreenTutorialStateSwitchHandler;
 namespace Ui {
   class CEditorMainScreen;
 }
-class QComboBox;
 struct SProject;
 typedef std::shared_ptr<SProject> tspProject;
 
 class CEditorMainScreen : public QWidget
 {
   Q_OBJECT
-  friend class CMainScreenTutorialStateSwitchHandler;
+  friend class CEditorLayoutViewProvider;
 
 public:
   explicit CEditorMainScreen(QWidget* pParent = nullptr);
@@ -44,13 +38,9 @@ signals:
   void SignalUnloadFinished();
 
 protected slots:
-  void on_pLeftComboBox_currentIndexChanged(qint32 iIndex);
-  void on_pRightComboBox_currentIndexChanged(qint32 iIndex);
-  void SlotDisplayResource(const QString& sName);
   void SlotExitClicked(bool bClick);
   void SlotExportClicked(bool bClick);
   void SlotHelpClicked(bool bClick);
-  void SlotKeyBindingsChanged();
   void SlotProjectEdited();
   void SlotProjectExportStarted();
   void SlotProjectExportError(CEditorModel::EExportError error, const QString& sErrorString);
@@ -61,30 +51,22 @@ protected slots:
   void SlotUnloadFinished();
 
 private:
-  void ChangeIndex(QComboBox* pComboBox, QWidget* pContainer,
-                   CEditorActionBar* pActionBar, qint32 iIndex);
+  void CreateLayout();
   void ProjectLoaded(bool bNewProject);
+  void RemoveLayout();
   void SetModificaitonFlag(bool bModified);
-  template<class T> T* GetWidget();
 
   std::unique_ptr<CEditorModel>                               m_spEditorModel;
+  std::shared_ptr<CEditorLayoutViewProvider>                  m_spViewProvider;
   std::shared_ptr<Ui::CEditorMainScreen>                      m_spUi;
-  std::shared_ptr<CMainScreenTutorialStateSwitchHandler>      m_spStateSwitchHandler;
   std::vector<QPointer<QAction>>                              m_vpKeyBindingActions;
+  QPointer<CEditorLayoutBase>                                 m_pLayout;
   QPointer<CEditorTutorialOverlay>                            m_pTutorialOverlay;
   std::map<EEditorWidget, QPointer<CEditorWidgetBase>>        m_spWidgetsMap;
   tspProject                                                  m_spCurrentProject;
   std::weak_ptr<CDatabaseManager>                             m_wpDbManager;
   bool                                                        m_bInitialized;
   bool                                                        m_bProjectModified;
-  qint32                                                      m_iLastLeftIndex;
-  qint32                                                      m_iLastRightIndex;
 };
-
-template<> CEditorResourceWidget* CEditorMainScreen::GetWidget<CEditorResourceWidget>();
-template<> CEditorResourceDisplayWidget* CEditorMainScreen::GetWidget<CEditorResourceDisplayWidget>();
-template<> CEditorProjectSettingsWidget* CEditorMainScreen::GetWidget<CEditorProjectSettingsWidget>();
-template<> CEditorSceneNodeWidget* CEditorMainScreen::GetWidget<CEditorSceneNodeWidget>();
-template<> CEditorCodeWidget* CEditorMainScreen::GetWidget<CEditorCodeWidget>();
 
 #endif // EDITORMAINSCREEN_H

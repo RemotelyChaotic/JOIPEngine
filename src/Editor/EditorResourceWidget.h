@@ -79,4 +79,6 @@ private:
   QPointer<QNetworkReply>                              m_pResponse;
 };
 
+DECLARE_EDITORWIDGET(CEditorResourceWidget, EEditorWidget::eResourceWidget)
+
 #endif // EDITORRESOURCEWIDGET_H

@@ -40,6 +40,12 @@ set(Sources
   Editor/EditorCodeWidget.cpp 
   Editor/EditorCodeWidget.h 
   Editor/EditorCodeWidget.ui 
+  Editor/EditorLayouts/EditorLayoutBase.cpp
+  Editor/EditorLayouts/EditorLayoutBase.h
+  Editor/EditorLayouts/EditorLayoutClassic.cpp
+  Editor/EditorLayouts/EditorLayoutClassic.h
+  Editor/EditorLayouts/EditorLayoutClassic.ui
+  Editor/EditorLayouts/IEditorLayoutViewProvider.h
   Editor/EditorMainScreen.cpp 
   Editor/EditorMainScreen.h 
   Editor/EditorMainScreen.ui 
@@ -59,6 +65,7 @@ set(Sources
   Editor/EditorSceneNodeWidget.ui 
   Editor/EditorWidgetBase.cpp 
   Editor/EditorWidgetBase.h 
+  Editor/EditorWidgetRegistry.h
   Editor/EditorWidgetTypes.h 
   Editor/NodeEditor/CommandChangeSelection.cpp
   Editor/NodeEditor/CommandChangeSelection.h

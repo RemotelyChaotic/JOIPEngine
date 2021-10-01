@@ -2,6 +2,7 @@
 #define EDITORWIDGETBASE_H
 
 #include "Widgets/IWidgetBaseInterface.h"
+#include "Editor/EditorWidgetRegistry.h"
 #include <QWidget>
 #include <memory>
 

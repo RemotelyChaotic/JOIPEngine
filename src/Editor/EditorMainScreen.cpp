@@ -1,70 +1,86 @@
 #include "EditorMainScreen.h"
 #include "Application.h"
-#include "EditorCodeWidget.h"
-#include "EditorProjectSettingsWidget.h"
-#include "EditorResourceDisplayWidget.h"
-#include "EditorResourceWidget.h"
-#include "EditorSceneNodeWidget.h"
+#include "EditorWidgetBase.h"
+#include "EditorWidgetRegistry.h"
+#include "Settings.h"
+#include "EditorLayouts/EditorLayoutBase.h"
+#include "EditorLayouts/IEditorLayoutViewProvider.h"
 #include "Systems/DatabaseManager.h"
-#include "Systems/HelpFactory.h"
 #include "Systems/Project.h"
 #include "Tutorial/EditorTutorialOverlay.h"
 #include "Tutorial/MainScreenTutorialStateSwitchHandler.h"
 #include "Widgets/HelpOverlay.h"
 
 #include <QAction>
+#include <QDebug>
 #include <QFileInfo>
 #include <QMessageBox>
 #include <QPointer>
 #include <QUndoStack>
 
-namespace
+//----------------------------------------------------------------------------------------
+//
+class CEditorLayoutViewProvider : public IEditorLayoutViewProvider
 {
-  const std::map<EEditorWidget, QString> m_sEditorNamesMap =
-  {
-    { EEditorWidget::eResourceWidget, "Resource Manager (%1)" },
-    { EEditorWidget::eResourceDisplay, "Resource View & Undo Stack (%1)" },
-    { EEditorWidget::eProjectSettings, "Project Settings (%1)" },
-    { EEditorWidget::eSceneNodeWidget, "Scene Node Editor (%1)" },
-    { EEditorWidget::eSceneCodeEditorWidget, "Scene Code Editor (%1)" }
-  };
+public:
+  CEditorLayoutViewProvider(QPointer<CEditorMainScreen> pParent) :
+    IEditorLayoutViewProvider(),
+    m_pParent(pParent)
+  {}
+  ~CEditorLayoutViewProvider() = default;
 
-  const std::map<EEditorWidget, QString> m_sEditorKeyBindingMap =
+  QPointer<CEditorTutorialOverlay> GetTutorialOverlay() const override
   {
-    { EEditorWidget::eResourceWidget, "Resource" },
-    { EEditorWidget::eResourceDisplay, "MediaPlayer" },
-    { EEditorWidget::eProjectSettings, "Settings" },
-    { EEditorWidget::eSceneNodeWidget, "Nodes" },
-    { EEditorWidget::eSceneCodeEditorWidget, "Code" }
-  };
-  const std::map<CEditorActionBar::EActionBarPosition, QString> m_sSideKeyBindingMap =
+    if (nullptr != m_pParent)
+    {
+      return m_pParent->m_pTutorialOverlay;
+    }
+    return nullptr;
+  }
+
+  QPointer<CEditorWidgetBase> GetEditorWidget(EEditorWidget widget) const override
   {
-    { CEditorActionBar::eLeft, "LeftTab" },
-    { CEditorActionBar::eRight, "RightTab" }
-  };
+    if (nullptr != m_pParent)
+    {
+      auto it = m_pParent->m_spWidgetsMap.find(widget);
+      if (m_pParent->m_spWidgetsMap.end() != it)
+      {
+        return it->second;
+      }
+    }
+    return nullptr;
+  }
 
-  const char* c_sEditorProperty = "Editor";
-  const char* c_sSideProperty = "Side";
+  void VisitWidgets(const std::function<void(QPointer<CEditorWidgetBase>, EEditorWidget)>& fnVisitor) override
+  {
+    if (nullptr != m_pParent)
+    {
+      for (auto it = m_pParent->m_spWidgetsMap.begin(); m_pParent->m_spWidgetsMap.end() != it; ++it)
+      {
+        fnVisitor(it->second, it->first);
+      }
+    }
+  }
 
-  const QString c_sViewSelectorHelpId =  "Editor/ViewSelector";
-}
+private:
+  QPointer<CEditorMainScreen> m_pParent;
+};
 
 //----------------------------------------------------------------------------------------
 //
 CEditorMainScreen::CEditorMainScreen(QWidget* pParent) :
   QWidget(pParent),
   m_spEditorModel(std::make_unique<CEditorModel>(this)),
+  m_spViewProvider(std::make_shared<CEditorLayoutViewProvider>(this)),
   m_spUi(std::make_shared<Ui::CEditorMainScreen>()),
-  m_spStateSwitchHandler(nullptr),
   m_vpKeyBindingActions(),
+  m_pLayout(nullptr),
   m_pTutorialOverlay(new CEditorTutorialOverlay(this)),
   m_spWidgetsMap(),
   m_spCurrentProject(nullptr),
   m_wpDbManager(),
   m_bInitialized(false),
-  m_bProjectModified(false),
-  m_iLastLeftIndex(-1),
-  m_iLastRightIndex(-2)
+  m_bProjectModified(false)
 {
   m_spUi->setupUi(this);
 
@@ -87,11 +103,6 @@ void CEditorMainScreen::Initialize()
 
   m_wpDbManager = CApplication::Instance()->System<CDatabaseManager>();
 
-  // state switch handler
-  m_spStateSwitchHandler =
-      std::make_shared<CMainScreenTutorialStateSwitchHandler>(this, m_spUi, m_pTutorialOverlay);
-  m_spEditorModel->AddTutorialStateSwitchHandler(m_spStateSwitchHandler);
-
   connect(m_spEditorModel.get(), &CEditorModel::SignalProjectEdited,
           this, &CEditorMainScreen::SlotProjectEdited);
 
@@ -102,10 +113,6 @@ void CEditorMainScreen::Initialize()
   m_spUi->pProjectActionBar->SetActionBarPosition(CEditorActionBar::eTop);
   m_spUi->pProjectActionBar->Initialize();
   m_spUi->pProjectActionBar->ShowProjectActionBar();
-  m_spUi->pActionBarLeft->SetActionBarPosition(CEditorActionBar::eLeft);
-  m_spUi->pActionBarLeft->Initialize();
-  m_spUi->pActionBarRight->SetActionBarPosition(CEditorActionBar::eRight);
-  m_spUi->pActionBarRight->Initialize();
 
   m_spUi->pProjectActionBar->m_spUi->ReadOnly->setVisible(false);
 
@@ -125,29 +132,20 @@ void CEditorMainScreen::Initialize()
           this, &CEditorMainScreen::SlotExitClicked);
 
   // insert items in map
-  m_spWidgetsMap.insert({EEditorWidget::eResourceWidget, new CEditorResourceWidget(this)});
-  m_spWidgetsMap.insert({EEditorWidget::eResourceDisplay, new CEditorResourceDisplayWidget(this)});
-  m_spWidgetsMap.insert({EEditorWidget::eProjectSettings, new CEditorProjectSettingsWidget(this)});
-  m_spWidgetsMap.insert({EEditorWidget::eSceneNodeWidget, new CEditorSceneNodeWidget(this)});
-  m_spWidgetsMap.insert({EEditorWidget::eSceneCodeEditorWidget, new CEditorCodeWidget(this)});
-
-  // initialize action map
-  for (qint32 i = CEditorActionBar::eLeft; CEditorActionBar::eRight+1 > i; ++i)
+  for (auto type : EEditorWidget::_values())
   {
-    for (EEditorWidget eval : EEditorWidget::_values())
+    CEditorWidgetBase* pWidet = CEditorFactory::CreateWidgetInstance(this, type);
+    if (nullptr != pWidet)
     {
-      QAction* pAction = new QAction(this);
-      pAction->setProperty(c_sEditorProperty, eval._to_integral());
-      pAction->setProperty(c_sSideProperty, static_cast<qint32>(i));
-      m_vpKeyBindingActions.push_back(pAction);
-      addAction(pAction);
+      m_spWidgetsMap.insert({type, pWidet});
+    }
+    else
+    {
+      qCritical() << "Could not create Editor widget for" << type._to_string();
     }
   }
 
-
   // initialize widgets
-  m_spUi->pLeftComboBox->blockSignals(true);
-  m_spUi->pRightComboBox->blockSignals(true);
   for (auto it = m_spWidgetsMap.begin(); m_spWidgetsMap.end() != it; ++it)
   {
     connect(it->second, &CEditorWidgetBase::SignalProjectEdited,
@@ -158,28 +156,8 @@ void CEditorMainScreen::Initialize()
     it->second->SetEditorModel(m_spEditorModel.get());
     it->second->Initialize();
     it->second->setVisible(false);
-
-    // Key-bindings werden später sowieso gesetzt
-    m_spUi->pLeftComboBox->addItem(m_sEditorNamesMap.find(it->first)->second.arg(""),
-                                   it->first._to_integral());
-    m_spUi->pRightComboBox->addItem(m_sEditorNamesMap.find(it->first)->second.arg(""),
-                                    it->first._to_integral());
   }
-  m_spUi->pLeftComboBox->blockSignals(false);
-  m_spUi->pRightComboBox->blockSignals(false);
 
-  // custom stuff
-  connect(GetWidget<CEditorResourceWidget>(), &CEditorResourceWidget::SignalResourceSelected,
-          this, &CEditorMainScreen::SlotDisplayResource);
-
-  // help
-  auto wpHelpFactory = CApplication::Instance()->System<CHelpFactory>().lock();
-  if (nullptr != wpHelpFactory)
-  {
-    m_spUi->pLeftComboBox->setProperty(helpOverlay::c_sHelpPagePropertyName, c_sViewSelectorHelpId);
-    wpHelpFactory->RegisterHelp(c_sViewSelectorHelpId, ":/resources/help/editor/selection_combobox_help.html");
-    m_spUi->pRightComboBox->setProperty(helpOverlay::c_sHelpPagePropertyName, c_sViewSelectorHelpId);
-  }
   // db manager
   auto spDataBaseManager = m_wpDbManager.lock();
   if (nullptr != spDataBaseManager)
@@ -201,6 +179,8 @@ void CEditorMainScreen::InitNewProject(const QString& sNewProjectName, bool bTut
   m_spEditorModel->InitNewProject(sNewProjectName, bTutorial);
   m_spCurrentProject = m_spEditorModel->CurrentProject();
 
+  CreateLayout();
+
   ProjectLoaded(true);
 }
 
@@ -212,6 +192,8 @@ void CEditorMainScreen::LoadProject(qint32 iId)
 
   m_spEditorModel->LoadProject(iId);
   m_spCurrentProject = m_spEditorModel->CurrentProject();
+
+  CreateLayout();
 
   ProjectLoaded(false);
 }
@@ -230,6 +212,8 @@ void CEditorMainScreen::UnloadProject()
   m_spCurrentProject = nullptr;
   m_spEditorModel->UnloadProject();
 
+  m_pLayout->ProjectUnloaded();
+
   // disconnect shortcuts
   for (QAction* pAction : m_vpKeyBindingActions)
   {
@@ -242,85 +226,8 @@ void CEditorMainScreen::UnloadProject()
   m_spUi->pProjectActionBar->m_spUi->pTitleLineEdit->setReadOnly(false);
   m_spUi->pProjectActionBar->m_spUi->SaveButton->setEnabled(true);
   m_spUi->pProjectActionBar->m_spUi->ExportButton->setEnabled(true);
-}
 
-//----------------------------------------------------------------------------------------
-//
-void CEditorMainScreen::on_pLeftComboBox_currentIndexChanged(qint32 iIndex)
-{
-  if (!m_bInitialized) { return; }
-  if (m_iLastLeftIndex == iIndex) { return; }
-
-  ChangeIndex(m_spUi->pLeftComboBox, m_spUi->pLeftContainer, m_spUi->pActionBarLeft, iIndex);
-
-  if (iIndex == m_spUi->pRightComboBox->currentIndex())
-  {
-    m_spUi->pRightComboBox->blockSignals(true);
-    m_spUi->pRightComboBox->setCurrentIndex(m_iLastLeftIndex);
-    ChangeIndex(m_spUi->pRightComboBox, m_spUi->pRightContainer, m_spUi->pActionBarRight, m_iLastLeftIndex);
-    m_iLastRightIndex = m_iLastLeftIndex;
-    m_spUi->pRightComboBox->blockSignals(false);
-  }
-  m_iLastLeftIndex = iIndex;
-}
-
-//----------------------------------------------------------------------------------------
-//
-void CEditorMainScreen::on_pRightComboBox_currentIndexChanged(qint32 iIndex)
-{
-  if (!m_bInitialized) { return; }
-  if (m_iLastRightIndex == iIndex) { return; }
-
-  ChangeIndex(m_spUi->pRightComboBox, m_spUi->pRightContainer, m_spUi->pActionBarRight, iIndex);
-
-  if (iIndex == m_spUi->pLeftComboBox->currentIndex())
-  {
-    m_spUi->pLeftComboBox->blockSignals(true);
-    m_spUi->pLeftComboBox->setCurrentIndex(m_iLastRightIndex);
-    ChangeIndex(m_spUi->pLeftComboBox, m_spUi->pLeftContainer, m_spUi->pActionBarLeft, m_iLastRightIndex);
-    m_iLastLeftIndex = m_iLastRightIndex;
-    m_spUi->pLeftComboBox->blockSignals(false);
-  }
-  m_iLastRightIndex = iIndex;
-}
-
-//----------------------------------------------------------------------------------------
-//
-void CEditorMainScreen::SlotDisplayResource(const QString& sName)
-{
-  if (!m_bInitialized && nullptr != m_spCurrentProject) { return; }
-
-  CEditorResourceDisplayWidget* pWidget = GetWidget<CEditorResourceDisplayWidget>();
-  auto spDbManager = m_wpDbManager.lock();
-  if (nullptr != spDbManager && nullptr != pWidget)
-  {
-    // get resource type
-    auto spResource = spDbManager->FindResourceInProject(m_spCurrentProject, sName);
-    EResourceType type = EResourceType::eOther;
-    if (nullptr != spResource)
-    {
-      QReadLocker rcLocker(&spResource->m_rwLock);
-      type = spResource->m_type;
-    }
-
-    // script selected?
-    if (EResourceType::eScript == type._to_integral())
-    {
-      CEditorCodeWidget* pCodeWidget = GetWidget<CEditorCodeWidget>();
-      pCodeWidget->LoadResource(spResource);
-    }
-    // normal resource, just show in resource viewer
-    else
-    {
-      pWidget->UnloadResource();
-      pWidget->LoadResource(spResource);
-      if (m_spUi->pRightComboBox->itemData(m_spUi->pRightComboBox->currentIndex(), Qt::UserRole).toInt() == EEditorWidget::eResourceDisplay ||
-          m_spUi->pLeftComboBox->itemData(m_spUi->pLeftComboBox->currentIndex(), Qt::UserRole).toInt() == EEditorWidget::eResourceDisplay)
-      {
-        pWidget->UpdateActionBar();
-      }
-    }
-  }
+  RemoveLayout();
 }
 
 //----------------------------------------------------------------------------------------
@@ -383,46 +290,6 @@ void CEditorMainScreen::SlotHelpClicked(bool bClick)
         m_spUi->pProjectActionBar->m_spUi->HelpButton->parentWidget()->mapFromGlobal(
           mapToGlobal(m_spUi->pProjectActionBar->m_spUi->HelpButton->geometry().center())),
         this);
-}
-
-//----------------------------------------------------------------------------------------
-//
-void CEditorMainScreen::SlotKeyBindingsChanged()
-{
-  auto spSettings = CApplication::Instance()->Settings();
-  for (QAction* pAction : m_vpKeyBindingActions)
-  {
-    EEditorWidget widget =
-        EEditorWidget::_from_integral(pAction->property(c_sEditorProperty).toInt());
-    CEditorActionBar::EActionBarPosition position =
-        static_cast<CEditorActionBar::EActionBarPosition>(pAction->property(c_sSideProperty).toInt());
-
-    pAction->disconnect();
-
-    auto itSide = m_sSideKeyBindingMap.find(position);
-    auto itKey = m_sEditorKeyBindingMap.find(widget);
-    if (m_sSideKeyBindingMap.end() != itSide && m_sEditorKeyBindingMap.end() != itKey)
-    {
-      qint32 iIndex = std::distance(m_spWidgetsMap.begin(), m_spWidgetsMap.find(widget));
-
-      QKeySequence seq = spSettings->keyBinding(QString("%1_%2").arg(itSide->second).arg(itKey->second));
-      pAction->setShortcut(seq);
-      if (position == CEditorActionBar::eLeft)
-      {
-        m_spUi->pLeftComboBox->setItemText(iIndex, m_sEditorNamesMap.find(widget)->second.arg(seq.toString()));
-        connect(pAction, &QAction::triggered, this, [this, iIndex](){
-          m_spUi->pLeftComboBox->setCurrentIndex(iIndex);
-        });
-      }
-      else if (position == CEditorActionBar::eRight)
-      {
-        m_spUi->pRightComboBox->setItemText(iIndex, m_sEditorNamesMap.find(widget)->second.arg(seq.toString()));
-        connect(pAction, &QAction::triggered, this, [this, iIndex](){
-          m_spUi->pRightComboBox->setCurrentIndex(iIndex);
-        });
-      }
-    }
-  }
 }
 
 //----------------------------------------------------------------------------------------
@@ -578,45 +445,31 @@ void CEditorMainScreen::SlotUnloadFinished()
 
 //----------------------------------------------------------------------------------------
 //
-void CEditorMainScreen::ChangeIndex(QComboBox* pComboBox, QWidget* pContainer,
-  CEditorActionBar* pActionBar, qint32 iIndex)
+void CEditorMainScreen::CreateLayout()
 {
-  qint32 iEnumValue = pComboBox->itemData(iIndex, Qt::UserRole).toInt();
-  QLayout* pLayout = pContainer->layout();
-  while (auto item = pLayout->takeAt(0))
+  CSettings::EditorType type =
+      CApplication::Instance()->Settings()->PreferedEditorLayout();
+  if (CSettings::eNone == type)
   {
-    CEditorWidgetBase* pEditor = qobject_cast<CEditorWidgetBase*>(item->widget());
-    pEditor->OnHidden();
-    pEditor->setVisible(false);
+    type = CSettings::eClassic;
   }
 
-  auto it = m_spWidgetsMap.find(EEditorWidget::_from_integral(iEnumValue));
-  if (m_spWidgetsMap.end() != it)
+  m_pLayout =
+      CEditorFactory::CreateLayoutInstance(m_spUi->pMainWidget, type);
+
+  QLayout* pLayout = m_spUi->pMainWidget->layout();
+  if (nullptr != pLayout)
   {
-    it->second->setVisible(true);
-    pLayout->addWidget(it->second);
-    it->second->OnShown();
-    it->second->SetActionBar(pActionBar);
+    pLayout->addWidget(m_pLayout);
   }
+
+  m_pLayout->Initialize(m_spViewProvider, m_spEditorModel.get());
 }
 
 //----------------------------------------------------------------------------------------
 //
 void CEditorMainScreen::ProjectLoaded(bool bNewProject)
 {
-  // init indicees
-  m_spUi->pRightComboBox->blockSignals(true);
-  m_spUi->pRightComboBox->setCurrentIndex(EEditorWidget::eProjectSettings);
-  on_pRightComboBox_currentIndexChanged(EEditorWidget::eProjectSettings);
-  m_spUi->pRightComboBox->blockSignals(false);
-
-  m_spUi->pLeftComboBox->blockSignals(true);
-  m_spUi->pLeftComboBox->setCurrentIndex(EEditorWidget::eResourceWidget);
-  on_pLeftComboBox_currentIndexChanged(EEditorWidget::eResourceWidget);
-  m_spUi->pLeftComboBox->blockSignals(false);
-
-  SlotKeyBindingsChanged();
-
   if (nullptr != m_spCurrentProject)
   {
     QReadLocker locker(&m_spCurrentProject->m_rwLock);
@@ -628,18 +481,14 @@ void CEditorMainScreen::ProjectLoaded(bool bNewProject)
     it->second->LoadProject(m_spCurrentProject);
   }
 
+  m_pLayout->ProjectLoaded(m_spCurrentProject, bNewProject);
+
   if (bNewProject)
   {
     SlotSaveClicked(true);
   }
 
   SetModificaitonFlag(false);
-
-  // reload action bars
-  ChangeIndex(m_spUi->pRightComboBox, m_spUi->pRightContainer, m_spUi->pActionBarRight, 2);
-  ChangeIndex(m_spUi->pLeftComboBox, m_spUi->pLeftContainer, m_spUi->pActionBarLeft, 0);
-
-  m_spUi->splitter->setSizes({ width() * 1/3 , width() * 2/3 });
 
   // read only
   if (m_spEditorModel->IsReadOnly())
@@ -653,6 +502,24 @@ void CEditorMainScreen::ProjectLoaded(bool bNewProject)
 
 //----------------------------------------------------------------------------------------
 //
+void CEditorMainScreen::RemoveLayout()
+{
+  QLayout* pLayout = m_spUi->pMainWidget->layout();
+  if (nullptr != pLayout)
+  {
+    while (auto pItem = pLayout->takeAt(0))
+    {
+      if (nullptr != pItem)
+      {
+        if (nullptr != pItem->widget()) { delete pItem->widget(); }
+        delete pItem;
+      }
+    }
+  }
+}
+
+//----------------------------------------------------------------------------------------
+//
 void CEditorMainScreen::SetModificaitonFlag(bool bModified)
 {
   if (m_bProjectModified != bModified)
@@ -660,66 +527,4 @@ void CEditorMainScreen::SetModificaitonFlag(bool bModified)
     m_bProjectModified = bModified;
     m_spUi->pProjectActionBar->m_spUi->pProjectLabel->setText(QString(tr("Project")) + (bModified ? " *" : ""));
   }
-}
-
-//----------------------------------------------------------------------------------------
-//
-template<> CEditorResourceWidget* CEditorMainScreen::GetWidget<CEditorResourceWidget>()
-{
-  auto it = m_spWidgetsMap.find(EEditorWidget::eResourceWidget);
-  if (m_spWidgetsMap.end() != it)
-  {
-    CEditorResourceWidget* pWidget =
-        dynamic_cast<CEditorResourceWidget*>(it->second.data());
-    return pWidget;
-  }
-  return nullptr;
-}
-
-template<> CEditorResourceDisplayWidget* CEditorMainScreen::GetWidget<CEditorResourceDisplayWidget>()
-{
-  auto it = m_spWidgetsMap.find(EEditorWidget::eResourceDisplay);
-  if (m_spWidgetsMap.end() != it)
-  {
-    CEditorResourceDisplayWidget* pWidget =
-        dynamic_cast<CEditorResourceDisplayWidget*>(it->second.data());
-    return pWidget;
-  }
-  return nullptr;
-}
-
-template<> CEditorProjectSettingsWidget* CEditorMainScreen::GetWidget<CEditorProjectSettingsWidget>()
-{
-  auto it = m_spWidgetsMap.find(EEditorWidget::eProjectSettings);
-  if (m_spWidgetsMap.end() != it)
-  {
-    CEditorProjectSettingsWidget* pWidget =
-        dynamic_cast<CEditorProjectSettingsWidget*>(it->second.data());
-    return pWidget;
-  }
-  return nullptr;
-}
-
-template<> CEditorSceneNodeWidget* CEditorMainScreen::GetWidget<CEditorSceneNodeWidget>()
-{
-  auto it = m_spWidgetsMap.find(EEditorWidget::eSceneNodeWidget);
-  if (m_spWidgetsMap.end() != it)
-  {
-    CEditorSceneNodeWidget* pWidget =
-        dynamic_cast<CEditorSceneNodeWidget*>(it->second.data());
-    return pWidget;
-  }
-  return nullptr;
-}
-
-template<> CEditorCodeWidget* CEditorMainScreen::GetWidget<CEditorCodeWidget>()
-{
-  auto it = m_spWidgetsMap.find(EEditorWidget::eSceneCodeEditorWidget);
-  if (m_spWidgetsMap.end() != it)
-  {
-    CEditorCodeWidget* pWidget =
-        dynamic_cast<CEditorCodeWidget*>(it->second.data());
-    return pWidget;
-  }
-  return nullptr;
 }

@@ -5,27 +5,27 @@
 #include "CommandText.h"
 #include "EditorTutorialOverlay.h"
 #include "Editor/EditorMainScreen.h"
+#include "Editor/EditorLayouts/EditorLayoutClassic.h"
 #include "Systems/JSON/JsonInstructionSetParser.h"
 #include "Systems/JSON/JsonInstructionSetRunner.h"
+#include <QComboBox>
 #include <QDebug>
 #include <QFile>
 #include <QListView>
 #include <QTimer>
 
 CMainScreenTutorialStateSwitchHandler::CMainScreenTutorialStateSwitchHandler(
-    QPointer<CEditorMainScreen> pParentWidget,
-    const std::shared_ptr<Ui::CEditorMainScreen>& spUi,
+    QPointer<CEditorLayoutClassic> pParentWidget,
     QPointer<CEditorTutorialOverlay> pTutorialOverlay) :
   QObject(nullptr),
   ITutorialStateSwitchHandler(),
   m_spTutorialParser(std::make_unique<CJsonInstructionSetParser>()),
-  m_spUi(spUi),
   m_spTutorialRunner(nullptr),
   m_ParentWidget(pParentWidget),
   m_pTutorialOverlay(pTutorialOverlay),
   m_currentState(ETutorialState::eFinished)
 {
-  connect(m_spUi->pRightComboBox, qOverload<qint32>(&QComboBox::currentIndexChanged),
+  connect(m_ParentWidget->RightComboBox(), qOverload<qint32>(&QComboBox::currentIndexChanged),
           this, &CMainScreenTutorialStateSwitchHandler::SlotRightPanelSwitched);
   connect(pTutorialOverlay, &CEditorTutorialOverlay::SignalOverlayNextInstructionTriggered,
           this, &CMainScreenTutorialStateSwitchHandler::SlotOverlayNextInstructionTriggered,
@@ -97,7 +97,7 @@ void CMainScreenTutorialStateSwitchHandler::OnStateSwitch(ETutorialState newStat
       {
         if (EEditorWidget::eProjectSettings != val._to_integral())
         {
-          qobject_cast<QListView*>(m_spUi->pRightComboBox->view())
+          qobject_cast<QListView*>(m_ParentWidget->RightComboBox()->view())
               ->setRowHidden(val, true);
         }
       }
@@ -106,7 +106,7 @@ void CMainScreenTutorialStateSwitchHandler::OnStateSwitch(ETutorialState newStat
     {
       for (EEditorWidget val : EEditorWidget::_values())
       {
-        qobject_cast<QListView*>(m_spUi->pRightComboBox->view())
+        qobject_cast<QListView*>(m_ParentWidget->RightComboBox()->view())
             ->setRowHidden(val, false);
       }
 
@@ -116,20 +116,20 @@ void CMainScreenTutorialStateSwitchHandler::OnStateSwitch(ETutorialState newStat
       assert(bOk);
       Q_UNUSED(bOk);
 
-      m_spUi->pLeftComboBox->setEnabled(false);
-      m_spUi->pRightComboBox->setEnabled(false);
-      m_spUi->pLeftPanelGroupBox->setEnabled(false);
+      m_ParentWidget->LeftComboBox()->setEnabled(false);
+      m_ParentWidget->RightComboBox()->setEnabled(false);
+      m_ParentWidget->LeftGroupBox()->setEnabled(false);
     } break;
     case ETutorialState::eResourcePanel:
     {
-      m_spUi->pLeftComboBox->setEnabled(false);
-      m_spUi->pRightComboBox->setEnabled(false);
-      m_spUi->pLeftPanelGroupBox->setEnabled(true);
+      m_ParentWidget->LeftComboBox()->setEnabled(false);
+      m_ParentWidget->RightComboBox()->setEnabled(false);
+      m_ParentWidget->LeftGroupBox()->setEnabled(true);
     } break;
     case ETutorialState::eImageResourceSelected:
     {
-      m_spUi->pLeftComboBox->setEnabled(false);
-      m_spUi->pRightComboBox->setEnabled(false);
+      m_ParentWidget->LeftComboBox()->setEnabled(false);
+      m_ParentWidget->RightComboBox()->setEnabled(false);
     } break;
     case ETutorialState::eSwitchRightPanelToNodeSettings:
     {
@@ -138,17 +138,17 @@ void CMainScreenTutorialStateSwitchHandler::OnStateSwitch(ETutorialState newStat
         if (EEditorWidget::eSceneNodeWidget != val._to_integral() &&
             EEditorWidget::eProjectSettings != val._to_integral())
         {
-          qobject_cast<QListView*>(m_spUi->pRightComboBox->view())
+          qobject_cast<QListView*>(m_ParentWidget->RightComboBox()->view())
               ->setRowHidden(val, true);
         }
       }
-      m_spUi->pRightComboBox->setEnabled(true);
+      m_ParentWidget->RightComboBox()->setEnabled(true);
     } break;
     case ETutorialState::eNodePanel:
     {
       for (EEditorWidget val : EEditorWidget::_values())
       {
-        qobject_cast<QListView*>(m_spUi->pRightComboBox->view())
+        qobject_cast<QListView*>(m_ParentWidget->RightComboBox()->view())
             ->setRowHidden(val, false);
       }
     } // fallthrough
@@ -161,9 +161,9 @@ void CMainScreenTutorialStateSwitchHandler::OnStateSwitch(ETutorialState newStat
       assert(bOk);
       Q_UNUSED(bOk);
 
-      m_spUi->pLeftComboBox->setEnabled(false);
-      m_spUi->pRightComboBox->setEnabled(newState._to_integral() == ETutorialState::eNodePanelDone);
-      m_spUi->pLeftPanelGroupBox->setEnabled(false);
+      m_ParentWidget->LeftComboBox()->setEnabled(false);
+      m_ParentWidget->RightComboBox()->setEnabled(newState._to_integral() == ETutorialState::eNodePanelDone);
+      m_ParentWidget->LeftGroupBox()->setEnabled(false);
     } break;
     case ETutorialState::eCodePanel:
     {
@@ -176,18 +176,18 @@ void CMainScreenTutorialStateSwitchHandler::OnStateSwitch(ETutorialState newStat
       assert(bOk);
       Q_UNUSED(bOk);
 
-      m_spUi->pLeftComboBox->setEnabled(false);
-      m_spUi->pRightComboBox->setEnabled(false);
-      m_spUi->pLeftPanelGroupBox->setEnabled(true);
+      m_ParentWidget->LeftComboBox()->setEnabled(false);
+      m_ParentWidget->RightComboBox()->setEnabled(false);
+      m_ParentWidget->LeftGroupBox()->setEnabled(true);
     } break;
     case ETutorialState::eFinished:
     {
       if (ETutorialState::eCodePanel == oldState._to_integral())
       {
-        m_spUi->pLeftComboBox->setEnabled(true);
-        m_spUi->pRightComboBox->setEnabled(true);
-        m_spUi->pLeftPanelGroupBox->setEnabled(true);
-        m_spUi->pRightPanelGroupBox->setEnabled(true);
+        m_ParentWidget->LeftComboBox()->setEnabled(true);
+        m_ParentWidget->RightComboBox()->setEnabled(true);
+        m_ParentWidget->LeftGroupBox()->setEnabled(true);
+        m_ParentWidget->RightGroupBox()->setEnabled(true);
 
         QTimer::singleShot(500, m_pTutorialOverlay, SLOT(Hide()));
       }
@@ -206,14 +206,14 @@ void CMainScreenTutorialStateSwitchHandler::OnStateSwitch(ETutorialState newStat
 //
 void CMainScreenTutorialStateSwitchHandler::SlotSwitchLeftPanel(qint32 iNewIndex)
 {
-  m_spUi->pLeftComboBox->setCurrentIndex(iNewIndex);
+  m_ParentWidget->LeftComboBox()->setCurrentIndex(iNewIndex);
 }
 
 //----------------------------------------------------------------------------------------
 //
 void CMainScreenTutorialStateSwitchHandler::SlotSwitchRightPanel(qint32 iNewIndex)
 {
-  m_spUi->pRightComboBox->setCurrentIndex(iNewIndex);
+  m_ParentWidget->RightComboBox()->setCurrentIndex(iNewIndex);
 }
 
 //----------------------------------------------------------------------------------------
