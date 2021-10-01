@@ -1,5 +1,5 @@
 #include "CodeWidgetTutorialStateSwitchHandler.h"
-#include "Editor/EditorCodeWidget.h"
+#include "Editor/EditorWidgets/EditorCodeWidget.h"
 
 CCodeWidgetTutorialStateSwitchHandler::CCodeWidgetTutorialStateSwitchHandler(QPointer<CEditorCodeWidget> pParentWidget,
                                                                              const std::shared_ptr<Ui::CEditorCodeWidget>& spUI) :

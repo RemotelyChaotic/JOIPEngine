@@ -353,6 +353,8 @@ set(Sources
   ../version.h
 )
 
+set(CMAKE_AUTOUIC_SEARCH_PATHS ${CMAKE_AUTOUIC_SEARCH_PATHS} Editor)
+
 if(ANDROID)
   add_library(${PROJECT_NAME} SHARED ${Sources})
 else()

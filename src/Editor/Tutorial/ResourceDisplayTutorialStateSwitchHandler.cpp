@@ -1,5 +1,5 @@
 #include "ResourceDisplayTutorialStateSwitchHandler.h"
-#include "Editor/EditorResourceDisplayWidget.h"
+#include "Editor/EditorWidgets/EditorResourceDisplayWidget.h"
 
 CResourceDisplayTutorialStateSwitchHandler::
 CResourceDisplayTutorialStateSwitchHandler(QPointer<CEditorResourceDisplayWidget> pParentWidget,

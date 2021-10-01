@@ -1,11 +1,11 @@
 #ifndef EDITORMAINSCREEN_H
 #define EDITORMAINSCREEN_H
 
-#include "EditorWidgetBase.h"
 #include "EditorModel.h"
 #include "EditorWidgetTypes.h"
 #include "ui_EditorMainScreen.h" // we need to include this in the header for the tutorial
 #include "ui_EditorActionBar.h"  // state switch handler to be able to access the ui
+#include "EditorWidgets/EditorWidgetBase.h"
 #include <QWidget>
 #include <map>
 #include <memory>

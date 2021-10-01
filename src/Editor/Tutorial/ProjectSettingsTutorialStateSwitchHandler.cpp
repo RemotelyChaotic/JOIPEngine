@@ -1,5 +1,5 @@
 #include "ProjectSettingsTutorialStateSwitchHandler.h"
-#include "Editor/EditorProjectSettingsWidget.h"
+#include "Editor/EditorWidgets/EditorProjectSettingsWidget.h"
 
 CProjectSettingsTutorialStateSwitchHandler::
 CProjectSettingsTutorialStateSwitchHandler(QPointer<CEditorProjectSettingsWidget> pParentWidget,

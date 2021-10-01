@@ -1,6 +1,6 @@
 #include "EditorWidgetBase.h"
-#include "EditorModel.h"
-#include "Resources/ResourceTreeItemModel.h"
+#include "Editor/EditorModel.h"
+#include "Editor/Resources/ResourceTreeItemModel.h"
 
 CEditorWidgetBase::CEditorWidgetBase(QWidget* pParent) :
   QWidget(pParent),

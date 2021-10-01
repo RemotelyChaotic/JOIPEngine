@@ -1,10 +1,10 @@
 #include "EditorLayoutBase.h"
-#include "Editor/EditorCodeWidget.h"
 #include "Editor/EditorModel.h"
-#include "Editor/EditorProjectSettingsWidget.h"
-#include "Editor/EditorResourceDisplayWidget.h"
-#include "Editor/EditorResourceWidget.h"
-#include "Editor/EditorSceneNodeWidget.h"
+#include "Editor/EditorWidgets/EditorCodeWidget.h"
+#include "Editor/EditorWidgets/EditorProjectSettingsWidget.h"
+#include "Editor/EditorWidgets/EditorResourceDisplayWidget.h"
+#include "Editor/EditorWidgets/EditorResourceWidget.h"
+#include "Editor/EditorWidgets/EditorSceneNodeWidget.h"
 #include "Editor/Tutorial/EditorTutorialOverlay.h"
 #include <QPointer>
 

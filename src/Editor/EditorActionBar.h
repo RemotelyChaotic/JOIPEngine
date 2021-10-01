@@ -1,7 +1,7 @@
 #ifndef EDITORACTIONBAR_H
 #define EDITORACTIONBAR_H
 
-#include "EditorWidgetBase.h"
+#include "EditorWidgets/EditorWidgetBase.h"
 #include "enum.h"
 #include <memory>
 

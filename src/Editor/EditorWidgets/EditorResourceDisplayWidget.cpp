@@ -1,6 +1,6 @@
 #include "EditorResourceDisplayWidget.h"
 #include "Application.h"
-#include "EditorActionBar.h"
+#include "Editor/EditorActionBar.h"
 #include "Systems/DatabaseManager.h"
 #include <QUndoView>
 

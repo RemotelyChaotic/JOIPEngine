@@ -1,7 +1,7 @@
 #include "ResourceTutorialStateSwitchHandler.h"
 #include "Application.h"
 #include "Editor/EditorModel.h"
-#include "Editor/EditorResourceWidget.h"
+#include "Editor/EditorWidgets/EditorResourceWidget.h"
 #include "Editor/Resources/ResourceTreeItem.h"
 #include "Editor/Resources/ResourceTreeItemModel.h"
 #include "Editor/Resources/ResourceTreeItemSortFilterProxyModel.h"
