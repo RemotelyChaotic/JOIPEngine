@@ -33,7 +33,8 @@ CEditorLayoutCompact::CEditorLayoutCompact(QWidget *parent) :
   m_spUi(std::make_unique<Ui::CEditorLayoutCompact>()),
   m_spCurrentProject(nullptr),
   m_vpKeyBindingActions(),
-  m_iCurrentView(EEditorWidget::eProjectSettings)
+  // don't set to projectSettings, so we can set it on initialization
+  m_iCurrentView(EEditorWidget::_from_integral(EEditorWidget(EEditorWidget::eProjectSettings)._to_integral()+1))
 {
   m_spUi->setupUi(this);
 }
@@ -52,7 +53,7 @@ void CEditorLayoutCompact::ProjectLoaded(tspProject spCurrentProject, bool bModi
 
   m_spCurrentProject = spCurrentProject;
 
-  ChangeView(m_iCurrentView);
+  ChangeView(EEditorWidget::eProjectSettings);
 }
 
 //----------------------------------------------------------------------------------------
@@ -115,7 +116,7 @@ void CEditorLayoutCompact::InitializeImpl()
 
   // create all the buttons to switch views
   QLayout* pLayout = m_spUi->pViewsButtonContainer->layout();
-  pLayout->addItem(new QSpacerItem(0, 20));
+  pLayout->addItem(new QSpacerItem(0, 20, QSizePolicy::Expanding, QSizePolicy::Fixed));
   VisitWidgets([this, pLayout](QPointer<CEditorWidgetBase> pWidget, EEditorWidget type) {
     Q_UNUSED(pWidget)
 
@@ -135,7 +136,7 @@ void CEditorLayoutCompact::InitializeImpl()
       pLayout->addWidget(pButton);
     }
   });
-  pLayout->addItem(new QSpacerItem(0, 20));
+  pLayout->addItem(new QSpacerItem(0, 20, QSizePolicy::Expanding, QSizePolicy::Fixed));
 
   // help
   auto wpHelpFactory = CApplication::Instance()->System<CHelpFactory>().lock();
