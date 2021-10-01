@@ -17,6 +17,7 @@
 #include <QGraphicsItem>
 #include <QHeaderView>
 #include <QLineEdit>
+#include <QGLWidget>
 #include <QMenu>
 #include <QTreeWidget>
 #include <QUndoStack>
@@ -31,6 +32,7 @@ CFlowView::CFlowView(QWidget* pParent) :
   m_contextMenuItemVisibility(),
   m_pUndoStack(new QUndoStack(this))
 {
+  setViewportUpdateMode(QGraphicsView::SmartViewportUpdate);
 }
 
 CFlowView::CFlowView(CFlowScene* pScene, QWidget* pParent) :
@@ -39,6 +41,7 @@ CFlowView::CFlowView(CFlowScene* pScene, QWidget* pParent) :
   m_contextMenuItemVisibility(),
   m_pUndoStack(new QUndoStack(this))
 {
+  setViewportUpdateMode(QGraphicsView::SmartViewportUpdate);
 }
 
 CFlowView::~CFlowView() {}
