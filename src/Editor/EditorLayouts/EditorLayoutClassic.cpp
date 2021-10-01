@@ -363,7 +363,7 @@ void CEditorLayoutClassic::InitializeImpl()
   VisitWidgets([this](QPointer<CEditorWidgetBase> pWidget, EEditorWidget type) {
     Q_UNUSED(pWidget)
 
-    // Key-bindings werden später sowieso gesetzt
+    // Key-bindings will be set later
     m_spUi->pLeftComboBox->addItem(m_sEditorNamesMap.find(type)->second.arg(""),
                                    type._to_integral());
     m_spUi->pRightComboBox->addItem(m_sEditorNamesMap.find(type)->second.arg(""),

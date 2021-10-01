@@ -42,6 +42,9 @@ set(Sources
   Editor/EditorLayouts/EditorLayoutClassic.cpp
   Editor/EditorLayouts/EditorLayoutClassic.h
   Editor/EditorLayouts/EditorLayoutClassic.ui
+  Editor/EditorLayouts/EditorLayoutCompact.cpp
+  Editor/EditorLayouts/EditorLayoutCompact.h
+  Editor/EditorLayouts/EditorLayoutCompact.ui
   Editor/EditorLayouts/EditorLayoutModern.cpp
   Editor/EditorLayouts/EditorLayoutModern.h
   Editor/EditorLayouts/EditorLayoutModern.ui

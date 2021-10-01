@@ -66,4 +66,7 @@ void CEditorLayoutModern::ProjectUnloaded()
 void CEditorLayoutModern::InitializeImpl()
 {
   m_spUi->pTop->Initialize(m_pLayoutViewProvider, EditorModel());
+
+  m_spUi->pActionBarLeft->SetActionBarPosition(CEditorActionBar::eLeft);
+  m_spUi->pActionBarLeft->Initialize();
 }
