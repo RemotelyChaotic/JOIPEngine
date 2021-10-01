@@ -2,6 +2,7 @@
 #include "Application.h"
 #include "Editor/EditorActionBar.h"
 #include "Systems/DatabaseManager.h"
+#include <QUndoStack>
 #include <QUndoView>
 
 CEditorResourceDisplayWidget::CEditorResourceDisplayWidget(QWidget* pParent) :

@@ -3,6 +3,7 @@
 #include "ui_EditorLayoutClassic.h"
 #include "Editor/EditorActionBar.h"
 #include "Editor/EditorModel.h"
+#include "Editor/EditorWidgetTypes.h"
 #include "Editor/EditorWidgets/EditorCodeWidget.h"
 #include "Editor/EditorWidgets/EditorResourceWidget.h"
 #include "Editor/EditorWidgets/EditorResourceDisplayWidget.h"
@@ -60,6 +61,15 @@ CEditorLayoutClassic::CEditorLayoutClassic(QWidget* pParent) :
 CEditorLayoutClassic::~CEditorLayoutClassic()
 {
   m_vpKeyBindingActions.clear();
+  m_spUi->pRightComboBox->blockSignals(true);
+  m_spUi->pRightComboBox->clear();
+  m_spUi->pRightComboBox->blockSignals(false);
+  m_spUi->pLeftComboBox->blockSignals(true);
+  m_spUi->pLeftComboBox->clear();
+  m_spUi->pLeftComboBox->blockSignals(false);
+
+  ChangeIndex(m_spUi->pRightComboBox, m_spUi->pRightContainer, m_spUi->pActionBarRight, -1);
+  ChangeIndex(m_spUi->pLeftComboBox, m_spUi->pLeftContainer, m_spUi->pActionBarLeft, -1);
 }
 
 //----------------------------------------------------------------------------------------
@@ -101,6 +111,92 @@ void CEditorLayoutClassic::ProjectUnloaded()
   {
     pAction->disconnect();
   }
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CEditorLayoutClassic::ChangeIndex(QComboBox* pComboBox, QWidget* pContainer,
+                                       CEditorActionBar* pActionBar, qint32 iIndex)
+{
+  QLayout* pLayout = pContainer->layout();
+  while (auto item = pLayout->takeAt(0))
+  {
+    CEditorWidgetBase* pEditor = qobject_cast<CEditorWidgetBase*>(item->widget());
+    pEditor->TakeFromLayout();
+    pEditor->OnHidden();
+    pEditor->setVisible(false);
+    delete item;
+  }
+
+  if (-1 < iIndex && pComboBox->count() > iIndex)
+  {
+    qint32 iEnumValue = pComboBox->itemData(iIndex, Qt::UserRole).toInt();
+
+    QPointer<CEditorWidgetBase> pWidget = GetWidget(EEditorWidget::_from_integral(iEnumValue));
+    if (nullptr != pWidget)
+    {
+      pWidget->setVisible(true);
+      pLayout->addWidget(pWidget);
+      pWidget->OnShown();
+      pWidget->SetActionBar(pActionBar);
+    }
+  }
+}
+
+//----------------------------------------------------------------------------------------
+//
+QPointer<CEditorActionBar> CEditorLayoutClassic::LeftActionBar() const
+{
+  return m_spUi->pActionBarLeft;
+}
+
+//----------------------------------------------------------------------------------------
+//
+QPointer<QComboBox> CEditorLayoutClassic::LeftComboBox() const
+{
+  return m_spUi->pLeftComboBox;
+}
+
+//----------------------------------------------------------------------------------------
+//
+QPointer<QWidget> CEditorLayoutClassic::LeftContainer() const
+{
+  return m_spUi->pLeftContainer;
+}
+
+//----------------------------------------------------------------------------------------
+//
+QPointer<QGroupBox> CEditorLayoutClassic::LeftGroupBox() const
+{
+  return m_spUi->pLeftPanelGroupBox;
+}
+
+//----------------------------------------------------------------------------------------
+//
+QPointer<CEditorActionBar> CEditorLayoutClassic::RightActionBar() const
+{
+  return m_spUi->pActionBarRight;
+}
+
+//----------------------------------------------------------------------------------------
+//
+QPointer<QComboBox> CEditorLayoutClassic::RightComboBox() const
+{
+  return m_spUi->pRightComboBox;
+}
+
+//----------------------------------------------------------------------------------------
+//
+QPointer<QWidget> CEditorLayoutClassic::RightContainer() const
+{
+  return m_spUi->pRightContainer;
+}
+
+//----------------------------------------------------------------------------------------
+//
+QPointer<QGroupBox> CEditorLayoutClassic::RightGroupBox() const
+{
+  return m_spUi->pRightPanelGroupBox;
 }
 
 //----------------------------------------------------------------------------------------
@@ -208,14 +304,22 @@ void CEditorLayoutClassic::SlotKeyBindingsChanged()
       {
         m_spUi->pLeftComboBox->setItemText(iIndex, m_sEditorNamesMap.find(widget)->second.arg(seq.toString()));
         connect(pAction, &QAction::triggered, this, [this, iIndex](){
-          m_spUi->pLeftComboBox->setCurrentIndex(iIndex);
+          if (sender()->property(c_sEditorProperty).toInt() ==
+              m_spUi->pLeftComboBox->itemData(iIndex).toInt())
+          {
+            m_spUi->pLeftComboBox->setCurrentIndex(iIndex);
+          }
         });
       }
       else if (position == CEditorActionBar::eRight)
       {
         m_spUi->pRightComboBox->setItemText(iIndex, m_sEditorNamesMap.find(widget)->second.arg(seq.toString()));
         connect(pAction, &QAction::triggered, this, [this, iIndex](){
-          m_spUi->pRightComboBox->setCurrentIndex(iIndex);
+          if (sender()->property(c_sEditorProperty).toInt() ==
+              m_spUi->pRightComboBox->itemData(iIndex).toInt())
+          {
+            m_spUi->pRightComboBox->setCurrentIndex(iIndex);
+          }
         });
       }
     }
@@ -279,57 +383,5 @@ void CEditorLayoutClassic::InitializeImpl()
     m_spUi->pLeftComboBox->setProperty(helpOverlay::c_sHelpPagePropertyName, c_sViewSelectorHelpId);
     wpHelpFactory->RegisterHelp(c_sViewSelectorHelpId, ":/resources/help/editor/selection_combobox_help.html");
     m_spUi->pRightComboBox->setProperty(helpOverlay::c_sHelpPagePropertyName, c_sViewSelectorHelpId);
-  }
-}
-
-//----------------------------------------------------------------------------------------
-//
-QPointer<QComboBox> CEditorLayoutClassic::LeftComboBox() const
-{
-  return m_spUi->pLeftComboBox;
-}
-
-//----------------------------------------------------------------------------------------
-//
-QPointer<QGroupBox> CEditorLayoutClassic::LeftGroupBox() const
-{
-  return m_spUi->pLeftPanelGroupBox;
-}
-
-//----------------------------------------------------------------------------------------
-//
-QPointer<QComboBox> CEditorLayoutClassic::RightComboBox() const
-{
-  return m_spUi->pRightComboBox;
-}
-
-//----------------------------------------------------------------------------------------
-//
-QPointer<QGroupBox> CEditorLayoutClassic::RightGroupBox() const
-{
-  return m_spUi->pRightPanelGroupBox;
-}
-
-//----------------------------------------------------------------------------------------
-//
-void CEditorLayoutClassic::ChangeIndex(QComboBox* pComboBox, QWidget* pContainer,
-                                       CEditorActionBar* pActionBar, qint32 iIndex)
-{
-  qint32 iEnumValue = pComboBox->itemData(iIndex, Qt::UserRole).toInt();
-  QLayout* pLayout = pContainer->layout();
-  while (auto item = pLayout->takeAt(0))
-  {
-    CEditorWidgetBase* pEditor = qobject_cast<CEditorWidgetBase*>(item->widget());
-    pEditor->OnHidden();
-    pEditor->setVisible(false);
-  }
-
-  QPointer<CEditorWidgetBase> pWidget = GetWidget(EEditorWidget::_from_integral(iEnumValue));
-  if (nullptr != pWidget)
-  {
-    pWidget->setVisible(true);
-    pLayout->addWidget(pWidget);
-    pWidget->OnShown();
-    pWidget->SetActionBar(pActionBar);
   }
 }

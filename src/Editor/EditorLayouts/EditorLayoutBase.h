@@ -39,12 +39,11 @@ protected:
   virtual void InitializeImpl() = 0;
 
   std::shared_ptr<ITutorialStateSwitchHandler>  m_spStateSwitchHandler;
+  std::weak_ptr<IEditorLayoutViewProvider>      m_pLayoutViewProvider;
+  QPointer<CEditorModel>                        m_pEditorModel;
 
 private:
   void Initialize() override;
-
-  std::weak_ptr<IEditorLayoutViewProvider>      m_pLayoutViewProvider;
-  QPointer<CEditorModel>                        m_pEditorModel;
 };
 
 #endif // IEDITORLAYOUT_H

@@ -2,6 +2,7 @@
 #include "Application.h"
 #include "Editor/EditorActionBar.h"
 #include "Editor/EditorModel.h"
+#include "Editor/Resources/ResourceTreeItemModel.h"
 #include "Editor/Script/BackgroundSnippetOverlay.h"
 #include "Editor/Script/CommandChangeOpenedScript.h"
 #include "Editor/Script/CommandScriptContentChange.h"

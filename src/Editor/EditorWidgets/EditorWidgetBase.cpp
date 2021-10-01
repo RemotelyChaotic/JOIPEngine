@@ -1,10 +1,16 @@
 #include "EditorWidgetBase.h"
+#include "Editor/EditorActionBar.h"
 #include "Editor/EditorModel.h"
+#include "Editor/NodeEditor/FlowScene.h"
+#include "Editor/Project/KinkTreeModel.h"
 #include "Editor/Resources/ResourceTreeItemModel.h"
+#include "Editor/Script/ScriptEditorModel.h"
+#include <QUndoStack>
 
 CEditorWidgetBase::CEditorWidgetBase(QWidget* pParent) :
   QWidget(pParent),
   IWidgetBaseInterface(),
+  m_pOriginalParent(pParent),
   m_pActionBar(nullptr),
   m_bLoaded(false)
 {
@@ -34,49 +40,56 @@ void CEditorWidgetBase::SetEditorModel(CEditorModel* pItemModel)
 
 //----------------------------------------------------------------------------------------
 //
-CEditorActionBar* CEditorWidgetBase::ActionBar() const
+void CEditorWidgetBase::TakeFromLayout()
+{
+  setParent(m_pOriginalParent);
+}
+
+//----------------------------------------------------------------------------------------
+//
+QPointer<CEditorActionBar> CEditorWidgetBase::ActionBar() const
 {
   return m_pActionBar;
 }
 
 //----------------------------------------------------------------------------------------
 //
-CEditorModel* CEditorWidgetBase::EditorModel() const
+QPointer<CEditorModel> CEditorWidgetBase::EditorModel() const
 {
   return m_pEditorModel;
 }
 
 //----------------------------------------------------------------------------------------
 //
-CFlowScene* CEditorWidgetBase::FlowSceneModel() const
+QPointer<CFlowScene> CEditorWidgetBase::FlowSceneModel() const
 {
   return m_pEditorModel->FlowSceneModel();
 }
 
 //----------------------------------------------------------------------------------------
 //
-CKinkTreeModel* CEditorWidgetBase::KinkModel() const
+QPointer<CKinkTreeModel> CEditorWidgetBase::KinkModel() const
 {
   return  m_pEditorModel->KinkTreeModel();
 }
 
 //----------------------------------------------------------------------------------------
 //
-CResourceTreeItemModel* CEditorWidgetBase::ResourceTreeModel() const
+QPointer<CResourceTreeItemModel> CEditorWidgetBase::ResourceTreeModel() const
 {
   return m_pEditorModel->ResourceTreeModel();
 }
 
 //----------------------------------------------------------------------------------------
 //
-CScriptEditorModel* CEditorWidgetBase::ScriptEditorModel() const
+QPointer<CScriptEditorModel> CEditorWidgetBase::ScriptEditorModel() const
 {
   return m_pEditorModel->ScriptEditorModel();
 }
 
 //----------------------------------------------------------------------------------------
 //
-QUndoStack* CEditorWidgetBase::UndoStack() const
+QPointer<QUndoStack> CEditorWidgetBase::UndoStack() const
 {
   return m_pEditorModel->UndoStack();
 }

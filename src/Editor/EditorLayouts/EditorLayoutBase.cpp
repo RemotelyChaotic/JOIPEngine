@@ -110,8 +110,7 @@ QPointer<CEditorWidgetBase> CEditorLayoutBase::GetWidget(EEditorWidget widget) c
 {
   if (auto spLayoutProvider = m_pLayoutViewProvider.lock())
   {
-    return qobject_cast<CEditorResourceWidget*>(
-          spLayoutProvider->GetEditorWidget(widget).data());
+    return spLayoutProvider->GetEditorWidget(widget);
   }
   return nullptr;
 }

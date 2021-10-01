@@ -3,6 +3,7 @@
 
 #include "Widgets/IWidgetBaseInterface.h"
 #include "Editor/EditorWidgetRegistry.h"
+#include <QPointer>
 #include <QWidget>
 #include <memory>
 
@@ -34,6 +35,7 @@ public:
   bool IsLoaded() { return m_bLoaded; }
   void SetActionBar(CEditorActionBar* pActionBar);
   void SetEditorModel(CEditorModel* pItemModel);
+  void TakeFromLayout();
 
 signals:
   void SignalProjectEdited();
@@ -43,18 +45,19 @@ protected:
   virtual void OnActionBarAboutToChange() {}
   virtual void OnActionBarChanged() {}
 
-  CEditorActionBar* ActionBar() const;
-  CEditorModel* EditorModel() const;
-  CFlowScene* FlowSceneModel() const;
-  CKinkTreeModel* KinkModel() const;
-  CResourceTreeItemModel* ResourceTreeModel() const;
-  CScriptEditorModel* ScriptEditorModel() const;
-  QUndoStack* UndoStack() const;
+  QPointer<CEditorActionBar> ActionBar() const;
+  QPointer<CEditorModel> EditorModel() const;
+  QPointer<CFlowScene> FlowSceneModel() const;
+  QPointer<CKinkTreeModel> KinkModel() const;
+  QPointer<CResourceTreeItemModel> ResourceTreeModel() const;
+  QPointer<CScriptEditorModel> ScriptEditorModel() const;
+  QPointer<QUndoStack> UndoStack() const;
 
   void SetLoaded(bool bLoaded);
 
-  CEditorActionBar*                                m_pActionBar;
-  CEditorModel*                                    m_pEditorModel;
+  QPointer<QWidget>                                m_pOriginalParent;
+  QPointer<CEditorActionBar>                       m_pActionBar;
+  QPointer<CEditorModel>                           m_pEditorModel;
   bool                                             m_bLoaded;
 };
 
