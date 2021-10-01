@@ -96,8 +96,6 @@ void CEditorLayoutClassic::ProjectLoaded(tspProject spCurrentProject, bool bModi
   // reload action bars
   ChangeIndex(m_spUi->pRightComboBox, m_spUi->pRightContainer, m_spUi->pActionBarRight, 2);
   ChangeIndex(m_spUi->pLeftComboBox, m_spUi->pLeftContainer, m_spUi->pActionBarLeft, 0);
-
-  m_spUi->splitter->setSizes({ width() * 1/3 , width() * 2/3 });
 }
 
 //----------------------------------------------------------------------------------------
@@ -141,6 +139,8 @@ void CEditorLayoutClassic::ChangeIndex(QComboBox* pComboBox, QWidget* pContainer
       pWidget->SetActionBar(pActionBar);
     }
   }
+
+  m_spUi->splitter->setSizes({ width() * 1/4 , width() * 3/4 });
 }
 
 //----------------------------------------------------------------------------------------

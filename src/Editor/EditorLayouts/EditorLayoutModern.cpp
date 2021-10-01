@@ -51,7 +51,7 @@ void CEditorLayoutModern::ProjectLoaded(tspProject spCurrentProject, bool bModif
     pWidget->SetActionBar(m_spUi->pActionBarLeft);
   }
 
-  m_spUi->pSplitter->setSizes({height() *3/4, height()/4});
+  m_spUi->pSplitter->setSizes({ height() *4/5, height()/5 });
 }
 
 //----------------------------------------------------------------------------------------
