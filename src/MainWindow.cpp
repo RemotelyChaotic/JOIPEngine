@@ -222,8 +222,8 @@ void CMainWindow::OldSettingsDetected()
     if (QMessageBox::Yes == iRetVal)
     {
       m_spSettings->SetContentFolder(contentFileInfo.absoluteFilePath());
-      m_spSettings->SetSettingsVersion(QT_VERSION_CHECK(version.m_iMajor, version.m_iMinor, version.m_iPatch));
     }
+    m_spSettings->SetSettingsVersion(QT_VERSION_CHECK(version.m_iMajor, version.m_iMinor, version.m_iPatch));
   }
   else
   {

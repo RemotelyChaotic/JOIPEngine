@@ -137,3 +137,5 @@ Fixed Bugs:
 - UI sound effects don't cut off anymore.
 - Performance fixes for title in menu and 404 text.
 - Resource view is properly resizable now.
+- Old version detection turn off even if the user answers 'No' to changing
+  the folder.
