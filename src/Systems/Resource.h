@@ -18,7 +18,8 @@ BETTER_ENUM(EResourceType, qint32,
             eSound      = 2,
             eOther      = 3,
             eScript     = 4,
-            eDatabase   = 5);
+            eDatabase   = 5,
+            eFont       = 6);
 
 class CProjectScriptWrapper;
 class QJSEngine;
@@ -44,6 +45,9 @@ struct SResource : public ISerializable, public std::enable_shared_from_this<SRe
   QUrl                      m_sPath;
   QUrl                      m_sSource;
   EResourceType             m_type;
+
+  // internal variable/not serialized: currently only used for fonts
+  qint32                    m_iLoadedId;
 
   QJsonObject ToJsonObject() override;
   void FromJsonObject(const QJsonObject& json) override;
@@ -75,7 +79,8 @@ public:
     Sound    = EResourceType::eSound,
     Other    = EResourceType::eOther,
     Script   = EResourceType::eScript,
-    Database = EResourceType::eDatabase
+    Database = EResourceType::eDatabase,
+    Font     = EResourceType::eFont
   };
   Q_ENUM(ResourceType)
 
@@ -130,6 +135,7 @@ struct SResourceFormats
   static QStringList AudioFormats();
   static QStringList ArchiveFormats();
   static QStringList DatabaseFormats();
+  static QStringList FontFormats();
   static QStringList ImageFormats();
   static QStringList OtherFormats();
   static QStringList ScriptFormats();

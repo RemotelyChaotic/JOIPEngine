@@ -78,6 +78,11 @@ namespace  {
             sResource = spDbManager->AddResource(spCurrentProject, url, EResourceType::eDatabase);
             bAddedFiles = true;
           }
+          else if (SResourceFormats::FontFormats().contains(sEnding))
+          {
+            sResource = spDbManager->AddResource(spCurrentProject, url, EResourceType::eFont);
+            bAddedFiles = true;
+          }
           else if (SResourceFormats::ArchiveFormats().contains(sEnding))
           {
             if (spDbManager->AddResourceArchive(spCurrentProject, url))
@@ -88,6 +93,7 @@ namespace  {
                                           SResourceFormats::ImageFormats() <<
                                           SResourceFormats::VideoFormats() <<
                                           SResourceFormats::AudioFormats() <<
+                                          SResourceFormats::FontFormats() <<
                                           SResourceFormats::OtherFormats() <<
                                           SResourceFormats::ScriptFormats() <<
                                           SResourceFormats::DatabaseFormats(),

@@ -27,15 +27,17 @@ private:
   QImage RequestImage(tspProject spProject,
                       spResource spResource,
                       std::shared_ptr<CDatabaseManager> spDbManager,
+                      const QString& sResourceName,
+                      const QUrl& sResourcePath,
                       QSize* pSize, const QSize& requestedSize,
-                      bool bLoadedBefore,
-                      QReadLocker& locker);
+                      bool bLoadedBefore);
   QImage LoadImage(const QString& sPath);
   QImage RequestMovieFrame(tspProject spProject,
                            spResource spResource,
+                           const QString& sResourceName,
+                           const QUrl& sResourcePath,
                            QSize* pSize, const QSize& requestedSize,
-                           bool bLoadedBefore,
-                           QReadLocker& locker);
+                           bool bLoadedBefore);
 
   std::weak_ptr<CDatabaseManager>            m_wpDatabase;
 };

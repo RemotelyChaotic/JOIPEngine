@@ -19,7 +19,11 @@ namespace resource_item
 
   const qint32 c_iNumColumns    = 3;
 
+  // not shown
   const qint32 c_iColumnToolTip = 4;
+  const qint32 c_iColumnLoadedID= 5;
+
+  const qint32 c_iNumItems      = 6;
 }
 
 class CResourceTreeItem

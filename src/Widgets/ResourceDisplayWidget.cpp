@@ -118,11 +118,11 @@ void CResourceDisplayWidget::LoadResource(tspResource spResource)
         m_iLoadState = ELoadState::eFinished;
         break;
       }
-      case EResourceType::eOther:
+      default:
       {
-        break;
-      }
-      default: break;
+        m_spUi->pStackedWidget->setCurrentIndex(EResourceDisplayType::eError);
+        m_iLoadState = ELoadState::eError;
+      } break;
     }
   }
   // if offline mode is on, we don't want to use web content
@@ -440,10 +440,6 @@ void CResourceDisplayWidget::SlotLoadFinished()
             m_iLoadState = ELoadState::eError;
             m_spUi->pStackedWidget->setCurrentIndex(EResourceDisplayType::eError);
           }
-          break;
-        }
-        case EResourceType::eOther:
-        {
           break;
         }
         default: break;

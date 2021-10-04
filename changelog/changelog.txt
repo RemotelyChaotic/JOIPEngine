@@ -119,6 +119,8 @@ New Features:
 - Hotload for styles implemented for developping new application styles.
 - Resource Viewer has an alternate Explorer View and can display Tree and 
   Explorer View next to each other.
+- Added support for Font type Resources. Fonts are automatically loaded on loading
+  a JOI-Project and can be used in 'font-family' attributes in the PlayerTextBox.
 
 Changes:
 - JOIP-Engine uses PhysFS to allow restricted acces to files only, making it

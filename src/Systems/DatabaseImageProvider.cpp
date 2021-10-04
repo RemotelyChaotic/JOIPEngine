@@ -39,15 +39,21 @@ QImage CDatabaseImageProvider::requestImage(const QString& id, QSize* pSize,
       if (nullptr != spResource)
       {
         QReadLocker locker(&spResource->m_rwLock);
+        const QString sResourceName = spResource->m_sName;
+        const QUrl sResourcePath = spResource->m_sPath;
         if (spResource->m_type._to_integral() == EResourceType::eImage)
         {
+          locker.unlock();
           return RequestImage(spProject, spResource, spDbManager,
-                              pSize, requestedSize, bLoadedBefore, locker);
+                              sResourceName, sResourcePath,
+                              pSize, requestedSize, bLoadedBefore);
         }
         else if (spResource->m_type._to_integral() == EResourceType::eMovie)
         {
-          return RequestMovieFrame(spProject, spResource, pSize,
-                                   requestedSize, bLoadedBefore, locker);
+          locker.unlock();
+          return RequestMovieFrame(spProject, spResource,
+                                   sResourceName, sResourcePath, pSize,
+                                   requestedSize, bLoadedBefore);
         }
       }
     }
@@ -60,16 +66,15 @@ QImage CDatabaseImageProvider::requestImage(const QString& id, QSize* pSize,
 QImage CDatabaseImageProvider::RequestImage(tspProject spProject,
                                             spResource spResource,
                                             std::shared_ptr<CDatabaseManager> spDbManager,
+                                            const QString& sResourceName,
+                                            const QUrl& sResourcePath,
                                             QSize* pSize, const QSize& requestedSize,
-                                            bool bLoadedBefore,
-                                            QReadLocker& locker)
+                                            bool bLoadedBefore)
 {
   // local file
-  if (IsLocalFile(spResource->m_sPath))
+  if (IsLocalFile(sResourcePath))
   {
-    locker.unlock();
     QString sPath = ResourceUrlToAbsolutePath(spResource);
-    locker.relock();
 
     CDatabaseManager::LoadProject(spProject);
     if (QFileInfo(sPath).exists())
@@ -87,7 +92,7 @@ QImage CDatabaseImageProvider::RequestImage(tspProject spProject,
           // unload resources again to save memory
           if (!CDatabaseManager::UnloadProject(spProject))
           {
-            qWarning() << tr("Unload of resources failed:") << spResource->m_sName;
+            qWarning() << tr("Unload of resources failed:") << sResourceName;
           }
         }
         return img.scaled(0 < requestedSize.width() ? requestedSize.width() : img.width(),
@@ -104,7 +109,7 @@ QImage CDatabaseImageProvider::RequestImage(tspProject spProject,
     QImage img;
     QEventLoop loop;
     std::shared_ptr<QNetworkAccessManager> spManager = std::make_shared<QNetworkAccessManager>();
-    QPointer<QNetworkReply> pReply = spManager->get(QNetworkRequest(spResource->m_sPath));
+    QPointer<QNetworkReply> pReply = spManager->get(QNetworkRequest(sResourcePath));
     connect(pReply, &QNetworkReply::finished,
             this, [pReply, &spDbManager, &img, &loop](){
       if(nullptr != pReply)
@@ -186,9 +191,10 @@ QImage CDatabaseImageProvider::LoadImage(const QString& sPath)
 //
 QImage CDatabaseImageProvider::RequestMovieFrame(tspProject spProject,
                                                  spResource spResource,
+                                                 const QString& sResourceName,
+                                                 const QUrl& sResourcePath,
                                                  QSize* pSize, const QSize& requestedSize,
-                                                 bool bLoadedBefore,
-                                                 QReadLocker& locker)
+                                                 bool bLoadedBefore)
 {
   std::shared_ptr<QtAV::VideoFrameExtractor> spExtractor =
       std::make_shared<QtAV::VideoFrameExtractor>();
@@ -196,11 +202,9 @@ QImage CDatabaseImageProvider::RequestMovieFrame(tspProject spProject,
 
   // local file
   bool bOk = true;
-  if (IsLocalFile(spResource->m_sPath))
+  if (IsLocalFile(sResourcePath))
   {
-    locker.unlock();
     QString sPath = ResourceUrlToAbsolutePath(spResource);
-    locker.relock();
 
     CDatabaseManager::LoadProject(spProject);
     if (QFileInfo(sPath).exists())
@@ -215,7 +219,7 @@ QImage CDatabaseImageProvider::RequestMovieFrame(tspProject spProject,
   else
   {
     CDatabaseManager::LoadProject(spProject);
-    spExtractor->setSource(spResource->m_sPath.toString());
+    spExtractor->setSource(sResourcePath.toString());
   }
 
   QImage img;
@@ -253,7 +257,7 @@ QImage CDatabaseImageProvider::RequestMovieFrame(tspProject spProject,
     // unload resources again to save memory
     if (!CDatabaseManager::UnloadProject(spProject))
     {
-      qWarning() << tr("Unload of resources failed:") << spResource->m_sName;
+      qWarning() << tr("Unload of resources failed:") << sResourceName;
     }
   }
 

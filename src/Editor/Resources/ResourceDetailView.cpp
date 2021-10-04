@@ -1,6 +1,7 @@
 #include "ResourceDetailView.h"
 #include "ResourceDetailViewFetcherThread.h"
 #include "ResourceTreeItem.h"
+#include "ResourceTreeItemModel.h"
 #include "Systems/ThreadedSystem.h"
 #include <QApplication>
 #include <QPainter>
@@ -52,6 +53,7 @@ public:
       {
         const QString sName = pModel->data(indexName).toString();
         const QVariant vType = pModel->data(indexType);
+        const qint32 iLoadedId = pModel->data(indexType, CResourceTreeItemModel::eLoadedIDRole).toInt();
         QIcon::Mode mode = opt.showDecorationSelected ? QIcon::Selected :
                                                         QIcon::Normal;
 
@@ -127,6 +129,22 @@ public:
               pStyle->drawItemText(pPainter, rectIcon, Qt::AlignCenter,
                                    opt.palette, true, "{}");
               break;
+            case EResourceType::eFont:
+            {
+              const QStringList vsFamilies = QFontDatabase::applicationFontFamilies(iLoadedId);
+              if (vsFamilies.size() > 0)
+              {
+                modedFont.setFamily(vsFamilies.first());
+                modedFont.setPointSize(opt.font.pointSize()*2);
+                pPainter->setFont(modedFont);
+              }
+              m_pView->IconFile().paint(pPainter,
+                                        rectIcon, opt.displayAlignment,
+                                        mode,
+                                        m_pView->ReadOnly() ? QIcon::Off : QIcon::On);
+              pStyle->drawItemText(pPainter, rectIcon, Qt::AlignCenter,
+                                   opt.palette, true, "Aa");
+            } break;
             case EResourceType::eOther: // fallthrough
             case EResourceType::eDatabase:
               m_pView->IconFile().paint(pPainter,

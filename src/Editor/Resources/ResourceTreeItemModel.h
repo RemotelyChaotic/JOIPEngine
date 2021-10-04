@@ -19,6 +19,12 @@ class CResourceTreeItemModel : public QAbstractItemModel
   friend class CCommandChangeResourceData;
 
 public:
+  enum ECutomRoles
+  {
+    eSearchRole = Qt::UserRole,
+    eLoadedIDRole = Qt::UserRole+1
+  };
+
   explicit CResourceTreeItemModel(QPointer<QUndoStack> pUndoStack,
                                   QObject* pParent = nullptr);
   ~CResourceTreeItemModel() override;

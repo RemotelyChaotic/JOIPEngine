@@ -109,6 +109,8 @@ private:
   bool PrepareProjectPrivate(tspProject& spProject);
   bool SerializeProjectPrivate(tspProject& spProject);
 
+  static void LoadResource(tspResource& spRes);
+  static void UnloadResource(tspResource& spRes);
   static bool MountProject(tspProject& spProject);
   static bool UnmountProject(tspProject& spProject);
 

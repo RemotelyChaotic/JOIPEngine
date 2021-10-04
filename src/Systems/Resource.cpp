@@ -16,7 +16,8 @@ SResource::SResource(EResourceType type) :
   m_sName(),
   m_sPath(),
   m_sSource(),
-  m_type(type)
+  m_type(type),
+  m_iLoadedId(-1)
 {}
 
 SResource::SResource(const SResource& other) :
@@ -25,7 +26,8 @@ SResource::SResource(const SResource& other) :
   m_sName(other.m_sName),
   m_sPath(other.m_sPath),
   m_sSource(other.m_sSource),
-  m_type(other.m_type)
+  m_type(other.m_type),
+  m_iLoadedId(other.m_iLoadedId)
 {}
 
 SResource::~SResource() {}
@@ -357,6 +359,13 @@ QStringList SResourceFormats::DatabaseFormats()
 
 //----------------------------------------------------------------------------------------
 //
+QStringList SResourceFormats::FontFormats()
+{
+  return QStringList() << "*.tff" << "*.otf" << "*.otc" << "*.ttf" << "*.ttc" << "*.pfa" << "*.pfb" << "*.bdf" << "*.cff" << "*.fnt" << "*.pcf";
+}
+
+//----------------------------------------------------------------------------------------
+//
 QStringList SResourceFormats::ImageFormats()
 {
   QList<QByteArray> imageFormats = QImageReader::supportedImageFormats();
@@ -404,11 +413,12 @@ QStringList SResourceFormats::VideoFormats()
 //
 QString SResourceFormats::JoinedFormatsForFilePicker()
 {
-  QString sFormatSelection = "Image Files (%1);;Video Files (%2);;Sound Files (%3);;Script Files (%4);;Archives (%5);;Other Files (%6)";
+  QString sFormatSelection = "Image Files (%1);;Video Files (%2);;Sound Files (%3);;Script Files (%4);;Archives (%5);;Fonts (%6);;Other Files (%7)";
   return sFormatSelection.arg(ImageFormats().join(" "))
                          .arg(VideoFormats().join(" "))
                          .arg(AudioFormats().join(" "))
                          .arg(ScriptFormats().join(" "))
                          .arg(ArchiveFormats().join(" "))
+                         .arg(FontFormats().join(" "))
                          .arg(OtherFormats().join(" "));
 }

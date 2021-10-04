@@ -141,10 +141,15 @@ QVariant CResourceTreeItemModel::data(const QModelIndex& index, int iRole, int i
     return item->Data(iColumnOverride);
   }
   // used for id to search
-  else if (Qt::UserRole == iRole)
+  else if (CResourceTreeItemModel::eSearchRole == iRole)
   {
     CResourceTreeItem* item = static_cast<CResourceTreeItem*>(index.internalPointer());
     return QString(item->Type()._to_string()) + ";" + item->Data(c_iColumnName).toString();
+  }
+  else if (CResourceTreeItemModel::eLoadedIDRole == iRole)
+  {
+    CResourceTreeItem* item = static_cast<CResourceTreeItem*>(index.internalPointer());
+    return item->Data(c_iColumnLoadedID);
   }
   else
   {
@@ -163,7 +168,7 @@ QVariant CResourceTreeItemModel::data(const QModelIndex& index, int iRole) const
     return item->Data(index.column());
   }
   // used for id to search
-  else if (Qt::UserRole == iRole)
+  else if (CResourceTreeItemModel::eSearchRole == iRole)
   {
     CResourceTreeItem* item = static_cast<CResourceTreeItem*>(index.internalPointer());
     return QString(item->Type()._to_string()) + ";" + item->Data(c_iColumnName).toString();
@@ -172,6 +177,11 @@ QVariant CResourceTreeItemModel::data(const QModelIndex& index, int iRole) const
   {
     CResourceTreeItem* item = static_cast<CResourceTreeItem*>(index.internalPointer());
     return item->Data(c_iColumnToolTip);
+  }
+  else if (CResourceTreeItemModel::eLoadedIDRole == iRole)
+  {
+    CResourceTreeItem* item = static_cast<CResourceTreeItem*>(index.internalPointer());
+    return item->Data(c_iColumnLoadedID);
   }
   else
   {
@@ -412,7 +422,7 @@ QModelIndex CResourceTreeItemModel::IndexForResource(const tspResource& spResour
   if (iResourceId != iThisId) { return QModelIndex(); }
 
   QModelIndexList indices =
-    QAbstractItemModel::match(createIndex(0, 0, m_pRootItem), Qt::UserRole,
+    QAbstractItemModel::match(createIndex(0, 0, m_pRootItem), CResourceTreeItemModel::eSearchRole,
                               QString(EResourceTreeItemType((EResourceTreeItemType::eResource))._to_string()) +
                                 ";" + sName, 1,
                               Qt::MatchStartsWith | Qt::MatchWrap | Qt::MatchRecursive);
@@ -551,7 +561,7 @@ void CResourceTreeItemModel::SlotResourceRemoved(qint32 iProjId, const QString& 
     {
 
       QModelIndexList indices =
-        QAbstractItemModel::match(createIndex(0, 0, m_pRootItem), Qt::UserRole,
+        QAbstractItemModel::match(createIndex(0, 0, m_pRootItem), CResourceTreeItemModel::eSearchRole,
                                   QString(EResourceTreeItemType((EResourceTreeItemType::eResource))._to_string()) +
                                     ";" + sName, 1,
                                   Qt::MatchStartsWith | Qt::MatchWrap | Qt::MatchRecursive);

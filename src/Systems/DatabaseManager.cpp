@@ -10,6 +10,7 @@
 #include <QDir>
 #include <QDirIterator>
 #include <QFileInfo>
+#include <QFontDatabase>
 #include <QJsonDocument>
 #include <QResource>
 
@@ -40,27 +41,45 @@ bool CDatabaseManager::LoadProject(tspProject& spProject)
 
   const QString sProjectName = PhysicalProjectName(spProject);
   QWriteLocker locker(&spProject->m_rwLock);
+  bool bLoaded = false;
   if (spProject->m_bBundled && !spProject->m_bLoaded)
   {
     spProject->m_bLoaded =
         QResource::registerResource(CApplication::Instance()->Settings()->ContentFolder() + QDir::separator() +
                                     sProjectName + c_sProjectBundleFileEnding,
                                     QDir::separator() + spProject->m_sName);
-    return spProject->m_bLoaded;
+    bLoaded = spProject->m_bLoaded;
   }
   else
   {
-    locker.unlock();
+
     if (!spProject->m_bLoaded)
     {
-      spProject->m_bLoaded = MountProject(spProject);
-      return spProject->m_bLoaded;
+      locker.unlock();
+      bool bMountOk = MountProject(spProject);
+      locker.relock();
+      spProject->m_bLoaded = bMountOk;
+      bLoaded = spProject->m_bLoaded;
     }
     else
     {
-      return true;
+      bLoaded = true;
     }
   }
+
+  // if loaded, pre-load nessessary resources
+  if (bLoaded)
+  {
+    for (auto& itRes : spProject->m_spResourcesMap)
+    {
+      tspResource& spRes = itRes.second;
+      locker.unlock();
+      LoadResource(spRes);
+      locker.relock();
+    }
+  }
+
+  return bLoaded;
 }
 
 //----------------------------------------------------------------------------------------
@@ -71,13 +90,27 @@ bool CDatabaseManager::UnloadProject(tspProject& spProject)
 
   const QString sProjectName = PhysicalProjectName(spProject);
   QWriteLocker locker(&spProject->m_rwLock);
+
+
+  // if loaded, pre-unload nessessary resources
+  if (spProject->m_bLoaded)
+  {
+    for (auto& itRes : spProject->m_spResourcesMap)
+    {
+      tspResource& spRes = itRes.second;
+      UnloadResource(spRes);
+    }
+  }
+
+
+  bool bUnloaded = true;
   if (spProject->m_bBundled && spProject->m_bLoaded)
   {
     spProject->m_bLoaded =
         !QResource::unregisterResource(CApplication::Instance()->Settings()->ContentFolder() + QDir::separator() +
                                        sProjectName + c_sProjectBundleFileEnding,
                                        QDir::separator() + spProject->m_sName);
-    return !spProject->m_bLoaded;
+    bUnloaded = !spProject->m_bLoaded;
   }
   else
   {
@@ -85,13 +118,15 @@ bool CDatabaseManager::UnloadProject(tspProject& spProject)
     if (spProject->m_bLoaded)
     {
       spProject->m_bLoaded = !UnmountProject(spProject);
-      return !spProject->m_bLoaded;
+      bUnloaded = !spProject->m_bLoaded;
     }
     else
     {
-      return true;
+      bUnloaded = true;
     }
   }
+
+  return bUnloaded;
 }
 
 //----------------------------------------------------------------------------------------
@@ -660,6 +695,11 @@ QString CDatabaseManager::AddResource(tspProject& spProj, const QUrl& sPath,
   spProj->m_spResourcesMap.insert({sFinalName, spResource});
 
   locker.unlock();
+  if (spProj->m_bLoaded)
+  {
+    LoadResource(spResource);
+  }
+
 
   for (auto fn : vfnActionsAfterAdding)
   {
@@ -682,6 +722,12 @@ void CDatabaseManager::ClearResources(tspProject& spProj)
   {
     auto it = spProj->m_spResourcesMap.begin();
     QString sName = it->first;
+
+    if (spProj->m_bLoaded)
+    {
+      UnloadResource(it->second);
+    }
+
     spProj->m_spResourcesMap.erase(it);
 
     for (tspScene& spScene : spProj->m_vspScenes)
@@ -725,6 +771,11 @@ void CDatabaseManager::RemoveResource(tspProject& spProj, const QString& sName)
   auto it = spProj->m_spResourcesMap.find(sName);
   if (it != spProj->m_spResourcesMap.end())
   {
+    if (spProj->m_bLoaded)
+    {
+      UnloadResource(it->second);
+    }
+
     spProj->m_spResourcesMap.erase(it);
     for (tspScene& spScene : spProj->m_vspScenes)
     {
@@ -776,11 +827,23 @@ void CDatabaseManager::RenameResource(tspProject& spProj, const QString& sName, 
         spProj->m_sSceneModel = sNewName;
       }
 
+      if (spProj->m_bLoaded)
+      {
+        UnloadResource(spResource);
+      }
+
       spProj->m_spResourcesMap.erase(it);
       spResource->m_rwLock.lockForWrite();
       spResource->m_sName = sNewName;
       spResource->m_rwLock.unlock();
       spProj->m_spResourcesMap.insert({sNewName, spResource});
+
+      if (spProj->m_bLoaded)
+      {
+        locker.unlock();
+        LoadResource(spResource);
+        locker.relock();
+      }
 
       // rename refs from scene
       for (tspScene& spScene : spProj->m_vspScenes)
@@ -1183,6 +1246,57 @@ bool CDatabaseManager::SerializeProjectPrivate(tspProject& spProject)
   }
 
   return bOk;
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CDatabaseManager::LoadResource(tspResource& spRes)
+{
+  if (nullptr != spRes)
+  {
+    QWriteLocker lockerRes(&spRes->m_rwLock);
+    switch(spRes->m_type)
+    {
+      case EResourceType::eFont:
+      {
+        lockerRes.unlock();
+        qint32 iId = QFontDatabase::addApplicationFont(ResourceUrlToAbsolutePath(spRes));
+        lockerRes.relock();
+        if (-1 == iId)
+        {
+          qWarning() << "Could not load font: " << spRes->m_sName;
+        }
+        spRes->m_iLoadedId = iId;
+      } break;
+      default: break;
+    }
+  }
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CDatabaseManager::UnloadResource(tspResource& spRes)
+{
+  if (nullptr != spRes)
+  {
+    QWriteLocker lockerRes(&spRes->m_rwLock);
+    switch(spRes->m_type)
+    {
+      case EResourceType::eFont:
+      {
+        if (-1 != spRes->m_iLoadedId)
+        {
+          bool bOk = QFontDatabase::removeApplicationFont(spRes->m_iLoadedId);
+          if (!bOk)
+          {
+            qWarning() << "Could not unload font: " << spRes->m_sName;
+          }
+          spRes->m_iLoadedId = -1;
+        }
+      } break;
+      default: break;
+    }
+  }
 }
 
 //----------------------------------------------------------------------------------------
