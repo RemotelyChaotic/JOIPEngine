@@ -5,7 +5,7 @@
 #include "Editor/EditorModel.h"
 #include "Editor/EditorWidgetTypes.h"
 #include "Editor/EditorWidgets/EditorResourceDisplayWidget.h"
-//#include "Editor/Tutorial/MainScreenTutorialStateSwitchHandler.h"
+#include "Editor/Tutorial/CompactTutorialStateSwitchHandler.h"
 #include "Systems/HelpFactory.h"
 #include "Widgets/HelpOverlay.h"
 #include "Widgets/ShortcutButton.h"
@@ -15,11 +15,19 @@ namespace
 {
   const std::map<EEditorWidget, QString> m_sEditorKeyBindingMap =
   {
-    { EEditorWidget::eResourceWidget, "Resource" },
-    { EEditorWidget::eResourceDisplay, "MediaPlayer" },
-    { EEditorWidget::eProjectSettings, "Settings" },
-    { EEditorWidget::eSceneNodeWidget, "Nodes" },
-    { EEditorWidget::eSceneCodeEditorWidget, "Code" }
+    { EEditorWidget::eResourceWidget, "LeftTab_Resource" },
+    { EEditorWidget::eResourceDisplay, "LeftTab_MediaPlayer" },
+    { EEditorWidget::eProjectSettings, "LeftTab_Settings" },
+    { EEditorWidget::eSceneNodeWidget, "LeftTab_Nodes" },
+    { EEditorWidget::eSceneCodeEditorWidget, "LeftTab_Code" }
+  };
+  const std::map<EEditorWidget, QString> m_sEditorToolTipMap =
+  {
+    { EEditorWidget::eResourceWidget, "Switch to panel for resource management" },
+    { EEditorWidget::eResourceDisplay, "Switch to panel for resource and undo stack display" },
+    { EEditorWidget::eProjectSettings, "Switch to panel for Project settings" },
+    { EEditorWidget::eSceneNodeWidget, "Switch to panel for scene node configuration" },
+    { EEditorWidget::eSceneCodeEditorWidget, "Switch to panel for editing scene code" }
   };
 
   const char*   c_sEditorProperty = "Editor";
@@ -92,6 +100,26 @@ void CEditorLayoutCompact::ChangeView(qint32 iView)
     }
 
     m_iCurrentView = iEnumValue;
+    emit SignalViewChanged(m_iCurrentView);
+  }
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CEditorLayoutCompact::SetButtonVisible(qint32 iView, bool bVisible)
+{
+  QLayout* pLayout = m_spUi->pViewsButtonContainer->layout();
+  if (nullptr != pLayout)
+  {
+    for (qint32 i = 0; pLayout->count() > i; ++i)
+    {
+      QLayoutItem* pItem = pLayout->itemAt(i);
+      if (nullptr != pItem && nullptr != pItem->widget() &&
+          pItem->widget()->property(c_sEditorProperty).toInt() == iView)
+      {
+        pItem->widget()->setVisible(bVisible);
+      }
+    }
   }
 }
 
@@ -104,12 +132,15 @@ void CEditorLayoutCompact::SlotViewSwitchButtonClicked()
 
 //----------------------------------------------------------------------------------------
 //
-void CEditorLayoutCompact::InitializeImpl()
+void CEditorLayoutCompact::InitializeImpl(bool bWithTutorial)
 {
   // state switch handler
-  //m_spStateSwitchHandler =
-  //    std::make_shared<CMainScreenTutorialStateSwitchHandler>(this, GetTutorialOverlay());
-  //EditorModel()->AddTutorialStateSwitchHandler(m_spStateSwitchHandler);
+  if (bWithTutorial)
+  {
+    m_spStateSwitchHandler =
+        std::make_shared<CCompactTutorialStateSwitchHandler>(this, GetTutorialOverlay());
+    EditorModel()->AddTutorialStateSwitchHandler(m_spStateSwitchHandler);
+  }
 
   m_spUi->pActionBar->SetActionBarPosition(CEditorActionBar::eLeft);
   m_spUi->pActionBar->Initialize();
@@ -121,20 +152,22 @@ void CEditorLayoutCompact::InitializeImpl()
     Q_UNUSED(pWidget)
 
     // Key-bindings will be set later
-    if (EEditorWidget::eResourceDisplay != type._to_integral())
+    CShortcutButton* pButton = new CShortcutButton(m_spUi->pViewsButtonContainer);
+    pButton->setObjectName(type._to_string());
+    pButton->setSizePolicy(QSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed));
+    pButton->setProperty(c_sEditorProperty, type._to_integral());
+    auto it = m_sEditorToolTipMap.find(type);
+    if (m_sEditorToolTipMap.end() != it)
     {
-      CShortcutButton* pButton = new CShortcutButton(m_spUi->pViewsButtonContainer);
-      pButton->setObjectName(type._to_string());
-      pButton->setSizePolicy(QSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed));
-      pButton->setProperty(c_sEditorProperty, type._to_integral());
-      auto it = m_sEditorKeyBindingMap.find(type);
-      if (m_sEditorKeyBindingMap.end() != it)
-      {
-        pButton->SetShortcut(CApplication::Instance()->Settings()->keyBinding(it->second));
-      }
-      connect(pButton, &QPushButton::clicked, this, &CEditorLayoutCompact::SlotViewSwitchButtonClicked);
-      pLayout->addWidget(pButton);
+      pButton->setToolTip(it->second);
     }
+    it = m_sEditorKeyBindingMap.find(type);
+    if (m_sEditorKeyBindingMap.end() != it)
+    {
+      pButton->SetShortcut(CApplication::Instance()->Settings()->keyBinding(it->second));
+    }
+    connect(pButton, &QPushButton::clicked, this, &CEditorLayoutCompact::SlotViewSwitchButtonClicked);
+    pLayout->addWidget(pButton);
   });
   pLayout->addItem(new QSpacerItem(0, 20, QSizePolicy::Expanding, QSizePolicy::Fixed));
 

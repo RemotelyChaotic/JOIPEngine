@@ -427,6 +427,26 @@ QPushButton#DownloadButton {
   qproperty-icon: url(:/resources/style/img/ButtonDownload.png) off,
                   url(:/resources/style/img/ButtonDownload.png) on;
 }
+QPushButton#eResourceWidget {
+  qproperty-icon: url(:/resources/style/img/ButtonResourceWidget.png) off,
+                  url(:/resources/style/img/ButtonResourceWidget.png) on;
+}
+QPushButton#eResourceDisplay {
+  qproperty-icon: url(:/resources/style/img/ButtonResourceDisplay.png) off,
+                  url(:/resources/style/img/ButtonResourceDisplay.png) on;
+}
+QPushButton#eProjectSettings {
+  qproperty-icon: url(:/resources/style/img/ButtonProjectSettings.png) off,
+                  url(:/resources/style/img/ButtonProjectSettings.png) on;
+}
+QPushButton#eSceneNodeWidget {
+  qproperty-icon: url(:/resources/style/img/ButtonSceneNodeWidget.png) off,
+                  url(:/resources/style/img/ButtonSceneNodeWidget.png) on;
+}
+QPushButton#eSceneCodeEditorWidget {
+  qproperty-icon: url(:/resources/style/img/ButtonCode.png) off,
+                  url(:/resources/style/img/ButtonCode.png) on;
+}
 
 
 QPushButton:hover,

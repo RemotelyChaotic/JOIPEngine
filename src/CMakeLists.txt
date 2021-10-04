@@ -195,6 +195,8 @@ set(Sources
   Editor/Script/TimerSnippetOverlay.cpp 
   Editor/Script/TimerSnippetOverlay.h 
   Editor/Script/TimerSnippetOverlay.ui 
+  Editor/Tutorial/ClassicTutorialStateSwitchHandler.cpp
+  Editor/Tutorial/ClassicTutorialStateSwitchHandler.h
   Editor/Tutorial/CodeWidgetTutorialStateSwitchHandler.cpp
   Editor/Tutorial/CodeWidgetTutorialStateSwitchHandler.h
   Editor/Tutorial/CommandBackground.cpp
@@ -205,12 +207,14 @@ set(Sources
   Editor/Tutorial/CommandHighlight.h
   Editor/Tutorial/CommandText.cpp
   Editor/Tutorial/CommandText.h
+  Editor/Tutorial/CompactTutorialStateSwitchHandler.cpp
+  Editor/Tutorial/CompactTutorialStateSwitchHandler.h
   Editor/Tutorial/EditorTutorialOverlay.cpp
   Editor/Tutorial/EditorTutorialOverlay.h
   Editor/Tutorial/ITutorialStateSwitchHandler.cpp
   Editor/Tutorial/ITutorialStateSwitchHandler.h
-  Editor/Tutorial/MainScreenTutorialStateSwitchHandler.cpp
-  Editor/Tutorial/MainScreenTutorialStateSwitchHandler.h
+  Editor/Tutorial/ModernTutorialStateSwitchHandler.cpp
+  Editor/Tutorial/ModernTutorialStateSwitchHandler.h
   Editor/Tutorial/ProjectSettingsTutorialStateSwitchHandler.cpp
   Editor/Tutorial/ProjectSettingsTutorialStateSwitchHandler.h
   Editor/Tutorial/ResourceDisplayTutorialStateSwitchHandler.cpp
@@ -219,6 +223,8 @@ set(Sources
   Editor/Tutorial/ResourceTutorialStateSwitchHandler.h
   Editor/Tutorial/SceneNodeWidgetTutorialStateSwitchHandler.cpp
   Editor/Tutorial/SceneNodeWidgetTutorialStateSwitchHandler.h
+  Editor/Tutorial/TutorialStateSwitchHandlerMainBase.cpp
+  Editor/Tutorial/TutorialStateSwitchHandlerMainBase.h
   EditorScreen.cpp 
   EditorScreen.h 
   EditorScreen.ui 

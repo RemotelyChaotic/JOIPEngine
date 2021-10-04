@@ -1,88 +1,36 @@
-#include "MainScreenTutorialStateSwitchHandler.h"
-#include "CommandBackground.h"
-#include "CommandClickFilter.h"
-#include "CommandHighlight.h"
-#include "CommandText.h"
+#include "ClassicTutorialStateSwitchHandler.h"
 #include "EditorTutorialOverlay.h"
-#include "Editor/EditorMainScreen.h"
 #include "Editor/EditorLayouts/EditorLayoutClassic.h"
-#include "Systems/JSON/JsonInstructionSetParser.h"
-#include "Systems/JSON/JsonInstructionSetRunner.h"
 #include <QComboBox>
 #include <QDebug>
-#include <QFile>
+#include <QGroupBox>
 #include <QListView>
 #include <QTimer>
 
-CMainScreenTutorialStateSwitchHandler::CMainScreenTutorialStateSwitchHandler(
+CClassicTutorialStateSwitchHandler::CClassicTutorialStateSwitchHandler(
     QPointer<CEditorLayoutClassic> pParentWidget,
     QPointer<CEditorTutorialOverlay> pTutorialOverlay) :
-  QObject(nullptr),
-  ITutorialStateSwitchHandler(),
-  m_spTutorialParser(std::make_unique<CJsonInstructionSetParser>()),
-  m_spTutorialRunner(nullptr),
-  m_ParentWidget(pParentWidget),
-  m_pTutorialOverlay(pTutorialOverlay),
-  m_currentState(ETutorialState::eFinished)
+  CTutorialStateSwitchHandlerMainBase(pTutorialOverlay,
+                                      ":/resources/help/tutorial/TutorialClassic.json"),
+  m_ParentWidget(pParentWidget)
 {
   connect(m_ParentWidget->RightComboBox(), qOverload<qint32>(&QComboBox::currentIndexChanged),
-          this, &CMainScreenTutorialStateSwitchHandler::SlotRightPanelSwitched);
+          this, &CClassicTutorialStateSwitchHandler::SlotRightPanelSwitched);
   connect(pTutorialOverlay, &CEditorTutorialOverlay::SignalOverlayNextInstructionTriggered,
-          this, &CMainScreenTutorialStateSwitchHandler::SlotOverlayNextInstructionTriggered,
+          this, &CClassicTutorialStateSwitchHandler::SlotOverlayNextInstructionTriggered,
           Qt::QueuedConnection);
-
-  QFile schemaFile(":/resources/help/tutorial/TutorialScheme.json");
-  QFile tutorialFile(":/resources/help/tutorial/Tutorial.json");
-  if (schemaFile.open(QIODevice::ReadOnly) && tutorialFile.open(QIODevice::ReadOnly))
-  {
-    m_spTutorialParser->SetJsonBaseSchema(schemaFile.readAll());
-    m_spTutorialParser->RegisterInstructionSetPath("Tutorial", "/");
-
-    m_spTutorialParser->RegisterInstruction("background", std::make_shared<CCommandBackground>(m_pTutorialOverlay));
-    m_spTutorialParser->RegisterInstruction("clickFilter", std::make_shared<CCommandClickFilter>(m_pTutorialOverlay));
-    m_spTutorialParser->RegisterInstruction("highlight",  std::make_shared<CCommandHighlight>(m_pTutorialOverlay));
-    m_spTutorialParser->RegisterInstruction("text",  std::make_shared<CCommandText>(m_pTutorialOverlay));
-
-    m_spTutorialRunner =
-      m_spTutorialParser->ParseJson(tutorialFile.readAll());
-
-    if (nullptr == m_spTutorialRunner)
-    {
-      qCritical() << QT_TR_NOOP("Could not create tutorial JSON runner object.");
-    }
-  }
-  else
-  {
-    qCritical() << QT_TR_NOOP("Could not open tutorial files.");
-  }
 }
 
-CMainScreenTutorialStateSwitchHandler::~CMainScreenTutorialStateSwitchHandler()
+CClassicTutorialStateSwitchHandler::~CClassicTutorialStateSwitchHandler()
 {
 
 }
 
 //----------------------------------------------------------------------------------------
 //
-void CMainScreenTutorialStateSwitchHandler::OnResetStates()
+void CClassicTutorialStateSwitchHandler::OnStateSwitchImpl(ETutorialState newState,
+                                                           ETutorialState oldState)
 {
-  m_currentState = ETutorialState::eFinished;
-  m_pTutorialOverlay->Hide();
-}
-
-//----------------------------------------------------------------------------------------
-//
-void CMainScreenTutorialStateSwitchHandler::OnStateSwitch(ETutorialState newState,
-                                                          ETutorialState oldState)
-{
-  m_currentState = newState;
-
-  if (oldState._to_integral() == ETutorialState::eUnstarted)
-  {
-    // deleay showing a bit, so the user can see the UI pop up
-    QTimer::singleShot(500, m_pTutorialOverlay, SLOT(Show()));
-  }
-
   switch (newState)
   {
     case ETutorialState::eBeginTutorial: // fallthrough
@@ -194,31 +142,27 @@ void CMainScreenTutorialStateSwitchHandler::OnStateSwitch(ETutorialState newStat
     } break;
   default: break;
   }
-
-  // run json script for the new state
-  if (nullptr != m_spTutorialRunner)
-  {
-    m_spTutorialRunner->Run(newState._to_string());
-  }
 }
 
 //----------------------------------------------------------------------------------------
 //
-void CMainScreenTutorialStateSwitchHandler::SlotSwitchLeftPanel(qint32 iNewIndex)
+void CClassicTutorialStateSwitchHandler::SlotSwitchLeftPanel(qint32 iNewIndex)
 {
-  m_ParentWidget->LeftComboBox()->setCurrentIndex(iNewIndex);
+  qint32 iIndex = m_ParentWidget->LeftComboBox()->findData(iNewIndex);
+  m_ParentWidget->LeftComboBox()->setCurrentIndex(iIndex);
 }
 
 //----------------------------------------------------------------------------------------
 //
-void CMainScreenTutorialStateSwitchHandler::SlotSwitchRightPanel(qint32 iNewIndex)
+void CClassicTutorialStateSwitchHandler::SlotSwitchRightPanel(qint32 iNewIndex)
 {
-  m_ParentWidget->RightComboBox()->setCurrentIndex(iNewIndex);
+  qint32 iIndex = m_ParentWidget->RightComboBox()->findData(iNewIndex);
+  m_ParentWidget->RightComboBox()->setCurrentIndex(iIndex);
 }
 
 //----------------------------------------------------------------------------------------
 //
-void CMainScreenTutorialStateSwitchHandler::SlotRightPanelSwitched(qint32 iNewIndex)
+void CClassicTutorialStateSwitchHandler::SlotRightPanelSwitched(qint32 iNewIndex)
 {
   if (ETutorialState::eSwitchRightPanelToProjectSettings == m_currentState._to_integral() &&
       EEditorWidget::eProjectSettings == iNewIndex)
@@ -243,18 +187,5 @@ void CMainScreenTutorialStateSwitchHandler::SlotRightPanelSwitched(qint32 iNewIn
                                          Qt::QueuedConnection);
     assert(bOk);
     Q_UNUSED(bOk);
-  }
-}
-
-//----------------------------------------------------------------------------------------
-//
-void CMainScreenTutorialStateSwitchHandler::SlotOverlayNextInstructionTriggered()
-{
-  if (nullptr != m_spTutorialRunner)
-  {
-    if (!m_spTutorialRunner->CallNextCommand())
-    {
-      m_pTutorialOverlay->NextTutorialState();
-    }
   }
 }

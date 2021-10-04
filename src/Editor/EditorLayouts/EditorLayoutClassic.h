@@ -43,7 +43,7 @@ protected slots:
   void SlotKeyBindingsChanged();
 
 protected:
-  void InitializeImpl() override;
+  void InitializeImpl(bool bWithTutorial) override;
 
 private:
   std::shared_ptr<Ui::CEditorLayoutClassic>                   m_spUi;

@@ -27,7 +27,7 @@
         </property>
         <widget class="QWidget" name="tab">
          <attribute name="title">
-          <string>About</string>
+          <string>Credits</string>
          </attribute>
          <layout class="QVBoxLayout" name="verticalLayout_3">
           <item>
@@ -131,8 +131,8 @@
               <rect>
                <x>0</x>
                <y>0</y>
-               <width>246</width>
-               <height>119</height>
+               <width>100</width>
+               <height>30</height>
               </rect>
              </property>
              <layout class="QVBoxLayout" name="verticalLayout_4">

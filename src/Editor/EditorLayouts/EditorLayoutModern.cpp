@@ -1,7 +1,9 @@
 #include "EditorLayoutModern.h"
 #include "ui_EditorLayoutModern.h"
 #include "Editor/EditorActionBar.h"
+#include "Editor/EditorModel.h"
 #include "Editor/EditorWidgets/EditorWidgetBase.h"
+#include "Editor/Tutorial/ModernTutorialStateSwitchHandler.h"
 #include <QComboBox>
 
 CEditorLayoutModern::CEditorLayoutModern(QWidget *parent) :
@@ -48,7 +50,7 @@ void CEditorLayoutModern::ProjectLoaded(tspProject spCurrentProject, bool bModif
     pWidget->setVisible(true);
     pLayout->addWidget(pWidget);
     pWidget->OnShown();
-    pWidget->SetActionBar(m_spUi->pActionBarLeft);
+    pWidget->SetActionBar(m_spUi->pActionBarLeftBottom);
   }
 
   m_spUi->pSplitter->setSizes({ height() *3/4, height()/4 });
@@ -63,10 +65,31 @@ void CEditorLayoutModern::ProjectUnloaded()
 
 //----------------------------------------------------------------------------------------
 //
-void CEditorLayoutModern::InitializeImpl()
+QPointer<CEditorLayoutClassic> CEditorLayoutModern::TopEditor() const
 {
-  m_spUi->pTop->Initialize(m_pLayoutViewProvider, EditorModel());
+  return m_spUi->pTop;
+}
 
-  m_spUi->pActionBarLeft->SetActionBarPosition(CEditorActionBar::eLeft);
-  m_spUi->pActionBarLeft->Initialize();
+//----------------------------------------------------------------------------------------
+//
+QPointer<QWidget> CEditorLayoutModern::BottomEditor() const
+{
+  return m_spUi->pBottomPanelGroupBox;
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CEditorLayoutModern::InitializeImpl(bool bWithTutorial)
+{
+  m_spUi->pTop->Initialize(m_pLayoutViewProvider, EditorModel(), false);
+
+  if (bWithTutorial)
+  {
+    m_spStateSwitchHandler =
+        std::make_shared<CModernTutorialStateSwitchHandler>(this, GetTutorialOverlay());
+    EditorModel()->AddTutorialStateSwitchHandler(m_spStateSwitchHandler);
+  }
+
+  m_spUi->pActionBarLeftBottom->SetActionBarPosition(CEditorActionBar::eLeft);
+  m_spUi->pActionBarLeftBottom->Initialize();
 }

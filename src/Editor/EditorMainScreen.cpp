@@ -8,7 +8,7 @@
 #include "Systems/DatabaseManager.h"
 #include "Systems/Project.h"
 #include "Tutorial/EditorTutorialOverlay.h"
-#include "Tutorial/MainScreenTutorialStateSwitchHandler.h"
+#include "Tutorial/ClassicTutorialStateSwitchHandler.h"
 #include "Widgets/HelpOverlay.h"
 
 #include <QAction>
@@ -176,10 +176,10 @@ void CEditorMainScreen::InitNewProject(const QString& sNewProjectName, bool bTut
 {
   if (!m_bInitialized) { return; }
 
+  CreateLayout();
+
   m_spEditorModel->InitNewProject(sNewProjectName, bTutorial);
   m_spCurrentProject = m_spEditorModel->CurrentProject();
-
-  CreateLayout();
 
   ProjectLoaded(true);
 }
@@ -190,10 +190,10 @@ void CEditorMainScreen::LoadProject(qint32 iId)
 {
   if (!m_bInitialized) { return; }
 
+  CreateLayout();
+
   m_spEditorModel->LoadProject(iId);
   m_spCurrentProject = m_spEditorModel->CurrentProject();
-
-  CreateLayout();
 
   ProjectLoaded(false);
 }
@@ -463,7 +463,7 @@ void CEditorMainScreen::CreateLayout()
     pLayout->addWidget(m_pLayout);
   }
 
-  m_pLayout->Initialize(m_spViewProvider, m_spEditorModel.get());
+  m_pLayout->Initialize(m_spViewProvider, m_spEditorModel.get(), true);
 }
 
 //----------------------------------------------------------------------------------------

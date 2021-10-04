@@ -7,7 +7,7 @@
 #include "Editor/EditorWidgets/EditorCodeWidget.h"
 #include "Editor/EditorWidgets/EditorResourceWidget.h"
 #include "Editor/EditorWidgets/EditorResourceDisplayWidget.h"
-#include "Editor/Tutorial/MainScreenTutorialStateSwitchHandler.h"
+#include "Editor/Tutorial/ClassicTutorialStateSwitchHandler.h"
 #include "Systems/HelpFactory.h"
 #include "Widgets/HelpOverlay.h"
 #include <QAction>
@@ -328,12 +328,15 @@ void CEditorLayoutClassic::SlotKeyBindingsChanged()
 
 //----------------------------------------------------------------------------------------
 //
-void CEditorLayoutClassic::InitializeImpl()
+void CEditorLayoutClassic::InitializeImpl(bool bWithTutorial)
 {
   // state switch handler
-  m_spStateSwitchHandler =
-      std::make_shared<CMainScreenTutorialStateSwitchHandler>(this, GetTutorialOverlay());
-  EditorModel()->AddTutorialStateSwitchHandler(m_spStateSwitchHandler);
+  if (bWithTutorial)
+  {
+    m_spStateSwitchHandler =
+        std::make_shared<CClassicTutorialStateSwitchHandler>(this, GetTutorialOverlay());
+    EditorModel()->AddTutorialStateSwitchHandler(m_spStateSwitchHandler);
+  }
 
   connect(CApplication::Instance()->Settings().get(), &CSettings::keyBindingsChanged,
           this, &CEditorLayoutClassic::SlotKeyBindingsChanged);

@@ -20,12 +20,16 @@ public:
   void ProjectUnloaded() override;
 
   void ChangeView(qint32 iView);
+  void SetButtonVisible(qint32 iView, bool bVisible);
+
+signals:
+  void SignalViewChanged(qint32 iView);
 
 protected slots:
   void SlotViewSwitchButtonClicked();
 
 protected:
-  void InitializeImpl() override;
+  void InitializeImpl(bool bWithTutorial) override;
 
 private:
   std::unique_ptr<Ui::CEditorLayoutCompact> m_spUi;

@@ -13,7 +13,8 @@ CEditorLayoutBase::CEditorLayoutBase(QWidget* pParent) :
   IWidgetBaseInterface(),
   m_spStateSwitchHandler(nullptr),
   m_pLayoutViewProvider(),
-  m_pEditorModel(nullptr)
+  m_pEditorModel(nullptr),
+  m_bWithTutorial(false)
 {
 
 }
@@ -26,10 +27,12 @@ CEditorLayoutBase::~CEditorLayoutBase()
 //----------------------------------------------------------------------------------------
 //
 void CEditorLayoutBase::Initialize(std::weak_ptr<IEditorLayoutViewProvider> pLayoutViewProvider,
-                                   QPointer<CEditorModel> pEditorModel)
+                                   QPointer<CEditorModel> pEditorModel,
+                                   bool bWithTutorial)
 {
   m_pLayoutViewProvider = pLayoutViewProvider;
   m_pEditorModel = pEditorModel;
+  m_bWithTutorial = bWithTutorial;
   Initialize();
 }
 
@@ -131,6 +134,6 @@ void CEditorLayoutBase::VisitWidgets(
 void CEditorLayoutBase::Initialize()
 {
   SetInitialized(false);
-  InitializeImpl();
+  InitializeImpl(m_bWithTutorial);
   SetInitialized(true);
 }

@@ -23,7 +23,8 @@ public:
   ~CEditorLayoutBase() override;
 
   void Initialize(std::weak_ptr<IEditorLayoutViewProvider> pLayoutViewProvider,
-                  QPointer<CEditorModel> pEditorModel);
+                  QPointer<CEditorModel> pEditorModel,
+                  bool bWithTutorial);
 
   virtual void ProjectLoaded(tspProject spCurrentProject, bool bModified) = 0;
   virtual void ProjectUnloaded() = 0;
@@ -36,7 +37,7 @@ protected:
   QPointer<CEditorWidgetBase> GetWidget(EEditorWidget widget) const;
   void VisitWidgets(const std::function<void(QPointer<CEditorWidgetBase>, EEditorWidget)>& fnVisitor);
 
-  virtual void InitializeImpl() = 0;
+  virtual void InitializeImpl(bool bWithTutorial) = 0;
 
   std::shared_ptr<ITutorialStateSwitchHandler>  m_spStateSwitchHandler;
   std::weak_ptr<IEditorLayoutViewProvider>      m_pLayoutViewProvider;
@@ -44,6 +45,8 @@ protected:
 
 private:
   void Initialize() override;
+
+  bool                                          m_bWithTutorial;
 };
 
 #endif // IEDITORLAYOUT_H

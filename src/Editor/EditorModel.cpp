@@ -473,8 +473,10 @@ void CEditorModel::SaveProject()
     if (m_spCurrentProject->m_sSceneModel.isNull() ||
         m_spCurrentProject->m_sSceneModel.isEmpty())
     {
+      projectLocker.unlock();
       spDbManager->AddResource(m_spCurrentProject, ResourceUrlFromLocalFile(joip_resource::c_sSceneModelFile),
                                EResourceType::eOther, joip_resource::c_sSceneModelFile);
+      projectLocker.relock();
       m_spCurrentProject->m_sSceneModel = joip_resource::c_sSceneModelFile;
     }
 

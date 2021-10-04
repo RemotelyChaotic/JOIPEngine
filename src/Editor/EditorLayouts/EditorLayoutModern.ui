@@ -39,7 +39,7 @@
        </sizepolicy>
       </property>
      </widget>
-     <widget class="QGroupBox" name="groupBox">
+     <widget class="QGroupBox" name="pBottomPanelGroupBox">
       <property name="sizePolicy">
        <sizepolicy hsizetype="Preferred" vsizetype="Ignored">
         <horstretch>0</horstretch>
@@ -60,7 +60,7 @@
         <number>0</number>
        </property>
        <item>
-        <widget class="CEditorActionBar" name="pActionBarLeft" native="true">
+        <widget class="CEditorActionBar" name="pActionBarLeftBottom" native="true">
          <property name="sizePolicy">
           <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
            <horstretch>0</horstretch>

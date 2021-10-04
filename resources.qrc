@@ -104,7 +104,6 @@
         <file>resources/help/editor/images/addmetronome_dialog_general.png</file>
         <file>resources/style/style_default.css</file>
         <file>resources/data/credits.txt</file>
-        <file>resources/help/tutorial/Tutorial.json</file>
         <file>resources/help/settings/pausewheninactive_setting_help.html</file>
         <file>resources/help/tutorial/DemoSceneModel.flow</file>
         <file>resources/help/tutorial/TutorialScheme.json</file>
@@ -191,6 +190,9 @@
         <file>resources/style/img/FolderIcon.png</file>
         <file>resources/help/editor/cdup_button_help.html</file>
         <file>resources/help/editor/changetotreefolderview_button_help.html</file>
+        <file>resources/help/tutorial/TutorialClassic.json</file>
+        <file>resources/help/tutorial/TutorialCompact.json</file>
+        <file>resources/help/tutorial/TutorialModern.json</file>
     </qresource>
     <qresource prefix="/qml">
         <file>resources/qml/ProjectCardSelection.qml</file>
