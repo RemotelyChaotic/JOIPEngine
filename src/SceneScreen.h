@@ -17,7 +17,7 @@ class CSceneScreen : public QWidget, public IAppStateScreen
 
 public:
   explicit CSceneScreen(const std::shared_ptr<CWindowContext>& spWindowContext,
-                                 QWidget* pParent = nullptr);
+                        QWidget* pParent = nullptr);
   ~CSceneScreen() override;
 
   void Initialize() override;

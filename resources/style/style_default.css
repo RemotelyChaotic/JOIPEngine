@@ -29,10 +29,8 @@ QTreeView::indicator,
 QRadioButton::indicator,
 QGroupBox::indicator,
 QCheckBox::indicator {
-  min-height: 18px;
-  min-width: 18px;
-  max-height: 18px;
-  max-width: 18px;
+  width: 18px;
+  height: 18px;
 }
 
 QTreeView::indicator::unchecked,
@@ -110,6 +108,7 @@ CResourceModelView>QTabWidget::pane {
 }
 
 QGroupBox::title {
+  color: white;
   subcontrol-origin: margin;
   subcontrol-position: top center; /* position at the top center */
   padding: 0 3px;
@@ -249,7 +248,7 @@ CEditorSearchBar>QPushButton {
   qproperty-iconSize: 24px;
 }
 
-CHelpButtonOverlay>CShortcutButton {
+COverlayButton>CShortcutButton {
   min-width: 64px;
   min-height: 48px;
   max-width: 64px;
@@ -423,6 +422,10 @@ QPushButton#ExplorerViewButton {
 QPushButton#CdUpButton {
   qproperty-icon: url(:/resources/style/img/ButtonDotDot.png) off,
                   url(:/resources/style/img/ButtonDotDot.png) on;
+}
+QPushButton#DownloadButton {
+  qproperty-icon: url(:/resources/style/img/ButtonDownload.png) off,
+                  url(:/resources/style/img/ButtonDownload.png) on;
 }
 
 
@@ -856,7 +859,8 @@ COverlayBase {
   border-radius: 10px;
   padding: 5px;
 }
-COverlayBase#HelpButtonOverlay {
+COverlayBase#HelpButtonOverlay,
+COverlayBase#DownloadButtonOverlay {
   color: transparent;
   background-color: transparent;
   border: none;

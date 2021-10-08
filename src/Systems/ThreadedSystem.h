@@ -6,6 +6,7 @@
 #include <QThread>
 #include <atomic>
 #include <functional>
+#include <optional>
 #include <memory>
 #include <type_traits>
 
@@ -44,10 +45,10 @@ public:
   std::shared_ptr<CSystemBase> Get() { return m_spSystem; }
 
   template<typename T,
-           typename = std::enable_if<std::is_base_of<CSystemBase, T>::value>>
-  void RegisterObject()
+           typename ...ARG>
+  void RegisterObject(ARG... args)
   {
-    m_spSystem = std::shared_ptr<T>(new T, [](T*){});
+    m_spSystem = std::shared_ptr<T>(new T(args...), [](T*){});
     m_spSystem->moveToThread(m_pThread.data());
 
     connect(m_pThread.data(), &QThread::started, m_spSystem.get(), &CSystemBase::Initialize);

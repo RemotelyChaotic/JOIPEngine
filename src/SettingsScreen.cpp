@@ -3,6 +3,7 @@
 #include "Settings.h"
 #include "Style.h"
 #include "WindowContext.h"
+#include "Systems/DLJobs/DownloadJobRegistry.h"
 #include "Systems/HelpFactory.h"
 #include "Widgets/HelpOverlay.h"
 #include "ui_SettingsScreen.h"
@@ -119,6 +120,21 @@ void CSettingsScreen::Initialize()
     m_spUi->pEditorLayoutComboBox->addItem(it->second, static_cast<qint32>(it->first));
   }
 
+  // Dynamically create job settings. The jobs define the behavior of these.
+  for (const auto& itJob : CDownloadJobFactory::Instance().GetHostSettingMap())
+  {
+    QWidget* pWidget = CDownloadJobFactory::Instance().GetJobWidget(m_spUi->pAdvancedContent,
+                                                                    itJob.second.m_sClassType);
+    if (nullptr != pWidget)
+    {
+      QVBoxLayout* pLayout = dynamic_cast<QVBoxLayout*>(m_spUi->pAdvancedContent->layout());
+      if (nullptr != pLayout)
+      {
+        pLayout->insertWidget(pLayout->count()-1, pWidget);
+      }
+    }
+  }
+
   m_bInitialized = true;
 }
 
@@ -126,6 +142,8 @@ void CSettingsScreen::Initialize()
 //
 void CSettingsScreen::Load()
 {
+  emit m_spWindowContext->SignalSetDownloadButtonVisible(false);
+
   qint32 iThisScreen = QApplication::desktop()->screenNumber(this);
   QScreen* pThisScreen = QApplication::screens()[iThisScreen];
   assert(nullptr != pThisScreen);

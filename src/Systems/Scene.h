@@ -3,7 +3,7 @@
 
 #include "ISerializable.h"
 #include "Lockable.h"
-#include <enum.h>
+#include "DatabaseInterface/SceneData.h"
 #include <QJSEngine>
 #include <QObject>
 #include <QPointer>
@@ -11,27 +11,20 @@
 #include <memory>
 #include <set>
 
-BETTER_ENUM(ESceneTransitionType, qint32,
-            eRandom = 0,
-            eSelection = 1);
-
 class CProjectScriptWrapper;
 class CResourceScriptWrapper;
 class QJSEngine;
 struct SProject;
 typedef std::set<QString>        tvsResourceRefs;
 
-struct SScene : public ISerializable
+struct SScene : public ISerializable, public SSceneData
 {
   SScene();
   SScene(const SScene& other);
   ~SScene() override;
 
-  std::shared_ptr<SProject> m_spParent;
   mutable QReadWriteLock    m_rwLock;
-  qint32                    m_iId;
-  QString                   m_sName;
-  QString                   m_sScript;
+  std::shared_ptr<SProject> m_spParent;
   tvsResourceRefs           m_vsResourceRefs;
 
   QJsonObject ToJsonObject() override;

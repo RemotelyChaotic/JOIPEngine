@@ -2,12 +2,12 @@
 #define PROJECT_H
 
 #include "ISerializable.h"
+#include "DatabaseInterface/ProjectData.h"
 #include "Enums.h"
 #include "Kink.h"
 #include "Lockable.h"
 #include "Resource.h"
 #include "Scene.h"
-#include "SVersion.h"
 #include <QObject>
 #include <QPointer>
 #include <QSharedPointer>
@@ -16,30 +16,14 @@
 
 class QJSEngine;
 
-struct SProject : public ISerializable, std::enable_shared_from_this<SProject>
+struct SProject : public ISerializable, std::enable_shared_from_this<SProject>,
+                  public SProjectData
 {
   SProject();
   SProject(const SProject& other);
   ~SProject() override;
 
   mutable QReadWriteLock    m_rwLock;
-  qint32                    m_iId;
-  SVersion                  m_iVersion;
-  SVersion                  m_iTargetVersion;
-  QString                   m_sName;
-  QString                   m_sFolderName;
-  QString                   m_sDescribtion;
-  QString                   m_sTitleCard;
-  QString                   m_sMap;
-  QString                   m_sSceneModel;
-  QString                   m_sPlayerLayout;
-  ETutorialState            m_tutorialState;
-  qint32                    m_iNumberOfSoundEmitters;
-  bool                      m_bUsesWeb;
-  bool                      m_bNeedsCodecs;
-  bool                      m_bBundled;
-  bool                      m_bReadOnly;
-  bool                      m_bLoaded;
   QStringList               m_vsKinks;
   tvspScene                 m_vspScenes;
   tspResourceMap            m_spResourcesMap;
@@ -62,26 +46,35 @@ class CProjectScriptWrapper : public QObject, public CLockable
   Q_OBJECT
   Q_DISABLE_COPY(CProjectScriptWrapper)
   CProjectScriptWrapper() = delete;
-  Q_PROPERTY(qint32  id                READ getId                CONSTANT)
-  Q_PROPERTY(qint32  version           READ getVersion           CONSTANT)
-  Q_PROPERTY(QString versionText       READ getVersionText       CONSTANT)
-  Q_PROPERTY(qint32  targetVersion     READ getTargetVersion     CONSTANT)
-  Q_PROPERTY(QString targetVersionText READ getTargetVersionText CONSTANT)
-  Q_PROPERTY(QString name              READ getName              CONSTANT)
-  Q_PROPERTY(QString folderName        READ getFolderName        CONSTANT)
-  Q_PROPERTY(QString describtion       READ getDescribtion       CONSTANT)
-  Q_PROPERTY(QString titleCard         READ getTitleCard         CONSTANT)
-  Q_PROPERTY(QString map               READ getMap               CONSTANT)
-  Q_PROPERTY(QString sceneModel        READ getSceneModel        CONSTANT)
-  Q_PROPERTY(QString playerLayout      READ getPlayerLayout      CONSTANT)
-  Q_PROPERTY(qint32  numberOfSoundEmitters READ getNumberOfSoundEmitters CONSTANT)
-  Q_PROPERTY(bool    isUsingWeb        READ isUsingWeb           CONSTANT)
-  Q_PROPERTY(bool    isUsingCodecs     READ isUsingCodecs        CONSTANT)
-  Q_PROPERTY(bool    isBundled         READ isBundled            CONSTANT)
-  Q_PROPERTY(bool    isReadOnly        READ isReadOnly           CONSTANT)
-  Q_PROPERTY(bool    isLoaded          READ isLoaded             CONSTANT)
+  Q_PROPERTY(qint32         id                READ getId                CONSTANT)
+  Q_PROPERTY(qint32         version           READ getVersion           CONSTANT)
+  Q_PROPERTY(QString        versionText       READ getVersionText       CONSTANT)
+  Q_PROPERTY(qint32         targetVersion     READ getTargetVersion     CONSTANT)
+  Q_PROPERTY(QString        targetVersionText READ getTargetVersionText CONSTANT)
+  Q_PROPERTY(QString        name              READ getName              CONSTANT)
+  Q_PROPERTY(QString        folderName        READ getFolderName        CONSTANT)
+  Q_PROPERTY(QString        describtion       READ getDescribtion       CONSTANT)
+  Q_PROPERTY(QString        titleCard         READ getTitleCard         CONSTANT)
+  Q_PROPERTY(QString        map               READ getMap               CONSTANT)
+  Q_PROPERTY(QString        sceneModel        READ getSceneModel        CONSTANT)
+  Q_PROPERTY(QString        playerLayout      READ getPlayerLayout      CONSTANT)
+  Q_PROPERTY(qint32         numberOfSoundEmitters READ getNumberOfSoundEmitters CONSTANT)
+  Q_PROPERTY(bool           isUsingWeb        READ isUsingWeb           CONSTANT)
+  Q_PROPERTY(bool           isUsingCodecs     READ isUsingCodecs        CONSTANT)
+  Q_PROPERTY(bool           isBundled         READ isBundled            CONSTANT)
+  Q_PROPERTY(bool           isReadOnly        READ isReadOnly           CONSTANT)
+  Q_PROPERTY(bool           isLoaded          READ isLoaded             CONSTANT)
+  Q_PROPERTY(DownLoadState  dlState           READ getDlState           CONSTANT)
 
 public:
+  enum DownLoadState
+  {
+    Unstarted         = EDownLoadState::eUnstarted,
+    DownloadRunning   = EDownLoadState::eDownloadRunning,
+    Finished          = EDownLoadState::eFinished
+  };
+  Q_ENUM(EDownLoadState)
+
   explicit CProjectScriptWrapper(QJSEngine* pEngine, const std::shared_ptr<SProject>& spProject);
   ~CProjectScriptWrapper();
 
@@ -103,6 +96,7 @@ public:
   bool isBundled();
   bool isReadOnly();
   bool isLoaded();
+  DownLoadState getDlState();
 
   Q_INVOKABLE qint32 numKinks();
   Q_INVOKABLE QStringList kinks();

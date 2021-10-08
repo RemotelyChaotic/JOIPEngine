@@ -1,6 +1,7 @@
 #ifndef PROJECTCARDSELECTIONWIDGET_H
 #define PROJECTCARDSELECTIONWIDGET_H
 
+#include "Systems/DatabaseInterface/ProjectData.h"
 #include <QPointer>
 #include <QQuickWidget>
 #include <QWidget>
@@ -25,7 +26,7 @@ public:
   ~CProjectCardSelectionWidget() override;
 
   void Initialize();
-  void LoadProjects();
+  void LoadProjects(EDownLoadStateFlags flags);
   void UnloadProjects();
   qint32 SelectedId() { return m_iSelectedProjectId; }
   void ShowWarning(const QString& sWarning);
@@ -42,7 +43,7 @@ protected slots:
   void on_pQmlWidget_statusChanged(QQuickWidget::Status);
   void on_pQmlWidget_sceneGraphError(QQuickWindow::SceneGraphError error, const QString &message);
   void SlotCardClicked(int iProjId);
-  void SlotLoadProjectsPrivate();
+  void SlotLoadProjectsPrivate(EDownLoadStateFlags flags);
   void SlotOverlayOpened();
   void SlotOverlayClosed();
   void SlotResizeDone();

@@ -18,6 +18,7 @@ namespace {
     "Save",
     "Export",
     "Help",
+    "Download",
     "Exit",
 
     "Answer_1",
@@ -106,6 +107,7 @@ CSettings::CSettings(QObject* pParent) :
       { "Save",       QKeySequence(QKeySequence::Save)               },
       { "Export",     QKeySequence(Qt::CTRL + Qt::SHIFT + Qt::Key_S) },
       { "Help",       QKeySequence(Qt::Key_H)                        },
+      { "Download",   QKeySequence(Qt::Key_D)                        },
       { "Exit",       QKeySequence(Qt::Key_Escape)                   },
 
       { "Answer_1",   QKeySequence(Qt::Key_1)            },
@@ -183,6 +185,30 @@ CSettings::CSettings(QObject* pParent) :
 CSettings::~CSettings()
 {
 
+}
+
+//----------------------------------------------------------------------------------------
+//
+bool CSettings::HasRaw(const QString& sSetting)
+{
+  QMutexLocker locker(&m_settingsMutex);
+  return m_spSettings->contains(sSetting);
+}
+
+//----------------------------------------------------------------------------------------
+//
+QVariant CSettings::ReadRaw(const QString& sSetting, const QVariant& sDefaultValue)
+{
+  QMutexLocker locker(&m_settingsMutex);
+  return m_spSettings->value(sSetting, sDefaultValue);
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CSettings::WriteRaw(const QString& sSetting, const QVariant& value)
+{
+  QMutexLocker locker(&m_settingsMutex);
+  m_spSettings->setValue(sSetting, value);
 }
 
 //----------------------------------------------------------------------------------------

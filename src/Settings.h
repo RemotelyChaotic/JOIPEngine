@@ -57,6 +57,10 @@ public:
   explicit CSettings(QObject* pParent = nullptr);
   ~CSettings() override;
 
+  bool HasRaw(const QString& sSetting);
+  QVariant ReadRaw(const QString& sSetting, const QVariant& sDefaultValue);
+  void WriteRaw(const QString& sSetting, const QVariant& value);
+
   void SetContentFolder(const QString& sPath);
   QString ContentFolder();
   void SetFont(const QString& sFont);

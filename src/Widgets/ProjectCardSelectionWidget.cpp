@@ -29,6 +29,8 @@ CProjectCardSelectionWidget::CProjectCardSelectionWidget(QWidget* pParent) :
   m_iSelectedProjectId(-1),
   m_bLoadedQml(false)
 {
+  qRegisterMetaType<EDownLoadStateFlags>();
+
   m_spUi->setupUi(this);
   Initialize();
 }
@@ -68,19 +70,20 @@ void CProjectCardSelectionWidget::Initialize()
 
 //----------------------------------------------------------------------------------------
 //
-void CProjectCardSelectionWidget::LoadProjects()
+void CProjectCardSelectionWidget::LoadProjects(EDownLoadStateFlags flags)
 {
   m_iSelectedProjectId = -1;
 
   if (!IsLoaded())
   {
     // load everything directly
-    SlotLoadProjectsPrivate();
+    SlotLoadProjectsPrivate(flags);
   }
   else
   {
     // not unloaded yet, queue loading after everything is unloaded
-    bool bOk = QMetaObject::invokeMethod(this, "SlotLoadProjectsPrivate", Qt::QueuedConnection);
+    bool bOk = QMetaObject::invokeMethod(this, "SlotLoadProjectsPrivate", Qt::QueuedConnection,
+                                         Q_ARG(EDownLoadStateFlags, flags));
     assert(bOk);
     Q_UNUSED(bOk);
   }
@@ -189,7 +192,7 @@ void CProjectCardSelectionWidget::SlotCardClicked(int iProjId)
 
 //----------------------------------------------------------------------------------------
 //
-void CProjectCardSelectionWidget::SlotLoadProjectsPrivate()
+void CProjectCardSelectionWidget::SlotLoadProjectsPrivate(EDownLoadStateFlags flags)
 {
   m_spUi->pQmlWidget->setSource(QUrl("qrc:/qml/resources/qml/ProjectCardSelection.qml"));
 
@@ -210,16 +213,21 @@ void CProjectCardSelectionWidget::SlotLoadProjectsPrivate()
       tspProject spProject = spDbManager->FindProject(*it);
       if (nullptr != spProject)
       {
+        bool bDisplay = true;
         if (-1 == m_iSelectedProjectId)
         {
           QReadLocker locker(&spProject->m_rwLock);
           m_iSelectedProjectId = spProject->m_iId;
+          bDisplay = flags & spProject->m_dlState;
         }
 
-        CProjectScriptWrapper* pValue = new CProjectScriptWrapper(pEngine, spProject);
-        m_spUi->pQmlWidget->rootObject()->setProperty("currentlyAddedProject", QVariant::fromValue(pValue));
-        QMetaObject::invokeMethod(pRootObject, "onAddProject");
-        m_vpProjects.push_back(pValue);
+        if (bDisplay)
+        {
+          CProjectScriptWrapper* pValue = new CProjectScriptWrapper(pEngine, spProject);
+          m_spUi->pQmlWidget->rootObject()->setProperty("currentlyAddedProject", QVariant::fromValue(pValue));
+          QMetaObject::invokeMethod(pRootObject, "onAddProject");
+          m_vpProjects.push_back(pValue);
+        }
       }
     }
   }

@@ -15,48 +15,17 @@ namespace  {
 //----------------------------------------------------------------------------------------
 //
 SProject::SProject() :
+  SProjectData(),
   m_rwLock(QReadWriteLock::Recursive),
-  m_iId(),
-  m_iVersion(SVersion(1, 0, 0)),
-  m_iTargetVersion(SVersion(VERSION_XYZ)),
-  m_sName(),
-  m_sFolderName(),
-  m_sDescribtion(),
-  m_sTitleCard(),
-  m_sMap(),
-  m_sSceneModel(),
-  m_sPlayerLayout(),
-  m_tutorialState(ETutorialState::eFinished),
-  m_iNumberOfSoundEmitters(5),
-  m_bUsesWeb(false),
-  m_bNeedsCodecs(false),
-  m_bBundled(false),
-  m_bReadOnly(false),
-  m_bLoaded(false),
   m_vsKinks(),
   m_vspScenes(),
   m_spResourcesMap(),
   m_vsMountPoints()
-{}
+{
+}
 SProject::SProject(const SProject& other) :
+  SProjectData(other),
   m_rwLock(QReadWriteLock::Recursive),
-  m_iId(other.m_iId),
-  m_iVersion(other.m_iVersion),
-  m_iTargetVersion(other.m_iTargetVersion),
-  m_sName(other.m_sName),
-  m_sFolderName(other.m_sFolderName),
-  m_sDescribtion(other.m_sDescribtion),
-  m_sTitleCard(other.m_sTitleCard),
-  m_sMap(other.m_sMap),
-  m_sSceneModel(other.m_sSceneModel),
-  m_sPlayerLayout(other.m_sPlayerLayout),
-  m_tutorialState(other.m_tutorialState),
-  m_iNumberOfSoundEmitters(other.m_iNumberOfSoundEmitters),
-  m_bUsesWeb(other.m_bUsesWeb),
-  m_bNeedsCodecs(other.m_bNeedsCodecs),
-  m_bBundled(other.m_bBundled),
-  m_bReadOnly(other.m_bReadOnly),
-  m_bLoaded(other.m_bLoaded),
   m_vsKinks(other.m_vsKinks),
   m_vspScenes(other.m_vspScenes),
   m_spResourcesMap(other.m_spResourcesMap),
@@ -107,7 +76,8 @@ QJsonObject SProject::ToJsonObject()
     { "vsKinks", kinks },
     { "vspScenes", scenes },
     { "vspResources", resources },
-    { "m_vsMountPoints", mountPoints },
+    { "vsMountPoints", mountPoints },
+    { "dlState", m_dlState._to_integral() },
   };
 }
 
@@ -214,7 +184,7 @@ void SProject::FromJsonObject(const QJsonObject& json)
       m_spResourcesMap.insert({spResource->m_sName, spResource});
     }
   }
-  it = json.find("m_vsMountPoints");
+  it = json.find("vsMountPoints");
   m_vsMountPoints.clear();
   if (it != json.end())
   {
@@ -223,6 +193,11 @@ void SProject::FromJsonObject(const QJsonObject& json)
       QString sMountPoint = val.toString();
       m_vsMountPoints.push_back(sMountPoint);
     }
+  }
+  it = json.find("dlState");
+  if (it != json.end())
+  {
+    m_dlState = EDownLoadState::_from_integral(it.value().toInt());
   }
 }
 
@@ -384,6 +359,14 @@ bool CProjectScriptWrapper::isLoaded()
 {
   QReadLocker locker(&m_spData->m_rwLock);
   return m_spData->m_bLoaded;
+}
+
+//----------------------------------------------------------------------------------------
+//
+CProjectScriptWrapper::DownLoadState CProjectScriptWrapper::getDlState()
+{
+  QReadLocker locker(&m_spData->m_rwLock);
+  return static_cast<DownLoadState>(m_spData->m_dlState._to_integral());
 }
 
 //----------------------------------------------------------------------------------------

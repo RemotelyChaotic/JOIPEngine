@@ -6,19 +6,15 @@
 #include <cassert>
 
 SScene::SScene() :
-  m_spParent(nullptr),
+  SSceneData(),
   m_rwLock(QReadWriteLock::Recursive),
-  m_iId(),
-  m_sName(),
-  m_sScript(),
+  m_spParent(nullptr),
   m_vsResourceRefs()
 {}
 SScene::SScene(const SScene& other) :
-  m_spParent(other.m_spParent),
+  SSceneData(other),
   m_rwLock(QReadWriteLock::Recursive),
-  m_iId(other.m_iId),
-  m_sName(other.m_sName),
-  m_sScript(other.m_sScript),
+  m_spParent(other.m_spParent),
   m_vsResourceRefs(other.m_vsResourceRefs)
 {}
 

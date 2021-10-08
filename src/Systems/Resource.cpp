@@ -11,22 +11,15 @@
 //----------------------------------------------------------------------------------------
 //
 SResource::SResource(EResourceType type) :
-  m_spParent(nullptr),
+  SResourceData(type),
   m_rwLock(QReadWriteLock::Recursive),
-  m_sName(),
-  m_sPath(),
-  m_sSource(),
-  m_type(type),
-  m_iLoadedId(-1)
+  m_spParent()
 {}
 
 SResource::SResource(const SResource& other) :
-  m_spParent(other.m_spParent),
+  SResourceData(other),
   m_rwLock(QReadWriteLock::Recursive),
-  m_sName(other.m_sName),
-  m_sPath(other.m_sPath),
-  m_sSource(other.m_sSource),
-  m_type(other.m_type),
+  m_spParent(other.m_spParent),
   m_iLoadedId(other.m_iLoadedId)
 {}
 

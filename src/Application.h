@@ -10,6 +10,7 @@
 
 class CHelpFactory;
 class COverlayManager;
+class CProjectDownloader;
 class CThreadedSystem;
 class CUISoundEmitter;
 class QQmlEngine;
@@ -67,5 +68,6 @@ private:
 template<> std::weak_ptr<CDatabaseManager> CApplication::System<CDatabaseManager>();
 template<> std::weak_ptr<CHelpFactory> CApplication::System<CHelpFactory>();
 template<> std::weak_ptr<COverlayManager> CApplication::System<COverlayManager>();
+template<> std::weak_ptr<CProjectDownloader> CApplication::System<CProjectDownloader>();
 
 #endif // CAPPLICATION_H

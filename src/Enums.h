@@ -10,10 +10,12 @@ BETTER_ENUM(EAppState, qint32,
             eSceneScreen = 1,
             eSettingsScreen = 2,
             eEditorScreen = 3,
-            eCreditsScreen = 4);
+            eCreditsScreen = 4,
+            eDownloadScreen = 5);
 
 BETTER_ENUM(ECoreSystems, qint32,
-            eDatabaseManager = 0);
+            eDatabaseManager = 0,
+            eProjectDownloader = 1);
 
 BETTER_ENUM(ELoadState, qint32,
             eUnstarted = 0,

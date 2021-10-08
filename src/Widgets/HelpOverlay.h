@@ -1,7 +1,7 @@
 #ifndef HELPOVERLAY_H
 #define HELPOVERLAY_H
 
-#include "OverlayBase.h"
+#include "OverlayButton.h"
 #include <QAction>
 #include <QPaintEvent>
 #include <QPointer>
@@ -125,7 +125,7 @@ private:
 
 //----------------------------------------------------------------------------------------
 //
-class CHelpButtonOverlay : public COverlayBase
+class CHelpButtonOverlay : public COverlayButton
 {
   Q_OBJECT
 
@@ -133,21 +133,7 @@ public:
   explicit CHelpButtonOverlay(QWidget* pParent = nullptr);
   ~CHelpButtonOverlay() override;
 
-  void Initialize();
-
-  void Climb() override;
   void Resize() override;
-
-signals:
-  void SignalButtonClicked();
-
-protected:
-  void SlotKeyBindingsChanged();
-
-private:
-  void retranslateUi(QWidget* pHelpOverlay);
-
-  QPointer<CShortcutButton> m_pButton;
 };
 
 #endif // HELPOVERLAY_H

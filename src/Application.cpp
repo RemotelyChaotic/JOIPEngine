@@ -13,6 +13,7 @@
 #include "Systems/HelpFactory.h"
 #include "Systems/OverlayManager.h"
 #include "Systems/Project.h"
+#include "Systems/ProjectDownloader.h"
 #include "Systems/Resource.h"
 #include "Systems/Scene.h"
 #include "Systems/ScriptRunner.h"
@@ -76,6 +77,13 @@ CApplication::CApplication(int& argc, char *argv[]) :
 
 CApplication::~CApplication()
 {
+  if (auto spPrjDownloader = System<CProjectDownloader>().lock())
+  {
+    spPrjDownloader->ClearQueue();
+    spPrjDownloader->StopRunningJobs();
+    spPrjDownloader->WaitForFinished();
+  }
+
   m_spOverlayManager->Deinitialize();
   m_spHelpFactory->Deinitialize();
 }
@@ -110,6 +118,19 @@ void CApplication::Initialize()
 
   // settings
   m_spSettings = std::make_shared<CSettings>();
+
+  // copy host config
+  std::vector<SDownloadJobConfig> vJobCfg;
+  for (const auto& it : CDownloadJobFactory::GetHostSettingMap())
+  {
+    if (!m_spSettings->HasRaw(it.second.m_sSettingsEntry))
+    {
+      m_spSettings->WriteRaw(it.second.m_sSettingsEntry, it.second.m_vsAllowedHosts);
+    }
+    QVariant varRet = m_spSettings->ReadRaw(it.second.m_sSettingsEntry, it.second.m_vsAllowedHosts);
+    vJobCfg.push_back({it.second.m_sClassType, it.second.m_sSettingsEntry, varRet.toStringList()});
+  }
+
   connect(m_spSettings.get(), &CSettings::fontChanged,
           this, &CApplication::MarkStyleDirty, Qt::DirectConnection);
   connect(m_spSettings.get(), &CSettings::styleChanged,
@@ -128,9 +149,11 @@ void CApplication::Initialize()
 
   // create subsystems
   m_spSystemsMap.insert({ECoreSystems::eDatabaseManager, std::make_shared<CThreadedSystem>()});
+  m_spSystemsMap.insert({ECoreSystems::eProjectDownloader, std::make_shared<CThreadedSystem>()});
 
   // init subsystems
   m_spSystemsMap[ECoreSystems::eDatabaseManager]->RegisterObject<CDatabaseManager>();
+  m_spSystemsMap[ECoreSystems::eProjectDownloader]->RegisterObject<CProjectDownloader>(vJobCfg);
 
   // qml
   RegisterQmlTypes();
@@ -161,6 +184,12 @@ template<>
 std::weak_ptr<COverlayManager> CApplication::System<COverlayManager>()
 {
   return m_spOverlayManager;
+}
+
+template<>
+std::weak_ptr<CProjectDownloader> CApplication::System<CProjectDownloader>()
+{
+  return std::static_pointer_cast<CProjectDownloader>(m_spSystemsMap[ECoreSystems::eProjectDownloader]->Get());
 }
 
 //----------------------------------------------------------------------------------------

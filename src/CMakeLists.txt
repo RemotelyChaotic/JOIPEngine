@@ -30,6 +30,9 @@ set(Sources
   CreditsScreen.ui 
   ClipboardQmlWrapper.cpp
   ClipboardQmlWrapper.h
+  DownloadScreen.cpp
+  DownloadScreen.h
+  DownloadScreen.ui
   Editor/EditorActionBar.cpp 
   Editor/EditorActionBar.h 
   Editor/EditorActionBar.ui 
@@ -258,8 +261,16 @@ set(Sources
   Style.h 
   Systems/DatabaseImageProvider.cpp 
   Systems/DatabaseImageProvider.h 
+  Systems/DatabaseInterface/ProjectData.h
+  Systems/DatabaseInterface/ResourceData.h
+  Systems/DatabaseInterface/SceneData.h
   Systems/DatabaseManager.cpp 
   Systems/DatabaseManager.h 
+  Systems/DLJobs/IDownloadJob.h
+  Systems/DLJobs/DownloadJobRegistry.h
+  Systems/DLJobs/EosDownloadJob.cpp
+  Systems/DLJobs/EosDownloadJob.h
+  Systems/DLJobs/EosDownloadJobWidget.ui
   Systems/HelpFactory.cpp 
   Systems/HelpFactory.h 
   Systems/ISerializable.h 
@@ -274,6 +285,8 @@ set(Sources
   Systems/PhysFs/PhysFsQtAVIntegration.h
   Systems/Project.cpp 
   Systems/Project.h 
+  Systems/ProjectDownloader.cpp
+  Systems/ProjectDownloader.h
   Systems/Resource.cpp 
   Systems/Resource.h 
   Systems/Scene.cpp 
@@ -320,6 +333,8 @@ set(Sources
   Widgets/ColorPicker.cpp 
   Widgets/ColorPicker.h 
   Widgets/ColorPicker.ui 
+  Widgets/DownloadButtonOverlay.cpp
+  Widgets/DownloadButtonOverlay.h
   Widgets/Editor/EditorHighlighter.cpp
   Widgets/Editor/EditorHighlighter.h
   Widgets/Editor/EditorSearchBar.cpp
@@ -336,6 +351,8 @@ set(Sources
   Widgets/MenuButton.h 
   Widgets/OverlayBase.cpp 
   Widgets/OverlayBase.h 
+  Widgets/OverlayButton.cpp
+  Widgets/OverlayButton.h
   Widgets/Player/MediaPlayer.cpp 
   Widgets/Player/MediaPlayer.h   
   Widgets/ProjectCardSelectionWidget.cpp 

@@ -1,6 +1,7 @@
 #include "MainWindow.h"
 #include "Application.h"
 #include "CreditsScreen.h"
+#include "DownloadScreen.h"
 #include "Enums.h"
 #include "EditorScreen.h"
 #include "MainScreen.h"
@@ -10,7 +11,9 @@
 #include "SettingsScreen.h"
 #include "SVersion.h"
 #include "WindowContext.h"
+#include "Systems/ProjectDownloader.h"
 #include "Widgets/BackgroundWidget.h"
+#include "Widgets/DownloadButtonOverlay.h"
 #include "Widgets/HelpOverlay.h"
 #include "ui_MainWindow.h"
 #include <QDesktopWidget>
@@ -23,6 +26,7 @@ CMainWindow::CMainWindow(QWidget* pParent) :
   m_spUi(std::make_unique<Ui::CMainWindow>()),
   m_spHelpButtonOverlay(std::make_unique<CHelpButtonOverlay>(this)),
   m_spHelpOverlay(nullptr),
+  m_spDownloadButtonOverlay(std::make_unique<CDownloadButtonOverlay>(this)),
   m_spWindowContext(std::make_shared<CWindowContext>()),
   m_pBackground(new CBackgroundWidget(this)),
   m_bInitialized(false),
@@ -40,6 +44,7 @@ CMainWindow::~CMainWindow()
 {
   m_spHelpOverlay.reset();
   m_spHelpButtonOverlay.reset();
+  m_spDownloadButtonOverlay.reset();
 }
 
 //----------------------------------------------------------------------------------------
@@ -65,6 +70,8 @@ void CMainWindow::Initialize()
    new CEditorScreen(m_spWindowContext, m_spUi->pApplicationStackWidget));
   m_spUi->pApplicationStackWidget->insertWidget(EAppState::eCreditsScreen,
    new CCreditsScreen(m_spWindowContext, m_spUi->pApplicationStackWidget));
+  m_spUi->pApplicationStackWidget->insertWidget(EAppState::eDownloadScreen,
+   new CDownloadScreen(m_spWindowContext, m_spUi->pApplicationStackWidget));
 
   ConnectSlots();
 
@@ -83,6 +90,11 @@ void CMainWindow::Initialize()
   connect(m_spHelpButtonOverlay.get(), &CHelpButtonOverlay::SignalButtonClicked,
           this, &CMainWindow::SlotHelpButtonClicked);
   m_spHelpButtonOverlay->Show();
+
+  m_spDownloadButtonOverlay->Initialize();
+  connect(m_spDownloadButtonOverlay.get(), &CHelpButtonOverlay::SignalButtonClicked,
+          this, &CMainWindow::SlotDownloadButtonClicked);
+  m_spDownloadButtonOverlay->Show();
 
   if (m_spSettings->HasOldSettingsVersion())
   {
@@ -128,12 +140,27 @@ void CMainWindow::SlotCurrentAppStateUnloadFinished()
   m_spUi->pApplicationStackWidget->setCurrentIndex(m_nextState);
 
   m_spHelpButtonOverlay->Show();
+  m_spDownloadButtonOverlay->Show();
 
   pScreen =
       dynamic_cast<IAppStateScreen*>(m_spUi->pApplicationStackWidget->currentWidget());
   if (nullptr != pScreen)
   {
     pScreen->Load();
+  }
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CMainWindow::SlotDownloadButtonClicked()
+{
+  if (m_spUi->pApplicationStackWidget->currentIndex() != EAppState::eDownloadScreen)
+  {
+    SlotChangeAppState(EAppState::eDownloadScreen);
+  }
+  else
+  {
+    SlotChangeAppState(EAppState::eMainScreen);
   }
 }
 
@@ -169,6 +196,20 @@ void CMainWindow::SlotResolutionChanged()
 
 //----------------------------------------------------------------------------------------
 //
+void CMainWindow::SlotSetDownloadButtonVisible(bool bVisible)
+{
+  if (bVisible)
+  {
+    m_spDownloadButtonOverlay->Show();
+  }
+  else
+  {
+    m_spDownloadButtonOverlay->Hide();
+  }
+}
+
+//----------------------------------------------------------------------------------------
+//
 void CMainWindow::SlotSetHelpButtonVisible(bool bVisible)
 {
   if (bVisible)
@@ -179,6 +220,41 @@ void CMainWindow::SlotSetHelpButtonVisible(bool bVisible)
   {
     m_spHelpButtonOverlay->Hide();
   }
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CMainWindow::closeEvent(QCloseEvent* pEvent)
+{
+  if (auto spPrjDownloader = CApplication::Instance()->System<CProjectDownloader>().lock())
+  {
+    if (spPrjDownloader->HasRunningJobs())
+    {
+      QPointer<CMainWindow> pThis(this);
+      QMessageBox::StandardButton resBtn =
+          QMessageBox::question(this, QString("Downloads running."),
+                                tr("Downloads are still running and will be paused.\n"
+                                   "If you quit, they will continue after re-opening the application.\n"
+                                   "Are you sure you want to quit?\n"),
+                                QMessageBox::Cancel | QMessageBox::No | QMessageBox::Yes,
+                                QMessageBox::No);
+      if (nullptr == pThis) { return; } // abort, abort window was destroyed
+      if (resBtn != QMessageBox::Yes)
+      {
+        spPrjDownloader->ClearQueue();
+        spPrjDownloader->StopRunningJobs();
+        spPrjDownloader->WaitForFinished();
+        pEvent->accept();
+        return;
+      }
+      else
+      {
+        pEvent->ignore();
+        return;
+      }
+    }
+  }
+  pEvent->accept();
 }
 
 //----------------------------------------------------------------------------------------
@@ -237,6 +313,9 @@ void CMainWindow::ConnectSlots()
 {
   connect(m_spWindowContext.get(), &CWindowContext::SignalChangeAppState,
           this, &CMainWindow::SlotChangeAppState, Qt::DirectConnection);
+
+  connect(m_spWindowContext.get(), &CWindowContext::SignalSetDownloadButtonVisible,
+          this, &CMainWindow::SlotSetDownloadButtonVisible, Qt::DirectConnection);
 
   connect(m_spWindowContext.get(), &CWindowContext::SignalSetHelpButtonVisible,
           this, &CMainWindow::SlotSetHelpButtonVisible, Qt::DirectConnection);

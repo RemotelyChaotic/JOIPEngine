@@ -694,41 +694,12 @@ void CHelpOverlay::ShowHelp(const QString sKey)
 //----------------------------------------------------------------------------------------
 //
 CHelpButtonOverlay::CHelpButtonOverlay(QWidget* pParent) :
-  COverlayBase(0, pParent)
+  COverlayButton(QStringLiteral("HelpButtonOverlay"),
+                 QStringLiteral("HelpButton"),
+                 QStringLiteral("Open help interface"),
+                 QStringLiteral("Help"), pParent)
 {
-  setObjectName(QStringLiteral("HelpButtonOverlay"));
-  QSizePolicy sizePolicyThis(QSizePolicy::Preferred, QSizePolicy::Fixed);
-  sizePolicyThis.setHorizontalStretch(0);
-  sizePolicyThis.setVerticalStretch(0);
-  sizePolicyThis.setHeightForWidth(sizePolicy().hasHeightForWidth());
-  setSizePolicy(sizePolicyThis);
-  setMinimumSize(QSize(0, 48));
-  setMaximumSize(QSize(16777215, 48));
-  setAttribute(Qt::WA_TranslucentBackground);
 
-  QVBoxLayout* pLayout = new QVBoxLayout(this);
-  pLayout->setSpacing(0);
-  pLayout->setContentsMargins(0, 0, 0, 0);
-
-  m_pButton = new CShortcutButton(this);
-  m_pButton->setObjectName(QStringLiteral("HelpButton"));
-  QSizePolicy sizePolicy2(QSizePolicy::Fixed, QSizePolicy::Fixed);
-  sizePolicy2.setHorizontalStretch(48);
-  sizePolicy2.setVerticalStretch(48);
-  sizePolicy2.setHeightForWidth(m_pButton->sizePolicy().hasHeightForWidth());
-  m_pButton->setSizePolicy(sizePolicy2);
-  m_pButton->setMinimumSize(QSize(48, 48));
-  m_pButton->setMaximumSize(QSize(48, 48));
-  m_pButton->setIconSize(QSize(48, 48));
-  m_pButton->EnableShortcutAsText(true);
-
-  auto spSettings = CApplication::Instance()->Settings();
-  connect(spSettings.get(), &CSettings::keyBindingsChanged, this, &CHelpButtonOverlay::SlotKeyBindingsChanged);
-  m_pButton->SetShortcut(spSettings->keyBinding("Help"));
-
-  pLayout->addWidget(m_pButton);
-
-  retranslateUi(this);
 }
 
 //----------------------------------------------------------------------------------------
@@ -740,39 +711,8 @@ CHelpButtonOverlay::~CHelpButtonOverlay()
 
 //----------------------------------------------------------------------------------------
 //
-void CHelpButtonOverlay::Initialize()
-{
-  connect(m_pButton, &QPushButton::clicked,
-          this, &CHelpButtonOverlay::SignalButtonClicked, Qt::UniqueConnection);
-}
-
-//----------------------------------------------------------------------------------------
-//
-void CHelpButtonOverlay::Climb()
-{
-  ClimbToTop();
-}
-
-//----------------------------------------------------------------------------------------
-//
 void CHelpButtonOverlay::Resize()
 {
   QSize parentSize = m_pTargetWidget->size();
-  move(parentSize.width() - 50 - width(), 50);
-}
-
-//----------------------------------------------------------------------------------------
-//
-void CHelpButtonOverlay::SlotKeyBindingsChanged()
-{
-  auto spSettings = CApplication::Instance()->Settings();
-  m_pButton->SetShortcut(spSettings->keyBinding("Help"));
-}
-
-//----------------------------------------------------------------------------------------
-//
-void CHelpButtonOverlay::retranslateUi(QWidget* pHelpOverlay)
-{
-  Q_UNUSED(pHelpOverlay)
-  m_pButton->setToolTip(QApplication::translate("CHelpButtonOverlay", "Open help interface", Q_NULLPTR));
+  move(parentSize.width() - 50 - sizeHint().width(), 50);
 }

@@ -2,24 +2,15 @@
 #define RESOURCE_H
 
 #include "ISerializable.h"
+#include "DatabaseInterface/ResourceData.h"
 #include "Lockable.h"
 #include <enum.h>
 #include <QJSEngine>
 #include <QObject>
 #include <QPointer>
 #include <QSharedPointer>
-#include <QUrl>
 #include <memory>
 #include <set>
-
-BETTER_ENUM(EResourceType, qint32,
-            eImage      = 0,
-            eMovie      = 1,
-            eSound      = 2,
-            eOther      = 3,
-            eScript     = 4,
-            eDatabase   = 5,
-            eFont       = 6);
 
 class CProjectScriptWrapper;
 class QJSEngine;
@@ -33,21 +24,18 @@ namespace joip_resource {
 
 //----------------------------------------------------------------------------------------
 //
-struct SResource : public ISerializable, public std::enable_shared_from_this<SResource>
+struct SResource : public ISerializable, public std::enable_shared_from_this<SResource>,
+                   public SResourceData
 {
   explicit SResource(EResourceType type = EResourceType::eOther);
   SResource(const SResource& other);
   ~SResource() override;
 
-  std::shared_ptr<SProject> m_spParent;
   mutable QReadWriteLock    m_rwLock;
-  QString                   m_sName;
-  QUrl                      m_sPath;
-  QUrl                      m_sSource;
-  EResourceType             m_type;
+  std::shared_ptr<SProject> m_spParent = nullptr;
 
   // internal variable/not serialized: currently only used for fonts
-  qint32                    m_iLoadedId;
+  qint32                    m_iLoadedId = -1;
 
   QJsonObject ToJsonObject() override;
   void FromJsonObject(const QJsonObject& json) override;
