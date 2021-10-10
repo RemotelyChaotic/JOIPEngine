@@ -218,6 +218,10 @@ void CProjectCardSelectionWidget::SlotLoadProjectsPrivate(EDownLoadStateFlags fl
         {
           QReadLocker locker(&spProject->m_rwLock);
           m_iSelectedProjectId = spProject->m_iId;
+        }
+
+        {
+          QReadLocker locker(&spProject->m_rwLock);
           bDisplay = flags & spProject->m_dlState;
         }
 
