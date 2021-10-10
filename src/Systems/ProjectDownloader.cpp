@@ -170,6 +170,7 @@ void CProjectDownloader::SlotRunNextJob()
     }
 
     m_waitForFinishCounter.release(1);
+    m_jobMutex.lock();
   }
   m_jobMutex.unlock();
 }

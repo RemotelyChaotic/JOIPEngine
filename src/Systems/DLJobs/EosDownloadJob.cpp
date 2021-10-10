@@ -70,7 +70,7 @@ QWidget* CEosDownloadJobWidgetProvider::operator()() const
 CEosDownloadJob::CEosDownloadJob(QObject* pParent) :
   QObject(pParent),
   IDownloadJob(),
-  m_spNetworkAccessManager(std::make_shared<QNetworkAccessManager>()),
+  m_spNetworkAccessManager(nullptr),
   m_iProgress(0)
 {
 }
@@ -112,6 +112,8 @@ void CEosDownloadJob::Run(const QVariantList& args)
   m_iProgress = 0;
   emit SignalStarted();
   emit SignalProgressChanged(Progress());
+
+  m_spNetworkAccessManager.reset(new QNetworkAccessManager());
 
   QString sTeaseId;
   QJsonDocument jsonScript;
