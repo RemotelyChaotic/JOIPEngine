@@ -13,6 +13,7 @@ BETTER_ENUM(EEditorCommandId, qint32,
             eRemoveFetishes,
             eChangeProjectName,
             eChangeVersion,
+            eChangeFont,
 
             eAddResource,
             eChangeCurrentResource,

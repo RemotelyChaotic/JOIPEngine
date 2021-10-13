@@ -8,6 +8,7 @@
 #include "Editor/Project/CommandChangeDescribtion.h"
 #include "Editor/Project/CommandChangeEmitterCount.h"
 #include "Editor/Project/CommandChangeFetishes.h"
+#include "Editor/Project/CommandChangeFont.h"
 #include "Editor/Project/CommandChangeProjectName.h"
 #include "Editor/Project/CommandChangeVersion.h"
 #include "Editor/Project/KinkCompleter.h"
@@ -35,6 +36,7 @@ namespace
   const QString c_sProjectVersionHelpId =   "Editor/ProjectVersion";
   const QString c_sEngineVersionHelpId =    "Editor/EngineVersion";
   const QString c_sSoundEmitterCountHelpId ="Editor/SoundEmitterCount";
+  const QString c_sProjectFontHelpId       ="Editor/ProjectFont";
   const QString c_sProjectDescribtionHelpId="Editor/ProjectDescribtion";
   const QString c_sFetishListHelpId =       "Editor/FetishList";
   const QString c_sAddFetishHelpId =        "Editor/AddFetish";
@@ -84,6 +86,8 @@ void CEditorProjectSettingsWidget::Initialize()
     wpHelpFactory->RegisterHelp(c_sEngineVersionHelpId, ":/resources/help/editor/projectsettings/engineversion_help.html");
     m_spUi->pSoundEmitterCount->setProperty(helpOverlay::c_sHelpPagePropertyName, c_sSoundEmitterCountHelpId);
     wpHelpFactory->RegisterHelp(c_sSoundEmitterCountHelpId, ":/resources/help/editor/projectsettings/number_soundemitters_help.html");
+    m_spUi->pFontComboBox->setProperty(helpOverlay::c_sHelpPagePropertyName, c_sProjectFontHelpId);
+    wpHelpFactory->RegisterHelp(c_sProjectFontHelpId, ":/resources/help/editor/projectsettings/font_help.html");
     m_spUi->pDescribtionTextEdit->setProperty(helpOverlay::c_sHelpPagePropertyName, c_sProjectDescribtionHelpId);
     wpHelpFactory->RegisterHelp(c_sProjectDescribtionHelpId, ":/resources/help/editor/projectsettings/describtion_textedit_help.html");
     m_spUi->pFetishListWidget->setProperty(helpOverlay::c_sHelpPagePropertyName, c_sFetishListHelpId);
@@ -124,6 +128,7 @@ void CEditorProjectSettingsWidget::Initialize()
   new CUndoRedoFilter(m_spUi->pProjectMinorVersion, nullptr);
   new CUndoRedoFilter(m_spUi->pProjectPatchVersion, nullptr);
   new CUndoRedoFilter(m_spUi->pFetishLineEdit, nullptr);
+  new CUndoRedoFilter(m_spUi->pFontComboBox, nullptr);
 
   auto pFilter =
       new CUndoRedoFilter(m_spUi->pDescribtionTextEdit,
@@ -184,9 +189,17 @@ void CEditorProjectSettingsWidget::LoadProject(tspProject spProject)
     m_spUi->pProjectMinorVersion->blockSignals(false);
     m_spUi->pProjectPatchVersion->blockSignals(false);
 
+    m_spUi->pSoundEmitterCount->blockSignals(true);
     m_spUi->pSoundEmitterCount->setValue(m_spCurrentProject->m_iNumberOfSoundEmitters);
     m_spUi->pSoundEmitterCount->setProperty(editor::c_sPropertyOldValue, m_spCurrentProject->m_iNumberOfSoundEmitters);
     m_spUi->pSoundEmitterCount->setEnabled(!bReadOnly);
+    m_spUi->pSoundEmitterCount->blockSignals(false);
+
+    m_spUi->pSoundEmitterCount->blockSignals(true);
+    m_spUi->pFontComboBox->setFont(m_spCurrentProject->m_sFont);
+    m_spUi->pFontComboBox->setProperty(editor::c_sPropertyOldValue, m_spCurrentProject->m_sFont);
+    m_spUi->pFontComboBox->setEnabled(!bReadOnly);
+    m_spUi->pSoundEmitterCount->blockSignals(false);
 
     m_spUi->pDescribtionTextEdit->setPlainText(m_spCurrentProject->m_sDescribtion);
     m_spUi->pDescribtionTextEdit->setReadOnly(bReadOnly);
@@ -333,6 +346,18 @@ void CEditorProjectSettingsWidget::on_pSoundEmitterCount_valueChanged(qint32 iVa
   Q_UNUSED(iValue)
 
   UndoStack()->push(new CCommandChangeEmitterCount(m_spUi->pSoundEmitterCount));
+  emit SignalProjectEdited();
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CEditorProjectSettingsWidget::on_pFontComboBox_currentFontChanged(const QFont& font)
+{
+  WIDGET_INITIALIZED_GUARD
+  if (nullptr == m_spCurrentProject) { return; }
+  Q_UNUSED(font)
+
+  UndoStack()->push(new CCommandChangeFont(m_spUi->pFontComboBox));
   emit SignalProjectEdited();
 }
 

@@ -121,6 +121,8 @@ set(Sources
   Editor/Project/CommandChangeEmitterCount.h
   Editor/Project/CommandChangeFetishes.cpp
   Editor/Project/CommandChangeFetishes.h
+  Editor/Project/CommandChangeFont.cpp
+  Editor/Project/CommandChangeFont.h
   Editor/Project/CommandChangeProjectName.cpp
   Editor/Project/CommandChangeProjectName.h
   Editor/Project/CommandChangeVersion.cpp

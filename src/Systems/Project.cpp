@@ -78,6 +78,7 @@ QJsonObject SProject::ToJsonObject()
     { "vspResources", resources },
     { "vsMountPoints", mountPoints },
     { "dlState", m_dlState._to_integral() },
+    { "sFont", m_sFont }
   };
 }
 
@@ -198,6 +199,11 @@ void SProject::FromJsonObject(const QJsonObject& json)
   if (it != json.end())
   {
     m_dlState = EDownLoadState::_from_integral(it.value().toInt());
+  }
+  it = json.find("sFont");
+  if (it != json.end())
+  {
+    m_sFont = it.value().toString();
   }
 }
 
@@ -367,6 +373,14 @@ CProjectScriptWrapper::DownLoadState CProjectScriptWrapper::getDlState()
 {
   QReadLocker locker(&m_spData->m_rwLock);
   return static_cast<DownLoadState>(m_spData->m_dlState._to_integral());
+}
+
+//----------------------------------------------------------------------------------------
+//
+QString CProjectScriptWrapper::getFont()
+{
+  QReadLocker locker(&m_spData->m_rwLock);
+  return m_spData->m_sFont;
 }
 
 //----------------------------------------------------------------------------------------

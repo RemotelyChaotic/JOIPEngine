@@ -29,7 +29,7 @@ Rectangle {
             width: textMetrics.boundingRect.width < 200 ? 200 : textMetrics.boundingRect.width
             anchors.centerIn: parent
 
-            font.family: Settings.font;
+            font.family: root.currentlyLoadedProject.font;
             font.pointSize: 14
             wrapMode: Text.WordWrap
             horizontalAlignment: Text.AlignHCenter

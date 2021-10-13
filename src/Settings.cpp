@@ -649,7 +649,7 @@ void CSettings::GenerateSettingsIfNotExists()
   if (!m_spSettings->contains(CSettings::c_sSettingFont))
   {
     bNeedsSynch = true;
-    m_spSettings->setValue(CSettings::c_sSettingFont, "Arial");
+    m_spSettings->setValue(CSettings::c_sSettingFont, "Segoe UI Emoji");
   }
 
   // check editor Layout

@@ -37,7 +37,7 @@ Rectangle {
             Text {
                 id: text
                 anchors.centerIn: parent
-                font.family: Settings.font;
+                font.family: root.currentlyLoadedProject.font
                 font.pointSize: 14
                 horizontalAlignment: Text.AlignHCenter
                 elide: Text.ElideNone

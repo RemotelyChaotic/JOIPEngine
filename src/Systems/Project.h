@@ -65,6 +65,7 @@ class CProjectScriptWrapper : public QObject, public CLockable
   Q_PROPERTY(bool           isReadOnly        READ isReadOnly           CONSTANT)
   Q_PROPERTY(bool           isLoaded          READ isLoaded             CONSTANT)
   Q_PROPERTY(DownLoadState  dlState           READ getDlState           CONSTANT)
+  Q_PROPERTY(QString        font              READ getFont              CONSTANT)
 
 public:
   enum DownLoadState
@@ -97,6 +98,7 @@ public:
   bool isReadOnly();
   bool isLoaded();
   DownLoadState getDlState();
+  QString getFont();
 
   Q_INVOKABLE qint32 numKinks();
   Q_INVOKABLE QStringList kinks();

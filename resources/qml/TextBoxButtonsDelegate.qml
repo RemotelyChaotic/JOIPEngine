@@ -15,7 +15,7 @@ Rectangle {
 
     TextMetrics {
         id: textMetrics
-        font.family: Settings.font
+        font.family: root.currentlyLoadedProject.font
         font.pointSize: 14
         text: "testText here"
     }
@@ -139,7 +139,7 @@ Rectangle {
                     contentItem: Text {
                         id: text
                         anchors.centerIn: parent
-                        font.family: Settings.font;
+                        font.family: root.currentlyLoadedProject.font;
                         font.pointSize: textMetrics.font.pointSize
                         elide: Text.ElideNone
                         text: repeaterItem.textForButton

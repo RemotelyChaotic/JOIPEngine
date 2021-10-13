@@ -288,16 +288,23 @@ void CMainWindow::OldSettingsDetected()
   {
     QPointer pThis(this);
     QMessageBox msgBox;
+    msgBox.setWindowFlags(Qt::FramelessWindowHint);
     msgBox.setText(tr("Settings for old version found."));
-    msgBox.setInformativeText(tr("Do you want to set the content folder to this applications data folder "
-                                 "(You will have to move over any JOI-Projects from the old folder to access them)?"));
+    msgBox.setInformativeText(tr("Would you like to update the settings to:<br>"
+                                 "<ul>"
+                                 "<li>Change the application font to <i>Segoe UI Emoji</i> for colored emojis on Windows.</li>"
+                                 "<li>Set the content folder to this applications data folder<br>"
+                                 "(You will have to move over any JOI-Projects from the old folder to access them)?</li>"
+                                 "</ul>"));
     msgBox.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
     msgBox.setDefaultButton(QMessageBox::Yes);
+    msgBox.setModal(true);
     qint32 iRetVal = msgBox.exec();
     if (pThis.isNull()) { return; }
     if (QMessageBox::Yes == iRetVal)
     {
       m_spSettings->SetContentFolder(contentFileInfo.absoluteFilePath());
+      m_spSettings->SetFont("Segoe UI Emoji");
     }
     m_spSettings->SetSettingsVersion(QT_VERSION_CHECK(version.m_iMajor, version.m_iMinor, version.m_iPatch));
   }
