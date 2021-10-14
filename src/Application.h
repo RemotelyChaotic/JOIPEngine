@@ -9,6 +9,7 @@
 #include <memory>
 
 class CHelpFactory;
+class CNotificationSender;
 class COverlayManager;
 class CProjectDownloader;
 class CThreadedSystem;
@@ -43,6 +44,7 @@ public:
 
   std::shared_ptr<CSettings> Settings() { return m_spSettings; }
   template<typename T> std::weak_ptr<T> System();
+  void SendNotification(const QString& sMsg);
 
 signals:
   void StyleLoaded();
@@ -60,6 +62,7 @@ private:
   std::shared_ptr<CHelpFactory>                      m_spHelpFactory;
   std::shared_ptr<COverlayManager>                   m_spOverlayManager;
   std::shared_ptr<CSettings>                         m_spSettings;
+  std::shared_ptr<CNotificationSender>               m_spNotifier;
   QFileSystemWatcher                                 m_styleWatcher;
   bool                                               m_bStyleDirty;
   bool                                               m_bInitialized;

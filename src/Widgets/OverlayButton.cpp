@@ -5,12 +5,16 @@
 
 #include <QVBoxLayout>
 
+qint32 COverlayButton::c_iOverlayButtonZOrder = 0;
+
+//----------------------------------------------------------------------------------------
+//
 COverlayButton::COverlayButton(const QString& sOverlayName,
                                const QString& sButtonName,
                                const QString& sToolTip,
                                const QString& sKeyBinding,
                                QWidget* pParent) :
-  COverlayBase(0, pParent),
+  COverlayBase(c_iOverlayButtonZOrder, pParent),
   m_sOverlayName(sOverlayName),
   m_sButtonName(sButtonName),
   m_sToolTip(sToolTip),

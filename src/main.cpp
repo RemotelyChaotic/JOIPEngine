@@ -1,6 +1,7 @@
 #include "Application.h"
 #include "Settings.h"
 #include "MainWindow.h"
+#include "Systems/NotificationSender.h"
 #include "Systems/PhysFs/PhysFsFileEngine.h"
 #include "Systems/PhysFs/PhysFsQtAVIntegration.h"
 
@@ -67,6 +68,8 @@ int main(int argc, char *argv[])
   // https://doc.qt.io/qt-5/windows-issues.html#fullscreen-opengl-based-windows
   QWindowsWindowFunctions::setHasBorderInFullScreen(w.windowHandle(), true);
 #endif
+
+  Notifier()->SetMainWindow(&w);
 
   qint32 iRetVal = app.exec();
 

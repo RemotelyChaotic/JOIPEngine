@@ -194,6 +194,7 @@
         <file>resources/help/tutorial/TutorialCompact.json</file>
         <file>resources/help/tutorial/TutorialModern.json</file>
         <file>resources/help/editor/projectsettings/font_help.html</file>
+        <file>resources/style/img/ButtonDownload.png</file>
     </qresource>
     <qresource prefix="/qml">
         <file>resources/qml/ProjectCardSelection.qml</file>

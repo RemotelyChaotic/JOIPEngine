@@ -304,6 +304,8 @@ CTitleLabel::CTitleLabel(QWidget* pParent) :
   connect(CApplication::Instance(), &CApplication::StyleLoaded,
           this, &CTitleLabel::SlotStyleLoaded, Qt::QueuedConnection);
 
+  setAlignment(Qt::AlignCenter);
+
   QFont thisFont = font();
   thisFont.setPixelSize(60);
   setFont(thisFont);
@@ -330,6 +332,8 @@ CTitleLabel::CTitleLabel(QString sText, QWidget* pParent) :
 {
   connect(CApplication::Instance(), &CApplication::StyleLoaded,
           this, &CTitleLabel::SlotStyleLoaded, Qt::QueuedConnection);
+
+  setAlignment(Qt::AlignCenter);
 
   QFont thisFont = font();
   thisFont.setPixelSize(60);

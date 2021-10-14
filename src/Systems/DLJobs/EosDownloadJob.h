@@ -36,9 +36,11 @@ public:
   explicit CEosDownloadJob(QObject* pParent = nullptr);
   ~CEosDownloadJob() override;
 
+  QString Error() override;
   bool Finished() override;
-  qint32 Progress() override;
-  void Run(const QVariantList& args) override;
+  QString JobName() const override;
+  qint32 Progress() const override;
+  bool Run(const QVariantList& args) override;
 
 signals:
   void SignalFinished() override;
@@ -56,6 +58,8 @@ private:
 
   std::shared_ptr<QNetworkAccessManager> m_spNetworkAccessManager;
   qint32                                 m_iProgress = 0;
+  QString                                m_sName;
+  QString                                m_sError;
 };
 
 DECLARE_DOWNLOADJOB(CEosDownloadJob, "EOS/hostcfg", {"milovana.com"})

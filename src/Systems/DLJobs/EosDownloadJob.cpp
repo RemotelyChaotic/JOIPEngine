@@ -71,13 +71,21 @@ CEosDownloadJob::CEosDownloadJob(QObject* pParent) :
   QObject(pParent),
   IDownloadJob(),
   m_spNetworkAccessManager(nullptr),
-  m_iProgress(0)
+  m_iProgress(0),
+  m_sName("EOS"),
+  m_sError("No error.")
 {
 }
 
 CEosDownloadJob::~CEosDownloadJob()
 {
+}
 
+//----------------------------------------------------------------------------------------
+//
+QString CEosDownloadJob::Error()
+{
+  return m_sError;
 }
 
 //----------------------------------------------------------------------------------------
@@ -89,17 +97,28 @@ bool CEosDownloadJob::Finished()
 
 //----------------------------------------------------------------------------------------
 //
-qint32 CEosDownloadJob::Progress()
+QString CEosDownloadJob::JobName() const
+{
+  return m_sName;
+}
+
+//----------------------------------------------------------------------------------------
+//
+qint32 CEosDownloadJob::Progress() const
 {
   return m_iProgress;
 }
 
 //----------------------------------------------------------------------------------------
 //
-void CEosDownloadJob::Run(const QVariantList& args)
+bool CEosDownloadJob::Run(const QVariantList& args)
 {
   assert(1 == args.size());
-  if (1 != args.size()) { return; }
+  if (1 != args.size())
+  {
+    m_sError = QString("1 argument was expected, got %1.").arg(args.size());
+    return false;
+  }
 
   const QUrl dlUrl = args[0].toUrl();
 
@@ -113,15 +132,22 @@ void CEosDownloadJob::Run(const QVariantList& args)
   emit SignalStarted();
   emit SignalProgressChanged(Progress());
 
+  // offline test
+  QThread::sleep(10);
+
+  m_sName = "123456";
+  /*
   m_spNetworkAccessManager.reset(new QNetworkAccessManager());
 
   QString sTeaseId;
   QJsonDocument jsonScript;
   if (!RequestRemoteScript(dlUrl, sTeaseId, jsonScript))
   {
-    return;
+    m_sError = QString("Could not parse tease script.\nOnly EOS teases are supported.");
+    return false;
   }
 
+  */
   ABORT_CHECK
 
   emit SignalFinished();
@@ -131,7 +157,7 @@ void CEosDownloadJob::Run(const QVariantList& args)
 //
 void CEosDownloadJob::AbortImpl()
 {
-
+  m_sError = QString("Download stopped.");
 }
 
 //----------------------------------------------------------------------------------------

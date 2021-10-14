@@ -4,110 +4,13 @@
 #include "Constants.h"
 #include "Settings.h"
 
+#include "Widgets/ProgressBar.h"
+
 #include <QLabel>
 #include <QPainter>
 #include <QResizeEvent>
 #include <QTime>
 #include <QtSvg>
-
-namespace  {
-  const qint32 c_iBorderWidth = 2;
-  const qint32 c_iGroveWidth = 10;
-
-  //--------------------------------------------------------------------------------------
-  //
-  void paintTimer(QPainter* pPainter, QColor primaryColor, QColor secondaryColor, QColor tertiaryColor,
-                  qint32 iBorderWidth, qint32 iGroveWidth,
-                  qint32 iWidth, qint32 iHeight, QRect contentsRect,
-                  qint32 iTimeMsMax, qint32 iTimeMsCurrent, qint32 iUpdateCounter, bool bVisibleCounter)
-  {
-    // variables
-    QColor progressFront = primaryColor;
-    progressFront.setAlpha(0);
-
-    qint32 iMinimalDimension = std::min(iWidth, iHeight);
-
-    pPainter->setBackgroundMode(Qt::BGMode::TransparentMode);
-    pPainter->setRenderHints(QPainter::Antialiasing | QPainter::SmoothPixmapTransform |
-                             QPainter::TextAntialiasing, true);
-
-    // draw background
-    pPainter->fillRect(contentsRect, Qt::transparent);
-
-    // draw segments
-    pPainter->save();
-    pPainter->translate(iWidth / 2, iHeight / 2);
-    pPainter->setPen(tertiaryColor);
-    for (int i = 0; i < 12; ++i)
-    {
-      pPainter->drawLine(iMinimalDimension / 2 - iBorderWidth - iGroveWidth, 0, iMinimalDimension / 2 - c_iBorderWidth, 0);
-      pPainter->rotate(30.0);
-    }
-    pPainter->restore();
-
-    // draw "hand"
-    pPainter->save();
-    double currentPosition = 0.0;
-    if (0 != iTimeMsMax)
-    {
-      qint32 iConeAngle = 0;
-      if (bVisibleCounter)
-      {
-        currentPosition = 360 -
-            360 * static_cast<double>(iTimeMsCurrent) /
-            static_cast<double>(iTimeMsMax);
-      }
-      else
-      {
-        currentPosition = 360 + iUpdateCounter % 360;
-      }
-      iConeAngle = static_cast<qint32>(360 + 90 - currentPosition) % 360;
-      QConicalGradient conGrad(QPointF(static_cast<double>(iMinimalDimension) / 2.0,
-                                       static_cast<double>(iMinimalDimension) / 2.0),
-                               iConeAngle);
-      conGrad.setColorAt(1, progressFront);
-      conGrad.setColorAt(0, tertiaryColor);
-
-      pPainter->setBrush(conGrad);
-      pPainter->setPen(Qt::NoPen);
-      if (bVisibleCounter)
-      {
-        pPainter->drawPie(QRect(iBorderWidth, iBorderWidth,
-                                iMinimalDimension - iBorderWidth * 2,
-                                iHeight - iBorderWidth * 2),
-                        90 * 16, -static_cast<qint32>(currentPosition) * 16);
-      }
-      else
-      {
-        pPainter->drawPie(QRect(iBorderWidth, iBorderWidth,
-                              iMinimalDimension - iBorderWidth * 2,
-                              iHeight - iBorderWidth * 2),
-                        -static_cast<qint32>(currentPosition - 90) * 16, -static_cast<qint32>(currentPosition) * 16);
-      }
-    }
-
-    // draw overlay
-    pPainter->setBrush(QColor(BLACK));
-    pPainter->setPen(Qt::NoPen);
-    pPainter->drawEllipse(QRect(iBorderWidth + iGroveWidth, iBorderWidth + iGroveWidth,
-                                iMinimalDimension - (iBorderWidth + iGroveWidth) * 2,
-                                iMinimalDimension - (iBorderWidth + iGroveWidth) * 2));
-
-    pPainter->restore();
-
-    // draw progress dot
-    if (0 != iTimeMsMax)
-    {
-      pPainter->save();
-      pPainter->translate(iMinimalDimension / 2, iMinimalDimension / 2);
-      pPainter->setPen(secondaryColor);
-      pPainter->setBrush(secondaryColor);
-      pPainter->rotate(currentPosition - 90 - 2);
-      pPainter->drawEllipse(QRect(iMinimalDimension / 2 - (iBorderWidth + iGroveWidth), 0, iGroveWidth, iGroveWidth));
-      pPainter->restore();
-    }
-  }
-}
 
 //----------------------------------------------------------------------------------------
 //
@@ -131,10 +34,10 @@ CTimerCanvasQml::~CTimerCanvasQml()
 //
 void CTimerCanvasQml::paint(QPainter* pPainter)
 {
-  paintTimer(pPainter, m_primaryColor, m_secondaryColor, m_tertiaryColor,
-             m_iBorderWidth, m_iGroveWidth,
-             width(), height(), QRect({0,0}, textureSize()),
-             m_iTimeMsMax, m_iTimeMsCurrent, m_iUpdateCounter, m_bVisibleCounter);
+  PaintProgress(pPainter, m_primaryColor, m_secondaryColor, m_tertiaryColor,
+                m_iBorderWidth, m_iGroveWidth,
+                width(), height(), QRect({0,0}, textureSize()),
+                m_iTimeMsMax, m_iTimeMsCurrent, m_iUpdateCounter, m_bVisibleCounter);
 }
 
 //----------------------------------------------------------------------------------------
@@ -208,11 +111,11 @@ CTimerCanvas::~CTimerCanvas()
 void CTimerCanvas::paintEvent(QPaintEvent* /*pEvent*/)
 {
   QPainter painter(this);
-  paintTimer(&painter, m_pParent->m_primaryColor, m_pParent->m_secondaryColor, m_pParent->m_tertiaryColor,
-             c_iBorderWidth, c_iGroveWidth,
-             width(), height(), contentsRect(),
-             m_pParent->m_iTimeMsMax, m_pParent->m_iTimeMsCurrent, m_pParent->m_iUpdateCounter,
-             m_pParent->m_bVisible);
+  PaintProgress(&painter, m_pParent->m_primaryColor, m_pParent->m_secondaryColor, m_pParent->m_tertiaryColor,
+                CProgressBar::c_iBorderWidth, CProgressBar::c_iGroveWidth,
+                width(), height(), contentsRect(),
+                m_pParent->m_iTimeMsMax, m_pParent->m_iTimeMsCurrent, m_pParent->m_iUpdateCounter,
+                m_pParent->m_bVisible);
 }
 
 //----------------------------------------------------------------------------------------
@@ -360,9 +263,11 @@ void CTimerWidget::resizeEvent(QResizeEvent* pEvent)
   m_pTimerBackGround->setFixedSize(pEvent->size().width(), pEvent->size().height());
   m_pCanvas->setFixedSize(width(), height());
 
-  m_pTimeLabel->setGeometry(c_iBorderWidth + c_iGroveWidth + iMarginText, pEvent->size().height() / 3,
+  m_pTimeLabel->setGeometry(CProgressBar::c_iBorderWidth + CProgressBar::c_iGroveWidth + iMarginText,
+                            pEvent->size().height() / 3,
                             pEvent->size().width(), pEvent->size().height());
-  m_pTimeLabel->setFixedSize(pEvent->size().width() - (c_iBorderWidth + c_iGroveWidth + iMarginText) * 2,
+  m_pTimeLabel->setFixedSize(pEvent->size().width() -
+                             (CProgressBar::c_iBorderWidth + CProgressBar::c_iGroveWidth + iMarginText) * 2,
                              pEvent->size().height() / 3);
 
   m_doubleBuffer = m_doubleBuffer.scaled(pEvent->size().width(), pEvent->size().height());

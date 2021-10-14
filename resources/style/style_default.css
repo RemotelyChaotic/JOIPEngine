@@ -257,6 +257,10 @@ COverlayButton>CShortcutButton {
   qproperty-iconSize: 48px;
 }
 
+CDownloadButtonOverlay>CShortcutButton {
+  qproperty-iconSize: 24px;
+}
+
 QPushButton#AddShowBackgroundCode {
   qproperty-icon: url(:/resources/style/img/ButtonBackground.png) off,
                   url(:/resources/style/img/ButtonBackground.png) on;
@@ -536,7 +540,7 @@ QTabBar QToolButton::left-arrow:selected {
 */
 QProgressBar {
   color: white;
-  background-color: black;
+  background-color: rgb(50,50,50);
   border: 2px solid silver;
   border-radius: 10px;
   text-align: center;
@@ -545,6 +549,15 @@ QProgressBar {
 QProgressBar::chunk {
   background: qradialgradient(cx: 0.3, cy: -0.4, fx: 0.3, fy: -0.4, radius: 1.35, stop: 0 #aa00aa, stop: 1 #760076);
   width: 20px;
+}
+
+CProgressBar {
+  background-color: transparent;
+  border: 2px solid transparent;
+  qproperty-primaryColor: rgb(118, 0, 118);
+  qproperty-secondaryColor: rgb(185, 0, 100);
+  qproperty-tertiaryColor: rgb(236, 0, 236);
+  qproperty-drawDecoration: false;
 }
 
 /*

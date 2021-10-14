@@ -1,5 +1,6 @@
 #include "ProjectDownloader.h"
 #include "DLJobs/DownloadJobRegistry.h"
+#include "Systems/NotificationSender.h"
 #include <QDebug>
 
 CProjectDownloader::CProjectDownloader(const std::vector<SDownloadJobConfig>& vJobCfg) :
@@ -119,6 +120,30 @@ void CProjectDownloader::Deinitialize()
 
 //----------------------------------------------------------------------------------------
 //
+void CProjectDownloader::SlotDownloadFinished()
+{
+  IDownloadJob* pJob = dynamic_cast<IDownloadJob*>(sender());
+  if (nullptr != pJob)
+  {
+    Notifier()->SendNotification(QString("Download of %1 finished.").arg(pJob->JobName()));
+  }
+  emit SignalDownloadFinished();
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CProjectDownloader::SlotDownloadStarted()
+{
+  IDownloadJob* pJob = dynamic_cast<IDownloadJob*>(sender());
+  if (nullptr != pJob)
+  {
+    Notifier()->SendNotification(QString("%1 download started.").arg(pJob->JobName()));
+  }
+  emit SignalDownloadStarted();
+}
+
+//----------------------------------------------------------------------------------------
+//
 void CProjectDownloader::SlotClearQueue()
 {
   QMutexLocker locker(&m_jobMutex);
@@ -149,18 +174,27 @@ void CProjectDownloader::SlotRunNextJob()
 
     // connections (will be removed once the object is deleted, so we won't disconnect
     connect(dynamic_cast<QObject*>(m_spCurrentJob.get()), SIGNAL(SignalFinished()),
-            this, SIGNAL(SignalDownloadFinished()), Qt::DirectConnection);
+            this, SLOT(SlotDownloadFinished()), Qt::DirectConnection);
     connect(dynamic_cast<QObject*>(m_spCurrentJob.get()), SIGNAL(SignalProgressChanged(qint32)),
             this, SIGNAL(SignalProgressChanged(qint32)), Qt::DirectConnection);
     connect(dynamic_cast<QObject*>(m_spCurrentJob.get()), SIGNAL(SignalStarted()),
-            this, SIGNAL(SignalDownloadStarted()), Qt::DirectConnection);
+            this, SLOT(SlotDownloadStarted()), Qt::DirectConnection);
     connect(dynamic_cast<QObject*>(m_spCurrentJob.get()), SIGNAL(SignalFinished()),
             this, SLOT(SlotRunNextJob()), Qt::QueuedConnection);
 
-    m_spCurrentJob->Run(args);
-    if (!m_spCurrentJob->Finished())
+    bool bOk = m_spCurrentJob->Run(args);
+    if (!m_spCurrentJob->Finished() || !bOk)
     {
-      qWarning() << "Download could not finish properly with args: " << args;
+      if (!m_spCurrentJob->WasStopped())
+      {
+        qWarning() << "Download could not finish properly: " << m_spCurrentJob->Error();
+        Notifier()->SendNotification(QString("Download of %1 could not finish properly:\n%2")
+                                     .arg(m_spCurrentJob->JobName()).arg(m_spCurrentJob->Error()));
+      }
+      else
+      {
+        Notifier()->SendNotification("Download stopped.");
+      }
     }
 
     // reset current Job and delete object

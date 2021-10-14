@@ -36,6 +36,8 @@ public slots:
   void Deinitialize() override;
 
 private slots:
+  void SlotDownloadFinished();
+  void SlotDownloadStarted();
   void SlotClearQueue();
   void SlotRunNextJob();
 

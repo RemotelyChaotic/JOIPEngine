@@ -285,6 +285,8 @@ set(Sources
   Systems/Kink.cpp 
   Systems/Kink.h 
   Systems/Lockable.h
+  Systems/NotificationSender.cpp
+  Systems/NotificationSender.h
   Systems/OverlayManager.cpp 
   Systems/OverlayManager.h 
   Systems/PhysFs/PhysFsFileEngine.cpp
@@ -362,10 +364,14 @@ set(Sources
   Widgets/OverlayButton.cpp
   Widgets/OverlayButton.h
   Widgets/Player/MediaPlayer.cpp 
-  Widgets/Player/MediaPlayer.h   
+  Widgets/Player/MediaPlayer.h
+  Widgets/ProgressBar.cpp
+  Widgets/ProgressBar.h
   Widgets/ProjectCardSelectionWidget.cpp 
   Widgets/ProjectCardSelectionWidget.h 
   Widgets/ProjectCardSelectionWidget.ui 
+  Widgets/PushNotification.cpp
+  Widgets/PushNotification.h
   Widgets/ResourceDisplayWidget.cpp 
   Widgets/ResourceDisplayWidget.h 
   Widgets/ResourceDisplayWidget.ui 

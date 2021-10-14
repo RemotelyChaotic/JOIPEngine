@@ -12,6 +12,8 @@ class COverlayButton : public COverlayBase
   Q_OBJECT
 
 public:
+  static qint32 c_iOverlayButtonZOrder;
+
   explicit COverlayButton(const QString& sOverlayName,
                           const QString& sButtonName,
                           const QString& sToolTip,

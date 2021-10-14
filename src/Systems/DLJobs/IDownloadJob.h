@@ -6,7 +6,7 @@
 #include <atomic>
 
 #define ABORT_CHECK \
-  if (CheckIsStoppedAndAbort()) { return; }
+  if (CheckIsStoppedAndAbort()) { return false; }
 
 //----------------------------------------------------------------------------------------
 //
@@ -28,10 +28,14 @@ class IDownloadJob
 public:
   virtual ~IDownloadJob() {};
 
+  virtual QString Error() = 0;
   virtual bool Finished() = 0;
-  virtual qint32 Progress() = 0;
-  virtual void Run(const QVariantList& args) = 0;
+  virtual QString JobName() const = 0;
+  virtual qint32 Progress() const = 0;
+  virtual bool Run(const QVariantList& args) = 0;
   virtual void Stop() { m_bStop = true; }
+
+  bool WasStopped() { return m_bStop; }
 
 signals:
   virtual void SignalFinished() = 0;

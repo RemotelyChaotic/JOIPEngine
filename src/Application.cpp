@@ -11,6 +11,7 @@
 
 #include "Systems/DatabaseManager.h"
 #include "Systems/HelpFactory.h"
+#include "Systems/NotificationSender.h"
 #include "Systems/OverlayManager.h"
 #include "Systems/Project.h"
 #include "Systems/ProjectDownloader.h"
@@ -68,6 +69,7 @@ CApplication::CApplication(int& argc, char *argv[]) :
   m_spHelpFactory(std::make_unique<CHelpFactory>()),
   m_spOverlayManager(std::make_shared<COverlayManager>()),
   m_spSettings(nullptr),
+  m_spNotifier(std::make_shared<CNotificationSender>()),
   m_styleWatcher(),
   m_bStyleDirty(true),
   m_bInitialized(false)
@@ -164,6 +166,13 @@ void CApplication::Initialize()
   StyleHotloadChanged();
 
   m_bInitialized = true;
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CApplication::SendNotification(const QString& sMsg)
+{
+  m_spNotifier->SendNotification(sMsg);
 }
 
 //----------------------------------------------------------------------------------------
