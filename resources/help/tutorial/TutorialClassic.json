@@ -210,6 +210,34 @@
       },
       {
         "highlight": [
+          { "items" : ["pSoundEmitterCount"]}
+        ]
+      },
+      {
+        "text": [
+          {"posX" : 0.5}, { "posY": 0.6}, {"anchor": "eCenter"},
+          { "text": "Here you can change the amount of sound sources used by the media player." }
+        ]
+      },
+      {
+        "text": [
+          {"posX" : 0.5}, { "posY": 0.6}, {"anchor": "eCenter"},
+          { "text": "Setting this too high might cause a performacnce loss during playing though<br>so be careful." }
+        ]
+      },
+      {
+        "highlight": [
+          { "items" : ["pFontComboBox"]}
+        ]
+      },
+      {
+        "text": [
+          {"posX" : 0.5}, { "posY": 0.6}, {"anchor": "eCenter"},
+          { "text": "Next you can change the font which will be used in the player." }
+        ]
+      },
+      {
+        "highlight": [
           { "items" : ["pDescribtionTextEdit"] }
         ]
       },
