@@ -31,6 +31,7 @@ Rectangle {
 
             font.family: root.currentlyLoadedProject.font;
             font.pointSize: 14
+            font.hintingPreference: Font.PreferNoHinting
             wrapMode: Text.WordWrap
             horizontalAlignment: Text.AlignHCenter
             color: textColor

@@ -39,6 +39,7 @@ Rectangle {
                 anchors.centerIn: parent
                 font.family: root.currentlyLoadedProject.font
                 font.pointSize: 14
+                font.hintingPreference: Font.PreferNoHinting
                 horizontalAlignment: Text.AlignHCenter
                 elide: Text.ElideNone
                 text: textContent.replace("<html>","").replace("</html>","")

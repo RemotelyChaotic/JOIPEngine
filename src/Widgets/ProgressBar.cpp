@@ -111,7 +111,7 @@ void PaintProgress(QPainter* pPainter, QColor primaryColor, QColor secondaryColo
     double dCurrentPosition = 0.0;
     if (bVisibleCounter)
     {
-      dCurrentPosition = 360 - 360 * iTimeMsCurrent / iTimeMsMax;
+      dCurrentPosition = 360 - 360 * iTimeMsCurrent / (0 == iTimeMsMax ? 1.0 : iTimeMsMax);
     }
     else
     {

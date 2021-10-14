@@ -354,7 +354,7 @@ QStringList SResourceFormats::DatabaseFormats()
 //
 QStringList SResourceFormats::FontFormats()
 {
-  return QStringList() << "*.tff" << "*.otf" << "*.otc" << "*.ttf" << "*.ttc" << "*.pfa" << "*.pfb" << "*.bdf" << "*.cff" << "*.fnt" << "*.pcf";
+  return QStringList() << "*.tff" << "*.otf" << "*.otc" << "*.ttf"; // << "*.ttc" << "*.pfa" << "*.pfb" << "*.bdf" << "*.cff" << "*.fnt" << "*.pcf";
 }
 
 //----------------------------------------------------------------------------------------

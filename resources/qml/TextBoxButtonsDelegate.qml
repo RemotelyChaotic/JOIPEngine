@@ -141,6 +141,7 @@ Rectangle {
                         anchors.centerIn: parent
                         font.family: root.currentlyLoadedProject.font;
                         font.pointSize: textMetrics.font.pointSize
+                        font.hintingPreference: Font.PreferNoHinting
                         elide: Text.ElideNone
                         text: repeaterItem.textForButton
                         wrapMode: Text.WordWrap
