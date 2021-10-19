@@ -123,7 +123,7 @@ void CProjectDownloader::Deinitialize()
 void CProjectDownloader::SlotDownloadFinished()
 {
   IDownloadJob* pJob = dynamic_cast<IDownloadJob*>(sender());
-  if (nullptr != pJob)
+  if (nullptr != pJob && !pJob->WasStopped())
   {
     Notifier()->SendNotification(QString("Download of %1 finished.").arg(pJob->JobName()));
   }

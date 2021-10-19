@@ -8,9 +8,18 @@
  **//*----------------------------------------------------------------------------------*/
 
 #include "EosDownloadJob.h"
+#include "EosResourceLocator.h"
 #include "ui_EosDownloadJobWidget.h"
+
+#include "Utils/RaiiFunctionCaller.h"
+
+#include <nlohmann/json-schema.hpp>
+
+#include <QDomDocument>
 #include <QEventLoop>
+#include <QFile>
 #include <QJsonDocument>
+#include <QJsonObject>
 #include <QNetworkReply>
 #include <QNetworkRequest>
 #include <QPointer>
@@ -24,7 +33,66 @@ Q_DECLARE_METATYPE(std::shared_ptr<Ui::CEosDownloadJobWidget>)
 namespace
 {
   const QUrl c_sGetEOSScript = QUrl("https://milovana.com/webteases/geteosscript.php");
+  const QUrl c_sGetEOSTease = QUrl("https://milovana.com/webteases/showtease.php");
   const QString c_FIX_POLLUTION = /*QString("&")+QUrl::toPercentEncoding("___oeos:milovana.com")*/ "";
+
+  const QString c_sDataTitle = "data-title";
+  const QString c_sDataAuthor = "data-author";
+  const QString c_sDataAuthorId = "data-author-id";
+  const QString c_sDataTeaseId = "data-tease-id";
+  const QString c_sDataKey = "data-key";
+
+  // default trusted media hosts
+  const std::vector<QString> c_vsSupportedHosts = {
+    "thumbs[0-9]*\\.*gfycat\\.com\\/.+",
+    "thumbs[0-9]*\\.*redgifs\\.com\\/.+",
+    "w*[0-9]*\\.*mboxdrive\\.com\\/.+",
+    "media[0-9]*\\.vocaroo\\.com\\/.+",
+    "iili\\.io\\/.+",
+    "i\\.ibb\\.co\\/.",
+    "media\\.milovana\\.com\\/.+"
+  };
+
+  void InstructionSetFormatChecker(const std::string& format, const std::string& value)
+  {
+    Q_UNUSED(value)
+    if (format == "something")
+    {
+      //if (!check_value_for_something(value))
+      //  throw std::invalid_argument("value is not a good something");
+    }
+    else
+    {
+      //throw std::logic_error("Don't know how to validate " + format);
+    }
+  }
+
+  //--------------------------------------------------------------------------------------
+  //
+  /* json-parse the people - with custom error handler */
+  class CustomErrorHandler : public nlohmann::json_schema::basic_error_handler
+  {
+  public:
+    CustomErrorHandler(QString* pError) : m_pError(pError)
+    {
+    }
+
+    void error(const nlohmann::json_pointer<nlohmann::basic_json<>> &pointer,
+               const nlohmann::json &instance,
+               const std::string &message) override
+    {
+        nlohmann::json_schema::basic_error_handler::error(pointer, instance, message);
+        if (nullptr != m_pError)
+        {
+          *m_pError =
+              QString("Validation of schema failed:") + QString::fromStdString(pointer.to_string()) +
+                      ":" + QString::fromStdString(message);
+        }
+    }
+
+    QString* m_pError;
+  };
+
 
   //--------------------------------------------------------------------------------------
   //
@@ -128,29 +196,111 @@ bool CEosDownloadJob::Run(const QVariantList& args)
   //  thread()->sleep(10);
   //}
 
+  m_spNetworkAccessManager.reset(new QNetworkAccessManager());
+  CRaiiFunctionCaller resetCaller([this](){
+    m_spNetworkAccessManager.reset();
+  });
+
   m_iProgress = 0;
   emit SignalStarted();
   emit SignalProgressChanged(Progress());
 
   // offline test
-  QThread::sleep(10);
+  QString sTeaseId = "41639";
+  QFile testFile("testScript.json");
+  testFile.open(QIODevice::ReadOnly);
+  QByteArray arr = testFile.readAll();
+  ValidateJson(arr, &m_sError);
+  QJsonDocument jsonScript = QJsonDocument::fromJson(arr);
 
-  m_sName = "123456";
   /*
-  m_spNetworkAccessManager.reset(new QNetworkAccessManager());
-
+  // Get Script
   QString sTeaseId;
   QJsonDocument jsonScript;
-  if (!RequestRemoteScript(dlUrl, sTeaseId, jsonScript))
+  QString sError;
+  if (!RequestRemoteScript(dlUrl, sTeaseId, jsonScript, &sError))
   {
-    m_sError = QString("Could not parse tease script.\nOnly EOS teases are supported.");
+    if (sError.isEmpty())
+    {
+      m_sError = QString("Could not parse tease script.\nOnly EOS teases are supported.");
+    }
+    else
+    {
+      m_sError = sError;
+    }
     return false;
   }
 
   */
   ABORT_CHECK
 
+  // Get Metatate from html file
+  SScriptMetaData metaData;
+  QString sError;
+  /*
+  if (!RequestRemoteScriptMetadata(sTeaseId, metaData, &sError))
+  {
+    if (sError.isEmpty())
+    {
+      m_sError = QString("Could not parse tease script.\nOnly EOS teases are supported.");
+    }
+    else
+    {
+      m_sError = sError;
+    }
+    return false;
+  }
+  */
+
+  // offline test
+  QFile testFile2("testHtml.html");
+  testFile2.open(QIODevice::ReadOnly);
+  arr = testFile2.readAll();
+  ParseHtml(arr, metaData, &m_sError);
+
+  ABORT_CHECK
+
+  // locate all resources in the script
+  CEosResourceLocator locator(jsonScript, c_vsSupportedHosts);
+  if (!locator.LocateAllResources(&sError))
+  {
+    m_sError = sError;
+    return false;
+  }
+  else if (!sError.isEmpty())
+  {
+    m_sError = sError;
+  }
+
+  ABORT_CHECK
+
+  // download all resources
+  qint32 iMaxProgress = locator.m_resourceMap.size();
+  if (0 < iMaxProgress)
+  {
+    qint32 iCounter = 0;
+    for (const auto& it : locator.m_resourceMap)
+    {
+      sError = QString();
+      QByteArray arr =
+        locator.DownloadResource(it.second,
+                                 std::bind(&CEosDownloadJob::Fetch, this,
+                                           std::placeholders::_1, std::placeholders::_2),
+                                 &sError);
+
+      ABORT_CHECK
+
+      ++iCounter;
+      m_iProgress = 100 * iCounter / iMaxProgress;
+      emit SignalProgressChanged(Progress());
+
+      // wait a bit to not overload eos servers
+      thread()->sleep(1);
+    }
+  }
+
   emit SignalFinished();
+  return true;
 }
 
 //----------------------------------------------------------------------------------------
@@ -158,6 +308,7 @@ bool CEosDownloadJob::Run(const QVariantList& args)
 void CEosDownloadJob::AbortImpl()
 {
   m_sError = QString("Download stopped.");
+  m_spNetworkAccessManager.reset();
 }
 
 //----------------------------------------------------------------------------------------
@@ -171,14 +322,14 @@ QUrl CEosDownloadJob::EncodeForCorsProxy(const QUrl& url, const QString& sQuery)
 
 //----------------------------------------------------------------------------------------
 //
-QByteArray CEosDownloadJob::Fetch(const QUrl& url)
+QByteArray CEosDownloadJob::Fetch(const QUrl& url, QString* psError)
 {
   QByteArray arr;
   QEventLoop loop;
   QPointer<QNetworkReply> pReply =
       m_spNetworkAccessManager->get(QNetworkRequest(url));
   connect(pReply, &QNetworkReply::finished,
-          this, [pReply, &loop, &arr](){
+          this, [pReply, &loop, &arr, &psError](){
     if(nullptr != pReply)
     {
       QUrl url = pReply->url();
@@ -188,22 +339,23 @@ QByteArray CEosDownloadJob::Fetch(const QUrl& url)
     }
     else
     {
-      qCritical() << "QNetworkReply object was destroyed too early.";
+      if (nullptr != psError) { *psError = "NetworkReply object was destroyed too early."; }
     }
   });
   connect(pReply, QOverload<QNetworkReply::NetworkError>::of(&QNetworkReply::error),
-          this, [pReply, &loop](QNetworkReply::NetworkError error){
+          this, [pReply, &loop, &psError](QNetworkReply::NetworkError error){
     Q_UNUSED(error)
     if (nullptr != pReply)
     {
-      qWarning() << tr(QT_TR_NOOP("Error fetching remote resource: %1"))
-                    .arg(pReply->errorString());
+      if (nullptr != psError) { *psError =
+            tr(QT_TR_NOOP("Error fetching remote resource: %1"))
+                          .arg(pReply->errorString()); }
       bool bOk = QMetaObject::invokeMethod(&loop, "quit", Qt::QueuedConnection);
       assert(bOk); Q_UNUSED(bOk)
     }
     else
     {
-      qCritical() << "QNetworkReply object was destroyed too early.";
+      if (nullptr != psError) { *psError = "NetworkReply object was destroyed too early."; }
     }
   });
 
@@ -212,6 +364,52 @@ QByteArray CEosDownloadJob::Fetch(const QUrl& url)
   if (nullptr != pReply) { delete pReply; }
   else { return QByteArray(); }
   return arr;
+}
+
+//----------------------------------------------------------------------------------------
+//
+bool CEosDownloadJob::ParseHtml(const QByteArray& arr, SScriptMetaData& data, QString* psError)
+{
+  Q_UNUSED(psError)
+  // we won't parse the html document, as it might be not well formated
+  // instead we just regexp out the info we need
+  /*
+  QDomDocument html;
+  bool bOk = html.setContent(arr, false, psError);
+  if (!bOk)
+  {
+    return false;
+  }
+  */
+
+  QRegExp nodesTitle = QRegExp(c_sDataTitle + "=\"(.*)\"");
+  QRegExp nodesAuthor = QRegExp(c_sDataAuthor + "=\"(.*)\"");
+  QRegExp nodesAuthorId = QRegExp(c_sDataAuthorId + "=\"(.*)\"");
+  QRegExp nodesTeaseId = QRegExp(c_sDataTeaseId + "=\"(.*)\"");
+  QRegExp nodesDataKey = QRegExp(c_sDataKey + "=\"(.*)\"");
+
+  QString sStr = QString::fromUtf8(arr);
+  auto fnMatch = [&sStr](const QRegExp& node, QString& sSaveIn) {
+    qint32 iPos = 0;
+    while ((iPos = node.indexIn(sStr, iPos)) != -1)
+    {
+        sSaveIn = node.cap(1);
+        qint32 iEnd = sSaveIn.indexOf('\"');
+        if (-1 != iEnd)
+        {
+          sSaveIn = sSaveIn.mid(0, iEnd);
+        }
+        iPos += node.matchedLength();
+    }
+  };
+
+  fnMatch(nodesTitle, data.m_sTitle);
+  fnMatch(nodesAuthor, data.m_sAuthor);
+  fnMatch(nodesAuthorId, data.m_sAuthorId);
+  fnMatch(nodesTeaseId, data.m_sTeaseId);
+  fnMatch(nodesDataKey, data.m_sDataKey);
+
+  return true;
 }
 
 //----------------------------------------------------------------------------------------
@@ -232,7 +430,8 @@ QString CEosDownloadJob::ParseTeaseURI(const QUrl& url)
 //----------------------------------------------------------------------------------------
 //
 bool CEosDownloadJob::RequestRemoteScript(const QUrl& url, QString& sTeaseId,
-                                          QJsonDocument& jsonScript)
+                                          QJsonDocument& jsonScript,
+                                          QString* psError)
 {
   qint32 iMinutes = 0;
   {
@@ -242,20 +441,152 @@ bool CEosDownloadJob::RequestRemoteScript(const QUrl& url, QString& sTeaseId,
   }
 
   sTeaseId = ParseTeaseURI(url);
-  if (sTeaseId.isEmpty()) { return false; }
+  if (sTeaseId.isEmpty())
+  {
+    if (nullptr != psError) { *psError = "Could not parse tease id."; }
+    return false;
+  }
 
   const QUrl sFinalrequest = EncodeForCorsProxy(c_sGetEOSScript,
                                 QString("id=%1%2%3")
                                 .arg(sTeaseId)
                                 .arg(c_FIX_POLLUTION)
                                 .arg("&cacheable&_nc=" + QString::number(iMinutes)));
-  if (sFinalrequest.isEmpty()) { return false; }
+  if (sFinalrequest.isEmpty())
+  {
+    if (nullptr != psError) { *psError = "Could not create request."; }
+    return false;
+  }
 
   QPointer<CEosDownloadJob> pThis(this);
-  QByteArray arr = Fetch(sFinalrequest);
+  QByteArray arr = Fetch(sFinalrequest, psError);
   if (nullptr == pThis) { return false; }
-  if (arr.isEmpty()) { return false; }
+  if (arr.isEmpty())
+  {
+    if (nullptr != psError) { *psError = "Fetched resource was empty."; }
+    return false;
+  }
+
+  // test write to file
+  //QFile file("testHtml.html");
+  //file.open(QIODevice::WriteOnly);
+  //file.write(arr);
+
+  if (!ValidateJson(arr, psError))
+  {
+    return false;
+  }
 
   jsonScript = QJsonDocument::fromJson(arr);
   return jsonScript.isObject();
+}
+
+//----------------------------------------------------------------------------------------
+//
+bool CEosDownloadJob::RequestRemoteScriptMetadata(
+    const QString& sId, SScriptMetaData& data,
+    QString* psError)
+{
+  qint32 iMinutes = 0;
+  {
+    using namespace std::chrono;
+    minutes min = duration_cast<minutes>(TimeSinceEpoch());
+    iMinutes = min.count();
+  }
+
+  data.m_sTeaseId = sId;
+  const QUrl sFinalrequest = EncodeForCorsProxy(c_sGetEOSTease,
+                                QString("id=%1%2%3")
+                                .arg(sId)
+                                .arg(c_FIX_POLLUTION)
+                                .arg("&cacheable&_nc=" + QString::number(iMinutes)));
+  if (sFinalrequest.isEmpty())
+  {
+    if (nullptr != psError) { *psError = "Could not create request."; }
+    return false;
+  }
+
+  QPointer<CEosDownloadJob> pThis(this);
+  QByteArray arr = Fetch(sFinalrequest, psError);
+  if (nullptr == pThis) { return false; }
+  if (arr.isEmpty())
+  {
+    if (nullptr != psError) { *psError = "Fetched resource was empty."; }
+    return false;
+  }
+
+  // test write to file
+  //QFile file("testHtml.html");
+  //file.open(QIODevice::WriteOnly);
+  //file.write(arr);
+
+  if (!ParseHtml(arr, data, psError))
+  {
+    return false;
+  }
+
+
+  return true;
+}
+
+//----------------------------------------------------------------------------------------
+//
+bool CEosDownloadJob::ValidateJson(const QByteArray& arr, QString* psError)
+{
+  CustomErrorHandler errorHandler(psError);
+  nlohmann::json_schema::json_validator validator(nullptr, InstructionSetFormatChecker, nullptr);
+
+  nlohmann::json script;
+  try
+  {
+    script = nlohmann::json::parse(QString::fromUtf8(arr).toStdString());
+  }
+  catch (const std::exception &e)
+  {
+    if (nullptr != psError)
+     { *psError = QString(QT_TR_NOOP("Loading json failed: %1")).arg(e.what()); }
+    return false;
+  }
+
+  QFile schemaFile(":/EosSchema.json");
+  if (!schemaFile.open(QIODevice::ReadOnly))
+  {
+    if (nullptr != psError)
+    { *psError = QString(QT_TR_NOOP("Failed to open validation schema file.")); }
+    return false;
+  }
+
+  nlohmann::json schema;
+  try
+  {
+    schema = nlohmann::json::parse(QString::fromUtf8(schemaFile.readAll()).toStdString());
+  }
+  catch (const std::exception &e)
+  {
+    if (nullptr != psError)
+     { *psError = QString(QT_TR_NOOP("Loading of schema failed: %1"))
+                          .arg(e.what()); }
+    return false;
+  }
+
+  try
+  {
+    validator.set_root_schema(schema);
+  }
+  catch (const std::exception &e)
+  {
+    if (nullptr != psError)
+     { *psError = QString(QT_TR_NOOP("Validation of schema failed: %1"))
+                          .arg(e.what()); }
+    return false;
+  }
+
+  bool bOk = true;
+  validator.validate(script, errorHandler);
+  if (static_cast<bool>(errorHandler))
+  {
+    bOk = false;
+  }
+
+  return bOk;
 }

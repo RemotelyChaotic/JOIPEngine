@@ -279,6 +279,9 @@ set(Sources
   Systems/DLJobs/EosDownloadJob.cpp
   Systems/DLJobs/EosDownloadJob.h
   Systems/DLJobs/EosDownloadJobWidget.ui
+  Systems/DLJobs/EosResourceLocator.cpp
+  Systems/DLJobs/EosResourceLocator.h
+  Systems/DLJobs/EosResources.qrc
   Systems/HelpFactory.cpp 
   Systems/HelpFactory.h 
   Systems/ISerializable.h 

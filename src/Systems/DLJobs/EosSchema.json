@@ -1,0 +1,37 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "qrc:/EosSchema.json",
+  "title": "EosSchema",
+  "description": "Base schema for an EOS script.",
+  "type": "object",
+  "properties": {
+    "init": {
+      "type": "object"
+    },
+    "pages": {
+      "type": "object"
+    },
+    "galleries": {
+      "type": "object"
+    },
+    "modules": {
+      "type": "object",
+      "properties": {
+        "audio": { "type": "object" },
+        "storage": { "type": "object" },
+        "notification": { "type": "object" },
+        "nyx": false
+      },
+      "additionalProperties": true
+    },
+    "files": {
+      "type": "object"
+    }
+  },
+  "required": [
+    "pages",
+    "galleries",
+    "modules"
+  ],
+  "additionalProperties": true
+}

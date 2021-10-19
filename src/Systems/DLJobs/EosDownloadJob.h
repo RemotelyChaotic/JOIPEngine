@@ -32,6 +32,15 @@ class CEosDownloadJob : public QObject, public IDownloadJob
   Q_OBJECT
   Q_INTERFACES(IDownloadJob)
 
+  struct SScriptMetaData
+  {
+    QString m_sTitle;
+    QString m_sAuthor;
+    QString m_sAuthorId;
+    QString m_sTeaseId;
+    QString m_sDataKey;
+  };
+
 public:
   explicit CEosDownloadJob(QObject* pParent = nullptr);
   ~CEosDownloadJob() override;
@@ -52,9 +61,14 @@ protected:
 
 private:
   QUrl EncodeForCorsProxy(const QUrl& url, const QString& sQuery);
-  QByteArray Fetch(const QUrl& url);
+  QByteArray Fetch(const QUrl& url, QString* psError);
+  bool ParseHtml(const QByteArray& arr, SScriptMetaData& data, QString* psError);
   QString ParseTeaseURI(const QUrl& url);
-  bool RequestRemoteScript(const QUrl& url, QString& sId, QJsonDocument& jsonScript);
+  bool RequestRemoteScript(const QUrl& url, QString& sId, QJsonDocument& jsonScript,
+                           QString* psError);
+  bool RequestRemoteScriptMetadata(const QString& sId, SScriptMetaData& data,
+                                   QString* psError);
+  bool ValidateJson(const QByteArray& arr, QString* psError);
 
   std::shared_ptr<QNetworkAccessManager> m_spNetworkAccessManager;
   qint32                                 m_iProgress = 0;
