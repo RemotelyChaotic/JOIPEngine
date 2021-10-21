@@ -25,6 +25,8 @@
 **
 ** $QT_END_LICENSE$
 **
+** 21.10.2021: Adapted for the JOIP-Engine so reosurce files can be built from in-memory
+**             ByteArrays
 ****************************************************************************/
 
 // Note: A copy of this file is used in Qt Designer (qttools/src/designer/src/lib/shared/rcc_p.h)
@@ -33,6 +35,8 @@
 #define RCC_H
 
 #include <qstringlist.h>
+#include <qfileinfo.h>
+#include <qlocale.h>
 #include <qhash.h>
 #include <qstring.h>
 
@@ -40,10 +44,17 @@ typedef struct ZSTD_CCtx_s ZSTD_CCtx;
 
 QT_BEGIN_NAMESPACE
 
-class RCCFileInfo;
+#if QT_CONFIG(zstd) && QT_VERSION >= QT_VERSION_CHECK(6,0,0)
+#  define CONSTANT_COMPRESSALGO_DEFAULT     RCCResourceLibrary::CompressionAlgorithm::Zstd
+#elif !defined(QT_NO_COMPRESS)
+#  define CONSTANT_COMPRESSALGO_DEFAULT     RCCResourceLibrary::CompressionAlgorithm::Zlib
+#else
+#  define CONSTANT_COMPRESSALGO_DEFAULT     RCCResourceLibrary::CompressionAlgorithm::None
+#endif
+
 class QIODevice;
 class QTextStream;
-
+class RCCFileInfo;
 
 class RCCResourceLibrary
 {
@@ -51,6 +62,14 @@ class RCCResourceLibrary
     RCCResourceLibrary &operator=(const RCCResourceLibrary &);
 
 public:
+    enum {
+        CONSTANT_USENAMESPACE = 1,
+        CONSTANT_COMPRESSLEVEL_DEFAULT = -1,
+        CONSTANT_ZSTDCOMPRESSLEVEL_CHECK = 1,   // Zstd level to check if compressing is a good idea
+        CONSTANT_ZSTDCOMPRESSLEVEL_STORE = 14,  // Zstd level to actually store the data
+        CONSTANT_COMPRESSTHRESHOLD_DEFAULT = 70
+    };
+
     RCCResourceLibrary(quint8 formatVersion);
     ~RCCResourceLibrary();
 
@@ -109,6 +128,7 @@ public:
 
     int formatVersion() const { return m_formatVersion; }
 
+    bool addFile(const QString &alias, const RCCFileInfo &file);
 private:
     struct Strings {
         Strings();
@@ -124,7 +144,6 @@ private:
     };
     friend class RCCFileInfo;
     void reset();
-    bool addFile(const QString &alias, const RCCFileInfo &file);
     bool interpretResourceFile(QIODevice *inputDevice, const QString &file,
         QString currentPath = QString(), bool listMode = false);
     bool writeHeader();
@@ -170,6 +189,51 @@ private:
     QIODevice *m_outDevice;
     QByteArray m_out;
     quint8 m_formatVersion;
+};
+
+
+class RCCFileInfo
+{
+public:
+    enum Flags
+    {
+        // must match qresource.cpp
+        NoFlags = 0x00,
+        Compressed = 0x01,
+        Directory = 0x02,
+        CompressedZstd = 0x04
+    };
+
+    RCCFileInfo(const QString &name = QString(), const QFileInfo &fileInfo = QFileInfo(),
+                QLocale::Language language = QLocale::C,
+                QLocale::Country country = QLocale::AnyCountry,
+                uint flags = NoFlags,
+                RCCResourceLibrary::CompressionAlgorithm compressAlgo = RCCResourceLibrary::CONSTANT_COMPRESSALGO_DEFAULT,
+                int compressLevel = RCCResourceLibrary::CONSTANT_COMPRESSLEVEL_DEFAULT,
+                int compressThreshold = RCCResourceLibrary::CONSTANT_COMPRESSTHRESHOLD_DEFAULT);
+    ~RCCFileInfo();
+
+    QString resourceName() const;
+
+public:
+    qint64 writeDataBlob(RCCResourceLibrary &lib, qint64 offset, QString *errorMessage);
+    qint64 writeDataName(RCCResourceLibrary &, qint64 offset);
+    void writeDataInfo(RCCResourceLibrary &lib);
+
+    int m_flags;
+    QString m_name;
+    QLocale::Language m_language;
+    QLocale::Country m_country;
+    QFileInfo m_fileInfo;
+    RCCFileInfo *m_parent;
+    QHash<QString, RCCFileInfo*> m_children;
+    RCCResourceLibrary::CompressionAlgorithm m_compressAlgo;
+    int m_compressLevel;
+    int m_compressThreshold;
+
+    qint64 m_nameOffset;
+    qint64 m_dataOffset;
+    qint64 m_childOffset;
 };
 
 QT_END_NAMESPACE
