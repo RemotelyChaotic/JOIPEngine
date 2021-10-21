@@ -225,6 +225,7 @@ public:
     QLocale::Language m_language;
     QLocale::Country m_country;
     QFileInfo m_fileInfo;
+    QByteArray m_prefilledContent;
     RCCFileInfo *m_parent;
     QHash<QString, RCCFileInfo*> m_children;
     RCCResourceLibrary::CompressionAlgorithm m_compressAlgo;

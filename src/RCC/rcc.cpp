@@ -193,12 +193,17 @@ qint64 RCCFileInfo::writeDataBlob(RCCResourceLibrary &lib, qint64 offset,
     m_dataOffset = offset;
 
     //find the data to be written
-    QFile file(m_fileInfo.absoluteFilePath());
-    if (!file.open(QFile::ReadOnly)) {
-        *errorMessage = msgOpenReadFailed(m_fileInfo.absoluteFilePath(), file.errorString());
-        return 0;
+    QByteArray data;
+    if (m_prefilledContent.size() > 0) {
+      data = m_prefilledContent;
+    } else {
+      QFile file(m_fileInfo.absoluteFilePath());
+      if (!file.open(QFile::ReadOnly)) {
+          *errorMessage = msgOpenReadFailed(m_fileInfo.absoluteFilePath(), file.errorString());
+          return 0;
+      }
+      data = file.readAll();
     }
-    QByteArray data = file.readAll();
 
     // Check if compression is useful for this file
     if (data.size() != 0) {
