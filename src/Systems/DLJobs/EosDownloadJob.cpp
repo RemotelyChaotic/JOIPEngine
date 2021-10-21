@@ -9,12 +9,20 @@
 
 #include "EosDownloadJob.h"
 #include "EosResourceLocator.h"
+#include "Application.h"
+#include "Settings.h"
 #include "ui_EosDownloadJobWidget.h"
 
+#include "RCC/rcc.h"
+#include "Systems/DatabaseManager.h"
+#include "Systems/Project.h"
+#include "Systems/Resource.h"
 #include "Utils/RaiiFunctionCaller.h"
 
 #include <nlohmann/json-schema.hpp>
 
+#include <QDateTime>
+#include <QDir>
 #include <QDomDocument>
 #include <QEventLoop>
 #include <QFile>
@@ -41,6 +49,12 @@ namespace
   const QString c_sDataAuthorId = "data-author-id";
   const QString c_sDataTeaseId = "data-tease-id";
   const QString c_sDataKey = "data-key";
+
+  const qint32 c_iResourceLibraryFormatVersion = 3;
+  const qint32 c_iMaxResourceBlobSize = 1'000'000'000; // max resource blob size is 1GB to reduce memory usage
+  const QString c_sScriptResourceName = "script";
+  const QString c_sResourceBlobName = "resource";
+  const QString c_sResourceBlobSuffix = ".jrec";
 
   // default trusted media hosts
   const std::vector<QString> c_vsSupportedHosts = {
@@ -139,9 +153,13 @@ CEosDownloadJob::CEosDownloadJob(QObject* pParent) :
   QObject(pParent),
   IDownloadJob(),
   m_spNetworkAccessManager(nullptr),
+  m_spResourceLib(nullptr),
+  m_spProject(nullptr),
   m_iProgress(0),
   m_sName("EOS"),
-  m_sError("No error.")
+  m_sError("No error."),
+  m_iProjId(-1),
+  m_iFileBlobCounter(0)
 {
 }
 
@@ -191,29 +209,37 @@ bool CEosDownloadJob::Run(const QVariantList& args)
   const QUrl dlUrl = args[0].toUrl();
 
   // only allow downloads every 3 minutes to not strain eos servers too much
-  //while (!IsMinutesDividableBy3())
-  //{
-  //  thread()->sleep(10);
-  //}
+  while (!IsMinutesDividableBy3())
+  {
+    thread()->sleep(10);
+  }
 
   m_spNetworkAccessManager.reset(new QNetworkAccessManager());
   CRaiiFunctionCaller resetCaller([this](){
     m_spNetworkAccessManager.reset();
   });
+  std::shared_ptr<CDatabaseManager> spDbManager =
+    CApplication::Instance()->System<CDatabaseManager>().lock();
+  if (nullptr == spDbManager)
+  {
+    m_sError = QString("Internal Error: Database Manager was not found.");
+    return false;
+  }
 
   m_iProgress = 0;
   emit SignalStarted();
   emit SignalProgressChanged(Progress());
 
   // offline test
+  /*
   QString sTeaseId = "41639";
   QFile testFile("testScript.json");
   testFile.open(QIODevice::ReadOnly);
   QByteArray arr = testFile.readAll();
   ValidateJson(arr, &m_sError);
   QJsonDocument jsonScript = QJsonDocument::fromJson(arr);
+  */
 
-  /*
   // Get Script
   QString sTeaseId;
   QJsonDocument jsonScript;
@@ -231,13 +257,11 @@ bool CEosDownloadJob::Run(const QVariantList& args)
     return false;
   }
 
-  */
   ABORT_CHECK
 
   // Get Metatate from html file
   SScriptMetaData metaData;
-  QString sError;
-  /*
+  //QString sError;
   if (!RequestRemoteScriptMetadata(sTeaseId, metaData, &sError))
   {
     if (sError.isEmpty())
@@ -250,18 +274,57 @@ bool CEosDownloadJob::Run(const QVariantList& args)
     }
     return false;
   }
-  */
 
   // offline test
+  /*
   QFile testFile2("testHtml.html");
   testFile2.open(QIODevice::ReadOnly);
   arr = testFile2.readAll();
   ParseHtml(arr, metaData, &m_sError);
+  */
+
+  ABORT_CHECK
+
+  // create and get project
+  tvfnActionsProject vfnActions = {
+    [this, &metaData](const tspProject& spProjectCallback) {
+      spProjectCallback->m_dlState = EDownLoadState::eDownloadRunning;
+      m_spProject = spProjectCallback;
+      if (nullptr != m_spProject)
+      {
+        m_spProject->m_sDescribtion =
+          "<h1>" + metaData.m_sTitle + "</h1><br>" +
+          "Created by: <i>" + metaData.m_sAuthor + "</b><br>" +
+          "Downloaded from Milovana on " + QDateTime::currentDateTime().toString() + "";
+      }
+    }
+  };
+  m_iProjId = spDbManager->AddProject(metaData.m_sTitle, 1, false, true, vfnActions);
+  spDbManager->SerializeProject(m_iProjId);
+  if (0 > m_iProjId)
+  {
+    m_sError = "Could not create new project.";
+    return false;
+  }
+
+  ABORT_CHECK
+
+  m_spResourceLib  = std::make_shared<RCCResourceLibrary>(c_iResourceLibraryFormatVersion);
+  m_spResourceLib->setCompressionAlgorithm(RCCResourceLibrary::CompressionAlgorithm::None);
+  m_spResourceLib->setFormat(RCCResourceLibrary::Binary);
+
+  RCCFileInfo fileInfoScript(QString(c_sScriptResourceName + c_sScriptFormat),
+                             QFileInfo(c_sScriptResourceName + c_sScriptFormat),
+                             QLocale::C, QLocale::AnyCountry, RCCFileInfo::NoFlags);
+  fileInfoScript.m_prefilledContent = jsonScript.toJson();
+  m_spResourceLib->addFile(QString(), fileInfoScript);
+  spDbManager->AddResource(m_spProject, QUrl(":/" + c_sScriptResourceName + c_sScriptFormat),
+                           EResourceType::eScript, c_sScriptResourceName);
 
   ABORT_CHECK
 
   // locate all resources in the script
-  CEosResourceLocator locator(jsonScript, c_vsSupportedHosts);
+  CEosResourceLocator locator(jsonScript, c_vsSupportedHosts, c_FIX_POLLUTION);
   if (!locator.LocateAllResources(&sError))
   {
     m_sError = sError;
@@ -275,6 +338,8 @@ bool CEosDownloadJob::Run(const QVariantList& args)
   ABORT_CHECK
 
   // download all resources
+  m_iFileBlobCounter = 0;
+  qint32 iCollectiveSize = fileInfoScript.m_prefilledContent.size();
   qint32 iMaxProgress = locator.m_resourceMap.size();
   if (0 < iMaxProgress)
   {
@@ -290,6 +355,34 @@ bool CEosDownloadJob::Run(const QVariantList& args)
 
       ABORT_CHECK
 
+      // filesize would be too large, create new file
+      if (c_iMaxResourceBlobSize < iCollectiveSize + arr.size())
+      {
+        if (!WriteResourceBlob(m_spProject, m_iFileBlobCounter)) { return false; }
+
+        m_spResourceLib.reset(new RCCResourceLibrary(c_iResourceLibraryFormatVersion));
+        m_spResourceLib->setCompressionAlgorithm(RCCResourceLibrary::CompressionAlgorithm::None);
+        m_spResourceLib->setFormat(RCCResourceLibrary::Binary);
+        iCollectiveSize = 0;
+      }
+      // add file to resources
+      {
+        iCollectiveSize += arr.size();
+
+        const QString sName = it.second->m_data.m_sName;
+        QUrl urlCopy = it.second->m_data.m_sPath;
+        urlCopy.setScheme("");
+        const QString sPath = urlCopy.toString();
+        RCCFileInfo fileInfo(QString(sName), QFileInfo(sPath), QLocale::C,
+                             QLocale::AnyCountry, RCCFileInfo::NoFlags);
+        fileInfo.m_prefilledContent = arr;
+        m_spResourceLib->addFile(sName, fileInfo);
+        spDbManager->AddResource(m_spProject, QUrl(":/" + sPath),
+                                 it.second->m_data.m_type, sName);
+      }
+
+      ABORT_CHECK
+
       ++iCounter;
       m_iProgress = 100 * iCounter / iMaxProgress;
       emit SignalProgressChanged(Progress());
@@ -297,9 +390,18 @@ bool CEosDownloadJob::Run(const QVariantList& args)
       // wait a bit to not overload eos servers
       thread()->sleep(1);
     }
+
+    // write final blob
+    if (!WriteResourceBlob(m_spProject, m_iFileBlobCounter)) { return false; }
   }
 
+
+  // set downloadstate to finished
+  m_spProject->m_rwLock.lockForWrite();
+  m_spProject->m_dlState = EDownLoadState::eFinished;
+  m_spProject->m_rwLock.unlock();
   emit SignalFinished();
+
   return true;
 }
 
@@ -309,6 +411,16 @@ void CEosDownloadJob::AbortImpl()
 {
   m_sError = QString("Download stopped.");
   m_spNetworkAccessManager.reset();
+
+  std::shared_ptr<CDatabaseManager> spDbManager =
+    CApplication::Instance()->System<CDatabaseManager>().lock();
+  if (nullptr != spDbManager && -1 != m_iProjId)
+  {
+    spDbManager->SerializeProject(m_iProjId);
+  }
+
+  // write the resources collected so far
+  WriteResourceBlob(m_spProject, m_iFileBlobCounter);
 }
 
 //----------------------------------------------------------------------------------------
@@ -589,4 +701,32 @@ bool CEosDownloadJob::ValidateJson(const QByteArray& arr, QString* psError)
   }
 
   return bOk;
+}
+
+//----------------------------------------------------------------------------------------
+//
+bool CEosDownloadJob::WriteResourceBlob(const tspProject& spProject, qint32& iBlob)
+{
+  const QString sProjName = PhysicalProjectName(spProject);
+  QFile out(CApplication::Instance()->Settings()->ContentFolder() + "/" + sProjName + "/" +
+            c_sResourceBlobName + QString::number(iBlob++) + c_sResourceBlobSuffix);
+  QFile temp;
+  QFile errorDevice;
+  if (nullptr != m_spResourceLib)
+  {
+    bool success = m_spResourceLib->output(out, temp, errorDevice);
+    if (!success)
+    {
+        // erase the output file if we failed
+        out.remove();
+        m_sError = QString("Could not write Reosurce file: %1.").arg(out.fileName());
+        return false;
+    }
+    return true;
+  }
+  else
+  {
+    m_sError = QString("Could not write Reosurce file: Internal error.");
+    return false;
+  }
 }

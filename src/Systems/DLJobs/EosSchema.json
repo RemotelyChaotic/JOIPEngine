@@ -6,7 +6,7 @@
   "type": "object",
   "properties": {
     "init": {
-      "type": "object"
+      "type": "string"
     },
     "pages": {
       "type": "object"

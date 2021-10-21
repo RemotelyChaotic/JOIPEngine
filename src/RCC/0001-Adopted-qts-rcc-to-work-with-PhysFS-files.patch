@@ -1,0 +1,77 @@
+From a64857d85195f6740be928622ebca8319b08b648 Mon Sep 17 00:00:00 2001
+From: Remotely Chaotic <jtek.fdlt@gmail.com>
+Date: Thu, 21 Oct 2021 16:39:29 +0200
+Subject: [PATCH] Adopted qts rcc to work with PhysFS files
+
+---
+ src/RCC/main.cpp | 21 ++++++++++++++++++++-
+ src/RCC/rcc.cpp  |  4 ----
+ 2 files changed, 20 insertions(+), 5 deletions(-)
+
+diff --git a/src/RCC/main.cpp b/src/RCC/main.cpp
+index ac87e48..35b0a4b 100644
+--- a/src/RCC/main.cpp
++++ b/src/RCC/main.cpp
+@@ -25,9 +25,12 @@
+ **
+ ** $QT_END_LICENSE$
+ **
++** Adapted for the JOIP-Engine to handle PhysFs Files by RemotelyChaotic
+ ****************************************************************************/
+ 
+ #include <rcc.h>
++#include "PhysFsFileEngine.h"
++#include "RaiiFunctionCaller.h"
+ 
+ #include <qdebug.h>
+ #include <qdir.h>
+@@ -297,8 +300,17 @@ int runRcc(int argc, char *argv[])
+             qWarning("%s: File does not exist '%s'", argv[0], qPrintable(file));
+             return 1;
+         }
++        else {
++          CPhysFsFileEngine::mount(QFileInfo(file).absolutePath().toStdString().data(), nullptr);
++        }
+     }
+ 
++    CRaiiFunctionCaller raiiFnCaller([filenamesIn]() {
++      for (const QString &file : filenamesIn) {
++        CPhysFsFileEngine::unmount(QFileInfo(file).absolutePath().toStdString().data());
++      }
++    });
++
+     QString outFilename = parser.value(outputOption);
+     QString tempFilename = parser.value(tempOption);
+     QString depFilename = parser.value(depFileOption);
+@@ -441,5 +453,12 @@ int main(int argc, char *argv[])
+             qFatal("Cannot force QHash seed for testing as requested");
+     }
+ 
+-    return QT_PREPEND_NAMESPACE(runRcc)(argc, argv);
++    CPhysFsFileEngine::init(argv[0]);
++    CPhysFsFileEngineHandler engine;
++    Q_UNUSED(engine)
++
++    qint32 iRetVal = QT_PREPEND_NAMESPACE(runRcc)(argc, argv);
++
++    CPhysFsFileEngine::deInit();
++    return iRetVal;
+ }
+diff --git a/src/RCC/rcc.cpp b/src/RCC/rcc.cpp
+index 7185219..a58729c 100644
+--- a/src/RCC/rcc.cpp
++++ b/src/RCC/rcc.cpp
+@@ -43,10 +43,6 @@
+ 
+ #include <algorithm>
+ 
+-#if QT_CONFIG(zstd)
+-#  include <zstd.h>
+-#endif
+-
+ // Note: A copy of this file is used in Qt Designer (qttools/src/designer/src/lib/shared/rcc.cpp)
+ 
+ QT_BEGIN_NAMESPACE
+-- 
+2.24.0.windows.2
+

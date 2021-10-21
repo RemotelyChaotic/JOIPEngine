@@ -256,6 +256,8 @@ set(Sources
   Player/TimerDisplayWidget.ui 
   Player/TimerWidget.cpp 
   Player/TimerWidget.h 
+  RCC/rcc.cpp
+  RCC/rcc.h
   SVersion.h 
   SceneScreen.cpp 
   SceneScreen.h 
@@ -400,6 +402,8 @@ if(ANDROID)
 else()
   add_executable(${PROJECT_NAME} ${Sources})
 endif()
+
+target_compile_definitions(${PROJECT_NAME} PRIVATE QT_FEATURE_zstd=-1)
 
 #-----------------------------------------------------------------------------------------
 # Libs

@@ -1,0 +1,53 @@
+From a85aefa587f3a346c40ebdfd7f2b736d7b7f8a3d Mon Sep 17 00:00:00 2001
+From: Remotely Chaotic <jtek.fdlt@gmail.com>
+Date: Thu, 21 Oct 2021 14:09:09 +0200
+Subject: [PATCH 2/2] RCCFileInfo can be pre-filled with data instead of
+ getting it from file
+
+---
+ src/RCC/rcc.cpp | 15 ++++++++++-----
+ src/RCC/rcc.h   |  1 +
+ 2 files changed, 11 insertions(+), 5 deletions(-)
+
+diff --git a/src/RCC/rcc.cpp b/src/RCC/rcc.cpp
+index 5aa3796..257a53e 100644
+--- a/src/RCC/rcc.cpp
++++ b/src/RCC/rcc.cpp
+@@ -193,12 +193,17 @@ qint64 RCCFileInfo::writeDataBlob(RCCResourceLibrary &lib, qint64 offset,
+     m_dataOffset = offset;
+ 
+     //find the data to be written
+-    QFile file(m_fileInfo.absoluteFilePath());
+-    if (!file.open(QFile::ReadOnly)) {
+-        *errorMessage = msgOpenReadFailed(m_fileInfo.absoluteFilePath(), file.errorString());
+-        return 0;
++    QByteArray data;
++    if (m_prefilledContent.size() > 0) {
++      data = m_prefilledContent;
++    } else {
++      QFile file(m_fileInfo.absoluteFilePath());
++      if (!file.open(QFile::ReadOnly)) {
++          *errorMessage = msgOpenReadFailed(m_fileInfo.absoluteFilePath(), file.errorString());
++          return 0;
++      }
++      data = file.readAll();
+     }
+-    QByteArray data = file.readAll();
+ 
+     // Check if compression is useful for this file
+     if (data.size() != 0) {
+diff --git a/src/RCC/rcc.h b/src/RCC/rcc.h
+index a4aa574..a0fb0f9 100644
+--- a/src/RCC/rcc.h
++++ b/src/RCC/rcc.h
+@@ -225,6 +225,7 @@ public:
+     QLocale::Language m_language;
+     QLocale::Country m_country;
+     QFileInfo m_fileInfo;
++    QByteArray m_prefilledContent;
+     RCCFileInfo *m_parent;
+     QHash<QString, RCCFileInfo*> m_children;
+     RCCResourceLibrary::CompressionAlgorithm m_compressAlgo;
+-- 
+2.24.0.windows.2
+

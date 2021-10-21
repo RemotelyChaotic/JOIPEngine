@@ -19,7 +19,8 @@ public:
   };
 
   CEosResourceLocator(const QJsonDocument& script,
-                      const std::vector<QString>& vsSupportedHosts);
+                      const std::vector<QString>& vsSupportedHosts,
+                      const QString& sFIX_POLLUTION);
   ~CEosResourceLocator();
 
   bool LocateAllResources(QString* psError);
@@ -39,6 +40,7 @@ private:
 
   const QJsonDocument&                          m_script;
   const std::vector<QString>&                   m_vsSupportedHosts;
+  QString                                       m_sFIX_POLLUTION;
   qint32                                        m_iIdCounter;
 };
 

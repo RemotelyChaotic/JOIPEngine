@@ -383,7 +383,7 @@ QStringList SResourceFormats::OtherFormats()
 //
 QStringList SResourceFormats::ScriptFormats()
 {
-  static QStringList vsFormats = QStringList() << "*.js";
+  static QStringList vsFormats = QStringList() << "*.js" << "*.eos";
   return vsFormats;
 }
 

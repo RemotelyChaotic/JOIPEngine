@@ -15,6 +15,9 @@
 #include <QObject>
 #include <memory>
 
+class RCCResourceLibrary;
+typedef std::shared_ptr<struct SProject> tspProject;
+
 //----------------------------------------------------------------------------------------
 //
 class CEosDownloadJobWidgetProvider : public IDownloadJobWidgetProvider
@@ -42,6 +45,8 @@ class CEosDownloadJob : public QObject, public IDownloadJob
   };
 
 public:
+  const QString c_sScriptFormat = ".eos";
+
   explicit CEosDownloadJob(QObject* pParent = nullptr);
   ~CEosDownloadJob() override;
 
@@ -69,11 +74,16 @@ private:
   bool RequestRemoteScriptMetadata(const QString& sId, SScriptMetaData& data,
                                    QString* psError);
   bool ValidateJson(const QByteArray& arr, QString* psError);
+  bool WriteResourceBlob(const tspProject& spProject, qint32& iBlob);
 
   std::shared_ptr<QNetworkAccessManager> m_spNetworkAccessManager;
+  std::shared_ptr<RCCResourceLibrary>    m_spResourceLib;
+  tspProject                             m_spProject;
   qint32                                 m_iProgress = 0;
   QString                                m_sName;
   QString                                m_sError;
+  qint32                                 m_iProjId;
+  qint32                                 m_iFileBlobCounter = 0;
 };
 
 DECLARE_DOWNLOADJOB(CEosDownloadJob, "EOS/hostcfg", {"milovana.com"})

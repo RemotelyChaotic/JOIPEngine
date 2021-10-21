@@ -4,6 +4,8 @@
 
 namespace
 {
+  const QString c_sDownloadPath = "https://media.milovana.com/timg/";
+
   const QString c_sPagesKeyWord = "pages";
   const QString c_sLocatorKeyWord = "locator";
 
@@ -41,6 +43,9 @@ namespace
     {"audio/mpeg", EResourceType::eSound},
     {"image/jpeg", EResourceType::eImage},
   };
+
+  const QString c_sSchemeGallery = "gallery";
+  const QString c_sSchemeFile = "file";
 
   std::vector<QJsonValue> FindKeyRecursive(const QString& key, const QJsonValue& value)
   {
@@ -80,9 +85,11 @@ namespace
 //----------------------------------------------------------------------------------------
 //
 CEosResourceLocator::CEosResourceLocator(const QJsonDocument& script,
-                                         const std::vector<QString>& vsSupportedHosts) :
+                                         const std::vector<QString>& vsSupportedHosts,
+                                         const QString& sFIX_POLLUTION) :
   m_script(script),
   m_vsSupportedHosts(vsSupportedHosts),
+  m_sFIX_POLLUTION(sFIX_POLLUTION.isEmpty() ? "" : ("?"+sFIX_POLLUTION)),
   m_iIdCounter(0)
 {
 }
@@ -189,7 +196,7 @@ bool CEosResourceLocator::LocateAllResources(QString* psError)
                   spImg->m_iHeight = it.value().toInt();
                 }
                 spImg->m_data.m_sPath = sGaleryKey + "/" + spImg->m_data.m_sName;
-                spImg->m_data.m_sPath.setScheme("gallery");
+                spImg->m_data.m_sPath.setScheme(c_sSchemeGallery);
                 m_resourceMap.insert({spImg->m_sHash, spImg});
                 currentGallery.insert({spImg->m_sHash, spImg});
               }
@@ -244,7 +251,7 @@ bool CEosResourceLocator::LocateAllResources(QString* psError)
           }
         }
         spImg->m_data.m_sPath = sFileKey;
-        spImg->m_data.m_sPath.setScheme("file");
+        spImg->m_data.m_sPath.setScheme(c_sSchemeFile);
         m_resourceMap.insert({spImg->m_sHash, spImg});
         files.insert({sFileKey, spImg});
       }
@@ -297,6 +304,34 @@ QByteArray CEosResourceLocator::DownloadResource(
     QString* psError)
 {
   QByteArray arr;
+  QUrl dowloadUrl;
+  QUrl path = spResource->m_data.m_sPath;
+  if (path.scheme() == c_sSchemeGallery)
+  {
+    dowloadUrl =
+        c_sDownloadPath + "tb_x1/" + spResource->m_sHash + ".jpeg" + m_sFIX_POLLUTION;
+  }
+  else if (path.scheme() == c_sSchemeFile)
+  {
+    auto it =
+        std::find_if(c_sExtensionMap.begin(), c_sExtensionMap.end(),
+                     [&spResource](const std::pair<QString, std::pair<QString, EResourceType>>& pair) {
+      return pair.second.second == spResource->m_data.m_type;
+    });
+    if (c_sExtensionMap.end() == it)
+    {
+      if (nullptr != psError) { *psError = "Tried to download unknown file type"; }
+      return arr;
+    }
+    dowloadUrl =
+        c_sDownloadPath + "/" + spResource->m_sHash + "." + it->first + m_sFIX_POLLUTION;
+  }
+  else
+  {
+    dowloadUrl = path;
+  }
+
+  arr = fnFetch(dowloadUrl, psError);
   return arr;
 }
 
