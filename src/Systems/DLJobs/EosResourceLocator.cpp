@@ -135,15 +135,12 @@ bool CEosResourceLocator::LocateAllResources(QString* psError)
   QJsonObject galeryObj = galeryIt.value().toObject();
   QJsonObject modulesObj = modulesIt.value().toObject();
 
-  // gallery init
-  tGaleryData galeryMap;
-
   // gather resources from galeries
   for (auto it = galeryObj.constBegin(); galeryObj.constEnd() != it; ++it)
   {
     QJsonValue galeryObjVal = it.value();
     const QString sGaleryKey = it.key();
-    auto& currentGallery = galeryMap[sGaleryKey];
+    auto& currentGallery = m_resourceMap[sGaleryKey];
     currentGallery.insert({});
     if (galeryObjVal.isObject())
     {
@@ -195,9 +192,8 @@ bool CEosResourceLocator::LocateAllResources(QString* psError)
                 {
                   spImg->m_iHeight = it.value().toInt();
                 }
-                spImg->m_data.m_sPath = sGaleryKey + "/" + spImg->m_data.m_sName;
+                spImg->m_data.m_sPath = sGaleryKey;
                 spImg->m_data.m_sPath.setScheme(c_sSchemeGallery);
-                m_resourceMap.insert({spImg->m_sHash, spImg});
                 currentGallery.insert({spImg->m_sHash, spImg});
               }
             }
@@ -252,7 +248,6 @@ bool CEosResourceLocator::LocateAllResources(QString* psError)
         }
         spImg->m_data.m_sPath = sFileKey;
         spImg->m_data.m_sPath.setScheme(c_sSchemeFile);
-        m_resourceMap.insert({spImg->m_sHash, spImg});
         files.insert({sFileKey, spImg});
       }
     }
@@ -272,7 +267,7 @@ bool CEosResourceLocator::LocateAllResources(QString* psError)
       continue;
     }
     if (!sError.isEmpty()) { vsErrors.push_back(sError); sError = QString(); }
-    if (LookupGaleryImage(galeryMap, sResource, &sError))
+    if (LookupGaleryImage(m_resourceMap, sResource, &sError))
     {
       continue;
     }
@@ -285,6 +280,8 @@ bool CEosResourceLocator::LocateAllResources(QString* psError)
 
     vsErrors << "Could not lookup " + sResource;
   }
+
+  m_resourceMap["_files"].insert(files.begin(), files.end());
 
   // errors
   if (nullptr != psError && vsErrors.size() > 0)
@@ -374,7 +371,7 @@ bool CEosResourceLocator::LookupRemoteLink(const QString& sResource, QString* ps
   spImg->m_iHeight = -1;
   spImg->m_data.m_sPath = sResource;
   spImg->m_data.m_sSource = sResource;
-  m_resourceMap.insert({spImg->m_sHash, spImg});
+  m_resourceMap["_remote"].insert({spImg->m_sHash, spImg});
 
   return true;
 }
@@ -434,6 +431,8 @@ bool CEosResourceLocator::LookupGaleryImage(const tGaleryData& gallieries,
     }
     return false;
   }
+
+  itId->second->m_data.m_sName.prepend(sGallery);
 
   return true;
 }
@@ -499,5 +498,5 @@ bool CEosResourceLocator::LookupFile(const tResourceMap& files,
     return false;
   }
 
-  return false;
+  return true;
 }

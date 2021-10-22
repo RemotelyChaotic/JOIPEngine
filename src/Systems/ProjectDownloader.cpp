@@ -120,26 +120,26 @@ void CProjectDownloader::Deinitialize()
 
 //----------------------------------------------------------------------------------------
 //
-void CProjectDownloader::SlotDownloadFinished()
+void CProjectDownloader::SlotDownloadFinished(qint32 iProjId)
 {
   IDownloadJob* pJob = dynamic_cast<IDownloadJob*>(sender());
   if (nullptr != pJob && !pJob->WasStopped())
   {
     Notifier()->SendNotification(QString("Download of %1 finished.").arg(pJob->JobName()));
   }
-  emit SignalDownloadFinished();
+  emit SignalDownloadFinished(iProjId);
 }
 
 //----------------------------------------------------------------------------------------
 //
-void CProjectDownloader::SlotDownloadStarted()
+void CProjectDownloader::SlotDownloadStarted(qint32 iProjId)
 {
   IDownloadJob* pJob = dynamic_cast<IDownloadJob*>(sender());
   if (nullptr != pJob)
   {
     Notifier()->SendNotification(QString("%1 download started.").arg(pJob->JobName()));
   }
-  emit SignalDownloadStarted();
+  emit SignalDownloadStarted(iProjId);
 }
 
 //----------------------------------------------------------------------------------------
@@ -173,13 +173,13 @@ void CProjectDownloader::SlotRunNextJob()
     }
 
     // connections (will be removed once the object is deleted, so we won't disconnect
-    connect(dynamic_cast<QObject*>(m_spCurrentJob.get()), SIGNAL(SignalFinished()),
-            this, SLOT(SlotDownloadFinished()), Qt::DirectConnection);
-    connect(dynamic_cast<QObject*>(m_spCurrentJob.get()), SIGNAL(SignalProgressChanged(qint32)),
-            this, SIGNAL(SignalProgressChanged(qint32)), Qt::DirectConnection);
-    connect(dynamic_cast<QObject*>(m_spCurrentJob.get()), SIGNAL(SignalStarted()),
-            this, SLOT(SlotDownloadStarted()), Qt::DirectConnection);
-    connect(dynamic_cast<QObject*>(m_spCurrentJob.get()), SIGNAL(SignalFinished()),
+    connect(dynamic_cast<QObject*>(m_spCurrentJob.get()), SIGNAL(SignalFinished(qint32)),
+            this, SLOT(SlotDownloadFinished(qint32)), Qt::DirectConnection);
+    connect(dynamic_cast<QObject*>(m_spCurrentJob.get()), SIGNAL(SignalProgressChanged(qint32,qint32)),
+            this, SIGNAL(SignalProgressChanged(qint32,qint32)), Qt::DirectConnection);
+    connect(dynamic_cast<QObject*>(m_spCurrentJob.get()), SIGNAL(SignalStarted(qint32)),
+            this, SLOT(SlotDownloadStarted(qint32)), Qt::DirectConnection);
+    connect(dynamic_cast<QObject*>(m_spCurrentJob.get()), SIGNAL(SignalFinished(qint32)),
             this, SLOT(SlotRunNextJob()), Qt::QueuedConnection);
 
     bool bOk = m_spCurrentJob->Run(args);

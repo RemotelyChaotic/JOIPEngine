@@ -30,7 +30,7 @@ public:
 
   using tResourceMap = std::map<QString /*sHash*/, std::shared_ptr<SEosResourceData>>;
   using tGaleryData = std::map<QString /*sGaleryHash*/, tResourceMap>;
-  tResourceMap                                  m_resourceMap;
+  tGaleryData                                   m_resourceMap;
 
 private:
   bool LookupRemoteLink(const QString& sResource, QString* psError);

@@ -5,8 +5,8 @@
 #include <QVariant>
 #include <atomic>
 
-#define ABORT_CHECK \
-  if (CheckIsStoppedAndAbort()) { return false; }
+#define ABORT_CHECK(id) \
+  if (CheckIsStoppedAndAbort(id)) { return false; }
 
 //----------------------------------------------------------------------------------------
 //
@@ -38,16 +38,16 @@ public:
   bool WasStopped() { return m_bStop; }
 
 signals:
-  virtual void SignalFinished() = 0;
-  virtual void SignalProgressChanged(qint32 iProgress) = 0;
-  virtual void SignalStarted() = 0;
+  virtual void SignalFinished(qint32 iProjId) = 0;
+  virtual void SignalProgressChanged(qint32 iProjId, qint32 iProgress) = 0;
+  virtual void SignalStarted(qint32 iProjId) = 0;
 
 protected:
   IDownloadJob() : m_bStop(false) {}
   virtual void AbortImpl() = 0;
 
-  bool CheckIsStoppedAndAbort() {
-    if (m_bStop) { AbortImpl(); emit SignalFinished(); return true; }
+  bool CheckIsStoppedAndAbort(qint32 iProjId) {
+    if (m_bStop) { AbortImpl(); emit SignalFinished(iProjId); return true; }
     return false;
   };
 

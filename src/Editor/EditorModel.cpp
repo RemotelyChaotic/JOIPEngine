@@ -352,8 +352,7 @@ void CEditorModel::LoadProject(qint32 iId)
 
     if (!m_bReadOnly)
     {
-      CPhysFsFileEngine::setWriteDir(
-            QString(m_spSettings->ContentFolder() + "/" + sProjName).toStdString().data());
+      CDatabaseManager::SetProjectEditing(m_spCurrentProject, true);
     }
 
     // nodes
@@ -542,7 +541,7 @@ void CEditorModel::UnloadProject()
     spDbManager->DeserializeProject(iId);
   }
 
-  CPhysFsFileEngine::setWriteDir(nullptr);
+  CDatabaseManager::SetProjectEditing(m_spCurrentProject, false);
   CDatabaseManager::UnloadProject(m_spCurrentProject);
   m_spCurrentProject = nullptr;
 

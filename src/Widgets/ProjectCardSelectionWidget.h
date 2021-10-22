@@ -46,9 +46,12 @@ protected slots:
   void SlotLoadProjectsPrivate(EDownLoadStateFlags flags);
   void SlotOverlayOpened();
   void SlotOverlayClosed();
+  void SlotProjectAdded(qint32 iId);
+  void SlotProjectDownloadFinished(qint32 iProjId);
+  void SlotProjectDownloadProgressChanged(qint32 iProjId, qint32 iProgress);
+  void SlotProjectRemoved(qint32 iId);
   void SlotResizeDone();
   void SlotUnloadFinished();
-
 
 protected:
   void resizeEvent(QResizeEvent* pEvent) override;
@@ -59,7 +62,8 @@ private:
 
   std::unique_ptr<Ui::CProjectCardSelectionWidget> m_spUi;
   std::weak_ptr<CDatabaseManager>                  m_wpDbManager;
-  std::vector<QPointer<CProjectScriptWrapper>>                  m_vpProjects;
+  std::vector<QPointer<CProjectScriptWrapper>>     m_vpProjects;
+  EDownLoadStateFlags                              m_flags;
   QColor                                           m_selectionColor;
   qint32                                           m_iSelectedProjectId;
   bool                                             m_bLoadedQml;

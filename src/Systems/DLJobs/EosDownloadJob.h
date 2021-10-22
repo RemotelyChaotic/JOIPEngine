@@ -57,9 +57,9 @@ public:
   bool Run(const QVariantList& args) override;
 
 signals:
-  void SignalFinished() override;
-  void SignalProgressChanged(qint32 iProgress) override;
-  void SignalStarted() override;
+  void SignalFinished(qint32 iProjId) override;
+  void SignalProgressChanged(qint32 iProjId, qint32 iProgress) override;
+  void SignalStarted(qint32 iProjId) override;
 
 protected:
   void AbortImpl() override;
@@ -74,7 +74,7 @@ private:
   bool RequestRemoteScriptMetadata(const QString& sId, SScriptMetaData& data,
                                    QString* psError);
   bool ValidateJson(const QByteArray& arr, QString* psError);
-  bool WriteResourceBlob(const tspProject& spProject, qint32& iBlob);
+  bool WriteResourceBlob(const tspProject& spProject, const QString& sName, qint32& iBlob);
 
   std::shared_ptr<QNetworkAccessManager> m_spNetworkAccessManager;
   std::shared_ptr<RCCResourceLibrary>    m_spResourceLib;

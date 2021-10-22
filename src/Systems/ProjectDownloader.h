@@ -26,18 +26,18 @@ public:
   void WaitForFinished();
 
 signals:
-  void SignalDownloadFinished();
-  void SignalDownloadStarted();
+  void SignalDownloadFinished(qint32 iProjId);
+  void SignalDownloadStarted(qint32 iProjId);
   void SignalJobAdded(qint32 iNumJobs);
-  void SignalProgressChanged(qint32 iProgress);
+  void SignalProgressChanged(qint32 iProjId, qint32 iProgress);
 
 public slots:
   void Initialize() override;
   void Deinitialize() override;
 
 private slots:
-  void SlotDownloadFinished();
-  void SlotDownloadStarted();
+  void SlotDownloadFinished(qint32 iProjId);
+  void SlotDownloadStarted(qint32 iProjId);
   void SlotClearQueue();
   void SlotRunNextJob();
 

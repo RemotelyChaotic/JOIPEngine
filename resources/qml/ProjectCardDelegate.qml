@@ -1,6 +1,7 @@
 import QtQuick 2.14
 import QtQuick.Controls 2.14
 import QtQuick.Layouts 1.14
+import QtQuick.Shapes 1.14
 import QtGraphicalEffects 1.12
 import JOIP.core 1.1
 import JOIP.db 1.1
@@ -12,6 +13,7 @@ Rectangle {
     clip: true
     color: "transparent"
 
+    property int progress: -1
     property bool isHovered: false
     property bool openedDetails: false
     property Project dto: project
@@ -48,6 +50,7 @@ Rectangle {
             onExited: isHovered = false
         }
 
+        // title card
         Rectangle {
             anchors.centerIn: parent
             width: parent.width
@@ -90,6 +93,44 @@ Rectangle {
                 id: errorResource
                 visible: resource.state === Resource.Null || resource.state === Resource.Error
                 fontSize: describtionDelegate.isHovered ? 100 : 90
+            }
+        }
+
+        // ProgressBar
+        Rectangle {
+            id: progressRect
+            anchors.centerIn: parent
+            width: parent.width
+            height: parent.height
+            color: "transparent"
+            visible: -1 !== describtionDelegate.progress
+
+            Rectangle {
+                anchors.left: parent.left
+                height: parent.height
+                width: parent.width * describtionDelegate.progress / 100.0
+
+                Behavior on width {
+                    animation: NumberAnimation {
+                         duration: 100; easing.type: Easing.InOutQuad
+                    }
+                }
+
+                gradient: Gradient {
+                    orientation: Gradient.Horizontal
+                    GradientStop { position: 0.0; color: root.selectionColor }
+                    GradientStop {
+                        position: 0.33
+                        color: Qt.darker(root.selectionColor, 2.0)
+
+                        SequentialAnimation on position {
+                            loops: Animation.Infinite
+                            PropertyAnimation { to: 0.0; duration: 200 }
+                            PropertyAnimation { to: 1.0; duration: 200 }
+                        }
+                    }
+                    GradientStop { position: 1.0; color: root.selectionColor }
+                }
             }
         }
 
@@ -430,13 +471,7 @@ Rectangle {
     }
 
 
-    Component.onCompleted: {
-        var pResource = dto.resource(dto.titleCard);
-        if (null !== pResource && undefined !== pResource)
-        {
-            resource.resource = pResource;
-        }
-
+    function updateDelegate(iProgress) {
         versionText.text = dto.versionText + " / " + dto.targetVersionText;
         describtion.text = (dto.describtion.length > 0 ? dto.describtion : qsTr("<i>No describtion</i>")) +
                 "<br><br>";
@@ -452,6 +487,27 @@ Rectangle {
         {
             iconUsesWebRect.visible = true;
             desaturateEffect.desaturation = (Settings.offline && dto.isUsingWeb) ? 0.9 : 0.0;
+        }
+
+        describtionDelegate.progress = iProgress;
+    }
+
+    Component.onCompleted: {
+        var pResource = dto.resource(dto.titleCard);
+        if (null !== pResource && undefined !== pResource)
+        {
+            resource.resource = pResource;
+        }
+
+        updateDelegate(-1);
+    }
+
+    Connections {
+        target: root
+        function onProjectUpdate(iProjId, iProgress) {
+            if (iProjId === dto.id) {
+                updateDelegate(iProgress);
+            }
         }
     }
 

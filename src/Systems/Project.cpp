@@ -540,7 +540,7 @@ QString PhysicalProjectName(const tspProject& spProject)
 {
   QReadLocker locker(&spProject->m_rwLock);
   QString sName = spProject->m_sName;
-  if (!spProject->m_sFolderName.isNull())
+  if (!spProject->m_sFolderName.isNull() && sName != spProject->m_sFolderName)
   {
     sName = spProject->m_sFolderName;
   }

@@ -31,6 +31,7 @@ public:
   ~CDatabaseManager() override;
 
   static bool LoadProject(tspProject& spProject);
+  static bool SetProjectEditing(tspProject& spProject, bool bEnabled);
   static bool UnloadProject(tspProject& spProject);
 
   // Project
@@ -49,8 +50,8 @@ public:
   void RemoveProject(const QString& sName);
   void RenameProject(qint32 iId, const QString& sNewName);
   void RenameProject(const QString& sName, const QString& sNewName);
-  bool SerializeProject(qint32 iId);
-  bool SerializeProject(const QString& sName);
+  bool SerializeProject(qint32 iId, bool bForceWriting = false);
+  bool SerializeProject(const QString& sName, bool bForceWriting = false);
 
   // Scene
   qint32 AddScene(tspProject& spProj, const QString& sName = "New_Scene",
@@ -107,7 +108,7 @@ private:
   qint32 FindNewSceneId(tspProject& spProj);
   void LoadDatabase();
   bool PrepareProjectPrivate(tspProject& spProject);
-  bool SerializeProjectPrivate(tspProject& spProject);
+  bool SerializeProjectPrivate(tspProject& spProject, bool bForceWriting);
 
   static void LoadResource(tspResource& spRes);
   static void UnloadResource(tspResource& spRes);

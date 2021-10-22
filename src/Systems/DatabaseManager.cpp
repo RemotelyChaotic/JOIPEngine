@@ -84,6 +84,23 @@ bool CDatabaseManager::LoadProject(tspProject& spProject)
 
 //----------------------------------------------------------------------------------------
 //
+bool CDatabaseManager::SetProjectEditing(tspProject& spProject, bool bEnabled)
+{
+  const QString sProjName = PhysicalProjectName(spProject);
+  if (bEnabled)
+  {
+    return CPhysFsFileEngine::setWriteDir(
+          QString(CApplication::Instance()->Settings()->ContentFolder() + QDir::separator() +
+                  sProjName).toStdString().data());
+  }
+  else
+  {
+    return CPhysFsFileEngine::setWriteDir(nullptr);
+  }
+}
+
+//----------------------------------------------------------------------------------------
+//
 bool CDatabaseManager::UnloadProject(tspProject& spProject)
 {
   if (nullptr == spProject) { return false; }
@@ -138,13 +155,14 @@ qint32 CDatabaseManager::AddProject(const QString& sDirName, quint32 iVersion,
   if (!IsInitialized()) { return -1; }
 
   qint32 iNewId = FindNewProjectId();
-
+  QString sDirNameResolved = sDirName;
   const QString sBaseName = QFileInfo(sDirName).completeBaseName();
   QString sName = sBaseName;
   QString sError;
   if (!ProjectNameCheck(sBaseName, &sError))
   {
     sName = ToValidProjectName(sBaseName);
+    sDirNameResolved = sName + QFileInfo(sDirName).suffix();
   }
   else
   {
@@ -158,7 +176,7 @@ qint32 CDatabaseManager::AddProject(const QString& sDirName, quint32 iVersion,
     m_vspProjectDatabase.push_back(std::make_shared<SProject>());
     m_vspProjectDatabase.back()->m_iId = iNewId;
     m_vspProjectDatabase.back()->m_sName = sName;
-    m_vspProjectDatabase.back()->m_sFolderName = sDirName;
+    m_vspProjectDatabase.back()->m_sFolderName = sDirNameResolved;
     m_vspProjectDatabase.back()->m_iVersion = iVersion;
     m_vspProjectDatabase.back()->m_bBundled = bBundled;
     m_vspProjectDatabase.back()->m_bReadOnly = bReadOnly;
@@ -421,28 +439,28 @@ void CDatabaseManager::RenameProject(const QString& sName, const QString& sNewNa
 
 //----------------------------------------------------------------------------------------
 //
-bool CDatabaseManager::SerializeProject(qint32 iId)
+bool CDatabaseManager::SerializeProject(qint32 iId, bool bForceWriting)
 {
   if (!IsInitialized()) { return false; }
 
   tspProject spProject = FindProject(iId);
   if (nullptr != spProject)
   {
-    return SerializeProjectPrivate(spProject);
+    return SerializeProjectPrivate(spProject, bForceWriting);
   }
   return false;
 }
 
 //----------------------------------------------------------------------------------------
 //
-bool CDatabaseManager::SerializeProject(const QString& sName)
+bool CDatabaseManager::SerializeProject(const QString& sName, bool bForceWriting)
 {
   if (!IsInitialized()) { return false; }
 
   tspProject spProject = FindProject(sName);
   if (nullptr != spProject)
   {
-    return SerializeProjectPrivate(spProject);
+    return SerializeProjectPrivate(spProject, bForceWriting);
   }
   return false;
 }
@@ -1175,7 +1193,7 @@ bool CDatabaseManager::PrepareProjectPrivate(tspProject& spProject)
 
 //----------------------------------------------------------------------------------------
 //
-bool CDatabaseManager::SerializeProjectPrivate(tspProject& spProject)
+bool CDatabaseManager::SerializeProjectPrivate(tspProject& spProject, bool bForceWriting)
 {
   spProject->m_rwLock.lockForRead();
   const QString sName = spProject->m_sName;
@@ -1193,27 +1211,30 @@ bool CDatabaseManager::SerializeProjectPrivate(tspProject& spProject)
 
   // first rename old folder
   QString sNewFolderName = sFolderName;
+  const QString sOldProjectFolder = m_spSettings->ContentFolder() + QDir::separator() + sFolderName;
+  QString sNewProjectFolder = m_spSettings->ContentFolder() + QDir::separator() + sNewFolderName;
   if (sBaseName != sName)
   {
     if (!sBaseName.isEmpty())
     {
-      if (QFileInfo(m_spSettings->ContentFolder() + QDir::separator() + sFolderName).exists())
+      if (QFileInfo(sOldProjectFolder).exists())
       {
         sNewFolderName = sName + "." + sSuffix;
-        bOk = sContentFolder.rename(sFolderName, sName + "." + sSuffix);
+        sNewProjectFolder = m_spSettings->ContentFolder() + QDir::separator() + sNewFolderName;
+        bOk = sContentFolder.rename(sFolderName, sNewFolderName);
       }
       else
       {
         bOk = false;
-        qWarning() << "Serialize: Could not rename folder: " + m_spSettings->ContentFolder() + QDir::separator() + sFolderName;
+        qWarning() << "Serialize: Could not rename folder: " + sOldProjectFolder;
       }
     }
   }
 
   // if new doesn't exist -> create
-  if (bOk && !QFileInfo(m_spSettings->ContentFolder() + QDir::separator() + sFolderName).exists())
+  if (bOk && !QFileInfo(sNewProjectFolder).exists())
   {
-    bOk = sContentFolder.mkdir(sFolderName);
+    bOk = sContentFolder.mkdir(sNewProjectFolder);
     if (!bOk)
     {
       qWarning() << "Serialize: Could not create folder: " + m_spSettings->ContentFolder() + QDir::separator() + sFolderName;
@@ -1232,7 +1253,10 @@ bool CDatabaseManager::SerializeProjectPrivate(tspProject& spProject)
   if (bOk)
   {
     QJsonDocument document(spProject->ToJsonObject());
-    QFile jsonFile(CPhysFsFileEngineHandler::c_sScheme + joip_resource::c_sProjectFileName);
+
+    QFile jsonFile((!bForceWriting ? CPhysFsFileEngineHandler::c_sScheme :
+                                     (sNewProjectFolder + QDir::separator())) +
+                   joip_resource::c_sProjectFileName);
     if (jsonFile.open(QIODevice::ReadWrite | QIODevice::Truncate))
     {
       jsonFile.write(document.toJson(QJsonDocument::Indented));

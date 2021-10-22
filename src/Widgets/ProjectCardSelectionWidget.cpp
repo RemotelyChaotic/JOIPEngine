@@ -5,6 +5,7 @@
 #include "Systems/DatabaseImageProvider.h"
 #include "Systems/HelpFactory.h"
 #include "Systems/Project.h"
+#include "Systems/ProjectDownloader.h"
 #include "Widgets/HelpOverlay.h"
 #include "ui_ProjectCardSelectionWidget.h"
 
@@ -25,6 +26,7 @@ namespace  {
 CProjectCardSelectionWidget::CProjectCardSelectionWidget(QWidget* pParent) :
   QWidget(pParent),
   m_spUi(std::make_unique<Ui::CProjectCardSelectionWidget>()),
+  m_flags(0),
   m_selectionColor(Qt::white),
   m_iSelectedProjectId(-1),
   m_bLoadedQml(false)
@@ -50,7 +52,6 @@ void CProjectCardSelectionWidget::Initialize()
   m_bLoadedQml = false;
 
   m_wpDbManager = CApplication::Instance()->System<CDatabaseManager>();
-
   auto wpHelpFactory = CApplication::Instance()->System<CHelpFactory>().lock();
   if (nullptr != wpHelpFactory)
   {
@@ -62,10 +63,27 @@ void CProjectCardSelectionWidget::Initialize()
 
   InitQmlMain();
 
+  if (auto spDbManager = m_wpDbManager.lock())
+  {
+    connect(spDbManager.get(), &CDatabaseManager::SignalProjectAdded,
+            this, &CProjectCardSelectionWidget::SlotProjectAdded);
+    connect(spDbManager.get(), &CDatabaseManager::SignalProjectAdded,
+            this, &CProjectCardSelectionWidget::SlotProjectRemoved);
+  }
+
   connect(CHelpOverlay::Instance(), &CHelpOverlay::SignalOverlayOpened,
           this, &CProjectCardSelectionWidget::SlotOverlayOpened);
   connect(CHelpOverlay::Instance(), &CHelpOverlay::SignalOverlayClosed,
           this, &CProjectCardSelectionWidget::SlotOverlayClosed);
+
+  auto wpDowloader = CApplication::Instance()->System<CProjectDownloader>();
+  if (auto spDownloader = wpDowloader.lock())
+  {
+    connect(spDownloader.get(), &CProjectDownloader::SignalDownloadFinished,
+            this, &CProjectCardSelectionWidget::SlotProjectDownloadFinished);
+    connect(spDownloader.get(), &CProjectDownloader::SignalProgressChanged,
+            this, &CProjectCardSelectionWidget::SlotProjectDownloadProgressChanged);
+  }
 }
 
 //----------------------------------------------------------------------------------------
@@ -194,6 +212,7 @@ void CProjectCardSelectionWidget::SlotCardClicked(int iProjId)
 //
 void CProjectCardSelectionWidget::SlotLoadProjectsPrivate(EDownLoadStateFlags flags)
 {
+  m_flags = flags;
   m_spUi->pQmlWidget->setSource(QUrl("qrc:/qml/resources/qml/ProjectCardSelection.qml"));
 
   connect(m_spUi->pQmlWidget->rootObject(), SIGNAL(selectedProjectIndex(int)),
@@ -202,37 +221,13 @@ void CProjectCardSelectionWidget::SlotLoadProjectsPrivate(EDownLoadStateFlags fl
   QQuickItem* pRootObject =  m_spUi->pQmlWidget->rootObject();
   pRootObject->setProperty("selectionColor", QVariant::fromValue(m_selectionColor));
 
-  QJSEngine* pEngine = m_spUi->pQmlWidget->engine();
-
   auto spDbManager = m_wpDbManager.lock();
   if (nullptr != spDbManager)
   {
     std::set<qint32, std::less<qint32>> ids = spDbManager->ProjectIds();
     for (auto it = ids.begin(); ids.end() != it; ++it)
     {
-      tspProject spProject = spDbManager->FindProject(*it);
-      if (nullptr != spProject)
-      {
-        bool bDisplay = true;
-        if (-1 == m_iSelectedProjectId)
-        {
-          QReadLocker locker(&spProject->m_rwLock);
-          m_iSelectedProjectId = spProject->m_iId;
-        }
-
-        {
-          QReadLocker locker(&spProject->m_rwLock);
-          bDisplay = flags & spProject->m_dlState;
-        }
-
-        if (bDisplay)
-        {
-          CProjectScriptWrapper* pValue = new CProjectScriptWrapper(pEngine, spProject);
-          m_spUi->pQmlWidget->rootObject()->setProperty("currentlyAddedProject", QVariant::fromValue(pValue));
-          QMetaObject::invokeMethod(pRootObject, "onAddProject");
-          m_vpProjects.push_back(pValue);
-        }
-      }
+      SlotProjectAdded(*it);
     }
   }
 
@@ -257,6 +252,89 @@ void CProjectCardSelectionWidget::SlotOverlayClosed()
   m_spUi->pQmlWidget->setAttribute(Qt::WA_TranslucentBackground, true);
   m_spUi->pQmlWidget->setClearColor(Qt::transparent);
   m_spUi->pQmlWidget->setStyleSheet("background-color: transparent;");
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CProjectCardSelectionWidget::SlotProjectAdded(qint32 iId)
+{
+  if (!IsLoaded()) { return; }
+
+  if (auto spDbManager = m_wpDbManager.lock())
+  {
+    QQuickItem* pRootObject =  m_spUi->pQmlWidget->rootObject();
+    QJSEngine* pEngine = m_spUi->pQmlWidget->engine();
+
+    tspProject spProject = spDbManager->FindProject(iId);
+    if (nullptr != spProject)
+    {
+      bool bDisplay = true;
+      if (-1 == m_iSelectedProjectId)
+      {
+        QReadLocker locker(&spProject->m_rwLock);
+        m_iSelectedProjectId = spProject->m_iId;
+      }
+
+      {
+        QReadLocker locker(&spProject->m_rwLock);
+        bDisplay = m_flags & spProject->m_dlState;
+      }
+
+      if (bDisplay)
+      {
+        CProjectScriptWrapper* pValue = new CProjectScriptWrapper(pEngine, spProject);
+        m_spUi->pQmlWidget->rootObject()->setProperty("currentlyAddedProject", QVariant::fromValue(pValue));
+        QMetaObject::invokeMethod(pRootObject, "onAddProject");
+        m_vpProjects.push_back(pValue);
+      }
+    }
+  }
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CProjectCardSelectionWidget::SlotProjectDownloadFinished(qint32 iProjId)
+{
+  if (!IsLoaded()) { return; }
+
+  if (!(m_flags & EDownLoadState::eFinished))
+  {
+    SlotProjectRemoved(iProjId);
+  }
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CProjectCardSelectionWidget::SlotProjectDownloadProgressChanged(qint32 iProjId,
+                                                                     qint32 iProgress)
+{
+  if (!IsLoaded()) { return; }
+
+  QQuickItem* pRootObject =  m_spUi->pQmlWidget->rootObject();
+  QMetaObject::invokeMethod(pRootObject, "onUpdateProject",
+                            Q_ARG(QVariant, QVariant(iProjId)),
+                            Q_ARG(QVariant, QVariant(iProgress)));
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CProjectCardSelectionWidget::SlotProjectRemoved(qint32 iId)
+{
+  if (!IsLoaded()) { return; }
+
+  QQuickItem* pRootObject =  m_spUi->pQmlWidget->rootObject();
+
+  m_spUi->pQmlWidget->rootObject()->setProperty("currentlyRemovedProject", iId);
+  QMetaObject::invokeMethod(pRootObject, "onRemoveProject");
+
+  for (auto it = m_vpProjects.begin(); m_vpProjects.end() != it; ++it)
+  {
+    if ((*it)->getId())
+    {
+      m_vpProjects.erase(it);
+      return;
+    }
+  }
 }
 
 //----------------------------------------------------------------------------------------

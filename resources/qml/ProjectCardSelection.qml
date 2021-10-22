@@ -12,14 +12,31 @@ Rectangle {
     property var style: null;
 
     property Project currentlyAddedProject: null
+    property int currentlyRemovedProject: -1
     property var selectionColor: "white"
     property var filter: ".*"
 
     signal selectedProjectIndex(int index)
+    signal projectUpdate(int iProjId, int iProgress)
 
     function onResize()
     {
         // nothing to do
+    }
+
+    function findProject(id)
+    {
+        if (-1 !== id)
+        {
+            for (var i = 0; i < listModel.count; ++i)
+            {
+                if (listModel.get(i).project.id === id)
+                {
+                    return i;
+                }
+            }
+        }
+        return -1;
     }
 
     function onAddProject()
@@ -35,10 +52,25 @@ Rectangle {
         }
     }
 
+    function onRemoveProject()
+    {
+        var iIndex = findProject(currentlyRemovedProject);
+        if (-1 !== iIndex)
+        {
+            listModel.remove(iIndex);
+        }
+    }
+
+    function onUpdateProject(iProjId, iProgress)
+    {
+        root.projectUpdate(iProjId, iProgress);
+    }
+
     function onUnLoad()
     {
         listModel.clear();
         currentlyAddedProject = null;
+        currentlyRemovedProject = -1;
         gc();
     }
 
