@@ -1255,10 +1255,12 @@ bool CDatabaseManager::SerializeProjectPrivate(tspProject& spProject, bool bForc
     }
   }
 
+  bool bWasLoaded = false;
   if (bOk)
   {
     spProject->m_rwLock.lockForWrite();
     spProject->m_sFolderName = sNewFolderName;
+    bWasLoaded = spProject->m_bLoaded;
     spProject->m_rwLock.unlock();
   }
 
@@ -1281,6 +1283,11 @@ bool CDatabaseManager::SerializeProjectPrivate(tspProject& spProject, bool bForc
       qWarning() << "Could not wirte project file: " + jsonFile.fileName();
       bOk =  false;
     }
+  }
+
+  if (!bWasLoaded)
+  {
+    bOk &= UnloadProject(spProject);
   }
 
   return bOk;
