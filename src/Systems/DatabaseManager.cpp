@@ -667,7 +667,7 @@ bool CDatabaseManager::AddResourceArchive(tspProject& spProj, const QUrl& sPath)
     const QString sName = QFileInfo(sPath.fileName()).completeBaseName();
     tspResourceBundle spResourceBundle = std::make_shared<SResourceBundle>();
     spResourceBundle->m_sName = sName;
-    spResourceBundle->m_sPath = sMountPoint;
+    spResourceBundle->m_sPath = sPath;
     spProj->m_spResourceBundleMap.insert({sMountPoint, spResourceBundle});
   }
   // archive

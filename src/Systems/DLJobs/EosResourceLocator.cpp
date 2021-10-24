@@ -1,4 +1,7 @@
 #include "EosResourceLocator.h"
+
+#include "Systems/Project.h"
+
 #include <QJsonArray>
 #include <QJsonObject>
 
@@ -175,11 +178,11 @@ bool CEosResourceLocator::LocateAllResources(QString* psError)
                 {
                   if (it.value().isString())
                   {
-                    spImg->m_data.m_sName = it.value().toString();
+                    spImg->m_data.m_sName = sGaleryKey + it.value().toString();
                   }
                   else
                   {
-                    spImg->m_data.m_sName = QString::number(it.value().toInt());
+                    spImg->m_data.m_sName = sGaleryKey + QString::number(it.value().toInt());
                   }
                 }
                 it = objImage.find(c_sImagewidthKeyWord);
@@ -192,9 +195,9 @@ bool CEosResourceLocator::LocateAllResources(QString* psError)
                 {
                   spImg->m_iHeight = it.value().toInt();
                 }
-                spImg->m_data.m_sPath = sGaleryKey;
+                spImg->m_data.m_sPath = ToValidProjectName(sGaleryName);
                 spImg->m_data.m_sPath.setScheme(c_sSchemeGallery);
-                currentGallery.insert({spImg->m_sHash, spImg});
+                currentGallery.insert({spImg->m_data.m_sName, spImg});
               }
             }
           }
@@ -277,11 +280,13 @@ bool CEosResourceLocator::LocateAllResources(QString* psError)
       continue;
     }
     if (!sError.isEmpty()) { vsErrors.push_back(sError); sError = QString(); }
-
-    vsErrors << "Could not lookup " + sResource;
   }
 
-  m_resourceMap["_files"].insert(files.begin(), files.end());
+  // insert a "gallery" for files
+  if (files.size() > 0)
+  {
+    m_resourceMap["_files"].insert(files.begin(), files.end());
+  }
 
   // errors
   if (nullptr != psError && vsErrors.size() > 0)
@@ -306,7 +311,7 @@ QByteArray CEosResourceLocator::DownloadResource(
   if (path.scheme() == c_sSchemeGallery)
   {
     dowloadUrl =
-        c_sDownloadPath + "tb_x1/" + spResource->m_sHash + ".jpeg" + m_sFIX_POLLUTION;
+        c_sDownloadPath + "tb_xl/" + spResource->m_sHash + ".jpg" + m_sFIX_POLLUTION;
   }
   else if (path.scheme() == c_sSchemeFile)
   {
@@ -321,7 +326,7 @@ QByteArray CEosResourceLocator::DownloadResource(
       return arr;
     }
     dowloadUrl =
-        c_sDownloadPath + "/" + spResource->m_sHash + "." + it->first + m_sFIX_POLLUTION;
+        c_sDownloadPath + spResource->m_sHash + "." + it->first + m_sFIX_POLLUTION;
   }
   else
   {
@@ -371,7 +376,7 @@ bool CEosResourceLocator::LookupRemoteLink(const QString& sResource, QString* ps
   spImg->m_iHeight = -1;
   spImg->m_data.m_sPath = sResource;
   spImg->m_data.m_sSource = sResource;
-  m_resourceMap["_remote"].insert({spImg->m_sHash, spImg});
+  m_resourceMap["_remote"].insert({sResource, spImg});
 
   return true;
 }
@@ -380,6 +385,8 @@ bool CEosResourceLocator::LookupRemoteLink(const QString& sResource, QString* ps
 //
 bool CEosResourceLocator::LookupEOSResource(const QString& sResource, QString* psError)
 {
+  Q_UNUSED(sResource)
+  Q_UNUSED(psError)
   return false;
 }
 
@@ -418,9 +425,10 @@ bool CEosResourceLocator::LookupGaleryImage(const tGaleryData& gallieries,
   }
 
   auto itId = std::find_if(itGallery->second.begin(), itGallery->second.end(),
-                           [&](const std::pair<QString /*sHash*/,
+                           [&](const std::pair<QString /*sImgHash*/,
                                               std::shared_ptr<SEosResourceData>>& pair) {
-    return pair.second->m_data.m_sName == sId;
+    const QString sName = sGallery + sId;
+    return pair.second->m_data.m_sName == sName;
   });
   if (itGallery->second.end() == itId)
   {
@@ -431,8 +439,6 @@ bool CEosResourceLocator::LookupGaleryImage(const tGaleryData& gallieries,
     }
     return false;
   }
-
-  itId->second->m_data.m_sName.prepend(sGallery);
 
   return true;
 }

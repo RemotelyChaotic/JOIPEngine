@@ -28,7 +28,7 @@ public:
                               std::function<QByteArray(const QUrl&, QString*)> fnFetch,
                               QString* psError);
 
-  using tResourceMap = std::map<QString /*sHash*/, std::shared_ptr<SEosResourceData>>;
+  using tResourceMap = std::map<QString /*sName*/, std::shared_ptr<SEosResourceData>>;
   using tGaleryData = std::map<QString /*sGaleryHash*/, tResourceMap>;
   tGaleryData                                   m_resourceMap;
 
