@@ -20,6 +20,7 @@ SProject::SProject() :
   m_vsKinks(),
   m_vspScenes(),
   m_spResourcesMap(),
+  m_spResourceBundleMap(),
   m_vsMountPoints()
 {
 }
@@ -29,6 +30,7 @@ SProject::SProject(const SProject& other) :
   m_vsKinks(other.m_vsKinks),
   m_vspScenes(other.m_vspScenes),
   m_spResourcesMap(other.m_spResourcesMap),
+  m_spResourceBundleMap(other.m_spResourceBundleMap),
   m_vsMountPoints(other.m_vsMountPoints)
 {}
 
@@ -55,6 +57,11 @@ QJsonObject SProject::ToJsonObject()
   {
     resources.push_back(spResource.second->ToJsonObject());
   }
+  QJsonArray resourceBundles;
+  for (auto& spResourceBundle : m_spResourceBundleMap)
+  {
+    resourceBundles.push_back(spResourceBundle.second->ToJsonObject());
+  }
   QJsonArray mountPoints;
   for (auto& sMountPoint : m_vsMountPoints)
   {
@@ -76,6 +83,7 @@ QJsonObject SProject::ToJsonObject()
     { "vsKinks", kinks },
     { "vspScenes", scenes },
     { "vspResources", resources },
+    { "vspResourceBundles", resourceBundles },
     { "vsMountPoints", mountPoints },
     { "dlState", m_dlState._to_integral() },
     { "sFont", m_sFont }
@@ -183,6 +191,21 @@ void SProject::FromJsonObject(const QJsonObject& json)
       spResource->FromJsonObject(val.toObject());
       locker.relock();
       m_spResourcesMap.insert({spResource->m_sName, spResource});
+    }
+  }
+  it = json.find("vspResourceBundles");
+  m_spResourceBundleMap.clear();
+  if (it != json.end())
+  {
+    for (QJsonValue val : it.value().toArray())
+    {
+      std::shared_ptr<SResourceBundle> spResourceBundle =
+          std::make_shared<SResourceBundle>();
+      spResourceBundle->m_spParent = GetPtr();
+      locker.unlock();
+      spResourceBundle->FromJsonObject(val.toObject());
+      locker.relock();
+      m_spResourceBundleMap.insert({spResourceBundle->m_sName, spResourceBundle});
     }
   }
   it = json.find("vsMountPoints");

@@ -657,19 +657,33 @@ bool CDatabaseManager::AddResourceArchive(tspProject& spProj, const QUrl& sPath)
   if (!IsInitialized() || nullptr == spProj) { return false; }
 
   const QString sName = PhysicalProjectName(spProj);
-  QString sProjPath = CApplication::Instance()->Settings()->ContentFolder() + QDir::separator() + sName;
-  QString sMountPoint = sPath.path();
+  const QString sProjPath = CApplication::Instance()->Settings()->ContentFolder() + QDir::separator() + sName;
+  const QString sMountPoint = sPath.path();
+  const QString sFileSuffix = QFileInfo(sPath.fileName()).suffix();
   QWriteLocker locker(&spProj->m_rwLock);
-  spProj->m_vsMountPoints << sMountPoint;
-  if (spProj->m_bLoaded)
+  // resource bundle
+  if (joip_resource::c_sResourceBundleSuffix == sFileSuffix)
   {
-    bool bOk = CPhysFsFileEngine::mount((sProjPath + "/" + sMountPoint).toStdString().data(), sMountPoint.toStdString().data());
-    if (!bOk)
+    const QString sName = QFileInfo(sPath.fileName()).completeBaseName();
+    tspResourceBundle spResourceBundle = std::make_shared<SResourceBundle>();
+    spResourceBundle->m_sName = sName;
+    spResourceBundle->m_sPath = sMountPoint;
+    spProj->m_spResourceBundleMap.insert({sMountPoint, spResourceBundle});
+  }
+  // archive
+  else
+  {
+    spProj->m_vsMountPoints << sMountPoint;
+    if (spProj->m_bLoaded)
     {
-      qWarning() << tr("Failed to mount %1: reason: %2").arg(sMountPoint)
-                    .arg(CPhysFsFileEngine::errorString());
+      bool bOk = CPhysFsFileEngine::mount((sProjPath + "/" + sMountPoint).toStdString().data(), sMountPoint.toStdString().data());
+      if (!bOk)
+      {
+        qWarning() << tr("Failed to mount %1: reason: %2").arg(sMountPoint)
+                      .arg(CPhysFsFileEngine::errorString());
+      }
+      return bOk;
     }
-    return bOk;
   }
   return true;
 }

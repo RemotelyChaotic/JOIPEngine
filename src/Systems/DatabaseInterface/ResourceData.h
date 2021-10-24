@@ -26,6 +26,7 @@ struct SResourceData
   QUrl                      m_sPath;
   QUrl                      m_sSource;
   EResourceType             m_type = EResourceType::eOther;
+  QString                   m_sResourceBundle;
 };
 
 #endif // RESOURCEDATA_H

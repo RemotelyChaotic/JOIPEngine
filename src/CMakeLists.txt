@@ -304,6 +304,8 @@ set(Sources
   Systems/ProjectDownloader.h
   Systems/Resource.cpp 
   Systems/Resource.h 
+  Systems/ResourceBundle.cpp
+  Systems/ResourceBundle.h
   Systems/Scene.cpp 
   Systems/Scene.h 
   Systems/JSON/JsonInstructionBase.h

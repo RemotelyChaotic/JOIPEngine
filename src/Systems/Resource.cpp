@@ -2,6 +2,7 @@
 #include "Application.h"
 #include "PhysFs/PhysFsFileEngine.h"
 #include "Project.h"
+#include "ResourceBundle.h"
 
 #include <QFileInfo>
 #include <QImageReader>
@@ -35,6 +36,7 @@ QJsonObject SResource::ToJsonObject()
     { "sPath", m_sPath.toString(QUrl::None) },
     { "sSource", m_sSource.toString(QUrl::None) },
     { "type", m_type._value },
+    { "sResourceBundle", m_sResourceBundle },
   };
 }
 
@@ -89,6 +91,11 @@ void SResource::FromJsonObject(const QJsonObject& json)
     {
       m_type = EResourceType::_from_integral(iValue);
     }
+  }
+  it = json.find("sResourceBundle");
+  if (it != json.end())
+  {
+    m_sResourceBundle = it.value().toString();
   }
 }
 
@@ -205,6 +212,14 @@ CResourceScriptWrapper::ResourceType CResourceScriptWrapper::getType()
 {
   QReadLocker locker(&m_spData->m_rwLock);
   return ResourceType(m_spData->m_type._to_integral());
+}
+
+//----------------------------------------------------------------------------------------
+//
+QString CResourceScriptWrapper::getResourceBundle()
+{
+  QReadLocker locker(&m_spData->m_rwLock);
+  return m_spData->m_sResourceBundle;
 }
 
 //----------------------------------------------------------------------------------------
@@ -339,6 +354,7 @@ QStringList SResourceFormats::ArchiveFormats()
   {
     for (const QString& sFormat : vsFormats) { vsReturn <<  QStringLiteral("*.") + sFormat.toLower(); }
   }
+  vsReturn << ("*." + joip_resource::c_sResourceBundleSuffix);
   return vsReturn;
 }
 

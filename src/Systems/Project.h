@@ -7,6 +7,7 @@
 #include "Kink.h"
 #include "Lockable.h"
 #include "Resource.h"
+#include "ResourceBundle.h"
 #include "Scene.h"
 #include <QObject>
 #include <QPointer>
@@ -27,6 +28,7 @@ struct SProject : public ISerializable, std::enable_shared_from_this<SProject>,
   QStringList               m_vsKinks;
   tvspScene                 m_vspScenes;
   tspResourceMap            m_spResourcesMap;
+  tspResourceBundleMap      m_spResourceBundleMap;
   QStringList               m_vsMountPoints;          // Archives need to be mounted via physFS to access content
                                                       // WARNING: root is NOT included in this list
 

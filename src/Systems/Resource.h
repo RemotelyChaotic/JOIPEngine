@@ -53,12 +53,13 @@ class CResourceScriptWrapper : public QObject, public CLockable
   Q_OBJECT
   Q_DISABLE_COPY(CResourceScriptWrapper)
   CResourceScriptWrapper() = delete;
-  Q_PROPERTY(bool          isAnimated READ isAnimatedImpl CONSTANT)
-  Q_PROPERTY(bool          isLocal    READ isLocalPath CONSTANT)
-  Q_PROPERTY(QString       name       READ getName CONSTANT)
-  Q_PROPERTY(QUrl          path       READ getPath CONSTANT)
-  Q_PROPERTY(QUrl          source     READ getSource CONSTANT)
-  Q_PROPERTY(ResourceType  type       READ getType CONSTANT)
+  Q_PROPERTY(bool          isAnimated     READ isAnimatedImpl CONSTANT)
+  Q_PROPERTY(bool          isLocal        READ isLocalPath CONSTANT)
+  Q_PROPERTY(QString       name           READ getName CONSTANT)
+  Q_PROPERTY(QUrl          path           READ getPath CONSTANT)
+  Q_PROPERTY(QUrl          source         READ getSource CONSTANT)
+  Q_PROPERTY(ResourceType  type           READ getType CONSTANT)
+  Q_PROPERTY(QString       resourceBundle READ getResourceBundle CONSTANT)
 
 public:
   enum ResourceType {
@@ -89,6 +90,7 @@ public:
   QUrl getPath();
   QUrl getSource();
   ResourceType getType();
+  QString getResourceBundle();
 
   Q_INVOKABLE QJSValue project();
 
