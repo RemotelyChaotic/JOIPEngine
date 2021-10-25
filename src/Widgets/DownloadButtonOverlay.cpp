@@ -143,6 +143,11 @@ void CDownloadButtonOverlay::Show()
 void CDownloadButtonOverlay::SlotDownloadFinished()
 {
   m_pProgressBar->hide();
+
+  if (auto spDownloader = CApplication::Instance()->System<CProjectDownloader>().lock())
+  {
+    SlotJobAdded(spDownloader->RunningJobsCount());
+  }
 }
 
 //----------------------------------------------------------------------------------------
@@ -171,8 +176,9 @@ void CDownloadButtonOverlay::SlotJobAdded(qint32 iNumJobs)
 
 //----------------------------------------------------------------------------------------
 //
-void CDownloadButtonOverlay::SlotProgressChanged(qint32 iProgress)
+void CDownloadButtonOverlay::SlotProgressChanged(qint32 iId, qint32 iProgress)
 {
+  Q_UNUSED(iId)
   if (0 < iProgress)
   {
     m_pProgressBar->SetRange(0, 100);

@@ -44,7 +44,7 @@ private slots:
   void SlotDownloadFinished();
   void SlotDownloadStarted();
   void SlotJobAdded(qint32 iNumJobs);
-  void SlotProgressChanged(qint32 iProgress);
+  void SlotProgressChanged(qint32 iId, qint32 iProgress);
 
 private:
   QPointer<CProgressBar>            m_pProgressBar;
