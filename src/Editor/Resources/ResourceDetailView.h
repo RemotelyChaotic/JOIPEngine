@@ -31,6 +31,7 @@ public:
   bool ReadOnly();
 
   const QPixmap& PreviewImageForResource(const QString& sResource) const;
+  void RequestResource(const QModelIndex& index);
 
 public slots:
   void Expand(const QModelIndex& index);

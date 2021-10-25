@@ -306,9 +306,10 @@ void CResourceModelView::SlotCurrentChanged(const QModelIndex& current,
                                             { m_spUi->pTreeView->selectionModel(),
                                               m_spUi->pDetailView->selectionModel() },
                                             m_pProxy.data(), sPrevious, sName,
-                                            [this, pThis](const QString& sName){
+                                            [this, pThis, current](const QString& sName){
       if (nullptr != pThis)
       {
+        m_spUi->pDetailView->RequestResource(current);
         emit SignalResourceSelected(sName);
       }
     }));

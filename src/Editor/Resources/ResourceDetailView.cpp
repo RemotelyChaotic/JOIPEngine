@@ -345,6 +345,34 @@ const QPixmap& CResourceDetailView::PreviewImageForResource(const QString& sReso
 
 //----------------------------------------------------------------------------------------
 //
+void CResourceDetailView::RequestResource(const QModelIndex& index)
+{
+  qint32 iProject = -1;
+  if (nullptr != m_spProject)
+  {
+    QReadLocker locker(&m_spProject->m_rwLock);
+    iProject = m_spProject->m_iId;
+  }
+
+  QAbstractItemModel* pModel = model();
+  if (nullptr != pModel)
+  {
+    const QModelIndex idxName = pModel->index(index.row(), resource_item::c_iColumnName, index.parent());
+    const QModelIndex idxType = pModel->index(index.row(), resource_item::c_iColumnType, index.parent());
+    const QVariant varType = pModel->data(idxType);
+    if (!varType.isNull())
+    {
+      qint32 type = varType.toInt();
+      if (EResourceType::eImage == type || EResourceType::eMovie == type)
+      {
+        ResourceFetcher()->RequestResources(iProject, {pModel->data(idxName).toString()}, iconSize());
+      }
+    }
+  }
+}
+
+//----------------------------------------------------------------------------------------
+//
 void CResourceDetailView::Expand(const QModelIndex& index)
 {
   setRootIndex(index);
