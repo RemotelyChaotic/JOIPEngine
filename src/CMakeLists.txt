@@ -313,6 +313,9 @@ set(Sources
   Systems/JSON/JsonInstructionSetParser.cpp
   Systems/JSON/JsonInstructionSetParser.h
   Systems/JSON/JsonInstructionSetRunner.h
+  Systems/Script/IScriptRunner.h
+  Systems/Script/JsScriptRunner.cpp
+  Systems/Script/JsScriptRunner.h
   Systems/Script/ScriptBackground.cpp 
   Systems/Script/ScriptBackground.h 
   Systems/Script/ScriptIcon.cpp 
