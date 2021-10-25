@@ -186,10 +186,10 @@ public:
     QStyleOptionViewItem opt = option;
     initStyleOption(&opt, index);
 
-    QRect rectTextBounds = CalculateTextRect(opt);
-    pEditor->setFixedSize(rectTextBounds.size());
-    pEditor->move(rectTextBounds.x(),
-                  rectTextBounds.y());
+    QRect rectTextInItem = CalculateTextRect(opt);
+    pEditor->setFixedSize(rectTextInItem.size());
+    QPoint rectTextOffset = m_pView->visualRect(index).topLeft();
+    pEditor->move(rectTextOffset + rectTextInItem.topLeft());
   }
 
   //--------------------------------------------------------------------------------------
