@@ -63,14 +63,6 @@ void CProjectCardSelectionWidget::Initialize()
 
   InitQmlMain();
 
-  if (auto spDbManager = m_wpDbManager.lock())
-  {
-    connect(spDbManager.get(), &CDatabaseManager::SignalProjectAdded,
-            this, &CProjectCardSelectionWidget::SlotProjectAdded);
-    connect(spDbManager.get(), &CDatabaseManager::SignalProjectAdded,
-            this, &CProjectCardSelectionWidget::SlotProjectRemoved);
-  }
-
   connect(CHelpOverlay::Instance(), &CHelpOverlay::SignalOverlayOpened,
           this, &CProjectCardSelectionWidget::SlotOverlayOpened);
   connect(CHelpOverlay::Instance(), &CHelpOverlay::SignalOverlayClosed,
@@ -232,6 +224,14 @@ void CProjectCardSelectionWidget::SlotLoadProjectsPrivate(EDownLoadStateFlags fl
   }
 
   m_bLoadedQml = true;
+
+  if (auto spDbManager = m_wpDbManager.lock())
+  {
+    connect(spDbManager.get(), &CDatabaseManager::SignalProjectAdded,
+            this, &CProjectCardSelectionWidget::SlotProjectAdded);
+    connect(spDbManager.get(), &CDatabaseManager::SignalProjectAdded,
+            this, &CProjectCardSelectionWidget::SlotProjectRemoved);
+  }
 }
 
 //----------------------------------------------------------------------------------------
@@ -258,8 +258,6 @@ void CProjectCardSelectionWidget::SlotOverlayClosed()
 //
 void CProjectCardSelectionWidget::SlotProjectAdded(qint32 iId)
 {
-  if (!IsLoaded()) { return; }
-
   if (auto spDbManager = m_wpDbManager.lock())
   {
     QQuickItem* pRootObject =  m_spUi->pQmlWidget->rootObject();
@@ -320,8 +318,6 @@ void CProjectCardSelectionWidget::SlotProjectDownloadProgressChanged(qint32 iPro
 //
 void CProjectCardSelectionWidget::SlotProjectRemoved(qint32 iId)
 {
-  if (!IsLoaded()) { return; }
-
   QQuickItem* pRootObject =  m_spUi->pQmlWidget->rootObject();
 
   m_spUi->pQmlWidget->rootObject()->setProperty("currentlyRemovedProject", iId);
@@ -382,6 +378,14 @@ void CProjectCardSelectionWidget::resizeEvent(QResizeEvent* pEvent)
 //
 void CProjectCardSelectionWidget::FinishUnloadPrivate()
 {
+  if (auto spDbManager = m_wpDbManager.lock())
+  {
+    disconnect(spDbManager.get(), &CDatabaseManager::SignalProjectAdded,
+            this, &CProjectCardSelectionWidget::SlotProjectAdded);
+    disconnect(spDbManager.get(), &CDatabaseManager::SignalProjectAdded,
+            this, &CProjectCardSelectionWidget::SlotProjectRemoved);
+  }
+
   m_spUi->pQmlWidget->engine()->clearComponentCache();
   m_spUi->pQmlWidget->engine()->collectGarbage();
   m_spUi->pQmlWidget->setSource(QUrl());
