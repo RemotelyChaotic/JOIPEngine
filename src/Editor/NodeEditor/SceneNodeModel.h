@@ -28,8 +28,11 @@ public:
   void SetProjectId(qint32 iId);
   qint32 ProjectId();
   qint32 SceneId();
+
+  void SetSceneName(const QString& sScene);
   QString SceneName() { return m_sSceneName; }
 
+  static QString Name() { return staticCaption(); }
   static QString staticCaption() { return QStringLiteral("Scene"); }
 
   QString caption() const override;

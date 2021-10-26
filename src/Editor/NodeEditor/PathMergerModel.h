@@ -20,6 +20,7 @@ public:
   CPathMergerModel();
    ~CPathMergerModel() override {}
 
+  static QString Name() { return staticCaption(); }
   static QString staticCaption() { return QStringLiteral("Path Merger"); }
 
   QString caption() const override;

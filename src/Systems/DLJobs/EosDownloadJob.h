@@ -11,12 +11,17 @@
 #define CEOSDOWNLOADJOB_H
 
 #include "DownloadJobRegistry.h"
+#include "EosPagesToScenesTransformer.h"
+#include "EosResourceLocator.h"
+
+#include <QBuffer>
 #include <QNetworkAccessManager>
 #include <QObject>
 #include <memory>
 
 class RCCResourceLibrary;
 typedef std::shared_ptr<struct SProject> tspProject;
+typedef std::shared_ptr<struct SResource> tspResource;
 
 //----------------------------------------------------------------------------------------
 //
@@ -65,10 +70,21 @@ protected:
   void AbortImpl() override;
 
 private:
+  bool CreateResourceFiles(const CEosResourceLocator::tGaleryData& resourceMap,
+                           tspResource spScript, size_t uiScriptSize, qint32 iMaxProgress,
+                           QBuffer& errorBuffer,
+                           CEosResourceLocator& locator,
+                           QString* psError);
+  bool CreateScriptFiles(const std::vector<CEosPagesToScenesTransformer::SPageScene>& vScenes,
+                         qint32 iMaxProgress,
+                         QBuffer& errorBuffer,
+                         CEosPagesToScenesTransformer& sceneTransformer,
+                         QString* psError);
   QUrl EncodeForCorsProxy(const QUrl& url, const QString& sQuery);
   QByteArray Fetch(const QUrl& url, QString* psError);
   bool ParseHtml(const QByteArray& arr, SScriptMetaData& data, QString* psError);
   QString ParseTeaseURI(const QUrl& url);
+  void ResetResourceLibrary(QBuffer& errorBuffer);
   bool RequestRemoteScript(const QUrl& url, QString& sId, QJsonDocument& jsonScript,
                            QString* psError);
   bool RequestRemoteScriptMetadata(const QString& sId, SScriptMetaData& data,
@@ -84,6 +100,7 @@ private:
   QString                                m_sError;
   qint32                                 m_iProjId;
   qint32                                 m_iFileBlobCounter = 0;
+  qint32                                 m_iProgressCounter = 0;
 };
 
 DECLARE_DOWNLOADJOB(CEosDownloadJob, "EOS/hostcfg", {"milovana.com"})

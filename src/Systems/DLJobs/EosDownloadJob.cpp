@@ -8,7 +8,6 @@
  **//*----------------------------------------------------------------------------------*/
 
 #include "EosDownloadJob.h"
-#include "EosResourceLocator.h"
 #include "Application.h"
 #include "Settings.h"
 #include "ui_EosDownloadJobWidget.h"
@@ -57,6 +56,8 @@ namespace
   const qint32 c_iMaxResourceBlobSize = 1'000'000'000; // max resource blob size is 1GB to reduce memory usage
   const QString c_sScriptResourceName = "script";
   const QString c_sResourceBlobName = "resource";
+
+  const QString c_sSceneModelName = "SceneModel";
 
   // default trusted media hosts
   const std::vector<QString> c_vsSupportedHosts = {
@@ -214,6 +215,16 @@ bool CEosDownloadJob::Run(const QVariantList& args)
   emit SignalStarted(m_iProjId);
   emit SignalProgressChanged(m_iProjId, Progress());
 
+  for (qint32 i = 0; i < 100; ++i)
+  {
+    m_iProgress = i;
+    thread()->sleep(1);
+    emit SignalProgressChanged(m_iProjId, Progress());
+  }
+  emit SignalFinished(m_iProjId);
+  return true;
+
+
   // only allow downloads every 3 minutes to not strain eos servers too much
   /*
   while (!IsMinutesDividableBy3())
@@ -342,116 +353,72 @@ bool CEosDownloadJob::Run(const QVariantList& args)
   CEosResourceLocator locator(jsonScript, c_vsSupportedHosts, c_FIX_POLLUTION);
   if (!locator.LocateAllResources(&sError))
   {
-    m_sError = sError;
+    m_sError = (m_sError.isEmpty() ? "" : "; ") + sError;
     return false;
   }
   else if (!sError.isEmpty())
   {
-    m_sError = sError;
+    m_sError += (m_sError.isEmpty() ? "" : "; ") + sError;
     qDebug() << sError;
   }
 
   ABORT_CHECK(m_iProjId)
 
-  qint32 iCollectiveSize = fileInfoScript.m_prefilledContent.size();
-  // get number of total resources
+  sError = QString();
+  CEosPagesToScenesTransformer pagesTransformer(jsonScript);
+  if (!pagesTransformer.CollectScenes(&sError))
+  {
+    m_sError = (m_sError.isEmpty() ? "" : "; ") + sError;
+    return false;
+  }
+  else if (!sError.isEmpty())
+  {
+    m_sError += (m_sError.isEmpty() ? "" : "; ") + sError;
+    qDebug() << sError;
+  }
+
+  ABORT_CHECK(m_iProjId)
+
+  if (!locator.m_spTitleImg.isEmpty())
+  {
+    if (nullptr != m_spProject)
+    {
+      QWriteLocker locker(&m_spProject->m_rwLock);
+      m_spProject->m_sTitleCard = locator.m_spTitleImg;
+    }
+    spDbManager->SerializeProject(m_iProjId, true);
+  }
+
+  ABORT_CHECK(m_iProjId)
+
+  // get number of total progress
   qint32 iMaxProgress = 0;
   for (const auto& itGallery : locator.m_resourceMap)
   {
     iMaxProgress += static_cast<qint32>(itGallery.second.size());
   }
+  iMaxProgress += static_cast<qint32>(pagesTransformer.m_vPages.size());
 
-  if (0 < iMaxProgress)
+
+  if (!CreateResourceFiles(locator.m_resourceMap, spResource,
+                           fileInfoScript.m_prefilledContent.size(), iMaxProgress,
+                           errorBuffer, locator,
+                           &m_sError))
   {
-    qint32 iCounter = 0;
-    for (const auto& itGallery : locator.m_resourceMap)
-    {
-      m_iFileBlobCounter = 0;
-      QString sFileBlob =  itGallery.first +
-          "." + QString::number(m_iFileBlobCounter) +
-          "." + joip_resource::c_sResourceBundleSuffix;
-      if (!spDbManager->AddResourceArchive(m_spProject,
-                                      QUrl(CPhysFsFileEngineHandler::c_sScheme + sFileBlob)))
-      { m_sError = QString("Could not create resource bundle.").arg(sFileBlob); return false; }
-      if (0 == iCounter)
-      {
-        QWriteLocker resourceLocker(&spResource->m_rwLock);
-        spResource->m_sResourceBundle = QFileInfo(sFileBlob).completeBaseName();
-      }
-
-      for (const auto& itFile : itGallery.second)
-      {
-        sError = QString();
-        QByteArray arr =
-          locator.DownloadResource(itFile.second,
-                                   std::bind(&CEosDownloadJob::Fetch, this,
-                                             std::placeholders::_1, std::placeholders::_2),
-                                   &sError);
-
-        ABORT_CHECK(m_iProjId)
-
-        // filesize would be too large, create new file
-        if (c_iMaxResourceBlobSize < iCollectiveSize + arr.size())
-        {
-          if (!WriteResourceBlob(m_spProject, sFileBlob, m_iFileBlobCounter)) { return false; }
-          sFileBlob =  itGallery.first +
-              "." + QString::number(m_iFileBlobCounter) +
-              "." + joip_resource::c_sResourceBundleSuffix;
-          if (!spDbManager->AddResourceArchive(m_spProject,
-                                          QUrl(CPhysFsFileEngineHandler::c_sScheme + sFileBlob)))
-          { m_sError = QString("Could not create resource bundle.").arg(sFileBlob); return false; }
-
-          errorBuffer.reset();
-          m_spResourceLib.reset(new RCCResourceLibrary(c_iResourceLibraryFormatVersion));
-          m_spResourceLib->setCompressionAlgorithm(RCCResourceLibrary::CompressionAlgorithm::None);
-          m_spResourceLib->setFormat(RCCResourceLibrary::Binary);
-          m_spResourceLib->readFiles(false, errorBuffer);
-          iCollectiveSize = 0;
-        }
-        // add file to resources
-        {
-          iCollectiveSize += arr.size();
-
-          const QString sName = itFile.second->m_data.m_sName;
-          QUrl urlCopy = itFile.second->m_data.m_sPath;
-          urlCopy.setScheme("");
-          const QString sPath = urlCopy.toString();
-          RCCFileInfo fileInfo(QString(sName), QFileInfo(sPath + "/" + sName), QLocale::C,
-                               QLocale::AnyCountry, RCCFileInfo::NoFlags);
-          fileInfo.m_prefilledContent = arr;
-          m_spResourceLib->addFile(":/" + sPath + "/" + sName, fileInfo);
-          sResource = spDbManager->AddResource(m_spProject, QUrl(":/" + sPath + "/" + sName),
-                                               itFile.second->m_data.m_type, sName);
-          spResource = spDbManager->FindResourceInProject(m_spProject, sResource);
-          if (nullptr == spResource) { m_sError = QString("Resource error."); return false; }
-
-          QWriteLocker resourceLocker(&spResource->m_rwLock);
-          spResource->m_sResourceBundle = QFileInfo(sFileBlob).completeBaseName();
-        }
-
-        ABORT_CHECK(m_iProjId)
-
-        // offline test:
-        //thread()->sleep(1);
-
-        ++iCounter;
-        m_iProgress = static_cast<qint32>(100.0 * static_cast<double>(iCounter) / iMaxProgress);
-        emit SignalProgressChanged(m_iProjId, Progress());
-
-        // wait a bit to not overload eos servers
-        thread()->sleep(1);
-      }
-
-      if (!WriteResourceBlob(m_spProject, sFileBlob, m_iFileBlobCounter)) { return false; }
-
-      errorBuffer.reset();
-      m_spResourceLib.reset(new RCCResourceLibrary(c_iResourceLibraryFormatVersion));
-      m_spResourceLib->setCompressionAlgorithm(RCCResourceLibrary::CompressionAlgorithm::None);
-      m_spResourceLib->setFormat(RCCResourceLibrary::Binary);
-      m_spResourceLib->readFiles(false, errorBuffer);
-      iCollectiveSize = 0;
-    }
+    return false;
   }
+
+  ABORT_CHECK(m_iProjId)
+
+  if (!CreateScriptFiles(pagesTransformer.m_vPages,
+                         iMaxProgress,
+                         errorBuffer, pagesTransformer,
+                         &m_sError))
+  {
+    return false;
+  }
+
+  ABORT_CHECK(m_iProjId)
 
   // set downloadstate to finished
   m_spProject->m_rwLock.lockForWrite();
@@ -482,6 +449,214 @@ void CEosDownloadJob::AbortImpl()
 
   // write the resources collected so far
   WriteResourceBlob(m_spProject, QString("==="), m_iFileBlobCounter);
+}
+
+//----------------------------------------------------------------------------------------
+//
+bool CEosDownloadJob::CreateResourceFiles(const CEosResourceLocator::tGaleryData& resourceMap,
+                                          tspResource spScript,
+                                          size_t uiScriptSize,
+                                          qint32 iMaxProgress,
+                                          QBuffer& errorBuffer,
+                                          CEosResourceLocator& locator,
+                                          QString* psError)
+{
+  // already checked for nullptr and must be != 0 at this point
+  std::shared_ptr<CDatabaseManager> spDbManager =
+    CApplication::Instance()->System<CDatabaseManager>().lock();
+
+  QString sResource;
+  tspResource spResource = spScript;
+  qint32 iCollectiveSize = uiScriptSize;
+  if (0 < iMaxProgress)
+  {
+    for (const auto& itGallery : resourceMap)
+    {
+      m_iFileBlobCounter = 0;
+      QString sFileBlob =  itGallery.first +
+          "." + QString::number(m_iFileBlobCounter) +
+          "." + joip_resource::c_sResourceBundleSuffix;
+      if (!spDbManager->AddResourceArchive(m_spProject,
+                                      QUrl(CPhysFsFileEngineHandler::c_sScheme + sFileBlob)))
+      {
+        if (nullptr != psError)
+        {
+          *psError += ((!psError->isEmpty()) ? "; " : "") +
+              QString("Could not create resource bundle.").arg(sFileBlob);
+        }
+        return false;
+      }
+      if (0 == m_iProgressCounter)
+      {
+        QWriteLocker resourceLocker(&spResource->m_rwLock);
+        spResource->m_sResourceBundle = QFileInfo(sFileBlob).completeBaseName();
+      }
+
+      for (const auto& itFile : itGallery.second)
+      {
+        QString sError;
+        QByteArray arr =
+          locator.DownloadResource(itFile.second,
+                                   std::bind(&CEosDownloadJob::Fetch, this,
+                                             std::placeholders::_1, std::placeholders::_2),
+                                   &sError);
+        ABORT_CHECK(m_iProjId)
+
+        // filesize would be too large, create new file
+        if (c_iMaxResourceBlobSize < iCollectiveSize + arr.size())
+        {
+          if (!WriteResourceBlob(m_spProject, sFileBlob, m_iFileBlobCounter)) { return false; }
+          sFileBlob =  itGallery.first +
+              "." + QString::number(m_iFileBlobCounter) +
+              "." + joip_resource::c_sResourceBundleSuffix;
+          if (!spDbManager->AddResourceArchive(m_spProject,
+                                          QUrl(CPhysFsFileEngineHandler::c_sScheme + sFileBlob)))
+          { sError = QString("Could not create resource bundle.").arg(sFileBlob); return false; }
+
+          ResetResourceLibrary(errorBuffer);
+          iCollectiveSize = 0;
+        }
+        // add file to resources
+        {
+          iCollectiveSize += arr.size();
+
+          const QString sName = itFile.second->m_data.m_sName;
+          QUrl urlCopy = itFile.second->m_data.m_sPath;
+          urlCopy.setScheme("");
+          const QString sPath = urlCopy.toString();
+          RCCFileInfo fileInfo(QString(sName), QFileInfo(sPath + "/" + sName), QLocale::C,
+                               QLocale::AnyCountry, RCCFileInfo::NoFlags);
+          fileInfo.m_prefilledContent = arr;
+          m_spResourceLib->addFile(":/" + sPath + "/" + sName, fileInfo);
+          sResource = spDbManager->AddResource(m_spProject, QUrl(":/" + sPath + "/" + sName),
+                                               itFile.second->m_data.m_type, sName);
+          spResource = spDbManager->FindResourceInProject(m_spProject, sResource);
+          if (nullptr == spResource) { sError = QString("Resource error."); return false; }
+
+          QWriteLocker resourceLocker(&spResource->m_rwLock);
+          spResource->m_sResourceBundle = QFileInfo(sFileBlob).completeBaseName();
+        }
+
+        ABORT_CHECK(m_iProjId)
+
+        // offline test:
+        //thread()->sleep(1);
+
+        ++m_iProgressCounter;
+        m_iProgress = static_cast<qint32>(100.0 * static_cast<double>(m_iProgressCounter) / iMaxProgress);
+        emit SignalProgressChanged(m_iProjId, Progress());
+
+        // wait a bit to not overload eos servers
+        thread()->sleep(1);
+
+        // add error to List
+        if (sError.isEmpty())
+        {
+          if (nullptr != psError) { *psError += ((!psError->isEmpty()) ? "; " : "") + sError; }
+        }
+      }
+
+      if (!WriteResourceBlob(m_spProject, sFileBlob, m_iFileBlobCounter)) { return false; }
+      ResetResourceLibrary(errorBuffer);
+      iCollectiveSize = 0;
+    }
+  }
+
+  return true;
+}
+
+//----------------------------------------------------------------------------------------
+//
+bool CEosDownloadJob::CreateScriptFiles(const std::vector<CEosPagesToScenesTransformer::SPageScene>& vScenes,
+                                        qint32 iMaxProgress,
+                                        QBuffer& errorBuffer,
+                                        CEosPagesToScenesTransformer& sceneTransformer,
+                                        QString* psError)
+{
+  // already checked for nullptr and must be != 0 at this point
+  std::shared_ptr<CDatabaseManager> spDbManager =
+    CApplication::Instance()->System<CDatabaseManager>().lock();
+
+  QString sError;
+  QString sResource;
+  tspResource spResource;
+
+  QString sFileBlob = c_sSceneModelName + "." + joip_resource::c_sResourceBundleSuffix;
+  if (!spDbManager->AddResourceArchive(m_spProject,
+                        QUrl(CPhysFsFileEngineHandler::c_sScheme + sFileBlob)))
+
+  for (const auto& scenePage : vScenes)
+  {
+    tspScene spScene =
+        sceneTransformer.AddPageToScene(m_iProjId, m_spProject, scenePage);
+    if (nullptr != spScene) { sError = QString("Scene error."); return false; }
+
+    const QString sName = scenePage.m_sName;
+    const QString sPath = c_sSceneModelName;
+    RCCFileInfo fileInfo(QString(sName), QFileInfo(sPath + "/" + sName), QLocale::C,
+                         QLocale::AnyCountry, RCCFileInfo::NoFlags);
+    fileInfo.m_prefilledContent = scenePage.m_pageScript.toJson();
+    m_spResourceLib->addFile(":/" + sPath + "/" + sName, fileInfo);
+    sResource = spDbManager->AddResource(m_spProject, QUrl(":/" + sPath + "/" + sName),
+                                         EResourceType::eScript, sName);
+    spResource = spDbManager->FindResourceInProject(m_spProject, sResource);
+    if (nullptr == spResource) { sError = QString("Resource error."); return false; }
+
+    {
+      QWriteLocker sceneLocker(&spScene->m_rwLock);
+      spScene->m_sScript = sResource;
+    }
+
+    {
+      QWriteLocker resourceLocker(&spResource->m_rwLock);
+      spResource->m_sResourceBundle = QFileInfo(sFileBlob).completeBaseName();
+    }
+
+    ABORT_CHECK(m_iProjId)
+
+    // offline test:
+    //thread()->sleep(1);
+
+    ++m_iProgressCounter;
+    m_iProgress = static_cast<qint32>(100.0 * static_cast<double>(m_iProgressCounter) / iMaxProgress);
+    emit SignalProgressChanged(m_iProjId, Progress());
+
+    // add error to List
+    if (sError.isEmpty())
+    {
+      if (nullptr != psError) { *psError += ((!psError->isEmpty()) ? "; " : "") + sError; }
+    }
+  }
+
+  ABORT_CHECK(m_iProjId)
+
+  QByteArray arr = sceneTransformer.CompileScenes();
+
+  const QString sName = joip_resource::c_sSceneModelFile;
+  RCCFileInfo fileInfo(QString(sName), QFileInfo(sName), QLocale::C,
+                       QLocale::AnyCountry, RCCFileInfo::NoFlags);
+  fileInfo.m_prefilledContent = arr;
+  m_spResourceLib->addFile(":/" + sName, fileInfo);
+  sResource = spDbManager->AddResource(m_spProject, QUrl(":/" + sName),
+                                       EResourceType::eOther, sName);
+  spResource = spDbManager->FindResourceInProject(m_spProject, sResource);
+  if (nullptr == spResource) { sError = QString("Resource error."); return false; }
+
+  QWriteLocker resourceLocker(&spResource->m_rwLock);
+  spResource->m_sResourceBundle = QFileInfo(sFileBlob).completeBaseName();
+
+
+  if (nullptr != m_spProject)
+  {
+    QWriteLocker locker(&m_spProject->m_rwLock);
+    m_spProject->m_sSceneModel = sName;
+  }
+  spDbManager->SerializeProject(m_iProjId, true);
+
+  if (!WriteResourceBlob(m_spProject, sFileBlob, m_iFileBlobCounter)) { return false; }
+  ResetResourceLibrary(errorBuffer);
+
+  return true;
 }
 
 //----------------------------------------------------------------------------------------
@@ -598,6 +773,17 @@ QString CEosDownloadJob::ParseTeaseURI(const QUrl& url)
     iPos += rx.matchedLength();
   }
   return sTeaseId;
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CEosDownloadJob::ResetResourceLibrary(QBuffer& errorBuffer)
+{
+  errorBuffer.reset();
+  m_spResourceLib.reset(new RCCResourceLibrary(c_iResourceLibraryFormatVersion));
+  m_spResourceLib->setCompressionAlgorithm(RCCResourceLibrary::CompressionAlgorithm::None);
+  m_spResourceLib->setFormat(RCCResourceLibrary::Binary);
+  m_spResourceLib->readFiles(false, errorBuffer);
 }
 
 //----------------------------------------------------------------------------------------

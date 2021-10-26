@@ -31,6 +31,7 @@ public:
   using tResourceMap = std::map<QString /*sName*/, std::shared_ptr<SEosResourceData>>;
   using tGaleryData = std::map<QString /*sGaleryHash*/, tResourceMap>;
   tGaleryData                                   m_resourceMap;
+  QString                                       m_spTitleImg;
 
 private:
   bool LookupRemoteLink(const QString& sResource, QString* psError);

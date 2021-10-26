@@ -18,6 +18,7 @@ public:
   CStartNodeModel();
   ~CStartNodeModel() override {}
 
+  static QString Name() { return staticCaption(); }
   static QString staticCaption() { return QStringLiteral("Entry Point"); }
 
   QString caption() const override;

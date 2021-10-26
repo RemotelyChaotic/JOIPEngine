@@ -99,6 +99,8 @@ set(Sources
   Editor/NodeEditor/FlowView.cpp 
   Editor/NodeEditor/FlowView.h 
   Editor/NodeEditor/IUndoStackAwareModel.h
+  Editor/NodeEditor/NodeEditorRegistry.cpp
+  Editor/NodeEditor/NodeEditorRegistry.h
   Editor/NodeEditor/PathMergerModel.cpp 
   Editor/NodeEditor/PathMergerModel.h 
   Editor/NodeEditor/PathSplitterModel.cpp 
@@ -281,6 +283,8 @@ set(Sources
   Systems/DLJobs/EosDownloadJob.cpp
   Systems/DLJobs/EosDownloadJob.h
   Systems/DLJobs/EosDownloadJobWidget.ui
+  Systems/DLJobs/EosPagesToScenesTransformer.cpp
+  Systems/DLJobs/EosPagesToScenesTransformer.h
   Systems/DLJobs/EosResourceLocator.cpp
   Systems/DLJobs/EosResourceLocator.h
   Systems/DLJobs/EosResources.qrc

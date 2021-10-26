@@ -111,6 +111,17 @@ qint32 CSceneNodeModel::SceneId()
 
 //----------------------------------------------------------------------------------------
 //
+void CSceneNodeModel::SetSceneName(const QString& sScene)
+{
+  if (nullptr != m_pWidget)
+  {
+    m_pWidget->SetName(sScene);
+    SlotNameChanged(sScene);
+  }
+}
+
+//----------------------------------------------------------------------------------------
+//
 QString CSceneNodeModel::caption() const
 {
   return staticCaption();

@@ -5,6 +5,7 @@
 #include "Editor/NodeEditor/FlowView.h"
 #include "Editor/NodeEditor/PathMergerModel.h"
 #include "Editor/NodeEditor/PathSplitterModel.h"
+#include "Editor/NodeEditor/NodeEditorRegistry.h"
 #include "Editor/NodeEditor/SceneNodeModel.h"
 #include "Editor/NodeEditor/SceneTranstitionData.h"
 #include "Editor/NodeEditor/StartNodeModel.h"
@@ -13,7 +14,6 @@
 #include "Systems/Resource.h"
 #include "Systems/Scene.h"
 
-#include <nodes/DataModelRegistry>
 #include <nodes/Node>
 #include <nodes/NodeData>
 
@@ -23,22 +23,7 @@
 #include <random>
 #include <chrono>
 
-using QtNodes::DataModelRegistry;
 using QtNodes::Node;
-
-namespace
-{
-  std::shared_ptr<DataModelRegistry> RegisterDataModels()
-  {
-    auto ret = std::make_shared<DataModelRegistry>();
-    ret->registerModel<CStartNodeModel>("Control");
-    ret->registerModel<CSceneNodeModel>("Scene");
-    ret->registerModel<CEndNodeModel>("Control");
-    ret->registerModel<CPathMergerModel>("Path");
-    ret->registerModel<CPathSplitterModel>("Path");
-    return ret;
-  }
-}
 
 //----------------------------------------------------------------------------------------
 //
@@ -80,7 +65,7 @@ void CProjectRunner::LoadProject(tspProject spProject, const QString sStartScene
     m_pFlowScene->clearScene();
     delete m_pFlowScene;
   }
-  m_pFlowScene = new CFlowScene(RegisterDataModels());
+  m_pFlowScene = new CFlowScene(CNodeEditorRegistry::RegisterDataModels());
   connect(m_pFlowScene, &CFlowScene::nodeCreated, this, &CProjectRunner::SlotNodeCreated);
 
   bool bOk = LoadFlowScene();

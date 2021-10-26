@@ -120,7 +120,7 @@ bool CEosResourceLocator::LocateAllResources(QString* psError)
 
   if (!pagesIt.value().isObject())
   {
-    if (nullptr != psError) { *psError = QString("\"%1\" node is not an object.").arg(c_sGalleryKeyWord); }
+    if (nullptr != psError) { *psError = QString("\"%1\" node is not an object.").arg(c_sPagesKeyWord); }
     return false;
   }
   if (!galeryIt.value().isObject())
@@ -130,7 +130,7 @@ bool CEosResourceLocator::LocateAllResources(QString* psError)
   }
   if (!modulesIt.value().isObject())
   {
-    if (nullptr != psError) { *psError = QString("\"%1\" node is not an object.").arg(c_sGalleryKeyWord); }
+    if (nullptr != psError) { *psError = QString("\"%1\" node is not an object.").arg(c_sModulesKeyWord); }
     return false;
   }
 
@@ -378,6 +378,12 @@ bool CEosResourceLocator::LookupRemoteLink(const QString& sResource, QString* ps
   spImg->m_data.m_sSource = sResource;
   m_resourceMap["_remote"].insert({sResource, spImg});
 
+  // set name
+  if (m_spTitleImg.isEmpty())
+  {
+    m_spTitleImg = spImg->m_data.m_sName;
+  }
+
   return true;
 }
 
@@ -438,6 +444,12 @@ bool CEosResourceLocator::LookupGaleryImage(const tGaleryData& gallieries,
           .arg(sGallery).arg(sId);
     }
     return false;
+  }
+
+  // set name
+  if (m_spTitleImg.isEmpty())
+  {
+    m_spTitleImg = itId->second->m_data.m_sName;
   }
 
   return true;
@@ -502,6 +514,12 @@ bool CEosResourceLocator::LookupFile(const tResourceMap& files,
   {
     *psError = QString("Unknown file type %1.").arg(itExt->second.first);
     return false;
+  }
+
+  // set name
+  if (m_spTitleImg.isEmpty())
+  {
+    m_spTitleImg = itFile->second->m_data.m_sName;
   }
 
   return true;
