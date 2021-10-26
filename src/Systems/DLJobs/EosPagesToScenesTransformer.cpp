@@ -14,6 +14,7 @@
 
 #include <nodes/Node>
 #include <QGraphicsObject>
+#include <QJsonArray>
 
 namespace
 {
@@ -22,6 +23,7 @@ namespace
 
   const QString c_sEvalKeyWord = "eval";
   const QString c_sScriptKeyWord = "script";
+  const QString c_sCommandsKeyWord = "commands";
 
   const double c_dNodeOffset = 200.0;
 }
@@ -126,7 +128,10 @@ bool CEosPagesToScenesTransformer::CollectScenes(QString* psError)
     QString sScript = initIt.value().toString();
     QJsonObject evalObj
     {
-        {c_sInitKeyWord, QJsonObject { {c_sEvalKeyWord, sScript} }}
+      {
+        c_sCommandsKeyWord,
+        QJsonArray{ {c_sEvalKeyWord, QJsonObject { {c_sScriptKeyWord, sScript} }} }
+      }
     };
     m_vPages.push_back({c_sInitKeyWord, QJsonDocument(evalObj)});
   }
@@ -137,9 +142,13 @@ bool CEosPagesToScenesTransformer::CollectScenes(QString* psError)
   {
     QJsonValue pageObjVal = it.value();
     const QString sPageKey = it.key();
-    if (pageObjVal.isObject())
+    if (pageObjVal.isArray())
     {
-      QJsonObject objPage = pageObjVal.toObject();
+      QJsonArray arrPage = pageObjVal.toArray();
+      QJsonObject objPage
+      {
+          {c_sCommandsKeyWord, arrPage}
+      };
       m_vPages.push_back({sPageKey, QJsonDocument(objPage)});
     }
   }

@@ -215,16 +215,6 @@ bool CEosDownloadJob::Run(const QVariantList& args)
   emit SignalStarted(m_iProjId);
   emit SignalProgressChanged(m_iProjId, Progress());
 
-  for (qint32 i = 0; i < 100; ++i)
-  {
-    m_iProgress = i;
-    thread()->sleep(1);
-    emit SignalProgressChanged(m_iProjId, Progress());
-  }
-  emit SignalFinished(m_iProjId);
-  return true;
-
-
   // only allow downloads every 3 minutes to not strain eos servers too much
   /*
   while (!IsMinutesDividableBy3())
@@ -400,21 +390,25 @@ bool CEosDownloadJob::Run(const QVariantList& args)
   iMaxProgress += static_cast<qint32>(pagesTransformer.m_vPages.size());
 
 
+  sError = QString();
   if (!CreateResourceFiles(locator.m_resourceMap, spResource,
                            fileInfoScript.m_prefilledContent.size(), iMaxProgress,
                            errorBuffer, locator,
-                           &m_sError))
+                           &sError))
   {
+    m_sError += (m_sError.isEmpty() ? "" : "; ") + sError;
     return false;
   }
 
   ABORT_CHECK(m_iProjId)
 
+  sError = QString();
   if (!CreateScriptFiles(pagesTransformer.m_vPages,
                          iMaxProgress,
                          errorBuffer, pagesTransformer,
-                         &m_sError))
+                         &sError))
   {
+    m_sError += (m_sError.isEmpty() ? "" : "; ") + sError;
     return false;
   }
 
@@ -584,6 +578,7 @@ bool CEosDownloadJob::CreateScriptFiles(const std::vector<CEosPagesToScenesTrans
   QString sFileBlob = c_sSceneModelName + "." + joip_resource::c_sResourceBundleSuffix;
   if (!spDbManager->AddResourceArchive(m_spProject,
                         QUrl(CPhysFsFileEngineHandler::c_sScheme + sFileBlob)))
+  { sError = QString("Could not create resource bundle.").arg(sFileBlob); return false; }
 
   for (const auto& scenePage : vScenes)
   {
