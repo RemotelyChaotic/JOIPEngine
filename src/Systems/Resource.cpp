@@ -174,7 +174,7 @@ QUrl CResourceScriptWrapper::getPath()
 
   if (IsLocalFile(m_spData->m_sPath))
   {
-    const QString sTruePathName = ResourceUrlToAbsolutePath(m_spData);
+    const QString sTruePathName = ResourceUrlToAbsolutePath(m_spData, "qrc:");
     return QUrl(sTruePathName);
   }
   else
@@ -245,7 +245,8 @@ bool IsLocalFile(const QUrl& url)
 
 //----------------------------------------------------------------------------------------
 //
-QString ResourceUrlToAbsolutePath(const tspResource& spResource)
+QString ResourceUrlToAbsolutePath(const tspResource& spResource,
+                                  const QString& sResourceScheme)
 {
   if (nullptr == spResource || nullptr == spResource->m_spParent)
   {
@@ -269,7 +270,7 @@ QString ResourceUrlToAbsolutePath(const tspResource& spResource)
     }
     else
     {
-      return "qrc:/" + sTrueProjectName + "/" + spResource->m_sName;
+      return sResourceScheme + "/" + sTrueProjectName + "/" + spResource->m_sName;
     }
   }
   else

@@ -81,7 +81,7 @@ tspScene CEosPagesToScenesTransformer::AddPageToScene(const qint32 iProjectId,
 
     // set properties
     CSceneNodeModel* pSceneModel =
-        dynamic_cast<CSceneNodeModel*>(pSplitterNode->nodeDataModel());
+        dynamic_cast<CSceneNodeModel*>(pSceneNode->nodeDataModel());
     auto spDbManager = CApplication::Instance()->System<CDatabaseManager>().lock();
     if (nullptr != pSceneModel && nullptr != spDbManager)
     {

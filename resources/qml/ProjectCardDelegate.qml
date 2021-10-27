@@ -114,7 +114,7 @@ Rectangle {
 
                 Behavior on width {
                     animation: NumberAnimation {
-                         duration: 100; easing.type: Easing.InOutQuad
+                         duration: 500; easing.type: Easing.InOutQuad
                     }
                 }
 

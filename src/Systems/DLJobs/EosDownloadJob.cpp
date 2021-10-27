@@ -223,32 +223,12 @@ bool CEosDownloadJob::Run(const QVariantList& args)
   }
   */
 
-  tvfnActionsProject vfnActions = {
-    [this](const tspProject& spProjectCallback) {
-      spProjectCallback->m_dlState = EDownLoadState::eDownloadRunning;
-      m_spProject = spProjectCallback;
-    }
-  };
-  std::shared_ptr<CDatabaseManager> spDbManager =
-    CApplication::Instance()->System<CDatabaseManager>().lock();
-  m_iProjId = spDbManager->AddProject("TBD", 1, false, true, vfnActions);
-  spDbManager->PrepareNewProject(m_iProjId);
-  spDbManager->SerializeProject(m_iProjId, true);
-  for (qint32 i = 0; i < 100; ++i)
-  {
-    m_iProgress = i;
-    emit SignalProgressChanged(m_iProjId, Progress());
-    thread()->sleep(1);
-  }
-  emit SignalFinished(m_iProjId);
-  return true;
-
   m_spNetworkAccessManager.reset(new QNetworkAccessManager());
   CRaiiFunctionCaller resetCaller([this](){
     m_spNetworkAccessManager.reset();
   });
-  //std::shared_ptr<CDatabaseManager> spDbManager =
-  //  CApplication::Instance()->System<CDatabaseManager>().lock();
+  std::shared_ptr<CDatabaseManager> spDbManager =
+    CApplication::Instance()->System<CDatabaseManager>().lock();
   if (nullptr == spDbManager)
   {
     m_sError = QString("Internal Error: Database Manager was not found.");
@@ -256,12 +236,12 @@ bool CEosDownloadJob::Run(const QVariantList& args)
   }
 
   // create and get new project
-  //tvfnActionsProject vfnActions = {
-  //  [this](const tspProject& spProjectCallback) {
-  //    spProjectCallback->m_dlState = EDownLoadState::eDownloadRunning;
-  //    m_spProject = spProjectCallback;
-  //  }
-  //};
+  tvfnActionsProject vfnActions = {
+    [this](const tspProject& spProjectCallback) {
+      spProjectCallback->m_dlState = EDownLoadState::eDownloadRunning;
+      m_spProject = spProjectCallback;
+    }
+  };
   m_iProjId = spDbManager->AddProject("TBD", 1, false, true, vfnActions);
   spDbManager->PrepareNewProject(m_iProjId);
   spDbManager->SerializeProject(m_iProjId, true);
@@ -488,11 +468,6 @@ bool CEosDownloadJob::CreateResourceFiles(const CEosResourceLocator::tGaleryData
         }
         return false;
       }
-      if (0 == m_iProgressCounter)
-      {
-        QWriteLocker resourceLocker(&spResource->m_rwLock);
-        spResource->m_sResourceBundle = QFileInfo(sFileBlob).completeBaseName();
-      }
 
       for (const auto& itFile : itGallery.second)
       {
@@ -611,7 +586,7 @@ bool CEosDownloadJob::CreateScriptFiles(const QJsonDocument& entireScript,
   {
     tspScene spScene =
         sceneTransformer.AddPageToScene(m_iProjId, m_spProject, scenePage);
-    if (nullptr != spScene) { sError = QString("Scene error."); return false; }
+    if (nullptr == spScene) { sError = QString("Scene error."); return false; }
 
     const QString sName = scenePage.m_sName;
     const QString sPath = c_sSceneModelName;
