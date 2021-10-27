@@ -32,7 +32,7 @@ namespace
 //
 CEosPagesToScenesTransformer::CEosPagesToScenesTransformer(const QJsonDocument& script) :
   m_vPages(),
-  m_spScene(std::make_unique<CFlowScene>(CNodeEditorRegistry::RegisterDataModels(), nullptr)),
+  m_spScene(std::make_unique<CFlowScene>(CNodeEditorRegistry::RegisterDataModelsWithoutUi(), nullptr)),
   m_script(script),
   m_startId(),
   m_endId()

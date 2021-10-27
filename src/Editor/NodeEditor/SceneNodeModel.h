@@ -25,11 +25,11 @@ public:
   ~CSceneNodeModel() override {}
 
 public:
-  void SetProjectId(qint32 iId);
+  virtual void SetProjectId(qint32 iId);
   qint32 ProjectId();
   qint32 SceneId();
 
-  void SetSceneName(const QString& sScene);
+  virtual void SetSceneName(const QString& sScene);
   QString SceneName() { return m_sSceneName; }
 
   static QString Name() { return staticCaption(); }
@@ -59,27 +59,56 @@ public:
 signals:
   void SignalAddScriptFileRequested();
 
+protected slots:
+  void SlotNameChanged(const QString& sName);
+  void SlotSceneRenamed(qint32 iProjId, qint32 iSceneId);
+  void SlotResourceAdded(qint32 iProjId, const QString& sName);
+  void SlotResourceRemoved(qint32 iProjId, const QString& sName);
+
 protected:
-  void OnUndoStackSet() override;
+  virtual void SlotNameChangedImpl(const QString&) {}
+  virtual void SlotSceneRenamedImpl(const QString&) {}
+  virtual void SlotResourceAddedImpl(const QString&) {}
+  virtual void SlotResourceRemovedImpl(const QString&) {}
 
   std::weak_ptr<CDatabaseManager>                     m_wpDbManager;
   std::weak_ptr<CSceneTranstitionData>                m_wpInData;
   std::shared_ptr<CSceneTranstitionData>              m_spOutData;
   tspProject                                          m_spProject;
   tspScene                                            m_spScene;
-  QPointer<CSceneNodeModelWidget>                     m_pWidget;
   bool                                                m_bOutConnected;
 
   NodeValidationState m_modelValidationState;
   QString             m_modelValidationError;
   QString             m_sSceneName;
   QString             m_sOldSceneName;
+};
 
-protected slots:
-  void SlotNameChanged(const QString& sName);
-  void SlotSceneRenamed(qint32 iProjId, qint32 iSceneId);
-  void SlotResourceAdded(qint32 iProjId, const QString& sName);
-  void SlotResourceRemoved(qint32 iProjId, const QString& sName);
+//----------------------------------------------------------------------------------------
+//
+class CSceneNodeModelWithWidget : public CSceneNodeModel
+{
+  Q_OBJECT
+
+public:
+  CSceneNodeModelWithWidget();
+  ~CSceneNodeModelWithWidget() override;
+
+  void SetProjectId(qint32 iId) override;
+  void SetSceneName(const QString& sScene) override;
+
+  void restore(QJsonObject const& p) override;
+
+  QWidget* embeddedWidget() override;
+
+protected:
+  void OnUndoStackSet() override;
+  void SlotNameChangedImpl(const QString& sName) override;
+  void SlotSceneRenamedImpl(const QString& sName) override;
+  void SlotResourceAddedImpl(const QString& sName) override;
+  void SlotResourceRemovedImpl(const QString& sName) override;
+
+  QPointer<CSceneNodeModelWidget>                   m_pWidget;
 };
 
 #endif // SCENENODEMODEL_H

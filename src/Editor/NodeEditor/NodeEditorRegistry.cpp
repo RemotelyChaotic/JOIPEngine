@@ -21,6 +21,17 @@ std::shared_ptr<DataModelRegistry> CNodeEditorRegistry::RegisterDataModels()
 {
   auto ret = std::make_shared<DataModelRegistry>();
   ret->registerModel<CStartNodeModel>(CNodeEditorRegistry::c_sModelCategoryControl);
+  ret->registerModel<CSceneNodeModelWithWidget>(CNodeEditorRegistry::c_sModelCategoryScene);
+  ret->registerModel<CEndNodeModel>(CNodeEditorRegistry::c_sModelCategoryControl);
+  ret->registerModel<CPathMergerModel>(CNodeEditorRegistry::c_sModelCategoryPath);
+  ret->registerModel<CPathSplitterModelWithWidget>(CNodeEditorRegistry::c_sModelCategoryPath);
+  return ret;
+}
+
+std::shared_ptr<QtNodes::DataModelRegistry> CNodeEditorRegistry::RegisterDataModelsWithoutUi()
+{
+  auto ret = std::make_shared<DataModelRegistry>();
+  ret->registerModel<CStartNodeModel>(CNodeEditorRegistry::c_sModelCategoryControl);
   ret->registerModel<CSceneNodeModel>(CNodeEditorRegistry::c_sModelCategoryScene);
   ret->registerModel<CEndNodeModel>(CNodeEditorRegistry::c_sModelCategoryControl);
   ret->registerModel<CPathMergerModel>(CNodeEditorRegistry::c_sModelCategoryPath);

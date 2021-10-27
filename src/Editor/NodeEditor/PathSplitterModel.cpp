@@ -14,7 +14,6 @@ namespace {
 CPathSplitterModel::CPathSplitterModel() :
   CEditorNodeModelBase(),
   m_spOutData(std::make_shared<CSceneTranstitionData>()),
-  m_pWidget(new CPathSplitterModelWidget()),
   m_modelValidationState(NodeValidationState::Warning),
   m_modelValidationError(QString(tr("Missing or incorrect input"))),
   m_vsLabelNames(),
@@ -24,11 +23,6 @@ CPathSplitterModel::CPathSplitterModel() :
   {
     m_vsLabelNames.push_back(QString());
   }
-
-  connect(m_pWidget, &CPathSplitterModelWidget::SignalTransitionTypeChanged,
-          this, &CPathSplitterModel::SlotTransitionTypeChanged);
-  connect(m_pWidget, &CPathSplitterModelWidget::SignalTransitionLabelChanged,
-          this, &CPathSplitterModel::SlotTransitionLabelChanged);
 }
 
 //----------------------------------------------------------------------------------------
@@ -74,7 +68,6 @@ void CPathSplitterModel::restore(QJsonObject const& p)
   if (!v.isUndefined())
   {
     m_transitonType = ESceneTransitionType::_from_integral(v.toInt());
-    m_pWidget->SetTransitionType(m_transitonType._to_integral());
   }
   QJsonValue arr = p["vsLabelNames"];
   if (!arr.isUndefined())
@@ -86,7 +79,6 @@ void CPathSplitterModel::restore(QJsonObject const& p)
       {
         const QString sLabel = val.toString();
         m_vsLabelNames[i] = sLabel;
-        m_pWidget->SetTransitionLabel(static_cast<qint32>(i), sLabel);
         i++;
       }
     }
@@ -147,7 +139,7 @@ void CPathSplitterModel::setInData(std::shared_ptr<NodeData> data, PortIndex por
 //
 QWidget* CPathSplitterModel::embeddedWidget()
 {
-  return m_pWidget;
+  return nullptr;
 }
 
 //----------------------------------------------------------------------------------------
@@ -162,16 +154,6 @@ NodeValidationState CPathSplitterModel::validationState() const
 QString CPathSplitterModel::validationMessage() const
 {
   return m_modelValidationError;
-}
-
-//----------------------------------------------------------------------------------------
-//
-void CPathSplitterModel::OnUndoStackSet()
-{
-  if (nullptr != m_pWidget)
-  {
-    m_pWidget->SetUndoStack(m_pUndoStack);
-  }
 }
 
 //----------------------------------------------------------------------------------------
@@ -202,5 +184,51 @@ void CPathSplitterModel::SlotTransitionLabelChanged(PortIndex index, const QStri
   if (nullptr != UndoStack())
   {
     UndoStack()->push(new CCommandNodeEdited(m_pScene, m_id, oldState, newState));
+  }
+}
+
+//----------------------------------------------------------------------------------------
+//
+CPathSplitterModelWithWidget::CPathSplitterModelWithWidget() :
+  CPathSplitterModel(),
+  m_pWidget(new CPathSplitterModelWidget())
+{
+  connect(m_pWidget, &CPathSplitterModelWidget::SignalTransitionTypeChanged,
+          this, &CPathSplitterModelWithWidget::SlotTransitionTypeChanged);
+  connect(m_pWidget, &CPathSplitterModelWidget::SignalTransitionLabelChanged,
+          this, &CPathSplitterModelWithWidget::SlotTransitionLabelChanged);
+}
+CPathSplitterModelWithWidget::~CPathSplitterModelWithWidget()
+{
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CPathSplitterModelWithWidget::restore(QJsonObject const& p)
+{
+  CPathSplitterModel::restore(p);
+
+  m_pWidget->SetTransitionType(m_transitonType._to_integral());
+
+  for (qint32 i = 0; static_cast<qint32>(m_vsLabelNames.size()) > i; ++i)
+  {
+    m_pWidget->SetTransitionLabel(static_cast<qint32>(i), m_vsLabelNames[i]);
+  }
+}
+
+//----------------------------------------------------------------------------------------
+//
+QWidget* CPathSplitterModelWithWidget::embeddedWidget()
+{
+  return m_pWidget;
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CPathSplitterModelWithWidget::OnUndoStackSet()
+{
+  if (nullptr != m_pWidget)
+  {
+    m_pWidget->SetUndoStack(m_pUndoStack);
   }
 }

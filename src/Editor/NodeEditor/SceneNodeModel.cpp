@@ -17,7 +17,6 @@ CSceneNodeModel::CSceneNodeModel() :
   m_spOutData(std::make_shared<CSceneTranstitionData>()),
   m_spProject(nullptr),
   m_spScene(nullptr),
-  m_pWidget(new CSceneNodeModelWidget()),
   m_bOutConnected(false),
   m_modelValidationState(NodeValidationState::Warning),
   m_modelValidationError(QString(tr("Missing or incorrect inputs or output"))),
@@ -34,13 +33,6 @@ CSceneNodeModel::CSceneNodeModel() :
     connect(spDbManager.get(), &CDatabaseManager::SignalResourceRemoved,
             this, &CSceneNodeModel::SlotResourceRemoved);
   }
-
-  connect(m_pWidget, &CSceneNodeModelWidget::SignalNameChanged,
-          this, &CSceneNodeModel::SlotNameChanged);
-  connect(m_pWidget, &CSceneNodeModelWidget::SignalAddScriptFileClicked,
-          this, &CSceneNodeModel::SignalAddScriptFileRequested);
-
-  m_pWidget->SetScriptButtonEnabled(false);
 }
 
 //----------------------------------------------------------------------------------------
@@ -67,21 +59,6 @@ void CSceneNodeModel::SetProjectId(qint32 iId)
     {
       m_spScene = spDbManager->FindScene(m_spProject, m_sSceneName);
     }
-
-    m_pWidget->SetScriptButtonEnabled(true);
-    if (nullptr != m_spScene)
-    {
-      QReadLocker locker(&m_spScene->m_rwLock);
-      if (!m_spScene->m_sScript.isEmpty())
-      {
-        m_pWidget->SetScriptButtonEnabled(false);
-      }
-    }
-  }
-
-  if (nullptr != m_pWidget)
-  {
-    m_pWidget->SetName(m_sSceneName);
   }
 }
 
@@ -113,11 +90,7 @@ qint32 CSceneNodeModel::SceneId()
 //
 void CSceneNodeModel::SetSceneName(const QString& sScene)
 {
-  if (nullptr != m_pWidget)
-  {
-    m_pWidget->SetName(sScene);
-    SlotNameChanged(sScene);
-  }
+  SlotNameChanged(sScene);
 }
 
 //----------------------------------------------------------------------------------------
@@ -152,10 +125,6 @@ void CSceneNodeModel::restore(QJsonObject const& p)
   {
     m_sSceneName = v.toString();
     m_sOldSceneName = m_sSceneName;
-    if (nullptr != m_pWidget)
-    {
-      m_pWidget->SetName(m_sSceneName);
-    }
   }
 }
 
@@ -226,7 +195,7 @@ void CSceneNodeModel::setInData(std::shared_ptr<NodeData> data, PortIndex portIn
 //
 QWidget* CSceneNodeModel::embeddedWidget()
 {
-  return m_pWidget;
+  return nullptr;
 }
 
 //----------------------------------------------------------------------------------------
@@ -273,16 +242,6 @@ void CSceneNodeModel::outputConnectionDeleted(QtNodes::Connection const& c)
 
 //----------------------------------------------------------------------------------------
 //
-void CSceneNodeModel::OnUndoStackSet()
-{
-  if (nullptr != m_pWidget)
-  {
-    m_pWidget->SetUndoStack(m_pUndoStack);
-  }
-}
-
-//----------------------------------------------------------------------------------------
-//
 void CSceneNodeModel::SlotNameChanged(const QString& sName)
 {
   QJsonObject oldState = save();
@@ -301,7 +260,7 @@ void CSceneNodeModel::SlotNameChanged(const QString& sName)
       QString sSceneNameAfterChange = m_spScene->m_sName;
       m_spScene->m_rwLock.unlock();
 
-      m_pWidget->SetName(sSceneNameAfterChange);
+      SlotNameChangedImpl(sSceneNameAfterChange);
       m_sSceneName = sSceneNameAfterChange;
 
       QJsonObject newState = save();
@@ -327,7 +286,7 @@ void CSceneNodeModel::SlotSceneRenamed(qint32 iProjId, qint32 iSceneId)
     if (m_sOldSceneName != sNewName)
     {
       m_sOldSceneName = sNewName;
-      m_pWidget->SetName(sNewName);
+      SlotSceneRenamedImpl(sNewName);
     }
   }
 }
@@ -341,7 +300,7 @@ void CSceneNodeModel::SlotResourceAdded(qint32 iProjId, const QString& sName)
     QReadLocker locker(&m_spScene->m_rwLock);
     if (m_spScene->m_sScript == sName)
     {
-      m_pWidget->SetScriptButtonEnabled(false);
+      SlotResourceAddedImpl(sName);
     }
   }
 }
@@ -356,7 +315,124 @@ void CSceneNodeModel::SlotResourceRemoved(qint32 iProjId, const QString& sName)
     QReadLocker locker(&m_spScene->m_rwLock);
     if (m_spScene->m_sScript.isEmpty())
     {
-      m_pWidget->SetScriptButtonEnabled(true);
+      SlotResourceRemovedImpl(sName);
     }
+  }
+}
+
+//----------------------------------------------------------------------------------------
+//
+CSceneNodeModelWithWidget::CSceneNodeModelWithWidget() :
+  CSceneNodeModel(),
+  m_pWidget(new CSceneNodeModelWidget())
+{
+  connect(m_pWidget, &CSceneNodeModelWidget::SignalNameChanged,
+          this, &CSceneNodeModelWithWidget::SlotNameChanged);
+  connect(m_pWidget, &CSceneNodeModelWidget::SignalAddScriptFileClicked,
+          this, &CSceneNodeModelWithWidget::SignalAddScriptFileRequested);
+
+  m_pWidget->SetScriptButtonEnabled(false);
+}
+CSceneNodeModelWithWidget::~CSceneNodeModelWithWidget()
+{
+
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CSceneNodeModelWithWidget::SetProjectId(qint32 iId)
+{
+  CSceneNodeModel::SetProjectId(iId);
+  if (nullptr != m_pWidget)
+  {
+    m_pWidget->SetName(m_sSceneName);
+    m_pWidget->SetScriptButtonEnabled(true);
+    if (nullptr != m_spScene)
+    {
+      QReadLocker locker(&m_spScene->m_rwLock);
+      if (!m_spScene->m_sScript.isEmpty())
+      {
+        m_pWidget->SetScriptButtonEnabled(false);
+      }
+    }
+  }
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CSceneNodeModelWithWidget::SetSceneName(const QString& sScene)
+{
+  if (nullptr != m_pWidget)
+  {
+    m_pWidget->SetName(sScene);
+  }
+  CSceneNodeModel::SetSceneName(sScene);
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CSceneNodeModelWithWidget::restore(QJsonObject const& p)
+{
+  CSceneNodeModel::restore(p);
+  if (nullptr != m_pWidget)
+  {
+    m_pWidget->SetName(m_sSceneName);
+  }
+}
+
+//----------------------------------------------------------------------------------------
+//
+QWidget* CSceneNodeModelWithWidget::embeddedWidget()
+{
+  return m_pWidget;
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CSceneNodeModelWithWidget::OnUndoStackSet()
+{
+  if (nullptr != m_pWidget)
+  {
+    m_pWidget->SetUndoStack(m_pUndoStack);
+  }
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CSceneNodeModelWithWidget::SlotNameChangedImpl(const QString& sName)
+{
+  if (nullptr != m_pWidget)
+  {
+    m_pWidget->SetName(sName);
+  }
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CSceneNodeModelWithWidget::SlotSceneRenamedImpl(const QString& sName)
+{
+  if (nullptr != m_pWidget)
+  {
+    m_pWidget->SetName(sName);
+  }
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CSceneNodeModelWithWidget::SlotResourceAddedImpl(const QString&)
+{
+  if (nullptr != m_pWidget)
+  {
+    m_pWidget->SetScriptButtonEnabled(false);
+  }
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CSceneNodeModelWithWidget::SlotResourceRemovedImpl(const QString&)
+{
+  if (nullptr != m_pWidget)
+  {
+    m_pWidget->SetScriptButtonEnabled(true);
   }
 }

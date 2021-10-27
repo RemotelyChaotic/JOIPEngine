@@ -17,6 +17,7 @@ public:
   static const char* c_sModelCategoryPath;
 
   static std::shared_ptr<QtNodes::DataModelRegistry> RegisterDataModels();
+  static std::shared_ptr<QtNodes::DataModelRegistry> RegisterDataModelsWithoutUi();
 };
 
 #endif // CNODEEDITORREGISTRY_H

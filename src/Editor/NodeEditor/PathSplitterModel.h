@@ -45,22 +45,39 @@ public:
 
   ConnectionPolicy portOutConnectionPolicy(PortIndex) const override { return ConnectionPolicy::One; }
 
-protected:
-  void OnUndoStackSet() override;
+protected slots:
+  void SlotTransitionTypeChanged(qint32 iType);
+  void SlotTransitionLabelChanged(PortIndex index, const QString& sLabelValue);
 
+protected:
   std::weak_ptr<CSceneTranstitionData>                m_wpInData;
   std::shared_ptr<CSceneTranstitionData>              m_spOutData;
-  QPointer<CPathSplitterModelWidget>                  m_pWidget;
 
   NodeValidationState m_modelValidationState;
   QString m_modelValidationError;
 
   std::vector<QString>          m_vsLabelNames;
   ESceneTransitionType          m_transitonType;
+};
 
-private slots:
-  void SlotTransitionTypeChanged(qint32 iType);
-  void SlotTransitionLabelChanged(PortIndex index, const QString& sLabelValue);
+//----------------------------------------------------------------------------------------
+//
+class CPathSplitterModelWithWidget : public CPathSplitterModel
+{
+  Q_OBJECT
+
+public:
+  CPathSplitterModelWithWidget();
+  ~CPathSplitterModelWithWidget() override;
+
+  void restore(QJsonObject const& p) override;
+
+  QWidget* embeddedWidget() override;
+
+protected:
+  void OnUndoStackSet() override;
+
+  QPointer<CPathSplitterModelWidget>                  m_pWidget;
 };
 
 #endif // PATHSPLITTERMODEL_H
