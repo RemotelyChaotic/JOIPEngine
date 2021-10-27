@@ -306,7 +306,9 @@ QStringList SResourceFormats::ArchiveFormats()
   {
     for (const QString& sFormat : vsFormats) { vsReturn <<  QStringLiteral("*.") + sFormat.toLower(); }
   }
-  vsReturn << ("*." + joip_resource::c_sResourceBundleSuffix);
+  // adding this kind of resorce doesn't work, but it can be read and will be created by
+  // the engine itself if needed
+  //vsReturn << ("*." + joip_resource::c_sResourceBundleSuffix);
   return vsReturn;
 }
 
