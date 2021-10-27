@@ -58,7 +58,7 @@ void CResourceTreeItemModel::InitializeModel(tspProject spProject)
       if (IsLocalFile(sPath))
       {
         locker.unlock();
-        sPathParts =  ResourceUrlToRelativePath(it->second).split("/");
+        sPathParts = ResourceUrlToAbsolutePath(it->second).split("/");
         locker.relock();
       }
       else
@@ -467,7 +467,7 @@ void CResourceTreeItemModel::SlotResourceAdded(qint32 iProjId, const QString& sN
       QStringList sPathParts;
       if (IsLocalFile(sPath))
       {
-        sPathParts = ResourceUrlToRelativePath(spResource).split("/");
+        sPathParts = ResourceUrlToAbsolutePath(spResource).split("/");
       }
       else
       {

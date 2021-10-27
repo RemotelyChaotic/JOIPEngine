@@ -87,8 +87,13 @@ void CResourceDisplayWidget::LoadResource(tspResource spResource)
   SetProjectId(spProject->m_iId);
 
   QUrl path = m_spResource->m_sPath;
+  QString sBundle = m_spResource->m_sResourceBundle;
   if (IsLocalFile(m_spResource->m_sPath))
   {
+    projectLocker.unlock();
+    CDatabaseManager::LoadBundle(m_spResource->m_spParent, sBundle);
+    projectLocker.relock();
+
     switch (m_spResource->m_type)
     {
       case EResourceType::eImage:

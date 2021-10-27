@@ -13,9 +13,11 @@ class CSceneScriptWrapper;
 class CSettings;
 struct SProject;
 struct SScene;
-typedef std::shared_ptr<SProject> tspProject;
-typedef std::vector<tspProject>   tvspProject;
-typedef std::shared_ptr<SScene>   tspScene;
+struct SResourceBundle;
+typedef std::shared_ptr<SProject>       tspProject;
+typedef std::vector<tspProject>         tvspProject;
+typedef std::shared_ptr<SResourceBundle>tspResourceBundle;
+typedef std::shared_ptr<SScene>         tspScene;
 
 typedef std::vector<std::function<void(const tspProject&)>> tvfnActionsProject;
 typedef std::vector<std::function<void(const tspScene&)>> tvfnActionsScene;
@@ -30,8 +32,10 @@ public:
   CDatabaseManager();
   ~CDatabaseManager() override;
 
+  static bool LoadBundle(tspProject& spProject, const QString& sBundle);
   static bool LoadProject(tspProject& spProject);
   static bool SetProjectEditing(tspProject& spProject, bool bEnabled);
+  static bool UnloadBundle(tspProject& spProject, const QString& sBundle);
   static bool UnloadProject(tspProject& spProject);
 
   // Project
@@ -70,6 +74,7 @@ public:
                       const tvfnActionsResource& vfnActionsAfterAdding = tvfnActionsResource());
   void ClearResources(tspProject& spProj);
   tspResource FindResourceInProject(tspProject& spProj, const QString& sName);
+  tspResourceBundle FindResourceBundleInProject(tspProject& spProj, const QString& sName);
   void RemoveResource(tspProject& spProj, const QString& sName);
   void RenameResource(tspProject& spProj, const QString& sName, const QString& sNewName);
 

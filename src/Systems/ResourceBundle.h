@@ -26,6 +26,7 @@ struct SResourceBundle : public ISerializable, public std::enable_shared_from_th
 
   QString                   m_sName;
   QUrl                      m_sPath;
+  bool                      m_bLoaded = false;
 
   QJsonObject ToJsonObject() override;
   void FromJsonObject(const QJsonObject& json) override;
@@ -43,5 +44,9 @@ typedef std::vector<tspResourceBundle>       tvspResourceBundle;
 typedef std::map<QString, tspResourceBundle> tspResourceBundleMap;
 
 Q_DECLARE_METATYPE(tspResourceBundle)
+
+//----------------------------------------------------------------------------------------
+//
+QString ResourceBundleUrlToAbsolutePath(const tspResourceBundle& spResourceBundle);
 
 #endif // RESOURCEBUNDLE_H

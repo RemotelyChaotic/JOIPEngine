@@ -172,25 +172,10 @@ QUrl CResourceScriptWrapper::getPath()
     return m_spData->m_sPath;
   }
 
-  const QString sTruePathName = PhysicalProjectName(m_spData->m_spParent);
-  QReadLocker projectLocker(&m_spData->m_spParent->m_rwLock);
-  bool bBundled = m_spData->m_spParent->m_bBundled;
-  projectLocker.unlock();
-
-  QReadLocker locker(&m_spData->m_rwLock);
   if (IsLocalFile(m_spData->m_sPath))
   {
-    if (!bBundled)
-    {
-      QUrl urlCopy(m_spData->m_sPath);
-      urlCopy.setScheme(QString());
-      QString sBasePath = CPhysFsFileEngineHandler::c_sScheme;
-      return QUrl(sBasePath + QUrl().resolved(urlCopy).toString());
-    }
-    else
-    {
-      return QUrl("qrc:/" + sTruePathName + "/" + m_spData->m_sName);
-    }
+    const QString sTruePathName = ResourceUrlToAbsolutePath(m_spData);
+    return QUrl(sTruePathName);
   }
   else
   {
@@ -267,15 +252,15 @@ QString ResourceUrlToAbsolutePath(const tspResource& spResource)
     return QString();
   }
 
-  const QString sTruePathName = PhysicalProjectName(spResource->m_spParent);
   QReadLocker projectLocker(&spResource->m_spParent->m_rwLock);
+  const QString sTrueProjectName = spResource->m_spParent->m_sName;
   bool bBundled = spResource->m_spParent->m_bBundled;
   projectLocker.unlock();
 
   QReadLocker locker(&spResource->m_rwLock);
   if (IsLocalFile(spResource->m_sPath))
   {
-    if (!bBundled)
+    if (!bBundled && spResource->m_sResourceBundle.isEmpty())
     {
       QUrl urlCopy(spResource->m_sPath);
       urlCopy.setScheme(QString());
@@ -284,41 +269,7 @@ QString ResourceUrlToAbsolutePath(const tspResource& spResource)
     }
     else
     {
-      return "qrc:/" + sTruePathName + "/" + spResource->m_sName;
-    }
-  }
-  else
-  {
-    return QString();
-  }
-}
-
-//----------------------------------------------------------------------------------------
-//
-QString ResourceUrlToRelativePath(const tspResource& spResource)
-{
-  if (nullptr == spResource || nullptr == spResource->m_spParent)
-  {
-    return QString();
-  }
-
-  const QString sTruePathName = PhysicalProjectName(spResource->m_spParent);
-  QReadLocker projectLocker(&spResource->m_spParent->m_rwLock);
-  bool bBundled = spResource->m_spParent->m_bBundled;
-  projectLocker.unlock();
-
-  QReadLocker locker(&spResource->m_rwLock);
-  if (IsLocalFile(spResource->m_sPath))
-  {
-    if (!bBundled)
-    {
-      QUrl urlCopy(spResource->m_sPath);
-      urlCopy.setScheme(QString());
-      return QUrl().resolved(urlCopy).toString();
-    }
-    else
-    {
-      return spResource->m_sName;
+      return "qrc:/" + sTrueProjectName + "/" + spResource->m_sName;
     }
   }
   else

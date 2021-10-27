@@ -12,6 +12,7 @@ class CEosResourceLocator
 public:
   struct SEosResourceData
   {
+    QString m_sLocatorType;
     QString m_sHash;
     SResourceData m_data;
     qint32 m_iWidth;

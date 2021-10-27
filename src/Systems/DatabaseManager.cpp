@@ -35,6 +35,36 @@ CDatabaseManager::~CDatabaseManager()
 
 //----------------------------------------------------------------------------------------
 //
+bool CDatabaseManager::LoadBundle(tspProject& spProject, const QString& sBundle)
+{
+  if (nullptr == spProject || sBundle.isEmpty()) { return false; }
+
+  bool bLoaded = true;
+
+  const QString sProjectName = PhysicalProjectName(spProject);
+  QReadLocker locker(&spProject->m_rwLock);
+
+  const auto& it = spProject->m_spResourceBundleMap.find(sBundle);
+  if (spProject->m_spResourceBundleMap.end() != it)
+  {
+    QWriteLocker lockerBundle(&it->second->m_rwLock);
+    if (it->second->m_bLoaded) { return true; }
+
+    lockerBundle.unlock();
+    const QString sPath = ResourceBundleUrlToAbsolutePath(it->second);
+    lockerBundle.relock();
+
+    it->second->m_bLoaded =
+        QResource::registerResource(sPath, QDir::separator() + spProject->m_sName);
+
+    bLoaded = !it->second->m_bLoaded;
+  }
+
+  return bLoaded;
+}
+
+//----------------------------------------------------------------------------------------
+//
 bool CDatabaseManager::LoadProject(tspProject& spProject)
 {
   if (nullptr == spProject) { return false; }
@@ -52,7 +82,6 @@ bool CDatabaseManager::LoadProject(tspProject& spProject)
   }
   else
   {
-
     if (!spProject->m_bLoaded)
     {
       locker.unlock();
@@ -101,6 +130,36 @@ bool CDatabaseManager::SetProjectEditing(tspProject& spProject, bool bEnabled)
 
 //----------------------------------------------------------------------------------------
 //
+bool CDatabaseManager::UnloadBundle(tspProject& spProject, const QString& sBundle)
+{
+  if (nullptr == spProject || sBundle.isEmpty()) { return false; }
+
+  bool bUnloaded = false;
+
+  const QString sProjectName = PhysicalProjectName(spProject);
+  QReadLocker locker(&spProject->m_rwLock);
+
+  const auto& it = spProject->m_spResourceBundleMap.find(sBundle);
+  if (spProject->m_spResourceBundleMap.end() != it)
+  {
+    QWriteLocker lockerBundle(&it->second->m_rwLock);
+    if (!it->second->m_bLoaded) { return true; }
+
+    lockerBundle.unlock();
+    const QString sPath = ResourceBundleUrlToAbsolutePath(it->second);
+    lockerBundle.relock();
+
+    it->second->m_bLoaded =
+        !QResource::unregisterResource(sPath, QDir::separator() + spProject->m_sName);
+
+    bUnloaded = !it->second->m_bLoaded;
+  }
+
+  return bUnloaded;
+}
+
+//----------------------------------------------------------------------------------------
+//
 bool CDatabaseManager::UnloadProject(tspProject& spProject)
 {
   if (nullptr == spProject) { return false; }
@@ -119,15 +178,24 @@ bool CDatabaseManager::UnloadProject(tspProject& spProject)
     }
   }
 
-
   bool bUnloaded = true;
+
+  // if loaded unload bundles
+  for (const auto& it : spProject->m_spResourceBundleMap)
+  {
+    locker.unlock();
+    bUnloaded &= UnloadBundle(spProject, it.first);
+    locker.relock();
+  }
+
+
   if (spProject->m_bBundled && spProject->m_bLoaded)
   {
     spProject->m_bLoaded =
         !QResource::unregisterResource(CApplication::Instance()->Settings()->ContentFolder() + QDir::separator() +
                                        sProjectName + c_sProjectBundleFileEnding,
                                        QDir::separator() + spProject->m_sName);
-    bUnloaded = !spProject->m_bLoaded;
+    bUnloaded &= !spProject->m_bLoaded;
   }
   else
   {
@@ -135,11 +203,11 @@ bool CDatabaseManager::UnloadProject(tspProject& spProject)
     if (spProject->m_bLoaded)
     {
       spProject->m_bLoaded = !UnmountProject(spProject);
-      bUnloaded = !spProject->m_bLoaded;
+      bUnloaded &= !spProject->m_bLoaded;
     }
     else
     {
-      bUnloaded = true;
+      bUnloaded &= true;
     }
   }
 
@@ -787,6 +855,21 @@ tspResource CDatabaseManager::FindResourceInProject(tspProject& spProj, const QS
   QReadLocker locker(&spProj->m_rwLock);
   auto it = spProj->m_spResourcesMap.find(sName);
   if (it != spProj->m_spResourcesMap.end())
+  {
+    return it->second;
+  }
+  return nullptr;
+}
+
+//----------------------------------------------------------------------------------------
+//
+tspResourceBundle CDatabaseManager::FindResourceBundleInProject(tspProject& spProj, const QString& sName)
+{
+  if (!IsInitialized() || nullptr == spProj) { return nullptr; }
+
+  QReadLocker locker(&spProj->m_rwLock);
+  auto it = spProj->m_spResourceBundleMap.find(sName);
+  if (it != spProj->m_spResourceBundleMap.end())
   {
     return it->second;
   }

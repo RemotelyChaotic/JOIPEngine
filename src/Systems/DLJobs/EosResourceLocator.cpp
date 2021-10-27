@@ -49,6 +49,7 @@ namespace
 
   const QString c_sSchemeGallery = "gallery";
   const QString c_sSchemeFile = "file";
+  const QString c_sSchemeRemote = "https";
 
   std::vector<QJsonValue> FindKeyRecursive(const QString& key, const QJsonValue& value)
   {
@@ -195,8 +196,8 @@ bool CEosResourceLocator::LocateAllResources(QString* psError)
                 {
                   spImg->m_iHeight = it.value().toInt();
                 }
-                spImg->m_data.m_sPath = ToValidProjectName(sGaleryName);
-                spImg->m_data.m_sPath.setScheme(c_sSchemeGallery);
+                spImg->m_sLocatorType = c_sSchemeGallery;
+                spImg->m_data.m_sPath = ":/" + ToValidProjectName(sGaleryName) + "/" + spImg->m_data.m_sName;
                 currentGallery.insert({spImg->m_data.m_sName, spImg});
               }
             }
@@ -249,8 +250,8 @@ bool CEosResourceLocator::LocateAllResources(QString* psError)
             spImg->m_data.m_type = itType->second;
           }
         }
-        spImg->m_data.m_sPath = sFileKey;
-        spImg->m_data.m_sPath.setScheme(c_sSchemeFile);
+        spImg->m_sLocatorType = c_sSchemeFile;
+        spImg->m_data.m_sPath = ":/_files/" + spImg->m_data.m_sName;
         files.insert({sFileKey, spImg});
       }
     }
@@ -307,13 +308,12 @@ QByteArray CEosResourceLocator::DownloadResource(
 {
   QByteArray arr;
   QUrl dowloadUrl;
-  QUrl path = spResource->m_data.m_sPath;
-  if (path.scheme() == c_sSchemeGallery)
+  if (spResource->m_sLocatorType == c_sSchemeGallery)
   {
     dowloadUrl =
         c_sDownloadPath + "tb_xl/" + spResource->m_sHash + ".jpg" + m_sFIX_POLLUTION;
   }
-  else if (path.scheme() == c_sSchemeFile)
+  else if (spResource->m_sLocatorType == c_sSchemeFile)
   {
     auto it =
         std::find_if(c_sExtensionMap.begin(), c_sExtensionMap.end(),
@@ -328,9 +328,9 @@ QByteArray CEosResourceLocator::DownloadResource(
     dowloadUrl =
         c_sDownloadPath + spResource->m_sHash + "." + it->first + m_sFIX_POLLUTION;
   }
-  else
+  else if (spResource->m_sLocatorType == c_sSchemeRemote)
   {
-    dowloadUrl = path;
+    dowloadUrl = spResource->m_data.m_sPath;
   }
 
   arr = fnFetch(dowloadUrl, psError);
@@ -376,6 +376,7 @@ bool CEosResourceLocator::LookupRemoteLink(const QString& sResource, QString* ps
   spImg->m_iHeight = -1;
   spImg->m_data.m_sPath = sResource;
   spImg->m_data.m_sSource = sResource;
+  spImg->m_sLocatorType = c_sSchemeRemote;
   m_resourceMap["_remote"].insert({sResource, spImg});
 
   // set name

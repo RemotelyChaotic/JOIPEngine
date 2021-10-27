@@ -115,7 +115,6 @@ Q_DECLARE_METATYPE(tspResource)
 //
 bool IsLocalFile(const QUrl& url);
 QString ResourceUrlToAbsolutePath(const tspResource& spResource);
-QString ResourceUrlToRelativePath(const tspResource& spResource);
 QUrl ResourceUrlFromLocalFile(const QString& sPath);
 
 //----------------------------------------------------------------------------------------

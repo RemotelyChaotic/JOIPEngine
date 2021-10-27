@@ -129,7 +129,6 @@ void CScriptEditorModel::SerializeProject()
         {
           const QString sFilePath = ResourceUrlToAbsolutePath(spResource);
           QReadLocker lockerResource(&spResource->m_rwLock);
-          QUrl sPath = spResource->m_sPath;
 
           QFile file(sFilePath);
           if (file.open(QIODevice::WriteOnly | QIODevice::Truncate))
@@ -533,7 +532,6 @@ void CScriptEditorModel::LoadScriptFile(const QString& sName)
       {
         const QString sFilePath = ResourceUrlToAbsolutePath(spResource);
         QReadLocker lockerResource(&spResource->m_rwLock);
-        QUrl sPath = spResource->m_sPath;
 
         QFile file(sFilePath);
         if (file.open(QIODevice::ReadOnly))

@@ -2,6 +2,7 @@
 #include "Systems/DatabaseManager.h"
 #include "Systems/Project.h"
 #include "Systems/Resource.h"
+#include "Systems/ResourceBundle.h"
 #include <QtAV/VideoFrameExtractor.h>
 #include <QFileInfo>
 #include <QImageReader>
@@ -41,19 +42,20 @@ QImage CDatabaseImageProvider::requestImage(const QString& id, QSize* pSize,
         QReadLocker locker(&spResource->m_rwLock);
         const QString sResourceName = spResource->m_sName;
         const QUrl sResourcePath = spResource->m_sPath;
+        const QString sResourceBundle = spResource->m_sResourceBundle;
         if (spResource->m_type._to_integral() == EResourceType::eImage)
         {
           locker.unlock();
           return RequestImage(spProject, spResource, spDbManager,
-                              sResourceName, sResourcePath,
+                              sResourceName, sResourceBundle, sResourcePath,
                               pSize, requestedSize, bLoadedBefore);
         }
         else if (spResource->m_type._to_integral() == EResourceType::eMovie)
         {
           locker.unlock();
           return RequestMovieFrame(spProject, spResource,
-                                   sResourceName, sResourcePath, pSize,
-                                   requestedSize, bLoadedBefore);
+                                   sResourceName, sResourceBundle, sResourcePath,
+                                   pSize, requestedSize, bLoadedBefore);
         }
       }
     }
@@ -67,6 +69,7 @@ QImage CDatabaseImageProvider::RequestImage(tspProject spProject,
                                             spResource spResource,
                                             std::shared_ptr<CDatabaseManager> spDbManager,
                                             const QString& sResourceName,
+                                            const QString& sResourceBundleName,
                                             const QUrl& sResourcePath,
                                             QSize* pSize, const QSize& requestedSize,
                                             bool bLoadedBefore)
@@ -77,6 +80,7 @@ QImage CDatabaseImageProvider::RequestImage(tspProject spProject,
     QString sPath = ResourceUrlToAbsolutePath(spResource);
 
     CDatabaseManager::LoadProject(spProject);
+    CDatabaseManager::LoadBundle(spProject, sResourceBundleName);
     if (QFileInfo(sPath).exists())
     {
       QImage img = LoadImage(sPath);
@@ -192,6 +196,7 @@ QImage CDatabaseImageProvider::LoadImage(const QString& sPath)
 QImage CDatabaseImageProvider::RequestMovieFrame(tspProject spProject,
                                                  spResource spResource,
                                                  const QString& sResourceName,
+                                                 const QString& sResourceBundleName,
                                                  const QUrl& sResourcePath,
                                                  QSize* pSize, const QSize& requestedSize,
                                                  bool bLoadedBefore)
@@ -207,6 +212,7 @@ QImage CDatabaseImageProvider::RequestMovieFrame(tspProject spProject,
     QString sPath = ResourceUrlToAbsolutePath(spResource);
 
     CDatabaseManager::LoadProject(spProject);
+    CDatabaseManager::LoadBundle(spProject, sResourceBundleName);
     if (QFileInfo(sPath).exists())
     {
       spExtractor->setSource(sPath);

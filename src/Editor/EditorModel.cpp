@@ -355,7 +355,6 @@ void CEditorModel::LoadProject(qint32 iId)
       {
         QString sPath = ResourceUrlToAbsolutePath(spResource);
         QReadLocker resourceLocker(&spResource->m_rwLock);
-        QUrl path = spResource->m_sPath;
         resourceLocker.unlock();
 
         QFile modelFile(sPath);
@@ -589,11 +588,12 @@ void CEditorModel::ExportProject()
   m_spCurrentProject->m_rwLock.lockForRead();
   for (auto spResourcePair : m_spCurrentProject->m_spResourcesMap)
   {
+    const QString sOutPath = ResourceUrlToAbsolutePath(spResourcePair.second);
     spResourcePair.second->m_rwLock.lockForRead();
-    if (spResourcePair.second->m_sPath.isLocalFile())
+    if (IsLocalFile(spResourcePair.second->m_sPath))
     {
       outStream << QString("<file alias=\"%2\">%1</file>")
-                   .arg(spResourcePair.second->m_sPath.toLocalFile())
+                   .arg(sOutPath)
                    .arg(spResourcePair.second->m_sName);
     }
     spResourcePair.second->m_rwLock.unlock();

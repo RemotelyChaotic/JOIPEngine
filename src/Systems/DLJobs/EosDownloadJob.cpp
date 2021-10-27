@@ -223,12 +223,32 @@ bool CEosDownloadJob::Run(const QVariantList& args)
   }
   */
 
+  tvfnActionsProject vfnActions = {
+    [this](const tspProject& spProjectCallback) {
+      spProjectCallback->m_dlState = EDownLoadState::eDownloadRunning;
+      m_spProject = spProjectCallback;
+    }
+  };
+  std::shared_ptr<CDatabaseManager> spDbManager =
+    CApplication::Instance()->System<CDatabaseManager>().lock();
+  m_iProjId = spDbManager->AddProject("TBD", 1, false, true, vfnActions);
+  spDbManager->PrepareNewProject(m_iProjId);
+  spDbManager->SerializeProject(m_iProjId, true);
+  for (qint32 i = 0; i < 100; ++i)
+  {
+    m_iProgress = i;
+    emit SignalProgressChanged(m_iProjId, Progress());
+    thread()->sleep(1);
+  }
+  emit SignalFinished(m_iProjId);
+  return true;
+
   m_spNetworkAccessManager.reset(new QNetworkAccessManager());
   CRaiiFunctionCaller resetCaller([this](){
     m_spNetworkAccessManager.reset();
   });
-  std::shared_ptr<CDatabaseManager> spDbManager =
-    CApplication::Instance()->System<CDatabaseManager>().lock();
+  //std::shared_ptr<CDatabaseManager> spDbManager =
+  //  CApplication::Instance()->System<CDatabaseManager>().lock();
   if (nullptr == spDbManager)
   {
     m_sError = QString("Internal Error: Database Manager was not found.");
@@ -236,12 +256,12 @@ bool CEosDownloadJob::Run(const QVariantList& args)
   }
 
   // create and get new project
-  tvfnActionsProject vfnActions = {
-    [this](const tspProject& spProjectCallback) {
-      spProjectCallback->m_dlState = EDownLoadState::eDownloadRunning;
-      m_spProject = spProjectCallback;
-    }
-  };
+  //tvfnActionsProject vfnActions = {
+  //  [this](const tspProject& spProjectCallback) {
+  //    spProjectCallback->m_dlState = EDownLoadState::eDownloadRunning;
+  //    m_spProject = spProjectCallback;
+  //  }
+  //};
   m_iProjId = spDbManager->AddProject("TBD", 1, false, true, vfnActions);
   spDbManager->PrepareNewProject(m_iProjId);
   spDbManager->SerializeProject(m_iProjId, true);
@@ -326,17 +346,6 @@ bool CEosDownloadJob::Run(const QVariantList& args)
   m_spResourceLib->setFormat(RCCResourceLibrary::Binary);
   m_spResourceLib->readFiles(false, errorBuffer);
 
-  RCCFileInfo fileInfoScript(QString(c_sScriptResourceName + c_sScriptFormat),
-                             QFileInfo(c_sScriptResourceName + c_sScriptFormat),
-                             QLocale::C, QLocale::AnyCountry, RCCFileInfo::NoFlags);
-  fileInfoScript.m_prefilledContent = jsonScript.toJson();
-  m_spResourceLib->addFile(QString(":/" + c_sScriptResourceName + c_sScriptFormat), fileInfoScript);
-  QString sResource =
-      spDbManager->AddResource(m_spProject, QUrl(":/" + c_sScriptResourceName + c_sScriptFormat),
-                               EResourceType::eScript, c_sScriptResourceName);
-  tspResource spResource =
-      spDbManager->FindResourceInProject(m_spProject, sResource);
-
   ABORT_CHECK(m_iProjId)
 
   // locate all resources in the script
@@ -391,8 +400,8 @@ bool CEosDownloadJob::Run(const QVariantList& args)
 
 
   sError = QString();
-  if (!CreateResourceFiles(locator.m_resourceMap, spResource,
-                           fileInfoScript.m_prefilledContent.size(), iMaxProgress,
+  if (!CreateResourceFiles(locator.m_resourceMap,
+                           iMaxProgress,
                            errorBuffer, locator,
                            &sError))
   {
@@ -403,7 +412,8 @@ bool CEosDownloadJob::Run(const QVariantList& args)
   ABORT_CHECK(m_iProjId)
 
   sError = QString();
-  if (!CreateScriptFiles(pagesTransformer.m_vPages,
+  if (!CreateScriptFiles(jsonScript,
+                         pagesTransformer.m_vPages,
                          iMaxProgress,
                          errorBuffer, pagesTransformer,
                          &sError))
@@ -448,8 +458,6 @@ void CEosDownloadJob::AbortImpl()
 //----------------------------------------------------------------------------------------
 //
 bool CEosDownloadJob::CreateResourceFiles(const CEosResourceLocator::tGaleryData& resourceMap,
-                                          tspResource spScript,
-                                          size_t uiScriptSize,
                                           qint32 iMaxProgress,
                                           QBuffer& errorBuffer,
                                           CEosResourceLocator& locator,
@@ -460,8 +468,8 @@ bool CEosDownloadJob::CreateResourceFiles(const CEosResourceLocator::tGaleryData
     CApplication::Instance()->System<CDatabaseManager>().lock();
 
   QString sResource;
-  tspResource spResource = spScript;
-  qint32 iCollectiveSize = uiScriptSize;
+  tspResource spResource;
+  qint32 iCollectiveSize = 0;
   if (0 < iMaxProgress)
   {
     for (const auto& itGallery : resourceMap)
@@ -470,8 +478,8 @@ bool CEosDownloadJob::CreateResourceFiles(const CEosResourceLocator::tGaleryData
       QString sFileBlob =  itGallery.first +
           "." + QString::number(m_iFileBlobCounter) +
           "." + joip_resource::c_sResourceBundleSuffix;
-      if (!spDbManager->AddResourceArchive(m_spProject,
-                                      QUrl(CPhysFsFileEngineHandler::c_sScheme + sFileBlob)))
+      if (!spDbManager->AddResourceArchive(
+            m_spProject, QUrl(CPhysFsFileEngineHandler::c_sScheme + sFileBlob)))
       {
         if (nullptr != psError)
         {
@@ -516,13 +524,12 @@ bool CEosDownloadJob::CreateResourceFiles(const CEosResourceLocator::tGaleryData
 
           const QString sName = itFile.second->m_data.m_sName;
           QUrl urlCopy = itFile.second->m_data.m_sPath;
-          urlCopy.setScheme("");
           const QString sPath = urlCopy.toString();
-          RCCFileInfo fileInfo(QString(sName), QFileInfo(sPath + "/" + sName), QLocale::C,
+          RCCFileInfo fileInfo(sName, QFileInfo(sPath), QLocale::C,
                                QLocale::AnyCountry, RCCFileInfo::NoFlags);
           fileInfo.m_prefilledContent = arr;
-          m_spResourceLib->addFile(":/" + sPath + "/" + sName, fileInfo);
-          sResource = spDbManager->AddResource(m_spProject, QUrl(":/" + sPath + "/" + sName),
+          m_spResourceLib->addFile(sName, fileInfo);
+          sResource = spDbManager->AddResource(m_spProject, urlCopy,
                                                itFile.second->m_data.m_type, sName);
           spResource = spDbManager->FindResourceInProject(m_spProject, sResource);
           if (nullptr == spResource) { sError = QString("Resource error."); return false; }
@@ -561,7 +568,8 @@ bool CEosDownloadJob::CreateResourceFiles(const CEosResourceLocator::tGaleryData
 
 //----------------------------------------------------------------------------------------
 //
-bool CEosDownloadJob::CreateScriptFiles(const std::vector<CEosPagesToScenesTransformer::SPageScene>& vScenes,
+bool CEosDownloadJob::CreateScriptFiles(const QJsonDocument& entireScript,
+                                        const std::vector<CEosPagesToScenesTransformer::SPageScene>& vScenes,
                                         qint32 iMaxProgress,
                                         QBuffer& errorBuffer,
                                         CEosPagesToScenesTransformer& sceneTransformer,
@@ -580,6 +588,25 @@ bool CEosDownloadJob::CreateScriptFiles(const std::vector<CEosPagesToScenesTrans
                         QUrl(CPhysFsFileEngineHandler::c_sScheme + sFileBlob)))
   { sError = QString("Could not create resource bundle.").arg(sFileBlob); return false; }
 
+
+  // write entire script into file
+  RCCFileInfo fileInfoScript(QString(c_sScriptResourceName + c_sScriptFormat),
+                             QFileInfo(c_sScriptResourceName + c_sScriptFormat),
+                             QLocale::C, QLocale::AnyCountry, RCCFileInfo::NoFlags);
+  fileInfoScript.m_prefilledContent = entireScript.toJson();
+  m_spResourceLib->addFile(QString(":/" + c_sScriptResourceName + c_sScriptFormat), fileInfoScript);
+  sResource =
+      spDbManager->AddResource(m_spProject, QUrl(":/" + c_sScriptResourceName + c_sScriptFormat),
+                               EResourceType::eScript, c_sScriptResourceName);
+  spResource =
+      spDbManager->FindResourceInProject(m_spProject, sResource);
+  {
+    QWriteLocker resourceLocker(&spResource->m_rwLock);
+    spResource->m_sResourceBundle = QFileInfo(sFileBlob).completeBaseName();
+  }
+
+
+  // write all pages into own file
   for (const auto& scenePage : vScenes)
   {
     tspScene spScene =
@@ -588,10 +615,10 @@ bool CEosDownloadJob::CreateScriptFiles(const std::vector<CEosPagesToScenesTrans
 
     const QString sName = scenePage.m_sName;
     const QString sPath = c_sSceneModelName;
-    RCCFileInfo fileInfo(QString(sName), QFileInfo(sPath + "/" + sName), QLocale::C,
+    RCCFileInfo fileInfo(QString(sName), QFileInfo(":/" + sPath + "/" + sName), QLocale::C,
                          QLocale::AnyCountry, RCCFileInfo::NoFlags);
     fileInfo.m_prefilledContent = scenePage.m_pageScript.toJson();
-    m_spResourceLib->addFile(":/" + sPath + "/" + sName, fileInfo);
+    m_spResourceLib->addFile(sName, fileInfo);
     sResource = spDbManager->AddResource(m_spProject, QUrl(":/" + sPath + "/" + sName),
                                          EResourceType::eScript, sName);
     spResource = spDbManager->FindResourceInProject(m_spProject, sResource);
@@ -625,13 +652,14 @@ bool CEosDownloadJob::CreateScriptFiles(const std::vector<CEosPagesToScenesTrans
 
   ABORT_CHECK(m_iProjId)
 
+  // write .flow file
   QByteArray arr = sceneTransformer.CompileScenes();
 
   const QString sName = joip_resource::c_sSceneModelFile;
-  RCCFileInfo fileInfo(QString(sName), QFileInfo(sName), QLocale::C,
+  RCCFileInfo fileInfo(QString(sName), QFileInfo(":/" + sName), QLocale::C,
                        QLocale::AnyCountry, RCCFileInfo::NoFlags);
   fileInfo.m_prefilledContent = arr;
-  m_spResourceLib->addFile(":/" + sName, fileInfo);
+  m_spResourceLib->addFile(sName, fileInfo);
   sResource = spDbManager->AddResource(m_spProject, QUrl(":/" + sName),
                                        EResourceType::eOther, sName);
   spResource = spDbManager->FindResourceInProject(m_spProject, sResource);

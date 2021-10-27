@@ -71,11 +71,12 @@ protected:
 
 private:
   bool CreateResourceFiles(const CEosResourceLocator::tGaleryData& resourceMap,
-                           tspResource spScript, size_t uiScriptSize, qint32 iMaxProgress,
+                           qint32 iMaxProgress,
                            QBuffer& errorBuffer,
                            CEosResourceLocator& locator,
                            QString* psError);
-  bool CreateScriptFiles(const std::vector<CEosPagesToScenesTransformer::SPageScene>& vScenes,
+  bool CreateScriptFiles(const QJsonDocument& entireScript,
+                         const std::vector<CEosPagesToScenesTransformer::SPageScene>& vScenes,
                          qint32 iMaxProgress,
                          QBuffer& errorBuffer,
                          CEosPagesToScenesTransformer& sceneTransformer,

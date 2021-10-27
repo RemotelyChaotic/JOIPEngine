@@ -10,8 +10,10 @@ class CDatabaseManager;
 class QNetworkAccessManager;
 struct SProject;
 struct SResource;
+struct SResourceBundle;
 typedef std::shared_ptr<SProject> tspProject;
 typedef std::shared_ptr<SResource> spResource;
+typedef std::shared_ptr<SResourceBundle>tspResourceBundle;
 
 class CDatabaseImageProvider : public QObject, public QQuickImageProvider
 {
@@ -28,6 +30,7 @@ private:
                       spResource spResource,
                       std::shared_ptr<CDatabaseManager> spDbManager,
                       const QString& sResourceName,
+                      const QString& sResourceBundleName,
                       const QUrl& sResourcePath,
                       QSize* pSize, const QSize& requestedSize,
                       bool bLoadedBefore);
@@ -35,6 +38,7 @@ private:
   QImage RequestMovieFrame(tspProject spProject,
                            spResource spResource,
                            const QString& sResourceName,
+                           const QString& sResourceBundleName,
                            const QUrl& sResourcePath,
                            QSize* pSize, const QSize& requestedSize,
                            bool bLoadedBefore);
