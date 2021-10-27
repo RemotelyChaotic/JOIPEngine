@@ -308,6 +308,16 @@ void CProjectCardSelectionWidget::SlotProjectDownloadProgressChanged(qint32 iPro
 {
   if (!IsLoaded()) { return; }
 
+  // add project to view if not already present
+  auto it = std::find_if(m_vpProjects.begin(), m_vpProjects.end(),
+                         [iProjId](const QPointer<CProjectScriptWrapper>& pProj) {
+    return pProj->getId() == iProjId;
+  });
+  if (m_vpProjects.end() == it)
+  {
+    SlotProjectAdded(iProjId);
+  }
+
   QQuickItem* pRootObject =  m_spUi->pQmlWidget->rootObject();
   QMetaObject::invokeMethod(pRootObject, "onUpdateProject",
                             Q_ARG(QVariant, QVariant(iProjId)),

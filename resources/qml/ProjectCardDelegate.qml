@@ -106,9 +106,11 @@ Rectangle {
             visible: -1 !== describtionDelegate.progress
 
             Rectangle {
+                id: progressDisplayRect
                 anchors.left: parent.left
                 height: parent.height
                 width: parent.width * describtionDelegate.progress / 100.0
+                opacity: 0.4
 
                 Behavior on width {
                     animation: NumberAnimation {
@@ -117,19 +119,31 @@ Rectangle {
                 }
 
                 gradient: Gradient {
-                    orientation: Gradient.Horizontal
-                    GradientStop { position: 0.0; color: root.selectionColor }
-                    GradientStop {
-                        position: 0.33
-                        color: Qt.darker(root.selectionColor, 2.0)
-
-                        SequentialAnimation on position {
-                            loops: Animation.Infinite
-                            PropertyAnimation { to: 0.0; duration: 200 }
-                            PropertyAnimation { to: 1.0; duration: 200 }
+                    id: gradientProgress
+                    property double progressPosition: 0.0
+                    SequentialAnimation on progressPosition {
+                        loops: Animation.Infinite
+                        PropertyAnimation {
+                            from: 0.0
+                            to: 1.0
+                            duration: progressDisplayRect.width <= 0 ? 1000 : progressDisplayRect.width / 0.1
                         }
                     }
-                    GradientStop { position: 1.0; color: root.selectionColor }
+
+                    orientation: Gradient.Horizontal
+
+                    GradientStop {
+                        position: Math.min(0.0, gradientProgress.progressPosition-0.3)
+                        color: root.selectionColor
+                    }
+                    GradientStop {
+                        position: gradientProgress.progressPosition
+                        color: Qt.darker(root.selectionColor, 2.0)
+                    }
+                    GradientStop {
+                        position: Math.max(1.0, gradientProgress.progressPosition+0.3)
+                        color: root.selectionColor
+                    }
                 }
             }
         }
@@ -472,6 +486,15 @@ Rectangle {
 
 
     function updateDelegate(iProgress) {
+        var pResource = dto.resource(dto.titleCard);
+        if (null !== pResource && undefined !== pResource)
+        {
+            if (resource.resource == null || resource.resource.name !== pResource.name)
+            {
+                resource.resource = pResource;
+            }
+        }
+
         versionText.text = dto.versionText + " / " + dto.targetVersionText;
         describtion.text = (dto.describtion.length > 0 ? dto.describtion : qsTr("<i>No describtion</i>")) +
                 "<br><br>";
@@ -493,12 +516,6 @@ Rectangle {
     }
 
     Component.onCompleted: {
-        var pResource = dto.resource(dto.titleCard);
-        if (null !== pResource && undefined !== pResource)
-        {
-            resource.resource = pResource;
-        }
-
         updateDelegate(-1);
     }
 
