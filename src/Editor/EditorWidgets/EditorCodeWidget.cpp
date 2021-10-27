@@ -620,7 +620,7 @@ void CEditorCodeWidget::ReloadEditor(qint32 iIndex)
       ActionBar()->m_spUi->DebugButton->setEnabled(nullptr != pScriptItem->m_spScene);
     }
     m_spUi->pCodeEdit->setPlainText(QString::fromUtf8(pScriptItem->m_data));
-    m_spUi->pCodeEdit->SetHighlightDefinition("JavaScript");
+    m_spUi->pCodeEdit->SetHighlightDefinition(pScriptItem->m_sHighlightDefinition);
   }
   m_spUi->pCodeEdit->update();
 

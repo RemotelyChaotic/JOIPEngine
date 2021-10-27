@@ -12,6 +12,12 @@
 namespace
 {
   const char c_sIdProperty[] = "ID";
+
+  std::map<QString, QString> c_sFileEngingDefinitionMap = {
+    { "js", "JavaScript" },
+    { "json", "JavaScript" },
+    { "eos", "JavaScript" },
+  };
 }
 
 //----------------------------------------------------------------------------------------
@@ -480,6 +486,11 @@ void CScriptEditorModel::AddResourceTo(tspResource spResource, std::map<QString,
     return;
   }
 
+  QString sBundle = spResource->m_sResourceBundle;
+  resourceLocker.unlock();
+  CDatabaseManager::LoadBundle(m_spProject, sBundle);
+  resourceLocker.relock();
+
   QFileInfo scriptFileInfo(sPath);
   if (scriptFileInfo.exists())
   {
@@ -489,6 +500,11 @@ void CScriptEditorModel::AddResourceTo(tspResource spResource, std::map<QString,
       mpToAddTo.insert({sResourceName, SCachedMapItem()});
       auto& script = mpToAddTo[sResourceName];
       script.m_sId = sResourceName;
+      auto itDefinition = c_sFileEngingDefinitionMap.find(QFileInfo(sPath).suffix());
+      if (c_sFileEngingDefinitionMap.end() != itDefinition)
+      {
+        script.m_sHighlightDefinition = itDefinition->second;
+      }
       if (!script.m_spWatcher->addPath(sPath))
       {
         qWarning() << QString(tr("Could not add %1 to the watched paths."))

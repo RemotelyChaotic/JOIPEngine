@@ -355,7 +355,10 @@ void CEditorModel::LoadProject(qint32 iId)
       {
         QString sPath = ResourceUrlToAbsolutePath(spResource);
         QReadLocker resourceLocker(&spResource->m_rwLock);
+        QString sBundle = spResource->m_sResourceBundle;
         resourceLocker.unlock();
+
+        CDatabaseManager::LoadBundle(m_spCurrentProject, sBundle);
 
         QFile modelFile(sPath);
         if (modelFile.open(QIODevice::ReadOnly))

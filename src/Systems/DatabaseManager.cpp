@@ -1383,11 +1383,16 @@ void CDatabaseManager::LoadResource(tspResource& spRes)
   if (nullptr != spRes)
   {
     QWriteLocker lockerRes(&spRes->m_rwLock);
+    tspProject spProject = spRes->m_spParent;
+    const QString sBundle = spRes->m_sResourceBundle;
     switch(spRes->m_type)
     {
       case EResourceType::eFont:
       {
         lockerRes.unlock();
+        // load bundle if needed
+        CDatabaseManager::LoadBundle(spProject, sBundle);
+        // load font
         qint32 iId = QFontDatabase::addApplicationFont(ResourceUrlToAbsolutePath(spRes));
         lockerRes.relock();
         if (-1 == iId)
