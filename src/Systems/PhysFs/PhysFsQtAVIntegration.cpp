@@ -7,6 +7,7 @@
 #include <QDebug>
 #include <QFile>
 #include <QIODevice>
+#include <QUrl>
 
 using namespace QtAV;
 
@@ -139,7 +140,14 @@ protected:
     if (path.isEmpty())
         return;
     if (!d.dev->open(QIODevice::ReadOnly))
+    {
+      // fallback in case of Url encoding bug in QtAV
+      QUrl url = QUrl::fromPercentEncoding(path.toUtf8());
+      path = url.toString();
+      d.file.setFileName(path);
+      if (!d.dev->open(QIODevice::ReadOnly))
         qWarning() << "Failed to open [" << d.file.fileName() << "]: " << d.file.errorString();
+    }
   }
 
 protected:
