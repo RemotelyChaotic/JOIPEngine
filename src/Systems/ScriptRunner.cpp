@@ -58,9 +58,10 @@ void CScriptRunner::Deinitialize()
   {
     it.second->Deinitialize();
   }
-  m_spRunnerMap.clear();
 
   m_spSignalEmitterContext = nullptr;
+
+  m_spRunnerMap.clear();
 
   SetInitialized(false);
 }

@@ -61,12 +61,12 @@ void CJsScriptRunner::Initialize()
 //
 void CJsScriptRunner::Deinitialize()
 {
-  m_spTimer->stop();
-  m_spTimer = nullptr;
-
   m_spScriptEngine->globalObject().setProperty("utils", QJSValue());
   delete m_pScriptUtils;
   m_pScriptUtils = nullptr;
+
+  m_spTimer->stop();
+  m_spTimer = nullptr;
 
   m_spScriptEngine.reset();
 }
