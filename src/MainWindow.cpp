@@ -292,7 +292,6 @@ void CMainWindow::OldSettingsDetected()
     msgBox.setText(tr("Settings for old version found."));
     msgBox.setInformativeText(tr("Would you like to update the settings to:<br>"
                                  "<ul>"
-                                 "<li>Change the application font to <i>Segoe UI Emoji</i> for colored emojis on Windows.</li>"
                                  "<li>Set the content folder to this applications data folder<br>"
                                  "(You will have to move over any JOI-Projects from the old folder to access them)?</li>"
                                  "</ul>"));
@@ -304,7 +303,6 @@ void CMainWindow::OldSettingsDetected()
     if (QMessageBox::Yes == iRetVal)
     {
       m_spSettings->SetContentFolder(contentFileInfo.absoluteFilePath());
-      m_spSettings->SetFont("Segoe UI Emoji");
     }
     m_spSettings->SetSettingsVersion(QT_VERSION_CHECK(version.m_iMajor, version.m_iMinor, version.m_iPatch));
   }

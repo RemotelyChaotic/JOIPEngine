@@ -48,9 +48,9 @@ private slots:
 private:
   void HandleError(QJSValue& value);
 
-  std::unique_ptr<QJSEngine>                     m_spScriptEngine;
   std::shared_ptr<QTimer>                        m_spTimer;
   std::weak_ptr<CScriptRunnerSignalContext>      m_wpSignalEmitterContext;
+  QPointer<QJSEngine>                            m_pScriptEngine;
   QPointer<CScriptRunnerUtils>                   m_pScriptUtils;
   QPointer<CSceneScriptWrapper>                  m_pCurrentScene;
   QJSValue                                       m_runFunction;

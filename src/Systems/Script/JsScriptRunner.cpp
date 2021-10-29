@@ -21,9 +21,9 @@ CJsScriptRunner::CJsScriptRunner(std::weak_ptr<CScriptRunnerSignalContext> spSig
                                  QObject* pParent) :
   QObject(pParent),
   IScriptRunner(),
-  m_spScriptEngine(new QJSEngine()),
   m_spTimer(std::make_shared<QTimer>()),
   m_wpSignalEmitterContext(spSignalEmitterContext),
+  m_pScriptEngine(new QJSEngine()),
   m_pScriptUtils(new CScriptRunnerUtils(this, this)),
   m_pCurrentScene(nullptr),
   m_runFunction(),
@@ -35,47 +35,51 @@ CJsScriptRunner::CJsScriptRunner(std::weak_ptr<CScriptRunnerSignalContext> spSig
 
 CJsScriptRunner::~CJsScriptRunner()
 {
+  if (nullptr != m_pScriptEngine)
+  {
+    m_pScriptEngine->deleteLater();
+  }
 }
 
 //----------------------------------------------------------------------------------------
 //
 void CJsScriptRunner::Initialize()
 {
-  m_spScriptEngine->installExtensions(QJSEngine::TranslationExtension |
-                                      QJSEngine::ConsoleExtension |
-                                      QJSEngine::GarbageCollectionExtension);
+  m_pScriptEngine->installExtensions(QJSEngine::TranslationExtension |
+                                     QJSEngine::ConsoleExtension |
+                                     QJSEngine::GarbageCollectionExtension);
 
   connect(m_pScriptUtils, &CScriptRunnerUtils::finishedScript,
           this, &CJsScriptRunner::SlotFinishedScript);
 
   // yes we need to call the static method of QQmlEngine, not QJSEngine, WHY Qt, WHY???
   QQmlEngine::setObjectOwnership(m_pScriptUtils, QQmlEngine::CppOwnership);
-  QJSValue scriptValueUtils = m_spScriptEngine->newQObject(m_pScriptUtils);
-  m_spScriptEngine->globalObject().setProperty("utils", scriptValueUtils);
+  QJSValue scriptValueUtils = m_pScriptEngine->newQObject(m_pScriptUtils);
+  m_pScriptEngine->globalObject().setProperty("utils", scriptValueUtils);
 
-  QJSValue enumTextObjectValue = m_spScriptEngine->newQMetaObject(&TextAlignment::staticMetaObject);
-  m_spScriptEngine->globalObject().setProperty("TextAlignment", enumTextObjectValue);
+  QJSValue enumTextObjectValue = m_pScriptEngine->newQMetaObject(&TextAlignment::staticMetaObject);
+  m_pScriptEngine->globalObject().setProperty("TextAlignment", enumTextObjectValue);
 }
 
 //----------------------------------------------------------------------------------------
 //
 void CJsScriptRunner::Deinitialize()
 {
-  m_spScriptEngine->globalObject().setProperty("utils", QJSValue());
+  m_pScriptEngine->globalObject().setProperty("utils", QJSValue());
   delete m_pScriptUtils;
   m_pScriptUtils = nullptr;
 
   m_spTimer->stop();
   m_spTimer = nullptr;
 
-  m_spScriptEngine.reset();
+  m_pScriptEngine->deleteLater();
 }
 
 //----------------------------------------------------------------------------------------
 //
 void CJsScriptRunner::InterruptExecution()
 {
-  m_spScriptEngine->setInterrupted(true);
+  m_pScriptEngine->setInterrupted(true);
 }
 
 //----------------------------------------------------------------------------------------
@@ -100,11 +104,11 @@ void CJsScriptRunner::LoadScript(const QString& sScript,
   {
     delete m_pCurrentScene;
   }
-  m_pCurrentScene = new CSceneScriptWrapper(m_spScriptEngine.get(), spScene);
+  m_pCurrentScene = new CSceneScriptWrapper(m_pScriptEngine, spScene);
   // yes we need to call the static method of QQmlEngine, not QJSEngine, WHY Qt, WHY???
   QQmlEngine::setObjectOwnership(m_pCurrentScene, QQmlEngine::CppOwnership);
-  QJSValue sceneValue = m_spScriptEngine->newQObject(m_pCurrentScene);
-  m_spScriptEngine->globalObject().setProperty("scene", sceneValue);
+  QJSValue sceneValue = m_pScriptEngine->newQObject(m_pCurrentScene);
+  m_pScriptEngine->globalObject().setProperty("scene", sceneValue);
 
   // set current Project
   m_objectMapMutex.lock();
@@ -117,7 +121,7 @@ void CJsScriptRunner::LoadScript(const QString& sScript,
   m_pScriptUtils->SetCurrentProject(spResource->m_spParent);
 
   // resume engine if interrupetd
-  m_spScriptEngine->setInterrupted(false);
+  m_pScriptEngine->setInterrupted(false);
 
   auto spSignalEmitterContext = m_wpSignalEmitterContext.lock();
   if (nullptr == spSignalEmitterContext)
@@ -144,7 +148,7 @@ void CJsScriptRunner::LoadScript(const QString& sScript,
       .arg(sSceneName)
       .arg(sScript)
       .arg(sSceneName);
-  m_runFunction = m_spScriptEngine->evaluate(sSkript);
+  m_runFunction = m_pScriptEngine->evaluate(sSkript);
 
   if (m_runFunction.isError())
   {
@@ -171,7 +175,7 @@ void CJsScriptRunner::RegisterNewComponent(const QString sName, QJSValue signalE
           qobject_cast<CScriptRunnerSignalEmiter*>(signalEmitter.toQObject());
       pObject->Initialize(m_wpSignalEmitterContext.lock());
       std::shared_ptr<CScriptObjectBase> spObject =
-          pObject->CreateNewScriptObject(m_spScriptEngine.get());
+          pObject->CreateNewScriptObject(m_pScriptEngine);
       if (spObject->thread() != thread())
       {
         spObject->moveToThread(thread());
@@ -187,17 +191,20 @@ void CJsScriptRunner::RegisterNewComponent(const QString sName, QJSValue signalE
 //
 void CJsScriptRunner::UnregisterComponents()
 {
-  m_spScriptEngine->globalObject().setProperty("scene", QJSValue());
+  // remove ref to run function
+  m_runFunction = QJSValue();
+
+  m_pScriptEngine->globalObject().setProperty("scene", QJSValue());
 
   m_objectMapMutex.lock();
   for (auto it = m_objectMap.begin(); m_objectMap.end() != it; ++it)
   {
-    m_spScriptEngine->globalObject().setProperty(it->first, QJSValue());
+    m_pScriptEngine->globalObject().setProperty(it->first, QJSValue());
     it->second->Cleanup();
   }
   m_objectMapMutex.unlock();
 
-  m_spScriptEngine->collectGarbage();
+  m_pScriptEngine->collectGarbage();
 
   if (nullptr != m_pCurrentScene)
   {
@@ -222,9 +229,9 @@ void CJsScriptRunner::HandleScriptFinish(bool bSuccess, const QVariant& sRetVal)
 
   spSignalEmitterContext->SetScriptExecutionStatus(CScriptRunnerSignalEmiter::eStopped);
 
-  m_spScriptEngine->globalObject().setProperty("scene", QJSValue());
+  m_pScriptEngine->globalObject().setProperty("scene", QJSValue());
 
-  m_spScriptEngine->collectGarbage();
+  m_pScriptEngine->collectGarbage();
 
   if (nullptr != m_pCurrentScene)
   {
@@ -276,8 +283,8 @@ void CJsScriptRunner::SlotRegisterObject(const QString& sObject)
   {
     // yes we need to call the static method of QQmlEngine, not QJSEngine, WHY Qt, WHY???
     QQmlEngine::setObjectOwnership(it->second.get(), QQmlEngine::CppOwnership);
-    QJSValue scriptValue = m_spScriptEngine->newQObject(it->second.get());
-    m_spScriptEngine->globalObject().setProperty(it->first, scriptValue);
+    QJSValue scriptValue = m_pScriptEngine->newQObject(it->second.get());
+    m_pScriptEngine->globalObject().setProperty(it->first, scriptValue);
   }
 }
 
@@ -296,7 +303,7 @@ void CJsScriptRunner::SlotRun()
   {
     QJSValue ret = m_runFunction.call();
     spSignalEmitterContext->SetScriptExecutionStatus(CScriptRunnerSignalEmiter::eStopped);
-    if (!m_spScriptEngine->isInterrupted())
+    if (!m_pScriptEngine->isInterrupted())
     {
       if (ret.isError())
       {

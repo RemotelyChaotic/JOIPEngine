@@ -4,7 +4,7 @@
 
 CCommandChangeFont::CCommandChangeFont(QPointer<QFontComboBox> pFontComboBox,
                                        QUndoCommand* pParent) :
-  QUndoCommand("Changed Project font -> " + m_pFontComboBox->currentFont().family(), pParent),
+  QUndoCommand("Changed Project font -> " + pFontComboBox->currentFont().family(), pParent),
   m_pFontComboBox(pFontComboBox),
   m_sOriginalValue(m_pFontComboBox->property(editor::c_sPropertyOldValue).toString()),
   m_sNewValue(m_pFontComboBox->currentFont().family())
@@ -19,7 +19,7 @@ void CCommandChangeFont::undo()
 {
   m_pFontComboBox->blockSignals(true);
   m_pFontComboBox->setProperty(editor::c_sPropertyOldValue, m_sOriginalValue);
-  m_pFontComboBox->setFont(m_sOriginalValue);
+  m_pFontComboBox->setCurrentFont(m_sOriginalValue);
   m_pFontComboBox->blockSignals(false);
 }
 
@@ -29,7 +29,7 @@ void CCommandChangeFont::redo()
 {
   m_pFontComboBox->blockSignals(true);
   m_pFontComboBox->setProperty(editor::c_sPropertyOldValue, m_sNewValue);
-  m_pFontComboBox->setFont(m_sNewValue);
+  m_pFontComboBox->setCurrentFont(m_sNewValue);
   m_pFontComboBox->blockSignals(false);
 }
 

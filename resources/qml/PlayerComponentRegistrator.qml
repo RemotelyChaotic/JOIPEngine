@@ -1,10 +1,14 @@
 import QtQuick 2.14
+import JOIP.core 1.1
 import JOIP.db 1.1
 
 Item {
     id: registrator
 
     property Project currentlyLoadedProject: root.currentlyLoadedProject
+    property string playerFont: {
+        null == currentlyLoadedProject ? Settings.font : currentlyLoadedProject.font
+    }
 
     function componentLoaded()
     {

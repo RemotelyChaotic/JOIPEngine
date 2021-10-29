@@ -13,6 +13,7 @@ Rectangle {
     property bool showTimeNumber: true
     property bool running: counter.running
     property int fontSize: 20
+    property string font: Settings.font
 
     property alias background: backgroundLayer
 
@@ -114,27 +115,33 @@ Rectangle {
         color: "transparent"
 
         Text {
-            anchors.centerIn: parent
+            anchors.fill: parent
             horizontalAlignment: Text.AlignHCenter
+            verticalAlignment: Text.AlignVCenter
 
             text: {
+                var sText;
                 if (showTime)
                 {
-                    return "" + ("00" + parseInt(timedItem.timeMs / 60000)).substr(-2) +
+                    sText = "" + ("00" + parseInt(timedItem.timeMs / 60000)).substr(-2) +
                             ":" + ("00" + parseInt((timedItem.timeMs / 1000) % 60, 10)).substr(-2)
                 }
                 else
                 {
-                    return "?";
+                    sText = "?";
                 }
+                return sText;
             }
-            font.family: Settings.font
-            font.pointSize: timedItem.fontSize
-            antialiasing: true
 
+            font.family: timedItem.font
+            font.pointSize: timedItem.fontSize
+            font.hintingPreference: Font.PreferNoHinting
+
+            renderType: Text.NativeRendering
             color: "black"
             style: Text.Outline
             styleColor: "white"
+
         }
     }
 }

@@ -15,8 +15,10 @@ void PaintProgress(QPainter* pPainter, QColor primaryColor, QColor secondaryColo
                    qint32 iBorderWidth, qint32 iGroveWidth,
                    qint32 iWidth, qint32 iHeight, QRect contentsRect,
                    qint32 iTimeMsMax, qint32 iTimeMsCurrent, qint32 iUpdateCounter,
-                   bool bVisibleCounter, bool bDrawDecoration)
+                   bool bVisibleCounter, bool bDrawDecoration, bool bFromQml)
 {
+  Q_UNUSED(bFromQml)
+
   // variables
   QColor progressFront = primaryColor;
   progressFront.setAlpha(0);

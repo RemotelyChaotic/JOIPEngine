@@ -54,6 +54,7 @@ Rectangle {
         height: parent.width - 10
 
         showTimeNumber: true
+        font: registrator.playerFont
 
         property bool bStarted: false
 

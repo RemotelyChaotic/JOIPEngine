@@ -195,11 +195,11 @@ void CEditorProjectSettingsWidget::LoadProject(tspProject spProject)
     m_spUi->pSoundEmitterCount->setEnabled(!bReadOnly);
     m_spUi->pSoundEmitterCount->blockSignals(false);
 
-    m_spUi->pSoundEmitterCount->blockSignals(true);
-    m_spUi->pFontComboBox->setFont(m_spCurrentProject->m_sFont);
+    m_spUi->pFontComboBox->blockSignals(true);
+    m_spUi->pFontComboBox->setCurrentFont(m_spCurrentProject->m_sFont);
     m_spUi->pFontComboBox->setProperty(editor::c_sPropertyOldValue, m_spCurrentProject->m_sFont);
     m_spUi->pFontComboBox->setEnabled(!bReadOnly);
-    m_spUi->pSoundEmitterCount->blockSignals(false);
+    m_spUi->pFontComboBox->blockSignals(false);
 
     m_spUi->pDescribtionTextEdit->setPlainText(m_spCurrentProject->m_sDescribtion);
     m_spUi->pDescribtionTextEdit->setReadOnly(bReadOnly);
@@ -274,6 +274,8 @@ void CEditorProjectSettingsWidget::SaveProject()
   m_spUi->WarningIcon->setVisible(false);
 
   m_spCurrentProject->m_iNumberOfSoundEmitters = m_spUi->pSoundEmitterCount->value();
+
+  m_spCurrentProject->m_sFont = m_spUi->pFontComboBox->currentFont().family();
 
   m_spCurrentProject->m_sDescribtion = m_spUi->pDescribtionTextEdit->toPlainText();
 

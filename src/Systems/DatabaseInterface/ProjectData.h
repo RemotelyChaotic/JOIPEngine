@@ -48,7 +48,7 @@ struct SProjectData
   bool                      m_bReadOnly = false;
   bool                      m_bLoaded = false;
   EDownLoadState            m_dlState = EDownLoadState::eFinished;
-  QString                   m_sFont = "Segoe UI Emoji";
+  QString                   m_sFont = "Segoe UI";
 };
 
 #endif // PROJECTDATA_H

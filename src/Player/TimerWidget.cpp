@@ -34,10 +34,13 @@ CTimerCanvasQml::~CTimerCanvasQml()
 //
 void CTimerCanvasQml::paint(QPainter* pPainter)
 {
+  pPainter->save();
   PaintProgress(pPainter, m_primaryColor, m_secondaryColor, m_tertiaryColor,
                 m_iBorderWidth, m_iGroveWidth,
                 width(), height(), QRect({0,0}, textureSize()),
-                m_iTimeMsMax, m_iTimeMsCurrent, m_iUpdateCounter, m_bVisibleCounter);
+                m_iTimeMsMax, m_iTimeMsMax - m_iTimeMsCurrent, m_iUpdateCounter, m_bVisibleCounter,
+                true, true);
+  pPainter->restore();
 }
 
 //----------------------------------------------------------------------------------------
@@ -114,8 +117,9 @@ void CTimerCanvas::paintEvent(QPaintEvent* /*pEvent*/)
   PaintProgress(&painter, m_pParent->m_primaryColor, m_pParent->m_secondaryColor, m_pParent->m_tertiaryColor,
                 CProgressBar::c_iBorderWidth, CProgressBar::c_iGroveWidth,
                 width(), height(), contentsRect(),
-                m_pParent->m_iTimeMsMax, m_pParent->m_iTimeMsCurrent, m_pParent->m_iUpdateCounter,
-                m_pParent->m_bVisible);
+                m_pParent->m_iTimeMsMax, m_pParent->m_iTimeMsMax - m_pParent->m_iTimeMsCurrent,
+                m_pParent->m_iUpdateCounter,
+                m_pParent->m_bVisible, true, false);
 }
 
 //----------------------------------------------------------------------------------------
