@@ -17,7 +17,10 @@ public:
   explicit CJsonInstructionSetParser(QObject* pParent = nullptr);
   ~CJsonInstructionSetParser() override;
 
+  void ClearInstructions();
+  SJsonException Error() const;
   std::shared_ptr<CJsonInstructionSetRunner> ParseJson(const QByteArray& json);
+  std::shared_ptr<CJsonInstructionSetRunner> ParseJson(const QString& sJson);
   template<typename T,
            typename = typename std::enable_if<std::is_base_of<IJsonInstructionBase, T>::value, void>::type>
   void RegisterInstruction(const QString& sId)

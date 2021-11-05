@@ -2,1122 +2,1122 @@
   "eBeginTutorial": {
     "commands": [
       {
-        "background": [{"showBg" : 1}, { "onCliCkAdvance": 1}]
+        "background": {"showBg" : 1, "onCliCkAdvance": 1}
       },
       {
-        "text": [
-          {"posX" : 0.5}, { "posY": 0.5},
-          { "text": "Welcome to the editor tutorial.<br>This tutorial will walk you through the JOIP editor's basic features.<br>In order to continue, just click the grey background or the button of this popup." }
-        ]
+        "text": {
+          "posX" : 0.5, "posY": 0.5,
+          "text": "Welcome to the editor tutorial.<br>This tutorial will walk you through the JOIP editor's basic features.<br>In order to continue, just click the grey background or the button of this popup."
+        }
       },
       {
-        "text": [
-          {"posX" : 0.5}, { "posY": 0.1},
-          { "text": "As you can see, the editor screen is divided into 4 sections." }
-        ]
+        "text": {
+          "posX" : 0.5, "posY": 0.1,
+          "text": "As you can see, the editor screen is divided into 4 sections."
+        }
       },
       {
-        "highlight": [
-          { "items" : ["pProjectActionBar"]}
-        ]
+        "highlight": {
+          "items" : ["pProjectActionBar"]
+        }
       },
       {
-        "text": [
-          {"posX" : 0.5}, { "posY": 0.2},
-          { "text": "This is the toolbar containing basic project functionaliy such as..." }
-        ]
+        "text": {
+          "posX" : 0.5, "posY": 0.2,
+          "text": "This is the toolbar containing basic project functionaliy such as..."
+        }
       },
       {
-        "highlight": [
-          { "items" : ["SaveButton", "ExportButton"]}
-        ]
+        "highlight": {
+          "items" : ["SaveButton", "ExportButton"]
+        }
       },
       {
-        "text": [
-          {"posX" : 0.5}, { "posY": 0.2},
-          { "text": "...saving or exporting the JOIP-Project..." }
-        ]
+        "text": {
+          "posX" : 0.5, "posY": 0.2,
+          "text": "...saving or exporting the JOIP-Project..."
+        }
       },
       {
-        "highlight": [
-          { "items" : ["UndoButton", "RedoButton"]}
-        ]
+        "highlight": {
+          "items" : ["UndoButton", "RedoButton"]
+        }
       },
       {
-        "text": [
-          {"posX" : 0.5}, { "posY": 0.2},
-          { "text": "...undoing and redoing actions..." }
-        ]
+        "text": {
+          "posX" : 0.5, "posY": 0.2,
+          "text": "...undoing and redoing actions..."
+        }
       },
       {
-        "highlight": [
-          { "items" : ["pTitleLineEdit"]}
-        ]
+        "highlight": {
+          "items" : ["pTitleLineEdit"]
+        }
       },
       {
-        "text": [
-          {"posX" : 0.5}, { "posY": 0.2},
-          { "text": "...renaming the JOIP-Project..." }
-        ]
+        "text": {
+          "posX" : 0.5, "posY": 0.2,
+          "text": "...renaming the JOIP-Project..."
+        }
       },
       {
-        "highlight": [
-          { "items" : ["HelpButton"]}
-        ]
+        "highlight": {
+          "items" : ["HelpButton"]
+        }
       },
       {
-        "text": [
-          {"posX" : 0.5}, { "posY": 0.2},
-          { "text": "...opening the help overlay..." }
-        ]
+        "text": {
+          "posX" : 0.5, "posY": 0.2,
+          "text": "...opening the help overlay..."
+        }
       },
       {
-        "highlight": [
-          { "items" : ["ExitButton"]}
-        ]
+        "highlight": {
+          "items" : ["ExitButton"]
+        }
       },
       {
-        "text": [
-          {"posX" : 0.5}, { "posY": 0.2},
-          { "text": "...and exiting the editor." }
-        ]
+        "text": {
+          "posX" : 0.5, "posY": 0.2,
+          "text": "...and exiting the editor."
+        }
       },
       {
-        "highlight": [
-          { "items" : ["pLeftPanelGroupBox"]}
-        ]
+        "highlight": {
+          "items" : ["pLeftPanelGroupBox"]
+        }
       },
       {
-        "text": [
-          {"posX" : 0.4}, { "posY": 0.5}, {"anchor": "eLeft"},
-          { "text": "This is the left editor panel.<br>A number of views can be displayed here." }
-        ]
+        "text": {
+          "posX" : 0.4, "posY": 0.5, "anchor": "eLeft",
+          "text": "This is the left editor panel.<br>A number of views can be displayed here."
+        }
       },
       {
-        "highlight": [
-          { "items" : ["pRightPanelGroupBox"]}
-        ]
+        "highlight": {
+          "items" : ["pRightPanelGroupBox"]
+        }
       },
       {
-        "text": [
-          {"posX" : 0.3}, { "posY": 0.5}, {"anchor": "eRight"},
-          { "text": "The same goes for the right panel." }
-        ]
+        "text": {
+          "posX" : 0.3, "posY": 0.5, "anchor": "eRight",
+          "text": "The same goes for the right panel."
+        }
       },
       {
-        "highlight": [
-          { "items" : ["pLeftComboBox", "pRightComboBox"]}
-        ]
+        "highlight": {
+          "items" : ["pLeftComboBox", "pRightComboBox"]
+        }
       },
       {
-        "text": [
-          {"posX" : 0.5}, { "posY": 0.5},
-          { "text": "The views in the panels can be switched via the toggle above the respective panel." }
-        ]
+        "text": {
+          "posX" : 0.5, "posY": 0.5,
+          "text": "The views in the panels can be switched via the toggle above the respective panel."
+        }
       },
       {
-        "highlight": [
-          { "items" : ["pBottomPanelGroupBox"]}
-        ]
+        "highlight": {
+          "items" : ["pBottomPanelGroupBox"]
+        }
       },
       {
-        "text": [
-          {"posX" : 0.4}, { "posY": 0.5}, {"anchor": "eLeft"},
-          { "text": "And finally, this is the bottom panel,<br>where you can manage the Projects resources." }
-        ]
+        "text": {
+          "posX" : 0.4, "posY": 0.5, "anchor": "eLeft",
+          "text": "And finally, this is the bottom panel,<br>where you can manage the Projects resources."
+        }
       },
       {
-        "highlight": [
-          { "items" : []}
-        ]
+        "highlight": {
+          "items" : []
+        }
       }
     ]
   },
   "eSwitchRightPanelToProjectSettings": {
     "commands": [
       {
-        "background": [{"showBg" : 1}, { "onCliCkAdvance": 1}]
+        "background": {"showBg" : 1, "onCliCkAdvance": 1}
       },
       {
-        "text": [
-          {"posX" : 0.5}, { "posY": 0.5},
-          { "text": "First let's take a look at the Project Settings view." }
-        ]
+        "text": {
+          "posX" : 0.5, "posY": 0.5,
+          "text": "First let's take a look at the Project Settings view."
+        }
       }
     ]
   },
   "eProjectSettings": {
     "commands": [
       {
-        "background": [{"showBg" : 1}, { "onCliCkAdvance": 1}]
+        "background": {"showBg" : 1, "onCliCkAdvance": 1}
       },
       {
-        "highlight": [
-          { "items" : ["pRightPanelGroupBox"]}
-        ]
+        "highlight": {
+          "items" : ["pRightPanelGroupBox"]
+        }
       },
       {
-        "text": [
-          {"posX" : 0.3}, { "posY": 0.5}, {"anchor": "eRight"},
-          { "text": "Here you can change the general JOIP-Project settings." }
-        ]
+        "text": {
+          "posX" : 0.3, "posY": 0.5, "anchor": "eRight",
+          "text": "Here you can change the general JOIP-Project settings."
+        }
       },
       {
-        "highlight": [
-          { "items" : ["pProjectVersionContainer"]}
-        ]
+        "highlight": {
+          "items" : ["pProjectVersionContainer"]
+        }
       },
       {
-        "text": [
-          {"posX" : 0.5}, { "posY": 0.5}, {"anchor": "eCenter"},
-          { "text": "This is the JOIP-Project version.<br>Feel free to change this as you wish as it is not used by the Application." }
-        ]
+        "text": {
+          "posX" : 0.5, "posY": 0.5, "anchor": "eCenter",
+          "text": "This is the JOIP-Project version.<br>Feel free to change this as you wish as it is not used by the Application."
+        }
       },
       {
-        "highlight": [
-          { "items" : ["pEngineVersionContainer"]}
-        ]
+        "highlight": {
+          "items" : ["pEngineVersionContainer"]
+        }
       },
       {
-        "text": [
-          {"posX" : 0.5}, { "posY": 0.5}, {"anchor": "eCenter"},
-          { "text": "Below that is the engine version this JOIP-Project was last saved with." }
-        ]
+        "text": {
+          "posX" : 0.5, "posY": 0.5, "anchor": "eCenter",
+          "text": "Below that is the engine version this JOIP-Project was last saved with."
+        }
       },
       {
-        "highlight": [
-          { "items" : ["pSoundEmitterCount"]}
-        ]
+        "highlight": {
+          "items" : ["pSoundEmitterCount"]
+        }
       },
       {
-        "text": [
-          {"posX" : 0.5}, { "posY": 0.6}, {"anchor": "eCenter"},
-          { "text": "Here you can change the amount of sound sources used by the media player." }
-        ]
+        "text": {
+          "posX" : 0.5, "posY": 0.6, "anchor": "eCenter",
+          "text": "Here you can change the amount of sound sources used by the media player."
+        }
       },
       {
-        "text": [
-          {"posX" : 0.5}, { "posY": 0.6}, {"anchor": "eCenter"},
-          { "text": "Setting this too high might cause a performacnce loss during playing though<br>so be careful." }
-        ]
+        "text": {
+          "posX" : 0.5, "posY": 0.6, "anchor": "eCenter",
+          "text": "Setting this too high might cause a performacnce loss during playing though<br>so be careful."
+        }
       },
       {
-        "highlight": [
-          { "items" : ["pFontComboBox"]}
-        ]
+        "highlight": {
+          "items" : ["pFontComboBox"]
+        }
       },
       {
-        "text": [
-          {"posX" : 0.5}, { "posY": 0.6}, {"anchor": "eCenter"},
-          { "text": "Next you can change the font which will be used in the player." }
-        ]
+        "text": {
+          "posX" : 0.5, "posY": 0.6, "anchor": "eCenter",
+          "text": "Next you can change the font which will be used in the player."
+        }
       },
       {
-        "highlight": [
-          { "items" : ["pDescribtionTextEdit"] }
-        ]
+        "highlight": {
+          "items" : ["pDescribtionTextEdit"]
+        }
       },
       {
-        "text": [
-          {"posX" : 0.5}, { "posY": 0.2}, {"anchor": "eCenter"},
-          { "text": "This textbox lets you change the JOIP-Project describtion.<br>It is visible on the title card, so it should contain a short and fitting describtion." }
-        ]
+        "text": {
+          "posX" : 0.5, "posY": 0.2, "anchor": "eCenter",
+          "text": "This textbox lets you change the JOIP-Project describtion.<br>It is visible on the title card, so it should contain a short and fitting describtion."
+        }
       },
       {
-        "highlight": [
-          { "items" : ["pDescribtionTextEdit"] },
-          { "allwaysOnTop": 1 }
-        ]
+        "highlight": {
+          "items" : ["pDescribtionTextEdit"],
+          "allwaysOnTop": 1
+        }
       },
       {
-        "background": [{"showBg" : 1}, {"onCliCkAdvance": 0}, {"mouseTransparent": 1}]
+        "background": {"showBg" : 1, "onCliCkAdvance": 0, "mouseTransparent": 1}
       },
       {
-        "text": [
-          {"posX" : 0.3}, { "posY": 0.5}, {"anchor": "eRight"},
-          { "text": "Feel free to change the describtion now.<br>If you are done, click the button to continue the tutorial." }
-        ]
+        "text": {
+          "posX" : 0.3, "posY": 0.5, "anchor": "eRight",
+          "text": "Feel free to change the describtion now.<br>If you are done, click the button to continue the tutorial."
+        }
       },
       {
-        "background": [{"showBg" : 1}, {"onCliCkAdvance": 1}, {"mouseTransparent": 0}]
+        "background": {"showBg" : 1, "onCliCkAdvance": 1, "mouseTransparent": 0}
       },
       {
-        "highlight": [
-          { "items" : ["pFetishListWidget", "pFetishInput"] }
-        ]
+        "highlight": {
+          "items" : ["pFetishListWidget", "pFetishInput"]
+        }
       },
       {
-        "text": [
-          {"posX" : 0.5}, { "posY": 0.5}, {"anchor": "eCenter"},
-          { "text": "And now to the last part of the JOIP-Project configuration." }
-        ]
+        "text": {
+          "posX" : 0.5, "posY": 0.5, "anchor": "eCenter",
+          "text": "And now to the last part of the JOIP-Project configuration."
+        }
       },
       {
-        "text": [
-          {"posX" : 0.5}, { "posY": 0.5}, {"anchor": "eCenter"},
-          { "text": "This is the list of fetishes this JOIP-Project was tagged with." }
-        ]
+        "text": {
+          "posX" : 0.5, "posY": 0.5, "anchor": "eCenter",
+          "text": "This is the list of fetishes this JOIP-Project was tagged with."
+        }
       },
       {
-        "text": [
-          {"posX" : 0.5}, { "posY": 0.5}, {"anchor": "eCenter"},
-          { "text": "These tags help players to identify which JOIP-Projects they might be interrested in<br>and which to avoid." }
-        ]
+        "text": {
+          "posX" : 0.5, "posY": 0.5, "anchor": "eCenter",
+          "text": "These tags help players to identify which JOIP-Projects they might be interrested in<br>and which to avoid."
+        }
       },
       {
-        "highlight": [
-          { "items" : ["FetishOverlayButton"] }
-        ]
+        "highlight": {
+          "items" : ["FetishOverlayButton"]
+        }
       },
       {
-        "text": [
-          {"posX" : 0.5}, { "posY": 0.5}, {"anchor": "eCenter"},
-          { "text": "Tags can be added by either browsing the list..." }
-        ]
+        "text": {
+          "posX" : 0.5, "posY": 0.5, "anchor": "eCenter",
+          "text": "Tags can be added by either browsing the list..."
+        }
       },
       {
-        "highlight": [
-          { "items" : ["pFetishLineEdit"] }
-        ]
+        "highlight": {
+          "items" : ["pFetishLineEdit"]
+        }
       },
       {
-        "text": [
-          {"posX" : 0.5}, { "posY": 0.5}, {"anchor": "eCenter"},
-          { "text": "...or entering specific tags into the text editor.<br>(You need to enter a category first, followed by a <b>&#47;</b> and the fetish name.)" }
-        ]
+        "text": {
+          "posX" : 0.5, "posY": 0.5, "anchor": "eCenter",
+          "text": "...or entering specific tags into the text editor.<br>(You need to enter a category first, followed by a <b>&#47;</b> and the fetish name.)"
+        }
       },
       {
-        "background": [{"showBg" : 1}, {"onCliCkAdvance": 0}, {"mouseTransparent": 1}]
+        "background": {"showBg" : 1, "onCliCkAdvance": 0, "mouseTransparent": 1}
       },
       {
-        "highlight": [
-          { "items" : ["pFetishListWidget", "pFetishInput"] },
-          { "allwaysOnTop": 1 }
-        ]
+        "highlight": {
+          "items" : ["pFetishListWidget", "pFetishInput"],
+          "allwaysOnTop": 1
+        }
       },
       {
-        "text": [
-          {"posX" : 0.3}, { "posY": 0.5}, {"anchor": "eCenter"},
-          { "text": "Feel free to select some tags.<br>If you are done, click the button to continue the tutorial." }
-        ]
+        "text": {
+          "posX" : 0.3, "posY": 0.5, "anchor": "eCenter",
+          "text": "Feel free to select some tags.<br>If you are done, click the button to continue the tutorial."
+        }
       },
       {
-        "background": [{"showBg" : 1}, {"onCliCkAdvance": 1}, {"mouseTransparent": 0}]
+        "background": {"showBg" : 1, "onCliCkAdvance": 1, "mouseTransparent": 0}
       },
       {
-        "text": [
-          {"posX" : 0.3}, { "posY": 0.5}, {"anchor": "eCenter"},
-          { "text": "To remove tags, simply click the <b>X</b> on the tag itself." }
-        ]
+        "text": {
+          "posX" : 0.3, "posY": 0.5, "anchor": "eCenter",
+          "text": "To remove tags, simply click the <b>X</b> on the tag itself."
+        }
       }
     ]
   },
   "eResourcePanel": {
     "commands": [
       {
-        "background": [{"showBg" : 1}, { "onCliCkAdvance": 1}]
+        "background": {"showBg" : 1, "onCliCkAdvance": 1}
       },
       {
-        "text": [
-          {"posX" : 0.5}, { "posY": 0.5},
-          { "text": "Let's now move on to the next view..." }
-        ]
+        "text": {
+          "posX" : 0.5, "posY": 0.5,
+          "text": "Let's now move on to the next view..."
+        }
       },
       {
-        "highlight": [
-          { "items" : ["pBottomPanelGroupBox"]}
-        ]
+        "highlight": {
+          "items" : ["pBottomPanelGroupBox"]
+        }
       },
       {
-        "text": [
-          {"posX" : 0.5}, { "posY": 0.7}, {"anchor": "eBottom"},
-          { "text": "...the Resource Manager View." }
-        ]
+        "text": {
+          "posX" : 0.5, "posY": 0.7, "anchor": "eBottom",
+          "text": "...the Resource Manager View."
+        }
       },
       {
-        "text": [
-          {"posX" : 0.5}, { "posY": 0.7}, {"anchor": "eBottom"},
-          { "text": "As the name implies, this is where you can manage your Project's resources: <br>Images, Movies, Sounds, Scripts etc." }
-        ]
+        "text": {
+          "posX" : 0.5, "posY": 0.7, "anchor": "eBottom",
+          "text": "As the name implies, this is where you can manage your Project's resources: <br>Images, Movies, Sounds, Scripts etc."
+        }
       },
       {
-        "highlight": [
-          { "items" : ["pResourceModelView"]}
-        ]
+        "highlight": {
+          "items" : ["pResourceModelView"]
+        }
       },
       {
-        "text": [
-          {"posX" : 0.5}, { "posY": 0.7}, {"anchor": "eBottom"},
-          { "text": "All Resources that are used in a JOIP-Project can be found in the Resource Tree.<br>(Sorted by category and folders.)" }
-        ]
+        "text": {
+          "posX" : 0.5, "posY": 0.7, "anchor": "eBottom",
+          "text": "All Resources that are used in a JOIP-Project can be found in the Resource Tree.<br>(Sorted by category and folders.)"
+        }
       },
       {
-        "text": [
-          {"posX" : 0.5}, { "posY": 0.7}, {"anchor": "eBottom"},
-          { "text": "So far the tree only contains two Resources:<br><ul><li>JOIPData.json</li><li>SceneModel.flow</li></ul>" }
-        ]
+        "text": {
+          "posX" : 0.5, "posY": 0.7, "anchor": "eBottom",
+          "text": "So far the tree only contains two Resources:<br><ul><li>JOIPData.json</li><li>SceneModel.flow</li></ul>"
+        }
       },
       {
-        "text": [
-          {"posX" : 0.5}, { "posY": 0.7}, {"anchor": "eBottom"},
-          { "text": "These are base resources that every project has.<br>The first is used for all Project data while the second contains Scene Flow (more about that later)." }
-        ]
+        "text": {
+          "posX" : 0.5, "posY": 0.7, "anchor": "eBottom",
+          "text": "These are base resources that every project has.<br>The first is used for all Project data while the second contains Scene Flow (more about that later)."
+        }
       },
       {
-        "text": [
-          {"posX" : 0.5}, { "posY": 0.7}, {"anchor": "eBottom"},
-          { "text": "You will never need to edit these two files manually." }
-        ]
+        "text": {
+          "posX" : 0.5, "posY": 0.7, "anchor": "eBottom",
+          "text": "You will never need to edit these two files manually."
+        }
       },
       {
-        "highlight": [
-          { "items" : ["pActionBarLeftBottom"]}
-        ]
+        "highlight": {
+          "items" : ["pActionBarLeftBottom"]
+        }
       },
       {
-        "text": [
-          {"posX" : 0.5}, { "posY": 0.7}, {"anchor": "eBottom"},
-          { "text": "Let's now add some Resources for later use." }
-        ]
+        "text": {
+          "posX" : 0.5, "posY": 0.7, "anchor": "eBottom",
+          "text": "Let's now add some Resources for later use."
+        }
       },
       {
-        "background": [{"showBg" : 1}, { "onCliCkAdvance": 0}]
+        "background": {"showBg" : 1, "onCliCkAdvance": 0}
       },
       {
-        "highlight": [
-          { "items" : ["AddResourceButton"]}
-        ]
+        "highlight": {
+          "items" : ["AddResourceButton"]
+        }
       },
       {
-        "clickFilter": [
-          { "items": ["AddResourceButton"] }
-        ]
+        "clickFilter": {
+          "items": ["AddResourceButton"]
+        }
       },
       {
-        "text": [
-          {"posX" : 0.25}, { "posY": 0.7}, {"anchor": "eBottom"}, {"hideButtons": 1},
-          { "text": "To do that click the <b>Add local resource</b> button<br>and select some images from your pc." }
-        ]
+        "text": {
+          "posX" : 0.25, "posY": 0.7, "anchor": "eBottom", "hideButtons": 1,
+          "text": "To do that click the <b>Add local resource</b> button<br>and select some images from your pc."
+        }
       },
       {
-        "clickFilter": [
-          { "items": [] }
-        ]
+        "clickFilter": {
+          "items": []
+        }
       },
       {
-        "background": [{"showBg" : 1}, { "onCliCkAdvance": 1}]
+        "background": {"showBg" : 1, "onCliCkAdvance": 1}
       },
       {
-        "text": [
-          {"posX" : 0.25}, { "posY": 0.7}, {"anchor": "eBottom"},
-          { "text": "If the resource is outside the project directory you will be asked to copy or move it into the project folder.<br>Otherwise the JOIP-Engine won't be able to access the resource." }
-        ]
+        "text": {
+          "posX" : 0.25, "posY": 0.7, "anchor": "eBottom",
+          "text": "If the resource is outside the project directory you will be asked to copy or move it into the project folder.<br>Otherwise the JOIP-Engine won't be able to access the resource."
+        }
       },
       {
-        "highlight": [
-          { "items" : ["pResourceModelView"]}
-        ]
+        "highlight": {
+          "items" : ["pResourceModelView"]
+        }
       },
       {
-        "text": [
-          {"posX" : 0.5}, { "posY": 0.7}, {"anchor": "eBottom"},
-          { "text": "You can also drag-and-drop the files from the explorer into the tree directly." }
-        ]
+        "text": {
+          "posX" : 0.5, "posY": 0.7, "anchor": "eBottom",
+          "text": "You can also drag-and-drop the files from the explorer into the tree directly."
+        }
       },
       {
-        "text": [
-          {"posX" : 0.5}, { "posY": 0.7}, {"anchor": "eBottom"},
-          { "text": "To remove Resources select them in the tree..." }
-        ]
+        "text": {
+          "posX" : 0.5, "posY": 0.7, "anchor": "eBottom",
+          "text": "To remove Resources select them in the tree..."
+        }
       },
       {
-        "highlight": [
-          { "items" : ["RemoveResourceButton"]}
-        ]
+        "highlight": {
+          "items" : ["RemoveResourceButton"]
+        }
       },
       {
-        "text": [
-          {"posX" : 0.25}, { "posY": 0.7}, {"anchor": "eBottom"},
-          { "text": "...and click the <b>Remove resource</b> button." }
-        ]
+        "text": {
+          "posX" : 0.25, "posY": 0.7, "anchor": "eBottom",
+          "text": "...and click the <b>Remove resource</b> button."
+        }
       },
       {
-        "text": [
-          {"posX" : 0.25}, { "posY": 0.7}, {"anchor": "eBottom"},
-          { "text": "This will <i>not</i> delete the file, only remove the reference from the Project." }
-        ]
+        "text": {
+          "posX" : 0.25, "posY": 0.7, "anchor": "eBottom",
+          "text": "This will <i>not</i> delete the file, only remove the reference from the Project."
+        }
       },
       {
-        "highlight": [
-          { "items" : ["AddWebResourceButton"]}
-        ]
+        "highlight": {
+          "items" : ["AddWebResourceButton"]
+        }
       },
       {
-        "text": [
-          {"posX" : 0.25}, { "posY": 0.7}, {"anchor": "eBottom"},
-          { "text": "You can also add Web-Resources by clicking the <b>Add web-resource</b> button." }
-        ]
+        "text": {
+          "posX" : 0.25, "posY": 0.7, "anchor": "eBottom",
+          "text": "You can also add Web-Resources by clicking the <b>Add web-resource</b> button."
+        }
       },
       {
-        "text": [
-          {"posX" : 0.25}, { "posY": 0.7}, {"anchor": "eBottom"},
-          { "text": "Doing this will mean your project can only played in online mode though." }
-        ]
+        "text": {
+          "posX" : 0.25, "posY": 0.7, "anchor": "eBottom",
+          "text": "Doing this will mean your project can only played in online mode though."
+        }
       },
       {
-        "highlight": [
-          { "items" : []}
-        ]
+        "highlight": {
+          "items" : []
+        }
       },
       {
-        "text": [
-          {"posX" : 0.5}, { "posY": 0.5}, {"anchor": "eCenter"},
-          { "text": "Let's now select a title card for the JOIP-Project." }
-        ]
+        "text": {
+          "posX" : 0.5, "posY": 0.5, "anchor": "eCenter",
+          "text": "Let's now select a title card for the JOIP-Project."
+        }
       },
       {
-        "background": [{"showBg" : 1}, {"onCliCkAdvance": 0}, {"mouseTransparent": 1}]
+        "background": {"showBg" : 1, "onCliCkAdvance": 0, "mouseTransparent": 1}
       },
       {
-        "highlight": [
-          { "items" : ["pResourceModelView", "AddResourceButton"]},
-          { "allwaysOnTop": 1 }
-        ]
+        "highlight": {
+          "items" : ["pResourceModelView", "AddResourceButton"],
+          "allwaysOnTop": 1
+        }
       },
       {
-        "text": [
-          {"posX" : 0.5}, { "posY": 0.5}, {"anchor": "eCenter"}, {"hideButtons": 1},
-          { "text": "First select an image in the Resource Tree..." }
-        ]
+        "text": {
+          "posX" : 0.5, "posY": 0.5, "anchor": "eCenter", "hideButtons": 1,
+          "text": "First select an image in the Resource Tree..."
+        }
       }
     ]
   },
   "eImageResourceSelected": {
     "commands": [
       {
-        "background": [{"showBg" : 1}, { "onCliCkAdvance": 0}, {"mouseTransparent": 0}]
+        "background": {"showBg" : 1, "onCliCkAdvance": 0, "mouseTransparent": 0}
       },
       {
-        "highlight": [
-          { "items" : ["TitleCardButton"]}
-        ]
+        "highlight": {
+          "items" : ["TitleCardButton"]
+        }
       },
       {
-        "clickFilter": [
-          { "items": ["TitleCardButton"] }
-        ]
+        "clickFilter": {
+          "items": ["TitleCardButton"]
+        }
       },
       {
-        "text": [
-          {"posX" : 0.25}, { "posY": 0.7}, {"anchor": "eBottom"}, {"hideButtons": 1},
-          { "text": "...and click the <b>Set image as title card</b> button." }
-        ]
+        "text": {
+          "posX" : 0.25, "posY": 0.7, "anchor": "eBottom", "hideButtons": 1,
+          "text": "...and click the <b>Set image as title card</b> button."
+        }
       },
       {
-        "clickFilter": [
-          { "items": [] }
-        ]
+        "clickFilter": {
+          "items": []
+        }
       },
       {
-        "background": [{"showBg" : 1}, { "onCliCkAdvance": 1}]
+        "background": {"showBg" : 1, "onCliCkAdvance": 1}
       },
       {
-        "highlight": [
-          { "items" : ["pResourceDisplayWidget"]}
-        ]
+        "highlight": {
+          "items" : ["pResourceDisplayWidget"]
+        }
       },
       {
-        "text": [
-          {"posX" : 0.8}, { "posY": 0.7}, {"anchor": "eBottom"},
-          { "text": "As you can see, if you select an Image, Movie or Sound type Resource,<br>you can see a preview down here." }
-        ]
+        "text": {
+          "posX" : 0.8, "posY": 0.7, "anchor": "eBottom",
+          "text": "As you can see, if you select an Image, Movie or Sound type Resource,<br>you can see a preview down here."
+        }
       },
       {
-        "text": [
-          {"posX" : 0.8}, { "posY": 0.7}, {"anchor": "eBottom"},
-          { "text": "For Movie and Sound type Resources, you can click the preview to play or pause the playback." }
-        ]
+        "text": {
+          "posX" : 0.8, "posY": 0.7, "anchor": "eBottom",
+          "text": "For Movie and Sound type Resources, you can click the preview to play or pause the playback."
+        }
       },
       {
-        "highlight": [
-          { "items" : ["SourceButton"]}
-        ]
+        "highlight": {
+          "items" : ["SourceButton"]
+        }
       },
       {
-        "text": [
-          {"posX" : 0.25}, { "posY": 0.7}, {"anchor": "eBottom"},
-          { "text": "After adding resources you can optionally add a source for the image<br>which is visible in the player.<br>Make sure to source the images used if possible." }
-        ]
+        "text": {
+          "posX" : 0.25, "posY": 0.7, "anchor": "eBottom",
+          "text": "After adding resources you can optionally add a source for the image<br>which is visible in the player.<br>Make sure to source the images used if possible."
+        }
       },
       {
-        "text": [
-          {"posX" : 0.25}, { "posY": 0.7}, {"anchor": "eBottom"},
-          { "text": "Web-Resources allways automatically add the address as source." }
-        ]
+        "text": {
+          "posX" : 0.25, "posY": 0.7, "anchor": "eBottom",
+          "text": "Web-Resources allways automatically add the address as source."
+        }
       }
     ]
   },
   "eSwitchRightPanelToNodeSettings": {
     "commands": [
       {
-        "background": [{"showBg" : 1}, { "onCliCkAdvance": 1}]
+        "background": {"showBg" : 1, "onCliCkAdvance": 1}
       },
       {
-        "text": [
-          {"posX" : 0.5}, { "posY": 0.5},
-          { "text": "Now let's switch the right panel to show the Scene Node Editor view." }
-        ]
+        "text": {
+          "posX" : 0.5, "posY": 0.5,
+          "text": "Now let's switch the right panel to show the Scene Node Editor view."
+        }
       },
       {
-        "background": [{"showBg" : 1}, { "onCliCkAdvance": 0}]
+        "background": {"showBg" : 1, "onCliCkAdvance": 0}
       },
       {
-        "highlight": [
-          { "items" : ["pRightComboBox"]}
-        ]
+        "highlight": {
+          "items" : ["pRightComboBox"]
+        }
       },
       {
-        "clickFilter": [
-          { "items": ["pRightComboBox"] }, {"triggerNext": 0}
-        ]
+        "clickFilter": {
+          "items": ["pRightComboBox"], "triggerNext": 0
+        }
       },
       {
-        "text": [
-          {"posX" : 0.3}, { "posY": 0.15}, {"anchor": "eRight"}, {"hideButtons": 1},
-          { "text": "Click the <i>Scene Node Editor</i> item." }
-        ]
+        "text": {
+          "posX" : 0.3, "posY": 0.15, "anchor": "eRight", "hideButtons": 1,
+          "text": "Click the <i>Scene Node Editor</i> item."
+        }
       },
       {
-        "clickFilter": [
-          { "items": [] }
-        ]
+        "clickFilter": {
+          "items": []
+        }
       }
     ]
   },
   "eNodePanel": {
     "commands": [
       {
-        "background": [{"showBg" : 1}, { "onCliCkAdvance": 1}]
+        "background": {"showBg" : 1, "onCliCkAdvance": 1}
       },
       {
-        "highlight": [
-          { "items" : ["pRightPanelGroupBox"]}
-        ]
+        "highlight": {
+          "items" : ["pRightPanelGroupBox"]
+        }
       },
       {
-        "text": [
-          {"posX" : 0.3}, { "posY": 0.5}, {"anchor": "eRight"},
-          { "text": "The <i>Node Editor View</i> lets you edit the JOI-Projects <i>Scene-Flow</i>." }
-        ]
+        "text": {
+          "posX" : 0.3, "posY": 0.5, "anchor": "eRight",
+          "text": "The <i>Node Editor View</i> lets you edit the JOI-Projects <i>Scene-Flow</i>."
+        }
       },
       {
-        "highlight": [
-          { "items" : ["FlowView"]}
-        ]
+        "highlight": {
+          "items" : ["FlowView"]
+        }
       },
       {
-        "text": [
-          {"posX" : 0.3}, { "posY": 0.5}, {"anchor": "eRight"},
-          { "text": "This is the graphical editor to edit the Scene-Flow." }
-        ]
+        "text": {
+          "posX" : 0.3, "posY": 0.5, "anchor": "eRight",
+          "text": "This is the graphical editor to edit the Scene-Flow."
+        }
       },
       {
-        "text": [
-          {"posX" : 0.3}, { "posY": 0.5}, {"anchor": "eRight"},
-          { "text": "To start let's create a basic Scene-Flow." }
-        ]
+        "text": {
+          "posX" : 0.3, "posY": 0.5, "anchor": "eRight",
+          "text": "To start let's create a basic Scene-Flow."
+        }
       },
       {
-        "text": [
-          {"posX" : 0.3}, { "posY": 0.5}, {"anchor": "eRight"},
-          { "text": "A Flow is made up of connectable elements called <i>Nodes</i>." }
-        ]
+        "text": {
+          "posX" : 0.3, "posY": 0.5, "anchor": "eRight",
+          "text": "A Flow is made up of connectable elements called <i>Nodes</i>."
+        }
       },
       {
-        "highlight": [
-          { "items" : ["AddNodeButton"]}
-        ]
+        "highlight": {
+          "items" : ["AddNodeButton"]
+        }
       },
       {
-        "text": [
-          {"posX" : 0.9}, { "posY": 0.2}, {"anchor": "eRight"},
-          { "text": "To add a Node, simply click the <i>Add Node</i> button..." }
-        ]
+        "text": {
+          "posX" : 0.9, "posY": 0.2, "anchor": "eRight",
+          "text": "To add a Node, simply click the <i>Add Node</i> button..."
+        }
       },
       {
-        "highlight": [
-          { "items" : ["FlowView"]}
-        ]
+        "highlight": {
+          "items" : ["FlowView"]
+        }
       },
       {
-        "text": [
-          {"posX" : 0.3}, { "posY": 0.5}, {"anchor": "eRight"},
-          { "text": "...or right click the graphical editor anywhere." }
-        ]
+        "text": {
+          "posX" : 0.3, "posY": 0.5, "anchor": "eRight",
+          "text": "...or right click the graphical editor anywhere."
+        }
       },
       {
-        "background": [{"showBg" : 1}, { "onCliCkAdvance": 0}, {"mouseTransparent": 1}]
+        "background": {"showBg" : 1, "onCliCkAdvance": 0, "mouseTransparent": 1}
       },
       {
-        "highlight": [
-          { "items" : ["AddNodeButton", "FlowView"]},
-          { "allwaysOnTop": 1 }
-        ]
+        "highlight": {
+          "items" : ["AddNodeButton", "FlowView"],
+          "allwaysOnTop": 1
+        }
       },
       {
-        "text": [
-          {"posX" : 0.3}, { "posY": 0.5}, {"anchor": "eRight"}, {"hideButtons": 1},
-          { "text": "Now open the Node menu by right clicking the editor<br>or clicking the <i>Add Node</i> Button..." }
-        ]
+        "text": {
+          "posX" : 0.3, "posY": 0.5, "anchor": "eRight", "hideButtons": 1,
+          "text": "Now open the Node menu by right clicking the editor<br>or clicking the <i>Add Node</i> Button..."
+        }
       },
       {
-        "text": [
-          {"posX" : 0.3}, { "posY": 0.5}, {"anchor": "eRight"}, {"hideButtons": 1},
-          { "text": "...and add an <i>Entry Point</i> node." }
-        ]
+        "text": {
+          "posX" : 0.3, "posY": 0.5, "anchor": "eRight", "hideButtons": 1,
+          "text": "...and add an <i>Entry Point</i> node."
+        }
       },
       {
-        "background": [{"showBg" : 1}, { "onCliCkAdvance": 1}, {"mouseTransparent": 0}]
+        "background": {"showBg" : 1, "onCliCkAdvance": 1, "mouseTransparent": 0}
       },
       {
-        "text": [
-          {"posX" : 0.3}, { "posY": 0.5}, {"anchor": "eRight"},
-          { "text": "<i>Entry Point</i> nodes are the entry point of a JOI-Project.<br>Each JOI-Project needs exactly one." }
-        ]
+        "text": {
+          "posX" : 0.3, "posY": 0.5, "anchor": "eRight",
+          "text": "<i>Entry Point</i> nodes are the entry point of a JOI-Project.<br>Each JOI-Project needs exactly one."
+        }
       },
       {
-        "background": [{"showBg" : 1}, { "onCliCkAdvance": 0}, {"mouseTransparent": 1}]
+        "background": {"showBg" : 1, "onCliCkAdvance": 0, "mouseTransparent": 1}
       },
       {
-        "text": [
-          {"posX" : 0.3}, { "posY": 0.5}, {"anchor": "eRight"}, {"hideButtons": 1},
-          { "text": "Next add an <i>Exit Point</i> node." }
-        ]
+        "text": {
+          "posX" : 0.3, "posY": 0.5, "anchor": "eRight", "hideButtons": 1,
+          "text": "Next add an <i>Exit Point</i> node."
+        }
       },
       {
-        "background": [{"showBg" : 1}, { "onCliCkAdvance": 1}, {"mouseTransparent": 0}]
+        "background": {"showBg" : 1, "onCliCkAdvance": 1, "mouseTransparent": 0}
       },
       {
-        "text": [
-          {"posX" : 0.3}, { "posY": 0.5}, {"anchor": "eRight"},
-          { "text": "<i>Exit Point</i> nodes are the end point of a JOI-Project.<br>A JOI-Project can have multiple exit points." }
-        ]
+        "text": {
+          "posX" : 0.3, "posY": 0.5, "anchor": "eRight",
+          "text": "<i>Exit Point</i> nodes are the end point of a JOI-Project.<br>A JOI-Project can have multiple exit points."
+        }
       },
       {
-        "text": [
-          {"posX" : 0.3}, { "posY": 0.5}, {"anchor": "eRight"},
-          { "text": "Finally, to have a simple JOI-Project, you need to add a <i>Scene</i> node." }
-        ]
+        "text": {
+          "posX" : 0.3, "posY": 0.5, "anchor": "eRight",
+          "text": "Finally, to have a simple JOI-Project, you need to add a <i>Scene</i> node."
+        }
       },
       {
-        "text": [
-          {"posX" : 0.3}, { "posY": 0.5}, {"anchor": "eRight"},
-          { "text": "<i>Scene</i> nodes are the scriptable part of a JOI-Project.<br>These scripts tell the engine to show images, text, etc." }
-        ]
+        "text": {
+          "posX" : 0.3, "posY": 0.5, "anchor": "eRight",
+          "text": "<i>Scene</i> nodes are the scriptable part of a JOI-Project.<br>These scripts tell the engine to show images, text, etc."
+        }
       },
       {
-        "background": [{"showBg" : 1}, { "onCliCkAdvance": 0}, {"mouseTransparent": 1}]
+        "background": {"showBg" : 1, "onCliCkAdvance": 0, "mouseTransparent": 1}
       },
       {
-        "text": [
-          {"posX" : 0.3}, { "posY": 0.5}, {"anchor": "eRight"}, {"hideButtons": 1},
-          { "text": "Add a <i>Scene</i> node the same way you added the other nodes.<br>Feel free to drag the nodes around for more room if you need it." }
-        ]
+        "text": {
+          "posX" : 0.3, "posY": 0.5, "anchor": "eRight", "hideButtons": 1,
+          "text": "Add a <i>Scene</i> node the same way you added the other nodes.<br>Feel free to drag the nodes around for more room if you need it."
+        }
       },
       {
-        "text": [
-          {"posX" : 0.3}, { "posY": 0.5}, {"anchor": "eRight"}, {"hideButtons": 1},
-          { "text": "After adding a <i>Scene</i> node,<br>you will be asked to create the associated <i>Script Resource</i> file." }
-        ]
+        "text": {
+          "posX" : 0.3, "posY": 0.5, "anchor": "eRight", "hideButtons": 1,
+          "text": "After adding a <i>Scene</i> node,<br>you will be asked to create the associated <i>Script Resource</i> file."
+        }
       },
       {
-        "background": [{"showBg" : 1}, { "onCliCkAdvance": 1}, {"mouseTransparent": 0}]
+        "background": {"showBg" : 1, "onCliCkAdvance": 1, "mouseTransparent": 0}
       },
       {
-        "highlight": [
-          { "items" : ["FlowView"]},
-          { "allwaysOnTop": 1 }
-        ]
+        "highlight": {
+          "items" : ["FlowView"],
+          "allwaysOnTop": 1
+        }
       },
       {
-        "text": [
-          {"posX" : 0.3}, { "posY": 0.5}, {"anchor": "eRight"},
-          { "text": "Every Scene needs a Scene-Script to be able to be used." }
-        ]
+        "text": {
+          "posX" : 0.3, "posY": 0.5, "anchor": "eRight",
+          "text": "Every Scene needs a Scene-Script to be able to be used."
+        }
       },
       {
-        "highlight": [
-          { "items" : ["AddScriptFile"]}
-        ]
+        "highlight": {
+          "items" : ["AddScriptFile"]
+        }
       },
       {
-        "text": [
-          {"posX" : 0.3}, { "posY": 0.5}, {"anchor": "eRight"},
-          { "text": "If you don't add a Script immediately, you can do so later,<br>by clicking the <i>Add script file</i> icon on the node." }
-        ]
+        "text": {
+          "posX" : 0.3, "posY": 0.5, "anchor": "eRight",
+          "text": "If you don't add a Script immediately, you can do so later,<br>by clicking the <i>Add script file</i> icon on the node."
+        }
       },
       {
-        "highlight": [
-          { "items" : ["FlowView"]}
-        ]
+        "highlight": {
+          "items" : ["FlowView"]
+        }
       },
       {
-        "text": [
-          {"posX" : 0.3}, { "posY": 0.5}, {"anchor": "eRight"},
-          { "text": "There's no limit on the number of Scene nodes in a project." }
-        ]
+        "text": {
+          "posX" : 0.3, "posY": 0.5, "anchor": "eRight",
+          "text": "There's no limit on the number of Scene nodes in a project."
+        }
       },
       {
-        "highlight": [
-          { "items" : ["pSceneNameLineEdit"]}
-        ]
+        "highlight": {
+          "items" : ["pSceneNameLineEdit"]
+        }
       },
       {
-        "text": [
-          {"posX" : 0.3}, { "posY": 0.5}, {"anchor": "eRight"},
-          { "text": "Every Scene Node has an internal id.<br>You can change it by entering the new name in the editor on the node." }
-        ]
+        "text": {
+          "posX" : 0.3, "posY": 0.5, "anchor": "eRight",
+          "text": "Every Scene Node has an internal id.<br>You can change it by entering the new name in the editor on the node."
+        }
       },
       {
-        "highlight": [
-          { "items" : ["FlowView"]},
-          { "allwaysOnTop": 1 }
-        ]
+        "highlight": {
+          "items" : ["FlowView"],
+          "allwaysOnTop": 1
+        }
       },
       {
-        "text": [
-          {"posX" : 0.3}, { "posY": 0.5}, {"anchor": "eRight"},
-          { "text": "The basic setup is almost done.<br>The only thing left for the Flow to work, is to connect the nodes." }
-        ]
+        "text": {
+          "posX" : 0.3, "posY": 0.5, "anchor": "eRight",
+          "text": "The basic setup is almost done.<br>The only thing left for the Flow to work, is to connect the nodes."
+        }
       },
       {
-        "background": [{"showBg" : 1}, { "onCliCkAdvance": 0}, {"mouseTransparent": 1}]
+        "background": {"showBg" : 1, "onCliCkAdvance": 0, "mouseTransparent": 1}
       },
       {
-        "text": [
-          {"posX" : 0.3}, { "posY": 0.5}, {"anchor": "eRight"}, {"hideButtons": 1},
-          { "text": "To connect two nodes, drag the node connectors (little circle on the side)<br>of two nodes together." }
-        ]
+        "text": {
+          "posX" : 0.3, "posY": 0.5, "anchor": "eRight", "hideButtons": 1,
+          "text": "To connect two nodes, drag the node connectors (little circle on the side)<br>of two nodes together."
+        }
       },
       {
-        "background": [{"showBg" : 1}, { "onCliCkAdvance": 1}, {"mouseTransparent": 0}]
+        "background": {"showBg" : 1, "onCliCkAdvance": 1, "mouseTransparent": 0}
       },
       {
-        "highlight": [
-          { "items" : ["FlowView"]}
-        ]
+        "highlight": {
+          "items" : ["FlowView"]
+        }
       },
       {
-        "text": [
-          {"posX" : 0.3}, { "posY": 0.5}, {"anchor": "eRight"},
-          { "text": "Good job, your JOI-Project flow is now fully functional." }
-        ]
+        "text": {
+          "posX" : 0.3, "posY": 0.5, "anchor": "eRight",
+          "text": "Good job, your JOI-Project flow is now fully functional."
+        }
       }
     ]
   },
   "eNodePanelAdvanced": {
     "commands": [
       {
-        "background": [{"showBg" : 1}, { "onCliCkAdvance": 1}]
+        "background": {"showBg" : 1, "onCliCkAdvance": 1}
       },
       {
-        "text": [
-          {"posX" : 0.3}, { "posY": 0.5}, {"anchor": "eRight"},
-          { "text": "There's two more types of nodes that weren't used yet:<br><ul><li>Path Splitter</li><li>Path Merger</li></ul><br>These allow you to create more complex flows with branching paths." }
-        ]
+        "text": {
+          "posX" : 0.3, "posY": 0.5, "anchor": "eRight",
+          "text": "There's two more types of nodes that weren't used yet:<br><ul><li>Path Splitter</li><li>Path Merger</li></ul><br>These allow you to create more complex flows with branching paths."
+        }
       },
       {
-        "highlight": [
-          { "items" : ["FlowView"]}
-        ]
+        "highlight": {
+          "items" : ["FlowView"]
+        }
       },
       {
-        "text": [
-          {"posX" : 0.3}, { "posY": 0.5}, {"anchor": "eRight"},
-          { "text": "A pre-created flow has been loaded to explain these." }
-        ]
+        "text": {
+          "posX" : 0.3, "posY": 0.5, "anchor": "eRight",
+          "text": "A pre-created flow has been loaded to explain these."
+        }
       },
       {
-        "text": [
-          {"posX" : 0.3}, { "posY": 0.5}, {"anchor": "eRight"},
-          { "text": "<i>Path Splitter</i> nodes split the flow into up to four alternatives." }
-        ]
+        "text": {
+          "posX" : 0.3, "posY": 0.5, "anchor": "eRight",
+          "text": "<i>Path Splitter</i> nodes split the flow into up to four alternatives."
+        }
       },
       {
-        "highlight": [
-          { "items" : ["pRandomRadio"]}
-        ]
+        "highlight": {
+          "items" : ["pRandomRadio"]
+        }
       },
       {
-        "text": [
-          {"posX" : 0.3}, { "posY": 0.5}, {"anchor": "eRight"},
-          { "text": "<i>Path Splitter</i> nodes can be configured to select a path at random..." }
-        ]
+        "text": {
+          "posX" : 0.3, "posY": 0.5, "anchor": "eRight",
+          "text": "<i>Path Splitter</i> nodes can be configured to select a path at random..."
+        }
       },
       {
-        "highlight": [
-          { "items" : ["pSelectionRadio"]}
-        ]
+        "highlight": {
+          "items" : ["pSelectionRadio"]
+        }
       },
       {
-        "text": [
-          {"posX" : 0.3}, { "posY": 0.5}, {"anchor": "eRight"},
-          { "text": "...or present the player with a choice which should be the next scene." }
-        ]
+        "text": {
+          "posX" : 0.3, "posY": 0.5, "anchor": "eRight",
+          "text": "...or present the player with a choice which should be the next scene."
+        }
       },
       {
-        "highlight": [
-          { "items" : ["pButtonLabelsGroupBox"]}
-        ]
+        "highlight": {
+          "items" : ["pButtonLabelsGroupBox"]
+        }
       },
       {
-        "text": [
-          {"posX" : 0.3}, { "posY": 0.5}, {"anchor": "eRight"},
-          { "text": "The labels of the buttons will be the ones configured here." }
-        ]
+        "text": {
+          "posX" : 0.3, "posY": 0.5, "anchor": "eRight",
+          "text": "The labels of the buttons will be the ones configured here."
+        }
       },
       {
-        "highlight": [
-          { "items" : ["FlowView"]}
-        ]
+        "highlight": {
+          "items" : ["FlowView"]
+        }
       },
       {
-        "text": [
-          {"posX" : 0.3}, { "posY": 0.5}, {"anchor": "eRight"},
-          { "text": "<i>Path Merger</i> nodes merge the flow from up to four paths into one." }
-        ]
+        "text": {
+          "posX" : 0.3, "posY": 0.5, "anchor": "eRight",
+          "text": "<i>Path Merger</i> nodes merge the flow from up to four paths into one."
+        }
       },
       {
-        "text": [
-          {"posX" : 0.3}, { "posY": 0.5}, {"anchor": "eRight"},
-          { "text": "<i>Path Splitter</i> and <i>Path Merger</i> nodes can be combined at will<br>(even in succession)." }
-        ]
+        "text": {
+          "posX" : 0.3, "posY": 0.5, "anchor": "eRight",
+          "text": "<i>Path Splitter</i> and <i>Path Merger</i> nodes can be combined at will<br>(even in succession)."
+        }
       }
     ]
   },
   "eNodePanelDone": {
     "commands": [
       {
-        "background": [{"showBg" : 1}, { "onCliCkAdvance": 1}]
+        "background": {"showBg" : 1, "onCliCkAdvance": 1}
       },
       {
-        "text": [
-          {"posX" : 0.3}, { "posY": 0.5}, {"anchor": "eRight"},
-          { "text": "The previously created flow has now been restored to continue the tutorial." }
-        ]
+        "text": {
+          "posX" : 0.3, "posY": 0.5, "anchor": "eRight",
+          "text": "The previously created flow has now been restored to continue the tutorial."
+        }
       },
       {
-        "highlight": [
-          { "items" : []}
-        ]
+        "highlight": {
+          "items" : []
+        }
       },
       {
-        "text": [
-          {"posX" : 0.5}, { "posY": 0.5},
-          { "text": "For the last part, let's switch the right panel to show the Scene Code Editor view." }
-        ]
+        "text": {
+          "posX" : 0.5, "posY": 0.5,
+          "text": "For the last part, let's switch the right panel to show the Scene Code Editor view."
+        }
       },
       {
-        "background": [{"showBg" : 1}, { "onCliCkAdvance": 0}]
+        "background": {"showBg" : 1, "onCliCkAdvance": 0}
       },
       {
-        "highlight": [
-          { "items" : ["pRightComboBox"]}
-        ]
+        "highlight": {
+          "items" : ["pRightComboBox"]
+        }
       },
       {
-        "clickFilter": [
-          { "items": ["pRightComboBox"] }, {"triggerNext": 0}
-        ]
+        "clickFilter": {
+          "items": ["pRightComboBox"], "triggerNext": 0
+        }
       },
       {
-        "text": [
-          {"posX" : 0.3}, { "posY": 0.15}, {"anchor": "eRight"}, {"hideButtons": 1},
-          { "text": "Click the <i>Scene Code Editor</i> item." }
-        ]
+        "text": {
+          "posX" : 0.3, "posY": 0.15, "anchor": "eRight", "hideButtons": 1,
+          "text": "Click the <i>Scene Code Editor</i> item."
+        }
       },
       {
-        "clickFilter": [
-          { "items": [] }
-        ]
+        "clickFilter": {
+          "items": []
+        }
       }
     ]
   },
   "eCodePanel": {
     "commands": [
       {
-        "background": [{"showBg" : 1}, { "onCliCkAdvance": 1}]
+        "background": {"showBg" : 1, "onCliCkAdvance": 1}
       },
       {
-        "highlight": [
-          { "items" : ["pCodeEdit"]}
-        ]
+        "highlight": {
+          "items" : ["pCodeEdit"]
+        }
       },
       {
-        "text": [
-          {"posX" : 0.3}, { "posY": 0.5}, {"anchor": "eRight"},
-          { "text": "This is the code editor.<br>Here is where you can create the logic of your Scene nodes." }
-        ]
+        "text": {
+          "posX" : 0.3, "posY": 0.5, "anchor": "eRight",
+          "text": "This is the code editor.<br>Here is where you can create the logic of your Scene nodes."
+        }
       },
       {
-        "text": [
-          {"posX" : 0.3}, { "posY": 0.5}, {"anchor": "eRight"},
-          { "text": "It works like any text editor, but provides you with syntactic code highlighting." }
-        ]
+        "text": {
+          "posX" : 0.3, "posY": 0.5, "anchor": "eRight",
+          "text": "It works like any text editor, but provides you with syntactic code highlighting."
+        }
       },
       {
-        "highlight": [
-          { "items" : ["pResourceComboBox"]}
-        ]
+        "highlight": {
+          "items" : ["pResourceComboBox"]
+        }
       },
       {
-        "text": [
-          {"posX" : 0.3}, { "posY": 0.5}, {"anchor": "eRight"},
-          { "text": "This selector shows you every script in your JOI-Project and let's you switch to it at will..." }
-        ]
+        "text": {
+          "posX" : 0.3, "posY": 0.5, "anchor": "eRight",
+          "text": "This selector shows you every script in your JOI-Project and let's you switch to it at will..."
+        }
       },
       {
-        "highlight": [
-          { "items" : ["pResourceModelView"]}
-        ]
+        "highlight": {
+          "items" : ["pResourceModelView"]
+        }
       },
       {
-        "text": [
-          {"posX" : 0.4}, { "posY": 0.5}, {"anchor": "eLeft"},
-          { "text": "...alternatively click the Script Resource in the tree." }
-        ]
+        "text": {
+          "posX" : 0.4, "posY": 0.5, "anchor": "eLeft",
+          "text": "...alternatively click the Script Resource in the tree."
+        }
       },
       {
-        "highlight": [
-          { "items" : []}
-        ]
+        "highlight": {
+          "items" : []
+        }
       },
       {
-        "text": [
-          {"posX" : 0.5}, { "posY": 0.5},
-          { "text": "The code is JavaScript code (more precisely ECMAScript), but if you don't know JavaScript,<br>don't fret. You won't <i>have</i> to write a lot of code on your own." }
-        ]
+        "text": {
+          "posX" : 0.5, "posY": 0.5,
+          "text": "The code is JavaScript code (more precisely ECMAScript), but if you don't know JavaScript,<br>don't fret. You won't <i>have</i> to write a lot of code on your own."
+        }
       },
       {
-        "highlight": [
-          { "items" : ["AddMetronomeCode", "AddShowBackgroundCode", "AddShowIconCode", "AddShowImageCode", "AddTextCode", "AddThreadCode", "AddTimerCode"]}
-        ]
+        "highlight": {
+          "items" : ["AddMetronomeCode", "AddShowBackgroundCode", "AddShowIconCode", "AddShowImageCode", "AddTextCode", "AddThreadCode", "AddTimerCode"]
+        }
       },
       {
-        "text": [
-          {"posX" : 0.9}, { "posY": 0.5}, {"anchor": "eRight"},
-          { "text": "These buttons will show a ui that let you generate code snippets<br>at your cursor position for most things you need." }
-        ]
+        "text": {
+          "posX" : 0.9, "posY": 0.5, "anchor": "eRight",
+          "text": "These buttons will show a ui that let you generate code snippets<br>at your cursor position for most things you need."
+        }
       },
       {
-        "highlight": [
-          { "items" : ["AddShowImageCode"]}
-        ]
+        "highlight": {
+          "items" : ["AddShowImageCode"]
+        }
       },
       {
-        "text": [
-          {"posX" : 0.9}, { "posY": 0.2}, {"anchor": "eRight"},
-          { "text": "Here you can generate code to show media Resources and manipulate them..." }
-        ]
+        "text": {
+          "posX" : 0.9, "posY": 0.2, "anchor": "eRight",
+          "text": "Here you can generate code to show media Resources and manipulate them..."
+        }
       },
       {
-        "highlight": [
-          { "items" : ["AddShowIconCode"]}
-        ]
+        "highlight": {
+          "items" : ["AddShowIconCode"]
+        }
       },
       {
-        "text": [
-          {"posX" : 0.9}, { "posY": 0.2}, {"anchor": "eRight"},
-          { "text": "...this will let you generate code to show icons..." }
-        ]
+        "text": {
+          "posX" : 0.9, "posY": 0.2, "anchor": "eRight",
+          "text": "...this will let you generate code to show icons..."
+        }
       },
       {
-        "highlight": [
-          { "items" : ["AddShowBackgroundCode"]}
-        ]
+        "highlight": {
+          "items" : ["AddShowBackgroundCode"]
+        }
       },
       {
-        "text": [
-          {"posX" : 0.9}, { "posY": 0.3}, {"anchor": "eRight"},
-          { "text": "...while this will let you generate code to change the background..." }
-        ]
+        "text": {
+          "posX" : 0.9, "posY": 0.3, "anchor": "eRight",
+          "text": "...while this will let you generate code to change the background..."
+        }
       },
       {
-        "highlight": [
-          { "items" : ["AddTextCode"]}
-        ]
+        "highlight": {
+          "items" : ["AddTextCode"]
+        }
       },
       {
-        "text": [
-          {"posX" : 0.9}, { "posY": 0.3}, {"anchor": "eRight"},
-          { "text": "...show text..." }
-        ]
+        "text": {
+          "posX" : 0.9, "posY": 0.3, "anchor": "eRight",
+          "text": "...show text..."
+        }
       },
       {
-        "highlight": [
-          { "items" : ["AddMetronomeCode"]}
-        ]
+        "highlight": {
+          "items" : ["AddMetronomeCode"]
+        }
       },
       {
-        "text": [
-          {"posX" : 0.9}, { "posY": 0.4}, {"anchor": "eRight"},
-          { "text": "...set a metronome..." }
-        ]
+        "text": {
+          "posX" : 0.9, "posY": 0.4, "anchor": "eRight",
+          "text": "...set a metronome..."
+        }
       },
       {
-        "highlight": [
-          { "items" : ["AddTimerCode"]}
-        ]
+        "highlight": {
+          "items" : ["AddTimerCode"]
+        }
       },
       {
-        "text": [
-          {"posX" : 0.9}, { "posY": 0.4}, {"anchor": "eRight"},
-          { "text": "...or a timer..." }
-        ]
+        "text": {
+          "posX" : 0.9, "posY": 0.4, "anchor": "eRight",
+          "text": "...or a timer..."
+        }
       },
       {
-        "highlight": [
-          { "items" : ["AddThreadCode"]}
-        ]
+        "highlight": {
+          "items" : ["AddThreadCode"]
+        }
       },
       {
-        "text": [
-          {"posX" : 0.9}, { "posY": 0.5}, {"anchor": "eRight"},
-          { "text": "...and last but not least, let you simply wait." }
-        ]
+        "text": {
+          "posX" : 0.9, "posY": 0.5, "anchor": "eRight",
+          "text": "...and last but not least, let you simply wait."
+        }
       },
       {
-        "highlight": [
-          { "items" : ["HelpButton"]}
-        ]
+        "highlight": {
+          "items" : ["HelpButton"]
+        }
       },
       {
-        "text": [
-          {"posX" : 0.5}, { "posY": 0.2},
-          { "text": "If you need more detailed information, please check out the interactive help." }
-        ]
+        "text": {
+          "posX" : 0.5, "posY": 0.2,
+          "text": "If you need more detailed information, please check out the interactive help."
+        }
       },
       {
-        "highlight": [
-          { "items" : ["SaveButton"]}
-        ]
+        "highlight": {
+          "items" : ["SaveButton"]
+        }
       },
       {
-        "text": [
-          {"posX" : 0.5}, { "posY": 0.2},
-          { "text": "Lastly, don't forget to save the project before exiting the editor." }
-        ]
+        "text": {
+          "posX" : 0.5, "posY": 0.2,
+          "text": "Lastly, don't forget to save the project before exiting the editor."
+        }
       },
       {
-        "highlight": [
-          { "items" : []}
-        ]
+        "highlight": {
+          "items" : []
+        }
       },
       {
-        "text": [
-          {"posX" : 0.5}, { "posY": 0.5},
-          { "text": "Happy creating." }
-        ]
+        "text": {
+          "posX" : 0.5, "posY": 0.5,
+          "text": "Happy creating."
+        }
       }
     ]
   }

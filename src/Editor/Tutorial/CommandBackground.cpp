@@ -2,7 +2,9 @@
 
 CCommandBackground::CCommandBackground(QPointer<CEditorTutorialOverlay> pTutorialOverlay) :
   IJsonInstructionBase(),
-  m_argTypes({{"showBg", QVariant::Bool}, {"onCliCkAdvance", QVariant::Bool}, {"mouseTransparent", QVariant::Bool}}),
+  m_argTypes({{"showBg", SInstructionArgumentType{EArgumentType::eBool}},
+              {"onCliCkAdvance", SInstructionArgumentType{EArgumentType::eBool}},
+              {"mouseTransparent", SInstructionArgumentType{EArgumentType::eBool}}}),
   m_pTutorialOverlay(pTutorialOverlay)
 {
 }
@@ -14,27 +16,27 @@ CCommandBackground::~CCommandBackground()
 
 //----------------------------------------------------------------------------------------
 //
-const std::map<QString, QVariant::Type>& CCommandBackground::ArgList() const
+tInstructionMapType& CCommandBackground::ArgList()
 {
   return m_argTypes;
 }
 
 //----------------------------------------------------------------------------------------
 //
-void CCommandBackground::Call(const QVariantMap& args)
+IJsonInstructionBase::tRetVal CCommandBackground::Call(const tInstructionMapValue& args)
 {
   if (nullptr != m_pTutorialOverlay)
   {
-    auto itShowBg = args.find("showBg");
-    auto itClickToAdvance = args.find("onCliCkAdvance");
-    auto itMouseTransparent = args.find("mouseTransparent");
+    const auto& itShowBg = GetValue<EArgumentType::eBool>(args, "showBg");
+    const auto& itClickToAdvance = GetValue<EArgumentType::eBool>(args, "onCliCkAdvance");
+    const auto& itMouseTransparent = GetValue<EArgumentType::eBool>(args, "mouseTransparent");
     bool bIsVisible = m_pTutorialOverlay->isVisible();
     bool bShowRequested = false;
     bool bClickToAdvance = false;
     bool bMouseTransparent = false;
-    if (args.end() != itShowBg)
+    if (HasValue(args, "showBg") && IsOk<EArgumentType::eBool>(itShowBg))
     {
-      bShowRequested = itShowBg.value().toBool();
+      bShowRequested = std::get<bool>(itShowBg);
       if (bShowRequested && !bIsVisible)
       {
         m_pTutorialOverlay->Show();
@@ -44,14 +46,14 @@ void CCommandBackground::Call(const QVariantMap& args)
         m_pTutorialOverlay->Hide();
       }
     }
-    if (args.end() != itClickToAdvance)
+    if (HasValue(args, "onCliCkAdvance") && IsOk<EArgumentType::eBool>(itClickToAdvance))
     {
-      bClickToAdvance = itClickToAdvance.value().toBool();
+      bClickToAdvance = std::get<bool>(itClickToAdvance);
       m_pTutorialOverlay->SetClickToAdvanceEnabled(bClickToAdvance);
     }
-    if (args.end() != itMouseTransparent)
+    if (HasValue(args, "mouseTransparent") && IsOk<EArgumentType::eBool>(itMouseTransparent))
     {
-      bMouseTransparent = itMouseTransparent.value().toBool();
+      bMouseTransparent = std::get<bool>(itMouseTransparent);
       m_pTutorialOverlay->SetMouseTransparecny(bMouseTransparent);
     }
 
@@ -59,5 +61,8 @@ void CCommandBackground::Call(const QVariantMap& args)
     {
       m_pTutorialOverlay->SlotTriggerNextInstruction();
     }
+
+    return std::true_type();
   }
+  return std::true_type();
 }

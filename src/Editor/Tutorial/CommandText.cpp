@@ -3,9 +3,11 @@
 
 CCommandText::CCommandText(QPointer<CEditorTutorialOverlay> pTutorialOverlay) :
   IJsonInstructionBase(),
-  m_argTypes({{"posX", QVariant::Double}, {"posY", QVariant::Double},
-              {"text", QVariant::String}, {"anchor", QVariant::String},
-              {"hideButtons", QVariant::Bool}}),
+  m_argTypes({{"posX", SInstructionArgumentType{EArgumentType::eDouble}},
+              {"posY", SInstructionArgumentType{EArgumentType::eDouble}},
+              {QString("text"), SInstructionArgumentType{EArgumentType::eString}},
+              {"anchor", SInstructionArgumentType{EArgumentType::eString}},
+              {"hideButtons", SInstructionArgumentType{EArgumentType::eBool}}}),
   m_pTutorialOverlay(pTutorialOverlay)
 {
 
@@ -17,46 +19,52 @@ CCommandText::~CCommandText()
 
 //----------------------------------------------------------------------------------------
 //
-const std::map<QString, QVariant::Type>& CCommandText::ArgList() const
+tInstructionMapType& CCommandText::ArgList()
 {
   return m_argTypes;
 }
 
 //----------------------------------------------------------------------------------------
 //
-void CCommandText::Call(const QVariantMap& instruction)
+IJsonInstructionBase::tRetVal CCommandText::Call(const tInstructionMapValue& args)
 {
   double dPosX = 0.0;
   double dPosY = 0.0;
   QString sText;
   EAnchors anchor = EAnchors::eCenter;
   bool bHideButtons = false;
-  for (auto it = instruction.begin(); instruction.end() != it; ++it)
+
+  const auto& itPosX = GetValue<EArgumentType::eDouble>(args, "posX");
+  const auto& itPosY = GetValue<EArgumentType::eDouble>(args, "posY");
+  const auto& itText = GetValue<EArgumentType::eString>(args, "text");
+  const auto& itanchor = GetValue<EArgumentType::eString>(args, "anchor");
+  const auto& itHideButtons = GetValue<EArgumentType::eBool>(args, "hideButtons");
+
+  if (HasValue(args, "posX") && IsOk<EArgumentType::eDouble>(itPosX))
   {
-    if (it.key() == "posX")
-    {
-      dPosX = it.value().toDouble();
-    }
-    else if (it.key() == "posY")
-    {
-      dPosY = it.value().toDouble();
-    }
-    else if (it.key() == "text")
-    {
-      sText = it.value().toString();
-    }
-    else if (it.key() == "anchor")
-    {
-      anchor = EAnchors::_from_string(it.value().toString().toStdString().data());
-    }
-    else if (it.key() == "hideButtons")
-    {
-      bHideButtons = it.value().toBool();
-    }
+    dPosX = std::get<double>(itPosX);
+  }
+  if (HasValue(args, "posY") && IsOk<EArgumentType::eDouble>(itPosY))
+  {
+    dPosY = std::get<double>(itPosY);
+  }
+  if (HasValue(args, "text") && IsOk<EArgumentType::eString>(itText))
+  {
+    sText = std::get<QString>(itText);
+  }
+  if (HasValue(args, "anchor") && IsOk<EArgumentType::eString>(itanchor))
+  {
+    anchor = EAnchors::_from_string(std::get<QString>(itanchor).toStdString().data());
+  }
+  if (HasValue(args, "hideButtons") && IsOk<EArgumentType::eBool>(itHideButtons))
+  {
+    bHideButtons = std::get<bool>(itHideButtons);
   }
 
   if (nullptr != m_pTutorialOverlay)
   {
     m_pTutorialOverlay->ShowTutorialText(anchor, dPosX, dPosY, bHideButtons, sText);
+    return std::true_type();
   }
+  return std::true_type();
 }

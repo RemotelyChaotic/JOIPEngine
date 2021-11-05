@@ -11,11 +11,11 @@ public:
   CCommandText(QPointer<CEditorTutorialOverlay> pTutorialOverlay);
   ~CCommandText() override;
 
-  const std::map<QString, QVariant::Type>& ArgList() const override;
-  void Call(const QVariantMap& instruction) override;
+  tInstructionMapType& ArgList() override;
+  IJsonInstructionBase::tRetVal Call(const tInstructionMapValue& instruction) override;
 
 private:
-  const std::map<QString, QVariant::Type> m_argTypes;
+  tInstructionMapType                     m_argTypes;
   QPointer<CEditorTutorialOverlay>        m_pTutorialOverlay;
 };
 

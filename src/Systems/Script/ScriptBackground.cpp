@@ -21,6 +21,11 @@ std::shared_ptr<CScriptObjectBase> CBackgroundSignalEmitter::CreateNewScriptObje
   return std::make_shared<CScriptBackground>(this, pEngine);
 }
 
+std::shared_ptr<CScriptObjectBase> CBackgroundSignalEmitter::CreateNewScriptObject(QPointer<CJsonInstructionSetParser> pParser)
+{
+  return nullptr;
+}
+
 //----------------------------------------------------------------------------------------
 //
 CScriptBackground::CScriptBackground(QPointer<CScriptRunnerSignalEmiter> pEmitter,

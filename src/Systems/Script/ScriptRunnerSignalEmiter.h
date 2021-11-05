@@ -8,6 +8,7 @@
 #include <QString>
 #include <memory>
 
+class CJsonInstructionSetParser;
 class CScriptRunnerSignalContext;
 class CScriptObjectBase;
 class QJSEngine;
@@ -31,6 +32,7 @@ public:
   ~CScriptRunnerSignalEmiter();
 
   virtual std::shared_ptr<CScriptObjectBase> CreateNewScriptObject(QPointer<QJSEngine>);
+  virtual std::shared_ptr<CScriptObjectBase> CreateNewScriptObject(QPointer<CJsonInstructionSetParser>);
 
   void Initialize(std::shared_ptr<CScriptRunnerSignalContext> spContext);
   void SetScriptExecutionStatus(ScriptExecStatus status);

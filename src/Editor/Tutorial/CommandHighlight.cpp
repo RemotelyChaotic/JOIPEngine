@@ -2,7 +2,9 @@
 
 CCommandHighlight::CCommandHighlight(QPointer<CEditorTutorialOverlay> pTutorialOverlay) :
   IJsonInstructionBase(),
-  m_argTypes({{"items", QVariant::StringList}, {"allwaysOnTop", QVariant::Bool}}),
+  m_argTypes({{"items", SInstructionArgumentType{EArgumentType::eArray,
+                                                 MakeArgArray(EArgumentType::eString)}},
+              {"allwaysOnTop", SInstructionArgumentType{EArgumentType::eBool}}}),
   m_pTutorialOverlay(pTutorialOverlay)
 {
 }
@@ -14,25 +16,36 @@ CCommandHighlight::~CCommandHighlight()
 
 //----------------------------------------------------------------------------------------
 //
-const std::map<QString, QVariant::Type>& CCommandHighlight::ArgList() const
+tInstructionMapType& CCommandHighlight::ArgList()
 {
   return m_argTypes;
 }
 
 //----------------------------------------------------------------------------------------
 //
-void CCommandHighlight::Call(const QVariantMap& instruction)
+IJsonInstructionBase::tRetVal CCommandHighlight::Call(const tInstructionMapValue& args)
 {
-  auto itAllwaysOnTop = instruction.find("allwaysOnTop");
+  const auto& itAllwaysOnTop = GetValue<EArgumentType::eBool>(args, "allwaysOnTop");
+  const auto& itItems = GetValue<EArgumentType::eArray>(args, "items");
   bool bAllwaysOnTop = false;
-  if (instruction.end() != itAllwaysOnTop)
+  if (HasValue(args, "allwaysOnTop") && IsOk<EArgumentType::eBool>(itAllwaysOnTop))
   {
-    bAllwaysOnTop = itAllwaysOnTop.value().toBool();
+    bAllwaysOnTop = std::get<bool>(itAllwaysOnTop);
   }
-  auto it = instruction.find("items");
-  if (instruction.end() != it)
+  if (HasValue(args, "items") && IsOk<EArgumentType::eArray>(itItems))
   {
-    m_pTutorialOverlay->SetHighlightedWidgets(it.value().toStringList(), bAllwaysOnTop);
+    QStringList vList;
+    tInstructionArrayValue items = std::get<tInstructionArrayValue>(itItems);
+    for (size_t i = 0; items.size() > i; ++i)
+    {
+      const auto& itClickableItem = GetValue<EArgumentType::eString>(items, i);
+      if (IsOk<EArgumentType::eString>(itClickableItem))
+      {
+        vList << std::get<QString>(itClickableItem);
+      }
+    }
+    m_pTutorialOverlay->SetHighlightedWidgets(vList, bAllwaysOnTop);
     m_pTutorialOverlay->SlotTriggerNextInstruction();
   }
+  return std::true_type();
 }

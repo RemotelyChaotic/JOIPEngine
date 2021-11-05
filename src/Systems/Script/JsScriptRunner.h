@@ -6,6 +6,8 @@
 #include <QPointer>
 #include <QJSEngine>
 #include <QMutex>
+#include <map>
+#include <memory>
 
 class CScriptRunnerUtils;
 class CSceneScriptWrapper;

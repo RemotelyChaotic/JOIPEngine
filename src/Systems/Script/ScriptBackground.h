@@ -17,7 +17,8 @@ public:
   CBackgroundSignalEmitter();
   ~CBackgroundSignalEmitter();
 
-  virtual std::shared_ptr<CScriptObjectBase> CreateNewScriptObject(QPointer<QJSEngine> pEngine);
+  std::shared_ptr<CScriptObjectBase> CreateNewScriptObject(QPointer<QJSEngine> pEngine) override;
+  std::shared_ptr<CScriptObjectBase> CreateNewScriptObject(QPointer<CJsonInstructionSetParser> pParser) override;
 
 signals:
   void backgroundColorChanged(QColor color);

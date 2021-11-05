@@ -1,13 +1,7 @@
 #include "JsScriptRunner.h"
 #include "Application.h"
-#include "ScriptBackground.h"
-#include "ScriptIcon.h"
-#include "ScriptMediaPlayer.h"
 #include "ScriptRunnerSignalEmiter.h"
-#include "ScriptStorage.h"
 #include "ScriptTextBox.h"
-#include "ScriptTimer.h"
-#include "ScriptThread.h"
 #include "Systems/Project.h"
 #include "Systems/Resource.h"
 #include "Systems/Scene.h"
@@ -27,7 +21,7 @@ CJsScriptRunner::CJsScriptRunner(std::weak_ptr<CScriptRunnerSignalContext> spSig
   m_pScriptUtils(new CScriptRunnerUtils(this, this)),
   m_pCurrentScene(nullptr),
   m_runFunction(),
-  m_objectMapMutex(),
+  m_objectMapMutex(QMutex::Recursive),
   m_objectMap()
 {
   connect(m_spTimer.get(), &QTimer::timeout, this, &CJsScriptRunner::SlotRun);
@@ -65,7 +59,9 @@ void CJsScriptRunner::Initialize()
 //
 void CJsScriptRunner::Deinitialize()
 {
-  m_pScriptEngine->globalObject().setProperty("utils", QJSValue());
+  m_spTimer->stop();
+
+  m_spScriptEngine->globalObject().setProperty("utils", QJSValue());
   delete m_pScriptUtils;
   m_pScriptUtils = nullptr;
 

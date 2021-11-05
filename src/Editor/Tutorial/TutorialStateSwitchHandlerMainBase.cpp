@@ -88,9 +88,20 @@ void CTutorialStateSwitchHandlerMainBase::SlotOverlayNextInstructionTriggered()
 {
   if (nullptr != m_spTutorialRunner)
   {
-    if (!m_spTutorialRunner->CallNextCommand())
+    CJsonInstructionSetRunner::tRetVal retVal = m_spTutorialRunner->CallNextCommand();
+    if (!std::holds_alternative<SJsonException>(retVal))
     {
-      m_pTutorialOverlay->NextTutorialState();
+      if (!std::get<bool>(retVal))
+      {
+        m_pTutorialOverlay->NextTutorialState();
+      }
+    }
+    else
+    {
+      SJsonException exception = std::get<SJsonException>(retVal);
+      QString sException = exception.m_sException;
+      QString sError = "Uncaught exception " + sException;
+      qWarning() << sError;
     }
   }
 }

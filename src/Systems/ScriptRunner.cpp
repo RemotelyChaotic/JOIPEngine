@@ -2,6 +2,7 @@
 #include "Project.h"
 #include "Resource.h"
 #include "Scene.h"
+#include "Script/EosScriptRunner.h"
 #include "Script/JsScriptRunner.h"
 #include "Script/ScriptRunnerSignalEmiter.h"
 #include <QDebug>
@@ -36,6 +37,8 @@ void CScriptRunner::Initialize()
 
   m_spRunnerMap.insert({"js",
                         std::make_unique<CJsScriptRunner>(m_spSignalEmitterContext)});
+  m_spRunnerMap.insert({"eos",
+                        std::make_unique<CEosScriptRunner>(m_spSignalEmitterContext)});
 
   for (const auto& it : m_spRunnerMap)
   {

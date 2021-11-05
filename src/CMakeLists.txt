@@ -317,6 +317,9 @@ set(Sources
   Systems/JSON/JsonInstructionSetParser.cpp
   Systems/JSON/JsonInstructionSetParser.h
   Systems/JSON/JsonInstructionSetRunner.h
+  Systems/JSON/JsonInstructionSetSaxParser.h
+  Systems/Script/EosScriptRunner.cpp
+  Systems/Script/EosScriptRunner.h
   Systems/Script/IScriptRunner.h
   Systems/Script/JsScriptRunner.cpp
   Systems/Script/JsScriptRunner.h

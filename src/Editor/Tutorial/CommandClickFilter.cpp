@@ -2,10 +2,11 @@
 
 CCommandClickFilter::CCommandClickFilter(QPointer<CEditorTutorialOverlay> pTutorialOverlay) :
   IJsonInstructionBase(),
-  m_argTypes({{"items", QVariant::StringList}, {"triggerNext", QVariant::Bool}}),
+  m_argTypes({{"items", SInstructionArgumentType{EArgumentType::eArray,
+                                                 MakeArgArray(EArgumentType::eString)}},
+              {"triggerNext", SInstructionArgumentType{EArgumentType::eBool}}}),
   m_pTutorialOverlay(pTutorialOverlay)
 {
-
 }
 
 CCommandClickFilter::~CCommandClickFilter()
@@ -15,28 +16,40 @@ CCommandClickFilter::~CCommandClickFilter()
 
 //----------------------------------------------------------------------------------------
 //
-const std::map<QString, QVariant::Type>& CCommandClickFilter::ArgList() const
+tInstructionMapType& CCommandClickFilter::ArgList()
 {
   return m_argTypes;
 }
 
 //----------------------------------------------------------------------------------------
 //
-void CCommandClickFilter::Call(const QVariantMap& args)
+IJsonInstructionBase::tRetVal CCommandClickFilter::Call(const tInstructionMapValue& args)
 {
   if (nullptr != m_pTutorialOverlay)
   {
-    auto itClickableItems = args.find("items");
-    auto itTriggerNext = args.find("triggerNext");
+    const auto& itClickableItems = GetValue<EArgumentType::eArray>(args, "items");
+    const auto& itTriggerNext = GetValue<EArgumentType::eBool>(args, "triggerNext");
     bool bTriggerNext = true;
-    if (args.end() != itTriggerNext)
+    if (HasValue(args, "triggerNext") && IsOk<EArgumentType::eBool>(itTriggerNext))
     {
-      bTriggerNext = itTriggerNext.value().toBool();
+      bTriggerNext = std::get<bool>(itTriggerNext);
     }
-    if (args.end() != itClickableItems)
+    if (HasValue(args, "items") && IsOk<EArgumentType::eArray>(itClickableItems))
     {
-      m_pTutorialOverlay->SetClickFilterWidgets(itClickableItems.value().toStringList(), bTriggerNext);
+      QStringList vList;
+      tInstructionArrayValue items = std::get<tInstructionArrayValue>(itClickableItems);
+      for (size_t i = 0; items.size() > i; ++i)
+      {
+        const auto& itClickableItem = GetValue<EArgumentType::eString>(items, i);
+        if (IsOk<EArgumentType::eString>(itClickableItem))
+        {
+          vList << std::get<QString>(itClickableItem);
+        }
+      }
+      m_pTutorialOverlay->SetClickFilterWidgets(vList, bTriggerNext);
       m_pTutorialOverlay->SlotTriggerNextInstruction();
     }
+    return std::true_type();
   }
+  return std::true_type();
 }

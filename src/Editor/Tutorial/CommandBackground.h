@@ -11,12 +11,12 @@ public:
   CCommandBackground(QPointer<CEditorTutorialOverlay> pTutorialOverlay);
   ~CCommandBackground() override;
 
-  const std::map<QString, QVariant::Type>& ArgList() const override;
-  void Call(const QVariantMap& args) override;
+  tInstructionMapType& ArgList() override;
+  IJsonInstructionBase::tRetVal Call(const tInstructionMapValue& args) override;
 
 private:
-  const std::map<QString, QVariant::Type> m_argTypes;
-  QPointer<CEditorTutorialOverlay>        m_pTutorialOverlay;
+  tInstructionMapType               m_argTypes;
+  QPointer<CEditorTutorialOverlay>  m_pTutorialOverlay;
 };
 
 #endif // CTUTORIALCOMMANDBACKGROUND_H

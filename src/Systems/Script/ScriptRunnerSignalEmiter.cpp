@@ -50,6 +50,11 @@ std::shared_ptr<CScriptObjectBase> CScriptRunnerSignalEmiter::CreateNewScriptObj
   return nullptr;
 }
 
+std::shared_ptr<CScriptObjectBase> CScriptRunnerSignalEmiter::CreateNewScriptObject(QPointer<CJsonInstructionSetParser>)
+{
+  return nullptr;
+}
+
 //----------------------------------------------------------------------------------------
 //
 void CScriptRunnerSignalEmiter::Initialize(std::shared_ptr<CScriptRunnerSignalContext> spContext)
