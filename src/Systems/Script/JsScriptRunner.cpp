@@ -61,7 +61,7 @@ void CJsScriptRunner::Deinitialize()
 {
   m_spTimer->stop();
 
-  m_spScriptEngine->globalObject().setProperty("utils", QJSValue());
+  m_pScriptEngine->globalObject().setProperty("utils", QJSValue());
   delete m_pScriptUtils;
   m_pScriptUtils = nullptr;
 
