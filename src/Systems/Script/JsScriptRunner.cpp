@@ -172,13 +172,16 @@ void CJsScriptRunner::RegisterNewComponent(const QString sName, QJSValue signalE
       pObject->Initialize(m_wpSignalEmitterContext.lock());
       std::shared_ptr<CScriptObjectBase> spObject =
           pObject->CreateNewScriptObject(m_pScriptEngine);
-      if (spObject->thread() != thread())
+      if (nullptr != spObject)
       {
-        spObject->moveToThread(thread());
+        if (spObject->thread() != thread())
+        {
+          spObject->moveToThread(thread());
+        }
+        m_objectMap.insert({ sName, spObject });
+        QMetaObject::invokeMethod(this, "SlotRegisterObject", Qt::QueuedConnection,
+                                  Q_ARG(QString, sName));
       }
-      m_objectMap.insert({ sName, spObject });
-      QMetaObject::invokeMethod(this, "SlotRegisterObject", Qt::QueuedConnection,
-                                Q_ARG(QString, sName));
     }
   }
 }
