@@ -16,6 +16,7 @@ class CScriptRunnerSignalContext;
 class CJsScriptRunner : public QObject, public IScriptRunner
 {
   Q_OBJECT
+  Q_INTERFACES(IScriptRunner)
   Q_DISABLE_COPY(CJsScriptRunner)
   friend class CScriptRunnerUtils;
 

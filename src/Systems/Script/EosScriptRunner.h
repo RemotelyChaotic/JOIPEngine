@@ -17,6 +17,7 @@ struct SJsonException;
 class CEosScriptRunner : public QObject, public IScriptRunner
 {
   Q_OBJECT
+  Q_INTERFACES(IScriptRunner)
   Q_DISABLE_COPY(CEosScriptRunner)
 
 public:
