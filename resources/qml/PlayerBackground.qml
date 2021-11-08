@@ -10,6 +10,7 @@ Rectangle {
     color: "transparent"
     property string userName: "background"
     property bool startedBackgroundLoad: false
+    property bool animated: false
 
     BorderImage {
         id: img
@@ -18,6 +19,8 @@ Rectangle {
         border { left: 0; top: 0; right: 0; bottom: 0 }
         horizontalTileMode: null == root.style ? BorderImage.Round : root.style.backgroundDisplay.horizontalTileMode
         verticalTileMode: null == root.style ? BorderImage.Round : root.style.backgroundDisplay.verticalTileMode
+
+        visible: !background.animated
 
         onStatusChanged: {
             if (startedBackgroundLoad)
@@ -35,10 +38,32 @@ Rectangle {
         }
     }
 
+    AnimatedImage {
+        id: animatedImage
+        source: ""
+
+        anchors.fill: parent
+        fillMode: Image.PreserveAspectCrop
+
+        visible: background.animated
+
+        onStatusChanged: {
+            if (status === Image.Error || status === Image.Null)
+            {
+                console.error(qsTr("Resource %1 not found.").arg(source));
+                startedBackgroundLoad = false;
+            }
+            else if (status === Image.Ready)
+            {
+                startedBackgroundLoad = false;
+            }
+        }
+    }
+
     ColorOverlay {
         id: colorOverlay
-        anchors.fill: img
-        source: img
+        anchors.fill: background.animated ? animatedImage : img
+        source: background.animated ? animatedImage : img
         color: "#00000000"
 
         Behavior on color {
@@ -66,13 +91,35 @@ Rectangle {
         }
 
         onBackgroundTextureChanged: {
-            if (sResource !== "")
+            if (null !== registrator.currentlyLoadedProject &&
+                undefined !== registrator.currentlyLoadedProject)
             {
-                startedBackgroundLoad = true;
-                img.source =  "image://DataBaseImageProivider/" +  + registrator.currentlyLoadedProject.id + "/" + sResource;
+                var pResource = registrator.currentlyLoadedProject.resource(sResource);
+                if (null !== pResource && undefined !== pResource)
+                {
+                    if (!pResource.isAnimated)
+                    {
+                        background.animated = false;
+                        startedBackgroundLoad = true;
+                        img.source =  "image://DataBaseImageProivider/" +  + registrator.currentlyLoadedProject.id + "/" + sResource;
+                    }
+                    else
+                    {
+                        background.animated = true;
+                        startedBackgroundLoad = true;
+                        animatedImage.source = pResource.path;
+                    }
+                }
+                else
+                {
+                    background.animated = false;
+                    startedBackgroundLoad = true;
+                    img.source = Settings.styleFolderQml() + "/Background.png";
+                }
             }
             else
             {
+                background.animated = false;
                 startedBackgroundLoad = true;
                 img.source = Settings.styleFolderQml() + "/Background.png";
             }

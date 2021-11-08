@@ -124,6 +124,8 @@ New Features:
 - Alternate Editor Layouts for different screen sizes and preference.
 - Every project can have a default font configured, which is used in the Player.
   This font can be a custom Font type Resource.
+- PlayerBackground finally accepts animated images as well. Animated images
+  will not be tiled, but instead stretched.
 
 Changes:
 - JOIP-Engine uses PhysFS to allow restricted acces to files only, making it
