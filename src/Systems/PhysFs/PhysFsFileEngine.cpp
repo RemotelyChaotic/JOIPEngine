@@ -228,7 +228,7 @@ QString CPhysFsFileEngine::fileName(FileName file) const
     return PHYSFS_getWriteDir();
   }
 
-  return m_sFilename;
+  return CPhysFsFileEngineHandler::c_sScheme + m_sFilename;
 }
 
 QDateTime CPhysFsFileEngine::fileTime(FileTime time) const
