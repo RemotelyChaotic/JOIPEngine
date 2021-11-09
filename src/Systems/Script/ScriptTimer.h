@@ -30,7 +30,7 @@ Q_DECLARE_METATYPE(CTimerSignalEmitter)
 
 //----------------------------------------------------------------------------------------
 //
-class CScriptTimer : public CScriptObjectBase
+class CScriptTimer : public CJsScriptObjectBase
 {
   Q_OBJECT
   Q_DISABLE_COPY(CScriptTimer)

@@ -48,7 +48,7 @@ Q_DECLARE_METATYPE(CTextBoxSignalEmitter)
 
 //----------------------------------------------------------------------------------------
 //
-class CScriptTextBox : public CScriptObjectBase
+class CScriptTextBox : public CJsScriptObjectBase
 {
   Q_OBJECT
   Q_DISABLE_COPY(CScriptTextBox)

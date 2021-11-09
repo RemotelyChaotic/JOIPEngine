@@ -139,10 +139,67 @@ void CResourceSnippetOverlay::on_pStopRadioButton_toggled(bool bChecked)
 
 //----------------------------------------------------------------------------------------
 //
+void CResourceSnippetOverlay::on_pSeekRadioButton_toggled(bool bChecked)
+{
+  if (!m_bInitialized) { return; }
+  if (bChecked)
+  {
+    m_data.m_displayMode = EDisplayMode::eSeek;
+  }
+}
+
+
+//----------------------------------------------------------------------------------------
+//
+void CResourceSnippetOverlay::on_pSeekSpinBox_valueChanged(qint32 iValue)
+{
+  if (!m_bInitialized) { return; }
+  m_data.m_iSeekTime = iValue;
+}
+
+
+//----------------------------------------------------------------------------------------
+//
 void CResourceSnippetOverlay::on_pWaitForFinishedCheckBox_toggled(bool bChecked)
 {
   if (!m_bInitialized) { return; }
   m_data.m_bWaitForFinished = bChecked;
+}
+
+
+//----------------------------------------------------------------------------------------
+//
+void CResourceSnippetOverlay::on_pLoopsCheckBox_toggled(bool bChecked)
+{
+  if (!m_bInitialized) { return; }
+  m_data.m_bLoops = bChecked;
+}
+
+
+//----------------------------------------------------------------------------------------
+//
+void CResourceSnippetOverlay::on_pLoopsSpinBox_valueChanged(qint32 iValue)
+{
+  if (!m_bInitialized) { return; }
+  m_data.m_iLoops = iValue;
+}
+
+
+//----------------------------------------------------------------------------------------
+//
+void CResourceSnippetOverlay::on_pStartAtCheckBox_toggled(bool bChecked)
+{
+  if (!m_bInitialized) { return; }
+  m_data.m_bStartAt = bChecked;
+}
+
+
+//----------------------------------------------------------------------------------------
+//
+void CResourceSnippetOverlay::on_pStartAtSpinBox_valueChanged(qint32 iValue)
+{
+  if (!m_bInitialized) { return; }
+  m_data.m_iStartAt = iValue;
 }
 
 
@@ -181,12 +238,37 @@ void CResourceSnippetOverlay::on_pConfirmButton_clicked()
     }
   }
 
+  QString sAlias = "";
+  if (EResourceType::eSound == type._to_integral())
+  {
+    sAlias = "\"\",";
+  }
+  QString sLoopsAndStart = m_data.m_bLoops ?
+        (m_data.m_bStartAt ? ",%3 %1, %2" : ",%2 %1") :
+        (m_data.m_bStartAt ? ",%2 1, %1" : "");
+  if (m_data.m_bLoops)
+  {
+    if (m_data.m_bStartAt)
+    {
+      sLoopsAndStart = sLoopsAndStart.arg(m_data.m_iLoops).arg(m_data.m_iStartAt).arg(sAlias);
+    }
+    else
+    {
+      sLoopsAndStart = sLoopsAndStart.arg(m_data.m_iLoops).arg(sAlias);
+    }
+  }
+  else if (m_data.m_bStartAt)
+  {
+    sLoopsAndStart = sLoopsAndStart.arg(m_data.m_iStartAt).arg(sAlias);
+  }
+
+
   QString sCode;
   if (!m_data.m_sResource.isEmpty())
   {
     if (EDisplayMode::ePlayShow == m_data.m_displayMode)
     {
-      QString sMainCommand("mediaPlayer.%1(\"%2\");\n");
+      QString sMainCommand("mediaPlayer.%1(\"%2\"%3);\n");
       switch (type)
       {
         case EResourceType::eImage:
@@ -201,6 +283,10 @@ void CResourceSnippetOverlay::on_pConfirmButton_clicked()
         default: break;
       }
       sMainCommand = sMainCommand.arg(m_data.m_sResource);
+      if (EResourceType::eMovie == type._to_integral() || EResourceType::eSound == type._to_integral())
+      {
+        sMainCommand = sMainCommand.arg(sLoopsAndStart);
+      }
       sCode += sMainCommand;
     }
     else if (EDisplayMode::ePause == m_data.m_displayMode)
@@ -227,6 +313,18 @@ void CResourceSnippetOverlay::on_pConfirmButton_clicked()
         default: break;
       }
     }
+    else if (EDisplayMode::eSeek == m_data.m_displayMode)
+    {
+      switch (type)
+      {
+        case EResourceType::eImage: break;
+        case EResourceType::eMovie: sCode += QString("mediaPlayer.seekVideo(%1);\n").arg(m_data.m_iSeekTime); break;
+        case EResourceType::eSound:
+          sCode += QString("mediaPlayer.seekSound(\"%1\",%2);\n").arg(m_data.m_sResource).arg(m_data.m_iSeekTime);
+          break;
+        default: break;
+      }
+    }
   }
   else
   {
@@ -241,8 +339,12 @@ void CResourceSnippetOverlay::on_pConfirmButton_clicked()
     }
     else if (EDisplayMode::eStop == m_data.m_displayMode)
     {
-      sCode +="mediaPlayer.stopVideo();\n";
-      sCode +="mediaPlayer.stopSound();\n";
+      sCode += "mediaPlayer.stopVideo();\n";
+      sCode += "mediaPlayer.stopSound();\n";
+    }
+    else if (EDisplayMode::eSeek == m_data.m_displayMode)
+    {
+      sCode += QString("mediaPlayer.seekVideo(%1);\n").arg(m_data.m_iSeekTime);
     }
   }
 

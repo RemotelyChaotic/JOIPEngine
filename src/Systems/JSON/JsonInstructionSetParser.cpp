@@ -1045,7 +1045,18 @@ public:
   void RegisterInstruction(const QString& sId,
                            const std::shared_ptr<IJsonInstructionBase>& spInstructionDefinition)
   {
-    m_instructionMap.insert({sId, spInstructionDefinition});
+    if (nullptr != spInstructionDefinition)
+    {
+      m_instructionMap.insert({sId, spInstructionDefinition});
+    }
+    else
+    {
+      auto it = m_instructionMap.find(sId);
+      if (m_instructionMap.end() != it)
+      {
+        m_instructionMap.erase(it);
+      }
+    }
   }
 
   //--------------------------------------------------------------------------------------

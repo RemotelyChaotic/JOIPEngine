@@ -3,12 +3,10 @@
 #include "Systems/Project.h"
 #include <QEventLoop>
 
-CScriptObjectBase::CScriptObjectBase(QPointer<CScriptRunnerSignalEmiter> pEmitter,
-                                     QPointer<QJSEngine> pEngine) :
+CScriptObjectBase::CScriptObjectBase(QPointer<CScriptRunnerSignalEmiter> pEmitter) :
   QObject(nullptr),
   m_spProject(nullptr),
-  m_pSignalEmitter(pEmitter),
-  m_pEngine(pEngine)
+  m_pSignalEmitter(pEmitter)
 {
 
 }
@@ -84,4 +82,25 @@ bool CScriptObjectBase::CheckIfScriptCanRun()
 void CScriptObjectBase::Cleanup_Impl()
 {
   // default implementation does nothing
+}
+
+//----------------------------------------------------------------------------------------
+//
+CJsScriptObjectBase::CJsScriptObjectBase(QPointer<CScriptRunnerSignalEmiter> pEmitter,
+                                         QPointer<QJSEngine> pEngine) :
+  CScriptObjectBase(pEmitter),
+  m_pEngine(pEngine)
+{}
+CJsScriptObjectBase::~CJsScriptObjectBase()
+{}
+
+//----------------------------------------------------------------------------------------
+//
+CEosScriptObjectBase::CEosScriptObjectBase(QPointer<CScriptRunnerSignalEmiter> pEmitter,
+                                           QPointer<CJsonInstructionSetParser> pParser) :
+  CScriptObjectBase(pEmitter),
+  m_pParser(pParser)
+{}
+CEosScriptObjectBase::~CEosScriptObjectBase()
+{
 }

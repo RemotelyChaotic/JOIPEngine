@@ -13,7 +13,7 @@ Rectangle {
     property string userName: "mediaPlayer"
     property bool mainMediaPlayer: false
 
-    function showOrPlayMedia(sName) {
+    function showOrPlayMedia(sName, sId, iLoops, iStartAt) {
         if (null !== registrator.currentlyLoadedProject &&
             undefined !== registrator.currentlyLoadedProject)
         {
@@ -42,6 +42,8 @@ Rectangle {
                     }
                     else
                     {
+                        movieResource.loops = iLoops;
+                        movieResource.startAt = iStartAt;
                         movieResource.resource = pResource;
                     }
                     break;
@@ -59,7 +61,10 @@ Rectangle {
                             }
                             else
                             {
+                                soundPlayer.loops = iLoops;
+                                soundPlayer.startAt = iStartAt;
                                 soundPlayer.resource = pResource;
+                                soundPlayer.nameId = sId;
                             }
                         }
                     }
@@ -83,7 +88,9 @@ Rectangle {
             var player = soundRepeater.itemAt(i);
             if (null !== player && undefined !== player)
             {
-                if (null !== player.resource && player.resource.name === sResource)
+                if (null !== player.resource &&
+                    (player.nameId !== "" && player.nameId === sResource ||
+                     player.nameId === "" && player.resource.name === sResource))
                 {
                     return player;
                 }
@@ -121,13 +128,17 @@ Rectangle {
         id: signalEmitter
 
         function tryToCall(sResource, fn) {
+            var args = Array.prototype.slice.call(arguments);
+            args = args.slice(2);
+
             var player = null;
             if ("" !== sResource)
             {
                 player = findSoundView(sResource);
                 if (null !== player)
                 {
-                    player[fn]();
+                    var fnToCall = player[fn];
+                    fnToCall.apply(player, args);
                 }
             }
             if ("" !== sResource || null === player)
@@ -138,20 +149,22 @@ Rectangle {
                     if (null !== playerI && undefined !== playerI &&
                         null !== playerI.resource)
                     {
-                        playerI[fn]();
+                        var fnToCallI = playerI[fn];
+                        fnToCallI.apply(playerI, args);
                     }
                 }
             }
         }
 
-        function tryToPlaySoundOrMovie(sResource) {
-            if ("" !== sResource)
+        function tryToPlaySoundOrMovie(sResource, sId, iLoops, iStartAt) {
+            if ("" !== sResource || "" !== sId)
             {
-                var player = findSoundView(sResource);
+                // first do id lookup
+                var player = findSoundView(sId);
                 if (null !== player && player.state === Resource.Loaded)
                 {
                     if (null !== player.resource &&
-                        sResource === player.resource.name)
+                        sId === player.nameId)
                     {
                         player.play();
                     }
@@ -162,7 +175,25 @@ Rectangle {
                 }
                 else
                 {
-                    showOrPlayMedia(sResource);
+                    // next do name lookup
+                    var player2 = findSoundView(sResource);
+                    if (null !== player2 && player2.state === Resource.Loaded)
+                    {
+                        if (null !== player2.resource &&
+                            (sResource === player2.nameId || sResource === player2.resource.name))
+                        {
+                            player2.play();
+                        }
+                        else
+                        {
+                            player2.resource = pResource;
+                        }
+                    }
+                    else
+                    {
+                        // if none found, start playing new media
+                        showOrPlayMedia(sResource, sId, iLoops, iStartAt);
+                    }
                 }
             }
         }
@@ -171,16 +202,10 @@ Rectangle {
             movieResource.play();
         }
         onPlaySound: {
-            if ("" !== sResource)
+            if ("" !== sResource || "" !== sId)
             {
-                var pResource = registrator.currentlyLoadedProject.resource(sResource);
-                if (null !== pResource && undefined !== pResource)
-                {
-                    if (Resource.Sound === pResource.type)
-                    {
-                        tryToPlaySoundOrMovie(sResource);
-                    }
-                }
+                // both could be an id, so just make a normal lookup
+                tryToPlaySoundOrMovie(sResource, sId, iLoops, iStartAt);
             }
             else
             {
@@ -196,7 +221,8 @@ Rectangle {
         onPlayMedia: {
             if ("" !== sResource)
             {
-                tryToPlaySoundOrMovie(sResource);
+                // could be both an id or a name
+                tryToPlaySoundOrMovie(sResource, sResource, iLoops, iStartAt);
             }
             else
             {
@@ -207,8 +233,23 @@ Rectangle {
                 signalEmitter.tryToCall(sResource, "play");
             }
         }
+        onSeekAudio: {
+            signalEmitter.tryToCall(sResource, "seek", iSeek);
+        }
+        onSeekMedia: {
+            if (null !== movieResource.resource &&
+                (sResource === movieResource.resource.name ||
+                 sResource === ""))
+            {
+                movieResource.seek(iSeek);
+            }
+            signalEmitter.tryToCall(sResource, "seek", iSeek);
+        }
+        onSeekVideo: {
+            movieResource.seek(iSeek);
+        }
         onShowMedia: {
-            showOrPlayMedia(sResource);
+            showOrPlayMedia(sResource, "", 1, 0);
         }
         onStopVideo: {
             movieResource.stop();
@@ -355,6 +396,8 @@ Rectangle {
             height: 0
             resource: null
             visible: true
+
+            property string nameId: ""
 
             onFinishedPlaying: {
                 signalEmitter.playbackFinished(resource.name);

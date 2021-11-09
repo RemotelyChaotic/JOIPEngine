@@ -23,7 +23,7 @@ std::shared_ptr<CScriptObjectBase> CMetronomeSignalEmitter::CreateNewScriptObjec
 //
 CScriptMetronome::CScriptMetronome(QPointer<CScriptRunnerSignalEmiter> pEmitter,
                                    QPointer<QJSEngine> pEngine) :
-  CScriptObjectBase(pEmitter, pEngine),
+  CJsScriptObjectBase(pEmitter, pEngine),
   m_wpDbManager(CApplication::Instance()->System<CDatabaseManager>())
 {
 }

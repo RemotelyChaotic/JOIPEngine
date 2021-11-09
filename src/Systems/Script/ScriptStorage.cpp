@@ -23,7 +23,7 @@ std::shared_ptr<CScriptObjectBase> CStorageSignalEmitter::CreateNewScriptObject(
 //
 CScriptStorage::CScriptStorage(QPointer<CScriptRunnerSignalEmiter> pEmitter,
                                QPointer<QJSEngine> pEngine) :
-  CScriptObjectBase(pEmitter, pEngine),
+  CJsScriptObjectBase(pEmitter, pEngine),
   m_storage()
 {
   connect(m_pSignalEmitter, &CScriptRunnerSignalEmiter::clearStorage,

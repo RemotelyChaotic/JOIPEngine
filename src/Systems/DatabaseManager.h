@@ -74,6 +74,7 @@ public:
                       const tvfnActionsResource& vfnActionsAfterAdding = tvfnActionsResource());
   void ClearResources(tspProject& spProj);
   tspResource FindResourceInProject(tspProject& spProj, const QString& sName);
+  tvspResource FindResourcesInProject(tspProject& spProj, const QRegExp& rx);
   tspResourceBundle FindResourceBundleInProject(tspProject& spProj, const QString& sName);
   void RemoveResource(tspProject& spProj, const QString& sName);
   void RenameResource(tspProject& spProj, const QString& sName, const QString& sNewName);

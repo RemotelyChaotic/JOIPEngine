@@ -29,7 +29,7 @@ Q_DECLARE_METATYPE(CBackgroundSignalEmitter)
 
 //----------------------------------------------------------------------------------------
 //
-class CScriptBackground : public CScriptObjectBase
+class CScriptBackground : public CJsScriptObjectBase
 {
   Q_OBJECT
   Q_DISABLE_COPY(CScriptBackground)

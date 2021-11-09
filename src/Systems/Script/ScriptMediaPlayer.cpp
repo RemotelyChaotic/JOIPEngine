@@ -1,9 +1,13 @@
 #include "ScriptMediaPlayer.h"
 #include "Application.h"
 #include "Systems/DatabaseManager.h"
+#include "Systems/JSON/JsonInstructionBase.h"
+#include "Systems/JSON/JsonInstructionSetParser.h"
 #include "Systems/Project.h"
 #include "Systems/Resource.h"
 #include <QTimer>
+#include <chrono>
+#include <random>
 
 CMediaPlayerSignalEmitter::CMediaPlayerSignalEmitter() :
   CScriptRunnerSignalEmiter()
@@ -22,11 +26,16 @@ std::shared_ptr<CScriptObjectBase> CMediaPlayerSignalEmitter::CreateNewScriptObj
   return std::make_shared<CScriptMediaPlayer>(this, pEngine);
 }
 
+std::shared_ptr<CScriptObjectBase> CMediaPlayerSignalEmitter::CreateNewScriptObject(QPointer<CJsonInstructionSetParser> pParser)
+{
+  return std::make_shared<CEosScriptMediaPlayer>(this, pParser);
+}
+
 //----------------------------------------------------------------------------------------
 //
 CScriptMediaPlayer::CScriptMediaPlayer(QPointer<CScriptRunnerSignalEmiter> pEmitter,
                                        QPointer<QJSEngine> pEngine) :
-  CScriptObjectBase(pEmitter, pEngine),
+  CJsScriptObjectBase(pEmitter, pEngine),
   m_wpDbManager(CApplication::Instance()->System<CDatabaseManager>())
 {
 }
@@ -44,7 +53,7 @@ void CScriptMediaPlayer::show(QJSValue resource)
   auto spSignalEmitter = SignalEmitter<CMediaPlayerSignalEmitter>();
 
   bool bError = false;
-  QString sResource = GetResourceName(resource, &bError);
+  QString sResource = GetResourceName(resource, false, &bError);
   if (bError) { return; }
 
   emit spSignalEmitter->showMedia(sResource);
@@ -55,21 +64,35 @@ void CScriptMediaPlayer::show(QJSValue resource)
 void CScriptMediaPlayer::play()
 {
   if (!CheckIfScriptCanRun()) { return; }
-  emit SignalEmitter<CMediaPlayerSignalEmitter>()->playMedia(QString());
+  emit SignalEmitter<CMediaPlayerSignalEmitter>()->playMedia(QString(), 1, 0);
 }
 
 //----------------------------------------------------------------------------------------
 //
 void CScriptMediaPlayer::play(QJSValue resource)
 {
+  play(resource, 1, 0);
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CScriptMediaPlayer::play(QJSValue resource, qint64 iLoops)
+{
+  play(resource, iLoops, 0);
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CScriptMediaPlayer::play(QJSValue resource, qint64 iLoops, qint64 iStartAt)
+{
   if (!CheckIfScriptCanRun()) { return; }
 
   auto pSignalEmitter = SignalEmitter<CMediaPlayerSignalEmitter>();
   bool bError = false;
-  QString sResource = GetResourceName(resource, &bError);
+  QString sResource = GetResourceName(resource, true, &bError);
   if (bError) { return; }
 
-  emit pSignalEmitter->playMedia(sResource);
+  emit pSignalEmitter->playMedia(sResource, iLoops, iStartAt);
 }
 
 //----------------------------------------------------------------------------------------
@@ -83,10 +106,32 @@ void CScriptMediaPlayer::playVideo()
 
 //----------------------------------------------------------------------------------------
 //
+void CScriptMediaPlayer::seek(QJSValue resource, qint64 iSeek)
+{
+  if (!CheckIfScriptCanRun()) { return; }
+
+  auto pSignalEmitter = SignalEmitter<CMediaPlayerSignalEmitter>();
+  bool bError = false;
+  QString sResource = GetResourceName(resource, true, &bError);
+  if (bError) { return; }
+
+  emit pSignalEmitter->seekMedia(sResource, iSeek);
+}
+
+//----------------------------------------------------------------------------------------
+//
 void CScriptMediaPlayer::pauseVideo()
 {
   if (!CheckIfScriptCanRun()) { return; }
   emit SignalEmitter<CMediaPlayerSignalEmitter>()->pauseVideo();
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CScriptMediaPlayer::seekVideo(qint64 iSeek)
+{
+  if (!CheckIfScriptCanRun()) { return; }
+  emit SignalEmitter<CMediaPlayerSignalEmitter>()->seekVideo(iSeek);
 }
 
 //----------------------------------------------------------------------------------------
@@ -102,13 +147,34 @@ void CScriptMediaPlayer::stopVideo()
 //
 void CScriptMediaPlayer::playSound(QJSValue resource)
 {
+  playSound(resource, QString(), -1, 0);
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CScriptMediaPlayer::playSound(QJSValue resource, const QString& sId)
+{
+  playSound(resource, sId, -1, 0);
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CScriptMediaPlayer::playSound(QJSValue resource, const QString& sId, qint64 iLoops)
+{
+  playSound(resource, sId, iLoops, 0);
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CScriptMediaPlayer::playSound(QJSValue resource, const QString& sId, qint64 iLoops, qint64 iStartAt)
+{
   if (!CheckIfScriptCanRun()) { return; }
 
   bool bError = false;
-  QString sResource = GetResourceName(resource, &bError);
+  QString sResource = GetResourceName(resource, false, &bError);
   if (bError) { return; }
 
-  emit SignalEmitter<CMediaPlayerSignalEmitter>()->playSound(sResource);
+  emit SignalEmitter<CMediaPlayerSignalEmitter>()->playSound(sResource, sId, iLoops, iStartAt);
 }
 
 //----------------------------------------------------------------------------------------
@@ -118,10 +184,23 @@ void CScriptMediaPlayer::pauseSound(QJSValue resource)
   if (!CheckIfScriptCanRun()) { return; }
 
   bool bError = false;
-  QString sResource = GetResourceName(resource, &bError);
+  QString sResource = GetResourceName(resource, true, &bError);
   if (bError) { return; }
 
   emit SignalEmitter<CMediaPlayerSignalEmitter>()->pauseSound(sResource);
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CScriptMediaPlayer::seekSound(QJSValue resource, qint64 iSeek)
+{
+  if (!CheckIfScriptCanRun()) { return; }
+
+  bool bError = false;
+  QString sResource = GetResourceName(resource, true, &bError);
+  if (bError) { return; }
+
+  emit SignalEmitter<CMediaPlayerSignalEmitter>()->seekAudio(sResource, iSeek);
 }
 
 //----------------------------------------------------------------------------------------
@@ -131,7 +210,7 @@ void CScriptMediaPlayer::stopSound(QJSValue resource)
   if (!CheckIfScriptCanRun()) { return; }
 
   bool bError = false;
-  QString sResource = GetResourceName(resource, &bError);
+  QString sResource = GetResourceName(resource, true, &bError);
   if (bError) { return; }
 
   emit SignalEmitter<CMediaPlayerSignalEmitter>()->stopSound(sResource);
@@ -152,7 +231,7 @@ void CScriptMediaPlayer::waitForPlayback(QJSValue resource)
   if (!CheckIfScriptCanRun()) { return; }
 
   bool bError = false;
-  QString sResource = GetResourceName(resource, &bError);
+  QString sResource = GetResourceName(resource, true, &bError);
   if (bError) { return; }
 
   WaitForPlayBackImpl(sResource);
@@ -202,7 +281,7 @@ void CScriptMediaPlayer::waitForSound(QJSValue resource)
   if (!CheckIfScriptCanRun()) { return; }
 
   bool bError = false;
-  QString sResource = GetResourceName(resource, &bError);
+  QString sResource = GetResourceName(resource, true, &bError);
   if (bError) { return; }
 
   WaitForSoundImpl(sResource);
@@ -210,7 +289,8 @@ void CScriptMediaPlayer::waitForSound(QJSValue resource)
 
 //----------------------------------------------------------------------------------------
 //
-QString CScriptMediaPlayer::GetResourceName(const QJSValue& resource, bool* pbError)
+QString CScriptMediaPlayer::GetResourceName(const QJSValue& resource,
+                                            bool bStringCanBeId, bool* pbError)
 {
   auto spDbManager = m_wpDbManager.lock();
   if (nullptr != pbError) { *pbError = false; }
@@ -220,13 +300,16 @@ QString CScriptMediaPlayer::GetResourceName(const QJSValue& resource, bool* pbEr
     if (resource.isString())
     {
       sResource = resource.toString();
-      tspResource spResource = spDbManager->FindResourceInProject(m_spProject, sResource);
-      if (nullptr == spResource)
+      if (!bStringCanBeId)
       {
-        QString sError = tr("Resource %1 not found");
-        emit m_pSignalEmitter->showError(sError.arg(resource.toString()),
-                                          QtMsgType::QtWarningMsg);
-        if (nullptr != pbError) { *pbError = true; }
+        tspResource spResource = spDbManager->FindResourceInProject(m_spProject, sResource);
+        if (nullptr == spResource)
+        {
+          QString sError = tr("Resource %1 not found");
+          emit m_pSignalEmitter->showError(sError.arg(resource.toString()),
+                                            QtMsgType::QtWarningMsg);
+          if (nullptr != pbError) { *pbError = true; }
+        }
       }
     }
     else if (resource.isQObject())
@@ -344,4 +427,348 @@ void CScriptMediaPlayer::WaitForSoundImpl(const QString& sResource)
   loop.disconnect();
 
   disconnect(connStop);
+}
+
+//----------------------------------------------------------------------------------------
+//
+class CCommandEosImage : public IJsonInstructionBase
+{
+public:
+  CCommandEosImage(CEosScriptMediaPlayer* pParent) :
+    m_pParent(pParent),
+    m_argTypes({
+    {"locator", SInstructionArgumentType{EArgumentType::eString}}
+  }) {}
+  ~CCommandEosImage() override {}
+
+  tInstructionMapType& ArgList() override
+  {
+    return m_argTypes;
+  }
+
+  IJsonInstructionBase::tRetVal Call(const tInstructionMapValue& args) override
+  {
+    const auto& itLocator = GetValue<EArgumentType::eString>(args, "locator");
+    if (HasValue(args, "locator") && IsOk<EArgumentType::eString>(itLocator) &&
+        nullptr != m_pParent)
+    {
+      QString sResourceLocator = std::get<QString>(itLocator);
+      m_pParent->show(sResourceLocator);
+      return SRunRetVal<ENextCommandToCall::eSibling>();
+    }
+    return SJsonException{"Locator missing from image call.", "locator", "image", 0, 0};
+  }
+
+private:
+  CEosScriptMediaPlayer* m_pParent;
+  tInstructionMapType    m_argTypes;
+};
+
+//----------------------------------------------------------------------------------------
+//
+class CCommandEosAudio : public IJsonInstructionBase
+{
+public:
+  CCommandEosAudio(CEosScriptMediaPlayer* pParent) :
+    m_pParent(pParent),
+    m_argTypes({
+    {"locator", SInstructionArgumentType{EArgumentType::eString}},
+    {"id", SInstructionArgumentType{EArgumentType::eString}},
+    {"loops", SInstructionArgumentType{EArgumentType::eInt64}},
+    {"volume", SInstructionArgumentType{EArgumentType::eDouble}}, // ignored, engine manages volume
+    {"seek", SInstructionArgumentType{EArgumentType::eInt64}},
+    {"startAt", SInstructionArgumentType{EArgumentType::eInt64}}
+  }) {}
+  ~CCommandEosAudio() override {}
+
+  tInstructionMapType& ArgList() override
+  {
+    return m_argTypes;
+  }
+
+  IJsonInstructionBase::tRetVal Call(const tInstructionMapValue& args) override
+  {
+    const auto& itLocator = GetValue<EArgumentType::eString>(args, "locator");
+    const auto& itId = GetValue<EArgumentType::eString>(args, "id");
+    const auto& itLoops = GetValue<EArgumentType::eInt64>(args, "loops");
+    const auto& itSeek = GetValue<EArgumentType::eInt64>(args, "seek");
+    const auto& itStartAt = GetValue<EArgumentType::eInt64>(args, "startAt");
+
+    const bool bHasLocator = HasValue(args, "locator") && IsOk<EArgumentType::eString>(itLocator);
+    const bool bHasId = HasValue(args, "id") && IsOk<EArgumentType::eString>(itId);
+    const bool bHasSeek = HasValue(args, "seek") && IsOk<EArgumentType::eInt64>(itSeek);
+
+    if ((bHasLocator || (bHasSeek && (bHasId ||  bHasLocator))) && nullptr != m_pParent)
+    {
+      // play
+      if (bHasLocator)
+      {
+        QString sResourceLocator = std::get<QString>(itLocator);
+        // optional
+        QString sId;
+        if (bHasId)
+        {
+          sId = std::get<QString>(itId);
+        }
+        qint64 iLoops = 1;
+        if (HasValue(args, "loops") && IsOk<EArgumentType::eInt64>(itLoops))
+        {
+          iLoops = std::get<qint64>(itLoops);
+        }
+        qint64 iStartAt = 0;
+        if (HasValue(args, "startAt") && IsOk<EArgumentType::eInt64>(itStartAt))
+        {
+          iStartAt = std::get<qint64>(itStartAt);
+        }
+
+        m_pParent->playSound(sResourceLocator, sId, iLoops, iStartAt);
+        return SRunRetVal<ENextCommandToCall::eSibling>();
+      }
+
+      // seek
+      if (bHasSeek && (bHasId ||  bHasLocator))
+      {
+        QString sId;
+        if (bHasId)
+        {
+          sId = std::get<QString>(itId);
+        }
+        else if (bHasLocator)
+        {
+          sId = std::get<QString>(itLocator);
+        }
+
+        qint64 iSeek = 0;
+        if (bHasSeek)
+        {
+          iSeek = std::get<qint64>(itSeek);
+        }
+
+        m_pParent->seek(sId, iSeek);
+      }
+
+      return SRunRetVal<ENextCommandToCall::eSibling>();
+    }
+    return SJsonException{"Locator missing from image call.", "locator", "image", 0, 0};
+  }
+
+private:
+  CEosScriptMediaPlayer* m_pParent;
+  tInstructionMapType    m_argTypes;
+};
+
+//----------------------------------------------------------------------------------------
+//
+CEosScriptMediaPlayer::CEosScriptMediaPlayer(QPointer<CScriptRunnerSignalEmiter> pEmitter,
+                                             QPointer<CJsonInstructionSetParser> pParser) :
+  CEosScriptObjectBase(pEmitter, pParser),
+  m_spCommandImg(std::make_shared<CCommandEosImage>(this)),
+  m_spCommandAudio(std::make_shared<CCommandEosAudio>(this))
+{
+  pParser->RegisterInstruction("image", m_spCommandImg);
+  pParser->RegisterInstruction("audio.play", m_spCommandAudio);
+}
+CEosScriptMediaPlayer::~CEosScriptMediaPlayer()
+{
+  m_pParser->RegisterInstruction("image", nullptr);
+  m_pParser->RegisterInstruction("audio.play", nullptr);
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CEosScriptMediaPlayer::show(const QString& sResourceLocator)
+{
+  if (!CheckIfScriptCanRun()) { return; }
+
+  auto spSignalEmitter = SignalEmitter<CMediaPlayerSignalEmitter>();
+
+  bool bError = false;
+  QString sResource = GetResourceName(sResourceLocator, &bError);
+  if (bError) { return; }
+
+  emit spSignalEmitter->showMedia(sResource);
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CEosScriptMediaPlayer::playSound(const QString& sResourceLocator, const QString& iId,
+                                      qint64 iLoops, qint64 iStartAt)
+{
+  if (!CheckIfScriptCanRun()) { return; }
+
+  auto spSignalEmitter = SignalEmitter<CMediaPlayerSignalEmitter>();
+
+  bool bError = false;
+  QString sResource = GetResourceName(sResourceLocator, &bError);
+  if (bError) { return; }
+
+  emit spSignalEmitter->playSound(sResource, iId, iLoops, iStartAt);
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CEosScriptMediaPlayer::seek(const QString& iId, qint64 iSeek)
+{
+  if (!CheckIfScriptCanRun()) { return; }
+  auto spSignalEmitter = SignalEmitter<CMediaPlayerSignalEmitter>();
+  emit spSignalEmitter->seekMedia(iId, iSeek);
+}
+
+//----------------------------------------------------------------------------------------
+//
+const QString c_sMatcherRemotePrefix = "^https*:\\/\\/";
+bool LookupRemoteLink(const QString& sResourceLocator, tspProject& spProject,
+                      std::shared_ptr<CDatabaseManager> spDbManager,
+                      QString& sResource)
+{
+  static QRegExp rxRemote(c_sMatcherRemotePrefix);
+  qint32 iPos = 0;
+
+  if ((iPos = rxRemote.indexIn(sResourceLocator, iPos)) == -1)
+  {
+    return false;
+  }
+
+  const QString sFound = QUrl(sResourceLocator).fileName();
+  if (nullptr == spDbManager->FindResourceInProject(spProject, sFound))
+  {
+    return false;
+  }
+
+  sResource = sFound;
+  return true;
+}
+
+const QString c_sMatcherGallery = "^gallery:([^/]+)\\/(.*)$";
+bool LookupGaleryImage(const QString& sResourceLocator, tspProject& spProject,
+                       std::shared_ptr<CDatabaseManager> spDbManager,
+                       QString& sResource)
+{
+  static QRegExp rxGallery(c_sMatcherGallery);
+  qint32 iPos = 0;
+
+  QString sGallery;
+  QString sId;
+  if ((iPos = rxGallery.indexIn(sResourceLocator, iPos)) != -1)
+  {
+    sGallery = rxGallery.cap(1);
+    sId = rxGallery.cap(2);
+    iPos += rxGallery.matchedLength();
+  }
+  else
+  {
+    return false;
+  }
+
+  const QString sFound = sGallery + sId;
+  if ("*" == sId)
+  {
+    tvspResource vspResources =
+        spDbManager->FindResourcesInProject(spProject, QRegExp(sGallery + "(.*)"));
+    if (vspResources.size() <= 0)
+    {
+      return false;
+    }
+
+    long unsigned int seed =
+      static_cast<long unsigned int>(std::chrono::high_resolution_clock::now().time_since_epoch().count());
+    std::mt19937 generator(static_cast<long unsigned int>(seed));
+    std::uniform_int_distribution<> dis(0, static_cast<qint32>(vspResources.size() - 1));
+    qint32 iGeneratedIndex = dis(generator);
+    tspResource& spResource = vspResources[iGeneratedIndex];
+
+    QReadLocker locker(&spResource->m_rwLock);
+    sResource = spResource->m_sName;
+  }
+  else
+  {
+    if (nullptr == spDbManager->FindResourceInProject(spProject, sFound))
+    {
+      return false;
+    }
+  }
+
+  sResource = sFound;
+  return true;
+}
+
+const QString c_sMatcherFile = "^file:(.*)$";
+const QString c_sMatcherFileIsRandom = "\\*";
+bool LookupFile(const QString& sResourceLocator, tspProject& spProject,
+                std::shared_ptr<CDatabaseManager> spDbManager,
+                QString& sResource)
+{
+  static QRegExp rxFile(c_sMatcherFile);
+  static QRegExp rxFileIsRandom(c_sMatcherFileIsRandom);
+  qint32 iPos = 0;
+
+  if ((iPos = rxFile.indexIn(sResourceLocator, iPos)) == -1)
+  {
+    return false;
+  }
+
+  bool bIsRandom = false;
+  iPos = 0;
+  if ((iPos = rxFileIsRandom.indexIn(sResourceLocator, iPos)) != -1)
+  {
+    bIsRandom = true;
+  }
+
+  const QString sFound = sResourceLocator.mid(5); // remove 'file:'
+  if (bIsRandom)
+  {
+    tvspResource vspResources =
+        spDbManager->FindResourcesInProject(spProject, QRegExp(QString(sResourceLocator).replace("*", "(.*)")));
+    if (vspResources.size() <= 0)
+    {
+      return false;
+    }
+
+    long unsigned int seed =
+      static_cast<long unsigned int>(std::chrono::high_resolution_clock::now().time_since_epoch().count());
+    std::mt19937 generator(static_cast<long unsigned int>(seed));
+    std::uniform_int_distribution<> dis(0, static_cast<qint32>(vspResources.size() - 1));
+    qint32 iGeneratedIndex = dis(generator);
+    tspResource& spResource = vspResources[iGeneratedIndex];
+
+    QReadLocker locker(&spResource->m_rwLock);
+    sResource = spResource->m_sName;
+  }
+  else
+  {
+    if (nullptr == spDbManager->FindResourceInProject(spProject, sFound))
+    {
+      return false;
+    }
+  }
+
+  sResource = sFound;
+  return true;
+}
+
+//----------------------------------------------------------------------------------------
+//
+QString CEosScriptMediaPlayer::GetResourceName(const QString& sResourceLocator, bool* pbError)
+{
+  auto spDbManager = m_wpDbManager.lock();
+  if (nullptr != pbError) { *pbError = false; }
+  QString sResource;
+  if (nullptr != spDbManager)
+  {
+    if (LookupRemoteLink(sResourceLocator, m_spProject, spDbManager, sResource))
+    {
+      return sResource;
+    }
+    if (LookupGaleryImage(sResourceLocator, m_spProject, spDbManager, sResource))
+    {
+      return sResource;
+    }
+    if (LookupFile(sResourceLocator, m_spProject, spDbManager, sResource))
+    {
+      return sResource;
+    }
+    if (nullptr != pbError) { *pbError = true; }
+  }
+
+  return sResource;
 }

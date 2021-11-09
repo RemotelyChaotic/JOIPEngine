@@ -21,7 +21,7 @@ Q_DECLARE_METATYPE(CStorageSignalEmitter)
 
 //----------------------------------------------------------------------------------------
 //
-class CScriptStorage : public CScriptObjectBase
+class CScriptStorage : public CJsScriptObjectBase
 {
   Q_OBJECT
   Q_DISABLE_COPY(CScriptStorage)

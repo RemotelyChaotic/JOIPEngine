@@ -27,7 +27,7 @@ std::shared_ptr<CScriptObjectBase> CTextBoxSignalEmitter::CreateNewScriptObject(
 //
 CScriptTextBox::CScriptTextBox(QPointer<CScriptRunnerSignalEmiter> pEmitter,
                                QPointer<QJSEngine> pEngine) :
-  CScriptObjectBase(pEmitter, pEngine),
+  CJsScriptObjectBase(pEmitter, pEngine),
   m_wpDbManager(CApplication::Instance()->System<CDatabaseManager>())
 {
 }

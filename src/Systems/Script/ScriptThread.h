@@ -24,7 +24,7 @@ Q_DECLARE_METATYPE(CThreadSignalEmitter)
 
 //----------------------------------------------------------------------------------------
 //
-class CScriptThread : public CScriptObjectBase
+class CScriptThread : public CJsScriptObjectBase
 {
   Q_OBJECT
   Q_DISABLE_COPY(CScriptThread)

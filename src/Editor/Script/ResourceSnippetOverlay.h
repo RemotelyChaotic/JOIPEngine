@@ -17,7 +17,8 @@ enum class EDisplayMode : qint32
 {
   ePlayShow,
   ePause,
-  eStop
+  eStop,
+  eSeek
 };
 
 struct SResourceSnippetData
@@ -25,6 +26,11 @@ struct SResourceSnippetData
   QString m_sResource;
   EDisplayMode m_displayMode = EDisplayMode::ePlayShow;
   bool m_bWaitForFinished = false;
+  qint32 m_iSeekTime = 0;
+  bool m_bLoops = false;
+  qint64 m_iLoops = 1;
+  bool m_bStartAt = false;
+  qint64 m_iStartAt = 0;
 };
 
 //----------------------------------------------------------------------------------------
@@ -54,7 +60,13 @@ protected slots:
   void on_pPlayRadioButton_toggled(bool bChecked);
   void on_pPauseRadioButton_toggled(bool bChecked);
   void on_pStopRadioButton_toggled(bool bChecked);
+  void on_pSeekRadioButton_toggled(bool bChecked);
+  void on_pSeekSpinBox_valueChanged(qint32 iValue);
   void on_pWaitForFinishedCheckBox_toggled(bool bChecked);
+  void on_pLoopsCheckBox_toggled(bool bChecked);
+  void on_pLoopsSpinBox_valueChanged(qint32 iValue);
+  void on_pStartAtCheckBox_toggled(bool bChecked);
+  void on_pStartAtSpinBox_valueChanged(qint32 iValue);
   void on_pFilter_SignalFilterChanged(const QString& sText);
   void on_pConfirmButton_clicked();
   void on_pCancelButton_clicked();

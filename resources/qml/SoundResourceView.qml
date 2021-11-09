@@ -10,6 +10,8 @@ Rectangle {
     property Resource resource: null
     property int state: Resource.Null
     property int playbackState: player.playbackState
+    property int loops: 1
+    property int startAt: 0
 
     signal finishedPlaying();
 
@@ -31,7 +33,7 @@ Rectangle {
         }
     }
 
-    function play()
+    function play(iLoops, iStartAt)
     {
         if (player.playbackState !== MediaPlayer.PlayingState)
         {
@@ -44,6 +46,15 @@ Rectangle {
         if (player.playbackState === MediaPlayer.PlayingState || player.playbackState === MediaPlayer.PausedState)
         {
             player.stoppedTargetState = true;
+        }
+    }
+
+    function seek(iSeekPos)
+    {
+        if ((player.playbackState === MediaPlayer.PlayingState || player.playbackState === MediaPlayer.PausedState) && player.seekable)
+        {
+            player.fastSeek = true;
+            player.seek(iSeekPos);
         }
     }
 
@@ -72,6 +83,8 @@ Rectangle {
         id: player
         objectName: "player"
 
+        loops: -1 === mediaPlayer.loops ? MediaPlayer.Infinite : mediaPlayer.loops
+        startPosition: mediaPlayer.startAt
         autoPlay: true
         videoCodecPriority: ["FFmpeg"]
 

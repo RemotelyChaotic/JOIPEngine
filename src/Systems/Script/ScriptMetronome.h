@@ -30,7 +30,7 @@ Q_DECLARE_METATYPE(CMetronomeSignalEmitter)
 
 //----------------------------------------------------------------------------------------
 //
-class CScriptMetronome : public CScriptObjectBase
+class CScriptMetronome : public CJsScriptObjectBase
 {
   Q_OBJECT
   Q_DISABLE_COPY(CScriptMetronome)

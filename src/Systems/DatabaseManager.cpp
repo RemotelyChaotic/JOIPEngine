@@ -863,6 +863,25 @@ tspResource CDatabaseManager::FindResourceInProject(tspProject& spProj, const QS
 
 //----------------------------------------------------------------------------------------
 //
+tvspResource CDatabaseManager::FindResourcesInProject(tspProject& spProj, const QRegExp& rx)
+{
+  tvspResource retVal;
+  if (!IsInitialized() || nullptr == spProj) { return retVal; }
+
+  QReadLocker locker(&spProj->m_rwLock);
+  for (auto it = spProj->m_spResourcesMap.begin(); spProj->m_spResourcesMap.end() != it; ++it)
+  {
+    qint32 iPos = 0;
+    if ((iPos = rx.indexIn(it->first, iPos)) == -1)
+    {
+      retVal.push_back(it->second);
+    }
+  }
+  return retVal;
+}
+
+//----------------------------------------------------------------------------------------
+//
 tspResourceBundle CDatabaseManager::FindResourceBundleInProject(tspProject& spProj, const QString& sName)
 {
   if (!IsInitialized() || nullptr == spProj) { return nullptr; }

@@ -28,7 +28,7 @@ Q_DECLARE_METATYPE(CIconSignalEmitter)
 
 //----------------------------------------------------------------------------------------
 //
-class CScriptIcon : public CScriptObjectBase
+class CScriptIcon : public CJsScriptObjectBase
 {
   Q_OBJECT
   Q_DISABLE_COPY(CScriptIcon)

@@ -25,7 +25,7 @@ std::shared_ptr<CScriptObjectBase> CTimerSignalEmitter::CreateNewScriptObject(QP
 //
 CScriptTimer::CScriptTimer(QPointer<CScriptRunnerSignalEmiter> pEmitter,
                            QPointer<QJSEngine> pEngine) :
-  CScriptObjectBase(pEmitter, pEngine)
+  CJsScriptObjectBase(pEmitter, pEngine)
 {
 
 }

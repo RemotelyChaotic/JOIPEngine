@@ -25,7 +25,7 @@ std::shared_ptr<CScriptObjectBase> CIconSignalEmitter::CreateNewScriptObject(QPo
 //
 CScriptIcon::CScriptIcon(QPointer<CScriptRunnerSignalEmiter> pEmitter,
                          QPointer<QJSEngine> pEngine) :
-  CScriptObjectBase(pEmitter, pEngine),
+  CJsScriptObjectBase(pEmitter, pEngine),
   m_wpDbManager(CApplication::Instance()->System<CDatabaseManager>())
 {
 

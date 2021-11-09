@@ -136,17 +136,20 @@
         mediaPlayer.show(myMediaVar); /* note: in this example myMediaVar is a var */<br>
         <br></li>
 
-        <li><b>play ( [ string | Resource ] ):</b><br>
+        <li><b>play ( [ string | Resource [, int [, int] ] ] ):</b><br>
         This function can be called with or without arguments. Calling it with arguments
         plays a <i>Movie</i> or <i>Sound</i> type Resource.
-        The Resource input can be the name of a Resource or a Resource object obtained from the
-        current Scene object.<br>
+        The second and third argument denote the number of loops and the start position of the media
+        respectively. The default amount of loops is 1 and the default start position is frame 0.
+        If a loop count of -1 is given, the playback will loop infinitely.<br>
+        The Resource input can be the name of a Resource, a Resource object obtained from the
+        current Scene object of the custom id of a Sound Resource.<br>
         When playing a <i>Movie</i>, it will
         stop the currently running <i>Movie</i>.<br>
         When playing a <i>Sound</i>, it will try to either find the emiter, that has the <i>Sound</i>
         already loaded and resume or restart it or find an available sound emitter
-        and play it. If there's no available sound emitters,
-        it will not play the sound. The number of maximum available sound emitters can be
+        and play it. If there's no available sound emitters, it will not play the sound.
+        The number of maximum available sound emitters can be
         configured in the <a href="qrc:/resources/help/editor/resources/resource_help.html">Project Settings</a>.
         The number describes the maximum number of Sound type Resources can play simultaniously.<br>
         When calling this without any argument, it will continue playing
@@ -157,6 +160,9 @@
         mediaPlayer.play("mySound"); // continues or starts playing the sound Resource<br>
         mediaPlayer.play(myVideoOrSoundVar); /* note: in this example myVideoOrSoundVar is a var */<br>
         mediaPlayer.play(); // only for compatibility<br>
+        mediaPlayer.play("mySound", 2); // loop sound twice<br>
+        mediaPlayer.play("mySound", -1); // loop sound until stopped manually<br>
+        mediaPlayer.play("mySound", 1, 10); // starts "mysound" at frame 10 <br>
         <br></li>
 
         <li><b>playVideo ( ):</b><br>
@@ -182,12 +188,17 @@
         mediaPlayer.stopVideo(); // stops playing the last played video<br>
         <br></li>
 
-        <li><b>playSound ( [ string | Resource ] ):</b><br>
+        <li><b>playSound ( [ string | Resource [, string [, int [, int] ] ] ] ):</b><br>
         This function does the same as if you call <i>play</i> with the selected arguments,
-        but will not work play <i>Movie</i> type resources.<br>
+        but will not work play <i>Movie</i> type resources. The second argument is the exception
+        to that. It describes the custom id the sound can be referenced with. If left empty, no id will be set.<br>
         <i>Example Usage:</i><br>
         mediaPlayer.playSound("mySound"); // continues or starts playing the sound Resource<br>
         mediaPlayer.playSound(); // continues playing all sounds sound<br>
+        mediaPlayer.playSound("mySound", "id1"); // continues or starts playing the resource "mysound" and sets the id "id1"<br>
+        mediaPlayer.playSound("mySound", "", 2); // continues or starts playing the resource "mysound", does not set the id and loops twice<br>
+        mediaPlayer.playSound("mySound", "id1", 2); // continues or starts playing the resource "mysound", sets the id "id1" and loops twice<br>
+        mediaPlayer.playSound("mySound", "", 1, 10); // starts "mysound" at frame 10 and does not set the id<br>
         <br></li>
 
         <li><b>pauseSound ( [ string | Resource ] ):</b><br>
@@ -195,7 +206,9 @@
         will pause the given <i>Sound</i> Resource. A paused <i>Sound</i>
         can never stop the wait in <i>waitForSound</i> or <i>waitForPlayback</i> since the sound
         is not considered finished yet.<br>
-        Without arguments, it will pause all <i>Sound</i> Resource playbacks.<br>
+        Without arguments, it will pause all <i>Sound</i> Resource playbacks.
+        The Resource input can be the name of a Resource, a Resource object obtained from the
+        current Scene object of the custom id of a Sound Resource.<br>
         <i>Example Usage:</i><br>
         mediaPlayer.pauseSound("mySound"); // pauses playing the sound<br>
         mediaPlayer.pauseSound(); // pauses playing all sounds<br>
@@ -206,22 +219,48 @@
         will stop the given <i>Sound</i> Resource. A stopped <i>Sound</i>
         can never stop the wait in <i>waitForSound</i> or <i>waitForPlayback</i> since the sound
         is not considered finished yet.<br>
-        Without arguments, it will stop all <i>Sound</i> Resource playbacks.<br>
+        Without arguments, it will stop all <i>Sound</i> Resource playbacks.
+        The Resource input can be the name of a Resource, a Resource object obtained from the
+        current Scene object of the custom id of a Sound Resource.<br>
         <i>Example Usage:</i><br>
         mediaPlayer.stopSound("mySound"); // stops playing the sound<br>
         mediaPlayer.stopSound(); // stops playing all sounds<br>
         <br></li>
 
+        <li><b>seekMedia ( [ string | Resource ], int ):</b><br>
+        This function can be called with one or two arguments. Calling it with one arguments
+        will skip the currently playing <i>Movie</i> Resource to the given frame. With two arguments,
+        it will skip the given <i>Sound</i> or <i>Movie</i> Resource to the given frame.
+        The Resource input can be the name of a Resource, a Resource object obtained from the
+        current Scene object of the custom id of a Sound Resource.<br>
+        <i>Example Usage:</i><br>
+        mediaPlayer.seekMedia(10); // skips the curently playing movie to frame 10 <br>
+        mediaPlayer.seekMedia("mySound", 10); // skips "mySound" to frame 10<br>
+        <br></li>
+
+        <li><b>seekAudio ( ( string | Resource ), int ):</b><br>
+        Does the same as <i>seekMedia</i> but only for a <i>Sound</i> type Resource.<br>
+        <i>Example Usage:</i><br>
+        mediaPlayer.seekMedia("mySound", 10); // skips "mySound" to frame 10<br>
+        <br></li>
+
+        <li><b>seekVideo ( int ):</b><br>
+        Does the same as <i>seekMedia</i> but only for the curently playing <i>Movie</i> type Resource.<br>
+        <i>Example Usage:</i><br>
+        mediaPlayer.seekMedia(10); // skips the curently playing movie to frame 10<br>
+        <br></li>
+
         <li><b>waitForPlayback ( [ string | Resource ] ):</b><br>
         This function can be called with or without arguments.
-        The Resource input can be the name of a Resource or a Resource object obtained from the
-        current Scene object.<br>
+        The Resource input can be the name of a Resource, a Resource object obtained from the
+        current Scene object of the custom id of a Sound Resource.<br>
         With arguments, it blocks and waits until the given <i>Sound</i> Resource stopps
         playing.<br>
         Without arguments, it blocks and waits until current <i>Movie</i> Resource stopps
         playing.<br>
         If no sound or video is playing this function will return immediately. If
         both sound and video are paused this function will never return.<br>
+        If the Resource loops forever this will never return.<br>
         <i>Example Usage:</i><br>
         mediaPlayer.waitForPlayback("mySound"); // to wait for sound<br>
         mediaPlayer.waitForPlayback(); // to wait for movie<br>
@@ -235,7 +274,9 @@
 
         <li><b>waitForSound ( [ string | Resource ] ):</b><br>
         This function does the same as if you call <i>waitForPlayback</i> with the given arguments arguments.<br>
-        If given no argument, it will do nothing.<br>
+        If given no argument, it will do nothing.
+        The Resource input can be the name of a Resource, a Resource object obtained from the
+        current Scene object of the custom id of a Sound Resource.<br>
         <i>Example Usage:</i><br>
         mediaPlayer.waitForSound("mySound");<br>
         <br></li>
