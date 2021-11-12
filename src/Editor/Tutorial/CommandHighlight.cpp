@@ -44,8 +44,11 @@ IJsonInstructionBase::tRetVal CCommandHighlight::Call(const tInstructionMapValue
         vList << std::get<QString>(itClickableItem);
       }
     }
-    m_pTutorialOverlay->SetHighlightedWidgets(vList, bAllwaysOnTop);
-    m_pTutorialOverlay->SlotTriggerNextInstruction();
+    bool bOk = QMetaObject::invokeMethod(m_pTutorialOverlay, "SetHighlightedWidgets", Qt::QueuedConnection,
+                                         Q_ARG(QStringList, vList),
+                                         Q_ARG(bool, bAllwaysOnTop));
+    bOk &= QMetaObject::invokeMethod(m_pTutorialOverlay, "SlotTriggerNextInstruction", Qt::QueuedConnection);
+    assert(bOk); Q_UNUSED(bOk);
   }
   return std::true_type();
 }

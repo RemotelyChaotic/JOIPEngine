@@ -1,53 +1,16 @@
 #ifndef CJSONINSTRUCTIONSETRUNNER_H
 #define CJSONINSTRUCTIONSETRUNNER_H
 
-#include <QString>
+#include "JsonInstructionTypes.h"
 #include <QVariant>
-#include <memory>
-#include <variant>
 
 class CJsonInstructionSetRunnerPrivate;
 
-struct SJsonException
-{
-  QString m_sException;
-  QString m_sToken;
-  QString m_sCommand;
-  qint32  m_iLineNr;
-  qint32  m_iColumn;
-};
-
-enum class ERunerMode
-{
-  eAutoRunAll,  // run all commands blocking
-  eRunOne       // return after each command and advance runner state
-};
-
 //----------------------------------------------------------------------------------------
 //
-enum class ENextCommandToCall
+class CJsonInstructionSetRunner : public QObject
 {
-  eChild = 0,
-  eSibling
-};
-
-template<ENextCommandToCall M> struct SRunRetVal : std::false_type {};
-template<> struct SRunRetVal<ENextCommandToCall::eChild>
-{
-  SRunRetVal(qint32 iIndex) : m_iIndex(iIndex) {}
-  ENextCommandToCall m_type = ENextCommandToCall::eChild;
-  qint32             m_iIndex;
-};
-template<> struct SRunRetVal<ENextCommandToCall::eSibling>
-{
-  SRunRetVal() {}
-  ENextCommandToCall m_type = ENextCommandToCall::eSibling;
-};
-
-//----------------------------------------------------------------------------------------
-//
-class CJsonInstructionSetRunner
-{
+  Q_OBJECT
   friend class CJsonInstructionSetParserPrivate;
 
 public:
@@ -56,11 +19,16 @@ public:
   explicit CJsonInstructionSetRunner();
   ~CJsonInstructionSetRunner();
 
-  tRetVal CallNextCommand(ERunerMode runMode = ERunerMode::eRunOne);
-  tRetVal Run(const QString& sInstructionSet, ERunerMode runMode = ERunerMode::eRunOne);
+  tRetVal CallNextCommand(ERunerMode runMode = ERunerMode::eRunOne, bool bBlocking = true);
+  tRetVal Run(const QString& sInstructionSet, ERunerMode runMode = ERunerMode::eRunOne, bool bBlocking = true);
+
+signals:
+  void CommandRetVal(CJsonInstructionSetRunner::tRetVal retVal);
 
 protected:
   std::unique_ptr<CJsonInstructionSetRunnerPrivate> m_pPrivate;
 };
+
+Q_DECLARE_METATYPE(CJsonInstructionSetRunner::tRetVal)
 
 #endif // CJSONINSTRUCTIONSETRUNNER_H

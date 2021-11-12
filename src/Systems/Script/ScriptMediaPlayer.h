@@ -6,8 +6,6 @@
 #include <QJSValue>
 #include <memory>
 
-class CCommandEosAudio;
-class CCommandEosImage;
 class CDatabaseManager;
 
 class CMediaPlayerSignalEmitter : public CScriptRunnerSignalEmiter
@@ -89,6 +87,8 @@ private:
 
 //----------------------------------------------------------------------------------------
 //
+class CCommandEosAudio;
+class CCommandEosImage;
 class CEosScriptMediaPlayer : public CEosScriptObjectBase
 {
   Q_OBJECT

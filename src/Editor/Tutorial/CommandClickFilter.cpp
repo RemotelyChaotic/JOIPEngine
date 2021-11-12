@@ -46,8 +46,11 @@ IJsonInstructionBase::tRetVal CCommandClickFilter::Call(const tInstructionMapVal
           vList << std::get<QString>(itClickableItem);
         }
       }
-      m_pTutorialOverlay->SetClickFilterWidgets(vList, bTriggerNext);
-      m_pTutorialOverlay->SlotTriggerNextInstruction();
+      bool bOk = QMetaObject::invokeMethod(m_pTutorialOverlay, "SetClickFilterWidgets", Qt::QueuedConnection,
+                                           Q_ARG(QStringList, vList),
+                                           Q_ARG(bool, bTriggerNext));
+      bOk &= QMetaObject::invokeMethod(m_pTutorialOverlay, "SlotTriggerNextInstruction", Qt::QueuedConnection);
+      assert(bOk); Q_UNUSED(bOk);
     }
     return std::true_type();
   }

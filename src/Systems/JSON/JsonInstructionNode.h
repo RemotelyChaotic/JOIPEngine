@@ -5,8 +5,12 @@
 #include <memory>
 #include <vector>
 
-struct SJsonInstructionNode
+class CJsonInstructionNode : public std::enable_shared_from_this<CJsonInstructionNode>
 {
+public:
+  CJsonInstructionNode() = default;
+  CJsonInstructionNode(CJsonInstructionNode& other);
+
   // build data
   QString                                            m_sName;
   bool                                               m_bIgnoreChildren = false;
@@ -19,8 +23,10 @@ struct SJsonInstructionNode
   tInstructionMapValue                               m_actualArgs;
 
   // tree hierarchy
-  std::vector<std::shared_ptr<SJsonInstructionNode>> m_spChildren;
-  std::weak_ptr<SJsonInstructionNode>                m_wpParent;
+  std::vector<std::shared_ptr<CJsonInstructionNode>> m_spChildren;
+  std::weak_ptr<CJsonInstructionNode>                m_wpParent;
 };
+
+Q_DECLARE_METATYPE(std::shared_ptr<CJsonInstructionNode>)
 
 #endif // JSONINSTRUCTIONNODE_H

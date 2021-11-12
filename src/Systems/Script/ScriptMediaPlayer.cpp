@@ -1,6 +1,7 @@
 #include "ScriptMediaPlayer.h"
 #include "Application.h"
 #include "Systems/DatabaseManager.h"
+#include "Systems/EOS/EosHelpers.h"
 #include "Systems/JSON/JsonInstructionBase.h"
 #include "Systems/JSON/JsonInstructionSetParser.h"
 #include "Systems/Project.h"
@@ -549,7 +550,7 @@ public:
 
       return SRunRetVal<ENextCommandToCall::eSibling>();
     }
-    return SJsonException{"Locator missing from image call.", "locator", "image", 0, 0};
+    return SJsonException{"Locator or id missing from audio.play call.", "locator", "audio.play", 0, 0};
   }
 
 private:
@@ -570,8 +571,6 @@ CEosScriptMediaPlayer::CEosScriptMediaPlayer(QPointer<CScriptRunnerSignalEmiter>
 }
 CEosScriptMediaPlayer::~CEosScriptMediaPlayer()
 {
-  m_pParser->RegisterInstruction("image", nullptr);
-  m_pParser->RegisterInstruction("audio.play", nullptr);
 }
 
 //----------------------------------------------------------------------------------------
@@ -616,138 +615,6 @@ void CEosScriptMediaPlayer::seek(const QString& iId, qint64 iSeek)
 
 //----------------------------------------------------------------------------------------
 //
-const QString c_sMatcherRemotePrefix = "^https*:\\/\\/";
-bool LookupRemoteLink(const QString& sResourceLocator, tspProject& spProject,
-                      std::shared_ptr<CDatabaseManager> spDbManager,
-                      QString& sResource)
-{
-  static QRegExp rxRemote(c_sMatcherRemotePrefix);
-  qint32 iPos = 0;
-
-  if ((iPos = rxRemote.indexIn(sResourceLocator, iPos)) == -1)
-  {
-    return false;
-  }
-
-  const QString sFound = QUrl(sResourceLocator).fileName();
-  if (nullptr == spDbManager->FindResourceInProject(spProject, sFound))
-  {
-    return false;
-  }
-
-  sResource = sFound;
-  return true;
-}
-
-const QString c_sMatcherGallery = "^gallery:([^/]+)\\/(.*)$";
-bool LookupGaleryImage(const QString& sResourceLocator, tspProject& spProject,
-                       std::shared_ptr<CDatabaseManager> spDbManager,
-                       QString& sResource)
-{
-  static QRegExp rxGallery(c_sMatcherGallery);
-  qint32 iPos = 0;
-
-  QString sGallery;
-  QString sId;
-  if ((iPos = rxGallery.indexIn(sResourceLocator, iPos)) != -1)
-  {
-    sGallery = rxGallery.cap(1);
-    sId = rxGallery.cap(2);
-    iPos += rxGallery.matchedLength();
-  }
-  else
-  {
-    return false;
-  }
-
-  const QString sFound = sGallery + sId;
-  if ("*" == sId)
-  {
-    tvspResource vspResources =
-        spDbManager->FindResourcesInProject(spProject, QRegExp(sGallery + "(.*)"));
-    if (vspResources.size() <= 0)
-    {
-      return false;
-    }
-
-    long unsigned int seed =
-      static_cast<long unsigned int>(std::chrono::high_resolution_clock::now().time_since_epoch().count());
-    std::mt19937 generator(static_cast<long unsigned int>(seed));
-    std::uniform_int_distribution<> dis(0, static_cast<qint32>(vspResources.size() - 1));
-    qint32 iGeneratedIndex = dis(generator);
-    tspResource& spResource = vspResources[iGeneratedIndex];
-
-    QReadLocker locker(&spResource->m_rwLock);
-    sResource = spResource->m_sName;
-  }
-  else
-  {
-    if (nullptr == spDbManager->FindResourceInProject(spProject, sFound))
-    {
-      return false;
-    }
-  }
-
-  sResource = sFound;
-  return true;
-}
-
-const QString c_sMatcherFile = "^file:(.*)$";
-const QString c_sMatcherFileIsRandom = "\\*";
-bool LookupFile(const QString& sResourceLocator, tspProject& spProject,
-                std::shared_ptr<CDatabaseManager> spDbManager,
-                QString& sResource)
-{
-  static QRegExp rxFile(c_sMatcherFile);
-  static QRegExp rxFileIsRandom(c_sMatcherFileIsRandom);
-  qint32 iPos = 0;
-
-  if ((iPos = rxFile.indexIn(sResourceLocator, iPos)) == -1)
-  {
-    return false;
-  }
-
-  bool bIsRandom = false;
-  iPos = 0;
-  if ((iPos = rxFileIsRandom.indexIn(sResourceLocator, iPos)) != -1)
-  {
-    bIsRandom = true;
-  }
-
-  const QString sFound = sResourceLocator.mid(5); // remove 'file:'
-  if (bIsRandom)
-  {
-    tvspResource vspResources =
-        spDbManager->FindResourcesInProject(spProject, QRegExp(QString(sResourceLocator).replace("*", "(.*)")));
-    if (vspResources.size() <= 0)
-    {
-      return false;
-    }
-
-    long unsigned int seed =
-      static_cast<long unsigned int>(std::chrono::high_resolution_clock::now().time_since_epoch().count());
-    std::mt19937 generator(static_cast<long unsigned int>(seed));
-    std::uniform_int_distribution<> dis(0, static_cast<qint32>(vspResources.size() - 1));
-    qint32 iGeneratedIndex = dis(generator);
-    tspResource& spResource = vspResources[iGeneratedIndex];
-
-    QReadLocker locker(&spResource->m_rwLock);
-    sResource = spResource->m_sName;
-  }
-  else
-  {
-    if (nullptr == spDbManager->FindResourceInProject(spProject, sFound))
-    {
-      return false;
-    }
-  }
-
-  sResource = sFound;
-  return true;
-}
-
-//----------------------------------------------------------------------------------------
-//
 QString CEosScriptMediaPlayer::GetResourceName(const QString& sResourceLocator, bool* pbError)
 {
   auto spDbManager = m_wpDbManager.lock();
@@ -755,15 +622,15 @@ QString CEosScriptMediaPlayer::GetResourceName(const QString& sResourceLocator, 
   QString sResource;
   if (nullptr != spDbManager)
   {
-    if (LookupRemoteLink(sResourceLocator, m_spProject, spDbManager, sResource))
+    if (eos::LookupRemoteLink(sResourceLocator, m_spProject, spDbManager, sResource))
     {
       return sResource;
     }
-    if (LookupGaleryImage(sResourceLocator, m_spProject, spDbManager, sResource))
+    if (eos::LookupGaleryImage(sResourceLocator, m_spProject, spDbManager, sResource))
     {
       return sResource;
     }
-    if (LookupFile(sResourceLocator, m_spProject, spDbManager, sResource))
+    if (eos::LookupFile(sResourceLocator, m_spProject, spDbManager, sResource))
     {
       return sResource;
     }

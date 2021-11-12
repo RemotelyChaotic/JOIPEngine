@@ -39,27 +39,34 @@ IJsonInstructionBase::tRetVal CCommandBackground::Call(const tInstructionMapValu
       bShowRequested = std::get<bool>(itShowBg);
       if (bShowRequested && !bIsVisible)
       {
-        m_pTutorialOverlay->Show();
+        bool bOk = QMetaObject::invokeMethod(m_pTutorialOverlay, "Show", Qt::QueuedConnection);
+        assert(bOk); Q_UNUSED(bOk);
       }
       else if (!bShowRequested && bIsVisible)
       {
-        m_pTutorialOverlay->Hide();
+        bool bOk = QMetaObject::invokeMethod(m_pTutorialOverlay, "Hide", Qt::QueuedConnection);
+        assert(bOk); Q_UNUSED(bOk);
       }
     }
     if (HasValue(args, "onCliCkAdvance") && IsOk<EArgumentType::eBool>(itClickToAdvance))
     {
       bClickToAdvance = std::get<bool>(itClickToAdvance);
-      m_pTutorialOverlay->SetClickToAdvanceEnabled(bClickToAdvance);
+      bool bOk = QMetaObject::invokeMethod(m_pTutorialOverlay, "SetClickToAdvanceEnabled", Qt::QueuedConnection,
+                                           Q_ARG(bool, bClickToAdvance));
+      assert(bOk); Q_UNUSED(bOk);
     }
     if (HasValue(args, "mouseTransparent") && IsOk<EArgumentType::eBool>(itMouseTransparent))
     {
       bMouseTransparent = std::get<bool>(itMouseTransparent);
-      m_pTutorialOverlay->SetMouseTransparecny(bMouseTransparent);
+      bool bOk = QMetaObject::invokeMethod(m_pTutorialOverlay, "SetMouseTransparecny", Qt::QueuedConnection,
+                                           Q_ARG(bool, bMouseTransparent));
+      assert(bOk); Q_UNUSED(bOk);
     }
 
     if ((bShowRequested && bIsVisible) || (!bShowRequested && !bIsVisible) || !bClickToAdvance)
     {
-      m_pTutorialOverlay->SlotTriggerNextInstruction();
+      bool bOk = QMetaObject::invokeMethod(m_pTutorialOverlay, "SlotTriggerNextInstruction", Qt::QueuedConnection);
+      assert(bOk); Q_UNUSED(bOk);
     }
 
     return std::true_type();

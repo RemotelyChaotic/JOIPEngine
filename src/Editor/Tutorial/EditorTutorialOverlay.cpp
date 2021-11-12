@@ -189,7 +189,7 @@ void CEditorTutorialOverlay::SetMouseTransparecny(bool bEnabled)
 
 //----------------------------------------------------------------------------------------
 //
-void CEditorTutorialOverlay::ShowTutorialText(EAnchors anchor, double dPosX, double dPosY,
+void CEditorTutorialOverlay::ShowTutorialText(int anchor, double dPosX, double dPosY,
                                               bool bHideButtons, QString sText)
 {
   if (nullptr != m_pTutorialTextBox)

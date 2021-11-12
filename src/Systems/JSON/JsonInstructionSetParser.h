@@ -2,7 +2,6 @@
 #define CJSONINSTRUCTIONSETPARSER_H
 
 #include "JsonInstructionBase.h"
-#include <QJsonDocument>
 #include <QObject>
 #include <memory>
 #include <type_traits>

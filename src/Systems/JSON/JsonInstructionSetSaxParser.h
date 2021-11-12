@@ -11,7 +11,7 @@
 
 class CJsonInstructionSetRunnerPrivate;
 class IJsonInstructionBase;
-struct SJsonInstructionNode;
+class CJsonInstructionNode;
 
 class CJSonSaxParser : public nlohmann::json_sax<nlohmann::json>
 {
@@ -55,7 +55,7 @@ public:
 private:
   CJsonInstructionSetRunnerPrivate*                        m_pParent = nullptr;
   std::map<QString, std::shared_ptr<IJsonInstructionBase>> m_instructionMap;
-  std::stack<std::shared_ptr<SJsonInstructionNode>>        m_parseStack;
+  std::stack<std::shared_ptr<CJsonInstructionNode>>        m_parseStack;
   std::string                                              m_sCurrentKey;
   bool                                                     m_bParsingCommands = false;
 };

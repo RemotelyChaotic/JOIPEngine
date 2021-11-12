@@ -5,7 +5,11 @@
 
 #include <nlohmann/json-schema.hpp>
 
+#include <QAtomicInt>
 #include <QDebug>
+#include <QEventLoop>
+#include <QPointer>
+#include <QThread>
 #include <set>
 #include <stack>
 #include <string>
@@ -78,29 +82,263 @@ namespace  {
 }
 
 //----------------------------------------------------------------------------------------
+// CJsonInstructionSetRunnerWorker & CJsonInstructionSetRunnerWorkerController class definition
+//
+class CJsonInstructionSetRunnerWorker : public QObject
+{
+  Q_OBJECT
+  Q_DISABLE_COPY(CJsonInstructionSetRunnerWorker)
+public:
+  CJsonInstructionSetRunnerWorker(std::shared_ptr<CJsonInstructionNode> spNode) :
+    m_spNextNode(spNode)
+  {}
+
+public:
+  QAtomicInt     m_bInterrupted = 0;
+
+public slots:
+  //--------------------------------------------------------------------------------------
+  //
+  void CallNextCommand(ERunerMode runMode)
+  {
+    auto fnCallImpl = [this, &runMode]() -> CJsonInstructionSetRunner::tRetVal {
+      IJsonInstructionBase::tRetVal vRetVal = CallCommand();
+      if (std::holds_alternative<SJsonException>(vRetVal))
+      {
+        return std::get<SJsonException>(vRetVal);
+      }
+      else if (std::holds_alternative<SRunRetVal<ENextCommandToCall::eChild>>(vRetVal))
+      {
+        auto& ret = std::get<SRunRetVal<ENextCommandToCall::eChild>>(vRetVal);
+        return NextCommand(ret.m_type, ret.m_iIndex);
+      }
+      else if (std::holds_alternative<SRunRetVal<ENextCommandToCall::eSibling>>(vRetVal))
+      {
+        auto& ret = std::get<SRunRetVal<ENextCommandToCall::eSibling>>(vRetVal);
+        return NextCommand(ret.m_type);
+      }
+      else if (std::holds_alternative<SRunRetVal<ENextCommandToCall::eForkThis>>(vRetVal))
+      {
+        auto& ret = std::get<SRunRetVal<ENextCommandToCall::eForkThis>>(vRetVal);
+        emit Fork(runMode, m_spNextNode, ret.m_args);
+        return NextCommand(ENextCommandToCall::eSibling);
+      }
+      else return NextCommand(ENextCommandToCall::eChild, 0);
+    };
+
+
+    if (ERunerMode::eAutoRunAll == runMode)
+    {
+      while (nullptr != m_spNextNode)
+      {
+        if (1 == m_bInterrupted)
+        {
+          emit CallNextCommandRetVal(runMode, SJsonException{"Interrupted.","","",0,0});
+          return;
+        }
+
+        CJsonInstructionSetRunner::tRetVal retVal = fnCallImpl();
+        if (std::holds_alternative<SJsonException>(retVal))
+        {
+          emit CallNextCommandRetVal(runMode, retVal);
+          return;
+        }
+      }
+      emit CallNextCommandRetVal(runMode, std::true_type());
+      return;
+    }
+    else if (ERunerMode::eRunOne == runMode)
+    {
+      if (nullptr != m_spNextNode)
+      {
+        emit CallNextCommandRetVal(runMode, fnCallImpl());
+        return;
+      }
+    }
+
+    // nothing to run
+    emit CallNextCommandRetVal(runMode, std::true_type());
+    return;
+  }
+
+signals:
+  void CallNextCommandRetVal(ERunerMode runMode,
+                             CJsonInstructionSetRunner::tRetVal retVal);
+  void Fork(ERunerMode runMode,
+            std::shared_ptr<CJsonInstructionNode> spNode,
+            tInstructionMapValue args);
+
+protected:
+  //--------------------------------------------------------------------------------------
+  //
+  IJsonInstructionBase::tRetVal CallCommand()
+  {
+    if (nullptr != m_spNextNode)
+    {
+      if (auto spCommand = m_spNextNode->m_wpCommand.lock())
+      {
+        IJsonInstructionBase::tRetVal retVal =
+            spCommand->Call(m_spNextNode->m_actualArgs);
+        return retVal;
+      }
+    }
+    return SJsonException{"Internal error.", "", "", 0, 0};
+  }
+
+  //--------------------------------------------------------------------------------------
+  //
+  bool NextCommand(ENextCommandToCall nextCmd, qint32 iIndex = 0)
+  {
+    if (nullptr != m_spNextNode)
+    {
+      // dfs
+      if (m_spNextNode->m_spChildren.size() > 0 &&
+          ENextCommandToCall::eChild == nextCmd)
+      {
+        iIndex = std::min(static_cast<qint32>(m_spNextNode->m_spChildren.size()-1),
+                          std::max(0, iIndex));
+        m_spNextNode = *std::next(m_spNextNode->m_spChildren.begin(), iIndex);
+        return true;
+      }
+      else
+      {
+        auto spParent = m_spNextNode->m_wpParent.lock();
+        while (nullptr != spParent)
+        {
+          auto it =
+            std::find(spParent->m_spChildren.begin(), spParent->m_spChildren.end(), m_spNextNode);
+          qint32 iIndex = std::distance(spParent->m_spChildren.begin(), it);
+          if (static_cast<qint32>(spParent->m_spChildren.size()) > iIndex+1)
+          {
+            m_spNextNode = spParent->m_spChildren[static_cast<size_t>(iIndex+1)];
+            return true;
+          }
+          else
+          {
+            // go up one
+            m_spNextNode = spParent;
+            spParent = spParent->m_wpParent.lock();
+          }
+        }
+      }
+    }
+    // nothing found -> reset since all commands have run
+    m_spNextNode = nullptr;
+    return false;
+  }
+
+private:
+  std::shared_ptr<CJsonInstructionNode>                   m_spNextNode;
+};
+
+//----------------------------------------------------------------------------------------
+//
+class CJsonInstructionSetRunnerWorkerController : public QObject
+{
+  Q_OBJECT
+  Q_DISABLE_COPY(CJsonInstructionSetRunnerWorkerController)
+
+public:
+  CJsonInstructionSetRunnerWorkerController(std::shared_ptr<CJsonInstructionNode> spNode) :
+    m_spWorker(std::make_shared<CJsonInstructionSetRunnerWorker>(spNode)),
+    m_pThread(new QThread(this))
+  {
+    m_spWorker->moveToThread(m_pThread.data());
+
+    connect(m_spWorker.get(), &CJsonInstructionSetRunnerWorker::CallNextCommandRetVal,
+            this, &CJsonInstructionSetRunnerWorkerController::SlotCallNextCommandRetVal);
+    connect(m_spWorker.get(), &CJsonInstructionSetRunnerWorker::Fork,
+            this, &CJsonInstructionSetRunnerWorkerController::Fork);
+    connect(m_pThread.data(), &QThread::finished, this, &CJsonInstructionSetRunnerWorker::deleteLater);
+
+    m_pThread->start();
+    while (!m_pThread->isRunning())
+    {
+      thread()->wait(5);
+    }
+  }
+  ~CJsonInstructionSetRunnerWorkerController()
+  {
+    if (nullptr != m_pThread)
+    {
+      m_spWorker->m_bInterrupted = true;
+      m_pThread->quit();
+      while (!m_pThread->isFinished())
+      {
+        m_pThread->wait(5);
+      }
+    }
+  }
+
+  void CallNextCommand(ERunerMode runMode, bool bBlocking)
+  {
+    m_bHasMoreCommands = false;
+    m_bCommandDone = false;
+    m_bBlockingCall = bBlocking;
+    bool bOk = QMetaObject::invokeMethod(m_spWorker.get(), "CallNextCommand", Qt::QueuedConnection,
+                                         Q_ARG(ERunerMode, runMode));
+    assert(bOk);
+    if (!bOk) { m_bCommandDone = false; }
+  }
+
+  bool HasMoreCommands() { return m_bHasMoreCommands; }
+  bool IsBlockingCall() { return m_bBlockingCall; }
+  bool IsDoneWithCommand() { return m_bCommandDone; }
+
+signals:
+  void CallNextCommandRetVal(ERunerMode runMode, CJsonInstructionSetRunner::tRetVal retVal);
+  void Fork(ERunerMode runMode,
+            std::shared_ptr<CJsonInstructionNode> spNode,
+            tInstructionMapValue args);
+
+protected slots:
+  void SlotCallNextCommandRetVal(ERunerMode runMode, CJsonInstructionSetRunner::tRetVal retVal)
+  {
+    if (std::holds_alternative<bool>(retVal))
+    {
+      m_bHasMoreCommands = std::get<bool>(retVal);
+    }
+    m_bCommandDone = true;
+    emit CallNextCommandRetVal(runMode, retVal);
+  }
+
+public:
+  std::shared_ptr<CJsonInstructionSetRunnerWorker> m_spWorker;
+  QPointer<QThread>                                m_pThread;
+  bool                                             m_bCommandDone = true;
+  bool                                             m_bHasMoreCommands = false;
+  bool                                             m_bBlockingCall = false;
+};
+
+//----------------------------------------------------------------------------------------
 // CJsonInstructionSetRunnerPrivate class definition
 //
-class CJsonInstructionSetRunnerPrivate
+class CJsonInstructionSetRunnerPrivate : public QObject
 {
+  Q_OBJECT
+  Q_DISABLE_COPY(CJsonInstructionSetRunnerPrivate)
   friend class CJsonInstructionSetParserPrivate;
   friend class CJSonSaxParser;
 
 public:
   CJsonInstructionSetRunnerPrivate() :
+    QObject(),
     m_vspBuiltCommands(),
+    m_vspWorkerControllers(),
     m_spValidationErrorHandler(std::make_unique<CustomErrorHandler>()),
     m_validator(nullptr, InstructionSetFormatChecker, nullptr),
     m_jsonBaseSchema(),
     m_jsonParsed(),
     m_sJson(),
     m_parseError(),
-    m_bValidationOk(false),
-    m_spNextNode(nullptr)
+    m_bValidationOk(false)
   {
   }
 
   ~CJsonInstructionSetRunnerPrivate()
   {
+    // makes debugging easier
+    m_vspWorkerControllers.clear();
   }
 
   //--------------------------------------------------------------------------------------
@@ -162,70 +400,74 @@ public:
 
   //--------------------------------------------------------------------------------------
   //
-  CJsonInstructionSetRunner::tRetVal CallNextCommand(ERunerMode runMode)
+  CJsonInstructionSetRunner::tRetVal CallNextCommand(ERunerMode runMode, bool bBlocking)
   {
-    auto fnCallImpl = [this]() -> CJsonInstructionSetRunner::tRetVal {
-      IJsonInstructionBase::tRetVal vRetVal = CallCommand();
-      if (std::holds_alternative<SJsonException>(vRetVal))
-      {
-        return std::get<SJsonException>(vRetVal);
-      }
-      else if (std::holds_alternative<SRunRetVal<ENextCommandToCall::eChild>>(vRetVal))
-      {
-        auto& ret = std::get<SRunRetVal<ENextCommandToCall::eChild>>(vRetVal);
-        return NextCommand(ret.m_type, ret.m_iIndex);
-      }
-      else if (std::holds_alternative<SRunRetVal<ENextCommandToCall::eSibling>>(vRetVal))
-      {
-        auto& ret = std::get<SRunRetVal<ENextCommandToCall::eSibling>>(vRetVal);
-        return NextCommand(ret.m_type);
-      }
-      else return NextCommand(ENextCommandToCall::eChild, 0);
-    };
-
-
-    if (ERunerMode::eAutoRunAll == runMode)
+    QMetaObject::Connection connBlocking;
+    CJsonInstructionSetRunner::tRetVal retVal;
+    if (bBlocking)
     {
-      while (nullptr != m_spNextNode)
-      {
-        CJsonInstructionSetRunner::tRetVal retVal = fnCallImpl();
-        if (std::holds_alternative<SJsonException>(retVal)) { return retVal; }
-      }
+      connBlocking = connect(this, &CJsonInstructionSetRunnerPrivate::WaitDone,
+              this, [&retVal](CJsonInstructionSetRunner::tRetVal retValDone) {
+        retVal = retValDone;
+      });
+    }
+
+    for (auto& spController : m_vspWorkerControllers)
+    {
+      spController->CallNextCommand(runMode, bBlocking);
+    }
+
+    if (!bBlocking)
+    {
       return std::true_type();
     }
-    else if (ERunerMode::eRunOne == runMode)
+    else
     {
-      if (nullptr != m_spNextNode)
-      {
-        return fnCallImpl();
-      }
+      QEventLoop waitLoop;
+      connect(this, &CJsonInstructionSetRunnerPrivate::WaitDone,
+              &waitLoop, &QEventLoop::quit);
+      waitLoop.exec();
+      disconnect(connBlocking);
+      return retVal;
     }
-
-    // nothing to run
-    return std::true_type();
   }
 
   //--------------------------------------------------------------------------------------
   //
-  CJsonInstructionSetRunner::tRetVal Run(const QString& sInstructionSet, ERunerMode runMode)
+  CJsonInstructionSetRunner::tRetVal Run(const QString& sInstructionSet, ERunerMode runMode,
+                                         bool bBlocking)
   {
     if (!m_bValidationOk)
-    { return SJsonException{"Parse error", "", "", 0, 0}; }
+    { return SJsonException{"Parse error.", "", "", 0, 0}; }
 
-    m_spNextNode = nullptr;
+    m_vspWorkerControllers.clear();
 
     // validation success, start actually running the commands
     auto it = std::find_if(m_vspBuiltCommands.begin(), m_vspBuiltCommands.end(),
-                           [&sInstructionSet](const std::pair<QString, std::shared_ptr<SJsonInstructionNode>>& pair){
+                           [&sInstructionSet](const std::pair<QString, std::shared_ptr<CJsonInstructionNode>>& pair){
       return pair.first == sInstructionSet;
     });
     if (m_vspBuiltCommands.end() != it)
     {
       if (static_cast<qint32>(it->second->m_spChildren.size()) > 0)
       {
-        m_spNextNode =
-            *it->second->m_spChildren.begin();
-        return CallNextCommand(runMode);
+        m_vspWorkerControllers.push_back(
+              std::make_unique<CJsonInstructionSetRunnerWorkerController>(*it->second->m_spChildren.begin()));
+        if (bBlocking)
+        {
+          connect(m_vspWorkerControllers.back().get(), &CJsonInstructionSetRunnerWorkerController::CallNextCommandRetVal,
+                  this, &CJsonInstructionSetRunnerPrivate::CallNextCommandRetVal);
+        }
+        else
+        {
+          connect(m_vspWorkerControllers.back().get(), &CJsonInstructionSetRunnerWorkerController::CallNextCommandRetVal,
+                  this, [this](ERunerMode, CJsonInstructionSetRunner::tRetVal retVal) {
+            emit CommandRetVal(retVal);
+          });
+        }
+        connect(m_vspWorkerControllers.back().get(), &CJsonInstructionSetRunnerWorkerController::Fork,
+                this, &CJsonInstructionSetRunnerPrivate::Fork);
+        return CallNextCommand(runMode, bBlocking);
       }
     }
 
@@ -233,85 +475,89 @@ public:
         SJsonException{"Can not run instruction set " + sInstructionSet, sInstructionSet, sInstructionSet, 0, 0};
   }
 
+signals:
+  void CommandRetVal(CJsonInstructionSetRunner::tRetVal retVal);
+  void WaitDone(CJsonInstructionSetRunner::tRetVal retVal);
+
+protected slots:
+  //--------------------------------------------------------------------------------------
+  //
+  void CallNextCommandRetVal(ERunerMode runMode, CJsonInstructionSetRunner::tRetVal retVal)
+  {
+    Q_UNUSED(runMode)
+    // if we have an error, we return now no use in continuing
+    if (std::holds_alternative<SJsonException>(retVal))
+    {
+      emit WaitDone(retVal);
+    }
+    else
+    {
+      bool bHasMore = false;
+      bool bAllDone = true;
+      for (auto& spController : m_vspWorkerControllers)
+      {
+        bHasMore |= spController->HasMoreCommands();
+        bAllDone &= spController->IsDoneWithCommand();
+      }
+      if (bAllDone)
+      {
+        emit WaitDone(bHasMore);
+      }
+    }
+  }
+
+  //--------------------------------------------------------------------------------------
+  //
+  void Fork(ERunerMode runMode,
+            std::shared_ptr<CJsonInstructionNode> spNode,
+            tInstructionMapValue args)
+  {
+    bool bBlocking = dynamic_cast<CJsonInstructionSetRunnerWorkerController*>(sender())->IsBlockingCall();
+
+    std::shared_ptr<CJsonInstructionNode> spNewNode =
+        std::make_shared<CJsonInstructionNode>(*spNode);
+    // change args and make an orphan
+    spNewNode->m_actualArgs = args;
+    spNewNode->m_wpParent = std::weak_ptr<CJsonInstructionNode>();
+    m_vspWorkerControllers.push_back(
+          std::make_unique<CJsonInstructionSetRunnerWorkerController>(spNewNode));
+    if (bBlocking)
+    {
+      connect(m_vspWorkerControllers.back().get(), &CJsonInstructionSetRunnerWorkerController::CallNextCommandRetVal,
+              this, &CJsonInstructionSetRunnerPrivate::CallNextCommandRetVal);
+    }
+    else
+    {
+      connect(m_vspWorkerControllers.back().get(), &CJsonInstructionSetRunnerWorkerController::CallNextCommandRetVal,
+              this, [this](ERunerMode, CJsonInstructionSetRunner::tRetVal retVal) {
+        emit CommandRetVal(retVal);
+      });
+    }
+    connect(m_vspWorkerControllers.back().get(), &CJsonInstructionSetRunnerWorkerController::Fork,
+            this, &CJsonInstructionSetRunnerPrivate::Fork);
+    m_vspWorkerControllers.back()->CallNextCommand(runMode, bBlocking);
+  }
 
 protected:
-  //--------------------------------------------------------------------------------------
-  //
-  IJsonInstructionBase::tRetVal CallCommand()
-  {
-    if (nullptr != m_spNextNode)
-    {
-      if (auto spCommand = m_spNextNode->m_wpCommand.lock())
-      {
-        IJsonInstructionBase::tRetVal retVal =
-            spCommand->Call(m_spNextNode->m_actualArgs);
-        return retVal;
-      }
-    }
-    return SJsonException{"Internal error.", "", "", 0, 0};
-  }
-
-  //--------------------------------------------------------------------------------------
-  //
-  bool NextCommand(ENextCommandToCall nextCmd, qint32 iIndex = 0)
-  {
-    if (nullptr != m_spNextNode)
-    {
-      // dfs
-      if (m_spNextNode->m_spChildren.size() > 0 &&
-          ENextCommandToCall::eChild == nextCmd)
-      {
-        iIndex = std::min(static_cast<qint32>(m_spNextNode->m_spChildren.size()-1),
-                          std::max(0, iIndex));
-        m_spNextNode = *std::next(m_spNextNode->m_spChildren.begin(), iIndex);
-        return true;
-      }
-      else
-      {
-        auto spParent = m_spNextNode->m_wpParent.lock();
-        while (nullptr != spParent)
-        {
-          auto it =
-            std::find(spParent->m_spChildren.begin(), spParent->m_spChildren.end(), m_spNextNode);
-          qint32 iIndex = std::distance(spParent->m_spChildren.begin(), it);
-          if (static_cast<qint32>(spParent->m_spChildren.size()) > iIndex+1)
-          {
-            m_spNextNode = spParent->m_spChildren[static_cast<size_t>(iIndex+1)];
-            return true;
-          }
-          else
-          {
-            // go up one
-            m_spNextNode = spParent;
-            spParent = spParent->m_wpParent.lock();
-          }
-        }
-      }
-    }
-    // nothing found -> reset since all commands have run
-    m_spNextNode = nullptr;
-    return false;
-  }
-
-  std::vector<std::pair<QString, std::shared_ptr<SJsonInstructionNode>>>
+  std::map<QString, std::shared_ptr<IJsonInstructionBase>> m_instructionMap;
+  std::vector<std::pair<QString, std::shared_ptr<CJsonInstructionNode>>>
                                                           m_vspBuiltCommands;
+  std::vector<std::unique_ptr<CJsonInstructionSetRunnerWorkerController>>
+                                                          m_vspWorkerControllers;
   std::unique_ptr<CustomErrorHandler>                     m_spValidationErrorHandler;
   nlohmann::json_schema::json_validator                   m_validator;
   nlohmann::json                                          m_jsonBaseSchema;
   nlohmann::json                                          m_jsonParsed;
   std::string                                             m_sJson;
-  SJsonException                                           m_parseError;
+  SJsonException                                          m_parseError;
   bool                                                    m_bValidationOk;
-
-private:
-  std::shared_ptr<SJsonInstructionNode>                   m_spNextNode;
 };
 
 //----------------------------------------------------------------------------------------
 // CJSonSaxParser helper funcntions
 //
 std::variant<EArgumentType, std::false_type>
-TypeFromNode(const std::shared_ptr<SJsonInstructionNode>& spNode,
+TypeFromNode(const std::shared_ptr<CJsonInstructionNode>& spNode,
              const std::string& sKey,
              bool& bArray)
 {
@@ -617,8 +863,8 @@ bool CJSonSaxParser::start_object(std::size_t elements)
       auto it = m_instructionMap.find(QString::fromStdString(m_sCurrentKey));
       if (m_instructionMap.end() != it)
       {
-        std::shared_ptr<SJsonInstructionNode> spNode =
-            std::make_shared<SJsonInstructionNode>();
+        std::shared_ptr<CJsonInstructionNode> spNode =
+            std::make_shared<CJsonInstructionNode>();
         spNode->m_sName = QString::fromStdString(m_sCurrentKey);
         spNode->m_wpCommand = it->second;
         spNode->m_wpParent = m_parseStack.top();
@@ -629,8 +875,8 @@ bool CJSonSaxParser::start_object(std::size_t elements)
       }
       else
       {
-        std::shared_ptr<SJsonInstructionNode> spNode =
-            std::make_shared<SJsonInstructionNode>();
+        std::shared_ptr<CJsonInstructionNode> spNode =
+            std::make_shared<CJsonInstructionNode>();
         spNode->m_sName = QString::fromStdString(m_sCurrentKey);
         spNode->m_bIgnoreChildren = false;
         spNode->m_wpParent = m_parseStack.top();
@@ -642,7 +888,7 @@ bool CJSonSaxParser::start_object(std::size_t elements)
     else
     {
       // a command is being parsed
-      std::shared_ptr<SJsonInstructionNode> spParentNode = m_parseStack.top();
+      std::shared_ptr<CJsonInstructionNode> spParentNode = m_parseStack.top();
       tInstructionMapType* argsDefinition = spParentNode->m_argsDefinition;
       SInstructionArgumentType* argDefinitionArr = spParentNode->m_argDefinitionArr;
       if (nullptr != argsDefinition || nullptr != argDefinitionArr)
@@ -661,7 +907,7 @@ bool CJSonSaxParser::start_object(std::size_t elements)
               {
                 spParentNode->m_actualArgs.insert({QString::fromStdString(m_sCurrentKey),
                                                    {EArgumentType::eObject, QString::fromStdString(m_sCurrentKey)}});
-                std::shared_ptr<SJsonInstructionNode> spNode = std::make_shared<SJsonInstructionNode>();
+                std::shared_ptr<CJsonInstructionNode> spNode = std::make_shared<CJsonInstructionNode>();
                 spNode->m_sName = QString::fromStdString(m_sCurrentKey);
                 spNode->m_wpCommand = itInstruction->second;
                 spNode->m_wpParent = m_parseStack.top();
@@ -691,7 +937,7 @@ bool CJSonSaxParser::start_object(std::size_t elements)
               array.push_back({EArgumentType::eObject, sElemName});
 
               // insert mostly empty node
-              std::shared_ptr<SJsonInstructionNode> spNode = std::make_shared<SJsonInstructionNode>();
+              std::shared_ptr<CJsonInstructionNode> spNode = std::make_shared<CJsonInstructionNode>();
               spNode->m_sName = sElemName;
               spNode->m_wpParent = m_parseStack.top();
               spNode->m_bIgnoreChildren = false;
@@ -702,7 +948,7 @@ bool CJSonSaxParser::start_object(std::size_t elements)
           // is it part of the arguments
           else if (EArgumentType::eMap == std::get<EArgumentType>(type)._to_integral())
           {
-            std::shared_ptr<SJsonInstructionNode> spNode = std::make_shared<SJsonInstructionNode>();
+            std::shared_ptr<CJsonInstructionNode> spNode = std::make_shared<CJsonInstructionNode>();
             spNode->m_sName = QString::fromStdString(m_sCurrentKey);
             spNode->m_wpCommand = spParentNode->m_wpCommand;
             spNode->m_wpParent = m_parseStack.top();
@@ -747,7 +993,7 @@ bool CJSonSaxParser::end_object()
 {
   if (!m_parseStack.empty())
   {
-    std::shared_ptr<SJsonInstructionNode> spChild = m_parseStack.top();
+    std::shared_ptr<CJsonInstructionNode> spChild = m_parseStack.top();
     m_parseStack.pop();
     if (m_parseStack.empty())
     {
@@ -757,7 +1003,7 @@ bool CJSonSaxParser::end_object()
     {
       m_sCurrentKey = m_parseStack.top()->m_sName.toStdString();
 
-      std::shared_ptr<SJsonInstructionNode> spParent = m_parseStack.top();
+      std::shared_ptr<CJsonInstructionNode> spParent = m_parseStack.top();
       std::shared_ptr<IJsonInstructionBase> spChildCommand = spChild->m_wpCommand.lock();
       std::shared_ptr<IJsonInstructionBase> spParentCommand = spParent->m_wpCommand.lock();
 
@@ -819,8 +1065,8 @@ bool CJSonSaxParser::start_array(std::size_t elements)
     // no command is parsing yet
     if (nullptr == spCurrentCommand)
     {
-      std::shared_ptr<SJsonInstructionNode> spNode =
-          std::make_shared<SJsonInstructionNode>();
+      std::shared_ptr<CJsonInstructionNode> spNode =
+          std::make_shared<CJsonInstructionNode>();
       spNode->m_sName = QString::fromStdString(m_sCurrentKey);
       spNode->m_bIgnoreChildren = false;
       spNode->m_wpParent = m_parseStack.top();
@@ -831,7 +1077,7 @@ bool CJSonSaxParser::start_array(std::size_t elements)
     else
     {
       // a command is being parsed
-      std::shared_ptr<SJsonInstructionNode> spParentNode = m_parseStack.top();
+      std::shared_ptr<CJsonInstructionNode> spParentNode = m_parseStack.top();
       tInstructionMapType* argsDefinition = spParentNode->m_argsDefinition;
       if (nullptr != argsDefinition)
       {
@@ -841,7 +1087,7 @@ bool CJSonSaxParser::start_array(std::size_t elements)
           // is it an array?
           if (EArgumentType::eArray == itArg->second.m_type._to_integral())
           {
-            std::shared_ptr<SJsonInstructionNode> spNode = std::make_shared<SJsonInstructionNode>();
+            std::shared_ptr<CJsonInstructionNode> spNode = std::make_shared<CJsonInstructionNode>();
             spNode->m_sName = QString::fromStdString(m_sCurrentKey);
             spNode->m_wpCommand = spParentNode->m_wpCommand;
             spNode->m_wpParent = m_parseStack.top();
@@ -875,7 +1121,7 @@ bool CJSonSaxParser::end_array()
 {
   if (m_bParsingCommands)
   {
-    std::shared_ptr<SJsonInstructionNode> spChild = m_parseStack.top();
+    std::shared_ptr<CJsonInstructionNode> spChild = m_parseStack.top();
     m_parseStack.pop();
     if (m_parseStack.empty())
     {
@@ -885,7 +1131,7 @@ bool CJSonSaxParser::end_array()
     {
       m_sCurrentKey = m_parseStack.top()->m_sName.toStdString();
 
-      std::shared_ptr<SJsonInstructionNode> spParent = m_parseStack.top();
+      std::shared_ptr<CJsonInstructionNode> spParent = m_parseStack.top();
       std::shared_ptr<IJsonInstructionBase> spChildCommand = spChild->m_wpCommand.lock();
       std::shared_ptr<IJsonInstructionBase> spParentCommand = spParent->m_wpCommand.lock();
 
@@ -939,8 +1185,8 @@ bool CJSonSaxParser::key(string_t& val)
   {
     m_bParsingCommands = true;
 
-    std::shared_ptr<SJsonInstructionNode> spRotNode =
-        std::make_shared<SJsonInstructionNode>();
+    std::shared_ptr<CJsonInstructionNode> spRotNode =
+        std::make_shared<CJsonInstructionNode>();
     spRotNode->m_sName = QString::fromStdString(m_sCurrentKey);
     spRotNode->m_bIgnoreChildren = false;
     m_parseStack.push(spRotNode);
@@ -969,8 +1215,8 @@ bool CJSonSaxParser::parse_error(std::size_t position, const std::string& last_t
 void CJSonSaxParser::CreateAndAddIgnoreNode()
 {
   // we don't add to parents children, so this object will be deleted once popped from stack
-  std::shared_ptr<SJsonInstructionNode> spNode =
-      std::make_shared<SJsonInstructionNode>();
+  std::shared_ptr<CJsonInstructionNode> spNode =
+      std::make_shared<CJsonInstructionNode>();
   spNode->m_sName = QString::fromStdString(m_sCurrentKey);
   spNode->m_wpParent = m_parseStack.top();
   spNode->m_bIgnoreChildren = true;
@@ -982,6 +1228,8 @@ void CJSonSaxParser::CreateAndAddIgnoreNode()
 //
 class CJsonInstructionSetParserPrivate
 {
+  friend class CJsonInstructionSetParser;
+
 public:
   CJsonInstructionSetParserPrivate() :
     m_spParser(nullptr),
@@ -997,13 +1245,6 @@ public:
 
   //--------------------------------------------------------------------------------------
   //
-  void ClearInstructions()
-  {
-    m_instructionMap.clear();
-  }
-
-  //--------------------------------------------------------------------------------------
-  //
   SJsonException Error() const
   {
     return m_error;
@@ -1015,11 +1256,13 @@ public:
   {
     auto spRunner =
         std::make_shared<CJsonInstructionSetRunner>();
+    spRunner->m_pPrivate->m_instructionMap = m_instructionMap;
     spRunner->m_pPrivate->m_jsonBaseSchema = m_jsonBaseSchema;
     if (spRunner->m_pPrivate->Validate(json))
     {
       spRunner->m_pPrivate->m_sJson = json;
-      m_spParser.reset(new CJSonSaxParser(spRunner->m_pPrivate.get(), m_instructionMap));
+      m_spParser.reset(new CJSonSaxParser(spRunner->m_pPrivate.get(),
+                                          spRunner->m_pPrivate->m_instructionMap));
       if (nlohmann::json::sax_parse(spRunner->m_pPrivate->m_sJson, m_spParser.get()))
       {
         m_error = SJsonException();
@@ -1048,14 +1291,6 @@ public:
     if (nullptr != spInstructionDefinition)
     {
       m_instructionMap.insert({sId, spInstructionDefinition});
-    }
-    else
-    {
-      auto it = m_instructionMap.find(sId);
-      if (m_instructionMap.end() != it)
-      {
-        m_instructionMap.erase(it);
-      }
     }
   }
 
@@ -1095,7 +1330,13 @@ protected:
 CJsonInstructionSetRunner::CJsonInstructionSetRunner() :
   m_pPrivate(std::make_unique<CJsonInstructionSetRunnerPrivate>())
 {
+  qRegisterMetaType<CJsonInstructionSetRunner::tRetVal>();
+  qRegisterMetaType<ERunerMode>();
+  qRegisterMetaType<std::shared_ptr<CJsonInstructionNode>>();
+  qRegisterMetaType<tInstructionMapValue>();
 
+  connect(m_pPrivate.get(), &CJsonInstructionSetRunnerPrivate::CommandRetVal,
+          this, &CJsonInstructionSetRunner::CommandRetVal);
 }
 
 CJsonInstructionSetRunner::~CJsonInstructionSetRunner()
@@ -1106,17 +1347,17 @@ CJsonInstructionSetRunner::~CJsonInstructionSetRunner()
 //----------------------------------------------------------------------------------------
 //
 CJsonInstructionSetRunner::tRetVal
-CJsonInstructionSetRunner::CallNextCommand(ERunerMode runMode)
+CJsonInstructionSetRunner::CallNextCommand(ERunerMode runMode, bool bBlocking)
 {
-  return m_pPrivate->CallNextCommand(runMode);
+  return m_pPrivate->CallNextCommand(runMode, bBlocking);
 }
 
 //----------------------------------------------------------------------------------------
 //
 CJsonInstructionSetRunner::tRetVal
-CJsonInstructionSetRunner::Run(const QString& sInstructionSet, ERunerMode runMode)
+CJsonInstructionSetRunner::Run(const QString& sInstructionSet, ERunerMode runMode, bool bBlocking)
 {
-  return m_pPrivate->Run(sInstructionSet, runMode);
+  return m_pPrivate->Run(sInstructionSet, runMode, bBlocking);
 }
 
 //----------------------------------------------------------------------------------------
@@ -1137,7 +1378,7 @@ CJsonInstructionSetParser::~CJsonInstructionSetParser()
 //
 void CJsonInstructionSetParser::ClearInstructions()
 {
-  m_spPtr->ClearInstructions();
+  m_spPtr->m_instructionMap.clear();
 }
 
 //----------------------------------------------------------------------------------------
@@ -1193,3 +1434,5 @@ void CJsonInstructionSetParser::SetJsonBaseSchema(const QByteArray& schema)
 {
   m_spPtr->SetJsonBaseSchema(QString::fromUtf8(schema).toStdString());
 }
+
+#include "JsonInstructionSetParser.moc"

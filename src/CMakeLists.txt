@@ -288,6 +288,8 @@ set(Sources
   Systems/DLJobs/EosResourceLocator.cpp
   Systems/DLJobs/EosResourceLocator.h
   Systems/DLJobs/EosResources.qrc
+  Systems/EOS/EosHelpers.cpp
+  Systems/EOS/EosHelpers.h
   Systems/HelpFactory.cpp 
   Systems/HelpFactory.h 
   Systems/ISerializable.h 
@@ -313,11 +315,13 @@ set(Sources
   Systems/Scene.cpp 
   Systems/Scene.h 
   Systems/JSON/JsonInstructionBase.h
+  Systems/JSON/JsonInstructionNode.cpp
   Systems/JSON/JsonInstructionNode.h
   Systems/JSON/JsonInstructionSetParser.cpp
   Systems/JSON/JsonInstructionSetParser.h
   Systems/JSON/JsonInstructionSetRunner.h
   Systems/JSON/JsonInstructionSetSaxParser.h
+  Systems/JSON/JsonInstructionTypes.h
   Systems/Script/EosScriptRunner.cpp
   Systems/Script/EosScriptRunner.h
   Systems/Script/IScriptRunner.h

@@ -2,6 +2,7 @@
 #define ENUMS_H
 
 #include <QtGlobal>
+#include <QMetaType>
 #include <enum.h>
 #include <limits>
 

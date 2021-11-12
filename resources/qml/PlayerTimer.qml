@@ -17,7 +17,7 @@ Rectangle {
             timerDisplay.opacity = 0.0;
         }
         onSetTime: {
-            timerDisplay.timeMs = iTimeS * 1000
+            timerDisplay.timeMs = dTimeS * 1000.0
             timerDisplay.maxTimeMs = timerDisplay.timeMs;
         }
         onSetTimeVisible: {

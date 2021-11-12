@@ -27,15 +27,16 @@ public:
   static QPointer<CEditorTutorialOverlay> Instance();
 
   void Initialize(QPointer<CEditorModel> pEditorModel);
+
+public slots:
   void NextTutorialState();
   void SetClickToAdvanceEnabled(bool bEnabled);
   void SetClickFilterWidgets(const QStringList& vsWidgetNames, bool bTriggerNextAfterClick = true);
   void SetHighlightedWidgets(const QStringList& vsWidgetNames, bool bAllwaysOnTop);
   void SetMouseTransparecny(bool bEnabled);
-  void ShowTutorialText(EAnchors anchor, double dPosX, double dPosY,
+  void ShowTutorialText(int anchor, double dPosX, double dPosY,
                         bool bHideButtons, QString sText);
 
-public slots:
   void Climb() override;
   void Hide() override;
   void Resize() override;

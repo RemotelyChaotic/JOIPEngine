@@ -10,7 +10,6 @@ CCommandText::CCommandText(QPointer<CEditorTutorialOverlay> pTutorialOverlay) :
               {"hideButtons", SInstructionArgumentType{EArgumentType::eBool}}}),
   m_pTutorialOverlay(pTutorialOverlay)
 {
-
 }
 CCommandText::~CCommandText()
 {
@@ -63,7 +62,11 @@ IJsonInstructionBase::tRetVal CCommandText::Call(const tInstructionMapValue& arg
 
   if (nullptr != m_pTutorialOverlay)
   {
-    m_pTutorialOverlay->ShowTutorialText(anchor, dPosX, dPosY, bHideButtons, sText);
+    bool bOk = QMetaObject::invokeMethod(m_pTutorialOverlay, "ShowTutorialText", Qt::QueuedConnection,
+                                         Q_ARG(int, anchor._to_integral()),
+                                         Q_ARG(double, dPosX), Q_ARG(double, dPosY),
+                                         Q_ARG(bool, bHideButtons), Q_ARG(QString, sText));
+    assert(bOk); Q_UNUSED(bOk);
     return std::true_type();
   }
   return std::true_type();
