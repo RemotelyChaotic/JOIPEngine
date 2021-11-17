@@ -250,6 +250,8 @@ set(Sources
   Player/SceneMainScreen.cpp 
   Player/SceneMainScreen.h 
   Player/SceneMainScreen.ui 
+  Player/TeaseStorage.cpp
+  Player/TeaseStorage.h
   Player/TextBoxWidget.cpp 
   Player/TextBoxWidget.h 
   Player/TextBoxWidget.ui 

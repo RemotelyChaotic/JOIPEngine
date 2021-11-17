@@ -36,7 +36,7 @@ signals:
   void clearText();
   void showButtonPrompts(QStringList vsLabels);
   void showButtonReturnValue(qint32 iIndex);
-  void showInput();
+  void showInput(QString sStoreIntoVar);
   void showInputReturnValue(QString sValue);
   void showText(QString sText, double dSkippableWaitS);
   void textAlignmentChanged(qint32 alignment);
@@ -105,7 +105,7 @@ public:
   void setTextAlignment(qint32 alignment);
   void setTextColors(const std::vector<QColor>& vColors);
   qint32 showButtonPrompts(const QStringList& vsLabels);
-  QString showInput();
+  QString showInput(const QString& sStoreIntoVar);
   void showText(QString sText);
   void showText(QString sText, double dWaitTime, bool bSkipable);
 

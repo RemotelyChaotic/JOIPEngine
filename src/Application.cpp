@@ -7,6 +7,7 @@
 // needed to register to qml
 #include "Player/MetronomePaintedWidget.h"
 #include "Player/SceneMainScreen.h"
+#include "Player/TeaseStorage.h"
 #include "Player/TimerWidget.h"
 
 #include "Systems/DatabaseManager.h"
@@ -264,6 +265,8 @@ void CApplication::RegisterQmlTypes()
   qRegisterMetaType<QQmlWebChannel*>();
 
   qmlRegisterType<CClipboardQmlWrapper>("QtGui", 5, 14, "Clipboard");
+
+  qmlRegisterType<CTeaseStorage>("JOIP.core", 1, 1, "TeaseStorage");
 
   qmlRegisterSingletonType<CQmlApplicationQtNamespaceWrapper>(
         "JOIP.core", 1, 1, "QtApp",

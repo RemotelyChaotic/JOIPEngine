@@ -50,11 +50,11 @@ Rectangle {
         showButtonPrompts(vsLabels);
     }
 
-    function showInput()
+    function showInput(sStoreIntoVar)
     {
         textLogModel.append({
             "textAlignment": "",
-            "textContent": "",
+            "textContent": sStoreIntoVar,
             "backgroundColor": undefined !== textLog.backgroundColors  && textLog.backgroundColors.length > 0 ? textLog.backgroundColors[0] : "#ff000000",
             "textColor": undefined !== textLog.textColors  && textLog.textColors.length > 0 ? textLog.textColors[0] : "#ffffffff",
             "numButtons": "",
@@ -133,7 +133,7 @@ Rectangle {
             textBox.showButtonPrompts(vsLabels);
         }
         onShowInput: {
-            textBox.showInput();
+            textBox.showInput(sStoreIntoVar);
         }
         onShowText: {
             textBox.showText(sText);
@@ -187,8 +187,12 @@ Rectangle {
         property bool sceneSelection: false
         property bool skippable: false
 
-        function inputEditingFinished(sInput)
+        function inputEditingFinished(sInput, sStoreIntoVar)
         {
+            if ("" !== sStoreIntoVar)
+            {
+                root.storage.store(sStoreIntoVar, sInput);
+            }
             signalEmitter.showInputReturnValue(sInput);
         }
         function buttonPressed(iIndex)

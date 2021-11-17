@@ -275,7 +275,7 @@ void CScriptTextBox::showText(QString sText, double dWaitTime, bool bSkipable)
                 &loop, &QEventLoop::quit, Qt::QueuedConnection);
     }
 
-    emit pSignalEmitter->showText(sText, bSkipable ? dWaitTime : 0);
+    QTimer::singleShot(0, this, [&pSignalEmitter,sText,bSkipable,dWaitTime]() { emit pSignalEmitter->showText(sText, bSkipable ? dWaitTime : 0); });
 
     timer.start();
     loop.exec();
@@ -301,7 +301,7 @@ QString CScriptTextBox::showInput()
   if (!CheckIfScriptCanRun()) { return QString(); }
 
   auto pSignalEmitter = SignalEmitter<CTextBoxSignalEmitter>();
-  emit pSignalEmitter->showInput();
+  QTimer::singleShot(0, this, [&pSignalEmitter]() { emit pSignalEmitter->showInput(QString()); });
 
   // local loop to wait for answer
   QString sReturnValue = QString();
@@ -529,16 +529,15 @@ public:
   {
     if (nullptr != m_pParent)
     {
-      const QString sValue = m_pParent->showInput();
-
       const auto& itVariable = GetValue<EArgumentType::eString>(args, "variable");
       if (HasValue(args, "variable") && IsOk<EArgumentType::eString>(itVariable))
       {
         const QString sVariable = std::get<QString>(itVariable);
-        // TODO:
-      }
+        const QString sValue = m_pParent->showInput(sVariable);
+        Q_UNUSED(sValue)
 
-      return SRunRetVal<ENextCommandToCall::eSibling>();
+        return SRunRetVal<ENextCommandToCall::eSibling>();
+      }
     }
     return SJsonException{"internal Error.", "", "prompt", 0, 0};
   }
@@ -747,12 +746,12 @@ qint32 CEosScriptTextBox::showButtonPrompts(const QStringList& vsLabels)
 
 //----------------------------------------------------------------------------------------
 //
-QString CEosScriptTextBox::showInput()
+QString CEosScriptTextBox::showInput(const QString& sStoreIntoVar)
 {
   if (!CheckIfScriptCanRun()) { return QString(); }
 
   auto pSignalEmitter = SignalEmitter<CTextBoxSignalEmitter>();
-  emit pSignalEmitter->showInput();
+  QTimer::singleShot(0, this, [&pSignalEmitter,sStoreIntoVar]() { emit pSignalEmitter->showInput(sStoreIntoVar); });
 
   // local loop to wait for answer
   QString sReturnValue = QString();

@@ -16,6 +16,12 @@ public:
   ~CStorageSignalEmitter();
 
   virtual std::shared_ptr<CScriptObjectBase> CreateNewScriptObject(QPointer<QJSEngine> pEngine);
+
+signals:
+  void clear();
+  void load(QString sId);
+  void loadReturnValue(QVariant value);
+  void store(QString sId, QVariant value);
 };
 Q_DECLARE_METATYPE(CStorageSignalEmitter)
 
@@ -35,14 +41,11 @@ public slots:
   QJSValue load(QString sId);
   void store(QString sId, QJSValue value);
 
+signals:
+  void SignalQuitLoop();
+
 protected:
   void Cleanup_Impl() override;
-
-private slots:
-  void SlotClearStorage();
-
-private:
-  std::map<QString, QJSValue>                m_storage;
 };
 
 #endif // SCRIPTSTORAGE_H

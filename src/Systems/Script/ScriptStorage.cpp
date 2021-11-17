@@ -1,6 +1,8 @@
 #include "ScriptStorage.h"
 #include "ScriptRunnerSignalEmiter.h"
 #include <QDebug>
+#include <QEventLoop>
+#include <QTimer>
 
 CStorageSignalEmitter::CStorageSignalEmitter() :
   CScriptRunnerSignalEmiter()
@@ -23,16 +25,12 @@ std::shared_ptr<CScriptObjectBase> CStorageSignalEmitter::CreateNewScriptObject(
 //
 CScriptStorage::CScriptStorage(QPointer<CScriptRunnerSignalEmiter> pEmitter,
                                QPointer<QJSEngine> pEngine) :
-  CJsScriptObjectBase(pEmitter, pEngine),
-  m_storage()
+  CJsScriptObjectBase(pEmitter, pEngine)
 {
-  connect(m_pSignalEmitter, &CScriptRunnerSignalEmiter::clearStorage,
-          this, &CScriptStorage::SlotClearStorage, Qt::QueuedConnection);
 }
 
 CScriptStorage::~CScriptStorage()
 {
-  SlotClearStorage();
 }
 
 //----------------------------------------------------------------------------------------
@@ -41,12 +39,34 @@ QJSValue CScriptStorage::load(QString sId)
 {
   if (!CheckIfScriptCanRun()) { return QJSValue(); }
 
-  auto it = m_storage.find(sId);
-  if (m_storage.end() != it)
+  auto pSignalEmitter = SignalEmitter<CStorageSignalEmitter>();
+  QTimer::singleShot(0, this, [&pSignalEmitter,sId]() { emit pSignalEmitter->load(sId); });
+
+  // local loop to wait for answer
+  QVariant varRetVal = QString();
+  QEventLoop loop;
+  QMetaObject::Connection quitLoop =
+    connect(this, &CScriptStorage::SignalQuitLoop, &loop, &QEventLoop::quit);
+  QMetaObject::Connection interruptLoop =
+    connect(pSignalEmitter, &CStorageSignalEmitter::interrupt,
+            &loop, &QEventLoop::quit, Qt::QueuedConnection);
+  QMetaObject::Connection showRetValLoop =
+    connect(pSignalEmitter, &CStorageSignalEmitter::loadReturnValue,
+            this, [this, &varRetVal](QVariant var)
   {
-    return it->second;
-  }
-  return QJSValue();
+    varRetVal = var;
+    varRetVal.detach(); // fixes some crashes with QJSEngine
+    emit this->SignalQuitLoop();
+    // direct connection to fix cross thread issues with QString content being deleted
+  }, Qt::DirectConnection);
+  loop.exec();
+  loop.disconnect();
+
+  disconnect(quitLoop);
+  disconnect(interruptLoop);
+  disconnect(showRetValLoop);
+
+  return m_pEngine->toScriptValue(varRetVal);
 }
 
 //----------------------------------------------------------------------------------------
@@ -55,26 +75,12 @@ void CScriptStorage::store(QString sId, QJSValue value)
 {
   if (!CheckIfScriptCanRun()) { return; }
 
-  if (value.isNull() || value.isUndefined())
-  {
-    QString sError = tr("Storing 'null' or 'undefined' object as '%1'.");
-    qWarning() << sError.arg(sId);
-    emit m_pSignalEmitter->showError(sError.arg(sId), QtMsgType::QtWarningMsg);
-  }
-
-  m_storage[sId] = value;
+  QVariant var = value.toVariant();
+  emit SignalEmitter<CStorageSignalEmitter>()->store(sId, var);
 }
 
 //----------------------------------------------------------------------------------------
 //
 void CScriptStorage::Cleanup_Impl()
 {
-  SlotClearStorage();
-}
-
-//----------------------------------------------------------------------------------------
-//
-void CScriptStorage::SlotClearStorage()
-{
-  m_storage.clear();
 }

@@ -61,6 +61,8 @@ Rectangle {
 
     function onUnLoadProject()
     {
+        storage.clear();
+
         registeredTextBox = null;
         registeredMediaPlayer = null;
 
@@ -178,9 +180,23 @@ Rectangle {
             }
         }
     }
-    StorageSignalEmitter {
+    TeaseStorage {
         id: storage
+    }
+    StorageSignalEmitter {
+        id: storageEmitter
         property string userName: "localStorage"
+
+        onClear: {
+            storage.clear();
+        }
+        onLoad: {
+            var loaded = storage.load(sId);
+            loadReturnValue(loaded);
+        }
+        onStore: {
+            storage.store(sId, value);
+        }
     }
     PlayerBackground {
         id: background
@@ -292,7 +308,7 @@ Rectangle {
         }
 
         ScriptRunner.registerNewComponent(thread.userName, thread);
-        ScriptRunner.registerNewComponent(storage.userName, storage);
+        ScriptRunner.registerNewComponent(storageEmitter.userName, storageEmitter);
         numReadyComponents += 2;
     }
 }
