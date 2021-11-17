@@ -23,6 +23,10 @@ struct STextSnippetCode
   QString m_sText = QString();
   bool m_bSetAlignment = false;
   Qt::AlignmentFlag m_textAlignment = Qt::AlignHCenter;
+  bool m_bSetSleepTime = false;
+  bool m_bAutoTime = true;
+  double m_dSleepTimeS = -1;
+  bool m_bSkippable = false;
   bool m_bShowIcon = false;
   QString m_sTextIcon = QString();
   bool m_bShowButtons = false;
@@ -60,6 +64,10 @@ protected slots:
   void on_pShowUserInputCheckBox_toggled(bool bStatus);
   void on_pSetTextOrientation_toggled(bool bStatus);
   void on_pOrientationComboBox_currentIndexChanged(qint32 iIndex);
+  void on_pSetSleepTimeCheckBox_toggled(bool bStatus);
+  void on_pAutoTimeCheckBox_toggled(bool bStatus);
+  void on_pSleepSpinBox_valueChanged(double dValue);
+  void on_pSkippableCheckBox_toggled(bool bStatus);
   void on_pTextEdit_textChanged();
   void on_pShowIconCheckBox_toggled(bool bStatus);
   void on_pResourceLineEdit_editingFinished();

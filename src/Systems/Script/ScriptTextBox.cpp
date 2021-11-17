@@ -1,11 +1,40 @@
 #include "ScriptTextBox.h"
 #include "Application.h"
 #include "Systems/DatabaseManager.h"
+#include "Systems/EOS/EosHelpers.h"
+#include "Systems/JSON/JsonInstructionBase.h"
+#include "Systems/JSON/JsonInstructionSetParser.h"
 #include "Systems/Project.h"
 #include "Systems/Resource.h"
-#include <QEventLoop>
-#include <QDebug>
 
+#include <QDateTime>
+#include <QDebug>
+#include <QEventLoop>
+#include <QTextDocumentFragment>
+#include <QTimer>
+
+namespace
+{
+  const qint32 c_iDelayBaseMs = 1'500;
+  const qint32 c_iDelayPerCharMs = 30;
+  const qint32 c_iDelayPerCharMaxMs = 8'000;
+  const qint32 c_iDelayPerWordMs = 300;
+
+  qint32 EstimateDurationBasedOnText(const QString& sText)
+  {
+    QString sPlainText = QTextDocumentFragment::fromHtml(sText).toPlainText();
+     return (
+       c_iDelayBaseMs +
+       std::max(
+         std::min(sPlainText.size() * c_iDelayPerCharMs, c_iDelayPerCharMaxMs),
+         (sPlainText.count(QRegExp("\\s")) + 1) * c_iDelayPerWordMs
+       )
+     );
+  }
+}
+
+//----------------------------------------------------------------------------------------
+//
 CTextBoxSignalEmitter::CTextBoxSignalEmitter() :
   CScriptRunnerSignalEmiter()
 {
@@ -179,7 +208,90 @@ void CScriptTextBox::showText(QString sText)
 {
   if (!CheckIfScriptCanRun()) { return; }
 
-  emit SignalEmitter<CTextBoxSignalEmitter>()->showText(sText);
+  emit SignalEmitter<CTextBoxSignalEmitter>()->showText(sText, -1);
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CScriptTextBox::showText(QString sText, double dWaitTime)
+{
+  if (!CheckIfScriptCanRun()) { return; }
+  showText(sText, dWaitTime, false);
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CScriptTextBox::showText(QString sText, double dWaitTime, bool bSkipable)
+{
+  if (!CheckIfScriptCanRun()) { return; }
+
+  auto pSignalEmitter = SignalEmitter<CTextBoxSignalEmitter>();
+
+  if (0 > dWaitTime)
+  {
+    dWaitTime = EstimateDurationBasedOnText(sText);
+  }
+
+  if (0 < dWaitTime)
+  {
+    QDateTime lastTime = QDateTime::currentDateTime();
+    qint32 iTimeLeft = dWaitTime * 1000;
+
+    QTimer timer;
+    timer.setSingleShot(false);
+    timer.setInterval(20);
+    QEventLoop loop;
+    QMetaObject::Connection interruptLoop =
+      connect(pSignalEmitter, &CTextBoxSignalEmitter::interrupt,
+              &loop, &QEventLoop::quit, Qt::QueuedConnection);
+
+    // connect lambdas in loop context, so events are processed, but capture timer,
+    // to start / stop
+    QMetaObject::Connection pauseLoop =
+      connect(pSignalEmitter, &CTextBoxSignalEmitter::pauseExecution, &loop, [&timer]() {
+        timer.stop();
+      }, Qt::QueuedConnection);
+    QMetaObject::Connection resumeLoop =
+      connect(pSignalEmitter, &CTextBoxSignalEmitter::resumeExecution, &loop, [&timer]() {
+        timer.start();
+      }, Qt::QueuedConnection);
+
+    QMetaObject::Connection timeoutLoop =
+      connect(&timer, &QTimer::timeout, &loop, [&loop, &iTimeLeft, &lastTime]() {
+        QDateTime newTime = QDateTime::currentDateTime();
+        iTimeLeft -= newTime.toMSecsSinceEpoch() - lastTime.toMSecsSinceEpoch();
+        lastTime = newTime;
+        if (0 >= iTimeLeft)
+        {
+          emit loop.exit();
+        }
+      });
+
+    QMetaObject::Connection skipLoop;
+    if (bSkipable)
+    {
+      skipLoop =
+        connect(pSignalEmitter, &CTextBoxSignalEmitter::waitSkipped,
+                &loop, &QEventLoop::quit, Qt::QueuedConnection);
+    }
+
+    emit pSignalEmitter->showText(sText, bSkipable ? dWaitTime : 0);
+
+    timer.start();
+    loop.exec();
+    timer.stop();
+    timer.disconnect();
+    loop.disconnect();
+
+    disconnect(interruptLoop);
+    disconnect(pauseLoop);
+    disconnect(resumeLoop);
+    disconnect(timeoutLoop);
+    if (bSkipable)
+    {
+      disconnect(skipLoop);
+    }
+  }
 }
 
 //----------------------------------------------------------------------------------------
@@ -286,4 +398,463 @@ std::vector<QColor> CScriptTextBox::GetColors(const QJSValue& colors, const QStr
   }
 
   return colorsRet;
+}
+
+//----------------------------------------------------------------------------------------
+//
+class CCommandEosChoice : public IJsonInstructionBase
+{
+public:
+  CCommandEosChoice(CEosScriptTextBox* pParent) :
+    m_pParent(pParent),
+    m_argTypes({
+      {"options", SInstructionArgumentType{EArgumentType::eArray,
+               MakeArgArray(EArgumentType::eMap, tInstructionMapType{
+                     {"label", SInstructionArgumentType{EArgumentType::eString}},
+                     {"commands", SInstructionArgumentType{EArgumentType::eArray,
+                            MakeArgArray(EArgumentType::eObject)}},
+                     {"color", SInstructionArgumentType{EArgumentType::eString}},
+                     {"visible", SInstructionArgumentType{EArgumentType::eBool}}
+               })
+      }},
+    }) {}
+  ~CCommandEosChoice() override {}
+
+  tInstructionMapType& ArgList() override
+  {
+    return m_argTypes;
+  }
+
+  IJsonInstructionBase::tRetVal Call(const tInstructionMapValue& args) override
+  {
+    if (nullptr != m_pParent)
+    {
+      const auto& itOptions = GetValue<EArgumentType::eArray>(args, "options");
+      if (HasValue(args, "options") && IsOk<EArgumentType::eArray>(itOptions))
+      {
+        QStringList vsOptions;
+        std::map<qint32, qint32> vsOptionMapping;
+        std::vector<QColor> vColors;
+        std::vector<qint32> viNumChildren;
+        qint32 iCounter = 0;
+
+        const tInstructionArrayValue& arrOptions = std::get<tInstructionArrayValue>(itOptions);
+        for (size_t i = 0; arrOptions.size() > i; ++i)
+        {
+          const auto& itOption = GetValue<EArgumentType::eMap>(arrOptions, i);
+          if (IsOk<EArgumentType::eMap>(itOption))
+          {
+            const tInstructionMapValue& optionsArg = std::get<tInstructionMapValue>(itOption);
+
+            const auto& itLabel = GetValue<EArgumentType::eString>(optionsArg, "label");
+            const auto& itCommands = GetValue<EArgumentType::eArray>(optionsArg, "commands");
+            const auto& itColor = GetValue<EArgumentType::eString>(optionsArg, "color");
+            const auto& itVisible = GetValue<EArgumentType::eBool>(optionsArg, "visible");
+
+            // TODO: <eval></eval> does not work yet
+            QString sLabel;
+            if (HasValue(optionsArg, "label") && IsOk<EArgumentType::eString>(itLabel))
+            {
+              sLabel = std::get<QString>(itLabel);
+            }
+            if (HasValue(optionsArg, "commands") && IsOk<EArgumentType::eArray>(itCommands))
+            {
+              const tInstructionArrayValue& commands = std::get<tInstructionArrayValue>(itCommands);
+              viNumChildren.push_back(static_cast<qint32>(commands.size()));
+            }
+            QColor col;
+            if (HasValue(optionsArg, "color") && IsOk<EArgumentType::eString>(itColor))
+            {
+              col = std::get<QString>(itColor);
+            }
+            bool bVisible = true;
+            if (HasValue(optionsArg, "visible") && IsOk<EArgumentType::eBool>(itVisible))
+            {
+              bVisible = std::get<bool>(itVisible);
+            }
+
+            if (bVisible)
+            {
+              vsOptions.push_back(sLabel);
+              vColors.push_back(col);
+              vsOptionMapping.insert({iCounter++, static_cast<qint32>(i)});
+            }
+            else
+            {
+              vsOptionMapping.insert({static_cast<qint32>(1000000+i), static_cast<qint32>(i)});
+            }
+          }
+        }
+
+        m_pParent->setTextColors(vColors);
+        qint32 iButton = m_pParent->showButtonPrompts(vsOptions);
+        m_pParent->setTextColors({QColor(Qt::white)});
+
+        qint32 iSiblingToCall = 0;
+        qint32 iActualButton = vsOptionMapping[iButton];
+        for (qint32 i = 0; i < iActualButton; ++i)
+        {
+          iSiblingToCall += viNumChildren[static_cast<size_t>(i)];
+        }
+
+        return SRunRetVal<ENextCommandToCall::eChild>(iSiblingToCall);
+      }
+    }
+    return SJsonException{"internal Error.", "", "choice", 0, 0};
+  }
+
+private:
+  CEosScriptTextBox*     m_pParent;
+  tInstructionMapType    m_argTypes;
+};
+
+//----------------------------------------------------------------------------------------
+//
+class CCommandEosPrompt : public IJsonInstructionBase
+{
+public:
+  CCommandEosPrompt(CEosScriptTextBox* pParent) :
+    m_pParent(pParent),
+    m_argTypes({
+      {"variable", SInstructionArgumentType{EArgumentType::eString}}
+    }) {}
+  ~CCommandEosPrompt() override {}
+
+  tInstructionMapType& ArgList() override
+  {
+    return m_argTypes;
+  }
+
+  IJsonInstructionBase::tRetVal Call(const tInstructionMapValue& args) override
+  {
+    if (nullptr != m_pParent)
+    {
+      const QString sValue = m_pParent->showInput();
+
+      const auto& itVariable = GetValue<EArgumentType::eString>(args, "variable");
+      if (HasValue(args, "variable") && IsOk<EArgumentType::eString>(itVariable))
+      {
+        const QString sVariable = std::get<QString>(itVariable);
+        // TODO:
+      }
+
+      return SRunRetVal<ENextCommandToCall::eSibling>();
+    }
+    return SJsonException{"internal Error.", "", "prompt", 0, 0};
+  }
+
+private:
+  CEosScriptTextBox*     m_pParent;
+  tInstructionMapType    m_argTypes;
+};
+
+//----------------------------------------------------------------------------------------
+//
+class CCommandEosSay : public IJsonInstructionBase
+{
+public:
+  CCommandEosSay(CEosScriptTextBox* pParent) :
+    m_pParent(pParent),
+    m_argTypes({
+      {"label", SInstructionArgumentType{EArgumentType::eString}},
+      {"align", SInstructionArgumentType{EArgumentType::eString}},
+      {"mode", SInstructionArgumentType{EArgumentType::eString}},
+      {"allowSkip", SInstructionArgumentType{EArgumentType::eBool}},
+      {"duration", SInstructionArgumentType{EArgumentType::eString}}
+    }) {}
+  ~CCommandEosSay() override {}
+
+  tInstructionMapType& ArgList() override
+  {
+    return m_argTypes;
+  }
+
+  IJsonInstructionBase::tRetVal Call(const tInstructionMapValue& args) override
+  {
+    if (nullptr != m_pParent)
+    {
+      const auto& itLabel = GetValue<EArgumentType::eString>(args, "label");
+      const auto& itAlign = GetValue<EArgumentType::eString>(args, "align");
+      const auto& itMode = GetValue<EArgumentType::eString>(args, "mode");
+      const auto& itAllowSkip = GetValue<EArgumentType::eBool>(args, "allowSkip");
+      const auto& itDuration = GetValue<EArgumentType::eString>(args, "duration");
+
+      // TODO: <eval></eval> does not work yet
+      QString sLabel;
+      if (HasValue(args, "label") && IsOk<EArgumentType::eString>(itLabel))
+      {
+        sLabel = std::get<QString>(itLabel);
+      }
+
+      if (HasValue(args, "align") && IsOk<EArgumentType::eString>(itAlign))
+      {
+        QString sAlign = std::get<QString>(itAlign);
+        if ("center" == sAlign)
+        {
+          m_pParent->setTextAlignment(TextAlignment::AlignCenter);
+        }
+        else if ("left" == sAlign)
+        {
+          m_pParent->setTextAlignment(TextAlignment::AlignLeft);
+        }
+        else if ("right" == sAlign)
+        {
+          m_pParent->setTextAlignment(TextAlignment::AlignRight);
+        }
+      }
+
+      CEosScriptTextBox::ESayMode mode = CEosScriptTextBox::eAutoplay;
+      if (HasValue(args, "mode") && IsOk<EArgumentType::eString>(itMode))
+      {
+        QString sMode = std::get<QString>(itMode);
+        if ("autoplay" == sMode)
+        {
+          mode = CEosScriptTextBox::eAutoplay;
+        }
+        else if ("instant" == sMode)
+        {
+          mode = CEosScriptTextBox::eInstant;
+        }
+        else if ("pause" == sMode)
+        {
+          mode = CEosScriptTextBox::ePause;
+        }
+      }
+
+      bool bAllowSkip = false;
+      if (HasValue(args, "allowSkip") && IsOk<EArgumentType::eBool>(itAllowSkip))
+      {
+        bAllowSkip = std::get<bool>(itAllowSkip);
+      }
+
+      qint64 iDurationMs = -1;
+      if (HasValue(args, "itDuration") && IsOk<EArgumentType::eString>(itDuration))
+      {
+        iDurationMs = eos::ParseEosDuration(std::get<QString>(itDuration));
+      }
+
+      // based on mode we call things now
+      if (CEosScriptTextBox::eAutoplay == mode)
+      {
+        iDurationMs = EstimateDurationBasedOnText(sLabel);
+        if (0 == iDurationMs)
+        {
+          m_pParent->showText(sLabel);
+        }
+        else
+        {
+          m_pParent->showText(sLabel, static_cast<double>(iDurationMs) / 1000, bAllowSkip);
+        }
+      }
+      else if (CEosScriptTextBox::eInstant == mode)
+      {
+        iDurationMs = 0;
+        m_pParent->showText(sLabel);
+      }
+      else if (CEosScriptTextBox::ePause == mode)
+      {
+        if (0 == iDurationMs)
+        {
+          m_pParent->showText(sLabel);
+        }
+        else
+        {
+          m_pParent->showText(sLabel, static_cast<double>(iDurationMs) / 1000, bAllowSkip);
+        }
+      }
+
+      return SRunRetVal<ENextCommandToCall::eSibling>();
+    }
+    return SJsonException{"internal Error.", "", "say", 0, 0};
+  }
+
+private:
+  CEosScriptTextBox*     m_pParent;
+  tInstructionMapType    m_argTypes;
+};
+
+//----------------------------------------------------------------------------------------
+//
+CEosScriptTextBox::CEosScriptTextBox(QPointer<CScriptRunnerSignalEmiter> pEmitter,
+                                     QPointer<CJsonInstructionSetParser> pParser) :
+  CEosScriptObjectBase(pEmitter, pParser),
+  m_spCommandChoice(std::make_shared<CCommandEosChoice>(this)),
+  m_spCommandPrompt(std::make_shared<CCommandEosPrompt>(this)),
+  m_spCommandSay(std::make_shared<CCommandEosSay>(this))
+{
+  pParser->RegisterInstruction("choice", m_spCommandChoice);
+  pParser->RegisterInstruction("prompt", m_spCommandPrompt);
+  pParser->RegisterInstruction("say", m_spCommandSay);
+}
+CEosScriptTextBox::~CEosScriptTextBox()
+{
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CEosScriptTextBox::setTextAlignment(qint32 alignment)
+{
+  if (!CheckIfScriptCanRun()) { return; }
+  emit SignalEmitter<CTextBoxSignalEmitter>()->textAlignmentChanged(alignment);
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CEosScriptTextBox::setTextColors(const std::vector<QColor>& vColors)
+{
+  if (!CheckIfScriptCanRun()) { return; }
+  emit SignalEmitter<CTextBoxSignalEmitter>()->textColorsChanged(vColors);
+}
+
+//----------------------------------------------------------------------------------------
+//
+qint32 CEosScriptTextBox::showButtonPrompts(const QStringList& vsLabels)
+{
+  if (!CheckIfScriptCanRun()) { return -1; }
+
+  auto pSignalEmitter = SignalEmitter<CTextBoxSignalEmitter>();
+  if (vsLabels.size() > 0)
+  {
+    emit pSignalEmitter->showButtonPrompts(vsLabels);
+
+    // local loop to wait for answer
+    qint32 iReturnValue = -1;
+    QEventLoop loop;
+    QMetaObject::Connection quitLoop =
+      connect(this, &CEosScriptTextBox::SignalQuitLoop, &loop, &QEventLoop::quit);
+    QMetaObject::Connection interruptLoop =
+      connect(pSignalEmitter, &CTextBoxSignalEmitter::interrupt,
+              &loop, &QEventLoop::quit, Qt::QueuedConnection);
+    QMetaObject::Connection showRetValLoop =
+      connect(pSignalEmitter, &CTextBoxSignalEmitter::showButtonReturnValue,
+              this, [this, &iReturnValue](qint32 iIndexSelected)
+    {
+      iReturnValue = iIndexSelected;
+      emit this->SignalQuitLoop();
+    }, Qt::QueuedConnection);
+    loop.exec();
+    loop.disconnect();
+
+    disconnect(quitLoop);
+    disconnect(interruptLoop);
+    disconnect(showRetValLoop);
+
+    return iReturnValue;
+  }
+
+  return -1;
+}
+
+//----------------------------------------------------------------------------------------
+//
+QString CEosScriptTextBox::showInput()
+{
+  if (!CheckIfScriptCanRun()) { return QString(); }
+
+  auto pSignalEmitter = SignalEmitter<CTextBoxSignalEmitter>();
+  emit pSignalEmitter->showInput();
+
+  // local loop to wait for answer
+  QString sReturnValue = QString();
+  QEventLoop loop;
+  QMetaObject::Connection quitLoop =
+    connect(this, &CEosScriptTextBox::SignalQuitLoop, &loop, &QEventLoop::quit);
+  QMetaObject::Connection interruptLoop =
+    connect(pSignalEmitter, &CTextBoxSignalEmitter::interrupt,
+            &loop, &QEventLoop::quit, Qt::QueuedConnection);
+  QMetaObject::Connection showRetValLoop =
+    connect(pSignalEmitter, &CTextBoxSignalEmitter::showInputReturnValue,
+            this, [this, &sReturnValue](QString sInput)
+  {
+    sReturnValue = sInput;
+    sReturnValue.detach(); // fixes some crashes with QJSEngine
+    emit this->SignalQuitLoop();
+    // direct connection to fix cross thread issues with QString content being deleted
+  }, Qt::DirectConnection);
+  loop.exec();
+  loop.disconnect();
+
+  disconnect(quitLoop);
+  disconnect(interruptLoop);
+  disconnect(showRetValLoop);
+
+  return sReturnValue;
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CEosScriptTextBox::showText(QString sText)
+{
+  if (!CheckIfScriptCanRun()) { return; }
+  emit SignalEmitter<CTextBoxSignalEmitter>()->showText(sText, -1);
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CEosScriptTextBox::showText(QString sText, double dWaitTime, bool bSkipable)
+{
+  if (!CheckIfScriptCanRun()) { return; }
+
+  auto pSignalEmitter = SignalEmitter<CTextBoxSignalEmitter>();
+
+  if (0 < dWaitTime)
+  {
+    QDateTime lastTime = QDateTime::currentDateTime();
+    qint32 iTimeLeft = dWaitTime * 1000;
+
+    QTimer timer;
+    timer.setSingleShot(false);
+    timer.setInterval(20);
+    QEventLoop loop;
+    QMetaObject::Connection interruptLoop =
+      connect(pSignalEmitter, &CTextBoxSignalEmitter::interrupt,
+              &loop, &QEventLoop::quit, Qt::QueuedConnection);
+
+    // connect lambdas in loop context, so events are processed, but capture timer,
+    // to start / stop
+    QMetaObject::Connection pauseLoop =
+      connect(pSignalEmitter, &CTextBoxSignalEmitter::pauseExecution, &loop, [&timer]() {
+        timer.stop();
+      }, Qt::QueuedConnection);
+    QMetaObject::Connection resumeLoop =
+      connect(pSignalEmitter, &CTextBoxSignalEmitter::resumeExecution, &loop, [&timer]() {
+        timer.start();
+      }, Qt::QueuedConnection);
+
+    QMetaObject::Connection timeoutLoop =
+      connect(&timer, &QTimer::timeout, &loop, [&loop, &iTimeLeft, &lastTime]() {
+        QDateTime newTime = QDateTime::currentDateTime();
+        iTimeLeft -= newTime.toMSecsSinceEpoch() - lastTime.toMSecsSinceEpoch();
+        lastTime = newTime;
+        if (0 >= iTimeLeft)
+        {
+          emit loop.exit();
+        }
+      });
+
+    QMetaObject::Connection skipLoop;
+    if (bSkipable)
+    {
+      skipLoop =
+        connect(pSignalEmitter, &CTextBoxSignalEmitter::waitSkipped,
+                &loop, &QEventLoop::quit, Qt::QueuedConnection);
+    }
+
+    emit pSignalEmitter->showText(sText, bSkipable ? dWaitTime : 0);
+
+    timer.start();
+    loop.exec();
+    timer.stop();
+    timer.disconnect();
+    loop.disconnect();
+
+    disconnect(interruptLoop);
+    disconnect(pauseLoop);
+    disconnect(resumeLoop);
+    disconnect(timeoutLoop);
+    if (bSkipable)
+    {
+      disconnect(skipLoop);
+    }
+  }
 }

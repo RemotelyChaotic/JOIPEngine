@@ -18,6 +18,18 @@ Item {
 
     signal skippableWait(int iTimeS)
     signal skippableWaitFinished()
+    function setSkippableWait(iTimeS)
+    {
+        if (0 !== iTimeS)
+        {
+            skippableWait(iTimeS);
+        }
+        else
+        {
+            skippableWaitFinished();
+        }
+    }
+
     function registerTextBox(item)
     {
         root.registeredTextBox = item;

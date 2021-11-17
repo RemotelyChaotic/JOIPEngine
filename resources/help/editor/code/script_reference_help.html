@@ -320,7 +320,7 @@
         metronome.setMuted(false);<br>
         <br></li>
 
-        <li><b>setPattern ( real[] ):</b><br>
+        <li><b>setPattern ( int[] ):</b><br>
         This function is used to set the pattern of the beat. This pattern will repeat until
         the metronome is playing and will determine, how the intervals between beats are streched.
         If this is called with an array of zero elements, the default pattern ( [1] ) will be set.<br>
@@ -457,17 +457,26 @@
         var input = textBox.showInput();<br>
         <br></li>
 
-        <li><b>showText ( string ):</b><br>
+        <li><b>showText ( string [, double [, bool ] ] ):</b><br>
         Shows text. The input string will be used for the text content and the first colors
         set by setBackgroundColors and setTextColors will be used for
         text and background coloring. It is allways possible to use HTML 3.2 tags in text.
         If you need more, you can surround the text with &lt;html&gt;...&lt;/html&gt; to
         use a subset of html HTML 4 tags in the text (see
         https://doc.qt.io/qt-5/richtext-html-subset.html for the supported subset).<br>
+        The second argument is optional and denotes the time that the text should be visible for.
+        If the second value is &lt; 0 the wait time will be automatically determined based on the number of characters
+        in the text.<br>
+        The third argument is also optional and is a flag if the wait should be skipable or not.<br>
+        These two arguments are provided for convenience only and have the same effect as if
+        </i>thread.sleep(...)</i> was called after the <i>showText</i> call.
         <i>Example Usage:</i><br>
         textBox.showText("Hello world!"); /* default text */<br>
         textBox.showText("Hello&lt;br&gt;world!"); /* Will insert a newline between Hello and world! */<br>
         textBox.showText(&lt;html&gt;&lt;span style='font-weight:bold;font-size:large'&gt;Settings&lt;/span&gt;&lt;/html&gt;); /*styled text*/<br>
+        textBox.showText("Hello world!", -1); /* show Hello world for an automatically determined time (non-skippable)*/<br>
+        textBox.showText("Hello world!", 10); /* show Hello world for 10 seconds (non-skippable)*/<br>
+        textBox.showText("Hello world!", 10, true); /* show Hello world for 10 seconds (skippable)*/<br>
         <br></li>
 
         <li><b>clear (  ):</b><br>
@@ -493,7 +502,7 @@
         timer.hide();<br>
         <br></li>
 
-        <li><b>setTime ( int ):</b><br>
+        <li><b>setTime ( real ):</b><br>
         Sets the counter of the timer to the input. The input is given in seconds. Setting
         the time during a running timer will reset the timer.<br>
         <i>Example Usage:</i><br>

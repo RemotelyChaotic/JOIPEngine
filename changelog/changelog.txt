@@ -128,8 +128,6 @@ New Features:
 - Changeable Layouts in Player implemented
 - New PlayerMediaPlayer features: seek, looping and startAt. Works with Sound and 
   Movie type resources.
-- New PlayerMediaPlayer feature: give resources an ID and refer to them in 
-  functions via id instead of resource name.
 
 Changes:
 - JOIP-Engine uses PhysFS to allow restricted acces to files only, making it
@@ -139,6 +137,12 @@ Changes:
 - Changelog visible in the "About" menu.
 - Help has a tree view containing all topics and pages can be searched.
 - Code editor allows folding blocks.
+- New PlayerMediaPlayer feature: give resources an ID and refer to them in 
+  functions via id instead of resource name.
+- New PlayerTextBox feature: can set duration of message and skippable flag
+  in setText call itself instead of having to call the thread.sleep() method.
+  The duration of a message can also be determined automatically with the 
+  argument -1 (or any number < 0).
 
 Fixed Bugs:
 - Default style is fixed. Qml and icons look no longer broken.

@@ -137,6 +137,9 @@ Rectangle {
         }
         onShowText: {
             textBox.showText(sText);
+            if (0 < dSkippableWaitS) {
+                registrator.setSkippableWait(dSkippableWaitS);
+            }
         }
         onTextAlignmentChanged: {
             textLog.textAlignment = alignment;
@@ -160,6 +163,7 @@ Rectangle {
         }
         onSkippableWaitFinished: {
             textLog.skippable = false;
+            signalEmitter.waitSkipped();
         }
     }
 

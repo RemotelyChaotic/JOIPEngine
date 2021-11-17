@@ -144,6 +144,38 @@ void CTextSnippetOverlay::on_pOrientationComboBox_currentIndexChanged(qint32 iIn
 
 //----------------------------------------------------------------------------------------
 //
+void CTextSnippetOverlay::on_pSetSleepTimeCheckBox_toggled(bool bStatus)
+{
+  if (!m_bInitialized) { return; }
+  m_data.m_bSetSleepTime = bStatus;
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CTextSnippetOverlay::on_pAutoTimeCheckBox_toggled(bool bStatus)
+{
+  if (!m_bInitialized) { return; }
+  m_data.m_bAutoTime = bStatus;
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CTextSnippetOverlay::on_pSleepSpinBox_valueChanged(double dValue)
+{
+  if (!m_bInitialized) { return; }
+  m_data.m_dSleepTimeS = dValue;
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CTextSnippetOverlay::on_pSkippableCheckBox_toggled(bool bStatus)
+{
+  if (!m_bInitialized) { return; }
+  m_data.m_bSkippable = bStatus;
+}
+
+//----------------------------------------------------------------------------------------
+//
 void CTextSnippetOverlay::on_pTextEdit_textChanged()
 {
   if (!m_bInitialized) { return; }
@@ -478,8 +510,17 @@ void CTextSnippetOverlay::on_pConfirmButton_clicked()
   }
   if (m_data.m_bShowText)
   {
-    QString sText("textBox.showText(\"%1\");\n");
-    sCode += sText.arg(m_data.m_sText);
+    QString sOptionalArgs;
+    if (m_data.m_bSetSleepTime)
+    {
+      double dSleepTimeS = m_data.m_dSleepTimeS;
+      if (m_data.m_bAutoTime) { dSleepTimeS = -1; }
+      sOptionalArgs = QString(", %1, %2")
+          .arg(dSleepTimeS).arg(m_data.m_bSkippable ? "true" : "false");
+    }
+
+    QString sText("textBox.showText(\"%1\"%2);\n");
+    sCode += sText.arg(m_data.m_sText).arg(sOptionalArgs);
   }
   if (m_data.m_bShowUserInput)
   {
