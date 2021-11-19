@@ -447,7 +447,8 @@ target_link_libraries(${PROJECT_NAME}
     KF5SyntaxHighlighting
     better_enums
     nlohmann_json_schema_validator
-    physfs-static)
+    physfs-static
+    xmldom)
 
 target_sources(${PROJECT_NAME}
   PRIVATE
@@ -460,7 +461,8 @@ target_include_directories(${PROJECT_NAME}
     ${QTAVWIDGETS_INCLUDE_DIRS}
     ${NodeEditor_INCLUDE_DIRS}
     ${PhysicsFS_INCLUDE_DIRS}
-    $<TARGET_PROPERTY:SortFilterProxyModel,INTERFACE_INCLUDE_DIRECTORIES>)
+    $<TARGET_PROPERTY:SortFilterProxyModel,INTERFACE_INCLUDE_DIRECTORIES>
+    $<TARGET_PROPERTY:xmldom,INTERFACE_INCLUDE_DIRECTORIES>)
 
 target_compile_definitions(${PROJECT_NAME}
   PRIVATE

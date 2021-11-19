@@ -25,3 +25,6 @@
 [submodule "3rdparty/libqpcx"]
 	path = 3rdparty/libqpcx
 	url = https://github.com/RemotelyChaotic/libqpcx.git
+[submodule "3rdparty/xmldom"]
+	path = 3rdparty/xmldom
+	url = https://github.com/RemotelyChaotic/xmldom.git

@@ -455,7 +455,7 @@ public:
             QString sLabel;
             if (HasValue(optionsArg, "label") && IsOk<EArgumentType::eString>(itLabel))
             {
-              sLabel = std::get<QString>(itLabel);
+              sLabel = "<html><body>" + std::get<QString>(itLabel) + "</body></html>";
             }
             if (HasValue(optionsArg, "commands") && IsOk<EArgumentType::eArray>(itCommands))
             {
@@ -578,11 +578,10 @@ public:
       const auto& itAllowSkip = GetValue<EArgumentType::eBool>(args, "allowSkip");
       const auto& itDuration = GetValue<EArgumentType::eString>(args, "duration");
 
-      // TODO: <eval></eval> does not work yet
       QString sLabel;
       if (HasValue(args, "label") && IsOk<EArgumentType::eString>(itLabel))
       {
-        sLabel = std::get<QString>(itLabel);
+        sLabel = "<html><body>" + std::get<QString>(itLabel) + "</body></html>";
       }
 
       if (HasValue(args, "align") && IsOk<EArgumentType::eString>(itAlign))

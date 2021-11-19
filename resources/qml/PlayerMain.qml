@@ -311,4 +311,11 @@ Rectangle {
         ScriptRunner.registerNewComponent(storageEmitter.userName, storageEmitter);
         numReadyComponents += 2;
     }
+
+    //------------------------------------------------------------------------------------
+    // eval:
+    function _globalEval(script)
+    {
+        return eval(script);
+    }
 }

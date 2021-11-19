@@ -5,6 +5,8 @@ import JOIP.core 1.1
 import JOIP.db 1.1
 import JOIP.script 1.1
 
+import "qrc:/xmldom/dom-parser.mjs" as DOMParser;
+
 Rectangle {
     id: textBox
     color: "transparent"
@@ -130,13 +132,23 @@ Rectangle {
             textBox.clearTextBox();
         }
         onShowButtonPrompts: {
-            textBox.showButtonPrompts(vsLabels);
+            var vsModifiedPrompts = vsLabels;
+            for (var i = 0; i < vsModifiedPrompts.length; ++i) {
+                if (vsModifiedPrompts[i].startsWith("<html>") && vsModifiedPrompts[i].endsWith("</html>")) {
+                    vsModifiedPrompts[i] = parseHtmlToJS(vsModifiedPrompts[i]);
+                }
+            }
+            textBox.showButtonPrompts(vsModifiedPrompts);
         }
         onShowInput: {
             textBox.showInput(sStoreIntoVar);
         }
         onShowText: {
-            textBox.showText(sText);
+            if (sText.startsWith("<html>") && sText.endsWith("</html>")) {
+                textBox.showText(parseHtmlToJS(sText));
+            } else {
+                textBox.showText(sText);
+            }
             if (0 < dSkippableWaitS) {
                 registrator.setSkippableWait(dSkippableWaitS);
             }
@@ -240,5 +252,56 @@ Rectangle {
             registrator.registerTextBox(textBox);
         }
         registrator.componentLoaded();
+    }
+
+    //------------------------------------------------------------------------------------
+    // variables
+    // from openeos:
+    function wrap(script, onerror, type) {
+      return "
+      (function() {try {return root._globalEval(" + JSON.stringify(script) + ")}
+        catch (e) {console.error(
+          e.stack,
+          " + JSON.stringify('\nIn ' + (type || 'Script EVAL') + ':\n') + ",
+          " + JSON.stringify(script) + "
+          );return " + onerror || '' + "}
+      })()"
+    }
+
+    // Convert HTML string to in-line javascript string expression
+    // Replace ...<eval>expression</eval>... with "..." + (isolated eval expression) + "..."
+    function parseHtmlToJS(string) {
+      if (typeof string !== 'string') return JSON.stringify('');
+      const result = [];
+      const parser = new DOMParser.DOMParser();
+      const doc = parser
+        .parseFromString(string, 'text/html')
+        .getElementsByTagName('body')[0];
+      if (null == doc) return string;
+      const evs = doc.getElementsByTagName('eval');
+      if (null == evs) return string;
+      let docstring = doc.innerHTML;
+      if (null == docstring) return string;
+      for (var iEv = 0; iEv < evs.length; ++iEv) {
+        const ev = evs.item(iEv);
+        if (null == ev) continue;
+        const evHtml = ev.outerHTML;
+        const i = docstring.indexOf(evHtml);
+        const beforeEv = docstring.slice(0, i);
+        const afterEv = docstring.slice(i + evHtml.length, docstring.length);
+        if (beforeEv.length) {
+          result.push(JSON.stringify(beforeEv));
+        }
+        const evExpression = QtApp.decodeHTML(ev.innerHTML).trim();
+        if (evExpression.length) {
+          result.push(wrap(evExpression, 'e.toString()', 'Say/Text <eval>'));
+        }
+        docstring = afterEv;
+      }
+      if (docstring.length) {
+        result.push(JSON.stringify(docstring));
+      }
+      if (!result.length) return JSON.stringify('');
+      return result.join(' + ');
     }
 }

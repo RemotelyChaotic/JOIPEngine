@@ -43,6 +43,7 @@
 #include <QQuickItem>
 #include <QQmlWebChannel>
 #include <QTextDocument>
+#include <QTextDocumentFragment>
 #include <QTimer>
 #include <cassert>
 
@@ -52,6 +53,13 @@ CQmlApplicationQtNamespaceWrapper::CQmlApplicationQtNamespaceWrapper(QObject* eP
 }
 CQmlApplicationQtNamespaceWrapper::~CQmlApplicationQtNamespaceWrapper()
 {
+}
+
+//----------------------------------------------------------------------------------------
+//
+QString CQmlApplicationQtNamespaceWrapper::decodeHTML(const QString& sString)
+{
+  return QTextDocumentFragment::fromHtml(sString).toPlainText();
 }
 
 //----------------------------------------------------------------------------------------

@@ -12,6 +12,8 @@
 #include "Widgets/BackgroundWidget.h"
 #include "ui_SceneMainScreen.h"
 
+#include <XmlDomWrapper.h>
+
 #include <QAction>
 #include <QQmlContext>
 #include <QQmlEngine>
@@ -447,6 +449,8 @@ void CSceneMainScreen::InitQmlMain()
   m_spUi->pQmlWidget->setAttribute(Qt::WA_TranslucentBackground, true);
   m_spUi->pQmlWidget->setClearColor(Qt::transparent);
   m_spUi->pQmlWidget->setStyleSheet("background-color: transparent;");
+
+  xmldom::RegisterWrapper(m_spUi->pQmlWidget->engine());
 
   m_spUi->pQmlWidget->engine()->setProperty(player::c_sMainPlayerProperty, QVariant::fromValue(this));
 

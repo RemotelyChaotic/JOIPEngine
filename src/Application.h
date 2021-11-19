@@ -25,6 +25,7 @@ public:
   ~CQmlApplicationQtNamespaceWrapper();
 
 public slots:
+  QString decodeHTML(const QString& sString);
   bool mightBeRichtext(const QString& sString);
 };
 
