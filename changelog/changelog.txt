@@ -130,6 +130,9 @@ New Features:
   Movie type resources.
 - showText can now execute code during the printing of text if it is encased in a 
   <eval></eval> block in html mode.
+- New component: PlayerEval for when you need to run arbitrary code in the UI 
+  directly. This is not usually recomended, but is a way to give a script 
+  full UI control.
 
 Changes:
 - JOIP-Engine uses PhysFS to allow restricted acces to files only, making it

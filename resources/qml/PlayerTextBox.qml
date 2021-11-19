@@ -257,17 +257,6 @@ Rectangle {
     //------------------------------------------------------------------------------------
     // variables
     // from openeos:
-    function wrap(script, onerror, type) {
-      return "
-      (function() {try {return root._globalEval(" + JSON.stringify(script) + ")}
-        catch (e) {console.error(
-          e.stack,
-          " + JSON.stringify('\nIn ' + (type || 'Script EVAL') + ':\n') + ",
-          " + JSON.stringify(script) + "
-          );return " + onerror || '' + "}
-      })()"
-    }
-
     // Convert HTML string to in-line javascript string expression
     // Replace ...<eval>expression</eval>... with "..." + (isolated eval expression) + "..."
     function parseHtmlToJS(string) {
@@ -294,7 +283,7 @@ Rectangle {
         }
         const evExpression = QtApp.decodeHTML(ev.innerHTML).trim();
         if (evExpression.length) {
-          result.push(wrap(evExpression, 'e.toString()', 'Say/Text <eval>'));
+          result.push(root.wrap(evExpression, 'e.toString()', 'Say/Text <eval>'));
         }
         docstring = afterEv;
       }

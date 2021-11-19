@@ -51,6 +51,10 @@ std::shared_ptr<CScriptObjectBase> CTextBoxSignalEmitter::CreateNewScriptObject(
 {
   return std::make_shared<CScriptTextBox>(this, pEngine);
 }
+std::shared_ptr<CScriptObjectBase> CTextBoxSignalEmitter::CreateNewScriptObject(QPointer<CJsonInstructionSetParser> pParser)
+{
+  return std::make_shared<CEosScriptTextBox>(this, pParser);
+}
 
 //----------------------------------------------------------------------------------------
 //

@@ -569,6 +569,27 @@
 
     <br>
 
+    <h2>PlayerEval (name: <i>evalRunner</i>)</h2>
+
+    <br>
+
+    <p>This object is automatically registered by the JOIP-Engine on loading a
+    <a href="qrc:/resources/help/project/joi_project_help.html">JOI-Project</a> and
+    should not be placed in the <a href="qrc:/resources/help/layout/layout_help.html">Layout</a> manually. This object can be used to run
+    arbitrary code in the player UI.<br>
+      <ul>
+        <li><b>eval ( string ): var</b><br>
+        Runs some code in the UI and returns the return value of the execution. The variables of this script are
+        <i>not</i> accessable in the UI and all registered components might have different object names.
+        Only for advanced users, who know what they are doing, as this has full access to the player UI.<br>
+        <i>Example Usage:</i><br>
+        evalRunner.eval("root.storage.clear();"); /* clears storage variables */<br>
+      <br></li>
+      </ul>
+    </p>
+
+    <br>
+
     <h2>Project</h2>
 
     <br>

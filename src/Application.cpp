@@ -23,6 +23,7 @@
 
 // needed to register to qml
 #include "Systems/Script/ScriptBackground.h"
+#include "Systems/Script/ScriptEval.h"
 #include "Systems/Script/ScriptIcon.h"
 #include "Systems/Script/ScriptMediaPlayer.h"
 #include "Systems/Script/ScriptMetronome.h"
@@ -334,6 +335,7 @@ void CApplication::RegisterQmlTypes()
   qmlRegisterUncreatableType<CResourceScriptWrapper>("JOIP.db", 1, 1, "Resource", "");
 
   qmlRegisterType<CBackgroundSignalEmitter>("JOIP.script", 1, 1, "BackgroundSignalEmitter");
+  qmlRegisterType<CEvalSignalEmiter>("JOIP.script", 1, 1, "EvalSignalEmitter");
   qmlRegisterType<CIconSignalEmitter>("JOIP.script", 1, 1, "IconSignalEmitter");
   qmlRegisterType<CMediaPlayerSignalEmitter>("JOIP.script", 1, 1, "MediaPlayerSignalEmitter");
   qmlRegisterType<CMetronomeSignalEmitter>("JOIP.script", 1, 1, "MetronomeSignalEmitter");

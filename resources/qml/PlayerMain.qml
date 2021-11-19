@@ -61,6 +61,8 @@ Rectangle {
 
     function onUnLoadProject()
     {
+        // clear eval environement and storage
+        evalEnvironement = null;
         storage.clear();
 
         registeredTextBox = null;
@@ -198,6 +200,30 @@ Rectangle {
             storage.store(sId, value);
         }
     }
+    property var evalEnvironement: null
+    function _globalEval(script)
+    {
+        return eval(script);
+    }
+    function wrap(script, onerror, type) {
+      return "
+      (function() {try {return evalEnvironement._globalEval(" + JSON.stringify(script) + ")}
+        catch (e) {console.error(
+          e.stack,
+          " + JSON.stringify('\nIn ' + (type || 'Script EVAL') + ':\n') + ",
+          " + JSON.stringify(script) + "
+          );return " + onerror || '' + "}
+      })()"
+    }
+    EvalSignalEmitter {
+        id: evaluator
+        property string userName: "evalRunner"
+
+        onEval: {
+            var retVal = root.wrap(sScript, 'e.toString()', 'evaluator <' + userName + '>')
+            evaluator.evalReturn(retVal);
+        }
+    }
     PlayerBackground {
         id: background
         anchors.fill: parent
@@ -309,13 +335,12 @@ Rectangle {
 
         ScriptRunner.registerNewComponent(thread.userName, thread);
         ScriptRunner.registerNewComponent(storageEmitter.userName, storageEmitter);
-        numReadyComponents += 2;
-    }
+        ScriptRunner.registerNewComponent(evaluator.userName, evaluator);
+        numReadyComponents += 3;
 
-    //------------------------------------------------------------------------------------
-    // eval:
-    function _globalEval(script)
-    {
-        return eval(script);
+        // repopulate eval environement
+        evalEnvironement = {
+            _globalEval: _globalEval
+        };
     }
 }

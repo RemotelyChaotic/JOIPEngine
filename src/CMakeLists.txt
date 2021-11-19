@@ -331,6 +331,8 @@ set(Sources
   Systems/Script/JsScriptRunner.h
   Systems/Script/ScriptBackground.cpp 
   Systems/Script/ScriptBackground.h 
+  Systems/Script/ScriptEval.cpp
+  Systems/Script/ScriptEval.h
   Systems/Script/ScriptIcon.cpp 
   Systems/Script/ScriptIcon.h 
   Systems/Script/ScriptMediaPlayer.cpp 

@@ -30,7 +30,8 @@ public:
   CTextBoxSignalEmitter();
   ~CTextBoxSignalEmitter();
 
-  virtual std::shared_ptr<CScriptObjectBase> CreateNewScriptObject(QPointer<QJSEngine> pEngine);
+  std::shared_ptr<CScriptObjectBase> CreateNewScriptObject(QPointer<QJSEngine> pEngine) override;
+  std::shared_ptr<CScriptObjectBase> CreateNewScriptObject(QPointer<CJsonInstructionSetParser> pParser) override;
 
 signals:
   void clearText();
