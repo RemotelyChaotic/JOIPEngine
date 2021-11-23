@@ -13,6 +13,7 @@ public:
                        SRunRetVal<ENextCommandToCall::eChild>,
                        SRunRetVal<ENextCommandToCall::eSibling>,
                        SRunRetVal<ENextCommandToCall::eForkThis>,
+                       SRunRetVal<ENextCommandToCall::eFinish>,
                        std::true_type /*Default: dfs traversal of tree*/> tRetVal;
 
   IJsonInstructionBase() {}

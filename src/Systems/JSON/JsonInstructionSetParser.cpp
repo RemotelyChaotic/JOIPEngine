@@ -110,30 +110,35 @@ public slots:
       else if (std::holds_alternative<SRunRetVal<ENextCommandToCall::eChild>>(vRetVal))
       {
         auto& ret = std::get<SRunRetVal<ENextCommandToCall::eChild>>(vRetVal);
-        return NextCommand(ret.m_type, ret.m_iIndex);
+        return SRunnerRetVal{NextCommand(ret.m_type, ret.m_iIndex), std::any()};
       }
       else if (std::holds_alternative<SRunRetVal<ENextCommandToCall::eSibling>>(vRetVal))
       {
         auto& ret = std::get<SRunRetVal<ENextCommandToCall::eSibling>>(vRetVal);
-        return NextCommand(ret.m_type);
+        return SRunnerRetVal{NextCommand(ret.m_type), std::any()};
       }
       else if (std::holds_alternative<SRunRetVal<ENextCommandToCall::eForkThis>>(vRetVal))
       {
         auto& ret = std::get<SRunRetVal<ENextCommandToCall::eForkThis>>(vRetVal);
         emit Fork(runMode, m_spNextNode, ret.m_args);
-        return NextCommand(ENextCommandToCall::eSibling);
+        return SRunnerRetVal{NextCommand(ENextCommandToCall::eSibling), std::any()};
       }
-      else return NextCommand(ENextCommandToCall::eChild, 0);
+      else if (std::holds_alternative<SRunRetVal<ENextCommandToCall::eFinish>>(vRetVal))
+      {
+        m_spNextNode = nullptr;
+        return SRunnerRetVal{false, std::get<SRunRetVal<ENextCommandToCall::eFinish>>(vRetVal).m_retVal};
+      }
+      else return SRunnerRetVal{NextCommand(ENextCommandToCall::eChild, 0), std::any()};
     };
 
 
     if (ERunerMode::eAutoRunAll == runMode)
     {
+      SRunnerRetVal retValLast;
       while (nullptr != m_spNextNode)
       {
         if (1 == m_bInterrupted)
         {
-          emit CallNextCommandRetVal(runMode, SJsonException{"Interrupted.","","",0,0});
           return;
         }
 
@@ -143,8 +148,9 @@ public slots:
           emit CallNextCommandRetVal(runMode, retVal);
           return;
         }
+        retValLast = std::get<SRunnerRetVal>(retVal);
       }
-      emit CallNextCommandRetVal(runMode, std::true_type());
+      emit CallNextCommandRetVal(runMode, retValLast);
       return;
     }
     else if (ERunerMode::eRunOne == runMode)
@@ -157,7 +163,7 @@ public slots:
     }
 
     // nothing to run
-    emit CallNextCommandRetVal(runMode, std::true_type());
+    emit CallNextCommandRetVal(runMode, SRunnerRetVal{false, std::any()});
     return;
   }
 
@@ -259,6 +265,22 @@ public:
   }
   ~CJsonInstructionSetRunnerWorkerController()
   {
+    Interrupt();
+  }
+
+  void CallNextCommand(ERunerMode runMode, bool bBlocking)
+  {
+    m_retVal = SRunnerRetVal{false, std::any()};
+    m_bCommandDone = false;
+    m_bBlockingCall = bBlocking;
+    bool bOk = QMetaObject::invokeMethod(m_spWorker.get(), "CallNextCommand", Qt::QueuedConnection,
+                                         Q_ARG(ERunerMode, runMode));
+    assert(bOk);
+    if (!bOk) { m_bCommandDone = false; }
+  }
+
+  void Interrupt()
+  {
     if (nullptr != m_pThread)
     {
       m_spWorker->m_bInterrupted = true;
@@ -270,20 +292,10 @@ public:
     }
   }
 
-  void CallNextCommand(ERunerMode runMode, bool bBlocking)
-  {
-    m_bHasMoreCommands = false;
-    m_bCommandDone = false;
-    m_bBlockingCall = bBlocking;
-    bool bOk = QMetaObject::invokeMethod(m_spWorker.get(), "CallNextCommand", Qt::QueuedConnection,
-                                         Q_ARG(ERunerMode, runMode));
-    assert(bOk);
-    if (!bOk) { m_bCommandDone = false; }
-  }
-
-  bool HasMoreCommands() { return m_bHasMoreCommands; }
+  bool HasMoreCommands() { return m_retVal.m_bHasMoreCommands; }
   bool IsBlockingCall() { return m_bBlockingCall; }
   bool IsDoneWithCommand() { return m_bCommandDone; }
+  std::any RetVal() { return m_retVal.m_retVal; }
 
 signals:
   void CallNextCommandRetVal(ERunerMode runMode, CJsonInstructionSetRunner::tRetVal retVal);
@@ -294,9 +306,9 @@ signals:
 protected slots:
   void SlotCallNextCommandRetVal(ERunerMode runMode, CJsonInstructionSetRunner::tRetVal retVal)
   {
-    if (std::holds_alternative<bool>(retVal))
+    if (std::holds_alternative<SRunnerRetVal>(retVal))
     {
-      m_bHasMoreCommands = std::get<bool>(retVal);
+      m_retVal = std::get<SRunnerRetVal>(retVal);
     }
     m_bCommandDone = true;
     emit CallNextCommandRetVal(runMode, retVal);
@@ -305,8 +317,8 @@ protected slots:
 public:
   std::shared_ptr<CJsonInstructionSetRunnerWorker> m_spWorker;
   QPointer<QThread>                                m_pThread;
+  SRunnerRetVal                                    m_retVal;
   bool                                             m_bCommandDone = true;
-  bool                                             m_bHasMoreCommands = false;
   bool                                             m_bBlockingCall = false;
 };
 
@@ -419,7 +431,7 @@ public:
 
     if (!bBlocking)
     {
-      return std::true_type();
+      return SRunnerRetVal{true, std::any()};
     }
     else
     {
@@ -429,6 +441,16 @@ public:
       waitLoop.exec();
       disconnect(connBlocking);
       return retVal;
+    }
+  }
+
+  //--------------------------------------------------------------------------------------
+  //
+  void Interrupt()
+  {
+    for (auto& spController : m_vspWorkerControllers)
+    {
+      spController->Interrupt();
     }
   }
 
@@ -494,14 +516,27 @@ protected slots:
     {
       bool bHasMore = false;
       bool bAllDone = true;
+      std::vector<std::any> vRetVals;
       for (auto& spController : m_vspWorkerControllers)
       {
         bHasMore |= spController->HasMoreCommands();
         bAllDone &= spController->IsDoneWithCommand();
+        vRetVals.push_back(spController->RetVal());
       }
       if (bAllDone)
       {
-        emit WaitDone(bHasMore);
+        if (vRetVals.size() == 0)
+        {
+          emit WaitDone(SRunnerRetVal{bHasMore, std::any()});
+        }
+        if (vRetVals.size() == 1)
+        {
+          emit WaitDone(SRunnerRetVal{bHasMore, vRetVals.front()});
+        }
+        else
+        {
+          emit WaitDone(SRunnerRetVal{bHasMore, vRetVals});
+        }
       }
     }
   }
@@ -1350,6 +1385,13 @@ CJsonInstructionSetRunner::tRetVal
 CJsonInstructionSetRunner::CallNextCommand(ERunerMode runMode, bool bBlocking)
 {
   return m_pPrivate->CallNextCommand(runMode, bBlocking);
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CJsonInstructionSetRunner::Interrupt()
+{
+  m_pPrivate->Interrupt();
 }
 
 //----------------------------------------------------------------------------------------

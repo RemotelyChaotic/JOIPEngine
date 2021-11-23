@@ -353,7 +353,6 @@ void CSceneMainScreen::SlotScriptRunFinished(bool bOk, const QString& sRetVal)
     }
     else
     {
-      qWarning() << tr("Error in script, unloading project.");
       SlotQuit();
     }
   }

@@ -1,11 +1,12 @@
 #ifndef JSONINSTRUCTIONTYPES_H
 #define JSONINSTRUCTIONTYPES_H
 
-#include <QVariant>
-
 #include <enum.h>
 
 #include <QString>
+#include <QVariant>
+
+#include <any>
 #include <map>
 #include <memory>
 #include <type_traits>
@@ -166,7 +167,8 @@ enum class ENextCommandToCall
 {
   eChild = 0,
   eSibling,
-  eForkThis
+  eForkThis,
+  eFinish
 };
 
 template<ENextCommandToCall M> struct SRunRetVal : std::false_type {};
@@ -186,6 +188,12 @@ template<> struct SRunRetVal<ENextCommandToCall::eForkThis>
   SRunRetVal(const tInstructionMapValue& args) : m_args(args) {}
   ENextCommandToCall m_type = ENextCommandToCall::eForkThis;
   tInstructionMapValue m_args; // arguments for the this call in new worker thread
+};
+template<> struct SRunRetVal<ENextCommandToCall::eFinish>
+{
+  SRunRetVal(std::any retVal) : m_retVal(retVal) {}
+  ENextCommandToCall m_type = ENextCommandToCall::eFinish;
+  std::any           m_retVal;
 };
 
 

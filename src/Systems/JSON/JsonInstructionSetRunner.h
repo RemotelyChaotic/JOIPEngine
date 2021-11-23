@@ -3,8 +3,15 @@
 
 #include "JsonInstructionTypes.h"
 #include <QVariant>
+#include <any>
 
 class CJsonInstructionSetRunnerPrivate;
+
+struct SRunnerRetVal
+{
+  bool     m_bHasMoreCommands = false;
+  std::any m_retVal = std::any();
+};
 
 //----------------------------------------------------------------------------------------
 //
@@ -14,12 +21,13 @@ class CJsonInstructionSetRunner : public QObject
   friend class CJsonInstructionSetParserPrivate;
 
 public:
-  typedef std::variant<SJsonException, bool /*Has more commands*/> tRetVal;
+  typedef std::variant<SJsonException, SRunnerRetVal /*Has more commands*/> tRetVal;
 
   explicit CJsonInstructionSetRunner();
   ~CJsonInstructionSetRunner();
 
   tRetVal CallNextCommand(ERunerMode runMode = ERunerMode::eRunOne, bool bBlocking = true);
+  void Interrupt();
   tRetVal Run(const QString& sInstructionSet, ERunerMode runMode = ERunerMode::eRunOne, bool bBlocking = true);
 
 signals:

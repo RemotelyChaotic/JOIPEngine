@@ -248,6 +248,11 @@ void CJsScriptRunner::HandleScriptFinish(bool bSuccess, const QVariant& sRetVal)
   }
   m_objectMapMutex.unlock();
 
+  if (!bSuccess)
+  {
+    qWarning() << tr("Error in script, unloading project.");
+  }
+
   if (QVariant::String == sRetVal.type())
   {
     emit SignalScriptRunFinished(bSuccess, sRetVal.toString());

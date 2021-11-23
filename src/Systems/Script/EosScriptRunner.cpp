@@ -9,6 +9,86 @@
 #include <QDebug>
 #include <QFile>
 
+struct SFinishTag {};
+
+//----------------------------------------------------------------------------------------
+//
+class CCommandEosEnd : public IJsonInstructionBase
+{
+public:
+  CCommandEosEnd() : m_argTypes() {}
+  ~CCommandEosEnd() override {}
+
+  tInstructionMapType& ArgList() override
+  {
+    return m_argTypes;
+  }
+
+  IJsonInstructionBase::tRetVal Call(const tInstructionMapValue& args) override
+  {
+    Q_UNUSED(args)
+    return SRunRetVal<ENextCommandToCall::eFinish>(SFinishTag());
+  }
+
+private:
+  tInstructionMapType    m_argTypes;
+};
+
+//----------------------------------------------------------------------------------------
+//
+class CCommandEosGoto : public IJsonInstructionBase
+{
+public:
+  CCommandEosGoto() :
+    m_argTypes({
+    { "target", SInstructionArgumentType{EArgumentType::eString}}
+  }) {}
+  ~CCommandEosGoto() override {}
+
+  tInstructionMapType& ArgList() override
+  {
+    return m_argTypes;
+  }
+
+  IJsonInstructionBase::tRetVal Call(const tInstructionMapValue& args) override
+  {
+    const auto& itTarget = GetValue<EArgumentType::eString>(args, "target");
+    if (HasValue(args, "target") && IsOk<EArgumentType::eString>(itTarget))
+    {
+      return SRunRetVal<ENextCommandToCall::eFinish>(std::get<QString>(itTarget));
+    }
+    return SJsonException{"internal Error: No target for goto.", "target", "goto", 0, 0};
+  }
+
+private:
+  tInstructionMapType    m_argTypes;
+};
+
+//----------------------------------------------------------------------------------------
+//
+class CCommandEosNoop : public IJsonInstructionBase
+{
+public:
+  CCommandEosNoop() : m_argTypes() {}
+  ~CCommandEosNoop() override {}
+
+  tInstructionMapType& ArgList() override
+  {
+    return m_argTypes;
+  }
+
+  IJsonInstructionBase::tRetVal Call(const tInstructionMapValue& args) override
+  {
+    Q_UNUSED(args)
+    return SRunRetVal<ENextCommandToCall::eChild>(0);
+  }
+
+private:
+  tInstructionMapType    m_argTypes;
+};
+
+//----------------------------------------------------------------------------------------
+//
 CEosScriptRunner::CEosScriptRunner(std::weak_ptr<CScriptRunnerSignalContext> spSignalEmitterContext,
                                    QObject* pParent) :
   QObject(pParent),
@@ -34,6 +114,9 @@ CEosScriptRunner::~CEosScriptRunner()
 void CEosScriptRunner::Initialize()
 {
   m_spEosParser->RegisterInstructionSetPath("Commands", "/");
+  m_spEosParser->RegisterInstruction("end", std::make_shared<CCommandEosEnd>());
+  m_spEosParser->RegisterInstruction("goto", std::make_shared<CCommandEosGoto>());
+  m_spEosParser->RegisterInstruction("noop", std::make_shared<CCommandEosNoop>());
 }
 
 //----------------------------------------------------------------------------------------
@@ -98,11 +181,14 @@ void CEosScriptRunner::LoadScript(const QString& sScript, tspScene spScene, tspR
   // create runner
   m_spEosRunner =
     m_spEosParser->ParseJson(sScript);
-  if (nullptr == m_spEosParser)
+  if (nullptr == m_spEosRunner)
   {
     HandleError(m_spEosParser->Error());
     return;
   }
+
+  connect(m_spEosRunner.get(), &CJsonInstructionSetRunner::CommandRetVal,
+          this, &CEosScriptRunner::SlotCommandRetVal);
 
   spSignalEmitterContext->SetScriptExecutionStatus(CScriptRunnerSignalEmiter::eRunning);
 
@@ -132,8 +218,6 @@ void CEosScriptRunner::RegisterNewComponent(const QString sName, QJSValue signal
           spObject->moveToThread(thread());
         }
         m_objectMap.insert({ sName, spObject });
-        QMetaObject::invokeMethod(this, "SlotRegisterObject", Qt::QueuedConnection,
-                                  Q_ARG(QString, sName));
       }
     }
   }
@@ -185,31 +269,31 @@ void CEosScriptRunner::HandleScriptFinish(bool bSuccess, const QVariant& sRetVal
   }
   m_objectMapMutex.unlock();
 
-  if (QVariant::String == sRetVal.type())
+  if (!bSuccess)
   {
-    emit SignalScriptRunFinished(bSuccess, sRetVal.toString());
+    qWarning() << tr("Error in script, unloading project.");
+    emit SignalScriptRunFinished(false, QString());
   }
   else
   {
-    emit SignalScriptRunFinished(bSuccess, QString());
+    if (QVariant::String == sRetVal.type())
+    {
+      emit SignalScriptRunFinished(bSuccess, sRetVal.toString());
+    }
+    else if (sRetVal.isNull())
+    {
+      emit SignalScriptRunFinished(false, QString());
+    }
+    else
+    {
+      emit SignalScriptRunFinished(bSuccess, QString());
+    }
   }
 }
 
 //----------------------------------------------------------------------------------------
 //
-void CEosScriptRunner::SlotRegisterObject(const QString& sObject)
-{
-  QMutexLocker locker(&m_objectMapMutex);
-  auto it = m_objectMap.find(sObject);
-  if (m_objectMap.end() != it)
-  {
-    //m_spEosParser->RegisterInstruction(sObject, it->second);
-  }
-}
-
-//----------------------------------------------------------------------------------------
-//
-void CEosScriptRunner::SlotRun()
+void CEosScriptRunner::SlotCommandRetVal(CJsonInstructionSetRunner::tRetVal retVal)
 {
   auto spSignalEmitterContext = m_wpSignalEmitterContext.lock();
   if (nullptr == spSignalEmitterContext)
@@ -218,16 +302,39 @@ void CEosScriptRunner::SlotRun()
     return;
   }
 
-  CJsonInstructionSetRunner::tRetVal bOk = m_spEosRunner->Run("Commands", ERunerMode::eAutoRunAll);
   spSignalEmitterContext->SetScriptExecutionStatus(CScriptRunnerSignalEmiter::eStopped);
 
-  if (!std::holds_alternative<bool>(bOk))
+  if (std::holds_alternative<SJsonException>(retVal))
   {
-    HandleError(std::get<SJsonException>(bOk));
+    HandleError(std::get<SJsonException>(retVal));
   }
   else
   {
-    HandleScriptFinish(true, QString());
+    SRunnerRetVal& retValCasted = std::get<SRunnerRetVal>(retVal);
+    // retValCasted.m_bHasMoreCommands
+    if (retValCasted.m_retVal.type() == typeid(QString))
+    {
+      HandleScriptFinish(true, std::any_cast<QString>(retValCasted.m_retVal));
+    }
+    else if (retValCasted.m_retVal.type() == typeid(SFinishTag))
+    {
+      HandleScriptFinish(true, QVariant());
+    }
+    else
+    {
+      HandleScriptFinish(true, QString());
+    }
+  }
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CEosScriptRunner::SlotRun()
+{
+  CJsonInstructionSetRunner::tRetVal retVal = m_spEosRunner->Run("Commands", ERunerMode::eAutoRunAll, false);
+  if (!std::holds_alternative<SRunnerRetVal>(retVal))
+  {
+    HandleError(std::get<SJsonException>(retVal));
   }
 }
 

@@ -2,6 +2,7 @@
 #define CEOSSCRIPTRUNNER_H
 
 #include "IScriptRunner.h"
+#include "Systems/JSON/JsonInstructionSetRunner.h"
 #include <QObject>
 #include <QMutex>
 #include <QPointer>
@@ -10,7 +11,6 @@
 #include <memory>
 
 class CJsonInstructionSetParser;
-class CJsonInstructionSetRunner;
 class CScriptRunnerSignalContext;
 struct SJsonException;
 
@@ -41,7 +41,7 @@ signals:
   void SignalScriptRunFinished(bool bOk, const QString& sRetVal) override;
 
 private slots:
-  void SlotRegisterObject(const QString& sObject);
+  void SlotCommandRetVal(CJsonInstructionSetRunner::tRetVal retVal);
   void SlotRun();
 
 private:

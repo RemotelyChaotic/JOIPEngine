@@ -91,7 +91,7 @@ void CTutorialStateSwitchHandlerMainBase::SlotOverlayNextInstructionTriggered()
     CJsonInstructionSetRunner::tRetVal retVal = m_spTutorialRunner->CallNextCommand();
     if (!std::holds_alternative<SJsonException>(retVal))
     {
-      if (!std::get<bool>(retVal))
+      if (!std::get<SRunnerRetVal>(retVal).m_bHasMoreCommands)
       {
         m_pTutorialOverlay->NextTutorialState();
       }
