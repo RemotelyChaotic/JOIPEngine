@@ -6,9 +6,9 @@
 #include <QObject>
 #include <QMutex>
 #include <QPointer>
-#include <QTimer>
 #include <map>
 #include <memory>
+#include <map>
 
 class CJsonInstructionSetParser;
 class CScriptRunnerSignalContext;
@@ -42,14 +42,15 @@ signals:
 
 private slots:
   void SlotCommandRetVal(CJsonInstructionSetRunner::tRetVal retVal);
-  void SlotRun();
+  void SlotFork(std::shared_ptr<CJsonInstructionSetRunner> spNewRunner, const QString& sForkCommandsName);
+  void SlotRun(const QString& sRunner, const QString& sCommands);
 
 private:
   void HandleError(const SJsonException& value);
 
   std::unique_ptr<CJsonInstructionSetParser>     m_spEosParser;
-  std::shared_ptr<CJsonInstructionSetRunner>     m_spEosRunner;
-  std::shared_ptr<QTimer>                        m_spTimer;
+  std::map<QString, std::shared_ptr<CJsonInstructionSetRunner>>
+                                                 m_vspEosRunner;
   std::weak_ptr<CScriptRunnerSignalContext>      m_wpSignalEmitterContext;
   tspScene                                       m_spCurrentScene;
   mutable QMutex                                 m_sceneMutex;
@@ -57,6 +58,7 @@ private:
   mutable QMutex                                 m_objectMapMutex;
   std::map<QString /*name*/,
            std::shared_ptr<CScriptObjectBase>>   m_objectMap;
+  QAtomicInt                                     m_bInitialized;
 };
 
 #endif // CEOSSCRIPTRUNNER_H

@@ -10,6 +10,7 @@
 #include <QEventLoop>
 #include <QPointer>
 #include <QThread>
+#include <memory>
 #include <set>
 #include <stack>
 #include <string>
@@ -120,7 +121,7 @@ public slots:
       else if (std::holds_alternative<SRunRetVal<ENextCommandToCall::eForkThis>>(vRetVal))
       {
         auto& ret = std::get<SRunRetVal<ENextCommandToCall::eForkThis>>(vRetVal);
-        emit Fork(runMode, m_spNextNode, ret.m_args);
+        emit Fork(runMode, m_spNextNode, ret.m_args, ret.m_sName);
         return SRunnerRetVal{NextCommand(ENextCommandToCall::eSibling), std::any()};
       }
       else if (std::holds_alternative<SRunRetVal<ENextCommandToCall::eFinish>>(vRetVal))
@@ -172,7 +173,8 @@ signals:
                              CJsonInstructionSetRunner::tRetVal retVal);
   void Fork(ERunerMode runMode,
             std::shared_ptr<CJsonInstructionNode> spNode,
-            tInstructionMapValue args);
+            tInstructionMapValue args,
+            const QString& sName);
 
 protected:
   //--------------------------------------------------------------------------------------
@@ -301,7 +303,8 @@ signals:
   void CallNextCommandRetVal(ERunerMode runMode, CJsonInstructionSetRunner::tRetVal retVal);
   void Fork(ERunerMode runMode,
             std::shared_ptr<CJsonInstructionNode> spNode,
-            tInstructionMapValue args);
+            tInstructionMapValue args,
+            const QString& sName);
 
 protected slots:
   void SlotCallNextCommandRetVal(ERunerMode runMode, CJsonInstructionSetRunner::tRetVal retVal)
@@ -336,7 +339,7 @@ public:
   CJsonInstructionSetRunnerPrivate() :
     QObject(),
     m_vspBuiltCommands(),
-    m_vspWorkerControllers(),
+    m_spWorkerController(nullptr),
     m_spValidationErrorHandler(std::make_unique<CustomErrorHandler>()),
     m_validator(nullptr, InstructionSetFormatChecker, nullptr),
     m_jsonBaseSchema(),
@@ -350,7 +353,7 @@ public:
   ~CJsonInstructionSetRunnerPrivate()
   {
     // makes debugging easier
-    m_vspWorkerControllers.clear();
+    m_spWorkerController.reset();
   }
 
   //--------------------------------------------------------------------------------------
@@ -424,10 +427,7 @@ public:
       });
     }
 
-    for (auto& spController : m_vspWorkerControllers)
-    {
-      spController->CallNextCommand(runMode, bBlocking);
-    }
+    m_spWorkerController->CallNextCommand(runMode, bBlocking);
 
     if (!bBlocking)
     {
@@ -435,10 +435,12 @@ public:
     }
     else
     {
+      QPointer<CJsonInstructionSetRunnerPrivate> pThisGuard(this);
       QEventLoop waitLoop;
       connect(this, &CJsonInstructionSetRunnerPrivate::WaitDone,
               &waitLoop, &QEventLoop::quit);
       waitLoop.exec();
+      if (pThisGuard.isNull()) { return SJsonException{"Internal error.", "", "", 0, 0}; }
       disconnect(connBlocking);
       return retVal;
     }
@@ -448,10 +450,7 @@ public:
   //
   void Interrupt()
   {
-    for (auto& spController : m_vspWorkerControllers)
-    {
-      spController->Interrupt();
-    }
+    m_spWorkerController->Interrupt();
   }
 
   //--------------------------------------------------------------------------------------
@@ -462,7 +461,7 @@ public:
     if (!m_bValidationOk)
     { return SJsonException{"Parse error.", "", "", 0, 0}; }
 
-    m_vspWorkerControllers.clear();
+    m_spWorkerController.reset(nullptr);
 
     // validation success, start actually running the commands
     auto it = std::find_if(m_vspBuiltCommands.begin(), m_vspBuiltCommands.end(),
@@ -473,22 +472,22 @@ public:
     {
       if (static_cast<qint32>(it->second->m_spChildren.size()) > 0)
       {
-        m_vspWorkerControllers.push_back(
-              std::make_unique<CJsonInstructionSetRunnerWorkerController>(*it->second->m_spChildren.begin()));
+        m_spWorkerController.reset(
+              new CJsonInstructionSetRunnerWorkerController(*it->second->m_spChildren.begin()));
         if (bBlocking)
         {
-          connect(m_vspWorkerControllers.back().get(), &CJsonInstructionSetRunnerWorkerController::CallNextCommandRetVal,
+          connect(m_spWorkerController.get(), &CJsonInstructionSetRunnerWorkerController::CallNextCommandRetVal,
                   this, &CJsonInstructionSetRunnerPrivate::CallNextCommandRetVal);
         }
         else
         {
-          connect(m_vspWorkerControllers.back().get(), &CJsonInstructionSetRunnerWorkerController::CallNextCommandRetVal,
+          connect(m_spWorkerController.get(), &CJsonInstructionSetRunnerWorkerController::CallNextCommandRetVal,
                   this, [this](ERunerMode, CJsonInstructionSetRunner::tRetVal retVal) {
             emit CommandRetVal(retVal);
           });
         }
-        connect(m_vspWorkerControllers.back().get(), &CJsonInstructionSetRunnerWorkerController::Fork,
-                this, &CJsonInstructionSetRunnerPrivate::Fork);
+        connect(m_spWorkerController.get(), &CJsonInstructionSetRunnerWorkerController::Fork,
+                this, &CJsonInstructionSetRunnerPrivate::SlotFork);
         return CallNextCommand(runMode, bBlocking);
       }
     }
@@ -499,6 +498,7 @@ public:
 
 signals:
   void CommandRetVal(CJsonInstructionSetRunner::tRetVal retVal);
+  void Fork(std::shared_ptr<CJsonInstructionSetRunner> spNewRunner, const QString& sForkCommandsName);
   void WaitDone(CJsonInstructionSetRunner::tRetVal retVal);
 
 protected slots:
@@ -514,71 +514,47 @@ protected slots:
     }
     else
     {
-      bool bHasMore = false;
-      bool bAllDone = true;
-      std::vector<std::any> vRetVals;
-      for (auto& spController : m_vspWorkerControllers)
-      {
-        bHasMore |= spController->HasMoreCommands();
-        bAllDone &= spController->IsDoneWithCommand();
-        vRetVals.push_back(spController->RetVal());
-      }
+      bool bHasMore = m_spWorkerController->HasMoreCommands();
+      bool bAllDone = m_spWorkerController->IsDoneWithCommand();
+      std::any vRetVal = m_spWorkerController->RetVal();
       if (bAllDone)
       {
-        if (vRetVals.size() == 0)
-        {
-          emit WaitDone(SRunnerRetVal{bHasMore, std::any()});
-        }
-        if (vRetVals.size() == 1)
-        {
-          emit WaitDone(SRunnerRetVal{bHasMore, vRetVals.front()});
-        }
-        else
-        {
-          emit WaitDone(SRunnerRetVal{bHasMore, vRetVals});
-        }
+        emit WaitDone(SRunnerRetVal{bHasMore, vRetVal});
       }
     }
   }
 
   //--------------------------------------------------------------------------------------
   //
-  void Fork(ERunerMode runMode,
-            std::shared_ptr<CJsonInstructionNode> spNode,
-            tInstructionMapValue args)
+  void SlotFork(ERunerMode /*runMode*/,
+                std::shared_ptr<CJsonInstructionNode> spNode,
+                tInstructionMapValue args,
+                const QString& sName)
   {
-    bool bBlocking = dynamic_cast<CJsonInstructionSetRunnerWorkerController*>(sender())->IsBlockingCall();
-
     std::shared_ptr<CJsonInstructionNode> spNewNode =
         std::make_shared<CJsonInstructionNode>(*spNode);
     // change args and make an orphan
     spNewNode->m_actualArgs = args;
     spNewNode->m_wpParent = std::weak_ptr<CJsonInstructionNode>();
-    m_vspWorkerControllers.push_back(
-          std::make_unique<CJsonInstructionSetRunnerWorkerController>(spNewNode));
-    if (bBlocking)
-    {
-      connect(m_vspWorkerControllers.back().get(), &CJsonInstructionSetRunnerWorkerController::CallNextCommandRetVal,
-              this, &CJsonInstructionSetRunnerPrivate::CallNextCommandRetVal);
-    }
-    else
-    {
-      connect(m_vspWorkerControllers.back().get(), &CJsonInstructionSetRunnerWorkerController::CallNextCommandRetVal,
-              this, [this](ERunerMode, CJsonInstructionSetRunner::tRetVal retVal) {
-        emit CommandRetVal(retVal);
-      });
-    }
-    connect(m_vspWorkerControllers.back().get(), &CJsonInstructionSetRunnerWorkerController::Fork,
-            this, &CJsonInstructionSetRunnerPrivate::Fork);
-    m_vspWorkerControllers.back()->CallNextCommand(runMode, bBlocking);
+
+    std::shared_ptr<CJsonInstructionSetRunner> spRunner =
+        std::make_shared<CJsonInstructionSetRunner>();
+    spRunner->m_pPrivate->m_instructionMap = m_instructionMap;
+    spRunner->m_pPrivate->m_vspBuiltCommands = { {sName, spNewNode} };
+    // rest is not needed
+    spRunner->m_pPrivate->m_bValidationOk = true;
+
+    spRunner->m_pPrivate->m_spWorkerController =
+        std::make_unique<CJsonInstructionSetRunnerWorkerController>(spNewNode);
+    emit Fork(spRunner, sName);
   }
 
 protected:
   std::map<QString, std::shared_ptr<IJsonInstructionBase>> m_instructionMap;
   std::vector<std::pair<QString, std::shared_ptr<CJsonInstructionNode>>>
                                                           m_vspBuiltCommands;
-  std::vector<std::unique_ptr<CJsonInstructionSetRunnerWorkerController>>
-                                                          m_vspWorkerControllers;
+  std::unique_ptr<CJsonInstructionSetRunnerWorkerController>
+                                                          m_spWorkerController;
   std::unique_ptr<CustomErrorHandler>                     m_spValidationErrorHandler;
   nlohmann::json_schema::json_validator                   m_validator;
   nlohmann::json                                          m_jsonBaseSchema;
@@ -1369,9 +1345,12 @@ CJsonInstructionSetRunner::CJsonInstructionSetRunner() :
   qRegisterMetaType<ERunerMode>();
   qRegisterMetaType<std::shared_ptr<CJsonInstructionNode>>();
   qRegisterMetaType<tInstructionMapValue>();
+  qRegisterMetaType<std::shared_ptr<CJsonInstructionSetRunner>>();
 
   connect(m_pPrivate.get(), &CJsonInstructionSetRunnerPrivate::CommandRetVal,
           this, &CJsonInstructionSetRunner::CommandRetVal);
+  connect(m_pPrivate.get(), &CJsonInstructionSetRunnerPrivate::Fork,
+          this, &CJsonInstructionSetRunner::Fork);
 }
 
 CJsonInstructionSetRunner::~CJsonInstructionSetRunner()

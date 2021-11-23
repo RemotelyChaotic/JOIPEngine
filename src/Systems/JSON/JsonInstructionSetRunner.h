@@ -19,6 +19,7 @@ class CJsonInstructionSetRunner : public QObject
 {
   Q_OBJECT
   friend class CJsonInstructionSetParserPrivate;
+  friend class CJsonInstructionSetRunnerPrivate;
 
 public:
   typedef std::variant<SJsonException, SRunnerRetVal /*Has more commands*/> tRetVal;
@@ -32,11 +33,13 @@ public:
 
 signals:
   void CommandRetVal(CJsonInstructionSetRunner::tRetVal retVal);
+  void Fork(std::shared_ptr<CJsonInstructionSetRunner> spNewRunner, const QString& sForkCommandsName);
 
 protected:
   std::unique_ptr<CJsonInstructionSetRunnerPrivate> m_pPrivate;
 };
 
 Q_DECLARE_METATYPE(CJsonInstructionSetRunner::tRetVal)
+Q_DECLARE_METATYPE(std::shared_ptr<CJsonInstructionSetRunner>)
 
 #endif // CJSONINSTRUCTIONSETRUNNER_H

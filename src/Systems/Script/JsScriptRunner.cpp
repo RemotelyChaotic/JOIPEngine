@@ -75,7 +75,10 @@ void CJsScriptRunner::Deinitialize()
 //
 void CJsScriptRunner::InterruptExecution()
 {
-  m_pScriptEngine->setInterrupted(true);
+  if (nullptr != m_pScriptEngine)
+  {
+    m_pScriptEngine->setInterrupted(true);
+  }
 }
 
 //----------------------------------------------------------------------------------------
