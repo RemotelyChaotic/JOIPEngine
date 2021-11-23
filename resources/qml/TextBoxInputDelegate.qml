@@ -53,7 +53,7 @@ Rectangle {
             onEditingFinished: {
                 textInput.focus = false;
                 textInput.cursorVisible = false;
-                textDelegate.parent.ListView.view.inputEditingFinished(textInput.text, textInput.storeIntoVar);
+                textDelegate.parent.ListView.view.inputEditingFinished(textInput.text, textInput.storeIntoVar, model.sRequestId);
                 textInput.readOnly = true;
             }
         }

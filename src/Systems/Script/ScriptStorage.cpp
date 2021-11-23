@@ -1,8 +1,10 @@
 #include "ScriptStorage.h"
 #include "ScriptRunnerSignalEmiter.h"
+
 #include <QDebug>
 #include <QEventLoop>
 #include <QTimer>
+#include <QUuid>
 
 CStorageSignalEmitter::CStorageSignalEmitter() :
   CScriptRunnerSignalEmiter()
@@ -39,8 +41,12 @@ QJSValue CScriptStorage::load(QString sId)
 {
   if (!CheckIfScriptCanRun()) { return QJSValue(); }
 
+  QString sRequestId = QUuid::createUuid().toString();
+
   auto pSignalEmitter = SignalEmitter<CStorageSignalEmitter>();
-  QTimer::singleShot(0, this, [&pSignalEmitter,sId]() { emit pSignalEmitter->load(sId); });
+  QTimer::singleShot(0, this, [&pSignalEmitter,sId,sRequestId]() {
+    emit pSignalEmitter->load(sId, sRequestId);
+  });
 
   // local loop to wait for answer
   QVariant varRetVal = QString();
@@ -52,11 +58,14 @@ QJSValue CScriptStorage::load(QString sId)
             &loop, &QEventLoop::quit, Qt::QueuedConnection);
   QMetaObject::Connection showRetValLoop =
     connect(pSignalEmitter, &CStorageSignalEmitter::loadReturnValue,
-            this, [this, &varRetVal](QVariant var)
+            this, [this, &varRetVal, sRequestId](QVariant var, QString sRequestIdRet)
   {
-    varRetVal = var;
-    varRetVal.detach(); // fixes some crashes with QJSEngine
-    emit this->SignalQuitLoop();
+    if (sRequestId == sRequestIdRet)
+    {
+      varRetVal = var;
+      varRetVal.detach(); // fixes some crashes with QJSEngine
+      emit this->SignalQuitLoop();
+    }
     // direct connection to fix cross thread issues with QString content being deleted
   }, Qt::DirectConnection);
   loop.exec();

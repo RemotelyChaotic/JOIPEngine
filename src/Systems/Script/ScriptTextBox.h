@@ -35,10 +35,10 @@ public:
 
 signals:
   void clearText();
-  void showButtonPrompts(QStringList vsLabels);
-  void showButtonReturnValue(qint32 iIndex);
-  void showInput(QString sStoreIntoVar);
-  void showInputReturnValue(QString sValue);
+  void showButtonPrompts(QStringList vsLabels, QString sRequestId);
+  void showButtonReturnValue(qint32 iIndex, QString sRequestId);
+  void showInput(QString sStoreIntoVar, QString sRequestId);
+  void showInputReturnValue(QString sValue, QString sRequestId);
   void showText(QString sText, double dSkippableWaitS);
   void textAlignmentChanged(qint32 alignment);
   void textBackgroundColorsChanged(std::vector<QColor> vColors);

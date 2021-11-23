@@ -127,7 +127,7 @@ Rectangle {
                     }
                     onClicked: {
                         root.soundEffects.clickSound.play();
-                        textDelegate.parent.ListView.view.buttonPressed(index);
+                        textDelegate.parent.ListView.view.buttonPressed(index, model.sRequestId);
                     }
 
                     background: Rectangle {

@@ -12,6 +12,7 @@
 #include <QEventLoop>
 #include <QTextDocumentFragment>
 #include <QTimer>
+#include <QUuid>
 
 namespace
 {
@@ -162,6 +163,8 @@ qint32 CScriptTextBox::showButtonPrompts(QJSValue vsLabels)
 {
   if (!CheckIfScriptCanRun()) { return -1; }
 
+  QString sRequestId = QUuid::createUuid().toString();
+
   auto pSignalEmitter = SignalEmitter<CTextBoxSignalEmitter>();
   if (vsLabels.isArray())
   {
@@ -171,7 +174,7 @@ qint32 CScriptTextBox::showButtonPrompts(QJSValue vsLabels)
     {
       vsStringLabels << vsLabels.property(static_cast<quint32>(iIndex)).toString();
     }
-    emit pSignalEmitter->showButtonPrompts(vsStringLabels);
+    emit pSignalEmitter->showButtonPrompts(vsStringLabels, sRequestId);
 
     // local loop to wait for answer
     qint32 iReturnValue = -1;
@@ -183,10 +186,13 @@ qint32 CScriptTextBox::showButtonPrompts(QJSValue vsLabels)
               &loop, &QEventLoop::quit, Qt::QueuedConnection);
     QMetaObject::Connection showRetValLoop =
       connect(pSignalEmitter, &CTextBoxSignalEmitter::showButtonReturnValue,
-              this, [this, &iReturnValue](qint32 iIndexSelected)
+              this, [this, &iReturnValue, sRequestId](qint32 iIndexSelected, QString sRequestIdRet)
     {
-      iReturnValue = iIndexSelected;
-      emit this->SignalQuitLoop();
+      if (sRequestId == sRequestIdRet)
+      {
+        iReturnValue = iIndexSelected;
+        emit this->SignalQuitLoop();
+      }
     }, Qt::QueuedConnection);
     loop.exec();
     loop.disconnect();
@@ -304,8 +310,11 @@ QString CScriptTextBox::showInput()
 {
   if (!CheckIfScriptCanRun()) { return QString(); }
 
+  QString sRequestId = QUuid::createUuid().toString();
   auto pSignalEmitter = SignalEmitter<CTextBoxSignalEmitter>();
-  QTimer::singleShot(0, this, [&pSignalEmitter]() { emit pSignalEmitter->showInput(QString()); });
+  QTimer::singleShot(0, this, [&pSignalEmitter, sRequestId]() {
+    emit pSignalEmitter->showInput(QString(), sRequestId);
+  });
 
   // local loop to wait for answer
   QString sReturnValue = QString();
@@ -317,11 +326,14 @@ QString CScriptTextBox::showInput()
             &loop, &QEventLoop::quit, Qt::QueuedConnection);
   QMetaObject::Connection showRetValLoop =
     connect(pSignalEmitter, &CTextBoxSignalEmitter::showInputReturnValue,
-            this, [this, &sReturnValue](QString sInput)
+            this, [this, &sReturnValue, sRequestId](QString sInput, QString sRequestIdRet)
   {
-    sReturnValue = sInput;
-    sReturnValue.detach(); // fixes some crashes with QJSEngine
-    emit this->SignalQuitLoop();
+    if (sRequestId == sRequestIdRet)
+    {
+      sReturnValue = sInput;
+      sReturnValue.detach(); // fixes some crashes with QJSEngine
+      emit this->SignalQuitLoop();
+    }
     // direct connection to fix cross thread issues with QString content being deleted
   }, Qt::DirectConnection);
   loop.exec();
@@ -714,10 +726,12 @@ qint32 CEosScriptTextBox::showButtonPrompts(const QStringList& vsLabels)
 {
   if (!CheckIfScriptCanRun()) { return -1; }
 
+  QString sRequestId = QUuid::createUuid().toString();
+
   auto pSignalEmitter = SignalEmitter<CTextBoxSignalEmitter>();
   if (vsLabels.size() > 0)
   {
-    emit pSignalEmitter->showButtonPrompts(vsLabels);
+    emit pSignalEmitter->showButtonPrompts(vsLabels, sRequestId);
 
     // local loop to wait for answer
     qint32 iReturnValue = -1;
@@ -729,10 +743,13 @@ qint32 CEosScriptTextBox::showButtonPrompts(const QStringList& vsLabels)
               &loop, &QEventLoop::quit, Qt::QueuedConnection);
     QMetaObject::Connection showRetValLoop =
       connect(pSignalEmitter, &CTextBoxSignalEmitter::showButtonReturnValue,
-              this, [this, &iReturnValue](qint32 iIndexSelected)
+              this, [this, &iReturnValue, sRequestId](qint32 iIndexSelected, QString sRequestIdRet)
     {
-      iReturnValue = iIndexSelected;
-      emit this->SignalQuitLoop();
+      if (sRequestId == sRequestIdRet)
+      {
+        iReturnValue = iIndexSelected;
+        emit this->SignalQuitLoop();
+      }
     }, Qt::QueuedConnection);
     loop.exec();
     loop.disconnect();
@@ -753,8 +770,12 @@ QString CEosScriptTextBox::showInput(const QString& sStoreIntoVar)
 {
   if (!CheckIfScriptCanRun()) { return QString(); }
 
+  QString sRequestId = QUuid::createUuid().toString();
+
   auto pSignalEmitter = SignalEmitter<CTextBoxSignalEmitter>();
-  QTimer::singleShot(0, this, [&pSignalEmitter,sStoreIntoVar]() { emit pSignalEmitter->showInput(sStoreIntoVar); });
+  QTimer::singleShot(0, this, [&pSignalEmitter,sStoreIntoVar,sRequestId]() {
+    emit pSignalEmitter->showInput(sStoreIntoVar, sRequestId);
+  });
 
   // local loop to wait for answer
   QString sReturnValue = QString();
@@ -766,11 +787,14 @@ QString CEosScriptTextBox::showInput(const QString& sStoreIntoVar)
             &loop, &QEventLoop::quit, Qt::QueuedConnection);
   QMetaObject::Connection showRetValLoop =
     connect(pSignalEmitter, &CTextBoxSignalEmitter::showInputReturnValue,
-            this, [this, &sReturnValue](QString sInput)
+            this, [this, &sReturnValue,sRequestId](QString sInput, QString sRequestIdRet)
   {
-    sReturnValue = sInput;
-    sReturnValue.detach(); // fixes some crashes with QJSEngine
-    emit this->SignalQuitLoop();
+    if (sRequestId == sRequestIdRet)
+    {
+      sReturnValue = sInput;
+      sReturnValue.detach(); // fixes some crashes with QJSEngine
+      emit this->SignalQuitLoop();
+    }
     // direct connection to fix cross thread issues with QString content being deleted
   }, Qt::DirectConnection);
   loop.exec();

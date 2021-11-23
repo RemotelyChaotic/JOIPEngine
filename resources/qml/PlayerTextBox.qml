@@ -23,13 +23,14 @@ Rectangle {
             "textColor": "",
             "numButtons": "",
             "portrait": null,
+            "sRequestId": "",
             "type": "TextBoxSpacerDelegate.qml"
         });
         textLog.cancelFlick();
         textLog.flick(0,-1000);
     }
 
-    function showButtonPrompts(vsLabels)
+    function showButtonPrompts(vsLabels, sRequestId)
     {
         textLog.buttonTexts = vsLabels;
         textLogModel.append({
@@ -39,6 +40,7 @@ Rectangle {
             "textColor": "",
             "numButtons": vsLabels.length,
             "portrait": null,
+            "sRequestId": sRequestId,
             "type": "TextBoxButtonsDelegate.qml"
         });
         textLog.cancelFlick();
@@ -52,7 +54,7 @@ Rectangle {
         showButtonPrompts(vsLabels);
     }
 
-    function showInput(sStoreIntoVar)
+    function showInput(sStoreIntoVar, sRequestId)
     {
         textLogModel.append({
             "textAlignment": "",
@@ -61,6 +63,7 @@ Rectangle {
             "textColor": undefined !== textLog.textColors  && textLog.textColors.length > 0 ? textLog.textColors[0] : "#ffffffff",
             "numButtons": "",
             "portrait": null,
+            "sRequestId": sRequestId,
             "type": "TextBoxInputDelegate.qml"
         });
         textLog.cancelFlick();
@@ -76,6 +79,7 @@ Rectangle {
             "textColor": undefined !== textLog.textColors  && textLog.textColors.length > 0 ? textLog.textColors[0] : "#ffffffff",
             "numButtons": "",
             "portrait": textLog.portrait,
+            "sRequestId": "",
             "type": "TextBoxTextDelegate.qml"
         });
         textLog.cancelFlick();
@@ -138,10 +142,10 @@ Rectangle {
                     vsModifiedPrompts[i] = parseHtmlToJS(vsModifiedPrompts[i]);
                 }
             }
-            textBox.showButtonPrompts(vsModifiedPrompts);
+            textBox.showButtonPrompts(vsModifiedPrompts, sRequestId);
         }
         onShowInput: {
-            textBox.showInput(sStoreIntoVar);
+            textBox.showInput(sStoreIntoVar, sRequestId);
         }
         onShowText: {
             if (sText.startsWith("<html>") && sText.endsWith("</html>")) {
@@ -199,19 +203,19 @@ Rectangle {
         property bool sceneSelection: false
         property bool skippable: false
 
-        function inputEditingFinished(sInput, sStoreIntoVar)
+        function inputEditingFinished(sInput, sStoreIntoVar, sRequestId)
         {
             if ("" !== sStoreIntoVar)
             {
                 root.storage.store(sStoreIntoVar, sInput);
             }
-            signalEmitter.showInputReturnValue(sInput);
+            signalEmitter.showInputReturnValue(sInput, sRequestId);
         }
-        function buttonPressed(iIndex)
+        function buttonPressed(iIndex, sRequestId)
         {
             if (!sceneSelection)
             {
-                signalEmitter.showButtonReturnValue(iIndex);
+                signalEmitter.showButtonReturnValue(iIndex, sRequestId);
             }
             else
             {

@@ -194,7 +194,7 @@ Rectangle {
         }
         onLoad: {
             var loaded = storage.load(sId);
-            loadReturnValue(loaded);
+            loadReturnValue(loaded, sRequestId);
         }
         onStore: {
             storage.store(sId, value);

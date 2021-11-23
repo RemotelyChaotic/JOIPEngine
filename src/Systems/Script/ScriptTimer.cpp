@@ -7,6 +7,7 @@
 #include <QDateTime>
 #include <QEventLoop>
 #include <QTimer>
+#include <QUuid>
 
 CTimerSignalEmitter::CTimerSignalEmitter() :
   CScriptRunnerSignalEmiter()
@@ -144,7 +145,7 @@ public:
       tInstructionMapValue argsCopy = args;
       argsCopy.erase(args.find("isAsync"));
       argsCopy.insert({"isAsync_threadImpl", SInstructionArgumentValue{EArgumentType::eBool, true}});
-      return SRunRetVal<ENextCommandToCall::eForkThis>(argsCopy);
+      return SRunRetVal<ENextCommandToCall::eForkThis>(argsCopy, QUuid::createUuid().toString() );
     }
     else
     {
