@@ -121,7 +121,10 @@ public slots:
       else if (std::holds_alternative<SRunRetVal<ENextCommandToCall::eForkThis>>(vRetVal))
       {
         auto& ret = std::get<SRunRetVal<ENextCommandToCall::eForkThis>>(vRetVal);
-        emit Fork(runMode, m_spNextNode, ret.m_args, ret.m_sName);
+        for (auto& fork : ret.m_vForks)
+        {
+          emit Fork(runMode, m_spNextNode, fork.m_args, fork.m_sName, fork.m_bAutorun);
+        }
         return SRunnerRetVal{NextCommand(ENextCommandToCall::eSibling), std::any()};
       }
       else if (std::holds_alternative<SRunRetVal<ENextCommandToCall::eFinish>>(vRetVal))
@@ -174,7 +177,8 @@ signals:
   void Fork(ERunerMode runMode,
             std::shared_ptr<CJsonInstructionNode> spNode,
             tInstructionMapValue args,
-            const QString& sName);
+            const QString& sName,
+            bool bAutorun);
 
 protected:
   //--------------------------------------------------------------------------------------
@@ -304,7 +308,8 @@ signals:
   void Fork(ERunerMode runMode,
             std::shared_ptr<CJsonInstructionNode> spNode,
             tInstructionMapValue args,
-            const QString& sName);
+            const QString& sName,
+            bool bAutorun);
 
 protected slots:
   void SlotCallNextCommandRetVal(ERunerMode runMode, CJsonInstructionSetRunner::tRetVal retVal)
@@ -498,7 +503,7 @@ public:
 
 signals:
   void CommandRetVal(CJsonInstructionSetRunner::tRetVal retVal);
-  void Fork(std::shared_ptr<CJsonInstructionSetRunner> spNewRunner, const QString& sForkCommandsName);
+  void Fork(std::shared_ptr<CJsonInstructionSetRunner> spNewRunner, const QString& sForkCommandsName, bool bAutorun);
   void WaitDone(CJsonInstructionSetRunner::tRetVal retVal);
 
 protected slots:
@@ -529,7 +534,8 @@ protected slots:
   void SlotFork(ERunerMode /*runMode*/,
                 std::shared_ptr<CJsonInstructionNode> spNode,
                 tInstructionMapValue args,
-                const QString& sName)
+                const QString& sName,
+                bool bAutorun)
   {
     std::shared_ptr<CJsonInstructionNode> spNewNode =
         std::make_shared<CJsonInstructionNode>(*spNode);
@@ -546,7 +552,7 @@ protected slots:
 
     spRunner->m_pPrivate->m_spWorkerController =
         std::make_unique<CJsonInstructionSetRunnerWorkerController>(spNewNode);
-    emit Fork(spRunner, sName);
+    emit Fork(spRunner, sName, bAutorun);
   }
 
 protected:

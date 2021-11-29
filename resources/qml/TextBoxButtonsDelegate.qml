@@ -155,7 +155,7 @@ Rectangle {
                         sequence: Settings.keyBinding("Answer_" + (index+1));
                         onActivated: {
                             root.soundEffects.clickSound.play();
-                            textDelegate.parent.ListView.view.buttonPressed(index);
+                            textDelegate.parent.ListView.view.buttonPressed(index, model.sRequestId);
                         }
                     }
                 }

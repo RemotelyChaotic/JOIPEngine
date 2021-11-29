@@ -183,13 +183,19 @@ template<> struct SRunRetVal<ENextCommandToCall::eSibling>
   SRunRetVal() {}
   ENextCommandToCall m_type = ENextCommandToCall::eSibling;
 };
+struct SForkData
+{
+  tInstructionMapValue m_args;//: arguments for the this call in new worker thread
+  QString m_sName;//: New commands-Fork name
+  bool m_bAutorun;
+};
+typedef std::vector<SForkData> tvForks;
 template<> struct SRunRetVal<ENextCommandToCall::eForkThis>
 {
-  SRunRetVal(const tInstructionMapValue& args, const QString& sName) :
-    m_args(args), m_sName(sName) {}
-  ENextCommandToCall   m_type = ENextCommandToCall::eForkThis;
-  tInstructionMapValue m_args; // arguments for the this call in new worker thread
-  QString              m_sName; // New commands-Fork name
+  SRunRetVal(std::vector<SForkData> vForks) :
+    m_vForks(vForks) {}
+  ENextCommandToCall     m_type = ENextCommandToCall::eForkThis;
+  std::vector<SForkData> m_vForks;
 };
 template<> struct SRunRetVal<ENextCommandToCall::eFinish>
 {

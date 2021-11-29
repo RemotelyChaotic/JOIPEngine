@@ -29,7 +29,6 @@ public:
   virtual void LoadScript(const QString& sScript, tspScene spScene, tspResource spResource) = 0;
   virtual void RegisterNewComponent(const QString sName, QJSValue signalEmitter) = 0;
   virtual void UnregisterComponents() = 0;
-  virtual void HandleScriptFinish(bool bSuccess, const QVariant& sRetVal) = 0;
 
 signals:
   virtual void SignalScriptRunFinished(bool bOk, const QString& sRetVal) = 0;

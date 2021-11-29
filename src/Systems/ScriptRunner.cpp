@@ -82,8 +82,10 @@ void CScriptRunner::LoadScript(tspScene spScene, tspResource spResource)
     return;
   }
 
+  tspProject spProject;
   QReadLocker projectLocker(&spResource->m_spParent->m_rwLock);
   QReadLocker resourceLocker(&spResource->m_rwLock);
+  spProject = spResource->m_spParent;
   if (spResource->m_type._to_integral() != EResourceType::eScript)
   {
     QString sError = tr("Script resource is of wrong type.");

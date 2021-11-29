@@ -133,6 +133,8 @@ New Features:
 - New component: PlayerEval for when you need to run arbitrary code in the UI 
   directly. This is not usually recomended, but is a way to give a script 
   full UI control.
+- New Component: PlayerNotification for when you need to asynchronously run code
+  after a timeout or on button press. Styleable like the PlayerTextbox via script.
 
 Changes:
 - JOIP-Engine uses PhysFS to allow restricted acces to files only, making it

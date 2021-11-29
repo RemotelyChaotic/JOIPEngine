@@ -9,9 +9,11 @@
 #include <map>
 #include <memory>
 
+class CJsScriptRunnerInstanceController;
 class CScriptRunnerUtils;
 class CSceneScriptWrapper;
 class CScriptRunnerSignalContext;
+class CScriptRunnerSignalEmiter;
 
 class CJsScriptRunner : public QObject, public IScriptRunner
 {
@@ -35,7 +37,6 @@ public:
   void LoadScript(const QString& sScript, tspScene spScene, tspResource spResource) override;
   void RegisterNewComponent(const QString sName, QJSValue signalEmitter) override;
   void UnregisterComponents() override;
-  void HandleScriptFinish(bool bSuccess, const QVariant& sRetVal) override;
 
 signals:
   void SignalScriptRunFinished(bool bOk, const QString& sRetVal) override;
@@ -44,22 +45,21 @@ protected:
   std::shared_ptr<CScriptRunnerSignalContext> SignalEmmitterContext();
 
 private slots:
-  void SlotFinishedScript(const QVariant& sRetVal);
-  void SlotRegisterObject(const QString& sObject);
-  void SlotRun();
+  void SlotHandleScriptFinish(const QString& sName, bool bSuccess, const QVariant& sRetVal);
+  void SlotOverlayCleared();
+  void SlotOverlayClosed(const QString& sId);
+  void SlotOverlayRunAsync(tspProject spProject, const QString& sId, const QString& sScriptResource);
 
 private:
-  void HandleError(QJSValue& value);
+  void RunScript(const QString& sId, const QString& sScript,
+                 tspScene spScene, tspResource spResource);
 
-  std::shared_ptr<QTimer>                        m_spTimer;
   std::weak_ptr<CScriptRunnerSignalContext>      m_wpSignalEmitterContext;
-  QPointer<QJSEngine>                            m_pScriptEngine;
-  QPointer<CScriptRunnerUtils>                   m_pScriptUtils;
-  QPointer<CSceneScriptWrapper>                  m_pCurrentScene;
-  QJSValue                                       m_runFunction;
-  mutable QMutex                                 m_objectMapMutex;
-  std::map<QString /*name*/,
-           std::shared_ptr<CScriptObjectBase>>   m_objectMap;
+  mutable QMutex                                 m_runnerMutex;
+  std::map<QString, std::shared_ptr<CJsScriptRunnerInstanceController>>
+                                                 m_vspJsRunner;
+  mutable QMutex                                 m_signalEmiterMutex;
+  std::map<QString, CScriptRunnerSignalEmiter*>  m_pSignalEmiters;
 };
 
 
@@ -71,7 +71,8 @@ class CScriptRunnerUtils : public QObject
   Q_DISABLE_COPY(CScriptRunnerUtils)
 
 public:
-  CScriptRunnerUtils(QObject* pParent, QPointer<CJsScriptRunner> pScriptRunner);
+  CScriptRunnerUtils(QObject* pParent,
+                     std::shared_ptr<CScriptRunnerSignalContext> pSignalEmiterContext);
   ~CScriptRunnerUtils() override;
 
   void SetCurrentProject(tspProject spProject);
@@ -83,7 +84,7 @@ signals:
   void finishedScript(const QVariant& sRetVal);
 
 private:
-  QPointer<CJsScriptRunner>                       m_pScriptRunner;
+  std::shared_ptr<CScriptRunnerSignalContext>     m_spSignalEmiterContext;
   tspProject                                      m_spProject;
 };
 

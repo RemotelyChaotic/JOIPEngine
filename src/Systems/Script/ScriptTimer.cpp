@@ -145,7 +145,7 @@ public:
       tInstructionMapValue argsCopy = args;
       argsCopy.erase(args.find("isAsync"));
       argsCopy.insert({"isAsync_threadImpl", SInstructionArgumentValue{EArgumentType::eBool, true}});
-      return SRunRetVal<ENextCommandToCall::eForkThis>(argsCopy, QUuid::createUuid().toString() );
+      return SRunRetVal<ENextCommandToCall::eForkThis>({{argsCopy, QUuid::createUuid().toString(), true}});
     }
     else
     {

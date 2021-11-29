@@ -1,6 +1,8 @@
 #include "EosScriptRunner.h"
+#include "ScriptNotification.h"
 #include "ScriptObjectBase.h"
 #include "ScriptRunnerSignalEmiter.h"
+
 #include "Systems/JSON/JsonInstructionSetParser.h"
 #include "Systems/JSON/JsonInstructionSetRunner.h"
 #include "Systems/Resource.h"
@@ -226,6 +228,28 @@ void CEosScriptRunner::RegisterNewComponent(const QString sName, QJSValue signal
         if (spObject->thread() != thread())
         {
           spObject->moveToThread(thread());
+
+          // special handling for notifications: erase runner if overlay was closed pre-maturely
+          if (auto spNotification = std::dynamic_pointer_cast<CEosScriptNotification>(spObject))
+          {
+            connect(spNotification.get(), &CEosScriptNotification::SignalOverlayClosed,
+                    this, [this](const QString& sId) {
+              auto it = m_vspEosRunner.find(sId);
+              if (m_vspEosRunner.end() != it)
+              {
+                it->second->Interrupt();
+                m_vspEosRunner.erase(it);
+              }
+            });
+            connect(spNotification.get(), &CEosScriptNotification::SignalOverlayRunAsync,
+                    this, [this](const QString& sId) {
+              auto it = m_vspEosRunner.find(sId);
+              if (m_vspEosRunner.end() != it)
+              {
+                SlotRun(sId, sId);
+              }
+            });
+          }
         }
         m_objectMap.insert({ sName, spObject });
       }
@@ -345,7 +369,8 @@ void CEosScriptRunner::SlotCommandRetVal(CJsonInstructionSetRunner::tRetVal retV
 //----------------------------------------------------------------------------------------
 //
 void CEosScriptRunner::SlotFork(
-    std::shared_ptr<CJsonInstructionSetRunner> spNewRunner, const QString& sForkCommandsName)
+    std::shared_ptr<CJsonInstructionSetRunner> spNewRunner, const QString& sForkCommandsName,
+    bool bAutoRun)
 {
   if (nullptr == spNewRunner)
   {
@@ -363,7 +388,10 @@ void CEosScriptRunner::SlotFork(
   connect(spEosRunner.get(), &CJsonInstructionSetRunner::Fork,
           this, &CEosScriptRunner::SlotFork);
 
-  SlotRun(sForkCommandsName, sForkCommandsName);
+  if (bAutoRun)
+  {
+    SlotRun(sForkCommandsName, sForkCommandsName);
+  }
 }
 
 //----------------------------------------------------------------------------------------

@@ -51,6 +51,7 @@ protected:
   std::shared_ptr<CScriptRunnerSignalContext> m_spContext;
 };
 
+Q_DECLARE_METATYPE(CScriptRunnerSignalEmiter*)
 Q_DECLARE_METATYPE(CScriptRunnerSignalEmiter)
 Q_DECLARE_METATYPE(QtMsgType)
 

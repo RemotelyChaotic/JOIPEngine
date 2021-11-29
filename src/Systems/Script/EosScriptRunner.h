@@ -35,14 +35,14 @@ public:
   void LoadScript(const QString& sScript, tspScene spScene, tspResource spResource) override;
   void RegisterNewComponent(const QString sName, QJSValue signalEmitter) override;
   void UnregisterComponents() override;
-  void HandleScriptFinish(bool bSuccess, const QVariant& sRetVal) override;
+  void HandleScriptFinish(bool bSuccess, const QVariant& sRetVal);
 
 signals:
   void SignalScriptRunFinished(bool bOk, const QString& sRetVal) override;
 
 private slots:
   void SlotCommandRetVal(CJsonInstructionSetRunner::tRetVal retVal);
-  void SlotFork(std::shared_ptr<CJsonInstructionSetRunner> spNewRunner, const QString& sForkCommandsName);
+  void SlotFork(std::shared_ptr<CJsonInstructionSetRunner> spNewRunner, const QString& sForkCommandsName, bool bAutoRun);
   void SlotRun(const QString& sRunner, const QString& sCommands);
 
 private:

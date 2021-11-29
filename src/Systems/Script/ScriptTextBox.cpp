@@ -135,13 +135,13 @@ void CScriptTextBox::setTextPortrait(QJSValue resource)
         }
         else
         {
-          QString sError = tr("Resource in show() holds no data.");
+          QString sError = tr("Resource in setTextPortrait() holds no data.");
           emit m_pSignalEmitter->showError(sError, QtMsgType::QtWarningMsg);
         }
       }
       else
       {
-        QString sError = tr("Wrong argument-type to show(). String or resource was expected.");
+        QString sError = tr("Wrong argument-type to setTextPortrait(). String or resource was expected.");
         emit m_pSignalEmitter->showError(sError, QtMsgType::QtWarningMsg);
       }
     }
@@ -151,7 +151,7 @@ void CScriptTextBox::setTextPortrait(QJSValue resource)
     }
     else
     {
-      QString sError = tr("Wrong argument-type to show(). String or resource was expected.");
+      QString sError = tr("Wrong argument-type to setTextPortrait(). String or resource was expected.");
       emit m_pSignalEmitter->showError(sError, QtMsgType::QtWarningMsg);
     }
   }

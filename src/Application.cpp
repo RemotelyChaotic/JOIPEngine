@@ -27,6 +27,7 @@
 #include "Systems/Script/ScriptIcon.h"
 #include "Systems/Script/ScriptMediaPlayer.h"
 #include "Systems/Script/ScriptMetronome.h"
+#include "Systems/Script/ScriptNotification.h"
 #include "Systems/Script/ScriptStorage.h"
 #include "Systems/Script/ScriptTextBox.h"
 #include "Systems/Script/ScriptThread.h"
@@ -339,11 +340,14 @@ void CApplication::RegisterQmlTypes()
   qmlRegisterType<CIconSignalEmitter>("JOIP.script", 1, 1, "IconSignalEmitter");
   qmlRegisterType<CMediaPlayerSignalEmitter>("JOIP.script", 1, 1, "MediaPlayerSignalEmitter");
   qmlRegisterType<CMetronomeSignalEmitter>("JOIP.script", 1, 1, "MetronomeSignalEmitter");
+  qmlRegisterType<CNotificationSignalEmiter>("JOIP.script", 1, 1, "NotificationSignalEmiter");
   qmlRegisterType<CStorageSignalEmitter>("JOIP.script", 1, 1, "StorageSignalEmitter");
   qmlRegisterType<CTextBoxSignalEmitter>("JOIP.script", 1, 1, "TextBoxSignalEmitter");
   qmlRegisterType<CThreadSignalEmitter>("JOIP.script", 1, 1, "ThreadSignalEmitter");
   qmlRegisterType<CTimerSignalEmitter>("JOIP.script", 1, 1, "TimerSignalEmitter");
 
+  qmlRegisterUncreatableMetaObject(
+    IconAlignment::staticMetaObject, "JOIP.script", 1, 1, "IconAlignment", "");
   qmlRegisterUncreatableMetaObject(
     TextAlignment::staticMetaObject, "JOIP.script", 1, 1, "TextAlignment", "");
 

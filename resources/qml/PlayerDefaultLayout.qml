@@ -60,12 +60,33 @@ Rectangle {
                 Layout.alignment: Qt.AlignVCenter
                 color: "transparent"
 
-                PlayerTimer {
-                    id: timer
-                    anchors.centerIn: parent
-                    width: 138
-                    height: 138
-                    userName: "timer"
+                Rectangle {
+                    anchors.top: parent.top
+                    anchors.left: parent.left
+                    width: parent.Layout.preferredWidth
+                    height: parent.Layout.preferredHeight / 2
+                    color: "transparent"
+
+                    PlayerTimer {
+                        id: timer
+                        anchors.centerIn: parent
+                        width: 138
+                        height: 138
+                        userName: "timer"
+                    }
+                }
+                Rectangle {
+                    anchors.bottom: parent.bottom
+                    anchors.left: parent.left
+                    width: parent.Layout.preferredWidth
+                    height: parent.Layout.preferredHeight / 2
+                    color: "transparent"
+
+                    PlayerNotification {
+                        id: notification
+                        anchors.fill: parent
+                        userName: "notification"
+                    }
                 }
             }
         }

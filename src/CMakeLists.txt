@@ -183,6 +183,9 @@ set(Sources
   Editor/Script/MetronomeSnippetOverlay.cpp
   Editor/Script/MetronomeSnippetOverlay.h
   Editor/Script/MetronomeSnippetOverlay.ui
+  Editor/Script/NotificationSnippetOverlay.cpp
+  Editor/Script/NotificationSnippetOverlay.h
+  Editor/Script/NotificationSnippetOverlay.ui
   Editor/Script/ResourceSnippetOverlay.cpp 
   Editor/Script/ResourceSnippetOverlay.h 
   Editor/Script/ResourceSnippetOverlay.ui 
@@ -339,6 +342,8 @@ set(Sources
   Systems/Script/ScriptMediaPlayer.h 
   Systems/Script/ScriptMetronome.cpp
   Systems/Script/ScriptMetronome.h
+  Systems/Script/ScriptNotification.cpp
+  Systems/Script/ScriptNotification.h
   Systems/Script/ScriptObjectBase.cpp 
   Systems/Script/ScriptObjectBase.h 
   Systems/Script/ScriptRunnerSignalEmiter.cpp 

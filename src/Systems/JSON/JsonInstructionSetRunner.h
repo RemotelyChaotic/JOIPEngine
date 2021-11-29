@@ -33,7 +33,7 @@ public:
 
 signals:
   void CommandRetVal(CJsonInstructionSetRunner::tRetVal retVal);
-  void Fork(std::shared_ptr<CJsonInstructionSetRunner> spNewRunner, const QString& sForkCommandsName);
+  void Fork(std::shared_ptr<CJsonInstructionSetRunner> spNewRunner, const QString& sForkCommandsName, bool bAutorun);
 
 protected:
   std::unique_ptr<CJsonInstructionSetRunnerPrivate> m_pPrivate;

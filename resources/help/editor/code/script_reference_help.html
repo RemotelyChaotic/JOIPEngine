@@ -435,7 +435,7 @@
         remove the portraits from future texts resulting from <i>showText</i> calls.<br>
         <i>Example Usage:</i><br>
         textBox.setTextPortrait("myIcon");<br>
-        textBox.setTextPortrait(myIconVar); /* note: in this example myIconVar is a var */<br>
+        textBox.setTextPortrait(myIconVar); /* note: in this example myIconVar is a Resource */<br>
         <br></li>
 
         <li><b>showButtonPrompts ( string[] ):</b><br>
@@ -541,6 +541,123 @@
         return immediately.<br>
         <i>Example Usage:</i><br>
         timer.waitForTimer();<br>
+        <br></li>
+      </ul>
+    </p>
+
+    <br>
+
+    <h2>PlayerNotification (name: <i>notification</i>)</h2>
+
+    <br>
+
+    <p>This object is registered by the JOIP-Engine if it is present in the current <a href="qrc:/resources/help/layout/layout_help.html">Layout</a>.
+    This object can be used to display asynchronous messages and buttons that can run an asynchronous script on click or timeout.<br>
+      <ul>
+        <li><b>clear ( ): </b><br>
+        Clears all open notifications and does <i>not</i> call any associated scripts.<br>
+        <i>Example Usage:</i><br>
+        notification.clear();<br>
+        <br></li>
+
+        <li><b>hide ( string ): </b><br>
+        The input to this function needs to be the string id of any open notification.
+        This will hide the notification without calling any associated scripts.<br>
+        <i>Example Usage:</i><br>
+        notification.hide("myid"); // hides notification with id "myid"<br>
+        <br></li>
+
+        <li><b>setIconAlignment ( enum:IconAlignment  ):</b><br>
+        This will set the icon alignment of icons for notifications resulting from <i>show</i> calls.
+        Once set, all future <i>show</i> calls will display the icon of the notification with the set alignment.
+        The given argument needs to be one of the enum values: <i>IconAlignment.AlignLeft</i>,
+        <i>IconAlignment.AlignRight</i>, <i>IconAlignment.AlignCenter</i> or their coresponding nummerical
+        values (<i>1</i>, <i>2</i>, <i>4</i> respectively).<br>
+        Changing the alignment will change the position of portraits set by <i>setPortrait</i> an the position
+        of the timer set by <i>show</i>.<br>
+        <i>Example Usage:</i><br>
+        notification.setIconAlignment(IconAlignment.AlignLeft); /* portraits will be aligned to the right */<br>
+        notification.setIconAlignment(1); /* same as above */<br>
+        notification.setIconAlignment(IconAlignment.AlignRight); /* portraits will be aligned to the left */<br>
+        notification.setIconAlignment(2); /* same as above */<br>
+        notification.setIconAlignment(IconAlignment.AlignCenter); /* portraits will be centered above the notification */<br>
+        notification.setIconAlignment(4); /* same as above */<br>
+        <br></li>
+
+        <li><b>setPortrait ( string | Resource | null ):</b><br>
+        This will set an <i>Image</i> or <i>Movie</i> type <a href="qrc:/resources/help/editor/resources/resource_help.html">Resource</a>
+        to be shown besides notifications resulting from <i>show</i> calls.
+        The Resource can be the name of a Resource, a Resource object obtained from the
+        current Scene object or null. Calling the function with null will
+        remove the portraits from future <i>show</i> calls.<br>
+        <i>Example Usage:</i><br>
+        notification.setPortrait("myIcon");<br>
+        notification.setPortrait(myIconVar); /* note: in this example myIconVar is a Resource */<br>
+        <br></li>
+
+        <li><b>show ( string, string [, string [, double [, string | Resource | null [, string | Resource | null ] ] ] ] ): </b><br>
+        Inputs to the function are (in the listed order):
+        <ul>
+          <li>The string id of the notification to be created</li>
+          <li>The text in the notification (can be empty to create a notification without text)</li>
+          <li>(optional) The button text. If not empty, the notification will display a clickable button.<br>
+          If this argument is not provided, no button will be shown.</li>
+          <li>(optional) The timeout time of the notification in seconds.<br>
+          If not given or &lt; 0, the notification will never time out and the caller is responsible for hiding it.</li>
+          <li>(optional) The script to be called on clicking the button.<br>
+          The <a href="qrc:/resources/help/editor/resources/resource_help.html">Resource</a> can only
+          be of the <i>Script</i> type and can either be the name of a Resource, a resource
+          object obtained from the current Scene object or <i>null<i>.</li>
+          <li>(optional) The script to be called on timeout.<br>
+          The <a href="qrc:/resources/help/editor/resources/resource_help.html">Resource</a> can only
+          be of the <i>Script</i> type and can either be the name of a Resource, a resource
+          object obtained from the current Scene object or <i>null<i>.</li>
+        </ul>
+        This function will show a new notification with the provided id.
+        If a notification of the given id already exists, the old notification will be hidden.<br>
+        <i>Example Usage:</i><br>
+        notification.show("myid", ""); // shows a notification with the id "myid"<br>
+        notification.show("myid", "MyTitle"); // shows a notification with the id "myid" and the text "MyTitle"<br>
+        notification.show("myid", "MyTitle", 10); // shows a notification with the id "myid" and the text "MyTitle" for 10 seconds<br>
+        notification.show("myid", "MyTitle", 10, "OnTimeoutScript"); // Will call OnTimeoutScript after 10 seconds<br>
+        notification.show("myid", "MyTitle", "MyButton"); // shows text and button<br>
+        notification.show("myid", "", "MyButton"); // shows only a button<br>
+        notification.show("myid", "", "MyButton", 10); // shows only a button for 10 seconds<br>
+        notification.show("myid", "", "MyButton"); // shows only a button for 10 seconds<br>
+        notification.show("myid", "", "MyButton", "OnClickScript"); // On clicking the button will call OnClickScript<br>
+        notification.show("myid", "", "MyButton", 10, "OnClickScript", "OnTimeoutScript"); // On timeout will call OnTimeoutScript<br>
+        <br></li>
+
+        <li><b>setTextBackgroundColor | setWidgetBackgroundColor ( string | int[3 | 4] ):</b><br>
+        As the name implies, this will set the background color of elements in the notification box.
+        The given argument can be an html-style color string ("#argb")
+        or an array of 3 or 4 numbers ranging from 0 - 255
+        representing red, green, blue and alpha in this order.<br>
+        <i>Example Usage:</i><br>
+        notification.setTextBackgroundColor("#88ff0000"); /* will set background of text to a 50% transparent red.
+        In case of two buttons the background of the first one will be 50% transparent red and the second will be 0% transparent red */<br>
+        notification.setTextBackgroundColor([255, 0, 0, 128]); /* same as above example */<br>
+        notification.setTextBackgroundColor("red"); /* same as above example */<br>
+        notification.setWidgetBackgroundColor("#88ff0000"); /* will set background of buttons to a 50% transparent red.
+        In case of two buttons the background of the first one will be 50% transparent red and the second will be 0% transparent red */<br>
+        notification.setWidgetBackgroundColor([255, 0, 0, 128]); /* same as above example */<br>
+        notification.setWidgetBackgroundColor("red"); /* same as above example */<br>
+        <br></li>
+
+        <li><b>setTextColor | setWidgetColor ( string | int[3 | 4] ):</b><br>
+        As the name implies, this will set the text color of elements in the notification box.
+        The given argument can be an html-style color string ("#argb")
+        or an array of 3 or 4 numbers ranging from 0 - 255
+        representing red, green, blue and alpha in this order.<br>
+        <i>Example Usage:</i><br>
+        notification.setTextColor("#ffff0000"); /* will set text color to a 0% transparent red.
+        In case of two buttons the text color of the first one will be 0% transparent red and the second will be 0% transparent green */<br>
+        notification.setTextColor([255, 0, 0, 255]); /* same as above example */<br>
+        notification.setTextColor("green"); /* same as above example */<br>
+        notification.setWidgetColor("#ffff0000"); /* will set button text color to a 0% transparent red.
+        In case of two buttons the text color of the first one will be 0% transparent red and the second will be 0% transparent green */<br>
+        notification.setWidgetColor([255, 0, 0, 255]); /* same as above example */<br>
+        notification.setWidgetColor("green"); /* same as above example */<br>
         <br></li>
       </ul>
     </p>

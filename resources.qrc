@@ -223,5 +223,7 @@
         <file>resources/qml/PlayerMetronome.qml</file>
         <file>resources/qml/MetronomeItem.qml</file>
         <file>resources/qml/EmptyDummy.qml</file>
+        <file>resources/qml/PlayerNotification.qml</file>
+        <file>resources/qml/NotificationDefaultDelegate.qml</file>
     </qresource>
 </RCC>
