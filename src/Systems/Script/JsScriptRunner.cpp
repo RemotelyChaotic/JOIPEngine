@@ -549,7 +549,7 @@ void CJsScriptRunner::SlotHandleScriptFinish(const QString& sName, bool bSuccess
     qWarning() << tr("Error in script, unloading project.");
   }
 
-  if (c_sMainRunner != sName || QVariant::String == sRetVal.type())
+  if (c_sMainRunner == sName || QVariant::String == sRetVal.type())
   {
     if (QVariant::String == sRetVal.type())
     {
