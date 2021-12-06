@@ -249,7 +249,7 @@ public slots:
           // yes we need to call the static method of QQmlEngine, not QJSEngine, WHY Qt, WHY???
           QQmlEngine::setObjectOwnership(spObject.get(), QQmlEngine::CppOwnership);
           QJSValue scriptValue = m_pScriptEngine->newQObject(spObject.get());
-          m_pScriptEngine->globalObject().setProperty(it->first, scriptValue);
+          m_pScriptEngine->globalObject().setProperty(sName, scriptValue);
         }
       }
     }

@@ -139,7 +139,7 @@ Rectangle {
         closePolicy: Popup.CloseOnEscape | Popup.CloseOnPressOutside
     }
 
-
+    // needs to be declared outside because of https://bugreports.qt.io/browse/QTBUG-86428
     ListModel {
         id: listModel
         dynamicRoles: false

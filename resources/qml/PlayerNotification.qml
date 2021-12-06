@@ -130,11 +130,7 @@ Rectangle {
         model: SortFilterProxyModel {
             id: widgetProxyModel
 
-            sourceModel: ListModel {
-                id: widgetModel
-                dynamicRoles: true
-            }
-
+            sourceModel: widgetModel
             filters: RegExpFilter {
                 id: sortFilter
                 roleName: "sId"
@@ -160,6 +156,13 @@ Rectangle {
             visible: true
         }
     }
+
+    // needs to be declared outside because of https://bugreports.qt.io/browse/QTBUG-86428
+    ListModel {
+        id: widgetModel
+        dynamicRoles: true
+    }
+
 
     Component.onCompleted: {
         ScriptRunner.registerNewComponent(userName, signalEmitter);
