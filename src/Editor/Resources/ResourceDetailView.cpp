@@ -230,7 +230,7 @@ private:
 //
 CResourceDetailView::CResourceDetailView(QWidget* pParent) :
   QListView(pParent),
-  m_spThreadedLoader(std::make_unique<CThreadedSystem>()),
+  m_spThreadedLoader(std::make_unique<CThreadedSystem>("ResourceDetailViewFetcher")),
   m_spProject(nullptr),
   m_imageCache(),
   m_bReadOnly(false),

@@ -10,10 +10,11 @@ CSystemBase::~CSystemBase()
 
 //----------------------------------------------------------------------------------------
 //
-CThreadedSystem::CThreadedSystem() :
+CThreadedSystem::CThreadedSystem(const QString& sName) :
   QObject(nullptr),
   m_pThread(new QThread(this))
 {
+  m_pThread->setObjectName(sName);
 }
 
 CThreadedSystem::~CThreadedSystem()

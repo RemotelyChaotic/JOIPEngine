@@ -161,8 +161,8 @@ void CApplication::Initialize()
   m_spOverlayManager->Initialize();
 
   // create subsystems
-  m_spSystemsMap.insert({ECoreSystems::eDatabaseManager, std::make_shared<CThreadedSystem>()});
-  m_spSystemsMap.insert({ECoreSystems::eProjectDownloader, std::make_shared<CThreadedSystem>()});
+  m_spSystemsMap.insert({ECoreSystems::eDatabaseManager, std::make_shared<CThreadedSystem>("DatabaseManager")});
+  m_spSystemsMap.insert({ECoreSystems::eProjectDownloader, std::make_shared<CThreadedSystem>("ProjectDownloader")});
 
   // init subsystems
   m_spSystemsMap[ECoreSystems::eDatabaseManager]->RegisterObject<CDatabaseManager>();

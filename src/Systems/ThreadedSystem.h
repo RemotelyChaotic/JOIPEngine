@@ -39,7 +39,7 @@ class CThreadedSystem : public QObject
   Q_DISABLE_COPY(CThreadedSystem)
 
 public:
-  CThreadedSystem();
+  CThreadedSystem(const QString& sName);
   ~CThreadedSystem();
 
   std::shared_ptr<CSystemBase> Get() { return m_spSystem; }

@@ -31,7 +31,7 @@ CSceneMainScreen::CSceneMainScreen(QWidget* pParent) :
   QWidget(pParent),
   m_spUi(std::make_unique<Ui::CSceneMainScreen>()),
   m_spProjectRunner(std::make_unique<CProjectRunner>()),
-  m_spScriptRunnerSystem(std::make_shared<CThreadedSystem>()),
+  m_spScriptRunnerSystem(std::make_shared<CThreadedSystem>("ScriptRunner")),
   m_spScriptRunner(nullptr),
   m_spSettings(CApplication::Instance()->Settings()),
   m_spCurrentProject(nullptr),
