@@ -287,6 +287,10 @@ void CResourceSnippetOverlay::on_pConfirmButton_clicked()
       {
         sMainCommand = sMainCommand.arg(sLoopsAndStart);
       }
+      else if (EResourceType::eImage == type._to_integral())
+      {
+        sMainCommand = sMainCommand.arg("");
+      }
       sCode += sMainCommand;
     }
     else if (EDisplayMode::ePause == m_data.m_displayMode)

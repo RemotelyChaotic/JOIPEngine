@@ -559,6 +559,10 @@ void CTextSnippetOverlay::Initialize()
   m_spUi->pShowUserInputCheckBox->setChecked(false);
   m_spUi->pSetTextOrientation->setChecked(false);
   m_spUi->pOrientationComboBox->setCurrentIndex(c_iAlignHCenterIndex);
+  m_spUi->pSetSleepTimeCheckBox->setChecked(false);
+  m_spUi->pAutoTimeCheckBox->setChecked(true);
+  m_spUi->pSleepSpinBox->setValue(0.0);
+  m_spUi->pSkippableCheckBox->setChecked(false);
   m_spUi->pTextEdit->clear();
   m_spUi->pShowIconCheckBox->setChecked(false);
   m_spUi->pResourceLineEdit->clear();

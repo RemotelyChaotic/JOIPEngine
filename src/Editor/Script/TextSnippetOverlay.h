@@ -25,7 +25,7 @@ struct STextSnippetCode
   Qt::AlignmentFlag m_textAlignment = Qt::AlignHCenter;
   bool m_bSetSleepTime = false;
   bool m_bAutoTime = true;
-  double m_dSleepTimeS = -1;
+  double m_dSleepTimeS = 0.0;
   bool m_bSkippable = false;
   bool m_bShowIcon = false;
   QString m_sTextIcon = QString();
