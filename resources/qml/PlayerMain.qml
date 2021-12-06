@@ -7,6 +7,8 @@ import JOIP.core 1.1
 import JOIP.db 1.1
 import JOIP.script 1.1
 
+import "qrc:/xmldom/dom-parser.mjs" as DOMParser;
+
 Rectangle {
     id: root
     color: "transparent"
@@ -206,14 +208,64 @@ Rectangle {
         return eval(script);
     }
     function wrap(script, onerror, type) {
-      return "
-      (function() {try {return evalEnvironement._globalEval(" + JSON.stringify(script) + ")}
-        catch (e) {console.error(
-          e.stack,
-          " + JSON.stringify('\nIn ' + (type || 'Script EVAL') + ':\n') + ",
-          " + JSON.stringify(script) + "
-          );return " + onerror || '' + "}
-      })()"
+      return "\n"+
+      "(function() {try {return root.evalEnvironement._globalEval(" + JSON.stringify(script) + ")}\n"+
+        "catch (e) {console.error(\n"+
+          "e.stack,\n"+
+          JSON.stringify('\nIn ' + (type || 'Script EVAL') + ':\n') + ",\n" +
+          JSON.stringify(script) +
+          ");return " + (onerror || '') + "}\n"+
+      "})()";
+    }
+    function isolate(script, type) {
+      return "\n"+
+      "try {_globalEval(" + JSON.stringify(script) + ")}\n"+
+        "catch (e) {console.error(\n"+
+          "e.stack,\n"+
+          JSON.stringify('\n\nIn ' + (type || 'Script EVAL') + ':\n') + ",\n" +
+          JSON.stringify(script) +
+          ")}";
+    }
+    //------------------------------------------------------------------------------------
+    // variables
+    // from openeos:
+    // Convert HTML string to in-line javascript string expression
+    // Replace ...<eval>expression</eval>... with "..." + (isolated eval expression) + "..."
+    function parseHtmlToJS(string, context) {
+      if (typeof string !== 'string') return JSON.stringify('');
+      var result = [];
+      var parser = new DOMParser.DOMParser({});
+      var doc = parser
+        .parseFromString(string, 'text/html')
+        .getElementsByTagName('body')[0];
+      if (null == doc) return string;
+      var evs = doc.getElementsByTagName('eval');
+      if (null == evs) return string;
+      let docstring = doc.innerHTML;
+      docstring = docstring.replace(' xmlns="http://www.w3.org/1999/xhtml"', '');
+      if (null == docstring) return string;
+      for (var iEv = 0; iEv < evs.length; ++iEv) {
+        var ev = evs.item(iEv);
+        if (null == ev) continue;
+        var evHtml = ev.outerHTML;
+        evHtml = evHtml.replace(' xmlns="http://www.w3.org/1999/xhtml"', '');
+        var i = docstring.indexOf(evHtml);
+        var beforeEv = string.slice(0, i);
+        var afterEv = docstring.slice(i + evHtml.length, docstring.length);
+        if (beforeEv.length) {
+          result.push(beforeEv);
+        }
+        var evExpression = QtApp.decodeHTML(ev.innerHTML).trim();
+        if (evExpression.length) {
+          result.push(eval(root.wrap(evExpression, 'e.toString()', context +' <eval>')));
+        }
+        docstring = afterEv;
+      }
+      if (docstring.length) {
+        result.push(docstring);
+      }
+      if (!result.length) return JSON.stringify('');
+      return '<html><body><nobr>' + result.join(' + ') + '</nobr></body></html>';
     }
     EvalSignalEmitter {
         id: evaluator
@@ -340,7 +392,8 @@ Rectangle {
 
         // repopulate eval environement
         evalEnvironement = {
-            _globalEval: _globalEval
+            _globalEval: _globalEval,
+            teaseStorage: storage
         };
     }
 }
