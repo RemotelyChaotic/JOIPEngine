@@ -21,7 +21,7 @@ namespace
   const qint32 c_iDelayPerCharMaxMs = 8'000;
   const qint32 c_iDelayPerWordMs = 300;
 
-  qint32 EstimateDurationBasedOnText(const QString& sText)
+  qint64 EstimateDurationBasedOnText(const QString& sText)
   {
     QString sPlainText = QTextDocumentFragment::fromHtml(sText).toPlainText();
      return (
@@ -239,7 +239,7 @@ void CScriptTextBox::showText(QString sText, double dWaitTime, bool bSkipable)
 
   if (0 > dWaitTime)
   {
-    dWaitTime = EstimateDurationBasedOnText(sText);
+    dWaitTime = static_cast<double>(EstimateDurationBasedOnText(sText)) / 1000.0;
   }
 
   if (0 < dWaitTime)
