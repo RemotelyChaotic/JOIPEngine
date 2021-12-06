@@ -66,6 +66,7 @@ Rectangle {
             state = Resource.Loading;
             if (resource.isLocal)
             {
+                player.volume = Settings.volume;
                 player.source = resource.path;
             }
             else
@@ -114,7 +115,7 @@ Rectangle {
 
         Behavior on volume {
             animation: NumberAnimation {
-                id:audiofadeout; duration: 1000; easing.type: Easing.InOutQuad
+                id:audiofadeout; duration: 200; easing.type: Easing.InOutQuad
                 onRunningChanged: {
                     if (!running && player.stoppedTargetState) {
                         player.currentLoop = 0;
