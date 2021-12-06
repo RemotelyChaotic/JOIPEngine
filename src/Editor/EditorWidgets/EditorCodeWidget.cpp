@@ -140,7 +140,7 @@ void CEditorCodeWidget::Initialize()
       new CUndoRedoFilter(m_spUi->pCodeEdit,
                           std::bind(&CScriptEditorWidget::CreateContextMenu, m_spUi->pCodeEdit));
   connect(m_spUi->pCodeEdit->document(), &QTextDocument::undoCommandAdded,
-          this, &CEditorCodeWidget::SlotUndoForDescribtionAdded);
+          this, &CEditorCodeWidget::SlotUndoForScriptContentAdded);
   connect(pFilter, &CUndoRedoFilter::UndoTriggered, this, [this]() { UndoStack()->undo(); });
   connect(pFilter, &CUndoRedoFilter::RedoTriggered, this, [this]() { UndoStack()->redo(); });
 
@@ -593,7 +593,7 @@ void CEditorCodeWidget::SlotRowsRemoved(const QModelIndex& parent, int iFirst, i
 
 //----------------------------------------------------------------------------------------
 //
-void CEditorCodeWidget::SlotUndoForDescribtionAdded()
+void CEditorCodeWidget::SlotUndoForScriptContentAdded()
 {
   WIDGET_INITIALIZED_GUARD
   if (nullptr == m_spCurrentProject) { return; }

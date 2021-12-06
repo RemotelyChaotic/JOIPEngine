@@ -91,6 +91,6 @@ void CCommandChangeOpenedScript::DoUndoRedo(const QString& sScriptNext)
       m_fnReloadEditor(m_pEditorModel->ScriptIndex(sScriptNext));
     }
 
-    *m_pbChangingIndexFlag = true;
+    *m_pbChangingIndexFlag = false;
   }
 }

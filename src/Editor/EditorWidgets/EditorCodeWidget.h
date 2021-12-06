@@ -65,7 +65,7 @@ protected slots:
   void SlotInsertGeneratedCode(const QString& sCode);
   void SlotRowsInserted(const QModelIndex& parent, int iFirst, int iLast);
   void SlotRowsRemoved(const QModelIndex& parent, int iFirst, int iLast);
-  void SlotUndoForDescribtionAdded();
+  void SlotUndoForScriptContentAdded();
 
 private:
   void ReloadEditor(qint32 iIndex);
