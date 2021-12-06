@@ -83,6 +83,8 @@ Rectangle {
         id: player
         objectName: "player"
 
+        property int currentLoop: 0
+
         loops: -1 === mediaPlayer.loops ? MediaPlayer.Infinite : mediaPlayer.loops
         startPosition: mediaPlayer.startAt
         autoPlay: true
@@ -115,6 +117,7 @@ Rectangle {
                 id:audiofadeout; duration: 1000; easing.type: Easing.InOutQuad
                 onRunningChanged: {
                     if (!running && player.stoppedTargetState) {
+                        player.currentLoop = 0;
                         player.stop();
                     }
                 }
@@ -129,7 +132,11 @@ Rectangle {
             }
             else if (status === MediaPlayer.EndOfMedia)
             {
-                player.stop();
+                currentLoop++;
+                if (currentLoop >= loops)
+                {
+                    player.stop();
+                }
             }
             else if (status === MediaPlayer.InvalidMedia)
             {

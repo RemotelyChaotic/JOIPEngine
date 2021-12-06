@@ -35,6 +35,7 @@ Rectangle {
     {
         if (player.playbackState === MediaPlayer.PlayingState || player.playbackState === MediaPlayer.PausedState)
         {
+            player.currentLoop = 0;
             player.stop();
         }
     }
@@ -51,6 +52,7 @@ Rectangle {
     onResourceChanged: {
         state = Resource.Null;
         mediaPlayer.stop();
+        player.currentLoop = 0;
         if (null !== resource && undefined !== resource)
         {
             if (!resource.isLocal && Settings.offline)
@@ -118,6 +120,8 @@ Rectangle {
     AVPlayer {
         id: player
         objectName: "player"
+
+        property int currentLoop: 0
 
         loops: -1 === mediaPlayer.loops ? MediaPlayer.Infinite : mediaPlayer.loops
         startPosition: mediaPlayer.startAt
@@ -199,7 +203,11 @@ Rectangle {
             }
             else if (status === MediaPlayer.EndOfMedia)
             {
-                player.stop();
+                currentLoop++;
+                if (currentLoop >= loops)
+                {
+                    player.stop();
+                }
             }
             else if (status === MediaPlayer.InvalidMedia)
             {
