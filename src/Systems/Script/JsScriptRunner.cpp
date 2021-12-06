@@ -347,8 +347,11 @@ public:
   {
     bool bOk = QMetaObject::invokeMethod(m_spWorker.get(), "Deinit", Qt::BlockingQueuedConnection);
     assert(bOk); Q_UNUSED(bOk)
-    m_pThread->terminate();
-    m_pThread->wait();
+    m_pThread->quit();
+    while (!m_pThread->isFinished())
+    {
+      m_pThread->wait(5);
+    }
   }
 
   void InterruptExecution()
