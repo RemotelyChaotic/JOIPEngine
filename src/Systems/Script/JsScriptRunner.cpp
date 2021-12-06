@@ -33,23 +33,6 @@ public:
   {}
   ~CJsScriptRunnerInstanceWorker()
   {
-    InterruptExecution();
-
-    ResetEngine();
-
-    if (nullptr != m_pScriptEngine)
-    {
-      m_pScriptEngine->globalObject().setProperty("utils", QJSValue());
-      m_pScriptEngine->collectGarbage();
-    }
-
-    delete m_pScriptUtils;
-    m_pScriptUtils = nullptr;
-
-    if (nullptr != m_pScriptEngine)
-    {
-      m_pScriptEngine->deleteLater();
-    }
   }
 
 public slots:
@@ -109,12 +92,35 @@ public slots:
 
   //--------------------------------------------------------------------------------------
   //
+  void Deinit()
+  {
+    InterruptExecution();
+
+    ResetEngine();
+
+    if (nullptr != m_pScriptEngine)
+    {
+      m_pScriptEngine->globalObject().setProperty("utils", QJSValue());
+      m_pScriptEngine->collectGarbage();
+    }
+
+    delete m_pScriptUtils;
+    m_pScriptUtils = nullptr;
+
+    if (nullptr != m_pScriptEngine)
+    {
+      m_pScriptEngine->deleteLater();
+    }
+  }
+
+  //--------------------------------------------------------------------------------------
+  //
   void InterruptExecution()
   {
     if (nullptr != m_pScriptEngine)
     {
       auto spSignalEmitterContext = m_wpSignalEmiterContext.lock();
-      if (nullptr == spSignalEmitterContext)
+      if (nullptr != spSignalEmitterContext)
       {
         emit spSignalEmitterContext->interrupt();
       }
@@ -309,14 +315,13 @@ class CJsScriptRunnerInstanceController : public QObject
 {
   Q_OBJECT
 public:
-  CJsScriptRunnerInstanceController(std::weak_ptr<CScriptRunnerSignalContext> wpSignalEmitterContext) :
+  CJsScriptRunnerInstanceController(const QString& sName,
+                                    std::weak_ptr<CScriptRunnerSignalContext> wpSignalEmitterContext) :
     QObject(nullptr),
     m_spWorker(std::make_shared<CJsScriptRunnerInstanceWorker>(wpSignalEmitterContext)),
     m_pThread(new QThread(this))
   {
     qRegisterMetaType<CScriptRunnerSignalEmiter*>();
-
-    m_spWorker->moveToThread(m_pThread.data());
 
     connect(m_spWorker.get(), &CJsScriptRunnerInstanceWorker::HandleScriptFinish,
             this, &CJsScriptRunnerInstanceController::SlotHandleScriptFinish, Qt::QueuedConnection);
@@ -328,19 +333,28 @@ public:
     connect(m_spWorker.get(), &CJsScriptRunnerInstanceWorker::SignalOverlayRunAsync,
             this, &CJsScriptRunnerInstanceController::SignalOverlayRunAsync, Qt::QueuedConnection);
 
+    m_pThread->setObjectName("ScriptController::"+sName);
     m_pThread->start();
     while (!m_pThread->isRunning())
     {
       thread()->wait(5);
     }
+    m_spWorker->moveToThread(m_pThread.data());
     bool bOk = QMetaObject::invokeMethod(m_spWorker.get(), "Init", Qt::BlockingQueuedConnection);
     assert(bOk); Q_UNUSED(bOk)
+  }
+  ~CJsScriptRunnerInstanceController()
+  {
+    bool bOk = QMetaObject::invokeMethod(m_spWorker.get(), "Deinit", Qt::BlockingQueuedConnection);
+    assert(bOk); Q_UNUSED(bOk)
+    m_pThread->terminate();
+    m_pThread->wait();
   }
 
   void InterruptExecution()
   {
-    bool bOk = QMetaObject::invokeMethod(m_spWorker.get(), "InterruptExecution", Qt::BlockingQueuedConnection);
-    assert(bOk); Q_UNUSED(bOk)
+    // direct call, or else we can't stop the script
+    m_spWorker->InterruptExecution();
   }
 
   void RegisterNewComponent(const QString sName, CScriptRunnerSignalEmiter* pObject)
@@ -415,7 +429,8 @@ void CJsScriptRunner::Initialize()
 {
   QMutexLocker locker(&m_runnerMutex);
   m_vspJsRunner.insert({c_sMainRunner,
-                        std::make_shared<CJsScriptRunnerInstanceController>(m_wpSignalEmitterContext)});
+                        std::make_shared<CJsScriptRunnerInstanceController>(
+                          c_sMainRunner, m_wpSignalEmitterContext)});
   auto it = m_vspJsRunner.find(c_sMainRunner);
   it->second->setObjectName(c_sMainRunner);
   connect(it->second.get(), &CJsScriptRunnerInstanceController::HandleScriptFinish,
@@ -594,7 +609,8 @@ void CJsScriptRunner::SlotOverlayRunAsync(tspProject spProject, const QString& s
   {
     QMutexLocker locker(&m_runnerMutex);
     m_vspJsRunner.insert({sId,
-                          std::make_shared<CJsScriptRunnerInstanceController>(m_wpSignalEmitterContext)});
+                          std::make_shared<CJsScriptRunnerInstanceController>(
+                            sId, m_wpSignalEmitterContext)});
     auto it = m_vspJsRunner.find(sId);
     it->second->setObjectName(sId);
     connect(it->second.get(), &CJsScriptRunnerInstanceController::HandleScriptFinish,
