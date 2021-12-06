@@ -259,7 +259,7 @@ Rectangle {
         if (evExpression.length) {
           result.push(eval(root.wrap(evExpression, 'e.toString()', context +' <eval>')));
         }
-        docstring = afterEv;
+        docstring = afterEv.replace(' xmlns="http://www.w3.org/1999/xhtml"', '');
       }
       if (docstring.length) {
         result.push(docstring);

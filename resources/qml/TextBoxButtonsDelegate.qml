@@ -116,7 +116,7 @@ Rectangle {
                 Button {
                     id: button
                     anchors.fill: parent
-                    text: repeaterItem.textForButton;
+                    text: repeaterItem.textForButton.replace("<html>","").replace("</html>","");
                     z: 1
 
                     onHoveredChanged: {
@@ -143,12 +143,15 @@ Rectangle {
                         font.pointSize: textMetrics.font.pointSize
                         font.hintingPreference: Font.PreferNoHinting
                         elide: Text.ElideNone
-                        text: repeaterItem.textForButton
+                        text: repeaterItem.textForButton.replace("<html>","").replace("</html>","")
                         wrapMode: Text.WordWrap
                         horizontalAlignment: Text.AlignHCenter
                         verticalAlignment: Text.AlignVCenter
                         color: repeaterItem.fgColor
-                        textFormat: QtApp.mightBeRichtext(text) ? Text.RichText : Text.PlainText
+                        textFormat: (repeaterItem.textForButton.startsWith("<html>") && repeaterItem.textForButton.endsWith("</html>")) ?
+                                        Text.RichText :
+                                        (QtApp.mightBeRichtext(repeaterItem.textForButton) ?
+                                             Text.StyledText : Text.PlainText)
                     }
 
                     Shortcut {
