@@ -21,6 +21,8 @@ namespace
   const QString c_sPagesKeyWord = "pages";
   const QString c_sInitKeyWord = "init";
 
+  const QString c_sStartPageKeyWord = "start";
+
   const QString c_sEvalKeyWord = "eval";
   const QString c_sScriptKeyWord = "script";
   const QString c_sCommandsKeyWord = "commands";
@@ -149,7 +151,14 @@ bool CEosPagesToScenesTransformer::CollectScenes(QString* psError)
       {
           {c_sCommandsKeyWord, arrPage}
       };
-      m_vPages.push_back({sPageKey, QJsonDocument(objPage)});
+      if (c_sStartPageKeyWord == sPageKey)
+      {
+        m_vPages.insert(m_vPages.begin(), {sPageKey, QJsonDocument(objPage)});
+      }
+      else
+      {
+        m_vPages.push_back({sPageKey, QJsonDocument(objPage)});
+      }
     }
   }
 

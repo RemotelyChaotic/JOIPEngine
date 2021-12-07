@@ -12,6 +12,8 @@ namespace
   const QString c_sPagesKeyWord = "pages";
   const QString c_sLocatorKeyWord = "locator";
 
+  const QString c_sStartPageKeyWord = "start";
+
   const QString c_sGalleryKeyWord = "galleries";
   const QString c_sGalleryNameKeyWord = "name";
   const QString c_sGalleryImagesKeyWord = "images";
@@ -139,6 +141,13 @@ bool CEosResourceLocator::LocateAllResources(QString* psError)
   QJsonObject galeryObj = galeryIt.value().toObject();
   QJsonObject modulesObj = modulesIt.value().toObject();
 
+  QJsonArray startPageArr;
+  auto startIt = pagesObj.find(c_sStartPageKeyWord);
+  if (pagesObj.end() != startIt && startIt.value().isArray())
+  {
+    startPageArr = startIt.value().toArray();
+  }
+
   // gather resources from galeries
   for (auto it = galeryObj.constBegin(); galeryObj.constEnd() != it; ++it)
   {
@@ -260,8 +269,41 @@ bool CEosResourceLocator::LocateAllResources(QString* psError)
   // find resources in the pages in case of remote resources
   QRegExp rxMatcherImageData(c_sMatcherImageData);
   QRegExp rxOEOS(c_sMatcherOEOSResource);
+  std::vector<QJsonValue> valsStart;
+  for (QJsonValueRef obj : startPageArr)
+  {
+    if (obj.isObject())
+    {
+      std::vector<QJsonValue> valueTemp = FindKeyRecursive(c_sLocatorKeyWord, obj.toObject());
+      valsStart.insert(valsStart.end(), valueTemp.begin(), valueTemp.end());
+    }
+  }
   std::vector<QJsonValue> vals = FindKeyRecursive(c_sLocatorKeyWord, pagesObj);
+
+  // iterate over start page at first
   QStringList vsErrors;
+  for (const QJsonValue& value : valsStart)
+  {
+    QString sError;
+    const QString sResource = value.toString();
+    if (LookupRemoteLink(sResource, &sError))
+    {
+      continue;
+    }
+    if (!sError.isEmpty()) { vsErrors.push_back(sError); sError = QString(); }
+    if (LookupGaleryImage(m_resourceMap, sResource, &sError))
+    {
+      continue;
+    }
+    if (!sError.isEmpty()) { vsErrors.push_back(sError); sError = QString(); }
+    if (LookupFile(files, sResource, &sError))
+    {
+      continue;
+    }
+    if (!sError.isEmpty()) { vsErrors.push_back(sError); sError = QString(); }
+  }
+
+  // now iterate over everything
   for (const QJsonValue& value : vals)
   {
     QString sError;
