@@ -124,6 +124,62 @@ Rectangle {
         return null;
     }
 
+    // accessor object for eval
+    property var evalAccessor: ({
+        showOrPlayMedia: function(sName, sId, iLoops, iStartAt)
+        {
+            mediaPlayer.showOrPlayMedia(sName, sId, iLoops, iStartAt);
+        },
+        tryToPlaySoundOrMovie: function(sResource, sId, iLoops, iStartAt)
+        {
+            signalEmitter.tryToPlaySoundOrMovie(sResource, sId, iLoops, iStartAt);
+        },
+        playVideo: function()
+        {
+            signalEmitter.playVideo();
+        },
+        playSound: function(sResource, sId, iLoops, iStartAt)
+        {
+            signalEmitter.playSound(sResource, sId, iLoops, iStartAt);
+        },
+        pauseVideo: function()
+        {
+            signalEmitter.pauseVideo();
+        },
+        pauseSound: function(sResource)
+        {
+            signalEmitter.pauseSound(sResource);
+        },
+        playMedia: function(sResource, sResource, iLoops, iStartAt)
+        {
+            signalEmitter.playMedia(sResource, sResource, iLoops, iStartAt);
+        },
+        seekAudio: function(sResource, iSeek)
+        {
+            signalEmitter.seekAudio(sResource, iSeek);
+        },
+        seekMedia: function(sResource, iSeek)
+        {
+            signalEmitter.seekMedia(sResource, iSeek);
+        },
+        seekVideo: function(iSeek)
+        {
+            signalEmitter.seekVideo(iSeek);
+        },
+        showMedia: function(sResource)
+        {
+            signalEmitter.showMedia(sResource, "", 1, 0);
+        },
+        stopVideo: function()
+        {
+            signalEmitter.stopVideo();
+        },
+        stopSound: function(sResource)
+        {
+            signalEmitter.stopSound(sResource);
+        }
+    });
+
     MediaPlayerSignalEmitter {
         id: signalEmitter
 
@@ -463,6 +519,8 @@ Rectangle {
             registrator.registerMediaPlayer(mediaPlayer);
         }
         registrator.componentLoaded();
+
+        root.registerUIComponent(mediaPlayer.userName, evalAccessor);
     }
 
     // Misc components

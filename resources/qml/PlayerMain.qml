@@ -70,6 +70,8 @@ Rectangle {
         registeredTextBox = null;
         registeredMediaPlayer = null;
 
+        // TODO: unload registered eval access objects
+
         numReadyComponents = 0;
         componentsRegistered = [];
 
@@ -266,6 +268,14 @@ Rectangle {
         anchors.fill: parent
     }
 
+    //------------------------------------------------------------------------------------
+    //
+    // Misc
+    function registerUIComponent(sComponent, component)
+    {
+        EvalWrapper.registerUIComponent(sComponent, component);
+    }
+
     function skipWait()
     {
         for (var i = 0; root.componentsRegistered.length > i; ++i)
@@ -375,6 +385,6 @@ Rectangle {
         ScriptRunner.registerNewComponent(evaluator.userName, evaluator);
         numReadyComponents += 3;
 
-        EvalWrapper.init(storage);
+        registerUIComponent("teaseStorage", storage);
     }
 }

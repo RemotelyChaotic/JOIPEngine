@@ -83,6 +83,18 @@ Rectangle {
         }
     }
 
+    // accessor object for eval
+    property var evalAccessor: ({
+        setBackgroundColor: function(color)
+        {
+            signalEmitter.backgroundColorChanged(color);
+        },
+        setBackgroundTexture: function(sResource)
+        {
+            signalEmitter.backgroundTextureChanged(sResource);
+        }
+    });
+
     BackgroundSignalEmitter {
         id: signalEmitter
 
@@ -134,5 +146,7 @@ Rectangle {
         img.source = Settings.styleFolderQml() + "/Background.png";
         ScriptRunner.registerNewComponent(userName, signalEmitter);
         registrator.componentLoaded();
+
+        root.registerUIComponent(background.userName, evalAccessor);
     }
 }

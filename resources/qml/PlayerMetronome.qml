@@ -10,6 +10,34 @@ Rectangle {
     color: "transparent"
     property string userName: "metronome"
 
+    // accessor object for eval
+    property var evalAccessor: ({
+        start: function()
+        {
+            signalEmitter.start();
+        },
+        setBpm: function(iBpm)
+        {
+            signalEmitter.setBpm(iBpm);
+        },
+        setBeatResource: function(sResource)
+        {
+            signalEmitter.setBeatResource(sResource);
+        },
+        setMuted: function(bMuted)
+        {
+            signalEmitter.start(bMuted);
+        },
+        setPattern: function(vdPattern)
+        {
+            signalEmitter.start(vdPattern);
+        },
+        stop: function()
+        {
+            signalEmitter.stop();
+        }
+    });
+
     MetronomeSignalEmitter {
         id: signalEmitter
 
@@ -94,5 +122,7 @@ Rectangle {
     Component.onCompleted: {
         ScriptRunner.registerNewComponent(userName, signalEmitter);
         registrator.componentLoaded();
+
+        root.registerUIComponent(metronome.userName, evalAccessor);
     }
 }

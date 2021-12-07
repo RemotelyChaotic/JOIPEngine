@@ -126,6 +126,50 @@ Rectangle {
         textLog.textColors = vColors;
     }
 
+    // accessor object for eval
+    property var evalAccessor: ({
+        clearTextBox: function()
+        {
+            textBox.clearTextBox();
+        },
+        showButtonPrompts: function(vsLabels, sRequestId)
+        {
+            signalEmitter.showButtonPrompts(vsLabels, sRequestId);
+        },
+        showSceneSelectionPrompts: function(vsLabels)
+        {
+            textBox.showButtonPrompts(vsLabels);
+        },
+        showInput: function(sStoreIntoVar, sRequestId)
+        {
+            signalEmitter.showInput(sStoreIntoVar, sRequestId);
+        },
+        showText: function(sText)
+        {
+            signalEmitter.showInput(sText);
+        },
+        setPortrait: function(sName)
+        {
+            textBox.setPortrait(sName);
+        },
+        backgroundColors: function()
+        {
+            return textBox.backgroundColors();
+        },
+        setBackgroundColors: function(vColors)
+        {
+            textBox.setBackgroundColors(vColors);
+        },
+        textColors: function()
+        {
+            return textBox.textColors();
+        },
+        setTextColors: function(vColors)
+        {
+            textBox.setTextColors(vColors);
+        }
+    });
+
     // signal handling from script
     TextBoxSignalEmitter {
         id: signalEmitter
@@ -254,5 +298,7 @@ Rectangle {
             registrator.registerTextBox(textBox);
         }
         registrator.componentLoaded();
+
+        root.registerUIComponent(textBox.userName, evalAccessor);
     }
 }

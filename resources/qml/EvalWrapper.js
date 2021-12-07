@@ -1,11 +1,12 @@
 var _globalEval = eval;
 
-function init(storage) {
+function registerUIComponent(sComponent, component)
+{
     // extend "global" scope with custom Objects to mock EOS and give controlled access to
     // objects
-    (function(storage) {
-        this.teaseStorage = storage;
-    })(storage);
+    (function(sComponent, component) {
+        this[sComponent] = component;
+    })(sComponent, component);
 }
 
 function globalEval(script) {

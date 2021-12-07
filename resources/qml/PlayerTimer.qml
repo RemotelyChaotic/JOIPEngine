@@ -10,6 +10,34 @@ Rectangle {
     color: "transparent"
     property string userName: "timer"
 
+    // accessor object for eval
+    property var evalAccessor: ({
+        hideTimer: function()
+        {
+            signalEmitter.hideTimer();
+        },
+        setTime: function(dTimeS)
+        {
+            signalEmitter.setTime(dTimeS);
+        },
+        setTimeVisible: function(bVisible)
+        {
+            signalEmitter.setTimeVisible(bVisible);
+        },
+        showTimer: function()
+        {
+            signalEmitter.showTimer();
+        },
+        startTimer: function()
+        {
+            signalEmitter.startTimer();
+        },
+        stopTimer: function()
+        {
+            signalEmitter.stopTimer();
+        }
+    });
+
     TimerSignalEmitter {
         id: signalEmitter
 
@@ -73,6 +101,8 @@ Rectangle {
     Component.onCompleted: {
         ScriptRunner.registerNewComponent(userName, signalEmitter);
         registrator.componentLoaded();
+
+        root.registerUIComponent(timer.userName, evalAccessor);
     }
 
     // handle interrupt

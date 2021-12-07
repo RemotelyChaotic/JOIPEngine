@@ -45,6 +45,50 @@ Rectangle {
         }
     }
 
+    // accessor object for eval
+    property var evalAccessor: ({
+        showNotification: function(sId, sTitle, sButtonText, iTimeS, sOnButton, sOnTimeout)
+        {
+            notification.showNotification(sId, sTitle, sButtonText, iTimeS, sOnButton, sOnTimeout);
+        },
+        removeNotificaiton: function(sId)
+        {
+            notification.removeNotificaiton(sId);
+        },
+        clearNotifications: function()
+        {
+            signalEmitter.clearNotifications();
+        },
+        hideNotification: function(sId)
+        {
+            signalEmitter.hideNotification(sId);
+        },
+        setIconAlignment: function(alignment)
+        {
+            signalEmitter.iconAlignmentChanged(alignment);
+        },
+        setPortrait: function(sResource)
+        {
+            signalEmitter.portraitChanged(sResource);
+        },
+        setTextBackgroundColor: function(color)
+        {
+            signalEmitter.textBackgroundColorChanged(color);
+        },
+        setTextColor: function(color)
+        {
+            signalEmitter.textColorChanged(color);
+        },
+        setWidgetBackgroundColor: function(color)
+        {
+            signalEmitter.widgetBackgroundColorChanged(color);
+        },
+        setWidgetColor: function(color)
+        {
+            signalEmitter.widgetColorChanged(color);
+        }
+    });
+
     NotificationSignalEmiter {
         id: signalEmitter
 
@@ -167,5 +211,6 @@ Rectangle {
     Component.onCompleted: {
         ScriptRunner.registerNewComponent(userName, signalEmitter);
         registrator.componentLoaded();
+        root.registerUIComponent(notification.userName, evalAccessor);
     }
 }

@@ -43,11 +43,34 @@ Rectangle {
         }
     }
 
-    function clearIcons(sName)
+    function clearIcons()
     {
         iconModel.clear();
     }
 
+    // accessor object for eval
+    property var evalAccessor: ({
+        addIcon: function(sName)
+        {
+            icon.clearTextBox(sName);
+        },
+        removeIcon: function(sName)
+        {
+            icon.clearTextBox(sName);
+        },
+        clearIcons: function()
+        {
+            icon.clearIcons();
+        },
+        hideIcon: function(sName)
+        {
+            signalEmitter.hideIcon(sName);
+        },
+        showIcon: function(sName)
+        {
+            signalEmitter.showIcon(sName);
+        }
+    });
 
     IconSignalEmitter {
         id: signalEmitter
@@ -110,5 +133,7 @@ Rectangle {
     Component.onCompleted: {
         ScriptRunner.registerNewComponent(userName, signalEmitter);
         registrator.componentLoaded();
+
+        root.registerUIComponent(icon.userName, evalAccessor);
     }
 }
