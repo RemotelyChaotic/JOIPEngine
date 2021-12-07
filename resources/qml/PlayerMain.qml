@@ -186,6 +186,15 @@ Rectangle {
     }
     TeaseStorage {
         id: storage
+
+        function setItem(sId, value)
+        {
+            store(sId, value);
+        }
+        function getItem(sId)
+        {
+            return load(sId);
+        }
     }
     StorageSignalEmitter {
         id: storageEmitter
