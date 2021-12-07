@@ -225,5 +225,6 @@
         <file>resources/qml/EmptyDummy.qml</file>
         <file>resources/qml/PlayerNotification.qml</file>
         <file>resources/qml/NotificationDefaultDelegate.qml</file>
+        <file>resources/qml/EvalWrapper.js</file>
     </qresource>
 </RCC>

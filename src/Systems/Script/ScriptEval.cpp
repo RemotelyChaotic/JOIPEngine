@@ -40,7 +40,7 @@ QJSValue CScriptEval::eval(const QString& sScript)
   if (!CheckIfScriptCanRun()) { return QJSValue(); }
 
   auto pSignalEmitter = SignalEmitter<CEvalSignalEmiter>();
-  QTimer::singleShot(0, this, [&pSignalEmitter,sScript]() { emit pSignalEmitter->eval(sScript); });
+  QTimer::singleShot(0, this, [&pSignalEmitter,sScript]() { emit pSignalEmitter->evalQuery(sScript); });
 
   // local loop to wait for answer
   QVariant returnValue = QVariant();
@@ -182,7 +182,7 @@ QVariant CEosScriptEval::eval(const QString& sScript)
   if (!CheckIfScriptCanRun()) { return QVariant(); }
 
   auto pSignalEmitter = SignalEmitter<CEvalSignalEmiter>();
-  QTimer::singleShot(0, this, [&pSignalEmitter,sScript]() { emit pSignalEmitter->eval(sScript); });
+  QTimer::singleShot(0, this, [&pSignalEmitter,sScript]() { emit pSignalEmitter->evalQuery(sScript); });
 
   // local loop to wait for answer
   QVariant returnValue = QVariant();

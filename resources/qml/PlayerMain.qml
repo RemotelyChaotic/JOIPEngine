@@ -7,6 +7,7 @@ import JOIP.core 1.1
 import JOIP.db 1.1
 import JOIP.script 1.1
 
+import "EvalWrapper.js" as EvalWrapper
 import "qrc:/xmldom/dom-parser.mjs" as DOMParser;
 
 Rectangle {
@@ -64,8 +65,7 @@ Rectangle {
     function onUnLoadProject()
     {
         // clear eval environement and storage
-        evalEnvironement = null;
-        teaseStorage.clear();
+        storage.clear();
 
         registeredTextBox = null;
         registeredMediaPlayer = null;
@@ -185,7 +185,7 @@ Rectangle {
         }
     }
     TeaseStorage {
-        id: teaseStorage
+        id: storage
 
         function setItem(sId, value)
         {
@@ -201,39 +201,15 @@ Rectangle {
         property string userName: "localStorage"
 
         onClear: {
-            teaseStorage.clear();
+            storage.clear();
         }
         onLoad: {
-            var loaded = teaseStorage.load(sId);
+            var loaded = storage.load(sId);
             loadReturnValue(loaded, sRequestId);
         }
         onStore: {
-            teaseStorage.store(sId, value);
+            storage.store(sId, value);
         }
-    }
-    property var evalEnvironement: null
-    function _globalEval(script)
-    {
-        return eval(script);
-    }
-    function wrap(script, onerror, type) {
-      return "\n"+
-      "(function() {try {return root.evalEnvironement._globalEval(" + JSON.stringify(script) + ")}\n"+
-        "catch (e) {console.error(\n"+
-          "e.stack,\n"+
-          JSON.stringify('\nIn ' + (type || 'Script EVAL') + ':\n') + ",\n" +
-          JSON.stringify(script) +
-          ");return " + (onerror || '') + "}\n"+
-      "})()";
-    }
-    function isolate(script, type) {
-      return "\n"+
-      "try {_globalEval(" + JSON.stringify(script) + ")}\n"+
-        "catch (e) {console.error(\n"+
-          "e.stack,\n"+
-          JSON.stringify('\n\nIn ' + (type || 'Script EVAL') + ':\n') + ",\n" +
-          JSON.stringify(script) +
-          ")}";
     }
     //------------------------------------------------------------------------------------
     // variables
@@ -266,7 +242,7 @@ Rectangle {
         }
         var evExpression = QtApp.decodeHTML(ev.innerHTML).trim();
         if (evExpression.length) {
-          result.push(eval(root.wrap(evExpression, 'e.toString()', context +' <eval>')));
+          result.push(EvalWrapper.globalEval(EvalWrapper.wrap(evExpression, 'e.toString()', context +' <eval>')));
         }
         docstring = afterEv.replace(' xmlns="http://www.w3.org/1999/xhtml"', '');
       }
@@ -280,8 +256,8 @@ Rectangle {
         id: evaluator
         property string userName: "evalRunner"
 
-        onEval: {
-            var retVal = root.wrap(sScript, 'e.toString()', 'evaluator <' + userName + '>')
+        onEvalQuery: {
+            var retVal = EvalWrapper.globalEval(EvalWrapper.isolate(sScript, 'evaluator <' + userName + '>'));
             evaluator.evalReturn(retVal);
         }
     }
@@ -399,9 +375,6 @@ Rectangle {
         ScriptRunner.registerNewComponent(evaluator.userName, evaluator);
         numReadyComponents += 3;
 
-        // repopulate eval environement
-        evalEnvironement = {
-            _globalEval: _globalEval,
-        };
+        EvalWrapper.init(storage);
     }
 }

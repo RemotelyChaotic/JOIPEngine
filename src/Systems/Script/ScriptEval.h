@@ -17,7 +17,7 @@ public:
   std::shared_ptr<CScriptObjectBase> CreateNewScriptObject(QPointer<CJsonInstructionSetParser> pParser);
 
 signals:
-  void eval(QString sScript);
+  void evalQuery(QString sScript);
   void evalReturn(QVariant value);
 };
 Q_DECLARE_METATYPE(CEvalSignalEmiter)
@@ -33,6 +33,7 @@ public:
               QPointer<QJSEngine> pEngine);
   ~CScriptEval();
 
+public slots:
   QJSValue eval(const QString& sScript);
 
 signals:
