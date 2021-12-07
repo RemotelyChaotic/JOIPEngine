@@ -62,7 +62,8 @@ QJSValue CScriptStorage::load(QString sId)
   {
     if (sRequestId == sRequestIdRet)
     {
-      varRetVal = var;
+      QJSValue val = var.value<QJSValue>();
+      varRetVal = val.toVariant();
       varRetVal.detach(); // fixes some crashes with QJSEngine
       emit this->SignalQuitLoop();
     }
@@ -84,8 +85,21 @@ void CScriptStorage::store(QString sId, QJSValue value)
 {
   if (!CheckIfScriptCanRun()) { return; }
 
-  QVariant var = value.toVariant();
-  emit SignalEmitter<CStorageSignalEmitter>()->store(sId, var);
+  if (value.isArray())
+  {
+    QVariant var = value.toVariant();
+    emit SignalEmitter<CStorageSignalEmitter>()->store(sId, var.toList());
+  }
+  else if (value.isObject())
+  {
+    QVariant var = value.toVariant();
+    emit SignalEmitter<CStorageSignalEmitter>()->store(sId, var.toMap());
+  }
+  else
+  {
+    QVariant var = value.toVariant();
+    emit SignalEmitter<CStorageSignalEmitter>()->store(sId, var);
+  }
 }
 
 //----------------------------------------------------------------------------------------
