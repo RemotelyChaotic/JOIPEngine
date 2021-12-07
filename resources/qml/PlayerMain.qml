@@ -65,7 +65,7 @@ Rectangle {
     {
         // clear eval environement and storage
         evalEnvironement = null;
-        storage.clear();
+        teaseStorage.clear();
 
         registeredTextBox = null;
         registeredMediaPlayer = null;
@@ -185,7 +185,7 @@ Rectangle {
         }
     }
     TeaseStorage {
-        id: storage
+        id: teaseStorage
 
         function setItem(sId, value)
         {
@@ -201,14 +201,14 @@ Rectangle {
         property string userName: "localStorage"
 
         onClear: {
-            storage.clear();
+            teaseStorage.clear();
         }
         onLoad: {
-            var loaded = storage.load(sId);
+            var loaded = teaseStorage.load(sId);
             loadReturnValue(loaded, sRequestId);
         }
         onStore: {
-            storage.store(sId, value);
+            teaseStorage.store(sId, value);
         }
     }
     property var evalEnvironement: null
@@ -402,7 +402,6 @@ Rectangle {
         // repopulate eval environement
         evalEnvironement = {
             _globalEval: _globalEval,
-            teaseStorage: storage
         };
     }
 }
