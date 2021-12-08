@@ -1,6 +1,11 @@
 import QtQuick 2.14
 
 QtObject {
+    property QtObject controllButtonDisplay: QtObject {
+        property var topOffset: 50
+        property var rightOffset: 50
+        property var height: 64
+    }
     property QtObject backgroundDisplay: QtObject {
         property var horizontalTileMode: BorderImage.Round
         property var verticalTileMode: BorderImage.Round

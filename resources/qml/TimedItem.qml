@@ -15,7 +15,7 @@ Rectangle {
     property int fontSize: 20
     property string font: Settings.font
 
-    property alias background: backgroundLayer
+    property alias background: backgroundLayer.data
 
     signal timeout()
 
@@ -79,9 +79,8 @@ Rectangle {
         anchors.fill: parent
         color: "transparent"
 
-        Image {
+        data: Image {
             anchors.fill: parent
-
             source: Settings.styleFolderQml() + "/TimerBg.svg"
             fillMode: Image.Stretch
             smooth: true

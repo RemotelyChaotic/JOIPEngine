@@ -444,6 +444,7 @@ void CEditorCodeWidget::SlotDebugStart()
     qint32 iCurrProject = m_spCurrentProject->m_iId;
     m_spCurrentProject->m_rwLock.unlock();
     CSceneMainScreen* pMainSceneScreen = new CSceneMainScreen(m_spUi->pSceneView);
+    pMainSceneScreen->SetDebugging(true);
 
     connect(pMainSceneScreen, &CSceneMainScreen::SignalUnloadFinished,
             this, &CEditorCodeWidget::SlotDebugUnloadFinished);

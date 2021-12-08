@@ -39,7 +39,8 @@ CSceneMainScreen::CSceneMainScreen(QWidget* pParent) :
   m_wpDbManager(),
   m_lastScriptExecutionStatus(static_cast<qint32>(CScriptRunnerSignalEmiter::ScriptExecStatus::eRunning)),
   m_bInitialized(false),
-  m_bShuttingDown(false)
+  m_bShuttingDown(false),
+  m_bBeingDebugged(false)
 {
   m_spUi->setupUi(this);
 
@@ -118,6 +119,22 @@ void CSceneMainScreen::UnloadProject()
 
   m_bShuttingDown = true;
   m_spScriptRunner->InterruptExecution();
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CSceneMainScreen::SetDebugging(bool bDebugging)
+{
+  if (m_bBeingDebugged != bDebugging)
+  {
+    m_bBeingDebugged = bDebugging;
+    // set size properties manually setzen, since this isn't done automatically
+    QQuickItem* pRootObject =  m_spUi->pQmlWidget->rootObject();
+    if (nullptr != pRootObject)
+    {
+      pRootObject->setProperty("debug", QVariant::fromValue(bDebugging));
+    }
+  }
 }
 
 //----------------------------------------------------------------------------------------
@@ -471,6 +488,8 @@ void CSceneMainScreen::LoadQml()
     pRootObject->setProperty("currentlyLoadedProject", QVariant::fromValue(m_pCurrentProjectWrapper.data()));
 
     QMetaObject::invokeMethod(pRootObject, "onLoadProject");
+
+    pRootObject->setProperty("debug", m_bBeingDebugged);
   }
 }
 

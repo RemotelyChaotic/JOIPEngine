@@ -35,6 +35,7 @@ public:
   void LoadProject(qint32 iId, const QString sStartScene = QString());
   std::weak_ptr<CScriptRunner> ScriptRunner();
   void UnloadProject();
+  void SetDebugging(bool bDebugging);
 
 public slots:
   void SlotQuit();
@@ -80,6 +81,7 @@ private:
   qint32                                                      m_lastScriptExecutionStatus;
   bool                                                        m_bInitialized;
   bool                                                        m_bShuttingDown;
+  bool                                                        m_bBeingDebugged;
 };
 
 #endif // SCENEMAINSCREEN_H

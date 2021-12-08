@@ -21,6 +21,8 @@ Rectangle {
             Layout.preferredWidth: 64
             Layout.alignment: Qt.AlignVCenter
 
+            visible: !root.debug
+
             text: Settings.keyBinding("Exit")
             contentItem: Text {
                 anchors.fill: parent

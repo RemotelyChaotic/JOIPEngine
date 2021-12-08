@@ -18,6 +18,7 @@ Rectangle {
     // make globally accessible for now
     property alias soundEffects: playerSoundEffects
 
+    property bool debug: false
     property Project currentlyLoadedProject: null
     property PlayerTextBox registeredTextBox: null
     property PlayerMediaPlayer registeredMediaPlayer: null
@@ -356,12 +357,11 @@ Rectangle {
 
         PlayerControls {
             id: sceneControl
-            color: "transparent"
             anchors.top: parent.top
             anchors.horizontalCenter: parent.horizontalCenter
-            anchors.topMargin: 50
-            width: parent.width - 100
-            height: 64
+            anchors.topMargin: (null != style) ? style.controllButtonDisplay.topOffset : 50
+            width: (null != style) ? (parent.width - style.controllButtonDisplay.rightOffset*2) : parent.width-100
+            height: (null != style) ? style.controllButtonDisplay.height : 64
 
             soundEffects: playerSoundEffects
         }
