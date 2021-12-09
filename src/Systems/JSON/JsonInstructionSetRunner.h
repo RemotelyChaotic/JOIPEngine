@@ -29,6 +29,7 @@ public:
 
   tRetVal CallNextCommand(ERunerMode runMode = ERunerMode::eRunOne, bool bBlocking = true);
   void Interrupt();
+  bool IsRunning() const;
   tRetVal Run(const QString& sInstructionSet, ERunerMode runMode = ERunerMode::eRunOne, bool bBlocking = true);
 
 signals:

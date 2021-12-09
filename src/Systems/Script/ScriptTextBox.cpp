@@ -184,6 +184,9 @@ qint32 CScriptTextBox::showButtonPrompts(QJSValue vsLabels)
     QMetaObject::Connection interruptLoop =
       connect(pSignalEmitter, &CTextBoxSignalEmitter::interrupt,
               &loop, &QEventLoop::quit, Qt::QueuedConnection);
+    QMetaObject::Connection interruptThisLoop =
+      connect(this, &CScriptObjectBase::SignalInterruptExecution,
+              &loop, &QEventLoop::quit, Qt::QueuedConnection);
     QMetaObject::Connection showRetValLoop =
       connect(pSignalEmitter, &CTextBoxSignalEmitter::showButtonReturnValue,
               this, [this, &iReturnValue, sRequestId](qint32 iIndexSelected, QString sRequestIdRet)
@@ -199,6 +202,7 @@ qint32 CScriptTextBox::showButtonPrompts(QJSValue vsLabels)
 
     disconnect(quitLoop);
     disconnect(interruptLoop);
+    disconnect(interruptThisLoop);
     disconnect(showRetValLoop);
 
     return iReturnValue;
@@ -254,6 +258,9 @@ void CScriptTextBox::showText(QString sText, double dWaitTime, bool bSkipable)
     QMetaObject::Connection interruptLoop =
       connect(pSignalEmitter, &CTextBoxSignalEmitter::interrupt,
               &loop, &QEventLoop::quit, Qt::QueuedConnection);
+    QMetaObject::Connection interruptThisLoop =
+      connect(this, &CScriptObjectBase::SignalInterruptExecution,
+              &loop, &QEventLoop::quit, Qt::QueuedConnection);
 
     // connect lambdas in loop context, so events are processed, but capture timer,
     // to start / stop
@@ -294,6 +301,7 @@ void CScriptTextBox::showText(QString sText, double dWaitTime, bool bSkipable)
     loop.disconnect();
 
     disconnect(interruptLoop);
+    disconnect(interruptThisLoop);
     disconnect(pauseLoop);
     disconnect(resumeLoop);
     disconnect(timeoutLoop);
@@ -324,6 +332,9 @@ QString CScriptTextBox::showInput()
   QMetaObject::Connection interruptLoop =
     connect(pSignalEmitter, &CTextBoxSignalEmitter::interrupt,
             &loop, &QEventLoop::quit, Qt::QueuedConnection);
+  QMetaObject::Connection interruptThisLoop =
+    connect(this, &CScriptObjectBase::SignalInterruptExecution,
+            &loop, &QEventLoop::quit, Qt::QueuedConnection);
   QMetaObject::Connection showRetValLoop =
     connect(pSignalEmitter, &CTextBoxSignalEmitter::showInputReturnValue,
             this, [this, &sReturnValue, sRequestId](QString sInput, QString sRequestIdRet)
@@ -341,6 +352,7 @@ QString CScriptTextBox::showInput()
 
   disconnect(quitLoop);
   disconnect(interruptLoop);
+  disconnect(interruptThisLoop);
   disconnect(showRetValLoop);
 
   return sReturnValue;
@@ -741,6 +753,9 @@ qint32 CEosScriptTextBox::showButtonPrompts(const QStringList& vsLabels)
     QMetaObject::Connection interruptLoop =
       connect(pSignalEmitter, &CTextBoxSignalEmitter::interrupt,
               &loop, &QEventLoop::quit, Qt::QueuedConnection);
+    QMetaObject::Connection interruptThisLoop =
+      connect(this, &CScriptObjectBase::SignalInterruptExecution,
+              &loop, &QEventLoop::quit, Qt::QueuedConnection);
     QMetaObject::Connection showRetValLoop =
       connect(pSignalEmitter, &CTextBoxSignalEmitter::showButtonReturnValue,
               this, [this, &iReturnValue, sRequestId](qint32 iIndexSelected, QString sRequestIdRet)
@@ -756,6 +771,7 @@ qint32 CEosScriptTextBox::showButtonPrompts(const QStringList& vsLabels)
 
     disconnect(quitLoop);
     disconnect(interruptLoop);
+    disconnect(interruptThisLoop);
     disconnect(showRetValLoop);
 
     return iReturnValue;
@@ -785,6 +801,9 @@ QString CEosScriptTextBox::showInput(const QString& sStoreIntoVar)
   QMetaObject::Connection interruptLoop =
     connect(pSignalEmitter, &CTextBoxSignalEmitter::interrupt,
             &loop, &QEventLoop::quit, Qt::QueuedConnection);
+  QMetaObject::Connection interruptThisLoop =
+    connect(this, &CScriptObjectBase::SignalInterruptExecution,
+            &loop, &QEventLoop::quit, Qt::QueuedConnection);
   QMetaObject::Connection showRetValLoop =
     connect(pSignalEmitter, &CTextBoxSignalEmitter::showInputReturnValue,
             this, [this, &sReturnValue,sRequestId](QString sInput, QString sRequestIdRet)
@@ -802,6 +821,7 @@ QString CEosScriptTextBox::showInput(const QString& sStoreIntoVar)
 
   disconnect(quitLoop);
   disconnect(interruptLoop);
+  disconnect(interruptThisLoop);
   disconnect(showRetValLoop);
 
   return sReturnValue;
@@ -834,6 +854,9 @@ void CEosScriptTextBox::showText(QString sText, double dWaitTime, bool bSkipable
     QEventLoop loop;
     QMetaObject::Connection interruptLoop =
       connect(pSignalEmitter, &CTextBoxSignalEmitter::interrupt,
+              &loop, &QEventLoop::quit, Qt::QueuedConnection);
+    QMetaObject::Connection interruptThisLoop =
+      connect(this, &CScriptObjectBase::SignalInterruptExecution,
               &loop, &QEventLoop::quit, Qt::QueuedConnection);
 
     // connect lambdas in loop context, so events are processed, but capture timer,
@@ -875,6 +898,7 @@ void CEosScriptTextBox::showText(QString sText, double dWaitTime, bool bSkipable
     loop.disconnect();
 
     disconnect(interruptLoop);
+    disconnect(interruptThisLoop);
     disconnect(pauseLoop);
     disconnect(resumeLoop);
     disconnect(timeoutLoop);

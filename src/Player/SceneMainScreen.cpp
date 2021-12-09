@@ -139,6 +139,30 @@ void CSceneMainScreen::SetDebugging(bool bDebugging)
 
 //----------------------------------------------------------------------------------------
 //
+void CSceneMainScreen::SlotFinish()
+{
+  if (!m_bInitialized || nullptr == m_spCurrentProject) { return; }
+
+  // no signal is giong to be emitted
+  auto spSignalEmmiterContext = m_spScriptRunner->SignalEmmitterContext();
+  if (nullptr != spSignalEmmiterContext &&
+      CScriptRunnerSignalEmiter::ScriptExecStatus::eStopped ==
+      spSignalEmmiterContext->ScriptExecutionStatus())
+  {
+    UnloadProject();
+
+    emit SignalExitClicked();
+
+    bool bOk =
+        QMetaObject::invokeMethod(this, "SlotScriptRunFinished", Qt::QueuedConnection,
+                                  Q_ARG(bool, false), Q_ARG(QString, QString()));
+    assert(bOk);
+    Q_UNUSED(bOk);
+  }
+}
+
+//----------------------------------------------------------------------------------------
+//
 void CSceneMainScreen::SlotQuit()
 {
   if (!m_bInitialized || nullptr == m_spCurrentProject) { return; }
@@ -337,13 +361,13 @@ void CSceneMainScreen::SlotSceneSelectReturnValue(int iIndex)
     else
     {
       qInfo() << tr("Next scene is null or end.");
-      SlotQuit();
+      SlotFinish();
     }
   }
   else
   {
     qWarning() << tr("No more scenes to load was unexpected.");
-    SlotQuit();
+    SlotFinish();
   }
 }
 
@@ -528,7 +552,7 @@ void CSceneMainScreen::NextSkript()
       else
       {
         qInfo() << tr("Next scene is null or end.");
-        SlotQuit();
+        SlotFinish();
       }
     }
     else
@@ -546,7 +570,7 @@ void CSceneMainScreen::NextSkript()
   else
   {
     qInfo() << tr("No more scenes to load.");
-    SlotQuit();
+    SlotFinish();
   }
 }
 

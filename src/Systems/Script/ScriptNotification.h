@@ -15,8 +15,7 @@ namespace IconAlignment
   enum EIconAlignment
   {
     AlignLeft = Qt::AlignLeft,
-    AlignRight = Qt::AlignRight,
-    AlignCenter = Qt::AlignHCenter
+    AlignRight = Qt::AlignRight
   };
   Q_ENUM_NS(EIconAlignment)
 }

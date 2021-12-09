@@ -12,6 +12,9 @@
 #include <QFile>
 #include <QTimer>
 
+namespace  {
+  const char* c_sMainRunner = "~main";
+}
 struct SFinishTag {};
 
 //----------------------------------------------------------------------------------------
@@ -159,6 +162,21 @@ void CEosScriptRunner::ResumeExecution()
 
 //----------------------------------------------------------------------------------------
 //
+bool CEosScriptRunner::HasRunningScripts() const
+{
+  bool bHasRunningScripts = false;
+  for (auto& it : m_vspEosRunner)
+  {
+    if (nullptr != it.second)
+    {
+      bHasRunningScripts |= it.second->IsRunning();
+    }
+  }
+  return bHasRunningScripts;
+}
+
+//----------------------------------------------------------------------------------------
+//
 void CEosScriptRunner::LoadScript(const QString& sScript, tspScene spScene, tspResource spResource)
 {
   // set scene
@@ -166,19 +184,23 @@ void CEosScriptRunner::LoadScript(const QString& sScript, tspScene spScene, tspR
   //
 
   // get scene name
-  QReadLocker locker(&spScene->m_rwLock);
-  QMutexLocker lockerScene(&m_sceneMutex);
-  m_sSceneName = spScene->m_sName;
-  lockerScene.unlock();
-  locker.unlock();
+  if (nullptr != spScene)
+  {
+    QReadLocker locker(&spScene->m_rwLock);
+    QMutexLocker lockerScene(&m_sceneMutex);
+    m_sSceneName = spScene->m_sName;
+  }
 
   // set current Project
-  m_objectMapMutex.lock();
-  for (auto it = m_objectMap.begin(); m_objectMap.end() != it; ++it)
   {
-    it->second->SetCurrentProject(spResource->m_spParent);
+    QReadLocker scriptLocker(&spResource->m_rwLock);
+    m_objectMapMutex.lock();
+    for (auto it = m_objectMap.begin(); m_objectMap.end() != it; ++it)
+    {
+      it->second->SetCurrentProject(spResource->m_spParent);
+    }
+    m_objectMapMutex.unlock();
   }
-  m_objectMapMutex.unlock();
 
   auto spSignalEmitterContext = m_wpSignalEmitterContext.lock();
   if (nullptr == spSignalEmitterContext)
@@ -188,16 +210,16 @@ void CEosScriptRunner::LoadScript(const QString& sScript, tspScene spScene, tspR
   }
 
   // create runner
-  m_vspEosRunner["~main"] =
+  m_vspEosRunner[c_sMainRunner] =
     m_spEosParser->ParseJson(sScript);
-  auto spEosRunnerMain = m_vspEosRunner["~main"];
+  auto spEosRunnerMain = m_vspEosRunner[c_sMainRunner];
   if (nullptr == spEosRunnerMain)
   {
     HandleError(m_spEosParser->Error());
     return;
   }
 
-  spEosRunnerMain->setObjectName("~main");
+  spEosRunnerMain->setObjectName(c_sMainRunner);
   connect(spEosRunnerMain.get(), &CJsonInstructionSetRunner::CommandRetVal,
           this, &CEosScriptRunner::SlotCommandRetVal);
   connect(spEosRunnerMain.get(), &CJsonInstructionSetRunner::Fork,
@@ -205,7 +227,7 @@ void CEosScriptRunner::LoadScript(const QString& sScript, tspScene spScene, tspR
 
   spSignalEmitterContext->SetScriptExecutionStatus(CScriptRunnerSignalEmiter::eRunning);
 
-  QTimer::singleShot(10, this, [this]{ SlotRun("~main", "Commands"); });
+  QTimer::singleShot(10, this, [this]{ SlotRun(c_sMainRunner, "Commands"); });
 }
 
 //----------------------------------------------------------------------------------------
@@ -292,11 +314,7 @@ void CEosScriptRunner::HandleScriptFinish(bool bSuccess, const QVariant& sRetVal
     return;
   }
 
-  spSignalEmitterContext->SetScriptExecutionStatus(CScriptRunnerSignalEmiter::eStopped);
-
   m_spCurrentScene = nullptr;
-
-  emit spSignalEmitterContext->interrupt();
 
   auto itRunner = m_vspEosRunner.find(sId);
   if (m_vspEosRunner.end() == itRunner || nullptr == itRunner->second)
@@ -334,15 +352,6 @@ void CEosScriptRunner::HandleScriptFinish(bool bSuccess, const QVariant& sRetVal
 //
 void CEosScriptRunner::SlotCommandRetVal(CJsonInstructionSetRunner::tRetVal retVal)
 {
-  auto spSignalEmitterContext = m_wpSignalEmitterContext.lock();
-  if (nullptr == spSignalEmitterContext)
-  {
-    HandleError(SJsonException{"Internal error.","","",0,0});
-    return;
-  }
-
-  spSignalEmitterContext->SetScriptExecutionStatus(CScriptRunnerSignalEmiter::eStopped);
-
   if (std::holds_alternative<SJsonException>(retVal))
   {
     HandleError(std::get<SJsonException>(retVal));

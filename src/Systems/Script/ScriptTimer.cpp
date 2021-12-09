@@ -108,10 +108,14 @@ void CScriptTimer::waitForTimer()
   QMetaObject::Connection quitLoop =
     connect(pSignalEmitter, &CTimerSignalEmitter::interrupt,
             &loop, &QEventLoop::quit, Qt::QueuedConnection);
+  QMetaObject::Connection interruptThisLoop =
+    connect(this, &CScriptObjectBase::SignalInterruptExecution,
+            &loop, &QEventLoop::quit, Qt::QueuedConnection);
   emit pSignalEmitter->waitForTimer();
   loop.exec();
   loop.disconnect();
   disconnect(timeoutLoop);
+  disconnect(interruptThisLoop);
   disconnect(quitLoop);
 }
 
@@ -289,6 +293,9 @@ void CEosScriptTimer::sleep(qint64 iTimeMs)
     QMetaObject::Connection interruptLoop =
       connect(pSignalEmitter, &CTimerSignalEmitter::interrupt,
               &loop, &QEventLoop::quit, Qt::QueuedConnection);
+    QMetaObject::Connection interruptThisLoop =
+      connect(this, &CScriptObjectBase::SignalInterruptExecution,
+              &loop, &QEventLoop::quit, Qt::QueuedConnection);
 
     // connect lambdas in loop context, so events are processed, but capture timer,
     // to start / stop
@@ -319,6 +326,7 @@ void CEosScriptTimer::sleep(qint64 iTimeMs)
     loop.disconnect();
 
     disconnect(interruptLoop);
+    disconnect(interruptThisLoop);
     disconnect(pauseLoop);
     disconnect(resumeLoop);
     disconnect(timeoutLoop);
@@ -355,9 +363,13 @@ void CEosScriptTimer::waitForTimer()
   QMetaObject::Connection quitLoop =
     connect(pSignalEmitter, &CTimerSignalEmitter::interrupt,
             &loop, &QEventLoop::quit, Qt::QueuedConnection);
+  QMetaObject::Connection interruptThisLoop =
+    connect(this, &CScriptObjectBase::SignalInterruptExecution,
+            &loop, &QEventLoop::quit, Qt::QueuedConnection);
   emit pSignalEmitter->waitForTimer();
   loop.exec();
   loop.disconnect();
   disconnect(timeoutLoop);
+  disconnect(interruptThisLoop);
   disconnect(quitLoop);
 }

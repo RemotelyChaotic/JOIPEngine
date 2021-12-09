@@ -39,11 +39,21 @@ CScriptNotification::CScriptNotification(QPointer<CScriptRunnerSignalEmiter> pEm
   auto spEmiter = SignalEmitter<CNotificationSignalEmiter>();
   connect(spEmiter, &CNotificationSignalEmiter::showNotificationClick,
           this, [this] (QString sId, QString sOnEvt){
-    emit SignalOverlayRunAsync(sId, sOnEvt);
+    QString sCopy = sOnEvt;
+    sCopy.detach();
+    if (!sCopy.isEmpty())
+    {
+      emit SignalOverlayRunAsync(sId, sOnEvt);
+    }
   }, Qt::QueuedConnection);
   connect(spEmiter, &CNotificationSignalEmiter::showNotificationTimeout,
           this, [this] (QString sId, QString sOnEvt){
-    emit SignalOverlayRunAsync(sId, sOnEvt);
+    QString sCopy = sOnEvt;
+    sCopy.detach();
+    if (!sCopy.isEmpty())
+    {
+      emit SignalOverlayRunAsync(sId, sOnEvt);
+    }
   }, Qt::QueuedConnection);
 }
 CScriptNotification::~CScriptNotification()

@@ -153,7 +153,7 @@ Rectangle {
         orientation: ListView.Vertical
         property var backgroundColor: "#ff000000"
         property var textColor: "#ffffffff"
-        property var backgroundColorWidget: "#ff111111"
+        property var backgroundColorWidget: "#ff333333"
         property var textColorWidget: "#ffffffff"
         property var iconAlignment: TextAlignment.AlignLeft
         property Resource portrait: null

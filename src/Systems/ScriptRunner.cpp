@@ -43,8 +43,9 @@ void CScriptRunner::Initialize()
   for (const auto& it : m_spRunnerMap)
   {
     it.second->Initialize();
-    connect(dynamic_cast<QObject*>(it.second.get()), SIGNAL(SignalScriptRunFinished(bool,const QString&)),
-            this, SIGNAL(SignalScriptRunFinished(bool,const QString&)));
+    bool bOk = connect(dynamic_cast<QObject*>(it.second.get()), SIGNAL(SignalScriptRunFinished(bool,const QString&)),
+                       this, SLOT(SlotScriptRunFinished(bool,const QString&)));
+    assert(bOk); Q_UNUSED(bOk);
   }
 
   SetInitialized(true);
@@ -193,6 +194,24 @@ void CScriptRunner::UnregisterComponents()
   {
     it.second->UnregisterComponents();
   }
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CScriptRunner::SlotScriptRunFinished(bool bOk, const QString& sRetVal)
+{
+  bool bHasRunningScripts = false;
+  for (const auto& it : m_spRunnerMap)
+  {
+    bHasRunningScripts |= it.second->HasRunningScripts();
+  }
+
+  if (!bHasRunningScripts)
+  {
+    m_spSignalEmitterContext->SetScriptExecutionStatus(CScriptRunnerSignalEmiter::eStopped);
+  }
+
+  emit SignalScriptRunFinished(bOk, sRetVal);
 }
 
 //----------------------------------------------------------------------------------------

@@ -32,6 +32,8 @@ public:
   void PauseExecution() override;
   void ResumeExecution() override;
 
+  bool HasRunningScripts() const override;
+
   void LoadScript(const QString& sScript, tspScene spScene, tspResource spResource) override;
   void RegisterNewComponent(const QString sName, QJSValue signalEmitter) override;
   void UnregisterComponents() override;

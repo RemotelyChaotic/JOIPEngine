@@ -69,6 +69,9 @@ void CScriptThread::sleep(qint32 iTimeS, QJSValue bSkippable)
     QMetaObject::Connection interruptLoop =
       connect(pSignalEmitter, &CThreadSignalEmitter::interrupt,
               &loop, &QEventLoop::quit, Qt::QueuedConnection);
+    QMetaObject::Connection interruptThisLoop =
+      connect(this, &CScriptObjectBase::SignalInterruptExecution,
+              &loop, &QEventLoop::quit, Qt::QueuedConnection);
 
     // connect lambdas in loop context, so events are processed, but capture timer,
     // to start / stop
@@ -108,6 +111,7 @@ void CScriptThread::sleep(qint32 iTimeS, QJSValue bSkippable)
     loop.disconnect();
 
     disconnect(interruptLoop);
+    disconnect(interruptThisLoop);
     disconnect(pauseLoop);
     disconnect(resumeLoop);
     disconnect(timeoutLoop);

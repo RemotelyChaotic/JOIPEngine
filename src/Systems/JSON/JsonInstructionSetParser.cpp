@@ -96,6 +96,7 @@ public:
 
 public:
   QAtomicInt     m_bInterrupted = 0;
+  QAtomicInt     m_bRunning = 0;
 
 public slots:
   //--------------------------------------------------------------------------------------
@@ -139,21 +140,25 @@ public slots:
     if (ERunerMode::eAutoRunAll == runMode)
     {
       SRunnerRetVal retValLast;
+      m_bRunning = 1;
       while (nullptr != m_spNextNode)
       {
         if (1 == m_bInterrupted)
         {
+          m_bRunning = 0;
           return;
         }
 
         CJsonInstructionSetRunner::tRetVal retVal = fnCallImpl();
         if (std::holds_alternative<SJsonException>(retVal))
         {
+          m_bRunning = 0;
           emit CallNextCommandRetVal(runMode, retVal);
           return;
         }
         retValLast = std::get<SRunnerRetVal>(retVal);
       }
+      m_bRunning = 0;
       emit CallNextCommandRetVal(runMode, retValLast);
       return;
     }
@@ -161,7 +166,10 @@ public slots:
     {
       if (nullptr != m_spNextNode)
       {
-        emit CallNextCommandRetVal(runMode, fnCallImpl());
+        m_bRunning = 1;
+        auto retVal = fnCallImpl();
+        m_bRunning = 0;
+        emit CallNextCommandRetVal(runMode, retVal);
         return;
       }
     }
@@ -298,10 +306,11 @@ public:
     }
   }
 
-  bool HasMoreCommands() { return m_retVal.m_bHasMoreCommands; }
-  bool IsBlockingCall() { return m_bBlockingCall; }
-  bool IsDoneWithCommand() { return m_bCommandDone; }
-  std::any RetVal() { return m_retVal.m_retVal; }
+  bool IsRunning() const { return m_spWorker->m_bRunning == 1; }
+  bool HasMoreCommands() const { return m_retVal.m_bHasMoreCommands; }
+  bool IsBlockingCall() const { return m_bBlockingCall; }
+  bool IsDoneWithCommand() const { return m_bCommandDone; }
+  std::any RetVal() const { return m_retVal.m_retVal; }
 
 signals:
   void CallNextCommandRetVal(ERunerMode runMode, CJsonInstructionSetRunner::tRetVal retVal);
@@ -456,6 +465,13 @@ public:
   void Interrupt()
   {
     m_spWorkerController->Interrupt();
+  }
+
+  //--------------------------------------------------------------------------------------
+  //
+  bool IsRunning() const
+  {
+    return nullptr != m_spWorkerController && m_spWorkerController->IsRunning();
   }
 
   //--------------------------------------------------------------------------------------
@@ -1377,6 +1393,13 @@ CJsonInstructionSetRunner::CallNextCommand(ERunerMode runMode, bool bBlocking)
 void CJsonInstructionSetRunner::Interrupt()
 {
   m_pPrivate->Interrupt();
+}
+
+//----------------------------------------------------------------------------------------
+//
+bool CJsonInstructionSetRunner::IsRunning() const
+{
+  return m_pPrivate->IsRunning();
 }
 
 //----------------------------------------------------------------------------------------

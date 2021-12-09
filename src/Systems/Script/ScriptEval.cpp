@@ -50,6 +50,9 @@ QJSValue CScriptEval::eval(const QString& sScript)
   QMetaObject::Connection interruptLoop =
     connect(pSignalEmitter, &CEvalSignalEmiter::interrupt,
             &loop, &QEventLoop::quit, Qt::QueuedConnection);
+  QMetaObject::Connection interruptThisLoop =
+    connect(this, &CScriptObjectBase::SignalInterruptExecution,
+            &loop, &QEventLoop::quit, Qt::QueuedConnection);
   QMetaObject::Connection showRetValLoop =
     connect(pSignalEmitter, &CEvalSignalEmiter::evalReturn,
             this, [this, &returnValue](QVariant input)
@@ -64,6 +67,7 @@ QJSValue CScriptEval::eval(const QString& sScript)
 
   disconnect(quitLoop);
   disconnect(interruptLoop);
+  disconnect(interruptThisLoop);
   disconnect(showRetValLoop);
 
   return m_pEngine->toScriptValue(returnValue);
@@ -192,6 +196,9 @@ QVariant CEosScriptEval::eval(const QString& sScript)
   QMetaObject::Connection interruptLoop =
     connect(pSignalEmitter, &CEvalSignalEmiter::interrupt,
             &loop, &QEventLoop::quit, Qt::QueuedConnection);
+  QMetaObject::Connection interruptThisLoop =
+    connect(this, &CScriptObjectBase::SignalInterruptExecution,
+            &loop, &QEventLoop::quit, Qt::QueuedConnection);
   QMetaObject::Connection showRetValLoop =
     connect(pSignalEmitter, &CEvalSignalEmiter::evalReturn,
             this, [this, &returnValue](QVariant input)
@@ -206,6 +213,7 @@ QVariant CEosScriptEval::eval(const QString& sScript)
 
   disconnect(quitLoop);
   disconnect(interruptLoop);
+  disconnect(interruptThisLoop);
   disconnect(showRetValLoop);
 
   return returnValue;

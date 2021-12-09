@@ -26,6 +26,8 @@ public:
   virtual void PauseExecution() = 0;
   virtual void ResumeExecution() = 0;
 
+  virtual bool HasRunningScripts() const = 0;
+
   virtual void LoadScript(const QString& sScript, tspScene spScene, tspResource spResource) = 0;
   virtual void RegisterNewComponent(const QString sName, QJSValue signalEmitter) = 0;
   virtual void UnregisterComponents() = 0;

@@ -28,6 +28,9 @@ public:
     return qobject_cast<T*>(m_pSignalEmitter);
   }
 
+signals:
+  void SignalInterruptExecution();
+
 protected:
   bool CheckIfScriptCanRun();
 

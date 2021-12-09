@@ -567,12 +567,12 @@
         notification.hide("myid"); // hides notification with id "myid"<br>
         <br></li>
 
-        <li><b>setIconAlignment ( enum:IconAlignment  ):</b><br>
+        <li><b>setIconAlignment ( enum: IconAlignment ):</b><br>
         This will set the icon alignment of icons for notifications resulting from <i>show</i> calls.
         Once set, all future <i>show</i> calls will display the icon of the notification with the set alignment.
         The given argument needs to be one of the enum values: <i>IconAlignment.AlignLeft</i>,
-        <i>IconAlignment.AlignRight</i>, <i>IconAlignment.AlignCenter</i> or their coresponding nummerical
-        values (<i>1</i>, <i>2</i>, <i>4</i> respectively).<br>
+        <i>IconAlignment.AlignRight</i> or their coresponding nummerical
+        values (<i>1</i>, <i>2</i> respectively).<br>
         Changing the alignment will change the position of portraits set by <i>setPortrait</i> an the position
         of the timer set by <i>show</i>.<br>
         <i>Example Usage:</i><br>
@@ -580,8 +580,6 @@
         notification.setIconAlignment(1); /* same as above */<br>
         notification.setIconAlignment(IconAlignment.AlignRight); /* portraits will be aligned to the left */<br>
         notification.setIconAlignment(2); /* same as above */<br>
-        notification.setIconAlignment(IconAlignment.AlignCenter); /* portraits will be centered above the notification */<br>
-        notification.setIconAlignment(4); /* same as above */<br>
         <br></li>
 
         <li><b>setPortrait ( string | Resource | null ):</b><br>

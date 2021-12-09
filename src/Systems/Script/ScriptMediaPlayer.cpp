@@ -254,6 +254,9 @@ void CScriptMediaPlayer::waitForVideo()
           &loop, &QEventLoop::quit, Qt::QueuedConnection);
   connect(pSignalEmitter, &CMediaPlayerSignalEmitter::interrupt,
           &loop, &QEventLoop::quit, Qt::QueuedConnection);
+  QMetaObject::Connection interruptThisLoop =
+    connect(this, &CScriptObjectBase::SignalInterruptExecution,
+            &loop, &QEventLoop::quit, Qt::QueuedConnection);
   emit pSignalEmitter->startVideoWait();
   loop.exec();
 
@@ -261,6 +264,7 @@ void CScriptMediaPlayer::waitForVideo()
              &loop, &QEventLoop::quit);
   disconnect(pSignalEmitter, &CMediaPlayerSignalEmitter::interrupt,
              &loop, &QEventLoop::quit);
+  disconnect(interruptThisLoop);
   loop.disconnect();
 
   disconnect(pSignalEmitter, &CMediaPlayerSignalEmitter::videoFinished,
@@ -381,12 +385,16 @@ void CScriptMediaPlayer::WaitForPlayBackImpl(const QString& sResource)
   }, Qt::QueuedConnection);
   connect(pSignalEmitter, &CMediaPlayerSignalEmitter::interrupt,
           &loop, &QEventLoop::quit, Qt::QueuedConnection);
+  QMetaObject::Connection interruptThisLoop =
+    connect(this, &CScriptObjectBase::SignalInterruptExecution,
+            &loop, &QEventLoop::quit, Qt::QueuedConnection);
   emit pSignalEmitter->startPlaybackWait(sResource);
   loop.exec();
 
   disconnect(connQuit);
   disconnect(pSignalEmitter, &CMediaPlayerSignalEmitter::interrupt,
              &loop, &QEventLoop::quit);
+  disconnect(interruptThisLoop);
   loop.disconnect();
 
   disconnect(connStopPlayback);
@@ -419,12 +427,16 @@ void CScriptMediaPlayer::WaitForSoundImpl(const QString& sResource)
   }, Qt::QueuedConnection);
   connect(pSignalEmitter, &CMediaPlayerSignalEmitter::interrupt,
           &loop, &QEventLoop::quit, Qt::QueuedConnection);
+  QMetaObject::Connection interruptThisLoop =
+    connect(this, &CScriptObjectBase::SignalInterruptExecution,
+            &loop, &QEventLoop::quit, Qt::QueuedConnection);
   emit pSignalEmitter->startSoundWait(sResource);
   loop.exec();
 
   disconnect(connQuit);
   disconnect(pSignalEmitter, &CMediaPlayerSignalEmitter::interrupt,
              &loop, &QEventLoop::quit);
+  disconnect(interruptThisLoop);
   loop.disconnect();
 
   disconnect(connStop);

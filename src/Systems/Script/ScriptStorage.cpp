@@ -56,6 +56,9 @@ QJSValue CScriptStorage::load(QString sId)
   QMetaObject::Connection interruptLoop =
     connect(pSignalEmitter, &CStorageSignalEmitter::interrupt,
             &loop, &QEventLoop::quit, Qt::QueuedConnection);
+  QMetaObject::Connection interruptThisLoop =
+    connect(this, &CScriptObjectBase::SignalInterruptExecution,
+            &loop, &QEventLoop::quit, Qt::QueuedConnection);
   QMetaObject::Connection showRetValLoop =
     connect(pSignalEmitter, &CStorageSignalEmitter::loadReturnValue,
             this, [this, &varRetVal, sRequestId](QVariant var, QString sRequestIdRet)
@@ -74,6 +77,7 @@ QJSValue CScriptStorage::load(QString sId)
 
   disconnect(quitLoop);
   disconnect(interruptLoop);
+  disconnect(interruptThisLoop);
   disconnect(showRetValLoop);
 
   return m_pEngine->toScriptValue(varRetVal);

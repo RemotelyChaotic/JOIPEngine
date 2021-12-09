@@ -2,40 +2,40 @@ import QtQuick 2.14
 import QtQuick.Controls 2.14
 import QtQuick.Layouts 1.14
 import JOIP.core 1.1
+import JOIP.db 1.1
 import JOIP.script 1.1
 
 Rectangle {
     id: defaultDelegate
     width: parent.ListView.view.width
-    height: notificationBackground.height + 40
+    height: Math.min(timer.height, notificationBackground.height) + 15
     color: "transparent"
 
     Rectangle {
         id: notificationBackground
-        anchors.verticalCenter: parent.verticalCenter
-        x: {
-            switch (model.iconAlignment)
-            {
-                case TextAlignment.AlignCenter: return defaultDelegate.width / 2 - width / 2;
-                case TextAlignment.AlignLeft: return 20; // a little bit of a margin looks better
-                case TextAlignment.AlignRight: return defaultDelegate.width - width - 20;
-            }
-            return defaultDelegate.width / 2 - width / 2;
-        }
-        width: layoutText.width + 30
-        height: layoutText.height + 20
+        anchors.centerIn: parent
+        width: layoutText.width + 10
+        height: layoutText.height + 10
         color: model.backgroundColor
         radius: 5
 
         ColumnLayout {
             id: layoutText
             anchors.centerIn: parent
-            width: Math.max(text.contentWidth, buttonText.contentWidth + 20)
-            height: text.contentHeight + spacing + buttonText.contentHeight + 20
+            width: Math.max(text.contentWidth, buttonText.contentWidth + 10)
+            height: text.visibleHeight +
+                    ((text.visible && button.visible) ? spacing : 0) +
+                    button.visibleHeight
 
             Text {
                 id: text
+
+                property real visibleHeight: visible ? contentHeight : 0
+
+                Layout.preferredHeight: visibleHeight
                 Layout.alignment: Qt.AlignHCenter
+
+                visible: model.title !== ""
 
                 font.family: root.currentlyLoadedProject.font
                 font.pointSize: 14
@@ -49,13 +49,15 @@ Rectangle {
                                 Text.RichText :
                                 (QtApp.mightBeRichtext(model.title) ?
                                      Text.StyledText : Text.PlainText)
-
-                visible: model.title !== ""
             }
 
             Button {
                 id: button
 
+                property real visibleHeight: visible ? (buttonText.contentHeight + 10) : 0
+
+                Layout.preferredWidth: buttonText.contentWidth + 10
+                Layout.preferredHeight: visibleHeight
                 Layout.alignment: Qt.AlignHCenter
                 text: model.buttonText;
 
@@ -82,7 +84,7 @@ Rectangle {
                     id: buttonText
                     anchors.centerIn: parent
                     font.family: root.currentlyLoadedProject.font;
-                    font.pointSize: text.pointSize
+                    font.pointSize: 14
                     font.hintingPreference: Font.PreferNoHinting
                     elide: Text.ElideNone
                     text: button.text
@@ -102,55 +104,67 @@ Rectangle {
                 }
             }
         }
+    }
 
-        TimedItem {
-            id: timer
-            x: {
-                switch (model.iconAlignment)
-                {
-                    case TextAlignment.AlignCenter: return parent.width / 2 - width / 2;
-                    case TextAlignment.AlignLeft: return parent.width - width / 5;
-                    case TextAlignment.AlignRight: return -width * 4 / 5;
-                }
-                return parent.width / 2 - width / 2;
+    TimedItem {
+        id: timer
+        x: {
+            switch (model.iconAlignment)
+            {
+                default:
+                case TextAlignment.AlignLeft: return defaultDelegate.width / 2 - width + 5 - notificationBackground.width / 2;
+                case TextAlignment.AlignRight: return defaultDelegate.width / 2 + width - 5 + - notificationBackground.width / 2;
             }
-            y: {
-                switch (model.iconAlignment)
-                {
-                    case TextAlignment.AlignCenter: return -height * 3 / 4;
-                    case TextAlignment.AlignLeft: return parent.height / 2 - height / 2;
-                    case TextAlignment.AlignRight: return parent.height / 2 - height / 2;
-                }
-                return -height * 3 / 4;
+        }
+        y: {
+            switch (model.iconAlignment)
+            {
+                default:
+                case TextAlignment.AlignLeft: return defaultDelegate.height / 2 - height / 2;
+                case TextAlignment.AlignRight: return defaultDelegate.height / 2 - height / 2;
             }
-            width: (pResource === null || model.timeMs > 0) ? 0 : 64
-            height: 64
+        }
+        width: (pResource !== null || model.timeMs > 0) ? 48 : 0
+        height: 48
 
-            showTime: true
-            showTimeNumber: false
-            maxTimeMs: model.timeMs
+        showTime: true
+        showTimeNumber: false
+        maxTimeMs: model.timeMs
 
-            property Resource pResource: model.portrait
+        property Resource pResource: model.portrait
 
-            background: IconResourceDelegate {
-                id: portraitBg
-                x: parent.x
-                y: parent.y
-                width: parent.widgth
-                height: parent.height
+        background: IconResourceDelegate {
+            id: portraitBg
+            anchors.fill: parent
+            pResource: timer.pResource
+        }
 
-                pResource: parent.pResource
-            }
-
-            onTimeout: {
-                defaultDelegate.parent.ListView.view.timeout(model.sId, model.sOnTimeout);
-            }
+        onTimeout: {
+            defaultDelegate.parent.ListView.view.timeout(model.sId, model.sOnTimeout);
         }
     }
 
     Component.onCompleted: {
         if (model.timeMs > 0) {
+            timer.timeMs = model.timeMs;
             timer.start();
+        }
+    }
+
+    // handle interrupt
+    Connections {
+        target: ScriptRunner
+        onRunningChanged: {
+            if (timer.bStarted) {
+                if (!bRunning)
+                {
+                    timer.pause();
+                }
+                else
+                {
+                    timer.resume();
+                }
+            }
         }
     }
 }

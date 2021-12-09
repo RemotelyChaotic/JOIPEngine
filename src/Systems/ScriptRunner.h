@@ -41,6 +41,9 @@ public slots:
   void RegisterNewComponent(const QString sName, QJSValue signalEmitter);
   void UnregisterComponents();
 
+protected slots:
+  void SlotScriptRunFinished(bool bOk, const QString& sRetVal);
+
 private:
   std::map<QString, std::unique_ptr<IScriptRunner>> m_spRunnerMap;
   std::shared_ptr<CScriptRunnerSignalContext>       m_spSignalEmitterContext;

@@ -38,6 +38,7 @@ public:
   void SetDebugging(bool bDebugging);
 
 public slots:
+  void SlotFinish();
   void SlotQuit();
 
 signals:
@@ -63,6 +64,7 @@ private slots:
 private:
   void ConnectAllSignals();
   void DisconnectAllSignals();
+  void Finish();
   void InitQmlMain();
   void LoadQml();
   void NextSkript();
