@@ -286,6 +286,10 @@ QPushButton#AddTimerCode {
   qproperty-icon: url(:/resources/style/img/ButtonClock.png) off,
                   url(:/resources/style/img/ButtonClock.png) on;
 }
+QPushButton#AddNotificationCode {
+  qproperty-icon: url(:/resources/style/img/ButtonNotification.png) off,
+                  url(:/resources/style/img/ButtonNotification.png) on;
+}
 QPushButton#DebugButton {
   qproperty-icon: url(:/resources/style/img/ButtonPlay.png) off,
                   url(:/resources/style/img/ButtonPlay.png) on;

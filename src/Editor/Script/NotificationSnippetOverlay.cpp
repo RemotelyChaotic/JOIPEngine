@@ -24,6 +24,12 @@ CNotificationSnippetOverlay::CNotificationSnippetOverlay(QWidget* pParent) :
 
 CNotificationSnippetOverlay::~CNotificationSnippetOverlay()
 {
+  dynamic_cast<CResourceTreeItemSortFilterProxyModel*>(m_spUi->pPortraitResourceSelectTree->model())
+      ->setSourceModel(nullptr);
+  dynamic_cast<CResourceTreeItemSortFilterProxyModel*>(m_spUi->pOnClickResourceSelectTree->model())
+      ->setSourceModel(nullptr);
+  dynamic_cast<CResourceTreeItemSortFilterProxyModel*>(m_spUi->pOnTimeoutResourceSelectTree->model())
+      ->setSourceModel(nullptr);
 }
 
 //----------------------------------------------------------------------------------------
@@ -33,14 +39,17 @@ void CNotificationSnippetOverlay::Initialize(CResourceTreeItemModel* pResourceTr
   m_bInitialized = false;
 
   CResourceTreeItemSortFilterProxyModel* pPortraitProxyModel =
-      dynamic_cast<CResourceTreeItemSortFilterProxyModel*>(m_spUi->pPortraitResourceSelectTree->model());
+      new CResourceTreeItemSortFilterProxyModel(m_spUi->pPortraitResourceSelectTree);
   pPortraitProxyModel->setSourceModel(pResourceTreeModel);
+  m_spUi->pPortraitResourceSelectTree->setModel(pPortraitProxyModel);
   CResourceTreeItemSortFilterProxyModel* pOnClickProxyModel =
-      dynamic_cast<CResourceTreeItemSortFilterProxyModel*>(m_spUi->pOnClickResourceSelectTree->model());
+      new CResourceTreeItemSortFilterProxyModel(m_spUi->pOnClickResourceSelectTree);
   pOnClickProxyModel->setSourceModel(pResourceTreeModel);
+  m_spUi->pOnClickResourceSelectTree->setModel(pOnClickProxyModel);
   CResourceTreeItemSortFilterProxyModel* pOnTimeoutProxyModel =
-      dynamic_cast<CResourceTreeItemSortFilterProxyModel*>(m_spUi->pOnTimeoutResourceSelectTree->model());
+      new CResourceTreeItemSortFilterProxyModel(m_spUi->pOnTimeoutResourceSelectTree);
   pOnTimeoutProxyModel->setSourceModel(pResourceTreeModel);
+  m_spUi->pOnTimeoutResourceSelectTree->setModel(pOnTimeoutProxyModel);
 
   QItemSelectionModel* pIconSelectionModel = m_spUi->pPortraitResourceSelectTree->selectionModel();
   connect(pIconSelectionModel, &QItemSelectionModel::currentChanged,

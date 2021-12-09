@@ -641,6 +641,16 @@
         </property>
        </widget>
       </item>
+      <item row="8" column="1">
+       <widget class="CShortcutButton" name="AddNotificationCode">
+        <property name="toolTip">
+         <string>Add code to show notifications</string>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+       </widget>
+      </item>
      </layout>
     </widget>
    </item>

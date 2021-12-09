@@ -57,7 +57,10 @@
 
     <p>Checking the <i>Show / Play</i> check box will add code to either show or play the resource.
     Movie and Sound type <a href="qrc:/resources/help/editor/resources/resource_help.html">Resources</a> will
-    be played, while Image types will be shown.<br>
+    be played, while Image types will be shown. checking <i>Seek</i> will generate code to seek the media file in case of
+    Movie or Sound resources. The input for <i>Seek</i> is in frames. Checking <i>Loops</i>
+    and entering a number &gt; 0 will generate code to loop the media if possible, and <i>Start At</i>
+    will generate code to start the media at the given frame.<br>
       <ul>
         <li><b>Generated code example for Image:</b> mediaPlayer.show("a");</li>
         <li><b>Generated code example for Movie:</b> mediaPlayer.play("b");</li>

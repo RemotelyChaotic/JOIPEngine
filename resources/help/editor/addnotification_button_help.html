@@ -1,0 +1,117 @@
+<!doctype html>
+<html class="no-js" lang="">
+
+<head>
+  <meta charset="utf-8">
+  <title>Add Notification Code</title>
+  <meta name="description" content="">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <style>
+    h1 {
+      text-align: center;
+    }
+    div.container {
+      min-height: 10em;
+      display: table-cell;
+      margin-left: auto;
+      margin-right: auto;
+      width: 0.6em
+    }
+    table.warning {
+      color: black;
+      background-color: #cccc44;
+      border-color: yellow;
+      border-style: solid;
+    }
+  </style>
+</head>
+
+
+<body>
+  <h1>Add Notification Code</h1>
+
+  <hr>
+
+  <div class="container">
+    <p>This button opens an overlay to add code snippets to the currently opened script in
+    the <a href="qrc:/resources/help/editor/code/script_editor_help.html">Script Editor</a>,
+    to show an interactable notification popup.</p>
+
+    <br>
+
+    <p>For more information about the script API, please see the <a href="qrc:/resources/help/editor/code/script_reference_help.html">API Reference</a>.</p>
+
+    <br>
+
+    <p><img src="qrc:/resources/help/editor/images/addnotification_dialog_text.png"><br><i>Add Notification Content</i></p>
+
+    <br>
+
+    <p>The first page lets you <i>Show</i> or <i>Hide</i> notifications or <i>Clear</i> all shown notifications.
+    You can also asign an <i>ID</i> to each notification and optionally set the <i>Timeout</i> and <i>Icon alignment</i>.
+    The <i>Text</i> and <i>Widget Text</i> boxes can be filled,
+    or left empty if no code should be generated for the widget or the text above the widget.
+    The text can contain html for formating (see <a href="qrc:/resources/help/editor/code/script_reference_help.html">API Reference</a> for more detail).<br>
+      <ul>
+        <li><b>Generated code example:</b> notification.show("myId","Text",""); // Only text</li>
+        <li><b>Generated code example:</b> notification.show("myId","","Button"); // Only button</li>
+        <li><b>Generated code example:</b> notification.show("myId","Text","",20); // Text with timeout of 20s</li>
+        <li><b>Generated code example:</b> notification.setIconAlignment(IconAlignment.AlignLeft); // set icon alignment</li>
+      </ul>
+    </p>
+
+    <br>
+
+    <p><img src="qrc:/resources/help/editor/images/addnotification_dialog_portrait.png"><br><i>Add Notification Portrait</i></p>
+
+    <br>
+
+    <p>The second page lets you customize the portrait of the notificatons with a <a href="qrc:/resources/help/editor/resources/resource_help.html">Resource</a>.<br>
+    The overlay contains a tree to browse <a href="qrc:/resources/help/editor/resources/resource_help.html">Resources</a>
+    including a search bar similar to the <a href="qrc:/resources/help/editor/resources/resources_tree_help.html">Resource Tree</a>
+    in the <a href="qrc:/resources/help/editor/selection_combobox_help.html">Resource Manager</a>.
+    Clicking a tree item will select the resource for the generated code snippet. Clicking the x
+    button next to the selected resource will remove it. The selected resource behaves the same
+    as it does for <a href="qrc:/resources/help/editor/addshowicon_button_help.html">Icons</a>.<br>
+      <ul>
+        <li><b>Generated code example:</b> notification.setPortrait("myResource"); // Resource name </li>
+      </ul>
+    </p>
+
+    <br>
+
+    <p><img src="qrc:/resources/help/editor/images/addnotification_dialog_onclick.png"><br><i>Add Notification on-click Script</i></p>
+
+    <br>
+
+    <p><img src="qrc:/resources/help/editor/images/addnotification_dialog_ontimeout.png"><br><i>Add Notification on-timeout Script</i></p>
+
+    <br>
+
+    <p>The third and fourth page behave the same as the second page and let you select resources for
+    the scripts to be called on click of the button or on timeout.<br>
+      <ul>
+        <li><b>Generated code example:</b> notification.show("myId","Text","",20,"timeoutScript.js"); </li>
+        <li><b>Generated code example:</b> notification.show("myId","Text","",20,"timeoutScript.js","clickScript.js"); </li>
+      </ul>
+    </p>
+
+    <p><img src="qrc:/resources/help/editor/images/addnotification_dialog_colors.png"><br><i>Add Notification Colors</i></p>
+
+    <p>The last page lets you configure the colors of the notification and the widget.
+    The components can be entered numerically (red, green, blue, alpha in this order).
+    Alternatively, clicking the colored boxes to the right will open a color wheel to pick the color.<br>
+      <ul>
+        <li><b>Generated code example:</b> notification.setTextBackgroundColor([255,0,0,255]); // red text background</li>
+        <li><b>Generated code example:</b> notification.setTextColor([0,255,0,255]); // green text</li>
+        <li><b>Generated code example:</b> notification.setWidgetBackgroundColor([0,0,0,0]); // transparent widget/button background</li>
+        <li><b>Generated code example:</b> notification.setWidgetColor([0,0,255,255]); // blue button text</li>
+      </ul>
+    </p>
+
+    <br>
+  </div>
+</body>
+
+</html>

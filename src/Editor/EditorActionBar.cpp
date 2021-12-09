@@ -39,6 +39,7 @@ namespace {
   const QString c_sAddMetronomeHelpId =   "Editor/AddMetronomeCode";
   const QString c_sAddTimerHelpId =       "Editor/AddTimerCode";
   const QString c_sAddThreadHelpId =      "Editor/AddThreadCode";
+  const QString c_sAddNotificationHelpId ="Editor/AddNotificationCode";
 
   const QString c_sAddFetishHelpId =      "Editor/AddFetish";
   const QString c_sRemoveFetishHelpId =   "Editor/RemoveFetish";
@@ -178,6 +179,8 @@ void CEditorActionBar::Initialize()
     wpHelpFactory->RegisterHelp(c_sAddTimerHelpId, ":/resources/help/editor/addtimer_button_help.html");
     m_spUi->AddThreadCode->setProperty(helpOverlay::c_sHelpPagePropertyName, c_sAddThreadHelpId);
     wpHelpFactory->RegisterHelp(c_sAddThreadHelpId, ":/resources/help/editor/addthread_button_help.html");
+    m_spUi->AddNotificationCode->setProperty(helpOverlay::c_sHelpPagePropertyName, c_sAddNotificationHelpId);
+    wpHelpFactory->RegisterHelp(c_sAddNotificationHelpId, ":/resources/help/editor/addnotification_button_help.html");
   }
 
   connect(m_spSettings.get(), &CSettings::keyBindingsChanged,
@@ -321,5 +324,6 @@ void CEditorActionBar::SlotKeyBindingsChanged()
     m_spUi->AddTimerCode->SetShortcut(m_spSettings->keyBinding(sKey.arg(7)));
     m_spUi->AddMetronomeCode->SetShortcut(m_spSettings->keyBinding(sKey.arg(8)));
     m_spUi->AddThreadCode->SetShortcut(m_spSettings->keyBinding(sKey.arg(9)));
+    //m_spUi->AddNotificationCode->SetShortcut(m_spSettings->keyBinding(sKey.arg(9)));
   }
 }

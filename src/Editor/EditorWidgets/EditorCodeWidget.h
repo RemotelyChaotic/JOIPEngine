@@ -11,6 +11,7 @@ class CBackgroundSnippetOverlay;
 class CCodeWidgetTutorialStateSwitchHandler;
 class CIconSnippetOverlay;
 class CMetronomeSnippetOverlay;
+class CNotificationSnippetOverlay;
 class CResourceSnippetOverlay;
 class CTextSnippetOverlay;
 class CTimerSnippetOverlay;
@@ -73,6 +74,7 @@ private:
   std::unique_ptr<CBackgroundSnippetOverlay>             m_spBackgroundSnippetOverlay;
   std::unique_ptr<CIconSnippetOverlay>                   m_spIconSnippetOverlay;
   std::unique_ptr<CMetronomeSnippetOverlay>              m_spMetronomeSnippetOverlay;
+  std::unique_ptr<CNotificationSnippetOverlay>           m_spNotificationSnippetOverlay;
   std::unique_ptr<CResourceSnippetOverlay>               m_spResourceSnippetOverlay;
   std::unique_ptr<CTextSnippetOverlay>                   m_spTextSnippetOverlay;
   std::unique_ptr<CTimerSnippetOverlay>                  m_spTimerSnippetOverlay;

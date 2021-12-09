@@ -195,6 +195,13 @@
         <file>resources/help/tutorial/TutorialModern.json</file>
         <file>resources/help/editor/projectsettings/font_help.html</file>
         <file>resources/style/img/ButtonDownload.png</file>
+        <file>resources/help/editor/addnotification_button_help.html</file>
+        <file>resources/help/editor/images/addnotification_dialog_colors.png</file>
+        <file>resources/help/editor/images/addnotification_dialog_onclick.png</file>
+        <file>resources/help/editor/images/addnotification_dialog_ontimeout.png</file>
+        <file>resources/help/editor/images/addnotification_dialog_portrait.png</file>
+        <file>resources/help/editor/images/addnotification_dialog_text.png</file>
+        <file>resources/style/img/ButtonNotification.png</file>
     </qresource>
     <qresource prefix="/qml">
         <file>resources/qml/ProjectCardSelection.qml</file>
