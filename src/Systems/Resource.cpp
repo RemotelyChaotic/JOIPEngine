@@ -239,7 +239,7 @@ QStringList SResourceFormats::AudioFormats()
 //
 bool IsLocalFile(const QUrl& url)
 {
-  return url.isLocalFile() ||
+  return url.scheme().contains("qrc") || url.isLocalFile() ||
       CPhysFsFileEngineHandler::c_sScheme.contains(url.scheme());
 }
 

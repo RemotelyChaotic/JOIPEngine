@@ -571,7 +571,7 @@ bool CEosDownloadJob::CreateScriptFiles(const QJsonDocument& entireScript,
   fileInfoScript.m_prefilledContent = entireScript.toJson();
   m_spResourceLib->addFile(QString(":/" + c_sScriptResourceName + c_sScriptFormat), fileInfoScript);
   sResource =
-      spDbManager->AddResource(m_spProject, QUrl(":/" + c_sScriptResourceName + c_sScriptFormat),
+      spDbManager->AddResource(m_spProject, QUrl("qrc:" + c_sScriptResourceName + c_sScriptFormat),
                                EResourceType::eScript, c_sScriptResourceName);
   spResource =
       spDbManager->FindResourceInProject(m_spProject, sResource);
@@ -594,7 +594,7 @@ bool CEosDownloadJob::CreateScriptFiles(const QJsonDocument& entireScript,
                          QLocale::AnyCountry, RCCFileInfo::NoFlags);
     fileInfo.m_prefilledContent = scenePage.m_pageScript.toJson();
     m_spResourceLib->addFile(sName, fileInfo);
-    sResource = spDbManager->AddResource(m_spProject, QUrl(":/" + sPath + "/" + sName),
+    sResource = spDbManager->AddResource(m_spProject, QUrl("qrc:" + sPath + "/" + sName + c_sScriptFormat),
                                          EResourceType::eScript, sName);
     spResource = spDbManager->FindResourceInProject(m_spProject, sResource);
     if (nullptr == spResource) { sError = QString("Resource error."); return false; }
@@ -635,7 +635,7 @@ bool CEosDownloadJob::CreateScriptFiles(const QJsonDocument& entireScript,
                        QLocale::AnyCountry, RCCFileInfo::NoFlags);
   fileInfo.m_prefilledContent = arr;
   m_spResourceLib->addFile(sName, fileInfo);
-  sResource = spDbManager->AddResource(m_spProject, QUrl(":/" + sName),
+  sResource = spDbManager->AddResource(m_spProject, QUrl("qrc:" + sName),
                                        EResourceType::eOther, sName);
   spResource = spDbManager->FindResourceInProject(m_spProject, sResource);
   if (nullptr == spResource) { sError = QString("Resource error."); return false; }
