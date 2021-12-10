@@ -203,7 +203,10 @@ void CResourceDisplayWidget::UnloadResource()
     m_spFutureWatcher->cancel();
     m_spFutureWatcher->waitForFinished();
   }
+
   SlotStop();
+
+  m_spLoadedMovie.reset();
 }
 
 //----------------------------------------------------------------------------------------

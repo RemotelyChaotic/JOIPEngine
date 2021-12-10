@@ -1107,6 +1107,7 @@ bool CDatabaseManager::DeserializeProjectPrivate(tspProject& spProject)
   const QString sName = spProject->m_sName;
   const QString sFolderName = spProject->m_sFolderName;
   bool bBundled = spProject->m_bBundled;
+  bool bWasLoaded = spProject->m_bLoaded;
   spProject->m_rwLock.unlock();
 
   bool bOk = true;
@@ -1173,7 +1174,12 @@ bool CDatabaseManager::DeserializeProjectPrivate(tspProject& spProject)
     }
   }
 
-  return bOk & UnloadProject(spProject);
+  if (!bWasLoaded)
+  {
+    bOk &= UnloadProject(spProject);
+  }
+
+  return bOk;
 }
 
 //----------------------------------------------------------------------------------------
@@ -1458,6 +1464,7 @@ bool CDatabaseManager::MountProject(tspProject& spProject)
   const QString sName = PhysicalProjectName(spProject);
   QString sFinalPath = CApplication::Instance()->Settings()->ContentFolder() + QDir::separator() + sName;
   bool bOk = CPhysFsFileEngine::mount(sFinalPath.toStdString().data(), "");
+  assert(bOk);
   if (!bOk)
   {
     qWarning() << tr("Failed to mount %1: reason: %2").arg(sFinalPath)
@@ -1469,6 +1476,7 @@ bool CDatabaseManager::MountProject(tspProject& spProject)
     for (const QString& sMountPoint : qAsConst(spProject->m_vsMountPoints))
     {
       bOk &= CPhysFsFileEngine::mount((sFinalPath + "/" + sMountPoint).toStdString().data(), sMountPoint.toStdString().data());
+      assert(bOk);
       if (!bOk)
       {
         qWarning() << tr("Failed to mount %1: reason: %2").arg(sFinalPath)
@@ -1492,6 +1500,7 @@ bool CDatabaseManager::UnmountProject(tspProject& spProject)
     for (const QString& sMountPoint : qAsConst(spProject->m_vsMountPoints))
     {
       bOk &= CPhysFsFileEngine::unmount((sFinalPath + "/" + sMountPoint).toStdString().data());
+      assert(bOk);
       if (!bOk)
       {
         qWarning() << tr("Failed to unmount %1: reason: %2").arg(sFinalPath)
@@ -1503,6 +1512,7 @@ bool CDatabaseManager::UnmountProject(tspProject& spProject)
   if (!bOk) { return bOk; }
 
   bOk &= CPhysFsFileEngine::unmount(sFinalPath.toStdString().data());
+  assert(bOk);
   if (!bOk)
   {
     qWarning() << tr("Failed to unmount %1: reason: %2").arg(sFinalPath)
