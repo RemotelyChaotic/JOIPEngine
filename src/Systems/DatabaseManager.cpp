@@ -78,6 +78,7 @@ bool CDatabaseManager::LoadProject(tspProject& spProject)
         QResource::registerResource(CApplication::Instance()->Settings()->ContentFolder() + QDir::separator() +
                                     sProjectName,
                                     QDir::separator() + spProject->m_sName);
+    assert(spProject->m_bLoaded);
     bLoaded = spProject->m_bLoaded;
   }
   else
@@ -195,6 +196,7 @@ bool CDatabaseManager::UnloadProject(tspProject& spProject)
         !QResource::unregisterResource(CApplication::Instance()->Settings()->ContentFolder() + QDir::separator() +
                                        sProjectName,
                                        QDir::separator() + spProject->m_sName);
+    assert(!spProject->m_bLoaded);
     bUnloaded &= !spProject->m_bLoaded;
   }
   else

@@ -40,6 +40,7 @@ CSceneMainScreen::CSceneMainScreen(QWidget* pParent) :
   m_lastScriptExecutionStatus(static_cast<qint32>(CScriptRunnerSignalEmiter::ScriptExecStatus::eRunning)),
   m_bInitialized(false),
   m_bShuttingDown(false),
+  m_bErrorState(false),
   m_bBeingDebugged(false)
 {
   m_spUi->setupUi(this);
@@ -101,6 +102,7 @@ void CSceneMainScreen::LoadProject(qint32 iId, const QString sStartScene)
     LoadQml();
 
     m_bShuttingDown = false;
+    m_bErrorState = false;
   }
 }
 
@@ -182,7 +184,7 @@ void CSceneMainScreen::SlotQuit()
   emit SignalExitClicked();
 
   // no signal is giong to be emitted
-  if (CScriptRunnerSignalEmiter::ScriptExecStatus::eStopped == statusBefore)
+  if (CScriptRunnerSignalEmiter::ScriptExecStatus::eStopped == statusBefore || m_bErrorState)
   {
     bool bOk =
         QMetaObject::invokeMethod(this, "SlotScriptRunFinished", Qt::QueuedConnection,
@@ -259,6 +261,8 @@ void CSceneMainScreen::SlotApplicationStateChanged(Qt::ApplicationState state)
 void CSceneMainScreen::SlotError(QString sError, QtMsgType type)
 {
   if (!m_bInitialized || nullptr == m_spCurrentProject) { return; }
+
+  m_bErrorState = true;
 
   std::vector<QColor> vBgColors;
   std::vector<QColor> vTextColors;
@@ -405,9 +409,6 @@ void CSceneMainScreen::SlotScriptRunFinished(bool bOk, const QString& sRetVal)
     UnloadRunner();
     UnloadQml();
 
-    disconnect(m_spScriptRunner.get(), &CScriptRunner::SignalScriptRunFinished,
-            this, &CSceneMainScreen::SlotScriptRunFinished);
-
     bool bOk = QMetaObject::invokeMethod(this, "SlotUnloadFinished", Qt::QueuedConnection);
     assert(bOk); Q_UNUSED(bOk)
   }
@@ -429,8 +430,6 @@ void CSceneMainScreen::SlotUnloadFinished()
   m_spUi->pQmlWidget->setSource(QUrl());
 
   delete m_pCurrentProjectWrapper;
-  m_spCurrentProject = nullptr;
-
   CDatabaseManager::UnloadProject(m_spCurrentProject);
   m_spCurrentProject = nullptr;
 

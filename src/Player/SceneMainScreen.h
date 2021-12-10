@@ -83,6 +83,7 @@ private:
   qint32                                                      m_lastScriptExecutionStatus;
   bool                                                        m_bInitialized;
   bool                                                        m_bShuttingDown;
+  bool                                                        m_bErrorState;
   bool                                                        m_bBeingDebugged;
 };
 
