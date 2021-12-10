@@ -87,6 +87,7 @@ void CScriptRunner::LoadScript(tspScene spScene, tspResource spResource)
   QReadLocker projectLocker(&spResource->m_spParent->m_rwLock);
   QReadLocker resourceLocker(&spResource->m_rwLock);
   spProject = spResource->m_spParent;
+  QUrl sResourceUrl = spResource->m_sPath;
   if (spResource->m_type._to_integral() != EResourceType::eScript)
   {
     QString sError = tr("Script resource is of wrong type.");
@@ -106,7 +107,8 @@ void CScriptRunner::LoadScript(tspScene spScene, tspResource spResource)
     if (scriptFile.open(QIODevice::ReadOnly))
     {
       QString sScript = QString::fromUtf8(scriptFile.readAll());
-      const QString sSuffix = scriptFileInfo.suffix();
+      // get suffix from the path, as bundles might not have the suffix in the name
+      const QString sSuffix = QFileInfo(sResourceUrl.toString()).suffix();
       auto it = m_spRunnerMap.find(sSuffix);
       if (m_spRunnerMap.end() != it)
       {

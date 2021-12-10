@@ -76,7 +76,7 @@ bool CDatabaseManager::LoadProject(tspProject& spProject)
   {
     spProject->m_bLoaded =
         QResource::registerResource(CApplication::Instance()->Settings()->ContentFolder() + QDir::separator() +
-                                    sProjectName + c_sProjectBundleFileEnding,
+                                    sProjectName,
                                     QDir::separator() + spProject->m_sName);
     bLoaded = spProject->m_bLoaded;
   }
@@ -193,7 +193,7 @@ bool CDatabaseManager::UnloadProject(tspProject& spProject)
   {
     spProject->m_bLoaded =
         !QResource::unregisterResource(CApplication::Instance()->Settings()->ContentFolder() + QDir::separator() +
-                                       sProjectName + c_sProjectBundleFileEnding,
+                                       sProjectName,
                                        QDir::separator() + spProject->m_sName);
     bUnloaded &= !spProject->m_bLoaded;
   }
@@ -1250,7 +1250,7 @@ void CDatabaseManager::LoadDatabase()
   }
 
   // finally load packed projects
-  vsFileEndings = QStringList() << c_sProjectBundleFileEnding;
+  vsFileEndings = QStringList() << QString("*") + c_sProjectBundleFileEnding;
   QDirIterator itBundle(sPath, vsFileEndings,
                         QDir::Files | QDir::NoDotAndDotDot, QDirIterator::NoIteratorFlags);
   while (itBundle.hasNext())
