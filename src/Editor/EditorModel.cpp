@@ -368,7 +368,7 @@ void CEditorModel::LoadProject(qint32 iId)
         }
         else
         {
-          qWarning() << tr("Could not open save scene model file.");
+          qWarning() << tr("Could not open scene model file.");
         }
       }
     }

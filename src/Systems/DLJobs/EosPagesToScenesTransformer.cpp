@@ -27,7 +27,7 @@ namespace
   const QString c_sScriptKeyWord = "script";
   const QString c_sCommandsKeyWord = "commands";
 
-  const double c_dNodeOffset = 200.0;
+  const double c_dNodeOffset = 500.0;
 }
 
 //----------------------------------------------------------------------------------------
@@ -82,6 +82,13 @@ tspScene CEosPagesToScenesTransformer::AddPageToScene(const qint32 iProjectId,
     m_spScene->createConnection(*pSceneNode, 0, *pSplitterNode, 0);
 
     // set properties
+    CPathSplitterModel* pSplitter =
+        dynamic_cast<CPathSplitterModel*>(pSplitterNode->nodeDataModel());
+    if (nullptr != pSplitter)
+    {
+      pSplitter->SetTransitionLabel(0, page.m_sName);
+    }
+
     CSceneNodeModel* pSceneModel =
         dynamic_cast<CSceneNodeModel*>(pSceneNode->nodeDataModel());
     auto spDbManager = CApplication::Instance()->System<CDatabaseManager>().lock();

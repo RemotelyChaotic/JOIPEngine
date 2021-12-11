@@ -38,6 +38,13 @@ QString CPathSplitterModel::TransitionLabel(PortIndex port)
 
 //----------------------------------------------------------------------------------------
 //
+void CPathSplitterModel::SetTransitionLabel(PortIndex index, const QString& sLabelValue)
+{
+  SlotTransitionLabelChanged(index, sLabelValue);
+}
+
+//----------------------------------------------------------------------------------------
+//
 QString CPathSplitterModel::caption() const
 { return staticCaption(); }
 bool CPathSplitterModel::captionVisible() const
