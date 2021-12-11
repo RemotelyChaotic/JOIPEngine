@@ -1069,6 +1069,23 @@ bool CJSonSaxParser::end_object()
               auto itChild = std::find(spParent->m_spChildren.begin(), spParent->m_spChildren.end(), spChild);
               spParent->m_spChildren.erase(itChild);
             }
+            else if (EArgumentType::eObject == itArg->second.m_type._to_integral())
+            {
+              auto it = spChild->m_actualArgs.find(spChild->m_sName);
+              if (spChild->m_actualArgs.end() != it)
+              {
+                spParent->m_actualArgs.insert({spChild->m_sName,
+                                               {EArgumentType::eObject, it->second.m_value}});
+                auto itChild = std::find(spParent->m_spChildren.begin(), spParent->m_spChildren.end(), spChild);
+                spParent->m_spChildren.erase(itChild);
+                spParent->m_spChildren.insert(spParent->m_spChildren.end(),
+                                              spChild->m_spChildren.begin(), spChild->m_spChildren.end());
+                for (auto& spChildChild : spChild->m_spChildren)
+                {
+                  spChildChild->m_wpParent = spParent;
+                }
+              }
+            }
           }
         }
       }
@@ -1199,6 +1216,12 @@ bool CJSonSaxParser::end_array()
                                                {EArgumentType::eArray, it->second.m_value}});
                 auto itChild = std::find(spParent->m_spChildren.begin(), spParent->m_spChildren.end(), spChild);
                 spParent->m_spChildren.erase(itChild);
+                spParent->m_spChildren.insert(spParent->m_spChildren.end(),
+                                              spChild->m_spChildren.begin(), spChild->m_spChildren.end());
+                for (auto& spChildChild : spChild->m_spChildren)
+                {
+                  spChildChild->m_wpParent = spParent;
+                }
               }
             }
           }
@@ -1218,13 +1241,28 @@ bool CJSonSaxParser::key(string_t& val)
   {
     m_bParsingCommands = true;
 
-    std::shared_ptr<CJsonInstructionNode> spRotNode =
-        std::make_shared<CJsonInstructionNode>();
-    spRotNode->m_sName = QString::fromStdString(m_sCurrentKey);
-    spRotNode->m_bIgnoreChildren = false;
-    m_parseStack.push(spRotNode);
-    m_pParent->m_vspBuiltCommands.push_back(
-          {QString::fromStdString(m_sCurrentKey), spRotNode});
+    // we need to filter parsing of commands, since an argument could be called: 'commands'
+    if (m_parseStack.size() <= 0 || m_parseStack.top()->m_wpCommand.expired())
+    {
+      bool bIgnoreCommandKey = false;
+      if (m_parseStack.size() > 0 && nullptr != m_parseStack.top()->m_argsDefinition)
+      {
+        auto it = m_parseStack.top()->m_argsDefinition->find(c_sCommandsNode);
+        bIgnoreCommandKey = m_parseStack.top()->m_argsDefinition->end() != it;
+      }
+
+      if (!bIgnoreCommandKey)
+      {
+        // insert a node
+        std::shared_ptr<CJsonInstructionNode> spRotNode =
+            std::make_shared<CJsonInstructionNode>();
+        spRotNode->m_sName = QString::fromStdString(m_sCurrentKey);
+        spRotNode->m_bIgnoreChildren = false;
+        m_parseStack.push(spRotNode);
+        m_pParent->m_vspBuiltCommands.push_back(
+              {QString::fromStdString(m_sCurrentKey), spRotNode});
+      }
+    }
   }
 
   // store key
