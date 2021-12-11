@@ -457,20 +457,7 @@ CJsScriptRunner::~CJsScriptRunner()
 void CJsScriptRunner::Initialize()
 {
   QMutexLocker locker(&m_runnerMutex);
-  m_vspJsRunner.insert({c_sMainRunner,
-                        std::make_shared<CJsScriptRunnerInstanceController>(
-                          c_sMainRunner, m_wpSignalEmitterContext)});
-  auto it = m_vspJsRunner.find(c_sMainRunner);
-  it->second->setObjectName(c_sMainRunner);
-  connect(it->second.get(), &CJsScriptRunnerInstanceController::HandleScriptFinish,
-          this, &CJsScriptRunner::SlotHandleScriptFinish);
-
-  connect(it->second.get(), &CJsScriptRunnerInstanceController::SignalOverlayCleared,
-          this, &CJsScriptRunner::SlotOverlayCleared);
-  connect(it->second.get(), &CJsScriptRunnerInstanceController::SignalOverlayClosed,
-          this, &CJsScriptRunner::SlotOverlayClosed);
-  connect(it->second.get(), &CJsScriptRunnerInstanceController::SignalOverlayRunAsync,
-          this, &CJsScriptRunner::SlotOverlayRunAsync);
+  m_vspJsRunner.clear();
 }
 
 //----------------------------------------------------------------------------------------
@@ -522,6 +509,7 @@ bool CJsScriptRunner::HasRunningScripts() const
 void CJsScriptRunner::LoadScript(const QString& sScript,
                                  tspScene spScene, tspResource spResource)
 {
+  CreateRunner(c_sMainRunner);
   RunScript(c_sMainRunner, sScript, spScene, spResource);
 }
 
@@ -529,19 +517,22 @@ void CJsScriptRunner::LoadScript(const QString& sScript,
 //
 void CJsScriptRunner::RegisterNewComponent(const QString sName, QJSValue signalEmitter)
 {
-  QMutexLocker locker(&m_runnerMutex);
-  for (auto& it : m_vspJsRunner)
+  CScriptRunnerSignalEmiter* pObject = nullptr;
+  if (signalEmitter.isObject())
   {
-    if (signalEmitter.isObject())
-    {
-      CScriptRunnerSignalEmiter* pObject =
-          qobject_cast<CScriptRunnerSignalEmiter*>(signalEmitter.toQObject());
-      it.second->RegisterNewComponent(sName, pObject);
+    pObject = qobject_cast<CScriptRunnerSignalEmiter*>(signalEmitter.toQObject());
+  }
 
-      QMutexLocker lockerEmiter(&m_signalEmiterMutex);
-      m_pSignalEmiters.insert({sName, pObject});
+  {
+    QMutexLocker locker(&m_runnerMutex);
+    for (auto& it : m_vspJsRunner)
+    {
+      it.second->RegisterNewComponent(sName, pObject);
     }
   }
+
+  QMutexLocker lockerEmiter(&m_signalEmiterMutex);
+  m_pSignalEmiters.insert({sName, pObject});
 }
 
 //----------------------------------------------------------------------------------------
@@ -573,10 +564,7 @@ void CJsScriptRunner::SlotHandleScriptFinish(const QString& sName, bool bSuccess
 
     it->second->ResetEngine();
 
-    if (c_sMainRunner != sName)
-    {
-      m_vspJsRunner.erase(it);
-    }
+    m_vspJsRunner.erase(it);
   }
 
   if (!bSuccess)
@@ -641,27 +629,7 @@ void CJsScriptRunner::SlotOverlayClosed(const QString& sId)
 void CJsScriptRunner::SlotOverlayRunAsync(tspProject spProject, const QString& sId, const QString& sScriptResource)
 {
   {
-    QMutexLocker locker(&m_runnerMutex);
-    m_vspJsRunner.insert({sId,
-                          std::make_shared<CJsScriptRunnerInstanceController>(
-                            sId, m_wpSignalEmitterContext)});
-    auto it = m_vspJsRunner.find(sId);
-    it->second->setObjectName(sId);
-    connect(it->second.get(), &CJsScriptRunnerInstanceController::HandleScriptFinish,
-            this, &CJsScriptRunner::SlotHandleScriptFinish);
-
-    connect(it->second.get(), &CJsScriptRunnerInstanceController::SignalOverlayCleared,
-            this, &CJsScriptRunner::SlotOverlayCleared);
-    connect(it->second.get(), &CJsScriptRunnerInstanceController::SignalOverlayClosed,
-            this, &CJsScriptRunner::SlotOverlayClosed);
-    connect(it->second.get(), &CJsScriptRunnerInstanceController::SignalOverlayRunAsync,
-            this, &CJsScriptRunner::SlotOverlayRunAsync);
-
-    QMutexLocker lockerEmiter(&m_signalEmiterMutex);
-    for (auto& itEmiter : m_pSignalEmiters)
-    {
-      it->second->RegisterNewComponent(itEmiter.first, itEmiter.second);
-    }
+    CreateRunner(sId);
   }
 
   auto spSignalEmitterContext = m_wpSignalEmitterContext.lock();
@@ -727,6 +695,32 @@ void CJsScriptRunner::SlotOverlayRunAsync(tspProject spProject, const QString& s
 
 //----------------------------------------------------------------------------------------
 //
+void CJsScriptRunner::CreateRunner(const QString& sId)
+{
+  QMutexLocker locker(&m_runnerMutex);
+  m_vspJsRunner.insert({sId, std::make_shared<CJsScriptRunnerInstanceController>(
+                                sId, m_wpSignalEmitterContext)});
+  auto it = m_vspJsRunner.find(sId);
+  it->second->setObjectName(sId);
+  connect(it->second.get(), &CJsScriptRunnerInstanceController::HandleScriptFinish,
+          this, &CJsScriptRunner::SlotHandleScriptFinish);
+
+  connect(it->second.get(), &CJsScriptRunnerInstanceController::SignalOverlayCleared,
+          this, &CJsScriptRunner::SlotOverlayCleared);
+  connect(it->second.get(), &CJsScriptRunnerInstanceController::SignalOverlayClosed,
+          this, &CJsScriptRunner::SlotOverlayClosed);
+  connect(it->second.get(), &CJsScriptRunnerInstanceController::SignalOverlayRunAsync,
+          this, &CJsScriptRunner::SlotOverlayRunAsync);
+
+  QMutexLocker lockerEmiter(&m_signalEmiterMutex);
+  for (auto& itEmiter : m_pSignalEmiters)
+  {
+    it->second->RegisterNewComponent(itEmiter.first, itEmiter.second);
+  }
+}
+
+//----------------------------------------------------------------------------------------
+//
 void CJsScriptRunner::RunScript(const QString& sId, const QString& sScript,
                                 tspScene spScene, tspResource spResource)
 {
@@ -734,7 +728,6 @@ void CJsScriptRunner::RunScript(const QString& sId, const QString& sScript,
   auto it = m_vspJsRunner.find(sId);
   if (m_vspJsRunner.end() != it)
   {
-    it->second->InterruptExecution();
     it->second->RunScript(sScript, spScene, spResource);
   }
 }

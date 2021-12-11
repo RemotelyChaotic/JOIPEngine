@@ -53,6 +53,7 @@ private slots:
   void SlotOverlayRunAsync(tspProject spProject, const QString& sId, const QString& sScriptResource);
 
 private:
+  void CreateRunner(const QString& sId);
   void RunScript(const QString& sId, const QString& sScript,
                  tspScene spScene, tspResource spResource);
 
