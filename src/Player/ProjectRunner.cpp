@@ -69,9 +69,11 @@ void CProjectRunner::LoadProject(tspProject spProject, const QString sStartScene
   connect(m_pFlowScene, &CFlowScene::nodeCreated, this, &CProjectRunner::SlotNodeCreated);
 
   bool bOk = LoadFlowScene();
+  assert(bOk && "Could not load Flow scene. Why????");
   if (!bOk) { return; }
 
   bOk = ResolveStart(sStartScene);
+  assert(bOk && "Starting scene could not be resolved.");
   if (!bOk) { return; }
 
   CSceneNodeModel* pNodeDataModel = dynamic_cast<CSceneNodeModel*>(m_pCurrentNode->nodeDataModel());
@@ -194,7 +196,13 @@ bool CProjectRunner::LoadFlowScene()
       auto spResource = spDbManager->FindResourceInProject(m_spCurrentProject, sModelName);
       if (nullptr != spResource)
       {
+        QString sResourceBundle;
         QString sPath = ResourceUrlToAbsolutePath(spResource);
+        {
+          QReadLocker locker(&spResource->m_rwLock);
+          sResourceBundle = spResource->m_sResourceBundle;
+        }
+        CDatabaseManager::LoadBundle(m_spCurrentProject, sResourceBundle);
         QFile modelFile(sPath);
         if (modelFile.open(QIODevice::ReadOnly))
         {
@@ -203,7 +211,7 @@ bool CProjectRunner::LoadFlowScene()
         }
         else
         {
-          QString sError(tr("Could not open save scene model file."));
+          QString sError(tr("Could not open scene model file: %1.").arg(modelFile.errorString()));
           qWarning() << sError;
           emit SignalError(sError, QtMsgType::QtWarningMsg);
           return false;
@@ -212,7 +220,7 @@ bool CProjectRunner::LoadFlowScene()
     }
     else
     {
-      QString sError(tr("Could not open save scene model file."));
+      QString sError(tr("Could not open scene model file: scene not found."));
       qWarning() << sError;
       emit SignalError(sError, QtMsgType::QtWarningMsg);
       return false;

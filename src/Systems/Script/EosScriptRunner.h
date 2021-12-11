@@ -23,7 +23,7 @@ class CEosScriptRunner : public QObject, public IScriptRunner
 public:
   explicit CEosScriptRunner(std::weak_ptr<CScriptRunnerSignalContext> spSignalEmitterContext,
                             QObject* pParent = nullptr);
-  ~CEosScriptRunner();
+  ~CEosScriptRunner() override;
 
   void Initialize() override;
   void Deinitialize() override;
