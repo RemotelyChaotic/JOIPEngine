@@ -147,7 +147,11 @@ public:
     if (HasValue(args, "isAsync") && IsOk<EArgumentType::eBool>(itIsAsync))
     {
       tInstructionMapValue argsCopy = args;
-      argsCopy.erase(args.find("isAsync"));
+      auto itAsynchCopy = args.find("isAsync");
+      if (args.end() != itAsynchCopy)
+      {
+        argsCopy.erase(itAsynchCopy);
+      }
       argsCopy.insert({"isAsync_threadImpl", SInstructionArgumentValue{EArgumentType::eBool, true}});
       return SRunRetVal<ENextCommandToCall::eForkThis>({{argsCopy, QUuid::createUuid().toString(), true}});
     }
@@ -165,28 +169,37 @@ public:
           m_pParent->setTime(static_cast<double>(iTimeMs) / 1000);
         }
 
+        bool bHasDefinedStyle = false;
         bool bIsMainClock = true;
         if (HasValue(args, "style") && IsOk<EArgumentType::eString>(itStyle))
         {
           const QString sStyle = std::get<QString>(itStyle);
           if ("normal" == sStyle)
           {
+            bHasDefinedStyle = true;
             bIsMainClock = true;
             m_pParent->setTimeVisible(true);
             m_pParent->show();
           }
           else if ("hidden" == sStyle)
           {
+            bHasDefinedStyle = true;
             bIsMainClock = true;
             m_pParent->setTimeVisible(true);
             m_pParent->hide();
           }
           else if ("secret" == sStyle)
           {
+            bHasDefinedStyle = true;
             bIsMainClock = true;
             m_pParent->setTimeVisible(false);
             m_pParent->show();
           }
+        }
+        if (!bHasDefinedStyle)
+        {
+          m_pParent->setTimeVisible(true);
+          m_pParent->show();
         }
 
         bool bIsInThread = true;
