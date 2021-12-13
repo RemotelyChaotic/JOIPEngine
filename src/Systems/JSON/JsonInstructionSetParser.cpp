@@ -8,6 +8,7 @@
 #include <QAtomicInt>
 #include <QDebug>
 #include <QEventLoop>
+#include <QMutex>
 #include <QPointer>
 #include <QThread>
 #include <memory>
@@ -91,8 +92,13 @@ class CJsonInstructionSetRunnerWorker : public QObject
   Q_DISABLE_COPY(CJsonInstructionSetRunnerWorker)
 public:
   CJsonInstructionSetRunnerWorker(std::shared_ptr<CJsonInstructionNode> spNode) :
+    QObject(nullptr),
     m_spNextNode(spNode)
   {}
+  ~CJsonInstructionSetRunnerWorker() override
+  {
+
+  }
 
 public:
   QAtomicInt     m_bInterrupted = 0;
@@ -260,30 +266,38 @@ class CJsonInstructionSetRunnerWorkerController : public QObject
 
 public:
   CJsonInstructionSetRunnerWorkerController(std::shared_ptr<CJsonInstructionNode> spNode) :
+    QObject(nullptr),
     m_spWorker(std::make_shared<CJsonInstructionSetRunnerWorker>(spNode)),
-    m_pThread(new QThread(this))
+    m_pThread(new QThread(this)),
+    m_mutex(QMutex::Recursive)
   {
-    m_spWorker->moveToThread(m_pThread.data());
-
+    QMutexLocker locker(&m_mutex);
     connect(m_spWorker.get(), &CJsonInstructionSetRunnerWorker::CallNextCommandRetVal,
             this, &CJsonInstructionSetRunnerWorkerController::SlotCallNextCommandRetVal);
     connect(m_spWorker.get(), &CJsonInstructionSetRunnerWorker::Fork,
             this, &CJsonInstructionSetRunnerWorkerController::Fork);
     connect(m_pThread.data(), &QThread::finished, this, &CJsonInstructionSetRunnerWorker::deleteLater);
 
+    m_pThread->setObjectName("CJsonInstructionSetRunnerWorkerController");
     m_pThread->start();
     while (!m_pThread->isRunning())
     {
       thread()->wait(5);
     }
+    m_spWorker->moveToThread(m_pThread.data());
   }
   ~CJsonInstructionSetRunnerWorkerController()
   {
+    QMutexLocker locker(&m_mutex);
     Interrupt();
+    m_spWorker = nullptr;
+    delete m_pThread;
+    m_pThread = nullptr;
   }
 
   void CallNextCommand(ERunerMode runMode, bool bBlocking)
   {
+    QMutexLocker locker(&m_mutex);
     m_retVal = SRunnerRetVal{false, std::any()};
     m_bCommandDone = false;
     m_bBlockingCall = bBlocking;
@@ -295,22 +309,23 @@ public:
 
   void Interrupt()
   {
+    QMutexLocker locker(&m_mutex);
     if (nullptr != m_pThread)
     {
       m_spWorker->m_bInterrupted = true;
       m_pThread->quit();
       while (!m_pThread->isFinished())
       {
-        m_pThread->wait(5);
+        thread()->wait(5);
       }
     }
   }
 
-  bool IsRunning() const { return m_spWorker->m_bRunning == 1; }
-  bool HasMoreCommands() const { return m_retVal.m_bHasMoreCommands; }
-  bool IsBlockingCall() const { return m_bBlockingCall; }
-  bool IsDoneWithCommand() const { return m_bCommandDone; }
-  std::any RetVal() const { return m_retVal.m_retVal; }
+  bool IsRunning() const { QMutexLocker locker(&m_mutex); return m_spWorker->m_bRunning == 1; }
+  bool HasMoreCommands() const { QMutexLocker locker(&m_mutex); return m_retVal.m_bHasMoreCommands; }
+  bool IsBlockingCall() const { QMutexLocker locker(&m_mutex); return m_bBlockingCall; }
+  bool IsDoneWithCommand() const { QMutexLocker locker(&m_mutex); return m_bCommandDone; }
+  std::any RetVal() const { QMutexLocker locker(&m_mutex); return m_retVal.m_retVal; }
 
 signals:
   void CallNextCommandRetVal(ERunerMode runMode, CJsonInstructionSetRunner::tRetVal retVal);
@@ -323,17 +338,20 @@ signals:
 protected slots:
   void SlotCallNextCommandRetVal(ERunerMode runMode, CJsonInstructionSetRunner::tRetVal retVal)
   {
+    QMutexLocker locker(&m_mutex);
     if (std::holds_alternative<SRunnerRetVal>(retVal))
     {
       m_retVal = std::get<SRunnerRetVal>(retVal);
     }
     m_bCommandDone = true;
+    locker.unlock();
     emit CallNextCommandRetVal(runMode, retVal);
   }
 
 public:
   std::shared_ptr<CJsonInstructionSetRunnerWorker> m_spWorker;
   QPointer<QThread>                                m_pThread;
+  mutable QMutex                                   m_mutex;
   SRunnerRetVal                                    m_retVal;
   bool                                             m_bCommandDone = true;
   bool                                             m_bBlockingCall = false;
@@ -364,10 +382,13 @@ public:
   {
   }
 
-  ~CJsonInstructionSetRunnerPrivate()
+  ~CJsonInstructionSetRunnerPrivate() override
   {
     // makes debugging easier
-    m_spWorkerController.reset();
+    if (nullptr != m_spWorkerController)
+    {
+      m_spWorkerController = nullptr;
+    }
   }
 
   //--------------------------------------------------------------------------------------
@@ -464,7 +485,10 @@ public:
   //
   void Interrupt()
   {
-    m_spWorkerController->Interrupt();
+    if (nullptr != m_spWorkerController)
+    {
+      m_spWorkerController->Interrupt();
+    }
   }
 
   //--------------------------------------------------------------------------------------
@@ -482,7 +506,7 @@ public:
     if (!m_bValidationOk)
     { return SJsonException{"Parse error.", "", "", 0, 0}; }
 
-    m_spWorkerController.reset(nullptr);
+    m_spWorkerController = nullptr;
 
     // validation success, start actually running the commands
     auto it = std::find_if(m_vspBuiltCommands.begin(), m_vspBuiltCommands.end(),
