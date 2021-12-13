@@ -283,7 +283,7 @@ public:
     m_pThread->start();
     while (!m_pThread->isRunning())
     {
-      thread()->wait(5);
+      thread()->sleep(1);
     }
     m_spWorker->moveToThread(m_pThread.data());
   }
@@ -317,7 +317,7 @@ public:
       m_pThread->quit();
       while (!m_pThread->isFinished())
       {
-        thread()->wait(5);
+        thread()->sleep(1);
       }
     }
   }

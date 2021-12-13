@@ -105,6 +105,7 @@ public:
 
   void setTextAlignment(qint32 alignment);
   void setTextColors(const std::vector<QColor>& vColors);
+  void setBackgroundColors(const std::vector<QColor>& vColors);
   qint32 showButtonPrompts(const QStringList& vsLabels);
   QString showInput(const QString& sStoreIntoVar);
   void showText(QString sText);

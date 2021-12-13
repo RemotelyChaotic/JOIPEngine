@@ -87,7 +87,7 @@ public:
   IJsonInstructionBase::tRetVal Call(const tInstructionMapValue& args) override
   {
     Q_UNUSED(args)
-    return SRunRetVal<ENextCommandToCall::eChild>(0);
+    return SRunRetVal<ENextCommandToCall::eSibling>();
   }
 
 private:

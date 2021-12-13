@@ -147,8 +147,8 @@ public:
     if (HasValue(args, "isAsync") && IsOk<EArgumentType::eBool>(itIsAsync))
     {
       tInstructionMapValue argsCopy = args;
-      auto itAsynchCopy = args.find("isAsync");
-      if (args.end() != itAsynchCopy)
+      auto itAsynchCopy = argsCopy.find("isAsync");
+      if (argsCopy.end() != itAsynchCopy)
       {
         argsCopy.erase(itAsynchCopy);
       }

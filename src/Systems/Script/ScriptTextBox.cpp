@@ -463,6 +463,7 @@ public:
         QStringList vsOptions;
         std::map<qint32, qint32> vsOptionMapping;
         std::vector<QColor> vColors;
+        std::vector<QColor> vColorsBg;
         std::vector<qint32> viNumChildren;
         qint32 iCounter = 0;
 
@@ -489,7 +490,7 @@ public:
               const tInstructionArrayValue& commands = std::get<tInstructionArrayValue>(itCommands);
               viNumChildren.push_back(static_cast<qint32>(commands.size()));
             }
-            QColor col;
+            QColor col = Qt::black;
             if (HasValue(optionsArg, "color") && IsOk<EArgumentType::eString>(itColor))
             {
               col = std::get<QString>(itColor);
@@ -502,8 +503,19 @@ public:
 
             if (bVisible)
             {
+              // calculate foreground / text color
+              double dLuminance = (0.299 * col.red() +
+                                   0.587 * col.green() +
+                                   0.114 * col.blue()) / 255;
+              QColor foregroundColor = Qt::white;
+              if (dLuminance > 0.5)
+              {
+                foregroundColor = Qt::black;
+              }
+
               vsOptions.push_back(sLabel);
-              vColors.push_back(col);
+              vColors.push_back(foregroundColor);
+              vColorsBg.push_back(col);
               vsOptionMapping.insert({iCounter++, static_cast<qint32>(i)});
             }
             else
@@ -513,8 +525,10 @@ public:
           }
         }
 
+        m_pParent->setBackgroundColors(vColorsBg);
         m_pParent->setTextColors(vColors);
         qint32 iButton = m_pParent->showButtonPrompts(vsOptions);
+        m_pParent->setBackgroundColors({QColor(Qt::black)});
         m_pParent->setTextColors({QColor(Qt::white)});
 
         qint32 iSiblingToCall = 0;
@@ -729,6 +743,14 @@ void CEosScriptTextBox::setTextColors(const std::vector<QColor>& vColors)
 {
   if (!CheckIfScriptCanRun()) { return; }
   emit SignalEmitter<CTextBoxSignalEmitter>()->textColorsChanged(vColors);
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CEosScriptTextBox::setBackgroundColors(const std::vector<QColor>& vColors)
+{
+  if (!CheckIfScriptCanRun()) { return; }
+  emit SignalEmitter<CTextBoxSignalEmitter>()->textBackgroundColorsChanged(vColors);
 }
 
 //----------------------------------------------------------------------------------------
