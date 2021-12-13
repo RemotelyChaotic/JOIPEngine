@@ -233,8 +233,8 @@ void CMainWindow::closeEvent(QCloseEvent* pEvent)
       QPointer<CMainWindow> pThis(this);
       QMessageBox::StandardButton resBtn =
           QMessageBox::question(this, QString("Downloads running."),
-                                tr("Downloads are still running and will be paused.\n"
-                                   "If you quit, they will continue after re-opening the application.\n"
+                                tr("Downloads are still running and will be canceled.\n"
+                                   "If you quit, you will need to delete the left-over folders manually.\n"
                                    "Are you sure you want to quit?\n"),
                                 QMessageBox::Cancel | QMessageBox::No | QMessageBox::Yes,
                                 QMessageBox::No);

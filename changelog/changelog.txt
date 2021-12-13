@@ -134,6 +134,11 @@ New Features:
   This is not usually recomended, but is a way to give a script more UI control.
 - New Component: PlayerNotification for when you need to asynchronously run code
   after a timeout or on button press. Styleable like the PlayerTextbox via script.
+- Added Milovana EOS file support to editor and player. EOS scripts can be edited
+  and played like normal JS scripts.
+- Added ability to download EOS teases from Milovana from url. Downloaded teases
+  are read-only and can't be downloaded in the editor to protect the
+  original creators.
 
 Changes:
 - JOIP-Engine uses PhysFS to allow restricted acces to files only, making it
