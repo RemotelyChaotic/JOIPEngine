@@ -75,7 +75,8 @@ private:
 class CCommandEosNoop : public IJsonInstructionBase
 {
 public:
-  CCommandEosNoop() : m_argTypes() {}
+  CCommandEosNoop() :
+    m_argTypes() {}
   ~CCommandEosNoop() override {}
 
   tInstructionMapType& ArgList() override

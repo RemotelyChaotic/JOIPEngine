@@ -1026,7 +1026,30 @@ bool CJSonSaxParser::start_object(std::size_t elements)
           }
           else
           {
-            return false;
+            auto it = m_instructionMap.find(QString::fromStdString(m_sCurrentKey));
+            if (m_instructionMap.end() != it)
+            {
+              std::shared_ptr<CJsonInstructionNode> spNode =
+                  std::make_shared<CJsonInstructionNode>();
+              spNode->m_sName = QString::fromStdString(m_sCurrentKey);
+              spNode->m_wpCommand = it->second;
+              spNode->m_wpParent = m_parseStack.top();
+              spNode->m_bIgnoreChildren = false;
+              spNode->m_argsDefinition = &it->second->ArgList();
+              m_parseStack.top()->m_spChildren.push_back(spNode);
+              m_parseStack.push(spNode);
+            }
+            else
+            {
+              std::shared_ptr<CJsonInstructionNode> spNode =
+                  std::make_shared<CJsonInstructionNode>();
+              spNode->m_sName = QString::fromStdString(m_sCurrentKey);
+              spNode->m_bIgnoreChildren = false;
+              spNode->m_wpParent = m_parseStack.top();
+              m_parseStack.top()->m_spChildren.push_back(spNode);
+              m_parseStack.push(spNode);
+              return true;
+            }
           }
         }
         else
