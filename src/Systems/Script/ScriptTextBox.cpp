@@ -479,7 +479,6 @@ public:
             const auto& itColor = GetValue<EArgumentType::eString>(optionsArg, "color");
             const auto& itVisible = GetValue<EArgumentType::eBool>(optionsArg, "visible");
 
-            // TODO: <eval></eval> does not work yet
             QString sLabel;
             if (HasValue(optionsArg, "label") && IsOk<EArgumentType::eString>(itLabel))
             {

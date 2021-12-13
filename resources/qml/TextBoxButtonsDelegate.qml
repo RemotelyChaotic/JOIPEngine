@@ -12,6 +12,7 @@ Rectangle {
     property var backgroundColors: []
     property var textColors: []
     property var buttonTexts: []
+    property var requestId: sRequestId
 
     TextMetrics {
         id: textMetrics
@@ -127,7 +128,7 @@ Rectangle {
                     }
                     onClicked: {
                         root.soundEffects.clickSound.play();
-                        textDelegate.parent.ListView.view.buttonPressed(index, model.sRequestId);
+                        textDelegate.parent.ListView.view.buttonPressed(index, textDelegate.requestId);
                     }
 
                     background: Rectangle {
@@ -158,7 +159,7 @@ Rectangle {
                         sequence: Settings.keyBinding("Answer_" + (index+1));
                         onActivated: {
                             root.soundEffects.clickSound.play();
-                            textDelegate.parent.ListView.view.buttonPressed(index, model.sRequestId);
+                            textDelegate.parent.ListView.view.buttonPressed(index, textDelegate.requestId);
                         }
                     }
                 }

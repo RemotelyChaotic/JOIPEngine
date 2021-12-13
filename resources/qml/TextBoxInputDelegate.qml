@@ -9,6 +9,8 @@ Rectangle {
     height: 40 + 40
     color: "transparent"
 
+    property var requestId: sRequestId
+
     MouseArea {
         anchors.fill: parent
         onClicked: {
@@ -53,7 +55,7 @@ Rectangle {
             onEditingFinished: {
                 textInput.focus = false;
                 textInput.cursorVisible = false;
-                textDelegate.parent.ListView.view.inputEditingFinished(textInput.text, textInput.storeIntoVar, model.sRequestId);
+                textDelegate.parent.ListView.view.inputEditingFinished(textInput.text, textInput.storeIntoVar, textDelegate.requestId);
                 textInput.readOnly = true;
             }
         }
