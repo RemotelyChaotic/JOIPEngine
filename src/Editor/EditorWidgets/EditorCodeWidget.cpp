@@ -382,6 +382,18 @@ void CEditorCodeWidget::OnActionBarChanged()
       ActionBar()->m_spUi->AddTimerCode->setEnabled(false);
       ActionBar()->m_spUi->AddThreadCode->setEnabled(false);
     }
+
+    if (0 < ScriptEditorModel()->rowCount())
+    {
+      auto pScriptItem = ScriptEditorModel()->CachedScript(ScriptEditorModel()->CachedScriptName(0));
+      if (nullptr != pScriptItem)
+      {
+        if (nullptr != ActionBar())
+        {
+          SetButtonsBasedOnScript(pScriptItem->m_sScriptType);
+        }
+      }
+    }
   }
 }
 
@@ -635,6 +647,7 @@ void CEditorCodeWidget::ReloadEditor(qint32 iIndex)
     if (nullptr != ActionBar())
     {
       ActionBar()->m_spUi->DebugButton->setEnabled(nullptr != pScriptItem->m_spScene);
+      SetButtonsBasedOnScript(pScriptItem->m_sScriptType);
     }
     m_spUi->pCodeEdit->setPlainText(QString::fromUtf8(pScriptItem->m_data));
     m_spUi->pCodeEdit->SetHighlightDefinition(pScriptItem->m_sHighlightDefinition);
@@ -642,4 +655,33 @@ void CEditorCodeWidget::ReloadEditor(qint32 iIndex)
   m_spUi->pCodeEdit->update();
 
   m_bChangingIndex = false;
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CEditorCodeWidget::SetButtonsBasedOnScript(const QString& sScriptType)
+{
+  // do this for now, later use a registry
+  if ("js" == sScriptType)
+  {
+    ActionBar()->m_spUi->AddShowBackgroundCode->setVisible(true);
+    ActionBar()->m_spUi->AddShowIconCode->setVisible(true);
+    ActionBar()->m_spUi->AddShowImageCode->setVisible(true);
+    ActionBar()->m_spUi->AddTextCode->setVisible(true);
+    ActionBar()->m_spUi->AddMetronomeCode->setVisible(true);
+    ActionBar()->m_spUi->AddNotificationCode->setVisible(true);
+    ActionBar()->m_spUi->AddTimerCode->setVisible(true);
+    ActionBar()->m_spUi->AddThreadCode->setVisible(true);
+  }
+  else
+  {
+    ActionBar()->m_spUi->AddShowBackgroundCode->setVisible(false);
+    ActionBar()->m_spUi->AddShowIconCode->setVisible(false);
+    ActionBar()->m_spUi->AddShowImageCode->setVisible(false);
+    ActionBar()->m_spUi->AddTextCode->setVisible(false);
+    ActionBar()->m_spUi->AddMetronomeCode->setVisible(false);
+    ActionBar()->m_spUi->AddNotificationCode->setVisible(false);
+    ActionBar()->m_spUi->AddTimerCode->setVisible(false);
+    ActionBar()->m_spUi->AddThreadCode->setVisible(false);
+  }
 }

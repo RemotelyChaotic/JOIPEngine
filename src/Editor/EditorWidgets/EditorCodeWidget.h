@@ -70,6 +70,7 @@ protected slots:
 
 private:
   void ReloadEditor(qint32 iIndex);
+  void SetButtonsBasedOnScript(const QString& sScriptType);
 
   std::unique_ptr<CBackgroundSnippetOverlay>             m_spBackgroundSnippetOverlay;
   std::unique_ptr<CIconSnippetOverlay>                   m_spIconSnippetOverlay;

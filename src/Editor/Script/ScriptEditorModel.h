@@ -18,7 +18,7 @@ struct SCachedMapItem
 {
   SCachedMapItem() :
     m_spScene(), m_spWatcher(std::make_shared<QFileSystemWatcher>()), m_data(), m_sId(),
-    m_sHighlightDefinition("JavaScript"),
+    m_sHighlightDefinition("JavaScript"), m_sScriptType("js"),
     m_bChanged(false), m_bIgnoreNextModification(false), m_bAllreadyAsked(false), m_bInitialized(false)
   {}
   SCachedMapItem(const SCachedMapItem& other) :
@@ -26,6 +26,7 @@ struct SCachedMapItem
     m_spWatcher(other.m_spWatcher), m_data(other.m_data),
     m_sId(other.m_sId),
     m_sHighlightDefinition(other.m_sHighlightDefinition),
+    m_sScriptType(other.m_sScriptType),
     m_bChanged(other.m_bChanged),
     m_bIgnoreNextModification(other.m_bIgnoreNextModification),
     m_bAllreadyAsked(other.m_bAllreadyAsked),
@@ -38,6 +39,7 @@ struct SCachedMapItem
   QByteArray                           m_data;
   QString                              m_sId;
   QString                              m_sHighlightDefinition;
+  QString                              m_sScriptType;
   bool                                 m_bChanged;
   bool                                 m_bIgnoreNextModification;
   bool                                 m_bAllreadyAsked;

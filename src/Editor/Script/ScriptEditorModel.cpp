@@ -487,6 +487,7 @@ void CScriptEditorModel::AddResourceTo(tspResource spResource, std::map<QString,
   }
 
   QString sBundle = spResource->m_sResourceBundle;
+  QUrl sResourcePath = spResource->m_sPath;
   resourceLocker.unlock();
   CDatabaseManager::LoadBundle(m_spProject, sBundle);
   resourceLocker.relock();
@@ -500,9 +501,10 @@ void CScriptEditorModel::AddResourceTo(tspResource spResource, std::map<QString,
       mpToAddTo.insert({sResourceName, SCachedMapItem()});
       auto& script = mpToAddTo[sResourceName];
       script.m_sId = sResourceName;
-      auto itDefinition = c_sFileEngingDefinitionMap.find(QFileInfo(sPath).suffix());
+      auto itDefinition = c_sFileEngingDefinitionMap.find(QFileInfo(sResourcePath.toString()).suffix());
       if (c_sFileEngingDefinitionMap.end() != itDefinition)
       {
+        script.m_sScriptType = itDefinition->first;
         script.m_sHighlightDefinition = itDefinition->second;
       }
       if (!script.m_spWatcher->addPath(sPath))
