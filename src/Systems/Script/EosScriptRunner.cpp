@@ -227,7 +227,7 @@ void CEosScriptRunner::LoadScript(const QString& sScript, tspScene spScene, tspR
 
   spSignalEmitterContext->SetScriptExecutionStatus(CScriptRunnerSignalEmiter::eRunning);
 
-  QTimer::singleShot(10, this, [this]{ SlotRun(c_sMainRunner, "Commands"); });
+  QTimer::singleShot(10, this, [this]{ SlotRun(c_sMainRunner, ""); });
 }
 
 //----------------------------------------------------------------------------------------
