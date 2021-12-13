@@ -238,7 +238,7 @@ Rectangle {
         var evHtml = ev.outerHTML;
         evHtml = evHtml.replace(' xmlns="http://www.w3.org/1999/xhtml"', '');
         var i = docstring.indexOf(evHtml);
-        var beforeEv = string.slice(0, i);
+        var beforeEv = docstring.slice(0, i);
         var afterEv = docstring.slice(i + evHtml.length, docstring.length);
         if (beforeEv.length) {
           result.push(beforeEv);
@@ -253,14 +253,14 @@ Rectangle {
         result.push(docstring);
       }
       if (!result.length) return JSON.stringify('');
-      return '<html><body><nobr>' + result.join(' + ') + '</nobr></body></html>';
+      return '<html><body><nobr>' + result.join('') + '</nobr></body></html>';
     }
     EvalSignalEmitter {
         id: evaluator
         property string userName: "evalRunner"
 
         onEvalQuery: {
-            var retVal = EvalWrapper.globalEval(EvalWrapper.isolate(sScript, 'evaluator <' + userName + '>'));
+            var retVal = EvalWrapper.globalEval(EvalWrapper.wrap(sScript, 'e.toString()', 'evaluator <' + userName + '>'));
             evaluator.evalReturn(retVal);
         }
     }
