@@ -994,8 +994,7 @@ bool CJSonSaxParser::start_object(std::size_t elements)
             }
             else
             {
-              // not valid json file requested in command
-              return false;
+              spNode->m_argsDefinition = &std::get<tInstructionMapType>(argDefinitionArr->m_nestedType);
             }
             m_parseStack.top()->m_spChildren.push_back(spNode);
             m_parseStack.push(spNode);
@@ -1056,26 +1055,65 @@ bool CJSonSaxParser::end_object()
       {
         if (nullptr != spParentCommand)
         {
-          auto itArg = spParent->m_argsDefinition->find(spChild->m_sName);
-          if (spParent->m_argsDefinition->end() != itArg)
+          bool bArray = false;
+          auto type = TypeFromNode(spParent, spChild->m_sName.toStdString(), bArray);
+          if (std::holds_alternative<EArgumentType>(type))
           {
             // we popped a map type, so we need to insert the values into the arguments as a map value
             // we can also just remove the node from the children since we are done processing
             // the object
-            if (EArgumentType::eMap == itArg->second.m_type._to_integral())
+            if (EArgumentType::eMap == std::get<EArgumentType>(type)._to_integral())
             {
-              spParent->m_actualArgs.insert({spChild->m_sName,
-                                             {EArgumentType::eMap, spChild->m_actualArgs}});
+              if (!bArray)
+              {
+                spParent->m_actualArgs.insert({spChild->m_sName,
+                                               {EArgumentType::eMap, spChild->m_actualArgs}});
+              }
+              else
+              {
+                // vector not found -> insert new vector
+                auto it = spParent->m_actualArgs.find(spChild->m_sName);
+                if (spParent->m_actualArgs.end() == it)
+                {
+                  spParent->m_actualArgs.insert({spChild->m_sName,
+                                                 {EArgumentType::eArray, tInstructionArrayValue()}});
+                }
+                it = spParent->m_actualArgs.find(spChild->m_sName);
+                tInstructionArrayValue& array = std::get<tInstructionArrayValue>(it->second.m_value);
+                array.push_back({EArgumentType::eMap, spChild->m_actualArgs});
+              }
               auto itChild = std::find(spParent->m_spChildren.begin(), spParent->m_spChildren.end(), spChild);
               spParent->m_spChildren.erase(itChild);
+              spParent->m_spChildren.insert(spParent->m_spChildren.end(),
+                                            spChild->m_spChildren.begin(), spChild->m_spChildren.end());
+              for (auto& spChildChild : spChild->m_spChildren)
+              {
+                spChildChild->m_wpParent = spParent;
+              }
             }
-            else if (EArgumentType::eObject == itArg->second.m_type._to_integral())
+            else if (EArgumentType::eObject == std::get<EArgumentType>(type)._to_integral())
             {
               auto it = spChild->m_actualArgs.find(spChild->m_sName);
               if (spChild->m_actualArgs.end() != it)
               {
-                spParent->m_actualArgs.insert({spChild->m_sName,
-                                               {EArgumentType::eObject, it->second.m_value}});
+                if (!bArray)
+                {
+                  spParent->m_actualArgs.insert({spChild->m_sName,
+                                                 {EArgumentType::eObject, it->second.m_value}});
+                }
+                else
+                {
+                  // vector not found -> insert new vector
+                  auto it = spParent->m_actualArgs.find(spChild->m_sName);
+                  if (spParent->m_actualArgs.end() == it)
+                  {
+                    spParent->m_actualArgs.insert({spChild->m_sName,
+                                                   {EArgumentType::eArray, tInstructionArrayValue()}});
+                  }
+                  it = spParent->m_actualArgs.find(spChild->m_sName);
+                  tInstructionArrayValue& array = std::get<tInstructionArrayValue>(it->second.m_value);
+                  array.push_back({EArgumentType::eObject, it->second.m_value});
+                }
                 auto itChild = std::find(spParent->m_spChildren.begin(), spParent->m_spChildren.end(), spChild);
                 spParent->m_spChildren.erase(itChild);
                 spParent->m_spChildren.insert(spParent->m_spChildren.end(),
