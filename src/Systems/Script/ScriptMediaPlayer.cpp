@@ -575,6 +575,7 @@ private:
 CEosScriptMediaPlayer::CEosScriptMediaPlayer(QPointer<CScriptRunnerSignalEmiter> pEmitter,
                                              QPointer<CJsonInstructionSetParser> pParser) :
   CEosScriptObjectBase(pEmitter, pParser),
+  m_wpDbManager(CApplication::Instance()->System<CDatabaseManager>()),
   m_spCommandImg(std::make_shared<CCommandEosImage>(this)),
   m_spCommandAudio(std::make_shared<CCommandEosAudio>(this))
 {
