@@ -11,6 +11,8 @@ public:
   CJsonInstructionNode() = default;
   CJsonInstructionNode(CJsonInstructionNode& other);
 
+  void ReparentChildren();
+
   // build data
   QString                                            m_sName;
   bool                                               m_bIgnoreChildren = false;

@@ -16,6 +16,16 @@ CJsonInstructionNode::CJsonInstructionNode(CJsonInstructionNode& other) :
   for (auto& spChild : other.m_spChildren)
   {
     m_spChildren.push_back(std::make_shared<CJsonInstructionNode>(*spChild));
-    m_spChildren.back()->m_wpParent =  shared_from_this();
+  }
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CJsonInstructionNode::ReparentChildren()
+{
+  for (auto& spChild : m_spChildren)
+  {
+    spChild->m_wpParent = shared_from_this();
+    spChild->ReparentChildren();
   }
 }

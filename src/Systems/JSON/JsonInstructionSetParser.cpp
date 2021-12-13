@@ -580,6 +580,7 @@ protected slots:
   {
     std::shared_ptr<CJsonInstructionNode> spNewNode =
         std::make_shared<CJsonInstructionNode>(*spNode);
+    spNewNode->ReparentChildren();
     // change args and make an orphan
     spNewNode->m_actualArgs = args;
     spNewNode->m_wpParent = std::weak_ptr<CJsonInstructionNode>();
