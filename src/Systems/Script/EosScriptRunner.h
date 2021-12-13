@@ -53,6 +53,7 @@ private:
   std::unique_ptr<CJsonInstructionSetParser>     m_spEosParser;
   std::map<QString, std::shared_ptr<CJsonInstructionSetRunner>>
                                                  m_vspEosRunner;
+  mutable QMutex                                 m_runnerMutex;
   std::weak_ptr<CScriptRunnerSignalContext>      m_wpSignalEmitterContext;
   tspScene                                       m_spCurrentScene;
   mutable QMutex                                 m_sceneMutex;

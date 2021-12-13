@@ -152,6 +152,7 @@ public slots:
         if (1 == m_bInterrupted)
         {
           m_bRunning = 0;
+          emit CallNextCommandRetVal(runMode, retValLast);
           return;
         }
 
