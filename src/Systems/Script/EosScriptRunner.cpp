@@ -309,6 +309,9 @@ void CEosScriptRunner::UnregisterComponents()
   m_objectMapMutex.unlock();
 
   m_spEosParser->ClearInstructions();
+  m_spEosParser->RegisterInstruction("end", std::make_shared<CCommandEosEnd>());
+  m_spEosParser->RegisterInstruction("goto", std::make_shared<CCommandEosGoto>());
+  m_spEosParser->RegisterInstruction("noop", std::make_shared<CCommandEosNoop>());
 
   m_spCurrentScene = nullptr;
 
