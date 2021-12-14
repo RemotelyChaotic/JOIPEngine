@@ -56,6 +56,7 @@ bool CDatabaseManager::LoadBundle(tspProject& spProject, const QString& sBundle)
 
     it->second->m_bLoaded =
         QResource::registerResource(sPath, QDir::separator() + spProject->m_sName);
+    assert(it->second->m_bLoaded);
 
     bLoaded = !it->second->m_bLoaded;
   }
@@ -152,6 +153,7 @@ bool CDatabaseManager::UnloadBundle(tspProject& spProject, const QString& sBundl
 
     it->second->m_bLoaded =
         !QResource::unregisterResource(sPath, QDir::separator() + spProject->m_sName);
+    assert(!it->second->m_bLoaded);
 
     bUnloaded = !it->second->m_bLoaded;
   }

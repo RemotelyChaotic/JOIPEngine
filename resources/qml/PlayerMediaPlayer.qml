@@ -33,6 +33,7 @@ Rectangle {
                     break;
 
                 case Resource.Movie:
+                    pResource.load(); // load bundles now
                     resourceDisplay.source = pResource.source
                     imgResource.resource = null;
                     if (null !== movieResource.resource &&
@@ -54,6 +55,7 @@ Rectangle {
                         var soundPlayer = findFirstIdleSoundView();
                         if (null !== soundPlayer && undefined !== soundPlayer)
                         {
+                            pResource.load(); // load bundles now
                             if (null !== soundPlayer.resource &&
                                 sName === soundPlayer.resource.name)
                             {

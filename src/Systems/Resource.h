@@ -92,6 +92,7 @@ public:
   ResourceType getType();
   QString getResourceBundle();
 
+  Q_INVOKABLE bool load();
   Q_INVOKABLE QJSValue project();
 
   std::shared_ptr<SResource> Data() { return m_spData; }

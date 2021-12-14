@@ -209,6 +209,19 @@ QString CResourceScriptWrapper::getResourceBundle()
 
 //----------------------------------------------------------------------------------------
 //
+bool CResourceScriptWrapper::load()
+{
+  QReadLocker locker(&m_spData->m_rwLock);
+  QString sResourceBundle = m_spData->m_sResourceBundle;
+  if (!m_spData->m_sResourceBundle.isEmpty())
+  {
+    return CDatabaseManager::LoadBundle(m_spData->m_spParent, sResourceBundle);
+  }
+  return true;
+}
+
+//----------------------------------------------------------------------------------------
+//
 QJSValue CResourceScriptWrapper::project()
 {
   QReadLocker locker(&m_spData->m_rwLock);
