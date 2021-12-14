@@ -259,7 +259,7 @@ Rectangle {
                 }
                 else
                 {
-                    root.evaluate(sStoreIntoVar + "=" + sInput);
+                    root.evaluate(sStoreIntoVar + "='" + sInput + "'");
                 }
             }
             signalEmitter.showInputReturnValue(sInput, sRequestId);

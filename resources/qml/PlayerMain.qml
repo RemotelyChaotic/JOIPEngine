@@ -245,7 +245,7 @@ Rectangle {
         }
         var evExpression = QtApp.decodeHTML(ev.innerHTML).trim();
         if (evExpression.length) {
-          result.push(EvalWrapper.globalEval(EvalWrapper.wrap(evExpression, 'e.toString()', context +' <eval>')));
+          result.push(EvalWrapper.globalEval(EvalWrapper.isolate(evExpression, context +' <eval>')));
         }
         docstring = afterEv.replace(' xmlns="http://www.w3.org/1999/xhtml"', '');
       }
@@ -260,12 +260,12 @@ Rectangle {
         property string userName: "evalRunner"
 
         onEvalQuery: {
-            var retVal = EvalWrapper.globalEval(EvalWrapper.wrap(sScript, 'e.toString()', 'evaluator <' + userName + '>'));
+            var retVal = EvalWrapper.globalEval(EvalWrapper.isolate(sScript, 'evaluator <' + userName + '>'));
             evaluator.evalReturn(retVal);
         }
     }
     function evaluate(sScript) {
-        return EvalWrapper.globalEval(EvalWrapper.wrap(sScript, 'e.toString()', 'evaluator <' + evaluator.userName + '>'));
+        return EvalWrapper.globalEval(EvalWrapper.isolate(sScript, 'evaluator <' + evaluator.userName + '>'));
     }
 
     PlayerBackground {

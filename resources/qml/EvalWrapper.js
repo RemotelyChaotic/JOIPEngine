@@ -10,13 +10,16 @@ function registerUIComponent(sComponent, component)
 }
 
 function globalEval(script) {
-    return eval(script);
+    return (function(sScript) {
+        return eval(sScript);
+    })(script);
 }
 
 function wrap(script, onerror, type) {
   return "\n"+
   "(function() {try {return _globalEval(" + JSON.stringify(script) + ")}\n"+
     "catch (e) {console.error(\n"+
+      "e.message,\n"+
       "e.stack,\n"+
       JSON.stringify('\nIn ' + (type || 'Script EVAL') + ':\n') + ",\n" +
       JSON.stringify(script) +
@@ -28,6 +31,7 @@ function isolate(script, type) {
   return "\n"+
   "try {_globalEval(" + JSON.stringify(script) + ")}\n"+
     "catch (e) {console.error(\n"+
+      "e.message,\n"+
       "e.stack,\n"+
       JSON.stringify('\n\nIn ' + (type || 'Script EVAL') + ':\n') + ",\n" +
       JSON.stringify(script) +
