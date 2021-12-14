@@ -37,7 +37,7 @@ signals:
   void clearText();
   void showButtonPrompts(QStringList vsLabels, QString sRequestId);
   void showButtonReturnValue(qint32 iIndex, QString sRequestId);
-  void showInput(QString sStoreIntoVar, QString sRequestId);
+  void showInput(QString sStoreIntoVar, QString sRequestId, bool bStoreIntoStorageInstead);
   void showInputReturnValue(QString sValue, QString sRequestId);
   void showText(QString sText, double dSkippableWaitS);
   void textAlignmentChanged(qint32 alignment);

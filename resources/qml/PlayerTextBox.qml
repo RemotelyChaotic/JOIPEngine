@@ -17,6 +17,7 @@ Rectangle {
         textLogModel.append({
             "textAlignment": "",
             "textContent": "",
+            "storeIntoStorageInstead": false,
             "backgroundColor": "",
             "textColor": "",
             "numButtons": "",
@@ -34,6 +35,7 @@ Rectangle {
         textLogModel.append({
             "textAlignment": "",
             "textContent": "",
+            "storeIntoStorageInstead": false,
             "backgroundColor": "",
             "textColor": "",
             "numButtons": vsLabels.length,
@@ -52,11 +54,12 @@ Rectangle {
         showButtonPrompts(vsLabels);
     }
 
-    function showInput(sStoreIntoVar, sRequestId)
+    function showInput(sStoreIntoVar, sRequestId, bStoreIntoStorageInstead)
     {
         textLogModel.append({
             "textAlignment": "",
             "textContent": sStoreIntoVar,
+            "storeIntoStorageInstead": bStoreIntoStorageInstead,
             "backgroundColor": undefined !== textLog.backgroundColors  && textLog.backgroundColors.length > 0 ? textLog.backgroundColors[0] : "#ff000000",
             "textColor": undefined !== textLog.textColors  && textLog.textColors.length > 0 ? textLog.textColors[0] : "#ffffffff",
             "numButtons": "",
@@ -73,6 +76,7 @@ Rectangle {
         textLogModel.append({
             "textAlignment": textLog.textAlignment,
             "textContent": sText,
+            "storeIntoStorageInstead": false,
             "backgroundColor": undefined !== textLog.backgroundColors  && textLog.backgroundColors.length > 0 ? textLog.backgroundColors[0] : "#ff000000",
             "textColor": undefined !== textLog.textColors  && textLog.textColors.length > 0 ? textLog.textColors[0] : "#ffffffff",
             "numButtons": "",
@@ -140,9 +144,9 @@ Rectangle {
         {
             textBox.showButtonPrompts(vsLabels);
         },
-        showInput: function(sStoreIntoVar, sRequestId)
+        showInput: function(sStoreIntoVar, sRequestId, bStoreIntoStorageInstead)
         {
-            signalEmitter.showInput(sStoreIntoVar, sRequestId);
+            signalEmitter.showInput(sStoreIntoVar, sRequestId, bStoreIntoStorageInstead);
         },
         showText: function(sText)
         {
@@ -187,7 +191,7 @@ Rectangle {
             textBox.showButtonPrompts(vsModifiedPrompts, sRequestId);
         }
         onShowInput: {
-            textBox.showInput(sStoreIntoVar, sRequestId);
+            textBox.showInput(sStoreIntoVar, sRequestId, bStoreIntoStorageInstead);
         }
         onShowText: {
             if (sText.startsWith("<html>") && sText.endsWith("</html>")) {
@@ -245,11 +249,18 @@ Rectangle {
         property bool sceneSelection: false
         property bool skippable: false
 
-        function inputEditingFinished(sInput, sStoreIntoVar, sRequestId)
+        function inputEditingFinished(sInput, sStoreIntoVar, sRequestId, bStoreIntoStorageInstead)
         {
             if ("" !== sStoreIntoVar)
             {
-                root.storage.store(sStoreIntoVar, sInput);
+                if (bStoreIntoStorageInstead)
+                {
+                    root.storage.store(sStoreIntoVar, sInput);
+                }
+                else
+                {
+                    root.evaluate(sStoreIntoVar + "=" + sInput);
+                }
             }
             signalEmitter.showInputReturnValue(sInput, sRequestId);
         }

@@ -264,6 +264,10 @@ Rectangle {
             evaluator.evalReturn(retVal);
         }
     }
+    function evaluate(sScript) {
+        return EvalWrapper.globalEval(EvalWrapper.wrap(sScript, 'e.toString()', 'evaluator <' + evaluator.userName + '>'));
+    }
+
     PlayerBackground {
         id: background
         anchors.fill: parent

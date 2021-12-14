@@ -323,7 +323,7 @@ QString CScriptTextBox::showInput()
   QString sRequestId = QUuid::createUuid().toString();
   auto pSignalEmitter = SignalEmitter<CTextBoxSignalEmitter>();
   QTimer::singleShot(0, this, [&pSignalEmitter, sRequestId]() {
-    emit pSignalEmitter->showInput(QString(), sRequestId);
+    emit pSignalEmitter->showInput(QString(), sRequestId, true);
   });
 
   // local loop to wait for answer
@@ -822,7 +822,7 @@ QString CEosScriptTextBox::showInput(const QString& sStoreIntoVar)
 
   auto pSignalEmitter = SignalEmitter<CTextBoxSignalEmitter>();
   QTimer::singleShot(0, this, [&pSignalEmitter,sStoreIntoVar,sRequestId]() {
-    emit pSignalEmitter->showInput(sStoreIntoVar, sRequestId);
+    emit pSignalEmitter->showInput(sStoreIntoVar, sRequestId, false);
   });
 
   // local loop to wait for answer

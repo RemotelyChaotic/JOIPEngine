@@ -43,6 +43,7 @@ Rectangle {
             property string placeholderText: "....."
             property bool displayPlaceHolder: !text && !focus
             property string storeIntoVar: textContent
+            property bool storeVarIntoStorageInstead: storeIntoStorageInstead
 
             Text {
                 id: overlay
@@ -55,7 +56,8 @@ Rectangle {
             onEditingFinished: {
                 textInput.focus = false;
                 textInput.cursorVisible = false;
-                textDelegate.parent.ListView.view.inputEditingFinished(textInput.text, textInput.storeIntoVar, textDelegate.requestId);
+                textDelegate.parent.ListView.view.inputEditingFinished(textInput.text, textInput.storeIntoVar,
+                                                                       textDelegate.requestId, textInput.storeVarIntoStorageInstead);
                 textInput.readOnly = true;
             }
         }
