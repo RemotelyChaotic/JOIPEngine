@@ -583,12 +583,18 @@ protected slots:
     spNewNode->ReparentChildren();
     // change args and make an orphan
     spNewNode->m_actualArgs = args;
-    spNewNode->m_wpParent = std::weak_ptr<CJsonInstructionNode>();
+
+    std::shared_ptr<CJsonInstructionNode> spNewRootNode =
+        std::make_shared<CJsonInstructionNode>();
+    spNewRootNode->m_spChildren.push_back(spNewNode);
+    spNewRootNode->m_sName = sName;
+
+    spNewNode->m_wpParent = spNewRootNode;
 
     std::shared_ptr<CJsonInstructionSetRunner> spRunner =
         std::make_shared<CJsonInstructionSetRunner>();
     spRunner->m_pPrivate->m_instructionMap = m_instructionMap;
-    spRunner->m_pPrivate->m_vspBuiltCommands = { {sName, spNewNode} };
+    spRunner->m_pPrivate->m_vspBuiltCommands = { {sName, spNewRootNode} };
     // rest is not needed
     spRunner->m_pPrivate->m_bValidationOk = true;
 

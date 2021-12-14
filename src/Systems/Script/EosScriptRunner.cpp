@@ -348,17 +348,18 @@ void CEosScriptRunner::HandleScriptFinish(bool bSuccess, const QVariant& sRetVal
   }
   else
   {
-    if (QVariant::String == sRetVal.type())
+    if (QVariant::String == sRetVal.type() && !sRetVal.toString().isEmpty())
     {
       emit SignalScriptRunFinished(bSuccess, sRetVal.toString());
     }
-    else if (sRetVal.isNull())
+    else if (QVariant::String != sRetVal.type() && sRetVal.isNull())
     {
       emit SignalScriptRunFinished(false, QString());
     }
     else
     {
-      emit SignalScriptRunFinished(bSuccess, QString());
+      // eos does not autorun the next scene
+      //emit SignalScriptRunFinished(bSuccess, QString());
     }
   }
 }
