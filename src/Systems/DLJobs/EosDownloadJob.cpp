@@ -47,7 +47,12 @@ namespace
   const QString c_FIX_POLLUTION = /*QString("&")+QUrl::toPercentEncoding("___oeos:milovana.com")*/ "";
 
   const QString c_sDataTitle = "data-title";
+  const QString c_sDataTitleAlt = "<title>(.*)</title>";
+  const QString c_sDataTitleAlt2 = "<span class=\"TopBar_tease__1kRgf\">(.*)</span>";
+  const QString c_sDataTitleAlt3 = "<h1>(.*)</h1>";
   const QString c_sDataAuthor = "data-author";
+  const QString c_sDataAuthorAlt = "<button class=\"TopBar_authorButton__Nrip5\">(.*)</button>";
+  const QString c_sDataAuthorAlt2 = "<h2>(.*)</h2>";
   const QString c_sDataAuthorId = "data-author-id";
   const QString c_sDataTeaseId = "data-tease-id";
   const QString c_sDataKey = "data-key";
@@ -754,6 +759,28 @@ bool CEosDownloadJob::ParseHtml(const QByteArray& arr, SScriptMetaData& data, QS
   fnMatch(nodesAuthorId, data.m_sAuthorId);
   fnMatch(nodesTeaseId, data.m_sTeaseId);
   fnMatch(nodesDataKey, data.m_sDataKey);
+
+  if (data.m_sTitle.isEmpty())
+  {
+    fnMatch(QRegExp(c_sDataTitleAlt), data.m_sTitle);
+    if (data.m_sTitle.isEmpty())
+    {
+      fnMatch(QRegExp(c_sDataTitleAlt2), data.m_sTitle);
+      if (data.m_sTitle.isEmpty())
+      {
+        fnMatch(QRegExp(c_sDataTitleAlt3), data.m_sTitle);
+      }
+    }
+  }
+  if (data.m_sAuthor.isEmpty())
+  {
+    fnMatch(QRegExp(c_sDataAuthorAlt), data.m_sAuthor);
+    if (data.m_sAuthor.isEmpty())
+    {
+      fnMatch(QRegExp(c_sDataAuthorAlt2), data.m_sAuthor);
+      data.m_sAuthor.replace("by ", "");
+    }
+  }
 
   return true;
 }
