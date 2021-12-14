@@ -309,6 +309,7 @@ void CEditorModel::LoadProject(qint32 iId)
 {
   if (nullptr != m_spCurrentProject && !m_bInitializingNewProject)
   {
+    assert(false);
     qWarning() << "Old Project was not unloaded before loading project.";
   }
 

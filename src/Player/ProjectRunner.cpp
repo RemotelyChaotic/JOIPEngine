@@ -55,6 +55,7 @@ void CProjectRunner::LoadProject(tspProject spProject, const QString sStartScene
 {
   if (nullptr != m_spCurrentProject)
   {
+    assert(false);
     qWarning() << "Old Project was not unloaded before loading project.";
   }
 

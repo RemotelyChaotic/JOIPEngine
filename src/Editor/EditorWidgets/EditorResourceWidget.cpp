@@ -128,6 +128,7 @@ void CEditorResourceWidget::LoadProject(tspProject spCurrentProject)
   WIDGET_INITIALIZED_GUARD
   if (nullptr != m_spCurrentProject)
   {
+    assert(false);
     qWarning() << "Old Project was not unloaded before loading project.";
   }
 

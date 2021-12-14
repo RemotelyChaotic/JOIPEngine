@@ -84,6 +84,7 @@ void CSceneMainScreen::LoadProject(qint32 iId, const QString sStartScene)
   if (!m_bInitialized) { return; }
   if (nullptr != m_spCurrentProject)
   {
+    assert(false);
     qWarning() << "Old Project was not unloaded before loading project.";
   }
 
@@ -430,7 +431,12 @@ void CSceneMainScreen::SlotUnloadFinished()
   m_spUi->pQmlWidget->setSource(QUrl());
 
   delete m_pCurrentProjectWrapper;
-  CDatabaseManager::UnloadProject(m_spCurrentProject);
+  bool bOk = CDatabaseManager::UnloadProject(m_spCurrentProject);
+  if (!bOk)
+  {
+    assert(bOk && "Failed to unload project");
+    qWarning() << "Failed to unload project";
+  }
   m_spCurrentProject = nullptr;
 
   emit SignalUnloadFinished();

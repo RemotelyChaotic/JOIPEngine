@@ -141,6 +141,10 @@ void CEosScriptRunner::Deinitialize()
 void CEosScriptRunner::InterruptExecution()
 {
   QMutexLocker locker(&m_runnerMutex);
+  if (0 >= m_vspEosRunner.size())
+  {
+    emit SignalScriptRunFinished(false, QString());
+  }
   for (auto& it : m_vspEosRunner)
   {
     if (nullptr != it.second)
@@ -356,11 +360,12 @@ void CEosScriptRunner::HandleScriptFinish(bool bSuccess, const QVariant& sRetVal
     {
       emit SignalScriptRunFinished(false, QString());
     }
-    else
+    else if (spSignalEmitterContext->ScriptExecutionStatus() ==
+             CScriptRunnerSignalEmiter::ScriptExecStatus::eStopped)
     {
-      // eos does not autorun the next scene
-      //emit SignalScriptRunFinished(bSuccess, QString());
+      emit SignalScriptRunFinished(false, QString());
     }
+    // eos does not autorun the next scene
   }
 }
 
