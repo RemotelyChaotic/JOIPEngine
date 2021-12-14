@@ -14,6 +14,8 @@
 #include <QTimer>
 #include <QUuid>
 
+#include <limits>
+
 namespace
 {
   const qint32 c_iDelayBaseMs = 1'500;
@@ -658,6 +660,10 @@ public:
         {
           mode = CEosScriptTextBox::ePause;
         }
+        else if ("custom" == sMode)
+        {
+          mode = CEosScriptTextBox::eCustom;
+        }
       }
 
       bool bAllowSkip = false;
@@ -692,13 +698,18 @@ public:
       }
       else if (CEosScriptTextBox::ePause == mode)
       {
+        m_pParent->showText(sLabel, std::numeric_limits<double>::max(), true);
+      }
+      else if (CEosScriptTextBox::eCustom == mode)
+      {
+        iDurationMs = EstimateDurationBasedOnText(sLabel);
         if (0 == iDurationMs)
         {
           m_pParent->showText(sLabel);
         }
         else
         {
-          m_pParent->showText(sLabel, static_cast<double>(iDurationMs) / 1000, bAllowSkip);
+          m_pParent->showText(sLabel, static_cast<double>(iDurationMs) / 1000, false || bAllowSkip);
         }
       }
 

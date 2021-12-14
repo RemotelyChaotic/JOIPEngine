@@ -96,7 +96,8 @@ public:
   {
     eAutoplay = 0,
     eInstant,
-    ePause
+    ePause,
+    eCustom
   };
 
   CEosScriptTextBox(QPointer<CScriptRunnerSignalEmiter> pEmitter,
