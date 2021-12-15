@@ -4,13 +4,13 @@
 #include <QJSValue>
 #include <QObject>
 
-class CTeaseStorage : public QObject
+class CTeaseStorageWrapper : public QObject
 {
   Q_OBJECT
 
 public:
-  CTeaseStorage(QObject* pParent = nullptr);
-  ~CTeaseStorage();
+  CTeaseStorageWrapper(QObject* pParent = nullptr);
+  ~CTeaseStorageWrapper();
 
 public slots:
   void clear();

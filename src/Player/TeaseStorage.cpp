@@ -1,24 +1,24 @@
 #include "TeaseStorage.h"
 
-CTeaseStorage::CTeaseStorage(QObject* pParent) :
+CTeaseStorageWrapper::CTeaseStorageWrapper(QObject* pParent) :
   QObject(pParent)
 {
 }
-CTeaseStorage::~CTeaseStorage()
+CTeaseStorageWrapper::~CTeaseStorageWrapper()
 {
   clear();
 }
 
 //----------------------------------------------------------------------------------------
 //
-void CTeaseStorage::clear()
+void CTeaseStorageWrapper::clear()
 {
   m_storage.clear();
 }
 
 //----------------------------------------------------------------------------------------
 //
-QJSValue CTeaseStorage::load(const QString& sId)
+QJSValue CTeaseStorageWrapper::load(const QString& sId)
 {
   auto it = m_storage.find(sId);
   if (m_storage.end() != it)
@@ -30,7 +30,7 @@ QJSValue CTeaseStorage::load(const QString& sId)
 
 //----------------------------------------------------------------------------------------
 //
-void CTeaseStorage::store(const QString& sId, const QJSValue& value)
+void CTeaseStorageWrapper::store(const QString& sId, const QJSValue& value)
 {
   m_storage[sId] = value;
 }

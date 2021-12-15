@@ -8,6 +8,7 @@
 
 class CBackgroundWidget;
 class CDatabaseManager;
+class CProjectEventCallbackRegistry;
 class CProjectScriptWrapper;
 class CProjectRunner;
 class CScriptRunner;
@@ -23,6 +24,8 @@ namespace player {
   extern const char* c_sMainPlayerProperty;
 }
 
+//----------------------------------------------------------------------------------------
+//
 class CSceneMainScreen : public QWidget
 {
   Q_OBJECT
@@ -33,6 +36,8 @@ public:
 
   void Initialize();
   void LoadProject(qint32 iId, const QString sStartScene = QString());
+  std::weak_ptr<CProjectEventCallbackRegistry> EventCallbackRegistry();
+  std::weak_ptr<CProjectRunner> ProjectRunner();
   std::weak_ptr<CScriptRunner> ScriptRunner();
   void UnloadProject();
   void SetDebugging(bool bDebugging);
@@ -73,18 +78,37 @@ private:
 
 private:
   std::unique_ptr<Ui::CSceneMainScreen>                       m_spUi;
-  std::unique_ptr<CProjectRunner>                             m_spProjectRunner;
+  std::shared_ptr<CProjectEventCallbackRegistry>              m_spEventCallbackRegistry;
+  std::shared_ptr<CProjectRunner>                             m_spProjectRunner;
   std::shared_ptr<CThreadedSystem>                            m_spScriptRunnerSystem;
   std::shared_ptr<CScriptRunner>                              m_spScriptRunner;
   std::shared_ptr<CSettings>                                  m_spSettings;
   tspProject                                                  m_spCurrentProject;
-  QPointer<CProjectScriptWrapper>                                          m_pCurrentProjectWrapper;
+  QPointer<CProjectScriptWrapper>                             m_pCurrentProjectWrapper;
   std::weak_ptr<CDatabaseManager>                             m_wpDbManager;
   qint32                                                      m_lastScriptExecutionStatus;
   bool                                                        m_bInitialized;
   bool                                                        m_bShuttingDown;
   bool                                                        m_bErrorState;
   bool                                                        m_bBeingDebugged;
+};
+
+//----------------------------------------------------------------------------------------
+//
+class CSceneMainScreenWrapper : public QObject
+{
+  Q_OBJECT
+  Q_DISABLE_COPY(CSceneMainScreenWrapper)
+
+public:
+  CSceneMainScreenWrapper(QObject* pParent, QPointer<CSceneMainScreen> pPlayer);
+  ~CSceneMainScreenWrapper() override;
+
+public:
+  Q_INVOKABLE void initObject(QJSValue wrapper);
+
+private:
+  QPointer<CSceneMainScreen>                    m_pPlayer;
 };
 
 #endif // SCENEMAINSCREEN_H

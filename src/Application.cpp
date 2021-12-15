@@ -6,6 +6,7 @@
 
 // needed to register to qml
 #include "Player/MetronomePaintedWidget.h"
+#include "Player/ProjectSceneManager.h"
 #include "Player/SceneMainScreen.h"
 #include "Player/TeaseStorage.h"
 #include "Player/TimerWidget.h"
@@ -28,6 +29,7 @@
 #include "Systems/Script/ScriptMediaPlayer.h"
 #include "Systems/Script/ScriptMetronome.h"
 #include "Systems/Script/ScriptNotification.h"
+#include "Systems/Script/ScriptSceneManager.h"
 #include "Systems/Script/ScriptStorage.h"
 #include "Systems/Script/ScriptTextBox.h"
 #include "Systems/Script/ScriptThread.h"
@@ -276,7 +278,9 @@ void CApplication::RegisterQmlTypes()
 
   qmlRegisterType<CClipboardQmlWrapper>("QtGui", 5, 14, "Clipboard");
 
-  qmlRegisterType<CTeaseStorage>("JOIP.core", 1, 1, "TeaseStorage");
+  qmlRegisterType<CTeaseStorageWrapper>("JOIP.core", 1, 1, "TeaseStorage");
+  qmlRegisterUncreatableType<CProjectEventTargetWrapper>("JOIP.core", 1, 2, "EventTarget", "");
+  qmlRegisterType<CProjectSceneManagerWrapper>("JOIP.core", 1, 2, "SceneManager");
 
   qmlRegisterSingletonType<CQmlApplicationQtNamespaceWrapper>(
         "JOIP.core", 1, 1, "QtApp",
@@ -329,6 +333,28 @@ void CApplication::RegisterQmlTypes()
       }
       return nullptr;
   });
+  qmlRegisterSingletonType<CSceneMainScreenWrapper>("JOIP.core", 1, 1, "Player",
+                                                    [](QQmlEngine *engine, QJSEngine *scriptEngine) -> QObject*
+  {
+      Q_UNUSED(scriptEngine)
+      if (nullptr != engine)
+      {
+        CSceneMainScreen* pMainScreen = engine->property(player::c_sMainPlayerProperty).value<CSceneMainScreen*>();
+        if (nullptr != pMainScreen)
+        {
+          return new CSceneMainScreenWrapper(engine, pMainScreen);
+        }
+      }
+      else if (nullptr != scriptEngine)
+      {
+        CSceneMainScreen* pMainScreen = engine->property(player::c_sMainPlayerProperty).value<CSceneMainScreen*>();
+        if (nullptr != pMainScreen)
+        {
+          return new CSceneMainScreenWrapper(scriptEngine, pMainScreen);
+        }
+      }
+      return nullptr;
+  });
 
   qmlRegisterUncreatableType<CKink>("JOIP.db", 1, 1, "Kink", "");
   qmlRegisterUncreatableType<CProjectScriptWrapper>("JOIP.db", 1, 1, "Project", "");
@@ -336,11 +362,12 @@ void CApplication::RegisterQmlTypes()
   qmlRegisterUncreatableType<CResourceScriptWrapper>("JOIP.db", 1, 1, "Resource", "");
 
   qmlRegisterType<CBackgroundSignalEmitter>("JOIP.script", 1, 1, "BackgroundSignalEmitter");
-  qmlRegisterType<CEvalSignalEmiter>("JOIP.script", 1, 1, "EvalSignalEmitter");
+  qmlRegisterType<CEvalSignalEmiter>("JOIP.script", 1, 2, "EvalSignalEmitter");
   qmlRegisterType<CIconSignalEmitter>("JOIP.script", 1, 1, "IconSignalEmitter");
   qmlRegisterType<CMediaPlayerSignalEmitter>("JOIP.script", 1, 1, "MediaPlayerSignalEmitter");
   qmlRegisterType<CMetronomeSignalEmitter>("JOIP.script", 1, 1, "MetronomeSignalEmitter");
   qmlRegisterType<CNotificationSignalEmiter>("JOIP.script", 1, 1, "NotificationSignalEmiter");
+  qmlRegisterType<CSceneManagerSignalEmiter>("JOIP.script", 1, 2, "SceneManagerSignalEmiter");
   qmlRegisterType<CStorageSignalEmitter>("JOIP.script", 1, 1, "StorageSignalEmitter");
   qmlRegisterType<CTextBoxSignalEmitter>("JOIP.script", 1, 1, "TextBoxSignalEmitter");
   qmlRegisterType<CThreadSignalEmitter>("JOIP.script", 1, 1, "ThreadSignalEmitter");

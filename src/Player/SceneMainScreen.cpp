@@ -1,7 +1,9 @@
 #include "SceneMainScreen.h"
 #include "Application.h"
 #include "Constants.h"
+#include "ProjectEventTarget.h"
 #include "ProjectRunner.h"
+#include "ProjectSceneManager.h"
 #include "Settings.h"
 #include "Systems/DatabaseManager.h"
 #include "Systems/DatabaseImageProvider.h"
@@ -30,7 +32,8 @@ const char* player::c_sMainPlayerProperty = "MainPlayer";
 CSceneMainScreen::CSceneMainScreen(QWidget* pParent) :
   QWidget(pParent),
   m_spUi(std::make_unique<Ui::CSceneMainScreen>()),
-  m_spProjectRunner(std::make_unique<CProjectRunner>()),
+  m_spEventCallbackRegistry(std::make_shared<CProjectEventCallbackRegistry>()),
+  m_spProjectRunner(std::make_shared<CProjectRunner>()),
   m_spScriptRunnerSystem(std::make_shared<CThreadedSystem>("ScriptRunner")),
   m_spScriptRunner(nullptr),
   m_spSettings(CApplication::Instance()->Settings()),
@@ -61,6 +64,13 @@ void CSceneMainScreen::Initialize()
   connect(CApplication::Instance(), &QGuiApplication::applicationStateChanged,
           this, &CSceneMainScreen::SlotApplicationStateChanged);
 
+  connect(m_spEventCallbackRegistry.get(), &CProjectEventCallbackRegistry::SignalError,
+          this, &CSceneMainScreen::SlotError);
+  connect(m_spProjectRunner.get(), &CProjectRunner::SignalChangeSceneRequest,
+          m_spEventCallbackRegistry.get(), [this](const QString&) {
+    m_spEventCallbackRegistry->SlotSceneChanged();
+  });
+
   m_spScriptRunnerSystem->RegisterObject<CScriptRunner>();
   m_spScriptRunner = std::dynamic_pointer_cast<CScriptRunner>(m_spScriptRunnerSystem->Get());
   assert(m_spScriptRunner != nullptr);
@@ -70,6 +80,10 @@ void CSceneMainScreen::Initialize()
 
   InitQmlMain();
 
+  connect(m_spProjectRunner.get(), &CProjectRunner::SignalChangeSceneRequest,
+          this, [this](const QString& sScene) {
+    SlotScriptRunFinished(true, sScene);
+  });
   connect(m_spProjectRunner.get(), &CProjectRunner::SignalError,
           this, &CSceneMainScreen::SlotError);
 
@@ -105,6 +119,20 @@ void CSceneMainScreen::LoadProject(qint32 iId, const QString sStartScene)
     m_bShuttingDown = false;
     m_bErrorState = false;
   }
+}
+
+//----------------------------------------------------------------------------------------
+//
+std::weak_ptr<CProjectEventCallbackRegistry> CSceneMainScreen::EventCallbackRegistry()
+{
+  return m_spEventCallbackRegistry;
+}
+
+//----------------------------------------------------------------------------------------
+//
+std::weak_ptr<CProjectRunner> CSceneMainScreen::ProjectRunner()
+{
+  return m_spProjectRunner;
 }
 
 //----------------------------------------------------------------------------------------
@@ -426,6 +454,8 @@ void CSceneMainScreen::SlotStartLoadingSkript()
 //
 void CSceneMainScreen::SlotUnloadFinished()
 {
+  m_spEventCallbackRegistry->Clear();
+
   m_spUi->pQmlWidget->engine()->clearComponentCache();
   m_spUi->pQmlWidget->engine()->collectGarbage();
   m_spUi->pQmlWidget->setSource(QUrl());
@@ -503,6 +533,10 @@ void CSceneMainScreen::InitQmlMain()
   // engine will allways take owership of this object
   CDatabaseImageProvider* pProvider = new CDatabaseImageProvider(m_wpDbManager);
   m_spUi->pQmlWidget->engine()->addImageProvider("DataBaseImageProivider", pProvider);
+
+  // for eos compatibility
+  QJSValue jsSceneManagerMetaObject = m_spUi->pQmlWidget->engine()->newQMetaObject(&CProjectEventWrapper::staticMetaObject);
+  m_spUi->pQmlWidget->engine()->globalObject().setProperty("Event", jsSceneManagerMetaObject);
 }
 
 //----------------------------------------------------------------------------------------
@@ -598,3 +632,35 @@ void CSceneMainScreen::UnloadQml()
   }
 }
 
+//----------------------------------------------------------------------------------------
+//
+CSceneMainScreenWrapper::CSceneMainScreenWrapper(QObject* pParent,
+                                                 QPointer<CSceneMainScreen> pPlayer) :
+  QObject(pParent),
+  m_pPlayer(pPlayer)
+{
+}
+CSceneMainScreenWrapper::~CSceneMainScreenWrapper()
+{
+
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CSceneMainScreenWrapper::initObject(QJSValue wrapper)
+{
+  if (wrapper.isObject() && nullptr != m_pPlayer)
+  {
+    CProjectEventTargetWrapper* pObject =
+        qobject_cast<CProjectEventTargetWrapper*>(wrapper.toQObject());
+    if (nullptr != pObject)
+    {
+      CProjectSceneManagerWrapper* pSceneManager =
+          qobject_cast<CProjectSceneManagerWrapper*>(pObject);
+      if (nullptr != pSceneManager)
+      {
+        pSceneManager->Initalize(m_pPlayer->ProjectRunner(), m_pPlayer->EventCallbackRegistry());
+      }
+    }
+  }
+}

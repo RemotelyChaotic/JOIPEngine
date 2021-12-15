@@ -3,9 +3,9 @@ import QtQuick.Controls 2.14
 import QtQuick.Layouts 1.14
 import QtGraphicalEffects 1.12
 import QtMultimedia 5.14
-import JOIP.core 1.1
+import JOIP.core 1.2
 import JOIP.db 1.1
-import JOIP.script 1.1
+import JOIP.script 1.2
 
 import "EvalWrapper.js" as EvalWrapper
 import "qrc:/xmldom/dom-parser.mjs" as DOMParser;
@@ -214,6 +214,10 @@ Rectangle {
             storage.store(sId, value);
         }
     }
+    PlayerSceneManager {
+        id: sceneManager
+    }
+
     //------------------------------------------------------------------------------------
     // variables
     // from openeos:

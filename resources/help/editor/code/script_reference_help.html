@@ -678,7 +678,7 @@
         thread.sleep(10,true); /* Skippable 10s wait */<br>
         thread.sleep(10,false); /* Unskippable 10s wait */<br>
         thread.sleep(10); /* Unskippable 10s wait */<br>
-      <br></li>
+        <br></li>
       </ul>
     </p>
 
@@ -699,7 +699,48 @@
         Only for advanced users, who know what they are doing, as this has full access to the player UI.<br>
         <i>Example Usage:</i><br>
         evalRunner.eval("root.storage.clear();"); /* clears storage variables */<br>
-      <br></li>
+        <br></li>
+      </ul>
+    </p>
+
+    <br>
+
+    <h2>PlayerSceneManager (name: <i>sceneManager</i>)</h2>
+
+    <br>
+
+    <p>This object is automatically registered by the JOIP-Engine on loading a
+    <a href="qrc:/resources/help/project/joi_project_help.html">JOI-Project</a> and
+    should not be placed in the <a href="qrc:/resources/help/layout/layout_help.html">Layout</a> manually.
+    This object allows for finer control of the <a href="qrc:/resources/help/editor/nodes/nodeeditor_help.html">Scene Flow</a> of a project.
+    Here you can skip to scenes and enable or disable scenes dynamically for the current run.<br>
+      <ul>
+        <li><b>disable ( string | Scene ): var</b><br>
+        The argument can either be a string or the reference to a scene object obtained from the
+        current Project. Calling this will disable the scene until it is re-enabled again.
+        Disabled scenes can not be run and will not show up in scene selections.<br>
+        <i>Example Usage:</i><br>
+        sceneManager.disable("MyScene");<br>
+        sceneManager.disable(mySceneRefObj);<br>
+        <br></li>
+
+        <li><b>enable ( string | Scene ): var</b><br>
+        The argument can either be a string or the reference to a scene object obtained from the
+        current Project. Calling this will re-enable the scene again. All scenes are enabled by default.<br>
+        <i>Example Usage:</i><br>
+        sceneManager.enable("MyScene");<br>
+        sceneManager.enable(mySceneRefObj);<br>
+        <br></li>
+
+        <li><b>gotoScene ( string | Scene ): var</b><br>
+        The argument can either be a string or the reference to a scene object obtained from the
+        current Project. Calling this will end the currently running scene script and
+        start running the requested scene script. Has the same effect as returning a Scene name
+        from a main script, but it can also be called in helper scripts.<br>
+        <i>Example Usage:</i><br>
+        sceneManager.gotoScene("MyScene");<br>
+        sceneManager.gotoScene(mySceneRefObj);<br>
+        <br></li>
       </ul>
     </p>
 

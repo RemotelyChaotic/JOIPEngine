@@ -4,6 +4,7 @@
 #include <QObject>
 #include <memory>
 #include <random>
+#include <set>
 
 class CDatabaseManager;
 class CFlowScene;
@@ -26,12 +27,17 @@ public:
   void LoadProject(tspProject spProject, const QString sStartScene);
   void UnloadProject();
 
+  tspScene CurrentScene() const;
+  void DisableScene(const QString& sScene);
+  void EnableScene(const QString& sScene);
+  bool IsSceneEnabled(const QString& sScene) const;
   tspScene NextScene(const QString sName);
   QStringList PossibleScenes();
   void ResolveFindScenes(const QString sName);
   void ResolveScenes();
 
 signals:
+  void SignalChangeSceneRequest(const QString& sScene);
   void SignalError(QString sError, QtMsgType type);
 
 private:
@@ -45,8 +51,10 @@ private slots:
 
 private:
   tspProject                        m_spCurrentProject;
+  tspScene                          m_spCurrentScene;
   std::weak_ptr<CDatabaseManager>   m_wpDbManager;
   std::map<QString, QtNodes::Node*> m_nodeMap;
+  std::set<QString>                 m_disabledScenes;
   CFlowScene*                       m_pFlowScene;
   QtNodes::Node*                    m_pCurrentNode;
   std::mt19937                      m_generator;

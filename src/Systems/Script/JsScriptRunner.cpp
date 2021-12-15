@@ -509,6 +509,18 @@ bool CJsScriptRunner::HasRunningScripts() const
 void CJsScriptRunner::LoadScript(const QString& sScript,
                                  tspScene spScene, tspResource spResource)
 {
+  {
+    // we need to clear old runners just in case
+    QMutexLocker locker(&m_runnerMutex);
+    auto it = m_vspJsRunner.find(c_sMainRunner);
+    if (m_vspJsRunner.end() != it)
+    {
+      it->second->InterruptExecution();
+      it->second->ResetEngine();
+      m_vspJsRunner.erase(it);
+    }
+  }
+
   CreateRunner(c_sMainRunner);
   RunScript(c_sMainRunner, sScript, spScene, spResource);
 }

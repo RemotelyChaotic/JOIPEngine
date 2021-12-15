@@ -250,6 +250,10 @@ set(Sources
   Player/MetronomePaintedWidget.h
   Player/ProjectRunner.cpp 
   Player/ProjectRunner.h 
+  Player/ProjectEventTarget.cpp
+  Player/ProjectEventTarget.h
+  Player/ProjectSceneManager.cpp
+  Player/ProjectSceneManager.h
   Player/SceneMainScreen.cpp 
   Player/SceneMainScreen.h 
   Player/SceneMainScreen.ui 
@@ -348,6 +352,8 @@ set(Sources
   Systems/Script/ScriptObjectBase.h 
   Systems/Script/ScriptRunnerSignalEmiter.cpp 
   Systems/Script/ScriptRunnerSignalEmiter.h 
+  Systems/Script/ScriptSceneManager.cpp
+  Systems/Script/ScriptSceneManager.h
   Systems/Script/ScriptStorage.cpp 
   Systems/Script/ScriptStorage.h 
   Systems/Script/ScriptTextBox.cpp 

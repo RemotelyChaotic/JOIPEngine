@@ -32,6 +32,7 @@ CProjectRunner::CProjectRunner(QObject* pParent) :
   m_spCurrentProject(nullptr),
   m_wpDbManager(CApplication::Instance()->System<CDatabaseManager>()),
   m_nodeMap(),
+  m_disabledScenes(),
   m_pFlowScene(nullptr),
   m_pCurrentNode(nullptr)
 {
@@ -95,13 +96,48 @@ void CProjectRunner::UnloadProject()
 {
   m_pCurrentNode = nullptr;
   m_spCurrentProject = nullptr;
+  m_spCurrentScene = nullptr;
   m_nodeMap.clear();
+  m_disabledScenes.clear();
   if (nullptr != m_pFlowScene)
   {
     m_pFlowScene->clearScene();
     delete m_pFlowScene;
     m_pFlowScene = nullptr;
   }
+}
+
+//----------------------------------------------------------------------------------------
+//
+tspScene CProjectRunner::CurrentScene() const
+{
+  return m_spCurrentScene;
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CProjectRunner::DisableScene(const QString& sScene)
+{
+  m_disabledScenes.insert(sScene);
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CProjectRunner::EnableScene(const QString& sScene)
+{
+  auto it = m_disabledScenes.find(sScene);
+  if (m_disabledScenes.end() != it)
+  {
+    m_disabledScenes.erase(it);
+  }
+}
+
+//----------------------------------------------------------------------------------------
+//
+bool CProjectRunner::IsSceneEnabled(const QString& sScene) const
+{
+  auto it = m_disabledScenes.find(sScene);
+  return m_disabledScenes.end() == it;
 }
 
 //----------------------------------------------------------------------------------------
@@ -122,12 +158,12 @@ tspScene CProjectRunner::NextScene(const QString sName)
       if (nullptr != spDbManager)
       {
         tspScene spScene = spDbManager->FindScene(m_spCurrentProject, iId);
-        return spScene;
+        if (nullptr != spScene)
+        {
+          m_spCurrentScene = spScene;
+          return spScene;
+        }
       }
-    }
-    else
-    {
-      return nullptr;
     }
   }
   return nullptr;
@@ -165,9 +201,31 @@ void CProjectRunner::ResolveFindScenes(const QString sName)
     CSceneNodeModel* pSceneModel = dynamic_cast<CSceneNodeModel*>(pNode->nodeDataModel());
     if (nullptr != pSceneModel && !sName.isNull() && !sName.isEmpty())
     {
-      if (pSceneModel->SceneName() == sName)
+      // could it be a regexp expression?
+      if (sName.contains('+') || sName.contains('*') || sName.contains('|') || sName.contains('{') ||
+          sName.contains('}') || sName.contains('[') || sName.contains(']'))
       {
-        m_nodeMap.insert({pSceneModel->SceneName(), pNode});
+        QRegExp rx(sName);
+        qint32 iPos = 0;
+        if ((iPos = rx.indexIn(pSceneModel->SceneName(), iPos)) == -1)
+        {
+          auto it = m_disabledScenes.find(pSceneModel->SceneName());
+          if (m_disabledScenes.end() == it)
+          {
+            m_nodeMap.insert({pSceneModel->SceneName(), pNode});
+          }
+        }
+      }
+      else
+      {
+        if (pSceneModel->SceneName() == sName)
+        {
+          auto it = m_disabledScenes.find(pSceneModel->SceneName());
+          if (m_disabledScenes.end() == it)
+          {
+            m_nodeMap.insert({pSceneModel->SceneName(), pNode});
+          }
+        }
       }
     }
   }
@@ -361,7 +419,11 @@ bool CProjectRunner::ResolveNextScene()
           tspScene spScene = spDbManager->FindScene(m_spCurrentProject, iId);
           if (nullptr != spScene)
           {
-            m_nodeMap.insert({pNode.first, pNode.second});
+            auto it = m_disabledScenes.find(pNode.first);
+            if (m_disabledScenes.end() == it)
+            {
+              m_nodeMap.insert({pNode.first, pNode.second});
+            }
           }
         }
       }
