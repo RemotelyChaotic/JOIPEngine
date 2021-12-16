@@ -13,13 +13,27 @@ CProjectEventWrapper::CProjectEventWrapper(const QString& sType) :
 //----------------------------------------------------------------------------------------
 //
 CProjectEventCallbackRegistry::CProjectEventCallbackRegistry(QObject* pParent) :
-  QObject(pParent)
+  QObject(pParent),
+  m_callbackMap(),
+  m_dispatchTargetMap()
 {
 
 }
 CProjectEventCallbackRegistry::~CProjectEventCallbackRegistry()
 {
 
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CProjectEventCallbackRegistry::AddDispatchTarget(const QString& sType,
+                                                      QPointer<CProjectEventTargetWrapper> pWrapper)
+{
+  auto it = m_dispatchTargetMap.find(sType);
+  if (m_dispatchTargetMap.end() == it)
+  {
+    m_dispatchTargetMap.insert({sType, pWrapper});
+  }
 }
 
 //----------------------------------------------------------------------------------------
@@ -52,27 +66,6 @@ void CProjectEventCallbackRegistry::Clear()
 
 //----------------------------------------------------------------------------------------
 //
-void CProjectEventCallbackRegistry::Dispatch(const QString& sEvent)
-{
-  auto it = m_callbackMap.find(sEvent);
-  if (m_callbackMap.end() != it)
-  {
-    for (auto& callback : it->second)
-    {
-      if (callback.isCallable())
-      {
-        QJSValue ret = callback.call();
-        if (ret.isError())
-        {
-          HandleError(ret);
-        }
-      }
-    }
-  }
-}
-
-//----------------------------------------------------------------------------------------
-//
 void CProjectEventCallbackRegistry::HandleError(QJSValue& value)
 {
   QString sException = value.property("name").toString();
@@ -84,6 +77,18 @@ void CProjectEventCallbackRegistry::HandleError(QJSValue& value)
   qWarning() << sError;
   emit SignalError(sError, QtMsgType::QtWarningMsg);
 }
+
+//----------------------------------------------------------------------------------------
+//
+void CProjectEventCallbackRegistry::RemoveDispatchTarget(const QString& sType)
+{
+  auto it = m_dispatchTargetMap.find(sType);
+  if (m_dispatchTargetMap.end() != it)
+  {
+    m_dispatchTargetMap.erase(it);
+  }
+}
+
 
 //----------------------------------------------------------------------------------------
 //
@@ -105,9 +110,29 @@ void CProjectEventCallbackRegistry::RemoveEventListener(QString sType, QJSValue 
 
 //----------------------------------------------------------------------------------------
 //
-void CProjectEventCallbackRegistry::SlotSceneChanged()
+void CProjectEventCallbackRegistry::Dispatch(const QString& sEvent)
 {
-  Dispatch("change");
+  auto it = m_callbackMap.find(sEvent);
+  if (m_callbackMap.end() != it)
+  {
+    for (auto& callback : it->second)
+    {
+      if (callback.isCallable())
+      {
+        QJSValue ret = callback.call();
+        if (ret.isError())
+        {
+          HandleError(ret);
+        }
+      }
+    }
+  }
+
+  auto itDispatchTarget = m_dispatchTargetMap.find(sEvent);
+  if (m_dispatchTargetMap.end() != itDispatchTarget && nullptr != itDispatchTarget->second)
+  {
+    itDispatchTarget->second->Dispatched(sEvent);
+  }
 }
 
 //----------------------------------------------------------------------------------------
@@ -120,6 +145,13 @@ CProjectEventTargetWrapper::CProjectEventTargetWrapper(QObject* pParent) :
 CProjectEventTargetWrapper::~CProjectEventTargetWrapper()
 {
 
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CProjectEventTargetWrapper::Dispatched(const QString&)
+{
+  // don't do anything
 }
 
 //----------------------------------------------------------------------------------------

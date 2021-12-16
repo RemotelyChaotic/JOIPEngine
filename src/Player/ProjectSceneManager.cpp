@@ -15,6 +15,13 @@ CProjectSceneManagerWrapper::~CProjectSceneManagerWrapper()
 
 //----------------------------------------------------------------------------------------
 //
+void CProjectSceneManagerWrapper::Dispatched(const QString&)
+{
+  // nothing to do
+}
+
+//----------------------------------------------------------------------------------------
+//
 void CProjectSceneManagerWrapper::Initalize(std::weak_ptr<CProjectRunner> wpProjectRunner,
                                             std::weak_ptr<CProjectEventCallbackRegistry> wpRegistry)
 {

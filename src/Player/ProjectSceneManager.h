@@ -13,6 +13,7 @@ public:
   CProjectSceneManagerWrapper(QObject* pParent = nullptr);
   ~CProjectSceneManagerWrapper() override;
 
+  void Dispatched(const QString& sEvent) override;
   void Initalize(std::weak_ptr<CProjectRunner> wpProjectRunner,
                  std::weak_ptr<CProjectEventCallbackRegistry> wpRegistry);
 
