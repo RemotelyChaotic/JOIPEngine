@@ -30,12 +30,16 @@ Rectangle {
     function pause()
     {
         player.pauseRequested = true;
+        player.stoppedTargetState = false;
+        player.volume = Settings.volume;
         player.pause();
     }
 
     function play(iLoops, iStartAt)
     {
         player.pauseRequested = false;
+        player.stoppedTargetState = false;
+        player.volume = Settings.volume;
         player.play();
     }
 
@@ -43,6 +47,8 @@ Rectangle {
     {
         player.pauseRequested = false;
         player.stoppedTargetState = true;
+        player.volume = Settings.volume;
+        player.volume = 0.0;
     }
 
     function seek(iSeekPos)
@@ -64,6 +70,7 @@ Rectangle {
             if (resource.isLocal)
             {
                 player.pauseRequested = false;
+                player.stoppedTargetState = false;
                 player.volume = Settings.volume;
                 player.source = resource.path;
             }
@@ -91,11 +98,11 @@ Rectangle {
         videoCodecPriority: ["FFmpeg"]
 
         onPlaying: {
-            player.stoppedTargetState = false;
             mediaPlayer.state = Resource.Loaded;
-            soundInstance.dispatch(new Event("play"));
             if (pauseRequested) {
                 pause();
+            } else if (!stoppedTargetState) {
+                soundInstance.dispatch(new Event("play"));
             }
         }
         onPaused: {
@@ -106,6 +113,7 @@ Rectangle {
             if (mediaPlayer.state === Resource.Loaded)
             {
                 player.pauseRequested = false;
+                player.stoppedTargetState = false;
                 mediaPlayer.finishedPlaying();
                 soundInstance.dispatch(new Event("end"));
             }
@@ -120,11 +128,13 @@ Rectangle {
 
         property bool stoppedTargetState: true
         muted: Settings.muted
-        volume: stoppedTargetState ? 0 : Settings.volume
+        volume: stoppedTargetState ? 0.0 : Settings.volume
 
         Behavior on volume {
             animation: NumberAnimation {
-                id:audiofadeout; duration: 200; easing.type: Easing.InOutQuad
+                id:audiofadeout
+                duration: 300
+                easing.type: Easing.InOutQuad
                 onRunningChanged: {
                     if (!running && player.stoppedTargetState) {
                         player.currentLoop = 0;

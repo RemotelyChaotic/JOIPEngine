@@ -199,7 +199,7 @@ Rectangle {
                     fnToCall.apply(player, args);
                 }
             }
-            if ("" !== sResource || null === player)
+            if ("" === sResource || null === player)
             {
                 for (var i = 0; soundRepeater.count > i; ++i)
                 {
