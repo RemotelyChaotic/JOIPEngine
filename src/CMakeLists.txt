@@ -252,6 +252,8 @@ set(Sources
   Player/ProjectRunner.h 
   Player/ProjectEventTarget.cpp
   Player/ProjectEventTarget.h
+  Player/ProjectNotificationManager.cpp
+  Player/ProjectNotificationManager.h
   Player/ProjectSceneManager.cpp
   Player/ProjectSceneManager.h
   Player/ProjectSoundManager.cpp

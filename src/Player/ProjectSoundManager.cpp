@@ -1,6 +1,8 @@
 #include "ProjectSoundManager.h"
 #include "Systems/Resource.h"
 
+#include <QJSEngine>
+
 //----------------------------------------------------------------------------------------
 //
 CSoundInstanceMessageSender::CSoundInstanceMessageSender() :

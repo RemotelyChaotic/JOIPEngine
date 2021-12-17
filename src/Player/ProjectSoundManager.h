@@ -3,6 +3,7 @@
 
 #include "ProjectEventTarget.h"
 #include <QPointer>
+#include <map>
 #include <memory>
 
 struct SResource;
@@ -13,7 +14,7 @@ class CSoundInstanceMessageSender : public QObject
 
 public:
   CSoundInstanceMessageSender();
-  ~CSoundInstanceMessageSender();
+  ~CSoundInstanceMessageSender() override;
 
 signals:
   void SignalPlay(const QString& sId, const QString& sResource, qint32 iLoops, qint32 iStartAt);
@@ -37,7 +38,7 @@ public:
                                  const QString& sId,
                                  qint32 iLoops,
                                  qint32 iStartAt);
-  ~CSoundInstanceWrapper();
+  ~CSoundInstanceWrapper() override;
 
   void Dispatched(const QString& sEvent) override;
   QString EventTarget() override;

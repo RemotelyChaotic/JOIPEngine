@@ -6,6 +6,7 @@
 
 // needed to register to qml
 #include "Player/MetronomePaintedWidget.h"
+#include "Player/ProjectNotificationManager.h"
 #include "Player/ProjectSceneManager.h"
 #include "Player/ProjectSoundManager.h"
 #include "Player/SceneMainScreen.h"
@@ -281,6 +282,7 @@ void CApplication::RegisterQmlTypes()
 
   qmlRegisterType<CTeaseStorageWrapper>("JOIP.core", 1, 1, "TeaseStorage");
   qmlRegisterUncreatableType<CProjectEventTargetWrapper>("JOIP.core", 1, 2, "EventTarget", "");
+  qmlRegisterUncreatableType<CNotificationInstanceWrapper>("JOIP.core", 1, 2, "NotificationInstance", "");
   qmlRegisterType<CProjectSceneManagerWrapper>("JOIP.core", 1, 2, "SceneManager");
   qmlRegisterUncreatableType<CSoundInstanceWrapper>("JOIP.core", 1, 2, "SoundInstance", "");
 
@@ -353,6 +355,32 @@ void CApplication::RegisterQmlTypes()
         if (nullptr != pMainScreen)
         {
           return new CSceneMainScreenWrapper(scriptEngine, pMainScreen);
+        }
+      }
+      return nullptr;
+  });
+  qmlRegisterSingletonType<CProjectNotificationManager>("JOIP.core", 1, 2, "NotificationManager",
+                                                        [](QQmlEngine *engine, QJSEngine *scriptEngine) -> QObject*
+  {
+      Q_UNUSED(scriptEngine)
+      if (nullptr != engine)
+      {
+        CSceneMainScreen* pMainScreen = engine->property(player::c_sMainPlayerProperty).value<CSceneMainScreen*>();
+        if (nullptr != pMainScreen)
+        {
+          CProjectNotificationManager* pWrapper = new CProjectNotificationManager(engine, pMainScreen);
+          pWrapper->Initalize(pMainScreen->EventCallbackRegistry());
+          return pWrapper;
+        }
+      }
+      else if (nullptr != scriptEngine)
+      {
+        CSceneMainScreen* pMainScreen = engine->property(player::c_sMainPlayerProperty).value<CSceneMainScreen*>();
+        if (nullptr != pMainScreen)
+        {
+          CProjectNotificationManager* pWrapper = new CProjectNotificationManager(engine, pMainScreen);
+          pWrapper->Initalize(pMainScreen->EventCallbackRegistry());
+          return pWrapper;
         }
       }
       return nullptr;

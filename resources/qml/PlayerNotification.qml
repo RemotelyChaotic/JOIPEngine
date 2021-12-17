@@ -1,7 +1,7 @@
 import QtQuick 2.14
 import QtQuick.Controls 2.14
 import QtQuick.Layouts 1.14
-import JOIP.core 1.1
+import JOIP.core 1.2
 import JOIP.db 1.1
 import JOIP.script 1.1
 import SortFilterProxyModel 0.2
@@ -28,6 +28,21 @@ Rectangle {
             "portrait": widgetDisplay.portrait,
             "type": "NotificationDefaultDelegate.qml"
         });
+    }
+
+    function findNotification(sId)
+    {
+        if ("" !== sId)
+        {
+            for (var i = 0; i < widgetModel.count; ++i)
+            {
+                if (widgetModel.get(i).sId === sId)
+                {
+                    return widgetModel.get(i)
+                }
+            }
+        }
+        return null;
     }
 
     function removeNotificaiton(sId)
@@ -207,10 +222,27 @@ Rectangle {
         dynamicRoles: true
     }
 
+    Connections {
+        target: NotificationManager
+        onSignalRemove: {
+            notification.removeNotificaiton(sId);
+        }
+        onSignalSetTitle: {
+            var item = notification.findNotification(sId);
+            if (null !== item && undefined !== item)
+            {
+                item.title = sTitle;
+                return;
+            }
+        }
+    }
+
 
     Component.onCompleted: {
         ScriptRunner.registerNewComponent(userName, signalEmitter);
         registrator.componentLoaded();
+
         root.registerUIComponent(notification.userName, evalAccessor);
+        root.registerUIComponent("Notification", NotificationManager);
     }
 }
