@@ -540,7 +540,15 @@ public:
           iSiblingToCall += viNumChildren[static_cast<size_t>(i)];
         }
 
-        return SRunRetVal<ENextCommandToCall::eChild>(iSiblingToCall);
+        if (static_cast<qint32>(vsOptionMapping.size()) > 0 &&
+            viNumChildren.size() > 0)
+        {
+          return SRunRetVal<ENextCommandToCall::eChild>(iSiblingToCall);
+        }
+        else
+        {
+          return SRunRetVal<ENextCommandToCall::eSibling>();
+        }
       }
     }
     return SJsonException{"internal Error.", "", "choice", 0, 0};
