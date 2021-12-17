@@ -224,6 +224,16 @@ void CEosScriptRunner::LoadScript(const QString& sScript, tspScene spScene, tspR
   std::shared_ptr<CJsonInstructionSetRunner> spEosRunnerMain = nullptr;
   {
     QMutexLocker locker(&m_runnerMutex);
+    auto itRunner = m_vspEosRunner.find(c_sMainRunner);
+    if (m_vspEosRunner.end() != itRunner)
+    {
+      if (nullptr != itRunner->second)
+      {
+        itRunner->second->Interrupt();
+      }
+      m_vspEosRunner.erase(itRunner);
+    }
+
     m_vspEosRunner[c_sMainRunner] =
       m_spEosParser->ParseJson(sScript);
     spEosRunnerMain = m_vspEosRunner[c_sMainRunner];

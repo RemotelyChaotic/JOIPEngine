@@ -1098,12 +1098,15 @@ bool CJSonSaxParser::end_object()
       {
         // squash children
         auto itChild = std::find(spParent->m_spChildren.begin(), spParent->m_spChildren.end(), spChild);
-        spParent->m_spChildren.erase(itChild);
-        spParent->m_spChildren.insert(spParent->m_spChildren.end(),
-                                      spChild->m_spChildren.begin(), spChild->m_spChildren.end());
-        for (auto& spChildChild : spChild->m_spChildren)
+        if (spParent->m_spChildren.end() != itChild)
         {
-          spChildChild->m_wpParent = spParent;
+          spParent->m_spChildren.erase(itChild);
+          spParent->m_spChildren.insert(spParent->m_spChildren.end(),
+                                        spChild->m_spChildren.begin(), spChild->m_spChildren.end());
+          for (auto& spChildChild : spChild->m_spChildren)
+          {
+            spChildChild->m_wpParent = spParent;
+          }
         }
       }
       else
@@ -1138,12 +1141,15 @@ bool CJSonSaxParser::end_object()
                 array.push_back({EArgumentType::eMap, spChild->m_actualArgs});
               }
               auto itChild = std::find(spParent->m_spChildren.begin(), spParent->m_spChildren.end(), spChild);
-              spParent->m_spChildren.erase(itChild);
-              spParent->m_spChildren.insert(spParent->m_spChildren.end(),
-                                            spChild->m_spChildren.begin(), spChild->m_spChildren.end());
-              for (auto& spChildChild : spChild->m_spChildren)
+              if (spParent->m_spChildren.end() != itChild)
               {
-                spChildChild->m_wpParent = spParent;
+                spParent->m_spChildren.erase(itChild);
+                spParent->m_spChildren.insert(spParent->m_spChildren.end(),
+                                              spChild->m_spChildren.begin(), spChild->m_spChildren.end());
+                for (auto& spChildChild : spChild->m_spChildren)
+                {
+                  spChildChild->m_wpParent = spParent;
+                }
               }
             }
             else if (EArgumentType::eObject == std::get<EArgumentType>(type)._to_integral())
@@ -1170,12 +1176,15 @@ bool CJSonSaxParser::end_object()
                   array.push_back({EArgumentType::eObject, it->second.m_value});
                 }
                 auto itChild = std::find(spParent->m_spChildren.begin(), spParent->m_spChildren.end(), spChild);
-                spParent->m_spChildren.erase(itChild);
-                spParent->m_spChildren.insert(spParent->m_spChildren.end(),
-                                              spChild->m_spChildren.begin(), spChild->m_spChildren.end());
-                for (auto& spChildChild : spChild->m_spChildren)
+                if (spParent->m_spChildren.end() != itChild)
                 {
-                  spChildChild->m_wpParent = spParent;
+                  spParent->m_spChildren.erase(itChild);
+                  spParent->m_spChildren.insert(spParent->m_spChildren.end(),
+                                                spChild->m_spChildren.begin(), spChild->m_spChildren.end());
+                  for (auto& spChildChild : spChild->m_spChildren)
+                  {
+                    spChildChild->m_wpParent = spParent;
+                  }
                 }
               }
             }
@@ -1282,12 +1291,15 @@ bool CJSonSaxParser::end_array()
       {
         // squash children
         auto itChild = std::find(spParent->m_spChildren.begin(), spParent->m_spChildren.end(), spChild);
-        spParent->m_spChildren.erase(itChild);
-        spParent->m_spChildren.insert(spParent->m_spChildren.end(),
-                                      spChild->m_spChildren.begin(), spChild->m_spChildren.end());
-        for (auto& spChildChild : spChild->m_spChildren)
+        if (spParent->m_spChildren.end() != itChild)
         {
-          spChildChild->m_wpParent = spParent;
+          spParent->m_spChildren.erase(itChild);
+          spParent->m_spChildren.insert(spParent->m_spChildren.end(),
+                                        spChild->m_spChildren.begin(), spChild->m_spChildren.end());
+          for (auto& spChildChild : spChild->m_spChildren)
+          {
+            spChildChild->m_wpParent = spParent;
+          }
         }
       }
       else
@@ -1308,12 +1320,15 @@ bool CJSonSaxParser::end_array()
                 spParent->m_actualArgs.insert({spChild->m_sName,
                                                {EArgumentType::eArray, it->second.m_value}});
                 auto itChild = std::find(spParent->m_spChildren.begin(), spParent->m_spChildren.end(), spChild);
-                spParent->m_spChildren.erase(itChild);
-                spParent->m_spChildren.insert(spParent->m_spChildren.end(),
-                                              spChild->m_spChildren.begin(), spChild->m_spChildren.end());
-                for (auto& spChildChild : spChild->m_spChildren)
+                if (spParent->m_spChildren.end() != itChild)
                 {
-                  spChildChild->m_wpParent = spParent;
+                  spParent->m_spChildren.erase(itChild);
+                  spParent->m_spChildren.insert(spParent->m_spChildren.end(),
+                                                spChild->m_spChildren.begin(), spChild->m_spChildren.end());
+                  for (auto& spChildChild : spChild->m_spChildren)
+                  {
+                    spChildChild->m_wpParent = spParent;
+                  }
                 }
               }
             }
