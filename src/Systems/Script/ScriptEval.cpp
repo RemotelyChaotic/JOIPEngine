@@ -83,6 +83,8 @@ public:
     m_argTypes({
       {"condition", SInstructionArgumentType{EArgumentType::eString}},
       {"commands", SInstructionArgumentType{EArgumentType::eArray,
+               MakeArgArray(EArgumentType::eObject)}},
+      {"elseCommands", SInstructionArgumentType{EArgumentType::eArray,
                MakeArgArray(EArgumentType::eObject)}}
     }) {}
   ~CCommandEosIf() override {}
@@ -101,17 +103,34 @@ public:
       {
         const QString sCondition = std::get<QString>(itCondition);
 
+        qint32 iCommandsIf = 0;
+        qint32 iCommandsElse = 0;
+        const auto& itCommands = GetValue<EArgumentType::eArray>(args, "commands");
+        if (HasValue(args, "commands") && IsOk<EArgumentType::eArray>(itCommands))
+        {
+          const tInstructionArrayValue& arrOptions = std::get<tInstructionArrayValue>(itCommands);
+          iCommandsIf = static_cast<quint32>(arrOptions.size());
+        }
+        const auto& itCommandsElse = GetValue<EArgumentType::eArray>(args, "elseCommands");
+        if (HasValue(args, "elseCommands") && IsOk<EArgumentType::eArray>(itCommandsElse))
+        {
+          const tInstructionArrayValue& arrOptions = std::get<tInstructionArrayValue>(itCommandsElse);
+          iCommandsElse = static_cast<quint32>(arrOptions.size());
+        }
+
         QVariant var = m_pParent->eval(sCondition);
         if (var.toBool())
         {
-          const auto& itCommands = GetValue<EArgumentType::eArray>(args, "commands");
-          if (HasValue(args, "commands") && IsOk<EArgumentType::eArray>(itCommands))
+          if (iCommandsIf > 0)
           {
-            const tInstructionArrayValue& arrOptions = std::get<tInstructionArrayValue>(itCommands);
-            if (arrOptions.size() > 0)
-            {
-              return SRunRetVal<ENextCommandToCall::eChild>(0);
-            }
+            return SRunRetVal<ENextCommandToCall::eChild>(0);
+          }
+        }
+        else
+        {
+          if (iCommandsElse > 0)
+          {
+            return SRunRetVal<ENextCommandToCall::eChild>(iCommandsIf);
           }
         }
         return SRunRetVal<ENextCommandToCall::eSibling>();
