@@ -9,6 +9,7 @@ CJsonInstructionNode::CJsonInstructionNode(CJsonInstructionNode& other) :
   // actually useful things
   m_wpCommand(other.m_wpCommand),
   m_actualArgs(other.m_actualArgs),
+  m_bEnabled(other.m_bEnabled),
   m_spChildren(),
   m_wpParent(other.m_wpParent)
 {

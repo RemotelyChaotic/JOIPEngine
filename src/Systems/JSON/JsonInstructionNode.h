@@ -23,6 +23,7 @@ public:
   // run data
   std::weak_ptr<IJsonInstructionBase>                m_wpCommand;
   tInstructionMapValue                               m_actualArgs;
+  bool                                               m_bEnabled = true;
 
   // tree hierarchy
   std::vector<std::shared_ptr<CJsonInstructionNode>> m_spChildren;

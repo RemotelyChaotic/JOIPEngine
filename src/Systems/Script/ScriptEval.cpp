@@ -123,7 +123,7 @@ public:
         {
           if (iCommandsIf > 0)
           {
-            return SRunRetVal<ENextCommandToCall::eChild>(0);
+            return SRunRetVal<ENextCommandToCall::eChild>(0, iCommandsIf);
           }
         }
         else

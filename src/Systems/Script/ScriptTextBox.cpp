@@ -534,16 +534,22 @@ public:
         m_pParent->setTextColors({QColor(Qt::white)});
 
         qint32 iSiblingToCall = 0;
+        qint32 iNumChildrenToCall = -1;
         qint32 iActualButton = vsOptionMapping[iButton];
         for (qint32 i = 0; i < iActualButton; ++i)
         {
           iSiblingToCall += viNumChildren[static_cast<size_t>(i)];
         }
+        if (static_cast<qint32>(viNumChildren.size()) > iActualButton)
+        {
+          iNumChildrenToCall = viNumChildren[static_cast<size_t>(iActualButton)];
+        }
 
         if (static_cast<qint32>(vsOptionMapping.size()) > 0 &&
             viNumChildren.size() > 0)
         {
-          return SRunRetVal<ENextCommandToCall::eChild>(iSiblingToCall);
+          return SRunRetVal<ENextCommandToCall::eChild>(iSiblingToCall,
+                                                        iSiblingToCall+iNumChildrenToCall);
         }
         else
         {

@@ -174,9 +174,11 @@ enum class ENextCommandToCall
 template<ENextCommandToCall M> struct SRunRetVal : std::false_type {};
 template<> struct SRunRetVal<ENextCommandToCall::eChild>
 {
-  SRunRetVal(qint32 iIndex) : m_iIndex(iIndex) {}
+  SRunRetVal(qint32 iBegin, qint32 iEnd = -1) :
+    m_iBegin(iBegin), m_iEnd(iEnd) {}
   ENextCommandToCall m_type = ENextCommandToCall::eChild;
-  qint32             m_iIndex;
+  qint32             m_iBegin;
+  qint32             m_iEnd;
 };
 template<> struct SRunRetVal<ENextCommandToCall::eSibling>
 {

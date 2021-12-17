@@ -118,7 +118,7 @@ public slots:
       else if (std::holds_alternative<SRunRetVal<ENextCommandToCall::eChild>>(vRetVal))
       {
         auto& ret = std::get<SRunRetVal<ENextCommandToCall::eChild>>(vRetVal);
-        return SRunnerRetVal{NextCommand(ret.m_type, ret.m_iIndex), std::any()};
+        return SRunnerRetVal{NextCommand(ret.m_type, ret.m_iBegin, ret.m_iEnd), std::any()};
       }
       else if (std::holds_alternative<SRunRetVal<ENextCommandToCall::eSibling>>(vRetVal))
       {
@@ -214,7 +214,25 @@ protected:
 
   //--------------------------------------------------------------------------------------
   //
-  bool NextCommand(ENextCommandToCall nextCmd, qint32 iIndex = 0)
+  void MakeChildrenExclusive(qint32 iBegin = 0, qint32 iEnd = -1)
+  {
+    if (nullptr != m_spNextNode)
+    {
+      for (qint32 i = 0; i < static_cast<qint32>(m_spNextNode->m_spChildren.size()); ++i)
+      {
+        if (i < iBegin) { m_spNextNode->m_spChildren[i]->m_bEnabled = false; }
+        else
+        {
+          if (iEnd < iBegin || i < iEnd) { m_spNextNode->m_spChildren[i]->m_bEnabled = true; }
+          else { m_spNextNode->m_spChildren[i]->m_bEnabled = false; }
+        }
+      }
+    }
+  }
+
+  //--------------------------------------------------------------------------------------
+  //
+  bool NextCommand(ENextCommandToCall nextCmd, qint32 iBegin = 0, qint32 iEnd = -1)
   {
     if (nullptr != m_spNextNode)
     {
@@ -222,9 +240,10 @@ protected:
       if (m_spNextNode->m_spChildren.size() > 0 &&
           ENextCommandToCall::eChild == nextCmd)
       {
-        iIndex = std::min(static_cast<qint32>(m_spNextNode->m_spChildren.size()-1),
-                          std::max(0, iIndex));
-        m_spNextNode = *std::next(m_spNextNode->m_spChildren.begin(), iIndex);
+        iBegin = std::min(static_cast<qint32>(m_spNextNode->m_spChildren.size()-1),
+                          std::max(0, iBegin));
+        MakeChildrenExclusive(iBegin, iEnd);
+        m_spNextNode = *std::next(m_spNextNode->m_spChildren.begin(), iBegin);
         return true;
       }
       else
@@ -235,17 +254,19 @@ protected:
           auto it =
             std::find(spParent->m_spChildren.begin(), spParent->m_spChildren.end(), m_spNextNode);
           qint32 iIndex = std::distance(spParent->m_spChildren.begin(), it);
-          if (static_cast<qint32>(spParent->m_spChildren.size()) > iIndex+1)
+          while (iIndex+1 < static_cast<qint32>(spParent->m_spChildren.size()))
           {
-            m_spNextNode = spParent->m_spChildren[static_cast<size_t>(iIndex+1)];
-            return true;
+            ++iIndex;
+            if (spParent->m_spChildren[static_cast<size_t>(iIndex)]->m_bEnabled)
+            {
+              m_spNextNode = spParent->m_spChildren[static_cast<size_t>(iIndex)];
+              return true;
+            }
           }
-          else
-          {
-            // go up one
-            m_spNextNode = spParent;
-            spParent = spParent->m_wpParent.lock();
-          }
+
+          // go up one since we haven't found a node that can be executed
+          m_spNextNode = spParent;
+          spParent = spParent->m_wpParent.lock();
         }
       }
     }
