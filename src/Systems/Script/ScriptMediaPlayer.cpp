@@ -534,7 +534,7 @@ public:
           iStartAt = std::get<qint64>(itStartAt);
         }
 
-        m_pParent->playSound(sResourceLocator, sId, iLoops, iStartAt);
+        m_pParent->playSound(sResourceLocator, sId, 0==iLoops ? -1 : iLoops, iStartAt);
         return SRunRetVal<ENextCommandToCall::eSibling>();
       }
 
