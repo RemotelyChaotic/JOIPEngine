@@ -61,7 +61,9 @@ public:
     const auto& itTarget = GetValue<EArgumentType::eString>(args, "target");
     if (HasValue(args, "target") && IsOk<EArgumentType::eString>(itTarget))
     {
-      return SRunRetVal<ENextCommandToCall::eFinish>(std::get<QString>(itTarget));
+      QString sTarget = std::get<QString>(itTarget);
+      sTarget.replace("*", "(.*)");
+      return SRunRetVal<ENextCommandToCall::eFinish>(sTarget);
     }
     return SJsonException{"internal Error: No target for goto.", "target", "goto", 0, 0};
   }

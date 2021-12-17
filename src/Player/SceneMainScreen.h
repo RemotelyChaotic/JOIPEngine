@@ -59,7 +59,7 @@ private slots:
   void SlotApplicationStateChanged(Qt::ApplicationState state);
   void SlotError(QString sError, QtMsgType type);
   void SlotExecutionError(QString sException, qint32 iLine, QString sStack);
-  void SlotNextSkript();
+  void SlotNextSkript(bool bMightBeRegex);
   void SlotResizeDone();
   void SlotSceneSelectReturnValue(int iIndex);
   void SlotScriptRunFinished(bool bOk, const QString& sRetVal);
@@ -72,7 +72,7 @@ private:
   void Finish();
   void InitQmlMain();
   void LoadQml();
-  void NextSkript();
+  void NextSkript(bool bMightBeRegex);
   void UnloadRunner();
   void UnloadQml();
 

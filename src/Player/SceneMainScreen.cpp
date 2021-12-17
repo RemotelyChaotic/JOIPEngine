@@ -24,6 +24,7 @@
 #include <QUrl>
 
 #include <assert.h>
+#include <random>
 
 const char* player::c_sMainPlayerProperty = "MainPlayer";
 
@@ -336,12 +337,12 @@ void CSceneMainScreen::SlotExecutionError(QString sException, qint32 iLine, QStr
 
 //----------------------------------------------------------------------------------------
 //
-void CSceneMainScreen::SlotNextSkript()
+void CSceneMainScreen::SlotNextSkript(bool bMightBeRegex)
 {
   if (!m_bInitialized || nullptr == m_spCurrentProject) { return; }
 
   m_spProjectRunner->ResolveScenes();
-  NextSkript();
+  NextSkript(bMightBeRegex);
 }
 
 //----------------------------------------------------------------------------------------
@@ -415,14 +416,15 @@ void CSceneMainScreen::SlotScriptRunFinished(bool bOk, const QString& sRetVal)
   {
     if (bOk)
     {
+      bool bMightBeRegex = CProjectRunner::MightBeRegexScene(sRetVal);
       if (sRetVal.isNull() || sRetVal.isEmpty())
       {
-        SlotNextSkript();
+        SlotNextSkript(bMightBeRegex);
       }
       else
       {
         m_spProjectRunner->ResolveFindScenes(sRetVal);
-        NextSkript();
+        NextSkript(bMightBeRegex);
       }
     }
     else
@@ -447,7 +449,7 @@ void CSceneMainScreen::SlotScriptRunFinished(bool bOk, const QString& sRetVal)
 //
 void CSceneMainScreen::SlotStartLoadingSkript()
 {
-  NextSkript();
+  NextSkript(false);
 }
 
 //----------------------------------------------------------------------------------------
@@ -558,7 +560,7 @@ void CSceneMainScreen::LoadQml()
 
 //----------------------------------------------------------------------------------------
 //
-void CSceneMainScreen::NextSkript()
+void CSceneMainScreen::NextSkript(bool bMightBeRegex)
 {
   auto spDbManager = m_wpDbManager.lock();
   if (nullptr == spDbManager) { return; }
@@ -572,6 +574,36 @@ void CSceneMainScreen::NextSkript()
     if (sScenes.size() == 1)
     {
       tspScene spScene = m_spProjectRunner->NextScene(sScenes[0]);
+      if (nullptr != spScene)
+      {
+        // load script
+        QReadLocker lockerScene(&spScene->m_rwLock);
+        QString sScript = spScene->m_sScript;
+        lockerScene.unlock();
+        bool bOk = QMetaObject::invokeMethod(m_spScriptRunner.get(), "LoadScript", Qt::QueuedConnection,
+                                             Q_ARG(tspScene, spScene),
+                                             Q_ARG(tspResource, spDbManager->FindResourceInProject(m_spCurrentProject, sScript)));
+        assert(bOk);
+        if (!bOk)
+        {
+          qWarning() << tr("LoadScript could not be called.");
+          SlotQuit();
+        }
+      }
+      else
+      {
+        qInfo() << tr("Next scene is null or end.");
+        SlotFinish();
+      }
+    }
+    else if (bMightBeRegex)
+    {
+      long unsigned int seed =
+        static_cast<long unsigned int>(std::chrono::high_resolution_clock::now().time_since_epoch().count());
+      std::mt19937 generator(static_cast<long unsigned int>(seed));
+      std::uniform_int_distribution<> dis(0, static_cast<qint32>(sScenes.size() - 1));
+      qint32 iGeneratedIndex = dis(generator);
+      tspScene spScene = m_spProjectRunner->NextScene(sScenes[iGeneratedIndex]);
       if (nullptr != spScene)
       {
         // load script

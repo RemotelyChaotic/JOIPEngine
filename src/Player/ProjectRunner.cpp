@@ -52,6 +52,14 @@ CProjectRunner::~CProjectRunner()
 
 //----------------------------------------------------------------------------------------
 //
+bool CProjectRunner::MightBeRegexScene(const QString& sName)
+{
+  return sName.contains('+') || sName.contains('*') || sName.contains('|') || sName.contains('{') ||
+         sName.contains('}') || sName.contains('[') || sName.contains(']');
+}
+
+//----------------------------------------------------------------------------------------
+//
 void CProjectRunner::LoadProject(tspProject spProject, const QString sStartScene)
 {
   if (nullptr != m_spCurrentProject)
@@ -202,12 +210,11 @@ void CProjectRunner::ResolveFindScenes(const QString sName)
     if (nullptr != pSceneModel && !sName.isNull() && !sName.isEmpty())
     {
       // could it be a regexp expression?
-      if (sName.contains('+') || sName.contains('*') || sName.contains('|') || sName.contains('{') ||
-          sName.contains('}') || sName.contains('[') || sName.contains(']'))
+      if (MightBeRegexScene(sName))
       {
         QRegExp rx(sName);
         qint32 iPos = 0;
-        if ((iPos = rx.indexIn(pSceneModel->SceneName(), iPos)) == -1)
+        if ((iPos = rx.indexIn(pSceneModel->SceneName(), iPos)) != -1)
         {
           auto it = m_disabledScenes.find(pSceneModel->SceneName());
           if (m_disabledScenes.end() == it)

@@ -24,6 +24,8 @@ public:
   explicit CProjectRunner(QObject* pParent = nullptr);
   ~CProjectRunner();
 
+  static bool MightBeRegexScene(const QString& sName);
+
   void LoadProject(tspProject spProject, const QString sStartScene);
   void UnloadProject();
 
