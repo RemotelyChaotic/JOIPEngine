@@ -67,6 +67,7 @@ Rectangle {
     {
         // clear eval environement and storage
         storage.clear();
+        SoundManager.clearRegistry();
 
         registeredTextBox = null;
         registeredMediaPlayer = null;

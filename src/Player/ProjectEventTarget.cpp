@@ -26,7 +26,7 @@ CProjectEventCallbackRegistry::~CProjectEventCallbackRegistry()
 
 //----------------------------------------------------------------------------------------
 //
-void CProjectEventCallbackRegistry::AddDispatchTarget(const QString& sType,
+void CProjectEventCallbackRegistry::AddDispatchTarget(const SEvent& sType,
                                                       QPointer<CProjectEventTargetWrapper> pWrapper)
 {
   auto it = m_dispatchTargetMap.find(sType);
@@ -38,7 +38,7 @@ void CProjectEventCallbackRegistry::AddDispatchTarget(const QString& sType,
 
 //----------------------------------------------------------------------------------------
 //
-void CProjectEventCallbackRegistry::AddEventListener(QString sType, QJSValue callback)
+void CProjectEventCallbackRegistry::AddEventListener(const SEvent& sType, QJSValue callback)
 {
   auto it = m_callbackMap.find(sType);
   if (m_callbackMap.end() == it)
@@ -80,7 +80,7 @@ void CProjectEventCallbackRegistry::HandleError(QJSValue& value)
 
 //----------------------------------------------------------------------------------------
 //
-void CProjectEventCallbackRegistry::RemoveDispatchTarget(const QString& sType)
+void CProjectEventCallbackRegistry::RemoveDispatchTarget(const SEvent& sType)
 {
   auto it = m_dispatchTargetMap.find(sType);
   if (m_dispatchTargetMap.end() != it)
@@ -92,7 +92,7 @@ void CProjectEventCallbackRegistry::RemoveDispatchTarget(const QString& sType)
 
 //----------------------------------------------------------------------------------------
 //
-void CProjectEventCallbackRegistry::RemoveEventListener(QString sType, QJSValue callback)
+void CProjectEventCallbackRegistry::RemoveEventListener(const SEvent& sType, QJSValue callback)
 {
   auto it = m_callbackMap.find(sType);
   if (m_callbackMap.end() != it)
@@ -110,9 +110,11 @@ void CProjectEventCallbackRegistry::RemoveEventListener(QString sType, QJSValue 
 
 //----------------------------------------------------------------------------------------
 //
-void CProjectEventCallbackRegistry::Dispatch(const QString& sEvent)
+void CProjectEventCallbackRegistry::Dispatch(const QString& sTarget, const QString& sEvent)
 {
-  auto it = m_callbackMap.find(sEvent);
+  SEvent evt = { sTarget, sEvent };
+
+  auto it = m_callbackMap.find(evt);
   if (m_callbackMap.end() != it)
   {
     for (auto& callback : it->second)
@@ -128,7 +130,7 @@ void CProjectEventCallbackRegistry::Dispatch(const QString& sEvent)
     }
   }
 
-  auto itDispatchTarget = m_dispatchTargetMap.find(sEvent);
+  auto itDispatchTarget = m_dispatchTargetMap.find(evt);
   if (m_dispatchTargetMap.end() != itDispatchTarget && nullptr != itDispatchTarget->second)
   {
     itDispatchTarget->second->Dispatched(sEvent);
@@ -168,7 +170,7 @@ void CProjectEventTargetWrapper::addEventListener(QString sType, QJSValue callba
 {
   if (auto spRegistry = m_wpRegistry.lock())
   {
-    spRegistry->AddEventListener(sType, callback);
+    spRegistry->AddEventListener({EventTarget(), sType}, callback);
   }
 }
 
@@ -178,7 +180,7 @@ void CProjectEventTargetWrapper::removeEventListener(QString sType, QJSValue cal
 {
   if (auto spRegistry = m_wpRegistry.lock())
   {
-    spRegistry->RemoveEventListener(sType, callback);
+    spRegistry->RemoveEventListener({EventTarget(), sType}, callback);
   }
 }
 
@@ -188,17 +190,13 @@ void CProjectEventTargetWrapper::dispatch(QJSValue event)
 {
   if (auto spRegistry = m_wpRegistry.lock())
   {
-    if (event.isString())
-    {
-      spRegistry->Dispatch(event.toString());
-    }
-    else if (event.isObject())
+    if (event.isObject())
     {
       CProjectEventWrapper* pEventWrapper =
           dynamic_cast<CProjectEventWrapper*>(event.toQObject());
       if (nullptr != pEventWrapper)
       {
-        spRegistry->Dispatch(pEventWrapper->m_sType);
+        spRegistry->Dispatch(EventTarget(), pEventWrapper->m_sType);
       }
     }
   }

@@ -1,5 +1,5 @@
 import QtQuick 2.14
-import JOIP.core 1.1
+import JOIP.core 1.2
 import JOIP.db 1.1
 import QtAV 1.7
 
@@ -12,6 +12,8 @@ Rectangle {
     property int playbackState: player.playbackState
     property int loops: 1
     property int startAt: 0
+    property string nameId: ""
+    property SoundInstance soundInstance: null
 
     signal finishedPlaying();
 
@@ -27,31 +29,25 @@ Rectangle {
 
     function pause()
     {
-        if (player.playbackState === MediaPlayer.PlayingState)
-        {
-            player.pause();
-        }
+        player.pauseRequested = true;
+        player.pause();
     }
 
     function play(iLoops, iStartAt)
     {
-        if (player.playbackState !== MediaPlayer.PlayingState)
-        {
-            player.play();
-        }
+        player.pauseRequested = false;
+        player.play();
     }
 
     function stop()
     {
-        if (player.playbackState === MediaPlayer.PlayingState || player.playbackState === MediaPlayer.PausedState)
-        {
-            player.stoppedTargetState = true;
-        }
+        player.pauseRequested = false;
+        player.stoppedTargetState = true;
     }
 
     function seek(iSeekPos)
     {
-        if ((player.playbackState === MediaPlayer.PlayingState || player.playbackState === MediaPlayer.PausedState) && player.seekable)
+        if (player.seekable)
         {
             player.fastSeek = true;
             player.seek(iSeekPos);
@@ -63,9 +59,11 @@ Rectangle {
         player.stop();
         if (null !== resource && undefined !== resource)
         {
+            soundInstance = SoundManager.get(nameId || resource.name);
             state = Resource.Loading;
             if (resource.isLocal)
             {
+                player.pauseRequested = false;
                 player.volume = Settings.volume;
                 player.source = resource.path;
             }
@@ -85,6 +83,7 @@ Rectangle {
         objectName: "player"
 
         property int currentLoop: 0
+        property bool pauseRequested: false
 
         loops: -1 === mediaPlayer.loops ? MediaPlayer.Infinite : mediaPlayer.loops
         startPosition: mediaPlayer.startAt
@@ -94,11 +93,21 @@ Rectangle {
         onPlaying: {
             player.stoppedTargetState = false;
             mediaPlayer.state = Resource.Loaded;
+            soundInstance.dispatch(new Event("play"));
+            if (pauseRequested) {
+                pause();
+            }
+        }
+        onPaused: {
+            pauseRequested = false;
+            soundInstance.dispatch(new Event("pause"));
         }
         onStopped: {
             if (mediaPlayer.state === Resource.Loaded)
             {
+                player.pauseRequested = false;
                 mediaPlayer.finishedPlaying();
+                soundInstance.dispatch(new Event("end"));
             }
         }
 

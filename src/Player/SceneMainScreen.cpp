@@ -68,7 +68,7 @@ void CSceneMainScreen::Initialize()
           this, &CSceneMainScreen::SlotError);
   connect(m_spProjectRunner.get(), &CProjectRunner::SignalChangeSceneRequest,
           m_spEventCallbackRegistry.get(), [this](const QString&) {
-    m_spEventCallbackRegistry->Dispatch("change");
+    m_spEventCallbackRegistry->Dispatch("CProjectSceneManagerWrapper", "change");
   });
 
   m_spScriptRunnerSystem->RegisterObject<CScriptRunner>();

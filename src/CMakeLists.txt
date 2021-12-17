@@ -254,6 +254,8 @@ set(Sources
   Player/ProjectEventTarget.h
   Player/ProjectSceneManager.cpp
   Player/ProjectSceneManager.h
+  Player/ProjectSoundManager.cpp
+  Player/ProjectSoundManager.h
   Player/SceneMainScreen.cpp 
   Player/SceneMainScreen.h 
   Player/SceneMainScreen.ui 

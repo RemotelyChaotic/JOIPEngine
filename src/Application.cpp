@@ -7,6 +7,7 @@
 // needed to register to qml
 #include "Player/MetronomePaintedWidget.h"
 #include "Player/ProjectSceneManager.h"
+#include "Player/ProjectSoundManager.h"
 #include "Player/SceneMainScreen.h"
 #include "Player/TeaseStorage.h"
 #include "Player/TimerWidget.h"
@@ -281,6 +282,7 @@ void CApplication::RegisterQmlTypes()
   qmlRegisterType<CTeaseStorageWrapper>("JOIP.core", 1, 1, "TeaseStorage");
   qmlRegisterUncreatableType<CProjectEventTargetWrapper>("JOIP.core", 1, 2, "EventTarget", "");
   qmlRegisterType<CProjectSceneManagerWrapper>("JOIP.core", 1, 2, "SceneManager");
+  qmlRegisterUncreatableType<CSoundInstanceWrapper>("JOIP.core", 1, 2, "SoundInstance", "");
 
   qmlRegisterSingletonType<CQmlApplicationQtNamespaceWrapper>(
         "JOIP.core", 1, 1, "QtApp",
@@ -333,7 +335,7 @@ void CApplication::RegisterQmlTypes()
       }
       return nullptr;
   });
-  qmlRegisterSingletonType<CSceneMainScreenWrapper>("JOIP.core", 1, 1, "Player",
+  qmlRegisterSingletonType<CSceneMainScreenWrapper>("JOIP.core", 1, 2, "Player",
                                                     [](QQmlEngine *engine, QJSEngine *scriptEngine) -> QObject*
   {
       Q_UNUSED(scriptEngine)
@@ -351,6 +353,32 @@ void CApplication::RegisterQmlTypes()
         if (nullptr != pMainScreen)
         {
           return new CSceneMainScreenWrapper(scriptEngine, pMainScreen);
+        }
+      }
+      return nullptr;
+  });
+  qmlRegisterSingletonType<CProjectSoundManager>("JOIP.core", 1, 2, "SoundManager",
+                                                 [](QQmlEngine *engine, QJSEngine *scriptEngine) -> QObject*
+  {
+      Q_UNUSED(scriptEngine)
+      if (nullptr != engine)
+      {
+        CSceneMainScreen* pMainScreen = engine->property(player::c_sMainPlayerProperty).value<CSceneMainScreen*>();
+        if (nullptr != pMainScreen)
+        {
+          CProjectSoundManager* pWrapper = new CProjectSoundManager(engine, pMainScreen);
+          pWrapper->Initalize(pMainScreen->EventCallbackRegistry());
+          return pWrapper;
+        }
+      }
+      else if (nullptr != scriptEngine)
+      {
+        CSceneMainScreen* pMainScreen = engine->property(player::c_sMainPlayerProperty).value<CSceneMainScreen*>();
+        if (nullptr != pMainScreen)
+        {
+          CProjectSoundManager* pWrapper = new CProjectSoundManager(engine, pMainScreen);
+          pWrapper->Initalize(pMainScreen->EventCallbackRegistry());
+          return pWrapper;
         }
       }
       return nullptr;

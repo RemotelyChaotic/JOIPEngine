@@ -22,11 +22,22 @@ void CProjectSceneManagerWrapper::Dispatched(const QString&)
 
 //----------------------------------------------------------------------------------------
 //
+QString CProjectSceneManagerWrapper::EventTarget()
+{
+  return "CProjectSceneManagerWrapper";
+}
+
+//----------------------------------------------------------------------------------------
+//
 void CProjectSceneManagerWrapper::Initalize(std::weak_ptr<CProjectRunner> wpProjectRunner,
                                             std::weak_ptr<CProjectEventCallbackRegistry> wpRegistry)
 {
   m_wpProjectRunner = wpProjectRunner;
   InitializeEventRegistry(wpRegistry);
+  if (auto spRegistry = m_wpRegistry.lock())
+  {
+    spRegistry->AddDispatchTarget({EventTarget(), "change"}, this);
+  }
 }
 
 //----------------------------------------------------------------------------------------

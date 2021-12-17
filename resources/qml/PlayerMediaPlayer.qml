@@ -2,7 +2,7 @@ import QtQuick 2.14
 import QtQuick.Controls 2.14
 import QtGraphicalEffects 1.14
 import QtGui 5.14
-import JOIP.core 1.1
+import JOIP.core 1.2
 import JOIP.db 1.1
 import JOIP.script 1.1
 import QtAV 1.7
@@ -63,10 +63,10 @@ Rectangle {
                             }
                             else
                             {
+                                soundPlayer.nameId = sId;
                                 soundPlayer.loops = iLoops;
                                 soundPlayer.startAt = iStartAt;
                                 soundPlayer.resource = pResource;
-                                soundPlayer.nameId = sId;
                             }
                         }
                     }
@@ -217,6 +217,13 @@ Rectangle {
         function tryToPlaySoundOrMovie(sResource, sId, iLoops, iStartAt) {
             if ("" !== sResource || "" !== sId)
             {
+                var pResource = registrator.currentlyLoadedProject.resource(sResource);
+                if (null !== pResource && undefined !== pResource &&
+                    Resource.Sound === pResource.type)
+                {
+                    SoundManager.registerId(sId || sResource, pResource, iLoops, iStartAt);
+                }
+
                 // first do id lookup
                 var player = findSoundView(sId);
                 if (null !== player && player.state === Resource.Loaded)
@@ -455,8 +462,6 @@ Rectangle {
             resource: null
             visible: true
 
-            property string nameId: ""
-
             onFinishedPlaying: {
                 signalEmitter.playbackFinished(resource.name);
                 signalEmitter.soundFinished(resource.name);
@@ -513,6 +518,21 @@ Rectangle {
             }
         }
     }
+    Connections {
+        target: SoundManager
+        onSignalPlay: {
+            signalEmitter.tryToPlaySoundOrMovie(sResource, sId, iLoops, iStartAt);
+        }
+        onSignalPause: {
+            signalEmitter.tryToCall(sId, "pause");
+        }
+        onSignalStop: {
+            signalEmitter.tryToCall(sId, "stop");
+        }
+        onSignalSeek: {
+            signalEmitter.tryToCall(sId, "seek");
+        }
+    }
 
     Component.onCompleted: {
         ScriptRunner.registerNewComponent(userName, signalEmitter);
@@ -523,6 +543,7 @@ Rectangle {
         registrator.componentLoaded();
 
         root.registerUIComponent(mediaPlayer.userName, evalAccessor);
+        root.registerUIComponent("Sound", SoundManager);
     }
 
     // Misc components
