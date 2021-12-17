@@ -463,11 +463,14 @@ void CSceneMainScreen::SlotUnloadFinished()
   m_spUi->pQmlWidget->setSource(QUrl());
 
   delete m_pCurrentProjectWrapper;
-  bool bOk = CDatabaseManager::UnloadProject(m_spCurrentProject);
-  if (!bOk)
+  if (!m_bBeingDebugged)
   {
-    assert(bOk && "Failed to unload project");
-    qWarning() << "Failed to unload project";
+    bool bOk = CDatabaseManager::UnloadProject(m_spCurrentProject);
+    if (!bOk)
+    {
+      assert(bOk && "Failed to unload project");
+      qWarning() << "Failed to unload project";
+    }
   }
   m_spCurrentProject = nullptr;
 
