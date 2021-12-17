@@ -35,6 +35,14 @@ function isolate(script, type) {
       "e.stack,\n"+
       JSON.stringify('\n\nIn ' + (type || 'Script EVAL') + ':\n') + ",\n" +
       JSON.stringify(script) +
-      ")}";
+      ");\n"+
+      "var hasVarsRxRes = e.message.match(/(.*) is not defined/);\n" +
+      "if (hasVarsRxRes.length > 1) {\n" +
+        "try{\n"+
+          "eval('var ' + hasVarsRxRes[1] + '=null;');\n" +
+          "eval(" + JSON.stringify(script) + ");"+
+        "} catch(e) {}\n"+
+      "}\n" +
+    "}";
 }
 
