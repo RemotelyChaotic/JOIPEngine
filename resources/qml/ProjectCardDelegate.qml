@@ -128,6 +128,11 @@ Rectangle {
                             to: 1.0
                             duration: progressDisplayRect.width <= 0 ? 1000 : progressDisplayRect.width / 0.1
                         }
+                        PropertyAnimation {
+                            from: 1.0
+                            to: 0.0
+                            duration: progressDisplayRect.width <= 0 ? 1000 : progressDisplayRect.width / 0.1
+                        }
                     }
 
                     orientation: Gradient.Horizontal
