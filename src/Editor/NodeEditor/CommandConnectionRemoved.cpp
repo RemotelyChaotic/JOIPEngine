@@ -57,13 +57,21 @@ void CCommandConnectionRemoved::redo()
 //
 int CCommandConnectionRemoved::id() const
 {
-  return EEditorCommandId::eNone;
+  return EEditorCommandId::eRemoveConnecectionItem;
 }
 
 //----------------------------------------------------------------------------------------
 //
 bool CCommandConnectionRemoved::mergeWith(const QUndoCommand* pOther)
 {
-  Q_UNUSED(pOther);
-  return false;
+  if (nullptr == pOther || id() != pOther->id())
+  {
+    return false;
+  }
+
+  const CCommandConnectionRemoved* pOtherCasted = dynamic_cast<const CCommandConnectionRemoved*>(pOther);
+  if (nullptr == pOtherCasted) { return false; }
+  if (m_connId != pOtherCasted->m_connId) { return false; }
+
+  return true;
 }

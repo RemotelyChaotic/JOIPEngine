@@ -27,7 +27,8 @@ BETTER_ENUM(EEditorCommandId, qint32,
 
             eAddNodeItem,
             eMoveNodeItem,
-            eChangeNodeItem
+            eChangeNodeItem,
+            eRemoveConnecectionItem
             );
 
 #endif // EDITORCOMMANDIDS_H
