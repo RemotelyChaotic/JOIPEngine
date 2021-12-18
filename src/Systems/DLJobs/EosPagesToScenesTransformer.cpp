@@ -23,9 +23,11 @@ namespace
 
   const QString c_sStartPageKeyWord = "start";
 
-  const QString c_sEvalKeyWord = "eval";
-  const QString c_sScriptKeyWord = "script";
   const QString c_sCommandsKeyWord = "commands";
+  const QString c_sEvalKeyWord = "eval";
+  const QString c_sGotoKeyWord = "goto";
+  const QString c_sScriptKeyWord = "script";
+  const QString c_sTargetKeyWord = "target";
 
   const double c_dNodeOffset = 500.0;
 }
@@ -131,20 +133,6 @@ bool CEosPagesToScenesTransformer::CollectScenes(QString* psError)
     return false;
   }
 
-  // create init "page"
-  if (root.end() != initIt && initIt.value().isString())
-  {
-    QString sScript = initIt.value().toString();
-    QJsonObject evalObj
-    {
-      {
-        c_sCommandsKeyWord,
-        QJsonArray{ {c_sEvalKeyWord, QJsonObject { {c_sScriptKeyWord, sScript} }} }
-      }
-    };
-    m_vPages.push_back({c_sInitKeyWord, QJsonDocument(evalObj)});
-  }
-
   // gather pages
   QJsonObject pagesObj = pagesIt.value().toObject();
   for (auto it = pagesObj.constBegin(); pagesObj.constEnd() != it; ++it)
@@ -167,6 +155,21 @@ bool CEosPagesToScenesTransformer::CollectScenes(QString* psError)
         m_vPages.push_back({sPageKey, QJsonDocument(objPage)});
       }
     }
+  }
+
+  // create init "page"
+  if (root.end() != initIt && initIt.value().isString())
+  {
+    QString sScript = initIt.value().toString();
+    QJsonObject evalObj
+    {
+      {
+        c_sCommandsKeyWord,
+        QJsonArray{ { QJsonObject{{c_sEvalKeyWord, QJsonObject { {c_sScriptKeyWord, sScript} }}},
+                      QJsonObject{{c_sGotoKeyWord, QJsonObject { {c_sTargetKeyWord, c_sStartPageKeyWord} }}}} }
+      }
+    };
+    m_vPages.insert(m_vPages.begin(), {c_sInitKeyWord, QJsonDocument(evalObj)});
   }
 
   return true;
