@@ -354,9 +354,49 @@ public:
       const auto& itButtonCommands = GetValue<EArgumentType::eArray>(args, "buttonCommands");
       const auto& itTimerCommands = GetValue<EArgumentType::eArray>(args, "timerCommands");
 
-      if (HasValue(args, "id") && IsOk<EArgumentType::eString>(itId))
+      if (HasValue(args, "onButtonCommand_Impl") && IsOk<EArgumentType::eBool>(itButtonImpl) &&
+               HasValue(args, "buttonCommands") && IsOk<EArgumentType::eArray>(itButtonCommands))
       {
-        const QString sId = std::get<QString>(itId);
+        QStringList vList;
+        tInstructionArrayValue items = std::get<tInstructionArrayValue>(itButtonCommands);
+        for (size_t i = 0; items.size() > i; ++i)
+        {
+          const auto& itCommand = GetValue<EArgumentType::eObject>(items, i);
+          if (IsOk<EArgumentType::eString>(itCommand))
+          {
+            vList << std::get<QString>(itCommand);
+          }
+        }
+        if (vList.size() > 0)
+        {
+          return SRunRetVal<ENextCommandToCall::eChild>(0);
+        }
+      }
+      else if (HasValue(args, "onTimerCommand_Impl") && IsOk<EArgumentType::eBool>(itTimerImpl) &&
+               HasValue(args, "timerCommands") && IsOk<EArgumentType::eArray>(itTimerCommands))
+      {
+        QStringList vList;
+        tInstructionArrayValue items = std::get<tInstructionArrayValue>(itTimerCommands);
+        for (size_t i = 0; items.size() > i; ++i)
+        {
+          const auto& itCommand = GetValue<EArgumentType::eObject>(items, i);
+          if (IsOk<EArgumentType::eString>(itCommand))
+          {
+            vList << std::get<QString>(itCommand);
+          }
+        }
+        if (vList.size() > 0)
+        {
+          return SRunRetVal<ENextCommandToCall::eChild>(0);
+        }
+      }
+      else
+      {
+        QString sId;
+        if (HasValue(args, "id") && IsOk<EArgumentType::eString>(itId))
+        {
+          sId = std::get<QString>(itId);
+        }
 
         QString sTitle;
         if (HasValue(args, "title") && IsOk<EArgumentType::eString>(itTitle))
@@ -413,43 +453,7 @@ public:
           return SRunRetVal<ENextCommandToCall::eSibling>();
         }
       }
-      else if (HasValue(args, "onButtonCommand_Impl") && IsOk<EArgumentType::eBool>(itButtonImpl) &&
-               HasValue(args, "buttonCommands") && IsOk<EArgumentType::eArray>(itButtonCommands))
-      {
-        QStringList vList;
-        tInstructionArrayValue items = std::get<tInstructionArrayValue>(itButtonCommands);
-        for (size_t i = 0; items.size() > i; ++i)
-        {
-          const auto& itCommand = GetValue<EArgumentType::eObject>(items, i);
-          if (IsOk<EArgumentType::eString>(itCommand))
-          {
-            vList << std::get<QString>(itCommand);
-          }
-        }
-        if (vList.size() > 0)
-        {
-          return SRunRetVal<ENextCommandToCall::eChild>(0);
-        }
-      }
-      else if (HasValue(args, "onTimerCommand_Impl") && IsOk<EArgumentType::eBool>(itTimerImpl) &&
-               HasValue(args, "timerCommands") && IsOk<EArgumentType::eArray>(itTimerCommands))
-      {
-        QStringList vList;
-        tInstructionArrayValue items = std::get<tInstructionArrayValue>(itTimerCommands);
-        for (size_t i = 0; items.size() > i; ++i)
-        {
-          const auto& itCommand = GetValue<EArgumentType::eObject>(items, i);
-          if (IsOk<EArgumentType::eString>(itCommand))
-          {
-            vList << std::get<QString>(itCommand);
-          }
-        }
-        if (vList.size() > 0)
-        {
-          return SRunRetVal<ENextCommandToCall::eChild>(0);
-        }
-      }
-      return SJsonException{"Do valid arguments for notification.", "", "notification.create", 0, 0};
+      return SJsonException{"No valid arguments for notification.", "", "notification.create", 0, 0};
     }
     return SJsonException{"Internal error.", "", "notification.create", 0, 0};
   }

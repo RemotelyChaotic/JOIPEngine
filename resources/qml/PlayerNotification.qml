@@ -32,30 +32,23 @@ Rectangle {
 
     function findNotification(sId)
     {
-        if ("" !== sId)
+        for (var i = 0; i < widgetModel.count; ++i)
         {
-            for (var i = 0; i < widgetModel.count; ++i)
+            if (widgetModel.get(i).sId === sId)
             {
-                if (widgetModel.get(i).sId === sId)
-                {
-                    return widgetModel.get(i)
-                }
+                return widgetModel.get(i)
             }
         }
-        return null;
     }
 
     function removeNotificaiton(sId)
     {
-        if ("" !== sId)
+        for (var i = 0; i < widgetModel.count; ++i)
         {
-            for (var i = 0; i < widgetModel.count; ++i)
+            if (widgetModel.get(i).sId === sId)
             {
-                if (widgetModel.get(i).sId === sId)
-                {
-                    widgetModel.remove(i);
-                    return;
-                }
+                widgetModel.remove(i);
+                return;
             }
         }
     }
