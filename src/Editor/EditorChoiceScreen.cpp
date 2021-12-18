@@ -1,6 +1,7 @@
 #include "EditorChoiceScreen.h"
 #include "Application.h"
 #include "Systems/DatabaseManager.h"
+#include "Systems/EOS/EosHelpers.h"
 #include "Systems/HelpFactory.h"
 #include "Systems/Project.h"
 #include "Widgets/HelpOverlay.h"
@@ -161,15 +162,30 @@ void CEditorChoiceScreen::on_pCreateProjectButton_clicked()
 void CEditorChoiceScreen::on_pOpenExistingProjectButton_clicked()
 {
   if (!m_bInitialized) { return; }
+
+  bool bOk = true;
   auto spDbManager = m_wpDbManager.lock();
   if (nullptr != spDbManager)
   {
     qint32 iId = m_spUi->pProjectCardSelectionWidget->SelectedId();
-    if (spDbManager->FindProject(iId) != nullptr)
+    tspProject spProject = spDbManager->FindProject(iId);
+    if (spProject != nullptr)
     {
-      emit SignalOpenClicked(iId);
+      if (!eos::VerifyProjectEditable(spProject))
+      {
+        bOk = false;
+        m_spUi->pProjectCardSelectionWidget->ShowWarning(
+              tr("Not allowed to open downloaded EOS Tease in editor."));
+      }
+      else
+      {
+        emit SignalOpenClicked(iId);
+      }
     }
   }
 
-  m_spUi->pStackedWidget->setCurrentIndex(c_iPageIndexChoice);
+  if (bOk)
+  {
+    m_spUi->pStackedWidget->setCurrentIndex(c_iPageIndexChoice);
+  }
 }

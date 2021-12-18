@@ -49,6 +49,7 @@ struct SProjectData
   bool                      m_bLoaded = false;
   EDownLoadState            m_dlState = EDownLoadState::eFinished;
   QString                   m_sFont = "Segoe UI";
+  QString                   m_sUserData;
 };
 
 #endif // PROJECTDATA_H

@@ -1,11 +1,21 @@
 #include "EosHelpers.h"
 #include "Systems/DatabaseManager.h"
 
+#include <QCryptographicHash>
+#include <QDirIterator>
+#include <QFile>
 #include <QTime>
 #include <random>
 
 namespace eos
 {
+  //--------------------------------------------------------------------------------------
+  //
+  QString GetEOSK()
+  {
+    return "ZH3xbLBA30ADv9TrkAo8";
+  }
+
   //--------------------------------------------------------------------------------------
   //
   bool LookupRemoteLink(const QString& sResourceLocator, tspProject& spProject,
@@ -208,5 +218,77 @@ namespace eos
     {
       return StringTimeToMs(sDuration);
     }
+  }
+
+  //--------------------------------------------------------------------------------------
+  //
+  bool VerifyProjectEditable(tspProject& spProject)
+  {
+    QReadLocker locker(&spProject->m_rwLock);
+    bool bWasLoaded = spProject->m_bLoaded;
+    const QString sProjName = spProject->m_sName;
+    const QString sUserData = spProject->m_sUserData;
+    locker.unlock();
+
+    if (!CDatabaseManager::LoadProject(spProject))
+    {
+      return true;
+    }
+
+    // load all bundles
+    locker.relock();
+    for (auto it : spProject->m_spResourceBundleMap)
+    {
+      locker.unlock();
+      bool bOk = CDatabaseManager::LoadBundle(spProject, it.first);
+      if (!bOk) { locker.relock(); continue; }
+      locker.relock();
+    }
+    locker.unlock();
+
+    // check for eoskey files
+    QString sKey;
+    {
+      QDirIterator itFile(":/" + sProjName + "/",
+                          QStringList() << QStringLiteral("*") + eos::c_sEosKeyFile,
+                          QDir::Files | QDir::NoDotAndDotDot, QDirIterator::NoIteratorFlags);
+      while (itFile.hasNext())
+      {
+        QString sFileName = QFileInfo(itFile.next()).absoluteFilePath();
+        QFile file(sFileName);
+        if (file.open(QIODevice::ReadOnly))
+        {
+          sKey = QString::fromUtf8(file.readAll());
+          break;
+        }
+      }
+    }
+
+    // unload project again, as we don't need the files anymore
+    if (!bWasLoaded)
+    {
+      // try to unload all
+      CDatabaseManager::UnloadProject(spProject);
+    }
+
+    // check userdata
+    if (!sKey.isEmpty())
+    {
+      if (sUserData.isEmpty()) { return false; }
+      else if (sKey != QString(c_sKey + GetEOSK())) { return false; }
+      return false;
+    }
+    else
+    {
+      QCryptographicHash hash(QCryptographicHash::Algorithm::Sha256);
+      hash.addData(QString(sProjName + c_sKey + GetEOSK()).toUtf8());
+      QString sResultingData = QString::fromUtf8(hash.result().toBase64());
+      if (sUserData == sResultingData)
+      {
+        return false;
+      }
+    }
+
+    return true;
   }
 }

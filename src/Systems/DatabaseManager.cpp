@@ -58,7 +58,7 @@ bool CDatabaseManager::LoadBundle(tspProject& spProject, const QString& sBundle)
         QResource::registerResource(sPath, QDir::separator() + spProject->m_sName);
     //assert(it->second->m_bLoaded); // remove for download testing
 
-    bLoaded = !it->second->m_bLoaded;
+    bLoaded = it->second->m_bLoaded;
   }
 
   return bLoaded;

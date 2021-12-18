@@ -86,7 +86,8 @@ QJsonObject SProject::ToJsonObject()
     { "vspResourceBundles", resourceBundles },
     { "vsMountPoints", mountPoints },
     { "dlState", m_dlState._to_integral() },
-    { "sFont", m_sFont }
+    { "sFont", m_sFont },
+    { "sUserData", m_sUserData }
   };
 }
 
@@ -227,6 +228,11 @@ void SProject::FromJsonObject(const QJsonObject& json)
   if (it != json.end())
   {
     m_sFont = it.value().toString();
+  }
+  it = json.find("sUserData");
+  if (it != json.end())
+  {
+    m_sUserData = it.value().toString();
   }
 }
 
@@ -404,6 +410,14 @@ QString CProjectScriptWrapper::getFont()
 {
   QReadLocker locker(&m_spData->m_rwLock);
   return m_spData->m_sFont;
+}
+
+//----------------------------------------------------------------------------------------
+//
+QString CProjectScriptWrapper::getUserData()
+{
+  QReadLocker locker(&m_spData->m_rwLock);
+  return m_spData->m_sUserData;
 }
 
 //----------------------------------------------------------------------------------------

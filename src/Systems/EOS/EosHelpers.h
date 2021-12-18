@@ -14,6 +14,11 @@ namespace eos
   const QString c_sMatcherFile = "^file:(.*)$";
   const QString c_sMatcherFileIsRandom = "\\*";
 
+  const QString c_sEosKeyFile = ".eoskey";
+  const QString c_sKey = "3YzCjnWTLV6SYMgK7Lql";
+
+  QString GetEOSK();
+
   bool LookupRemoteLink(const QString& sResourceLocator, tspProject& spProject,
                         std::shared_ptr<CDatabaseManager> spDbManager,
                         QString& sResource);
@@ -27,6 +32,8 @@ namespace eos
                   QString& sResource);
 
   qint64 ParseEosDuration(const QString& sDuration);
+
+  bool VerifyProjectEditable(tspProject& spProject);
 }
 
 #endif // EOSHELPERS_H

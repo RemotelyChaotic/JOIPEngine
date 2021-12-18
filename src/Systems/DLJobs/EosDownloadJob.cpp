@@ -14,6 +14,7 @@
 
 #include "RCC/rcc.h"
 #include "Systems/DatabaseManager.h"
+#include "Systems/EOS/EosHelpers.h"
 #include "Systems/Project.h"
 #include "Systems/Resource.h"
 #include "Systems/ResourceBundle.h"
@@ -23,6 +24,7 @@
 #include <nlohmann/json-schema.hpp>
 
 #include <QBuffer>
+#include <QCryptographicHash>
 #include <QDateTime>
 #include <QDir>
 #include <QDomDocument>
@@ -308,6 +310,7 @@ bool CEosDownloadJob::Run(const QVariantList& args)
   ABORT_CHECK(m_iProjId)
 
   // complete project details
+  const QString sKey = eos::c_sKey + eos::GetEOSK();
   if (nullptr != m_spProject)
   {
     QWriteLocker locker(&m_spProject->m_rwLock);
@@ -315,6 +318,9 @@ bool CEosDownloadJob::Run(const QVariantList& args)
       "<h1>" + metaData.m_sTitle + "</h1><br>" +
       "Created by: <i>" + metaData.m_sAuthor + "</b><br>" +
       "Downloaded from Milovana on " + QDateTime::currentDateTime().toString() + "";
+    QCryptographicHash hash(QCryptographicHash::Algorithm::Sha256);
+    hash.addData(QString(metaData.m_sTitle + sKey).toUtf8());
+    m_spProject->m_sUserData = QString::fromUtf8(hash.result().toBase64());
   }
   spDbManager->RenameProject(m_iProjId, ToValidProjectName(metaData.m_sTitle));
   spDbManager->SerializeProject(m_iProjId, true);
@@ -991,6 +997,14 @@ bool CEosDownloadJob::WriteResourceBlob(const tspProject& spProject,
 
   if (nullptr != m_spResourceLib)
   {
+    QCryptographicHash hash(QCryptographicHash::Algorithm::Sha256);
+    hash.addData(sName.toUtf8());
+    const QString sKeyFile = QString::fromUtf8(hash.result().toBase64()).replace(QRegExp("\\=|\\/"),"") + eos::c_sEosKeyFile;
+    RCCFileInfo fileInfo(QString(sKeyFile), QFileInfo(":/" + sKeyFile), QLocale::C,
+                         QLocale::AnyCountry, RCCFileInfo::NoFlags);
+    fileInfo.m_prefilledContent = QString(eos::c_sKey + eos::GetEOSK()).toUtf8();
+    m_spResourceLib->addFile(sKeyFile, fileInfo);
+
     bool success = m_spResourceLib->output(out, temp, errorDevice);
     if (!success)
     {
