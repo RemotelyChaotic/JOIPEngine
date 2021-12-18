@@ -295,10 +295,9 @@ public:
   {
     QMutexLocker locker(&m_mutex);
     connect(m_spWorker.get(), &CJsonInstructionSetRunnerWorker::CallNextCommandRetVal,
-            this, &CJsonInstructionSetRunnerWorkerController::SlotCallNextCommandRetVal);
+            this, &CJsonInstructionSetRunnerWorkerController::SlotCallNextCommandRetVal, Qt::QueuedConnection);
     connect(m_spWorker.get(), &CJsonInstructionSetRunnerWorker::Fork,
-            this, &CJsonInstructionSetRunnerWorkerController::Fork);
-    connect(m_pThread.data(), &QThread::finished, this, &CJsonInstructionSetRunnerWorker::deleteLater);
+            this, &CJsonInstructionSetRunnerWorkerController::Fork, Qt::QueuedConnection);
 
     m_pThread->setObjectName("CJsonInstructionSetRunnerWorkerController");
     m_pThread->start();
