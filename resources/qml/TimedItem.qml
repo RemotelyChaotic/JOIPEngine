@@ -9,6 +9,7 @@ Rectangle {
 
     property real timeMs: 0.0
     property real maxTimeMs: 0.0
+    property bool showClock: true
     property bool showTime: true
     property bool showTimeNumber: true
     property bool running: counter.running
@@ -93,6 +94,8 @@ Rectangle {
         id: timerDisplay
         anchors.fill: parent
         fillColor: "transparent"
+
+        visible: timedItem.showClock
 
         primaryColor: root.style.timerDisplay.primaryColor
         secondaryColor: root.style.timerDisplay.secondaryColor

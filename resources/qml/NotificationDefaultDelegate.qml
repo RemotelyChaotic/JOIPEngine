@@ -127,6 +127,7 @@ Rectangle {
         width: (pResource !== null || model.timeMs > 0) ? 48 : 0
         height: 48
 
+        showClock: maxTimeMs > 0
         showTime: true
         showTimeNumber: false
         maxTimeMs: model.timeMs
