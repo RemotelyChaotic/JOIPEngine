@@ -148,14 +148,14 @@ void CScriptMediaPlayer::stopVideo()
 //
 void CScriptMediaPlayer::playSound(QJSValue resource)
 {
-  playSound(resource, QString(), -1, 0);
+  playSound(resource, QString(), 1, 0);
 }
 
 //----------------------------------------------------------------------------------------
 //
 void CScriptMediaPlayer::playSound(QJSValue resource, const QString& sId)
 {
-  playSound(resource, sId, -1, 0);
+  playSound(resource, sId, 1, 0);
 }
 
 //----------------------------------------------------------------------------------------
