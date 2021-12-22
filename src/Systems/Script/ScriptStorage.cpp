@@ -61,12 +61,11 @@ QJSValue CScriptStorage::load(QString sId)
             &loop, &QEventLoop::quit, Qt::QueuedConnection);
   QMetaObject::Connection showRetValLoop =
     connect(pSignalEmitter, &CStorageSignalEmitter::loadReturnValue,
-            this, [this, &varRetVal, sRequestId](QVariant var, QString sRequestIdRet)
+            this, [this, &varRetVal, sRequestId](QJSValue var, QString sRequestIdRet)
   {
     if (sRequestId == sRequestIdRet)
     {
-      QJSValue val = var.value<QJSValue>();
-      varRetVal = val.toVariant();
+      varRetVal = var.toVariant();
       varRetVal.detach(); // fixes some crashes with QJSEngine
       emit this->SignalQuitLoop();
     }

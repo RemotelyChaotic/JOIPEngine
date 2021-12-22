@@ -20,7 +20,7 @@ public:
 signals:
   void clear();
   void load(QString sId, QString sRequestId);
-  void loadReturnValue(QVariant value, QString sRequestId);
+  void loadReturnValue(QJSValue value, QString sRequestId);
   void store(QString sId, QVariant value);
 };
 Q_DECLARE_METATYPE(CStorageSignalEmitter)
