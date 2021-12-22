@@ -118,7 +118,7 @@ void CScriptNotification::show(QString sId, QString sTitle, QString sButtonText,
 {
   if (!CheckIfScriptCanRun()) { return; }
   QString sOnButtonResolved = GetResource(sOnButton, "show()");
-  Show(sId, sTitle, sButtonText, -1, QString(), QString());
+  Show(sId, sTitle, sButtonText, -1, sOnButtonResolved, QString());
 }
 
 //----------------------------------------------------------------------------------------
