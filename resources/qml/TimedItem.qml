@@ -47,6 +47,7 @@ Rectangle {
     function stop()
     {
         counter.updateCounter = 0;
+        timedItem.timeout();
         counter.stop();
     }
 

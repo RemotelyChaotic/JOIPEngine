@@ -531,7 +531,7 @@
         <br></li>
 
         <li><b>stop (  ):</b><br>
-        Stops the timer.<br>
+        Stops the timer.<br>This counts as a finished timer.<br>
         <i>Example Usage:</i><br>
         timer.stop();<br>
         <br></li>
@@ -595,7 +595,7 @@
 
         <li><b>show ( string, string [, string [, double [, string | Resource | null [, string | Resource | null ] ] ] ] ): </b><br>
         Inputs to the function are (in the listed order):
-        <ul>
+        <ol>
           <li>The string id of the notification to be created</li>
           <li>The text in the notification (can be empty to create a notification without text)</li>
           <li>(optional) The button text. If not empty, the notification will display a clickable button.<br>
@@ -610,7 +610,7 @@
           The <a href="qrc:/resources/help/editor/resources/resource_help.html">Resource</a> can only
           be of the <i>Script</i> type and can either be the name of a Resource, a resource
           object obtained from the current Scene object or <i>null<i>.</li>
-        </ul>
+        </ol>
         This function will show a new notification with the provided id.
         If a notification of the given id already exists, the old notification will be hidden.<br>
         <i>Example Usage:</i><br>
