@@ -459,7 +459,7 @@ void CNotificationSnippetOverlay::on_pConfirmButton_clicked()
   QString sCode;
   if (m_data.m_bSetTextColor)
   {
-    QString sText("notification.setTextColor([%1]);\n");
+    QString sText("notification.setTextColor(%1);\n");
       QString sColor = "[" +
           QString::number(m_data.m_textColor.red()) + "," +
           QString::number(m_data.m_textColor.green()) + "," +
@@ -469,7 +469,7 @@ void CNotificationSnippetOverlay::on_pConfirmButton_clicked()
   }
   if (m_data.m_bSetTextBackgroundColor)
   {
-    QString sText("notification.setTextBackgroundColor([%1]);\n");
+    QString sText("notification.setTextBackgroundColor(%1);\n");
       QString sColor = "[" +
           QString::number(m_data.m_textBackgroundColor.red()) + "," +
           QString::number(m_data.m_textBackgroundColor.green()) + "," +
@@ -479,7 +479,7 @@ void CNotificationSnippetOverlay::on_pConfirmButton_clicked()
   }
   if (m_data.m_bSetWidgetTextColors)
   {
-    QString sText("notification.setWidgetColor([%1]);\n");
+    QString sText("notification.setWidgetColor(%1);\n");
       QString sColor = "[" +
           QString::number(m_data.m_widgetTextColor.red()) + "," +
           QString::number(m_data.m_widgetTextColor.green()) + "," +
@@ -489,7 +489,7 @@ void CNotificationSnippetOverlay::on_pConfirmButton_clicked()
   }
   if (m_data.m_bSetWidgetTextBackgroundColor)
   {
-    QString sText("notification.setWidgetBackgroundColor([%1]);\n");
+    QString sText("notification.setWidgetBackgroundColor(%1);\n");
       QString sColor = "[" +
           QString::number(m_data.m_widgettextBackgroundColor.red()) + "," +
           QString::number(m_data.m_widgettextBackgroundColor.green()) + "," +
