@@ -106,44 +106,54 @@ void CScriptNotification::show(QString sId, QString sTitle)
 
 //----------------------------------------------------------------------------------------
 //
-void CScriptNotification::show(QString sId, QString sTitle, QString sButtonText)
+void CScriptNotification::show(QString sId, QString sTitle, QJSValue sButtonTextOrTimeout)
 {
   if (!CheckIfScriptCanRun()) { return; }
-  Show(sId, sTitle, sButtonText, -1, QString(), QString());
+  if (sButtonTextOrTimeout.isString())
+  {
+    QString sButtonText = sButtonTextOrTimeout.toString();
+    Show(sId, sTitle, sButtonText, -1, QString(), QString());
+  }
+  else if (sButtonTextOrTimeout.isNumber())
+  {
+    double dTimeS = sButtonTextOrTimeout.toNumber();
+    Show(sId, sTitle, QString(), dTimeS, QString(), QString());
+  }
+  else
+  {
+    Show(sId, sTitle, QString(), -1, QString(), QString());
+  }
 }
 
 //----------------------------------------------------------------------------------------
 //
-void CScriptNotification::show(QString sId, QString sTitle, QString sButtonText, QJSValue sOnButton)
+void CScriptNotification::show(QString sId, QString sTitle, QJSValue sButtonTextOrTimeout, QJSValue onButtonOnTimeoutOrTime)
 {
   if (!CheckIfScriptCanRun()) { return; }
-  QString sOnButtonResolved = GetResource(sOnButton, "show()");
-  Show(sId, sTitle, sButtonText, -1, sOnButtonResolved, QString());
-}
-
-//----------------------------------------------------------------------------------------
-//
-void CScriptNotification::show(QString sId, QString sTitle, double dTimeS)
-{
-  if (!CheckIfScriptCanRun()) { return; }
-  Show(sId, sTitle, QString(), dTimeS, QString(), QString());
-}
-
-//----------------------------------------------------------------------------------------
-//
-void CScriptNotification::show(QString sId, QString sTitle, double dTimeS, QJSValue sOnTimeout)
-{
-  if (!CheckIfScriptCanRun()) { return; }
-  QString sOnTimeoutResolved = GetResource(sOnTimeout, "show()");
-  Show(sId, sTitle, QString(), dTimeS, QString(), sOnTimeoutResolved);
-}
-
-//----------------------------------------------------------------------------------------
-//
-void CScriptNotification::show(QString sId, QString sTitle, QString sButtonText, double dTimeS)
-{
-  if (!CheckIfScriptCanRun()) { return; }
-  Show(sId, sTitle, sButtonText, dTimeS, QString(), QString());
+  if (sButtonTextOrTimeout.isString())
+  {
+    QString sButtonText = sButtonTextOrTimeout.toString();
+    if (onButtonOnTimeoutOrTime.isNumber())
+    {
+      double dTimeS = onButtonOnTimeoutOrTime.toNumber();
+      Show(sId, sTitle, sButtonText, dTimeS, QString(), QString());
+    }
+    else
+    {
+      QString sOnButtonResolved = GetResource(onButtonOnTimeoutOrTime, "show()");
+      Show(sId, sTitle, sButtonText, -1, sOnButtonResolved, QString());
+    }
+  }
+  else if (sButtonTextOrTimeout.isNumber())
+  {
+    double dTimeS = sButtonTextOrTimeout.toNumber();
+    QString sOnTimeoutResolved = GetResource(onButtonOnTimeoutOrTime, "show()");
+    Show(sId, sTitle, QString(), dTimeS, QString(), sOnTimeoutResolved);
+  }
+  else
+  {
+    Show(sId, sTitle, QString(), -1, QString(), QString());
+  }
 }
 
 //----------------------------------------------------------------------------------------

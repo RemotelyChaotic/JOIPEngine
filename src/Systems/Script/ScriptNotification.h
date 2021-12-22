@@ -65,11 +65,8 @@ public slots:
   void setIconAlignment(qint32 alignment);
   void setPortrait(QJSValue resource);
   void show(QString sId, QString sTitle);
-  void show(QString sId, QString sTitle, QString sButtonText);
-  void show(QString sId, QString sTitle, QString sButtonText, QJSValue sOnButton);
-  void show(QString sId, QString sTitle, double dTimeS);
-  void show(QString sId, QString sTitle, double dTimeS, QJSValue sOnTimeout);
-  void show(QString sId, QString sTitle, QString sButtonText, double dTimeS);
+  void show(QString sId, QString sTitle, QJSValue sButtonTextOrTimeout);
+  void show(QString sId, QString sTitle, QJSValue sButtonTextOrTimeout, QJSValue onButtonOnTimeoutOrTime);
   void show(QString sId, QString sTitle, QString sButtonText, double dTimeS, QJSValue sOnButton);
   void show(QString sId, QString sTitle, QString sButtonText, double dTimeS, QJSValue sOnButton, QJSValue sOnTimeout);
   void setTextBackgroundColor(QJSValue color);
