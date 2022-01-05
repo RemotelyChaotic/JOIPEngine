@@ -3,6 +3,8 @@
 
 #include "Systems/ThreadedSystem.h"
 
+#include <QMutex>
+
 class CDatabaseImageProvider;
 
 class CResourceDetailViewFetcherThread : public CSystemBase
@@ -28,12 +30,14 @@ public slots:
 
 private slots:
   void SlotResourcesRequested(qint32 iProject,
-                              const QStringList& vsResources,
                               const QSize& imageSize);
 
 private:
   std::unique_ptr<CDatabaseImageProvider> m_spDbImageProvider;
   std::atomic<bool>                       m_bLoading;
+  QMutex                                  m_queueMutex;
+  QStringList                             m_queue;
+
 };
 
 #endif // CRESOURCEDETAILVIEWFETCHERTHREAD_H
