@@ -275,7 +275,14 @@ void CResourceModelView::SlotCurrentChanged(const QModelIndex& current,
   for (auto pModel : SelectionModels()) { pModel->blockSignals(true); }
   if (sender() == m_spUi->pTreeView->selectionModel())
   {
-    m_spUi->pDetailView->Expand(current.parent());
+    if (m_spUi->pTreeView->model()->hasChildren(current))
+    {
+      m_spUi->pDetailView->Expand(current);
+    }
+    else
+    {
+      m_spUi->pDetailView->Expand(current.parent());
+    }
     m_spUi->pDetailView->selectionModel()->select(
           current, QItemSelectionModel::SelectionFlag::ClearAndSelect);
   }
