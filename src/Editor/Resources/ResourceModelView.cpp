@@ -46,6 +46,9 @@ void CResourceModelView::Initialize(QUndoStack* pStack,
 
   m_pProxy->setSourceModel(pModel);
 
+  // prevents flickering because of recalculation of scrollbar-size
+  m_spUi->pDetailView->setVerticalScrollBarPolicy(Qt::ScrollBarPolicy::ScrollBarAlwaysOn);
+
   m_spUi->pTreeView->setModel(m_pProxy);
   m_spUi->pDetailView->setModel(m_pProxy);
 
