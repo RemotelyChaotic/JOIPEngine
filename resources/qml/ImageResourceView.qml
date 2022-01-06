@@ -11,6 +11,8 @@ Rectangle {
     property Resource resource: null
     property int state: Resource.Null
     property bool animated: false
+    property real paintedWidth: animated ? animatedImage.paintedWidth : image.paintedWidth
+    property real paintedHeight: animated ? animatedImage.paintedHeight : image.paintedHeight
 
     function play()
     {

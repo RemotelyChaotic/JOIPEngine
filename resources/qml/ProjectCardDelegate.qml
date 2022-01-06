@@ -15,6 +15,7 @@ Rectangle {
 
     property int progress: -1
     property bool isHovered: false
+    property bool isSelected: describtionDelegate.parent.ListView.isCurrentItem
     property bool openedDetails: false
     property Project dto: project
 
@@ -57,7 +58,7 @@ Rectangle {
             height: parent.height
 
             color: "transparent"
-            layer.enabled: describtionDelegate.parent.ListView.isCurrentItem
+            layer.enabled: describtionDelegate.isSelected
             layer.effect: Glow {
                 radius: 8
                 samples: 17
@@ -80,6 +81,32 @@ Rectangle {
                 width: parent.width - 10
                 height: parent.height - 10
                 resource: null
+
+                // Gloss
+                Rectangle {
+                    id: glossRect
+                    x: (resource.width - resource.paintedWidth) / 2
+                    y: (resource.height - resource.paintedHeight) / 2
+                    width: resource.paintedWidth
+                    height: resource.paintedHeight
+                    color: "transparent"
+
+                    LinearGradient {
+                        anchors.fill: parent
+                        start: Qt.point(parent.width, 0)
+                        end: Qt.point(parent.width * 2 / 3, parent.height / 2)
+                        gradient: Gradient {
+                            GradientStop {
+                                position: 0.0
+                                color: describtionDelegate.isSelected ? "#DDF0F0F0" : "#AAF0F0F0"
+                            }
+                            GradientStop {
+                                position: 1.0
+                                color: "#00F0F0F0"
+                            }
+                        }
+                    }
+                }
             }
 
             Desaturate {
