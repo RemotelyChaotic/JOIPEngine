@@ -80,6 +80,16 @@ Rectangle {
         warningPopup.open();
     }
 
+    MouseArea {
+        anchors.fill: parent
+        preventStealing: true
+        propagateComposedEvents: true
+        onWheel: {
+            if (wheel.angleDelta.y < 0) scroll.increase();
+            else scroll.decrease();
+        }
+    }
+
     ListView {
         id: listView
         anchors.centerIn: parent
@@ -123,7 +133,10 @@ Rectangle {
             }
         }
 
-        ScrollBar.horizontal: ScrollBar {}
+        ScrollBar.horizontal: ScrollBar{
+            id: scroll
+            orientation: Qt.Horizontal
+        }
 
         // Set the highlight delegate. Note we must also set highlightFollowsCurrentItem
         // to false so the highlight delegate can control how the highlight is moved.
