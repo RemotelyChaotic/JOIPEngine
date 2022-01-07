@@ -82,7 +82,7 @@ public slots:
                                        QJSEngine::ConsoleExtension |
                                        QJSEngine::GarbageCollectionExtension);
 
-    m_pScriptUtils = new CScriptRunnerUtils(this, m_wpSignalEmiterContext.lock());
+    m_pScriptUtils = new CScriptRunnerUtils(this, m_pScriptEngine, m_wpSignalEmiterContext.lock());
     connect(m_pScriptUtils, &CScriptRunnerUtils::finishedScript,
             this, &CJsScriptRunnerInstanceWorker::FinishedScript);
 
@@ -95,6 +95,15 @@ public slots:
     m_pScriptEngine->globalObject().setProperty("IconAlignment", enumIconObjectValue);
     QJSValue enumTextObjectValue = m_pScriptEngine->newQMetaObject(&TextAlignment::staticMetaObject);
     m_pScriptEngine->globalObject().setProperty("TextAlignment", enumTextObjectValue);
+
+    // create wrapper function to make syntax of including scripts easier
+    QString sSkript = QString("(function() { "
+                              "include = function(resource) { "
+                              "   var ret = utils.include(resource); "
+                              "   if (typeof ret === 'string') { return eval(ret); } "
+                              "   else { return (function(){ return eval(ret); })(); } "
+                              "}})();");
+    m_pScriptEngine->evaluate(sSkript);
   }
 
   //--------------------------------------------------------------------------------------
@@ -192,7 +201,6 @@ public slots:
     // create wrapper function to make syntax of scripts easier and handle return value
     // and be able to emit signal on finished
     QString sSkript = QString("(function() { "
-                              "function include(resource) { return eval(utils.include(resource)); }; "
                               "var %1 = function() { %2\n}; "
                               "var ret = %3(); "
                               "utils.finishedScript(ret); \n "
@@ -754,9 +762,11 @@ std::shared_ptr<CScriptRunnerSignalContext> CJsScriptRunner::SignalEmmitterConte
 //----------------------------------------------------------------------------------------
 //
 CScriptRunnerUtils::CScriptRunnerUtils(QObject* pParent,
+                                       QPointer<QJSEngine> pEngine,
                                        std::shared_ptr<CScriptRunnerSignalContext> spSignalEmiterContext) :
   QObject(pParent),
-  m_spSignalEmiterContext(spSignalEmiterContext)
+  m_spSignalEmiterContext(spSignalEmiterContext),
+  m_pEngine(pEngine)
 {
 
 }
@@ -774,7 +784,57 @@ void CScriptRunnerUtils::SetCurrentProject(tspProject spProject)
 
 //----------------------------------------------------------------------------------------
 //
-QString CScriptRunnerUtils::include(QJSValue resource)
+QJSValue CScriptRunnerUtils::include(QJSValue resource)
+{
+  tspResource spResource = GetResource(resource);
+  if (nullptr != spResource)
+  {
+    QReadLocker locker(&spResource->m_rwLock);
+    if (EResourceType::eScript == spResource->m_type._to_integral())
+    {
+      QString sPath = ResourceUrlToAbsolutePath(spResource);
+      QFile sciptFile(sPath);
+      if (sciptFile.exists() && sciptFile.open(QIODevice::ReadOnly))
+      {
+        QString sScript = QString::fromUtf8(sciptFile.readAll());
+        if (sScript.startsWith("{") && sScript.endsWith("}"))
+        {
+          return m_pEngine->evaluate("(" + sScript + ")", spResource->m_sName);
+        }
+        else
+        {
+          return sScript;
+        }
+      }
+    }
+  }
+  return QJSValue();
+}
+
+//----------------------------------------------------------------------------------------
+//
+QJSValue CScriptRunnerUtils::import(QJSValue resource)
+{
+  tspResource spResource = GetResource(resource);
+  if (nullptr != spResource)
+  {
+    QReadLocker locker(&spResource->m_rwLock);
+    if (EResourceType::eScript == spResource->m_type._to_integral())
+    {
+      QString sPath = ResourceUrlToAbsolutePath(spResource);
+      QFile sciptFile(sPath);
+      if (sciptFile.exists() && sciptFile.open(QIODevice::ReadOnly))
+      {
+        return m_pEngine->importModule(sPath);
+      }
+    }
+  }
+  return QJSValue();
+}
+
+//----------------------------------------------------------------------------------------
+//
+tspResource CScriptRunnerUtils::GetResource(QJSValue resource)
 {
   auto spDbManager = CApplication::Instance()->System<CDatabaseManager>().lock();
   tspResource spResource;
@@ -821,22 +881,7 @@ QString CScriptRunnerUtils::include(QJSValue resource)
           ->showError(sError.arg(resource.toString()),QtMsgType::QtWarningMsg);
     }
   }
-
-
-  if (nullptr != spResource)
-  {
-    QReadLocker locker(&spResource->m_rwLock);
-    if (EResourceType::eScript == spResource->m_type._to_integral())
-    {
-      QString sPath = ResourceUrlToAbsolutePath(spResource);
-      QFile sciptFile(sPath);
-      if (sciptFile.exists() && sciptFile.open(QIODevice::ReadOnly))
-      {
-        return "(" + QString::fromUtf8(sciptFile.readAll()) + ")";
-      }
-    }
-  }
-  return QString("({})");
+  return spResource;
 }
 
 #include "JsScriptRunner.moc"

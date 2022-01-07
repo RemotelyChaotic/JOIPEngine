@@ -75,20 +75,25 @@ class CScriptRunnerUtils : public QObject
 
 public:
   CScriptRunnerUtils(QObject* pParent,
+                     QPointer<QJSEngine> pEngine,
                      std::shared_ptr<CScriptRunnerSignalContext> pSignalEmiterContext);
   ~CScriptRunnerUtils() override;
 
   void SetCurrentProject(tspProject spProject);
 
 public slots:
-  QString include(QJSValue resource);
+  QJSValue include(QJSValue resource);
+  QJSValue import(QJSValue resource);
 
 signals:
   void finishedScript(const QVariant& sRetVal);
 
 private:
+  tspResource GetResource(QJSValue resource);
+
   std::shared_ptr<CScriptRunnerSignalContext>     m_spSignalEmiterContext;
   tspProject                                      m_spProject;
+  QPointer<QJSEngine>                             m_pEngine;
 };
 
 #endif // CJSSCRIPTRUNNER_H
