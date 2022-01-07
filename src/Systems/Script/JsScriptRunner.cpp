@@ -12,9 +12,120 @@
 #include <QFileInfo>
 #include <QQmlEngine>
 #include <QTimer>
+#include <vector>
+
+enum EImportMode
+{
+  eModuleName,
+  eVariableName
+};
+struct SReplaceExpModule
+{
+  QString m_sFrom;
+  QString m_sTo;
+};
+struct SReplaceExp
+{
+  QString m_sModule;
+  std::vector<SReplaceExpModule> m_vsExps;
+  qint32 m_iBegin;
+  qint32 m_iNum;
+  EImportMode m_mode;
+};
 
 namespace  {
   const char* c_sMainRunner = "~main";
+
+  /*
+   * import "module-name";
+   * import name from "module-name";
+   * import * as name from "module-name";
+   * import { member } from "module-name";
+   * import { member as alias } from "module-name";
+   * import { member1 , member2 as alias2 , [...] } from "module-name";
+  */
+  const char* c_rxImportStatement0 = R"(import\s+\"(.*)\")";
+  const char* c_rxImportStatement1 = R"(import\s+([a-zA-Z0-9_]+)\s+from\s+\"(.*)\")";
+  const char* c_rxImportStatement2 = R"(import\s+\*\s+as\s+([a-zA-Z0-9_]+)\s+from\s+\"(.*)\")";
+  const char* c_rxImportStatement3 = R"(import\s+\{\s*(.+)\s*\}\s*from\s+\"(.*)\")";
+  const QString c_rxImportStatementFinal = QString("(%1)||(%2)||(%3)||(%4)")
+      .arg(c_rxImportStatement0).arg(c_rxImportStatement1)
+      .arg(c_rxImportStatement2).arg(c_rxImportStatement3);
+
+  QString ReplaceImportStatements(QString& sScript)
+  {
+    QRegularExpression rx(c_rxImportStatementFinal,
+                          QRegularExpression::MultilineOption);
+
+    // collect strings to replace
+    auto i = rx.globalMatch(sScript);
+    QString sModule;
+    QString sExp;
+    std::vector<SReplaceExp> vExps;
+    while (i.hasNext())
+    {
+      QRegularExpressionMatch match = i.next();
+      sModule = match.captured(match.lastCapturedIndex());
+      sExp = match.captured(match.lastCapturedIndex()-1);
+      if (!sModule.isEmpty())
+      {
+        EImportMode mode = eVariableName;
+        if (match.capturedStart(1) != -1 ||
+            match.capturedStart(6) != -1)
+        {
+          mode = eModuleName;
+        }
+        qint32 iBegin = match.capturedStart();
+        qint32 iNum = match.capturedEnd() - iBegin;
+        if (sExp.contains("import")) { sExp = QString(); }
+
+        std::vector<SReplaceExpModule> sExps;
+        if (!sExp.isEmpty())
+        {
+          QStringList vsExpsModule = sExp.split(",");
+          for (const QString& sExpModule : qAsConst(vsExpsModule))
+          {
+            QStringList vsExpModulkeParts = sExpModule.split("as");
+            if (vsExpModulkeParts.size() > 1)
+            {
+              sExps.push_back({vsExpModulkeParts[0].trimmed(), vsExpModulkeParts[1].trimmed()});
+            }
+            else
+            {
+              sExps.push_back({vsExpModulkeParts[0].trimmed(), vsExpModulkeParts[0].trimmed()});
+            }
+          }
+        }
+        vExps.push_back({sModule, sExps, iBegin, iNum, mode});
+      }
+    }
+
+    // replace them from the back
+    for (qint32 i = static_cast<qint32>(vExps.size())-1; 0 <= i; --i)
+    {
+      SReplaceExp& exp = vExps[i];
+      QString sNewExp = QString("utils.import(\"%1\");").arg(exp.m_sModule);
+      if (exp.m_vsExps.size() > 0)
+      {
+        if (eModuleName == exp.m_mode)
+        {
+          sNewExp.prepend(QString("var %1 = ").arg(exp.m_vsExps.front().m_sTo));
+        }
+        else
+        {
+          sNewExp.prepend(QString("var _var_temp_dont_asign = "));
+          for (auto& exp : exp.m_vsExps)
+          {
+            sNewExp.append(QString("var %2 = _var_temp_dont_asign.%1;").arg(exp.m_sFrom).arg(exp.m_sTo));
+          }
+        }
+      }
+      sScript.replace(exp.m_iBegin, exp.m_iNum, sNewExp);
+    }
+
+    return sScript;
+  }
+
 }
 
 //----------------------------------------------------------------------------------------
@@ -208,6 +319,7 @@ public slots:
         .arg(sSceneName)
         .arg(sScript)
         .arg(sSceneName);
+    ReplaceImportStatements(sSkript);
     QJSValue runFunction = m_pScriptEngine->evaluate(sSkript);
 
     if (runFunction.isError())
@@ -797,6 +909,7 @@ QJSValue CScriptRunnerUtils::include(QJSValue resource)
       if (sciptFile.exists() && sciptFile.open(QIODevice::ReadOnly))
       {
         QString sScript = QString::fromUtf8(sciptFile.readAll());
+        ReplaceImportStatements(sScript);
         if (sScript.startsWith("{") && sScript.endsWith("}"))
         {
           return m_pEngine->evaluate("(" + sScript + ")", spResource->m_sName);
