@@ -169,3 +169,23 @@ Fixed Bugs:
 - Resource view is properly resizable now.
 - Old version detection turn off even if the user answers 'No' to changing
   the folder.
+
+================================================================================
+Version 1.2.1.0
+================================================================================
+
+New Features:
+- JS-Style import statements for Modules implemented without defaultMember suport 
+  for now.
+
+Changes:
+- Resource Explorer View shows folder contents instead of the folder if a folder
+  is selected in Tree View.
+- Project Cards are rendered with a gloss effect.
+- include method can include non-JSON-Formated scripts, which are evaled in the
+  global scope.
+
+Fixed Bugs:
+- Flickering in Resource Explorer View was fixed.
+- Early stopping of Resource preview load in Explorer View was fixed.
+- Wheel scrolling of Project card selection fixed.
