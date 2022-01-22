@@ -116,6 +116,14 @@ void CScriptMetronome::setPattern(const QList<double>& vdPattern)
 
 //----------------------------------------------------------------------------------------
 //
+void CScriptMetronome::setVolume(double dVolume)
+{
+  if (!CheckIfScriptCanRun()) { return; }
+  emit SignalEmitter<CMetronomeSignalEmitter>()->setVolume(dVolume);
+}
+
+//----------------------------------------------------------------------------------------
+//
 void CScriptMetronome::start()
 {
   if (!CheckIfScriptCanRun()) { return; }

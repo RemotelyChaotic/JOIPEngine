@@ -251,6 +251,14 @@
         mediaPlayer.seekMedia(10); // skips the curently playing movie to frame 10<br>
         <br></li>
 
+        <li><b>setVolume ( [ string | Resource ], double ):</b><br>
+        Sets the volume of a currently playing <i>Movie</i> or <i>Sound</i> type Resource.<br>
+        If no string argument is provided, the volume of all playing Resources will be modified.<br>
+        The volume here is not an absolute value but multiplied with the engine's volume setting.<br>
+        <i>Example Usage:</i><br>
+        mediaPlayer.setVolume("myResource", 0.5); // volume of "myResource" will be set to 50% of the engine volume<br>
+        <br></li>
+
         <li><b>waitForPlayback ( [ string | Resource ] ):</b><br>
         This function can be called with or without arguments.
         The Resource input can be the name of a Resource, a Resource object obtained from the
@@ -329,6 +337,13 @@
         metronome.setPattern([1]); /* bpm of 60: default pattern; will make the metronome beat every second */<br>
         metronome.setPattern([1,2,2]); /* bpm of 60: will make the metronome beat after 1, 2 and 2 seconds (repeating pattern) */<br>
         metronome.setPattern([2,0.5,1]); /* bpm of 120: will make the metronome beat after 1, 0.25 and 0.5 seconds (repeating pattern) */<br>
+        <br></li>
+
+        <li><b>setVolume ( double ):</b><br>
+        Sets the volume of the metronome.<br>
+        The volume here is not an absolute value but multiplied with the engine's volume setting.<br>
+        <i>Example Usage:</i><br>
+        metronome.setVolume(0.5); // volume of the metronome will be set to 50% of the engine volume<br>
         <br></li>
 
         <li><b>start ( ):</b><br>

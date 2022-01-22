@@ -19,7 +19,8 @@ CMetronomeCanvasQml::CMetronomeCanvasQml(QQuickItem* pParent) :
   m_spSettings(CApplication::Instance()->Settings()),
   m_sBeatResource(":/resources/sound/metronome_default.wav"),
   m_tickColor(Qt::white),
-  m_vdTickmap()
+  m_vdTickmap(),
+  m_dVolume(1.0)
 {
   if (nullptr != m_spSettings)
   {
@@ -124,6 +125,25 @@ void CMetronomeCanvasQml::SetTickColor(const QColor& color)
 
 //----------------------------------------------------------------------------------------
 //
+double CMetronomeCanvasQml::Volume() const
+{
+  return m_dVolume;
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CMetronomeCanvasQml::SetVolume(double dValue)
+{
+  if (!qFuzzyCompare(m_dVolume, dValue))
+  {
+    m_dVolume = dValue;
+    SlotVolumeChanged();
+    emit volumeChanged();
+  }
+}
+
+//----------------------------------------------------------------------------------------
+//
 void CMetronomeCanvasQml::clear()
 {
   m_vdTickmap.clear();
@@ -179,6 +199,6 @@ void CMetronomeCanvasQml::SlotVolumeChanged()
 {
   if (nullptr != m_spSettings)
   {
-    m_spSoundEmitters->SetVolume(m_spSettings->Volume());
+    m_spSoundEmitters->SetVolume(m_spSettings->Volume() * m_dVolume);
   }
 }

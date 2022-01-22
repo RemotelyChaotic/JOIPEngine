@@ -266,8 +266,8 @@
            <rect>
             <x>0</x>
             <y>0</y>
-            <width>512</width>
-            <height>311</height>
+            <width>233</width>
+            <height>96</height>
            </rect>
           </property>
           <layout class="QGridLayout" name="gridLayout_7">
@@ -496,8 +496,17 @@
             <property name="pageStep">
              <number>1000</number>
             </property>
+            <property name="value">
+             <number>10000</number>
+            </property>
             <property name="orientation">
              <enum>Qt::Horizontal</enum>
+            </property>
+            <property name="tickPosition">
+             <enum>QSlider::TicksBelow</enum>
+            </property>
+            <property name="tickInterval">
+             <number>2500</number>
             </property>
            </widget>
           </item>
@@ -540,8 +549,8 @@
            <rect>
             <x>0</x>
             <y>0</y>
-            <width>512</width>
-            <height>311</height>
+            <width>100</width>
+            <height>30</height>
            </rect>
           </property>
           <layout class="QVBoxLayout" name="verticalLayout"/>
@@ -717,8 +726,8 @@
            <rect>
             <x>0</x>
             <y>0</y>
-            <width>512</width>
-            <height>311</height>
+            <width>101</width>
+            <height>37</height>
            </rect>
           </property>
           <layout class="QVBoxLayout" name="verticalLayout_2">

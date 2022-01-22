@@ -170,6 +170,10 @@ Rectangle {
         {
             signalEmitter.seekVideo(iSeek);
         },
+        setVolume: function(sResource, dValue)
+        {
+            signalEmitter.setVolume(sResource, dValue);
+        },
         showMedia: function(sResource)
         {
             signalEmitter.showMedia(sResource, "", 1, 0, -1);
@@ -314,6 +318,30 @@ Rectangle {
         }
         onSeekVideo: {
             movieResource.seek(iSeek);
+        }
+        onSetVolume: {
+            if (null !== movieResource.resource &&
+                (sResource === movieResource.resource.name ||
+                 sResource === ""))
+            {
+                movieResource.setVolume(dValue);
+            }
+
+            if (sResource === "")
+            {
+                for (var i = 0; soundRepeater.count > i; ++i)
+                {
+                    var player = soundRepeater.itemAt(i);
+                    if (null !== player && undefined !== player)
+                    {
+                        player.setVolume(dValue);
+                    }
+                }
+            }
+            else
+            {
+                signalEmitter.tryToCall(sResource, "setVolume", dValue);
+            }
         }
         onShowMedia: {
             showOrPlayMedia(sResource, "", 1, 0, -1);
@@ -532,7 +560,10 @@ Rectangle {
             signalEmitter.tryToCall(sId, "stop");
         }
         onSignalSeek: {
-            signalEmitter.tryToCall(sId, "seek");
+            signalEmitter.tryToCall(sId, "seek", dTime);
+        }
+        onSignalSetVolume: {
+            signalEmitter.tryToCall(sId, "setVolume", dVal);
         }
     }
 

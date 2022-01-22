@@ -33,6 +33,8 @@ struct SResourceSnippetData
   qint64 m_iStartAt = 0;
   bool m_bEndAt = false;
   qint64 m_iEndAt = -1;
+  bool m_bSetVolume = false;
+  double m_dVolume = 1.0;
 };
 
 //----------------------------------------------------------------------------------------
@@ -65,6 +67,8 @@ protected slots:
   void on_pSeekRadioButton_toggled(bool bChecked);
   void on_pSeekSpinBox_valueChanged(qint32 iValue);
   void on_pWaitForFinishedCheckBox_toggled(bool bChecked);
+  void on_pVolumeCheckBox_toggled(bool bChecked);
+  void on_pVolumeSlider_sliderReleased();
   void on_pLoopsCheckBox_toggled(bool bChecked);
   void on_pLoopsSpinBox_valueChanged(qint32 iValue);
   void on_pStartAtCheckBox_toggled(bool bChecked);

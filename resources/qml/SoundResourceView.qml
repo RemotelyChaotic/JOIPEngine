@@ -13,6 +13,7 @@ Rectangle {
     property int loops: 1
     property int startAt: 0
     property int endAt: -1
+    property double volume: 1.0
     property string nameId: ""
     property SoundInstance soundInstance: null
 
@@ -32,7 +33,7 @@ Rectangle {
     {
         player.pauseRequested = true;
         player.stoppedTargetState = false;
-        player.volume = Settings.volume;
+        player.volume = Settings.volume * mediaPlayer.volume;
         player.pause();
     }
 
@@ -40,7 +41,7 @@ Rectangle {
     {
         player.pauseRequested = false;
         player.stoppedTargetState = false;
-        player.volume = Settings.volume;
+        player.volume = Settings.volume * mediaPlayer.volume;
         player.play();
     }
 
@@ -48,7 +49,7 @@ Rectangle {
     {
         player.pauseRequested = false;
         player.stoppedTargetState = true;
-        player.volume = Settings.volume;
+        player.volume = Settings.volume * mediaPlayer.volume;
         player.volume = 0.0;
     }
 
@@ -59,6 +60,12 @@ Rectangle {
             player.fastSeek = true;
             player.seek(iSeekPos);
         }
+    }
+
+    function setVolume(dVolume)
+    {
+        mediaPlayer.volume = dVolume;
+        player.volume = Settings.volume * mediaPlayer.volume;
     }
 
     onResourceChanged: {
@@ -72,7 +79,8 @@ Rectangle {
             {
                 player.pauseRequested = false;
                 player.stoppedTargetState = false;
-                player.volume = Settings.volume;
+                mediaPlayer.volume = 1.0;
+                player.volume = Settings.volume * mediaPlayer.volume;
                 player.source = resource.path;
             }
             else
@@ -130,7 +138,7 @@ Rectangle {
 
         property bool stoppedTargetState: true
         muted: Settings.muted
-        volume: stoppedTargetState ? 0.0 : Settings.volume
+        volume: stoppedTargetState ? 0.0 : (Settings.volume * mediaPlayer.volume)
 
         Behavior on volume {
             animation: NumberAnimation {

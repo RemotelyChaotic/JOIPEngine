@@ -32,6 +32,10 @@ Rectangle {
         {
             signalEmitter.start(vdPattern);
         },
+        setVolume: function(dVolume)
+        {
+            signalEmitter.setVolume(dVolume);
+        },
         stop: function()
         {
             signalEmitter.stop();
@@ -75,6 +79,9 @@ Rectangle {
         }
         onSetPattern: {
             metronomeDisplay.pattern = vdPattern;
+        }
+        onSetVolume: {
+            metronomeDisplay.volume = dVolume;
         }
         onStop: {
             metronomeDisplay.opacity = 0.0;

@@ -29,6 +29,7 @@ signals:
   void seekAudio(const QString& sResource, qint64 iSeek);
   void seekMedia(const QString& sResource, qint64 iSeek);
   void seekVideo(qint64 iSeek);
+  void setVolume(const QString& sResource, double dValue);
   void showMedia(const QString& sResource);
   void stopVideo();
   void stopSound(const QString& sResource);
@@ -73,6 +74,8 @@ public slots:
   void pauseSound(QJSValue resource);
   void seekSound(QJSValue resource, qint64 iSeek);
   void stopSound(QJSValue resource);
+  void setVolume(double dValue);
+  void setVolume(QJSValue resource, double dValue);
   void waitForPlayback();
   void waitForPlayback(QJSValue resource);
   void waitForVideo();
@@ -105,6 +108,7 @@ public:
   void playSound(const QString& sResourceLocator, const QString& iId = QString(),
             qint64 iLoops = 1, qint64 iStartAt = 0);
   void seek(const QString& iId = QString(), qint64 iSeek = 1);
+  void setVolume(const QString& iId, double dValue);
 
 private:
   QString GetResourceName(const QString& sResourceLocator, bool* pbError = nullptr);

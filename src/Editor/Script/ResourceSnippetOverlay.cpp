@@ -8,6 +8,13 @@
 #include "Systems/Scene.h"
 #include "ui_ResourceSnippetOverlay.h"
 
+namespace
+{
+  const double c_dSliderScaling = 10000;
+}
+
+//----------------------------------------------------------------------------------------
+//
 CResourceSnippetOverlay::CResourceSnippetOverlay(QWidget* pParent) :
   COverlayBase(0, pParent),
   m_spUi(std::make_unique<Ui::CResourceSnippetOverlay>()),
@@ -164,6 +171,25 @@ void CResourceSnippetOverlay::on_pWaitForFinishedCheckBox_toggled(bool bChecked)
 {
   if (!m_bInitialized) { return; }
   m_data.m_bWaitForFinished = bChecked;
+}
+
+
+//----------------------------------------------------------------------------------------
+//
+void CResourceSnippetOverlay::on_pVolumeCheckBox_toggled(bool bChecked)
+{
+  if (!m_bInitialized) { return; }
+  m_data.m_bSetVolume = bChecked;
+}
+
+
+//----------------------------------------------------------------------------------------
+//
+void CResourceSnippetOverlay::on_pVolumeSlider_sliderReleased()
+{
+  if (!m_bInitialized) { return; }
+  double dVolume = static_cast<double>(m_spUi->pVolumeSlider->value()) / c_dSliderScaling;
+  m_data.m_dVolume = dVolume;
 }
 
 
@@ -401,6 +427,13 @@ void CResourceSnippetOverlay::on_pConfirmButton_clicked()
     {
       sCode += "mediaPlayer.waitForPlayback();\n";
     }
+  }
+
+  if (m_data.m_bSetVolume &&
+      (type._to_integral() == EResourceType::eMovie || type._to_integral() == EResourceType::eSound))
+  {
+    sCode += QString("mediaPlayer.setVolume(\"%1\", %2);\n")
+        .arg(m_data.m_sResource).arg(m_data.m_dVolume);
   }
 
   emit SignalResourceCode(sCode);

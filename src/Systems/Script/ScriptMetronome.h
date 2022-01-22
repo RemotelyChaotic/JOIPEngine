@@ -23,6 +23,7 @@ signals:
   void setBeatResource(const QString& sResource);
   void setMuted(bool bMuted);
   void setPattern(const QList<double>& vdPattern);
+  void setVolume(double dVolume);
   void start();
   void stop();
 };
@@ -45,6 +46,7 @@ public slots:
   void setBeatResource(QJSValue resource);
   void setMuted(bool bMuted);
   void setPattern(const QList<double>& vdPattern);
+  void setVolume(double dVolume);
   void start();
   void stop();
 

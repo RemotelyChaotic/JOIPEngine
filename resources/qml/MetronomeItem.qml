@@ -13,6 +13,7 @@ Rectangle {
     property var pattern: [ 1 ]
     property bool running: counter.running
     property bool muted: false
+    property double volume: 1.0
 
     function start()
     {
@@ -110,6 +111,15 @@ Rectangle {
         beatResource: metronomeItem.beatResource
         muted: metronomeItem.muted
         tickColor: root.style.metronomeDisplay.ticksColor
+        volume: metronomeItem.volume
+
+        Behavior on volume {
+            animation: NumberAnimation {
+                id: audiofade
+                duration: 300
+                easing.type: Easing.InOutQuad
+            }
+        }
 
         onTickReachedCenter: {
             beginAnim.start();

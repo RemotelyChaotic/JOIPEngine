@@ -23,6 +23,8 @@ struct SMetronomeSnippetCode
   bool m_bSetMute = false;
   bool m_bSetBeatSound = false;
   QString m_sBeatSound = QString();
+  bool m_bSetVolume = false;
+  double m_dVolume = 1.0;
 };
 
 //----------------------------------------------------------------------------------------
@@ -57,6 +59,8 @@ protected slots:
   void on_RemovePatternElemButton_clicked();
   void SlotPatternValueChanged(double dValue);
   void on_pMuteCheckBox_toggled(bool bValue);
+  void on_pVolumeCheckBox_toggled(bool bChecked);
+  void on_pVolumeSlider_sliderReleased();
   void on_pSetBeatSoundCheckBox_toggled(bool bState);
   void on_pResourceLineEdit_editingFinished();
   void on_pFilter_SignalFilterChanged(const QString& sText);

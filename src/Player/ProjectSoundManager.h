@@ -21,6 +21,7 @@ signals:
   void SignalPause(const QString& sId);
   void SignalStop(const QString& sId);
   void SignalSeek(const QString& sId, double dTime);
+  void SignalSetVolume(const QString& sId, double dVal);
   void SignalDestroy(const QString& sId);
 };
 
@@ -99,6 +100,7 @@ signals:
   void signalPause(const QString& sId);
   void signalStop(const QString& sId);
   void signalSeek(const QString& sId, double dTime);
+  void signalSetVolume(const QString& sId, double dVal);
 
 private slots:
   void SlotDestroy(const QString& sId);

@@ -13,6 +13,7 @@ Rectangle {
     property int loops: 1
     property int startAt: 0
     property int endAt: -1
+    property double volume: 1.0
 
     signal finishedPlaying();
 
@@ -50,6 +51,11 @@ Rectangle {
         }
     }
 
+    function setVolume(dVolume)
+    {
+        mediaPlayer.volume = dVolume;
+    }
+
     onResourceChanged: {
         state = Resource.Null;
         mediaPlayer.stop();
@@ -63,6 +69,7 @@ Rectangle {
             else
             {
                 state = Resource.Loading;
+                mediaPlayer.volume = 1.0;
                 player.source = resource.path;
             }
         }
@@ -192,12 +199,16 @@ Rectangle {
             }
         }
         muted: Settings.muted
-        volume: Settings.volume
-        //onVolumeChanged: { //why need this? control.volume = player.volume is not enough?
-        //    if (Math.abs(control.volume - volume) >= 0.01) {
-        //        control.volume = volume
-        //    }
-        //}
+        volume: Settings.volume * mediaPlayer.volume
+
+        Behavior on volume {
+            animation: NumberAnimation {
+                id: audiofade
+                duration: 300
+                easing.type: Easing.InOutQuad
+            }
+        }
+
         onStatusChanged: {
             if (status === MediaPlayer.Loading)
             {

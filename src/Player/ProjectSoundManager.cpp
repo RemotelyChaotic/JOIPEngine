@@ -101,8 +101,7 @@ void CSoundInstanceWrapper::seek(double dTime)
 //
 void CSoundInstanceWrapper::setVolume(double dVal)
 {
-  // volume is handled by the engine
-  Q_UNUSED(dVal);
+  m_spMsgSender->SignalSetVolume(m_sId, dVal);
 }
 
 //----------------------------------------------------------------------------------------
@@ -189,6 +188,8 @@ QJSValue CProjectSoundManager::get(QString sSounId)
             this, &CProjectSoundManager::signalPause);
     connect(pWrapper->m_spMsgSender.get(), &CSoundInstanceMessageSender::SignalSeek,
             this, &CProjectSoundManager::signalSeek);
+    connect(pWrapper->m_spMsgSender.get(), &CSoundInstanceMessageSender::SignalSetVolume,
+            this, &CProjectSoundManager::signalSetVolume);
     connect(pWrapper->m_spMsgSender.get(), &CSoundInstanceMessageSender::SignalStop,
             this, &CProjectSoundManager::signalStop);
 

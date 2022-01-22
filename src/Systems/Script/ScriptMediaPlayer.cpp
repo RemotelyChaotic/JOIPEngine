@@ -234,6 +234,27 @@ void CScriptMediaPlayer::stopSound(QJSValue resource)
 
 //----------------------------------------------------------------------------------------
 //
+void CScriptMediaPlayer::setVolume(double dValue)
+{
+  if (!CheckIfScriptCanRun()) { return; }
+  emit SignalEmitter<CMediaPlayerSignalEmitter>()->setVolume(QString(), dValue);
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CScriptMediaPlayer::setVolume(QJSValue resource, double dValue)
+{
+  if (!CheckIfScriptCanRun()) { return; }
+
+  bool bError = false;
+  QString sResource = GetResourceName(resource, true, &bError);
+  if (bError) { return; }
+
+  emit SignalEmitter<CMediaPlayerSignalEmitter>()->setVolume(sResource, dValue);
+}
+
+//----------------------------------------------------------------------------------------
+//
 void CScriptMediaPlayer::waitForPlayback()
 {
   if (!CheckIfScriptCanRun()) { return; }
@@ -550,6 +571,13 @@ public:
         }
 
         m_pParent->playSound(sResourceLocator, sId, 0==iLoops ? -1 : iLoops, iStartAt);
+
+        const auto& itVolume = GetValue<EArgumentType::eDouble>(args, "volume");
+        if (HasValue(args, "volume") && IsOk<EArgumentType::eDouble>(itVolume))
+        {
+          m_pParent->setVolume(sId, std::get<double>(itVolume));
+        }
+
         return SRunRetVal<ENextCommandToCall::eSibling>();
       }
 
@@ -639,6 +667,15 @@ void CEosScriptMediaPlayer::seek(const QString& iId, qint64 iSeek)
   if (!CheckIfScriptCanRun()) { return; }
   auto spSignalEmitter = SignalEmitter<CMediaPlayerSignalEmitter>();
   emit spSignalEmitter->seekMedia(iId, iSeek);
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CEosScriptMediaPlayer::setVolume(const QString& iId, double dValue)
+{
+  if (!CheckIfScriptCanRun()) { return; }
+  auto spSignalEmitter = SignalEmitter<CMediaPlayerSignalEmitter>();
+  emit spSignalEmitter->setVolume(iId, dValue);
 }
 
 //----------------------------------------------------------------------------------------

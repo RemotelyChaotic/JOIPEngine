@@ -178,6 +178,8 @@ New Features:
 - JS-Style import statements for Modules implemented without defaultMember suport 
   for now.
 - PlayerMediaPlayer supports a stop frame argument for play functions.
+- PlayerMediaPlayer supports setting the volume of Resources via setVolume.
+- PlayerMetronome supports setting the volume via setVolume.
 
 Changes:
 - Resource Explorer View shows folder contents instead of the folder if a folder

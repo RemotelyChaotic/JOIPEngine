@@ -10,6 +10,7 @@
 
 namespace  {
   const char* c_sIndexProperty = "Index";
+  const double c_dSliderScaling = 10000;
 }
 
 //----------------------------------------------------------------------------------------
@@ -214,6 +215,25 @@ void CMetronomeSnippetOverlay::on_pMuteCheckBox_toggled(bool bValue)
   m_data.m_bSetMute = bValue;
 }
 
+
+//----------------------------------------------------------------------------------------
+//
+void CMetronomeSnippetOverlay::on_pVolumeCheckBox_toggled(bool bChecked)
+{
+  if (!m_bInitialized) { return; }
+  m_data.m_bSetVolume = bChecked;
+}
+
+
+//----------------------------------------------------------------------------------------
+//
+void CMetronomeSnippetOverlay::on_pVolumeSlider_sliderReleased()
+{
+  if (!m_bInitialized) { return; }
+  double dVolume = static_cast<double>(m_spUi->pVolumeSlider->value()) / c_dSliderScaling;
+  m_data.m_dVolume = dVolume;
+}
+
 //----------------------------------------------------------------------------------------
 //
 void CMetronomeSnippetOverlay::on_pSetBeatSoundCheckBox_toggled(bool bState)
@@ -301,6 +321,10 @@ void CMetronomeSnippetOverlay::on_pConfirmButton_clicked()
         .arg((m_data.m_sBeatSound.isNull() || type._to_integral() != EResourceType::eSound) ?
              "null" :
              "\"" + m_data.m_sBeatSound + "\"");
+  }
+  if (m_data.m_bSetVolume)
+  {
+    sCode += QString("metronome.setVolume(%2);\n").arg(m_data.m_dVolume);
   }
   if (m_data.m_bStart)
   {
