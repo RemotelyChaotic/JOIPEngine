@@ -195,8 +195,10 @@ void CMediaPlayer::Stop()
 void CMediaPlayer::UpdateSlider(qint64 value)
 {
   if (!m_bLoaded) { return; }
+  m_slider->blockSignals(true);
   m_slider->setRange(0, int(m_player->duration()/m_unit));
   m_slider->setValue(int(value/m_unit));
+  m_slider->blockSignals(false);
 }
 
 //----------------------------------------------------------------------------------------
@@ -244,10 +246,8 @@ void CMediaPlayer::Load()
     vl->addWidget(m_vo->widget());
     m_slider = new QSlider(this);
     m_slider->setOrientation(Qt::Horizontal);
-    connect(m_slider, &QSlider::sliderMoved,
+    connect(m_slider, &QSlider::valueChanged,
             this, static_cast<void (CMediaPlayer::*)(qint32)>(&CMediaPlayer::SeekBySlider));
-    connect(m_slider, &QSlider::sliderPressed,
-            this, static_cast<void (CMediaPlayer::*)(void)>(&CMediaPlayer::SeekBySlider));
     connect(m_player, &AVPlayer::positionChanged,
             this, static_cast<void (CMediaPlayer::*)(qint64)>(&CMediaPlayer::UpdateSlider));
     connect(m_player, &AVPlayer::started,

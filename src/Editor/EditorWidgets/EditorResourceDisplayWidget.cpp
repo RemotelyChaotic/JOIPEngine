@@ -27,7 +27,7 @@ void CEditorResourceDisplayWidget::Initialize()
 {
   m_bInitialized = false;
 
-  m_spUi->pResourceDisplay->SlotSetSliderVisible(true);
+  m_spUi->pResourceDisplay->SlotSetSliderVisible(false);
 
   QUndoView* pView = new QUndoView(this);
   pView->setStack(UndoStack());
