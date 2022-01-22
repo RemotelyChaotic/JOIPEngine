@@ -403,6 +403,8 @@ set(Sources
   Widgets/OverlayBase.h 
   Widgets/OverlayButton.cpp
   Widgets/OverlayButton.h
+  Widgets/Player/AvSlider.cpp
+  Widgets/Player/AvSlider.h
   Widgets/Player/MediaPlayer.cpp 
   Widgets/Player/MediaPlayer.h
   Widgets/ProgressBar.cpp

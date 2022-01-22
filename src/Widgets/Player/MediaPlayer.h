@@ -23,11 +23,17 @@
 
 #include <QWidget>
 #include <QtAV>
+#include <QPointer>
 
+class CAvSlider;
 QT_BEGIN_NAMESPACE
-class QSlider;
+class QLabel;
 class QPushButton;
 QT_END_NAMESPACE
+namespace QtAV {
+class VideoPreviewWidget;
+}
+
 class CMediaPlayer : public QWidget
 {
   Q_OBJECT
@@ -56,6 +62,8 @@ public slots:
   void Stop();
 
 private slots:
+  void OnTimeSliderHover(qint32 pos, qint32 value);
+  void OnTimeSliderLeave();
   void UpdateSlider(qint64 value);
   void UpdateSlider();
   void UpdateSliderUnit();
@@ -63,7 +71,10 @@ private slots:
 private:
   QtAV::VideoOutput* m_vo = nullptr;
   QtAV::AVPlayer* m_player = nullptr;
-  QSlider* m_slider = nullptr;
+  QtAV::VideoPreviewWidget* m_preview = nullptr;
+
+  QPointer<CAvSlider> m_slider = nullptr;
+  QPointer<QLabel> m_timingInfo = nullptr;
   int m_unit;
   bool m_bLoaded = false;
 };

@@ -19,11 +19,18 @@
 ******************************************************************************/
 
 #include "MediaPlayer.h"
+#include "AvSlider.h"
+
 #include <QPushButton>
 #include <QSlider>
 #include <QLayout>
+#include <QLabel>
 #include <QMessageBox>
 #include <QFileDialog>
+#include <QToolTip>
+
+#include <QtAVWidgets>
+
 #include <limits>
 
 using namespace QtAV;
@@ -33,6 +40,7 @@ CMediaPlayer::CMediaPlayer(QWidget* pParent) :
 {
   m_unit = 1000;
   QVBoxLayout *vl = new QVBoxLayout();
+  vl->setSpacing(0);
   setLayout(vl);
   Load();
 }
@@ -68,6 +76,7 @@ void CMediaPlayer::SetSliderVisible(bool bVisible)
 {
   if (!m_bLoaded) { return; }
   m_slider->setVisible(bVisible);
+  m_timingInfo->setVisible(bVisible);
 }
 
 //----------------------------------------------------------------------------------------
@@ -154,17 +163,21 @@ void CMediaPlayer::Unload()
       while (QLayoutItem* pItem = pLayout->takeAt(0))
       {
         if (nullptr != pItem) { delete pItem; }
+        if (nullptr != pItem->widget() && m_vo->widget() != pItem->widget()) { delete pItem->widget(); }
       }
     }
 
-    delete m_slider;
     m_player->setRenderer(nullptr);
     delete m_player;
     delete m_vo;
+    if (m_preview)
+    {
+      m_preview->close();
+      delete m_preview;
+    }
 
     m_vo = nullptr;
     m_player = nullptr;
-    m_slider = nullptr;
     m_bLoaded = false;
   }
 }
@@ -192,12 +205,51 @@ void CMediaPlayer::Stop()
 
 //----------------------------------------------------------------------------------------
 //
+void CMediaPlayer::OnTimeSliderHover(qint32 pos, qint32 value)
+{
+  QPoint gpos = m_slider->parentWidget()->mapToGlobal(m_slider->pos() + QPoint(pos, 0));
+  QToolTip::showText(gpos, QTime(0, 0, 0).addMSecs(value*m_unit).toString("mm:ss"));
+  if (!m_preview)
+  {
+    m_preview = new VideoPreviewWidget();
+  }
+  m_preview->setFile(m_player->file());
+  m_preview->setTimestamp(value);
+  m_preview->preview();
+  static const int w = 100;
+  static const int h = 100;
+  m_preview->setWindowFlags(Qt::Tool |Qt::FramelessWindowHint|Qt::WindowStaysOnTopHint);
+  m_preview->resize(w, h);
+  m_preview->move(gpos - QPoint(w/2, h));
+  m_preview->show();
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CMediaPlayer::OnTimeSliderLeave()
+{
+  if (!m_preview)
+  {
+    return;
+  }
+  if (m_preview->isVisible())
+  {
+    m_preview->close();
+  }
+  delete m_preview;
+  m_preview = nullptr;
+}
+
+//----------------------------------------------------------------------------------------
+//
 void CMediaPlayer::UpdateSlider(qint64 value)
 {
   if (!m_bLoaded) { return; }
   m_slider->blockSignals(true);
   m_slider->setRange(0, int(m_player->duration()/m_unit));
   m_slider->setValue(int(value/m_unit));
+  m_timingInfo->setText(QTime(0, 0, 0).addMSecs(value).toString("mm:ss") + " / " +
+                        QTime(0, 0, 0).addMSecs(m_player->mediaStopPosition()).toString("mm:ss"));
   m_slider->blockSignals(false);
 }
 
@@ -243,11 +295,22 @@ void CMediaPlayer::Load()
     m_vo->widget()->setAttribute(Qt::WA_AlwaysStackOnTop);
     m_vo->widget()->setWindowFlag(Qt::FramelessWindowHint);
     m_player->setRenderer(m_vo);
-    vl->addWidget(m_vo->widget());
-    m_slider = new QSlider(this);
+
+    QWidget* pWidget = new QWidget(this);
+    pWidget->setSizePolicy(QSizePolicy(QSizePolicy::Preferred, QSizePolicy::Fixed));
+    QVBoxLayout* vl2 = new QVBoxLayout();
+    vl2->setSpacing(0);
+    pWidget->setLayout(vl2);
+
+    m_slider = new CAvSlider(pWidget);
     m_slider->setOrientation(Qt::Horizontal);
+    m_slider->setTracking(true);
+    m_timingInfo = new QLabel("00:00 / 00:00", pWidget);
+    m_timingInfo->setAlignment(Qt::AlignHCenter);
     connect(m_slider, &QSlider::valueChanged,
             this, static_cast<void (CMediaPlayer::*)(qint32)>(&CMediaPlayer::SeekBySlider));
+    connect(m_slider, &CAvSlider::onHover, this, &CMediaPlayer::OnTimeSliderHover);
+    connect(m_slider, &CAvSlider::onLeave, this, &CMediaPlayer::OnTimeSliderLeave);
     connect(m_player, &AVPlayer::positionChanged,
             this, static_cast<void (CMediaPlayer::*)(qint64)>(&CMediaPlayer::UpdateSlider));
     connect(m_player, &AVPlayer::started,
@@ -255,9 +318,11 @@ void CMediaPlayer::Load()
     connect(m_player, &AVPlayer::notifyIntervalChanged, this, &CMediaPlayer::UpdateSliderUnit);
     connect(m_player, &AVPlayer::mediaStatusChanged, this, &CMediaPlayer::MediaStatusChanged);
 
-    vl->addWidget(m_slider);
-    QHBoxLayout *hb = new QHBoxLayout();
-    vl->addLayout(hb);
+    vl2->addWidget(m_slider);
+    vl2->addWidget(m_timingInfo);
+
+    vl->addWidget(m_vo->widget());
+    vl->addWidget(pWidget);
 
     m_bLoaded = true;
   }
