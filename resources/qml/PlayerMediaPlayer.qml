@@ -2,10 +2,10 @@ import QtQuick 2.14
 import QtQuick.Controls 2.14
 import QtGraphicalEffects 1.14
 import QtGui 5.14
+import QtAV 1.7
 import JOIP.core 1.2
 import JOIP.db 1.1
 import JOIP.script 1.1
-import QtAV 1.7
 
 Rectangle {
     id: mediaPlayer
@@ -13,7 +13,7 @@ Rectangle {
     property string userName: "mediaPlayer"
     property bool mainMediaPlayer: false
 
-    function showOrPlayMedia(sName, sId, iLoops, iStartAt) {
+    function showOrPlayMedia(sName, sId, iLoops, iStartAt, iEndAt) {
         if (null !== registrator.currentlyLoadedProject &&
             undefined !== registrator.currentlyLoadedProject)
         {
@@ -45,6 +45,7 @@ Rectangle {
                     {
                         movieResource.loops = iLoops;
                         movieResource.startAt = iStartAt;
+                        movieResource.endAt = iEndAt;
                         movieResource.resource = pResource;
                     }
                     break;
@@ -66,6 +67,7 @@ Rectangle {
                                 soundPlayer.nameId = sId;
                                 soundPlayer.loops = iLoops;
                                 soundPlayer.startAt = iStartAt;
+                                soundPlayer.endAt = iEndAt;
                                 soundPlayer.resource = pResource;
                             }
                         }
@@ -128,21 +130,21 @@ Rectangle {
 
     // accessor object for eval
     property var evalAccessor: ({
-        showOrPlayMedia: function(sName, sId, iLoops, iStartAt)
+        showOrPlayMedia: function(sName, sId, iLoops, iStartAt, iEndAt)
         {
-            mediaPlayer.showOrPlayMedia(sName, sId, iLoops, iStartAt);
+            mediaPlayer.showOrPlayMedia(sName, sId, iLoops, iStartAt, iEndAt);
         },
-        tryToPlaySoundOrMovie: function(sResource, sId, iLoops, iStartAt)
+        tryToPlaySoundOrMovie: function(sResource, sId, iLoops, iStartAt, iEndAt)
         {
-            signalEmitter.tryToPlaySoundOrMovie(sResource, sId, iLoops, iStartAt);
+            signalEmitter.tryToPlaySoundOrMovie(sResource, sId, iLoops, iStartAt, iEndAt);
         },
         playVideo: function()
         {
             signalEmitter.playVideo();
         },
-        playSound: function(sResource, sId, iLoops, iStartAt)
+        playSound: function(sResource, sId, iLoops, iStartAt, iEndAt)
         {
-            signalEmitter.playSound(sResource, sId, iLoops, iStartAt);
+            signalEmitter.playSound(sResource, sId, iLoops, iStartAt, iEndAt);
         },
         pauseVideo: function()
         {
@@ -152,9 +154,9 @@ Rectangle {
         {
             signalEmitter.pauseSound(sResource);
         },
-        playMedia: function(sResource, sResource, iLoops, iStartAt)
+        playMedia: function(sResource, sResource, iLoops, iStartAt, iEndAt)
         {
-            signalEmitter.playMedia(sResource, sResource, iLoops, iStartAt);
+            signalEmitter.playMedia(sResource, sResource, iLoops, iStartAt, iEndAt);
         },
         seekAudio: function(sResource, iSeek)
         {
@@ -170,7 +172,7 @@ Rectangle {
         },
         showMedia: function(sResource)
         {
-            signalEmitter.showMedia(sResource, "", 1, 0);
+            signalEmitter.showMedia(sResource, "", 1, 0, -1);
         },
         stopVideo: function()
         {
@@ -214,14 +216,14 @@ Rectangle {
             }
         }
 
-        function tryToPlaySoundOrMovie(sResource, sId, iLoops, iStartAt) {
+        function tryToPlaySoundOrMovie(sResource, sId, iLoops, iStartAt, iEndAt) {
             if ("" !== sResource || "" !== sId)
             {
                 var pResource = registrator.currentlyLoadedProject.resource(sResource);
                 if (null !== pResource && undefined !== pResource &&
                     Resource.Sound === pResource.type)
                 {
-                    SoundManager.registerId(sId || sResource, pResource, iLoops, iStartAt);
+                    SoundManager.registerId(sId || sResource, pResource, iLoops, iStartAt, iEndAt);
                 }
 
                 // first do id lookup
@@ -257,7 +259,7 @@ Rectangle {
                     else
                     {
                         // if none found, start playing new media
-                        showOrPlayMedia(sResource, sId, iLoops, iStartAt);
+                        showOrPlayMedia(sResource, sId, iLoops, iStartAt, iEndAt);
                     }
                 }
             }
@@ -270,7 +272,7 @@ Rectangle {
             if ("" !== sResource || "" !== sId)
             {
                 // both could be an id, so just make a normal lookup
-                tryToPlaySoundOrMovie(sResource, sId, iLoops, iStartAt);
+                tryToPlaySoundOrMovie(sResource, sId, iLoops, iStartAt, iEndAt);
             }
             else
             {
@@ -287,7 +289,7 @@ Rectangle {
             if ("" !== sResource)
             {
                 // could be both an id or a name
-                tryToPlaySoundOrMovie(sResource, sResource, iLoops, iStartAt);
+                tryToPlaySoundOrMovie(sResource, sResource, iLoops, iStartAt, iEndAt);
             }
             else
             {
@@ -314,7 +316,7 @@ Rectangle {
             movieResource.seek(iSeek);
         }
         onShowMedia: {
-            showOrPlayMedia(sResource, "", 1, 0);
+            showOrPlayMedia(sResource, "", 1, 0, -1);
         }
         onStopVideo: {
             movieResource.stop();
@@ -521,7 +523,7 @@ Rectangle {
     Connections {
         target: SoundManager
         onSignalPlay: {
-            signalEmitter.tryToPlaySoundOrMovie(sResource, sId, iLoops, iStartAt);
+            signalEmitter.tryToPlaySoundOrMovie(sResource, sId, iLoops, iStartAt, iEndAt);
         }
         onSignalPause: {
             signalEmitter.tryToCall(sId, "pause");

@@ -221,7 +221,7 @@
          </item>
          <item row="1" column="0">
           <widget class="QWidget" name="widget_6" native="true">
-           <layout class="QHBoxLayout" name="horizontalLayout_3">
+           <layout class="QGridLayout" name="gridLayout_7">
             <property name="leftMargin">
              <number>0</number>
             </property>
@@ -234,14 +234,28 @@
             <property name="bottomMargin">
              <number>0</number>
             </property>
-            <item>
+            <item row="0" column="2">
+             <widget class="QCheckBox" name="pStartAtCheckBox">
+              <property name="text">
+               <string>Start At</string>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="3">
+             <widget class="QSpinBox" name="pStartAtSpinBox">
+              <property name="maximum">
+               <number>10000000</number>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="0">
              <widget class="QCheckBox" name="pLoopsCheckBox">
               <property name="text">
                <string>Loops</string>
               </property>
              </widget>
             </item>
-            <item>
+            <item row="0" column="1">
              <widget class="QSpinBox" name="pLoopsSpinBox">
               <property name="minimum">
                <number>-1</number>
@@ -251,17 +265,23 @@
               </property>
              </widget>
             </item>
-            <item>
-             <widget class="QCheckBox" name="pStartAtCheckBox">
+            <item row="1" column="2">
+             <widget class="QCheckBox" name="pEndAtCheckBox">
               <property name="text">
-               <string>Start At</string>
+               <string>Stop At</string>
               </property>
              </widget>
             </item>
-            <item>
-             <widget class="QSpinBox" name="pStartAtSpinBox">
+            <item row="1" column="3">
+             <widget class="QSpinBox" name="pEndAtSpinBox">
+              <property name="minimum">
+               <number>-1</number>
+              </property>
               <property name="maximum">
                <number>10000000</number>
+              </property>
+              <property name="value">
+               <number>-1</number>
               </property>
              </widget>
             </item>

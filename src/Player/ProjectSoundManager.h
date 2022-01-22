@@ -17,7 +17,7 @@ public:
   ~CSoundInstanceMessageSender() override;
 
 signals:
-  void SignalPlay(const QString& sId, const QString& sResource, qint32 iLoops, qint32 iStartAt);
+  void SignalPlay(const QString& sId, const QString& sResource, qint32 iLoops, qint32 iStartAt, qint32 iEndAt);
   void SignalPause(const QString& sId);
   void SignalStop(const QString& sId);
   void SignalSeek(const QString& sId, double dTime);
@@ -37,7 +37,8 @@ public:
                                  const std::shared_ptr<SResource>& spResource,
                                  const QString& sId,
                                  qint32 iLoops,
-                                 qint32 iStartAt);
+                                 qint32 iStartAt,
+                                 qint32 iEndAt);
   ~CSoundInstanceWrapper() override;
 
   void Dispatched(const QString& sEvent) override;
@@ -60,6 +61,7 @@ private:
   QString                    m_sId;
   qint32                     m_iLoops;
   qint32                     m_iStartAt;
+  qint32                     m_iEndAt;
 };
 
 //----------------------------------------------------------------------------------------
@@ -75,6 +77,7 @@ class CProjectSoundManager : public CProjectEventTargetWrapper
     std::shared_ptr<SResource> m_spResource;
     qint32 m_iLoops;
     qint32 m_iStartAt;
+    qint32 m_iEndAt;
   };
 
 public:
@@ -89,10 +92,10 @@ public slots:
   void clearRegistry();
   void deRregisterId(QString sId);
   QJSValue get(QString sSounId);
-  void registerId(QString sId, QJSValue sound, qint32 iLoops, qint32 iStartAt);
+  void registerId(QString sId, QJSValue sound, qint32 iLoops, qint32 iStartAt, qint32 iEndAt);
 
 signals:
-  void signalPlay(QString sId, QString sResource, qint32 iLoops, qint32 iStartAt);
+  void signalPlay(QString sId, QString sResource, qint32 iLoops, qint32 iStartAt, qint32 iEndAt);
   void signalPause(const QString& sId);
   void signalStop(const QString& sId);
   void signalSeek(const QString& sId, double dTime);

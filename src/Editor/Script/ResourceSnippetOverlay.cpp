@@ -205,6 +205,24 @@ void CResourceSnippetOverlay::on_pStartAtSpinBox_valueChanged(qint32 iValue)
 
 //----------------------------------------------------------------------------------------
 //
+void CResourceSnippetOverlay::on_pEndAtCheckBox_toggled(bool bChecked)
+{
+  if (!m_bInitialized) { return; }
+  m_data.m_bEndAt = bChecked;
+}
+
+
+//----------------------------------------------------------------------------------------
+//
+void CResourceSnippetOverlay::on_pEndAtSpinBox_valueChanged(qint32 iValue)
+{
+  if (!m_bInitialized) { return; }
+  m_data.m_iEndAt = iValue;
+}
+
+
+//----------------------------------------------------------------------------------------
+//
 void CResourceSnippetOverlay::on_pFilter_SignalFilterChanged(const QString& sText)
 {
   if (!m_bInitialized) { return; }
@@ -244,22 +262,30 @@ void CResourceSnippetOverlay::on_pConfirmButton_clicked()
     sAlias = "\"\",";
   }
   QString sLoopsAndStart = m_data.m_bLoops ?
-        (m_data.m_bStartAt ? ",%3 %1, %2" : ",%2 %1") :
-        (m_data.m_bStartAt ? ",%2 1, %1" : "");
+        ((m_data.m_bStartAt || m_data.m_iEndAt) ? ",%3 %1, %2" : ",%2 %1") :
+        ((m_data.m_bStartAt || m_data.m_iEndAt) ? ",%2 1, %1" : "");
   if (m_data.m_bLoops)
   {
     if (m_data.m_bStartAt)
     {
-      sLoopsAndStart = sLoopsAndStart.arg(m_data.m_iLoops).arg(m_data.m_iStartAt).arg(sAlias);
+      sLoopsAndStart = sLoopsAndStart.arg(m_data.m_iLoops)
+          .arg(!m_data.m_bEndAt ? QString::number(m_data.m_iStartAt) :
+                                  QString("%1, %2").arg(m_data.m_bStartAt ? m_data.m_iStartAt : 0).arg(m_data.m_iEndAt))
+          .arg(sAlias);
     }
     else
     {
-      sLoopsAndStart = sLoopsAndStart.arg(m_data.m_iLoops).arg(sAlias);
+      sLoopsAndStart = sLoopsAndStart
+          .arg(m_data.m_iLoops)
+          .arg(sAlias);
     }
   }
-  else if (m_data.m_bStartAt)
+  else if (m_data.m_bStartAt || m_data.m_bEndAt)
   {
-    sLoopsAndStart = sLoopsAndStart.arg(m_data.m_iStartAt).arg(sAlias);
+    sLoopsAndStart = sLoopsAndStart
+        .arg(!m_data.m_bEndAt ? QString::number(m_data.m_iStartAt) :
+                                QString("%1, %2").arg(m_data.m_bStartAt ? m_data.m_iStartAt : 0).arg(m_data.m_iEndAt))
+        .arg(sAlias);
   }
 
 

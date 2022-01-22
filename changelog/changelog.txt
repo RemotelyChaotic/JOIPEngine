@@ -177,6 +177,7 @@ Version 1.2.1.0
 New Features:
 - JS-Style import statements for Modules implemented without defaultMember suport 
   for now.
+- PlayerMediaPlayer supports a stop frame argument for play functions.
 
 Changes:
 - Resource Explorer View shows folder contents instead of the folder if a folder

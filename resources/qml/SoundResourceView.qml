@@ -12,6 +12,7 @@ Rectangle {
     property int playbackState: player.playbackState
     property int loops: 1
     property int startAt: 0
+    property int endAt: -1
     property string nameId: ""
     property SoundInstance soundInstance: null
 
@@ -94,6 +95,7 @@ Rectangle {
 
         loops: -1 === mediaPlayer.loops ? MediaPlayer.Infinite : mediaPlayer.loops
         startPosition: mediaPlayer.startAt
+        stopPosition: -1 == mediaPlayer.endAt ? MediaPlayer.PositionMax : mediaPlayer.endAt
         autoPlay: true
         videoCodecPriority: ["FFmpeg"]
 

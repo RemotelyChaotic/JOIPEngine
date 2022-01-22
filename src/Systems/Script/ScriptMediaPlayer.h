@@ -21,11 +21,11 @@ public:
 signals:
   void playVideo();
   void playSound(const QString& sResource, const QString& sId,
-                 qint64 iLoops, qint64 iStartAt);
+                 qint64 iLoops, qint64 iStartAt, qint64 iEndAt);
   void pauseVideo();
   void pauseSound(const QString& sResource);
   void playMedia(const QString& sResource,
-                 qint64 iLoops, qint64 iStartAt);
+                 qint64 iLoops, qint64 iStartAt, qint64 iEndAt);
   void seekAudio(const QString& sResource, qint64 iSeek);
   void seekMedia(const QString& sResource, qint64 iSeek);
   void seekVideo(qint64 iSeek);
@@ -59,6 +59,7 @@ public slots:
   void play(QJSValue resource);
   void play(QJSValue resource, qint64 iLoops);
   void play(QJSValue resource, qint64 iLoops, qint64 iStartAt);
+  void play(QJSValue resource, qint64 iLoops, qint64 iStartAt, qint64 iEndAt);
   void seek(QJSValue resource, qint64 iSeek);
   void playVideo();
   void pauseVideo();
@@ -68,6 +69,7 @@ public slots:
   void playSound(QJSValue resource, const QString& sId);
   void playSound(QJSValue resource, const QString& sId, qint64 iLoops);
   void playSound(QJSValue resource, const QString& sId, qint64 iLoops, qint64 iStartAt);
+  void playSound(QJSValue resource, const QString& sId, qint64 iLoops, qint64 iStartAt, qint64 iEndAt);
   void pauseSound(QJSValue resource);
   void seekSound(QJSValue resource, qint64 iSeek);
   void stopSound(QJSValue resource);

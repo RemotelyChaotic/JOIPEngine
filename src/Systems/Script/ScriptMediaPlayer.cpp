@@ -65,26 +65,33 @@ void CScriptMediaPlayer::show(QJSValue resource)
 void CScriptMediaPlayer::play()
 {
   if (!CheckIfScriptCanRun()) { return; }
-  emit SignalEmitter<CMediaPlayerSignalEmitter>()->playMedia(QString(), 1, 0);
+  emit SignalEmitter<CMediaPlayerSignalEmitter>()->playMedia(QString(), 1, 0, -1);
 }
 
 //----------------------------------------------------------------------------------------
 //
 void CScriptMediaPlayer::play(QJSValue resource)
 {
-  play(resource, 1, 0);
+  play(resource, 1, 0, -1);
 }
 
 //----------------------------------------------------------------------------------------
 //
 void CScriptMediaPlayer::play(QJSValue resource, qint64 iLoops)
 {
-  play(resource, iLoops, 0);
+  play(resource, iLoops, 0, -1);
 }
 
 //----------------------------------------------------------------------------------------
 //
 void CScriptMediaPlayer::play(QJSValue resource, qint64 iLoops, qint64 iStartAt)
+{
+  play(resource, iLoops, iStartAt, -1);
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CScriptMediaPlayer::play(QJSValue resource, qint64 iLoops, qint64 iStartAt, qint64 iEndAt)
 {
   if (!CheckIfScriptCanRun()) { return; }
 
@@ -93,7 +100,7 @@ void CScriptMediaPlayer::play(QJSValue resource, qint64 iLoops, qint64 iStartAt)
   QString sResource = GetResourceName(resource, true, &bError);
   if (bError) { return; }
 
-  emit pSignalEmitter->playMedia(sResource, iLoops, iStartAt);
+  emit pSignalEmitter->playMedia(sResource, iLoops, iStartAt, iEndAt);
 }
 
 //----------------------------------------------------------------------------------------
@@ -148,26 +155,34 @@ void CScriptMediaPlayer::stopVideo()
 //
 void CScriptMediaPlayer::playSound(QJSValue resource)
 {
-  playSound(resource, QString(), 1, 0);
+  playSound(resource, QString(), 1, 0, -1);
 }
 
 //----------------------------------------------------------------------------------------
 //
 void CScriptMediaPlayer::playSound(QJSValue resource, const QString& sId)
 {
-  playSound(resource, sId, 1, 0);
+  playSound(resource, sId, 1, 0, -1);
 }
 
 //----------------------------------------------------------------------------------------
 //
 void CScriptMediaPlayer::playSound(QJSValue resource, const QString& sId, qint64 iLoops)
 {
-  playSound(resource, sId, iLoops, 0);
+  playSound(resource, sId, iLoops, 0, -1);
 }
 
 //----------------------------------------------------------------------------------------
 //
 void CScriptMediaPlayer::playSound(QJSValue resource, const QString& sId, qint64 iLoops, qint64 iStartAt)
+{
+  playSound(resource, sId, iLoops, iStartAt, -1);
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CScriptMediaPlayer::playSound(QJSValue resource, const QString& sId, qint64 iLoops,
+                                   qint64 iStartAt, qint64 iEndAt)
 {
   if (!CheckIfScriptCanRun()) { return; }
 
@@ -175,7 +190,7 @@ void CScriptMediaPlayer::playSound(QJSValue resource, const QString& sId, qint64
   QString sResource = GetResourceName(resource, false, &bError);
   if (bError) { return; }
 
-  emit SignalEmitter<CMediaPlayerSignalEmitter>()->playSound(sResource, sId, iLoops, iStartAt);
+  emit SignalEmitter<CMediaPlayerSignalEmitter>()->playSound(sResource, sId, iLoops, iStartAt, iEndAt);
 }
 
 //----------------------------------------------------------------------------------------
@@ -614,7 +629,7 @@ void CEosScriptMediaPlayer::playSound(const QString& sResourceLocator, const QSt
   QString sResource = GetResourceName(sResourceLocator, &bError);
   if (bError) { return; }
 
-  emit spSignalEmitter->playSound(sResource, iId, iLoops, iStartAt);
+  emit spSignalEmitter->playSound(sResource, iId, iLoops, iStartAt, -1);
 }
 
 //----------------------------------------------------------------------------------------

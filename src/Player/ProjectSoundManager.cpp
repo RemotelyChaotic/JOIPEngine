@@ -19,14 +19,16 @@ CSoundInstanceWrapper::CSoundInstanceWrapper(QPointer<QJSEngine> pEngine,
                                              const std::shared_ptr<SResource>& spResource,
                                              const QString& sId,
                                              qint32 iLoops,
-                                             qint32 iStartAt) :
+                                             qint32 iStartAt,
+                                             qint32 iEndAt) :
   CProjectEventTargetWrapper(nullptr),
   m_spMsgSender(std::make_unique<CSoundInstanceMessageSender>()),
   m_spResource(spResource),
   m_pEngine(pEngine),
   m_sId(sId),
   m_iLoops(iLoops),
-  m_iStartAt(iStartAt)
+  m_iStartAt(iStartAt),
+  m_iEndAt(iEndAt)
 {
 
 }
@@ -71,7 +73,7 @@ void CSoundInstanceWrapper::play()
     QReadLocker locker(&m_spResource->m_rwLock);
     sName = m_spResource->m_sName;
   }
-  m_spMsgSender->SignalPlay(m_sId, sName, m_iLoops, m_iStartAt);
+  m_spMsgSender->SignalPlay(m_sId, sName, m_iLoops, m_iStartAt, m_iStartAt);
 }
 
 //----------------------------------------------------------------------------------------
@@ -175,7 +177,8 @@ QJSValue CProjectSoundManager::get(QString sSounId)
                                                                 it->second.m_spResource,
                                                                 sSounId,
                                                                 it->second.m_iLoops,
-                                                                it->second.m_iStartAt);
+                                                                it->second.m_iStartAt,
+                                                                it->second.m_iEndAt);
     pWrapper->InitializeEventRegistry(m_wpRegistry);
 
     connect(pWrapper->m_spMsgSender.get(), &CSoundInstanceMessageSender::SignalDestroy,
@@ -197,7 +200,8 @@ QJSValue CProjectSoundManager::get(QString sSounId)
 //----------------------------------------------------------------------------------------
 //
 void CProjectSoundManager::registerId(QString sId, QJSValue sound,
-                                      qint32 iLoops, qint32 iStartAt)
+                                      qint32 iLoops, qint32 iStartAt,
+                                      qint32 iEndAt)
 {
   auto it = m_registry.find(sId);
   if (m_registry.end() == it && sound.isObject())
@@ -206,7 +210,7 @@ void CProjectSoundManager::registerId(QString sId, QJSValue sound,
         dynamic_cast<CResourceScriptWrapper*>(sound.toQObject());
     if (nullptr != pResource)
     {
-      m_registry.insert({sId, {pResource->Data(), iLoops, iStartAt}});
+      m_registry.insert({sId, {pResource->Data(), iLoops, iStartAt, iEndAt}});
     }
   }
 }

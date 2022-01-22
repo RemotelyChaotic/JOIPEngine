@@ -136,11 +136,11 @@
         mediaPlayer.show(myMediaVar); /* note: in this example myMediaVar is a var */<br>
         <br></li>
 
-        <li><b>play ( [ string | Resource [, int [, int] ] ] ):</b><br>
+        <li><b>play ( [ string | Resource [, int [, int [, int] ] ] ] ):</b><br>
         This function can be called with or without arguments. Calling it with arguments
         plays a <i>Movie</i> or <i>Sound</i> type Resource.
-        The second and third argument denote the number of loops and the start position of the media
-        respectively. The default amount of loops is 1 and the default start position is frame 0.
+        The second, third and forth arguments denote the number of loops, the start position and stop position of the media
+        respectively. The default amount of loops is 1, the default start position is frame 0 and the default stop position is -1 for the last frame.
         If a loop count of -1 is given, the playback will loop infinitely.<br>
         The Resource input can be the name of a Resource, a Resource object obtained from the
         current Scene object of the custom id of a Sound Resource.<br>
@@ -163,6 +163,7 @@
         mediaPlayer.play("mySound", 2); // loop sound twice<br>
         mediaPlayer.play("mySound", -1); // loop sound until stopped manually<br>
         mediaPlayer.play("mySound", 1, 10); // starts "mysound" at frame 10 <br>
+        mediaPlayer.play("mySound", 1, 10, 100); // starts "mysound" at frame 10 and stops it at frame 100<br>
         <br></li>
 
         <li><b>playVideo ( ):</b><br>

@@ -31,6 +31,8 @@ struct SResourceSnippetData
   qint64 m_iLoops = 1;
   bool m_bStartAt = false;
   qint64 m_iStartAt = 0;
+  bool m_bEndAt = false;
+  qint64 m_iEndAt = -1;
 };
 
 //----------------------------------------------------------------------------------------
@@ -67,6 +69,8 @@ protected slots:
   void on_pLoopsSpinBox_valueChanged(qint32 iValue);
   void on_pStartAtCheckBox_toggled(bool bChecked);
   void on_pStartAtSpinBox_valueChanged(qint32 iValue);
+  void on_pEndAtCheckBox_toggled(bool bChecked);
+  void on_pEndAtSpinBox_valueChanged(qint32 iValue);
   void on_pFilter_SignalFilterChanged(const QString& sText);
   void on_pConfirmButton_clicked();
   void on_pCancelButton_clicked();
