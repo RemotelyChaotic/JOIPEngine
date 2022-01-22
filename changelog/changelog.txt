@@ -187,6 +187,8 @@ Changes:
 - Project Cards are rendered with a gloss effect.
 - include method can include non-JSON-Formated scripts, which are evaled in the
   global scope.
+- Resource Viewer in Editor shows timing info and preview for Movie and Sound
+  type Resources.
 
 Fixed Bugs:
 - Flickering in Resource Explorer View was fixed.
