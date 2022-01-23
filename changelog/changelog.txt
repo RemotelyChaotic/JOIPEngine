@@ -194,3 +194,4 @@ Fixed Bugs:
 - Flickering in Resource Explorer View was fixed.
 - Early stopping of Resource preview load in Explorer View was fixed.
 - Wheel scrolling of Project card selection fixed.
+- When debugging a script, the player is not shown stacked on top of everything.

@@ -160,6 +160,10 @@ void CSceneMainScreen::SetDebugging(bool bDebugging)
   if (m_bBeingDebugged != bDebugging)
   {
     m_bBeingDebugged = bDebugging;
+
+    m_spUi->pQmlWidget->setAttribute(Qt::WA_AlwaysStackOnTop, !m_bBeingDebugged);
+    m_spUi->pQmlWidget->setAttribute(Qt::WA_TranslucentBackground, !m_bBeingDebugged);
+
     // set size properties manually setzen, since this isn't done automatically
     QQuickItem* pRootObject =  m_spUi->pQmlWidget->rootObject();
     if (nullptr != pRootObject)
