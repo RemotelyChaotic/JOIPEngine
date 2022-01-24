@@ -42,14 +42,14 @@ namespace {
 //
 CEditorCodeWidget::CEditorCodeWidget(QWidget* pParent) :
   CEditorWidgetBase(pParent),
-  m_spBackgroundSnippetOverlay(std::make_unique<CBackgroundSnippetOverlay>(this)),
-  m_spIconSnippetOverlay(std::make_unique<CIconSnippetOverlay>(this)),
-  m_spMetronomeSnippetOverlay(std::make_unique<CMetronomeSnippetOverlay>(this)),
-  m_spNotificationSnippetOverlay(std::make_unique<CNotificationSnippetOverlay>(this)),
-  m_spResourceSnippetOverlay(std::make_unique<CResourceSnippetOverlay>(this)),
-  m_spTextSnippetOverlay(std::make_unique<CTextSnippetOverlay>(this)),
-  m_spTimerSnippetOverlay(std::make_unique<CTimerSnippetOverlay>(this)),
-  m_spThreadSnippetOverlay(std::make_unique<CThreadSnippetOverlay>(this)),
+  m_spBackgroundSnippetOverlay(nullptr),
+  m_spIconSnippetOverlay(nullptr),
+  m_spMetronomeSnippetOverlay(nullptr),
+  m_spNotificationSnippetOverlay(nullptr),
+  m_spResourceSnippetOverlay(nullptr),
+  m_spTextSnippetOverlay(nullptr),
+  m_spTimerSnippetOverlay(nullptr),
+  m_spThreadSnippetOverlay(nullptr),
   m_spUi(std::make_shared<Ui::CEditorCodeWidget>()),
   m_spTutorialStateSwitchHandler(nullptr),
   m_spSettings(CApplication::Instance()->Settings()),
@@ -64,6 +64,15 @@ CEditorCodeWidget::CEditorCodeWidget(QWidget* pParent) :
 {
   m_spUi->setupUi(this);
   m_spUi->pSceneView->setVisible(false);
+
+  m_spBackgroundSnippetOverlay = std::make_unique<CBackgroundSnippetOverlay>(m_spUi->pCodeEdit);
+  m_spIconSnippetOverlay = std::make_unique<CIconSnippetOverlay>(m_spUi->pCodeEdit);
+  m_spMetronomeSnippetOverlay = std::make_unique<CMetronomeSnippetOverlay>(m_spUi->pCodeEdit);
+  m_spNotificationSnippetOverlay = std::make_unique<CNotificationSnippetOverlay>(m_spUi->pCodeEdit);
+  m_spResourceSnippetOverlay = std::make_unique<CResourceSnippetOverlay>(m_spUi->pCodeEdit);
+  m_spTextSnippetOverlay = std::make_unique<CTextSnippetOverlay>(m_spUi->pCodeEdit);
+  m_spTimerSnippetOverlay = std::make_unique<CTimerSnippetOverlay>(m_spUi->pCodeEdit);
+  m_spThreadSnippetOverlay = std::make_unique<CThreadSnippetOverlay>(m_spUi->pCodeEdit);
 
   connect(m_spUi->pCodeEdit->document(), &QTextDocument::contentsChange,
           this, &CEditorCodeWidget::SlotCodeEditContentsChange);

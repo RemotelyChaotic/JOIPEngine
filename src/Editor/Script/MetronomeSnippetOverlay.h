@@ -6,6 +6,7 @@
 
 class CDatabaseManager;
 class CResourceTreeItemModel;
+class CScriptEditorWidget;
 namespace Ui {
   class CMetronomeSnippetOverlay;
 }
@@ -34,7 +35,7 @@ class CMetronomeSnippetOverlay : public COverlayBase
   Q_OBJECT
 
 public:
-  explicit CMetronomeSnippetOverlay(QWidget* pParent = nullptr);
+  explicit CMetronomeSnippetOverlay(CScriptEditorWidget* pParent = nullptr);
   ~CMetronomeSnippetOverlay();
 
   void Initialize(CResourceTreeItemModel* pResourceTreeModel);
@@ -75,6 +76,7 @@ private:
   std::unique_ptr<Ui::CMetronomeSnippetOverlay> m_spUi;
   tspProject                                    m_spCurrentProject;
   std::weak_ptr<CDatabaseManager>               m_wpDbManager;
+  QPointer<CScriptEditorWidget>                 m_pEditor;
   bool                                          m_bInitialized;
   SMetronomeSnippetCode                         m_data;
 };

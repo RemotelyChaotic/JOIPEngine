@@ -1,12 +1,14 @@
 #include "IconSnippetOverlay.h"
+#include "ScriptEditorWidget.h"
 #include "Editor/Resources/ResourceTreeItem.h"
 #include "Editor/Resources/ResourceTreeItemModel.h"
 #include "Editor/Resources/ResourceTreeItemSortFilterProxyModel.h"
 #include "ui_IconSnippetOverlay.h"
 
-CIconSnippetOverlay::CIconSnippetOverlay(QWidget* pParent) :
+CIconSnippetOverlay::CIconSnippetOverlay(CScriptEditorWidget* pParent) :
   COverlayBase(0, pParent),
   m_spUi(new Ui::CIconSnippetOverlay),
+  m_pEditor(pParent),
   m_bInitialized(false),
   m_data()
 {
@@ -48,7 +50,14 @@ void CIconSnippetOverlay::Initialize(CResourceTreeItemModel* pResourceTreeModel)
 //
 void CIconSnippetOverlay::Climb()
 {
-  ClimbToFirstInstanceOf("CEditorMainScreen", false);
+  if (m_pEditor->size().height() < sizeHint().height())
+  {
+    ClimbToFirstInstanceOf("QStackedWidget", false);
+  }
+  else
+  {
+    ClimbToFirstInstanceOf("CScriptEditorWidget", false);
+  }
 }
 
 //----------------------------------------------------------------------------------------

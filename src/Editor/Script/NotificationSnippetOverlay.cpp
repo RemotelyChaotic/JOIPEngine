@@ -1,5 +1,6 @@
 #include "NotificationSnippetOverlay.h"
 #include "Application.h"
+#include "ScriptEditorWidget.h"
 #include "ui_NotificationSnippetOverlay.h"
 #include "Editor/Resources/ResourceTreeItem.h"
 #include "Editor/Resources/ResourceTreeItemModel.h"
@@ -15,9 +16,10 @@ namespace  {
 
 //----------------------------------------------------------------------------------------
 //
-CNotificationSnippetOverlay::CNotificationSnippetOverlay(QWidget* pParent) :
+CNotificationSnippetOverlay::CNotificationSnippetOverlay(CScriptEditorWidget* pParent) :
   COverlayBase(0, pParent),
-  m_spUi(std::make_unique<Ui::CNotificationSnippetOverlay>())
+  m_spUi(std::make_unique<Ui::CNotificationSnippetOverlay>()),
+  m_pEditor(pParent)
 {
   m_spUi->setupUi(this);
 }
@@ -101,7 +103,14 @@ void CNotificationSnippetOverlay::UnloadProject()
 //
 void CNotificationSnippetOverlay::Climb()
 {
-  ClimbToFirstInstanceOf("CEditorMainScreen", false);
+  if (m_pEditor->size().height() < sizeHint().height())
+  {
+    ClimbToFirstInstanceOf("QStackedWidget", false);
+  }
+  else
+  {
+    ClimbToFirstInstanceOf("CScriptEditorWidget", false);
+  }
 }
 
 //----------------------------------------------------------------------------------------

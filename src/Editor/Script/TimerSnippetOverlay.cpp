@@ -1,9 +1,11 @@
 #include "TimerSnippetOverlay.h"
+#include "ScriptEditorWidget.h"
 #include "ui_TimerSnippetOverlay.h"
 
-CTimerSnippetOverlay::CTimerSnippetOverlay(QWidget* pParent) :
+CTimerSnippetOverlay::CTimerSnippetOverlay(CScriptEditorWidget* pParent) :
   COverlayBase(0, pParent),
   m_spUi(new Ui::CTimerSnippetOverlay),
+  m_pEditor(pParent),
   m_data()
 {
   m_spUi->setupUi(this);
@@ -17,9 +19,15 @@ CTimerSnippetOverlay::~CTimerSnippetOverlay()
 //
 void CTimerSnippetOverlay::Climb()
 {
-  ClimbToFirstInstanceOf("CEditorMainScreen", false);
+  if (m_pEditor->size().height() < sizeHint().height())
+  {
+    ClimbToFirstInstanceOf("QStackedWidget", false);
+  }
+  else
+  {
+    ClimbToFirstInstanceOf("CScriptEditorWidget", false);
+  }
 }
-
 
 //----------------------------------------------------------------------------------------
 //

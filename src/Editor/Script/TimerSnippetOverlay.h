@@ -6,6 +6,7 @@
 #include <QTime>
 #include <memory>
 
+class CScriptEditorWidget;
 namespace Ui {
   class CTimerSnippetOverlay;
 }
@@ -29,7 +30,7 @@ class CTimerSnippetOverlay : public COverlayBase
   Q_OBJECT
 
 public:
-  explicit CTimerSnippetOverlay(QWidget *parent = nullptr);
+  explicit CTimerSnippetOverlay(CScriptEditorWidget *parent = nullptr);
   ~CTimerSnippetOverlay() override;
 
 signals:
@@ -53,6 +54,7 @@ protected slots:
 
 private:
   std::unique_ptr<Ui::CTimerSnippetOverlay> m_spUi;
+  QPointer<CScriptEditorWidget>             m_pEditor;
   STimerSnippetData                         m_data;
 };
 

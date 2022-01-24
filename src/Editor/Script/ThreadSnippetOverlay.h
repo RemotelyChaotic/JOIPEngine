@@ -2,9 +2,11 @@
 #define THREADSNIPPETOVERLAY_H
 
 #include "Widgets/OverlayBase.h"
+#include <QPointer>
 #include <QWidget>
 #include <memory>
 
+class CScriptEditorWidget;
 namespace Ui {
   class CThreadSnippetOverlay;
 }
@@ -14,7 +16,7 @@ class CThreadSnippetOverlay : public COverlayBase
   Q_OBJECT
 
 public:
-  explicit CThreadSnippetOverlay(QWidget* pParent = nullptr);
+  explicit CThreadSnippetOverlay(CScriptEditorWidget* pParent = nullptr);
   ~CThreadSnippetOverlay() override;
 
 signals:
@@ -32,6 +34,7 @@ protected slots:
 
 private:
   std::unique_ptr<Ui::CThreadSnippetOverlay> m_spUi;
+  QPointer<CScriptEditorWidget>              m_pEditor;
   double                                     m_bSleepTimeS;
   bool                                       m_bSkippable;
 };

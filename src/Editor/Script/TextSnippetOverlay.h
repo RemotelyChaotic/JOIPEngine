@@ -10,6 +10,7 @@
 
 class CDatabaseManager;
 class CResourceTreeItemModel;
+class CScriptEditorWidget;
 namespace Ui {
   class CTextSnippetOverlay;
 }
@@ -44,7 +45,7 @@ class CTextSnippetOverlay : public COverlayBase
   Q_OBJECT
 
 public:
-  explicit CTextSnippetOverlay(QWidget* pParent = nullptr);
+  explicit CTextSnippetOverlay(CScriptEditorWidget* pParent = nullptr);
   ~CTextSnippetOverlay() override;
 
   void Initialize(CResourceTreeItemModel* pResourceTreeModel);
@@ -94,6 +95,7 @@ private:
   std::unique_ptr<Ui::CTextSnippetOverlay> m_spUi;
   tspProject                               m_spCurrentProject;
   std::weak_ptr<CDatabaseManager>          m_wpDbManager;
+  QPointer<CScriptEditorWidget>            m_pEditor;
   bool                                     m_bInitialized;
   STextSnippetCode                         m_data;
 };

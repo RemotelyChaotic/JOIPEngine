@@ -1,12 +1,14 @@
 #include "BackgroundSnippetOverlay.h"
+#include "ScriptEditorWidget.h"
 #include "Editor/Resources/ResourceTreeItem.h"
 #include "Editor/Resources/ResourceTreeItemModel.h"
 #include "Editor/Resources/ResourceTreeItemSortFilterProxyModel.h"
 #include "ui_BackgroundSnippetOverlay.h"
 
-CBackgroundSnippetOverlay::CBackgroundSnippetOverlay(QWidget* pParent) :
+CBackgroundSnippetOverlay::CBackgroundSnippetOverlay(CScriptEditorWidget* pParent) :
   COverlayBase(0, pParent),
   m_spUi(new Ui::CBackgroundSnippetOverlay),
+  m_pEditor(pParent),
   m_bInitialized(false),
   m_data()
 {
@@ -48,7 +50,14 @@ void CBackgroundSnippetOverlay::Initialize(CResourceTreeItemModel* pResourceTree
 //
 void CBackgroundSnippetOverlay::Climb()
 {
-  ClimbToFirstInstanceOf("CEditorMainScreen", false);
+  if (m_pEditor->size().height() < sizeHint().height())
+  {
+    ClimbToFirstInstanceOf("QStackedWidget", false);
+  }
+  else
+  {
+    ClimbToFirstInstanceOf("CScriptEditorWidget", false);
+  }
 }
 
 //----------------------------------------------------------------------------------------

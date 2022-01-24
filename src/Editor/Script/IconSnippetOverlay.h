@@ -2,8 +2,10 @@
 #define ICONSNIPPETOVERLAY_H
 
 #include "Widgets/OverlayBase.h"
+#include <QPointer>
 #include <memory>
 
+class CScriptEditorWidget;
 class CResourceTreeItemModel;
 namespace Ui {
   class CIconSnippetOverlay;
@@ -22,7 +24,7 @@ class CIconSnippetOverlay : public COverlayBase
   Q_OBJECT
 
 public:
-  explicit CIconSnippetOverlay(QWidget* pParent = nullptr);
+  explicit CIconSnippetOverlay(CScriptEditorWidget* pParent = nullptr);
   ~CIconSnippetOverlay() override;
 
   void Initialize(CResourceTreeItemModel* pResourceTreeModel);
@@ -46,6 +48,7 @@ protected slots:
 
 private:
   std::unique_ptr<Ui::CIconSnippetOverlay> m_spUi;
+  QPointer<CScriptEditorWidget>            m_pEditor;
   bool                                     m_bInitialized;
   SIconSnippetData                         m_data;
 };

@@ -1,5 +1,6 @@
 #include "TextSnippetOverlay.h"
 #include "Application.h"
+#include "ScriptEditorWidget.h"
 #include "Editor/Resources/ResourceTreeItem.h"
 #include "Editor/Resources/ResourceTreeItemModel.h"
 #include "Editor/Resources/ResourceTreeItemSortFilterProxyModel.h"
@@ -18,11 +19,12 @@ namespace  {
 
 //----------------------------------------------------------------------------------------
 //
-CTextSnippetOverlay::CTextSnippetOverlay(QWidget* pParent) :
+CTextSnippetOverlay::CTextSnippetOverlay(CScriptEditorWidget* pParent) :
   COverlayBase(0, pParent),
   m_spUi(new Ui::CTextSnippetOverlay),
   m_spCurrentProject(nullptr),
   m_wpDbManager(CApplication::Instance()->System<CDatabaseManager>()),
+  m_pEditor(pParent),
   m_bInitialized(true),
   m_data()
 {
@@ -81,7 +83,14 @@ void CTextSnippetOverlay::UnloadProject()
 //
 void CTextSnippetOverlay::Climb()
 {
-  ClimbToFirstInstanceOf("CEditorMainScreen", false);
+  if (m_pEditor->size().height() < sizeHint().height())
+  {
+    ClimbToFirstInstanceOf("QStackedWidget", false);
+  }
+  else
+  {
+    ClimbToFirstInstanceOf("CScriptEditorWidget", false);
+  }
 }
 
 //----------------------------------------------------------------------------------------
