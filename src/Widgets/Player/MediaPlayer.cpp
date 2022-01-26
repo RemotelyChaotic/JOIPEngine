@@ -163,8 +163,8 @@ void CMediaPlayer::Unload()
     {
       while (QLayoutItem* pItem = pLayout->takeAt(0))
       {
-        if (nullptr != pItem) { delete pItem; }
         if (nullptr != pItem->widget() && m_vo->widget() != pItem->widget()) { delete pItem->widget(); }
+        if (nullptr != pItem) { delete pItem; }
       }
     }
 
