@@ -1,6 +1,12 @@
 cmake_minimum_required(VERSION 3.5)
 
-project(JOIPEngineProject)
+if (ANDROID)
+  set(CMAKE_TRY_COMPILE_TARGET_TYPE "STATIC_LIBRARY")
+endif()
+
+# hack for android: root Project has to have the same name as the apk Target
+set(JOIP_PROJECT_NAME JOIPEngine)
+project(${JOIP_PROJECT_NAME})
 
 # disable testing and examples
 set(BUILD_TESTING OFF)
@@ -35,17 +41,17 @@ set(CMAKE_DISABLE_IN_SOURCE_BUILD ON)
 # They need to be set before the find_package(Qt5 ...) call.
 
 if(ANDROID)
-    set(ANDROID_PACKAGE_SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/android")
-    if (ANDROID_ABI STREQUAL "armeabi-v7a")
-        set(ANDROID_EXTRA_LIBS
-            ${CMAKE_CURRENT_SOURCE_DIR}/path/to/libcrypto.so
-            ${CMAKE_CURRENT_SOURCE_DIR}/path/to/libssl.so)
-    endif()
+  set(ANDROID_PACKAGE_SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/android")
+  if (ANDROID_ABI STREQUAL "armeabi-v7a")
+      set(ANDROID_EXTRA_LIBS
+          ${CMAKE_CURRENT_SOURCE_DIR}/path/to/libcrypto.so
+          ${CMAKE_CURRENT_SOURCE_DIR}/path/to/libssl.so)
+  endif()
 endif()
 
 add_subdirectory(3rdparty)
 add_subdirectory(src)
 if(WIN32 AND MSVC)
-add_subdirectory(src/Launcher)
+  add_subdirectory(src/Launcher)
+  add_subdirectory(src/RCC)
 endif()
-add_subdirectory(src/RCC)

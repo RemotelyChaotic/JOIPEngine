@@ -13,6 +13,8 @@
 #include <QAction>
 #include <map>
 
+DECLARE_EDITORLAYOUT(CEditorLayoutClassic, CSettings::eClassic)
+
 namespace
 {
   const std::map<EEditorWidget, QString> m_sEditorNamesMap =

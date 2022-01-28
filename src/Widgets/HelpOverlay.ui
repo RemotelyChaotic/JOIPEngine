@@ -161,7 +161,7 @@
   <customwidget>
    <class>COverlayBase</class>
    <extends>QWidget</extends>
-   <header>OverlayBase.h</header>
+   <header>Widgets/OverlayBase.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

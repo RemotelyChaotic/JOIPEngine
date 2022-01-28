@@ -94,7 +94,7 @@
   <customwidget>
    <class>CTimerWidget</class>
    <extends>QWidget</extends>
-   <header>TimerWidget.h</header>
+   <header>Player/TimerWidget.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

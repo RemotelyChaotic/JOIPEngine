@@ -11,6 +11,8 @@
 #include "Widgets/ShortcutButton.h"
 #include <QAction>
 
+DECLARE_EDITORLAYOUT(CEditorLayoutCompact, CSettings::eCompact)
+
 namespace
 {
   const std::map<EEditorWidget, QString> m_sEditorKeyBindingMap =

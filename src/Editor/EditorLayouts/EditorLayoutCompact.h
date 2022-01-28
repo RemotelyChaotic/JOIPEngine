@@ -38,6 +38,4 @@ private:
   EEditorWidget                             m_iCurrentView;
 };
 
-DECLARE_EDITORLAYOUT(CEditorLayoutCompact, CSettings::eCompact)
-
 #endif // EDITORLAYOUTCOMPACT_H

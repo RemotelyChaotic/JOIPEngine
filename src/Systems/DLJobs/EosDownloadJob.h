@@ -104,7 +104,4 @@ private:
   qint32                                 m_iProgressCounter = 0;
 };
 
-DECLARE_DOWNLOADJOB(CEosDownloadJob, "EOS/hostcfg", {"milovana.com"})
-//DECLARE_JOBSETTINGS_WIDGETPROVIDER(CEosDownloadJobWidgetProvider, CEosDownloadJob)
-
 #endif // CEOSDOWNLOADJOB_H

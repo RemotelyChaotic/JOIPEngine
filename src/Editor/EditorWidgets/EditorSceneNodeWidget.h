@@ -98,6 +98,4 @@ private:
   QColor                                                      m_hoveredColor;
 };
 
-DECLARE_EDITORWIDGET(CEditorSceneNodeWidget, EEditorWidget::eSceneNodeWidget)
-
 #endif // SCENENODEWIDGET_H

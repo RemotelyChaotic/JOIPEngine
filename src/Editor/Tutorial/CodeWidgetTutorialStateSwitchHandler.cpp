@@ -26,5 +26,6 @@ void CCodeWidgetTutorialStateSwitchHandler::OnResetStates()
 void CCodeWidgetTutorialStateSwitchHandler::OnStateSwitch(ETutorialState newState,
                                                           ETutorialState oldstate)
 {
-
+  Q_UNUSED(newState)
+  Q_UNUSED(oldstate)
 }

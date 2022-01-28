@@ -63,6 +63,4 @@ private:
   tspProject                                                  m_spCurrentProject;
 };
 
-DECLARE_EDITORWIDGET(CEditorProjectSettingsWidget, EEditorWidget::eProjectSettings)
-
 #endif // EDITORPROJECTSETTINGSWIDGET_H

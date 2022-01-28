@@ -28,5 +28,6 @@ void CProjectSettingsTutorialStateSwitchHandler::OnResetStates()
 void CProjectSettingsTutorialStateSwitchHandler::OnStateSwitch(ETutorialState newState,
                                                                ETutorialState oldstate)
 {
-
+  Q_UNUSED(newState)
+  Q_UNUSED(oldstate)
 }

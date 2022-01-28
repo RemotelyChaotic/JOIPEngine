@@ -42,6 +42,9 @@
 
 Q_DECLARE_METATYPE(std::shared_ptr<Ui::CEosDownloadJobWidget>)
 
+DECLARE_DOWNLOADJOB(CEosDownloadJob, "EOS/hostcfg", {"milovana.com"})
+//DECLARE_JOBSETTINGS_WIDGETPROVIDER(CEosDownloadJobWidgetProvider, CEosDownloadJob)
+
 namespace
 {
   const QUrl c_sGetEOSScript = QUrl("https://milovana.com/webteases/geteosscript.php");
@@ -129,6 +132,7 @@ namespace
 
   //--------------------------------------------------------------------------------------
   //
+  /*
   bool IsMinutesDividableBy3()
   {
     std::chrono::minutes m =
@@ -136,6 +140,7 @@ namespace
     qint32 iNumNinutes = m.count();
     return (iNumNinutes % 3) == 0;
   }
+  */
 }
 
 //----------------------------------------------------------------------------------------

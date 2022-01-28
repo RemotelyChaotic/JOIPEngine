@@ -109,7 +109,7 @@
   <customwidget>
    <class>CEditorLayoutClassic</class>
    <extends>QWidget</extends>
-   <header>EditorLayoutClassic.h</header>
+   <header>Editor/EditorLayouts/EditorLayoutClassic.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

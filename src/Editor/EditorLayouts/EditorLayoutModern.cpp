@@ -6,6 +6,8 @@
 #include "Editor/Tutorial/ModernTutorialStateSwitchHandler.h"
 #include <QComboBox>
 
+DECLARE_EDITORLAYOUT(CEditorLayoutModern, CSettings::eModern)
+
 CEditorLayoutModern::CEditorLayoutModern(QWidget *parent) :
   CEditorLayoutBase(parent),
   m_spUi(std::make_unique<Ui::CEditorLayoutModern>())

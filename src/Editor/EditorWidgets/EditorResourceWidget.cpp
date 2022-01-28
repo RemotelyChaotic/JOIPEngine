@@ -39,6 +39,8 @@
 
 #include <cassert>
 
+DECLARE_EDITORWIDGET(CEditorResourceWidget, EEditorWidget::eResourceWidget)
+
 namespace
 {
   const QString c_sResourceTreeHelpId =   "Editor/ResourceTree";

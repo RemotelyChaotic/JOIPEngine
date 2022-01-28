@@ -5,7 +5,6 @@
 #include <syntaxhighlighter.h>
 #include <definition.h>
 #include <theme.h>
-#include <repository.h>
 #include <QtWidgets>
 #include <QFontMetrics>
 

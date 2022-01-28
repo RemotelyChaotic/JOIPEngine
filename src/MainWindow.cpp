@@ -16,9 +16,11 @@
 #include "Widgets/DownloadButtonOverlay.h"
 #include "Widgets/HelpOverlay.h"
 #include "ui_MainWindow.h"
+
 #include <QDesktopWidget>
 #include <QDir>
 #include <QMessageBox>
+#include <QScreen>
 #include <QStyle>
 
 CMainWindow::CMainWindow(QWidget* pParent) :
@@ -184,9 +186,8 @@ void CMainWindow::SlotFullscreenChanged()
 void CMainWindow::SlotResolutionChanged()
 {
   QPoint globalCursorPos = QCursor::pos();
-  QDesktopWidget* pDesktop = QApplication::desktop();
   QRect availableGeometry =
-      pDesktop->availableGeometry(pDesktop->screenNumber(globalCursorPos));
+      QGuiApplication::screenAt(globalCursorPos)->geometry();
 
   QSize newResolution = m_spSettings->Resolution();
   setGeometry(

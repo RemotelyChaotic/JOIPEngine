@@ -29,6 +29,8 @@
 #include <QStandardItemModel>
 #include <QUndoStack>
 
+DECLARE_EDITORWIDGET(CEditorCodeWidget, EEditorWidget::eSceneCodeEditorWidget)
+
 namespace {
   const qint32 c_iIndexNoScripts = 0;
   const qint32 c_iIndexScripts   = 1;

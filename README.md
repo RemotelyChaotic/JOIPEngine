@@ -17,6 +17,9 @@ cmake -G"Ninja" -DCMAKE_INSTALL_PREFIX="./" ../extra-cmake-modules
 ninja install
 ```
 
+For Android, now add jom.exe to your PATH, be it in the Qt-Creator Project settings, or in the console.
+It's typically in a path like [...]\Qt5.14.1\Tools\QtCreator\bin\ if you downloaded Qt.
+
 Next you can build the Application.
 
 #### Building in QtCreator

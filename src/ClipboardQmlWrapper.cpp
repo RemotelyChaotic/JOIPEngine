@@ -8,7 +8,8 @@ CClipboardQmlWrapper::CClipboardQmlWrapper(QObject* pParent) :
 {
   if (nullptr != m_pClipboard)
   {
-    connect(m_pClipboard.data(), &QClipboard::changed, this, &CClipboardQmlWrapper::changed);
+    connect(m_pClipboard.data(), &QClipboard::changed, this,
+            [this](QClipboard::Mode mode) { emit changed(static_cast<int>(mode)); });
     connect(m_pClipboard.data(), &QClipboard::selectionChanged, this, &CClipboardQmlWrapper::selectionChanged);
     connect(m_pClipboard.data(), &QClipboard::findBufferChanged, this, &CClipboardQmlWrapper::findBufferChanged);
     connect(m_pClipboard.data(), &QClipboard::dataChanged, this, &CClipboardQmlWrapper::dataChanged);

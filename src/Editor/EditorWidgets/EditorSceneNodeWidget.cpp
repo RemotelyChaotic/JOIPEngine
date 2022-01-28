@@ -30,6 +30,8 @@ using QtNodes::FlowViewStyle;
 using QtNodes::Node;
 using QtNodes::NodeStyle;
 
+DECLARE_EDITORWIDGET(CEditorSceneNodeWidget, EEditorWidget::eSceneNodeWidget)
+
 namespace
 {
   const QString c_sNodeHelpId =      "Editor/NodeHelp";

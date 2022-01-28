@@ -28,6 +28,8 @@
 #include <QTextDocument>
 #include <QUndoStack>
 
+DECLARE_EDITORWIDGET(CEditorProjectSettingsWidget, EEditorWidget::eProjectSettings)
+
 namespace
 {
   const char c_sKinkRootWidgetProperty[] = "KinkRootWidget";

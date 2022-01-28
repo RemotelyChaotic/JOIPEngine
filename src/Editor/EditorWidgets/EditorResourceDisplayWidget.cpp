@@ -5,6 +5,8 @@
 #include <QUndoStack>
 #include <QUndoView>
 
+DECLARE_EDITORWIDGET(CEditorResourceDisplayWidget, EEditorWidget::eResourceDisplay)
+
 CEditorResourceDisplayWidget::CEditorResourceDisplayWidget(QWidget* pParent) :
   CEditorWidgetBase(pParent),
   m_spUi(std::make_shared<Ui::CEditorResourceDisplayWidget>()),

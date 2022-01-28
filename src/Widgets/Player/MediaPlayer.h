@@ -21,11 +21,12 @@
 #ifndef PLAYERWINDOW_H
 #define PLAYERWINDOW_H
 
+#include "AvSlider.h"
+
 #include <QWidget>
 #include <QtAV>
 #include <QPointer>
 
-class CAvSlider;
 QT_BEGIN_NAMESPACE
 class QLabel;
 class QPushButton;

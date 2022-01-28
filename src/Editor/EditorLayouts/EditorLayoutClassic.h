@@ -54,6 +54,4 @@ private:
   qint32                                                      m_iLastRightIndex;
 };
 
-DECLARE_EDITORLAYOUT(CEditorLayoutClassic, CSettings::eClassic)
-
 #endif // CEDITORLAYOUTCLASSIC_H

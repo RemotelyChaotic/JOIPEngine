@@ -1,6 +1,8 @@
 #ifndef SCRIPTEDITORWIDGET_H
 #define SCRIPTEDITORWIDGET_H
 
+#include <repository.h>
+
 #include <QIcon>
 #include <QPlainTextEdit>
 #include <QPointer>
@@ -14,10 +16,6 @@ class CLineNumberArea;
 class CHighlightedSearchableTextEdit;
 class CEditorSearchBar;
 class CWidgetArea;
-namespace KSyntaxHighlighting
-{
-  class Repository;
-}
 class QPaintEvent;
 class QResizeEvent;
 class QSize;

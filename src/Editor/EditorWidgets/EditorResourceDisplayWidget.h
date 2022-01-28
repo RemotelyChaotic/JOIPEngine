@@ -45,6 +45,4 @@ protected:
   std::shared_ptr<CResourceDisplayTutorialStateSwitchHandler> m_spTutorialStateSwitchHandler;
 };
 
-DECLARE_EDITORWIDGET(CEditorResourceDisplayWidget, EEditorWidget::eResourceDisplay)
-
 #endif // EDITORRESOURCEDISPLAYWIDGET_H

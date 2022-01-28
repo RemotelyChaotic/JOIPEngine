@@ -19,7 +19,6 @@
 ******************************************************************************/
 
 #include "MediaPlayer.h"
-#include "AvSlider.h"
 
 #include <QDebug>
 #include <QPushButton>

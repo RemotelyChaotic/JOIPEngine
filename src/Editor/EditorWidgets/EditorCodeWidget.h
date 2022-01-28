@@ -93,6 +93,4 @@ private:
   QString                                                m_sLastCachedScript;
 };
 
-DECLARE_EDITORWIDGET(CEditorCodeWidget, EEditorWidget::eSceneCodeEditorWidget)
-
 #endif // EDITORCODEWIDGET_H

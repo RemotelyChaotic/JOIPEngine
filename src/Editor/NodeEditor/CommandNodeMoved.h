@@ -2,6 +2,7 @@
 #define CCOMMANDNODEMOVED_H
 
 #include <QPointer>
+#include <QPointF>
 #include <QUndoCommand>
 #include <QUuid>
 

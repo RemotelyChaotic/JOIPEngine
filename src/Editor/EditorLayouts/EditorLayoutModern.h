@@ -30,6 +30,4 @@ private:
   std::unique_ptr<Ui::CEditorLayoutModern> m_spUi;
 };
 
-DECLARE_EDITORLAYOUT(CEditorLayoutModern, CSettings::eModern)
-
 #endif // EDITORLAYOUTMODERN_H

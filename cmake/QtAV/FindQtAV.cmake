@@ -24,27 +24,54 @@ find_path(QTAV_INCLUDE_DIR NAMES QtAV.h
     HINTS ${QT_INSTALL_HEADERS}
     PATH_SUFFIXES QtAV
 )
-if (KDE_DEBUG)
-  find_library(QTAV_LIBRARY NAMES QtAVd QtAVd1
-      HINTS ${QT_INSTALL_LIBS})
+
+if(ANDROID)
+  if (KDE_DEBUG)
+    find_library(QTAV_LIBRARY NAMES
+        libQtAVd${CMAKE_SHARED_LIBRARY_SUFFIX_CXX}
+        libQmlAVd${CMAKE_SHARED_LIBRARY_SUFFIX_CXX}
+        HINTS ${QT_INSTALL_LIBS})
+  else()
+    find_library(QTAV_LIBRARY NAMES
+        libQtAV${CMAKE_SHARED_LIBRARY_SUFFIX_CXX}
+        libQmlAV${CMAKE_SHARED_LIBRARY_SUFFIX_CXX}
+        HINTS ${QT_INSTALL_LIBS})
+  endif(KDE_DEBUG)
 else()
-  find_library(QTAV_LIBRARY NAMES QtAV QtAV1
-      HINTS ${QT_INSTALL_LIBS})
-endif(KDE_DEBUG)
+  if (KDE_DEBUG)
+    find_library(QTAV_LIBRARY NAMES QtAVd QtAVd1
+        HINTS ${QT_INSTALL_LIBS})
+  else()
+    find_library(QTAV_LIBRARY NAMES QtAV QtAV1
+        HINTS ${QT_INSTALL_LIBS})
+  endif(KDE_DEBUG)
+endif()
 
 find_path(QTAVWIDGETS_INCLUDE_DIR NAMES QtAVWidgets.h
     HINTS ${QT_INSTALL_HEADERS}
     PATH_SUFFIXES QtAVWidgets
 )
-if (KDE_DEBUG)
-  find_library(QTAVWIDGETS_LIBRARY NAMES QtAVWidgetsd QtAVWidgetsd1
-      HINTS ${QT_INSTALL_LIBS}
-  )
+if(ANDROID)
+  if (KDE_DEBUG)
+    find_library(QTAVWIDGETS_LIBRARY NAMES libQtAVWidgetsd${CMAKE_SHARED_LIBRARY_SUFFIX_CXX}
+        HINTS ${QT_INSTALL_LIBS}
+    )
+  else()
+    find_library(QTAVWIDGETS_LIBRARY NAMES libQtAVWidgets${CMAKE_SHARED_LIBRARY_SUFFIX_CXX}
+        HINTS ${QT_INSTALL_LIBS}
+    )
+  endif(KDE_DEBUG)
 else()
-  find_library(QTAVWIDGETS_LIBRARY NAMES QtAVWidgets QtAVWidgets1
-      HINTS ${QT_INSTALL_LIBS}
-  )
-endif(KDE_DEBUG)
+  if (KDE_DEBUG)
+    find_library(QTAVWIDGETS_LIBRARY NAMES QtAVWidgetsd QtAVWidgetsd1
+        HINTS ${QT_INSTALL_LIBS}
+    )
+  else()
+    find_library(QTAVWIDGETS_LIBRARY NAMES QtAVWidgets QtAVWidgets1
+        HINTS ${QT_INSTALL_LIBS}
+    )
+  endif(KDE_DEBUG)
+endif()
 
 set(QTAV_INCLUDE_DIRS ${QTAV_INCLUDE_DIR} ${QTAV_INCLUDE_DIR}/..)
 set(QTAV_LIBRARIES ${QTAV_LIBRARY})

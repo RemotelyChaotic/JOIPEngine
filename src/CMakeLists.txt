@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.5)
 
-project(JOIPEngine LANGUAGES CXX)
+set(PROJECT_NAME ${JOIP_PROJECT_NAME})
 
 include(JOIPCommon)
 include(QtAV/FindQtAV)
@@ -490,6 +490,19 @@ target_compile_definitions(${PROJECT_NAME}
     ${NodeEditor_DEFINITIONS})
 
 #-----------------------------------------------------------------------------------------
+# Android deployment fix
+# see https://bugreports.qt.io/browse/QTBUG-88583
+#-----------------------------------------------------------------------------------------
+if(ANDROID)
+  file(MAKE_DIRECTORY "${CMAKE_BINARY_DIR}/android-build/libs/${ANDROID_ABI}/")
+  add_custom_command(
+      TARGET ${PROJECT_NAME}
+      POST_BUILD
+      COMMAND ${CMAKE_COMMAND} -E copy "${CMAKE_CURRENT_BINARY_DIR}/lib${PROJECT_NAME}_${ANDROID_ABI}.so" "${CMAKE_BINARY_DIR}/android-build/libs/${ANDROID_ABI}/"
+  )
+endif()
+
+#-----------------------------------------------------------------------------------------
 # Version and icon
 #-----------------------------------------------------------------------------------------
 set_target_properties(${PROJECT_NAME} PROPERTIES OUTPUT_NAME ${PROJECT_NAME})
@@ -512,18 +525,26 @@ set(PROJECT_VERSION ${${PROJECT_NAME}_VERSION})
 get_target_property(OUTPUT_BASENAME ${PROJECT_NAME} OUTPUT_NAME)
 set(OUTPUT_FILENAME "$<TARGET_FILE_NAME:${PROJECT_NAME}>")
 
-target_sources(${PROJECT_NAME}
-  PRIVATE
-  "${CMAKE_SOURCE_DIR}/version.cpp"
-  "${CMAKE_SOURCE_DIR}/version.h.in"
-  "${CMAKE_SOURCE_DIR}/version_win.rc.in"
-  "${PROJECT_BINARY_DIR}/version_win.rc"
-  )
+if (WIN32)
+  target_sources(${PROJECT_NAME}
+    PRIVATE
+    "${CMAKE_SOURCE_DIR}/version.cpp"
+    "${CMAKE_SOURCE_DIR}/version.h.in"
+    "${CMAKE_SOURCE_DIR}/version_win.rc.in"
+    "${PROJECT_BINARY_DIR}/version_win.rc"
+    )
 
-configure_file(
-  "${CMAKE_SOURCE_DIR}/version_win.rc.in"
-  "${PROJECT_BINARY_DIR}/version_win.rc"
-)
+  configure_file(
+    "${CMAKE_SOURCE_DIR}/version_win.rc.in"
+    "${PROJECT_BINARY_DIR}/version_win.rc"
+  )
+else()
+  target_sources(${PROJECT_NAME}
+    PRIVATE
+    "${CMAKE_SOURCE_DIR}/version.cpp"
+    "${CMAKE_SOURCE_DIR}/version.h.in"
+    )
+endif()
 
 configure_file_generate(
   "${CMAKE_SOURCE_DIR}/version.h.in"
