@@ -28,3 +28,6 @@
 [submodule "3rdparty/xmldom"]
 	path = 3rdparty/xmldom
 	url = https://github.com/RemotelyChaotic/xmldom.git
+[submodule "3rdparty/android_openssl"]
+	path = 3rdparty/android_openssl
+	url = https://github.com/RemotelyChaotic/android_openssl.git

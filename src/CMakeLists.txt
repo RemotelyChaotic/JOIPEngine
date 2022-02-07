@@ -10,7 +10,6 @@ find_package(Qt5 COMPONENTS
     Multimedia
     MultimediaWidgets
     Network
-    OpenGL
     Qml
     Quick
     QuickControls2
@@ -451,7 +450,6 @@ target_link_libraries(${PROJECT_NAME}
     Qt5::Multimedia
     Qt5::MultimediaWidgets
     Qt5::Network
-    Qt5::OpenGL
     Qt5::Qml
     Qt5::Quick
     Qt5::QuickControls2
@@ -490,16 +488,25 @@ target_compile_definitions(${PROJECT_NAME}
     ${NodeEditor_DEFINITIONS})
 
 #-----------------------------------------------------------------------------------------
-# Android deployment fix
-# see https://bugreports.qt.io/browse/QTBUG-88583
+# Android stuff
 #-----------------------------------------------------------------------------------------
-if(ANDROID)
+if (ANDROID)
+  # Android deployment fix
+  # see https://bugreports.qt.io/browse/QTBUG-88583
   file(MAKE_DIRECTORY "${CMAKE_BINARY_DIR}/android-build/libs/${ANDROID_ABI}/")
   add_custom_command(
       TARGET ${PROJECT_NAME}
       POST_BUILD
       COMMAND ${CMAKE_COMMAND} -E copy "${CMAKE_CURRENT_BINARY_DIR}/lib${PROJECT_NAME}_${ANDROID_ABI}.so" "${CMAKE_BINARY_DIR}/android-build/libs/${ANDROID_ABI}/"
   )
+
+  set(ANDROID_PERMISSIONS
+    "android.permission.INTERNET"
+    "android.permission.MANAGE_DOCUMENTS"
+    "android.permission.MANAGE_MEDIA")
+
+  set(ANDROID_FEATURES
+    "android.hardware.opengles.aep")
 endif()
 
 #-----------------------------------------------------------------------------------------
