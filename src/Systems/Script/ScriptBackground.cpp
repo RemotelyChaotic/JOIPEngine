@@ -23,6 +23,7 @@ std::shared_ptr<CScriptObjectBase> CBackgroundSignalEmitter::CreateNewScriptObje
 
 std::shared_ptr<CScriptObjectBase> CBackgroundSignalEmitter::CreateNewScriptObject(QPointer<CJsonInstructionSetParser> pParser)
 {
+  Q_UNUSED(pParser)
   return nullptr;
 }
 

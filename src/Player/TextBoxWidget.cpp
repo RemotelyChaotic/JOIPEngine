@@ -155,11 +155,11 @@ void CTextBoxWidget::SlotShowButtonPrompts(QStringList vsLabels)
     pRoot->setFixedWidth(m_spUi->pContent->width());
     CFlowLayout* pFlowLayout = new CFlowLayout(pRoot, 10, 10, 10);
 
-    qint32 iIndex = 0;
+    size_t iIndex = 0;
     for (const QString& sLabel : qAsConst(vsLabels))
     {
       QPushButton* pButton = new QPushButton(sLabel, pRoot);
-      pButton->setProperty(c_sPropertyButtonIndex, iIndex);
+      pButton->setProperty(c_sPropertyButtonIndex, static_cast<qint32>(iIndex));
       pButton->setStyleSheet(QString("QPushButton { background-color: rgb(%1, %2, %3); "
                                      "color : rgb(%4, %5, %6); "
                                      "border-image: none;"
