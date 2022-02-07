@@ -760,7 +760,7 @@ bool CJSonSaxParser::number_integer(number_integer_t val)
       const auto& foundValueType = c_convertableTypes.find(std::get<EArgumentType>(type));
       if (foundValueType != c_convertableTypes.end())
       {
-        QVariant var(val);
+        QVariant var = QVariant::fromValue(val);
         if (!var.convert(*foundValueType)) { return false; }
         InsertValueIntoArgs(var, m_parseStack.top()->m_actualArgs, m_sCurrentKey,
                             *foundValueType, bArray);
@@ -797,7 +797,7 @@ bool CJSonSaxParser::number_unsigned(number_unsigned_t val)
       const auto& foundValueType = c_convertableTypes.find(std::get<EArgumentType>(type));
       if (foundValueType != c_convertableTypes.end())
       {
-        QVariant var(val);
+        QVariant var = QVariant::fromValue(val);
         if (!var.convert(*foundValueType)) { return false; }
         InsertValueIntoArgs(var, m_parseStack.top()->m_actualArgs, m_sCurrentKey,
                             *foundValueType, bArray);

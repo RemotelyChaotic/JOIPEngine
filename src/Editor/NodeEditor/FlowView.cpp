@@ -17,7 +17,6 @@
 #include <QGraphicsItem>
 #include <QHeaderView>
 #include <QLineEdit>
-#include <QGLWidget>
 #include <QMenu>
 #include <QTreeWidget>
 #include <QUndoStack>
