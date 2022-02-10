@@ -131,6 +131,13 @@ QTabBar::tab:!selected {
   margin-top: 2px; /* make non-selected tabs look smaller */
 }
 
+QTabBar::tab:disabled {
+  min-width: 0px;
+  max-width: 0px;
+  color: rgba(0,0,0,0);
+  background-color: rgba(0,0,0,0);
+}
+
 /*
  ----- QLabel, QToolTip, CTitleLabel
 */
