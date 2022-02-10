@@ -35,6 +35,7 @@ struct SProjectData
   SVersion                  m_iTargetVersion = SVersion(VERSION_XYZ);
   QString                   m_sName;
   QString                   m_sFolderName;
+  QString                   m_sProjectPath;
   QString                   m_sDescribtion;
   QString                   m_sTitleCard;
   QString                   m_sMap;

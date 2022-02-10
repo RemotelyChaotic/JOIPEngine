@@ -294,6 +294,9 @@ void CMainWindow::SlotHelpButtonClicked()
 void CMainWindow::OldSettingsDetected()
 {
   SVersion version(VERSION_XYZ);
+#if defined (Q_OS_ANDROID)
+  m_spSettings->SetSettingsVersion(QT_VERSION_CHECK(version.m_iMajor, version.m_iMinor, version.m_iPatch));
+#else
   QString sContentPath = QCoreApplication::instance()->applicationDirPath() +
       QDir::separator() + ".." + QDir::separator() + "data";
   QFileInfo contentFileInfo(sContentPath);
@@ -324,6 +327,7 @@ void CMainWindow::OldSettingsDetected()
   {
     m_spSettings->SetSettingsVersion(QT_VERSION_CHECK(version.m_iMajor, version.m_iMinor, version.m_iPatch));
   }
+#endif
 }
 
 //----------------------------------------------------------------------------------------

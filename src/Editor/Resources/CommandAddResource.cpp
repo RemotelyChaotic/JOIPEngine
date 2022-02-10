@@ -28,8 +28,7 @@ namespace  {
     bool bAddedFiles = false;
     QStringList vsNeedsToMove;
     tspResourceMap retMap;
-    const QString sName = PhysicalProjectName(spCurrentProject);
-    const QDir projectDir(spSettings->ContentFolder() + "/" + sName);
+    const QDir projectDir = PhysicalProjectPath(spCurrentProject);
     for (QString sFileName : vsFiles)
     {
       QFileInfo info(sFileName);

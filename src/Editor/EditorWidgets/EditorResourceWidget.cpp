@@ -323,7 +323,7 @@ void CEditorResourceWidget::SlotAddButtonClicked()
 {
   WIDGET_INITIALIZED_GUARD
 
-  QString sCurrentFolder = CApplication::Instance()->Settings()->ContentFolder();
+  QString sCurrentFolder = PhysicalProjectPath(m_spCurrentProject);
   QStringList  vsFileNames = QFileDialog::getOpenFileNames(this,
       tr("Add File"), sCurrentFolder, SResourceFormats::JoinedFormatsForFilePicker());
 

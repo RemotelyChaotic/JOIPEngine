@@ -140,6 +140,10 @@ QString PhysicalProjectName(const tspProject& spProject);
 
 //----------------------------------------------------------------------------------------
 //
+QString PhysicalProjectPath(const tspProject& spProject);
+
+//----------------------------------------------------------------------------------------
+//
 bool ProjectNameCheck(const QString& sProjectName, QString* sErrorText = nullptr);
 
 //----------------------------------------------------------------------------------------

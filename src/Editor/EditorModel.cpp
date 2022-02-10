@@ -145,7 +145,7 @@ void CEditorModel::AddNewScriptFileToScene(QPointer<QWidget> pParentForDialog,
     QReadLocker locker(&spScene->m_rwLock);
     if (spScene->m_sScript.isNull() || spScene->m_sScript.isEmpty())
     {
-      const QString sName = PhysicalProjectName(m_spCurrentProject);
+      const QString sProjectPath = PhysicalProjectPath(m_spCurrentProject);
       QPointer<CEditorModel> pThisGuard(this);
       QFileDialog* dlg = new QFileDialog(pParentForDialog,
                                          tr("Create Script File for %1").arg(spScene->m_sName));
@@ -169,7 +169,7 @@ void CEditorModel::AddNewScriptFileToScene(QPointer<QWidget> pParentForDialog,
         if (url.isValid())
         {
           QFileInfo info(url.toLocalFile());
-          QDir projectDir(m_spSettings->ContentFolder() + "/" + sName);
+          QDir projectDir(sProjectPath);
           if (!info.absoluteFilePath().contains(projectDir.absolutePath()))
           {
             qWarning() << "File is not in subfolder of Project.";
@@ -268,7 +268,14 @@ void CEditorModel::InitNewProject(const QString& sNewProjectName, bool bTutorial
   auto spDbManager = m_wpDbManager.lock();
   if (nullptr != spDbManager)
   {
-    spDbManager->AddProject(sNewProjectName);
+#if Q_OS_ANDROID
+    // TODO:
+    const QString sBaseProjectPath = m_spSettings->ContentFolder();
+#else
+    const QString sBaseProjectPath = m_spSettings->ContentFolder();
+#endif
+
+    spDbManager->AddProject(sBaseProjectPath + "/" + sNewProjectName);
     m_spCurrentProject = spDbManager->FindProject(sNewProjectName);
     const QString sProjName = PhysicalProjectName(m_spCurrentProject);
 
@@ -291,7 +298,7 @@ void CEditorModel::InitNewProject(const QString& sNewProjectName, bool bTutorial
       spDbManager->SerializeProject(iId);
       // set write dir to allow project to save files
       CPhysFsFileEngine::setWriteDir(
-            QString(m_spSettings->ContentFolder() + "/" + sProjName).toStdString().data());
+            QString(sBaseProjectPath + "/" + sProjName).toStdString().data());
       // serialize base project again after init (this time including all editor data)
       SerializeProject();
       // save changes (flow, etc)...

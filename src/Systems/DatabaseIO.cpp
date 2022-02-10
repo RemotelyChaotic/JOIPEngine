@@ -42,16 +42,17 @@ protected:
     spProject->m_rwLock.lockForRead();
     const QString sName = spProject->m_sName;
     const QString sFolderName = spProject->m_sFolderName;
+    const QString sContentFolder(spProject->m_sProjectPath);
     bool bBundled = spProject->m_bBundled;
     bool bWasLoaded = spProject->m_bLoaded;
     spProject->m_rwLock.unlock();
     bool bOk = true;
-    QDir sContentFolder(m_spSettings->ContentFolder());
     if (!bBundled)
     {
-      if (!QFileInfo(m_spSettings->ContentFolder() + QDir::separator() + sFolderName).exists())
+      if (!QFileInfo(sContentFolder + QDir::separator() + sFolderName).exists())
       {
-        qWarning() << "Deserialize: Could not find project at: " + m_spSettings->ContentFolder() + QDir::separator() + sName;
+        qWarning() << "Deserialize: Could not find project at: " +
+                      sContentFolder + QDir::separator() + sName;
       }
     }
 
@@ -127,7 +128,7 @@ protected:
     QDirIterator it(sPath, QDir::Dirs | QDir::NoDotAndDotDot);
     while (it.hasNext())
     {
-      QString sDirName = QFileInfo(it.next()).fileName();
+      QString sDirName = QFileInfo(it.next()).absoluteFilePath();
       m_pManager->AddProject(sDirName);
     }
 
@@ -141,7 +142,7 @@ protected:
                           QDir::Files | QDir::NoDotAndDotDot, QDirIterator::NoIteratorFlags);
     while (itCompressed.hasNext())
     {
-      QString sFileName = QFileInfo(itCompressed.next()).fileName();
+      QString sFileName = QFileInfo(itCompressed.next()).absoluteFilePath();
       m_pManager->AddProject(sFileName, 1, false, true);
     }
 
@@ -151,7 +152,7 @@ protected:
                           QDir::Files | QDir::NoDotAndDotDot, QDirIterator::NoIteratorFlags);
     while (itBundle.hasNext())
     {
-      QString sFileName = QFileInfo(itBundle.next()).fileName();
+      QString sFileName = QFileInfo(itBundle.next()).absoluteFilePath();
       m_pManager->AddProject(sFileName, 1, true, true);
     }
 
@@ -200,15 +201,17 @@ protected:
   //
   bool PrepareProjectImpl(tspProject& spProject) override
   {
-    const QString sFolderName = PhysicalProjectName(spProject);
-    QDir sContentFolder(m_spSettings->ContentFolder());
+    QReadLocker locker(&spProject->m_rwLock);
+    const QString sProjectFolder = PhysicalProjectName(spProject);
+    const QString sProjectPath = PhysicalProjectPath(spProject);
+    const QString sFolderPath = spProject->m_sProjectPath;
 
-    if (!QFileInfo(m_spSettings->ContentFolder() + QDir::separator() + sFolderName).exists())
+    if (!QFileInfo(sProjectPath).exists())
     {
-      bool bOk = sContentFolder.mkdir(sFolderName);
+      bool bOk = QDir(sFolderPath).mkdir(sProjectFolder);
       if (!bOk)
       {
-        qWarning() << "Could not create folder: " + m_spSettings->ContentFolder() + QDir::separator() + sFolderName;
+        qWarning() << "Could not create folder: " + sProjectPath;
       }
       return bOk;
     }
@@ -221,6 +224,7 @@ protected:
   {
     spProject->m_rwLock.lockForRead();
     const QString sName = spProject->m_sName;
+    const QString sProjectPath = spProject->m_sProjectPath;
     const QString sFolderName = spProject->m_sFolderName;
     const QString sBaseName = QFileInfo(sFolderName).completeBaseName();
     const QString sSuffix = QFileInfo(sFolderName).suffix();
@@ -231,12 +235,12 @@ protected:
     if (bBundled) { return true; }
 
     bool bOk = true;
-    QDir sContentFolder(m_spSettings->ContentFolder());
+    QDir sContentFolder(sProjectPath);
 
     // first rename old folder
     QString sNewFolderName = sFolderName;
-    const QString sOldProjectFolder = m_spSettings->ContentFolder() + QDir::separator() + sFolderName;
-    QString sNewProjectFolder = m_spSettings->ContentFolder() + QDir::separator() + sNewFolderName;
+    const QString sOldProjectFolder = sProjectPath + QDir::separator() + sFolderName;
+    QString sNewProjectFolder = sProjectPath + QDir::separator() + sNewFolderName;
     if (sBaseName != sName)
     {
       if (!sBaseName.isEmpty())
@@ -244,7 +248,7 @@ protected:
         if (QFileInfo(sOldProjectFolder).exists())
         {
           sNewFolderName = sName + "." + sSuffix;
-          sNewProjectFolder = m_spSettings->ContentFolder() + QDir::separator() + sNewFolderName;
+          sNewProjectFolder = sProjectPath + QDir::separator() + sNewFolderName;
           bOk = sContentFolder.rename(sFolderName, sNewFolderName);
         }
         else
@@ -261,7 +265,8 @@ protected:
       bOk = sContentFolder.mkdir(sNewProjectFolder);
       if (!bOk)
       {
-        qWarning() << "Serialize: Could not create folder: " + m_spSettings->ContentFolder() + QDir::separator() + sFolderName;
+        qWarning() << "Serialize: Could not create folder: " +
+                      sProjectPath + QDir::separator() + sFolderName;
       }
     }
 
@@ -410,14 +415,13 @@ bool CDatabaseIO::LoadProject(tspProject& spProject)
 {
   if (nullptr == spProject) { return false; }
 
-  const QString sProjectName = PhysicalProjectName(spProject);
+  const QString sProjectPath = PhysicalProjectPath(spProject);
   QWriteLocker locker(&spProject->m_rwLock);
   bool bLoaded = false;
   if (spProject->m_bBundled && !spProject->m_bLoaded)
   {
     spProject->m_bLoaded =
-        QResource::registerResource(CApplication::Instance()->Settings()->ContentFolder() + QDir::separator() +
-                                    sProjectName,
+        QResource::registerResource(sProjectPath,
                                     QDir::separator() + spProject->m_sName);
     assert(spProject->m_bLoaded);
     bLoaded = spProject->m_bLoaded;
@@ -457,12 +461,10 @@ bool CDatabaseIO::LoadProject(tspProject& spProject)
 //
 bool CDatabaseIO::SetProjectEditing(tspProject& spProject, bool bEnabled)
 {
-  const QString sProjName = PhysicalProjectName(spProject);
+  const QString sProjPath = PhysicalProjectPath(spProject);
   if (bEnabled)
   {
-    return CPhysFsFileEngine::setWriteDir(
-          QString(CApplication::Instance()->Settings()->ContentFolder() + QDir::separator() +
-                  sProjName).toStdString().data());
+    return CPhysFsFileEngine::setWriteDir(QString(sProjPath).toStdString().data());
   }
   else
   {
@@ -507,7 +509,7 @@ bool CDatabaseIO::UnloadProject(tspProject& spProject)
 {
   if (nullptr == spProject) { return false; }
 
-  const QString sProjectName = PhysicalProjectName(spProject);
+  const QString sProjectPath = PhysicalProjectPath(spProject);
   QWriteLocker locker(&spProject->m_rwLock);
 
 
@@ -535,8 +537,7 @@ bool CDatabaseIO::UnloadProject(tspProject& spProject)
   if (spProject->m_bBundled && spProject->m_bLoaded)
   {
     spProject->m_bLoaded =
-        !QResource::unregisterResource(CApplication::Instance()->Settings()->ContentFolder() + QDir::separator() +
-                                       sProjectName,
+        !QResource::unregisterResource(sProjectPath,
                                        QDir::separator() + spProject->m_sName);
     assert(!spProject->m_bLoaded);
     bUnloaded &= !spProject->m_bLoaded;
@@ -618,8 +619,7 @@ void CDatabaseIO::UnloadResource(tspResource& spRes)
 //
 bool CDatabaseIO::MountProject(tspProject& spProject)
 {
-  const QString sName = PhysicalProjectName(spProject);
-  QString sFinalPath = CApplication::Instance()->Settings()->ContentFolder() + QDir::separator() + sName;
+  QString sFinalPath = PhysicalProjectPath(spProject);
   bool bOk = CPhysFsFileEngine::mount(sFinalPath.toStdString().data(), "");
   assert(bOk);
   if (!bOk)
@@ -649,8 +649,7 @@ bool CDatabaseIO::MountProject(tspProject& spProject)
 //
 bool CDatabaseIO::UnmountProject(tspProject& spProject)
 {
-  const QString sName = PhysicalProjectName(spProject);
-  QString sFinalPath = CApplication::Instance()->Settings()->ContentFolder() + QDir::separator() + sName;
+  QString sFinalPath = PhysicalProjectPath(spProject);
   bool bOk = true;
   {
     QReadLocker locker(&spProject->m_rwLock);
@@ -692,8 +691,7 @@ CDatabaseIO::CDatabaseIO(CDatabaseManager* pManager, std::shared_ptr<CDatabaseDa
 //
 bool CDatabaseIO::AddResourceArchive(tspProject& spProj, const QUrl& sPath)
 {
-  const QString sName = PhysicalProjectName(spProj);
-  const QString sProjPath = CApplication::Instance()->Settings()->ContentFolder() + QDir::separator() + sName;
+  const QString sProjPath = PhysicalProjectPath(spProj);
   const QString sMountPoint = sPath.path();
   const QString sFileSuffix = QFileInfo(sPath.fileName()).suffix();
   QWriteLocker locker(&spProj->m_rwLock);

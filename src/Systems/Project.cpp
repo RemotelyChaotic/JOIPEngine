@@ -586,6 +586,15 @@ QString PhysicalProjectName(const tspProject& spProject)
 
 //----------------------------------------------------------------------------------------
 //
+QString PhysicalProjectPath(const tspProject& spProject)
+{
+  QString sFolderName = PhysicalProjectName(spProject);
+  QReadLocker locker(&spProject->m_rwLock);
+  return spProject->m_sProjectPath + "/" + sFolderName;
+}
+
+//----------------------------------------------------------------------------------------
+//
 bool ProjectNameCheck(const QString& sProjectName, QString* sErrorText)
 {
   auto spDbManager = CApplication::Instance()->System<CDatabaseManager>().lock();

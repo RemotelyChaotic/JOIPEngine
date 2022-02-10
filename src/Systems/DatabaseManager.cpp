@@ -72,9 +72,10 @@ qint32 CDatabaseManager::AddProject(const QString& sDirName, quint32 iVersion,
   if (!IsInitialized()) { return -1; }
 
   qint32 iNewId = FindNewProjectId();
-  QString sDirNameResolved = sDirName;
   const QString sBaseName = QFileInfo(sDirName).completeBaseName();
+  const QString sProjectPath = QFileInfo(sDirName).absolutePath();
   QString sName = sBaseName;
+  QString sDirNameResolved;
   QString sError;
   if (!ProjectNameCheck(sBaseName, &sError))
   {
@@ -84,6 +85,7 @@ qint32 CDatabaseManager::AddProject(const QString& sDirName, quint32 iVersion,
   else
   {
     sName = sBaseName;
+    sDirNameResolved = sBaseName;
   }
 
 
@@ -94,6 +96,7 @@ qint32 CDatabaseManager::AddProject(const QString& sDirName, quint32 iVersion,
     m_spData->m_vspProjectDatabase.back()->m_iId = iNewId;
     m_spData->m_vspProjectDatabase.back()->m_sName = sName;
     m_spData->m_vspProjectDatabase.back()->m_sFolderName = sDirNameResolved;
+    m_spData->m_vspProjectDatabase.back()->m_sProjectPath = sProjectPath;
     m_spData->m_vspProjectDatabase.back()->m_iVersion = iVersion;
     m_spData->m_vspProjectDatabase.back()->m_bBundled = bBundled;
     m_spData->m_vspProjectDatabase.back()->m_bReadOnly = bReadOnly;
