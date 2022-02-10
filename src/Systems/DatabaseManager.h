@@ -8,6 +8,8 @@
 #include <QMutex>
 #include <set>
 
+class CDatabaseData;
+class CDatabaseIO;
 class CProjectScriptWrapper;
 class CSceneScriptWrapper;
 class CSettings;
@@ -85,7 +87,8 @@ public:
   QStringList FindKinks(QString sCategory);
   QStringList KinkCategories();
 
-  bool IsDbLoaded() { return m_bLoadedDb == 1; }
+  qint32 FindNewProjectId();
+  bool IsDbLoaded() const;
 
 public slots:
   void Initialize() override;
@@ -108,24 +111,12 @@ private slots:
   void SlotContentFolderChanged();
 
 private:
-  bool DeserializeProjectPrivate(tspProject& spProject);
   qint32 FindNewIdFromSet(const std::set<qint32, std::less<qint32>>& ids);
-  qint32 FindNewProjectId();
   qint32 FindNewSceneId(tspProject& spProj);
-  void LoadDatabase();
-  bool PrepareProjectPrivate(tspProject& spProject);
-  bool SerializeProjectPrivate(tspProject& spProject, bool bForceWriting);
 
-  static void LoadResource(tspResource& spRes);
-  static void UnloadResource(tspResource& spRes);
-  static bool MountProject(tspProject& spProject);
-  static bool UnmountProject(tspProject& spProject);
-
+  std::unique_ptr<CDatabaseIO>           m_spDbIo;
   std::shared_ptr<CSettings>             m_spSettings;
-  mutable QMutex                         m_dbMutex;
-  QAtomicInt                             m_bLoadedDb;
-  tvspProject                            m_vspProjectDatabase;
-  tKinkKategories                        m_kinkKategoryMap;
+  std::shared_ptr<CDatabaseData>         m_spData;
 };
 
 #endif // DATABASEMANAGER_H

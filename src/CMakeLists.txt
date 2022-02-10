@@ -283,11 +283,15 @@ set(Sources
   SettingsScreen.ui 
   Style.cpp 
   Style.h 
+  Systems/DatabaseData.cpp
+  Systems/DatabaseData.h
   Systems/DatabaseImageProvider.cpp 
   Systems/DatabaseImageProvider.h 
   Systems/DatabaseInterface/ProjectData.h
   Systems/DatabaseInterface/ResourceData.h
   Systems/DatabaseInterface/SceneData.h
+  Systems/DatabaseIO.cpp
+  Systems/DatabaseIO.h
   Systems/DatabaseManager.cpp 
   Systems/DatabaseManager.h 
   Systems/DLJobs/IDownloadJob.h
