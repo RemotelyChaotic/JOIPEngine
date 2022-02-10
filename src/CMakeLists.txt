@@ -434,7 +434,9 @@ set(Sources
 set(CMAKE_AUTOUIC_SEARCH_PATHS ${CMAKE_AUTOUIC_SEARCH_PATHS} Editor)
 
 if(ANDROID)
-  add_library(${PROJECT_NAME} SHARED ${Sources})
+  add_library(${PROJECT_NAME} SHARED
+    ${Sources}
+    ../android_resources.qrc)
 else()
   add_executable(${PROJECT_NAME} ${Sources})
 endif()

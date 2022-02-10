@@ -81,8 +81,12 @@ namespace
 //
 QStringList joip_style::AvailableStyles()
 {
+#if defined(Q_OS_ANDROID)
+  const QString sStyleFolder = c_sDefaultAndroidStyleFolder;
+#else
   const QString sStyleFolder = QLibraryInfo::location(QLibraryInfo::PrefixPath) +
       QDir::separator() + c_sStyleFolder;
+#endif
   QDirIterator iter(sStyleFolder, QDir::NoDotAndDotDot | QDir::Dirs, QDirIterator::NoIteratorFlags);
 
   QStringList out;

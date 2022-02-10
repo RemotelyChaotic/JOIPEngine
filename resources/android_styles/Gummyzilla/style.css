@@ -1,0 +1,1428 @@
+/*
+ ----- QSplitter
+*/
+QSplitter {
+  min-height: 18px;
+  min-width: 18px;
+  max-height: 18px;
+  max-width: 18px;
+  background: transparent;
+}
+
+QSplitter::handle:horizontal {
+  image: url(ui/ButtonDotsVert.png);
+}
+QSplitter::handle:vertical {
+  image: url(ui/ButtonDotsHoriz.png);
+}
+
+/*
+ ----- QCheckBox, QRadioButton
+*/
+QCheckBox,
+QRadioButton {
+  color: black;
+  spacing: 5px;
+}
+
+QTreeView::indicator,
+QRadioButton::indicator,
+QGroupBox::indicator,
+QCheckBox::indicator {
+  width: 24px;
+  height: 24px;
+}
+
+QTreeView::indicator:unchecked,
+QRadioButton::indicator:unchecked,
+QGroupBox::indicator:unchecked,
+QCheckBox::indicator:unchecked {
+  image: url(ui/ButtonCheckBoxEmpty.png);
+}
+
+QTreeView::indicator:unchecked:hover,
+QRadioButton::indicator:unchecked:hover,
+QGroupBox::indicator:unchecked:hover,
+QCheckBox::indicator:unchecked:hover {
+  image: url(ui/ButtonCheckBoxEmpty.png);
+}
+
+QTreeView::indicator:unchecked:pressed,
+QRadioButton::indicator:unchecked:pressed,
+QGroupBox::indicator:unchecked:pressed,
+QCheckBox::indicator:unchecked:pressed {
+  image: url(ui/ButtonCheckBoxEmpty.png);
+}
+
+QTreeView::indicator:checked,
+QRadioButton::indicator:checked,
+QGroupBox::indicator:checked,
+QCheckBox::indicator:checked {
+  image: url(ui/ButtonCheckBox.png);
+}
+
+QTreeView::indicator:checked:pressed,
+QRadioButton::indicator:checked:pressed,
+QGroupBox::indicator:checked:pressed,
+QCheckBox::indicator:checked:pressed {
+  image: url(ui/ButtonCheckBox.png);
+}
+
+QTreeView::indicator:indeterminate:hover,
+QRadioButton::indicator:indeterminate:hover,
+QGroupBox::indicator:indeterminate:hover,
+QCheckBox::indicator:indeterminate:hover {
+  image: url(ui/ButtonCheckBox.png);
+}
+
+QTreeView::indicator:indeterminate:pressed,
+QRadioButton::indicator:indeterminate:pressed,
+QGroupBox::indicator:indeterminate:pressed,
+QCheckBox::indicator:indeterminate:pressed {
+  image: url(ui/ButtonCheckBox.png);
+}
+
+
+/*
+ ----- QGroupBox, QTabWidget
+*/
+QGroupBox,
+QTabWidget::pane {
+  background-color: white;
+  border: none;
+  border-radius: 0px;
+  padding: 6px;
+}
+
+CResourceModelView>QTabWidget::pane {
+  border: 0;
+  border-radius: 0px;
+  padding: 0px;
+}
+
+QGroupBox::title {
+  color: black;
+  subcontrol-origin: margin;
+  subcontrol-position: top center; /* position at the top center */
+  padding: 0 3px;
+}
+
+/* Style the tab using the tab sub-control. Note that
+    it reads QTabBar _not_ QTabWidget */
+QTabBar::tab {
+  color: black;
+  border: none;
+  border-radius: 0px;
+  padding: 5px;
+  background: white;
+  min-width: 8ex;
+}
+
+QTabBar::tab:hover {
+  background: rgb(247, 247, 247);
+}
+
+QTabBar::tab:selected {
+  color: white;
+  background: rgb(27, 188, 157);
+}
+
+QTabBar::tab:!selected {
+  margin-top: 2px; /* make non-selected tabs look smaller */
+}
+
+/*
+ ----- QLabel, QToolTip, CTitleLabel
+*/
+QToolTip {
+  color: white;
+  background-color: rgb(27, 188, 157);
+}
+
+QLabel {
+  color: black;
+  background-color: transparent;
+}
+
+QLabel#SearchIcon {
+  border-image: url(ui/ButtonSearch.png);
+  min-width: 20px;
+  min-height: 20px;
+  max-width: 20px;
+  max-height: 20px;
+}
+QLabel#PlayButton {
+  border-image: url(ui/ButtonPlay.png);
+}
+QLabel#ExitButton {
+  border-image: url(ui/ButtonExit.png);
+}
+QLabel#WarningIcon {
+  border-image: url(ui/WarningIcon.png);
+}
+QLabel#ErrorIcon {
+  border-image: url(ui/ButtonIcon.png);
+}
+QLabel#IconBackground {
+  qproperty-pixmap: url(ui/IconBg.svg);
+}
+QLabel#ReadOnly {
+  border-image: url(ui/ButtonReadOnly.png);
+  min-width: 20px;
+  min-height: 20px;
+  max-width: 20px;
+  max-height: 20px;
+}
+
+QToolTip {
+  border: none;
+  border-radius: 0px;
+  padding: 5px;
+}
+
+CTitleLabel {
+  color: rgb(27, 188, 157);
+  background-color: transparent;
+  qproperty-outlineColor: white;
+  border: 0px;
+  border-radius: 0px;
+}
+
+/*
+ ----- QLineEdit
+*/
+QLineEdit {
+  color: black;
+  background-color: white;
+  border: 2px solid rgb(27, 188, 157);
+  border-radius: 0px;
+  padding: 3px;
+  min-height: 16px;
+  selection-background-color: rgb(222, 222, 222);
+}
+
+QLineEdit[echoMode="2"] {
+  lineedit-password-character: 9679;
+}
+
+QLineEdit:disabled,
+QLineEdit:read-only {
+  background-color: rgb(222, 222, 222);
+}
+
+/*
+ ----- QPushButton, QToolButton, CShortcutButton
+*/
+QPushButton, QToolButton {
+  color: black;
+  border: 2px solid rgb(27, 188, 157);
+  border-radius: 0px;
+  background: white;
+  padding: 6px;
+  min-width: 64px;
+}
+
+QPushButton[styleSmall="true"] {
+  padding: 0px;
+  min-width: 24px;
+}
+
+CShortcutButton,
+CEditorSearchBar>QPushButton {
+  padding: 0px;
+  min-width: 24px;
+  min-height: 24px;
+  max-width: 24px;
+  max-height: 24px;
+  qproperty-iconSize: 24px;
+}
+
+COverlayButton>CShortcutButton {
+  min-width: 64px;
+  min-height: 48px;
+  max-width: 64px;
+  max-height: 48px;
+  padding: -2px;
+  qproperty-iconSize: 48px;
+}
+
+CDownloadButtonOverlay>CShortcutButton {
+  qproperty-iconSize: 24px;
+}
+
+QPushButton#AddShowBackgroundCode {
+  image: url(ui/ButtonBackground.png);
+}
+QPushButton#AddShowBackgroundCode:hover,
+QPushButton#AddShowBackgroundCode:pressed,
+QPushButton#AddShowBackgroundCode:disabled {
+  image: url(ui/ButtonBackgroundSelected.png);
+}
+QPushButton#AddShowIconCode,
+QPushButton#SourceButton {
+  image: url(ui/ButtonIcon.png);
+}
+QPushButton#AddShowIconCode:hover,
+QPushButton#AddShowIconCode:pressed,
+QPushButton#AddShowIconCode:disabled,
+QPushButton#SourceButton:hover,
+QPushButton#SourceButton:pressed,
+QPushButton#SourceButton:disabled {
+  image: url(ui/ButtonIconSelected.png);
+}
+QPushButton#AddShowImageCode {
+  image: url(ui/ButtonImage.png);
+}
+QPushButton#AddShowImageCode:hover,
+QPushButton#AddShowImageCode:pressed,
+QPushButton#AddShowImageCode:disabled {
+  image: url(ui/ButtonImageSelected.png);
+}
+QPushButton#AddTextCode {
+  image: url(ui/ButtonText.png);
+}
+QPushButton#AddTextCode:hover,
+QPushButton#AddTextCode:pressed,
+QPushButton#AddTextCode:disabled {
+  image: url(ui/ButtonTextSelected.png);
+}
+QPushButton#AddMetronomeCode {
+  image: url(ui/ButtonMetronome.png);
+}
+QPushButton#AddMetronomeCode:hover,
+QPushButton#AddMetronomeCode:pressed,
+QPushButton#AddMetronomeCode:disabled {
+  image: url(ui/ButtonMetronomeSelected.png);
+}
+QPushButton#AddTimerCode {
+  image: url(ui/ButtonClock.png);
+}
+QPushButton#AddTimerCode:hover,
+QPushButton#AddTimerCode:pressed,
+QPushButton#AddTimerCode:disabled {
+  image: url(ui/ButtonClockSelected.png);
+}
+QPushButton#AddNotificationCode {
+  image: url(ui/ButtonNotification.png);
+}
+QPushButton#AddNotificationCode:hover,
+QPushButton#AddNotificationCode:pressed,
+QPushButton#AddNotificationCode:disabled {
+  image: url(ui/ButtonNotificationSelected.png);
+}
+QPushButton#DebugButton {
+  image: url(ui/ButtonPlay.png);
+}
+QPushButton#DebugButton:hover,
+QPushButton#DebugButton:pressed,
+QPushButton#DebugButton:disabled {
+  image: url(ui/ButtonPlaySelected.png);
+}
+QPushButton#StopDebugButton {
+  image: url(ui/ButtonStop.png);
+}
+QPushButton#StopDebugButton:hover,
+QPushButton#StopDebugButton:pressed,
+QPushButton#StopDebugButton:disabled {
+  image: url(ui/ButtonStopSelected.png);
+}
+QPushButton#PauseButton {
+  image: url(ui/ButtonPause.png);
+}
+QPushButton#PauseButton:hover,
+QPushButton#PauseButton:pressed,
+QPushButton#PauseButton:disabled {
+  image: url(ui/ButtonPauseSelected.png);
+}
+QPushButton#PlayButton {
+  image: url(ui/ButtonPlaySelected.png);
+}
+QPushButton#PlayButton:hover,
+QPushButton#PlayButton:pressed,
+QPushButton#PlayButton:disabled {
+  image: url(ui/ButtonPlaySelected.png);
+}
+QPushButton#StopButton {
+  image: url(ui/ButtonStop.png);
+}
+QPushButton#StopButton:hover,
+QPushButton#StopButton:pressed,
+QPushButton#StopButton:disabled {
+  image: url(ui/ButtonStopSelected.png);
+}
+QPushButton#AddThreadCode {
+  image: url(ui/ButtonThread.png);
+}
+QPushButton#AddThreadCode:hover,
+QPushButton#AddThreadCode:pressed,
+QPushButton#AddThreadCode:disabled {
+  image: url(ui/ButtonThreadSelected.png);
+}
+QPushButton#ExitButton {
+  image: url(ui/ButtonExit.png);
+}
+QPushButton#ExitButton:hover,
+QPushButton#ExitButton:pressed,
+QPushButton#ExitButton:disabled {
+  image: url(ui/ButtonExitSelected.png);
+}
+QPushButton#SaveButton {
+  image: url(ui/ButtonSave.png);
+}
+QPushButton#SaveButton:hover,
+QPushButton#SaveButton:pressed,
+QPushButton#SaveButton:disabled {
+  image: url(ui/ButtonSaveSelected.png);
+}
+QPushButton#AddPatternElemButton,
+QPushButton#AddResourceButton,
+QPushButton#AddButtonButton,
+QPushButton#AddTextColorButton,
+QPushButton#AddBGColorButton,
+QPushButton#AddFetishButton {
+  padding: 0px;
+  min-width: 24px;
+  min-height: 24px;
+  max-width: 24px;
+  max-height: 24px;
+  qproperty-iconSize: 24px;
+  image: url(ui/ButtonPlus.png);
+}
+QPushButton#AddPatternElemButton:hover,
+QPushButton#AddPatternElemButton:pressed,
+QPushButton#AddPatternElemButton:disabled,
+QPushButton#AddResourceButton:hover,
+QPushButton#AddResourceButton:pressed,
+QPushButton#AddResourceButton:disabled,
+QPushButton#AddButtonButton:hover,
+QPushButton#AddButtonButton:pressed,
+QPushButton#AddButtonButton:disabled,
+QPushButton#AddTextColorButton:hover,
+QPushButton#AddTextColorButton:pressed,
+QPushButton#AddTextColorButton:disabled,
+QPushButton#AddBGColorButton:hover,
+QPushButton#AddBGColorButton:pressed,
+QPushButton#AddBGColorButton:disabled,
+QPushButton#AddFetishButton:hover,
+QPushButton#AddFetishButton:pressed,
+QPushButton#AddFetishButton:disabled {
+  padding: 0px;
+  min-width: 24px;
+  min-height: 24px;
+  max-width: 24px;
+  max-height: 24px;
+  qproperty-iconSize: 24px;
+  image: url(ui/ButtonPlusSelected.png);
+}
+QPushButton#AddWebResourceButton {
+  image: url(ui/ButtonWeb.png);
+}
+QPushButton#AddWebResourceButton:hover,
+QPushButton#AddWebResourceButton:pressed,
+QPushButton#AddWebResourceButton:disabled {
+  image: url(ui/ButtonWebSelected.png);
+}
+QPushButton#MapButton {
+  image: url(ui/ButtonMap.png);
+}
+QPushButton#MapButton:hover,
+QPushButton#MapButton:pressed,
+QPushButton#MapButton:disabled {
+  image: url(ui/ButtonMapSelected.png);
+}
+QPushButton#RemovePatternElemButton,
+QPushButton#RemoveResourceButton,
+QPushButton#RemoveButtonButton,
+QPushButton#RemoveTextColorButton,
+QPushButton#RemoveBGColorButton,
+QPushButton#RemoveFetishButton {
+  padding: 0px;
+  min-width: 24px;
+  min-height: 24px;
+  max-width: 24px;
+  max-height: 24px;
+  qproperty-iconSize: 24px;
+  image: url(ui/ButtonMinus.png);
+}
+QPushButton#RemovePatternElemButton:hover,
+QPushButton#RemovePatternElemButton:pressed,
+QPushButton#RemovePatternElemButton:disabled,
+QPushButton#RemoveResourceButton:hover,
+QPushButton#RemoveResourceButton:pressed,
+QPushButton#RemoveResourceButton:disabled,
+QPushButton#RemoveButtonButton:hover,
+QPushButton#RemoveButtonButton:pressed,
+QPushButton#RemoveButtonButton:disabled,
+QPushButton#RemoveTextColorButton:hover,
+QPushButton#RemoveTextColorButton:pressed,
+QPushButton#RemoveTextColorButton:disabled,
+QPushButton#RemoveBGColorButton:hover,
+QPushButton#RemoveBGColorButton:pressed,
+QPushButton#RemoveBGColorButton:disabled,
+QPushButton#RemoveFetishButton:hover,
+QPushButton#RemoveFetishButton:pressed,
+QPushButton#RemoveFetishButton:disabled {
+  padding: 0px;
+  min-width: 24px;
+  min-height: 24px;
+  max-width: 24px;
+  max-height: 24px;
+  qproperty-iconSize: 24px;
+  image: url(ui/ButtonMinusSelected.png);
+}
+QPushButton#TitleCardButton {
+  image: url(ui/ButtonTitleCard.png);
+}
+QPushButton#TitleCardButton:hover,
+QPushButton#TitleCardButton:pressed,
+QPushButton#TitleCardButton:disabled {
+  image: url(ui/ButtonTitleCardSelected.png);
+}
+QPushButton#AddNodeButton {
+  image: url(ui/ButtonPlus.png);
+}
+QPushButton#AddNodeButton:hover,
+QPushButton#AddNodeButton:pressed,
+QPushButton#AddNodeButton:disabled {
+  image: url(ui/ButtonPlusSelected.png);
+}
+QPushButton#RemoveNodeButton {
+  image: url(ui/ButtonMinus.png);
+}
+QPushButton#RemoveNodeButton:hover,
+QPushButton#RemoveNodeButton:pressed,
+QPushButton#RemoveNodeButton:disabled {
+  image: url(ui/ButtonMinusSelected.png);
+}
+QPushButton#HelpButton {
+  image: url(ui/ButtonHelp.png);
+}
+QPushButton#HelpButton:hover,
+QPushButton#HelpButton:pressed,
+QPushButton#HelpButton:disabled {
+  image: url(ui/ButtonHelpSelected.png);
+}
+QPushButton#ForardButton {
+  image: url(ui/ButtonPlay.png);
+}
+QPushButton#ForardButton:hover,
+QPushButton#ForardButton:pressed,
+QPushButton#ForardButton:disabled {
+  image: url(ui/ButtonPlaySelected.png);
+}
+QPushButton#BackButton {
+  image: url(ui/ButtonArrowLeft.png);
+}
+QPushButton#BackButton:hover,
+QPushButton#BackButton:pressed,
+QPushButton#BackButton:disabled {
+  image: url(ui/ButtonArrowLeftSelected.png);
+}
+QPushButton#HomeButton {
+  image: url(ui/ButtonHome.png);
+}
+QPushButton#HomeButton:hover,
+QPushButton#HomeButton:pressed,
+QPushButton#HomeButton:disabled {
+  image: url(ui/ButtonHomeSelected.png);
+}
+QPushButton#CloseButton {
+  padding: 0px;
+  min-width: 24px;
+  min-height: 24px;
+  max-width: 24px;
+  max-height: 24px;
+  qproperty-iconSize: 24px;
+  image: url(ui/ButtonX.png);
+}
+QPushButton#CloseButton:hover,
+QPushButton#CloseButton:pressed,
+QPushButton#CloseButton:disabled {
+  padding: 0px;
+  min-width: 24px;
+  min-height: 24px;
+  max-width: 24px;
+  max-height: 24px;
+  qproperty-iconSize: 24px;
+  image: url(ui/ButtonXSelected.png);
+}
+QPushButton#FetishOverlayButton {
+  image: url(ui/ButtonDotsHoriz.png);
+}
+QPushButton#FetishOverlayButton:hover,
+QPushButton#FetishOverlayButton:pressed,
+QPushButton#FetishOverlayButton:disabled {
+  image: url(ui/ButtonDotsHorizSelected.png);
+}
+QPushButton#ExportButton {
+  image: url(ui/ButtonExport.png);
+}
+QPushButton#ExportButton:hover,
+QPushButton#ExportButton:pressed,
+QPushButton#ExportButton:disabled {
+  image: url(ui/ButtonExportSelected.png);
+}
+QPushButton#AddScriptFile {
+  min-width: 24px;
+  image: url(ui/ButtonCode.png);
+}
+QPushButton#AddScriptFile:hover,
+QPushButton#AddScriptFile:pressed,
+QPushButton#AddScriptFile:disabled {
+  min-width: 24px;
+  image: url(ui/ButtonCodeSelected.png);
+}
+QPushButton#UndoButton {
+  image: url(ui/ButtonUndo.png);
+}
+QPushButton#UndoButton:hover,
+QPushButton#UndoButton:pressed,
+QPushButton#UndoButton:disabled {
+  image: url(ui/ButtonUndoSelected.png);
+}
+QPushButton#RedoButton {
+  image: url(ui/ButtonRedo.png);
+}
+QPushButton#RedoButton:hover,
+QPushButton#RedoButton:pressed,
+QPushButton#RedoButton:disabled {
+  image: url(ui/ButtonRedoSelected.png);
+}
+QPushButton#TreeViewButton {
+  image: url(ui/ButtonTree.png);
+}
+QPushButton#TreeViewButton:hover,
+QPushButton#TreeViewButton:pressed,
+QPushButton#TreeViewButton:disabled {
+  image: url(ui/ButtonTreeSelected.png);
+}
+QPushButton#ExplorerViewButton {
+  image: url(ui/ButtonFolder.png);
+}
+QPushButton#ExplorerViewButton:hover,
+QPushButton#ExplorerViewButton:pressed,
+QPushButton#ExplorerViewButton:disabled {
+  image: url(ui/ButtonFolderSelected.png);
+}
+QPushButton#CdUpButton {
+  image: url(ui/ButtonDotDot.png);
+}
+QPushButton#CdUpButton:hover,
+QPushButton#CdUpButton:pressed,
+QPushButton#CdUpButton:disabled {
+  image: url(ui/ButtonDotDotSelected.png);
+}
+QPushButton#DownloadButton {
+  image: url(ui/ButtonDownload.png);
+}
+QPushButton#DownloadButton:hover,
+QPushButton#DownloadButton:pressed,
+QPushButton#DownloadButton:disabled {
+  image: url(ui/ButtonDownloadSelected.png);
+}
+QPushButton#eResourceWidget {
+  qproperty-icon: url(ui/ButtonResourceWidget.png) off,
+                  url(ui/ButtonResourceWidget.png) on;
+}
+QPushButton#eResourceWidget:hover,
+QPushButton#eResourceWidget:pressed,
+QPushButton#eResourceWidget:disabled {
+  image: url(ui/ButtonResourceWidgetSelected.png);
+}
+QPushButton#eResourceDisplay {
+  qproperty-icon: url(ui/ButtonResourceDisplay.png) off,
+                  url(ui/ButtonResourceDisplay.png) on;
+}
+QPushButton#eResourceDisplay:hover,
+QPushButton#eResourceDisplay:pressed,
+QPushButton#eResourceDisplay:disabled {
+  image: url(ui/ButtonResourceDisplaySelected.png);
+}
+QPushButton#eProjectSettings {
+  qproperty-icon: url(ui/ButtonProjectSettings.png) off,
+                  url(ui/ButtonProjectSettings.png) on;
+}
+QPushButton#eProjectSettings:hover,
+QPushButton#eProjectSettings:pressed,
+QPushButton#eProjectSettings:disabled {
+  image: url(ui/ButtonProjectSettingsSelected.png);
+}
+QPushButton#eSceneNodeWidget {
+  qproperty-icon: url(ui/ButtonSceneNodeWidget.png) off,
+                  url(ui/ButtonSceneNodeWidget.png) on;
+}
+QPushButton#eSceneNodeWidget:hover,
+QPushButton#eSceneNodeWidget:pressed,
+QPushButton#eSceneNodeWidget:disabled {
+  image: url(ui/ButtonSceneNodeWidgetSelected.png);
+}
+QPushButton#eSceneCodeEditorWidget {
+  qproperty-icon: url(ui/ButtonCode.png) off,
+                  url(ui/ButtonCode.png) on;
+}
+QPushButton#eSceneCodeEditorWidget:hover,
+QPushButton#eSceneCodeEditorWidget:pressed,
+QPushButton#eSceneCodeEditorWidget:disabled {
+  image: url(ui/ButtonCodeSelected.png);
+}
+
+
+QPushButton:hover,
+QToolButton:hover {
+  color: white;
+  background: rgb(27, 188, 157);
+}
+
+QPushButton:pressed,
+QToolButton:pressed {
+  color: white;
+  background: rgb(27, 188, 157);
+}
+
+QPushButton:disabled,
+QToolButton:disabled {
+  color: white;
+  background: rgb(42, 42, 42);
+}
+
+
+CMenuButton {
+  color: black;
+  border: 2px solid rgb(27, 188, 157);
+  border-radius: 0px;
+  padding: 5px;
+  background: white;
+  min-width: 255px;
+}
+
+CMenuButton:hover {
+  color: white;
+  background: rgb(27, 188, 157);
+}
+
+CMenuButton:pressed {
+  color: white;
+  background: rgb(27, 188, 157);
+}
+
+/*
+ ----- QToolButton in QTabBar
+*/
+
+/* the scroll buttons are tool buttons */
+QTabBar QToolButton,
+QTabBar QToolButton::menu-button,
+QTabBar QToolButton::menu-arrow {
+  color: black;
+  border: 2px solid rgb(27, 188, 157);
+  border-radius: 0px;
+  background: white;
+}
+
+QToolButton:hover,
+QToolButton::menu-button:hover,
+QTabBar QToolButton::menu-arrow:hover {
+  color: white;
+  background: rgb(27, 188, 157);
+}
+
+QTabBar QToolButton:pressed,
+QTabBar QToolButton::menu-button:pressed,
+QTabBar QToolButton::menu-arrow:pressed {
+  color: white;
+  background: rgb(27, 188, 157);
+}
+
+/* the arrow mark in the tool buttons */
+QTabBar QToolButton::right-arrow {
+  image: url(ui/ButtonPlay.png);
+}
+QTabBar QToolButton::right-arrow:hover {
+  image: url(ui/ButtonPlaySelected.png);
+}
+QTabBar QToolButton::right-arrow:selected {
+  image: url(ui/ButtonPlaySelected.png);
+}
+
+QTabBar QToolButton::left-arrow {
+  image: url(ui/ButtonArrowLeft.png);
+}
+QTabBar QToolButton::left-arrow:hover {
+  image: url(ui/ButtonArrowLeftSelected.png);
+}
+QTabBar QToolButton::left-arrow:selected {
+  image: url(ui/ButtonArrowLeftSelected.png);
+}
+
+
+/*
+ ----- QProgressBar
+*/
+QProgressBar {
+  color: black;
+  border: 2px solid rgb(27, 188, 157);
+  border-radius: 0px;
+  background-color: white;
+  text-align: center;
+}
+
+QProgressBar::chunk {
+  background: rgb(27, 188, 157);
+  width: 20px;
+}
+
+CProgressBar {
+  background-color: transparent;
+  border: 2px solid transparent;
+  qproperty-primaryColor: rgb(42, 42, 42);
+  qproperty-secondaryColor: rgb(27, 188, 157);
+  qproperty-tertiaryColor: rgb(27, 188, 157);
+  qproperty-drawDecoration: false;
+}
+
+/*
+ ----- QScrollBar
+*/
+QScrollBar:horizontal,
+QSlider:horizontal{
+  background: transparent;
+  height: 24px;
+  margin-left: 24px;
+  margin-right: 24px;
+}
+QScrollBar:vertical,
+QSlider:vertical {
+  background: transparent;
+  width: 24px;
+  margin-top: 24px;
+  margin-bottom: 24px;
+}
+
+QSlider::handle,
+QScrollBar::handle {
+  border: 2px solid rgb(27, 188, 157);
+  border-radius: 0px;
+  background: white;
+}
+QSlider::handle:vertical,
+QScrollBar::handle:vertical{
+  min-height: 24px;
+}
+QSlider::handle:horizontal,
+QScrollBar::handle:horizontal {
+  min-width: 24px;
+}
+QSlider::handle:horizontal:hover,
+QSlider::handle:vertical:hover,
+QScrollBar::handle:horizontal:hover,
+QScrollBar::handle:vertical:hover {
+  background: rgb(27, 188, 157);
+}
+QSlider::handle:horizontal:pressed,
+QSlider::handle:vertical:pressed,
+QScrollBar::handle:horizontal:pressed,
+QScrollBar::handle:vertical:pressed {
+  background: rgb(27, 188, 157);
+}
+
+
+QSlider::add-line:horizontal,
+QScrollBar::add-line:horizontal {
+  border: 2px solid rgb(27, 188, 157);
+  width: 24px;
+  subcontrol-position: right;
+  subcontrol-origin: margin;
+}
+QSlider::add-line:horizontal:hover,
+QScrollBar::add-line:horizontal:hover,
+QSlider::add-line:horizontal:selected,
+QScrollBar::add-line:horizontal:selected {
+  background: rgb(27, 188, 157);
+}
+QSlider::sub-line:horizontal,
+QScrollBar::sub-line:horizontal {
+  border: 2px solid rgb(27, 188, 157);
+  width: 24px;
+  subcontrol-position: left;
+  subcontrol-origin: margin;
+  position: absolute;
+  right: 24px;
+}
+QSlider::sub-line:horizontal:hover,
+QScrollBar::sub-line:horizontal:hover,
+QSlider::sub-line:horizontal:selected,
+QScrollBar::sub-line:horizontal:selected {
+  background: rgb(27, 188, 157);
+}
+QSlider::add-line:vertical,
+QScrollBar::add-line:vertical {
+  border: 2px solid rgb(27, 188, 157);
+  height: 24px;
+  subcontrol-position: bottom;
+  subcontrol-origin: margin;
+}
+QSlider::add-line:vertical:hover,
+QScrollBar::add-line:vertical:hover,
+QSlider::add-line:vertical:selected,
+QScrollBar::add-line:vertical:selected  {
+  background: rgb(27, 188, 157);
+}
+QSlider::sub-line:vertical,
+QScrollBar::sub-line:vertical {
+  border: 2px solid rgb(27, 188, 157);
+  height: 24px;
+  subcontrol-position: top;
+  subcontrol-origin: margin;
+  position: absolute;
+  bottom: 24px;
+}
+QSlider::sub-line:vertical:hover,
+QScrollBar::sub-line:vertical:hover,
+QSlider::sub-line:vertical:selected,
+QScrollBar::sub-line:vertical:selected {
+  background: rgb(27, 188, 157);
+}
+
+
+QScrollBar:left-arrow:horizontal,
+QScrollBar::right-arrow:horizontal,
+QScrollBar::up-arrow:vertical,
+QScrollBar::down-arrow:vertical {
+  border: none;
+  height: 24px;
+  width: 24px;
+  background: white;
+}
+QScrollBar:left-arrow:horizontal {
+  image: url(ui/ButtonArrowLeft.png);
+  background: white;
+}
+QScrollBar:left-arrow:horizontal:hover,
+QScrollBar:left-arrow:horizontal:selected {
+  image: url(ui/ButtonArrowLeftSelected.png);
+  background: rgb(27, 188, 157);
+}
+QScrollBar:right-arrow:horizontal {
+  image: url(ui/ButtonPlay.png);
+  background: white;
+}
+QScrollBar:right-arrow:horizontal:hover,
+QScrollBar:right-arrow:horizontal:selected {
+  image: url(ui/ButtonPlaySelected.png);
+  background: rgb(27, 188, 157);
+}
+QScrollBar:up-arrow:vertical {
+  image: url(ui/ButtonArrowUp.png);
+  background: white;
+}
+QScrollBar:up-arrow:vertical:hover,
+QScrollBar:up-arrow:vertical:selected {
+  image: url(ui/ButtonArrowUpSelected.png);
+  background: rgb(27, 188, 157);
+}
+QScrollBar:down-arrow:vertical {
+  image: url(ui/ButtonArrowDown.png);
+  background: white;
+}
+QScrollBar:down-arrow:vertical:hover,
+QScrollBar:down-arrow:vertical:selected {
+  image: url(ui/ButtonArrowDownSelected.png);
+  background: rgb(27, 188, 157);
+}
+
+QScrollBar::add-page:horizontal,
+QScrollBar::sub-page:horizontal,
+QScrollBar::add-page:vertical,
+QScrollBar::sub-page:vertical{
+  background: white;
+}
+
+/*
+ ----- QScrollArea
+*/
+QScrollArea {
+  background: transparent;
+}
+QScrollArea > QWidget
+{
+  background: transparent;
+}
+QScrollArea > QWidget > QWidget
+{
+  background: transparent;
+}
+
+
+/*
+ ----- QComboBox
+*/
+QComboBox {
+  color: black;
+  border: 2px solid rgb(27, 188, 157);
+  border-radius: 0px;
+  padding: 3px;
+  background: white;
+  min-width: 64px;
+}
+QComboBox:hover,
+QComboBox:selected {
+  color: white;
+  border: 2px solid rgb(27, 188, 157);
+  background: rgb(27, 188, 157);
+}
+
+QComboBox:editable {
+  color: black;
+  border: 2px solid rgb(27, 188, 157);
+  border-radius: 0px;
+  padding: 5px;
+  background: white;
+  min-width: 64px;
+  min-height: 16px;
+  selection-background-color: rgb(222, 222, 222);
+}
+
+QComboBox QAbstractItemView {
+  color: black;
+  border: 2px solid rgb(222, 222, 222);
+  border-radius: 0px;
+  padding: 5px;
+  background: white;
+  selection-background-color: rgb(27, 188, 157);
+}
+
+/* shift the text when the popup opens */
+QComboBox:on {
+  padding-left: 5px;
+}
+
+QComboBox::drop-down {
+  subcontrol-origin: padding;
+  subcontrol-position: top right;
+  width: 24px;
+
+  border-left-width: 1px;
+  border-left-color: rgb(27, 188, 157);
+  border-left-style: solid; /* just a single line */
+  border-top-right-radius: 0px; /* same radius as the QComboBox */
+  border-bottom-right-radius: 0px;
+
+  background: white;
+}
+QComboBox::drop-down:hover,
+QComboBox::drop-down:selected {
+  border-left-color: white;
+  background: rgb(27, 188, 157);
+}
+
+QComboBox::down-arrow {
+  border-image: url(ui/ButtonArrowDown.png);
+  min-height: 24px;
+  min-width: 24px;
+}
+QComboBox::down-arrow:hover,
+QComboBox::down-arrow:selected {
+  border-image: url(ui/ButtonArrowDownSelected.png);
+  min-height: 24px;
+  min-width: 24px;
+}
+
+/* QComboBox gets the "on" state when the popup is open */
+QComboBox:!editable:on, QComboBox::drop-down:editable:on {
+  color: white;
+  background: rgb(27, 188, 157);
+}
+
+
+/*
+ ----- QSpinBox, QDoubleSpinBox, QTimeEdit
+*/
+QDoubleSpinBox,
+QTimeEdit,
+QSpinBox {
+  color: black;
+  background-color: white;
+  border: 2px solid rgb(27, 188, 157);
+  border-radius: 0px;
+  padding: 5px;
+  height: 24px;
+  selection-background-color: rgb(102, 212, 190);
+  padding-right: 16px; /* make room for the arrows */
+}
+QDoubleSpinBox:disabled,
+QTimeEdit:disabled,
+QSpinBox:disabled {
+  color: white;
+  background: rgb(42, 42, 42);
+}
+
+QDoubleSpinBox::up-button,
+QTimeEdit::up-button,
+QSpinBox::up-button {
+  subcontrol-origin: border;
+  subcontrol-position: top right; /* position at the top right corner */
+
+  width: 12px; /* 16 + 2*1px border-width = 15px padding + 3px parent border */
+  border: 1px solid rgb(27, 188, 157);
+  border-radius: 0px;
+  background: white;
+}
+QDoubleSpinBox::up-button:hover,
+QTimeEdit::up-button:hover,
+QSpinBox::up-button:hover,
+QDoubleSpinBox::up-button:pressed,
+QTimeEdit::up-button:pressed,
+QSpinBox::up-button:pressed  {
+  background: rgb(27, 188, 157)
+}
+
+QDoubleSpinBox::up-arrow,
+QTimeEdit::up-arrow,
+QSpinBox::up-arrow {
+  image: url(ui/ButtonPlus.png);
+  width: 12px;
+  height: 12px;
+}
+QDoubleSpinBox::up-arrow:disabled, QDoubleSpinBox::up-arrow:off,
+QTimeEdit::up-arrow:disabled, QTimeEdit::up-arrow:off,
+QSpinBox::up-arrow:disabled, QSpinBox::up-arrow:off { /* off state when value is max */
+  image: url(ui/ButtonPlus.png);
+  width: 12px;
+  height: 12px;
+  background: rgb(42, 42, 42);
+}
+QDoubleSpinBox::up-arrow:disabled,
+QTimeEdit::up-arrow:disabled,
+QSpinBox::up-arrow:disabled {
+  image: url(ui/ButtonPlusSelected.png);
+}
+QDoubleSpinBox::up-arrow:hover, QDoubleSpinBox::up-arrow:pressed,
+QTimeEdit::up-arrow:hover, QTimeEdit::up-arrow:pressed,
+QSpinBox::up-arrow:hover, QSpinBox::up-arrow:pressed {
+  image: url(ui/ButtonPlusSelected.png);
+  width: 12px;
+  height: 12px;
+}
+
+QDoubleSpinBox::down-button,
+QTimeEdit::down-button,
+QSpinBox::down-button {
+  subcontrol-origin: border;
+  subcontrol-position: bottom right; /* position at bottom right corner */
+
+  width: 12px; /* 16 + 2*1px border-width = 15px padding + 3px parent border */
+  border: 1px solid rgb(27, 188, 157);
+  border-radius: 0px;
+  background: white;
+}
+QDoubleSpinBox::down-button:hover,
+QTimeEdit::down-button:hover,
+QSpinBox::down-button:hover,
+QDoubleSpinBox::down-button:pressed,
+QTimeEdit::down-button:pressed,
+QSpinBox::down-button:pressed {
+  background: rgb(27, 188, 157)
+}
+
+QDoubleSpinBox::down-arrow,
+QTimeEdit::down-arrow,
+QSpinBox::down-arrow {
+  image: url(ui/ButtonMinus.png);
+  width: 12px;
+  height: 12px;
+}
+QDoubleSpinBox::down-arrow:disabled,
+QTimeEdit::down-arrow:disabled,
+QSpinBox::down-arrow:disabled,
+QDoubleSpinBox::down-arrow:off,
+QTimeEdit::down-arrow:off,
+QSpinBox::down-arrow:off { /* off state when value in min */
+  image: url(ui/ButtonMinus.png);
+  width: 12px;
+  height: 12px;
+  background: rgb(42, 42, 42);
+}
+QDoubleSpinBox::down-arrow:disabled,
+QTimeEdit::down-arrow:disabled,
+QSpinBox::down-arrow:disabled {
+  image: url(ui/ButtonMinusSelected.png);
+}
+QDoubleSpinBox::down-arrow:hover, QDoubleSpinBox::down-arrow:pressed,
+QTimeEdit::down-arrow:hover, QTimeEdit::down-arrow:pressed,
+QSpinBox::down-arrow:hover, QSpinBox::down-arrow:pressed {
+  image: url(ui/ButtonMinusSelected.png);
+  width: 12px;
+  height: 12px;
+}
+
+/*
+ ----- QMenu, QDialog
+*/
+QMenu,
+QDialog {
+  color: black;
+  background-color: white;
+  border: 2px solid rgb(27, 188, 157);
+  border-radius: 0px;
+  padding: 5px;
+}
+
+QMenu::item,
+QDialog::item {
+  padding: 2px 25px 2px 20px;
+  border: 1px solid transparent; /* reserve space for selection border */
+}
+
+QMenu::item:selected,
+QDialog::item:selected {
+  color: white;
+  background: rgb(27, 188, 157);
+}
+
+QMenu::icon:checked,
+QDialog::item:checked{ /* appearance of a 'checked' icon */
+  background: rgb(27, 188, 157);
+  position: absolute;
+  top: 1px;
+  right: 1px;
+  bottom: 1px;
+  left: 1px;
+}
+
+QMenu::separator,
+QDialog::separator {
+  height: 2px;
+  background: rgb(27, 188, 157);
+  margin-left: 10px;
+  margin-right: 5px;
+}
+
+QMenu::indicator,
+QDialog::indicator {
+  width: 13px;
+  height: 13px;
+}
+
+/*
+  ---- COverlayBase
+*/
+COverlayBase {
+  color: black;
+  background-color: white;
+  border: 2px solid rgb(27, 188, 157);
+  border-radius: 0px;
+  padding: 5px;
+}
+COverlayBase#HelpButtonOverlay {
+  color: transparent;
+  background-color: transparent;
+  border: none;
+  border-radius: 0px;
+  padding: 0;
+}
+
+/*
+ ----- QHeaderView
+*/
+QHeaderView::section {
+  color: white;
+  border: 0px solid transparent;
+  border-radius: 0px;
+  padding: 0px;
+  padding-left: 3px;
+  background: rgb(42, 42, 42);
+}
+
+QHeaderView::section:checked {
+  color: black;
+  background: rgb(27, 188, 157);
+}
+
+/* style the sort indicator */
+QHeaderView::down-arrow {
+  image: url(ui/ButtonArrowDownSelected.png);
+  min-width: 16px;
+  min-height: 16px;
+  max-width: 16px;
+  max-height: 16px;
+  subcontrol-position: right center;
+  subcontrol-origin: padding;
+}
+
+QHeaderView::up-arrow {
+  image: url(ui/ButtonArrowUpSelected.png);
+  min-width: 16px;
+  min-height: 16px;
+  max-width: 16px;
+  max-height: 16px;
+  subcontrol-position: right center;
+  subcontrol-origin: padding;
+}
+
+/*
+ ----- QListView, QTreeView, QTableView
+*/
+QListView, QTreeView, QTableView {
+  color: black;
+  background-color: white;
+  alternate-background-color: rgb(228, 228, 228);
+}
+
+QListView, QTreeView, QTableView {
+  show-decoration-selected: 1; /* make the selection span the entire width of the view */
+}
+
+QTreeView#pHelpSearchTree {
+  min-width: 100px;
+  width: 100px;
+}
+
+QListView::item,
+QTreeView::item,
+QTableView::item {
+  margin: 0px 0px 0px 0px;
+  border: 0px;
+  padding: 0px;
+  padding-right: 3px;
+  padding-left: 3px;
+}
+
+QListView::item::text,
+QTreeView::item::text,
+QTableView::item::text {
+  min-height: 18px;
+}
+
+QListView::item:alternate,
+QTreeView::item:alternate,
+QTableView::item:alternate {
+  background: rgb(228, 228, 228);
+}
+
+QListView::item:selected,
+QTreeView::item:selected,
+QTableView::item:selected {
+  color: white;
+  border: 1px solid rgb(27, 188, 157);
+  background: rgb(27, 188, 157);
+}
+
+QListView::item:hover,
+QTreeView::item:hover,
+QTableView::item:hover {
+  color: white;
+  border: 1px solid rgb(27, 188, 157);
+  background: rgb(27, 188, 157);
+}
+
+QListView::item:disabled,
+QTreeView::item:disabled,
+QTableView::item:disabled {
+  color: rgb(42, 42, 42);
+}
+
+QListView::branch:selected {
+  background: transparent;
+}
+
+QTreeView::branch:has-children:!has-siblings:closed,
+QTreeView::branch:closed:has-children:has-siblings {
+  image: url(ui/ButtonPlay.png);
+  min-width: 16px;
+  min-height: 16px;
+  max-width: 16px;
+  max-height: 16px;
+}
+
+QTreeView::branch:open:has-children:!has-siblings,
+QTreeView::branch:open:has-children:has-siblings  {
+  image: url(ui/ButtonArrowDown.png);
+  min-width: 16px;
+  min-height: 16px;
+  max-width: 16px;
+  max-height: 16px;
+}
+
+CResourceDetailView {
+  color: black;
+  background-color: transparent;
+  qproperty-iconSize: 64px;
+  qproperty-spacing: 10px;
+}
+
+/*
+ ----- QPlainTextEdit
+*/
+QTextEdit,
+QPlainTextEdit,
+QTextBrowser {
+    background-color: white;
+    color: black;
+    border: 2px solid rgb(27, 188, 157);
+    selection-background-color: rgb(222, 222, 222);
+}
+
+/*
+ ----- Specific
+*/
+QMainWindow {
+  background: rgb(228, 228, 228);
+}
+
+QQuickWidget {
+  background: white
+}
+
+CProjectCardSelectionWidget {
+  qproperty-selectionColor: rgb(27, 188, 157);
+}
+
+CTimerWidget {
+  qproperty-primaryColor: rgb(42, 42, 42);
+  qproperty-secondaryColor: rgb(27, 188, 157);
+  qproperty-tertiaryColor: rgb(27, 188, 157);
+}
+
+CScriptEditorWidget {
+  qproperty-iconFolded: url(ui/ButtonPlay.png);
+  qproperty-iconUnfolded: url(ui/ButtonArrowDown.png);
+  qproperty-foldAreaBackgroundColor: rgb(19, 28, 40);
+  qproperty-lineNumberBackgroundColor: rgb(42, 42, 42);
+  qproperty-lineNumberTextColor: rgb(222, 222, 222);
+  qproperty-highlightLineColor: rgb(222, 222, 222);
+  qproperty-highlightSearchBackgroundColor: rgb(42, 42, 42);
+  qproperty-highlightSearchColor: white;
+  qproperty-widgetsBackgroundColor: rgb(42, 42, 42);
+  qproperty-theme: "Printing";
+}
+
+CEditorSceneNodeWidget {
+  background: transparent;
+  qproperty-normalBoundaryColor: black;
+  qproperty-selectedBoundaryColor: black;
+  qproperty-gradientColor0: white;
+  qproperty-gradientColor1: white;
+  qproperty-gradientColor2: rgb(222, 222, 222);
+  qproperty-gradientColor3: silver;
+  qproperty-shadowColor: rgb(42, 42, 42);
+  qproperty-fontColor: black;
+  qproperty-fontColorFaded: rgb(42, 42, 42);
+  qproperty-connectionPointColor: rgb(27, 188, 157);
+  qproperty-backgroundColor: rgb(228, 228, 228);
+  qproperty-fineGridColor: rgb(14, 73, 61);
+  qproperty-coarseGridColor: rgb(33, 196, 163);
+  qproperty-normalConnectionColor: rgb(27, 188, 157);
+  qproperty-selectedConnectionColor: rgb(27, 188, 157);
+  qproperty-selectedConnectionHaloColor: white;
+  qproperty-hoveredConnectionColor: rgb(27, 188, 157);
+}
+
+CEditorActionBar {
+  qproperty-spacing: 1;
+}
+
+CResourceDetailView {
+  qproperty-iconFile: url(ui/FileIcon.png);
+  qproperty-iconFolder: url(ui/FolderIcon.png);
+  qproperty-spacing: 6;
+}

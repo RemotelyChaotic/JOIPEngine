@@ -1,0 +1,430 @@
+<RCC>
+    <qresource prefix="/android">
+        <file>resources/android_styles/621 Hexagons/qml/Background.png</file>
+        <file>resources/android_styles/621 Hexagons/qml/Button.qml</file>
+        <file>resources/android_styles/621 Hexagons/qml/ButtonArrowDown.svg</file>
+        <file>resources/android_styles/621 Hexagons/qml/ButtonArrowUp.svg</file>
+        <file>resources/android_styles/621 Hexagons/qml/ButtonExit.svg</file>
+        <file>resources/android_styles/621 Hexagons/qml/ButtonExitHover.svg</file>
+        <file>resources/android_styles/621 Hexagons/qml/ButtonPause.svg</file>
+        <file>resources/android_styles/621 Hexagons/qml/ButtonPauseHover.svg</file>
+        <file>resources/android_styles/621 Hexagons/qml/ButtonPlay.svg</file>
+        <file>resources/android_styles/621 Hexagons/qml/ButtonPlayHover.svg</file>
+        <file>resources/android_styles/621 Hexagons/qml/IconBg.svg</file>
+        <file>resources/android_styles/621 Hexagons/qml/IconBgHover.svg</file>
+        <file>resources/android_styles/621 Hexagons/qml/IconBgMask.png</file>
+        <file>resources/android_styles/621 Hexagons/qml/InfoIcon.svg</file>
+        <file>resources/android_styles/621 Hexagons/qml/MediaIcon.svg</file>
+        <file>resources/android_styles/621 Hexagons/qml/Popup.qml</file>
+        <file>resources/android_styles/621 Hexagons/qml/Style.qml</file>
+        <file>resources/android_styles/621 Hexagons/qml/Text.qml</file>
+        <file>resources/android_styles/621 Hexagons/qml/TimerBg.svg</file>
+        <file>resources/android_styles/621 Hexagons/qml/ToolTip.qml</file>
+        <file>resources/android_styles/621 Hexagons/qml/WarningIcon.svg</file>
+        <file>resources/android_styles/621 Hexagons/qml/WebIcon.svg</file>
+        <file>resources/android_styles/621 Hexagons/ui/Background.png</file>
+        <file>resources/android_styles/621 Hexagons/ui/ButtonArrowDown.png</file>
+        <file>resources/android_styles/621 Hexagons/ui/ButtonArrowLeft.png</file>
+        <file>resources/android_styles/621 Hexagons/ui/ButtonArrowUp.png</file>
+        <file>resources/android_styles/621 Hexagons/ui/ButtonBackground.png</file>
+        <file>resources/android_styles/621 Hexagons/ui/ButtonCheckBox.png</file>
+        <file>resources/android_styles/621 Hexagons/ui/ButtonCheckBoxEmpty.png</file>
+        <file>resources/android_styles/621 Hexagons/ui/ButtonClock.png</file>
+        <file>resources/android_styles/621 Hexagons/ui/ButtonCode.png</file>
+        <file>resources/android_styles/621 Hexagons/ui/ButtonDotDot.png</file>
+        <file>resources/android_styles/621 Hexagons/ui/ButtonDotsHoriz.png</file>
+        <file>resources/android_styles/621 Hexagons/ui/ButtonDotsVert.png</file>
+        <file>resources/android_styles/621 Hexagons/ui/ButtonDownload.png</file>
+        <file>resources/android_styles/621 Hexagons/ui/ButtonEdit.png</file>
+        <file>resources/android_styles/621 Hexagons/ui/ButtonExit.png</file>
+        <file>resources/android_styles/621 Hexagons/ui/ButtonExport.png</file>
+        <file>resources/android_styles/621 Hexagons/ui/ButtonHelp.png</file>
+        <file>resources/android_styles/621 Hexagons/ui/ButtonHome.png</file>
+        <file>resources/android_styles/621 Hexagons/ui/ButtonIcon.png</file>
+        <file>resources/android_styles/621 Hexagons/ui/ButtonImage.png</file>
+        <file>resources/android_styles/621 Hexagons/ui/ButtonMap.png</file>
+        <file>resources/android_styles/621 Hexagons/ui/ButtonMetronome.png</file>
+        <file>resources/android_styles/621 Hexagons/ui/ButtonMinus.png</file>
+        <file>resources/android_styles/621 Hexagons/ui/ButtonNotification.png</file>
+        <file>resources/android_styles/621 Hexagons/ui/ButtonPause.png</file>
+        <file>resources/android_styles/621 Hexagons/ui/ButtonPlay.png</file>
+        <file>resources/android_styles/621 Hexagons/ui/ButtonPlus.png</file>
+        <file>resources/android_styles/621 Hexagons/ui/ButtonProjectSettings.png</file>
+        <file>resources/android_styles/621 Hexagons/ui/ButtonReadOnly.png</file>
+        <file>resources/android_styles/621 Hexagons/ui/ButtonRedo.png</file>
+        <file>resources/android_styles/621 Hexagons/ui/ButtonResourceDisplay.png</file>
+        <file>resources/android_styles/621 Hexagons/ui/ButtonResourceWidget.png</file>
+        <file>resources/android_styles/621 Hexagons/ui/ButtonSave.png</file>
+        <file>resources/android_styles/621 Hexagons/ui/ButtonSceneNodeWidget.png</file>
+        <file>resources/android_styles/621 Hexagons/ui/ButtonSearch.png</file>
+        <file>resources/android_styles/621 Hexagons/ui/ButtonStop.png</file>
+        <file>resources/android_styles/621 Hexagons/ui/ButtonText.png</file>
+        <file>resources/android_styles/621 Hexagons/ui/ButtonThread.png</file>
+        <file>resources/android_styles/621 Hexagons/ui/ButtonTitleCard.png</file>
+        <file>resources/android_styles/621 Hexagons/ui/ButtonTree.png</file>
+        <file>resources/android_styles/621 Hexagons/ui/ButtonUndo.png</file>
+        <file>resources/android_styles/621 Hexagons/ui/ButtonWeb.png</file>
+        <file>resources/android_styles/621 Hexagons/ui/ButtonX.png</file>
+        <file>resources/android_styles/621 Hexagons/ui/FileIcon.png</file>
+        <file>resources/android_styles/621 Hexagons/ui/FolderIcon.png</file>
+        <file>resources/android_styles/621 Hexagons/ui/IconBg.svg</file>
+        <file>resources/android_styles/621 Hexagons/ui/WarningIcon.png</file>
+        <file>resources/android_styles/621 Hexagons/style.css</file>
+        <file>resources/android_styles/Blue Night/qml/Background.png</file>
+        <file>resources/android_styles/Blue Night/qml/Button.qml</file>
+        <file>resources/android_styles/Blue Night/qml/ButtonArrowDown.svg</file>
+        <file>resources/android_styles/Blue Night/qml/ButtonArrowUp.svg</file>
+        <file>resources/android_styles/Blue Night/qml/ButtonExit.svg</file>
+        <file>resources/android_styles/Blue Night/qml/ButtonExitHover.svg</file>
+        <file>resources/android_styles/Blue Night/qml/ButtonPause.svg</file>
+        <file>resources/android_styles/Blue Night/qml/ButtonPauseHover.svg</file>
+        <file>resources/android_styles/Blue Night/qml/ButtonPlay.svg</file>
+        <file>resources/android_styles/Blue Night/qml/ButtonPlayHover.svg</file>
+        <file>resources/android_styles/Blue Night/qml/IconBg.svg</file>
+        <file>resources/android_styles/Blue Night/qml/IconBgHover.svg</file>
+        <file>resources/android_styles/Blue Night/qml/IconBgMask.png</file>
+        <file>resources/android_styles/Blue Night/qml/InfoIcon.svg</file>
+        <file>resources/android_styles/Blue Night/qml/MediaIcon.svg</file>
+        <file>resources/android_styles/Blue Night/qml/Popup.qml</file>
+        <file>resources/android_styles/Blue Night/qml/Style.qml</file>
+        <file>resources/android_styles/Blue Night/qml/Text.qml</file>
+        <file>resources/android_styles/Blue Night/qml/TimerBg.svg</file>
+        <file>resources/android_styles/Blue Night/qml/ToolTip.qml</file>
+        <file>resources/android_styles/Blue Night/qml/WarningIcon.svg</file>
+        <file>resources/android_styles/Blue Night/qml/WebIcon.svg</file>
+        <file>resources/android_styles/Blue Night/ui/Background.png</file>
+        <file>resources/android_styles/Blue Night/ui/ButtonArrowDown.png</file>
+        <file>resources/android_styles/Blue Night/ui/ButtonArrowLeft.png</file>
+        <file>resources/android_styles/Blue Night/ui/ButtonArrowUp.png</file>
+        <file>resources/android_styles/Blue Night/ui/ButtonBackground.png</file>
+        <file>resources/android_styles/Blue Night/ui/ButtonCheckBox.png</file>
+        <file>resources/android_styles/Blue Night/ui/ButtonCheckBoxEmpty.png</file>
+        <file>resources/android_styles/Blue Night/ui/ButtonClock.png</file>
+        <file>resources/android_styles/Blue Night/ui/ButtonCode.png</file>
+        <file>resources/android_styles/Blue Night/ui/ButtonDotDot.png</file>
+        <file>resources/android_styles/Blue Night/ui/ButtonDotsHoriz.png</file>
+        <file>resources/android_styles/Blue Night/ui/ButtonDotsVert.png</file>
+        <file>resources/android_styles/Blue Night/ui/ButtonDownload.png</file>
+        <file>resources/android_styles/Blue Night/ui/ButtonEdit.png</file>
+        <file>resources/android_styles/Blue Night/ui/ButtonExit.png</file>
+        <file>resources/android_styles/Blue Night/ui/ButtonExport.png</file>
+        <file>resources/android_styles/Blue Night/ui/ButtonHelp.png</file>
+        <file>resources/android_styles/Blue Night/ui/ButtonHome.png</file>
+        <file>resources/android_styles/Blue Night/ui/ButtonIcon.png</file>
+        <file>resources/android_styles/Blue Night/ui/ButtonImage.png</file>
+        <file>resources/android_styles/Blue Night/ui/ButtonMap.png</file>
+        <file>resources/android_styles/Blue Night/ui/ButtonMetronome.png</file>
+        <file>resources/android_styles/Blue Night/ui/ButtonMinus.png</file>
+        <file>resources/android_styles/Blue Night/ui/ButtonNotification.png</file>
+        <file>resources/android_styles/Blue Night/ui/ButtonPause.png</file>
+        <file>resources/android_styles/Blue Night/ui/ButtonPlay.png</file>
+        <file>resources/android_styles/Blue Night/ui/ButtonPlus.png</file>
+        <file>resources/android_styles/Blue Night/ui/ButtonProjectSettings.png</file>
+        <file>resources/android_styles/Blue Night/ui/ButtonReadOnly.png</file>
+        <file>resources/android_styles/Blue Night/ui/ButtonRedo.png</file>
+        <file>resources/android_styles/Blue Night/ui/ButtonResourceDisplay.png</file>
+        <file>resources/android_styles/Blue Night/ui/ButtonResourceWidget.png</file>
+        <file>resources/android_styles/Blue Night/ui/Buttons.xcf</file>
+        <file>resources/android_styles/Blue Night/ui/ButtonSave.png</file>
+        <file>resources/android_styles/Blue Night/ui/ButtonSceneNodeWidget.png</file>
+        <file>resources/android_styles/Blue Night/ui/ButtonSearch.png</file>
+        <file>resources/android_styles/Blue Night/ui/ButtonStop.png</file>
+        <file>resources/android_styles/Blue Night/ui/ButtonText.png</file>
+        <file>resources/android_styles/Blue Night/ui/ButtonThread.png</file>
+        <file>resources/android_styles/Blue Night/ui/ButtonTitleCard.png</file>
+        <file>resources/android_styles/Blue Night/ui/ButtonTree.png</file>
+        <file>resources/android_styles/Blue Night/ui/ButtonUndo.png</file>
+        <file>resources/android_styles/Blue Night/ui/ButtonWeb.png</file>
+        <file>resources/android_styles/Blue Night/ui/ButtonX.png</file>
+        <file>resources/android_styles/Blue Night/ui/FileIcon.png</file>
+        <file>resources/android_styles/Blue Night/ui/FolderIcon.png</file>
+        <file>resources/android_styles/Blue Night/ui/IconBg.svg</file>
+        <file>resources/android_styles/Blue Night/ui/WarningIcon.png</file>
+        <file>resources/android_styles/Blue Night/style.css</file>
+        <file>resources/android_styles/Gummyzilla/qml/Background.png</file>
+        <file>resources/android_styles/Gummyzilla/qml/Button.qml</file>
+        <file>resources/android_styles/Gummyzilla/qml/ButtonArrowDown.svg</file>
+        <file>resources/android_styles/Gummyzilla/qml/ButtonArrowUp.svg</file>
+        <file>resources/android_styles/Gummyzilla/qml/ButtonExit.svg</file>
+        <file>resources/android_styles/Gummyzilla/qml/ButtonExitHover.svg</file>
+        <file>resources/android_styles/Gummyzilla/qml/ButtonPause.svg</file>
+        <file>resources/android_styles/Gummyzilla/qml/ButtonPauseHover.svg</file>
+        <file>resources/android_styles/Gummyzilla/qml/ButtonPlay.svg</file>
+        <file>resources/android_styles/Gummyzilla/qml/ButtonPlayHover.svg</file>
+        <file>resources/android_styles/Gummyzilla/qml/IconBg.svg</file>
+        <file>resources/android_styles/Gummyzilla/qml/IconBgHover.svg</file>
+        <file>resources/android_styles/Gummyzilla/qml/IconBgMask.png</file>
+        <file>resources/android_styles/Gummyzilla/qml/InfoIcon.svg</file>
+        <file>resources/android_styles/Gummyzilla/qml/MediaIcon.svg</file>
+        <file>resources/android_styles/Gummyzilla/qml/Popup.qml</file>
+        <file>resources/android_styles/Gummyzilla/qml/Style.qml</file>
+        <file>resources/android_styles/Gummyzilla/qml/Text.qml</file>
+        <file>resources/android_styles/Gummyzilla/qml/TimerBg.svg</file>
+        <file>resources/android_styles/Gummyzilla/qml/ToolTip.qml</file>
+        <file>resources/android_styles/Gummyzilla/qml/WarningIcon.svg</file>
+        <file>resources/android_styles/Gummyzilla/qml/WebIcon.svg</file>
+        <file>resources/android_styles/Gummyzilla/ui/ButtonArrowDown.png</file>
+        <file>resources/android_styles/Gummyzilla/ui/ButtonArrowDownSelected.png</file>
+        <file>resources/android_styles/Gummyzilla/ui/ButtonArrowLeft.png</file>
+        <file>resources/android_styles/Gummyzilla/ui/ButtonArrowLeftSelected.png</file>
+        <file>resources/android_styles/Gummyzilla/ui/ButtonArrowUp.png</file>
+        <file>resources/android_styles/Gummyzilla/ui/ButtonArrowUpSelected.png</file>
+        <file>resources/android_styles/Gummyzilla/ui/ButtonBackground.png</file>
+        <file>resources/android_styles/Gummyzilla/ui/ButtonBackgroundSelected.png</file>
+        <file>resources/android_styles/Gummyzilla/ui/ButtonCheckBox.png</file>
+        <file>resources/android_styles/Gummyzilla/ui/ButtonCheckBoxEmpty.png</file>
+        <file>resources/android_styles/Gummyzilla/ui/ButtonClock.png</file>
+        <file>resources/android_styles/Gummyzilla/ui/ButtonClockSelected.png</file>
+        <file>resources/android_styles/Gummyzilla/ui/ButtonCode.png</file>
+        <file>resources/android_styles/Gummyzilla/ui/ButtonCodeSelected.png</file>
+        <file>resources/android_styles/Gummyzilla/ui/ButtonDotDot.png</file>
+        <file>resources/android_styles/Gummyzilla/ui/ButtonDotDotSelected.png</file>
+        <file>resources/android_styles/Gummyzilla/ui/ButtonDotsHoriz.png</file>
+        <file>resources/android_styles/Gummyzilla/ui/ButtonDotsHorizSelected.png</file>
+        <file>resources/android_styles/Gummyzilla/ui/ButtonDotsVert.png</file>
+        <file>resources/android_styles/Gummyzilla/ui/ButtonDownload.png</file>
+        <file>resources/android_styles/Gummyzilla/ui/ButtonDownloadSelected.png</file>
+        <file>resources/android_styles/Gummyzilla/ui/ButtonEdit.png</file>
+        <file>resources/android_styles/Gummyzilla/ui/ButtonExit.png</file>
+        <file>resources/android_styles/Gummyzilla/ui/ButtonExitSelected.png</file>
+        <file>resources/android_styles/Gummyzilla/ui/ButtonExport.png</file>
+        <file>resources/android_styles/Gummyzilla/ui/ButtonExportSelected.png</file>
+        <file>resources/android_styles/Gummyzilla/ui/ButtonFolder.png</file>
+        <file>resources/android_styles/Gummyzilla/ui/ButtonFolderSelected.png</file>
+        <file>resources/android_styles/Gummyzilla/ui/ButtonHelp.png</file>
+        <file>resources/android_styles/Gummyzilla/ui/ButtonHelpSelected.png</file>
+        <file>resources/android_styles/Gummyzilla/ui/ButtonHome.png</file>
+        <file>resources/android_styles/Gummyzilla/ui/ButtonHomeSelected.png</file>
+        <file>resources/android_styles/Gummyzilla/ui/ButtonIcon.png</file>
+        <file>resources/android_styles/Gummyzilla/ui/ButtonIconSelected.png</file>
+        <file>resources/android_styles/Gummyzilla/ui/ButtonImage.png</file>
+        <file>resources/android_styles/Gummyzilla/ui/ButtonImageSelected.png</file>
+        <file>resources/android_styles/Gummyzilla/ui/ButtonMap.png</file>
+        <file>resources/android_styles/Gummyzilla/ui/ButtonMapSelected.png</file>
+        <file>resources/android_styles/Gummyzilla/ui/ButtonMetronome.png</file>
+        <file>resources/android_styles/Gummyzilla/ui/ButtonMetronomeSelected.png</file>
+        <file>resources/android_styles/Gummyzilla/ui/ButtonMinus.png</file>
+        <file>resources/android_styles/Gummyzilla/ui/ButtonMinusSelected.png</file>
+        <file>resources/android_styles/Gummyzilla/ui/ButtonNotification.png</file>
+        <file>resources/android_styles/Gummyzilla/ui/ButtonNotificationSelected.png</file>
+        <file>resources/android_styles/Gummyzilla/ui/ButtonPause.png</file>
+        <file>resources/android_styles/Gummyzilla/ui/ButtonPauseSelected.png</file>
+        <file>resources/android_styles/Gummyzilla/ui/ButtonPlay.png</file>
+        <file>resources/android_styles/Gummyzilla/ui/ButtonPlaySelected.png</file>
+        <file>resources/android_styles/Gummyzilla/ui/ButtonPlus.png</file>
+        <file>resources/android_styles/Gummyzilla/ui/ButtonPlusSelected.png</file>
+        <file>resources/android_styles/Gummyzilla/ui/ButtonProjectSettings.png</file>
+        <file>resources/android_styles/Gummyzilla/ui/ButtonProjectSettingsSelected.png</file>
+        <file>resources/android_styles/Gummyzilla/ui/ButtonReadOnly.png</file>
+        <file>resources/android_styles/Gummyzilla/ui/ButtonRedo.png</file>
+        <file>resources/android_styles/Gummyzilla/ui/ButtonRedoSelected.png</file>
+        <file>resources/android_styles/Gummyzilla/ui/ButtonResourceDisplay.png</file>
+        <file>resources/android_styles/Gummyzilla/ui/ButtonResourceDisplaySelected.png</file>
+        <file>resources/android_styles/Gummyzilla/ui/ButtonResourceWidget.png</file>
+        <file>resources/android_styles/Gummyzilla/ui/ButtonResourceWidgetSelected.png</file>
+        <file>resources/android_styles/Gummyzilla/ui/ButtonSave.png</file>
+        <file>resources/android_styles/Gummyzilla/ui/ButtonSaveSelected.png</file>
+        <file>resources/android_styles/Gummyzilla/ui/ButtonSceneNodeWidget.png</file>
+        <file>resources/android_styles/Gummyzilla/ui/ButtonSceneNodeWidgetSelected.png</file>
+        <file>resources/android_styles/Gummyzilla/ui/ButtonSearch.png</file>
+        <file>resources/android_styles/Gummyzilla/ui/ButtonStop.png</file>
+        <file>resources/android_styles/Gummyzilla/ui/ButtonStopSelected.png</file>
+        <file>resources/android_styles/Gummyzilla/ui/ButtonText.png</file>
+        <file>resources/android_styles/Gummyzilla/ui/ButtonTextSelected.png</file>
+        <file>resources/android_styles/Gummyzilla/ui/ButtonThread.png</file>
+        <file>resources/android_styles/Gummyzilla/ui/ButtonThreadSelected.png</file>
+        <file>resources/android_styles/Gummyzilla/ui/ButtonTitleCard.png</file>
+        <file>resources/android_styles/Gummyzilla/ui/ButtonTitleCardSelected.png</file>
+        <file>resources/android_styles/Gummyzilla/ui/ButtonTree.png</file>
+        <file>resources/android_styles/Gummyzilla/ui/ButtonTreeSelected.png</file>
+        <file>resources/android_styles/Gummyzilla/ui/ButtonUndo.png</file>
+        <file>resources/android_styles/Gummyzilla/ui/ButtonUndoSelected.png</file>
+        <file>resources/android_styles/Gummyzilla/ui/ButtonWeb.png</file>
+        <file>resources/android_styles/Gummyzilla/ui/ButtonWebSelected.png</file>
+        <file>resources/android_styles/Gummyzilla/ui/ButtonX.png</file>
+        <file>resources/android_styles/Gummyzilla/ui/ButtonXSelected.png</file>
+        <file>resources/android_styles/Gummyzilla/ui/FileIcon.png</file>
+        <file>resources/android_styles/Gummyzilla/ui/FolderIcon.png</file>
+        <file>resources/android_styles/Gummyzilla/ui/IconBg.svg</file>
+        <file>resources/android_styles/Gummyzilla/ui/WarningIcon.png</file>
+        <file>resources/android_styles/Gummyzilla/style.css</file>
+        <file>resources/android_styles/Somber Dark/qml/Background.png</file>
+        <file>resources/android_styles/Somber Dark/qml/Button.qml</file>
+        <file>resources/android_styles/Somber Dark/qml/ButtonArrowDown.svg</file>
+        <file>resources/android_styles/Somber Dark/qml/ButtonArrowUp.svg</file>
+        <file>resources/android_styles/Somber Dark/qml/ButtonExit.svg</file>
+        <file>resources/android_styles/Somber Dark/qml/ButtonExitHover.svg</file>
+        <file>resources/android_styles/Somber Dark/qml/ButtonPause.svg</file>
+        <file>resources/android_styles/Somber Dark/qml/ButtonPauseHover.svg</file>
+        <file>resources/android_styles/Somber Dark/qml/ButtonPlay.svg</file>
+        <file>resources/android_styles/Somber Dark/qml/ButtonPlayHover.svg</file>
+        <file>resources/android_styles/Somber Dark/qml/IconBg.svg</file>
+        <file>resources/android_styles/Somber Dark/qml/IconBgHover.svg</file>
+        <file>resources/android_styles/Somber Dark/qml/IconBgMask.png</file>
+        <file>resources/android_styles/Somber Dark/qml/InfoIcon.svg</file>
+        <file>resources/android_styles/Somber Dark/qml/MediaIcon.svg</file>
+        <file>resources/android_styles/Somber Dark/qml/Popup.qml</file>
+        <file>resources/android_styles/Somber Dark/qml/Style.qml</file>
+        <file>resources/android_styles/Somber Dark/qml/Text.qml</file>
+        <file>resources/android_styles/Somber Dark/qml/TimerBg.svg</file>
+        <file>resources/android_styles/Somber Dark/qml/ToolTip.qml</file>
+        <file>resources/android_styles/Somber Dark/qml/WarningIcon.svg</file>
+        <file>resources/android_styles/Somber Dark/qml/WebIcon.svg</file>
+        <file>resources/android_styles/Somber Dark/qml/WindowBGSmall.png</file>
+        <file>resources/android_styles/Somber Dark/ui/BarHorizontal.png</file>
+        <file>resources/android_styles/Somber Dark/ui/BarHorizontalHover.png</file>
+        <file>resources/android_styles/Somber Dark/ui/BarVertical.png</file>
+        <file>resources/android_styles/Somber Dark/ui/BarVerticalHover.png</file>
+        <file>resources/android_styles/Somber Dark/ui/Button.png</file>
+        <file>resources/android_styles/Somber Dark/ui/ButtonArrowDown.png</file>
+        <file>resources/android_styles/Somber Dark/ui/ButtonArrowDownComboBox.png</file>
+        <file>resources/android_styles/Somber Dark/ui/ButtonArrowDownHover.png</file>
+        <file>resources/android_styles/Somber Dark/ui/ButtonArrowDownPressed.png</file>
+        <file>resources/android_styles/Somber Dark/ui/ButtonArrowLeft.png</file>
+        <file>resources/android_styles/Somber Dark/ui/ButtonArrowLeftHover.png</file>
+        <file>resources/android_styles/Somber Dark/ui/ButtonArrowLeftPressed.png</file>
+        <file>resources/android_styles/Somber Dark/ui/ButtonArrowRight.png</file>
+        <file>resources/android_styles/Somber Dark/ui/ButtonArrowRightHover.png</file>
+        <file>resources/android_styles/Somber Dark/ui/ButtonArrowRightPressed.png</file>
+        <file>resources/android_styles/Somber Dark/ui/ButtonArrowUp.png</file>
+        <file>resources/android_styles/Somber Dark/ui/ButtonArrowUpHover.png</file>
+        <file>resources/android_styles/Somber Dark/ui/ButtonArrowUpPressed.png</file>
+        <file>resources/android_styles/Somber Dark/ui/ButtonBack.png</file>
+        <file>resources/android_styles/Somber Dark/ui/ButtonBackground.png</file>
+        <file>resources/android_styles/Somber Dark/ui/ButtonClock.png</file>
+        <file>resources/android_styles/Somber Dark/ui/ButtonCode.png</file>
+        <file>resources/android_styles/Somber Dark/ui/ButtonDisabled.png</file>
+        <file>resources/android_styles/Somber Dark/ui/ButtonDotDot.png</file>
+        <file>resources/android_styles/Somber Dark/ui/ButtonDotsHoriz.png</file>
+        <file>resources/android_styles/Somber Dark/ui/ButtonDownload.png</file>
+        <file>resources/android_styles/Somber Dark/ui/ButtonEdit.png</file>
+        <file>resources/android_styles/Somber Dark/ui/ButtonExit.png</file>
+        <file>resources/android_styles/Somber Dark/ui/ButtonExport.png</file>
+        <file>resources/android_styles/Somber Dark/ui/ButtonHelp.png</file>
+        <file>resources/android_styles/Somber Dark/ui/ButtonHome.png</file>
+        <file>resources/android_styles/Somber Dark/ui/ButtonHover.png</file>
+        <file>resources/android_styles/Somber Dark/ui/ButtonIcon.png</file>
+        <file>resources/android_styles/Somber Dark/ui/ButtonImage.png</file>
+        <file>resources/android_styles/Somber Dark/ui/ButtonMap.png</file>
+        <file>resources/android_styles/Somber Dark/ui/ButtonMetronome.png</file>
+        <file>resources/android_styles/Somber Dark/ui/ButtonMinus.png</file>
+        <file>resources/android_styles/Somber Dark/ui/ButtonNotification.png</file>
+        <file>resources/android_styles/Somber Dark/ui/ButtonPause.png</file>
+        <file>resources/android_styles/Somber Dark/ui/ButtonPlay.png</file>
+        <file>resources/android_styles/Somber Dark/ui/ButtonPlus.png</file>
+        <file>resources/android_styles/Somber Dark/ui/ButtonPressed.png</file>
+        <file>resources/android_styles/Somber Dark/ui/ButtonProjectSettings.png</file>
+        <file>resources/android_styles/Somber Dark/ui/ButtonReadOnly.png</file>
+        <file>resources/android_styles/Somber Dark/ui/ButtonRedo.png</file>
+        <file>resources/android_styles/Somber Dark/ui/ButtonResourceDisplay.png</file>
+        <file>resources/android_styles/Somber Dark/ui/ButtonResourceWidget.png</file>
+        <file>resources/android_styles/Somber Dark/ui/Buttons.png</file>
+        <file>resources/android_styles/Somber Dark/ui/ButtonSave.png</file>
+        <file>resources/android_styles/Somber Dark/ui/ButtonSceneNodeWidget.png</file>
+        <file>resources/android_styles/Somber Dark/ui/ButtonSearch.png</file>
+        <file>resources/android_styles/Somber Dark/ui/ButtonStop.png</file>
+        <file>resources/android_styles/Somber Dark/ui/ButtonText.png</file>
+        <file>resources/android_styles/Somber Dark/ui/ButtonThread.png</file>
+        <file>resources/android_styles/Somber Dark/ui/ButtonTitleCard.png</file>
+        <file>resources/android_styles/Somber Dark/ui/ButtonTree.png</file>
+        <file>resources/android_styles/Somber Dark/ui/ButtonUndo.png</file>
+        <file>resources/android_styles/Somber Dark/ui/ButtonWeb.png</file>
+        <file>resources/android_styles/Somber Dark/ui/ButtonX.png</file>
+        <file>resources/android_styles/Somber Dark/ui/CheckBoxChecked.png</file>
+        <file>resources/android_styles/Somber Dark/ui/CheckBoxCheckedHover.png</file>
+        <file>resources/android_styles/Somber Dark/ui/CheckBoxEmpty.png</file>
+        <file>resources/android_styles/Somber Dark/ui/CheckBoxEmptyHover.png</file>
+        <file>resources/android_styles/Somber Dark/ui/DotsHorizontal.png</file>
+        <file>resources/android_styles/Somber Dark/ui/DotsVertical.png</file>
+        <file>resources/android_styles/Somber Dark/ui/GUI.png</file>
+        <file>resources/android_styles/Somber Dark/ui/IconBg.svg</file>
+        <file>resources/android_styles/Somber Dark/ui/IconBgDisabled.svg</file>
+        <file>resources/android_styles/Somber Dark/ui/IconBgHover.svg</file>
+        <file>resources/android_styles/Somber Dark/ui/IconBgPressed.svg</file>
+        <file>resources/android_styles/Somber Dark/ui/IconX.png</file>
+        <file>resources/android_styles/Somber Dark/ui/MainMenuBG.png</file>
+        <file>resources/android_styles/Somber Dark/ui/MainMenuButtonBG.png</file>
+        <file>resources/android_styles/Somber Dark/ui/MainMenuButtonBGHover.png</file>
+        <file>resources/android_styles/Somber Dark/ui/MainMenuButtonBGPressed.png</file>
+        <file>resources/android_styles/Somber Dark/ui/WarningIcon.png</file>
+        <file>resources/android_styles/Somber Dark/ui/WindowBG.png</file>
+        <file>resources/android_styles/Somber Dark/style.css</file>
+        <file>resources/android_styles/Equestria after Dark/qml/Background.png</file>
+        <file>resources/android_styles/Equestria after Dark/qml/Button.qml</file>
+        <file>resources/android_styles/Equestria after Dark/qml/ButtonArrowDown.svg</file>
+        <file>resources/android_styles/Equestria after Dark/qml/ButtonArrowUp.svg</file>
+        <file>resources/android_styles/Equestria after Dark/qml/ButtonExit.svg</file>
+        <file>resources/android_styles/Equestria after Dark/qml/ButtonExitHover.svg</file>
+        <file>resources/android_styles/Equestria after Dark/qml/ButtonPause.svg</file>
+        <file>resources/android_styles/Equestria after Dark/qml/ButtonPauseHover.svg</file>
+        <file>resources/android_styles/Equestria after Dark/qml/ButtonPlay.svg</file>
+        <file>resources/android_styles/Equestria after Dark/qml/ButtonPlayHover.svg</file>
+        <file>resources/android_styles/Equestria after Dark/qml/IconBg.svg</file>
+        <file>resources/android_styles/Equestria after Dark/qml/IconBgHover.svg</file>
+        <file>resources/android_styles/Equestria after Dark/qml/IconBgMask.png</file>
+        <file>resources/android_styles/Equestria after Dark/qml/InfoIcon.svg</file>
+        <file>resources/android_styles/Equestria after Dark/qml/MediaIcon.svg</file>
+        <file>resources/android_styles/Equestria after Dark/qml/Popup.qml</file>
+        <file>resources/android_styles/Equestria after Dark/qml/Style.qml</file>
+        <file>resources/android_styles/Equestria after Dark/qml/Text.qml</file>
+        <file>resources/android_styles/Equestria after Dark/qml/TimerBg.svg</file>
+        <file>resources/android_styles/Equestria after Dark/qml/ToolTip.qml</file>
+        <file>resources/android_styles/Equestria after Dark/qml/WarningIcon.svg</file>
+        <file>resources/android_styles/Equestria after Dark/qml/WebIcon.svg</file>
+        <file>resources/android_styles/Equestria after Dark/ui/Background.png</file>
+        <file>resources/android_styles/Equestria after Dark/ui/ButtonArrowDown.png</file>
+        <file>resources/android_styles/Equestria after Dark/ui/ButtonArrowLeft.png</file>
+        <file>resources/android_styles/Equestria after Dark/ui/ButtonArrowUp.png</file>
+        <file>resources/android_styles/Equestria after Dark/ui/ButtonBackground.png</file>
+        <file>resources/android_styles/Equestria after Dark/ui/ButtonCheckBox.png</file>
+        <file>resources/android_styles/Equestria after Dark/ui/ButtonCheckBoxClick.png</file>
+        <file>resources/android_styles/Equestria after Dark/ui/ButtonCheckBoxEmpty.png</file>
+        <file>resources/android_styles/Equestria after Dark/ui/ButtonCheckBoxEmptyClick.png</file>
+        <file>resources/android_styles/Equestria after Dark/ui/ButtonCheckBoxEmptyHover.png</file>
+        <file>resources/android_styles/Equestria after Dark/ui/ButtonCheckBoxHover.png</file>
+        <file>resources/android_styles/Equestria after Dark/ui/ButtonClock.png</file>
+        <file>resources/android_styles/Equestria after Dark/ui/ButtonCode.png</file>
+        <file>resources/android_styles/Equestria after Dark/ui/ButtonDotDot.png</file>
+        <file>resources/android_styles/Equestria after Dark/ui/ButtonDotsHoriz.png</file>
+        <file>resources/android_styles/Equestria after Dark/ui/ButtonDotsVert.png</file>
+        <file>resources/android_styles/Equestria after Dark/ui/ButtonDownload.png</file>
+        <file>resources/android_styles/Equestria after Dark/ui/ButtonEdit.png</file>
+        <file>resources/android_styles/Equestria after Dark/ui/ButtonExit.png</file>
+        <file>resources/android_styles/Equestria after Dark/ui/ButtonExport.png</file>
+        <file>resources/android_styles/Equestria after Dark/ui/ButtonHelp.png</file>
+        <file>resources/android_styles/Equestria after Dark/ui/ButtonHome.png</file>
+        <file>resources/android_styles/Equestria after Dark/ui/ButtonIcon.png</file>
+        <file>resources/android_styles/Equestria after Dark/ui/ButtonImage.png</file>
+        <file>resources/android_styles/Equestria after Dark/ui/ButtonMap.png</file>
+        <file>resources/android_styles/Equestria after Dark/ui/ButtonMetronome.png</file>
+        <file>resources/android_styles/Equestria after Dark/ui/ButtonMinus.png</file>
+        <file>resources/android_styles/Equestria after Dark/ui/ButtonMinusDisabled.png</file>
+        <file>resources/android_styles/Equestria after Dark/ui/ButtonNotification.png</file>
+        <file>resources/android_styles/Equestria after Dark/ui/ButtonPause.png</file>
+        <file>resources/android_styles/Equestria after Dark/ui/ButtonPlay.png</file>
+        <file>resources/android_styles/Equestria after Dark/ui/ButtonPlus.png</file>
+        <file>resources/android_styles/Equestria after Dark/ui/ButtonPlusDisabled.png</file>
+        <file>resources/android_styles/Equestria after Dark/ui/ButtonProjectSettings.png</file>
+        <file>resources/android_styles/Equestria after Dark/ui/ButtonReadOnly.png</file>
+        <file>resources/android_styles/Equestria after Dark/ui/ButtonRedo.png</file>
+        <file>resources/android_styles/Equestria after Dark/ui/ButtonResourceDisplay.png</file>
+        <file>resources/android_styles/Equestria after Dark/ui/ButtonResourceWidget.png</file>
+        <file>resources/android_styles/Equestria after Dark/ui/ButtonSave.png</file>
+        <file>resources/android_styles/Equestria after Dark/ui/ButtonSceneNodeWidget.png</file>
+        <file>resources/android_styles/Equestria after Dark/ui/ButtonSearch.png</file>
+        <file>resources/android_styles/Equestria after Dark/ui/ButtonStop.png</file>
+        <file>resources/android_styles/Equestria after Dark/ui/ButtonText.png</file>
+        <file>resources/android_styles/Equestria after Dark/ui/ButtonThread.png</file>
+        <file>resources/android_styles/Equestria after Dark/ui/ButtonTitleCard.png</file>
+        <file>resources/android_styles/Equestria after Dark/ui/ButtonTree.png</file>
+        <file>resources/android_styles/Equestria after Dark/ui/ButtonUndo.png</file>
+        <file>resources/android_styles/Equestria after Dark/ui/ButtonWarning.png</file>
+        <file>resources/android_styles/Equestria after Dark/ui/ButtonWeb.png</file>
+        <file>resources/android_styles/Equestria after Dark/ui/ButtonX.png</file>
+        <file>resources/android_styles/Equestria after Dark/ui/FileIcon.png</file>
+        <file>resources/android_styles/Equestria after Dark/ui/FolderIcon.png</file>
+        <file>resources/android_styles/Equestria after Dark/ui/IconBg.svg</file>
+        <file>resources/android_styles/Equestria after Dark/ui/WarningIcon.png</file>
+        <file>resources/android_styles/Equestria after Dark/style.css</file>
+    </qresource>
+</RCC>
