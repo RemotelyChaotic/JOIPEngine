@@ -28,30 +28,48 @@ namespace
 //
 CShortcutButton::CShortcutButton(QWidget* pParent) :
   QPushButton(pParent),
+#if defined(Q_OS_ANDROID)
+#else
   m_pAction(new QAction(this)),
+#endif
   m_sBaseToolTip(),
   m_bShortCutAsTextEnabled(false)
 {
+#if defined(Q_OS_ANDROID)
+#else
   connect(m_pAction, &QAction::triggered, this, &QPushButton::clicked, Qt::DirectConnection);
   addAction(m_pAction);
+#endif
 }
 CShortcutButton::CShortcutButton(const QString& text, QWidget* pParent) :
   QPushButton(text, pParent),
+#if defined(Q_OS_ANDROID)
+#else
   m_pAction(new QAction(this)),
+#endif
   m_sBaseToolTip(),
   m_bShortCutAsTextEnabled(false)
 {
+#if defined(Q_OS_ANDROID)
+#else
   connect(m_pAction, &QAction::triggered, this, &QPushButton::clicked, Qt::DirectConnection);
   addAction(m_pAction);
+#endif
 }
 CShortcutButton::CShortcutButton(const QIcon& icon, const QString& text, QWidget* pParent) :
   QPushButton(icon, text, pParent),
+#if defined(Q_OS_ANDROID)
+#else
   m_pAction(new QAction(this)),
+#endif
   m_sBaseToolTip(),
   m_bShortCutAsTextEnabled(false)
 {
+#if defined(Q_OS_ANDROID)
+#else
   connect(m_pAction, &QAction::triggered, this, &QPushButton::clicked, Qt::DirectConnection);
   addAction(m_pAction);
+#endif
 }
 CShortcutButton::~CShortcutButton() {}
 
@@ -60,8 +78,12 @@ CShortcutButton::~CShortcutButton() {}
 //
 void CShortcutButton::SetShortcut(const QKeySequence& sequence)
 {
+#if defined(Q_OS_ANDROID)
+  Q_UNUSED(sequence)
+#else
   m_pAction->setShortcut(sequence);
   QPushButton::setToolTip(m_sBaseToolTip + "<br><i>" + m_pAction->shortcut().toString() + "</i>");
+#endif
 }
 
 //----------------------------------------------------------------------------------------
@@ -87,7 +109,12 @@ void CShortcutButton::EnableShortcutAsText(bool bEnabled)
 void CShortcutButton::setToolTip(const QString& sText)
 {
   m_sBaseToolTip = sText;
-  QPushButton::setToolTip(m_sBaseToolTip + "<br><i>" + m_pAction->shortcut().toString() + "</i>");
+  QPushButton::setToolTip(m_sBaseToolTip
+#if defined(Q_OS_ANDROID)
+#else
+                          + "<br><i>" + m_pAction->shortcut().toString() + "</i>"
+#endif
+   );
 }
 
 //----------------------------------------------------------------------------------------
@@ -96,6 +123,8 @@ void CShortcutButton::paintEvent(QPaintEvent* pEvt)
 {
   QPushButton::paintEvent(pEvt);
 
+#if defined(Q_OS_ANDROID)
+#else
   if (m_bShortCutAsTextEnabled)
   {
     QPainter painter(this);
@@ -114,4 +143,5 @@ void CShortcutButton::paintEvent(QPaintEvent* pEvt)
              rect().y() + rect().height() - textRect.height(),
              Qt::AlignLeft | Qt::AlignTop, sText);
   }
+  #endif
 }

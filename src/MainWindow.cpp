@@ -170,6 +170,9 @@ void CMainWindow::SlotDownloadButtonClicked()
 //
 void CMainWindow::SlotFullscreenChanged()
 {
+#if defined(Q_OS_ANDROID)
+  setWindowState(windowState() | Qt::WindowFullScreen);
+#else
   bool bFullscreen = m_spSettings->Fullscreen();
   if (bFullscreen)
   {
@@ -179,17 +182,27 @@ void CMainWindow::SlotFullscreenChanged()
   {
     setWindowState(windowState() & ~Qt::WindowFullScreen);
   }
+#endif
 }
 
 //----------------------------------------------------------------------------------------
 //
 void CMainWindow::SlotResolutionChanged()
 {
+#if defined(Q_OS_ANDROID)
+  QRect availableGeometry =
+      QGuiApplication::screenAt({0, 0})->geometry();
+#else
   QPoint globalCursorPos = QCursor::pos();
   QRect availableGeometry =
       QGuiApplication::screenAt(globalCursorPos)->geometry();
+#endif
 
+#if defined(Q_OS_ANDROID)
+  QSize newResolution = availableGeometry.size();
+#else
   QSize newResolution = m_spSettings->Resolution();
+#endif
   setGeometry(
       QStyle::alignedRect(Qt::LeftToRight, Qt::AlignCenter,
           newResolution, availableGeometry));
@@ -326,9 +339,12 @@ void CMainWindow::ConnectSlots()
   connect(m_spWindowContext.get(), &CWindowContext::SignalSetHelpButtonVisible,
           this, &CMainWindow::SlotSetHelpButtonVisible, Qt::DirectConnection);
 
+#if defined(Q_OS_ANDROID)
+#else
   connect(m_spSettings.get(), &CSettings::fullscreenChanged,
           this, &CMainWindow::SlotFullscreenChanged, Qt::QueuedConnection);
 
   connect(m_spSettings.get(), &CSettings::resolutionChanged,
           this, &CMainWindow::SlotResolutionChanged, Qt::QueuedConnection);
+#endif
 }

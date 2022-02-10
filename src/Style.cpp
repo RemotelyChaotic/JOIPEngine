@@ -44,8 +44,7 @@ namespace
 //
   void ResolveStyle(QApplication* pApp, const QString& sName)
   {
-    QFileInfo info(QLibraryInfo::location(QLibraryInfo::PrefixPath) +
-                   QDir::separator() + joip_style::c_sStyleFolder +
+    QFileInfo info(joip_style::StyleFolder() +
                    QDir::separator() + sName +
                    QDir::separator() + c_sStyleFile);
     if (info.exists())
@@ -54,8 +53,7 @@ namespace
       pApp->setStyleSheet(QString());
       pApp->setStyleSheet("file:///" + info.absoluteFilePath());
 
-      QFileInfo qmlStyle(QLibraryInfo::location(QLibraryInfo::PrefixPath) +
-                         QDir::separator() + joip_style::c_sStyleFolder +
+      QFileInfo qmlStyle(joip_style::StyleFolder() +
                          QDir::separator() + sName +
                          QDir::separator() + joip_style::c_sQmlStyleSubFolder);
       if (qmlStyle.exists())
@@ -81,12 +79,7 @@ namespace
 //
 QStringList joip_style::AvailableStyles()
 {
-#if defined(Q_OS_ANDROID)
-  const QString sStyleFolder = c_sDefaultAndroidStyleFolder;
-#else
-  const QString sStyleFolder = QLibraryInfo::location(QLibraryInfo::PrefixPath) +
-      QDir::separator() + c_sStyleFolder;
-#endif
+  const QString sStyleFolder = StyleFolder();
   QDirIterator iter(sStyleFolder, QDir::NoDotAndDotDot | QDir::Dirs, QDirIterator::NoIteratorFlags);
 
   QStringList out;
@@ -102,11 +95,22 @@ QStringList joip_style::AvailableStyles()
 //
 QString joip_style::StyleFile(const QString& sStyle)
 {
-  QFileInfo info(QLibraryInfo::location(QLibraryInfo::PrefixPath) +
-                 QDir::separator() + joip_style::c_sStyleFolder +
+  QFileInfo info(StyleFolder() +
                  QDir::separator() + sStyle +
                  QDir::separator() + c_sStyleFile);
   return info.absoluteFilePath();
+}
+
+//----------------------------------------------------------------------------------------
+//
+QString joip_style::StyleFolder()
+{
+#if defined(Q_OS_ANDROID)
+  return c_sDefaultAndroidStyleFolder;
+#else
+  return QLibraryInfo::location(QLibraryInfo::PrefixPath) +
+      QDir::separator() + c_sStyleFolder;
+#endif
 }
 
 //----------------------------------------------------------------------------------------

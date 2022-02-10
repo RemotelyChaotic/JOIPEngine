@@ -34,7 +34,10 @@ protected:
   void paintEvent(QPaintEvent* pEvt) override;
 
 private:
+#if defined(Q_OS_ANDROID)
+#else
   QAction* m_pAction;
+#endif
   QString  m_sBaseToolTip;
   bool     m_bShortCutAsTextEnabled;
 };

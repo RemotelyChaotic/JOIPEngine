@@ -135,6 +135,14 @@ void CSettingsScreen::Initialize()
     }
   }
 
+#if defined (Q_OS_ANDROID)
+  // disable settings pages that do not make sense on mobile
+  m_spUi->tabWidget->setTabEnabled(0, false);
+  m_spUi->tabWidget->setTabEnabled(3, false);
+  m_spUi->pContentContainer->hide();
+  m_spUi->pStyleHotoadContainer->hide();
+#endif
+
   m_bInitialized = true;
 }
 

@@ -9,6 +9,7 @@
 #include <QLibraryInfo>
 #include <QMutexLocker>
 #include <QSettings>
+#include <QScreen>
 #include <map>
 
 namespace {
@@ -215,6 +216,9 @@ void CSettings::WriteRaw(const QString& sSetting, const QVariant& value)
 //
 void CSettings::SetContentFolder(const QString& sPath)
 {
+#if defined(Q_OS_ANDROID)
+  Q_UNUSED(sPath)
+#else
   QMutexLocker locker(&m_settingsMutex);
   QString sOldPath = m_spSettings->value(CSettings::c_sSettingContentFolder).toString();
   QFileInfo contentFileInfo(sPath);
@@ -224,12 +228,16 @@ void CSettings::SetContentFolder(const QString& sPath)
   m_spSettings->setValue(CSettings::c_sSettingContentFolder, sPath);
 
   emit contentFolderChanged();
+#endif
 }
 
 //----------------------------------------------------------------------------------------
 //
 QString CSettings::ContentFolder()
 {
+#if defined(Q_OS_ANDROID)
+  return QString();
+#else
   QMutexLocker locker(&m_settingsMutex);
   QString sPath = m_spSettings->value(CSettings::c_sSettingContentFolder).toString();
   QFileInfo infoPath(sPath);
@@ -239,6 +247,7 @@ QString CSettings::ContentFolder()
     sPath = sPath.left(sPath.size()-1);
   }
   return sPath;
+#endif
 }
 
 //----------------------------------------------------------------------------------------
@@ -267,6 +276,9 @@ QString CSettings::Font()
 //
 void CSettings::SetFullscreen(bool bValue)
 {
+#if defined(Q_OS_ANDROID)
+  Q_UNUSED(bValue)
+#else
   QMutexLocker locker(&m_settingsMutex);
 
   bool bFullscreen = m_spSettings->value(CSettings::c_sSettingFullscreen).toBool();
@@ -276,27 +288,40 @@ void CSettings::SetFullscreen(bool bValue)
   m_spSettings->setValue(CSettings::c_sSettingFullscreen, bValue);
 
   emit fullscreenChanged();
+#endif
 }
 
 //----------------------------------------------------------------------------------------
 //
 bool CSettings::Fullscreen()
 {
+#if defined(Q_OS_ANDROID)
+  return true;
+#else
   QMutexLocker locker(&m_settingsMutex);
   return m_spSettings->value(CSettings::c_sSettingFullscreen).toBool();
+#endif
 }
 
 //----------------------------------------------------------------------------------------
 //
 QStringList CSettings::KeyBindings()
 {
+#if defined(Q_OS_ANDROID)
+  return QStringList();
+#else
   return c_vsKeyBindings;
+#endif
 }
 
 //----------------------------------------------------------------------------------------
 //
 QKeySequence CSettings::keyBinding(const QString& sRole)
 {
+#if defined(Q_OS_ANDROID)
+  Q_UNUSED(sRole)
+  return QKeySequence();
+#else
   QMutexLocker locker(&m_settingsMutex);
 
   // dur wenn in den defaults ein Eintrag existiert, kann dies verwendet werden
@@ -317,12 +342,17 @@ QKeySequence CSettings::keyBinding(const QString& sRole)
   {
     return QKeySequence();
   }
+#endif
 }
 
 //----------------------------------------------------------------------------------------
 //
 void CSettings::setKeyBinding(const QKeySequence& sKeySequence, const QString& sRole)
 {
+#if defined(Q_OS_ANDROID)
+  Q_UNUSED(sKeySequence)
+  Q_UNUSED(sRole)
+#else
   QMutexLocker locker(&m_settingsMutex);
 
   auto it = c_sDefaultKeyBindings.find(sRole);
@@ -336,6 +366,7 @@ void CSettings::setKeyBinding(const QKeySequence& sKeySequence, const QString& s
       emit keyBindingsChanged();
     }
   }
+#endif
 }
 
 //----------------------------------------------------------------------------------------
@@ -436,6 +467,9 @@ CSettings::EditorType CSettings::PreferedEditorLayout()
 //
 void CSettings::SetResolution(const QSize& size)
 {
+#if defined(Q_OS_ANDROID)
+  Q_UNUSED(size)
+#else
   QMutexLocker locker(&m_settingsMutex);
   QSize oldValue = m_spSettings->value(CSettings::c_sSettingResolution).toSize();
 
@@ -444,14 +478,19 @@ void CSettings::SetResolution(const QSize& size)
   m_spSettings->setValue(CSettings::c_sSettingResolution, size);
 
   emit resolutionChanged();
+#endif
 }
 
 //----------------------------------------------------------------------------------------
 //
 QSize CSettings::Resolution()
 {
+#if defined(Q_OS_ANDROID)
+  return QGuiApplication::screens()[0]->geometry().size();
+#else
   QMutexLocker locker(&m_settingsMutex);
   return m_spSettings->value(CSettings::c_sSettingResolution).toSize();
+#endif
 }
 
 //----------------------------------------------------------------------------------------
@@ -510,6 +549,9 @@ QString CSettings::Style()
 //
 void CSettings::SetStyleHotLoad(bool bValue)
 {
+#if defined(Q_OS_ANDROID)
+  Q_UNUSED(bValue)
+#else
   QMutexLocker locker(&m_settingsMutex);
   bool iOldValue = m_spSettings->value(CSettings::c_sSettingStyleHotLoad).toBool();
 
@@ -518,14 +560,19 @@ void CSettings::SetStyleHotLoad(bool bValue)
   m_spSettings->setValue(CSettings::c_sSettingStyleHotLoad, bValue);
 
   emit styleHotLoadChanged();
+#endif
 }
 
 //----------------------------------------------------------------------------------------
 //
 bool CSettings::StyleHotLoad()
 {
+#if defined(Q_OS_ANDROID)
+  return false;
+#else
   QMutexLocker locker(&m_settingsMutex);
   return m_spSettings->value(CSettings::c_sSettingStyleHotLoad).toBool();
+#endif
 }
 
 //----------------------------------------------------------------------------------------
@@ -534,8 +581,7 @@ QUrl CSettings::styleFolder()
 {
   QMutexLocker locker(&m_settingsMutex);
   QString sStyle = m_spSettings->value(CSettings::c_sSettingStyle).toString();
-  QFileInfo info(QLibraryInfo::location(QLibraryInfo::PrefixPath) +
-                 QDir::separator() + joip_style::c_sStyleFolder +
+  QFileInfo info(joip_style::StyleFolder() +
                  QDir::separator() + sStyle);
   if (info.exists())
   {
@@ -553,8 +599,7 @@ QUrl CSettings::styleFolderQml()
 {
   QMutexLocker locker(&m_settingsMutex);
   QString sStyle = m_spSettings->value(CSettings::c_sSettingStyle).toString();
-  QFileInfo info(QLibraryInfo::location(QLibraryInfo::PrefixPath) +
-                 QDir::separator() + joip_style::c_sStyleFolder +
+  QFileInfo info(joip_style::StyleFolder() +
                  QDir::separator() + sStyle +
                  QDir::separator() + joip_style::c_sQmlStyleSubFolder);
   if (info.exists())
@@ -601,6 +646,10 @@ double CSettings::Volume()
 //
 bool CSettings::IsAllowedToOverwriteKeyBinding(const QString& sRole)
 {
+#if defined(Q_OS_ANDROID)
+  Q_UNUSED(sRole)
+  return false;
+#else
   if (sRole == "Cut" ||
       sRole == "Copy" ||
       sRole == "Pase" ||
@@ -613,6 +662,7 @@ bool CSettings::IsAllowedToOverwriteKeyBinding(const QString& sRole)
     return false;
   }
   return true;
+#endif
 }
 
 //----------------------------------------------------------------------------------------
@@ -629,6 +679,7 @@ void CSettings::GenerateSettingsIfNotExists()
     m_spSettings->setValue(CSettings::c_sSettingAutoPauseInactive, true);
   }
 
+#if !defined(Q_OS_ANDROID)
   // check content path
   if (!m_spSettings->contains(CSettings::c_sSettingContentFolder))
   {
@@ -651,12 +702,17 @@ void CSettings::GenerateSettingsIfNotExists()
     bNeedsSynch = true;
     m_spSettings->setValue(CSettings::c_sSettingFont, "Arial");
   }
+#endif
 
   // check editor Layout
   if (!m_spSettings->contains(CSettings::c_sSettingEditorLayout))
   {
     bNeedsSynch = true;
+#if defined(Q_OS_ANDROID)
+    m_spSettings->setValue(CSettings::c_sSettingEditorLayout, CSettings::eCompact);
+#else
     m_spSettings->setValue(CSettings::c_sSettingEditorLayout, CSettings::eNone);
+#endif
   }
 
   // check fullscreen
@@ -667,6 +723,7 @@ void CSettings::GenerateSettingsIfNotExists()
   }
 
   // Keybindings
+#if !defined(Q_OS_ANDROID)
   for (const QString& sKeyBindingIdx : qAsConst(c_vsKeyBindings))
   {
     auto it = c_sDefaultKeyBindings.find(sKeyBindingIdx);
@@ -685,6 +742,7 @@ void CSettings::GenerateSettingsIfNotExists()
     QSize size = QSize(800, 450);
     m_spSettings->setValue(CSettings::c_sSettingResolution, size);
   }
+#endif
 
   // check muted
   if (!m_spSettings->contains(CSettings::c_sSettingMuted))
@@ -707,12 +765,14 @@ void CSettings::GenerateSettingsIfNotExists()
     m_spSettings->setValue(CSettings::c_sSettingStyle, "Blue Night");
   }
 
+#if !defined(Q_OS_ANDROID)
   // check style HotLoad
   if (!m_spSettings->contains(CSettings::c_sSettingStyleHotLoad))
   {
     bNeedsSynch = true;
     m_spSettings->setValue(CSettings::c_sSettingStyleHotLoad, false);
   }
+#endif
 
   // check volume
   if (!m_spSettings->contains(CSettings::c_sSettingVolume))
