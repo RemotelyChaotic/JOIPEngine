@@ -65,6 +65,37 @@ bool CDatabaseManager::UnloadProject(tspProject& spProject)
 
 //----------------------------------------------------------------------------------------
 //
+qint32 CDatabaseManager::AddProject(const QDir& dir, quint32 iVersion,
+                                    bool bBundled, bool bReadOnly,
+                                    const tvfnActionsProject& vfnActionsAfterAdding)
+{
+  if (!IsInitialized()) { return -1; }
+
+  qint32 iNewId = FindNewProjectId();
+  const QString sBaseName = dir.dirName();
+  const QString sProjectPath = QFileInfo(dir.absolutePath()).absolutePath();
+  QString sName = sBaseName;
+  QString sDirNameResolved;
+  QString sError;
+  if (!ProjectNameCheck(sBaseName, &sError))
+  {
+    sName = ToValidProjectName(sBaseName);
+    sDirNameResolved = sName;
+  }
+  else
+  {
+    sName = sBaseName;
+    sDirNameResolved = sBaseName;
+  }
+
+  return AddProjectPrivate(sName, sDirNameResolved, sProjectPath,
+                           iNewId, iVersion,
+                           bBundled, bReadOnly,
+                           vfnActionsAfterAdding);
+}
+
+//----------------------------------------------------------------------------------------
+//
 qint32 CDatabaseManager::AddProject(const QString& sDirName, quint32 iVersion,
                                     bool bBundled, bool bReadOnly,
                                     const tvfnActionsProject& vfnActionsAfterAdding)
@@ -80,37 +111,18 @@ qint32 CDatabaseManager::AddProject(const QString& sDirName, quint32 iVersion,
   if (!ProjectNameCheck(sBaseName, &sError))
   {
     sName = ToValidProjectName(sBaseName);
-    sDirNameResolved = sName + QFileInfo(sDirName).suffix();
+    sDirNameResolved = sName + "." + QFileInfo(sDirName).suffix();
   }
   else
   {
     sName = sBaseName;
-    sDirNameResolved = sBaseName;
+    sDirNameResolved = sBaseName + "." + QFileInfo(sDirName).suffix();
   }
 
-
-  QMutexLocker locker(m_spData.get());
-  if (0 <= iNewId)
-  {
-    m_spData->m_vspProjectDatabase.push_back(std::make_shared<SProject>());
-    m_spData->m_vspProjectDatabase.back()->m_iId = iNewId;
-    m_spData->m_vspProjectDatabase.back()->m_sName = sName;
-    m_spData->m_vspProjectDatabase.back()->m_sFolderName = sDirNameResolved;
-    m_spData->m_vspProjectDatabase.back()->m_sProjectPath = sProjectPath;
-    m_spData->m_vspProjectDatabase.back()->m_iVersion = iVersion;
-    m_spData->m_vspProjectDatabase.back()->m_bBundled = bBundled;
-    m_spData->m_vspProjectDatabase.back()->m_bReadOnly = bReadOnly;
-    locker.unlock();
-
-    for (auto fn : vfnActionsAfterAdding)
-    {
-      if (nullptr != fn) { fn(m_spData->m_vspProjectDatabase.back()); }
-    }
-
-    emit SignalProjectAdded(iNewId);
-  }
-
-  return iNewId;
+  return AddProjectPrivate(sName, sDirNameResolved, sProjectPath,
+                           iNewId, iVersion,
+                           bBundled, bReadOnly,
+                           vfnActionsAfterAdding);
 }
 
 //----------------------------------------------------------------------------------------
@@ -934,6 +946,40 @@ void CDatabaseManager::SlotContentFolderChanged()
   ClearProjects();
   m_spDbIo->LoadDatabase();
   emit SignalReloadFinished();
+}
+
+//----------------------------------------------------------------------------------------
+//
+qint32 CDatabaseManager::AddProjectPrivate(const QString& sName,
+                                           const QString& sDirNameResolved,
+                                           const QString& sProjectPath,
+                                           qint32 iNewId,
+                                           quint32 iVersion,
+                                           bool bBundled, bool bReadOnly,
+                                           const tvfnActionsProject& vfnActionsAfterAdding)
+{
+  QMutexLocker locker(m_spData.get());
+  if (0 <= iNewId)
+  {
+    m_spData->m_vspProjectDatabase.push_back(std::make_shared<SProject>());
+    m_spData->m_vspProjectDatabase.back()->m_iId = iNewId;
+    m_spData->m_vspProjectDatabase.back()->m_sName = sName;
+    m_spData->m_vspProjectDatabase.back()->m_sFolderName = sDirNameResolved;
+    m_spData->m_vspProjectDatabase.back()->m_sProjectPath = sProjectPath;
+    m_spData->m_vspProjectDatabase.back()->m_iVersion = iVersion;
+    m_spData->m_vspProjectDatabase.back()->m_bBundled = bBundled;
+    m_spData->m_vspProjectDatabase.back()->m_bReadOnly = bReadOnly;
+    locker.unlock();
+
+    for (auto fn : vfnActionsAfterAdding)
+    {
+      if (nullptr != fn) { fn(m_spData->m_vspProjectDatabase.back()); }
+    }
+
+    emit SignalProjectAdded(iNewId);
+  }
+
+  return iNewId;
 }
 
 //----------------------------------------------------------------------------------------

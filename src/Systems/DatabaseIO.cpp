@@ -129,7 +129,7 @@ protected:
     while (it.hasNext())
     {
       QString sDirName = QFileInfo(it.next()).absoluteFilePath();
-      m_pManager->AddProject(sDirName);
+      m_pManager->AddProject(QDir(sDirName));
     }
 
     // next load archives

@@ -275,7 +275,7 @@ void CEditorModel::InitNewProject(const QString& sNewProjectName, bool bTutorial
     const QString sBaseProjectPath = m_spSettings->ContentFolder();
 #endif
 
-    spDbManager->AddProject(sBaseProjectPath + "/" + sNewProjectName);
+    spDbManager->AddProject(QDir(sBaseProjectPath + "/" + sNewProjectName));
     m_spCurrentProject = spDbManager->FindProject(sNewProjectName);
     const QString sProjName = PhysicalProjectName(m_spCurrentProject);
 

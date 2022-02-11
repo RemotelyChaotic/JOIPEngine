@@ -5,6 +5,7 @@
 #include "Kink.h"
 #include "Resource.h"
 #include <QAtomicInt>
+#include <QDir>
 #include <QMutex>
 #include <set>
 
@@ -41,6 +42,9 @@ public:
   static bool UnloadProject(tspProject& spProject);
 
   // Project
+  qint32 AddProject(const QDir& dir = QDir("New_Project"), quint32 iVersion = 1,
+                    bool bBundled = false, bool bReadOnly = false,
+                    const tvfnActionsProject& vfnActionsAfterAdding = tvfnActionsProject());
   qint32 AddProject(const QString& sDirName = "New_Project", quint32 iVersion = 1,
                     bool bBundled = false, bool bReadOnly = false,
                     const tvfnActionsProject& vfnActionsAfterAdding = tvfnActionsProject());
@@ -111,6 +115,13 @@ private slots:
   void SlotContentFolderChanged();
 
 private:
+  qint32 AddProjectPrivate(const QString& sName,
+                           const QString& sDirNameResolved,
+                           const QString& sProjectPath,
+                           qint32 iNewId,
+                           quint32 iVersion,
+                           bool bBundled, bool bReadOnly,
+                           const tvfnActionsProject& vfnActionsAfterAdding);
   qint32 FindNewIdFromSet(const std::set<qint32, std::less<qint32>>& ids);
   qint32 FindNewSceneId(tspProject& spProj);
 
