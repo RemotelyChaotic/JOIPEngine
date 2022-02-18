@@ -381,7 +381,6 @@ void CProjectCardSelectionWidget::resizeEvent(QResizeEvent* pEvent)
   {
     QMetaObject::invokeMethod(this, "SlotResizeDone", Qt::QueuedConnection);
   }
-  pEvent->accept();
 }
 
 //----------------------------------------------------------------------------------------
