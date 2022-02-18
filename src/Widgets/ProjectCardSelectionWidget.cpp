@@ -241,7 +241,7 @@ void CProjectCardSelectionWidget::SlotOverlayOpened()
   m_spUi->pQmlWidget->setAttribute(Qt::WA_AlwaysStackOnTop, false);
   m_spUi->pQmlWidget->setAttribute(Qt::WA_TranslucentBackground, false);
   m_spUi->pQmlWidget->setStyleSheet(styleSheet());
-  m_spUi->pQmlWidget->setClearColor(m_spUi->pQmlWidget->palette().background().color());
+  m_spUi->pQmlWidget->setClearColor(m_spUi->pQmlWidget->palette().window().color());
 }
 
 //----------------------------------------------------------------------------------------
