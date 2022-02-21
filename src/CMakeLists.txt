@@ -509,7 +509,9 @@ if (ANDROID)
   set(ANDROID_PERMISSIONS
     "android.permission.INTERNET"
     "android.permission.MANAGE_DOCUMENTS"
-    "android.permission.MANAGE_MEDIA")
+    "android.permission.MANAGE_MEDIA"
+    "android.permission.READ_EXTERNAL_STORAGE"
+    "android.permission.WRITE_EXTERNAL_STORAGE")
 
   set(ANDROID_FEATURES
     "android.hardware.opengles.aep")

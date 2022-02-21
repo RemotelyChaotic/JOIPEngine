@@ -255,11 +255,11 @@ bool CEosDownloadJob::Run(const QVariantList& args)
     }
   };
 
-#if Q_OS_ANDROID
-    // TODO:
-    const QString sBaseProjectPath = CApplication::Instance()->Settings()->ContentFolder();
+#if defined(Q_OS_ANDROID)
+  // TODO:
+  const QString sBaseProjectPath = CApplication::Instance()->Settings()->ContentFolder();
 #else
-    const QString sBaseProjectPath = CApplication::Instance()->Settings()->ContentFolder();
+  const QString sBaseProjectPath = CApplication::Instance()->Settings()->ContentFolder();
 #endif
 
   m_iProjId = spDbManager->AddProject(QDir(sBaseProjectPath + "/TBD"), 1, false, true, vfnActions);

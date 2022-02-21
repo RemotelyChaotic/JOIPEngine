@@ -268,7 +268,7 @@ void CEditorModel::InitNewProject(const QString& sNewProjectName, bool bTutorial
   auto spDbManager = m_wpDbManager.lock();
   if (nullptr != spDbManager)
   {
-#if Q_OS_ANDROID
+#if defined(Q_OS_ANDROID)
     // TODO:
     const QString sBaseProjectPath = m_spSettings->ContentFolder();
 #else

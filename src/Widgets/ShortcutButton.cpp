@@ -9,6 +9,8 @@ namespace
 {
   //--------------------------------------------------------------------------------------
   //
+#if defined(Q_OS_ANDROID)
+#else
   void drawText(QPainter& painter, double x, double y, Qt::Alignment flags,
                 const QString& sText, QRectF* pBoundingRect = nullptr)
   {
@@ -22,6 +24,7 @@ namespace
      QRectF rect{corner.x(), corner.y(), size, size};
      painter.drawText(rect, flags, sText, pBoundingRect);
   }
+#endif
 }
 
 //----------------------------------------------------------------------------------------

@@ -333,35 +333,273 @@ protected:
   //
   bool DeserializeProjectImpl(tspProject& spProject) override
   {
+    spProject->m_rwLock.lockForRead();
+    const QString sName = spProject->m_sName;
+    const QString sFolderName = spProject->m_sFolderName;
+    const QString sContentFolder(spProject->m_sProjectPath);
+    bool bBundled = spProject->m_bBundled;
+    bool bWasLoaded = spProject->m_bLoaded;
+    spProject->m_rwLock.unlock();
+    bool bOk = true;
+    if (!bBundled)
+    {
+      if (!QFileInfo(sContentFolder + QDir::separator() + sFolderName).exists())
+      {
+        qWarning() << "Deserialize: Could not find project at: " +
+                      sContentFolder + QDir::separator() + sName;
+      }
+    }
 
+    bOk &= LoadProject(spProject);
+
+    if (bOk)
+    {
+      QString sJsonFile;
+      if (!bBundled)
+      {
+        sJsonFile = CPhysFsFileEngineHandler::c_sScheme + joip_resource::c_sProjectFileName;
+      }
+      else
+      {
+        sJsonFile = ":/" + sName + QDir::separator() + joip_resource::c_sProjectFileName;
+      }
+
+      QFileInfo jsonInfo(sJsonFile);
+      if (jsonInfo.exists())
+      {
+        QFile jsonFile(sJsonFile);
+        if (jsonFile.open(QIODevice::ReadOnly))
+        {
+          QJsonParseError err;
+          QJsonDocument jsonDocument = QJsonDocument::fromJson(jsonFile.readAll(), &err);
+          if (err.error == QJsonParseError::NoError)
+          {
+            spProject->FromJsonObject(jsonDocument.object());
+
+            spProject->m_rwLock.lockForRead();
+            qint32 iOldId = spProject->m_iId;
+            spProject->m_rwLock.unlock();
+            qint32 iNewId = (-1 == iOldId) ? m_pManager->FindNewProjectId() : -1;
+            spProject->m_rwLock.lockForWrite();
+            spProject->m_iId = (-1 == iOldId) ? iNewId : iOldId;
+            spProject->m_rwLock.unlock();
+            bOk = true;
+          }
+          else
+          {
+            qWarning() << err.errorString();
+            bOk = false;
+          }
+        }
+        else
+        {
+          qWarning() << "Could not read project file: " + sJsonFile;
+          bOk = false;
+        }
+      }
+      else
+      {
+        qWarning() << "Could not find project file: " + sJsonFile;
+        bOk = false;
+      }
+    }
+
+    if (!bWasLoaded)
+    {
+      bOk &= UnloadProject(spProject);
+    }
+
+    return bOk;
   }
 
   //--------------------------------------------------------------------------------------
   //
   void LoadProjects() override
   {
+    // load projects
+    // first load folders
+    QString sPath = "";/*m_spSettings->ContentFolder();*/
+    QDirIterator it(sPath, QDir::Dirs | QDir::NoDotAndDotDot);
+    while (it.hasNext())
+    {
+      QString sDirName = QFileInfo(it.next()).absoluteFilePath();
+      m_pManager->AddProject(QDir(sDirName));
+    }
 
+    // next load archives
+    QStringList vsFileEndings;
+    for (const QString& sEnding : CPhysFsFileEngineHandler::SupportedFileTypes())
+    {
+      vsFileEndings << QStringLiteral("*.") + sEnding.toLower();
+    }
+    QDirIterator itCompressed(sPath, vsFileEndings,
+                          QDir::Files | QDir::NoDotAndDotDot, QDirIterator::NoIteratorFlags);
+    while (itCompressed.hasNext())
+    {
+      QString sFileName = QFileInfo(itCompressed.next()).absoluteFilePath();
+      m_pManager->AddProject(sFileName, 1, false, true);
+    }
+
+    // finally load packed projects
+    vsFileEndings = QStringList() << QString("*") + c_sProjectBundleFileEnding;
+    QDirIterator itBundle(sPath, vsFileEndings,
+                          QDir::Files | QDir::NoDotAndDotDot, QDirIterator::NoIteratorFlags);
+    while (itBundle.hasNext())
+    {
+      QString sFileName = QFileInfo(itBundle.next()).absoluteFilePath();
+      m_pManager->AddProject(sFileName, 1, true, true);
+    }
+
+    // store projects
+    QMutexLocker locker(m_spData.get());
+    for (tspProject spProject : m_spData->m_vspProjectDatabase)
+    {
+      DeserializeProject(spProject);
+    }
   }
 
   //--------------------------------------------------------------------------------------
   //
   void LoadLinks() override
   {
+    QMutexLocker locker(m_spData.get());
 
+    // load kinks
+    qint32 iKinkIdCounter = 0;
+    QFile kinkData(":/resources/data/Kink_Information_Data.csv");
+    if (kinkData.exists() && kinkData.open(QIODevice::ReadOnly))
+    {
+      QTextStream stream(&kinkData);
+      stream.setCodec("UTF-8");
+
+      QString sLine;
+      while (stream.readLineInto(&sLine))
+      {
+        QStringList vsLineData = sLine.split(";");
+        if (vsLineData.size() == 3)
+        {
+          tKinks& kinks = m_spData->m_kinkKategoryMap[vsLineData[0]];
+          tspKink spKink = std::make_shared<SKink>();
+          spKink->m_iIdForOrdering = iKinkIdCounter;
+          spKink->m_sType = vsLineData[0];
+          spKink->m_sName = vsLineData[1];
+          spKink->m_sDescribtion = vsLineData[2];
+          kinks.insert({vsLineData[1], spKink});
+        }
+        ++iKinkIdCounter;
+      }
+    }
   }
 
   //--------------------------------------------------------------------------------------
   //
   bool PrepareProjectImpl(tspProject& spProject) override
   {
+    QReadLocker locker(&spProject->m_rwLock);
+    const QString sProjectFolder = PhysicalProjectName(spProject);
+    const QString sProjectPath = PhysicalProjectPath(spProject);
+    const QString sFolderPath = spProject->m_sProjectPath;
 
+    if (!QFileInfo(sProjectPath).exists())
+    {
+      bool bOk = QDir(sFolderPath).mkdir(sProjectFolder);
+      if (!bOk)
+      {
+        qWarning() << "Could not create folder: " + sProjectPath;
+      }
+      return bOk;
+    }
+    return true;
   }
 
   //--------------------------------------------------------------------------------------
   //
   bool SerializeProjectImpl(tspProject& spProject, bool bForceWriting) override
   {
+    spProject->m_rwLock.lockForRead();
+    const QString sName = spProject->m_sName;
+    const QString sProjectPath = spProject->m_sProjectPath;
+    const QString sFolderName = spProject->m_sFolderName;
+    const QString sBaseName = QFileInfo(sFolderName).completeBaseName();
+    const QString sSuffix = QFileInfo(sFolderName).suffix();
+    bool bBundled = spProject->m_bBundled;
+    spProject->m_rwLock.unlock();
 
+    // cannot serialize bundled projects, since these are read only
+    if (bBundled) { return true; }
+
+    bool bOk = true;
+    QDir sContentFolder(sProjectPath);
+
+    // first rename old folder
+    QString sNewFolderName = sFolderName;
+    const QString sOldProjectFolder = sProjectPath + QDir::separator() + sFolderName;
+    QString sNewProjectFolder = sProjectPath + QDir::separator() + sNewFolderName;
+    if (sBaseName != sName)
+    {
+      if (!sBaseName.isEmpty())
+      {
+        if (QFileInfo(sOldProjectFolder).exists())
+        {
+          sNewFolderName = sName + "." + sSuffix;
+          sNewProjectFolder = sProjectPath + QDir::separator() + sNewFolderName;
+          bOk = sContentFolder.rename(sFolderName, sNewFolderName);
+        }
+        else
+        {
+          bOk = false;
+          qWarning() << "Serialize: Could not rename folder: " + sOldProjectFolder;
+        }
+      }
+    }
+
+    // if new doesn't exist -> create
+    if (bOk && !QFileInfo(sNewProjectFolder).exists())
+    {
+      bOk = sContentFolder.mkdir(sNewProjectFolder);
+      if (!bOk)
+      {
+        qWarning() << "Serialize: Could not create folder: " +
+                      sProjectPath + QDir::separator() + sFolderName;
+      }
+    }
+
+    bool bWasLoaded = false;
+    if (bOk)
+    {
+      spProject->m_rwLock.lockForWrite();
+      spProject->m_sFolderName = sNewFolderName;
+      bWasLoaded = spProject->m_bLoaded;
+      spProject->m_rwLock.unlock();
+    }
+
+    bOk &= LoadProject(spProject);
+
+    if (bOk)
+    {
+      QJsonDocument document(spProject->ToJsonObject());
+
+      QFile jsonFile((!bForceWriting ? CPhysFsFileEngineHandler::c_sScheme :
+                                       (sNewProjectFolder + QDir::separator())) +
+                     joip_resource::c_sProjectFileName);
+      if (jsonFile.open(QIODevice::ReadWrite | QIODevice::Truncate))
+      {
+        jsonFile.write(document.toJson(QJsonDocument::Indented));
+        bOk = true;
+      }
+      else
+      {
+        qWarning() << "Could not wirte project file: " + jsonFile.fileName();
+        bOk =  false;
+      }
+    }
+
+    if (!bWasLoaded)
+    {
+      bOk &= UnloadProject(spProject);
+    }
+
+    return bOk;
   }
 };
 #endif
