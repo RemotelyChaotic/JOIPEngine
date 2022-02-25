@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.5)
 
-if(ANDROID)
+if (ANDROID)
   add_subdirectory(android_openssl)
 endif()
 add_subdirectory(better-enums)

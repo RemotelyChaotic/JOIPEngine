@@ -497,7 +497,7 @@ target_compile_definitions(${PROJECT_NAME}
 # Android stuff
 #-----------------------------------------------------------------------------------------
 if (ANDROID)
-  # Android deployment fix
+  # Android deployment fix for older qtcreator / androiddeployqt versions
   # see https://bugreports.qt.io/browse/QTBUG-88583
   file(MAKE_DIRECTORY "${CMAKE_BINARY_DIR}/android-build/libs/${ANDROID_ABI}/")
   add_custom_command(
@@ -505,6 +505,9 @@ if (ANDROID)
       POST_BUILD
       COMMAND ${CMAKE_COMMAND} -E copy "${CMAKE_CURRENT_BINARY_DIR}/lib${PROJECT_NAME}_${ANDROID_ABI}.so" "${CMAKE_BINARY_DIR}/android-build/libs/${ANDROID_ABI}/"
   )
+
+  # Another Android deployment fix of aditional libraries for qt 5.14.2
+
 
   set(ANDROID_PERMISSIONS
     "android.permission.INTERNET"
