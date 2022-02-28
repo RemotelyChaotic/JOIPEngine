@@ -91,3 +91,23 @@ message("QTAV_INCLUDE_DIRS          = ${QTAV_INCLUDE_DIRS}")
 message("QTAV_LIBRARIES             = ${QTAV_LIBRARIES}")
 message("QTAVWIDGETS_INCLUDE_DIRS   = ${QTAVWIDGETS_INCLUDE_DIRS}")
 message("QTAVWIDGETS_LIBRARIES      = ${QTAVWIDGETS_LIBRARIES}")
+
+
+if (ANDROID)
+  if (NOT (QT_VERSION LESS 5.14.0))
+    set(ffmpeg_dir ${CMAKE_SOURCE_DIR}/3rdparty/QtAV/ffmpeg/ffmpeg-4.4-android-default/lib/${ANDROID_ABI})
+  else()
+    set(ffmpeg_dir ${CMAKE_SOURCE_DIR}/3rdparty/QtAV/ffmpeg/ffmpeg-4.4-android-default/lib/${ANDROID_TARGET_ARCH})
+  endif()
+  set(CUSTOM_ANDROID_EXTRA_LIBS
+      ${CUSTOM_ANDROID_EXTRA_LIBS}
+      ${ffmpeg_dir}/libavcodec.so
+      ${ffmpeg_dir}/libavdevice.so
+      ${ffmpeg_dir}/libavfilter.so
+      ${ffmpeg_dir}/libavformat.so
+      ${ffmpeg_dir}/libavutil.so
+      ${ffmpeg_dir}/libffmpeg.so
+      ${ffmpeg_dir}/libswresample.so
+      ${ffmpeg_dir}/libswscale.so
+  CACHE INTERNAL "")
+endif()
