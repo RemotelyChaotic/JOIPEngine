@@ -3,7 +3,6 @@
 #include "Settings.h"
 #include "Systems/Resource.h"
 #include "Utils/MultiEmitterSoundPlayer.h"
-#include <QtAV>
 #include <QFileInfo>
 #include <QPainter>
 

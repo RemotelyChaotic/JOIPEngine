@@ -7,7 +7,6 @@
 
 class CMultiEmitterSoundPlayer;
 class CSettings;
-namespace QtAV { class AVPlayer; }
 struct SResource;
 typedef std::shared_ptr<SResource>      tspResource;
 

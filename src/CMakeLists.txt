@@ -20,6 +20,10 @@ find_package(Qt5 COMPONENTS
     Xml
   REQUIRED)
 
+if (ANDROID)
+  find_package(Qt5 COMPONENTS AndroidExtras)
+endif()
+
 set(Sources
   Application.cpp 
   Application.h 
@@ -408,7 +412,7 @@ set(Sources
   Widgets/OverlayButton.h
   Widgets/Player/AvSlider.cpp
   Widgets/Player/AvSlider.h
-  Widgets/Player/MediaPlayer.cpp 
+  Widgets/Player/MediaPlayer.cpp
   Widgets/Player/MediaPlayer.h
   Widgets/ProgressBar.cpp
   Widgets/ProgressBar.h
@@ -497,6 +501,8 @@ target_compile_definitions(${PROJECT_NAME}
 # Android stuff
 #-----------------------------------------------------------------------------------------
 if (ANDROID)
+  target_link_libraries(${PROJECT_NAME} PRIVATE Qt5::AndroidExtras)
+
   # Android deployment fix for older qtcreator / androiddeployqt versions
   # see https://bugreports.qt.io/browse/QTBUG-88583
   file(MAKE_DIRECTORY "${CMAKE_BINARY_DIR}/android-build/libs/${ANDROID_ABI}/")
@@ -505,9 +511,6 @@ if (ANDROID)
       POST_BUILD
       COMMAND ${CMAKE_COMMAND} -E copy "${CMAKE_CURRENT_BINARY_DIR}/lib${PROJECT_NAME}_${ANDROID_ABI}.so" "${CMAKE_BINARY_DIR}/android-build/libs/${ANDROID_ABI}/"
   )
-
-  # Another Android deployment fix of aditional libraries for qt 5.14.2
-
 
   set(ANDROID_PERMISSIONS
     "android.permission.INTERNET"

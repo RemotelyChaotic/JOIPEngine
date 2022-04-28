@@ -1,7 +1,6 @@
 #include "CreditsScreen.h"
 #include "Application.h"
 #include "ui_CreditsScreen.h"
-#include <QtAV>
 #include <QFile>
 #include <QFont>
 #include <QMessageBox>
