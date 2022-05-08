@@ -1,0 +1,89 @@
+From 265d48f688b4169e60055b15702a90eb54262298 Mon Sep 17 00:00:00 2001
+From: Joerg Bornemann <joerg.bornemann@qt.io>
+Date: Wed, 11 Aug 2021 10:02:10 +0200
+Subject: [PATCH] CMake: Prevent multiple creation of the targets 'aab' and
+ 'apk'
+
+Suppose you have a project with multiple subdirectories.  In the
+subdirectories are find_package calls for Qt, but not in the top-level
+file.
+
+Example:
+- CMakeLists.txt
+- subdir1/CMakeLists.txt
+  find_package(Qt5 COMPONENTS Core)
+- subdir2/CMakeLists.txt
+  find_package(Qt5 COMPONENTS Core)
+
+Both find_package calls are local to their subdirectories, which means
+that the second find_package is executed, even though the first was
+already successful.  Both calls try to create the targets 'apk' and
+'aab'.  This leads to the following CMake error:
+
+    add_custom_target cannot create target "apk" because another target
+    with the same name already exists.
+
+Guard the add_custom_target calls such that they do not create a target
+if it is already existent.
+
+Fixes: QTBUG-87863
+Change-Id: I132b0c7d9db9b2cb33b5e091cf0b216f06cd0d39
+Reviewed-by: Alexandru Croitor <alexandru.croitor@qt.io>
+---
+ src/corelib/Qt5AndroidSupport.cmake | 40 ++++++++++++++++-------------
+ 1 file changed, 22 insertions(+), 18 deletions(-)
+
+diff --git a/src/corelib/Qt5AndroidSupport.cmake b/src/corelib/Qt5AndroidSupport.cmake
+index 5512635f97..74d9e257d3 100644
+--- a/src/corelib/Qt5AndroidSupport.cmake
++++ b/src/corelib/Qt5AndroidSupport.cmake
+@@ -123,24 +123,28 @@ if (NOT ${PROJECT_NAME}-MultiAbiBuild)
+     set(android_deploy_qt_platform "--android-platform ${ANDROID_SDK_PLATFORM}")
+   endif()
+ 
+-  add_custom_target(apk
+-    COMMAND ${CMAKE_COMMAND} -E env JAVA_HOME=${JAVA_HOME} ${ANDROID_DEPLOY_QT}
+-       --input "${CMAKE_BINARY_DIR}/android_deployment_settings.json"
+-       --output "${CMAKE_BINARY_DIR}/android-build"
+-       --apk "${CMAKE_BINARY_DIR}/android-build/${PROJECT_NAME}.apk"
+-       ${android_deploy_qt_platform}
+-       ${android_deploy_qt_jdk}
+-    VERBATIM)
+-
+-  add_custom_target(aab
+-    COMMAND ${CMAKE_COMMAND} -E env JAVA_HOME=${JAVA_HOME} ${ANDROID_DEPLOY_QT}
+-      --input "${CMAKE_BINARY_DIR}/android_deployment_settings.json"
+-      --output "${CMAKE_BINARY_DIR}/android-build"
+-      --apk "${CMAKE_BINARY_DIR}/android-build/${PROJECT_NAME}.apk"
+-      --aab
+-      ${android_deploy_qt_platform}
+-      ${android_deploy_qt_jdk}
+-   VERBATIM)
++  if(NOT TARGET apk)
++    add_custom_target(apk
++      COMMAND ${CMAKE_COMMAND} -E env JAVA_HOME=${JAVA_HOME} ${ANDROID_DEPLOY_QT}
++         --input "${CMAKE_BINARY_DIR}/android_deployment_settings.json"
++         --output "${CMAKE_BINARY_DIR}/android-build"
++         --apk "${CMAKE_BINARY_DIR}/android-build/${PROJECT_NAME}.apk"
++         ${android_deploy_qt_platform}
++         ${android_deploy_qt_jdk}
++      VERBATIM)
++  endif()
++
++  if(NOT TARGET aab)
++    add_custom_target(aab
++      COMMAND ${CMAKE_COMMAND} -E env JAVA_HOME=${JAVA_HOME} ${ANDROID_DEPLOY_QT}
++        --input "${CMAKE_BINARY_DIR}/android_deployment_settings.json"
++        --output "${CMAKE_BINARY_DIR}/android-build"
++        --apk "${CMAKE_BINARY_DIR}/android-build/${PROJECT_NAME}.apk"
++        --aab
++        ${android_deploy_qt_platform}
++        ${android_deploy_qt_jdk}
++     VERBATIM)
++  endif()
+ 
+   include(ExternalProject)
+   macro (setup_library library_name android_abi)
+-- 
+2.33.0.windows.2
+

@@ -9,9 +9,9 @@
 #  compile, using preprocessor checks for platform-specific bits instead of
 #  testing in here.
 
-cmake_minimum_required(VERSION 2.8.4)
+cmake_minimum_required(VERSION 3.5)
 
-project(PhysicsFS)
+project(PhysicsFS VERSION 3.0.2)
 set(PHYSFS_VERSION 3.0.2)
 
 # Increment this if/when we break backwards compatibility.
