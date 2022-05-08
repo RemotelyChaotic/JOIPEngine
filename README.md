@@ -3,22 +3,14 @@
 ## Building
 ### Prerequisites:
 - Building requires [CMake](https://cmake.org/).
+- Building QtAV with CMake also requires [pkg-config](https://www.freedesktop.org/wiki/Software/pkg-config/) for easy installation, see [how-to-install-pkg-config-in-windows](https://stackoverflow.com/questions/1710922/how-to-install-pkg-config-in-windows).
 - A version of Pearl is also required for building the highlight definitions. Recommended for Windows is: [Strawberry Pearl](https://strawberryperl.com/)
-- Get [Qt 5.14+.*](https://download.qt.io/) and either install a pre-built version or build all required modules from source ( Core, Multimedia, MultimediaWidgets, Network, OpenGL, Qml, Quick, QuickControls2, QuickWidgets, Svg, Widgets, WebChannel, Xml ). Qt 6 is not supported as it lacks some of the required modules.
-- [Build](https://github.com/wang-bin/QtAV/wiki/Build-QtAV) the provided QtAV fork for your target platform with FFmpeg and OpenAL support. If you have trubble building for Android: follow this [guide](https://github.com/wang-bin/QtAV/issues/1262#issuecomment-597193360) and build all architectures separately. Don't forget, that mingw32-make.exe must be in the Path, even if you build with clang. Use QMake to build QtAV, as CMake does not seem to work correctly. If you get compiler errors for Android, don't worry. As long as you have the .so files built it works.
-- Get a pre-built version of [OpenSSL 1.1.*](https://www.openssl.org/) or build it from source (1.1.1g used for testing but others may work).
+- Get [Qt 5.14+.*](https://download.qt.io/) and either install a pre-built version or build all required modules from source ( Core Multimedia MultimediaWidgets Network PrintSupport Qml Quick QuickControls2 QuickWidgets Svg Widgets WebChannel Xml XmlPatterns). Qt 6 is not fully supported as some libraries do not support it and a lot of the API has changed.
+- Build the provided [QtAV](https://github.com/RemotelyChaotic/QtAV) fork for your target platform with FFmpeg and OpenAL support. A CMake build is recommended. If you want to build it with qmake and have trubble building for Android, follow this [guide](https://github.com/wang-bin/QtAV/issues/1262#issuecomment-597193360) and build all architectures separately. Don't forget, that mingw32-make.exe must be in the Path for qmake builds.
+- Get a pre-built version of [OpenSSL 1.1.*](https://www.openssl.org/), build it from source, or use the provided version in 3rd-party (1.1.1g was used for testing but newer versions should work).
 
 ### Build:
-First you will need to "install" ECM. For that you need to do the following:
-```
-cd /d <root>/cmake
-mkdir ECM
-cd ECM
-cmake -G"Ninja" -DCMAKE_INSTALL_PREFIX="./" ../extra-cmake-modules
-ninja install
-```
-
-For Android, now add jom.exe to your PATH, be it in the Qt-Creator Project settings, or in the console.
+For Android, add jom.exe to your PATH, be it in the Qt-Creator Project settings, or in the console.
 It's typically in a path like [...]\Qt5.14.1\Tools\QtCreator\bin\ if you downloaded Qt.
 
 Next you can build the Application.
