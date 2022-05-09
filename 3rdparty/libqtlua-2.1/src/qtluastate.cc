@@ -866,7 +866,7 @@ struct lua_reader_state_s
   QByteArray _read_buf;
 };
 
-static const char * lua_reader(lua_State *st, void *data, size_t *size)
+static const char * lua_reader(lua_State *, void *data, size_t *size)
 {
   struct lua_reader_state_s *rst = (struct lua_reader_state_s *)data;
 
@@ -1021,7 +1021,7 @@ bool State::openlib(Library lib)
       QTLUA_LUA_CALL(_lst, luaopen_debug, "debug");
       return true;
 
-#if LUA_VERSION_NUM >= 502
+#if LUA_VERSION_NUM >= 502 && LUA_VERSION_NUM < 504
     case Bit32Lib:
       QTLUA_LUA_CALL(_lst, luaopen_bit32, "bit32");
       return true;
@@ -1041,7 +1041,9 @@ bool State::openlib(Library lib)
     case AllLibs:
 #if LUA_VERSION_NUM >= 502
       QTLUA_LUA_CALL(_lst, luaopen_coroutine, "coroutine");
+#if LUA_VERSION_NUM < 504
       QTLUA_LUA_CALL(_lst, luaopen_bit32, "bit32");
+#endif
 #endif
 #ifdef HAVE_LUA_OSLIB
       QTLUA_LUA_CALL(_lst, luaopen_os, "os");
@@ -1099,7 +1101,7 @@ void State::fill_completion_list_r(String &path, const String &prefix,
 				   QStringList &list, const Value &tbl,
 				   int &cursor_offset)
 {
-  int len = strcspn(prefix.constData(), ":.");
+  int len = static_cast<int>(strcspn(prefix.constData(), ":."));
 
   if (len == prefix.size())
     {

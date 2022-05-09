@@ -90,7 +90,7 @@ namespace QtLua {
 	  for (Value::const_iterator i = _table.begin(); i != _table.end(); i++)
 	    _row_keys.push_back(i.key());
 	}
-    } catch (const String &e) {
+    } catch (const String &) {
     }
   }
 
@@ -124,7 +124,7 @@ namespace QtLua {
 	    for (Value::const_iterator i = first.begin(); i != first.end(); i++)
 	      _col_keys.push_back(i.key());
 	}
-    } catch (const String &e) {
+    } catch (const String &) {
     }
   }
 
@@ -190,7 +190,7 @@ namespace QtLua {
     return createIndex(row, column, (void*)0);
   }
 
-  QModelIndex TableGridModel::parent(const QModelIndex &index) const
+  QModelIndex TableGridModel::parent(const QModelIndex &) const
   {
     return QModelIndex();
   }
@@ -205,7 +205,7 @@ namespace QtLua {
     return _attr & NumKeysCols ? _num_col_count : _col_keys.count();
   }
 
-  int TableGridModel::rowCount(const QModelIndex &parent) const
+  int TableGridModel::rowCount(const QModelIndex &) const
   {
     if (!_st)
       return 0;
@@ -213,7 +213,7 @@ namespace QtLua {
     return _attr & RowColSwap ? column_count() : row_count();
   }
 
-  int TableGridModel::columnCount(const QModelIndex &parent) const
+  int TableGridModel::columnCount(const QModelIndex &) const
   {
     if (!_st)
       return 0;
@@ -221,7 +221,7 @@ namespace QtLua {
     return _attr & RowColSwap ? row_count() : column_count();
   }
 
-  bool TableGridModel::hasChildren(const QModelIndex & parent) const
+  bool TableGridModel::hasChildren(const QModelIndex &) const
   {
     return false;
   }
@@ -285,7 +285,7 @@ namespace QtLua {
 	try {
 	  return QVariant(get_value_ref(index).value()
 			  .to_string_p(!(_attr & UnquoteValues)));
-	} catch (const String &e) {
+  } catch (const String &) {
 	  return QVariant();	  
 	}
 
@@ -490,7 +490,7 @@ namespace QtLua {
     return true;
   }
 
-  Value TableGridModel::new_cell_value(State *st, int row, int col) const
+  Value TableGridModel::new_cell_value(State *st, int, int ) const
   {
 #if 0
     QString s;

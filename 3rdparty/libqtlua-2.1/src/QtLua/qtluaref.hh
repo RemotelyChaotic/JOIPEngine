@@ -23,7 +23,11 @@
 #define QTLUAREF_HH_
 
 #ifndef __GNUC__
+#if defined(_MSC_VER) && !defined(__INTEL_COMPILER)
+# pragma message("GCC atomic operations are not available, QtLua::Ref will not be thread-safe")
+#else
 # warning GCC atomic operations are not available, QtLua::Ref will not be thread-safe
+#endif
 #endif
 
 #include <QtGlobal> // for Q_UNUSED

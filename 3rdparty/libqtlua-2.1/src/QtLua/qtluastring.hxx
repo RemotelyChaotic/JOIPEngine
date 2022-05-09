@@ -21,6 +21,9 @@
 #ifndef QTLUASTRING_HXX_
 #define QTLUASTRING_HXX_
 
+#include <QString>
+#include <QByteArray>
+
 namespace QtLua {
 
   String::String()

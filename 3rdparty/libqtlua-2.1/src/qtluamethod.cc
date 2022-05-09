@@ -57,10 +57,12 @@ namespace QtLua {
 	&& mm.methodType() != QMetaMethod::Method
 #endif
 	)
-      QTLUA_THROW(QtLua::Method, "The QMetaMethod `%' is not callable.",
+
 #if QT_VERSION < 0x050000
+      QTLUA_THROW(QtLua::Method, "The QMetaMethod `%' is not callable.",
 		  .arg(mm.signature()));
 #else
+      QTLUA_THROW(QtLua::Method, "The QMetaMethod `%' is not callable.",
 		  .arg(mm.methodSignature()));
 #endif
 
@@ -78,10 +80,12 @@ namespace QtLua {
     QList<QByteArray> pt = mm.parameterTypes();
 
     if (pt.size() != lua_args.size() - 1)
-      QTLUA_THROW(QtLua::Method, "Wrong number of arguments for the `%' QMetaMethod.",
+
 #if QT_VERSION < 0x050000
+      QTLUA_THROW(QtLua::Method, "Wrong number of arguments for the `%' QMetaMethod.",
 		 .arg(mm.signature()));
 #else
+      QTLUA_THROW(QtLua::Method, "Wrong number of arguments for the `%' QMetaMethod.",
 		 .arg(mm.methodSignature()));
 #endif
 
@@ -100,10 +104,12 @@ namespace QtLua {
 
     // actual invocation
     if (!obj.qt_metacall(QMetaObject::InvokeMetaMethod, _index, qt_args))
-      QTLUA_THROW(QtLua::Method, "Error on invocation of the `%' Qt method.",
+
 #if QT_VERSION < 0x050000
+      QTLUA_THROW(QtLua::Method, "Error on invocation of the `%' Qt method.",
 		  .arg(mm.signature()));
 #else
+      QTLUA_THROW(QtLua::Method, "Error on invocation of the `%' Qt method.",
 		  .arg(mm.methodSignature()));
 #endif
 

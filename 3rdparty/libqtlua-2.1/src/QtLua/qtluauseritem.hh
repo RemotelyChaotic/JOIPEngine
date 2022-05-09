@@ -82,7 +82,7 @@ public:
   ~UserItem();
 
   /** The as @ref insert. */
-  __attribute__((deprecated))
+  Q_DECL_DEPRECATED
   void move(const Ref<UserListItem> &parent);
 
   /** Insert this item in parent container, remove from existing parent if any. */

@@ -1,3 +1,4 @@
+cmake_policy(SET CMP0100 NEW)
 
 SET(QTLUA_LIB_SRCS )
 
@@ -13,7 +14,7 @@ QT5_WRAP_CPP(MOC_OUTFILES QtLua/qtluatablegridmodel.hh OPTIONS -fQtLua/TableGrid
 QT5_WRAP_CPP(MOC_OUTFILES QtLua/qtluastate.hh          OPTIONS -fQtLua/State)
 QT5_WRAP_CPP(MOC_OUTFILES qtluaqtlib.hh)
 
-ADD_LIBRARY(qtlua SHARED 
+ADD_LIBRARY(qtlua STATIC
 
             qtluaconsole.cc qtluaenum.cc
             qtluaenumiterator.cc qtluafunction.cc
@@ -34,9 +35,11 @@ ADD_LIBRARY(qtlua SHARED
 
             ${MOC_OUTFILES})
 
-QT5_USE_MODULES(qtlua Widgets Core)
-
-TARGET_LINK_LIBRARIES(qtlua ${QT_LIBRARIES} ${LUA_LIBRARIES})
+TARGET_LINK_LIBRARIES(qtlua Qt5::Core Qt5::Widgets lua_static)
+TARGET_INCLUDE_DIRECTORIES(qtlua PUBLIC
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
+    $<INSTALL_INTERFACE:${INSTALL_INC}>
+)
 
 INSTALL(TARGETS qtlua
 	LIBRARY DESTINATION ${INSTALL_LIB}

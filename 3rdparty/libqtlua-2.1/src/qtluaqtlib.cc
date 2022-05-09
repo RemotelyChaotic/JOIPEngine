@@ -610,7 +610,7 @@ namespace QtLua {
   QTLUA_FUNCTION(new_action_group, "Create a new QActionGroup and add passed actions.",
 		 "usage: qt.ui.menu.new_action_group( action [, action ...] )\n")
   {
-    QAction *a[args.size()];
+    QAction **a = new QAction*[args.size()];
 
     for (int i = 0; i < args.size(); i++)
       a[i] = args[i].to_qobject_cast<QAction>();
@@ -619,6 +619,7 @@ namespace QtLua {
     for (int i = 0; i < args.size(); i++)
       result->addAction(a[i]);
 
+    delete[] a;
     return QtLua::Value(ls, result, true, true);
   }
 

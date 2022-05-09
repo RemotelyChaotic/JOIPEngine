@@ -69,7 +69,7 @@ bool ValueBase::connect(QObject *obj, const char *signal)
 
     qow->_lua_connect(sigid, *this);
 
-  } catch (const String &e) {
+  } catch (const String &) {
     return false;
   }
   return true;
@@ -160,8 +160,11 @@ Value::List ValueBase::call(const List &args) const
 	_st->_lst = th; // switch current thread State pointer
 #if LUA_VERSION_NUM < 502
 	int r = lua_resume(th, args.size());
+#elif LUA_VERSION_NUM < 504
+  int r = lua_resume(th, _st->_lst, args.size());
 #else
-	int r = lua_resume(th, _st->_lst, args.size());
+  int nresults = 0;
+  int r = lua_resume(th, _st->_lst, args.size(), &nresults);
 #endif
 	_st->_lst = lst;
 
@@ -450,7 +453,7 @@ String ValueBase::type_name_u() const
 	UserData::ptr ud = UserData::get_ud(lst, -1);
 	if (ud.valid())
 	  res = ud->get_type_name();
-      } catch (const String &e) {
+      } catch (const String &) {
       }
     }
 
@@ -518,7 +521,7 @@ String ValueBase::to_string() const
 #else
       size_t len;
       const char *s = lua_tolstring(lst, -1, &len);
-      String res(s, len);
+      String res(s, static_cast<int>(len));
 #endif
       lua_pop(lst, 1);
       return res;
@@ -571,7 +574,7 @@ String ValueBase::to_string_p(lua_State *st, int index, bool quote_string)
 	UserData::ptr ud = UserData::get_ud(st, index);
 	String res(ud.valid() ? ud->get_value_str() : ud->UserData::get_value_str());
 	return res;
-      } catch (const String &e) {
+      } catch (const String &) {
 	// goto default
       }
     }
@@ -703,7 +706,7 @@ int ValueBase::len() const
 # endif
 #endif
       lua_pop(lst, 1);
-      return res;
+      return static_cast<int>(res);
 
     case TUserData: {
       UserData::ptr ptr = UserData::pop_ud(lst);
@@ -813,7 +816,7 @@ bool ValueBase::support(Operation c) const
       try {
 	UserData::ptr ptr = UserData::get_ud(lst, -1);
 	res = ptr->support(c);
-      } catch (const String &s) {
+      } catch (const String &) {
 	res = false;
       }
       break;
@@ -854,7 +857,7 @@ bool ValueBase::operator==(const Value &lv) const
 	UserData::ptr b = UserData::get_ud(lst, -2);
 
 	res = a.ptr() == b.ptr();
-      } catch (const String &e) {
+      } catch (const String &) {
 	res = lua_rawequal(lst, -1, -2);
       }
     }
@@ -906,7 +909,7 @@ bool ValueBase::operator<(const Value &lv) const
 	  res = a.ptr() < b.ptr();
 	  break;
 #ifndef QTLUA_NO_USERDATA_CHECK
-	} catch (const String &e) {
+  } catch (const String &) {
 	}
 #endif
       case LUA_TLIGHTUSERDATA:
@@ -951,7 +954,7 @@ bool ValueBase::operator==(const String &str) const
 #else
       size_t len;
       const char *cs = lua_tolstring(lst, -1, &len);
-      String s(cs, len);
+      String s(cs, static_cast<int>(len));
 #endif
       res = (str == s);
     }
@@ -1032,7 +1035,7 @@ uint ValueBase::qHash(lua_State *lst, int index)
 #else
       size_t len;
       const char *cs = lua_tolstring(lst, -1, &len);
-      String s(cs, len);
+      String s(cs, static_cast<int>(len));
 #endif
       return ::qHash(s);
     }
@@ -1040,15 +1043,15 @@ uint ValueBase::qHash(lua_State *lst, int index)
     case LUA_TUSERDATA: {
       try {
 	QtLua::Ref<UserData> ud = UserData::get_ud(lst, index);
-	return (uint)(long)ud.ptr();
+  return (uint)(intptr_t)ud.ptr();
       } catch (...) {
-	return (uint)(long)lua_touserdata(lst, index);
+  return (uint)(intptr_t)lua_touserdata(lst, index);
       }
       break;
     }
 
     default:
-      return (uint)(long)lua_topointer(lst, index);
+      return (uint)(intptr_t)lua_topointer(lst, index);
     }
 }
 

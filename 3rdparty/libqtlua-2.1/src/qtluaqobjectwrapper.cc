@@ -381,7 +381,7 @@ namespace QtLua {
     return addr;
   }
 
-  void QObjectWrapper::completion_patch(String &path, String &entry, int &offset)
+  void QObjectWrapper::completion_patch(String &, String &entry, int &)
   {
     if (_obj)
       entry += ".";
@@ -393,7 +393,8 @@ namespace QtLua {
       {
 	QString name;
 
-	name.sprintf("%s_%lx", obj.metaObject()->className(), (unsigned long)&obj);
+  name.sprintf("%s_%lx", obj.metaObject()->className(),
+               static_cast<unsigned long>(reinterpret_cast<long long>(&obj)));
 	obj.setObjectName(name.toLower());
       }
 

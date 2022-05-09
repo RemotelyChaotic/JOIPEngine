@@ -81,7 +81,7 @@ namespace QtLua {
 	    if (!ud->support(Value::OpNewindex))
 	      attr_mask |= TableTreeModel::EditAll;
 
-	  } catch (const String &e) {
+    } catch (const String &) {
 	    // not a QtLua::UserData userdata
 	    break;
 	  }
@@ -96,7 +96,7 @@ namespace QtLua {
 	  break;
 	}
 
-    } catch (const String &e) {
+    } catch (const String &) {
     }
 
     e->_table_chk = true;
@@ -114,7 +114,7 @@ namespace QtLua {
     try {
       for (i = _value.begin(); i != _value.end(); i++)
 	_entries.push_back(Entry(i.key()));
-    } catch (const String &e) {
+    } catch (const String &) {
     }
 
     qSort(_entries.begin(), _entries.end());

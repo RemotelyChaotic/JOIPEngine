@@ -567,7 +567,8 @@ macro(JOIPProjectSettings JOIP_PROJECT_NAME)
       better_enums
       nlohmann_json_schema_validator
       physfs-static
-      xmldom)
+      xmldom
+      qtlua)
 
     if (WIN32)
       find_library(PSAPI NAMES "psapi" REQUIRED)

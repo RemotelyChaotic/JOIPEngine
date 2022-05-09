@@ -129,7 +129,7 @@ bool UserData::meta_contains(State *ls, const Value &key)
 {
   try {
     return !meta_index(ls, key).is_nil();
-  } catch (String &e) {
+  } catch (String &) {
     return false;
   }
 }

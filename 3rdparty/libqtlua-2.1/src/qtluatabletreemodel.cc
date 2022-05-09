@@ -130,7 +130,7 @@ namespace QtLua {
       return 0;
 
     t->update();
-    return t->count();
+    return static_cast<int>(t->count());
   }
 
   bool TableTreeModel::hasChildren(const QModelIndex &parent) const
@@ -143,7 +143,7 @@ namespace QtLua {
     return t != NULL;
   }
 
-  int TableTreeModel::columnCount(const QModelIndex &parent) const
+  int TableTreeModel::columnCount(const QModelIndex &) const
   {
     if (!_st)
       return 0;
@@ -180,7 +180,7 @@ namespace QtLua {
 	  return QVariant();
 	}
 
-    } catch (const String &e) {
+    } catch (const String &) {
       return QVariant();
     }
   }
@@ -223,7 +223,7 @@ namespace QtLua {
 
     TableTreeKeys *t = static_cast<TableTreeKeys*>(index.internalPointer());
 
-    Qt::ItemFlags res = (Qt::ItemFlag)(Qt::ItemIsEnabled | Qt::ItemIsSelectable);
+    Qt::ItemFlags res = (Qt::ItemIsEnabled | Qt::ItemIsSelectable);
 
     if (t->_attr & Editable)
       {
