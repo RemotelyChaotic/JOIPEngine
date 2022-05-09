@@ -34,3 +34,6 @@
 [submodule "3rdparty/WinToast"]
 	path = 3rdparty/WinToast
 	url = https://github.com/RemotelyChaotic/WinToast.git
+[submodule "3rdparty/Lua"]
+	path = 3rdparty/Lua
+	url = https://github.com/RemotelyChaotic/Lua.git
