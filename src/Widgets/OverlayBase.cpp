@@ -72,6 +72,20 @@ void COverlayBase::Show()
 
 //----------------------------------------------------------------------------------------
 //
+void COverlayBase::Toggle()
+{
+  if (m_bShowCalled)
+  {
+    Hide();
+  }
+  else
+  {
+    Show();
+  }
+}
+
+//----------------------------------------------------------------------------------------
+//
 bool COverlayBase::IsInPlace() const
 {
   return m_bReachedDestination;

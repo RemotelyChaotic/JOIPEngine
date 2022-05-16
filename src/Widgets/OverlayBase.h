@@ -21,6 +21,7 @@ public slots:
   virtual void Hide();
   virtual void Resize();
   virtual void Show();
+  virtual void Toggle();
 
   bool IsInPlace() const;
   qint32 ZOrder() const;

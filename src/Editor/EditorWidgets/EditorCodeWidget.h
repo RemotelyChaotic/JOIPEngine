@@ -64,6 +64,7 @@ protected slots:
   void SlotDebugUnloadFinished();
   void SlotFileChangedExternally(const QString& sName);
   void SlotInsertGeneratedCode(const QString& sCode);
+  void SlotShowOverlay();
   void SlotRowsInserted(const QModelIndex& parent, int iFirst, int iLast);
   void SlotRowsRemoved(const QModelIndex& parent, int iFirst, int iLast);
   void SlotUndoForScriptContentAdded();

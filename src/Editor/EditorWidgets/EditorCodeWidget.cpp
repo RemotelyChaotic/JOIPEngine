@@ -326,21 +326,21 @@ void CEditorCodeWidget::OnActionBarAboutToChange()
     disconnect(ActionBar()->m_spUi->StopDebugButton, &QPushButton::clicked,
             this, &CEditorCodeWidget::SlotDebugStop);
     disconnect(ActionBar()->m_spUi->AddShowBackgroundCode, &QPushButton::clicked,
-            m_spBackgroundSnippetOverlay.get(), &CBackgroundSnippetOverlay::Show);
+            this, &CEditorCodeWidget::SlotShowOverlay);
     disconnect(ActionBar()->m_spUi->AddShowIconCode, &QPushButton::clicked,
-            m_spIconSnippetOverlay.get(), &CIconSnippetOverlay::Show);
+            this, &CEditorCodeWidget::SlotShowOverlay);
     disconnect(ActionBar()->m_spUi->AddShowImageCode, &QPushButton::clicked,
-            m_spResourceSnippetOverlay.get(), &CResourceSnippetOverlay::Show);
+            this, &CEditorCodeWidget::SlotShowOverlay);
     disconnect(ActionBar()->m_spUi->AddTextCode, &QPushButton::clicked,
-            m_spTextSnippetOverlay.get(), &CTextSnippetOverlay::Show);
+            this, &CEditorCodeWidget::SlotShowOverlay);
     disconnect(ActionBar()->m_spUi->AddMetronomeCode, &QPushButton::clicked,
-            m_spMetronomeSnippetOverlay.get(), &CMetronomeSnippetOverlay::Show);
+            this, &CEditorCodeWidget::SlotShowOverlay);
     disconnect(ActionBar()->m_spUi->AddNotificationCode, &QPushButton::clicked,
-            m_spNotificationSnippetOverlay.get(), &CNotificationSnippetOverlay::Show);
+            this, &CEditorCodeWidget::SlotShowOverlay);
     disconnect(ActionBar()->m_spUi->AddTimerCode, &QPushButton::clicked,
-            m_spTimerSnippetOverlay.get(), &CTimerSnippetOverlay::Show);
+            this, &CEditorCodeWidget::SlotShowOverlay);
     disconnect(ActionBar()->m_spUi->AddThreadCode, &QPushButton::clicked,
-            m_spThreadSnippetOverlay.get(), &CThreadSnippetOverlay::Show);
+            this, &CEditorCodeWidget::SlotShowOverlay);
 
     ActionBar()->m_spUi->StopDebugButton->setEnabled(true);
     ActionBar()->m_spUi->AddShowBackgroundCode->setEnabled(true);
@@ -366,21 +366,21 @@ void CEditorCodeWidget::OnActionBarChanged()
     connect(ActionBar()->m_spUi->StopDebugButton, &QPushButton::clicked,
             this, &CEditorCodeWidget::SlotDebugStop);
     connect(ActionBar()->m_spUi->AddShowBackgroundCode, &QPushButton::clicked,
-            m_spBackgroundSnippetOverlay.get(), &CBackgroundSnippetOverlay::Show);
+            this, &CEditorCodeWidget::SlotShowOverlay);
     connect(ActionBar()->m_spUi->AddShowIconCode, &QPushButton::clicked,
-            m_spIconSnippetOverlay.get(), &CIconSnippetOverlay::Show);
+            this, &CEditorCodeWidget::SlotShowOverlay);
     connect(ActionBar()->m_spUi->AddShowImageCode, &QPushButton::clicked,
-            m_spResourceSnippetOverlay.get(), &CResourceSnippetOverlay::Show);
+            this, &CEditorCodeWidget::SlotShowOverlay);
     connect(ActionBar()->m_spUi->AddTextCode, &QPushButton::clicked,
-            m_spTextSnippetOverlay.get(), &CTextSnippetOverlay::Show);
+            this, &CEditorCodeWidget::SlotShowOverlay);
     connect(ActionBar()->m_spUi->AddMetronomeCode, &QPushButton::clicked,
-            m_spMetronomeSnippetOverlay.get(), &CMetronomeSnippetOverlay::Show);
+            this, &CEditorCodeWidget::SlotShowOverlay);
     connect(ActionBar()->m_spUi->AddNotificationCode, &QPushButton::clicked,
-            m_spNotificationSnippetOverlay.get(), &CNotificationSnippetOverlay::Show);
+            this, &CEditorCodeWidget::SlotShowOverlay);
     connect(ActionBar()->m_spUi->AddTimerCode, &QPushButton::clicked,
-            m_spTimerSnippetOverlay.get(), &CTimerSnippetOverlay::Show);
+            this, &CEditorCodeWidget::SlotShowOverlay);
     connect(ActionBar()->m_spUi->AddThreadCode, &QPushButton::clicked,
-            m_spThreadSnippetOverlay.get(), &CThreadSnippetOverlay::Show);
+            this, &CEditorCodeWidget::SlotShowOverlay);
 
     if (EditorModel()->IsReadOnly())
     {
@@ -603,6 +603,102 @@ void CEditorCodeWidget::SlotInsertGeneratedCode(const QString& sCode)
   WIDGET_INITIALIZED_GUARD
   if (nullptr == m_spCurrentProject) { return; }
   m_spUi->pCodeEdit->insertPlainText(sCode);
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CEditorCodeWidget::SlotShowOverlay()
+{
+  WIDGET_INITIALIZED_GUARD
+
+  if (sender() == ActionBar()->m_spUi->AddShowBackgroundCode)
+  {
+    m_spIconSnippetOverlay->Hide();
+    m_spMetronomeSnippetOverlay->Hide();
+    m_spNotificationSnippetOverlay->Hide();
+    m_spResourceSnippetOverlay->Hide();
+    m_spTextSnippetOverlay->Hide();
+    m_spTimerSnippetOverlay->Hide();
+    m_spThreadSnippetOverlay->Hide();
+    m_spBackgroundSnippetOverlay->Toggle();
+  }
+  else if (sender() == ActionBar()->m_spUi->AddShowIconCode)
+  {
+    m_spBackgroundSnippetOverlay->Hide();
+    m_spMetronomeSnippetOverlay->Hide();
+    m_spNotificationSnippetOverlay->Hide();
+    m_spResourceSnippetOverlay->Hide();
+    m_spTextSnippetOverlay->Hide();
+    m_spTimerSnippetOverlay->Hide();
+    m_spThreadSnippetOverlay->Hide();
+    m_spIconSnippetOverlay->Toggle();
+  }
+  else if (sender() == ActionBar()->m_spUi->AddShowImageCode)
+  {
+    m_spBackgroundSnippetOverlay->Hide();
+    m_spIconSnippetOverlay->Hide();
+    m_spMetronomeSnippetOverlay->Hide();
+    m_spNotificationSnippetOverlay->Hide();
+    m_spTextSnippetOverlay->Hide();
+    m_spTimerSnippetOverlay->Hide();
+    m_spThreadSnippetOverlay->Hide();
+    m_spResourceSnippetOverlay->Toggle();
+  }
+  else if (sender() == ActionBar()->m_spUi->AddTextCode)
+  {
+    m_spBackgroundSnippetOverlay->Hide();
+    m_spIconSnippetOverlay->Hide();
+    m_spMetronomeSnippetOverlay->Hide();
+    m_spNotificationSnippetOverlay->Hide();
+    m_spResourceSnippetOverlay->Hide();
+    m_spTimerSnippetOverlay->Hide();
+    m_spThreadSnippetOverlay->Hide();
+    m_spTextSnippetOverlay->Toggle();
+  }
+  else if (sender() == ActionBar()->m_spUi->AddMetronomeCode)
+  {
+    m_spBackgroundSnippetOverlay->Hide();
+    m_spIconSnippetOverlay->Hide();
+    m_spNotificationSnippetOverlay->Hide();
+    m_spResourceSnippetOverlay->Hide();
+    m_spTextSnippetOverlay->Hide();
+    m_spTimerSnippetOverlay->Hide();
+    m_spThreadSnippetOverlay->Hide();
+    m_spMetronomeSnippetOverlay->Toggle();
+  }
+  else if (sender() == ActionBar()->m_spUi->AddNotificationCode)
+  {
+    m_spBackgroundSnippetOverlay->Hide();
+    m_spIconSnippetOverlay->Hide();
+    m_spMetronomeSnippetOverlay->Hide();
+    m_spResourceSnippetOverlay->Hide();
+    m_spTextSnippetOverlay->Hide();
+    m_spTimerSnippetOverlay->Hide();
+    m_spThreadSnippetOverlay->Hide();
+    m_spNotificationSnippetOverlay->Toggle();
+  }
+  else if (sender() == ActionBar()->m_spUi->AddTimerCode)
+  {
+    m_spBackgroundSnippetOverlay->Hide();
+    m_spIconSnippetOverlay->Hide();
+    m_spMetronomeSnippetOverlay->Hide();
+    m_spNotificationSnippetOverlay->Hide();
+    m_spResourceSnippetOverlay->Hide();
+    m_spTextSnippetOverlay->Hide();
+    m_spThreadSnippetOverlay->Hide();
+    m_spTimerSnippetOverlay->Toggle();
+  }
+  else if (sender() == ActionBar()->m_spUi->AddThreadCode)
+  {
+    m_spBackgroundSnippetOverlay->Hide();
+    m_spIconSnippetOverlay->Hide();
+    m_spMetronomeSnippetOverlay->Hide();
+    m_spNotificationSnippetOverlay->Hide();
+    m_spResourceSnippetOverlay->Hide();
+    m_spTextSnippetOverlay->Hide();
+    m_spTimerSnippetOverlay->Hide();
+    m_spThreadSnippetOverlay->Toggle();
+  }
 }
 
 //----------------------------------------------------------------------------------------
