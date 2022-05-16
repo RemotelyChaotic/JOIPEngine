@@ -22,7 +22,8 @@ public:
   enum ECutomRoles
   {
     eSearchRole = Qt::UserRole,
-    eLoadedIDRole = Qt::UserRole+1
+    eLoadedIDRole = Qt::UserRole+1,
+    eItemTypeRole = Qt::UserRole+2
   };
 
   explicit CResourceTreeItemModel(QPointer<QUndoStack> pUndoStack,

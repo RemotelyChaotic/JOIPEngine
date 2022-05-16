@@ -35,15 +35,16 @@ void CResourceTreeItemModel::InitializeModel(tspProject spProject)
 {
   if (nullptr == m_pRootItem)
   {
-    m_pRootItem = new CResourceTreeItem(EResourceTreeItemType::eRoot, "Resources");
+    m_pRootItem = new CResourceTreeItem(EResourceTreeItemType::eRoot, std::nullopt, "Resources");
 
     beginInsertRows(QModelIndex(), 0, static_cast<qint32>(EResourceType::_size() - 1));
     for (size_t i = 0; i < EResourceType::_size(); i++)
     {
       CResourceTreeItem* pItem =
           new CResourceTreeItem(EResourceTreeItemType::eCategory,
-                              QString(EResourceType::_from_index(i)._to_string()).remove(0, 1),
-                              nullptr, m_pRootItem);
+                                EResourceType::_from_index(i),
+                                QString(EResourceType::_from_index(i)._to_string()).remove(0, 1),
+                                nullptr, m_pRootItem);
       m_categoryMap.insert({EResourceType::_from_index(i), pItem});
       m_pRootItem->AppendChild(pItem);
     }
@@ -101,6 +102,7 @@ void CResourceTreeItemModel::InitializeModel(tspProject spProject)
             {
               CResourceTreeItem* pNewItem =
                 new CResourceTreeItem(EResourceTreeItemType::eFolder,
+                                      std::nullopt,
                                       sDisplayFolderName, nullptr, pItem);
               pItem->AppendChild(pNewItem);
               pItem = pNewItem;
@@ -109,7 +111,9 @@ void CResourceTreeItemModel::InitializeModel(tspProject spProject)
         }
 
         pItem->AppendChild(
-              new CResourceTreeItem(EResourceTreeItemType::eResource, QString(), it->second, pItem));
+              new CResourceTreeItem(EResourceTreeItemType::eResource,
+                                    std::nullopt,
+                                    QString(), it->second, pItem));
       }
     }
     endInsertRows();
@@ -152,6 +156,11 @@ QVariant CResourceTreeItemModel::data(const QModelIndex& index, int iRole, int i
     CResourceTreeItem* item = static_cast<CResourceTreeItem*>(index.internalPointer());
     return item->Data(c_iColumnLoadedID);
   }
+  else if (CResourceTreeItemModel::eItemTypeRole == iRole)
+  {
+    CResourceTreeItem* item = static_cast<CResourceTreeItem*>(index.internalPointer());
+    return item->Type()._to_integral();
+  }
   else
   {
     return QVariant();
@@ -183,6 +192,11 @@ QVariant CResourceTreeItemModel::data(const QModelIndex& index, int iRole) const
   {
     CResourceTreeItem* item = static_cast<CResourceTreeItem*>(index.internalPointer());
     return item->Data(c_iColumnLoadedID);
+  }
+  else if (CResourceTreeItemModel::eItemTypeRole == iRole)
+  {
+    CResourceTreeItem* item = static_cast<CResourceTreeItem*>(index.internalPointer());
+    return item->Type()._to_integral();
   }
   else
   {

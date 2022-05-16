@@ -30,6 +30,7 @@ void CIconSnippetOverlay::Initialize(CResourceTreeItemModel* pResourceTreeModel)
   CResourceTreeItemSortFilterProxyModel* pProxyModel =
       new CResourceTreeItemSortFilterProxyModel(m_spUi->pResourceSelectTree);
   pProxyModel->setSourceModel(pResourceTreeModel);
+  pProxyModel->FilterForTypes({EResourceType::eImage, EResourceType::eMovie});
   m_spUi->pResourceSelectTree->setModel(pProxyModel);
 
   QItemSelectionModel* pSelectionModel = m_spUi->pResourceSelectTree->selectionModel();

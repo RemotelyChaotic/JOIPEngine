@@ -36,6 +36,18 @@ void CResourceTreeItemSortFilterProxyModel::DeInitializeModel()
 
 //----------------------------------------------------------------------------------------
 //
+void CResourceTreeItemSortFilterProxyModel::FilterForTypes(
+    const std::vector<EResourceType>& vEnabledTypes)
+{
+  if (m_vEnabledTypes != vEnabledTypes)
+  {
+    m_vEnabledTypes = vEnabledTypes;
+    invalidateFilter();
+  }
+}
+
+//----------------------------------------------------------------------------------------
+//
 void CResourceTreeItemSortFilterProxyModel::setSourceModel(QAbstractItemModel* pSourceModel)
 {
   if (nullptr != sourceModel())
@@ -82,7 +94,16 @@ bool CResourceTreeItemSortFilterProxyModel::filterAcceptsRow(int iSourceRow,
           }
           // check current index itself :
           QString key = pSourceModel->data(sourceIndex, Qt::DisplayRole, resource_item::c_iColumnName).toString();
-          return key.contains(filterRegExp()) ;
+          QVariant varType = pSourceModel->data(sourceIndex, Qt::DisplayRole, resource_item::c_iColumnType).toInt();
+          bool bMatchesTsypeSelector = m_vEnabledTypes.empty() || !varType.isValid();
+          if (!bMatchesTsypeSelector)
+          {
+            auto it =
+                std::find(m_vEnabledTypes.begin(), m_vEnabledTypes.end(),
+                          EResourceType::_from_integral(varType.toInt()));
+            bMatchesTsypeSelector = m_vEnabledTypes.end() != it;
+          }
+          return bMatchesTsypeSelector && key.contains(filterRegExp());
         }
     }
   }

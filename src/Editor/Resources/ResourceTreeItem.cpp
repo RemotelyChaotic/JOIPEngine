@@ -6,10 +6,14 @@ using namespace resource_item;
 
 //----------------------------------------------------------------------------------------
 //
-CResourceTreeItem::CResourceTreeItem(EResourceTreeItemType type,  const QString& sLabel,
-  tspResource spResource, CResourceTreeItem* pParent) :
+CResourceTreeItem::CResourceTreeItem(EResourceTreeItemType type,
+                                     std::optional<EResourceType> resourceType,
+                                     const QString& sLabel,
+                                     tspResource spResource,
+                                     CResourceTreeItem* pParent) :
   m_pParentItem(pParent),
   m_type(type),
+  m_resourceType(resourceType),
   m_sLabel(sLabel),
   m_spResource(spResource)
 {}
@@ -83,13 +87,13 @@ QVariant CResourceTreeItem::Data(qint32 iColumn) const
       case EResourceTreeItemType::eCategory:// fallthrough
       case EResourceTreeItemType::eFolder:
       {
-        if (iColumn == c_iColumnName)
+        switch(iColumn)
         {
-          return QT_TR_NOOP(m_sLabel);
-        }
-        else
-        {
-          return QVariant();
+          case c_iColumnName:
+            return QT_TR_NOOP(m_sLabel);
+          case c_iColumnType:
+            return m_resourceType.has_value() ? m_resourceType.value()._to_integral() : QVariant();
+          default: return QVariant();
         }
       }
       case EResourceTreeItemType::eResource:
@@ -153,7 +157,8 @@ bool CResourceTreeItem::InsertChildren(qint32 iPosition, qint32 iCount, qint32 i
   for (qint32 iRow = 0; iRow < iCount; ++iRow)
   {
     CResourceTreeItem* pItem = new CResourceTreeItem(EResourceTreeItemType::eRoot,
-      QString(), nullptr, this);
+                                                     std::nullopt,
+                                                     QString(), nullptr, this);
     m_vpChildItems.insert(iPosition, pItem);
   }
 

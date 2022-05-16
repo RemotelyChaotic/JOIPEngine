@@ -34,6 +34,7 @@ CTextSnippetOverlay::CTextSnippetOverlay(CScriptEditorWidget* pParent) :
 
   CResourceTreeItemSortFilterProxyModel* pProxyModel =
       new CResourceTreeItemSortFilterProxyModel(m_spUi->pResourceSelectTree);
+  pProxyModel->FilterForTypes({EResourceType::eImage, EResourceType::eMovie});
   m_spUi->pResourceSelectTree->setModel(pProxyModel);
 }
 

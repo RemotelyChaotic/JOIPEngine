@@ -30,6 +30,7 @@ void CBackgroundSnippetOverlay::Initialize(CResourceTreeItemModel* pResourceTree
   CResourceTreeItemSortFilterProxyModel* pProxyModel =
       new CResourceTreeItemSortFilterProxyModel(m_spUi->pResourceSelectTree);
   pProxyModel->setSourceModel(pResourceTreeModel);
+  pProxyModel->FilterForTypes({EResourceType::eImage});
   m_spUi->pResourceSelectTree->setModel(pProxyModel);
 
   QItemSelectionModel* pSelectionModel = m_spUi->pResourceSelectTree->selectionModel();

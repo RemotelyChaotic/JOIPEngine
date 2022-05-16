@@ -29,6 +29,7 @@ CMetronomeSnippetOverlay::CMetronomeSnippetOverlay(CScriptEditorWidget* pParent)
 
   CResourceTreeItemSortFilterProxyModel* pProxyModel =
       new CResourceTreeItemSortFilterProxyModel(m_spUi->pResourceSelectTree);
+  pProxyModel->FilterForTypes({EResourceType::eSound});
   m_spUi->pResourceSelectTree->setModel(pProxyModel);
 }
 

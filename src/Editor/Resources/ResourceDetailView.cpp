@@ -53,6 +53,7 @@ public:
       {
         const QString sName = pModel->data(indexName).toString();
         const QVariant vType = pModel->data(indexType);
+        const QVariant vItemType = pModel->data(indexType, CResourceTreeItemModel::eItemTypeRole);
         const qint32 iLoadedId = pModel->data(indexType, CResourceTreeItemModel::eLoadedIDRole).toInt();
         QIcon::Mode mode = opt.showDecorationSelected ? QIcon::Selected :
                                                         QIcon::Normal;
@@ -65,7 +66,7 @@ public:
         QRect rectIcon({opt.rect.x() + iOffsetX, opt.rect.y() + iOffsetY}, iconSize);
 
         // folder
-        if (!vType.isValid())
+        if (!vItemType.isValid() || vItemType.toInt() != EResourceTreeItemType::eResource)
         {
           m_pView->IconFolder().paint(pPainter,
                                       rectIcon, opt.displayAlignment,

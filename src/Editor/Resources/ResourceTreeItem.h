@@ -4,6 +4,7 @@
 #include "Systems/Resource.h"
 #include <QVariant>
 #include <QVector>
+#include <optional>
 
 BETTER_ENUM(EResourceTreeItemType, qint32,
             eRoot      = 0,
@@ -29,8 +30,11 @@ namespace resource_item
 class CResourceTreeItem
 {
 public:
-  explicit CResourceTreeItem(EResourceTreeItemType type, const QString& sLabel = QString(),
-    tspResource spResource = nullptr, CResourceTreeItem* pParentItem = nullptr);
+  explicit CResourceTreeItem(EResourceTreeItemType type,
+                             std::optional<EResourceType> resourceType = std::nullopt,
+                             const QString& sLabel = QString(),
+                             tspResource spResource = nullptr,
+                             CResourceTreeItem* pParentItem = nullptr);
   ~CResourceTreeItem();
 
   void AppendChild(CResourceTreeItem* pChild);
@@ -59,6 +63,7 @@ private:
   CResourceTreeItem*          m_pParentItem;
   QVector<CResourceTreeItem*> m_vpChildItems;
   EResourceTreeItemType       m_type;
+  std::optional<EResourceType>m_resourceType;
   QString                     m_sLabel;
   tspResource                 m_spResource;
 };

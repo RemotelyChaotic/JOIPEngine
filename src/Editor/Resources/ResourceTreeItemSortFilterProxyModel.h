@@ -3,6 +3,7 @@
 
 #include "Systems/Project.h"
 #include <QSortFilterProxyModel>
+#include <vector>
 
 class CResourceTreeItemSortFilterProxyModel : public QSortFilterProxyModel
 {
@@ -13,6 +14,8 @@ public:
   void InitializeModel(tspProject spProject);
   void DeInitializeModel();
 
+  void FilterForTypes(const std::vector<EResourceType>& vEnabledTypes);
+
   void setSourceModel(QAbstractItemModel* pSourceModel) override;
 
 protected:
@@ -22,6 +25,8 @@ protected:
 private:
   void SlotResourceAdded();
   void SlotResourceRemoved();
+
+  std::vector<EResourceType> m_vEnabledTypes;
 };
 
 #endif // RESOURCETREEITEMSORTFILTERPROXYMODEL_H

@@ -45,6 +45,7 @@ void CResourceSnippetOverlay::Initialize(CResourceTreeItemModel* pResourceTreeMo
 
   CResourceTreeItemSortFilterProxyModel* pProxyModel =
       dynamic_cast<CResourceTreeItemSortFilterProxyModel*>(m_spUi->pResourceSelectTree->model());
+  pProxyModel->FilterForTypes({EResourceType::eImage, EResourceType::eMovie, EResourceType::eSound});
   pProxyModel->setSourceModel(pResourceTreeModel);
 
   QItemSelectionModel* pSelectionModel = m_spUi->pResourceSelectTree->selectionModel();
