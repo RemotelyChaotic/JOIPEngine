@@ -87,8 +87,8 @@ private:
   std::weak_ptr<CDatabaseManager>              m_wpDbManager;
   QPointer<CScriptEditorWidget>                m_pEditor;
   bool                                         m_bInitialized;
-
   SResourceSnippetData                         m_data;
+  QSize                                        m_preferredSize;
 };
 
 #endif // RESOURCESNIPPETOVERLAY_H

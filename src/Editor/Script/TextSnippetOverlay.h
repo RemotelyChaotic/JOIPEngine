@@ -2,6 +2,7 @@
 #define TEXTSNIPPETOVERLAY_H
 
 #include "Widgets/OverlayBase.h"
+#include <QScrollArea>
 #include <QStyledItemDelegate>
 #include <QPointer>
 #include <memory>
@@ -96,8 +97,10 @@ private:
   tspProject                               m_spCurrentProject;
   std::weak_ptr<CDatabaseManager>          m_wpDbManager;
   QPointer<CScriptEditorWidget>            m_pEditor;
+  std::vector<QPointer<QScrollArea>>       m_vScrollAreas;
   bool                                     m_bInitialized;
   STextSnippetCode                         m_data;
+  QSize                                    m_preferredSize;
 };
 
 #endif // TEXTSNIPPETOVERLAY_H

@@ -4,6 +4,7 @@
 #include "Editor/Resources/ResourceTreeItemModel.h"
 #include "Editor/Resources/ResourceTreeItemSortFilterProxyModel.h"
 #include "ui_BackgroundSnippetOverlay.h"
+#include <QScrollBar>
 
 CBackgroundSnippetOverlay::CBackgroundSnippetOverlay(CScriptEditorWidget* pParent) :
   COverlayBase(0, pParent),
@@ -13,6 +14,8 @@ CBackgroundSnippetOverlay::CBackgroundSnippetOverlay(CScriptEditorWidget* pParen
   m_data()
 {
   m_spUi->setupUi(this);
+  m_spUi->pScrollArea->setWidgetResizable(true);
+  m_preferredSize = size();
 }
 
 CBackgroundSnippetOverlay::~CBackgroundSnippetOverlay()
@@ -41,6 +44,7 @@ void CBackgroundSnippetOverlay::Initialize(CResourceTreeItemModel* pResourceTree
   pProxyModel->setFilterRegExp(QRegExp(".*", Qt::CaseInsensitive, QRegExp::RegExp));
 
   // setup Tree
+  m_spUi->pResourceSelectTree->setColumnHidden(resource_item::c_iColumnType, true);
   m_spUi->pResourceSelectTree->setColumnHidden(resource_item::c_iColumnPath, true);
   m_spUi->pResourceSelectTree->header()->setSectionResizeMode(resource_item::c_iColumnName, QHeaderView::Stretch);
   m_spUi->pResourceSelectTree->header()->setSectionResizeMode(resource_item::c_iColumnType, QHeaderView::Interactive);
@@ -51,26 +55,35 @@ void CBackgroundSnippetOverlay::Initialize(CResourceTreeItemModel* pResourceTree
 //
 void CBackgroundSnippetOverlay::Climb()
 {
-  if (m_pEditor->size().height() < sizeHint().height())
-  {
-    ClimbToFirstInstanceOf("QStackedWidget", false);
-  }
-  else
-  {
-    ClimbToFirstInstanceOf("CScriptEditorWidget", false);
-  }
+  ClimbToFirstInstanceOf("QStackedWidget", false);
 }
 
 //----------------------------------------------------------------------------------------
 //
 void CBackgroundSnippetOverlay::Resize()
 {
+  QSize newSize = m_preferredSize;
+  if (m_pTargetWidget->geometry().width() < m_preferredSize.width())
+  {
+    newSize.setWidth(m_pTargetWidget->geometry().width());
+  }
+  if (m_pTargetWidget->geometry().height() < m_preferredSize.height())
+  {
+    newSize.setHeight(m_pTargetWidget->geometry().height());
+  }
+
   QPoint newPos =
       QPoint(m_pTargetWidget->geometry().width() / 2, m_pTargetWidget->geometry().height() / 2) -
-      QPoint(width() / 2, height() / 2);
+      QPoint(newSize.width() / 2, newSize.height() / 2);
 
   move(newPos.x(), newPos.y());
-  resize(width(), height());
+  resize(newSize);
+
+  m_spUi->pScrollArea->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+  m_spUi->pScrollArea->setVerticalScrollBarPolicy(Qt::ScrollBarAsNeeded);
+  m_spUi->pScrollArea->widget()->setMinimumWidth(
+        newSize.width() - m_spUi->pScrollArea->verticalScrollBar()->width() -
+        m_spUi->pScrollArea->widget()->layout()->spacing());
 }
 
 //----------------------------------------------------------------------------------------

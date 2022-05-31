@@ -8,6 +8,7 @@
 #include "ui_MetronomeSnippetOverlay.h"
 
 #include <QLineEdit>
+#include <QScrollBar>
 
 namespace  {
   const char* c_sIndexProperty = "Index";
@@ -31,6 +32,14 @@ CMetronomeSnippetOverlay::CMetronomeSnippetOverlay(CScriptEditorWidget* pParent)
       new CResourceTreeItemSortFilterProxyModel(m_spUi->pResourceSelectTree);
   pProxyModel->FilterForTypes({EResourceType::eSound});
   m_spUi->pResourceSelectTree->setModel(pProxyModel);
+
+  m_spUi->pGeneralScrollArea->setWidgetResizable(true);
+  m_spUi->pBeatScrollArea->setWidgetResizable(true);
+  m_preferredSize = size();
+  m_vScrollAreas = {
+    m_spUi->pGeneralScrollArea,
+    m_spUi->pBeatScrollArea
+  };
 }
 
 CMetronomeSnippetOverlay::~CMetronomeSnippetOverlay()
@@ -79,26 +88,54 @@ void CMetronomeSnippetOverlay::UnloadProject()
 //
 void CMetronomeSnippetOverlay::Climb()
 {
-  if (m_pEditor->size().height() < sizeHint().height())
-  {
-    ClimbToFirstInstanceOf("QStackedWidget", false);
-  }
-  else
-  {
-    ClimbToFirstInstanceOf("CScriptEditorWidget", false);
-  }
+  ClimbToFirstInstanceOf("QStackedWidget", false);
 }
 
 //----------------------------------------------------------------------------------------
 //
 void CMetronomeSnippetOverlay::Resize()
 {
+  QSize newSize = m_preferredSize;
+  if (m_pTargetWidget->geometry().width() < m_preferredSize.width())
+  {
+    newSize.setWidth(m_pTargetWidget->geometry().width());
+  }
+  if (m_pTargetWidget->geometry().height() < m_preferredSize.height())
+  {
+    newSize.setHeight(m_pTargetWidget->geometry().height());
+  }
+  if (m_pTargetWidget->width() > m_pTargetWidget->height())
+  {
+    m_spUi->pTabWidget->setTabPosition(QTabWidget::TabPosition::North);
+  }
+  else
+  {
+    m_spUi->pTabWidget->setTabPosition(QTabWidget::TabPosition::East);
+  }
+
   QPoint newPos =
       QPoint(m_pTargetWidget->geometry().width() / 2, m_pTargetWidget->geometry().height() / 2) -
       QPoint(width() / 2, height() / 2);
 
   move(newPos.x(), newPos.y());
-  resize(width(), height());
+  resize(newSize);
+
+  qint32 iLeftMargin = 0;
+  qint32 iRightMargin = 0;
+  layout()->getContentsMargins(&iLeftMargin, nullptr, &iRightMargin, nullptr);
+  for (QPointer<QScrollArea> pArea : m_vScrollAreas)
+  {
+    qint32 iLeftMarginInner = 0;
+    qint32 iRightMarginInner = 0;
+    pArea->widget()->layout()->getContentsMargins(&iLeftMarginInner, nullptr,
+                                                  &iRightMarginInner, nullptr);
+    pArea->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+    pArea->setVerticalScrollBarPolicy(Qt::ScrollBarAsNeeded);
+    pArea->widget()->setMinimumWidth(
+          newSize.width() - pArea->verticalScrollBar()->width() -
+          pArea->widget()->layout()->spacing() - iLeftMargin - iLeftMarginInner -
+          iRightMargin - iRightMarginInner - 1);
+  }
 }
 
 //----------------------------------------------------------------------------------------

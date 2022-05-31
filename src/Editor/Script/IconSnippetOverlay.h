@@ -51,6 +51,7 @@ private:
   QPointer<CScriptEditorWidget>            m_pEditor;
   bool                                     m_bInitialized;
   SIconSnippetData                         m_data;
+  QSize                                    m_preferredSize;
 };
 
 #endif // ICONSNIPPETOVERLAY_H

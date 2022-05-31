@@ -54,6 +54,7 @@ private:
   QPointer<CScriptEditorWidget>                  m_pEditor;
   bool                                           m_bInitialized;
   SBackgroundSnippetData                         m_data;
+  QSize                                          m_preferredSize;
 };
 
 #endif // BACKGROUNDSNIPPETOVERLAY_H

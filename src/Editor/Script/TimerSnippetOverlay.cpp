@@ -2,6 +2,8 @@
 #include "ScriptEditorWidget.h"
 #include "ui_TimerSnippetOverlay.h"
 
+#include <QScrollBar>
+
 CTimerSnippetOverlay::CTimerSnippetOverlay(CScriptEditorWidget* pParent) :
   COverlayBase(0, pParent),
   m_spUi(new Ui::CTimerSnippetOverlay),
@@ -9,6 +11,8 @@ CTimerSnippetOverlay::CTimerSnippetOverlay(CScriptEditorWidget* pParent) :
   m_data()
 {
   m_spUi->setupUi(this);
+  m_spUi->pScrollArea->setWidgetResizable(true);
+  m_preferredSize = size();
 }
 
 CTimerSnippetOverlay::~CTimerSnippetOverlay()
@@ -19,26 +23,35 @@ CTimerSnippetOverlay::~CTimerSnippetOverlay()
 //
 void CTimerSnippetOverlay::Climb()
 {
-  if (m_pEditor->size().height() < sizeHint().height())
-  {
-    ClimbToFirstInstanceOf("QStackedWidget", false);
-  }
-  else
-  {
-    ClimbToFirstInstanceOf("CScriptEditorWidget", false);
-  }
+  ClimbToFirstInstanceOf("QStackedWidget", false);
 }
 
 //----------------------------------------------------------------------------------------
 //
 void CTimerSnippetOverlay::Resize()
 {
+  QSize newSize = m_preferredSize;
+  if (m_pTargetWidget->geometry().width() < m_preferredSize.width())
+  {
+    newSize.setWidth(m_pTargetWidget->geometry().width());
+  }
+  if (m_pTargetWidget->geometry().height() < m_preferredSize.height())
+  {
+    newSize.setHeight(m_pTargetWidget->geometry().height());
+  }
+
   QPoint newPos =
       QPoint(m_pTargetWidget->geometry().width() / 2, m_pTargetWidget->geometry().height() / 2) -
-      QPoint(width() / 2, height() / 2);
+      QPoint(newSize.width() / 2, newSize.height() / 2);
 
   move(newPos.x(), newPos.y());
-  resize(width(), height());
+  resize(newSize);
+
+  m_spUi->pScrollArea->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+  m_spUi->pScrollArea->setVerticalScrollBarPolicy(Qt::ScrollBarAsNeeded);
+  m_spUi->pScrollArea->widget()->setMinimumWidth(
+        newSize.width() - m_spUi->pScrollArea->verticalScrollBar()->width() -
+        m_spUi->pScrollArea->widget()->layout()->spacing());
 }
 
 //----------------------------------------------------------------------------------------

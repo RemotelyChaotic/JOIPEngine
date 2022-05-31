@@ -8,6 +8,8 @@
 #include "Systems/DatabaseManager.h"
 #include "Widgets/ColorPicker.h"
 
+#include <QScrollBar>
+
 namespace  {
   const qint32 c_iAlignLeftIndex = 0;
   const qint32 c_iAlignRightIndex = 1;
@@ -22,6 +24,20 @@ CNotificationSnippetOverlay::CNotificationSnippetOverlay(CScriptEditorWidget* pP
   m_pEditor(pParent)
 {
   m_spUi->setupUi(this);
+
+  m_spUi->pTextScrollArea->setWidgetResizable(true);
+  m_spUi->pIconScrollArea->setWidgetResizable(true);
+  m_spUi->pOnClickScrollArea->setWidgetResizable(true);
+  m_spUi->pOnTimeoutScrollArea->setWidgetResizable(true);
+  m_spUi->pColorScrollArea->setWidgetResizable(true);
+  m_preferredSize = size();
+  m_vScrollAreas = {
+    m_spUi->pTextScrollArea,
+    m_spUi->pIconScrollArea,
+    m_spUi->pOnClickScrollArea,
+    m_spUi->pOnTimeoutScrollArea,
+    m_spUi->pColorScrollArea
+  };
 }
 
 CNotificationSnippetOverlay::~CNotificationSnippetOverlay()
@@ -106,26 +122,54 @@ void CNotificationSnippetOverlay::UnloadProject()
 //
 void CNotificationSnippetOverlay::Climb()
 {
-  if (m_pEditor->size().height() < sizeHint().height())
-  {
-    ClimbToFirstInstanceOf("QStackedWidget", false);
-  }
-  else
-  {
-    ClimbToFirstInstanceOf("CScriptEditorWidget", false);
-  }
+  ClimbToFirstInstanceOf("QStackedWidget", false);
 }
 
 //----------------------------------------------------------------------------------------
 //
 void CNotificationSnippetOverlay::Resize()
 {
+  QSize newSize = m_preferredSize;
+  if (m_pTargetWidget->geometry().width() < m_preferredSize.width())
+  {
+    newSize.setWidth(m_pTargetWidget->geometry().width());
+  }
+  if (m_pTargetWidget->geometry().height() < m_preferredSize.height())
+  {
+    newSize.setHeight(m_pTargetWidget->geometry().height());
+  }
+  if (m_pTargetWidget->width() > m_pTargetWidget->height())
+  {
+    m_spUi->pTabWidget->setTabPosition(QTabWidget::TabPosition::North);
+  }
+  else
+  {
+    m_spUi->pTabWidget->setTabPosition(QTabWidget::TabPosition::East);
+  }
+
   QPoint newPos =
       QPoint(m_pTargetWidget->geometry().width() / 2, m_pTargetWidget->geometry().height() / 2) -
       QPoint(width() / 2, height() / 2);
 
   move(newPos.x(), newPos.y());
-  resize(width(), height());
+  resize(newSize);
+
+  qint32 iLeftMargin = 0;
+  qint32 iRightMargin = 0;
+  layout()->getContentsMargins(&iLeftMargin, nullptr, &iRightMargin, nullptr);
+  for (QPointer<QScrollArea> pArea : m_vScrollAreas)
+  {
+    qint32 iLeftMarginInner = 0;
+    qint32 iRightMarginInner = 0;
+    pArea->widget()->layout()->getContentsMargins(&iLeftMarginInner, nullptr,
+                                                  &iRightMarginInner, nullptr);
+    pArea->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+    pArea->setVerticalScrollBarPolicy(Qt::ScrollBarAsNeeded);
+    pArea->widget()->setMinimumWidth(
+          newSize.width() - pArea->verticalScrollBar()->width() -
+          pArea->widget()->layout()->spacing() - iLeftMargin - iLeftMarginInner -
+          iRightMargin - iRightMarginInner - 1);
+  }
 }
 
 //----------------------------------------------------------------------------------------

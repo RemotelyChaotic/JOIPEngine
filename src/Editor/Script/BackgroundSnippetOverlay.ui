@@ -35,58 +35,22 @@
    <property name="spacing">
     <number>0</number>
    </property>
-   <item row="0" column="0">
-    <widget class="QGroupBox" name="groupBox">
-     <property name="title">
-      <string/>
-     </property>
+   <item row="1" column="0">
+    <widget class="QWidget" name="widget_2" native="true">
      <layout class="QGridLayout" name="gridLayout_5">
+      <property name="leftMargin">
+       <number>0</number>
+      </property>
+      <property name="topMargin">
+       <number>0</number>
+      </property>
+      <property name="rightMargin">
+       <number>0</number>
+      </property>
+      <property name="bottomMargin">
+       <number>0</number>
+      </property>
       <item row="1" column="1">
-       <widget class="QWidget" name="widget_5" native="true">
-        <layout class="QGridLayout" name="gridLayout_6">
-         <property name="leftMargin">
-          <number>0</number>
-         </property>
-         <property name="topMargin">
-          <number>0</number>
-         </property>
-         <property name="rightMargin">
-          <number>0</number>
-         </property>
-         <property name="bottomMargin">
-          <number>0</number>
-         </property>
-         <property name="spacing">
-          <number>10</number>
-         </property>
-         <item row="0" column="1" colspan="2">
-          <widget class="QLineEdit" name="pResourceLineEdit">
-           <property name="enabled">
-            <bool>false</bool>
-           </property>
-          </widget>
-         </item>
-         <item row="1" column="0">
-          <widget class="QCheckBox" name="pColorCheckBox">
-           <property name="text">
-            <string>Color</string>
-           </property>
-          </widget>
-         </item>
-         <item row="0" column="0">
-          <widget class="QCheckBox" name="pResourceCheckBox">
-           <property name="text">
-            <string>Resource</string>
-           </property>
-          </widget>
-         </item>
-         <item row="1" column="1" colspan="2">
-          <widget class="CColorPicker" name="pColorWidget" native="true"/>
-         </item>
-        </layout>
-       </widget>
-      </item>
-      <item row="2" column="1">
        <widget class="QWidget" name="widget_4" native="true">
         <property name="sizePolicy">
          <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
@@ -110,32 +74,10 @@
          <property name="spacing">
           <number>10</number>
          </property>
-         <item row="0" column="0">
-          <widget class="QTreeView" name="pResourceSelectTree">
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
-             <horstretch>1</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
-           <property name="alternatingRowColors">
-            <bool>true</bool>
-           </property>
-           <property name="sortingEnabled">
-            <bool>true</bool>
-           </property>
-           <property name="animated">
-            <bool>true</bool>
-           </property>
-          </widget>
-         </item>
-         <item row="1" column="0">
-          <widget class="CSearchWidget" name="pFilter" native="true"/>
-         </item>
         </layout>
        </widget>
       </item>
-      <item row="3" column="1">
+      <item row="2" column="1">
        <widget class="QWidget" name="widget" native="true">
         <layout class="QGridLayout" name="gridLayout">
          <item row="2" column="2">
@@ -200,15 +142,104 @@
      </layout>
     </widget>
    </item>
+   <item row="0" column="0">
+    <widget class="QScrollArea" name="pScrollArea">
+     <property name="frameShape">
+      <enum>QFrame::NoFrame</enum>
+     </property>
+     <property name="frameShadow">
+      <enum>QFrame::Plain</enum>
+     </property>
+     <property name="lineWidth">
+      <number>0</number>
+     </property>
+     <property name="widgetResizable">
+      <bool>true</bool>
+     </property>
+     <widget class="QWidget" name="scrollAreaWidgetContents">
+      <property name="geometry">
+       <rect>
+        <x>0</x>
+        <y>0</y>
+        <width>500</width>
+        <height>453</height>
+       </rect>
+      </property>
+      <layout class="QGridLayout" name="gridLayout_4">
+       <item row="1" column="0">
+        <widget class="QTreeView" name="pResourceSelectTree">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
+           <horstretch>1</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="alternatingRowColors">
+          <bool>true</bool>
+         </property>
+         <property name="sortingEnabled">
+          <bool>true</bool>
+         </property>
+         <property name="animated">
+          <bool>true</bool>
+         </property>
+        </widget>
+       </item>
+       <item row="0" column="0">
+        <widget class="QWidget" name="widget_5" native="true">
+         <layout class="QGridLayout" name="gridLayout_6">
+          <property name="leftMargin">
+           <number>0</number>
+          </property>
+          <property name="topMargin">
+           <number>0</number>
+          </property>
+          <property name="rightMargin">
+           <number>0</number>
+          </property>
+          <property name="bottomMargin">
+           <number>0</number>
+          </property>
+          <property name="spacing">
+           <number>10</number>
+          </property>
+          <item row="0" column="1" colspan="2">
+           <widget class="QLineEdit" name="pResourceLineEdit">
+            <property name="enabled">
+             <bool>false</bool>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="0">
+           <widget class="QCheckBox" name="pColorCheckBox">
+            <property name="text">
+             <string>Color</string>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="0">
+           <widget class="QCheckBox" name="pResourceCheckBox">
+            <property name="text">
+             <string>Resource</string>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="1" colspan="2">
+           <widget class="CColorPicker" name="pColorWidget" native="true"/>
+          </item>
+         </layout>
+        </widget>
+       </item>
+       <item row="2" column="0">
+        <widget class="CSearchWidget" name="pFilter" native="true"/>
+       </item>
+      </layout>
+     </widget>
+    </widget>
+   </item>
   </layout>
  </widget>
  <customwidgets>
-  <customwidget>
-   <class>CSearchWidget</class>
-   <extends>QWidget</extends>
-   <header>Widgets/SearchWidget.h</header>
-   <container>1</container>
-  </customwidget>
   <customwidget>
    <class>COverlayBase</class>
    <extends>QWidget</extends>
@@ -219,6 +250,12 @@
    <class>CColorPicker</class>
    <extends>QWidget</extends>
    <header>Widgets/ColorPicker.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>CSearchWidget</class>
+   <extends>QWidget</extends>
+   <header>Widgets/SearchWidget.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

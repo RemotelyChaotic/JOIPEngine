@@ -56,6 +56,7 @@ private:
   std::unique_ptr<Ui::CTimerSnippetOverlay> m_spUi;
   QPointer<CScriptEditorWidget>             m_pEditor;
   STimerSnippetData                         m_data;
+  QSize                                     m_preferredSize;
 };
 
 #endif // TIMERSNIPPETOVERLAY_H

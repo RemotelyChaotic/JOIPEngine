@@ -8,6 +8,7 @@ CThreadSnippetOverlay::CThreadSnippetOverlay(CScriptEditorWidget* pParent) :
   m_pEditor(pParent)
 {
   m_spUi->setupUi(this);
+  m_preferredSize = size();
 }
 
 CThreadSnippetOverlay::~CThreadSnippetOverlay()
@@ -18,26 +19,29 @@ CThreadSnippetOverlay::~CThreadSnippetOverlay()
 //
 void CThreadSnippetOverlay::Climb()
 {
-  if (m_pEditor->size().height() < sizeHint().height())
-  {
-    ClimbToFirstInstanceOf("QStackedWidget", false);
-  }
-  else
-  {
-    ClimbToFirstInstanceOf("CScriptEditorWidget", false);
-  }
+  ClimbToFirstInstanceOf("QStackedWidget", false);
 }
 
 //----------------------------------------------------------------------------------------
 //
 void CThreadSnippetOverlay::Resize()
 {
+  QSize newSize = m_preferredSize;
+  if (m_pTargetWidget->geometry().width() < m_preferredSize.width())
+  {
+    newSize.setWidth(m_pTargetWidget->geometry().width());
+  }
+  if (m_pTargetWidget->geometry().height() < m_preferredSize.height())
+  {
+    newSize.setHeight(m_pTargetWidget->geometry().height());
+  }
+
   QPoint newPos =
       QPoint(m_pTargetWidget->geometry().width() / 2, m_pTargetWidget->geometry().height() / 2) -
-      QPoint(width() / 2, height() / 2);
+      QPoint(newSize.width() / 2, newSize.height() / 2);
 
   move(newPos.x(), newPos.y());
-  resize(width(), height());
+  resize(newSize);
 }
 
 //----------------------------------------------------------------------------------------

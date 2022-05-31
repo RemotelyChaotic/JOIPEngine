@@ -9,6 +9,7 @@
 #include "ui_TextSnippetOverlay.h"
 
 #include <QLineEdit>
+#include <QScrollBar>
 
 namespace  {
   const char* c_sIndexProperty = "Index";
@@ -36,6 +37,20 @@ CTextSnippetOverlay::CTextSnippetOverlay(CScriptEditorWidget* pParent) :
       new CResourceTreeItemSortFilterProxyModel(m_spUi->pResourceSelectTree);
   pProxyModel->FilterForTypes({EResourceType::eImage, EResourceType::eMovie});
   m_spUi->pResourceSelectTree->setModel(pProxyModel);
+
+  m_spUi->pScrollAreaText->setWidgetResizable(true);
+  m_spUi->pScrollAreaIcon->setWidgetResizable(true);
+  m_spUi->pScrollAreaButtons->setWidgetResizable(true);
+  m_spUi->pScrollAreaTextColor->setWidgetResizable(true);
+  m_spUi->pScrollAreaBG->setWidgetResizable(true);
+  m_preferredSize = size();
+  m_vScrollAreas = {
+    m_spUi->pScrollAreaText,
+    m_spUi->pScrollAreaIcon,
+    m_spUi->pScrollAreaButtons,
+    m_spUi->pScrollAreaTextColor,
+    m_spUi->pScrollAreaBG
+  };
 }
 
 CTextSnippetOverlay::~CTextSnippetOverlay()
@@ -60,6 +75,7 @@ void CTextSnippetOverlay::Initialize(CResourceTreeItemModel* pResourceTreeModel)
   pProxyModel->setFilterRegExp(QRegExp(".*", Qt::CaseInsensitive, QRegExp::RegExp));
 
   // setup Tree
+  m_spUi->pResourceSelectTree->setColumnHidden(resource_item::c_iColumnType, true);
   m_spUi->pResourceSelectTree->setColumnHidden(resource_item::c_iColumnPath, true);
   m_spUi->pResourceSelectTree->header()->setSectionResizeMode(resource_item::c_iColumnName, QHeaderView::Stretch);
   m_spUi->pResourceSelectTree->header()->setSectionResizeMode(resource_item::c_iColumnType, QHeaderView::Interactive);
@@ -84,26 +100,54 @@ void CTextSnippetOverlay::UnloadProject()
 //
 void CTextSnippetOverlay::Climb()
 {
-  if (m_pEditor->size().height() < sizeHint().height())
-  {
-    ClimbToFirstInstanceOf("QStackedWidget", false);
-  }
-  else
-  {
-    ClimbToFirstInstanceOf("CScriptEditorWidget", false);
-  }
+  ClimbToFirstInstanceOf("QStackedWidget", false);
 }
 
 //----------------------------------------------------------------------------------------
 //
 void CTextSnippetOverlay::Resize()
 {
+  QSize newSize = m_preferredSize;
+  if (m_pTargetWidget->geometry().width() < m_preferredSize.width())
+  {
+    newSize.setWidth(m_pTargetWidget->geometry().width());
+  }
+  if (m_pTargetWidget->geometry().height() < m_preferredSize.height())
+  {
+    newSize.setHeight(m_pTargetWidget->geometry().height());
+  }
+  if (m_pTargetWidget->width() > m_pTargetWidget->height())
+  {
+    m_spUi->pTabWidget->setTabPosition(QTabWidget::TabPosition::North);
+  }
+  else
+  {
+    m_spUi->pTabWidget->setTabPosition(QTabWidget::TabPosition::East);
+  }
+
   QPoint newPos =
       QPoint(m_pTargetWidget->geometry().width() / 2, m_pTargetWidget->geometry().height() / 2) -
-      QPoint(width() / 2, height() / 2);
+      QPoint(newSize.width() / 2, newSize.height() / 2);
 
   move(newPos.x(), newPos.y());
-  resize(width(), height());
+  resize(newSize);
+
+  qint32 iLeftMargin = 0;
+  qint32 iRightMargin = 0;
+  layout()->getContentsMargins(&iLeftMargin, nullptr, &iRightMargin, nullptr);
+  for (QPointer<QScrollArea> pArea : m_vScrollAreas)
+  {
+    qint32 iLeftMarginInner = 0;
+    qint32 iRightMarginInner = 0;
+    pArea->widget()->layout()->getContentsMargins(&iLeftMarginInner, nullptr,
+                                                  &iRightMarginInner, nullptr);
+    pArea->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+    pArea->setVerticalScrollBarPolicy(Qt::ScrollBarAsNeeded);
+    pArea->widget()->setMinimumWidth(
+          newSize.width() - pArea->verticalScrollBar()->width() -
+          pArea->widget()->layout()->spacing() - iLeftMargin - iLeftMarginInner -
+          iRightMargin - iRightMarginInner - 1);
+  }
 }
 
 //----------------------------------------------------------------------------------------

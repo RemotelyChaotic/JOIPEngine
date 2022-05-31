@@ -37,6 +37,7 @@ private:
   QPointer<CScriptEditorWidget>              m_pEditor;
   double                                     m_bSleepTimeS;
   bool                                       m_bSkippable;
+  QSize                                      m_preferredSize;
 };
 
 #endif // THREADSNIPPETOVERLAY_H
