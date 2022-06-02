@@ -10,7 +10,8 @@ Rectangle {
     width: visible ? parent.width : 0
     height: visible ? parent.height : 0
 
-    property alias fontSize: text404.font.pixelSize
+    property real fontSize: 100
+    property real glowRadius: 10
 
     color: "transparent"
 
@@ -25,19 +26,34 @@ Rectangle {
         }
     }
 
+    FontMetrics {
+        id: fontMetrics
+        font.family: text404.font.family
+        font.pixelSize: fontSize
+    }
+
     Text {
         id: text404
         text: "404"
         anchors.fill: parent
         color: "black"
         font.family: Settings.font
-        font.pixelSize: 100
+        font.pixelSize: {
+            var iWidth = fontMetrics.boundingRect(text404.text).width;
+            var dRatio = 1.0;
+            if (text404Rect.parent.width < iWidth + text404Rect.glowRadius*2+5)
+            {
+                dRatio = text404Rect.parent.width / (iWidth + text404Rect.glowRadius*2+5);
+            }
+            return text404Rect.fontSize * dRatio;
+        }
+
         horizontalAlignment: Text.AlignHCenter
         verticalAlignment: Text.AlignVCenter
 
         layer.enabled: true
         layer.effect: Glow {
-            radius: 10
+            radius: text404Rect.glowRadius
             samples: 17
             spread: 0.5
             color: "white"

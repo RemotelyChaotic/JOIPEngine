@@ -2,12 +2,15 @@
 #define MAINSCREEN_H
 
 #include "IAppStateScreen.h"
+#include <QPointer>
 #include <QWidget>
 #include <memory>
 
 namespace Ui {
   class CMainScreen;
 }
+class CHelpButtonOverlay;
+class CDownloadButtonOverlay;
 
 class CMainScreen : public QWidget, public IAppStateScreen
 {
@@ -34,8 +37,13 @@ protected slots:
   void on_pQuitButton_clicked();
   void SlotStyleLoaded();
 
+protected:
+  void resizeEvent(QResizeEvent* pEvt) override;
+
 private:
   std::unique_ptr<Ui::CMainScreen> m_spUi;
+  QPointer<CHelpButtonOverlay>     m_pHelpButtonOverlay;
+  QPointer<CDownloadButtonOverlay> m_pDownloadButtonOverlay;
 };
 
 #endif // MAINSCREEN_H

@@ -61,6 +61,16 @@ void CMainWindow::Initialize()
   m_spUi->pMenuBar->setVisible(false);
   m_spUi->pStatusBar->setVisible(false);
 
+  m_spHelpButtonOverlay->Initialize();
+  connect(m_spHelpButtonOverlay.get(), &CHelpButtonOverlay::SignalButtonClicked,
+          this, &CMainWindow::SlotHelpButtonClicked);
+  m_spHelpButtonOverlay->Show();
+
+  m_spDownloadButtonOverlay->Initialize();
+  connect(m_spDownloadButtonOverlay.get(), &CHelpButtonOverlay::SignalButtonClicked,
+          this, &CMainWindow::SlotDownloadButtonClicked);
+  m_spDownloadButtonOverlay->Show();
+
   // add all screens
   m_spUi->pApplicationStackWidget->insertWidget(EAppState::eMainScreen,
    new CMainScreen(m_spWindowContext, m_spUi->pApplicationStackWidget));
@@ -87,16 +97,6 @@ void CMainWindow::Initialize()
   {
     pScreen->Load();
   }
-
-  m_spHelpButtonOverlay->Initialize();
-  connect(m_spHelpButtonOverlay.get(), &CHelpButtonOverlay::SignalButtonClicked,
-          this, &CMainWindow::SlotHelpButtonClicked);
-  m_spHelpButtonOverlay->Show();
-
-  m_spDownloadButtonOverlay->Initialize();
-  connect(m_spDownloadButtonOverlay.get(), &CHelpButtonOverlay::SignalButtonClicked,
-          this, &CMainWindow::SlotDownloadButtonClicked);
-  m_spDownloadButtonOverlay->Show();
 
   if (m_spSettings->HasOldSettingsVersion())
   {

@@ -11,13 +11,18 @@ class CTitleLabel : public QLabel
 {
   Q_OBJECT
   Q_PROPERTY(QColor outlineColor READ OutlineColor WRITE SetOutlineColor)
+  Q_PROPERTY(qint32 fontSize READ FontSize WRITE SetFontSize)
 
 public:
   explicit CTitleLabel(QWidget* pParent = nullptr);
   explicit CTitleLabel(QString sText = "", QWidget* pParent = nullptr);
 
   void SetOutlineColor(const QColor& color);
-  const QColor& OutlineColor();
+  const QColor& OutlineColor() const;
+  void SetFontSize(qint32 iFontSize) { m_iFontSize = iFontSize; }
+  qint32 FontSize() const { return m_iFontSize; }
+
+  QSize SuggestedSize() const { return m_suggestedSize; }
 
 protected slots:
   void SlotStyleLoaded();
@@ -31,6 +36,10 @@ private:
 
   QPointer<CTitleProxyStyle> m_pStyle;
   QTimer                     m_updateTimer;
+  QTimer                     m_settledTimer;
+  QSize                      m_lastSize;
+  QSize                      m_suggestedSize;
+  qint32                     m_iFontSize;
 };
 
 #endif // TITLELABEL_H

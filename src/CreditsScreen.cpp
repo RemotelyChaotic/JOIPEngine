@@ -28,14 +28,6 @@ void CCreditsScreen::Initialize()
   connect(CApplication::Instance(), &CApplication::StyleLoaded,
           this, &CCreditsScreen::SlotStyleLoaded, Qt::QueuedConnection);
 
-  QFont font = m_spUi->pTextCredits->font();
-  font.setPixelSize(20);
-  m_spUi->pTextCredits->setFont(font);
-
-  font = m_spUi->pTextChangelog->font();
-  font.setPixelSize(20);
-  m_spUi->pTextChangelog->setFont(font);
-
   m_bInitialized = true;
 }
 

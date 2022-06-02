@@ -8,6 +8,7 @@
 #include <QPainter>
 #include <QPropertyAnimation>
 #include <QProxyStyle>
+#include <QResizeEvent>
 #include <QtConcurrent/QtConcurrent>
 
 namespace  {
@@ -16,6 +17,7 @@ namespace  {
   const double c_iOffsetBorder = 5.0;
   const qint32 c_iAnimationTime = 1500;
   const qint32 c_iUpdateInterval = 5;
+  const qint32 c_iTitleFontSize = 60;
 
   //--------------------------------------------------------------------------------------
   //
@@ -299,7 +301,8 @@ protected:
 //----------------------------------------------------------------------------------------
 //
 CTitleLabel::CTitleLabel(QWidget* pParent) :
-  QLabel(pParent)
+  QLabel(pParent),
+  m_iFontSize(c_iTitleFontSize)
 {
   connect(CApplication::Instance(), &CApplication::StyleLoaded,
           this, &CTitleLabel::SlotStyleLoaded, Qt::QueuedConnection);
@@ -307,7 +310,7 @@ CTitleLabel::CTitleLabel(QWidget* pParent) :
   setAlignment(Qt::AlignCenter);
 
   QFont thisFont = font();
-  thisFont.setPixelSize(60);
+  thisFont.setPixelSize(m_iFontSize);
   setFont(thisFont);
   m_pStyle = new CTitleProxyStyle();
   m_pStyle->setParent(this);
@@ -325,10 +328,18 @@ CTitleLabel::CTitleLabel(QWidget* pParent) :
   m_updateTimer.setSingleShot(false);
   connect(&m_updateTimer, &QTimer::timeout,
           this, &CTitleLabel::SlotUpdate, Qt::DirectConnection);
+
+  m_settledTimer.setInterval(c_iAnimationTime);
+  m_settledTimer.setSingleShot(true);
+  connect(&m_settledTimer, &QTimer::timeout,
+          this, &CTitleLabel::SlotStyleLoaded, Qt::DirectConnection);
+
+  m_lastSize = {0,0};
 }
 
 CTitleLabel::CTitleLabel(QString sText, QWidget* pParent) :
-  QLabel(sText, pParent)
+  QLabel(sText, pParent),
+  m_iFontSize(c_iTitleFontSize)
 {
   connect(CApplication::Instance(), &CApplication::StyleLoaded,
           this, &CTitleLabel::SlotStyleLoaded, Qt::QueuedConnection);
@@ -336,7 +347,7 @@ CTitleLabel::CTitleLabel(QString sText, QWidget* pParent) :
   setAlignment(Qt::AlignCenter);
 
   QFont thisFont = font();
-  thisFont.setPixelSize(60);
+  thisFont.setPixelSize(m_iFontSize);
   setFont(thisFont);
   m_pStyle = new CTitleProxyStyle();
   m_pStyle->setParent(this);
@@ -355,6 +366,13 @@ CTitleLabel::CTitleLabel(QString sText, QWidget* pParent) :
   connect(&m_updateTimer, &QTimer::timeout,
           this, &CTitleLabel::SlotUpdate, Qt::DirectConnection);
   m_updateTimer.start();
+
+  m_settledTimer.setInterval(c_iAnimationTime);
+  m_settledTimer.setSingleShot(true);
+  connect(&m_settledTimer, &QTimer::timeout,
+          this, &CTitleLabel::SlotStyleLoaded, Qt::DirectConnection);
+
+  m_lastSize = {0,0};
 }
 
 //----------------------------------------------------------------------------------------
@@ -368,7 +386,7 @@ void CTitleLabel::SetOutlineColor(const QColor& color)
 
 //----------------------------------------------------------------------------------------
 //
-const QColor& CTitleLabel::OutlineColor()
+const QColor& CTitleLabel::OutlineColor() const
 {
   return m_pStyle->OutlineColor();
 }
@@ -378,9 +396,25 @@ const QColor& CTitleLabel::OutlineColor()
 void CTitleLabel::SlotStyleLoaded()
 {
   QFont thisFont = font();
-  thisFont.setPixelSize(60);
+  thisFont.setPixelSize(m_iFontSize);
   thisFont.setFamily(CApplication::Instance()->Settings()->Font());
+  QFontMetrics fontMetrics(thisFont);
+  qint32 iHeight = fontMetrics.height() + c_iKernelSize + static_cast<qint32>(c_iOffsetBorder);
+  qint32 iWidth = fontMetrics.boundingRect(text()).width() + c_iKernelSize + static_cast<qint32>(c_iOffsetBorder);
+  double dRatio = 1.0;
+  if (nullptr != parentWidget() && parentWidget()->width() < iWidth)
+  {
+    dRatio = static_cast<double>(parentWidget()->width()) / iWidth;
+    thisFont.setPixelSize(static_cast<qint32>(m_iFontSize * dRatio));
+    fontMetrics = QFontMetrics(thisFont);
+    iHeight = fontMetrics.height() + c_iKernelSize + static_cast<qint32>(c_iOffsetBorder);
+    iWidth = fontMetrics.boundingRect(text()).width() + c_iKernelSize + static_cast<qint32>(c_iOffsetBorder);
+  }
+
   setFont(thisFont);
+  setFixedHeight(iHeight);
+  m_suggestedSize = {iWidth, iHeight};
+  m_lastSize = size();
   m_pStyle->SetDirty();
   m_updateTimer.start();
 }
@@ -396,7 +430,12 @@ void CTitleLabel::SlotUpdate()
 //
 void CTitleLabel::resizeEvent(QResizeEvent* pEvt)
 {
-  Q_UNUSED(pEvt)
+  if (nullptr == pEvt) { return; }
+  if (m_lastSize != pEvt->size())
+  {
+    m_settledTimer.stop();
+    m_settledTimer.start();
+  }
 }
 
 //----------------------------------------------------------------------------------------

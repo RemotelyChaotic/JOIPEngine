@@ -4,8 +4,11 @@
 #include "WindowContext.h"
 #include "ui_MainScreen.h"
 #include "Systems/HelpFactory.h"
+#include "Widgets/DownloadButtonOverlay.h"
 #include "Widgets/HelpOverlay.h"
 #include <QApplication>
+#include <QResizeEvent>
+#include <QSpacerItem>
 
 namespace
 {
@@ -60,9 +63,10 @@ void CMainScreen::Initialize()
           this, &CMainScreen::SlotStyleLoaded, Qt::QueuedConnection);
 
   m_spUi->pVersionLabel->setText("v" VERSION_XYZ);
-  QFont versionFont = m_spUi->pVersionLabel->font();
-  versionFont.setPixelSize(30);
-  m_spUi->pVersionLabel->setFont(versionFont);
+  m_spUi->pVersionLabel->SetFontSize(30);
+
+  m_pHelpButtonOverlay = window()->findChild<CHelpButtonOverlay*>();
+  m_pDownloadButtonOverlay = window()->findChild<CDownloadButtonOverlay*>();
 
   m_bInitialized = true;
 }
@@ -134,4 +138,29 @@ void CMainScreen::SlotStyleLoaded()
   versionFont.setPixelSize(30);
   versionFont.setFamily(CApplication::Instance()->Settings()->Font());
   m_spUi->pVersionLabel->setFont(versionFont);
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CMainScreen::resizeEvent(QResizeEvent* pEvt)
+{
+  if (nullptr == pEvt) { return; }
+
+  if (nullptr != m_pDownloadButtonOverlay && nullptr != m_pHelpButtonOverlay)
+  {
+    const QSize titleSize = m_spUi->pTitle->SuggestedSize();
+    const qint32 iSpaceInMiddle = parentWidget()->width()-
+        (m_pDownloadButtonOverlay->x() + m_pDownloadButtonOverlay->width()) -
+        (parentWidget()->width() - m_pHelpButtonOverlay->x());
+    if (titleSize.width() > iSpaceInMiddle)
+    {
+      m_spUi->pTopVerticalSpacer->changeSize(20, m_pHelpButtonOverlay->y() + m_pHelpButtonOverlay->height() + 10,
+                                             QSizePolicy::Minimum, QSizePolicy::Maximum);
+    }
+    else
+    {
+      m_spUi->pTopVerticalSpacer->changeSize(20, 20, QSizePolicy::Minimum, QSizePolicy::Maximum);
+    }
+    layout()->invalidate();
+  }
 }
