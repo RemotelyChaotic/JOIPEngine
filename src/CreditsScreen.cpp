@@ -81,12 +81,10 @@ void CCreditsScreen::on_pAboutQtButton_clicked()
 void CCreditsScreen::SlotStyleLoaded()
 {
   QFont font = m_spUi->pTextCredits->font();
-  font.setPixelSize(20);
   font.setFamily(CApplication::Instance()->Settings()->Font());
   m_spUi->pTextCredits->setFont(font);
 
   font = m_spUi->pTextChangelog->font();
-  font.setPixelSize(20);
   font.setFamily(CApplication::Instance()->Settings()->Font());
   m_spUi->pTextChangelog->setFont(font);
 }

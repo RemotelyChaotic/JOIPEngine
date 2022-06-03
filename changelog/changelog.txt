@@ -1,12 +1,12 @@
-================================================================================
+=================
 Version 1.0.0.0
-================================================================================
+=================
 
 - First release
 
-================================================================================
+=================
 Version 1.1.0.0
-================================================================================
+=================
 
 New Features:
 - Help overlay added that can interactively display help based on clicked engine 
@@ -69,9 +69,9 @@ Fixed Bugs:
 - Fixed multiple issues with editor code overlays.
 
 
-================================================================================
+=================
 Version 1.1.1.0
-================================================================================
+=================
 
 New Features:
 - PlayerMetronome can be muted with the function "setMuted".
@@ -96,18 +96,18 @@ Fixed Bugs:
 - On reloading a Project in the Editor the tags will not show up multiple times.
 
 
-================================================================================
+=================
 Version 1.1.2.0
-================================================================================
+=================
 
 Fixed Bugs:
 - Fixed the tutorial. It should not get stuck or make the highlights disappear now.
 - Sped up loading times at startup a little.
 
 
-================================================================================
+=================
 Version 1.2.0.0
-================================================================================
+=================
 
 New Features:
 - The use of PhysFS makes it possible to use archived files transparently and
@@ -170,9 +170,9 @@ Fixed Bugs:
 - Old version detection turn off even if the user answers 'No' to changing
   the folder.
 
-================================================================================
+=================
 Version 1.2.1.0
-================================================================================
+=================
 
 New Features:
 - JS-Style import statements for Modules implemented without defaultMember suport 
