@@ -135,10 +135,13 @@ void CSettingsScreen::Initialize()
     }
   }
 
+  m_spUi->tabWidget->setCurrentIndex(0);
+
 #if defined (Q_OS_ANDROID)
   // disable settings pages that do not make sense on mobile
   m_spUi->tabWidget->setTabEnabled(0, false);
   m_spUi->tabWidget->setTabEnabled(3, false);
+  m_spUi->tabWidget->setCurrentIndex(1);
   m_spUi->pContentContainer->hide();
   m_spUi->pStyleHotoadContainer->hide();
 #endif
@@ -177,6 +180,8 @@ void CSettingsScreen::Load()
   m_spUi->pFullscreenCheckBox->setCheckState(m_spSettings->Fullscreen() ? Qt::Checked : Qt::Unchecked);
 
   // find available screen dimensions
+  m_spUi->pResolutionComboBox->setSizeAdjustPolicy(QComboBox::AdjustToContents);
+
   qint32 iIndex = 0;
   bool bFoundResolution = false;
   for (auto it = c_possibleDimensionsMap.begin(); c_possibleDimensionsMap.end() != it; ++it)
@@ -202,6 +207,8 @@ void CSettingsScreen::Load()
       ++iIndex;
     }
   }
+
+  m_spUi->pResolutionContainer->layout()->invalidate();
 
   // no default dimension -> add custom dimension
   if (!bFoundResolution)
