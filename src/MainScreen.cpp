@@ -68,6 +68,12 @@ void CMainScreen::Initialize()
   m_pHelpButtonOverlay = window()->findChild<CHelpButtonOverlay*>();
   m_pDownloadButtonOverlay = window()->findChild<CDownloadButtonOverlay*>();
 
+#if defined(Q_OS_ANDROID)
+  // on android we don't need a quit button
+  m_spUi->pQuitButton->parentWidget()->layout()->removeWidget(m_spUi->pQuitButton);
+  m_spUi->pQuitButton->setParent(this);
+ #endif
+
   m_bInitialized = true;
 }
 
