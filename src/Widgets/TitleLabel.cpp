@@ -380,8 +380,6 @@ CTitleLabel::CTitleLabel(QString sText, QWidget* pParent) :
 void CTitleLabel::SetOutlineColor(const QColor& color)
 {
   m_pStyle->SetOutlineColor(color);
-  m_pStyle->SetDirty();
-  m_updateTimer.start();
 }
 
 //----------------------------------------------------------------------------------------
