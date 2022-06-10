@@ -180,6 +180,8 @@ New Features:
 - PlayerMediaPlayer supports a stop frame argument for play functions.
 - PlayerMediaPlayer supports setting the volume of Resources via setVolume.
 - PlayerMetronome supports setting the volume via setVolume.
+- New window mode setting. The application can now be displayed in
+  fullscreen, borderless or windowed mode.
 
 Changes:
 - Resource Explorer View shows folder contents instead of the folder if a folder
@@ -189,9 +191,13 @@ Changes:
   global scope.
 - Resource Viewer in Editor shows timing info and preview for Movie and Sound
   type Resources.
+- Resource Viewers only show relevant Resource types.
+- Code snippet overlays are shown in the Code Editor instead of the entire Editor
+  window.
 
 Fixed Bugs:
 - Flickering in Resource Explorer View was fixed.
 - Early stopping of Resource preview load in Explorer View was fixed.
 - Wheel scrolling of Project card selection fixed.
 - When debugging a script, the player is not shown stacked on top of everything.
+- Fixed some style bugs.
