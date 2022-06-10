@@ -90,6 +90,7 @@ const QString CSettings::c_sSettingResolution = "Graphics/resolution";
 const QString CSettings::c_sSettingStyle = "Graphics/style";
 const QString CSettings::c_sSettingStyleHotLoad = "Debug/stylehotload";
 const QString CSettings::c_sSettingVolume = "Audio/volume";
+const QString CSettings::c_sWindowMode = "Graphics/windowMode";
 
 const QString CSettings::c_sOrganisation = "Private";
 const QString CSettings::c_sApplicationName = "JOIPEngine";
@@ -279,13 +280,12 @@ void CSettings::SetFullscreen(bool bValue)
 #if defined(Q_OS_ANDROID)
   Q_UNUSED(bValue)
 #else
-  QMutexLocker locker(&m_settingsMutex);
+  WindowMode oldMode =  GetWindowMode();
+  WindowMode newMode = bValue ? WindowMode::eFullscreen : WindowMode ::eBorderless;
 
-  bool bFullscreen = m_spSettings->value(CSettings::c_sSettingFullscreen).toBool();
+  if (oldMode == newMode) { return; }
 
-  if (bFullscreen == bValue) { return; }
-
-  m_spSettings->setValue(CSettings::c_sSettingFullscreen, bValue);
+  SetWindowMode(newMode);
 
   emit fullscreenChanged();
 #endif
@@ -298,8 +298,7 @@ bool CSettings::Fullscreen()
 #if defined(Q_OS_ANDROID)
   return true;
 #else
-  QMutexLocker locker(&m_settingsMutex);
-  return m_spSettings->value(CSettings::c_sSettingFullscreen).toBool();
+  return GetWindowMode() == WindowMode::eFullscreen;
 #endif
 }
 
@@ -644,6 +643,33 @@ double CSettings::Volume()
 
 //----------------------------------------------------------------------------------------
 //
+CSettings::WindowMode CSettings::GetWindowMode() const
+{
+#if defined(Q_OS_ANDROID)
+  return CSettings::WindowMode::eFullscreen;
+#else
+  QMutexLocker locker(&m_settingsMutex);
+  return static_cast<CSettings::WindowMode>(m_spSettings->value(CSettings::c_sWindowMode).toInt());
+#endif
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CSettings::SetWindowMode(const CSettings::WindowMode& mode)
+{
+  QMutexLocker locker(&m_settingsMutex);
+
+  quint32 iOldMode = m_spSettings->value(CSettings::c_sWindowMode).toInt();
+
+  if (iOldMode == mode) { return; }
+
+  m_spSettings->setValue(CSettings::c_sWindowMode, static_cast<qint32>(mode));
+
+  emit windowModeChanged();
+}
+
+//----------------------------------------------------------------------------------------
+//
 bool CSettings::IsAllowedToOverwriteKeyBinding(const QString& sRole)
 {
 #if defined(Q_OS_ANDROID)
@@ -696,7 +722,7 @@ void CSettings::GenerateSettingsIfNotExists()
     }
   }
 
-  // check fullscreen
+  // check font
   if (!m_spSettings->contains(CSettings::c_sSettingFont))
   {
     bNeedsSynch = true;
@@ -715,11 +741,21 @@ void CSettings::GenerateSettingsIfNotExists()
 #endif
   }
 
-  // check fullscreen
-  if (!m_spSettings->contains(CSettings::c_sSettingFullscreen))
+  // check window mode
+  if (!m_spSettings->contains(CSettings::c_sWindowMode))
   {
-    bNeedsSynch = true;
-    m_spSettings->setValue(CSettings::c_sSettingFullscreen, true);
+    if (m_spSettings->contains(CSettings::c_sSettingFullscreen))
+    {
+      bNeedsSynch = true;
+      m_spSettings->setValue(CSettings::c_sWindowMode,
+                             m_spSettings->value(CSettings::c_sSettingFullscreen).toBool() ?
+                             WindowMode::eFullscreen : WindowMode::eBorderless);
+    }
+    else
+    {
+      bNeedsSynch = true;
+      m_spSettings->setValue(CSettings::c_sWindowMode, WindowMode::eFullscreen);
+    }
   }
 
   // Keybindings

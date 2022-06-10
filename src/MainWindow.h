@@ -31,11 +31,11 @@ protected slots:
   void SlotChangeAppState(EAppState newState);
   void SlotCurrentAppStateUnloadFinished();
   void SlotDownloadButtonClicked();
-  void SlotFullscreenChanged();
   void SlotHelpButtonClicked();
   void SlotResolutionChanged();
   void SlotSetDownloadButtonVisible(bool bVisible);
   void SlotSetHelpButtonVisible(bool bVisible);
+  void SlotWindowModeChanged();
 
 protected:
   void closeEvent(QCloseEvent* pEvent) override;

@@ -8,6 +8,7 @@
 #include <QLinearGradient>
 #include <QPainter>
 #include <QtConcurrent/QtConcurrent>
+#include <QStyle>
 
 CBackgroundWidget::CBackgroundWidget(QWidget* pParent) :
   QWidget(pParent),
@@ -45,6 +46,7 @@ void CBackgroundWidget::SetBackgroundColor(const QColor& color)
 //
 void CBackgroundWidget::SetBackgroundTexture(const QString& sTexture)
 {
+  m_sBgTexture = sTexture;
   m_iLoadState = ELoadState::eFinished;
   if (QFileInfo(sTexture).exists())
   {
@@ -131,6 +133,15 @@ void CBackgroundWidget::paintEvent(QPaintEvent* /*pEvent*/)
   painter.setBrush(linGrad);
   painter.setPen(Qt::NoPen);
   painter.drawRect(rect());
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CBackgroundWidget::resizeEvent(QResizeEvent* pEvent)
+{
+  SetBackgroundTexture(m_sBgTexture);
+  style()->unpolish(this);
+  style()->polish(this);
 }
 
 //----------------------------------------------------------------------------------------

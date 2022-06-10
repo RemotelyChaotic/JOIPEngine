@@ -36,7 +36,6 @@ CMainWindow::CMainWindow(QWidget* pParent) :
 {
   m_spHelpOverlay.reset(new CHelpOverlay(m_spHelpButtonOverlay.get(), this));
   m_spUi->setupUi(this);
-  setWindowFlags(Qt::FramelessWindowHint);
 
   m_pBackground->setFixedSize(size());
   m_pBackground->lower();
@@ -88,7 +87,7 @@ void CMainWindow::Initialize()
   ConnectSlots();
 
   SlotResolutionChanged();
-  SlotFullscreenChanged();
+  SlotWindowModeChanged();
 
   m_spUi->pApplicationStackWidget->setCurrentIndex(EAppState::eMainScreen);
   IAppStateScreen* pScreen =
@@ -168,25 +167,6 @@ void CMainWindow::SlotDownloadButtonClicked()
 
 //----------------------------------------------------------------------------------------
 //
-void CMainWindow::SlotFullscreenChanged()
-{
-#if defined(Q_OS_ANDROID)
-  setWindowState(windowState() | Qt::WindowFullScreen);
-#else
-  bool bFullscreen = m_spSettings->Fullscreen();
-  if (bFullscreen)
-  {
-    setWindowState(windowState() | Qt::WindowFullScreen);
-  }
-  else
-  {
-    setWindowState(windowState() & ~Qt::WindowFullScreen);
-  }
-#endif
-}
-
-//----------------------------------------------------------------------------------------
-//
 void CMainWindow::SlotResolutionChanged()
 {
 #if defined(Q_OS_ANDROID)
@@ -238,6 +218,46 @@ void CMainWindow::SlotSetHelpButtonVisible(bool bVisible)
 
 //----------------------------------------------------------------------------------------
 //
+void CMainWindow::SlotWindowModeChanged()
+{
+#if defined(Q_OS_ANDROID)
+  setWindowFlag(Qt::FramelessWindowHint);
+  setWindowState(windowState() | Qt::WindowFullScreen);
+#else
+  CSettings::WindowMode winMode = m_spSettings->GetWindowMode();
+
+  if (CSettings::WindowMode::eBorderless == winMode ||
+      CSettings::WindowMode::eFullscreen == winMode)
+  {
+    setWindowFlag(Qt::FramelessWindowHint, true);
+  }
+  else
+  {
+    setWindowFlag(Qt::FramelessWindowHint, false);
+  }
+
+  bool bWasFullScreen = windowState() & Qt::WindowFullScreen;
+
+  if (CSettings::WindowMode::eFullscreen == winMode)
+  {
+    setWindowState(windowState() | Qt::WindowFullScreen);
+  }
+  else
+  {
+    setWindowState(windowState() & ~Qt::WindowFullScreen);
+  }
+
+  if (bWasFullScreen && CSettings::WindowMode::eFullscreen != winMode)
+  {
+    SlotResolutionChanged();
+  }
+
+  window()->show();
+#endif
+}
+
+//----------------------------------------------------------------------------------------
+//
 void CMainWindow::closeEvent(QCloseEvent* pEvent)
 {
   if (auto spPrjDownloader = CApplication::Instance()->System<CProjectDownloader>().lock())
@@ -275,8 +295,8 @@ void CMainWindow::closeEvent(QCloseEvent* pEvent)
 //
 void CMainWindow::resizeEvent(QResizeEvent* pEvent)
 {
-  m_pBackground->setFixedSize(pEvent->size());
-  m_pBackground->setGeometry(0, 0, pEvent->size().width(), pEvent->size().height());
+  m_pBackground->setFixedSize(size());
+  m_pBackground->setGeometry(0, 0, width(), height());
 }
 
 //----------------------------------------------------------------------------------------
@@ -346,7 +366,9 @@ void CMainWindow::ConnectSlots()
 #if defined(Q_OS_ANDROID)
 #else
   connect(m_spSettings.get(), &CSettings::fullscreenChanged,
-          this, &CMainWindow::SlotFullscreenChanged, Qt::QueuedConnection);
+          this, &CMainWindow::SlotWindowModeChanged, Qt::QueuedConnection);
+  connect(m_spSettings.get(), &CSettings::windowModeChanged,
+          this, &CMainWindow::SlotWindowModeChanged, Qt::QueuedConnection);
 
   connect(m_spSettings.get(), &CSettings::resolutionChanged,
           this, &CMainWindow::SlotResolutionChanged, Qt::QueuedConnection);

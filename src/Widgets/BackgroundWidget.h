@@ -27,6 +27,7 @@ public slots:
 
 protected:
   void paintEvent(QPaintEvent* pEvent) override;
+  void resizeEvent(QResizeEvent* pEvent) override;
 
 protected slots:
   void SlotImageLoad(QString sPath);
@@ -42,6 +43,7 @@ private:
   QFuture<void>                               m_future;
   QAtomicInt                                  m_iLoadState;
 
+  QString                                     m_sBgTexture;
   QPixmap                                     m_backgroundPixmap;
   QColor                                      m_backgroundColor;
 };

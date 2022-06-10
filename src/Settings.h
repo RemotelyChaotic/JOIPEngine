@@ -17,7 +17,7 @@ class CSettings : public QObject
   Q_PROPERTY(QString contentFolder READ ContentFolder WRITE SetContentFolder NOTIFY contentFolderChanged)
   Q_PROPERTY(QString font READ Font WRITE SetFont NOTIFY fontChanged)
   Q_PROPERTY(bool fullscreen READ Fullscreen WRITE SetFullscreen NOTIFY fullscreenChanged)
-  Q_PROPERTY(QStringList keyBindings READ KeyBindings)
+  Q_PROPERTY(QStringList keyBindings READ KeyBindings CONSTANT)
   Q_PROPERTY(bool muted READ Muted WRITE SetMuted NOTIFY mutedChanged)
   Q_PROPERTY(bool offline READ Offline WRITE SetOffline NOTIFY offlineChanged)
   Q_PROPERTY(bool pauseWhenInactive READ PauseWhenInactive WRITE SetPauseWhenInactive NOTIFY pauseWhenInactiveChanged)
@@ -25,8 +25,9 @@ class CSettings : public QObject
   Q_PROPERTY(QSize resolution READ Resolution WRITE SetResolution NOTIFY resolutionChanged)
   Q_PROPERTY(QString style READ Style WRITE SetStyle NOTIFY styleChanged)
   Q_PROPERTY(double styleHotLoad READ StyleHotLoad WRITE SetStyleHotLoad NOTIFY styleHotLoadChanged)
-  Q_PROPERTY(qint32 version READ Version)
+  Q_PROPERTY(qint32 version READ Version CONSTANT)
   Q_PROPERTY(double volume READ Volume WRITE SetVolume NOTIFY volumeChanged)
+  Q_PROPERTY(WindowMode windowMode READ GetWindowMode WRITE SetWindowMode NOTIFY windowModeChanged)
 
 public:
   static const QString c_sVersion;
@@ -42,6 +43,7 @@ public:
   static const QString c_sSettingStyle;
   static const QString c_sSettingStyleHotLoad;
   static const QString c_sSettingVolume;
+  static const QString c_sWindowMode;
 
   static const QString c_sOrganisation;
   static const QString c_sApplicationName;
@@ -53,6 +55,13 @@ public:
     eCompact = 3
   };
   Q_ENUM(EditorType)
+
+  enum WindowMode {
+    eFullscreen   = 0,
+    eBorderless   = 1,
+    eWindowed     = 2
+  };
+  Q_ENUM(WindowMode)
 
   explicit CSettings(QObject* pParent = nullptr);
   ~CSettings() override;
@@ -92,6 +101,8 @@ public:
   qint32 Version();
   void SetVolume(double dVolume);
   double Volume();
+  WindowMode GetWindowMode() const;
+  void SetWindowMode(const WindowMode& mode);
 
   static bool IsAllowedToOverwriteKeyBinding(const QString& sRole);
 
@@ -108,6 +119,7 @@ signals:
   void styleChanged();
   void styleHotLoadChanged();
   void volumeChanged();
+  void windowModeChanged();
 
 private:
   void GenerateSettingsIfNotExists();

@@ -141,9 +141,8 @@ void CMainScreen::on_pQuitButton_clicked()
 void CMainScreen::SlotStyleLoaded()
 {
   QFont versionFont = m_spUi->pVersionLabel->font();
-  versionFont.setPixelSize(30);
   versionFont.setFamily(CApplication::Instance()->Settings()->Font());
-  m_spUi->pVersionLabel->setFont(versionFont);
+  m_spUi->pVersionLabel->SetFontSize(30);
 }
 
 //----------------------------------------------------------------------------------------

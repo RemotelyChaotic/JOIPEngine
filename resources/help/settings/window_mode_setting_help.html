@@ -3,7 +3,7 @@
 
 <head>
   <meta charset="utf-8">
-  <title>Fullscreen</title>
+  <title>Window Mode</title>
   <meta name="description" content="">
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
@@ -29,12 +29,22 @@
 
 
 <body>
-  <h1>Fullscreen</h1>
+  <h1>Window Mode</h1>
 
   <hr>
 
   <div class="container">
-    <p>Toggles fullscreen mode for the application.</p>
+    <p>Toggles window mode for the application.</p>
+
+    <br>
+
+    <p>Available values are:</p>
+
+    <ul>
+    <li><b>Fullscreen</b>: Application fills a screen.</li>
+    <li><b>Borderless Window</b>: Application respects the selected <a href="qrc:/resources/help/settings/resolution_setting_help.html">Resolution</a> but is displayed without a header.</li>
+    <li><b>Windowed</b>: Application is shown as moveable, resizable window and respects the selected <a href="qrc:/resources/help/settings/resolution_setting_help.html">Resolution</a>.</li>
+    </ul>
   </div>
 
   <br>

@@ -24,7 +24,6 @@
         <file>resources/help/cancel_button_help.html</file>
         <file>resources/help/settings/datafolder_setting_help.html</file>
         <file>resources/help/settings/font_setting_help.html</file>
-        <file>resources/help/settings/fullscreen_setting_help.html</file>
         <file>resources/help/settings/mute_setting_help.html</file>
         <file>resources/help/settings/resolution_setting_help.html</file>
         <file>resources/help/settings/style_setting_help.html</file>
@@ -202,6 +201,7 @@
         <file>resources/help/editor/images/addnotification_dialog_portrait.png</file>
         <file>resources/help/editor/images/addnotification_dialog_text.png</file>
         <file>resources/style/img/ButtonNotification.png</file>
+        <file>resources/help/settings/window_mode_setting_help.html</file>
     </qresource>
     <qresource prefix="/qml">
         <file>resources/qml/ProjectCardSelection.qml</file>

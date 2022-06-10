@@ -21,7 +21,7 @@
 namespace  {
   const double c_dSliderScaling = 10000;
 
-  const QString c_sFullscreenHelpId = "Settings/Fullscreen";
+  const QString c_sWindowModeHelpId = "Settings/WindowMode";
   const QString c_sDataFolderHelpId = "Settings/DataFolder";
   const QString c_sFontHelpId = "Settings/Font";
   const QString c_sStyleHelpId = "Settings/Style";
@@ -88,8 +88,8 @@ void CSettingsScreen::Initialize()
   auto wpHelpFactory = CApplication::Instance()->System<CHelpFactory>().lock();
   if (nullptr != wpHelpFactory)
   {
-    m_spUi->pFullScreenContainer->setProperty(helpOverlay::c_sHelpPagePropertyName, c_sFullscreenHelpId);
-    wpHelpFactory->RegisterHelp(c_sFullscreenHelpId, ":/resources/help/settings/fullscreen_setting_help.html");
+    m_spUi->pWindowModeContainer->setProperty(helpOverlay::c_sHelpPagePropertyName, c_sWindowModeHelpId);
+    wpHelpFactory->RegisterHelp(c_sWindowModeHelpId, ":/resources/help/settings/window_mode_setting_help.html");
     m_spUi->pContentContainer->setProperty(helpOverlay::c_sHelpPagePropertyName, c_sDataFolderHelpId);
     wpHelpFactory->RegisterHelp(c_sDataFolderHelpId, ":/resources/help/settings/datafolder_setting_help.html");
     m_spUi->pFontContainer->setProperty(helpOverlay::c_sHelpPagePropertyName, c_sFontHelpId);
@@ -142,6 +142,7 @@ void CSettingsScreen::Initialize()
   m_spUi->tabWidget->setTabEnabled(0, false);
   m_spUi->tabWidget->setTabEnabled(3, false);
   m_spUi->tabWidget->setCurrentIndex(1);
+  m_spUi->pWindowModeContainer->hide();
   m_spUi->pContentContainer->hide();
   m_spUi->pStyleHotoadContainer->hide();
 #endif
@@ -164,7 +165,7 @@ void CSettingsScreen::Load()
   QSize currentResolution = m_spSettings->Resolution();
 
   // block signals to prevent settings change
-  m_spUi->pFullscreenCheckBox->blockSignals(true);
+  m_spUi->pWindowModeComboBox->blockSignals(true);
   m_spUi->pFolderLineEdit->blockSignals(true);
   m_spUi->pFontComboBox->blockSignals(true);
   m_spUi->pStyleComboBox->blockSignals(true);
@@ -177,7 +178,7 @@ void CSettingsScreen::Load()
   m_spUi->pStyleHotoadCheckBox->blockSignals(true);
 
   // set fullscreen
-  m_spUi->pFullscreenCheckBox->setCheckState(m_spSettings->Fullscreen() ? Qt::Checked : Qt::Unchecked);
+  m_spUi->pWindowModeComboBox->setCurrentIndex(static_cast<qint32>(m_spSettings->GetWindowMode()));
 
   // find available screen dimensions
   m_spUi->pResolutionComboBox->setSizeAdjustPolicy(QComboBox::AdjustToContents);
@@ -279,7 +280,7 @@ void CSettingsScreen::Load()
   m_spUi->pStyleHotoadCheckBox->setChecked(m_spSettings->StyleHotLoad());
 
   // unblock signals
-  m_spUi->pFullscreenCheckBox->blockSignals(false);
+  m_spUi->pWindowModeComboBox->blockSignals(false);
   m_spUi->pResolutionComboBox->blockSignals(false);
   m_spUi->pFontComboBox->blockSignals(false);
   m_spUi->pStyleComboBox->blockSignals(false);
@@ -310,13 +311,13 @@ void CSettingsScreen::Unload()
 
 //----------------------------------------------------------------------------------------
 //
-void CSettingsScreen::on_pFullscreenCheckBox_stateChanged(qint32 iState)
+void CSettingsScreen::on_pWindowModeComboBox_currentIndexChanged(qint32 iIndex)
 {
   WIDGET_INITIALIZED_GUARD
   assert(nullptr != m_spSettings);
   if (nullptr == m_spSettings) { return; }
 
-  m_spSettings->SetFullscreen(iState == Qt::Checked);
+  m_spSettings->SetWindowMode(CSettings::WindowMode(iIndex));
 }
 
 //----------------------------------------------------------------------------------------

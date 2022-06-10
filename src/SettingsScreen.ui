@@ -204,9 +204,22 @@
              </layout>
             </widget>
            </item>
+           <item row="3" column="0" colspan="2">
+            <spacer name="verticalSpacer">
+             <property name="orientation">
+              <enum>Qt::Vertical</enum>
+             </property>
+             <property name="sizeHint" stdset="0">
+              <size>
+               <width>20</width>
+               <height>40</height>
+              </size>
+             </property>
+            </spacer>
+           </item>
            <item row="1" column="0" colspan="2">
-            <widget class="QWidget" name="pFullScreenContainer" native="true">
-             <layout class="QHBoxLayout" name="horizontalLayout_2">
+            <widget class="QWidget" name="pWindowModeContainer" native="true">
+             <layout class="QHBoxLayout" name="horizontalLayout_14">
               <property name="leftMargin">
                <number>0</number>
               </property>
@@ -220,14 +233,14 @@
                <number>0</number>
               </property>
               <item>
-               <widget class="QLabel" name="label_3">
+               <widget class="QLabel" name="label_12">
                 <property name="text">
-                 <string>Fullscreen</string>
+                 <string>Window Mode</string>
                 </property>
                </widget>
               </item>
               <item>
-               <spacer name="horizontalSpacer_5">
+               <spacer name="horizontalSpacer_14">
                 <property name="orientation">
                  <enum>Qt::Horizontal</enum>
                 </property>
@@ -240,27 +253,26 @@
                </spacer>
               </item>
               <item>
-               <widget class="QCheckBox" name="pFullscreenCheckBox">
-                <property name="text">
-                 <string/>
-                </property>
+               <widget class="QComboBox" name="pWindowModeComboBox">
+                <item>
+                 <property name="text">
+                  <string>Fullscreen</string>
+                 </property>
+                </item>
+                <item>
+                 <property name="text">
+                  <string>Borderless Window</string>
+                 </property>
+                </item>
+                <item>
+                 <property name="text">
+                  <string>Windowed</string>
+                 </property>
+                </item>
                </widget>
               </item>
              </layout>
             </widget>
-           </item>
-           <item row="3" column="0" colspan="2">
-            <spacer name="verticalSpacer">
-             <property name="orientation">
-              <enum>Qt::Vertical</enum>
-             </property>
-             <property name="sizeHint" stdset="0">
-              <size>
-               <width>20</width>
-               <height>40</height>
-              </size>
-             </property>
-            </spacer>
            </item>
           </layout>
          </widget>
