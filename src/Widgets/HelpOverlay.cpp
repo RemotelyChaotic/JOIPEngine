@@ -15,6 +15,7 @@
 #include <QPainter>
 #include <QPushButton>
 #include <QPropertyAnimation>
+#include <QScroller>
 #include <QStandardItemModel>
 #include <QSortFilterProxyModel>
 #include <QStyle>
@@ -320,6 +321,10 @@ CHelpOverlay::CHelpOverlay(QPointer<CHelpButtonOverlay> pHelpButton, QWidget* pP
   m_pHelpOverlay = this;
 
   m_spUi->pHtmlBrowser->setUndoRedoEnabled(false);
+
+#if defined(Q_OS_ANDROID)
+  QScroller::grabGesture(m_spUi->pHtmlBrowser, QScroller::LeftMouseButtonGesture);
+#endif
 
   m_pHighlightedSearchableEdit = new CHighlightedSearchableTextEdit(m_spUi->pHtmlBrowser);
   m_pHighlightedSearchableEdit->SetSyntaxHighlightingEnabled(false);

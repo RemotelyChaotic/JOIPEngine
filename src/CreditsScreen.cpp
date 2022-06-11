@@ -4,6 +4,7 @@
 #include <QFile>
 #include <QFont>
 #include <QMessageBox>
+#include <QScroller>
 
 CCreditsScreen::CCreditsScreen(const std::shared_ptr<CWindowContext>& spWindowContext,
                                QWidget* pParent) :
@@ -27,6 +28,11 @@ void CCreditsScreen::Initialize()
 
   connect(CApplication::Instance(), &CApplication::StyleLoaded,
           this, &CCreditsScreen::SlotStyleLoaded, Qt::QueuedConnection);
+
+#if defined(Q_OS_ANDROID)
+  QScroller::grabGesture(m_spUi->pScrollArea, QScroller::LeftMouseButtonGesture);
+  QScroller::grabGesture(m_spUi->pScrollArea_2, QScroller::LeftMouseButtonGesture);
+#endif
 
   m_bInitialized = true;
 }
