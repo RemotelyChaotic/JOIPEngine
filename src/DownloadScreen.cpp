@@ -55,7 +55,6 @@ void CDownloadScreen::Initialize()
 //
 void CDownloadScreen::Load()
 {
-  m_spUi->pProjectCardSelectionWidget->setFixedHeight(geometry().height() / 2);
   m_spUi->pProjectCardSelectionWidget->LoadProjects(EDownloadStateFlag::eUnstarted |
                                                     EDownloadStateFlag::eDownloadRunning);
 }

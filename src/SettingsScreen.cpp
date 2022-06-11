@@ -5,6 +5,7 @@
 #include "WindowContext.h"
 #include "Systems/DLJobs/DownloadJobRegistry.h"
 #include "Systems/HelpFactory.h"
+#include "Widgets/DownloadButtonOverlay.h"
 #include "Widgets/HelpOverlay.h"
 #include "ui_SettingsScreen.h"
 
@@ -112,7 +113,10 @@ void CSettingsScreen::Initialize()
     wpHelpFactory->RegisterHelp(c_sCancelHelpId, ":/resources/help/player/cancel_button_help.html");
   }
 
+  m_pHelpButtonOverlay = window()->findChild<CHelpButtonOverlay*>();
+
   m_spUi->WarningIcon->hide();
+  m_spUi->BrowseButton->setProperty("styleSmall", true);
 
   m_spUi->pEditorLayoutComboBox->clear();
   for (auto it = c_editorTypeStrings.begin(); c_editorTypeStrings.end() != it; ++it)
@@ -154,6 +158,11 @@ void CSettingsScreen::Initialize()
 //
 void CSettingsScreen::Load()
 {
+  // ensure settings tab-bar is visible
+  m_spUi->pTopSpacer->changeSize(20, m_pHelpButtonOverlay->y() + m_pHelpButtonOverlay->height() + 10,
+                                 QSizePolicy::Fixed, QSizePolicy::Fixed);
+  layout()->invalidate();
+
   emit m_spWindowContext->SignalSetDownloadButtonVisible(false);
 
   qint32 iThisScreen = QApplication::desktop()->screenNumber(this);
@@ -240,6 +249,7 @@ void CSettingsScreen::Load()
 
     QLabel* pKeyLabel = new QLabel(sKeyBinding, pKeyBindingContainer);
     pKeyLabel->setSizePolicy(sizePolicy);
+    pKeyLabel->setMinimumSize({1, 0});
     pLayout->addWidget(pKeyLabel);
 
     QKeySequenceEdit* pKeySequenceEdit = new QKeySequenceEdit(m_spSettings->keyBinding(sKeyBinding),
@@ -385,7 +395,7 @@ void CSettingsScreen::on_pFolderLineEdit_editingFinished()
 
 //----------------------------------------------------------------------------------------
 //
-void CSettingsScreen::on_pBrowseButton_clicked()
+void CSettingsScreen::on_BrowseButton_clicked()
 {
   WIDGET_INITIALIZED_GUARD
   assert(nullptr != m_spSettings);

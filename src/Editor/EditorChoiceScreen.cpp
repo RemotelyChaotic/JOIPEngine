@@ -73,7 +73,6 @@ void CEditorChoiceScreen::Initialize()
 //
 void CEditorChoiceScreen::Load()
 {
-  m_spUi->pProjectCardSelectionWidget->setFixedHeight(geometry().height() / 2);
   m_spUi->pProjectCardSelectionWidget->LoadProjects(EDownloadStateFlag::eFinished);
 }
 

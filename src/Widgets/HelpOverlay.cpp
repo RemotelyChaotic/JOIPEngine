@@ -23,7 +23,7 @@
 #include <QTextBrowser>
 
 namespace  {
-  const qint32 c_iOffsetOfHelpWindow = 100;
+  const qint32 c_iOffsetOfHelpWindow = 40;
   const qint32 c_iAnimationTime = 1500;
   const qint32 c_iUpdateInterval = 5;
 
@@ -388,8 +388,20 @@ void CHelpOverlay::Resize()
                                   parentSize.height() - c_iOffsetOfHelpWindow * 2);
   m_spUi->pHtmlBrowserBox->move(c_iOffsetOfHelpWindow, c_iOffsetOfHelpWindow);
 
+#if defined(Q_OS_ANDROID)
+  if (parentSize.width() > parentSize.height())
+  {
+    m_spUi->pSplitter->setSizes({m_spUi->pHtmlBrowserBox->width() / 5,
+                                 m_spUi->pHtmlBrowserBox->width() * 4 / 5});
+  }
+  else
+  {
+    m_spUi->pSplitter->setSizes({0, m_spUi->pHtmlBrowserBox->width()});
+  }
+#else
   m_spUi->pSplitter->setSizes({m_spUi->pHtmlBrowserBox->width() / 5,
                                m_spUi->pHtmlBrowserBox->width() * 4 / 5});
+#endif
 }
 
 //----------------------------------------------------------------------------------------

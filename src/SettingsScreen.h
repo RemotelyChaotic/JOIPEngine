@@ -2,9 +2,11 @@
 #define SETTINGSSCREEN_H
 
 #include "IAppStateScreen.h"
+#include <QPointer>
 #include <QWidget>
 #include <memory>
 
+class CHelpButtonOverlay;
 class CSettings;
 class QKeySequence;
 namespace Ui {
@@ -35,7 +37,7 @@ protected slots:
   void on_pStyleComboBox_currentIndexChanged(qint32 iIndex);
   void on_pEditorLayoutComboBox_currentIndexChanged(qint32 iIndex);
   void on_pFolderLineEdit_editingFinished();
-  void on_pBrowseButton_clicked();
+  void on_BrowseButton_clicked();
   void on_pMuteCheckBox_stateChanged(qint32 iState);
   void on_pVolumeSlider_sliderReleased();
   void on_pPauseWhenNotActiveCheckBox_stateChanged(qint32 iState);
@@ -47,6 +49,7 @@ protected slots:
 private:
   std::unique_ptr<Ui::CSettingsScreen> m_spUi;
   std::shared_ptr<CSettings>           m_spSettings;
+  QPointer<CHelpButtonOverlay>         m_pHelpButtonOverlay;
 };
 
 #endif // SETTINGSSCREEN_H

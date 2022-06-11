@@ -7,6 +7,7 @@
 #include "Widgets/DownloadButtonOverlay.h"
 #include "Widgets/HelpOverlay.h"
 #include <QApplication>
+#include <QDebug>
 #include <QResizeEvent>
 #include <QSpacerItem>
 
@@ -72,6 +73,7 @@ void CMainScreen::Initialize()
   // on android we don't need a quit button
   m_spUi->pQuitButton->parentWidget()->layout()->removeWidget(m_spUi->pQuitButton);
   m_spUi->pQuitButton->setParent(this);
+  m_spUi->pQuitButton->hide();
  #endif
 
   m_bInitialized = true;
@@ -157,7 +159,11 @@ void CMainScreen::resizeEvent(QResizeEvent* pEvt)
     const qint32 iSpaceInMiddle = parentWidget()->width()-
         (m_pDownloadButtonOverlay->x() + m_pDownloadButtonOverlay->width()) -
         (parentWidget()->width() - m_pHelpButtonOverlay->x());
+#if defined(Q_OS_ANDROID)
+    if (height() > width())
+#else
     if (titleSize.width() > iSpaceInMiddle)
+#endif
     {
       m_spUi->pTopVerticalSpacer->changeSize(20, m_pHelpButtonOverlay->y() + m_pHelpButtonOverlay->height() + 10,
                                              QSizePolicy::Minimum, QSizePolicy::Maximum);

@@ -17,6 +17,8 @@ public:
   explicit CTitleLabel(QWidget* pParent = nullptr);
   explicit CTitleLabel(QString sText = "", QWidget* pParent = nullptr);
 
+  void Initialize();
+
   void SetOutlineColor(const QColor& color);
   const QColor& OutlineColor() const;
   void SetFontSize(qint32 iFontSize) { m_iFontSize = iFontSize; }
@@ -40,6 +42,8 @@ private:
   QSize                      m_lastSize;
   QSize                      m_suggestedSize;
   qint32                     m_iFontSize;
+  double                     m_dRatio;
+  bool                       m_bUpdateGuard;
 };
 
 #endif // TITLELABEL_H

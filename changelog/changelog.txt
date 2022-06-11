@@ -194,6 +194,7 @@ Changes:
 - Resource Viewers only show relevant Resource types.
 - Code snippet overlays are shown in the Code Editor instead of the entire Editor
   window.
+- Changed UI to work reliably with mobile and extremely small resolutions.
 
 Fixed Bugs:
 - Flickering in Resource Explorer View was fixed.

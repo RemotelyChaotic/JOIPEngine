@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>654</width>
-    <height>579</height>
+    <width>411</width>
+    <height>463</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -26,7 +26,7 @@
       <enum>Qt::Horizontal</enum>
      </property>
      <property name="sizeType">
-      <enum>QSizePolicy::Fixed</enum>
+      <enum>QSizePolicy::Maximum</enum>
      </property>
      <property name="sizeHint" stdset="0">
       <size>
@@ -42,7 +42,7 @@
       <enum>Qt::Horizontal</enum>
      </property>
      <property name="sizeType">
-      <enum>QSizePolicy::Fixed</enum>
+      <enum>QSizePolicy::Maximum</enum>
      </property>
      <property name="sizeHint" stdset="0">
       <size>
@@ -53,7 +53,7 @@
     </spacer>
    </item>
    <item row="0" column="1" colspan="2">
-    <spacer name="verticalSpacer_2">
+    <spacer name="pTopSpacer">
      <property name="orientation">
       <enum>Qt::Vertical</enum>
      </property>
@@ -76,11 +76,8 @@
         <property name="orientation">
          <enum>Qt::Horizontal</enum>
         </property>
-        <property name="sizeHint" stdset="0">
-         <size>
-          <width>40</width>
-          <height>20</height>
-         </size>
+        <property name="sizeType">
+         <enum>QSizePolicy::Expanding</enum>
         </property>
        </spacer>
       </item>
@@ -96,12 +93,6 @@
         <property name="orientation">
          <enum>Qt::Horizontal</enum>
         </property>
-        <property name="sizeHint" stdset="0">
-         <size>
-          <width>40</width>
-          <height>20</height>
-         </size>
-        </property>
        </spacer>
       </item>
      </layout>
@@ -113,12 +104,12 @@
       <enum>Qt::Vertical</enum>
      </property>
      <property name="sizeType">
-      <enum>QSizePolicy::Fixed</enum>
+      <enum>QSizePolicy::Maximum</enum>
      </property>
      <property name="sizeHint" stdset="0">
       <size>
-       <width>20</width>
-       <height>40</height>
+       <width>0</width>
+       <height>20</height>
       </size>
      </property>
     </spacer>
@@ -152,8 +143,8 @@
            <rect>
             <x>0</x>
             <y>0</y>
-            <width>512</width>
-            <height>311</height>
+            <width>281</width>
+            <height>215</height>
            </rect>
           </property>
           <layout class="QGridLayout" name="gridLayout_5">
@@ -179,6 +170,12 @@
                   <horstretch>0</horstretch>
                   <verstretch>0</verstretch>
                  </sizepolicy>
+                </property>
+                <property name="minimumSize">
+                 <size>
+                  <width>1</width>
+                  <height>0</height>
+                 </size>
                 </property>
                 <property name="text">
                  <string>Window Resolution</string>
@@ -234,6 +231,12 @@
               </property>
               <item>
                <widget class="QLabel" name="label_12">
+                <property name="minimumSize">
+                 <size>
+                  <width>1</width>
+                  <height>0</height>
+                 </size>
+                </property>
                 <property name="text">
                  <string>Window Mode</string>
                 </property>
@@ -304,8 +307,8 @@
            <rect>
             <x>0</x>
             <y>0</y>
-            <width>512</width>
-            <height>311</height>
+            <width>281</width>
+            <height>215</height>
            </rect>
           </property>
           <layout class="QGridLayout" name="gridLayout_7">
@@ -348,6 +351,12 @@
               </property>
               <item>
                <widget class="QLabel" name="label_6">
+                <property name="minimumSize">
+                 <size>
+                  <width>1</width>
+                  <height>0</height>
+                 </size>
+                </property>
                 <property name="text">
                  <string>Font</string>
                 </property>
@@ -367,7 +376,14 @@
                </spacer>
               </item>
               <item>
-               <widget class="QFontComboBox" name="pFontComboBox"/>
+               <widget class="QFontComboBox" name="pFontComboBox">
+                <property name="minimumSize">
+                 <size>
+                  <width>1</width>
+                  <height>0</height>
+                 </size>
+                </property>
+               </widget>
               </item>
              </layout>
             </widget>
@@ -407,6 +423,12 @@
                  </property>
                  <item>
                   <widget class="QLabel" name="label_7">
+                   <property name="minimumSize">
+                    <size>
+                     <width>1</width>
+                     <height>0</height>
+                    </size>
+                   </property>
                    <property name="text">
                     <string>Style</string>
                    </property>
@@ -473,6 +495,12 @@
               </property>
               <item>
                <widget class="QLabel" name="label_11">
+                <property name="minimumSize">
+                 <size>
+                  <width>1</width>
+                  <height>0</height>
+                 </size>
+                </property>
                 <property name="text">
                  <string>Preferred Editor Layout</string>
                 </property>
@@ -525,6 +553,12 @@
           </property>
           <item>
            <widget class="QLabel" name="label_4">
+            <property name="minimumSize">
+             <size>
+              <width>1</width>
+              <height>0</height>
+             </size>
+            </property>
             <property name="text">
              <string>Mute</string>
             </property>
@@ -570,6 +604,12 @@
           </property>
           <item>
            <widget class="QLabel" name="label_5">
+            <property name="minimumSize">
+             <size>
+              <width>1</width>
+              <height>0</height>
+             </size>
+            </property>
             <property name="text">
              <string>Volume</string>
             </property>
@@ -639,8 +679,8 @@
            <rect>
             <x>0</x>
             <y>0</y>
-            <width>512</width>
-            <height>311</height>
+            <width>281</width>
+            <height>215</height>
            </rect>
           </property>
           <layout class="QVBoxLayout" name="verticalLayout"/>
@@ -680,6 +720,12 @@
               <verstretch>0</verstretch>
              </sizepolicy>
             </property>
+            <property name="minimumSize">
+             <size>
+              <width>1</width>
+              <height>0</height>
+             </size>
+            </property>
             <property name="text">
              <string>Content Folder</string>
             </property>
@@ -689,24 +735,12 @@
            <widget class="QLineEdit" name="pFolderLineEdit"/>
           </item>
           <item>
-           <widget class="QPushButton" name="pBrowseButton">
+           <widget class="QPushButton" name="BrowseButton">
             <property name="sizePolicy">
-             <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+             <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
               <horstretch>0</horstretch>
               <verstretch>0</verstretch>
              </sizepolicy>
-            </property>
-            <property name="minimumSize">
-             <size>
-              <width>0</width>
-              <height>0</height>
-             </size>
-            </property>
-            <property name="maximumSize">
-             <size>
-              <width>16777215</width>
-              <height>16777215</height>
-             </size>
             </property>
             <property name="text">
              <string>...</string>
@@ -733,6 +767,12 @@
           </property>
           <item>
            <widget class="QLabel" name="label_8">
+            <property name="minimumSize">
+             <size>
+              <width>1</width>
+              <height>0</height>
+             </size>
+            </property>
             <property name="text">
              <string>Offline Mode</string>
             </property>
@@ -778,6 +818,12 @@
           </property>
           <item>
            <widget class="QLabel" name="label_9">
+            <property name="minimumSize">
+             <size>
+              <width>1</width>
+              <height>0</height>
+             </size>
+            </property>
             <property name="text">
              <string>Pause Player when app is not active</string>
             </property>
@@ -845,8 +891,8 @@
            <rect>
             <x>0</x>
             <y>0</y>
-            <width>512</width>
-            <height>311</height>
+            <width>281</width>
+            <height>215</height>
            </rect>
           </property>
           <layout class="QVBoxLayout" name="verticalLayout_2">
@@ -867,6 +913,12 @@
               </property>
               <item>
                <widget class="QLabel" name="label_10">
+                <property name="minimumSize">
+                 <size>
+                  <width>1</width>
+                  <height>0</height>
+                 </size>
+                </property>
                 <property name="text">
                  <string>Hotload Style</string>
                 </property>

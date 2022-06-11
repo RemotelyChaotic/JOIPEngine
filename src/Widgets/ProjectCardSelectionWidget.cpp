@@ -61,6 +61,8 @@ void CProjectCardSelectionWidget::Initialize()
     m_spUi->pSearchWidget->setProperty(helpOverlay::c_sHelpPagePropertyName, c_sSearchBarHelpId);
   }
 
+  m_spUi->pQmlWidget->setResizeMode(QQuickWidget::ResizeMode::SizeRootObjectToView);
+
   InitQmlMain();
 
   connect(CHelpOverlay::Instance(), &CHelpOverlay::SignalOverlayOpened,
@@ -351,12 +353,7 @@ void CProjectCardSelectionWidget::SlotResizeDone()
 
   // set size properties manually setzen, since this isn't done automatically
   QQuickItem* pRootObject =  m_spUi->pQmlWidget->rootObject();
-  QSize newSize = size() -
-      QSize(contentsMargins().left() +
-            contentsMargins().right(),
-            contentsMargins().top() +
-            contentsMargins().bottom()) -
-      QSize(0, m_spUi->pSearchWidget->size().height() + layout()->spacing());
+  QSize newSize = m_spUi->pQmlWidget->size();
   if (nullptr != pRootObject)
   {
     pRootObject->setProperty("width", QVariant::fromValue(newSize.width()));
@@ -379,7 +376,7 @@ void CProjectCardSelectionWidget::resizeEvent(QResizeEvent* pEvent)
 {
   if (nullptr != pEvent)
   {
-    QMetaObject::invokeMethod(this, "SlotResizeDone", Qt::QueuedConnection);
+    SlotResizeDone();
   }
 }
 

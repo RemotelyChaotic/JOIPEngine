@@ -171,21 +171,18 @@ void CMainWindow::SlotResolutionChanged()
 {
 #if defined(Q_OS_ANDROID)
   QRect availableGeometry =
-      QGuiApplication::screenAt({0, 0})->geometry();
+      QGuiApplication::screenAt({0,0})->geometry();
+  setFixedSize(availableGeometry.size());
 #else
   QPoint globalCursorPos = QCursor::pos();
   QRect availableGeometry =
       QGuiApplication::screenAt(globalCursorPos)->geometry();
-#endif
 
-#if defined(Q_OS_ANDROID)
-  QSize newResolution = availableGeometry.size();
-#else
   QSize newResolution = m_spSettings->Resolution();
-#endif
   setGeometry(
       QStyle::alignedRect(Qt::LeftToRight, Qt::AlignCenter,
           newResolution, availableGeometry));
+#endif
 }
 
 //----------------------------------------------------------------------------------------
@@ -223,6 +220,7 @@ void CMainWindow::SlotWindowModeChanged()
 #if defined(Q_OS_ANDROID)
   setWindowFlag(Qt::FramelessWindowHint);
   setWindowState(windowState() | Qt::WindowFullScreen);
+  showMaximized();
 #else
   CSettings::WindowMode winMode = m_spSettings->GetWindowMode();
 

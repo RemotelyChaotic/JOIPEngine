@@ -93,11 +93,9 @@ Rectangle {
     ListView {
         id: listView
         anchors.centerIn: parent
-        width: {
-            var itemWidth = (height - 20) / 4 * 3;
-            var neededWidth = (listModel.count * itemWidth + spacing * (listModel.count-1));
-            return (neededWidth < parent.width - 20) ? neededWidth : parent.width - 20;
-        }
+        property real itemWidth: (height - 20) / 4 * 3
+        property real neededWidth: (listModel.count * itemWidth + spacing * (listModel.count-1))
+        width: (neededWidth < parent.width - 20) ? neededWidth : parent.width - 20;
         height: parent.height - 20
         clip: true
 
