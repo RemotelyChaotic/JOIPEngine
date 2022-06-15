@@ -92,6 +92,9 @@ CEditorMainScreen::CEditorMainScreen(QWidget* pParent) :
 
 CEditorMainScreen::~CEditorMainScreen()
 {
+  //leads to a crash otherwise
+  disconnect(m_spEditorModel.get(), &CEditorModel::SignalProjectEdited,
+             this, &CEditorMainScreen::SlotProjectEdited);
   m_vpKeyBindingActions.clear();
 }
 
