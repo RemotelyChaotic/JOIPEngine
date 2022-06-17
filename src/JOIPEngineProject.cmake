@@ -419,6 +419,8 @@ macro(CreateJOIPProject JOIP_PROJECT_NAME)
     ${JOIPSources}/Widgets/Editor/EditorSearchBar.h
     ${JOIPSources}/Widgets/Editor/HighlightedSearchableTextEdit.cpp
     ${JOIPSources}/Widgets/Editor/HighlightedSearchableTextEdit.h
+    ${JOIPSources}/Widgets/Editor/TextEditZoomEnabler.cpp
+    ${JOIPSources}/Widgets/Editor/TextEditZoomEnabler.h
     ${JOIPSources}/Widgets/FlowLayout.cpp
     ${JOIPSources}/Widgets/FlowLayout.h
     ${JOIPSources}/Widgets/HelpOverlay.cpp

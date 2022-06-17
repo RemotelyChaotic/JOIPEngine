@@ -182,6 +182,7 @@ New Features:
 - PlayerMetronome supports setting the volume via setVolume.
 - New window mode setting. The application can now be displayed in
   fullscreen, borderless or windowed mode.
+- Code Editor & Help can be zoomed with CTRL+MWhl.
 
 Changes:
 - Resource Explorer View shows folder contents instead of the folder if a folder

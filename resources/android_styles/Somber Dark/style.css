@@ -1347,6 +1347,22 @@ COverlayBase#HelpButtonOverlay {
   padding: 0;
 }
 
+CTextEditZoomEnabler {
+  border-radius: 0px;
+  border-image: url(ui/WindowBG.png) 50 50 50 50 repeat repeat;
+  border-top: 20px transparent;
+  border-bottom: 20px transparent;
+  border-right: 20px transparent;
+  border-left: 20px transparent;
+  padding: 0;
+}
+
+CTextEditZoomEnabler>QLabel {
+  color: white;
+  background-color: transparent;
+}
+
+
 /*
  ----- QHeaderView
 */

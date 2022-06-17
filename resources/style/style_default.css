@@ -920,6 +920,18 @@ COverlayBase#DownloadButtonOverlay {
   padding: 0;
 }
 
+CTextEditZoomEnabler {
+  background-color: rgba(20, 20, 20, 200);
+  border-radius: 10px;
+  border: none;
+  padding: 0;
+}
+
+CTextEditZoomEnabler>QLabel {
+  color: white;
+  background-color: rgba(20, 20, 20, 200);
+}
+
 /*
  ----- QHeaderView
 */

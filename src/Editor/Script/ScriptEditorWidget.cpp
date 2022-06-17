@@ -2,6 +2,7 @@
 #include "Widgets/Editor/EditorSearchBar.h"
 #include "Widgets/Editor/EditorHighlighter.h"
 #include "Widgets/Editor/HighlightedSearchableTextEdit.h"
+#include "Widgets/Editor/TextEditZoomEnabler.h"
 #include <syntaxhighlighter.h>
 #include <definition.h>
 #include <theme.h>
@@ -33,6 +34,8 @@ CScriptEditorWidget::CScriptEditorWidget(QWidget* pParent) :
   m_pHighlightedSearchableEdit = new CHighlightedSearchableTextEdit(this);
   m_pHighlightedSearchableEdit->Highlighter()->setTheme(m_spRepository->theme(m_sTheme));
 
+  m_pZoomEnabler = new CTextEditZoomEnabler(this);
+
   m_pLineNumberArea = new CLineNumberArea(this);
   m_pWidgetArea = new CWidgetArea(this);
   m_pFoldBlockArea = new CFoldBlockArea(this);
@@ -56,7 +59,7 @@ CScriptEditorWidget::CScriptEditorWidget(QWidget* pParent) :
   font.setStyleHint(QFont::Monospace);
   font.setFixedPitch(true);
   font.setPointSize(10);
-  setFont(font);
+  document()->setDefaultFont(font);
 
   QFontMetrics metrics(font);
   setTabStopDistance(c_iTabStop * metrics.boundingRect(' ').width());

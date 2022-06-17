@@ -4,6 +4,7 @@
 #include "ui_HelpOverlay.h"
 #include "Systems/HelpFactory.h"
 #include "Widgets/Editor/HighlightedSearchableTextEdit.h"
+#include "Widgets/Editor/TextEditZoomEnabler.h"
 #include "Widgets/ShortcutButton.h"
 
 //#include <private/qpixmapfilter_p.h>
@@ -328,6 +329,7 @@ CHelpOverlay::CHelpOverlay(QPointer<CHelpButtonOverlay> pHelpButton, QWidget* pP
 
   m_pHighlightedSearchableEdit = new CHighlightedSearchableTextEdit(m_spUi->pHtmlBrowser);
   m_pHighlightedSearchableEdit->SetSyntaxHighlightingEnabled(false);
+  m_pZoomEnabler = new CTextEditZoomEnabler(m_spUi->pHtmlBrowser);
 
   m_pBackground = new CHelpOverlayBackGround(this);
   m_pBackground->installEventFilter(this);

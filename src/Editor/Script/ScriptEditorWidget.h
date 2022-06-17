@@ -15,6 +15,7 @@ class CFoldBlockArea;
 class CLineNumberArea;
 class CHighlightedSearchableTextEdit;
 class CEditorSearchBar;
+class CTextEditZoomEnabler;
 class CWidgetArea;
 class QPaintEvent;
 class QResizeEvent;
@@ -98,6 +99,7 @@ private slots:
 private:
   std::unique_ptr<KSyntaxHighlighting::Repository> m_spRepository;
   QPointer<CHighlightedSearchableTextEdit>         m_pHighlightedSearchableEdit;
+  QPointer<CTextEditZoomEnabler>                   m_pZoomEnabler;
   CLineNumberArea*                                 m_pLineNumberArea;
   CWidgetArea*                                     m_pWidgetArea;
   CFoldBlockArea*                                  m_pFoldBlockArea;

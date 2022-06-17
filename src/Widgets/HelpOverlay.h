@@ -15,6 +15,7 @@ class CHelpFactory;
 class CHighlightedSearchableTextEdit;
 class CSettings;
 class CShortcutButton;
+class CTextEditZoomEnabler;
 namespace Ui {
   class CHelpOverlay;
 }
@@ -119,6 +120,7 @@ private:
   std::shared_ptr<CSettings>        m_spSettings;
   std::weak_ptr<CHelpFactory>       m_wpHelpFactory;
   QPointer<CHighlightedSearchableTextEdit> m_pHighlightedSearchableEdit;
+  QPointer<CTextEditZoomEnabler>    m_pZoomEnabler;
   QPointer<CHelpButtonOverlay>      m_pHelpButton;
   QPointer<CHelpOverlayBackGround>  m_pBackground;
 };

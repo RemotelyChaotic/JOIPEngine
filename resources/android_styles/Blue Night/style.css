@@ -904,6 +904,18 @@ COverlayBase#HelpButtonOverlay {
   padding: 0;
 }
 
+CTextEditZoomEnabler {
+  background-color: rgba(52, 69, 97, 200);
+  border-radius: 10px;
+  border: none;
+  padding: 0;
+}
+
+CTextEditZoomEnabler>QLabel {
+  color: white;
+  background-color: rgba(52, 69, 97, 200);
+}
+
 /*
  ----- QHeaderView
 */
