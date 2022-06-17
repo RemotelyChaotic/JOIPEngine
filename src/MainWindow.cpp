@@ -9,7 +9,6 @@
 #include "SceneScreen.h"
 #include "Settings.h"
 #include "SettingsScreen.h"
-#include "SVersion.h"
 #include "WindowContext.h"
 #include "Systems/ProjectDownloader.h"
 #include "Widgets/BackgroundWidget.h"
@@ -20,11 +19,9 @@
 #include <QDesktopWidget>
 #include <QDir>
 #include <QMessageBox>
-#include <QScreen>
-#include <QStyle>
 
 CMainWindow::CMainWindow(QWidget* pParent) :
-  QMainWindow(pParent),
+  CMainWindowBase(pParent),
   m_spUi(std::make_unique<Ui::CMainWindow>()),
   m_spHelpButtonOverlay(std::make_unique<CHelpButtonOverlay>(this)),
   m_spHelpOverlay(nullptr),
@@ -46,6 +43,22 @@ CMainWindow::~CMainWindow()
   m_spHelpOverlay.reset();
   m_spHelpButtonOverlay.reset();
   m_spDownloadButtonOverlay.reset();
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CMainWindow::ConnectSlots()
+{
+  connect(m_spWindowContext.get(), &CWindowContext::SignalChangeAppState,
+          this, &CMainWindow::SlotChangeAppState, Qt::DirectConnection);
+
+  connect(m_spWindowContext.get(), &CWindowContext::SignalSetDownloadButtonVisible,
+          this, &CMainWindow::SlotSetDownloadButtonVisible, Qt::DirectConnection);
+
+  connect(m_spWindowContext.get(), &CWindowContext::SignalSetHelpButtonVisible,
+          this, &CMainWindow::SlotSetHelpButtonVisible, Qt::DirectConnection);
+
+  ConnectSlotsImpl();
 }
 
 //----------------------------------------------------------------------------------------
@@ -167,26 +180,6 @@ void CMainWindow::SlotDownloadButtonClicked()
 
 //----------------------------------------------------------------------------------------
 //
-void CMainWindow::SlotResolutionChanged()
-{
-#if defined(Q_OS_ANDROID)
-  QRect availableGeometry =
-      QGuiApplication::screenAt({0,0})->geometry();
-  setFixedSize(availableGeometry.size());
-#else
-  QPoint globalCursorPos = QCursor::pos();
-  QRect availableGeometry =
-      QGuiApplication::screenAt(globalCursorPos)->geometry();
-
-  QSize newResolution = m_spSettings->Resolution();
-  setGeometry(
-      QStyle::alignedRect(Qt::LeftToRight, Qt::AlignCenter,
-          newResolution, availableGeometry));
-#endif
-}
-
-//----------------------------------------------------------------------------------------
-//
 void CMainWindow::SlotSetDownloadButtonVisible(bool bVisible)
 {
   if (bVisible)
@@ -211,47 +204,6 @@ void CMainWindow::SlotSetHelpButtonVisible(bool bVisible)
   {
     m_spHelpButtonOverlay->Hide();
   }
-}
-
-//----------------------------------------------------------------------------------------
-//
-void CMainWindow::SlotWindowModeChanged()
-{
-#if defined(Q_OS_ANDROID)
-  setWindowFlag(Qt::FramelessWindowHint);
-  setWindowState(windowState() | Qt::WindowFullScreen);
-  showMaximized();
-#else
-  CSettings::WindowMode winMode = m_spSettings->GetWindowMode();
-
-  if (CSettings::WindowMode::eBorderless == winMode ||
-      CSettings::WindowMode::eFullscreen == winMode)
-  {
-    setWindowFlag(Qt::FramelessWindowHint, true);
-  }
-  else
-  {
-    setWindowFlag(Qt::FramelessWindowHint, false);
-  }
-
-  bool bWasFullScreen = windowState() & Qt::WindowFullScreen;
-
-  if (CSettings::WindowMode::eFullscreen == winMode)
-  {
-    setWindowState(windowState() | Qt::WindowFullScreen);
-  }
-  else
-  {
-    setWindowState(windowState() & ~Qt::WindowFullScreen);
-  }
-
-  if (bWasFullScreen && CSettings::WindowMode::eFullscreen != winMode)
-  {
-    SlotResolutionChanged();
-  }
-
-  window()->show();
-#endif
 }
 
 //----------------------------------------------------------------------------------------
@@ -305,70 +257,4 @@ void CMainWindow::SlotHelpButtonClicked()
                           m_spHelpButtonOverlay->parentWidget()->mapToGlobal(
                               m_spHelpButtonOverlay->geometry().center())),
                         m_spUi->pApplicationStackWidget->currentWidget());
-}
-
-//----------------------------------------------------------------------------------------
-//
-void CMainWindow::OldSettingsDetected()
-{
-  SVersion version(VERSION_XYZ);
-#if defined (Q_OS_ANDROID)
-  m_spSettings->SetSettingsVersion(QT_VERSION_CHECK(version.m_iMajor, version.m_iMinor, version.m_iPatch));
-#else
-  QString sContentPath = QCoreApplication::instance()->applicationDirPath() +
-      QDir::separator() + ".." + QDir::separator() + "data";
-  QFileInfo contentFileInfo(sContentPath);
-
-  if (m_spSettings->ContentFolder() != contentFileInfo.absoluteFilePath())
-  {
-    QPointer pThis(this);
-    QMessageBox msgBox;
-    msgBox.setWindowFlags(Qt::FramelessWindowHint);
-    msgBox.setText(tr("Settings for old version found."));
-    msgBox.setInformativeText(tr("Would you like to update the settings to:<br>"
-                                 "<ul>"
-                                 "<li>Set the content folder to this applications data folder<br>"
-                                 "(You will have to move over any JOI-Projects from the old folder to access them)?</li>"
-                                 "</ul>"));
-    msgBox.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
-    msgBox.setDefaultButton(QMessageBox::Yes);
-    msgBox.setModal(true);
-    qint32 iRetVal = msgBox.exec();
-    if (pThis.isNull()) { return; }
-    if (QMessageBox::Yes == iRetVal)
-    {
-      m_spSettings->SetContentFolder(contentFileInfo.absoluteFilePath());
-    }
-    m_spSettings->SetSettingsVersion(QT_VERSION_CHECK(version.m_iMajor, version.m_iMinor, version.m_iPatch));
-  }
-  else
-  {
-    m_spSettings->SetSettingsVersion(QT_VERSION_CHECK(version.m_iMajor, version.m_iMinor, version.m_iPatch));
-  }
-#endif
-}
-
-//----------------------------------------------------------------------------------------
-//
-void CMainWindow::ConnectSlots()
-{
-  connect(m_spWindowContext.get(), &CWindowContext::SignalChangeAppState,
-          this, &CMainWindow::SlotChangeAppState, Qt::DirectConnection);
-
-  connect(m_spWindowContext.get(), &CWindowContext::SignalSetDownloadButtonVisible,
-          this, &CMainWindow::SlotSetDownloadButtonVisible, Qt::DirectConnection);
-
-  connect(m_spWindowContext.get(), &CWindowContext::SignalSetHelpButtonVisible,
-          this, &CMainWindow::SlotSetHelpButtonVisible, Qt::DirectConnection);
-
-#if defined(Q_OS_ANDROID)
-#else
-  connect(m_spSettings.get(), &CSettings::fullscreenChanged,
-          this, &CMainWindow::SlotWindowModeChanged, Qt::QueuedConnection);
-  connect(m_spSettings.get(), &CSettings::windowModeChanged,
-          this, &CMainWindow::SlotWindowModeChanged, Qt::QueuedConnection);
-
-  connect(m_spSettings.get(), &CSettings::resolutionChanged,
-          this, &CMainWindow::SlotResolutionChanged, Qt::QueuedConnection);
-#endif
 }

@@ -12,6 +12,7 @@
 ### Build:
 For Android, add jom.exe to your PATH, be it in the Qt-Creator Project settings, or in the console.
 It's typically in a path like [...]\Qt5.14.1\Tools\QtCreator\bin\ if you downloaded Qt.
+On startup, if you get an error that libavutil.so or similar was not found, check if <build>/android-build/libs/<abi>/ contains the av libraries and if not, rerun cmake.
 
 Next you can build the Application.
 

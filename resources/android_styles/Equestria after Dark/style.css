@@ -1073,6 +1073,10 @@ QMainWindow {
   background-image: url(ui/Background.png);
 }
 
+CAndroidMainWindow {
+  qproperty-navigationColor: rgba(255, 255, 255, 0);
+}
+
 QQuickWidget {
   background-color: rgb(38, 38, 38);
 }

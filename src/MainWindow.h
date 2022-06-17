@@ -1,6 +1,7 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
+#include "MainWindowFactory.h"
 #include "Enums.h"
 #include <QMainWindow>
 #include <QPointer>
@@ -17,35 +18,33 @@ namespace Ui {
 }
 class QResizeEvent;
 
-class CMainWindow : public QMainWindow
+class CMainWindow : public CMainWindowBase
 {
   Q_OBJECT
 
 public:
   explicit CMainWindow(QWidget* pParent = nullptr);
-  ~CMainWindow();
+  ~CMainWindow() override;
 
-  void Initialize();
+  void ConnectSlots() override;
+  void Initialize() override;
 
 protected slots:
   void SlotChangeAppState(EAppState newState);
   void SlotCurrentAppStateUnloadFinished();
   void SlotDownloadButtonClicked();
   void SlotHelpButtonClicked();
-  void SlotResolutionChanged();
   void SlotSetDownloadButtonVisible(bool bVisible);
   void SlotSetHelpButtonVisible(bool bVisible);
-  void SlotWindowModeChanged();
+
+  virtual void SlotResolutionChanged() {}
+  virtual void SlotWindowModeChanged() {}
 
 protected:
   void closeEvent(QCloseEvent* pEvent) override;
   void resizeEvent(QResizeEvent* pEvt) override;
 
-private slots:
-  void OldSettingsDetected();
-
-private:
-  void ConnectSlots();
+  virtual void ConnectSlotsImpl() {}
 
   std::unique_ptr<Ui::CMainWindow>        m_spUi;
   std::unique_ptr<CHelpButtonOverlay>     m_spHelpButtonOverlay;
@@ -54,6 +53,11 @@ private:
   std::shared_ptr<CWindowContext>         m_spWindowContext;
   std::shared_ptr<CSettings>              m_spSettings;
   QPointer<CBackgroundWidget>             m_pBackground;
+
+private slots:
+  virtual void OldSettingsDetected() {};
+
+private:
   bool                                    m_bInitialized;
   EAppState                               m_nextState;
 };

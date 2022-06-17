@@ -1396,6 +1396,10 @@ QMainWindow {
   background: rgb(228, 228, 228);
 }
 
+CAndroidMainWindow {
+  qproperty-navigationColor: rgba(255, 255, 255, 255);
+}
+
 QQuickWidget {
   background: white
 }

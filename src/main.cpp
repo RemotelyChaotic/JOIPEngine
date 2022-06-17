@@ -1,13 +1,10 @@
 #include "Application.h"
 #include "Settings.h"
 #include "MainWindow.h"
+#include "MainWindowFactory.h"
 #include "Systems/NotificationSender.h"
 #include "Systems/PhysFs/PhysFsFileEngine.h"
 #include "Systems/PhysFs/PhysFsQtAVIntegration.h"
-
-#if defined(Q_OS_WIN)
-#include <QtPlatformHeaders/QWindowsWindowFunctions>
-#endif
 
 #include <QApplication>
 #include <QImageReader>
@@ -55,21 +52,15 @@ int main(int argc, char *argv[])
 
   app.Initialize();
 
-  // bugfix on vertain machines
+  // bugfix on certain machines
   QOpenGLContext context;
   context.create();
 
-  CMainWindow w;
-  w.Initialize();
-  w.show();
+  std::unique_ptr<CMainWindowBase> spW = CMainWindowFactory::Instance().CreateMainWindow();
+  spW->Initialize();
+  spW->show();
 
-#if defined(Q_OS_WIN)
-  // Fixes problems with OpenGL based windows
-  // https://doc.qt.io/qt-5/windows-issues.html#fullscreen-opengl-based-windows
-  QWindowsWindowFunctions::setHasBorderInFullScreen(w.windowHandle(), true);
-#endif
-
-  Notifier()->SetMainWindow(&w);
+  Notifier()->SetMainWindow(dynamic_cast<CMainWindow*>(spW.get()));
 
   qint32 iRetVal = app.exec();
 

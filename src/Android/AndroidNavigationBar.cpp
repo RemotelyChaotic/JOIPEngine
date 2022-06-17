@@ -1,0 +1,39 @@
+#include "AndroidNavigationBar.h"
+#include "AndroidApplicationWindow.h"
+
+QColor CAndroidNavigationBar::m_color = QColor(Qt::black);
+
+//----------------------------------------------------------------------------------------
+//
+CAndroidNavigationBar::CAndroidNavigationBar(QObject* pParent) :
+  QObject(pParent)
+{
+
+}
+
+//----------------------------------------------------------------------------------------
+//
+bool CAndroidNavigationBar::IsAvailable()
+{
+  return QtAndroid::androidSdkVersion() >= 21;
+}
+
+//----------------------------------------------------------------------------------------
+//
+QColor CAndroidNavigationBar::Color()
+{
+  return m_color;
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CAndroidNavigationBar::SetColor(const QColor &color)
+{
+  if (!IsAvailable()) { return; }
+
+  m_color = color;
+  QtAndroid::runOnAndroidThread([=]() {
+      QAndroidJniObject window = GetAndroidWindow();
+      window.callMethod<void>("setNavigationBarColor", "(I)V", color.rgba());
+  });
+}

@@ -267,6 +267,8 @@ macro(CreateJOIPProject JOIP_PROJECT_NAME)
     ${JOIPSources}/MainWindow.cpp
     ${JOIPSources}/MainWindow.h
     ${JOIPSources}/MainWindow.ui
+    ${JOIPSources}/MainWindowFactory.cpp
+    ${JOIPSources}/MainWindowFactory.h
     ${JOIPSources}/Player/InformationWidget.cpp
     ${JOIPSources}/Player/InformationWidget.h
     ${JOIPSources}/Player/InformationWidget.ui
@@ -462,19 +464,42 @@ macro(CreateJOIPProject JOIP_PROJECT_NAME)
     ${CMAKE_SOURCE_DIR}/version.h
   )
 
+  if (WIN32)
+    set(WinSources
+      ${JOIPSources}/Windows/WindowsMainWindow.cpp
+      ${JOIPSources}/Windows/WindowsMainWindow.h
+    )
+  elseif(ANDROID)
+    set(AndroidSources
+      ${JOIPSources}/Android/AndroidApplicationWindow.cpp
+      ${JOIPSources}/Android/AndroidApplicationWindow.h
+      ${JOIPSources}/Android/AndroidMainWindow.cpp
+      ${JOIPSources}/Android/AndroidMainWindow.h
+      ${JOIPSources}/Android/AndroidNavigationBar.cpp
+      ${JOIPSources}/Android/AndroidNavigationBar.h
+      ${CMAKE_SOURCE_DIR}/android_resources.qrc
+    )
+  endif()
+
   set(CMAKE_AUTOUIC_SEARCH_PATHS ${CMAKE_AUTOUIC_SEARCH_PATHS} ${JOIPSources}/Editor)
 
   if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
     if(ANDROID)
       qt_add_executable(${JOIP_PROJECT_NAME}
           MANUAL_FINALIZATION
-          ${PROJECT_SOURCES}
+          ${Sources}
           ${CMAKE_SOURCE_DIR}/android_resources.qrc
+      )
+    elseif(WIN32)
+      qt_add_executable(${JOIP_PROJECT_NAME}
+          MANUAL_FINALIZATION
+          ${Sources}
+          ${WinSources}
       )
     else()
       qt_add_executable(${JOIP_PROJECT_NAME}
           MANUAL_FINALIZATION
-          ${PROJECT_SOURCES}
+          ${Sources}
       )
     endif()
   # Define target properties for Android with Qt 6 as:
@@ -485,10 +510,15 @@ macro(CreateJOIPProject JOIP_PROJECT_NAME)
       if(ANDROID)
           add_library(${JOIP_PROJECT_NAME} SHARED
               ${Sources}
-              ${CMAKE_SOURCE_DIR}/android_resources.qrc
+              ${AndroidSources}
           )
   # Define properties for Android with Qt 5 after find_package() calls as:
   #    set(ANDROID_PACKAGE_SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/android")
+      elseif(WIN32)
+          add_executable(${JOIP_PROJECT_NAME}
+              ${Sources}
+              ${WinSources}
+          )
       else()
           add_executable(${JOIP_PROJECT_NAME}
               ${Sources}
