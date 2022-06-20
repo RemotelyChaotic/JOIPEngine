@@ -56,6 +56,8 @@ public:
   explicit CScriptEditorModel(QWidget* pParent = nullptr);
   ~CScriptEditorModel() override;
 
+  static void InitScript(QIODevice& file, const QString& sType);
+
   SCachedMapItem* CachedScript(const QString& sName);
   QString CachedScriptName(qint32 iName);
   void InitializeModel(tspProject spProject);

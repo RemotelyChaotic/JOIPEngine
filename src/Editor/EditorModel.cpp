@@ -181,7 +181,7 @@ void CEditorModel::AddNewScriptFileToScene(QPointer<QWidget> pParentForDialog,
             QFile jsFile(info.absoluteFilePath());
             if (jsFile.open(QIODevice::WriteOnly | QIODevice::Truncate))
             {
-              jsFile.write(QString("// insert code to control scene").toUtf8());
+              m_spScriptEditorModel->InitScript(jsFile, info.suffix());
 
               tvfnActionsResource vfnActions = {[&spScene](const tspResource& spNewResource){
                 QWriteLocker locker(&spNewResource->m_rwLock);
