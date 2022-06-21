@@ -19,6 +19,7 @@ public:
 
   QPointer<QLabel> Counter();
 
+public slots:
   void Climb() override;
   void Resize() override;
 
@@ -36,6 +37,7 @@ public:
   explicit CDownloadButtonOverlay(QWidget* pParent = nullptr);
   ~CDownloadButtonOverlay() override;
 
+public slots:
   void Hide() override;
   void Resize() override;
   void Show() override;

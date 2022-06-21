@@ -23,6 +23,7 @@ public:
 
   void Initialize();
 
+public slots:
   void Climb() override;
   void Resize() override;
 

@@ -11,6 +11,7 @@
 #include "SettingsScreen.h"
 #include "WindowContext.h"
 #include "Systems/ProjectDownloader.h"
+#include "Widgets/AgeCheckOverlay.h"
 #include "Widgets/BackgroundWidget.h"
 #include "Widgets/DownloadButtonOverlay.h"
 #include "Widgets/HelpOverlay.h"
@@ -23,6 +24,7 @@
 CMainWindow::CMainWindow(QWidget* pParent) :
   CMainWindowBase(pParent),
   m_spUi(std::make_unique<Ui::CMainWindow>()),
+  m_spAgeCheckOverlay(std::make_unique<CAgeCheckOverlay>(this)),
   m_spHelpButtonOverlay(std::make_unique<CHelpButtonOverlay>(this)),
   m_spHelpOverlay(nullptr),
   m_spDownloadButtonOverlay(std::make_unique<CDownloadButtonOverlay>(this)),
@@ -82,6 +84,8 @@ void CMainWindow::Initialize()
   connect(m_spDownloadButtonOverlay.get(), &CHelpButtonOverlay::SignalButtonClicked,
           this, &CMainWindow::SlotDownloadButtonClicked);
   m_spDownloadButtonOverlay->Show();
+
+  m_spAgeCheckOverlay->Show();
 
   // add all screens
   m_spUi->pApplicationStackWidget->insertWidget(EAppState::eMainScreen,

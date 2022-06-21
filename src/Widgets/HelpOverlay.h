@@ -135,6 +135,7 @@ public:
   explicit CHelpButtonOverlay(QWidget* pParent = nullptr);
   ~CHelpButtonOverlay() override;
 
+public slots:
   void Resize() override;
 };
 

@@ -7,6 +7,7 @@
 #include <QPointer>
 #include <memory>
 
+class CAgeCheckOverlay;
 class CDownloadButtonOverlay;
 class CHelpButtonOverlay;
 class CHelpOverlay;
@@ -47,6 +48,7 @@ protected:
   virtual void ConnectSlotsImpl() {}
 
   std::unique_ptr<Ui::CMainWindow>        m_spUi;
+  std::unique_ptr<CAgeCheckOverlay>       m_spAgeCheckOverlay;
   std::unique_ptr<CHelpButtonOverlay>     m_spHelpButtonOverlay;
   std::unique_ptr<CHelpOverlay>           m_spHelpOverlay;
   std::unique_ptr<CDownloadButtonOverlay> m_spDownloadButtonOverlay;

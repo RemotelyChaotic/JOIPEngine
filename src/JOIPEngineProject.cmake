@@ -408,6 +408,9 @@ macro(CreateJOIPProject JOIP_PROJECT_NAME)
     ${JOIPSources}/Utils/RaiiFunctionCaller.h
     ${JOIPSources}/Utils/UndoRedoFilter.cpp
     ${JOIPSources}/Utils/UndoRedoFilter.h
+    ${JOIPSources}/Widgets/AgeCheckOverlay.cpp
+    ${JOIPSources}/Widgets/AgeCheckOverlay.h
+    ${JOIPSources}/Widgets/AgeCheckOverlay.ui
     ${JOIPSources}/Widgets/BackgroundWidget.cpp
     ${JOIPSources}/Widgets/BackgroundWidget.h
     ${JOIPSources}/Widgets/ColorPicker.cpp
