@@ -10,6 +10,7 @@
 #include <QMutexLocker>
 #include <QSettings>
 #include <QScreen>
+#include <QStandardPaths>
 #include <map>
 
 namespace {
@@ -217,9 +218,6 @@ void CSettings::WriteRaw(const QString& sSetting, const QVariant& value)
 //
 void CSettings::SetContentFolder(const QString& sPath)
 {
-#if defined(Q_OS_ANDROID)
-  Q_UNUSED(sPath)
-#else
   QMutexLocker locker(&m_settingsMutex);
   QString sOldPath = m_spSettings->value(CSettings::c_sSettingContentFolder).toString();
   QFileInfo contentFileInfo(sPath);
@@ -229,7 +227,6 @@ void CSettings::SetContentFolder(const QString& sPath)
   m_spSettings->setValue(CSettings::c_sSettingContentFolder, sPath);
 
   emit contentFolderChanged();
-#endif
 }
 
 //----------------------------------------------------------------------------------------
@@ -237,7 +234,7 @@ void CSettings::SetContentFolder(const QString& sPath)
 QString CSettings::ContentFolder()
 {
 #if defined(Q_OS_ANDROID)
-  return QString();
+  return m_spSettings->value(CSettings::c_sSettingContentFolder).toString();
 #else
   QMutexLocker locker(&m_settingsMutex);
   QString sPath = m_spSettings->value(CSettings::c_sSettingContentFolder).toString();
@@ -705,11 +702,19 @@ void CSettings::GenerateSettingsIfNotExists()
     m_spSettings->setValue(CSettings::c_sSettingAutoPauseInactive, true);
   }
 
-#if !defined(Q_OS_ANDROID)
   // check content path
   if (!m_spSettings->contains(CSettings::c_sSettingContentFolder))
   {
     bNeedsSynch = true;
+#if defined(Q_OS_ANDROID)
+    QString sContentPath = QStandardPaths::writableLocation(QStandardPaths::DataLocation) + "/Teases";
+    QFileInfo contentFileInfo(sContentPath);
+    m_spSettings->setValue(CSettings::c_sSettingContentFolder, sContentPath);
+    if (!contentFileInfo.exists())
+    {
+      QDir(QStandardPaths::writableLocation(QStandardPaths::DataLocation)).mkdir("Teases");
+    }
+#else
     QString sContentPath = QCoreApplication::instance()->applicationDirPath() +
         QDir::separator() + ".." + QDir::separator() + "data";
     QFileInfo contentFileInfo(sContentPath);
@@ -720,6 +725,7 @@ void CSettings::GenerateSettingsIfNotExists()
     {
       QDir::current().mkdir("data");
     }
+#endif
   }
 
   // check font
@@ -728,7 +734,6 @@ void CSettings::GenerateSettingsIfNotExists()
     bNeedsSynch = true;
     m_spSettings->setValue(CSettings::c_sSettingFont, "Arial");
   }
-#endif
 
   // check editor Layout
   if (!m_spSettings->contains(CSettings::c_sSettingEditorLayout))

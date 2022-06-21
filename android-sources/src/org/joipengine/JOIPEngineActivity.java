@@ -37,21 +37,27 @@ public class JOIPEngineActivity extends QtActivity
 
   protected boolean checkPermission()
   {
-    return true;
-    //int result = ContextCompat.checkSelfPermission(this, android.Manifest.permission.WRITE_EXTERNAL_STORAGE);
-    //if (result == PackageManager.PERMISSION_GRANTED)
-    //    return true;
-    //return false;
+    int iResultW = ContextCompat.checkSelfPermission(this, android.Manifest.permission.WRITE_EXTERNAL_STORAGE);
+    if (iResultW == PackageManager.PERMISSION_GRANTED)
+    {
+      return true;
+    }
+    return false;
   }
+
   protected void requestPermission()
   {
-    return;
-    //if (ActivityCompat.shouldShowRequestPermissionRationale(this, android.Manifest.permission.WRITE_EXTERNAL_STORAGE)) {
-    //    Toast.makeText(this, "Please allow Write External Storage permission to play your local videos", Toast.LENGTH_LONG).show();
-    //} else {
-    //    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M)
-    //        requestPermissions(new String[]{android.Manifest.permission.WRITE_EXTERNAL_STORAGE}, 100);
-    //  }
+    if (ActivityCompat.shouldShowRequestPermissionRationale(this, android.Manifest.permission.WRITE_EXTERNAL_STORAGE))
+    {
+      Toast.makeText(this, "Please allow Write External Storage permission to load and edit JOIP-Projects", Toast.LENGTH_LONG).show();
+    }
+    else
+    {
+      if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M)
+      {
+        requestPermissions(new String[]{android.Manifest.permission.WRITE_EXTERNAL_STORAGE}, 100);
+      }
+    }
   }
 
   // see https://github.com/DeiVadder/PaintBehindSystemBars &

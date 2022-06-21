@@ -42,7 +42,7 @@ public:
 protected:
   virtual bool DeserializeProjectImpl(tspProject& spProject) = 0;
   virtual void LoadProjects() = 0;
-  virtual void LoadLinks() = 0;
+  virtual void LoadKinks() = 0;
   virtual bool PrepareProjectImpl(tspProject& spProject) = 0;
   virtual bool SerializeProjectImpl(tspProject& spProject, bool bForceWriting) = 0;
 

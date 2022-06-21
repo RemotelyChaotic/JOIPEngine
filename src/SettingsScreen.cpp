@@ -147,7 +147,6 @@ void CSettingsScreen::Initialize()
   m_spUi->tabWidget->setTabEnabled(3, false);
   m_spUi->tabWidget->setCurrentIndex(1);
   m_spUi->pWindowModeContainer->hide();
-  m_spUi->pContentContainer->hide();
   m_spUi->pStyleHotoadContainer->hide();
 #endif
 

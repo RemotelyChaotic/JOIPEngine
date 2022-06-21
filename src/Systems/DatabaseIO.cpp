@@ -166,7 +166,7 @@ protected:
 
   //--------------------------------------------------------------------------------------
   //
-  void LoadLinks() override
+  void LoadKinks() override
   {
     QMutexLocker locker(m_spData.get());
 
@@ -418,7 +418,7 @@ protected:
   {
     // load projects
     // first load folders
-    QString sPath = "";/*m_spSettings->ContentFolder();*/
+    QString sPath = m_spSettings->ContentFolder();
     QDirIterator it(sPath, QDir::Dirs | QDir::NoDotAndDotDot);
     while (it.hasNext())
     {
@@ -460,7 +460,7 @@ protected:
 
   //--------------------------------------------------------------------------------------
   //
-  void LoadLinks() override
+  void LoadKinks() override
   {
     QMutexLocker locker(m_spData.get());
 
@@ -973,7 +973,7 @@ bool CDatabaseIO::DeserializeProject(tspProject& spProject)
 void CDatabaseIO::LoadDatabase()
 {
   LoadProjects();
-  LoadLinks();
+  LoadKinks();
   m_bLoadedDb = 1;
 }
 
