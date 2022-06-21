@@ -249,6 +249,7 @@ void CMainWindow::closeEvent(QCloseEvent* pEvent)
 //
 void CMainWindow::resizeEvent(QResizeEvent* pEvent)
 {
+  Q_UNUSED(pEvent)
   m_pBackground->setFixedSize(size());
   m_pBackground->setGeometry(0, 0, width(), height());
 }
