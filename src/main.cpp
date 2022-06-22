@@ -15,6 +15,9 @@
 #include <QQmlDebuggingEnabler>
 #endif
 #include <QSslSocket>
+#if defined(Q_OS_WIN32) && !defined(Q_OS_ANDROID)
+#include <QtPlatformHeaders/QWindowsWindowFunctions>
+#endif
 //#include <QtWebEngine>
 //#include <QtWebView/QtWebView>
 
@@ -59,6 +62,12 @@ int main(int argc, char *argv[])
   std::unique_ptr<CMainWindowBase> spW = CMainWindowFactory::Instance().CreateMainWindow();
   spW->Initialize();
   spW->show();
+
+#if defined(Q_OS_WIN) && !defined(Q_OS_ANDROID)
+  // Fixes problems with OpenGL based windows
+  // https://doc.qt.io/qt-5/windows-issues.html#fullscreen-opengl-based-windows
+  QWindowsWindowFunctions::setHasBorderInFullScreen(spW->windowHandle(), true);
+#endif
 
   Notifier()->SetMainWindow(dynamic_cast<CMainWindow*>(spW.get()));
 
