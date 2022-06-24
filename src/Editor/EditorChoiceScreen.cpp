@@ -1,11 +1,13 @@
 #include "EditorChoiceScreen.h"
 #include "Application.h"
+#include "ui_EditorChoiceScreen.h"
+
 #include "Systems/DatabaseManager.h"
 #include "Systems/EOS/EosHelpers.h"
 #include "Systems/HelpFactory.h"
 #include "Systems/Project.h"
+#include "Utils/WidgetHelpers.h"
 #include "Widgets/HelpOverlay.h"
-#include "ui_EditorChoiceScreen.h"
 
 namespace
 {
@@ -65,6 +67,10 @@ void CEditorChoiceScreen::Initialize()
 
   connect(m_spUi->pProjectCardSelectionWidget, &CProjectCardSelectionWidget::SignalUnloadFinished,
           this, &CEditorChoiceScreen::SignalUnloadFinished);
+
+#if defined(Q_OS_ANDROID)
+  widget_helpers::RetainSizeAndHide(m_spUi->pCancelButton);
+#endif
 
   m_bInitialized = true;
 }

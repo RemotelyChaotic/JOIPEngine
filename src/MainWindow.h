@@ -32,6 +32,7 @@ public:
 
 protected slots:
   void SlotChangeAppState(EAppState newState);
+  void SlotChangeAppStateToMain();
   void SlotCurrentAppStateUnloadFinished();
   void SlotDownloadButtonClicked();
   void SlotHelpButtonClicked();

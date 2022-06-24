@@ -310,6 +310,8 @@ macro(CreateJOIPProject JOIP_PROJECT_NAME)
     ${JOIPSources}/SettingsScreen.ui
     ${JOIPSources}/Style.cpp
     ${JOIPSources}/Style.h
+    ${JOIPSources}/Systems/BackActionHandler.cpp
+    ${JOIPSources}/Systems/BackActionHandler.h
     ${JOIPSources}/Systems/DatabaseData.cpp
     ${JOIPSources}/Systems/DatabaseData.h
     ${JOIPSources}/Systems/DatabaseImageProvider.cpp
@@ -408,6 +410,8 @@ macro(CreateJOIPProject JOIP_PROJECT_NAME)
     ${JOIPSources}/Utils/RaiiFunctionCaller.h
     ${JOIPSources}/Utils/UndoRedoFilter.cpp
     ${JOIPSources}/Utils/UndoRedoFilter.h
+    ${JOIPSources}/Utils/WidgetHelpers.cpp
+    ${JOIPSources}/Utils/WidgetHelpers.h
     ${JOIPSources}/Widgets/AgeCheckOverlay.cpp
     ${JOIPSources}/Widgets/AgeCheckOverlay.h
     ${JOIPSources}/Widgets/AgeCheckOverlay.ui

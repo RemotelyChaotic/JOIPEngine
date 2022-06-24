@@ -4,6 +4,7 @@
 #include "MainWindow.h"
 
 #include <QColor>
+#include <QPointer>
 
 class CAndroidNavigationBar;
 

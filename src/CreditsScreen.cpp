@@ -1,6 +1,9 @@
 #include "CreditsScreen.h"
 #include "Application.h"
 #include "ui_CreditsScreen.h"
+
+#include "Utils/WidgetHelpers.h"
+
 #include <QFile>
 #include <QFont>
 #include <QMessageBox>
@@ -32,6 +35,8 @@ void CCreditsScreen::Initialize()
 #if defined(Q_OS_ANDROID)
   QScroller::grabGesture(m_spUi->pScrollArea, QScroller::LeftMouseButtonGesture);
   QScroller::grabGesture(m_spUi->pScrollArea_2, QScroller::LeftMouseButtonGesture);
+
+  widget_helpers::RetainSizeAndHide(m_spUi->pBackButton);
 #endif
 
   m_bInitialized = true;

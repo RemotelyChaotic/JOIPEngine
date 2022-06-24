@@ -10,6 +10,7 @@
 #include "Settings.h"
 #include "SettingsScreen.h"
 #include "WindowContext.h"
+#include "Systems/BackActionHandler.h"
 #include "Systems/ProjectDownloader.h"
 #include "Widgets/AgeCheckOverlay.h"
 #include "Widgets/BackgroundWidget.h"
@@ -143,6 +144,13 @@ void CMainWindow::SlotChangeAppState(EAppState newState)
 
 //----------------------------------------------------------------------------------------
 //
+void CMainWindow::SlotChangeAppStateToMain()
+{
+  SlotChangeAppState(EAppState::eMainScreen);
+}
+
+//----------------------------------------------------------------------------------------
+//
 void CMainWindow::SlotCurrentAppStateUnloadFinished()
 {
   IAppStateScreen* pScreen =
@@ -165,6 +173,18 @@ void CMainWindow::SlotCurrentAppStateUnloadFinished()
   if (nullptr != pScreen)
   {
     pScreen->Load();
+  }
+
+  if (auto spBackActionHandler = CApplication::Instance()->System<CBackActionHandler>().lock())
+  {
+    if (EAppState::eMainScreen != m_nextState._to_integral())
+    {
+      spBackActionHandler->RegisterSlotToCall(this, "SlotChangeAppStateToMain");
+    }
+    else
+    {
+      spBackActionHandler->ClearSlotToCall();
+    }
   }
 }
 

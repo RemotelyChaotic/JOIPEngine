@@ -8,6 +8,7 @@
 #include <map>
 #include <memory>
 
+class CBackActionHandler;
 class CHelpFactory;
 class CNotificationSender;
 class COverlayManager;
@@ -64,6 +65,7 @@ private:
   std::shared_ptr<COverlayManager>                   m_spOverlayManager;
   std::shared_ptr<CSettings>                         m_spSettings;
   std::shared_ptr<CNotificationSender>               m_spNotifier;
+  std::shared_ptr<CBackActionHandler>                m_spBackActionHandler;
   QFileSystemWatcher                                 m_styleWatcher;
   bool                                               m_bStyleDirty;
   bool                                               m_bInitialized;
@@ -73,5 +75,6 @@ template<> std::weak_ptr<CDatabaseManager> CApplication::System<CDatabaseManager
 template<> std::weak_ptr<CHelpFactory> CApplication::System<CHelpFactory>();
 template<> std::weak_ptr<COverlayManager> CApplication::System<COverlayManager>();
 template<> std::weak_ptr<CProjectDownloader> CApplication::System<CProjectDownloader>();
+template<> std::weak_ptr<CBackActionHandler> CApplication::System<CBackActionHandler>();
 
 #endif // CAPPLICATION_H

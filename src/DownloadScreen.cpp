@@ -6,6 +6,7 @@
 #include "Systems/HelpFactory.h"
 #include "Systems/Project.h"
 #include "Systems/ProjectDownloader.h"
+#include "Utils/WidgetHelpers.h"
 #include "Widgets/HelpOverlay.h"
 #include "ui_DownloadScreen.h"
 
@@ -47,6 +48,10 @@ void CDownloadScreen::Initialize()
 
   connect(m_spUi->pProjectCardSelectionWidget, &CProjectCardSelectionWidget::SignalUnloadFinished,
           this, &CDownloadScreen::SlotCardsUnloadFinished);
+
+#if defined(Q_OS_ANDROID)
+  widget_helpers::RetainSizeAndHide(m_spUi->pCancelButton);
+#endif
 
   m_bInitialized = true;
 }

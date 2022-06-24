@@ -3,8 +3,10 @@
 #include "Settings.h"
 #include "Style.h"
 #include "WindowContext.h"
+
 #include "Systems/DLJobs/DownloadJobRegistry.h"
 #include "Systems/HelpFactory.h"
+#include "Utils/WidgetHelpers.h"
 #include "Widgets/DownloadButtonOverlay.h"
 #include "Widgets/HelpOverlay.h"
 #include "ui_SettingsScreen.h"
@@ -148,6 +150,8 @@ void CSettingsScreen::Initialize()
   m_spUi->tabWidget->setCurrentIndex(1);
   m_spUi->pWindowModeContainer->hide();
   m_spUi->pStyleHotoadContainer->hide();
+
+  widget_helpers::RetainSizeAndHide(m_spUi->pBackButton);
 #endif
 
   m_bInitialized = true;

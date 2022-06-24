@@ -1,9 +1,9 @@
 #include "AndroidMainWindow.h"
 #include "AndroidNavigationBar.h"
+#include "Application.h"
 #include "Settings.h"
 #include "SVersion.h"
 
-#include <QGuiApplication>
 #include <QScreen>
 #include <QStyle>
 

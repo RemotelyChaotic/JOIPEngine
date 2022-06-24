@@ -5,6 +5,7 @@
 #include "Systems/DatabaseManager.h"
 #include "Systems/HelpFactory.h"
 #include "Systems/Project.h"
+#include "Utils/WidgetHelpers.h"
 #include "Widgets/HelpOverlay.h"
 #include "ui_SceneScreen.h"
 
@@ -57,6 +58,10 @@ void CSceneScreen::Initialize()
           this, &CSceneScreen::SlotCardsUnloadFinished);
 
   m_spUi->pStackedWidget->setCurrentIndex(c_iPageIndexChoice);
+
+#if defined(Q_OS_ANDROID)
+  widget_helpers::RetainSizeAndHide(m_spUi->pCancelButton);
+#endif
 
   m_bInitialized = true;
 }

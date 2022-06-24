@@ -13,6 +13,7 @@
 #include "Player/TeaseStorage.h"
 #include "Player/TimerWidget.h"
 
+#include "Systems/BackActionHandler.h"
 #include "Systems/DatabaseManager.h"
 #include "Systems/HelpFactory.h"
 #include "Systems/NotificationSender.h"
@@ -37,6 +38,7 @@
 #include "Systems/Script/ScriptThread.h"
 #include "Systems/Script/ScriptTimer.h"
 // needed to register to qml
+
 #include <filters/regexpfilter.h>
 #include <sorters/stringsorter.h>
 #include <qqmlsortfilterproxymodel.h>
@@ -85,6 +87,7 @@ CApplication::CApplication(int& argc, char *argv[]) :
   m_spOverlayManager(std::make_shared<COverlayManager>()),
   m_spSettings(nullptr),
   m_spNotifier(std::make_shared<CNotificationSender>()),
+  m_spBackActionHandler(nullptr),
   m_styleWatcher(),
   m_bStyleDirty(true),
   m_bInitialized(false)
@@ -120,6 +123,7 @@ void CApplication::Initialize()
 {
   // sound
   installEventFilter(m_spSoundEmitter.get());
+  m_spBackActionHandler = std::make_shared<CBackActionHandler>();
 
   // fonts
   QFontDatabase::addApplicationFont(":/resources/fonts/Equestria.otf");
@@ -214,6 +218,12 @@ template<>
 std::weak_ptr<CProjectDownloader> CApplication::System<CProjectDownloader>()
 {
   return std::static_pointer_cast<CProjectDownloader>(m_spSystemsMap[ECoreSystems::eProjectDownloader]->Get());
+}
+
+template<>
+std::weak_ptr<CBackActionHandler> CApplication::System<CBackActionHandler>()
+{
+  return m_spBackActionHandler;
 }
 
 //----------------------------------------------------------------------------------------
