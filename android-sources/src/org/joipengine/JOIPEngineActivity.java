@@ -8,6 +8,11 @@ import android.app.*;
 
 import android.content.pm.PackageManager;
 
+import android.provider.Settings;
+import android.provider.Settings.System;
+
+import android.net.Uri;
+
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
@@ -34,15 +39,19 @@ public class JOIPEngineActivity extends QtActivity
     super.onCreate(savedInstanceState);
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M)
     {
-      if (!checkPermission())
+      if (!checkWritePermission())
       {
-        requestPermission();
+        requestWritePermission();
+      }
+      if (!Settings.System.canWrite(this))
+      {
+        requestSettingsPermission();
       }
     }
     setCustomStatusAndNavBar();
   }
 
-  protected boolean checkPermission()
+  protected boolean checkWritePermission()
   {
     int iResultW = ContextCompat.checkSelfPermission(this, android.Manifest.permission.WRITE_EXTERNAL_STORAGE);
     if (iResultW == PackageManager.PERMISSION_GRANTED)
@@ -52,7 +61,22 @@ public class JOIPEngineActivity extends QtActivity
     return false;
   }
 
-  protected void requestPermission()
+  protected void requestSettingsPermission()
+  {
+    if (ActivityCompat.shouldShowRequestPermissionRationale(this, android.provider.Settings.ACTION_MANAGE_WRITE_SETTINGS))
+    {
+      Toast.makeText(this, "Please allow Write Write Settings permission to load and edit Settings", Toast.LENGTH_LONG).show();
+    }
+    else
+    {
+      if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M)
+      {
+        requestPermissions(new String[]{android.provider.Settings.ACTION_MANAGE_WRITE_SETTINGS}, 100);
+      }
+    }
+  }
+
+  protected void requestWritePermission()
   {
     if (ActivityCompat.shouldShowRequestPermissionRationale(this, android.Manifest.permission.WRITE_EXTERNAL_STORAGE))
     {
@@ -60,7 +84,7 @@ public class JOIPEngineActivity extends QtActivity
     }
     else
     {
-      if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M)
+      if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M)
       {
         requestPermissions(new String[]{android.Manifest.permission.WRITE_EXTERNAL_STORAGE}, 100);
       }

@@ -707,12 +707,12 @@ void CSettings::GenerateSettingsIfNotExists()
   {
     bNeedsSynch = true;
 #if defined(Q_OS_ANDROID)
-    QString sContentPath = QStandardPaths::writableLocation(QStandardPaths::DataLocation) + "/Teases";
+    QString sContentPath = QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation) + "/Teases";
     QFileInfo contentFileInfo(sContentPath);
     m_spSettings->setValue(CSettings::c_sSettingContentFolder, sContentPath);
     if (!contentFileInfo.exists())
     {
-      QDir(QStandardPaths::writableLocation(QStandardPaths::DataLocation)).mkdir("Teases");
+      QDir(QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation)).mkdir("Teases");
     }
 #else
     QString sContentPath = QCoreApplication::instance()->applicationDirPath() +
