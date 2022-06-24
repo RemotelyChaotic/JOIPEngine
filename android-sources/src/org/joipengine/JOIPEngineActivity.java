@@ -6,12 +6,19 @@ import android.os.*;
 import android.content.*;
 import android.app.*;
 
+import android.content.pm.PackageManager;
+
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
+
 import android.widget.Button;
+import android.widget.Toast;
 
 import android.graphics.Color;
+
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 
 public class JOIPEngineActivity extends QtActivity
 {

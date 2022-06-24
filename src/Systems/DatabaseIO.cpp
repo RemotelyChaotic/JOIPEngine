@@ -323,7 +323,8 @@ class CDatabaseIOAndroid : public CDatabaseIO
 {
 public:
   CDatabaseIOAndroid(CDatabaseManager* pManager, std::shared_ptr<CDatabaseData> spData) :
-    CDatabaseIO(pManager, spData)
+    CDatabaseIO(pManager, spData),
+    m_spSettings(CApplication::Instance()->Settings())
   {
   }
   ~CDatabaseIOAndroid() override {}
@@ -601,6 +602,10 @@ protected:
 
     return bOk;
   }
+  //--------------------------------------------------------------------------------------
+  //
+private:
+  std::shared_ptr<CSettings> m_spSettings;
 };
 #endif
 
