@@ -10,6 +10,8 @@ Rectangle {
     color: "transparent"
     property string userName: "textBox"
     property bool mainTextBox: false
+    property int iconWidth: 64
+    property int iconHeight: 64
 
     function clearTextBox()
     {
@@ -248,6 +250,8 @@ Rectangle {
         property Resource portrait: null
         property bool sceneSelection: false
         property bool skippable: false
+        property int iconWidth: textBox.iconWidth
+        property int iconHeight: textBox.iconHeight
 
         function inputEditingFinished(sInput, sStoreIntoVar, sRequestId, bStoreIntoStorageInstead)
         {

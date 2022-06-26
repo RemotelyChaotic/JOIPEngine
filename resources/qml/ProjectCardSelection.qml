@@ -85,8 +85,11 @@ Rectangle {
         preventStealing: true
         propagateComposedEvents: true
         onWheel: {
-            if (wheel.angleDelta.y < 0) scroll.increase();
-            else scroll.decrease();
+            if (wheel.angleDelta.y < 0) {
+                scroll.increase();
+            } else {
+                scroll.decrease();
+            }
         }
     }
 
@@ -101,7 +104,7 @@ Rectangle {
 
         cacheBuffer: 0
         layoutDirection: Qt.LeftToRight
-        orientation: ListView.Horizontal
+        orientation: width > height ? ListView.Horizontal : ListView.Vertical
         spacing: 50
 
         signal clicked(int index)

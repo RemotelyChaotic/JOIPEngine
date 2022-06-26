@@ -404,10 +404,12 @@ void CSettingsScreen::on_BrowseButton_clicked()
   assert(nullptr != m_spSettings);
   if (nullptr == m_spSettings) { return; }
 
+  QPointer<CSettingsScreen> pThis(this);
   QString dir =
-      QFileDialog::getExistingDirectory(this, tr("Open Directory"),
+      widget_helpers::GetExistingDirectory(this, tr("Open Directory"),
         m_spSettings->ContentFolder(),
         QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks);
+  if (nullptr == pThis) { return; }
 
   QFileInfo path(dir);
   if (!path.exists()) { return; }

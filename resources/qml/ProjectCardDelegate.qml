@@ -8,14 +8,15 @@ import JOIP.db 1.1
 
 Rectangle {
     id: describtionDelegate
-    width: height / 4 * 3
-    height: parent.ListView.view.height - 20
+    width: isLandscape ? height / 4 * 3 : parent.ListView.view.width - 20
+    height: isLandscape ? parent.ListView.view.height - 20 : width / 4 * 3
     clip: true
     color: "transparent"
 
     property int progress: -1
     property bool isHovered: false
     property bool isSelected: describtionDelegate.parent.ListView.isCurrentItem
+    property bool isLandscape: parent.ListView.view.width > parent.ListView.view.height
     property bool openedDetails: false
     property Project dto: project
 

@@ -243,7 +243,8 @@ QPushButton, QToolButton {
   min-width: 64px;
 }
 
-QPushButton[styleSmall="true"] {
+QPushButton[styleSmall="true"],
+QToolButton[styleSmall="true"] {
   padding: 0px;
   min-width: 24px;
 }
@@ -910,7 +911,8 @@ COverlayBase {
   border-radius: 10px;
   padding: 5px;
 }
-COverlayBase#HelpButtonOverlay {
+COverlayBase#HelpButtonOverlay,
+COverlayBase#DownloadButtonOverlay {
   color: transparent;
   background-color: transparent;
   border: none;

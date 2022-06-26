@@ -798,7 +798,8 @@ QToolButton:disabled {
   border-image: url(ui/ButtonDisabled.png) 0 50 0 50 stretch stretch;
 }
 
-QPushButton[styleSmall="true"] {
+QPushButton[styleSmall="true"],
+QToolButton[styleSmall="true"] {
   padding: 0px;
   min-width: 24px;
 }
@@ -1338,7 +1339,8 @@ COverlayBase {
   border-left: 20px transparent;
   padding: 5;
 }
-COverlayBase#HelpButtonOverlay {
+COverlayBase#HelpButtonOverlay,
+COverlayBase#DownloadButtonOverlay {
   color: white;
   background-color: transparent;
   border-radius: 0px;

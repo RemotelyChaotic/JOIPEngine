@@ -2,102 +2,135 @@ import QtQuick 2.14
 import QtQuick.Controls 2.14
 import QtQuick.Layouts 1.14
 import QtGraphicalEffects 1.14
+import JOIP.core 1.1
 
 Rectangle {
     id: layout
     anchors.fill: parent
     color: "transparent"
 
-    ColumnLayout {
-        anchors.fill: parent
-        spacing: 5
+    property int spacing: 5
 
-        RowLayout {
-            Layout.preferredWidth: parent.width
-            Layout.preferredHeight: parent.height * 2 / 3 - parent.spacing / 2
-            Layout.alignment: Qt.AlignHCenter
-            spacing: 5
+    readonly property bool isMobile: Settings.platform === "Android"
+    readonly property int iconWidth: isMobile ? 24 : 64
+    readonly property int iconHeight: isMobile ? 24 : 64
+    property bool isLandscape: { console.log("isLandscape: " + (width > height ? "true" : "false")); return width > height; }
 
+    PlayerMediaPlayer {
+        id: mediaPlayer
 
-            Rectangle {
-                Layout.preferredWidth: (parent.width - parent.spacing * 2) / 4
-                Layout.preferredHeight: parent.height
-                Layout.alignment: Qt.AlignVCenter
-                color: "transparent"
+        anchors.top: parent.top
+        x: !isMobile ? (parent.width - width) / 2 : 0
 
-                PlayerIcons {
-                    id: icon
-                    width: parent.width - 50
-                    height: parent.height - 50
-                    anchors.right: parent.right
-                    anchors.bottom: parent.bottom
-                    userName: "icon"
-                }
-            }
+        width: !isMobile ? ((parent.width - parent.spacing * 2) / 2) :
+                           (isLandscape ? parent.width / 2 : parent.width)
+        height: !isMobile ? (parent.height * 2 / 3 - parent.spacing / 2) :
+                            (isLandscape ? parent.height : (parent.height * 2 / 3 - parent.spacing / 2))
+        userName: "mediaPlayer"
+        mainMediaPlayer: true
 
-            PlayerMediaPlayer {
-                id: mediaPlayer
-                Layout.preferredWidth: (parent.width - parent.spacing * 2) / 2
-                Layout.preferredHeight: parent.height
-                Layout.alignment: Qt.AlignVCenter
-                userName: "mediaPlayer"
-                mainMediaPlayer: true
+        PlayerMetronome {
+            id: metronome
+            anchors.bottom: parent.bottom
+            anchors.horizontalCenter: parent.horizontalCenter
+            width: parent.width
+            height: parent.height / 6
+            userName: "metronome"
+        }
+    }
 
-                PlayerMetronome {
-                    id: metronome
-                    anchors.bottom: parent.bottom
-                    anchors.horizontalCenter: parent.horizontalCenter
-                    width: parent.width
-                    height: parent.height / 6
-                    userName: "metronome"
-                }
-            }
+    Rectangle {
+        anchors.top: parent.top
+        x: !isMobile  ? 0 : (isLandscape ? mediaPlayer.x + mediaPlayer.width + parent.spacing : 0)
 
+        width: (parent.width - parent.spacing * 2) / 4
+        height: !isMobile ? mediaPlayer.height :
+                            (isLandscape ? ((parent.height - parent.spacing) / 2) :
+                                           mediaPlayer.height)
+        color: "transparent"
 
-            Rectangle {
-                Layout.preferredWidth: (parent.width - parent.spacing * 2) / 4
-                Layout.preferredHeight: parent.height
-                Layout.alignment: Qt.AlignVCenter
-                color: "transparent"
+        PlayerIcons {
+            id: icon
+            width: parent.width - layout.spacing
+            height: parent.height - layout.spacing
+            iconWidth: layout.iconWidth
+            iconHeight: layout.iconHeight
 
-                Rectangle {
-                    anchors.top: parent.top
-                    anchors.left: parent.left
-                    width: parent.Layout.preferredWidth
-                    height: parent.Layout.preferredHeight / 2
-                    color: "transparent"
+            anchors.right: parent.right
+            anchors.bottom: parent.bottom
+            userName: "icon"
+        }
+    }
 
-                    PlayerTimer {
-                        id: timer
-                        anchors.centerIn: parent
-                        width: 138
-                        height: 138
-                        userName: "timer"
-                    }
-                }
-                Rectangle {
-                    anchors.bottom: parent.bottom
-                    anchors.left: parent.left
-                    width: parent.Layout.preferredWidth
-                    height: parent.Layout.preferredHeight / 2
-                    color: "transparent"
+    Rectangle {
+        anchors.top: parent.top
+        x: parent.width - width
 
-                    PlayerNotification {
-                        id: notification
-                        anchors.fill: parent
-                        userName: "notification"
-                    }
-                }
+        width: (parent.width - parent.spacing * 2) / 4
+        height: !isMobile ? mediaPlayer.height :
+                            (isLandscape ? ((parent.height - parent.spacing) / 2) :
+                                           mediaPlayer.height)
+        color: "transparent"
+
+        Rectangle {
+            anchors.top: parent.top
+            anchors.left: parent.left
+            width: !isMobile ? parent.width : parent.width
+            height: !isMobile ? parent.height / 2 : width
+            color: "transparent"
+
+            PlayerTimer {
+                id: timer
+                anchors.centerIn: parent
+                width: Math.min(138, parent.width)
+                height: Math.min(138, parent.width)
+                userName: "timer"
             }
         }
+        Rectangle {
+            anchors.bottom: parent.bottom
+            anchors.left: parent.left
+            width: parent.width
+            height: parent.height / 2
+            color: "transparent"
 
-        PlayerTextBox {
-            id: textBox;
-            Layout.preferredWidth: parent.width
-            Layout.preferredHeight: parent.height / 3 - parent.spacing / 2
-            Layout.alignment: Qt.AlignHCenter
-            userName: "textBox"
-            mainTextBox: true
+            PlayerNotification {
+                id: notification
+                anchors.fill: parent
+                userName: "notification"
+            }
         }
+    }
+
+    PlayerTextBox {
+        id: textBox;
+
+        anchors.bottom: parent.bottom
+        x: !isMobile ? 0 : (isLandscape ? (parent.width + parent.spacing) / 2 : 0)
+
+        width: !isMobile ? parent.width :
+                           (isLandscape ? (parent.width - parent.spacing) / 2 : parent.width)
+        height: !isMobile ? (parent.height / 3 - parent.spacing / 2) :
+                            (isLandscape ? ((parent.height - parent.spacing) / 2) :
+                                           (parent.height / 3 - parent.spacing / 2))
+        iconWidth: layout.iconWidth
+        iconHeight: layout.iconHeight
+
+        userName: "textBox"
+        mainTextBox: true
+    }
+
+    PlayerControls {
+        id: sceneControl
+
+        x: textBox.x
+        y: textBox.y - height / 2
+        width: textBox.width - parent.spacing
+        height: 32
+
+        buttonHeight: 32
+        buttonWidth: 48
+        spacing: parent.spacing
+        soundEffects: root.soundEffects
     }
 }

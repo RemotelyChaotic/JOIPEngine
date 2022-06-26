@@ -479,6 +479,19 @@ void CSettings::SetResolution(const QSize& size)
 
 //----------------------------------------------------------------------------------------
 //
+QString CSettings::Platform() const
+{
+#if defined(Q_OS_ANDROID)
+  return "Android";
+#elif defined(Q_OS_WINDOWS)
+  return "Windows";
+#else
+  return QString();
+#endif
+}
+
+//----------------------------------------------------------------------------------------
+//
 QSize CSettings::Resolution()
 {
 #if defined(Q_OS_ANDROID)

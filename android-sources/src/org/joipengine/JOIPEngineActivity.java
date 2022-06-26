@@ -51,6 +51,25 @@ public class JOIPEngineActivity extends QtActivity
     setCustomStatusAndNavBar();
   }
 
+  public void setNavigationVisible(boolean bVisible)
+  {
+    View decor = getWindow().getDecorView();
+    if (bVisible)
+    {
+      decor.setSystemUiVisibility(decor.getSystemUiVisibility()
+                                  | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+                                  | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
+                                  | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY);
+    }
+    else
+    {
+      decor.setSystemUiVisibility(decor.getSystemUiVisibility() &
+                                  ~(View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION |
+                                    View.SYSTEM_UI_FLAG_HIDE_NAVIGATION |
+                                    View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY));
+    }
+  }
+
   protected boolean checkWritePermission()
   {
     int iResultW = ContextCompat.checkSelfPermission(this, android.Manifest.permission.WRITE_EXTERNAL_STORAGE);
@@ -105,17 +124,27 @@ public class JOIPEngineActivity extends QtActivity
       window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS|
                       WindowManager.LayoutParams.FLAG_TRANSLUCENT_NAVIGATION);
 
+      View decor = window.getDecorView();
+
       //The Window flag 'FLAG_TRANSLUCENT_NAVIGATION' will allow us to paint the background of the navigation bar ourself
       //But we will also have to deal with orientation and OEM specifications, as the nav bar may or may not depend on the orientation of the device
       //window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS | WindowManager.LayoutParams.FLAG_TRANSLUCENT_NAVIGATION);
-      window.getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN);
+      decor.setSystemUiVisibility(View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
+                                  | View.SYSTEM_UI_FLAG_FULLSCREEN);
 
       //Set Statusbar Transparent
       window.setStatusBarColor(Color.TRANSPARENT);
       //Statusbar background is now transparent, but the icons and text are probably white and not really readable, as we have a bright background color
       //We set/force a light theme for the status bar to make those dark
-      View decor = window.getDecorView();
-      decor.setSystemUiVisibility(decor.getSystemUiVisibility() | View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR);
+      decor.setSystemUiVisibility(decor.getSystemUiVisibility()
+                                  | View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR);
+
+      // by Default hide the Navigationbar and run the app in "immersive mode"
+      // https://developer.android.com/training/system-ui/immersive.html
+      decor.setSystemUiVisibility(decor.getSystemUiVisibility()
+                                  | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+                                  | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
+                                  | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY);
     }
   }
 }

@@ -10,6 +10,9 @@ Rectangle {
     height: textBackground.height + 40
     color: "transparent"
 
+    property int iconWidth: parent.ListView.view.iconWidth
+    property int iconHeight: parent.ListView.view.iconHeight
+
     Rectangle {
         id: textBackground
         anchors.verticalCenter: parent.verticalCenter
@@ -22,34 +25,45 @@ Rectangle {
             }
             return textDelegate.width / 2 - width / 2;
         }
-        width: layoutText.width + imageSkip.width + 30
-        height: layoutText.height + 20
+        width: textContentItem.width + imageSkip.width + 30
+        height: textContentItem.height + 20
         color: backgroundColor
         radius: 5
 
-        Rectangle {
-            id: layoutText
-            anchors.centerIn: parent
-            width: text.contentWidth
-            height: text.contentHeight
-            color: "transparent"
+        Text {
+            id: textContentItem
 
-            Text {
-                id: text
-                anchors.centerIn: parent
-                font.family: root.currentlyLoadedProject.font
-                font.pointSize: 14
-                font.hintingPreference: Font.PreferNoHinting
-                horizontalAlignment: Text.AlignHCenter
-                elide: Text.ElideNone
-                text: textContent.replace("<html>","").replace("</html>","")
-                wrapMode: Text.WordWrap
-                color: textColor
-                textFormat: (textContent.startsWith("<html>") && textContent.endsWith("</html>")) ?
-                                Text.RichText :
-                                (QtApp.mightBeRichtext(textContent) ?
-                                     Text.StyledText : Text.PlainText)
-            }
+            // yes, this causes a binding loop for property "width" too bad we ignore it
+            // otherwise we can't get the width of the content
+            width: Math.min(dummy.contentWidth, textDelegate.width - imageSkip.width - 50)
+            height: contentHeight
+            anchors.centerIn: parent
+
+            font.family: root.currentlyLoadedProject.font
+            font.pointSize: 14
+            font.hintingPreference: Font.PreferNoHinting
+
+            horizontalAlignment: Text.AlignHCenter
+            elide: Text.ElideNone
+            text: textContent.replace("<html>","").replace("</html>","")
+            wrapMode: Text.WordWrap
+            color: textColor
+            textFormat: (textContent.startsWith("<html>") && textContent.endsWith("</html>")) ?
+                            Text.RichText :
+                            (QtApp.mightBeRichtext(textContent) ?
+                                 Text.StyledText : Text.PlainText)
+        }
+        Text {
+            id: dummy
+            visible: false
+
+            font: textContentItem.font
+
+            horizontalAlignment: textContentItem.horizontalAlignment
+            elide: Text.ElideNone
+            text: textContentItem.text
+            wrapMode: textContentItem.wrapMode
+            textFormat: textContentItem.textFormat
         }
 
         IconResourceDelegate {
@@ -72,8 +86,8 @@ Rectangle {
                 }
                 return -height * 3 / 4;
             }
-            width: pResource === null ? 0 : 64
-            height: 64
+            width: pResource === null ? 0 : textDelegate.iconWidth
+            height: textDelegate.iconHeight
 
             pResource: model.portrait
         }

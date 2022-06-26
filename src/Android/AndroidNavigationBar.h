@@ -13,6 +13,7 @@ public:
   CAndroidNavigationBar(QObject* pParent);
 
   static bool IsAvailable();
+  static void SetBarVisiblility(bool bVisible);
 
   static QColor Color();
   static void SetColor(const QColor &color);

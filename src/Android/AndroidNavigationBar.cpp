@@ -20,6 +20,18 @@ bool CAndroidNavigationBar::IsAvailable()
 
 //----------------------------------------------------------------------------------------
 //
+void CAndroidNavigationBar::SetBarVisiblility(bool bVisible)
+{
+  if (!IsAvailable()) { return; }
+
+  QtAndroid::runOnAndroidThread([=]() {
+      QAndroidJniObject window = GetAndroidWindow();
+      window.callMethod<void>("setNavigationVisible", "(Z)V", bVisible);
+  });
+}
+
+//----------------------------------------------------------------------------------------
+//
 QColor CAndroidNavigationBar::Color()
 {
   return m_color;

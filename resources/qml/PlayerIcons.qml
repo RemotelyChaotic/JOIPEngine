@@ -10,6 +10,9 @@ Rectangle {
     color: "transparent"
     property string userName: "icon"
 
+    property int iconWidth: 64
+    property int iconHeight: 64
+
     function addIcon(sName)
     {
         if (null !== registrator.currentlyLoadedProject &&
@@ -125,6 +128,8 @@ Rectangle {
                 model: iconModel
                 delegate: IconResourceDelegate {
                     pResource: model.resource
+                    width: icon.iconWidth
+                    height: icon.iconHeight
                 }
             }
         }

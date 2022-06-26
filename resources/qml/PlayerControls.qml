@@ -8,17 +8,20 @@ Rectangle {
     id: sceneControl
     color: "transparent"
 
+    property int buttonHeight: 48
+    property int buttonWidth: 64
+    property int spacing: 10
     property Item soundEffects: null
 
     RowLayout {
         anchors.fill: parent
-        spacing: 10
+        spacing: parent.spacing
         layoutDirection: Qt.RightToLeft
 
         Button {
             id: exitButton
-            Layout.preferredHeight: 48
-            Layout.preferredWidth: 64
+            Layout.preferredHeight: sceneControl.buttonHeight
+            Layout.preferredWidth: sceneControl.buttonWidth
             Layout.alignment: Qt.AlignVCenter
 
             visible: !root.debug
@@ -71,8 +74,8 @@ Rectangle {
 
         Button {
             id: pauseButton
-            Layout.preferredHeight: 48
-            Layout.preferredWidth: 64
+            Layout.preferredHeight: sceneControl.buttonHeight
+            Layout.preferredWidth: sceneControl.buttonWidth
             Layout.alignment: Qt.AlignVCenter
 
             text: Settings.keyBinding("Pause")

@@ -21,6 +21,7 @@ class CSettings : public QObject
   Q_PROPERTY(bool muted READ Muted WRITE SetMuted NOTIFY mutedChanged)
   Q_PROPERTY(bool offline READ Offline WRITE SetOffline NOTIFY offlineChanged)
   Q_PROPERTY(bool pauseWhenInactive READ PauseWhenInactive WRITE SetPauseWhenInactive NOTIFY pauseWhenInactiveChanged)
+  Q_PROPERTY(QString platform READ Platform CONSTANT)
   Q_PROPERTY(EditorType preferedEditorLayout READ PreferedEditorLayout WRITE SetPreferedEditorLayout NOTIFY preferedEditorLayoutChanged)
   Q_PROPERTY(QSize resolution READ Resolution WRITE SetResolution NOTIFY resolutionChanged)
   Q_PROPERTY(QString style READ Style WRITE SetStyle NOTIFY styleChanged)
@@ -88,6 +89,7 @@ public:
   void SetPreferedEditorLayout(const EditorType& eType);
   EditorType PreferedEditorLayout();
   void SetResolution(const QSize& size);
+  QString Platform() const;
   QSize Resolution();
   bool HasOldSettingsVersion();
   void SetSettingsVersion(quint32 uiVersion);

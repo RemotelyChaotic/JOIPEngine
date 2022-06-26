@@ -363,17 +363,6 @@ Rectangle {
                 console.log("Loading Layout: " + progress + "%");
             }
         }
-
-        PlayerControls {
-            id: sceneControl
-            anchors.top: parent.top
-            anchors.horizontalCenter: parent.horizontalCenter
-            anchors.topMargin: (null != style) ? style.controllButtonDisplay.topOffset : 50
-            width: (null != style) ? (parent.width - style.controllButtonDisplay.rightOffset*2) : parent.width-100
-            height: (null != style) ? style.controllButtonDisplay.height : 64
-
-            soundEffects: playerSoundEffects
-        }
     }
 
     //------------------------------------------------------------------------------------
