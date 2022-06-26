@@ -323,6 +323,7 @@ Rectangle {
             transparentBorder: true
             horizontalOffset: 8
             verticalOffset: 8
+            cached: true
         }
 
         MouseArea {
