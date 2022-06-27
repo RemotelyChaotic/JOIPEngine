@@ -115,7 +115,7 @@ void CMetronomeSnippetOverlay::Resize()
 
   QPoint newPos =
       QPoint(m_pTargetWidget->geometry().width() / 2, m_pTargetWidget->geometry().height() / 2) -
-      QPoint(width() / 2, height() / 2);
+      QPoint(newSize.width() / 2, newSize.height() / 2);
 
   move(newPos.x(), newPos.y());
   resize(newSize);
