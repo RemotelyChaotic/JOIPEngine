@@ -96,15 +96,22 @@ Rectangle {
     ListView {
         id: listView
         anchors.centerIn: parent
-        property real itemWidth: (height - 20) / 4 * 3
+
+        property bool isLandscape: parent.width > parent.height
+        property real itemWidth: isLandscape ? (parent.height - 40) / 4 * 3 : parent.width - 40
+        property real itemHeight: isLandscape ? parent.height - 40 : (parent.width - 40) / 4 * 3
         property real neededWidth: (listModel.count * itemWidth + spacing * (listModel.count-1))
-        width: (neededWidth < parent.width - 20) ? neededWidth : parent.width - 20;
-        height: parent.height - 20
+        property real neededHeight: (listModel.count * itemHeight + spacing * (listModel.count-1))
+
+        width: isLandscape ? ((neededWidth < parent.width - 20) ? neededWidth : parent.width - 20) :
+                             (parent.width - 20)
+        height: isLandscape ? (parent.height - 20) :
+                              ((neededHeight < parent.height - 20) ? neededHeight : parent.height - 20)
         clip: true
 
         cacheBuffer: 0
         layoutDirection: Qt.LeftToRight
-        orientation: width > height ? ListView.Horizontal : ListView.Vertical
+        orientation: isLandscape ? ListView.Horizontal : ListView.Vertical
         spacing: 50
 
         signal clicked(int index)
@@ -135,8 +142,16 @@ Rectangle {
         }
 
         ScrollBar.horizontal: ScrollBar{
-            id: scroll
+            id: scrollH
+
+            visible: parent.isLandscape
             orientation: Qt.Horizontal
+        }
+        ScrollBar.vertical: ScrollBar{
+            id: scrollV
+
+            visible: !parent.isLandscape
+            orientation: Qt.Vertical
         }
 
         // Set the highlight delegate. Note we must also set highlightFollowsCurrentItem
