@@ -32,6 +32,7 @@ class CSceneMainScreen : public QWidget
 
 public:
   explicit CSceneMainScreen(QWidget* pParent = nullptr);
+  explicit CSceneMainScreen(QWidget* pParent, bool bDebug);
   ~CSceneMainScreen() override;
 
   void Initialize();

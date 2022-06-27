@@ -5,6 +5,7 @@
 #include "EditorLayouts/EditorLayoutBase.h"
 #include "EditorLayouts/IEditorLayoutViewProvider.h"
 #include "EditorWidgets/EditorWidgetBase.h"
+#include "Systems/BackActionHandler.h"
 #include "Systems/DatabaseManager.h"
 #include "Systems/Project.h"
 #include "Tutorial/EditorTutorialOverlay.h"
@@ -198,6 +199,11 @@ void CEditorMainScreen::LoadProject(qint32 iId)
   m_spEditorModel->LoadProject(iId);
   m_spCurrentProject = m_spEditorModel->CurrentProject();
 
+  if (auto spBackActionHandler = CApplication::Instance()->System<CBackActionHandler>().lock())
+  {
+    spBackActionHandler->RegisterSlotToCall(this, "SlotExitCalled");
+  }
+
   ProjectLoaded(false);
 }
 
@@ -231,6 +237,13 @@ void CEditorMainScreen::UnloadProject()
   m_spUi->pProjectActionBar->m_spUi->ExportButton->setEnabled(true);
 
   RemoveLayout();
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CEditorMainScreen::SlotExitCalled()
+{
+  SlotExitClicked(false);
 }
 
 //----------------------------------------------------------------------------------------

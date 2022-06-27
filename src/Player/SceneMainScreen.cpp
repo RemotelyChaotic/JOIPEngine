@@ -5,6 +5,8 @@
 #include "ProjectRunner.h"
 #include "ProjectSceneManager.h"
 #include "Settings.h"
+
+#include "Systems/BackActionHandler.h"
 #include "Systems/DatabaseManager.h"
 #include "Systems/DatabaseImageProvider.h"
 #include "Systems/Project.h"
@@ -50,6 +52,12 @@ CSceneMainScreen::CSceneMainScreen(QWidget* pParent) :
   m_spUi->setupUi(this);
 
   Initialize();
+}
+
+CSceneMainScreen::CSceneMainScreen(QWidget* pParent, bool bDebug) :
+  CSceneMainScreen(pParent)
+{
+  SetDebugging(bDebug);
 }
 
 CSceneMainScreen::~CSceneMainScreen()
@@ -119,6 +127,14 @@ void CSceneMainScreen::LoadProject(qint32 iId, const QString sStartScene)
 
     m_bShuttingDown = false;
     m_bErrorState = false;
+  }
+
+  if (!m_bBeingDebugged)
+  {
+    if (auto spBackActionHandler = CApplication::Instance()->System<CBackActionHandler>().lock())
+    {
+      spBackActionHandler->RegisterSlotToCall(this, "SlotQuit");
+    }
   }
 }
 

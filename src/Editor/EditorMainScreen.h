@@ -38,6 +38,7 @@ signals:
   void SignalUnloadFinished();
 
 protected slots:
+  void SlotExitCalled();
   void SlotExitClicked(bool bClick);
   void SlotExportClicked(bool bClick);
   void SlotHelpClicked(bool bClick);
