@@ -25,6 +25,7 @@ Rectangle {
     property int numReadyComponents: 0
     property var componentsRegistered: []
     signal startLoadingSkript()
+    signal unloadFinished()
     signal quit()
 
     //------------------------------------------------------------------------------------
@@ -65,25 +66,34 @@ Rectangle {
 
     function onUnLoadProject()
     {
-        // clear eval environement and storage
-        storage.clear();
-        SoundManager.clearRegistry();
+        if (null != currentlyLoadedProject)
+        {
+            // clear eval environement and storage
+            storage.clear();
+            SoundManager.clearRegistry();
 
-        registeredTextBox = null;
-        registeredMediaPlayer = null;
+            registeredTextBox = null;
+            registeredMediaPlayer = null;
 
-        // TODO: unload registered eval access objects
+            // TODO: unload registered eval access objects
 
-        numReadyComponents = 0;
-        componentsRegistered = [];
+            numReadyComponents = 0;
+            componentsRegistered = [];
 
-        layoutLoader.setSource("");
+            layoutLoader.setSource("");
+            layoutLoader.unload();
 
-        currentlyLoadedProject = null;
+            hoverSound.source = "";
+            clickSound.source = "";
 
-        style = null;
+            currentlyLoadedProject = null;
 
-        gc();
+            style = null;
+
+            gc();
+
+            root.unloadFinished();
+        }
     }
 
     //------------------------------------------------------------------------------------
@@ -339,6 +349,11 @@ Rectangle {
             anchors.fill: parent
             asynchronous: true
             active: true
+
+            function unload(){
+                sourceComponent = undefined;
+            }
+
             onLoaded: {
                 if (status === Loader.Ready)
                 {

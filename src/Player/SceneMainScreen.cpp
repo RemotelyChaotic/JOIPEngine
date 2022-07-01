@@ -459,9 +459,6 @@ void CSceneMainScreen::SlotScriptRunFinished(bool bOk, const QString& sRetVal)
     DisconnectAllSignals();
     UnloadRunner();
     UnloadQml();
-
-    bool bOk = QMetaObject::invokeMethod(this, "SlotUnloadFinished", Qt::QueuedConnection);
-    assert(bOk); Q_UNUSED(bOk)
   }
 }
 
@@ -477,6 +474,11 @@ void CSceneMainScreen::SlotStartLoadingSkript()
 void CSceneMainScreen::SlotUnloadFinished()
 {
   m_spEventCallbackRegistry->Clear();
+
+  // disconnect this after unloading
+  QQuickItem* pRootObject =  m_spUi->pQmlWidget->rootObject();
+  disconnect(pRootObject, SIGNAL(unloadFinished()),
+             this, SLOT(SlotUnloadFinished()));
 
   m_spUi->pQmlWidget->engine()->clearComponentCache();
   m_spUi->pQmlWidget->engine()->collectGarbage();
@@ -519,6 +521,9 @@ void CSceneMainScreen::ConnectAllSignals()
 
   bOk = connect(pRootObject, SIGNAL(sceneSelectionReturnValue(int)),
                 this, SLOT(SlotSceneSelectReturnValue(int)), Qt::QueuedConnection);
+  assert(bOk);
+  bOk = connect(pRootObject, SIGNAL(unloadFinished()),
+                this, SLOT(SlotUnloadFinished()), Qt::QueuedConnection);
   assert(bOk);
 }
 
