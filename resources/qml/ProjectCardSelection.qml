@@ -86,9 +86,9 @@ Rectangle {
         propagateComposedEvents: true
         onWheel: {
             if (wheel.angleDelta.y < 0) {
-                scroll.increase();
+                listView.isLandscape ? scrollH.increase() : scrollV.increase();
             } else {
-                scroll.decrease();
+                listView.isLandscape ? scrollH.decrease() : scrollV.decrease();
             }
         }
     }
