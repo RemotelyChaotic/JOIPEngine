@@ -25,14 +25,17 @@ Rectangle {
         onStatusChanged: {
             if (startedBackgroundLoad)
             {
-                if (status === Image.Error || status === Image.Null)
+                if ("" !== source)
                 {
-                    console.error(qsTr("Resource %1 not found.").arg(source));
-                    startedBackgroundLoad = false;
-                }
-                else if (status === Image.Ready)
-                {
-                    startedBackgroundLoad = false;
+                    if (status === Image.Error || status === Image.Null)
+                    {
+                        console.error(qsTr("Resource %1 not found.").arg(source));
+                        startedBackgroundLoad = false;
+                    }
+                    else if (status === Image.Ready)
+                    {
+                        startedBackgroundLoad = false;
+                    }
                 }
             }
         }
@@ -48,14 +51,17 @@ Rectangle {
         visible: background.animated
 
         onStatusChanged: {
-            if (status === Image.Error || status === Image.Null)
+            if ("" !== source)
             {
-                console.error(qsTr("Resource %1 not found.").arg(source));
-                startedBackgroundLoad = false;
-            }
-            else if (status === Image.Ready)
-            {
-                startedBackgroundLoad = false;
+                if (status === Image.Error || status === Image.Null)
+                {
+                    console.error(qsTr("Resource %1 not found.").arg(source));
+                    startedBackgroundLoad = false;
+                }
+                else if (status === Image.Ready)
+                {
+                    startedBackgroundLoad = false;
+                }
             }
         }
     }
