@@ -203,3 +203,5 @@ Fixed Bugs:
 - Wheel scrolling of Project card selection fixed.
 - When debugging a script, the player is not shown stacked on top of everything.
 - Fixed some style bugs.
+- Fixed a bug, where Scenes could not be resolved, and thus the Player could not
+  start correctly due to different traversal of the SceneFlow.

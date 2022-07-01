@@ -62,10 +62,13 @@ bool CProjectRunner::MightBeRegexScene(const QString& sName)
 //
 void CProjectRunner::LoadProject(tspProject spProject, const QString sStartScene)
 {
+  QString sError;
   if (nullptr != m_spCurrentProject)
   {
     assert(false);
-    qWarning() << "Old Project was not unloaded before loading project.";
+    sError = tr("Old Project was not unloaded before loading project.");
+    qWarning() << sError;
+    emit SignalError(sError, QtMsgType::QtCriticalMsg);
   }
 
   m_spCurrentProject = spProject;
@@ -80,11 +83,23 @@ void CProjectRunner::LoadProject(tspProject spProject, const QString sStartScene
 
   bool bOk = LoadFlowScene();
   assert(bOk && "Could not load Flow scene. Why????");
-  if (!bOk) { return; }
+  if (!bOk)
+  {
+    sError = tr("Could not load Flow scene.");
+    qWarning() << sError;
+    emit SignalError(sError, QtMsgType::QtCriticalMsg);
+    return;
+  }
 
   bOk = ResolveStart(sStartScene);
   assert(bOk && "Starting scene could not be resolved.");
-  if (!bOk) { return; }
+  if (!bOk)
+  {
+    sError = QString(tr("Starting scene '%1' could not be resolved.")).arg(sStartScene);
+    qWarning() << sError;
+    emit SignalError(sError, QtMsgType::QtCriticalMsg);
+    return;
+  }
 
   CSceneNodeModel* pNodeDataModel = dynamic_cast<CSceneNodeModel*>(m_pCurrentNode->nodeDataModel());
   if (!sStartScene.isNull() && !sStartScene.isEmpty() && nullptr != pNodeDataModel)
@@ -95,7 +110,13 @@ void CProjectRunner::LoadProject(tspProject spProject, const QString sStartScene
   }
 
   bOk = ResolveNextScene();
-  if (!bOk) { return; }
+  if (!bOk)
+  {
+    sError = tr("Could not resolve next scene.");
+    qWarning() << sError;
+    emit SignalError(sError, QtMsgType::QtCriticalMsg);
+    return;
+  }
 }
 
 //----------------------------------------------------------------------------------------
@@ -464,15 +485,17 @@ bool CProjectRunner::ResolveStart(const QString sStartScene)
   }
 
   bool bFound = false;
+  QStringList vsFoundNames;
   auto vpNodes = m_pFlowScene->allNodes();
   for (auto pNode : vpNodes)
   {
     CSceneNodeModel* pSceneModel = dynamic_cast<CSceneNodeModel*>(pNode->nodeDataModel());
     CStartNodeModel* pStartModel = dynamic_cast<CStartNodeModel*>(pNode->nodeDataModel());
-    if (nullptr != pSceneModel && !sStartScene.isNull() && !sStartScene.isEmpty())
+    if (nullptr != pSceneModel && !sStartScene.isEmpty())
     {
       if (pSceneModel->SceneName() == sStartScene)
       {
+        vsFoundNames.push_back(pSceneModel->SceneName());
         bFound = true;
         m_pCurrentNode = pNode;
       }
@@ -481,16 +504,29 @@ bool CProjectRunner::ResolveStart(const QString sStartScene)
     {
       if (!bFound)
       {
+        vsFoundNames.push_back(pStartModel->Name());
         bFound = true;
         m_pCurrentNode = pNode;
       }
-      else
-      {
-        QString sError(tr("Multiple entry points in project."));
-        qWarning() << sError;
-        emit SignalError(sError, QtMsgType::QtCriticalMsg);
-        return false;
-      }
+    }
+  }
+
+  if (!bFound)
+  {
+    if (vsFoundNames.size() > 0)
+    {
+      QString sError = QString(tr("Multiple entry points in project: %1 (%2)"))
+                       .arg(vsFoundNames.size()).arg(vsFoundNames.join(", "));
+      qWarning() << sError;
+      emit SignalError(sError, QtMsgType::QtCriticalMsg);
+      return false;
+    }
+    else
+    {
+      QString sError = QString(tr("No entry points in project."));
+      qWarning() << sError;
+      emit SignalError(sError, QtMsgType::QtCriticalMsg);
+      return false;
     }
   }
 
