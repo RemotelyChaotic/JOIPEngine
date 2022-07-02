@@ -4,6 +4,8 @@
 #include "Settings.h"
 #include "SVersion.h"
 
+#include <wintoastlib.h>
+
 #include <QDebug>
 #include <QFileInfo>
 #include <QObject>

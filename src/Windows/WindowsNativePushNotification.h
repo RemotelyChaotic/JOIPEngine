@@ -1,8 +1,6 @@
 #ifndef CWINDOWSNATIVEPUSHNOTIFICATION_H
 #define CWINDOWSNATIVEPUSHNOTIFICATION_H
 
-#include <wintoastlib.h>
-
 #include <QPointer>
 #include <QString>
 
@@ -11,6 +9,9 @@
 
 class CMainWindow;
 class CWinToastHandler;
+namespace WinToastLib {
+  class WinToastTemplate;
+}
 
 class CWindowsNativePushNotification
 {
