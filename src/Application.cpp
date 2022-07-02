@@ -189,9 +189,9 @@ void CApplication::Initialize()
 
 //----------------------------------------------------------------------------------------
 //
-void CApplication::SendNotification(const QString& sMsg)
+void CApplication::SendNotification(const QString& sTitle, const QString& sMsg)
 {
-  m_spNotifier->SendNotification(sMsg);
+  m_spNotifier->SendNotification(sTitle, sMsg);
 }
 
 //----------------------------------------------------------------------------------------

@@ -196,6 +196,8 @@ Changes:
 - Code snippet overlays are shown in the Code Editor instead of the entire Editor
   window.
 - Changed UI to work reliably with mobile and extremely small resolutions.
+- On Windows, notifications are shown as toast notifications if app is not
+  active.
 
 Fixed Bugs:
 - Flickering in Resource Explorer View was fixed.

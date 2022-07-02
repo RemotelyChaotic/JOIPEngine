@@ -205,6 +205,13 @@ QString CEosDownloadJob::JobName() const
 
 //----------------------------------------------------------------------------------------
 //
+QString CEosDownloadJob::JobType() const
+{
+  return "EOS";
+}
+
+//----------------------------------------------------------------------------------------
+//
 qint32 CEosDownloadJob::Progress() const
 {
   return m_iProgress;

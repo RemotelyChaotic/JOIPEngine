@@ -31,3 +31,6 @@
 [submodule "3rdparty/android_openssl"]
 	path = 3rdparty/android_openssl
 	url = https://github.com/RemotelyChaotic/android_openssl.git
+[submodule "3rdparty/WinToast"]
+	path = 3rdparty/WinToast
+	url = https://github.com/RemotelyChaotic/WinToast.git

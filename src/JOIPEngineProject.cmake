@@ -472,9 +472,13 @@ macro(CreateJOIPProject JOIP_PROJECT_NAME)
   )
 
   if (WIN32)
+    get_target_property(WINTOAST_SRC WinToast SOURCES)
     set(WinSources
       ${JOIPSources}/Windows/WindowsMainWindow.cpp
       ${JOIPSources}/Windows/WindowsMainWindow.h
+      ${JOIPSources}/Windows/WindowsNativePushNotification.cpp
+      ${JOIPSources}/Windows/WindowsNativePushNotification.h
+      ${WINTOAST_SRC}
     )
   elseif(ANDROID)
     set(AndroidSources
@@ -484,6 +488,8 @@ macro(CreateJOIPProject JOIP_PROJECT_NAME)
       ${JOIPSources}/Android/AndroidMainWindow.h
       ${JOIPSources}/Android/AndroidNavigationBar.cpp
       ${JOIPSources}/Android/AndroidNavigationBar.h
+      ${JOIPSources}/Android/AndroidNotificationClient.cpp
+      ${JOIPSources}/Android/AndroidNotificationClient.h
       ${CMAKE_SOURCE_DIR}/android_resources.qrc
     )
   endif()
@@ -562,6 +568,15 @@ macro(JOIPProjectSettings JOIP_PROJECT_NAME)
       nlohmann_json_schema_validator
       physfs-static
       xmldom)
+
+    if (WIN32)
+      find_library(PSAPI NAMES "psapi" REQUIRED)
+      message (STATUS "PSAPI: ${PSAPI}")
+      target_link_libraries(${JOIP_PROJECT_NAME}
+        PRIVATE
+          WinToast
+          Psapi)
+    endif()
 
   target_sources(${JOIP_PROJECT_NAME}
     PRIVATE

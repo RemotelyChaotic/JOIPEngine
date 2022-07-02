@@ -13,7 +13,8 @@ class CPushNotification : public COverlayBase
   Q_PROPERTY(qint32 iYOffset READ YOffset WRITE SetYOffset)
 
 public:
-  explicit CPushNotification(const QString& sMsg, std::chrono::milliseconds displayTime,
+  explicit CPushNotification(const QString& sMsg,
+                             std::chrono::milliseconds displayTime,
                              QWidget* pParent = nullptr);
   ~CPushNotification() override;
 

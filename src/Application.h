@@ -46,7 +46,7 @@ public:
 
   std::shared_ptr<CSettings> Settings() { return m_spSettings; }
   template<typename T> std::weak_ptr<T> System();
-  void SendNotification(const QString& sMsg);
+  void SendNotification(const QString& sTitle, const QString& sMsg);
 
 signals:
   void StyleLoaded();

@@ -58,6 +58,7 @@ public:
   QString Error() override;
   bool Finished() override;
   QString JobName() const override;
+  QString JobType() const override;
   qint32 Progress() const override;
   bool Run(const QVariantList& args) override;
 

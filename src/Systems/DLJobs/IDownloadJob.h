@@ -31,6 +31,7 @@ public:
   virtual QString Error() = 0;
   virtual bool Finished() = 0;
   virtual QString JobName() const = 0;
+  virtual QString JobType() const = 0;
   virtual qint32 Progress() const = 0;
   virtual bool Run(const QVariantList& args) = 0;
   virtual void Stop() { m_bStop = true; }

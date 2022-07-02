@@ -16,6 +16,7 @@ nodeeditor by "Dmitry Pinaev" (https://github.com/paceholder/nodeeditor)
 physfs-3.0.2 by "Ryan C. Gordon" (https://icculus.org/physfs)
 QtAV by "The QtAV-Team" (https://www.qtav.org)
 SortFilterProxyModel by "oKcerG" (https://github.com/oKcerG/SortFilterProxyModel)
+WinToast by "mohabouje" (https://github.com/mohabouje/WinToast)
 
 Software Design & Programming:
 "RemotlyChaotic"
