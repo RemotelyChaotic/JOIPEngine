@@ -30,6 +30,9 @@ protected:
 private slots:
   void OldSettingsDetected() override;
 
+  void SlotApplicationStateChanged(Qt::ApplicationState state);
+  void SlotKeyboardVisibilityChanged();
+
 private:
   QPointer<CAndroidNavigationBar> m_pNavigationBar;
 };

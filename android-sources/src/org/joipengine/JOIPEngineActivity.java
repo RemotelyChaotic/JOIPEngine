@@ -54,7 +54,7 @@ public class JOIPEngineActivity extends QtActivity
   public void setNavigationVisible(boolean bVisible)
   {
     View decor = getWindow().getDecorView();
-    if (bVisible)
+    if (!bVisible)
     {
       decor.setSystemUiVisibility(decor.getSystemUiVisibility()
                                   | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION

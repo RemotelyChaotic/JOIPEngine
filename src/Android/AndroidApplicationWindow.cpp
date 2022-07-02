@@ -10,6 +10,13 @@ QAndroidJniObject GetAndroidWindow()
 
 //----------------------------------------------------------------------------------------
 //
+QAndroidJniObject GetAndroidActivity()
+{
+  return QtAndroid::androidActivity();
+}
+
+//----------------------------------------------------------------------------------------
+//
 void SetAndroidWindowFlags(QAndroidJniObject& window, qint32 iFlags)
 {
   window.callMethod<void>("addFlags", "(I)V", iFlags);

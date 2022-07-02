@@ -10,6 +10,7 @@
 #define SYSTEM_UI_FLAG_LIGHT_STATUS_BAR 0x00002000
 
 QAndroidJniObject GetAndroidWindow();
+QAndroidJniObject GetAndroidActivity();
 void SetAndroidWindowFlags(QAndroidJniObject& window, qint32 iFlags);
 void ClearAndroidWindowFlags(QAndroidJniObject& window, qint32 iFlags);
 

@@ -25,8 +25,8 @@ void CAndroidNavigationBar::SetBarVisiblility(bool bVisible)
   if (!IsAvailable()) { return; }
 
   QtAndroid::runOnAndroidThread([=]() {
-      QAndroidJniObject window = GetAndroidWindow();
-      window.callMethod<void>("setNavigationVisible", "(Z)V", bVisible);
+      QAndroidJniObject activity = GetAndroidActivity();
+      activity.callMethod<void>("setNavigationVisible", "(Z)V", bVisible);
   });
 }
 
