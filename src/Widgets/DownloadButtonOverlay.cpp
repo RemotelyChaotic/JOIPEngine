@@ -19,13 +19,12 @@ CDownloadCounterOverlay::CDownloadCounterOverlay(QWidget* pParent) :
   setFrameShape(QFrame::NoFrame);
   setFrameShadow(QFrame::Plain);
 
-  QFont font = m_pDlCounter->font();
-  font.setPointSize(14);
-  m_pDlCounter->setFont(font);
-  m_pDlCounter->setSizePolicy(QSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed));
-  m_pDlCounter->setFixedSize(QSize(100, 100));
+  m_pDlCounter->SetFontSize(14);
+  m_pDlCounter->setSizePolicy(QSizePolicy(QSizePolicy::Preferred, QSizePolicy::Preferred));
 
   QLayout* pLayout = new QVBoxLayout(this);
+  pLayout->setMargin(0);
+  pLayout->setContentsMargins(0, 0, 0, 0);
   pLayout->addWidget(m_pDlCounter.data());
   setLayout(pLayout);
 }
@@ -43,7 +42,7 @@ void CDownloadCounterOverlay::Initialize()
 
 //----------------------------------------------------------------------------------------
 //
-QPointer<QLabel> CDownloadCounterOverlay::Counter()
+QPointer<CTitleLabel> CDownloadCounterOverlay::Counter()
 {
   return m_pDlCounter;
 }
@@ -60,7 +59,7 @@ void CDownloadCounterOverlay::Climb()
 //
 void CDownloadCounterOverlay::Resize()
 {
-  resize(m_pDlCounter->sizeHint());
+  resize(m_pDlCounter->SuggestedSize() + QSize(10, 10));
 }
 
 //----------------------------------------------------------------------------------------
@@ -123,8 +122,8 @@ void CDownloadButtonOverlay::Resize()
   m_pProgressBar->resize(sizeHint());
 
   m_pCounterOverlay->Resize();
-  m_pCounterOverlay->move(pos.x() - m_pCounterOverlay->size().width() / 2 - 10,
-                          pos.y() - m_pCounterOverlay->size().height() / 2 - 10);
+  m_pCounterOverlay->move(pos.x() - m_pCounterOverlay->size().width() / 2,
+                          pos.y() - m_pCounterOverlay->size().height() / 2);
 }
 
 //----------------------------------------------------------------------------------------

@@ -207,3 +207,5 @@ Fixed Bugs:
 - Fixed some style bugs.
 - Fixed a bug, where Scenes could not be resolved, and thus the Player could not
   start correctly due to different traversal of the SceneFlow.
+- Fixed EOS teases setting a non-image file as Title Image.
+- General tease download (UI) fixes.

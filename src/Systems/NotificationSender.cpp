@@ -43,7 +43,7 @@ void CNotificationSender::SendNotification(const QString& sTitle,
 {
   bool bOk =
       QMetaObject::invokeMethod(this, "SlotSendNotification", Qt::QueuedConnection,
-                                Q_ARG(QString, sMsg), Q_ARG(QString, sMsg));
+                                Q_ARG(QString, sTitle), Q_ARG(QString, sMsg));
   assert(bOk);
   Q_UNUSED(bOk)
 }

@@ -5,7 +5,7 @@
 #include <QPointer>
 
 class CProgressBar;
-class QLabel;
+class CTitleLabel;
 
 class CDownloadCounterOverlay : public COverlayBase
 {
@@ -17,14 +17,14 @@ public:
 
   void Initialize();
 
-  QPointer<QLabel> Counter();
+  QPointer<CTitleLabel> Counter();
 
 public slots:
   void Climb() override;
   void Resize() override;
 
 private:
-  QPointer<QLabel>    m_pDlCounter;
+  QPointer<CTitleLabel>    m_pDlCounter;
 };
 
 //----------------------------------------------------------------------------------------

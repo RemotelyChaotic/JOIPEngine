@@ -345,6 +345,11 @@ bool CEosDownloadJob::Run(const QVariantList& args)
   spDbManager->RenameProject(m_iProjId, ToValidProjectName(metaData.m_sTitle));
   spDbManager->SerializeProject(m_iProjId, true);
 
+  {
+    QReadLocker locker(&m_spProject->m_rwLock);
+    m_sName = m_spProject->m_sName;
+  }
+
   // emit another progress update to let the displays update
   emit SignalProgressChanged(m_iProjId, Progress());
 

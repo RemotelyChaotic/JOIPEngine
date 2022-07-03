@@ -559,11 +559,12 @@ bool CEosResourceLocator::LookupFile(const tResourceMap& files,
     return false;
   }
 
-  // set name
+  // Usually this doesn't contain images, so we won't check
+  /*
   if (m_spTitleImg.isEmpty())
   {
     m_spTitleImg = itFile->second->m_data.m_sName;
-  }
+  }*/
 
   return true;
 }
