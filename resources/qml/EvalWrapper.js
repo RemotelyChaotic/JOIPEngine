@@ -30,19 +30,13 @@ function wrap(script, onerror, type) {
 function isolate(script, type) {
   return "\n"+
   "try {_globalEval(" + JSON.stringify(script) + ")}\n"+
-    "catch (e) {console.error(\n"+
+  "catch (e) {\n"+
+    "console.error(\n"+
       "e.message,\n"+
       "e.stack,\n"+
       JSON.stringify('\n\nIn ' + (type || 'Script EVAL') + ':\n') + ",\n" +
       JSON.stringify(script) +
-      ");\n"+
-      "var hasVarsRxRes = e.message.match(/(.*) is not defined/);\n" +
-      "if (hasVarsRxRes.length > 1) {\n" +
-        "try{\n"+
-          "eval('var ' + hasVarsRxRes[1] + '=null;');\n" +
-          "eval(" + JSON.stringify(script) + ");"+
-        "} catch(e) {}\n"+
-      "}\n" +
-    "}";
+    ");\n"+
+  "}";
 }
 

@@ -209,6 +209,10 @@ Rectangle {
         {
             return load(sId);
         }
+        function removeItem(sId)
+        {
+            store(sId, null);
+        }
     }
     StorageSignalEmitter {
         id: storageEmitter
@@ -400,5 +404,6 @@ Rectangle {
         numReadyComponents += 3;
 
         registerUIComponent("teaseStorage", storage);
+        evaluate("var window = {};");
     }
 }

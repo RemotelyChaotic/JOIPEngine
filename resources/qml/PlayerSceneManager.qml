@@ -43,7 +43,7 @@ Rectangle {
         },
         "isEnabled": function(sScene)
         {
-            return sceneManagerPrivate.isEnabled();
+            return sceneManagerPrivate.isEnabled(sScene);
         },
         "getCurrentSceneId": function()
         {
