@@ -1431,7 +1431,6 @@ class CJsonInstructionSetParserPrivate
 
 public:
   CJsonInstructionSetParserPrivate() :
-    m_spParser(nullptr),
     m_jsonBaseSchema(),
     m_error()
   {
@@ -1460,9 +1459,9 @@ public:
     if (spRunner->m_pPrivate->Validate(json))
     {
       spRunner->m_pPrivate->m_sJson = json;
-      m_spParser.reset(new CJSonSaxParser(spRunner->m_pPrivate.get(),
-                                          spRunner->m_pPrivate->m_instructionMap));
-      if (nlohmann::json::sax_parse(spRunner->m_pPrivate->m_sJson, m_spParser.get()))
+      CJSonSaxParser spParser(spRunner->m_pPrivate.get(),
+                              m_instructionMap);
+      if (nlohmann::json::sax_parse(spRunner->m_pPrivate->m_sJson, &spParser))
       {
         m_error = SJsonException();
         return spRunner;
@@ -1470,6 +1469,7 @@ public:
       else
       {
         m_error = spRunner->m_pPrivate->ParseError();
+        m_error.m_sException = "Failed to parse json:" + m_error.m_sException;
         qWarning() << m_error.m_sException;
         return nullptr;
       }
@@ -1477,6 +1477,7 @@ public:
     else
     {
       m_error = spRunner->m_pPrivate->ParseError();
+      m_error.m_sException = "Failed to validate json:" + m_error.m_sException;
       qWarning() << m_error.m_sException;
       return nullptr;
     }
@@ -1516,7 +1517,6 @@ public:
   }
 
 protected:
-  std::unique_ptr<CJSonSaxParser>                          m_spParser;
   nlohmann::json                                           m_jsonBaseSchema;
   std::map<QString, QStringList>                           m_instructionSetPath;
   std::map<QString, std::shared_ptr<IJsonInstructionBase>> m_instructionMap;
