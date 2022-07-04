@@ -13,6 +13,7 @@
 class CDatabaseManager;
 class CEditorLayoutViewProvider;
 class CEditorTutorialOverlay;
+class CWindowContext;
 namespace Ui {
   class CEditorMainScreen;
 }
@@ -28,7 +29,7 @@ public:
   explicit CEditorMainScreen(QWidget* pParent = nullptr);
   ~CEditorMainScreen();
 
-  void Initialize();
+  void Initialize(const std::shared_ptr<CWindowContext>& spWindowContext);
   void InitNewProject(const QString& sNewProjectName, bool bTutorial);
   void LoadProject(qint32 iId);
   void UnloadProject();
@@ -60,6 +61,7 @@ private:
   std::unique_ptr<CEditorModel>                               m_spEditorModel;
   std::shared_ptr<CEditorLayoutViewProvider>                  m_spViewProvider;
   std::shared_ptr<Ui::CEditorMainScreen>                      m_spUi;
+  std::shared_ptr<CWindowContext>                             m_spWindowContext;
   std::vector<QPointer<QAction>>                              m_vpKeyBindingActions;
   QPointer<CEditorLayoutBase>                                 m_pLayout;
   QPointer<CEditorTutorialOverlay>                            m_pTutorialOverlay;

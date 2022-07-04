@@ -29,6 +29,7 @@ public:
 
   void ConnectSlots() override;
   void Initialize() override;
+  void OnShow() override {}
 
 protected slots:
   void SlotChangeAppState(EAppState newState);

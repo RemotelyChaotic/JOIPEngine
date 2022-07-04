@@ -198,6 +198,7 @@ Changes:
 - Changed UI to work reliably with mobile and extremely small resolutions.
 - On Windows, notifications are shown as toast notifications if app is not
   active.
+- On Windows, taskbar shows icon overlays based on app state.
 
 Fixed Bugs:
 - Flickering in Resource Explorer View was fixed.

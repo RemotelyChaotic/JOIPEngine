@@ -5,6 +5,7 @@
 #include "ProjectRunner.h"
 #include "ProjectSceneManager.h"
 #include "Settings.h"
+#include "WindowContext.h"
 
 #include "Systems/BackActionHandler.h"
 #include "Systems/DatabaseManager.h"
@@ -50,14 +51,6 @@ CSceneMainScreen::CSceneMainScreen(QWidget* pParent) :
   m_bBeingDebugged(false)
 {
   m_spUi->setupUi(this);
-
-  Initialize();
-}
-
-CSceneMainScreen::CSceneMainScreen(QWidget* pParent, bool bDebug) :
-  CSceneMainScreen(pParent)
-{
-  SetDebugging(bDebug);
 }
 
 CSceneMainScreen::~CSceneMainScreen()
@@ -66,9 +59,12 @@ CSceneMainScreen::~CSceneMainScreen()
 
 //----------------------------------------------------------------------------------------
 //
-void CSceneMainScreen::Initialize()
+void CSceneMainScreen::Initialize(const std::shared_ptr<CWindowContext>& spWindowContext,
+                                  bool bDebug)
 {
   m_bInitialized = false;
+
+  m_spWindowContext = spWindowContext;
 
   connect(CApplication::Instance(), &QGuiApplication::applicationStateChanged,
           this, &CSceneMainScreen::SlotApplicationStateChanged);
@@ -96,6 +92,8 @@ void CSceneMainScreen::Initialize()
   connect(m_spProjectRunner.get(), &CProjectRunner::SignalError,
           this, &CSceneMainScreen::SlotError);
 
+  SetDebugging(bDebug);
+
   // initializing done
   m_bInitialized = true;
 }
@@ -121,6 +119,11 @@ void CSceneMainScreen::LoadProject(qint32 iId, const QString sStartScene)
 
     CDatabaseManager::LoadProject(m_spCurrentProject);
     m_spProjectRunner->LoadProject(m_spCurrentProject, sStartScene);
+
+    if (nullptr != m_spWindowContext && !m_bBeingDebugged)
+    {
+      m_spWindowContext->SignalChangeAppOverlay(":/resources/style/img/ButtonPlay.png");
+    }
 
     ConnectAllSignals();
     LoadQml();
@@ -495,6 +498,11 @@ void CSceneMainScreen::SlotUnloadFinished()
     }
   }
   m_spCurrentProject = nullptr;
+
+  if (nullptr != m_spWindowContext && !m_bBeingDebugged)
+  {
+    m_spWindowContext->SignalChangeAppOverlay(QString());
+  }
 
   emit SignalUnloadFinished();
 }

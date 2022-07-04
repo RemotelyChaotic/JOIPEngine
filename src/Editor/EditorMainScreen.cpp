@@ -2,6 +2,8 @@
 #include "Application.h"
 #include "EditorWidgetRegistry.h"
 #include "Settings.h"
+#include "WindowContext.h"
+
 #include "EditorLayouts/EditorLayoutBase.h"
 #include "EditorLayouts/IEditorLayoutViewProvider.h"
 #include "EditorWidgets/EditorWidgetBase.h"
@@ -74,6 +76,7 @@ CEditorMainScreen::CEditorMainScreen(QWidget* pParent) :
   m_spEditorModel(std::make_unique<CEditorModel>(this)),
   m_spViewProvider(std::make_shared<CEditorLayoutViewProvider>(this)),
   m_spUi(std::make_shared<Ui::CEditorMainScreen>()),
+  m_spWindowContext(nullptr),
   m_vpKeyBindingActions(),
   m_pLayout(nullptr),
   m_pTutorialOverlay(new CEditorTutorialOverlay(this)),
@@ -87,8 +90,6 @@ CEditorMainScreen::CEditorMainScreen(QWidget* pParent) :
 
   // Testing
   //new ModelTest(pModel, this);
-
-  Initialize();
 }
 
 CEditorMainScreen::~CEditorMainScreen()
@@ -101,9 +102,11 @@ CEditorMainScreen::~CEditorMainScreen()
 
 //----------------------------------------------------------------------------------------
 //
-void CEditorMainScreen::Initialize()
+void CEditorMainScreen::Initialize(const std::shared_ptr<CWindowContext>& spWindowContext)
 {
   m_bInitialized = false;
+
+  m_spWindowContext = spWindowContext;
 
   m_wpDbManager = CApplication::Instance()->System<CDatabaseManager>();
 
@@ -222,6 +225,11 @@ void CEditorMainScreen::UnloadProject()
   m_spEditorModel->UnloadProject();
 
   m_pLayout->ProjectUnloaded();
+
+  if (nullptr != m_spWindowContext)
+  {
+    m_spWindowContext->SignalChangeAppOverlay(QString());
+  }
 
   // disconnect shortcuts
   for (QAction* pAction : m_vpKeyBindingActions)
@@ -498,6 +506,11 @@ void CEditorMainScreen::ProjectLoaded(bool bNewProject)
   }
 
   m_pLayout->ProjectLoaded(m_spCurrentProject, bNewProject);
+
+  if (nullptr != m_spWindowContext)
+  {
+    m_spWindowContext->SignalChangeAppOverlay(":/resources/style/img/ButtonProjectSettings.png");
+  }
 
   if (bNewProject)
   {

@@ -39,6 +39,8 @@ void CSceneScreen::Initialize()
 {
   m_bInitialized = false;
 
+  m_spUi->pMainSceneScreen->Initialize(m_spWindowContext, false);
+
   m_wpDbManager = CApplication::Instance()->System<CDatabaseManager>();
 
   auto wpHelpFactory = CApplication::Instance()->System<CHelpFactory>().lock();

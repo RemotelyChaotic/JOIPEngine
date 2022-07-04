@@ -14,6 +14,7 @@ class CProjectRunner;
 class CScriptRunner;
 class CSettings;
 class CThreadedSystem;
+class CWindowContext;
 namespace Ui {
   class CSceneMainScreen;
 }
@@ -32,10 +33,9 @@ class CSceneMainScreen : public QWidget
 
 public:
   explicit CSceneMainScreen(QWidget* pParent = nullptr);
-  explicit CSceneMainScreen(QWidget* pParent, bool bDebug);
   ~CSceneMainScreen() override;
 
-  void Initialize();
+  void Initialize(const std::shared_ptr<CWindowContext>& spWindowContext, bool bDebug);
   void LoadProject(qint32 iId, const QString sStartScene = QString());
   std::weak_ptr<CProjectEventCallbackRegistry> EventCallbackRegistry();
   std::weak_ptr<CProjectRunner> ProjectRunner();
@@ -79,6 +79,7 @@ private:
 
 private:
   std::unique_ptr<Ui::CSceneMainScreen>                       m_spUi;
+  std::shared_ptr<CWindowContext>                             m_spWindowContext;
   std::shared_ptr<CProjectEventCallbackRegistry>              m_spEventCallbackRegistry;
   std::shared_ptr<CProjectRunner>                             m_spProjectRunner;
   std::shared_ptr<CThreadedSystem>                            m_spScriptRunnerSystem;

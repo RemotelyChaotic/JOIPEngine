@@ -30,6 +30,8 @@ void CEditorScreen::Initialize()
 {
   m_bInitialized = false;
 
+  m_spUi->pEditorScreen->Initialize(m_spWindowContext);
+
   connect(m_spUi->pChoiceScreen, &CEditorChoiceScreen::SignalNewClicked,
           this, &CEditorScreen::SlotNewClicked, Qt::DirectConnection);
   connect(m_spUi->pChoiceScreen, &CEditorChoiceScreen::SignalOpenClicked,

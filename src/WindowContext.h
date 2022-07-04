@@ -12,6 +12,7 @@ public:
   ~CWindowContext();
 
 signals:
+  void SignalChangeAppOverlay(const QString& sImage);
   void SignalChangeAppState(EAppState newState);
   void SignalSetDownloadButtonVisible(bool bVisible);
   void SignalSetHelpButtonVisible(bool bVisible);

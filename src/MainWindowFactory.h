@@ -16,6 +16,7 @@ public:
 
   virtual void ConnectSlots() = 0;
   virtual void Initialize() = 0;
+  virtual void OnShow() = 0;
 };
 
 //----------------------------------------------------------------------------------------

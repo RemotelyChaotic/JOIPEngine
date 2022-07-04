@@ -31,7 +31,10 @@ macro(FindRequiredQtPackages)
     WebChannel
     Xml REQUIRED)
 
-  if (ANDROID)
+  if (WIN32)
+    find_package(QT NAMES Qt6 Qt5 COMPONENTS WinExtras REQUIRED)
+    find_package(Qt${QT_VERSION_MAJOR} COMPONENTS WinExtras REQUIRED)
+  elseif (ANDROID)
     find_package(QT NAMES Qt6 Qt5 COMPONENTS AndroidExtras REQUIRED)
     find_package(Qt${QT_VERSION_MAJOR} COMPONENTS AndroidExtras REQUIRED)
   endif()
@@ -575,6 +578,7 @@ macro(JOIPProjectSettings JOIP_PROJECT_NAME)
       message (STATUS "PSAPI: ${PSAPI}")
       target_link_libraries(${JOIP_PROJECT_NAME}
         PRIVATE
+          Qt${QT_VERSION_MAJOR}::WinExtras
           WinToast
           Psapi)
     endif()

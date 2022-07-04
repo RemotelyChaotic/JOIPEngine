@@ -203,6 +203,8 @@
         <file>resources/style/img/ButtonNotification.png</file>
         <file>resources/help/settings/window_mode_setting_help.html</file>
         <file>resources/help/settings/push_notification_setting_help.html</file>
+        <file>resources/style/img/ButtonProjectSettings.png</file>
+        <file>resources/style/img/ButtonSceneNodeWidget.png</file>
     </qresource>
     <qresource prefix="/qml">
         <file>resources/qml/ProjectCardSelection.qml</file>
