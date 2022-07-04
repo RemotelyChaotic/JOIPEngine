@@ -202,6 +202,7 @@
         <file>resources/help/editor/images/addnotification_dialog_text.png</file>
         <file>resources/style/img/ButtonNotification.png</file>
         <file>resources/help/settings/window_mode_setting_help.html</file>
+        <file>resources/help/settings/push_notification_setting_help.html</file>
     </qresource>
     <qresource prefix="/qml">
         <file>resources/qml/ProjectCardSelection.qml</file>

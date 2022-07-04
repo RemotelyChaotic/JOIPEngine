@@ -87,6 +87,7 @@ const QString CSettings::c_sSettingFullscreen = "Graphics/fullscreen";
 const QString CSettings::c_sSettingKeyBindings = "KeyBindings/";
 const QString CSettings::c_sSettingMuted = "Audio/muted";
 const QString CSettings::c_sSettingOffline = "Content/offline";
+const QString CSettings::c_sSettingPushNotifications = "Content/pushnotifications";
 const QString CSettings::c_sSettingResolution = "Graphics/resolution";
 const QString CSettings::c_sSettingStyle = "Graphics/style";
 const QString CSettings::c_sSettingStyleHotLoad = "Debug/stylehotload";
@@ -492,6 +493,30 @@ QString CSettings::Platform() const
 
 //----------------------------------------------------------------------------------------
 //
+bool CSettings::PushNotifications() const
+{
+  QMutexLocker locker(&m_settingsMutex);
+  return m_spSettings->value(CSettings::c_sSettingPushNotifications).toBool();
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CSettings::SetPushNotifications(bool bValue)
+{
+  QMutexLocker locker(&m_settingsMutex);
+
+  bool value = static_cast<CSettings::EditorType>(
+        m_spSettings->value(CSettings::c_sSettingPushNotifications).toInt());
+
+  if (value == bValue) { return; }
+
+  m_spSettings->setValue(CSettings::c_sSettingPushNotifications, bValue);
+
+  emit pushNotificationsChanged();
+}
+
+//----------------------------------------------------------------------------------------
+//
 QSize CSettings::Resolution()
 {
 #if defined(Q_OS_ANDROID)
@@ -810,6 +835,13 @@ void CSettings::GenerateSettingsIfNotExists()
   {
     bNeedsSynch = true;
     m_spSettings->setValue(CSettings::c_sSettingOffline, false);
+  }
+
+  // check push notifications
+  if (!m_spSettings->contains(CSettings::c_sSettingPushNotifications))
+  {
+    bNeedsSynch = true;
+    m_spSettings->setValue(CSettings::c_sSettingPushNotifications, true);
   }
 
   // check style

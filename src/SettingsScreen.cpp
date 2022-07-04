@@ -33,6 +33,7 @@ namespace  {
   const QString c_sVolumeHelpId = "Settings/Volume";
   const QString c_sOfflineHelpId = "Settings/Offline";
   const QString c_sPauseWhenInactiveHelpId = "Settings/PauseWhenInactive";
+  const QString c_sPushNotificationsHelpId = "Settings/PushNotifications";
   const QString c_sHotloadStyleHelpId = "Settings/HotloadStyle";
   const QString c_sCancelHelpId = "MainScreen/Cancel";
 
@@ -109,6 +110,8 @@ void CSettingsScreen::Initialize()
     wpHelpFactory->RegisterHelp(c_sOfflineHelpId, ":/resources/help/settings/offline_setting_help.html");
     m_spUi->pPauseWhenNotActive->setProperty(helpOverlay::c_sHelpPagePropertyName, c_sPauseWhenInactiveHelpId);
     wpHelpFactory->RegisterHelp(c_sPauseWhenInactiveHelpId, ":/resources/help/settings/pausewheninactive_setting_help.html");
+    m_spUi->pShowPushNotifications->setProperty(helpOverlay::c_sHelpPagePropertyName, c_sPushNotificationsHelpId);
+    wpHelpFactory->RegisterHelp(c_sPushNotificationsHelpId, ":/resources/help/settings/push_notification_setting_help.html");
     m_spUi->pStyleHotoadContainer->setProperty(helpOverlay::c_sHelpPagePropertyName, c_sHotloadStyleHelpId);
     wpHelpFactory->RegisterHelp(c_sHotloadStyleHelpId, ":/resources/help/settings/hotloadstyle_setting_help.html");
     m_spUi->pBackButton->setProperty(helpOverlay::c_sHelpPagePropertyName, c_sCancelHelpId);
@@ -187,6 +190,7 @@ void CSettingsScreen::Load()
   m_spUi->pVolumeSlider->blockSignals(true);
   m_spUi->pOfflineModeCheckBox->blockSignals(true);
   m_spUi->pPauseWhenNotActiveCheckBox->blockSignals(true);
+  m_spUi->pShowPushNotificationsCeckBox->blockSignals(true);
   m_spUi->pStyleHotoadCheckBox->blockSignals(true);
 
   // set fullscreen
@@ -289,6 +293,9 @@ void CSettingsScreen::Load()
   // set pause when app is inactive
   m_spUi->pPauseWhenNotActiveCheckBox->setChecked(m_spSettings->PauseWhenInactive());
 
+  // push notifications
+  m_spUi->pShowPushNotificationsCeckBox->setChecked(m_spSettings->PushNotifications());
+
   // hot-loading of style
   m_spUi->pStyleHotoadCheckBox->setChecked(m_spSettings->StyleHotLoad());
 
@@ -303,6 +310,7 @@ void CSettingsScreen::Load()
   m_spUi->pVolumeSlider->blockSignals(false);
   m_spUi->pOfflineModeCheckBox->blockSignals(false);
   m_spUi->pPauseWhenNotActiveCheckBox->blockSignals(false);
+  m_spUi->pShowPushNotificationsCeckBox->blockSignals(false);
   m_spUi->pStyleHotoadCheckBox->blockSignals(false);
 }
 
@@ -461,6 +469,17 @@ void CSettingsScreen::on_pOfflineModeCheckBox_stateChanged(qint32 iState)
   if (nullptr == m_spSettings) { return; }
 
   m_spSettings->SetOffline(iState == Qt::Checked);
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CSettingsScreen::on_pShowPushNotificationsCeckBox_stateChanged(qint32 iState)
+{
+  WIDGET_INITIALIZED_GUARD
+  assert(nullptr != m_spSettings);
+  if (nullptr == m_spSettings) { return; }
+
+  m_spSettings->SetPushNotifications(iState == Qt::Checked);
 }
 
 //----------------------------------------------------------------------------------------

@@ -23,6 +23,7 @@ class CSettings : public QObject
   Q_PROPERTY(bool pauseWhenInactive READ PauseWhenInactive WRITE SetPauseWhenInactive NOTIFY pauseWhenInactiveChanged)
   Q_PROPERTY(QString platform READ Platform CONSTANT)
   Q_PROPERTY(EditorType preferedEditorLayout READ PreferedEditorLayout WRITE SetPreferedEditorLayout NOTIFY preferedEditorLayoutChanged)
+  Q_PROPERTY(bool pushNotifications READ PushNotifications WRITE SetPushNotifications NOTIFY pushNotificationsChanged)
   Q_PROPERTY(QSize resolution READ Resolution WRITE SetResolution NOTIFY resolutionChanged)
   Q_PROPERTY(QString style READ Style WRITE SetStyle NOTIFY styleChanged)
   Q_PROPERTY(double styleHotLoad READ StyleHotLoad WRITE SetStyleHotLoad NOTIFY styleHotLoadChanged)
@@ -40,6 +41,7 @@ public:
   static const QString c_sSettingKeyBindings;
   static const QString c_sSettingMuted;
   static const QString c_sSettingOffline;
+  static const QString c_sSettingPushNotifications;
   static const QString c_sSettingResolution;
   static const QString c_sSettingStyle;
   static const QString c_sSettingStyleHotLoad;
@@ -90,6 +92,8 @@ public:
   EditorType PreferedEditorLayout();
   void SetResolution(const QSize& size);
   QString Platform() const;
+  bool PushNotifications() const;
+  void SetPushNotifications(bool bValue);
   QSize Resolution();
   bool HasOldSettingsVersion();
   void SetSettingsVersion(quint32 uiVersion);
@@ -116,6 +120,7 @@ signals:
   void mutedChanged();
   void offlineChanged();
   void pauseWhenInactiveChanged();
+  void pushNotificationsChanged();
   void preferedEditorLayoutChanged();
   void resolutionChanged();
   void styleChanged();
