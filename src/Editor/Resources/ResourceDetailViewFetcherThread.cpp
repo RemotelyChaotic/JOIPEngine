@@ -3,6 +3,8 @@
 #include "Systems/DatabaseImageProvider.h"
 #include "Systems/DatabaseManager.h"
 
+#include <QBuffer>
+
 CResourceDetailViewFetcherThread::CResourceDetailViewFetcherThread() :
   CSystemBase(),
   m_spDbImageProvider(nullptr),
@@ -94,12 +96,20 @@ void CResourceDetailViewFetcherThread::SlotResourcesRequested(qint32 iProject,
     if (!img.isNull() && m_bLoading)
     {
       emit LoadFinished(sResource, QPixmap::fromImage(img));
+      QByteArray ba;
+      QBuffer buffer(&ba);
+      if (buffer.open(QIODevice::ReadWrite))
+      {
+        img.save(&buffer, "png");
+        emit LoadFinished(sResource, QString::fromUtf8(ba.toBase64()));
+      }
     }
 
     // early stop because new images were requested
     if (!m_bLoading)
     {
       emit LoadFinished(QString(), QPixmap());
+      emit LoadFinished(QString(), QString());
       return;
     }
 
@@ -109,4 +119,5 @@ void CResourceDetailViewFetcherThread::SlotResourcesRequested(qint32 iProject,
 
   m_bLoading = false;
   emit LoadFinished(QString(), QPixmap());
+  emit LoadFinished(QString(), QString());
 }

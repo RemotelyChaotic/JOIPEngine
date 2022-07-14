@@ -22,6 +22,7 @@ public:
 
 signals:
   void LoadFinished(const QString& sResource, const QPixmap& pixmap);
+  void LoadFinished(const QString& sResource, const QString& sResourceBase64);
   void LoadStarted();
 
 public slots:

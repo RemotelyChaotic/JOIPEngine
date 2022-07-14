@@ -255,7 +255,8 @@ CResourceDetailView::CResourceDetailView(QWidget* pParent) :
           this, [this](){
     dynamic_cast<CResourceDetailViewDelegate*>(itemDelegate())->StartLoading();
   }, Qt::QueuedConnection);
-  connect(ResourceFetcher().get(), &CResourceDetailViewFetcherThread::LoadFinished,
+  connect(ResourceFetcher().get(),
+          qOverload<const QString&, const QPixmap&>(&CResourceDetailViewFetcherThread::LoadFinished),
           this, &CResourceDetailView::SlotResourceLoadFinished, Qt::QueuedConnection);
 }
 

@@ -55,6 +55,7 @@ protected slots:
                           const QModelIndex& previous);
 
 protected:
+  bool eventFilter(QObject* pObj, QEvent* pEvt) override;
   void resizeEvent(QResizeEvent* pEvent) override;
 
 private:

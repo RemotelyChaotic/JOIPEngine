@@ -188,6 +188,9 @@ macro(CreateJOIPProject JOIP_PROJECT_NAME)
     ${JOIPSources}/Editor/Resources/ResourceModelView.cpp
     ${JOIPSources}/Editor/Resources/ResourceModelView.h
     ${JOIPSources}/Editor/Resources/ResourceModelView.ui
+    ${JOIPSources}/Editor/Resources/ResourceToolTip.cpp
+    ${JOIPSources}/Editor/Resources/ResourceToolTip.h
+    ${JOIPSources}/Editor/Resources/ResourceToolTip.ui
     ${JOIPSources}/Editor/Resources/ResourceTreeItem.cpp
     ${JOIPSources}/Editor/Resources/ResourceTreeItem.h
     ${JOIPSources}/Editor/Resources/ResourceTreeItemModel.cpp
@@ -590,8 +593,9 @@ macro(JOIPProjectSettings JOIP_PROJECT_NAME)
   target_include_directories(${JOIP_PROJECT_NAME}
     PRIVATE
       ${JOIPSources}
-      ${Qt5Core_PRIVATE_INCLUDE_DIRS}
-      ${Qt5Widgets_PRIVATE_INCLUDE_DIRS}
+      ${Qt${QT_VERSION_MAJOR}Core_PRIVATE_INCLUDE_DIRS}
+      ${Qt${QT_VERSION_MAJOR}Gui_PRIVATE_INCLUDE_DIRS}
+      ${Qt${QT_VERSION_MAJOR}Widgets_PRIVATE_INCLUDE_DIRS}
       ${QTAVWIDGETS_INCLUDE_DIRS}
       ${NodeEditor_INCLUDE_DIRS}
       ${PhysicsFS_INCLUDE_DIRS}
