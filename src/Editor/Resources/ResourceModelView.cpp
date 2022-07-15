@@ -8,6 +8,8 @@
 
 #include "Utils/UndoRedoFilter.h"
 
+#include <QClipboard>
+#include <QContextMenuEvent>
 #include <QHelpEvent>
 #include <QItemSelectionModel>
 #include <QListView>
@@ -243,6 +245,71 @@ void CResourceModelView::SetLandscape(bool bLandscape)
 
 //----------------------------------------------------------------------------------------
 //
+void CResourceModelView::ShowContextMenu(CResourceTreeItemModel* pModel, const QModelIndex& idx,
+                                         const QPoint& globalPos)
+{
+  if (nullptr != pModel && pModel == dynamic_cast<const CResourceTreeItemModel*>(idx.model()))
+  {
+    CResourceTreeItem* item = static_cast<CResourceTreeItem*>(idx.internalPointer());
+    if (nullptr != item && nullptr != item->Resource())
+    {
+      QMenu menu(this);
+
+      QAction* pAction = new QAction("Copy Name", &menu);
+      connect(pAction, &QAction::triggered, pModel, [idx]() {
+        CResourceTreeItem* item = static_cast<CResourceTreeItem*>(idx.internalPointer());
+        if (nullptr != item)
+        {
+          QClipboard* pClipboard = QGuiApplication::clipboard();
+          tspResource spResource = item->Resource();
+          QReadLocker locker(&spResource->m_rwLock);
+          pClipboard->setText(spResource->m_sName);
+        }
+      });
+      menu.addAction(pAction);
+      pAction = new QAction("Copy Path", &menu);
+      connect(pAction, &QAction::triggered, pModel, [idx]() {
+        CResourceTreeItem* item = static_cast<CResourceTreeItem*>(idx.internalPointer());
+        if (nullptr != item)
+        {
+          QClipboard* pClipboard = QGuiApplication::clipboard();
+          tspResource spResource = item->Resource();
+          QReadLocker locker(&spResource->m_rwLock);
+          pClipboard->setText(spResource->m_sPath.toString());
+        }
+      });
+      menu.addAction(pAction);
+      pAction = new QAction("Copy System Path", &menu);
+      connect(pAction, &QAction::triggered, pModel, [idx]() {
+        CResourceTreeItem* item = static_cast<CResourceTreeItem*>(idx.internalPointer());
+        if (nullptr != item)
+        {
+          QClipboard* pClipboard = QGuiApplication::clipboard();
+          tspResource spResource = item->Resource();
+          pClipboard->setText(PhysicalResourcePath(spResource));
+        }
+      });
+      menu.addAction(pAction);
+      pAction = new QAction("Copy Source", &menu);
+      connect(pAction, &QAction::triggered, pModel, [idx]() {
+        CResourceTreeItem* item = static_cast<CResourceTreeItem*>(idx.internalPointer());
+        if (nullptr != item)
+        {
+          QClipboard* pClipboard = QGuiApplication::clipboard();
+          tspResource spResource = item->Resource();
+          QReadLocker locker(&spResource->m_rwLock);
+          pClipboard->setText(spResource->m_sSource.toString());
+        }
+      });
+      menu.addAction(pAction);
+
+      menu.exec(globalPos);
+    }
+  }
+}
+
+//----------------------------------------------------------------------------------------
+//
 bool CResourceModelView::Landscape()
 {
   return m_bLandscape;
@@ -384,6 +451,33 @@ bool CResourceModelView::eventFilter(QObject* pObj, QEvent* pEvt)
         pEvt->ignore();
         return true;
       }
+    }
+    else if (QEvent::ContextMenu == pEvt->type())
+    {
+      QContextMenuEvent* pContextEvt = static_cast<QContextMenuEvent*>(pEvt);
+      CResourceTreeItemModel* pModel = nullptr;
+      QModelIndex index;
+      if (m_spUi->pTreeView == pObj)
+      {
+        index = m_spUi->pTreeView->indexAt(
+              m_spUi->pTreeView->viewport()->mapFromGlobal(pContextEvt->globalPos()));
+        if (auto pProxy = dynamic_cast<QSortFilterProxyModel*>(m_spUi->pTreeView->model()))
+        {
+          pModel = dynamic_cast<CResourceTreeItemModel*>(pProxy->sourceModel());
+          index = pProxy->mapToSource(index);
+        }
+      }
+      else if (m_spUi->pDetailView == pObj)
+      {
+        index = m_spUi->pDetailView->indexAt(
+              m_spUi->pDetailView->viewport()->mapFromGlobal(pContextEvt->globalPos()));
+        if (auto pProxy = dynamic_cast<QSortFilterProxyModel*>(m_spUi->pDetailView->model()))
+        {
+          pModel = dynamic_cast<CResourceTreeItemModel*>(pProxy->sourceModel());
+          index = pProxy->mapToSource(index);
+        }
+      }
+      ShowContextMenu(pModel, index, pContextEvt->globalPos());
     }
   }
   return QWidget::eventFilter(pObj, pEvt);

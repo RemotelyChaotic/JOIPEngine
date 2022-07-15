@@ -258,6 +258,41 @@ bool IsLocalFile(const QUrl& url)
 
 //----------------------------------------------------------------------------------------
 //
+QString PhysicalResourcePath(const tspResource& spResource)
+{
+  if (nullptr == spResource || nullptr == spResource->m_spParent)
+  {
+    return QString();
+  }
+
+  QReadLocker projectLocker(&spResource->m_spParent->m_rwLock);
+  const QString sTrueProjectName = spResource->m_spParent->m_sName;
+  bool bBundled = spResource->m_spParent->m_bBundled;
+  projectLocker.unlock();
+
+  QReadLocker locker(&spResource->m_rwLock);
+  if (IsLocalFile(spResource->m_sPath))
+  {
+    if (!bBundled && spResource->m_sResourceBundle.isEmpty())
+    {
+      QUrl urlCopy(spResource->m_sPath);
+      urlCopy.setScheme(QString());
+      QString sBasePath = PhysicalProjectPath(spResource->m_spParent);
+      return sBasePath + "/" + QUrl().resolved(urlCopy).toString();
+    }
+    else
+    {
+      return ":/" + sTrueProjectName + "/" + spResource->m_sName;
+    }
+  }
+  else
+  {
+    return spResource->m_sPath.toString();
+  }
+}
+
+//----------------------------------------------------------------------------------------
+//
 QString ResourceUrlToAbsolutePath(const tspResource& spResource,
                                   const QString& sResourceScheme)
 {

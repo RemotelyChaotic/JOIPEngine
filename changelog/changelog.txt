@@ -184,6 +184,7 @@ New Features:
   fullscreen, borderless or windowed mode.
 - Code Editor & Help can be zoomed with CTRL+MWhl.
 - Code-internal (experimental) Lua support (not for Script Resources implemented yet).
+- Context menu added to Resource Views.
 
 Changes:
 - Resource Explorer View shows folder contents instead of the folder if a folder

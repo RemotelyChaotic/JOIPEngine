@@ -43,6 +43,8 @@ public:
   void SetView(EView view);
   EView View() const;
   void SetLandscape(bool bLandscape);
+  void ShowContextMenu(CResourceTreeItemModel* pModel, const QModelIndex& idx,
+                       const QPoint& globalPos);
   bool Landscape();
 
 signals:
