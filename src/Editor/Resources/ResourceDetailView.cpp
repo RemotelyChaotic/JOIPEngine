@@ -418,7 +418,16 @@ void CResourceDetailView::SlotDoubleClicked(const QModelIndex& index)
       }
       else
       {
-        QListView::edit(index);
+        if (EResourceTreeItemType::eCategory == vType.toInt() ||
+            EResourceTreeItemType::eRoot == vType.toInt() ||
+            EResourceTreeItemType::eFolder == vType.toInt())
+        {
+          Expand(index);
+        }
+        else
+        {
+          QListView::edit(index);
+        }
       }
     }
   }
