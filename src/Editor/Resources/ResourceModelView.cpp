@@ -56,6 +56,7 @@ void CResourceModelView::Initialize(QUndoStack* pStack,
   m_spUi->pDetailView->setVerticalScrollBarPolicy(Qt::ScrollBarPolicy::ScrollBarAlwaysOn);
 
   m_spUi->pTreeView->installEventFilter(this);
+  m_spUi->pDetailView->installEventFilter(this);
 
   m_spUi->pTreeView->setModel(m_pProxy);
   m_spUi->pDetailView->setModel(m_pProxy);
@@ -339,18 +340,32 @@ void CResourceModelView::SlotCurrentChanged(const QModelIndex& current,
 bool CResourceModelView::eventFilter(QObject* pObj, QEvent* pEvt)
 {
   if (nullptr == pObj || nullptr == pEvt) { return QWidget::eventFilter(pObj, pEvt); }
-  if (m_spUi->pTreeView == pObj)
+  if (m_spUi->pTreeView == pObj || m_spUi->pDetailView == pObj)
   {
     if (QEvent::ToolTip == pEvt->type())
     {
       QHelpEvent* pHelpEvent = static_cast<QHelpEvent*>(pEvt);
 
-      QModelIndex index = m_spUi->pTreeView->indexAt(
-            m_spUi->pTreeView->viewport()->mapFromGlobal(pHelpEvent->globalPos()));
-      if (auto pProxy = dynamic_cast<QSortFilterProxyModel*>(m_spUi->pTreeView->model()))
+      QModelIndex index;
+      if (m_spUi->pTreeView == pObj)
       {
-        index = pProxy->mapToSource(index);
+        index = m_spUi->pTreeView->indexAt(
+              m_spUi->pTreeView->viewport()->mapFromGlobal(pHelpEvent->globalPos()));
+        if (auto pProxy = dynamic_cast<QSortFilterProxyModel*>(m_spUi->pTreeView->model()))
+        {
+          index = pProxy->mapToSource(index);
+        }
       }
+      else if (m_spUi->pDetailView == pObj)
+      {
+        index = m_spUi->pDetailView->indexAt(
+              m_spUi->pDetailView->viewport()->mapFromGlobal(pHelpEvent->globalPos()));
+        if (auto pProxy = dynamic_cast<QSortFilterProxyModel*>(m_spUi->pDetailView->model()))
+        {
+          index = pProxy->mapToSource(index);
+        }
+      }
+
       CResourceTreeItem* pItem = static_cast<CResourceTreeItem*>(index.internalPointer());
       if (nullptr != pItem)
       {
@@ -358,13 +373,13 @@ bool CResourceModelView::eventFilter(QObject* pObj, QEvent* pEvt)
         {
           CResourceToolTip::showResource(pHelpEvent->globalPos(),
                                          pItem->Resource(),
-                                         m_spUi->pTreeView);
+                                         qobject_cast<QWidget*>(pObj));
         }
         else
         {
           QToolTip::showText(pHelpEvent->globalPos(),
                              pItem->Data(resource_item::c_iColumnToolTip).toString(),
-                             m_spUi->pTreeView);
+                             qobject_cast<QWidget*>(pObj));
         }
         pEvt->ignore();
         return true;
