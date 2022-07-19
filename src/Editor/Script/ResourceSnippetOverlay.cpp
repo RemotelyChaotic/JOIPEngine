@@ -310,11 +310,10 @@ void CResourceSnippetOverlay::on_pConfirmButton_clicked()
   {
     sAlias = "\"\",";
   }
-  QString sLoopsAndStart = m_data.m_bLoops ?
-        ((m_data.m_bStartAt || m_data.m_iEndAt) ? ",%3 %1, %2" : ",%2 %1") :
-        ((m_data.m_bStartAt || m_data.m_iEndAt) ? ",%2 1, %1" : "");
+  QString sLoopsAndStart;
   if (m_data.m_bLoops)
   {
+    sLoopsAndStart = (m_data.m_bStartAt || m_data.m_iEndAt) ? ",%3 %1, %2" : ",%2 %1";
     if (m_data.m_bStartAt)
     {
       sLoopsAndStart = sLoopsAndStart.arg(m_data.m_iLoops)
@@ -331,6 +330,7 @@ void CResourceSnippetOverlay::on_pConfirmButton_clicked()
   }
   else if (m_data.m_bStartAt || m_data.m_bEndAt)
   {
+    sLoopsAndStart = ",%2 1, %1";
     sLoopsAndStart = sLoopsAndStart
         .arg(!m_data.m_bEndAt ? QString::number(m_data.m_iStartAt) :
                                 QString("%1, %2").arg(m_data.m_bStartAt ? m_data.m_iStartAt : 0).arg(m_data.m_iEndAt))
