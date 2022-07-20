@@ -194,7 +194,7 @@ Changes:
   global scope.
 - Resource Viewer in Editor shows timing info and preview for Movie and Sound
   type Resources.
-- Resource Viewers only show relevant Resource types.
+- Resource Viewers only show relevant Resource types and only the name column.
 - Code snippet overlays are shown in the Code Editor instead of the entire Editor
   window.
 - Changed UI to work reliably with mobile and extremely small resolutions.

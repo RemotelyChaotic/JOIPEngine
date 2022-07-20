@@ -63,8 +63,10 @@ void CResourceModelView::Initialize(QUndoStack* pStack,
   m_spUi->pTreeView->setModel(m_pProxy);
   m_spUi->pDetailView->setModel(m_pProxy);
 
-  m_spUi->pTreeView->header()->setStretchLastSection(true);
-  m_spUi->pTreeView->header()->setSectionResizeMode(QHeaderView::ResizeToContents);
+  m_spUi->pTreeView->header()->setSectionHidden(resource_item::c_iColumnType, true);
+  m_spUi->pTreeView->header()->setSectionHidden(resource_item::c_iColumnPath, true);
+  m_spUi->pTreeView->header()->setSectionResizeMode(resource_item::c_iColumnName, QHeaderView::Stretch);
+  m_spUi->pTreeView->header()->setSectionResizeMode(resource_item::c_iColumnType, QHeaderView::Interactive);
 
   QItemSelectionModel* pSelectionModel = m_spUi->pTreeView->selectionModel();
   connect(pSelectionModel, &QItemSelectionModel::currentChanged,
