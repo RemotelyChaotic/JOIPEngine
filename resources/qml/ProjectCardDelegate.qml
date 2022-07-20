@@ -568,7 +568,7 @@ Rectangle {
     ToolTip {
         parent: iconUsesCodecsRect
         visible: iconUsesCodecsRect.hovered
-        text: qsTr("Uses web resources and requires an internet connection.")
+        text: qsTr("Uses media with audio and might be loud.")
     }
     ToolTip {
         parent: iconUsesWebRect
