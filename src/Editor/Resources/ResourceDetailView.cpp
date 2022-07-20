@@ -3,9 +3,11 @@
 #include "ResourceTreeItem.h"
 #include "ResourceTreeItemModel.h"
 #include "Systems/ThreadedSystem.h"
+
 #include <QApplication>
 #include <QPainter>
 #include <QPlainTextEdit>
+#include <QSortFilterProxyModel>
 #include <QStyledItemDelegate>
 #include <QMovie>
 #include <QDebug>
@@ -406,27 +408,28 @@ void CResourceDetailView::UpdateResources()
 void CResourceDetailView::SlotDoubleClicked(const QModelIndex& index)
 {
   QAbstractItemModel* pModel = model();
+  auto pProxy = dynamic_cast<QSortFilterProxyModel*>(pModel);
+  if (nullptr != pProxy)
+  {
+    pModel = pProxy->sourceModel();
+  }
+
   if (nullptr != pModel)
   {
-    const QModelIndex indexType = pModel->index(index.row(), resource_item::c_iColumnType, index.parent());
-    if (index.isValid() && indexType.isValid())
+    CResourceTreeItemModel* pResourceModel = dynamic_cast<CResourceTreeItemModel*>(pModel);
+    if (nullptr != pResourceModel)
     {
-      const QVariant vType = pModel->data(indexType);
-      if (!vType.isValid())
+      QModelIndex indexType = pResourceModel->index(pProxy->mapToSource(index).row(),
+                                                    resource_item::c_iColumnType, index.parent());
+      if (index.isValid() && indexType.isValid())
       {
-        Expand(index);
-      }
-      else
-      {
-        if (EResourceTreeItemType::eCategory == vType.toInt() ||
-            EResourceTreeItemType::eRoot == vType.toInt() ||
-            EResourceTreeItemType::eFolder == vType.toInt())
+        if (pResourceModel->IsResourceType(indexType))
         {
-          Expand(index);
+          QListView::edit(index);
         }
         else
         {
-          QListView::edit(index);
+          Expand(index);
         }
       }
     }
