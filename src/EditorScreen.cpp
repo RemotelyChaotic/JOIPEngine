@@ -26,6 +26,13 @@ CEditorScreen::~CEditorScreen()
 
 //----------------------------------------------------------------------------------------
 //
+bool CEditorScreen::CloseApplication()
+{
+  return m_spUi->pEditorScreen->CloseApplication();
+}
+
+//----------------------------------------------------------------------------------------
+//
 void CEditorScreen::Initialize()
 {
   m_bInitialized = false;

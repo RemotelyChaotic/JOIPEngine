@@ -29,6 +29,7 @@ public:
   explicit CEditorMainScreen(QWidget* pParent = nullptr);
   ~CEditorMainScreen();
 
+  bool CloseApplication();
   void Initialize(const std::shared_ptr<CWindowContext>& spWindowContext);
   void InitNewProject(const QString& sNewProjectName, bool bTutorial);
   void LoadProject(qint32 iId);
@@ -70,6 +71,7 @@ private:
   std::weak_ptr<CDatabaseManager>                             m_wpDbManager;
   bool                                                        m_bInitialized;
   bool                                                        m_bProjectModified;
+  bool                                                        m_bCloseCalled;
 };
 
 #endif // EDITORMAINSCREEN_H

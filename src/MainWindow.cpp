@@ -234,6 +234,7 @@ void CMainWindow::SlotSetHelpButtonVisible(bool bVisible)
 //
 void CMainWindow::closeEvent(QCloseEvent* pEvent)
 {
+  bool bIgnore = false;
   if (auto spPrjDownloader = CApplication::Instance()->System<CProjectDownloader>().lock())
   {
     if (spPrjDownloader->HasRunningJobs())
@@ -252,17 +253,34 @@ void CMainWindow::closeEvent(QCloseEvent* pEvent)
         spPrjDownloader->ClearQueue();
         spPrjDownloader->StopRunningJobs();
         spPrjDownloader->WaitForFinished();
-        pEvent->accept();
-        return;
+        bIgnore = false;
       }
       else
       {
-        pEvent->ignore();
-        return;
+        bIgnore = true;
       }
     }
   }
-  pEvent->accept();
+
+  // request close from current Screen
+  if (!bIgnore)
+  {
+    IAppStateScreen* pScreen =
+        dynamic_cast<IAppStateScreen*>(m_spUi->pApplicationStackWidget->currentWidget());
+    if (nullptr != pScreen)
+    {
+      bIgnore = pScreen->CloseApplication();
+    }
+  }
+
+  if (bIgnore)
+  {
+    pEvent->ignore();
+  }
+  else
+  {
+    pEvent->accept();
+  }
 }
 
 //----------------------------------------------------------------------------------------

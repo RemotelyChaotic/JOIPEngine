@@ -23,6 +23,7 @@ public:
                            QWidget* pParent = nullptr);
   ~CSettingsScreen() override;
 
+  bool CloseApplication() override { return false; }
   void Initialize() override;
   void Load() override;
   void Unload() override;

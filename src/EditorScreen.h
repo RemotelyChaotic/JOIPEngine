@@ -19,6 +19,7 @@ public:
                          QWidget* pParent = nullptr);
   ~CEditorScreen() override;
 
+  bool CloseApplication() override;
   void Initialize() override;
   void Load() override;
   void Unload() override;

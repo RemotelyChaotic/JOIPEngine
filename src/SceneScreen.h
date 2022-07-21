@@ -20,6 +20,7 @@ public:
                         QWidget* pParent = nullptr);
   ~CSceneScreen() override;
 
+  bool CloseApplication() override;
   void Initialize() override;
   void Load() override;
   void Unload() override;

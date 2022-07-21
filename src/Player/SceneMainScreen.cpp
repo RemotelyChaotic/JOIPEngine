@@ -48,13 +48,28 @@ CSceneMainScreen::CSceneMainScreen(QWidget* pParent) :
   m_bInitialized(false),
   m_bShuttingDown(false),
   m_bErrorState(false),
-  m_bBeingDebugged(false)
+  m_bBeingDebugged(false),
+  m_bCloseRequested(false)
 {
   m_spUi->setupUi(this);
 }
 
 CSceneMainScreen::~CSceneMainScreen()
 {
+}
+
+//----------------------------------------------------------------------------------------
+//
+bool CSceneMainScreen::CloseApplication()
+{
+  if (!m_bCloseRequested)
+  {
+    bool bOk = QMetaObject::invokeMethod(this, "SlotQuit", Qt::QueuedConnection);
+    assert(bOk);
+    m_bCloseRequested = bOk;
+    return bOk;
+  }
+  return false;
 }
 
 //----------------------------------------------------------------------------------------
@@ -505,6 +520,10 @@ void CSceneMainScreen::SlotUnloadFinished()
   }
 
   emit SignalUnloadFinished();
+  if (m_bCloseRequested)
+  {
+    qApp->quit();
+  }
 }
 
 //----------------------------------------------------------------------------------------

@@ -20,6 +20,7 @@ public:
                            QWidget *parent = nullptr);
   ~CDownloadScreen();
 
+  bool CloseApplication() override { return false; }
   void Initialize() override;
   void Load() override;
   void Unload() override;

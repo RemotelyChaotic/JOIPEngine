@@ -15,6 +15,11 @@ public:
   {}
   ~IAppStateScreen() override {}
 
+  /*!
+   * \brief Close of Application was requested
+   * \return true if event is consumed, false otherwise (similarly to eventFilter)
+   */
+  virtual bool CloseApplication() = 0;
   void Initialize() override {}
   virtual void Load() = 0;
   virtual void Unload() = 0;

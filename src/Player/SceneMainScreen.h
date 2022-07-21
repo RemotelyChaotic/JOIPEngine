@@ -35,6 +35,7 @@ public:
   explicit CSceneMainScreen(QWidget* pParent = nullptr);
   ~CSceneMainScreen() override;
 
+  bool CloseApplication();
   void Initialize(const std::shared_ptr<CWindowContext>& spWindowContext, bool bDebug);
   void LoadProject(qint32 iId, const QString sStartScene = QString());
   std::weak_ptr<CProjectEventCallbackRegistry> EventCallbackRegistry();
@@ -93,6 +94,7 @@ private:
   bool                                                        m_bShuttingDown;
   bool                                                        m_bErrorState;
   bool                                                        m_bBeingDebugged;
+  bool                                                        m_bCloseRequested;
 };
 
 //----------------------------------------------------------------------------------------

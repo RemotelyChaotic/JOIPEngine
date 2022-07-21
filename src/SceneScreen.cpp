@@ -35,6 +35,13 @@ CSceneScreen::~CSceneScreen()
 
 //----------------------------------------------------------------------------------------
 //
+bool CSceneScreen::CloseApplication()
+{
+  return m_spUi->pMainSceneScreen->CloseApplication();
+}
+
+//----------------------------------------------------------------------------------------
+//
 void CSceneScreen::Initialize()
 {
   m_bInitialized = false;

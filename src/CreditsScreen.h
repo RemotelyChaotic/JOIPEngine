@@ -19,6 +19,7 @@ public:
                           QWidget* pParent = nullptr);
   ~CCreditsScreen() override;
 
+  bool CloseApplication() override { return false; }
   void Initialize() override;
   void Load() override;
   void Unload() override;

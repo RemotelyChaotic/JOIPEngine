@@ -84,7 +84,8 @@ CEditorMainScreen::CEditorMainScreen(QWidget* pParent) :
   m_spCurrentProject(nullptr),
   m_wpDbManager(),
   m_bInitialized(false),
-  m_bProjectModified(false)
+  m_bProjectModified(false),
+  m_bCloseCalled(false)
 {
   m_spUi->setupUi(this);
 
@@ -98,6 +99,20 @@ CEditorMainScreen::~CEditorMainScreen()
   disconnect(m_spEditorModel.get(), &CEditorModel::SignalProjectEdited,
              this, &CEditorMainScreen::SlotProjectEdited);
   m_vpKeyBindingActions.clear();
+}
+
+//----------------------------------------------------------------------------------------
+//
+bool CEditorMainScreen::CloseApplication()
+{
+  if (!m_bCloseCalled)
+  {
+    bool bOk = QMetaObject::invokeMethod(this, "SlotExitCalled", Qt::QueuedConnection);
+    assert(bOk);
+    m_bCloseCalled = bOk;
+    return bOk;
+  }
+  return false;
 }
 
 //----------------------------------------------------------------------------------------
@@ -464,6 +479,10 @@ void CEditorMainScreen::SlotUnloadFinished()
   if (bAllUnloaded)
   {
     emit SignalUnloadFinished();
+    if (m_bCloseCalled)
+    {
+      qApp->quit();
+    }
   }
 }
 
