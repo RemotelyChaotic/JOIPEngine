@@ -57,7 +57,7 @@ class CNotificationSnippetOverlay : public COverlayBase
   Q_OBJECT
 
 public:
-  explicit CNotificationSnippetOverlay(CScriptEditorWidget* pParent = nullptr);
+  explicit CNotificationSnippetOverlay(QWidget* pParent = nullptr);
   ~CNotificationSnippetOverlay();
 
   void Initialize(CResourceTreeItemModel* pResourceTreeModel);
@@ -116,7 +116,6 @@ private:
   std::unique_ptr<Ui::CNotificationSnippetOverlay> m_spUi;
   tspProject                                       m_spCurrentProject;
   std::weak_ptr<CDatabaseManager>                  m_wpDbManager;
-  QPointer<CScriptEditorWidget>                    m_pEditor;
   std::vector<QPointer<QScrollArea>>               m_vScrollAreas;
   bool                                             m_bInitialized;
   SNotificationSnippetCode                         m_data;

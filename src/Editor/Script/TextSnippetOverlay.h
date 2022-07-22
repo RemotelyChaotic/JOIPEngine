@@ -46,7 +46,7 @@ class CTextSnippetOverlay : public COverlayBase
   Q_OBJECT
 
 public:
-  explicit CTextSnippetOverlay(CScriptEditorWidget* pParent = nullptr);
+  explicit CTextSnippetOverlay(QWidget* pParent = nullptr);
   ~CTextSnippetOverlay() override;
 
   void Initialize(CResourceTreeItemModel* pResourceTreeModel);
@@ -96,7 +96,6 @@ private:
   std::unique_ptr<Ui::CTextSnippetOverlay> m_spUi;
   tspProject                               m_spCurrentProject;
   std::weak_ptr<CDatabaseManager>          m_wpDbManager;
-  QPointer<CScriptEditorWidget>            m_pEditor;
   std::vector<QPointer<QScrollArea>>       m_vScrollAreas;
   bool                                     m_bInitialized;
   STextSnippetCode                         m_data;

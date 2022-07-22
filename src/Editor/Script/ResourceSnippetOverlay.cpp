@@ -1,12 +1,10 @@
 #include "ResourceSnippetOverlay.h"
 #include "Application.h"
-#include "ScriptEditorWidget.h"
 #include "Editor/Resources/ResourceTreeItem.h"
 #include "Editor/Resources/ResourceTreeItemModel.h"
 #include "Editor/Resources/ResourceTreeItemSortFilterProxyModel.h"
 #include "Systems/DatabaseManager.h"
 #include "Systems/Resource.h"
-#include "Systems/Scene.h"
 #include "ui_ResourceSnippetOverlay.h"
 #include <QScrollBar>
 
@@ -17,12 +15,11 @@ namespace
 
 //----------------------------------------------------------------------------------------
 //
-CResourceSnippetOverlay::CResourceSnippetOverlay(CScriptEditorWidget* pParent) :
+CResourceSnippetOverlay::CResourceSnippetOverlay(QWidget* pParent) :
   COverlayBase(0, pParent),
   m_spUi(std::make_unique<Ui::CResourceSnippetOverlay>()),
   m_spCurrentProject(nullptr),
   m_wpDbManager(CApplication::Instance()->System<CDatabaseManager>()),
-  m_pEditor(pParent),
   m_bInitialized(false),
   m_data()
 {

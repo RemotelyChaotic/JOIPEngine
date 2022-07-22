@@ -62,16 +62,6 @@
        <property name="spacing">
         <number>6</number>
        </property>
-       <item row="2" column="0">
-        <widget class="CScriptEditorWidget" name="pCodeEdit">
-         <property name="sizePolicy">
-          <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-           <horstretch>0</horstretch>
-           <verstretch>1</verstretch>
-          </sizepolicy>
-         </property>
-        </widget>
-       </item>
        <item row="1" column="0">
         <widget class="QWidget" name="pSceneView" native="true">
          <property name="sizePolicy">
@@ -102,6 +92,16 @@
        <item row="0" column="0">
         <widget class="QComboBox" name="pResourceComboBox"/>
        </item>
+       <item row="2" column="0">
+        <widget class="CCodeDisplayWidget" name="pCodeEditorView" native="true">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+           <horstretch>0</horstretch>
+           <verstretch>3</verstretch>
+          </sizepolicy>
+         </property>
+        </widget>
+       </item>
       </layout>
      </widget>
     </widget>
@@ -110,9 +110,10 @@
  </widget>
  <customwidgets>
   <customwidget>
-   <class>CScriptEditorWidget</class>
-   <extends>QTextEdit</extends>
-   <header>Editor/Script/ScriptEditorWidget.h</header>
+   <class>CCodeDisplayWidget</class>
+   <extends>QWidget</extends>
+   <header>Editor/Script/CodeDisplayWidget.h</header>
+   <container>1</container>
   </customwidget>
  </customwidgets>
  <resources/>

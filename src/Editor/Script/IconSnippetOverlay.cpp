@@ -6,10 +6,9 @@
 #include "ui_IconSnippetOverlay.h"
 #include <QScrollBar>
 
-CIconSnippetOverlay::CIconSnippetOverlay(CScriptEditorWidget* pParent) :
+CIconSnippetOverlay::CIconSnippetOverlay(QWidget* pParent) :
   COverlayBase(0, pParent),
   m_spUi(new Ui::CIconSnippetOverlay),
-  m_pEditor(pParent),
   m_bInitialized(false),
   m_data()
 {

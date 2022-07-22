@@ -200,6 +200,9 @@ macro(CreateJOIPProject JOIP_PROJECT_NAME)
     ${JOIPSources}/Editor/Resources/WebResourceOverlay.cpp
     ${JOIPSources}/Editor/Resources/WebResourceOverlay.h
     ${JOIPSources}/Editor/Resources/WebResourceOverlay.ui
+    ${JOIPSources}/Editor/Script/CodeDisplayWidget.cpp
+    ${JOIPSources}/Editor/Script/CodeDisplayWidget.h
+    ${JOIPSources}/Editor/Script/CodeDisplayWidget.ui
     ${JOIPSources}/Editor/Script/BackgroundSnippetOverlay.cpp
     ${JOIPSources}/Editor/Script/BackgroundSnippetOverlay.h
     ${JOIPSources}/Editor/Script/BackgroundSnippetOverlay.ui

@@ -1,28 +1,26 @@
 #include "EditorCodeWidget.h"
 #include "Application.h"
+
 #include "Editor/EditorActionBar.h"
 #include "Editor/EditorModel.h"
+
 #include "Editor/Resources/ResourceTreeItemModel.h"
-#include "Editor/Script/BackgroundSnippetOverlay.h"
+
+#include "Editor/Script/CodeDisplayWidget.h"
 #include "Editor/Script/CommandChangeOpenedScript.h"
-#include "Editor/Script/CommandScriptContentChange.h"
-#include "Editor/Script/IconSnippetOverlay.h"
-#include "Editor/Script/NotificationSnippetOverlay.h"
-#include "Editor/Script/MetronomeSnippetOverlay.h"
-#include "Editor/Script/ResourceSnippetOverlay.h"
 #include "Editor/Script/ScriptEditorModel.h"
-#include "Editor/Script/TextSnippetOverlay.h"
-#include "Editor/Script/TimerSnippetOverlay.h"
-#include "Editor/Script/ThreadSnippetOverlay.h"
+
 #include "Editor/Tutorial/CodeWidgetTutorialStateSwitchHandler.h"
+
 #include "Player/SceneMainScreen.h"
+
 #include "Systems/DatabaseManager.h"
 #include "Systems/HelpFactory.h"
 #include "Systems/Project.h"
 #include "Systems/Scene.h"
 #include "Systems/ScriptRunner.h"
 #include "Systems/Script/ScriptRunnerSignalEmiter.h"
-#include "Utils/UndoRedoFilter.h"
+
 #include "Widgets/HelpOverlay.h"
 
 #include <QDebug>
@@ -36,22 +34,12 @@ namespace {
   const qint32 c_iIndexScripts   = 1;
 
   const QString c_sScriptSelectionHelpId =  "Editor/ScriptSelection";
-  const QString c_sSciptEditorHelpId =      "Editor/SciptEditor";
-  const QString c_sSciptAPIHelpId =         "Editor/SciptAPI/Editor";
 }
 
 //----------------------------------------------------------------------------------------
 //
 CEditorCodeWidget::CEditorCodeWidget(QWidget* pParent) :
   CEditorWidgetBase(pParent),
-  m_spBackgroundSnippetOverlay(nullptr),
-  m_spIconSnippetOverlay(nullptr),
-  m_spMetronomeSnippetOverlay(nullptr),
-  m_spNotificationSnippetOverlay(nullptr),
-  m_spResourceSnippetOverlay(nullptr),
-  m_spTextSnippetOverlay(nullptr),
-  m_spTimerSnippetOverlay(nullptr),
-  m_spThreadSnippetOverlay(nullptr),
   m_spUi(std::make_shared<Ui::CEditorCodeWidget>()),
   m_spTutorialStateSwitchHandler(nullptr),
   m_spSettings(CApplication::Instance()->Settings()),
@@ -67,29 +55,13 @@ CEditorCodeWidget::CEditorCodeWidget(QWidget* pParent) :
   m_spUi->setupUi(this);
   m_spUi->pSceneView->setVisible(false);
 
-  m_spBackgroundSnippetOverlay = std::make_unique<CBackgroundSnippetOverlay>(m_spUi->pCodeEdit);
-  m_spIconSnippetOverlay = std::make_unique<CIconSnippetOverlay>(m_spUi->pCodeEdit);
-  m_spMetronomeSnippetOverlay = std::make_unique<CMetronomeSnippetOverlay>(m_spUi->pCodeEdit);
-  m_spNotificationSnippetOverlay = std::make_unique<CNotificationSnippetOverlay>(m_spUi->pCodeEdit);
-  m_spResourceSnippetOverlay = std::make_unique<CResourceSnippetOverlay>(m_spUi->pCodeEdit);
-  m_spTextSnippetOverlay = std::make_unique<CTextSnippetOverlay>(m_spUi->pCodeEdit);
-  m_spTimerSnippetOverlay = std::make_unique<CTimerSnippetOverlay>(m_spUi->pCodeEdit);
-  m_spThreadSnippetOverlay = std::make_unique<CThreadSnippetOverlay>(m_spUi->pCodeEdit);
-
-  connect(m_spUi->pCodeEdit->document(), &QTextDocument::contentsChange,
+  connect(m_spUi->pCodeEditorView, &CCodeDisplayWidget::SignalContentsChange,
           this, &CEditorCodeWidget::SlotCodeEditContentsChange);
 }
 
 CEditorCodeWidget::~CEditorCodeWidget()
 {
-  m_spThreadSnippetOverlay.reset();
-  m_spTimerSnippetOverlay.reset();
-  m_spTextSnippetOverlay.reset();
-  m_spResourceSnippetOverlay.reset();
-  m_spNotificationSnippetOverlay.reset();
-  m_spMetronomeSnippetOverlay.reset();
-  m_spIconSnippetOverlay.reset();
-  m_spBackgroundSnippetOverlay.reset();
+
 }
 
 //----------------------------------------------------------------------------------------
@@ -105,62 +77,20 @@ void CEditorCodeWidget::Initialize()
 
   m_wpDbManager = CApplication::Instance()->System<CDatabaseManager>();
 
-  m_spBackgroundSnippetOverlay->Initialize(ResourceTreeModel());
-  m_spIconSnippetOverlay->Initialize(ResourceTreeModel());
-  m_spMetronomeSnippetOverlay->Initialize(ResourceTreeModel());
-  m_spNotificationSnippetOverlay->Initialize(ResourceTreeModel());
-  m_spResourceSnippetOverlay->Initialize(ResourceTreeModel());
-  m_spTextSnippetOverlay->Initialize(ResourceTreeModel());
-
-  m_spBackgroundSnippetOverlay->Hide();
-  m_spIconSnippetOverlay->Hide();
-  m_spMetronomeSnippetOverlay->Hide();
-  m_spNotificationSnippetOverlay->Hide();
-  m_spResourceSnippetOverlay->Hide();
-  m_spTextSnippetOverlay->Hide();
-  m_spTimerSnippetOverlay->Hide();
-  m_spThreadSnippetOverlay->Hide();
-
-  connect(m_spBackgroundSnippetOverlay.get(), &CBackgroundSnippetOverlay::SignalBackgroundCode,
-          this, &CEditorCodeWidget::SlotInsertGeneratedCode);
-  connect(m_spIconSnippetOverlay.get(), &CIconSnippetOverlay::SignalIconCode,
-          this, &CEditorCodeWidget::SlotInsertGeneratedCode);
-  connect(m_spMetronomeSnippetOverlay.get(), &CMetronomeSnippetOverlay::SignalMetronomeSnippetCode,
-          this, &CEditorCodeWidget::SlotInsertGeneratedCode);
-  connect(m_spNotificationSnippetOverlay.get(), &CNotificationSnippetOverlay::SignalNotificationSnippetCode,
-          this, &CEditorCodeWidget::SlotInsertGeneratedCode);
-  connect(m_spResourceSnippetOverlay.get(), &CResourceSnippetOverlay::SignalResourceCode,
-          this, &CEditorCodeWidget::SlotInsertGeneratedCode);
-  connect(m_spTextSnippetOverlay.get(), &CTextSnippetOverlay::SignalTextSnippetCode,
-          this, &CEditorCodeWidget::SlotInsertGeneratedCode);
-  connect(m_spTimerSnippetOverlay.get(), &CTimerSnippetOverlay::SignalTimerCode,
-          this, &CEditorCodeWidget::SlotInsertGeneratedCode);
-  connect(m_spThreadSnippetOverlay.get(), &CThreadSnippetOverlay::SignalThreadCode,
-          this, &CEditorCodeWidget::SlotInsertGeneratedCode);
+  m_spUi->pCodeEditorView->Initialize(EditorModel(), ScriptEditorModel(),
+                                      ResourceTreeModel(), UndoStack());
 
   auto wpHelpFactory = CApplication::Instance()->System<CHelpFactory>().lock();
   if (nullptr != wpHelpFactory)
   {
     m_spUi->pResourceComboBox->setProperty(helpOverlay::c_sHelpPagePropertyName, c_sScriptSelectionHelpId);
     wpHelpFactory->RegisterHelp(c_sScriptSelectionHelpId, ":/resources/help/editor/code/scriptselection_combobox_help.html");
-    m_spUi->pCodeEdit->setProperty(helpOverlay::c_sHelpPagePropertyName, c_sSciptEditorHelpId);
-    wpHelpFactory->RegisterHelp(c_sSciptEditorHelpId, ":/resources/help/editor/code/script_editor_help.html");
-
-    wpHelpFactory->RegisterHelp(c_sSciptAPIHelpId, ":/resources/help/editor/code/script_reference_help.html");
   }
 
   m_spUi->pResourceComboBox->setModel(m_pDummyModel);
 
   connect(ScriptEditorModel(), &CScriptEditorModel::SignalFileChangedExternally,
           this, &CEditorCodeWidget::SlotFileChangedExternally);
-
-  CUndoRedoFilter* pFilter =
-      new CUndoRedoFilter(m_spUi->pCodeEdit,
-                          std::bind(&CScriptEditorWidget::CreateContextMenu, m_spUi->pCodeEdit));
-  connect(m_spUi->pCodeEdit->document(), &QTextDocument::undoCommandAdded,
-          this, &CEditorCodeWidget::SlotUndoForScriptContentAdded);
-  connect(pFilter, &CUndoRedoFilter::UndoTriggered, this, [this]() { UndoStack()->undo(); });
-  connect(pFilter, &CUndoRedoFilter::RedoTriggered, this, [this]() { UndoStack()->redo(); });
 
   m_spUi->pStackedWidget->setCurrentIndex(c_iIndexNoScripts);
 
@@ -182,10 +112,7 @@ void CEditorCodeWidget::LoadProject(tspProject spProject)
           this, &CEditorCodeWidget::SlotRowsRemoved, Qt::QueuedConnection);
 
   m_spCurrentProject = spProject;
-  m_spResourceSnippetOverlay->LoadProject(m_spCurrentProject);
-  m_spMetronomeSnippetOverlay->LoadProject(m_spCurrentProject);
-  m_spNotificationSnippetOverlay->LoadProject(m_spCurrentProject);
-  m_spTextSnippetOverlay->LoadProject(m_spCurrentProject);
+  m_spUi->pCodeEditorView->LoadProject(spProject);
 
   if (0 < ScriptEditorModel()->rowCount())
   {
@@ -196,8 +123,6 @@ void CEditorCodeWidget::LoadProject(tspProject spProject)
   {
     m_spUi->pStackedWidget->setCurrentIndex(c_iIndexNoScripts);
   }
-
-  m_spUi->pCodeEdit->setReadOnly(EditorModel()->IsReadOnly());
 
   SetLoaded(true);
 }
@@ -220,18 +145,7 @@ void CEditorCodeWidget::UnloadProject()
     SlotDebugStop();
   }
 
-  m_spUi->pCodeEdit->blockSignals(true);
-  m_spUi->pCodeEdit->document()->blockSignals(true);
-  m_spUi->pCodeEdit->ResetWidget();
-  m_spUi->pCodeEdit->clear();
-  m_spUi->pCodeEdit->document()->blockSignals(false);
-  m_spUi->pCodeEdit->blockSignals(false);
-  m_spUi->pCodeEdit->setReadOnly(false);
-
-  m_spResourceSnippetOverlay->UnloadProject();
-  m_spMetronomeSnippetOverlay->UnloadProject();
-  m_spNotificationSnippetOverlay->UnloadProject();
-  m_spTextSnippetOverlay->UnloadProject();
+  m_spUi->pCodeEditorView->UnloadProject();
 
   m_spCurrentProject = nullptr;
 
@@ -245,15 +159,6 @@ void CEditorCodeWidget::UnloadProject()
 
   m_spUi->pResourceComboBox->setModel(m_pDummyModel);
   m_spUi->pResourceComboBox->clear();
-
-  m_spBackgroundSnippetOverlay->Hide();
-  m_spIconSnippetOverlay->Hide();
-  m_spMetronomeSnippetOverlay->Hide();
-  m_spNotificationSnippetOverlay->Hide();
-  m_spResourceSnippetOverlay->Hide();
-  m_spTextSnippetOverlay->Hide();
-  m_spTimerSnippetOverlay->Hide();
-  m_spThreadSnippetOverlay->Hide();
 
   if (!m_bDebugging)
   {
@@ -276,7 +181,7 @@ void CEditorCodeWidget::SaveProject()
         ScriptEditorModel()->CachedScriptName(m_spUi->pResourceComboBox->currentIndex()));
   if (nullptr != pScriptItem)
   {
-    pScriptItem->m_data = m_spUi->pCodeEdit->toPlainText().toUtf8();
+    pScriptItem->m_data = m_spUi->pCodeEditorView->GetCurrentText().toUtf8();
     ScriptEditorModel()->SetSceneScriptModifiedFlag(pScriptItem->m_sId, pScriptItem->m_bChanged);
   }
 }
@@ -351,6 +256,8 @@ void CEditorCodeWidget::OnActionBarAboutToChange()
     ActionBar()->m_spUi->AddNotificationCode->setEnabled(true);
     ActionBar()->m_spUi->AddTimerCode->setEnabled(true);
     ActionBar()->m_spUi->AddThreadCode->setEnabled(true);
+
+    m_spUi->pCodeEditorView->OnActionBarAboutToChange(&ActionBar()->m_spUi);
   }
 }
 
@@ -394,6 +301,8 @@ void CEditorCodeWidget::OnActionBarChanged()
       ActionBar()->m_spUi->AddThreadCode->setEnabled(false);
     }
 
+    m_spUi->pCodeEditorView->OnActionBarChanged(&ActionBar()->m_spUi);
+
     if (0 < ScriptEditorModel()->rowCount())
     {
       auto pScriptItem = ScriptEditorModel()->CachedScript(ScriptEditorModel()->CachedScriptName(0));
@@ -401,7 +310,7 @@ void CEditorCodeWidget::OnActionBarChanged()
       {
         if (nullptr != ActionBar())
         {
-          SetButtonsBasedOnScript(pScriptItem->m_sScriptType);
+          m_spUi->pCodeEditorView->SetScriptType(pScriptItem->m_sScriptType);
         }
       }
     }
@@ -418,7 +327,7 @@ void CEditorCodeWidget::on_pResourceComboBox_currentIndexChanged(qint32 iIndex)
   if (ScriptEditorModel()->CachedScriptName(iIndex) != m_sLastCachedScript)
   {
     UndoStack()->push(new CCommandChangeOpenedScript(m_spUi->pResourceComboBox,
-                                                     m_spUi->pCodeEdit,
+                                                     m_spUi->pCodeEditorView,
                                                      this, std::bind(&CEditorCodeWidget::ReloadEditor, this, std::placeholders::_1),
                                                      &m_bChangingIndex, &m_sLastCachedScript,
                                                      m_sLastCachedScript,
@@ -442,7 +351,7 @@ void CEditorCodeWidget::SlotCodeEditContentsChange(qint32 iPos, qint32 iDel, qin
   if (nullptr != pScriptItem)
   {
     pScriptItem->m_bChanged = true;
-    pScriptItem->m_data = m_spUi->pCodeEdit->toPlainText().toUtf8();
+    pScriptItem->m_data = m_spUi->pCodeEditorView->GetCurrentText().toUtf8();
     ScriptEditorModel()->SetSceneScriptModifiedFlag(pScriptItem->m_sId, true);
   }
 }
@@ -493,14 +402,15 @@ void CEditorCodeWidget::SlotDebugStart()
     {
       auto spSignalEmmiter = spScriptRunner->SignalEmmitterContext();
       connect(spSignalEmmiter.get(), &CScriptRunnerSignalContext::executionError,
-              m_spUi->pCodeEdit, &CScriptEditorWidget::SlotExecutionError, Qt::QueuedConnection);
+              m_spUi->pCodeEditorView, &CCodeDisplayWidget::SlotExecutionError,
+              Qt::QueuedConnection);
     }
 
     pMainSceneScreen->LoadProject(iCurrProject, sSceneName);
 
     pLayout->addWidget(pMainSceneScreen);
 
-    m_spUi->pCodeEdit->ResetWidget();
+    m_spUi->pCodeEditorView->ResetWidget();
 
     m_bDebugging = true;
   }
@@ -531,7 +441,7 @@ void CEditorCodeWidget::SlotDebugStop()
       {
         auto spSignalEmmiter = spScriptRunner->SignalEmmitterContext();
         disconnect(spSignalEmmiter.get(), &CScriptRunnerSignalContext::executionError,
-                m_spUi->pCodeEdit, &CScriptEditorWidget::SlotExecutionError);
+                   m_spUi->pCodeEditorView, &CCodeDisplayWidget::SlotExecutionError);
       }
 
       pMainSceneScreen->SlotQuit();
@@ -584,13 +494,13 @@ void CEditorCodeWidget::SlotFileChangedExternally(const QString& sName)
   {
     m_bChangingIndex = true;
 
-    m_spUi->pCodeEdit->ResetWidget();
-    m_spUi->pCodeEdit->clear();
+    m_spUi->pCodeEditorView->ResetWidget();
+    m_spUi->pCodeEditorView->Clear();
     // load new contents
     ActionBar()->m_spUi->DebugButton->setEnabled(nullptr != pScriptItem->m_spScene);
-    m_spUi->pCodeEdit->setPlainText(QString::fromUtf8(pScriptItem->m_data));
+    m_spUi->pCodeEditorView->SetContent(QString::fromUtf8(pScriptItem->m_data));
 
-    m_spUi->pCodeEdit->update();
+    m_spUi->pCodeEditorView->Update();
 
     m_bChangingIndex = false;
   }
@@ -598,107 +508,10 @@ void CEditorCodeWidget::SlotFileChangedExternally(const QString& sName)
 
 //----------------------------------------------------------------------------------------
 //
-void CEditorCodeWidget::SlotInsertGeneratedCode(const QString& sCode)
-{
-  WIDGET_INITIALIZED_GUARD
-  if (nullptr == m_spCurrentProject) { return; }
-  m_spUi->pCodeEdit->insertPlainText(sCode);
-}
-
-//----------------------------------------------------------------------------------------
-//
 void CEditorCodeWidget::SlotShowOverlay()
 {
   WIDGET_INITIALIZED_GUARD
-
-  if (sender() == ActionBar()->m_spUi->AddShowBackgroundCode)
-  {
-    m_spIconSnippetOverlay->Hide();
-    m_spMetronomeSnippetOverlay->Hide();
-    m_spNotificationSnippetOverlay->Hide();
-    m_spResourceSnippetOverlay->Hide();
-    m_spTextSnippetOverlay->Hide();
-    m_spTimerSnippetOverlay->Hide();
-    m_spThreadSnippetOverlay->Hide();
-    m_spBackgroundSnippetOverlay->Toggle();
-  }
-  else if (sender() == ActionBar()->m_spUi->AddShowIconCode)
-  {
-    m_spBackgroundSnippetOverlay->Hide();
-    m_spMetronomeSnippetOverlay->Hide();
-    m_spNotificationSnippetOverlay->Hide();
-    m_spResourceSnippetOverlay->Hide();
-    m_spTextSnippetOverlay->Hide();
-    m_spTimerSnippetOverlay->Hide();
-    m_spThreadSnippetOverlay->Hide();
-    m_spIconSnippetOverlay->Toggle();
-  }
-  else if (sender() == ActionBar()->m_spUi->AddShowImageCode)
-  {
-    m_spBackgroundSnippetOverlay->Hide();
-    m_spIconSnippetOverlay->Hide();
-    m_spMetronomeSnippetOverlay->Hide();
-    m_spNotificationSnippetOverlay->Hide();
-    m_spTextSnippetOverlay->Hide();
-    m_spTimerSnippetOverlay->Hide();
-    m_spThreadSnippetOverlay->Hide();
-    m_spResourceSnippetOverlay->Toggle();
-  }
-  else if (sender() == ActionBar()->m_spUi->AddTextCode)
-  {
-    m_spBackgroundSnippetOverlay->Hide();
-    m_spIconSnippetOverlay->Hide();
-    m_spMetronomeSnippetOverlay->Hide();
-    m_spNotificationSnippetOverlay->Hide();
-    m_spResourceSnippetOverlay->Hide();
-    m_spTimerSnippetOverlay->Hide();
-    m_spThreadSnippetOverlay->Hide();
-    m_spTextSnippetOverlay->Toggle();
-  }
-  else if (sender() == ActionBar()->m_spUi->AddMetronomeCode)
-  {
-    m_spBackgroundSnippetOverlay->Hide();
-    m_spIconSnippetOverlay->Hide();
-    m_spNotificationSnippetOverlay->Hide();
-    m_spResourceSnippetOverlay->Hide();
-    m_spTextSnippetOverlay->Hide();
-    m_spTimerSnippetOverlay->Hide();
-    m_spThreadSnippetOverlay->Hide();
-    m_spMetronomeSnippetOverlay->Toggle();
-  }
-  else if (sender() == ActionBar()->m_spUi->AddNotificationCode)
-  {
-    m_spBackgroundSnippetOverlay->Hide();
-    m_spIconSnippetOverlay->Hide();
-    m_spMetronomeSnippetOverlay->Hide();
-    m_spResourceSnippetOverlay->Hide();
-    m_spTextSnippetOverlay->Hide();
-    m_spTimerSnippetOverlay->Hide();
-    m_spThreadSnippetOverlay->Hide();
-    m_spNotificationSnippetOverlay->Toggle();
-  }
-  else if (sender() == ActionBar()->m_spUi->AddTimerCode)
-  {
-    m_spBackgroundSnippetOverlay->Hide();
-    m_spIconSnippetOverlay->Hide();
-    m_spMetronomeSnippetOverlay->Hide();
-    m_spNotificationSnippetOverlay->Hide();
-    m_spResourceSnippetOverlay->Hide();
-    m_spTextSnippetOverlay->Hide();
-    m_spThreadSnippetOverlay->Hide();
-    m_spTimerSnippetOverlay->Toggle();
-  }
-  else if (sender() == ActionBar()->m_spUi->AddThreadCode)
-  {
-    m_spBackgroundSnippetOverlay->Hide();
-    m_spIconSnippetOverlay->Hide();
-    m_spMetronomeSnippetOverlay->Hide();
-    m_spNotificationSnippetOverlay->Hide();
-    m_spResourceSnippetOverlay->Hide();
-    m_spTextSnippetOverlay->Hide();
-    m_spTimerSnippetOverlay->Hide();
-    m_spThreadSnippetOverlay->Toggle();
-  }
+  m_spUi->pCodeEditorView->SlotShowOverlay();
 }
 
 //----------------------------------------------------------------------------------------
@@ -729,22 +542,12 @@ void CEditorCodeWidget::SlotRowsRemoved(const QModelIndex& parent, int iFirst, i
 
 //----------------------------------------------------------------------------------------
 //
-void CEditorCodeWidget::SlotUndoForScriptContentAdded()
-{
-  WIDGET_INITIALIZED_GUARD
-  if (nullptr == m_spCurrentProject) { return; }
-
-  UndoStack()->push(new CCommandScriptContentChange(m_spUi->pCodeEdit->document()));
-}
-
-//----------------------------------------------------------------------------------------
-//
 void CEditorCodeWidget::ReloadEditor(qint32 iIndex)
 {
   m_bChangingIndex = true;
 
-  m_spUi->pCodeEdit->ResetWidget();
-  m_spUi->pCodeEdit->clear();
+  m_spUi->pCodeEditorView->ResetWidget();
+  m_spUi->pCodeEditorView->Clear();
 
   // load new contents
   m_sLastCachedScript = ScriptEditorModel()->CachedScriptName(iIndex);
@@ -754,41 +557,12 @@ void CEditorCodeWidget::ReloadEditor(qint32 iIndex)
     if (nullptr != ActionBar())
     {
       ActionBar()->m_spUi->DebugButton->setEnabled(nullptr != pScriptItem->m_spScene);
-      SetButtonsBasedOnScript(pScriptItem->m_sScriptType);
+      m_spUi->pCodeEditorView->SetScriptType(pScriptItem->m_sScriptType);
     }
-    m_spUi->pCodeEdit->setPlainText(QString::fromUtf8(pScriptItem->m_data));
-    m_spUi->pCodeEdit->SetHighlightDefinition(pScriptItem->m_sHighlightDefinition);
+    m_spUi->pCodeEditorView->SetContent(QString::fromUtf8(pScriptItem->m_data));
+    m_spUi->pCodeEditorView->SetHighlightDefinition(pScriptItem->m_sHighlightDefinition);
   }
-  m_spUi->pCodeEdit->update();
+  m_spUi->pCodeEditorView->Update();
 
   m_bChangingIndex = false;
-}
-
-//----------------------------------------------------------------------------------------
-//
-void CEditorCodeWidget::SetButtonsBasedOnScript(const QString& sScriptType)
-{
-  // do this for now, later use a registry
-  if ("js" == sScriptType)
-  {
-    ActionBar()->m_spUi->AddShowBackgroundCode->setVisible(true);
-    ActionBar()->m_spUi->AddShowIconCode->setVisible(true);
-    ActionBar()->m_spUi->AddShowImageCode->setVisible(true);
-    ActionBar()->m_spUi->AddTextCode->setVisible(true);
-    ActionBar()->m_spUi->AddMetronomeCode->setVisible(true);
-    ActionBar()->m_spUi->AddNotificationCode->setVisible(true);
-    ActionBar()->m_spUi->AddTimerCode->setVisible(true);
-    ActionBar()->m_spUi->AddThreadCode->setVisible(true);
-  }
-  else
-  {
-    ActionBar()->m_spUi->AddShowBackgroundCode->setVisible(false);
-    ActionBar()->m_spUi->AddShowIconCode->setVisible(false);
-    ActionBar()->m_spUi->AddShowImageCode->setVisible(false);
-    ActionBar()->m_spUi->AddTextCode->setVisible(false);
-    ActionBar()->m_spUi->AddMetronomeCode->setVisible(false);
-    ActionBar()->m_spUi->AddNotificationCode->setVisible(false);
-    ActionBar()->m_spUi->AddTimerCode->setVisible(false);
-    ActionBar()->m_spUi->AddThreadCode->setVisible(false);
-  }
 }

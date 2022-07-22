@@ -27,7 +27,7 @@ class CBackgroundSnippetOverlay : public COverlayBase
   Q_OBJECT
 
 public:
-  explicit CBackgroundSnippetOverlay(CScriptEditorWidget* pParent = nullptr);
+  explicit CBackgroundSnippetOverlay(QWidget* pParent = nullptr);
   ~CBackgroundSnippetOverlay() override;
 
   void Initialize(CResourceTreeItemModel* pResourceTreeModel);
@@ -51,7 +51,6 @@ protected slots:
 
 private:
   std::unique_ptr<Ui::CBackgroundSnippetOverlay> m_spUi;
-  QPointer<CScriptEditorWidget>                  m_pEditor;
   bool                                           m_bInitialized;
   SBackgroundSnippetData                         m_data;
   QSize                                          m_preferredSize;

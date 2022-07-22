@@ -4,6 +4,8 @@
 #include <enum.h>
 #include <QString>
 #include <QUrl>
+
+#include <map>
 #include <memory>
 
 BETTER_ENUM(EResourceType, qint32,
@@ -27,6 +29,23 @@ struct SResourceData
   QUrl                      m_sSource;
   EResourceType             m_type = EResourceType::eOther;
   QString                   m_sResourceBundle;
+};
+
+struct SScriptDefinitionData
+{
+  QString sType;
+  QString sHighlightDefinition;
+  QString sInitText;
+
+  static inline const std::map<QString, SScriptDefinitionData>& DefinitionMap()
+  {
+    static std::map<QString, SScriptDefinitionData> c_sFileEngingDefinitionMap = {
+        { "js", {"js", "JavaScript", "// insert code to control scene"} },
+        { "json", {"js", "JavaScript", "{\n}"}},
+        { "eos", {"eos", "JavaScript", "{\n\t\"commands\": [\n\t]\n}"} },
+      };
+    return c_sFileEngingDefinitionMap;
+  }
 };
 
 #endif // RESOURCEDATA_H

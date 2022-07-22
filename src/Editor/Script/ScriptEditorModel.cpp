@@ -12,19 +12,6 @@
 namespace
 {
   const char c_sIdProperty[] = "ID";
-
-  struct SScriptDefinitionData
-  {
-    QString sType;
-    QString sHighlightDefinition;
-    QString sInitText;
-  };
-
-  std::map<QString, SScriptDefinitionData> c_sFileEngingDefinitionMap = {
-    { "js", {"js", "JavaScript", "// insert code to control scene"} },
-    { "json", {"js", "JavaScript", "{\n}"}},
-    { "eos", {"js", "JavaScript", "{\n\t\"commands\": [\n\t]\n}"} },
-  };
 }
 
 //----------------------------------------------------------------------------------------
@@ -60,8 +47,8 @@ CScriptEditorModel::~CScriptEditorModel()
 //
 void CScriptEditorModel::InitScript(QIODevice& file, const QString& sType)
 {
-  auto itDefinition = c_sFileEngingDefinitionMap.find(sType);
-  if (c_sFileEngingDefinitionMap.end() != itDefinition)
+  auto itDefinition = SScriptDefinitionData::DefinitionMap().find(sType);
+  if (SScriptDefinitionData::DefinitionMap().end() != itDefinition)
   {
     file.write(itDefinition->second.sInitText.toUtf8());
   }
@@ -519,8 +506,9 @@ void CScriptEditorModel::AddResourceTo(tspResource spResource, std::map<QString,
       mpToAddTo.insert({sResourceName, SCachedMapItem()});
       auto& script = mpToAddTo[sResourceName];
       script.m_sId = sResourceName;
-      auto itDefinition = c_sFileEngingDefinitionMap.find(QFileInfo(sResourcePath.toString()).suffix());
-      if (c_sFileEngingDefinitionMap.end() != itDefinition)
+      auto itDefinition = SScriptDefinitionData::DefinitionMap().find(
+            QFileInfo(sResourcePath.toString()).suffix());
+      if (SScriptDefinitionData::DefinitionMap().end() != itDefinition)
       {
         script.m_sScriptType = itDefinition->first;
         script.m_sHighlightDefinition = itDefinition->second.sHighlightDefinition;

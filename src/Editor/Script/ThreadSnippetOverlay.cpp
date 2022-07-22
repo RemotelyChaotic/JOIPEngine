@@ -1,11 +1,9 @@
 #include "ThreadSnippetOverlay.h"
-#include "ScriptEditorWidget.h"
 #include "ui_ThreadSnippetOverlay.h"
 
-CThreadSnippetOverlay::CThreadSnippetOverlay(CScriptEditorWidget* pParent) :
+CThreadSnippetOverlay::CThreadSnippetOverlay(QWidget* pParent) :
   COverlayBase(0, pParent),
-  m_spUi(std::make_unique<Ui::CThreadSnippetOverlay>()),
-  m_pEditor(pParent)
+  m_spUi(std::make_unique<Ui::CThreadSnippetOverlay>())
 {
   m_spUi->setupUi(this);
   m_preferredSize = size();

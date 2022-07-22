@@ -7,15 +7,15 @@
 #include <QPointer>
 #include <functional>
 
+class CCodeDisplayWidget;
 class CDatabaseManager;
 class CScriptEditorModel;
-class CScriptEditorWidget;
 
 class CCommandChangeOpenedScript : public QUndoCommand
 {
 public:
   CCommandChangeOpenedScript(QPointer<QComboBox> pResourcesComboBox,
-                             QPointer<CScriptEditorWidget> pEditorWidget,
+                             QPointer<CCodeDisplayWidget> pScriptDisplayWidget,
                              QPointer<QWidget> pGuard,
                              const std::function<void(qint32)>& fnReloadEditor,
                              bool* pbChangingIndexFlag,
@@ -34,7 +34,7 @@ public:
 protected:
   std::weak_ptr<CDatabaseManager> m_wpDbManager;
   QPointer<QComboBox> m_pResourcesComboBox;
-  QPointer<CScriptEditorWidget> m_pEditorWidget;
+  QPointer<CCodeDisplayWidget> m_pScriptDisplayWidget;
   QPointer<CScriptEditorModel> m_pEditorModel;
   QPointer<QWidget> m_pGuard;
   std::function<void(qint32)> m_fnReloadEditor;

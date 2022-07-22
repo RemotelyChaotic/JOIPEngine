@@ -24,7 +24,7 @@ class CIconSnippetOverlay : public COverlayBase
   Q_OBJECT
 
 public:
-  explicit CIconSnippetOverlay(CScriptEditorWidget* pParent = nullptr);
+  explicit CIconSnippetOverlay(QWidget* pParent = nullptr);
   ~CIconSnippetOverlay() override;
 
   void Initialize(CResourceTreeItemModel* pResourceTreeModel);
@@ -48,7 +48,6 @@ protected slots:
 
 private:
   std::unique_ptr<Ui::CIconSnippetOverlay> m_spUi;
-  QPointer<CScriptEditorWidget>            m_pEditor;
   bool                                     m_bInitialized;
   SIconSnippetData                         m_data;
   QSize                                    m_preferredSize;

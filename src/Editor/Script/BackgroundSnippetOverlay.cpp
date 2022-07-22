@@ -1,15 +1,13 @@
 #include "BackgroundSnippetOverlay.h"
-#include "ScriptEditorWidget.h"
 #include "Editor/Resources/ResourceTreeItem.h"
 #include "Editor/Resources/ResourceTreeItemModel.h"
 #include "Editor/Resources/ResourceTreeItemSortFilterProxyModel.h"
 #include "ui_BackgroundSnippetOverlay.h"
 #include <QScrollBar>
 
-CBackgroundSnippetOverlay::CBackgroundSnippetOverlay(CScriptEditorWidget* pParent) :
+CBackgroundSnippetOverlay::CBackgroundSnippetOverlay(QWidget* pParent) :
   COverlayBase(0, pParent),
   m_spUi(new Ui::CBackgroundSnippetOverlay),
-  m_pEditor(pParent),
   m_bInitialized(false),
   m_data()
 {

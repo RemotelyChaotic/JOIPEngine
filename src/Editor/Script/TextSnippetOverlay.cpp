@@ -20,12 +20,11 @@ namespace  {
 
 //----------------------------------------------------------------------------------------
 //
-CTextSnippetOverlay::CTextSnippetOverlay(CScriptEditorWidget* pParent) :
+CTextSnippetOverlay::CTextSnippetOverlay(QWidget* pParent) :
   COverlayBase(0, pParent),
   m_spUi(new Ui::CTextSnippetOverlay),
   m_spCurrentProject(nullptr),
   m_wpDbManager(CApplication::Instance()->System<CDatabaseManager>()),
-  m_pEditor(pParent),
   m_bInitialized(true),
   m_data()
 {

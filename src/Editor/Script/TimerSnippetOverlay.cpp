@@ -1,13 +1,11 @@
 #include "TimerSnippetOverlay.h"
-#include "ScriptEditorWidget.h"
 #include "ui_TimerSnippetOverlay.h"
 
 #include <QScrollBar>
 
-CTimerSnippetOverlay::CTimerSnippetOverlay(CScriptEditorWidget* pParent) :
+CTimerSnippetOverlay::CTimerSnippetOverlay(QWidget* pParent) :
   COverlayBase(0, pParent),
   m_spUi(new Ui::CTimerSnippetOverlay),
-  m_pEditor(pParent),
   m_data()
 {
   m_spUi->setupUi(this);

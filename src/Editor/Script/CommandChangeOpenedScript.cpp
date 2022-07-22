@@ -1,12 +1,12 @@
 #include "CommandChangeOpenedScript.h"
 #include "Application.h"
+#include "CodeDisplayWidget.h"
 #include "ScriptEditorModel.h"
-#include "ScriptEditorWidget.h"
 #include "Editor/EditorCommandIds.h"
 #include "Systems/DatabaseManager.h"
 
 CCommandChangeOpenedScript::CCommandChangeOpenedScript(QPointer<QComboBox> pResourcesComboBox,
-                                                       QPointer<CScriptEditorWidget> pEditorWidget,
+                                                       QPointer<CCodeDisplayWidget> pScriptDisplayWidget,
                                                        QPointer<QWidget> pGuard,
                                                        const std::function<void(qint32)>& fnReloadEditor,
                                                        bool* pbChangingIndexFlag,
@@ -17,7 +17,7 @@ CCommandChangeOpenedScript::CCommandChangeOpenedScript(QPointer<QComboBox> pReso
   QUndoCommand("Opened script: " + sNewScript, pParent),
   m_wpDbManager(CApplication::Instance()->System<CDatabaseManager>()),
   m_pResourcesComboBox(pResourcesComboBox),
-  m_pEditorWidget(pEditorWidget),
+  m_pScriptDisplayWidget(pScriptDisplayWidget),
   m_pEditorModel(dynamic_cast<CScriptEditorModel*>(pResourcesComboBox->model())),
   m_pGuard(pGuard),
   m_fnReloadEditor(fnReloadEditor),
@@ -82,7 +82,7 @@ void CCommandChangeOpenedScript::DoUndoRedo(const QString& sScriptNext)
     auto pScriptItem = m_pEditorModel->CachedScript(*m_psLastCachedScript);
     if (nullptr != pScriptItem)
     {
-      pScriptItem->m_data = m_pEditorWidget->toPlainText().toUtf8();
+      pScriptItem->m_data = m_pScriptDisplayWidget->GetCurrentText().toUtf8();
       m_pEditorModel->SetSceneScriptModifiedFlag(pScriptItem->m_sId, pScriptItem->m_bChanged);
     }
 

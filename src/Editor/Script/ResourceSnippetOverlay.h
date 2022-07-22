@@ -45,7 +45,7 @@ class CResourceSnippetOverlay : public COverlayBase
   Q_OBJECT
 
 public:
-  explicit CResourceSnippetOverlay(CScriptEditorWidget* pParent = nullptr);
+  explicit CResourceSnippetOverlay(QWidget* pParent = nullptr);
   ~CResourceSnippetOverlay() override;
 
   void Initialize(CResourceTreeItemModel* pResourceTreeModel);
@@ -85,7 +85,6 @@ private:
   std::unique_ptr<Ui::CResourceSnippetOverlay> m_spUi;
   tspProject                                   m_spCurrentProject;
   std::weak_ptr<CDatabaseManager>              m_wpDbManager;
-  QPointer<CScriptEditorWidget>                m_pEditor;
   bool                                         m_bInitialized;
   SResourceSnippetData                         m_data;
   QSize                                        m_preferredSize;

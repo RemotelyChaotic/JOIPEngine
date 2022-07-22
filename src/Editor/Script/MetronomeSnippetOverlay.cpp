@@ -1,6 +1,5 @@
 #include "MetronomeSnippetOverlay.h"
 #include "Application.h"
-#include "ScriptEditorWidget.h"
 #include "Editor/Resources/ResourceTreeItem.h"
 #include "Editor/Resources/ResourceTreeItemModel.h"
 #include "Editor/Resources/ResourceTreeItemSortFilterProxyModel.h"
@@ -17,12 +16,11 @@ namespace  {
 
 //----------------------------------------------------------------------------------------
 //
-CMetronomeSnippetOverlay::CMetronomeSnippetOverlay(CScriptEditorWidget* pParent) :
+CMetronomeSnippetOverlay::CMetronomeSnippetOverlay(QWidget* pParent) :
   COverlayBase(0, pParent),
   m_spUi(std::make_unique<Ui::CMetronomeSnippetOverlay>()),
   m_spCurrentProject(nullptr),
   m_wpDbManager(CApplication::Instance()->System<CDatabaseManager>()),
-  m_pEditor(pParent),
   m_bInitialized(true),
   m_data()
 {
