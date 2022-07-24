@@ -739,6 +739,46 @@ bool CJSonSaxParser::boolean(bool val)
 
 //----------------------------------------------------------------------------------------
 //
+using tNLohmanNumber = std::variant<CJSonSaxParser::number_integer_t,
+                                    CJSonSaxParser::number_unsigned_t,
+                                    CJSonSaxParser::number_float_t>;
+QVariant FallbackNumberConverter(tNLohmanNumber val, EArgumentType toType)
+{
+  if (std::holds_alternative<CJSonSaxParser::number_integer_t>(val))
+  {
+    switch (toType)
+    {
+      case EArgumentType::eInt64: return QVariant(static_cast<qint64>(std::get<CJSonSaxParser::number_integer_t>(val)));
+      case EArgumentType::eUInt64: return QVariant(static_cast<quint64>(std::get<CJSonSaxParser::number_integer_t>(val)));
+      case EArgumentType::eDouble: return QVariant(static_cast<double>(std::get<CJSonSaxParser::number_integer_t>(val)));
+      default: return QVariant();
+    }
+  }
+  else if (std::holds_alternative<CJSonSaxParser::number_unsigned_t>(val))
+  {
+    switch (toType)
+    {
+      case EArgumentType::eInt64: return QVariant(static_cast<qint64>(std::get<CJSonSaxParser::number_unsigned_t>(val)));
+      case EArgumentType::eUInt64: return QVariant(static_cast<quint64>(std::get<CJSonSaxParser::number_unsigned_t>(val)));
+      case EArgumentType::eDouble: return QVariant(static_cast<double>(std::get<CJSonSaxParser::number_unsigned_t>(val)));
+      default: return QVariant();
+    }
+  }
+  else if (std::holds_alternative<CJSonSaxParser::number_float_t>(val))
+  {
+    switch (toType)
+    {
+      case EArgumentType::eInt64: return QVariant(static_cast<qint64>(std::get<CJSonSaxParser::number_float_t>(val)));
+      case EArgumentType::eUInt64: return QVariant(static_cast<quint64>(std::get<CJSonSaxParser::number_float_t>(val)));
+      case EArgumentType::eDouble: return QVariant(static_cast<double>(std::get<CJSonSaxParser::number_float_t>(val)));
+      default: return QVariant();
+    }
+  }
+  return QVariant();
+}
+
+//----------------------------------------------------------------------------------------
+//
 bool CJSonSaxParser::number_integer(number_integer_t val)
 {
   static const std::set<EArgumentType> c_convertableTypes = {
@@ -761,7 +801,14 @@ bool CJSonSaxParser::number_integer(number_integer_t val)
       if (foundValueType != c_convertableTypes.end())
       {
         QVariant var = QVariant::fromValue(val);
-        if (!var.convert(*foundValueType)) { return false; }
+        if (!var.convert(*foundValueType))
+        {
+          var = FallbackNumberConverter(val, *foundValueType);
+          if (!var.isValid())
+          {
+            return false;
+          }
+        }
         InsertValueIntoArgs(var, m_parseStack.top()->m_actualArgs, m_sCurrentKey,
                             *foundValueType, bArray);
       }
@@ -798,7 +845,14 @@ bool CJSonSaxParser::number_unsigned(number_unsigned_t val)
       if (foundValueType != c_convertableTypes.end())
       {
         QVariant var = QVariant::fromValue(val);
-        if (!var.convert(*foundValueType)) { return false; }
+        if (!var.convert(*foundValueType))
+        {
+          var = FallbackNumberConverter(val, *foundValueType);
+          if (!var.isValid())
+          {
+            return false;
+          }
+        }
         InsertValueIntoArgs(var, m_parseStack.top()->m_actualArgs, m_sCurrentKey,
                             *foundValueType, bArray);
       }
@@ -835,7 +889,14 @@ bool CJSonSaxParser::number_float(number_float_t val, const string_t&)
       if (foundValueType != c_convertableTypes.end())
       {
         QVariant var(val);
-        if (!var.convert(*foundValueType)) { return false; }
+        if (!var.convert(*foundValueType))
+        {
+          var = FallbackNumberConverter(val, *foundValueType);
+          if (!var.isValid())
+          {
+            return false;
+          }
+        }
         InsertValueIntoArgs(var, m_parseStack.top()->m_actualArgs, m_sCurrentKey,
                             *foundValueType, bArray);
       }
