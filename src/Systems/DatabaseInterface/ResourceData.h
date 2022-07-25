@@ -37,12 +37,14 @@ struct SScriptDefinitionData
   QString sHighlightDefinition;
   QString sInitText;
 
+  constexpr static char c_sScriptTypeJs[] = "js";
+  constexpr static char c_sScriptTypeEos[] = "eos";
   static inline const std::map<QString, SScriptDefinitionData>& DefinitionMap()
   {
     static std::map<QString, SScriptDefinitionData> c_sFileEngingDefinitionMap = {
-        { "js", {"js", "JavaScript", "// insert code to control scene"} },
-        { "json", {"js", "JavaScript", "{\n}"}},
-        { "eos", {"eos", "JavaScript", "{\n\t\"commands\": [\n\t]\n}"} },
+        { c_sScriptTypeJs, {c_sScriptTypeJs, "JavaScript", "// insert code to control scene"} },
+        { "json", {c_sScriptTypeJs, "JavaScript", "{\n}"}},
+        { c_sScriptTypeEos, {c_sScriptTypeEos, "JavaScript", "{\n\t\"commands\": [\n\t]\n}"} },
       };
     return c_sFileEngingDefinitionMap;
   }

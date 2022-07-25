@@ -200,6 +200,10 @@ macro(CreateJOIPProject JOIP_PROJECT_NAME)
     ${JOIPSources}/Editor/Resources/WebResourceOverlay.cpp
     ${JOIPSources}/Editor/Resources/WebResourceOverlay.h
     ${JOIPSources}/Editor/Resources/WebResourceOverlay.ui
+    ${JOIPSources}/Editor/Script/CodeDisplayDefaultEditorImpl.cpp
+    ${JOIPSources}/Editor/Script/CodeDisplayDefaultEditorImpl.h
+    ${JOIPSources}/Editor/Script/CodeDisplayEosEditorImpl.cpp
+    ${JOIPSources}/Editor/Script/CodeDisplayEosEditorImpl.h
     ${JOIPSources}/Editor/Script/CodeDisplayWidget.cpp
     ${JOIPSources}/Editor/Script/CodeDisplayWidget.h
     ${JOIPSources}/Editor/Script/CodeDisplayWidget.ui
@@ -210,6 +214,7 @@ macro(CreateJOIPProject JOIP_PROJECT_NAME)
     ${JOIPSources}/Editor/Script/CommandChangeOpenedScript.h
     ${JOIPSources}/Editor/Script/CommandScriptContentChange.cpp
     ${JOIPSources}/Editor/Script/CommandScriptContentChange.h
+    ${JOIPSources}/Editor/Script/ICodeDisplayWidgetImpl.h
     ${JOIPSources}/Editor/Script/IconSnippetOverlay.cpp
     ${JOIPSources}/Editor/Script/IconSnippetOverlay.h
     ${JOIPSources}/Editor/Script/IconSnippetOverlay.ui

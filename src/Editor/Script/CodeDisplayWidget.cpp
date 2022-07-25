@@ -1,6 +1,8 @@
 #include "CodeDisplayWidget.h"
 #include "Application.h"
 #include "BackgroundSnippetOverlay.h"
+#include "CodeDisplayDefaultEditorImpl.h"
+#include "CodeDisplayEosEditorImpl.h"
 #include "CommandScriptContentChange.h"
 #include "IconSnippetOverlay.h"
 #include "NotificationSnippetOverlay.h"
@@ -38,17 +40,15 @@ namespace
   qint32 PageIndexFromScriptType(const QString& sType)
   {
     return c_iIndexScriptJs;
-    /*
     static std::map<QString, qint32> typeToPageMap = {
-      { "js", c_iIndexScriptJs },
-      { "eos", c_iIndexScriptEos }
+      { SScriptDefinitionData::c_sScriptTypeJs, c_iIndexScriptJs },
+      { SScriptDefinitionData::c_sScriptTypeEos, c_iIndexScriptEos }
     };
     if (auto it = typeToPageMap.find(sType); typeToPageMap.end() != it)
     {
       return it->second;
     }
     return c_iIndexNoScripts;
-    */
   }
 }
 
@@ -57,6 +57,7 @@ namespace
 CCodeDisplayWidget::CCodeDisplayWidget(QWidget* pParent) :
   QWidget(pParent),
   m_spUi(std::make_unique<Ui::CCodeDisplayWidget>()),
+  m_displayImplMap(),
   m_spBackgroundSnippetOverlay(nullptr),
   m_spIconSnippetOverlay(nullptr),
   m_spMetronomeSnippetOverlay(nullptr),
@@ -67,6 +68,9 @@ CCodeDisplayWidget::CCodeDisplayWidget(QWidget* pParent) :
   m_spThreadSnippetOverlay(nullptr)
 {
   m_spUi->setupUi(this);
+
+  m_displayImplMap[SScriptDefinitionData::c_sScriptTypeJs] = std::make_unique<CCodeDisplayDefaultEditorImpl>(m_spUi->pCodeEdit);
+  m_displayImplMap[SScriptDefinitionData::c_sScriptTypeEos] = std::make_unique<CCodeDisplayEosEditorImpl>(m_spUi->pEosEdit);
 
   m_spBackgroundSnippetOverlay = std::make_unique<CBackgroundSnippetOverlay>(this);
   m_spIconSnippetOverlay = std::make_unique<CIconSnippetOverlay>(this);
@@ -169,8 +173,11 @@ void CCodeDisplayWidget::LoadProject(tspProject spProject)
   m_spNotificationSnippetOverlay->LoadProject(spProject);
   m_spTextSnippetOverlay->LoadProject(spProject);
 
-  m_spUi->pCodeEdit->setReadOnly(m_pEditorModel->IsReadOnly());
-  //m_spUi->pEosEdit;
+  bool bReadOnly = m_pEditorModel->IsReadOnly();
+  m_spUi->pCodeEdit->setReadOnly(bReadOnly);
+  m_spUi->pEosEdit->setEditTriggers(
+        bReadOnly ? QAbstractItemView::NoEditTriggers :
+                    QAbstractItemView::DoubleClicked | QAbstractItemView::EditKeyPressed);
 }
 
 //----------------------------------------------------------------------------------------
@@ -225,28 +232,44 @@ void CCodeDisplayWidget::OnActionBarChanged(std::unique_ptr<Ui::CEditorActionBar
 //
 void CCodeDisplayWidget::Clear()
 {
-  m_spUi->pCodeEdit->clear();
+  auto it = m_displayImplMap.find(m_sScriptType);
+  if (m_displayImplMap.end() != it)
+  {
+    it->second->Clear();
+  }
 }
 
 //----------------------------------------------------------------------------------------
 //
 void CCodeDisplayWidget::ResetWidget()
 {
-  m_spUi->pCodeEdit->ResetWidget();
+  auto it = m_displayImplMap.find(m_sScriptType);
+  if (m_displayImplMap.end() != it)
+  {
+    it->second->ResetWidget();
+  }
 }
 
 //----------------------------------------------------------------------------------------
 //
 void CCodeDisplayWidget::SetContent(const QString& sContent)
 {
-  m_spUi->pCodeEdit->setPlainText(sContent);
+  auto it = m_displayImplMap.find(m_sScriptType);
+  if (m_displayImplMap.end() != it)
+  {
+    it->second->SetContent(sContent);
+  }
 }
 
 //----------------------------------------------------------------------------------------
 //
 void CCodeDisplayWidget::SetHighlightDefinition(const QString& sType)
 {
-  m_spUi->pCodeEdit->SetHighlightDefinition(sType);
+  auto it = m_displayImplMap.find(m_sScriptType);
+  if (m_displayImplMap.end() != it)
+  {
+    it->second->SetHighlightDefinition(sType);
+  }
 }
 
 //----------------------------------------------------------------------------------------
@@ -255,52 +278,50 @@ void CCodeDisplayWidget::SetScriptType(const QString& sScriptType)
 {
   if (!m_pInitialized || nullptr == m_pspUiActionBar) { return; }
 
-  // do this for now, later use a registry
-  if ("js" == sScriptType)
+  if (m_sScriptType != sScriptType)
   {
-    (*m_pspUiActionBar)->AddShowBackgroundCode->setVisible(true);
-    (*m_pspUiActionBar)->AddShowIconCode->setVisible(true);
-    (*m_pspUiActionBar)->AddShowImageCode->setVisible(true);
-    (*m_pspUiActionBar)->AddTextCode->setVisible(true);
-    (*m_pspUiActionBar)->AddMetronomeCode->setVisible(true);
-    (*m_pspUiActionBar)->AddNotificationCode->setVisible(true);
-    (*m_pspUiActionBar)->AddTimerCode->setVisible(true);
-    (*m_pspUiActionBar)->AddThreadCode->setVisible(true);
+    m_sScriptType = sScriptType;
+    auto it = m_displayImplMap.find(m_sScriptType);
+    if (m_displayImplMap.end() != it)
+    {
+      it->second->ShowButtons((*m_pspUiActionBar).get());
+    }
+    m_spUi->pEditorStackedWidget->setCurrentIndex(PageIndexFromScriptType(sScriptType));
   }
-  else
-  {
-    (*m_pspUiActionBar)->AddShowBackgroundCode->setVisible(false);
-    (*m_pspUiActionBar)->AddShowIconCode->setVisible(false);
-    (*m_pspUiActionBar)->AddShowImageCode->setVisible(false);
-    (*m_pspUiActionBar)->AddTextCode->setVisible(false);
-    (*m_pspUiActionBar)->AddMetronomeCode->setVisible(false);
-    (*m_pspUiActionBar)->AddNotificationCode->setVisible(false);
-    (*m_pspUiActionBar)->AddTimerCode->setVisible(false);
-    (*m_pspUiActionBar)->AddThreadCode->setVisible(false);
-  }
-
-  m_spUi->pEditorStackedWidget->setCurrentIndex(PageIndexFromScriptType(sScriptType));
 }
 
 //----------------------------------------------------------------------------------------
 //
 void CCodeDisplayWidget::Update()
 {
-  m_spUi->pCodeEdit->update();
+  auto it = m_displayImplMap.find(m_sScriptType);
+  if (m_displayImplMap.end() != it)
+  {
+    it->second->Update();
+  }
 }
 
 //----------------------------------------------------------------------------------------
 //
 QString CCodeDisplayWidget::GetCurrentText() const
 {
-  return m_spUi->pCodeEdit->toPlainText();
+  auto it = m_displayImplMap.find(m_sScriptType);
+  if (m_displayImplMap.end() != it)
+  {
+    return it->second->GetCurrentText();
+  }
+  return QString();
 }
 
 //----------------------------------------------------------------------------------------
 //
 void CCodeDisplayWidget::SlotExecutionError(QString sException, qint32 iLine, QString sStack)
 {
-  m_spUi->pCodeEdit->SlotExecutionError(sException, iLine, sStack);
+  auto it = m_displayImplMap.find(m_sScriptType);
+  if (m_displayImplMap.end() != it)
+  {
+    it->second->ExecutionError(sException, iLine, sStack);
+  }
 }
 
 //----------------------------------------------------------------------------------------
@@ -404,7 +425,11 @@ void CCodeDisplayWidget::SlotShowOverlay()
 void CCodeDisplayWidget::SlotInsertGeneratedCode(const QString& sCode)
 {
   if (!m_pInitialized) { return; }
-  m_spUi->pCodeEdit->insertPlainText(sCode);
+  auto it = m_displayImplMap.find(m_sScriptType);
+  if (m_displayImplMap.end() != it)
+  {
+    it->second->InsertGeneratedCode(sCode);
+  }
 }
 
 //----------------------------------------------------------------------------------------

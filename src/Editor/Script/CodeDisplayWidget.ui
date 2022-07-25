@@ -28,6 +28,9 @@
    </property>
    <item>
     <widget class="QStackedWidget" name="pEditorStackedWidget">
+     <property name="currentIndex">
+      <number>0</number>
+     </property>
      <widget class="QWidget" name="pPageEmpty">
       <layout class="QGridLayout" name="gridLayout">
        <item row="0" column="0">

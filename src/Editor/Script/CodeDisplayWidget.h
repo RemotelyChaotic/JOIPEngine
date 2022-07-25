@@ -4,6 +4,7 @@
 #include <QPointer>
 #include <QWidget>
 
+#include <map>
 #include <memory>
 
 class CBackgroundSnippetOverlay;
@@ -17,6 +18,7 @@ class CScriptEditorModel;
 class CTextSnippetOverlay;
 class CTimerSnippetOverlay;
 class CThreadSnippetOverlay;
+class ICodeDisplayWidgetImpl;
 namespace Ui {
   class CCodeDisplayWidget;
   class CEditorActionBar;
@@ -24,6 +26,8 @@ namespace Ui {
 class QUndoStack;
 typedef std::shared_ptr<struct SProject> tspProject;
 
+//----------------------------------------------------------------------------------------
+//
 class CCodeDisplayWidget : public QWidget
 {
   Q_OBJECT
@@ -66,6 +70,8 @@ private:
   std::unique_ptr<Ui::CCodeDisplayWidget>                m_spUi;
   std::unique_ptr<Ui::CEditorActionBar>*                 m_pspUiActionBar = nullptr;
 
+  std::map<QString, std::unique_ptr<ICodeDisplayWidgetImpl>> m_displayImplMap;
+
   std::unique_ptr<CBackgroundSnippetOverlay>             m_spBackgroundSnippetOverlay;
   std::unique_ptr<CIconSnippetOverlay>                   m_spIconSnippetOverlay;
   std::unique_ptr<CMetronomeSnippetOverlay>              m_spMetronomeSnippetOverlay;
@@ -79,6 +85,7 @@ private:
   QPointer<CScriptEditorModel>                           m_pScriptEditorModel;
   QPointer<CResourceTreeItemModel>                       m_pResourceTreeModel;
   QPointer<QUndoStack>                                   m_pUndoStack;
+  QString                                                m_sScriptType;
   bool                                                   m_pInitialized = false;
 };
 
