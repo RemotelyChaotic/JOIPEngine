@@ -5,13 +5,11 @@
 #include <memory>
 #include <vector>
 
-class CJsonInstructionNode : public std::enable_shared_from_this<CJsonInstructionNode>
+class CJsonInstructionNodeBuildData
 {
 public:
-  CJsonInstructionNode() = default;
-  CJsonInstructionNode(CJsonInstructionNode& other);
-
-  void ReparentChildren();
+  CJsonInstructionNodeBuildData() = default;
+  CJsonInstructionNodeBuildData(CJsonInstructionNodeBuildData& other);
 
   // build data
   QString                                            m_sName;
@@ -19,6 +17,18 @@ public:
   tInstructionMapType*                               m_argsDefinition = nullptr;
   // for arrays
   SInstructionArgumentType*                          m_argDefinitionArr = nullptr;
+};
+
+//----------------------------------------------------------------------------------------
+//
+class CJsonInstructionNode : public std::enable_shared_from_this<CJsonInstructionNode>,
+                             public CJsonInstructionNodeBuildData
+{
+public:
+  CJsonInstructionNode() = default;
+  CJsonInstructionNode(CJsonInstructionNode& other);
+
+  void ReparentChildren();
 
   // run data
   std::weak_ptr<IJsonInstructionBase>                m_wpCommand;

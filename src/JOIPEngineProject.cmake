@@ -376,6 +376,8 @@ macro(CreateJOIPProject JOIP_PROJECT_NAME)
     ${JOIPSources}/Systems/JSON/JsonInstructionSetParser.cpp
     ${JOIPSources}/Systems/JSON/JsonInstructionSetParser.h
     ${JOIPSources}/Systems/JSON/JsonInstructionSetRunner.h
+    ${JOIPSources}/Systems/JSON/JsonInstructionSetRunnerItemModel.cpp
+    ${JOIPSources}/Systems/JSON/JsonInstructionSetRunnerItemModel.h
     ${JOIPSources}/Systems/JSON/JsonInstructionSetSaxParser.h
     ${JOIPSources}/Systems/JSON/JsonInstructionTypes.h
     ${JOIPSources}/Systems/Script/EosScriptRunner.cpp

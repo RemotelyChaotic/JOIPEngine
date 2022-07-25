@@ -5,6 +5,7 @@
 #include <QVariant>
 #include <any>
 
+class CJsonInstructionNode;
 class CJsonInstructionSetRunnerPrivate;
 
 struct SRunnerRetVal
@@ -20,6 +21,7 @@ class CJsonInstructionSetRunner : public QObject
   Q_OBJECT
   friend class CJsonInstructionSetParserPrivate;
   friend class CJsonInstructionSetRunnerPrivate;
+  friend class CJsonInstructionSetRunnerItemModel;
 
 public:
   typedef std::variant<SJsonException, SRunnerRetVal /*Has more commands*/> tRetVal;
@@ -37,6 +39,8 @@ signals:
   void Fork(std::shared_ptr<CJsonInstructionSetRunner> spNewRunner, const QString& sForkCommandsName, bool bAutorun);
 
 protected:
+  const std::vector<std::pair<QString, std::shared_ptr<CJsonInstructionNode>>>& Nodes() const;
+
   std::unique_ptr<CJsonInstructionSetRunnerPrivate> m_pPrivate;
 };
 

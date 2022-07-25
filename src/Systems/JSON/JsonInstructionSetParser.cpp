@@ -404,6 +404,7 @@ class CJsonInstructionSetRunnerPrivate : public QObject
 {
   Q_OBJECT
   Q_DISABLE_COPY(CJsonInstructionSetRunnerPrivate)
+  friend class CJsonInstructionSetRunner;
   friend class CJsonInstructionSetParserPrivate;
   friend class CJSonSaxParser;
 
@@ -1620,6 +1621,14 @@ CJsonInstructionSetRunner::tRetVal
 CJsonInstructionSetRunner::Run(const QString& sInstructionSet, ERunerMode runMode, bool bBlocking)
 {
   return m_pPrivate->Run(sInstructionSet, runMode, bBlocking);
+}
+
+//----------------------------------------------------------------------------------------
+//
+const std::vector<std::pair<QString, std::shared_ptr<CJsonInstructionNode>>>&
+CJsonInstructionSetRunner::Nodes() const
+{
+  return m_pPrivate->m_vspBuiltCommands;
 }
 
 //----------------------------------------------------------------------------------------

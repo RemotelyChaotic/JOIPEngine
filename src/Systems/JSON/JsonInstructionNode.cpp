@@ -1,11 +1,18 @@
 #include "JsonInstructionNode.h"
 
-CJsonInstructionNode::CJsonInstructionNode(CJsonInstructionNode& other) :
+
+CJsonInstructionNodeBuildData::CJsonInstructionNodeBuildData(CJsonInstructionNodeBuildData& other) :
   m_sName(other.m_sName),
   m_bIgnoreChildren(other.m_bIgnoreChildren),
   // not really an issue as these are only build time information
   m_argsDefinition(other.m_argsDefinition),
-  m_argDefinitionArr(other.m_argDefinitionArr),
+  m_argDefinitionArr(other.m_argDefinitionArr)
+{
+
+}
+
+CJsonInstructionNode::CJsonInstructionNode(CJsonInstructionNode& other) :
+  CJsonInstructionNodeBuildData(other),
   // actually useful things
   m_wpCommand(other.m_wpCommand),
   m_actualArgs(other.m_actualArgs),
