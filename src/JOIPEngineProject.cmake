@@ -349,6 +349,37 @@ macro(CreateJOIPProject JOIP_PROJECT_NAME)
     ${JOIPSources}/Systems/DLJobs/EosResourceLocator.cpp
     ${JOIPSources}/Systems/DLJobs/EosResourceLocator.h
     ${JOIPSources}/Systems/DLJobs/EosResources.qrc
+    ${JOIPSources}/Systems/EOS/CommandEosAudioBase.cpp
+    ${JOIPSources}/Systems/EOS/CommandEosAudioBase.h
+    ${JOIPSources}/Systems/EOS/CommandEosChoiceBase.cpp
+    ${JOIPSources}/Systems/EOS/CommandEosChoiceBase.h
+    ${JOIPSources}/Systems/EOS/CommandEosDisableSceneBase.cpp
+    ${JOIPSources}/Systems/EOS/CommandEosDisableSceneBase.h
+    ${JOIPSources}/Systems/EOS/CommandEosEnableSceneBase.cpp
+    ${JOIPSources}/Systems/EOS/CommandEosEnableSceneBase.h
+    ${JOIPSources}/Systems/EOS/CommandEosEndBase.cpp
+    ${JOIPSources}/Systems/EOS/CommandEosEndBase.h
+    ${JOIPSources}/Systems/EOS/CommandEosEvalBase.cpp
+    ${JOIPSources}/Systems/EOS/CommandEosEvalBase.h
+    ${JOIPSources}/Systems/EOS/CommandEosGotoBase.cpp
+    ${JOIPSources}/Systems/EOS/CommandEosGotoBase.h
+    ${JOIPSources}/Systems/EOS/CommandEosIfBase.cpp
+    ${JOIPSources}/Systems/EOS/CommandEosIfBase.h
+    ${JOIPSources}/Systems/EOS/CommandEosImageBase.cpp
+    ${JOIPSources}/Systems/EOS/CommandEosImageBase.h
+    ${JOIPSources}/Systems/EOS/CommandEosNoopBase.cpp
+    ${JOIPSources}/Systems/EOS/CommandEosNoopBase.h
+    ${JOIPSources}/Systems/EOS/CommandEosNotificationCloseBase.cpp
+    ${JOIPSources}/Systems/EOS/CommandEosNotificationCloseBase.h
+    ${JOIPSources}/Systems/EOS/CommandEosNotificationCreateBase.cpp
+    ${JOIPSources}/Systems/EOS/CommandEosNotificationCreateBase.h
+    ${JOIPSources}/Systems/EOS/CommandEosPromptBase.cpp
+    ${JOIPSources}/Systems/EOS/CommandEosPromptBase.h
+    ${JOIPSources}/Systems/EOS/CommandEosSayBase.cpp
+    ${JOIPSources}/Systems/EOS/CommandEosSayBase.h
+    ${JOIPSources}/Systems/EOS/CommandEosTimerBase.cpp
+    ${JOIPSources}/Systems/EOS/CommandEosTimerBase.h
+    ${JOIPSources}/Systems/EOS/EosCommands.h
     ${JOIPSources}/Systems/EOS/EosHelpers.cpp
     ${JOIPSources}/Systems/EOS/EosHelpers.h
     ${JOIPSources}/Systems/HelpFactory.cpp

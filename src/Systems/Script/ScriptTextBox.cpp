@@ -1,9 +1,17 @@
 #include "ScriptTextBox.h"
 #include "Application.h"
+
 #include "Systems/DatabaseManager.h"
+
+#include "Systems/EOS/CommandEosChoiceBase.h"
+#include "Systems/EOS/CommandEosPromptBase.h"
+#include "Systems/EOS/CommandEosSayBase.h"
+#include "Systems/EOS/EosCommands.h"
 #include "Systems/EOS/EosHelpers.h"
+
 #include "Systems/JSON/JsonInstructionBase.h"
 #include "Systems/JSON/JsonInstructionSetParser.h"
+
 #include "Systems/Project.h"
 #include "Systems/Resource.h"
 
@@ -432,28 +440,14 @@ std::vector<QColor> CScriptTextBox::GetColors(const QJSValue& colors, const QStr
 
 //----------------------------------------------------------------------------------------
 //
-class CCommandEosChoice : public IJsonInstructionBase
+class CCommandEosChoice : public CCommandEosChoiceBase
 {
 public:
   CCommandEosChoice(CEosScriptTextBox* pParent) :
-    m_pParent(pParent),
-    m_argTypes({
-      {"options", SInstructionArgumentType{EArgumentType::eArray,
-               MakeArgArray(EArgumentType::eMap, tInstructionMapType{
-                     {"label", SInstructionArgumentType{EArgumentType::eString}},
-                     {"commands", SInstructionArgumentType{EArgumentType::eArray,
-                            MakeArgArray(EArgumentType::eObject)}},
-                     {"color", SInstructionArgumentType{EArgumentType::eString}},
-                     {"visible", SInstructionArgumentType{EArgumentType::eBool}}
-               })
-      }},
-    }) {}
+    CCommandEosChoiceBase(),
+    m_pParent(pParent)
+  {}
   ~CCommandEosChoice() override {}
-
-  tInstructionMapType& ArgList() override
-  {
-    return m_argTypes;
-  }
 
   IJsonInstructionBase::tRetVal Call(const tInstructionMapValue& args) override
   {
@@ -557,30 +551,23 @@ public:
         }
       }
     }
-    return SJsonException{"internal Error.", "", "choice", 0, 0};
+    return SJsonException{"internal Error.", "", eos::c_sCommandChoice, 0, 0};
   }
 
 private:
   CEosScriptTextBox*     m_pParent;
-  tInstructionMapType    m_argTypes;
 };
 
 //----------------------------------------------------------------------------------------
 //
-class CCommandEosPrompt : public IJsonInstructionBase
+class CCommandEosPrompt : public CCommandEosPromptBase
 {
 public:
   CCommandEosPrompt(CEosScriptTextBox* pParent) :
-    m_pParent(pParent),
-    m_argTypes({
-      {"variable", SInstructionArgumentType{EArgumentType::eString}}
-    }) {}
+    CCommandEosPromptBase(),
+    m_pParent(pParent)
+  {}
   ~CCommandEosPrompt() override {}
-
-  tInstructionMapType& ArgList() override
-  {
-    return m_argTypes;
-  }
 
   IJsonInstructionBase::tRetVal Call(const tInstructionMapValue& args) override
   {
@@ -596,34 +583,23 @@ public:
         return SRunRetVal<ENextCommandToCall::eSibling>();
       }
     }
-    return SJsonException{"internal Error.", "", "prompt", 0, 0};
+    return SJsonException{"internal Error.", "", eos::c_sCommandPrompt, 0, 0};
   }
 
 private:
   CEosScriptTextBox*     m_pParent;
-  tInstructionMapType    m_argTypes;
 };
 
 //----------------------------------------------------------------------------------------
 //
-class CCommandEosSay : public IJsonInstructionBase
+class CCommandEosSay : public CCommandEosSayBase
 {
 public:
   CCommandEosSay(CEosScriptTextBox* pParent) :
-    m_pParent(pParent),
-    m_argTypes({
-      {"label", SInstructionArgumentType{EArgumentType::eString}},
-      {"align", SInstructionArgumentType{EArgumentType::eString}},
-      {"mode", SInstructionArgumentType{EArgumentType::eString}},
-      {"allowSkip", SInstructionArgumentType{EArgumentType::eBool}},
-      {"duration", SInstructionArgumentType{EArgumentType::eString}}
-    }) {}
+    CCommandEosSayBase(),
+    m_pParent(pParent)
+  {}
   ~CCommandEosSay() override {}
-
-  tInstructionMapType& ArgList() override
-  {
-    return m_argTypes;
-  }
 
   IJsonInstructionBase::tRetVal Call(const tInstructionMapValue& args) override
   {
@@ -729,12 +705,11 @@ public:
 
       return SRunRetVal<ENextCommandToCall::eSibling>();
     }
-    return SJsonException{"internal Error.", "", "say", 0, 0};
+    return SJsonException{"internal Error.", "", eos::c_sCommandSay, 0, 0};
   }
 
 private:
   CEosScriptTextBox*     m_pParent;
-  tInstructionMapType    m_argTypes;
 };
 
 //----------------------------------------------------------------------------------------
@@ -746,9 +721,9 @@ CEosScriptTextBox::CEosScriptTextBox(QPointer<CScriptRunnerSignalEmiter> pEmitte
   m_spCommandPrompt(std::make_shared<CCommandEosPrompt>(this)),
   m_spCommandSay(std::make_shared<CCommandEosSay>(this))
 {
-  pParser->RegisterInstruction("choice", m_spCommandChoice);
-  pParser->RegisterInstruction("prompt", m_spCommandPrompt);
-  pParser->RegisterInstruction("say", m_spCommandSay);
+  pParser->RegisterInstruction(eos::c_sCommandChoice, m_spCommandChoice);
+  pParser->RegisterInstruction(eos::c_sCommandPrompt, m_spCommandPrompt);
+  pParser->RegisterInstruction(eos::c_sCommandSay, m_spCommandSay);
 }
 CEosScriptTextBox::~CEosScriptTextBox()
 {

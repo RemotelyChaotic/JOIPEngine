@@ -2,8 +2,14 @@
 #include "Application.h"
 
 #include "Systems/DatabaseManager.h"
+
+#include "Systems/EOS/CommandEosDisableSceneBase.h"
+#include "Systems/EOS/CommandEosEnableSceneBase.h"
+#include "Systems/EOS/EosCommands.h"
+
 #include "Systems/JSON/JsonInstructionBase.h"
 #include "Systems/JSON/JsonInstructionSetParser.h"
+
 #include "Systems/Project.h"
 #include "Systems/Scene.h"
 
@@ -125,20 +131,14 @@ QString CScriptSceneManager::GetScene(const QJSValue& scene, const QString& sSou
 
 //----------------------------------------------------------------------------------------
 //
-class CCommandEosDisableScene : public IJsonInstructionBase
+class CCommandEosDisableScene : public CCommandEosEnableSceneBase
 {
 public:
   CCommandEosDisableScene(CEosScriptSceneManager* pParent) :
-    m_pParent(pParent),
-    m_argTypes({
-      {"target", SInstructionArgumentType{EArgumentType::eString}}
-    }) {}
+    CCommandEosEnableSceneBase(),
+    m_pParent(pParent)
+  {}
   ~CCommandEosDisableScene() override {}
-
-  tInstructionMapType& ArgList() override
-  {
-    return m_argTypes;
-  }
 
   IJsonInstructionBase::tRetVal Call(const tInstructionMapValue& args) override
   {
@@ -151,32 +151,26 @@ public:
         m_pParent->Disable(sTarget);
         return SRunRetVal<ENextCommandToCall::eSibling>();
       }
-      return SJsonException{"Do id for notification.", "", "notification.remove", 0, 0};
+      return SJsonException{"Do id for notification.", "", eos::c_sCommandEnableScreen, 0, 0};
     }
-    return SJsonException{"Internal error.", "", "notification.remove", 0, 0};
+    return SJsonException{"Internal error.", "", eos::c_sCommandEnableScreen, 0, 0};
   }
 
 private:
   CEosScriptSceneManager*       m_pParent;
-  tInstructionMapType           m_argTypes;
+
 };
 
 //----------------------------------------------------------------------------------------
 //
-class CCommandEosEnableScene : public IJsonInstructionBase
+class CCommandEosEnableScene : public CCommandEosDisableSceneBase
 {
 public:
   CCommandEosEnableScene(CEosScriptSceneManager* pParent) :
-    m_pParent(pParent),
-    m_argTypes({
-      {"target", SInstructionArgumentType{EArgumentType::eString}}
-    }) {}
+    CCommandEosDisableSceneBase(),
+    m_pParent(pParent)
+  {}
   ~CCommandEosEnableScene() override {}
-
-  tInstructionMapType& ArgList() override
-  {
-    return m_argTypes;
-  }
 
   IJsonInstructionBase::tRetVal Call(const tInstructionMapValue& args) override
   {
@@ -189,14 +183,13 @@ public:
         m_pParent->Enable(sTarget);
         return SRunRetVal<ENextCommandToCall::eSibling>();
       }
-      return SJsonException{"Do id for notification.", "", "notification.remove", 0, 0};
+      return SJsonException{"Do id for notification.", "", eos::c_sCommandDisableScreen, 0, 0};
     }
-    return SJsonException{"Internal error.", "", "notification.remove", 0, 0};
+    return SJsonException{"Internal error.", "", eos::c_sCommandDisableScreen, 0, 0};
   }
 
 private:
   CEosScriptSceneManager*       m_pParent;
-  tInstructionMapType           m_argTypes;
 };
 
 //----------------------------------------------------------------------------------------
@@ -207,8 +200,8 @@ CEosScriptSceneManager::CEosScriptSceneManager(QPointer<CScriptRunnerSignalEmite
   m_spCommandDisable(std::make_shared<CCommandEosDisableScene>(this)),
   m_spCommandEnable(std::make_shared<CCommandEosEnableScene>(this))
 {
-  pParser->RegisterInstruction("disable", m_spCommandDisable);
-  pParser->RegisterInstruction("enable", m_spCommandEnable);
+  pParser->RegisterInstruction(eos::c_sCommandDisableScreen, m_spCommandDisable);
+  pParser->RegisterInstruction(eos::c_sCommandEnableScreen, m_spCommandEnable);
 }
 CEosScriptSceneManager::~CEosScriptSceneManager()
 {

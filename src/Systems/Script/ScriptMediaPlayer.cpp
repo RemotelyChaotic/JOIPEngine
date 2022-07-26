@@ -1,11 +1,19 @@
 #include "ScriptMediaPlayer.h"
 #include "Application.h"
+
 #include "Systems/DatabaseManager.h"
+
+#include "Systems/EOS/CommandEosAudioBase.h"
+#include "Systems/EOS/CommandEosImageBase.h"
+#include "Systems/EOS/EosCommands.h"
 #include "Systems/EOS/EosHelpers.h"
+
 #include "Systems/JSON/JsonInstructionBase.h"
 #include "Systems/JSON/JsonInstructionSetParser.h"
+
 #include "Systems/Project.h"
 #include "Systems/Resource.h"
+
 #include <QTimer>
 #include <chrono>
 #include <random>
@@ -480,20 +488,14 @@ void CScriptMediaPlayer::WaitForSoundImpl(const QString& sResource)
 
 //----------------------------------------------------------------------------------------
 //
-class CCommandEosImage : public IJsonInstructionBase
+class CCommandEosImage : public CCommandEosImageBase
 {
 public:
   CCommandEosImage(CEosScriptMediaPlayer* pParent) :
-    m_pParent(pParent),
-    m_argTypes({
-    {"locator", SInstructionArgumentType{EArgumentType::eString}}
-  }) {}
+    CCommandEosImageBase(),
+    m_pParent(pParent)
+  {}
   ~CCommandEosImage() override {}
-
-  tInstructionMapType& ArgList() override
-  {
-    return m_argTypes;
-  }
 
   IJsonInstructionBase::tRetVal Call(const tInstructionMapValue& args) override
   {
@@ -505,35 +507,23 @@ public:
       m_pParent->show(sResourceLocator);
       return SRunRetVal<ENextCommandToCall::eSibling>();
     }
-    return SJsonException{"Locator missing from image call.", "locator", "image", 0, 0};
+    return SJsonException{"Locator missing from image call.", "locator", eos::c_sCommandImage, 0, 0};
   }
 
 private:
   CEosScriptMediaPlayer* m_pParent;
-  tInstructionMapType    m_argTypes;
 };
 
 //----------------------------------------------------------------------------------------
 //
-class CCommandEosAudio : public IJsonInstructionBase
+class CCommandEosAudio : public CCommandEosAudioBase
 {
 public:
   CCommandEosAudio(CEosScriptMediaPlayer* pParent) :
-    m_pParent(pParent),
-    m_argTypes({
-    {"locator", SInstructionArgumentType{EArgumentType::eString}},
-    {"id", SInstructionArgumentType{EArgumentType::eString}},
-    {"loops", SInstructionArgumentType{EArgumentType::eInt64}},
-    {"volume", SInstructionArgumentType{EArgumentType::eDouble}}, // ignored, engine manages volume
-    {"seek", SInstructionArgumentType{EArgumentType::eInt64}},
-    {"startAt", SInstructionArgumentType{EArgumentType::eInt64}}
-  }) {}
+    CCommandEosAudioBase(),
+    m_pParent(pParent)
+  {}
   ~CCommandEosAudio() override {}
-
-  tInstructionMapType& ArgList() override
-  {
-    return m_argTypes;
-  }
 
   IJsonInstructionBase::tRetVal Call(const tInstructionMapValue& args) override
   {
@@ -605,12 +595,11 @@ public:
 
       return SRunRetVal<ENextCommandToCall::eSibling>();
     }
-    return SJsonException{"Locator or id missing from audio.play call.", "locator", "audio.play", 0, 0};
+    return SJsonException{"Locator or id missing from audio.play call.", "locator", eos::c_sCommandAudioPlay, 0, 0};
   }
 
 private:
   CEosScriptMediaPlayer* m_pParent;
-  tInstructionMapType    m_argTypes;
 };
 
 //----------------------------------------------------------------------------------------
@@ -622,8 +611,8 @@ CEosScriptMediaPlayer::CEosScriptMediaPlayer(QPointer<CScriptRunnerSignalEmiter>
   m_spCommandImg(std::make_shared<CCommandEosImage>(this)),
   m_spCommandAudio(std::make_shared<CCommandEosAudio>(this))
 {
-  pParser->RegisterInstruction("image", m_spCommandImg);
-  pParser->RegisterInstruction("audio.play", m_spCommandAudio);
+  pParser->RegisterInstruction(eos::c_sCommandImage, m_spCommandImg);
+  pParser->RegisterInstruction(eos::c_sCommandAudioPlay, m_spCommandAudio);
 }
 CEosScriptMediaPlayer::~CEosScriptMediaPlayer()
 {

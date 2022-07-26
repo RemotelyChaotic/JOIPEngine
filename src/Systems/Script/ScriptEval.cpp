@@ -1,4 +1,9 @@
 #include "ScriptEval.h"
+
+#include "Systems/EOS/CommandEosEvalBase.h"
+#include "Systems/EOS/CommandEosIfBase.h"
+#include "Systems/EOS/EosCommands.h"
+
 #include "Systems/JSON/JsonInstructionBase.h"
 #include "Systems/JSON/JsonInstructionSetParser.h"
 
@@ -75,24 +80,14 @@ QJSValue CScriptEval::eval(const QString& sScript)
 
 //----------------------------------------------------------------------------------------
 //
-class CCommandEosIf : public IJsonInstructionBase
+class CCommandEosIf : public CCommandEosIfBase
 {
 public:
   CCommandEosIf(CEosScriptEval* pParent) :
-    m_pParent(pParent),
-    m_argTypes({
-      {"condition", SInstructionArgumentType{EArgumentType::eString}},
-      {"commands", SInstructionArgumentType{EArgumentType::eArray,
-               MakeArgArray(EArgumentType::eObject)}},
-      {"elseCommands", SInstructionArgumentType{EArgumentType::eArray,
-               MakeArgArray(EArgumentType::eObject)}}
-    }) {}
+    CCommandEosIfBase(),
+    m_pParent(pParent)
+  {}
   ~CCommandEosIf() override {}
-
-  tInstructionMapType& ArgList() override
-  {
-    return m_argTypes;
-  }
 
   IJsonInstructionBase::tRetVal Call(const tInstructionMapValue& args) override
   {
@@ -136,31 +131,24 @@ public:
         return SRunRetVal<ENextCommandToCall::eSibling>();
       }
     }
-    return SJsonException{"internal Error.", "", "prompt", 0, 0};
+    return SJsonException{"internal Error.", "", eos::c_sCommandIf, 0, 0};
   }
 
 private:
   CEosScriptEval*        m_pParent;
-  tInstructionMapType    m_argTypes;
 };
 
 
 //----------------------------------------------------------------------------------------
 //
-class CCommandEosEval : public IJsonInstructionBase
+class CCommandEosEval : public CCommandEosEvalBase
 {
 public:
   CCommandEosEval(CEosScriptEval* pParent) :
-    m_pParent(pParent),
-    m_argTypes({
-      {"script", SInstructionArgumentType{EArgumentType::eString}}
-    }) {}
+    CCommandEosEvalBase(),
+    m_pParent(pParent)
+  {}
   ~CCommandEosEval() override {}
-
-  tInstructionMapType& ArgList() override
-  {
-    return m_argTypes;
-  }
 
   IJsonInstructionBase::tRetVal Call(const tInstructionMapValue& args) override
   {
@@ -175,12 +163,11 @@ public:
         return SRunRetVal<ENextCommandToCall::eSibling>();
       }
     }
-    return SJsonException{"internal Error.", "script", "eval", 0, 0};
+    return SJsonException{"internal Error.", "script", eos::c_sCommandEval, 0, 0};
   }
 
 private:
   CEosScriptEval*        m_pParent;
-  tInstructionMapType    m_argTypes;
 };
 
 
@@ -192,8 +179,8 @@ CEosScriptEval::CEosScriptEval(QPointer<CScriptRunnerSignalEmiter> pEmitter,
   m_spCommandIf(std::make_shared<CCommandEosIf>(this)),
   m_spCommandEval(std::make_shared<CCommandEosEval>(this))
 {
-  pParser->RegisterInstruction("if", m_spCommandIf);
-  pParser->RegisterInstruction("eval", m_spCommandEval);
+  pParser->RegisterInstruction(eos::c_sCommandIf, m_spCommandIf);
+  pParser->RegisterInstruction(eos::c_sCommandEval, m_spCommandEval);
 }
 CEosScriptEval::~CEosScriptEval()
 {}

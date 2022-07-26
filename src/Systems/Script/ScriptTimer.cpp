@@ -1,6 +1,9 @@
 #include "ScriptTimer.h"
 
+#include "Systems/EOS/CommandEosTimerBase.h"
+#include "Systems/EOS/EosCommands.h"
 #include "Systems/EOS/EosHelpers.h"
+
 #include "Systems/JSON/JsonInstructionBase.h"
 #include "Systems/JSON/JsonInstructionSetParser.h"
 
@@ -121,25 +124,14 @@ void CScriptTimer::waitForTimer()
 
 //----------------------------------------------------------------------------------------
 //
-class CCommandEosTimer : public IJsonInstructionBase
+class CCommandEosTimer : public CCommandEosTimerBase
 {
 public:
   CCommandEosTimer(CEosScriptTimer* pParent) :
-    m_pParent(pParent),
-    m_argTypes({
-      {"duration", SInstructionArgumentType{EArgumentType::eString}},
-      {"isAsync", SInstructionArgumentType{EArgumentType::eBool}},
-      {"isAsync_threadImpl", SInstructionArgumentType{EArgumentType::eBool}},
-      {"style", SInstructionArgumentType{EArgumentType::eString}},
-      {"commands", SInstructionArgumentType{EArgumentType::eArray,
-               MakeArgArray(EArgumentType::eObject)}},
-    }) {}
+    CCommandEosTimerBase(),
+    m_pParent(pParent)
+  {}
   ~CCommandEosTimer() override {}
-
-  tInstructionMapType& ArgList() override
-  {
-    return m_argTypes;
-  }
 
   IJsonInstructionBase::tRetVal Call(const tInstructionMapValue& args) override
   {
@@ -208,6 +200,7 @@ public:
         {
           bIsInThread = std::get<bool>(itInThread);
         }
+        Q_UNUSED(bIsInThread)
 
         if (bIsMainClock)
         {
@@ -239,14 +232,13 @@ public:
         }
         return SRunRetVal<ENextCommandToCall::eSibling>();
       }
-      return SJsonException{"internal Error.", "", "timer", 0, 0};
+      return SJsonException{"internal Error.", "", eos::c_sCommandTimer, 0, 0};
     }
-    return SJsonException{"Invalid timer call.", "", "timer", 0, 0};
+    return SJsonException{"Invalid timer call.", "", eos::c_sCommandTimer, 0, 0};
   }
 
 private:
   CEosScriptTimer*       m_pParent;
-  tInstructionMapType    m_argTypes;
 };
 
 //----------------------------------------------------------------------------------------
@@ -256,7 +248,7 @@ CEosScriptTimer::CEosScriptTimer(QPointer<CScriptRunnerSignalEmiter> pEmitter,
   CEosScriptObjectBase(pEmitter, pParser),
   m_spCommandTimer(std::make_shared<CCommandEosTimer>(this))
 {
-  pParser->RegisterInstruction("timer", m_spCommandTimer);
+  pParser->RegisterInstruction(eos::c_sCommandTimer, m_spCommandTimer);
 }
 CEosScriptTimer::~CEosScriptTimer()
 {

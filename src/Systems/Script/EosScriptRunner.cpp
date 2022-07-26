@@ -3,8 +3,14 @@
 #include "ScriptObjectBase.h"
 #include "ScriptRunnerSignalEmiter.h"
 
+#include "Systems/EOS/CommandEosEndBase.h"
+#include "Systems/EOS/CommandEosGotoBase.h"
+#include "Systems/EOS/CommandEosNoopBase.h"
+#include "Systems/EOS/EosCommands.h"
+
 #include "Systems/JSON/JsonInstructionSetParser.h"
 #include "Systems/JSON/JsonInstructionSetRunner.h"
+
 #include "Systems/Resource.h"
 #include "Systems/Scene.h"
 
@@ -19,42 +25,26 @@ struct SFinishTag {};
 
 //----------------------------------------------------------------------------------------
 //
-class CCommandEosEnd : public IJsonInstructionBase
+class CCommandEosEnd : public CCommandEosEndBase
 {
 public:
-  CCommandEosEnd() : m_argTypes() {}
+  CCommandEosEnd() : CCommandEosEndBase() {}
   ~CCommandEosEnd() override {}
-
-  tInstructionMapType& ArgList() override
-  {
-    return m_argTypes;
-  }
 
   IJsonInstructionBase::tRetVal Call(const tInstructionMapValue& args) override
   {
     Q_UNUSED(args)
     return SRunRetVal<ENextCommandToCall::eFinish>(SFinishTag());
   }
-
-private:
-  tInstructionMapType    m_argTypes;
 };
 
 //----------------------------------------------------------------------------------------
 //
-class CCommandEosGoto : public IJsonInstructionBase
+class CCommandEosGoto : public CCommandEosGotoBase
 {
 public:
-  CCommandEosGoto() :
-    m_argTypes({
-    { "target", SInstructionArgumentType{EArgumentType::eString}}
-  }) {}
+  CCommandEosGoto() : CCommandEosGotoBase() {}
   ~CCommandEosGoto() override {}
-
-  tInstructionMapType& ArgList() override
-  {
-    return m_argTypes;
-  }
 
   IJsonInstructionBase::tRetVal Call(const tInstructionMapValue& args) override
   {
@@ -65,35 +55,23 @@ public:
       sTarget.replace("*", "(.*)");
       return SRunRetVal<ENextCommandToCall::eFinish>(sTarget);
     }
-    return SJsonException{"internal Error: No target for goto.", "target", "goto", 0, 0};
+    return SJsonException{"internal Error: No target for goto.", "target", eos::c_sCommandGoto, 0, 0};
   }
-
-private:
-  tInstructionMapType    m_argTypes;
 };
 
 //----------------------------------------------------------------------------------------
 //
-class CCommandEosNoop : public IJsonInstructionBase
+class CCommandEosNoop : public CCommandEosNoopBase
 {
 public:
-  CCommandEosNoop() :
-    m_argTypes() {}
+  CCommandEosNoop() : CCommandEosNoopBase() {}
   ~CCommandEosNoop() override {}
-
-  tInstructionMapType& ArgList() override
-  {
-    return m_argTypes;
-  }
 
   IJsonInstructionBase::tRetVal Call(const tInstructionMapValue& args) override
   {
     Q_UNUSED(args)
     return SRunRetVal<ENextCommandToCall::eSibling>();
   }
-
-private:
-  tInstructionMapType    m_argTypes;
 };
 
 //----------------------------------------------------------------------------------------
@@ -123,9 +101,9 @@ CEosScriptRunner::~CEosScriptRunner()
 void CEosScriptRunner::Initialize()
 {
   m_spEosParser->RegisterInstructionSetPath("Commands", "/");
-  m_spEosParser->RegisterInstruction("end", std::make_shared<CCommandEosEnd>());
-  m_spEosParser->RegisterInstruction("goto", std::make_shared<CCommandEosGoto>());
-  m_spEosParser->RegisterInstruction("noop", std::make_shared<CCommandEosNoop>());
+  m_spEosParser->RegisterInstruction(eos::c_sCommandEnd, std::make_shared<CCommandEosEnd>());
+  m_spEosParser->RegisterInstruction(eos::c_sCommandGoto, std::make_shared<CCommandEosGoto>());
+  m_spEosParser->RegisterInstruction(eos::c_sCommandNoop, std::make_shared<CCommandEosNoop>());
   m_bInitialized = 1;
 }
 

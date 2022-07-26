@@ -2,9 +2,15 @@
 #include "Application.h"
 
 #include "Systems/DatabaseManager.h"
+
+#include "Systems/EOS/CommandEosNotificationCloseBase.h"
+#include "Systems/EOS/CommandEosNotificationCreateBase.h"
+#include "Systems/EOS/EosCommands.h"
 #include "Systems/EOS/EosHelpers.h"
+
 #include "Systems/JSON/JsonInstructionBase.h"
 #include "Systems/JSON/JsonInstructionSetParser.h"
+
 #include "Systems/Project.h"
 #include "Systems/Resource.h"
 
@@ -324,30 +330,14 @@ void CScriptNotification::Show(QString sId, QString sTitle, QString sButtonText,
 
 //----------------------------------------------------------------------------------------
 //
-class CCommandEosNotificationCreate : public IJsonInstructionBase
+class CCommandEosNotificationCreate : public CCommandEosNotificationCreateBase
 {
 public:
   CCommandEosNotificationCreate(CEosScriptNotification* pParent) :
-    m_pParent(pParent),
-    m_argTypes({
-      {"id", SInstructionArgumentType{EArgumentType::eString}},
-      {"title", SInstructionArgumentType{EArgumentType::eString}},
-      {"buttonLabel", SInstructionArgumentType{EArgumentType::eString}},
-      {"timerDuration", SInstructionArgumentType{EArgumentType::eString}},
-      {"onButtonCommand_Impl", SInstructionArgumentType{EArgumentType::eBool}},
-      {"onTimerCommand_Impl", SInstructionArgumentType{EArgumentType::eBool}},
-      {"timerDuration", SInstructionArgumentType{EArgumentType::eString}},
-      {"buttonCommands", SInstructionArgumentType{EArgumentType::eArray,
-               MakeArgArray(EArgumentType::eObject)}},
-      {"timerCommands", SInstructionArgumentType{EArgumentType::eArray,
-               MakeArgArray(EArgumentType::eObject)}},
-    }) {}
+    CCommandEosNotificationCreateBase(),
+    m_pParent(pParent)
+  {}
   ~CCommandEosNotificationCreate() override {}
-
-  tInstructionMapType& ArgList() override
-  {
-    return m_argTypes;
-  }
 
   IJsonInstructionBase::tRetVal Call(const tInstructionMapValue& args) override
   {
@@ -463,32 +453,25 @@ public:
           return SRunRetVal<ENextCommandToCall::eSibling>();
         }
       }
-      return SJsonException{"No valid arguments for notification.", "", "notification.create", 0, 0};
+      return SJsonException{"No valid arguments for notification.", "", eos::c_sCommandNotificationCreate, 0, 0};
     }
-    return SJsonException{"Internal error.", "", "notification.create", 0, 0};
+    return SJsonException{"Internal error.", "", eos::c_sCommandNotificationCreate, 0, 0};
   }
 
 private:
   CEosScriptNotification*       m_pParent;
-  tInstructionMapType           m_argTypes;
 };
 
 //----------------------------------------------------------------------------------------
 //
-class CCommandEosNotificationClose : public IJsonInstructionBase
+class CCommandEosNotificationClose : public CCommandEosNotificationCloseBase
 {
 public:
   CCommandEosNotificationClose(CEosScriptNotification* pParent) :
-    m_pParent(pParent),
-    m_argTypes({
-      {"id", SInstructionArgumentType{EArgumentType::eString}}
-    }) {}
+    CCommandEosNotificationCloseBase(),
+    m_pParent(pParent)
+  {}
   ~CCommandEosNotificationClose() override {}
-
-  tInstructionMapType& ArgList() override
-  {
-    return m_argTypes;
-  }
 
   IJsonInstructionBase::tRetVal Call(const tInstructionMapValue& args) override
   {
@@ -501,14 +484,13 @@ public:
         m_pParent->Hide(sId);
         return SRunRetVal<ENextCommandToCall::eSibling>();
       }
-      return SJsonException{"Do id for notification.", "", "notification.remove", 0, 0};
+      return SJsonException{"Do id for notification.", "", eos::c_sCommandNotificationClose, 0, 0};
     }
-    return SJsonException{"Internal error.", "", "notification.remove", 0, 0};
+    return SJsonException{"Internal error.", "", eos::c_sCommandNotificationClose, 0, 0};
   }
 
 private:
   CEosScriptNotification*       m_pParent;
-  tInstructionMapType           m_argTypes;
 };
 
 //----------------------------------------------------------------------------------------
@@ -519,8 +501,8 @@ CEosScriptNotification::CEosScriptNotification(QPointer<CScriptRunnerSignalEmite
   m_spCommandCreate(std::make_shared<CCommandEosNotificationCreate>(this)),
   m_spCommandClose(std::make_shared<CCommandEosNotificationClose>(this))
 {
-  pParser->RegisterInstruction("notification.create", m_spCommandCreate);
-  pParser->RegisterInstruction("notification.remove", m_spCommandClose);
+  pParser->RegisterInstruction(eos::c_sCommandNotificationCreate, m_spCommandCreate);
+  pParser->RegisterInstruction(eos::c_sCommandNotificationClose, m_spCommandClose);
 
   auto spEmiter = SignalEmitter<CNotificationSignalEmiter>();
   connect(spEmiter, &CNotificationSignalEmiter::showNotificationClick,
