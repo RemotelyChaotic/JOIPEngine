@@ -407,11 +407,13 @@ void CResourceDetailView::UpdateResources()
 //
 void CResourceDetailView::SlotDoubleClicked(const QModelIndex& index)
 {
+  QModelIndex sourceIdx = index;
   QAbstractItemModel* pModel = model();
   auto pProxy = dynamic_cast<QSortFilterProxyModel*>(pModel);
   if (nullptr != pProxy)
   {
     pModel = pProxy->sourceModel();
+    sourceIdx = pProxy->mapToSource(index);
   }
 
   if (nullptr != pModel)
@@ -419,8 +421,9 @@ void CResourceDetailView::SlotDoubleClicked(const QModelIndex& index)
     CResourceTreeItemModel* pResourceModel = dynamic_cast<CResourceTreeItemModel*>(pModel);
     if (nullptr != pResourceModel)
     {
-      QModelIndex indexType = pResourceModel->index(pProxy->mapToSource(index).row(),
-                                                    resource_item::c_iColumnType, index.parent());
+      QModelIndex indexType = pResourceModel->index(sourceIdx.row(),
+                                                    resource_item::c_iColumnType,
+                                                    sourceIdx.parent());
       if (index.isValid() && indexType.isValid())
       {
         if (pResourceModel->IsResourceType(indexType))
