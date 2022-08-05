@@ -107,13 +107,11 @@ void CResourceToolTipPrivate::ShowResource(const QPoint& pos, const tspResource&
 {
   if (nullptr != spResource)
   {
-    m_currentRequest = STipData{
-      pos, spResource, pW, rect, iMsecShowTime
-    };
-
-    if (!m_bShown)
+    QString sOldName;
+    if (m_currentRequest.has_value() && nullptr != m_currentRequest->spResource)
     {
-      InstallToolTipFilter(pos, pW);
+      QReadLocker locker(&m_currentRequest->spResource->m_rwLock);
+      sOldName = m_currentRequest->spResource->m_sName;
     }
 
     qint32 iProject = -1;
@@ -128,6 +126,18 @@ void CResourceToolTipPrivate::ShowResource(const QPoint& pos, const tspResource&
         QReadLocker locker(&spResource->m_spParent->m_rwLock);
         iProject = spResource->m_spParent->m_iId;
       }
+    }
+
+    // are we already fetching the resource? If so, abort new request
+    if (sOldName == sName) { return; }
+
+    m_currentRequest = STipData{
+      pos, spResource, pW, rect, iMsecShowTime
+    };
+
+    if (!m_bShown)
+    {
+      InstallToolTipFilter(pos, pW);
     }
 
     if (EResourceType::eImage == type._to_integral() ||
