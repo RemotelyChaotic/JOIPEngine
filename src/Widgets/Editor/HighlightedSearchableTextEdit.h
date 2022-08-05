@@ -1,6 +1,8 @@
 #ifndef CHIGHLIGHTEDSEARCHABLETEXTEDIT_H
 #define CHIGHLIGHTEDSEARCHABLETEXTEDIT_H
 
+#include "EditorSearchBar.h"
+
 #include <QObject>
 #include <QPointer>
 #include <QPlainTextEdit>
@@ -8,7 +10,6 @@
 #include <variant>
 
 class CEditorHighlighter;
-class CEditorSearchBar;
 
 class CHighlightedSearchableTextEdit : public QObject
 {
@@ -28,7 +29,7 @@ public:
 protected slots:
   void SlotShowHideSearchFilter();
   void SlotSearchAreaHidden();
-  void SlotSearchFilterChanged(bool bForward, const QString& sText);
+  void SlotSearchFilterChanged(CEditorSearchBar::ESearhDirection direction, const QString& sText);
 
 protected:
   bool eventFilter(QObject* pObj, QEvent* pEvt) override;

@@ -5,7 +5,7 @@
 
 CEditorSearchBar::CEditorSearchBar(QWidget* pParent) :
   COverlayBase(0, pParent),
-  m_bForward(true)
+  m_searchDir(eNone)
 {
   QHBoxLayout* pLayout = new QHBoxLayout(this);
   m_pSearchWidget = new CSearchWidget(this);
@@ -91,21 +91,21 @@ void CEditorSearchBar::Show()
 //
 void CEditorSearchBar::SlotBackClicked()
 {
-  m_bForward = false;
-  emit SignalFilterChanged(false, m_pSearchWidget->Filter());
+  m_searchDir = ESearhDirection::eBackward;
+  emit SignalFilterChanged(ESearhDirection::eBackward, m_pSearchWidget->Filter());
 }
 
 //----------------------------------------------------------------------------------------
 //
 void CEditorSearchBar::SlotForwardClicked()
 {
-  m_bForward = true;
-  emit SignalFilterChanged(true, m_pSearchWidget->Filter());
+  m_searchDir = ESearhDirection::eForward;
+  emit SignalFilterChanged(ESearhDirection::eForward, m_pSearchWidget->Filter());
 }
 
 //----------------------------------------------------------------------------------------
 //
 void CEditorSearchBar::SlotFilterChanged(const QString& sText)
 {
-  emit SignalFilterChanged(m_bForward, sText);
+  emit SignalFilterChanged(ESearhDirection::eNone, sText);
 }

@@ -11,10 +11,20 @@ class CEditorSearchBar : public COverlayBase
 {
   Q_OBJECT
 public:
+  enum ESearhDirection
+  {
+    eForward,
+    eBackward,
+    eNone
+  };
+  Q_ENUM(ESearhDirection)
+
   explicit CEditorSearchBar(QWidget* pParent = nullptr);
   ~CEditorSearchBar() override;
 
-  bool IsSearchingForward() { return m_bForward; }
+  bool IsSearchingForward() const { return m_searchDir == ESearhDirection::eForward; }
+  ESearhDirection SearchDirection() const { return m_searchDir; }
+
   void SetFilter(const QString& sString);
 
 public slots:
@@ -24,7 +34,7 @@ public slots:
   void Show() override;
 
 signals:
-  void SignalFilterChanged(bool bForward, const QString& sText);
+  void SignalFilterChanged(CEditorSearchBar::ESearhDirection direction, const QString& sText);
   void SignalHidden();
 
 private:
@@ -36,7 +46,7 @@ private:
   QPointer<QPushButton>   m_pBack;
   QPointer<QPushButton>   m_pForward;
   QPointer<QPushButton>   m_pCloseButton;
-  bool                    m_bForward;
+  CEditorSearchBar::ESearhDirection m_searchDir;
 };
 
 #endif // CSCRIPTSEARCHBAR_H

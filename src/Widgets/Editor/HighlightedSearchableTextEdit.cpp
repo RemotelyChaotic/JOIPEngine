@@ -1,6 +1,5 @@
 #include "HighlightedSearchableTextEdit.h"
 #include "EditorHighlighter.h"
-#include "EditorSearchBar.h"
 #include <QMenu>
 
 CHighlightedSearchableTextEdit::CHighlightedSearchableTextEdit(QPointer<QTextEdit> pEditor) :
@@ -86,10 +85,6 @@ void CHighlightedSearchableTextEdit::SlotShowHideSearchFilter()
 //
 void CHighlightedSearchableTextEdit::SlotSearchAreaHidden()
 {
-  if (!m_highlightCursor.isNull())
-  {
-    SetTextCursor(m_highlightCursor);
-  }
   m_highlightCursor = QTextCursor();
   m_sLastSearch = QString();
   m_pHighlighter->SetSearchExpression(QString());
@@ -98,7 +93,8 @@ void CHighlightedSearchableTextEdit::SlotSearchAreaHidden()
 
 //----------------------------------------------------------------------------------------
 //
-void CHighlightedSearchableTextEdit::SlotSearchFilterChanged(bool bForward, const QString& sText)
+void CHighlightedSearchableTextEdit::SlotSearchFilterChanged(
+    CEditorSearchBar::ESearhDirection direction, const QString& sText)
 {
   QTextDocument* pDocument = Document();
 
@@ -117,13 +113,19 @@ void CHighlightedSearchableTextEdit::SlotSearchFilterChanged(bool bForward, cons
     }
 
     m_sLastSearch = sText;
-    highlightCursor =
-        pDocument->find(sText, highlightCursor, bForward ? QTextDocument::FindFlags() :
-                                                           QTextDocument::FindBackward);
-    if (!highlightCursor.isNull())
+
+    if (direction != CEditorSearchBar::eNone)
     {
-      SetTextCursor(highlightCursor);
-      m_highlightCursor = highlightCursor;
+      highlightCursor =
+          pDocument->find(sText, highlightCursor,
+                          direction == CEditorSearchBar::eForward ?
+                            QTextDocument::FindFlags() :
+                            QTextDocument::FindBackward);
+      if (!highlightCursor.isNull())
+      {
+        SetTextCursor(highlightCursor);
+        m_highlightCursor = highlightCursor;
+      }
     }
   }
 }
@@ -155,7 +157,7 @@ bool CHighlightedSearchableTextEdit::eventFilter(QObject* pTarget, QEvent* pEven
             !m_sLastSearch.isEmpty() &&
             qobject_cast<QWidget*>(parent())->focusWidget() != qobject_cast<QWidget*>(parent()))
         {
-          SlotSearchFilterChanged(m_pSearchBar->IsSearchingForward(), m_sLastSearch);
+          SlotSearchFilterChanged(m_pSearchBar->SearchDirection(), m_sLastSearch);
           pEvent->ignore();
           return true;
         }

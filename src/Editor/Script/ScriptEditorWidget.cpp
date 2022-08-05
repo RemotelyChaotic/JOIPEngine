@@ -677,11 +677,10 @@ void CScriptEditorWidget::paintEvent(QPaintEvent* pEvent)
         QRect bgRectToDraw(topLeft.x(), topLeft.y(),
                            static_cast<qint32>(blockRect.width()) - topLeft.x(),
                            static_cast<qint32>(blockRect.height()));
-        QLinearGradient linGrad(0, 0, bgRectToDraw.width(), 0);
+        QLinearGradient linGrad(topLeft.x(), 0, bgRectToDraw.width(), 0);
         linGrad.setColorAt(0.0, QColor(255, 0, 0, 0));
-        linGrad.setColorAt(0.4, QColor(255, 0, 0, 50));
-        linGrad.setColorAt(0.6, QColor(255, 0, 0, 50));
-        linGrad.setColorAt(1.0, QColor(255, 0, 0, 0));
+        linGrad.setColorAt(30.0 / bgRectToDraw.width(), QColor(255, 0, 0, 100));
+        linGrad.setColorAt(1.0, QColor(255, 0, 0, 100));
 
         painter.setPen(Qt::transparent);
         painter.setBrush(linGrad);
@@ -689,7 +688,8 @@ void CScriptEditorWidget::paintEvent(QPaintEvent* pEvent)
 
         painter.setPen(QColor(200, 100, 100));
         painter.setBrush(Qt::transparent);
-        painter.drawText(QPointF(topLeft.x() + 30, topLeft.y() - iFontHeight / 2 + iBlockHeight),
+        painter.drawText(QPointF(topLeft.x() + 30,
+                                 topLeft.y() + iFontHeight + iBlockHeight / 2 - iFontHeight / 2),
                          pWidget->toolTip().replace("\n", " "));
       }
     }
