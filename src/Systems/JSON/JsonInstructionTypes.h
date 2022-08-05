@@ -95,6 +95,27 @@ inline SInstructionArgumentValue ValuefromVariant(QVariant var, EArgumentType ty
   }
 }
 
+inline tInstructionMapValue ValuesFromTypes(const tInstructionMapType& type)
+{
+  tInstructionMapValue ret;
+  for (const auto& it : type)
+  {
+    SInstructionArgumentValue value = ValuefromVariant(QVariant(), it.second.m_type);
+    switch(it.second.m_type)
+    {
+      case EArgumentType::eMap:
+      {
+        auto nested =
+            std::get<tInstructionMapType>(it.second.m_nestedType);
+        value.m_value = ValuesFromTypes(nested);
+      } [[fallthrough]];
+      default:
+        ret.insert({it.first, value});
+    }
+  }
+  return ret;
+}
+
 template<EArgumentType::_enumerated T>
 std::variant<typename detail::arg_value_type<T>::type, std::false_type>
 GetValue(const tInstructionMapValue& from, const QString& sValue)
@@ -124,6 +145,24 @@ GetValue(const tInstructionArrayValue& from, size_t iValue)
     }
   }
   return std::false_type();
+}
+
+template<EArgumentType::_enumerated T>
+void SetValue(tInstructionMapValue* to, const QString& sParam,
+              const typename detail::arg_value_type<T>::type& value)
+{
+  if (nullptr == to) return;
+
+  const auto& it = to->find(sParam);
+  if (to->end() != it)
+  {
+    it->second.m_type = T;
+    it->second.m_value = value;
+  }
+  else
+  {
+    to->insert({sParam, SInstructionArgumentValue{T, value}});
+  }
 }
 
 inline bool HasValue(const tInstructionMapValue& from, const QString& sValue)

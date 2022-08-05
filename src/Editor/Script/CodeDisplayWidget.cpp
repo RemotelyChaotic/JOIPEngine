@@ -39,7 +39,6 @@ namespace
   //
   qint32 PageIndexFromScriptType(const QString& sType)
   {
-    return c_iIndexScriptJs;
     static std::map<QString, qint32> typeToPageMap = {
       { SScriptDefinitionData::c_sScriptTypeJs, c_iIndexScriptJs },
       { SScriptDefinitionData::c_sScriptTypeEos, c_iIndexScriptEos }
@@ -111,6 +110,12 @@ void CCodeDisplayWidget::Initialize(QPointer<CEditorModel> pEditorModel,
   m_pResourceTreeModel = pResourceTreeModel;
   m_pUndoStack = pUndoStack;
 
+  for (auto& [sKey, spDisplayI] : m_displayImplMap)
+  {
+    Q_UNUSED(sKey)
+    spDisplayI->Initialize(m_pEditorModel);
+  }
+
   m_spBackgroundSnippetOverlay->Initialize(m_pResourceTreeModel);
   m_spIconSnippetOverlay->Initialize(m_pResourceTreeModel);
   m_spMetronomeSnippetOverlay->Initialize(m_pResourceTreeModel);
@@ -175,9 +180,7 @@ void CCodeDisplayWidget::LoadProject(tspProject spProject)
 
   bool bReadOnly = m_pEditorModel->IsReadOnly();
   m_spUi->pCodeEdit->setReadOnly(bReadOnly);
-  m_spUi->pEosEdit->setEditTriggers(
-        bReadOnly ? QAbstractItemView::NoEditTriggers :
-                    QAbstractItemView::DoubleClicked | QAbstractItemView::EditKeyPressed);
+  m_spUi->pEosEdit->setEditTriggers(QAbstractItemView::NoEditTriggers);
 }
 
 //----------------------------------------------------------------------------------------
@@ -280,8 +283,13 @@ void CCodeDisplayWidget::SetScriptType(const QString& sScriptType)
 
   if (m_sScriptType != sScriptType)
   {
-    m_sScriptType = sScriptType;
     auto it = m_displayImplMap.find(m_sScriptType);
+    if (m_displayImplMap.end() != it)
+    {
+      it->second->HideButtons((*m_pspUiActionBar).get());
+    }
+    m_sScriptType = sScriptType;
+    it = m_displayImplMap.find(m_sScriptType);
     if (m_displayImplMap.end() != it)
     {
       it->second->ShowButtons((*m_pspUiActionBar).get());

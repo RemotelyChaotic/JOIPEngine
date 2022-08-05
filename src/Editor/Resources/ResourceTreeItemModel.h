@@ -36,6 +36,8 @@ public:
   void SetCardIcon(const QImage& img);
   void SetCardIconSize(qint32 iValue);
 
+  tspProject Project() const { return m_spProject; };
+
   // read-only functions
   QVariant data(const QModelIndex& index, int iRole, int iColumnOverride);
   QVariant data(const QModelIndex& index, int iRole) const override;
@@ -65,6 +67,7 @@ public:
   // convenience-functions
   bool IsResourceType(const QModelIndex& index = QModelIndex());
   QModelIndex IndexForResource(const tspResource& spResource);
+  tspResource ResourceForIndex(const QModelIndex& idx);
 
 signals:
   void SignalProjectEdited();

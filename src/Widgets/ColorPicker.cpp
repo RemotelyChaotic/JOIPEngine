@@ -64,6 +64,8 @@ bool CColorPicker::eventFilter(QObject* pObject, QEvent* pEvent)
   if (nullptr != pObject && pObject == m_spUi->pColorDisplay &&
       nullptr != pEvent && pEvent->type() == QEvent::MouseButtonRelease)
   {
+    emit SignalColorWheelOpening();
+
     const QColorDialog::ColorDialogOptions options = QColorDialog::ShowAlphaChannel | QColorDialog::DontUseNativeDialog;
     QColorDialog dlg(this);
     dlg.setWindowFlag(Qt::FramelessWindowHint);

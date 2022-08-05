@@ -28,3 +28,10 @@ IJsonInstructionBase::tRetVal CCommandEosAudioBase::Call(const tInstructionMapVa
   Q_UNUSED(args)
   return SJsonException{"Not implemented call error.", "", eos::c_sCommandAudioPlay, 0, 0};
 }
+
+//----------------------------------------------------------------------------------------
+//
+CCommandEosAudioBase::tChildNodeGroups CCommandEosAudioBase::ChildNodeGroups(const tInstructionMapValue&) const
+{
+  return {};
+}

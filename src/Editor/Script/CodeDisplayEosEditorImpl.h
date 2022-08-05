@@ -5,11 +5,22 @@
 
 #include <QTreeView>
 
-class CCodeDisplayEosEditorImpl : public ICodeDisplayWidgetImpl
+class CEosScriptModel;
+class CEosScriptEditorView;
+class CEosScriptOverlayDelegate;
+class CEosSortFilterProxyModel;
+class CJsonInstructionSetParser;
+
+//----------------------------------------------------------------------------------------
+//
+class CCodeDisplayEosEditorImpl : public QObject, public ICodeDisplayWidgetImpl
 {
+  Q_OBJECT
 public:
-  CCodeDisplayEosEditorImpl(QPointer<QTreeView> pTarget);
+  CCodeDisplayEosEditorImpl(QPointer<CEosScriptEditorView> pTarget);
   ~CCodeDisplayEosEditorImpl() override;
+
+  void Initialize(CEditorModel* pEditorModel) override;
 
   void Clear() override;
   void ExecutionError(QString sException, qint32 iLine, QString sStack) override;
@@ -17,13 +28,40 @@ public:
   void ResetWidget() override;
   void SetContent(const QString& sContent) override;
   void SetHighlightDefinition(const QString& sType) override;
+  void HideButtons(Ui::CEditorActionBar* pActionBar) override;
   void ShowButtons(Ui::CEditorActionBar* pActionBar) override;
   void Update() override;
 
   QString GetCurrentText() const override;
 
+protected slots:
+  void CurrentItemChanged(const QItemSelection& selected, const QItemSelection& deselected);
+  void CurrentItemDataChanged();
+  void CurrentItemInvalidated();
+  void SlotAddAudio();
+  void SlotAddChoice();
+  void SlotAddDisable();
+  void SlotAddEnable();
+  void SlotAddEnd();
+  void SlotAddEval();
+  void SlotAddGoto();
+  void SlotAddIf();
+  void SlotAddImage();
+  void SlotAddNotificationRemove();
+  void SlotAddNotificationCreate();
+  void SlotAddPrompt();
+  void SlotAddSay();
+  void SlotAddTimer();
+  void SlotClickedOutsideView();
+  void SlotRemoveInstruction();
+
 private:
-  QPointer<QTreeView> m_pTarget;
+  std::unique_ptr<CJsonInstructionSetParser>   m_spEosParser;
+  QPointer<CEosScriptEditorView>               m_pTarget;
+  QPointer<CEosScriptOverlayDelegate>          m_pEditorDelegate;
+  QPointer<CEosSortFilterProxyModel>           m_pProxy;
+  QPointer<CEosScriptModel>                    m_pJsonParserModel;
+  QPointer<CEditorModel>                       m_pEditorModel;
 };
 
 #endif // CCODEDISPLAYEOSEDITORIMPL_H

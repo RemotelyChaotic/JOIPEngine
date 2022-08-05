@@ -13,6 +13,7 @@ public:
 
   tInstructionMapType& ArgList() override;
   IJsonInstructionBase::tRetVal Call(const tInstructionMapValue& args) override;
+  tChildNodeGroups ChildNodeGroups(const tInstructionMapValue&) const override;
 
 private:
   tInstructionMapType                     m_argTypes;

@@ -25,18 +25,21 @@ QVariant CJsonInstructionSetRunnerItemModel::data(const QModelIndex& index, int 
 {
   Q_UNUSED(iColumnOverride)
   const CJsonInstructionNode* pItem = GetItem(index);
-  switch (iRole)
+  if (nullptr != pItem)
   {
-    case Qt::DisplayRole: [[fallthrough]];
-    case Qt::EditRole:
+    switch (iRole)
     {
-      return pItem->m_sName;
+      case Qt::DisplayRole: [[fallthrough]];
+      case Qt::EditRole:
+      {
+        return pItem->m_sName;
+      }
+      case Qt::CheckStateRole:
+      {
+        return pItem->m_bEnabled ? Qt::Checked : Qt::Unchecked;
+      }
+      default: break;
     }
-    case Qt::CheckStateRole:
-    {
-      return pItem->m_bEnabled;
-    }
-    default: break;
   }
   return QVariant();
 }
@@ -90,12 +93,15 @@ QModelIndex CJsonInstructionSetRunnerItemModel::index(int iRow, int iColumn,
   CJsonInstructionNode* pspParentNode = GetItem(parent);
   if (nullptr == pspParentNode)
   {
-    const auto& nodes = m_spRunner->Nodes();
-    if (0 <= iRow && nodes.size() > iRow)
+    if (nullptr != m_spRunner)
     {
-      CJsonInstructionNode* pspChildItem =
-          const_cast<CJsonInstructionNode*>(nodes[iRow].second.get());
-      return createIndex(iRow, iColumn, pspChildItem);
+      const auto& nodes = m_spRunner->Nodes();
+      if (0 <= iRow && nodes.size() > iRow)
+      {
+        CJsonInstructionNode* pspChildItem =
+            const_cast<CJsonInstructionNode*>(nodes[iRow].second.get());
+        return createIndex(iRow, iColumn, pspChildItem);
+      }
     }
     return QModelIndex();
   }
@@ -134,8 +140,15 @@ int CJsonInstructionSetRunnerItemModel::rowCount(const QModelIndex& parent) cons
 {
   if (!parent.isValid())
   {
-    const auto& nodes = m_spRunner->Nodes();
-    return static_cast<qint32>(nodes.size());
+    if (nullptr != m_spRunner)
+    {
+      const auto& nodes = m_spRunner->Nodes();
+      return static_cast<qint32>(nodes.size());
+    }
+    else
+    {
+      return 0;
+    }
   }
 
   const CJsonInstructionNode* pParentItem = GetItem(parent);
@@ -194,4 +207,17 @@ CJsonInstructionNode* CJsonInstructionSetRunnerItemModel::GetItem(const QModelIn
     if (nullptr != pItem) { return pItem; }
   }
   return nullptr;
+}
+
+//----------------------------------------------------------------------------------------
+//
+const std::vector<std::pair<QString, std::shared_ptr<CJsonInstructionNode>>>&
+CJsonInstructionSetRunnerItemModel::RootNodes() const
+{
+  if (nullptr != m_spRunner)
+  {
+    return m_spRunner->Nodes();
+  }
+  static std::vector<std::pair<QString, std::shared_ptr<CJsonInstructionNode>>> m_empty;
+  return m_empty;
 }

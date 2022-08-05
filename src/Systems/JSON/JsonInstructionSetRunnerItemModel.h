@@ -20,7 +20,7 @@ public:
   void SetRunner(const std::shared_ptr<CJsonInstructionSetRunner>& spRunner);
 
   // read-only functions
-  QVariant data(const QModelIndex& index, int iRole, int iColumnOverride) const;
+  virtual QVariant data(const QModelIndex& index, int iRole, int iColumnOverride) const;
   QVariant data(const QModelIndex& index, int iRole) const override;
   Qt::ItemFlags flags(const QModelIndex& index) const override;
   QVariant headerData(int iSection, Qt::Orientation orientation,
@@ -42,6 +42,9 @@ public:
   CJsonInstructionNode* GetItem(const QModelIndex& index) const;
 
 signals:
+
+protected:
+  const std::vector<std::pair<QString, std::shared_ptr<CJsonInstructionNode>>>& RootNodes() const;
 
 private:
   std::shared_ptr<CJsonInstructionSetRunner> m_spRunner;

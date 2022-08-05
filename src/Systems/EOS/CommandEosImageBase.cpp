@@ -24,3 +24,10 @@ IJsonInstructionBase::tRetVal CCommandEosImageBase::Call(const tInstructionMapVa
   Q_UNUSED(args)
   return SJsonException{"Not implemented call error.", "", eos::c_sCommandImage, 0, 0};
 }
+
+//----------------------------------------------------------------------------------------
+//
+CCommandEosImageBase::tChildNodeGroups CCommandEosImageBase::ChildNodeGroups(const tInstructionMapValue&) const
+{
+  return {};
+}

@@ -214,6 +214,30 @@ macro(CreateJOIPProject JOIP_PROJECT_NAME)
     ${JOIPSources}/Editor/Script/CommandChangeOpenedScript.h
     ${JOIPSources}/Editor/Script/CommandScriptContentChange.cpp
     ${JOIPSources}/Editor/Script/CommandScriptContentChange.h
+    ${JOIPSources}/Editor/Script/EosCommandModels.cpp
+    ${JOIPSources}/Editor/Script/EosCommandModels.h
+    ${JOIPSources}/Editor/Script/EosCommandWidgets.cpp
+    ${JOIPSources}/Editor/Script/EosCommandWidgets.h
+    ${JOIPSources}/Editor/Script/EosCommandWidgetAudio.ui
+    ${JOIPSources}/Editor/Script/EosCommandWidgetChoice.ui
+    ${JOIPSources}/Editor/Script/EosCommandWidgetEval.ui
+    ${JOIPSources}/Editor/Script/EosCommandWidgetGoto.ui
+    ${JOIPSources}/Editor/Script/EosCommandWidgetIf.ui
+    ${JOIPSources}/Editor/Script/EosCommandWidgetImage.ui
+    ${JOIPSources}/Editor/Script/EosCommandWidgetNotificationClose.ui
+    ${JOIPSources}/Editor/Script/EosCommandWidgetNotificationCreate.ui
+    ${JOIPSources}/Editor/Script/EosCommandWidgetPrompt.ui
+    ${JOIPSources}/Editor/Script/EosCommandWidgetSay.ui
+    ${JOIPSources}/Editor/Script/EosCommandWidgetScene.ui
+    ${JOIPSources}/Editor/Script/EosCommandWidgetTimer.ui
+    ${JOIPSources}/Editor/Script/EosScriptEditorView.cpp
+    ${JOIPSources}/Editor/Script/EosScriptEditorView.h
+    ${JOIPSources}/Editor/Script/EosScriptModel.cpp
+    ${JOIPSources}/Editor/Script/EosScriptModel.h
+    ${JOIPSources}/Editor/Script/EosScriptModelItem.cpp
+    ${JOIPSources}/Editor/Script/EosScriptModelItem.h
+    ${JOIPSources}/Editor/Script/EosScriptOverlayDelegate.cpp
+    ${JOIPSources}/Editor/Script/EosScriptOverlayDelegate.h
     ${JOIPSources}/Editor/Script/ICodeDisplayWidgetImpl.h
     ${JOIPSources}/Editor/Script/IconSnippetOverlay.cpp
     ${JOIPSources}/Editor/Script/IconSnippetOverlay.h
@@ -485,6 +509,8 @@ macro(CreateJOIPProject JOIP_PROJECT_NAME)
     ${JOIPSources}/Widgets/HelpOverlay.h
     ${JOIPSources}/Widgets/HelpOverlay.ui
     ${JOIPSources}/Widgets/IWidgetBaseInterface.h
+    ${JOIPSources}/Widgets/LongLongSpinBox.cpp
+    ${JOIPSources}/Widgets/LongLongSpinBox.h
     ${JOIPSources}/Widgets/MenuButton.cpp
     ${JOIPSources}/Widgets/MenuButton.h
     ${JOIPSources}/Widgets/OverlayBase.cpp
@@ -510,6 +536,8 @@ macro(CreateJOIPProject JOIP_PROJECT_NAME)
     ${JOIPSources}/Widgets/SearchWidget.ui
     ${JOIPSources}/Widgets/ShortcutButton.cpp
     ${JOIPSources}/Widgets/ShortcutButton.h
+    ${JOIPSources}/Widgets/SlidingStackedWidget.cpp
+    ${JOIPSources}/Widgets/SlidingStackedWidget.h
     ${JOIPSources}/Widgets/TitleLabel.cpp
     ${JOIPSources}/Widgets/TitleLabel.h
     ${JOIPSources}/WindowContext.cpp

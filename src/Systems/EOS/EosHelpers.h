@@ -13,9 +13,44 @@ namespace eos
   const QString c_sMatcherGallery = "^gallery:([^/]+)\\/(.*)$";
   const QString c_sMatcherFile = "^file:(.*)$";
   const QString c_sMatcherFileIsRandom = "\\*";
+  const QString c_sMatcherTimeDuration = "^([0-9]+)|(([0-9]+w)?([0-9]+d)?([0-9]+h)?([0-9]+m)?([0-9]+s)?([0-9]+ms)?)$";
 
   const QString c_sEosKeyFile = ".eoskey";
   const QString c_sKey = "3YzCjnWTLV6SYMgK7Lql";
+
+  enum EAlignMode : size_t
+  {
+    eCenter = 0,
+    eLeft,
+    eRight
+  };
+
+  const std::vector<QString> c_vsAlignStrings = {
+    "center", "left", "right"
+  };
+
+  enum EPlayMode : size_t
+  {
+    eAutoplay = 0,
+    eInstant,
+    ePause,
+    eCustom
+  };
+
+  const std::vector<QString> c_vsPlayModeStrings = {
+    "autoplay", "instant", "pause", "custom"
+  };
+
+  enum ETimerStyle : size_t
+  {
+    eNormal = 0,
+    eHidden,
+    eSecret
+  };
+
+  const std::vector<QString> c_vsTimerStyleStrings = {
+    "normal", "hidden", "secret"
+  };
 
   QString GetEOSK();
 
@@ -34,6 +69,8 @@ namespace eos
   qint64 ParseEosDuration(const QString& sDuration);
 
   bool VerifyProjectEditable(tspProject& spProject);
+
+  QString GetEosLocator(tspResource spResource);
 }
 
 #endif // EOSHELPERS_H

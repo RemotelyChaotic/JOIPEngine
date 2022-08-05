@@ -166,21 +166,21 @@ public:
         if (HasValue(args, "style") && IsOk<EArgumentType::eString>(itStyle))
         {
           const QString sStyle = std::get<QString>(itStyle);
-          if ("normal" == sStyle)
+          if (eos::c_vsTimerStyleStrings[eos::eNormal] == sStyle)
           {
             bHasDefinedStyle = true;
             bIsMainClock = true;
             m_pParent->setTimeVisible(true);
             m_pParent->show();
           }
-          else if ("hidden" == sStyle)
+          else if (eos::c_vsTimerStyleStrings[eos::eHidden] == sStyle)
           {
             bHasDefinedStyle = true;
             bIsMainClock = true;
             m_pParent->setTimeVisible(true);
             m_pParent->hide();
           }
-          else if ("secret" == sStyle)
+          else if (eos::c_vsTimerStyleStrings[eos::eSecret] == sStyle)
           {
             bHasDefinedStyle = true;
             bIsMainClock = true;

@@ -19,3 +19,10 @@ IJsonInstructionBase::tRetVal CCommandEosEnableSceneBase::Call(const tInstructio
   Q_UNUSED(args)
   return SJsonException{"Not implemented call error.", "", eos::c_sCommandEnableScreen, 0, 0};
 }
+
+//----------------------------------------------------------------------------------------
+//
+CCommandEosEnableSceneBase::tChildNodeGroups CCommandEosEnableSceneBase::ChildNodeGroups(const tInstructionMapValue&) const
+{
+  return {};
+}

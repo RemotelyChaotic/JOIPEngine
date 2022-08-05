@@ -30,6 +30,7 @@ public:
                            const std::shared_ptr<IJsonInstructionBase>& spInstructionDefinition);
   void RegisterInstructionSetPath(const QString& sId, const QString& sInstructionSetPath);
   void SetJsonBaseSchema(const QByteArray& schema);
+  QString ToJson(std::shared_ptr<CJsonInstructionSetRunner> spRunner);
 
 private:
   std::unique_ptr<CJsonInstructionSetParserPrivate> m_spPtr;

@@ -26,3 +26,11 @@ IJsonInstructionBase::tRetVal CCommandEosNotificationCloseBase::Call(const tInst
   Q_UNUSED(args)
   return SJsonException{"Not implemented call error.", "", eos::c_sCommandNotificationClose, 0, 0};
 }
+
+//----------------------------------------------------------------------------------------
+//
+CCommandEosNotificationCloseBase::tChildNodeGroups CCommandEosNotificationCloseBase::ChildNodeGroups(const tInstructionMapValue&) const
+{
+  return {};
+}
+

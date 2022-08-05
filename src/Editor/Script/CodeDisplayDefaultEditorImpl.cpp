@@ -57,16 +57,15 @@ void CCodeDisplayDefaultEditorImpl::SetHighlightDefinition(const QString& sType)
 
 //----------------------------------------------------------------------------------------
 //
+void CCodeDisplayDefaultEditorImpl::HideButtons(Ui::CEditorActionBar*)
+{
+}
+
+//----------------------------------------------------------------------------------------
+//
 void CCodeDisplayDefaultEditorImpl::ShowButtons(Ui::CEditorActionBar* pActionBar)
 {
-  pActionBar->AddShowBackgroundCode->setVisible(true);
-  pActionBar->AddShowIconCode->setVisible(true);
-  pActionBar->AddShowImageCode->setVisible(true);
-  pActionBar->AddTextCode->setVisible(true);
-  pActionBar->AddMetronomeCode->setVisible(true);
-  pActionBar->AddNotificationCode->setVisible(true);
-  pActionBar->AddTimerCode->setVisible(true);
-  pActionBar->AddThreadCode->setVisible(true);
+  pActionBar->pCodeEditorContainerStack->setCurrentWidget(pActionBar->pCodeEditorContainerPageDefault);
 }
 
 //----------------------------------------------------------------------------------------

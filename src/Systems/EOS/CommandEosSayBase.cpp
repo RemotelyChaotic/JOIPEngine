@@ -29,3 +29,10 @@ IJsonInstructionBase::tRetVal CCommandEosSayBase::Call(const tInstructionMapValu
   Q_UNUSED(args)
   return SJsonException{"Not implemented call error.", "", eos::c_sCommandSay, 0, 0};
 }
+
+//----------------------------------------------------------------------------------------
+//
+CCommandEosSayBase::tChildNodeGroups CCommandEosSayBase::ChildNodeGroups(const tInstructionMapValue&) const
+{
+  return {};
+}

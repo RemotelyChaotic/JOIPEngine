@@ -79,7 +79,7 @@
         <number>0</number>
        </property>
        <item row="0" column="0">
-        <widget class="QTreeView" name="pEosEdit"/>
+        <widget class="CEosScriptEditorView" name="pEosEdit"/>
        </item>
       </layout>
      </widget>
@@ -92,6 +92,11 @@
    <class>CScriptEditorWidget</class>
    <extends>QTextEdit</extends>
    <header>Editor/Script/ScriptEditorWidget.h</header>
+  </customwidget>
+  <customwidget>
+   <class>CEosScriptEditorView</class>
+   <extends>QTreeView</extends>
+   <header>Editor/Script/EosScriptEditorView.h</header>
   </customwidget>
  </customwidgets>
  <resources/>

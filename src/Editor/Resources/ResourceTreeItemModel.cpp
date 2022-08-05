@@ -155,7 +155,6 @@ void CResourceTreeItemModel::SetCardIconSize(qint32 iValue)
 
 //----------------------------------------------------------------------------------------
 //
-#include <QDebug>
 QVariant CResourceTreeItemModel::data(const QModelIndex& index, int iRole, int iColumnOverride)
 {
   if (!index.isValid()) { return QVariant(); }
@@ -489,7 +488,22 @@ QModelIndex CResourceTreeItemModel::IndexForResource(const tspResource& spResour
 
 //----------------------------------------------------------------------------------------
 //
-CResourceTreeItem* CResourceTreeItemModel::CResourceTreeItemModel::GetItem(const QModelIndex& index) const
+tspResource CResourceTreeItemModel::ResourceForIndex(const QModelIndex& idx)
+{
+  if (nullptr == m_spProject || !idx.isValid()) { return nullptr; }
+  CResourceTreeItem* pItem = GetItem(idx);
+  if (pItem == nullptr) { return nullptr; }
+
+  if (EResourceTreeItemType::eResource == pItem->Type()._to_integral())
+  {
+    return pItem->Resource();
+  }
+  return nullptr;
+}
+
+//----------------------------------------------------------------------------------------
+//
+CResourceTreeItem* CResourceTreeItemModel::GetItem(const QModelIndex& index) const
 {
   if (index.isValid())
   {

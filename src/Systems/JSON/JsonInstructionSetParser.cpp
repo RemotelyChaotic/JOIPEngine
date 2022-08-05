@@ -12,6 +12,7 @@
 #include <QPointer>
 #include <QThread>
 #include <memory>
+#include <optional>
 #include <set>
 #include <stack>
 #include <string>
@@ -1470,6 +1471,177 @@ void CJSonSaxParser::CreateAndAddIgnoreNode()
 }
 
 //----------------------------------------------------------------------------------------
+//
+namespace
+{
+  nlohmann::json MapToJson(
+      const tInstructionMapType& argDefinitionList, const tInstructionMapValue& args,
+      const std::shared_ptr<CJsonInstructionNode>& spChild, qint32& iOffset);
+  std::optional<nlohmann::json> NodeToJson(std::shared_ptr<CJsonInstructionNode> spNode);
+
+
+  //--------------------------------------------------------------------------------------
+  //
+  void ElementToJson(const SInstructionArgumentValue& value,
+                     const tNestedType& nestedType,
+                     const std::shared_ptr<CJsonInstructionNode>& spChild,
+                     qint32& iOffset,
+                     nlohmann::json& elemParams)
+  {
+    switch(value.m_type)
+    {
+      case EArgumentType::eBool:
+      {
+        bool bValue = std::get<bool>(value.m_value);
+        elemParams = bValue;
+      } break;
+      case EArgumentType::eInt64:
+      {
+        qint64 iValue = std::get<qint64>(value.m_value);
+        elemParams = iValue;
+      } break;
+      case EArgumentType::eUInt64:
+      {
+        quint64 uiValue = std::get<quint64>(value.m_value);
+        elemParams = uiValue;
+      } break;
+      case EArgumentType::eDouble:
+      {
+        double dValue = std::get<double>(value.m_value);
+        elemParams = dValue;
+      } break;
+      case EArgumentType::eString:
+      {
+        QString sValue = std::get<QString>(value.m_value);
+        elemParams = sValue.toStdString();
+      } break;
+      case EArgumentType::eObject:
+      {
+        if (static_cast<qint32>(spChild->m_spChildren.size()) > iOffset && 0 <= iOffset)
+        {
+          std::optional<nlohmann::json> optNode = NodeToJson(spChild->m_spChildren[iOffset]);
+          if (optNode.has_value())
+          {
+            elemParams = optNode.value();
+          }
+        }
+      } break;
+      case EArgumentType::eArray:
+      {
+        std::shared_ptr<SInstructionArgumentType> argListValue =
+            std::get<std::shared_ptr<SInstructionArgumentType>>(nestedType);
+        tInstructionArrayValue values =
+            std::get<tInstructionArrayValue>(value.m_value);
+        elemParams = nlohmann::json::array();
+        for (qint32 i = 0; static_cast<qint32>(values.size()) > i; ++i)
+        {
+          nlohmann::json innerObject;
+          auto& elem = values[static_cast<size_t>(i)];
+          ElementToJson(elem, argListValue->m_nestedType, spChild, iOffset, innerObject);
+          iOffset++;
+          elemParams.push_back(innerObject);
+        }
+      } break;
+      case EArgumentType::eMap:
+      {
+        tInstructionMapType argListValue =
+            std::get<tInstructionMapType>(nestedType);
+        tInstructionMapValue values =
+            std::get<tInstructionMapValue>(value.m_value);
+        elemParams = MapToJson(argListValue, values, spChild, iOffset);
+      } break;
+    }
+  }
+
+  //--------------------------------------------------------------------------------------
+  //
+  nlohmann::json MapToJson(
+      const tInstructionMapType& argDefinitionList, const tInstructionMapValue& args,
+      const std::shared_ptr<CJsonInstructionNode>& spChild, qint32& iOffset)
+  {
+    nlohmann::json elemParams = nlohmann::json::object();
+    for (const auto& [sKey, arg] : argDefinitionList)
+    {
+      auto itInArgs = args.find(sKey);
+      if (args.end() != itInArgs)
+      {
+        ElementToJson(itInArgs->second, arg.m_nestedType, spChild, iOffset,
+                      elemParams[sKey.toStdString()]);
+      }
+    }
+
+    return elemParams;
+  }
+
+  //--------------------------------------------------------------------------------------
+  //
+  std::optional<nlohmann::json> NodeToJson(std::shared_ptr<CJsonInstructionNode> spNode)
+  {
+    if (auto spCommand = spNode->m_wpCommand.lock())
+    {
+      auto argList = spCommand->ArgList();
+      auto args = spNode->m_actualArgs;
+
+      if (argList.size() > 0)
+      {
+        nlohmann::json elem = nlohmann::json::object();
+        qint32 iOffset = 0;
+        elem[spNode->m_sName.toStdString()] = MapToJson(argList, args, spNode, iOffset);
+        return elem;
+      }
+      else if (spNode->m_spChildren.size() > 0)
+      {
+        nlohmann::json elem = nlohmann::json::object();
+        for (qint32 i = 0; static_cast<qint32>(spNode->m_spChildren.size()) > i; ++i)
+        {
+          auto& spChildOfChild = spNode->m_spChildren[static_cast<size_t>(i)];
+          std::optional<nlohmann::json> optNode = NodeToJson(spChildOfChild);
+          if (optNode.has_value())
+          {
+            elem[spNode->m_sName.toStdString()] = optNode.value();
+          }
+        }
+        return elem;
+      }
+    }
+    // we don't have a command definition, but children,
+    // just serialise children directly into the node
+    else if (spNode->m_spChildren.size() > 0)
+    {
+      nlohmann::json elem = nlohmann::json::object();
+      for (qint32 i = 0; static_cast<qint32>(spNode->m_spChildren.size()) > i; ++i)
+      {
+        auto& spChildOfChild = spNode->m_spChildren[static_cast<size_t>(i)];
+        std::optional<nlohmann::json> optNode = NodeToJson(spChildOfChild);
+        if (optNode.has_value())
+        {
+          elem[spNode->m_sName.toStdString()] = optNode.value();
+        }
+      }
+
+      return elem;
+    }
+    return std::nullopt;
+  }
+
+  //--------------------------------------------------------------------------------------
+  //
+  nlohmann::json ToJson(std::shared_ptr<CJsonInstructionNode> spNode)
+  {
+    nlohmann::json commands = nlohmann::json::array();
+    for (const std::shared_ptr<CJsonInstructionNode>& spChild : spNode->m_spChildren)
+    {
+      std::optional<nlohmann::json> optNode = NodeToJson(spChild);
+      if (optNode.has_value())
+      {
+        commands.push_back(optNode.value());
+      }
+    }
+    return commands;
+  }
+}
+
+//----------------------------------------------------------------------------------------
 // CJsonInstructionSetParserPrivate implementation
 //
 class CJsonInstructionSetParserPrivate
@@ -1563,6 +1735,28 @@ public:
     }
   }
 
+  //--------------------------------------------------------------------------------------
+  //
+  QString ToJson(std::shared_ptr<CJsonInstructionSetRunner> spRunner)
+  {
+    nlohmann::json json;
+    if (spRunner->Nodes().size() > 1 ||
+        (spRunner->Nodes().size() == 1 && !spRunner->Nodes()[0].first.isEmpty()))
+    {
+      for (const std::pair<QString, std::shared_ptr<CJsonInstructionNode>>& pair : spRunner->Nodes())
+      {
+        json[pair.first.toStdString()][c_sCommandsNode] = nlohmann::json::array();
+        json[pair.first.toStdString()][c_sCommandsNode] = ::ToJson(pair.second);
+      }
+    }
+    else if (spRunner->Nodes().size() == 1)
+    {
+      json[c_sCommandsNode] = nlohmann::json::array();
+      json[c_sCommandsNode] = ::ToJson(spRunner->Nodes()[0].second);
+    }
+    return QString::fromStdString(json.dump(4));
+  }
+
 protected:
   nlohmann::json                                           m_jsonBaseSchema;
   std::map<QString, QStringList>                           m_instructionSetPath;
@@ -1599,6 +1793,18 @@ CJsonInstructionSetRunner::tRetVal
 CJsonInstructionSetRunner::CallNextCommand(ERunerMode runMode, bool bBlocking)
 {
   return m_pPrivate->CallNextCommand(runMode, bBlocking);
+}
+
+//----------------------------------------------------------------------------------------
+//
+std::shared_ptr<IJsonInstructionBase> CJsonInstructionSetRunner::Instruction(const QString& sName) const
+{
+  auto it = m_pPrivate->m_instructionMap.find(sName);
+  if (m_pPrivate->m_instructionMap.end() != it)
+  {
+    return it->second;
+  }
+  return nullptr;
 }
 
 //----------------------------------------------------------------------------------------
@@ -1704,6 +1910,17 @@ void CJsonInstructionSetParser::RegisterInstructionSetPath(const QString& sId,
 void CJsonInstructionSetParser::SetJsonBaseSchema(const QByteArray& schema)
 {
   m_spPtr->SetJsonBaseSchema(QString::fromUtf8(schema).toStdString());
+}
+
+//----------------------------------------------------------------------------------------
+//
+QString CJsonInstructionSetParser::ToJson(std::shared_ptr<CJsonInstructionSetRunner> spRunner)
+{
+  if (nullptr != spRunner)
+  {
+    return m_spPtr->ToJson(spRunner);
+  }
+  return QString();
 }
 
 #include "JsonInstructionSetParser.moc"

@@ -52,3 +52,10 @@ IJsonInstructionBase::tRetVal CCommandHighlight::Call(const tInstructionMapValue
   }
   return std::true_type();
 }
+
+//----------------------------------------------------------------------------------------
+//
+CCommandHighlight::tChildNodeGroups CCommandHighlight::ChildNodeGroups(const tInstructionMapValue&) const
+{
+  return {};
+}

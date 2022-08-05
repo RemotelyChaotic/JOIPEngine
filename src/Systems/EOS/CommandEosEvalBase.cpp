@@ -19,3 +19,10 @@ IJsonInstructionBase::tRetVal CCommandEosEvalBase::Call(const tInstructionMapVal
   Q_UNUSED(args)
   return SJsonException{"Not implemented call error.", "", eos::c_sCommandEval, 0, 0};
 }
+
+//----------------------------------------------------------------------------------------
+//
+CCommandEosEvalBase::tChildNodeGroups CCommandEosEvalBase::ChildNodeGroups(const tInstructionMapValue&) const
+{
+  return {};
+}

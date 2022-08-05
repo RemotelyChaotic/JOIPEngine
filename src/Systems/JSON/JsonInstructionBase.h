@@ -9,6 +9,7 @@
 class IJsonInstructionBase
 {
 public:
+  typedef std::vector<std::pair<QString, qint32>> tChildNodeGroups;
   typedef std::variant<SJsonException,
                        SRunRetVal<ENextCommandToCall::eChild>,
                        SRunRetVal<ENextCommandToCall::eSibling>,
@@ -21,6 +22,7 @@ public:
 
   virtual tInstructionMapType& ArgList() = 0;
   virtual IJsonInstructionBase::tRetVal Call(const tInstructionMapValue& args) = 0;
+  virtual tChildNodeGroups ChildNodeGroups(const tInstructionMapValue& args) const = 0;
 };
 
 #endif // JSONINSTRUCTIONBASE_H

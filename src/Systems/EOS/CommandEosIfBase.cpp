@@ -29,3 +29,25 @@ IJsonInstructionBase::tRetVal CCommandEosIfBase::Call(const tInstructionMapValue
   Q_UNUSED(args)
   return SJsonException{"Not implemented call error.", "", eos::c_sCommandIf, 0, 0};
 }
+
+//----------------------------------------------------------------------------------------
+//
+CCommandEosIfBase::tChildNodeGroups CCommandEosIfBase::ChildNodeGroups(const tInstructionMapValue& args) const
+{
+  qint32 iCommandsIf = 0;
+  qint32 iCommandsElse = 0;
+  const auto& itCommands = GetValue<EArgumentType::eArray>(args, "commands");
+  if (HasValue(args, "commands") && IsOk<EArgumentType::eArray>(itCommands))
+  {
+    const tInstructionArrayValue& arrOptions = std::get<tInstructionArrayValue>(itCommands);
+    iCommandsIf = static_cast<quint32>(arrOptions.size());
+  }
+  const auto& itCommandsElse = GetValue<EArgumentType::eArray>(args, "elseCommands");
+  if (HasValue(args, "elseCommands") && IsOk<EArgumentType::eArray>(itCommandsElse))
+  {
+    const tInstructionArrayValue& arrOptions = std::get<tInstructionArrayValue>(itCommandsElse);
+    iCommandsElse = static_cast<quint32>(arrOptions.size());
+  }
+
+  return {{QString("If"), iCommandsIf}, {QString("Else"), iCommandsElse}};
+}

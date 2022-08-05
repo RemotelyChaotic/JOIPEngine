@@ -73,3 +73,10 @@ IJsonInstructionBase::tRetVal CCommandBackground::Call(const tInstructionMapValu
   }
   return std::true_type();
 }
+
+//----------------------------------------------------------------------------------------
+//
+CCommandBackground::tChildNodeGroups CCommandBackground::ChildNodeGroups(const tInstructionMapValue&) const
+{
+  return {};
+}

@@ -620,15 +620,15 @@ public:
       if (HasValue(args, "align") && IsOk<EArgumentType::eString>(itAlign))
       {
         QString sAlign = std::get<QString>(itAlign);
-        if ("center" == sAlign)
+        if (eos::c_vsAlignStrings[eos::eCenter] == sAlign)
         {
           m_pParent->setTextAlignment(TextAlignment::AlignCenter);
         }
-        else if ("left" == sAlign)
+        else if (eos::c_vsAlignStrings[eos::eLeft] == sAlign)
         {
           m_pParent->setTextAlignment(TextAlignment::AlignLeft);
         }
-        else if ("right" == sAlign)
+        else if (eos::c_vsAlignStrings[eos::eRight] == sAlign)
         {
           m_pParent->setTextAlignment(TextAlignment::AlignRight);
         }
@@ -638,19 +638,19 @@ public:
       if (HasValue(args, "mode") && IsOk<EArgumentType::eString>(itMode))
       {
         QString sMode = std::get<QString>(itMode);
-        if ("autoplay" == sMode)
+        if (eos::c_vsPlayModeStrings[eos::eAutoplay] == sMode)
         {
           mode = CEosScriptTextBox::eAutoplay;
         }
-        else if ("instant" == sMode)
+        else if (eos::c_vsPlayModeStrings[eos::eInstant] == sMode)
         {
           mode = CEosScriptTextBox::eInstant;
         }
-        else if ("pause" == sMode)
+        else if (eos::c_vsPlayModeStrings[eos::ePause] == sMode)
         {
           mode = CEosScriptTextBox::ePause;
         }
-        else if ("custom" == sMode)
+        else if (eos::c_vsPlayModeStrings[eos::eCustom] == sMode)
         {
           mode = CEosScriptTextBox::eCustom;
         }

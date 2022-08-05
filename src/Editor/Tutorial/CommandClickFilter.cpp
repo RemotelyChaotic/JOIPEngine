@@ -56,3 +56,10 @@ IJsonInstructionBase::tRetVal CCommandClickFilter::Call(const tInstructionMapVal
   }
   return std::true_type();
 }
+
+//----------------------------------------------------------------------------------------
+//
+CCommandClickFilter::tChildNodeGroups CCommandClickFilter::ChildNodeGroups(const tInstructionMapValue&) const
+{
+  return {};
+}

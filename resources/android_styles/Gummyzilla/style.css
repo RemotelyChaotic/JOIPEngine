@@ -26,6 +26,8 @@ QRadioButton {
 }
 
 QTreeView::indicator,
+QTableView::indicator,
+QListView::indicator,
 QRadioButton::indicator,
 QGroupBox::indicator,
 QCheckBox::indicator {
@@ -34,6 +36,8 @@ QCheckBox::indicator {
 }
 
 QTreeView::indicator:unchecked,
+QTableView::indicator::unchecked,
+QListView::indicator::unchecked,
 QRadioButton::indicator:unchecked,
 QGroupBox::indicator:unchecked,
 QCheckBox::indicator:unchecked {
@@ -41,6 +45,8 @@ QCheckBox::indicator:unchecked {
 }
 
 QTreeView::indicator:unchecked:hover,
+QTableView::indicator::unchecked:hover,
+QListView::indicator::unchecked:hover,
 QRadioButton::indicator:unchecked:hover,
 QGroupBox::indicator:unchecked:hover,
 QCheckBox::indicator:unchecked:hover {
@@ -48,6 +54,8 @@ QCheckBox::indicator:unchecked:hover {
 }
 
 QTreeView::indicator:unchecked:pressed,
+QTableView::indicator::unchecked:pressed,
+QListView::indicator::unchecked:pressed,
 QRadioButton::indicator:unchecked:pressed,
 QGroupBox::indicator:unchecked:pressed,
 QCheckBox::indicator:unchecked:pressed {
@@ -55,6 +63,8 @@ QCheckBox::indicator:unchecked:pressed {
 }
 
 QTreeView::indicator:checked,
+QTableView::indicator::checked,
+QListView::indicator::checked,
 QRadioButton::indicator:checked,
 QGroupBox::indicator:checked,
 QCheckBox::indicator:checked {
@@ -62,6 +72,8 @@ QCheckBox::indicator:checked {
 }
 
 QTreeView::indicator:checked:pressed,
+QTableView::indicator::checked:pressed,
+QListView::indicator::checked:pressed,
 QRadioButton::indicator:checked:pressed,
 QGroupBox::indicator:checked:pressed,
 QCheckBox::indicator:checked:pressed {
@@ -69,6 +81,8 @@ QCheckBox::indicator:checked:pressed {
 }
 
 QTreeView::indicator:indeterminate:hover,
+QTableView::indicator::indeterminate:hover,
+QListView::indicator::indeterminate:hover,
 QRadioButton::indicator:indeterminate:hover,
 QGroupBox::indicator:indeterminate:hover,
 QCheckBox::indicator:indeterminate:hover {
@@ -76,6 +90,8 @@ QCheckBox::indicator:indeterminate:hover {
 }
 
 QTreeView::indicator:indeterminate:pressed,
+QTableView::indicator:indeterminate:pressed,
+QListView::indicator:indeterminate:pressed,
 QRadioButton::indicator:indeterminate:pressed,
 QGroupBox::indicator:indeterminate:pressed,
 QCheckBox::indicator:indeterminate:pressed {

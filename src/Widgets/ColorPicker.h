@@ -25,6 +25,7 @@ public:
 
 signals:
   void SignalColorChanged(const QColor& color);
+  void SignalColorWheelOpening();
 
 protected:
   bool eventFilter(QObject* pObject, QEvent* pEvent) override;

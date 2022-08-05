@@ -291,4 +291,29 @@ namespace eos
 
     return true;
   }
+
+  //--------------------------------------------------------------------------------------
+  //
+  QString GetEosLocator(tspResource spResource)
+  {
+    QString sString = "gallery:";
+    QReadLocker locker(&spResource->m_rwLock);
+    if (spResource->m_sName.contains("/"))
+    {
+      return QString();
+    }
+
+    if (!spResource->m_sResourceBundle.isEmpty() &&
+        spResource->m_sName.startsWith(spResource->m_sResourceBundle))
+    {
+      sString += spResource->m_sResourceBundle + "/" +
+          spResource->m_sName.right(spResource->m_sName.length() -
+                                    spResource->m_sResourceBundle.length());
+    }
+    else
+    {
+      sString += spResource->m_sName + "/";
+    }
+    return sString;
+  }
 }
