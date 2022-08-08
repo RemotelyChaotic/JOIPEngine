@@ -519,11 +519,11 @@ void CSceneMainScreen::SlotUnloadFinished()
     m_spWindowContext->SignalChangeAppOverlay(QString());
   }
 
-  emit SignalUnloadFinished();
   if (m_bCloseRequested)
   {
     qApp->quit();
   }
+  emit SignalUnloadFinished();
 }
 
 //----------------------------------------------------------------------------------------
