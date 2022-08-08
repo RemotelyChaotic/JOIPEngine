@@ -22,33 +22,25 @@ Rectangle {
         ColumnLayout {
             id: layoutText
             anchors.centerIn: parent
-            width: Math.max(text.contentWidth, buttonText.contentWidth + 10)
+            width: Math.max(text.width, buttonText.contentWidth + 10)
             height: text.visibleHeight +
                     ((text.visible && button.visible) ? spacing : 0) +
                     button.visibleHeight
 
-            Text {
+            TextItemFormated {
                 id: text
 
-                property real visibleHeight: visible ? contentHeight : 0
+                property real visibleHeight: visible ? height : 0
 
                 Layout.preferredHeight: visibleHeight
                 Layout.alignment: Qt.AlignHCenter
 
-                visible: model.title !== ""
+                maximumWidth: defaultDelegate.width
 
-                font.family: root.currentlyLoadedProject.font
-                font.pointSize: 14
-                font.hintingPreference: Font.PreferNoHinting
-                horizontalAlignment: Text.AlignHCenter
-                elide: Text.ElideNone
-                text: model.title.replace("<html>","").replace("</html>","")
-                wrapMode: Text.WordWrap
-                color: model.textColor
-                textFormat: (model.title.startsWith("<html>") && model.title.endsWith("</html>")) ?
-                                Text.RichText :
-                                (QtApp.mightBeRichtext(model.title) ?
-                                     Text.StyledText : Text.PlainText)
+                text: model.title
+                textColor: model.textColor
+
+                visible: model.title !== ""
             }
 
             Button {

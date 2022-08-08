@@ -30,40 +30,14 @@ Rectangle {
         color: backgroundColor
         radius: 5
 
-        Text {
+        TextItemFormated {
             id: textContentItem
-
-            // yes, this causes a binding loop for property "width" too bad we ignore it
-            // otherwise we can't get the width of the content
-            width: Math.min(dummy.contentWidth, textDelegate.width - imageSkip.width - 50)
-            height: contentHeight
             anchors.centerIn: parent
 
-            font.family: root.currentlyLoadedProject.font
-            font.pointSize: 14
-            font.hintingPreference: Font.PreferNoHinting
+            maximumWidth: textDelegate.width - imageSkip.width - 50
 
-            horizontalAlignment: Text.AlignHCenter
-            elide: Text.ElideNone
-            text: textContent.replace("<html>","").replace("</html>","")
-            wrapMode: Text.WordWrap
-            color: textColor
-            textFormat: (textContent.startsWith("<html>") && textContent.endsWith("</html>")) ?
-                            Text.RichText :
-                            (QtApp.mightBeRichtext(textContent) ?
-                                 Text.StyledText : Text.PlainText)
-        }
-        Text {
-            id: dummy
-            visible: false
-
-            font: textContentItem.font
-
-            horizontalAlignment: textContentItem.horizontalAlignment
-            elide: Text.ElideNone
-            text: textContentItem.text
-            wrapMode: textContentItem.wrapMode
-            textFormat: textContentItem.textFormat
+            text: textContent
+            textColor: model.textColor
         }
 
         IconResourceDelegate {

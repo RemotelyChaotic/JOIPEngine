@@ -237,5 +237,6 @@
         <file>resources/qml/NotificationDefaultDelegate.qml</file>
         <file>resources/qml/EvalWrapper.js</file>
         <file>resources/qml/PlayerSceneManager.qml</file>
+        <file>resources/qml/TextItemFormated.qml</file>
     </qresource>
 </RCC>
