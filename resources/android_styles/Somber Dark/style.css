@@ -1587,3 +1587,8 @@ CResourceDetailView {
   qproperty-iconFolder: url(ui/FolderIcon.png);
   qproperty-spacing: 6;
 }
+
+CResourceModelView {
+  qproperty-cardIcon: url(ui/ButtonTitleCard.png);
+  qproperty-cardIconSize: 16;
+}

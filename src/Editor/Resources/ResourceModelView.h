@@ -19,6 +19,8 @@ typedef std::shared_ptr<SProject> tspProject;
 class CResourceModelView : public QWidget
 {
   Q_OBJECT
+  Q_PROPERTY(QImage cardIcon READ CardIcon WRITE SetCardIcon NOTIFY SignalCardIconChanged)
+  Q_PROPERTY(qint32 cardIconSize READ CardIconSize WRITE SetCardIconSize NOTIFY SignalCardIconSizeChanged)
 
 public:
   enum EView
@@ -47,7 +49,14 @@ public:
                        const QPoint& globalPos);
   bool Landscape();
 
+  const QImage& CardIcon() const { return m_cardIcon; }
+  void SetCardIcon(const QImage& img);
+  qint32 CardIconSize() const { return m_cardIconSize; }
+  void SetCardIconSize(qint32 iValue);
+
 signals:
+  void SignalCardIconChanged();
+  void SignalCardIconSizeChanged();
   void SignalResourceSelected(const QString& sName);
 
 protected slots:
@@ -66,6 +75,8 @@ private:
   QPointer<CResourceTreeItemSortFilterProxyModel> m_pProxy;
   QPointer<CResourceTreeItemModel>                m_pModel;
   QPointer<QUndoStack>                            m_pStack;
+  QImage                                          m_cardIcon;
+  qint32                                          m_cardIconSize;
   bool                                            m_bInitializing;
   bool                                            m_bLandscape;
 };

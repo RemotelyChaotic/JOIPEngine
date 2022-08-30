@@ -25,6 +25,8 @@ CResourceModelView::CResourceModelView(QWidget *parent) :
   m_pProxy(new CResourceTreeItemSortFilterProxyModel(this)),
   m_pModel(nullptr),
   m_pStack(nullptr),
+  m_cardIcon(),
+  m_cardIconSize(16),
   m_bInitializing(false),
   m_bLandscape(false)
 {
@@ -317,6 +319,33 @@ void CResourceModelView::ShowContextMenu(CResourceTreeItemModel* pModel, const Q
 bool CResourceModelView::Landscape()
 {
   return m_bLandscape;
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CResourceModelView::SetCardIcon(const QImage& img)
+{
+  m_cardIcon = img;
+  if (nullptr != m_pModel)
+  {
+    m_pModel->SetCardIcon(m_cardIcon);
+  }
+  emit SignalCardIconChanged();
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CResourceModelView::SetCardIconSize(qint32 iValue)
+{
+  if (m_cardIconSize != iValue)
+  {
+    m_cardIconSize = iValue;
+    if (nullptr != m_pModel)
+    {
+      m_pModel->SetCardIconSize(m_cardIconSize);
+    }
+    emit SignalCardIconSizeChanged();
+  }
 }
 
 //----------------------------------------------------------------------------------------

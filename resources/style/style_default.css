@@ -1132,3 +1132,8 @@ CResourceDetailView {
   qproperty-iconFolder: url(:/resources/style/img/FolderIcon.png);
   qproperty-spacing: 6;
 }
+
+CResourceModelView {
+  qproperty-cardIcon: url(:/resources/style/img/ButtonTitleCard.png);
+  qproperty-cardIconSize: 16;
+}

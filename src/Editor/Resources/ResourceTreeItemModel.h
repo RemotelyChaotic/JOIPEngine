@@ -3,6 +3,7 @@
 
 #include "Systems/Project.h"
 #include <QAbstractItemModel>
+#include <QImage>
 #include <QModelIndex>
 #include <QPointer>
 #include <QVariant>
@@ -32,6 +33,8 @@ public:
 
   void InitializeModel(tspProject spProject);
   void DeInitializeModel();
+  void SetCardIcon(const QImage& img);
+  void SetCardIconSize(qint32 iValue);
 
   // read-only functions
   QVariant data(const QModelIndex& index, int iRole, int iColumnOverride);
@@ -79,6 +82,8 @@ private:
   CResourceTreeItem*                          m_pRootItem;
   std::map<EResourceType, CResourceTreeItem*> m_categoryMap;
   tspProject                                  m_spProject;
+  QImage                                      m_cardIcon;
+  qint32                                      m_cardIconSize;
 };
 
 #endif // RESOURCETREEITEMMODEL_H

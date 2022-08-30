@@ -202,6 +202,7 @@ Changes:
   active.
 - On Windows, taskbar shows icon overlays based on app state.
 - Improved tooltips for Resources.
+- Resource Views show the currently selected Title Card with an icon.
 
 Fixed Bugs:
 - Flickering in Resource Explorer View was fixed.

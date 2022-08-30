@@ -4,6 +4,8 @@
 #include "ResourceTreeItem.h"
 #include "Systems/DatabaseManager.h"
 #include "Systems/Resource.h"
+
+#include <QPixmap>
 #include <QUndoStack>
 
 using namespace resource_item;
@@ -15,7 +17,9 @@ CResourceTreeItemModel::CResourceTreeItemModel(QPointer<QUndoStack> pUndoStack,
   m_pUndoStack(pUndoStack),
   m_pRootItem(nullptr),
   m_categoryMap(),
-  m_spProject()
+  m_spProject(),
+  m_cardIcon(),
+  m_cardIconSize(16)
 {
   auto spDbManager = m_wpDbManager.lock();
   connect(spDbManager.get(), &CDatabaseManager::SignalResourceAdded,
@@ -137,6 +141,21 @@ void CResourceTreeItemModel::DeInitializeModel()
 
 //----------------------------------------------------------------------------------------
 //
+void CResourceTreeItemModel::SetCardIcon(const QImage& img)
+{
+  m_cardIcon = img;
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CResourceTreeItemModel::SetCardIconSize(qint32 iValue)
+{
+  m_cardIconSize = iValue;
+}
+
+//----------------------------------------------------------------------------------------
+//
+#include <QDebug>
 QVariant CResourceTreeItemModel::data(const QModelIndex& index, int iRole, int iColumnOverride)
 {
   if (!index.isValid()) { return QVariant(); }
@@ -144,6 +163,16 @@ QVariant CResourceTreeItemModel::data(const QModelIndex& index, int iRole, int i
   {
     CResourceTreeItem* item = static_cast<CResourceTreeItem*>(index.internalPointer());
     return item->Data(iColumnOverride);
+  }
+  else if (Qt::DecorationRole == iRole)
+  {
+    QReadLocker locker(&m_spProject->m_rwLock);
+    CResourceTreeItem* item = static_cast<CResourceTreeItem*>(index.internalPointer());
+    if (item->Data(c_iColumnName) == m_spProject->m_sTitleCard)
+    {
+      return QPixmap::fromImage(m_cardIcon.scaled(m_cardIconSize,m_cardIconSize));
+    }
+    return QVariant();
   }
   // used for id to search
   else if (CResourceTreeItemModel::eSearchRole == iRole)
@@ -176,6 +205,16 @@ QVariant CResourceTreeItemModel::data(const QModelIndex& index, int iRole) const
   {
     CResourceTreeItem* item = static_cast<CResourceTreeItem*>(index.internalPointer());
     return item->Data(index.column());
+  }
+  else if (Qt::DecorationRole == iRole)
+  {
+    QReadLocker locker(&m_spProject->m_rwLock);
+    CResourceTreeItem* item = static_cast<CResourceTreeItem*>(index.internalPointer());
+    if (item->Data(c_iColumnName) == m_spProject->m_sTitleCard)
+    {
+      return QPixmap::fromImage(m_cardIcon.scaled(m_cardIconSize,m_cardIconSize));
+    }
+    return QVariant();
   }
   // used for id to search
   else if (CResourceTreeItemModel::eSearchRole == iRole)
