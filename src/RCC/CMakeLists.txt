@@ -82,3 +82,10 @@ configure_file_generate(
   "${CMAKE_SOURCE_DIR}/version.h.in"
   "${CMAKE_CURRENT_BINARY_DIR}/out_Version.h"
 )
+
+#-----------------------------------------------------------------------------------------
+# install
+#-----------------------------------------------------------------------------------------
+install(
+  TARGETS ${PROJECT_NAME}
+  DESTINATION "${CMAKE_INSTALL_PREFIX}/bin")

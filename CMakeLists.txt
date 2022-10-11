@@ -34,6 +34,20 @@ if(NOT ANDROID)
   include(KDEFrameworkCompilerSettings NO_POLICY_SCOPE)
   include(KDECMakeSettings)
   include(KDEClangFormat)
+  # overwrite install dir
+  set(CMAKE_INSTALL_PREFIX "${CMAKE_BINARY_DIR}/deploy" CACHE PATH "Install path prefix" FORCE)
+endif()
+
+# check 32bit
+set(32BIT FALSE)
+if(NOT "${CMAKE_GENERATOR}" MATCHES "(Win64|IA64)")
+  set(32BIT TRUE)
+endif()
+if("${CMAKE_SIZEOF_VOID_P}" STREQUAL "4")
+  set(32BIT TRUE)
+endif()
+if(NOT CMAKE_CL_64)
+  set(32BIT TRUE)
 endif()
 
 # custom options that override KDE options and are the only relevant ones for android

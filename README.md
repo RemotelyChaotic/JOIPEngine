@@ -19,25 +19,16 @@ Next you can build the Application.
 #### Building in QtCreator
 Open src_dir/CMakeList.txt in QtCreator -> Run CMake and build
 
-#### Building in Console with Ninja
+#### Building and installing in Console with Ninja
 ```
 cmake -GNinja -DCMAKE_BUILD_TYPE=RelWithDebInfo -DQTDIR=C:\Qt\5.14.2\msvc2017 src_dir
-ninja
+cmake --build . --target install
 ```
 
 #### Deploying
-First you need to run the following command (assuming Qt is installed in the default install directory)
-```
-> C:\Qt\Qt5.14.2\5.14.2\msvc2017_64\bin\windeployqt.exe --no-patchqt --release --qmldir "%SOURCE_DIR%\resources\qml" --no-webenginecore --no-webengine --no-webenginewidgets --no-webview --angle JOIPEngine.exe
-```
+Install creates a directory in your build directory called deploy.
 
-Next:
-- copy built OpenSSL binaries to bin
-- copy QtAV binaries including all ffmpeg libraries to bin
-- copy Qt5OpenGL.dll to bin
-- copy qpcxd.dll from lib subfolder in the build tree to bin/imageformats
-- remove the folders resources, position, QtWebEngine, QtWebView
-- Then move the transplations folder up once
-- copy qt.conf from <SOURCE_DIR> to bin
-- copy all license files from the sources to license
-- copy compiler libraries to bin (e.g vcruntime140.dll)
+Now you can:
+- copy all license files from the sources to deploy/license
+
+And you are done.

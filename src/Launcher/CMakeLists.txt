@@ -54,3 +54,20 @@ configure_file_generate(
   "${CMAKE_SOURCE_DIR}/version.h.in"
   "${CMAKE_CURRENT_BINARY_DIR}/out_Version.h"
 )
+
+#-----------------------------------------------------------------------------------------
+# install
+#-----------------------------------------------------------------------------------------
+install(
+  TARGETS ${PROJECT_NAME}
+  DESTINATION "${CMAKE_INSTALL_PREFIX}")
+
+if (KDE_DEBUG)
+  set(CMAKE_INSTALL_DEBUG_LIBRARIES TRUE)
+endif()
+unset(CMAKE_INSTALL_UCRT_LIBRARIES)
+unset(CMAKE_INSTALL_MFC_LIBRARIES)
+unset(CMAKE_INSTALL_OPENMP_LIBRARIES)
+set(CMAKE_INSTALL_SYSTEM_RUNTIME_DESTINATION "${CMAKE_INSTALL_PREFIX}")
+set(CMAKE_INSTALL_SYSTEM_RUNTIME_LIBS_NO_WARNINGS TRUE)
+include(InstallRequiredSystemLibraries)

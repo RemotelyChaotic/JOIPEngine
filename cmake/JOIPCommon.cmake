@@ -27,3 +27,62 @@ function(configure_file_generate)
      INPUT ${intermediate_file}
      )
 endfunction(configure_file_generate)
+
+# Gets a variety of qt-Paths
+function(qt_get_variables)
+  get_target_property(qmake Qt5::qmake LOCATION)
+  execute_process(
+      COMMAND ${qmake} -query QT_VERSION
+      OUTPUT_VARIABLE qt_version
+      OUTPUT_STRIP_TRAILING_WHITESPACE
+  )
+  set(QT_VERSION ${qt_version} CACHE INTERNAL "")
+  execute_process(
+      COMMAND ${qmake} -query QT_INSTALL_PREFIX
+      OUTPUT_VARIABLE qt_install_prefix
+      OUTPUT_STRIP_TRAILING_WHITESPACE
+  )
+  set(QT_INSTALL_PREFIX ${qt_install_prefix} CACHE INTERNAL "")
+  execute_process(
+      COMMAND ${qmake} -query QT_INSTALL_HEADERS
+      OUTPUT_VARIABLE qt_install_headers
+      OUTPUT_STRIP_TRAILING_WHITESPACE
+  )
+  set(QT_INSTALL_HEADERS ${qt_install_headers} CACHE INTERNAL "")
+  execute_process(
+      COMMAND ${qmake} -query QT_INSTALL_LIBS
+      OUTPUT_VARIABLE qt_install_libs
+      OUTPUT_STRIP_TRAILING_WHITESPACE
+  )
+  set(QT_INSTALL_LIBS ${qt_install_libs} CACHE INTERNAL "")
+  execute_process(
+      COMMAND ${qmake} -query QT_INSTALL_BINS
+      OUTPUT_VARIABLE qt_install_bins
+      OUTPUT_STRIP_TRAILING_WHITESPACE
+  )
+  set(QT_INSTALL_BINS ${qt_install_bins} CACHE INTERNAL "")
+  execute_process(
+      COMMAND ${qmake} -query QT_INSTALL_PLUGINS
+      OUTPUT_VARIABLE qt_install_plugins
+      OUTPUT_STRIP_TRAILING_WHITESPACE
+  )
+  set(QT_INSTALL_PLUGINS ${qt_install_plugins} CACHE INTERNAL "")
+  execute_process(
+      COMMAND ${qmake} -query QT_INSTALL_QML
+      OUTPUT_VARIABLE qt_install_qml
+      OUTPUT_STRIP_TRAILING_WHITESPACE
+  )
+  set(QT_INSTALL_QML ${qt_install_qml} CACHE INTERNAL "")
+  execute_process(
+      COMMAND ${qmake} -query QT_INSTALL_TRANSLATIONS
+      OUTPUT_VARIABLE qt_install_translations
+      OUTPUT_STRIP_TRAILING_WHITESPACE
+  )
+  set(QT_INSTALL_TRANSLATIONS ${qt_install_translations} CACHE INTERNAL "")
+  execute_process(
+      COMMAND ${qmake} -query QMAKE_SPEC
+      OUTPUT_VARIABLE qmake_spec
+      OUTPUT_STRIP_TRAILING_WHITESPACE
+  )
+  set(QMAKE_SPEC ${qmake_spec} CACHE INTERNAL "")
+endfunction()
