@@ -215,3 +215,15 @@ Fixed Bugs:
 - Fixed EOS teases setting a non-image file as Title Image.
 - General tease download (UI) fixes.
 - Editor search bar fixes.
+
+=================
+Version 1.2.2.0
+=================
+
+Fixed Bugs:
+- Fixed Tutorials not working.
+- Fixed EOS script commands with empty arrays not evaluating correctly.
+- Fixed JS import parsing for aliases containing "as".
+- Fixed missing images in default style
+- Fixed being able to set editor layout to "none" (default value) in settings.
+- Cosmetic fixes in html help.
