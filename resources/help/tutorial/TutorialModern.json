@@ -100,7 +100,7 @@
       },
       {
         "text": {
-          "posX" : 0.3, "posY": 0.5, "anchor": "eRight",
+          "posX" : 0.3, "posY": 0.5, "anchor": "eLeft",
           "text": "The same goes for the right panel."
         }
       },
@@ -122,7 +122,7 @@
       },
       {
         "text": {
-          "posX" : 0.4, "posY": 0.5, "anchor": "eLeft",
+          "posX" : 0.5, "posY": 0.6,
           "text": "And finally, this is the bottom panel,<br>where you can manage the Projects resources."
         }
       },
@@ -130,6 +130,9 @@
         "highlight": {
           "items" : []
         }
+      },
+      {
+        "end": {}
       }
     ]
   },
@@ -143,6 +146,9 @@
           "posX" : 0.5, "posY": 0.5,
           "text": "First let's take a look at the Project Settings view."
         }
+      },
+      {
+        "end": {}
       }
     ]
   },
@@ -309,6 +315,9 @@
           "posX" : 0.3, "posY": 0.5, "anchor": "eCenter",
           "text": "To remove tags, simply click the <b>X</b> on the tag itself."
         }
+      },
+      {
+        "end": {}
       }
     ]
   },
@@ -489,6 +498,9 @@
           "posX" : 0.5, "posY": 0.5, "anchor": "eCenter", "hideButtons": 1,
           "text": "First select an image in the Resource Tree..."
         }
+      },
+      {
+        "end": {}
       }
     ]
   },
@@ -554,6 +566,9 @@
           "posX" : 0.25, "posY": 0.7, "anchor": "eBottom",
           "text": "Web-Resources allways automatically add the address as source."
         }
+      },
+      {
+        "end": {}
       }
     ]
   },
@@ -591,6 +606,9 @@
         "clickFilter": {
           "items": []
         }
+      },
+      {
+        "end": {}
       }
     ]
   },
@@ -812,6 +830,9 @@
           "posX" : 0.3, "posY": 0.5, "anchor": "eRight",
           "text": "Good job, your JOI-Project flow is now fully functional."
         }
+      },
+      {
+        "end": {}
       }
     ]
   },
@@ -892,6 +913,9 @@
           "posX" : 0.3, "posY": 0.5, "anchor": "eRight",
           "text": "<i>Path Splitter</i> and <i>Path Merger</i> nodes can be combined at will<br>(even in succession)."
         }
+      },
+      {
+        "end": {}
       }
     ]
   },
@@ -940,6 +964,9 @@
         "clickFilter": {
           "items": []
         }
+      },
+      {
+        "end": {}
       }
     ]
   },
@@ -1118,6 +1145,9 @@
           "posX" : 0.5, "posY": 0.5,
           "text": "Happy creating."
         }
+      },
+      {
+        "end": {}
       }
     ]
   }

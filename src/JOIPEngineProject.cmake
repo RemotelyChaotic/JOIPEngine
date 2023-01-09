@@ -240,6 +240,8 @@ macro(CreateJOIPProject JOIP_PROJECT_NAME)
     ${JOIPSources}/Editor/Tutorial/CommandBackground.h
     ${JOIPSources}/Editor/Tutorial/CommandClickFilter.cpp
     ${JOIPSources}/Editor/Tutorial/CommandClickFilter.h
+    ${JOIPSources}/Editor/Tutorial/CommandEnd.cpp
+    ${JOIPSources}/Editor/Tutorial/CommandEnd.h
     ${JOIPSources}/Editor/Tutorial/CommandHighlight.cpp
     ${JOIPSources}/Editor/Tutorial/CommandHighlight.h
     ${JOIPSources}/Editor/Tutorial/CommandText.cpp

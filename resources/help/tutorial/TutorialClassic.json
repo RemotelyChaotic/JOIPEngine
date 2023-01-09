@@ -119,6 +119,9 @@
         "highlight": {
           "items" : []
         }
+      },
+      {
+        "end": {}
       }
     ]
   },
@@ -167,6 +170,9 @@
         "clickFilter": {
           "items": []
         }
+      },
+      {
+        "end": {}
       }
     ]
   },
@@ -333,6 +339,9 @@
           "posX" : 0.3, "posY": 0.5, "anchor": "eCenter",
           "text": "To remove tags, simply click the <b>X</b> on the tag itself."
         }
+      },
+      {
+        "end": {}
       }
     ]
   },
@@ -513,6 +522,9 @@
           "posX" : 0.4, "posY": 0.5, "anchor": "eLeft", "hideButtons": 1,
           "text": "First select an image in the Resource Tree..."
         }
+      },
+      {
+        "end": {}
       }
     ]
   },
@@ -578,6 +590,9 @@
           "posX" : 0.1, "posY": 0.2, "anchor": "eLeft",
           "text": "Web-Resources allways automatically add the address as source."
         }
+      },
+      {
+        "end": {}
       }
     ]
   },
@@ -615,6 +630,9 @@
         "clickFilter": {
           "items": []
         }
+      },
+      {
+        "end": {}
       }
     ]
   },
@@ -836,6 +854,9 @@
           "posX" : 0.3, "posY": 0.5, "anchor": "eRight",
           "text": "Good job, your JOI-Project flow is now fully functional."
         }
+      },
+      {
+        "end": {}
       }
     ]
   },
@@ -916,6 +937,9 @@
           "posX" : 0.3, "posY": 0.5, "anchor": "eRight",
           "text": "<i>Path Splitter</i> and <i>Path Merger</i> nodes can be combined at will<br>(even in succession)."
         }
+      },
+      {
+        "end": {}
       }
     ]
   },
@@ -964,6 +988,9 @@
         "clickFilter": {
           "items": []
         }
+      },
+      {
+        "end": {}
       }
     ]
   },
@@ -1142,6 +1169,9 @@
           "posX" : 0.5, "posY": 0.5,
           "text": "Happy creating."
         }
+      },
+      {
+        "end": {}
       }
     ]
   }

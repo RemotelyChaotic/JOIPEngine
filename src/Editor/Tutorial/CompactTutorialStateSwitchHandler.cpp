@@ -207,6 +207,14 @@ void CCompactTutorialStateSwitchHandler::SlotViewSwitched(qint32 iView)
     assert(bOk);
     Q_UNUSED(bOk);
   }
+  else if (ETutorialState::eResourcePanel == m_currentState._to_integral() &&
+           EEditorWidget::eResourceWidget == iView)
+  {
+    bool bOk = QMetaObject::invokeMethod(this, "SlotOverlayNextInstructionTriggered",
+                                         Qt::QueuedConnection);
+    assert(bOk);
+    Q_UNUSED(bOk);
+  }
   else if (ETutorialState::eNodePanelDone == m_currentState._to_integral() &&
            EEditorWidget::eSceneCodeEditorWidget == iView)
   {

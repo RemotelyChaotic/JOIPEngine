@@ -1,6 +1,7 @@
 #include "TutorialStateSwitchHandlerMainBase.h"
 #include "CommandBackground.h"
 #include "CommandClickFilter.h"
+#include "CommandEnd.h"
 #include "CommandHighlight.h"
 #include "CommandText.h"
 #include "Systems/JSON/JsonInstructionSetParser.h"
@@ -32,6 +33,7 @@ CTutorialStateSwitchHandlerMainBase::CTutorialStateSwitchHandlerMainBase(
     m_spTutorialParser->RegisterInstruction("clickFilter", std::make_shared<CCommandClickFilter>(m_pTutorialOverlay));
     m_spTutorialParser->RegisterInstruction("highlight",  std::make_shared<CCommandHighlight>(m_pTutorialOverlay));
     m_spTutorialParser->RegisterInstruction("text",  std::make_shared<CCommandText>(m_pTutorialOverlay));
+    m_spTutorialParser->RegisterInstruction("end",  std::make_shared<CCommandEnd>());
 
     m_spTutorialRunner =
       m_spTutorialParser->ParseJson(tutorialFile.readAll());
@@ -70,7 +72,7 @@ void CTutorialStateSwitchHandlerMainBase::OnStateSwitch(ETutorialState newState,
   // run json script for the new state
   if (nullptr != m_spTutorialRunner)
   {
-    m_spTutorialRunner->Run(newState._to_string());
+    m_spTutorialRunner->Run(newState._to_string(), ERunerMode::eRunOne, true);
   }
 }
 
@@ -88,7 +90,7 @@ void CTutorialStateSwitchHandlerMainBase::SlotOverlayNextInstructionTriggered()
 {
   if (nullptr != m_spTutorialRunner)
   {
-    CJsonInstructionSetRunner::tRetVal retVal = m_spTutorialRunner->CallNextCommand();
+    CJsonInstructionSetRunner::tRetVal retVal = m_spTutorialRunner->CallNextCommand(ERunerMode::eRunOne, true);
     if (!std::holds_alternative<SJsonException>(retVal))
     {
       if (!std::get<SRunnerRetVal>(retVal).m_bHasMoreCommands)

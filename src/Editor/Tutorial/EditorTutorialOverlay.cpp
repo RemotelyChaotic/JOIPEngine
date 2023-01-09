@@ -275,13 +275,16 @@ void CEditorTutorialOverlay::Resize()
 //
 void CEditorTutorialOverlay::Show()
 {
-  COverlayBase::Show();
+  if (!isVisible())
+  {
+    COverlayBase::Show();
 
-  // start animation
-  m_pAlphaAnimation->setStartValue(0.0);
-  m_pAlphaAnimation->setEndValue(200.0);
-  m_pAlphaAnimation->start();
-  m_updateTimer.start();
+    // start animation
+    m_pAlphaAnimation->setStartValue(0.0);
+    m_pAlphaAnimation->setEndValue(200.0);
+    m_pAlphaAnimation->start();
+    m_updateTimer.start();
+  }
 }
 
 //----------------------------------------------------------------------------------------
