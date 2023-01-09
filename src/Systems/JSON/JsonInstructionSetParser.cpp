@@ -107,42 +107,8 @@ public:
 public slots:
   //--------------------------------------------------------------------------------------
   //
-  void CallNextCommand(ERunerMode runMode)
+  CJsonInstructionSetRunner::tRetVal CallNextCommand(ERunerMode runMode)
   {
-    auto fnCallImpl = [this, &runMode]() -> CJsonInstructionSetRunner::tRetVal {
-      IJsonInstructionBase::tRetVal vRetVal = CallCommand();
-      if (std::holds_alternative<SJsonException>(vRetVal))
-      {
-        return std::get<SJsonException>(vRetVal);
-      }
-      else if (std::holds_alternative<SRunRetVal<ENextCommandToCall::eChild>>(vRetVal))
-      {
-        auto& ret = std::get<SRunRetVal<ENextCommandToCall::eChild>>(vRetVal);
-        return SRunnerRetVal{NextCommand(ret.m_type, ret.m_iBegin, ret.m_iEnd), std::any()};
-      }
-      else if (std::holds_alternative<SRunRetVal<ENextCommandToCall::eSibling>>(vRetVal))
-      {
-        auto& ret = std::get<SRunRetVal<ENextCommandToCall::eSibling>>(vRetVal);
-        return SRunnerRetVal{NextCommand(ret.m_type), std::any()};
-      }
-      else if (std::holds_alternative<SRunRetVal<ENextCommandToCall::eForkThis>>(vRetVal))
-      {
-        auto& ret = std::get<SRunRetVal<ENextCommandToCall::eForkThis>>(vRetVal);
-        for (auto& fork : ret.m_vForks)
-        {
-          emit Fork(runMode, m_spNextNode, fork.m_args, fork.m_sName, fork.m_bAutorun);
-        }
-        return SRunnerRetVal{NextCommand(ENextCommandToCall::eSibling), std::any()};
-      }
-      else if (std::holds_alternative<SRunRetVal<ENextCommandToCall::eFinish>>(vRetVal))
-      {
-        m_spNextNode = nullptr;
-        return SRunnerRetVal{false, std::get<SRunRetVal<ENextCommandToCall::eFinish>>(vRetVal).m_retVal};
-      }
-      else return SRunnerRetVal{NextCommand(ENextCommandToCall::eChild, 0), std::any()};
-    };
-
-
     if (ERunerMode::eAutoRunAll == runMode)
     {
       SRunnerRetVal retValLast;
@@ -153,39 +119,42 @@ public slots:
         {
           m_bRunning = 0;
           emit CallNextCommandRetVal(runMode, retValLast);
-          return;
+          return retValLast;
         }
 
-        CJsonInstructionSetRunner::tRetVal retVal = fnCallImpl();
+        CJsonInstructionSetRunner::tRetVal retVal = CallNextCommandImpl(runMode);
         if (std::holds_alternative<SJsonException>(retVal))
         {
           m_bRunning = 0;
           emit CallNextCommandRetVal(runMode, retVal);
-          return;
+          return retVal;
         }
         retValLast = std::get<SRunnerRetVal>(retVal);
       }
       m_bRunning = 0;
       emit CallNextCommandRetVal(runMode, retValLast);
-      return;
+      return retValLast;
     }
     else if (ERunerMode::eRunOne == runMode)
     {
       if (nullptr != m_spNextNode)
       {
         m_bRunning = 1;
-        auto retVal = fnCallImpl();
+        auto retVal = CallNextCommandImpl(runMode);
         m_bRunning = 0;
         emit CallNextCommandRetVal(runMode, retVal);
-        return;
+        return retVal;
       }
     }
 
     // nothing to run
-    emit CallNextCommandRetVal(runMode, SRunnerRetVal{false, std::any()});
-    return;
+    CJsonInstructionSetRunner::tRetVal retVal = SRunnerRetVal{false, std::any()};
+    emit CallNextCommandRetVal(runMode, retVal);
+    return retVal;
   }
 
+  //--------------------------------------------------------------------------------------
+  //
 signals:
   void CallNextCommandRetVal(ERunerMode runMode,
                              CJsonInstructionSetRunner::tRetVal retVal);
@@ -196,6 +165,42 @@ signals:
             bool bAutorun);
 
 protected:
+  //--------------------------------------------------------------------------------------
+  //
+  CJsonInstructionSetRunner::tRetVal CallNextCommandImpl(ERunerMode runMode)
+  {
+    IJsonInstructionBase::tRetVal vRetVal = CallCommand();
+    if (std::holds_alternative<SJsonException>(vRetVal))
+    {
+      return std::get<SJsonException>(vRetVal);
+    }
+    else if (std::holds_alternative<SRunRetVal<ENextCommandToCall::eChild>>(vRetVal))
+    {
+      auto& ret = std::get<SRunRetVal<ENextCommandToCall::eChild>>(vRetVal);
+      return SRunnerRetVal{NextCommand(ret.m_type, ret.m_iBegin, ret.m_iEnd), std::any()};
+    }
+    else if (std::holds_alternative<SRunRetVal<ENextCommandToCall::eSibling>>(vRetVal))
+    {
+      auto& ret = std::get<SRunRetVal<ENextCommandToCall::eSibling>>(vRetVal);
+      return SRunnerRetVal{NextCommand(ret.m_type), std::any()};
+    }
+    else if (std::holds_alternative<SRunRetVal<ENextCommandToCall::eForkThis>>(vRetVal))
+    {
+      auto& ret = std::get<SRunRetVal<ENextCommandToCall::eForkThis>>(vRetVal);
+      for (auto& fork : ret.m_vForks)
+      {
+        emit Fork(runMode, m_spNextNode, fork.m_args, fork.m_sName, fork.m_bAutorun);
+      }
+      return SRunnerRetVal{NextCommand(ENextCommandToCall::eSibling), std::any()};
+    }
+    else if (std::holds_alternative<SRunRetVal<ENextCommandToCall::eFinish>>(vRetVal))
+    {
+      m_spNextNode = nullptr;
+      return SRunnerRetVal{false, std::get<SRunRetVal<ENextCommandToCall::eFinish>>(vRetVal).m_retVal};
+    }
+    else return SRunnerRetVal{NextCommand(ENextCommandToCall::eChild, 0), std::any()};
+  }
+
   //--------------------------------------------------------------------------------------
   //
   IJsonInstructionBase::tRetVal CallCommand()
@@ -316,16 +321,30 @@ public:
     m_pThread = nullptr;
   }
 
-  void CallNextCommand(ERunerMode runMode, bool bBlocking)
+  CJsonInstructionSetRunner::tRetVal CallNextCommand(ERunerMode runMode, bool bBlocking)
   {
     QMutexLocker locker(&m_mutex);
     m_retVal = SRunnerRetVal{false, std::any()};
     m_bCommandDone = false;
     m_bBlockingCall = bBlocking;
-    bool bOk = QMetaObject::invokeMethod(m_spWorker.get(), "CallNextCommand", Qt::QueuedConnection,
-                                         Q_ARG(ERunerMode, runMode));
+    bool bOk = false;
+    CJsonInstructionSetRunner::tRetVal retVal;
+    if (bBlocking)
+    {
+      bOk = QMetaObject::invokeMethod(m_spWorker.get(), "CallNextCommand",
+                                      Qt::BlockingQueuedConnection,
+                                      Q_RETURN_ARG(CJsonInstructionSetRunner::tRetVal, retVal),
+                                      Q_ARG(ERunerMode, runMode));
+    }
+    else
+    {
+      bOk = QMetaObject::invokeMethod(m_spWorker.get(), "CallNextCommand",
+                                      Qt::QueuedConnection,
+                                      Q_ARG(ERunerMode, runMode));
+    }
     assert(bOk);
     if (!bOk) { m_bCommandDone = false; }
+    return retVal;
   }
 
   void Interrupt()
@@ -473,17 +492,8 @@ public:
   //
   CJsonInstructionSetRunner::tRetVal CallNextCommand(ERunerMode runMode, bool bBlocking)
   {
-    QMetaObject::Connection connBlocking;
-    CJsonInstructionSetRunner::tRetVal retVal;
-    if (bBlocking)
-    {
-      connBlocking = connect(this, &CJsonInstructionSetRunnerPrivate::WaitDone,
-              this, [&retVal](CJsonInstructionSetRunner::tRetVal retValDone) {
-        retVal = retValDone;
-      });
-    }
-
-    m_spWorkerController->CallNextCommand(runMode, bBlocking);
+    CJsonInstructionSetRunner::tRetVal retVal =
+        m_spWorkerController->CallNextCommand(runMode, bBlocking);
 
     if (!bBlocking)
     {
@@ -491,13 +501,6 @@ public:
     }
     else
     {
-      QPointer<CJsonInstructionSetRunnerPrivate> pThisGuard(this);
-      QEventLoop waitLoop;
-      connect(this, &CJsonInstructionSetRunnerPrivate::WaitDone,
-              &waitLoop, &QEventLoop::quit);
-      waitLoop.exec();
-      if (pThisGuard.isNull()) { return SJsonException{"Internal error.", "", "", 0, 0}; }
-      disconnect(connBlocking);
       return retVal;
     }
   }
@@ -540,12 +543,7 @@ public:
       {
         m_spWorkerController.reset(
               new CJsonInstructionSetRunnerWorkerController(*it->second->m_spChildren.begin()));
-        if (bBlocking)
-        {
-          connect(m_spWorkerController.get(), &CJsonInstructionSetRunnerWorkerController::CallNextCommandRetVal,
-                  this, &CJsonInstructionSetRunnerPrivate::CallNextCommandRetVal);
-        }
-        else
+        if (!bBlocking)
         {
           connect(m_spWorkerController.get(), &CJsonInstructionSetRunnerWorkerController::CallNextCommandRetVal,
                   this, [this](ERunerMode, CJsonInstructionSetRunner::tRetVal retVal) {
@@ -565,31 +563,8 @@ public:
 signals:
   void CommandRetVal(CJsonInstructionSetRunner::tRetVal retVal);
   void Fork(std::shared_ptr<CJsonInstructionSetRunner> spNewRunner, const QString& sForkCommandsName, bool bAutorun);
-  void WaitDone(CJsonInstructionSetRunner::tRetVal retVal);
 
 protected slots:
-  //--------------------------------------------------------------------------------------
-  //
-  void CallNextCommandRetVal(ERunerMode runMode, CJsonInstructionSetRunner::tRetVal retVal)
-  {
-    Q_UNUSED(runMode)
-    // if we have an error, we return now no use in continuing
-    if (std::holds_alternative<SJsonException>(retVal))
-    {
-      emit WaitDone(retVal);
-    }
-    else
-    {
-      bool bHasMore = m_spWorkerController->HasMoreCommands();
-      bool bAllDone = m_spWorkerController->IsDoneWithCommand();
-      std::any vRetVal = m_spWorkerController->RetVal();
-      if (bAllDone)
-      {
-        emit WaitDone(SRunnerRetVal{bHasMore, vRetVal});
-      }
-    }
-  }
-
   //--------------------------------------------------------------------------------------
   //
   void SlotFork(ERunerMode /*runMode*/,
