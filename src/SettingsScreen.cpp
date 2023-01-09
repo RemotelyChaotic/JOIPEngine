@@ -16,6 +16,7 @@
 #include <QFileDialog>
 #include <QFileInfo>
 #include <QKeySequenceEdit>
+#include <QListView>
 #include <QScreen>
 #include <QSize>
 #include <cassert>
@@ -128,6 +129,8 @@ void CSettingsScreen::Initialize()
   {
     m_spUi->pEditorLayoutComboBox->addItem(it->second, static_cast<qint32>(it->first));
   }
+  qobject_cast<QListView*>(m_spUi->pEditorLayoutComboBox->view())
+      ->setRowHidden(CSettings::eNone, true);
 
   // Dynamically create job settings. The jobs define the behavior of these.
   for (const auto& itJob : CDownloadJobFactory::Instance().GetHostSettingMap())
