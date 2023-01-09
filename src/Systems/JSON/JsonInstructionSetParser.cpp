@@ -1412,6 +1412,16 @@ bool CJSonSaxParser::end_array()
                   }
                 }
               }
+              else
+              {
+                spParent->m_actualArgs.insert({spChild->m_sName,
+                                               {EArgumentType::eArray, tInstructionArrayValue{}}});
+                auto itChild = std::find(spParent->m_spChildren.begin(), spParent->m_spChildren.end(), spChild);
+                if (spParent->m_spChildren.end() != itChild)
+                {
+                  spParent->m_spChildren.erase(itChild);
+                }
+              }
             }
           }
         }
