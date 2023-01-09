@@ -59,12 +59,15 @@ namespace  {
 
     // collect strings to replace
     auto i = rx.globalMatch(sScript);
+    QString sEntireMatch;
     QString sModule;
     QString sExp;
     std::vector<SReplaceExp> vExps;
     while (i.hasNext())
     {
       QRegularExpressionMatch match = i.next();
+      //qDebug() << match.capturedTexts();
+      //sEntireMatch = match.captured(0); // DEBUG
       sModule = match.captured(match.lastCapturedIndex());
       sExp = match.captured(match.lastCapturedIndex()-1);
       if (!sModule.isEmpty())
@@ -85,7 +88,7 @@ namespace  {
           QStringList vsExpsModule = sExp.split(",");
           for (const QString& sExpModule : qAsConst(vsExpsModule))
           {
-            QStringList vsExpModulkeParts = sExpModule.split("as");
+            QStringList vsExpModulkeParts = sExpModule.split(" as ");
             if (vsExpModulkeParts.size() > 1)
             {
               sExps.push_back({vsExpModulkeParts[0].trimmed(), vsExpModulkeParts[1].trimmed()});
