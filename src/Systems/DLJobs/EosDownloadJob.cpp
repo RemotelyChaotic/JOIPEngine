@@ -552,14 +552,14 @@ bool CEosDownloadJob::CreateResourceFiles(const CEosResourceLocator::tGaleryData
         ABORT_CHECK(m_iProjId)
 
         // offline test:
-        //thread()->sleep(1);
+        //thread()->msleep(100);
 
         ++m_iProgressCounter;
         m_iProgress = static_cast<qint32>(100.0 * static_cast<double>(m_iProgressCounter) / iMaxProgress);
         emit SignalProgressChanged(m_iProjId, Progress());
 
         // wait a bit to not overload eos servers
-        thread()->sleep(1);
+        thread()->msleep(100);
 
         // add error to List
         if (sError.isEmpty())
@@ -648,7 +648,7 @@ bool CEosDownloadJob::CreateScriptFiles(const QJsonDocument& entireScript,
     ABORT_CHECK(m_iProjId)
 
     // offline test:
-    //thread()->sleep(1);
+    //thread()->msleep(1);
 
     ++m_iProgressCounter;
     m_iProgress = static_cast<qint32>(100.0 * static_cast<double>(m_iProgressCounter) / iMaxProgress);
