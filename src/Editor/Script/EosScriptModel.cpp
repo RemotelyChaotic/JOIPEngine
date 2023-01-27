@@ -1,4 +1,7 @@
 #include "EosScriptModel.h"
+#include "CommandInsertEosCommand.h"
+#include "CommandRemoveEosCommand.h"
+#include "CommandToggledEosCommand.h"
 #include "EosScriptModelItem.h"
 #include "EosCommandModels.h"
 
@@ -6,6 +9,7 @@
 
 #include "Systems/EOS/EosCommands.h"
 
+#include <QUndoStack>
 #include <variant>
 
 CEosScriptModel::CEosScriptModel(QObject* pParent) :
@@ -25,106 +29,15 @@ CEosScriptModel::~CEosScriptModel()
 void CEosScriptModel::InsertInstruction(const QModelIndex& current,
                                         const QString& sType, const tInstructionMapValue& args)
 {
-  QModelIndex changedParent;
-  qint32 iInsertPoint = 0;
-  qint32 iModelItemInsertPoint = 0;
-  QString sChildGroup;
-  CEosScriptModelItem* pCurrentItem = GetItem(current);
-
-  // depending on selection wen need to insert the child somewhere
-  if (nullptr == pCurrentItem ||
-      pCurrentItem->Type()._to_integral() == EosScriptModelItem::eRoot)
+  if (nullptr != m_pUndoStack)
   {
-    pCurrentItem = m_vRootItems.back().second;
-    changedParent = createIndex(static_cast<qint32>(m_vRootItems.size())-1,0,pCurrentItem);
-    if (nullptr != pCurrentItem)
-    {
-      iInsertPoint = pCurrentItem->ChildCount();
-      iModelItemInsertPoint = iInsertPoint;
-    }
+    SItemIndexPath path;
+    GetIndexPath(current, -1, &path);
+    m_pUndoStack->push(new CCommandInsertEosCommand(this, path, sType, args));
   }
-  else if (pCurrentItem->Type()._to_integral() == EosScriptModelItem::eInstruction)
+  else
   {
-    CEosScriptModelItem* pChild = pCurrentItem;
-    pCurrentItem = pCurrentItem->Parent();
-    changedParent = parent(current);
-    if (pCurrentItem->Type()._to_integral() == EosScriptModelItem::eInstructionChild)
-    {
-      for (qint32 i = 0; pCurrentItem->ChildIndex(pChild) > i; ++i)
-      {
-        iInsertPoint += pCurrentItem->Child(i)->ChildCount();
-      }
-      qint32 iOffset = pCurrentItem->ChildIndex(pChild)+1;
-      iInsertPoint += iOffset;
-      iModelItemInsertPoint = iOffset;
-      sChildGroup = pCurrentItem->Data(eos_item::c_iColumnName, Qt::DisplayRole).toString();
-    }
-    else
-    {
-      iInsertPoint = pCurrentItem->ChildIndex(pChild)+1;
-      iModelItemInsertPoint = iInsertPoint;
-    }
-  }
-  else if (pCurrentItem->Type()._to_integral() == EosScriptModelItem::eInstructionChild)
-  {
-    CEosScriptModelItem* pParentItem = pCurrentItem->Parent();
-    changedParent = current;
-    if (nullptr != pParentItem)
-    {
-      qint32 iMax = pParentItem->ChildIndex(pCurrentItem);
-      for (qint32 i = 0; iMax >= i; ++i)
-      {
-        iInsertPoint += pParentItem->Child(i)->ChildCount();
-      }
-      iModelItemInsertPoint = pParentItem->Child(iMax)->ChildCount();
-      sChildGroup = pCurrentItem->Data(eos_item::c_iColumnName, Qt::DisplayRole).toString();
-    }
-  }
-  else if (pCurrentItem->Type()._to_integral() == EosScriptModelItem::eInstructionSet)
-  {
-    changedParent = current;
-    iInsertPoint = pCurrentItem->ChildCount();
-    iModelItemInsertPoint = iInsertPoint;
-  }
-
-
-  if (nullptr != pCurrentItem)
-  {
-    // on handled cases start the insertion
-    beginInsertRows(changedParent, iInsertPoint, iInsertPoint);
-    auto spNodeParent = pCurrentItem->Node();
-    std::shared_ptr<CJsonInstructionNode> spNewNode = std::make_shared<CJsonInstructionNode>();
-    if (spNodeParent->m_spChildren.size() > iInsertPoint && iInsertPoint)
-    {
-      spNodeParent->m_spChildren.insert(spNodeParent->m_spChildren.begin()+iInsertPoint, spNewNode);
-    }
-    else if (spNodeParent->m_spChildren.size() == iInsertPoint)
-    {
-      spNodeParent->m_spChildren.push_back(spNewNode);
-    }
-    spNewNode->m_wpParent = spNodeParent;
-    spNewNode->m_sName = sType;
-    spNewNode->m_wpCommand = m_spRunner->Instruction(sType);
-
-    if (auto spCommand = std::dynamic_pointer_cast<IEosCommandModel>(spNewNode->m_wpCommand.lock());
-        nullptr != spCommand && spNewNode->m_actualArgs.empty())
-    {
-      spNewNode->m_actualArgs = spCommand->DefaultArgs();
-    }
-
-    // if it's a nested istruction we might need to change the parameters of the parent as well
-    if (pCurrentItem->Type()._to_integral() == EosScriptModelItem::eInstructionChild)
-    {
-      if (auto spCommand = std::dynamic_pointer_cast<IEosCommandModel>(spNodeParent->m_wpCommand.lock());
-          nullptr != spCommand)
-      {
-        spCommand->InsertedChildAt(&spNodeParent->m_actualArgs, iInsertPoint, sChildGroup, sType);
-      }
-    }
-
-    Inserted(changedParent, iModelItemInsertPoint);
-
-    endInsertRows();
+    InsertInstructionImpl(current, sType, args);
   }
 }
 
@@ -172,78 +85,23 @@ void CEosScriptModel::Invalidate(const QModelIndex& idx)
 //
 void CEosScriptModel::RemoveInstruction(const QModelIndex& current)
 {
-  bool bAnythingToRemove = false;
-  CEosScriptModelItem* pCurrentItem = GetItem(current);
-
-  // depending on selection we need to remove the child or not
-  if (nullptr != pCurrentItem &&
-      pCurrentItem->Type()._to_integral() == EosScriptModelItem::eInstruction)
+  if (nullptr != m_pUndoStack)
   {
-    bAnythingToRemove = true;
+    SItemIndexPath path;
+    GetIndexPath(current, -1, &path);
+    m_pUndoStack->push(new CCommandRemoveEosCommand(this, path));
   }
-
-  if (bAnythingToRemove)
+  else
   {
-    QModelIndex parentIdx = parent(current);
-    CEosScriptModelItem* pParentItem = GetItem(parentIdx);
-
-    std::shared_ptr<CJsonInstructionNode> spCurrentNode = pCurrentItem->Node();
-    std::shared_ptr<CJsonInstructionNode> spParentNode = nullptr;
-    qint32 iModelIndex = pCurrentItem->Parent()->ChildIndex(pCurrentItem);
-    qint32 iRemovePos = -1;
-    QString sChildGroup;
-
-    // depending on selection wen need to insert the child somewhere
-    if (nullptr == pParentItem ||
-        pParentItem->Type()._to_integral() == EosScriptModelItem::eRoot)
-    {
-      spParentNode = nullptr;
-    }
-    else if (pParentItem->Type()._to_integral() == EosScriptModelItem::eInstruction)
-    {
-      spParentNode = nullptr;
-    }
-    else if (pParentItem->Type()._to_integral() == EosScriptModelItem::eInstructionChild)
-    {
-      spParentNode = pParentItem->Node();
-
-      if (nullptr != pParentItem->Parent())
-      {
-        iRemovePos = 0;
-        qint32 iMax = pParentItem->Parent()->ChildIndex(pParentItem);
-        for (qint32 i = 0; iMax > i; ++i)
-        {
-          iRemovePos += pParentItem->Parent()->Child(i)->ChildCount();
-        }
-        iRemovePos += iModelIndex;
-        sChildGroup = pParentItem->Data(eos_item::c_iColumnName, Qt::DisplayRole).toString();
-      }
-    }
-    else if (pParentItem->Type()._to_integral() == EosScriptModelItem::eInstructionSet)
-    {
-      spParentNode = pParentItem->Node();
-      iRemovePos = iModelIndex;
-    }
-
-    if (-1 != iRemovePos && nullptr != spParentNode)
-    {
-      // if it's a nested istruction we might need to change the parameters of the parent as well
-      if (pParentItem->Type()._to_integral() == EosScriptModelItem::eInstructionChild)
-      {
-        if (auto spCommand = std::dynamic_pointer_cast<IEosCommandModel>(spParentNode->m_wpCommand.lock());
-            nullptr != spCommand)
-        {
-          spCommand->RemoveChildAt(&spParentNode->m_actualArgs, iModelIndex, sChildGroup);
-        }
-      }
-
-      beginRemoveRows(parentIdx, iModelIndex, iModelIndex);
-      spParentNode->m_spChildren.erase(spParentNode->m_spChildren.begin()+iRemovePos);
-      pCurrentItem->Parent()->RemoveChildren(iModelIndex, 1);
-      pCurrentItem = nullptr;
-      endRemoveRows();
-    }
+    RemoveInstructionImpl(current);
   }
+}
+
+//----------------------------------------------------------------------------------------
+//
+std::shared_ptr<CJsonInstructionSetRunner> CEosScriptModel::Runner() const
+{
+  return m_spRunner;
 }
 
 //----------------------------------------------------------------------------------------
@@ -288,9 +146,9 @@ void CEosScriptModel::SetRunner(const std::shared_ptr<CJsonInstructionSetRunner>
 
 //----------------------------------------------------------------------------------------
 //
-std::shared_ptr<CJsonInstructionSetRunner> CEosScriptModel::Runner() const
+void CEosScriptModel::SetUndoStack(QUndoStack* pStack)
 {
-  return m_spRunner;
+  m_pUndoStack = pStack;
 }
 
 //----------------------------------------------------------------------------------------
@@ -422,7 +280,35 @@ bool CEosScriptModel::setData(const QModelIndex& index, const QVariant& value,
   CEosScriptModelItem* pItem = GetItem(index);
   if (nullptr != pItem)
   {
-    return pItem->SetData(index.column(), iRole, value);
+    if (eos_item::c_iNumColumns <= index.column() || 0 > index.column()) { return false; }
+
+    switch(index.column())
+    {
+      case eos_item::c_iColumnName:
+      {
+        switch (iRole)
+        {
+          case Qt::CheckStateRole:
+          {
+            bool bChecked = value.value<Qt::CheckState>() == Qt::Checked;
+            if (nullptr != m_pUndoStack)
+            {
+              SItemIndexPath path;
+              GetIndexPath(index, iRole, &path);
+              m_pUndoStack->push(
+                    new CCommandToggledEosCommand(this, path, pItem->IsChecked(), bChecked));
+            }
+            else
+            {
+              pItem->SetChecked(bChecked);
+            }
+            return true;
+          }
+          default: break;
+        }
+      }
+      default: break;
+    }
   }
   return false;
 }
@@ -459,6 +345,269 @@ CEosScriptModelItem* CEosScriptModel::GetItem(const QModelIndex& index) const
     if (nullptr != pItem) { return pItem; }
   }
   return m_pRoot;
+}
+
+//----------------------------------------------------------------------------------------
+//
+CEosScriptModelItem* CEosScriptModel::GetItem(const SItemIndexPath& path) const
+{
+  CEosScriptModelItem* pItem = m_pRoot;
+  for (qint32 iElem : path.m_viRowPath)
+  {
+    pItem = pItem->Child(iElem);
+    if (nullptr == pItem) { return nullptr; }
+  }
+
+  if (pItem->Name() == path.m_sName &&
+      pItem->Type() == path.m_type)
+  {
+    return pItem;
+  }
+  return nullptr;
+}
+
+//----------------------------------------------------------------------------------------
+//
+bool CEosScriptModel::GetIndexPath(QModelIndex idx, qint32 iRole, SItemIndexPath* pOutPath) const
+{
+  if (nullptr != pOutPath)
+  {
+    CEosScriptModelItem* pItem = GetItem(idx);
+    CEosScriptModelItem* pChild = pItem;
+    CEosScriptModelItem* pParent = pItem->Parent();
+    pOutPath->m_viRowPath.clear();
+    while (nullptr != pParent)
+    {
+      qint32 iIndex = pParent->ChildIndex(pChild);
+      pOutPath->m_viRowPath.insert(pOutPath->m_viRowPath.begin(), iIndex);
+      pChild = pParent;
+      pParent = pParent->Parent();
+    }
+    pOutPath->m_iRole = iRole;
+    pOutPath->m_iColumn = idx.column();
+    pOutPath->m_sName = pItem->Name();
+    pOutPath->m_type = pItem->Type();
+
+    return true;
+  }
+  return false;
+}
+
+//----------------------------------------------------------------------------------------
+//
+QModelIndex CEosScriptModel::GetIndex(const SItemIndexPath& index) const
+{
+  CEosScriptModelItem* pItem = GetItem(index);
+  if (nullptr != pItem && index.m_viRowPath.size() > 0)
+  {
+    return createIndex(index.m_viRowPath.back(), index.m_iColumn, pItem);
+  }
+  return QModelIndex();
+}
+
+//----------------------------------------------------------------------------------------
+//
+QModelIndex CEosScriptModel::InsertInstructionImpl(
+    const QModelIndex& current, const QString& sType, const tInstructionMapValue& args)
+{
+  QModelIndex changedParent;
+  qint32 iInsertPoint = 0;
+  qint32 iModelItemInsertPoint = 0;
+  QString sChildGroup;
+  CEosScriptModelItem* pCurrentItem = GetItem(current);
+
+  // depending on selection wen need to insert the child somewhere
+  if (nullptr == pCurrentItem ||
+      pCurrentItem->Type()._to_integral() == EosScriptModelItem::eRoot)
+  {
+    pCurrentItem = m_vRootItems.back().second;
+    changedParent = createIndex(static_cast<qint32>(m_vRootItems.size())-1,0,pCurrentItem);
+    if (nullptr != pCurrentItem)
+    {
+      iInsertPoint = pCurrentItem->ChildCount();
+      iModelItemInsertPoint = iInsertPoint;
+    }
+  }
+  else if (pCurrentItem->Type()._to_integral() == EosScriptModelItem::eInstruction)
+  {
+    CEosScriptModelItem* pChild = pCurrentItem;
+    pCurrentItem = pCurrentItem->Parent();
+    changedParent = parent(current);
+    if (pCurrentItem->Type()._to_integral() == EosScriptModelItem::eInstructionChild)
+    {
+      for (qint32 i = 0; pCurrentItem->ChildIndex(pChild) > i; ++i)
+      {
+        iInsertPoint += pCurrentItem->Child(i)->ChildCount();
+      }
+      qint32 iOffset = pCurrentItem->ChildIndex(pChild)+1;
+      iInsertPoint += iOffset;
+      iModelItemInsertPoint = iOffset;
+      sChildGroup = pCurrentItem->Data(eos_item::c_iColumnName, Qt::DisplayRole).toString();
+    }
+    else
+    {
+      iInsertPoint = pCurrentItem->ChildIndex(pChild)+1;
+      iModelItemInsertPoint = iInsertPoint;
+    }
+  }
+  else if (pCurrentItem->Type()._to_integral() == EosScriptModelItem::eInstructionChild)
+  {
+    CEosScriptModelItem* pParentItem = pCurrentItem->Parent();
+    changedParent = current;
+    if (nullptr != pParentItem)
+    {
+      qint32 iMax = pParentItem->ChildIndex(pCurrentItem);
+      for (qint32 i = 0; iMax >= i; ++i)
+      {
+        iInsertPoint += pParentItem->Child(i)->ChildCount();
+      }
+      iModelItemInsertPoint = pParentItem->Child(iMax)->ChildCount();
+      sChildGroup = pCurrentItem->Data(eos_item::c_iColumnName, Qt::DisplayRole).toString();
+    }
+  }
+  else if (pCurrentItem->Type()._to_integral() == EosScriptModelItem::eInstructionSet)
+  {
+    changedParent = current;
+    iInsertPoint = pCurrentItem->ChildCount();
+    iModelItemInsertPoint = iInsertPoint;
+  }
+
+
+  if (nullptr != pCurrentItem)
+  {
+    return InsertInstructionAtImpl(changedParent, iInsertPoint, iModelItemInsertPoint,
+                                   sChildGroup, sType,
+                                   pCurrentItem->Type()._to_integral(),
+                                   args, pCurrentItem->Node());
+  }
+
+  return QModelIndex();
+}
+
+//----------------------------------------------------------------------------------------
+//
+QModelIndex CEosScriptModel::InsertInstructionAtImpl(
+    const QModelIndex& parent, qint32 iInsertPoint, qint32 iModelItemInsertPoint,
+    const QString& sChildGroup, const QString& sType, qint32 itemType,
+    const tInstructionMapValue& args, std::shared_ptr<CJsonInstructionNode> spNodeParent)
+{
+  // on handled cases start the insertion
+  beginInsertRows(parent, iInsertPoint, iInsertPoint);
+  std::shared_ptr<CJsonInstructionNode> spNewNode = std::make_shared<CJsonInstructionNode>();
+  if (spNodeParent->m_spChildren.size() > iInsertPoint && iInsertPoint)
+  {
+    spNodeParent->m_spChildren.insert(spNodeParent->m_spChildren.begin()+iInsertPoint, spNewNode);
+  }
+  else if (spNodeParent->m_spChildren.size() == iInsertPoint)
+  {
+    spNodeParent->m_spChildren.push_back(spNewNode);
+  }
+  spNewNode->m_wpParent = spNodeParent;
+  spNewNode->m_sName = sType;
+  spNewNode->m_wpCommand = m_spRunner->Instruction(sType);
+  spNewNode->m_actualArgs = args;
+
+  if (auto spCommand = std::dynamic_pointer_cast<IEosCommandModel>(spNewNode->m_wpCommand.lock());
+      nullptr != spCommand && spNewNode->m_actualArgs.empty())
+  {
+    spNewNode->m_actualArgs = spCommand->DefaultArgs();
+  }
+
+  // if it's a nested istruction we might need to change the parameters of the parent as well
+  if (itemType == EosScriptModelItem::eInstructionChild)
+  {
+    if (auto spCommand = std::dynamic_pointer_cast<IEosCommandModel>(spNodeParent->m_wpCommand.lock());
+        nullptr != spCommand)
+    {
+      spCommand->InsertedChildAt(&spNodeParent->m_actualArgs, iInsertPoint, sChildGroup, sType);
+    }
+  }
+
+  QModelIndex idxInserted = Inserted(parent, iModelItemInsertPoint);
+
+  endInsertRows();
+
+  emit dataChanged(idxInserted, idxInserted);
+
+  return idxInserted;
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CEosScriptModel::RemoveInstructionImpl(const QModelIndex& current)
+{
+  bool bAnythingToRemove = false;
+  CEosScriptModelItem* pCurrentItem = GetItem(current);
+
+  // depending on selection we need to remove the child or not
+  if (nullptr != pCurrentItem &&
+      pCurrentItem->Type()._to_integral() == EosScriptModelItem::eInstruction)
+  {
+    bAnythingToRemove = true;
+  }
+
+  if (bAnythingToRemove)
+  {
+    QModelIndex parentIdx = parent(current);
+    CEosScriptModelItem* pParentItem = GetItem(parentIdx);
+
+    std::shared_ptr<CJsonInstructionNode> spCurrentNode = pCurrentItem->Node();
+    std::shared_ptr<CJsonInstructionNode> spParentNode = nullptr;
+    qint32 iModelIndex = pCurrentItem->Parent()->ChildIndex(pCurrentItem);
+    qint32 iRemovePos = -1;
+    QString sChildGroup;
+
+    // depending on selection wen need to insert the child somewhere
+    if (nullptr == pParentItem ||
+        pParentItem->Type()._to_integral() == EosScriptModelItem::eRoot)
+    {
+      spParentNode = nullptr;
+    }
+    else if (pParentItem->Type()._to_integral() == EosScriptModelItem::eInstruction)
+    {
+      spParentNode = nullptr;
+    }
+    else if (pParentItem->Type()._to_integral() == EosScriptModelItem::eInstructionChild)
+    {
+      spParentNode = pParentItem->Node();
+
+      if (nullptr != pParentItem->Parent())
+      {
+        iRemovePos = 0;
+        qint32 iMax = pParentItem->Parent()->ChildIndex(pParentItem);
+        for (qint32 i = 0; iMax > i; ++i)
+        {
+          iRemovePos += pParentItem->Parent()->Child(i)->ChildCount();
+        }
+        iRemovePos += iModelIndex;
+        sChildGroup = pParentItem->Data(eos_item::c_iColumnName, Qt::DisplayRole).toString();
+      }
+    }
+    else if (pParentItem->Type()._to_integral() == EosScriptModelItem::eInstructionSet)
+    {
+      spParentNode = pParentItem->Node();
+      iRemovePos = iModelIndex;
+    }
+
+    if (-1 != iRemovePos && nullptr != spParentNode)
+    {
+      // if it's a nested istruction we might need to change the parameters of the parent as well
+      if (pParentItem->Type()._to_integral() == EosScriptModelItem::eInstructionChild)
+      {
+        if (auto spCommand = std::dynamic_pointer_cast<IEosCommandModel>(spParentNode->m_wpCommand.lock());
+            nullptr != spCommand)
+        {
+          spCommand->RemoveChildAt(&spParentNode->m_actualArgs, iModelIndex, sChildGroup);
+        }
+      }
+
+      beginRemoveRows(parentIdx, iModelIndex, iModelIndex);
+      spParentNode->m_spChildren.erase(spParentNode->m_spChildren.begin()+iRemovePos);
+      pCurrentItem->Parent()->RemoveChildren(iModelIndex, 1);
+      pCurrentItem = nullptr;
+      endRemoveRows();
+    }
+  }
 }
 
 //----------------------------------------------------------------------------------------
@@ -514,7 +663,7 @@ void RecursivelyConstructChild(CEosScriptModelItem* pParentItem,
 
 //----------------------------------------------------------------------------------------
 //
-void CEosScriptModel::Inserted(const QModelIndex& parent, qint32 iIndex)
+QModelIndex CEosScriptModel::Inserted(const QModelIndex& parent, qint32 iIndex)
 {
   CEosScriptModelItem* pParentItem = GetItem(parent);
   CEosScriptModelItem* pChildItem = nullptr;
@@ -536,7 +685,11 @@ void CEosScriptModel::Inserted(const QModelIndex& parent, qint32 iIndex)
     pParentItem->InsertChild(pChildItem, iIndex);
 
     RecursivelyConstruct(pChildItem, spChildNode);
+
+    return createIndex(iIndex, eos_item::c_iColumnName, pChildItem);
   }
+
+  return QModelIndex();
 }
 
 //----------------------------------------------------------------------------------------

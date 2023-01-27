@@ -200,6 +200,9 @@ macro(CreateJOIPProject JOIP_PROJECT_NAME)
     ${JOIPSources}/Editor/Resources/WebResourceOverlay.cpp
     ${JOIPSources}/Editor/Resources/WebResourceOverlay.h
     ${JOIPSources}/Editor/Resources/WebResourceOverlay.ui
+    ${JOIPSources}/Editor/Script/BackgroundSnippetOverlay.cpp
+    ${JOIPSources}/Editor/Script/BackgroundSnippetOverlay.h
+    ${JOIPSources}/Editor/Script/BackgroundSnippetOverlay.ui
     ${JOIPSources}/Editor/Script/CodeDisplayDefaultEditorImpl.cpp
     ${JOIPSources}/Editor/Script/CodeDisplayDefaultEditorImpl.h
     ${JOIPSources}/Editor/Script/CodeDisplayEosEditorImpl.cpp
@@ -207,13 +210,18 @@ macro(CreateJOIPProject JOIP_PROJECT_NAME)
     ${JOIPSources}/Editor/Script/CodeDisplayWidget.cpp
     ${JOIPSources}/Editor/Script/CodeDisplayWidget.h
     ${JOIPSources}/Editor/Script/CodeDisplayWidget.ui
-    ${JOIPSources}/Editor/Script/BackgroundSnippetOverlay.cpp
-    ${JOIPSources}/Editor/Script/BackgroundSnippetOverlay.h
-    ${JOIPSources}/Editor/Script/BackgroundSnippetOverlay.ui
     ${JOIPSources}/Editor/Script/CommandChangeOpenedScript.cpp
     ${JOIPSources}/Editor/Script/CommandChangeOpenedScript.h
+    ${JOIPSources}/Editor/Script/CommandInsertEosCommand.cpp
+    ${JOIPSources}/Editor/Script/CommandInsertEosCommand.h
+    ${JOIPSources}/Editor/Script/CommandRemoveEosCommand.cpp
+    ${JOIPSources}/Editor/Script/CommandRemoveEosCommand.h
     ${JOIPSources}/Editor/Script/CommandScriptContentChange.cpp
     ${JOIPSources}/Editor/Script/CommandScriptContentChange.h
+    ${JOIPSources}/Editor/Script/CommandToggledEosCommand.cpp
+    ${JOIPSources}/Editor/Script/CommandToggledEosCommand.h
+    ${JOIPSources}/Editor/Script/CommandUpdateEosCommand.cpp
+    ${JOIPSources}/Editor/Script/CommandUpdateEosCommand.h
     ${JOIPSources}/Editor/Script/EosCommandModels.cpp
     ${JOIPSources}/Editor/Script/EosCommandModels.h
     ${JOIPSources}/Editor/Script/EosCommandWidgets.cpp

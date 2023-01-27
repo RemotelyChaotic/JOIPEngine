@@ -1,6 +1,32 @@
 #include "EosScriptModelItem.h"
 #include "EosCommandModels.h"
 
+SItemIndexPath::SItemIndexPath() :
+  m_viRowPath(),
+  m_iRole(-1),
+  m_iColumn(-1),
+  m_sName(),
+  m_type(EosScriptModelItem::eRoot)
+{
+}
+
+//----------------------------------------------------------------------------------------
+//
+bool operator==(const SItemIndexPath& lhs, const SItemIndexPath& rhs)
+{
+  return lhs.m_viRowPath == rhs.m_viRowPath &&
+      lhs.m_iColumn == rhs.m_iColumn &&
+      lhs.m_iRole == rhs.m_iRole &&
+      lhs.m_sName == rhs.m_sName &&
+      lhs.m_type == rhs.m_type;
+}
+bool operator!=(const SItemIndexPath& lhs, const SItemIndexPath& rhs)
+{
+  return !(lhs == rhs);
+}
+
+//----------------------------------------------------------------------------------------
+//
 CEosScriptModelItem::CEosScriptModelItem(EosScriptModelItem type,
                                          CEosScriptModelItem* pParentItem,
                                          const std::shared_ptr<CJsonInstructionNode>& spInstruction) :
@@ -97,21 +123,7 @@ QVariant CEosScriptModelItem::Data(qint32 iColumn, qint32 iRole) const
         case Qt::EditRole: [[fallthrough]];
         case Qt::DisplayRole:
         {
-          if (nullptr != m_spInstruction)
-          {
-            IEosCommandModel* pCommandModel =
-                dynamic_cast<IEosCommandModel*>(m_spInstruction->m_wpCommand.lock().get());
-            if (nullptr != pCommandModel)
-            {
-              return m_sCustomName.isEmpty() ? pCommandModel->DisplayName(m_spInstruction->m_actualArgs) :
-                                               m_sCustomName;
-            }
-            return m_sCustomName.isEmpty() ? m_spInstruction->m_sName : m_sCustomName;
-          }
-          else
-          {
-            return m_sCustomName;
-          }
+          return DisplayName();
         }
         case Qt::DecorationRole: return QVariant();
         case Qt::CheckStateRole:
@@ -146,6 +158,41 @@ QVariant CEosScriptModelItem::Data(qint32 iColumn, qint32 iRole) const
 
 //----------------------------------------------------------------------------------------
 //
+QString CEosScriptModelItem::DisplayName() const
+{
+  if (nullptr != m_spInstruction)
+  {
+    IEosCommandModel* pCommandModel =
+        dynamic_cast<IEosCommandModel*>(m_spInstruction->m_wpCommand.lock().get());
+    if (nullptr != pCommandModel)
+    {
+      return m_sCustomName.isEmpty() ? pCommandModel->DisplayName(m_spInstruction->m_actualArgs) :
+                                       m_sCustomName;
+    }
+    return m_sCustomName.isEmpty() ? m_spInstruction->m_sName : m_sCustomName;
+  }
+  else
+  {
+    return m_sCustomName;
+  }
+}
+
+//----------------------------------------------------------------------------------------
+//
+QString CEosScriptModelItem::Name() const
+{
+  if (nullptr != m_spInstruction)
+  {
+    return m_sCustomName.isEmpty() ? m_spInstruction->m_sName : m_sCustomName;
+  }
+  else
+  {
+    return m_sCustomName;
+  }
+}
+
+//----------------------------------------------------------------------------------------
+//
 std::shared_ptr<CJsonInstructionNode> CEosScriptModelItem::Node() const
 {
   return m_spInstruction;
@@ -171,6 +218,13 @@ bool CEosScriptModelItem::InsertColumns(qint32 iPosition, qint32 iColumns)
   Q_UNUSED(iPosition)
   Q_UNUSED(iColumns)
   return true;
+}
+
+//----------------------------------------------------------------------------------------
+//
+bool CEosScriptModelItem::IsChecked() const
+{
+  return m_bChecked;
 }
 
 //----------------------------------------------------------------------------------------
@@ -311,32 +365,5 @@ void CEosScriptModelItem::SetCheckedWithoutNodeInteraction(bool bValue)
 //
 bool CEosScriptModelItem::SetData(qint32 iColumn, qint32 iRole, const QVariant &value)
 {
-  if (eos_item::c_iNumColumns <= iColumn || 0 > iColumn) { return false; }
-
-  switch(iColumn)
-  {
-    case eos_item::c_iColumnName:
-    {
-      switch (iRole)
-      {
-        case Qt::CheckStateRole:
-        {
-          bool bChecked = value.value<Qt::CheckState>() == Qt::Checked;
-          if (bChecked != m_bChecked)
-          {
-            SetChecked(bChecked);
-            return true;
-          }
-          else
-          {
-            return false;
-          }
-        }
-        default: break;
-      }
-    }
-    default: break;
-  }
-
   return false;
 }

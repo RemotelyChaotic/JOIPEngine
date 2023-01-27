@@ -1,4 +1,5 @@
 #include "CodeDisplayEosEditorImpl.h"
+#include "CommandUpdateEosCommand.h"
 #include "EosScriptEditorView.h"
 #include "EosScriptModel.h"
 #include "EosScriptModelItem.h"
@@ -58,6 +59,8 @@ CCodeDisplayEosEditorImpl::CCodeDisplayEosEditorImpl(QPointer<CEosScriptEditorVi
           this, &CCodeDisplayEosEditorImpl::CurrentItemDataChanged);
   connect(m_pEditorDelegate, &CEosScriptOverlayDelegate::SignalInvalidateItemChildren,
           this, &CCodeDisplayEosEditorImpl::CurrentItemInvalidated);
+  connect(m_pJsonParserModel, &CEosScriptModel::dataChanged,
+          this, &CCodeDisplayEosEditorImpl::SlotItemModelDataChanged);
 }
 CCodeDisplayEosEditorImpl::~CCodeDisplayEosEditorImpl()
 {
@@ -67,6 +70,7 @@ CCodeDisplayEosEditorImpl::~CCodeDisplayEosEditorImpl()
 void CCodeDisplayEosEditorImpl::Initialize(CEditorModel* pEditorModel)
 {
   m_pEditorModel = pEditorModel;
+  m_pJsonParserModel->SetUndoStack(pEditorModel->UndoStack());
   m_pEditorDelegate->Initialize(m_pEditorModel->ResourceTreeModel());
 }
 
@@ -188,6 +192,7 @@ void CCodeDisplayEosEditorImpl::CurrentItemChanged(const QItemSelection& selecte
                                                    const QItemSelection& deselected)
 {
   Q_UNUSED(deselected)
+  m_bEnableDelegateUpdate = false;
   if (selected.count() == 1 && selected.indexes()[0].isValid())
   {
     QModelIndex currentMapped = m_pProxy->mapToSource(selected.indexes()[0]);
@@ -198,11 +203,20 @@ void CCodeDisplayEosEditorImpl::CurrentItemChanged(const QItemSelection& selecte
     {
       if (pItem->Type()._to_integral() == EosScriptModelItem::eInstructionChild)
       {
-        m_pEditorDelegate->Show(pItem->Parent());
+        CEosScriptModelItem* pParent = pItem->Parent();
+        SItemIndexPath path;
+        m_pJsonParserModel->GetIndexPath(m_pJsonParserModel->parent(currentMapped), -1, &path);
+        m_pEditorDelegate->Show(path,
+              pParent->Data(eos_item::c_iColumnType, eos_item::c_iRoleEosItemType).toString(),
+              *pParent->Arguments());
       }
       else
       {
-        m_pEditorDelegate->Show(pItem);
+        SItemIndexPath path;
+        m_pJsonParserModel->GetIndexPath(currentMapped, -1, &path);
+        m_pEditorDelegate->Show(path,
+                                pItem->Data(eos_item::c_iColumnType, eos_item::c_iRoleEosItemType).toString(),
+                                *pItem->Arguments());
       }
     }
     else
@@ -214,16 +228,25 @@ void CCodeDisplayEosEditorImpl::CurrentItemChanged(const QItemSelection& selecte
   {
     m_pEditorDelegate->Hide();
   }
+  m_bEnableDelegateUpdate = true;
 }
 
 //----------------------------------------------------------------------------------------
 //
 void CCodeDisplayEosEditorImpl::CurrentItemDataChanged()
 {
-  QModelIndex currentMapped = m_pProxy->mapToSource(m_pTarget->selectionModel()->currentIndex());
+  QModelIndex currentMapped = m_pJsonParserModel->GetIndex(m_pEditorDelegate->CurrentPath());
   if (currentMapped.isValid())
   {
-    m_pJsonParserModel->Update(currentMapped);
+    m_bEnableDelegateUpdate = false;
+    CEosScriptModelItem* pItem = m_pJsonParserModel->GetItem(currentMapped);
+    m_pEditorModel->UndoStack()->push(
+          new CCommandUpdateEosCommand(m_pJsonParserModel, m_pTarget,
+                                       m_pEditorDelegate->CurrentPath(),
+                                       *pItem->Arguments(),
+                                       m_pEditorDelegate->CurrentProperties(),
+                                       false));
+    m_bEnableDelegateUpdate = true;
   }
 }
 
@@ -231,11 +254,34 @@ void CCodeDisplayEosEditorImpl::CurrentItemDataChanged()
 //
 void CCodeDisplayEosEditorImpl::CurrentItemInvalidated()
 {
-  QModelIndex currentMapped = m_pProxy->mapToSource(m_pTarget->selectionModel()->currentIndex());
+  QModelIndex currentMapped = m_pJsonParserModel->GetIndex(m_pEditorDelegate->CurrentPath());
   if (currentMapped.isValid())
   {
-    m_pJsonParserModel->Invalidate(currentMapped);
-    m_pTarget->ExpandAll();
+    m_bEnableDelegateUpdate = false;
+    CEosScriptModelItem* pItem = m_pJsonParserModel->GetItem(currentMapped);
+    m_pEditorModel->UndoStack()->push(
+          new CCommandUpdateEosCommand(m_pJsonParserModel, m_pTarget,
+                                       m_pEditorDelegate->CurrentPath(),
+                                       *pItem->Arguments(),
+                                       m_pEditorDelegate->CurrentProperties(),
+                                       true));
+    m_bEnableDelegateUpdate = true;
+  }
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CCodeDisplayEosEditorImpl::SlotItemModelDataChanged(
+    const QModelIndex& begin, const QModelIndex& end)
+{
+  if (m_pEditorDelegate->isVisible() && m_bEnableDelegateUpdate)
+  {
+    CEosScriptModelItem* pItem = m_pJsonParserModel->GetItem(begin);
+    SItemIndexPath path;
+    m_pJsonParserModel->GetIndexPath(begin, -1, &path);
+    m_pEditorDelegate->Show(path,
+                            pItem->Data(eos_item::c_iColumnType, eos_item::c_iRoleEosItemType).toString(),
+                            *pItem->Arguments());
   }
 }
 
@@ -243,87 +289,115 @@ void CCodeDisplayEosEditorImpl::CurrentItemInvalidated()
 //
 void CCodeDisplayEosEditorImpl::SlotAddAudio()
 {
+  m_bEnableDelegateUpdate = false;
   QModelIndex currentMapped = m_pProxy->mapToSource(m_pTarget->selectionModel()->currentIndex());
   m_pJsonParserModel->InsertInstruction(currentMapped,
                                         eos::c_sCommandAudioPlay, {});
+  m_bEnableDelegateUpdate = true;
 }
 void CCodeDisplayEosEditorImpl::SlotAddChoice()
 {
+  m_bEnableDelegateUpdate = false;
   QModelIndex currentMapped = m_pProxy->mapToSource(m_pTarget->selectionModel()->currentIndex());
   m_pJsonParserModel->InsertInstruction(currentMapped,
                                         eos::c_sCommandChoice, {});
+  m_bEnableDelegateUpdate = true;
 }
 void CCodeDisplayEosEditorImpl::SlotAddDisable()
 {
+  m_bEnableDelegateUpdate = false;
   QModelIndex currentMapped = m_pProxy->mapToSource(m_pTarget->selectionModel()->currentIndex());
   m_pJsonParserModel->InsertInstruction(currentMapped,
                                         eos::c_sCommandDisableScreen, {});
+  m_bEnableDelegateUpdate = true;
 }
 void CCodeDisplayEosEditorImpl::SlotAddEnable()
 {
+  m_bEnableDelegateUpdate = false;
   QModelIndex currentMapped = m_pProxy->mapToSource(m_pTarget->selectionModel()->currentIndex());
   m_pJsonParserModel->InsertInstruction(currentMapped,
                                         eos::c_sCommandEnableScreen, {});
+  m_bEnableDelegateUpdate = true;
 }
 void CCodeDisplayEosEditorImpl::SlotAddEnd()
 {
+  m_bEnableDelegateUpdate = false;
   QModelIndex currentMapped = m_pProxy->mapToSource(m_pTarget->selectionModel()->currentIndex());
   m_pJsonParserModel->InsertInstruction(currentMapped,
                                         eos::c_sCommandEnd, {});
+  m_bEnableDelegateUpdate = true;
 }
 void CCodeDisplayEosEditorImpl::SlotAddEval()
 {
+  m_bEnableDelegateUpdate = false;
   QModelIndex currentMapped = m_pProxy->mapToSource(m_pTarget->selectionModel()->currentIndex());
   m_pJsonParserModel->InsertInstruction(currentMapped,
                                         eos::c_sCommandEval, {});
+  m_bEnableDelegateUpdate = true;
 }
 void CCodeDisplayEosEditorImpl::SlotAddGoto()
 {
+  m_bEnableDelegateUpdate = false;
   QModelIndex currentMapped = m_pProxy->mapToSource(m_pTarget->selectionModel()->currentIndex());
   m_pJsonParserModel->InsertInstruction(currentMapped,
                                         eos::c_sCommandGoto, {});
+  m_bEnableDelegateUpdate = true;
 }
 void CCodeDisplayEosEditorImpl::SlotAddIf()
 {
+  m_bEnableDelegateUpdate = false;
   QModelIndex currentMapped = m_pProxy->mapToSource(m_pTarget->selectionModel()->currentIndex());
   m_pJsonParserModel->InsertInstruction(currentMapped,
                                         eos::c_sCommandIf, {});
+  m_bEnableDelegateUpdate = true;
 }
 void CCodeDisplayEosEditorImpl::SlotAddImage()
 {
+  m_bEnableDelegateUpdate = false;
   QModelIndex currentMapped = m_pProxy->mapToSource(m_pTarget->selectionModel()->currentIndex());
   m_pJsonParserModel->InsertInstruction(currentMapped,
                                         eos::c_sCommandImage, {});
+  m_bEnableDelegateUpdate = true;
 }
 void CCodeDisplayEosEditorImpl::SlotAddNotificationRemove()
 {
+  m_bEnableDelegateUpdate = false;
   QModelIndex currentMapped = m_pProxy->mapToSource(m_pTarget->selectionModel()->currentIndex());
   m_pJsonParserModel->InsertInstruction(currentMapped,
                                         eos::c_sCommandNotificationClose, {});
+  m_bEnableDelegateUpdate = true;
 }
 void CCodeDisplayEosEditorImpl::SlotAddNotificationCreate()
 {
+  m_bEnableDelegateUpdate = false;
   QModelIndex currentMapped = m_pProxy->mapToSource(m_pTarget->selectionModel()->currentIndex());
   m_pJsonParserModel->InsertInstruction(currentMapped,
                                         eos::c_sCommandNotificationCreate, {});
+  m_bEnableDelegateUpdate = true;
 }
 void CCodeDisplayEosEditorImpl::SlotAddPrompt()
 {
+  m_bEnableDelegateUpdate = false;
   QModelIndex currentMapped = m_pProxy->mapToSource(m_pTarget->selectionModel()->currentIndex());
   m_pJsonParserModel->InsertInstruction(currentMapped,
                                         eos::c_sCommandPrompt, {});
+  m_bEnableDelegateUpdate = true;
 }
 void CCodeDisplayEosEditorImpl::SlotAddSay()
 {
+  m_bEnableDelegateUpdate = false;
   QModelIndex currentMapped = m_pProxy->mapToSource(m_pTarget->selectionModel()->currentIndex());
   m_pJsonParserModel->InsertInstruction(currentMapped,
                                         eos::c_sCommandSay, {});
+  m_bEnableDelegateUpdate = true;
 }
 void CCodeDisplayEosEditorImpl::SlotAddTimer()
 {
+  m_bEnableDelegateUpdate = false;
   QModelIndex currentMapped = m_pProxy->mapToSource(m_pTarget->selectionModel()->currentIndex());
   m_pJsonParserModel->InsertInstruction(currentMapped,
                                         eos::c_sCommandTimer, {});
+  m_bEnableDelegateUpdate = true;
 }
 
 //----------------------------------------------------------------------------------------

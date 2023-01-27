@@ -8,6 +8,8 @@
 #include <QtGlobal>
 #include <QVariant>
 
+#include <vector>
+
 BETTER_ENUM(EosScriptModelItem, qint32,
             eRoot            = 0,
             eInstructionSet  = 1,
@@ -24,6 +26,19 @@ namespace eos_item
 
   const qint32 c_iRoleEosItemType = Qt::UserRole;
 }
+
+struct SItemIndexPath
+{
+  SItemIndexPath();
+
+  std::vector<qint32> m_viRowPath;
+  qint32 m_iRole;
+  qint32 m_iColumn;
+  QString m_sName;
+  EosScriptModelItem m_type;
+};
+bool operator==(const SItemIndexPath& lhs, const SItemIndexPath& rhs);
+bool operator!=(const SItemIndexPath& lhs, const SItemIndexPath& rhs);
 
 class CEosScriptModelItem
 {
@@ -43,9 +58,12 @@ public:
   qint32 ChildCount() const;
   qint32 ColumnCount() const;
   QVariant Data(qint32 iColumn, qint32 iRole) const;
+  QString DisplayName() const;
+  QString Name() const;
   std::shared_ptr<CJsonInstructionNode> Node() const;
   bool InsertChild(CEosScriptModelItem* pChild, qint32 iRow);
   bool InsertColumns(qint32 iPosition, qint32 iColumns);
+  bool IsChecked() const;
   bool RemoveChildren(qint32 iPosition, qint32 iCount);
   bool RemoveColumns(qint32 iPosition, qint32 iColumns);
   CEosScriptModelItem* Parent() const;

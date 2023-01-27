@@ -17,7 +17,20 @@ CEosScriptOverlayDelegate::CEosScriptOverlayDelegate(QWidget* pParent) :
 }
 CEosScriptOverlayDelegate::~CEosScriptOverlayDelegate()
 {
-  m_pItem = nullptr;
+}
+
+//----------------------------------------------------------------------------------------
+//
+SItemIndexPath CEosScriptOverlayDelegate::CurrentPath() const
+{
+  return m_path;
+}
+
+//----------------------------------------------------------------------------------------
+//
+tInstructionMapValue CEosScriptOverlayDelegate::CurrentProperties() const
+{
+  return m_propsCopy;
 }
 
 //----------------------------------------------------------------------------------------
@@ -29,26 +42,45 @@ void CEosScriptOverlayDelegate::Initialize(CResourceTreeItemModel* pEditorModel)
 
 //----------------------------------------------------------------------------------------
 //
-void CEosScriptOverlayDelegate::Show(CEosScriptModelItem* pItem)
+void CEosScriptOverlayDelegate::Show(const SItemIndexPath& path,
+                                     const QString& sType, const tInstructionMapValue& props)
 {
-  ClearLayout();
-  m_pItem = pItem;
+  CEosCommandWidgetBase* pWidget = nullptr;
+  bool bNewWidget = false;
 
-  CEosCommandWidgetBase* pWidget =
-      eos::CreateWidgetFromType(
-        m_pItem->Data(eos_item::c_iColumnType, eos_item::c_iRoleEosItemType).toString(), this);
+  if (path != m_path)
+  {
+    bNewWidget = true;
+    ClearLayout();
+    m_path = path;
+    m_propsCopy = props;
+
+    pWidget = eos::CreateWidgetFromType(sType, this);
+  }
+  else
+  {
+    m_propsCopy = props;
+    if (auto pItem = layout()->itemAt(0))
+    {
+      pWidget = dynamic_cast<CEosCommandWidgetBase*>(pItem->widget());
+    }
+  }
 
   if (nullptr != pWidget && pWidget->HasUi())
   {
-    pWidget->SetProperties(m_pItem->Arguments());
-    pWidget->SetResourceModel(m_pEditorModel);
-    layout()->addWidget(pWidget);
-    layout()->addItem(new QSpacerItem(0, 0, QSizePolicy::Expanding, QSizePolicy::Fixed));
+    pWidget->SetProperties(&m_propsCopy);
 
-    connect(pWidget, &CEosCommandWidgetBase::SignalChangedProperties, this,
-            &CEosScriptOverlayDelegate::SignalCurrentItemChanged);
-    connect(pWidget, &CEosCommandWidgetBase::SignalInvalidateItemChildren, this,
-            &CEosScriptOverlayDelegate::SignalInvalidateItemChildren);
+    if (bNewWidget)
+    {
+      pWidget->SetResourceModel(m_pEditorModel);
+      layout()->addWidget(pWidget);
+      layout()->addItem(new QSpacerItem(0, 0, QSizePolicy::Expanding, QSizePolicy::Fixed));
+
+      connect(pWidget, &CEosCommandWidgetBase::SignalChangedProperties, this,
+              &CEosScriptOverlayDelegate::SignalCurrentItemChanged);
+      connect(pWidget, &CEosCommandWidgetBase::SignalInvalidateItemChildren, this,
+              &CEosScriptOverlayDelegate::SignalInvalidateItemChildren);
+    }
 
     COverlayBase::Show();
   }
@@ -81,7 +113,8 @@ void CEosScriptOverlayDelegate::Climb()
 void CEosScriptOverlayDelegate::Hide()
 {
   ClearLayout();
-  m_pItem = nullptr;
+  m_propsCopy = tInstructionMapValue();
+  m_path = SItemIndexPath();
   COverlayBase::Hide();
 }
 
@@ -124,7 +157,7 @@ void CEosScriptOverlayDelegate::ClearLayout()
     auto pItem = layout()->takeAt(0);
     if (nullptr != pItem)
     {
-      if (nullptr != pItem->widget()) { delete pItem->widget(); }
+      if (nullptr != pItem->widget()) { pItem->widget()->deleteLater(); }
       delete pItem;
     }
   }

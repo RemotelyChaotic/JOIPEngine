@@ -24,6 +24,10 @@ BETTER_ENUM(EEditorCommandId, qint32,
             eRemoveResource,
 
             eChangeOpenedScript,
+            eToggleEosCommand,
+            eInsertEosCommand,
+            eRemoveEosCommand,
+            eUpdateEosCommand,
 
             eAddNodeItem,
             eMoveNodeItem,

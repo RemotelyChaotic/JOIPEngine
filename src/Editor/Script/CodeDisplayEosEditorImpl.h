@@ -38,6 +38,7 @@ protected slots:
   void CurrentItemChanged(const QItemSelection& selected, const QItemSelection& deselected);
   void CurrentItemDataChanged();
   void CurrentItemInvalidated();
+  void SlotItemModelDataChanged(const QModelIndex& begin, const QModelIndex& end);
   void SlotAddAudio();
   void SlotAddChoice();
   void SlotAddDisable();
@@ -62,6 +63,7 @@ private:
   QPointer<CEosSortFilterProxyModel>           m_pProxy;
   QPointer<CEosScriptModel>                    m_pJsonParserModel;
   QPointer<CEditorModel>                       m_pEditorModel;
+  bool                                         m_bEnableDelegateUpdate = true;
 };
 
 #endif // CCODEDISPLAYEOSEDITORIMPL_H

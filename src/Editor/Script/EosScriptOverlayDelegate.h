@@ -1,10 +1,11 @@
 #ifndef CEOSSCRIPTOVERLAYDELEGATE_H
 #define CEOSSCRIPTOVERLAYDELEGATE_H
 
+#include "EosScriptModelItem.h"
+#include "Systems/JSON/JsonInstructionTypes.h"
 #include "Widgets/OverlayBase.h"
 #include <QPointer>
 
-class CEosScriptModelItem;
 class CResourceTreeItemModel;
 
 class CEosScriptOverlayDelegate : public COverlayBase
@@ -14,8 +15,11 @@ public:
   CEosScriptOverlayDelegate(QWidget* pParent = nullptr);
   ~CEosScriptOverlayDelegate() override;
 
+  SItemIndexPath CurrentPath() const;
+  tInstructionMapValue CurrentProperties() const;
   void Initialize(CResourceTreeItemModel* pEditorModel);
-  void Show(CEosScriptModelItem* pItem);
+  void Show(const SItemIndexPath& path, const QString& sType,
+            const tInstructionMapValue& props);
 
   bool IsForcedOpen() const;
 
@@ -32,7 +36,8 @@ private:
   void ClearLayout();
 
   QPointer<CResourceTreeItemModel> m_pEditorModel;
-  CEosScriptModelItem*             m_pItem;
+  SItemIndexPath                   m_path;
+  tInstructionMapValue             m_propsCopy;
 };
 
 #endif // CEOSSCRIPTOVERLAYDELEGATE_H
