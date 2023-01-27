@@ -1,6 +1,5 @@
 ﻿#include "EosCommandWidgets.h"
 
-#include "Application.h"
 #include "ui_EosCommandWidgetAudio.h"
 #include "ui_EosCommandWidgetChoice.h"
 #include "ui_EosCommandWidgetEval.h"
@@ -1252,6 +1251,7 @@ void CEosCommandWidgetSay::on_pAllowSkipCheckBox_toggled(bool bValue)
 {
   if (m_bIsInitializing) { return; }
   SetValue<EArgumentType::eBool>(m_pProps, "allowSkip", bValue);
+  emit SignalChangedProperties();
 }
 
 //----------------------------------------------------------------------------------------
@@ -1422,6 +1422,7 @@ void CEosCommandWidgetTimer::on_pAsynchCheckBox_toggled(bool bValue)
 {
   if (m_bIsInitializing) { return; }
   SetValue<EArgumentType::eBool>(m_pProps, "isAsync", bValue);
+  emit SignalChangedProperties();
 }
 
 //----------------------------------------------------------------------------------------
