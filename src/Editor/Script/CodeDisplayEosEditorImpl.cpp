@@ -108,6 +108,10 @@ void CCodeDisplayEosEditorImpl::ResetWidget()
 //
 void CCodeDisplayEosEditorImpl::SetContent(const QString& sContent)
 {
+  // Debug
+  //QFile file("in.json"); file.open(QIODevice::ReadWrite | QIODevice::Truncate);
+  //file.write(sContent.toUtf8());
+
   auto spEosRunnerMain = m_spEosParser->ParseJson(sContent);
   if (nullptr == spEosRunnerMain)
   {

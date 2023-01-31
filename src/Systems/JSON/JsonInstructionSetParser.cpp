@@ -1524,6 +1524,7 @@ namespace
           {
             elemParams = optNode.value();
           }
+          iOffset++;
         }
       } break;
       case EArgumentType::eArray:
@@ -1538,7 +1539,6 @@ namespace
           nlohmann::json innerObject;
           auto& elem = values[static_cast<size_t>(i)];
           ElementToJson(elem, argListValue->m_nestedType, spChild, iOffset, innerObject);
-          iOffset++;
           elemParams.push_back(innerObject);
         }
       } break;
