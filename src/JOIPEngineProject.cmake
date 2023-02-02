@@ -521,6 +521,8 @@ macro(CreateJOIPProject JOIP_PROJECT_NAME)
     ${JOIPSources}/Widgets/LongLongSpinBox.h
     ${JOIPSources}/Widgets/MenuButton.cpp
     ${JOIPSources}/Widgets/MenuButton.h
+    ${JOIPSources}/Widgets/MinimizingScrollArea.cpp
+    ${JOIPSources}/Widgets/MinimizingScrollArea.h
     ${JOIPSources}/Widgets/OverlayBase.cpp
     ${JOIPSources}/Widgets/OverlayBase.h
     ${JOIPSources}/Widgets/OverlayButton.cpp

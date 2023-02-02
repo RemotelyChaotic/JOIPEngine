@@ -53,6 +53,7 @@ CEditorActionBar::CEditorActionBar(QWidget* pParent) :
   m_iCurrentDisplayType(-1)
 {
   m_spUi->setupUi(this);
+  m_spUi->pCodeEditorContainer->setFixedWidth(m_spUi->pCodeEditorContainerStack->sizeHint().width());
 }
 
 CEditorActionBar::~CEditorActionBar()

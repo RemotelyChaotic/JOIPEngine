@@ -486,9 +486,9 @@
     </widget>
    </item>
    <item>
-    <widget class="QScrollArea" name="pCodeEditorContainer">
+    <widget class="CMinimizingScrollArea" name="pCodeEditorContainer">
      <property name="sizePolicy">
-      <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
+      <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
        <horstretch>0</horstretch>
        <verstretch>0</verstretch>
       </sizepolicy>
@@ -507,6 +507,9 @@
      </property>
      <property name="horizontalScrollBarPolicy">
       <enum>Qt::ScrollBarAlwaysOff</enum>
+     </property>
+     <property name="sizeAdjustPolicy">
+      <enum>QAbstractScrollArea::AdjustToContents</enum>
      </property>
      <property name="widgetResizable">
       <bool>true</bool>
@@ -589,6 +592,12 @@
           <number>0</number>
          </property>
          <widget class="QWidget" name="pCodeEditorContainerPageDefault">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
           <layout class="QGridLayout" name="gridLayout_2">
            <property name="leftMargin">
             <number>0</number>
@@ -737,6 +746,12 @@
           </layout>
          </widget>
          <widget class="QWidget" name="pCodeEditorContainerPageEos">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
           <layout class="QGridLayout" name="gridLayout_4">
            <property name="leftMargin">
             <number>0</number>
@@ -813,6 +828,12 @@
            </item>
            <item row="8" column="0">
             <widget class="CShortcutButton" name="AddEnableCode">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
              <property name="toolTip">
               <string>Add a scene instruction</string>
              </property>
@@ -823,6 +844,12 @@
            </item>
            <item row="8" column="1">
             <widget class="CShortcutButton" name="AddDisableCode">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
              <property name="toolTip">
               <string>Add a scene instruction</string>
              </property>
@@ -833,6 +860,12 @@
            </item>
            <item row="3" column="1">
             <widget class="CShortcutButton" name="AddNotificationCreateCode">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
              <property name="toolTip">
               <string>Add an notification instruction</string>
              </property>
@@ -843,6 +876,12 @@
            </item>
            <item row="5" column="1">
             <widget class="CShortcutButton" name="AddEndCode">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
              <property name="toolTip">
               <string>Add an end instruction</string>
              </property>
@@ -853,6 +892,12 @@
            </item>
            <item row="4" column="1">
             <widget class="CShortcutButton" name="AddNotificationCloseCode">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
              <property name="toolTip">
               <string>Add an notification instruction</string>
              </property>
@@ -863,6 +908,12 @@
            </item>
            <item row="4" column="0">
             <widget class="CShortcutButton" name="AddEvalCode">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
              <property name="toolTip">
               <string>Add an eval instruction</string>
              </property>
@@ -905,6 +956,12 @@
            </item>
            <item row="5" column="0">
             <widget class="CShortcutButton" name="AddGotoCode">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
              <property name="toolTip">
               <string>Add a goto instruction</string>
              </property>
@@ -991,6 +1048,12 @@
    <class>CShortcutButton</class>
    <extends>QPushButton</extends>
    <header>Widgets/ShortcutButton.h</header>
+  </customwidget>
+  <customwidget>
+   <class>CMinimizingScrollArea</class>
+   <extends>QScrollArea</extends>
+   <header>Widgets/MinimizingScrollArea.h</header>
+   <container>1</container>
   </customwidget>
  </customwidgets>
  <resources/>
