@@ -73,6 +73,7 @@ void CEosScriptOverlayDelegate::Show(const SItemIndexPath& path,
     if (bNewWidget)
     {
       pWidget->SetResourceModel(m_pEditorModel);
+      pWidget->setSizePolicy(QSizePolicy(QSizePolicy::Preferred, QSizePolicy::Fixed));
       layout()->addWidget(pWidget);
       layout()->addItem(new QSpacerItem(0, 0, QSizePolicy::Expanding, QSizePolicy::Fixed));
 

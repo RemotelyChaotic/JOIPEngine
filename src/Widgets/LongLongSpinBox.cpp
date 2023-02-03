@@ -5,6 +5,7 @@ CLongLongSpinBox::CLongLongSpinBox(QWidget* pParent) :
   QAbstractSpinBox{pParent}
 {
   connect(lineEdit(), &QLineEdit::textEdited, this, &CLongLongSpinBox::SlotEditFinished);
+  lineEdit()->setText(textFromValue(m_iValue));
 }
 CLongLongSpinBox::~CLongLongSpinBox()
 {

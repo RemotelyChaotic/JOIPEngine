@@ -303,11 +303,13 @@ QPushButton#SourceButton {
   qproperty-icon: url(:/resources/style/img/ButtonIcon.png) off,
                   url(:/resources/style/img/ButtonIcon.png) on;
 }
-QPushButton#AddShowImageCode {
+QPushButton#AddShowImageCode,
+QPushButton#AddImageCode {
   qproperty-icon: url(:/resources/style/img/ButtonImage.png) off,
                   url(:/resources/style/img/ButtonImage.png) on;
 }
-QPushButton#AddTextCode {
+QPushButton#AddTextCode,
+QPushButton#AddSayCode {
   qproperty-icon: url(:/resources/style/img/ButtonText.png) off,
                   url(:/resources/style/img/ButtonText.png) on;
 }
@@ -315,11 +317,13 @@ QPushButton#AddMetronomeCode {
   qproperty-icon: url(:/resources/style/img/ButtonMetronome.png) off,
                   url(:/resources/style/img/ButtonMetronome.png) on;
 }
-QPushButton#AddTimerCode {
+QPushButton#AddTimerCode,
+QPushButton#AddTimerCode2 {
   qproperty-icon: url(:/resources/style/img/ButtonClock.png) off,
                   url(:/resources/style/img/ButtonClock.png) on;
 }
-QPushButton#AddNotificationCode {
+QPushButton#AddNotificationCode,
+QPushButton#AddNotificationCreateCode {
   qproperty-icon: url(:/resources/style/img/ButtonNotification.png) off,
                   url(:/resources/style/img/ButtonNotification.png) on;
 }
@@ -347,7 +351,8 @@ QPushButton#AddThreadCode {
   qproperty-icon: url(:/resources/style/img/ButtonThread.png) off,
                   url(:/resources/style/img/ButtonThread.png) on;
 }
-QPushButton#ExitButton {
+QPushButton#ExitButton,
+QPushButton#AddEndCode {
   qproperty-icon: url(:/resources/style/img/ButtonExit.png) off,
                   url(:/resources/style/img/ButtonExit.png) on;
 }
@@ -360,7 +365,8 @@ QPushButton#AddResourceButton,
 QPushButton#AddButtonButton,
 QPushButton#AddTextColorButton,
 QPushButton#AddBGColorButton,
-QPushButton#AddFetishButton {
+QPushButton#AddFetishButton,
+QPushButton#AddButtonButton {
   padding: 0px;
   min-width: 24px;
   min-height: 24px;
@@ -383,7 +389,9 @@ QPushButton#RemoveResourceButton,
 QPushButton#RemoveButtonButton,
 QPushButton#RemoveTextColorButton,
 QPushButton#RemoveBGColorButton,
-QPushButton#RemoveFetishButton  {
+QPushButton#RemoveFetishButton,
+QPushButton#RemoveCode,
+QPushButton#RemoveButtonButton {
   padding: 0px;
   min-width: 24px;
   min-height: 24px;
@@ -487,6 +495,46 @@ QPushButton#eSceneNodeWidget {
 QPushButton#eSceneCodeEditorWidget {
   qproperty-icon: url(:/resources/style/img/ButtonCode.png) off,
                   url(:/resources/style/img/ButtonCode.png) on;
+}
+QPushButton#AddAutioCode {
+  qproperty-icon: url(:/resources/style/img/ButtonAudio.png) off,
+                  url(:/resources/style/img/ButtonAudio.png) on;
+}
+QPushButton#AddPromptCode {
+  qproperty-icon: url(:/resources/style/img/ButtonPrompt.png) off,
+                  url(:/resources/style/img/ButtonPrompt.png) on;
+}
+QPushButton#AddChoiceCode {
+  qproperty-icon: url(:/resources/style/img/ButtonChoice.png) off,
+                  url(:/resources/style/img/ButtonChoice.png) on;
+}
+QPushButton#AddIfCode {
+  qproperty-icon: url(:/resources/style/img/ButtonIf.png) off,
+                  url(:/resources/style/img/ButtonIf.png) on;
+}
+QPushButton#AddEvalCode {
+  qproperty-icon: url(:/resources/style/img/ButtonEval.png) off,
+                  url(:/resources/style/img/ButtonEval.png) on;
+}
+QPushButton#AddGotoCode {
+  qproperty-icon: url(:/resources/style/img/ButtonGoto.png) off,
+                  url(:/resources/style/img/ButtonGoto.png) on;
+}
+QPushButton#AddEnableCode {
+  qproperty-icon: url(:/resources/style/img/ButtonEnable.png) off,
+                  url(:/resources/style/img/ButtonEnable.png) on;
+}
+QPushButton#AddDisableCode {
+  qproperty-icon: url(:/resources/style/img/ButtonDisable.png) off,
+                  url(:/resources/style/img/ButtonDisable.png) on;
+}
+QPushButton#AddNotificationCloseCode {
+  qproperty-icon: url(:/resources/style/img/ButtonNotificationClose.png) off,
+                  url(:/resources/style/img/ButtonNotificationClose.png) on;
+}
+QPushButton#SearchButton {
+  qproperty-icon: url(:/resources/style/img/ButtonSearch.png) off,
+                  url(:/resources/style/img/ButtonSearch.png) on;
 }
 
 

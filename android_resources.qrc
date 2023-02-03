@@ -426,5 +426,59 @@
         <file>resources/android_styles/Equestria after Dark/ui/IconBg.svg</file>
         <file>resources/android_styles/Equestria after Dark/ui/WarningIcon.png</file>
         <file>resources/android_styles/Equestria after Dark/style.css</file>
+        <file>resources/android_styles/621 Hexagons/ui/ButtonAudio.png</file>
+        <file>resources/android_styles/621 Hexagons/ui/ButtonChoice.png</file>
+        <file>resources/android_styles/621 Hexagons/ui/ButtonDisable.png</file>
+        <file>resources/android_styles/621 Hexagons/ui/ButtonEnable.png</file>
+        <file>resources/android_styles/621 Hexagons/ui/ButtonEval.png</file>
+        <file>resources/android_styles/621 Hexagons/ui/ButtonGoto.png</file>
+        <file>resources/android_styles/621 Hexagons/ui/ButtonIf.png</file>
+        <file>resources/android_styles/621 Hexagons/ui/ButtonNotificationClose.png</file>
+        <file>resources/android_styles/621 Hexagons/ui/ButtonPrompt.png</file>
+        <file>resources/android_styles/Blue Night/ui/ButtonAudio.png</file>
+        <file>resources/android_styles/Blue Night/ui/ButtonChoice.png</file>
+        <file>resources/android_styles/Blue Night/ui/ButtonDisable.png</file>
+        <file>resources/android_styles/Blue Night/ui/ButtonEnable.png</file>
+        <file>resources/android_styles/Blue Night/ui/ButtonEval.png</file>
+        <file>resources/android_styles/Blue Night/ui/ButtonGoto.png</file>
+        <file>resources/android_styles/Blue Night/ui/ButtonIf.png</file>
+        <file>resources/android_styles/Blue Night/ui/ButtonNotificationClose.png</file>
+        <file>resources/android_styles/Blue Night/ui/ButtonPrompt.png</file>
+        <file>resources/android_styles/Equestria after Dark/ui/ButtonAudio.png</file>
+        <file>resources/android_styles/Equestria after Dark/ui/ButtonChoice.png</file>
+        <file>resources/android_styles/Equestria after Dark/ui/ButtonDisable.png</file>
+        <file>resources/android_styles/Equestria after Dark/ui/ButtonEnable.png</file>
+        <file>resources/android_styles/Equestria after Dark/ui/ButtonEval.png</file>
+        <file>resources/android_styles/Equestria after Dark/ui/ButtonGoto.png</file>
+        <file>resources/android_styles/Equestria after Dark/ui/ButtonIf.png</file>
+        <file>resources/android_styles/Equestria after Dark/ui/ButtonNotificationClose.png</file>
+        <file>resources/android_styles/Equestria after Dark/ui/ButtonPrompt.png</file>
+        <file>resources/android_styles/Gummyzilla/ui/ButtonAudio.png</file>
+        <file>resources/android_styles/Gummyzilla/ui/ButtonAudioSelected.png</file>
+        <file>resources/android_styles/Gummyzilla/ui/ButtonChoice.png</file>
+        <file>resources/android_styles/Gummyzilla/ui/ButtonChoiceSelected.png</file>
+        <file>resources/android_styles/Gummyzilla/ui/ButtonDisable.png</file>
+        <file>resources/android_styles/Gummyzilla/ui/ButtonDisableSelected.png</file>
+        <file>resources/android_styles/Gummyzilla/ui/ButtonEnable.png</file>
+        <file>resources/android_styles/Gummyzilla/ui/ButtonEnableSelected.png</file>
+        <file>resources/android_styles/Gummyzilla/ui/ButtonEval.png</file>
+        <file>resources/android_styles/Gummyzilla/ui/ButtonEvalSelected.png</file>
+        <file>resources/android_styles/Gummyzilla/ui/ButtonGoto.png</file>
+        <file>resources/android_styles/Gummyzilla/ui/ButtonGotoSelected.png</file>
+        <file>resources/android_styles/Gummyzilla/ui/ButtonIf.png</file>
+        <file>resources/android_styles/Gummyzilla/ui/ButtonIfSelected.png</file>
+        <file>resources/android_styles/Gummyzilla/ui/ButtonNotificationClose.png</file>
+        <file>resources/android_styles/Gummyzilla/ui/ButtonNotificationCloseSelected.png</file>
+        <file>resources/android_styles/Gummyzilla/ui/ButtonPrompt.png</file>
+        <file>resources/android_styles/Gummyzilla/ui/ButtonPromptSelected.png</file>
+        <file>resources/android_styles/Somber Dark/ui/ButtonAudio.png</file>
+        <file>resources/android_styles/Somber Dark/ui/ButtonChoice.png</file>
+        <file>resources/android_styles/Somber Dark/ui/ButtonDisable.png</file>
+        <file>resources/android_styles/Somber Dark/ui/ButtonEnable.png</file>
+        <file>resources/android_styles/Somber Dark/ui/ButtonEval.png</file>
+        <file>resources/android_styles/Somber Dark/ui/ButtonGoto.png</file>
+        <file>resources/android_styles/Somber Dark/ui/ButtonIf.png</file>
+        <file>resources/android_styles/Somber Dark/ui/ButtonNotificationClose.png</file>
+        <file>resources/android_styles/Somber Dark/ui/ButtonPrompt.png</file>
     </qresource>
 </RCC>

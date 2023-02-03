@@ -40,6 +40,21 @@ namespace {
   const QString c_sAddTimerHelpId =       "Editor/AddTimerCode";
   const QString c_sAddThreadHelpId =      "Editor/AddThreadCode";
   const QString c_sAddNotificationHelpId ="Editor/AddNotificationCode";
+  const QString c_sAddEosImageHelpId =    "Editor/EOS/AddEosImageInstruction";
+  const QString c_sAddEosAudioHelpId =    "Editor/EOS/AddEosAudioInstruction";
+  const QString c_sAddEosSayHelpId =      "Editor/EOS/AddEosSayInstruction";
+  const QString c_sAddEosPromptHelpId =   "Editor/EOS/AddEosAddPromptInstruction";
+  const QString c_sAddEosTimerHelpId =    "Editor/EOS/AddEosAddTimerInstruction";
+  const QString c_sAddEosChioceHelpId =   "Editor/EOS/AddEosChoiceInstruction";
+  const QString c_sAddEosIfHelpId =       "Editor/EOS/AddEosIfInstruction";
+  const QString c_sAddEosNotCreateHelpId ="Editor/EOS/AddEosNotificationCreateInstruction";
+  const QString c_sAddEosNotCloseHelpId = "Editor/EOS/AddEosNotificationCloseInstruction";
+  const QString c_sAddEosEvalHelpId =     "Editor/EOS/AddEosEvalInstruction";
+  const QString c_sAddEosGotoHelpId =     "Editor/EOS/AddEosGotoInstruction";
+  const QString c_sAddEosEndHelpId =      "Editor/EOS/AddEosEndInstruction";
+  const QString c_sAddEosEnableHelpId =   "Editor/EOS/AddEosEnableInstruction";
+  const QString c_sAddEosDisableHelpId =  "Editor/EOS/AddEosDisableInstruction";
+  const QString c_sAddEosRemoveHelpId =   "Editor/EOS/AddEosRemoveInstruction";
 
   const QString c_sAddFetishHelpId =      "Editor/AddFetish";
   const QString c_sRemoveFetishHelpId =   "Editor/RemoveFetish";
@@ -166,6 +181,7 @@ void CEditorActionBar::Initialize()
     wpHelpFactory->RegisterHelp(c_sStartDebugHelpId, ":/resources/help/editor/startdebug_button_help.html");
     m_spUi->StopDebugButton->setProperty(helpOverlay::c_sHelpPagePropertyName, c_sStopDebugHelpId);
     wpHelpFactory->RegisterHelp(c_sStopDebugHelpId, ":/resources/help/editor/stopdebug_button_help.html");
+
     m_spUi->AddShowImageCode->setProperty(helpOverlay::c_sHelpPagePropertyName, c_sAddShowImageHelpId);
     wpHelpFactory->RegisterHelp(c_sAddShowImageHelpId, ":/resources/help/editor/addshowimage_button_help.html");
     m_spUi->AddShowIconCode->setProperty(helpOverlay::c_sHelpPagePropertyName, c_sAddShowIconHelpId);
@@ -182,6 +198,37 @@ void CEditorActionBar::Initialize()
     wpHelpFactory->RegisterHelp(c_sAddThreadHelpId, ":/resources/help/editor/addthread_button_help.html");
     m_spUi->AddNotificationCode->setProperty(helpOverlay::c_sHelpPagePropertyName, c_sAddNotificationHelpId);
     wpHelpFactory->RegisterHelp(c_sAddNotificationHelpId, ":/resources/help/editor/addnotification_button_help.html");
+
+    m_spUi->AddImageCode->setProperty(helpOverlay::c_sHelpPagePropertyName, c_sAddEosImageHelpId);
+    wpHelpFactory->RegisterHelp(c_sAddEosImageHelpId, ":/resources/help/editor/add_eos_image_button_help.html");
+    m_spUi->AddAutioCode->setProperty(helpOverlay::c_sHelpPagePropertyName, c_sAddEosAudioHelpId);
+    wpHelpFactory->RegisterHelp(c_sAddEosAudioHelpId, ":/resources/help/editor/add_eos_audio_button_help.html");
+    m_spUi->AddSayCode->setProperty(helpOverlay::c_sHelpPagePropertyName, c_sAddEosSayHelpId);
+    wpHelpFactory->RegisterHelp(c_sAddEosSayHelpId, ":/resources/help/editor/add_eos_say_button_help.html");
+    m_spUi->AddPromptCode->setProperty(helpOverlay::c_sHelpPagePropertyName, c_sAddEosPromptHelpId);
+    wpHelpFactory->RegisterHelp(c_sAddEosPromptHelpId, ":/resources/help/editor/add_eos_prompt_button_help.html");
+    m_spUi->AddTimerCode2->setProperty(helpOverlay::c_sHelpPagePropertyName, c_sAddEosTimerHelpId);
+    wpHelpFactory->RegisterHelp(c_sAddEosTimerHelpId, ":/resources/help/editor/add_eos_timer_button_help.html");
+    m_spUi->AddChoiceCode->setProperty(helpOverlay::c_sHelpPagePropertyName, c_sAddEosChioceHelpId);
+    wpHelpFactory->RegisterHelp(c_sAddEosChioceHelpId, ":/resources/help/editor/add_eos_choice_button_help.html");
+    m_spUi->AddIfCode->setProperty(helpOverlay::c_sHelpPagePropertyName, c_sAddEosIfHelpId);
+    wpHelpFactory->RegisterHelp(c_sAddEosIfHelpId, ":/resources/help/editor/add_eos_if_button_help.html");
+    m_spUi->AddNotificationCreateCode->setProperty(helpOverlay::c_sHelpPagePropertyName, c_sAddEosNotCreateHelpId);
+    wpHelpFactory->RegisterHelp(c_sAddEosNotCreateHelpId, ":/resources/help/editor/add_eos_notification_button_help.html");
+    m_spUi->AddNotificationCloseCode->setProperty(helpOverlay::c_sHelpPagePropertyName, c_sAddEosNotCloseHelpId);
+    wpHelpFactory->RegisterHelp(c_sAddEosNotCloseHelpId, ":/resources/help/editor/add_eos_notification_button_help.html");
+    m_spUi->AddEvalCode->setProperty(helpOverlay::c_sHelpPagePropertyName, c_sAddEosEvalHelpId);
+    wpHelpFactory->RegisterHelp(c_sAddEosEvalHelpId, ":/resources/help/editor/add_eos_eval_button_help.html");
+    m_spUi->AddGotoCode->setProperty(helpOverlay::c_sHelpPagePropertyName, c_sAddEosGotoHelpId);
+    wpHelpFactory->RegisterHelp(c_sAddEosGotoHelpId, ":/resources/help/editor/add_eos_goto_button_help.html");
+    m_spUi->AddEndCode->setProperty(helpOverlay::c_sHelpPagePropertyName, c_sAddEosEndHelpId);
+    wpHelpFactory->RegisterHelp(c_sAddEosEndHelpId, ":/resources/help/editor/add_eos_end_button_help.html");
+    m_spUi->AddEnableCode->setProperty(helpOverlay::c_sHelpPagePropertyName, c_sAddEosEnableHelpId);
+    wpHelpFactory->RegisterHelp(c_sAddEosEnableHelpId, ":/resources/help/editor/add_eos_enable_button_help.html");
+    m_spUi->AddDisableCode->setProperty(helpOverlay::c_sHelpPagePropertyName, c_sAddEosDisableHelpId);
+    wpHelpFactory->RegisterHelp(c_sAddEosDisableHelpId, ":/resources/help/editor/add_eos_disable_button_help.html");
+    m_spUi->RemoveCode->setProperty(helpOverlay::c_sHelpPagePropertyName, c_sAddEosRemoveHelpId);
+    wpHelpFactory->RegisterHelp(c_sAddEosRemoveHelpId, ":/resources/help/editor/remove_eos_button_help.html");
   }
 
   connect(m_spSettings.get(), &CSettings::keyBindingsChanged,

@@ -1,0 +1,84 @@
+<!doctype html>
+<html class="no-js" lang="">
+
+<head>
+  <meta charset="utf-8">
+  <title>Add Metronome Code</title>
+  <meta name="description" content="">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <style>
+    h1 {
+      text-align: center;
+    }
+    div.container {
+      min-height: 10em;
+      display: table-cell;
+      margin-left: auto;
+      margin-right: auto;
+      width: 0.6em
+    }
+    table.warning {
+      color: black;
+      background-color: #cccc44;
+      border-color: yellow;
+      border-style: solid;
+    }
+  </style>
+</head>
+
+
+<body>
+  <h1>Add Audio Instruction</h1>
+
+  <hr>
+
+  <div class="container">
+    <p>This button opens adds an audio instruction to the currently opened eos script in
+    the <a href="qrc:/resources/help/editor/code/eos_editor_help.html">EOS Editor</a>.</p>
+
+    <br>
+
+    <p>The following parameters can be changed for audio instructions:<br>
+      <ul>
+        <li><b>locator<i> (json attr: locator)</i>:</b> The button next to the line editor
+        lets you select the <a href="qrc:/resources/help/editor/resources/resource_help.html">Sound Resource</a> to load and play.</li>
+        <li><b>id<i> (json attr: id)</i>:</b> This is the field where an id can be entered.<br>
+        This id can be used in eval scripts to access the <a href="qrc:/resources/help/editor/resources/resource_help.html">Sound Resource</a>.<br>
+        See the <a href="qrc:/resources/help/editor/code/eos_reference_help.html">EOS API Reference</a> for more information on how to use sound resources.</li>
+        <li><b>loops<i> (json attr: loops)</i>:</b> Sets the number of times the
+        <a href="qrc:/resources/help/editor/resources/resource_help.html">Sound Resource</a> is replayed when started.</li>
+        <li><b>start<i> (json attr: startAt)</i>:</b> Sets the start frame of the
+        <a href="qrc:/resources/help/editor/resources/resource_help.html">Sound Resource</a>.</li>
+        <li><b>seek<i> (json attr: seek)</i>:</b> Allows you to seek the position of a specific frame in a <a href="qrc:/resources/help/editor/resources/resource_help.html">Sound Resource</a>.</li>
+        <li><b>volume<i> (json attr: volume)</i>:</b> Allows to set the volume for the <a href="qrc:/resources/help/editor/resources/resource_help.html">Sound Resource</a>.</li>
+      </ul>
+    </p>
+
+    <br>
+
+    <table>
+    <tr><th>Settings</th><th>Resource Selection</th></tr>
+    <tr><th><img src="qrc:/resources/help/editor/images/eos_autio_play_1.png"></th><th><img src="qrc:/resources/help/editor/images/eos_autio_play_2.png"></th></tr>
+    </table>
+
+    <br>
+
+    <p>A full node in serialised JSON form:<br>
+      <pre style="font-family: courier,monospace;">
+{
+    "audio.play": {
+        "locator": "myBundle/myResource",
+        "id": "sound",
+        "loops": -1,
+        "startAt": 0,
+        "seek": 0,
+        "volume": 1.0
+    }
+}
+      </pre>
+    </p>
+  </div>
+</body>
+
+</html>

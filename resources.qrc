@@ -207,6 +207,31 @@
         <file>resources/style/img/ButtonSceneNodeWidget.png</file>
         <file>resources/style/img/ButtonResourceDisplay.png</file>
         <file>resources/style/img/ButtonResourceWidget.png</file>
+        <file>resources/help/editor/add_eos_audio_button_help.html</file>
+        <file>resources/help/editor/add_eos_choice_button_help.html</file>
+        <file>resources/help/editor/add_eos_disable_button_help.html</file>
+        <file>resources/help/editor/add_eos_enable_button_help.html</file>
+        <file>resources/help/editor/add_eos_end_button_help.html</file>
+        <file>resources/help/editor/add_eos_eval_button_help.html</file>
+        <file>resources/help/editor/add_eos_goto_button_help.html</file>
+        <file>resources/help/editor/add_eos_if_button_help.html</file>
+        <file>resources/help/editor/add_eos_image_button_help.html</file>
+        <file>resources/help/editor/add_eos_notification_button_help.html</file>
+        <file>resources/help/editor/add_eos_prompt_button_help.html</file>
+        <file>resources/help/editor/add_eos_say_button_help.html</file>
+        <file>resources/help/editor/add_eos_timer_button_help.html</file>
+        <file>resources/help/editor/remove_eos_button_help.html</file>
+        <file>resources/style/img/ButtonAudio.png</file>
+        <file>resources/style/img/ButtonChoice.png</file>
+        <file>resources/style/img/ButtonDisable.png</file>
+        <file>resources/style/img/ButtonEnable.png</file>
+        <file>resources/style/img/ButtonEval.png</file>
+        <file>resources/style/img/ButtonGoto.png</file>
+        <file>resources/style/img/ButtonIf.png</file>
+        <file>resources/style/img/ButtonNotificationClose.png</file>
+        <file>resources/style/img/ButtonPrompt.png</file>
+        <file>resources/help/editor/images/eos_autio_play_1.png</file>
+        <file>resources/help/editor/images/eos_autio_play_2.png</file>
     </qresource>
     <qresource prefix="/qml">
         <file>resources/qml/ProjectCardSelection.qml</file>

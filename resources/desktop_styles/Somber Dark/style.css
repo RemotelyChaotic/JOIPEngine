@@ -286,7 +286,8 @@ QPushButton#SourceButton {
   qproperty-icon: url(ui/ButtonIcon.png) off,
                   url(ui/ButtonIcon.png) on;
 }
-QPushButton#AddShowImageCode {
+QPushButton#AddShowImageCode,
+QPushButton#AddImageCode {
   border-image: url(ui/IconBg.svg) 0 0 0 0 stretch stretch;
   border-top: 0 transparent;
   border-bottom: 0 transparent;
@@ -295,7 +296,8 @@ QPushButton#AddShowImageCode {
   qproperty-icon: url(ui/ButtonImage.png) off,
                   url(ui/ButtonImage.png) on;
 }
-QPushButton#AddTextCode {
+QPushButton#AddTextCode,
+QPushButton#AddSayCode {
   border-image: url(ui/IconBg.svg) 0 0 0 0 stretch stretch;
   border-top: 0 transparent;
   border-bottom: 0 transparent;
@@ -313,7 +315,8 @@ QPushButton#AddMetronomeCode {
   qproperty-icon: url(ui/ButtonMetronome.png) off,
                   url(ui/ButtonMetronome.png) on;
 }
-QPushButton#AddTimerCode {
+QPushButton#AddTimerCode,
+QPushButton#AddTimerCode2 {
   border-image: url(ui/IconBg.svg) 0 0 0 0 stretch stretch;
   border-top: 0 transparent;
   border-bottom: 0 transparent;
@@ -322,7 +325,8 @@ QPushButton#AddTimerCode {
   qproperty-icon: url(ui/ButtonClock.png) off,
                   url(ui/ButtonClock.png) on;
 }
-QPushButton#AddNotificationCode {
+QPushButton#AddNotificationCode,
+QPushButton#AddNotificationCreateCode {
   border-image: url(ui/IconBg.svg) 0 0 0 0 stretch stretch;
   border-top: 0 transparent;
   border-bottom: 0 transparent;
@@ -381,7 +385,8 @@ QPushButton#AddThreadCode {
   qproperty-icon: url(ui/ButtonThread.png) off,
                   url(ui/ButtonThread.png) on;
 }
-QPushButton#ExitButton {
+QPushButton#ExitButton,
+QPushButton#AddEndCode {
   border-image: url(ui/IconBg.svg) 0 0 0 0 stretch stretch;
   border-top: 0 transparent;
   border-bottom: 0 transparent;
@@ -404,7 +409,8 @@ QPushButton#AddResourceButton,
 QPushButton#AddButtonButton,
 QPushButton#AddTextColorButton,
 QPushButton#AddBGColorButton,
-QPushButton#AddFetishButton {
+QPushButton#AddFetishButton,
+QPushButton#AddButtonButton {
   padding: 0px;
   min-width: 24px;
   min-height: 24px;
@@ -442,7 +448,9 @@ QPushButton#RemoveResourceButton,
 QPushButton#RemoveButtonButton,
 QPushButton#RemoveTextColorButton,
 QPushButton#RemoveBGColorButton,
-QPushButton#RemoveFetishButton {
+QPushButton#RemoveFetishButton,
+QPushButton#RemoveCode,
+QPushButton#RemoveButtonButton {
   padding: 0px;
   min-width: 24px;
   min-height: 24px;
@@ -661,6 +669,96 @@ QPushButton#eSceneCodeEditorWidget {
   qproperty-icon: url(ui/ButtonCode.png) off,
                   url(ui/ButtonCode.png) on;
 }
+QPushButton#AddAutioCode {
+  border-image: url(ui/IconBg.svg) 0 0 0 0 stretch stretch;
+  border-top: 0 transparent;
+  border-bottom: 0 transparent;
+  border-right: 0 transparent;
+  border-left: 0 transparent;
+  qproperty-icon: url(ui/ButtonAudio.png) off,
+                  url(ui/ButtonAudio.png) on;
+}
+QPushButton#AddPromptCode {
+  border-image: url(ui/IconBg.svg) 0 0 0 0 stretch stretch;
+  border-top: 0 transparent;
+  border-bottom: 0 transparent;
+  border-right: 0 transparent;
+  border-left: 0 transparent;
+  qproperty-icon: url(ui/ButtonPrompt.png) off,
+                  url(ui/ButtonPrompt.png) on;
+}
+QPushButton#AddChoiceCode {
+  border-image: url(ui/IconBg.svg) 0 0 0 0 stretch stretch;
+  border-top: 0 transparent;
+  border-bottom: 0 transparent;
+  border-right: 0 transparent;
+  border-left: 0 transparent;
+  qproperty-icon: url(ui/ButtonChoice.png) off,
+                  url(ui/ButtonChoice.png) on;
+}
+QPushButton#AddIfCode {
+  border-image: url(ui/IconBg.svg) 0 0 0 0 stretch stretch;
+  border-top: 0 transparent;
+  border-bottom: 0 transparent;
+  border-right: 0 transparent;
+  border-left: 0 transparent;
+  qproperty-icon: url(ui/ButtonIf.png) off,
+                  url(ui/ButtonIf.png) on;
+}
+QPushButton#AddEvalCode {
+  border-image: url(ui/IconBg.svg) 0 0 0 0 stretch stretch;
+  border-top: 0 transparent;
+  border-bottom: 0 transparent;
+  border-right: 0 transparent;
+  border-left: 0 transparent;
+  qproperty-icon: url(ui/ButtonEval.png) off,
+                  url(ui/ButtonEval.png) on;
+}
+QPushButton#AddGotoCode {
+  border-image: url(ui/IconBg.svg) 0 0 0 0 stretch stretch;
+  border-top: 0 transparent;
+  border-bottom: 0 transparent;
+  border-right: 0 transparent;
+  border-left: 0 transparent;
+  qproperty-icon: url(ui/ButtonGoto.png) off,
+                  url(ui/ButtonGoto.png) on;
+}
+QPushButton#AddEnableCode {
+  border-image: url(ui/IconBg.svg) 0 0 0 0 stretch stretch;
+  border-top: 0 transparent;
+  border-bottom: 0 transparent;
+  border-right: 0 transparent;
+  border-left: 0 transparent;
+  qproperty-icon: url(ui/ButtonEnable.png) off,
+                  url(ui/ButtonEnable.png) on;
+}
+QPushButton#AddDisableCode {
+  border-image: url(ui/IconBg.svg) 0 0 0 0 stretch stretch;
+  border-top: 0 transparent;
+  border-bottom: 0 transparent;
+  border-right: 0 transparent;
+  border-left: 0 transparent;
+  qproperty-icon: url(ui/ButtonDisable.png) off,
+                  url(ui/ButtonDisable.png) on;
+}
+QPushButton#AddNotificationCloseCode {
+  border-image: url(ui/IconBg.svg) 0 0 0 0 stretch stretch;
+  border-top: 0 transparent;
+  border-bottom: 0 transparent;
+  border-right: 0 transparent;
+  border-left: 0 transparent;
+  qproperty-icon: url(ui/ButtonNotificationClose.png) off,
+                  url(ui/ButtonNotificationClose.png) on;
+}
+QPushButton#SearchButton {
+  border-image: url(ui/IconBg.svg) 0 0 0 0 stretch stretch;
+  border-top: 0 transparent;
+  border-bottom: 0 transparent;
+  border-right: 0 transparent;
+  border-left: 0 transparent;
+  qproperty-icon: url(ui/ButtonSearch.png) off,
+                  url(ui/ButtonSearch.png) on;
+}
 
 QPushButton#AddShowBackgroundCode:hover,
 QPushButton#AddShowIconCode:hover,
@@ -701,7 +799,25 @@ QPushButton#eResourceWidget:hover,
 QPushButton#eResourceDisplay:hover,
 QPushButton#eProjectSettings:hover,
 QPushButton#eSceneNodeWidget:hover,
-QPushButton#eSceneCodeEditorWidget:hover {
+QPushButton#eSceneCodeEditorWidget:hover,
+QPushButton#AddAutioCode:hover,
+QPushButton#AddPromptCode:hover,
+QPushButton#AddChoiceCode:hover,
+QPushButton#AddIfCode:hover,
+QPushButton#AddEvalCode:hover,
+QPushButton#AddGotoCode:hover,
+QPushButton#AddEnableCode:hover,
+QPushButton#AddDisableCode:hover,
+QPushButton#AddNotificationCloseCode:hover,
+QPushButton#AddImageCode:hover,
+QPushButton#AddSayCode:hover,
+QPushButton#AddTimerCode2:hover,
+QPushButton#AddNotificationCreateCode:hover,
+QPushButton#AddEndCode:hover,
+QPushButton#RemoveCode:hover,
+QPushButton#SearchButton:hover,
+QPushButton#RemoveButtonButton:hover,
+QPushButton#AddButtonButton:hover {
   border-image: url(ui/IconBgHover.svg) 0 0 0 0 stretch stretch;
 }
 
@@ -740,11 +856,29 @@ QPushButton#AddScriptFile:pressed,
 QPushButton#UndoButton:pressed,
 QPushButton#RedoButton:pressed,
 QPushButton#DownloadButton:pressed,
-QPushButton#eResourceWidget:hover,
-QPushButton#eResourceDisplay:hover,
-QPushButton#eProjectSettings:hover,
-QPushButton#eSceneNodeWidget:hover,
-QPushButton#eSceneCodeEditorWidget:hover {
+QPushButton#eResourceWidget:pressed,
+QPushButton#eResourceDisplay:pressed,
+QPushButton#eProjectSettings:pressed,
+QPushButton#eSceneNodeWidget:pressed,
+QPushButton#eSceneCodeEditorWidget:pressed,
+QPushButton#AddAutioCode:pressed,
+QPushButton#AddPromptCode:pressed,
+QPushButton#AddChoiceCode:pressed,
+QPushButton#AddIfCode:pressed,
+QPushButton#AddEvalCode:pressed,
+QPushButton#AddGotoCode:pressed,
+QPushButton#AddEnableCode:pressed,
+QPushButton#AddDisableCode:pressed,
+QPushButton#AddNotificationCloseCode:pressed,
+QPushButton#AddImageCode:pressed,
+QPushButton#AddSayCode:pressed,
+QPushButton#AddTimerCode2:pressed,
+QPushButton#AddNotificationCreateCode:pressed,
+QPushButton#AddEndCode:pressed,
+QPushButton#RemoveCode:pressed,
+QPushButton#SearchButton:pressed,
+QPushButton#RemoveButtonButton:pressed,
+QPushButton#AddButtonButton:pressed {
   border-image: url(ui/IconBgPressed.svg) 0 0 0 0 stretch stretch;
 }
 
@@ -787,7 +921,25 @@ QPushButton#eResourceWidget:disabled,
 QPushButton#eResourceDisplay:disabled,
 QPushButton#eProjectSettings:disabled,
 QPushButton#eSceneNodeWidget:disabled,
-QPushButton#eSceneCodeEditorWidget:disabled {
+QPushButton#eSceneCodeEditorWidget:disabled,
+QPushButton#AddAutioCode:disabled,
+QPushButton#AddPromptCode:disabled,
+QPushButton#AddChoiceCode:disabled,
+QPushButton#AddIfCode:disabled,
+QPushButton#AddEvalCode:disabled,
+QPushButton#AddGotoCode:disabled,
+QPushButton#AddEnableCode:disabled,
+QPushButton#AddDisableCode:disabled,
+QPushButton#AddNotificationCloseCode:disabled,
+QPushButton#AddImageCode:disabled,
+QPushButton#AddSayCode:disabled,
+QPushButton#AddTimerCode2:disabled,
+QPushButton#AddNotificationCreateCode:disabled,
+QPushButton#AddEndCode:disabled,
+QPushButton#RemoveCode:disabled,
+QPushButton#SearchButton:disabled,
+QPushButton#RemoveButtonButton:disabled,
+QPushButton#AddButtonButton:disabled {
   border-image: url(ui/IconBgDisabled.svg) 0 0 0 0 stretch stretch;
 }
 
@@ -1219,7 +1371,8 @@ QComboBox::down-arrow {
 */
 QDoubleSpinBox,
 QTimeEdit,
-QSpinBox {
+QSpinBox,
+CLongLongSpinBox {
   color: white;
   background-color: black;
   padding-right: 16px; /* make room for the arrows */
@@ -1231,13 +1384,15 @@ QSpinBox {
 }
 QDoubleSpinBox:disabled,
 QTimeEdit:disabled,
-QSpinBox:disabled {
+QSpinBox:disabled,
+CLongLongSpinBox:disabled {
   color: rgb(42, 42, 42);
 }
 
 QDoubleSpinBox::up-button,
 QTimeEdit::up-button,
-QSpinBox::up-button {
+QSpinBox::up-button,
+CLongLongSpinBox::up-button {
   padding-right: 2px;
 
   subcontrol-origin: border;
@@ -1251,7 +1406,8 @@ QSpinBox::up-button {
 
 QDoubleSpinBox::up-arrow,
 QTimeEdit::up-arrow,
-QSpinBox::up-arrow {
+QSpinBox::up-arrow,
+CLongLongSpinBox::up-arrow {
   image: url(ui/ButtonPlus.png);
   width: 12px;
   height: 12px;
@@ -1259,7 +1415,8 @@ QSpinBox::up-arrow {
 
 QDoubleSpinBox::down-button,
 QTimeEdit::down-button,
-QSpinBox::down-button {
+QSpinBox::down-button,
+CLongLongSpinBox::down-button {
   padding-right: 2px;
 
   subcontrol-origin: border;
@@ -1273,7 +1430,8 @@ QSpinBox::down-button {
 
 QDoubleSpinBox::down-arrow,
 QTimeEdit::down-arrow,
-QSpinBox::down-arrow {
+QSpinBox::down-arrow,
+CLongLongSpinBox::down-arrow {
   image: url(ui/ButtonMinus.png);
   width: 12px;
   height: 12px;

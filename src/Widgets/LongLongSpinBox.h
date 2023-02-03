@@ -2,6 +2,7 @@
 #define CLONGLONGSPINBOX_H
 
 #include <QAbstractSpinBox>
+#include <limits>
 
 class CLongLongSpinBox : public QAbstractSpinBox
 {
@@ -44,7 +45,7 @@ private slots:
 
 private:
   qint64 m_iMin = 0;
-  qint64 m_iMax = LONG_MAX;
+  qint64 m_iMax = LLONG_MAX;
   qint64 m_iValue = 0;
 };
 
