@@ -82,6 +82,8 @@ CCodeDisplayWidget::CCodeDisplayWidget(QWidget* pParent) :
 
   connect(m_spUi->pCodeEdit->document(), &QTextDocument::contentsChange,
           this, &CCodeDisplayWidget::SignalContentsChange);
+  connect(m_spUi->pEosEdit, &CEosScriptEditorView::SignalContentsChange,
+          this, &CCodeDisplayWidget::SignalContentsChange);
 }
 
 CCodeDisplayWidget::~CCodeDisplayWidget()

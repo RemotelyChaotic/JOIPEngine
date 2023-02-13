@@ -17,6 +17,7 @@ public:
 
 signals:
   void SignalClickedOutside();
+  void SignalContentsChange(qint32 iPos, qint32 iDel, qint32 iAdd);
 
 protected slots:
   void SlotModelReset();

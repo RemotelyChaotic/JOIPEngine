@@ -11,6 +11,7 @@ struct SItemIndexPath;
 
 class CEosScriptModel : public QAbstractItemModel
 {
+  Q_OBJECT
   friend class CCommandInsertEosCommand;
   friend class CCommandRemoveEosCommand;
 
@@ -52,6 +53,7 @@ public:
   QModelIndex GetIndex(const SItemIndexPath& index) const;
 
 signals:
+  void SignalContentsChange(qint32 iPos, qint32 iDel, qint32 iAdd);
 
 protected:
   QModelIndex InsertInstructionImpl(const QModelIndex& current,

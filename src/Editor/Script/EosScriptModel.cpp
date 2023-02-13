@@ -158,6 +158,7 @@ void CEosScriptModel::Update(const QModelIndex& index)
   if (index.isValid())
   {
     emit dataChanged(index, index);
+    emit SignalContentsChange(index.row(), 1, 1);
   }
 }
 
@@ -528,6 +529,7 @@ QModelIndex CEosScriptModel::InsertInstructionAtImpl(
   endInsertRows();
 
   emit dataChanged(idxInserted, idxInserted);
+  emit SignalContentsChange(idxInserted.row(), 0, 1);
 
   return idxInserted;
 }
@@ -606,6 +608,8 @@ void CEosScriptModel::RemoveInstructionImpl(const QModelIndex& current)
       pCurrentItem->Parent()->RemoveChildren(iModelIndex, 1);
       pCurrentItem = nullptr;
       endRemoveRows();
+
+      emit SignalContentsChange(iModelIndex, 1, 0);
     }
   }
 }

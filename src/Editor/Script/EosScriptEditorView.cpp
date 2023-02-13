@@ -109,6 +109,8 @@ void CEosScriptEditorView::setModel(QAbstractItemModel* pModel)
     {
       connect(pModel, &QAbstractItemModel::modelReset, this,
               &CEosScriptEditorView::SlotModelReset, Qt::UniqueConnection);
+      connect(m_pModel, &CEosScriptModel::SignalContentsChange,
+              this, &CEosScriptEditorView::SignalContentsChange, Qt::UniqueConnection);
       SlotModelReset();
     }
   }
