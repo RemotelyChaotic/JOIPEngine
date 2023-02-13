@@ -3,13 +3,14 @@
 
 #include "JsonInstructionSetRunner.h"
 #include <QVariant>
+#include <tuple>
 
 //----------------------------------------------------------------------------------------
 //
 class IJsonInstructionBase
 {
 public:
-  typedef std::vector<std::pair<QString, qint32>> tChildNodeGroups;
+  typedef std::vector<std::tuple<QString, QString, qint32>> tChildNodeGroups;
   typedef std::variant<SJsonException,
                        SRunRetVal<ENextCommandToCall::eChild>,
                        SRunRetVal<ENextCommandToCall::eSibling>,

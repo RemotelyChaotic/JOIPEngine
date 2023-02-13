@@ -66,7 +66,7 @@ CCommandEosChoiceBase::tChildNodeGroups CCommandEosChoiceBase::ChildNodeGroups(c
           viNumChildren.push_back(static_cast<qint32>(commands.size()));
         }
 
-        vsReturn.push_back({sLabel, viNumChildren.back()});
+        vsReturn.push_back({sLabel, sLabel, viNumChildren.back()});
       }
     }
   }

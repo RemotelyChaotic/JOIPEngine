@@ -42,5 +42,5 @@ CCommandEosTimerBase::tChildNodeGroups CCommandEosTimerBase::ChildNodeGroups(con
     tInstructionArrayValue arrOptions = std::get<tInstructionArrayValue>(itCommands);
     iCommands = static_cast<quint32>(arrOptions.size());
   }
-  return {{QString("On Timeout"), iCommands}};
+  return {{QString("On Timeout"), QString("commands"), iCommands}};
 }

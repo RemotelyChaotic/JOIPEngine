@@ -59,18 +59,25 @@ void CEosScriptModel::Invalidate(const QModelIndex& idx)
       }
       if (pCurrentItem->Type()._to_integral() == EosScriptModelItem::eInstruction)
       {
-        beginRemoveRows(currentIdx, 0, pCurrentItem->ChildCount()-1);
-        pCurrentItem->RemoveChildren(0, pCurrentItem->ChildCount());
-        endRemoveRows();
+        if (pCurrentItem->ChildCount() > 0)
+        {
+          beginRemoveRows(currentIdx, 0, pCurrentItem->ChildCount()-1);
+          pCurrentItem->RemoveChildren(0, pCurrentItem->ChildCount());
+          endRemoveRows();
+        }
 
         IJsonInstructionBase::tChildNodeGroups vChildGroups;
         if (auto spCommand = pCurrentItem->Node()->m_wpCommand.lock())
         {
           vChildGroups = spCommand->ChildNodeGroups(pCurrentItem->Node()->m_actualArgs);
         }
-        beginInsertRows(currentIdx, 0, static_cast<qint32>(vChildGroups.size()-1));
-        RecursivelyConstruct(pCurrentItem, pCurrentItem->Node());
-        endInsertRows();
+
+        if (vChildGroups.size() > 0)
+        {
+          beginInsertRows(currentIdx, 0, static_cast<qint32>(vChildGroups.size()-1));
+          RecursivelyConstruct(pCurrentItem, pCurrentItem->Node());
+          endInsertRows();
+        }
 
         Update(currentIdx);
         return;
@@ -235,6 +242,13 @@ QModelIndex CEosScriptModel::index(int iRow, int iColumn,
 
 //----------------------------------------------------------------------------------------
 //
+bool CEosScriptModel::hasChildren(const QModelIndex& parent) const
+{
+  return QAbstractItemModel::hasChildren(parent);
+}
+
+//----------------------------------------------------------------------------------------
+//
 QModelIndex CEosScriptModel::parent(const QModelIndex& index) const
 {
   if (!index.isValid()) { return QModelIndex(); }
@@ -249,8 +263,12 @@ QModelIndex CEosScriptModel::parent(const QModelIndex& index) const
       if (nullptr != pParentParent)
       {
         iRowOfParent = pParentParent->ChildIndex(pParent);
+        return createIndex(iRowOfParent, index.column(), pParent);
       }
-      return createIndex(iRowOfParent, index.column(), pParent);
+      else
+      {
+        return QModelIndex();
+      }
     }
   }
   return QModelIndex();
@@ -493,7 +511,7 @@ QModelIndex CEosScriptModel::InsertInstructionAtImpl(
     const tInstructionMapValue& args, std::shared_ptr<CJsonInstructionNode> spNodeParent)
 {
   // on handled cases start the insertion
-  beginInsertRows(parent, iInsertPoint, iInsertPoint);
+  beginInsertRows(parent, iModelItemInsertPoint, iModelItemInsertPoint);
   std::shared_ptr<CJsonInstructionNode> spNewNode = std::make_shared<CJsonInstructionNode>();
   if (spNodeParent->m_spChildren.size() > iInsertPoint && iInsertPoint)
   {
@@ -524,7 +542,7 @@ QModelIndex CEosScriptModel::InsertInstructionAtImpl(
     }
   }
 
-  QModelIndex idxInserted = Inserted(parent, iModelItemInsertPoint);
+  QModelIndex idxInserted = Inserted(parent, iInsertPoint, iModelItemInsertPoint);
 
   endInsertRows();
 
@@ -667,7 +685,7 @@ void RecursivelyConstructChild(CEosScriptModelItem* pParentItem,
 
 //----------------------------------------------------------------------------------------
 //
-QModelIndex CEosScriptModel::Inserted(const QModelIndex& parent, qint32 iIndex)
+QModelIndex CEosScriptModel::Inserted(const QModelIndex& parent, qint32 iInsertPoint, qint32 iModelItemInsertPoint)
 {
   CEosScriptModelItem* pParentItem = GetItem(parent);
   CEosScriptModelItem* pChildItem = nullptr;
@@ -682,15 +700,15 @@ QModelIndex CEosScriptModel::Inserted(const QModelIndex& parent, qint32 iIndex)
       vChildGroups = spCommand->ChildNodeGroups(spParentNode->m_actualArgs);
     }
 
-    spChildNode = spParentNode->m_spChildren.at(iIndex);
+    spChildNode = spParentNode->m_spChildren.at(iInsertPoint);
     pChildItem =
         new CEosScriptModelItem(EosScriptModelItem::eInstruction, pParentItem,
                                 spChildNode);
-    pParentItem->InsertChild(pChildItem, iIndex);
+    pParentItem->InsertChild(pChildItem, iModelItemInsertPoint);
 
     RecursivelyConstruct(pChildItem, spChildNode);
 
-    return createIndex(iIndex, eos_item::c_iColumnName, pChildItem);
+    return createIndex(iModelItemInsertPoint, eos_item::c_iColumnName, pChildItem);
   }
 
   return QModelIndex();
@@ -718,16 +736,16 @@ void CEosScriptModel::RecursivelyConstruct(
                 new CEosScriptModelItem(EosScriptModelItem::eInstructionChild, pParentItem,
                                         spParentInstruction);
       pParentItem->AppendChild(pChild);
-      pChild->SetCustomName(pair.first);
+      pChild->SetCustomName(std::get<0>(pair));
 
-      for (qint32 i = iCurrent; iCurrent+pair.second > i; ++i)
+      for (qint32 i = iCurrent; iCurrent+std::get<2>(pair) > i; ++i)
       {
         if (spParentInstruction->m_spChildren.size() <= i) { assert(false); break; }
         RecursivelyConstructChild(pChild, spParentInstruction->m_spChildren[i],
                                   std::bind(&CEosScriptModel::RecursivelyConstruct, this,
                                             std::placeholders::_1, std::placeholders::_2));
       }
-      iCurrent += pair.second;
+      iCurrent += std::get<2>(pair);
     }
   }
   else

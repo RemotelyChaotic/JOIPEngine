@@ -96,8 +96,8 @@ void CCommandEosChoiceModel::InsertedChildAt(tInstructionMapValue* pArgs, qint32
 {
   tChildNodeGroups groups = ChildNodeGroups(*pArgs);
   auto it = std::find_if(groups.begin(), groups.end(),
-                      [&sIntoGroup](const std::pair<QString, qint32>& pair) {
-    return pair.first == sIntoGroup;
+                      [&sIntoGroup](const std::tuple<QString, QString, qint32>& tuple) {
+    return std::get<0>(tuple) == sIntoGroup;
   });
 
   if (groups.end() != it)
@@ -135,8 +135,8 @@ void CCommandEosChoiceModel::RemoveChildAt(tInstructionMapValue* pArgs, qint32 i
 {
   tChildNodeGroups groups = ChildNodeGroups(*pArgs);
   auto it = std::find_if(groups.begin(), groups.end(),
-                      [&sIntoGroup](const std::pair<QString, qint32>& pair) {
-    return pair.first == sIntoGroup;
+                      [&sIntoGroup](const std::tuple<QString, QString, qint32>& tuple) {
+    return std::get<0>(tuple) == sIntoGroup;
   });
 
   if (groups.end() != it)
@@ -365,21 +365,22 @@ void CCommandEosIfModel::InsertedChildAt(tInstructionMapValue* pArgs, qint32 iIn
 {
   tChildNodeGroups groups = ChildNodeGroups(*pArgs);
   auto it = std::find_if(groups.begin(), groups.end(),
-                      [&sIntoGroup](const std::pair<QString, qint32>& pair) {
-    return pair.first == sIntoGroup;
+                      [&sIntoGroup](const std::tuple<QString, QString, qint32>& tuple) {
+    return std::get<0>(tuple) == sIntoGroup;
   });
 
   if (groups.end() != it)
   {
+    QString sAttr = std::get<1>(*it);
     tInstructionArrayValue arrCommands;
 
-    const auto& itCommands = GetValue<EArgumentType::eArray>(*pArgs, it->first);
-    if (HasValue(*pArgs, it->first) && IsOk<EArgumentType::eArray>(itCommands))
+    const auto& itCommands = GetValue<EArgumentType::eArray>(*pArgs, sAttr);
+    if (HasValue(*pArgs, sAttr) && IsOk<EArgumentType::eArray>(itCommands))
     {
       arrCommands = std::get<tInstructionArrayValue>(itCommands);
       arrCommands.insert(arrCommands.begin()+iIndex, { EArgumentType::eObject, sInsertedChild});
     }
-    pArgs->insert_or_assign(it->first,
+    pArgs->insert_or_assign(sAttr,
                             SInstructionArgumentValue{ EArgumentType::eArray, arrCommands });
   }
 }
@@ -391,21 +392,22 @@ void CCommandEosIfModel::RemoveChildAt(tInstructionMapValue* pArgs, qint32 iInde
 {
   tChildNodeGroups groups = ChildNodeGroups(*pArgs);
   auto it = std::find_if(groups.begin(), groups.end(),
-                      [&sIntoGroup](const std::pair<QString, qint32>& pair) {
-    return pair.first == sIntoGroup;
+                      [&sIntoGroup](const std::tuple<QString, QString, qint32>& tuple) {
+    return std::get<0>(tuple) == sIntoGroup;
   });
 
   if (groups.end() != it)
   {
+    QString sAttr = std::get<1>(*it);
     tInstructionArrayValue arrCommands;
 
-    const auto& itCommands = GetValue<EArgumentType::eArray>(*pArgs, it->first);
-    if (HasValue(*pArgs, it->first) && IsOk<EArgumentType::eArray>(itCommands))
+    const auto& itCommands = GetValue<EArgumentType::eArray>(*pArgs, sAttr);
+    if (HasValue(*pArgs, sAttr) && IsOk<EArgumentType::eArray>(itCommands))
     {
       arrCommands = std::get<tInstructionArrayValue>(itCommands);
       arrCommands.erase(arrCommands.begin()+iIndex);
     }
-    pArgs->insert_or_assign(it->first,
+    pArgs->insert_or_assign(sAttr,
                             SInstructionArgumentValue{ EArgumentType::eArray, arrCommands });
   }
 }
@@ -536,21 +538,22 @@ void CCommandEosNotificationCreateModel::InsertedChildAt(tInstructionMapValue* p
 {
   tChildNodeGroups groups = ChildNodeGroups(*pArgs);
   auto it = std::find_if(groups.begin(), groups.end(),
-                      [&sIntoGroup](const std::pair<QString, qint32>& pair) {
-    return pair.first == sIntoGroup;
+                      [&sIntoGroup](const std::tuple<QString, QString, qint32>& tuple) {
+    return std::get<0>(tuple) == sIntoGroup;
   });
 
   if (groups.end() != it)
   {
+    QString sAttr = std::get<1>(*it);
     tInstructionArrayValue arrCommands;
 
-    const auto& itCommands = GetValue<EArgumentType::eArray>(*pArgs, it->first);
-    if (HasValue(*pArgs, it->first) && IsOk<EArgumentType::eArray>(itCommands))
+    const auto& itCommands = GetValue<EArgumentType::eArray>(*pArgs, sAttr);
+    if (HasValue(*pArgs, sAttr) && IsOk<EArgumentType::eArray>(itCommands))
     {
       arrCommands = std::get<tInstructionArrayValue>(itCommands);
       arrCommands.insert(arrCommands.begin()+iIndex, { EArgumentType::eObject, sInsertedChild});
     }
-    pArgs->insert_or_assign(it->first,
+    pArgs->insert_or_assign(sAttr,
                             SInstructionArgumentValue{ EArgumentType::eArray, arrCommands });
   }
 }
@@ -562,21 +565,22 @@ void CCommandEosNotificationCreateModel::RemoveChildAt(tInstructionMapValue* pAr
 {
   tChildNodeGroups groups = ChildNodeGroups(*pArgs);
   auto it = std::find_if(groups.begin(), groups.end(),
-                      [&sIntoGroup](const std::pair<QString, qint32>& pair) {
-    return pair.first == sIntoGroup;
+                      [&sIntoGroup](const std::tuple<QString, QString, qint32>& tuple) {
+    return std::get<0>(tuple) == sIntoGroup;
   });
 
   if (groups.end() != it)
   {
+    QString sAttr = std::get<1>(*it);
     tInstructionArrayValue arrCommands;
 
-    const auto& itCommands = GetValue<EArgumentType::eArray>(*pArgs, it->first);
-    if (HasValue(*pArgs, it->first) && IsOk<EArgumentType::eArray>(itCommands))
+    const auto& itCommands = GetValue<EArgumentType::eArray>(*pArgs, sAttr);
+    if (HasValue(*pArgs, sAttr) && IsOk<EArgumentType::eArray>(itCommands))
     {
       arrCommands = std::get<tInstructionArrayValue>(itCommands);
       arrCommands.erase(arrCommands.begin()+iIndex);
     }
-    pArgs->insert_or_assign(it->first,
+    pArgs->insert_or_assign(sAttr,
                             SInstructionArgumentValue{ EArgumentType::eArray, arrCommands });
   }
 }
@@ -732,21 +736,22 @@ void CCommandEosTimerModel::InsertedChildAt(tInstructionMapValue* pArgs, qint32 
 {
   tChildNodeGroups groups = ChildNodeGroups(*pArgs);
   auto it = std::find_if(groups.begin(), groups.end(),
-                      [&sIntoGroup](const std::pair<QString, qint32>& pair) {
-    return pair.first == sIntoGroup;
+                      [&sIntoGroup](const std::tuple<QString, QString, qint32>& tuple) {
+    return std::get<0>(tuple) == sIntoGroup;
   });
 
   if (groups.end() != it)
   {
+    QString sAttr = std::get<1>(*it);
     tInstructionArrayValue arrCommands;
 
-    const auto& itCommands = GetValue<EArgumentType::eArray>(*pArgs, it->first);
-    if (HasValue(*pArgs, it->first) && IsOk<EArgumentType::eArray>(itCommands))
+    const auto& itCommands = GetValue<EArgumentType::eArray>(*pArgs, sAttr);
+    if (HasValue(*pArgs, sAttr) && IsOk<EArgumentType::eArray>(itCommands))
     {
       arrCommands = std::get<tInstructionArrayValue>(itCommands);
       arrCommands.insert(arrCommands.begin()+iIndex, { EArgumentType::eObject, sInsertedChild});
     }
-    pArgs->insert_or_assign(it->first,
+    pArgs->insert_or_assign(sAttr,
                             SInstructionArgumentValue{ EArgumentType::eArray, arrCommands });
   }
 }
@@ -758,21 +763,22 @@ void CCommandEosTimerModel::RemoveChildAt(tInstructionMapValue* pArgs, qint32 iI
 {
   tChildNodeGroups groups = ChildNodeGroups(*pArgs);
   auto it = std::find_if(groups.begin(), groups.end(),
-                      [&sIntoGroup](const std::pair<QString, qint32>& pair) {
-    return pair.first == sIntoGroup;
+                      [&sIntoGroup](const std::tuple<QString, QString, qint32>& tuple) {
+    return std::get<0>(tuple) == sIntoGroup;
   });
 
   if (groups.end() != it)
   {
+    QString sAttr = std::get<1>(*it);
     tInstructionArrayValue arrCommands;
 
-    const auto& itCommands = GetValue<EArgumentType::eArray>(*pArgs, it->first);
-    if (HasValue(*pArgs, it->first) && IsOk<EArgumentType::eArray>(itCommands))
+    const auto& itCommands = GetValue<EArgumentType::eArray>(*pArgs, sAttr);
+    if (HasValue(*pArgs, sAttr) && IsOk<EArgumentType::eArray>(itCommands))
     {
       arrCommands = std::get<tInstructionArrayValue>(itCommands);
       arrCommands.erase(arrCommands.begin()+iIndex);
     }
-    pArgs->insert_or_assign(it->first,
+    pArgs->insert_or_assign(sAttr,
                             SInstructionArgumentValue{ EArgumentType::eArray, arrCommands });
   }
 }

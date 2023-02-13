@@ -53,5 +53,6 @@ CCommandEosNotificationCreateBase::tChildNodeGroups CCommandEosNotificationCreat
     const tInstructionArrayValue& arrOptions = std::get<tInstructionArrayValue>(itTimerCommands);
     iCommandsTimer = static_cast<quint32>(arrOptions.size());
   }
-  return {{QString("On Click"), iCommandsButton}, {QString("On Timeout"), iCommandsTimer}};
+  return {{QString("On Click"), QString("buttonCommands"), iCommandsButton},
+          {QString("On Timeout"), QString("timerCommands"), iCommandsTimer}};
 }

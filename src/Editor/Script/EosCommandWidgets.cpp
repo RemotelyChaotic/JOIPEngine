@@ -469,10 +469,9 @@ void CEosCommandWidgetChoice::on_AddButtonButton_clicked()
     tInstructionArrayValue arrOptions = std::get<tInstructionArrayValue>(itOptions);
     arrOptions.push_back(
           { EArgumentType::eMap,
-            tInstructionMapValue{{ "label", { EArgumentType::eString, "Button" } },
-                                 { "commands", { EArgumentType::eArray,
-                                                 tInstructionArrayValue{}} },
-                                 { "color", { EArgumentType::eString, "#000000" } },
+            tInstructionMapValue{{ "label", { EArgumentType::eString, QString("Button") } },
+                                 { "commands", { EArgumentType::eArray, tInstructionArrayValue{}} },
+                                 { "color", { EArgumentType::eString, QString("#000000") } },
                                  { "visible", { EArgumentType::eBool, true } }}});
 
     m_pProps->insert_or_assign("options", SInstructionArgumentValue{ EArgumentType::eArray, arrOptions });

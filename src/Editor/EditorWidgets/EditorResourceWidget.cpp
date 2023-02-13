@@ -22,7 +22,7 @@
 #include "Widgets/ResourceDisplayWidget.h"
 
 // Testing
-//#include "modeltest.h"
+//#include <QtTest/QAbstractItemModelTester>
 
 #include <QDebug>
 #include <QDomDocument>

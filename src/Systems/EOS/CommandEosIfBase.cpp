@@ -49,5 +49,6 @@ CCommandEosIfBase::tChildNodeGroups CCommandEosIfBase::ChildNodeGroups(const tIn
     iCommandsElse = static_cast<quint32>(arrOptions.size());
   }
 
-  return {{QString("If"), iCommandsIf}, {QString("Else"), iCommandsElse}};
+  return {{QString("If"), QString("commands"), iCommandsIf},
+          {QString("Else"), QString("elseCommands"), iCommandsElse}};
 }

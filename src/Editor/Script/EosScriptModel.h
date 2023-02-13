@@ -35,6 +35,7 @@ public:
                       int iRole = Qt::DisplayRole) const override;
   QModelIndex index(int iRow, int iColumn,
                     const QModelIndex& parent = QModelIndex()) const override;
+  bool hasChildren(const QModelIndex& parent = QModelIndex()) const override;
   QModelIndex parent(const QModelIndex& index) const override;
   int rowCount(const QModelIndex& parent = QModelIndex()) const override;
   int columnCount(const QModelIndex& parent = QModelIndex()) const override;
@@ -70,7 +71,7 @@ protected:
   const std::vector<std::pair<QString, std::shared_ptr<CJsonInstructionNode>>>& RootNodes() const;
 
 private:
-  QModelIndex Inserted(const QModelIndex& parent, qint32 iIndex);
+  QModelIndex Inserted(const QModelIndex& parent, qint32 iInsertPoint, qint32 iIndex);
   void RecursivelyConstruct(CEosScriptModelItem* pParentItem,
                             std::shared_ptr<CJsonInstructionNode> spParentInstruction);
 

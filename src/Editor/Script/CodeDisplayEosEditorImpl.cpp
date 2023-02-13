@@ -11,6 +11,9 @@
 #include "Systems/JSON/JsonInstructionSetParser.h"
 #include "Systems/JSON/JsonInstructionSetRunner.h"
 
+// Testing
+//#include <QtTest/QAbstractItemModelTester>
+
 #include <QDebug>
 #include <QHeaderView>
 #include <QItemSelectionModel>
@@ -278,6 +281,10 @@ void CCodeDisplayEosEditorImpl::CurrentItemInvalidated()
 void CCodeDisplayEosEditorImpl::SlotItemModelDataChanged(
     const QModelIndex& begin, const QModelIndex& end)
 {
+  // testing
+  //QAbstractItemModelTester test(m_pJsonParserModel,
+  //                              QAbstractItemModelTester::FailureReportingMode::Warning);
+
   if (m_pEditorDelegate->isVisible() && m_bEnableDelegateUpdate)
   {
     CEosScriptModelItem* pItem = m_pJsonParserModel->GetItem(begin);
