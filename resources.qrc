@@ -232,6 +232,19 @@
         <file>resources/style/img/ButtonPrompt.png</file>
         <file>resources/help/editor/images/eos_autio_play_1.png</file>
         <file>resources/help/editor/images/eos_autio_play_2.png</file>
+        <file>resources/help/editor/images/eos_choice.png</file>
+        <file>resources/help/editor/images/eos_disable.png</file>
+        <file>resources/help/editor/code/eos_editor_help.html</file>
+        <file>resources/help/editor/code/eos_reference_help.html</file>
+        <file>resources/help/editor/images/eos_eval.png</file>
+        <file>resources/help/editor/images/eos_if.png</file>
+        <file>resources/help/editor/images/eos_image_1.png</file>
+        <file>resources/help/editor/images/eos_image_2.png</file>
+        <file>resources/help/editor/images/eos_notification.png</file>
+        <file>resources/help/editor/images/eos_notification_close.png</file>
+        <file>resources/help/editor/images/eos_prompt.png</file>
+        <file>resources/help/editor/images/eos_say.png</file>
+        <file>resources/help/editor/images/eos_timer.png</file>
     </qresource>
     <qresource prefix="/qml">
         <file>resources/qml/ProjectCardSelection.qml</file>

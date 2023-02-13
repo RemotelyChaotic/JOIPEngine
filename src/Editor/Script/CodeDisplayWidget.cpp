@@ -34,6 +34,8 @@ namespace
 
   const QString c_sSciptEditorHelpId =      "Editor/SciptEditor";
   const QString c_sSciptAPIHelpId =         "Editor/SciptAPI/Editor";
+  const QString c_sEOSSciptEditorHelpId =   "Editor/EOS/SciptEditor";
+  const QString c_sEOSSciptAPIHelpId =      "Editor/SciptAPI/Editor";
 
   //--------------------------------------------------------------------------------------
   //
@@ -156,8 +158,10 @@ void CCodeDisplayWidget::Initialize(QPointer<CEditorModel> pEditorModel,
   {
     m_spUi->pCodeEdit->setProperty(helpOverlay::c_sHelpPagePropertyName, c_sSciptEditorHelpId);
     wpHelpFactory->RegisterHelp(c_sSciptEditorHelpId, ":/resources/help/editor/code/script_editor_help.html");
-
     wpHelpFactory->RegisterHelp(c_sSciptAPIHelpId, ":/resources/help/editor/code/script_reference_help.html");
+    m_spUi->pEosEdit->setProperty(helpOverlay::c_sHelpPagePropertyName, c_sEOSSciptEditorHelpId);
+    wpHelpFactory->RegisterHelp(c_sEOSSciptEditorHelpId, ":/resources/help/editor/code/eos_editor_help.html");
+    wpHelpFactory->RegisterHelp(c_sEOSSciptAPIHelpId, ":/resources/help/editor/code/eos_reference_help.html");
   }
 
   CUndoRedoFilter* pFilter =

@@ -3,7 +3,7 @@
 
 <head>
   <meta charset="utf-8">
-  <title>Add Metronome Code</title>
+  <title>Add Notification Create and Close Instructions</title>
   <meta name="description" content="">
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
@@ -29,63 +29,84 @@
 
 
 <body>
-  <h1>Add Metronome Code</h1>
+  <h1>Add Notification Create and Close Instructions</h1>
 
   <hr>
 
   <div class="container">
-    <p>This button opens an overlay to add code snippets to the currently opened script in
-    the <a href="qrc:/resources/help/editor/code/script_editor_help.html">Script Editor</a>,
-    to interact with the metronome.</p>
+    <p>This button adds a notification create or close instruction to the currently opened eos script in
+    the <a href="qrc:/resources/help/editor/code/eos_editor_help.html">EOS Editor</a>.</p>
 
     <br>
 
-    <p>For more information about the script API, please see the <a href="qrc:/resources/help/editor/code/script_reference_help.html">API Reference</a>.</p>
-
-    <br>
-
-    <p>The overlay has two tabs that each serve to insert different peices of code.</p>
-
-    <br>
-
-    <p><img src="qrc:/resources/help/editor/images/addmetronome_dialog_general.png"><br><i>Add Metronome Code Dialog (General Tab)</i></p>
-
-    <br>
-
-    <p>The first tab contains the general metronome settings like Bpm, beat Pattern and
-    options to stop or start the metronome. If <i>Set BPM (beats / min)</i> is checked,
-    the bpm to the right will be set. If <i>Set pattern</i> is checked, the pattern
-    defined in the table below will be set as pattern.
-    The pattern list can be modified with the "+" and "-" buttons on the side.
-    Clicking "+" will add a new button to the list and clicking "-" will remove the currently
-    selected one.<br>
+    <p>The following parameters can be changed for notification create instructions:<br>
       <ul>
-        <li><b>Generated code example for <i>Set BPM (beats / min)</i>:</b> metronome.setBpm(90);</li>
-        <li><b>Generated code example for <i>Set pattern</i>:</b> metronome.setPattern([1,2,2]);</li>
-        <li><b>Generated code example for <i>Start</i>:</b> metronome.start();</li>
-        <li><b>Generated code example for <i>Stop</i>:</b> metronome.stop();</li>
+        <li><b>id<i> (json attr: id)</i>:</b> The id of the notification. Notifications can be referenced
+        from <a href="qrc:/resources/help/editor/code/eos_editor_help.html">Eval Instructions</a> via the id
+        and all notifications will be sorted according to the id from top to bottom.</li>
+        <li><b>title<i> (json attr: title)</i>:</b> This is the static text on a notification.
+        Can be html and can contain evaluator expressions:
+        <span style="font-family: courier,monospace;">&lt;eval&gt;//code here&lt;/eval&gt;</span>.</li>
+        <li><b>button<i> (json attr: buttonLabel)</i>:</b> The button label of the notification.
+        A button is only shown if the label string is not empty.
+        Can be html and can contain evaluator expressions:
+        <span style="font-family: courier,monospace;">&lt;eval&gt;//code here&lt;/eval&gt;</span>.</li>
+        <li><b>timerDuration<i> (json attr: startAt)</i>:</b>
+        The duration for which the notification
+        is shown. If left empty the notification will be shown indefinitely.
+        Needs to follow the format
+        &lt;weeks&gt;w&lt;days&gt;d&lt;hours&gt;h&lt;minutes&gt;m&lt;seconds&gt;s&lt;milis&gt;ms or be a plain number denoting miliseconds.
+        For example: <i>2m30s</i> or <i>100</i>.</li>
       </ul>
     </p>
 
     <br>
 
-    <p><img src="qrc:/resources/help/editor/images/addmetronome_dialog_beatsound.png"><br><i>Add Metronome Code Dialog (Beat Sound Tab)</i></p>
+    <p>The following parameters can be changed for notification close instructions:<br>
+      <ul>
+        <li><b>id<i> (json attr: id)</i>:</b> The id of the notification to close.
+        No timeout or button commands will be executed for a notification closed this way.</li>
+      </ul>
+    </p>
 
     <br>
 
-    <p>The second tab contains a tree to browse <a href="qrc:/resources/help/editor/resources/resource_help.html">Resources</a>
-    including a search bar similar to the <a href="qrc:/resources/help/editor/resources/resources_tree_help.html">Resource Tree</a>
-    in the <a href="qrc:/resources/help/editor/selection_combobox_help.html">Resource Manager</a>.
-    Clicking a tree item will select the resource for the generated code snippet. Checking
-    <i>Set resource</i> will generate code to set the currently selected Resource as the beat sound effect for
-    future calls to <i>start</i>. If no <i>Sound</i> type resource is selected,
-    checking the checkbox will generate code to reset the sound to the default one.<br>
-    To mute or unmute the metronome, the <i>Mute</i> checkbox can be checked or unchecked. Volume controls the volume of the metronome.
-    Please note that the volume is not an absolute value, but multiplied with the engine volume.<br>
-      <ul>
-        <li><b>Generated code example for <i>Set resource</i>:</b> metronome.setBeatResource("thing"); // valid resource selected</li>
-        <li><b>Generated code example for <i>Set resource</i>:</b> metronome.setBeatResource(null); // invalid or no resource selected</li>
-      </ul>
+    <table>
+    <tr><th>notification.create UI</th><th>notification.remove UI</th></tr>
+    <tr><th><img src="qrc:/resources/help/editor/images/eos_notification.png"></th><th><img src="qrc:/resources/help/editor/images/eos_notification_close.png"></th></tr>
+    </table>
+
+    <br>
+
+    <p>Both nodes in serialised JSON form:<br>
+      <pre style="font-family: courier,monospace;">
+{
+  "notification.create": {
+      "id": "myId",
+      "title": "Notification",
+      "buttonLabel": "Click Me",
+      "timerDuration": "20s",
+      "buttonCommands": [
+          {
+              ...
+          },
+          ...
+      ],
+      "timerCommands": [
+        {
+            ...
+        },
+        ...
+      ]
+  }
+}
+
+{
+  "notification.remove": {
+      "id": "sound"
+  }
+}
+      </pre>
     </p>
   </div>
 </body>
