@@ -476,6 +476,7 @@ void CEosCommandWidgetChoice::on_AddButtonButton_clicked()
 
     m_pProps->insert_or_assign("options", SInstructionArgumentValue{ EArgumentType::eArray, arrOptions });
     AddItemToList(m_spUi->pTableWidget->rowCount(), QString("Button"), Qt::black, true);
+    m_spUi->pTableWidget->resizeColumnToContents(1);
     emit SignalChangedProperties();
   }
 }
