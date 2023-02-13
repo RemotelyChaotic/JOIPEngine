@@ -511,7 +511,7 @@ void CEditorCodeWidget::SlotFileChangedExternally(const QString& sName)
 void CEditorCodeWidget::SlotShowOverlay()
 {
   WIDGET_INITIALIZED_GUARD
-  m_spUi->pCodeEditorView->SlotShowOverlay();
+  m_spUi->pCodeEditorView->SlotShowOverlay(dynamic_cast<QWidget*>(sender()));
 }
 
 //----------------------------------------------------------------------------------------

@@ -334,11 +334,11 @@ void CCodeDisplayWidget::SlotExecutionError(QString sException, qint32 iLine, QS
 
 //----------------------------------------------------------------------------------------
 //
-void CCodeDisplayWidget::SlotShowOverlay()
+void CCodeDisplayWidget::SlotShowOverlay(const QWidget* pWidget)
 {
   if (!m_pInitialized || nullptr == m_pspUiActionBar) { return; }
 
-  if (sender() == (*m_pspUiActionBar)->AddShowBackgroundCode)
+  if (pWidget == (*m_pspUiActionBar)->AddShowBackgroundCode)
   {
     m_spIconSnippetOverlay->Hide();
     m_spMetronomeSnippetOverlay->Hide();
@@ -349,7 +349,7 @@ void CCodeDisplayWidget::SlotShowOverlay()
     m_spThreadSnippetOverlay->Hide();
     m_spBackgroundSnippetOverlay->Toggle();
   }
-  else if (sender() == (*m_pspUiActionBar)->AddShowIconCode)
+  else if (pWidget == (*m_pspUiActionBar)->AddShowIconCode)
   {
     m_spBackgroundSnippetOverlay->Hide();
     m_spMetronomeSnippetOverlay->Hide();
@@ -360,7 +360,7 @@ void CCodeDisplayWidget::SlotShowOverlay()
     m_spThreadSnippetOverlay->Hide();
     m_spIconSnippetOverlay->Toggle();
   }
-  else if (sender() == (*m_pspUiActionBar)->AddShowImageCode)
+  else if (pWidget == (*m_pspUiActionBar)->AddShowImageCode)
   {
     m_spBackgroundSnippetOverlay->Hide();
     m_spIconSnippetOverlay->Hide();
@@ -371,7 +371,7 @@ void CCodeDisplayWidget::SlotShowOverlay()
     m_spThreadSnippetOverlay->Hide();
     m_spResourceSnippetOverlay->Toggle();
   }
-  else if (sender() == (*m_pspUiActionBar)->AddTextCode)
+  else if (pWidget == (*m_pspUiActionBar)->AddTextCode)
   {
     m_spBackgroundSnippetOverlay->Hide();
     m_spIconSnippetOverlay->Hide();
@@ -382,7 +382,7 @@ void CCodeDisplayWidget::SlotShowOverlay()
     m_spThreadSnippetOverlay->Hide();
     m_spTextSnippetOverlay->Toggle();
   }
-  else if (sender() == (*m_pspUiActionBar)->AddMetronomeCode)
+  else if (pWidget == (*m_pspUiActionBar)->AddMetronomeCode)
   {
     m_spBackgroundSnippetOverlay->Hide();
     m_spIconSnippetOverlay->Hide();
@@ -393,7 +393,7 @@ void CCodeDisplayWidget::SlotShowOverlay()
     m_spThreadSnippetOverlay->Hide();
     m_spMetronomeSnippetOverlay->Toggle();
   }
-  else if (sender() == (*m_pspUiActionBar)->AddNotificationCode)
+  else if (pWidget == (*m_pspUiActionBar)->AddNotificationCode)
   {
     m_spBackgroundSnippetOverlay->Hide();
     m_spIconSnippetOverlay->Hide();
@@ -404,7 +404,7 @@ void CCodeDisplayWidget::SlotShowOverlay()
     m_spThreadSnippetOverlay->Hide();
     m_spNotificationSnippetOverlay->Toggle();
   }
-  else if (sender() == (*m_pspUiActionBar)->AddTimerCode)
+  else if (pWidget == (*m_pspUiActionBar)->AddTimerCode)
   {
     m_spBackgroundSnippetOverlay->Hide();
     m_spIconSnippetOverlay->Hide();
@@ -415,7 +415,7 @@ void CCodeDisplayWidget::SlotShowOverlay()
     m_spThreadSnippetOverlay->Hide();
     m_spTimerSnippetOverlay->Toggle();
   }
-  else if (sender() == (*m_pspUiActionBar)->AddThreadCode)
+  else if (pWidget == (*m_pspUiActionBar)->AddThreadCode)
   {
     m_spBackgroundSnippetOverlay->Hide();
     m_spIconSnippetOverlay->Hide();

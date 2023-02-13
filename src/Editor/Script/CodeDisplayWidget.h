@@ -57,7 +57,7 @@ public:
 
 public slots:
   void SlotExecutionError(QString sException, qint32 iLine, QString sStack);
-  void SlotShowOverlay();
+  void SlotShowOverlay(const QWidget* pWidget);
 
 signals:
   void SignalContentsChange(qint32 iPos, qint32 iDel, qint32 iAdd);
