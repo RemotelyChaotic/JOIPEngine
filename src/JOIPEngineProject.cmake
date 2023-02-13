@@ -31,6 +31,11 @@ macro(FindRequiredQtPackages)
     WebChannel
     Xml REQUIRED)
 
+  if (KDE_DEBUG)
+    find_package(QT NAMES Qt6 Qt5 COMPONENTS Test REQUIRED)
+    find_package(Qt${QT_VERSION_MAJOR} COMPONENTS Test REQUIRED)
+  endif()
+
   if (WIN32)
     find_package(QT NAMES Qt6 Qt5 COMPONENTS WinExtras REQUIRED)
     find_package(Qt${QT_VERSION_MAJOR} COMPONENTS WinExtras REQUIRED)
@@ -656,6 +661,12 @@ macro(JOIPProjectSettings JOIP_PROJECT_NAME)
       physfs-static
       xmldom
       qtlua)
+
+    if (KDE_DEBUG)
+      target_link_libraries(${JOIP_PROJECT_NAME}
+        PRIVATE
+          Qt${QT_VERSION_MAJOR}::Test)
+    endif()
 
     if (WIN32)
       find_library(PSAPI NAMES "psapi" REQUIRED)
