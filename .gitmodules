@@ -37,3 +37,6 @@
 [submodule "3rdparty/Lua"]
 	path = 3rdparty/Lua
 	url = https://github.com/RemotelyChaotic/Lua.git
+[submodule "3rdparty/MRichTextEditor"]
+	path = 3rdparty/MRichTextEditor
+	url = https://github.com/RemotelyChaotic/MRichTextEditor.git

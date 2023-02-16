@@ -514,6 +514,8 @@ macro(CreateJOIPProject JOIP_PROJECT_NAME)
     ${JOIPSources}/Widgets/Editor/EditorSearchBar.h
     ${JOIPSources}/Widgets/Editor/HighlightedSearchableTextEdit.cpp
     ${JOIPSources}/Widgets/Editor/HighlightedSearchableTextEdit.h
+    ${JOIPSources}/Widgets/Editor/RichTextEdit.cpp
+    ${JOIPSources}/Widgets/Editor/RichTextEdit.h
     ${JOIPSources}/Widgets/Editor/TextEditZoomEnabler.cpp
     ${JOIPSources}/Widgets/Editor/TextEditZoomEnabler.h
     ${JOIPSources}/Widgets/FlowLayout.cpp
@@ -680,6 +682,7 @@ macro(JOIPProjectSettings JOIP_PROJECT_NAME)
 
   target_sources(${JOIP_PROJECT_NAME}
     PRIVATE
+      $<TARGET_OBJECTS:MRichTextEditor>
       $<TARGET_OBJECTS:SortFilterProxyModel>)
 
   target_include_directories(${JOIP_PROJECT_NAME}
@@ -691,6 +694,7 @@ macro(JOIPProjectSettings JOIP_PROJECT_NAME)
       ${QTAVWIDGETS_INCLUDE_DIRS}
       ${NodeEditor_INCLUDE_DIRS}
       ${PhysicsFS_INCLUDE_DIRS}
+      $<TARGET_PROPERTY:MRichTextEditor,INTERFACE_INCLUDE_DIRECTORIES>
       $<TARGET_PROPERTY:SortFilterProxyModel,INTERFACE_INCLUDE_DIRECTORIES>
       $<TARGET_PROPERTY:xmldom,INTERFACE_INCLUDE_DIRECTORIES>)
 

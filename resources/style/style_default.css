@@ -261,13 +261,16 @@ QPushButton, QToolButton {
   min-width: 64px;
 }
 
-QPushButton[styleSmall="true"] {
+QPushButton[styleSmall="true"],
+MRichTextEdit QToolButton
+{
   padding: 0px;
   min-width: 24px;
 }
 
 CShortcutButton,
-CEditorSearchBar>QPushButton {
+CEditorSearchBar>QPushButton,
+MRichTextEdit QToolButton {
   padding: 0px;
   min-width: 24px;
   min-height: 24px;

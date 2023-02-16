@@ -132,14 +132,13 @@ void CEditorProjectSettingsWidget::Initialize()
   new CUndoRedoFilter(m_spUi->pFetishLineEdit, nullptr);
   new CUndoRedoFilter(m_spUi->pFontComboBox, nullptr);
 
-  auto pFilter =
-      new CUndoRedoFilter(m_spUi->pDescribtionTextEdit,
-                          std::bind(static_cast<QMenu*(QPlainTextEdit::*)(void)>(&QPlainTextEdit::createStandardContextMenu),
-                                    m_spUi->pDescribtionTextEdit));
+  m_spUi->pDescribtionTextEdit->setPlaceholderText("No describtion set");
   connect(m_spUi->pDescribtionTextEdit->document(), &QTextDocument::undoCommandAdded,
           this, &CEditorProjectSettingsWidget::SlotUndoForDescribtionAdded);
-  connect(pFilter, &CUndoRedoFilter::UndoTriggered, this, [this]() { UndoStack()->undo(); });
-  connect(pFilter, &CUndoRedoFilter::RedoTriggered, this, [this]() { UndoStack()->redo(); });
+  connect(m_spUi->pDescribtionTextEdit, &CRichTextEdit::UndoTriggered,
+          this, [this]() { UndoStack()->undo(); });
+  connect(m_spUi->pDescribtionTextEdit, &CRichTextEdit::RedoTriggered,
+          this, [this]() { UndoStack()->redo(); });
 
   m_bInitialized = true;
 }
@@ -240,7 +239,7 @@ void CEditorProjectSettingsWidget::UnloadProject()
   m_spUi->pProjectPatchVersion->setEnabled(true);
   m_spUi->WarningIcon->setVisible(false);
 
-  m_spUi->pDescribtionTextEdit->clear();
+  m_spUi->pDescribtionTextEdit->clearSource();
   m_spUi->pDescribtionTextEdit->setReadOnly(false);
 
   m_spUi->pFetishLineEdit->setEnabled(true);

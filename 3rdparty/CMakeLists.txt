@@ -9,6 +9,7 @@ add_subdirectory(json-schema-validator)
 add_subdirectory(libqpcx)
 add_subdirectory(Lua)          # reverse-order because of dependencies
 add_subdirectory(libqtlua-2.1) # reverse-order because of dependencies
+add_subdirectory(MRichTextEditor)
 add_subdirectory(nodeeditor)
 add_subdirectory(physfs-3.0.2)
 add_subdirectory(SortFilterProxyModel)
