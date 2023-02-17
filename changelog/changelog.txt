@@ -227,3 +227,10 @@ Fixed Bugs:
 - Fixed missing images in default style
 - Fixed being able to set editor layout to "none" (default value) in settings.
 - Cosmetic fixes in html help.
+
+=================
+Version 1.2.3.0
+=================
+
+Changes:
+- Project Describtion can be edited in a new richtext editor.

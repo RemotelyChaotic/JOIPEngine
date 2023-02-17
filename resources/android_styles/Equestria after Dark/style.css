@@ -262,13 +262,15 @@ QPushButton, QToolButton {
 }
 
 QPushButton[styleSmall="true"],
-QToolButton[styleSmall="true"] {
+QToolButton[styleSmall="true"],
+MRichTextEdit QToolButton {
   padding: 0px;
   min-width: 24px;
 }
 
 CShortcutButton,
-CEditorSearchBar>QPushButton {
+CEditorSearchBar>QPushButton,
+MRichTextEdit QToolButton {
   padding: 0px;
   min-width: 24px;
   min-height: 24px;
@@ -305,7 +307,8 @@ QPushButton#SourceButton {
                   url(ui/ButtonIcon.png) on;
 }
 QPushButton#AddShowImageCode,
-QPushButton#AddImageCode {
+QPushButton#AddImageCode,
+QToolButton#f_image {
   qproperty-icon: url(ui/ButtonImage.png) off,
                   url(ui/ButtonImage.png) on;
 }
@@ -377,7 +380,8 @@ QPushButton#AddButtonButton {
   qproperty-icon: url(ui/ButtonPlus.png) off,
                   url(ui/ButtonPlus.png) on;
 }
-QPushButton#AddWebResourceButton {
+QPushButton#AddWebResourceButton,
+QToolButton#f_link {
   qproperty-icon: url(ui/ButtonWeb.png) off,
                   url(ui/ButtonWeb.png) on;
 }
@@ -453,11 +457,13 @@ QPushButton#AddScriptFile {
   qproperty-icon: url(ui/ButtonCode.png) off,
                   url(ui/ButtonCode.png) on;
 }
-QPushButton#UndoButton {
+QPushButton#UndoButton,
+QToolButton#f_undo {
   qproperty-icon: url(ui/ButtonUndo.png) off,
                   url(ui/ButtonUndo.png) on;
 }
-QPushButton#RedoButton {
+QPushButton#RedoButton,
+QToolButton#f_redo {
   qproperty-icon: url(ui/ButtonRedo.png) off,
                   url(ui/ButtonRedo.png) on;
 }
@@ -536,6 +542,38 @@ QPushButton#AddNotificationCloseCode {
 QPushButton#SearchButton {
   qproperty-icon: url(ui/ButtonSearch.png) off,
                   url(ui/ButtonSearch.png) on;
+}
+QToolButton#f_bold {
+  qproperty-icon: url(ui/ButtonBold.png) off,
+                  url(ui/ButtonBold.png) on;
+}
+QToolButton#f_italic {
+  qproperty-icon: url(ui/ButtonItalic.png) off,
+                  url(ui/ButtonItalic.png) on;
+}
+QToolButton#f_underline {
+  qproperty-icon: url(ui/ButtonUnderline.png) off,
+                  url(ui/ButtonUnderline.png) on;
+}
+QToolButton#f_strikeout {
+  qproperty-icon: url(ui/ButtonStrikethrough.png) off,
+                  url(ui/ButtonStrikethrough.png) on;
+}
+QToolButton#f_list_bullet {
+  qproperty-icon: url(ui/ButtonUList.png) off,
+                  url(ui/ButtonUList.png) on;
+}
+QToolButton#f_list_ordered {
+  qproperty-icon: url(ui/ButtonOList.png) off,
+                  url(ui/ButtonOList.png) on;
+}
+QToolButton#f_indent_dec {
+  qproperty-icon: url(ui/ButtonUnindent.png) off,
+                  url(ui/ButtonUnindent.png) on;
+}
+QToolButton#f_indent_inc {
+  qproperty-icon: url(ui/ButtonIndent.png) off,
+                  url(ui/ButtonIndent.png) on;
 }
 
 QPushButton:hover,

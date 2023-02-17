@@ -238,13 +238,15 @@ QPushButton, QToolButton {
   min-width: 64px;
 }
 
-QPushButton[styleSmall="true"] {
+QPushButton[styleSmall="true"],
+MRichTextEdit QToolButton {
   padding: 0px;
   min-width: 24px;
 }
 
 CShortcutButton,
-CEditorSearchBar>QPushButton {
+CEditorSearchBar>QPushButton,
+MRichTextEdit QToolButton {
   padding: 0px;
   min-width: 24px;
   min-height: 24px;
@@ -287,7 +289,8 @@ QPushButton#SourceButton:disabled {
   image: url(ui/ButtonIconSelected.png);
 }
 QPushButton#AddShowImageCode,
-QPushButton#AddImageCode {
+QPushButton#AddImageCode,
+QToolButton#f_image {
   image: url(ui/ButtonImage.png);
 }
 QPushButton#AddShowImageCode:hover,
@@ -295,7 +298,10 @@ QPushButton#AddShowImageCode:pressed,
 QPushButton#AddShowImageCode:disabled,
 QPushButton#AddImageCode:hover,
 QPushButton#AddImageCode:pressed,
-QPushButton#AddImageCode:disabled {
+QPushButton#AddImageCode:disabled,
+QToolButton#f_image:hover,
+QToolButton#f_image:pressed,
+QToolButton#f_image:disabled {
   image: url(ui/ButtonImageSelected.png);
 }
 QPushButton#AddTextCode,
@@ -454,12 +460,16 @@ QPushButton#AddButtonButton:disabled {
   qproperty-iconSize: 24px;
   image: url(ui/ButtonPlusSelected.png);
 }
-QPushButton#AddWebResourceButton {
+QPushButton#AddWebResourceButton,
+QToolButton#f_link {
   image: url(ui/ButtonWeb.png);
 }
 QPushButton#AddWebResourceButton:hover,
 QPushButton#AddWebResourceButton:pressed,
-QPushButton#AddWebResourceButton:disabled {
+QPushButton#AddWebResourceButton:disabled,
+QToolButton#f_link:hover,
+QToolButton#f_link:pressed,
+QToolButton#f_link:disabled {
   image: url(ui/ButtonWebSelected.png);
 }
 QPushButton#MapButton {
@@ -620,20 +630,28 @@ QPushButton#AddScriptFile:disabled {
   min-width: 24px;
   image: url(ui/ButtonCodeSelected.png);
 }
-QPushButton#UndoButton {
+QPushButton#UndoButton,
+QToolButton#f_undo {
   image: url(ui/ButtonUndo.png);
 }
 QPushButton#UndoButton:hover,
 QPushButton#UndoButton:pressed,
-QPushButton#UndoButton:disabled {
+QPushButton#UndoButton:disabled,
+QToolButton#f_undo:hover,
+QToolButton#f_undo:pressed,
+QToolButton#f_undo:disabled {
   image: url(ui/ButtonUndoSelected.png);
 }
-QPushButton#RedoButton {
+QPushButton#RedoButton,
+QToolButton#f_redo {
   image: url(ui/ButtonRedo.png);
 }
 QPushButton#RedoButton:hover,
 QPushButton#RedoButton:pressed,
-QPushButton#RedoButton:disabled {
+QPushButton#RedoButton:disabled,
+QToolButton#f_redo:hover,
+QToolButton#f_redo:pressed,
+QToolButton#f_redo:disabled {
   image: url(ui/ButtonRedoSelected.png);
 }
 QPushButton#TreeViewButton {
@@ -791,7 +809,71 @@ QPushButton#SearchButton {
 QPushButton#SearchButton:hover,
 QPushButton#SearchButton:pressed,
 QPushButton#SearchButton:disabled {
-  image: url(ui/ButtonSearch.png);
+  image: url(ui/ButtonSearchSelected.png);
+}
+QToolButton#f_bold {
+  image: url(ui/ButtonBold.png);
+}
+QToolButton#f_bold:hover,
+QToolButton#f_bold:pressed,
+QToolButton#f_bold:disabled {
+  image: url(ui/ButtonBoldSelected.png);
+}
+QToolButton#f_italic {
+  image: url(ui/ButtonItalic.png);
+}
+QToolButton#f_italic:hover,
+QToolButton#f_italic:pressed,
+QToolButton#f_italic:disabled {
+  image: url(ui/ButtonItalicSelected.png);
+}
+QToolButton#f_underline {
+  image: url(ui/ButtonUnderline.png);
+}
+QToolButton#f_underline:hover,
+QToolButton#f_underline:pressed,
+QToolButton#f_underline:disabled {
+  image: url(ui/ButtonUnderlineSelected.png);
+}
+QToolButton#f_strikeout {
+  image: url(ui/ButtonStrikethrough.png);
+}
+QToolButton#f_strikeout:hover,
+QToolButton#f_strikeout:pressed,
+QToolButton#f_strikeout:disabled {
+  image: url(ui/ButtonStrikethroughSelected.png);
+}
+QToolButton#f_list_bullet {
+  image: url(ui/ButtonUList.png);
+}
+QToolButton#f_list_bullet:hover,
+QToolButton#f_list_bullet:pressed,
+QToolButton#f_list_bullet:disabled {
+  image: url(ui/ButtonUListSelected.png);
+}
+QToolButton#f_list_ordered {
+  image: url(ui/ButtonOList.png);
+}
+QToolButton#f_list_ordered:hover,
+QToolButton#f_list_ordered:pressed,
+QToolButton#f_list_ordered:disabled {
+  image: url(ui/ButtonOListSelected.png);
+}
+QToolButton#f_indent_dec {
+  image: url(ui/ButtonUnindent.png);
+}
+QToolButton#f_indent_dec:hover,
+QToolButton#f_indent_dec:pressed,
+QToolButton#f_indent_dec:disabled {
+  image: url(ui/ButtonUnindentSelected.png);
+}
+QToolButton#f_indent_inc {
+  image: url(ui/ButtonIndent.png);
+}
+QToolButton#f_indent_inc:hover,
+QToolButton#f_indent_inc:pressed,
+QToolButton#f_indent_inc:disabled {
+  image: url(ui/ButtonIndentSelected.png);
 }
 
 

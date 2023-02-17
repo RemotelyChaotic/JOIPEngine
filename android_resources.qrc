@@ -480,5 +480,53 @@
         <file>resources/android_styles/Somber Dark/ui/ButtonIf.png</file>
         <file>resources/android_styles/Somber Dark/ui/ButtonNotificationClose.png</file>
         <file>resources/android_styles/Somber Dark/ui/ButtonPrompt.png</file>
+        <file>resources/android_styles/621 Hexagons/ui/ButtonBold.png</file>
+        <file>resources/android_styles/621 Hexagons/ui/ButtonIndent.png</file>
+        <file>resources/android_styles/621 Hexagons/ui/ButtonItalic.png</file>
+        <file>resources/android_styles/621 Hexagons/ui/ButtonOList.png</file>
+        <file>resources/android_styles/621 Hexagons/ui/ButtonStrikethrough.png</file>
+        <file>resources/android_styles/621 Hexagons/ui/ButtonUList.png</file>
+        <file>resources/android_styles/621 Hexagons/ui/ButtonUnderline.png</file>
+        <file>resources/android_styles/621 Hexagons/ui/ButtonUnindent.png</file>
+        <file>resources/android_styles/Blue Night/ui/ButtonBold.png</file>
+        <file>resources/android_styles/Blue Night/ui/ButtonIndent.png</file>
+        <file>resources/android_styles/Blue Night/ui/ButtonItalic.png</file>
+        <file>resources/android_styles/Blue Night/ui/ButtonOList.png</file>
+        <file>resources/android_styles/Blue Night/ui/ButtonStrikethrough.png</file>
+        <file>resources/android_styles/Blue Night/ui/ButtonUList.png</file>
+        <file>resources/android_styles/Blue Night/ui/ButtonUnderline.png</file>
+        <file>resources/android_styles/Blue Night/ui/ButtonUnindent.png</file>
+        <file>resources/android_styles/Equestria after Dark/ui/ButtonBold.png</file>
+        <file>resources/android_styles/Equestria after Dark/ui/ButtonIndent.png</file>
+        <file>resources/android_styles/Equestria after Dark/ui/ButtonItalic.png</file>
+        <file>resources/android_styles/Equestria after Dark/ui/ButtonOList.png</file>
+        <file>resources/android_styles/Equestria after Dark/ui/ButtonStrikethrough.png</file>
+        <file>resources/android_styles/Equestria after Dark/ui/ButtonUList.png</file>
+        <file>resources/android_styles/Equestria after Dark/ui/ButtonUnderline.png</file>
+        <file>resources/android_styles/Equestria after Dark/ui/ButtonUnindent.png</file>
+        <file>resources/android_styles/Gummyzilla/ui/ButtonBold.png</file>
+        <file>resources/android_styles/Gummyzilla/ui/ButtonBoldSelected.png</file>
+        <file>resources/android_styles/Gummyzilla/ui/ButtonIndent.png</file>
+        <file>resources/android_styles/Gummyzilla/ui/ButtonIndentSelected.png</file>
+        <file>resources/android_styles/Gummyzilla/ui/ButtonItalic.png</file>
+        <file>resources/android_styles/Gummyzilla/ui/ButtonItalicSelected.png</file>
+        <file>resources/android_styles/Gummyzilla/ui/ButtonOList.png</file>
+        <file>resources/android_styles/Gummyzilla/ui/ButtonOListSelected.png</file>
+        <file>resources/android_styles/Gummyzilla/ui/ButtonStrikethrough.png</file>
+        <file>resources/android_styles/Gummyzilla/ui/ButtonStrikethroughSelected.png</file>
+        <file>resources/android_styles/Gummyzilla/ui/ButtonUList.png</file>
+        <file>resources/android_styles/Gummyzilla/ui/ButtonUListSelected.png</file>
+        <file>resources/android_styles/Gummyzilla/ui/ButtonUnderline.png</file>
+        <file>resources/android_styles/Gummyzilla/ui/ButtonUnderlineSelected.png</file>
+        <file>resources/android_styles/Gummyzilla/ui/ButtonUnindent.png</file>
+        <file>resources/android_styles/Gummyzilla/ui/ButtonUnindentSelected.png</file>
+        <file>resources/android_styles/Somber Dark/ui/ButtonBold.png</file>
+        <file>resources/android_styles/Somber Dark/ui/ButtonIndent.png</file>
+        <file>resources/android_styles/Somber Dark/ui/ButtonItalic.png</file>
+        <file>resources/android_styles/Somber Dark/ui/ButtonOList.png</file>
+        <file>resources/android_styles/Somber Dark/ui/ButtonStrikethrough.png</file>
+        <file>resources/android_styles/Somber Dark/ui/ButtonUList.png</file>
+        <file>resources/android_styles/Somber Dark/ui/ButtonUnderline.png</file>
+        <file>resources/android_styles/Somber Dark/ui/ButtonUnindent.png</file>
     </qresource>
 </RCC>

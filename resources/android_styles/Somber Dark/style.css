@@ -297,7 +297,8 @@ QPushButton#SourceButton {
                   url(ui/ButtonIcon.png) on;
 }
 QPushButton#AddShowImageCode,
-QPushButton#AddImageCode {
+QPushButton#AddImageCode,
+QToolButton#f_image {
   border-image: url(ui/IconBg.svg) 0 0 0 0 stretch stretch;
   border-top: 0 transparent;
   border-bottom: 0 transparent;
@@ -435,7 +436,8 @@ QPushButton#AddButtonButton {
   qproperty-icon: url(ui/ButtonPlus.png) off,
                   url(ui/ButtonPlus.png) on;
 }
-QPushButton#AddWebResourceButton {
+QPushButton#AddWebResourceButton,
+QToolButton#f_link {
   border-image: url(ui/IconBg.svg) 0 0 0 0 stretch stretch;
   border-top: 0 transparent;
   border-bottom: 0 transparent;
@@ -580,7 +582,8 @@ QPushButton#AddScriptFile {
   qproperty-icon: url(ui/ButtonCode.png) off,
                   url(ui/ButtonCode.png) on;
 }
-QPushButton#UndoButton {
+QPushButton#UndoButton,
+QToolButton#f_undo {
   border-image: url(ui/IconBg.svg) 0 0 0 0 stretch stretch;
   border-top: 0 transparent;
   border-bottom: 0 transparent;
@@ -589,7 +592,8 @@ QPushButton#UndoButton {
   qproperty-icon: url(ui/ButtonUndo.png) off,
                   url(ui/ButtonUndo.png) on;
 }
-QPushButton#RedoButton {
+QPushButton#RedoButton,
+QToolButton#f_redo {
   border-image: url(ui/IconBg.svg) 0 0 0 0 stretch stretch;
   border-top: 0 transparent;
   border-bottom: 0 transparent;
@@ -769,6 +773,78 @@ QPushButton#SearchButton {
   qproperty-icon: url(ui/ButtonSearch.png) off,
                   url(ui/ButtonSearch.png) on;
 }
+QToolButton#f_bold {
+  border-image: url(ui/IconBg.svg) 0 0 0 0 stretch stretch;
+  border-top: 0 transparent;
+  border-bottom: 0 transparent;
+  border-right: 0 transparent;
+  border-left: 0 transparent;
+  qproperty-icon: url(ui/ButtonBold.png) off,
+                  url(ui/ButtonBold.png) on;
+}
+QToolButton#f_italic {
+  border-image: url(ui/IconBg.svg) 0 0 0 0 stretch stretch;
+  border-top: 0 transparent;
+  border-bottom: 0 transparent;
+  border-right: 0 transparent;
+  border-left: 0 transparent;
+  qproperty-icon: url(ui/ButtonItalic.png) off,
+                  url(ui/ButtonItalic.png) on;
+}
+QToolButton#f_underline {
+  border-image: url(ui/IconBg.svg) 0 0 0 0 stretch stretch;
+  border-top: 0 transparent;
+  border-bottom: 0 transparent;
+  border-right: 0 transparent;
+  border-left: 0 transparent;
+  qproperty-icon: url(ui/ButtonUnderline.png) off,
+                  url(ui/ButtonUnderline.png) on;
+}
+QToolButton#f_strikeout {
+  border-image: url(ui/IconBg.svg) 0 0 0 0 stretch stretch;
+  border-top: 0 transparent;
+  border-bottom: 0 transparent;
+  border-right: 0 transparent;
+  border-left: 0 transparent;
+  qproperty-icon: url(ui/ButtonStrikethrough.png) off,
+                  url(ui/ButtonStrikethrough.png) on;
+}
+QToolButton#f_list_bullet {
+  border-image: url(ui/IconBg.svg) 0 0 0 0 stretch stretch;
+  border-top: 0 transparent;
+  border-bottom: 0 transparent;
+  border-right: 0 transparent;
+  border-left: 0 transparent;
+  qproperty-icon: url(ui/ButtonUList.png) off,
+                  url(ui/ButtonUList.png) on;
+}
+QToolButton#f_list_ordered {
+  border-image: url(ui/IconBg.svg) 0 0 0 0 stretch stretch;
+  border-top: 0 transparent;
+  border-bottom: 0 transparent;
+  border-right: 0 transparent;
+  border-left: 0 transparent;
+  qproperty-icon: url(ui/ButtonOList.png) off,
+                  url(ui/ButtonOList.png) on;
+}
+QToolButton#f_indent_dec {
+  border-image: url(ui/IconBg.svg) 0 0 0 0 stretch stretch;
+  border-top: 0 transparent;
+  border-bottom: 0 transparent;
+  border-right: 0 transparent;
+  border-left: 0 transparent;
+  qproperty-icon: url(ui/ButtonUnindent.png) off,
+                  url(ui/ButtonUnindent.png) on;
+}
+QToolButton#f_indent_inc {
+  border-image: url(ui/IconBg.svg) 0 0 0 0 stretch stretch;
+  border-top: 0 transparent;
+  border-bottom: 0 transparent;
+  border-right: 0 transparent;
+  border-left: 0 transparent;
+  qproperty-icon: url(ui/ButtonIndent.png) off,
+                  url(ui/ButtonIndent.png) on;
+}
 
 QPushButton#AddShowBackgroundCode:hover,
 QPushButton#AddShowIconCode:hover,
@@ -827,7 +903,19 @@ QPushButton#AddEndCode:hover,
 QPushButton#RemoveCode:hover,
 QPushButton#SearchButton:hover,
 QPushButton#RemoveButtonButton:hover,
-QPushButton#AddButtonButton:hover {
+QPushButton#AddButtonButton:hover,
+QToolButton#f_image:hover,
+QToolButton#f_link:hover,
+QToolButton#f_undo:hover,
+QToolButton#f_redo:hover,
+QToolButton#f_bold:hover,
+QToolButton#f_italic:hover,
+QToolButton#f_underline:hover,
+QToolButton#f_strikeout:hover,
+QToolButton#f_list_bullet:hover,
+QToolButton#f_list_ordered:hover,
+QToolButton#f_indent_dec:hover,
+QToolButton#f_indent_inc:hover {
   border-image: url(ui/IconBgHover.svg) 0 0 0 0 stretch stretch;
 }
 
@@ -888,7 +976,19 @@ QPushButton#AddEndCode:pressed,
 QPushButton#RemoveCode:pressed,
 QPushButton#SearchButton:pressed,
 QPushButton#RemoveButtonButton:pressed,
-QPushButton#AddButtonButton:pressed {
+QPushButton#AddButtonButton:pressed,
+QToolButton#f_image:pressed,
+QToolButton#f_link:pressed,
+QToolButton#f_undo:pressed,
+QToolButton#f_redo:pressed,
+QToolButton#f_bold:pressed,
+QToolButton#f_italic:pressed,
+QToolButton#f_underline:pressed,
+QToolButton#f_strikeout:pressed,
+QToolButton#f_list_bullet:pressed,
+QToolButton#f_list_ordered:pressed,
+QToolButton#f_indent_dec:pressed,
+QToolButton#f_indent_inc:pressed  {
   border-image: url(ui/IconBgPressed.svg) 0 0 0 0 stretch stretch;
 }
 
@@ -949,7 +1049,19 @@ QPushButton#AddEndCode:disabled,
 QPushButton#RemoveCode:disabled,
 QPushButton#SearchButton:disabled,
 QPushButton#RemoveButtonButton:disabled,
-QPushButton#AddButtonButton:disabled {
+QPushButton#AddButtonButton:disabled,
+QToolButton#f_image:disabled,
+QToolButton#f_link:disabled,
+QToolButton#f_undo:disabled,
+QToolButton#f_redo:disabled,
+QToolButton#f_bold:disabled,
+QToolButton#f_italic:disabled,
+QToolButton#f_underline:disabled,
+QToolButton#f_strikeout:disabled,
+QToolButton#f_list_bullet:disabled,
+QToolButton#f_list_ordered:disabled,
+QToolButton#f_indent_dec:disabled,
+QToolButton#f_indent_inc:disabled {
   border-image: url(ui/IconBgDisabled.svg) 0 0 0 0 stretch stretch;
 }
 
@@ -969,13 +1081,15 @@ QToolButton:disabled {
 }
 
 QPushButton[styleSmall="true"],
-QToolButton[styleSmall="true"] {
+QToolButton[styleSmall="true"],
+MRichTextEdit QToolButton {
   padding: 0px;
   min-width: 24px;
 }
 
 CShortcutButton,
-CEditorSearchBar>QPushButton {
+CEditorSearchBar>QPushButton,
+MRichTextEdit QToolButton {
   padding: 0px;
   min-width: 24px;
   min-height: 24px;

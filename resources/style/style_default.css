@@ -307,7 +307,8 @@ QPushButton#SourceButton {
                   url(:/resources/style/img/ButtonIcon.png) on;
 }
 QPushButton#AddShowImageCode,
-QPushButton#AddImageCode {
+QPushButton#AddImageCode,
+QToolButton#f_image {
   qproperty-icon: url(:/resources/style/img/ButtonImage.png) off,
                   url(:/resources/style/img/ButtonImage.png) on;
 }
@@ -379,7 +380,8 @@ QPushButton#AddButtonButton {
   qproperty-icon: url(:/resources/style/img/ButtonPlus.png) off,
                   url(:/resources/style/img/ButtonPlus.png) on;
 }
-QPushButton#AddWebResourceButton {
+QPushButton#AddWebResourceButton,
+QToolButton#f_link {
   qproperty-icon: url(:/resources/style/img/ButtonWeb.png) off,
                   url(:/resources/style/img/ButtonWeb.png) on;
 }
@@ -455,11 +457,13 @@ QPushButton#AddScriptFile {
   qproperty-icon: url(:/resources/style/img/ButtonCode.png) off,
                   url(:/resources/style/img/ButtonCode.png) on;
 }
-QPushButton#UndoButton {
+QPushButton#UndoButton,
+QToolButton#f_undo {
   qproperty-icon: url(:/resources/style/img/ButtonUndo.png) off,
                   url(:/resources/style/img/ButtonUndo.png) on;
 }
-QPushButton#RedoButton {
+QPushButton#RedoButton,
+QToolButton#f_redo {
   qproperty-icon: url(:/resources/style/img/ButtonRedo.png) off,
                   url(:/resources/style/img/ButtonRedo.png) on;
 }
@@ -538,6 +542,38 @@ QPushButton#AddNotificationCloseCode {
 QPushButton#SearchButton {
   qproperty-icon: url(:/resources/style/img/ButtonSearch.png) off,
                   url(:/resources/style/img/ButtonSearch.png) on;
+}
+QToolButton#f_bold {
+  qproperty-icon: url(:/resources/style/img/ButtonBold.png) off,
+                  url(:/resources/style/img/ButtonBold.png) on;
+}
+QToolButton#f_italic {
+  qproperty-icon: url(:/resources/style/img/ButtonItalic.png) off,
+                  url(:/resources/style/img/ButtonItalic.png) on;
+}
+QToolButton#f_underline {
+  qproperty-icon: url(:/resources/style/img/ButtonUnderline.png) off,
+                  url(:/resources/style/img/ButtonUnderline.png) on;
+}
+QToolButton#f_strikeout {
+  qproperty-icon: url(:/resources/style/img/ButtonStrikethrough.png) off,
+                  url(:/resources/style/img/ButtonStrikethrough.png) on;
+}
+QToolButton#f_list_bullet {
+  qproperty-icon: url(:/resources/style/img/ButtonUList.png) off,
+                  url(:/resources/style/img/ButtonUList.png) on;
+}
+QToolButton#f_list_ordered {
+  qproperty-icon: url(:/resources/style/img/ButtonOList.png) off,
+                  url(:/resources/style/img/ButtonOList.png) on;
+}
+QToolButton#f_indent_dec {
+  qproperty-icon: url(:/resources/style/img/ButtonUnindent.png) off,
+                  url(:/resources/style/img/ButtonUnindent.png) on;
+}
+QToolButton#f_indent_inc {
+  qproperty-icon: url(:/resources/style/img/ButtonIndent.png) off,
+                  url(:/resources/style/img/ButtonIndent.png) on;
 }
 
 

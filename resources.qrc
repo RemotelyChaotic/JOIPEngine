@@ -245,6 +245,14 @@
         <file>resources/help/editor/images/eos_prompt.png</file>
         <file>resources/help/editor/images/eos_say.png</file>
         <file>resources/help/editor/images/eos_timer.png</file>
+        <file>resources/style/img/ButtonBold.png</file>
+        <file>resources/style/img/ButtonItalic.png</file>
+        <file>resources/style/img/ButtonUnderline.png</file>
+        <file>resources/style/img/ButtonStrikethrough.png</file>
+        <file>resources/style/img/ButtonUList.png</file>
+        <file>resources/style/img/ButtonOList.png</file>
+        <file>resources/style/img/ButtonIndent.png</file>
+        <file>resources/style/img/ButtonUnindent.png</file>
     </qresource>
     <qresource prefix="/qml">
         <file>resources/qml/ProjectCardSelection.qml</file>
