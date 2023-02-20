@@ -94,7 +94,7 @@ void CEditorChoiceScreen::Unload()
 void CEditorChoiceScreen::on_pNewProjectButton_clicked()
 {
   if (!m_bInitialized) { return; }
-  m_spUi->pStackedWidget->setCurrentIndex(c_iPageIndexNew);
+  m_spUi->pStackedWidget->SlideInIdx(c_iPageIndexNew);
 }
 
 //----------------------------------------------------------------------------------------
@@ -102,7 +102,7 @@ void CEditorChoiceScreen::on_pNewProjectButton_clicked()
 void CEditorChoiceScreen::on_pOpenProjectButton_clicked()
 {
   if (!m_bInitialized) { return; }
-  m_spUi->pStackedWidget->setCurrentIndex(c_iPageIndexOpen);
+  m_spUi->pStackedWidget->SlideInIdx(c_iPageIndexOpen);
 }
 
 //----------------------------------------------------------------------------------------
@@ -112,7 +112,7 @@ void CEditorChoiceScreen::on_pCancelButton_clicked()
   if (!m_bInitialized) { return; }
 
   emit SignalCancelClicked();
-  m_spUi->pStackedWidget->setCurrentIndex(c_iPageIndexChoice);
+  m_spUi->pStackedWidget->SlideInIdx(c_iPageIndexChoice);
 }
 
 //----------------------------------------------------------------------------------------
@@ -157,7 +157,7 @@ void CEditorChoiceScreen::on_pCreateProjectButton_clicked()
     {
       m_spUi->pErrorLabel->setVisible(false);
       emit SignalNewClicked(sNewName, m_spUi->pEnableTutorialCheckBox->isChecked());
-      m_spUi->pStackedWidget->setCurrentIndex(c_iPageIndexChoice);
+      m_spUi->pStackedWidget->SlideInIdx(c_iPageIndexChoice);
     }
   }
 }
@@ -191,6 +191,6 @@ void CEditorChoiceScreen::on_pOpenExistingProjectButton_clicked()
 
   if (bOk)
   {
-    m_spUi->pStackedWidget->setCurrentIndex(c_iPageIndexChoice);
+    m_spUi->pStackedWidget->SlideInIdx(c_iPageIndexChoice);
   }
 }

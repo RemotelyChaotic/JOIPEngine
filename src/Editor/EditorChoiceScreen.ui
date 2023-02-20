@@ -135,7 +135,7 @@
        </spacer>
       </item>
       <item>
-       <widget class="QStackedWidget" name="pStackedWidget">
+       <widget class="CSlidingStackedWidget" name="pStackedWidget">
         <property name="sizePolicy">
          <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
           <horstretch>0</horstretch>
@@ -643,6 +643,12 @@
    <class>CProjectCardSelectionWidget</class>
    <extends>QWidget</extends>
    <header>Widgets/ProjectCardSelectionWidget.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>CSlidingStackedWidget</class>
+   <extends>QStackedWidget</extends>
+   <header>Widgets/SlidingStackedWidget.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>
