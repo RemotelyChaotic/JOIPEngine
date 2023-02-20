@@ -555,6 +555,10 @@ macro(CreateJOIPProject JOIP_PROJECT_NAME)
     ${JOIPSources}/Widgets/ShortcutButton.h
     ${JOIPSources}/Widgets/SlidingStackedWidget.cpp
     ${JOIPSources}/Widgets/SlidingStackedWidget.h
+    ${JOIPSources}/Widgets/SlidingTabWidget.cpp
+    ${JOIPSources}/Widgets/SlidingTabWidget.h
+    ${JOIPSources}/Widgets/SlidingWidget.cpp
+    ${JOIPSources}/Widgets/SlidingWidget.h
     ${JOIPSources}/Widgets/TitleLabel.cpp
     ${JOIPSources}/Widgets/TitleLabel.h
     ${JOIPSources}/WindowContext.cpp
