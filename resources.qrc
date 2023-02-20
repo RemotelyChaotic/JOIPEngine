@@ -235,7 +235,6 @@
         <file>resources/help/editor/images/eos_choice.png</file>
         <file>resources/help/editor/images/eos_disable.png</file>
         <file>resources/help/editor/code/eos_editor_help.html</file>
-        <file>resources/help/editor/code/eos_reference_help.html</file>
         <file>resources/help/editor/images/eos_eval.png</file>
         <file>resources/help/editor/images/eos_if.png</file>
         <file>resources/help/editor/images/eos_image_1.png</file>
@@ -253,6 +252,7 @@
         <file>resources/style/img/ButtonOList.png</file>
         <file>resources/style/img/ButtonIndent.png</file>
         <file>resources/style/img/ButtonUnindent.png</file>
+        <file>resources/help/editor/code/eval_api_reference_help.html</file>
     </qresource>
     <qresource prefix="/qml">
         <file>resources/qml/ProjectCardSelection.qml</file>
