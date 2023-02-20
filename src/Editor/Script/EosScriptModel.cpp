@@ -773,6 +773,37 @@ CEosSortFilterProxyModel::~CEosSortFilterProxyModel()
 bool CEosSortFilterProxyModel::filterAcceptsRow(int iSourceRow,
                                                 const QModelIndex& sourceParent) const
 {
+  CEosScriptModel* pSourceModel = dynamic_cast<CEosScriptModel*>(sourceModel());
+  if (nullptr != pSourceModel)
+  {
+    if(!filterRegExp().isEmpty())
+    {
+      // get source-model index for current row
+      QModelIndex sourceIndex = pSourceModel->index(iSourceRow, 0, sourceParent);
+      if(sourceIndex.isValid())
+      {
+        // if any of children matches the filter, then current index matches the filter as well
+        qint32 iNb = pSourceModel->rowCount(sourceIndex) ;
+        for(qint32 i = 0; i < iNb; ++i)
+        {
+          if(filterAcceptsRow(i, sourceIndex))
+          {
+            return true;
+          }
+        }
+
+        const CEosScriptModelItem* pItem = pSourceModel->GetItem(sourceIndex);
+        if (nullptr == pItem)
+        {
+          return false;
+        }
+
+        QString sData = pItem->Data(eos_item::c_iColumnName, Qt::DisplayRole).toString();
+        return sData.contains(filterRegExp());
+      }
+    }
+  }
+
   return QSortFilterProxyModel::filterAcceptsRow(iSourceRow, sourceParent);
 }
 

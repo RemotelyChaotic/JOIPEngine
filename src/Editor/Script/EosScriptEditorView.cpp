@@ -1,10 +1,10 @@
 #include "EosScriptEditorView.h"
-#include "EosCommandWidgets.h"
 #include "EosScriptModel.h"
 
 #include <QAbstractTextDocumentLayout>
 #include <QApplication>
 #include <QFocusEvent>
+#include <QMenu>
 #include <QPainter>
 #include <QTextDocument>
 #include <QStyledItemDelegate>
@@ -85,6 +85,26 @@ CEosScriptEditorView::CEosScriptEditorView(QWidget* pParent) :
 {
   qApp->installEventFilter(this);
   setItemDelegate(new CEosScriptEditorViewDelegate(this));
+
+  setContextMenuPolicy(Qt::CustomContextMenu);
+  connect(this, &QTreeView::customContextMenuRequested,
+          this, &CEosScriptEditorView::SlotCreateContextMenu);
+
+  m_pSearchBar = new CEditorSearchBar(this);
+  m_pSearchBar->Climb();
+  m_pSearchBar->Resize();
+
+  // reset things after closing search bar
+  connect(m_pSearchBar, &CEditorSearchBar::SignalHidden,
+          this, &CEosScriptEditorView::SlotSearchAreaHidden);
+  connect(m_pSearchBar, &CEditorSearchBar::SignalFilterChanged,
+          this, &CEosScriptEditorView::SlotSearchFilterChanged);
+
+  QAction* pSearchAction = new QAction(tr("Search"), this);
+  pSearchAction->setShortcutContext(Qt::WidgetWithChildrenShortcut);
+  pSearchAction->setShortcut(QKeySequence::Find);
+  connect(pSearchAction, &QAction::triggered,
+          this, &CEosScriptEditorView::SlotShowHideSearchFilter);
 }
 CEosScriptEditorView::~CEosScriptEditorView()
 {
@@ -127,10 +147,65 @@ void CEosScriptEditorView::ExpandAll()
 
 //----------------------------------------------------------------------------------------
 //
+void CEosScriptEditorView::SlotCreateContextMenu(QPoint p)
+{
+  QModelIndex index = indexAt(p);
+  Q_UNUSED(index)
+
+  QMenu* pMenu = new QMenu(this);
+  pMenu->addAction(tr("Search"), this, SLOT(SlotShowHideSearchFilter()),
+                   QKeySequence::Find);
+  pMenu->exec(viewport()->mapToGlobal(p));
+  pMenu->deleteLater();
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CEosScriptEditorView::SlotSearchFilterChanged(
+    CEditorSearchBar::ESearhDirection, const QString& sText)
+{
+  QSortFilterProxyModel* pFilterModel =
+      dynamic_cast<QSortFilterProxyModel*>(model());
+  if (nullptr != pFilterModel)
+  {
+    pFilterModel->setFilterRegExp(QRegExp(sText));
+    ExpandAll();
+  }
+}
+
+//----------------------------------------------------------------------------------------
+//
 void CEosScriptEditorView::SlotModelReset()
 {
   if (nullptr != m_pModel)
   {
+    ExpandAll();
+  }
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CEosScriptEditorView::SlotShowHideSearchFilter()
+{
+  if (m_pSearchBar->isVisible())
+  {
+    m_pSearchBar->Hide();
+  }
+  else
+  {
+    m_pSearchBar->Show();
+  }
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CEosScriptEditorView::SlotSearchAreaHidden()
+{
+  QSortFilterProxyModel* pFilterModel =
+      dynamic_cast<QSortFilterProxyModel*>(model());
+  if (nullptr != pFilterModel)
+  {
+    pFilterModel->setFilterRegExp(".*");
     ExpandAll();
   }
 }
