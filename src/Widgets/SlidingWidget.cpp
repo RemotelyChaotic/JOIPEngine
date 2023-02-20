@@ -247,7 +247,7 @@ void CSlidingWidget::SlideInWgt(QWidget* pWidget, ESlideDirection direction)
   QPropertyAnimation* pAnimnext = new QPropertyAnimation(Widget(iNext), "pos");
   pAnimnext->setDuration(m_iSpeed);
   pAnimnext->setEasingCurve(m_animationType);
-  pAnimnext->setStartValue(QPoint(-iOffsetx + pNext.x(), iOffsety + pNext.y()));
+  pAnimnext->setStartValue(QPoint(-iOffsetx + pNext.x(), -iOffsety + pNext.y()));
   pAnimnext->setEndValue(QPoint(pNext.x(), pNext.y()));
 
   pAnimgroup->addAnimation(pAnimnow);
