@@ -71,16 +71,15 @@
         background.setBackgroundColor([255, 0, 0, 128]); /* will set background to a 50% transparent red */<br>
         <br></li>
 
-        <li><b>setBackgroundTexture ( string | Resource | null ):</b><br>
+        <li><b>setBackgroundTexture ( string | null ):</b><br>
         As the name implies, this will set the background texture. The texture is repeated as often as
-        neccessary to fill the entire object. The argument can either be the name of a
-        <a href="qrc:/resources/help/editor/resources/resource_help.html">Resource</a>
-        or a resource object obtained from the current Scene object. In any case, it has to be of the
-        <i>Image</i> type. A null argument will reset the background to the style-defined application background.<br>
+        neccessary to fill the entire object. The argument needs to be the name of a
+        <a href="qrc:/resources/help/editor/resources/resource_help.html">Resource</a>.
+        It also has to be of the <i>Image</i> type.
+        A null argument will reset the background to the style-defined application background.<br>
         <i>Example Usage:</i><br>
         background.setBackgroundTexture("tiledBg");<br>
         background.setBackgroundTexture(null);<br>
-        background.setBackgroundTexture(bgObject); /* note: in this example bgObject is a var */<br>
         <br></li>
       </ul>
     </p>
@@ -95,24 +94,28 @@
     It is a container for a list of icons that can be shown or hidden at will.
     <br>
       <ul>
-        <li><b>show ( string | Resource ):</b><br>
+        <li><b>addIcon / showIcon ( string ):</b><br>
         This function will add a new icon to the list, where the resource argument will be the shown
         icon. The <a href="qrc:/resources/help/editor/resources/resource_help.html">Resource</a> has
-        to be of the <i>Image</i> or <i>Movie</i> type and can either be the name of a Resource or a resource
-        object obtained from the current Scene object.<br>
+        to be of the <i>Image</i> or <i>Movie</i> type and must be the name of a Resource or a resource.<br>
         <i>Example Usage:</i><br>
-        icon.show("myIcon");<br>
-        icon.show(myIconVar); /* note: in this example myIconVar is a var */<br>
+        icon.showIcon("myIcon");<br>
         <br></li>
 
-        <li><b>hide ( [ string ] ):</b><br>
+        <li><b>removeIcon / hideIcon ( [ string ] ):</b><br>
         This function will remove the icon with the name given in the input. An empty input,
         no input or the input string: "~all" will remove all icons.<br>
         <i>Example Usage:</i><br>
-        icon.hide("myIcon"); // hides myIcon<br>
-        icon.hide(); // hides all icons<br>
-        icon.hide(""); // hides all icons<br>
-        icon.hide("~all"); // hides all icons<br>
+        icon.hideIcon("myIcon"); // hides myIcon<br>
+        icon.hideIcon(); // hides all icons<br>
+        icon.hideIcon(""); // hides all icons<br>
+        icon.hideIcon("~all"); // hides all icons<br>
+        <br></li>
+
+        <li><b>clearIcons ( string ):</b><br>
+        This function will remove all icons.<br>
+        <i>Example Usage:</i><br>
+        icon.clearIcons(); // hides all icons<br>
         <br></li>
       </ul>
     </p>
@@ -127,18 +130,15 @@
     This is the main way to display or play media <a href="qrc:/resources/help/editor/resources/resource_help.html">Resources</a>
     of types <i>Image</i>, <i>Movie</i> or <i>Sound</i>.<br>
       <ul>
-        <li><b>show ( string | Resource ):</b><br>
+        <li><b>showMedia ( string ):</b><br>
         This function shows an <i>Image</i> type Resource. Calling this will stop any
-        currently running playback. The Resource can be the name of a Resource or a Resource
-        object obtained from the current Scene object.<br>
+        currently running playback. The Resource must be the name of a Resource.<br>
         <i>Example Usage:</i><br>
-        mediaPlayer.show("myIcon");<br>
-        mediaPlayer.show(myMediaVar); /* note: in this example myMediaVar is a var */<br>
+        mediaPlayer.showMedia("myIcon");<br>
         <br></li>
 
-        <li><b>play ( [ string | Resource [, int [, int [, int] ] ] ] ):</b><br>
-        This function can be called with or without arguments. Calling it with arguments
-        plays a <i>Movie</i> or <i>Sound</i> type Resource.
+        <li><b>playMedia / showOrPlayMedia ( [ string [, int [, int [, int] ] ] ] ):</b><br>
+        This function plays a <i>Movie</i> or <i>Sound</i> type Resource.
         The second, third and forth arguments denote the number of loops, the start position and stop position of the media
         respectively. The default amount of loops is 1, the default start position is frame 0 and the default stop position is -1 for the last frame.
         If a loop count of -1 is given, the playback will loop infinitely.<br>
@@ -156,14 +156,13 @@
         the last used <i>Movie</i> and all loaded <i>Sound</i> resources. This is provided
         for compatibility and should not be used. Use the specific functions instead.<br>
         <i>Example Usage:</i><br>
-        mediaPlayer.play("myVideoOrSound"); // plays myVideoOrSound<br>
-        mediaPlayer.play("mySound"); // continues or starts playing the sound Resource<br>
-        mediaPlayer.play(myVideoOrSoundVar); /* note: in this example myVideoOrSoundVar is a var */<br>
-        mediaPlayer.play(); // only for compatibility<br>
-        mediaPlayer.play("mySound", 2); // loop sound twice<br>
-        mediaPlayer.play("mySound", -1); // loop sound until stopped manually<br>
-        mediaPlayer.play("mySound", 1, 10); // starts "mysound" at frame 10 <br>
-        mediaPlayer.play("mySound", 1, 10, 100); // starts "mysound" at frame 10 and stops it at frame 100<br>
+        mediaPlayer.playMedia("myVideoOrSound"); // plays myVideoOrSound<br>
+        mediaPlayer.playMedia("mySound"); // continues or starts playing the sound Resource<br>
+        mediaPlayer.playMedia(); // only for compatibility<br>
+        mediaPlayer.playMedia("mySound", 2); // loop sound twice<br>
+        mediaPlayer.playMedia("mySound", -1); // loop sound until stopped manually<br>
+        mediaPlayer.playMedia("mySound", 1, 10); // starts "mysound" at frame 10 <br>
+        mediaPlayer.playMedia("mySound", 1, 10, 100); // starts "mysound" at frame 10 and stops it at frame 100<br>
         <br></li>
 
         <li><b>playVideo ( ):</b><br>
@@ -189,7 +188,7 @@
         mediaPlayer.stopVideo(); // stops playing the last played video<br>
         <br></li>
 
-        <li><b>playSound ( [ string | Resource [, string [, int [, int] ] ] ] ):</b><br>
+        <li><b>playSound ( [ string [, string [, int [, int] ] ] ] ):</b><br>
         This function does the same as if you call <i>play</i> with the selected arguments,
         but will not work play <i>Movie</i> type resources. The second argument is the exception
         to that. It describes the custom id the sound can be referenced with. If left empty, no id will be set.<br>
@@ -202,7 +201,7 @@
         mediaPlayer.playSound("mySound", "", 1, 10); // starts "mysound" at frame 10 and does not set the id<br>
         <br></li>
 
-        <li><b>pauseSound ( [ string | Resource ] ):</b><br>
+        <li><b>pauseSound ( [ string ] ):</b><br>
         This function can be called with or without arguments. Calling it with arguments
         will pause the given <i>Sound</i> Resource. A paused <i>Sound</i>
         can never stop the wait in <i>waitForSound</i> or <i>waitForPlayback</i> since the sound
@@ -215,7 +214,7 @@
         mediaPlayer.pauseSound(); // pauses playing all sounds<br>
         <br></li>
 
-        <li><b>stopSound ( [ string | Resource ] ):</b><br>
+        <li><b>stopSound ( [ string ] ):</b><br>
         This function can be called with or without arguments. Calling it with arguments
         will stop the given <i>Sound</i> Resource. A stopped <i>Sound</i>
         can never stop the wait in <i>waitForSound</i> or <i>waitForPlayback</i> since the sound
@@ -228,18 +227,17 @@
         mediaPlayer.stopSound(); // stops playing all sounds<br>
         <br></li>
 
-        <li><b>seekMedia ( [ string | Resource ], int ):</b><br>
+        <li><b>seekMedia ( [ string ], int ):</b><br>
         This function can be called with one or two arguments. Calling it with one arguments
         will skip the currently playing <i>Movie</i> Resource to the given frame. With two arguments,
         it will skip the given <i>Sound</i> or <i>Movie</i> Resource to the given frame.
-        The Resource input can be the name of a Resource, a Resource object obtained from the
-        current Scene object of the custom id of a Sound Resource.<br>
+        The Resource input must be the name of a Resource or the custom id of a Sound Resource.<br>
         <i>Example Usage:</i><br>
         mediaPlayer.seekMedia(10); // skips the curently playing movie to frame 10 <br>
         mediaPlayer.seekMedia("mySound", 10); // skips "mySound" to frame 10<br>
         <br></li>
 
-        <li><b>seekAudio ( ( string | Resource ), int ):</b><br>
+        <li><b>seekAudio ( ( string ), int ):</b><br>
         Does the same as <i>seekMedia</i> but only for a <i>Sound</i> type Resource.<br>
         <i>Example Usage:</i><br>
         mediaPlayer.seekMedia("mySound", 10); // skips "mySound" to frame 10<br>
@@ -251,43 +249,101 @@
         mediaPlayer.seekMedia(10); // skips the curently playing movie to frame 10<br>
         <br></li>
 
-        <li><b>setVolume ( [ string | Resource ], double ):</b><br>
+        <li><b>setVolume ( [ string ], double ):</b><br>
         Sets the volume of a currently playing <i>Movie</i> or <i>Sound</i> type Resource.<br>
         If no string argument is provided, the volume of all playing Resources will be modified.<br>
         The volume here is not an absolute value but multiplied with the engine's volume setting.<br>
         <i>Example Usage:</i><br>
         mediaPlayer.setVolume("myResource", 0.5); // volume of "myResource" will be set to 50% of the engine volume<br>
         <br></li>
+      </ul>
+    </p>
 
-        <li><b>waitForPlayback ( [ string | Resource ] ):</b><br>
-        This function can be called with or without arguments.
-        The Resource input can be the name of a Resource, a Resource object obtained from the
-        current Scene object of the custom id of a Sound Resource.<br>
-        With arguments, it blocks and waits until the given <i>Sound</i> Resource stopps
-        playing.<br>
-        Without arguments, it blocks and waits until current <i>Movie</i> Resource stopps
-        playing.<br>
-        If no sound or video is playing this function will return immediately. If
-        both sound and video are paused this function will never return.<br>
-        If the Resource loops forever this will never return.<br>
+    <br>
+
+    <h2>SoundManager (name: <i>Sound</i>)</h2>
+
+    <br>
+
+    <p>This object is registered by the JOIP-Engine if any media player is present in the Layout.
+    It allows access to <i>Sound</i> type resources registered via id. It is provided for EOS
+    compatibility.
+    <br>
+      <ul>
+        <li><b>addEventListener ( "play" | "end" | "pause", function ):</b><br>
+        Adds an event listener callback that is triggered when the coresponding event is
+        dispatched. Only "play", "end" and "pause" events are dispatched to this object.
         <i>Example Usage:</i><br>
-        mediaPlayer.waitForPlayback("mySound"); // to wait for sound<br>
-        mediaPlayer.waitForPlayback(); // to wait for movie<br>
+        Sound.get('example').addEventListener('play', function () {<br>
+          console.log('The sound looped again!')<br>
+        })<br>
         <br></li>
 
-        <li><b>waitForVideo (  ):</b><br>
-        This function does the same as if you call <i>waitForPlayback</i> without arguments.<br>
+        <li><b>removeEventListener ( "play" | "end" | "pause", function ):</b><br>
+        Removes a registered event listener.
         <i>Example Usage:</i><br>
-        mediaPlayer.waitForVideo();<br>
+        Sound.removeEventListener("play", myfunc);<br>
         <br></li>
 
-        <li><b>waitForSound ( [ string | Resource ] ):</b><br>
-        This function does the same as if you call <i>waitForPlayback</i> with the given arguments arguments.<br>
-        If given no argument, it will do nothing.
-        The Resource input can be the name of a Resource, a Resource object obtained from the
-        current Scene object of the custom id of a Sound Resource.<br>
+        <li><b>get ( string ):</b><br>
+        This function will fetch the Audio object wrapper for a <i>Sound</i> type Resource
+        registered via id and return it.
         <i>Example Usage:</i><br>
-        mediaPlayer.waitForSound("mySound");<br>
+        var myAudio = Sound.get("mySound");<br>
+        <br></li>
+      </ul>
+    </p>
+
+    <br>
+
+    <h2>Audio</h2>
+
+    <br>
+
+    <p>This object represents a wrapped <i>Sound</i> Resource returned by <i>Sound.get</i>.
+    This is <b>not</b> equal to a <i>Sound</i> Resource object. It is provided for EOS
+    compatibility.
+    <br>
+      <ul>
+        <li><b>play ( ):</b><br>
+        Start or continue playing the audio clip.
+        <i>Example Usage:</i><br>
+        myAudio.play();<br>
+        <br></li>
+
+        <li><b>pause ( ):</b><br>
+        Pause the audio clip.
+        <i>Example Usage:</i><br>
+        myAudio.pause();<br>
+        <br></li>
+
+        <li><b>stop ( ):</b><br>
+        Stop the audio clip and rewind to the beginning.
+        <i>Example Usage:</i><br>
+        myAudio.stop();<br>
+        <br></li>
+
+        <li><b>seek ( real ):</b><br>
+        Go to the specified position in the clip.<br>Does not affect the playback state.
+        In other words, if the audio clip is playing, it will continue to play after seeking and if it was paused,
+        it will still be paused.
+        <i>Example Usage:</i><br>
+        mySound.seek(20);<br>
+        <br></li>
+
+        <li><b>setVolume ( real ):</b><br>
+        Set the volume of the audio clip.
+        <i>Example Usage:</i><br>
+        myAudio.setVolume(0.5);<br>
+        <br></li>
+
+        <li><b>destroy ( ):</b><br>
+        Remove the audio clip from the id registry.<br>If you call this method,
+        the clip will be deleted from the audio clip ID registry and you will no longer be
+        able to retrieve it using the <i>Sound.get</i> method. The same as calling
+        <i>Sound.deRregisterId</i>.
+        <i>Example Usage:</i><br>
+        myAudio.destroy();<br>
         <br></li>
       </ul>
     </p>
@@ -309,15 +365,13 @@
         metronome.setBpm(60);<br>
         <br></li>
 
-        <li><b>setBeatResource ( string | Resource | null ):</b><br>
+        <li><b>setBeatResource ( string | null ):</b><br>
         This function will set the sound effect that is played on each beat reaching the center.
         The <a href="qrc:/resources/help/editor/resources/resource_help.html">Resource</a> can only
-        be of the <i>Sound</i> type and can either be the name of a Resource, a resource
-        object obtained from the current Scene object or <i>null<i>. Calling the function with null will
-        reset the sound effect to the default sound effect.<br>
+        be of the <i>Sound</i> type and can either be the name of a Resource or <i>null<i>.
+        Calling the function with null will reset the sound effect to the default sound effect.<br>
         <i>Example Usage:</i><br>
         metronome.setBeatResource("myBeat");<br>
-        metronome.setBeatResource(myBeatVar); /* note: in this example myIconVar is a var */<br>
         metronome.setBeatResource(null);<br>
         <br></li>
 
@@ -363,7 +417,7 @@
 
     <br>
 
-    <h2>PlayerStorage (name: <i>localStorage</i>)</h2>
+    <h2>TeaseStorage (name: <i>teaseStorage</i>)</h2>
 
     <br>
 
@@ -373,18 +427,24 @@
     this object stores values that can be retrieved at any time.
     The storage will remain until the currently running
     <a href="qrc:/resources/help/project/joi_project_help.html">JOI-Project</a> finishes
-    playing.<br>
+    playing. Methods marked with <i>Extension</i> are not part of the EOS API.<br>
       <ul>
-        <li><b>store ( string id, var value ):</b><br>
+        <li><b>setItem ( string id, var value ):</b><br>
         Stores a value with the given id in the storage. Any value can be stored and loaded, even complex objects.<br>
         <i>Example Usage:</i><br>
-        localStorage.store("value", 5);<br>
+        localStorage.setItem("value", 5);<br>
         <br></li>
 
-        <li><b>load ( string id ): value:</b><br>
+        <li><b>getItem ( string id ):</b><br>
         Loads a value with the given id from the storage. Any value can be stored and loaded, even complex objects.<br>
         <i>Example Usage:</i><br>
-        var value = localStorage.load("value");<br>
+        var value = teaseStorage.getItem("value");<br>
+        <br></li>
+
+        <li><b>removeItem ( string id ):</b> <i>Extension</i><br>
+        Removes a value with the given id from the storage.<br>
+        <i>Example Usage:</i><br>
+        teaseStorage.removeItem("value");<br>
         <br></li>
       </ul>
     </p>
@@ -411,6 +471,10 @@
         textBox.setBackgroundColors([[255, 0, 0, 128], [255, 0, 0]]); /* same as above example */<br>
         textBox.setBackgroundColors([[255, 0, 0, 128], "red"]); /* same as above example */<br>
         <br></li>
+
+        <li><b>backgroundColors ( ):</b><br>
+        Accessor method for the currently set background colors.
+        </li>
 
         <li><b>setTextAlignment ( enum:TextAlignment  ):</b><br>
         This will set the text alignment of texts resulting from <i>showText</i> calls in the text box.
@@ -443,15 +507,17 @@
         textBox.setTextColors([[255, 0, 0, 255], "green"]); /* same as above example */<br>
         <br></li>
 
-        <li><b>setTextPortrait ( string | Resource | null ):</b><br>
+        <li><b>textColors ( ):</b><br>
+        Accessor method for the currently set text colors.
+        </li>
+
+        <li><b>setTextPortrait ( string | null ):</b><br>
         This will set an <i>Image</i> or <i>Movie</i> type <a href="qrc:/resources/help/editor/resources/resource_help.html">Resource</a>
         to be shown besides text resulting from <i>showText</i> calls.
-        The Resource can be the name of a Resource, a Resource object obtained from the
-        current Scene object or null. Calling the function with null will
+        The Resource can be the name of a Resource or null. Calling the function with null will
         remove the portraits from future texts resulting from <i>showText</i> calls.<br>
         <i>Example Usage:</i><br>
         textBox.setTextPortrait("myIcon");<br>
-        textBox.setTextPortrait(myIconVar); /* note: in this example myIconVar is a Resource */<br>
         <br></li>
 
         <li><b>showButtonPrompts ( string[] ):</b><br>
@@ -496,7 +562,7 @@
         textBox.showText("Hello world!", 10, true); /* show Hello world for 10 seconds (skippable)*/<br>
         <br></li>
 
-        <li><b>clear (  ):</b><br>
+        <li><b>clearTextBox (  ):</b><br>
         Clears the log of the textbox. This will not clear any previously set colors.<br>
         <i>Example Usage:</i><br>
         textBox.clear();<br>
@@ -513,7 +579,7 @@
     <p>This object is registered by the JOIP-Engine if it is present in the current <a href="qrc:/resources/help/layout/layout_help.html">Layout</a>.
     This object is for displaying a timer that can be shown or hidden on demand.<br>
       <ul>
-        <li><b>hide (  ):</b><br>
+        <li><b>hideTimer (  ):</b><br>
         Hides the timer completely, but does not stop any running timer.<br>
         <i>Example Usage:</i><br>
         timer.hide();<br>
@@ -534,19 +600,19 @@
         timer.setTimeVisible(true);<br>
         <br></li>
 
-        <li><b>show (  ):</b><br>
+        <li><b>showTimer (  ):</b><br>
         Shows the timer, but does not stop any running timer.<br>
         <i>Example Usage:</i><br>
         timer.show();<br>
         <br></li>
 
-        <li><b>start (  ):</b><br>
+        <li><b>startTimer (  ):</b><br>
         Starts the timer.<br>
         <i>Example Usage:</i><br>
         timer.start();<br>
         <br></li>
 
-        <li><b>stop (  ):</b><br>
+        <li><b>stopTimer (  ):</b><br>
         Stops the timer.<br>This counts as a finished timer.<br>
         <i>Example Usage:</i><br>
         timer.stop();<br>
@@ -570,13 +636,13 @@
     <p>This object is registered by the JOIP-Engine if it is present in the current <a href="qrc:/resources/help/layout/layout_help.html">Layout</a>.
     This object can be used to display asynchronous messages and buttons that can run an asynchronous script on click or timeout.<br>
       <ul>
-        <li><b>clear ( ): </b><br>
+        <li><b>clearNotifications ( ): </b><br>
         Clears all open notifications and does <i>not</i> call any associated scripts.<br>
         <i>Example Usage:</i><br>
         notification.clear();<br>
         <br></li>
 
-        <li><b>hide ( string ): </b><br>
+        <li><b>removeNotificaiton ( string ): </b><br>
         The input to this function needs to be the string id of any open notification.
         This will hide the notification without calling any associated scripts.<br>
         <i>Example Usage:</i><br>
@@ -598,18 +664,16 @@
         notification.setIconAlignment(2); /* same as above */<br>
         <br></li>
 
-        <li><b>setPortrait ( string | Resource | null ):</b><br>
+        <li><b>setPortrait ( string | null ):</b><br>
         This will set an <i>Image</i> or <i>Movie</i> type <a href="qrc:/resources/help/editor/resources/resource_help.html">Resource</a>
         to be shown besides notifications resulting from <i>show</i> calls.
-        The Resource can be the name of a Resource, a Resource object obtained from the
-        current Scene object or null. Calling the function with null will
+        The Resource must be the name of a Resource or null. Calling the function with null will
         remove the portraits from future <i>show</i> calls.<br>
         <i>Example Usage:</i><br>
         notification.setPortrait("myIcon");<br>
-        notification.setPortrait(myIconVar); /* note: in this example myIconVar is a Resource */<br>
         <br></li>
 
-        <li><b>show ( string, string [, string [, double [, string | Resource | null [, string | Resource | null ] ] ] ] ): </b><br>
+        <li><b>showNotification ( string, string [, string [, double [, string | null [, string | null ] ] ] ] ): </b><br>
         Inputs to the function are (in the listed order):
         <ol>
           <li>The string id of the notification to be created</li>
@@ -620,8 +684,7 @@
           If not given or &lt; 0, the notification will never time out and the caller is responsible for hiding it.</li>
           <li>(optional) The script to be called on clicking the button.<br>
           The <a href="qrc:/resources/help/editor/resources/resource_help.html">Resource</a> can only
-          be of the <i>Script</i> type and can either be the name of a Resource, a resource
-          object obtained from the current Scene object or <i>null<i>.</li>
+          be of the <i>Script</i> type and must be the name of a Resource or <i>null<i>.</li>
           <li>(optional) The script to be called on timeout.<br>
           The <a href="qrc:/resources/help/editor/resources/resource_help.html">Resource</a> can only
           be of the <i>Script</i> type and can either be the name of a Resource, a resource
@@ -678,43 +741,41 @@
 
     <br>
 
-    <h2>PlayerThread (name: <i>thread</i>)</h2>
+    <h2>NotificationManager (name: <i>Notification</i>)</h2>
 
     <br>
 
-    <p>This object is automatically registered by the JOIP-Engine on loading a
-    <a href="qrc:/resources/help/project/joi_project_help.html">JOI-Project</a> and
-    should not be placed in the <a href="qrc:/resources/help/layout/layout_help.html">Layout</a> manually. This object is only used to idle the script for
-    a certain time.<br>
+    <p>This object is registered by the JOIP-Engine if any media PlayerNotification is present in the Layout.
+    It allows access notifications and is provided for EOS compatibility.
+    <br>
       <ul>
-        <li><b>sleep ( int timeout [, bool skippable ] ):</b><br>
-        Blocks and waits for <i>timeout</i> seconds. <i>Skippable</i> is optional and if
-        it is set to true, the wait can by skipped by the player.<br>
+        <li><b>get ( string ):</b><br>
+        This function will fetch the <i>Notification</i> object wrapper for an id and return it.
         <i>Example Usage:</i><br>
-        thread.sleep(10,true); /* Skippable 10s wait */<br>
-        thread.sleep(10,false); /* Unskippable 10s wait */<br>
-        thread.sleep(10); /* Unskippable 10s wait */<br>
+        var notification = Notification.get("myId");<br>
         <br></li>
       </ul>
     </p>
 
     <br>
 
-    <h2>PlayerEval (name: <i>evalRunner</i>)</h2>
+    <h2>Notification</h2>
 
     <br>
 
-    <p>This object is automatically registered by the JOIP-Engine on loading a
-    <a href="qrc:/resources/help/project/joi_project_help.html">JOI-Project</a> and
-    should not be placed in the <a href="qrc:/resources/help/layout/layout_help.html">Layout</a> manually. This object can be used to run
-    arbitrary code in the player UI.<br>
+    <p>This object represents a wrapped <i>Notification</i> returned by <i>Notification.get</i>.
+    <br>
       <ul>
-        <li><b>eval ( string ): var</b><br>
-        Runs some code in the UI and returns the return value of the execution. The variables of this script are
-        <i>not</i> accessable in the UI and all registered components might have different object names.
-        Only for advanced users, who know what they are doing, as this has full access to the player UI.<br>
+        <li><b>setTitle ( string ):</b><br>
+        Change the notification title.
         <i>Example Usage:</i><br>
-        evalRunner.eval("root.storage.clear();"); /* clears storage variables */<br>
+        notification.setTitle("newTitle");<br>
+        <br></li>
+
+        <li><b>remove ( ):</b><br>
+        Remove the notification from the screen.
+        <i>Example Usage:</i><br>
+        notification.remove();<br>
         <br></li>
       </ul>
     </p>
@@ -731,329 +792,105 @@
     This object allows for finer control of the <a href="qrc:/resources/help/editor/nodes/nodeeditor_help.html">Scene Flow</a> of a project.
     Here you can skip to scenes and enable or disable scenes dynamically for the current run.<br>
       <ul>
-        <li><b>disable ( string | Scene ): var</b><br>
-        The argument can either be a string or the reference to a scene object obtained from the
-        current Project. Calling this will disable the scene until it is re-enabled again.
-        Disabled scenes can not be run and will not show up in scene selections.<br>
+        <li><b>disable ( string ):</b><br>
+        The argument must be the string of a scene name. Calling this will disable the scene until it is re-enabled again.
+        Scenes can be "enabled" or "disabled".
+        Disabled scenes can not be run and will not show up in scene selections and when
+        using a goto with a wildcard target, e.g. "page*",
+        only enabled Scenes will be considered as possible targets.<br>
         <i>Example Usage:</i><br>
         sceneManager.disable("MyScene");<br>
-        sceneManager.disable(mySceneRefObj);<br>
         <br></li>
 
-        <li><b>enable ( string | Scene ): var</b><br>
-        The argument can either be a string or the reference to a scene object obtained from the
-        current Project. Calling this will re-enable the scene again. All scenes are enabled by default.<br>
+        <li><b>enable ( string ):</b><br>
+        The argument must be the string of a scene name.
+        Calling this will re-enable the scene again. All scenes are enabled by default.
+        Disabled scenes can not be run and will not show up in scene selections and when
+        using a goto with a wildcard target, e.g. "page*",
+        only enabled Scenes will be considered as possible targets.<br>
         <i>Example Usage:</i><br>
         sceneManager.enable("MyScene");<br>
-        sceneManager.enable(mySceneRefObj);<br>
         <br></li>
 
-        <li><b>gotoScene ( string | Scene ): var</b><br>
-        The argument can either be a string or the reference to a scene object obtained from the
-        current Project. Calling this will end the currently running scene script and
-        start running the requested scene script. Has the same effect as returning a Scene name
-        from a main script, but it can also be called in helper scripts.<br>
+        <li><b>goto ( string ):</b><br>
+        The argument must be the string of a scene name.
+        Calling this will end the currently running scene script and
+        start running the requested scene script.<br>
         <i>Example Usage:</i><br>
-        sceneManager.gotoScene("MyScene");<br>
-        sceneManager.gotoScene(mySceneRefObj);<br>
+        sceneManager.goto("MyScene");<br>
         <br></li>
       </ul>
     </p>
 
     <br>
 
-    <h2>Project</h2>
+    <h2>PageManager (name: <i>pages</i>)</h2>
 
     <br>
 
-    <p>A reference to the current Project object can be retrieved from the currently playing
-    Scene object. This object can be used to retrieve resources and data about
-    the current <a href="qrc:/resources/help/project/joi_project_help.html">JOI-Project</a>.
-    This object should not be placed in the <a href="qrc:/resources/help/layout/layout_help.html">Layout</a> manually.<br>
+    <p>This object is registered by the JOIP-Engine if any media PlayerSceneManager is present in the Layout.
+    It allows access Scenes and is provided for EOS compatibility.
+    <br>
       <ul>
-        <li><b>id: int:</b><br>
-        This property lets you read the internal Project id.<br></li>
-
-        <li><b>version: int:</b><br>
-        This reads the project version. Useful, if you need to have your scripts be compatible
-        with different JOIP-Engine versions. The version is a number with bits 16-23
-        being major, bits 8-15 being minor and the last eight being the patch version (0x00MMmmPP).<br>
+        <li><b>addEventListener ( "change", function ):</b><br>
+        Adds an event listener callback that is triggered when the coresponding event is
+        dispatched. Only "change" events are dispatched to this object when the current Scene changes.
         <i>Example Usage:</i><br>
-        var major = (project.version &amp; 0x00ff0000) &gt;&gt; 16; /* read major version */<br>
-        var minor = (project.version &amp; 0x0000ff00) &gt;&gt; 8; /* read minor version */<br>
-        var path = project.version &amp; 0x000000ff; /* read path version */<br></li>
+        pages.addEventListener('change', function () {<br>
+          /* Do something*/<br>
+        })<br>
+        <br></li>
 
-        <li><b>versionText: string:</b><br>
-        This property reads the project version as a formated user-readable string.<br></li>
-
-        <li><b>targetVersion: int:</b><br>
-        This reads the target engine version. Useful, if you need to have your scripts be compatible
-        with different JOIP-Engine versions. The version is a number with bits 16-23
-        being major, bits 8-15 being minor and the last eight being the patch version (0x00MMmmPP).<br>
+        <li><b>removeEventListener ( "change", function ):</b><br>
+        Removes a registered event listener.
         <i>Example Usage:</i><br>
-        var major = (project.version &amp; 0x00ff0000) &gt;&gt; 16; /* read major version */<br>
-        var minor = (project.version &amp; 0x0000ff00) &gt;&gt; 8; /* read minor version */<br>
-        var path = project.version &amp; 0x000000ff; /* read path version */<br></li>
+        pages.removeEventListener("change", myfunc);<br>
+        <br></li>
 
-        <li><b>targetVersionText: string:</b><br>
-        This property reads the target engine version as a formated user-readable string.<br></li>
-
-        <li><b>name: string:</b><br>
-        This property lets you read the Project name.<br></li>
-
-        <li><b>folderName: string:</b><br>
-        This property lets you read the Project's folder name.<br></li>
-
-        <li><b>describtion: string:</b><br>
-        This property lets you read the Project's describtion.<br></li>
-
-        <li><b>titleCard: string:</b><br>
-        This property lets you read the <a href="qrc:/resources/help/editor/resources/resource_help.html">Resources</a>
-        name representing the title card of the
-        <a href="qrc:/resources/help/project/joi_project_help.html">JOI-Project</a>.<br>
+        <li><b>goto / gotoScene ( string ):</b><br>
+        The argument must be the string of a scene name.
+        Calling this will end the currently running scene script and
+        start running the requested scene script.<br>
         <i>Example Usage:</i><br>
-        mediaPlayer.show(project.titleCard);<br></li>
+        pages.goto("MyScene");<br>
+        <br></li>
 
-        <li><b>map: string:</b><br>
-        This property lets you read the <a href="qrc:/resources/help/editor/resources/resource_help.html">Resources</a>
-        name representing the map of the
-        <a href="qrc:/resources/help/project/joi_project_help.html">JOI-Project</a>.
-        Because this is a currently unused and not fully implemented functionality,
-        this property shouldn't be accessed.<br></li>
-
-        <li><b>sceneModel: string:</b><br>
-        This property lets you read the <a href="qrc:/resources/help/editor/resources/resource_help.html">Resources</a>
-        name representing the scene model of the
-        <a href="qrc:/resources/help/project/joi_project_help.html">JOI-Project</a>.
-        This property is only useful for manually parsing the file.<br></li>
-
-        <li><b>playerLayout: string:</b><br>
-        This property lets you read the <a href="qrc:/resources/help/editor/resources/resource_help.html">Resources</a>
-        name representing the <a href="qrc:/resources/help/layout/layout_help.html">Layout</a> file of the
-        <a href="qrc:/resources/help/project/joi_project_help.html">JOI-Project</a>.
-        This property is only useful for manually parsing the file.<br></li>
-
-        <li><b>isUsingWeb: bool:</b><br>
-        This property lets you read the using-web-flag that is set, if the project
-        contains any remote <a href="qrc:/resources/help/editor/resources/resource_help.html">Resources</a>.<br></li>
-
-        <li><b>isUsingCodecs: bool:</b><br>
-        This property lets you read the using-codecs-flag that is set, if the project
-        contains any video or sound <a href="qrc:/resources/help/editor/resources/resource_help.html">Resources</a>.<br></li>
-
-        <li><b>isBundled: bool:</b><br>
-        This property lets you read the bundled-flag that is set, if the project
-        was <a href="qrc:/resources/help/editor/exportproject_button_help.html">exported</a>
-        and is thus read-only.<br></li>
-
-        <li><b>isReadOnly: bool:</b><br>
-        This property lets you read the read-only-flag that is set if the project
-        was loaded as read-only due to being an archive.<br></li>
-
-        <li><b>dlState: DownloadState:</b><br>
-        This property lets you read the download-state of the project. The download states are
-        <b>Unstarted</b>, <b>DownloadRunning</b>, <b>Finished</b>. A playable project will
-        always have this set to Finished and you will probably never need to check this property.<br></li>
-
-
-        <li><b>numKinks (  ): int:</b><br>
-        This property lets you read the number of kinks, that the application has been tagged with.<br></li>
-
-        <li><b>kinks: string[]:</b><br>
-        This property lets you read the kinks, that the application has been tagged with.<br></li>
-
-        <li><b>kink ( string name ): Kink:</b><br>
-        Returns a Kink object with the name <i>name</i>. Useful if you
-        need to read Kink specific properties.<br>
+        <li><b>isEnabled ( string ):</b><br>
+        Check if a given Scene is enabled.
+        Disabled scenes can not be run and will not show up in scene selections and when
+        using a goto with a wildcard target, e.g. "page*",
+        only enabled Scenes will be considered as possible targets.<br>
         <i>Example Usage:</i><br>
-        var myScene = project.kink("Vaginal Sex (Giving)");<br></li>
+        if (pages.isEnabled("myScene")) { /*Do something*/ }<br>
+        <br></li>
 
-        <li><b>numScenes (  ): int:</b><br>
-        Returns the number of scenes in the project. Usefull for iteration.<br></li>
-
-        <li><b>scenes (  ): string[]:</b><br>
-        Returns all scene names. Useful for iteration.<br></li>
-
-        <li><b>scene ( int index | string name ): Scene:</b><br>
-        Returns a Scene object at index index or with the name <i>name</i>. Useful if you
-        need to read scene specific properties.<br>
+        <li><b>disable ( string ):</b><br>
+        The argument must be the string of a scene name. Calling this will disable the scene until it is re-enabled again.
+        Scenes can be "enabled" or "disabled".
+        Disabled scenes can not be run and will not show up in scene selections and when
+        using a goto with a wildcard target, e.g. "page*",
+        only enabled Scenes will be considered as possible targets.<br>
         <i>Example Usage:</i><br>
-        var myScene = project.scene("myScene");<br>
-        var myScene = project.scene(0);<br></li>
+        pages.disable("MyScene");<br>
+        <br></li>
 
-        <li><b>numResources (  ): int:</b><br>
-        Returns the number of Resources in the project. Usefull for iteration.<br></li>
-
-        <li><b>resources (  ): string[]:</b><br>
-        Returns all Resource names. Useful for iteration.<br></li>
-
-        <li><b>resource ( int index | string name ): Resource:</b><br>
-        Returns a Resource object at index index or with the name <i>name</i>. Useful if you
-        need to read Resource specific properties.<br>
+        <li><b>enable ( string ):</b><br>
+        The argument must be the string of a scene name.
+        Calling this will re-enable the scene again. All scenes are enabled by default.
+        Disabled scenes can not be run and will not show up in scene selections and when
+        using a goto with a wildcard target, e.g. "page*",
+        only enabled Scenes will be considered as possible targets.<br>
         <i>Example Usage:</i><br>
-        var myResource = project.resource("myScene");<br>
-        var myResource = project.resource(0);<br></li>
+        pages.enable("MyScene");<br>
+        <br></li>
 
-        <li><b>font: string:</b><br>
-        Returns the font used in the player. Mainly in the PlayerTextBox.<br></li>
-      <br></li>
+        <li><b>getCurrentSceneId / getCurrentPageId ( ):</b><br>
+        Return the ID of the current Scene.<br>
+        <i>Example Usage:</i><br>
+        var id = pages.getCurrentSceneId("myScene");<br>
+        <br></li>
       </ul>
     </p>
-
-    <br>
-
-    <h2>Scene (name: <i>scene</i>)</h2>
-
-    <br>
-
-    <p>This object is automatically registered by the JOIP-Engine on loading a
-    <a href="qrc:/resources/help/project/joi_project_help.html">JOI-Project</a> and
-    should not be placed in the <a href="qrc:/resources/help/layout/layout_help.html">Layout</a> manually. This object should not be placed in the Layout manually.<br>
-      <ul>
-        <li><b>id: int</b><br>
-        This property lets you read the internal Scene id.<br></li>
-
-        <li><b>name: string:</b><br>
-        This property lets you read the Scene name.<br></li>
-
-        <li><b>script: string</b><br>
-        Gets the script file name that is associated with the scene.<br></li>
-
-        <li><b>numResources (  ): int:</b><br>
-        Returns the number of Resources in the project. Currently unused and will allways return 0.<br></li>
-
-        <li><b>resources (  ): string[]:</b><br>
-        Returns all Resource names. Currently unused and will allways return an empty list.<br></li>
-
-        <li><b>resource ( string name ): Resource:</b><br>
-        Returns a Resource object with the name <i>name</i>.
-        Currently unused and will allways return <i>undefined</i>.<br></li>
-
-        <li><b>project (  ): Project:</b><br>
-        Returns the Project object that contains this Scene. Useful for getting information
-        about the Project itself, or about Resources.<br>
-        <i>Example Usage:</i><br>
-        var project = scene.project();<br></li>
-      <br></li>
-      </ul>
-    </p>
-
-    <br>
-
-    <h2>Resource</h2>
-
-    <br>
-
-    <p>This type of object can be returned by a Project object and contains information
-    about the <a href="qrc:/resources/help/editor/resources/resource_help.html">Resource</a>.
-    It can also be used as argument in the PlayerBackground, PlayerIcons, PlayerMediaPlayer etc.
-    This object should not be placed in the <a href="qrc:/resources/help/layout/layout_help.html">Layout</a> manually.<br>
-      <ul>
-        <li><b>isAnimated: bool</b><br>
-        This property lets you read if the resource is animated (gif image or video
-        <a href="qrc:/resources/help/editor/resources/resource_help.html">Resource</a>).
-        An animated Resource can be played or paused and video Resources
-        can be waited on with <i>waitForVideo</i> or <i>waitForPlayback</i>.<br></li>
-
-        <li><b>isLocal: bool</b><br>
-        This property lets you read if the Resource is local or online.
-        For online resources, the <i>path</i> points to the image or video url directly and for
-        local resources it contains the local file relave to the
-        <a href="qrc:/resources/help/project/joi_project_help.html">JOI-Project</a>
-        root folder.<br></li>
-
-        <li><b>name: string</b><br>
-        This property lets you read the Resource name. This also serves as the Resource identifier.<br>
-
-        <li><b>path: url</b><br>
-        This property lets you read the path to the Resource.For online resources,
-        the <i>path</i> points to the image or video url directly and for
-        local resources it contains the local file relave to the
-        <a href="qrc:/resources/help/project/joi_project_help.html">JOI-Project</a>
-        root folder.<br></li>
-
-        <li><b>type: ResourceType</b><br>
-        This property lets you read the resource type. The values are:<br>
-        <i>ResourceType.Image (0)</i>: Image Resource<br>
-        <i>ResourceType.Movie (1)</i>: Movie Resource<br>
-        <i>ResourceType.Sound (2)</i>: Sound Resource<br>
-        <i>ResourceType.Other (3)</i>: Flow file, <a href="qrc:/resources/help/project/joi_project_help.html">Project</a> file,
-        <a href="qrc:/resources/help/editor/nodes/node_help.html">Scene Script</a> files and <a href="qrc:/resources/help/layout/layout_help.html">Layout</a> file<br>
-        </li>
-
-        <li><b>project (  ): Project:</b><br>
-        Returns the Project object that contains this Resource. Useful for getting information
-        about the Project itself, or about other Resources or Scenes.<br>
-        <i>Example Usage:</i><br>
-        var project = resource.project();<br></li>
-      <br></li>
-      </ul>
-    </p>
-
-    <br>
-
-    <h2>Kink</h2>
-
-    <br>
-
-    <p>This type of object can be returned by a Project object and contains information
-    about the specific Kink registered in the database. It is used internally to visualize the kinks
-    associated with a Project.<br>
-      <ul>
-        <li><b>idForOrdering: int</b><br>
-        This property lets you read the internal index of the Kink, which is used for sorting.<br></li>
-
-        <li><b>type: string</b><br>
-        This property lets you read the kink category.<br></li>
-
-        <li><b>name: string</b><br>
-        This property lets you read the Kink name. This also serves as the Kink identifier.<br>
-
-        <li><b>describtion: string</b><br>
-        This property lets you read the describtion of the Kink.<br></li>
-
-        <li><b>color ( ): color</b><br>
-        This property lets you read the color of the Tink that is used in the UI.
-        The red green and blue values are generated from an MD4 Hash of the category where
-        red is the first byte green the second and blue the third.<br>
-        </li>
-      <br></li>
-      </ul>
-    </p>
-
-    <br>
-
-    <h2>include( string | Resource ): var</h2>
-
-    <br>
-
-    <p>This is a function that lets you use a different script as a library or module
-    to prevent code duplication. It can be called with a string or Resource argument. In any case
-    the input has to reference a <i>Script</i> type <a href="qrc:/resources/help/editor/resources/resource_help.html">Resource</a>.
-    It will return an access object, that let's you access the functions and properties
-    of the library.
-    <br>
-    <i>Example Usage:</i><br>
-    var Lib = include("myLib.js"); // loads the library script myLib.js into Lib for later access<br>
-    Lib.myFunction(); // calls the function myFunction from Lib<br>
-    include("myLib2.js"); // loads script myLib2 and evaluates it in the global context<br>
-    <br></li>
-    </p>
-
-    <br>
-
-    <h2>return</h2>
-
-    <br>
-
-    <p>While not an actual object, this JavaScript language feature is used to "skip"
-    to a Scene directly without a normal <a href="qrc:/resources/help/editor/nodes/node_help.html">Scene Transition</a>.
-    The value to be returned is the Scene name as a string.<br>
-    <i>Example Usage:</i><br>
-    return "SceneB"; // skipps to "SceneB" and terminates current script<br>
-    <br></li>
-    </p>
-
   </div>
 </body>
 

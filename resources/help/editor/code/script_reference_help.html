@@ -735,7 +735,9 @@
         <li><b>disable ( string | Scene ): var</b><br>
         The argument can either be a string or the reference to a scene object obtained from the
         current Project. Calling this will disable the scene until it is re-enabled again.
-        Disabled scenes can not be run and will not show up in scene selections.<br>
+        Disabled scenes can not be run and will not show up in scene selections and when
+        using a goto with a wildcard target, e.g. "page*",
+        only enabled Scenes will be considered as possible targets.<br>
         <i>Example Usage:</i><br>
         sceneManager.disable("MyScene");<br>
         sceneManager.disable(mySceneRefObj);<br>
@@ -743,7 +745,10 @@
 
         <li><b>enable ( string | Scene ): var</b><br>
         The argument can either be a string or the reference to a scene object obtained from the
-        current Project. Calling this will re-enable the scene again. All scenes are enabled by default.<br>
+        current Project. Calling this will re-enable the scene again. All scenes are enabled by default.
+        Disabled scenes can not be run and will not show up in scene selections and when
+        using a goto with a wildcard target, e.g. "page*",
+        only enabled Scenes will be considered as possible targets.<br>
         <i>Example Usage:</i><br>
         sceneManager.enable("MyScene");<br>
         sceneManager.enable(mySceneRefObj);<br>
