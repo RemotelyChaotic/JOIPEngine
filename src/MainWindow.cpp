@@ -9,7 +9,6 @@
 #include "SceneScreen.h"
 #include "Settings.h"
 #include "SettingsScreen.h"
-#include "WindowContext.h"
 #include "Systems/BackActionHandler.h"
 #include "Systems/ProjectDownloader.h"
 #include "Widgets/AgeCheckOverlay.h"
@@ -32,7 +31,8 @@ CMainWindow::CMainWindow(QWidget* pParent) :
   m_spWindowContext(std::make_shared<CWindowContext>()),
   m_pBackground(new CBackgroundWidget(this)),
   m_bInitialized(false),
-  m_nextState(EAppState::eMainScreen)
+  m_nextState(EAppState::eMainScreen),
+  m_transitionDirection(CWindowContext::eHorizontal)
 {
   m_spHelpOverlay.reset(new CHelpOverlay(m_spHelpButtonOverlay.get(), this));
   m_spUi->setupUi(this);
@@ -126,16 +126,18 @@ void CMainWindow::Initialize()
 
 //----------------------------------------------------------------------------------------
 //
-void CMainWindow::SlotChangeAppState(EAppState newState)
+void CMainWindow::SlotChangeAppState(EAppState newState,
+                                     CWindowContext::ETransitionDirection direction)
 {
   m_nextState = newState;
+  m_transitionDirection = direction;
 
   IAppStateScreen* pScreen =
     dynamic_cast<IAppStateScreen*>(m_spUi->pApplicationStackWidget->currentWidget());
   if (nullptr != pScreen)
   {
     bool bOk = connect(dynamic_cast<QWidget*>(pScreen), SIGNAL(UnloadFinished()),
-                       this, SLOT(SlotCurrentAppStateUnloadFinished()));
+                       this, SLOT(SlotCurrentAppStateUnloadFinished()), Qt::QueuedConnection);
     assert(bOk);
     Q_UNUSED(bOk);
     pScreen->Unload();
@@ -163,13 +165,23 @@ void CMainWindow::SlotCurrentAppStateUnloadFinished()
     Q_UNUSED(bOk);
   }
 
-  m_spUi->pApplicationStackWidget->setCurrentIndex(m_nextState);
+  switch(m_transitionDirection)
+  {
+    case CWindowContext::eHorizontal:
+      m_spUi->pApplicationStackWidget->SetSlideDirection(CSlidingWidget::eHorizontal);
+    break;
+    case CWindowContext::eVertical:
+      m_spUi->pApplicationStackWidget->SetSlideDirection(CSlidingWidget::eVertical);
+    break;
+  }
+
+  m_spUi->pApplicationStackWidget->SlideInIdx(m_nextState);
 
   m_spHelpButtonOverlay->Show();
   m_spDownloadButtonOverlay->Show();
 
   pScreen =
-      dynamic_cast<IAppStateScreen*>(m_spUi->pApplicationStackWidget->currentWidget());
+      dynamic_cast<IAppStateScreen*>(m_spUi->pApplicationStackWidget->widget(m_nextState));
   if (nullptr != pScreen)
   {
     pScreen->Load();
@@ -194,11 +206,11 @@ void CMainWindow::SlotDownloadButtonClicked()
 {
   if (m_spUi->pApplicationStackWidget->currentIndex() != EAppState::eDownloadScreen)
   {
-    SlotChangeAppState(EAppState::eDownloadScreen);
+    SlotChangeAppState(EAppState::eDownloadScreen, CWindowContext::eVertical);
   }
   else
   {
-    SlotChangeAppState(EAppState::eMainScreen);
+    SlotChangeAppState(EAppState::eMainScreen, CWindowContext::eVertical);
   }
 }
 

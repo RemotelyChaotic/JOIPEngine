@@ -35,7 +35,7 @@
      <number>0</number>
     </property>
     <item row="0" column="0">
-     <widget class="QStackedWidget" name="pApplicationStackWidget"/>
+     <widget class="CSlidingStackedWidget" name="pApplicationStackWidget"/>
     </item>
    </layout>
   </widget>
@@ -45,7 +45,7 @@
      <x>0</x>
      <y>0</y>
      <width>800</width>
-     <height>20</height>
+     <height>21</height>
     </rect>
    </property>
   </widget>
@@ -60,6 +60,14 @@
   <widget class="QStatusBar" name="pStatusBar"/>
  </widget>
  <layoutdefault spacing="6" margin="11"/>
+ <customwidgets>
+  <customwidget>
+   <class>CSlidingStackedWidget</class>
+   <extends>QStackedWidget</extends>
+   <header>Widgets/SlidingStackedWidget.h</header>
+   <container>1</container>
+  </customwidget>
+ </customwidgets>
  <resources>
   <include location="../resources.qrc"/>
  </resources>

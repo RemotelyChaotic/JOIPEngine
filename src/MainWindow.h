@@ -3,6 +3,8 @@
 
 #include "MainWindowFactory.h"
 #include "Enums.h"
+#include "WindowContext.h"
+
 #include <QMainWindow>
 #include <QPointer>
 #include <memory>
@@ -13,7 +15,6 @@ class CHelpButtonOverlay;
 class CHelpOverlay;
 class CBackgroundWidget;
 class CSettings;
-class CWindowContext;
 namespace Ui {
   class CMainWindow;
 }
@@ -32,7 +33,9 @@ public:
   void OnShow() override {}
 
 protected slots:
-  void SlotChangeAppState(EAppState newState);
+  void SlotChangeAppState(EAppState newState,
+                          CWindowContext::ETransitionDirection direction =
+                              CWindowContext::eHorizontal);
   void SlotChangeAppStateToMain();
   void SlotCurrentAppStateUnloadFinished();
   void SlotDownloadButtonClicked();
@@ -64,6 +67,7 @@ private slots:
 private:
   bool                                    m_bInitialized;
   EAppState                               m_nextState;
+  CWindowContext::ETransitionDirection    m_transitionDirection;
 };
 
 #endif // MAINWINDOW_H

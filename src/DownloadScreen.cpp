@@ -89,7 +89,7 @@ void CDownloadScreen::on_pDownloadButton_clicked()
 void CDownloadScreen::on_pCancelButton_clicked()
 {
   WIDGET_INITIALIZED_GUARD
-  emit m_spWindowContext->SignalChangeAppState(EAppState::eMainScreen);
+  emit m_spWindowContext->SignalChangeAppState(EAppState::eMainScreen, CWindowContext::eVertical);
 }
 
 //----------------------------------------------------------------------------------------
@@ -97,7 +97,7 @@ void CDownloadScreen::on_pCancelButton_clicked()
 void CDownloadScreen::SlotExitClicked()
 {
   WIDGET_INITIALIZED_GUARD
-  emit m_spWindowContext->SignalChangeAppState(EAppState::eMainScreen);
+  emit m_spWindowContext->SignalChangeAppState(EAppState::eMainScreen, CWindowContext::eVertical);
 }
 
 //----------------------------------------------------------------------------------------
