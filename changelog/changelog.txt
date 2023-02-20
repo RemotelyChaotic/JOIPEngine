@@ -233,4 +233,5 @@ Version 1.2.3.0
 =================
 
 Changes:
+- EOS script files have a new graphical editor similar to the Milovana editor.
 - Project Describtion can be edited in a new richtext editor.
