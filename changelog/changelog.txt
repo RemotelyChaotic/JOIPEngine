@@ -236,3 +236,5 @@ Changes:
 - EOS script files have a new graphical editor similar to the Milovana editor.
 - Project Describtion can be edited in a new richtext editor.
 - Added smaller animations to various ui interactions
+- Project version warning on card is only shown if project version is larger than
+  the current engine version.

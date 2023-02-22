@@ -530,7 +530,7 @@ Rectangle {
         versionText.text = dto.versionText + " / " + dto.targetVersionText;
         describtion.text = (dto.describtion.length > 0 ? dto.describtion : qsTr("<i>No describtion</i>")) +
                 "<br><br>";
-        if (dto.targetVersion !== Settings.version)
+        if (dto.targetVersion > Settings.version)
         {
             iconWarningVersionRect.visible = true
         }
