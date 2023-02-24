@@ -232,6 +232,9 @@ Fixed Bugs:
 Version 1.2.3.0
 =================
 
+New Features:
+- Added a new "Show in Explorer" option to the context menu in the Resource Tree.
+
 Changes:
 - EOS script files have a new graphical editor similar to the Milovana editor.
 - Project Describtion can be edited in a new richtext editor.

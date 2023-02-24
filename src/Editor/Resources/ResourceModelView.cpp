@@ -11,12 +11,78 @@
 #include <QClipboard>
 #include <QContextMenuEvent>
 #include <QHelpEvent>
+#include <QHostInfo>
 #include <QItemSelectionModel>
 #include <QListView>
+#include <QProcess>
 #include <QUndoStack>
 #include <QToolTip>
 
 #include <limits>
+
+// the functions in this namespace are from QtCtreator code:
+namespace
+{
+  enum EHostOsType
+  {
+    eOsTypeWindows,
+    eOsTypeLinux,
+    eOsTypeMac,
+    eOsTypeOtherUnix,
+    eOsTypeOther
+  };
+
+  static constexpr EHostOsType HostOs()
+  {
+  #if defined(Q_OS_WIN)
+    return eOsTypeWindows;
+  #elif defined(Q_OS_LINUX)
+    return eOsTypeLinux;
+  #elif defined(Q_OS_MAC)
+    return eOsTypeMac;
+  #elif defined(Q_OS_UNIX)
+    return eOsTypeOtherUnix;
+  #else
+    return eOsTypeOther;
+  #endif
+  }
+
+  bool IsWindowsHost() { return HostOs() == EHostOsType::eOsTypeWindows; }
+  bool IsMacHost() { return HostOs() == EHostOsType::eOsTypeMac; }
+
+  void ShowInGraphicalShell(const QString& sPathIn)
+  {
+    const QFileInfo fileInfo(sPathIn);
+    // Mac, Windows support folder or file.
+    if (IsWindowsHost())
+    {
+      const QString sExplorer = "explorer.exe";
+      QStringList param;
+      if (!fileInfo.isDir())
+      {
+        param += QLatin1String("/select,");
+      }
+      param += QDir::toNativeSeparators(fileInfo.canonicalFilePath());
+      QProcess::startDetached(sExplorer, param);
+    }
+    else if (IsMacHost())
+    {
+      QStringList scriptArgs;
+      scriptArgs << QLatin1String("-e")
+                 << QString::fromLatin1("tell application \"Finder\" to reveal POSIX file \"%1\"")
+                                       .arg(fileInfo.canonicalFilePath());
+      QProcess::execute(QLatin1String("/usr/bin/osascript"), scriptArgs);
+      scriptArgs.clear();
+      scriptArgs << QLatin1String("-e")
+                 << QLatin1String("tell application \"Finder\" to activate");
+      QProcess::execute(QLatin1String("/usr/bin/osascript"), scriptArgs);
+    }
+    else
+    {
+      // we cannot select a file here, because no file browser really supports it...
+    }
+  }
+}
 
 CResourceModelView::CResourceModelView(QWidget *parent) :
   QWidget(parent),
@@ -308,6 +374,22 @@ void CResourceModelView::ShowContextMenu(CResourceTreeItemModel* pModel, const Q
         }
       });
       menu.addAction(pAction);
+
+      menu.addSeparator();
+
+#if defined(Q_OS_WIN)
+      pAction = new QAction("Show in Explorer", &menu);
+      connect(pAction, &QAction::triggered, pModel, [idx]() {
+        CResourceTreeItem* item = static_cast<CResourceTreeItem*>(idx.internalPointer());
+        if (nullptr != item)
+        {
+          tspResource spResource = item->Resource();
+          const QString sPath = PhysicalResourcePath(spResource);
+          ShowInGraphicalShell(QFileInfo(sPath).absoluteFilePath());
+        }
+      });
+      menu.addAction(pAction);
+#endif
 
       menu.exec(globalPos);
     }
