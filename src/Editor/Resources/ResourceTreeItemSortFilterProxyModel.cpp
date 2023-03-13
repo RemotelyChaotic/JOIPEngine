@@ -5,6 +5,7 @@
 CResourceTreeItemSortFilterProxyModel::CResourceTreeItemSortFilterProxyModel(QObject* pParent) :
   QSortFilterProxyModel(pParent)
 {
+  m_collator.setNumericMode(true);
 }
 
 CResourceTreeItemSortFilterProxyModel::~CResourceTreeItemSortFilterProxyModel()
@@ -119,11 +120,23 @@ bool CResourceTreeItemSortFilterProxyModel::lessThan(const QModelIndex& left,
   QVariant leftData = sourceModel()->data(left, Qt::DisplayRole);
   QVariant rightData = sourceModel()->data(right, Qt::DisplayRole);
 
+  bool bLeftHasChildren = sourceModel()->hasChildren(left);
+  bool bRightHasChildren = sourceModel()->hasChildren(right);
+
+  if (bLeftHasChildren && !bRightHasChildren)
+  {
+    return true;
+  }
+  else if (!bLeftHasChildren && bRightHasChildren)
+  {
+    return false;
+  }
+
   switch(left.column())
   {
     case resource_item::c_iColumnName:
     {
-      return leftData.toString() < rightData.toString();
+      return m_collator.compare(leftData.toString(), rightData.toString()) < 0;
     }
     case resource_item::c_iColumnType:
     {

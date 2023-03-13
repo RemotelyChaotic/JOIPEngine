@@ -241,3 +241,5 @@ Changes:
 - Added smaller animations to various ui interactions
 - Project version warning on card is only shown if project version is larger than
   the current engine version.
+- Sorting of Resource View improved. It now sorts items like the Explorer would
+  (Folders first, and using natural sort) when sorting for names.

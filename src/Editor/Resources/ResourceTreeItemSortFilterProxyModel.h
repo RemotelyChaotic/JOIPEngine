@@ -2,6 +2,7 @@
 #define RESOURCETREEITEMSORTFILTERPROXYMODEL_H
 
 #include "Systems/Project.h"
+#include <QCollator>
 #include <QSortFilterProxyModel>
 #include <vector>
 
@@ -27,6 +28,7 @@ private:
   void SlotResourceRemoved();
 
   std::vector<EResourceType> m_vEnabledTypes;
+  QCollator                  m_collator;
 };
 
 #endif // RESOURCETREEITEMSORTFILTERPROXYMODEL_H
