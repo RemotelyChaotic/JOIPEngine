@@ -243,3 +243,5 @@ Changes:
   the current engine version.
 - Sorting of Resource View improved. It now sorts items like the Explorer would
   (Folders first, and using natural sort) when sorting for names.
+- Removed auto-replay of Audio Resources in the Editor because it felt 
+  irritating when working with audio.

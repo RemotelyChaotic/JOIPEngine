@@ -112,7 +112,7 @@ void CMediaPlayer::OpenMedia(const QString sPath)
   if (sPath.isEmpty()) { return; }
   m_player->setStartPosition(0);
   m_player->setStopPosition();
-  m_player->setRepeat(std::numeric_limits<int>::max());
+  m_player->setRepeat(0);
   m_player->play(sPath);
 }
 
@@ -122,7 +122,7 @@ void CMediaPlayer::SeekBySlider(qint32 value)
 {
   if (!m_bLoaded) { return; }
   if (!m_player->isPlaying())  { return; }
-  qDebug("seekbyslider: %d", value);
+  //qDebug("seekbyslider: %d", value);
   m_player->seek(qint64(value*m_unit));
 }
 
@@ -131,7 +131,7 @@ void CMediaPlayer::SeekBySlider(qint32 value)
 void CMediaPlayer::SeekBySlider()
 {
   if (!m_bLoaded) { return; }
-  qDebug("pressed: %d", m_slider->value());
+  //qDebug("pressed: %d", m_slider->value());
   SeekBySlider(m_slider->value());
 }
 
@@ -144,7 +144,7 @@ void CMediaPlayer::PlayPause()
   {
     m_player->setStartPosition(0);
     m_player->setStopPosition();
-    m_player->setRepeat(std::numeric_limits<int>::max());
+    m_player->setRepeat(0);
     m_player->play();
     return;
   }
