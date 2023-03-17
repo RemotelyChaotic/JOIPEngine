@@ -6,7 +6,7 @@ set(BUILD_EXAMPLES OFF) # Disable examples for all libraries
 
 set(JOIP_VERSION_MAJOR 1)
 set(JOIP_VERSION_MINOR 2)
-set(JOIP_VERSION_PATCH 2)
+set(JOIP_VERSION_PATCH 3)
 
 # KDE Options
 set(ECM_DIR ${CMAKE_CURRENT_LIST_DIR}/cmake/ECM/share/ECM/cmake)
