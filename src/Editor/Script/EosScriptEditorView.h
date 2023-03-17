@@ -15,7 +15,7 @@ public:
   explicit CEosScriptEditorView(QWidget* pParent = nullptr);
   ~CEosScriptEditorView();
 
-  void setModel(QAbstractItemModel* pModel);
+  void setModel(QAbstractItemModel* pModel) override;
   void ExpandAll();
 
 signals:
@@ -38,7 +38,7 @@ private:
   void IterateItems(const QModelIndex& index,
                     const std::function<void(const QModelIndex&)>& fnToCall);
 
-  QPointer<CEosScriptModel> m_pModel = nullptr;
+  QPointer<CEosScriptModel> m_pModel;
   QPointer<CEditorSearchBar>m_pSearchBar;
 };
 

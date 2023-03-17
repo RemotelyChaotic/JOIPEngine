@@ -81,7 +81,8 @@ private:
 //----------------------------------------------------------------------------------------
 //
 CEosScriptEditorView::CEosScriptEditorView(QWidget* pParent) :
-  QTreeView(pParent)
+  QTreeView(pParent),
+  m_pModel(nullptr)
 {
   qApp->installEventFilter(this);
   setItemDelegate(new CEosScriptEditorViewDelegate(this));
