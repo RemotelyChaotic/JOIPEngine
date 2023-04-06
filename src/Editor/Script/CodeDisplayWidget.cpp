@@ -31,6 +31,7 @@ namespace
   const qint32 c_iIndexNoScripts = 0;
   const qint32 c_iIndexScriptJs  = 1;
   const qint32 c_iIndexScriptEos = 2;
+  const qint32 c_iIndexScriptLua = 1;
 
   const QString c_sSciptEditorHelpId =      "Editor/SciptEditor";
   const QString c_sSciptAPIHelpId =         "Editor/SciptAPI/Editor";
@@ -43,7 +44,8 @@ namespace
   {
     static std::map<QString, qint32> typeToPageMap = {
       { SScriptDefinitionData::c_sScriptTypeJs, c_iIndexScriptJs },
-      { SScriptDefinitionData::c_sScriptTypeEos, c_iIndexScriptEos }
+      { SScriptDefinitionData::c_sScriptTypeEos, c_iIndexScriptEos },
+      { SScriptDefinitionData::c_sScriptTypeLua, c_iIndexScriptLua }
     };
     if (auto it = typeToPageMap.find(sType); typeToPageMap.end() != it)
     {
@@ -72,6 +74,7 @@ CCodeDisplayWidget::CCodeDisplayWidget(QWidget* pParent) :
 
   m_displayImplMap[SScriptDefinitionData::c_sScriptTypeJs] = std::make_unique<CCodeDisplayDefaultEditorImpl>(m_spUi->pCodeEdit);
   m_displayImplMap[SScriptDefinitionData::c_sScriptTypeEos] = std::make_unique<CCodeDisplayEosEditorImpl>(m_spUi->pEosEdit);
+  m_displayImplMap[SScriptDefinitionData::c_sScriptTypeLua] = std::make_unique<CCodeDisplayDefaultEditorImpl>(m_spUi->pCodeEdit);
 
   m_spBackgroundSnippetOverlay = std::make_unique<CBackgroundSnippetOverlay>(this);
   m_spIconSnippetOverlay = std::make_unique<CIconSnippetOverlay>(this);
@@ -136,21 +139,21 @@ void CCodeDisplayWidget::Initialize(QPointer<CEditorModel> pEditorModel,
   m_spTimerSnippetOverlay->Hide();
   m_spThreadSnippetOverlay->Hide();
 
-  connect(m_spBackgroundSnippetOverlay.get(), &CBackgroundSnippetOverlay::SignalBackgroundCode,
+  connect(m_spBackgroundSnippetOverlay.get(), &CBackgroundSnippetOverlay::SignalCodeGenerated,
           this, &CCodeDisplayWidget::SlotInsertGeneratedCode);
-  connect(m_spIconSnippetOverlay.get(), &CIconSnippetOverlay::SignalIconCode,
+  connect(m_spIconSnippetOverlay.get(), &CIconSnippetOverlay::SignalCodeGenerated,
           this, &CCodeDisplayWidget::SlotInsertGeneratedCode);
-  connect(m_spMetronomeSnippetOverlay.get(), &CMetronomeSnippetOverlay::SignalMetronomeSnippetCode,
+  connect(m_spMetronomeSnippetOverlay.get(), &CMetronomeSnippetOverlay::SignalCodeGenerated,
           this, &CCodeDisplayWidget::SlotInsertGeneratedCode);
-  connect(m_spNotificationSnippetOverlay.get(), &CNotificationSnippetOverlay::SignalNotificationSnippetCode,
+  connect(m_spNotificationSnippetOverlay.get(), &CNotificationSnippetOverlay::SignalCodeGenerated,
           this, &CCodeDisplayWidget::SlotInsertGeneratedCode);
-  connect(m_spResourceSnippetOverlay.get(), &CResourceSnippetOverlay::SignalResourceCode,
+  connect(m_spResourceSnippetOverlay.get(), &CResourceSnippetOverlay::SignalCodeGenerated,
           this, &CCodeDisplayWidget::SlotInsertGeneratedCode);
-  connect(m_spTextSnippetOverlay.get(), &CTextSnippetOverlay::SignalTextSnippetCode,
+  connect(m_spTextSnippetOverlay.get(), &CTextSnippetOverlay::SignalCodeGenerated,
           this, &CCodeDisplayWidget::SlotInsertGeneratedCode);
-  connect(m_spTimerSnippetOverlay.get(), &CTimerSnippetOverlay::SignalTimerCode,
+  connect(m_spTimerSnippetOverlay.get(), &CTimerSnippetOverlay::SignalCodeGenerated,
           this, &CCodeDisplayWidget::SlotInsertGeneratedCode);
-  connect(m_spThreadSnippetOverlay.get(), &CThreadSnippetOverlay::SignalThreadCode,
+  connect(m_spThreadSnippetOverlay.get(), &CThreadSnippetOverlay::SignalCodeGenerated,
           this, &CCodeDisplayWidget::SlotInsertGeneratedCode);
 
   auto wpHelpFactory = CApplication::Instance()->System<CHelpFactory>().lock();
@@ -308,6 +311,15 @@ void CCodeDisplayWidget::SetScriptType(const QString& sScriptType)
         it->second->ShowButtons((*m_pspUiActionBar).get());
       }
     }
+
+    m_spBackgroundSnippetOverlay->SetCurrentScriptType(m_sScriptType);
+    m_spIconSnippetOverlay->SetCurrentScriptType(m_sScriptType);
+    m_spMetronomeSnippetOverlay->SetCurrentScriptType(m_sScriptType);
+    m_spNotificationSnippetOverlay->SetCurrentScriptType(m_sScriptType);
+    m_spResourceSnippetOverlay->SetCurrentScriptType(m_sScriptType);
+    m_spTextSnippetOverlay->SetCurrentScriptType(m_sScriptType);
+    m_spTimerSnippetOverlay->SetCurrentScriptType(m_sScriptType);
+    m_spThreadSnippetOverlay->SetCurrentScriptType(m_sScriptType);
 
     m_spUi->pEditorStackedWidget->setCurrentIndex(PageIndexFromScriptType(sScriptType));
   }

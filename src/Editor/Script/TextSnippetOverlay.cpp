@@ -21,11 +21,9 @@ namespace  {
 //----------------------------------------------------------------------------------------
 //
 CTextSnippetOverlay::CTextSnippetOverlay(QWidget* pParent) :
-  COverlayBase(0, pParent),
+  CCodeSnippetOverlayBase(pParent),
   m_spUi(new Ui::CTextSnippetOverlay),
-  m_spCurrentProject(nullptr),
   m_wpDbManager(CApplication::Instance()->System<CDatabaseManager>()),
-  m_bInitialized(true),
   m_data()
 {
   m_spUi->setupUi(this);
@@ -60,7 +58,7 @@ CTextSnippetOverlay::~CTextSnippetOverlay()
 //
 void CTextSnippetOverlay::Initialize(CResourceTreeItemModel* pResourceTreeModel)
 {
-  m_bInitialized = false;
+  SetInitialized(false);
 
   CResourceTreeItemSortFilterProxyModel* pProxyModel =
       dynamic_cast<CResourceTreeItemSortFilterProxyModel*>(m_spUi->pResourceSelectTree->model());
@@ -78,28 +76,8 @@ void CTextSnippetOverlay::Initialize(CResourceTreeItemModel* pResourceTreeModel)
   m_spUi->pResourceSelectTree->setColumnHidden(resource_item::c_iColumnPath, true);
   m_spUi->pResourceSelectTree->header()->setSectionResizeMode(resource_item::c_iColumnName, QHeaderView::Stretch);
   m_spUi->pResourceSelectTree->header()->setSectionResizeMode(resource_item::c_iColumnType, QHeaderView::Interactive);
-  m_bInitialized = true;
-}
 
-//----------------------------------------------------------------------------------------
-//
-void CTextSnippetOverlay::LoadProject(tspProject spProject)
-{
-  m_spCurrentProject = spProject;
-}
-
-//----------------------------------------------------------------------------------------
-//
-void CTextSnippetOverlay::UnloadProject()
-{
-  m_spCurrentProject = nullptr;
-}
-
-//----------------------------------------------------------------------------------------
-//
-void CTextSnippetOverlay::Climb()
-{
-  ClimbToFirstInstanceOf("QStackedWidget", false);
+  SetInitialized(true);
 }
 
 //----------------------------------------------------------------------------------------
@@ -494,104 +472,11 @@ void CTextSnippetOverlay::SlotBGColorChanged(const QColor& color)
 //
 void CTextSnippetOverlay::on_pConfirmButton_clicked()
 {
-  QString sCode;
-  if (m_data.m_bSetTextColors)
+  auto spGenerator = CodeGenerator();
+  if (nullptr != spGenerator)
   {
-    QString sText("textBox.setTextColors([%1]);\n");
-    QStringList vsColors;
-    for (auto it : m_data.m_vTextColors)
-    {
-      QString sColor = "[" + QString::number(it.second.red()) + "," +
-          QString::number(it.second.green()) + "," +
-          QString::number(it.second.blue()) + "]";
-      vsColors << sColor;
-    }
-    sCode += sText.arg(vsColors.join(","));
+    emit SignalCodeGenerated(spGenerator->Generate(m_data, m_spCurrentProject));
   }
-  if (m_data.m_bSetBGColors)
-  {
-    QString sText("textBox.setBackgroundColors([%1]);\n");
-    QStringList vsColors;
-    for (auto it : m_data.m_vBGColors)
-    {
-      QString sColor = "[" + QString::number(it.second.red()) + "," +
-          QString::number(it.second.green()) + "," +
-          QString::number(it.second.blue()) + "]";
-      vsColors << sColor;
-    }
-    sCode += sText.arg(vsColors.join(","));
-  }
-  if (m_data.m_bSetAlignment)
-  {
-    QString sText("textBox.setTextAlignment(TextAlignment.%1);\n");
-    switch (m_data.m_textAlignment)
-    {
-    case Qt::AlignLeft: sText = sText.arg("AlignLeft"); break;
-    case Qt::AlignRight: sText = sText.arg("AlignRight"); break;
-    case Qt::AlignHCenter: sText = sText.arg("AlignCenter"); break;
-    default: break;
-    }
-    sCode += sText;
-  }
-  if (m_data.m_bShowIcon)
-  {
-    EResourceType type = EResourceType::eImage;
-    auto spDbManager = m_wpDbManager.lock();
-    if (nullptr != spDbManager && nullptr != m_spCurrentProject)
-    {
-      tspResource spResource = spDbManager->FindResourceInProject(m_spCurrentProject, m_data.m_sTextIcon);
-      if (nullptr != spResource)
-      {
-        QReadLocker locker(&spResource->m_rwLock);
-        type = spResource->m_type;
-      }
-    }
-
-    QString sText("textBox.setTextPortrait(%2);\n");
-    switch (type)
-    {
-      case EResourceType::eMovie: // fallthrough
-      case EResourceType::eImage:
-        sText = sText.arg(m_data.m_sTextIcon.isEmpty() ? "null" :
-                                                         ("\"" + m_data.m_sTextIcon + "\""));
-        break;
-      case EResourceType::eSound: // fallthrough
-    default: sText = ""; break;
-    }
-
-    sCode += sText;
-  }
-  if (m_data.m_bShowText)
-  {
-    QString sOptionalArgs;
-    if (m_data.m_bSetSleepTime)
-    {
-      double dSleepTimeS = m_data.m_dSleepTimeS;
-      if (m_data.m_bAutoTime) { dSleepTimeS = -1; }
-      sOptionalArgs = QString(", %1, %2")
-          .arg(dSleepTimeS).arg(m_data.m_bSkippable ? "true" : "false");
-    }
-
-    QString sText("textBox.showText(\"%1\"%2);\n");
-    sCode += sText.arg(m_data.m_sText).arg(sOptionalArgs);
-  }
-  if (m_data.m_bShowUserInput)
-  {
-    QString sText("var sInput = textBox.showInput(); // TODO: change variable name\n");
-    sCode += sText;
-  }
-  if (m_data.m_bShowButtons)
-  {
-    QString sText("var iSelection = textBox.showButtonPrompts([%1]);  // TODO: change variable name\n");
-    QStringList vsPrompts;
-    for (auto sButton : m_data.m_vsButtons)
-    {
-      vsPrompts << "\"" + sButton + "\"";
-    }
-    sCode += sText.arg(vsPrompts.join(","));
-  }
-
-  emit SignalTextSnippetCode(sCode);
   Hide();
 }
 

@@ -1,9 +1,8 @@
 #ifndef METRONOMESNIPPETOVERLAY_H
 #define METRONOMESNIPPETOVERLAY_H
 
-#include "Widgets/OverlayBase.h"
+#include "CodeSnippetOverlayBase.h"
 #include <QScrollArea>
-#include <memory>
 #include <vector>
 
 class CDatabaseManager;
@@ -12,27 +11,10 @@ class CScriptEditorWidget;
 namespace Ui {
   class CMetronomeSnippetOverlay;
 }
-typedef std::shared_ptr<struct SProject> tspProject;
-
-
-struct SMetronomeSnippetCode
-{
-  bool m_bStart = true;
-  bool m_bStop = false;
-  bool m_bSetBpm = false;
-  qint32 m_iBpm = 60;
-  bool m_bSetPattern = false;
-  std::map<qint32, double> m_vdPatternElems;
-  bool m_bSetMute = false;
-  bool m_bSetBeatSound = false;
-  QString m_sBeatSound = QString();
-  bool m_bSetVolume = false;
-  double m_dVolume = 1.0;
-};
 
 //----------------------------------------------------------------------------------------
 //
-class CMetronomeSnippetOverlay : public COverlayBase
+class CMetronomeSnippetOverlay : public CCodeSnippetOverlayBase
 {
   Q_OBJECT
 
@@ -41,14 +23,8 @@ public:
   ~CMetronomeSnippetOverlay();
 
   void Initialize(CResourceTreeItemModel* pResourceTreeModel);
-  void LoadProject(tspProject spProject);
-  void UnloadProject();
-
-signals:
-  void SignalMetronomeSnippetCode(const QString& code);
 
 public slots:
-  void Climb() override;
   void Resize() override;
   void Show() override;
 
@@ -76,7 +52,6 @@ private:
   void Initialize();
 
   std::unique_ptr<Ui::CMetronomeSnippetOverlay> m_spUi;
-  tspProject                                    m_spCurrentProject;
   std::weak_ptr<CDatabaseManager>               m_wpDbManager;
   std::vector<QPointer<QScrollArea>>            m_vScrollAreas;
   bool                                          m_bInitialized;

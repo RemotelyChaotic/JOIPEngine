@@ -1,7 +1,7 @@
 #ifndef TIMERSNIPPETOVERLAY_H
 #define TIMERSNIPPETOVERLAY_H
 
-#include "Widgets/OverlayBase.h"
+#include "CodeSnippetOverlayBase.h"
 #include <QPointer>
 #include <QTime>
 #include <memory>
@@ -11,21 +11,9 @@ namespace Ui {
   class CTimerSnippetOverlay;
 }
 
-struct STimerSnippetData
-{
-  bool m_bSetTime = false;
-  qint32 m_iTimeS = 0;
-  bool m_bShow = false;
-  bool m_bHide = false;
-  bool m_bTimerVisible = false;
-  bool m_bStart = false;
-  bool m_bStop = false;
-  bool m_bWait = false;
-};
-
 //----------------------------------------------------------------------------------------
 //
-class CTimerSnippetOverlay : public COverlayBase
+class CTimerSnippetOverlay : public CCodeSnippetOverlayBase
 {
   Q_OBJECT
 
@@ -33,11 +21,7 @@ public:
   explicit CTimerSnippetOverlay(QWidget *parent = nullptr);
   ~CTimerSnippetOverlay() override;
 
-signals:
-  void SignalTimerCode(const QString& code);
-
 public slots:
-  void Climb() override;
   void Resize() override;
 
 protected slots:

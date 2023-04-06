@@ -12,6 +12,9 @@ class CJsonInstructionSetParser;
 class CScriptRunnerSignalContext;
 class CScriptObjectBase;
 class QJSEngine;
+namespace QtLua {
+  class State;
+}
 
 //----------------------------------------------------------------------------------------
 //
@@ -33,6 +36,7 @@ public:
 
   virtual std::shared_ptr<CScriptObjectBase> CreateNewScriptObject(QPointer<QJSEngine>);
   virtual std::shared_ptr<CScriptObjectBase> CreateNewScriptObject(QPointer<CJsonInstructionSetParser>);
+  virtual std::shared_ptr<CScriptObjectBase> CreateNewScriptObject(QtLua::State*);
 
   void Initialize(std::shared_ptr<CScriptRunnerSignalContext> spContext);
   void SetScriptExecutionStatus(ScriptExecStatus status);

@@ -15,7 +15,8 @@ public:
   CStorageSignalEmitter();
   ~CStorageSignalEmitter();
 
-  virtual std::shared_ptr<CScriptObjectBase> CreateNewScriptObject(QPointer<QJSEngine> pEngine);
+  std::shared_ptr<CScriptObjectBase> CreateNewScriptObject(QPointer<QJSEngine> pEngine) override;
+  std::shared_ptr<CScriptObjectBase> CreateNewScriptObject(QtLua::State* pState) override;
 
 signals:
   void clear();
@@ -27,25 +28,58 @@ Q_DECLARE_METATYPE(CStorageSignalEmitter)
 
 //----------------------------------------------------------------------------------------
 //
-class CScriptStorage : public CJsScriptObjectBase
+class CScriptStorageBase : public CJsScriptObjectBase
 {
   Q_OBJECT
-  Q_DISABLE_COPY(CScriptStorage)
+  Q_DISABLE_COPY(CScriptStorageBase)
 
 public:
-  CScriptStorage(QPointer<CScriptRunnerSignalEmiter> pEmitter,
-                 QPointer<QJSEngine> pEngine);
-  ~CScriptStorage();
-
-public slots:
-  QJSValue load(QString sId);
-  void store(QString sId, QJSValue value);
+  CScriptStorageBase(QPointer<CScriptRunnerSignalEmiter> pEmitter,
+                     QPointer<QJSEngine> pEngine);
+  CScriptStorageBase(QPointer<CScriptRunnerSignalEmiter> pEmitter,
+                     QtLua::State* pState);
+  ~CScriptStorageBase();
 
 signals:
   void SignalQuitLoop();
 
 protected:
   void Cleanup_Impl() override;
+  QVariant LoadImpl(QString sId);
+  void StoreImpl(QString sId, QVariant value);
+};
+
+//----------------------------------------------------------------------------------------
+//
+class CScriptStorageJs : public CScriptStorageBase
+{
+  Q_OBJECT
+  Q_DISABLE_COPY(CScriptStorageJs)
+public:
+  CScriptStorageJs(QPointer<CScriptRunnerSignalEmiter> pEmitter,
+                   QPointer<QJSEngine> pEngine);
+  ~CScriptStorageJs();
+
+public slots:
+  QVariant load(QString sId);
+  void store(QString sId, QVariant value);
+};
+
+//----------------------------------------------------------------------------------------
+//
+class CScriptStorageLua : public CScriptStorageBase
+{
+  Q_OBJECT
+  Q_DISABLE_COPY(CScriptStorageLua)
+
+public:
+  CScriptStorageLua(QPointer<CScriptRunnerSignalEmiter> pEmitter,
+                    QtLua::State* pState);
+  ~CScriptStorageLua();
+
+public slots:
+  QVariant load(QString sId);
+  void store(QString sId, QVariant value);
 };
 
 #endif // SCRIPTSTORAGE_H

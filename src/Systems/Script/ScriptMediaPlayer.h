@@ -3,7 +3,7 @@
 
 #include "ScriptObjectBase.h"
 #include "ScriptRunnerSignalEmiter.h"
-#include <QJSValue>
+#include <QVariant>
 #include <memory>
 
 class CDatabaseManager;
@@ -17,6 +17,7 @@ public:
 
   std::shared_ptr<CScriptObjectBase> CreateNewScriptObject(QPointer<QJSEngine> pEngine) override;
   std::shared_ptr<CScriptObjectBase> CreateNewScriptObject(QPointer<CJsonInstructionSetParser> pParser) override;
+  std::shared_ptr<CScriptObjectBase> CreateNewScriptObject(QtLua::State* pState) override;
 
 signals:
   void playVideo();
@@ -52,38 +53,41 @@ class CScriptMediaPlayer : public CJsScriptObjectBase
 public:
   CScriptMediaPlayer(QPointer<CScriptRunnerSignalEmiter> pEmitter,
                      QPointer<QJSEngine> pEngine);
+  CScriptMediaPlayer(QPointer<CScriptRunnerSignalEmiter> pEmitter,
+                     QtLua::State* pState);
   ~CScriptMediaPlayer();
 
 public slots:
-  void show(QJSValue resource);
+  void show(QVariant resource);
   void play();
-  void play(QJSValue resource);
-  void play(QJSValue resource, qint64 iLoops);
-  void play(QJSValue resource, qint64 iLoops, qint64 iStartAt);
-  void play(QJSValue resource, qint64 iLoops, qint64 iStartAt, qint64 iEndAt);
-  void seek(QJSValue resource, qint64 iSeek);
+  void play(QVariant resource);
+  void play(QVariant resource, qint64 iLoops);
+  void play(QVariant resource, qint64 iLoops, qint64 iStartAt);
+  void play(QVariant resource, qint64 iLoops, qint64 iStartAt, qint64 iEndAt);
+  void seek(QVariant resource, qint64 iSeek);
   void playVideo();
   void pauseVideo();
   void seekVideo(qint64 iSeek);
   void stopVideo();
-  void playSound(QJSValue resource);
-  void playSound(QJSValue resource, const QString& sId);
-  void playSound(QJSValue resource, const QString& sId, qint64 iLoops);
-  void playSound(QJSValue resource, const QString& sId, qint64 iLoops, qint64 iStartAt);
-  void playSound(QJSValue resource, const QString& sId, qint64 iLoops, qint64 iStartAt, qint64 iEndAt);
-  void pauseSound(QJSValue resource);
-  void seekSound(QJSValue resource, qint64 iSeek);
-  void stopSound(QJSValue resource);
+  void playSound(QVariant resource);
+  void playSound(QVariant resource, const QString& sId);
+  void playSound(QVariant resource, const QString& sId, qint64 iLoops);
+  void playSound(QVariant resource, const QString& sId, qint64 iLoops, qint64 iStartAt);
+  void playSound(QVariant resource, const QString& sId, qint64 iLoops, qint64 iStartAt, qint64 iEndAt);
+  void pauseSound(QVariant resource);
+  void seekSound(QVariant resource, qint64 iSeek);
+  void stopSound(QVariant resource);
   void setVolume(double dValue);
-  void setVolume(QJSValue resource, double dValue);
+  void setVolume(QVariant resource, double dValue);
   void waitForPlayback();
-  void waitForPlayback(QJSValue resource);
+  void waitForPlayback(QVariant resource);
   void waitForVideo();
   void waitForSound();
-  void waitForSound(QJSValue resource);
+  void waitForSound(QVariant resource);
 
 private:
-  QString GetResourceName(const QJSValue& resource, bool bStringCanBeId = false, bool* pbError = nullptr);
+  QString GetResourceName(const QVariant& resource, const QString& sMethod,
+                          bool bStringCanBeId = false, bool* pbError = nullptr);
   void WaitForPlayBackImpl(const QString& sResource);
   void WaitForSoundImpl(const QString& sResource);
 

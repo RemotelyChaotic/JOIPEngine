@@ -27,6 +27,7 @@
 
 // needed to register to qml
 #include "Systems/Script/ScriptBackground.h"
+#include "Systems/Script/ScriptDbWrappers.h"
 #include "Systems/Script/ScriptEval.h"
 #include "Systems/Script/ScriptIcon.h"
 #include "Systems/Script/ScriptMediaPlayer.h"
@@ -422,7 +423,7 @@ void CApplication::RegisterQmlTypes()
       return nullptr;
   });
 
-  qmlRegisterUncreatableType<CKink>("JOIP.db", 1, 1, "Kink", "");
+  qmlRegisterUncreatableType<CKinkWrapper>("JOIP.db", 1, 1, "Kink", "");
   qmlRegisterUncreatableType<CProjectScriptWrapper>("JOIP.db", 1, 1, "Project", "");
   qmlRegisterUncreatableType<CSceneScriptWrapper>("JOIP.db", 1, 1, "Scene", "");
   qmlRegisterUncreatableType<CResourceScriptWrapper>("JOIP.db", 1, 1, "Resource", "");

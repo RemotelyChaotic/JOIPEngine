@@ -32,7 +32,16 @@ public:
   virtual void RegisterNewComponent(const QString sName, QJSValue signalEmitter) = 0;
   virtual void UnregisterComponents() = 0;
 
+  virtual void OverlayCleared() = 0;
+  virtual void OverlayClosed(const QString& sId)  = 0;
+  virtual void OverlayRunAsync(const QString& sId,
+                               const QString& sScript, tspResource spResource) = 0;
+
 signals:
+  virtual void SignalOverlayCleared() = 0;
+  virtual void SignalOverlayClosed(const QString& sId) = 0;
+  virtual void SignalOverlayRunAsync(tspProject spProject, const QString& sId,
+                                     const QString& sScriptResource) = 0;
   virtual void SignalScriptRunFinished(bool bOk, const QString& sRetVal) = 0;
 };
 

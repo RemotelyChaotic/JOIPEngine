@@ -16,7 +16,8 @@ public:
   CMetronomeSignalEmitter();
   ~CMetronomeSignalEmitter();
 
-  virtual std::shared_ptr<CScriptObjectBase> CreateNewScriptObject(QPointer<QJSEngine> pEngine);
+  std::shared_ptr<CScriptObjectBase> CreateNewScriptObject(QPointer<QJSEngine> pEngine) override;
+  std::shared_ptr<CScriptObjectBase> CreateNewScriptObject(QtLua::State* pState) override;
 
 signals:
   void setBpm(qint32 iBpm);
@@ -39,11 +40,13 @@ class CScriptMetronome : public CJsScriptObjectBase
 public:
   CScriptMetronome(QPointer<CScriptRunnerSignalEmiter> pEmitter,
                    QPointer<QJSEngine> pEngine);
+  CScriptMetronome(QPointer<CScriptRunnerSignalEmiter> pEmitter,
+                   QtLua::State* pState);
   ~CScriptMetronome();
 
 public slots:
   void setBpm(qint32 iBpm);
-  void setBeatResource(QJSValue resource);
+  void setBeatResource(QVariant resource);
   void setMuted(bool bMuted);
   void setPattern(const QList<double>& vdPattern);
   void setVolume(double dVolume);

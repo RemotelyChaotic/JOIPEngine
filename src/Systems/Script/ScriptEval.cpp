@@ -7,6 +7,9 @@
 #include "Systems/JSON/JsonInstructionBase.h"
 #include "Systems/JSON/JsonInstructionSetParser.h"
 
+#include <QtLua/Value>
+#include <QtLua/State>
+
 #include <QEventLoop>
 #include <QTimer>
 
@@ -22,27 +25,35 @@ CEvalSignalEmiter::~CEvalSignalEmiter() {}
 //
 std::shared_ptr<CScriptObjectBase> CEvalSignalEmiter::CreateNewScriptObject(QPointer<QJSEngine> pEngine)
 {
-  return std::make_shared<CScriptEval>(this, pEngine);
+  return std::make_shared<CScriptEvalJs>(this, pEngine);
 }
 std::shared_ptr<CScriptObjectBase> CEvalSignalEmiter::CreateNewScriptObject(QPointer<CJsonInstructionSetParser> pParser)
 {
   return std::make_shared<CEosScriptEval>(this, pParser);
 }
+std::shared_ptr<CScriptObjectBase> CEvalSignalEmiter::CreateNewScriptObject(QtLua::State* pState)
+{
+  return std::make_shared<CScriptEvalLua>(this, pState);
+}
 
 //----------------------------------------------------------------------------------------
 //
-CScriptEval::CScriptEval(QPointer<CScriptRunnerSignalEmiter> pEmitter,
-                         QPointer<QJSEngine> pEngine) :
+CScriptEvalBase::CScriptEvalBase(QPointer<CScriptRunnerSignalEmiter> pEmitter,
+                                 QPointer<QJSEngine> pEngine) :
   CJsScriptObjectBase(pEmitter, pEngine)
 {}
-CScriptEval::~CScriptEval()
+CScriptEvalBase::CScriptEvalBase(QPointer<CScriptRunnerSignalEmiter> pEmitter,
+                                 QtLua::State* pState) :
+  CJsScriptObjectBase(pEmitter, pState)
+{}
+CScriptEvalBase::~CScriptEvalBase()
 {}
 
 //----------------------------------------------------------------------------------------
 //
-QJSValue CScriptEval::eval(const QString& sScript)
+QVariant CScriptEvalBase::EvalImpl(const QString& sScript)
 {
-  if (!CheckIfScriptCanRun()) { return QJSValue(); }
+  if (!CheckIfScriptCanRun()) { return QVariant(); }
 
   auto pSignalEmitter = SignalEmitter<CEvalSignalEmiter>();
   QTimer::singleShot(0, this, [&pSignalEmitter,sScript]() { emit pSignalEmitter->evalQuery(sScript); });
@@ -51,7 +62,7 @@ QJSValue CScriptEval::eval(const QString& sScript)
   QVariant returnValue = QVariant();
   QEventLoop loop;
   QMetaObject::Connection quitLoop =
-    connect(this, &CScriptEval::SignalQuitLoop, &loop, &QEventLoop::quit);
+    connect(this, &CScriptEvalBase::SignalQuitLoop, &loop, &QEventLoop::quit);
   QMetaObject::Connection interruptLoop =
     connect(pSignalEmitter, &CEvalSignalEmiter::interrupt,
             &loop, &QEventLoop::quit, Qt::QueuedConnection);
@@ -60,9 +71,9 @@ QJSValue CScriptEval::eval(const QString& sScript)
             &loop, &QEventLoop::quit, Qt::QueuedConnection);
   QMetaObject::Connection showRetValLoop =
     connect(pSignalEmitter, &CEvalSignalEmiter::evalReturn,
-            this, [this, &returnValue](QVariant input)
+            this, [this, &returnValue](QJSValue input)
   {
-    returnValue = input;
+    returnValue = input.toVariant();
     returnValue.detach(); // fixes some crashes with QJSEngine
     emit this->SignalQuitLoop();
     // direct connection to fix cross thread issues with QString content being deleted
@@ -75,7 +86,38 @@ QJSValue CScriptEval::eval(const QString& sScript)
   disconnect(interruptThisLoop);
   disconnect(showRetValLoop);
 
-  return m_pEngine->toScriptValue(returnValue);
+  return returnValue;
+}
+
+//----------------------------------------------------------------------------------------
+//
+CScriptEvalJs::CScriptEvalJs(QPointer<CScriptRunnerSignalEmiter> pEmitter,
+                             QPointer<QJSEngine> pEngine) :
+  CScriptEvalBase(pEmitter, pEngine)
+{}
+CScriptEvalJs::~CScriptEvalJs() {}
+
+//----------------------------------------------------------------------------------------
+//
+QJSValue CScriptEvalJs::eval(const QString& sScript)
+{
+  QVariant retVal = EvalImpl(sScript);
+  return m_pEngine->toScriptValue(retVal);
+}
+
+//----------------------------------------------------------------------------------------
+//
+CScriptEvalLua::CScriptEvalLua(QPointer<CScriptRunnerSignalEmiter> pEmitter,
+                               QtLua::State* pState) :
+  CScriptEvalBase(pEmitter, pState)
+{}
+CScriptEvalLua::~CScriptEvalLua() {}
+
+//----------------------------------------------------------------------------------------
+//
+QVariant CScriptEvalLua::eval(const QString& sScript)
+{
+  return EvalImpl(sScript);
 }
 
 //----------------------------------------------------------------------------------------
@@ -209,9 +251,9 @@ QVariant CEosScriptEval::eval(const QString& sScript)
             &loop, &QEventLoop::quit, Qt::QueuedConnection);
   QMetaObject::Connection showRetValLoop =
     connect(pSignalEmitter, &CEvalSignalEmiter::evalReturn,
-            this, [this, &returnValue](QVariant input)
+            this, [this, &returnValue](QJSValue input)
   {
-    returnValue = input;
+    returnValue = input.toVariant();
     returnValue.detach(); // fixes some crashes with QJSEngine
     emit this->SignalQuitLoop();
     // direct connection to fix cross thread issues with QString content being deleted

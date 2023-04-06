@@ -1,8 +1,12 @@
 #include "ScriptBackground.h"
 #include "Application.h"
+#include "CommonScriptHelpers.h"
 #include "Systems/DatabaseManager.h"
 #include "Systems/Project.h"
 #include "Systems/Resource.h"
+
+#include <QtLua/Value>
+#include <QtLua/State>
 
 CBackgroundSignalEmitter::CBackgroundSignalEmitter() :
   CScriptRunnerSignalEmiter()
@@ -27,6 +31,11 @@ std::shared_ptr<CScriptObjectBase> CBackgroundSignalEmitter::CreateNewScriptObje
   return nullptr;
 }
 
+std::shared_ptr<CScriptObjectBase> CBackgroundSignalEmitter::CreateNewScriptObject(QtLua::State* pState)
+{
+  return std::make_shared<CScriptBackground>(this, pState);
+}
+
 //----------------------------------------------------------------------------------------
 //
 CScriptBackground::CScriptBackground(QPointer<CScriptRunnerSignalEmiter> pEmitter,
@@ -35,14 +44,19 @@ CScriptBackground::CScriptBackground(QPointer<CScriptRunnerSignalEmiter> pEmitte
   m_wpDbManager(CApplication::Instance()->System<CDatabaseManager>())
 {
 }
-
+CScriptBackground::CScriptBackground(QPointer<CScriptRunnerSignalEmiter> pEmitter,
+                                     QtLua::State* pState) :
+  CJsScriptObjectBase(pEmitter, pState),
+  m_wpDbManager(CApplication::Instance()->System<CDatabaseManager>())
+{
+}
 CScriptBackground::~CScriptBackground()
 {
 }
 
 //----------------------------------------------------------------------------------------
 //
-void CScriptBackground::setBackgroundColor(QJSValue color)
+void CScriptBackground::setBackgroundColor(QVariant color)
 {
   if (!CheckIfScriptCanRun()) { return; }
 
@@ -58,111 +72,45 @@ void CScriptBackground::setBackgroundColor(QJSValue color)
   }
 
   auto spSignalEmitter = SignalEmitter<CBackgroundSignalEmitter>();
-  if (color.isString())
+  if (nullptr != spSignalEmitter)
   {
-    QColor col(color.toString());
-    col.setAlpha(col.alpha()*dAlphaMultiplierFromOldVersion);
-    emit spSignalEmitter->backgroundColorChanged(col);
-  }
-  else if (color.isArray())
-  {
-    std::vector<qint32> viColorComponents;
-    const qint32 iLength = color.property("length").toInt();
-    for (qint32 iIndex = 0; iLength > iIndex; iIndex++)
+    QString sError;
+    std::optional<QColor> optCol =
+        script::ParseColorFromScriptVariant(color, 128, "setBackgroundColor", &sError);
+    if (optCol.has_value())
     {
-      viColorComponents.push_back(color.property(static_cast<quint32>(iIndex)).toInt());
-    }
-
-    if (viColorComponents.size() != 4 && viColorComponents.size() != 3)
-    {
-      QString sError = tr("Argument error in setBackgroundColor(). Array of three or four numbers or string was expected.");
-      emit m_pSignalEmitter->showError(sError, QtMsgType::QtWarningMsg);
+      QColor colorRet = optCol.value();
+      colorRet.setAlpha(colorRet.alpha()*dAlphaMultiplierFromOldVersion);
+      emit spSignalEmitter->backgroundColorChanged(colorRet);
     }
     else
     {
-      if (viColorComponents.size() == 4)
-      {
-        QColor col(viColorComponents[0], viColorComponents[1], viColorComponents[2], viColorComponents[3]);
-        col.setAlpha(col.alpha()*dAlphaMultiplierFromOldVersion);
-        emit spSignalEmitter->backgroundColorChanged(col);
-      }
-      else
-      {
-        // if no alpha is given, make it half transparent
-        emit spSignalEmitter->backgroundColorChanged(
-              QColor(viColorComponents[0], viColorComponents[1], viColorComponents[2], 128));
-      }
+      emit m_pSignalEmitter->showError(sError, QtMsgType::QtWarningMsg);
     }
-  }
-  else
-  {
-    QString sError = tr("Wrong argument-type to setBackgroundColor(). Array of three or four numbers or string was expected.");
-    emit m_pSignalEmitter->showError(sError, QtMsgType::QtWarningMsg);
   }
 }
 
 //----------------------------------------------------------------------------------------
 //
-void CScriptBackground::setBackgroundTexture(QJSValue resource)
+void CScriptBackground::setBackgroundTexture(QVariant resource)
 {
   if (!CheckIfScriptCanRun()) { return; }
 
   auto spSignalEmitter = SignalEmitter<CBackgroundSignalEmitter>();
-  auto spDbManager = m_wpDbManager.lock();
-  if (nullptr != spDbManager)
+  if (nullptr != spSignalEmitter)
   {
-    if (resource.isString())
+    QString sError;
+    std::optional<QString> optRes =
+        script::ParseResourceFromScriptVariant(resource, m_wpDbManager.lock(),
+                                               m_spProject,
+                                               "setBackgroundTexture", &sError);
+    if (optRes.has_value())
     {
-      QString sResource = resource.toString();
-      if (sResource.isNull() || sResource.isEmpty())
-      {
-        emit spSignalEmitter->backgroundTextureChanged(QString());
-      }
-      else
-      {
-        tspResource spResource = spDbManager->FindResourceInProject(m_spProject, sResource);
-        if (nullptr != spResource)
-        {
-          emit spSignalEmitter->backgroundTextureChanged(sResource);
-        }
-        else
-        {
-          QString sError = tr("Resource %1 not found.");
-          emit m_pSignalEmitter->showError(sError.arg(resource.toString()),
-                                                  QtMsgType::QtWarningMsg);
-        }
-      }
-    }
-    else if (resource.isNull())
-    {
-      emit spSignalEmitter->backgroundTextureChanged(QString());
-    }
-    else if (resource.isQObject())
-    {
-      CResourceScriptWrapper* pResource = dynamic_cast<CResourceScriptWrapper*>(resource.toQObject());
-      if (nullptr != pResource)
-      {
-        tspResource spResource = pResource->Data();
-        if (nullptr != spResource)
-        {
-          QString sName = pResource->getName();
-          emit spSignalEmitter->backgroundTextureChanged(sName);
-        }
-        else
-        {
-          QString sError = tr("Resource in setBackgroundTexture() holds no data.");
-          emit m_pSignalEmitter->showError(sError, QtMsgType::QtWarningMsg);
-        }
-      }
-      else
-      {
-        QString sError = tr("Wrong argument-type to setBackgroundTexture(). String, resource or null was expected.");
-        emit m_pSignalEmitter->showError(sError, QtMsgType::QtWarningMsg);
-      }
+      QString resRet = optRes.value();
+      emit spSignalEmitter->backgroundTextureChanged(resRet);
     }
     else
     {
-      QString sError = tr("Wrong argument-type to setBackgroundTexture(). String, resource or null was expected.");
       emit m_pSignalEmitter->showError(sError, QtMsgType::QtWarningMsg);
     }
   }

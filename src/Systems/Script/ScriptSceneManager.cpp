@@ -1,5 +1,7 @@
 #include "ScriptSceneManager.h"
 #include "Application.h"
+#include "CommonScriptHelpers.h"
+#include "ScriptDbWrappers.h"
 
 #include "Systems/DatabaseManager.h"
 
@@ -31,6 +33,10 @@ std::shared_ptr<CScriptObjectBase> CSceneManagerSignalEmiter::CreateNewScriptObj
 {
   return std::make_shared<CEosScriptSceneManager>(this, pParser);
 }
+std::shared_ptr<CScriptObjectBase> CSceneManagerSignalEmiter::CreateNewScriptObject(QtLua::State* pState)
+{
+  return std::make_shared<CScriptSceneManager>(this, pState);
+}
 
 //----------------------------------------------------------------------------------------
 //
@@ -39,7 +45,12 @@ CScriptSceneManager::CScriptSceneManager(QPointer<CScriptRunnerSignalEmiter> pEm
   CJsScriptObjectBase(pEmitter, pEngine),
   m_wpDbManager(CApplication::Instance()->System<CDatabaseManager>())
 {
-
+}
+CScriptSceneManager::CScriptSceneManager(QPointer<CScriptRunnerSignalEmiter> pEmitter,
+                                         QtLua::State* pState) :
+  CJsScriptObjectBase(pEmitter, pState),
+  m_wpDbManager(CApplication::Instance()->System<CDatabaseManager>())
+{
 }
 CScriptSceneManager::~CScriptSceneManager()
 {
@@ -48,28 +59,28 @@ CScriptSceneManager::~CScriptSceneManager()
 
 //----------------------------------------------------------------------------------------
 //
-void CScriptSceneManager::disable(QJSValue scene)
+void CScriptSceneManager::disable(QVariant scene)
 {
   if (!CheckIfScriptCanRun()) { return; }
-  QString sScene = GetScene(scene, "disable()");
+  QString sScene = GetScene(scene, "disable");
   emit SignalEmitter<CSceneManagerSignalEmiter>()->disable(sScene);
 }
 
 //----------------------------------------------------------------------------------------
 //
-void CScriptSceneManager::enable(QJSValue scene)
+void CScriptSceneManager::enable(QVariant scene)
 {
   if (!CheckIfScriptCanRun()) { return; }
-  QString sScene = GetScene(scene, "enable()");
+  QString sScene = GetScene(scene, "enable");
   emit SignalEmitter<CSceneManagerSignalEmiter>()->enable(sScene);
 }
 
 //----------------------------------------------------------------------------------------
 //
-void CScriptSceneManager::gotoScene(QJSValue scene)
+void CScriptSceneManager::gotoScene(QVariant scene)
 {
   if (!CheckIfScriptCanRun()) { return; }
-  QString sScene = GetScene(scene, "gotoScene()");
+  QString sScene = GetScene(scene, "gotoScene");
 
   auto pSignalEmitter = SignalEmitter<CSceneManagerSignalEmiter>();
   emit pSignalEmitter->gotoScene(sScene);
@@ -77,56 +88,27 @@ void CScriptSceneManager::gotoScene(QJSValue scene)
 
 //----------------------------------------------------------------------------------------
 //
-QString CScriptSceneManager::GetScene(const QJSValue& scene, const QString& sSource)
+QString CScriptSceneManager::GetScene(const QVariant& scene, const QString& sSource)
 {
-  QString sRet;
-  auto spDbManager = m_wpDbManager.lock();
-  if (nullptr != spDbManager)
+  auto spSignalEmitter = SignalEmitter<CSceneManagerSignalEmiter>();
+  if (nullptr != spSignalEmitter)
   {
-    if (scene.isString())
+    QString sError;
+    std::optional<QString> optRes =
+        script::ParseSceneFromScriptVariant(scene, m_wpDbManager.lock(),
+                                            m_spProject,
+                                            sSource, &sError);
+    if (optRes.has_value())
     {
-      QString sSceneName = scene.toString();
-      tspScene spScene = spDbManager->FindScene(m_spProject, sSceneName);
-      if (nullptr != spScene)
-      {
-        sRet = sSceneName;
-      }
-      else
-      {
-        QString sError = tr("Resource %1 not found");
-        emit m_pSignalEmitter->showError(sError.arg(scene.toString()),
-                                                QtMsgType::QtWarningMsg);
-      }
-    }
-    else if (scene.isQObject())
-    {
-      CSceneScriptWrapper* pScene = dynamic_cast<CSceneScriptWrapper*>(scene.toQObject());
-      if (nullptr != pScene)
-      {
-        tspScene spScene = pScene->Data();
-        if (nullptr != spScene)
-        {
-          sRet = pScene->getName();
-        }
-        else
-        {
-          QString sError = tr("Resource in %1 holds no data.");
-          emit m_pSignalEmitter->showError(sError.arg(sSource), QtMsgType::QtWarningMsg);
-        }
-      }
-      else
-      {
-        QString sError = tr("Wrong argument-type to %1. String or scene was expected.");
-        emit m_pSignalEmitter->showError(sError.arg(sSource), QtMsgType::QtWarningMsg);
-      }
+      return optRes.value();
     }
     else
     {
-      QString sError = tr("Wrong argument-type to %1. String or scene was expected.");
-      emit m_pSignalEmitter->showError(sError.arg(sSource), QtMsgType::QtWarningMsg);
+      emit m_pSignalEmitter->showError(sError, QtMsgType::QtWarningMsg);
     }
   }
-  return sRet;
+
+  return QString();
 }
 
 //----------------------------------------------------------------------------------------

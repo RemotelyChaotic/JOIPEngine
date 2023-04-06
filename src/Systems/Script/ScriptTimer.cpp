@@ -33,7 +33,10 @@ std::shared_ptr<CScriptObjectBase> CTimerSignalEmitter::CreateNewScriptObject(QP
 {
   return std::make_shared<CEosScriptTimer>(this, pParser);
 }
-
+std::shared_ptr<CScriptObjectBase> CTimerSignalEmitter::CreateNewScriptObject(QtLua::State* pState)
+{
+  return std::make_shared<CScriptTimer>(this, pState);
+}
 
 //----------------------------------------------------------------------------------------
 //
@@ -41,7 +44,11 @@ CScriptTimer::CScriptTimer(QPointer<CScriptRunnerSignalEmiter> pEmitter,
                            QPointer<QJSEngine> pEngine) :
   CJsScriptObjectBase(pEmitter, pEngine)
 {
-
+}
+CScriptTimer::CScriptTimer(QPointer<CScriptRunnerSignalEmiter> pEmitter,
+                           QtLua::State* pState) :
+  CJsScriptObjectBase(pEmitter, pState)
+{
 }
 
 CScriptTimer::~CScriptTimer()

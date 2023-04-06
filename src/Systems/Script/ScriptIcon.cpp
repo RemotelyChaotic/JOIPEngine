@@ -1,5 +1,7 @@
 #include "ScriptIcon.h"
 #include "Application.h"
+#include "CommonScriptHelpers.h"
+#include "ScriptDbWrappers.h"
 #include "Systems/DatabaseManager.h"
 #include "Systems/Project.h"
 
@@ -20,12 +22,22 @@ std::shared_ptr<CScriptObjectBase> CIconSignalEmitter::CreateNewScriptObject(QPo
 {
   return std::make_shared<CScriptIcon>(this, pEngine);
 }
+std::shared_ptr<CScriptObjectBase> CIconSignalEmitter::CreateNewScriptObject(QtLua::State* pState)
+{
+  return std::make_shared<CScriptIcon>(this, pState);
+}
 
 //----------------------------------------------------------------------------------------
 //
 CScriptIcon::CScriptIcon(QPointer<CScriptRunnerSignalEmiter> pEmitter,
                          QPointer<QJSEngine> pEngine) :
   CJsScriptObjectBase(pEmitter, pEngine),
+  m_wpDbManager(CApplication::Instance()->System<CDatabaseManager>())
+{
+}
+CScriptIcon::CScriptIcon(QPointer<CScriptRunnerSignalEmiter> pEmitter,
+                         QtLua::State* pState) :
+  CJsScriptObjectBase(pEmitter, pState),
   m_wpDbManager(CApplication::Instance()->System<CDatabaseManager>())
 {
 
@@ -45,19 +57,24 @@ void CScriptIcon::hide()
 
 //----------------------------------------------------------------------------------------
 //
-void CScriptIcon::hide(QJSValue resource)
+void CScriptIcon::hide(QVariant resource)
 {
   if (!CheckIfScriptCanRun()) { return; }
 
   auto spSignalEmitter = SignalEmitter<CIconSignalEmitter>();
-  if (resource.isString())
+  if (nullptr != spSignalEmitter)
   {
-    const QString sResource = resource.toString();
-    if (!sResource.isEmpty())
+    QString sError;
+    std::optional<QString> optRes =
+        script::ParseResourceFromScriptVariant(resource, m_wpDbManager.lock(),
+                                               m_spProject,
+                                               "hide", &sError);
+    if (optRes.has_value())
     {
-      if (sResource != "~all")
+      QString resRet = optRes.value();
+      if (!resRet.isEmpty() && resRet != "~all")
       {
-        emit spSignalEmitter->hideIcon(sResource);
+        emit spSignalEmitter->hideIcon(resRet);
       }
       else
       {
@@ -66,67 +83,43 @@ void CScriptIcon::hide(QJSValue resource)
     }
     else
     {
-      emit spSignalEmitter->hideIcon(QString());
+      if (resource.type() == QVariant::String ||
+          resource.type() == QVariant::ByteArray)
+      {
+        QString resRet = resource.toString();
+        if ("~all" == resRet)
+        {
+          emit spSignalEmitter->hideIcon(QString());
+          return;
+        }
+      }
+      emit m_pSignalEmitter->showError(sError, QtMsgType::QtWarningMsg);
     }
-  }
-  else
-  {
-    QString sError = tr("Argument to hide() needs to be a string ('~all' or '' to hide all).");
-    emit m_pSignalEmitter->showError(sError.arg(resource.toString()),
-                                      QtMsgType::QtWarningMsg);
   }
 }
 
 //----------------------------------------------------------------------------------------
 //
-void CScriptIcon::show(QJSValue resource)
+void CScriptIcon::show(QVariant resource)
 {
   if (!CheckIfScriptCanRun()) { return; }
 
   auto spSignalEmitter = SignalEmitter<CIconSignalEmitter>();
   auto spDbManager = m_wpDbManager.lock();
-  if (nullptr != spDbManager)
+  if (nullptr != spSignalEmitter)
   {
-    if (resource.isString())
+    QString sError;
+    std::optional<QString> optRes =
+        script::ParseResourceFromScriptVariant(resource, m_wpDbManager.lock(),
+                                               m_spProject,
+                                               "show", &sError);
+    if (optRes.has_value())
     {
-      QString sResourceName = resource.toString();
-      tspResource spResource = spDbManager->FindResourceInProject(m_spProject, sResourceName);
-      if (nullptr != spResource)
-      {
-        emit spSignalEmitter->showIcon(sResourceName);
-      }
-      else
-      {
-        QString sError = tr("Resource %1 not found");
-        emit m_pSignalEmitter->showError(sError.arg(resource.toString()),
-                                                QtMsgType::QtWarningMsg);
-      }
-    }
-    else if (resource.isQObject())
-    {
-      CResourceScriptWrapper* pResource = dynamic_cast<CResourceScriptWrapper*>(resource.toQObject());
-      if (nullptr != pResource)
-      {
-        tspResource spResource = pResource->Data();
-        if (nullptr != spResource)
-        {
-          emit spSignalEmitter->showIcon(pResource->getName());
-        }
-        else
-        {
-          QString sError = tr("Resource in show() holds no data.");
-          emit m_pSignalEmitter->showError(sError, QtMsgType::QtWarningMsg);
-        }
-      }
-      else
-      {
-        QString sError = tr("Wrong argument-type to show(). String or resource was expected.");
-        emit m_pSignalEmitter->showError(sError, QtMsgType::QtWarningMsg);
-      }
+      QString resRet = optRes.value();
+      emit spSignalEmitter->showIcon(resRet);
     }
     else
     {
-      QString sError = tr("Wrong argument-type to show(). String or resource was expected.");
       emit m_pSignalEmitter->showError(sError, QtMsgType::QtWarningMsg);
     }
   }

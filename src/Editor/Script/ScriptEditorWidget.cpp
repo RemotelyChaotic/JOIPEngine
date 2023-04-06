@@ -75,6 +75,7 @@ void CScriptEditorWidget::SetHighlightDefinition(const QString& sType)
 {
   const auto def = m_spRepository->definitionForName(sType);
   m_pHighlightedSearchableEdit->Highlighter()->setDefinition(def);
+  m_pHighlightedSearchableEdit->Highlighter()->rehighlight();
 }
 
 //----------------------------------------------------------------------------------------

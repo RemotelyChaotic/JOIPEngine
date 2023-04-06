@@ -12,6 +12,7 @@
 #include "Systems/DatabaseImageProvider.h"
 #include "Systems/Project.h"
 #include "Systems/ScriptRunner.h"
+#include "Systems/Script/ScriptDbWrappers.h"
 #include "Systems/Script/ScriptRunnerSignalEmiter.h"
 #include "Systems/ThreadedSystem.h"
 #include "Widgets/BackgroundWidget.h"

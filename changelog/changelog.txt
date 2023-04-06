@@ -1,4 +1,19 @@
 =================
+Version 1.3.0.0
+=================
+
+New Features:
+- Added support for Lua scripts. Scene and notification scripts can load and
+  run Lua scripts instead of JS. the script types can be mixed in a Project
+  at will.
+
+Changes:
+- Code Editor supports Lua highlighting, code generation and debugging.
+
+Fixed Bugs:
+- Fixed an error message in PlayerMediaPlayer that was reporting the wrong function call.
+
+=================
 Version 1.2.5.0
 =================
 

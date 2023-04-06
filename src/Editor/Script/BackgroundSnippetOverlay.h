@@ -1,10 +1,9 @@
 #ifndef BACKGROUNDSNIPPETOVERLAY_H
 #define BACKGROUNDSNIPPETOVERLAY_H
 
-#include "Widgets/OverlayBase.h"
+#include "CodeSnippetOverlayBase.h"
 #include <QColor>
 #include <QPointer>
-#include <memory>
 
 class CScriptEditorWidget;
 class CResourceTreeItemModel;
@@ -12,17 +11,9 @@ namespace Ui {
   class CBackgroundSnippetOverlay;
 }
 
-struct SBackgroundSnippetData
-{
-  bool      m_bUseResource = false;
-  QString   m_sCurrentResource = QString();
-  bool      m_bUseColor = false;
-  QColor    m_color = QColor();
-};
-
 //----------------------------------------------------------------------------------------
 //
-class CBackgroundSnippetOverlay : public COverlayBase
+class CBackgroundSnippetOverlay : public CCodeSnippetOverlayBase
 {
   Q_OBJECT
 
@@ -32,11 +23,7 @@ public:
 
   void Initialize(CResourceTreeItemModel* pResourceTreeModel);
 
-signals:
-  void SignalBackgroundCode(const QString& code);
-
 public slots:
-  void Climb() override;
   void Resize() override;
 
 protected slots:
@@ -51,7 +38,6 @@ protected slots:
 
 private:
   std::unique_ptr<Ui::CBackgroundSnippetOverlay> m_spUi;
-  bool                                           m_bInitialized;
   SBackgroundSnippetData                         m_data;
   QSize                                          m_preferredSize;
 };

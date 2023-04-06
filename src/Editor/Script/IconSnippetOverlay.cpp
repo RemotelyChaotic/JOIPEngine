@@ -1,5 +1,4 @@
 #include "IconSnippetOverlay.h"
-#include "ScriptEditorWidget.h"
 #include "Editor/Resources/ResourceTreeItem.h"
 #include "Editor/Resources/ResourceTreeItemModel.h"
 #include "Editor/Resources/ResourceTreeItemSortFilterProxyModel.h"
@@ -7,9 +6,8 @@
 #include <QScrollBar>
 
 CIconSnippetOverlay::CIconSnippetOverlay(QWidget* pParent) :
-  COverlayBase(0, pParent),
+  CCodeSnippetOverlayBase(pParent),
   m_spUi(new Ui::CIconSnippetOverlay),
-  m_bInitialized(false),
   m_data()
 {
   m_spUi->setupUi(this);
@@ -27,7 +25,7 @@ CIconSnippetOverlay::~CIconSnippetOverlay()
 //
 void CIconSnippetOverlay::Initialize(CResourceTreeItemModel* pResourceTreeModel)
 {
-  m_bInitialized = false;
+  SetInitialized(false);
 
   CResourceTreeItemSortFilterProxyModel* pProxyModel =
       new CResourceTreeItemSortFilterProxyModel(m_spUi->pResourceSelectTree);
@@ -47,14 +45,8 @@ void CIconSnippetOverlay::Initialize(CResourceTreeItemModel* pResourceTreeModel)
   m_spUi->pResourceSelectTree->setColumnHidden(resource_item::c_iColumnPath, true);
   m_spUi->pResourceSelectTree->header()->setSectionResizeMode(resource_item::c_iColumnName, QHeaderView::Stretch);
   m_spUi->pResourceSelectTree->header()->setSectionResizeMode(resource_item::c_iColumnType, QHeaderView::Interactive);
-  m_bInitialized = true;
-}
 
-//----------------------------------------------------------------------------------------
-//
-void CIconSnippetOverlay::Climb()
-{
-  ClimbToFirstInstanceOf("QStackedWidget", false);
+  SetInitialized(true);
 }
 
 //----------------------------------------------------------------------------------------
@@ -150,27 +142,11 @@ void CIconSnippetOverlay::on_CloseButton_clicked()
 //
 void CIconSnippetOverlay::on_pConfirmButton_clicked()
 {
-  QString sCode;
-  if (m_data.m_bShow)
+  auto spGenerator = CodeGenerator();
+  if (nullptr != spGenerator)
   {
-    QString sResource("icon.show(\"%1\");\n");
-    sCode += sResource.arg(m_data.m_sCurrentResource);
+    emit SignalCodeGenerated(spGenerator->Generate(m_data, nullptr));
   }
-  else
-  {
-    if (!m_data.m_sCurrentResource.isNull() && !m_data.m_sCurrentResource.isEmpty())
-    {
-      QString sResource("icon.hide(\"%1\");\n");
-      sCode += sResource.arg(m_data.m_sCurrentResource);
-    }
-    else
-    {
-      QString sResource("icon.hide(\"~all\");\n");
-      sCode += sResource;
-    }
-  }
-
-  emit SignalIconCode(sCode);
   Hide();
 }
 

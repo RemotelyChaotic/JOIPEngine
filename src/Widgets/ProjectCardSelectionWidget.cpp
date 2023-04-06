@@ -6,6 +6,7 @@
 #include "Systems/HelpFactory.h"
 #include "Systems/Project.h"
 #include "Systems/ProjectDownloader.h"
+#include "Systems/Script/ScriptDbWrappers.h"
 #include "Widgets/HelpOverlay.h"
 #include "ui_ProjectCardSelectionWidget.h"
 

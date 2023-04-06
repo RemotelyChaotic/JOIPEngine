@@ -215,6 +215,8 @@ macro(CreateJOIPProject JOIP_PROJECT_NAME)
     ${JOIPSources}/Editor/Script/CodeDisplayWidget.cpp
     ${JOIPSources}/Editor/Script/CodeDisplayWidget.h
     ${JOIPSources}/Editor/Script/CodeDisplayWidget.ui
+    ${JOIPSources}/Editor/Script/CodeSnippetOverlayBase.cpp
+    ${JOIPSources}/Editor/Script/CodeSnippetOverlayBase.h
     ${JOIPSources}/Editor/Script/CommandChangeOpenedScript.cpp
     ${JOIPSources}/Editor/Script/CommandChangeOpenedScript.h
     ${JOIPSources}/Editor/Script/CommandInsertEosCommand.cpp
@@ -453,13 +455,28 @@ macro(CreateJOIPProject JOIP_PROJECT_NAME)
     ${JOIPSources}/Systems/JSON/JsonInstructionSetRunnerItemModel.h
     ${JOIPSources}/Systems/JSON/JsonInstructionSetSaxParser.h
     ${JOIPSources}/Systems/JSON/JsonInstructionTypes.h
+    ${JOIPSources}/Systems/Script/CodeGeneratorProvider.cpp
+    ${JOIPSources}/Systems/Script/CodeGeneratorProvider.h
+    ${JOIPSources}/Systems/Script/CommonCodeGenerator.cpp
+    ${JOIPSources}/Systems/Script/CommonCodeGenerator.h
+    ${JOIPSources}/Systems/Script/CommonScriptHelpers.cpp
+    ${JOIPSources}/Systems/Script/CommonScriptHelpers.h
     ${JOIPSources}/Systems/Script/EosScriptRunner.cpp
     ${JOIPSources}/Systems/Script/EosScriptRunner.h
+    ${JOIPSources}/Systems/Script/ICodeGenerator.h
     ${JOIPSources}/Systems/Script/IScriptRunner.h
+    ${JOIPSources}/Systems/Script/JsCodeGenerator.cpp
+    ${JOIPSources}/Systems/Script/JsCodeGenerator.h
     ${JOIPSources}/Systems/Script/JsScriptRunner.cpp
     ${JOIPSources}/Systems/Script/JsScriptRunner.h
+    ${JOIPSources}/Systems/Script/LuaCodeGenerator.cpp
+    ${JOIPSources}/Systems/Script/LuaCodeGenerator.h
+    ${JOIPSources}/Systems/Script/LuaScriptRunner.cpp
+    ${JOIPSources}/Systems/Script/LuaScriptRunner.h
     ${JOIPSources}/Systems/Script/ScriptBackground.cpp
     ${JOIPSources}/Systems/Script/ScriptBackground.h
+    ${JOIPSources}/Systems/Script/ScriptDbWrappers.cpp
+    ${JOIPSources}/Systems/Script/ScriptDbWrappers.h
     ${JOIPSources}/Systems/Script/ScriptEval.cpp
     ${JOIPSources}/Systems/Script/ScriptEval.h
     ${JOIPSources}/Systems/Script/ScriptIcon.cpp
@@ -472,6 +489,8 @@ macro(CreateJOIPProject JOIP_PROJECT_NAME)
     ${JOIPSources}/Systems/Script/ScriptNotification.h
     ${JOIPSources}/Systems/Script/ScriptObjectBase.cpp
     ${JOIPSources}/Systems/Script/ScriptObjectBase.h
+    ${JOIPSources}/Systems/Script/ScriptRunnerInstanceController.cpp
+    ${JOIPSources}/Systems/Script/ScriptRunnerInstanceController.h
     ${JOIPSources}/Systems/Script/ScriptRunnerSignalEmiter.cpp
     ${JOIPSources}/Systems/Script/ScriptRunnerSignalEmiter.h
     ${JOIPSources}/Systems/Script/ScriptSceneManager.cpp

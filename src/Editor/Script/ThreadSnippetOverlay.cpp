@@ -2,22 +2,17 @@
 #include "ui_ThreadSnippetOverlay.h"
 
 CThreadSnippetOverlay::CThreadSnippetOverlay(QWidget* pParent) :
-  COverlayBase(0, pParent),
-  m_spUi(std::make_unique<Ui::CThreadSnippetOverlay>())
+  CCodeSnippetOverlayBase(pParent),
+  m_spUi(std::make_unique<Ui::CThreadSnippetOverlay>()),
+  m_data()
 {
   m_spUi->setupUi(this);
   m_preferredSize = size();
+  m_bInitialized = true;
 }
 
 CThreadSnippetOverlay::~CThreadSnippetOverlay()
 {
-}
-
-//----------------------------------------------------------------------------------------
-//
-void CThreadSnippetOverlay::Climb()
-{
-  ClimbToFirstInstanceOf("QStackedWidget", false);
 }
 
 //----------------------------------------------------------------------------------------
@@ -46,24 +41,25 @@ void CThreadSnippetOverlay::Resize()
 //
 void CThreadSnippetOverlay::on_pSleepSpinBox_valueChanged(double dValue)
 {
-  m_bSleepTimeS = dValue;
+  m_data.m_bSleepTimeS = dValue;
 }
 
 //----------------------------------------------------------------------------------------
 //
 void CThreadSnippetOverlay::on_pSkippableCheckBox_toggled(bool bStatus)
 {
-  m_bSkippable = bStatus;
+  m_data.m_bSkippable = bStatus;
 }
 
 //----------------------------------------------------------------------------------------
 //
 void CThreadSnippetOverlay::on_pConfirmButton_clicked()
 {
-  QString sCode = QString("thread.sleep(%1,%2);\n")
-      .arg(m_bSleepTimeS)
-      .arg(m_bSkippable ? "true" : "false");
-  emit SignalThreadCode(sCode);
+  auto spGenerator = CodeGenerator();
+  if (nullptr != spGenerator)
+  {
+    emit SignalCodeGenerated(spGenerator->Generate(m_data, nullptr));
+  }
   Hide();
 }
 

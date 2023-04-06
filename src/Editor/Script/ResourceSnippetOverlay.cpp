@@ -16,11 +16,9 @@ namespace
 //----------------------------------------------------------------------------------------
 //
 CResourceSnippetOverlay::CResourceSnippetOverlay(QWidget* pParent) :
-  COverlayBase(0, pParent),
+  CCodeSnippetOverlayBase(pParent),
   m_spUi(std::make_unique<Ui::CResourceSnippetOverlay>()),
-  m_spCurrentProject(nullptr),
   m_wpDbManager(CApplication::Instance()->System<CDatabaseManager>()),
-  m_bInitialized(false),
   m_data()
 {
   m_spUi->setupUi(this);
@@ -41,7 +39,7 @@ CResourceSnippetOverlay::~CResourceSnippetOverlay()
 //
 void CResourceSnippetOverlay::Initialize(CResourceTreeItemModel* pResourceTreeModel)
 {
-  m_bInitialized = false;
+  SetInitialized(false);
 
   CResourceTreeItemSortFilterProxyModel* pProxyModel =
       dynamic_cast<CResourceTreeItemSortFilterProxyModel*>(m_spUi->pResourceSelectTree->model());
@@ -60,28 +58,8 @@ void CResourceSnippetOverlay::Initialize(CResourceTreeItemModel* pResourceTreeMo
   m_spUi->pResourceSelectTree->setColumnHidden(resource_item::c_iColumnPath, true);
   m_spUi->pResourceSelectTree->header()->setSectionResizeMode(resource_item::c_iColumnName, QHeaderView::Stretch);
   m_spUi->pResourceSelectTree->header()->setSectionResizeMode(resource_item::c_iColumnType, QHeaderView::Interactive);
-  m_bInitialized = true;
-}
 
-//----------------------------------------------------------------------------------------
-//
-void CResourceSnippetOverlay::LoadProject(tspProject spProject)
-{
-  m_spCurrentProject = spProject;
-}
-
-//----------------------------------------------------------------------------------------
-//
-void CResourceSnippetOverlay::UnloadProject()
-{
-  m_spCurrentProject = nullptr;
-}
-
-//----------------------------------------------------------------------------------------
-//
-void CResourceSnippetOverlay::Climb()
-{
-  ClimbToFirstInstanceOf("QStackedWidget", false);
+  SetInitialized(true);
 }
 
 //----------------------------------------------------------------------------------------
@@ -290,173 +268,11 @@ void CResourceSnippetOverlay::on_pFilter_SignalFilterChanged(const QString& sTex
 //
 void CResourceSnippetOverlay::on_pConfirmButton_clicked()
 {
-  EResourceType type = EResourceType::eImage;
-  auto spDbManager = m_wpDbManager.lock();
-  if (nullptr != spDbManager && nullptr != m_spCurrentProject)
+  auto spGenerator = CodeGenerator();
+  if (nullptr != spGenerator)
   {
-    tspResource spResource = spDbManager->FindResourceInProject(m_spCurrentProject, m_data.m_sResource);
-    if (nullptr != spResource)
-    {
-      QReadLocker locker(&spResource->m_rwLock);
-      type = spResource->m_type;
-    }
+    emit SignalCodeGenerated(spGenerator->Generate(m_data, m_spCurrentProject));
   }
-
-  QString sAlias = "";
-  if (EResourceType::eSound == type._to_integral())
-  {
-    sAlias = "\"\",";
-  }
-  QString sLoopsAndStart;
-  if (m_data.m_bLoops)
-  {
-    sLoopsAndStart = (m_data.m_bStartAt || m_data.m_iEndAt) ? ",%3 %1, %2" : ",%2 %1";
-    if (m_data.m_bStartAt)
-    {
-      sLoopsAndStart = sLoopsAndStart.arg(m_data.m_iLoops)
-          .arg(!m_data.m_bEndAt ? QString::number(m_data.m_iStartAt) :
-                                  QString("%1, %2").arg(m_data.m_bStartAt ? m_data.m_iStartAt : 0).arg(m_data.m_iEndAt))
-          .arg(sAlias);
-    }
-    else
-    {
-      sLoopsAndStart = sLoopsAndStart
-          .arg(m_data.m_iLoops)
-          .arg(sAlias);
-    }
-  }
-  else if (m_data.m_bStartAt || m_data.m_bEndAt)
-  {
-    sLoopsAndStart = ",%2 1, %1";
-    sLoopsAndStart = sLoopsAndStart
-        .arg(!m_data.m_bEndAt ? QString::number(m_data.m_iStartAt) :
-                                QString("%1, %2").arg(m_data.m_bStartAt ? m_data.m_iStartAt : 0).arg(m_data.m_iEndAt))
-        .arg(sAlias);
-  }
-
-
-  QString sCode;
-  if (!m_data.m_sResource.isEmpty())
-  {
-    if (EDisplayMode::ePlayShow == m_data.m_displayMode)
-    {
-      QString sMainCommand("mediaPlayer.%1(\"%2\"%3);\n");
-      switch (type)
-      {
-        case EResourceType::eImage:
-          sMainCommand = sMainCommand.arg("show");
-          break;
-        case EResourceType::eMovie:
-          sMainCommand = sMainCommand.arg("play");
-          break;
-        case EResourceType::eSound:
-          sMainCommand = sMainCommand.arg("playSound");
-          break;
-        default: break;
-      }
-      sMainCommand = sMainCommand.arg(m_data.m_sResource);
-      if (EResourceType::eMovie == type._to_integral() || EResourceType::eSound == type._to_integral())
-      {
-        sMainCommand = sMainCommand.arg(sLoopsAndStart);
-      }
-      else if (EResourceType::eImage == type._to_integral())
-      {
-        sMainCommand = sMainCommand.arg("");
-      }
-      sCode += sMainCommand;
-    }
-    else if (EDisplayMode::ePause == m_data.m_displayMode)
-    {
-      switch (type)
-      {
-        case EResourceType::eImage: break;
-        case EResourceType::eMovie: sCode += "mediaPlayer.pauseVideo();\n"; break;
-        case EResourceType::eSound:
-          sCode += QString("mediaPlayer.pauseSound(\"%1\");\n").arg(m_data.m_sResource);
-          break;
-        default: break;
-      }
-    }
-    else if (EDisplayMode::eStop == m_data.m_displayMode)
-    {
-      switch (type)
-      {
-        case EResourceType::eImage: break;
-        case EResourceType::eMovie: sCode += "mediaPlayer.stopVideo();\n"; break;
-        case EResourceType::eSound:
-          sCode += QString("mediaPlayer.stopSound(\"%1\");\n").arg(m_data.m_sResource);
-          break;
-        default: break;
-      }
-    }
-    else if (EDisplayMode::eSeek == m_data.m_displayMode)
-    {
-      switch (type)
-      {
-        case EResourceType::eImage: break;
-        case EResourceType::eMovie: sCode += QString("mediaPlayer.seekVideo(%1);\n").arg(m_data.m_iSeekTime); break;
-        case EResourceType::eSound:
-          sCode += QString("mediaPlayer.seekSound(\"%1\",%2);\n").arg(m_data.m_sResource).arg(m_data.m_iSeekTime);
-          break;
-        default: break;
-      }
-    }
-  }
-  else
-  {
-    if (EDisplayMode::ePlayShow == m_data.m_displayMode)
-    {
-      sCode += "mediaPlayer.play();\n";
-    }
-    else if (EDisplayMode::ePause == m_data.m_displayMode)
-    {
-      sCode += "mediaPlayer.pauseVideo();\n";
-      sCode += "mediaPlayer.pauseSound();\n";
-    }
-    else if (EDisplayMode::eStop == m_data.m_displayMode)
-    {
-      sCode += "mediaPlayer.stopVideo();\n";
-      sCode += "mediaPlayer.stopSound();\n";
-    }
-    else if (EDisplayMode::eSeek == m_data.m_displayMode)
-    {
-      sCode += QString("mediaPlayer.seekVideo(%1);\n").arg(m_data.m_iSeekTime);
-    }
-  }
-
-  if ((type._to_integral() == EResourceType::eMovie || type._to_integral() == EResourceType::eSound)
-      && m_data.m_bWaitForFinished)
-  {
-    if (!m_data.m_sResource.isEmpty())
-    {
-      switch (type)
-      {
-        case EResourceType::eImage:
-          sCode += QString("mediaPlayer.waitForPlayback(\"%1\");\n").arg(m_data.m_sResource);
-          break;
-        case EResourceType::eMovie:
-          sCode += QString("mediaPlayer.waitForVideo();\n").arg(m_data.m_sResource);
-          break;
-        case EResourceType::eSound:
-          sCode += QString("mediaPlayer.waitForSound(\"%1\");\n").arg(m_data.m_sResource);
-          break;
-        default: break;
-      }
-    }
-    else
-    {
-      sCode += "mediaPlayer.waitForPlayback();\n";
-    }
-  }
-
-  if (m_data.m_bSetVolume &&
-      (type._to_integral() == EResourceType::eMovie || type._to_integral() == EResourceType::eSound))
-  {
-    sCode += QString("mediaPlayer.setVolume(\"%1\", %2);\n")
-        .arg(m_data.m_sResource).arg(m_data.m_dVolume);
-  }
-
-  emit SignalResourceCode(sCode);
   Hide();
 }
 

@@ -18,7 +18,8 @@ public:
   CIconSignalEmitter();
   ~CIconSignalEmitter();
 
-  virtual std::shared_ptr<CScriptObjectBase> CreateNewScriptObject(QPointer<QJSEngine> pEngine);
+  std::shared_ptr<CScriptObjectBase> CreateNewScriptObject(QPointer<QJSEngine> pEngine) override;
+  std::shared_ptr<CScriptObjectBase> CreateNewScriptObject(QtLua::State* pState) override;
 
 signals:
   void hideIcon(QString sResource);
@@ -36,12 +37,14 @@ class CScriptIcon : public CJsScriptObjectBase
 public:
   CScriptIcon(QPointer<CScriptRunnerSignalEmiter> pEmitter,
               QPointer<QJSEngine> pEngine);
+  CScriptIcon(QPointer<CScriptRunnerSignalEmiter> pEmitter,
+              QtLua::State* pState);
   ~CScriptIcon();
 
 public slots:
   void hide();
-  void hide(QJSValue resource);
-  void show(QJSValue resource);
+  void hide(QVariant resource);
+  void show(QVariant resource);
 
 private:
   std::weak_ptr<CDatabaseManager>  m_wpDbManager;

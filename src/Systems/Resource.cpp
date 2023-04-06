@@ -1,8 +1,6 @@
 #include "Resource.h"
-#include "Application.h"
 #include "PhysFs/PhysFsFileEngine.h"
 #include "Project.h"
-#include "ResourceBundle.h"
 
 #include <QFileInfo>
 #include <QImageReader>
@@ -97,141 +95,6 @@ void SResource::FromJsonObject(const QJsonObject& json)
   {
     m_sResourceBundle = it.value().toString();
   }
-}
-
-//----------------------------------------------------------------------------------------
-//
-CResourceScriptWrapper::CResourceScriptWrapper(QJSEngine* pEngine, const std::shared_ptr<SResource>& spResource) :
-  QObject(),
-  CLockable(&spResource->m_rwLock),
-  m_spData(spResource),
-  m_pEngine(pEngine)
-{
-  assert(nullptr != spResource);
-  assert(nullptr != pEngine);
-}
-
-CResourceScriptWrapper::~CResourceScriptWrapper()
-{
-}
-
-//----------------------------------------------------------------------------------------
-//
-bool CResourceScriptWrapper::isAnimatedImpl()
-{
-  QReadLocker locker(&m_spData->m_rwLock);
-  switch (m_spData->m_type)
-  {
-    case EResourceType::eImage:
-    {
-      if (IsLocalFile(m_spData->m_sPath))
-      {
-        locker.unlock();
-        QImageReader reader(ResourceUrlToAbsolutePath(m_spData));
-        if (reader.canRead())
-        {
-          return reader.supportsAnimation();
-        }
-        else
-        {
-          return false;
-        }
-      }
-      else
-      {
-        return false;
-      }
-    }
-    case EResourceType::eMovie: return true;
-    default: return false;
-  }
-}
-
-//----------------------------------------------------------------------------------------
-//
-bool CResourceScriptWrapper::isLocalPath()
-{
-  QReadLocker locker(&m_spData->m_rwLock);
-  return IsLocalFile(m_spData->m_sPath);
-}
-
-//----------------------------------------------------------------------------------------
-//
-QString CResourceScriptWrapper::getName()
-{
-  QReadLocker locker(&m_spData->m_rwLock);
-  return m_spData->m_sName;
-}
-
-//----------------------------------------------------------------------------------------
-//
-QUrl CResourceScriptWrapper::getPath()
-{
-  if (nullptr == m_spData->m_spParent)
-  {
-    return m_spData->m_sPath;
-  }
-
-  if (IsLocalFile(m_spData->m_sPath))
-  {
-    const QString sTruePathName = ResourceUrlToAbsolutePath(m_spData, "qrc:");
-    return QUrl(sTruePathName);
-  }
-  else
-  {
-    return m_spData->m_sPath;
-  }
-}
-
-//----------------------------------------------------------------------------------------
-//
-QUrl CResourceScriptWrapper::getSource()
-{
-  QReadLocker locker(&m_spData->m_rwLock);
-  return m_spData->m_sSource;
-}
-
-//----------------------------------------------------------------------------------------
-//
-CResourceScriptWrapper::ResourceType CResourceScriptWrapper::getType()
-{
-  QReadLocker locker(&m_spData->m_rwLock);
-  return ResourceType(m_spData->m_type._to_integral());
-}
-
-//----------------------------------------------------------------------------------------
-//
-QString CResourceScriptWrapper::getResourceBundle()
-{
-  QReadLocker locker(&m_spData->m_rwLock);
-  return m_spData->m_sResourceBundle;
-}
-
-//----------------------------------------------------------------------------------------
-//
-bool CResourceScriptWrapper::load()
-{
-  QReadLocker locker(&m_spData->m_rwLock);
-  QString sResourceBundle = m_spData->m_sResourceBundle;
-  if (!m_spData->m_sResourceBundle.isEmpty())
-  {
-    return CDatabaseManager::LoadBundle(m_spData->m_spParent, sResourceBundle);
-  }
-  return true;
-}
-
-//----------------------------------------------------------------------------------------
-//
-QJSValue CResourceScriptWrapper::project()
-{
-  QReadLocker locker(&m_spData->m_rwLock);
-  if (nullptr != m_spData->m_spParent)
-  {
-    CProjectScriptWrapper* pProject =
-        new CProjectScriptWrapper(m_pEngine, std::make_shared<SProject>(*m_spData->m_spParent));
-    return m_pEngine->newQObject(pProject);
-  }
-  return QJSValue();
 }
 
 //----------------------------------------------------------------------------------------
@@ -401,7 +264,7 @@ QStringList SResourceFormats::OtherFormats()
 //
 QStringList SResourceFormats::ScriptFormats()
 {
-  static QStringList vsFormats = QStringList() << "*.js" << "*.eos";
+  static QStringList vsFormats = QStringList() << "*.js" << "*.eos" << "*.lua";
   return vsFormats;
 }
 

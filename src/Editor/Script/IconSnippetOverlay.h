@@ -1,9 +1,8 @@
 #ifndef ICONSNIPPETOVERLAY_H
 #define ICONSNIPPETOVERLAY_H
 
-#include "Widgets/OverlayBase.h"
+#include "CodeSnippetOverlayBase.h"
 #include <QPointer>
-#include <memory>
 
 class CScriptEditorWidget;
 class CResourceTreeItemModel;
@@ -11,15 +10,9 @@ namespace Ui {
   class CIconSnippetOverlay;
 }
 
-struct SIconSnippetData
-{
-  bool      m_bShow = false;
-  QString   m_sCurrentResource = QString();
-};
-
 //----------------------------------------------------------------------------------------
 //
-class CIconSnippetOverlay : public COverlayBase
+class CIconSnippetOverlay : public CCodeSnippetOverlayBase
 {
   Q_OBJECT
 
@@ -29,11 +22,7 @@ public:
 
   void Initialize(CResourceTreeItemModel* pResourceTreeModel);
 
-signals:
-  void SignalIconCode(const QString& code);
-
 public slots:
-  void Climb() override;
   void Resize() override;
 
 protected slots:
@@ -48,7 +37,6 @@ protected slots:
 
 private:
   std::unique_ptr<Ui::CIconSnippetOverlay> m_spUi;
-  bool                                     m_bInitialized;
   SIconSnippetData                         m_data;
   QSize                                    m_preferredSize;
 };

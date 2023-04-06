@@ -1,5 +1,7 @@
 #include "ScriptNotification.h"
 #include "Application.h"
+#include "CommonScriptHelpers.h"
+#include "ScriptDbWrappers.h"
 
 #include "Systems/DatabaseManager.h"
 
@@ -14,6 +16,8 @@
 #include "Systems/Project.h"
 #include "Systems/Resource.h"
 
+//----------------------------------------------------------------------------------------
+//
 CNotificationSignalEmiter::CNotificationSignalEmiter() :
   CScriptRunnerSignalEmiter()
 {
@@ -34,6 +38,10 @@ std::shared_ptr<CScriptObjectBase> CNotificationSignalEmiter::CreateNewScriptObj
 {
   return std::make_shared<CEosScriptNotification>(this, pParser);
 }
+std::shared_ptr<CScriptObjectBase> CNotificationSignalEmiter::CreateNewScriptObject(QtLua::State* pState)
+{
+  return std::make_shared<CScriptNotification>(this, pState);
+}
 
 //----------------------------------------------------------------------------------------
 //
@@ -42,25 +50,14 @@ CScriptNotification::CScriptNotification(QPointer<CScriptRunnerSignalEmiter> pEm
   CJsScriptObjectBase(pEmitter, pEngine),
   m_wpDbManager(CApplication::Instance()->System<CDatabaseManager>())
 {
-  auto spEmiter = SignalEmitter<CNotificationSignalEmiter>();
-  connect(spEmiter, &CNotificationSignalEmiter::showNotificationClick,
-          this, [this] (QString sId, QString sOnEvt){
-    QString sCopy = sOnEvt;
-    sCopy.detach();
-    if (!sCopy.isEmpty())
-    {
-      emit SignalOverlayRunAsync(sId, sOnEvt);
-    }
-  }, Qt::QueuedConnection);
-  connect(spEmiter, &CNotificationSignalEmiter::showNotificationTimeout,
-          this, [this] (QString sId, QString sOnEvt){
-    QString sCopy = sOnEvt;
-    sCopy.detach();
-    if (!sCopy.isEmpty())
-    {
-      emit SignalOverlayRunAsync(sId, sOnEvt);
-    }
-  }, Qt::QueuedConnection);
+  Initialize();
+}
+CScriptNotification::CScriptNotification(QPointer<CScriptRunnerSignalEmiter> pEmitter,
+                                         QtLua::State* pState) :
+  CJsScriptObjectBase(pEmitter, pState),
+  m_wpDbManager(CApplication::Instance()->System<CDatabaseManager>())
+{
+  Initialize();
 }
 CScriptNotification::~CScriptNotification()
 {
@@ -94,11 +91,11 @@ void CScriptNotification::setIconAlignment(qint32 alignment)
 
 //----------------------------------------------------------------------------------------
 //
-void CScriptNotification::setPortrait(QJSValue resource)
+void CScriptNotification::setPortrait(QVariant resource)
 {
   if (!CheckIfScriptCanRun()) { return; }
 
-  QString sResource = GetResource(resource, "setPortrait()");
+  QString sResource = GetResource(resource, "setPortrait");
   emit SignalEmitter<CNotificationSignalEmiter>()->portraitChanged(sResource);
 }
 
@@ -112,17 +109,21 @@ void CScriptNotification::show(QString sId, QString sTitle)
 
 //----------------------------------------------------------------------------------------
 //
-void CScriptNotification::show(QString sId, QString sTitle, QJSValue sButtonTextOrTimeout)
+void CScriptNotification::show(QString sId, QString sTitle, QVariant sButtonTextOrTimeout)
 {
   if (!CheckIfScriptCanRun()) { return; }
-  if (sButtonTextOrTimeout.isString())
+  if (sButtonTextOrTimeout.type() == QVariant::String)
   {
     QString sButtonText = sButtonTextOrTimeout.toString();
     Show(sId, sTitle, sButtonText, -1, QString(), QString());
   }
-  else if (sButtonTextOrTimeout.isNumber())
+  else if (sButtonTextOrTimeout.isNull())
   {
-    double dTimeS = sButtonTextOrTimeout.toNumber();
+    Show(sId, sTitle, QString(), -1, QString(), QString());
+  }
+  else if (sButtonTextOrTimeout.canConvert(QVariant::Double))
+  {
+    double dTimeS = sButtonTextOrTimeout.toDouble();
     Show(sId, sTitle, QString(), dTimeS, QString(), QString());
   }
   else
@@ -133,27 +134,36 @@ void CScriptNotification::show(QString sId, QString sTitle, QJSValue sButtonText
 
 //----------------------------------------------------------------------------------------
 //
-void CScriptNotification::show(QString sId, QString sTitle, QJSValue sButtonTextOrTimeout, QJSValue onButtonOnTimeoutOrTime)
+void CScriptNotification::show(QString sId, QString sTitle, QVariant sButtonTextOrTimeout, QVariant onButtonOnTimeoutOrTime)
 {
   if (!CheckIfScriptCanRun()) { return; }
-  if (sButtonTextOrTimeout.isString())
+  if (sButtonTextOrTimeout.type() == QVariant::String)
   {
     QString sButtonText = sButtonTextOrTimeout.toString();
-    if (onButtonOnTimeoutOrTime.isNumber())
+    if (onButtonOnTimeoutOrTime.isNull())
     {
-      double dTimeS = onButtonOnTimeoutOrTime.toNumber();
+      QString sOnButtonResolved = GetResource(onButtonOnTimeoutOrTime, "show");
+      Show(sId, sTitle, sButtonText, -1, sOnButtonResolved, QString());
+    }
+    if (onButtonOnTimeoutOrTime.canConvert(QVariant::Double))
+    {
+      double dTimeS = onButtonOnTimeoutOrTime.toDouble();
       Show(sId, sTitle, sButtonText, dTimeS, QString(), QString());
     }
     else
     {
-      QString sOnButtonResolved = GetResource(onButtonOnTimeoutOrTime, "show()");
+      QString sOnButtonResolved = GetResource(onButtonOnTimeoutOrTime, "show");
       Show(sId, sTitle, sButtonText, -1, sOnButtonResolved, QString());
     }
   }
-  else if (sButtonTextOrTimeout.isNumber())
+  else if (sButtonTextOrTimeout.isNull())
   {
-    double dTimeS = sButtonTextOrTimeout.toNumber();
-    QString sOnTimeoutResolved = GetResource(onButtonOnTimeoutOrTime, "show()");
+    Show(sId, sTitle, QString(), -1, QString(), QString());
+  }
+  else if (sButtonTextOrTimeout.canConvert(QVariant::Double))
+  {
+    double dTimeS = sButtonTextOrTimeout.toDouble();
+    QString sOnTimeoutResolved = GetResource(onButtonOnTimeoutOrTime, "show");
     Show(sId, sTitle, QString(), dTimeS, QString(), sOnTimeoutResolved);
   }
   else
@@ -164,159 +174,131 @@ void CScriptNotification::show(QString sId, QString sTitle, QJSValue sButtonText
 
 //----------------------------------------------------------------------------------------
 //
-void CScriptNotification::show(QString sId, QString sTitle, QString sButtonText, double dTimeS, QJSValue sOnButton)
+void CScriptNotification::show(QString sId, QString sTitle, QString sButtonText, double dTimeS, QVariant sOnButton)
 {
   if (!CheckIfScriptCanRun()) { return; }
-  QString sOnButtonResolved = GetResource(sOnButton, "show()");
+  QString sOnButtonResolved = GetResource(sOnButton, "show");
   Show(sId, sTitle, sButtonText, dTimeS, sOnButtonResolved, QString());
 }
 
 //----------------------------------------------------------------------------------------
 //
-void CScriptNotification::show(QString sId, QString sTitle, QString sButtonText, double dTimeS, QJSValue sOnButton, QJSValue sOnTimeout)
+void CScriptNotification::show(QString sId, QString sTitle, QString sButtonText, double dTimeS, QVariant sOnButton, QVariant sOnTimeout)
 {
   if (!CheckIfScriptCanRun()) { return; }
-  QString sOnButtonResolved = GetResource(sOnButton, "show()");
-  QString sOnTimeoutResolved = GetResource(sOnTimeout, "show()");
+  QString sOnButtonResolved = GetResource(sOnButton, "show");
+  QString sOnTimeoutResolved = GetResource(sOnTimeout, "show");
   Show(sId, sTitle, sButtonText, dTimeS, sOnButtonResolved, sOnTimeoutResolved);
 }
 
 //----------------------------------------------------------------------------------------
 //
-void CScriptNotification::setTextBackgroundColor(QJSValue color)
+void CScriptNotification::setTextBackgroundColor(QVariant color)
 {
   if (!CheckIfScriptCanRun()) { return; }
 
-  QColor colorConverted = GetColor(color, "setTextBackgroundColor()");
+  QColor colorConverted = GetColor(color, "setTextBackgroundColor");
   emit SignalEmitter<CNotificationSignalEmiter>()->textBackgroundColorChanged(colorConverted);
 }
 
 //----------------------------------------------------------------------------------------
 //
-void CScriptNotification::setTextColor(QJSValue color)
+void CScriptNotification::setTextColor(QVariant color)
 {
   if (!CheckIfScriptCanRun()) { return; }
 
-  QColor colorConverted = GetColor(color, "setTextColor()");
+  QColor colorConverted = GetColor(color, "setTextColor");
   emit SignalEmitter<CNotificationSignalEmiter>()->textColorChanged(colorConverted);
 }
 
 //----------------------------------------------------------------------------------------
 //
-void CScriptNotification::setWidgetBackgroundColor(QJSValue color)
+void CScriptNotification::setWidgetBackgroundColor(QVariant color)
 {
   if (!CheckIfScriptCanRun()) { return; }
 
-  QColor colorConverted = GetColor(color, "setWidgetBackgroundColor()");
+  QColor colorConverted = GetColor(color, "setWidgetBackgroundColor");
   emit SignalEmitter<CNotificationSignalEmiter>()->widgetBackgroundColorChanged(colorConverted);
 }
 
 //----------------------------------------------------------------------------------------
 //
-void CScriptNotification::setWidgetColor(QJSValue color)
+void CScriptNotification::setWidgetColor(QVariant color)
 {
   if (!CheckIfScriptCanRun()) { return; }
 
-  QColor colorConverted = GetColor(color, "setWidgetColor()");
+  QColor colorConverted = GetColor(color, "setWidgetColor");
   emit SignalEmitter<CNotificationSignalEmiter>()->widgetColorChanged(colorConverted);
 }
 
 //----------------------------------------------------------------------------------------
 //
-QColor CScriptNotification::GetColor(const QJSValue& color, const QString& sSource)
+void CScriptNotification::Initialize()
 {
-  QColor colorRet;
-  if (color.isString())
-  {
-    colorRet = QColor(color.toString());
-  }
-  else if (color.isArray())
-  {
-    std::vector<qint32> viColorComponents;
-    const qint32 iLength = color.property("length").toInt();
-    for (qint32 iIndex = 0; iLength > iIndex; iIndex++)
+  auto spEmiter = SignalEmitter<CNotificationSignalEmiter>();
+  connect(spEmiter, &CNotificationSignalEmiter::showNotificationClick,
+          this, [this] (QString sId, QString sOnEvt){
+    QString sCopy = sOnEvt;
+    sCopy.detach();
+    if (!sCopy.isEmpty())
     {
-      viColorComponents.push_back(color.property(static_cast<quint32>(iIndex)).toInt());
+      emit SignalOverlayRunAsync(sId, sOnEvt);
     }
-
-    if (viColorComponents.size() != 4 && viColorComponents.size() != 3)
+  }, Qt::QueuedConnection);
+  connect(spEmiter, &CNotificationSignalEmiter::showNotificationTimeout,
+          this, [this] (QString sId, QString sOnEvt){
+    QString sCopy = sOnEvt;
+    sCopy.detach();
+    if (!sCopy.isEmpty())
     {
-      QString sError = tr("Argument error in %1. Array of three or four numbers or string was expected.");
-      emit m_pSignalEmitter->showError(sError.arg(sSource), QtMsgType::QtWarningMsg);
+      emit SignalOverlayRunAsync(sId, sOnEvt);
     }
-    else
-    {
-      if (viColorComponents.size() == 4)
-      {
-        colorRet =
-              QColor(viColorComponents[0], viColorComponents[1], viColorComponents[2], viColorComponents[3]);
-      }
-      else
-      {
-        colorRet =
-              QColor(viColorComponents[0], viColorComponents[1], viColorComponents[2]);
-      }
-    }
-  }
-  return colorRet;
+  }, Qt::QueuedConnection);
 }
 
 //----------------------------------------------------------------------------------------
 //
-QString CScriptNotification::GetResource(const QJSValue& resource, const QString& sSource)
+QColor CScriptNotification::GetColor(const QVariant& color, const QString& sSource)
 {
-  QString sRet;
-  auto spDbManager = m_wpDbManager.lock();
-  if (nullptr != spDbManager)
+  if (nullptr != m_pSignalEmitter)
   {
-    if (resource.isString())
+    QString sError;
+    std::optional<QColor> optCol =
+        script::ParseColorFromScriptVariant(color, 255, sSource, &sError);
+    if (optCol.has_value())
     {
-      QString sResourceName = resource.toString();
-      tspResource spResource = spDbManager->FindResourceInProject(m_spProject, sResourceName);
-      if (nullptr != spResource)
-      {
-        sRet = sResourceName;
-      }
-      else
-      {
-        QString sError = tr("Resource %1 not found");
-        emit m_pSignalEmitter->showError(sError.arg(resource.toString()),
-                                                QtMsgType::QtWarningMsg);
-      }
-    }
-    else if (resource.isQObject())
-    {
-      CResourceScriptWrapper* pResource = dynamic_cast<CResourceScriptWrapper*>(resource.toQObject());
-      if (nullptr != pResource)
-      {
-        tspResource spResource = pResource->Data();
-        if (nullptr != spResource)
-        {
-          sRet = pResource->getName();
-        }
-        else
-        {
-          QString sError = tr("Resource in %1 holds no data.");
-          emit m_pSignalEmitter->showError(sError.arg(sSource), QtMsgType::QtWarningMsg);
-        }
-      }
-      else
-      {
-        QString sError = tr("Wrong argument-type to %1. String or resource was expected.");
-        emit m_pSignalEmitter->showError(sError.arg(sSource), QtMsgType::QtWarningMsg);
-      }
-    }
-    else if (resource.isNull() || resource.isUndefined())
-    {
-      sRet = QString();
+      return optCol.value();
     }
     else
     {
-      QString sError = tr("Wrong argument-type to %1. String or resource was expected.");
-      emit m_pSignalEmitter->showError(sError.arg(sSource), QtMsgType::QtWarningMsg);
+      emit m_pSignalEmitter->showError(sError, QtMsgType::QtWarningMsg);
     }
   }
-  return sRet;
+
+  return QColor();
+}
+
+//----------------------------------------------------------------------------------------
+//
+QString CScriptNotification::GetResource(const QVariant& resource, const QString& sSource)
+{
+  if (nullptr != m_pSignalEmitter)
+  {
+    QString sError;
+    std::optional<QString> optRes =
+        script::ParseResourceFromScriptVariant(resource, m_wpDbManager.lock(),
+                                               m_spProject,
+                                               sSource, &sError);
+    if (optRes.has_value())
+    {
+      return optRes.value();
+    }
+    else
+    {
+      emit m_pSignalEmitter->showError(sError, QtMsgType::QtWarningMsg);
+    }
+  }
+  return QString();
 }
 
 //----------------------------------------------------------------------------------------

@@ -6,6 +6,8 @@
 #include <QMutex>
 #include <QPointer>
 #include <QTimer>
+
+#include <functional>
 #include <map>
 #include <memory>
 
@@ -42,9 +44,16 @@ public slots:
   void UnregisterComponents();
 
 protected slots:
+  void SlotOverlayCleared();
+  void SlotOverlayClosed(const QString& sId);
+  void SlotOverlayRunAsync(tspProject spProject, const QString& sId, const QString& sScriptResource);
   void SlotScriptRunFinished(bool bOk, const QString& sRetVal);
 
 private:
+  void LoadScriptAndCall(tspScene spScene, tspResource spResource,
+                         std::function<void(std::unique_ptr<IScriptRunner>&,
+                                            const QString&, tspScene, tspResource)> fn);
+
   std::map<QString, std::unique_ptr<IScriptRunner>> m_spRunnerMap;
   std::shared_ptr<CScriptRunnerSignalContext>       m_spSignalEmitterContext;
 };

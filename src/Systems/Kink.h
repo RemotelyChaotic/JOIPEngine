@@ -9,8 +9,6 @@
 #include <map>
 #include <memory>
 
-class QJSEngine;
-
 //----------------------------------------------------------------------------------------
 //
 struct SKink
@@ -25,36 +23,6 @@ struct SKink
   QString                 m_sType;
   QString                 m_sName;
   QString                 m_sDescribtion;
-};
-
-//----------------------------------------------------------------------------------------
-//
-class CKink : public QObject
-{
-  Q_OBJECT
-  Q_DISABLE_COPY(CKink)
-  CKink() {}
-  Q_PROPERTY(qint32   idForOrdering              READ getIdForOrdering     CONSTANT)
-  Q_PROPERTY(QString  type                       READ getType              CONSTANT)
-  Q_PROPERTY(QString  name                       READ getName              CONSTANT)
-  Q_PROPERTY(QString  describtion                READ getDescribtion       CONSTANT)
-
-public:
-  explicit CKink(QJSEngine* pEngine, const std::shared_ptr<SKink>& spKink);
-  ~CKink();
-
-  qint32 getIdForOrdering();
-  QString getType();
-  QString getName();
-  QString getDescribtion();
-
-  Q_INVOKABLE QColor color();
-
-  std::shared_ptr<SKink> Data() { return m_spData; }
-
-private:
-  std::shared_ptr<SKink>              m_spData;
-  QJSEngine*                          m_pEngine;
 };
 
 QColor CalculateKinkColor(const SKink& kink);

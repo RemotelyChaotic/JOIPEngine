@@ -8,6 +8,10 @@
 
 class CScriptRunnerSignalEmiter;
 class CJsonInstructionSetParser;
+namespace QtLua {
+  class State;
+}
+class QJSEngine;
 struct SProject;
 typedef std::shared_ptr<SProject> tspProject;
 
@@ -38,7 +42,6 @@ protected:
 
   tspProject                                 m_spProject;
   QPointer<CScriptRunnerSignalEmiter>        m_pSignalEmitter;
-  QPointer<QJSEngine>                        m_pEngine;
 };
 
 //----------------------------------------------------------------------------------------
@@ -51,10 +54,13 @@ class CJsScriptObjectBase : public CScriptObjectBase
 public:
   CJsScriptObjectBase(QPointer<CScriptRunnerSignalEmiter> pEmitter,
                       QPointer<QJSEngine> pEngine);
+  CJsScriptObjectBase(QPointer<CScriptRunnerSignalEmiter> pEmitter,
+                      QtLua::State* pState);
   ~CJsScriptObjectBase();
 
 protected:
-  QPointer<QJSEngine>                 m_pEngine;
+  QPointer<QJSEngine>                 m_pEngine = nullptr;
+  QtLua::State*                       m_pState = nullptr;
 };
 
 //----------------------------------------------------------------------------------------

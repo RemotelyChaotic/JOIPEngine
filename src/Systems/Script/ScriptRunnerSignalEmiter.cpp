@@ -54,6 +54,10 @@ std::shared_ptr<CScriptObjectBase> CScriptRunnerSignalEmiter::CreateNewScriptObj
 {
   return nullptr;
 }
+std::shared_ptr<CScriptObjectBase> CScriptRunnerSignalEmiter::CreateNewScriptObject(QtLua::State*)
+{
+  return nullptr;
+}
 
 //----------------------------------------------------------------------------------------
 //

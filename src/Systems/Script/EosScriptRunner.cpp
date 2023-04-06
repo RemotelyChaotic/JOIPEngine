@@ -260,13 +260,9 @@ void CEosScriptRunner::RegisterNewComponent(const QString sName, QJSValue signal
           {
             connect(spNotification.get(), &CEosScriptNotification::SignalOverlayClosed,
                     this, [this](const QString& sId) {
-              QMutexLocker locker(&m_runnerMutex);
-              auto it = m_vspEosRunner.find(sId);
-              if (m_vspEosRunner.end() != it)
-              {
-                it->second->Interrupt();
-                m_vspEosRunner.erase(it);
-              }
+              // we remove the notification now if possible
+              OverlayClosed(sId);
+              emit SignalOverlayClosed(sId);
             });
             connect(spNotification.get(), &CEosScriptNotification::SignalOverlayRunAsync,
                     this, [this](const QString& sId) {
@@ -274,6 +270,9 @@ void CEosScriptRunner::RegisterNewComponent(const QString sName, QJSValue signal
               auto it = m_vspEosRunner.find(sId);
               if (m_vspEosRunner.end() != it)
               {
+                // we would call SignalOverlayRunAsync here normally,
+                // but this type of script can only use
+                // eos scripts as notifications
                 SlotRun(sId, sId);
               }
             });
@@ -308,6 +307,77 @@ void CEosScriptRunner::UnregisterComponents()
   m_objectMapMutex.lock();
   m_objectMap.clear();
   m_objectMapMutex.unlock();
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CEosScriptRunner::OverlayCleared()
+{
+  QMutexLocker locker(&m_runnerMutex);
+  auto it = m_vspEosRunner.begin();
+  while (m_vspEosRunner.end() != it)
+  {
+    if (c_sMainRunner != it->first)
+    {
+      it->second->Interrupt();
+      it = m_vspEosRunner.erase(it);
+    }
+    else
+    {
+      ++it;
+    }
+  }
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CEosScriptRunner::OverlayClosed(const QString& sId)
+{
+  QMutexLocker locker(&m_runnerMutex);
+  auto it = m_vspEosRunner.find(sId);
+  if (m_vspEosRunner.end() != it)
+  {
+    it->second->Interrupt();
+    m_vspEosRunner.erase(it);
+  }
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CEosScriptRunner::OverlayRunAsync(const QString& sId, const QString& sScript,
+                                       tspResource spResource)
+{
+  // create runner
+  std::shared_ptr<CJsonInstructionSetRunner> spEosRunner = nullptr;
+  {
+    QMutexLocker locker(&m_runnerMutex);
+    auto itRunner = m_vspEosRunner.find(sId);
+    if (m_vspEosRunner.end() != itRunner)
+    {
+      if (nullptr != itRunner->second)
+      {
+        itRunner->second->Interrupt();
+      }
+      m_vspEosRunner.erase(itRunner);
+    }
+
+    m_vspEosRunner[sId] = m_spEosParser->ParseJson(sScript);
+    spEosRunner = m_vspEosRunner[sId];
+  }
+
+  if (nullptr == spEosRunner)
+  {
+    HandleError(m_spEosParser->Error());
+    return;
+  }
+
+  spEosRunner->setObjectName(sId);
+  connect(spEosRunner.get(), &CJsonInstructionSetRunner::CommandRetVal,
+          this, &CEosScriptRunner::SlotCommandRetVal);
+  connect(spEosRunner.get(), &CJsonInstructionSetRunner::Fork,
+          this, &CEosScriptRunner::SlotFork);
+
+  SlotRun(sId, "");
 }
 
 //----------------------------------------------------------------------------------------

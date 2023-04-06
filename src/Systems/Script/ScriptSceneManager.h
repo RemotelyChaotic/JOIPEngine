@@ -19,6 +19,7 @@ public:
 
   std::shared_ptr<CScriptObjectBase> CreateNewScriptObject(QPointer<QJSEngine> pEngine) override;
   std::shared_ptr<CScriptObjectBase> CreateNewScriptObject(QPointer<CJsonInstructionSetParser> pParser) override;
+  std::shared_ptr<CScriptObjectBase> CreateNewScriptObject(QtLua::State* pState) override;
 
 signals:
   void disable(QString sScene);
@@ -37,15 +38,17 @@ class CScriptSceneManager : public CJsScriptObjectBase
 public:
   CScriptSceneManager(QPointer<CScriptRunnerSignalEmiter> pEmitter,
                       QPointer<QJSEngine> pEngine);
+  CScriptSceneManager(QPointer<CScriptRunnerSignalEmiter> pEmitter,
+                      QtLua::State* pState);
   ~CScriptSceneManager();
 
 public slots:
-  void disable(QJSValue scene);
-  void enable(QJSValue scene);
-  void gotoScene(QJSValue scene);
+  void disable(QVariant scene);
+  void enable(QVariant scene);
+  void gotoScene(QVariant scene);
 
 private:
-  QString GetScene(const QJSValue& scene, const QString& sSource);
+  QString GetScene(const QVariant& scene, const QString& sSource);
 
   std::weak_ptr<CDatabaseManager>  m_wpDbManager;
 };

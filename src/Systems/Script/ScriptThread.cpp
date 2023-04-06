@@ -21,6 +21,10 @@ std::shared_ptr<CScriptObjectBase> CThreadSignalEmitter::CreateNewScriptObject(Q
 {
   return std::make_shared<CScriptThread>(this, pEngine);
 }
+std::shared_ptr<CScriptObjectBase> CThreadSignalEmitter::CreateNewScriptObject(QtLua::State* pState)
+{
+  return std::make_shared<CScriptThread>(this, pState);
+}
 
 //----------------------------------------------------------------------------------------
 //
@@ -28,7 +32,11 @@ CScriptThread::CScriptThread(QPointer<CScriptRunnerSignalEmiter> pEmitter,
                              QPointer<QJSEngine> pEngine) :
   CJsScriptObjectBase(pEmitter, pEngine)
 {
-
+}
+CScriptThread::CScriptThread(QPointer<CScriptRunnerSignalEmiter> pEmitter,
+                             QtLua::State* pState)  :
+  CJsScriptObjectBase(pEmitter, pState)
+{
 }
 
 CScriptThread::~CScriptThread()
@@ -45,14 +53,14 @@ void CScriptThread::sleep(qint32 iTimeS)
 
 //----------------------------------------------------------------------------------------
 //
-void CScriptThread::sleep(qint32 iTimeS, QJSValue bSkippable)
+void CScriptThread::sleep(qint32 iTimeS, QVariant bSkippable)
 {
   if (!CheckIfScriptCanRun()) { return; }
 
   auto pSignalEmitter = SignalEmitter<CThreadSignalEmitter>();
 
   bool bSkippableFlag = false;
-  if (bSkippable.isBool())
+  if (bSkippable.type() == QVariant::Bool)
   {
     bSkippableFlag = bSkippable.toBool();
   }

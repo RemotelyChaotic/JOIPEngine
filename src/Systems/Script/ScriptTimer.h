@@ -16,6 +16,7 @@ public:
 
   std::shared_ptr<CScriptObjectBase> CreateNewScriptObject(QPointer<QJSEngine> pEngine) override;
   std::shared_ptr<CScriptObjectBase> CreateNewScriptObject(QPointer<CJsonInstructionSetParser> pParser) override;
+  std::shared_ptr<CScriptObjectBase> CreateNewScriptObject(QtLua::State* pState) override;
 
 signals:
   void hideTimer();
@@ -39,6 +40,8 @@ class CScriptTimer : public CJsScriptObjectBase
 public:
   CScriptTimer(QPointer<CScriptRunnerSignalEmiter> pEmitter,
                QPointer<QJSEngine> pEngine);
+  CScriptTimer(QPointer<CScriptRunnerSignalEmiter> pEmitter,
+               QtLua::State* pState);
   ~CScriptTimer();
 
 public slots:

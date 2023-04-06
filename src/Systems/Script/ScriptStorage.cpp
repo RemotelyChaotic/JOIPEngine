@@ -1,10 +1,13 @@
 #include "ScriptStorage.h"
+#include "CommonScriptHelpers.h"
 #include "ScriptRunnerSignalEmiter.h"
 
 #include <QDebug>
 #include <QEventLoop>
 #include <QTimer>
 #include <QUuid>
+
+#include <functional>
 
 CStorageSignalEmitter::CStorageSignalEmitter() :
   CScriptRunnerSignalEmiter()
@@ -20,27 +23,40 @@ CStorageSignalEmitter::~CStorageSignalEmitter()
 //
 std::shared_ptr<CScriptObjectBase> CStorageSignalEmitter::CreateNewScriptObject(QPointer<QJSEngine> pEngine)
 {
-  return std::make_shared<CScriptStorage>(this, pEngine);
+  return std::make_shared<CScriptStorageJs>(this, pEngine);
+}
+std::shared_ptr<CScriptObjectBase> CStorageSignalEmitter::CreateNewScriptObject(QtLua::State* pState)
+{
+  return std::make_shared<CScriptStorageLua>(this, pState);
 }
 
 //----------------------------------------------------------------------------------------
 //
-CScriptStorage::CScriptStorage(QPointer<CScriptRunnerSignalEmiter> pEmitter,
-                               QPointer<QJSEngine> pEngine) :
+CScriptStorageBase::CScriptStorageBase(QPointer<CScriptRunnerSignalEmiter> pEmitter,
+                                       QPointer<QJSEngine> pEngine) :
   CJsScriptObjectBase(pEmitter, pEngine)
 {
 }
+CScriptStorageBase::CScriptStorageBase(QPointer<CScriptRunnerSignalEmiter> pEmitter,
+                                       QtLua::State* pState) :
+  CJsScriptObjectBase(pEmitter, pState)
+{
+}
 
-CScriptStorage::~CScriptStorage()
+CScriptStorageBase::~CScriptStorageBase()
 {
 }
 
 //----------------------------------------------------------------------------------------
 //
-QJSValue CScriptStorage::load(QString sId)
+void CScriptStorageBase::Cleanup_Impl()
 {
-  if (!CheckIfScriptCanRun()) { return QJSValue(); }
+}
 
+//----------------------------------------------------------------------------------------
+//
+QVariant CScriptStorageBase::LoadImpl(QString sId)
+{
   QString sRequestId = QUuid::createUuid().toString();
 
   auto pSignalEmitter = SignalEmitter<CStorageSignalEmitter>();
@@ -52,7 +68,7 @@ QJSValue CScriptStorage::load(QString sId)
   QVariant varRetVal = QString();
   QEventLoop loop;
   QMetaObject::Connection quitLoop =
-    connect(this, &CScriptStorage::SignalQuitLoop, &loop, &QEventLoop::quit);
+    connect(this, &CScriptStorageBase::SignalQuitLoop, &loop, &QEventLoop::quit);
   QMetaObject::Connection interruptLoop =
     connect(pSignalEmitter, &CStorageSignalEmitter::interrupt,
             &loop, &QEventLoop::quit, Qt::QueuedConnection);
@@ -79,34 +95,114 @@ QJSValue CScriptStorage::load(QString sId)
   disconnect(interruptThisLoop);
   disconnect(showRetValLoop);
 
-  return m_pEngine->toScriptValue(varRetVal);
+  return varRetVal;
 }
 
 //----------------------------------------------------------------------------------------
 //
-void CScriptStorage::store(QString sId, QJSValue value)
+void CScriptStorageBase::StoreImpl(QString sId, QVariant value)
+{
+  emit SignalEmitter<CStorageSignalEmitter>()->store(sId, value);
+}
+
+//----------------------------------------------------------------------------------------
+//
+CScriptStorageJs::CScriptStorageJs(QPointer<CScriptRunnerSignalEmiter> pEmitter,
+                                   QPointer<QJSEngine> pEngine) :
+  CScriptStorageBase(pEmitter, pEngine)
+{
+}
+CScriptStorageJs::~CScriptStorageJs()
+{
+}
+
+//----------------------------------------------------------------------------------------
+//
+QVariant CScriptStorageJs::load(QString sId)
+{
+  if (!CheckIfScriptCanRun()) { return QVariant(); }
+  return LoadImpl(sId);
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CScriptStorageJs::store(QString sId, QVariant value)
+{
+  if (!CheckIfScriptCanRun()) { return; }
+  StoreImpl(sId, value);
+}
+
+//----------------------------------------------------------------------------------------
+//
+CScriptStorageLua::CScriptStorageLua(QPointer<CScriptRunnerSignalEmiter> pEmitter,
+                                     QtLua::State* pState) :
+  CScriptStorageBase(pEmitter, pState)
+{
+}
+CScriptStorageLua::~CScriptStorageLua()
+{
+}
+
+//----------------------------------------------------------------------------------------
+//
+QVariant CScriptStorageLua::load(QString sId)
+{
+  if (!CheckIfScriptCanRun()) { return QVariant(); }
+  return LoadImpl(sId);
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CScriptStorageLua::store(QString sId, QVariant value)
 {
   if (!CheckIfScriptCanRun()) { return; }
 
-  if (value.isArray())
+  std::function<QVariant(QVariant)> fnConvert =
+      [&fnConvert](QVariant var) -> QVariant
   {
-    QVariant var = value.toVariant();
-    emit SignalEmitter<CStorageSignalEmitter>()->store(sId, var.toList());
-  }
-  else if (value.isObject())
-  {
-    QVariant var = value.toVariant();
-    emit SignalEmitter<CStorageSignalEmitter>()->store(sId, var.toMap());
-  }
-  else
-  {
-    QVariant var = value.toVariant();
-    emit SignalEmitter<CStorageSignalEmitter>()->store(sId, var);
-  }
-}
+    QVariant varConverted;
+    switch (var.type())
+    {
+      case QVariant::Map:
+      {
+        QVariantList convertedList;
+        QVariantMap map = var.toMap();
+        if (script::CouldBeListFromLua(map))
+        {
+          // we need to convert these types of maps to a list
+          for (const auto& v : qAsConst(map))
+          {
+            convertedList << fnConvert(v);
+          }
+          varConverted = convertedList;
+        }
+        else
+        {
+          QVariantMap convertedMap;
+          for (auto it = map.begin(); map.end() != it; ++it)
+          {
+            convertedMap.insert(it.key(), fnConvert(it.value()));
+          }
+          varConverted = convertedMap;
+        }
+      } break;
+      case QVariant::List:
+      {
+        QVariantList convertedList;
+        QVariantList list = var.toList();
+        for (const auto& v : qAsConst(list))
+        {
+          convertedList << fnConvert(v);
+        }
+        varConverted = convertedList;
+      }
+      default:
+      {
+        varConverted = var;
+      } break;
+    }
+    return varConverted;
+  };
 
-//----------------------------------------------------------------------------------------
-//
-void CScriptStorage::Cleanup_Impl()
-{
+  StoreImpl(sId, fnConvert(value));
 }

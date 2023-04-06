@@ -32,6 +32,7 @@ public:
 
   std::shared_ptr<CScriptObjectBase> CreateNewScriptObject(QPointer<QJSEngine> pEngine) override;
   std::shared_ptr<CScriptObjectBase> CreateNewScriptObject(QPointer<CJsonInstructionSetParser> pParser) override;
+  std::shared_ptr<CScriptObjectBase> CreateNewScriptObject(QtLua::State* pState) override;
 
 signals:
   void clearText();
@@ -58,14 +59,16 @@ class CScriptTextBox : public CJsScriptObjectBase
 public:
   CScriptTextBox(QPointer<CScriptRunnerSignalEmiter> pEmitter,
                  QPointer<QJSEngine> pEngine);
+  CScriptTextBox(QPointer<CScriptRunnerSignalEmiter> pEmitter,
+                 QtLua::State* pState);
   ~CScriptTextBox();
 
 public slots:
-  void setBackgroundColors(QJSValue color);
+  void setBackgroundColors(QVariant color);
   void setTextAlignment(qint32 alignment);
-  void setTextColors(QJSValue color);
-  void setTextPortrait(QJSValue resource);
-  qint32 showButtonPrompts(QJSValue vsLabels);
+  void setTextColors(QVariant color);
+  void setTextPortrait(QVariant resource);
+  qint32 showButtonPrompts(QVariant vsLabels);
   QString showInput();
   void showText(QString sText);
   void showText(QString sText, double dWaitTime);
@@ -76,7 +79,7 @@ signals:
   void SignalQuitLoop();
 
 private:
-  std::vector<QColor> GetColors(const QJSValue& color, const QString& sSource);
+  std::vector<QColor> GetColors(const QVariant& color, const QString& sSource);
 
   std::weak_ptr<CDatabaseManager>  m_wpDbManager;
 };

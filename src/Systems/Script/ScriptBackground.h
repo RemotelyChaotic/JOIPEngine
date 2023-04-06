@@ -19,6 +19,7 @@ public:
 
   std::shared_ptr<CScriptObjectBase> CreateNewScriptObject(QPointer<QJSEngine> pEngine) override;
   std::shared_ptr<CScriptObjectBase> CreateNewScriptObject(QPointer<CJsonInstructionSetParser> pParser) override;
+  std::shared_ptr<CScriptObjectBase> CreateNewScriptObject(QtLua::State* pState) override;
 
 signals:
   void backgroundColorChanged(QColor color);
@@ -37,11 +38,13 @@ class CScriptBackground : public CJsScriptObjectBase
 public:
   CScriptBackground(QPointer<CScriptRunnerSignalEmiter> pEmitter,
                     QPointer<QJSEngine> pEngine);
+  CScriptBackground(QPointer<CScriptRunnerSignalEmiter> pEmitter,
+                    QtLua::State* pState);
   ~CScriptBackground();
 
 public slots:
-  void setBackgroundColor(QJSValue color);
-  void setBackgroundTexture(QJSValue resource);
+  void setBackgroundColor(QVariant color);
+  void setBackgroundTexture(QVariant resource);
 
 private:
   std::weak_ptr<CDatabaseManager>  m_wpDbManager;

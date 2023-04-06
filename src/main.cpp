@@ -6,6 +6,8 @@
 #include "Systems/PhysFs/PhysFsFileEngine.h"
 #include "Systems/PhysFs/PhysFsQtAVIntegration.h"
 
+#include <JsonLuaWrapper.h>
+
 #include <QApplication>
 #include <QImageReader>
 #include <QtAVWidgets>

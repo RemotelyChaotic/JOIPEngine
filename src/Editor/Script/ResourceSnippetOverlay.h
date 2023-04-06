@@ -1,9 +1,8 @@
 #ifndef RESOURCESNIPPETOVERLAY_H
 #define RESOURCESNIPPETOVERLAY_H
 
-#include "Widgets/OverlayBase.h"
+#include "CodeSnippetOverlayBase.h"
 #include <QPointer>
-#include <memory>
 
 class CDatabaseManager;
 class CResourceTreeItemModel;
@@ -11,36 +10,10 @@ class CScriptEditorWidget;
 namespace Ui {
   class CResourceSnippetOverlay;
 }
-typedef std::shared_ptr<struct SProject> tspProject;
-
-
-enum class EDisplayMode : qint32
-{
-  ePlayShow,
-  ePause,
-  eStop,
-  eSeek
-};
-
-struct SResourceSnippetData
-{
-  QString m_sResource;
-  EDisplayMode m_displayMode = EDisplayMode::ePlayShow;
-  bool m_bWaitForFinished = false;
-  qint32 m_iSeekTime = 0;
-  bool m_bLoops = false;
-  qint64 m_iLoops = 1;
-  bool m_bStartAt = false;
-  qint64 m_iStartAt = 0;
-  bool m_bEndAt = false;
-  qint64 m_iEndAt = -1;
-  bool m_bSetVolume = false;
-  double m_dVolume = 1.0;
-};
 
 //----------------------------------------------------------------------------------------
 //
-class CResourceSnippetOverlay : public COverlayBase
+class CResourceSnippetOverlay : public CCodeSnippetOverlayBase
 {
   Q_OBJECT
 
@@ -49,14 +22,8 @@ public:
   ~CResourceSnippetOverlay() override;
 
   void Initialize(CResourceTreeItemModel* pResourceTreeModel);
-  void LoadProject(tspProject spProject);
-  void UnloadProject();
-
-signals:
-  void SignalResourceCode(const QString& code);
 
 public slots:
-  void Climb() override;
   void Resize() override;
 
 protected slots:
@@ -83,9 +50,7 @@ protected slots:
 
 private:
   std::unique_ptr<Ui::CResourceSnippetOverlay> m_spUi;
-  tspProject                                   m_spCurrentProject;
   std::weak_ptr<CDatabaseManager>              m_wpDbManager;
-  bool                                         m_bInitialized;
   SResourceSnippetData                         m_data;
   QSize                                        m_preferredSize;
 };

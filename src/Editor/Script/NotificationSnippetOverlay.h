@@ -1,11 +1,10 @@
 #ifndef NOTIFICATIONSNIPPETOVERLAY_H
 #define NOTIFICATIONSNIPPETOVERLAY_H
 
-#include "Widgets/OverlayBase.h"
+#include "CodeSnippetOverlayBase.h"
 #include <QScrollArea>
 #include <QStyledItemDelegate>
 #include <QPointer>
-#include <memory>
 #include <vector>
 
 class CDatabaseManager;
@@ -14,45 +13,10 @@ class CScriptEditorWidget;
 namespace Ui {
 class CNotificationSnippetOverlay;
 }
-typedef std::shared_ptr<struct SProject> tspProject;
-
-
-enum EDisplayStatus
-{
-  eShow,
-  eHide,
-  eClear
-};
-
-struct SNotificationSnippetCode
-{
-  QString m_sId = QString();
-  EDisplayStatus m_displayStatus = EDisplayStatus::eShow;
-  QString m_sText = QString();
-  QString m_sWidgetText = QString();
-  bool m_bSetAlignment = false;
-  Qt::AlignmentFlag m_textAlignment = Qt::AlignHCenter;
-  bool m_bSetTimeoutTime = false;
-  double m_dTimeoutTimeS = -1;
-  bool m_bShowIcon = false;
-  QString m_sIcon = QString();
-  bool m_bOnButton = false;
-  QString m_sOnButton = QString();
-  bool m_bOnTimeout = false;
-  QString m_sOnTimeout = QString();
-  bool m_bSetTextColor = false;
-  QColor m_textColor;
-  bool m_bSetTextBackgroundColor = false;
-  QColor m_textBackgroundColor;
-  bool m_bSetWidgetTextColors = false;
-  QColor m_widgetTextColor;
-  bool m_bSetWidgetTextBackgroundColor = false;
-  QColor m_widgettextBackgroundColor;
-};
 
 //----------------------------------------------------------------------------------------
 //
-class CNotificationSnippetOverlay : public COverlayBase
+class CNotificationSnippetOverlay : public CCodeSnippetOverlayBase
 {
   Q_OBJECT
 
@@ -61,14 +25,8 @@ public:
   ~CNotificationSnippetOverlay();
 
   void Initialize(CResourceTreeItemModel* pResourceTreeModel);
-  void LoadProject(tspProject spProject);
-  void UnloadProject();
-
-signals:
-  void SignalNotificationSnippetCode(const QString& code);
 
 public slots:
-  void Climb() override;
   void Resize() override;
   void Show() override;
 
@@ -114,10 +72,8 @@ private:
   void Initialize();
 
   std::unique_ptr<Ui::CNotificationSnippetOverlay> m_spUi;
-  tspProject                                       m_spCurrentProject;
   std::weak_ptr<CDatabaseManager>                  m_wpDbManager;
   std::vector<QPointer<QScrollArea>>               m_vScrollAreas;
-  bool                                             m_bInitialized;
   SNotificationSnippetCode                         m_data;
   QSize                                            m_preferredSize;
 };

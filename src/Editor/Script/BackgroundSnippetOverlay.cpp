@@ -6,9 +6,8 @@
 #include <QScrollBar>
 
 CBackgroundSnippetOverlay::CBackgroundSnippetOverlay(QWidget* pParent) :
-  COverlayBase(0, pParent),
+  CCodeSnippetOverlayBase(pParent),
   m_spUi(new Ui::CBackgroundSnippetOverlay),
-  m_bInitialized(false),
   m_data()
 {
   m_spUi->setupUi(this);
@@ -26,7 +25,7 @@ CBackgroundSnippetOverlay::~CBackgroundSnippetOverlay()
 //
 void CBackgroundSnippetOverlay::Initialize(CResourceTreeItemModel* pResourceTreeModel)
 {
-  m_bInitialized = false;
+  SetInitialized(false);
 
   CResourceTreeItemSortFilterProxyModel* pProxyModel =
       new CResourceTreeItemSortFilterProxyModel(m_spUi->pResourceSelectTree);
@@ -46,14 +45,8 @@ void CBackgroundSnippetOverlay::Initialize(CResourceTreeItemModel* pResourceTree
   m_spUi->pResourceSelectTree->setColumnHidden(resource_item::c_iColumnPath, true);
   m_spUi->pResourceSelectTree->header()->setSectionResizeMode(resource_item::c_iColumnName, QHeaderView::Stretch);
   m_spUi->pResourceSelectTree->header()->setSectionResizeMode(resource_item::c_iColumnType, QHeaderView::Interactive);
-  m_bInitialized = true;
-}
 
-//----------------------------------------------------------------------------------------
-//
-void CBackgroundSnippetOverlay::Climb()
-{
-  ClimbToFirstInstanceOf("QStackedWidget", false);
+  SetInitialized(true);
 }
 
 //----------------------------------------------------------------------------------------
@@ -139,20 +132,11 @@ void CBackgroundSnippetOverlay::on_pFilter_SignalFilterChanged(const QString& sT
 //
 void CBackgroundSnippetOverlay::on_pConfirmButton_clicked()
 {
-  QString sCode;
-  if (m_data.m_bUseColor)
+  auto spGenerator = CodeGenerator();
+  if (nullptr != spGenerator)
   {
-    QString sColor("background.setBackgroundColor([%1,%2,%3,%4]);\n");
-    sCode += sColor.arg(m_data.m_color.red()).arg(m_data.m_color.green())
-        .arg(m_data.m_color.blue()).arg(m_data.m_color.alpha());
+    emit SignalCodeGenerated(spGenerator->Generate(m_data, nullptr));
   }
-  if (m_data.m_bUseResource)
-  {
-    QString sTexture("background.setBackgroundTexture(\"%1\");\n");
-    sCode += sTexture.arg(m_data.m_sCurrentResource);
-  }
-
-  emit SignalBackgroundCode(sCode);
   Hide();
 }
 

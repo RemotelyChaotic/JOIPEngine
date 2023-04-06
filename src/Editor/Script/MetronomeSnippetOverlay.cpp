@@ -17,11 +17,9 @@ namespace  {
 //----------------------------------------------------------------------------------------
 //
 CMetronomeSnippetOverlay::CMetronomeSnippetOverlay(QWidget* pParent) :
-  COverlayBase(0, pParent),
+  CCodeSnippetOverlayBase(pParent),
   m_spUi(std::make_unique<Ui::CMetronomeSnippetOverlay>()),
-  m_spCurrentProject(nullptr),
   m_wpDbManager(CApplication::Instance()->System<CDatabaseManager>()),
-  m_bInitialized(true),
   m_data()
 {
   m_spUi->setupUi(this);
@@ -48,7 +46,7 @@ CMetronomeSnippetOverlay::~CMetronomeSnippetOverlay()
 //
 void CMetronomeSnippetOverlay::Initialize(CResourceTreeItemModel* pResourceTreeModel)
 {
-  m_bInitialized = false;
+  SetInitialized(false);
 
   CResourceTreeItemSortFilterProxyModel* pProxyModel =
       dynamic_cast<CResourceTreeItemSortFilterProxyModel*>(m_spUi->pResourceSelectTree->model());
@@ -65,28 +63,8 @@ void CMetronomeSnippetOverlay::Initialize(CResourceTreeItemModel* pResourceTreeM
   m_spUi->pResourceSelectTree->setColumnHidden(resource_item::c_iColumnPath, true);
   m_spUi->pResourceSelectTree->header()->setSectionResizeMode(resource_item::c_iColumnName, QHeaderView::Stretch);
   m_spUi->pResourceSelectTree->header()->setSectionResizeMode(resource_item::c_iColumnType, QHeaderView::Interactive);
-  m_bInitialized = true;
-}
 
-//----------------------------------------------------------------------------------------
-//
-void CMetronomeSnippetOverlay::LoadProject(tspProject spProject)
-{
-  m_spCurrentProject = spProject;
-}
-
-//----------------------------------------------------------------------------------------
-//
-void CMetronomeSnippetOverlay::UnloadProject()
-{
-  m_spCurrentProject = nullptr;
-}
-
-//----------------------------------------------------------------------------------------
-//
-void CMetronomeSnippetOverlay::Climb()
-{
-  ClimbToFirstInstanceOf("QStackedWidget", false);
+  SetInitialized(true);
 }
 
 //----------------------------------------------------------------------------------------
@@ -328,59 +306,11 @@ void CMetronomeSnippetOverlay::on_CloseButton_clicked()
 //
 void CMetronomeSnippetOverlay::on_pConfirmButton_clicked()
 {
-  QString sCode;
-
-  if (m_data.m_bSetBpm)
+  auto spGenerator = CodeGenerator();
+  if (nullptr != spGenerator)
   {
-    QString sText = "metronome.setBpm(%1);\n";
-    sCode += sText.arg(m_data.m_iBpm);
+    emit SignalCodeGenerated(spGenerator->Generate(m_data, m_spCurrentProject));
   }
-  if (m_data.m_bSetPattern)
-  {
-    QString sText = "metronome.setPattern([%1]);\n";
-    QStringList vsPatternElems;
-    for (auto it = m_data.m_vdPatternElems.begin(); m_data.m_vdPatternElems.end() != it; ++it)
-    {
-      vsPatternElems << QString::number(it->second);
-    }
-    sCode += sText.arg(vsPatternElems.join(","));
-  }
-
-  sCode += QString("metronome.setMuted(%1);\n")
-      .arg(m_data.m_bSetMute ? "true" : "false");
-
-  if (m_data.m_bSetBeatSound)
-  {
-    EResourceType type = EResourceType::eSound;
-    auto spDbManager = m_wpDbManager.lock();
-    if (nullptr != spDbManager && nullptr != m_spCurrentProject)
-    {
-      tspResource spResource = spDbManager->FindResourceInProject(m_spCurrentProject, m_data.m_sBeatSound);
-      if (nullptr != spResource)
-      {
-        QReadLocker locker(&spResource->m_rwLock);
-        type = spResource->m_type;
-      }
-    }
-    sCode += QString("metronome.setBeatResource(%1);\n")
-        .arg((m_data.m_sBeatSound.isNull() || type._to_integral() != EResourceType::eSound) ?
-             "null" :
-             "\"" + m_data.m_sBeatSound + "\"");
-  }
-  if (m_data.m_bSetVolume)
-  {
-    sCode += QString("metronome.setVolume(%2);\n").arg(m_data.m_dVolume);
-  }
-  if (m_data.m_bStart)
-  {
-    sCode += QString("metronome.start();\n");
-  }
-  if (m_data.m_bStop)
-  {
-    sCode += QString("metronome.stop();\n");
-  }
-
-  emit SignalMetronomeSnippetCode(sCode);
   Hide();
 }
 

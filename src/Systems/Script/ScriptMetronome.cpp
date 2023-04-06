@@ -1,5 +1,7 @@
 #include "ScriptMetronome.h"
 #include "Application.h"
+#include "CommonScriptHelpers.h"
+#include "ScriptDbWrappers.h"
 #include "Systems/DatabaseManager.h"
 
 CMetronomeSignalEmitter::CMetronomeSignalEmitter() :
@@ -18,12 +20,22 @@ std::shared_ptr<CScriptObjectBase> CMetronomeSignalEmitter::CreateNewScriptObjec
 {
   return std::make_shared<CScriptMetronome>(this, pEngine);
 }
+std::shared_ptr<CScriptObjectBase> CMetronomeSignalEmitter::CreateNewScriptObject(QtLua::State* pState)
+{
+  return std::make_shared<CScriptMetronome>(this, pState);
+}
 
 //----------------------------------------------------------------------------------------
 //
 CScriptMetronome::CScriptMetronome(QPointer<CScriptRunnerSignalEmiter> pEmitter,
                                    QPointer<QJSEngine> pEngine) :
   CJsScriptObjectBase(pEmitter, pEngine),
+  m_wpDbManager(CApplication::Instance()->System<CDatabaseManager>())
+{
+}
+CScriptMetronome::CScriptMetronome(QPointer<CScriptRunnerSignalEmiter> pEmitter,
+                                   QtLua::State* pState) :
+  CJsScriptObjectBase(pEmitter, pState),
   m_wpDbManager(CApplication::Instance()->System<CDatabaseManager>())
 {
 }
@@ -42,57 +54,25 @@ void CScriptMetronome::setBpm(qint32 iBpm)
 
 //----------------------------------------------------------------------------------------
 //
-void CScriptMetronome::setBeatResource(QJSValue resource)
+void CScriptMetronome::setBeatResource(QVariant resource)
 {
   if (!CheckIfScriptCanRun()) { return; }
 
   auto pSignalEmitter = SignalEmitter<CMetronomeSignalEmitter>();
-  auto spDbManager = m_wpDbManager.lock();
-  if (nullptr != spDbManager)
+  if (nullptr != pSignalEmitter)
   {
-    if (resource.isString())
+    QString sError;
+    std::optional<QString> optRes =
+        script::ParseResourceFromScriptVariant(resource, m_wpDbManager.lock(),
+                                               m_spProject,
+                                               "setBeatResource", &sError);
+    if (optRes.has_value())
     {
-      QString sResource = resource.toString();
-      tspResource spResource = spDbManager->FindResourceInProject(m_spProject, sResource);
-      if (nullptr != spResource)
-      {
-        emit pSignalEmitter->setBeatResource(sResource);
-      }
-      else
-      {
-        QString sError = tr("Resource %1 not found");
-        emit m_pSignalEmitter->showError(sError.arg(resource.toString()),
-                                          QtMsgType::QtWarningMsg);
-      }
-    }
-    else if (resource.isQObject())
-    {
-      CResourceScriptWrapper* pResource = dynamic_cast<CResourceScriptWrapper*>(resource.toQObject());
-      if (nullptr != pResource)
-      {
-        if (nullptr != pResource->Data())
-        {
-          emit pSignalEmitter->setBeatResource(pResource->getName());
-        }
-        else
-        {
-          QString sError = tr("Resource in setBeatResource() holds no data.");
-          emit m_pSignalEmitter->showError(sError, QtMsgType::QtWarningMsg);
-        }
-      }
-      else
-      {
-        QString sError = tr("Wrong argument-type to setBeatResource(). String, resource or null was expected.");
-        emit m_pSignalEmitter->showError(sError, QtMsgType::QtWarningMsg);
-      }
-    }
-    else if (resource.isNull())
-    {
-      emit pSignalEmitter->setBeatResource(QString());
+      QString resRet = optRes.value();
+      emit pSignalEmitter->setBeatResource(resRet);
     }
     else
     {
-      QString sError = tr("Wrong argument-type to play(). String, resource or null was expected.");
       emit m_pSignalEmitter->showError(sError, QtMsgType::QtWarningMsg);
     }
   }

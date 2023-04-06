@@ -1,6 +1,8 @@
 #include "JsScriptRunner.h"
 #include "Application.h"
+#include "ScriptDbWrappers.h"
 #include "ScriptNotification.h"
+#include "ScriptRunnerInstanceController.h"
 #include "ScriptRunnerSignalEmiter.h"
 #include "ScriptTextBox.h"
 #include "Systems/Project.h"
@@ -133,35 +135,22 @@ namespace  {
 
 //----------------------------------------------------------------------------------------
 //
-class CJsScriptRunnerInstanceWorker : public QObject
+class CJsScriptRunnerInstanceWorker : public CScriptRunnerInstanceWorkerBase
 {
   Q_OBJECT
 public:
   CJsScriptRunnerInstanceWorker(const QString& sName,
                                 std::weak_ptr<CScriptRunnerSignalContext> wpSignalEmitterContext) :
-    QObject(),
-    m_wpSignalEmiterContext(wpSignalEmitterContext),
+    CScriptRunnerInstanceWorkerBase(sName, wpSignalEmitterContext),
     m_pScriptEngine(nullptr),
     m_pScriptUtils(nullptr),
-    m_pCurrentScene(nullptr),
-    m_objectMap(),
-    m_sName(sName)
+    m_pCurrentScene(nullptr)
   {}
   ~CJsScriptRunnerInstanceWorker()
   {
   }
 
-  QAtomicInt                                     m_bRunning = 0;
-
 public slots:
-  //----------------------------------------------------------------------------------------
-  //
-  void FinishedScript(const QVariant& sRetVal)
-  {
-    m_bRunning = 0;
-    emit HandleScriptFinish(true, sRetVal);
-  }
-
   //----------------------------------------------------------------------------------------
   //
   void HandleError(QJSValue& value)
@@ -189,15 +178,15 @@ public slots:
 
   //--------------------------------------------------------------------------------------
   //
-  void Init()
+  void Init() override
   {
     m_pScriptEngine = new QJSEngine();
     m_pScriptEngine->installExtensions(QJSEngine::TranslationExtension |
                                        QJSEngine::ConsoleExtension |
                                        QJSEngine::GarbageCollectionExtension);
 
-    m_pScriptUtils = new CScriptRunnerUtils(this, m_pScriptEngine, m_wpSignalEmiterContext.lock());
-    connect(m_pScriptUtils, &CScriptRunnerUtils::finishedScript,
+    m_pScriptUtils = new CScriptRunnerUtilsJs(this, m_pScriptEngine, m_wpSignalEmiterContext.lock());
+    connect(m_pScriptUtils, &CScriptRunnerUtilsJs::finishedScript,
             this, &CJsScriptRunnerInstanceWorker::FinishedScript);
 
     // yes we need to call the static method of QQmlEngine, not QJSEngine, WHY Qt, WHY???
@@ -222,7 +211,7 @@ public slots:
 
   //--------------------------------------------------------------------------------------
   //
-  void Deinit()
+  void Deinit() override
   {
     InterruptExecution();
 
@@ -245,7 +234,7 @@ public slots:
 
   //--------------------------------------------------------------------------------------
   //
-  void InterruptExecution()
+  void InterruptExecution() override
   {
     m_bRunning = 0;
     if (nullptr != m_pScriptEngine)
@@ -258,7 +247,7 @@ public slots:
   //----------------------------------------------------------------------------------------
   //
   void RunScript(const QString& sScript,
-                 tspScene spScene, tspResource spResource)
+                 tspScene spScene, tspResource spResource) override
   {
     // set scene
     if (nullptr != m_pCurrentScene)
@@ -361,7 +350,7 @@ public slots:
 
   //--------------------------------------------------------------------------------------
   //
-  void RegisterNewComponent(const QString sName, CScriptRunnerSignalEmiter* pObject)
+  void RegisterNewComponent(const QString sName, CScriptRunnerSignalEmiter* pObject) override
   {
     auto it = m_objectMap.find(sName);
     if (m_objectMap.end() == it)
@@ -405,7 +394,7 @@ public slots:
 
   //--------------------------------------------------------------------------------------
   //
-  void ResetEngine()
+  void ResetEngine() override
   {
     // remove ref to run function
     m_pScriptEngine->globalObject().setProperty("scene", QJSValue());
@@ -427,132 +416,14 @@ public slots:
     }
   }
 
-  //--------------------------------------------------------------------------------------
-  //
-  void UnregisterComponents()
-  {
-    ResetEngine();
-    m_objectMap.clear();
-  }
-
-signals:
-  void HandleScriptFinish(bool bSuccess, const QVariant& sRetVal);
-  void SignalInterruptExecution();
-  void SignalOverlayCleared();
-  void SignalOverlayClosed(const QString& sId);
-  void SignalOverlayRunAsync(tspProject spProject, const QString& sId, const QString& sScriptResource);
-
 private:
   tspProject                                     m_spProject;
-  std::weak_ptr<CScriptRunnerSignalContext>      m_wpSignalEmiterContext;
   QPointer<QJSEngine>                            m_pScriptEngine;
-  QPointer<CScriptRunnerUtils>                   m_pScriptUtils;
+  QPointer<CScriptRunnerUtilsJs>                 m_pScriptUtils;
   QPointer<CSceneScriptWrapper>                  m_pCurrentScene;
   std::map<QString /*name*/,
            std::shared_ptr<CScriptObjectBase>>   m_objectMap;
   QString                                        m_sName;
-};
-
-//----------------------------------------------------------------------------------------
-//
-class CJsScriptRunnerInstanceController : public QObject
-{
-  Q_OBJECT
-public:
-  CJsScriptRunnerInstanceController(const QString& sName,
-                                    std::weak_ptr<CScriptRunnerSignalContext> wpSignalEmitterContext) :
-    QObject(nullptr),
-    m_spWorker(std::make_shared<CJsScriptRunnerInstanceWorker>(sName, wpSignalEmitterContext)),
-    m_pThread(new QThread(this))
-  {
-    qRegisterMetaType<CScriptRunnerSignalEmiter*>();
-
-    connect(m_spWorker.get(), &CJsScriptRunnerInstanceWorker::HandleScriptFinish,
-            this, &CJsScriptRunnerInstanceController::SlotHandleScriptFinish, Qt::QueuedConnection);
-
-    connect(m_spWorker.get(), &CJsScriptRunnerInstanceWorker::SignalOverlayCleared,
-            this, &CJsScriptRunnerInstanceController::SignalOverlayCleared, Qt::QueuedConnection);
-    connect(m_spWorker.get(), &CJsScriptRunnerInstanceWorker::SignalOverlayClosed,
-            this, &CJsScriptRunnerInstanceController::SignalOverlayClosed, Qt::QueuedConnection);
-    connect(m_spWorker.get(), &CJsScriptRunnerInstanceWorker::SignalOverlayRunAsync,
-            this, &CJsScriptRunnerInstanceController::SignalOverlayRunAsync, Qt::QueuedConnection);
-
-    m_pThread->setObjectName("ScriptController::"+sName);
-    m_pThread->start();
-    while (!m_pThread->isRunning())
-    {
-      thread()->wait(5);
-    }
-    m_spWorker->moveToThread(m_pThread.data());
-    bool bOk = QMetaObject::invokeMethod(m_spWorker.get(), "Init", Qt::BlockingQueuedConnection);
-    assert(bOk); Q_UNUSED(bOk)
-  }
-  ~CJsScriptRunnerInstanceController()
-  {
-    bool bOk = QMetaObject::invokeMethod(m_spWorker.get(), "Deinit", Qt::BlockingQueuedConnection);
-    assert(bOk); Q_UNUSED(bOk)
-    m_pThread->quit();
-    while (!m_pThread->isFinished())
-    {
-      m_pThread->wait(5);
-    }
-  }
-
-  void InterruptExecution()
-  {
-    // direct call, or else we can't stop the script
-    m_spWorker->InterruptExecution();
-  }
-
-  bool IsRunning() const
-  {
-    return m_spWorker->m_bRunning == 1;
-  }
-
-  void RegisterNewComponent(const QString sName, CScriptRunnerSignalEmiter* pObject)
-  {
-    bool bOk = QMetaObject::invokeMethod(m_spWorker.get(), "RegisterNewComponent", Qt::BlockingQueuedConnection,
-                                         Q_ARG(QString, sName),
-                                         Q_ARG(CScriptRunnerSignalEmiter*, pObject));
-    assert(bOk); Q_UNUSED(bOk)
-  }
-
-  void RunScript(const QString& sScript, tspScene spScene, tspResource spResource)
-  {
-    bool bOk = QMetaObject::invokeMethod(m_spWorker.get(), "RunScript", Qt::QueuedConnection,
-                                         Q_ARG(QString, sScript),
-                                         Q_ARG(tspScene, spScene),
-                                         Q_ARG(tspResource, spResource));
-    assert(bOk); Q_UNUSED(bOk)
-  }
-
-  void ResetEngine()
-  {
-    bool bOk = QMetaObject::invokeMethod(m_spWorker.get(), "ResetEngine", Qt::BlockingQueuedConnection);
-    assert(bOk); Q_UNUSED(bOk)
-  }
-
-  void UnregisterComponents()
-  {
-    bool bOk = QMetaObject::invokeMethod(m_spWorker.get(), "UnregisterComponents", Qt::BlockingQueuedConnection);
-    assert(bOk); Q_UNUSED(bOk)
-  }
-
-signals:
-  void HandleScriptFinish(const QString& sName, bool bSuccess, const QVariant& sRetVal);
-  void SignalOverlayCleared();
-  void SignalOverlayClosed(const QString& sId);
-  void SignalOverlayRunAsync(tspProject spProject, const QString& sId, const QString& sScriptResource);
-
-private slots:
-  void SlotHandleScriptFinish(bool bSuccess, const QVariant& sRetVal)
-  {
-    emit HandleScriptFinish(objectName(), bSuccess, sRetVal);
-  }
-
-private:
-  std::shared_ptr<CJsScriptRunnerInstanceWorker> m_spWorker;
-  QPointer<QThread>                              m_pThread;
 };
 
 //----------------------------------------------------------------------------------------
@@ -633,7 +504,7 @@ void CJsScriptRunner::LoadScript(const QString& sScript,
                                  tspScene spScene, tspResource spResource)
 {
   {
-    // we need to clear old runners just in case
+    // we need to clear old runner just in case
     QMutexLocker locker(&m_runnerMutex);
     auto it = m_vspJsRunner.find(c_sMainRunner);
     if (m_vspJsRunner.end() != it)
@@ -686,6 +557,73 @@ void CJsScriptRunner::UnregisterComponents()
 
 //----------------------------------------------------------------------------------------
 //
+void CJsScriptRunner::OverlayCleared()
+{
+  QMutexLocker locker(&m_runnerMutex);
+  auto it = m_vspJsRunner.begin();
+  while (m_vspJsRunner.end() != it)
+  {
+    if (c_sMainRunner != it->first)
+    {
+      it->second->ResetEngine();
+      it = m_vspJsRunner.erase(it);
+    }
+    else
+    {
+      ++it;
+    }
+  }
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CJsScriptRunner::OverlayClosed(const QString& sId)
+{
+  QMutexLocker locker(&m_runnerMutex);
+  auto it = m_vspJsRunner.find(sId);
+  if (m_vspJsRunner.end() == it)
+  {
+    return;
+  }
+
+  it->second->ResetEngine();
+
+  if (c_sMainRunner != sId)
+  {
+    m_vspJsRunner.erase(it);
+  }
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CJsScriptRunner::OverlayRunAsync(const QString& sId,
+                                      const QString& sScript, tspResource spResource)
+{
+  {
+    CreateRunner(sId);
+  }
+
+  auto spSignalEmitterContext = m_wpSignalEmitterContext.lock();
+  if (nullptr == spSignalEmitterContext)
+  {
+    qWarning() << "m_wpSignalEmitterContext was null";
+    return;
+  }
+
+  if (nullptr == spResource ||
+      nullptr == spResource->m_spParent)
+  {
+    QString sError = tr("Script file, Scene or Project is null");
+    qCritical() << sError;
+    emit spSignalEmitterContext->showError(sError, QtMsgType::QtCriticalMsg);
+    return;
+  }
+
+  RunScript(sId, sScript, nullptr, spResource);
+}
+
+//----------------------------------------------------------------------------------------
+//
 void CJsScriptRunner::SlotHandleScriptFinish(const QString& sName, bool bSuccess, const QVariant& sRetVal)
 {
   {
@@ -722,130 +660,26 @@ void CJsScriptRunner::SlotHandleScriptFinish(const QString& sName, bool bSuccess
 
 //----------------------------------------------------------------------------------------
 //
-void CJsScriptRunner::SlotOverlayCleared()
-{
-  QMutexLocker locker(&m_runnerMutex);
-  auto it = m_vspJsRunner.begin();
-  while (m_vspJsRunner.end() != it)
-  {
-    if (c_sMainRunner != it->first)
-    {
-      it->second->ResetEngine();
-      it = m_vspJsRunner.erase(it);
-    }
-    else
-    {
-      ++it;
-    }
-  }
-}
-
-//----------------------------------------------------------------------------------------
-//
-void CJsScriptRunner::SlotOverlayClosed(const QString& sId)
-{
-  QMutexLocker locker(&m_runnerMutex);
-  auto it = m_vspJsRunner.find(sId);
-  if (m_vspJsRunner.end() == it)
-  {
-    return;
-  }
-
-  it->second->ResetEngine();
-
-  if (c_sMainRunner != sId)
-  {
-    m_vspJsRunner.erase(it);
-  }
-}
-
-//----------------------------------------------------------------------------------------
-//
-void CJsScriptRunner::SlotOverlayRunAsync(tspProject spProject, const QString& sId, const QString& sScriptResource)
-{
-  {
-    CreateRunner(sId);
-  }
-
-  auto spSignalEmitterContext = m_wpSignalEmitterContext.lock();
-  if (nullptr == spSignalEmitterContext)
-  {
-    qWarning() << "m_wpSignalEmitterContext was null";
-    return;
-  }
-
-  if (auto spDbManager = CApplication::Instance()->System<CDatabaseManager>().lock())
-  {
-    tspResource spResource = spDbManager->FindResourceInProject(spProject, sScriptResource);
-
-    if (nullptr == spResource ||
-        nullptr == spResource->m_spParent)
-    {
-      QString sError = tr("Script file, Scene or Project is null");
-      qCritical() << sError;
-      emit spSignalEmitterContext->showError(sError, QtMsgType::QtCriticalMsg);
-      return;
-    }
-
-    QReadLocker projectLocker(&spResource->m_spParent->m_rwLock);
-    QReadLocker resourceLocker(&spResource->m_rwLock);
-    if (spResource->m_type._to_integral() != EResourceType::eScript)
-    {
-      QString sError = tr("Script resource is of wrong type.");
-      qCritical() << sError;
-      emit spSignalEmitterContext->showError(sError, QtMsgType::QtCriticalMsg);
-      return;
-    }
-
-    resourceLocker.unlock();
-    projectLocker.unlock();
-    QString sPath = ResourceUrlToAbsolutePath(spResource);
-
-    QFileInfo scriptFileInfo(sPath);
-    if (scriptFileInfo.exists())
-    {
-      QFile scriptFile(sPath);
-      if (scriptFile.open(QIODevice::ReadOnly))
-      {
-        QString sScript = QString::fromUtf8(scriptFile.readAll());
-        RunScript(sId, sScript, nullptr, spResource);
-      }
-      else
-      {
-        QString sError = tr("Script resource file could not be opened.");
-        qCritical() << sError;
-        emit spSignalEmitterContext->showError(sError, QtMsgType::QtCriticalMsg);
-        return;
-      }
-    }
-    else
-    {
-      QString sError = tr("Script resource file does not exist.");
-      qCritical() << sError;
-      emit spSignalEmitterContext->showError(sError, QtMsgType::QtCriticalMsg);
-      return;
-    }
-  }
-}
-
-//----------------------------------------------------------------------------------------
-//
 void CJsScriptRunner::CreateRunner(const QString& sId)
 {
   QMutexLocker locker(&m_runnerMutex);
-  m_vspJsRunner.insert({sId, std::make_shared<CJsScriptRunnerInstanceController>(
-                                sId, m_wpSignalEmitterContext)});
+  m_vspJsRunner.insert({sId,
+                        std::make_shared<CScriptRunnerInstanceController>(
+                          sId,
+                          std::make_shared<CJsScriptRunnerInstanceWorker>(
+                            sId, m_wpSignalEmitterContext),
+                          m_wpSignalEmitterContext)});
   auto it = m_vspJsRunner.find(sId);
   it->second->setObjectName(sId);
-  connect(it->second.get(), &CJsScriptRunnerInstanceController::HandleScriptFinish,
+  connect(it->second.get(), &CScriptRunnerInstanceController::HandleScriptFinish,
           this, &CJsScriptRunner::SlotHandleScriptFinish);
 
-  connect(it->second.get(), &CJsScriptRunnerInstanceController::SignalOverlayCleared,
-          this, &CJsScriptRunner::SlotOverlayCleared);
-  connect(it->second.get(), &CJsScriptRunnerInstanceController::SignalOverlayClosed,
-          this, &CJsScriptRunner::SlotOverlayClosed);
-  connect(it->second.get(), &CJsScriptRunnerInstanceController::SignalOverlayRunAsync,
-          this, &CJsScriptRunner::SlotOverlayRunAsync);
+  connect(it->second.get(), &CScriptRunnerInstanceController::SignalOverlayCleared,
+          this, &CJsScriptRunner::SignalOverlayCleared);
+  connect(it->second.get(), &CScriptRunnerInstanceController::SignalOverlayClosed,
+          this, &CJsScriptRunner::SignalOverlayClosed);
+  connect(it->second.get(), &CScriptRunnerInstanceController::SignalOverlayRunAsync,
+          this, &CJsScriptRunner::SignalOverlayRunAsync);
 
   QMutexLocker lockerEmiter(&m_signalEmiterMutex);
   for (auto& itEmiter : m_pSignalEmiters)
@@ -876,30 +710,30 @@ std::shared_ptr<CScriptRunnerSignalContext> CJsScriptRunner::SignalEmmitterConte
 
 //----------------------------------------------------------------------------------------
 //
-CScriptRunnerUtils::CScriptRunnerUtils(QObject* pParent,
-                                       QPointer<QJSEngine> pEngine,
-                                       std::shared_ptr<CScriptRunnerSignalContext> spSignalEmiterContext) :
+CScriptRunnerUtilsJs::CScriptRunnerUtilsJs(QObject* pParent,
+                                           QPointer<QJSEngine> pEngine,
+                                           std::shared_ptr<CScriptRunnerSignalContext> spSignalEmiterContext) :
   QObject(pParent),
   m_spSignalEmiterContext(spSignalEmiterContext),
   m_pEngine(pEngine)
 {
 
 }
-CScriptRunnerUtils::~CScriptRunnerUtils()
+CScriptRunnerUtilsJs::~CScriptRunnerUtilsJs()
 {
 
 }
 
 //----------------------------------------------------------------------------------------
 //
-void CScriptRunnerUtils::SetCurrentProject(tspProject spProject)
+void CScriptRunnerUtilsJs::SetCurrentProject(tspProject spProject)
 {
   m_spProject = spProject;
 }
 
 //----------------------------------------------------------------------------------------
 //
-QJSValue CScriptRunnerUtils::include(QJSValue resource)
+QJSValue CScriptRunnerUtilsJs::include(QJSValue resource)
 {
   tspResource spResource = GetResource(resource);
   if (nullptr != spResource)
@@ -929,7 +763,7 @@ QJSValue CScriptRunnerUtils::include(QJSValue resource)
 
 //----------------------------------------------------------------------------------------
 //
-QJSValue CScriptRunnerUtils::import(QJSValue resource)
+QJSValue CScriptRunnerUtilsJs::import(QJSValue resource)
 {
   tspResource spResource = GetResource(resource);
   if (nullptr != spResource)
@@ -950,7 +784,7 @@ QJSValue CScriptRunnerUtils::import(QJSValue resource)
 
 //----------------------------------------------------------------------------------------
 //
-tspResource CScriptRunnerUtils::GetResource(QJSValue resource)
+tspResource CScriptRunnerUtilsJs::GetResource(QJSValue resource)
 {
   auto spDbManager = CApplication::Instance()->System<CDatabaseManager>().lock();
   tspResource spResource;

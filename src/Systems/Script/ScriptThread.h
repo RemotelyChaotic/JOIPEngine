@@ -14,7 +14,8 @@ public:
   CThreadSignalEmitter();
   ~CThreadSignalEmitter();
 
-  virtual std::shared_ptr<CScriptObjectBase> CreateNewScriptObject(QPointer<QJSEngine> pEngine);
+  std::shared_ptr<CScriptObjectBase> CreateNewScriptObject(QPointer<QJSEngine> pEngine) override;
+  std::shared_ptr<CScriptObjectBase> CreateNewScriptObject(QtLua::State* pState) override;
 
 signals:
   void skippableWait(qint32 iTimeS);
@@ -32,11 +33,13 @@ class CScriptThread : public CJsScriptObjectBase
 public:
   CScriptThread(QPointer<CScriptRunnerSignalEmiter> pEmitter,
                 QPointer<QJSEngine> pEngine);
+  CScriptThread(QPointer<CScriptRunnerSignalEmiter> pEmitter,
+                QtLua::State* pState);
   ~CScriptThread();
 
 public slots:
   void sleep(qint32 iTimeS);
-  void sleep(qint32 iTimeS, QJSValue bSkippable);
+  void sleep(qint32 iTimeS, QVariant bSkippable);
 
 };
 

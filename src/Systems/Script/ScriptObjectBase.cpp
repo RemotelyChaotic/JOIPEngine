@@ -1,6 +1,7 @@
 #include "ScriptObjectBase.h"
 #include "ScriptRunnerSignalEmiter.h"
 #include "Systems/Project.h"
+#include <QtLua/State>
 #include <QEventLoop>
 
 CScriptObjectBase::CScriptObjectBase(QPointer<CScriptRunnerSignalEmiter> pEmitter) :
@@ -90,6 +91,11 @@ CJsScriptObjectBase::CJsScriptObjectBase(QPointer<CScriptRunnerSignalEmiter> pEm
                                          QPointer<QJSEngine> pEngine) :
   CScriptObjectBase(pEmitter),
   m_pEngine(pEngine)
+{}
+CJsScriptObjectBase::CJsScriptObjectBase(QPointer<CScriptRunnerSignalEmiter> pEmitter,
+                                         QtLua::State* pState) :
+  CScriptObjectBase(pEmitter),
+  m_pState(pState)
 {}
 CJsScriptObjectBase::~CJsScriptObjectBase()
 {}

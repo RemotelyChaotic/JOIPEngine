@@ -37,9 +37,19 @@ public:
   void LoadScript(const QString& sScript, tspScene spScene, tspResource spResource) override;
   void RegisterNewComponent(const QString sName, QJSValue signalEmitter) override;
   void UnregisterComponents() override;
+
+  void OverlayCleared() override;
+  void OverlayClosed(const QString& sId) override;
+  void OverlayRunAsync(const QString& sId, const QString& sScript,
+                       tspResource spResource) override;
+
   void HandleScriptFinish(bool bSuccess, const QVariant& sRetVal);
 
 signals:
+  void SignalOverlayCleared() override;
+  void SignalOverlayClosed(const QString& sId) override;
+  void SignalOverlayRunAsync(tspProject spProject, const QString& sId,
+                             const QString& sScriptResource) override;
   void SignalScriptRunFinished(bool bOk, const QString& sRetVal) override;
 
 private slots:
