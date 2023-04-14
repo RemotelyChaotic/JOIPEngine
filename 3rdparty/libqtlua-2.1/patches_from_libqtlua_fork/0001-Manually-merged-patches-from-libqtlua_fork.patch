@@ -1,0 +1,1991 @@
+From 861ed19ee0493f09efca540308ba38aee0349b02 Mon Sep 17 00:00:00 2001
+From: Li Kwue-Ron <likwueron@gmail.com>
+Date: Sun, 14 Jun 2015 17:30:27 +0200
+Subject: [PATCH] Manually merged patches from libqtlua_fork
+
+---
+ AUTHORS                                  |   2 +
+ README                                   |  30 ++++-
+ src/CMakeLists.txt                       |   3 +
+ src/QtLua/FunctionSignature              |   1 +
+ src/QtLua/qtluafunctionsignature.hh      |  31 +++++
+ src/QtLua/qtluaqhashproxy.hxx            |   2 +
+ src/QtLua/qtluastate.hh                  |  53 +++++---
+ src/QtLua/qtluastate.hxx                 |  12 ++
+ src/QtLua/qtluavaluebase.hh              |   4 +
+ src/QtLua/qtluavaluebase.hxx             |  11 ++
+ src/config.hh                            |  80 ++++++++++++
+ src/internal/FunctionWrapperData         |   1 +
+ src/internal/StaticFunction              |   4 +
+ src/internal/qtluafunctionwrapperdata.hh |  66 ++++++++++
+ src/internal/qtluametacache.hh           |  44 ++++++-
+ src/internal/qtluametacache.hxx          |  15 ++-
+ src/internal/qtluaqmetavalue.hxx         |   4 +-
+ src/internal/qtluaqobjectiterator.hh     |   3 +
+ src/internal/qtluaqobjectwrapper.hh      |   2 +
+ src/internal/qtluastaticfunction.hh      |  74 +++++++++++
+ src/internal/qtluastaticfunction.hxx     |  34 ++++++
+ src/qtluafunctionwrapperdata.cc          |  74 +++++++++++
+ src/qtluametacache.cc                    | 149 ++++++++++++++++++++---
+ src/qtluamethod.cc                       |  24 ++--
+ src/qtluaqmetaobjectwrapper.cc           |  22 +++-
+ src/qtluaqmetavalue.cc                   |  20 +++
+ src/qtluaqobjectiterator.cc              |  14 ++-
+ src/qtluaqobjectwrapper.cc               |  94 +++++++++++---
+ src/qtluaqtlib.cc                        |  43 +++++--
+ src/qtluaqtlib.hh                        |   4 +
+ src/qtluastate.cc                        | 117 ++++++++----------
+ src/qtluastaticfunction.cc               |  83 +++++++++++++
+ src/qtluavaluebase.cc                    |  31 +++++
+ tools/qtlua/CMakeLists.txt               |   5 +-
+ 34 files changed, 1005 insertions(+), 151 deletions(-)
+ create mode 100644 src/QtLua/FunctionSignature
+ create mode 100644 src/QtLua/qtluafunctionsignature.hh
+ create mode 100644 src/config.hh
+ create mode 100644 src/internal/FunctionWrapperData
+ create mode 100644 src/internal/StaticFunction
+ create mode 100644 src/internal/qtluafunctionwrapperdata.hh
+ create mode 100644 src/internal/qtluastaticfunction.hh
+ create mode 100644 src/internal/qtluastaticfunction.hxx
+ create mode 100644 src/qtluafunctionwrapperdata.cc
+ create mode 100644 src/qtluastaticfunction.cc
+
+diff --git a/AUTHORS b/AUTHORS
+index 35c2829..070b429 100644
+--- a/AUTHORS
++++ b/AUTHORS
+@@ -1,3 +1,5 @@
+ 
+ Copyright (C) 2008-2013 Alexandre Becoulet <alexandre.becoulet@free.fr>
+ 
++Fork
++Copyright (C) 2015 (Li, Kwue-Ron) <likwueron@gmail.com>
+diff --git a/README b/README
+index 095e3c6..402c438 100644
+--- a/README
++++ b/README
+@@ -1,12 +1,27 @@
+-
+ The QtLua library aims to make Qt4/Qt5 applications scriptable using
+ the Lua scripting language.
+ 
++
+ QtLua is released under the GNU LGPL v3 license.
+ 
+-Project documentation can be found online:
++Project documentation can be found online:(Original one)
+ http://www.nongnu.org/libqtlua/
+ 
++This fork project provide some features:
++- QFlag QtLua::Librarys which provide OR combination when using QtLua::State.openlib()
++- Value of QObject (via print()) can be costum by slot "QString toString()"
++- Register QObject can limit member access by setting "supreme meta object" which reject member access to it's super one
++- Name of QObject can be costum by Q_CLASSINFO("LuaName", NAME_YOU_WANT)
++- Can register static member method to registered QObject
++
++Those are not neccessary because of QtLua::MetaType. They added because I didn't notice that class before.
++- Methods can use QVariant/QVariantList as parameter or return value in script environment.
++
++Those are once add but removed due to they'll cause crash in some situation:
++- Methods can use QObject as parameter or return value without register via QtLua::MetaType
++
++
++
+ Build and install
+ =================
+ 
+@@ -29,4 +44,15 @@ CMake
+     cmake ..
+     make
+     make install
++    
++Windows CMake MinGW32
++---------------------
++
++    OPEN Qt Command Prompt
+ 
++    set LUA_DIR=[location of lua]
++
++    cd libqtlua-x.x.x
++    cmake-gui
++    cd [where to build the binaries]
++    mingw32-make
+diff --git a/src/CMakeLists.txt b/src/CMakeLists.txt
+index 2e042c7..08c3f0d 100644
+--- a/src/CMakeLists.txt
++++ b/src/CMakeLists.txt
+@@ -32,6 +32,7 @@ ADD_LIBRARY(qtlua STATIC
+             qtluatabletreemodel.cc qtluauserdata.cc
+             qtluavaluebase.cc qtluavalue.cc
+             qtluavalueref.cc qtluadispatchproxy.cc
++            qtluafunctionwrapperdata.cc qtluastaticfunction.cc
+ 
+             ${MOC_OUTFILES})
+ 
+@@ -73,6 +74,8 @@ INSTALL(FILES
+         QtLua/ArrayProxy         QtLua/qtluaarrayproxy.hh      QtLua/qtluaarrayproxy.hxx 
+         QtLua/MetaType           QtLua/qtluametatype.hh        QtLua/qtluametatype.hxx 
+         QtLua/DispatchProxy      QtLua/qtluadispatchproxy.hh   QtLua/qtluadispatchproxy.hxx
++        QtLua/FunctionSignature  QtLua/qtluafunctionsignature.hh
++        
+ 
+         DESTINATION ${INSTALL_INC}/QtLua)
+ 
+diff --git a/src/QtLua/FunctionSignature b/src/QtLua/FunctionSignature
+new file mode 100644
+index 0000000..6998654
+--- /dev/null
++++ b/src/QtLua/FunctionSignature
+@@ -0,0 +1 @@
++#include "qtluafunctionsignature.hh"
+diff --git a/src/QtLua/qtluafunctionsignature.hh b/src/QtLua/qtluafunctionsignature.hh
+new file mode 100644
+index 0000000..5748f21
+--- /dev/null
++++ b/src/QtLua/qtluafunctionsignature.hh
+@@ -0,0 +1,31 @@
++/*
++    This file is part of LibQtLua.
++
++    LibQtLua is free software: you can redistribute it and/or modify
++    it under the terms of the GNU Lesser General Public License as published by
++    the Free Software Foundation, either version 3 of the License, or
++    (at your option) any later version.
++
++    LibQtLua is distributed in the hope that it will be useful,
++    but WITHOUT ANY WARRANTY; without even the implied warranty of
++    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++    GNU General Public License for more details.
++
++    You should have received a copy of the GNU Lesser General Public License
++    along with LibQtLua.  If not, see <http://www.gnu.org/licenses/>.
++
++    Copyright (C) 2008, Alexandre Becoulet <alexandre.becoulet@free.fr>
++
++    Fork
++    Copyright (C) 2015 (Li, Kwue-Ron) <likwueron@gmail.com>
++*/
++
++#include <QMetaType>
++#include "qtluavalue.hh"
++
++namespace QtLua {
++  class State;
++
++  typedef Value::List (*FunctionSignature)(State*, const Value::List&);
++#define SIZEOF_ARGT(ARGT) sizeof(ARGT) / sizeof(QMetaType::Type)
++}
+diff --git a/src/QtLua/qtluaqhashproxy.hxx b/src/QtLua/qtluaqhashproxy.hxx
+index ec9d0e7..5d84326 100644
+--- a/src/QtLua/qtluaqhashproxy.hxx
++++ b/src/QtLua/qtluaqhashproxy.hxx
+@@ -189,6 +189,8 @@ namespace QtLua {
+ 
+   void QHashProxyKeytype<String>::completion_patch(String &path, String &entry, int &offset)
+   {
++    Q_UNUSED(path)
++    Q_UNUSED(offset)
+     entry += ".";
+   }
+ 
+diff --git a/src/QtLua/qtluastate.hh b/src/QtLua/qtluastate.hh
+index 2ee6144..7038f61 100644
+--- a/src/QtLua/qtluastate.hh
++++ b/src/QtLua/qtluastate.hh
+@@ -16,6 +16,8 @@
+ 
+     Copyright (C) 2008, Alexandre Becoulet <alexandre.becoulet@free.fr>
+ 
++    Fork
++    Copyright (C) 2015 (Li, Kwue-Ron) <likwueron@gmail.com>
+ */
+ 
+ // __moc_flags__ -fQtLua/State
+@@ -27,6 +29,7 @@
+ #include <QObject>
+ #include <QHash>
+ 
++#include "qtluafunctionsignature.hh"
+ #include "qtluastring.hh"
+ #include "qtluavalue.hh"
+ #include "qtluavalueref.hh"
+@@ -45,6 +48,12 @@ namespace QtLua {
+   /** @internal */
+   void qtlib_register_meta(const QMetaObject *mo, qobject_creator *creator);
+ 
++  void qtlib_register_meta(const QMetaObject *mo, const QMetaObject *supreme_mo, bool auto_property, qobject_creator *creator);
++  
++  void qtlib_enable_meta_auto_property(const QMetaObject *mo, bool enable);
++
++  void qtlib_register_static_method(const QMetaObject *mo, const String &name, FunctionSignature func, const QList<String> &argv);
++
+   class UserData;
+   class QObjectWrapper;
+   class TableIterator;
+@@ -56,22 +65,28 @@ namespace QtLua {
+       with the @ref State::openlib function. */
+   enum Library
+     {
+-      BaseLib,		//< standard lua base library
+-      CoroutineLib,	//< standard lua coroutine library, included in base before lua 5.2
+-      PackageLib,	//< standard lua package library
+-      StringLib,	//< standard lua string library
+-      TableLib,		//< standard lua table library
+-      MathLib,		//< standard lua math library
+-      IoLib,		//< standard lua io library
+-      OsLib,		//< standard lua os library
+-      DebugLib,		//< standard lua debug library
+-      Bit32Lib,		//< standard lua bit library
+-      JitLib,		//< luajit jit library
+-      FfiLib,		//< luajit ffi library
+-      QtLuaLib,		//< lua library with base functions, see the @xref{Predefined lua functions} section.
+-      QtLib,		//< lua library with wrapped Qt functions, see the @xref{Qt related functions} section.
+-      AllLibs,		//< All libraries wildcard
++      BaseLib = 0x1,      //< standard lua base library
++      CoroutineLib = 0x2, //< standard lua coroutine library, included in base before lua 5.2
++      PackageLib = 0x4,   //< standard lua package library
++      StringLib = 0x8,    //< standard lua string library
++      TableLib = 0x10,    //< standard lua table library
++      MathLib = 0x20,     //< standard lua math library
++      IoLib = 0x40,       //< standard lua io library
++      OsLib = 0x80,       //< standard lua os library
++      DebugLib = 0x100,   //< standard lua debug library
++      Bit32Lib = 0x200,   //< standard lua bit library
++      JitLib = 0x400,     //< luajit jit library
++      FfiLib = 0x800,     //< luajit ffi library
++      QtLuaLib = 0x1000,  //< lua library with base functions, see the @xref{Predefined lua functions} section.
++      QtLib = 0x2000,     //< lua library with wrapped Qt functions, see the @xref{Qt related functions} section.
++      AllLibs =           //< All libraries wildcard
++                BaseLib | CoroutineLib |
++                PackageLib | StringLib | TableLib | MathLib |
++                IoLib | OsLib | DebugLib | Bit32Lib |
++                JitLib | FfiLib |
++                QtLuaLib | QtLib,
+     };
++  Q_DECLARE_FLAGS(Librarys, Library);
+ 
+   /**
+    * @short Lua interpreter state wrapper class
+@@ -197,7 +212,7 @@ public:
+    * @see QtLua::Library
+    * @xsee{QtLua lua libraries}
+    */
+-  bool openlib(Library lib);
++  bool openlib(Librarys lib);
+ 
+   /** 
+    * Call given function pointer with internal @ref lua_State
+@@ -220,6 +235,11 @@ public:
+    */
+   template <class QObject_T>
+   static inline void register_qobject_meta();
++  template <class QObject_T, class Supreme_T>
++  static inline void register_qobject_meta();
++
++  template <class QObject_T>
++  static inline void register_qobject_static_method(const String &name, FunctionSignature func, const QList<String> &argv);
+ 
+   /**
+    * @internal @This asserts internal lua stack is empty.
+@@ -328,5 +348,6 @@ private:
+ };
+ 
+ }
++Q_DECLARE_OPERATORS_FOR_FLAGS(QtLua::Librarys);
+ 
+ #endif
+diff --git a/src/QtLua/qtluastate.hxx b/src/QtLua/qtluastate.hxx
+index 1523f67..de22e86 100644
+--- a/src/QtLua/qtluastate.hxx
++++ b/src/QtLua/qtluastate.hxx
+@@ -69,6 +69,18 @@ namespace QtLua {
+     qtlib_register_meta(&QObject_T::staticMetaObject, &create_qobject<QObject_T>);
+   }
+ 
++  template <class QObject_T, class Supreme_T>
++  void State::register_qobject_meta()
++  {
++    qtlib_register_meta(&QObject_T::staticMetaObject, &Supreme_T::staticMetaObject, &create_qobject<QObject_T>);
++  }
++
++  template <class QObject_T>
++  void State::register_qobject_static_method(const String &name, FunctionSignature func, const QList<String> &argv)
++  {
++    qtlib_register_static_method(&QObject_T::staticMetaObject, name, func, argv);
++  }
++
+   void State::enable_qdebug_print(bool enabled)
+   {
+     _debug_output = enabled;
+diff --git a/src/QtLua/qtluavaluebase.hh b/src/QtLua/qtluavaluebase.hh
+index 4eb5a22..75849b7 100644
+--- a/src/QtLua/qtluavaluebase.hh
++++ b/src/QtLua/qtluavaluebase.hh
+@@ -16,6 +16,8 @@
+ 
+     Copyright (C) 2008, Alexandre Becoulet <alexandre.becoulet@free.fr>
+ 
++    Fork
++    Copyright (C) 2015 (Li, Kwue-Ron) <likwueron@gmail.com>
+ */
+ 
+ 
+@@ -26,6 +28,7 @@
+ #include <QList>
+ #include <QPointer>
+ #include <QVariant>
++#include <QVariantList>
+ 
+ #include "qtluastring.hh"
+ #include "qtluaref.hh"
+@@ -251,6 +254,7 @@ public:
+   /** Call operation on a lua userdata or lua function value.
+       When invoked on a lua thread value, the thread is resumed. @multiple */
+   List call(const List &args) const;
++  inline List call(const QVariantList &args) const;
+   inline List operator() () const;
+   inline List operator() (const Value &arg1) const;
+   inline List operator() (const Value &arg1, const Value &arg2) const;
+diff --git a/src/QtLua/qtluavaluebase.hxx b/src/QtLua/qtluavaluebase.hxx
+index b03fb19..771e6da 100644
+--- a/src/QtLua/qtluavaluebase.hxx
++++ b/src/QtLua/qtluavaluebase.hxx
+@@ -16,6 +16,8 @@
+ 
+     Copyright (C) 2008, Alexandre Becoulet <alexandre.becoulet@free.fr>
+ 
++    Fork
++    Copyright (C) 2015 (Li, Kwue-Ron) <likwueron@gmail.com>
+ */
+ 
+ 
+@@ -289,6 +291,15 @@ namespace QtLua {
+     *this << v1 << v2 << v3 << v4 << v5 << v6;
+   }
+ 
++  Value::List ValueBase::call(const QVariantList &args) const
++  {
++    ValueBase::List _args;
++    foreach(const QVariant &i, args) {
++      _args.push_back(Value(_st, i));
++    }
++    return call(_args);
++  }
++
+   ValueBase::List ValueBase::operator() () const
+   {
+     return this->call(List());
+diff --git a/src/config.hh b/src/config.hh
+new file mode 100644
+index 0000000..fd15dea
+--- /dev/null
++++ b/src/config.hh
+@@ -0,0 +1,80 @@
++/* config.hh.in.  Generated from configure.ac by autoheader.  */
++
++/* Define to 1 if you have the <dlfcn.h> header file. */
++/* #undef HAVE_DLFCN_H */
++
++/* Define to 1 if you have the <inttypes.h> header file. */
++#define HAVE_INTTYPES_H 1
++
++/* Define to 1 if you have the `m' library (-lm). */
++/* #undef HAVE_LIBM */
++
++/* lua_gc function is available */
++#define HAVE_LUA_GC 1
++
++/* lua os library is available */
++#define HAVE_LUA_OPENLIBS 1
++
++/* lua os library is available */
++#define HAVE_LUA_OSLIB 1
++
++/* lua package library is available */
++#define HAVE_LUA_PACKAGELIB 1
++
++/* Define to 1 if you have the <memory.h> header file. */
++#define HAVE_MEMORY_H 1
++
++/* Define to 1 if you have the <stdint.h> header file. */
++#define HAVE_STDINT_H 1
++
++/* Define to 1 if you have the <stdlib.h> header file. */
++#define HAVE_STDLIB_H 1
++
++/* Define to 1 if you have the <strings.h> header file. */
++#define HAVE_STRINGS_H 1
++
++/* Define to 1 if you have the <string.h> header file. */
++#define HAVE_STRING_H 1
++
++/* Define to 1 if you have the <sys/stat.h> header file. */
++#define HAVE_SYS_STAT_H 1
++
++/* Define to 1 if you have the <sys/types.h> header file. */
++#define HAVE_SYS_TYPES_H 1
++
++/* Define to 1 if you have the <unistd.h> header file. */
++#define HAVE_UNISTD_H 1
++
++/* Define to the sub-directory in which libtool stores uninstalled libraries.
++   */
++#undef LT_OBJDIR
++
++/* Name of package */
++/* #undef PACKAGE */
++
++/* Define to the address where bug reports for this package should be sent. */
++#define PACKAGE_BUGREPORT ""
++
++/* Define to the full name of this package. */
++#define PACKAGE_NAME "libqtlua"
++
++/* Define to the full name and version of this package. */
++#define PACKAGE_STRING "libqtlua 2.0"
++
++/* Define to the one symbol short name of this package. */
++#define PACKAGE_TARNAME "libqtlua"
++
++/* Define to the home page for this package. */
++#undef PACKAGE_URL
++
++/* Define to the version of this package. */
++#define PACKAGE_VERSION "2.0"
++
++/* suffix for dynamic libraries is $shared_ext */
++#define SHLIBEXT .dll
++
++/* Define to 1 if you have the ANSI C header files. */
++#define STDC_HEADERS 1
++
++/* Version number of package */
++/* #undef VERSION */
+diff --git a/src/internal/FunctionWrapperData b/src/internal/FunctionWrapperData
+new file mode 100644
+index 0000000..26ffa67
+--- /dev/null
++++ b/src/internal/FunctionWrapperData
+@@ -0,0 +1 @@
++#include "qtluafunctionwrapperdata.hh"
+diff --git a/src/internal/StaticFunction b/src/internal/StaticFunction
+new file mode 100644
+index 0000000..ab69af2
+--- /dev/null
++++ b/src/internal/StaticFunction
+@@ -0,0 +1,4 @@
++
++#include "qtluastaticfunction.hh"
++#include "qtluastaticfunction.hxx"
++
+diff --git a/src/internal/qtluafunctionwrapperdata.hh b/src/internal/qtluafunctionwrapperdata.hh
+new file mode 100644
+index 0000000..fedba97
+--- /dev/null
++++ b/src/internal/qtluafunctionwrapperdata.hh
+@@ -0,0 +1,66 @@
++/*
++    This file is part of LibQtLua.
++
++    LibQtLua is free software: you can redistribute it and/or modify
++    it under the terms of the GNU Lesser General Public License as published by
++    the Free Software Foundation, either version 3 of the License, or
++    (at your option) any later version.
++
++    LibQtLua is distributed in the hope that it will be useful,
++    but WITHOUT ANY WARRANTY; without even the implied warranty of
++    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++    GNU General Public License for more details.
++
++    You should have received a copy of the GNU Lesser General Public License
++    along with LibQtLua.  If not, see <http://www.gnu.org/licenses/>.
++
++    Copyright (C) 2008, Alexandre Becoulet <alexandre.becoulet@free.fr>
++
++    Fork
++    Copyright (C) 2015 (Li, Kwue-Ron) <likwueron@gmail.com>
++*/
++
++#ifndef QTLUAFUNCTIONWRAPPERDATA_HH_
++#define QTLUAFUNCTIONWRAPPERDATA_HH_
++
++#include <QMetaMethod>
++#include <QMetaType>
++#include <QList>
++
++#include <QtLua/String>
++#include <QtLua/FunctionSignature>
++
++namespace QtLua {
++
++/**
++ * @short function wrapper inner data class
++ * @header internal/FunctionWrapperData
++ * @module {Base}
++ * @internal
++ *
++ * This internal class implements the wrapper which enables invocation
++ * of function from lua.
++ */
++  class FunctionWrapperData
++  {
++  public:
++#if QT_VERSION < QT_VERSION_CHECK(5, 2, 0)
++    static const int defaultMaxCount = 11;
++#else
++    static const int defaultMaxCount = Q_METAMETHOD_INVOKE_MAX_ARGS + 1;
++#endif
++    FunctionWrapperData(FunctionSignature func, 
++                        const QMetaType::Type argt_array[], int count);
++    FunctionWrapperData(FunctionSignature func, 
++                        const QList<String> argv);
++
++  protected:
++    FunctionSignature _func;
++    String _return_type_name;
++    String _argvs_type_name;
++    int _argc;
++  };
++
++}
++
++#endif
+\ No newline at end of file
+diff --git a/src/internal/qtluametacache.hh b/src/internal/qtluametacache.hh
+index 56eaa15..1adaaf2 100644
+--- a/src/internal/qtluametacache.hh
++++ b/src/internal/qtluametacache.hh
+@@ -16,6 +16,8 @@
+ 
+     Copyright (C) 2008, Alexandre Becoulet <alexandre.becoulet@free.fr>
+ 
++    Fork
++    Copyright (C) 2015 (Li, Kwue-Ron) <likwueron@gmail.com>
+ */
+ 
+ #ifndef QTLUAMETACACHE_HH_
+@@ -25,6 +27,7 @@
+ #include <QHash>
+ 
+ #include <QtLua/Ref>
++#include <QtLua/FunctionSignature>
+ 
+ namespace QtLua {
+ 
+@@ -51,16 +54,28 @@ namespace QtLua {
+   {
+     friend class QObjectWrapper;
+ 
+-    MetaCache(const QMetaObject *mo);
++    MetaCache(const QMetaObject *mo, const QMetaObject *supreme_mo, bool auto_property);
+ 
+   public:
+     /** Copy constructor */
+     inline MetaCache(const MetaCache &mc);
+-
++    /** Create cache meta information for a QMetaObject with supreme QMetaObject which limit member access. */
++    static MetaCache & create_meta(const QMetaObject *mo, const QMetaObject *supreme_mo, bool auto_property);
++    /** Add static function to existed cache meta information. */
++    static bool add_static_function(const QMetaObject *mo, const String &key, FunctionSignature func, QMetaType::Type argt[], int count);
++    static bool add_static_function(const QMetaObject *mo, const String &key, FunctionSignature func, const QList<String> &argv);
+     /** Get cache meta information for a QObject */
+     inline static MetaCache & get_meta(const QObject &obj);
+     /** Get cache meta information for a QMetaObject */
+     static MetaCache & get_meta(const QMetaObject *mo);
++    /** Get meta object name by className() or classInfo("LuaName") */
++    static String get_meta_name(const QMetaObject *mo);
++    /** Get index of toString slot which costum print() result*/
++    static int get_index_toString(const QObject &obj);
++    /** Get index of getDP slot which get dynamic property*/
++    static int get_index_getDP(const QObject &obj);
++    /** Get index of setDP slot which set dynamic property*/
++    static int get_index_setDP(const QObject &obj);
+ 
+     /** Recursively search for memeber in class and parent classes */
+     Ref<Member> get_member(const String &name) const;
+@@ -80,10 +95,35 @@ namespace QtLua {
+     /** Get associated QMetaObject pointer */
+     inline const QMetaObject * get_meta_object() const;
+ 
++    /** Get supreme QMetaObject pointer for current QMetaObject pointer which should not affect others */
++    inline const QMetaObject * get_supreme_meta_object() const;
++
++    /** Get index of slot toString for current QMetaObject */
++    int get_index_toString() const;
++
++    /** Get index of slot getDP for current QMetaObject */
++    int get_index_getDP() const;
++
++    /** Get index of slot setDP for current QMetaObject */
++    int get_index_setDP() const;
++
++    /** Can use property() setProperty()*/
++    bool can_auto_property() const;
++    void enable_auto_property(bool enable);
++
+   private:
+     member_cache_t _member_cache;
+     const QMetaObject *_mo;
++    const QMetaObject *_supreme_mo;
+     static meta_cache_t _meta_cache;
++    //classinfo "LuaName"
++    String _lua_name;
++    //index of slots
++    int _index_toString;
++    int _index_setDP;
++    int _index_getDP;
++    //auto set/get property, will be override if has setDP/getDP
++    int _auto_property;
+   };
+ 
+ }
+diff --git a/src/internal/qtluametacache.hxx b/src/internal/qtluametacache.hxx
+index 922e777..33fe653 100644
+--- a/src/internal/qtluametacache.hxx
++++ b/src/internal/qtluametacache.hxx
+@@ -16,6 +16,8 @@
+ 
+     Copyright (C) 2008, Alexandre Becoulet <alexandre.becoulet@free.fr>
+ 
++    Fork
++    Copyright (C) 2015 (Li, Kwue-Ron) <likwueron@gmail.com>
+ */
+ 
+ #ifndef QTLUAMETACACHE_HXX_
+@@ -28,7 +30,13 @@ namespace QtLua {
+ 
+   MetaCache::MetaCache(const MetaCache &mc)
+     : _member_cache(mc._member_cache),
+-      _mo(mc._mo)
++      _mo(mc._mo),
++      _supreme_mo(mc._supreme_mo),
++      _lua_name(mc._lua_name),
++      _index_toString(mc._index_toString),
++      _index_getDP(mc._index_getDP),
++      _index_setDP(mc._index_setDP),
++      _auto_property(mc._auto_property)
+   {
+   }
+ 
+@@ -42,6 +50,11 @@ namespace QtLua {
+     return _mo;
+   }
+ 
++  const QMetaObject * MetaCache::get_supreme_meta_object() const
++  {
++      return _supreme_mo;
++  }
++
+   Member::ptr MetaCache::get_member_throw(const String &name) const
+   {
+     Member::ptr m = get_member(name);
+diff --git a/src/internal/qtluaqmetavalue.hxx b/src/internal/qtluaqmetavalue.hxx
+index ae51eff..fa61b1e 100644
+--- a/src/internal/qtluaqmetavalue.hxx
++++ b/src/internal/qtluaqmetavalue.hxx
+@@ -16,6 +16,8 @@
+ 
+     Copyright (C) 2008-2012, Alexandre Becoulet <alexandre.becoulet@free.fr>
+ 
++    Fork
++    Copyright (C) 2015 (Li, Kwue-Ron) <likwueron@gmail.com>
+ */
+ 
+ #ifndef QTLUAQMETAVALUE_HXX_
+@@ -40,7 +42,7 @@ namespace QtLua {
+     _data = QMetaType::create(_type, 0);
+ #endif
+     if (!_data)
+-      QTLUA_THROW(QtLui::QMetaValue, "Failed to construct an object of type `%' using the QMetaType API.",
++      QTLUA_THROW(QtLua::QMetaValue, "Failed to construct an object of type `%' using the QMetaType API.",
+ 		  .arg(QMetaType::typeName(_type)));
+   }
+ 
+diff --git a/src/internal/qtluaqobjectiterator.hh b/src/internal/qtluaqobjectiterator.hh
+index 0eaa7f4..7e68030 100644
+--- a/src/internal/qtluaqobjectiterator.hh
++++ b/src/internal/qtluaqobjectiterator.hh
+@@ -16,6 +16,8 @@
+ 
+     Copyright (C) 2008, Alexandre Becoulet <alexandre.becoulet@free.fr>
+ 
++    Fork
++    Copyright (C) 2015 (Li, Kwue-Ron) <likwueron@gmail.com>
+ */
+ 
+ #ifndef QTLUAQOBJECTITERATOR_HH_
+@@ -72,6 +74,7 @@ private:
+   QPointer<State> _ls;
+   Ref<QObjectWrapper> _qow;
+   MetaCache *_mc;
++  const QMetaObject *_supreme_mo;
+   Current _cur;
+   member_cache_t::const_iterator _it;
+   int _child_id;
+diff --git a/src/internal/qtluaqobjectwrapper.hh b/src/internal/qtluaqobjectwrapper.hh
+index 8ef0178..dd1e25e 100644
+--- a/src/internal/qtluaqobjectwrapper.hh
++++ b/src/internal/qtluaqobjectwrapper.hh
+@@ -16,6 +16,8 @@
+ 
+     Copyright (C) 2008, Alexandre Becoulet <alexandre.becoulet@free.fr>
+ 
++    Fork
++    Copyright (C) 2015 (Li, Kwue-Ron) <likwueron@gmail.com>
+ */
+ 
+ 
+diff --git a/src/internal/qtluastaticfunction.hh b/src/internal/qtluastaticfunction.hh
+new file mode 100644
+index 0000000..82c50d6
+--- /dev/null
++++ b/src/internal/qtluastaticfunction.hh
+@@ -0,0 +1,74 @@
++/*
++    This file is part of LibQtLua.
++
++    LibQtLua is free software: you can redistribute it and/or modify
++    it under the terms of the GNU Lesser General Public License as published by
++    the Free Software Foundation, either version 3 of the License, or
++    (at your option) any later version.
++
++    LibQtLua is distributed in the hope that it will be useful,
++    but WITHOUT ANY WARRANTY; without even the implied warranty of
++    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++    GNU General Public License for more details.
++
++    You should have received a copy of the GNU Lesser General Public License
++    along with LibQtLua.  If not, see <http://www.gnu.org/licenses/>.
++
++    Copyright (C) 2008, Alexandre Becoulet <alexandre.becoulet@free.fr>
++
++    Fork
++    Copyright (C) 2015 (Li, Kwue-Ron) <likwueron@gmail.com>
++
++*/
++
++
++#ifndef QTLUASTATICFUNCTION_HH_
++#define QTLUASTATICFUNCTION_HH_
++
++#include <QMetaType>
++#include <QList>
++#include <QByteArray>
++
++#include <internal/qtluamember.hh>
++#include <internal/FunctionWrapperData>
++#include <QtLua/FunctionSignature>
++
++class QMetaObject;
++
++namespace QtLua {
++
++/**
++ * @short static function wrapper class
++ * @header internal/StaticFunction
++ * @module {QObject wrapping}
++ * @internal
++ *
++ * This internal class implements the wrapper which enables invocation
++ * of static function for @ref QObject objects from lua.
++ */
++  class StaticFunction : public Member, FunctionWrapperData
++  {
++  public:
++    QTLUA_REFTYPE(StaticFunction);
++
++    StaticFunction(const QMetaObject *mo, 
++                   const String &name, FunctionSignature func, 
++                   const QMetaType::Type argt_array[], int argc);
++    StaticFunction(const QMetaObject *mo, 
++                   const String &name, FunctionSignature func, 
++                   const QList<String> &argv);
++
++  private:
++    Value::List meta_call(State *ls, const Value::List &args);
++    bool support(Value::Operation c) const;
++    String get_type_name() const;
++    String get_value_str() const;
++    void completion_patch(String &path, String &entry, int &offset);
++    
++    String _name;
++  };
++
++}
++
++#endif
++
+diff --git a/src/internal/qtluastaticfunction.hxx b/src/internal/qtluastaticfunction.hxx
+new file mode 100644
+index 0000000..443803f
+--- /dev/null
++++ b/src/internal/qtluastaticfunction.hxx
+@@ -0,0 +1,34 @@
++/*
++    This file is part of LibQtLua.
++
++    LibQtLua is free software: you can redistribute it and/or modify
++    it under the terms of the GNU Lesser General Public License as published by
++    the Free Software Foundation, either version 3 of the License, or
++    (at your option) any later version.
++
++    LibQtLua is distributed in the hope that it will be useful,
++    but WITHOUT ANY WARRANTY; without even the implied warranty of
++    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++    GNU General Public License for more details.
++
++    You should have received a copy of the GNU Lesser General Public License
++    along with LibQtLua.  If not, see <http://www.gnu.org/licenses/>.
++
++    Copyright (C) 2008, Alexandre Becoulet <alexandre.becoulet@free.fr>
++
++    Fork
++    Copyright (C) 2015 (Li, Kwue-Ron) <likwueron@gmail.com>
++*/
++
++
++#ifndef QTLUASTATICFUNCTION_HXX_
++#define QTLUASTATCIFUNCTION_HXX_
++
++#include <internal/qtluamember.hxx>
++
++namespace QtLua {
++
++}
++
++#endif
++
+diff --git a/src/qtluafunctionwrapperdata.cc b/src/qtluafunctionwrapperdata.cc
+new file mode 100644
+index 0000000..10a9764
+--- /dev/null
++++ b/src/qtluafunctionwrapperdata.cc
+@@ -0,0 +1,74 @@
++/*
++    This file is part of LibQtLua.
++
++    LibQtLua is free software: you can redistribute it and/or modify
++    it under the terms of the GNU Lesser General Public License as published by
++    the Free Software Foundation, either version 3 of the License, or
++    (at your option) any later version.
++
++    LibQtLua is distributed in the hope that it will be useful,
++    but WITHOUT ANY WARRANTY; without even the implied warranty of
++    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++    GNU General Public License for more details.
++
++    You should have received a copy of the GNU Lesser General Public License
++    along with LibQtLua.  If not, see <http://www.gnu.org/licenses/>.
++
++    Copyright (C) 2008, Alexandre Becoulet <alexandre.becoulet@free.fr>
++
++    Fork
++    Copyright (C) 2015 (Li, Kwue-Ron) <likwueron@gmail.com>
++*/
++
++#include <internal/FunctionWrapperData>
++
++namespace QtLua {
++
++  FunctionWrapperData::FunctionWrapperData(FunctionSignature func, 
++                                           const QMetaType::Type argt_array[], 
++                                           int count)
++      : _func(func)
++  {
++    //convert Type to bytearray
++    _argc = (count < defaultMaxCount) ? count : defaultMaxCount;
++    if(0 < _argc) {
++        //generate return type
++        _return_type_name = QMetaType::typeName(argt_array[0]);
++        //generate argv
++        for(int i = 1; i < _argc; i++) {
++            QByteArray name = QMetaType::typeName(argt_array[i]);
++            if(!name.isEmpty()) _argvs_type_name += name + ",";
++        }
++        _argvs_type_name.chop(1);
++        
++        _argc -= 1;
++    }
++    else {
++        _return_type_name = "unknown";
++        _argvs_type_name = "unknown";
++    }
++  }
++  FunctionWrapperData::FunctionWrapperData(FunctionSignature func, 
++                                           const QList<String> argv)
++    : _func(func)
++  {
++    int count = argv.count();
++    _argc = (count < defaultMaxCount) ? count : defaultMaxCount;
++    if(0 < _argc) {
++        //generate return type
++        _return_type_name = argv.at(0);
++        //generate argv
++        for(int i = 1; i < _argc; i++) {
++            String name = argv.at(i);
++            if(!name.isEmpty()) _argvs_type_name += name + ",";
++        }
++        _argvs_type_name.chop(1);
++        
++        _argc -= 1;
++    }
++    else {
++        _return_type_name = "unknown";
++        _argvs_type_name = "unknown";
++    }
++  }
++}
+\ No newline at end of file
+diff --git a/src/qtluametacache.cc b/src/qtluametacache.cc
+index 7ba2730..7a4b907 100644
+--- a/src/qtluametacache.cc
++++ b/src/qtluametacache.cc
+@@ -16,6 +16,8 @@
+ 
+     Copyright (C) 2008, Alexandre Becoulet <alexandre.becoulet@free.fr>
+ 
++    Fork
++    Copyright (C) 2015 (Li, Kwue-Ron) <likwueron@gmail.com>
+ */
+ 
+ #include <QSet>
+@@ -25,14 +27,53 @@
+ #include <internal/Enum>
+ #include <internal/Property>
+ #include <internal/MetaCache>
++#include <internal/StaticFunction>
+ 
+ namespace QtLua {
+ 
+   meta_cache_t MetaCache::_meta_cache;
+ 
+-  MetaCache::MetaCache(const QMetaObject *mo)
+-    : _mo(mo)
++  MetaCache::MetaCache(const QMetaObject *mo, const QMetaObject *supreme_mo, bool auto_property)
++    : _mo(mo), _supreme_mo(supreme_mo),
++      _index_toString(-1), _index_setDP(-1), _index_getDP(-1),
++      _auto_property(auto_property)
+   {
++    //get Lua name if exist
++    {
++      int index = _mo->indexOfClassInfo("LuaName");
++      if(index != -1 && _mo->classInfoOffset() <= index)
++          _lua_name = _mo->classInfo(index).value();
++      else _lua_name = _mo->className();
++    }
++    int method_offset = _supreme_mo->methodOffset();
++    //get index of toString
++    {
++      int index = _mo->indexOfMethod("toString()");
++      if(index != -1 && method_offset <= index)
++        {
++          if(mo->method(index).returnType() == QMetaType::QString)
++              _index_toString = index;
++        }
++    }
++    //get index of getDP
++    {
++      int index = _mo->indexOfMethod("getDP(QByteArray)");
++      if(index != -1 && method_offset <= index)
++        {
++          if(mo->method(index).returnType() == QMetaType::QVariant)
++              _index_getDP = index;
++        }
++    }
++    //get index of setDP
++    {
++      int index = _mo->indexOfMethod("setDP(QByteArray,QVariant)");
++      if(index != -1 && method_offset <= index)
++        {
++          if(mo->method(index).returnType() == QMetaType::Void)
++              _index_setDP = index;
++        }
++    }
++
+     // Fill a set with existing member names in parent classes to
+     // detect names collisions
+ 
+@@ -63,7 +104,7 @@ namespace QtLua {
+ #endif
+ 
+ 	String name(signature.constData(), signature.indexOf('('));
+-
++        //if collision, assigned new name
+ 	while (existing.contains(name) || _member_cache.contains(name))
+ 	  name += "_m";
+ 
+@@ -108,37 +149,67 @@ namespace QtLua {
+   Member::ptr MetaCache::get_member(const String &name) const
+   {
+     const MetaCache *mc = this;
+-    Member::ptr m;
+-
+-    for (m = _member_cache.value(name);
+-	 !m.valid() && mc->_mo->superClass();
+-	 m = (mc = &MetaCache::get_meta(mc->_mo->superClass()))->get_member(name))
+-      ;
++    const QMetaObject *meta = _mo;
++    Member::ptr m = mc->_member_cache.value(name);
++    while(!m.valid() && mc->_mo != _supreme_mo) {
++        meta = mc->_mo->superClass();
++        if(meta) {
++            mc = &MetaCache::get_meta(meta);
++            m = mc->_member_cache.value(name);
++        }
++        else break;
++    }
+ 
+     return m;
+   }
+ 
+   int MetaCache::get_enum_value(const String &name) const
+   {
+-    for (const QMetaObject *mo = _mo; mo; mo = mo->superClass())
++    for (const QMetaObject *mo = _mo; mo;
++         mo = (mo == _supreme_mo) ? 0x0 : mo->superClass())
+       {
+ 	for (int i = 0; i < mo->enumeratorCount(); i++)
+ 	  {
+ 	    int index = mo->enumeratorOffset() + i;
+ 	    QMetaEnum me = mo->enumerator(index);
+ 
+-	    if (!me.isValid())
+-	      continue;
++            if(!me.isValid()) continue;
+ 
+ 	    int value = me.keyToValue(name);
+-	    if (value >= 0)
+-	      return value;
++            if(0 <= value) return value;
+ 	  }
+       }
+ 
+     return -1;
+   }
+ 
++  MetaCache & MetaCache::create_meta(const QMetaObject *mo, const QMetaObject *supreme_mo, bool auto_property)
++  {
++    return _meta_cache.insert(mo, MetaCache(mo, supreme_mo, auto_property)).value();
++  }
++
++  bool MetaCache::add_static_function(const QMetaObject *mo, const String &key, FunctionSignature func, QMetaType::Type argt[], int count)
++  {
++      meta_cache_t::iterator i = _meta_cache.find(mo);
++      if(i != _meta_cache.end()) {
++          MetaCache &mc = i.value();
++          mc._member_cache.insert(key, QTLUA_REFNEW(StaticFunction, mo, key, func, argt, count));
++          return true;
++      }
++      else return false;
++  }
++
++  bool MetaCache::add_static_function(const QMetaObject *mo, const String &key, FunctionSignature func, const QList<String> &argv)
++  {
++      meta_cache_t::iterator i = _meta_cache.find(mo);
++      if(i != _meta_cache.end()) {
++          MetaCache &mc = i.value();
++          mc._member_cache.insert(key, QTLUA_REFNEW(StaticFunction, mo, key, func, argv));
++          return true;
++      }
++      else return false;
++  }
++
+   MetaCache & MetaCache::get_meta(const QMetaObject *mo)
+   {
+     meta_cache_t::iterator i = _meta_cache.find(mo);
+@@ -146,8 +217,56 @@ namespace QtLua {
+     if (i != _meta_cache.end())
+       return i.value();
+ 
+-    return _meta_cache.insert(mo, MetaCache(mo)).value();
++    return _meta_cache.insert(mo, MetaCache(mo, &QObject::staticMetaObject, false)).value();
++  }
++
++  String MetaCache::get_meta_name(const QMetaObject *mo)
++  {
++    MetaCache &mc = get_meta(mo);
++    return mc._lua_name;
++  }
++
++  int MetaCache::get_index_toString(const QObject &obj)
++  {
++    MetaCache &mc = get_meta(obj);
++    return mc._index_toString;
++  }
++
++  int MetaCache::get_index_getDP(const QObject &obj)
++  {
++    MetaCache &mc = get_meta(obj);
++    return mc._index_getDP;
++  }
++
++  int MetaCache::get_index_setDP(const QObject &obj)
++  {
++    MetaCache &mc = get_meta(obj);
++    return mc._index_setDP;
++  }
++
++  int MetaCache::get_index_toString() const
++  {
++    return _index_toString;
++  }
++
++  int MetaCache::get_index_getDP() const
++  {
++    return _index_getDP;
++  }
++
++  int MetaCache::get_index_setDP() const
++  {
++    return _index_setDP;
++  }
++
++  bool MetaCache::can_auto_property() const
++  {
++      return _auto_property;
+   }
+ 
++  void MetaCache::enable_auto_property(bool enable)
++  {
++      _auto_property = enable;
++  }
+ }
+ 
+diff --git a/src/qtluamethod.cc b/src/qtluamethod.cc
+index df41d1d..c365b75 100644
+--- a/src/qtluamethod.cc
++++ b/src/qtluamethod.cc
+@@ -16,6 +16,8 @@
+ 
+     Copyright (C) 2008, Alexandre Becoulet <alexandre.becoulet@free.fr>
+ 
++    Fork
++    Copyright (C) 2015 (Li, Kwue-Ron) <likwueron@gmail.com>
+ */
+ 
+ #include <QDebug>
+@@ -23,7 +25,7 @@
+ #include <cstring>
+ 
+ #include <internal/QObjectWrapper>
+-
++#include <internal/MetaCache>
+ #include <internal/Method>
+ #include <internal/QMetaValue>
+ #include <internal/qtluapoolarray.hh>
+@@ -70,8 +72,9 @@ namespace QtLua {
+     void *qt_args[11];
+ 
+     // return value
+-    if (*mm.typeName())
+-      qt_args[0] = args.create(QMetaType::type(mm.typeName())).get_data();
++    if (*mm.typeName()) {
++        qt_args[0] = args.create(QMetaType::type(mm.typeName())).get_data();
++    }
+     else
+       qt_args[0] = 0;
+ 
+@@ -93,12 +96,7 @@ namespace QtLua {
+     foreach (const QByteArray &pt, pt)
+       {
+ 	assert(i < 11);
+-
+-	//	if (i <= lua_args.size())
+-	  qt_args[i] = args.create(QMetaType::type(pt.constData()), lua_args[i]).get_data();
+-
+-	  //	else
+-	  //	  qt_args[i] = args.create(QMetaType::type(pt.constData())).get_data();
++        qt_args[i] = args.create(QMetaType::type(pt.constData()), lua_args[i]).get_data();
+ 	i++;
+       }
+ 
+@@ -113,8 +111,9 @@ namespace QtLua {
+ 		  .arg(mm.methodSignature()));
+ #endif
+ 
+-    if (qt_args[0])
+-      return args[0].to_value(ls);
++    if (qt_args[0]) {
++        return args[0].to_value(ls);
++    }
+     else
+       return Value::List();
+   }
+@@ -137,7 +136,7 @@ namespace QtLua {
+     QMetaMethod mm = _mo->method(_index);
+     const char * t = mm.typeName();
+ 
+-    return String(*t ? t : "void") + " " + _mo->className() + "::"
++    return String(*t ? t : "void") + " " + MetaCache::get_meta_name(_mo) + "::"
+ #if QT_VERSION < 0x050000
+       + mm.signature();
+ #else
+@@ -161,6 +160,7 @@ namespace QtLua {
+     switch (_mo->method(_index).methodType())
+       {
+       case QMetaMethod::Slot:
++      case QMetaMethod::Method:
+ 	// force method invokation operator
+ 	if (!path.isEmpty())
+ 	  path[path.size() - 1] = ':';
+diff --git a/src/qtluaqmetaobjectwrapper.cc b/src/qtluaqmetaobjectwrapper.cc
+index 574def8..cfd6b03 100644
+--- a/src/qtluaqmetaobjectwrapper.cc
++++ b/src/qtluaqmetaobjectwrapper.cc
+@@ -16,6 +16,8 @@
+ 
+     Copyright (C) 2008, Alexandre Becoulet <alexandre.becoulet@free.fr>
+ 
++    Fork
++    Copyright (C) 2015 (Li, Kwue-Ron) <likwueron@gmail.com>
+ */
+ 
+ #include <QObject>
+@@ -76,7 +78,7 @@ namespace QtLua {
+       }
+ #endif
+ 
+-    QTLUA_THROW(QtLua::QMetaObjectWrapper, "No invokable constructor found to create an object of the `%' class.", .arg(_mo->className()));
++    QTLUA_THROW(QtLua::QMetaObjectWrapper, "No invokable constructor found to create an object of the `%' class.", .arg(MetaCache::get_meta_name(_mo)));
+   }
+ 
+   Value QMetaObjectWrapper::meta_index(State *ls, const Value &key)
+@@ -119,10 +121,22 @@ namespace QtLua {
+ 
+   String QMetaObjectWrapper::get_value_str() const
+   {
+-    String res(_mo->className());
++    String res(MetaCache::get_meta_name(_mo));
+ 
+-    if (_mo->superClass())
+-      res += String(" : public ") + _mo->superClass()->className();
++    const MetaCache &mc = MetaCache::get_meta(_mo);
++    if (const QMetaObject *super = _mo->superClass()) {
++        const QMetaObject *supreme = mc.get_supreme_meta_object();
++        if(_mo == supreme) {
++            res += String(" : protected ") +
++                    MetaCache::get_meta_name(super);
++        }
++        else {
++            res += String(" : public ") +
++                    MetaCache::get_meta_name(super);
++        }
++        res += String(", supreme ") +
++                MetaCache::get_meta_name(supreme);
++    }
+ 
+     return res;
+   }
+diff --git a/src/qtluaqmetavalue.cc b/src/qtluaqmetavalue.cc
+index 859529f..cb1d15d 100644
+--- a/src/qtluaqmetavalue.cc
++++ b/src/qtluaqmetavalue.cc
+@@ -16,6 +16,8 @@
+ 
+     Copyright (C) 2008-2012, Alexandre Becoulet <alexandre.becoulet@free.fr>
+ 
++    Fork
++    Copyright (C) 2015 (Li, Kwue-Ron) <likwueron@gmail.com>
+ */
+ 
+ #include <QSize>
+@@ -147,6 +149,14 @@ namespace QtLua {
+ 	value[3] = color->blue();
+ 	return value;
+       }
++      case QMetaType::QVariant: {
++        const QVariant *v = reinterpret_cast<const QVariant*>(data);
++        return Value(ls, *v);
++      }
++      case QMetaType::QVariantList: {
++        const QVariantList *vl = reinterpret_cast<const QVariantList*>(data);
++        return Value(ls, *vl);
++      }
+       default:
+ 	if (type == ud_ref_type)
+ 	  {
+@@ -307,6 +317,16 @@ namespace QtLua {
+ 	*color = QColor(v.at(1).to_integer(), v.at(2).to_integer(), v.at(3).to_integer());
+ 	break;
+       }
++      case QMetaType::QVariant: {
++        QVariant *qv = reinterpret_cast<QVariant*>(data);
++        *qv = v.to_qvariant();
++        break;
++      }
++      case QMetaType::QVariantList: {
++        QVariantList *qvl = reinterpret_cast<QVariantList*>(data);
++        *qvl = v.to_qlist<QVariant>();
++        break;
++      }
+       default: {
+ 
+ 	if (!QMetaType::isRegistered(type))
+diff --git a/src/qtluaqobjectiterator.cc b/src/qtluaqobjectiterator.cc
+index 402ecbc..5fe0679 100644
+--- a/src/qtluaqobjectiterator.cc
++++ b/src/qtluaqobjectiterator.cc
+@@ -16,6 +16,8 @@
+ 
+     Copyright (C) 2008, Alexandre Becoulet <alexandre.becoulet@free.fr>
+ 
++    Fork
++    Copyright (C) 2015 (Li, Kwue-Ron) <likwueron@gmail.com>
+ */
+ 
+ #include <cstdlib>
+@@ -35,6 +37,7 @@ namespace QtLua {
+     _cur = CurMember;
+     _mc = &MetaCache::get_meta(mo);
+     _it = _mc->get_member_table().begin();
++    _supreme_mo = _mc->get_supreme_meta_object();
+ 
+     update();
+   }
+@@ -49,6 +52,7 @@ namespace QtLua {
+     QObject &obj = _qow->get_object();
+ 
+     _mc = &MetaCache::get_meta(obj.metaObject());
++    _supreme_mo = _mc->get_supreme_meta_object();
+     _it = _mc->get_member_table().begin();
+ 
+     update();
+@@ -86,12 +90,14 @@ namespace QtLua {
+ 
+ 	_cur = CurMember;
+ 
+-      case CurMember:
++      case CurMember: {
+ 	while (_it == _mc->get_member_table().end())
+ 	  {
+-	    const QMetaObject *super = _mc->get_meta_object()->superClass();
++            const QMetaObject *curMeta = _mc->get_meta_object();
++            bool reachSupreme = (curMeta == _supreme_mo);
++            const QMetaObject *super = curMeta->superClass();
+ 
+-	    if (!super)
++            if (!super || reachSupreme)
+ 	      {
+ 		_cur = CurEnd;
+ 		break;
+@@ -100,7 +106,7 @@ namespace QtLua {
+ 	    _mc = &MetaCache::get_meta(super);
+ 	    _it = _mc->get_member_table().begin();
+ 	  }
+-
++        }
+       case CurEnd:
+ 	break;
+       }
+diff --git a/src/qtluaqobjectwrapper.cc b/src/qtluaqobjectwrapper.cc
+index 92dadab..0e6735e 100644
+--- a/src/qtluaqobjectwrapper.cc
++++ b/src/qtluaqobjectwrapper.cc
+@@ -16,6 +16,8 @@
+ 
+     Copyright (C) 2008, Alexandre Becoulet <alexandre.becoulet@free.fr>
+ 
++    Fork
++    Copyright (C) 2015 (Li, Kwue-Ron) <likwueron@gmail.com>
+ */
+ 
+ #include <QDebug>
+@@ -52,6 +54,7 @@ namespace QtLua {
+ 	assert_do(QMetaObject::connect(obj, destroyindex, this, metaObject()->methodCount() + 0));
+ 
+ 	ls->_whash.insert(obj, this);
++
+ 	// increment reference count since we are bound to a qobject
+ 	_inc();
+       }
+@@ -285,9 +288,27 @@ namespace QtLua {
+       return Value(ls, QObjectWrapper::get_wrapper(ls, child));
+ 
+     // fallback to member read access
+-    Member::ptr m = MetaCache::get_meta(obj).get_member(skey);
++    MetaCache &mc = MetaCache::get_meta(obj);
++    Member::ptr m = mc.get_member(skey);
+ 
+-    return m.valid() ? m->access(*this) : Value(ls);
++    if(m.valid())
++      return m->access(*this);
++    else
++      {
++        int index = mc.get_index_getDP();
++        if(index != -1)
++          {
++            QVariant dp;
++            QByteArray name = skey;
++            void *argv[2] = {Q_RETURN_ARG(QVariant, dp).data(), Q_ARG(QByteArray, name).data()};
++            obj.qt_metacall(QMetaObject::InvokeMetaMethod, index, argv);
++            return Value(ls, dp);
++          }
++        else if(mc.can_auto_property()) {
++            return Value(ls, obj.property(skey));
++        }
++        else return Value(ls);
++      }
+   }
+ 
+   void QObjectWrapper::reparent(QObject *parent)
+@@ -312,6 +333,7 @@ namespace QtLua {
+     // handle existing children access
+     if (QObject *cobj = get_child(obj, skey))
+       {
++        //old child
+ 	QObjectWrapper::ptr cw = get_wrapper(ls, cobj);
+ 
+ 	if (value.is_nil())
+@@ -319,7 +341,7 @@ namespace QtLua {
+ 	    cw->reparent(0);
+ 	    return;
+ 	  }
+-
++        //new child
+ 	QObjectWrapper::ptr vw = value.to_userdata_cast<QObjectWrapper>();
+ 	QObject &vobj = vw->get_object();
+ 
+@@ -330,8 +352,9 @@ namespace QtLua {
+       }
+     else
+       {
++        MetaCache &mc = MetaCache::get_meta(obj);
+ 	// fallback to member write access
+-	Member::ptr m = MetaCache::get_meta(obj).get_member(skey);
++        Member::ptr m = mc.get_member(skey);
+ 
+ 	if (m.valid())
+ 	  {
+@@ -340,12 +363,37 @@ namespace QtLua {
+ 	  }
+       }
+ 
+-    // child insertion
+-    QObjectWrapper::ptr vw = value.to_userdata_cast<QObjectWrapper>();
+-    QObject &vobj = vw->get_object();
+-
+-    vobj.setObjectName(skey.to_qstring());
+-    vw->reparent(&obj);
++    switch(value.type()) {
++    case ValueBase::TUserData: {
++        // child insertion
++        QObjectWrapper::ptr vw = value.to_userdata_cast<QObjectWrapper>();
++        QObject &vobj = vw->get_object();
++
++        vobj.setObjectName(skey.to_qstring());
++        vw->reparent(&obj);
++    break; }
++    case ValueBase::TNumber:
++    case ValueBase::TBool:
++    case ValueBase::TString:
++    case ValueBase::TTable: {
++        MetaCache &mc = MetaCache::get_meta(obj);
++        int index = mc.get_index_setDP();
++        if(index != -1)
++        {
++          QVariant dp = value.to_qvariant();
++          QByteArray name = skey;
++          void *argv[3] = {0x0, Q_ARG(QByteArray, name).data(), Q_ARG(QVariant, dp).data()};
++          obj.qt_metacall(QMetaObject::InvokeMetaMethod, index, argv);
++        }
++        else if(mc.can_auto_property()) {
++            obj.setProperty(skey, value.to_qvariant());
++        }
++    break; }
++    default:
++        QTLUA_THROW(QtLua::QObjectWrapper, "Cannot assign value type `%' to QObject",
++                    .arg(value.type_name()));
++        break;
++    }
+   }
+ 
+   Ref<Iterator> QObjectWrapper::new_iterator(State *ls)
+@@ -369,16 +417,27 @@ namespace QtLua {
+ 
+   String QObjectWrapper::get_type_name() const
+   {
+-    return _obj ? _obj->metaObject()->className() : "";
++    return _obj ? MetaCache::get_meta_name(_obj->metaObject()) : "";
+   }
+ 
+   String QObjectWrapper::get_value_str() const
+   {
+-    if (!_obj)
+-      return "(deleted)";
+-    QString addr;
+-    addr.sprintf("%p", _obj);
+-    return addr;
++    if(!_obj) return "(deleted)";
++    QString result;
++    int index = MetaCache::get_index_toString(*_obj);
++    if(index != -1)
++      {
++        void *args[1] = {static_cast<void*>(&result)};
++        _obj->qt_metacall(QMetaObject::InvokeMetaMethod, index, args);
++
++      }
++    else
++      {
++        result = QString("0x%1(%2)")
++                .arg((qulonglong)_obj, 0, 16)
++                .arg(qobject_name(*_obj).constData());
++      }
++    return result;
+   }
+ 
+   void QObjectWrapper::completion_patch(String &, String &entry, int &)
+@@ -393,8 +452,7 @@ namespace QtLua {
+       {
+ 	QString name;
+ 
+-  name.sprintf("%s_%lx", obj.metaObject()->className(),
+-               static_cast<unsigned long>(reinterpret_cast<long long>(&obj)));
++  name.sprintf("%s_%lx", MetaCache::get_meta_name(obj.metaObject()).constData(), (unsigned long)&obj);
+ 	obj.setObjectName(name.toLower());
+       }
+ 
+diff --git a/src/qtluaqtlib.cc b/src/qtluaqtlib.cc
+index d419c26..23a893b 100644
+--- a/src/qtluaqtlib.cc
++++ b/src/qtluaqtlib.cc
+@@ -16,6 +16,8 @@
+ 
+     Copyright (C) 2008-2013, Alexandre Becoulet <alexandre.becoulet@free.fr>
+ 
++    Fork
++    Copyright (C) 2015 (Li, Kwue-Ron) <likwueron@gmail.com>
+ */
+ 
+ #include "config.hh"
+@@ -79,8 +81,7 @@ namespace QtLua {
+   typedef QMap<String, QMetaObjectWrapper > qmetaobject_table_t;
+ 
+   class QMetaObjectTable
+-    : public QHashProxyRo<qmetaobject_table_t>
+-    , public QObject
++    : public QObject, public QHashProxyRo<qmetaobject_table_t>
+   {
+   public:
+     QMetaObjectTable()
+@@ -88,10 +89,10 @@ namespace QtLua {
+     {
+       for (const meta_object_table_s *me = meta_object_table; me->_mo; me++)
+ 	{
+-	  String name(me->_mo->className());
++          String name(me->_mo->className());
+ 	  name.replace(':', '_');
+-	  _mo_table.insert(name, QMetaObjectWrapper(me->_mo, me->_creator));
+-	}
++          _mo_table.insert(name, QMetaObjectWrapper(me->_mo, me->_creator));
++        }
+ 
+       _mo_table.insert("Qt", QMetaObjectWrapper(&staticQtMetaObject));
+       _mo_table.insert("QSizePolicy", QMetaObjectWrapper(&QtLua::SizePolicy::staticMetaObject));
+@@ -100,13 +101,37 @@ namespace QtLua {
+     qmetaobject_table_t _mo_table;
+   };
+ 
+-  static QMetaObjectTable qt_meta;
++  static QMetaObjectTable *qt_meta = 0x0;
++
++  void create_qmeta_object_table()
++  {
++      if(!qt_meta) {
++          qt_meta = new QMetaObjectTable;
++          qt_meta->setParent(qApp);
++      }
++  }
+ 
+   void qtlib_register_meta(const QMetaObject *mo, qobject_creator *creator)
+   {
+-    String name(mo->className());
++    String name(MetaCache::get_meta_name(mo));
+     name.replace(':', '_');
+-    qt_meta._mo_table.insert(name, QMetaObjectWrapper(mo, creator));
++    qt_meta->_mo_table.insert(name, QMetaObjectWrapper(mo, creator));
++  }
++
++  void qtlib_register_meta(const QMetaObject *mo, const QMetaObject *supreme_mo, bool auto_property, qobject_creator *creator)
++  {
++      qtlib_register_meta(mo, creator);
++      MetaCache::create_meta(mo, supreme_mo, auto_property);
++  }
++  
++  void qtlib_enable_meta_auto_property(const QMetaObject *mo, bool enable)
++  {
++    MetaCache::get_meta(mo).enable_auto_property(enable);
++  }
++
++  void qtlib_register_static_method(const QMetaObject *mo, const String &name, FunctionSignature func, const QList<String> &argv)
++  {
++      MetaCache::add_static_function(mo, name, func, argv);
+   }
+ 
+ 
+@@ -1057,7 +1082,7 @@ namespace QtLua {
+    
+   void qtluaopen_qt(State *ls)
+   {
+-    ls->set_global("qt.meta", Value(ls, qt_meta));
++    ls->set_global("qt.meta", Value(ls, *qt_meta));
+ 
+     QTLUA_FUNCTION_REGISTER(ls, "qt.", new_qobject           );
+     QTLUA_FUNCTION_REGISTER(ls, "qt.", connect               );
+diff --git a/src/qtluaqtlib.hh b/src/qtluaqtlib.hh
+index cada872..a4cab12 100644
+--- a/src/qtluaqtlib.hh
++++ b/src/qtluaqtlib.hh
+@@ -16,6 +16,8 @@
+ 
+     Copyright (C) 2008, Alexandre Becoulet <alexandre.becoulet@free.fr>
+ 
++    Fork
++    Copyright (C) 2015 (Li, Kwue-Ron) <likwueron@gmail.com>
+ */
+ 
+ #ifndef QTLUAQTLIB_HH_
+@@ -30,6 +32,8 @@ namespace QtLua {
+ 
+   void qtluaopen_qt(State *ls);
+ 
++  void create_qmeta_object_table();
++
+   /** Fake QSizePolicy class needed to expose Policy enum */
+   class SizePolicy
+     : public QObject
+diff --git a/src/qtluastate.cc b/src/qtluastate.cc
+index ccb2a2a..6f01732 100644
+--- a/src/qtluastate.cc
++++ b/src/qtluastate.cc
+@@ -16,6 +16,8 @@
+ 
+     Copyright (C) 2008, Alexandre Becoulet <alexandre.becoulet@free.fr>
+ 
++    Fork
++    Copyright (C) 2015 (Li, Kwue-Ron) <likwueron@gmail.com>
+ */
+ 
+ #include "config.hh"
+@@ -749,6 +751,7 @@ State::State()
+   assert(Value::TFunction == LUA_TFUNCTION);
+   assert(Value::TUserData == LUA_TUSERDATA);
+   assert(Value::TThread == LUA_TTHREAD);
++  create_qmeta_object_table();
+ 
+ #if LUA_VERSION_NUM < 501
+   _mst = _lst = lua_open();
+@@ -983,104 +986,86 @@ State * State::get_this(lua_State *st)
+   lua_pop(st, 1);
+ #endif
+ 
+-bool State::openlib(Library lib)
++bool State::openlib(Librarys lib)
+ {
+-  switch (lib)
+-    {
+-    case CoroutineLib:
++    bool hasSetted = false;
++    if(lib & CoroutineLib) {
+ #if LUA_VERSION_NUM >= 502
+       QTLUA_LUA_CALL(_lst, luaopen_coroutine, "coroutine");
+-      return true;
++      hasSetted = true;
++#else
++      lib |= BaseLib;
+ #endif
+-    case BaseLib:
+-      QTLUA_LUA_CALL(_lst, luaopen_base, "_G");
+-      return true;
++    }
++    if(lib & BaseLib) {
++        QTLUA_LUA_CALL(_lst, luaopen_base, "_G");
++        hasSetted = true;
++    }
+ #ifdef HAVE_LUA_PACKAGELIB
+-    case PackageLib:
++    if(lib & PackageLib) {
+       QTLUA_LUA_CALL(_lst, luaopen_package, "package");
+-      return true;
++      hasSetted = true;
++    }
+ #endif
+-    case StringLib:
++    if(lib & StringLib) {
+       QTLUA_LUA_CALL(_lst, luaopen_string, "string");
+-      return true;
+-    case TableLib:
++      hasSetted = true;
++    }
++    if(lib & TableLib) {
+       QTLUA_LUA_CALL(_lst, luaopen_table, "table");
+-      return true;
+-    case MathLib:
++      hasSetted = true;
++    }
++    if(lib & MathLib) {
+       QTLUA_LUA_CALL(_lst, luaopen_math, "math");
+-      return true;
+-    case IoLib:
++      hasSetted = true;
++    }
++    if(lib & IoLib) {
+       QTLUA_LUA_CALL(_lst, luaopen_io, "io");
+-      return true;
++      hasSetted = true;
++    }
+ #ifdef HAVE_LUA_OSLIB
+-    case OsLib:
++    if(lib & OsLib) {
+       QTLUA_LUA_CALL(_lst, luaopen_os, "os");
+-      return true;
++      hasSetted = true;
++    }
+ #endif
+-    case DebugLib:
++    if(lib & DebugLib) {
+       QTLUA_LUA_CALL(_lst, luaopen_debug, "debug");
+-      return true;
+-
+-#if LUA_VERSION_NUM >= 502 && LUA_VERSION_NUM < 504
+-    case Bit32Lib:
+-      QTLUA_LUA_CALL(_lst, luaopen_bit32, "bit32");
+-      return true;
+-#endif
+-
+-#ifdef HAVE_LUA_JITLIB
+-    case JitLib:
+-      QTLUA_LUA_CALL(_lst, luaopen_jit, "jit");
+-      return true;
+-#endif
+-#ifdef HAVE_LUA_FFILIB
+-    case FfiLib:
+-      QTLUA_LUA_CALL(_lst, luaopen_ffi, "ffi");
+-      return true;
+-#endif
+-
+-    case AllLibs:
++      hasSetted = true;
++    }
+ #if LUA_VERSION_NUM >= 502
+-      QTLUA_LUA_CALL(_lst, luaopen_coroutine, "coroutine");
+-#if LUA_VERSION_NUM < 504
++    if(lib & Bit32Lib) {
+       QTLUA_LUA_CALL(_lst, luaopen_bit32, "bit32");
++      hasSetted = true;
++    }
+ #endif
+-#endif
+-#ifdef HAVE_LUA_OSLIB
+-      QTLUA_LUA_CALL(_lst, luaopen_os, "os");
+-#endif
+-#ifdef HAVE_LUA_PACKAGELIB
+-      QTLUA_LUA_CALL(_lst, luaopen_package, "package");
+-#endif
+-      QTLUA_LUA_CALL(_lst, luaopen_base, "_G");
+-      QTLUA_LUA_CALL(_lst, luaopen_string, "string");
+-      QTLUA_LUA_CALL(_lst, luaopen_table, "table");
+-      QTLUA_LUA_CALL(_lst, luaopen_math, "math");
+-      QTLUA_LUA_CALL(_lst, luaopen_io, "io");
+-      QTLUA_LUA_CALL(_lst, luaopen_debug, "debug");
+ #ifdef HAVE_LUA_JITLIB
++    if(lib & JitLib) {
+       QTLUA_LUA_CALL(_lst, luaopen_jit, "jit");
++      hasSetted = true;
++    }
+ #endif
+ #ifdef HAVE_LUA_FFILIB
++    if(lib & FfiLib) {
+       QTLUA_LUA_CALL(_lst, luaopen_ffi, "ffi");
++      hasSetted = true;
++    }
+ #endif
+-      qtluaopen_qt(this);
+-
+-    case QtLuaLib:
++    if(lib & QtLuaLib) {
+       reg_c_function("print", lua_cmd_print);
+       reg_c_function("list", lua_cmd_list);
+       reg_c_function("each", lua_cmd_each);
+       reg_c_function("help", lua_cmd_help);
+       reg_c_function("plugin", lua_cmd_plugin);
+       reg_c_function("qtype", lua_cmd_qtype);
+-      return true;
+-
+-    case QtLib:
++      hasSetted = true;
++    }
++    if(lib & QtLib) {
+       qtluaopen_qt(this);
+-      return true;
+-
+-    default:
+-      return false;
++      hasSetted = true;
+     }
++
++    return hasSetted;
+ }
+ 
+ int State::lua_version() const
+diff --git a/src/qtluastaticfunction.cc b/src/qtluastaticfunction.cc
+new file mode 100644
+index 0000000..a2dd7c4
+--- /dev/null
++++ b/src/qtluastaticfunction.cc
+@@ -0,0 +1,83 @@
++/*
++    This file is part of LibQtLua.
++
++    LibQtLua is free software: you can redistribute it and/or modify
++    it under the terms of the GNU Lesser General Public License as published by
++    the Free Software Foundation, either version 3 of the License, or
++    (at your option) any later version.
++
++    LibQtLua is distributed in the hope that it will be useful,
++    but WITHOUT ANY WARRANTY; without even the implied warranty of
++    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++    GNU General Public License for more details.
++
++    You should have received a copy of the GNU Lesser General Public License
++    along with LibQtLua.  If not, see <http://www.gnu.org/licenses/>.
++
++    Copyright (C) 2008, Alexandre Becoulet <alexandre.becoulet@free.fr>
++
++    Fork
++    Copyright (C) 2015 (Li, Kwue-Ron) <likwueron@gmail.com>
++
++*/
++
++#include <internal/QObjectWrapper>
++#include <internal/MetaCache>
++#include <internal/StaticFunction>
++#include <internal/QMetaValue>
++#include <internal/qtluapoolarray.hh>
++
++namespace QtLua {
++
++  StaticFunction::StaticFunction(const QMetaObject *mo, 
++                                 const String &name, FunctionSignature func, 
++                                 const QMetaType::Type argt_array[], int argc)
++    : Member(mo, -1), FunctionWrapperData(func, argt_array, argc), 
++    _name(name)
++  {
++    
++  }
++  
++  StaticFunction::StaticFunction(const QMetaObject *mo, 
++                                 const String &name, FunctionSignature func, 
++                                 const QList<String> &argv)
++    : Member(mo, -1), FunctionWrapperData(func, argv), 
++    _name(name)
++  {
++  }
++
++  Value::List StaticFunction::meta_call(State *ls, const Value::List &lua_args)
++  {
++    return _func(ls, lua_args);
++  }
++
++  String StaticFunction::get_type_name() const
++  {
++	return "QtLua::Method<static>";
++  }
++
++  String StaticFunction::get_value_str() const
++  {
++    return _return_type_name + " " + MetaCache::get_meta_name(_mo) + "::" + _name + "(" + _argvs_type_name + ")";
++  }
++
++  bool StaticFunction::support(Value::Operation c) const
++  {
++    switch (c)
++      {
++      case Value::OpCall:
++	return true;
++      default:
++	return false;
++      }
++  }
++
++  void StaticFunction::completion_patch(String &path, String &entry, int &offset)
++  {
++	if (!path.isEmpty()) path[path.size() - 1] = '.';
++	entry += "()";
++	offset--;
++  }
++
++}
++
+diff --git a/src/qtluavaluebase.cc b/src/qtluavaluebase.cc
+index e733017..6c9c600 100644
+--- a/src/qtluavaluebase.cc
++++ b/src/qtluavaluebase.cc
+@@ -16,6 +16,8 @@
+ 
+     Copyright (C) 2008, Alexandre Becoulet <alexandre.becoulet@free.fr>
+ 
++    Fork
++    Copyright (C) 2015 (Li, Kwue-Ron) <likwueron@gmail.com>
+ */
+ 
+ #include <cstdlib>
+@@ -34,6 +36,11 @@
+ #include <internal/TableIterator>
+ #include <internal/QMetaValue>
+ 
++//table covert to qvariant
++#include <QColor>
++#include <QRectF>
++#include <QPointF>
++
+ extern "C" {
+ #include <lua.h>
+ #if LUA_VERSION_NUM < 501
+@@ -633,6 +640,30 @@ QVariant ValueBase::to_qvariant() const
+       return QVariant(to_number());
+     case TString:
+       return QVariant(to_string());
++    case TTable: {
++      QList<qreal> list = to_qlist<qreal>();
++      switch(list.count()) {
++      case 2:
++        return QVariant(QPointF(list.at(0),
++                                list.at(1))
++                        );
++      case 3:
++        return QVariant(QColor(int(list.at(0)),
++                               int(list.at(1)),
++                               int(list.at(2)))
++                        );
++      case 4:
++        return QVariant(QRectF(list.at(0),
++                               list.at(1),
++                               list.at(2),
++                               list.at(3))
++                        );
++      default:
++        QTLUA_THROW(QtLua::ValueBase, "Can not convert a lua::table with % argument(s) to a QVariant.", .arg(list.count()));
++      }
++
++
++    }
+ 
+     default:
+       QTLUA_THROW(QtLua::ValueBase, "Can not convert a `%' lua value to a QVariant.", .arg(type_name()));
+diff --git a/tools/qtlua/CMakeLists.txt b/tools/qtlua/CMakeLists.txt
+index 539e6c4..be5b6f6 100644
+--- a/tools/qtlua/CMakeLists.txt
++++ b/tools/qtlua/CMakeLists.txt
+@@ -1,5 +1,8 @@
++IF(WIN32)
++SET(GUI_TYPE WIN32)
++ENDIF(WIN32)
+ 
+-ADD_EXECUTABLE(qtlua_app qtlua.cc )
++ADD_EXECUTABLE(qtlua_app ${GUI_TYPE} qtlua.cc )
+ QT5_USE_MODULES(qtlua_app Widgets Core)
+ 
+ TARGET_LINK_LIBRARIES(qtlua_app qtlua)
+-- 
+2.24.0.windows.2
+
