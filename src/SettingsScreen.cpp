@@ -12,6 +12,7 @@
 #include "ui_SettingsScreen.h"
 
 #include <QApplication>
+#include <QDebug>
 #include <QDesktopWidget>
 #include <QFileDialog>
 #include <QFileInfo>
@@ -174,8 +175,14 @@ void CSettingsScreen::Load()
 
   emit m_spWindowContext->SignalSetDownloadButtonVisible(false);
 
+#ifndef Q_OS_ANDROID
   qint32 iThisScreen = QApplication::desktop()->screenNumber(this);
-  QScreen* pThisScreen = QApplication::screens()[iThisScreen];
+  auto vpScreens = QApplication::screens();
+  QScreen* pThisScreen = vpScreens[iThisScreen];
+#else
+  QScreen* pThisScreen = QApplication::screens()[0];
+#endif
+
   assert(nullptr != pThisScreen);
   if (nullptr == pThisScreen) { return; }
   QSize screenSize = pThisScreen->availableSize();

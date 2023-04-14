@@ -245,3 +245,10 @@ Changes:
   (Folders first, and using natural sort) when sorting for names.
 - Removed auto-replay of Audio Resources in the Editor because it felt 
   irritating when working with audio.
+
+=================
+Version 1.2.4.0
+=================
+
+Fixed Bugs:
+- Fixed crash on Android when trying to obtain screen size
