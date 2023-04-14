@@ -154,9 +154,9 @@ void CSettingsScreen::Initialize()
   // disable settings pages that do not make sense on mobile
   m_spUi->tabWidget->setTabEnabled(0, false);
   m_spUi->tabWidget->setTabEnabled(3, false);
+  m_spUi->tabWidget->setTabEnabled(5, false);
   m_spUi->tabWidget->setCurrentIndex(1);
   m_spUi->pWindowModeContainer->hide();
-  m_spUi->pStyleHotoadContainer->hide();
 
   widget_helpers::RetainSizeAndHide(m_spUi->pBackButton);
 #endif

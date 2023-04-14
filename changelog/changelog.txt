@@ -250,5 +250,8 @@ Changes:
 Version 1.2.4.0
 =================
 
+Changes:
+- Removed advanced settings page on Android, because it was empty anyways.
+
 Fixed Bugs:
 - Fixed crash on Android when trying to obtain screen size
