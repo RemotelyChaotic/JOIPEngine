@@ -1,109 +1,90 @@
 =================
-Version 1.0.0.0
+Version 1.2.4.0
 =================
 
-- First release
+Changes:
+- Removed advanced settings page on Android, because it was empty anyways.
+- Inverted Changelog order so players can see the new changes without scrolling
+  down for an hour.
+
+Fixed Bugs:
+- Fixed crash on Android when trying to obtain screen size
 
 =================
-Version 1.1.0.0
+Version 1.2.3.0
 =================
 
 New Features:
-- Help overlay added that can interactively display help based on clicked engine 
-  component.
-- Editor has a new view to configure project properties
-- Kink tag list added to project configuration describing all kinks used in the 
-  project.
-- Target verision and project version added to project configuration describing
-  the project's version and the engine version the project was saved in.
-- Support for key bindings added and settings expanded.
-- Project-Player can be paused.
-- Projects can now be exported as a bundle, packing all resources in a single
-  file.
-- Added PlayerMetronome component to player and editor.
-- Option to pause Player automativally if app is not currently active.
-- Optional tutorial for the editor.
-- Scripts can now include other scripts to provide some modularisation
-  to the JOI-Projects.
-- Resources can have a source link attached to them. This is visible
-  in various places.
-
-Updated Features:
-- Upgrade to Qt5.14.2 with msvc2017 for more QJSEngine and QML features.
-  -> Recompiled dependant libraries.
-- Changed card selection backend to QML and greatly improved card display.
-- Changed Project-Player backend to QML and improved overall look.
-- New resource types added: Script and Database
-  -> Resources of type Other in old projects will be reassigned on project
-     load if needed.
-- Changed syntax highlighting in editor to new backend.
-  -> Highlighter can now be styled.
-- PlayerTextBox text alignment can now be set to either Left, Right or Center.
-- PlayerTextBox can now display a portrait next to the text. This portrait
-  can be any Image or Movie type Resource.
-- Styles have been updated.
-- New button to Script type nodes added which allows to add scripts to the
-  scene.
-- Code Editor has a Search functionality and behaves more akin to other
-  code editors (completion of brackets, quotes, tab-behavior, etc.)
-- Support for multiple Sound Resources playing simultaniously and
-  the number of Sound Resources that can be played simultaniously can
-  be configured on a Project level.
-- Sound Resources fade out when stopped instead of abruptly stopping.
+- Added a new "Show in Explorer" option to the context menu in the Resource Tree.
 
 Changes:
-- In-Game title changed to JOIP Engine.
-- Reworked editor models to work more consistently.
-- Reworked project naming restrictions to work on all future supported
-  systems.
-- Code editor displays special info-text if no scripts are available.
-- Removed WebEngine because of the overhead of using it.
-- Changed build system from QMake to CMake.
-- Reworked overlays. Overlays are using a manager to determine z-order.
-- Fullscreen mode is on by default.
-- Removed map button for now, since it is not implemented yet.
-
-Fixed Bugs:
-- Timer interval bug fixed; the timer doesn't run longer than expected anymore.
-- Fixed OpenGL issues that prevented menus to be opened.
-- Fixed multiple issues with editor code overlays.
-
+- EOS script files have a new graphical editor similar to the Milovana editor.
+- Project Describtion can be edited in a new richtext editor.
+- Added smaller animations to various ui interactions
+- Project version warning on card is only shown if project version is larger than
+  the current engine version.
+- Sorting of Resource View improved. It now sorts items like the Explorer would
+  (Folders first, and using natural sort) when sorting for names.
+- Removed auto-replay of Audio Resources in the Editor because it felt 
+  irritating when working with audio.
 
 =================
-Version 1.1.1.0
+Version 1.2.2.0
+=================
+
+Fixed Bugs:
+- Fixed Tutorials not working.
+- Fixed EOS script commands with empty arrays not evaluating correctly.
+- Fixed JS import parsing for aliases containing "as".
+- Fixed missing images in default style
+- Fixed being able to set editor layout to "none" (default value) in settings.
+- Cosmetic fixes in html help.
+
+=================
+Version 1.2.1.0
 =================
 
 New Features:
-- PlayerMetronome can be muted with the function "setMuted".
-- PCX and DCX image format support.
+- JS-Style import statements for Modules implemented without defaultMember suport 
+  for now.
+- PlayerMediaPlayer supports a stop frame argument for play functions.
+- PlayerMediaPlayer supports setting the volume of Resources via setVolume.
+- PlayerMetronome supports setting the volume via setVolume.
+- New window mode setting. The application can now be displayed in
+  fullscreen, borderless or windowed mode.
+- Code Editor & Help can be zoomed with CTRL+MWhl.
+- Code-internal (experimental) Lua support (not for Script Resources implemented yet).
+- Context menu added to Resource Views.
 
 Changes:
-- Resource tree filtering is more consistent with other trees and hides
-  folders whose contents do not match the filter.
-- Application auto-detects old version and asks to overwrite content
-  folder with own content folder.
-- Kink / Fetish tags are sorted.
+- Resource Explorer View shows folder contents instead of the folder if a folder
+  is selected in Tree View.
+- Project Cards are rendered with a gloss effect.
+- include method can include non-JSON-Formated scripts, which are evaled in the
+  global scope.
+- Resource Viewer in Editor shows timing info and preview for Movie and Sound
+  type Resources.
+- Resource Viewers only show relevant Resource types and only the name column.
+- Code snippet overlays are shown in the Code Editor instead of the entire Editor
+  window.
+- Changed UI to work reliably with mobile and extremely small resolutions.
+- On Windows, notifications are shown as toast notifications if app is not
+  active.
+- On Windows, taskbar shows icon overlays based on app state.
+- Improved tooltips for Resources.
+- Resource Views show the currently selected Title Card with an icon.
 
 Fixed Bugs:
-- Metronome not accepting null or empty string to reset beat sound was fixed.
-- Fixed Metronome not clearing on stop.
-- "Pause Player when app is not active" setting can now be actually toggled.
-- Filtered Resource tree updates when a Resource is added or removed.
-- Wildly jumping PlayerTextBox fixed.
-- Fixed buttons in Player not accepting shortcuts and changing their text when
-  new buttons are created.
-- Fixed Sounds in PlayerMetronome not playing if the metronome was too fast.
-- On reloading a Project in the Editor the tags will not show up multiple times.
-
-
-=================
-Version 1.1.2.0
-=================
-
-Fixed Bugs:
-- Fixed the tutorial. It should not get stuck or make the highlights disappear now.
-- Sped up loading times at startup a little.
-
+- Flickering in Resource Explorer View was fixed.
+- Early stopping of Resource preview load in Explorer View was fixed.
+- Wheel scrolling of Project card selection fixed.
+- When debugging a script, the player is not shown stacked on top of everything.
+- Fixed some style bugs.
+- Fixed a bug, where Scenes could not be resolved, and thus the Player could not
+  start correctly due to different traversal of the SceneFlow.
+- Fixed EOS teases setting a non-image file as Title Image.
+- General tease download (UI) fixes.
+- Editor search bar fixes.
 
 =================
 Version 1.2.0.0
@@ -171,87 +152,105 @@ Fixed Bugs:
   the folder.
 
 =================
-Version 1.2.1.0
+Version 1.1.2.0
+=================
+
+Fixed Bugs:
+- Fixed the tutorial. It should not get stuck or make the highlights disappear now.
+- Sped up loading times at startup a little.
+
+=================
+Version 1.1.1.0
 =================
 
 New Features:
-- JS-Style import statements for Modules implemented without defaultMember suport 
-  for now.
-- PlayerMediaPlayer supports a stop frame argument for play functions.
-- PlayerMediaPlayer supports setting the volume of Resources via setVolume.
-- PlayerMetronome supports setting the volume via setVolume.
-- New window mode setting. The application can now be displayed in
-  fullscreen, borderless or windowed mode.
-- Code Editor & Help can be zoomed with CTRL+MWhl.
-- Code-internal (experimental) Lua support (not for Script Resources implemented yet).
-- Context menu added to Resource Views.
+- PlayerMetronome can be muted with the function "setMuted".
+- PCX and DCX image format support.
 
 Changes:
-- Resource Explorer View shows folder contents instead of the folder if a folder
-  is selected in Tree View.
-- Project Cards are rendered with a gloss effect.
-- include method can include non-JSON-Formated scripts, which are evaled in the
-  global scope.
-- Resource Viewer in Editor shows timing info and preview for Movie and Sound
-  type Resources.
-- Resource Viewers only show relevant Resource types and only the name column.
-- Code snippet overlays are shown in the Code Editor instead of the entire Editor
-  window.
-- Changed UI to work reliably with mobile and extremely small resolutions.
-- On Windows, notifications are shown as toast notifications if app is not
-  active.
-- On Windows, taskbar shows icon overlays based on app state.
-- Improved tooltips for Resources.
-- Resource Views show the currently selected Title Card with an icon.
+- Resource tree filtering is more consistent with other trees and hides
+  folders whose contents do not match the filter.
+- Application auto-detects old version and asks to overwrite content
+  folder with own content folder.
+- Kink / Fetish tags are sorted.
 
 Fixed Bugs:
-- Flickering in Resource Explorer View was fixed.
-- Early stopping of Resource preview load in Explorer View was fixed.
-- Wheel scrolling of Project card selection fixed.
-- When debugging a script, the player is not shown stacked on top of everything.
-- Fixed some style bugs.
-- Fixed a bug, where Scenes could not be resolved, and thus the Player could not
-  start correctly due to different traversal of the SceneFlow.
-- Fixed EOS teases setting a non-image file as Title Image.
-- General tease download (UI) fixes.
-- Editor search bar fixes.
+- Metronome not accepting null or empty string to reset beat sound was fixed.
+- Fixed Metronome not clearing on stop.
+- "Pause Player when app is not active" setting can now be actually toggled.
+- Filtered Resource tree updates when a Resource is added or removed.
+- Wildly jumping PlayerTextBox fixed.
+- Fixed buttons in Player not accepting shortcuts and changing their text when
+  new buttons are created.
+- Fixed Sounds in PlayerMetronome not playing if the metronome was too fast.
+- On reloading a Project in the Editor the tags will not show up multiple times.
 
 =================
-Version 1.2.2.0
-=================
-
-Fixed Bugs:
-- Fixed Tutorials not working.
-- Fixed EOS script commands with empty arrays not evaluating correctly.
-- Fixed JS import parsing for aliases containing "as".
-- Fixed missing images in default style
-- Fixed being able to set editor layout to "none" (default value) in settings.
-- Cosmetic fixes in html help.
-
-=================
-Version 1.2.3.0
+Version 1.1.0.0
 =================
 
 New Features:
-- Added a new "Show in Explorer" option to the context menu in the Resource Tree.
+- Help overlay added that can interactively display help based on clicked engine 
+  component.
+- Editor has a new view to configure project properties
+- Kink tag list added to project configuration describing all kinks used in the 
+  project.
+- Target verision and project version added to project configuration describing
+  the project's version and the engine version the project was saved in.
+- Support for key bindings added and settings expanded.
+- Project-Player can be paused.
+- Projects can now be exported as a bundle, packing all resources in a single
+  file.
+- Added PlayerMetronome component to player and editor.
+- Option to pause Player automativally if app is not currently active.
+- Optional tutorial for the editor.
+- Scripts can now include other scripts to provide some modularisation
+  to the JOI-Projects.
+- Resources can have a source link attached to them. This is visible
+  in various places.
+
+Updated Features:
+- Upgrade to Qt5.14.2 with msvc2017 for more QJSEngine and QML features.
+  -> Recompiled dependant libraries.
+- Changed card selection backend to QML and greatly improved card display.
+- Changed Project-Player backend to QML and improved overall look.
+- New resource types added: Script and Database
+  -> Resources of type Other in old projects will be reassigned on project
+     load if needed.
+- Changed syntax highlighting in editor to new backend.
+  -> Highlighter can now be styled.
+- PlayerTextBox text alignment can now be set to either Left, Right or Center.
+- PlayerTextBox can now display a portrait next to the text. This portrait
+  can be any Image or Movie type Resource.
+- Styles have been updated.
+- New button to Script type nodes added which allows to add scripts to the
+  scene.
+- Code Editor has a Search functionality and behaves more akin to other
+  code editors (completion of brackets, quotes, tab-behavior, etc.)
+- Support for multiple Sound Resources playing simultaniously and
+  the number of Sound Resources that can be played simultaniously can
+  be configured on a Project level.
+- Sound Resources fade out when stopped instead of abruptly stopping.
 
 Changes:
-- EOS script files have a new graphical editor similar to the Milovana editor.
-- Project Describtion can be edited in a new richtext editor.
-- Added smaller animations to various ui interactions
-- Project version warning on card is only shown if project version is larger than
-  the current engine version.
-- Sorting of Resource View improved. It now sorts items like the Explorer would
-  (Folders first, and using natural sort) when sorting for names.
-- Removed auto-replay of Audio Resources in the Editor because it felt 
-  irritating when working with audio.
-
-=================
-Version 1.2.4.0
-=================
-
-Changes:
-- Removed advanced settings page on Android, because it was empty anyways.
+- In-Game title changed to JOIP Engine.
+- Reworked editor models to work more consistently.
+- Reworked project naming restrictions to work on all future supported
+  systems.
+- Code editor displays special info-text if no scripts are available.
+- Removed WebEngine because of the overhead of using it.
+- Changed build system from QMake to CMake.
+- Reworked overlays. Overlays are using a manager to determine z-order.
+- Fullscreen mode is on by default.
+- Removed map button for now, since it is not implemented yet.
 
 Fixed Bugs:
-- Fixed crash on Android when trying to obtain screen size
+- Timer interval bug fixed; the timer doesn't run longer than expected anymore.
+- Fixed OpenGL issues that prevented menus to be opened.
+- Fixed multiple issues with editor code overlays.
+
+=================
+Version 1.0.0.0
+=================
+
+- First release
