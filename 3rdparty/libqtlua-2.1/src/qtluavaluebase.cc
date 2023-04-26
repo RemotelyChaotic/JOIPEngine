@@ -661,9 +661,9 @@ QVariant ValueBase::to_qvariant() const
       default:
         QTLUA_THROW(QtLua::ValueBase, "Can not convert a lua::table with % argument(s) to a QVariant.", .arg(list.count()));
       }
-
-
     }
+    case TUserData:
+      return QVariant::fromValue(to_qobject());
 
     default:
       QTLUA_THROW(QtLua::ValueBase, "Can not convert a `%' lua value to a QVariant.", .arg(type_name()));
