@@ -4,6 +4,9 @@ Version 1.2.5.0
 
 Changes:
 - Updated tutorial to account for EOS scripts.
+- Title Card decoration in Resource Detail View does not take away space
+  from the actual image and is instead drawn over the image in the top
+  left corner.
 
 Fixed Bugs:
 - Fixed initially opened script contents not showing in the Script Editor

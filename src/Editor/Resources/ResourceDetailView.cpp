@@ -55,6 +55,7 @@ public:
       {
         const QString sName = pModel->data(indexName).toString();
         const QVariant vType = pModel->data(indexType);
+        const QPixmap decoration = pModel->data(indexName, Qt::DecorationRole).value<QPixmap>();
         const QVariant vItemType = pModel->data(indexType, CResourceTreeItemModel::eItemTypeRole);
         const qint32 iLoadedId = pModel->data(indexType, CResourceTreeItemModel::eLoadedIDRole).toInt();
         QIcon::Mode mode = opt.showDecorationSelected ? QIcon::Selected :
@@ -159,6 +160,9 @@ public:
           pPainter->restore();
         }
 
+        // draw decoration in top left
+        pStyle->drawItemPixmap(pPainter, opt.rect, Qt::AlignTop | Qt::AlignLeft, decoration);
+
         // and finally draw text below icon
         QRect rectText = opt.rect.adjusted(0, m_pView->iconSize().height(), 0, 0);
         pStyle->drawItemText(pPainter, rectText, opt.displayAlignment | Qt::TextWrapAnywhere,
@@ -207,6 +211,14 @@ public:
   void StopLoading()
   {
     m_pLoading.stop();
+  }
+
+protected:
+  void initStyleOption(QStyleOptionViewItem* pOption,
+                       const QModelIndex& index) const override
+  {
+    QStyledItemDelegate::initStyleOption(pOption, index);
+    pOption->decorationSize = QSize();
   }
 
 private:
