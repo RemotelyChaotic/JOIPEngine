@@ -947,7 +947,7 @@ QSpinBox::down-arrow:disabled,
 CLongLongSpinBox::down-arrow:disabled,
 QDoubleSpinBox::down-arrow:off,
 QTimeEdit::down-arrow:off,
-QSpinBox::down-arrow:off
+QSpinBox::down-arrow:off,
 CLongLongSpinBox::down-arrow:off { /* off state when value in min */
    image: url(ui/ButtonMinus.png);
    background: rgb(52, 69, 97);

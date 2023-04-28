@@ -168,6 +168,17 @@ QTabBar::tab:!selected {
   margin-top: 2px; /* make non-selected tabs look smaller */
 }
 
+QTabBar::tab:disabled {
+  min-width: 0px;
+  max-width: 0px;
+  border: none;
+  border-radius: 0px;
+  border-image: none;
+  padding: 0px;
+  color: rgba(0,0,0,0);
+  background-color: rgba(0,0,0,0);
+}
+
 /*
  ----- QLabel, QToolTip, CTitleLabel
 */
@@ -1616,13 +1627,26 @@ COverlayBase {
   border-left: 20px transparent;
   padding: 5;
 }
-COverlayBase#HelpButtonOverlay {
+COverlayBase#HelpButtonOverlay,
+COverlayBase#DownloadButtonOverlay {
   color: white;
   background-color: transparent;
   border-radius: 0px;
   border-image: none;
   border: none;
   padding: 0;
+}
+
+CTextEditZoomEnabler {
+  background-color: rgba(20, 20, 20, 200);
+  border-radius: 10px;
+  border: none;
+  padding: 0;
+}
+
+CTextEditZoomEnabler>QLabel {
+  color: white;
+  background-color: rgba(20, 20, 20, 200);
 }
 
 /*
@@ -1842,4 +1866,9 @@ CResourceDetailView {
   qproperty-iconFile: url(ui/FileIcon.png);
   qproperty-iconFolder: url(ui/FolderIcon.png);
   qproperty-spacing: 6;
+}
+
+CResourceModelView {
+  qproperty-cardIcon: url(ui/ButtonTitleCard.png);
+  qproperty-cardIconSize: 16;
 }

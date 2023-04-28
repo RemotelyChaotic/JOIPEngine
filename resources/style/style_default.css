@@ -867,7 +867,8 @@ QComboBox:!editable:on, QComboBox::drop-down:editable:on {
 */
 QDoubleSpinBox,
 QTimeEdit,
-QSpinBox {
+QSpinBox,
+CLongLongSpinBox {
   color: white;
   background-color: black;
   padding-right: 16px; /* make room for the arrows */
@@ -877,14 +878,16 @@ QSpinBox {
 }
 QDoubleSpinBox:disabled,
 QTimeEdit:disabled,
-QSpinBox:disabled {
+QSpinBox:disabled,
+CLongLongSpinBox:disabled {
   color: silver;
   background: black;
 }
 
 QDoubleSpinBox::up-button,
 QTimeEdit::up-button,
-QSpinBox::up-button {
+QSpinBox::up-button,
+CLongLongSpinBox::up-button {
   subcontrol-origin: border;
   subcontrol-position: top right; /* position at the top right corner */
 
@@ -895,32 +898,37 @@ QSpinBox::up-button {
 }
 QDoubleSpinBox::up-button:hover,
 QTimeEdit::up-button:hover,
-QSpinBox::up-button:hover {
+QSpinBox::up-button:hover,
+CLongLongSpinBox::up-button:hover{
   background: qradialgradient(cx: 0.3, cy: -0.4, fx: 0.3, fy: -0.4, radius: 1.35, stop: 0 #aa00aa, stop: 1 #b900b9);
 }
 QDoubleSpinBox::up-button:pressed,
 QTimeEdit::up-button:pressed,
-QSpinBox::up-button:pressed {
+QSpinBox::up-button:pressed,
+CLongLongSpinBox::up-button:pressed{
   background: qradialgradient(cx: 0.4, cy: -0.1, fx: 0.4, fy: -0.1, radius: 1.35, stop: 0 #dd00dd, stop: 1 #aa00aa);
 }
 
 QDoubleSpinBox::up-arrow,
 QTimeEdit::up-arrow,
-QSpinBox::up-arrow {
+QSpinBox::up-arrow,
+CLongLongSpinBox::up-arrow {
   image: url(:/resources/style/img/ButtonPlus.png);
   width: 12px;
   height: 12px;
 }
 QDoubleSpinBox::up-arrow:disabled, QDoubleSpinBox::up-arrow:off,
 QTimeEdit::up-arrow:disabled, QTimeEdit::up-arrow:off,
-QSpinBox::up-arrow:disabled, QSpinBox::up-arrow:off { /* off state when value is max */
+QSpinBox::up-arrow:disabled, QSpinBox::up-arrow:off,
+CLongLongSpinBox::up-arrow:disabled, CLongLongSpinBox::up-arrow:off{ /* off state when value is max */
    image: url(:/resources/style/img/ButtonPlusDisabled.png);
    background: qradialgradient(cx: 0.4, cy: -0.1, fx: 0.4, fy: -0.1, radius: 1.35, stop: 0 rgb(38, 38, 38), stop: 1 rgb(38, 38, 38));
 }
 
 QDoubleSpinBox::down-button,
 QTimeEdit::down-button,
-QSpinBox::down-button {
+QSpinBox::down-button,
+CLongLongSpinBox::down-button {
   subcontrol-origin: border;
   subcontrol-position: bottom right; /* position at bottom right corner */
 
@@ -931,18 +939,21 @@ QSpinBox::down-button {
 }
 QDoubleSpinBox::down-button:hover,
 QTimeEdit::down-button:hover,
-QSpinBox::down-button:hover {
+QSpinBox::down-button:hover,
+CLongLongSpinBox::down-button:hover {
   background: qradialgradient(cx: 0.3, cy: -0.4, fx: 0.3, fy: -0.4, radius: 1.35, stop: 0 #aa00aa, stop: 1 #b900b9);
 }
 QDoubleSpinBox::down-button:pressed,
 QTimeEdit::down-button:pressed,
-QSpinBox::down-button:pressed {
+QSpinBox::down-button:pressed,
+CLongLongSpinBox::down-button:pressed {
   background: qradialgradient(cx: 0.4, cy: -0.1, fx: 0.4, fy: -0.1, radius: 1.35, stop: 0 #dd00dd, stop: 1 #aa00aa);
 }
 
 QDoubleSpinBox::down-arrow,
 QTimeEdit::down-arrow,
-QSpinBox::down-arrow {
+QSpinBox::down-arrow,
+CLongLongSpinBox::down-arrow {
   image: url(:/resources/style/img/ButtonMinus.png);
   width: 12px;
   height: 12px;
@@ -950,9 +961,11 @@ QSpinBox::down-arrow {
 QDoubleSpinBox::down-arrow:disabled,
 QTimeEdit::down-arrow:disabled,
 QSpinBox::down-arrow:disabled,
+CLongLongSpinBox::down-arrow:disabled,
 QDoubleSpinBox::down-arrow:off,
 QTimeEdit::down-arrow:off,
-QSpinBox::down-arrow:off { /* off state when value in min */
+QSpinBox::down-arrow:off,
+CLongLongSpinBox::down-arrow:off { /* off state when value in min */
    image: url(:/resources/style/img/ButtonMinusDisabled.png);
    background: qradialgradient(cx: 0.4, cy: -0.1, fx: 0.4, fy: -0.1, radius: 1.35, stop: 0 rgb(38, 38, 38), stop: 1 rgb(38, 38, 38));
 }

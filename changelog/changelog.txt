@@ -10,6 +10,8 @@ Fixed Bugs:
   on application launch.
 - Fixed the file browser opening outside the Project folder when trying to
   create a new script.
+- Fixed desktop styles missing some updates that are present in Android
+  version.
 
 =================
 Version 1.2.4.0
