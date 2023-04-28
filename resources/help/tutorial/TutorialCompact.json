@@ -758,6 +758,12 @@
         }
       },
       {
+        "text": {
+          "posX" : 0.3, "posY": 0.5, "anchor": "eRight",
+          "text": "Only common script types have been enabled for now for tutorial purposes."
+        }
+      },
+      {
         "background": {"showBg" : 1, "onCliCkAdvance": 0, "mouseTransparent": 1}
       },
       {
@@ -1139,13 +1145,52 @@
       },
       {
         "highlight": {
+          "items" : []
+        }
+      },
+      {
+        "end": {}
+      }
+    ]
+  },
+  "eCodePanelEOS": {
+    "commands": [
+      {
+        "background": {"showBg" : 1, "onCliCkAdvance": 1}
+      },
+      {
+        "text": {
+          "posX" : 0.5, "posY": 0.5,
+          "text": "If you don't feel like coding, the JOIP-Engine also supports\nEOS scripts like Milovana (https://milovana.com/)."
+        }
+      },
+      {
+        "text": {
+          "posX" : 0.5, "posY": 0.5,
+          "text": "Simply set the file ending of a script to <i>.eos</i> to use the EOS format."
+        }
+      },
+      {
+        "text": {
+          "posX" : 0.5, "posY": 0.5,
+          "text": "EOS scripts are a way to create scripts with a visual editor."
+        }
+      },
+      {
+        "text": {
+          "posX" : 0.5, "posY": 0.5,
+          "text": "Check out the Milovana help page if you need to know more about EOS scripts:\nhttps://milovana.com/eos/editor/help"
+        }
+      },
+      {
+        "highlight": {
           "items" : ["HelpButton"]
         }
       },
       {
         "text": {
           "posX" : 0.5, "posY": 0.2,
-          "text": "If you need more detailed information, please check out the interactive help."
+          "text": "If you need more detailed information about the engine,\nplease check out the interactive help."
         }
       },
       {

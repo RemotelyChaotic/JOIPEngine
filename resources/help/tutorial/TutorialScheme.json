@@ -14,7 +14,8 @@
     "eNodePanel":                         { "type": "object" },
     "eNodePanelAdvanced":                 { "type": "object" },
     "eNodePanelDone":                     { "type": "object" },
-    "eCodePanel":                         { "type": "object" }
+    "eCodePanel":                         { "type": "object" },
+    "eCodePanelEOS":                      { "type": "object" }
   },
   "required": [
     "eBeginTutorial",
@@ -26,7 +27,8 @@
     "eNodePanel",
     "eNodePanelAdvanced",
     "eNodePanelDone",
-    "eCodePanel"
+    "eCodePanel",
+    "eCodePanelEOS"
   ],
   "additionalProperties": false
 }

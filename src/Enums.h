@@ -36,6 +36,7 @@ BETTER_ENUM(ETutorialState, qint32,
             eNodePanelAdvanced,
             eNodePanelDone,
             eCodePanel,
+            eCodePanelEOS,
             eFinished  = 63); // maximum value for Better-Enum
 
 BETTER_ENUM(EAnchors, qint32,

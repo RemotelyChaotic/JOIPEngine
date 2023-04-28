@@ -2,6 +2,9 @@
 Version 1.2.5.0
 =================
 
+Changes:
+- Updated tutorial to account for EOS scripts.
+
 Fixed Bugs:
 - Fixed initially opened script contents not showing in the Script Editor
   on application launch.

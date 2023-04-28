@@ -1,5 +1,6 @@
 #include "ClassicTutorialStateSwitchHandler.h"
 #include "EditorTutorialOverlay.h"
+#include "Editor/EditorModel.h"
 #include "Editor/EditorLayouts/EditorLayoutClassic.h"
 #include <QComboBox>
 #include <QDebug>
@@ -94,6 +95,7 @@ void CClassicTutorialStateSwitchHandler::OnStateSwitchImpl(ETutorialState newSta
     } break;
     case ETutorialState::eNodePanel:
     {
+      m_ParentWidget->EditorModel()->SetScriptTypeFilterForNewScripts("^\\*\\.(?!eos$).*$");
       for (EEditorWidget val : EEditorWidget::_values())
       {
         qobject_cast<QListView*>(m_ParentWidget->RightComboBox()->view())
@@ -101,6 +103,10 @@ void CClassicTutorialStateSwitchHandler::OnStateSwitchImpl(ETutorialState newSta
       }
     } // fallthrough
     case ETutorialState::eNodePanelAdvanced: // fallthrough
+      if (ETutorialState::eNodePanelAdvanced == newState._to_integral())
+      {
+        m_ParentWidget->EditorModel()->SetScriptTypeFilterForNewScripts(".*");
+      }
     case ETutorialState::eNodePanelDone:
     {
       bool bOk = QMetaObject::invokeMethod(this, "SlotSwitchRightPanel",
@@ -113,6 +119,7 @@ void CClassicTutorialStateSwitchHandler::OnStateSwitchImpl(ETutorialState newSta
       m_ParentWidget->RightComboBox()->setEnabled(newState._to_integral() == ETutorialState::eNodePanelDone);
       m_ParentWidget->LeftGroupBox()->setEnabled(false);
     } break;
+    case ETutorialState::eCodePanelEOS: // fallthrough
     case ETutorialState::eCodePanel:
     {
       bool bOk = QMetaObject::invokeMethod(this, "SlotSwitchLeftPanel",
@@ -130,7 +137,7 @@ void CClassicTutorialStateSwitchHandler::OnStateSwitchImpl(ETutorialState newSta
     } break;
     case ETutorialState::eFinished:
     {
-      if (ETutorialState::eCodePanel == oldState._to_integral())
+      if (ETutorialState::eCodePanelEOS == oldState._to_integral())
       {
         m_ParentWidget->LeftComboBox()->setEnabled(true);
         m_ParentWidget->RightComboBox()->setEnabled(true);

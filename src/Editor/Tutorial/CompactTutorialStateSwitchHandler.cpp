@@ -1,5 +1,6 @@
 #include "CompactTutorialStateSwitchHandler.h"
 #include "EditorTutorialOverlay.h"
+#include "Editor/EditorModel.h"
 #include "Editor/EditorLayouts/EditorLayoutCompact.h"
 #include <QDebug>
 #include <QFile>
@@ -121,8 +122,15 @@ void CCompactTutorialStateSwitchHandler::OnStateSwitchImpl(ETutorialState newSta
       Q_UNUSED(bOk);
     } break;
     case ETutorialState::eNodePanel: // fallthrough
+    {
+      m_ParentWidget->EditorModel()->SetScriptTypeFilterForNewScripts("^\\*\\.(?!eos$).*$");
+    }
     case ETutorialState::eNodePanelAdvanced:
     {
+      if (ETutorialState::eNodePanelAdvanced == newState._to_integral())
+      {
+        m_ParentWidget->EditorModel()->SetScriptTypeFilterForNewScripts(".*");
+      }
       for (EEditorWidget val : EEditorWidget::_values())
       {
         if (EEditorWidget::eProjectSettings != val._to_integral() &&
@@ -156,6 +164,7 @@ void CCompactTutorialStateSwitchHandler::OnStateSwitchImpl(ETutorialState newSta
       assert(bOk);
       Q_UNUSED(bOk);
     } break;
+    case ETutorialState::eCodePanelEOS: // fallthrough
     case ETutorialState::eCodePanel:
     {
       for (EEditorWidget val : EEditorWidget::_values())
@@ -171,7 +180,7 @@ void CCompactTutorialStateSwitchHandler::OnStateSwitchImpl(ETutorialState newSta
     } break;
     case ETutorialState::eFinished:
     {
-      if (ETutorialState::eCodePanel == oldState._to_integral())
+      if (ETutorialState::eCodePanelEOS == oldState._to_integral())
       {
         QTimer::singleShot(500, m_pTutorialOverlay, SLOT(Hide()));
       }

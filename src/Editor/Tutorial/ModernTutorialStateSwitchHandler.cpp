@@ -1,5 +1,6 @@
 #include "ModernTutorialStateSwitchHandler.h"
 #include "EditorTutorialOverlay.h"
+#include "Editor/EditorModel.h"
 #include "Editor/EditorLayouts/EditorLayoutClassic.h"
 #include "Editor/EditorLayouts/EditorLayoutModern.h"
 #include <QComboBox>
@@ -94,6 +95,7 @@ void CModernTutorialStateSwitchHandler::OnStateSwitchImpl(ETutorialState newStat
     } break;
     case ETutorialState::eNodePanel:
     {
+      m_ParentWidget->EditorModel()->SetScriptTypeFilterForNewScripts("^\\*\\.(?!eos$).*$");
       for (EEditorWidget val : EEditorWidget::_values())
       {
         qobject_cast<QListView*>(m_ParentWidget->TopEditor()->RightComboBox()->view())
@@ -101,6 +103,10 @@ void CModernTutorialStateSwitchHandler::OnStateSwitchImpl(ETutorialState newStat
       }
     } // fallthrough
     case ETutorialState::eNodePanelAdvanced: // fallthrough
+      if (ETutorialState::eNodePanelAdvanced == newState._to_integral())
+      {
+        m_ParentWidget->EditorModel()->SetScriptTypeFilterForNewScripts(".*");
+      }
     case ETutorialState::eNodePanelDone:
     {
       bool bOk = QMetaObject::invokeMethod(this, "SlotSwitchRightPanel",
@@ -113,6 +119,7 @@ void CModernTutorialStateSwitchHandler::OnStateSwitchImpl(ETutorialState newStat
       m_ParentWidget->TopEditor()->RightComboBox()->setEnabled(newState._to_integral() == ETutorialState::eNodePanelDone);
       m_ParentWidget->TopEditor()->LeftGroupBox()->setEnabled(false);
     } break;
+    case ETutorialState::eCodePanelEOS: // fallthrough
     case ETutorialState::eCodePanel:
     {
       bool bOk = QMetaObject::invokeMethod(this, "SlotSwitchLeftPanel",
@@ -130,7 +137,7 @@ void CModernTutorialStateSwitchHandler::OnStateSwitchImpl(ETutorialState newStat
     } break;
     case ETutorialState::eFinished:
     {
-      if (ETutorialState::eCodePanel == oldState._to_integral())
+      if (ETutorialState::eCodePanelEOS == oldState._to_integral())
       {
         m_ParentWidget->TopEditor()->LeftComboBox()->setEnabled(true);
         m_ParentWidget->TopEditor()->RightComboBox()->setEnabled(true);

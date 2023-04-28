@@ -51,6 +51,7 @@ CEditorModel::CEditorModel(QWidget* pParent) :
   m_wpDbManager(CApplication::Instance()->System<CDatabaseManager>()),
   m_vwpTutorialStateSwitchHandlers(),
   m_pParentWidget(pParent),
+  m_sScriptTypesFilter(".*"),
   m_bInitializingNewProject(false),
   m_bReadOnly(false)
 {
@@ -128,6 +129,13 @@ CScriptEditorModel* CEditorModel::ScriptEditorModel() const
 
 //----------------------------------------------------------------------------------------
 //
+QString CEditorModel::ScriptTypeFilterForNewScripts() const
+{
+  return m_sScriptTypesFilter;
+}
+
+//----------------------------------------------------------------------------------------
+//
 QUndoStack* CEditorModel::UndoStack() const
 {
   return m_spUndoStack.get();
@@ -145,6 +153,17 @@ void CEditorModel::AddNewScriptFileToScene(QPointer<QWidget> pParentForDialog,
     QReadLocker locker(&spScene->m_rwLock);
     if (spScene->m_sScript.isNull() || spScene->m_sScript.isEmpty())
     {
+      QRegExp rxTypeFilter(m_sScriptTypesFilter);
+      QStringList vsScriptTypes = SResourceFormats::ScriptFormats();
+      for (qint32 i = 0; vsScriptTypes.size() > i; ++i)
+      {
+        if (!rxTypeFilter.exactMatch(vsScriptTypes[i]))
+        {
+          vsScriptTypes.erase(vsScriptTypes.begin()+i);
+          --i;
+        }
+      }
+
       const QString sProjectPath = PhysicalProjectPath(m_spCurrentProject);
       QDir projectDir(sProjectPath);
       QPointer<CEditorModel> pThisGuard(this);
@@ -156,7 +175,7 @@ void CEditorModel::AddNewScriptFileToScene(QPointer<QWidget> pParentForDialog,
       dlg->setOptions(QFileDialog::DontUseCustomDirectoryIcons);
       dlg->setDirectoryUrl(projectDir.absolutePath());
       dlg->setFilter(QDir::AllDirs);
-      dlg->setNameFilter(QString("Script Files (%1)").arg(SResourceFormats::ScriptFormats().join(" ")));
+      dlg->setNameFilter(QString("Script Files (%1)").arg(vsScriptTypes.join(" ")));
       dlg->setDefaultSuffix(SResourceFormats::ScriptFormats().first());
 
       if (dlg->exec())
@@ -631,6 +650,20 @@ void CEditorModel::ExportProject()
     qWarning() << sError;
     emit SignalProjectExportError(EExportError::eProcessError, sError);
     emit SignalProjectExportFinished();
+  }
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CEditorModel::SetScriptTypeFilterForNewScripts(const QString& sFilter)
+{
+  if (!sFilter.isEmpty())
+  {
+    m_sScriptTypesFilter = sFilter;
+  }
+  else
+  {
+    m_sScriptTypesFilter = ".*";
   }
 }
 

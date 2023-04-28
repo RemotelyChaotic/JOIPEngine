@@ -26,11 +26,12 @@ public:
                   QPointer<CEditorModel> pEditorModel,
                   bool bWithTutorial);
 
+  QPointer<CEditorModel> EditorModel() const;
+
   virtual void ProjectLoaded(tspProject spCurrentProject, bool bModified) = 0;
   virtual void ProjectUnloaded() = 0;
 
 protected:
-  QPointer<CEditorModel> EditorModel() const;
   QPointer<CEditorTutorialOverlay> GetTutorialOverlay() const;
   template<class T, typename std::enable_if<std::is_base_of<CEditorWidgetBase, T>::value, bool>::type = true>
   QPointer<T> GetWidget() const;
