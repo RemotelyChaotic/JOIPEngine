@@ -5,6 +5,8 @@ Version 1.2.5.0
 Fixed Bugs:
 - Fixed initially opened script contents not showing in the Script Editor
   on application launch.
+- Fixed the file browser opening outside the Project folder when trying to
+  create a new script.
 
 =================
 Version 1.2.4.0

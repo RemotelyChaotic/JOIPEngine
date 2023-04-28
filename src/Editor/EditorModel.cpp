@@ -146,6 +146,7 @@ void CEditorModel::AddNewScriptFileToScene(QPointer<QWidget> pParentForDialog,
     if (spScene->m_sScript.isNull() || spScene->m_sScript.isEmpty())
     {
       const QString sProjectPath = PhysicalProjectPath(m_spCurrentProject);
+      QDir projectDir(sProjectPath);
       QPointer<CEditorModel> pThisGuard(this);
       QFileDialog* dlg = new QFileDialog(pParentForDialog,
                                          tr("Create Script File for %1").arg(spScene->m_sName));
@@ -153,8 +154,7 @@ void CEditorModel::AddNewScriptFileToScene(QPointer<QWidget> pParentForDialog,
       dlg->setFileMode(QFileDialog::AnyFile);
       dlg->setAcceptMode(QFileDialog::AcceptSave);
       dlg->setOptions(QFileDialog::DontUseCustomDirectoryIcons);
-      dlg->setSupportedSchemes(QStringList() << QString(CPhysFsFileEngineHandler::c_sScheme).replace(":/", ""));
-      dlg->setDirectoryUrl(QUrl(CPhysFsFileEngineHandler::c_sScheme));
+      dlg->setDirectoryUrl(projectDir.absolutePath());
       dlg->setFilter(QDir::AllDirs);
       dlg->setNameFilter(QString("Script Files (%1)").arg(SResourceFormats::ScriptFormats().join(" ")));
       dlg->setDefaultSuffix(SResourceFormats::ScriptFormats().first());
@@ -169,7 +169,6 @@ void CEditorModel::AddNewScriptFileToScene(QPointer<QWidget> pParentForDialog,
         if (url.isValid())
         {
           QFileInfo info(url.toLocalFile());
-          QDir projectDir(sProjectPath);
           if (!info.absoluteFilePath().contains(projectDir.absolutePath()))
           {
             qWarning() << "File is not in subfolder of Project.";
@@ -178,10 +177,10 @@ void CEditorModel::AddNewScriptFileToScene(QPointer<QWidget> pParentForDialog,
           {
             QString sRelativePath = projectDir.relativeFilePath(info.absoluteFilePath());
             QUrl sUrlToSave = ResourceUrlFromLocalFile(sRelativePath);
-            QFile jsFile(info.absoluteFilePath());
-            if (jsFile.open(QIODevice::WriteOnly | QIODevice::Truncate))
+            QFile scriptFile(info.absoluteFilePath());
+            if (scriptFile.open(QIODevice::WriteOnly | QIODevice::Truncate))
             {
-              m_spScriptEditorModel->InitScript(jsFile, info.suffix());
+              m_spScriptEditorModel->InitScript(scriptFile, info.suffix());
 
               tvfnActionsResource vfnActions = {[&spScene](const tspResource& spNewResource){
                 QWriteLocker locker(&spNewResource->m_rwLock);
