@@ -285,21 +285,30 @@ void CCodeDisplayWidget::SetHighlightDefinition(const QString& sType)
 //
 void CCodeDisplayWidget::SetScriptType(const QString& sScriptType)
 {
-  if (!m_pInitialized || nullptr == m_pspUiActionBar) { return; }
+  if (!m_pInitialized) { return; }
 
   if (m_sScriptType != sScriptType)
   {
     auto it = m_displayImplMap.find(m_sScriptType);
-    if (m_displayImplMap.end() != it)
+    if (nullptr != m_pspUiActionBar)
     {
-      it->second->HideButtons((*m_pspUiActionBar).get());
+      if (m_displayImplMap.end() != it)
+      {
+        it->second->HideButtons((*m_pspUiActionBar).get());
+      }
     }
+
     m_sScriptType = sScriptType;
+
     it = m_displayImplMap.find(m_sScriptType);
-    if (m_displayImplMap.end() != it)
+    if (nullptr != m_pspUiActionBar)
     {
-      it->second->ShowButtons((*m_pspUiActionBar).get());
+      if (m_displayImplMap.end() != it)
+      {
+        it->second->ShowButtons((*m_pspUiActionBar).get());
+      }
     }
+
     m_spUi->pEditorStackedWidget->setCurrentIndex(PageIndexFromScriptType(sScriptType));
   }
 }

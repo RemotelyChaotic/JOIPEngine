@@ -1,4 +1,12 @@
 =================
+Version 1.2.5.0
+=================
+
+Fixed Bugs:
+- Fixed initially opened script contents not showing in the Script Editor
+  on application launch.
+
+=================
 Version 1.2.4.0
 =================
 

@@ -557,8 +557,8 @@ void CEditorCodeWidget::ReloadEditor(qint32 iIndex)
     if (nullptr != ActionBar())
     {
       ActionBar()->m_spUi->DebugButton->setEnabled(nullptr != pScriptItem->m_spScene);
-      m_spUi->pCodeEditorView->SetScriptType(pScriptItem->m_sScriptType);
     }
+    m_spUi->pCodeEditorView->SetScriptType(pScriptItem->m_sScriptType);
     m_spUi->pCodeEditorView->SetContent(QString::fromUtf8(pScriptItem->m_data));
     m_spUi->pCodeEditorView->SetHighlightDefinition(pScriptItem->m_sHighlightDefinition);
   }
