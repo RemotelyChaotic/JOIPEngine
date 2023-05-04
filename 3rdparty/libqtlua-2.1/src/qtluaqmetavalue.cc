@@ -28,6 +28,7 @@
 #include <QPointF>
 #include <QMetaObject>
 #include <QMetaType>
+#include <QUrl>
 #include <QWidget>
 #include <QIcon>
 #include <QColor>
@@ -78,6 +79,8 @@ namespace QtLua {
 	return Value(ls, *(float*)data);
       case QMetaType::QChar:
 	return Value(ls, (double)reinterpret_cast<const QChar*>(data)->unicode());
+      case QMetaType::QUrl:
+  return Value(ls, QUrl(*reinterpret_cast<const QUrl*>(data)).toString());
       case QMetaType::QString:
 	return Value(ls, String(*reinterpret_cast<const QString*>(data)));
       case QMetaType::QStringList: {
@@ -222,6 +225,9 @@ namespace QtLua {
       case QMetaType::QChar:
 	*reinterpret_cast<QChar*>(data) = QChar((unsigned short)v.to_number());
 	break;
+      case QMetaType::QUrl:
+  *reinterpret_cast<QUrl*>(data) = QUrl(v.to_qstring().toUtf8());
+  break;
       case QMetaType::QString:
 	*reinterpret_cast<QString*>(data) = v.to_qstring();
 	break;
