@@ -641,7 +641,7 @@ QVariant ValueBase::to_qvariant() const
     case TString:
       return QVariant(to_string());
     case TTable:
-      return QVariant::fromValue(to_qlist<QVariant>());
+      return QVariant::fromValue(to_qmap<QString,QVariant>());
     case TUserData:
       return QVariant::fromValue(to_qobject());
 

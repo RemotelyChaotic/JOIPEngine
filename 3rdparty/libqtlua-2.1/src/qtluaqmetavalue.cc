@@ -160,6 +160,10 @@ namespace QtLua {
         const QVariantList *vl = reinterpret_cast<const QVariantList*>(data);
         return Value(ls, *vl);
       }
+      case QMetaType::QVariantMap: {
+        const QVariantMap *vm = reinterpret_cast<const QVariantMap*>(data);
+        return Value(ls, *vm);
+      }
       default:
 	if (type == ud_ref_type)
 	  {
@@ -331,6 +335,11 @@ namespace QtLua {
       case QMetaType::QVariantList: {
         QVariantList *qvl = reinterpret_cast<QVariantList*>(data);
         *qvl = v.to_qlist<QVariant>();
+        break;
+      }
+      case QMetaType::QVariantMap: {
+        QVariantMap *qvm = reinterpret_cast<QVariantMap*>(data);
+        *qvm = v.to_qmap<QString, QVariant>();
         break;
       }
       default: {
