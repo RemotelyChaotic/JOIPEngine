@@ -78,12 +78,32 @@ namespace QtLua {
     else
       qt_args[0] = 0;
 
-    int i = 1;
-
     QList<QByteArray> pt = mm.parameterTypes();
+    int index_to_call = _index;
 
+    // check if parameters match. If not, check if other methods with the same name
+    // match the signature and call that one
     if (pt.size() != lua_args.size() - 1)
+    {
+      bool found_m = false;
+      int offset = _mo->methodOffset();
+      for (int i = 0; _mo->methodCount() > i; ++i)
+      {
+        QMetaMethod mm_check = _mo->method(i+offset);
+        QList<QByteArray> pt_check = mm_check.parameterTypes();
+        if (i+offset != _index&& mm_check.methodType() == mm.methodType() &&
+            QString(*mm_check.typeName()) == QString(*mm.typeName()) &&
+            lua_args.size() - 1 == pt_check.size())
+        {
+          mm = mm_check;
+          pt = pt_check;
+          index_to_call = i+offset;
+          found_m = true;
+          break;
+        }
+      }
 
+      if (!found_m)
 #if QT_VERSION < 0x050000
       QTLUA_THROW(QtLua::Method, "Wrong number of arguments for the `%' QMetaMethod.",
 		 .arg(mm.signature()));
@@ -91,8 +111,10 @@ namespace QtLua {
       QTLUA_THROW(QtLua::Method, "Wrong number of arguments for the `%' QMetaMethod.",
 		 .arg(mm.methodSignature()));
 #endif
+    }
 
     // parameters
+    int i = 1;
     foreach (const QByteArray &pt, pt)
       {
 	assert(i < 11);
@@ -101,7 +123,7 @@ namespace QtLua {
       }
 
     // actual invocation
-    if (!obj.qt_metacall(QMetaObject::InvokeMetaMethod, _index, qt_args))
+    if (!obj.qt_metacall(QMetaObject::InvokeMetaMethod, index_to_call, qt_args))
 
 #if QT_VERSION < 0x050000
       QTLUA_THROW(QtLua::Method, "Error on invocation of the `%' Qt method.",
