@@ -1,0 +1,5 @@
+<RCC>
+    <qresource prefix="/lua_json">
+        <file>json.lua</file>
+    </qresource>
+</RCC>

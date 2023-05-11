@@ -666,7 +666,9 @@ macro(JOIPProjectSettings JOIP_PROJECT_NAME)
       nlohmann_json_schema_validator
       physfs-static
       xmldom
-      qtlua)
+      qtlua
+      json_lua
+    )
 
     if (KDE_DEBUG)
       target_link_libraries(${JOIP_PROJECT_NAME}
@@ -700,7 +702,9 @@ macro(JOIPProjectSettings JOIP_PROJECT_NAME)
       ${PhysicsFS_INCLUDE_DIRS}
       $<TARGET_PROPERTY:MRichTextEditor,INTERFACE_INCLUDE_DIRECTORIES>
       $<TARGET_PROPERTY:SortFilterProxyModel,INTERFACE_INCLUDE_DIRECTORIES>
-      $<TARGET_PROPERTY:xmldom,INTERFACE_INCLUDE_DIRECTORIES>)
+      $<TARGET_PROPERTY:xmldom,INTERFACE_INCLUDE_DIRECTORIES>
+      $<TARGET_PROPERTY:json_lua,INTERFACE_INCLUDE_DIRECTORIES>
+    )
 
   target_compile_definitions(${JOIP_PROJECT_NAME}
     PRIVATE
