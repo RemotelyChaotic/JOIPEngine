@@ -85,8 +85,11 @@ public:
   // static address used for this
   static char sKeyThis;
 
+public slots:
+  void finishedScript(const QVariant& retVal);
+
 signals:
-  void finishedScript(const QVariant& sRetVal);
+  void finishedScriptSignal(const QVariant& sRetVal);
 
 private:
   std::shared_ptr<CScriptRunnerSignalContext>     m_spSignalEmiterContext;

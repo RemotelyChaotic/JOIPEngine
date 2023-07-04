@@ -109,7 +109,7 @@ namespace  {
     for (qint32 i = static_cast<qint32>(vExps.size())-1; 0 <= i; --i)
     {
       SReplaceExp& exp = vExps[i];
-      QString sNewExp = QString("utils.import(\"%1\");").arg(exp.m_sModule);
+      QString sNewExp = QString("utils_1337.import(\"%1\");").arg(exp.m_sModule);
       if (exp.m_vsExps.size() > 0)
       {
         if (eModuleName == exp.m_mode)
@@ -192,7 +192,7 @@ public slots:
     // yes we need to call the static method of QQmlEngine, not QJSEngine, WHY Qt, WHY???
     QQmlEngine::setObjectOwnership(m_pScriptUtils, QQmlEngine::CppOwnership);
     QJSValue scriptValueUtils = m_pScriptEngine->newQObject(m_pScriptUtils);
-    m_pScriptEngine->globalObject().setProperty("utils", scriptValueUtils);
+    m_pScriptEngine->globalObject().setProperty("utils_1337", scriptValueUtils);
 
     QJSValue enumIconObjectValue = m_pScriptEngine->newQMetaObject(&IconAlignment::staticMetaObject);
     m_pScriptEngine->globalObject().setProperty("IconAlignment", enumIconObjectValue);
@@ -202,7 +202,7 @@ public slots:
     // create wrapper function to make syntax of including scripts easier
     QString sSkript = QString("(function() { "
                               "include = function(resource) { "
-                              "   var ret = utils.include(resource); "
+                              "   var ret = utils_1337.include(resource); "
                               "   if (typeof ret === 'string') { return eval(ret); } "
                               "   else { return (function(){ return eval(ret); })(); } "
                               "}})();");
@@ -219,7 +219,7 @@ public slots:
 
     if (nullptr != m_pScriptEngine)
     {
-      m_pScriptEngine->globalObject().setProperty("utils", QJSValue());
+      m_pScriptEngine->globalObject().setProperty("utils_1337", QJSValue());
       m_pScriptEngine->collectGarbage();
     }
 
@@ -306,7 +306,7 @@ public slots:
     QString sSkript = QString("(function() { "
                               "var %1 = function() { %2\n}; "
                               "var ret = %3(); "
-                              "utils.finishedScript(ret); \n "
+                              "utils_1337.finishedScript(ret); \n "
                               "})")
         .arg(sSceneName)
         .arg(sScript)

@@ -1,0 +1,5 @@
+<RCC>
+    <qresource prefix="/">
+        <file>lua_sandbox/sandbox.lua</file>
+    </qresource>
+</RCC>

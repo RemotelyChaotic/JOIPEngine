@@ -10,6 +10,7 @@ add_subdirectory(libqpcx)
 add_subdirectory(Lua)          # reverse-order because of dependencies
 add_subdirectory(libqtlua-2.1) # reverse-order because of dependencies
 add_subdirectory(lua_json)
+add_subdirectory(lua_sandbox)
 add_subdirectory(MRichTextEditor)
 add_subdirectory(nodeeditor)
 add_subdirectory(physfs-3.0.2)

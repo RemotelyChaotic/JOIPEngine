@@ -47,6 +47,20 @@ namespace lua
 {
   void LUAHookAbort(lua_State* pL, lua_Debug* pAr);
   int LUACustomSearcher(lua_State* pL);
+  int LUAPrint(lua_State* pL);
+
+  static const struct luaL_Reg printlib [] = {
+    {"print", LUAPrint},
+    {NULL, NULL} /* end of array */
+  };
+
+  void LuaopenLUAPrintlib(lua_State *L)
+  {
+    lua_getglobal(L, "_G");
+    // luaL_register(L, NULL, printlib); // for Lua versions < 5.2
+    luaL_setfuncs(L, printlib, 0);  // for Lua versions 5.2 or greater
+    lua_pop(L, 1);
+  }
 }
 
 //----------------------------------------------------------------------------------------
@@ -121,8 +135,9 @@ public slots:
     bOk &= m_pLuaState->openlib(QtLua::PackageLib);
     bOk &= m_pLuaState->openlib(QtLua::StringLib);
     bOk &= m_pLuaState->openlib(QtLua::TableLib);
-    //bOk &= m_pLuaState->openlib(QtLua::IoLib);
-    //bOk &= m_pLuaState->openlib(QtLua::OsLib);
+    bOk &= m_pLuaState->openlib(QtLua::MathLib);
+    bOk &= m_pLuaState->openlib(QtLua::IoLib);
+    bOk &= m_pLuaState->openlib(QtLua::OsLib);
     bOk &= m_pLuaState->openlib(QtLua::DebugLib);
     //bOk &= m_pLuaState->openlib(QtLua::Bit32Lib);
     //bOk &= m_pLuaState->openlib(QtLua::JitLib);
@@ -131,8 +146,10 @@ public slots:
     //bOk &= m_pLuaState->openlib(QtLua::QtLib);
 
     RegisterCustomPackageSearcher(pInternalState);
+    lua::LuaopenLUAPrintlib(pInternalState);
 
     m_bLoadingInbuiltLibraries = true;
+    bOk &= OpenFileLibrary(m_pLuaState, "sandbox", ":/lua_sandbox/sandbox.lua");
     bOk &= OpenFileLibrary(m_pLuaState, "json", ":/lua_json/json.lua");
     m_bLoadingInbuiltLibraries = false;
 
@@ -143,10 +160,10 @@ public slots:
 
     m_pScriptUtils = new CScriptRunnerUtilsLua(this, m_pLuaState,
                                                m_wpSignalEmiterContext.lock());
-    connect(m_pScriptUtils, &CScriptRunnerUtilsLua::finishedScript,
+    connect(m_pScriptUtils, &CScriptRunnerUtilsLua::finishedScriptSignal,
             this, &CLuaScriptRunnerInstanceWorker::FinishedScript);
 
-    (*m_pLuaState)["utils"] = QtLua::Value(m_pLuaState, m_pScriptUtils.data(), false, false);
+    (*m_pLuaState)["utils_1337"] = QtLua::Value(m_pLuaState, m_pScriptUtils.data(), false, false);
 
     RegisterEnum(m_pLuaState, IconAlignment::staticMetaObject, "IconAlignment");
     RegisterEnum(m_pLuaState, TextAlignment::staticMetaObject, "TextAlignment");
@@ -242,12 +259,14 @@ public slots:
 
     // create wrapper function to make syntax of scripts easier and handle return value
     // and be able to emit signal on finished
-    QString sSkript = QString("%1 = function(); %2\nend;"
-                              "local ret = %3();"
-                              "utils.finishedScript(ret);")
+    QString sScriptEscaped = sScript;
+    sScriptEscaped.replace("[[", "\\[\\[").replace("]]", "\\]\\]");
+    QString sSkript = QString("local ret = sandbox.run([[local %1 = function();\n%2\nreturn nil;\nend;\nreturn %3();]], %4);"
+                              "utils_1337:finishedScript(ret);")
         .arg(sSceneName)
-        .arg(sScript)
-        .arg(sSceneName);
+        .arg(sScriptEscaped)
+        .arg(sSceneName)
+        .arg(GenerateEnvVariableString());
 
     try
     {
@@ -355,6 +374,19 @@ public slots:
 private:
   //--------------------------------------------------------------------------------------
   //
+  QString GenerateEnvVariableString()
+  {
+    QString sEnvVar = "{ env = { json = json, scene = scene, utils_1337 = utils_1337, sandbox = { run = sandbox.run } %1 } }";
+    QStringList vsBindings;
+    for (auto it = m_objectMap.begin(); m_objectMap.end() != it; ++it)
+    {
+      vsBindings << QString("%1 = %2").arg(it->first).arg(it->first);
+    }
+    return sEnvVar.arg(vsBindings.empty() ? "" : QString(",") + vsBindings.join(","));
+  }
+
+  //--------------------------------------------------------------------------------------
+  //
   void RegisterAbortHook(lua_State* pState)
   {
     // pointer to this
@@ -404,7 +436,7 @@ private:
   {
     try
     {
-      pState->exec(QString("%1 = require '%2';").arg(sGlobal).arg(sFile));
+      pState->exec_statements(QString("%1 = require '%2';").arg(sGlobal).arg(sFile));
     }
     catch (QtLua::String& s)
     {
@@ -516,6 +548,20 @@ namespace lua
               file.open(QIODevice::ReadOnly))
           {
             QByteArray arr = file.readAll();
+
+            // sandbox user modules as well
+            if (!bInbuiltLoad)
+            {
+              // create wrapper function to make syntax of scripts easier and handle return value
+              // and be able to emit signal on finished
+              QString sScriptEscaped = QString::fromUtf8(arr);
+              sScriptEscaped.replace("[[", "\\[\\[").replace("]]", "\\]\\]");
+              QString sSkript = QString("return sandbox.run([[%1]], %2);")
+                                    .arg(sScriptEscaped)
+                                    .arg(pContext->GenerateEnvVariableString());
+              arr = sSkript.toUtf8();
+            }
+
             int iStatus = luaL_loadbuffer(pL, arr.data(), arr.length(),
                                           sFoundResourceName.toStdString().c_str());
             if (iStatus == LUA_OK)
@@ -554,6 +600,24 @@ namespace lua
     }
     return luaL_error(pL, "Error loading module '%s': %s",
                           sName, sError.toStdString().data());
+  }
+
+  //--------------------------------------------------------------------------------------
+  //
+  int LUAPrint(lua_State* pL)
+  {
+    int iArgs = lua_gettop(pL);
+    for (int i = 1; i <= iArgs; i++)
+    {
+      size_t l;
+      if (lua_isstring(pL, i))
+      {
+        const char *s = luaL_tolstring(pL, i, &l);  /* convert it to string */
+        qDebug() << "Lua console: " << s;
+      }
+      lua_pop(pL, 1);  /* pop result */
+    }
+    return 0;
   }
 }
 
@@ -853,6 +917,13 @@ CScriptRunnerUtilsLua::~CScriptRunnerUtilsLua()
 void CScriptRunnerUtilsLua::SetCurrentProject(tspProject spProject)
 {
   m_spProject = spProject;
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CScriptRunnerUtilsLua::finishedScript(const QVariant& retVal)
+{
+  emit finishedScriptSignal(retVal);
 }
 
 #include "LuaScriptRunner.moc"

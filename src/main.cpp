@@ -7,6 +7,7 @@
 #include "Systems/PhysFs/PhysFsQtAVIntegration.h"
 
 #include <JsonLuaWrapper.h>
+#include <LuaSandboxWrapper.h>
 
 #include <QApplication>
 #include <QImageReader>
