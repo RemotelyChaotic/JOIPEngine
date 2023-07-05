@@ -178,6 +178,10 @@ void CSettingsScreen::Load()
 #ifndef Q_OS_ANDROID
   qint32 iThisScreen = QApplication::desktop()->screenNumber(this);
   auto vpScreens = QApplication::screens();
+  if (iThisScreen < 0 || iThisScreen > vpScreens.size())
+  {
+    iThisScreen = 0;
+  }
   QScreen* pThisScreen = vpScreens[iThisScreen];
 #else
   QScreen* pThisScreen = QApplication::screens()[0];
