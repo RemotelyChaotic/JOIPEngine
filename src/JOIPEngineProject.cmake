@@ -718,6 +718,7 @@ macro(JOIPProjectSettings JOIP_PROJECT_NAME)
       ${Qt${QT_VERSION_MAJOR}Gui_PRIVATE_INCLUDE_DIRS}
       ${Qt${QT_VERSION_MAJOR}Widgets_PRIVATE_INCLUDE_DIRS}
       ${QTAVWIDGETS_INCLUDE_DIRS}
+      ${FFMPEG_INCLUDE_DIRS}
       ${NodeEditor_INCLUDE_DIRS}
       ${PhysicsFS_INCLUDE_DIRS}
       $<TARGET_PROPERTY:MRichTextEditor,INTERFACE_INCLUDE_DIRECTORIES>
@@ -745,6 +746,19 @@ macro(JOIPProjectSettings JOIP_PROJECT_NAME)
 
     set(ANDROID_FEATURES
       "android.hardware.opengles.aep")
+  endif()
+
+  #-----------------------------------------------------------------------------------------
+  # Windows stuff
+  #-----------------------------------------------------------------------------------------
+  if (WIN32)
+    foreach(win_extra_lib ${CUSTOM_WINDOWS_EXTRA_LIBS})
+      add_custom_command(
+              TARGET ${JOIP_PROJECT_NAME} POST_BUILD
+              COMMAND ${CMAKE_COMMAND} -E copy_if_different
+                      ${win_extra_lib}
+                      "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}")
+    endforeach()
   endif()
 
   #-----------------------------------------------------------------------------------------
