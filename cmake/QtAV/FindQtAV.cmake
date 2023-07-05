@@ -99,6 +99,8 @@ if (ANDROID)
     set(ffmpeg_dir ${CMAKE_SOURCE_DIR}/3rdparty/QtAV/ffmpeg/ffmpeg-4.2-android-clang/lib/${ANDROID_TARGET_ARCH})
   endif()
 
+  set(FFMPEG_INCLUDE_DIRS ${ffmpeg_dir}/../../include)
+
   message("QTAV Android               = ${ffmpeg_dir}")
   set(CUSTOM_ANDROID_EXTRA_LIBS
       ${CUSTOM_ANDROID_EXTRA_LIBS}
@@ -112,4 +114,22 @@ if (ANDROID)
       ${ffmpeg_dir}/libswresample.so
       ${ffmpeg_dir}/libswscale.so
   CACHE INTERNAL "")
+
+elseif(WIN32)
+  if (32BIT)
+    set(ffmpeg_dir ${CMAKE_SOURCE_DIR}/3rdparty/QtAV/ffmpeg/QtAV-depends-windows-x86+x64/bin)
+    set(FFMPEG_INCLUDE_DIRS ${ffmpeg_dir}/../include)
+  else()
+    set(ffmpeg_dir ${CMAKE_SOURCE_DIR}/3rdparty/QtAV/ffmpeg/QtAV-depends-windows-x86+x64/bin/x64)
+    set(FFMPEG_INCLUDE_DIRS ${ffmpeg_dir}/../../include)
+  endif()
+
+  message("QTAV Windows               = ${ffmpeg_dir}")
+  set(ffmpeg_libs)
+  file(GLOB ffmpeg_libs ${ffmpeg_dir}/*.dll)
+  set(CUSTOM_WINDOWS_EXTRA_LIBS ${ffmpeg_libs}
+  CACHE INTERNAL "")
+
 endif()
+
+message("FFMPEG_INCLUDE_DIRS        = ${FFMPEG_INCLUDE_DIRS}")
