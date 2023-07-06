@@ -12,6 +12,7 @@ Changes:
 
 Fixed Bugs:
 - Fixed an error message in PlayerMediaPlayer that was reporting the wrong function call.
+- Crashfix for certain unusual screen configurations.
 
 =================
 Version 1.2.5.0
