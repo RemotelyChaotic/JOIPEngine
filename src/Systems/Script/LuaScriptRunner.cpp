@@ -100,11 +100,11 @@ public slots:
     qint32 iLineNr = 0;
 
     QRegExp rxLine(":[0-9]+:");
-    qint32 iPos = 0;
-    if ((iPos = rxLine.indexIn(sError, iPos)) != -1)
+    qint32 iPos = -1;
+    if ((iPos = rxLine.lastIndexIn(sError, iPos)) != -1)
     {
       bool bOk = false;
-      iLineNr = sError.mid(iPos+1, rxLine.matchedLength()-2).toInt(&bOk) - 1;
+      iLineNr = sError.mid(iPos+1, rxLine.matchedLength()-2).toInt(&bOk) - 2;
       if (!bOk)
       {
         iLineNr = 0;
