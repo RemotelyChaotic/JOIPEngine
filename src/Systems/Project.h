@@ -7,6 +7,7 @@
 #include "Resource.h"
 #include "ResourceBundle.h"
 #include "Scene.h"
+#include "Tag.h"
 #include <QObject>
 #include <QPointer>
 #include <QReadWriteLock>
@@ -28,6 +29,7 @@ struct SProject : public ISerializable, std::enable_shared_from_this<SProject>,
   tvspScene                 m_vspScenes;
   tspResourceMap            m_spResourcesMap;
   tspResourceBundleMap      m_spResourceBundleMap;
+  tspTagMap                 m_vspTags;
   QStringList               m_vsMountPoints;          // Archives need to be mounted via physFS to access content
                                                       // WARNING: root is NOT included in this list
 

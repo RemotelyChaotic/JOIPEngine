@@ -1,7 +1,6 @@
 #include "ScriptDbWrappers.h"
 #include "Application.h"
-#include "Systems/Kink.h"
-#include "Systems/ResourceBundle.h"
+#include "Systems/Tag.h"
 
 #include <QtLua/State>
 #include <QImageReader>
@@ -379,6 +378,61 @@ QVariant CProjectScriptWrapper::resource(qint32 iIndex)
 
 //----------------------------------------------------------------------------------------
 //
+qint32 CProjectScriptWrapper::numTags()
+{
+  QReadLocker locker(&m_spData->m_rwLock);
+  return static_cast<qint32>(m_spData->m_vspTags.size());
+}
+
+//----------------------------------------------------------------------------------------
+//
+QStringList CProjectScriptWrapper::tags()
+{
+  QReadLocker locker(&m_spData->m_rwLock);
+  QStringList ret;
+  for (auto it = m_spData->m_vspTags.begin(); m_spData->m_vspTags.end() != it; ++it)
+  {
+    ret << it->second->m_sName;
+  }
+  return ret;
+}
+
+//----------------------------------------------------------------------------------------
+//
+QVariant CProjectScriptWrapper::tag(const QString& sValue)
+{
+  QReadLocker locker(&m_spData->m_rwLock);
+  auto it = m_spData->m_vspTags.find(sValue);
+  if (m_spData->m_vspTags.end() != it)
+  {
+    CTagWrapper* pTag =
+        new CTagWrapper(m_pEngine, std::make_shared<STag>(*it->second));
+    return CreateScriptObject(pTag, m_pEngine);
+  }
+  return QVariant();
+}
+
+//----------------------------------------------------------------------------------------
+//
+QVariant CProjectScriptWrapper::tag(qint32 iIndex)
+{
+  QReadLocker locker(&m_spData->m_rwLock);
+  auto it = m_spData->m_vspTags.begin();
+  if (0 <= iIndex && m_spData->m_vspTags.size() > static_cast<size_t>(iIndex))
+  {
+    std::advance(it, iIndex);
+    if (m_spData->m_vspTags.end() != it)
+    {
+      CTagWrapper* pTag =
+          new CTagWrapper(m_pEngine, std::make_shared<STag>(*it->second));
+      return CreateScriptObject(pTag, m_pEngine);
+    }
+  }
+  return QVariant();
+}
+
+//----------------------------------------------------------------------------------------
+//
 CResourceScriptWrapper::CResourceScriptWrapper(tEngineType pEngine, const std::shared_ptr<SResource>& spResource) :
   QObject(),
   CLockable(&spResource->m_rwLock),
@@ -510,6 +564,44 @@ QVariant CResourceScriptWrapper::project()
     return CreateScriptObject(pProject, m_pEngine);
   }
   return QVariant();
+}
+
+//----------------------------------------------------------------------------------------
+//
+qint32 CResourceScriptWrapper::numTags()
+{
+  QReadLocker locker(&m_spData->m_rwLock);
+  return static_cast<qint32>(m_spData->m_vsResourceTags.size());
+}
+
+//----------------------------------------------------------------------------------------
+//
+QStringList CResourceScriptWrapper::tags()
+{
+  QReadLocker locker(&m_spData->m_rwLock);
+  QStringList ret;
+  for (auto it = m_spData->m_vsResourceTags.begin(); m_spData->m_vsResourceTags.end() != it; ++it)
+  {
+    ret << *it;
+  }
+  return ret;
+}
+
+//----------------------------------------------------------------------------------------
+//
+QString CResourceScriptWrapper::tag(qint32 iIndex)
+{
+  QReadLocker locker(&m_spData->m_rwLock);
+  auto it = m_spData->m_vsResourceTags.begin();
+  if (0 <= iIndex && m_spData->m_vsResourceTags.size() > static_cast<size_t>(iIndex))
+  {
+    std::advance(it, iIndex);
+    if (m_spData->m_vsResourceTags.end() != it)
+    {
+    return *it;
+    }
+  }
+  return QString();
 }
 
 //----------------------------------------------------------------------------------------
@@ -666,5 +758,51 @@ QString CKinkWrapper::getDescribtion()
 QColor CKinkWrapper::color()
 {
   QReadLocker locker(&m_spData->m_rwLock);
-  return CalculateKinkColor(*m_spData);
+  return CalculateTagColor(*m_spData);
+}
+
+//----------------------------------------------------------------------------------------
+//
+CTagWrapper::CTagWrapper(tEngineType pEngine, const std::shared_ptr<STag>& spTag) :
+    QObject(),
+    m_spData(spTag),
+    m_pEngine(pEngine)
+{
+  assert(nullptr != spTag);
+  assert(CheckEngineNotNull(pEngine));
+}
+CTagWrapper::~CTagWrapper()
+{
+}
+
+//----------------------------------------------------------------------------------------
+//
+QString CTagWrapper::getType()
+{
+  QReadLocker locker(&m_spData->m_rwLock);
+  return m_spData->m_sType;
+}
+
+//----------------------------------------------------------------------------------------
+//
+QString CTagWrapper::getName()
+{
+  QReadLocker locker(&m_spData->m_rwLock);
+  return m_spData->m_sName;
+}
+
+//----------------------------------------------------------------------------------------
+//
+QString CTagWrapper::getDescribtion()
+{
+  QReadLocker locker(&m_spData->m_rwLock);
+  return m_spData->m_sDescribtion;
+}
+
+//----------------------------------------------------------------------------------------
+//
+QColor CTagWrapper::color()
+{
+  QReadLocker locker(&m_spData->m_rwLock);
+  return CalculateTagColor(*m_spData);
 }

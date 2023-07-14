@@ -526,7 +526,7 @@ void CEditorProjectSettingsWidget::AddKinksToView(const std::vector<tspKink>& vs
       m_spUi->pFetishLineEdit->setText("");
 
       // Farbe für Kategorie ausrechnen
-      QColor hashColor = CalculateKinkColor(*spKink);
+      QColor hashColor = CalculateTagColor(*spKink);
 
       // calculate foreground / text color
       double dLuminance = (0.299 * hashColor.red() +

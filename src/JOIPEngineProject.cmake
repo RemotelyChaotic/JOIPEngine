@@ -374,6 +374,7 @@ macro(CreateJOIPProject JOIP_PROJECT_NAME)
     ${JOIPSources}/Systems/DatabaseInterface/ProjectData.h
     ${JOIPSources}/Systems/DatabaseInterface/ResourceData.h
     ${JOIPSources}/Systems/DatabaseInterface/SceneData.h
+    ${JOIPSources}/Systems/DatabaseInterface/TagData.h
     ${JOIPSources}/Systems/DatabaseIO.cpp
     ${JOIPSources}/Systems/DatabaseIO.h
     ${JOIPSources}/Systems/DatabaseManager.cpp
@@ -445,6 +446,8 @@ macro(CreateJOIPProject JOIP_PROJECT_NAME)
     ${JOIPSources}/Systems/ResourceBundle.h
     ${JOIPSources}/Systems/Scene.cpp
     ${JOIPSources}/Systems/Scene.h
+    ${JOIPSources}/Systems/Tag.cpp
+    ${JOIPSources}/Systems/Tag.h
     ${JOIPSources}/Systems/JSON/JsonInstructionBase.h
     ${JOIPSources}/Systems/JSON/JsonInstructionNode.cpp
     ${JOIPSources}/Systems/JSON/JsonInstructionNode.h

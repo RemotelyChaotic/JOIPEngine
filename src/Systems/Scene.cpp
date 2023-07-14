@@ -26,7 +26,7 @@ QJsonObject SScene::ToJsonObject()
 {
   QWriteLocker locker(&m_rwLock);
   QJsonArray resourceRefs;
-  for (QString sRef : m_vsResourceRefs)
+  for (const QString& sRef : m_vsResourceRefs)
   {
     resourceRefs.push_back(sRef);
   }
@@ -62,7 +62,7 @@ void SScene::FromJsonObject(const QJsonObject& json)
   m_vsResourceRefs.clear();
   if (it != json.end())
   {
-    for (QJsonValue val : it.value().toArray())
+    for (const QJsonValue& val : it.value().toArray())
     {
       m_vsResourceRefs.insert(val.toString());
     }

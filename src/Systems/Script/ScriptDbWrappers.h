@@ -94,6 +94,11 @@ public:
   Q_INVOKABLE QVariant resource(const QString& sValue);
   Q_INVOKABLE QVariant resource(qint32 iIndex);
 
+  Q_INVOKABLE qint32 numTags();
+  Q_INVOKABLE QStringList tags();
+  Q_INVOKABLE QVariant tag(const QString& sValue);
+  Q_INVOKABLE QVariant tag(qint32 iIndex);
+
   std::shared_ptr<SProject> Data() { return m_spData; }
 
 private:
@@ -149,6 +154,10 @@ public:
 
   Q_INVOKABLE bool load();
   Q_INVOKABLE QVariant project();
+
+  Q_INVOKABLE qint32 numTags();
+  Q_INVOKABLE QStringList tags();
+  Q_INVOKABLE QString tag(qint32 iIndex);
 
   std::shared_ptr<SResource> Data() { return m_spData; }
 
@@ -222,9 +231,38 @@ private:
 
 //----------------------------------------------------------------------------------------
 //
+class CTagWrapper : public QObject
+{
+  Q_OBJECT
+  Q_DISABLE_COPY(CTagWrapper)
+  CTagWrapper() {}
+  Q_PROPERTY(QString  type                       READ getType              CONSTANT)
+  Q_PROPERTY(QString  name                       READ getName              CONSTANT)
+  Q_PROPERTY(QString  describtion                READ getDescribtion       CONSTANT)
+
+public:
+  explicit CTagWrapper(tEngineType pEngine, const std::shared_ptr<STag>& spTag);
+  ~CTagWrapper();
+
+  QString getType();
+  QString getName();
+  QString getDescribtion();
+
+  Q_INVOKABLE QColor color();
+
+  std::shared_ptr<STag> Data() { return m_spData; }
+
+private:
+  std::shared_ptr<STag>               m_spData;
+  tEngineType                         m_pEngine;
+};
+
+//----------------------------------------------------------------------------------------
+//
 Q_DECLARE_METATYPE(CResourceScriptWrapper*)
 Q_DECLARE_METATYPE(CProjectScriptWrapper*)
 Q_DECLARE_METATYPE(CSceneScriptWrapper*)
 Q_DECLARE_METATYPE(CKinkWrapper*)
+Q_DECLARE_METATYPE(CTagWrapper*)
 
 #endif // SCRIPTDBWRAPPERS_H

@@ -1,12 +1,15 @@
 #ifndef RESOURCEDATA_H
 #define RESOURCEDATA_H
 
+#include "TagData.h"
+
 #include <enum.h>
 #include <QString>
 #include <QUrl>
 
 #include <map>
 #include <memory>
+#include <set>
 
 BETTER_ENUM(EResourceType, qint32,
             eImage      = 0,
@@ -29,6 +32,7 @@ struct SResourceData
   QUrl                      m_sSource;
   EResourceType             m_type = EResourceType::eOther;
   QString                   m_sResourceBundle;
+  tvsTags                   m_vsResourceTags;
 };
 
 struct SScriptDefinitionData

@@ -1,7 +1,7 @@
 #ifndef KINK_H
 #define KINK_H
 
-#include <enum.h>
+#include "DatabaseInterface/TagData.h"
 #include <QReadWriteLock>
 #include <QColor>
 #include <QObject>
@@ -11,7 +11,7 @@
 
 //----------------------------------------------------------------------------------------
 //
-struct SKink
+struct SKink : public STagData
 {
   SKink();
   SKink(qint32 iId, QString sType, QString sName, QString sDescribtion);
@@ -19,13 +19,8 @@ struct SKink
   ~SKink();
 
   mutable QReadWriteLock  m_rwLock;
-  qint32                  m_iIdForOrdering;
-  QString                 m_sType;
-  QString                 m_sName;
-  QString                 m_sDescribtion;
+  qint32                  m_iIdForOrdering = -1;
 };
-
-QColor CalculateKinkColor(const SKink& kink);
 
 //----------------------------------------------------------------------------------------
 //

@@ -4,6 +4,7 @@
 
 #include <QFileInfo>
 #include <QImageReader>
+#include <QJsonArray>
 #include <QMutexLocker>
 #include <cassert>
 
@@ -29,12 +30,18 @@ SResource::~SResource() {}
 QJsonObject SResource::ToJsonObject()
 {
   QWriteLocker locker(&m_rwLock);
+  QJsonArray resourceTags;
+  for (const QString& sTag : m_vsResourceTags)
+  {
+    resourceTags.push_back(sTag);
+  }
   return {
     { "sName", m_sName },
     { "sPath", m_sPath.toString(QUrl::None) },
     { "sSource", m_sSource.toString(QUrl::None) },
     { "type", m_type._value },
     { "sResourceBundle", m_sResourceBundle },
+    { "vsResourceTags", resourceTags }
   };
 }
 
@@ -70,6 +77,7 @@ void SResource::FromJsonObject(const QJsonObject& json)
       sProject = m_spParent->m_sName;
       bBundled = m_spParent->m_bBundled;
     }
+    Q_UNUSED(bBundled)
     locker.unlock();
     const QString sSuffix = QFileInfo(ResourceUrlToAbsolutePath(GetPtr())).suffix();
     locker.relock();
@@ -94,6 +102,15 @@ void SResource::FromJsonObject(const QJsonObject& json)
   if (it != json.end())
   {
     m_sResourceBundle = it.value().toString();
+  }
+  it = json.find("vsResourceTags");
+  m_vsResourceTags.clear();
+  if (it != json.end())
+  {
+    for (const QJsonValue& val : it.value().toArray())
+    {
+      m_vsResourceTags.insert(it.value().toString());
+    }
   }
 }
 
@@ -246,7 +263,6 @@ QStringList SResourceFormats::ImageFormats()
   static QStringList imageFormatsList;
   if (imageFormatsList.isEmpty())
   {
-    QString sImageFormats;
     for (const QByteArray& arr : imageFormats) { imageFormatsList += "*." + QString::fromUtf8(arr); }
   }
   return imageFormatsList;

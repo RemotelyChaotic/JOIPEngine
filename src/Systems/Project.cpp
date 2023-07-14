@@ -22,6 +22,7 @@ SProject::SProject() :
   m_vspScenes(),
   m_spResourcesMap(),
   m_spResourceBundleMap(),
+  m_vspTags(),
   m_vsMountPoints()
 {
 }
@@ -32,6 +33,7 @@ SProject::SProject(const SProject& other) :
   m_vspScenes(other.m_vspScenes),
   m_spResourcesMap(other.m_spResourcesMap),
   m_spResourceBundleMap(other.m_spResourceBundleMap),
+  m_vspTags(other.m_vspTags),
   m_vsMountPoints(other.m_vsMountPoints)
 {}
 
@@ -63,6 +65,11 @@ QJsonObject SProject::ToJsonObject()
   {
     resourceBundles.push_back(spResourceBundle.second->ToJsonObject());
   }
+  QJsonArray tags;
+  for (auto& spTag : m_vspTags)
+  {
+    tags.push_back(spTag.second->ToJsonObject());
+  }
   QJsonArray mountPoints;
   for (auto& sMountPoint : m_vsMountPoints)
   {
@@ -85,6 +92,7 @@ QJsonObject SProject::ToJsonObject()
     { "vspScenes", scenes },
     { "vspResources", resources },
     { "vspResourceBundles", resourceBundles },
+    { "vspTags", tags },
     { "vsMountPoints", mountPoints },
     { "dlState", m_dlState._to_integral() },
     { "sFont", m_sFont },
@@ -157,6 +165,7 @@ void SProject::FromJsonObject(const QJsonObject& json)
   {
     m_bNeedsCodecs = it.value().toBool();
   }
+
   it = json.find("vsKinks");
   m_vsKinks.clear();
   if (it != json.end())
@@ -208,6 +217,20 @@ void SProject::FromJsonObject(const QJsonObject& json)
       spResourceBundle->FromJsonObject(val.toObject());
       locker.relock();
       m_spResourceBundleMap.insert({spResourceBundle->m_sName, spResourceBundle});
+    }
+  }
+  it = json.find("vspTags");
+  m_vspTags.clear();
+  if (it != json.end())
+  {
+    for (QJsonValue val : it.value().toArray())
+    {
+      tspTag spTag = std::make_shared<STag>();
+      spTag->m_spParent = GetPtr();
+      locker.unlock();
+      spTag->FromJsonObject(val.toObject());
+      locker.relock();
+      m_vspTags.insert(std::pair<QString, tspTag>{spTag->m_sName, spTag});
     }
   }
   it = json.find("vsMountPoints");
