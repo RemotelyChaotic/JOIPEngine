@@ -382,6 +382,7 @@ void CEditorProjectSettingsWidget::on_pFetishLineEdit_editingFinished()
   WIDGET_INITIALIZED_GUARD
   if (nullptr == m_spCurrentProject) { return; }
   QString sKink = m_spUi->pFetishLineEdit->text();
+  if (sKink.isEmpty()) { return; }
 
   UndoStack()->push(
         new CCommandAddFetishes(this,
@@ -486,14 +487,17 @@ void CEditorProjectSettingsWidget::AddKinks(QStringList vsKinks)
     for (const QString& sKing : qAsConst(vsKinks))
     {
       tspKink spKink = spDbManager->FindKink(sKing);
-      if (m_vspKinks.end() != std::find_if(m_vspKinks.begin(), m_vspKinks.end(),
-        [&spKink](const tspKink& left) -> bool {
-        QReadLocker lockerLeft(&left->m_rwLock);
-        QReadLocker lockerRight(&spKink->m_rwLock);
-        return left->m_sName == spKink->m_sName && left->m_sType == spKink->m_sType;
-      })) continue;
-      m_vspKinks.push_back(spKink);
-      vspKinksAdded.push_back(spKink);
+      if(nullptr != spKink)
+      {
+        if (m_vspKinks.end() != std::find_if(m_vspKinks.begin(), m_vspKinks.end(),
+          [&spKink](const tspKink& left) -> bool {
+          QReadLocker lockerLeft(&left->m_rwLock);
+          QReadLocker lockerRight(&spKink->m_rwLock);
+          return left->m_sName == spKink->m_sName && left->m_sType == spKink->m_sType;
+        })) continue;
+        m_vspKinks.push_back(spKink);
+        vspKinksAdded.push_back(spKink);
+      }
     }
 
     std::sort(m_vspKinks.begin(), m_vspKinks.end(), [](const tspKink& left, const tspKink& right) {

@@ -91,7 +91,7 @@ void CCommandRemoveFetishes::undo()
 {
   if (!m_pGuard.isNull())
   {
-    m_fnRemove(m_vsRemovedKinks);
+    m_fnAdd(m_vsRemovedKinks);
   }
 }
 
@@ -101,7 +101,7 @@ void CCommandRemoveFetishes::redo()
 {
   if (!m_pGuard.isNull())
   {
-    m_fnAdd(m_vsRemovedKinks);
+    m_fnRemove(m_vsRemovedKinks);
   }
 }
 //----------------------------------------------------------------------------------------
