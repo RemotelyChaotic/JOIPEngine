@@ -199,7 +199,7 @@ Rectangle {
             }
         }
         muted: Settings.muted
-        volume: Settings.volume * mediaPlayer.volume
+        volume: Settings.muted ? 0.0 : Settings.volume * mediaPlayer.volume
 
         Behavior on volume {
             animation: NumberAnimation {
