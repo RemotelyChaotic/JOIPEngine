@@ -12,7 +12,16 @@ Changes:
 
 Fixed Bugs:
 - Fixed an error message in PlayerMediaPlayer that was reporting the wrong function call.
+
+=================
+Version 1.2.6.0
+=================
+
+Fixed Bugs:
+- Fixed the "mute" setting not muting Audio Resources in a JOIP-Project.
 - Crashfix for certain unusual screen configurations.
+- Crashfix for trying to enter an empty Kink.
+- Fixed Kinks not being removable via "x" button.
 
 =================
 Version 1.2.5.0
