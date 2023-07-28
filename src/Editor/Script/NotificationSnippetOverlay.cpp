@@ -206,6 +206,7 @@ void CNotificationSnippetOverlay::on_pSetTimeoutTimeCheckBox_toggled(bool bStatu
 {
   if (!m_bInitialized) { return; }
   m_data.m_bSetTimeoutTime = bStatus;
+  m_spUi->pTimeSpinBox->setEnabled(bStatus);
 }
 
 //----------------------------------------------------------------------------------------
