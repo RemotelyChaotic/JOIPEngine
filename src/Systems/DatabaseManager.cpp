@@ -678,6 +678,8 @@ void CDatabaseManager::ClearResources(tspProject& spProj)
     emit SignalResourceRemoved(spProj->m_iId, sName);
     locker.relock();
   }
+
+  ClearTags(spProj);
 }
 
 //----------------------------------------------------------------------------------------
@@ -739,12 +741,15 @@ void CDatabaseManager::RemoveResource(tspProject& spProj, const QString& sName)
   auto it = spProj->m_spResourcesMap.find(sName);
   if (it != spProj->m_spResourcesMap.end())
   {
+    qint32 iId = spProj->m_iId;
+
     if (spProj->m_bLoaded)
     {
       m_spDbIo->UnloadResource(it->second);
     }
 
     spProj->m_spResourcesMap.erase(it);
+
     for (tspScene& spScene : spProj->m_vspScenes)
     {
       QWriteLocker sceneLocker(&spScene->m_rwLock);
@@ -759,8 +764,35 @@ void CDatabaseManager::RemoveResource(tspProject& spProj, const QString& sName)
       }
     }
 
+    // delete tag references
+    for (auto itTag = spProj->m_vspTags.begin(); spProj->m_vspTags.end() != itTag;)
+    {
+      QWriteLocker tagLocker(&itTag->second->m_rwLock);
+      QString sTagName = itTag->second->m_sName;
+      auto itTagResRef = itTag->second->m_vsResourceRefs.find(sName);
+      if (itTag->second->m_vsResourceRefs.end() != itTagResRef)
+      {
+        itTag->second->m_vsResourceRefs.erase(itTagResRef);
+      }
+
+      if (itTag->second->m_vsResourceRefs.empty())
+      {
+        itTag = spProj->m_vspTags.erase(itTag);
+        tagLocker.unlock();
+        locker.unlock();
+        emit SignalTagRemoved(iId, QString(), sTagName);
+      }
+      else
+      {
+        ++itTag;
+        tagLocker.unlock();
+        locker.unlock();
+        emit SignalTagRemoved(iId, sName, sTagName);
+      }
+    }
+
     locker.unlock();
-    emit SignalResourceRemoved(spProj->m_iId, sName);
+    emit SignalResourceRemoved(iId, sName);
   }
 }
 
@@ -825,10 +857,189 @@ void CDatabaseManager::RenameResource(tspProject& spProj, const QString& sName, 
         }
       }
 
+      // rename refs in tags
+      for (const auto& [_, spTag] : spProj->m_vspTags)
+      {
+        QWriteLocker tagLocker(&spTag->m_rwLock);
+        auto itResRef = spTag->m_vsResourceRefs.find(sName);
+        if (spTag->m_vsResourceRefs.end() != itResRef)
+        {
+          spTag->m_vsResourceRefs.erase(itResRef);
+        }
+        spTag->m_vsResourceRefs.insert(sNewName);
+      }
+
       locker.unlock();
       emit SignalResourceRenamed(iProjId, sName, sNewName);
     }
   }
+}
+
+//----------------------------------------------------------------------------------------
+//
+QString CDatabaseManager::AddTag(tspProject& spProj, const QString& sResource, const QString& sCategory,
+                                 const QString& sName, const QString& sDescribtion)
+{
+  if (!IsInitialized() || nullptr == spProj) { return QString(); }
+
+  tspTag spTag = std::make_shared<STag>(sCategory, sName, sDescribtion);
+  tspResource spResource = FindResourceInProject(spProj, sResource);
+  if (sResource.isEmpty() || nullptr == spResource)
+  {
+    // nothing to do for now
+  }
+  else
+  {
+    QReadLocker locker(&spResource->m_rwLock);
+    spResource->m_vsResourceTags.insert(sName);
+    spTag->m_vsResourceRefs.insert(sResource);
+  }
+
+  qint32 iId = -1;
+  {
+    QWriteLocker locker(&spProj->m_rwLock);
+    spTag->m_spParent = spProj;
+    spProj->m_vspTags.insert({sName, spTag});
+    iId = spProj->m_iId;
+  }
+
+  emit SignalTagAdded(iId, sResource, sName);
+
+  return sName;
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CDatabaseManager::ClearTags(tspProject& spProj)
+{
+  if (!IsInitialized() || nullptr == spProj) { return; }
+
+  QWriteLocker locker(&spProj->m_rwLock);
+  qint32 iId = spProj->m_iId;
+  while (0 < spProj->m_vspTags.size())
+  {
+    auto it = spProj->m_vspTags.begin();
+    QString sTag = it->first;
+
+    spProj->m_vspTags.erase(it);
+
+    RemoveLingeringTagReferencesFromResources(spProj, it->second);
+
+    locker.unlock();
+    emit SignalTagRemoved(iId, QString(), sTag);
+    locker.relock();
+  }
+}
+
+//----------------------------------------------------------------------------------------
+//
+tspTag CDatabaseManager::FindTagInProject(tspProject& spProj, QString sName)
+{
+  if (!IsInitialized() || nullptr == spProj) { return nullptr; }
+
+  QReadLocker locker(&spProj->m_rwLock);
+  auto it = spProj->m_vspTags.find(sName);
+  if (spProj->m_vspTags.end() != it)
+  {
+    return it->second;
+  }
+  return nullptr;
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CDatabaseManager::RemoveTag(tspProject& spProj, const QString& sName)
+{
+  if (!IsInitialized() || nullptr == spProj) { return; }
+
+  bool bRemoved = false;
+  qint32 iProjId = -1;
+  {
+    QWriteLocker locker(&spProj->m_rwLock);
+    iProjId = spProj->m_iId;
+
+    auto it = spProj->m_vspTags.find(sName);
+    if (spProj->m_vspTags.end() != it)
+    {
+      RemoveLingeringTagReferencesFromResources(spProj, it->second);
+      spProj->m_vspTags.erase(it);
+      bRemoved = true;
+    }
+  }
+
+  if (bRemoved)
+  {
+    emit SignalTagRemoved(iProjId, QString(), sName);
+  }
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CDatabaseManager::RemoveTagFromResource(tspProject& spProj, const QString& sResource, const QString& sName)
+{
+  if (!IsInitialized() || nullptr == spProj || sResource.isEmpty()) { return; }
+
+  bool bRemoved = true;
+  bool bRemovedFromProject = false;
+  qint32 iProjId = -1;
+  {
+    QWriteLocker lockerProj(&spProj->m_rwLock);
+    iProjId = spProj->m_iId;
+
+    auto it = spProj->m_vspTags.find(sName);
+    if (spProj->m_vspTags.end() != it)
+    {
+      QWriteLocker locker(&it->second->m_rwLock);
+      auto itRes = it->second->m_vsResourceRefs.find(sResource);
+      bRemoved &= it->second->m_vsResourceRefs.end() != itRes;
+      if (bRemoved)
+      {
+        it->second->m_vsResourceRefs.erase(itRes);
+      }
+
+      if (it->second->m_vsResourceRefs.empty())
+      {
+        spProj->m_vspTags.erase(it);
+        bRemovedFromProject = true;
+      }
+
+      auto itResourse = spProj->m_spResourcesMap.find(sResource);
+      if (spProj->m_spResourcesMap.end() != itResourse)
+      {
+        QWriteLocker locker(&itResourse->second->m_rwLock);
+        auto itRes = itResourse->second->m_vsResourceTags.find(sName);
+        if (itResourse->second->m_vsResourceTags.end() != itRes)
+        {
+          itResourse->second->m_vsResourceTags.erase(itRes);
+        }
+      }
+    }
+  }
+
+  if (bRemoved)
+  {
+    emit SignalTagRemoved(iProjId, bRemovedFromProject ? QString() : sResource, sName);
+  }
+}
+
+//----------------------------------------------------------------------------------------
+//
+QStringList CDatabaseManager::TagCategories(const tspProject& spProj)
+{
+  if (!IsInitialized()) { return QStringList(); }
+
+  QStringList res;
+  QReadLocker locker(&spProj->m_rwLock);
+  for (const auto& [_, spTag] : spProj->m_vspTags)
+  {
+    QReadLocker tagLocker(&spTag->m_rwLock);
+    if (!res.contains(spTag->m_sType))
+    {
+      res << spTag->m_sType;
+    }
+  }
+
+  return res;
 }
 
 //----------------------------------------------------------------------------------------
@@ -1010,4 +1221,25 @@ qint32 CDatabaseManager::FindNewSceneId(tspProject& spProj)
   }
   projLocker.unlock();
   return FindNewIdFromSet(ids);
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CDatabaseManager::RemoveLingeringTagReferencesFromResources(tspProject& spProj,
+                                                                 tspTag& spTag)
+{
+  QWriteLocker tagLocker(&spProj->m_rwLock);
+  for (const QString& sRes : spTag->m_vsResourceRefs)
+  {
+    auto itRes = spProj->m_spResourcesMap.find(sRes);
+    if (spProj->m_spResourcesMap.end() != itRes)
+    {
+      QWriteLocker resLocker(&itRes->second->m_rwLock);
+      auto itTag = itRes->second->m_vsResourceTags.find(spTag->m_sName);
+      if (itRes->second->m_vsResourceTags.end() != itTag)
+      {
+        itRes->second->m_vsResourceTags.erase(itTag);
+      }
+    }
+  }
 }

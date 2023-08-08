@@ -233,6 +233,22 @@ void SProject::FromJsonObject(const QJsonObject& json)
       m_vspTags.insert(std::pair<QString, tspTag>{spTag->m_sName, spTag});
     }
   }
+
+  // connect tags and resources after both have been loaded
+  for (const auto& [sResource, spResource] : m_spResourcesMap)
+  {
+    QReadLocker resLocker(&spResource->m_rwLock);
+    for (const QString& sTag : spResource->m_vsResourceTags)
+    {
+      auto it = m_vspTags.find(sTag);
+      if (m_vspTags.end() != it)
+      {
+        QReadLocker tagLocker(&it->second->m_rwLock);
+        it->second->m_vsResourceRefs.insert(sResource);
+      }
+    }
+  }
+
   it = json.find("vsMountPoints");
   m_vsMountPoints.clear();
   if (it != json.end())

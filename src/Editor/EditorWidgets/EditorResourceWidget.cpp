@@ -12,6 +12,7 @@
 #include "Editor/Resources/ResourceTreeItem.h"
 #include "Editor/Resources/ResourceTreeItemModel.h"
 #include "Editor/Resources/ResourceTreeItemSortFilterProxyModel.h"
+#include "Editor/Resources/TagsEditorOverlay.h"
 #include "Editor/Resources/WebResourceOverlay.h"
 #include "Editor/Tutorial/ResourceTutorialStateSwitchHandler.h"
 #include "Systems/DatabaseManager.h"
@@ -57,6 +58,7 @@ CEditorResourceWidget::CEditorResourceWidget(QWidget* pParent) :
   m_spSourceOverlay(std::make_unique<CWebResourceOverlay>(this)),
   m_spWebOverlay(std::make_unique<CWebResourceOverlay>(this)),
   m_spNAManager(std::make_unique<QNetworkAccessManager>()),
+  m_spTagsOverlay(std::make_unique<CTagsEditorOverlay>(this)),
   m_spUi(std::make_shared<Ui::CEditorResourceWidget>()),
   m_spTutorialStateSwitchHandler(nullptr),
   m_spSettings(CApplication::Instance()->Settings()),
@@ -70,6 +72,8 @@ CEditorResourceWidget::CEditorResourceWidget(QWidget* pParent) :
           this, &CEditorResourceWidget::SlotWebSourceSelected);
   connect(m_spWebOverlay.get(), &CWebResourceOverlay::SignalResourceSelected,
           this, &CEditorResourceWidget::SlotWebResourceSelected);
+  connect(m_spTagsOverlay.get(), &CTagsEditorOverlay::SignalTagsChanged,
+          this, &CEditorResourceWidget::SignalProjectEdited);
 }
 
 CEditorResourceWidget::~CEditorResourceWidget()
@@ -84,6 +88,7 @@ CEditorResourceWidget::~CEditorResourceWidget()
 
   m_spWebOverlay.reset();
   m_spSourceOverlay.reset();
+  m_spTagsOverlay.reset();
 }
 
 //----------------------------------------------------------------------------------------
@@ -101,6 +106,9 @@ void CEditorResourceWidget::Initialize()
   m_spUi->pResourceModelView->Initialize(UndoStack(), ResourceTreeModel());
 
   m_spWebOverlay->Hide();
+  m_spTagsOverlay->Hide();
+
+  m_spTagsOverlay->SetUndoStack(UndoStack());
 
   setAcceptDrops(true);
 
@@ -135,6 +143,7 @@ void CEditorResourceWidget::LoadProject(tspProject spCurrentProject)
   }
 
   m_spCurrentProject = spCurrentProject;
+  m_spTagsOverlay->SetProject(spCurrentProject);
   m_spUi->pResourceModelView->ProjectLoaded(m_spCurrentProject,
                                             EditorModel()->IsReadOnly());
 
@@ -151,8 +160,12 @@ void CEditorResourceWidget::UnloadProject()
 
   m_spUi->pResourceDisplayWidget->UnloadResource();
   m_spUi->pResourceDisplayWidget->UnloadPlayer();
+
+  m_spTagsOverlay->SetProject(nullptr);
+
   m_spSourceOverlay->Hide();
   m_spWebOverlay->Hide();
+  m_spTagsOverlay->Hide();
 
   m_spUi->pResourceModelView->ProjectUnloaded();
 
@@ -179,6 +192,8 @@ void CEditorResourceWidget::OnActionBarAboutToChange()
             this, &CEditorResourceWidget::SlotSetSourceButtonClicked);
     disconnect(ActionBar()->m_spUi->TitleCardButton, &QPushButton::clicked,
             this, &CEditorResourceWidget::SlotTitleCardButtonClicked);
+    disconnect(ActionBar()->m_spUi->TagsButton, &QPushButton::clicked,
+               this, &CEditorResourceWidget::SlotTagsButtonClicked);
     disconnect(ActionBar()->m_spUi->MapButton, &QPushButton::clicked,
             this, &CEditorResourceWidget::SlotMapButtonClicked);
 
@@ -188,6 +203,7 @@ void CEditorResourceWidget::OnActionBarAboutToChange()
     ActionBar()->m_spUi->RemoveResourceButton->setEnabled(true);
     ActionBar()->m_spUi->SourceButton->setEnabled(true);
     ActionBar()->m_spUi->TitleCardButton->setEnabled(true);
+    ActionBar()->m_spUi->TagsButton->setEnabled(true);
     ActionBar()->m_spUi->MapButton->setEnabled(true);
   }
 }
@@ -223,6 +239,8 @@ void CEditorResourceWidget::OnActionBarChanged()
             this, &CEditorResourceWidget::SlotSetSourceButtonClicked);
     connect(ActionBar()->m_spUi->TitleCardButton, &QPushButton::clicked,
             this, &CEditorResourceWidget::SlotTitleCardButtonClicked);
+    connect(ActionBar()->m_spUi->TagsButton, &QPushButton::clicked,
+            this, &CEditorResourceWidget::SlotTagsButtonClicked);
     connect(ActionBar()->m_spUi->MapButton, &QPushButton::clicked,
             this, &CEditorResourceWidget::SlotMapButtonClicked);
 
@@ -234,6 +252,7 @@ void CEditorResourceWidget::OnActionBarChanged()
       ActionBar()->m_spUi->RemoveResourceButton->setEnabled(false);
       ActionBar()->m_spUi->SourceButton->setEnabled(false);
       ActionBar()->m_spUi->TitleCardButton->setEnabled(false);
+      ActionBar()->m_spUi->TagsButton->setEnabled(false);
       ActionBar()->m_spUi->MapButton->setEnabled(false);
     }
 
@@ -438,6 +457,27 @@ void CEditorResourceWidget::SlotTitleCardButtonClicked()
                 emit pThis->SignalProjectEdited();
               }
             }));
+
+      // only interrested in first item which is the actual item we need
+      break;
+    }
+  }
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CEditorResourceWidget::SlotTagsButtonClicked()
+{
+  WIDGET_INITIALIZED_GUARD
+  if (nullptr == m_spCurrentProject) { return; }
+
+  auto spDbManager = m_wpDbManager.lock();
+  if (nullptr != spDbManager)
+  {
+    for (QString sName : m_spUi->pResourceModelView->SelectedResources())
+    {
+      m_spTagsOverlay->SetResource(sName);
+      m_spTagsOverlay->Show();
 
       // only interrested in first item which is the actual item we need
       break;

@@ -182,6 +182,8 @@ macro(CreateJOIPProject JOIP_PROJECT_NAME)
     ${JOIPSources}/Editor/Resources/CommandChangeResourceData.h
     ${JOIPSources}/Editor/Resources/CommandChangeSource.cpp
     ${JOIPSources}/Editor/Resources/CommandChangeSource.h
+    ${JOIPSources}/Editor/Resources/CommandChangeTags.cpp
+    ${JOIPSources}/Editor/Resources/CommandChangeTags.h
     ${JOIPSources}/Editor/Resources/CommandChangeTitleCard.cpp
     ${JOIPSources}/Editor/Resources/CommandChangeTitleCard.h
     ${JOIPSources}/Editor/Resources/CommandRemoveResource.cpp
@@ -202,6 +204,11 @@ macro(CreateJOIPProject JOIP_PROJECT_NAME)
     ${JOIPSources}/Editor/Resources/ResourceTreeItemModel.h
     ${JOIPSources}/Editor/Resources/ResourceTreeItemSortFilterProxyModel.cpp
     ${JOIPSources}/Editor/Resources/ResourceTreeItemSortFilterProxyModel.h
+    ${JOIPSources}/Editor/Resources/TagCompleter.cpp
+    ${JOIPSources}/Editor/Resources/TagCompleter.h
+    ${JOIPSources}/Editor/Resources/TagsEditorOverlay.cpp
+    ${JOIPSources}/Editor/Resources/TagsEditorOverlay.h
+    ${JOIPSources}/Editor/Resources/TagsEditorOverlay.ui
     ${JOIPSources}/Editor/Resources/WebResourceOverlay.cpp
     ${JOIPSources}/Editor/Resources/WebResourceOverlay.h
     ${JOIPSources}/Editor/Resources/WebResourceOverlay.ui
@@ -581,6 +588,9 @@ macro(CreateJOIPProject JOIP_PROJECT_NAME)
     ${JOIPSources}/Widgets/SlidingTabWidget.h
     ${JOIPSources}/Widgets/SlidingWidget.cpp
     ${JOIPSources}/Widgets/SlidingWidget.h
+    ${JOIPSources}/Widgets/TagsView.cpp
+    ${JOIPSources}/Widgets/TagsView.h
+    ${JOIPSources}/Widgets/TagsView.ui
     ${JOIPSources}/Widgets/TitleLabel.cpp
     ${JOIPSources}/Widgets/TitleLabel.h
     ${JOIPSources}/WindowContext.cpp

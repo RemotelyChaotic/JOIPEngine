@@ -64,7 +64,7 @@
         </spacer>
        </item>
        <item row="12" column="0" colspan="3">
-        <widget class="QFrame" name="pFetishListWidget">
+        <widget class="CTagsView" name="pFetishListWidget">
          <property name="sizePolicy">
           <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
            <horstretch>0</horstretch>
@@ -404,6 +404,12 @@ Saving will overwrite old target version.</string>
    <class>CRichTextEdit</class>
    <extends>QWidget</extends>
    <header>Widgets/Editor/RichTextEdit.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>CTagsView</class>
+   <extends>QFrame</extends>
+   <header>Widgets/TagsView.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

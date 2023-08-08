@@ -15,6 +15,7 @@ namespace Ui {
 }
 class CDatabaseManager;
 class CSettings;
+class CTagsEditorOverlay;
 class CWebResourceOverlay;
 class QNetworkAccessManager;
 struct SProject;
@@ -58,6 +59,7 @@ protected slots:
   void SlotRemoveButtonClicked();
   void SlotSetSourceButtonClicked();
   void SlotTitleCardButtonClicked();
+  void SlotTagsButtonClicked();
   void SlotMapButtonClicked();
   void SlotWebResourceSelected(const QString& sResource);
   void SlotWebSourceSelected(const QString& sResource);
@@ -71,6 +73,7 @@ private:
   std::unique_ptr<CWebResourceOverlay>                 m_spSourceOverlay;
   std::unique_ptr<CWebResourceOverlay>                 m_spWebOverlay;
   std::unique_ptr<QNetworkAccessManager>               m_spNAManager;
+  std::unique_ptr<CTagsEditorOverlay>                  m_spTagsOverlay;
   std::shared_ptr<Ui::CEditorResourceWidget>           m_spUi;
   std::shared_ptr<CResourceTutorialStateSwitchHandler> m_spTutorialStateSwitchHandler;
   std::shared_ptr<CSettings>                           m_spSettings;

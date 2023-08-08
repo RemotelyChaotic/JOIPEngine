@@ -22,6 +22,8 @@ BETTER_ENUM(EEditorCommandId, qint32,
             eChangeSource,
             eChangeTitleCard,
             eRemoveResource,
+            eAddTag,
+            eRemoveTag,
 
             eChangeOpenedScript,
             eToggleEosCommand,

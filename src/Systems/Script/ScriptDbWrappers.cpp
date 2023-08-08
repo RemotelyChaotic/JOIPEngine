@@ -589,8 +589,29 @@ QStringList CResourceScriptWrapper::tags()
 
 //----------------------------------------------------------------------------------------
 //
-QString CResourceScriptWrapper::tag(qint32 iIndex)
+QVariant CResourceScriptWrapper::tag(const QString& sValue)
 {
+  QReadLocker projLocker(&m_spData->m_spParent->m_rwLock);
+  QReadLocker locker(&m_spData->m_rwLock);
+  auto it = m_spData->m_vsResourceTags.find(sValue);
+  if (m_spData->m_vsResourceTags.end() != it)
+  {
+    auto itTag = m_spData->m_spParent->m_vspTags.find(*it);
+    if (m_spData->m_spParent->m_vspTags.end() != itTag)
+    {
+      CTagWrapper* pTag =
+          new CTagWrapper(m_pEngine, std::make_shared<STag>(*itTag->second));
+      return CreateScriptObject(pTag, m_pEngine);
+    }
+  }
+  return QVariant();
+}
+
+//----------------------------------------------------------------------------------------
+//
+QVariant CResourceScriptWrapper::tag(qint32 iIndex)
+{
+  QReadLocker projLocker(&m_spData->m_spParent->m_rwLock);
   QReadLocker locker(&m_spData->m_rwLock);
   auto it = m_spData->m_vsResourceTags.begin();
   if (0 <= iIndex && m_spData->m_vsResourceTags.size() > static_cast<size_t>(iIndex))
@@ -598,10 +619,16 @@ QString CResourceScriptWrapper::tag(qint32 iIndex)
     std::advance(it, iIndex);
     if (m_spData->m_vsResourceTags.end() != it)
     {
-    return *it;
+      auto itTag = m_spData->m_spParent->m_vspTags.find(*it);
+      if (m_spData->m_spParent->m_vspTags.end() != itTag)
+      {
+        CTagWrapper* pTag =
+          new CTagWrapper(m_pEngine, std::make_shared<STag>(*itTag->second));
+        return CreateScriptObject(pTag, m_pEngine);
+      }
     }
   }
-  return QString();
+  return QVariant();
 }
 
 //----------------------------------------------------------------------------------------

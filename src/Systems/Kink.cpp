@@ -1,21 +1,18 @@
 #include "Kink.h"
 
 SKink::SKink() :
-  STagData(),
-  m_rwLock()
+  SLockableTagData()
 {
 }
 
 SKink::SKink(qint32 iId, QString sType, QString sName, QString sDescribtion) :
-  STagData{sType, sName, sDescribtion},
-  m_rwLock(),
+  SLockableTagData{sType, sName, sDescribtion},
   m_iIdForOrdering(iId)
 {
 }
 
 SKink::SKink(const SKink& other) :
-  STagData(other),
-  m_rwLock(),
+  SLockableTagData(other),
   m_iIdForOrdering(other.m_iIdForOrdering)
 {
 }

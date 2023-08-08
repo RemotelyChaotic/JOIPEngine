@@ -3,7 +3,6 @@
 
 #include "EditorWidgetBase.h"
 #include "Enums.h"
-#include "Systems/Resource.h"
 #include "ui_EditorProjectSettingsWidget.h"
 #include "ui_EditorActionBar.h"
 #include <memory>
@@ -49,9 +48,6 @@ protected slots:
 
 protected:
   void AddKinks(QStringList vsKinks);
-  void AddKinksToView(const std::vector<tspKink>& vspKinks);
-  void ClearKinkTagView();
-  void RemoveKinks(QStringList vsKinks);
   void OnActionBarAboutToChange() override;
   void OnActionBarChanged() override;
 
@@ -59,7 +55,6 @@ private:
   std::unique_ptr<CKinkSelectionOverlay>                      m_spKinkSelectionOverlay;
   std::shared_ptr<Ui::CEditorProjectSettingsWidget>           m_spUi;
   std::shared_ptr<CProjectSettingsTutorialStateSwitchHandler> m_spTutorialStateSwitchHandler;
-  std::vector<tspKink>                                        m_vspKinks;
   tspProject                                                  m_spCurrentProject;
 };
 

@@ -15,7 +15,6 @@ CKinkCompleter::CKinkCompleter(CKinkTreeModel* pModel, QObject* pParent) :
 //
 QStringList CKinkCompleter::splitPath(const QString& sPath) const
 {
-  QString sReultingKink = sPath;
   if (auto spDbManager = m_wpDbManager.lock())
   {
     tspKink spKink = spDbManager->FindKink(sPath);
@@ -43,8 +42,6 @@ QString CKinkCompleter::pathFromIndex(const QModelIndex& index) const
 
   CKinkTreeModel* pModel = dynamic_cast<CKinkTreeModel*>(model());
   if (nullptr == pModel) { return QString(); }
-
-  QString sData = pModel->data(index, completionRole()).toString();
 
   QModelIndex idx = index;
   QStringList vsList;

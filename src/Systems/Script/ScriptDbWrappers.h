@@ -157,7 +157,8 @@ public:
 
   Q_INVOKABLE qint32 numTags();
   Q_INVOKABLE QStringList tags();
-  Q_INVOKABLE QString tag(qint32 iIndex);
+  Q_INVOKABLE QVariant tag(const QString& sValue);
+  Q_INVOKABLE QVariant tag(qint32 iIndex);
 
   std::shared_ptr<SResource> Data() { return m_spData; }
 

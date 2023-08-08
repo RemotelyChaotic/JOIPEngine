@@ -21,6 +21,7 @@ namespace {
   const QString c_sRemoveResourceHelpId = "Editor/RemoveResource";
   const QString c_sImageSourceHelpId =    "Editor/ImageSource";
   const QString c_sTitleCardHelpId =      "Editor/TitleCard";
+  const QString c_sTagsHelpId =           "Editor/Tags";
   const QString c_sMapHelpId =            "Editor/Map";
 
   const QString c_sPlayHelpId =           "Editor/Play";
@@ -162,6 +163,8 @@ void CEditorActionBar::Initialize()
     wpHelpFactory->RegisterHelp(c_sImageSourceHelpId, ":/resources/help/editor/source_button_help.html");
     m_spUi->TitleCardButton->setProperty(helpOverlay::c_sHelpPagePropertyName, c_sTitleCardHelpId);
     wpHelpFactory->RegisterHelp(c_sTitleCardHelpId, ":/resources/help/editor/titlecard_button_help.html");
+    m_spUi->TagsButton->setProperty(helpOverlay::c_sHelpPagePropertyName, c_sTagsHelpId);
+    wpHelpFactory->RegisterHelp(c_sTagsHelpId, ":/resources/help/editor/tags_button_help.html");
     m_spUi->MapButton->setProperty(helpOverlay::c_sHelpPagePropertyName, c_sMapHelpId);
     wpHelpFactory->RegisterHelp(c_sMapHelpId, ":/resources/help/editor/map_button_help.html");
 
@@ -359,7 +362,8 @@ void CEditorActionBar::SlotKeyBindingsChanged()
     m_spUi->RemoveResourceButton->SetShortcut(m_spSettings->keyBinding(sKey.arg(5)));
     m_spUi->SourceButton->SetShortcut(m_spSettings->keyBinding(sKey.arg(6)));
     m_spUi->TitleCardButton->SetShortcut(m_spSettings->keyBinding(sKey.arg(7)));
-    m_spUi->MapButton->SetShortcut(m_spSettings->keyBinding(sKey.arg(8)));
+    m_spUi->TagsButton->SetShortcut(m_spSettings->keyBinding(sKey.arg(8)));
+    m_spUi->MapButton->SetShortcut(m_spSettings->keyBinding(sKey.arg(9)));
 
     m_spUi->PlayButton->SetShortcut(m_spSettings->keyBinding(sKey.arg(1)));
     m_spUi->PauseButton->SetShortcut(m_spSettings->keyBinding(sKey.arg(2)));

@@ -4,20 +4,19 @@
 #include <QDataStream>
 
 STag::STag() :
-    STagData(),
-    m_rwLock()
+  SLockableTagData()
 {
 }
 
 STag::STag(QString sType, QString sName, QString sDescribtion) :
-    STagData{sType, sName, sDescribtion},
-    m_rwLock()
+    SLockableTagData{sType, sName, sDescribtion}
 {
 }
 
 STag::STag(const STag& other) :
-    STagData(other),
-    m_rwLock()
+    SLockableTagData(other),
+    m_spParent(other.m_spParent),
+    m_vsResourceRefs(other.m_vsResourceRefs)
 {
 }
 

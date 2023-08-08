@@ -17,10 +17,12 @@ class CSettings;
 struct SProject;
 struct SScene;
 struct SResourceBundle;
+struct STag;
 typedef std::shared_ptr<SProject>       tspProject;
 typedef std::vector<tspProject>         tvspProject;
 typedef std::shared_ptr<SResourceBundle>tspResourceBundle;
 typedef std::shared_ptr<SScene>         tspScene;
+typedef std::shared_ptr<STag>           tspTag;
 
 typedef std::vector<std::function<void(const tspProject&)>> tvfnActionsProject;
 typedef std::vector<std::function<void(const tspScene&)>> tvfnActionsScene;
@@ -85,6 +87,15 @@ public:
   void RemoveResource(tspProject& spProj, const QString& sName);
   void RenameResource(tspProject& spProj, const QString& sName, const QString& sNewName);
 
+  // Tags
+  QString AddTag(tspProject& spProj, const QString& sResource, const QString& sCategory,
+                 const QString& sName, const QString& sDescribtion);
+  void ClearTags(tspProject& spProj);
+  tspTag FindTagInProject(tspProject& spProj, QString sName);
+  void RemoveTag(tspProject& spProj, const QString& sName);
+  void RemoveTagFromResource(tspProject& spProj, const QString& sResource, const QString& sName);
+  QStringList TagCategories(const tspProject& spProj);
+
   // Kinks
   tspKink FindKink(QString sName);
   tspKink FindKink(QString sCategory, QString sName);
@@ -110,6 +121,8 @@ signals:
   void SignalResourceAdded(qint32 iProjId, const QString& sName);
   void SignalResourceRenamed(qint32 iProjId, const QString& sOldName, const QString& sName);
   void SignalResourceRemoved(qint32 iProjId, const QString& sName);
+  void SignalTagAdded(qint32 iProjId, const QString& sResource, const QString& sName);
+  void SignalTagRemoved(qint32 iProjId, const QString& sResource, const QString& sName);
 
 private slots:
   void SlotContentFolderChanged();
@@ -124,6 +137,8 @@ private:
                            const tvfnActionsProject& vfnActionsAfterAdding);
   qint32 FindNewIdFromSet(const std::set<qint32, std::less<qint32>>& ids);
   qint32 FindNewSceneId(tspProject& spProj);
+  void RemoveLingeringTagReferencesFromResources(tspProject& spProj,
+                                                 tspTag& spTag);
 
   std::unique_ptr<CDatabaseIO>           m_spDbIo;
   std::shared_ptr<CSettings>             m_spSettings;

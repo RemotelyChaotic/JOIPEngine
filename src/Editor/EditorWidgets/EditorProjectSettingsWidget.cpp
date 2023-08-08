@@ -17,6 +17,7 @@
 #include "Editor/Tutorial/ProjectSettingsTutorialStateSwitchHandler.h"
 #include "Systems/DatabaseManager.h"
 #include "Systems/HelpFactory.h"
+#include "Systems/Kink.h"
 #include "Systems/Project.h"
 #include "Utils/UndoRedoFilter.h"
 #include "Widgets/FlowLayout.h"
@@ -51,7 +52,6 @@ CEditorProjectSettingsWidget::CEditorProjectSettingsWidget(QWidget *parent) :
   m_spKinkSelectionOverlay(std::make_unique<CKinkSelectionOverlay>(this)),
   m_spUi(std::make_shared<Ui::CEditorProjectSettingsWidget>()),
   m_spTutorialStateSwitchHandler(nullptr),
-  m_vspKinks(),
   m_spCurrentProject(nullptr)
 {
   m_spUi->setupUi(this);
@@ -116,8 +116,32 @@ void CEditorProjectSettingsWidget::Initialize()
   pCompleter->setMaxVisibleItems(10);
   m_spUi->pFetishLineEdit->setCompleter(pCompleter);
 
-  CFlowLayout* pFlow = new CFlowLayout(m_spUi->pFetishListWidget, 9, 6, 6);
-  m_spUi->pFetishListWidget->setLayout(pFlow);
+  m_spUi->pFetishListWidget->SetCallbacks(
+      [this](QPushButton* pRemove, const QString& sTag)
+      {
+        pRemove->setProperty(c_sKinkRootWidgetProperty, sTag);
+        connect(pRemove, &QPushButton::clicked,
+                this, &::CEditorProjectSettingsWidget::SlotRemoveKinkClicked);
+
+        KinkModel()->SetSelections(QStringList() << sTag);
+      },
+      [this](const QStringList& vsTags)
+      {
+        KinkModel()->ResetSelections(vsTags);
+        emit SignalProjectEdited();
+      });
+
+  m_spUi->pFetishListWidget->SetSortFunction(
+      [](std::vector<std::shared_ptr<SLockableTagData>>& vspTags) {
+        std::sort(vspTags.begin(), vspTags.end(),
+                  [](const std::shared_ptr<SLockableTagData>& left,
+                     const std::shared_ptr<SLockableTagData>& right) {
+                    QReadLocker lockerLeft(&left->m_rwLock);
+                    QReadLocker lockerRight(&right->m_rwLock);
+                    return std::dynamic_pointer_cast<SKink>(left)->m_iIdForOrdering <
+                           std::dynamic_pointer_cast<SKink>(right)->m_iIdForOrdering;
+                  });
+  });
 
   SVersion version(VERSION_XYZ);
   m_spUi->pEngineMajorVersion->setValue(version.m_iMajor);
@@ -225,7 +249,6 @@ void CEditorProjectSettingsWidget::UnloadProject()
 {
   WIDGET_INITIALIZED_GUARD
 
-  m_vspKinks.clear();
   m_spCurrentProject = nullptr;
 
   m_spUi->pTitleLineEdit->setReadOnly(false);
@@ -246,7 +269,7 @@ void CEditorProjectSettingsWidget::UnloadProject()
   m_spUi->pFetishListWidget->setEnabled(true);
 
   KinkModel()->ResetSelections();
-  ClearKinkTagView();
+  m_spUi->pFetishListWidget->ClearTags();
 
   m_spKinkSelectionOverlay->Hide();
   m_spKinkSelectionOverlay->UnloadProject();
@@ -282,10 +305,11 @@ void CEditorProjectSettingsWidget::SaveProject()
   m_spCurrentProject->m_sDescribtion = m_spUi->pDescribtionTextEdit->toPlainText();
 
   m_spCurrentProject->m_vsKinks.clear();
-  for (qint32 i = 0; static_cast<qint32>(m_vspKinks.size()) > i; ++i)
+  const auto& vspKinks = m_spUi->pFetishListWidget->Tags();
+  for (qint32 i = 0; static_cast<qint32>(vspKinks.size()) > i; ++i)
   {
-    QReadLocker locker(&m_vspKinks[static_cast<size_t>(i)]->m_rwLock);
-    m_spCurrentProject->m_vsKinks.push_back(m_vspKinks[static_cast<size_t>(i)]->m_sName);
+    QReadLocker locker(&vspKinks[static_cast<size_t>(i)]->m_rwLock);
+    m_spCurrentProject->m_vsKinks.push_back(vspKinks[static_cast<size_t>(i)]->m_sName);
   }
 }
 
@@ -387,7 +411,7 @@ void CEditorProjectSettingsWidget::on_pFetishLineEdit_editingFinished()
   UndoStack()->push(
         new CCommandAddFetishes(this,
                                 std::bind(&CEditorProjectSettingsWidget::AddKinks, this, std::placeholders::_1),
-                                std::bind(&CEditorProjectSettingsWidget::RemoveKinks, this, std::placeholders::_1),
+                                std::bind(&CTagsView::RemoveTags, m_spUi->pFetishListWidget, std::placeholders::_1),
                                 {sKink}));
   emit SignalProjectEdited();
 }
@@ -413,7 +437,7 @@ void CEditorProjectSettingsWidget::SlotKinkChecked(const QModelIndex& index, boo
     UndoStack()->push(
           new CCommandAddFetishes(this,
                                   std::bind(&CEditorProjectSettingsWidget::AddKinks, this, std::placeholders::_1),
-                                  std::bind(&CEditorProjectSettingsWidget::RemoveKinks, this, std::placeholders::_1),
+                                  std::bind(&CTagsView::RemoveTags, m_spUi->pFetishListWidget, std::placeholders::_1),
                                   {sKink}));
   }
   else
@@ -421,7 +445,7 @@ void CEditorProjectSettingsWidget::SlotKinkChecked(const QModelIndex& index, boo
     UndoStack()->push(
           new CCommandRemoveFetishes(this,
                                      std::bind(&CEditorProjectSettingsWidget::AddKinks, this, std::placeholders::_1),
-                                     std::bind(&CEditorProjectSettingsWidget::RemoveKinks, this, std::placeholders::_1),
+                                     std::bind(&CTagsView::RemoveTags, m_spUi->pFetishListWidget, std::placeholders::_1),
                                      {sKink}));
   }
 }
@@ -459,7 +483,7 @@ void CEditorProjectSettingsWidget::SlotRemoveKinkClicked()
   UndoStack()->push(
         new CCommandRemoveFetishes(this,
                                    std::bind(&CEditorProjectSettingsWidget::AddKinks, this, std::placeholders::_1),
-                                   std::bind(&CEditorProjectSettingsWidget::RemoveKinks, this, std::placeholders::_1),
+                                   std::bind(&CTagsView::RemoveTags, m_spUi->pFetishListWidget, std::placeholders::_1),
                                    {sKink}));
 }
 
@@ -483,186 +507,24 @@ void CEditorProjectSettingsWidget::AddKinks(QStringList vsKinks)
   auto spDbManager = CApplication::Instance()->System<CDatabaseManager>().lock();
   if (nullptr!= spDbManager)
   {
-    std::vector<tspKink> vspKinksAdded;
+    std::vector<std::shared_ptr<SLockableTagData>> vspKinksAdded;
     for (const QString& sKing : qAsConst(vsKinks))
     {
       tspKink spKink = spDbManager->FindKink(sKing);
       if(nullptr != spKink)
       {
-        if (m_vspKinks.end() != std::find_if(m_vspKinks.begin(), m_vspKinks.end(),
-          [&spKink](const tspKink& left) -> bool {
+        const auto& vspKinks = m_spUi->pFetishListWidget->Tags();
+        if (vspKinks.end() != std::find_if(vspKinks.begin(), vspKinks.end(),
+                                           [&spKink](const std::shared_ptr<SLockableTagData>& left) -> bool {
           QReadLocker lockerLeft(&left->m_rwLock);
           QReadLocker lockerRight(&spKink->m_rwLock);
           return left->m_sName == spKink->m_sName && left->m_sType == spKink->m_sType;
         })) continue;
-        m_vspKinks.push_back(spKink);
         vspKinksAdded.push_back(spKink);
       }
     }
 
-    std::sort(m_vspKinks.begin(), m_vspKinks.end(), [](const tspKink& left, const tspKink& right) {
-      QReadLocker lockerLeft(&left->m_rwLock);
-      QReadLocker lockerRight(&right->m_rwLock);
-      return left->m_iIdForOrdering < right->m_iIdForOrdering;
-    });
-
-    AddKinksToView(vspKinksAdded);
-  }
-}
-
-//----------------------------------------------------------------------------------------
-//
-void CEditorProjectSettingsWidget::AddKinksToView(const std::vector<tspKink>& vspKinks)
-{
-  WIDGET_INITIALIZED_GUARD
-  if (nullptr == m_spCurrentProject) { return; }
-
-  CFlowLayout* pLayout = dynamic_cast<CFlowLayout*>(m_spUi->pFetishListWidget->layout());
-  if (nullptr != pLayout)
-  {
-    for (const auto& spKink : vspKinks)
-    {
-      if (nullptr == spKink) { continue; }
-
-      qint32 iIndexOfNewElem =
-          std::find(m_vspKinks.begin(), m_vspKinks.end(), spKink) - m_vspKinks.begin();
-
-      m_spUi->pFetishLineEdit->setText("");
-
-      // Farbe für Kategorie ausrechnen
-      QColor hashColor = CalculateTagColor(*spKink);
-
-      // calculate foreground / text color
-      double dLuminance = (0.299 * hashColor.red() +
-                           0.587 * hashColor.green() +
-                           0.114 * hashColor.blue()) / 255;
-      QColor foregroundColor = Qt::white;
-      if (dLuminance > 0.5)
-      {
-        foregroundColor = Qt::black;
-      }
-
-      QReadLocker locker(&spKink->m_rwLock);
-      QWidget* pRoot = new QWidget(m_spUi->pFetishListWidget);
-      QSizePolicy sizePolicy(QSizePolicy::Preferred, QSizePolicy::Minimum);
-      sizePolicy.setHorizontalStretch(0);
-      sizePolicy.setVerticalStretch(0);
-      sizePolicy.setHeightForWidth(pRoot->sizePolicy().hasHeightForWidth());
-      pRoot->setSizePolicy(sizePolicy);
-      pRoot->setObjectName(spKink->m_sName);
-      pRoot->setStyleSheet(QString("QWidget { background-color: %1; border-radius: 5px; }")
-                           .arg(hashColor.name()));
-      pRoot->setToolTip(!spKink->m_sDescribtion.isEmpty() ?
-                         spKink->m_sDescribtion : tr("No Describtion available."));
-
-      QHBoxLayout* pRootLayout = new QHBoxLayout(pRoot);
-      pRoot->setLayout(pRootLayout);
-
-      QLabel* pLabel = new QLabel(spKink->m_sName, pRoot);
-      pLabel->setStyleSheet(QString("QLabel { background-color: transparent; color: %1; }")
-                            .arg(foregroundColor.name()));
-      pLabel->setSizePolicy(QSizePolicy(QSizePolicy::Minimum, QSizePolicy::Minimum));
-      pRootLayout->addWidget(pLabel);
-
-      QPushButton* pRemove = new QPushButton(pRoot);
-      pRemove->setObjectName("RemoveFetishButtonX");
-      pRemove->setText("X");
-      pRemove->setFlat(true);
-      QSizePolicy sizePolicy3(QSizePolicy::Fixed, QSizePolicy::Fixed);
-      sizePolicy3.setHorizontalStretch(0);
-      sizePolicy3.setVerticalStretch(0);
-      sizePolicy3.setHeightForWidth(pRemove->sizePolicy().hasHeightForWidth());
-      pRemove->setSizePolicy(sizePolicy3);
-      //pRemove->setMinimumSize(QSize(24, 24));
-      //pRemove->setMaximumSize(QSize(24, 24));
-      pRemove->setStyleSheet(QString("QPushButton { background-color: transparent; color: %1;"
-                                     "border: none; padding: 2px; min-width: 1px; min-height: 1px; border-image: none; }")
-                             .arg(foregroundColor.name()));
-      pRemove->setProperty(c_sKinkRootWidgetProperty, spKink->m_sName);
-      connect(pRemove, &QPushButton::clicked,
-              this, &::CEditorProjectSettingsWidget::SlotRemoveKinkClicked);
-      pRootLayout->addWidget(pRemove);
-
-      pLayout->insertWidget(iIndexOfNewElem, pRoot);
-
-      KinkModel()->SetSelections(QStringList() << spKink->m_sName);
-    }
-  }
-  else
-  {
-    qWarning() << tr("pFetishListWidget has no FlowLayout.");
-  }
-}
-
-//----------------------------------------------------------------------------------------
-//
-void CEditorProjectSettingsWidget::ClearKinkTagView()
-{
-  WIDGET_INITIALIZED_GUARD
-
-  CFlowLayout* pLayout = dynamic_cast<CFlowLayout*>(m_spUi->pFetishListWidget->layout());
-  if (nullptr != pLayout)
-  {
-    while (QLayoutItem* pItem = pLayout->takeAt(0))
-    {
-      if (nullptr != pItem->widget())
-      {
-        delete pItem->widget();
-        delete pItem;
-      }
-    }
-
-    pLayout->update();
-  }
-}
-
-//----------------------------------------------------------------------------------------
-//
-void CEditorProjectSettingsWidget::RemoveKinks(QStringList vsKinks)
-{
-  WIDGET_INITIALIZED_GUARD
-  if (nullptr == m_spCurrentProject) { return; }
-
-  auto spDbManager = CApplication::Instance()->System<CDatabaseManager>().lock();
-  if (nullptr!= spDbManager)
-  {
-    std::vector<tspKink> vspKinks;
-    for (const QString& sKing : qAsConst(vsKinks))
-    {
-      CFlowLayout* pLayout = dynamic_cast<CFlowLayout*>(m_spUi->pFetishListWidget->layout());
-      if (nullptr != pLayout)
-      {
-        for (qint32 i = 0; pLayout->count() > i; ++i)
-        {
-          if (nullptr != pLayout->itemAt(i)->widget() &&
-              pLayout->itemAt(i)->widget()->objectName() == sKing)
-          {
-            QLayoutItem* pItem = pLayout->takeAt(i);
-            delete pItem->widget();
-            delete pItem;
-            break;
-          }
-        }
-
-        for (auto it = m_vspKinks.begin(); m_vspKinks.end() != it; ++it)
-        {
-          QReadLocker locker(&(*it)->m_rwLock);
-          if ((*it)->m_sName == sKing)
-          {
-            m_vspKinks.erase(it);
-            break;
-          }
-        }
-
-        CFlowLayout* pLayout = dynamic_cast<CFlowLayout*>(m_spUi->pFetishListWidget->layout());
-        if (nullptr != pLayout)
-        {
-          pLayout->update();
-        }
-        KinkModel()->ResetSelections(QStringList() << sKing);
-        emit SignalProjectEdited();
-      }
-    }
+    m_spUi->pFetishListWidget->AddTags(vspKinksAdded);
   }
 }
 

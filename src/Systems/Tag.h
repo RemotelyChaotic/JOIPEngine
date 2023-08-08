@@ -12,8 +12,8 @@
 
 struct SProject;
 
-class STag : public ISerializable, std::enable_shared_from_this<STag>,
-             public STagData
+struct STag : public ISerializable, std::enable_shared_from_this<STag>,
+              public SLockableTagData
 {
 public:
   STag();
@@ -21,8 +21,8 @@ public:
   STag(const STag& other);
   ~STag();
 
-  mutable QReadWriteLock  m_rwLock;
   std::shared_ptr<SProject> m_spParent;
+  std::set<QString>         m_vsResourceRefs;
 
   QJsonObject ToJsonObject() override;
   void FromJsonObject(const QJsonObject& json) override;
