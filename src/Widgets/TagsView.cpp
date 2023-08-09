@@ -42,6 +42,20 @@ void CTagsView::SetSortFunction(tfnSort fnSort)
 
 //----------------------------------------------------------------------------------------
 //
+void CTagsView::SetFontSize(qint32 iFontSize)
+{
+  m_iFontSize = iFontSize;
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CTagsView::SetReadOnly(bool bReadOnly)
+{
+  m_bReadOnly = bReadOnly;
+}
+
+//----------------------------------------------------------------------------------------
+//
 void CTagsView::AddTags(const std::vector<std::shared_ptr<SLockableTagData>>& vspTags)
 {
   CFlowLayout* pLayout = dynamic_cast<CFlowLayout*>(layout());
@@ -79,7 +93,7 @@ void CTagsView::AddTags(const std::vector<std::shared_ptr<SLockableTagData>>& vs
 
       QReadLocker locker(&spTag->m_rwLock);
       QWidget* pRoot = new QWidget(this);
-      QSizePolicy sizePolicy(QSizePolicy::Preferred, QSizePolicy::Minimum);
+      QSizePolicy sizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
       sizePolicy.setHorizontalStretch(0);
       sizePolicy.setVerticalStretch(0);
       sizePolicy.setHeightForWidth(pRoot->sizePolicy().hasHeightForWidth());
@@ -88,32 +102,41 @@ void CTagsView::AddTags(const std::vector<std::shared_ptr<SLockableTagData>>& vs
       pRoot->setStyleSheet(QString("QWidget { background-color: %1; border-radius: 5px; }")
                                .arg(hashColor.name()));
       pRoot->setToolTip(!spTag->m_sDescribtion.isEmpty() ?
-                            spTag->m_sDescribtion : tr("No Describtion available."));
+                        spTag->m_sDescribtion : tr("No Describtion available."));
 
       QHBoxLayout* pRootLayout = new QHBoxLayout(pRoot);
+      pRootLayout->setContentsMargins({2,2,2,2});
+      pRootLayout->setMargin(2);
       pRoot->setLayout(pRootLayout);
 
       QLabel* pLabel = new QLabel(spTag->m_sName, pRoot);
+      QFont fontLabel = pLabel->font();
+      fontLabel.setPointSize(m_iFontSize);
+      pLabel->setFont(fontLabel);
       pLabel->setStyleSheet(QString("QLabel { background-color: transparent; color: %1; }")
                                 .arg(foregroundColor.name()));
-      pLabel->setSizePolicy(QSizePolicy(QSizePolicy::Minimum, QSizePolicy::Minimum));
+      pLabel->setSizePolicy(QSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed));
       pRootLayout->addWidget(pLabel);
 
-      QPushButton* pRemove = new QPushButton(pRoot);
-      pRemove->setObjectName("RemoveFetishButtonX");
-      pRemove->setText("X");
-      pRemove->setFlat(true);
-      QSizePolicy sizePolicy3(QSizePolicy::Fixed, QSizePolicy::Fixed);
-      sizePolicy3.setHorizontalStretch(0);
-      sizePolicy3.setVerticalStretch(0);
-      sizePolicy3.setHeightForWidth(pRemove->sizePolicy().hasHeightForWidth());
-      pRemove->setSizePolicy(sizePolicy3);
-      //pRemove->setMinimumSize(QSize(24, 24));
-      //pRemove->setMaximumSize(QSize(24, 24));
-      pRemove->setStyleSheet(QString("QPushButton { background-color: transparent; color: %1;"
-                                     "border: none; padding: 2px; min-width: 1px; min-height: 1px; border-image: none; }")
-                                 .arg(foregroundColor.name()));
-      pRootLayout->addWidget(pRemove);
+      QPushButton* pRemove = nullptr;
+      if (!m_bReadOnly)
+      {
+        pRemove = new QPushButton(pRoot);
+        pRemove->setObjectName("RemoveFetishButtonX");
+        pRemove->setText("X");
+        pRemove->setFlat(true);
+        QSizePolicy sizePolicy3(QSizePolicy::Fixed, QSizePolicy::Fixed);
+        sizePolicy3.setHorizontalStretch(0);
+        sizePolicy3.setVerticalStretch(0);
+        sizePolicy3.setHeightForWidth(pRemove->sizePolicy().hasHeightForWidth());
+        pRemove->setSizePolicy(sizePolicy3);
+        //pRemove->setMinimumSize(QSize(24, 24));
+        //pRemove->setMaximumSize(QSize(24, 24));
+        pRemove->setStyleSheet(QString("QPushButton { background-color: transparent; color: %1;"
+                                       "border: none; padding: 2px; min-width: 1px; min-height: 1px; border-image: none; }")
+                                   .arg(foregroundColor.name()));
+        pRootLayout->addWidget(pRemove);
+      }
 
       pLayout->insertWidget(iIndexOfNewElem, pRoot);
 

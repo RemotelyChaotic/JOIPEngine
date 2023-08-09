@@ -211,6 +211,8 @@ QString CResourceToolTipPrivate::GetTipString(const STipData& data,
   QString sFontFace = font.family();
   qint32 iFontsize = font.pointSize();
 
+  QReadLocker projLocker(&data.spResource->m_spParent->m_rwLock);
+  QReadLocker locker(&data.spResource->m_rwLock);
   if (EResourceType::eMovie == data.spResource->m_type._to_integral() ||
       EResourceType::eImage == data.spResource->m_type._to_integral())
   {
@@ -220,7 +222,8 @@ QString CResourceToolTipPrivate::GetTipString(const STipData& data,
           "<img src=\"data:image/png;base64,%3\" alt=\"%4\" style=\"width:%5px;height:%6px;\"/>"
           "</td>"
           "<td><p style=\"font-family:'%1';font-size:%2px;\">"
-          "Source: %7<br>Bundle: %8"
+          "Source: %7<br>Bundle: %8<br>"
+          "<table><tr><td>Tags:</td><td>%9</td></tr>"
           "</p></td>"
         "</tr></table>";
 
@@ -233,7 +236,8 @@ QString CResourceToolTipPrivate::GetTipString(const STipData& data,
   {
     sRet =
       "<p style=\"font-family:'%1';font-size:%2px\">"
-        "Source: %3<br>Bundle: %4"
+        "Source: %3<br>Bundle: %4<br>"
+        "<table><tr><td>Tags:</td><td>%5</td></tr>"
       "</p>";
 
     sRet = sRet.arg(sFontFace).arg(iFontsize);
@@ -242,7 +246,8 @@ QString CResourceToolTipPrivate::GetTipString(const STipData& data,
   {
     sRet =
       "<p style=\"font-family:'%1';font-size:%2px\">"
-        "Type: %3<br>Source: %4<br>Bundle: %5"
+        "Type: %3<br>Source: %4<br>Bundle: %5<br>"
+        "<table><tr><td>Tags:</td><td>%6</td></tr>"
       "</p>";
 
     sRet = sRet.arg(sFontFace).arg(iFontsize)
@@ -252,7 +257,9 @@ QString CResourceToolTipPrivate::GetTipString(const STipData& data,
   {
     sRet =
       "<p style=\"font-family:'%1';font-size:%2px;\">"
-        "Font-Family: <span style=\"font-family:'%3';font-size:%4px;\">%5</span><br>Source: %6<br>Bundle: %7"
+        "Font-Family: <span style=\"font-family:'%3';font-size:%4px;\">%5</span><br>"
+        "Source: %6<br>Bundle: %7<br>"
+        "<table><tr><td>Tags:</td><td>%8</td></tr>"
       "</p>";
     const QStringList vsFamilies =
         QFontDatabase::applicationFontFamilies(data.spResource->m_iLoadedId);
@@ -270,15 +277,65 @@ QString CResourceToolTipPrivate::GetTipString(const STipData& data,
   {
     sRet =
       "<p style=\"font-family:'%1';font-size:%2px\">"
-        "Source: %3<br>Bundle: %4"
+        "Source: %3<br>Bundle: %4<br>"
+        "<table><tr><td>Tags:</td><td>%5</td></tr>"
       "</p>";
     sRet = sRet.arg(sFontFace).arg(iFontsize);
+  }
+
+  qint32 iCounter = 0;
+  QString sTags = data.spResource->m_vsResourceTags.empty() ? "&lt;no tags&gt;" : "";
+  for (const QString& sTag : data.spResource->m_vsResourceTags)
+  {
+    QColor colBg = Qt::transparent;
+    QColor colText;
+    auto itTag = data.spResource->m_spParent->m_vspTags.find(sTag);
+    if (data.spResource->m_spParent->m_vspTags.end() != itTag)
+    {
+      QReadLocker tagLocker(&itTag->second->m_rwLock);
+      colBg = CalculateTagColor(*itTag->second);
+
+      // calculate foreground / text color
+      double dLuminance = (0.299 * colBg.red() +
+                           0.587 * colBg.green() +
+                           0.114 * colBg.blue()) / 255;
+      colText = Qt::white;
+      if (dLuminance > 0.5)
+      {
+        colText = Qt::black;
+      }
+    }
+
+    QString sTagFormated = sTag;
+    if (colText.isValid())
+    {
+      sTagFormated =
+          QString("<span style=\"border-radius:3px;background:%1;color:%2\">%3</span>")
+                         .arg(colBg.name(QColor::HexRgb)).arg(colText.name(QColor::HexRgb))
+                         .arg(sTag);
+    }
+
+    if (iCounter % 5 == 0 && 0 != iCounter)
+    {
+      sTags += sTagFormated + "<br>";
+    }
+    else if (data.spResource->m_vsResourceTags.size()-1 == iCounter)
+    {
+      sTags += sTagFormated;
+    }
+    else
+    {
+      sTags += sTagFormated + ", ";
+    }
+    ++iCounter;
   }
 
   QString sSource = data.spResource->m_sSource.toString();
   sRet = sRet.arg(sSource.isEmpty() ? "&lt;no source&gt;" : sSource)
              .arg(data.spResource->m_sResourceBundle.isEmpty() ?
-                    "&lt;no bundle&gt;" : data.spResource->m_sResourceBundle);
+                    "&lt;no bundle&gt;" : data.spResource->m_sResourceBundle)
+             .arg(sTags)
+      ;
   return sRet;
 }
 

@@ -248,9 +248,12 @@ void CTagsEditorOverlay::SortTags(std::vector<std::shared_ptr<SLockableTagData>>
 //
 void CTagsEditorOverlay::TagAdded(QPushButton* pButton, const QString& sTag)
 {
-  pButton->setProperty(c_sTagNameProperty, sTag);
-  connect(pButton, &QPushButton::clicked,
-          this, &CTagsEditorOverlay::SlotRemoveTagClicked);
+  if (nullptr != pButton)
+  {
+    pButton->setProperty(c_sTagNameProperty, sTag);
+    connect(pButton, &QPushButton::clicked,
+            this, &CTagsEditorOverlay::SlotRemoveTagClicked);
+  }
   emit SignalTagsChanged();
 }
 

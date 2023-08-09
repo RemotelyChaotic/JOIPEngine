@@ -27,6 +27,8 @@ public:
   void SetCallbacks(tfnAdded fnAdded, tfnRemoved fnRemoved);
   using tfnSort = std::function<void(std::vector<std::shared_ptr<SLockableTagData>>&)>;
   void SetSortFunction(tfnSort fnSort);
+  void SetFontSize(qint32 iFontSize);
+  void SetReadOnly(bool bReadOnly);
 
   void AddTags(const std::vector<std::shared_ptr<SLockableTagData>>& vspTags);
   void ClearTags();
@@ -41,6 +43,8 @@ private:
   tfnAdded                                       m_fnAdded;
   tfnRemoved                                     m_fnRemoved;
   tfnSort                                        m_fnSort;
+  qint32                                         m_iFontSize = 8;
+  bool                                           m_bReadOnly = false;
 };
 
 #endif // TAGSVIEW_H

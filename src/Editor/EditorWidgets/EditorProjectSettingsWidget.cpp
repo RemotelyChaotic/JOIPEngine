@@ -119,9 +119,12 @@ void CEditorProjectSettingsWidget::Initialize()
   m_spUi->pFetishListWidget->SetCallbacks(
       [this](QPushButton* pRemove, const QString& sTag)
       {
-        pRemove->setProperty(c_sKinkRootWidgetProperty, sTag);
-        connect(pRemove, &QPushButton::clicked,
-                this, &::CEditorProjectSettingsWidget::SlotRemoveKinkClicked);
+        if (nullptr != pRemove)
+        {
+          pRemove->setProperty(c_sKinkRootWidgetProperty, sTag);
+          connect(pRemove, &QPushButton::clicked,
+                  this, &::CEditorProjectSettingsWidget::SlotRemoveKinkClicked);
+        }
 
         KinkModel()->SetSelections(QStringList() << sTag);
       },
@@ -231,6 +234,7 @@ void CEditorProjectSettingsWidget::LoadProject(tspProject spProject)
     m_spUi->pDescribtionTextEdit->setReadOnly(bReadOnly);
 
     m_spUi->pFetishLineEdit->setEnabled(!bReadOnly);
+    m_spUi->pFetishListWidget->SetReadOnly(bReadOnly);
     m_spUi->pFetishListWidget->setEnabled(!bReadOnly);
 
 
