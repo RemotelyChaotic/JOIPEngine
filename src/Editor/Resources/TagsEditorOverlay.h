@@ -40,6 +40,7 @@ signals:
 
 protected slots:
   void on_pLineEdit_editingFinished();
+  void on_pDescribtionLineEdit_editingFinished();
   void on_pConfirmButton_clicked();
   void SlotRemoveTagClicked();
   void SlotTagAdded(qint32 iProjId, const QString& sResource, const QString& sName);

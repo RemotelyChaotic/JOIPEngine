@@ -375,6 +375,22 @@ void CResourceModelView::ShowContextMenu(CResourceTreeItemModel* pModel, const Q
       });
       menu.addAction(pAction);
 
+      QMenu* pSubMenu = new QMenu("Copy Tag", &menu);
+      tspResource spResource = item->Resource();
+      {
+        QReadLocker locker(&spResource->m_rwLock);
+        for (const QString& sTag : spResource->m_vsResourceTags)
+        {
+          pAction = new QAction(sTag, pSubMenu);
+          connect(pAction, &QAction::triggered, pModel, [sTag]() {
+            QClipboard* pClipboard = QGuiApplication::clipboard();
+            pClipboard->setText(sTag);
+          });
+          pSubMenu->addAction(pAction);
+        }
+      }
+      menu.addMenu(pSubMenu);
+
       menu.addSeparator();
 
 #if defined(Q_OS_WIN)

@@ -33,6 +33,7 @@ public:
   void AddTags(const std::vector<std::shared_ptr<SLockableTagData>>& vspTags);
   void ClearTags();
   void RemoveTags(QStringList vsTags);
+  void UpdateToolTip(const QString& sTag, const QString& sDescribtion);
 
   const std::vector<std::shared_ptr<SLockableTagData>>& Tags() const;
 

@@ -219,6 +219,28 @@ void CTagsView::RemoveTags(QStringList vsTags)
 
 //----------------------------------------------------------------------------------------
 //
+void CTagsView::UpdateToolTip(const QString& sTag, const QString& sDescribtion)
+{
+  CFlowLayout* pLayout = dynamic_cast<CFlowLayout*>(layout());
+  if (nullptr != pLayout)
+  {
+    for (qint32 i = 0; pLayout->count() > i; ++i)
+    {
+      QLayoutItem* pItem = pLayout->itemAt(i);
+      if (nullptr != pItem && nullptr != pItem->widget())
+      {
+        if (pItem->widget()->objectName() == sTag)
+        {
+          pItem->widget()->setToolTip(!sDescribtion.isEmpty() ?
+                                      sDescribtion : tr("No Describtion available."));
+        }
+      }
+    }
+  }
+}
+
+//----------------------------------------------------------------------------------------
+//
 const std::vector<std::shared_ptr<SLockableTagData>>& CTagsView::Tags() const
 {
   return m_vspTags;

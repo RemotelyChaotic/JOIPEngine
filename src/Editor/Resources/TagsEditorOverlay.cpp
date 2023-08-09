@@ -122,6 +122,7 @@ void CTagsEditorOverlay::Resize()
 void CTagsEditorOverlay::on_pLineEdit_editingFinished()
 {
   const QString& sTagName = m_spUi->pLineEdit->text();
+  const QString& sTagDescribtion = m_spUi->pDescribtionLineEdit->text();
   if (auto spDbManager = m_wpDbManager.lock();
       nullptr != m_pUndoStack && nullptr != spDbManager && nullptr != m_spCurrentProject &&
       !sTagName.isEmpty())
@@ -136,17 +137,42 @@ void CTagsEditorOverlay::on_pLineEdit_editingFinished()
 
     if (nullptr == spTag)
     {
-      spTag = std::make_unique<STag>(QString(), sTagName, QString());
+      spTag = std::make_unique<STag>(QString(), sTagName, sTagDescribtion);
+      if (nullptr != spResource)
+      {
+        {
+          QReadLocker resLocker(&spResource->m_rwLock);
+          spTag->m_sType = spResource->m_type._to_string();
+        }
+        m_pUndoStack->push(new CCommandAddTag(sProject, m_sResource, spTag));
+      }
     }
-    if (nullptr != spResource)
+    else
     {
+      QString sOldDescribtion;
+      QString sType;
       {
         QReadLocker resLocker(&spResource->m_rwLock);
-        spTag->m_sType = spResource->m_type._to_string();
+        QReadLocker tagLocker(&spTag->m_rwLock);
+        sOldDescribtion = spTag->m_sDescribtion;
+        sType = spResource->m_type._to_string();
       }
-      m_pUndoStack->push(new CCommandAddTag(sProject, m_sResource, spTag));
+      if (sOldDescribtion != sTagDescribtion && !sTagDescribtion.isEmpty())
+      {
+        m_pUndoStack->push(new CCommandChangeTag(sProject, sTagName, sType, sType,
+                                                 sTagDescribtion, sOldDescribtion));
+        m_spUi->pTagsFrame->UpdateToolTip(sTagName, sTagDescribtion);
+        emit SignalTagsChanged();
+      }
     }
   }
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CTagsEditorOverlay::on_pDescribtionLineEdit_editingFinished()
+{
+  on_pLineEdit_editingFinished();
 }
 
 //----------------------------------------------------------------------------------------
@@ -186,6 +212,8 @@ void CTagsEditorOverlay::SlotTagAdded(qint32, const QString& sResource, const QS
       sResource == m_sResource && nullptr != spDbManager && nullptr != m_spCurrentProject)
   {
     tspTag spTag = spDbManager->FindTagInProject(m_spCurrentProject, sName);
+
+    m_pCompleterModel->appendRow(new QStandardItem(sName));
     m_spUi->pTagsFrame->AddTags({spTag});
   }
 }
@@ -197,6 +225,12 @@ void CTagsEditorOverlay::SlotTagRemoved(qint32, const QString& sResource, const 
   if (auto spDbManager = m_wpDbManager.lock();
       (sResource == m_sResource || sResource.isEmpty()) && nullptr != m_spCurrentProject)
   {
+    QList<QStandardItem*> vpItems = m_pCompleterModel->findItems(sName);
+    if (vpItems.size() > 0)
+    {
+      QModelIndex idx = m_pCompleterModel->indexFromItem(vpItems[0]);
+      m_pCompleterModel->removeRows(idx.row(), 1);
+    }
     m_spUi->pTagsFrame->RemoveTags({sName});
   }
 }
@@ -206,6 +240,7 @@ void CTagsEditorOverlay::SlotTagRemoved(qint32, const QString& sResource, const 
 void CTagsEditorOverlay::Initialize()
 {
   m_spUi->pTagsFrame->ClearTags();
+  m_pCompleterModel->clear();
 
   if (auto spDbManager = m_wpDbManager.lock();
       nullptr != m_spCurrentProject && nullptr != spDbManager)
@@ -215,6 +250,7 @@ void CTagsEditorOverlay::Initialize()
     tvsTags vsTags = spResource->m_vsResourceTags;
     rLocker.unlock();
 
+    QList<QStandardItem*> vpTagItemsToAdd;
     std::vector<std::shared_ptr<SLockableTagData>> vspTagsToAdd;
     {
       QReadLocker pLocker(&m_spCurrentProject->m_rwLock);
@@ -222,11 +258,13 @@ void CTagsEditorOverlay::Initialize()
       {
         if (vsTags.find(sName) != vsTags.end())
         {
+          vpTagItemsToAdd.push_back(new QStandardItem(sName));
           vspTagsToAdd.push_back(spTag);
         }
       }
     }
 
+    m_pCompleterModel->appendRow(vpTagItemsToAdd);
     m_spUi->pTagsFrame->AddTags(vspTagsToAdd);
   }
 }
