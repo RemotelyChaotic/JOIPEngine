@@ -85,9 +85,9 @@ CDownloadButtonOverlay::CDownloadButtonOverlay(QWidget* pParent) :
 
   if (auto spDownloader = CApplication::Instance()->System<CProjectDownloader>().lock())
   {
-    connect(spDownloader.get(), &CProjectDownloader::SignalDownloadFinished,
+    connect(spDownloader.get(), &CProjectDownloader::SignalJobFinished,
             this, &CDownloadButtonOverlay::SlotDownloadFinished, Qt::QueuedConnection);
-    connect(spDownloader.get(), &CProjectDownloader::SignalDownloadStarted,
+    connect(spDownloader.get(), &CProjectDownloader::SignalJobStarted,
             this, &CDownloadButtonOverlay::SlotDownloadStarted, Qt::QueuedConnection);
     connect(spDownloader.get(), &CProjectDownloader::SignalJobAdded,
             this, &CDownloadButtonOverlay::SlotJobAdded, Qt::QueuedConnection);

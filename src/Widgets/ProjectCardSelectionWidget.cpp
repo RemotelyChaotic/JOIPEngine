@@ -74,7 +74,7 @@ void CProjectCardSelectionWidget::Initialize()
   auto wpDowloader = CApplication::Instance()->System<CProjectDownloader>();
   if (auto spDownloader = wpDowloader.lock())
   {
-    connect(spDownloader.get(), &CProjectDownloader::SignalDownloadFinished,
+    connect(spDownloader.get(), &CProjectDownloader::SignalJobFinished,
             this, &CProjectCardSelectionWidget::SlotProjectDownloadFinished);
     connect(spDownloader.get(), &CProjectDownloader::SignalProgressChanged,
             this, &CProjectCardSelectionWidget::SlotProjectDownloadProgressChanged);

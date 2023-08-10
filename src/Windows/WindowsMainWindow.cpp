@@ -106,9 +106,9 @@ void CWindowsMainWindow::ConnectSlotsImpl()
 
   if (auto spDownloader = CApplication::Instance()->System<CProjectDownloader>().lock())
   {
-    connect(spDownloader.get(), &CProjectDownloader::SignalDownloadFinished,
+    connect(spDownloader.get(), &CProjectDownloader::SignalJobFinished,
             this, &CWindowsMainWindow::SlotDownloadFinished, Qt::QueuedConnection);
-    connect(spDownloader.get(), &CProjectDownloader::SignalDownloadStarted,
+    connect(spDownloader.get(), &CProjectDownloader::SignalJobStarted,
             this, &CWindowsMainWindow::SlotDownloadStarted, Qt::QueuedConnection);
     connect(spDownloader.get(), &CProjectDownloader::SignalProgressChanged,
             this, &CWindowsMainWindow::SlotProgressChanged, Qt::QueuedConnection);

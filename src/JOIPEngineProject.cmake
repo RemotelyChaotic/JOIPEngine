@@ -432,6 +432,7 @@ macro(CreateJOIPProject JOIP_PROJECT_NAME)
     ${JOIPSources}/Systems/HelpFactory.cpp
     ${JOIPSources}/Systems/HelpFactory.h
     ${JOIPSources}/Systems/ISerializable.h
+    ${JOIPSources}/Systems/IRunnableJob.h
     ${JOIPSources}/Systems/Kink.cpp
     ${JOIPSources}/Systems/Kink.h
     ${JOIPSources}/Systems/Lockable.h
@@ -447,6 +448,8 @@ macro(CreateJOIPProject JOIP_PROJECT_NAME)
     ${JOIPSources}/Systems/Project.h
     ${JOIPSources}/Systems/ProjectDownloader.cpp
     ${JOIPSources}/Systems/ProjectDownloader.h
+    ${JOIPSources}/Systems/ProjectJobWorker.cpp
+    ${JOIPSources}/Systems/ProjectJobWorker.h
     ${JOIPSources}/Systems/Resource.cpp
     ${JOIPSources}/Systems/Resource.h
     ${JOIPSources}/Systems/ResourceBundle.cpp

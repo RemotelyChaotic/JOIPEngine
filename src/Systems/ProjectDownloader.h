@@ -1,15 +1,10 @@
 #ifndef CPROJECTDOWNLOADER_H
 #define CPROJECTDOWNLOADER_H
 
-#include "ThreadedSystem.h"
+#include "ProjectJobWorker.h"
 #include "DLJobs/DownloadJobRegistry.h"
-#include <QAtomicInt>
-#include <QMutex>
-#include <QSemaphore>
-#include <memory>
-#include <queue>
 
-class CProjectDownloader : public CSystemBase
+class CProjectDownloader : public CProjectJobWorker
 {
   Q_OBJECT
   Q_DISABLE_COPY(CProjectDownloader)
@@ -18,34 +13,15 @@ public:
   CProjectDownloader(const std::vector<SDownloadJobConfig>& vJobCfg);
   ~CProjectDownloader() override;
 
-  void ClearQueue();
   void CreateNewDownloadJob(const QString& sHost, const QVariantList& args);
-  bool HasRunningJobs() const;
-  qint32 RunningJobsCount() const;
-  void StopRunningJobs();
-  void WaitForFinished();
-
-signals:
-  void SignalDownloadFinished(qint32 iProjId);
-  void SignalDownloadStarted(qint32 iProjId);
-  void SignalJobAdded(qint32 iNumJobs);
-  void SignalProgressChanged(qint32 iProjId, qint32 iProgress);
-
-public slots:
-  void Initialize() override;
-  void Deinitialize() override;
 
 private slots:
-  void SlotDownloadFinished(qint32 iProjId);
-  void SlotDownloadStarted(qint32 iProjId);
-  void SlotClearQueue();
-  void SlotRunNextJob();
+  void SlotJobFinished(qint32 iProjId) override;
+  void SlotJobStarted(qint32 iProjId) override;
 
 private:
-  std::queue<std::pair<tspDownloadJob, QVariantList>>      m_vspJobs;
-  mutable QMutex                                           m_jobMutex;
-  mutable QSemaphore                                       m_waitForFinishCounter;
-  tspDownloadJob                                           m_spCurrentJob;
+  void RunNextJobImpl(const QVariantList& args) override;
+
   std::vector<SDownloadJobConfig>                          m_vJobCfg;
 };
 
