@@ -486,6 +486,15 @@ QPushButton#TitleCardButton {
   qproperty-icon: url(ui/ButtonTitleCard.png) off,
                   url(ui/ButtonTitleCard.png) on;
 }
+QPushButton#TagsButton {
+  border-image: url(ui/IconBg.svg) 0 0 0 0 stretch stretch;
+  border-top: 0 transparent;
+  border-bottom: 0 transparent;
+  border-right: 0 transparent;
+  border-left: 0 transparent;
+  qproperty-icon: url(ui/ButtonTag.png) off,
+                  url(ui/ButtonTag.png) on;
+}
 QPushButton#AddNodeButton {
   border-image: url(ui/IconBg.svg) 0 0 0 0 stretch stretch;
   border-top: 0 transparent;
@@ -868,6 +877,7 @@ QPushButton#MapButton:hover,
 QPushButton#RemovePatternElemButton:hover,
 QPushButton#RemoveResourceButton:hover,
 QPushButton#TitleCardButton:hover,
+QPushButton#TagsButton:hover,
 QPushButton#AddNodeButton:hover,
 QPushButton#RemoveNodeButton:hover,
 QPushButton#HelpButton:hover,
@@ -941,6 +951,7 @@ QPushButton#MapButton:pressed,
 QPushButton#RemovePatternElemButton:pressed,
 QPushButton#RemoveResourceButton:pressed,
 QPushButton#TitleCardButton:pressed,
+QPushButton#TagsButton:pressed,
 QPushButton#AddNodeButton:pressed,
 QPushButton#RemoveNodeButton:pressed,
 QPushButton#HelpButton:pressed,
@@ -1014,6 +1025,7 @@ QPushButton#MapButton:disabled,
 QPushButton#RemovePatternElemButton:disabled,
 QPushButton#RemoveResourceButton:disabled,
 QPushButton#TitleCardButton:disabled,
+QPushButton#TagsButton:disabled,
 QPushButton#AddNodeButton:disabled,
 QPushButton#RemoveNodeButton:disabled,
 QPushButton#HelpButton:disabled,

@@ -1133,6 +1133,19 @@
         local myResource = project:resource(0);<br>
         <br></li>
 
+        <li><b>numTags (  ): int:</b><br>
+        Returns the number of Tags in the project. Usefull for iteration.<br>
+        <br></li>
+
+        <li><b>tags (  ): string[]:</b><br>
+        Returns all Tag names. Useful for iteration.<br>
+        <br></li>
+
+        <li><b>tag ( string name | int index ): Tag:</b><br>
+        Returns a Tag object at index index or with the name <i>name</i>. Useful if you
+        need to use the Tag for custom logic.<br>
+        <br></li>
+
         <li><b>font: string:</b><br>
         Returns the font used in the player. Mainly in the PlayerTextBox.<br>
         <br></li>
@@ -1230,6 +1243,19 @@
         <a href="qrc:/resources/help/editor/nodes/node_help.html">Scene Script</a> files and <a href="qrc:/resources/help/layout/layout_help.html">Layout</a> file<br>
         </li>
 
+        <li><b>numTags (  ): int:</b><br>
+        Returns the number of Tags of the Resource. Usefull for iteration.<br>
+        <br></li>
+
+        <li><b>tags (  ): string[]:</b><br>
+        Returns all Tag names of the Resource. Useful for iteration.<br>
+        <br></li>
+
+        <li><b>tag ( string name | int index ): Tag:</b><br>
+        Returns a Tag object at index index or with the name <i>name</i>. Useful if you
+        need to use the Tag for custom logic.<br>
+        <br></li>
+
         <li><b>project (  ): Project:</b><br>
         Returns the Project object that contains this Resource. Useful for getting information
         about the Project itself, or about other Resources or Scenes.<br>
@@ -1238,6 +1264,33 @@
         <i>Example Usage (Lua):</i><br>
         local project = resource:project();<br>
         <br></li>
+      <br></li>
+      </ul>
+    </p>
+
+    <br>
+
+    <h2>Tag</h2>
+
+    <br>
+
+    <p>This type of object can be returned by a Project object and contains information
+    about the specific Tag registered in the database.<br>
+      <ul>
+        <li><b>type: string</b><br>
+        This property lets you read the Tag category.<br></li>
+
+        <li><b>name: string</b><br>
+        This property lets you read the Tag name. This also serves as the Tag identifier.<br>
+
+        <li><b>describtion: string</b><br>
+        This property lets you read the describtion of the Tag.<br></li>
+
+        <li><b>color ( ): color</b><br>
+        This property lets you read the color of the Tag that is used in the UI.
+        The red green and blue values are generated from an MD4 Hash of the category where
+        red is the first byte green the second and blue the third.<br>
+        </li>
       <br></li>
       </ul>
     </p>
@@ -1265,7 +1318,7 @@
         This property lets you read the describtion of the Kink.<br></li>
 
         <li><b>color ( ): color</b><br>
-        This property lets you read the color of the Tink that is used in the UI.
+        This property lets you read the color of the Kink that is used in the UI.
         The red green and blue values are generated from an MD4 Hash of the category where
         red is the first byte green the second and blue the third.<br>
         </li>

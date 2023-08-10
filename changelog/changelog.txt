@@ -6,6 +6,7 @@ New Features:
 - Added support for Lua scripts. Scene and notification scripts can load and
   run Lua scripts instead of JS. the script types can be mixed in a Project
   at will.
+- Resources can be tagged. Those tags can be used in scripts for custom logic.
 
 Changes:
 - Code Editor supports Lua highlighting, code generation and debugging.

@@ -410,6 +410,10 @@ QPushButton#TitleCardButton {
   qproperty-icon: url(ui/ButtonTitleCard.png) off,
                   url(ui/ButtonTitleCard.png) on;
 }
+QPushButton#TagsButton {
+  qproperty-icon: url(ui/ButtonTag.png) off,
+                  url(ui/ButtonTag.png) on;
+}
 QPushButton#AddNodeButton {
   qproperty-icon: url(ui/ButtonPlusDisabled.png) off,
                   url(ui/ButtonPlus.png) on;

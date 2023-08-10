@@ -21,7 +21,7 @@ namespace {
   const QString c_sRemoveResourceHelpId = "Editor/RemoveResource";
   const QString c_sImageSourceHelpId =    "Editor/ImageSource";
   const QString c_sTitleCardHelpId =      "Editor/TitleCard";
-  const QString c_sTagsHelpId =           "Editor/Tags";
+  const QString c_sTagsHelpId =           "Editor/ResourceTags";
   const QString c_sMapHelpId =            "Editor/Map";
 
   const QString c_sPlayHelpId =           "Editor/Play";

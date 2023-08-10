@@ -552,6 +552,14 @@ QPushButton#TitleCardButton:pressed,
 QPushButton#TitleCardButton:disabled {
   image: url(ui/ButtonTitleCardSelected.png);
 }
+QPushButton#TagsButton {
+  image: url(ui/ButtonTag.png);
+}
+QPushButton#TagsButton:hover,
+QPushButton#TagsButton:pressed,
+QPushButton#TagsButton:disabled {
+  image: url(ui/ButtonTagSelected.png);
+}
 QPushButton#AddNodeButton {
   image: url(ui/ButtonPlus.png);
 }

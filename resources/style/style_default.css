@@ -410,6 +410,10 @@ QPushButton#TitleCardButton {
   qproperty-icon: url(:/resources/style/img/ButtonTitleCard.png) off,
                   url(:/resources/style/img/ButtonTitleCard.png) on;
 }
+QPushButton#TagsButton {
+  qproperty-icon: url(:/resources/style/img/ButtonTag.png) off,
+                  url(:/resources/style/img/ButtonTag.png) on;
+}
 QPushButton#AddNodeButton {
   qproperty-icon: url(:/resources/style/img/ButtonPlusDisabled.png) off,
                   url(:/resources/style/img/ButtonPlus.png) on;

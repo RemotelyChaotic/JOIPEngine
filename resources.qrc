@@ -254,6 +254,8 @@
         <file>resources/style/img/ButtonUnindent.png</file>
         <file>resources/help/editor/code/eval_api_reference_help.html</file>
         <file>resources/help/editor/tags_button_help.html</file>
+        <file>resources/style/img/ButtonTag.png</file>
+        <file>resources/help/editor/images/tag_overlay.png</file>
     </qresource>
     <qresource prefix="/qml">
         <file>resources/qml/ProjectCardSelection.qml</file>
