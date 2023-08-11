@@ -159,10 +159,8 @@ void CMainWindow::SlotCurrentAppStateUnloadFinished()
     dynamic_cast<IAppStateScreen*>(m_spUi->pApplicationStackWidget->currentWidget());
   if (nullptr != pScreen)
   {
-    bool bOk = disconnect(dynamic_cast<QWidget*>(pScreen), SIGNAL(UnloadFinished()),
-                       this, SLOT(SlotCurrentAppStateUnloadFinished()));
-    assert(bOk);
-    Q_UNUSED(bOk);
+    disconnect(dynamic_cast<QWidget*>(pScreen), SIGNAL(UnloadFinished()),
+            this, SLOT(SlotCurrentAppStateUnloadFinished()));
   }
 
   switch(m_transitionDirection)
