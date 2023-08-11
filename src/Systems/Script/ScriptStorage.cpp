@@ -4,6 +4,7 @@
 
 #include <QDebug>
 #include <QEventLoop>
+#include <QJsValue>
 #include <QTimer>
 #include <QUuid>
 
@@ -129,7 +130,19 @@ QVariant CScriptStorageJs::load(QString sId)
 void CScriptStorageJs::store(QString sId, QVariant value)
 {
   if (!CheckIfScriptCanRun()) { return; }
-  StoreImpl(sId, value);
+
+  QVariant valueToWrite = value;
+  QJSValue valFromJS = value.value<QJSValue>();
+  if (valFromJS.isArray())
+  {
+    valueToWrite = valFromJS.toVariant();
+  }
+  else if (valFromJS.isObject())
+  {
+    valueToWrite = valFromJS.toVariant();
+  }
+
+  StoreImpl(sId, valueToWrite);
 }
 
 //----------------------------------------------------------------------------------------
