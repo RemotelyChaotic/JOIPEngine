@@ -87,7 +87,7 @@ public slots:
 
 private:
   QString GetResourceName(const QVariant& resource, const QString& sMethod,
-                          bool bStringCanBeId = false, bool* pbError = nullptr);
+                          bool bStringCanBeId = false, bool* pbOk = nullptr);
   void WaitForPlayBackImpl(const QString& sResource);
   void WaitForSoundImpl(const QString& sResource);
 
