@@ -173,8 +173,10 @@ CEosDownloadJob::CEosDownloadJob(QObject* pParent) :
   m_iProgress(0),
   m_sName("EOS"),
   m_sError("No error."),
+  m_bHasError(false),
   m_iProjId(-1),
-  m_iFileBlobCounter(0)
+  m_iFileBlobCounter(0),
+  m_bFinished(false)
 {
 }
 
@@ -184,16 +186,23 @@ CEosDownloadJob::~CEosDownloadJob()
 
 //----------------------------------------------------------------------------------------
 //
-QString CEosDownloadJob::Error()
+QString CEosDownloadJob::Error() const
 {
   return m_sError;
 }
 
 //----------------------------------------------------------------------------------------
 //
-bool CEosDownloadJob::Finished()
+bool CEosDownloadJob::Finished() const
 {
-  return true;
+  return m_bFinished;
+}
+
+//----------------------------------------------------------------------------------------
+//
+bool CEosDownloadJob::HasError() const
+{
+  return m_bHasError;
 }
 
 //----------------------------------------------------------------------------------------
@@ -221,16 +230,24 @@ qint32 CEosDownloadJob::Progress() const
 //
 bool CEosDownloadJob::Run(const QVariantList& args)
 {
+  m_bHasError = false;
+  m_bFinished = false;
+  m_iProgress = 0;
+
+  CRaiiFunctionCaller finishedCaller([this](){
+    m_bFinished = true;
+  });
+
   assert(1 == args.size());
   if (1 != args.size())
   {
     m_sError = QString("1 argument was expected, got %1.").arg(args.size());
+    m_bHasError = true;
     return false;
   }
 
   const QUrl dlUrl = args[0].toUrl();
 
-  m_iProgress = 0;
   emit SignalStarted(m_iProjId);
   emit SignalProgressChanged(m_iProjId, Progress());
 
@@ -251,6 +268,7 @@ bool CEosDownloadJob::Run(const QVariantList& args)
   if (nullptr == spDbManager)
   {
     m_sError = QString("Internal Error: Database Manager was not found.");
+    m_bHasError = true;
     return false;
   }
 
@@ -275,6 +293,7 @@ bool CEosDownloadJob::Run(const QVariantList& args)
   if (0 > m_iProjId)
   {
     m_sError = "Could not create new project.";
+    m_bHasError = true;
     return false;
   }
 
@@ -300,6 +319,7 @@ bool CEosDownloadJob::Run(const QVariantList& args)
     {
       m_sError = sError;
     }
+    m_bHasError = true;
     return false;
   }
 
@@ -318,6 +338,7 @@ bool CEosDownloadJob::Run(const QVariantList& args)
     {
       m_sError = sError;
     }
+    m_bHasError = true;
     return false;
   }
 
@@ -369,6 +390,7 @@ bool CEosDownloadJob::Run(const QVariantList& args)
   if (!locator.LocateAllResources(&sError))
   {
     m_sError = (m_sError.isEmpty() ? "" : "; ") + sError;
+    m_bHasError = true;
     return false;
   }
   else if (!sError.isEmpty())
@@ -384,6 +406,7 @@ bool CEosDownloadJob::Run(const QVariantList& args)
   if (!pagesTransformer.CollectScenes(&sError))
   {
     m_sError = (m_sError.isEmpty() ? "" : "; ") + sError;
+    m_bHasError = true;
     return false;
   }
   else if (!sError.isEmpty())
@@ -422,6 +445,7 @@ bool CEosDownloadJob::Run(const QVariantList& args)
                            &sError))
   {
     m_sError += (m_sError.isEmpty() ? "" : "; ") + sError;
+    m_bHasError = true;
     return false;
   }
 
@@ -435,6 +459,7 @@ bool CEosDownloadJob::Run(const QVariantList& args)
                          &sError))
   {
     m_sError += (m_sError.isEmpty() ? "" : "; ") + sError;
+    m_bHasError = true;
     return false;
   }
 

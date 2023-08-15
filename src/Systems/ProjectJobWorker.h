@@ -29,10 +29,10 @@ public:
   void WaitForFinished();
 
 signals:
-  void SignalJobFinished(qint32 iProjId);
-  void SignalJobStarted(qint32 iProjId);
+  void SignalJobFinished(qint32 iId);
+  void SignalJobStarted(qint32 iId);
   void SignalJobAdded(qint32 iNumJobs);
-  void SignalProgressChanged(qint32 iProjId, qint32 iProgress);
+  void SignalProgressChanged(qint32 iId, qint32 iProgress);
 
 public slots:
   void Initialize() override;
@@ -49,6 +49,7 @@ protected slots:
 
   void SlotClearQueue();
   void SlotRunNextJob();
+  void SlotFinalizeJob();
 
 protected:
   std::queue<std::pair<tspRunnableJob, QVariantList>>      m_vspJobs;

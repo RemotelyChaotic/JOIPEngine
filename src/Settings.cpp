@@ -22,6 +22,7 @@ namespace {
     "Help",
     "Download",
     "Exit",
+    "Tools",
 
     "Answer_1",
     "Answer_2",
@@ -113,6 +114,7 @@ CSettings::CSettings(QObject* pParent) :
       { "Help",       QKeySequence(Qt::Key_H)                        },
       { "Download",   QKeySequence(Qt::Key_D)                        },
       { "Exit",       QKeySequence(Qt::Key_Escape)                   },
+      { "Tools",      QKeySequence(Qt::CTRL + Qt::Key_T)             },
 
       { "Answer_1",   QKeySequence(Qt::Key_1)            },
       { "Answer_2",   QKeySequence(Qt::Key_2)            },

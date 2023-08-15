@@ -8,10 +8,12 @@
 
 class CDatabaseManager;
 class CFlowScene;
+class CEditorJobWorker;
 class CKinkTreeModel;
 class CResourceTreeItemModel;
 class CScriptEditorModel;
 class CSettings;
+class CThreadedSystem;
 class ITutorialStateSwitchHandler;
 namespace QtNodes {
   class Node;
@@ -39,6 +41,7 @@ public:
   const tspProject& CurrentProject() const;
   CFlowScene* FlowSceneModel() const;
   bool IsReadOnly() const;
+  CEditorJobWorker* JobWorker() const;
   CKinkTreeModel* KinkTreeModel() const;
   CResourceTreeItemModel* ResourceTreeModel() const;
   CScriptEditorModel* ScriptEditorModel() const;
@@ -66,18 +69,14 @@ public slots:
   void SlotNodeDeleted(QtNodes::Node &n);
 
 signals:
+  void SignalJobMessage(qint32 iId, QString sMsg);
+  void SignalJobFinished(qint32 iId);
+  void SignalJobStarted(qint32 iId);
+  void SignalJobProgressChanged(qint32 iId, qint32 iProgress);
   void SignalProjectEdited();
-  void SignalProjectExportStarted();
-  void SignalProjectExportError(EExportError error, const QString& sErrorString);
-  void SignalProjectExportFinished();
 
 private slots:
   void SlotAddNewScriptFileToScene();
-  void SlotExportErrorOccurred(QProcess::ProcessError error);
-  void SlotExportFinished(int exitCode, QProcess::ExitStatus exitStatus);
-  void SlotExportStarted();
-  void SlotExportStateChanged(QProcess::ProcessState newState);
-
 
 private:
   std::unique_ptr<CKinkTreeModel>                             m_spKinkTreeModel;
@@ -85,8 +84,8 @@ private:
   std::unique_ptr<CFlowScene>                                 m_spFlowSceneModel;
   std::unique_ptr<QUndoStack>                                 m_spUndoStack;
   std::unique_ptr<CResourceTreeItemModel>                     m_spResourceTreeModel;
-  std::unique_ptr<QProcess>                                   m_spExportProcess;
   std::shared_ptr<CSettings>                                  m_spSettings;
+  std::shared_ptr<CThreadedSystem>                            m_spJobWorkerSystem;
   tspProject                                                  m_spCurrentProject;
   std::weak_ptr<CDatabaseManager>                             m_wpDbManager;
   std::vector<std::weak_ptr<ITutorialStateSwitchHandler>>     m_vwpTutorialStateSwitchHandlers;

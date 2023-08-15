@@ -55,8 +55,9 @@ public:
   explicit CEosDownloadJob(QObject* pParent = nullptr);
   ~CEosDownloadJob() override;
 
-  QString Error() override;
-  bool Finished() override;
+  QString Error() const override;
+  bool Finished() const override;
+  bool HasError() const override;
   QString JobName() const override;
   QString JobType() const override;
   qint32 Progress() const override;
@@ -100,9 +101,11 @@ private:
   qint32                                 m_iProgress = 0;
   QString                                m_sName;
   QString                                m_sError;
+  bool                                   m_bHasError;
   qint32                                 m_iProjId;
   qint32                                 m_iFileBlobCounter = 0;
   qint32                                 m_iProgressCounter = 0;
+  bool                                   m_bFinished;
 };
 
 #endif // CEOSDOWNLOADJOB_H

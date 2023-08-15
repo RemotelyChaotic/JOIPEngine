@@ -127,6 +127,10 @@ void CProjectJobWorker::SlotRunNextJob()
       m_vspJobs.pop();
     }
 
+    QMetaObject::Connection conn =
+        connect(dynamic_cast<QObject*>(m_spCurrentJob.get()), SIGNAL(SignalFinished(qint32)),
+            this, SLOT(SlotFinalizeJob()), Qt::DirectConnection);
+
     // connections (will be removed once the object is deleted, so we won't disconnect
     connect(dynamic_cast<QObject*>(m_spCurrentJob.get()), SIGNAL(SignalFinished(qint32)),
             this, SLOT(SlotJobFinished(qint32)), Qt::DirectConnection);
@@ -139,14 +143,26 @@ void CProjectJobWorker::SlotRunNextJob()
 
     RunNextJobImpl(args);
 
-    // reset current Job and delete object
+    if (m_spCurrentJob->Finished())
     {
-      QMutexLocker locker(&m_jobMutex);
-      m_spCurrentJob = nullptr;
+      SlotFinalizeJob();
+      disconnect(conn);
     }
 
-    m_waitForFinishCounter.release(1);
     m_jobMutex.lock();
   }
   m_jobMutex.unlock();
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CProjectJobWorker::SlotFinalizeJob()
+{
+  // reset current Job and delete object
+  {
+    QMutexLocker locker(&m_jobMutex);
+    m_spCurrentJob = nullptr;
+  }
+
+  m_waitForFinishCounter.release(1);
 }

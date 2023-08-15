@@ -10,8 +10,9 @@ class IRunnableJob
 public:
   virtual ~IRunnableJob() {};
 
-  virtual QString Error() = 0;
-  virtual bool Finished() = 0;
+  virtual QString Error() const = 0;
+  virtual bool Finished() const = 0;
+  virtual bool HasError() const = 0;
   virtual QString JobName() const = 0;
   virtual QString JobType() const = 0;
   virtual qint32 Progress() const = 0;
