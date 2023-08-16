@@ -3,6 +3,8 @@
 
 #include "OverlayButton.h"
 #include <QPointer>
+#include <QTimer>
+#include <optional>
 
 class QLabel;
 class QPropertyAnimation;
@@ -14,18 +16,21 @@ class CPushNotification : public COverlayBase
 
 public:
   explicit CPushNotification(const QString& sMsg,
-                             std::chrono::milliseconds displayTime,
+                             std::optional<std::chrono::milliseconds> displayTime,
+                             bool bSingleShot = true,
                              QWidget* pParent = nullptr);
   ~CPushNotification() override;
 
-  void Initialize();
-
   void Climb() override;
   void Hide() override;
+  void Hide(std::chrono::milliseconds in);
   void Resize() override;
   void Show() override;
 
   void Move(qint32 iX, qint32 iY);
+
+  void SetMessage(const QString& sMsg);
+  void SetTargetPosition(qint32 iYOffsetTarget);
 
   void SetYOffset(qint32 iValue);
   qint32 YOffset() const;
@@ -33,6 +38,8 @@ public:
 private:
   QPointer<QPropertyAnimation> m_pPopInOutAnim;
   QPointer<QLabel>             m_pMsg;
+  QTimer                       m_timer;
+  std::optional<qint32>        m_iTargetPosition;
   qint32                       m_iYOffset;
 };
 

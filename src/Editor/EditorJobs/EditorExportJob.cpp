@@ -1,5 +1,6 @@
 #include "EditorExportJob.h"
 #include "Application.h"
+#include "EditorJobTypes.h"
 
 #include "Systems/DatabaseManager.h"
 #include "Systems/PhysFs/PhysFsFileEngine.h"
@@ -14,21 +15,15 @@ namespace
 
 CEditorExportJob::CEditorExportJob(QObject* pParent) :
     QObject(pParent),
-    m_spExportProcess(std::make_unique<QProcess>()),
+    m_spExportProcess(nullptr),
     m_spProject(nullptr),
     m_iProgress(0),
-    m_sName("Download"),
+    m_sName("Export"),
     m_sError("No error."),
     m_bFinished(false)
 {
-  connect(m_spExportProcess.get(), &QProcess::errorOccurred,
-          this, &CEditorExportJob::SlotExportErrorOccurred);
-  connect(m_spExportProcess.get(), qOverload<int,QProcess::ExitStatus>(&QProcess::finished),
-          this, &CEditorExportJob::SlotExportFinished);
-  connect(m_spExportProcess.get(), &QProcess::started,
-          this, &CEditorExportJob::SlotExportStarted);
-  connect(m_spExportProcess.get(), &QProcess::stateChanged,
-          this, &CEditorExportJob::SlotExportStateChanged);
+  qRegisterMetaType<QProcess::ProcessState>();
+  qRegisterMetaType<QProcess::ExitStatus>();
 }
 CEditorExportJob::~CEditorExportJob()
 {
@@ -74,7 +69,7 @@ QString CEditorExportJob::JobName() const
 //
 QString CEditorExportJob::JobType() const
 {
-  return "Export";
+  return editor_job::c_sExport;
 }
 
 //----------------------------------------------------------------------------------------
@@ -118,12 +113,13 @@ bool CEditorExportJob::Run(const QVariantList& args)
     emit SignalProgressChanged(m_iId, Progress());
 
     const QString sName = PhysicalProjectName(m_spProject);
-    const QString sFolder = CPhysFsFileEngineHandler::c_sScheme + sName;
+    const QString sFolder = CApplication::Instance()->Settings()->ContentFolder() + "/" + sName;
 
-    QFile rccFile(sFolder + "/" + "JOIPEngineExport.qrc");
+    QFile rccFile(CPhysFsFileEngineHandler::c_sScheme + "JOIPEngineExport.qrc");
     if (!rccFile.open(QIODevice::WriteOnly | QIODevice::Truncate))
     {
-      m_sError =  tr("Could not write temporary resource file '%1'").arg(rccFile.fileName());
+      m_sError =  tr("Could not write temporary resource file '%1':\n%2")
+                     .arg(rccFile.fileName()).arg(rccFile.errorString());
       m_bHasError = true;
       m_bFinished = true;
       return false;
@@ -153,14 +149,16 @@ bool CEditorExportJob::Run(const QVariantList& args)
 
     rccFile.close();
 
+    CreateProcess();
+
     if (m_spExportProcess->state() == QProcess::ProcessState::NotRunning)
     {
       m_spExportProcess->setProperty(c_sTemporaryRccFileProperty, rccFile.fileName());
       m_spExportProcess->setWorkingDirectory(sFolder);
       m_spExportProcess->start("rcc",
-                               QStringList() << "--binary" << "--no-compress"
+                               QStringList() << "--binary" << "--no-compress" << "--verbose"
                                              << rccFile.fileName()
-                                             << "--output" << sFolder + "/" + sName + ".proj");
+                                             << "--output" << (sFolder + "/" + sName + ".proj"));
     }
     else
     {
@@ -170,7 +168,7 @@ bool CEditorExportJob::Run(const QVariantList& args)
       return false;
     }
 
-    m_bFinished = true;
+    m_bFinished = false;
     return true;
   }
 
@@ -203,6 +201,26 @@ void CEditorExportJob::AbortImpl()
 
 //----------------------------------------------------------------------------------------
 //
+void CEditorExportJob::CreateProcess()
+{
+  m_spExportProcess.reset(new QProcess());
+
+  connect(m_spExportProcess.get(), &QProcess::errorOccurred,
+          this, &CEditorExportJob::SlotExportErrorOccurred);
+  connect(m_spExportProcess.get(), qOverload<int,QProcess::ExitStatus>(&QProcess::finished),
+          this, &CEditorExportJob::SlotExportFinished);
+  connect(m_spExportProcess.get(), &QProcess::started,
+          this, &CEditorExportJob::SlotExportStarted);
+  connect(m_spExportProcess.get(), &QProcess::stateChanged,
+          this, &CEditorExportJob::SlotExportStateChanged);
+  connect(m_spExportProcess.get(), &QProcess::readyReadStandardError,
+          this, &CEditorExportJob::SlotReadErrorOut);
+  connect(m_spExportProcess.get(), &QProcess::readyReadStandardOutput,
+          this, &CEditorExportJob::SlotReadStandardOut);
+}
+
+//----------------------------------------------------------------------------------------
+//
 void CEditorExportJob::SlotExportErrorOccurred(QProcess::ProcessError error)
 {
   switch (error)
@@ -218,7 +236,7 @@ void CEditorExportJob::SlotExportErrorOccurred(QProcess::ProcessError error)
 
   m_bHasError = true;
 
-  emit SignalJobMessage(m_iId, m_sError);
+  emit SignalJobMessage(m_iId, JobType(), m_sError);
   qWarning() << m_spExportProcess->errorString();
 }
 
@@ -272,6 +290,22 @@ void CEditorExportJob::SlotExportStateChanged(QProcess::ProcessState newState)
   }
   if (!sMsg.isEmpty())
   {
-    emit SignalJobMessage(m_iId, sMsg);
+    emit SignalJobMessage(m_iId, JobType(), sMsg);
   }
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CEditorExportJob::SlotReadErrorOut()
+{
+  QByteArray arr = m_spExportProcess->readAllStandardError();
+  emit SignalJobMessage(m_iId, JobType(), QString::fromUtf8(arr));
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CEditorExportJob::SlotReadStandardOut()
+{
+  QByteArray arr = m_spExportProcess->readAllStandardOutput();
+  emit SignalJobMessage(m_iId, JobType(), QString::fromUtf8(arr));
 }

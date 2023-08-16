@@ -19,6 +19,13 @@ public:
   explicit CEditorExportJob(QObject* pParent = nullptr);
   ~CEditorExportJob() override;
 
+  enum class EExportError : qint32 {
+    eWriteFailed,
+    eCleanupFailed,
+    eProcessError
+  };
+  Q_ENUM(EExportError)
+
   QString Error() const override;
   bool Finished() const override;
   bool HasError() const override;
@@ -34,16 +41,19 @@ signals:
   void SignalFinished(qint32 iId) override;
   void SignalProgressChanged(qint32 iId, qint32 iProgress) override;
   void SignalStarted(qint32 iId) override;
-  void SignalJobMessage(qint32 iId, QString sMsg);
+  void SignalJobMessage(qint32 iId, QString sType, QString sMsg);
 
 protected:
   void AbortImpl() override;
+  void CreateProcess();
 
 protected slots:
   void SlotExportErrorOccurred(QProcess::ProcessError error);
   void SlotExportFinished(int exitCode, QProcess::ExitStatus exitStatus);
   void SlotExportStarted();
   void SlotExportStateChanged(QProcess::ProcessState newState);
+  void SlotReadErrorOut();
+  void SlotReadStandardOut();
 
 protected:
   std::unique_ptr<QProcess>              m_spExportProcess;

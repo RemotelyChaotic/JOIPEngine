@@ -103,7 +103,7 @@ void CNotificationSender::SoftwarePushNotifications(const QString& /*sTitle*/, c
     const auto showTime = 5s;
 
     CPushNotification* pNotification =
-        new CPushNotification(sMsg, showTime, m_pMainWindow.data());
+        new CPushNotification(sMsg, showTime, true, m_pMainWindow.data());
     pNotification->Climb();
     pNotification->Move(pNotification->x(), pNotification->height());
     pNotification->Resize();

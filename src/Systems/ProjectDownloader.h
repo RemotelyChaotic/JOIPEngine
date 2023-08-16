@@ -16,12 +16,15 @@ public:
   void CreateNewDownloadJob(const QString& sHost, const QVariantList& args);
 
 protected:
+  void JobFinalizeImpl(tspRunnableJob spJob) override;
   void JobFinishedImpl(qint32 iId, tspRunnableJob spJob) override;
-  void JobRunImpl(qint32 iId, bool bOk, tspRunnableJob spJob) override;
+  void JobPreRunImpl(qint32 iId, tspRunnableJob spJob) override;
+  void JobPostRunImpl(qint32 iId, bool bOk, tspRunnableJob spJob) override;
   void JobStartedImpl(qint32 iId, tspRunnableJob spJob) override;
 
 private:
   std::vector<SDownloadJobConfig>                          m_vJobCfg;
+  QMetaObject::Connection                                  m_finalizeConn;
 };
 
 #endif // CPROJECTDOWNLOADER_H

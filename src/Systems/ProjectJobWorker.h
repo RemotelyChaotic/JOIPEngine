@@ -50,8 +50,10 @@ protected slots:
   void SlotFinalizeJob();
 
 protected:
+  virtual void JobFinalizeImpl(tspRunnableJob spJob) = 0;
   virtual void JobFinishedImpl(qint32 iId, tspRunnableJob spJob) = 0;
-  virtual void JobRunImpl(qint32 iId, bool bOk, tspRunnableJob spJob) = 0;
+  virtual void JobPreRunImpl(qint32 iId, tspRunnableJob spJob) = 0;
+  virtual void JobPostRunImpl(qint32 iId, bool bOk, tspRunnableJob spJob) = 0;
   virtual void JobStartedImpl(qint32 iId, tspRunnableJob spJob) = 0;
 
   std::queue<std::pair<tspRunnableJob, QVariantList>>      m_vspJobs;

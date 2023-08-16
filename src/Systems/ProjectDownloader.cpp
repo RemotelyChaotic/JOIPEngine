@@ -34,7 +34,18 @@ void CProjectDownloader::CreateNewDownloadJob(const QString& sHost, const QVaria
 
   tspDownloadJob spJob =
       std::shared_ptr<IDownloadJob>(CDownloadJobFactory::GetJob(it->m_sClassType));
+  if (QObject* pObj = dynamic_cast<QObject*>(spJob.get()))
+  {
+    pObj->moveToThread(thread());
+  }
   CProjectJobWorker::CreatedNewJob(spJob, args);
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CProjectDownloader::JobFinalizeImpl(tspRunnableJob spJob)
+{
+  disconnect(m_finalizeConn);
 }
 
 //----------------------------------------------------------------------------------------
@@ -68,7 +79,25 @@ void CProjectDownloader::JobFinishedImpl(qint32, tspRunnableJob spJob)
 
 //----------------------------------------------------------------------------------------
 //
-void CProjectDownloader::JobRunImpl(qint32 iId, bool bOk, tspRunnableJob spJob)
+void CProjectDownloader::JobPreRunImpl(qint32 iId, tspRunnableJob spJob)
+{
+  // connections (will be removed once the object is deleted, so we won't disconnect
+  connect(dynamic_cast<QObject*>(m_spCurrentJob.get()), SIGNAL(SignalFinished(qint32)),
+          this, SLOT(SlotJobFinished(qint32)), Qt::DirectConnection);
+
+  m_finalizeConn =
+      connect(dynamic_cast<QObject*>(m_spCurrentJob.get()), SIGNAL(SignalFinished(qint32)),
+              this, SLOT(SlotFinalizeJob()), Qt::DirectConnection);
+
+  connect(dynamic_cast<QObject*>(m_spCurrentJob.get()), SIGNAL(SignalProgressChanged(qint32,qint32)),
+          this, SIGNAL(SignalProgressChanged(qint32,qint32)), Qt::DirectConnection);
+  connect(dynamic_cast<QObject*>(m_spCurrentJob.get()), SIGNAL(SignalStarted(qint32)),
+          this, SLOT(SlotJobStarted(qint32)), Qt::DirectConnection);
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CProjectDownloader::JobPostRunImpl(qint32 iId, bool bOk, tspRunnableJob spJob)
 {
   if (!bOk)
   {

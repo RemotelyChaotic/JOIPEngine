@@ -4,15 +4,21 @@
 #include "Settings.h"
 #include "WindowContext.h"
 
+#include "EditorJobs/EditorJobTypes.h"
 #include "EditorLayouts/EditorLayoutBase.h"
 #include "EditorLayouts/IEditorLayoutViewProvider.h"
 #include "EditorWidgets/EditorWidgetBase.h"
+
 #include "Systems/BackActionHandler.h"
 #include "Systems/DatabaseManager.h"
 #include "Systems/Project.h"
+
 #include "Tutorial/EditorTutorialOverlay.h"
 #include "Tutorial/ClassicTutorialStateSwitchHandler.h"
+
 #include "Widgets/HelpOverlay.h"
+#include "Widgets/ProgressBar.h"
+#include "Widgets/PushNotification.h"
 
 #include <QAction>
 #include <QDebug>
@@ -74,6 +80,7 @@ private:
 CEditorMainScreen::CEditorMainScreen(QWidget* pParent) :
   QWidget(pParent),
   m_spEditorModel(std::make_unique<CEditorModel>(this)),
+  m_spPushNotificator(std::make_unique<CPushNotification>(QString(), std::nullopt, false, this)),
   m_spViewProvider(std::make_shared<CEditorLayoutViewProvider>(this)),
   m_spUi(std::make_shared<Ui::CEditorMainScreen>()),
   m_spWindowContext(nullptr),
@@ -89,12 +96,22 @@ CEditorMainScreen::CEditorMainScreen(QWidget* pParent) :
 {
   m_spUi->setupUi(this);
 
+  QHBoxLayout* pLayout = dynamic_cast<QHBoxLayout*>(m_spPushNotificator->layout());
+  if (nullptr != pLayout)
+  {
+    m_pPushProgress = new CProgressBar(m_spPushNotificator.get());
+    m_pPushProgress->SetRange(0, 0);
+    pLayout->insertWidget(0, m_pPushProgress);
+  }
+
   // Testing
   //new ModelTest(pModel, this);
 }
 
 CEditorMainScreen::~CEditorMainScreen()
 {
+  m_spPushNotificator.reset();
+
   //leads to a crash otherwise
   disconnect(m_spEditorModel.get(), &CEditorModel::SignalProjectEdited,
              this, &CEditorMainScreen::SlotProjectEdited);
@@ -128,6 +145,8 @@ void CEditorMainScreen::Initialize(const std::shared_ptr<CWindowContext>& spWind
   connect(m_spEditorModel.get(), &CEditorModel::SignalProjectEdited,
           this, &CEditorMainScreen::SlotProjectEdited);
 
+  m_spEditorModel->AddEditorJobStateListener(editor_job::c_sExport, this);
+
   m_pTutorialOverlay->Initialize(m_spEditorModel.get());
   m_pTutorialOverlay->Hide();
 
@@ -152,6 +171,13 @@ void CEditorMainScreen::Initialize(const std::shared_ptr<CWindowContext>& spWind
           this, &CEditorMainScreen::SlotHelpClicked);
   connect(m_spUi->pProjectActionBar->m_spUi->ExitButton, &QPushButton::clicked,
           this, &CEditorMainScreen::SlotExitClicked);
+
+  qint32 iPosActionBar =
+      m_spUi->pProjectActionBar->m_spUi->pProjectContainer->parentWidget()->mapToGlobal(
+      m_spUi->pProjectActionBar->m_spUi->pProjectContainer->pos()).y();
+  m_spPushNotificator->SetTargetPosition(iPosActionBar +
+                                         m_spUi->pProjectActionBar->m_spUi->pProjectContainer->height() +
+                                         9);
 
   // insert items in map
   for (auto type : EEditorWidget::_values())
@@ -346,14 +372,7 @@ void CEditorMainScreen::SlotProjectEdited()
 
 //----------------------------------------------------------------------------------------
 //
-void CEditorMainScreen::SlotProjectExportStarted()
-{
-  m_spUi->pProjectActionBar->m_spUi->SaveButton->setEnabled(false);
-  m_spUi->pProjectActionBar->m_spUi->ExportButton->setEnabled(false);
-}
-
-//----------------------------------------------------------------------------------------
-//
+/*
 void CEditorMainScreen::SlotProjectExportError(CEditorModel::EExportError error, const QString& sErrorString)
 {
   QMessageBox msgBox;
@@ -405,14 +424,7 @@ void CEditorMainScreen::SlotProjectExportError(CEditorModel::EExportError error,
         break;
   }
 }
-
-//----------------------------------------------------------------------------------------
-//
-void CEditorMainScreen::SlotProjectExportFinished()
-{
-  m_spUi->pProjectActionBar->m_spUi->SaveButton->setEnabled(true);
-  m_spUi->pProjectActionBar->m_spUi->ExportButton->setEnabled(true);
-}
+*/
 
 //----------------------------------------------------------------------------------------
 //
@@ -484,6 +496,45 @@ void CEditorMainScreen::SlotUnloadFinished()
       qApp->quit();
     }
   }
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CEditorMainScreen::JobFinished(qint32 iId)
+{
+  Q_UNUSED(iId)
+  using namespace std::chrono_literals;
+  m_spPushNotificator->Hide(2s);
+  m_spUi->pProjectActionBar->m_spUi->SaveButton->setEnabled(true);
+  m_spUi->pProjectActionBar->m_spUi->ExportButton->setEnabled(true);
+  m_spUi->pMainWidget->setEnabled(true);
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CEditorMainScreen::JobStarted(qint32 iId)
+{
+  Q_UNUSED(iId)
+  m_spPushNotificator->Show();
+  m_spUi->pProjectActionBar->m_spUi->SaveButton->setEnabled(false);
+  m_spUi->pProjectActionBar->m_spUi->ExportButton->setEnabled(false);
+  m_spUi->pMainWidget->setEnabled(false);
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CEditorMainScreen::JobMessage(qint32 iId, const QString& sMsg)
+{
+  Q_UNUSED(iId)
+  m_spPushNotificator->SetMessage(sMsg);
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CEditorMainScreen::JobProgressChanged(qint32 iId, qint32 iProgress)
+{
+  Q_UNUSED(iId)
+  Q_UNUSED(iProgress)
 }
 
 //----------------------------------------------------------------------------------------

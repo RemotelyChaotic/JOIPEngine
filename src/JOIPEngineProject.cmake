@@ -76,6 +76,8 @@ macro(CreateJOIPProject JOIP_PROJECT_NAME)
     ${JOIPSources}/Editor/EditorJobWorker.h
     ${JOIPSources}/Editor/EditorJobs/EditorExportJob.cpp
     ${JOIPSources}/Editor/EditorJobs/EditorExportJob.h
+    ${JOIPSources}/Editor/EditorJobs/EditorJobTypes.h
+    ${JOIPSources}/Editor/EditorJobs/IEditorJobStateListener.h
     ${JOIPSources}/Editor/EditorLayouts/EditorLayoutBase.cpp
     ${JOIPSources}/Editor/EditorLayouts/EditorLayoutBase.h
     ${JOIPSources}/Editor/EditorLayouts/EditorLayoutClassic.cpp

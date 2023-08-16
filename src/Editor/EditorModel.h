@@ -4,7 +4,10 @@
 #include <QObject>
 #include <QPointer>
 #include <QProcess>
+#include <QString>
+#include <map>
 #include <memory>
+#include <vector>
 
 class CDatabaseManager;
 class CFlowScene;
@@ -14,6 +17,7 @@ class CResourceTreeItemModel;
 class CScriptEditorModel;
 class CSettings;
 class CThreadedSystem;
+class IEditorJobStateListener;
 class ITutorialStateSwitchHandler;
 namespace QtNodes {
   class Node;
@@ -30,13 +34,6 @@ class CEditorModel : public QObject
 public:
   explicit CEditorModel(QWidget* pParent = nullptr);
   ~CEditorModel();
-
-  enum class EExportError : qint32 {
-    eWriteFailed,
-    eCleanupFailed,
-    eProcessError
-  };
-  Q_ENUM(EExportError)
 
   const tspProject& CurrentProject() const;
   CFlowScene* FlowSceneModel() const;
@@ -55,6 +52,8 @@ public:
   void NextTutorialState();
   void NextResetTutorialState();
 
+  void AddEditorJobStateListener(const QString& sJobType, IEditorJobStateListener* pListener);
+
   void InitNewProject(const QString& sNewProjectName, bool bTutorial);
   void LoadProject(qint32 iId);
   QString RenameProject(const QString& sNewProjectName);
@@ -69,14 +68,14 @@ public slots:
   void SlotNodeDeleted(QtNodes::Node &n);
 
 signals:
-  void SignalJobMessage(qint32 iId, QString sMsg);
-  void SignalJobFinished(qint32 iId);
-  void SignalJobStarted(qint32 iId);
-  void SignalJobProgressChanged(qint32 iId, qint32 iProgress);
   void SignalProjectEdited();
 
 private slots:
   void SlotAddNewScriptFileToScene();
+  void SlotJobFinished(qint32 iId, QString type);
+  void SlotJobStarted(qint32 iId, QString type);
+  void SlotJobMessage(qint32 iId, QString type, QString sMsg);
+  void SlotJobProgressChanged(qint32 iId, QString type, qint32 iProgress);
 
 private:
   std::unique_ptr<CKinkTreeModel>                             m_spKinkTreeModel;
@@ -89,6 +88,7 @@ private:
   tspProject                                                  m_spCurrentProject;
   std::weak_ptr<CDatabaseManager>                             m_wpDbManager;
   std::vector<std::weak_ptr<ITutorialStateSwitchHandler>>     m_vwpTutorialStateSwitchHandlers;
+  std::map<QString, std::vector<IEditorJobStateListener*>>    m_vpEditorJobStateListeners;
   QPointer<QWidget>                                           m_pParentWidget;
   QString                                                     m_sScriptTypesFilter;
   bool                                                        m_bInitializingNewProject;

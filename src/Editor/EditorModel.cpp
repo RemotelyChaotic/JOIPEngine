@@ -3,6 +3,7 @@
 #include "EditorJobWorker.h"
 
 #include "EditorJobs/EditorExportJob.h"
+#include "EditorJobs/IEditorJobStateListener.h"
 
 #include "NodeEditor/EndNodeModel.h"
 #include "NodeEditor/FlowScene.h"
@@ -10,7 +11,6 @@
 #include "NodeEditor/PathSplitterModel.h"
 #include "NodeEditor/NodeEditorRegistry.h"
 #include "NodeEditor/SceneNodeModel.h"
-#include "NodeEditor/SceneNodeModelWidget.h"
 #include "NodeEditor/SceneTranstitionData.h"
 #include "NodeEditor/StartNodeModel.h"
 
@@ -66,14 +66,14 @@ CEditorModel::CEditorModel(QWidget* pParent) :
   connect(m_spFlowSceneModel.get(), &CFlowScene::nodeDeleted,
           this, &CEditorModel::SlotNodeDeleted);
 
-  connect(JobWorker(), &CEditorJobWorker::SignalJobMessage,
-          this, &CEditorModel::SignalJobMessage);
-  connect(JobWorker(), &CEditorJobWorker::SignalJobFinished,
-          this, &CEditorModel::SignalJobFinished);
-  connect(JobWorker(), &CEditorJobWorker::SignalJobStarted,
-          this, &CEditorModel::SignalJobStarted);
-  connect(JobWorker(), &CEditorJobWorker::SignalProgressChanged,
-          this, &CEditorModel::SignalJobProgressChanged);
+  connect(JobWorker(), &CEditorJobWorker::SignalEditorJobStarted,
+          this, &CEditorModel::SlotJobStarted);
+  connect(JobWorker(), &CEditorJobWorker::SignalEditorJobFinished,
+          this, &CEditorModel::SlotJobFinished);
+  connect(JobWorker(), &CEditorJobWorker::SignalEditorJobMessage,
+          this, &CEditorModel::SlotJobMessage);
+  connect(JobWorker(), &CEditorJobWorker::SignalEditorJobProgress,
+          this, &CEditorModel::SlotJobProgressChanged);
 }
 
 CEditorModel::~CEditorModel()
@@ -278,6 +278,16 @@ void CEditorModel::NextResetTutorialState()
   }
 }
 
+//----------------------------------------------------------------------------------------
+//
+void CEditorModel::AddEditorJobStateListener(const QString& sJobType,
+                                             IEditorJobStateListener* pListener)
+{
+  if (nullptr != pListener)
+  {
+    m_vpEditorJobStateListeners[sJobType].push_back(pListener);
+  }
+}
 
 //----------------------------------------------------------------------------------------
 //
@@ -688,6 +698,62 @@ void CEditorModel::SlotAddNewScriptFileToScene()
       qint32 iSceneId = pSceneModel->SceneId();
       auto spScene = spDbManager->FindScene(m_spCurrentProject, iSceneId);
       AddNewScriptFileToScene(m_pParentWidget, spScene);
+    }
+  }
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CEditorModel::SlotJobFinished(qint32 iId, QString type)
+{
+  auto it = m_vpEditorJobStateListeners.find(type);
+  if (m_vpEditorJobStateListeners.end() != it)
+  {
+    for (IEditorJobStateListener* pListener : it->second)
+    {
+      pListener->JobFinished(iId);
+    }
+  }
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CEditorModel::SlotJobStarted(qint32 iId, QString type)
+{
+  auto it = m_vpEditorJobStateListeners.find(type);
+  if (m_vpEditorJobStateListeners.end() != it)
+  {
+    for (IEditorJobStateListener* pListener : it->second)
+    {
+      pListener->JobStarted(iId);
+    }
+  }
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CEditorModel::SlotJobMessage(qint32 iId, QString type, QString sMsg)
+{
+  auto it = m_vpEditorJobStateListeners.find(type);
+  if (m_vpEditorJobStateListeners.end() != it)
+  {
+    for (IEditorJobStateListener* pListener : it->second)
+    {
+      pListener->JobMessage(iId, sMsg);
+    }
+  }
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CEditorModel::SlotJobProgressChanged(qint32 iId, QString type, qint32 iProgress)
+{
+  auto it = m_vpEditorJobStateListeners.find(type);
+  if (m_vpEditorJobStateListeners.end() != it)
+  {
+    for (IEditorJobStateListener* pListener : it->second)
+    {
+      pListener->JobProgressChanged(iId, iProgress);
     }
   }
 }
