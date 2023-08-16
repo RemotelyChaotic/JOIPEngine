@@ -15,13 +15,12 @@ public:
 
   void CreateNewDownloadJob(const QString& sHost, const QVariantList& args);
 
-private slots:
-  void SlotJobFinished(qint32 iProjId) override;
-  void SlotJobStarted(qint32 iProjId) override;
+protected:
+  void JobFinishedImpl(qint32 iId, tspRunnableJob spJob) override;
+  void JobRunImpl(qint32 iId, bool bOk, tspRunnableJob spJob) override;
+  void JobStartedImpl(qint32 iId, tspRunnableJob spJob) override;
 
 private:
-  void RunNextJobImpl(const QVariantList& args) override;
-
   std::vector<SDownloadJobConfig>                          m_vJobCfg;
 };
 

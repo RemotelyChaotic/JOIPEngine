@@ -21,61 +21,60 @@ qint32 CEditorJobWorker::GenerateNewId()
 
 //----------------------------------------------------------------------------------------
 //
-void CEditorJobWorker::SlotJobFinished(qint32 iId)
+void CEditorJobWorker::JobFinishedImpl(qint32 iId, tspRunnableJob spJob)
 {
-  IRunnableJob* pJob = dynamic_cast<IRunnableJob*>(sender());
-  if (nullptr != pJob && !pJob->WasStopped())
+  if (nullptr != spJob)
   {
-    /*
-    Notifier()->SendNotification(QString("%1 Download").arg(pJob->JobType()),
-                                 QString("Download of %1 finished.").arg(pJob->JobName()));
-    */
-  }
-
-  emit SignalJobFinished(iId);
-}
-
-//----------------------------------------------------------------------------------------
-//
-void CEditorJobWorker::SlotJobStarted(qint32 iId)
-{
-  IRunnableJob* pJob = dynamic_cast<IRunnableJob*>(sender());
-  if (nullptr != pJob && !pJob->WasStopped())
-  {
-    /*
-    Notifier()->SendNotification(QString("%1 Download").arg(pJob->JobType()),
-                                 QString("%1 download started.").arg(pJob->JobName()));
-    */
-  }
-  emit SignalJobStarted(iId);
-}
-
-//----------------------------------------------------------------------------------------
-//
-void CEditorJobWorker::RunNextJobImpl(const QVariantList& args)
-{
-  bool bOkConn = connect(dynamic_cast<QObject*>(m_spCurrentJob.get()), SIGNAL(SignalJobMessage(qint32,QString)),
-          this, SLOT(SignalJobMessage(qint32,QString)), Qt::QueuedConnection);
-  assert(bOkConn); Q_UNUSED(bOkConn);
-
-  bool bOk = m_spCurrentJob->Run(args);
-  if (!m_spCurrentJob->Finished() || !bOk)
-  {
-    if (!m_spCurrentJob->WasStopped())
+    if (!spJob->WasStopped())
     {
-      /*
-      qWarning() << "Download could not finish properly: " << m_spCurrentJob->Error();
-      Notifier()->SendNotification(QString("%1 Download").arg(m_spCurrentJob->JobType()),
-                                   QString("Download of %1 could not finish properly:\n%2")
-                                       .arg(m_spCurrentJob->JobName()).arg(m_spCurrentJob->Error()));
-      */
+      if (spJob->HasError())
+      {
+        QString sMsg = QString("Failed to run %1 job.\n%2")
+                           .arg(spJob->JobType()).arg(spJob->Error());
+        emit SignalJobMessage(iId, sMsg);
+      }
+      else
+      {
+        QString sMsg = QString("%1 job finished.")
+                           .arg(spJob->JobType());
+        emit SignalJobMessage(iId, sMsg);
+      }
     }
     else
     {
-      /*
-      Notifier()->SendNotification(QString("%1 Download").arg(m_spCurrentJob->JobType()),
-                                   "Download stopped.");
-      */
+      QString sMsg = QString("%1 job stopped.")
+                         .arg(spJob->JobType());
+      emit SignalJobMessage(iId, sMsg);
     }
+  }
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CEditorJobWorker::JobRunImpl(qint32 iId, bool bOk, tspRunnableJob spJob)
+{
+  if (!bOk)
+  {
+    if (!spJob->WasStopped())
+    {
+      QString sMsg = QString("Failed to run %1 job.\n%2")
+                         .arg(spJob->JobType()).arg(spJob->Error());
+      emit SignalJobMessage(iId, sMsg);
+    }
+  }
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CEditorJobWorker::JobStartedImpl(qint32 iId, tspRunnableJob spJob)
+{
+  if (nullptr != spJob)
+  {
+    bool bOkConn = connect(dynamic_cast<QObject*>(spJob.get()), SIGNAL(SignalJobMessage(qint32,QString)),
+                           this, SLOT(SignalJobMessage(qint32,QString)), Qt::QueuedConnection);
+    assert(bOkConn); Q_UNUSED(bOkConn);
+
+    QString sMsg = QString("%1 job started.").arg(spJob->JobType());
+    emit SignalJobMessage(iId, sMsg);
   }
 }

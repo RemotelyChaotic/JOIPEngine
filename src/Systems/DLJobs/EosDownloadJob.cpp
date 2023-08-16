@@ -207,6 +207,13 @@ bool CEosDownloadJob::HasError() const
 
 //----------------------------------------------------------------------------------------
 //
+qint32 CEosDownloadJob::Id() const
+{
+  return m_iProjId;
+}
+
+//----------------------------------------------------------------------------------------
+//
 QString CEosDownloadJob::JobName() const
 {
   return m_sName;

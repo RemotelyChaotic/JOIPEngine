@@ -4,8 +4,9 @@
 #include <QString>
 #include <QVariant>
 #include <atomic>
+#include <memory>
 
-class IRunnableJob
+class IRunnableJob : public std::enable_shared_from_this<IRunnableJob>
 {
 public:
   virtual ~IRunnableJob() {};
@@ -13,6 +14,7 @@ public:
   virtual QString Error() const = 0;
   virtual bool Finished() const = 0;
   virtual bool HasError() const = 0;
+  virtual qint32 Id() const = 0;
   virtual QString JobName() const = 0;
   virtual QString JobType() const = 0;
   virtual qint32 Progress() const = 0;

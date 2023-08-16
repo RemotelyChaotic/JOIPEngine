@@ -39,48 +39,56 @@ void CProjectDownloader::CreateNewDownloadJob(const QString& sHost, const QVaria
 
 //----------------------------------------------------------------------------------------
 //
-void CProjectDownloader::SlotJobFinished(qint32 iProjId)
+void CProjectDownloader::JobFinishedImpl(qint32, tspRunnableJob spJob)
 {
-  IDownloadJob* pJob = dynamic_cast<IDownloadJob*>(sender());
-  if (nullptr != pJob && !pJob->WasStopped())
+  if (nullptr != spJob)
   {
-    Notifier()->SendNotification(QString("%1 Download").arg(pJob->JobType()),
-                                 QString("Download of %1 finished.").arg(pJob->JobName()));
-  }
-  emit SignalJobFinished(iProjId);
-}
-
-//----------------------------------------------------------------------------------------
-//
-void CProjectDownloader::SlotJobStarted(qint32 iProjId)
-{
-  IDownloadJob* pJob = dynamic_cast<IDownloadJob*>(sender());
-  if (nullptr != pJob)
-  {
-    Notifier()->SendNotification(QString("%1 Download").arg(pJob->JobType()),
-                                 QString("%1 download started.").arg(pJob->JobName()));
-  }
-  emit SignalJobStarted(iProjId);
-}
-
-//----------------------------------------------------------------------------------------
-//
-void CProjectDownloader::RunNextJobImpl(const QVariantList& args)
-{
-  bool bOk = m_spCurrentJob->Run(args);
-  if (!m_spCurrentJob->Finished() || !bOk)
-  {
-    if (!m_spCurrentJob->WasStopped())
+    if (!spJob->WasStopped())
     {
-      qWarning() << "Download could not finish properly: " << m_spCurrentJob->Error();
-      Notifier()->SendNotification(QString("%1 Download").arg(m_spCurrentJob->JobType()),
-                                   QString("Download of %1 could not finish properly:\n%2")
-                                   .arg(m_spCurrentJob->JobName()).arg(m_spCurrentJob->Error()));
+      if (spJob->HasError())
+      {
+        qWarning() << "Download could not finish properly: " << spJob->Error();
+        Notifier()->SendNotification(QString("%1 Download").arg(spJob->JobType()),
+                                     QString("Download of %1 could not finish properly:\n%2")
+                                         .arg(spJob->JobName()).arg(spJob->Error()));
+      }
+      else
+      {
+        Notifier()->SendNotification(QString("%1 Download").arg(spJob->JobType()),
+                                     QString("Download of %1 finished.").arg(spJob->JobName()));
+      }
     }
     else
     {
-      Notifier()->SendNotification(QString("%1 Download").arg(m_spCurrentJob->JobType()),
+      Notifier()->SendNotification(QString("%1 Download").arg(spJob->JobType()),
                                    "Download stopped.");
     }
+  }
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CProjectDownloader::JobRunImpl(qint32 iId, bool bOk, tspRunnableJob spJob)
+{
+  if (!bOk)
+  {
+    if (!spJob->WasStopped())
+    {
+      qWarning() << "Download could not finish properly: " << spJob->Error();
+      Notifier()->SendNotification(QString("%1 Download").arg(spJob->JobType()),
+                                   QString("Download of %1 could not finish properly:\n%2")
+                                       .arg(spJob->JobName()).arg(spJob->Error()));
+    }
+  }
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CProjectDownloader::JobStartedImpl(qint32, tspRunnableJob spJob)
+{
+  if (nullptr != spJob)
+  {
+    Notifier()->SendNotification(QString("%1 Download").arg(spJob->JobType()),
+                                 QString("%1 download started.").arg(spJob->JobName()));
   }
 }

@@ -26,12 +26,10 @@ public:
 signals:
   void SignalJobMessage(qint32 iId, QString sMsg);
 
-private slots:
-  void SlotJobFinished(qint32 iProjId) override;
-  void SlotJobStarted(qint32 iProjId) override;
-
-private:
-  void RunNextJobImpl(const QVariantList& args) override;
+protected:
+  void JobFinishedImpl(qint32 iId, tspRunnableJob spJob) override;
+  void JobRunImpl(qint32 iId, bool bOk, tspRunnableJob spJob) override;
+  void JobStartedImpl(qint32 iId, tspRunnableJob spJob) override;
 
   mutable QMutex    m_idMutex;
   qint32            m_iLastId;

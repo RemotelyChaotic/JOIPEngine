@@ -58,6 +58,13 @@ bool CEditorExportJob::HasError() const
 
 //----------------------------------------------------------------------------------------
 //
+qint32 CEditorExportJob::Id() const
+{
+  return m_iId;
+}
+
+//----------------------------------------------------------------------------------------
+//
 QString CEditorExportJob::JobName() const
 {
   return m_sName;

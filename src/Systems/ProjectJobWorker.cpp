@@ -99,6 +99,30 @@ void CProjectJobWorker::CreatedNewJob(const tspRunnableJob& spJob, const QVarian
 
 //----------------------------------------------------------------------------------------
 //
+void CProjectJobWorker::SlotJobFinished(qint32 iId)
+{
+  IRunnableJob* pJob = dynamic_cast<IRunnableJob*>(sender());
+  if (nullptr != pJob)
+  {
+    JobFinishedImpl(iId, pJob->shared_from_this());
+  }
+  emit SignalJobFinished(iId);
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CProjectJobWorker::SlotJobStarted(qint32 iId)
+{
+  IRunnableJob* pJob = dynamic_cast<IRunnableJob*>(sender());
+  if (nullptr != pJob)
+  {
+    JobStartedImpl(iId, pJob->shared_from_this());
+  }
+  emit SignalJobStarted(iId);
+}
+
+//----------------------------------------------------------------------------------------
+//
 void CProjectJobWorker::SlotClearQueue()
 {
   QMutexLocker locker(&m_jobMutex);
@@ -127,13 +151,14 @@ void CProjectJobWorker::SlotRunNextJob()
       m_vspJobs.pop();
     }
 
-    QMetaObject::Connection conn =
-        connect(dynamic_cast<QObject*>(m_spCurrentJob.get()), SIGNAL(SignalFinished(qint32)),
-            this, SLOT(SlotFinalizeJob()), Qt::DirectConnection);
-
     // connections (will be removed once the object is deleted, so we won't disconnect
     connect(dynamic_cast<QObject*>(m_spCurrentJob.get()), SIGNAL(SignalFinished(qint32)),
             this, SLOT(SlotJobFinished(qint32)), Qt::DirectConnection);
+
+    QMetaObject::Connection conn =
+        connect(dynamic_cast<QObject*>(m_spCurrentJob.get()), SIGNAL(SignalFinished(qint32)),
+                this, SLOT(SlotFinalizeJob()), Qt::DirectConnection);
+
     connect(dynamic_cast<QObject*>(m_spCurrentJob.get()), SIGNAL(SignalProgressChanged(qint32,qint32)),
             this, SIGNAL(SignalProgressChanged(qint32,qint32)), Qt::DirectConnection);
     connect(dynamic_cast<QObject*>(m_spCurrentJob.get()), SIGNAL(SignalStarted(qint32)),
@@ -141,7 +166,8 @@ void CProjectJobWorker::SlotRunNextJob()
     connect(dynamic_cast<QObject*>(m_spCurrentJob.get()), SIGNAL(SignalFinished(qint32)),
             this, SLOT(SlotRunNextJob()), Qt::QueuedConnection);
 
-    RunNextJobImpl(args);
+    bool bOk = m_spCurrentJob->Run(args);
+    JobRunImpl(m_spCurrentJob->Id(), bOk, m_spCurrentJob);
 
     if (m_spCurrentJob->Finished())
     {

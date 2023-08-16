@@ -41,17 +41,19 @@ public slots:
 protected:
   void CreatedNewJob(const tspRunnableJob& spJob, const QVariantList& args);
 
-  virtual void RunNextJobImpl(const QVariantList& args) = 0;
-
 protected slots:
-  virtual void SlotJobFinished(qint32 iProjId) = 0;
-  virtual void SlotJobStarted(qint32 iProjId) = 0;
+  void SlotJobFinished(qint32 iId);
+  void SlotJobStarted(qint32 iId);
 
   void SlotClearQueue();
   void SlotRunNextJob();
   void SlotFinalizeJob();
 
 protected:
+  virtual void JobFinishedImpl(qint32 iId, tspRunnableJob spJob) = 0;
+  virtual void JobRunImpl(qint32 iId, bool bOk, tspRunnableJob spJob) = 0;
+  virtual void JobStartedImpl(qint32 iId, tspRunnableJob spJob) = 0;
+
   std::queue<std::pair<tspRunnableJob, QVariantList>>      m_vspJobs;
   tspRunnableJob                                           m_spCurrentJob;
   mutable QMutex                                           m_jobMutex;
