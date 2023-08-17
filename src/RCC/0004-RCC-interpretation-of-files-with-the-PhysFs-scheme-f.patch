@@ -1,0 +1,35 @@
+From ebb66c6e4289f3822a846a8fc918e4fa2b498838 Mon Sep 17 00:00:00 2001
+From: Remotely Chaotic <jtek.fdlt@gmail.com>
+Date: Thu, 17 Aug 2023 16:49:06 +0200
+Subject: [PATCH] RCC interpretation of files with the PhysFs scheme fixed
+
+---
+ src/RCC/rcc.cpp | 5 ++++-
+ 1 file changed, 4 insertions(+), 1 deletion(-)
+
+diff --git a/src/RCC/rcc.cpp b/src/RCC/rcc.cpp
+index 257a53e..dca324b 100644
+--- a/src/RCC/rcc.cpp
++++ b/src/RCC/rcc.cpp
+@@ -31,6 +31,8 @@
+ 
+ #include "rcc.h"
+ 
++#include "../Systems/PhysFs/PhysFsFileEngine.h"
++
+ #include <qbytearray.h>
+ #include <qdatetime.h>
+ #include <qdebug.h>
+@@ -571,7 +573,8 @@ bool RCCResourceLibrary::interpretResourceFile(QIODevice *inputDevice,
+                 alias = QDir::cleanPath(m_resourceRoot) + prefix + alias;
+ 
+                 QString absFileName = fileName;
+-                if (QDir::isRelativePath(absFileName))
++                if (absFileName.startsWith(CPhysFsFileEngineHandler::c_sScheme));
++                else if (QDir::isRelativePath(absFileName))
+                     absFileName.prepend(currentPath);
+                 QFileInfo file(absFileName);
+                 if (file.isDir()) {
+-- 
+2.24.0.windows.2
+
