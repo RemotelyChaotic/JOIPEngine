@@ -31,6 +31,8 @@
 
 #include "rcc.h"
 
+#include "../Systems/PhysFs/PhysFsFileEngine.h"
+
 #include <qbytearray.h>
 #include <qdatetime.h>
 #include <qdebug.h>
@@ -571,7 +573,8 @@ bool RCCResourceLibrary::interpretResourceFile(QIODevice *inputDevice,
                 alias = QDir::cleanPath(m_resourceRoot) + prefix + alias;
 
                 QString absFileName = fileName;
-                if (QDir::isRelativePath(absFileName))
+                if (absFileName.startsWith(CPhysFsFileEngineHandler::c_sScheme));
+                else if (QDir::isRelativePath(absFileName))
                     absFileName.prepend(currentPath);
                 QFileInfo file(absFileName);
                 if (file.isDir()) {
