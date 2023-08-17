@@ -40,11 +40,13 @@ CNotificationSender* CNotificationSender::Instance()
 //----------------------------------------------------------------------------------------
 //
 void CNotificationSender::SendNotification(const QString& sTitle,
-                                           const QString& sMsg)
+                                           const QString& sMsg,
+                                           bool bExternalOnly)
 {
   bool bOk =
       QMetaObject::invokeMethod(this, "SlotSendNotification", Qt::QueuedConnection,
-                                Q_ARG(QString, sTitle), Q_ARG(QString, sMsg));
+                                       Q_ARG(QString, sTitle), Q_ARG(QString, sMsg),
+                                       Q_ARG(bool, bExternalOnly));
   assert(bOk);
   Q_UNUSED(bOk)
 }
@@ -62,7 +64,8 @@ void CNotificationSender::SetMainWindow(CMainWindow* pMainWindow)
 
 //----------------------------------------------------------------------------------------
 //
-void CNotificationSender::SlotSendNotification(const QString& sTitle, const QString& sMsg)
+void CNotificationSender::SlotSendNotification(const QString& sTitle, const QString& sMsg,
+                                               bool bExternalOnly)
 {
   using namespace std::chrono_literals;
   const auto showTime = 5s;
@@ -75,7 +78,8 @@ void CNotificationSender::SlotSendNotification(const QString& sTitle, const QStr
   {
 #if (defined(Q_OS_WIN) || defined(Q_OS_LINUX)) && !defined(Q_OS_ANDROID)
     if (nullptr != m_pMainWindow &&
-        Qt::ApplicationActive == CApplication::Instance()->applicationState())
+        Qt::ApplicationActive == CApplication::Instance()->applicationState() &&
+        !bExternalOnly)
     {
       SoftwarePushNotifications(sTitle, sMsg);
     }

@@ -1,5 +1,7 @@
 #include "EditorJobWorker.h"
 
+#include "Editor/EditorJobs/EditorJobTypes.h"
+
 CEditorJobWorker::CEditorJobWorker() :
   CProjectJobWorker(),
   m_iLastId(0)
@@ -42,8 +44,17 @@ void CEditorJobWorker::JobFinishedImpl(qint32 iId, tspRunnableJob spJob)
       }
       else
       {
-        QString sMsg = QString("%1 job finished.")
-                           .arg(spJob->JobType());
+        QString sMsg;
+        if (auto spRunnableEditorJob = std::dynamic_pointer_cast<IEditorJob>(spJob))
+        {
+          sMsg = QString("%1 job finished.\n%2")
+                         .arg(spJob->JobType()).arg(spRunnableEditorJob->ReturnValue());
+        }
+        else
+        {
+          sMsg = QString("%1 job finished.")
+                         .arg(spJob->JobType());
+        }
         emit SignalEditorJobMessage(iId, spJob->JobType(), sMsg);
       }
     }

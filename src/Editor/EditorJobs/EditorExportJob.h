@@ -1,7 +1,7 @@
 #ifndef CEDITOREXPORTJOB_H
 #define CEDITOREXPORTJOB_H
 
-#include "Systems/IRunnableJob.h"
+#include "EditorJobTypes.h"
 
 #include <QObject>
 #include <QProcess>
@@ -10,7 +10,7 @@
 
 typedef std::shared_ptr<struct SProject> tspProject;
 
-class CEditorExportJob : public QObject, public IRunnableJob
+class CEditorExportJob : public QObject, public IEditorJob
 {
   Q_OBJECT
   Q_INTERFACES(IRunnableJob)
@@ -33,6 +33,7 @@ public:
   QString JobName() const override;
   QString JobType() const override;
   qint32 Progress() const override;
+  QString ReturnValue() const override;
 
   bool Run(const QVariantList& args) override;
   void Stop() override;
@@ -62,6 +63,7 @@ protected:
   qint32                                 m_iProgress = 0;
   QString                                m_sName;
   QString                                m_sError;
+  QString                                m_sReturnValue;
   bool                                   m_bHasError;
   bool                                   m_bFinished;
 };

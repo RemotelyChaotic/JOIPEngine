@@ -10,9 +10,11 @@ New Features:
 
 Changes:
 - Code Editor supports Lua highlighting, code generation and debugging.
+- Project exports now lock the UI for the duration of the Export, so nothing breaks.
 
 Fixed Bugs:
 - Fixed an error message in PlayerMediaPlayer that was reporting the wrong function call.
+- Fixed bug with preventing RCC to export Projects properly.
 
 =================
 Version 1.2.6.0

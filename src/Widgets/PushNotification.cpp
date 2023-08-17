@@ -134,6 +134,17 @@ void CPushNotification::SetMessage(const QString& sMsg)
 
 //----------------------------------------------------------------------------------------
 //
+QString CPushNotification::Message() const
+{
+  if (nullptr != m_pMsg)
+  {
+    return m_pMsg->text();
+  }
+  return QString();
+}
+
+//----------------------------------------------------------------------------------------
+//
 void CPushNotification::SetTargetPosition(qint32 iYOffsetTarget)
 {
   m_iTargetPosition = iYOffsetTarget;

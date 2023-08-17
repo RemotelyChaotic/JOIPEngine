@@ -25,11 +25,11 @@ public:
 
   static CNotificationSender* Instance();
 
-  void SendNotification(const QString& sTitle, const QString& sMsg);
+  void SendNotification(const QString& sTitle, const QString& sMsg, bool bExternalOnly = false);
   void SetMainWindow(CMainWindow* pMainWindow);
 
 private slots:
-  void SlotSendNotification(const QString& sTitle, const QString& sMsg);
+  void SlotSendNotification(const QString& sTitle, const QString& sMsg, bool bExternalOnly);
 
 private:
   void SoftwarePushNotifications(const QString& sTitle, const QString& sMsg);

@@ -1,6 +1,5 @@
 #include "EditorExportJob.h"
 #include "Application.h"
-#include "EditorJobTypes.h"
 
 #include "Systems/DatabaseManager.h"
 #include "Systems/PhysFs/PhysFsFileEngine.h"
@@ -10,7 +9,9 @@
 
 namespace
 {
+  const char c_sTempRCCFileName[] = "JOIPEngineExport.qrc";
   const char c_sTemporaryRccFileProperty[] = "RccFile";
+  const char c_sTemporaryOutFileProperty[] = "OutFile";
 }
 
 CEditorExportJob::CEditorExportJob(QObject* pParent) :
@@ -81,6 +82,13 @@ qint32 CEditorExportJob::Progress() const
 
 //----------------------------------------------------------------------------------------
 //
+QString CEditorExportJob::ReturnValue() const
+{
+  return m_sReturnValue;
+}
+
+//----------------------------------------------------------------------------------------
+//
 bool CEditorExportJob::Run(const QVariantList& args)
 {
   m_bHasError = false;
@@ -115,7 +123,7 @@ bool CEditorExportJob::Run(const QVariantList& args)
     const QString sName = PhysicalProjectName(m_spProject);
     const QString sFolder = CApplication::Instance()->Settings()->ContentFolder() + "/" + sName;
 
-    QFile rccFile(CPhysFsFileEngineHandler::c_sScheme + "JOIPEngineExport.qrc");
+    QFile rccFile(CPhysFsFileEngineHandler::c_sScheme + c_sTempRCCFileName);
     if (!rccFile.open(QIODevice::WriteOnly | QIODevice::Truncate))
     {
       m_sError =  tr("Could not write temporary resource file '%1':\n%2")
@@ -153,12 +161,17 @@ bool CEditorExportJob::Run(const QVariantList& args)
 
     if (m_spExportProcess->state() == QProcess::ProcessState::NotRunning)
     {
+      QString sRccFileName = (sFolder + "/" + c_sTempRCCFileName);
+      QString sOutFileName = (sFolder + "/" + sName + ".proj");
+      QString rccExe = QApplication::applicationDirPath() + "/rcc.exe";
       m_spExportProcess->setProperty(c_sTemporaryRccFileProperty, rccFile.fileName());
+      m_spExportProcess->setProperty(c_sTemporaryOutFileProperty, sOutFileName);
       m_spExportProcess->setWorkingDirectory(sFolder);
-      m_spExportProcess->start("rcc",
+      m_spExportProcess->start(rccExe,
                                QStringList() << "--binary" << "--no-compress" << "--verbose"
-                                             << rccFile.fileName()
-                                             << "--output" << (sFolder + "/" + sName + ".proj"));
+                                             //<< "--output" << (sFolder + "/export.log")
+                                             << sRccFileName
+                                             << "--output" << sOutFileName);
     }
     else
     {
@@ -255,6 +268,7 @@ void CEditorExportJob::SlotExportFinished(int exitCode, QProcess::ExitStatus exi
     return;
   }
 
+  const QString sOutFile(m_spExportProcess->property(c_sTemporaryOutFileProperty).toString());
   QFile rccFile(m_spExportProcess->property(c_sTemporaryRccFileProperty).toString());
   if (!rccFile.remove())
   {
@@ -265,6 +279,7 @@ void CEditorExportJob::SlotExportFinished(int exitCode, QProcess::ExitStatus exi
     return;
   }
 
+  m_sReturnValue = QString("Exported to: %2").arg(sOutFile);
   emit SignalFinished(m_iId);
 }
 
@@ -285,7 +300,7 @@ void CEditorExportJob::SlotExportStateChanged(QProcess::ProcessState newState)
   {
     case QProcess::ProcessState::Running: sMsg = tr("Running export."); break;
     case QProcess::ProcessState::Starting: sMsg = tr("Starting export."); break;
-    case QProcess::ProcessState::NotRunning: sMsg = tr("Export finished."); break;
+    //case QProcess::ProcessState::NotRunning: sMsg = tr("Export finished."); break;
     default: break;
   }
   if (!sMsg.isEmpty())
@@ -299,7 +314,7 @@ void CEditorExportJob::SlotExportStateChanged(QProcess::ProcessState newState)
 void CEditorExportJob::SlotReadErrorOut()
 {
   QByteArray arr = m_spExportProcess->readAllStandardError();
-  emit SignalJobMessage(m_iId, JobType(), QString::fromUtf8(arr));
+  emit SignalJobMessage(m_iId, JobType(), QString::fromLocal8Bit(arr));
 }
 
 //----------------------------------------------------------------------------------------
@@ -307,5 +322,5 @@ void CEditorExportJob::SlotReadErrorOut()
 void CEditorExportJob::SlotReadStandardOut()
 {
   QByteArray arr = m_spExportProcess->readAllStandardOutput();
-  emit SignalJobMessage(m_iId, JobType(), QString::fromUtf8(arr));
+  emit SignalJobMessage(m_iId, JobType(), QString::fromLocal8Bit(arr));
 }

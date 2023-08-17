@@ -11,6 +11,7 @@
 
 #include "Systems/BackActionHandler.h"
 #include "Systems/DatabaseManager.h"
+#include "Systems/NotificationSender.h"
 #include "Systems/Project.h"
 
 #include "Tutorial/EditorTutorialOverlay.h"
@@ -100,6 +101,7 @@ CEditorMainScreen::CEditorMainScreen(QWidget* pParent) :
   if (nullptr != pLayout)
   {
     m_pPushProgress = new CProgressBar(m_spPushNotificator.get());
+    m_pPushProgress->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
     m_pPushProgress->SetRange(0, 0);
     pLayout->insertWidget(0, m_pPushProgress);
   }
@@ -504,10 +506,18 @@ void CEditorMainScreen::JobFinished(qint32 iId)
 {
   Q_UNUSED(iId)
   using namespace std::chrono_literals;
-  m_spPushNotificator->Hide(2s);
+  m_spPushNotificator->Hide(10s);
   m_spUi->pProjectActionBar->m_spUi->SaveButton->setEnabled(true);
   m_spUi->pProjectActionBar->m_spUi->ExportButton->setEnabled(true);
   m_spUi->pMainWidget->setEnabled(true);
+
+  QString sProjectName;
+  if (nullptr != m_spCurrentProject)
+  {
+    QReadLocker locker(&m_spCurrentProject->m_rwLock);
+    sProjectName = m_spCurrentProject->m_sName;
+  }
+  Notifier()->SendNotification(sProjectName + " Export", m_spPushNotificator->Message(), true);
 }
 
 //----------------------------------------------------------------------------------------

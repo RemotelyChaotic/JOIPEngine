@@ -30,6 +30,8 @@ public:
   void Move(qint32 iX, qint32 iY);
 
   void SetMessage(const QString& sMsg);
+  QString Message() const;
+
   void SetTargetPosition(qint32 iYOffsetTarget);
 
   void SetYOffset(qint32 iValue);
