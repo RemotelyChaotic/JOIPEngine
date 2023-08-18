@@ -109,8 +109,8 @@ Rectangle {
 
                 TextMetrics {
                     id: localTextMetrics
-                    font.family: text.font.family
-                    font.pointSize: text.font.pointSize
+                    font.family: root.currentlyLoadedProject.font
+                    font.pointSize: 14
                     text: text.text
                 }
 
