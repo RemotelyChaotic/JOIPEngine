@@ -99,30 +99,6 @@ void CProjectJobWorker::CreatedNewJob(const tspRunnableJob& spJob, const QVarian
 
 //----------------------------------------------------------------------------------------
 //
-void CProjectJobWorker::SlotJobFinished(qint32 iId)
-{
-  IRunnableJob* pJob = dynamic_cast<IRunnableJob*>(sender());
-  if (nullptr != pJob)
-  {
-    JobFinishedImpl(iId, pJob->shared_from_this());
-  }
-  emit SignalJobFinished(iId);
-}
-
-//----------------------------------------------------------------------------------------
-//
-void CProjectJobWorker::SlotJobStarted(qint32 iId)
-{
-  IRunnableJob* pJob = dynamic_cast<IRunnableJob*>(sender());
-  if (nullptr != pJob)
-  {
-    JobStartedImpl(iId, pJob->shared_from_this());
-  }
-  emit SignalJobStarted(iId);
-}
-
-//----------------------------------------------------------------------------------------
-//
 void CProjectJobWorker::SlotClearQueue()
 {
   QMutexLocker locker(&m_jobMutex);
@@ -152,8 +128,6 @@ void CProjectJobWorker::SlotRunNextJob()
     }
 
     JobPreRunImpl(m_spCurrentJob->Id(), m_spCurrentJob);
-    connect(dynamic_cast<QObject*>(m_spCurrentJob.get()), SIGNAL(SignalFinished(qint32)),
-            this, SLOT(SlotRunNextJob()), Qt::QueuedConnection);
 
     bool bOk = m_spCurrentJob->Run(args);
 
@@ -161,6 +135,7 @@ void CProjectJobWorker::SlotRunNextJob()
 
     if (m_spCurrentJob->Finished())
     {
+      JobFinishedImpl(m_spCurrentJob->Id(), m_spCurrentJob);
       SlotFinalizeJob();
     }
 
@@ -182,4 +157,8 @@ void CProjectJobWorker::SlotFinalizeJob()
   }
 
   m_waitForFinishCounter.release(1);
+
+  bool bOk = QMetaObject::invokeMethod(this, "SlotRunNextJob", Qt::QueuedConnection);
+  Q_UNUSED(bOk);
+  assert(bOk);
 }

@@ -43,6 +43,28 @@ void CProjectDownloader::CreateNewDownloadJob(const QString& sHost, const QVaria
 
 //----------------------------------------------------------------------------------------
 //
+void CProjectDownloader::SlotJobFinished(qint32 iId)
+{
+  IRunnableJob* pJob = dynamic_cast<IRunnableJob*>(sender());
+  if (nullptr != pJob)
+  {
+    JobFinishedImpl(iId, pJob->shared_from_this());
+  }
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CProjectDownloader::SlotJobStarted(qint32 iId)
+{
+  IRunnableJob* pJob = dynamic_cast<IRunnableJob*>(sender());
+  if (nullptr != pJob)
+  {
+    JobStartedImpl(iId, pJob->shared_from_this());
+  }
+}
+
+//----------------------------------------------------------------------------------------
+//
 void CProjectDownloader::JobFinalizeImpl(tspRunnableJob spJob)
 {
   disconnect(m_finalizeConn);
@@ -50,7 +72,7 @@ void CProjectDownloader::JobFinalizeImpl(tspRunnableJob spJob)
 
 //----------------------------------------------------------------------------------------
 //
-void CProjectDownloader::JobFinishedImpl(qint32, tspRunnableJob spJob)
+void CProjectDownloader::JobFinishedImpl(qint32 iId, tspRunnableJob spJob)
 {
   if (nullptr != spJob)
   {
@@ -74,6 +96,8 @@ void CProjectDownloader::JobFinishedImpl(qint32, tspRunnableJob spJob)
       Notifier()->SendNotification(QString("%1 Download").arg(spJob->JobType()),
                                    "Download stopped.");
     }
+
+    emit SignalJobFinished(iId);
   }
 }
 
@@ -113,11 +137,12 @@ void CProjectDownloader::JobPostRunImpl(qint32 iId, bool bOk, tspRunnableJob spJ
 
 //----------------------------------------------------------------------------------------
 //
-void CProjectDownloader::JobStartedImpl(qint32, tspRunnableJob spJob)
+void CProjectDownloader::JobStartedImpl(qint32 iId, tspRunnableJob spJob)
 {
   if (nullptr != spJob)
   {
     Notifier()->SendNotification(QString("%1 Download").arg(spJob->JobType()),
                                  QString("%1 download started.").arg(spJob->JobName()));
+    emit SignalJobStarted(iId);
   }
 }

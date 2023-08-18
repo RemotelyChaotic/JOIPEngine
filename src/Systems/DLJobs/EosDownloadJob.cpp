@@ -480,8 +480,6 @@ bool CEosDownloadJob::Run(const QVariantList& args)
   // save the project
   spDbManager->SerializeProject(m_iProjId, true);
 
-  emit SignalFinished(m_iProjId);
-
   return true;
 }
 

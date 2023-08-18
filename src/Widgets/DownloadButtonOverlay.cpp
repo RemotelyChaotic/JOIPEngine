@@ -146,7 +146,7 @@ void CDownloadButtonOverlay::SlotDownloadFinished()
   if (auto spDownloader = CApplication::Instance()->System<CProjectDownloader>().lock())
   {
     // we're currently still in the download process, and the queue has not been decremented yet
-    SlotJobAdded(spDownloader->RunningJobsCount()-1);
+    SlotJobAdded(spDownloader->RunningJobsCount());
   }
 }
 

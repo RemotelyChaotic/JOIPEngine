@@ -42,9 +42,6 @@ protected:
   void CreatedNewJob(const tspRunnableJob& spJob, const QVariantList& args);
 
 protected slots:
-  void SlotJobFinished(qint32 iId);
-  void SlotJobStarted(qint32 iId);
-
   void SlotClearQueue();
   void SlotRunNextJob();
   void SlotFinalizeJob();

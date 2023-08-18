@@ -10,6 +10,7 @@
 namespace
 {
   const char c_sTempRCCFileName[] = "JOIPEngineExport.qrc";
+  const char c_sLogFileName[] = "export.log.txt";
   const char c_sTemporaryRccFileProperty[] = "RccFile";
   const char c_sTemporaryOutFileProperty[] = "OutFile";
 }
@@ -117,7 +118,6 @@ bool CEditorExportJob::Run(const QVariantList& args)
       return false;
     }
 
-    emit SignalStarted(m_iId);
     emit SignalProgressChanged(m_iId, Progress());
 
     const QString sName = PhysicalProjectName(m_spProject);
@@ -158,6 +158,12 @@ bool CEditorExportJob::Run(const QVariantList& args)
     rccFile.close();
 
     CreateProcess();
+
+    QFile exportLog(CPhysFsFileEngineHandler::c_sScheme + c_sLogFileName);
+    if (exportLog.open(QIODevice::WriteOnly | QIODevice::Truncate))
+    {
+      exportLog.write("Export log:\n\n");
+    }
 
     if (m_spExportProcess->state() == QProcess::ProcessState::NotRunning)
     {
@@ -259,27 +265,37 @@ void CEditorExportJob::SlotExportFinished(int exitCode, QProcess::ExitStatus exi
 {
   m_bFinished = true;
 
+  m_sError = QString();
   if (exitStatus == QProcess::ExitStatus::CrashExit)
   {
-    m_sError = tr("Export process crashed with code %1 (%2).")
+    m_sError += tr("Export process crashed with code %1 (%2).")
                   .arg(exitCode).arg(m_spExportProcess->errorString());
     m_bHasError = true;
-    emit SignalFinished(m_iId);
-    return;
   }
 
   const QString sOutFile(m_spExportProcess->property(c_sTemporaryOutFileProperty).toString());
   QFile rccFile(m_spExportProcess->property(c_sTemporaryRccFileProperty).toString());
   if (!rccFile.remove())
   {
-    m_sError = tr("Could not remove temporary qrc file '%1'.")
+    m_sError += tr("Could not remove temporary qrc file '%1'.")
                   .arg(rccFile.fileName());
     m_bHasError = true;
-    emit SignalFinished(m_iId);
-    return;
   }
 
-  m_sReturnValue = QString("Exported to: %2").arg(sOutFile);
+  if (!QFile(sOutFile).exists())
+  {
+    m_sError += tr("Could not create exported project File.");
+    m_bHasError = true;
+  }
+
+  if (!m_bHasError)
+  {
+    m_sReturnValue = QString("Exported to: %2").arg(sOutFile);
+  }
+  else
+  {
+    m_sError += tr("\nSee %1 for errors.").arg(c_sLogFileName);
+  }
   emit SignalFinished(m_iId);
 }
 
@@ -314,7 +330,11 @@ void CEditorExportJob::SlotExportStateChanged(QProcess::ProcessState newState)
 void CEditorExportJob::SlotReadErrorOut()
 {
   QByteArray arr = m_spExportProcess->readAllStandardError();
-  emit SignalJobMessage(m_iId, JobType(), QString::fromLocal8Bit(arr));
+  QFile exportLog(CPhysFsFileEngineHandler::c_sScheme + c_sLogFileName);
+  if (exportLog.open(QIODevice::WriteOnly | QIODevice::Append))
+  {
+    exportLog.write(arr);
+  }
 }
 
 //----------------------------------------------------------------------------------------
@@ -322,5 +342,9 @@ void CEditorExportJob::SlotReadErrorOut()
 void CEditorExportJob::SlotReadStandardOut()
 {
   QByteArray arr = m_spExportProcess->readAllStandardOutput();
-  emit SignalJobMessage(m_iId, JobType(), QString::fromLocal8Bit(arr));
+  QFile exportLog(CPhysFsFileEngineHandler::c_sScheme + c_sLogFileName);
+  if (exportLog.open(QIODevice::WriteOnly | QIODevice::Append))
+  {
+    exportLog.write(arr);
+  }
 }

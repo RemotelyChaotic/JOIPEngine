@@ -64,6 +64,8 @@ void CEditorJobWorker::JobFinishedImpl(qint32 iId, tspRunnableJob spJob)
                          .arg(spJob->JobType());
       emit SignalEditorJobMessage(iId, spJob->JobType(), sMsg);
     }
+
+    emit SignalEditorJobFinished(iId, m_spCurrentJob->JobType());
   }
 }
 
@@ -111,6 +113,7 @@ void CEditorJobWorker::JobStartedImpl(qint32 iId, tspRunnableJob spJob)
     assert(bOkConn); Q_UNUSED(bOkConn);
 
     QString sMsg = QString("%1 job started.").arg(spJob->JobType());
+    emit SignalEditorJobStarted(iId, m_spCurrentJob->JobType());
     emit SignalEditorJobMessage(iId, spJob->JobType(), sMsg);
   }
 }
@@ -124,7 +127,6 @@ void CEditorJobWorker::SlotJobFinishedPrivate(qint32 iId)
   {
     JobFinishedImpl(iId, pJob->shared_from_this());
   }
-  emit SignalEditorJobFinished(iId, m_spCurrentJob->JobType());
 }
 
 //----------------------------------------------------------------------------------------
@@ -136,7 +138,6 @@ void CEditorJobWorker::SlotJobStartedPrivate(qint32 iId)
   {
     JobStartedImpl(iId, pJob->shared_from_this());
   }
-  emit SignalEditorJobStarted(iId, m_spCurrentJob->JobType());
 }
 
 //----------------------------------------------------------------------------------------

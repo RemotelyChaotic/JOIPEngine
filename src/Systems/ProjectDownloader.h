@@ -15,6 +15,10 @@ public:
 
   void CreateNewDownloadJob(const QString& sHost, const QVariantList& args);
 
+protected slots:
+  void SlotJobFinished(qint32 iId);
+  void SlotJobStarted(qint32 iId);
+
 protected:
   void JobFinalizeImpl(tspRunnableJob spJob) override;
   void JobFinishedImpl(qint32 iId, tspRunnableJob spJob) override;
