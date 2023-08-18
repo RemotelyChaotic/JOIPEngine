@@ -230,10 +230,10 @@ void CScriptRunner::LoadScriptAndCall(tspScene spScene, tspResource spResource,
     return;
   }
 
-  if (nullptr == spResource || nullptr == spScene ||
+  if (nullptr == spResource ||
       nullptr == spResource->m_spParent)
   {
-    QString sError = tr("Script file, Scene or Project is null");
+    QString sError = tr("Script file, or Project is null");
     qCritical() << sError;
     emit m_spSignalEmitterContext->showError(sError, QtMsgType::QtCriticalMsg);
     return;
