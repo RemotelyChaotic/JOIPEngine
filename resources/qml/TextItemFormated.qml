@@ -3,6 +3,7 @@ import QtQuick.Controls 2.14
 import JOIP.core 1.1
 
 Rectangle {
+    id: textItemRoot
     color: "transparent"
 
     property real maximumWidth: 1000000
@@ -15,6 +16,8 @@ Rectangle {
     Text {
         id: textContentItem
 
+        property bool bIsHtml: textItemRoot.text.startsWith("<html>") && parent.text.endsWith("</html>")
+
         // yes, this causes a binding loop for property "width" too bad we ignore it
         // otherwise we can't get the width of the content
         anchors.fill: parent
@@ -25,12 +28,20 @@ Rectangle {
 
         horizontalAlignment: Text.AlignHCenter
         elide: Text.ElideNone
-        text: parent.text.replace("<html>","").replace("</html>","")
+        text: {
+            var sText = textItemRoot.text.replace("<html>","").replace("</html>","");
+            if (bIsHtml) {
+                if (contentWidth > textItemRoot.maximumWidth) {
+                    sText = sText.replace("<nobr>","").replace("</nobr>","");
+                }
+            }
+            return sText;
+        }
         wrapMode: Text.WordWrap
-        color: parent.textColor
-        textFormat: (parent.text.startsWith("<html>") && parent.text.endsWith("</html>")) ?
+        color: textItemRoot.textColor
+        textFormat: (bIsHtml ?
                         Text.RichText :
-                        (QtApp.mightBeRichtext(parent.text) ?
-                             Text.StyledText : Text.PlainText)
+                        (QtApp.mightBeRichtext(textItemRoot.text) ?
+                             Text.StyledText : Text.PlainText))
     }
 }

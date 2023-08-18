@@ -137,22 +137,12 @@ Rectangle {
                         radius: 5
                     }
 
-                    contentItem: Text {
+                    contentItem: TextItemFormated {
                         id: text
                         anchors.centerIn: parent
-                        font.family: root.currentlyLoadedProject.font;
-                        font.pointSize: textMetrics.font.pointSize
-                        font.hintingPreference: Font.PreferNoHinting
-                        elide: Text.ElideNone
-                        text: repeaterItem.textForButton.replace("<html>","").replace("</html>","")
-                        wrapMode: Text.WordWrap
-                        horizontalAlignment: Text.AlignHCenter
-                        verticalAlignment: Text.AlignVCenter
-                        color: repeaterItem.fgColor
-                        textFormat: (repeaterItem.textForButton.startsWith("<html>") && repeaterItem.textForButton.endsWith("</html>")) ?
-                                        Text.RichText :
-                                        (QtApp.mightBeRichtext(repeaterItem.textForButton) ?
-                                             Text.StyledText : Text.PlainText)
+                        maximumWidth: textDelegate.width - 50
+                        text: repeaterItem.textForButton
+                        textColor: repeaterItem.fgColor
                     }
 
                     Shortcut {

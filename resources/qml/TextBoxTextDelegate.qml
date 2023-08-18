@@ -34,7 +34,8 @@ Rectangle {
             id: textContentItem
             anchors.centerIn: parent
 
-            maximumWidth: textDelegate.width - imageSkip.width - 50
+            maximumWidth: textDelegate.width - 50 - 24 // 24 is imageSkip.width at it's max
+                                                       // 50 is for spacing
 
             text: textContent
             textColor: model.textColor
