@@ -319,8 +319,10 @@ bool CEditorExportJob::RunZipExport(const QString& sName, const QString& sFolder
                                             0, -1);
     if (nullptr != pSource)
     {
+      QString sFileInArch = sFilePath.replace(sFolder + "/", "");
       zip_int64_t iFile =
-        zip_file_add(pOutArch, sFilePath.toStdString().c_str(), pSource,
+        zip_file_add(pOutArch,
+                     sFileInArch.toStdString().c_str(), pSource,
                      ZIP_FL_OVERWRITE | ZIP_FL_ENC_UTF_8);
       if (0 > iFile)
       {
