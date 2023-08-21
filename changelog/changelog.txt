@@ -8,6 +8,7 @@ New Features:
   at will.
 - Resources can be tagged. Those tags can be used in scripts for custom logic.
 - Metronome volume and default SFX can be configured.
+- Added feature to export Projects as an archive from the editor.
 
 Changes:
 - Code Editor supports Lua highlighting, code generation and debugging.

@@ -11,6 +11,7 @@ Json for Modern C++ by "nlohmann" (https://github.com/nlohmann/json)
 JSON schema validator for JSON for Modern C++ by "Patrick Boettcher" (https://github.com/pboettch/json-schema-validator)
 KDE extra-cmake-modules (https://github.com/KDE/extra-cmake-modules)
 KDE syntax-highlighting (https://github.com/KDE/syntax-highlighting)
+Libzip by Dieter Baron and Thomas Klausner (https://libzip.org/)
 Lua 5.4.4 (https://www.lua.org/)
 Lua JSON Library by "Tyler Neylon" (https://gist.github.com/tylerneylon/59f4bcf316be525b30ab)
 QtLua (http://www.nongnu.org/libqtlua/)
@@ -22,6 +23,7 @@ physfs-3.0.2 by "Ryan C. Gordon" (https://icculus.org/physfs)
 QtAV by "The QtAV-Team" (https://www.qtav.org)
 SortFilterProxyModel by "oKcerG" (https://github.com/oKcerG/SortFilterProxyModel)
 WinToast by "mohabouje" (https://github.com/mohabouje/WinToast)
+zlib by "Greg Roelofs" and maintained by "Mark Adler" (https://www.zlib.net/)
 
 Software Design & Programming:
 "RemotlyChaotic"
