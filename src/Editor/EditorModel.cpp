@@ -2,7 +2,6 @@
 #include "Application.h"
 #include "EditorJobWorker.h"
 
-#include "EditorJobs/EditorExportJob.h"
 #include "EditorJobs/IEditorJobStateListener.h"
 
 #include "NodeEditor/EndNodeModel.h"
@@ -589,7 +588,7 @@ void CEditorModel::SerializeProject()
 
 //----------------------------------------------------------------------------------------
 //
-void CEditorModel::ExportProject()
+void CEditorModel::ExportProject(CEditorExportJob::EExportFormat format)
 {
   if (nullptr == m_spCurrentProject)
   {
@@ -602,6 +601,7 @@ void CEditorModel::ExportProject()
     QReadLocker locker(&m_spCurrentProject->m_rwLock);
     args << m_spCurrentProject->m_sName;
   }
+  args << static_cast<qint32>(format);
   JobWorker()->CreateNewEditorJob<CEditorExportJob>(args);
 }
 

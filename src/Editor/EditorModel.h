@@ -1,6 +1,8 @@
 #ifndef EDITORMODEL_H
 #define EDITORMODEL_H
 
+#include "EditorJobs/EditorExportJob.h"
+
 #include <QObject>
 #include <QPointer>
 #include <QProcess>
@@ -60,7 +62,7 @@ public:
   void SaveProject();
   void UnloadProject();
   void SerializeProject();
-  void ExportProject();
+  void ExportProject(CEditorExportJob::EExportFormat format);
   void SetScriptTypeFilterForNewScripts(const QString& sFilter);
 
 public slots:

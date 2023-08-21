@@ -5,6 +5,7 @@
 
 #include <QObject>
 #include <QProcess>
+#include <QUrl>
 
 #include <memory>
 
@@ -18,6 +19,11 @@ class CEditorExportJob : public QObject, public IEditorJob
 public:
   explicit CEditorExportJob(QObject* pParent = nullptr);
   ~CEditorExportJob() override;
+
+  enum class EExportFormat : qint32 {
+    eArchive,
+    eBinary
+  };
 
   enum class EExportError : qint32 {
     eWriteFailed,
@@ -36,6 +42,8 @@ public:
   QString ReturnValue() const override;
 
   bool Run(const QVariantList& args) override;
+  bool RunBinaryExport(const QString& sName, const QString& sFolder);
+  bool RunZipExport(const QString& sName, const QString& sFolder);
   void Stop() override;
 
 signals:
@@ -57,6 +65,12 @@ protected slots:
   void SlotReadStandardOut();
 
 protected:
+  struct SExportFile
+  {
+    QString                   m_sName;
+    QString                   m_sPath;
+  };
+
   std::unique_ptr<QProcess>              m_spExportProcess;
   tspProject                             m_spProject;
   qint32                                 m_iId = -1;

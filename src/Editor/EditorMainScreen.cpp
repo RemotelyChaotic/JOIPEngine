@@ -24,6 +24,7 @@
 #include <QAction>
 #include <QDebug>
 #include <QFileInfo>
+#include <QMenu>
 #include <QMessageBox>
 #include <QPointer>
 #include <QUndoStack>
@@ -344,8 +345,27 @@ void CEditorMainScreen::SlotExportClicked(bool bClick)
 {
   Q_UNUSED(bClick);
   if (!m_bInitialized) { return; }
-  SlotSaveClicked(bClick);
-  m_spEditorModel->ExportProject();
+
+  QMenu menu;
+
+  QAction* pAction = new QAction("Export as Archive", &menu);
+  connect(pAction, &QAction::triggered, this, [this](bool bChecked) {
+    SlotSaveClicked(bChecked);
+    m_spEditorModel->ExportProject(CEditorExportJob::EExportFormat::eArchive);
+  });
+  menu.addAction(pAction);
+
+  pAction = new QAction("Export as Binary", &menu);
+  connect(pAction, &QAction::triggered, this, [this](bool bChecked) {
+    SlotSaveClicked(bChecked);
+    m_spEditorModel->ExportProject(CEditorExportJob::EExportFormat::eBinary);
+  });
+  menu.addAction(pAction);
+
+  QPoint p =
+      m_spUi->pProjectActionBar->m_spUi->ExportButton->parentWidget()->mapToGlobal(
+            m_spUi->pProjectActionBar->m_spUi->ExportButton->pos());
+  menu.exec(p + QPoint(0, m_spUi->pProjectActionBar->m_spUi->ExportButton->height()));
 }
 
 //----------------------------------------------------------------------------------------
@@ -371,62 +391,6 @@ void CEditorMainScreen::SlotProjectEdited()
     it->second->EditedProject();
   }
 }
-
-//----------------------------------------------------------------------------------------
-//
-/*
-void CEditorMainScreen::SlotProjectExportError(CEditorModel::EExportError error, const QString& sErrorString)
-{
-  QMessageBox msgBox;
-  msgBox.setText("Export error.");
-
-  switch (error)
-  {
-    case CEditorModel::EExportError::eWriteFailed:
-    msgBox.setInformativeText(sErrorString + "\n"
-                              + tr("Please move the data directory to a writable location and try again."));
-    msgBox.setStandardButtons(QMessageBox::Ok);
-    msgBox.setDefaultButton(QMessageBox::Ok);
-    break;
-
-    case CEditorModel::EExportError::eProcessError:
-    msgBox.setInformativeText(sErrorString + "\n");
-    msgBox.setStandardButtons(QMessageBox::Ok);
-    msgBox.setDefaultButton(QMessageBox::Ok);
-    break;
-
-    case CEditorModel::EExportError::eCleanupFailed:
-    msgBox.setInformativeText(sErrorString + "\n"
-                              + tr("Please delete the file manually."));
-    msgBox.setStandardButtons(QMessageBox::Ok);
-    msgBox.setDefaultButton(QMessageBox::Ok);
-    break;
-
-    default:
-    msgBox.setInformativeText(sErrorString);
-    msgBox.setStandardButtons(QMessageBox::Ok);
-    msgBox.setDefaultButton(QMessageBox::Ok);
-    break;
-  }
-
-  msgBox.setModal(true);
-  msgBox.setWindowFlag(Qt::FramelessWindowHint);
-
-  QPointer<CEditorMainScreen> pMeMyselfMyPointerAndI(this);
-  qint32 iRet = msgBox.exec();
-  if (nullptr == pMeMyselfMyPointerAndI)
-  {
-    return;
-  }
-
-  switch (iRet) {
-    case QMessageBox::Ok:
-        break;
-    default:
-        break;
-  }
-}
-*/
 
 //----------------------------------------------------------------------------------------
 //
