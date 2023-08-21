@@ -7,6 +7,7 @@ New Features:
   run Lua scripts instead of JS. the script types can be mixed in a Project
   at will.
 - Resources can be tagged. Those tags can be used in scripts for custom logic.
+- Metronome volume and default SFX can be configured.
 
 Changes:
 - Code Editor supports Lua highlighting, code generation and debugging.

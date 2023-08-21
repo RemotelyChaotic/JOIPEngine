@@ -256,6 +256,11 @@
         <file>resources/help/editor/tags_button_help.html</file>
         <file>resources/style/img/ButtonTag.png</file>
         <file>resources/help/editor/images/tag_overlay.png</file>
+        <file>resources/sound/plop-sound-mouth-100690.wav</file>
+        <file>resources/sound/bubble_plopp.wav</file>
+        <file>resources/sound/metronome-85688.wav</file>
+        <file>resources/sound/finger-snap-43482.wav</file>
+        <file>resources/help/settings/metronome_setting_help.html</file>
     </qresource>
     <qresource prefix="/qml">
         <file>resources/qml/ProjectCardSelection.qml</file>

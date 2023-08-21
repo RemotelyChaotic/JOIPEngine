@@ -7,6 +7,7 @@
 #include "Systems/DLJobs/DownloadJobRegistry.h"
 #include "Systems/HelpFactory.h"
 #include "Utils/WidgetHelpers.h"
+#include "Utils/MetronomeHelpers.h"
 #include "Widgets/DownloadButtonOverlay.h"
 #include "Widgets/HelpOverlay.h"
 #include "ui_SettingsScreen.h"
@@ -20,6 +21,8 @@
 #include <QListView>
 #include <QScreen>
 #include <QSize>
+#include <QtAV>
+
 #include <cassert>
 #include <map>
 
@@ -33,6 +36,7 @@ namespace  {
   const QString c_sResolutionHelpId = "Settings/Resolution";
   const QString c_sMuteHelpId = "Settings/Mute";
   const QString c_sVolumeHelpId = "Settings/Volume";
+  const QString c_sMetronomeHelpId = "Settings/Metronome";
   const QString c_sOfflineHelpId = "Settings/Offline";
   const QString c_sPauseWhenInactiveHelpId = "Settings/PauseWhenInactive";
   const QString c_sPushNotificationsHelpId = "Settings/PushNotifications";
@@ -71,7 +75,8 @@ CSettingsScreen::CSettingsScreen(const std::shared_ptr<CWindowContext>& spWindow
                                  QWidget* pParent) :
   QWidget(pParent),
   IAppStateScreen(spWindowContext),
-  m_spUi(std::make_unique<Ui::CSettingsScreen>())
+  m_spUi(std::make_unique<Ui::CSettingsScreen>()),
+  m_spPlayer(std::make_unique<QtAV::AVPlayer>())
 {
   m_spUi->setupUi(this);
   Initialize();
@@ -108,6 +113,8 @@ void CSettingsScreen::Initialize()
     wpHelpFactory->RegisterHelp(c_sMuteHelpId, ":/resources/help/settings/mute_setting_help.html");
     m_spUi->pVolumeContainer->setProperty(helpOverlay::c_sHelpPagePropertyName, c_sVolumeHelpId);
     wpHelpFactory->RegisterHelp(c_sVolumeHelpId, ":/resources/help/settings/volume_setting_help.html");
+    m_spUi->pVolumeContainer->setProperty(helpOverlay::c_sHelpPagePropertyName, c_sMetronomeHelpId);
+    wpHelpFactory->RegisterHelp(c_sMetronomeHelpId, ":/resources/help/settings/metronome_setting_help.html");
     m_spUi->pOfflineContainer->setProperty(helpOverlay::c_sHelpPagePropertyName, c_sOfflineHelpId);
     wpHelpFactory->RegisterHelp(c_sOfflineHelpId, ":/resources/help/settings/offline_setting_help.html");
     m_spUi->pPauseWhenNotActive->setProperty(helpOverlay::c_sHelpPagePropertyName, c_sPauseWhenInactiveHelpId);
@@ -149,6 +156,9 @@ void CSettingsScreen::Initialize()
   }
 
   m_spUi->tabWidget->setCurrentIndex(0);
+
+  connect(m_spUi->pMetronomeSFXComboBox, qOverload<int>(&QComboBox::highlighted),
+          this, &CSettingsScreen::SlotMetronomeSfxItemHovered);
 
 #if defined (Q_OS_ANDROID)
   // disable settings pages that do not make sense on mobile
@@ -202,6 +212,8 @@ void CSettingsScreen::Load()
   m_spUi->pResolutionComboBox->blockSignals(true);
   m_spUi->pMuteCheckBox->blockSignals(true);
   m_spUi->pVolumeSlider->blockSignals(true);
+  m_spUi->pMetronomeVolumeSlider->blockSignals(true);
+  m_spUi->pMetronomeSFXComboBox->blockSignals(true);
   m_spUi->pOfflineModeCheckBox->blockSignals(true);
   m_spUi->pPauseWhenNotActiveCheckBox->blockSignals(true);
   m_spUi->pShowPushNotificationsCeckBox->blockSignals(true);
@@ -297,6 +309,15 @@ void CSettingsScreen::Load()
   // set volume
   m_spUi->pMuteCheckBox->setCheckState(m_spSettings->Muted() ? Qt::Checked : Qt::Unchecked);
   m_spUi->pVolumeSlider->setValue(static_cast<qint32>(m_spSettings->Volume() * c_dSliderScaling));
+  m_spUi->pMetronomeVolumeSlider->setValue(static_cast<qint32>(m_spSettings->MetronomeVolume() * c_dSliderScaling));
+
+  const auto& sfxMap = metronome::MetronomeSfxMap();
+  for (const auto& [sSfxKEy, sPath] : sfxMap)
+  {
+    m_spUi->pMetronomeSFXComboBox->addItem(sSfxKEy, sPath);
+  }
+  qint32 iIndexSfx = m_spUi->pMetronomeSFXComboBox->findText(m_spSettings->MetronomeSfx());
+  m_spUi->pMetronomeSFXComboBox->setCurrentIndex(iIndexSfx);
 
   // set lineedit
   m_spUi->pFolderLineEdit->setText(m_spSettings->ContentFolder());
@@ -322,6 +343,8 @@ void CSettingsScreen::Load()
   m_spUi->pFolderLineEdit->blockSignals(false);
   m_spUi->pMuteCheckBox->blockSignals(false);
   m_spUi->pVolumeSlider->blockSignals(false);
+  m_spUi->pMetronomeVolumeSlider->blockSignals(false);
+  m_spUi->pMetronomeSFXComboBox->blockSignals(false);
   m_spUi->pOfflineModeCheckBox->blockSignals(false);
   m_spUi->pPauseWhenNotActiveCheckBox->blockSignals(false);
   m_spUi->pShowPushNotificationsCeckBox->blockSignals(false);
@@ -334,12 +357,15 @@ void CSettingsScreen::Unload()
 {
   m_spUi->pResolutionComboBox->blockSignals(true);
   m_spUi->pStyleComboBox->blockSignals(true);
+  m_spUi->pMetronomeSFXComboBox->blockSignals(true);
 
+  m_spUi->pMetronomeSFXComboBox->clear();
   m_spUi->pResolutionComboBox->clear();
   m_spUi->pStyleComboBox->clear();
 
   m_spUi->pResolutionComboBox->blockSignals(false);
   m_spUi->pStyleComboBox->blockSignals(false);
+  m_spUi->pMetronomeSFXComboBox->blockSignals(false);
 
   emit UnloadFinished();
 }
@@ -465,6 +491,29 @@ void CSettingsScreen::on_pVolumeSlider_sliderReleased()
 
 //----------------------------------------------------------------------------------------
 //
+void CSettingsScreen::on_pMetronomeVolumeSlider_sliderReleased()
+{
+  WIDGET_INITIALIZED_GUARD
+  assert(nullptr != m_spSettings);
+  if (nullptr == m_spSettings) { return; }
+
+  double dVolume = static_cast<double>(m_spUi->pMetronomeVolumeSlider->value()) / c_dSliderScaling;
+  m_spSettings->SetMetronomeVolume(dVolume);
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CSettingsScreen::on_pMetronomeSFXComboBox_currentIndexChanged(qint32)
+{
+  WIDGET_INITIALIZED_GUARD
+  assert(nullptr != m_spSettings);
+  if (nullptr == m_spSettings) { return; }
+
+  m_spSettings->SetMetronomeSfx(m_spUi->pMetronomeSFXComboBox->currentText());
+}
+
+//----------------------------------------------------------------------------------------
+//
 void CSettingsScreen::on_pPauseWhenNotActiveCheckBox_stateChanged(qint32 iState)
 {
   WIDGET_INITIALIZED_GUARD
@@ -522,4 +571,21 @@ void CSettingsScreen::SlotKeySequenceChanged(const QKeySequence& keySequence)
   WIDGET_INITIALIZED_GUARD
   QString sKeyBinding = sender()->property(c_sPropertyKeySequence).toString();
   m_spSettings->setKeyBinding(keySequence, sKeyBinding);
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CSettingsScreen::SlotMetronomeSfxItemHovered(qint32 iIndex)
+{
+  WIDGET_INITIALIZED_GUARD
+  const QString sSfx = m_spUi->pMetronomeSFXComboBox->itemData(iIndex).toString();
+  if (!m_spSettings->Muted())
+  {
+    if (m_spPlayer->isPlaying())
+    {
+      m_spPlayer->stop();
+    }
+    m_spPlayer->play(sSfx);
+    m_spPlayer->audio()->setVolume(m_spSettings->Volume()*m_spSettings->MetronomeVolume());
+  }
 }

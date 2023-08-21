@@ -1,7 +1,10 @@
 #include "MetronomePaintedWidget.h"
 #include "Application.h"
 #include "Settings.h"
+
 #include "Systems/Resource.h"
+#include "Utils/MetronomeHelpers.h"
+
 #include "Utils/MultiEmitterSoundPlayer.h"
 #include <QFileInfo>
 #include <QPainter>
@@ -16,13 +19,14 @@ CMetronomeCanvasQml::CMetronomeCanvasQml(QQuickItem* pParent) :
     std::make_unique<CMultiEmitterSoundPlayer>(CMultiEmitterSoundPlayer::c_iDefaultNumAutioEmitters,
                                                ":/resources/sound/metronome_default.wav")),
   m_spSettings(CApplication::Instance()->Settings()),
-  m_sBeatResource(":/resources/sound/metronome_default.wav"),
   m_tickColor(Qt::white),
   m_vdTickmap(),
   m_dVolume(1.0)
 {
   if (nullptr != m_spSettings)
   {
+    m_spSoundEmitters->SetSoundEffect(metronome::MetronomeSfxFromKey(m_spSettings->MetronomeSfx()));
+
     connect(m_spSettings.get(), &CSettings::mutedChanged,
             this, &CMetronomeCanvasQml::SlotMutedChanged, Qt::QueuedConnection);
     connect(m_spSettings.get(), &CSettings::volumeChanged,
@@ -72,7 +76,11 @@ void CMetronomeCanvasQml::SetBeatResource(const QString& sResource)
   const QString sOldResource = m_spSoundEmitters->SoundEffect();
   if (sResource.isEmpty())
   {
-    m_spSoundEmitters->SetSoundEffect(":/resources/sound/metronome_default.wav");
+    if (nullptr != m_spSettings)
+    {
+      m_spSoundEmitters->SetSoundEffect(
+            metronome::MetronomeSfxFromKey(m_spSettings->MetronomeSfx()));
+    }
   }
   else
   {
@@ -198,6 +206,7 @@ void CMetronomeCanvasQml::SlotVolumeChanged()
 {
   if (nullptr != m_spSettings)
   {
-    m_spSoundEmitters->SetVolume(m_spSettings->Volume() * m_dVolume);
+    m_spSoundEmitters->SetVolume(m_spSettings->Volume() * m_spSettings->MetronomeVolume() *
+                                 m_dVolume);
   }
 }

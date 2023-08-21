@@ -3,6 +3,8 @@
 #include "Style.h"
 #include "SVersion.h"
 
+#include "Utils/MetronomeHelpers.h"
+
 #include <QCoreApplication>
 #include <QDir>
 #include <QFileInfo>
@@ -86,6 +88,8 @@ const QString CSettings::c_sSettingEditorLayout = "Content/preferededitorlayout"
 const QString CSettings::c_sSettingFont = "Graphics/font";
 const QString CSettings::c_sSettingFullscreen = "Graphics/fullscreen";
 const QString CSettings::c_sSettingKeyBindings = "KeyBindings/";
+const QString CSettings::c_sSettingMetronomeSfx = "Audio/metronomeSfx";
+const QString CSettings::c_sSettingMetronomeVolume = "Audio/metronomeVolume";
 const QString CSettings::c_sSettingMuted = "Audio/muted";
 const QString CSettings::c_sSettingOffline = "Content/offline";
 const QString CSettings::c_sSettingPushNotifications = "Content/pushnotifications";
@@ -366,6 +370,52 @@ void CSettings::setKeyBinding(const QKeySequence& sKeySequence, const QString& s
     }
   }
 #endif
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CSettings::SetMetronomeSfx(const QString& sValue)
+{
+  QMutexLocker locker(&m_settingsMutex);
+
+  QString sResource = m_spSettings->value(CSettings::c_sSettingMetronomeSfx).toString();
+
+  if (sResource == sValue) { return; }
+
+  m_spSettings->setValue(CSettings::c_sSettingMetronomeSfx, sValue);
+
+  emit metronomeSfxChanged();
+}
+
+//----------------------------------------------------------------------------------------
+//
+QString CSettings::MetronomeSfx() const
+{
+  QMutexLocker locker(&m_settingsMutex);
+  return m_spSettings->value(CSettings::c_sSettingMetronomeSfx).toString();
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CSettings::SetMetronomeVolume(double dValue)
+{
+  QMutexLocker locker(&m_settingsMutex);
+
+  double dVolume = m_spSettings->value(CSettings::c_sSettingMetronomeVolume).toDouble();
+
+  if (dVolume == dValue) { return; }
+
+  m_spSettings->setValue(CSettings::c_sSettingMetronomeVolume, dValue);
+
+  emit metronomeVolumeChanged();
+}
+
+//----------------------------------------------------------------------------------------
+//
+double CSettings::MetronomeVolume() const
+{
+  QMutexLocker locker(&m_settingsMutex);
+  return m_spSettings->value(CSettings::c_sSettingMetronomeVolume).toDouble();
 }
 
 //----------------------------------------------------------------------------------------
@@ -824,6 +874,20 @@ void CSettings::GenerateSettingsIfNotExists()
     m_spSettings->setValue(CSettings::c_sSettingResolution, size);
   }
 #endif
+
+  // check metronome sfx
+  if (!m_spSettings->contains(CSettings::c_sSettingMetronomeSfx))
+  {
+    bNeedsSynch = true;
+    m_spSettings->setValue(CSettings::c_sSettingMetronomeSfx, QString(metronome::c_sSfxToc));
+  }
+
+  // check metronome volume
+  if (!m_spSettings->contains(CSettings::c_sSettingMetronomeVolume))
+  {
+    bNeedsSynch = true;
+    m_spSettings->setValue(CSettings::c_sSettingMetronomeVolume, 1.0);
+  }
 
   // check muted
   if (!m_spSettings->contains(CSettings::c_sSettingMuted))

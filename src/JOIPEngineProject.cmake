@@ -528,6 +528,8 @@ macro(CreateJOIPProject JOIP_PROJECT_NAME)
     ${JOIPSources}/Systems/ThreadedSystem.h
     ${JOIPSources}/UISoundEmitter.cpp
     ${JOIPSources}/UISoundEmitter.h
+    ${JOIPSources}/Utils/MetronomeHelpers.cpp
+    ${JOIPSources}/Utils/MetronomeHelpers.h
     ${JOIPSources}/Utils/MultiEmitterSoundPlayer.cpp
     ${JOIPSources}/Utils/MultiEmitterSoundPlayer.h
     ${JOIPSources}/Utils/RaiiFunctionCaller.cpp

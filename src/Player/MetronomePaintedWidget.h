@@ -52,7 +52,6 @@ private slots:
 private:
   std::unique_ptr<CMultiEmitterSoundPlayer>    m_spSoundEmitters;
   std::shared_ptr<CSettings>                   m_spSettings;
-  QString                                      m_sBeatResource;
   QColor                                       m_tickColor;
   std::vector<double>                          m_vdTickmap;
   bool                                         m_bMuted;

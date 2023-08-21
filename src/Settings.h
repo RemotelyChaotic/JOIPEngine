@@ -18,6 +18,8 @@ class CSettings : public QObject
   Q_PROPERTY(QString font READ Font WRITE SetFont NOTIFY fontChanged)
   Q_PROPERTY(bool fullscreen READ Fullscreen WRITE SetFullscreen NOTIFY fullscreenChanged)
   Q_PROPERTY(QStringList keyBindings READ KeyBindings CONSTANT)
+  Q_PROPERTY(QString metronomeSfx READ MetronomeSfx WRITE SetMetronomeSfx NOTIFY metronomeSfxChanged)
+  Q_PROPERTY(double metronomeVolume READ MetronomeVolume WRITE SetMetronomeVolume NOTIFY metronomeVolumeChanged)
   Q_PROPERTY(bool muted READ Muted WRITE SetMuted NOTIFY mutedChanged)
   Q_PROPERTY(bool offline READ Offline WRITE SetOffline NOTIFY offlineChanged)
   Q_PROPERTY(bool pauseWhenInactive READ PauseWhenInactive WRITE SetPauseWhenInactive NOTIFY pauseWhenInactiveChanged)
@@ -39,6 +41,8 @@ public:
   static const QString c_sSettingFont;
   static const QString c_sSettingFullscreen;
   static const QString c_sSettingKeyBindings;
+  static const QString c_sSettingMetronomeSfx;
+  static const QString c_sSettingMetronomeVolume;
   static const QString c_sSettingMuted;
   static const QString c_sSettingOffline;
   static const QString c_sSettingPushNotifications;
@@ -82,6 +86,10 @@ public:
   QStringList KeyBindings();
   Q_INVOKABLE QKeySequence keyBinding(const QString& sRole);
   Q_INVOKABLE void setKeyBinding(const QKeySequence& sKeySequence, const QString& sRole);
+  void SetMetronomeSfx(const QString& sResource);
+  QString MetronomeSfx() const;
+  void SetMetronomeVolume(double dVolume);
+  double MetronomeVolume() const;
   void SetMuted(bool bValue);
   bool Muted();
   void SetOffline(bool bValue);
@@ -117,6 +125,8 @@ signals:
   void fontChanged();
   void fullscreenChanged();
   void keyBindingsChanged();
+  void metronomeSfxChanged();
+  void metronomeVolumeChanged();
   void mutedChanged();
   void offlineChanged();
   void pauseWhenInactiveChanged();

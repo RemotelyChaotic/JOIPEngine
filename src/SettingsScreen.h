@@ -9,6 +9,7 @@
 class CHelpButtonOverlay;
 class CSettings;
 class QKeySequence;
+namespace QtAV { class AVPlayer; }
 namespace Ui {
   class CSettingsScreen;
 }
@@ -41,15 +42,19 @@ protected slots:
   void on_BrowseButton_clicked();
   void on_pMuteCheckBox_stateChanged(qint32 iState);
   void on_pVolumeSlider_sliderReleased();
+  void on_pMetronomeVolumeSlider_sliderReleased();
+  void on_pMetronomeSFXComboBox_currentIndexChanged(qint32 iIndex);
   void on_pPauseWhenNotActiveCheckBox_stateChanged(qint32 iState);
   void on_pOfflineModeCheckBox_stateChanged(qint32 iState);
   void on_pShowPushNotificationsCeckBox_stateChanged(qint32 iState);
   void on_pStyleHotoadCheckBox_stateChanged(qint32 iState);
   void on_pBackButton_clicked();
   void SlotKeySequenceChanged(const QKeySequence& keySequence);
+  void SlotMetronomeSfxItemHovered(qint32 iIndex);
 
 private:
   std::unique_ptr<Ui::CSettingsScreen> m_spUi;
+  std::unique_ptr<QtAV::AVPlayer>      m_spPlayer;
   std::shared_ptr<CSettings>           m_spSettings;
   QPointer<CHelpButtonOverlay>         m_pHelpButtonOverlay;
 };
