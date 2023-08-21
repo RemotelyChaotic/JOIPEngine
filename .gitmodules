@@ -43,3 +43,7 @@
 [submodule "3rdparty/lua_sandbox/lua_sandbox"]
 	path = 3rdparty/lua_sandbox/lua_sandbox
 	url = https://github.com/RemotelyChaotic/lua-sandbox.git
+[submodule "3rdparty/libzip"]
+	path = 3rdparty/libzip
+	url = https://github.com/RemotelyChaotic/libzip.git
+	branch = v.1.10.0

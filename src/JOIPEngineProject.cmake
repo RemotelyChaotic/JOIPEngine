@@ -712,6 +712,7 @@ macro(JOIPProjectSettings JOIP_PROJECT_NAME)
       qtlua
       json_lua
       lua_sandbox
+      zip
     )
 
     if (KDE_DEBUG)

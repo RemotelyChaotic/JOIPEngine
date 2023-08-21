@@ -1,5 +1,6 @@
 cmake_minimum_required(VERSION 3.5)
 
+add_subdirectory(zlib-1.3) # reverse-order because of dependencies
 if (ANDROID)
   add_subdirectory(android_openssl)
 endif()
@@ -9,6 +10,7 @@ add_subdirectory(json-schema-validator)
 add_subdirectory(libqpcx)
 add_subdirectory(Lua)          # reverse-order because of dependencies
 add_subdirectory(libqtlua-2.1) # reverse-order because of dependencies
+add_subdirectory(libzip)
 add_subdirectory(lua_json)
 add_subdirectory(lua_sandbox)
 add_subdirectory(MRichTextEditor)
