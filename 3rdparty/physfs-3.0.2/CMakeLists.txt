@@ -251,7 +251,7 @@ endif()
 if(UNIX)
     set(PHYSFS_TARBALL "${CMAKE_CURRENT_SOURCE_DIR}/../physfs-${PHYSFS_VERSION}.tar.bz2")
 
-    set(PHYSFS_TARGETNAME_DIST "dist" CACHE STRING "Name of 'dist' build target")
+    set(PHYSFS_TARGETNAME_DIST "physfsdist" CACHE STRING "Name of 'dist' build target")
     add_custom_target(
         ${PHYSFS_TARGETNAME_DIST}
         hg archive -t tbz2 "${PHYSFS_TARBALL}"
