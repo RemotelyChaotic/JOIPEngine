@@ -416,7 +416,7 @@ endif()
 
 # Only supported since cmake 3.7
 if(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
-    set(CMAKE_INSTALL_PREFIX "${ECM_PREFIX}" CACHE PATH "Install path prefix" FORCE)
+    #set(CMAKE_INSTALL_PREFIX "${ECM_PREFIX}" CACHE PATH "Install path prefix" FORCE)
 endif()
 
 _define_absolute(EXECROOTDIR ""
