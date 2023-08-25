@@ -68,6 +68,8 @@ CEditorResourceWidget::CEditorResourceWidget(QWidget* pParent) :
   m_spUi->setupUi(this);
   connect(m_spUi->pResourceModelView, &CResourceModelView::SignalResourceSelected,
           this, &CEditorResourceWidget::SlotViewResourceSelected);
+  connect(m_spUi->pResourceModelView, &CResourceModelView::SignalProjectEdited,
+          this, &CEditorResourceWidget::SignalProjectEdited);
   connect(m_spSourceOverlay.get(), &CWebResourceOverlay::SignalResourceSelected,
           this, &CEditorResourceWidget::SlotWebSourceSelected);
   connect(m_spWebOverlay.get(), &CWebResourceOverlay::SignalResourceSelected,

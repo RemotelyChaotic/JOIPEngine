@@ -520,6 +520,7 @@ void CResourceModelView::JobMessage(qint32 iId, const QString& sMsg)
         if (m_sCurrentResourceConversion != sMsg)
         {
           m_sCurrentResourceConversion = sMsg;
+          emit SignalProjectEdited();
         }
         else
         {

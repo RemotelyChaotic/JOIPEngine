@@ -75,6 +75,7 @@ public:
 signals:
   void SignalCardIconChanged();
   void SignalCardIconSizeChanged();
+  void SignalProjectEdited();
   void SignalResourceSelected(const QString& sName);
 
 protected slots:

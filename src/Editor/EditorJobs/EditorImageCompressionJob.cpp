@@ -3,6 +3,7 @@
 
 #include "Systems/DatabaseManager.h"
 #include "Systems/Project.h"
+#include "Systems/PhysFs/PhysFsFileEngine.h"
 #include "Systems/Resource.h"
 
 #include "Utils/RaiiFunctionCaller.h"
@@ -160,16 +161,24 @@ bool CEditorImageCompressionJob::Run(const QVariantList& args)
       QWriteLocker resLocker(&spResource->m_rwLock);
       emit SignalJobMessage(m_iId, JobType(), spResource->m_sName);
 
-      QString sDestPath = spResource->m_sPath.toString() + ".jpeg";
-      QImage img(spResource->m_sPath.toString());
-      bool bOk = img.save(sDestPath, nullptr, iCompression);
+      QUrl urlCopy(spResource->m_sPath);
+      urlCopy.setScheme(QString());
+      QString sBasePath = PhysicalProjectPath(spResource->m_spParent);
+      QString sFilePath = QUrl().resolved(urlCopy).toString();
+      QString sSourcePath =  sBasePath + "/" + sFilePath;
+
+      // qimage can not handle PhysFS paths because reasons
+      QString sDestPathImage = sSourcePath + ".jpeg";
+      QImage img(sSourcePath);
+      bool bOk = img.save(sDestPathImage, nullptr, iCompression);
       if (bOk)
       {
-        spResource->m_sPath = sDestPath;
-        QFile oldImg(spResource->m_sPath.toString());
+        spResource->m_sPath = QUrl::fromLocalFile(sFilePath + ".jpeg");
+        spResource->m_sPath.setScheme(QString(CPhysFsFileEngineHandler::c_sScheme).replace(":/", ""));
+        QFile oldImg(sSourcePath);
         if (!oldImg.remove())
         {
-          QString sMsg = tr("Could not remove old image.");
+          QString sMsg = tr("Could not remove old image.\n%1").arg(oldImg.errorString());
           emit SignalJobMessage(m_iId, JobType(), sMsg);
         }
       }
@@ -178,9 +187,6 @@ bool CEditorImageCompressionJob::Run(const QVariantList& args)
         QString sMsg = tr("Could not convert image to jpeg.");
         emit SignalJobMessage(m_iId, JobType(), sMsg);
       }
-
-      QString sMsg = tr("Could not convert image to jpeg.");
-      emit SignalJobMessage(m_iId, JobType(), sMsg);
 
       m_iProgress = iResourceNr * 100 / iResourceCount;
       emit SignalProgressChanged(m_iId, Progress());
