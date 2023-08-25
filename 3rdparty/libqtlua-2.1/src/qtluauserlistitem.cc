@@ -251,7 +251,7 @@ void UserListItem::insert_name(UserItem *item, int row)
     {
       String basename = name.remove(QRegExp("_[0-9]+$"));
       do {
-	name = QString().sprintf("%s_%u", basename.constData(), _id_counter++);
+  name = QString().asprintf("%s_%u", basename.constData(), _id_counter++);
       } while (_child_hash.contains(name));
     }
 

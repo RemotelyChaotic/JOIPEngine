@@ -452,7 +452,7 @@ namespace QtLua {
       {
 	QString name;
 
-  name.sprintf("%s_%lx", MetaCache::get_meta_name(obj.metaObject()).constData(),
+  name.asprintf("%s_%llx", MetaCache::get_meta_name(obj.metaObject()).constData(),
                reinterpret_cast<unsigned long long>(&obj));
 	obj.setObjectName(name.toLower());
       }

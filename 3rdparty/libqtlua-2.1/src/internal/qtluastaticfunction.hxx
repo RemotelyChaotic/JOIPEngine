@@ -21,7 +21,7 @@
 */
 
 
-#ifndef QTLUASTATICFUNCTION_HXX_
+#ifndef QTLUASTATCIFUNCTION_HXX_
 #define QTLUASTATCIFUNCTION_HXX_
 
 #include <internal/qtluamember.hxx>

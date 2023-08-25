@@ -35,11 +35,13 @@ namespace QtLua {
     UserItem *i = static_cast<UserItem*>(index.internalPointer());
 
     if (UserListItem *l = dynamic_cast<UserListItem*>(i))
+    {
       foreach(const UserItem::ptr &c, l->get_list())
-	{
-	  selection.select(c->get_model_index(), c->get_model_index());
-	  select_childs(c->get_model_index(), selection);
-	}
+      {
+        selection.select(c->get_model_index(), c->get_model_index());
+        select_childs(c->get_model_index(), selection);
+      }
+    }
   }
 
   void UserItemSelectionModel::select_parents(const QModelIndex &index, QItemSelection &selection)
