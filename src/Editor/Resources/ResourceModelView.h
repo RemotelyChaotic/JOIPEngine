@@ -1,10 +1,18 @@
 #ifndef RESOURCEMODELVIEW_H
 #define RESOURCEMODELVIEW_H
 
+#include "CompressJobSettingsOverlay.h"
+
+#include "Editor/EditorJobs/IEditorJobStateListener.h"
+
+#include "Editor/IEditorTool.h"
+
 #include <QWidget>
 #include <QPointer>
 #include <memory>
 
+class CCompressJobSettingsOverlay;
+class CEditorModel;
 class CResourceTreeItemModel;
 class CResourceTreeItemSortFilterProxyModel;
 namespace Ui {
@@ -16,7 +24,9 @@ struct SProject;
 typedef std::shared_ptr<SProject> tspProject;
 
 
-class CResourceModelView : public QWidget
+class CResourceModelView : public QWidget,
+                           public IEditorToolBox,
+                           public IEditorJobStateListener
 {
   Q_OBJECT
   Q_PROPERTY(QImage cardIcon READ CardIcon WRITE SetCardIcon NOTIFY SignalCardIconChanged)
@@ -33,7 +43,7 @@ public:
   explicit CResourceModelView(QWidget *parent = nullptr);
   ~CResourceModelView();
 
-  void Initialize(QUndoStack* pStack, CResourceTreeItemModel* pModel);
+  void Initialize(CEditorModel* pEditorModel, QUndoStack* pStack, CResourceTreeItemModel* pModel);
   void ProjectLoaded(tspProject spCurrentProject, bool bReadOnly);
   void ProjectUnloaded();
   void CdUp();
@@ -54,6 +64,14 @@ public:
   qint32 CardIconSize() const { return m_cardIconSize; }
   void SetCardIconSize(qint32 iValue);
 
+  QStringList Tools() const override;
+  void ToolTriggered(const QString& sTool) override;
+
+  void JobFinished(qint32 iId) override;
+  void JobStarted(qint32 iId) override;
+  void JobMessage(qint32 iId, const QString& sMsg) override;
+  void JobProgressChanged(qint32 iId, qint32 iProgress) override;
+
 signals:
   void SignalCardIconChanged();
   void SignalCardIconSizeChanged();
@@ -64,6 +82,7 @@ protected slots:
   void SlotCollapsed(const QModelIndex& index);
   void SlotCurrentChanged(const QModelIndex& current,
                           const QModelIndex& previous);
+  void SlotJobSettingsConfirmed(const CCompressJobSettingsOverlay::SCompressJobSettings& settings);
 
 protected:
   bool eventFilter(QObject* pObj, QEvent* pEvt) override;
@@ -72,10 +91,13 @@ protected:
 private:
   std::unique_ptr<Ui::CResourceModelView>         m_spUi;
   tspProject                                      m_spCurrentProject;
+  QPointer<CCompressJobSettingsOverlay>           m_pCompressJobOverlay;
+  QPointer<CEditorModel>                          m_pEditorModel;
   QPointer<CResourceTreeItemSortFilterProxyModel> m_pProxy;
   QPointer<CResourceTreeItemModel>                m_pModel;
   QPointer<QUndoStack>                            m_pStack;
   QImage                                          m_cardIcon;
+  QString                                         m_sCurrentResourceConversion;
   qint32                                          m_cardIconSize;
   bool                                            m_bInitializing;
   bool                                            m_bLandscape;

@@ -76,6 +76,8 @@ macro(CreateJOIPProject JOIP_PROJECT_NAME)
     ${JOIPSources}/Editor/EditorJobWorker.h
     ${JOIPSources}/Editor/EditorJobs/EditorExportJob.cpp
     ${JOIPSources}/Editor/EditorJobs/EditorExportJob.h
+    ${JOIPSources}/Editor/EditorJobs/EditorImageCompressionJob.cpp
+    ${JOIPSources}/Editor/EditorJobs/EditorImageCompressionJob.h
     ${JOIPSources}/Editor/EditorJobs/EditorJobTypes.h
     ${JOIPSources}/Editor/EditorJobs/IEditorJobStateListener.h
     ${JOIPSources}/Editor/EditorLayouts/EditorLayoutBase.cpp
@@ -95,6 +97,7 @@ macro(CreateJOIPProject JOIP_PROJECT_NAME)
     ${JOIPSources}/Editor/EditorMainScreen.ui
     ${JOIPSources}/Editor/EditorModel.cpp
     ${JOIPSources}/Editor/EditorModel.h
+    ${JOIPSources}/Editor/IEditorTool.h
     ${JOIPSources}/Editor/EditorWidgets/EditorCodeWidget.cpp
     ${JOIPSources}/Editor/EditorWidgets/EditorCodeWidget.h
     ${JOIPSources}/Editor/EditorWidgets/EditorCodeWidget.ui
@@ -194,6 +197,9 @@ macro(CreateJOIPProject JOIP_PROJECT_NAME)
     ${JOIPSources}/Editor/Resources/CommandChangeTitleCard.h
     ${JOIPSources}/Editor/Resources/CommandRemoveResource.cpp
     ${JOIPSources}/Editor/Resources/CommandRemoveResource.h
+    ${JOIPSources}/Editor/Resources/CompressJobSettingsOverlay.cpp
+    ${JOIPSources}/Editor/Resources/CompressJobSettingsOverlay.h
+    ${JOIPSources}/Editor/Resources/CompressJobSettingsOverlay.ui
     ${JOIPSources}/Editor/Resources/ResourceDetailView.cpp
     ${JOIPSources}/Editor/Resources/ResourceDetailView.h
     ${JOIPSources}/Editor/Resources/ResourceDetailViewFetcherThread.cpp
@@ -204,6 +210,8 @@ macro(CreateJOIPProject JOIP_PROJECT_NAME)
     ${JOIPSources}/Editor/Resources/ResourceToolTip.cpp
     ${JOIPSources}/Editor/Resources/ResourceToolTip.h
     ${JOIPSources}/Editor/Resources/ResourceToolTip.ui
+    ${JOIPSources}/Editor/Resources/ResourceTreeDelegate.cpp
+    ${JOIPSources}/Editor/Resources/ResourceTreeDelegate.h
     ${JOIPSources}/Editor/Resources/ResourceTreeItem.cpp
     ${JOIPSources}/Editor/Resources/ResourceTreeItem.h
     ${JOIPSources}/Editor/Resources/ResourceTreeItemModel.cpp

@@ -20,6 +20,7 @@ class CScriptEditorModel;
 class CSettings;
 class CThreadedSystem;
 class IEditorJobStateListener;
+class IEditorToolBox;
 class ITutorialStateSwitchHandler;
 namespace QtNodes {
   class Node;
@@ -56,6 +57,9 @@ public:
 
   void AddEditorJobStateListener(const QString& sJobType, IEditorJobStateListener* pListener);
 
+  void AddEditorToolbox(const QString& sTool, IEditorToolBox* pTool);
+  const std::map<QString, IEditorToolBox*>& EditorToolboxes() const;
+
   void InitNewProject(const QString& sNewProjectName, bool bTutorial);
   void LoadProject(qint32 iId);
   QString RenameProject(const QString& sNewProjectName);
@@ -91,6 +95,7 @@ private:
   std::weak_ptr<CDatabaseManager>                             m_wpDbManager;
   std::vector<std::weak_ptr<ITutorialStateSwitchHandler>>     m_vwpTutorialStateSwitchHandlers;
   std::map<QString, std::vector<IEditorJobStateListener*>>    m_vpEditorJobStateListeners;
+  std::map<QString, IEditorToolBox*>                          m_editorTools;
   QPointer<QWidget>                                           m_pParentWidget;
   QString                                                     m_sScriptTypesFilter;
   bool                                                        m_bInitializingNewProject;

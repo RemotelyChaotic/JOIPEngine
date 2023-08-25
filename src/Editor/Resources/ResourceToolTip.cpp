@@ -17,6 +17,25 @@
 namespace
 {
   const qint32 c_iPreviewImageSize = 48;
+
+  QString WarningIcon()
+  {
+    static QString sResult;
+    if (sResult.isEmpty())
+    {
+      QImage warnIcon(":/resources/style/img/WarningIcon.png");
+      warnIcon = warnIcon.scaled({24,24});
+      QByteArray arr;
+      QBuffer buffer(&arr);
+      if (buffer.open(QIODevice::ReadWrite))
+      {
+        warnIcon.save(&buffer, "png");
+      }
+      sResult = QString::fromUtf8(arr.toBase64());
+    }
+
+    return sResult;
+  }
 }
 
 class CResourceToolTipPrivate : public QObject
@@ -30,7 +49,7 @@ public:
   bool IsShown() const { return m_bShown; }
   tspResource Resource() const;
   std::shared_ptr<CResourceDetailViewFetcherThread> ResourceFetcher() const;
-  void ShowResource(const QPoint& pos, const tspResource& spResource,
+  void ShowResource(const QPoint& pos, const tspResource& spResource, const QString& sWarning,
                     QWidget* pW, const QRect& rect, qint32 iMsecShowTime);
 
 protected:
@@ -44,6 +63,7 @@ private:
   {
     QPoint pos;
     tspResource spResource;
+    QString sWarning;
     QPointer<QWidget> pW;
     QRect rect;
     qint32 iMsecShowTime;
@@ -102,7 +122,7 @@ std::shared_ptr<CResourceDetailViewFetcherThread> CResourceToolTipPrivate::Resou
 
 //----------------------------------------------------------------------------------------
 //
-void CResourceToolTipPrivate::ShowResource(const QPoint& pos, const tspResource& spResource,
+void CResourceToolTipPrivate::ShowResource(const QPoint& pos, const tspResource& spResource, const QString& sWarning,
                                            QWidget* pW, const QRect& rect, qint32 iMsecShowTime)
 {
   if (nullptr != spResource)
@@ -132,7 +152,7 @@ void CResourceToolTipPrivate::ShowResource(const QPoint& pos, const tspResource&
     if (sOldName == sName) { return; }
 
     m_currentRequest = STipData{
-      pos, spResource, pW, rect, iMsecShowTime
+      pos, spResource, sWarning, pW, rect, iMsecShowTime
     };
 
     if (!m_bShown)
@@ -283,6 +303,20 @@ QString CResourceToolTipPrivate::GetTipString(const STipData& data,
     sRet = sRet.arg(sFontFace).arg(iFontsize);
   }
 
+  if (!data.sWarning.isEmpty())
+  {
+    sRet = sRet.prepend(QString(
+      "<table width=\"100%\" style=\"color: black;background-color:#cccc44;border-color:yellow;border-style:solid;\" >"
+        "<tr>"
+          "<td width=\"10%\"><img src=\"data:image/png;base64,%3\" width:\"%4\" height:\"%5\"/></td>"
+          "<td width=\"90%\" style=\"font-family:'%1';font-size:%2px;text-align:center;vertical-align:middle;\">%6</td>"
+        "</tr>"
+      "</table>")
+        .arg(sFontFace).arg(iFontsize)
+        .arg(WarningIcon())
+        .arg(24).arg(24).arg(data.sWarning));
+  }
+
   qint32 iCounter = 0;
   QString sTags = data.spResource->m_vsResourceTags.empty() ? "&lt;no tags&gt;" : "";
   for (const QString& sTag : data.spResource->m_vsResourceTags)
@@ -334,8 +368,7 @@ QString CResourceToolTipPrivate::GetTipString(const STipData& data,
   sRet = sRet.arg(sSource.isEmpty() ? "&lt;no source&gt;" : sSource)
              .arg(data.spResource->m_sResourceBundle.isEmpty() ?
                     "&lt;no bundle&gt;" : data.spResource->m_sResourceBundle)
-             .arg(sTags)
-      ;
+             .arg(sTags);
   return sRet;
 }
 
@@ -383,25 +416,25 @@ QT_WARNING_POP
 //----------------------------------------------------------------------------------------
 //
 void CResourceToolTip::showResource(const QPoint& pos, const tspResource& spResource,
-                                    QWidget* pW)
+                                    const QString& sWarning, QWidget* pW)
 {
-  CResourceToolTip::showResource(pos, spResource, pW, QRect());
+  CResourceToolTip::showResource(pos, spResource, sWarning, pW, QRect());
 }
 
 //----------------------------------------------------------------------------------------
 //
 void CResourceToolTip::showResource(const QPoint& pos, const tspResource& spResource,
-                                    QWidget* pW, const QRect& rect)
+                                    const QString& sWarning, QWidget* pW, const QRect& rect)
 {
-  showResource(pos, spResource, pW, rect, -1);
+  showResource(pos, spResource, sWarning, pW, rect, -1);
 }
 
 //----------------------------------------------------------------------------------------
 //
 void CResourceToolTip::showResource(const QPoint& pos, const tspResource& spResource,
-                                    QWidget* pW, const QRect& rect, qint32 iMsecShowTime)
+                                    const QString& sWarning, QWidget* pW, const QRect& rect, qint32 iMsecShowTime)
 {
-  CResourceToolTipPrivate::Instance()->ShowResource(pos, spResource, pW, rect, iMsecShowTime);
+  CResourceToolTipPrivate::Instance()->ShowResource(pos, spResource, sWarning, pW, rect, iMsecShowTime);
 }
 
 //----------------------------------------------------------------------------------------

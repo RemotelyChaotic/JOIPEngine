@@ -28,7 +28,7 @@ namespace
 }
 
 CEditorExportJob::CEditorExportJob(QObject* pParent) :
-    QObject(pParent),
+    IEditorJob(pParent),
     m_spExportProcess(nullptr),
     m_spProject(nullptr),
     m_iProgress(0),

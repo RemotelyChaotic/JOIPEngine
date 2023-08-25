@@ -534,5 +534,11 @@
         <file>resources/android_styles/Gummyzilla/ui/ButtonTag.png</file>
         <file>resources/android_styles/Gummyzilla/ui/ButtonTagSelected.png</file>
         <file>resources/android_styles/Somber Dark/ui/ButtonTag.png</file>
+        <file>resources/android_styles/621 Hexagons/ui/ButtonTools.png</file>
+        <file>resources/android_styles/Blue Night/ui/ButtonTools.png</file>
+        <file>resources/android_styles/Equestria after Dark/ui/ButtonTools.png</file>
+        <file>resources/android_styles/Gummyzilla/ui/ButtonTools.png</file>
+        <file>resources/android_styles/Gummyzilla/ui/ButtonToolsSelected.png</file>
+        <file>resources/android_styles/Somber Dark/ui/ButtonTools.png</file>
     </qresource>
 </RCC>

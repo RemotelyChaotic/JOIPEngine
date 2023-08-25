@@ -23,8 +23,9 @@ namespace resource_item
   // not shown
   const qint32 c_iColumnToolTip = 4;
   const qint32 c_iColumnLoadedID= 5;
+  const qint32 c_iColumnWarning = 6;
 
-  const qint32 c_iNumItems      = 6;
+  const qint32 c_iNumItems      = 7;
 }
 
 class CResourceTreeItem
@@ -44,6 +45,7 @@ public:
   void SetLabel(const QString& sLabel) { m_sLabel = sLabel; }
   void SetResource(const tspResource& spResource) { m_spResource = spResource; }
   void SetType(const EResourceTreeItemType& type) { m_type = type; }
+  void SetWarning(const QString& sWarning) { m_sWarning = sWarning; }
 
   CResourceTreeItem* Child(qint32 iRow);
   qint32 ChildIndex(CResourceTreeItem* pCompare);
@@ -65,6 +67,7 @@ private:
   EResourceTreeItemType       m_type;
   std::optional<EResourceType>m_resourceType;
   QString                     m_sLabel;
+  QString                     m_sWarning;
   tspResource                 m_spResource;
 };
 

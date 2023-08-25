@@ -579,7 +579,10 @@ QToolButton#f_indent_inc {
   qproperty-icon: url(:/resources/style/img/ButtonIndent.png) off,
                   url(:/resources/style/img/ButtonIndent.png) on;
 }
-
+QToolButton#ToolsButton {
+  qproperty-icon: url(:/resources/style/img/ButtonTools.png) off,
+                  url(:/resources/style/img/ButtonTools.png) on;
+}
 
 QPushButton:hover,
 QToolButton:hover {

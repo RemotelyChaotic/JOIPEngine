@@ -81,7 +81,7 @@ void CResourceDetailViewFetcherThread::SlotResourcesRequested(qint32 iProject,
   emit LoadStarted();
 
   QMutexLocker locker(&m_queueMutex);
-  while (m_queue.size() > 0)
+  while (m_queue.size() > 0 && nullptr != m_spDbImageProvider)
   {
     QString sResource = m_queue[0];
     sResource.detach();

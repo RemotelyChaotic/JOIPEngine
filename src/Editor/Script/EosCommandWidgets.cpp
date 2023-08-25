@@ -355,6 +355,7 @@ bool CEosCommandWidgetAudio::eventFilter(QObject* pObj, QEvent* pEvt)
         {
           CResourceToolTip::showResource(pHelpEvent->globalPos(),
                                          pItem->Resource(),
+                                         pItem->Data(resource_item::c_iColumnWarning).toString(),
                                          qobject_cast<QWidget*>(pObj));
         }
         else
@@ -935,6 +936,7 @@ bool CEosCommandWidgetImage::eventFilter(QObject* pObj, QEvent* pEvt)
         {
           CResourceToolTip::showResource(pHelpEvent->globalPos(),
                                          pItem->Resource(),
+                                         pItem->Data(resource_item::c_iColumnWarning).toString(),
                                          qobject_cast<QWidget*>(pObj));
         }
         else

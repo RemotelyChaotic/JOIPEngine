@@ -13,12 +13,14 @@
 #include "ui_EosDownloadJobWidget.h"
 
 #include "RCC/rcc.h"
+
 #include "Systems/DatabaseManager.h"
 #include "Systems/EOS/EosHelpers.h"
 #include "Systems/Project.h"
 #include "Systems/Resource.h"
 #include "Systems/ResourceBundle.h"
 #include "Systems/PhysFs/PhysFsFileEngine.h"
+
 #include "Utils/RaiiFunctionCaller.h"
 
 #include <nlohmann/json-schema.hpp>

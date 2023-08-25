@@ -11,10 +11,9 @@
 
 typedef std::shared_ptr<struct SProject> tspProject;
 
-class CEditorExportJob : public QObject, public IEditorJob
+class CEditorExportJob : public IEditorJob
 {
   Q_OBJECT
-  Q_INTERFACES(IRunnableJob)
 
 public:
   explicit CEditorExportJob(QObject* pParent = nullptr);
@@ -45,12 +44,6 @@ public:
   bool RunBinaryExport(const QString& sName, const QString& sFolder);
   bool RunZipExport(const QString& sName, const QString& sFolder);
   void Stop() override;
-
-signals:
-  void SignalFinished(qint32 iId) override;
-  void SignalProgressChanged(qint32 iId, qint32 iProgress) override;
-  void SignalStarted(qint32 iId) override;
-  void SignalJobMessage(qint32 iId, QString sType, QString sMsg);
 
 protected:
   void AbortImpl() override;

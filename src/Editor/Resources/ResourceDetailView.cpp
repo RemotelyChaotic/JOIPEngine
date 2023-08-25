@@ -20,7 +20,8 @@ public:
   inline CResourceDetailViewDelegate(CResourceDetailView* pView) :
     QStyledItemDelegate(pView),
     m_pView(pView),
-    m_pLoading(new QMovie(this))
+    m_pLoading(new QMovie(this)),
+    m_warnIcon(":/resources/style/img/WarningIcon.png")
   {
     m_pLoading.setFileName(":/resources/gif/spinner_transparent.gif");
     connect(&m_pLoading, &QMovie::frameChanged, [this]() {
@@ -48,8 +49,16 @@ public:
     QAbstractItemModel* pModel = m_pView->model();
     if (nullptr != pModel)
     {
+      qint32 iIconSize = 16;
+      if (auto pTreeModel = dynamic_cast<CResourceTreeItemModel*>(pModel))
+      {
+        iIconSize = pTreeModel->CardIconSize();
+      }
+
       const QModelIndex indexName = pModel->index(index.row(), resource_item::c_iColumnName, index.parent());
       const QModelIndex indexType = pModel->index(index.row(), resource_item::c_iColumnType, index.parent());
+      const QString sWarning =
+          index.model()->data(index, CResourceTreeItemModel::eItemWarningRole).toString();
 
       if (index.isValid() && indexName.isValid() && indexType.isValid())
       {
@@ -163,6 +172,13 @@ public:
         // draw decoration in top left
         pStyle->drawItemPixmap(pPainter, opt.rect, Qt::AlignTop | Qt::AlignLeft, decoration);
 
+        // draw warning icon in top right
+        if (!sWarning.isEmpty())
+        {
+          pStyle->drawItemPixmap(pPainter, opt.rect, Qt::AlignTop | Qt::AlignRight,
+                                 m_warnIcon.scaled({iIconSize, iIconSize}));
+        }
+
         // and finally draw text below icon
         QRect rectText = opt.rect.adjusted(0, m_pView->iconSize().height(), 0, 0);
         pStyle->drawItemText(pPainter, rectText, opt.displayAlignment | Qt::TextWrapAnywhere,
@@ -239,6 +255,7 @@ private:
 
   CResourceDetailView* m_pView;
   QMovie               m_pLoading;
+  QPixmap              m_warnIcon;
 };
 
 //----------------------------------------------------------------------------------------

@@ -1,10 +1,20 @@
 #include "ResourceModelView.h"
+#include "Application.h"
 #include "CommandChangeCurrentResource.h"
 #include "ResourceToolTip.h"
+#include "ResourceTreeDelegate.h"
 #include "ResourceTreeItem.h"
 #include "ResourceTreeItemModel.h"
 #include "ResourceTreeItemSortFilterProxyModel.h"
 #include "ui_ResourceModelView.h"
+
+#include "Editor/EditorJobs/EditorImageCompressionJob.h"
+#include "Editor/EditorJobs/EditorJobTypes.h"
+
+#include "Editor/EditorModel.h"
+#include "Editor/EditorJobWorker.h"
+
+#include "Systems/DatabaseManager.h"
 
 #include "Utils/UndoRedoFilter.h"
 
@@ -23,6 +33,8 @@
 // the functions in this namespace are from QtCtreator code:
 namespace
 {
+  const char c_sCompressAllResources[] = "Compress all Image Resources";
+
   enum EHostOsType
   {
     eOsTypeWindows,
@@ -84,10 +96,13 @@ namespace
   }
 }
 
+//----------------------------------------------------------------------------------------
+//
 CResourceModelView::CResourceModelView(QWidget *parent) :
   QWidget(parent),
   m_spUi(std::make_unique<Ui::CResourceModelView>()),
   m_spCurrentProject(nullptr),
+  m_pCompressJobOverlay(new CCompressJobSettingsOverlay(this)),
   m_pProxy(new CResourceTreeItemSortFilterProxyModel(this)),
   m_pModel(nullptr),
   m_pStack(nullptr),
@@ -97,6 +112,7 @@ CResourceModelView::CResourceModelView(QWidget *parent) :
   m_bLandscape(false)
 {
   m_spUi->setupUi(this);
+  m_spUi->pTreeView->setItemDelegate(new CResourceTreeDelegate(m_spUi->pTreeView));
 }
 
 CResourceModelView::~CResourceModelView()
@@ -109,11 +125,20 @@ CResourceModelView::~CResourceModelView()
 
 //----------------------------------------------------------------------------------------
 //
-void CResourceModelView::Initialize(QUndoStack* pStack,
+void CResourceModelView::Initialize(CEditorModel* pEditorModel,
+                                    QUndoStack* pStack,
                                     CResourceTreeItemModel* pModel)
 {
   m_bInitializing = true;
 
+  pEditorModel->AddEditorToolbox("Resource Tools", this);
+  pEditorModel->AddEditorJobStateListener(editor_job::c_sCompress, this);
+
+  m_pCompressJobOverlay->Hide();
+  connect(m_pCompressJobOverlay, &CCompressJobSettingsOverlay::SignalJobSettingsConfirmed,
+          this, &CResourceModelView::SlotJobSettingsConfirmed);
+
+  m_pEditorModel = pEditorModel;
   m_pStack = pStack;
   m_pModel = pModel;
 
@@ -186,6 +211,8 @@ void CResourceModelView::ProjectLoaded(tspProject spCurrentProject, bool bReadOn
 //
 void CResourceModelView::ProjectUnloaded()
 {
+  m_pCompressJobOverlay->Hide();
+
   m_spUi->pTreeView->setEditTriggers(
         QAbstractItemView::DoubleClicked | QAbstractItemView::EditKeyPressed);
   m_spUi->pDetailView->setEditTriggers(QAbstractItemView::DoubleClicked | QAbstractItemView::EditKeyPressed);
@@ -448,6 +475,82 @@ void CResourceModelView::SetCardIconSize(qint32 iValue)
 
 //----------------------------------------------------------------------------------------
 //
+QStringList CResourceModelView::Tools() const
+{
+  return QStringList() << c_sCompressAllResources;
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CResourceModelView::ToolTriggered(const QString& sTool)
+{
+  if (sTool == QString(c_sCompressAllResources))
+  {
+    m_pCompressJobOverlay->Show();
+  }
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CResourceModelView::JobFinished(qint32 iId)
+{
+  Q_UNUSED(iId)
+  m_sCurrentResourceConversion = QString();
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CResourceModelView::JobStarted(qint32 iId)
+{
+  Q_UNUSED(iId)
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CResourceModelView::JobMessage(qint32 iId, const QString& sMsg)
+{
+  Q_UNUSED(iId)
+  if (auto spManager = CApplication::Instance()->System<CDatabaseManager>().lock())
+  {
+    if (nullptr != m_spCurrentProject)
+    {
+      tspResource spResource = spManager->FindResourceInProject(m_spCurrentProject, sMsg);
+      if (nullptr != spResource)
+      {
+        if (m_sCurrentResourceConversion != sMsg)
+        {
+          m_sCurrentResourceConversion = sMsg;
+        }
+        else
+        {
+          m_sCurrentResourceConversion = QString();
+        }
+      }
+      else if (!m_sCurrentResourceConversion.isEmpty())
+      {
+        spResource = spManager->FindResourceInProject(m_spCurrentProject,
+                                                      m_sCurrentResourceConversion);
+        if (nullptr != spResource && nullptr != m_pModel)
+        {
+          QModelIndex idx = m_pModel->IndexForResource(spResource);
+          m_pModel->setData(idx, sMsg,
+                            CResourceTreeItemModel::eItemWarningRole);
+        }
+      }
+    }
+  }
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CResourceModelView::JobProgressChanged(qint32 iId, qint32 iProgress)
+{
+  Q_UNUSED(iId)
+  Q_UNUSED(iProgress)
+}
+
+//----------------------------------------------------------------------------------------
+//
 void CResourceModelView::SlotExpanded(const QModelIndex& index)
 {
   // handle selection internally
@@ -535,6 +638,24 @@ void CResourceModelView::SlotCurrentChanged(const QModelIndex& current,
 
 //----------------------------------------------------------------------------------------
 //
+void CResourceModelView::SlotJobSettingsConfirmed(
+    const CCompressJobSettingsOverlay::SCompressJobSettings& settings)
+{
+  if (nullptr != m_pEditorModel)
+  {
+    QVariantList args;
+    args << m_pEditorModel->JobWorker()->GenerateNewId();
+    {
+      QReadLocker locker(&m_spCurrentProject->m_rwLock);
+      args << m_spCurrentProject->m_sName;
+    }
+    args << settings.m_iCompression;
+    m_pEditorModel->JobWorker()->CreateNewEditorJob<CEditorImageCompressionJob>(args);
+  }
+}
+
+//----------------------------------------------------------------------------------------
+//
 bool CResourceModelView::eventFilter(QObject* pObj, QEvent* pEvt)
 {
   if (nullptr == pObj || nullptr == pEvt) { return QWidget::eventFilter(pObj, pEvt); }
@@ -574,6 +695,7 @@ bool CResourceModelView::eventFilter(QObject* pObj, QEvent* pEvt)
         {
           CResourceToolTip::showResource(pHelpEvent->globalPos(),
                                          pItem->Resource(),
+                                         pItem->Data(resource_item::c_iColumnWarning).toString(),
                                          qobject_cast<QWidget*>(pObj));
         }
         else

@@ -1,6 +1,7 @@
 #include "EditorMainScreen.h"
 #include "Application.h"
 #include "EditorWidgetRegistry.h"
+#include "IEditorTool.h"
 #include "Settings.h"
 #include "WindowContext.h"
 
@@ -170,6 +171,8 @@ void CEditorMainScreen::Initialize(const std::shared_ptr<CWindowContext>& spWind
           m_spEditorModel->UndoStack(), &QUndoStack::redo);
   connect(m_spUi->pProjectActionBar->m_spUi->ExportButton, &QPushButton::clicked,
           this, &CEditorMainScreen::SlotExportClicked);
+  connect(m_spUi->pProjectActionBar->m_spUi->ToolsButton, &QPushButton::clicked,
+          this, &CEditorMainScreen::SlotToolsClicked);
   connect(m_spUi->pProjectActionBar->m_spUi->HelpButton, &QPushButton::clicked,
           this, &CEditorMainScreen::SlotHelpClicked);
   connect(m_spUi->pProjectActionBar->m_spUi->ExitButton, &QPushButton::clicked,
@@ -366,6 +369,45 @@ void CEditorMainScreen::SlotExportClicked(bool bClick)
       m_spUi->pProjectActionBar->m_spUi->ExportButton->parentWidget()->mapToGlobal(
             m_spUi->pProjectActionBar->m_spUi->ExportButton->pos());
   menu.exec(p + QPoint(0, m_spUi->pProjectActionBar->m_spUi->ExportButton->height()));
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CEditorMainScreen::SlotToolsClicked(bool bClick)
+{
+  Q_UNUSED(bClick);
+  if (!m_bInitialized) { return; }
+
+  QMenu menu;
+
+  qint32 i = 0;
+  const auto& toolBoxMap = m_spEditorModel->EditorToolboxes();
+  for (const auto& [sTool, pToolBox] : toolBoxMap)
+  {
+    for (const QString& sTool : pToolBox->Tools())
+    {
+      QPointer<CEditorModel> pModel(m_spEditorModel.get());
+      QAction* pAction = new QAction(sTool, &menu);
+      connect(pAction, &QAction::triggered, this,
+              [pModel, pToolBoxCopy = pToolBox, sTool](bool bChecked) {
+        if (nullptr != pModel)
+        {
+          pToolBoxCopy->ToolTriggered(sTool);
+        }
+      });
+      menu.addAction(pAction);
+    }
+    if (toolBoxMap.size() - 1 != i)
+    {
+      menu.addSeparator();
+    }
+    ++i;
+  }
+
+  QPoint p =
+      m_spUi->pProjectActionBar->m_spUi->ToolsButton->parentWidget()->mapToGlobal(
+          m_spUi->pProjectActionBar->m_spUi->ToolsButton->pos());
+  menu.exec(p + QPoint(0, m_spUi->pProjectActionBar->m_spUi->ToolsButton->height()));
 }
 
 //----------------------------------------------------------------------------------------

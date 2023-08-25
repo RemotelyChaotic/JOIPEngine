@@ -236,6 +236,11 @@ QVariant CResourceTreeItemModel::data(const QModelIndex& index, int iRole) const
     CResourceTreeItem* item = static_cast<CResourceTreeItem*>(index.internalPointer());
     return item->Type()._to_integral();
   }
+  else if(CResourceTreeItemModel::eItemWarningRole == iRole)
+  {
+    CResourceTreeItem* item = static_cast<CResourceTreeItem*>(index.internalPointer());
+    return item->Data(c_iColumnWarning);
+  }
   else
   {
     return QVariant();
@@ -344,19 +349,28 @@ int CResourceTreeItemModel::columnCount(const QModelIndex& parent) const
 //----------------------------------------------------------------------------------------
 //
 bool CResourceTreeItemModel::setData(const QModelIndex& index, const QVariant& value,
-             qint32 iRole)
+                                     qint32 iRole)
 {
-  if (iRole != Qt::EditRole) { return false; }
+  if (Qt::EditRole != iRole && CResourceTreeItemModel::eItemWarningRole != iRole) { return false; }
 
   CResourceTreeItem* pItem = GetItem(index);
 
   if (nullptr != m_pUndoStack)
   {
-    m_pUndoStack->push(
+    if (index.column() == resource_item::c_iColumnName &&
+        CResourceTreeItemModel::eItemWarningRole == iRole)
+    {
+      pItem->SetWarning(value.toString());
+      emit dataChanged(index, index, {Qt::DisplayRole, CResourceTreeItemModel::eItemWarningRole});
+    }
+    else
+    {
+      m_pUndoStack->push(
           new CCommandChangeResourceData(this, m_spProject,
                                          pItem->Data(resource_item::c_iColumnName).toString(),
                                          index.column(),
                                          value));
+    }
 
     return true;
   }

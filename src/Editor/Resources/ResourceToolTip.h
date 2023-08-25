@@ -22,10 +22,10 @@ class CResourceToolTip
   CResourceToolTip() = delete;
 
 public:
-  static void showResource(const QPoint& pos, const tspResource& spResource, QWidget* pW = nullptr);
-  static void showResource(const QPoint& pos, const tspResource& spResource, QWidget* pW, const QRect& rect);
-  static void showResource(const QPoint& pos, const tspResource& spResource, QWidget* pW, const QRect& rect, qint32 iMsecShowTime);
-  static inline void hideResourceTip() { showResource(QPoint(), nullptr); }
+  static void showResource(const QPoint& pos, const tspResource& spResource, const QString& sWarning, QWidget* pW = nullptr);
+  static void showResource(const QPoint& pos, const tspResource& spResource, const QString& sWarning, QWidget* pW, const QRect& rect);
+  static void showResource(const QPoint& pos, const tspResource& spResource, const QString& sWarning, QWidget* pW, const QRect& rect, qint32 iMsecShowTime);
+  static inline void hideResourceTip() { showResource(QPoint(), nullptr, QString()); }
 
   static bool isVisible();
   static tspResource resource();

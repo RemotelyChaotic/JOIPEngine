@@ -24,7 +24,8 @@ public:
   {
     eSearchRole = Qt::UserRole,
     eLoadedIDRole = Qt::UserRole+1,
-    eItemTypeRole = Qt::UserRole+2
+    eItemTypeRole = Qt::UserRole+2,
+    eItemWarningRole = Qt::UserRole+3
   };
 
   explicit CResourceTreeItemModel(QPointer<QUndoStack> pUndoStack,
@@ -35,6 +36,7 @@ public:
   void DeInitializeModel();
   void SetCardIcon(const QImage& img);
   void SetCardIconSize(qint32 iValue);
+  qint32 CardIconSize() const { return m_cardIconSize; }
 
   tspProject Project() const { return m_spProject; };
 

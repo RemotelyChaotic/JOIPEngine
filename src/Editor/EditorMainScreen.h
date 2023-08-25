@@ -23,7 +23,8 @@ namespace Ui {
 struct SProject;
 typedef std::shared_ptr<SProject> tspProject;
 
-class CEditorMainScreen : public QWidget, public IEditorJobStateListener
+class CEditorMainScreen : public QWidget,
+                          public IEditorJobStateListener
 {
   Q_OBJECT
   friend class CEditorLayoutViewProvider;
@@ -46,6 +47,7 @@ protected slots:
   void SlotExitCalled();
   void SlotExitClicked(bool bClick);
   void SlotExportClicked(bool bClick);
+  void SlotToolsClicked(bool bClick);
   void SlotHelpClicked(bool bClick);
   void SlotProjectEdited();
   //void SlotProjectExportError(CEditorModel::EExportError error, const QString& sErrorString);

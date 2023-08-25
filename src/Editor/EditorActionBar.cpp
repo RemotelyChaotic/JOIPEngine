@@ -12,6 +12,7 @@ namespace {
   const QString c_sUndoHelpId =           "Editor/Undo";
   const QString c_sRedoHelpId =           "Editor/Redo";
   const QString c_sExportProjectHelpId =  "Editor/ExportProject";
+  const QString c_sToolsHelpId =          "Editor/Tools";
   const QString c_sExitProjectHelpId =    "Editor/ExitProject";
 
   const QString c_sChangeViewHelpId =     "Editor/ChangeResourceView";
@@ -146,6 +147,8 @@ void CEditorActionBar::Initialize()
     wpHelpFactory->RegisterHelp(c_sRedoHelpId, ":/resources/help/editor/redo_button_help.html");
     m_spUi->ExportButton->setProperty(helpOverlay::c_sHelpPagePropertyName, c_sExportProjectHelpId);
     wpHelpFactory->RegisterHelp(c_sExportProjectHelpId, ":/resources/help/editor/exportproject_button_help.html");
+    m_spUi->ToolsButton->setProperty(helpOverlay::c_sHelpPagePropertyName, c_sToolsHelpId);
+    wpHelpFactory->RegisterHelp(c_sToolsHelpId, ":/resources/help/editor/tools_button_help.html");
     m_spUi->ExitButton->setProperty(helpOverlay::c_sHelpPagePropertyName, c_sExitProjectHelpId);
     wpHelpFactory->RegisterHelp(c_sExitProjectHelpId, ":/resources/help/editor/exitproject_button_help.html");
 
@@ -352,6 +355,7 @@ void CEditorActionBar::SlotKeyBindingsChanged()
     m_spUi->UndoButton->SetShortcut(m_spSettings->keyBinding("Undo"));
     m_spUi->RedoButton->SetShortcut(m_spSettings->keyBinding("Redo"));
     m_spUi->ExportButton->SetShortcut(m_spSettings->keyBinding("Export"));
+    m_spUi->ToolsButton->SetShortcut(m_spSettings->keyBinding("Tools"));
   }
   else
   {

@@ -290,6 +290,23 @@ void CEditorModel::AddEditorJobStateListener(const QString& sJobType,
 
 //----------------------------------------------------------------------------------------
 //
+void CEditorModel::AddEditorToolbox(const QString& sTool, IEditorToolBox* pTool)
+{
+  if (nullptr != pTool)
+  {
+    m_editorTools[sTool] = pTool;
+  }
+}
+
+//----------------------------------------------------------------------------------------
+//
+const std::map<QString, IEditorToolBox*>& CEditorModel::EditorToolboxes() const
+{
+  return m_editorTools;
+}
+
+//----------------------------------------------------------------------------------------
+//
 void CEditorModel::InitNewProject(const QString& sNewProjectName, bool bTutorial)
 {
   m_bInitializingNewProject = true;

@@ -113,6 +113,8 @@ QVariant CResourceTreeItem::Data(qint32 iColumn) const
                   QVariant() : QString("Source: ") + m_spResource->m_sSource.toString();
           case c_iColumnLoadedID:
             return m_spResource->m_iLoadedId;
+          case c_iColumnWarning:
+            return m_sWarning;
         default: return QVariant();
         }
       }
