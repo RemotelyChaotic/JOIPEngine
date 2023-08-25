@@ -18,6 +18,8 @@
 
 #include "Utils/UndoRedoFilter.h"
 
+#include "Widgets/ProgressBar.h"
+
 #include <QClipboard>
 #include <QContextMenuEvent>
 #include <QHelpEvent>
@@ -113,6 +115,13 @@ CResourceModelView::CResourceModelView(QWidget *parent) :
 {
   m_spUi->setupUi(this);
   m_spUi->pTreeView->setItemDelegate(new CResourceTreeDelegate(m_spUi->pTreeView));
+
+  m_pProgressBar = new CProgressBar(this);
+  m_pProgressBar->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
+  m_pProgressBar->SetRange(0, 0);
+  m_pProgressBar->setFixedSize(32,32);
+  m_pProgressBar->SetRange(0, 100);
+  m_pProgressBar->hide();
 }
 
 CResourceModelView::~CResourceModelView()
@@ -496,6 +505,7 @@ void CResourceModelView::JobFinished(qint32 iId)
 {
   Q_UNUSED(iId)
   m_sCurrentResourceConversion = QString();
+  m_pProgressBar->hide();
 }
 
 //----------------------------------------------------------------------------------------
@@ -503,6 +513,7 @@ void CResourceModelView::JobFinished(qint32 iId)
 void CResourceModelView::JobStarted(qint32 iId)
 {
   Q_UNUSED(iId)
+  m_pProgressBar->show();
 }
 
 //----------------------------------------------------------------------------------------
@@ -547,7 +558,7 @@ void CResourceModelView::JobMessage(qint32 iId, const QString& sMsg)
 void CResourceModelView::JobProgressChanged(qint32 iId, qint32 iProgress)
 {
   Q_UNUSED(iId)
-  Q_UNUSED(iProgress)
+  m_pProgressBar->setValue(iProgress);
 }
 
 //----------------------------------------------------------------------------------------
@@ -755,4 +766,11 @@ void CResourceModelView::resizeEvent(QResizeEvent* pEvent)
     m_spUi->pTreeView->setMinimumWidth(0);
     m_spUi->pTreeView->setMaximumWidth(QWIDGETSIZE_MAX);
   }
+
+  QPoint progressPos = {
+    layout()->spacing()*2,
+    height() - m_pProgressBar->height() - layout()->spacing()*2
+  };
+  m_pProgressBar->move(progressPos);
+  m_pProgressBar->raise();
 }

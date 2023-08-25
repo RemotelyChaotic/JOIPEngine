@@ -256,7 +256,6 @@ void CProgressBar::SlotAnimationUpdate()
   repaint();
 }
 
-#include <QDebug>
 //----------------------------------------------------------------------------------------
 //
 void CProgressBar::paintEvent(QPaintEvent*)

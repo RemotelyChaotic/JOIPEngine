@@ -13,6 +13,7 @@
 
 class CCompressJobSettingsOverlay;
 class CEditorModel;
+class CProgressBar;
 class CResourceTreeItemModel;
 class CResourceTreeItemSortFilterProxyModel;
 namespace Ui {
@@ -92,6 +93,7 @@ protected:
 private:
   std::unique_ptr<Ui::CResourceModelView>         m_spUi;
   tspProject                                      m_spCurrentProject;
+  QPointer<CProgressBar>                          m_pProgressBar;
   QPointer<CCompressJobSettingsOverlay>           m_pCompressJobOverlay;
   QPointer<CEditorModel>                          m_pEditorModel;
   QPointer<CResourceTreeItemSortFilterProxyModel> m_pProxy;

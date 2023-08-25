@@ -105,6 +105,7 @@ CEditorMainScreen::CEditorMainScreen(QWidget* pParent) :
     m_pPushProgress = new CProgressBar(m_spPushNotificator.get());
     m_pPushProgress->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
     m_pPushProgress->SetRange(0, 0);
+    m_pPushProgress->setFixedSize(48,48);
     pLayout->insertWidget(0, m_pPushProgress);
   }
 
