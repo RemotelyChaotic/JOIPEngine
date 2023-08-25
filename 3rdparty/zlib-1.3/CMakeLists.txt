@@ -149,17 +149,21 @@ if(MINGW)
     set(ZLIB_DLL_SRCS ${CMAKE_CURRENT_BINARY_DIR}/zlib1rc.obj)
 endif(MINGW)
 
-add_library(zlib SHARED ${ZLIB_SRCS} ${ZLIB_DLL_SRCS} ${ZLIB_PUBLIC_HDRS} ${ZLIB_PRIVATE_HDRS})
-add_library(zlibstatic STATIC ${ZLIB_SRCS} ${ZLIB_PUBLIC_HDRS} ${ZLIB_PRIVATE_HDRS})
-set_target_properties(zlib PROPERTIES DEFINE_SYMBOL ZLIB_DLL)
-set_target_properties(zlib PROPERTIES SOVERSION 1)
+if (BUILD_SHARED_LIBS)
+  add_library(zlib SHARED ${ZLIB_SRCS} ${ZLIB_DLL_SRCS} ${ZLIB_PUBLIC_HDRS} ${ZLIB_PRIVATE_HDRS})
+  set_target_properties(zlib PROPERTIES DEFINE_SYMBOL ZLIB_DLL)
+  set_target_properties(zlib PROPERTIES SOVERSION 1)
 
-target_include_directories(zlib PUBLIC ${CMAKE_CURRENT_BINARY_DIR})
-target_include_directories(zlib PUBLIC ${CMAKE_CURRENT_LIST_DIR})
-target_include_directories(zlibstatic PUBLIC ${CMAKE_CURRENT_BINARY_DIR})
-target_include_directories(zlibstatic PUBLIC ${CMAKE_CURRENT_LIST_DIR})
+  target_include_directories(zlib PUBLIC ${CMAKE_CURRENT_BINARY_DIR})
+  target_include_directories(zlib PUBLIC ${CMAKE_CURRENT_LIST_DIR})
+else()
+  add_library(zlibstatic STATIC ${ZLIB_SRCS} ${ZLIB_PUBLIC_HDRS} ${ZLIB_PRIVATE_HDRS})
 
-if(NOT CYGWIN)
+  target_include_directories(zlibstatic PUBLIC ${CMAKE_CURRENT_BINARY_DIR})
+  target_include_directories(zlibstatic PUBLIC ${CMAKE_CURRENT_LIST_DIR})
+endif()
+
+if(NOT CYGWIN AND BUILD_SHARED_LIBS)
     # This property causes shared libraries on Linux to have the full version
     # encoded into their final filename.  We disable this on Cygwin because
     # it causes cygz-${ZLIB_FULL_VERSION}.dll to be created when cygz.dll
@@ -172,8 +176,13 @@ endif()
 
 if(UNIX)
     # On unix-like platforms the library is almost always called libz
-   set_target_properties(zlib zlibstatic PROPERTIES OUTPUT_NAME z)
-   if(NOT APPLE)
+   if (BUILD_SHARED_LIBS)
+     set_target_properties(zlib PROPERTIES OUTPUT_NAME z)
+   else()
+     set_target_properties(zlibstatic PROPERTIES OUTPUT_NAME z)
+   endif()
+
+   if(NOT APPLE AND BUILD_SHARED_LIBS)
      set_target_properties(zlib PROPERTIES LINK_FLAGS "-Wl,--version-script,\"${CMAKE_CURRENT_SOURCE_DIR}/zlib.map\"")
    endif()
 elseif(BUILD_SHARED_LIBS AND WIN32)
@@ -182,10 +191,17 @@ elseif(BUILD_SHARED_LIBS AND WIN32)
 endif()
 
 if(NOT SKIP_INSTALL_LIBRARIES AND NOT SKIP_INSTALL_ALL )
-    install(TARGETS zlib zlibstatic
+  if (BUILD_SHARED_LIBS)
+    install(TARGETS zlib
         RUNTIME DESTINATION "${ZLIB_INSTALL_BIN_DIR}"
         ARCHIVE DESTINATION "${ZLIB_INSTALL_LIB_DIR}"
         LIBRARY DESTINATION "${ZLIB_INSTALL_LIB_DIR}" )
+  else ()
+    install(TARGETS zlibstatic
+        RUNTIME DESTINATION "${ZLIB_INSTALL_BIN_DIR}"
+        ARCHIVE DESTINATION "${ZLIB_INSTALL_LIB_DIR}"
+        LIBRARY DESTINATION "${ZLIB_INSTALL_LIB_DIR}" )
+  endif()
 endif()
 if(NOT SKIP_INSTALL_HEADERS AND NOT SKIP_INSTALL_ALL )
     install(FILES ${ZLIB_PUBLIC_HDRS} DESTINATION "${ZLIB_INSTALL_INC_DIR}")
