@@ -240,11 +240,6 @@ void CEditorActionBar::Initialize()
   connect(m_spSettings.get(), &CSettings::keyBindingsChanged,
           this, &CEditorActionBar::SlotKeyBindingsChanged);
 
-#if defined(Q_OS_ANDROID)
-  // can't currently export on android
-  m_spUi->ExportButton->hide();
-#endif
-
   SetInitialized(true);
 }
 

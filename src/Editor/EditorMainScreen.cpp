@@ -359,12 +359,15 @@ void CEditorMainScreen::SlotExportClicked(bool bClick)
   });
   menu.addAction(pAction);
 
+  // android doesn't build and deploy rcc
+#ifndef Q_OS_ANDROID
   pAction = new QAction("Export as Binary", &menu);
   connect(pAction, &QAction::triggered, this, [this](bool bChecked) {
     SlotSaveClicked(bChecked);
     m_spEditorModel->ExportProject(CEditorExportJob::EExportFormat::eBinary);
   });
   menu.addAction(pAction);
+#endif
 
   QPoint p =
       m_spUi->pProjectActionBar->m_spUi->ExportButton->parentWidget()->mapToGlobal(
