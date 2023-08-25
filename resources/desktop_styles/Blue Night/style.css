@@ -564,7 +564,7 @@ QToolButton#f_indent_inc {
   qproperty-icon: url(ui/ButtonIndent.png) off,
                   url(ui/ButtonIndent.png) on;
 }
-QToolButton#ToolsButton {
+QPushButton#ToolsButton {
   qproperty-icon: url(ui/ButtonTools.png) off,
                   url(ui/ButtonTools.png) on;
 }

@@ -894,12 +894,12 @@ QToolButton#f_indent_inc:pressed,
 QToolButton#f_indent_inc:disabled {
   image: url(ui/ButtonIndentSelected.png);
 }
-QToolButton#ToolsButton {
+QPushButton#ToolsButton {
   image: url(ui/ButtonTools.png);
 }
-QToolButton#ToolsButton:hover,
-QToolButton#ToolsButton:pressed,
-QToolButton#ToolsButton:disabled {
+QPushButton#ToolsButton:hover,
+QPushButton#ToolsButton:pressed,
+QPushButton#ToolsButton:disabled {
   image: url(ui/ButtonToolsSelected.png);
 }
 

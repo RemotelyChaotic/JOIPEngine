@@ -854,7 +854,7 @@ QToolButton#f_indent_inc {
   qproperty-icon: url(ui/ButtonIndent.png) off,
                   url(ui/ButtonIndent.png) on;
 }
-QToolButton#ToolsButton {
+QPushButton#ToolsButton {
   border-image: url(ui/IconBg.svg) 0 0 0 0 stretch stretch;
   border-top: 0 transparent;
   border-bottom: 0 transparent;
@@ -935,7 +935,7 @@ QToolButton#f_list_bullet:hover,
 QToolButton#f_list_ordered:hover,
 QToolButton#f_indent_dec:hover,
 QToolButton#f_indent_inc:hover,
-QToolButton#ToolsButton:hover {
+QPushButton#ToolsButton:hover {
   border-image: url(ui/IconBgHover.svg) 0 0 0 0 stretch stretch;
 }
 
@@ -1010,7 +1010,7 @@ QToolButton#f_list_bullet:pressed,
 QToolButton#f_list_ordered:pressed,
 QToolButton#f_indent_dec:pressed,
 QToolButton#f_indent_inc:pressed,
-QToolButton#ToolsButton:pressed {
+QPushButton#ToolsButton:pressed {
   border-image: url(ui/IconBgPressed.svg) 0 0 0 0 stretch stretch;
 }
 
@@ -1085,7 +1085,7 @@ QToolButton#f_list_bullet:disabled,
 QToolButton#f_list_ordered:disabled,
 QToolButton#f_indent_dec:disabled,
 QToolButton#f_indent_inc:disabled,
-QToolButton#ToolsButton:disabled {
+QPushButton#ToolsButton:disabled {
   border-image: url(ui/IconBgDisabled.svg) 0 0 0 0 stretch stretch;
 }
 
