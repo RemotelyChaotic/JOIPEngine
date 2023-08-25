@@ -10,6 +10,9 @@ Rectangle {
     height: textBackground.height + 40
     color: "transparent"
 
+    smooth: Settings.playerImageSmooth
+    antialiasing: Settings.playerAntialiasing
+
     property int iconWidth: parent.ListView.view.iconWidth
     property int iconHeight: parent.ListView.view.iconHeight
 

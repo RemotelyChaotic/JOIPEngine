@@ -1,0 +1,67 @@
+<!doctype html>
+<html class="no-js" lang="">
+
+<head>
+  <meta charset="utf-8">
+  <title>Resolution</title>
+  <meta name="description" content="">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <style>
+    h1 {
+      text-align: center;
+    }
+    div.container {
+      min-height: 10em;
+      display: table-cell;
+      margin-left: auto;
+      margin-right: auto;
+      width: 0.6em
+    }
+    table.warning {
+      color: black;
+      background-color: #cccc44;
+      border-color: yellow;
+      border-style: solid;
+    }
+  </style>
+</head>
+
+
+<body>
+  <h1>Player Settings</h1>
+
+  <hr>
+
+  <div class="container">
+    <p>Set various rendering options for the player.<br>
+    <ul>
+      <li><b>Antialiasing</b>: Used by visual elements (like the shape of a message etc.) to decide if the item should use antialiasing or not.
+      In some cases items with antialiasing require more memory and are potentially slower to render.</li>
+      <li><b>Drop Shadows</b>: Determines whether to use drop shadows for all visual elements in the player or not.<br>
+      The soft shadow is created by blurring the elements in a post-processing stop using a gaussian blur.
+      Performing this blur is a costly operation.</li>
+      <li><b>Mipmaps</b>: This determines whether images use mipmap filtering when scaled or transformed.<br>
+      Mipmap filtering gives better visual quality when scaling down compared to smooth,
+      but it may come at a performance cost (both when initializing the image and during rendering).</li>
+      <li><b>Smoothing</b>: This property holds whether images are smoothly filtered when scaled or transformed.
+      Smooth filtering gives better visual quality, but it may be slower on some hardware.
+      If the image is displayed at its natural size, this property has no visual or performance effect.</li>
+    </ul>
+    </p>
+  </div>
+
+  <br>
+
+  <div class="container">
+    <table width="100%" class="warning">
+      <tr>
+        <td width="10%"><img src="qrc:/resources/help/icons/WarningIcon.png" width="64" height="64" alt="Warning"></td>
+        <td width="90%"><br>Multiple instances of the application share the same configuration file.<br>
+        If you use different versions of the application, your settings for all instances will change.</td>
+      </tr>
+    </table>
+  </div>
+</body>
+
+</html>

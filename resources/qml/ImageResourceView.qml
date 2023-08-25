@@ -101,9 +101,9 @@ Rectangle {
             }
         }
 
-        antialiasing: true
-        mipmap: true
-        smooth: true
+        smooth: Settings.playerImageSmooth
+        antialiasing: Settings.playerAntialiasing
+        mipmap: Settings.playerImageMipMap
         fillMode: Image.PreserveAspectFit
         source: ""
     }

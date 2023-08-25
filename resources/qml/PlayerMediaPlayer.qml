@@ -473,6 +473,10 @@ Rectangle {
                 anchors.fill: parent
                 source: Settings.styleFolderQml() + "/InfoIcon.svg"
                 opacity: iconSourceInfoRect.hovered ? 1.0 : 0.5
+
+                smooth: Settings.playerImageSmooth
+                antialiasing: Settings.playerAntialiasing
+                mipmap: Settings.playerImageMipMap
             }
 
             onClicked: {

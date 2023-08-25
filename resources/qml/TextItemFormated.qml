@@ -6,6 +6,9 @@ Rectangle {
     id: textItemRoot
     color: "transparent"
 
+    smooth: Settings.playerImageSmooth
+    antialiasing: Settings.playerAntialiasing
+
     property real maximumWidth: 1000000
     property string text: ""
     property var textColor: "#ffffff"

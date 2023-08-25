@@ -332,7 +332,7 @@ Rectangle {
     Rectangle {
         color: "transparent"
         anchors.fill: parent
-        layer.enabled: true
+        layer.enabled: Settings.playerDropShadow
         layer.effect: DropShadow {
             transparentBorder: true
             horizontalOffset: 8

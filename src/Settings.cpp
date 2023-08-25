@@ -92,6 +92,10 @@ const QString CSettings::c_sSettingMetronomeSfx = "Audio/metronomeSfx";
 const QString CSettings::c_sSettingMetronomeVolume = "Audio/metronomeVolume";
 const QString CSettings::c_sSettingMuted = "Audio/muted";
 const QString CSettings::c_sSettingOffline = "Content/offline";
+const QString CSettings::c_sSettingPlayerAntialiasing = "Graphics/playerAntialiasing";
+const QString CSettings::c_sSettingPlayerDropShadow = "Graphics/playerDropShadow";
+const QString CSettings::c_sSettingPlayerImageMipMap = "Graphics/playerMipMap";
+const QString CSettings::c_sSettingPlayerImageSmooth = "Graphics/playerSmooth";
 const QString CSettings::c_sSettingPushNotifications = "Content/pushnotifications";
 const QString CSettings::c_sSettingResolution = "Graphics/resolution";
 const QString CSettings::c_sSettingStyle = "Graphics/style";
@@ -485,6 +489,98 @@ bool CSettings::PauseWhenInactive()
 {
   QMutexLocker locker(&m_settingsMutex);
   return m_spSettings->value(CSettings::c_sSettingAutoPauseInactive).toBool();
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CSettings::SetPlayerAntialiasing(bool bValue)
+{
+  QMutexLocker locker(&m_settingsMutex);
+
+  bool vSetValue = m_spSettings->value(CSettings::c_sSettingPlayerAntialiasing).toBool();
+
+  if (vSetValue == bValue) { return; }
+
+  m_spSettings->setValue(CSettings::c_sSettingPlayerAntialiasing, bValue);
+
+  emit playerAntialiasingChanged();
+}
+
+//----------------------------------------------------------------------------------------
+//
+bool CSettings::PlayerAntialiasing() const
+{
+  QMutexLocker locker(&m_settingsMutex);
+  return m_spSettings->value(CSettings::c_sSettingPlayerAntialiasing).toBool();
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CSettings::SetPlayerDropShadow(bool bValue)
+{
+  QMutexLocker locker(&m_settingsMutex);
+
+  bool vSetValue = m_spSettings->value(CSettings::c_sSettingPlayerDropShadow).toBool();
+
+  if (vSetValue == bValue) { return; }
+
+  m_spSettings->setValue(CSettings::c_sSettingPlayerDropShadow, bValue);
+
+  emit playerDropShadowChanged();
+}
+
+//----------------------------------------------------------------------------------------
+//
+bool CSettings::PlayerDropShadow() const
+{
+  QMutexLocker locker(&m_settingsMutex);
+  return m_spSettings->value(CSettings::c_sSettingPlayerDropShadow).toBool();
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CSettings::SetPlayerImageMipMap(bool bValue)
+{
+  QMutexLocker locker(&m_settingsMutex);
+
+  bool vSetValue = m_spSettings->value(CSettings::c_sSettingPlayerImageMipMap).toBool();
+
+  if (vSetValue == bValue) { return; }
+
+  m_spSettings->setValue(CSettings::c_sSettingPlayerImageMipMap, bValue);
+
+  emit playerImageMipMapChanged();
+}
+
+//----------------------------------------------------------------------------------------
+//
+bool CSettings::PlayerImageMipMap() const
+{
+  QMutexLocker locker(&m_settingsMutex);
+  return m_spSettings->value(CSettings::c_sSettingPlayerImageMipMap).toBool();
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CSettings::SetPlayerImageSmooth(bool bValue)
+{
+  QMutexLocker locker(&m_settingsMutex);
+
+  bool vSetValue = m_spSettings->value(CSettings::c_sSettingPlayerImageSmooth).toBool();
+
+  if (vSetValue == bValue) { return; }
+
+  m_spSettings->setValue(CSettings::c_sSettingPlayerImageSmooth, bValue);
+
+  emit playerImageSmoothChanged();
+}
+
+//----------------------------------------------------------------------------------------
+//
+bool CSettings::PlayerImageSmooth() const
+{
+  QMutexLocker locker(&m_settingsMutex);
+  return m_spSettings->value(CSettings::c_sSettingPlayerImageSmooth).toBool();
 }
 
 //----------------------------------------------------------------------------------------
@@ -901,6 +997,28 @@ void CSettings::GenerateSettingsIfNotExists()
   {
     bNeedsSynch = true;
     m_spSettings->setValue(CSettings::c_sSettingOffline, false);
+  }
+
+  // check player graphical settings
+  if (!m_spSettings->contains(CSettings::c_sSettingPlayerAntialiasing))
+  {
+    bNeedsSynch = true;
+    m_spSettings->setValue(CSettings::c_sSettingPlayerAntialiasing, true);
+  }
+  if (!m_spSettings->contains(CSettings::c_sSettingPlayerDropShadow))
+  {
+    bNeedsSynch = true;
+    m_spSettings->setValue(CSettings::c_sSettingPlayerDropShadow, true);
+  }
+  if (!m_spSettings->contains(CSettings::c_sSettingPlayerImageMipMap))
+  {
+    bNeedsSynch = true;
+    m_spSettings->setValue(CSettings::c_sSettingPlayerImageMipMap, true);
+  }
+  if (!m_spSettings->contains(CSettings::c_sSettingPlayerImageSmooth))
+  {
+    bNeedsSynch = true;
+    m_spSettings->setValue(CSettings::c_sSettingPlayerImageSmooth, true);
   }
 
   // check push notifications

@@ -24,6 +24,10 @@ class CSettings : public QObject
   Q_PROPERTY(bool offline READ Offline WRITE SetOffline NOTIFY offlineChanged)
   Q_PROPERTY(bool pauseWhenInactive READ PauseWhenInactive WRITE SetPauseWhenInactive NOTIFY pauseWhenInactiveChanged)
   Q_PROPERTY(QString platform READ Platform CONSTANT)
+  Q_PROPERTY(bool playerAntialiasing READ PlayerAntialiasing WRITE SetPlayerAntialiasing NOTIFY playerAntialiasingChanged)
+  Q_PROPERTY(bool playerDropShadow READ PlayerDropShadow WRITE SetPlayerDropShadow NOTIFY playerDropShadowChanged)
+  Q_PROPERTY(bool playerImageMipMap READ PlayerImageMipMap WRITE SetPlayerImageMipMap NOTIFY playerImageMipMapChanged)
+  Q_PROPERTY(bool playerImageSmooth READ PlayerImageSmooth WRITE SetPlayerImageSmooth NOTIFY playerImageSmoothChanged)
   Q_PROPERTY(EditorType preferedEditorLayout READ PreferedEditorLayout WRITE SetPreferedEditorLayout NOTIFY preferedEditorLayoutChanged)
   Q_PROPERTY(bool pushNotifications READ PushNotifications WRITE SetPushNotifications NOTIFY pushNotificationsChanged)
   Q_PROPERTY(QSize resolution READ Resolution WRITE SetResolution NOTIFY resolutionChanged)
@@ -45,6 +49,10 @@ public:
   static const QString c_sSettingMetronomeVolume;
   static const QString c_sSettingMuted;
   static const QString c_sSettingOffline;
+  static const QString c_sSettingPlayerAntialiasing;
+  static const QString c_sSettingPlayerDropShadow;
+  static const QString c_sSettingPlayerImageMipMap;
+  static const QString c_sSettingPlayerImageSmooth;
   static const QString c_sSettingPushNotifications;
   static const QString c_sSettingResolution;
   static const QString c_sSettingStyle;
@@ -96,6 +104,14 @@ public:
   bool Offline();
   void SetPauseWhenInactive(bool bValue);
   bool PauseWhenInactive();
+  void SetPlayerAntialiasing(bool bValue);
+  bool PlayerAntialiasing() const;
+  void SetPlayerDropShadow(bool bValue);
+  bool PlayerDropShadow() const;
+  void SetPlayerImageMipMap(bool bValue);
+  bool PlayerImageMipMap() const;
+  void SetPlayerImageSmooth(bool bValue);
+  bool PlayerImageSmooth() const;
   void SetPreferedEditorLayout(const EditorType& eType);
   EditorType PreferedEditorLayout();
   void SetResolution(const QSize& size);
@@ -130,6 +146,10 @@ signals:
   void mutedChanged();
   void offlineChanged();
   void pauseWhenInactiveChanged();
+  void playerAntialiasingChanged();
+  void playerDropShadowChanged();
+  void playerImageMipMapChanged();
+  void playerImageSmoothChanged();
   void pushNotificationsChanged();
   void preferedEditorLayoutChanged();
   void resolutionChanged();

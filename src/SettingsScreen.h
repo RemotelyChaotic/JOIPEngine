@@ -35,6 +35,10 @@ signals:
 protected slots:
   void on_pWindowModeComboBox_currentIndexChanged(qint32 iIndex);
   void on_pResolutionComboBox_currentIndexChanged(qint32 iIndex);
+  void on_pAntialiasingCheckBox_toggled(bool bState);
+  void on_pDropShadowCheckBox_toggled(bool bState);
+  void on_pMipMapCheckBox_toggled(bool bState);
+  void on_pSmoothingCheckBox_toggled(bool bState);
   void on_pFontComboBox_currentFontChanged(const QFont& font);
   void on_pStyleComboBox_currentIndexChanged(qint32 iIndex);
   void on_pEditorLayoutComboBox_currentIndexChanged(qint32 iIndex);

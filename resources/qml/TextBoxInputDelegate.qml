@@ -9,6 +9,9 @@ Rectangle {
     height: 40 + 40
     color: "transparent"
 
+    smooth: Settings.playerImageSmooth
+    antialiasing: Settings.playerAntialiasing
+
     property var requestId: sRequestId
 
     MouseArea {

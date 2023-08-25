@@ -31,6 +31,7 @@ namespace  {
 
   const QString c_sWindowModeHelpId = "Settings/WindowMode";
   const QString c_sDataFolderHelpId = "Settings/DataFolder";
+  const QString c_sPlayerGraphicsHelpId = "Settings/PlayerGraphics";
   const QString c_sFontHelpId = "Settings/Font";
   const QString c_sStyleHelpId = "Settings/Style";
   const QString c_sResolutionHelpId = "Settings/Resolution";
@@ -103,6 +104,8 @@ void CSettingsScreen::Initialize()
     wpHelpFactory->RegisterHelp(c_sWindowModeHelpId, ":/resources/help/settings/window_mode_setting_help.html");
     m_spUi->pContentContainer->setProperty(helpOverlay::c_sHelpPagePropertyName, c_sDataFolderHelpId);
     wpHelpFactory->RegisterHelp(c_sDataFolderHelpId, ":/resources/help/settings/datafolder_setting_help.html");
+    m_spUi->pPlayerSettingsGroupBox->setProperty(helpOverlay::c_sHelpPagePropertyName, c_sPlayerGraphicsHelpId);
+    wpHelpFactory->RegisterHelp(c_sPlayerGraphicsHelpId, ":/resources/help/settings/playersettings_setting_help.html");
     m_spUi->pFontContainer->setProperty(helpOverlay::c_sHelpPagePropertyName, c_sFontHelpId);
     wpHelpFactory->RegisterHelp(c_sFontHelpId, ":/resources/help/settings/font_setting_help.html");
     m_spUi->pStyleContainer->setProperty(helpOverlay::c_sHelpPagePropertyName, c_sStyleHelpId);
@@ -218,12 +221,22 @@ void CSettingsScreen::Load()
   m_spUi->pPauseWhenNotActiveCheckBox->blockSignals(true);
   m_spUi->pShowPushNotificationsCeckBox->blockSignals(true);
   m_spUi->pStyleHotoadCheckBox->blockSignals(true);
+  m_spUi->pAntialiasingCheckBox->blockSignals(true);
+  m_spUi->pDropShadowCheckBox->blockSignals(true);
+  m_spUi->pMipMapCheckBox->blockSignals(true);
+  m_spUi->pSmoothingCheckBox->blockSignals(true);
 
   // set fullscreen
   m_spUi->pWindowModeComboBox->setCurrentIndex(static_cast<qint32>(m_spSettings->GetWindowMode()));
 
   // find available screen dimensions
   m_spUi->pResolutionComboBox->setSizeAdjustPolicy(QComboBox::AdjustToContents);
+
+  // player graphical settings
+  m_spUi->pAntialiasingCheckBox->setChecked(m_spSettings->PlayerAntialiasing());
+  m_spUi->pDropShadowCheckBox->setChecked(m_spSettings->PlayerDropShadow());
+  m_spUi->pMipMapCheckBox->setChecked(m_spSettings->PlayerImageMipMap());
+  m_spUi->pSmoothingCheckBox->setChecked(m_spSettings->PlayerImageSmooth());
 
   qint32 iIndex = 0;
   bool bFoundResolution = false;
@@ -349,6 +362,10 @@ void CSettingsScreen::Load()
   m_spUi->pPauseWhenNotActiveCheckBox->blockSignals(false);
   m_spUi->pShowPushNotificationsCeckBox->blockSignals(false);
   m_spUi->pStyleHotoadCheckBox->blockSignals(false);
+  m_spUi->pAntialiasingCheckBox->blockSignals(false);
+  m_spUi->pDropShadowCheckBox->blockSignals(false);
+  m_spUi->pMipMapCheckBox->blockSignals(false);
+  m_spUi->pSmoothingCheckBox->blockSignals(false);
 }
 
 //----------------------------------------------------------------------------------------
@@ -391,6 +408,50 @@ void CSettingsScreen::on_pResolutionComboBox_currentIndexChanged(qint32 iIndex)
 
   QSize size = m_spUi->pResolutionComboBox->itemData(iIndex, Qt::UserRole).toSize();
   m_spSettings->SetResolution(size);
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CSettingsScreen::on_pAntialiasingCheckBox_toggled(bool bState)
+{
+  WIDGET_INITIALIZED_GUARD
+  assert(nullptr != m_spSettings);
+  if (nullptr == m_spSettings) { return; }
+
+  m_spSettings->SetPlayerAntialiasing(bState);
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CSettingsScreen::on_pDropShadowCheckBox_toggled(bool bState)
+{
+  WIDGET_INITIALIZED_GUARD
+  assert(nullptr != m_spSettings);
+  if (nullptr == m_spSettings) { return; }
+
+  m_spSettings->SetPlayerDropShadow(bState);
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CSettingsScreen::on_pMipMapCheckBox_toggled(bool bState)
+{
+  WIDGET_INITIALIZED_GUARD
+  assert(nullptr != m_spSettings);
+  if (nullptr == m_spSettings) { return; }
+
+  m_spSettings->SetPlayerImageMipMap(bState);
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CSettingsScreen::on_pSmoothingCheckBox_toggled(bool bState)
+{
+  WIDGET_INITIALIZED_GUARD
+  assert(nullptr != m_spSettings);
+  if (nullptr == m_spSettings) { return; }
+
+  m_spSettings->SetPlayerImageSmooth(bState);
 }
 
 //----------------------------------------------------------------------------------------

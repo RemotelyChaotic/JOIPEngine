@@ -85,9 +85,9 @@ Rectangle {
             anchors.fill: parent
             source: Settings.styleFolderQml() + "/TimerBg.svg"
             fillMode: Image.Stretch
-            smooth: true
-            antialiasing: true
-            mipmap: true
+            smooth: Settings.playerImageSmooth
+            antialiasing: Settings.playerAntialiasing
+            mipmap: Settings.playerImageMipMap
         }
     }
 
@@ -97,6 +97,8 @@ Rectangle {
         fillColor: "transparent"
 
         visible: timedItem.showClock
+        smooth: Settings.playerImageSmooth
+        antialiasing: Settings.playerAntialiasing
 
         primaryColor: root.style.timerDisplay.primaryColor
         secondaryColor: root.style.timerDisplay.secondaryColor

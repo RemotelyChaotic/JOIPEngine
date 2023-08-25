@@ -86,9 +86,9 @@ Item {
             anchors.fill: parent
             source: Settings.styleFolderQml() + "/IconBg.svg";
             sourceSize: Qt.size(parent.width, parent.height)
-            smooth: true
-            antialiasing: true
-            mipmap: true
+            smooth: Settings.playerImageSmooth
+            antialiasing: Settings.playerAntialiasing
+            mipmap: Settings.playerImageMipMap
         }
 
         Image {
@@ -97,9 +97,9 @@ Item {
             source: Settings.styleFolderQml() + "/IconBgMask.png";
             sourceSize: Qt.size(parent.width, parent.height)
             visible: false
-            smooth: true
-            antialiasing: true
-            mipmap: true
+            smooth: Settings.playerImageSmooth
+            antialiasing: Settings.playerAntialiasing
+            mipmap: Settings.playerImageMipMap
         }
 
         Rectangle {
@@ -148,6 +148,9 @@ Item {
             anchors.fill: resourceDisplay
             source: resourceDisplay
             maskSource: iconBGOpacity
+
+            smooth: Settings.playerImageSmooth
+            antialiasing: Settings.playerAntialiasing
         }
     }
 }

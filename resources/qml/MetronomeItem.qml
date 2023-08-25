@@ -135,6 +135,9 @@ Rectangle {
         width: parent.width > parent.height ? parent.height : parent.width
         color: "transparent"
 
+        smooth: Settings.playerImageSmooth
+        antialiasing: Settings.playerAntialiasing
+
         Rectangle {
             anchors.centerIn: parent
             width: metronomeItem.width > metronomeItem.height ? 5 : (parent.width / 2)
@@ -151,9 +154,9 @@ Rectangle {
 
             source: Settings.styleFolderQml() + "/TimerBg.svg"
             fillMode: Image.Stretch
-            smooth: true
-            antialiasing: true
-            mipmap: true
+            smooth: Settings.playerImageSmooth
+            antialiasing: Settings.playerAntialiasing
+            mipmap: Settings.playerImageMipMap
         }
 
         RadialGradient {

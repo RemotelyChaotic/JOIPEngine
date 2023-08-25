@@ -10,6 +10,7 @@ New Features:
 - Metronome volume and default SFX can be configured.
 - Added the ability to export Projects as an archive from the editor.
 - Added an editor tool to compress all images in a project, reducing the project's size.
+- Added graphics options to optimize the Player and possibly prevent lag on older devices.
 
 Changes:
 - Code Editor supports Lua highlighting, code generation and debugging.
