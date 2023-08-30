@@ -134,31 +134,36 @@ void CScriptNotification::show(QString sId, QString sTitle, QVariant sButtonText
 
 //----------------------------------------------------------------------------------------
 //
-void CScriptNotification::show(QString sId, QString sTitle, QVariant sButtonTextOrTimeout, QVariant onButtonOnTimeoutOrTime)
+void CScriptNotification::show(QString sId, QString sTitle, QVariant sButtonTextOrTimeout,
+                               QVariant onButtonOnTimeoutOrTime)
 {
   if (!CheckIfScriptCanRun()) { return; }
-  if (sButtonTextOrTimeout.type() == QVariant::String)
+
+  if (sButtonTextOrTimeout.isNull())
+  {
+    Show(sId, sTitle, QString(), -1, QString(), QString());
+  }
+  else if (sButtonTextOrTimeout.type() == QVariant::String)
   {
     QString sButtonText = sButtonTextOrTimeout.toString();
     if (onButtonOnTimeoutOrTime.isNull())
     {
+      Show(sId, sTitle, sButtonText, -1, QString(), QString());
+    }
+    else if (onButtonOnTimeoutOrTime.type() == QVariant::String)
+    {
       QString sOnButtonResolved = GetResource(onButtonOnTimeoutOrTime, "show");
       Show(sId, sTitle, sButtonText, -1, sOnButtonResolved, QString());
     }
-    if (onButtonOnTimeoutOrTime.canConvert(QVariant::Double))
+    else if (onButtonOnTimeoutOrTime.canConvert(QVariant::Double))
     {
       double dTimeS = onButtonOnTimeoutOrTime.toDouble();
       Show(sId, sTitle, sButtonText, dTimeS, QString(), QString());
     }
     else
     {
-      QString sOnButtonResolved = GetResource(onButtonOnTimeoutOrTime, "show");
-      Show(sId, sTitle, sButtonText, -1, sOnButtonResolved, QString());
+      Show(sId, sTitle, sButtonText, -1, QString(), QString());
     }
-  }
-  else if (sButtonTextOrTimeout.isNull())
-  {
-    Show(sId, sTitle, QString(), -1, QString(), QString());
   }
   else if (sButtonTextOrTimeout.canConvert(QVariant::Double))
   {
