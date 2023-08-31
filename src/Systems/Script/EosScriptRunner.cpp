@@ -13,6 +13,7 @@
 
 #include "Systems/Resource.h"
 #include "Systems/Scene.h"
+#include "Systems/ScriptRunner.h"
 
 #include <QDebug>
 #include <QFile>
@@ -73,19 +74,73 @@ public:
 
 //----------------------------------------------------------------------------------------
 //
+CEosScriptRunnerInstanceController::CEosScriptRunnerInstanceController(
+    const QString& sName, std::shared_ptr<CJsonInstructionSetRunner> spEosRunner) :
+  QObject(),
+  IScriptRunnerInstanceController(),
+  m_spEosRunner(spEosRunner)
+{
+
+}
+CEosScriptRunnerInstanceController::~CEosScriptRunnerInstanceController()
+{}
+
+//----------------------------------------------------------------------------------------
+//
+void CEosScriptRunnerInstanceController::InterruptExecution()
+{
+  m_spEosRunner->Interrupt();
+}
+
+//----------------------------------------------------------------------------------------
+//
+bool CEosScriptRunnerInstanceController::IsRunning() const
+{
+  return m_spEosRunner->IsRunning();
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CEosScriptRunnerInstanceController::RegisterNewComponent(const QString,
+                                                              CScriptRunnerSignalEmiter*)
+{
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CEosScriptRunnerInstanceController::ResetEngine()
+{
+  m_spEosRunner->Interrupt();
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CEosScriptRunnerInstanceController::UnregisterComponents()
+{
+}
+
+//----------------------------------------------------------------------------------------
+//
+std::shared_ptr<CJsonInstructionSetRunner> CEosScriptRunnerInstanceController::Runner() const
+{
+  return m_spEosRunner;
+}
+
+//----------------------------------------------------------------------------------------
+//
 CEosScriptRunner::CEosScriptRunner(std::weak_ptr<CScriptRunnerSignalContext> spSignalEmitterContext,
+                                   CScriptRunner* pRunnerParent,
                                    QObject* pParent) :
   QObject(pParent),
   IScriptRunnerFactory(),
   m_spEosParser(std::make_unique<CJsonInstructionSetParser>()),
-  m_vspEosRunner(),
-  m_runnerMutex(QMutex::Recursive),
   m_wpSignalEmitterContext(spSignalEmitterContext),
   m_spCurrentScene(nullptr),
   m_sceneMutex(QMutex::Recursive),
   m_sSceneName(),
   m_objectMapMutex(QMutex::Recursive),
   m_objectMap(),
+  m_pRunnerParent(pRunnerParent),
   m_bInitialized(0)
 {
 }
@@ -109,61 +164,12 @@ void CEosScriptRunner::Initialize()
 void CEosScriptRunner::Deinitialize()
 {
   m_bInitialized = 0;
-  QMutexLocker locker(&m_runnerMutex);
-  m_vspEosRunner.clear();
 }
 
 //----------------------------------------------------------------------------------------
 //
-void CEosScriptRunner::InterruptExecution()
-{
-  QMutexLocker locker(&m_runnerMutex);
-  if (0 >= m_vspEosRunner.size())
-  {
-    emit SignalScriptRunFinished(false, QString());
-  }
-  for (auto& it : m_vspEosRunner)
-  {
-    if (nullptr != it.second)
-    {
-      it.second->Interrupt();
-    }
-  }
-}
-
-//----------------------------------------------------------------------------------------
-//
-void CEosScriptRunner::PauseExecution()
-{
-
-}
-
-//----------------------------------------------------------------------------------------
-//
-void CEosScriptRunner::ResumeExecution()
-{
-
-}
-
-//----------------------------------------------------------------------------------------
-//
-bool CEosScriptRunner::HasRunningScripts() const
-{
-  bool bHasRunningScripts = false;
-  QMutexLocker locker(&m_runnerMutex);
-  for (auto& it : m_vspEosRunner)
-  {
-    if (nullptr != it.second)
-    {
-      bHasRunningScripts |= it.second->IsRunning();
-    }
-  }
-  return bHasRunningScripts;
-}
-
-//----------------------------------------------------------------------------------------
-//
-void CEosScriptRunner::LoadScript(const QString& sScript, tspScene spScene, tspResource spResource)
+std::shared_ptr<IScriptRunnerInstanceController>
+CEosScriptRunner::LoadScript(const QString& sScript, tspScene spScene, tspResource spResource)
 {
   // set scene
   m_spCurrentScene = spScene;
@@ -192,32 +198,17 @@ void CEosScriptRunner::LoadScript(const QString& sScript, tspScene spScene, tspR
   if (nullptr == spSignalEmitterContext)
   {
     HandleError(SJsonException{"Internal error.","","",0,0});
-    return;
+    return nullptr;
   }
 
   // create runner
-  std::shared_ptr<CJsonInstructionSetRunner> spEosRunnerMain = nullptr;
-  {
-    QMutexLocker locker(&m_runnerMutex);
-    auto itRunner = m_vspEosRunner.find(c_sMainRunner);
-    if (m_vspEosRunner.end() != itRunner)
-    {
-      if (nullptr != itRunner->second)
-      {
-        itRunner->second->Interrupt();
-      }
-      m_vspEosRunner.erase(itRunner);
-    }
-
-    m_vspEosRunner[c_sMainRunner] =
+  std::shared_ptr<CJsonInstructionSetRunner> spEosRunnerMain =
       m_spEosParser->ParseJson(sScript);
-    spEosRunnerMain = m_vspEosRunner[c_sMainRunner];
-  }
 
   if (nullptr == spEosRunnerMain)
   {
     HandleError(m_spEosParser->Error());
-    return;
+    return nullptr;
   }
 
   spEosRunnerMain->setObjectName(c_sMainRunner);
@@ -228,7 +219,9 @@ void CEosScriptRunner::LoadScript(const QString& sScript, tspScene spScene, tspR
 
   spSignalEmitterContext->SetScriptExecutionStatus(CScriptRunnerSignalEmiter::eRunning);
 
-  QTimer::singleShot(10, this, [this]{ SlotRun(c_sMainRunner, ""); });
+  QTimer::singleShot(10, this, [this, spEosRunnerMain]{ SlotRun(spEosRunnerMain, c_sMainRunner, ""); });
+
+  return std::make_shared<CEosScriptRunnerInstanceController>(c_sMainRunner, spEosRunnerMain);
 }
 
 //----------------------------------------------------------------------------------------
@@ -256,21 +249,18 @@ void CEosScriptRunner::RegisterNewComponent(const QString sName, QJSValue signal
           if (auto spNotification = std::dynamic_pointer_cast<CEosScriptNotification>(spObject))
           {
             connect(spNotification.get(), &CEosScriptNotification::SignalOverlayClosed,
-                    this, [this](const QString& sId) {
-              // we remove the notification now if possible
-              OverlayClosed(sId);
-              emit SignalOverlayClosed(sId);
-            });
+                    this, &CEosScriptRunner::SignalOverlayClosed);
             connect(spNotification.get(), &CEosScriptNotification::SignalOverlayRunAsync,
                     this, [this](const QString& sId) {
-              QMutexLocker locker(&m_runnerMutex);
-              auto it = m_vspEosRunner.find(sId);
-              if (m_vspEosRunner.end() != it)
+              auto spRunner =
+                  std::dynamic_pointer_cast<CEosScriptRunnerInstanceController>(
+                  m_pRunnerParent->RunnerController(sId));
+              if (nullptr != spRunner)
               {
                 // we would call SignalOverlayRunAsync here normally,
                 // but this type of script can only use
                 // eos scripts as notifications
-                SlotRun(sId, sId);
+                SlotRun(spRunner->Runner(), sId, sId);
               }
             });
           }
@@ -308,64 +298,18 @@ void CEosScriptRunner::UnregisterComponents()
 
 //----------------------------------------------------------------------------------------
 //
-void CEosScriptRunner::OverlayCleared()
-{
-  QMutexLocker locker(&m_runnerMutex);
-  auto it = m_vspEosRunner.begin();
-  while (m_vspEosRunner.end() != it)
-  {
-    if (c_sMainRunner != it->first)
-    {
-      it->second->Interrupt();
-      it = m_vspEosRunner.erase(it);
-    }
-    else
-    {
-      ++it;
-    }
-  }
-}
-
-//----------------------------------------------------------------------------------------
-//
-void CEosScriptRunner::OverlayClosed(const QString& sId)
-{
-  QMutexLocker locker(&m_runnerMutex);
-  auto it = m_vspEosRunner.find(sId);
-  if (m_vspEosRunner.end() != it)
-  {
-    it->second->Interrupt();
-    m_vspEosRunner.erase(it);
-  }
-}
-
-//----------------------------------------------------------------------------------------
-//
-void CEosScriptRunner::OverlayRunAsync(const QString& sId, const QString& sScript,
-                                       tspResource spResource)
+std::shared_ptr<IScriptRunnerInstanceController>
+CEosScriptRunner::OverlayRunAsync(const QString& sId, const QString& sScript,
+                                  tspResource spResource)
 {
   // create runner
-  std::shared_ptr<CJsonInstructionSetRunner> spEosRunner = nullptr;
-  {
-    QMutexLocker locker(&m_runnerMutex);
-    auto itRunner = m_vspEosRunner.find(sId);
-    if (m_vspEosRunner.end() != itRunner)
-    {
-      if (nullptr != itRunner->second)
-      {
-        itRunner->second->Interrupt();
-      }
-      m_vspEosRunner.erase(itRunner);
-    }
-
-    m_vspEosRunner[sId] = m_spEosParser->ParseJson(sScript);
-    spEosRunner = m_vspEosRunner[sId];
-  }
+  std::shared_ptr<CJsonInstructionSetRunner> spEosRunner =
+      m_spEosParser->ParseJson(sScript);
 
   if (nullptr == spEosRunner)
   {
     HandleError(m_spEosParser->Error());
-    return;
+    return nullptr;
   }
 
   spEosRunner->setObjectName(sId);
@@ -374,7 +318,9 @@ void CEosScriptRunner::OverlayRunAsync(const QString& sId, const QString& sScrip
   connect(spEosRunner.get(), &CJsonInstructionSetRunner::Fork,
           this, &CEosScriptRunner::SlotFork);
 
-  SlotRun(sId, "");
+  SlotRun(spEosRunner, sId, "");
+
+  return std::make_shared<CEosScriptRunnerInstanceController>(sId, spEosRunner);
 }
 
 //----------------------------------------------------------------------------------------
@@ -392,18 +338,7 @@ void CEosScriptRunner::HandleScriptFinish(bool bSuccess, const QVariant& sRetVal
 
   m_spCurrentScene = nullptr;
 
-  {
-    QMutexLocker locker(&m_runnerMutex);
-    auto itRunner = m_vspEosRunner.find(sId);
-    if (m_vspEosRunner.end() == itRunner || nullptr == itRunner->second)
-    {
-      qWarning() << tr("Internal error: runner was null.");
-      emit SignalScriptRunFinished(false, QString());
-      return;
-    }
-    itRunner->second->Interrupt();
-    m_vspEosRunner.erase(itRunner);
-  }
+  emit SignalRemoveScriptRunner(sId);
 
   if (!bSuccess)
   {
@@ -468,55 +403,41 @@ void CEosScriptRunner::SlotFork(
     return;
   }
 
-  // create runner
-  std::shared_ptr<CJsonInstructionSetRunner> spEosRunner = nullptr;
-  {
-    QMutexLocker locker(&m_runnerMutex);
-    m_vspEosRunner[sForkCommandsName] = spNewRunner;
-    spEosRunner = m_vspEosRunner[sForkCommandsName];
-  }
+  emit SignalAddScriptRunner(sForkCommandsName,
+                             std::make_shared<CEosScriptRunnerInstanceController>(
+                                 sForkCommandsName, spNewRunner));
 
-  spEosRunner->setObjectName(sForkCommandsName);
-  connect(spEosRunner.get(), &CJsonInstructionSetRunner::CommandRetVal,
+  spNewRunner->setObjectName(sForkCommandsName);
+  connect(spNewRunner.get(), &CJsonInstructionSetRunner::CommandRetVal,
           this, &CEosScriptRunner::SlotCommandRetVal);
-  connect(spEosRunner.get(), &CJsonInstructionSetRunner::Fork,
+  connect(spNewRunner.get(), &CJsonInstructionSetRunner::Fork,
           this, &CEosScriptRunner::SlotFork);
 
   if (bAutoRun)
   {
-    SlotRun(sForkCommandsName, sForkCommandsName);
+    SlotRun(spNewRunner, sForkCommandsName, sForkCommandsName);
   }
 }
 
 //----------------------------------------------------------------------------------------
 //
-void CEosScriptRunner::SlotRun(const QString& sRunner, const QString& sCommands)
+void CEosScriptRunner::SlotRun(std::shared_ptr<CJsonInstructionSetRunner> spEosRunner,
+                               const QString& sRunner, const QString& sCommands)
 {
   if (1 != m_bInitialized) { return; }
 
-  QMutexLocker locker(&m_runnerMutex);
-  auto it = m_vspEosRunner.find(sRunner);
-  if (m_vspEosRunner.end() != it)
+  if (nullptr != spEosRunner)
   {
-    std::shared_ptr<CJsonInstructionSetRunner> spRunner = it->second;
-    locker.unlock();
-
-    CJsonInstructionSetRunner::tRetVal retVal = spRunner->Run(sCommands, ERunerMode::eAutoRunAll, false);
+    CJsonInstructionSetRunner::tRetVal retVal =
+        spEosRunner->Run(sCommands, ERunerMode::eAutoRunAll, false);
     if (!std::holds_alternative<SRunnerRetVal>(retVal))
     {
-      locker.relock();
-      auto it = m_vspEosRunner.find(sRunner);
-      if (m_vspEosRunner.end() != it)
-      {
-        m_vspEosRunner.erase(it);
-      }
-      locker.unlock();
+      emit SignalRemoveScriptRunner(sRunner);
       HandleError(std::get<SJsonException>(retVal));
     }
   }
   else
   {
-    locker.unlock();
     HandleError(SJsonException{"Internal error: Runner unavailable","","",0,0});
   }
 }

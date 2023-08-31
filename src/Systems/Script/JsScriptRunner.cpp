@@ -427,94 +427,42 @@ private:
 //----------------------------------------------------------------------------------------
 //
 CJsScriptRunner::CJsScriptRunner(std::weak_ptr<CScriptRunnerSignalContext> spSignalEmitterContext,
+                                 tRunningScriptsCheck fnRunningScriptsCheck,
                                  QObject* pParent) :
   QObject(pParent),
   IScriptRunnerFactory(),
   m_wpSignalEmitterContext(spSignalEmitterContext),
-  m_runnerMutex(QMutex::Recursive),
-  m_vspJsRunner(),
   m_signalEmiterMutex(QMutex::Recursive),
-  m_pSignalEmiters()
+  m_pSignalEmiters(),
+  m_fnRunningScriptsCheck(fnRunningScriptsCheck)
 {
 }
 
 CJsScriptRunner::~CJsScriptRunner()
 {
-  QMutexLocker locker(&m_runnerMutex);
-  m_vspJsRunner.clear();
 }
 
 //----------------------------------------------------------------------------------------
 //
 void CJsScriptRunner::Initialize()
 {
-  QMutexLocker locker(&m_runnerMutex);
-  m_vspJsRunner.clear();
 }
 
 //----------------------------------------------------------------------------------------
 //
 void CJsScriptRunner::Deinitialize()
 {
-  QMutexLocker locker(&m_runnerMutex);
-  m_vspJsRunner.clear();
 }
 
 //----------------------------------------------------------------------------------------
 //
-void CJsScriptRunner::InterruptExecution()
+std::shared_ptr<IScriptRunnerInstanceController>
+CJsScriptRunner::LoadScript(const QString& sScript,
+                            tspScene spScene, tspResource spResource)
 {
-  QMutexLocker locker(&m_runnerMutex);
-  for (auto& it : m_vspJsRunner)
-  {
-    it.second->InterruptExecution();
-  }
-}
-
-//----------------------------------------------------------------------------------------
-//
-void CJsScriptRunner::PauseExecution()
-{
-}
-
-//----------------------------------------------------------------------------------------
-//
-void CJsScriptRunner::ResumeExecution()
-{
-}
-
-//----------------------------------------------------------------------------------------
-//
-bool CJsScriptRunner::HasRunningScripts() const
-{
-  bool bHasRunningScripts = false;
-  QMutexLocker locker(&m_runnerMutex);
-  for (auto& it : m_vspJsRunner)
-  {
-    bHasRunningScripts |= it.second->IsRunning();
-  }
-  return bHasRunningScripts;
-}
-
-//----------------------------------------------------------------------------------------
-//
-void CJsScriptRunner::LoadScript(const QString& sScript,
-                                 tspScene spScene, tspResource spResource)
-{
-  {
-    // we need to clear old runner just in case
-    QMutexLocker locker(&m_runnerMutex);
-    auto it = m_vspJsRunner.find(c_sMainRunner);
-    if (m_vspJsRunner.end() != it)
-    {
-      it->second->InterruptExecution();
-      it->second->ResetEngine();
-      m_vspJsRunner.erase(it);
-    }
-  }
-
-  CreateRunner(c_sMainRunner);
-  RunScript(c_sMainRunner, sScript, spScene, spResource);
+  std::shared_ptr<CScriptRunnerInstanceController> spRunner = CreateRunner(c_sMainRunner);
+  RunScript(spRunner, sScript, spScene, spResource);
+  return spRunner;
 }
 
 //----------------------------------------------------------------------------------------
@@ -527,14 +475,6 @@ void CJsScriptRunner::RegisterNewComponent(const QString sName, QJSValue signalE
     pObject = qobject_cast<CScriptRunnerSignalEmiter*>(signalEmitter.toQObject());
   }
 
-  {
-    QMutexLocker locker(&m_runnerMutex);
-    for (auto& it : m_vspJsRunner)
-    {
-      it.second->RegisterNewComponent(sName, pObject);
-    }
-  }
-
   QMutexLocker lockerEmiter(&m_signalEmiterMutex);
   m_pSignalEmiters.insert({sName, pObject});
 }
@@ -543,69 +483,22 @@ void CJsScriptRunner::RegisterNewComponent(const QString sName, QJSValue signalE
 //
 void CJsScriptRunner::UnregisterComponents()
 {
-  QMutexLocker locker(&m_runnerMutex);
-  for (auto& it : m_vspJsRunner)
-  {
-    it.second->UnregisterComponents();
-  }
-
   QMutexLocker lockerEmiter(&m_signalEmiterMutex);
   m_pSignalEmiters.clear();
 }
 
 //----------------------------------------------------------------------------------------
 //
-void CJsScriptRunner::OverlayCleared()
+std::shared_ptr<IScriptRunnerInstanceController> CJsScriptRunner::OverlayRunAsync(
+    const QString& sId, const QString& sScript, tspResource spResource)
 {
-  QMutexLocker locker(&m_runnerMutex);
-  auto it = m_vspJsRunner.begin();
-  while (m_vspJsRunner.end() != it)
-  {
-    if (c_sMainRunner != it->first)
-    {
-      it->second->ResetEngine();
-      it = m_vspJsRunner.erase(it);
-    }
-    else
-    {
-      ++it;
-    }
-  }
-}
-
-//----------------------------------------------------------------------------------------
-//
-void CJsScriptRunner::OverlayClosed(const QString& sId)
-{
-  QMutexLocker locker(&m_runnerMutex);
-  auto it = m_vspJsRunner.find(sId);
-  if (m_vspJsRunner.end() == it)
-  {
-    return;
-  }
-
-  it->second->ResetEngine();
-
-  if (c_sMainRunner != sId)
-  {
-    m_vspJsRunner.erase(it);
-  }
-}
-
-//----------------------------------------------------------------------------------------
-//
-void CJsScriptRunner::OverlayRunAsync(const QString& sId,
-                                      const QString& sScript, tspResource spResource)
-{
-  {
-    CreateRunner(sId);
-  }
+  std::shared_ptr<CScriptRunnerInstanceController> spController = CreateRunner(sId);
 
   auto spSignalEmitterContext = m_wpSignalEmitterContext.lock();
   if (nullptr == spSignalEmitterContext)
   {
     qWarning() << "m_wpSignalEmitterContext was null";
-    return;
+    return nullptr;
   }
 
   if (nullptr == spResource ||
@@ -614,36 +507,26 @@ void CJsScriptRunner::OverlayRunAsync(const QString& sId,
     QString sError = tr("Script file, Scene or Project is null");
     qCritical() << sError;
     emit spSignalEmitterContext->showError(sError, QtMsgType::QtCriticalMsg);
-    return;
+    return nullptr;
   }
 
-  RunScript(sId, sScript, nullptr, spResource);
+  RunScript(spController, sScript, nullptr, spResource);
+  return spController;
 }
 
 //----------------------------------------------------------------------------------------
 //
-void CJsScriptRunner::SlotHandleScriptFinish(const QString& sName, bool bSuccess, const QVariant& sRetVal)
+void CJsScriptRunner::SlotHandleScriptFinish(const QString& sName, bool bSuccess,
+                                             const QVariant& sRetVal)
 {
-  {
-    QMutexLocker locker(&m_runnerMutex);
-    auto it = m_vspJsRunner.find(sName);
-    if (m_vspJsRunner.end() == it)
-    {
-      qWarning() << QString("JS Script runner %1 not found").arg(sName);
-      return;
-    }
-
-    it->second->ResetEngine();
-
-    m_vspJsRunner.erase(it);
-  }
+  emit SignalRemoveScriptRunner(sName);
 
   if (!bSuccess)
   {
     qWarning() << tr("Error in script, unloading project.");
   }
 
-  if (c_sMainRunner == sName || QVariant::String == sRetVal.type() || !HasRunningScripts())
+  if (c_sMainRunner == sName || QVariant::String == sRetVal.type() || !m_fnRunningScriptsCheck())
   {
     if (QVariant::String == sRetVal.type())
     {
@@ -658,45 +541,40 @@ void CJsScriptRunner::SlotHandleScriptFinish(const QString& sName, bool bSuccess
 
 //----------------------------------------------------------------------------------------
 //
-void CJsScriptRunner::CreateRunner(const QString& sId)
+std::shared_ptr<CScriptRunnerInstanceController> CJsScriptRunner::CreateRunner(const QString& sId)
 {
-  QMutexLocker locker(&m_runnerMutex);
-  m_vspJsRunner.insert({sId,
-                        std::make_shared<CScriptRunnerInstanceController>(
+  std::shared_ptr<CScriptRunnerInstanceController> spController =
+      std::make_shared<CScriptRunnerInstanceController>(
                           sId,
                           std::make_shared<CJsScriptRunnerInstanceWorker>(
                             sId, m_wpSignalEmitterContext),
-                          m_wpSignalEmitterContext)});
-  auto it = m_vspJsRunner.find(sId);
-  it->second->setObjectName(sId);
-  connect(it->second.get(), &CScriptRunnerInstanceController::HandleScriptFinish,
+                          m_wpSignalEmitterContext);
+  spController->setObjectName(sId);
+  connect(spController.get(), &CScriptRunnerInstanceController::HandleScriptFinish,
           this, &CJsScriptRunner::SlotHandleScriptFinish);
 
-  connect(it->second.get(), &CScriptRunnerInstanceController::SignalOverlayCleared,
+  connect(spController.get(), &CScriptRunnerInstanceController::SignalOverlayCleared,
           this, &CJsScriptRunner::SignalOverlayCleared);
-  connect(it->second.get(), &CScriptRunnerInstanceController::SignalOverlayClosed,
+  connect(spController.get(), &CScriptRunnerInstanceController::SignalOverlayClosed,
           this, &CJsScriptRunner::SignalOverlayClosed);
-  connect(it->second.get(), &CScriptRunnerInstanceController::SignalOverlayRunAsync,
+  connect(spController.get(), &CScriptRunnerInstanceController::SignalOverlayRunAsync,
           this, &CJsScriptRunner::SignalOverlayRunAsync);
 
   QMutexLocker lockerEmiter(&m_signalEmiterMutex);
   for (auto& itEmiter : m_pSignalEmiters)
   {
-    it->second->RegisterNewComponent(itEmiter.first, itEmiter.second);
+    spController->RegisterNewComponent(itEmiter.first, itEmiter.second);
   }
+  return spController;
 }
 
 //----------------------------------------------------------------------------------------
 //
-void CJsScriptRunner::RunScript(const QString& sId, const QString& sScript,
+void CJsScriptRunner::RunScript(std::shared_ptr<CScriptRunnerInstanceController> spController,
+                                const QString& sScript,
                                 tspScene spScene, tspResource spResource)
 {
-  QMutexLocker locker(&m_runnerMutex);
-  auto it = m_vspJsRunner.find(sId);
-  if (m_vspJsRunner.end() != it)
-  {
-    it->second->RunScript(sScript, spScene, spResource);
-  }
+  spController->RunScript(sScript, spScene, spResource);
 }
 
 //----------------------------------------------------------------------------------------

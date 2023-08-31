@@ -13,6 +13,7 @@
 
 class CScriptRunnerSignalContext;
 class CSettings;
+class IScriptRunnerInstanceController;
 
 //----------------------------------------------------------------------------------------
 //
@@ -29,7 +30,9 @@ public:
   void PauseExecution();
   void ResumeExecution();
 
-  std::shared_ptr<CScriptRunnerSignalContext> SignalEmmitterContext();
+  bool HasRunningScripts() const;
+  std::shared_ptr<IScriptRunnerInstanceController> RunnerController(const QString& sId) const;
+  std::shared_ptr<CScriptRunnerSignalContext> SignalEmmitterContext()const ;
 
 signals:
   void SignalRunningChanged(bool bRunning);
@@ -44,9 +47,11 @@ public slots:
   void UnregisterComponents();
 
 protected slots:
+  void SlotAddScriptController(const QString& sId, std::shared_ptr<IScriptRunnerInstanceController>);
   void SlotOverlayCleared();
   void SlotOverlayClosed(const QString& sId);
   void SlotOverlayRunAsync(tspProject spProject, const QString& sId, const QString& sScriptResource);
+  void SlotRemoveScriptRunner(const QString& sId);
   void SlotScriptRunFinished(bool bOk, const QString& sRetVal);
 
 private:
@@ -55,6 +60,9 @@ private:
                                             const QString&, tspScene, tspResource)> fn);
 
   std::map<QString, std::unique_ptr<IScriptRunnerFactory>> m_spRunnerFactoryMap;
+  mutable QMutex                                           m_runnerMutex;
+  std::map<QString, std::shared_ptr<IScriptRunnerInstanceController>>
+                                                           m_vspRunner;
   std::shared_ptr<CScriptRunnerSignalContext>              m_spSignalEmitterContext;
 };
 

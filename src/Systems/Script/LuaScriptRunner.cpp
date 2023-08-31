@@ -622,93 +622,41 @@ namespace lua
 //----------------------------------------------------------------------------------------
 //
 CLuaScriptRunner::CLuaScriptRunner(std::weak_ptr<CScriptRunnerSignalContext> spSignalEmitterContext,
+                                   tRunningScriptsCheck fnRunningScriptsCheck,
                                    QObject* pParent) :
   QObject(pParent),
   IScriptRunnerFactory(),
   m_wpSignalEmitterContext(spSignalEmitterContext),
-  m_runnerMutex(QMutex::Recursive),
-  m_vspLuaRunner(),
   m_signalEmiterMutex(QMutex::Recursive),
-  m_pSignalEmiters()
+  m_pSignalEmiters(),
+  m_fnRunningScriptsCheck(fnRunningScriptsCheck)
 {
 }
 CLuaScriptRunner::~CLuaScriptRunner()
 {
-  QMutexLocker locker(&m_runnerMutex);
-  m_vspLuaRunner.clear();
 }
 
 //----------------------------------------------------------------------------------------
 //
 void CLuaScriptRunner::Initialize()
 {
-  QMutexLocker locker(&m_runnerMutex);
-  m_vspLuaRunner.clear();
 }
 
 //----------------------------------------------------------------------------------------
 //
 void CLuaScriptRunner::Deinitialize()
 {
-  QMutexLocker locker(&m_runnerMutex);
-  m_vspLuaRunner.clear();
 }
 
 //----------------------------------------------------------------------------------------
 //
-void CLuaScriptRunner::InterruptExecution()
+std::shared_ptr<IScriptRunnerInstanceController>
+CLuaScriptRunner::LoadScript(const QString& sScript,
+                             tspScene spScene, tspResource spResource)
 {
-  QMutexLocker locker(&m_runnerMutex);
-  for (auto& it : m_vspLuaRunner)
-  {
-    it.second->InterruptExecution();
-  }
-}
-
-//----------------------------------------------------------------------------------------
-//
-void CLuaScriptRunner::PauseExecution()
-{
-}
-
-//----------------------------------------------------------------------------------------
-//
-void CLuaScriptRunner::ResumeExecution()
-{
-}
-
-//----------------------------------------------------------------------------------------
-//
-bool CLuaScriptRunner::HasRunningScripts() const
-{
-  bool bHasRunningScripts = false;
-  QMutexLocker locker(&m_runnerMutex);
-  for (auto& it : m_vspLuaRunner)
-  {
-    bHasRunningScripts |= it.second->IsRunning();
-  }
-  return bHasRunningScripts;
-}
-
-//----------------------------------------------------------------------------------------
-//
-void CLuaScriptRunner::LoadScript(const QString& sScript,
-                                  tspScene spScene, tspResource spResource)
-{
-  {
-    // we need to clear old runner just in case
-    QMutexLocker locker(&m_runnerMutex);
-    auto it = m_vspLuaRunner.find(c_sMainRunner);
-    if (m_vspLuaRunner.end() != it)
-    {
-      it->second->InterruptExecution();
-      it->second->ResetEngine();
-      m_vspLuaRunner.erase(it);
-    }
-  }
-
-  CreateRunner(c_sMainRunner);
-  RunScript(c_sMainRunner, sScript, spScene, spResource);
+  std::shared_ptr<CScriptRunnerInstanceController> spRunner = CreateRunner(c_sMainRunner);
+  RunScript(spRunner, sScript, spScene, spResource);
+  return spRunner;
 }
 
 //----------------------------------------------------------------------------------------
@@ -721,14 +669,6 @@ void CLuaScriptRunner::RegisterNewComponent(const QString sName, QJSValue signal
     pObject = qobject_cast<CScriptRunnerSignalEmiter*>(signalEmitter.toQObject());
   }
 
-  {
-    QMutexLocker locker(&m_runnerMutex);
-    for (auto& it : m_vspLuaRunner)
-    {
-      it.second->RegisterNewComponent(sName, pObject);
-    }
-  }
-
   QMutexLocker lockerEmiter(&m_signalEmiterMutex);
   m_pSignalEmiters.insert({sName, pObject});
 }
@@ -737,69 +677,23 @@ void CLuaScriptRunner::RegisterNewComponent(const QString sName, QJSValue signal
 //
 void CLuaScriptRunner::UnregisterComponents()
 {
-  QMutexLocker locker(&m_runnerMutex);
-  for (auto& it : m_vspLuaRunner)
-  {
-    it.second->UnregisterComponents();
-  }
-
   QMutexLocker lockerEmiter(&m_signalEmiterMutex);
   m_pSignalEmiters.clear();
 }
 
 //----------------------------------------------------------------------------------------
 //
-void CLuaScriptRunner::OverlayCleared()
+std::shared_ptr<IScriptRunnerInstanceController>
+CLuaScriptRunner::OverlayRunAsync(const QString& sId,
+                                  const QString& sScript, tspResource spResource)
 {
-  QMutexLocker locker(&m_runnerMutex);
-  auto it = m_vspLuaRunner.begin();
-  while (m_vspLuaRunner.end() != it)
-  {
-    if (c_sMainRunner != it->first)
-    {
-      it->second->ResetEngine();
-      it = m_vspLuaRunner.erase(it);
-    }
-    else
-    {
-      ++it;
-    }
-  }
-}
-
-//----------------------------------------------------------------------------------------
-//
-void CLuaScriptRunner::OverlayClosed(const QString& sId)
-{
-  QMutexLocker locker(&m_runnerMutex);
-  auto it = m_vspLuaRunner.find(sId);
-  if (m_vspLuaRunner.end() == it)
-  {
-    return;
-  }
-
-  it->second->ResetEngine();
-
-  if (c_sMainRunner != sId)
-  {
-    m_vspLuaRunner.erase(it);
-  }
-}
-
-//----------------------------------------------------------------------------------------
-//
-void CLuaScriptRunner::OverlayRunAsync(const QString& sId,
-                                      const QString& sScript, tspResource spResource)
-{
-  {
-    CreateRunner(sId);
-  }
+  std::shared_ptr<CScriptRunnerInstanceController> spRunner = CreateRunner(sId);
 
   auto spSignalEmitterContext = m_wpSignalEmitterContext.lock();
   if (nullptr == spSignalEmitterContext)
   {
     qWarning() << "m_wpSignalEmitterContext was null";
-    return;
+    return nullptr;
   }
 
   if (nullptr == spResource ||
@@ -808,10 +702,11 @@ void CLuaScriptRunner::OverlayRunAsync(const QString& sId,
     QString sError = tr("Script file, Scene or Project is null");
     qCritical() << sError;
     emit spSignalEmitterContext->showError(sError, QtMsgType::QtCriticalMsg);
-    return;
+    return nullptr;
   }
 
-  RunScript(sId, sScript, nullptr, spResource);
+  RunScript(spRunner, sScript, nullptr, spResource);
+  return spRunner;
 }
 
 //----------------------------------------------------------------------------------------
@@ -819,26 +714,14 @@ void CLuaScriptRunner::OverlayRunAsync(const QString& sId,
 void CLuaScriptRunner::SlotHandleScriptFinish(const QString& sName, bool bSuccess,
                                               const QVariant& sRetVal)
 {
-  {
-    QMutexLocker locker(&m_runnerMutex);
-    auto it = m_vspLuaRunner.find(sName);
-    if (m_vspLuaRunner.end() == it)
-    {
-      qWarning() << QString("Lua Script runner %1 not found").arg(sName);
-      return;
-    }
-
-    it->second->ResetEngine();
-
-    m_vspLuaRunner.erase(it);
-  }
+  emit SignalRemoveScriptRunner(sName);
 
   if (!bSuccess)
   {
     qWarning() << tr("Error in script, unloading project.");
   }
 
-  if (c_sMainRunner == sName || QVariant::String == sRetVal.type() || !HasRunningScripts())
+  if (c_sMainRunner == sName || QVariant::String == sRetVal.type() || !m_fnRunningScriptsCheck())
   {
     if (QVariant::String == sRetVal.type())
     {
@@ -853,45 +736,40 @@ void CLuaScriptRunner::SlotHandleScriptFinish(const QString& sName, bool bSucces
 
 //----------------------------------------------------------------------------------------
 //
-void CLuaScriptRunner::CreateRunner(const QString& sId)
+std::shared_ptr<CScriptRunnerInstanceController> CLuaScriptRunner::CreateRunner(const QString& sId)
 {
-  QMutexLocker locker(&m_runnerMutex);
-  m_vspLuaRunner.insert({sId,
-                         std::make_shared<CScriptRunnerInstanceController>(
+  std::shared_ptr<CScriptRunnerInstanceController> spRunner =
+      std::make_shared<CScriptRunnerInstanceController>(
                            sId,
                            std::make_shared<CLuaScriptRunnerInstanceWorker>(
                              sId, m_wpSignalEmitterContext),
-                           m_wpSignalEmitterContext)});
-  auto it = m_vspLuaRunner.find(sId);
-  it->second->setObjectName(sId);
-  connect(it->second.get(), &CScriptRunnerInstanceController::HandleScriptFinish,
+                           m_wpSignalEmitterContext);
+  spRunner->setObjectName(sId);
+  connect(spRunner.get(), &CScriptRunnerInstanceController::HandleScriptFinish,
           this, &CLuaScriptRunner::SlotHandleScriptFinish);
 
-  connect(it->second.get(), &CScriptRunnerInstanceController::SignalOverlayCleared,
+  connect(spRunner.get(), &CScriptRunnerInstanceController::SignalOverlayCleared,
           this, &CLuaScriptRunner::SignalOverlayCleared);
-  connect(it->second.get(), &CScriptRunnerInstanceController::SignalOverlayClosed,
+  connect(spRunner.get(), &CScriptRunnerInstanceController::SignalOverlayClosed,
           this, &CLuaScriptRunner::SignalOverlayClosed);
-  connect(it->second.get(), &CScriptRunnerInstanceController::SignalOverlayRunAsync,
+  connect(spRunner.get(), &CScriptRunnerInstanceController::SignalOverlayRunAsync,
           this, &CLuaScriptRunner::SignalOverlayRunAsync);
 
   QMutexLocker lockerEmiter(&m_signalEmiterMutex);
   for (auto& itEmiter : m_pSignalEmiters)
   {
-    it->second->RegisterNewComponent(itEmiter.first, itEmiter.second);
+    spRunner->RegisterNewComponent(itEmiter.first, itEmiter.second);
   }
+  return spRunner;
 }
 
 //----------------------------------------------------------------------------------------
 //
-void CLuaScriptRunner::RunScript(const QString& sId, const QString& sScript,
-                                tspScene spScene, tspResource spResource)
+void CLuaScriptRunner::RunScript(std::shared_ptr<CScriptRunnerInstanceController> spRunner,
+                                 const QString& sScript,
+                                 tspScene spScene, tspResource spResource)
 {
-  QMutexLocker locker(&m_runnerMutex);
-  auto it = m_vspLuaRunner.find(sId);
-  if (m_vspLuaRunner.end() != it)
-  {
-    it->second->RunScript(sScript, spScene, spResource);
-  }
+  spRunner->RunScript(sScript, spScene, spResource);
 }
 
 //----------------------------------------------------------------------------------------

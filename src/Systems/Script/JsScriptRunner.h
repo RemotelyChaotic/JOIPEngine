@@ -6,6 +6,8 @@
 #include <QPointer>
 #include <QJSEngine>
 #include <QMutex>
+
+#include <functional>
 #include <map>
 #include <memory>
 
@@ -22,33 +24,32 @@ class CJsScriptRunner : public QObject, public IScriptRunnerFactory
   friend class CScriptRunnerUtils;
 
 public:
+  using tRunningScriptsCheck = std::function<bool()>;
+
   explicit CJsScriptRunner(std::weak_ptr<CScriptRunnerSignalContext> spSignalEmitterContext,
+                           tRunningScriptsCheck fnRunningScriptsCheck,
                            QObject* pParent = nullptr);
   ~CJsScriptRunner() override;
 
   void Initialize() override;
   void Deinitialize() override;
 
-  void InterruptExecution() override;
-  void PauseExecution() override;
-  void ResumeExecution() override;
-
-  bool HasRunningScripts() const override;
-
-  void LoadScript(const QString& sScript, tspScene spScene, tspResource spResource) override;
+  std::shared_ptr<IScriptRunnerInstanceController>
+       LoadScript(const QString& sScript, tspScene spScene, tspResource spResource) override;
   void RegisterNewComponent(const QString sName, QJSValue signalEmitter) override;
   void UnregisterComponents() override;
 
-  void OverlayCleared() override;
-  void OverlayClosed(const QString& sId) override;
-  void OverlayRunAsync(const QString& sId, const QString& sScript,
+  std::shared_ptr<IScriptRunnerInstanceController>
+       OverlayRunAsync(const QString& sId, const QString& sScript,
                        tspResource spResource) override;
 
 signals:
+  void SignalAddScriptRunner(const QString& sId, std::shared_ptr<IScriptRunnerInstanceController> spController) override;
   void SignalOverlayCleared() override;
   void SignalOverlayClosed(const QString& sId) override;
   void SignalOverlayRunAsync(tspProject spProject, const QString& sId,
                              const QString& sScriptResource) override;
+  void SignalRemoveScriptRunner(const QString& sId) override;
   void SignalScriptRunFinished(bool bOk, const QString& sRetVal) override;
 
 protected:
@@ -58,16 +59,15 @@ private slots:
   void SlotHandleScriptFinish(const QString& sName, bool bSuccess, const QVariant& sRetVal);
 
 private:
-  void CreateRunner(const QString& sId);
-  void RunScript(const QString& sId, const QString& sScript,
+  std::shared_ptr<CScriptRunnerInstanceController> CreateRunner(const QString& sId);
+  void RunScript(std::shared_ptr<CScriptRunnerInstanceController> spController,
+                 const QString& sScript,
                  tspScene spScene, tspResource spResource);
 
   std::weak_ptr<CScriptRunnerSignalContext>      m_wpSignalEmitterContext;
-  mutable QMutex                                 m_runnerMutex;
-  std::map<QString, std::shared_ptr<CScriptRunnerInstanceController>>
-                                                 m_vspJsRunner;
   mutable QMutex                                 m_signalEmiterMutex;
   std::map<QString, CScriptRunnerSignalEmiter*>  m_pSignalEmiters;
+  tRunningScriptsCheck                           m_fnRunningScriptsCheck;
 };
 
 

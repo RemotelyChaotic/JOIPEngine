@@ -52,24 +52,49 @@ protected:
 
 //----------------------------------------------------------------------------------------
 //
-class CScriptRunnerInstanceController : public QObject
+class IScriptRunnerInstanceController
+{
+public:
+  IScriptRunnerInstanceController() = default;
+  ~IScriptRunnerInstanceController() = default;
+
+  virtual void InterruptExecution() = 0;
+  virtual bool IsRunning() const = 0;
+  virtual void RegisterNewComponent(const QString sName, CScriptRunnerSignalEmiter* pObject) = 0;
+  virtual void ResetEngine() = 0;
+  virtual void UnregisterComponents() = 0;
+
+  // putting the signals here leads to compile errors because of MOC for no
+  // reason whatsoever
+//signals:
+  virtual void HandleScriptFinish(const QString& sName, bool bSuccess, const QVariant& sRetVal) = 0;
+};
+
+Q_DECLARE_INTERFACE(IScriptRunnerInstanceController, "IScriptRunnerInstanceController")
+
+//----------------------------------------------------------------------------------------
+//
+class CScriptRunnerInstanceController : public QObject,
+                                        public IScriptRunnerInstanceController
 {
   Q_OBJECT
+  Q_INTERFACES(IScriptRunnerInstanceController)
+
 public:
   CScriptRunnerInstanceController(const QString& sName,
                                   std::shared_ptr<CScriptRunnerInstanceWorkerBase> spWorkerBase,
                                   std::weak_ptr<CScriptRunnerSignalContext> wpSignalEmitterContext);
-  ~CScriptRunnerInstanceController();
+  ~CScriptRunnerInstanceController() override;
 
-  void InterruptExecution();
-  bool IsRunning() const;
-  void RegisterNewComponent(const QString sName, CScriptRunnerSignalEmiter* pObject);
+  void InterruptExecution() override;
+  bool IsRunning() const override;
+  void RegisterNewComponent(const QString sName, CScriptRunnerSignalEmiter* pObject) override;
   void RunScript(const QString& sScript, tspScene spScene, tspResource spResource);
-  void ResetEngine();
-  void UnregisterComponents();
+  void ResetEngine() override;
+  void UnregisterComponents() override;
 
 signals:
-  void HandleScriptFinish(const QString& sName, bool bSuccess, const QVariant& sRetVal);
+  void HandleScriptFinish(const QString& sName, bool bSuccess, const QVariant& sRetVal) override;
   void SignalOverlayCleared();
   void SignalOverlayClosed(const QString& sId);
   void SignalOverlayRunAsync(tspProject spProject, const QString& sId, const QString& sScriptResource);
