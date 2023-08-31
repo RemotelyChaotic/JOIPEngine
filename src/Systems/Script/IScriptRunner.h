@@ -13,11 +13,13 @@ typedef std::shared_ptr<SProject> tspProject;
 typedef std::shared_ptr<SResource> tspResource;
 typedef std::shared_ptr<SScene> tspScene;
 
-class IScriptRunner
+class IScriptRunnerFactory
 {
 public:
-  IScriptRunner() = default;
-  virtual ~IScriptRunner() = default;
+  static constexpr char c_sMainRunner[] = "~main";
+
+  IScriptRunnerFactory() = default;
+  virtual ~IScriptRunnerFactory() = default;
 
   virtual void Initialize() = 0;
   virtual void Deinitialize() = 0;
@@ -45,6 +47,6 @@ signals:
   virtual void SignalScriptRunFinished(bool bOk, const QString& sRetVal) = 0;
 };
 
-Q_DECLARE_INTERFACE(IScriptRunner, "IScriptRunner")
+Q_DECLARE_INTERFACE(IScriptRunnerFactory, "IScriptRunnerFactory")
 
 #endif // ISCRIPTRUNNER_H

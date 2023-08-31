@@ -18,9 +18,6 @@
 #include <QFile>
 #include <QTimer>
 
-namespace  {
-  const char* c_sMainRunner = "~main";
-}
 struct SFinishTag {};
 
 //----------------------------------------------------------------------------------------
@@ -79,7 +76,7 @@ public:
 CEosScriptRunner::CEosScriptRunner(std::weak_ptr<CScriptRunnerSignalContext> spSignalEmitterContext,
                                    QObject* pParent) :
   QObject(pParent),
-  IScriptRunner(),
+  IScriptRunnerFactory(),
   m_spEosParser(std::make_unique<CJsonInstructionSetParser>()),
   m_vspEosRunner(),
   m_runnerMutex(QMutex::Recursive),

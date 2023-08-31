@@ -90,6 +90,6 @@ void CProjectSceneManagerWrapper::gotoScene(QString sScene)
 {
   if (auto spRunner = m_wpProjectRunner.lock())
   {
-    spRunner->SignalChangeSceneRequest(sScene);
+    emit spRunner->SignalChangeSceneRequest(sScene);
   }
 }

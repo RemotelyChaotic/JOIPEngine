@@ -51,11 +51,11 @@ protected slots:
 
 private:
   void LoadScriptAndCall(tspScene spScene, tspResource spResource,
-                         std::function<void(std::unique_ptr<IScriptRunner>&,
+                         std::function<void(std::unique_ptr<IScriptRunnerFactory>&,
                                             const QString&, tspScene, tspResource)> fn);
 
-  std::map<QString, std::unique_ptr<IScriptRunner>> m_spRunnerMap;
-  std::shared_ptr<CScriptRunnerSignalContext>       m_spSignalEmitterContext;
+  std::map<QString, std::unique_ptr<IScriptRunnerFactory>> m_spRunnerFactoryMap;
+  std::shared_ptr<CScriptRunnerSignalContext>              m_spSignalEmitterContext;
 };
 
 //----------------------------------------------------------------------------------------

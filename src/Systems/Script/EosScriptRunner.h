@@ -14,10 +14,10 @@ class CJsonInstructionSetParser;
 class CScriptRunnerSignalContext;
 struct SJsonException;
 
-class CEosScriptRunner : public QObject, public IScriptRunner
+class CEosScriptRunner : public QObject, public IScriptRunnerFactory
 {
   Q_OBJECT
-  Q_INTERFACES(IScriptRunner)
+  Q_INTERFACES(IScriptRunnerFactory)
   Q_DISABLE_COPY(CEosScriptRunner)
 
 public:

@@ -17,7 +17,7 @@
 //
 CScriptRunner::CScriptRunner() :
   CSystemBase(),
-  m_spRunnerMap(),
+  m_spRunnerFactoryMap(),
   m_spSignalEmitterContext(nullptr)
 {
 }
@@ -40,14 +40,14 @@ void CScriptRunner::Initialize()
 {
   m_spSignalEmitterContext = std::make_shared<CScriptRunnerSignalContext>();
 
-  m_spRunnerMap.insert({"js",
+  m_spRunnerFactoryMap.insert({"js",
                         std::make_unique<CJsScriptRunner>(m_spSignalEmitterContext)});
-  m_spRunnerMap.insert({"eos",
+  m_spRunnerFactoryMap.insert({"eos",
                         std::make_unique<CEosScriptRunner>(m_spSignalEmitterContext)});
-  m_spRunnerMap.insert({"lua",
+  m_spRunnerFactoryMap.insert({"lua",
                         std::make_unique<CLuaScriptRunner>(m_spSignalEmitterContext)});
 
-  for (const auto& it : m_spRunnerMap)
+  for (const auto& it : m_spRunnerFactoryMap)
   {
     it.second->Initialize();
     bool bOk = connect(dynamic_cast<QObject*>(it.second.get()), SIGNAL(SignalOverlayCleared()),
@@ -74,14 +74,14 @@ void CScriptRunner::Deinitialize()
   InterruptExecution();
   UnregisterComponents();
 
-  for (const auto& it : m_spRunnerMap)
+  for (const auto& it : m_spRunnerFactoryMap)
   {
     it.second->Deinitialize();
   }
 
   m_spSignalEmitterContext = nullptr;
 
-  m_spRunnerMap.clear();
+  m_spRunnerFactoryMap.clear();
 
   SetInitialized(false);
 }
@@ -91,7 +91,7 @@ void CScriptRunner::Deinitialize()
 void CScriptRunner::LoadScript(tspScene spScene, tspResource spResource)
 {
   LoadScriptAndCall(spScene, spResource,
-                    [](std::unique_ptr<IScriptRunner>& spRunner,
+                    [](std::unique_ptr<IScriptRunnerFactory>& spRunner,
                        const QString& sScript, tspScene spScene, tspResource spResource) {
     spRunner->LoadScript(sScript, spScene, spResource);
   });
@@ -103,7 +103,7 @@ void CScriptRunner::InterruptExecution()
 {
   // interrupt, in case of infinite loop
   m_spSignalEmitterContext->SetScriptExecutionStatus(CScriptRunnerSignalEmiter::eStopped);
-  for (const auto& it : m_spRunnerMap)
+  for (const auto& it : m_spRunnerFactoryMap)
   {
     it.second->InterruptExecution();
   }
@@ -117,7 +117,7 @@ void CScriptRunner::PauseExecution()
       CScriptRunnerSignalEmiter::eStopped != m_spSignalEmitterContext->ScriptExecutionStatus())
   {
     m_spSignalEmitterContext->SetScriptExecutionStatus(CScriptRunnerSignalEmiter::ePaused);
-    for (const auto& it : m_spRunnerMap)
+    for (const auto& it : m_spRunnerFactoryMap)
     {
       it.second->PauseExecution();
     }
@@ -134,7 +134,7 @@ void CScriptRunner::ResumeExecution()
       CScriptRunnerSignalEmiter::eStopped != m_spSignalEmitterContext->ScriptExecutionStatus())
   {
     m_spSignalEmitterContext->SetScriptExecutionStatus(CScriptRunnerSignalEmiter::eRunning);
-    for (const auto& it : m_spRunnerMap)
+    for (const auto& it : m_spRunnerFactoryMap)
     {
       it.second->ResumeExecution();
     }
@@ -147,7 +147,7 @@ void CScriptRunner::ResumeExecution()
 //
 void CScriptRunner::RegisterNewComponent(const QString sName, QJSValue signalEmitter)
 {
-  for (const auto& it : m_spRunnerMap)
+  for (const auto& it : m_spRunnerFactoryMap)
   {
     it.second->RegisterNewComponent(sName, signalEmitter);
   }
@@ -157,7 +157,7 @@ void CScriptRunner::RegisterNewComponent(const QString sName, QJSValue signalEmi
 //
 void CScriptRunner::UnregisterComponents()
 {
-  for (const auto& it : m_spRunnerMap)
+  for (const auto& it : m_spRunnerFactoryMap)
   {
     it.second->UnregisterComponents();
   }
@@ -167,7 +167,7 @@ void CScriptRunner::UnregisterComponents()
 //
 void CScriptRunner::SlotOverlayCleared()
 {
-  for (const auto& it : m_spRunnerMap)
+  for (const auto& it : m_spRunnerFactoryMap)
   {
     it.second->OverlayCleared();
   }
@@ -177,7 +177,7 @@ void CScriptRunner::SlotOverlayCleared()
 //
 void CScriptRunner::SlotOverlayClosed(const QString& sId)
 {
-  for (const auto& it : m_spRunnerMap)
+  for (const auto& it : m_spRunnerFactoryMap)
   {
     it.second->OverlayClosed(sId);
   }
@@ -193,7 +193,7 @@ void CScriptRunner::SlotOverlayRunAsync(tspProject spProject, const QString& sId
     tspResource spResource = spDbManager->FindResourceInProject(spProject, sScriptResource);
 
     LoadScriptAndCall(nullptr, spResource,
-                      [sId](std::unique_ptr<IScriptRunner>& spRunner,
+                      [sId](std::unique_ptr<IScriptRunnerFactory>& spRunner,
                          const QString& sScript, tspScene, tspResource spResource) {
       spRunner->OverlayRunAsync(sId, sScript, spResource);
     });
@@ -205,7 +205,7 @@ void CScriptRunner::SlotOverlayRunAsync(tspProject spProject, const QString& sId
 void CScriptRunner::SlotScriptRunFinished(bool bOk, const QString& sRetVal)
 {
   bool bHasRunningScripts = false;
-  for (const auto& it : m_spRunnerMap)
+  for (const auto& it : m_spRunnerFactoryMap)
   {
     bHasRunningScripts |= it.second->HasRunningScripts();
   }
@@ -221,7 +221,7 @@ void CScriptRunner::SlotScriptRunFinished(bool bOk, const QString& sRetVal)
 //----------------------------------------------------------------------------------------
 //
 void CScriptRunner::LoadScriptAndCall(tspScene spScene, tspResource spResource,
-                                      std::function<void(std::unique_ptr<IScriptRunner>&,
+                                      std::function<void(std::unique_ptr<IScriptRunnerFactory>&,
                                                          const QString&, tspScene, tspResource)> fn)
 {
   if (nullptr == m_spSignalEmitterContext)
@@ -265,8 +265,8 @@ void CScriptRunner::LoadScriptAndCall(tspScene spScene, tspResource spResource,
       QString sScript = QString::fromUtf8(scriptFile.readAll());
       // get suffix from the path, as bundles might not have the suffix in the name
       const QString sSuffix = QFileInfo(sResourceUrl.toString()).suffix();
-      auto it = m_spRunnerMap.find(sSuffix);
-      if (m_spRunnerMap.end() != it)
+      auto it = m_spRunnerFactoryMap.find(sSuffix);
+      if (m_spRunnerFactoryMap.end() != it)
       {
         fn(it->second, sScript, spScene, spResource);
       }

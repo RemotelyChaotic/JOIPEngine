@@ -15,10 +15,10 @@ namespace QtLua {
   class State;
 }
 
-class CLuaScriptRunner : public QObject, public IScriptRunner
+class CLuaScriptRunner : public QObject, public IScriptRunnerFactory
 {
   Q_OBJECT
-  Q_INTERFACES(IScriptRunner)
+  Q_INTERFACES(IScriptRunnerFactory)
   Q_DISABLE_COPY(CLuaScriptRunner)
 
 public:

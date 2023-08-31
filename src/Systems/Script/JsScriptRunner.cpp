@@ -36,8 +36,6 @@ struct SReplaceExp
 };
 
 namespace  {
-  const char* c_sMainRunner = "~main";
-
   /*
    * import "module-name";
    * import name from "module-name";
@@ -431,7 +429,7 @@ private:
 CJsScriptRunner::CJsScriptRunner(std::weak_ptr<CScriptRunnerSignalContext> spSignalEmitterContext,
                                  QObject* pParent) :
   QObject(pParent),
-  IScriptRunner(),
+  IScriptRunnerFactory(),
   m_wpSignalEmitterContext(spSignalEmitterContext),
   m_runnerMutex(QMutex::Recursive),
   m_vspJsRunner(),

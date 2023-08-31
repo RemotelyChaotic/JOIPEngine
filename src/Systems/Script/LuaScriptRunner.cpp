@@ -25,8 +25,6 @@ char CScriptRunnerUtilsLua::sKeyThis;
 //
 namespace
 {
-  const char* c_sMainRunner = "~main";
-
   //--------------------------------------------------------------------------------------
   //
   void RegisterEnum(QtLua::State* pState, const QMetaObject& metaType, const QString& sName)
@@ -626,7 +624,7 @@ namespace lua
 CLuaScriptRunner::CLuaScriptRunner(std::weak_ptr<CScriptRunnerSignalContext> spSignalEmitterContext,
                                    QObject* pParent) :
   QObject(pParent),
-  IScriptRunner(),
+  IScriptRunnerFactory(),
   m_wpSignalEmitterContext(spSignalEmitterContext),
   m_runnerMutex(QMutex::Recursive),
   m_vspLuaRunner(),

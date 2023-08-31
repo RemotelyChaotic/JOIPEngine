@@ -14,10 +14,10 @@ class CScriptRunnerUtils;
 class CScriptRunnerSignalContext;
 class CScriptRunnerSignalEmiter;
 
-class CJsScriptRunner : public QObject, public IScriptRunner
+class CJsScriptRunner : public QObject, public IScriptRunnerFactory
 {
   Q_OBJECT
-  Q_INTERFACES(IScriptRunner)
+  Q_INTERFACES(IScriptRunnerFactory)
   Q_DISABLE_COPY(CJsScriptRunner)
   friend class CScriptRunnerUtils;
 
