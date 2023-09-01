@@ -147,10 +147,10 @@ void CScriptRunner::InterruptExecution()
   // interrupt, in case of infinite loop
   m_spSignalEmitterContext->SetScriptExecutionStatus(CScriptRunnerSignalEmiter::eStopped);
   // TODO: check if needed
-  //if (0 >= m_vspRunner.size())
-  //{
-  //  emit SignalScriptRunFinished(false, QString());
-  //}
+  if (0 >= m_vspRunner.size())
+  {
+    emit SignalScriptRunFinished(false, QString());
+  }
   for (const auto& it : m_vspRunner)
   {
     it.second->InterruptExecution();
@@ -255,7 +255,7 @@ void CScriptRunner::SlotAddScriptController(const QString& sId,
 
   if (nullptr != spController)
   {
-    m_vspRunner.insert({IScriptRunnerFactory::c_sMainRunner, spController});
+    m_vspRunner.insert({sId, spController});
   }
 }
 
