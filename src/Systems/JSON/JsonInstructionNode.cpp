@@ -31,9 +31,9 @@ CJsonInstructionNode::CJsonInstructionNode(CJsonInstructionNode& other) :
 //
 void CJsonInstructionNode::ReparentChildren()
 {
-  for (auto& spChild : m_spChildren)
+  for (auto spChild : m_spChildren)
   {
     spChild->m_wpParent = shared_from_this();
-    spChild->ReparentChildren();
+    spChild->ReparentChildren(); // only on first layer all susequent children are adopted
   }
 }

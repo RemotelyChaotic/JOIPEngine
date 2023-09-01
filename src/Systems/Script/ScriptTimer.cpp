@@ -152,7 +152,8 @@ public:
         argsCopy.erase(itAsynchCopy);
       }
       argsCopy.insert({"isAsync_threadImpl", SInstructionArgumentValue{EArgumentType::eBool, true}});
-      return SRunRetVal<ENextCommandToCall::eForkThis>({{argsCopy, QUuid::createUuid().toString(), true}});
+      return SRunRetVal<ENextCommandToCall::eForkThis>(
+            {{argsCopy, QUuid::createUuid().toString(), true, 0, -1}});
     }
     else
     {

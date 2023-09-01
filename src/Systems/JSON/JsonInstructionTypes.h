@@ -229,6 +229,8 @@ struct SForkData
   tInstructionMapValue m_args;//: arguments for the this call in new worker thread
   QString m_sName;//: New commands-Fork name
   bool m_bAutorun;
+  qint32 m_iAdoptChildrenBegin = 0; // inclusive
+  qint32 m_iAdoptChildrenEnd = -1; // exclusive, -1 == end
 };
 typedef std::vector<SForkData> tvForks;
 template<> struct SRunRetVal<ENextCommandToCall::eForkThis>

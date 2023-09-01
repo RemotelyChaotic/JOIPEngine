@@ -163,7 +163,9 @@ signals:
             std::shared_ptr<CJsonInstructionNode> spNode,
             tInstructionMapValue args,
             const QString& sName,
-            bool bAutorun);
+            bool bAutorun,
+            qint32 iAdoptChildrenBegin,
+            qint32 iAdoptChildrenEnd);
 
 protected:
   //--------------------------------------------------------------------------------------
@@ -190,7 +192,8 @@ protected:
       auto& ret = std::get<SRunRetVal<ENextCommandToCall::eForkThis>>(vRetVal);
       for (auto& fork : ret.m_vForks)
       {
-        emit Fork(runMode, m_spNextNode, fork.m_args, fork.m_sName, fork.m_bAutorun);
+        emit Fork(runMode, m_spNextNode, fork.m_args, fork.m_sName, fork.m_bAutorun,
+                  fork.m_iAdoptChildrenBegin, fork.m_iAdoptChildrenEnd);
       }
       return SRunnerRetVal{NextCommand(ENextCommandToCall::eSibling), std::any()};
     }
@@ -374,7 +377,9 @@ signals:
             std::shared_ptr<CJsonInstructionNode> spNode,
             tInstructionMapValue args,
             const QString& sName,
-            bool bAutorun);
+            bool bAutorun,
+            qint32 iAdoptChildrenBegin,
+            qint32 iAdoptChildrenEnd);
 
 protected slots:
   void SlotCallNextCommandRetVal(ERunerMode runMode, CJsonInstructionSetRunner::tRetVal retVal)
@@ -573,10 +578,26 @@ protected slots:
                 std::shared_ptr<CJsonInstructionNode> spNode,
                 tInstructionMapValue args,
                 const QString& sName,
-                bool bAutorun)
+                bool bAutorun,
+                qint32 iAdoptChildrenBegin,
+                qint32 iAdoptChildrenEnd)
   {
     std::shared_ptr<CJsonInstructionNode> spNewNode =
         std::make_shared<CJsonInstructionNode>(*spNode);
+    // remove unneeded children
+    qint32 iCount = 0;
+    for (qint32 i = 0; static_cast<qint32>(spNewNode->m_spChildren.size()) > i; iCount++)
+    {
+      if (iCount >= iAdoptChildrenBegin &&
+          (iCount < iAdoptChildrenEnd || -1 == iAdoptChildrenEnd))
+      {
+        ++i;
+      }
+      else
+      {
+        spNewNode->m_spChildren.erase(spNewNode->m_spChildren.begin() + i);
+      }
+    }
     spNewNode->ReparentChildren();
     // change args and make an orphan
     spNewNode->m_actualArgs = args;

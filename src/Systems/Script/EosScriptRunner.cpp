@@ -135,7 +135,6 @@ CEosScriptRunner::CEosScriptRunner(std::weak_ptr<CScriptRunnerSignalContext> spS
   IScriptRunnerFactory(),
   m_spEosParser(std::make_unique<CJsonInstructionSetParser>()),
   m_wpSignalEmitterContext(spSignalEmitterContext),
-  m_spCurrentScene(nullptr),
   m_sceneMutex(QMutex::Recursive),
   m_sSceneName(),
   m_objectMapMutex(QMutex::Recursive),
@@ -171,10 +170,6 @@ void CEosScriptRunner::Deinitialize()
 std::shared_ptr<IScriptRunnerInstanceController>
 CEosScriptRunner::LoadScript(const QString& sScript, tspScene spScene, tspResource spResource)
 {
-  // set scene
-  m_spCurrentScene = spScene;
-  //
-
   // get scene name
   if (nullptr != spScene)
   {
@@ -289,8 +284,6 @@ void CEosScriptRunner::UnregisterComponents()
   m_spEosParser->RegisterInstruction("goto", std::make_shared<CCommandEosGoto>());
   m_spEosParser->RegisterInstruction("noop", std::make_shared<CCommandEosNoop>());
 
-  m_spCurrentScene = nullptr;
-
   m_objectMapMutex.lock();
   m_objectMap.clear();
   m_objectMapMutex.unlock();
@@ -336,31 +329,24 @@ void CEosScriptRunner::HandleScriptFinish(bool bSuccess, const QVariant& sRetVal
     return;
   }
 
-  m_spCurrentScene = nullptr;
-
   emit SignalRemoveScriptRunner(sId);
 
   if (!bSuccess)
   {
     qWarning() << tr("Error in script, unloading project.");
-    emit SignalScriptRunFinished(false, QString());
   }
-  else
+
+  if (c_sMainRunner == sId || QVariant::String == sRetVal.type() ||
+      !m_pRunnerParent->HasRunningScripts())
   {
-    if (QVariant::String == sRetVal.type() && !sRetVal.toString().isEmpty())
+    if (QVariant::String == sRetVal.type())
     {
       emit SignalScriptRunFinished(bSuccess, sRetVal.toString());
     }
-    else if (QVariant::String != sRetVal.type() && sRetVal.isNull())
+    else
     {
-      emit SignalScriptRunFinished(false, QString());
+      emit SignalScriptRunFinished(bSuccess, QString());
     }
-    else if (spSignalEmitterContext->ScriptExecutionStatus() ==
-             CScriptRunnerSignalEmiter::ScriptExecStatus::eStopped)
-    {
-      emit SignalScriptRunFinished(false, QString());
-    }
-    // eos does not autorun the next scene
   }
 }
 

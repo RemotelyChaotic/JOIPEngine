@@ -342,7 +342,8 @@ public:
       const auto& itTimerCommands = GetValue<EArgumentType::eArray>(args, "timerCommands");
 
       if (HasValue(args, "onButtonCommand_Impl") && IsOk<EArgumentType::eBool>(itButtonImpl) &&
-               HasValue(args, "buttonCommands") && IsOk<EArgumentType::eArray>(itButtonCommands))
+          std::get<bool>(itButtonImpl) &&
+          HasValue(args, "buttonCommands") && IsOk<EArgumentType::eArray>(itButtonCommands))
       {
         QStringList vList;
         tInstructionArrayValue items = std::get<tInstructionArrayValue>(itButtonCommands);
@@ -360,6 +361,7 @@ public:
         }
       }
       else if (HasValue(args, "onTimerCommand_Impl") && IsOk<EArgumentType::eBool>(itTimerImpl) &&
+               std::get<bool>(itTimerImpl) &&
                HasValue(args, "timerCommands") && IsOk<EArgumentType::eArray>(itTimerCommands))
       {
         QStringList vList;
@@ -404,16 +406,18 @@ public:
         QString sIdButton;
         QString sIdTimer;
         tvForks vForks;
+        tInstructionArrayValue buttonitems;
         if (HasValue(args, "buttonCommands") && IsOk<EArgumentType::eArray>(itButtonCommands))
         {
           tInstructionMapValue argsCopyButtons;
-          tInstructionArrayValue items = std::get<tInstructionArrayValue>(itButtonCommands);
-          if (items.size() > 0)
+          buttonitems = std::get<tInstructionArrayValue>(itButtonCommands);
+          if (buttonitems.size() > 0)
           {
             sIdButton = sId + "_Button";
             argsCopyButtons.insert({"onButtonCommand_Impl", SInstructionArgumentValue{EArgumentType::eArray, true}});
-            argsCopyButtons.insert({"buttonCommands", SInstructionArgumentValue{EArgumentType::eArray, items}});
-            vForks.push_back({argsCopyButtons, sIdButton, false});
+            argsCopyButtons.insert({"buttonCommands", SInstructionArgumentValue{EArgumentType::eArray, buttonitems}});
+            vForks.push_back({argsCopyButtons, sIdButton, false, 0,
+                              static_cast<qint32>(buttonitems.size())});
           }
         }
         if (HasValue(args, "timerCommands") && IsOk<EArgumentType::eArray>(itTimerCommands))
@@ -423,13 +427,16 @@ public:
           if (items.size() > 0)
           {
             sIdTimer = sId + "_Timer";
-            argsCopyTimer.insert({"onButtonCommand_Impl", SInstructionArgumentValue{EArgumentType::eArray, true}});
+            argsCopyTimer.insert({"onTimerCommand_Impl", SInstructionArgumentValue{EArgumentType::eArray, true}});
             argsCopyTimer.insert({"timerCommands", SInstructionArgumentValue{EArgumentType::eArray, items}});
-            vForks.push_back({argsCopyTimer, sIdTimer, false});
+            vForks.push_back({argsCopyTimer, sIdTimer, false,
+                              static_cast<qint32>(buttonitems.size()), -1});
           }
         }
 
-        m_pParent->Show(sId, sTitle, sButtonLabel, iTimerDurationMs, sIdButton, sIdTimer);
+        m_pParent->Show(sId, sTitle, sButtonLabel,
+                        static_cast<double>(iTimerDurationMs) / 1000,
+                        sIdButton, sIdTimer);
 
         if (vForks.size() > 0)
         {

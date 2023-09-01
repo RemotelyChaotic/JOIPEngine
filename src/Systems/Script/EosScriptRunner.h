@@ -95,7 +95,6 @@ private:
 
   std::unique_ptr<CJsonInstructionSetParser>     m_spEosParser;
   std::weak_ptr<CScriptRunnerSignalContext>      m_wpSignalEmitterContext;
-  tspScene                                       m_spCurrentScene;
   mutable QMutex                                 m_sceneMutex;
   QString                                        m_sSceneName;
   mutable QMutex                                 m_objectMapMutex;
