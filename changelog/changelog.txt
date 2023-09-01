@@ -11,6 +11,8 @@ Fixed Bugs:
 - Fixed EOS notifications not working correctly.
 - Fixed EOS Scripts not terminating after the last scene ended if there was an open
   notification running.
+- Fixed some code generation overlays messing up the initial enabled state of certain 
+  elements.
 
 =================
 Version 1.3.0.0

@@ -516,6 +516,7 @@ void CNotificationSnippetOverlay::Initialize()
   m_spUi->pOrientationComboBox->setCurrentIndex(c_iAlignHCenterIndex);
   m_spUi->pSetTimeoutTimeCheckBox->setChecked(true);
   m_spUi->pTimeSpinBox->setValue(0.0);
+  m_spUi->pTimeSpinBox->setEnabled(true);
   m_spUi->pIdLineEdit->setText(QString());
   m_spUi->pShowRadioButton->setChecked(true);
   m_spUi->pTextEdit->clear();

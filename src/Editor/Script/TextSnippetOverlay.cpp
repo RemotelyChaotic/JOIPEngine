@@ -187,6 +187,7 @@ void CTextSnippetOverlay::on_pAutoTimeCheckBox_toggled(bool bStatus)
 {
   if (!m_bInitialized) { return; }
   m_data.m_bAutoTime = bStatus;
+  m_spUi->pSleepSpinBox->setEnabled(!bStatus);
 }
 
 //----------------------------------------------------------------------------------------
@@ -500,6 +501,7 @@ void CTextSnippetOverlay::Initialize()
   m_spUi->pSetSleepTimeCheckBox->setChecked(false);
   m_spUi->pAutoTimeCheckBox->setChecked(true);
   m_spUi->pSleepSpinBox->setValue(0.0);
+  m_spUi->pSleepSpinBox->setEnabled(false);
   m_spUi->pSkippableCheckBox->setChecked(false);
   m_spUi->pTextEdit->clear();
   m_spUi->pShowIconCheckBox->setChecked(false);
