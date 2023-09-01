@@ -116,6 +116,19 @@ void CEditorCodeWidget::LoadProject(tspProject spProject)
 
   if (0 < ScriptEditorModel()->rowCount())
   {
+    // force cvhange actionBar to not get dangling references
+    // in on_pResourceComboBox_currentIndexChanged
+    if (nullptr != ActionBar())
+    {
+      m_spUi->pCodeEditorView->OnActionBarAboutToChange(&ActionBar()->m_spUi);
+      m_spUi->pCodeEditorView->OnActionBarChanged(&ActionBar()->m_spUi);
+    }
+    else
+    {
+      m_spUi->pCodeEditorView->OnActionBarAboutToChange(nullptr);
+      m_spUi->pCodeEditorView->OnActionBarChanged(nullptr);
+    }
+
     on_pResourceComboBox_currentIndexChanged(0);
     m_spUi->pStackedWidget->setCurrentIndex(c_iIndexScripts);
   }

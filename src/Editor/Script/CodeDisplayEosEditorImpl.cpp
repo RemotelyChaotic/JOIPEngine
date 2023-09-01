@@ -135,43 +135,49 @@ void CCodeDisplayEosEditorImpl::SetHighlightDefinition(const QString&)
 //
 void CCodeDisplayEosEditorImpl::HideButtons(Ui::CEditorActionBar* pActionBar)
 {
-  disconnect(pActionBar->AddAutioCode, &QPushButton::clicked, this, &CCodeDisplayEosEditorImpl::SlotAddAudio);
-  disconnect(pActionBar->AddChoiceCode, &QPushButton::clicked, this, &CCodeDisplayEosEditorImpl::SlotAddChoice);
-  disconnect(pActionBar->AddDisableCode, &QPushButton::clicked, this, &CCodeDisplayEosEditorImpl::SlotAddDisable);
-  disconnect(pActionBar->AddEnableCode, &QPushButton::clicked, this, &CCodeDisplayEosEditorImpl::SlotAddEnable);
-  disconnect(pActionBar->AddEndCode, &QPushButton::clicked, this, &CCodeDisplayEosEditorImpl::SlotAddEnd);
-  disconnect(pActionBar->AddEvalCode, &QPushButton::clicked, this, &CCodeDisplayEosEditorImpl::SlotAddEval);
-  disconnect(pActionBar->AddGotoCode, &QPushButton::clicked, this, &CCodeDisplayEosEditorImpl::SlotAddGoto);
-  disconnect(pActionBar->AddIfCode, &QPushButton::clicked, this, &CCodeDisplayEosEditorImpl::SlotAddIf);
-  disconnect(pActionBar->AddImageCode, &QPushButton::clicked, this, &CCodeDisplayEosEditorImpl::SlotAddImage);
-  disconnect(pActionBar->AddNotificationCloseCode, &QPushButton::clicked, this, &CCodeDisplayEosEditorImpl::SlotAddNotificationRemove);
-  disconnect(pActionBar->AddNotificationCreateCode, &QPushButton::clicked, this, &CCodeDisplayEosEditorImpl::SlotAddNotificationCreate);
-  disconnect(pActionBar->AddPromptCode, &QPushButton::clicked, this, &CCodeDisplayEosEditorImpl::SlotAddPrompt);
-  disconnect(pActionBar->AddSayCode, &QPushButton::clicked, this, &CCodeDisplayEosEditorImpl::SlotAddSay);
-  disconnect(pActionBar->AddTimerCode2, &QPushButton::clicked, this, &CCodeDisplayEosEditorImpl::SlotAddTimer);
-  disconnect(pActionBar->RemoveCode, &QPushButton::clicked, this, &CCodeDisplayEosEditorImpl::SlotRemoveInstruction);
+  if (nullptr != pActionBar)
+  {
+    disconnect(pActionBar->AddAutioCode, &QPushButton::clicked, this, &CCodeDisplayEosEditorImpl::SlotAddAudio);
+    disconnect(pActionBar->AddChoiceCode, &QPushButton::clicked, this, &CCodeDisplayEosEditorImpl::SlotAddChoice);
+    disconnect(pActionBar->AddDisableCode, &QPushButton::clicked, this, &CCodeDisplayEosEditorImpl::SlotAddDisable);
+    disconnect(pActionBar->AddEnableCode, &QPushButton::clicked, this, &CCodeDisplayEosEditorImpl::SlotAddEnable);
+    disconnect(pActionBar->AddEndCode, &QPushButton::clicked, this, &CCodeDisplayEosEditorImpl::SlotAddEnd);
+    disconnect(pActionBar->AddEvalCode, &QPushButton::clicked, this, &CCodeDisplayEosEditorImpl::SlotAddEval);
+    disconnect(pActionBar->AddGotoCode, &QPushButton::clicked, this, &CCodeDisplayEosEditorImpl::SlotAddGoto);
+    disconnect(pActionBar->AddIfCode, &QPushButton::clicked, this, &CCodeDisplayEosEditorImpl::SlotAddIf);
+    disconnect(pActionBar->AddImageCode, &QPushButton::clicked, this, &CCodeDisplayEosEditorImpl::SlotAddImage);
+    disconnect(pActionBar->AddNotificationCloseCode, &QPushButton::clicked, this, &CCodeDisplayEosEditorImpl::SlotAddNotificationRemove);
+    disconnect(pActionBar->AddNotificationCreateCode, &QPushButton::clicked, this, &CCodeDisplayEosEditorImpl::SlotAddNotificationCreate);
+    disconnect(pActionBar->AddPromptCode, &QPushButton::clicked, this, &CCodeDisplayEosEditorImpl::SlotAddPrompt);
+    disconnect(pActionBar->AddSayCode, &QPushButton::clicked, this, &CCodeDisplayEosEditorImpl::SlotAddSay);
+    disconnect(pActionBar->AddTimerCode2, &QPushButton::clicked, this, &CCodeDisplayEosEditorImpl::SlotAddTimer);
+    disconnect(pActionBar->RemoveCode, &QPushButton::clicked, this, &CCodeDisplayEosEditorImpl::SlotRemoveInstruction);
+  }
 }
 
 //----------------------------------------------------------------------------------------
 //
 void CCodeDisplayEosEditorImpl::ShowButtons(Ui::CEditorActionBar* pActionBar)
 {
-  pActionBar->pCodeEditorContainerStack->setCurrentWidget(pActionBar->pCodeEditorContainerPageEos);
-  connect(pActionBar->AddAutioCode, &QPushButton::clicked, this, &CCodeDisplayEosEditorImpl::SlotAddAudio);
-  connect(pActionBar->AddChoiceCode, &QPushButton::clicked, this, &CCodeDisplayEosEditorImpl::SlotAddChoice);
-  connect(pActionBar->AddDisableCode, &QPushButton::clicked, this, &CCodeDisplayEosEditorImpl::SlotAddDisable);
-  connect(pActionBar->AddEnableCode, &QPushButton::clicked, this, &CCodeDisplayEosEditorImpl::SlotAddEnable);
-  connect(pActionBar->AddEndCode, &QPushButton::clicked, this, &CCodeDisplayEosEditorImpl::SlotAddEnd);
-  connect(pActionBar->AddEvalCode, &QPushButton::clicked, this, &CCodeDisplayEosEditorImpl::SlotAddEval);
-  connect(pActionBar->AddGotoCode, &QPushButton::clicked, this, &CCodeDisplayEosEditorImpl::SlotAddGoto);
-  connect(pActionBar->AddIfCode, &QPushButton::clicked, this, &CCodeDisplayEosEditorImpl::SlotAddIf);
-  connect(pActionBar->AddImageCode, &QPushButton::clicked, this, &CCodeDisplayEosEditorImpl::SlotAddImage);
-  connect(pActionBar->AddNotificationCloseCode, &QPushButton::clicked, this, &CCodeDisplayEosEditorImpl::SlotAddNotificationRemove);
-  connect(pActionBar->AddNotificationCreateCode, &QPushButton::clicked, this, &CCodeDisplayEosEditorImpl::SlotAddNotificationCreate);
-  connect(pActionBar->AddPromptCode, &QPushButton::clicked, this, &CCodeDisplayEosEditorImpl::SlotAddPrompt);
-  connect(pActionBar->AddSayCode, &QPushButton::clicked, this, &CCodeDisplayEosEditorImpl::SlotAddSay);
-  connect(pActionBar->AddTimerCode2, &QPushButton::clicked, this, &CCodeDisplayEosEditorImpl::SlotAddTimer);
-  connect(pActionBar->RemoveCode, &QPushButton::clicked, this, &CCodeDisplayEosEditorImpl::SlotRemoveInstruction);
+  if (nullptr != pActionBar)
+  {
+    pActionBar->pCodeEditorContainerStack->setCurrentWidget(pActionBar->pCodeEditorContainerPageEos);
+    connect(pActionBar->AddAutioCode, &QPushButton::clicked, this, &CCodeDisplayEosEditorImpl::SlotAddAudio);
+    connect(pActionBar->AddChoiceCode, &QPushButton::clicked, this, &CCodeDisplayEosEditorImpl::SlotAddChoice);
+    connect(pActionBar->AddDisableCode, &QPushButton::clicked, this, &CCodeDisplayEosEditorImpl::SlotAddDisable);
+    connect(pActionBar->AddEnableCode, &QPushButton::clicked, this, &CCodeDisplayEosEditorImpl::SlotAddEnable);
+    connect(pActionBar->AddEndCode, &QPushButton::clicked, this, &CCodeDisplayEosEditorImpl::SlotAddEnd);
+    connect(pActionBar->AddEvalCode, &QPushButton::clicked, this, &CCodeDisplayEosEditorImpl::SlotAddEval);
+    connect(pActionBar->AddGotoCode, &QPushButton::clicked, this, &CCodeDisplayEosEditorImpl::SlotAddGoto);
+    connect(pActionBar->AddIfCode, &QPushButton::clicked, this, &CCodeDisplayEosEditorImpl::SlotAddIf);
+    connect(pActionBar->AddImageCode, &QPushButton::clicked, this, &CCodeDisplayEosEditorImpl::SlotAddImage);
+    connect(pActionBar->AddNotificationCloseCode, &QPushButton::clicked, this, &CCodeDisplayEosEditorImpl::SlotAddNotificationRemove);
+    connect(pActionBar->AddNotificationCreateCode, &QPushButton::clicked, this, &CCodeDisplayEosEditorImpl::SlotAddNotificationCreate);
+    connect(pActionBar->AddPromptCode, &QPushButton::clicked, this, &CCodeDisplayEosEditorImpl::SlotAddPrompt);
+    connect(pActionBar->AddSayCode, &QPushButton::clicked, this, &CCodeDisplayEosEditorImpl::SlotAddSay);
+    connect(pActionBar->AddTimerCode2, &QPushButton::clicked, this, &CCodeDisplayEosEditorImpl::SlotAddTimer);
+    connect(pActionBar->RemoveCode, &QPushButton::clicked, this, &CCodeDisplayEosEditorImpl::SlotRemoveInstruction);
+  }
 }
 
 //----------------------------------------------------------------------------------------

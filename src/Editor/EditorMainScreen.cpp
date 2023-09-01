@@ -590,12 +590,12 @@ void CEditorMainScreen::ProjectLoaded(bool bNewProject)
     m_spUi->pProjectActionBar->m_spUi->pTitleLineEdit->setText(m_spCurrentProject->m_sName);
   }
 
+  m_pLayout->ProjectLoaded(m_spCurrentProject, bNewProject);
+
   for (auto it = m_spWidgetsMap.begin(); m_spWidgetsMap.end() != it; ++it)
   {
     it->second->LoadProject(m_spCurrentProject);
   }
-
-  m_pLayout->ProjectLoaded(m_spCurrentProject, bNewProject);
 
   if (nullptr != m_spWindowContext)
   {
