@@ -542,16 +542,29 @@ void CCommandEosNotificationCreateModel::InsertedChildAt(tInstructionMapValue* p
     return std::get<0>(tuple) == sIntoGroup;
   });
 
+  qint32 iIndexOfGroup = it - groups.begin();
   if (groups.end() != it)
   {
     QString sAttr = std::get<1>(*it);
     tInstructionArrayValue arrCommands;
 
+    qint32 iIndexToInsertAt = iIndex;
+    for (size_t i = 0; groups.size() > i && iIndexOfGroup > i; ++i)
+    {
+      QString sAttrLoop = std::get<1>(groups[i]);
+      const auto& itCommandsLoop = GetValue<EArgumentType::eArray>(*pArgs, sAttrLoop);
+      if (HasValue(*pArgs, sAttrLoop) && IsOk<EArgumentType::eArray>(itCommandsLoop))
+      {
+        iIndexToInsertAt -=
+            static_cast<qint32>(std::get<tInstructionArrayValue>(itCommandsLoop).size());
+      }
+    }
     const auto& itCommands = GetValue<EArgumentType::eArray>(*pArgs, sAttr);
     if (HasValue(*pArgs, sAttr) && IsOk<EArgumentType::eArray>(itCommands))
     {
       arrCommands = std::get<tInstructionArrayValue>(itCommands);
-      arrCommands.insert(arrCommands.begin()+iIndex, { EArgumentType::eObject, sInsertedChild});
+      arrCommands.insert(arrCommands.begin()+iIndexToInsertAt,
+                         { EArgumentType::eObject, sInsertedChild});
     }
     pArgs->insert_or_assign(sAttr,
                             SInstructionArgumentValue{ EArgumentType::eArray, arrCommands });
