@@ -104,7 +104,8 @@ void CCodeDisplayEosEditorImpl::InsertGeneratedCode(const QString&)
 //
 void CCodeDisplayEosEditorImpl::ResetWidget()
 {
-  m_pJsonParserModel->SetRunner(nullptr);
+  // Nothing to do, qt handles everything and we have no error messages
+  //m_pJsonParserModel->SetRunner(nullptr);
 }
 
 //----------------------------------------------------------------------------------------
