@@ -290,39 +290,36 @@ void CCodeDisplayWidget::SetScriptType(const QString& sScriptType)
 {
   if (!m_pInitialized) { return; }
 
-  if (m_sScriptType != sScriptType)
+  auto it = m_displayImplMap.find(m_sScriptType);
+  if (nullptr != m_pspUiActionBar)
   {
-    auto it = m_displayImplMap.find(m_sScriptType);
-    if (nullptr != m_pspUiActionBar)
+    if (m_displayImplMap.end() != it)
     {
-      if (m_displayImplMap.end() != it)
-      {
-        it->second->HideButtons((*m_pspUiActionBar).get());
-      }
+      it->second->HideButtons((*m_pspUiActionBar).get());
     }
-
-    m_sScriptType = sScriptType;
-
-    it = m_displayImplMap.find(m_sScriptType);
-    if (nullptr != m_pspUiActionBar)
-    {
-      if (m_displayImplMap.end() != it)
-      {
-        it->second->ShowButtons((*m_pspUiActionBar).get());
-      }
-    }
-
-    m_spBackgroundSnippetOverlay->SetCurrentScriptType(m_sScriptType);
-    m_spIconSnippetOverlay->SetCurrentScriptType(m_sScriptType);
-    m_spMetronomeSnippetOverlay->SetCurrentScriptType(m_sScriptType);
-    m_spNotificationSnippetOverlay->SetCurrentScriptType(m_sScriptType);
-    m_spResourceSnippetOverlay->SetCurrentScriptType(m_sScriptType);
-    m_spTextSnippetOverlay->SetCurrentScriptType(m_sScriptType);
-    m_spTimerSnippetOverlay->SetCurrentScriptType(m_sScriptType);
-    m_spThreadSnippetOverlay->SetCurrentScriptType(m_sScriptType);
-
-    m_spUi->pEditorStackedWidget->setCurrentIndex(PageIndexFromScriptType(sScriptType));
   }
+
+  m_sScriptType = sScriptType;
+
+  it = m_displayImplMap.find(m_sScriptType);
+  if (nullptr != m_pspUiActionBar)
+  {
+    if (m_displayImplMap.end() != it)
+    {
+      it->second->ShowButtons((*m_pspUiActionBar).get());
+    }
+  }
+
+  m_spBackgroundSnippetOverlay->SetCurrentScriptType(m_sScriptType);
+  m_spIconSnippetOverlay->SetCurrentScriptType(m_sScriptType);
+  m_spMetronomeSnippetOverlay->SetCurrentScriptType(m_sScriptType);
+  m_spNotificationSnippetOverlay->SetCurrentScriptType(m_sScriptType);
+  m_spResourceSnippetOverlay->SetCurrentScriptType(m_sScriptType);
+  m_spTextSnippetOverlay->SetCurrentScriptType(m_sScriptType);
+  m_spTimerSnippetOverlay->SetCurrentScriptType(m_sScriptType);
+  m_spThreadSnippetOverlay->SetCurrentScriptType(m_sScriptType);
+
+  m_spUi->pEditorStackedWidget->setCurrentIndex(PageIndexFromScriptType(sScriptType));
 }
 
 //----------------------------------------------------------------------------------------
