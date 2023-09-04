@@ -16,6 +16,7 @@ Fixed Bugs:
 - Fixed global constants missing from sanboxed Lua scripts.
 - Fixed race condition that prevented sceneManager.gotoScene() to transition to scenes
   when called at the end of scripts.
+- Fixed Lua code generation for global enum values (IconAlignment, TextAlignment).
 
 =================
 Version 1.3.0.0

@@ -6,7 +6,7 @@ DECLARE_CODE_GENERATOR(CJsCodeGenerator, SScriptDefinitionData::c_sScriptTypeJs)
 //----------------------------------------------------------------------------------------
 //
 CJsCodeGenerator::CJsCodeGenerator() :
-  CCommonCodeGenerator(SCommonCodeConfiguration{';', '[', ']', '(', ')', '\"', '.', "//",
+  CCommonCodeGenerator(SCommonCodeConfiguration{';', '[', ']', '(', ')', '\"', '.', '.', "//",
                                                 "true", "false", "null", "let"})
 {
 }

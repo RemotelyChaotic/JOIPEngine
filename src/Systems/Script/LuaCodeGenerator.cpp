@@ -7,7 +7,7 @@ DECLARE_CODE_GENERATOR(CLuaCodeGenerator, SScriptDefinitionData::c_sScriptTypeLu
 //----------------------------------------------------------------------------------------
 //
 CLuaCodeGenerator::CLuaCodeGenerator() :
-  CCommonCodeGenerator(SCommonCodeConfiguration{';', '{', '}', '(', ')', '\"', ':', "--",
+  CCommonCodeGenerator(SCommonCodeConfiguration{';', '{', '}', '(', ')', '\"', ':', '.', "--",
                                                 "true", "false", "nil", "local"})
 {
 }

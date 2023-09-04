@@ -180,7 +180,7 @@ QString CCommonCodeGenerator::Generate(const SNotificationSnippetCode& data,
   if (data.m_bSetAlignment)
   {
     QString sText = Statement(Invoke("notification", "setIconAlignment") +
-                              Call(Invoke("IconAlignment", "%1")));
+                              Call(Member("IconAlignment", "%1")));
     switch (data.m_textAlignment)
     {
     case Qt::AlignLeft: sText = sText.arg("AlignLeft"); break;
@@ -485,7 +485,7 @@ QString CCommonCodeGenerator::Generate(const STextSnippetCode& data,
   if (data.m_bSetAlignment)
   {
     QString sText = Statement(Invoke("textBox", "setTextAlignment") +
-                              Call(Invoke("TextAlignment", "%1")));
+                              Call(Member("TextAlignment", "%1")));
     switch (data.m_textAlignment)
     {
     case Qt::AlignLeft: sText = sText.arg("AlignLeft"); break;
@@ -654,6 +654,13 @@ QString CCommonCodeGenerator::Comment(const QString& sContent) const
 QString CCommonCodeGenerator::Invoke(const QString& sObj, const QString& sMember) const
 {
   return sObj + m_codeConfig.invokationOp + sMember;
+}
+
+//----------------------------------------------------------------------------------------
+//
+QString CCommonCodeGenerator::Member(const QString& sObj, const QString& sMember) const
+{
+  return sObj + m_codeConfig.memberOp + sMember;
 }
 
 //----------------------------------------------------------------------------------------

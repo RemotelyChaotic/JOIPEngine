@@ -16,6 +16,7 @@ struct SCommonCodeConfiguration
   QChar stringChar;
 
   QChar invokationOp;
+  QChar memberOp;
 
   QString sComment;
 
@@ -47,6 +48,7 @@ protected:
   QString Call(const QString& sContent) const;
   QString Comment(const QString& sContent) const;
   QString Invoke(const QString& sObj, const QString& sMember) const;
+  QString Member(const QString& sObj, const QString& sMember) const;
   QString Local(const QString& sVariable) const;
   QString Statement(const QString& sContent, const QString& sBeforeNewLine = QString()) const;
   QString String(const QString& sContent) const;
