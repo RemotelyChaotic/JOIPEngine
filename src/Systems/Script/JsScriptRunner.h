@@ -50,6 +50,7 @@ signals:
   void SignalOverlayRunAsync(tspProject spProject, const QString& sId,
                              const QString& sScriptResource) override;
   void SignalRemoveScriptRunner(const QString& sId) override;
+  void SignalSceneLoaded(const QString& sScene) override;
   void SignalScriptRunFinished(bool bOk, const QString& sRetVal) override;
 
 protected:

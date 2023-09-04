@@ -86,6 +86,9 @@ void CScriptRunner::Initialize()
     bOk = connect(dynamic_cast<QObject*>(it.second.get()), SIGNAL(SignalRemoveScriptRunner(const QString&)),
                   this, SLOT(SlotRemoveScriptRunner(const QString&)));
     assert(bOk); Q_UNUSED(bOk);
+    bOk = connect(dynamic_cast<QObject*>(it.second.get()), SIGNAL(SignalSceneLoaded(const QString&)),
+                  this, SIGNAL(SignalSceneLoaded(const QString&)));
+    assert(bOk); Q_UNUSED(bOk);
     bOk = connect(dynamic_cast<QObject*>(it.second.get()), SIGNAL(SignalScriptRunFinished(bool,const QString&)),
                   this, SLOT(SlotScriptRunFinished(bool,const QString&)));
     assert(bOk); Q_UNUSED(bOk);

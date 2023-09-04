@@ -45,6 +45,8 @@ CScriptRunnerInstanceController::CScriptRunnerInstanceController(
 
   connect(m_spWorker.get(), &CScriptRunnerInstanceWorkerBase::HandleScriptFinish,
           this, &CScriptRunnerInstanceController::SlotHandleScriptFinish, Qt::QueuedConnection);
+  connect(m_spWorker.get(), &CScriptRunnerInstanceWorkerBase::SignalSceneLoaded,
+          this, &CScriptRunnerInstanceController::SignalSceneLoaded);
 
   connect(m_spWorker.get(), &CScriptRunnerInstanceWorkerBase::SignalOverlayCleared,
           this, &CScriptRunnerInstanceController::SignalOverlayCleared, Qt::QueuedConnection);

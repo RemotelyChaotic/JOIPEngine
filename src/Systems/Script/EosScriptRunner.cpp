@@ -214,7 +214,8 @@ CEosScriptRunner::LoadScript(const QString& sScript, tspScene spScene, tspResour
 
   spSignalEmitterContext->SetScriptExecutionStatus(CScriptRunnerSignalEmiter::eRunning);
 
-  QTimer::singleShot(10, this, [this, spEosRunnerMain]{ SlotRun(spEosRunnerMain, c_sMainRunner, ""); });
+  QTimer::singleShot(10, this, [this, spEosRunnerMain, sSceneName = m_sSceneName]
+    { SlotRun(spEosRunnerMain, c_sMainRunner, "", sSceneName); });
 
   return std::make_shared<CEosScriptRunnerInstanceController>(c_sMainRunner, spEosRunnerMain);
 }
@@ -255,7 +256,7 @@ void CEosScriptRunner::RegisterNewComponent(const QString sName, QJSValue signal
                 // we would call SignalOverlayRunAsync here normally,
                 // but this type of script can only use
                 // eos scripts as notifications
-                SlotRun(spRunner->Runner(), sId, sId);
+                SlotRun(spRunner->Runner(), sId, sId, QString());
               }
             });
           }
@@ -311,7 +312,7 @@ CEosScriptRunner::OverlayRunAsync(const QString& sId, const QString& sScript,
   connect(spEosRunner.get(), &CJsonInstructionSetRunner::Fork,
           this, &CEosScriptRunner::SlotFork);
 
-  SlotRun(spEosRunner, sId, "");
+  SlotRun(spEosRunner, sId, "", QString());
 
   return std::make_shared<CEosScriptRunnerInstanceController>(sId, spEosRunner);
 }
@@ -401,19 +402,25 @@ void CEosScriptRunner::SlotFork(
 
   if (bAutoRun)
   {
-    SlotRun(spNewRunner, sForkCommandsName, sForkCommandsName);
+    SlotRun(spNewRunner, sForkCommandsName, sForkCommandsName, QString());
   }
 }
 
 //----------------------------------------------------------------------------------------
 //
 void CEosScriptRunner::SlotRun(std::shared_ptr<CJsonInstructionSetRunner> spEosRunner,
-                               const QString& sRunner, const QString& sCommands)
+                               const QString& sRunner, const QString& sCommands,
+                               const QString sSceneName)
 {
   if (1 != m_bInitialized) { return; }
 
   if (nullptr != spEosRunner)
   {
+    if (!sSceneName.isEmpty())
+    {
+      emit SignalSceneLoaded(sSceneName);
+    }
+
     CJsonInstructionSetRunner::tRetVal retVal =
         spEosRunner->Run(sCommands, ERunerMode::eAutoRunAll, false);
     if (!std::holds_alternative<SRunnerRetVal>(retVal))

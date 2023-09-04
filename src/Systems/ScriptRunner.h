@@ -36,6 +36,7 @@ public:
 
 signals:
   void SignalRunningChanged(bool bRunning);
+  void SignalSceneLoaded(const QString& sScene);
   void SignalScriptRunFinished(bool bOk, const QString& sRetVal);
 
 public slots:

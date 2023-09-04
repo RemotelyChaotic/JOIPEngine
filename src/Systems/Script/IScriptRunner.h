@@ -45,6 +45,7 @@ signals:
   virtual void SignalOverlayRunAsync(tspProject spProject, const QString& sId,
                                      const QString& sScriptResource) = 0;
   virtual void SignalRemoveScriptRunner(const QString& sId) = 0;
+  virtual void SignalSceneLoaded(const QString& sScene) = 0;
   virtual void SignalScriptRunFinished(bool bOk, const QString& sRetVal) = 0;
 };
 

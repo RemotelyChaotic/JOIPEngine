@@ -314,6 +314,11 @@ public slots:
 
     try
     {
+      if (!sSceneName.isEmpty())
+      {
+        emit SignalSceneLoaded(sSceneName);
+      }
+
       m_pLuaState->exec_statements(sSkript);
       if (IsInterrupted())
       {
@@ -834,6 +839,8 @@ std::shared_ptr<CScriptRunnerInstanceController> CLuaScriptRunner::CreateRunner(
   spRunner->setObjectName(sId);
   connect(spRunner.get(), &CScriptRunnerInstanceController::HandleScriptFinish,
           this, &CLuaScriptRunner::SlotHandleScriptFinish);
+  connect(spRunner.get(), &CScriptRunnerInstanceController::SignalSceneLoaded,
+          this, &CLuaScriptRunner::SignalSceneLoaded);
 
   connect(spRunner.get(), &CScriptRunnerInstanceController::SignalOverlayCleared,
           this, &CLuaScriptRunner::SignalOverlayCleared);

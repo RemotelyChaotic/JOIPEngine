@@ -320,6 +320,11 @@ public slots:
 
     if (runFunction.isCallable())
     {
+      if (!sSceneName.isEmpty())
+      {
+        emit SignalSceneLoaded(sSceneName);
+      }
+
       QJSValue ret = runFunction.call();
       if (!m_pScriptEngine->isInterrupted())
       {
@@ -552,6 +557,8 @@ std::shared_ptr<CScriptRunnerInstanceController> CJsScriptRunner::CreateRunner(c
   spController->setObjectName(sId);
   connect(spController.get(), &CScriptRunnerInstanceController::HandleScriptFinish,
           this, &CJsScriptRunner::SlotHandleScriptFinish);
+  connect(spController.get(), &CScriptRunnerInstanceController::SignalSceneLoaded,
+          this, &CJsScriptRunner::SignalSceneLoaded);
 
   connect(spController.get(), &CScriptRunnerInstanceController::SignalOverlayCleared,
           this, &CJsScriptRunner::SignalOverlayCleared);

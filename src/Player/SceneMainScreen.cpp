@@ -50,7 +50,8 @@ CSceneMainScreen::CSceneMainScreen(QWidget* pParent) :
   m_bShuttingDown(false),
   m_bErrorState(false),
   m_bBeingDebugged(false),
-  m_bCloseRequested(false)
+  m_bCloseRequested(false),
+  m_bCanLoadNewScene(true)
 {
   m_spUi->setupUi(this);
 }
@@ -97,6 +98,9 @@ void CSceneMainScreen::Initialize(const std::shared_ptr<CWindowContext>& spWindo
   assert(m_spScriptRunner != nullptr);
   QQmlEngine::setObjectOwnership(m_spScriptRunner.get(), QQmlEngine::CppOwnership);
 
+  connect(m_spScriptRunner.get(), &CScriptRunner::SignalSceneLoaded,
+          this, &CSceneMainScreen::SlotSceneLoaded);
+
   m_wpDbManager = CApplication::Instance()->System<CDatabaseManager>();
 
   InitQmlMain();
@@ -125,6 +129,7 @@ void CSceneMainScreen::LoadProject(qint32 iId, const QString sStartScene)
     qWarning() << "Old Project was not unloaded before loading project.";
   }
 
+  m_bCanLoadNewScene = true;
   m_spUi->pQmlWidget->setSource(QUrl("qrc:/qml/resources/qml/PlayerMain.qml"));
 
   auto spDbManager = m_wpDbManager.lock();
@@ -371,6 +376,9 @@ void CSceneMainScreen::SlotExecutionError(QString sException, qint32 iLine, QStr
 {
   if (!m_bInitialized || nullptr == m_spCurrentProject) { return; }
 
+  // scene load finished with an error allow loading new scenes again
+  m_bCanLoadNewScene = true;
+
   SlotError(QString(tr("%1 on line %2 (%3)")).arg(sException).arg(iLine).arg(sStack), QtMsgType::QtCriticalMsg);
 }
 
@@ -446,6 +454,16 @@ void CSceneMainScreen::SlotSceneSelectReturnValue(int iIndex)
 
 //----------------------------------------------------------------------------------------
 //
+void CSceneMainScreen::SlotSceneLoaded(const QString&)
+{
+  if (!m_bInitialized || nullptr == m_spCurrentProject) { return; }
+
+  // scene load finished allow loading new scenes again
+  m_bCanLoadNewScene = true;
+}
+
+//----------------------------------------------------------------------------------------
+//
 void CSceneMainScreen::SlotScriptRunFinished(bool bOk, const QString& sRetVal)
 {
   if (!m_bInitialized || nullptr == m_spCurrentProject) { return; }
@@ -455,15 +473,21 @@ void CSceneMainScreen::SlotScriptRunFinished(bool bOk, const QString& sRetVal)
   {
     if (bOk)
     {
-      bool bMightBeRegex = CProjectRunner::MightBeRegexScene(sRetVal);
-      if (sRetVal.isNull() || sRetVal.isEmpty())
+      // scene load was started already, block other scene transitions
+      if (m_bCanLoadNewScene)
       {
-        SlotNextSkript(bMightBeRegex);
-      }
-      else
-      {
-        m_spProjectRunner->ResolveFindScenes(sRetVal);
-        NextSkript(bMightBeRegex);
+        m_bCanLoadNewScene = false;
+
+        bool bMightBeRegex = CProjectRunner::MightBeRegexScene(sRetVal);
+        if (sRetVal.isNull() || sRetVal.isEmpty())
+        {
+          SlotNextSkript(bMightBeRegex);
+        }
+        else
+        {
+          m_spProjectRunner->ResolveFindScenes(sRetVal);
+          NextSkript(bMightBeRegex);
+        }
       }
     }
     else

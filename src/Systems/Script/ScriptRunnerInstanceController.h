@@ -41,6 +41,7 @@ signals:
   void SignalOverlayCleared();
   void SignalOverlayClosed(const QString& sId);
   void SignalOverlayRunAsync(tspProject spProject, const QString& sId, const QString& sScriptResource);
+  void SignalSceneLoaded(const QString& sScene);
 
 protected:
   tspProject                                     m_spProject;
@@ -98,6 +99,7 @@ signals:
   void SignalOverlayCleared();
   void SignalOverlayClosed(const QString& sId);
   void SignalOverlayRunAsync(tspProject spProject, const QString& sId, const QString& sScriptResource);
+  void SignalSceneLoaded(const QString& sScene);
 
 private slots:
   void SlotHandleScriptFinish(bool bSuccess, const QVariant& sRetVal);

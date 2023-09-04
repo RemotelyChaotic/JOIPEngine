@@ -64,6 +64,7 @@ private slots:
   void SlotNextSkript(bool bMightBeRegex);
   void SlotResizeDone();
   void SlotSceneSelectReturnValue(int iIndex);
+  void SlotSceneLoaded(const QString& sScene);
   void SlotScriptRunFinished(bool bOk, const QString& sRetVal);
   void SlotStartLoadingSkript();
   void SlotUnloadFinished();
@@ -95,6 +96,7 @@ private:
   bool                                                        m_bErrorState;
   bool                                                        m_bBeingDebugged;
   bool                                                        m_bCloseRequested;
+  bool                                                        m_bCanLoadNewScene;
 };
 
 //----------------------------------------------------------------------------------------

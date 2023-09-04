@@ -82,13 +82,14 @@ signals:
   void SignalOverlayRunAsync(tspProject spProject, const QString& sId,
                              const QString& sScriptResource) override;
   void SignalRemoveScriptRunner(const QString& sId) override;
+  void SignalSceneLoaded(const QString& sScene) override;
   void SignalScriptRunFinished(bool bOk, const QString& sRetVal) override;
 
 private slots:
   void SlotCommandRetVal(CJsonInstructionSetRunner::tRetVal retVal);
   void SlotFork(std::shared_ptr<CJsonInstructionSetRunner> spNewRunner, const QString& sForkCommandsName, bool bAutoRun);
   void SlotRun(std::shared_ptr<CJsonInstructionSetRunner> spEosRunnerMain,
-               const QString& sRunner, const QString& sCommands);
+               const QString& sRunner, const QString& sCommands, const QString sSceneName);
 
 private:
   void HandleError(const SJsonException& value);
