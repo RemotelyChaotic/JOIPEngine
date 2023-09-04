@@ -13,6 +13,7 @@ Fixed Bugs:
   notification running.
 - Fixed some code generation overlays messing up the initial enabled state of certain 
   elements.
+- Fixed global constants missing from sanboxed Lua scripts.
 
 =================
 Version 1.3.0.0
