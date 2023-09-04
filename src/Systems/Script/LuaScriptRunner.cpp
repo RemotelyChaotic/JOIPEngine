@@ -19,6 +19,8 @@ extern "C"
 #include <QDebug>
 #include <QFile>
 
+#include <set>
+
 char CScriptRunnerUtilsLua::sKeyThis;
 
 //----------------------------------------------------------------------------------------
@@ -27,15 +29,59 @@ namespace
 {
   //--------------------------------------------------------------------------------------
   //
-  void RegisterEnum(QtLua::State* pState, const QMetaObject& metaType, const QString& sName)
+  void RegisterEnum(QtLua::State* pState, const QMetaObject& metaType, const QString& sName,
+                    std::set<QString>* pvGlobalMap)
   {
     QtLua::Value luavalue(QtLua::Value::new_table(pState));
     QMetaEnum enumWrapper = metaType.enumerator(0);
     for (qint32 i = 0; enumWrapper.keyCount() > i; ++i)
     {
       luavalue[enumWrapper.key(i)] = enumWrapper.value(i);
+
+      if (nullptr != pvGlobalMap)
+      {
+        pvGlobalMap->insert(QString("%1.%2").arg(sName).arg(enumWrapper.key(i)));
+      }
     }
     (*pState)[sName] = luavalue;
+  }
+
+  //--------------------------------------------------------------------------------------
+  //
+  QStringList GetGlobalValues(const QStringList& vsPath, const QVariantMap& variables)
+  {
+    QStringList vsRet;
+    for (auto it = variables.begin(); variables.end() != it; ++it)
+    {
+      if (it.value().type() == QVariant::String)
+      {
+        const QString sValue = it.value().toString();
+        vsRet.push_back(sValue + " = " + vsPath.join(".") +
+                        (vsPath.isEmpty() ? "" : ".") + sValue);
+      }
+      else if (it.value().type() == QVariant::StringList)
+      {
+        QStringList vsChildrenRet;
+        for (const QString& sChild : it.value().toStringList())
+        {
+          QVariantMap map;
+          map[sChild] = sChild;
+          QStringList vsReflRet = GetGlobalValues(QStringList() << vsPath << it.key(),
+                                                  map);
+          vsChildrenRet << vsReflRet;
+        }
+        vsRet.push_back(QString("%1 = { %2 }").arg(it.key())
+                        .arg(vsChildrenRet.join(",")));
+      }
+      else
+      {
+        QVariantMap map = it.value().toMap();
+        QStringList vsReflRet = GetGlobalValues(QStringList() << vsPath << it.key(), map);
+        vsRet.push_back(QString("%1 = { %2 }").arg(it.key())
+                        .arg(vsReflRet.join(",")));
+      }
+    }
+    return vsRet;
   }
 }
 
@@ -163,8 +209,8 @@ public slots:
 
     (*m_pLuaState)["utils_1337"] = QtLua::Value(m_pLuaState, m_pScriptUtils.data(), false, false);
 
-    RegisterEnum(m_pLuaState, IconAlignment::staticMetaObject, "IconAlignment");
-    RegisterEnum(m_pLuaState, TextAlignment::staticMetaObject, "TextAlignment");
+    RegisterEnum(m_pLuaState, IconAlignment::staticMetaObject, "IconAlignment", &m_vGlobalValues);
+    RegisterEnum(m_pLuaState, TextAlignment::staticMetaObject, "TextAlignment", &m_vGlobalValues);
   }
 
   //--------------------------------------------------------------------------------------
@@ -380,6 +426,46 @@ private:
     {
       vsBindings << QString("%1 = %2").arg(it->first).arg(it->first);
     }
+    QVariantMap globalMap;
+    for (const QString& sGlobal : m_vGlobalValues)
+    {
+      QStringList vsGlobalElems = sGlobal.split(".");
+      std::function<void(const QStringList&, QVariantMap&)> fnBla =
+          [&fnBla](const QStringList& vsGlobalElems, QVariantMap& insertInto) {
+        if (vsGlobalElems.size() == 0)
+        {
+          return;
+        }
+        if (vsGlobalElems.size() == 1)
+        {
+          const QString sKey = vsGlobalElems.front();
+          insertInto[sKey] = sKey;
+        }
+        else
+        {
+          const QString sKey = vsGlobalElems.front();
+          QStringList vsElemsMinOne = vsGlobalElems.mid(1);
+          if (vsElemsMinOne.size() == 1)
+          {
+            QVariant var = insertInto[sKey];
+            QStringList vsElems = var.toStringList() << vsElemsMinOne[0];
+            insertInto[sKey] = vsElems;
+          }
+          else
+          {
+            QVariantMap childMap;
+            fnBla(vsElemsMinOne, childMap);
+            insertInto[sKey] = childMap;
+          }
+        }
+      };
+      fnBla(vsGlobalElems, globalMap);
+    }
+    QStringList vsGlobalsBindings = GetGlobalValues(QStringList(), globalMap);
+    if (!vsGlobalsBindings.isEmpty())
+    {
+      vsBindings << vsGlobalsBindings;
+    }
     return sEnvVar.arg(vsBindings.empty() ? "" : QString(",") + vsBindings.join(","));
   }
 
@@ -457,6 +543,7 @@ private:
   QPointer<CSceneScriptWrapper>                  m_pCurrentScene;
   std::map<QString /*name*/,
            std::shared_ptr<CScriptObjectBase>>   m_objectMap;
+  std::set<QString>                              m_vGlobalValues;
   QString                                        m_sName;
   QAtomicInt                                     m_bInterrupted;
 
