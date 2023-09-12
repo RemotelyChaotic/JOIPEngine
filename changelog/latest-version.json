@@ -1,0 +1,10 @@
+{
+  "latestVersion": "1.3.1",
+  "latestVersionCode": 66305,
+  "url": "https://github.com/RemotelyChaotic/JOIPEngine/releases",
+  "releaseNotes": [
+    "- Fixed multiple crashes",
+    "- Fixed Lua script issues",
+    "- Fixed sceneManager.goto instructions"
+  ]
+}

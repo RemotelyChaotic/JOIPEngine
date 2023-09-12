@@ -55,7 +55,8 @@ struct SVersion
 
   operator quint32() const
   {
-    return QT_VERSION_CHECK(m_iMajor, m_iMinor, m_iPatch);
+    qint32 iVersion = QT_VERSION_CHECK(m_iMajor, m_iMinor, m_iPatch);
+    return iVersion;
   }
   explicit operator QString() const
   {
