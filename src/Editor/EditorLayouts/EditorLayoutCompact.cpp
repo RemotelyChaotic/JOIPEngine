@@ -21,7 +21,8 @@ namespace
     { EEditorWidget::eResourceDisplay, "LeftTab_MediaPlayer" },
     { EEditorWidget::eProjectSettings, "LeftTab_Settings" },
     { EEditorWidget::eSceneNodeWidget, "LeftTab_Nodes" },
-    { EEditorWidget::eSceneCodeEditorWidget, "LeftTab_Code" }
+    { EEditorWidget::eSceneCodeEditorWidget, "LeftTab_Code" },
+    { EEditorWidget::ePatternEditor, "LeftTab_Pattern" }
   };
   const std::map<EEditorWidget, QString> m_sEditorToolTipMap =
   {
@@ -29,7 +30,8 @@ namespace
     { EEditorWidget::eResourceDisplay, "Switch to panel for resource and undo stack display" },
     { EEditorWidget::eProjectSettings, "Switch to panel for Project settings" },
     { EEditorWidget::eSceneNodeWidget, "Switch to panel for scene node configuration" },
-    { EEditorWidget::eSceneCodeEditorWidget, "Switch to panel for editing scene code" }
+    { EEditorWidget::eSceneCodeEditorWidget, "Switch to panel for editing scene code" },
+    { EEditorWidget::ePatternEditor, "Switch to panel for editing metronome patterns" }
   };
 
   const char*   c_sEditorProperty = "Editor";

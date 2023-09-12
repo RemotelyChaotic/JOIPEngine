@@ -10,7 +10,8 @@ BETTER_ENUM(EEditorWidget, qint32,
             eResourceDisplay = 1,
             eProjectSettings = 2,
             eSceneNodeWidget = 3,
-            eSceneCodeEditorWidget = 4);
+            eSceneCodeEditorWidget = 4,
+            ePatternEditor = 5);
 
 namespace editor {
   inline const char* c_sPropertyOldValue = "OldValue";

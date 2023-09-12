@@ -101,6 +101,9 @@ macro(CreateJOIPProject JOIP_PROJECT_NAME)
     ${JOIPSources}/Editor/EditorWidgets/EditorCodeWidget.cpp
     ${JOIPSources}/Editor/EditorWidgets/EditorCodeWidget.h
     ${JOIPSources}/Editor/EditorWidgets/EditorCodeWidget.ui
+    ${JOIPSources}/Editor/EditorWidgets/EditorPatternEditorWidget.cpp
+    ${JOIPSources}/Editor/EditorWidgets/EditorPatternEditorWidget.h
+    ${JOIPSources}/Editor/EditorWidgets/EditorPatternEditorWidget.ui
     ${JOIPSources}/Editor/EditorWidgets/EditorProjectSettingsWidget.cpp
     ${JOIPSources}/Editor/EditorWidgets/EditorProjectSettingsWidget.h
     ${JOIPSources}/Editor/EditorWidgets/EditorProjectSettingsWidget.ui
