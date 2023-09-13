@@ -18,6 +18,7 @@ public:
   explicit CTitleLabel(QString sText = "", QWidget* pParent = nullptr);
 
   void Initialize();
+  void Invalidate();
 
   void SetOutlineColor(const QColor& color);
   const QColor& OutlineColor() const;
@@ -29,6 +30,9 @@ public:
 protected slots:
   void SlotStyleLoaded();
   void SlotUpdate();
+
+signals:
+  void SignalAnimationFinished();
 
 protected:
   void resizeEvent(QResizeEvent* pEvt) override;

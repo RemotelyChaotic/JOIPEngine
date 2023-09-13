@@ -6,8 +6,8 @@ include(JOIPCommon)
 
 set(Sources
   main.cpp
-  ../../version.cpp
-  ../../version.h)
+  ${CMAKE_SOURCE_DIR}/version.cpp
+  ${CMAKE_SOURCE_DIR}/version.h)
 
 add_executable(${PROJECT_NAME} ${Sources})
 set_target_properties(${PROJECT_NAME} PROPERTIES

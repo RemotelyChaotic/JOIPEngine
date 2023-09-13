@@ -1,8 +1,5 @@
 #include "Style.h"
 
-#include "Application.h"
-#include "Settings.h"
-
 #include <QDebug>
 #include <QDir>
 #include <QDirIterator>
@@ -115,11 +112,8 @@ QString joip_style::StyleFolder()
 
 //----------------------------------------------------------------------------------------
 //
-void joip_style::SetStyle(QApplication* pApp)
+void joip_style::SetStyle(QApplication* pApp, const QString& sStyle, const QString& sFont)
 {
-  auto spSettings = dynamic_cast<CApplication*>(pApp)->Settings();
-
-  QString sStyle = spSettings->Style();
   if (sStyle == c_sDefaultStyle)
   {
     LoadDefaultStyle(pApp);
@@ -129,7 +123,7 @@ void joip_style::SetStyle(QApplication* pApp)
     ResolveStyle(pApp, sStyle);
   }
 
-  QFont font(spSettings->Font(), 10);
+  QFont font(sFont, 10);
   pApp->setFont(font);
 }
 

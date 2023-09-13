@@ -1,6 +1,5 @@
 #include "TitleLabel.h"
 #include "Application.h"
-#include "Constants.h"
 
 #include <QFont>
 #include <QFutureWatcher>
@@ -340,7 +339,11 @@ void CTitleLabel::Initialize()
   connect(m_pStyle, &CTitleProxyStyle::LoadingFinished,
           this, &CTitleLabel::SlotUpdate, Qt::QueuedConnection);
   connect(m_pStyle, &CTitleProxyStyle::AnimationsFinished,
-          this, [this](){ SlotUpdate(); m_updateTimer.stop(); });
+          this, [this](){
+    SlotUpdate();
+    m_updateTimer.stop();
+    emit SignalAnimationFinished();
+  });
 
   QFontMetrics fontMetrics(thisFont);
   setFixedHeight(fontMetrics.height() + c_iKernelSize + static_cast<qint32>(c_iOffsetBorder));
@@ -359,6 +362,13 @@ void CTitleLabel::Initialize()
 
   m_suggestedSize = size();
   m_lastSize = {0,0};
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CTitleLabel::Invalidate()
+{
+  SlotStyleLoaded();
 }
 
 //----------------------------------------------------------------------------------------

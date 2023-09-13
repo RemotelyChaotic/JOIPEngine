@@ -242,7 +242,7 @@ void CApplication::LoadStyle()
   if (m_bStyleDirty)
   {
     m_bStyleDirty = false;
-    joip_style::SetStyle(this);
+    joip_style::SetStyle(this, m_spSettings->Style(), m_spSettings->Font());
     emit StyleLoaded();
   }
 }

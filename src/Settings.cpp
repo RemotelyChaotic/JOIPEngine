@@ -83,6 +83,7 @@ namespace {
 //
 const QString CSettings::c_sVersion = "General/version";
 const QString CSettings::c_sSettingAutoPauseInactive = "Content/pauseinactive";
+const QString CSettings::c_sSettingAutoUpdate = "General/autoUpdate";
 const QString CSettings::c_sSettingContentFolder = "Content/folder";
 const QString CSettings::c_sSettingEditorLayout = "Content/preferededitorlayout";
 const QString CSettings::c_sSettingFont = "Graphics/font";
@@ -225,6 +226,28 @@ void CSettings::WriteRaw(const QString& sSetting, const QVariant& value)
 {
   QMutexLocker locker(&m_settingsMutex);
   m_spSettings->setValue(sSetting, value);
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CSettings::SetAutoUpdate(bool bValue)
+{
+  QMutexLocker locker(&m_settingsMutex);
+  bool bAutoUpdate = m_spSettings->value(CSettings::c_sSettingAutoUpdate).toBool();
+
+  if (bAutoUpdate == bValue) { return; }
+
+  m_spSettings->setValue(CSettings::c_sSettingAutoUpdate, bValue);
+
+  emit autoUpdateChanged();
+}
+
+//----------------------------------------------------------------------------------------
+//
+bool CSettings::AutoUpdate()
+{
+  QMutexLocker locker(&m_settingsMutex);
+  return m_spSettings->value(CSettings::c_sSettingAutoUpdate).toBool();
 }
 
 //----------------------------------------------------------------------------------------
@@ -888,6 +911,13 @@ void CSettings::GenerateSettingsIfNotExists()
   {
     bNeedsSynch = true;
     m_spSettings->setValue(CSettings::c_sSettingAutoPauseInactive, true);
+  }
+
+  // check autoupdate
+  if (!m_spSettings->contains(CSettings::c_sSettingAutoUpdate))
+  {
+    bNeedsSynch = true;
+    m_spSettings->setValue(CSettings::c_sSettingAutoUpdate, true);
   }
 
   // check content path

@@ -15,7 +15,7 @@ namespace joip_style {
   QStringList AvailableStyles();
   QString StyleFile(const QString& sStyle);
   QString StyleFolder();
-  void SetStyle(QApplication* pApp);
+  void SetStyle(QApplication* pApp, const QString& sStyle, const QString& sFont);
 }
 
 #endif // STYLE_H

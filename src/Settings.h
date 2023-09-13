@@ -14,6 +14,7 @@ class QSettings;
 class CSettings : public QObject
 {
   Q_OBJECT
+  Q_PROPERTY(bool autoUpdate READ AutoUpdate WRITE SetAutoUpdate NOTIFY autoUpdateChanged)
   Q_PROPERTY(QString contentFolder READ ContentFolder WRITE SetContentFolder NOTIFY contentFolderChanged)
   Q_PROPERTY(QString font READ Font WRITE SetFont NOTIFY fontChanged)
   Q_PROPERTY(bool fullscreen READ Fullscreen WRITE SetFullscreen NOTIFY fullscreenChanged)
@@ -40,6 +41,7 @@ class CSettings : public QObject
 public:
   static const QString c_sVersion;
   static const QString c_sSettingAutoPauseInactive;
+  static const QString c_sSettingAutoUpdate;
   static const QString c_sSettingContentFolder;
   static const QString c_sSettingEditorLayout;
   static const QString c_sSettingFont;
@@ -85,6 +87,8 @@ public:
   QVariant ReadRaw(const QString& sSetting, const QVariant& sDefaultValue);
   void WriteRaw(const QString& sSetting, const QVariant& value);
 
+  void SetAutoUpdate(bool bValue);
+  bool AutoUpdate();
   void SetContentFolder(const QString& sPath);
   QString ContentFolder();
   void SetFont(const QString& sFont);
@@ -137,6 +141,7 @@ public:
   static bool IsAllowedToOverwriteKeyBinding(const QString& sRole);
 
 signals:
+  void autoUpdateChanged();
   void contentFolderChanged();
   void fontChanged();
   void fullscreenChanged();

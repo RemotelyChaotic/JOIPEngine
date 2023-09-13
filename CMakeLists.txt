@@ -8,6 +8,10 @@ set(JOIP_VERSION_MAJOR 1)
 set(JOIP_VERSION_MINOR 4)
 set(JOIP_VERSION_PATCH 0)
 
+set(JOIP_UPDATER_VERSION_MAJOR 1)
+set(JOIP_UPDATER_VERSION_MINOR 0)
+set(JOIP_UPDATER_VERSION_PATCH 0)
+
 # KDE Options
 set(ECM_DIR ${CMAKE_CURRENT_LIST_DIR}/cmake/ECM/share/ECM/cmake)
 set(KDE_SKIP_TEST_SETTINGS TRUE)
@@ -92,8 +96,10 @@ if(WIN32)
   add_subdirectory(src)
   add_subdirectory(src/RCC)
   if(MSVC)
-    add_subdirectory(src/Launcher)
+    add_subdirectory(src/Windows/Launcher)
   endif()
+  add_subdirectory(src/Updater)
+
 elseif (ANDROID)
   # For android the executable project *needs* to be in the root project folder because of
   # bugs with qt
