@@ -4,11 +4,18 @@
 
 #include "Widgets/TitleLabel.h"
 
+#if defined(Q_OS_WIN)
+#include <QtPlatformHeaders/QWindowsWindowFunctions>
+#include <QWinTaskbarButton>
+#include <QWinTaskbarProgress>
+#endif
+
 #include <QDirIterator>
 #include <QGuiApplication>
 #include <QGridLayout>
 #include <QPainter>
 #include <QProcess>
+#include <QProgressBar>
 #include <QPushButton>
 #include <QScreen>
 #include <QStyle>
@@ -34,6 +41,13 @@ CSplash::CSplash(const SSettingsData& settings, QWidget *parent) :
 {
   setWindowFlag(Qt::FramelessWindowHint, true);
   setWindowIcon(QIcon(":/resouces/Icon.ico")); // TODO: replce with updater icon
+
+#if defined(Q_OS_WIN)
+  m_pTaskButton = new QWinTaskbarButton(this);
+  m_pTaskButton->setWindow(windowHandle());
+  m_pTaskProgress = m_pTaskButton->progress();
+  m_pTaskProgress->setVisible(false);
+#endif
 
   QPoint globalCursorPos = QCursor::pos();
   QRect availableGeometry =
@@ -86,24 +100,39 @@ CSplash::CSplash(const SSettingsData& settings, QWidget *parent) :
   connect(m_pSplashText, &CTitleLabel::SignalAnimationFinished, this,
           &CSplash::SlotAnimationFinished);
 
-  m_pMessageLabel = new QLabel(this);
-  m_pMessageLabel->setText(tr("Initializing..."));
-  m_pMessageLabel->setObjectName(QString::fromUtf8("pMessageLabel"));
+  m_pMessageBar = new QProgressBar(this);
+  m_pMessageBar->setRange(0, 0);
+  m_pMessageBar->setValue(0);
+  m_pMessageBar->setFormat(QString(""));
+  m_pMessageBar->setObjectName(QString::fromUtf8("pMessageLabel"));
   sizePolicy = QSizePolicy(QSizePolicy::Preferred, QSizePolicy::Fixed);
   sizePolicy.setHorizontalStretch(0);
   sizePolicy.setVerticalStretch(0);
-  sizePolicy.setHeightForWidth(m_pMessageLabel->sizePolicy().hasHeightForWidth());
-  m_pMessageLabel->setSizePolicy(sizePolicy);
-  m_pMessageLabel->setMinimumSize(QSize(1, 0));
-  m_pMessageLabel->setFixedHeight(c_iMessageHeight);
-  m_pMessageLabel->setAlignment(Qt::AlignLeft);
-  QFont font = m_pMessageLabel->font();
+  sizePolicy.setHeightForWidth(m_pMessageBar->sizePolicy().hasHeightForWidth());
+  m_pMessageBar->setSizePolicy(sizePolicy);
+  m_pMessageBar->setMinimumSize(QSize(1, 0));
+  m_pMessageBar->setFixedHeight(c_iMessageHeight);
+  m_pMessageBar->setAlignment(Qt::AlignCenter);
+  pLayout->addWidget(m_pMessageBar, 1, 0, 1, 1);
+
+  m_pMessageText = new QLabel(this);
+  m_pMessageText->setText(tr("Initializing..."));
+  m_pMessageText->setObjectName(QString::fromUtf8("pMessageLabel"));
+  sizePolicy = QSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
+  sizePolicy.setHorizontalStretch(0);
+  sizePolicy.setVerticalStretch(0);
+  sizePolicy.setHeightForWidth(m_pMessageText->sizePolicy().hasHeightForWidth());
+  m_pMessageText->setSizePolicy(sizePolicy);
+  m_pMessageText->setFixedSize(width(), c_iMessageHeight);
+  m_pMessageText->setAlignment(Qt::AlignCenter);
+  QFont font = m_pMessageBar->font();
   font.setPixelSize(12);
-  m_pMessageLabel->setFont(font);
-  m_pMessageLabel->setStyleSheet("QLabel {"
-                                 "  color: silver;"
-                                 "}");
-  pLayout->addWidget(m_pMessageLabel, 1, 0, 1, 1);
+  m_pMessageText->setFont(font);
+  m_pMessageText->setStyleSheet("QLabel {"
+                               "  color: silver;"
+                               "}");
+  m_pMessageText->move(0, height() - c_iMessageHeight);
+  m_pMessageText->raise();
 
   m_pPopupBox = new QGroupBox(this);
   m_pPopupBox->setObjectName(QString::fromUtf8("pPopupBox"));
@@ -170,8 +199,9 @@ CSplash::CSplash(const SSettingsData& settings, QWidget *parent) :
   });
 
   connect(m_pUpdater, &CUpdater::SignalMessage, this, [this](const QString& sText) {
-    m_pMessageLabel->setText(sText);
+    m_pMessageText->setText(sText);
   });
+  connect(m_pUpdater, &CUpdater::SignalProgress, this, &CSplash::SlotSetProgress);
   connect(m_pUpdater, &CUpdater::SignalStartExe, this, &CSplash::StartMainExe);
 
   m_animationTimer.setSingleShot(true);
@@ -203,15 +233,25 @@ CSplash::~CSplash() = default;
 //
 void CSplash::StartUpdate()
 {
-  m_pMessageLabel->setText(tr("Updating..."));
-  m_pUpdater->RunUpdate();
+  m_pMessageText->setText(tr("Updating..."));
+  SlotSetProgress(0, -1);
+
+  if (m_settings.bContinueUpdate)
+  {
+    m_pUpdater->ContinueUpdate();
+  }
+  else
+  {
+    m_pUpdater->RunUpdate();
+  }
 }
 
 //----------------------------------------------------------------------------------------
 //
 void CSplash::StartMainExe()
 {
-  m_pMessageLabel->setText(tr("Starting engine..."));
+  m_pMessageText->setText(tr("Starting engine..."));
+  SlotSetProgress(0, -1);
   QProcess proc;
   bool bOk =
       proc.startDetached(QCoreApplication::applicationDirPath() + "/../bin/JOIPEngine.exe",
@@ -226,7 +266,8 @@ void CSplash::StartMainExe()
   }
   else
   {
-    m_pMessageLabel->setText(tr("Error launching JOIPEngine.exe: %1").arg(proc.errorString()));
+    m_pMessageText->setText(tr("Error launching JOIPEngine.exe: %1").arg(proc.errorString()));
+    SlotSetProgress(0, -1);
   }
 }
 
@@ -250,6 +291,30 @@ void CSplash::SlotReloadText(bool bSkipUpdate)
   if (!bSkipUpdate)
   {
     m_pSplashText->Invalidate();
+  }
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CSplash::SlotSetProgress(qint32 iCurrent, qint32 iMax)
+{
+  if (0 > iMax)
+  {
+    m_pMessageBar->setRange(0, 0);
+    m_pMessageBar->setValue(0);
+#if defined(Q_OS_WIN)
+    m_pTaskProgress->setVisible(false);
+#endif
+  }
+  else
+  {
+    m_pMessageBar->setRange(0, iMax);
+    m_pMessageBar->setValue(iCurrent);
+#if defined(Q_OS_WIN)
+    m_pTaskProgress->setVisible(true);
+    m_pTaskProgress->setRange(0, iMax);
+    m_pTaskProgress->setValue(iCurrent);
+#endif
   }
 }
 

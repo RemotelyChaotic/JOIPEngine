@@ -25,6 +25,8 @@ set(Sources
   ${JOIPUpdaterSources}/Splash.h
   ${JOIPUpdaterSources}/Updater.cpp
   ${JOIPUpdaterSources}/Updater.h
+  ${JOIPUpdaterSources}/Unzipper.cpp
+  ${JOIPUpdaterSources}/Unzipper.h
   ${JOIPEngineSources}/Style.cpp
   ${JOIPEngineSources}/Style.h
   ${JOIPEngineSources}/SVersion.h
@@ -56,6 +58,7 @@ target_link_libraries(${PROJECT_NAME}
     Qt${QT_VERSION_MAJOR}::QuickControls2
     Qt${QT_VERSION_MAJOR}::Widgets
     nlohmann_json_schema_validator
+    zip
   )
 
 if (WIN32)

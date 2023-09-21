@@ -16,6 +16,9 @@ struct SSettingsData
   bool    bAutoUpdateFound;
   bool    bAutoUpdate;
 
+  bool    bContinueUpdate = false;
+  SVersion targetVersion;
+
   QString Font() const { return sFont; }
 };
 

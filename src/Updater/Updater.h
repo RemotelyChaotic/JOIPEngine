@@ -5,6 +5,8 @@
 #include <QPointer>
 #include <QNetworkAccessManager>
 
+#include <atomic>
+
 struct SSettingsData;
 
 constexpr char c_sLinkJson[] =
@@ -19,9 +21,11 @@ public:
   ~CUpdater() override;
 
   void RunUpdate();
+  void ContinueUpdate();
 
 signals:
   void SignalMessage(const QString& sMsg);
+  void SignalProgress(qint32 iCurrent, qint32 iMax);
   void SignalStartExe();
 
 private slots:
@@ -38,6 +42,9 @@ private:
     eEvaluateJson,
     eStartDownloadEngineFiles,
     eDownloadEngineFiles,
+    eUnpacking,
+    eContinuingUpdate,
+    eCopyingFiles,
 
     eFinished
   };
@@ -49,14 +56,16 @@ private:
   void EvaluateJson(const QByteArray& arr);
   void DownloadEngineData(const QString& sVersion);
   void DownloadedEngineData(const QByteArray& arr);
-  void FinishingUpdate(const QString& sVersion);
+  void FinishingUpdate(const QString& sVersion, bool bUpdated = true);
+  void UnpackEngine(const QString& sFrom);
+  void CopyFiles();
 
   QPointer<QNetworkAccessManager> m_pManager;
   SSettingsData*                  m_pSettings;
-  EState                          m_pCurrentState = EState::eNone;
+  std::atomic<EState>             m_pCurrentState = EState::eNone;
   std::string                     m_latestVersion;
   std::string                     m_latestUpdaterVersion;
-  bool                            m_bShuttingDown = false;
+  std::atomic<bool>               m_bShuttingDown = false;
   bool                            m_bUpdateLauncher = false;
 };
 

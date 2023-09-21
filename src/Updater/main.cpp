@@ -4,6 +4,7 @@
 #include "Style.h"
 
 #include <QApplication>
+#include <QCommandLineParser>
 
 namespace
 {
@@ -92,7 +93,20 @@ int main(int argc, char *argv[])
 
   CApplication app(argc, argv);
 
+  QCommandLineParser parser;
+  QCommandLineOption continueOption(QStringList() << "c" << "continue",
+                                    QCoreApplication::translate("main", "Overwrite existing files."));
+  parser.addOption(continueOption);
+  QCommandLineOption targetVersionOption(QStringList() << "t" << "target-version",
+                                         QCoreApplication::translate("main", "The new version."),
+                                         QCoreApplication::translate("main", "version"));
+  parser.addOption(targetVersionOption);
+  parser.process(app);
+
   SSettingsData settingsData = CheckSettings();
+  settingsData.bContinueUpdate = parser.isSet(continueOption);
+  settingsData.targetVersion = parser.value(targetVersionOption);
+
   joip_style::SetStyle(&app, settingsData.sStyle, settingsData.sFont);
   app.SetSettings(&settingsData);
 
