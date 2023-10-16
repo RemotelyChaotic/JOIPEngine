@@ -47,3 +47,7 @@
 	path = 3rdparty/libzip
 	url = https://github.com/RemotelyChaotic/libzip.git
 	branch = v.1.10.0
+[submodule "3rdparty/ButtplugCPP"]
+	path = 3rdparty/ButtplugCPP
+	url = https://github.com/RemotelyChaotic/ButtplugCPP.git
+	branch = main

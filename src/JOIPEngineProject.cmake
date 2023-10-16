@@ -717,6 +717,7 @@ macro(JOIPProjectSettings JOIP_PROJECT_NAME)
       NodeEditor::nodes
       KF5SyntaxHighlighting
       better_enums
+      ButtplugCppClient
       nlohmann_json_schema_validator
       physfs-static
       xmldom
