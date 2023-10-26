@@ -38,7 +38,7 @@ void CCodeDisplayDefaultEditorImpl::InsertGeneratedCode(const QString& sCode)
 //
 void CCodeDisplayDefaultEditorImpl::ResetWidget()
 {
-  m_pCodeEdit->ResetWidget();
+  m_pCodeEdit->ResetAddons();
 }
 
 //----------------------------------------------------------------------------------------

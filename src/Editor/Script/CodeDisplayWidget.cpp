@@ -198,7 +198,7 @@ void CCodeDisplayWidget::UnloadProject()
 {
   m_spUi->pCodeEdit->blockSignals(true);
   m_spUi->pCodeEdit->document()->blockSignals(true);
-  m_spUi->pCodeEdit->ResetWidget();
+  m_spUi->pCodeEdit->ResetAddons();
   m_spUi->pCodeEdit->clear();
   m_spUi->pCodeEdit->document()->blockSignals(false);
   m_spUi->pCodeEdit->blockSignals(false);

@@ -281,6 +281,7 @@ macro(CreateJOIPProject JOIP_PROJECT_NAME)
     ${JOIPSources}/Editor/Script/IconSnippetOverlay.cpp
     ${JOIPSources}/Editor/Script/IconSnippetOverlay.h
     ${JOIPSources}/Editor/Script/IconSnippetOverlay.ui
+    ${JOIPSources}/Editor/Script/IScriptEditorAddons.h
     ${JOIPSources}/Editor/Script/MetronomeSnippetOverlay.cpp
     ${JOIPSources}/Editor/Script/MetronomeSnippetOverlay.h
     ${JOIPSources}/Editor/Script/MetronomeSnippetOverlay.ui
@@ -290,6 +291,8 @@ macro(CreateJOIPProject JOIP_PROJECT_NAME)
     ${JOIPSources}/Editor/Script/ResourceSnippetOverlay.cpp
     ${JOIPSources}/Editor/Script/ResourceSnippetOverlay.h
     ${JOIPSources}/Editor/Script/ResourceSnippetOverlay.ui
+    ${JOIPSources}/Editor/Script/ScripEditorAddonWidgets.cpp
+    ${JOIPSources}/Editor/Script/ScripEditorAddonWidgets.h
     ${JOIPSources}/Editor/Script/ScriptEditorModel.cpp
     ${JOIPSources}/Editor/Script/ScriptEditorModel.h
     ${JOIPSources}/Editor/Script/ScriptEditorWidget.cpp

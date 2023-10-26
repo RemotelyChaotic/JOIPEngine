@@ -1,6 +1,8 @@
 #ifndef SCRIPTEDITORWIDGET_H
 #define SCRIPTEDITORWIDGET_H
 
+#include "IScriptEditorAddons.h"
+
 #include <repository.h>
 
 #include <QIcon>
@@ -8,7 +10,9 @@
 #include <QPointer>
 #include <QLabel>
 #include <QTextBlock>
+#include <functional>
 #include <map>
+#include <vector>
 
 class CEditorHighlighter;
 class CFoldBlockArea;
@@ -38,8 +42,21 @@ class CScriptEditorWidget : public QPlainTextEdit
   Q_PROPERTY(QString theme                     READ Theme                     WRITE SetTheme                    )
   Q_PROPERTY(QColor  widgetsBackgroundColor    READ WidgetsBackgroundColor    WRITE SetWidgetsBackgroundColor   )
 
+  friend class CFoldBlockArea;
+  friend class CLineNumberArea;
+  friend class CWidgetArea;
+
 public:
+  enum EScriptEditorAddonPosition
+  {
+    eLeft = Qt::AlignLeft,
+    eRight = Qt::AlignRight,
+    eTop = Qt::AlignTop,
+    eBottom = Qt::AlignBottom
+  };
+
   CScriptEditorWidget(QWidget* pParent = nullptr);
+  ~CScriptEditorWidget() override;
 
   void SetHighlightDefinition(const QString& sPath);
 
@@ -64,45 +81,40 @@ public:
   void SetWidgetsBackgroundColor(const QColor& color) { m_widgetsBackgroundColor = color; }
   const QColor& WidgetsBackgroundColor() { return m_widgetsBackgroundColor; }
 
-  CLineNumberArea* LineNumberArea() const { return m_pLineNumberArea; }
-  CWidgetArea*     WidgetArea() const { return m_pWidgetArea; }
-  CFoldBlockArea*  FoldBlockArea() const { return m_pFoldBlockArea; }
   QPointer<CEditorHighlighter> Highlighter() const;
   QPointer<CEditorSearchBar>   SearchBar() const;
 
-  void FoldBlockAreaMouseEvent(QMouseEvent* pEvt);
-  void FoldBlockAreaPaintEvent(QPaintEvent* pEvent);
-  qint32 FoldBlockAreaWidth() const;
-  void LineNumberAreaPaintEvent(QPaintEvent* pEvent);
-  qint32 LineNumberAreaWidth() const;
-  void ResetWidget();
-  void WidgetAreaPaintEvent(QPaintEvent* pEvent);
-  qint32 WidgetAreaWidth() const;
-
   QMenu* CreateContextMenu();
+  void UpdateArea(EScriptEditorAddonPosition pos, qint32 iNewBlockCount);
+  void ResetAddons();
 
 public slots:
   void SlotExecutionError(QString sException, qint32 iLine, QString sStack);
+  void SlotUpdateAllAddons(const QRect& rect, qint32 iDy);
 
 protected:
   bool eventFilter(QObject* pTarget, QEvent* pEvent) override;
   void paintEvent(QPaintEvent* pEvent) override;
   void resizeEvent(QResizeEvent* pEvent) override;
 
+  QRect                                            m_foldSelection;
+
 private slots:
   void HighlightCurrentLine();
   void UpdateLeftAreaWidth(qint32 iNewBlockCount);
-  void UpdateFoldBlockArea(const QRect&, qint32);
-  void UpdateLineNumberArea(const QRect&, qint32);
-  void UpdateWidgetArea(const QRect&, qint32);
+  void UpdateRightAreaWidth(qint32 iNewBlockCount);
+  void UpdateTopAreaHeight(qint32 iNewBlockCount);
+  void UpdateBottomAreaHeight(qint32 iNewBlockCount);
 
 private:
+  QPointer<QLabel> WidgetAreaWidget(qint32 iLine);
+
   std::unique_ptr<KSyntaxHighlighting::Repository> m_spRepository;
   QPointer<CHighlightedSearchableTextEdit>         m_pHighlightedSearchableEdit;
   QPointer<CTextEditZoomEnabler>                   m_pZoomEnabler;
-  CLineNumberArea*                                 m_pLineNumberArea;
-  CWidgetArea*                                     m_pWidgetArea;
-  CFoldBlockArea*                                  m_pFoldBlockArea;
+  std::map<EScriptEditorAddonPosition, std::vector<IScriptEditorAddon*>>
+                                                   m_vpEditorAddonsMap;
+  std::function<QPointer<QLabel>(qint32)>          m_fnWidget;
   QIcon                                            m_foldedIcon;
   QIcon                                            m_unfoldedIcon;
   QString                                          m_sTheme;
@@ -114,88 +126,6 @@ private:
   QColor                                           m_highlightSearchColor;
   QColor                                           m_widgetsBackgroundColor;
   Qt::Key                                          m_previouslyClickedKey;
-  QRect                                            m_foldSelection;
-};
-
-//----------------------------------------------------------------------------------------
-//
-class CLineNumberArea : public QWidget
-{
-public:
-  CLineNumberArea(CScriptEditorWidget* pEditor) :
-    QWidget(pEditor)
-  {
-    m_pCodeEditor = pEditor;
-  }
-
-  QSize sizeHint() const override
-  {
-    return QSize(m_pCodeEditor->LineNumberAreaWidth(), 0);
-  }
-
-protected:
-  void paintEvent(QPaintEvent *event) override
-  {
-    m_pCodeEditor->LineNumberAreaPaintEvent(event);
-  }
-
-private:
-  CScriptEditorWidget* m_pCodeEditor;
-};
-
-//----------------------------------------------------------------------------------------
-//
-class CWidgetArea : public QWidget
-{
-public:
-  CWidgetArea(CScriptEditorWidget* pEditor) :
-    QWidget(pEditor)
-  {
-    m_pCodeEditor = pEditor;
-  }
-
-  QSize sizeHint() const override
-  {
-    return QSize(m_pCodeEditor->WidgetAreaWidth(), 0);
-  }
-
-  void AddError(QString sException, qint32 iLine, QString sStack);
-  void ClearAllErrors();
-  void HideAllErrors();
-  QPointer<QLabel> Widget(qint32 iLine);
-
-protected:
-  bool eventFilter(QObject* pObject, QEvent* pEvent) override;
-  void paintEvent(QPaintEvent *event) override;
-
-private:
-  CScriptEditorWidget*               m_pCodeEditor;
-  std::map<qint32, QPointer<QLabel>> m_errorLabelMap;
-};
-
-//----------------------------------------------------------------------------------------
-//
-class CFoldBlockArea : public QWidget
-{
-public:
-  CFoldBlockArea(CScriptEditorWidget* pEditor) :
-    QWidget(pEditor)
-  {
-    m_pCodeEditor = pEditor;
-    setMouseTracking(true);
-  }
-
-  QSize sizeHint() const override
-  {
-    return QSize(m_pCodeEditor->FoldBlockAreaWidth(), m_pCodeEditor->height());
-  }
-
-protected:
-  void mousePressEvent(QMouseEvent* pEvt) override;
-  void paintEvent(QPaintEvent *event) override;
-
-private:
-  CScriptEditorWidget*               m_pCodeEditor;
 };
 
 #endif // SCRIPTEDITORWIDGET_H
