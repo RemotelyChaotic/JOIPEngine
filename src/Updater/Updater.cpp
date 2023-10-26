@@ -20,6 +20,38 @@
 
 Q_DECLARE_METATYPE(QAuthenticator*)
 
+//----------------------------------------------------------------------------------------
+//
+class CGuiThreadObject : public QObject
+{
+  Q_OBJECT
+
+public:
+  explicit CGuiThreadObject(std::function<void()> fn) : QObject(), m_fnFunction(fn)
+  {
+    moveToThread(qApp->thread());
+  }
+  ~CGuiThreadObject() override {}
+
+public slots:
+  void Call()
+  {
+    if (m_fnFunction)
+    {
+      m_fnFunction();
+    }
+    deleteLater();
+  }
+
+signals:
+  void Done();
+
+private:
+  std::function<void()> m_fnFunction;
+};
+
+#include "Updater.moc"
+
 namespace
 {
   const char c_sLlatestVersion[] = "latestVersion";
@@ -42,6 +74,15 @@ namespace
 #else
   // TODO: const QString c_sCopyCmd = ???
 #endif
+
+  //--------------------------------------------------------------------------------------
+  //
+  void RunInUiThread(std::function<void()> fn)
+  {
+    CGuiThreadObject* pObj = new CGuiThreadObject(fn);
+    const bool bOk = QMetaObject::invokeMethod(pObj, "Call", Qt::QueuedConnection);
+    assert(bOk); Q_UNUSED(bOk)
+  }
 }
 
 //----------------------------------------------------------------------------------------
@@ -196,8 +237,11 @@ void CUpdater::HandleError(const QString& sError)
   m_bShuttingDown = true;
   emit SignalMessage(tr("Error %1: %2.").arg(sState).arg(sError));
   using namespace std::chrono_literals;
-  QTimer::singleShot(5s, this, [this]() {
-    emit SignalStartExe();
+
+  RunInUiThread([this]() {
+    QTimer::singleShot(5s, this, [this]() {
+      emit SignalStartExe();
+      });
   });
 }
 
