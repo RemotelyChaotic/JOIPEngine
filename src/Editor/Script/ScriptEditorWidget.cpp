@@ -17,6 +17,33 @@ namespace
   const qint32 c_iTabStop = 2;  // 2 characters
 }
 
+//----------------------------------------------------------------------------------------
+//
+CCustomBlockUserData::CCustomBlockUserData(KSyntaxHighlighting::TextBlockUserData* pOldData) :
+  KSyntaxHighlighting::TextBlockUserData()
+{
+  if (nullptr != pOldData)
+  {
+    state = pOldData->state;
+    foldingRegions = pOldData->foldingRegions;
+  }
+}
+CCustomBlockUserData::~CCustomBlockUserData() = default;
+
+//----------------------------------------------------------------------------------------
+//
+void CCustomBlockUserData::SetFoldedContent(const QString& sContent)
+{
+  m_sFoldedContent = sContent;
+}
+
+const QString& CCustomBlockUserData::FoldedContent() const
+{
+  return m_sFoldedContent;
+}
+
+//----------------------------------------------------------------------------------------
+//
 CScriptEditorWidget::CScriptEditorWidget(QWidget* pParent) :
   QPlainTextEdit(pParent),
   m_spRepository(std::make_unique<KSyntaxHighlighting::Repository>()),
@@ -420,6 +447,31 @@ bool CScriptEditorWidget::eventFilter(QObject* pTarget, QEvent* pEvent)
 
       m_previouslyClickedKey = Qt::Key(pKeyEvent->key());
     }
+
+    else if (QEvent::ToolTip == pEvent->type())
+    {
+      QHelpEvent* helpEvent = static_cast<QHelpEvent*>(pEvent);
+      QTextCursor cursor = cursorForPosition(helpEvent->pos());
+      if (CCustomBlockUserData* pUserData =
+          dynamic_cast<CCustomBlockUserData*>(cursor.block().userData());
+          nullptr != pUserData)
+      {
+        const QString& sFoldedContent = pUserData->FoldedContent();
+        if (!sFoldedContent.isEmpty())
+        {
+          QToolTip::showText(helpEvent->globalPos(), sFoldedContent);
+        }
+        else
+        {
+          QToolTip::hideText();
+        }
+      }
+      else
+      {
+        QToolTip::hideText();
+      }
+      return true;
+    }
   }
 
   return QPlainTextEdit::eventFilter(pTarget, pEvent);
@@ -461,26 +513,26 @@ void CScriptEditorWidget::paintEvent(QPaintEvent* pEvent)
     {
       if (Highlighter()->startsFoldingRegion(block))
       {
-        if (!Highlighter()->findFoldingRegionEnd(block).isVisible())
+        if (!Highlighter()->findFoldingRegionEnd(block).previous().isVisible())
         {
-          QRectF blockRect = blockBoundingRect(block);
-          blockRect.setHeight(fontMetrics().height()-4);
-          blockRect.translate(0, iTop+2);
+          QTextCursor cursor(block);
+          cursor.movePosition(QTextCursor::EndOfBlock, QTextCursor::KeepAnchor);
+          QPoint topLeft = cursorRect(cursor).topLeft();
+          QRect blockRectToDraw(topLeft.x(), topLeft.y(),
+                                static_cast<qint32>(blockRect.width()) - topLeft.x(),
+                                iBlockHeight);
 
-          QString sText = block.text();
-          const qint32 iTextWidth = fontMetrics().boundingRect(sText).width();
-          blockRect.setLeft(blockRect.left() + iTextWidth + 10);
           const qint32 iDotWidth = fontMetrics().boundingRect("...").width();
-          blockRect.setWidth(iDotWidth + 10);
+          blockRectToDraw.setWidth(iDotWidth + 10);
 
           painter.save();
           painter.setBrush(QColor(200, 200, 200, 200));
           painter.setPen(QColor(50, 50, 50, 100));
-          painter.drawRoundedRect(blockRect, 4, 4);
+          painter.drawRoundedRect(blockRectToDraw, 4, 4);
           painter.restore();
           painter.save();
           painter.setPen(QColor(50, 50, 50, 255));
-          painter.drawText(blockRect.adjusted(5, 0, 5, 0), "...");
+          painter.drawText(blockRectToDraw.adjusted(5, 0, 5, 0), "...");
           painter.restore();
         }
       }

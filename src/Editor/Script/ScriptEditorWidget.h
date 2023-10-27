@@ -4,6 +4,7 @@
 #include "IScriptEditorAddons.h"
 
 #include <repository.h>
+#include <syntaxhighlighter.h>
 
 #include <QIcon>
 #include <QPlainTextEdit>
@@ -25,6 +26,21 @@ class QPaintEvent;
 class QResizeEvent;
 class QSize;
 class QWidget;
+
+//----------------------------------------------------------------------------------------
+//
+class CCustomBlockUserData : public KSyntaxHighlighting::TextBlockUserData
+{
+public:
+  CCustomBlockUserData(KSyntaxHighlighting::TextBlockUserData* pOldData = nullptr);
+  ~CCustomBlockUserData() override;
+
+  void SetFoldedContent(const QString& sContent);
+  const QString& FoldedContent() const;
+
+private:
+  QString m_sFoldedContent;
+};
 
 //----------------------------------------------------------------------------------------
 //
