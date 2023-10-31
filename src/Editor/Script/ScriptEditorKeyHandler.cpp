@@ -11,7 +11,7 @@ namespace
                        CScriptEditorWidget* pCodeEditor,
                        Qt::Key* pPreviouslyClickedKey)
   {
-    std::shared_ptr<T> spEnterHandler =
+    std::shared_ptr<IScriptEditorKeyHandler> spEnterHandler =
         std::make_shared<T>(pCodeEditor, pPreviouslyClickedKey);
     for (Qt::Key key : spEnterHandler->HandledKeys())
     {
@@ -136,8 +136,21 @@ bool CScriptEditorBracesHandler::KeyEvent(QKeyEvent* pKeyEvent)
 {
   if (pKeyEvent->key() == Qt::Key_BraceLeft)
   {
-    m_pCodeEditor->insertPlainText(QString("{  }"));
-    QTextCursor cursor = m_pCodeEditor->textCursor();
+    m_pCodeEditor->insertPlainText(QString("{}"));
+  }
+  else if (pKeyEvent->key() == Qt::Key_ParenLeft)
+  {
+    m_pCodeEditor->insertPlainText(QString("()"));
+  }
+  else if (pKeyEvent->key() == Qt::Key_BracketLeft)
+  {
+    m_pCodeEditor->insertPlainText(QString("[]"));
+  }
+
+  QTextCursor cursor = m_pCodeEditor->textCursor();
+
+  if (pKeyEvent->key() == Qt::Key_BraceLeft)
+  {
     cursor.movePosition(QTextCursor::Left, QTextCursor::MoveAnchor, 2);
     m_pCodeEditor->setTextCursor(cursor);
     *m_pPreviouslyClickedKey = Qt::Key(pKeyEvent->key());
@@ -147,7 +160,6 @@ bool CScriptEditorBracesHandler::KeyEvent(QKeyEvent* pKeyEvent)
   else if (pKeyEvent->key() == Qt::Key_BraceRight &&
            Qt::Key_BraceLeft == *m_pPreviouslyClickedKey)
   {
-    QTextCursor cursor = m_pCodeEditor->textCursor();
     cursor.movePosition(QTextCursor::Right, QTextCursor::MoveAnchor, 2);
     m_pCodeEditor->setTextCursor(cursor);
     *m_pPreviouslyClickedKey = Qt::Key(0);
@@ -156,8 +168,6 @@ bool CScriptEditorBracesHandler::KeyEvent(QKeyEvent* pKeyEvent)
   }
   else if (pKeyEvent->key() == Qt::Key_ParenLeft)
   {
-    m_pCodeEditor->insertPlainText(QString("()"));
-    QTextCursor cursor = m_pCodeEditor->textCursor();
     cursor.movePosition(QTextCursor::Left, QTextCursor::MoveAnchor, 1);
     *m_pPreviouslyClickedKey = Qt::Key(pKeyEvent->key());
     m_pCodeEditor->setTextCursor(cursor);
@@ -167,7 +177,6 @@ bool CScriptEditorBracesHandler::KeyEvent(QKeyEvent* pKeyEvent)
   else if (pKeyEvent->key() == Qt::Key_ParenRight &&
            Qt::Key_ParenLeft == *m_pPreviouslyClickedKey)
   {
-    QTextCursor cursor = m_pCodeEditor->textCursor();
     cursor.movePosition(QTextCursor::Right, QTextCursor::MoveAnchor, 1);
     m_pCodeEditor->setTextCursor(cursor);
     *m_pPreviouslyClickedKey = Qt::Key(0);
@@ -176,8 +185,6 @@ bool CScriptEditorBracesHandler::KeyEvent(QKeyEvent* pKeyEvent)
   }
   else if (pKeyEvent->key() == Qt::Key_BracketLeft)
   {
-    m_pCodeEditor->insertPlainText(QString("[]"));
-    QTextCursor cursor = m_pCodeEditor->textCursor();
     cursor.movePosition(QTextCursor::Left, QTextCursor::MoveAnchor, 1);
     m_pCodeEditor->setTextCursor(cursor);
     *m_pPreviouslyClickedKey = Qt::Key(pKeyEvent->key());
@@ -187,7 +194,6 @@ bool CScriptEditorBracesHandler::KeyEvent(QKeyEvent* pKeyEvent)
   else if (pKeyEvent->key() == Qt::Key_BracketRight &&
            Qt::Key_BracketLeft == *m_pPreviouslyClickedKey)
   {
-    QTextCursor cursor = m_pCodeEditor->textCursor();
     cursor.movePosition(QTextCursor::Right, QTextCursor::MoveAnchor, 1);
     m_pCodeEditor->setTextCursor(cursor);
     *m_pPreviouslyClickedKey = Qt::Key(0);
@@ -214,20 +220,38 @@ CScriptEditorQuotesHandler::~CScriptEditorQuotesHandler() = default;
 
 bool CScriptEditorQuotesHandler::KeyEvent(QKeyEvent* pKeyEvent)
 {
-  if (Qt::Key_QuoteDbl != *m_pPreviouslyClickedKey)
+  QTextCursor cursor = m_pCodeEditor->textCursor();
+  QString sSelectedText = cursor.selectedText();
+
+  if (sSelectedText.isEmpty() || sSelectedText.contains('\n'))
   {
-    m_pCodeEditor->insertPlainText(QString("\"\""));
-    QTextCursor cursor = m_pCodeEditor->textCursor();
-    cursor.movePosition(QTextCursor::Left, QTextCursor::MoveAnchor, 1);
-    m_pCodeEditor->setTextCursor(cursor);
-    *m_pPreviouslyClickedKey = Qt::Key(pKeyEvent->key());
+    if (Qt::Key_QuoteDbl != *m_pPreviouslyClickedKey)
+    {
+      m_pCodeEditor->insertPlainText(QString("\"\""));
+      QTextCursor cursor = m_pCodeEditor->textCursor();
+      cursor.movePosition(QTextCursor::Left, QTextCursor::MoveAnchor, 1);
+      m_pCodeEditor->setTextCursor(cursor);
+      *m_pPreviouslyClickedKey = Qt::Key(pKeyEvent->key());
+    }
+    else
+    {
+      QTextCursor cursor = m_pCodeEditor->textCursor();
+      cursor.movePosition(QTextCursor::Right, QTextCursor::MoveAnchor, 1);
+      m_pCodeEditor->setTextCursor(cursor);
+      *m_pPreviouslyClickedKey = Qt::Key(0);
+    }
   }
   else
   {
-    QTextCursor cursor = m_pCodeEditor->textCursor();
-    cursor.movePosition(QTextCursor::Right, QTextCursor::MoveAnchor, 1);
+    qint32 iBegin = cursor.selectionStart();
+    qint32 iEnd = cursor.selectionEnd();
+    QTextCursor cursorBegin(m_pCodeEditor->document()); cursorBegin.setPosition(iBegin);
+    QTextCursor cursorEnd(m_pCodeEditor->document()); cursorEnd.setPosition(iEnd);
+    m_pCodeEditor->setTextCursor(cursorBegin);
+    m_pCodeEditor->insertPlainText("\"");
+    m_pCodeEditor->setTextCursor(cursorEnd);
+    m_pCodeEditor->insertPlainText("\"");
     m_pCodeEditor->setTextCursor(cursor);
-    *m_pPreviouslyClickedKey = Qt::Key(0);
   }
   pKeyEvent->ignore();
   return true;

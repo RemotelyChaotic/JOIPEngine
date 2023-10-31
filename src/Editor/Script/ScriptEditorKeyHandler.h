@@ -30,7 +30,7 @@ protected:
 
 //----------------------------------------------------------------------------------------
 //
-class CScriptEditorEnterHandler : IScriptEditorKeyHandler
+class CScriptEditorEnterHandler : public IScriptEditorKeyHandler
 {
 public:
   CScriptEditorEnterHandler(CScriptEditorWidget* pCodeEditor,
@@ -43,7 +43,7 @@ public:
 
 //----------------------------------------------------------------------------------------
 //
-class CScriptEditorTabHandler : IScriptEditorKeyHandler
+class CScriptEditorTabHandler : public IScriptEditorKeyHandler
 {
 public:
   CScriptEditorTabHandler(CScriptEditorWidget* pCodeEditor,
@@ -56,7 +56,7 @@ public:
 
 //----------------------------------------------------------------------------------------
 //
-class CScriptEditorBracesHandler : IScriptEditorKeyHandler
+class CScriptEditorBracesHandler : public IScriptEditorKeyHandler
 {
 public:
   CScriptEditorBracesHandler(CScriptEditorWidget* pCodeEditor,
@@ -69,7 +69,7 @@ public:
 
 //----------------------------------------------------------------------------------------
 //
-class CScriptEditorQuotesHandler : IScriptEditorKeyHandler
+class CScriptEditorQuotesHandler : public IScriptEditorKeyHandler
 {
 public:
   CScriptEditorQuotesHandler(CScriptEditorWidget* pCodeEditor,
