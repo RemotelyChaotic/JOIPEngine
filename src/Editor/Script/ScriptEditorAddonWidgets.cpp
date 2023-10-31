@@ -1,4 +1,4 @@
-#include "ScripEditorAddonWidgets.h"
+#include "ScriptEditorAddonWidgets.h"
 #include "ScriptEditorWidget.h"
 
 #include "Widgets/Editor/EditorSearchBar.h"

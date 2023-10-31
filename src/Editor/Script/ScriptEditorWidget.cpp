@@ -1,5 +1,5 @@
 #include "ScriptEditorWidget.h"
-#include "ScripEditorAddonWidgets.h"
+#include "ScriptEditorAddonWidgets.h"
 
 #include "Widgets/Editor/EditorSearchBar.h"
 #include "Widgets/Editor/EditorHighlighter.h"
