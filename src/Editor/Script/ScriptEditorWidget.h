@@ -22,6 +22,7 @@ class CHighlightedSearchableTextEdit;
 class CEditorSearchBar;
 class CTextEditZoomEnabler;
 class CWidgetArea;
+class IScriptEditorKeyHandler;
 class QPaintEvent;
 class QResizeEvent;
 class QSize;
@@ -130,6 +131,8 @@ private:
   QPointer<CTextEditZoomEnabler>                   m_pZoomEnabler;
   std::map<EScriptEditorAddonPosition, std::vector<IScriptEditorAddon*>>
                                                    m_vpEditorAddonsMap;
+  std::map<Qt::Key, std::shared_ptr<IScriptEditorKeyHandler>>
+                                                   m_vpEditorKeyHandlerMap;
   std::function<QPointer<QLabel>(qint32)>          m_fnWidget;
   QIcon                                            m_foldedIcon;
   QIcon                                            m_unfoldedIcon;

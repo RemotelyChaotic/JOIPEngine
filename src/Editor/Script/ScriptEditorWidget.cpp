@@ -1,5 +1,6 @@
 #include "ScriptEditorWidget.h"
 #include "ScriptEditorAddonWidgets.h"
+#include "ScriptEditorKeyHandler.h"
 
 #include "Widgets/Editor/EditorSearchBar.h"
 #include "Widgets/Editor/EditorHighlighter.h"
@@ -71,6 +72,9 @@ CScriptEditorWidget::CScriptEditorWidget(QWidget* pParent) :
     new CLineNumberArea(this), pWidgetArea, new CFoldBlockArea(this)
   };
   m_fnWidget = std::bind(&CWidgetArea::Widget, pWidgetArea, std::placeholders::_1);
+
+  // register key handlers
+  IScriptEditorKeyHandler::RegisterHandlers(m_vpEditorKeyHandlerMap, this, &m_previouslyClickedKey);
 
   connect(this, &CScriptEditorWidget::blockCountChanged,
           this, &CScriptEditorWidget::UpdateLeftAreaWidth);
@@ -305,147 +309,16 @@ bool CScriptEditorWidget::eventFilter(QObject* pTarget, QEvent* pEvent)
     if (QEvent::KeyPress == pEvent->type())
     {
       QKeyEvent* pKeyEvent = static_cast<QKeyEvent*>(pEvent);
-      // Enter
-      if (pKeyEvent->key() == Qt::Key_Enter || pKeyEvent->key() == Qt::Key_Return)
-      {
-        // get indentation of current line, and mimic for new line
-        QTextCursor cursor = textCursor();
-        cursor.movePosition(QTextCursor::StartOfLine);
-        cursor.select(QTextCursor::SelectionType::LineUnderCursor);
-        QString sSelectedText = cursor.selectedText();
-        QString sIndentation;
-        for (qint32 i = 0; i < sSelectedText.length(); ++i)
-        {
-          if (sSelectedText[i].isSpace())
-          {
-            sIndentation += sSelectedText[i];
-          }
-          else
-          {
-            break;
-          }
-        }
-        insertPlainText(QString("\n") + sIndentation);
-        m_previouslyClickedKey = Qt::Key(pKeyEvent->key());
-        pEvent->ignore();
-        return true;
-      }
-      // Tab
-      else if (pKeyEvent->key() == Qt::Key_Tab)
-      {
-        QTextCursor cursor = textCursor();
-        qint32 iSelectedLines = 0;
-        QString sSelection;
-        if(cursor.hasSelection())
-        {
-            sSelection = cursor.selection().toPlainText();
-            iSelectedLines = sSelection.count("\n")+1;
-        }
 
-        if (2 > iSelectedLines)
-        {
-          insertPlainText(QString("").leftJustified(4, ' ', false));
-          pEvent->ignore();
-        }
-        else
-        {
-          QStringList vsLines = sSelection.split("\n");
-          for (QString& sLine : vsLines)
-          {
-            sLine.prepend(QString("").leftJustified(4, ' ', false));
-          }
-          m_previouslyClickedKey = Qt::Key(pKeyEvent->key());
-          insertPlainText(vsLines.join("\n"));
-          pEvent->ignore();
-        }
-        // workaround for losing focus after blocking tab
-        QMetaObject::invokeMethod(this, "setFocus", Qt::QueuedConnection);
-        return true;
-      }
-      // brackets
-      else if (pKeyEvent->key() == Qt::Key_BraceLeft)
+      bool bRet = false;
+      auto itKeyHandler = m_vpEditorKeyHandlerMap.find(Qt::Key(pKeyEvent->key()));
+      if (m_vpEditorKeyHandlerMap.end() != itKeyHandler)
       {
-        insertPlainText(QString("{  }"));
-        QTextCursor cursor = textCursor();
-        cursor.movePosition(QTextCursor::Left, QTextCursor::MoveAnchor, 2);
-        setTextCursor(cursor);
-        m_previouslyClickedKey = Qt::Key(pKeyEvent->key());
-        pEvent->ignore();
-        return true;
-      }
-      else if (pKeyEvent->key() == Qt::Key_BraceRight &&
-              Qt::Key_BraceLeft == m_previouslyClickedKey)
-      {
-        QTextCursor cursor = textCursor();
-        cursor.movePosition(QTextCursor::Right, QTextCursor::MoveAnchor, 2);
-        setTextCursor(cursor);
-        m_previouslyClickedKey = Qt::Key(0);
-        pEvent->ignore();
-        return true;
-      }
-      else if (pKeyEvent->key() == Qt::Key_ParenLeft)
-      {
-        insertPlainText(QString("()"));
-        QTextCursor cursor = textCursor();
-        cursor.movePosition(QTextCursor::Left, QTextCursor::MoveAnchor, 1);
-        m_previouslyClickedKey = Qt::Key(pKeyEvent->key());
-        setTextCursor(cursor);
-        pEvent->ignore();
-        return true;
-      }
-      else if (pKeyEvent->key() == Qt::Key_ParenRight &&
-              Qt::Key_ParenLeft == m_previouslyClickedKey)
-      {
-        QTextCursor cursor = textCursor();
-        cursor.movePosition(QTextCursor::Right, QTextCursor::MoveAnchor, 1);
-        setTextCursor(cursor);
-        m_previouslyClickedKey = Qt::Key(0);
-        pEvent->ignore();
-        return true;
-      }
-      else if (pKeyEvent->key() == Qt::Key_BracketLeft)
-      {
-        insertPlainText(QString("[]"));
-        QTextCursor cursor = textCursor();
-        cursor.movePosition(QTextCursor::Left, QTextCursor::MoveAnchor, 1);
-        setTextCursor(cursor);
-        m_previouslyClickedKey = Qt::Key(pKeyEvent->key());
-        pEvent->ignore();
-        return true;
-      }
-      else if (pKeyEvent->key() == Qt::Key_BracketRight &&
-              Qt::Key_BracketLeft == m_previouslyClickedKey)
-      {
-        QTextCursor cursor = textCursor();
-        cursor.movePosition(QTextCursor::Right, QTextCursor::MoveAnchor, 1);
-        setTextCursor(cursor);
-        m_previouslyClickedKey = Qt::Key(0);
-        pEvent->ignore();
-        return true;
-      }
-      // Quotes
-      else if (pKeyEvent->key() == Qt::Key_QuoteDbl)
-      {
-        if (Qt::Key_QuoteDbl != m_previouslyClickedKey)
-        {
-          insertPlainText(QString("\"\""));
-          QTextCursor cursor = textCursor();
-          cursor.movePosition(QTextCursor::Left, QTextCursor::MoveAnchor, 1);
-          setTextCursor(cursor);
-          m_previouslyClickedKey = Qt::Key(pKeyEvent->key());
-        }
-        else
-        {
-          QTextCursor cursor = textCursor();
-          cursor.movePosition(QTextCursor::Right, QTextCursor::MoveAnchor, 1);
-          setTextCursor(cursor);
-          m_previouslyClickedKey = Qt::Key(0);
-        }
-        pEvent->ignore();
-        return true;
+        bRet = itKeyHandler->second->KeyEvent(pKeyEvent);
       }
 
       m_previouslyClickedKey = Qt::Key(pKeyEvent->key());
+      return bRet;
     }
 
     else if (QEvent::ToolTip == pEvent->type())
