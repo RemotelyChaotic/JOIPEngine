@@ -451,15 +451,34 @@ bool CScriptEditorWidget::eventFilter(QObject* pTarget, QEvent* pEvent)
     else if (QEvent::ToolTip == pEvent->type())
     {
       QHelpEvent* helpEvent = static_cast<QHelpEvent*>(pEvent);
-      QTextCursor cursor = cursorForPosition(helpEvent->pos());
+      QPoint pos = helpEvent->pos();
+
+      QTextCursor cursor = cursorForPosition(pos);
       if (CCustomBlockUserData* pUserData =
           dynamic_cast<CCustomBlockUserData*>(cursor.block().userData());
           nullptr != pUserData)
       {
+        const QRectF blockRect = blockBoundingRect(cursor.block());
+        qint32 iBlockHeight = static_cast<qint32>(blockRect.height());
+        cursor.movePosition(QTextCursor::EndOfBlock, QTextCursor::KeepAnchor);
+        QPoint topLeft = cursorRect(cursor).topLeft();
+        QRect blockRectToCheck(topLeft.x(), topLeft.y(),
+                              static_cast<qint32>(blockRect.width()) - topLeft.x(),
+                              iBlockHeight);
+
+        const qint32 iDotWidth = fontMetrics().boundingRect("...").width();
+        blockRectToCheck.setWidth(iDotWidth + 10);
+        blockRectToCheck.translate(viewportMargins().left(), viewportMargins().top());
+
+        //qDebug() << pos << cursor.blockNumber() << cursor.block().text() << blockRectToCheck;
+
         const QString& sFoldedContent = pUserData->FoldedContent();
-        if (!sFoldedContent.isEmpty())
+        if (!sFoldedContent.isEmpty() &&
+            blockRectToCheck.contains(pos))
         {
-          QToolTip::showText(helpEvent->globalPos(), sFoldedContent);
+          QToolTip::showText(
+              mapToGlobal(QPoint(viewportMargins().left(), blockRectToCheck.topLeft().y())),
+              sFoldedContent);
         }
         else
         {

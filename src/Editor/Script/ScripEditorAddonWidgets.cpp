@@ -376,7 +376,7 @@ void CFoldBlockArea::mousePressEvent(QMouseEvent* pEvt)
         {
           current = current.next();
           vsFoldedData << current.text();
-          bWasVisible |= current.isVisible();
+          bWasVisible &= current.isVisible();
           current.setVisible(!current.isVisible());
         }
 
