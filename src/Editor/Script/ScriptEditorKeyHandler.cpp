@@ -67,7 +67,29 @@ bool CScriptEditorEnterHandler::KeyEvent(QKeyEvent* pKeyEvent)
       break;
     }
   }
+  // count the number of whitespaces after the new-Line until a new character is reached
+  qint32 iNbrOfEmptyAfter = 0;
+  for (qint32 i = m_pCodeEditor->textCursor().positionInBlock();
+       i < sSelectedText.length(); ++i)
+  {
+    if (sSelectedText[i].isSpace())
+    {
+      ++iNbrOfEmptyAfter;
+    }
+    else
+    {
+      break;
+    }
+  }
+
   m_pCodeEditor->insertPlainText(QString("\n") + sIndentation);
+  if (0 < iNbrOfEmptyAfter)
+  {
+    cursor = m_pCodeEditor->textCursor();
+    cursor.movePosition(QTextCursor::Right, QTextCursor::KeepAnchor, iNbrOfEmptyAfter);
+    cursor.removeSelectedText();
+  }
+
   *m_pPreviouslyClickedKey = Qt::Key(pKeyEvent->key());
   pKeyEvent->ignore();
   return true;
