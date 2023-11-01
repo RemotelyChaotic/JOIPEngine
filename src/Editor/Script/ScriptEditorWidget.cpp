@@ -187,6 +187,7 @@ void CScriptEditorWidget::HighlightCurrentLine()
   }
 
   setExtraSelections(vExtraSelections);
+  repaint();
 }
 
 //----------------------------------------------------------------------------------------
@@ -410,7 +411,8 @@ void CScriptEditorWidget::paintEvent(QPaintEvent* pEvent)
     {
       if (Highlighter()->startsFoldingRegion(block))
       {
-        if (!Highlighter()->findFoldingRegionEnd(block).previous().isVisible())
+        QTextBlock blockEnd = Highlighter()->findFoldingRegionEnd(block);
+        if (!blockEnd.previous().isVisible())
         {
           QTextCursor cursor(block);
           cursor.movePosition(QTextCursor::EndOfBlock, QTextCursor::KeepAnchor);
@@ -430,6 +432,27 @@ void CScriptEditorWidget::paintEvent(QPaintEvent* pEvent)
           painter.save();
           painter.setPen(QColor(50, 50, 50, 255));
           painter.drawText(blockRectToDraw.adjusted(5, 0, 5, 0), "...");
+          painter.restore();
+        }
+        else // paint vertical line
+        {
+          static const QRegExp rx("\\S");
+          // find first char
+          QTextCursor cursorStart(block);
+          cursorStart.movePosition(QTextCursor::StartOfBlock, QTextCursor::MoveAnchor);
+          qint32 iLinePos = block.text().indexOf(rx);
+          cursorStart.movePosition(QTextCursor::Right, QTextCursor::MoveAnchor, iLinePos);
+          QPoint topLeft = cursorRect(cursorStart).bottomLeft();
+
+          QTextCursor cursorEnd(blockEnd);
+          cursorEnd.movePosition(QTextCursor::StartOfBlock, QTextCursor::MoveAnchor);
+          QPoint bottomLeft(topLeft.x(), cursorRect(cursorEnd).top());
+
+          painter.save();
+          QColor col = palette().color(QPalette::Text);
+          col.setAlpha(100);
+          painter.setPen(col);
+          painter.drawLine(topLeft, bottomLeft);
           painter.restore();
         }
       }
