@@ -17,6 +17,7 @@ public:
   ~CEditorHighlighter() override;
 
   void SetSearchColors(const QColor& background, const QColor& foreground);
+  void SetActiveWordExpression(const QString& sWord);
   void SetSearchExpression(const QString& sExpresion);
   void SetSyntaxHighlightingEnabled(bool bEnabled);
 
@@ -26,7 +27,10 @@ protected:
 
 private:
   QRegularExpression m_searchExpression;
+  QRegularExpression m_activeWord;
   QTextCharFormat    m_searchFormat;
+  QString            m_sWord;
+  QString            m_sSearch;
   bool               m_bSyntaxHighlightingEnabled;
 };
 

@@ -566,6 +566,8 @@ macro(CreateJOIPProject JOIP_PROJECT_NAME)
     ${JOIPSources}/Widgets/ColorPicker.ui
     ${JOIPSources}/Widgets/DownloadButtonOverlay.cpp
     ${JOIPSources}/Widgets/DownloadButtonOverlay.h
+    ${JOIPSources}/Widgets/Editor/EditorCustomBlockUserData.cpp
+    ${JOIPSources}/Widgets/Editor/EditorCustomBlockUserData.h
     ${JOIPSources}/Widgets/Editor/EditorHighlighter.cpp
     ${JOIPSources}/Widgets/Editor/EditorHighlighter.h
     ${JOIPSources}/Widgets/Editor/EditorSearchBar.cpp

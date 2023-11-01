@@ -3,6 +3,7 @@
 #include "ScriptEditorCodeToolTip.h"
 #include "ScriptEditorKeyHandler.h"
 
+#include "Widgets/Editor/EditorCustomBlockUserData.h"
 #include "Widgets/Editor/EditorSearchBar.h"
 #include "Widgets/Editor/EditorHighlighter.h"
 #include "Widgets/Editor/HighlightedSearchableTextEdit.h"
@@ -17,31 +18,6 @@
 namespace
 {
   const qint32 c_iTabStop = 2;  // 2 characters
-}
-
-//----------------------------------------------------------------------------------------
-//
-CCustomBlockUserData::CCustomBlockUserData(KSyntaxHighlighting::TextBlockUserData* pOldData) :
-  KSyntaxHighlighting::TextBlockUserData()
-{
-  if (nullptr != pOldData)
-  {
-    state = pOldData->state;
-    foldingRegions = pOldData->foldingRegions;
-  }
-}
-CCustomBlockUserData::~CCustomBlockUserData() = default;
-
-//----------------------------------------------------------------------------------------
-//
-void CCustomBlockUserData::SetFoldedContent(const QString& sContent)
-{
-  m_sFoldedContent = sContent;
-}
-
-const QString& CCustomBlockUserData::FoldedContent() const
-{
-  return m_sFoldedContent;
 }
 
 //----------------------------------------------------------------------------------------
@@ -83,6 +59,8 @@ CScriptEditorWidget::CScriptEditorWidget(QWidget* pParent) :
           this, &CScriptEditorWidget::SlotUpdateAllAddons);
   connect(this, &CScriptEditorWidget::cursorPositionChanged,
           this, &CScriptEditorWidget::HighlightCurrentLine);
+  connect(this, &CScriptEditorWidget::cursorPositionChanged,
+          this, &CScriptEditorWidget::HighlightCurrentWord);
 
   UpdateLeftAreaWidth(0);
   HighlightCurrentLine();
@@ -122,8 +100,8 @@ void CScriptEditorWidget::SetHighlightSearchBackgroundColor(const QColor& color)
   if (m_highlightSearchBackgroundColor != color)
   {
     m_highlightSearchBackgroundColor = color;
-    m_pHighlightedSearchableEdit->Highlighter()->SetSearchColors(m_highlightSearchBackgroundColor,
-                                                                 m_highlightSearchColor);
+    Highlighter()->SetSearchColors(m_highlightSearchBackgroundColor,
+                                   m_highlightSearchColor);
   }
 }
 
@@ -134,8 +112,8 @@ void CScriptEditorWidget::SetHighlightSearchColor(const QColor& color)
   if (m_highlightSearchColor != color)
   {
     m_highlightSearchColor = color;
-    m_pHighlightedSearchableEdit->Highlighter()->SetSearchColors(m_highlightSearchBackgroundColor,
-                                                                 m_highlightSearchColor);
+    Highlighter()->SetSearchColors(m_highlightSearchBackgroundColor,
+                                   m_highlightSearchColor);
   }
 }
 
@@ -209,6 +187,32 @@ void CScriptEditorWidget::HighlightCurrentLine()
   }
 
   setExtraSelections(vExtraSelections);
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CScriptEditorWidget::HighlightCurrentWord()
+{
+  QTextCursor cursor = textCursor();
+  if (!cursor.hasSelection())
+  {
+    cursor.select(QTextCursor::WordUnderCursor);
+  }
+  QString sText = cursor.selectedText();
+  static const QRegExp exp("^\\w+$");
+  if (!exp.exactMatch(sText))
+  {
+    cursor.movePosition(QTextCursor::Left, QTextCursor::MoveAnchor, 1);
+    cursor.select(QTextCursor::WordUnderCursor);
+
+    sText = cursor.selectedText();
+    if (!exp.exactMatch(sText))
+    {
+      sText = QString();
+    }
+  }
+
+  Highlighter()->SetActiveWordExpression(sText);
 }
 
 //----------------------------------------------------------------------------------------
@@ -454,6 +458,34 @@ void CScriptEditorWidget::paintEvent(QPaintEvent* pEvent)
         painter.drawText(QPointF(topLeft.x() + 30,
                                  topLeft.y() + iFontHeight + iBlockHeight / 2 - iFontHeight / 2),
                          pWidget->toolTip().replace("\n", " "));
+      }
+
+      CCustomBlockUserData* pUserData = dynamic_cast<CCustomBlockUserData*>(block.userData());
+      if (nullptr != pUserData)
+      {
+        for (const SMatchedWordData& wordData : pUserData->m_vMatchedWordData)
+        {
+          QColor colSelect(m_highlightSearchBackgroundColor);
+          colSelect.setRed(255 - colSelect.red());
+          colSelect.setGreen(255 - colSelect.green());
+          colSelect.setBlue(255 - colSelect.blue());
+          colSelect.setAlpha(50);
+
+          QTextCursor cursor(block);
+          cursor.movePosition(QTextCursor::StartOfBlock, QTextCursor::MoveAnchor);
+          cursor.movePosition(QTextCursor::Right, QTextCursor::MoveAnchor, wordData.m_iStart);
+          QPoint tl = cursorRect(cursor).topLeft();
+          cursor.movePosition(QTextCursor::Right, QTextCursor::MoveAnchor, wordData.m_iLength);
+          QPoint br = cursorRect(cursor).bottomRight();
+          QRect blockRectToDraw = QRect(tl, br);
+
+          painter.save();
+          painter.setBrush(colSelect);
+          colSelect.setAlpha(200);
+          painter.setPen(colSelect);
+          painter.drawRect(blockRectToDraw);
+          painter.restore();
+        }
       }
     }
 

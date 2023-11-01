@@ -1,7 +1,7 @@
 #include "ScriptEditorAddonWidgets.h"
 #include "ScriptEditorWidget.h"
 
-#include "Widgets/Editor/EditorSearchBar.h"
+#include "Widgets/Editor/EditorCustomBlockUserData.h"
 #include "Widgets/Editor/EditorHighlighter.h"
 
 #include <QPainter>
@@ -389,8 +389,7 @@ void CFoldBlockArea::mousePressEvent(QMouseEvent* pEvt)
             if (pUserData = dynamic_cast<CCustomBlockUserData*>(block.userData());
                 nullptr == pUserData)
             {
-              pUserData = new CCustomBlockUserData(
-                  dynamic_cast<KSyntaxHighlighting::TextBlockUserData*>(block.userData()));
+              pUserData = new CCustomBlockUserData(block.userData());
               block.setUserData(pUserData);
             }
             pUserData->SetFoldedContent(vsFoldedData.join("\n"));

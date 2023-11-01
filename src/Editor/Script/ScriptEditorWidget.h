@@ -30,21 +30,6 @@ class QWidget;
 
 //----------------------------------------------------------------------------------------
 //
-class CCustomBlockUserData : public KSyntaxHighlighting::TextBlockUserData
-{
-public:
-  CCustomBlockUserData(KSyntaxHighlighting::TextBlockUserData* pOldData = nullptr);
-  ~CCustomBlockUserData() override;
-
-  void SetFoldedContent(const QString& sContent);
-  const QString& FoldedContent() const;
-
-private:
-  QString m_sFoldedContent;
-};
-
-//----------------------------------------------------------------------------------------
-//
 class CScriptEditorWidget : public QPlainTextEdit
 {
   Q_OBJECT
@@ -118,6 +103,7 @@ protected:
 
 private slots:
   void HighlightCurrentLine();
+  void HighlightCurrentWord();
   void UpdateLeftAreaWidth(qint32 iNewBlockCount);
   void UpdateRightAreaWidth(qint32 iNewBlockCount);
   void UpdateTopAreaHeight(qint32 iNewBlockCount);
