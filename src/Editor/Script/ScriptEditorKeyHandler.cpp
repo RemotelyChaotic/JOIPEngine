@@ -173,7 +173,7 @@ bool CScriptEditorBracesHandler::KeyEvent(QKeyEvent* pKeyEvent)
 
   if (pKeyEvent->key() == Qt::Key_BraceLeft)
   {
-    cursor.movePosition(QTextCursor::Left, QTextCursor::MoveAnchor, 2);
+    cursor.movePosition(QTextCursor::Left, QTextCursor::MoveAnchor, 1);
     m_pCodeEditor->setTextCursor(cursor);
     *m_pPreviouslyClickedKey = Qt::Key(pKeyEvent->key());
     pKeyEvent->ignore();
@@ -182,7 +182,7 @@ bool CScriptEditorBracesHandler::KeyEvent(QKeyEvent* pKeyEvent)
   else if (pKeyEvent->key() == Qt::Key_BraceRight &&
            Qt::Key_BraceLeft == *m_pPreviouslyClickedKey)
   {
-    cursor.movePosition(QTextCursor::Right, QTextCursor::MoveAnchor, 2);
+    cursor.movePosition(QTextCursor::Right, QTextCursor::MoveAnchor, 1);
     m_pCodeEditor->setTextCursor(cursor);
     *m_pPreviouslyClickedKey = Qt::Key(0);
     pKeyEvent->ignore();
