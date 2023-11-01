@@ -1,5 +1,6 @@
 #include "ScriptEditorWidget.h"
 #include "ScriptEditorAddonWidgets.h"
+#include "ScriptEditorCodeToolTip.h"
 #include "ScriptEditorKeyHandler.h"
 
 #include "Widgets/Editor/EditorSearchBar.h"
@@ -349,18 +350,18 @@ bool CScriptEditorWidget::eventFilter(QObject* pTarget, QEvent* pEvent)
         if (!sFoldedContent.isEmpty() &&
             blockRectToCheck.contains(pos))
         {
-          QToolTip::showText(
+          CScriptEditorCodeToolTip::showToolTip(
               mapToGlobal(QPoint(viewportMargins().left(), blockRectToCheck.topLeft().y())),
-              sFoldedContent);
+              sFoldedContent, Highlighter());
         }
         else
         {
-          QToolTip::hideText();
+          CScriptEditorCodeToolTip::hideToolTip();
         }
       }
       else
       {
-        QToolTip::hideText();
+        CScriptEditorCodeToolTip::hideToolTip();
       }
       return true;
     }

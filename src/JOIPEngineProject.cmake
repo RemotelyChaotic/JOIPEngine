@@ -293,6 +293,8 @@ macro(CreateJOIPProject JOIP_PROJECT_NAME)
     ${JOIPSources}/Editor/Script/ResourceSnippetOverlay.ui
     ${JOIPSources}/Editor/Script/ScriptEditorAddonWidgets.cpp
     ${JOIPSources}/Editor/Script/ScriptEditorAddonWidgets.h
+    ${JOIPSources}/Editor/Script/ScriptEditorCodeToolTip.cpp
+    ${JOIPSources}/Editor/Script/ScriptEditorCodeToolTip.h
     ${JOIPSources}/Editor/Script/ScriptEditorKeyHandler.cpp
     ${JOIPSources}/Editor/Script/ScriptEditorKeyHandler.h
     ${JOIPSources}/Editor/Script/ScriptEditorModel.cpp
