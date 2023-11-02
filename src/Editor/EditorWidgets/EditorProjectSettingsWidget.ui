@@ -30,8 +30,8 @@
        <rect>
         <x>0</x>
         <y>0</y>
-        <width>346</width>
-        <height>437</height>
+        <width>353</width>
+        <height>423</height>
        </rect>
       </property>
       <layout class="QGridLayout" name="gridLayout_2">
@@ -191,7 +191,7 @@
        <item row="8" column="0" colspan="2">
         <widget class="QLabel" name="label_4">
          <property name="text">
-          <string>Describtion</string>
+          <string>Description</string>
          </property>
         </widget>
        </item>
