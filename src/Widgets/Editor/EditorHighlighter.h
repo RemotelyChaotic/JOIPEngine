@@ -25,6 +25,8 @@ protected:
   void highlightBlock(const QString& sText) override;
   void applyFormat(int offset, int length, const KSyntaxHighlighting::Format &format) override;
 
+  void FormatBasedOnDepth(qint32 iDepth, qint32 iAt);
+
 private:
   QRegularExpression m_searchExpression;
   QRegularExpression m_activeWord;
