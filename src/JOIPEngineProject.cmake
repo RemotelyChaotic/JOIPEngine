@@ -726,7 +726,6 @@ macro(JOIPProjectSettings JOIP_PROJECT_NAME)
       NodeEditor::nodes
       KF5SyntaxHighlighting
       better_enums
-      ButtplugCppClient
       nlohmann_json_schema_validator
       physfs-static
       xmldom
@@ -735,6 +734,12 @@ macro(JOIPProjectSettings JOIP_PROJECT_NAME)
       lua_sandbox
       zip
     )
+
+    if (HAS_BUTTPLUG_CPP)
+      target_link_libraries(${JOIP_PROJECT_NAME}
+        PRIVATE
+          ButtplugCppClient)
+    endif()
 
     if (KDE_DEBUG)
       target_link_libraries(${JOIP_PROJECT_NAME}
@@ -748,6 +753,7 @@ macro(JOIPProjectSettings JOIP_PROJECT_NAME)
       target_link_libraries(${JOIP_PROJECT_NAME}
         PRIVATE
           Qt${QT_VERSION_MAJOR}::WinExtras
+          #ButtplugCppClient
           WinToast
           Psapi)
     endif()

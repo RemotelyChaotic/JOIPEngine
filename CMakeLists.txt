@@ -32,6 +32,9 @@ endif()
 include(src/JOIPEngineProject.cmake)
 include(JOIPCommon)
 
+if (ANDROID)
+  set(DISABLE_PARALLEL_CONFIGURE ON)
+endif()
 # For wondows use KDE common settings
 if(NOT ANDROID)
   include(KDEInstallDirs)
