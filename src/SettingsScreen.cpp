@@ -240,6 +240,7 @@ void CSettingsScreen::Load()
 
   qint32 iIndex = 0;
   bool bFoundResolution = false;
+  m_spUi->pResolutionComboBox->clear();
   for (auto it = c_possibleDimensionsMap.begin(); c_possibleDimensionsMap.end() != it; ++it)
   {
     if (it->second.width() <= screenSize.width() &&
@@ -281,6 +282,11 @@ void CSettingsScreen::Load()
   m_spUi->pFontComboBox->setCurrentFont(font);
 
   // set key bindings
+  while (auto pItem = m_spUi->pInputContainer->layout()->takeAt(0))
+  {
+    if (nullptr != pItem->widget()) { delete pItem->widget(); }
+    delete pItem;
+  }
   QStringList vsKeyBindings = m_spSettings->KeyBindings();
   for (const QString& sKeyBinding : qAsConst(vsKeyBindings))
   {
