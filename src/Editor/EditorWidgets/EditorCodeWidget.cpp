@@ -55,6 +55,9 @@ CEditorCodeWidget::CEditorCodeWidget(QWidget* pParent) :
   m_spUi->setupUi(this);
   m_spUi->pSceneView->setVisible(false);
 
+  // set initial splitter sizes
+  m_spUi->pCodeSplitter->setSizes(QList<int>() << height()/2 << height()/2);
+
   connect(m_spUi->pCodeEditorView, &CCodeDisplayWidget::SignalContentsChange,
           this, &CEditorCodeWidget::SlotCodeEditContentsChange);
 }
