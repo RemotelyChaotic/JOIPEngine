@@ -85,6 +85,7 @@ public:
 
   QPointer<CEditorHighlighter> Highlighter() const;
   QPointer<CEditorSearchBar>   SearchBar() const;
+  QPointer<CTextEditZoomEnabler> ZoomEnabler() const;
 
   QMenu* CreateContextMenu();
   void UpdateArea(EScriptEditorAddonPosition pos, qint32 iNewBlockCount);

@@ -20,12 +20,16 @@ public:
 
   void SetInnerMargin(qint32 iInnerMargin) { m_iInnerMargin = iInnerMargin; }
   qint32 InnerMargin() const { return m_iInnerMargin; }
+  qint32 Zoom() const { return m_iZoomLevel; };
 
 public slots:
   void Climb() override;
   void Resize() override;
   void Show() override;
-  void SetZoom(double dZoom);
+  void SetZoom(qint32 iZoom);
+
+signals:
+  void SignalZoomChanged(qint32 iZoom);
 
 protected:
   bool event(QEvent* pEvent) override;
@@ -34,7 +38,7 @@ protected:
 private:
   QPointer<QLabel>                                            m_pLabel;
   std::variant<QPointer<QTextEdit>, QPointer<QPlainTextEdit>> m_pEditor;
-  double                                                      m_dZoomLevel = 1.0;
+  qint32                                                      m_iZoomLevel = 100; // in %
   qint32                                                      m_iInnerMargin = 9;
 };
 

@@ -301,6 +301,7 @@ macro(CreateJOIPProject JOIP_PROJECT_NAME)
     ${JOIPSources}/Editor/Script/ScriptEditorModel.h
     ${JOIPSources}/Editor/Script/ScriptEditorWidget.cpp
     ${JOIPSources}/Editor/Script/ScriptEditorWidget.h
+    ${JOIPSources}/Editor/Script/ScriptFooterArea.ui
     ${JOIPSources}/Editor/Script/TextSnippetOverlay.cpp
     ${JOIPSources}/Editor/Script/TextSnippetOverlay.h
     ${JOIPSources}/Editor/Script/TextSnippetOverlay.ui

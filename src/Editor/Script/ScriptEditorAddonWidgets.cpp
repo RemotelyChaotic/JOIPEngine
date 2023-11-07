@@ -1,9 +1,14 @@
 #include "ScriptEditorAddonWidgets.h"
+#include "Application.h"
+#include "Settings.h"
 #include "ScriptEditorWidget.h"
+#include "ui_ScriptFooterArea.h"
 
 #include "Widgets/Editor/EditorCustomBlockUserData.h"
 #include "Widgets/Editor/EditorHighlighter.h"
+#include "Widgets/Editor/TextEditZoomEnabler.h"
 
+#include <QLineEdit>
 #include <QPainter>
 #include <QStyle>
 #include <QToolTip>
@@ -32,7 +37,7 @@ QSize CLineNumberArea::sizeHint() const
 //
 qint32 CLineNumberArea::AreaHeight() const
 {
-  return m_pCodeEditor->height();
+  return m_pCodeEditor->contentsRect().height();
 }
 
 //----------------------------------------------------------------------------------------
@@ -129,7 +134,7 @@ QSize CWidgetArea::sizeHint() const
 //
 qint32 CWidgetArea::AreaHeight() const
 {
-  return m_pCodeEditor->height();
+  return m_pCodeEditor->contentsRect().height();
 }
 
 //----------------------------------------------------------------------------------------
@@ -181,6 +186,7 @@ void CWidgetArea::AddError(QString sException, qint32 iLine, QString sStack)
   pLabel->raise();
   pLabel->style()->polish(pLabel);
   m_errorLabelMap.insert({ iLine, pLabel });
+  emit SignalAddedError();
 }
 
 //----------------------------------------------------------------------------------------
@@ -195,6 +201,17 @@ void CWidgetArea::ClearAllErrors()
     }
   }
   m_errorLabelMap.clear();
+  emit SignalClearErrors();
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CWidgetArea::ForEach(std::function<void(qint32, QPointer<QLabel>)> fn)
+{
+  for (const auto& [iLine, pLabel] : m_errorLabelMap)
+  {
+    if (nullptr != fn) { fn(iLine, pLabel); }
+  }
 }
 
 //----------------------------------------------------------------------------------------
@@ -303,7 +320,7 @@ QSize CFoldBlockArea::sizeHint() const
 //
 qint32 CFoldBlockArea::AreaHeight() const
 {
-  return m_pCodeEditor->height();
+  return m_pCodeEditor->contentsRect().height();
 }
 
 //----------------------------------------------------------------------------------------
@@ -581,4 +598,232 @@ void CFoldBlockArea::paintEvent(QPaintEvent* pEvent)
 void CFoldBlockArea::CursorPositionChanged()
 {
   repaint();
+}
+
+//----------------------------------------------------------------------------------------
+//
+CFooterArea::CFooterArea(CScriptEditorWidget* pEditor, CWidgetArea* pWidgetArea) :
+  QWidget(pEditor),
+  m_spUi(std::make_unique<Ui::CScriptFooterArea>())
+{
+  m_spUi->setupUi(this);
+  m_pListView = new QListWidget(pEditor);
+  m_pListView->setSizePolicy(QSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed));
+  m_pListView->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+  m_pListView->hide();
+  m_pCodeEditor = pEditor;
+  m_pWidgetArea = pWidgetArea;
+
+  StyleChanged();
+
+  m_spUi->ErrorPushButton->setProperty("styleSmall", true);
+  m_spUi->ErrorPushButton->setText(QString::number(0));
+  m_spUi->ErrorPushButton->setProperty("value", 0);
+  m_spUi->pZoomComboBox->setProperty("styleSmall", true);
+
+  m_spUi->pZoomComboBox->clear();
+  m_spUi->pZoomComboBox->setEditable(true);
+  ZoomChanged(m_pCodeEditor->ZoomEnabler()->Zoom());
+
+  connect(CApplication::Instance()->Settings().get(), &CSettings::styleChanged,
+          this, &CFooterArea::StyleChanged);
+
+  connect(m_pCodeEditor->ZoomEnabler(), &CTextEditZoomEnabler::SignalZoomChanged,
+          this, &CFooterArea::ZoomChanged);
+  connect(m_spUi->pZoomComboBox, qOverload<qint32>(&QComboBox::currentIndexChanged),
+          this, &CFooterArea::ZoomIndexChanged);
+  connect(m_spUi->pZoomComboBox->lineEdit(), &QLineEdit::editingFinished,
+          this, &CFooterArea::ZoomLineEditingFinished);
+  connect(m_pWidgetArea, &CWidgetArea::SignalAddedError,
+          this, &CFooterArea::ErrorAdded);
+  connect(m_pWidgetArea, &CWidgetArea::SignalClearErrors,
+          this, &CFooterArea::ClearAllErors);
+  connect(m_spUi->ErrorPushButton, &QPushButton::clicked,
+          this, &CFooterArea::ToggleErrorList);
+  connect(m_pCodeEditor, &CScriptEditorWidget::cursorPositionChanged,
+          this, &CFooterArea::CursorPositionChanged);
+}
+CFooterArea::~CFooterArea()
+{
+  delete m_pListView;
+}
+
+//----------------------------------------------------------------------------------------
+//
+QSize CFooterArea::sizeHint() const
+{
+  return QSize(AreaWidth(), AreaHeight());
+}
+
+//----------------------------------------------------------------------------------------
+//
+qint32 CFooterArea::AreaHeight() const
+{
+  return 18;
+}
+
+//----------------------------------------------------------------------------------------
+//
+qint32 CFooterArea::AreaWidth() const
+{
+  return m_pCodeEditor->contentsRect().width();
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CFooterArea::Reset()
+{
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CFooterArea::Update(const QRect& rect, qint32 iDy)
+{
+  update(0, 0, width(), height());
+  m_pCodeEditor->UpdateArea(CScriptEditorWidget::eBottom, 0);
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CFooterArea::paintEvent(QPaintEvent* pEvent)
+{
+  QPainter painter(this);
+  QColor widgetsBackgroundColor = m_pCodeEditor->WidgetsBackgroundColor();
+  painter.fillRect(pEvent->rect(), widgetsBackgroundColor);
+  QWidget::paintEvent(pEvent);
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CFooterArea::CursorPositionChanged()
+{
+  QTextCursor cursor = m_pCodeEditor->textCursor();
+  m_spUi->pCursorLabel->setText(QString("Ln:%1 Ch:%2")
+                                    .arg(cursor.block().blockNumber()+1) // start at 1
+                                    .arg(cursor.positionInBlock()));
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CFooterArea::ClearAllErors()
+{
+  m_spUi->ErrorPushButton->setText(QString::number(0));
+  m_spUi->ErrorPushButton->setProperty("value", 0);
+  m_pListView->clear();
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CFooterArea::ErrorAdded()
+{
+  qint32 iErrs = 0;
+  qint32 iSize = 0;
+  m_pWidgetArea->ForEach([&iErrs, &iSize, this](qint32 iLine, QPointer<QLabel> pLbl) mutable {
+    m_pListView->addItem(pLbl->toolTip());
+    iSize += m_pListView->sizeHintForRow(iErrs);
+    iErrs++;
+  });
+  m_spUi->ErrorPushButton->setText(QString::number(iErrs));
+  m_spUi->ErrorPushButton->setProperty("value", iErrs);
+  m_pListView->setFixedSize(m_pListView->sizeHintForColumn(0) + 10, std::min(iSize + 10, 400));
+  m_pListView->updateGeometry();
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CFooterArea::ToggleErrorList()
+{
+  if (0 < m_spUi->ErrorPushButton->property("value").toInt())
+  {
+    QSize size = m_pListView->size();
+    QPoint p = mapTo(m_pCodeEditor, m_spUi->ErrorPushButton->pos());
+    m_pListView->move(p.x(), p.y() - size.height());
+    m_pListView->setVisible(!m_pListView->isVisible());
+    m_pListView->raise();
+  }
+  else
+  {
+    m_pListView->hide();
+  }
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CFooterArea::StyleChanged()
+{
+  QPalette pal = m_spUi->ErrorPushButton->palette();
+  pal.setColor(QPalette::Text, m_pCodeEditor->LineNumberTextColor());
+  m_spUi->ErrorPushButton->setPalette(pal);
+
+  pal = m_spUi->pCursorLabel->palette();
+  pal.setColor(QPalette::Text, m_pCodeEditor->LineNumberTextColor());
+  m_spUi->pCursorLabel->setPalette(pal);
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CFooterArea::ZoomChanged(qint32 iZoom)
+{
+  UpdateZoomComboBox(iZoom);
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CFooterArea::ZoomIndexChanged(qint32)
+{
+  bool bOk = false;
+  qint32 iZoom = m_spUi->pZoomComboBox->currentData().toInt(&bOk);
+  if (bOk)
+  {
+    m_pCodeEditor->ZoomEnabler()->SetZoom(iZoom);
+  }
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CFooterArea::ZoomLineEditingFinished()
+{
+  bool bOk = false;
+  qint32 iZoom = m_spUi->pZoomComboBox->lineEdit()->text().toInt(&bOk);
+  if (bOk)
+  {
+    m_pCodeEditor->ZoomEnabler()->SetZoom(iZoom);
+  }
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CFooterArea::UpdateZoomComboBox(qint32 iCurrentZoom)
+{
+  bool bWereSignalsBlocked = m_spUi->pZoomComboBox->signalsBlocked();
+  m_spUi->pZoomComboBox->blockSignals(true);
+
+  std::map<qint32, QString> items = {
+      { 20, "20%" },
+      { 50, "50%" },
+      { 70, "70%" },
+      { 100, "100%" },
+      { 150, "150%" },
+      { 200, "200%" }
+  };
+
+  m_spUi->pZoomComboBox->clear();
+  m_spUi->pZoomComboBox->setEditable(true);
+
+  qint32 iIdx = m_spUi->pZoomComboBox->findData(iCurrentZoom);
+  if (-1 == iIdx)
+  {
+    items.insert({iCurrentZoom, QString::number(iCurrentZoom) + "%"});
+  }
+
+  for (const auto& [iValue, sText] : items)
+  {
+    m_spUi->pZoomComboBox->addItem(sText, iValue);
+  }
+  m_spUi->pZoomComboBox->setCurrentIndex(m_spUi->pZoomComboBox->findData(iCurrentZoom));
+
+  m_spUi->pZoomComboBox->lineEdit()->blockSignals(true);
+  m_spUi->pZoomComboBox->lineEdit()->setText(QString::number(iCurrentZoom) + "%");
+  m_spUi->pZoomComboBox->lineEdit()->blockSignals(false);
+  m_spUi->pZoomComboBox->blockSignals(bWereSignalsBlocked);
 }

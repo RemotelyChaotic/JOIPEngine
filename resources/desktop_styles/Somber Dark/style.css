@@ -259,6 +259,11 @@ QLineEdit:read-only {
   background-color: black;
 }
 
+QComboBox[styleSmall="true"] QLineEdit {
+  min-height: 0px;
+  border-radius: 0px;
+}
+
 /*
  ----- QPushButton, QToolButton
 */
@@ -864,6 +869,21 @@ QPushButton#ToolsButton {
   qproperty-icon: url(ui/ButtonTools.png) off,
                   url(ui/ButtonTools.png) on;
 }
+QPushButton#ErrorPushButton {
+  padding: 0px;
+  min-width: 18px;
+  min-height: 18px;
+  max-width: 18px;
+  max-height: 18px;
+  qproperty-iconSize: 18px;
+  
+  border-image: url(ui/IconBg.svg) 0 0 0 0 stretch stretch;
+  border-top: 0 transparent;
+  border-bottom: 0 transparent;
+  border-right: 0 transparent;
+  border-left: 0 transparent;
+}
+
 
 QPushButton#AddShowBackgroundCode:hover,
 QPushButton#AddShowIconCode:hover,
@@ -936,7 +956,8 @@ QToolButton#f_list_bullet:hover,
 QToolButton#f_list_ordered:hover,
 QToolButton#f_indent_dec:hover,
 QToolButton#f_indent_inc:hover,
-QPushButton#ToolsButton:hover {
+QPushButton#ToolsButton:hover,
+QPushButton#ErrorPushButton:hover {
   border-image: url(ui/IconBgHover.svg) 0 0 0 0 stretch stretch;
 }
 
@@ -1011,7 +1032,8 @@ QToolButton#f_list_bullet:pressed,
 QToolButton#f_list_ordered:pressed,
 QToolButton#f_indent_dec:pressed,
 QToolButton#f_indent_inc:pressed,
-QPushButton#ToolsButton:pressed {
+QPushButton#ToolsButton:pressed,
+QPushButton#ErrorPushButton:pressed {
   border-image: url(ui/IconBgPressed.svg) 0 0 0 0 stretch stretch;
 }
 
@@ -1086,7 +1108,8 @@ QToolButton#f_list_bullet:disabled,
 QToolButton#f_list_ordered:disabled,
 QToolButton#f_indent_dec:disabled,
 QToolButton#f_indent_inc:disabled,
-QPushButton#ToolsButton:disabled {
+QPushButton#ToolsButton:disabled,
+QPushButton#ErrorPushButton:disabled {
   border-image: url(ui/IconBgDisabled.svg) 0 0 0 0 stretch stretch;
 }
 
@@ -1108,6 +1131,13 @@ QToolButton:disabled {
 QPushButton[styleSmall="true"] {
   padding: 0px;
   min-width: 24px;
+}
+
+QPushButton[flat="true"],
+QToolButton[flat="true"] {
+  border: none;
+  border-image: none;
+  background: transparent;
 }
 
 CShortcutButton,
@@ -1510,6 +1540,21 @@ QComboBox::down-arrow {
   border-image: url(ui/ButtonArrowDownComboBox.png);
   min-height: 24px;
   min-width: 24px;
+}
+
+QComboBox[styleSmall="true"] {
+  padding: 0px;
+  min-width: 0px;
+  min-height: 0px;
+  border-image: none;
+  border: none;
+}
+
+QComboBox[styleSmall="true"]:down-arrow {
+  min-height: 14px;
+  min-width: 14px;
+  max-height: 14px;
+  max-width: 14px;
 }
 
 

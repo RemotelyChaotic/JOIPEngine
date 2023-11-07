@@ -49,6 +49,9 @@ CScriptEditorWidget::CScriptEditorWidget(QWidget* pParent) :
     new CLineNumberArea(this), pWidgetArea, new CFoldBlockArea(this)
   };
   m_fnWidget = std::bind(&CWidgetArea::Widget, pWidgetArea, std::placeholders::_1);
+  m_vpEditorAddonsMap[EScriptEditorAddonPosition::eBottom] = {
+    new CFooterArea(this, pWidgetArea)
+  };
 
   // register key handlers
   IScriptEditorKeyHandler::RegisterHandlers(m_vpEditorKeyHandlerMap, this, &m_previouslyClickedKey);
@@ -63,6 +66,7 @@ CScriptEditorWidget::CScriptEditorWidget(QWidget* pParent) :
           this, &CScriptEditorWidget::HighlightCurrentWord);
 
   UpdateLeftAreaWidth(0);
+  UpdateBottomAreaHeight(0);
   HighlightCurrentLine();
 
   QFont font;
@@ -131,6 +135,8 @@ QPointer<CEditorHighlighter> CScriptEditorWidget::Highlighter() const
 { return m_pHighlightedSearchableEdit->Highlighter(); }
 QPointer<CEditorSearchBar>   CScriptEditorWidget::SearchBar() const
 { return m_pHighlightedSearchableEdit->SearchBar(); }
+QPointer<CTextEditZoomEnabler> CScriptEditorWidget::ZoomEnabler() const
+{ return m_pZoomEnabler; }
 
 //----------------------------------------------------------------------------------------
 //
@@ -265,7 +271,7 @@ void CScriptEditorWidget::UpdateBottomAreaHeight(qint32 iNewBlockCount)
   Q_UNUSED(iNewBlockCount)
   QMargins margins = viewportMargins();
   qint32 iTotalHeight = 0;
-  for (IScriptEditorAddon* pAddon : m_vpEditorAddonsMap[EScriptEditorAddonPosition::eTop])
+  for (IScriptEditorAddon* pAddon : m_vpEditorAddonsMap[EScriptEditorAddonPosition::eBottom])
   {
     iTotalHeight += pAddon->AreaHeight();
   }
@@ -525,6 +531,7 @@ void CScriptEditorWidget::resizeEvent(QResizeEvent* pEvent)
 {
   QPlainTextEdit::resizeEvent(pEvent);
 
+  QMargins margins = viewportMargins();
   QRect cr = contentsRect();
   for (const auto& [pos, vpAddons] : m_vpEditorAddonsMap)
   {
@@ -538,7 +545,9 @@ void CScriptEditorWidget::resizeEvent(QResizeEvent* pEvent)
           if (auto pWidget = dynamic_cast<QWidget*>(pAddon); nullptr != pWidget)
           {
             qint32 iWidth = pAddon->AreaWidth();
-            pWidget->setGeometry(QRect(cr.left() + iTotalWidth, cr.top(), iWidth, cr.height()));
+            qint32 iHeight = pAddon->AreaHeight() - margins.top() - margins.bottom();
+            pWidget->setGeometry(QRect(cr.left() + iTotalWidth, cr.top() + margins.top(),
+                                       iWidth, iHeight));
             iTotalWidth += iWidth;
           }
         }
@@ -551,7 +560,9 @@ void CScriptEditorWidget::resizeEvent(QResizeEvent* pEvent)
           if (auto pWidget = dynamic_cast<QWidget*>(pAddon); nullptr != pWidget)
           {
             qint32 iWidth = pAddon->AreaWidth();
-            pWidget->setGeometry(QRect(cr.right() - iTotalWidth, cr.top(), iWidth, cr.height()));
+            qint32 iHeight = pAddon->AreaHeight() - margins.top() - margins.bottom();
+            pWidget->setGeometry(QRect(cr.right() - iTotalWidth, cr.top() + margins.top(),
+                                       iWidth, iHeight));
             iTotalWidth += iWidth;
           }
         }
@@ -563,8 +574,10 @@ void CScriptEditorWidget::resizeEvent(QResizeEvent* pEvent)
         {
           if (auto pWidget = dynamic_cast<QWidget*>(pAddon); nullptr != pWidget)
           {
+            qint32 iWidth = pAddon->AreaWidth();
             qint32 iHeight = pAddon->AreaHeight();
-            pWidget->setGeometry(QRect(cr.left(), cr.top() + iTotalHeight, cr.width(), iHeight));
+            pWidget->setGeometry(QRect(cr.left(), cr.top() + iTotalHeight,
+                                       iWidth, iHeight));
             iTotalHeight += iHeight;
           }
         }
@@ -576,14 +589,21 @@ void CScriptEditorWidget::resizeEvent(QResizeEvent* pEvent)
         {
           if (auto pWidget = dynamic_cast<QWidget*>(pAddon); nullptr != pWidget)
           {
+            qint32 iWidth = pAddon->AreaWidth();
             qint32 iHeight = pAddon->AreaHeight();
-            pWidget->setGeometry(QRect(cr.left(), cr.bottom() - iTotalHeight, cr.width(), iHeight));
+            pWidget->setGeometry(QRect(cr.left(), cr.bottom() - iTotalHeight - iHeight,
+                                       iWidth, iHeight));
             iTotalHeight += iHeight;
           }
         }
       } break;
     }
   }
+
+  verticalScrollBar()->setGeometry(QRect(verticalScrollBar()->x(),
+                                         cr.top() + margins.top(),
+                                         verticalScrollBar()->width(),
+                                         cr.height() - margins.top() - margins.bottom()));
 }
 
 //----------------------------------------------------------------------------------------

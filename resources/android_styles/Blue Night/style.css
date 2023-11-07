@@ -234,6 +234,11 @@ QLineEdit:read-only {
   background-color: rgb(52, 69, 97);
 }
 
+QComboBox[styleSmall="true"] QLineEdit {
+  min-height: 0px;
+  border-radius: 0px;
+}
+
 /*
  ----- QPushButton, QToolButton, CShortcutButton
 */
@@ -251,6 +256,12 @@ QToolButton[styleSmall="true"],
 MRichTextEdit QToolButton {
   padding: 0px;
   min-width: 24px;
+}
+
+QPushButton[flat="true"],
+QToolButton[flat="true"] {
+  border: none;
+  background: transparent;
 }
 
 CShortcutButton,
@@ -568,6 +579,11 @@ QPushButton#ToolsButton {
   qproperty-icon: url(ui/ButtonTools.png) off,
                   url(ui/ButtonTools.png) on;
 }
+QPushButton#ErrorPushButton {
+  qproperty-icon: url(ui/ButtonIcon.png) off,
+                  url(ui/ButtonIcon.png) on;
+  min-width: 32;
+}
 
 QPushButton:hover,
 QToolButton:hover {
@@ -850,6 +866,23 @@ QComboBox::down-arrow {
 /* QComboBox gets the "on" state when the popup is open */
 QComboBox:!editable:on, QComboBox::drop-down:editable:on {
   background: rgb(50, 97, 159);
+}
+
+QComboBox[styleSmall="true"] {
+  padding: 0px;
+  min-width: 0px;
+  border: none;
+}
+
+QComboBox[styleSmall="true"]:drop-down {
+  width: 18px;
+}
+
+QComboBox[styleSmall="true"]:down-arrow {
+  min-height: 14px;
+  min-width: 14px;
+  max-height: 14px;
+  max-width: 14px;
 }
 
 

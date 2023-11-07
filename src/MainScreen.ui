@@ -35,18 +35,12 @@
         <property name="text">
          <string>Play</string>
         </property>
-        <property name="flat">
-         <bool>true</bool>
-        </property>
        </widget>
       </item>
       <item>
        <widget class="CMenuButton" name="pEdiorButton">
         <property name="text">
          <string>Editor</string>
-        </property>
-        <property name="flat">
-         <bool>true</bool>
         </property>
        </widget>
       </item>
@@ -55,9 +49,6 @@
         <property name="text">
          <string>Settings</string>
         </property>
-        <property name="flat">
-         <bool>true</bool>
-        </property>
        </widget>
       </item>
       <item>
@@ -65,18 +56,12 @@
         <property name="text">
          <string>About</string>
         </property>
-        <property name="flat">
-         <bool>true</bool>
-        </property>
        </widget>
       </item>
       <item>
        <widget class="CMenuButton" name="pQuitButton">
         <property name="text">
          <string>Quit</string>
-        </property>
-        <property name="flat">
-         <bool>true</bool>
         </property>
        </widget>
       </item>
