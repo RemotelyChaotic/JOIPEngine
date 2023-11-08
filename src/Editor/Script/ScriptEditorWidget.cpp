@@ -1,7 +1,9 @@
 #include "ScriptEditorWidget.h"
+#include "Application.h"
 #include "ScriptEditorAddonWidgets.h"
 #include "ScriptEditorCodeToolTip.h"
 #include "ScriptEditorKeyHandler.h"
+#include "Settings.h"
 
 #include "Widgets/Editor/EditorCustomBlockUserData.h"
 #include "Widgets/Editor/EditorSearchBar.h"
@@ -75,7 +77,7 @@ CScriptEditorWidget::CScriptEditorWidget(QWidget* pParent) :
   HighlightCurrentLine();
 
   QFont font;
-  font.setFamily("Courier");
+  font.setFamily(CApplication::Instance()->Settings()->Font());
   font.setStyleHint(QFont::Monospace);
   font.setFixedPitch(true);
   font.setPointSize(10);
