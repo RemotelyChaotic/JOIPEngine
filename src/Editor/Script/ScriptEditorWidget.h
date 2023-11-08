@@ -33,6 +33,10 @@ class QWidget;
 class CScriptEditorWidget : public QPlainTextEdit
 {
   Q_OBJECT
+  Q_PROPERTY(QColor  bracketColor0             READ BracketColor0             WRITE SetBracketColor0)
+  Q_PROPERTY(QColor  bracketColor1             READ BracketColor1             WRITE SetBracketColor1)
+  Q_PROPERTY(QColor  bracketColor2             READ BracketColor2             WRITE SetBracketColor2)
+  Q_PROPERTY(QColor  bracketColor3             READ BracketColor3             WRITE SetBracketColor3)
   Q_PROPERTY(QColor  foldAreaBackgroundColor   READ FoldAreaBackgroundColor   WRITE SetFoldAreaBackgroundColor)
   Q_PROPERTY(QIcon   iconFolded                READ IconFolded                WRITE SetIconFolded)
   Q_PROPERTY(QIcon   iconUnfolded              READ IconUnfolded              WRITE SetIconUnfolded)
@@ -43,6 +47,7 @@ class CScriptEditorWidget : public QPlainTextEdit
   Q_PROPERTY(QColor  highlightSearchColor      READ HighlightSearchColor      WRITE SetHighlightSearchColor     )
   Q_PROPERTY(QString theme                     READ Theme                     WRITE SetTheme                    )
   Q_PROPERTY(QColor  widgetsBackgroundColor    READ WidgetsBackgroundColor    WRITE SetWidgetsBackgroundColor   )
+  Q_PROPERTY(QColor  wordHighlightColor        READ WordHighlightColor        WRITE SetWordHighlightColor       )
 
   friend class CFoldBlockArea;
   friend class CLineNumberArea;
@@ -62,6 +67,14 @@ public:
 
   void SetHighlightDefinition(const QString& sPath);
 
+  void SetBracketColor0(QColor c);
+  const QColor& BracketColor0() const  { return m_bracketColor0; }
+  void SetBracketColor1(QColor c);
+  const QColor& BracketColor1() const  { return m_bracketColor1; }
+  void SetBracketColor2(QColor c);
+  const QColor& BracketColor2() const  { return m_bracketColor2; }
+  void SetBracketColor3(QColor c);
+  const QColor& BracketColor3() const  { return m_bracketColor3; }
   void SetFoldAreaBackgroundColor(const QColor& color) { m_foldAreaBackgroundColor = color; }
   const QColor& FoldAreaBackgroundColor() { return m_foldAreaBackgroundColor; }
   void SetIconFolded(const QIcon &icon) { m_foldedIcon = icon; }
@@ -78,6 +91,8 @@ public:
   const QColor& HighlightSearchBackgroundColor() { return m_highlightSearchBackgroundColor; }
   void SetHighlightSearchColor(const QColor& color);
   const QColor& HighlightSearchColor() { return m_highlightSearchColor; }
+  void SetWordHighlightColor(const QColor& color);
+  const QColor& WordHighlightColor() { return m_wordhighlightColor; }
   void SetTheme(const QString& sTheme);
   const QString& Theme() { return m_sTheme; }
   void SetWidgetsBackgroundColor(const QColor& color) { m_widgetsBackgroundColor = color; }
@@ -124,12 +139,17 @@ private:
   QIcon                                            m_foldedIcon;
   QIcon                                            m_unfoldedIcon;
   QString                                          m_sTheme;
+  QColor                                           m_bracketColor0;
+  QColor                                           m_bracketColor1;
+  QColor                                           m_bracketColor2;
+  QColor                                           m_bracketColor3;
   QColor                                           m_foldAreaBackgroundColor;
   QColor                                           m_lineNumberBackgroundColor;
   QColor                                           m_lineNumberTextColor;
   QColor                                           m_highlightLineColor;
   QColor                                           m_highlightSearchBackgroundColor;
   QColor                                           m_highlightSearchColor;
+  QColor                                           m_wordhighlightColor;
   QColor                                           m_widgetsBackgroundColor;
   Qt::Key                                          m_previouslyClickedKey;
 };

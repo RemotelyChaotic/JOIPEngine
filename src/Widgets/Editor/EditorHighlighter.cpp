@@ -84,12 +84,23 @@ namespace
 //
 CEditorHighlighter::CEditorHighlighter(QTextDocument* pParent) :
   KSyntaxHighlighting::SyntaxHighlighter(pParent),
+  m_vBracketColors({QColor(237,41,57),
+                    QColor(0, 150, 255),
+                    QColor(255, 191, 0),
+                    QColor(191, 64, 191)}),
   m_bSyntaxHighlightingEnabled(true)
 {
 }
 
 CEditorHighlighter::~CEditorHighlighter()
 {}
+
+//----------------------------------------------------------------------------------------
+//
+void CEditorHighlighter::SetBracketColors(std::vector<QColor> vColors)
+{
+  m_vBracketColors = vColors;
+}
 
 //----------------------------------------------------------------------------------------
 //
@@ -243,11 +254,6 @@ void CEditorHighlighter::applyFormat(int offset, int length, const KSyntaxHighli
 //
 void CEditorHighlighter::FormatBasedOnDepth(qint32 iDepth, qint32 iAt)
 {
-  static const std::vector<QColor> vColors = {
-    QColor(191, 64, 191),
-    QColor(255, 191, 0),
-    QColor(0, 150, 255),
-    QColor(237,41,57),
-  };
-  setFormat(iAt, 1, vColors[std::abs(iDepth%4)]);
+  qint32 iNumColors = static_cast<qint32>(m_vBracketColors.size());
+  setFormat(iAt, 1, m_vBracketColors[std::abs(iDepth%iNumColors)]);
 }

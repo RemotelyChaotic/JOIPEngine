@@ -28,10 +28,15 @@ CScriptEditorWidget::CScriptEditorWidget(QWidget* pParent) :
   m_pHighlightedSearchableEdit(nullptr),
   m_foldedIcon(":/resources/style/img/ButtonPlay.png"),
   m_unfoldedIcon(":/resources/style/img/ButtonArrowDown.png"),
+  m_bracketColor0(237,41,57),
+  m_bracketColor1(0, 150, 255),
+  m_bracketColor2(255, 191, 0),
+  m_bracketColor3(191, 64, 191),
   m_foldAreaBackgroundColor(24, 24, 24),
   m_lineNumberBackgroundColor(24, 24, 24),
   m_lineNumberTextColor(Qt::white),
   m_highlightLineColor(68, 71, 90),
+  m_wordhighlightColor(200, 200, 200),
   m_widgetsBackgroundColor(24, 24, 24),
   m_previouslyClickedKey(Qt::Key(0))
 {
@@ -99,6 +104,54 @@ void CScriptEditorWidget::SetHighlightDefinition(const QString& sType)
 
 //----------------------------------------------------------------------------------------
 //
+void CScriptEditorWidget::SetBracketColor0(QColor c)
+{
+  if (m_bracketColor0 != c)
+  {
+    m_bracketColor0 = c;
+    m_pHighlightedSearchableEdit->Highlighter()->SetBracketColors(
+        {m_bracketColor0, m_bracketColor1, m_bracketColor2, m_bracketColor3});
+  }
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CScriptEditorWidget::SetBracketColor1(QColor c)
+{
+  if (m_bracketColor1 != c)
+  {
+    m_bracketColor1 = c;
+    m_pHighlightedSearchableEdit->Highlighter()->SetBracketColors(
+        {m_bracketColor0, m_bracketColor1, m_bracketColor2, m_bracketColor3});
+  }
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CScriptEditorWidget::SetBracketColor2(QColor c)
+{
+  if (m_bracketColor2 != c)
+  {
+    m_bracketColor2 = c;
+    m_pHighlightedSearchableEdit->Highlighter()->SetBracketColors(
+        {m_bracketColor0, m_bracketColor1, m_bracketColor2, m_bracketColor3});
+  }
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CScriptEditorWidget::SetBracketColor3(QColor c)
+{
+  if (m_bracketColor3 != c)
+  {
+    m_bracketColor3 = c;
+    m_pHighlightedSearchableEdit->Highlighter()->SetBracketColors(
+        {m_bracketColor0, m_bracketColor1, m_bracketColor2, m_bracketColor3});
+  }
+}
+
+//----------------------------------------------------------------------------------------
+//
 void CScriptEditorWidget::SetHighlightSearchBackgroundColor(const QColor& color)
 {
   if (m_highlightSearchBackgroundColor != color)
@@ -118,6 +171,16 @@ void CScriptEditorWidget::SetHighlightSearchColor(const QColor& color)
     m_highlightSearchColor = color;
     Highlighter()->SetSearchColors(m_highlightSearchBackgroundColor,
                                    m_highlightSearchColor);
+  }
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CScriptEditorWidget::SetWordHighlightColor(const QColor& color)
+{
+  if (m_wordhighlightColor != color)
+  {
+    m_wordhighlightColor = color;
   }
 }
 
@@ -494,10 +557,7 @@ void CScriptEditorWidget::paintEvent(QPaintEvent* pEvent)
       {
         for (const SMatchedWordData& wordData : pUserData->m_vMatchedWordData)
         {
-          QColor colSelect(m_highlightSearchBackgroundColor);
-          colSelect.setRed(255 - colSelect.red());
-          colSelect.setGreen(255 - colSelect.green());
-          colSelect.setBlue(255 - colSelect.blue());
+          QColor colSelect(m_wordhighlightColor);
           colSelect.setAlpha(50);
 
           QTextCursor cursor(block);

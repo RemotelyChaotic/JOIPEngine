@@ -1708,6 +1708,10 @@ CTimerWidget {
 }
 
 CScriptEditorWidget {
+  qproperty-bracketColor0: rgb(191, 64, 191);
+  qproperty-bracketColor1: rgb(27, 188, 157);
+  qproperty-bracketColor2: rgb(0, 150, 255);
+  qproperty-bracketColor3: rgb(237, 41, 57);
   qproperty-iconFolded: url(ui/ButtonPlaySelected.png);
   qproperty-iconUnfolded: url(ui/ButtonArrowDownSelected.png);
   qproperty-foldAreaBackgroundColor: rgb(42, 42, 42);
@@ -1716,6 +1720,7 @@ CScriptEditorWidget {
   qproperty-highlightLineColor: rgb(222, 222, 222);
   qproperty-highlightSearchBackgroundColor: rgb(42, 42, 42);
   qproperty-highlightSearchColor: white;
+  qproperty-wordHighlightColor: rgb(27, 188, 157);
   qproperty-widgetsBackgroundColor: rgb(42, 42, 42);
   qproperty-theme: "Printing";
 }

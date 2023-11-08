@@ -16,6 +16,7 @@ public:
   CEditorHighlighter(QTextDocument* pParent = nullptr);
   ~CEditorHighlighter() override;
 
+  void SetBracketColors(std::vector<QColor> vColors);
   void SetSearchColors(const QColor& background, const QColor& foreground);
   void SetActiveWordExpression(const QString& sWord);
   void SetSearchExpression(const QString& sExpresion);
@@ -28,6 +29,7 @@ protected:
   void FormatBasedOnDepth(qint32 iDepth, qint32 iAt);
 
 private:
+  std::vector<QColor>m_vBracketColors;
   QRegularExpression m_searchExpression;
   QRegularExpression m_activeWord;
   QTextCharFormat    m_searchFormat;
