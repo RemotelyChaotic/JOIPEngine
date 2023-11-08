@@ -40,6 +40,40 @@ CTextEditZoomEnabler::~CTextEditZoomEnabler()
 
 //----------------------------------------------------------------------------------------
 //
+void CTextEditZoomEnabler::UpdateZoom(qint32 iZoom)
+{
+  double dOldSize = 0.0;
+  if (std::holds_alternative<QPointer<QTextEdit>>(m_pEditor))
+  {
+    dOldSize = std::get<QPointer<QTextEdit>>(m_pEditor)->document()->defaultFont().pointSizeF();
+  }
+  else if (std::holds_alternative<QPointer<QPlainTextEdit>>(m_pEditor))
+  {
+    dOldSize = std::get<QPointer<QPlainTextEdit>>(m_pEditor)->document()->defaultFont().pointSizeF();
+  }
+
+  m_pLabel->setText(QString::number(iZoom) + " %");
+
+  double dNewSize = static_cast<double>(dOldSize * iZoom) / m_iZoomLevel;
+
+  if (std::holds_alternative<QPointer<QTextEdit>>(m_pEditor))
+  {
+    QPointer<QTextEdit> pEditor = std::get<QPointer<QTextEdit>>(m_pEditor);
+    QFont myFont = pEditor->document()->defaultFont();
+    myFont.setPointSizeF(dNewSize);
+    pEditor->document()->setDefaultFont(myFont);
+  }
+  else if (std::holds_alternative<QPointer<QPlainTextEdit>>(m_pEditor))
+  {
+    QPointer<QPlainTextEdit> pEditor = std::get<QPointer<QPlainTextEdit>>(m_pEditor);
+    QFont myFont = pEditor->document()->defaultFont();
+    myFont.setPointSizeF(dNewSize);
+    pEditor->document()->setDefaultFont(myFont);
+  }
+}
+
+//----------------------------------------------------------------------------------------
+//
 void CTextEditZoomEnabler::Climb()
 {
   ClimbToFirstInstanceOf(m_pOriginalParent->metaObject()->className(), false);
@@ -82,45 +116,7 @@ void CTextEditZoomEnabler::SetZoom(qint32 iZoom)
 {
   if (m_iZoomLevel != iZoom)
   {
-    double dOldSize = 0.0;
-    if (std::holds_alternative<QPointer<QTextEdit>>(m_pEditor))
-    {
-      dOldSize = std::get<QPointer<QTextEdit>>(m_pEditor)->document()->defaultFont().pointSizeF();
-    }
-    else if (std::holds_alternative<QPointer<QPlainTextEdit>>(m_pEditor))
-    {
-      dOldSize = std::get<QPointer<QPlainTextEdit>>(m_pEditor)->document()->defaultFont().pointSizeF();
-    }
-
-    m_pLabel->setText(QString::number(iZoom) + " %");
-
-    double dNewSize = dOldSize * iZoom / m_iZoomLevel;
-
-    if (std::holds_alternative<QPointer<QTextEdit>>(m_pEditor))
-    {
-      QPointer<QTextEdit> pEditor = std::get<QPointer<QTextEdit>>(m_pEditor);
-      if (m_iZoomLevel > iZoom)
-      {
-        pEditor->zoomOut(static_cast<qint32>(dOldSize - dNewSize));
-      }
-      else
-      {
-        pEditor->zoomIn(static_cast<qint32>(dNewSize - dOldSize));
-      }
-    }
-    else if (std::holds_alternative<QPointer<QPlainTextEdit>>(m_pEditor))
-    {
-      QPointer<QPlainTextEdit> pEditor = std::get<QPointer<QPlainTextEdit>>(m_pEditor);
-      if (m_iZoomLevel > iZoom)
-      {
-        pEditor->zoomOut(static_cast<qint32>(dOldSize - dNewSize));
-      }
-      else
-      {
-        pEditor->zoomIn(static_cast<qint32>(dNewSize - dOldSize));
-      }
-    }
-
+    UpdateZoom(iZoom);
     m_iZoomLevel = iZoom;
     emit SignalZoomChanged(m_iZoomLevel);
   }
@@ -157,14 +153,13 @@ bool CTextEditZoomEnabler::eventFilter(QObject* pObj, QEvent* pEvt)
       {
         SetZoom(std::min(200, m_iZoomLevel + 10));
         Show();
-        return true;
       }
       else if (pWheelEvent->angleDelta().y() < 0)
       {
         SetZoom(std::max(10, m_iZoomLevel - 10));
         Show();
-        return true;
       }
+      return true;
     }
     else if (nullptr != pEvt && pEvt->type() == QEvent::Gesture)
     {

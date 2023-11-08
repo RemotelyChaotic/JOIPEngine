@@ -40,7 +40,10 @@ CScriptEditorWidget::CScriptEditorWidget(QWidget* pParent) :
   m_highlightLineColor(68, 71, 90),
   m_wordhighlightColor(200, 200, 200),
   m_widgetsBackgroundColor(24, 24, 24),
-  m_previouslyClickedKey(Qt::Key(0))
+  m_previouslyClickedKey(Qt::Key(0)),
+  m_iTabStopWidth(c_iTabStop),
+  m_iFontSize(10),
+  m_sFontFamily("Courier New")
 {
   setAttribute(Qt::WA_NoMousePropagation, false);
   installEventFilter(this);
@@ -76,15 +79,8 @@ CScriptEditorWidget::CScriptEditorWidget(QWidget* pParent) :
   UpdateBottomAreaHeight(0);
   HighlightCurrentLine();
 
-  QFont font;
-  font.setFamily(CApplication::Instance()->Settings()->Font());
-  font.setStyleHint(QFont::Monospace);
-  font.setFixedPitch(true);
-  font.setPointSize(10);
-  document()->setDefaultFont(font);
-
-  QFontMetrics metrics(font);
-  setTabStopDistance(c_iTabStop * metrics.boundingRect(' ').width());
+  UpdateFont();
+  SetTabStopWidth(c_iTabStop);
 
   QTextOption option = document()->defaultTextOption();
   option.setFlags(QTextOption::ShowTabsAndSpaces);
@@ -102,6 +98,25 @@ void CScriptEditorWidget::SetHighlightDefinition(const QString& sType)
   const auto def = m_spRepository->definitionForName(sType);
   m_pHighlightedSearchableEdit->Highlighter()->setDefinition(def);
   m_pHighlightedSearchableEdit->Highlighter()->rehighlight();
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CScriptEditorWidget::SetTabStopWidth(qint32 iNumSpaces)
+{
+  m_iTabStopWidth = iNumSpaces;
+#if QT_VERSION >= QT_VERSION_CHECK(5,10,0)
+  QFontMetrics metrics(font());
+  setTabStopDistance(m_iTabStopWidth * metrics.boundingRect(' ').width());
+#endif
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CScriptEditorWidget::SetText(const QString& sText)
+{
+  setPlainText(sText);
+  UpdateFont();
 }
 
 //----------------------------------------------------------------------------------------
@@ -285,6 +300,25 @@ void CScriptEditorWidget::HighlightCurrentWord()
   }
 
   Highlighter()->SetActiveWordExpression(sText);
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CScriptEditorWidget::UpdateFont()
+{
+  qint32 iZoom = m_pZoomEnabler->Zoom();
+
+  QFont font;
+  font.setFamily(m_sFontFamily);
+  font.setStyleHint(QFont::Monospace);
+  font.setFixedPitch(true);
+  font.setPointSizeF(m_iFontSize);
+
+  setFont(font);
+  document()->setDefaultFont(font);
+  viewport()->setFont(font);
+
+  m_pZoomEnabler->UpdateZoom(iZoom);
 }
 
 //----------------------------------------------------------------------------------------
@@ -473,10 +507,15 @@ void CScriptEditorWidget::paintEvent(QPaintEvent* pEvent)
   const QRectF blockRect = blockBoundingRect(block);
   qint32 iBlockHeight = static_cast<qint32>(blockRect.height());
   qint32 iBottom = iTop + iBlockHeight;
-  const qint32 iFontHeight = fontMetrics().boundingRect(QLatin1Char('9')).height();
+  QFont font = document()->defaultFont();
+  QFontMetrics metrics(font);
+  const qint32 iFontHeight = metrics.boundingRect(QLatin1Char('9')).height();
 
   while (block.isValid() && iTop <= pEvent->rect().bottom())
   {
+    painter.save();
+    painter.setFont(font);
+
     const bool bTopEventOk = iBottom >= pEvent->rect().top();
     if (block.isVisible() && bTopEventOk)
     {
@@ -584,6 +623,8 @@ void CScriptEditorWidget::paintEvent(QPaintEvent* pEvent)
     iTop = iBottom;
     iBottom = iTop + static_cast<qint32>(blockBoundingRect(block).height());
     ++iBlockNumber;
+
+    painter.restore();
   }
 }
 

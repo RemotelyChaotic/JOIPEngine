@@ -66,6 +66,8 @@ public:
   ~CScriptEditorWidget() override;
 
   void SetHighlightDefinition(const QString& sPath);
+  void SetTabStopWidth(qint32 iNumSpaces);
+  void SetText(const QString& sText);
 
   void SetBracketColor0(QColor c);
   const QColor& BracketColor0() const  { return m_bracketColor0; }
@@ -120,6 +122,7 @@ protected:
 private slots:
   void HighlightCurrentLine();
   void HighlightCurrentWord();
+  void UpdateFont();
   void UpdateLeftAreaWidth(qint32 iNewBlockCount);
   void UpdateRightAreaWidth(qint32 iNewBlockCount);
   void UpdateTopAreaHeight(qint32 iNewBlockCount);
@@ -152,6 +155,9 @@ private:
   QColor                                           m_wordhighlightColor;
   QColor                                           m_widgetsBackgroundColor;
   Qt::Key                                          m_previouslyClickedKey;
+  qint32                                           m_iTabStopWidth;
+  qint32                                           m_iFontSize;
+  QString                                          m_sFontFamily;
 };
 
 #endif // SCRIPTEDITORWIDGET_H

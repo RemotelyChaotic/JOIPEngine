@@ -21,6 +21,7 @@ public:
   void SetInnerMargin(qint32 iInnerMargin) { m_iInnerMargin = iInnerMargin; }
   qint32 InnerMargin() const { return m_iInnerMargin; }
   qint32 Zoom() const { return m_iZoomLevel; };
+  void UpdateZoom(qint32 iZoom);
 
 public slots:
   void Climb() override;

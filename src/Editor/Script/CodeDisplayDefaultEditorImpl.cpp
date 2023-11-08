@@ -45,7 +45,7 @@ void CCodeDisplayDefaultEditorImpl::ResetWidget()
 //
 void CCodeDisplayDefaultEditorImpl::SetContent(const QString& sContent)
 {
-  m_pCodeEdit->setPlainText(sContent);
+  m_pCodeEdit->SetText(sContent);
 }
 
 //----------------------------------------------------------------------------------------
