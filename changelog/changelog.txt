@@ -1,4 +1,22 @@
 =================
+Version 1.4.0.0
+=================
+New Features:
+- Created an Auto-Updater for Windows.
+
+Changes:
+- Changed debug-view to a layout with splitter to support resizing the debugger.
+- Updated the Script Editor with a lot of new features:
+  - Better code folding.
+  - Color coded matching of braces, brackets and paratheses.
+  - Highlighting of selected word.
+  - Toolbar at the bottom.
+  - Better input completion.
+
+Fixed Bugs:
+- Fixed a few UI typos.
+
+=================
 Version 1.3.1.0
 =================
 
