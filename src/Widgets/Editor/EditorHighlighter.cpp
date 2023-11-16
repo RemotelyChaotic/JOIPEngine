@@ -87,8 +87,7 @@ CEditorHighlighter::CEditorHighlighter(QTextDocument* pParent) :
   m_vBracketColors({QColor(237,41,57),
                     QColor(0, 150, 255),
                     QColor(255, 191, 0),
-                    QColor(191, 64, 191)}),
-  m_bSyntaxHighlightingEnabled(true)
+                    QColor(191, 64, 191)})
 {
 }
 
@@ -118,9 +117,16 @@ void CEditorHighlighter::SetActiveWordExpression(const QString& sWord)
   if (m_sWord != sWord)
   {
     m_sWord = sWord;
+
+    QRegularExpression::PatternOptions options;
+    if (m_bCaseInsensitiveSearch)
+    {
+      options |= QRegularExpression::CaseInsensitiveOption;
+    }
+
     if (!sWord.isEmpty())
     {
-      m_activeWord = QRegularExpression("(^|\\W)(" + sWord + ")(\\W|$)");
+      m_activeWord = QRegularExpression("(^|\\W)(" + sWord + ")(\\W|$)", options);
     }
     else
     {
@@ -132,12 +138,27 @@ void CEditorHighlighter::SetActiveWordExpression(const QString& sWord)
 
 //----------------------------------------------------------------------------------------
 //
+void CEditorHighlighter::SetCaseInsensitiveSearchEnabled(bool bEnabled)
+{
+  if (m_bCaseInsensitiveSearch != bEnabled)
+  {
+    m_bCaseInsensitiveSearch = bEnabled;
+  }
+}
+
+//----------------------------------------------------------------------------------------
+//
 void CEditorHighlighter::SetSearchExpression(const QString& sExpresion)
 {
   if (m_sSearch != sExpresion)
   {
     m_sSearch = sExpresion;
-    m_searchExpression = QRegularExpression(sExpresion);
+    QRegularExpression::PatternOptions options;
+    if (m_bCaseInsensitiveSearch)
+    {
+      options |= QRegularExpression::CaseInsensitiveOption;
+    }
+    m_searchExpression = QRegularExpression(sExpresion, options);
     rehighlight(); // Restart the backlight
   }
 }

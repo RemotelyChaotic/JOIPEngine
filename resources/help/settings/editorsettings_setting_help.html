@@ -1,0 +1,64 @@
+<!doctype html>
+<html class="no-js" lang="">
+
+<head>
+  <meta charset="utf-8">
+  <title>Script Editor Settings</title>
+  <meta name="description" content="">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <style>
+    h1 {
+      text-align: center;
+    }
+    div.container {
+      min-height: 10em;
+      display: table-cell;
+      margin-left: auto;
+      margin-right: auto;
+      width: 0.6em
+    }
+    table.warning {
+      color: black;
+      background-color: #cccc44;
+      border-color: yellow;
+      border-style: solid;
+    }
+  </style>
+</head>
+
+
+<body>
+  <h1>Script Editor Settings</h1>
+
+  <hr>
+
+  <div class="container">
+    <p>Set various options for the <a href="qrc:/resources/help/editor/code/script_editor_help.html">Script Editor</a>.<br>
+    <ul>
+      <li><b>Case Sensitive Search</b>: Set this if you want searches and word highlights to be case sensitive.</li>
+      <li><b>Font</b>: Determines the font of the code editor.<br><img src="qrc:/resources/help/icons/WarningIcon.png" width="16" height="16" alt="Warning">
+      The selected font needs to support sub-pixel font-sizes to be used properly because of the editor's zoom feature.</li>
+      <li><b>Show Whitespace</b>: This determines whether the editor visualises whitespace
+      characters (like spaces and tabs).</li>
+      <li><b>Theme</b>: Determines the code highlighter's theme according to which it highlights
+      keywords, operators, members etc. &quot;From Style&quot; means the theme will be set by the
+      active <a href="qrc:/resources/help/settings/style_setting_help.html">Style</a>.</li>
+    </ul>
+    </p>
+  </div>
+
+  <br>
+
+  <div class="container">
+    <table width="100%" class="warning">
+      <tr>
+        <td width="10%"><img src="qrc:/resources/help/icons/WarningIcon.png" width="64" height="64" alt="Warning"></td>
+        <td width="90%"><br>Multiple instances of the application share the same configuration file.<br>
+        If you use different versions of the application, your settings for all instances will change.</td>
+      </tr>
+    </table>
+  </div>
+</body>
+
+</html>

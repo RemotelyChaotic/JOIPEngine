@@ -67,6 +67,17 @@ void CHighlightedSearchableTextEdit::SetSyntaxHighlightingEnabled(bool bEnabled)
 
 //----------------------------------------------------------------------------------------
 //
+void CHighlightedSearchableTextEdit::SetCaseInsensitiveFindEnabled(bool bEnabled)
+{
+  if (m_bCaseInsensitive != bEnabled)
+  {
+    m_bCaseInsensitive = bEnabled;
+    m_pHighlighter->SetCaseInsensitiveSearchEnabled(bEnabled);
+  }
+}
+
+//----------------------------------------------------------------------------------------
+//
 void CHighlightedSearchableTextEdit::SlotShowHideSearchFilter()
 {
   if (m_pSearchBar->isVisible())
@@ -116,11 +127,16 @@ void CHighlightedSearchableTextEdit::SlotSearchFilterChanged(
 
     if (direction != CEditorSearchBar::eNone)
     {
+      QTextDocument::FindFlags flags =
+          direction == CEditorSearchBar::eForward ?
+            QTextDocument::FindFlags() :
+            QTextDocument::FindBackward;
+      if (!m_bCaseInsensitive)
+      {
+        flags |= QTextDocument::FindCaseSensitively;
+      }
       highlightCursor =
-          pDocument->find(sText, highlightCursor,
-                          direction == CEditorSearchBar::eForward ?
-                            QTextDocument::FindFlags() :
-                            QTextDocument::FindBackward);
+          pDocument->find(sText, highlightCursor, flags);
       if (!highlightCursor.isNull())
       {
         SetTextCursor(highlightCursor);

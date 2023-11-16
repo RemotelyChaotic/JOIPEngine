@@ -621,11 +621,26 @@ CFooterArea::CFooterArea(CScriptEditorWidget* pEditor, CWidgetArea* pWidgetArea)
   m_spUi->ErrorPushButton->setProperty("value", 0);
   m_spUi->pZoomComboBox->setProperty("styleSmall", true);
 
+  m_spUi->WhitespacePushButton->setProperty("styleSmall", true);
+  QHBoxLayout* pLayout = new QHBoxLayout(m_spUi->WhitespacePushButton);
+  pLayout->setContentsMargins({0, 0, 0, 0});
+  m_pWsButtonLabel = new QLabel("WS", m_spUi->WhitespacePushButton);
+  m_pWsButtonLabel->setAttribute(Qt::WA_TranslucentBackground);
+  m_pWsButtonLabel->setAttribute(Qt::WA_TransparentForMouseEvents);
+  m_pWsButtonLabel->setAlignment(Qt::AlignCenter);
+  pLayout->addWidget(m_pWsButtonLabel);
+  UpdateWhitespaceText();
+  connect(m_spUi->WhitespacePushButton, &QPushButton::clicked,
+          this, &CFooterArea::WhiteSpaceButtonPressed);
+
   m_spUi->pZoomComboBox->clear();
   m_spUi->pZoomComboBox->setEditable(true);
   ZoomChanged(m_pCodeEditor->ZoomEnabler()->Zoom());
 
-  connect(CApplication::Instance()->Settings().get(), &CSettings::styleChanged,
+  CSettings* pSettings = CApplication::Instance()->Settings().get();
+  connect(pSettings, &CSettings::editorShowWhitespaceChanged,
+          this, &CFooterArea::UpdateWhitespaceText);
+  connect(pSettings, &CSettings::styleChanged,
           this, &CFooterArea::StyleChanged);
 
   connect(m_pCodeEditor->ZoomEnabler(), &CTextEditZoomEnabler::SignalZoomChanged,
@@ -758,6 +773,32 @@ void CFooterArea::StyleChanged()
   pal = m_spUi->pCursorLabel->palette();
   pal.setColor(QPalette::Text, m_pCodeEditor->LineNumberTextColor());
   m_spUi->pCursorLabel->setPalette(pal);
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CFooterArea::UpdateWhitespaceText()
+{
+  bool bWsEnabled = CApplication::Instance()->Settings()->EditorShowWhitespace();
+  if (bWsEnabled)
+  {
+    m_pWsButtonLabel->setText("WS");
+  }
+  else
+  {
+    m_pWsButtonLabel->setText("<s>WS</s>");
+  }
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CFooterArea::WhiteSpaceButtonPressed()
+{
+  auto spSettings = CApplication::Instance()->Settings();
+  if (nullptr != spSettings)
+  {
+    spSettings->SetEditorShowWhitespace(!spSettings->EditorShowWhitespace());
+  }
 }
 
 //----------------------------------------------------------------------------------------

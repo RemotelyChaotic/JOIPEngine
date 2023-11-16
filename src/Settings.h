@@ -16,6 +16,10 @@ class CSettings : public QObject
   Q_OBJECT
   Q_PROPERTY(bool autoUpdate READ AutoUpdate WRITE SetAutoUpdate NOTIFY autoUpdateChanged)
   Q_PROPERTY(QString contentFolder READ ContentFolder WRITE SetContentFolder NOTIFY contentFolderChanged)
+  Q_PROPERTY(bool editorCaseInsensitiveSearch READ EditorCaseInsensitiveSearch WRITE SetEditorCaseInsensitiveSearch NOTIFY editorCaseInsensitiveSearchChanged)
+  Q_PROPERTY(QString editorFont READ EditorFont WRITE SetEditorFont NOTIFY editorFontChanged)
+  Q_PROPERTY(bool editorShowWhitespace READ EditorShowWhitespace WRITE SetEditorShowWhitespace NOTIFY editorShowWhitespaceChanged)
+  Q_PROPERTY(QString editorTheme READ EditorTheme WRITE SetEditorTheme NOTIFY editorThemeChanged)
   Q_PROPERTY(QString font READ Font WRITE SetFont NOTIFY fontChanged)
   Q_PROPERTY(bool fullscreen READ Fullscreen WRITE SetFullscreen NOTIFY fullscreenChanged)
   Q_PROPERTY(QStringList keyBindings READ KeyBindings CONSTANT)
@@ -42,6 +46,10 @@ public:
   static const QString c_sVersion;
   static const QString c_sSettingAutoPauseInactive;
   static const QString c_sSettingAutoUpdate;
+  static const QString c_sSettingCodeEditorCaseInsensitiveSearch;
+  static const QString c_sSettingCodeEditorFont;
+  static const QString c_sSettingCodeEditorShowWhitespace;
+  static const QString c_sSettingCodeEditorTheme;
   static const QString c_sSettingContentFolder;
   static const QString c_sSettingEditorLayout;
   static const QString c_sSettingFont;
@@ -91,6 +99,14 @@ public:
   bool AutoUpdate();
   void SetContentFolder(const QString& sPath);
   QString ContentFolder();
+  void SetEditorCaseInsensitiveSearch(bool bValue);
+  bool EditorCaseInsensitiveSearch() const;
+  void SetEditorFont(const QString& sValue);
+  QString EditorFont() const;
+  void SetEditorShowWhitespace(bool bValue);
+  bool EditorShowWhitespace() const;
+  void SetEditorTheme(const QString& sValue);
+  QString EditorTheme() const;
   void SetFont(const QString& sFont);
   QString Font();
   void SetFullscreen(bool bValue);
@@ -143,6 +159,10 @@ public:
 signals:
   void autoUpdateChanged();
   void contentFolderChanged();
+  void editorCaseInsensitiveSearchChanged();
+  void editorFontChanged();
+  void editorShowWhitespaceChanged();
+  void editorThemeChanged();
   void fontChanged();
   void fullscreenChanged();
   void keyBindingsChanged();

@@ -125,6 +125,8 @@ private slots:
   void ErrorAdded();
   void ToggleErrorList();
   void StyleChanged();
+  void UpdateWhitespaceText();
+  void WhiteSpaceButtonPressed();
   void ZoomChanged(qint32 iZoom);
   void ZoomIndexChanged(qint32 iIndex);
   void ZoomLineEditingFinished();
@@ -133,6 +135,7 @@ private:
   void UpdateZoomComboBox(qint32 iCurrentZoom);
 
   std::unique_ptr<Ui::CScriptFooterArea> m_spUi;
+  QPointer<QLabel>                       m_pWsButtonLabel;
   CScriptEditorWidget*                   m_pCodeEditor = nullptr;
   CWidgetArea*                           m_pWidgetArea = nullptr;
   QPointer<QListWidget>                  m_pListView;

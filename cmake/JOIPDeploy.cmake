@@ -10,6 +10,7 @@ execute_process(COMMAND "${CMAKE_COMMAND}" -E rm -Rf -- "${CMAKE_INSTALL_PREFIX}
 execute_process(COMMAND "${CMAKE_COMMAND}" -E rm -Rf -- "${CMAKE_INSTALL_PREFIX}/lib")
 execute_process(COMMAND "${CMAKE_COMMAND}" -E make_directory "${CMAKE_INSTALL_PREFIX}/lib")
 execute_process(COMMAND "${CMAKE_COMMAND}" -E rm -Rf -- "${CMAKE_INSTALL_PREFIX}/styles")
+execute_process(COMMAND "${CMAKE_COMMAND}" -E rm -Rf -- "${CMAKE_INSTALL_PREFIX}/themes")
 execute_process(COMMAND "${CMAKE_COMMAND}" -E rm -Rf -- "${CMAKE_INSTALL_PREFIX}/mkspecs")
 
 find_program(WINDEPLOYQT_EXECUTABLE windeployqt HINTS "${QT_INSTALL_BINS}")
@@ -125,3 +126,8 @@ execute_process(COMMAND "${CMAKE_COMMAND}" -E copy
 execute_process(COMMAND "${CMAKE_COMMAND}" -E copy_directory
   "${CMAKE_SOURCE_DIR}/resources/desktop_styles"
   "${CMAKE_INSTALL_PREFIX}/styles")
+
+# copy themes
+execute_process(COMMAND "${CMAKE_COMMAND}" -E copy_directory
+  "${CMAKE_SOURCE_DIR}/resources/themes"
+  "${CMAKE_INSTALL_PREFIX}/themes")

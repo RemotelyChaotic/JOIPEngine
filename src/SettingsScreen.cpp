@@ -2,6 +2,7 @@
 #include "Application.h"
 #include "Settings.h"
 #include "Style.h"
+#include "Themes.h"
 #include "WindowContext.h"
 
 #include "Systems/DLJobs/DownloadJobRegistry.h"
@@ -20,6 +21,7 @@
 #include <QKeySequenceEdit>
 #include <QListView>
 #include <QScreen>
+#include <QScrollBar>
 #include <QSize>
 #include <QtAV>
 
@@ -32,6 +34,7 @@ namespace  {
   const QString c_sWindowModeHelpId = "Settings/WindowMode";
   const QString c_sDataFolderHelpId = "Settings/DataFolder";
   const QString c_sPlayerGraphicsHelpId = "Settings/PlayerGraphics";
+  const QString c_sEditorSettingsHelpId = "Settings/EditorSettings";
   const QString c_sFontHelpId = "Settings/Font";
   const QString c_sStyleHelpId = "Settings/Style";
   const QString c_sResolutionHelpId = "Settings/Resolution";
@@ -106,6 +109,8 @@ void CSettingsScreen::Initialize()
     wpHelpFactory->RegisterHelp(c_sDataFolderHelpId, ":/resources/help/settings/datafolder_setting_help.html");
     m_spUi->pPlayerSettingsGroupBox->setProperty(helpOverlay::c_sHelpPagePropertyName, c_sPlayerGraphicsHelpId);
     wpHelpFactory->RegisterHelp(c_sPlayerGraphicsHelpId, ":/resources/help/settings/playersettings_setting_help.html");
+    m_spUi->pCodeEditorGroupBox->setProperty(helpOverlay::c_sHelpPagePropertyName, c_sEditorSettingsHelpId);
+    wpHelpFactory->RegisterHelp(c_sEditorSettingsHelpId, ":/resources/help/settings/editorsettings_setting_help.html");
     m_spUi->pFontContainer->setProperty(helpOverlay::c_sHelpPagePropertyName, c_sFontHelpId);
     wpHelpFactory->RegisterHelp(c_sFontHelpId, ":/resources/help/settings/font_setting_help.html");
     m_spUi->pStyleContainer->setProperty(helpOverlay::c_sHelpPagePropertyName, c_sStyleHelpId);
@@ -116,7 +121,7 @@ void CSettingsScreen::Initialize()
     wpHelpFactory->RegisterHelp(c_sMuteHelpId, ":/resources/help/settings/mute_setting_help.html");
     m_spUi->pVolumeContainer->setProperty(helpOverlay::c_sHelpPagePropertyName, c_sVolumeHelpId);
     wpHelpFactory->RegisterHelp(c_sVolumeHelpId, ":/resources/help/settings/volume_setting_help.html");
-    m_spUi->pVolumeContainer->setProperty(helpOverlay::c_sHelpPagePropertyName, c_sMetronomeHelpId);
+    m_spUi->pMetronomeVolumeContainer->setProperty(helpOverlay::c_sHelpPagePropertyName, c_sMetronomeHelpId);
     wpHelpFactory->RegisterHelp(c_sMetronomeHelpId, ":/resources/help/settings/metronome_setting_help.html");
     m_spUi->pOfflineContainer->setProperty(helpOverlay::c_sHelpPagePropertyName, c_sOfflineHelpId);
     wpHelpFactory->RegisterHelp(c_sOfflineHelpId, ":/resources/help/settings/offline_setting_help.html");
@@ -157,6 +162,9 @@ void CSettingsScreen::Initialize()
       }
     }
   }
+
+  m_spUi->pCodeThemeComboBox->setSizeAdjustPolicy(QComboBox::AdjustToContents);
+  m_spUi->pCodeThemeComboBox->setMinimumContentsLength(1);
 
   m_spUi->tabWidget->setCurrentIndex(0);
 
@@ -212,6 +220,10 @@ void CSettingsScreen::Load()
   m_spUi->pFontComboBox->blockSignals(true);
   m_spUi->pStyleComboBox->blockSignals(true);
   m_spUi->pEditorLayoutComboBox->blockSignals(true);
+  m_spUi->pCaseSensitiveCheckBox->blockSignals(true);
+  m_spUi->pCodeFontComboBox->blockSignals(true);
+  m_spUi->pShowWhiteSpaceCheckBox->blockSignals(true);
+  m_spUi->pCodeThemeComboBox->blockSignals(true);
   m_spUi->pResolutionComboBox->blockSignals(true);
   m_spUi->pMuteCheckBox->blockSignals(true);
   m_spUi->pVolumeSlider->blockSignals(true);
@@ -325,6 +337,34 @@ void CSettingsScreen::Load()
         static_cast<qint32>(m_spSettings->PreferedEditorLayout()));
   m_spUi->pEditorLayoutComboBox->setCurrentIndex(iIndex);
 
+  // code editor
+  {
+    m_spUi->pCaseSensitiveCheckBox->setChecked(!m_spSettings->EditorCaseInsensitiveSearch());
+    font = QFont(m_spSettings->EditorFont());
+    m_spUi->pCodeFontComboBox->setCurrentFont(font);
+    m_spUi->pShowWhiteSpaceCheckBox->setChecked(m_spSettings->EditorShowWhitespace());
+    m_spUi->pCodeThemeComboBox->clear();
+    m_spUi->pCodeThemeComboBox->addItem("From Style", "");
+    bool bFound = false;
+    const QString sSetTheme = m_spSettings->EditorTheme();
+    for (const QString& sTheme : joip_style::AvailableThemes())
+    {
+      m_spUi->pCodeThemeComboBox->addItem(sTheme, sTheme);
+      if (sTheme == sSetTheme)
+      {
+        bFound = true;
+        m_spUi->pCodeThemeComboBox->setCurrentIndex(m_spUi->pCodeThemeComboBox->count()-1);
+      }
+    }
+    if (!bFound)
+    {
+      m_spUi->pCodeThemeComboBox->setCurrentIndex(0);
+    }
+    qint32 iWHint = m_spUi->pCodeThemeComboBox->minimumSizeHint().width();
+    m_spUi->pCodeThemeComboBox->view()->setMinimumWidth(
+        iWHint + m_spUi->pCodeThemeComboBox->view()->verticalScrollBar()->width() + 20);
+  }
+
   // set volume
   m_spUi->pMuteCheckBox->setCheckState(m_spSettings->Muted() ? Qt::Checked : Qt::Unchecked);
   m_spUi->pVolumeSlider->setValue(static_cast<qint32>(m_spSettings->Volume() * c_dSliderScaling));
@@ -359,6 +399,10 @@ void CSettingsScreen::Load()
   m_spUi->pFontComboBox->blockSignals(false);
   m_spUi->pStyleComboBox->blockSignals(false);
   m_spUi->pEditorLayoutComboBox->blockSignals(false);
+  m_spUi->pCaseSensitiveCheckBox->blockSignals(false);
+  m_spUi->pCodeFontComboBox->blockSignals(false);
+  m_spUi->pShowWhiteSpaceCheckBox->blockSignals(false);
+  m_spUi->pCodeThemeComboBox->blockSignals(false);
   m_spUi->pFolderLineEdit->blockSignals(false);
   m_spUi->pMuteCheckBox->blockSignals(false);
   m_spUi->pVolumeSlider->blockSignals(false);
@@ -495,6 +539,50 @@ void CSettingsScreen::on_pEditorLayoutComboBox_currentIndexChanged(qint32 iIndex
   m_spSettings->SetPreferedEditorLayout(
         static_cast<CSettings::EditorType>(
           m_spUi->pEditorLayoutComboBox->currentData().toInt()));
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CSettingsScreen::on_pCaseSensitiveCheckBox_toggled(bool bState)
+{
+  WIDGET_INITIALIZED_GUARD
+  assert(nullptr != m_spSettings);
+  if (nullptr == m_spSettings) { return; }
+
+  m_spSettings->SetEditorCaseInsensitiveSearch(!bState);
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CSettingsScreen::on_pCodeFontComboBox_currentFontChanged(const QFont& font)
+{
+  WIDGET_INITIALIZED_GUARD
+  assert(nullptr != m_spSettings);
+  if (nullptr == m_spSettings) { return; }
+
+  m_spSettings->SetEditorFont(font.family());
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CSettingsScreen::on_pShowWhiteSpaceCheckBox_toggled(bool bState)
+{
+  WIDGET_INITIALIZED_GUARD
+  assert(nullptr != m_spSettings);
+  if (nullptr == m_spSettings) { return; }
+
+  m_spSettings->SetEditorShowWhitespace(bState);
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CSettingsScreen::on_pCodeThemeComboBox_currentIndexChanged(qint32 /*iIndex*/)
+{
+  WIDGET_INITIALIZED_GUARD
+  assert(nullptr != m_spSettings);
+  if (nullptr == m_spSettings) { return; }
+
+  m_spSettings->SetEditorTheme(m_spUi->pCodeThemeComboBox->currentData().toString());
 }
 
 //----------------------------------------------------------------------------------------

@@ -540,5 +540,16 @@
         <file>resources/android_styles/Gummyzilla/ui/ButtonTools.png</file>
         <file>resources/android_styles/Gummyzilla/ui/ButtonToolsSelected.png</file>
         <file>resources/android_styles/Somber Dark/ui/ButtonTools.png</file>
+        <file>resources/themes/atom-one-dark.theme</file>
+        <file>resources/themes/atom-one-light.theme</file>
+        <file>resources/themes/ayu-dark.theme</file>
+        <file>resources/themes/ayu-light.theme</file>
+        <file>resources/themes/ayu-mirage.theme</file>
+        <file>resources/themes/dracula.theme</file>
+        <file>resources/themes/gruvbox-dark.theme</file>
+        <file>resources/themes/gruvbox-light.theme</file>
+        <file>resources/themes/monokai.theme</file>
+        <file>resources/themes/nord.theme</file>
+        <file>resources/themes/radical.theme</file>
     </qresource>
 </RCC>

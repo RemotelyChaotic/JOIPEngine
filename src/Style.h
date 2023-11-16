@@ -3,7 +3,8 @@
 
 #include <QApplication>
 
-namespace joip_style {
+namespace joip_style
+{
 #if defined(Q_OS_ANDROID)
   inline const char* c_sDefaultAndroidStyleFolder = ":/android/resources/android_styles";
 #endif

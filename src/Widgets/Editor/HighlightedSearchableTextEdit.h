@@ -25,6 +25,7 @@ public:
 
   QMenu* CreateContextMenu();
   void SetSyntaxHighlightingEnabled(bool bEnabled);
+  void SetCaseInsensitiveFindEnabled(bool bEnabled);
 
 protected slots:
   void SlotShowHideSearchFilter();
@@ -46,6 +47,7 @@ private:
   QPointer<CEditorSearchBar>        m_pSearchBar;
   QTextCursor                       m_highlightCursor;
   QString                           m_sLastSearch;
+  bool                              m_bCaseInsensitive = true;
 };
 
 #endif // CHIGHLIGHTEDSEARCHABLETEXTEDIT_H

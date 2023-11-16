@@ -4,6 +4,7 @@
 #include "ScriptEditorCodeToolTip.h"
 #include "ScriptEditorKeyHandler.h"
 #include "Settings.h"
+#include "Themes.h"
 
 #include "Widgets/Editor/EditorCustomBlockUserData.h"
 #include "Widgets/Editor/EditorSearchBar.h"
@@ -27,6 +28,7 @@ namespace
 CScriptEditorWidget::CScriptEditorWidget(QWidget* pParent) :
   QPlainTextEdit(pParent),
   m_spRepository(std::make_unique<KSyntaxHighlighting::Repository>()),
+  m_spSettings(CApplication::Instance()->Settings()),
   m_pHighlightedSearchableEdit(nullptr),
   m_foldedIcon(":/resources/style/img/ButtonPlay.png"),
   m_unfoldedIcon(":/resources/style/img/ButtonArrowDown.png"),
@@ -48,8 +50,9 @@ CScriptEditorWidget::CScriptEditorWidget(QWidget* pParent) :
   setAttribute(Qt::WA_NoMousePropagation, false);
   installEventFilter(this);
 
+  m_spRepository->addCustomSearchPath(joip_style::ThemeFolder());
   m_pHighlightedSearchableEdit = new CHighlightedSearchableTextEdit(this);
-  m_pHighlightedSearchableEdit->Highlighter()->setTheme(m_spRepository->theme(m_sTheme));
+  SlotSettingThemeChanged();
 
   m_pZoomEnabler = new CTextEditZoomEnabler(this);
 
@@ -79,12 +82,20 @@ CScriptEditorWidget::CScriptEditorWidget(QWidget* pParent) :
   UpdateBottomAreaHeight(0);
   HighlightCurrentLine();
 
-  UpdateFont();
+  SlotSettingFontChanged();
   SetTabStopWidth(c_iTabStop);
 
-  QTextOption option = document()->defaultTextOption();
-  option.setFlags(QTextOption::ShowTabsAndSpaces);
-  document()->setDefaultTextOption(option);
+  SlotSettingShowWhitespaceChanged();
+  SlotSettingCaseInsensitiveSearchChanged();
+
+  connect(m_spSettings.get(), &CSettings::editorCaseInsensitiveSearchChanged,
+          this, &CScriptEditorWidget::SlotSettingCaseInsensitiveSearchChanged);
+  connect(m_spSettings.get(), &CSettings::editorFontChanged,
+          this, &CScriptEditorWidget::SlotSettingFontChanged);
+  connect(m_spSettings.get(), &CSettings::editorShowWhitespaceChanged,
+          this, &CScriptEditorWidget::SlotSettingShowWhitespaceChanged);
+  connect(m_spSettings.get(), &CSettings::editorThemeChanged,
+          this, &CScriptEditorWidget::SlotSettingThemeChanged);
 }
 
 CScriptEditorWidget::~CScriptEditorWidget()
@@ -206,7 +217,7 @@ void CScriptEditorWidget::SetWordHighlightColor(const QColor& color)
 void CScriptEditorWidget::SetTheme(const QString& sTheme)
 {
   m_sTheme = sTheme;
-  m_pHighlightedSearchableEdit->Highlighter()->setTheme(m_spRepository->theme(m_sTheme));
+  SlotSettingThemeChanged();
 }
 
 //----------------------------------------------------------------------------------------
@@ -300,6 +311,54 @@ void CScriptEditorWidget::HighlightCurrentWord()
   }
 
   Highlighter()->SetActiveWordExpression(sText);
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CScriptEditorWidget::SlotSettingCaseInsensitiveSearchChanged()
+{
+  m_pHighlightedSearchableEdit->SetCaseInsensitiveFindEnabled(
+      m_spSettings->EditorCaseInsensitiveSearch());
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CScriptEditorWidget::SlotSettingFontChanged()
+{
+  m_sFontFamily = m_spSettings->EditorFont();
+  UpdateFont();
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CScriptEditorWidget::SlotSettingShowWhitespaceChanged()
+{
+  QTextOption option = document()->defaultTextOption();
+  if (m_spSettings->EditorShowWhitespace())
+  {
+    option.setFlags(QTextOption::ShowTabsAndSpaces);
+  }
+  else
+  {
+    option.setFlags(QTextOption::Flag(0x0));
+  }
+  document()->setDefaultTextOption(option);
+  repaint();
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CScriptEditorWidget::SlotSettingThemeChanged()
+{
+  QString sThemeFromSettings = m_spSettings->EditorTheme();
+  if (sThemeFromSettings.isEmpty())
+  {
+    Highlighter()->setTheme(m_spRepository->theme(m_sTheme));
+  }
+  else
+  {
+    Highlighter()->setTheme(m_spRepository->theme(sThemeFromSettings));
+  }
 }
 
 //----------------------------------------------------------------------------------------

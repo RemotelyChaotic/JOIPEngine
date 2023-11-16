@@ -545,6 +545,8 @@ macro(CreateJOIPProject JOIP_PROJECT_NAME)
     ${JOIPSources}/Systems/ScriptRunner.h
     ${JOIPSources}/Systems/ThreadedSystem.cpp
     ${JOIPSources}/Systems/ThreadedSystem.h
+    ${JOIPSources}/Themes.cpp
+    ${JOIPSources}/Themes.h
     ${JOIPSources}/UISoundEmitter.cpp
     ${JOIPSources}/UISoundEmitter.h
     ${JOIPSources}/Utils/MetronomeHelpers.cpp

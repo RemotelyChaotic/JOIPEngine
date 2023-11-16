@@ -84,6 +84,10 @@ namespace {
 const QString CSettings::c_sVersion = "General/version";
 const QString CSettings::c_sSettingAutoPauseInactive = "Content/pauseinactive";
 const QString CSettings::c_sSettingAutoUpdate = "General/autoUpdate";
+const QString CSettings::c_sSettingCodeEditorCaseInsensitiveSearch = "Content/editorCaseInsensitiveSearch";
+const QString CSettings::c_sSettingCodeEditorFont = "Content/editorFont";
+const QString CSettings::c_sSettingCodeEditorShowWhitespace = "Content/editorShowWhitespace";
+const QString CSettings::c_sSettingCodeEditorTheme = "Content/editorTheme";
 const QString CSettings::c_sSettingContentFolder = "Content/folder";
 const QString CSettings::c_sSettingEditorLayout = "Content/preferededitorlayout";
 const QString CSettings::c_sSettingFont = "Graphics/font";
@@ -282,6 +286,94 @@ QString CSettings::ContentFolder()
   }
   return sPath;
 #endif
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CSettings::SetEditorCaseInsensitiveSearch(bool bValue)
+{
+  QMutexLocker locker(&m_settingsMutex);
+  bool bOldValue = m_spSettings->value(CSettings::c_sSettingCodeEditorCaseInsensitiveSearch).toBool();
+
+  if (bOldValue == bValue) { return; }
+
+  m_spSettings->setValue(CSettings::c_sSettingCodeEditorCaseInsensitiveSearch, bValue);
+
+  emit editorCaseInsensitiveSearchChanged();
+}
+
+//----------------------------------------------------------------------------------------
+//
+bool CSettings::EditorCaseInsensitiveSearch() const
+{
+  QMutexLocker locker(&m_settingsMutex);
+  return m_spSettings->value(CSettings::c_sSettingCodeEditorCaseInsensitiveSearch).toBool();
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CSettings::SetEditorFont(const QString& sValue)
+{
+  QMutexLocker locker(&m_settingsMutex);
+  QString sOldFont = m_spSettings->value(CSettings::c_sSettingCodeEditorFont).toString();
+
+  if (sOldFont == sValue) { return; }
+
+  m_spSettings->setValue(CSettings::c_sSettingCodeEditorFont, sValue);
+
+  emit editorFontChanged();
+}
+
+//----------------------------------------------------------------------------------------
+//
+QString CSettings::EditorFont() const
+{
+  QMutexLocker locker(&m_settingsMutex);
+  return m_spSettings->value(CSettings::c_sSettingCodeEditorFont).toString();
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CSettings::SetEditorShowWhitespace(bool bValue)
+{
+  QMutexLocker locker(&m_settingsMutex);
+  bool bOldValue = m_spSettings->value(CSettings::c_sSettingCodeEditorShowWhitespace).toBool();
+
+  if (bOldValue == bValue) { return; }
+
+  m_spSettings->setValue(CSettings::c_sSettingCodeEditorShowWhitespace, bValue);
+
+  emit editorShowWhitespaceChanged();
+}
+
+//----------------------------------------------------------------------------------------
+//
+bool CSettings::EditorShowWhitespace() const
+{
+  QMutexLocker locker(&m_settingsMutex);
+  return m_spSettings->value(CSettings::c_sSettingCodeEditorShowWhitespace).toBool();
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CSettings::SetEditorTheme(const QString& sValue)
+{
+  QMutexLocker locker(&m_settingsMutex);
+  QString sOldStyle = m_spSettings->value(CSettings::c_sSettingCodeEditorTheme).toString();
+
+  if (sOldStyle == sValue) { return; }
+
+  m_spSettings->setValue(CSettings::c_sSettingCodeEditorTheme, sValue);
+
+  emit editorThemeChanged();
+}
+
+//----------------------------------------------------------------------------------------
+//
+QString CSettings::EditorTheme() const
+{
+  QMutexLocker locker(&m_settingsMutex);
+  return m_spSettings->value(CSettings::c_sSettingCodeEditorTheme).toString();
 }
 
 //----------------------------------------------------------------------------------------
@@ -944,6 +1036,28 @@ void CSettings::GenerateSettingsIfNotExists()
       QDir::current().mkdir("data");
     }
 #endif
+  }
+
+  // check code editor settings
+  if (!m_spSettings->contains(CSettings::c_sSettingCodeEditorCaseInsensitiveSearch))
+  {
+    bNeedsSynch = true;
+    m_spSettings->setValue(CSettings::c_sSettingCodeEditorCaseInsensitiveSearch, true);
+  }
+  if (!m_spSettings->contains(CSettings::c_sSettingCodeEditorFont))
+  {
+    bNeedsSynch = true;
+    m_spSettings->setValue(CSettings::c_sSettingCodeEditorFont, "Courier New");
+  }
+  if (!m_spSettings->contains(CSettings::c_sSettingCodeEditorShowWhitespace))
+  {
+    bNeedsSynch = true;
+    m_spSettings->setValue(CSettings::c_sSettingCodeEditorShowWhitespace, true);
+  }
+  if (!m_spSettings->contains(CSettings::c_sSettingCodeEditorTheme))
+  {
+    bNeedsSynch = true;
+    m_spSettings->setValue(CSettings::c_sSettingCodeEditorTheme, "");
   }
 
   // check font

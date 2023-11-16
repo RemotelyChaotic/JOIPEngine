@@ -20,6 +20,7 @@ class CFoldBlockArea;
 class CLineNumberArea;
 class CHighlightedSearchableTextEdit;
 class CEditorSearchBar;
+class CSettings;
 class CTextEditZoomEnabler;
 class CWidgetArea;
 class IScriptEditorKeyHandler;
@@ -122,6 +123,10 @@ protected:
 private slots:
   void HighlightCurrentLine();
   void HighlightCurrentWord();
+  void SlotSettingCaseInsensitiveSearchChanged();
+  void SlotSettingFontChanged();
+  void SlotSettingShowWhitespaceChanged();
+  void SlotSettingThemeChanged();
   void UpdateFont();
   void UpdateLeftAreaWidth(qint32 iNewBlockCount);
   void UpdateRightAreaWidth(qint32 iNewBlockCount);
@@ -132,6 +137,7 @@ private:
   QPointer<QLabel> WidgetAreaWidget(qint32 iLine);
 
   std::unique_ptr<KSyntaxHighlighting::Repository> m_spRepository;
+  std::shared_ptr<CSettings>                       m_spSettings;
   QPointer<CHighlightedSearchableTextEdit>         m_pHighlightedSearchableEdit;
   QPointer<CTextEditZoomEnabler>                   m_pZoomEnabler;
   std::map<EScriptEditorAddonPosition, std::vector<IScriptEditorAddon*>>
