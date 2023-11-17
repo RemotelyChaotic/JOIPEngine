@@ -240,11 +240,14 @@ QVariant CScriptEditorModel::data(const QModelIndex& index, int iRole) const
       {
         if (nullptr != spScene)
         {
-          QReadLocker plocker(&spScene->m_spParent->m_rwLock);
           QReadLocker locker(&spScene->m_rwLock);
-          if (spScene->m_spParent->m_sPlayerLayout == it->first)
+          if (nullptr != m_spProject)
           {
-            vsScriptAdditions << tr("Layout for Project");
+            QReadLocker plocker(&m_spProject->m_rwLock);
+            if (m_spProject->m_sPlayerLayout == it->first)
+            {
+              vsScriptAdditions << tr("Layout for Project");
+            }
           }
           if (spScene->m_sScript == it->first)
           {
