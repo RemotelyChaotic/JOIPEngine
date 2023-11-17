@@ -673,6 +673,14 @@ QString CSceneScriptWrapper::getScript()
 
 //----------------------------------------------------------------------------------------
 //
+QString CSceneScriptWrapper::getSceneLayout()
+{
+  QReadLocker locker(&m_spData->m_rwLock);
+  return m_spData->m_sSceneLayout;
+}
+
+//----------------------------------------------------------------------------------------
+//
 qint32 CSceneScriptWrapper::numResources()
 {
   QReadLocker locker(&m_spData->m_rwLock);

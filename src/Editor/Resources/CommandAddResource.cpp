@@ -82,6 +82,11 @@ namespace  {
             sResource = spDbManager->AddResource(spCurrentProject, url, EResourceType::eFont);
             bAddedFiles = true;
           }
+          else if (SResourceFormats::LayoutFormats().contains(sEnding))
+          {
+            sResource = spDbManager->AddResource(spCurrentProject, url, EResourceType::eLayout);
+            bAddedFiles = true;
+          }
           else if (SResourceFormats::ArchiveFormats().contains(sEnding))
           {
             if (spDbManager->AddResourceArchive(spCurrentProject, url))
@@ -95,7 +100,8 @@ namespace  {
                                           SResourceFormats::FontFormats() <<
                                           SResourceFormats::OtherFormats() <<
                                           SResourceFormats::ScriptFormats() <<
-                                          SResourceFormats::DatabaseFormats(),
+                                          SResourceFormats::DatabaseFormats() <<
+                                          SResourceFormats::LayoutFormats(),
                                         QDir::Files | QDir::NoDotAndDotDot,
                                         QDirIterator::Subdirectories);
               while (itCompressed.hasNext())

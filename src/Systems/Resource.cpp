@@ -93,6 +93,11 @@ void SResource::FromJsonObject(const QJsonObject& json)
     {
       m_type = EResourceType::eScript;
     }
+    else if (iValue == EResourceType::eOther &&
+             SResourceFormats::LayoutFormats().contains("*." + sSuffix))
+    {
+      m_type = EResourceType::eLayout;
+    }
     else
     {
       m_type = EResourceType::_from_integral(iValue);
@@ -272,7 +277,7 @@ QStringList SResourceFormats::ImageFormats()
 //
 QStringList SResourceFormats::OtherFormats()
 {
-  static QStringList vsFormats = QStringList() << "*.json" << "*.proj" << "*.flow" << ".layout";
+  static QStringList vsFormats = QStringList() << "*.json" << "*.proj" << "*.flow";
   return vsFormats;
 }
 
@@ -281,6 +286,14 @@ QStringList SResourceFormats::OtherFormats()
 QStringList SResourceFormats::ScriptFormats()
 {
   static QStringList vsFormats = QStringList() << "*.js" << "*.eos" << "*.lua";
+  return vsFormats;
+}
+
+//----------------------------------------------------------------------------------------
+//
+QStringList SResourceFormats::LayoutFormats()
+{
+  static QStringList vsFormats = QStringList() << "*.qml" << "*.layout";
   return vsFormats;
 }
 

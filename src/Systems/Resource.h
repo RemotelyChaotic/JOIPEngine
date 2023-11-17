@@ -16,10 +16,10 @@ class CProjectScriptWrapper;
 class QJSEngine;
 struct SProject;
 
-namespace joip_resource {
+namespace joip_resource
+{
   const QString c_sProjectFileName  = "JOIPData.json";
   const QString c_sSceneModelFile   = "SceneModel.flow";
-  const QString c_sPlayerLayoutFile = "Player.layout";
 }
 
 //----------------------------------------------------------------------------------------
@@ -74,6 +74,7 @@ struct SResourceFormats
   static QStringList ImageFormats();
   static QStringList OtherFormats();
   static QStringList ScriptFormats();
+  static QStringList LayoutFormats();
   static QStringList VideoFormats();
 
   static QString JoinedFormatsForFilePicker();

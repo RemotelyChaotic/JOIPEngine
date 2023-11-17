@@ -34,6 +34,7 @@ QJsonObject SScene::ToJsonObject()
     { "iId", m_iId },
     { "sName", m_sName },
     { "sScript", m_sScript },
+    { "sSceneLayout", m_sSceneLayout },
     { "vsResourceRefs", resourceRefs },
   };
 }
@@ -57,6 +58,11 @@ void SScene::FromJsonObject(const QJsonObject& json)
   if (it != json.end())
   {
     m_sScript = it.value().toString();
+  }
+  it = json.find("sSceneLayout");
+  if (it != json.end())
+  {
+    m_sSceneLayout = it.value().toString();
   }
   it = json.find("vsResourceRefs");
   m_vsResourceRefs.clear();

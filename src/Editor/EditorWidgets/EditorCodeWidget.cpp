@@ -24,6 +24,7 @@
 #include "Widgets/HelpOverlay.h"
 
 #include <QDebug>
+#include <QMenu>
 #include <QStandardItemModel>
 #include <QUndoStack>
 
@@ -390,17 +391,49 @@ void CEditorCodeWidget::SlotDebugStart()
     }
 
     // get Scene name
+    QStringList vsPossibleScenesToDebug;
     QString sSceneName = QString();
     QString sCachedScript = ScriptEditorModel()->CachedScriptName(
           m_spUi->pResourceComboBox->currentIndex());
     auto pScriptItem = ScriptEditorModel()->CachedScript(sCachedScript);
     if (nullptr != pScriptItem)
     {
-      auto spScene = pScriptItem->m_spScene;
-      if (nullptr != spScene)
+      auto vspScenes = pScriptItem->m_vspScenes;
+      if (!vspScenes.empty())
       {
-        QReadLocker locker(&spScene->m_rwLock);
-        sSceneName = spScene->m_sName;
+        for (const tspScene& spScene : vspScenes)
+        {
+          if (nullptr != spScene)
+          {
+            QReadLocker locker(&spScene->m_rwLock);
+            vsPossibleScenesToDebug << spScene->m_sName;
+          }
+        }
+      }
+    }
+
+    if (vsPossibleScenesToDebug.size() == 1)
+    {
+      sSceneName = vsPossibleScenesToDebug[0];
+    }
+    else if (vsPossibleScenesToDebug.size() > 1)
+    {
+      QMenu menu;
+
+      for (const QString& sSceneNameLoc : qAsConst(vsPossibleScenesToDebug))
+      {
+        QAction* pAction = new QAction(sSceneNameLoc, &menu);
+        connect(pAction, &QAction::triggered, pAction,
+                [&sSceneName, sSceneNameLoc]() { sSceneName = sSceneNameLoc; });
+        menu.addAction(pAction);
+      }
+
+      QPointer<CEditorCodeWidget> pThis(this);
+      menu.exec(ActionBar()->m_spUi->DebugButton->parentWidget()->mapToGlobal(
+          ActionBar()->m_spUi->DebugButton->pos()));
+      if (nullptr == pThis)
+      {
+        return;
       }
     }
 
@@ -513,7 +546,7 @@ void CEditorCodeWidget::SlotFileChangedExternally(const QString& sName)
     m_spUi->pCodeEditorView->ResetWidget();
     m_spUi->pCodeEditorView->Clear();
     // load new contents
-    ActionBar()->m_spUi->DebugButton->setEnabled(nullptr != pScriptItem->m_spScene);
+    ActionBar()->m_spUi->DebugButton->setEnabled(!pScriptItem->m_vspScenes.empty());
     m_spUi->pCodeEditorView->SetContent(QString::fromUtf8(pScriptItem->m_data));
 
     m_spUi->pCodeEditorView->Update();
@@ -572,7 +605,7 @@ void CEditorCodeWidget::ReloadEditor(qint32 iIndex)
   {
     if (nullptr != ActionBar())
     {
-      ActionBar()->m_spUi->DebugButton->setEnabled(nullptr != pScriptItem->m_spScene);
+      ActionBar()->m_spUi->DebugButton->setEnabled(!pScriptItem->m_vspScenes.empty());
     }
     m_spUi->pCodeEditorView->SetScriptType(pScriptItem->m_sScriptType);
     m_spUi->pCodeEditorView->SetContent(QString::fromUtf8(pScriptItem->m_data));

@@ -178,6 +178,7 @@ class CSceneScriptWrapper : public QObject, public CLockable
   Q_PROPERTY(qint32  id               READ getId     CONSTANT)
   Q_PROPERTY(QString name             READ getName   CONSTANT)
   Q_PROPERTY(QString script           READ getScript CONSTANT)
+  Q_PROPERTY(QString sceneLayout      READ getSceneLayout CONSTANT)
 
 public:
   explicit CSceneScriptWrapper(tEngineType pEngine, const std::shared_ptr<SScene>& spScene);
@@ -186,6 +187,7 @@ public:
   qint32 getId();
   QString getName();
   QString getScript();
+  QString getSceneLayout();
 
   Q_INVOKABLE qint32 numResources();
   Q_INVOKABLE QStringList resources();

@@ -28,10 +28,12 @@
 
 namespace
 {
-  const qint32 c_iIndexNoScripts = 0;
-  const qint32 c_iIndexScriptJs  = 1;
-  const qint32 c_iIndexScriptEos = 2;
-  const qint32 c_iIndexScriptLua = 1;
+  const qint32 c_iIndexNoScripts    = 0;
+  const qint32 c_iIndexScriptJs     = 1;
+  const qint32 c_iIndexScriptEos    = 2;
+  const qint32 c_iIndexScriptLua    = 1;
+  const qint32 c_iIndexScriptQml    = 1;
+  const qint32 c_iIndexScriptLayout = 1;
 
   const QString c_sSciptEditorHelpId =      "Editor/SciptEditor";
   const QString c_sSciptAPIHelpId =         "Editor/SciptAPI/Editor";
@@ -45,7 +47,9 @@ namespace
     static std::map<QString, qint32> typeToPageMap = {
       { SScriptDefinitionData::c_sScriptTypeJs, c_iIndexScriptJs },
       { SScriptDefinitionData::c_sScriptTypeEos, c_iIndexScriptEos },
-      { SScriptDefinitionData::c_sScriptTypeLua, c_iIndexScriptLua }
+      { SScriptDefinitionData::c_sScriptTypeLua, c_iIndexScriptLua },
+      { SScriptDefinitionData::c_sScriptTypeQml, c_iIndexScriptQml },
+      { SScriptDefinitionData::c_sScriptTypeLayout, c_iIndexScriptLayout }
     };
     if (auto it = typeToPageMap.find(sType); typeToPageMap.end() != it)
     {
@@ -75,6 +79,7 @@ CCodeDisplayWidget::CCodeDisplayWidget(QWidget* pParent) :
   m_displayImplMap[SScriptDefinitionData::c_sScriptTypeJs] = std::make_unique<CCodeDisplayDefaultEditorImpl>(m_spUi->pCodeEdit);
   m_displayImplMap[SScriptDefinitionData::c_sScriptTypeEos] = std::make_unique<CCodeDisplayEosEditorImpl>(m_spUi->pEosEdit);
   m_displayImplMap[SScriptDefinitionData::c_sScriptTypeLua] = std::make_unique<CCodeDisplayDefaultEditorImpl>(m_spUi->pCodeEdit);
+  m_displayImplMap[SScriptDefinitionData::c_sScriptTypeQml] = std::make_unique<CCodeDisplayDefaultEditorImpl>(m_spUi->pCodeEdit);
 
   m_spBackgroundSnippetOverlay = std::make_unique<CBackgroundSnippetOverlay>(this);
   m_spIconSnippetOverlay = std::make_unique<CIconSnippetOverlay>(this);

@@ -16,6 +16,7 @@ struct SSceneData
   qint32                    m_iId;
   QString                   m_sName;
   QString                   m_sScript;
+  QString                   m_sSceneLayout;
 };
 
 #endif // SCENEDATA_H

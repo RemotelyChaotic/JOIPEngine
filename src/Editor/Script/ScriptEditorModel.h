@@ -17,12 +17,12 @@ class CDatabaseManager;
 struct SCachedMapItem
 {
   SCachedMapItem() :
-    m_spScene(), m_spWatcher(std::make_shared<QFileSystemWatcher>()), m_data(), m_sId(),
+    m_vspScenes(), m_spWatcher(std::make_shared<QFileSystemWatcher>()), m_data(), m_sId(),
     m_sHighlightDefinition("JavaScript"), m_sScriptType("js"),
     m_bChanged(false), m_bIgnoreNextModification(false), m_bAllreadyAsked(false), m_bInitialized(false)
   {}
   SCachedMapItem(const SCachedMapItem& other) :
-    m_spScene(other.m_spScene),
+    m_vspScenes(other.m_vspScenes),
     m_spWatcher(other.m_spWatcher), m_data(other.m_data),
     m_sId(other.m_sId),
     m_sHighlightDefinition(other.m_sHighlightDefinition),
@@ -34,7 +34,7 @@ struct SCachedMapItem
   {
   }
 
-  tspScene                             m_spScene;
+  tvspScene                            m_vspScenes;
   std::shared_ptr<QFileSystemWatcher>  m_spWatcher;
   QByteArray                           m_data;
   QString                              m_sId;

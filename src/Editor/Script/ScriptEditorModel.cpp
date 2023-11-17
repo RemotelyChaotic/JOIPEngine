@@ -234,15 +234,32 @@ QVariant CScriptEditorModel::data(const QModelIndex& index, int iRole) const
 
     if (Qt::DisplayRole == iRole)
     {
-      QString sSceneName;
-      if (nullptr != it->second.m_spScene)
+      QStringList vsScriptAdditions;
+
+      for (const tspScene& spScene : it->second.m_vspScenes)
       {
-        QReadLocker locker(&it->second.m_spScene->m_rwLock);
-        sSceneName = it->second.m_spScene->m_sName;
+        if (nullptr != spScene)
+        {
+          QReadLocker plocker(&spScene->m_spParent->m_rwLock);
+          QReadLocker locker(&spScene->m_rwLock);
+          if (spScene->m_spParent->m_sPlayerLayout == it->first)
+          {
+            vsScriptAdditions << tr("Layout for Project");
+          }
+          if (spScene->m_sScript == it->first)
+          {
+            vsScriptAdditions << tr("Script for Scene: %1").arg(spScene->m_sName);
+          }
+          if (spScene->m_sSceneLayout == it->first)
+          {
+            vsScriptAdditions << tr("Layout for Scene: %1").arg(spScene->m_sName);
+          }
+        }
       }
+
       return it->first +
-          (!sSceneName.isEmpty() ? QString(tr(" (Scene: %1) ")).arg(sSceneName) : "") +
-          (it->second.m_bChanged ? "*" : "");
+             QString(" (%1) ").arg(vsScriptAdditions.join(", ")) +
+             (it->second.m_bChanged ? "*" : "");
     }
     else
     {
@@ -333,7 +350,8 @@ void CScriptEditorModel::SlotResourceAdded(qint32 iProjId, const QString& sName)
     if (nullptr != spResource)
     {
       QReadLocker locker(&spResource->m_rwLock);
-      if (spResource->m_type._to_integral() != EResourceType::eScript)
+      if (spResource->m_type._to_integral() != EResourceType::eScript &&
+          spResource->m_type._to_integral() != EResourceType::eLayout)
       { return; }
       locker.unlock();
 
@@ -422,19 +440,22 @@ void CScriptEditorModel::SlotSceneRenamed(qint32 iProjId, qint32 iId)
   {
     for (auto it = m_cachedScriptsMap.begin(); m_cachedScriptsMap.end() != it; ++it)
     {
-      auto spScene = it->second.m_spScene;
-      if (nullptr != spScene)
+      auto vspScene = it->second.m_vspScenes;
+      if (!vspScene.empty())
       {
-        QReadLocker locker(&spScene->m_rwLock);
-        qint32 iIdSaved = spScene->m_iId;
-        locker.unlock();
-
-        if (iId == iIdSaved)
+        for (tspScene spScene : vspScene)
         {
-          QModelIndex index =
-              createIndex(static_cast<qint32>(std::distance(m_cachedScriptsMap.begin(), it)),
-                          0, nullptr);
-          emit dataChanged(index, index);
+          QReadLocker locker(&spScene->m_rwLock);
+          qint32 iIdSaved = spScene->m_iId;
+          locker.unlock();
+
+          if (iId == iIdSaved)
+          {
+            QModelIndex index =
+                createIndex(static_cast<qint32>(std::distance(m_cachedScriptsMap.begin(), it)),
+                            0, nullptr);
+            emit dataChanged(index, index);
+          }
         }
       }
     }
@@ -457,20 +478,25 @@ void CScriptEditorModel::SlotSceneRemoved(qint32 iProjId, qint32 iId)
   {
     for (auto it = m_cachedScriptsMap.begin(); m_cachedScriptsMap.end() != it; ++it)
     {
-      auto spScene = it->second.m_spScene;
-      if (nullptr != spScene)
+      auto vspScene = it->second.m_vspScenes;
+      if (!vspScene.empty())
       {
-        QReadLocker locker(&spScene->m_rwLock);
-        qint32 iIdSaved = spScene->m_iId;
-        locker.unlock();
-
-        if (iId == iIdSaved)
+        qint32 i = 0;
+        for (tspScene spScene : vspScene)
         {
-          it->second.m_spScene = nullptr;
-          QModelIndex index =
-              createIndex(static_cast<qint32>(std::distance(m_cachedScriptsMap.begin(), it)),
-                          0, nullptr);
-          emit dataChanged(index, index);
+          QReadLocker locker(&spScene->m_rwLock);
+          qint32 iIdSaved = spScene->m_iId;
+          locker.unlock();
+
+          if (iId == iIdSaved)
+          {
+            it->second.m_vspScenes.erase(it->second.m_vspScenes.begin()+i);
+            QModelIndex index =
+                createIndex(static_cast<qint32>(std::distance(m_cachedScriptsMap.begin(), it)),
+                            0, nullptr);
+            emit dataChanged(index, index);
+          }
+          ++i;
         }
       }
     }
@@ -479,14 +505,16 @@ void CScriptEditorModel::SlotSceneRemoved(qint32 iProjId, qint32 iId)
 
 //----------------------------------------------------------------------------------------
 //
-void CScriptEditorModel::AddResourceTo(tspResource spResource, std::map<QString, SCachedMapItem>& mpToAddTo)
+void CScriptEditorModel::AddResourceTo(tspResource spResource,
+                                       std::map<QString, SCachedMapItem>& mpToAddTo)
 {
   if (nullptr == m_spProject) { return; }
 
   QString sPath = ResourceUrlToAbsolutePath(spResource);
   QReadLocker resourceLocker(&spResource->m_rwLock);
   const QString sResourceName = spResource->m_sName;
-  if (spResource->m_type._to_integral() != EResourceType::eScript)
+  if (spResource->m_type._to_integral() != EResourceType::eScript &&
+      spResource->m_type._to_integral() != EResourceType::eLayout)
   {
     return;
   }
@@ -510,7 +538,7 @@ void CScriptEditorModel::AddResourceTo(tspResource spResource, std::map<QString,
             QFileInfo(sResourcePath.toString()).suffix());
       if (SScriptDefinitionData::DefinitionMap().end() != itDefinition)
       {
-        script.m_sScriptType = itDefinition->first;
+        script.m_sScriptType = itDefinition->second.sType;
         script.m_sHighlightDefinition = itDefinition->second.sHighlightDefinition;
       }
       if (!script.m_spWatcher->addPath(sPath))
@@ -525,10 +553,10 @@ void CScriptEditorModel::AddResourceTo(tspResource spResource, std::map<QString,
       for (const auto& spScene : m_spProject->m_vspScenes)
       {
         QReadLocker sceneLocker(&spScene->m_rwLock);
-        if (spScene->m_sScript == sResourceName)
+        if (spScene->m_sScript == sResourceName ||
+            spScene->m_sSceneLayout == sResourceName)
         {
-          script.m_spScene = spScene;
-          break;
+          script.m_vspScenes.push_back(spScene);
         }
       }
     }
