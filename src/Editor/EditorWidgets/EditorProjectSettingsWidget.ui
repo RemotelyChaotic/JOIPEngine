@@ -30,8 +30,8 @@
        <rect>
         <x>0</x>
         <y>0</y>
-        <width>353</width>
-        <height>423</height>
+        <width>346</width>
+        <height>437</height>
        </rect>
       </property>
       <layout class="QGridLayout" name="gridLayout_2">
@@ -392,6 +392,16 @@ Saving will overwrite old target version.</string>
        </item>
        <item row="9" column="0" colspan="3">
         <widget class="CRichTextEdit" name="pDescribtionTextEdit" native="true"/>
+       </item>
+       <item row="5" column="0" colspan="2">
+        <widget class="QLabel" name="label_7">
+         <property name="text">
+          <string>Default Layout</string>
+         </property>
+        </widget>
+       </item>
+       <item row="5" column="2">
+        <widget class="QComboBox" name="pDefaultLayoutComboBox"/>
        </item>
       </layout>
      </widget>

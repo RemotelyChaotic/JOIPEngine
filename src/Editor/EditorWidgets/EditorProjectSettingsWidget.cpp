@@ -9,6 +9,7 @@
 #include "Editor/Project/CommandChangeEmitterCount.h"
 #include "Editor/Project/CommandChangeFetishes.h"
 #include "Editor/Project/CommandChangeFont.h"
+#include "Editor/Project/CommandChangeLayout.h"
 #include "Editor/Project/CommandChangeProjectName.h"
 #include "Editor/Project/CommandChangeVersion.h"
 #include "Editor/Project/KinkCompleter.h"
@@ -33,6 +34,7 @@ DECLARE_EDITORWIDGET(CEditorProjectSettingsWidget, EEditorWidget::eProjectSettin
 
 namespace
 {
+  const qint32 c_iCurrentDefaultLayout = 1;
   const char c_sKinkRootWidgetProperty[] = "KinkRootWidget";
 
   const QString c_sRenameProjectHelpId =    "Editor/RenameProject";
@@ -105,6 +107,12 @@ void CEditorProjectSettingsWidget::Initialize()
   {
     connect(spDataBaseManager.get(), &CDatabaseManager::SignalProjectRenamed,
             this, &CEditorProjectSettingsWidget::SlotProjectRenamed, Qt::QueuedConnection);
+    connect(spDataBaseManager.get(), &CDatabaseManager::SignalResourceAdded,
+            this, &CEditorProjectSettingsWidget::SlotResourceAdded, Qt::QueuedConnection);
+    connect(spDataBaseManager.get(), &CDatabaseManager::SignalResourceRemoved,
+            this, &CEditorProjectSettingsWidget::SlotResourceRemoved, Qt::QueuedConnection);
+    connect(spDataBaseManager.get(), &CDatabaseManager::SignalResourceRenamed,
+            this, &CEditorProjectSettingsWidget::SlotResourceRenamed, Qt::QueuedConnection);
   }
 
   CKinkCompleter* pCompleter = new CKinkCompleter(KinkModel(), m_spUi->pFetishLineEdit);
@@ -229,6 +237,23 @@ void CEditorProjectSettingsWidget::LoadProject(tspProject spProject)
     m_spUi->pFontComboBox->setProperty(editor::c_sPropertyOldValue, m_spCurrentProject->m_sFont);
     m_spUi->pFontComboBox->setEnabled(!bReadOnly);
     m_spUi->pFontComboBox->blockSignals(false);
+
+    m_spUi->pDefaultLayoutComboBox->blockSignals(true);
+    m_spUi->pDefaultLayoutComboBox->clear();
+    m_spUi->pDefaultLayoutComboBox->addItem("(In-Built) Old Layout", ":/qml/resources/qml/PlayerDefaultLayoutClassic.qml");
+    m_spUi->pDefaultLayoutComboBox->addItem("(In-Built) 1.4.0 Layout", ":/qml/resources/qml/PlayerDefaultLayout.qml");
+    for (const auto& [sName, spResource] : m_spCurrentProject->m_spResourcesMap)
+    {
+      QReadLocker resLocker(&spResource->m_rwLock);
+      if (EResourceType::eLayout == spResource->m_type._to_integral())
+      {
+        m_spUi->pDefaultLayoutComboBox->addItem(sName, sName);
+      }
+    }
+    m_spUi->pDefaultLayoutComboBox->setCurrentIndex(
+        m_spUi->pDefaultLayoutComboBox->findData(m_spCurrentProject->m_sPlayerLayout));
+    m_spUi->pDefaultLayoutComboBox->setProperty(editor::c_sPropertyOldValue, m_spCurrentProject->m_sPlayerLayout);
+    m_spUi->pDefaultLayoutComboBox->blockSignals(false);
 
     m_spUi->pDescribtionTextEdit->setPlainText(m_spCurrentProject->m_sDescribtion);
     m_spUi->pDescribtionTextEdit->setReadOnly(bReadOnly);
@@ -395,6 +420,18 @@ void CEditorProjectSettingsWidget::on_pFontComboBox_currentFontChanged(const QFo
 
 //----------------------------------------------------------------------------------------
 //
+void CEditorProjectSettingsWidget::on_pDefaultLayoutComboBox_currentIndexChanged(qint32 iIdx)
+{
+  WIDGET_INITIALIZED_GUARD
+  if (nullptr == m_spCurrentProject) { return; }
+  Q_UNUSED(iIdx)
+
+  UndoStack()->push(new CCommandChangeLayout(m_spUi->pDefaultLayoutComboBox));
+  emit SignalProjectEdited();
+}
+
+//----------------------------------------------------------------------------------------
+//
 void CEditorProjectSettingsWidget::on_pDescribtionTextEdit_textChanged()
 {
   WIDGET_INITIALIZED_GUARD
@@ -489,6 +526,98 @@ void CEditorProjectSettingsWidget::SlotRemoveKinkClicked()
                                    std::bind(&CEditorProjectSettingsWidget::AddKinks, this, std::placeholders::_1),
                                    std::bind(&CTagsView::RemoveTags, m_spUi->pFetishListWidget, std::placeholders::_1),
                                    {sKink}));
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CEditorProjectSettingsWidget::SlotResourceAdded(qint32 iProjId, const QString& sName)
+{
+  WIDGET_INITIALIZED_GUARD
+  if (nullptr == m_spCurrentProject) { return; }
+  m_spCurrentProject->m_rwLock.lockForRead();
+  qint32 iCurrentId = m_spCurrentProject->m_iId;
+  m_spCurrentProject->m_rwLock.unlock();
+
+  if (iCurrentId != iProjId) { return; }
+
+  auto spDbManager = CApplication::Instance()->System<CDatabaseManager>().lock();
+  if (nullptr != spDbManager)
+  {
+    auto spResource = spDbManager->FindResourceInProject(m_spCurrentProject, sName);
+    if (nullptr != spResource)
+    {
+      QReadLocker resLocker(&spResource->m_rwLock);
+      if (EResourceType::eLayout == spResource->m_type._to_integral())
+      {
+        m_spUi->pDefaultLayoutComboBox->addItem(spResource->m_sName,spResource->m_sName);
+      }
+    }
+  }
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CEditorProjectSettingsWidget::SlotResourceRemoved(qint32 iProjId, const QString& sName)
+{
+  WIDGET_INITIALIZED_GUARD
+  if (nullptr == m_spCurrentProject) { return; }
+  m_spCurrentProject->m_rwLock.lockForRead();
+  qint32 iCurrentId = m_spCurrentProject->m_iId;
+  m_spCurrentProject->m_rwLock.unlock();
+
+  if (iCurrentId != iProjId) { return; }
+
+  auto spDbManager = CApplication::Instance()->System<CDatabaseManager>().lock();
+  if (nullptr != spDbManager)
+  {
+    auto spResource = spDbManager->FindResourceInProject(m_spCurrentProject, sName);
+    if (nullptr != spResource)
+    {
+      QReadLocker resLocker(&spResource->m_rwLock);
+      if (EResourceType::eLayout == spResource->m_type._to_integral())
+      {
+        qint32 iIdx = m_spUi->pDefaultLayoutComboBox->findData(spResource->m_sName);
+        m_spUi->pDefaultLayoutComboBox->removeItem(iIdx);
+        if (m_spUi->pDefaultLayoutComboBox->currentIndex() == iIdx)
+        {
+          m_spUi->pDefaultLayoutComboBox->setCurrentIndex(c_iCurrentDefaultLayout);
+          UndoStack()->push(new CCommandChangeLayout(m_spUi->pDefaultLayoutComboBox));
+          emit SignalProjectEdited();
+        }
+      }
+    }
+  }
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CEditorProjectSettingsWidget::SlotResourceRenamed(qint32 iProjId, const QString& sOldName,
+                                                       const QString& sName)
+{
+  WIDGET_INITIALIZED_GUARD
+  if (nullptr == m_spCurrentProject) { return; }
+  m_spCurrentProject->m_rwLock.lockForRead();
+  qint32 iCurrentId = m_spCurrentProject->m_iId;
+  m_spCurrentProject->m_rwLock.unlock();
+
+  if (iCurrentId != iProjId) { return; }
+
+  auto spDbManager = CApplication::Instance()->System<CDatabaseManager>().lock();
+  if (nullptr != spDbManager)
+  {
+    auto spResource = spDbManager->FindResourceInProject(m_spCurrentProject, sName);
+    if (nullptr != spResource)
+    {
+      QReadLocker resLocker(&spResource->m_rwLock);
+      if (EResourceType::eLayout == spResource->m_type._to_integral())
+      {
+        qint32 iIdx = m_spUi->pDefaultLayoutComboBox->findData(spResource->m_sName);
+        m_spUi->pDefaultLayoutComboBox->removeItem(iIdx);
+        m_spUi->pDefaultLayoutComboBox->addItem(spResource->m_sName,spResource->m_sName);
+        m_spUi->pDefaultLayoutComboBox->setCurrentIndex(m_spUi->pDefaultLayoutComboBox->count());
+      }
+    }
+  }
 }
 
 //----------------------------------------------------------------------------------------

@@ -38,12 +38,16 @@ protected slots:
   void on_pProjectPatchVersion_valueChanged(qint32 iValue);
   void on_pSoundEmitterCount_valueChanged(qint32 iValue);
   void on_pFontComboBox_currentFontChanged(const QFont& font);
+  void on_pDefaultLayoutComboBox_currentIndexChanged(qint32 iIdx);
   void on_pDescribtionTextEdit_textChanged();
   void on_pFetishLineEdit_editingFinished();
   void on_FetishOverlayButton_clicked();
   void SlotKinkChecked(const QModelIndex& index, bool bChecked);
   void SlotProjectRenamed(qint32 iId);
   void SlotRemoveKinkClicked();
+  void SlotResourceAdded(qint32 iProjId, const QString& sName);
+  void SlotResourceRemoved(qint32 iProjId, const QString& sName);
+  void SlotResourceRenamed(qint32 iProjId, const QString& sOldName,const QString& sName);
   void SlotUndoForDescribtionAdded();
 
 protected:

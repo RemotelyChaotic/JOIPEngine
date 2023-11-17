@@ -298,5 +298,6 @@
         <file>resources/qml/EvalWrapper.js</file>
         <file>resources/qml/PlayerSceneManager.qml</file>
         <file>resources/qml/TextItemFormated.qml</file>
+        <file>resources/qml/PlayerDefaultLayoutClassic.qml</file>
     </qresource>
 </RCC>

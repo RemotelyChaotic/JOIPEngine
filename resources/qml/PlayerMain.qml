@@ -51,6 +51,11 @@ Rectangle {
                     layoutLoader.setSource(resource.path);
                     bFoundLayout = true;
                 }
+                else if (currentlyLoadedProject.playerLayout.startsWith(":/qml"))
+                {
+                    layoutLoader.setSource(currentlyLoadedProject.playerLayout);
+                    bFoundLayout = true;
+                }
             }
 
             if (!bFoundLayout)

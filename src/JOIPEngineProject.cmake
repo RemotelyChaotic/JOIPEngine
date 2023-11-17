@@ -169,6 +169,8 @@ macro(CreateJOIPProject JOIP_PROJECT_NAME)
     ${JOIPSources}/Editor/Project/CommandChangeFetishes.h
     ${JOIPSources}/Editor/Project/CommandChangeFont.cpp
     ${JOIPSources}/Editor/Project/CommandChangeFont.h
+    ${JOIPSources}/Editor/Project/CommandChangeLayout.cpp
+    ${JOIPSources}/Editor/Project/CommandChangeLayout.h
     ${JOIPSources}/Editor/Project/CommandChangeProjectName.cpp
     ${JOIPSources}/Editor/Project/CommandChangeProjectName.h
     ${JOIPSources}/Editor/Project/CommandChangeVersion.cpp

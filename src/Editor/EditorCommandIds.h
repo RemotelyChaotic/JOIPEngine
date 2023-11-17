@@ -14,6 +14,7 @@ BETTER_ENUM(EEditorCommandId, qint32,
             eChangeProjectName,
             eChangeVersion,
             eChangeFont,
+            eChangeDefaultLayout,
 
             eAddResource,
             eChangeCurrentResource,
