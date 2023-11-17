@@ -50,6 +50,8 @@ CScriptEditorWidget::CScriptEditorWidget(QWidget* pParent) :
   setAttribute(Qt::WA_NoMousePropagation, false);
   installEventFilter(this);
 
+  //for (auto def : m_spRepository->definitions()) qDebug() << def.name();
+
   m_spRepository->addCustomSearchPath(joip_style::ThemeFolder());
   m_pHighlightedSearchableEdit = new CHighlightedSearchableTextEdit(this);
   SlotSettingThemeChanged();

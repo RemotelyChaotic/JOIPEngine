@@ -69,8 +69,8 @@ Rectangle {
     static std::map<QString, SScriptDefinitionData> c_sFileEngingDefinitionMap = {
         { c_sScriptTypeJs, {c_sScriptTypeJs, "JavaScript", "// insert code to control scene"} },
         { "json", {c_sScriptTypeJs, "JavaScript", "{\n}"}},
-        { c_sScriptTypeQml, {c_sScriptTypeQml, "JavaScript", c_sDefaultLayout}},
-        { c_sScriptTypeLayout, {c_sScriptTypeQml, "JavaScript", c_sDefaultLayout}},
+        { c_sScriptTypeQml, {c_sScriptTypeQml, "QML", c_sDefaultLayout}},
+        { c_sScriptTypeLayout, {c_sScriptTypeQml, "QML", c_sDefaultLayout}},
         { c_sScriptTypeEos, {c_sScriptTypeEos, "JavaScript", "{\n\t\"commands\": [\n\t]\n}"} },
         { c_sScriptTypeLua, {c_sScriptTypeLua, "Lua", "-- insert code to control scene"} }
       };
