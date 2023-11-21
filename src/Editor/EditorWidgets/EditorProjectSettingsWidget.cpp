@@ -333,6 +333,8 @@ void CEditorProjectSettingsWidget::SaveProject()
 
   m_spCurrentProject->m_sDescribtion = m_spUi->pDescribtionTextEdit->toPlainText();
 
+  m_spCurrentProject->m_sPlayerLayout = m_spUi->pDefaultLayoutComboBox->currentData().toString();
+
   m_spCurrentProject->m_vsKinks.clear();
   const auto& vspKinks = m_spUi->pFetishListWidget->Tags();
   for (qint32 i = 0; static_cast<qint32>(vspKinks.size()) > i; ++i)
