@@ -42,6 +42,9 @@ void CSceneNodeModelWidget::SetProject(const tspProject& spProject)
   QSignalBlocker blocker21(m_spUi->pLayoutComboBox);
   m_spUi->pLayoutComboBox->clear();
 
+  m_spUi->pScriptComboBox->addItem("<No Script>", "");
+  m_spUi->pLayoutComboBox->addItem("<Project Layout>", "");
+
   for (const auto& [sName, tspResource] : spProject->m_spResourcesMap)
   {
     QReadLocker locker(&tspResource->m_rwLock);
