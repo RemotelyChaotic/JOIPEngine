@@ -263,7 +263,7 @@ QVariant CScriptEditorModel::data(const QModelIndex& index, int iRole) const
       }
 
       return it->first +
-             QString(" (%1) ").arg(vsScriptAdditions.join(", ")) +
+             (vsScriptAdditions.empty() ? QString("") : QString(" (%1) ").arg(vsScriptAdditions.join(", "))) +
              (it->second.m_bChanged ? "*" : "");
     }
     else
