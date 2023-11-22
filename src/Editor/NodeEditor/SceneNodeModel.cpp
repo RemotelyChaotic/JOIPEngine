@@ -551,8 +551,8 @@ void CSceneNodeModelWithWidget::restore(QJsonObject const& p)
   if (nullptr != m_pWidget)
   {
     m_pWidget->SetName(m_sSceneName);
-    m_pWidget->SetScript(m_spScene->m_sScript);
-    m_pWidget->SetLayout(m_spScene->m_sSceneLayout);
+    m_pWidget->SetScript(m_sScript);
+    m_pWidget->SetLayout(m_sLayout);
   }
 }
 
