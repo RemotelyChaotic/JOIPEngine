@@ -82,6 +82,7 @@ private slots:
   void SlotResourceAdded(qint32 iProjId, const QString& sName);
   void SlotResourceRemoved(qint32 iProjId, const QString& sName);
   void SlotResourceRenamed(qint32 iProjId, const QString& sOldName,const QString& sName);
+  void SlotSceneDatachanged(qint32 iProjId, qint32 iId);
   void SlotSceneRenamed(qint32 iProjId, qint32 iId);
   void SlotSceneRemoved(qint32 iProjId, qint32 iId);
 

@@ -144,85 +144,106 @@ QUndoStack* CEditorModel::UndoStack() const
 
 //----------------------------------------------------------------------------------------
 //
-void CEditorModel::AddNewScriptFileToScene(QPointer<QWidget> pParentForDialog,
-                                           tspScene spScene)
+void CEditorModel::AddNewFileToScene(QPointer<QWidget> pParentForDialog,
+                                     tspScene spScene,
+                                     EResourceType type)
 {
   auto spDbManager = m_wpDbManager.lock();
   if (nullptr != spScene && nullptr != spDbManager)
   {
+    QStringList formats;
+    if (EResourceType::eScript == type._to_integral())
+    {
+      formats = SResourceFormats::ScriptFormats();
+    }
+    else if (EResourceType::eLayout == type._to_integral())
+    {
+      formats = SResourceFormats::LayoutFormats();
+    }
+
     // if there is no script -> create
     QReadLocker locker(&spScene->m_rwLock);
-    if (spScene->m_sScript.isNull() || spScene->m_sScript.isEmpty())
+    QRegExp rxTypeFilter(m_sScriptTypesFilter);
+    for (qint32 i = 0; formats.size() > i; ++i)
     {
-      QRegExp rxTypeFilter(m_sScriptTypesFilter);
-      QStringList vsScriptTypes = SResourceFormats::ScriptFormats();
-      for (qint32 i = 0; vsScriptTypes.size() > i; ++i)
+      if (!rxTypeFilter.exactMatch(formats[i]))
       {
-        if (!rxTypeFilter.exactMatch(vsScriptTypes[i]))
-        {
-          vsScriptTypes.erase(vsScriptTypes.begin()+i);
-          --i;
-        }
+        formats.erase(formats.begin()+i);
+        --i;
       }
+    }
 
-      const QString sProjectPath = PhysicalProjectPath(m_spCurrentProject);
-      QDir projectDir(sProjectPath);
-      QPointer<CEditorModel> pThisGuard(this);
-      QFileDialog* dlg = new QFileDialog(pParentForDialog,
-                                         tr("Create Script File for %1").arg(spScene->m_sName));
-      dlg->setViewMode(QFileDialog::Detail);
-      dlg->setFileMode(QFileDialog::AnyFile);
-      dlg->setAcceptMode(QFileDialog::AcceptSave);
-      dlg->setOptions(QFileDialog::DontUseCustomDirectoryIcons);
-      dlg->setDirectoryUrl(projectDir.absolutePath());
-      dlg->setFilter(QDir::AllDirs);
-      dlg->setNameFilter(QString("Script Files (%1)").arg(vsScriptTypes.join(" ")));
-      dlg->setDefaultSuffix(SResourceFormats::ScriptFormats().first());
+    const QString sProjectPath = PhysicalProjectPath(m_spCurrentProject);
+    QDir projectDir(sProjectPath);
+    QPointer<CEditorModel> pThisGuard(this);
+    QFileDialog* dlg = new QFileDialog(pParentForDialog,
+                                       tr("Create File for %1").arg(spScene->m_sName));
+    dlg->setViewMode(QFileDialog::Detail);
+    dlg->setFileMode(QFileDialog::AnyFile);
+    dlg->setAcceptMode(QFileDialog::AcceptSave);
+    dlg->setOptions(QFileDialog::DontUseCustomDirectoryIcons);
+    dlg->setDirectoryUrl(projectDir.absolutePath());
+    dlg->setFilter(QDir::AllDirs);
+    dlg->setNameFilter(QString("Files (%1)").arg(formats.join(" ")));
+    dlg->setDefaultSuffix(formats.first());
 
-      if (dlg->exec())
+    if (dlg->exec())
+    {
+      if (nullptr == pThisGuard) { return; }
+      QList<QUrl> urls = dlg->selectedUrls();
+      delete dlg;
+
+      QUrl url = 1 == urls.size() ? urls[0] : QUrl();
+      if (url.isValid())
       {
-        if (nullptr == pThisGuard) { return; }
-        QList<QUrl> urls = dlg->selectedUrls();
-        delete dlg;
-
-        QUrl url = 1 == urls.size() ? urls[0] : QUrl();
-        if (url.isValid())
+        QFileInfo info(url.toLocalFile());
+        if (!info.absoluteFilePath().contains(projectDir.absolutePath()))
         {
-          QFileInfo info(url.toLocalFile());
-          if (!info.absoluteFilePath().contains(projectDir.absolutePath()))
+          qWarning() << "File is not in subfolder of Project.";
+        }
+        else
+        {
+          QString sRelativePath = projectDir.relativeFilePath(info.absoluteFilePath());
+          QUrl sUrlToSave = ResourceUrlFromLocalFile(sRelativePath);
+          QFile scriptFile(info.absoluteFilePath());
+          if (scriptFile.open(QIODevice::WriteOnly | QIODevice::Truncate))
           {
-            qWarning() << "File is not in subfolder of Project.";
+            m_spScriptEditorModel->InitScript(scriptFile, info.suffix());
+
+            tvfnActionsResource vfnActions =
+                {[&spScene, type, spDbManager](const tspResource& spNewResource){
+              qint32 iProjId = -1;
+              spScene->m_spParent->m_rwLock.lockForRead();
+              iProjId = spScene->m_spParent->m_iId;
+              spScene->m_spParent->m_rwLock.unlock();
+              QWriteLocker locker(&spNewResource->m_rwLock);
+              if (EResourceType::eScript == type._to_integral())
+              {
+                spScene->m_sScript = spNewResource->m_sName;
+                emit spDbManager->SignalSceneDataChanged(iProjId, spScene->m_iId);
+              }
+              else if (EResourceType::eLayout == type._to_integral())
+              {
+                spScene->m_sSceneLayout = spNewResource->m_sName;
+                emit spDbManager->SignalSceneDataChanged(iProjId, spScene->m_iId);
+              }
+            }};
+
+            QString sResource = spDbManager->AddResource(m_spCurrentProject, sUrlToSave,
+                                                         type, QString(),
+                                                         vfnActions);
           }
           else
           {
-            QString sRelativePath = projectDir.relativeFilePath(info.absoluteFilePath());
-            QUrl sUrlToSave = ResourceUrlFromLocalFile(sRelativePath);
-            QFile scriptFile(info.absoluteFilePath());
-            if (scriptFile.open(QIODevice::WriteOnly | QIODevice::Truncate))
-            {
-              m_spScriptEditorModel->InitScript(scriptFile, info.suffix());
-
-              tvfnActionsResource vfnActions = {[&spScene](const tspResource& spNewResource){
-                QWriteLocker locker(&spNewResource->m_rwLock);
-                spScene->m_sScript = spNewResource->m_sName;
-              }};
-
-              QString sResource = spDbManager->AddResource(m_spCurrentProject, sUrlToSave,
-                                                           EResourceType::eScript, QString(),
-                                                           vfnActions);
-            }
-            else
-            {
-              qWarning() << "Could not write script file.";
-            }
+            qWarning() << "Could not write script file.";
           }
         }
       }
-      else
-      {
-        if (nullptr == pThisGuard) { return; }
-        delete dlg;
-      }
+    }
+    else
+    {
+      if (nullptr == pThisGuard) { return; }
+      delete dlg;
     }
   }
 }
@@ -657,12 +678,10 @@ void CEditorModel::SlotNodeCreated(Node &n)
       m_spCurrentProject->m_rwLock.unlock();
       pSceneModel->SetProjectId(iId);
 
-      qint32 iSceneId = pSceneModel->SceneId();
-      auto spScene = spDbManager->FindScene(m_spCurrentProject, iSceneId);
-      AddNewScriptFileToScene(m_pParentWidget, spScene);
-
       connect(pSceneModel, &CSceneNodeModel::SignalAddScriptFileRequested,
               this, &CEditorModel::SlotAddNewScriptFileToScene, Qt::UniqueConnection);
+      connect(pSceneModel, &CSceneNodeModel::SignalAddLayoutFileRequested,
+              this, &CEditorModel::SlotAddNewLayoutFileToScene, Qt::UniqueConnection);
     }
     emit SignalProjectEdited();
   }
@@ -707,14 +726,32 @@ void CEditorModel::SlotAddNewScriptFileToScene()
     CSceneNodeModel* pSceneModel = dynamic_cast<CSceneNodeModel*>(sender());
     if (nullptr != pSceneModel)
     {
-      m_spCurrentProject->m_rwLock.lockForRead();
-      qint32 iId = m_spCurrentProject->m_iId;
-      m_spCurrentProject->m_rwLock.unlock();
-      pSceneModel->SetProjectId(iId);
-
       qint32 iSceneId = pSceneModel->SceneId();
       auto spScene = spDbManager->FindScene(m_spCurrentProject, iSceneId);
-      AddNewScriptFileToScene(m_pParentWidget, spScene);
+      AddNewFileToScene(m_pParentWidget, spScene, EResourceType::eScript);
+    }
+  }
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CEditorModel::SlotAddNewLayoutFileToScene()
+{
+  if (nullptr == m_spCurrentProject)
+  {
+    qWarning() << "Node created in null-project.";
+    return;
+  }
+
+  auto spDbManager = m_wpDbManager.lock();
+  if (nullptr != spDbManager)
+  {
+    CSceneNodeModel* pSceneModel = dynamic_cast<CSceneNodeModel*>(sender());
+    if (nullptr != pSceneModel)
+    {
+      qint32 iSceneId = pSceneModel->SceneId();
+      auto spScene = spDbManager->FindScene(m_spCurrentProject, iSceneId);
+      AddNewFileToScene(m_pParentWidget, spScene, EResourceType::eLayout);
     }
   }
 }

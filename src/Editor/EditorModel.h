@@ -3,6 +3,8 @@
 
 #include "EditorJobs/EditorExportJob.h"
 
+#include "Systems/DatabaseInterface/ResourceData.h"
+
 #include <QObject>
 #include <QPointer>
 #include <QProcess>
@@ -48,8 +50,9 @@ public:
   QString ScriptTypeFilterForNewScripts() const;
   QUndoStack* UndoStack() const;
 
-  void AddNewScriptFileToScene(QPointer<QWidget> pParentForDialog,
-                               tspScene spScene);
+  void AddNewFileToScene(QPointer<QWidget> pParentForDialog,
+                         tspScene spScene,
+                         EResourceType type);
 
   void AddTutorialStateSwitchHandler(std::weak_ptr<ITutorialStateSwitchHandler> wpSwitcher);
   void NextTutorialState();
@@ -78,6 +81,7 @@ signals:
 
 private slots:
   void SlotAddNewScriptFileToScene();
+  void SlotAddNewLayoutFileToScene();
   void SlotJobFinished(qint32 iId, QString type);
   void SlotJobStarted(qint32 iId, QString type);
   void SlotJobMessage(qint32 iId, QString type, QString sMsg);

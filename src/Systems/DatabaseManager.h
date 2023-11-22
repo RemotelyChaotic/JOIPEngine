@@ -114,6 +114,7 @@ signals:
   void SignalProjectRenamed(qint32 iId);
   void SignalProjectRemoved(qint32 iId);
   void SignalSceneAdded(qint32 iProjId, qint32 iId);
+  void SignalSceneDataChanged(qint32 iProjId, qint32 iId);
   void SignalSceneRenamed(qint32 iProjId, qint32 iId);
   void SignalSceneRemoved(qint32 iProjId, qint32 iId);
   void SignalReloadFinished();

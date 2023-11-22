@@ -19,6 +19,8 @@ public:
 
   void SetNodeContext(const QUuid& id, QPointer<CFlowScene> pScene);
 
+  void UndoRestore(const QJsonObject& obj) override;
+
 protected:
   QUuid m_id;
   QPointer<CFlowScene> m_pScene;

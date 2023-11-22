@@ -2,6 +2,9 @@
 #define SCENENODEMODELWIDGET_H
 
 #include "IUndoStackAwareModel.h"
+
+#include "Systems/Project.h"
+
 #include <QWidget>
 #include <memory>
 
@@ -18,15 +21,31 @@ public:
   ~CSceneNodeModelWidget();
 
   void SetName(const QString& sName);
-  void SetScriptButtonEnabled(bool bEnabled);
+  void SetProject(const tspProject& spProject);
+  void SetScript(const QString& sName);
+  void SetLayout(const QString& sName);
+
+  void OnLayoutAdded(const QString& sName);
+  void OnLayoutRenamed(const QString& sOldName, const QString& sName);
+  void OnLayoutRemoved(const QString& sName);
+
+  void OnScriptAdded(const QString& sName);
+  void OnScriptRenamed(const QString& sOldName, const QString& sName);
+  void OnScriptRemoved(const QString& sName);
 
 signals:
   void SignalAddScriptFileClicked();
+  void SignalAddLayoutFileClicked();
   void SignalNameChanged(const QString& sName);
+  void SignalScriptChanged(const QString& sName);
+  void SignalLayoutChanged(const QString& sName);
 
 protected slots:
   void on_AddScriptFile_clicked();
+  void on_AddLayoutFile_clicked();
   void on_pSceneNameLineEdit_editingFinished();
+  void on_pScriptComboBox_currentIndexChanged(qint32 iIdx);
+  void on_pLayoutComboBox_currentIndexChanged(qint32 iIdx);
 
 private:
   std::unique_ptr<Ui::CSceneNodeModelWidget> m_spUi;

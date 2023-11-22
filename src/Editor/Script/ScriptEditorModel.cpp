@@ -32,6 +32,8 @@ CScriptEditorModel::CScriptEditorModel(QWidget* pParent) :
   connect(spDbManager.get(), &CDatabaseManager::SignalResourceRenamed,
           this, &CScriptEditorModel::SlotResourceRenamed, Qt::QueuedConnection);
 
+  connect(spDbManager.get(), &CDatabaseManager::SignalSceneDataChanged,
+          this, &CScriptEditorModel::SlotSceneDatachanged, Qt::QueuedConnection);
   connect(spDbManager.get(), &CDatabaseManager::SignalSceneRemoved,
           this, &CScriptEditorModel::SlotSceneRemoved, Qt::QueuedConnection);
   connect(spDbManager.get(), &CDatabaseManager::SignalSceneRenamed,
@@ -424,6 +426,44 @@ void CScriptEditorModel::SlotResourceRenamed(qint32 iProjId, const QString& sOld
   {
     SlotResourceRemoved(iProjId, sOldName);
     SlotResourceAdded(iProjId, sName);
+  }
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CScriptEditorModel::SlotSceneDatachanged(qint32 iProjId, qint32 iId)
+{
+  if (nullptr == m_spProject) { return; }
+  m_spProject->m_rwLock.lockForRead();
+  qint32 iCurrentId = m_spProject->m_iId;
+  m_spProject->m_rwLock.unlock();
+
+  if (iCurrentId != iProjId) { return; }
+
+  auto spDbManager = m_wpDbManager.lock();
+  if (nullptr != spDbManager)
+  {
+    for (auto it = m_cachedScriptsMap.begin(); m_cachedScriptsMap.end() != it; ++it)
+    {
+      auto vspScene = it->second.m_vspScenes;
+      if (!vspScene.empty())
+      {
+        for (tspScene spScene : vspScene)
+        {
+          QReadLocker locker(&spScene->m_rwLock);
+          qint32 iIdSaved = spScene->m_iId;
+          locker.unlock();
+
+          if (iId == iIdSaved)
+          {
+            QModelIndex index =
+                createIndex(static_cast<qint32>(std::distance(m_cachedScriptsMap.begin(), it)),
+                            0, nullptr);
+            emit dataChanged(index, index);
+          }
+        }
+      }
+    }
   }
 }
 

@@ -19,17 +19,19 @@ CSceneNodeModel::CSceneNodeModel() :
   m_spScene(nullptr),
   m_bOutConnected(false),
   m_modelValidationState(NodeValidationState::Warning),
-  m_modelValidationError(QString(tr("Missing or incorrect inputs or output"))),
-  m_sSceneName(),
-  m_sOldSceneName()
+  m_modelValidationError(QString(tr("Missing or incorrect inputs or output")))
 {
   auto spDbManager = m_wpDbManager.lock();
   if (nullptr != spDbManager)
   {
+    connect(spDbManager.get(), &CDatabaseManager::SignalSceneDataChanged,
+            this, &CSceneNodeModel::SlotSceneDataChanged);
     connect(spDbManager.get(), &CDatabaseManager::SignalSceneRenamed,
             this, &CSceneNodeModel::SlotSceneRenamed);
     connect(spDbManager.get(), &CDatabaseManager::SignalResourceAdded,
             this, &CSceneNodeModel::SlotResourceAdded);
+    connect(spDbManager.get(), &CDatabaseManager::SignalResourceRenamed,
+            this, &CSceneNodeModel::SlotResourceRenamed);
     connect(spDbManager.get(), &CDatabaseManager::SignalResourceRemoved,
             this, &CSceneNodeModel::SlotResourceRemoved);
   }
@@ -59,6 +61,15 @@ void CSceneNodeModel::SetProjectId(qint32 iId)
     {
       m_spScene = spDbManager->FindScene(m_spProject, m_sSceneName);
     }
+
+    // compatibility with old versions that didn't save the script
+    if (m_sScript.isEmpty())
+    {
+      QReadLocker locker(&m_spScene->m_rwLock);
+      m_sScript = m_spScene->m_sScript;
+    }
+
+    ProjectSetImpl();
   }
 }
 
@@ -113,6 +124,8 @@ QJsonObject CSceneNodeModel::save() const
 {
   QJsonObject modelJson = NodeDataModel::save();
   modelJson["sName"] = m_sSceneName;
+  modelJson["sScript"] = m_sScript;
+  modelJson["sLayout"] = m_sLayout;
   return modelJson;
 }
 
@@ -126,6 +139,40 @@ void CSceneNodeModel::restore(QJsonObject const& p)
     m_sSceneName = v.toString();
     m_sOldSceneName = m_sSceneName;
   }
+  v = p["sScript"];
+  if (!v.isUndefined())
+  {
+    m_sScript = v.toString();
+  }
+  v = p["sLayout"];
+  if (!v.isUndefined())
+  {
+    m_sLayout = v.toString();
+  }
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CSceneNodeModel::UndoRestore(QJsonObject const& p)
+{
+  m_bIsInUndoOperation = true;
+  QJsonValue v = p["sName"];
+  if (!v.isUndefined())
+  {
+    SlotNameChanged(v.toString());
+    m_sOldSceneName = m_sSceneName;
+  }
+  v = p["sScript"];
+  if (!v.isUndefined())
+  {
+    SlotScriptChanged(v.toString());
+  }
+  v = p["sLayout"];
+  if (!v.isUndefined())
+  {
+    SlotLayoutChanged(v.toString());
+  }
+  m_bIsInUndoOperation = false;
 }
 
 //----------------------------------------------------------------------------------------
@@ -263,12 +310,109 @@ void CSceneNodeModel::SlotNameChanged(const QString& sName)
       SlotNameChangedImpl(sSceneNameAfterChange);
       m_sSceneName = sSceneNameAfterChange;
 
-      QJsonObject newState = save();
-      if (nullptr != UndoStack())
+      if (nullptr != UndoStack() && !m_bIsInUndoOperation)
       {
+        QJsonObject newState = save();
         UndoStack()->push(new CCommandNodeEdited(m_pScene, m_id, oldState, newState));
       }
     }
+  }
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CSceneNodeModel::SlotLayoutChanged(const QString& sName)
+{
+  QJsonObject oldState = save();
+  auto spDbManager = m_wpDbManager.lock();
+  if (nullptr != spDbManager)
+  {
+    if (nullptr != m_spScene)
+    {
+      qint32 iProjId = -1;
+      m_spProject->m_rwLock.lockForRead();
+      iProjId = m_spProject->m_iId;
+      m_spProject->m_rwLock.unlock();
+
+      bool bChanged = false;
+      qint32 iSceneId = -1;
+      m_spScene->m_rwLock.lockForRead();
+      bChanged = m_spScene->m_sSceneLayout != sName;
+      m_spScene->m_sSceneLayout = sName;
+      iSceneId = m_spScene->m_iId;
+      m_spScene->m_rwLock.unlock();
+
+      if (bChanged)
+      {
+        SlotLayoutChangedImpl(sName);
+        emit spDbManager->SignalSceneDataChanged(iProjId, iSceneId);
+      }
+
+      m_sLayout = sName;
+
+      if (nullptr != UndoStack() && !m_bIsInUndoOperation)
+      {
+        QJsonObject newState = save();
+        UndoStack()->push(new CCommandNodeEdited(m_pScene, m_id, oldState, newState));
+      }
+    }
+  }
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CSceneNodeModel::SlotScriptChanged(const QString& sName)
+{
+  QJsonObject oldState = save();
+  auto spDbManager = m_wpDbManager.lock();
+  if (nullptr != spDbManager)
+  {
+    if (nullptr != m_spScene)
+    {
+      qint32 iProjId = -1;
+      m_spProject->m_rwLock.lockForRead();
+      iProjId = m_spProject->m_iId;
+      m_spProject->m_rwLock.unlock();
+
+      bool bChanged = false;
+      qint32 iSceneId = -1;
+      m_spScene->m_rwLock.lockForRead();
+      bChanged = m_spScene->m_sScript != sName;
+      m_spScene->m_sScript = sName;
+      iSceneId = m_spScene->m_iId;
+      m_spScene->m_rwLock.unlock();
+
+      if (bChanged)
+      {
+        SlotScriptChangedImpl(sName);
+        emit spDbManager->SignalSceneDataChanged(iProjId, iSceneId);
+      }
+
+      m_sScript = sName;
+
+      if (nullptr != UndoStack() && !m_bIsInUndoOperation)
+      {
+        QJsonObject newState = save();
+        UndoStack()->push(new CCommandNodeEdited(m_pScene, m_id, oldState, newState));
+      }
+    }
+  }
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CSceneNodeModel::SlotSceneDataChanged(qint32 iProjId, qint32 iSceneId)
+{
+  m_spScene->m_rwLock.lockForRead();
+  qint32 iId = m_spScene->m_iId;
+  const QString sScript = m_spScene->m_sScript;
+  const QString sLayout = m_spScene->m_sSceneLayout;
+  m_spScene->m_rwLock.unlock();
+
+  if (iProjId == ProjectId() && iSceneId == iId)
+  {
+    SlotLayoutChanged(sLayout);
+    SlotScriptChanged(sScript);
   }
 }
 
@@ -295,12 +439,33 @@ void CSceneNodeModel::SlotSceneRenamed(qint32 iProjId, qint32 iSceneId)
 //
 void CSceneNodeModel::SlotResourceAdded(qint32 iProjId, const QString& sName)
 {
-  if (ProjectId() == iProjId && nullptr != m_spScene)
+  auto spDbManager = m_wpDbManager.lock();
+  if (ProjectId() == iProjId && nullptr != m_spScene && nullptr != spDbManager)
   {
-    QReadLocker locker(&m_spScene->m_rwLock);
-    if (m_spScene->m_sScript == sName)
+    tspResource spResource = spDbManager->FindResourceInProject(m_spProject, sName);
+    QReadLocker locker(&spResource->m_rwLock);
+    if (EResourceType::eScript == spResource->m_type._to_integral() ||
+        EResourceType::eLayout == spResource->m_type._to_integral())
     {
-      SlotResourceAddedImpl(sName);
+      SlotResourceAddedImpl(sName, spResource->m_type);
+    }
+  }
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CSceneNodeModel::SlotResourceRenamed(qint32 iProjId,
+                                          const QString& sOldName, const QString& sName)
+{
+  auto spDbManager = m_wpDbManager.lock();
+  if (ProjectId() == iProjId && nullptr != m_spScene && nullptr != spDbManager)
+  {
+    tspResource spResource = spDbManager->FindResourceInProject(m_spProject, sName);
+    QReadLocker locker(&spResource->m_rwLock);
+    if (EResourceType::eScript == spResource->m_type._to_integral() ||
+        EResourceType::eLayout == spResource->m_type._to_integral())
+    {
+      SlotResourceRenamedImpl(sOldName, sName, spResource->m_type);
     }
   }
 }
@@ -309,13 +474,15 @@ void CSceneNodeModel::SlotResourceAdded(qint32 iProjId, const QString& sName)
 //
 void CSceneNodeModel::SlotResourceRemoved(qint32 iProjId, const QString& sName)
 {
-  Q_UNUSED(sName)
-  if (ProjectId() == iProjId && nullptr != m_spScene)
+  auto spDbManager = m_wpDbManager.lock();
+  if (ProjectId() == iProjId && nullptr != m_spScene && nullptr != spDbManager)
   {
-    QReadLocker locker(&m_spScene->m_rwLock);
-    if (m_spScene->m_sScript.isEmpty())
+    tspResource spResource = spDbManager->FindResourceInProject(m_spProject, sName);
+    QReadLocker locker(&spResource->m_rwLock);
+    if (EResourceType::eScript == spResource->m_type._to_integral() ||
+        EResourceType::eLayout == spResource->m_type._to_integral())
     {
-      SlotResourceRemovedImpl(sName);
+      SlotResourceRemovedImpl(sName, spResource->m_type);
     }
   }
 }
@@ -328,10 +495,14 @@ CSceneNodeModelWithWidget::CSceneNodeModelWithWidget() :
 {
   connect(m_pWidget, &CSceneNodeModelWidget::SignalNameChanged,
           this, &CSceneNodeModelWithWidget::SlotNameChanged);
+  connect(m_pWidget, &CSceneNodeModelWidget::SignalLayoutChanged,
+          this, &CSceneNodeModelWithWidget::SlotLayoutChanged);
+  connect(m_pWidget, &CSceneNodeModelWidget::SignalScriptChanged,
+          this, &CSceneNodeModelWithWidget::SlotScriptChanged);
   connect(m_pWidget, &CSceneNodeModelWidget::SignalAddScriptFileClicked,
           this, &CSceneNodeModelWithWidget::SignalAddScriptFileRequested);
-
-  m_pWidget->SetScriptButtonEnabled(false);
+  connect(m_pWidget, &CSceneNodeModelWidget::SignalAddLayoutFileClicked,
+          this, &CSceneNodeModelWithWidget::SignalAddLayoutFileRequested);
 }
 CSceneNodeModelWithWidget::~CSceneNodeModelWithWidget()
 {
@@ -346,13 +517,16 @@ void CSceneNodeModelWithWidget::SetProjectId(qint32 iId)
   if (nullptr != m_pWidget)
   {
     m_pWidget->SetName(m_sSceneName);
-    m_pWidget->SetScriptButtonEnabled(true);
     if (nullptr != m_spScene)
     {
       QReadLocker locker(&m_spScene->m_rwLock);
       if (!m_spScene->m_sScript.isEmpty())
       {
-        m_pWidget->SetScriptButtonEnabled(false);
+        m_pWidget->SetScript(m_spScene->m_sScript);
+      }
+      if (!m_spScene->m_sSceneLayout.isEmpty())
+      {
+        m_pWidget->SetLayout(m_spScene->m_sSceneLayout);
       }
     }
   }
@@ -377,6 +551,8 @@ void CSceneNodeModelWithWidget::restore(QJsonObject const& p)
   if (nullptr != m_pWidget)
   {
     m_pWidget->SetName(m_sSceneName);
+    m_pWidget->SetScript(m_spScene->m_sScript);
+    m_pWidget->SetLayout(m_spScene->m_sSceneLayout);
   }
 }
 
@@ -399,11 +575,41 @@ void CSceneNodeModelWithWidget::OnUndoStackSet()
 
 //----------------------------------------------------------------------------------------
 //
+void CSceneNodeModelWithWidget::ProjectSetImpl()
+{
+  if (nullptr != m_pWidget)
+  {
+    m_pWidget->SetProject(m_spProject);
+  }
+}
+
+//----------------------------------------------------------------------------------------
+//
 void CSceneNodeModelWithWidget::SlotNameChangedImpl(const QString& sName)
 {
   if (nullptr != m_pWidget)
   {
     m_pWidget->SetName(sName);
+  }
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CSceneNodeModelWithWidget::SlotLayoutChangedImpl(const QString& sName)
+{
+  if (nullptr != m_pWidget)
+  {
+    m_pWidget->SetLayout(sName);
+  }
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CSceneNodeModelWithWidget::SlotScriptChangedImpl(const QString& sName)
+{
+  if (nullptr != m_pWidget)
+  {
+    m_pWidget->SetScript(sName);
   }
 }
 
@@ -419,20 +625,54 @@ void CSceneNodeModelWithWidget::SlotSceneRenamedImpl(const QString& sName)
 
 //----------------------------------------------------------------------------------------
 //
-void CSceneNodeModelWithWidget::SlotResourceAddedImpl(const QString&)
+void CSceneNodeModelWithWidget::SlotResourceAddedImpl(const QString& sName, EResourceType type)
 {
   if (nullptr != m_pWidget)
   {
-    m_pWidget->SetScriptButtonEnabled(false);
+    if (EResourceType::eScript == type._to_integral())
+    {
+      m_pWidget->OnScriptAdded(sName);
+    }
+    else if (EResourceType::eLayout == type._to_integral())
+    {
+      m_pWidget->OnLayoutAdded(sName);
+    }
   }
 }
 
 //----------------------------------------------------------------------------------------
 //
-void CSceneNodeModelWithWidget::SlotResourceRemovedImpl(const QString&)
+void CSceneNodeModelWithWidget::SlotResourceRenamedImpl(const QString& sOldName,
+                                                        const QString& sName,
+                                                        EResourceType type)
 {
   if (nullptr != m_pWidget)
   {
-    m_pWidget->SetScriptButtonEnabled(true);
+    if (EResourceType::eScript == type._to_integral())
+    {
+      m_pWidget->OnScriptRenamed(sOldName, sName);
+    }
+    else if (EResourceType::eLayout == type._to_integral())
+    {
+      m_pWidget->OnLayoutRenamed(sOldName, sName);
+    }
+  }
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CSceneNodeModelWithWidget::SlotResourceRemovedImpl(const QString& sName,
+                                                        EResourceType type)
+{
+  if (nullptr != m_pWidget)
+  {
+    if (EResourceType::eScript == type._to_integral())
+    {
+      m_pWidget->OnScriptRemoved(sName);
+    }
+    else if (EResourceType::eLayout == type._to_integral())
+    {
+      m_pWidget->OnLayoutRemoved(sName);
+    }
   }
 }

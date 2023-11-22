@@ -14,6 +14,8 @@ public:
   }
   QPointer<QUndoStack> UndoStack() { return m_pUndoStack; }
 
+  virtual void UndoRestore(const QJsonObject& obj) {}
+
 protected:
   virtual ~IUndoStackAwareModel() {}
   virtual void OnUndoStackSet() {}

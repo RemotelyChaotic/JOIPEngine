@@ -1,5 +1,6 @@
 #include "SceneNodeModelWidget.h"
 #include "ui_SceneNodeModelWidget.h"
+
 #include "Utils/UndoRedoFilter.h"
 
 CSceneNodeModelWidget::CSceneNodeModelWidget(QWidget* pParent) :
@@ -25,16 +26,115 @@ CSceneNodeModelWidget::~CSceneNodeModelWidget()
 //
 void CSceneNodeModelWidget::SetName(const QString& sName)
 {
-  m_spUi->pSceneNameLineEdit->blockSignals(true);
+  QSignalBlocker blocker(m_spUi->pSceneNameLineEdit);
   m_spUi->pSceneNameLineEdit->setText(sName);
-  m_spUi->pSceneNameLineEdit->blockSignals(false);
 }
 
 //----------------------------------------------------------------------------------------
 //
-void CSceneNodeModelWidget::SetScriptButtonEnabled(bool bEnabled)
+void CSceneNodeModelWidget::SetProject(const tspProject& spProject)
 {
-  m_spUi->AddScriptFile->setEnabled(bEnabled);
+  QSignalBlocker blocker1(m_spUi->pScriptComboBox);
+  m_spUi->pScriptComboBox->clear();
+  QSignalBlocker blocker21(m_spUi->pLayoutComboBox);
+  m_spUi->pLayoutComboBox->clear();
+
+  for (const auto& [sName, tspResource] : spProject->m_spResourcesMap)
+  {
+    QReadLocker locker(&tspResource->m_rwLock);
+    switch (tspResource->m_type)
+    {
+      case EResourceType::eScript:
+        m_spUi->pScriptComboBox->addItem(sName, sName);
+        break;
+      case EResourceType::eLayout:
+        m_spUi->pLayoutComboBox->addItem(sName, sName);
+        break;
+      default: break;
+    }
+  }
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CSceneNodeModelWidget::SetScript(const QString& sName)
+{
+  QSignalBlocker blocker(m_spUi->pScriptComboBox);
+  qint32 iIdx = m_spUi->pScriptComboBox->findData(sName);
+  m_spUi->pScriptComboBox->setCurrentIndex(iIdx);
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CSceneNodeModelWidget::SetLayout(const QString& sName)
+{
+  QSignalBlocker blocker(m_spUi->pLayoutComboBox);
+  qint32 iIdx = m_spUi->pLayoutComboBox->findData(sName);
+  m_spUi->pLayoutComboBox->setCurrentIndex(iIdx);
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CSceneNodeModelWidget::OnLayoutAdded(const QString& sName)
+{
+  QSignalBlocker blocker(m_spUi->pLayoutComboBox);
+  m_spUi->pLayoutComboBox->addItem(sName, sName);
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CSceneNodeModelWidget::OnLayoutRenamed(const QString& sOldName, const QString& sName)
+{
+  QSignalBlocker blocker(m_spUi->pLayoutComboBox);
+  qint32 iIdx = m_spUi->pLayoutComboBox->findData(sOldName);
+  bool bWasSelected = iIdx == m_spUi->pLayoutComboBox->currentIndex();
+  m_spUi->pLayoutComboBox->removeItem(iIdx);
+  m_spUi->pLayoutComboBox->addItem(sName, sName);
+  if (bWasSelected)
+  {
+    m_spUi->pLayoutComboBox->setCurrentIndex(m_spUi->pLayoutComboBox->findData(sName));
+  }
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CSceneNodeModelWidget::OnLayoutRemoved(const QString& sName)
+{
+  QSignalBlocker blocker(m_spUi->pLayoutComboBox);
+  qint32 iIdx = m_spUi->pLayoutComboBox->findData(sName);
+  m_spUi->pLayoutComboBox->removeItem(iIdx);
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CSceneNodeModelWidget::OnScriptAdded(const QString& sName)
+{
+  QSignalBlocker blocker(m_spUi->pScriptComboBox);
+  m_spUi->pScriptComboBox->addItem(sName, sName);
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CSceneNodeModelWidget::OnScriptRenamed(const QString& sOldName, const QString& sName)
+{
+  QSignalBlocker blocker(m_spUi->pScriptComboBox);
+  qint32 iIdx = m_spUi->pScriptComboBox->findData(sOldName);
+  bool bWasSelected = iIdx == m_spUi->pScriptComboBox->currentIndex();
+  m_spUi->pScriptComboBox->removeItem(iIdx);
+  m_spUi->pScriptComboBox->addItem(sName, sName);
+  if (bWasSelected)
+  {
+    m_spUi->pScriptComboBox->setCurrentIndex(m_spUi->pScriptComboBox->findData(sName));
+  }
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CSceneNodeModelWidget::OnScriptRemoved(const QString& sName)
+{
+  QSignalBlocker blocker(m_spUi->pScriptComboBox);
+  qint32 iIdx = m_spUi->pScriptComboBox->findData(sName);
+  m_spUi->pScriptComboBox->removeItem(iIdx);
 }
 
 //----------------------------------------------------------------------------------------
@@ -46,7 +146,28 @@ void CSceneNodeModelWidget::on_AddScriptFile_clicked()
 
 //----------------------------------------------------------------------------------------
 //
+void CSceneNodeModelWidget::on_AddLayoutFile_clicked()
+{
+  emit SignalAddLayoutFileClicked();
+}
+
+//----------------------------------------------------------------------------------------
+//
 void CSceneNodeModelWidget::on_pSceneNameLineEdit_editingFinished()
 {
   emit SignalNameChanged(m_spUi->pSceneNameLineEdit->text());
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CSceneNodeModelWidget::on_pScriptComboBox_currentIndexChanged(qint32 iIdx)
+{
+  emit SignalScriptChanged(m_spUi->pScriptComboBox->currentData().toString());
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CSceneNodeModelWidget::on_pLayoutComboBox_currentIndexChanged(qint32 iIdx)
+{
+  emit SignalLayoutChanged(m_spUi->pLayoutComboBox->currentData().toString());
 }

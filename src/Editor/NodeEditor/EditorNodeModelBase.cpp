@@ -17,3 +17,10 @@ void CEditorNodeModelBase::SetNodeContext(const QUuid& id, QPointer<CFlowScene> 
   m_id = id;
   m_pScene = pScene;
 }
+
+//----------------------------------------------------------------------------------------
+//
+void CEditorNodeModelBase::UndoRestore(const QJsonObject& obj)
+{
+  restore(obj);
+}
