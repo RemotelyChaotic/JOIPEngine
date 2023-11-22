@@ -654,14 +654,20 @@ QPushButton#ExportButton:disabled {
   image: url(ui/ButtonExportSelected.png);
 }
 QPushButton#AddScriptFile {
-  min-width: 24px;
   image: url(ui/ButtonCode.png);
 }
 QPushButton#AddScriptFile:hover,
 QPushButton#AddScriptFile:pressed,
 QPushButton#AddScriptFile:disabled {
-  min-width: 24px;
   image: url(ui/ButtonCodeSelected.png);
+}
+QPushButton#AddLayoutFile {
+  image: url(ui/ButtonLayout.png);
+}
+QPushButton#AddLayoutFile:hover,
+QPushButton#AddLayoutFile:pressed,
+QPushButton#AddLayoutFile:disabled {
+  image: url(ui/ButtonLayoutSelected.png);
 }
 QPushButton#UndoButton,
 QToolButton#f_undo {

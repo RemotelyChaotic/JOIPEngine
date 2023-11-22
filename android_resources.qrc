@@ -551,5 +551,11 @@
         <file>resources/themes/monokai.theme</file>
         <file>resources/themes/nord.theme</file>
         <file>resources/themes/radical.theme</file>
+        <file>resources/android_styles/621 Hexagons/ui/ButtonLayout.png</file>
+        <file>resources/android_styles/Blue Night/ui/ButtonLayout.png</file>
+        <file>resources/android_styles/Equestria after Dark/ui/ButtonLayout.png</file>
+        <file>resources/android_styles/Gummyzilla/ui/ButtonLayout.png</file>
+        <file>resources/android_styles/Gummyzilla/ui/ButtonLayoutSelected.png</file>
+        <file>resources/android_styles/Somber Dark/ui/ButtonLayout.png</file>
     </qresource>
 </RCC>

@@ -468,9 +468,12 @@ QPushButton#ExportButton {
                   url(:/resources/style/img/ButtonExport.png) on;
 }
 QPushButton#AddScriptFile {
-  min-width: 24px;
   qproperty-icon: url(:/resources/style/img/ButtonCode.png) off,
                   url(:/resources/style/img/ButtonCode.png) on;
+}
+QPushButton#AddLayoutFile {
+  qproperty-icon: url(:/resources/style/img/ButtonLayout.png) off,
+                  url(:/resources/style/img/ButtonLayout.png) on;
 }
 QPushButton#UndoButton,
 QToolButton#f_undo {

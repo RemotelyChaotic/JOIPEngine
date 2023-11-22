@@ -265,6 +265,7 @@
         <file>resources/help/editor/tools_button_help.html</file>
         <file>resources/help/settings/playersettings_setting_help.html</file>
         <file>resources/help/settings/editorsettings_setting_help.html</file>
+        <file>resources/style/img/ButtonLayout.png</file>
     </qresource>
     <qresource prefix="/qml">
         <file>resources/qml/ProjectCardSelection.qml</file>

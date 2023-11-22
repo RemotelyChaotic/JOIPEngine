@@ -596,6 +596,15 @@ QPushButton#AddScriptFile {
   qproperty-icon: url(ui/ButtonCode.png) off,
                   url(ui/ButtonCode.png) on;
 }
+QPushButton#AddLayoutFile {
+  border-image: url(ui/IconBg.svg) 0 0 0 0 stretch stretch;
+  border-top: 0 transparent;
+  border-bottom: 0 transparent;
+  border-right: 0 transparent;
+  border-left: 0 transparent;
+  qproperty-icon: url(ui/ButtonLayout.png) off,
+                  url(ui/ButtonLayout.png) on;
+}
 QPushButton#UndoButton,
 QToolButton#f_undo {
   border-image: url(ui/IconBg.svg) 0 0 0 0 stretch stretch;
@@ -916,6 +925,7 @@ QPushButton#CloseButton:hover,
 QPushButton#FetishOverlayButton:hover,
 QPushButton#ExportButton:hover,
 QPushButton#AddScriptFile:hover,
+QPushButton#AddLayoutFile:hover,
 QPushButton#UndoButton:hover,
 QPushButton#RedoButton:hover,
 QPushButton#DownloadButton:hover,
@@ -992,6 +1002,7 @@ QPushButton#CloseButton:pressed,
 QPushButton#FetishOverlayButton:pressed,
 QPushButton#ExportButton:pressed,
 QPushButton#AddScriptFile:pressed,
+QPushButton#AddLayoutFile:pressed,
 QPushButton#UndoButton:pressed,
 QPushButton#RedoButton:pressed,
 QPushButton#DownloadButton:pressed,
@@ -1068,6 +1079,7 @@ QPushButton#CloseButton:disabled,
 QPushButton#FetishOverlayButton:disabled,
 QPushButton#ExportButton:disabled,
 QPushButton#AddScriptFile:disabled,
+QPushButton#AddLayoutFile:disabled,
 QPushButton#UndoButton:disabled,
 QPushButton#RedoButton:disabled,
 QPushButton#DownloadButton:disabled,

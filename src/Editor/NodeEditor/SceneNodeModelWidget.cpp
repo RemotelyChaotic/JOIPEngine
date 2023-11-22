@@ -15,6 +15,9 @@ CSceneNodeModelWidget::CSceneNodeModelWidget(QWidget* pParent) :
   setAttribute(Qt::WA_NoSystemBackground);
   setAutoFillBackground(false);
 
+  m_spUi->AddLayoutFile->setProperty("styleSmall", true);
+  m_spUi->AddScriptFile->setProperty("styleSmall", true);
+
   new CUndoRedoFilter(m_spUi->pSceneNameLineEdit, nullptr);
 }
 
