@@ -1,7 +1,12 @@
 =================
 Version 1.4.0.0
 =================
+Fixed Bugs:
+- Fixed Node changes not generating an undo entry on the undo stack.
+
 New Features:
+- Added the possibility to configure the Layout of the Player for the project as a whole
+  and for specific scenes.
 - Created an Auto-Updater for Windows.
 
 Changes:
@@ -12,6 +17,8 @@ Changes:
   - Highlighting of selected word.
   - Toolbar at the bottom.
   - Better input completion.
+- Scenes now allow to select an existing Script Resource instead of having to create
+  a new one.
 
 Fixed Bugs:
 - Fixed a few UI typos.
