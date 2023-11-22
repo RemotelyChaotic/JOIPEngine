@@ -19,6 +19,8 @@ Changes:
   - Better input completion.
 - Scenes now allow to select an existing Script Resource instead of having to create
   a new one.
+- Script files reload without a user prompt if changed externally and not changed in 
+  the Editor.
 
 Fixed Bugs:
 - Fixed a few UI typos.

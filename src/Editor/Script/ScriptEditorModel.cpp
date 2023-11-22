@@ -306,7 +306,7 @@ void CScriptEditorModel::SlotFileChanged(const QString& sPath)
         {
           it->second.m_bIgnoreNextModification = true;
           it->second.m_bAllreadyAsked = true;
-          if (!m_bReloadFileWithoutQuestion)
+          if (!m_bReloadFileWithoutQuestion && it->second.m_bChanged)
           {
             QMessageBox msgBox(m_pParentWidget);
             msgBox.setText("The document has been modified on the disc.");
@@ -327,6 +327,7 @@ void CScriptEditorModel::SlotFileChanged(const QString& sPath)
           else
           {
             LoadScriptFile(sId);
+            emit SignalFileChangedExternally(sId);
           }
           it->second.m_bAllreadyAsked = false;
           it->second.m_bIgnoreNextModification = false;
