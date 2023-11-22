@@ -54,6 +54,15 @@ void CFlowScene::loadFromMemory(const QByteArray& data)
   m_bLoading = true;
   QtNodes::FlowScene::loadFromMemory(data);
   m_bLoading = false;
+
+  for (const auto& [uid, spNode] : nodes())
+  {
+    if (auto pTypeUndoAware = dynamic_cast<CEditorNodeModelBase*>(spNode->nodeDataModel()))
+    {
+      pTypeUndoAware->SetUndoStack(m_pUndoStack);
+      pTypeUndoAware->SetNodeContext(spNode->id(), this);
+    }
+  }
 }
 
 //----------------------------------------------------------------------------------------
