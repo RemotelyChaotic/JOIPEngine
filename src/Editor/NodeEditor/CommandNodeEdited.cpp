@@ -46,15 +46,24 @@ void CCommandNodeEdited::redo()
 //
 int CCommandNodeEdited::id() const
 {
-  return EEditorCommandId::eNone;
+  return EEditorCommandId::eChangeNodeItem;
 }
 
 //----------------------------------------------------------------------------------------
 //
 bool CCommandNodeEdited::mergeWith(const QUndoCommand* pOther)
 {
-  Q_UNUSED(pOther)
-  return false;
+  if (nullptr == pOther || id() != pOther->id())
+  {
+    return false;
+  }
+
+  const CCommandNodeEdited* pOtherCasted = dynamic_cast<const CCommandNodeEdited*>(pOther);
+  if (nullptr == pOtherCasted) { return false; }
+  if (m_nodeId != pOtherCasted->m_nodeId) { return false; }
+
+  m_newState = pOtherCasted->m_newState;
+  return true;
 }
 
 //----------------------------------------------------------------------------------------
