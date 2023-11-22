@@ -15,6 +15,7 @@ class CResourceDetailView : public QListView
   Q_OBJECT
   Q_PROPERTY(QIcon iconFile   READ IconFile   WRITE SetIconFile)
   Q_PROPERTY(QIcon iconFolder READ IconFolder WRITE SetIconFolder)
+  Q_PROPERTY(QIcon iconLayout READ IconLayout WRITE SetIconLayout)
 
 public:
   explicit CResourceDetailView(QWidget* pParent = nullptr);
@@ -27,6 +28,8 @@ public:
   const QIcon& IconFile() const;
   void SetIconFolder(const QIcon& icon);
   const QIcon& IconFolder() const;
+  void SetIconLayout(const QIcon& icon);
+  const QIcon& IconLayout() const;
   void SetReadOnly(bool bReadOnly);
   bool ReadOnly();
 
@@ -60,6 +63,7 @@ private:
   bool                                        m_bReadOnly;
   QIcon                                       m_iconFile;
   QIcon                                       m_iconFolder;
+  QIcon                                       m_iconLayout;
 };
 
 #endif // CRESOURCEDETAILVIEW_H

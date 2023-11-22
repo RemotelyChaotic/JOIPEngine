@@ -158,6 +158,20 @@ public:
               pStyle->drawItemText(pPainter, rectIcon, Qt::AlignCenter,
                                    opt.palette, true, "Aa");
             } break;
+            case EResourceType::eLayout:
+            {
+              m_pView->IconFile().paint(pPainter,
+                                        rectIcon, opt.displayAlignment,
+                                        mode,
+                                        m_pView->ReadOnly() ? QIcon::Off : QIcon::On);
+              qint32 iXAdjust = (rectIcon.width()-m_pView->iconSize().width()/2)/2;
+              qint32 iYAdjust = (rectIcon.height()-m_pView->iconSize().height()/2)/2;
+              rectIcon.adjust(iXAdjust, iYAdjust, -iXAdjust, -iYAdjust);
+              m_pView->IconLayout().paint(pPainter,
+                                          rectIcon, opt.displayAlignment,
+                                          mode,
+                                          m_pView->ReadOnly() ? QIcon::Off : QIcon::On);
+            } break;
             case EResourceType::eOther: // fallthrough
             case EResourceType::eDatabase:
               m_pView->IconFile().paint(pPainter,
@@ -267,7 +281,8 @@ CResourceDetailView::CResourceDetailView(QWidget* pParent) :
   m_imageCache(),
   m_bReadOnly(false),
   m_iconFile(":/resources/style/img/FileIcon.png"),
-  m_iconFolder(":/resources/style/img/FolderIcon.png")
+  m_iconFolder(":/resources/style/img/FolderIcon.png"),
+  m_iconLayout(":/resources/style/img/ButtonLayout.png")
 {
   m_spThreadedLoader->RegisterObject<CResourceDetailViewFetcherThread>();
 
@@ -344,6 +359,20 @@ void CResourceDetailView::SetIconFolder(const QIcon& icon)
 const QIcon& CResourceDetailView::IconFolder() const
 {
   return m_iconFolder;
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CResourceDetailView::SetIconLayout(const QIcon& icon)
+{
+  m_iconLayout = icon;
+}
+
+//----------------------------------------------------------------------------------------
+//
+const QIcon& CResourceDetailView::IconLayout() const
+{
+  return m_iconLayout;
 }
 
 //----------------------------------------------------------------------------------------

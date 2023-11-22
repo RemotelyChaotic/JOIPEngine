@@ -1296,6 +1296,7 @@ CEditorActionBar {
 CResourceDetailView {
   qproperty-iconFile: url(:/resources/style/img/FileIcon.png);
   qproperty-iconFolder: url(:/resources/style/img/FolderIcon.png);
+  qproperty-iconLayout: url(:/resources/style/img/ButtonLayout.png);
   qproperty-spacing: 6;
 }
 
