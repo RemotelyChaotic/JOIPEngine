@@ -16,7 +16,8 @@ Rectangle {
     RowLayout {
         anchors.fill: parent
         spacing: parent.spacing
-        layoutDirection: Qt.RightToLeft
+        layoutDirection: DominantHand.Left === Settings.dominantHand ? Qt.LeftToRight :
+                                                                       Qt.RightToLeft
 
         Button {
             id: exitButton

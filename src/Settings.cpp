@@ -89,6 +89,7 @@ const QString CSettings::c_sSettingCodeEditorFont = "Content/editorFont";
 const QString CSettings::c_sSettingCodeEditorShowWhitespace = "Content/editorShowWhitespace";
 const QString CSettings::c_sSettingCodeEditorTheme = "Content/editorTheme";
 const QString CSettings::c_sSettingContentFolder = "Content/folder";
+const QString CSettings::c_sSettingDominantHand  = "Content/dominantHand";
 const QString CSettings::c_sSettingEditorLayout = "Content/preferededitorlayout";
 const QString CSettings::c_sSettingFont = "Graphics/font";
 const QString CSettings::c_sSettingFullscreen = "Graphics/fullscreen";
@@ -286,6 +287,31 @@ QString CSettings::ContentFolder()
   }
   return sPath;
 #endif
+}
+
+//----------------------------------------------------------------------------------------
+//
+DominantHand::EDominantHand CSettings::GetDominantHand() const
+{
+  QMutexLocker locker(&m_settingsMutex);
+  return static_cast<DominantHand::EDominantHand>(
+      m_spSettings->value(CSettings::c_sSettingDominantHand).toInt());
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CSettings::SetDominantHand(DominantHand::EDominantHand hand)
+{
+  QMutexLocker locker(&m_settingsMutex);
+  DominantHand::EDominantHand oldValue =
+      static_cast<DominantHand::EDominantHand>(
+          m_spSettings->value(CSettings::c_sSettingDominantHand).toInt());
+
+  if (oldValue == hand) { return; }
+
+  m_spSettings->setValue(CSettings::c_sSettingDominantHand, static_cast<qint32>(hand));
+
+  emit dominantHandChanged();
 }
 
 //----------------------------------------------------------------------------------------
@@ -1058,6 +1084,13 @@ void CSettings::GenerateSettingsIfNotExists()
   {
     bNeedsSynch = true;
     m_spSettings->setValue(CSettings::c_sSettingCodeEditorTheme, "");
+  }
+
+  if (!m_spSettings->contains(CSettings::c_sSettingDominantHand))
+  {
+    bNeedsSynch = true;
+    m_spSettings->setValue(CSettings::c_sSettingDominantHand,
+                           static_cast<qint32>(DominantHand::NoDominantHand));
   }
 
   // check font

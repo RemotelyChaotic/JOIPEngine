@@ -2,12 +2,17 @@
 #include "Application.h"
 #include "Settings.h"
 #include "WindowContext.h"
+#include "ui_SceneScreen.h"
+
 #include "Systems/DatabaseManager.h"
 #include "Systems/HelpFactory.h"
 #include "Systems/Project.h"
+
 #include "Utils/WidgetHelpers.h"
+
 #include "Widgets/HelpOverlay.h"
-#include "ui_SceneScreen.h"
+
+#include <QMessageBox>
 
 namespace
 {
@@ -108,8 +113,10 @@ void CSceneScreen::on_pOpenExistingProjectButton_clicked()
     }
   }
 
+  auto spSettings = CApplication::Instance()->Settings();
+
   QReadLocker locker(&spProject->m_rwLock);
-  if (spProject->m_bUsesWeb && CApplication::Instance()->Settings()->Offline())
+  if (spProject->m_bUsesWeb && spSettings->Offline())
   {
     m_spUi->pProjectCardSelectionWidget->ShowWarning(
           tr("Can't open JOIP-Project that requires online resources in offline mode in the player."));
@@ -117,6 +124,38 @@ void CSceneScreen::on_pOpenExistingProjectButton_clicked()
   else
   {
     locker.unlock();
+
+    // set dominant hand now, if not set yet
+    if (DominantHand::EDominantHand::NoDominantHand == spSettings->GetDominantHand())
+    {
+      QMessageBox msgBox;
+      msgBox.setText("Predominantly used hand has not been configured");
+      msgBox.setInformativeText("The JOIP-Project Player was developped with one-handed use in mind.\n"
+                                "Please select the hand, you will be using this\n"
+                                "application with predominantly, to configure it properly.\n"
+                                "(You can allways change this in the settings.)");
+      auto pLeft = new QPushButton("Left");
+      auto pRight = new QPushButton("Right");
+      msgBox.addButton(pLeft, QMessageBox::ApplyRole);
+      msgBox.addButton(pRight, QMessageBox::ApplyRole);
+      msgBox.setModal(true);
+      msgBox.setWindowFlag(Qt::FramelessWindowHint);
+      QPointer<CSceneScreen> pMeMyselfMyPointerAndI(this);
+      msgBox.exec();
+      if (nullptr == pMeMyselfMyPointerAndI)
+      {
+        return;
+      }
+
+      if (msgBox.clickedButton() == pLeft)
+      {
+        spSettings->SetDominantHand(DominantHand::EDominantHand::Left);
+      }
+      else
+      {
+        spSettings->SetDominantHand(DominantHand::EDominantHand::Right);
+      }
+    }
 
     // will eventually emit a signal but we can ignore that
     m_spUi->pProjectCardSelectionWidget->UnloadProjects();

@@ -8,6 +8,8 @@ New Features:
 - Added the possibility to configure the Layout of the Player for the project as a whole
   and for specific scenes.
 - Created an Auto-Updater for Windows.
+- Added the ability to configure the predominantly used hand. This is taken into 
+  account in the default Player Layouts.
 
 Changes:
 - Changed debug-view to a layout with splitter to support resizing the debugger.

@@ -12,6 +12,7 @@ Rectangle {
     property int spacing: 5
 
     readonly property bool isMobile: Settings.platform === "Android"
+    readonly property int dominantHand: Settings.dominantHand
     readonly property int iconWidth: isMobile ? 32 : 64
     readonly property int iconHeight: isMobile ? 32 : 64
     property bool isLandscape: { return width > height; }
@@ -20,12 +21,16 @@ Rectangle {
         id: mediaPlayer
 
         anchors.top: parent.top
-        x: !isMobile ? (parent.width - width) / 2 : 0
+        x: !isMobile ? (parent.width - width) / 2 :
+                       (DominantHand.Left === dominantHand && isLandscape ? parent.width / 2 :
+                                                                            0)
 
         width: !isMobile ? ((parent.width - parent.spacing * 2) / 2) :
-                           (isLandscape ? parent.width / 2 : parent.width)
+                           (isLandscape ? parent.width / 2 :
+                                          parent.width)
         height: !isMobile ? (parent.height * 2 / 3 - parent.spacing / 2) :
-                            (isLandscape ? parent.height : (parent.height * 2 / 3 - parent.spacing / 2))
+                            (isLandscape ? parent.height :
+                                           (parent.height * 2 / 3 - parent.spacing / 2))
         userName: "mediaPlayer"
         mainMediaPlayer: true
 
@@ -42,7 +47,10 @@ Rectangle {
     Rectangle {
         id: iconRect
         anchors.top: parent.top
-        x: !isMobile  ? 0 : (isLandscape ? mediaPlayer.x + mediaPlayer.width + parent.spacing : 0)
+        x: !isMobile ? 0 :
+                       (isLandscape ? (DominantHand.Left === dominantHand ? 0 :
+                                                                            mediaPlayer.x + mediaPlayer.width + parent.spacing) :
+                                       0)
 
         width: (parent.width - parent.spacing * 2) / 4
         height: !isMobile ? mediaPlayer.height :
@@ -66,7 +74,9 @@ Rectangle {
     Rectangle {
         id: timerRect
         anchors.top: parent.top
-        x: parent.width - width
+        x: !isMobile || DominantHand.Left !== dominantHand ? parent.width - width :
+                                                             (isLandscape ? mediaPlayer.x - width :
+                                                                            parent.width - width)
 
         width: (parent.width - parent.spacing * 2) / 4
         height: !isMobile ? mediaPlayer.height :
@@ -92,8 +102,11 @@ Rectangle {
     }
 
     Rectangle {
-        anchors.bottom: isMobile && isLandscape ? iconRect.bottom : timerRect.bottom
-        anchors.left: isMobile && isLandscape ? iconRect.left : timerRect.left
+        anchors.bottom: isMobile && isLandscape ? iconRect.bottom :
+                                                  timerRect.bottom
+        anchors.left: isMobile && isLandscape ? iconRect.left :
+                                                (DominantHand.Left === dominantHand ? parent.left :
+                                                                                      timerRect.left)
         width: isMobile && isLandscape ? iconRect.width : timerRect.width
         height: isMobile && isLandscape ? iconRect.height * 2 / 3 : timerRect.height / 2
         color: "transparent"
@@ -109,7 +122,9 @@ Rectangle {
         id: textBox;
 
         anchors.bottom: parent.bottom
-        x: !isMobile ? 0 : (isLandscape ? (parent.width + parent.spacing) / 2 : 0)
+        x: !isMobile ? 0 :
+                       (isLandscape && DominantHand.Left !== dominantHand ? (parent.width + parent.spacing) / 2 :
+                                                                            0)
 
         width: !isMobile ? parent.width :
                            (isLandscape ? (parent.width - parent.spacing) / 2 : parent.width)

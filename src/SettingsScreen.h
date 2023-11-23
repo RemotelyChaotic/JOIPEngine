@@ -52,6 +52,7 @@ protected slots:
   void on_pVolumeSlider_sliderReleased();
   void on_pMetronomeVolumeSlider_sliderReleased();
   void on_pMetronomeSFXComboBox_currentIndexChanged(qint32 iIndex);
+  void on_pDominantHandComboBox_currentIndexChanged(qint32 iIndex);
   void on_pPauseWhenNotActiveCheckBox_stateChanged(qint32 iState);
   void on_pOfflineModeCheckBox_stateChanged(qint32 iState);
   void on_pShowPushNotificationsCeckBox_stateChanged(qint32 iState);

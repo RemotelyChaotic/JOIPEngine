@@ -155,7 +155,7 @@
            <rect>
             <x>0</x>
             <y>0</y>
-            <width>281</width>
+            <width>284</width>
             <height>235</height>
            </rect>
           </property>
@@ -502,7 +502,7 @@
      </widget>
      <widget class="QWidget" name="tab_3">
       <attribute name="title">
-       <string>Customization</string>
+       <string>UI</string>
       </attribute>
       <layout class="QGridLayout" name="gridLayout_6">
        <item row="0" column="0" colspan="2">
@@ -524,7 +524,7 @@
            <rect>
             <x>0</x>
             <y>0</y>
-            <width>264</width>
+            <width>267</width>
             <height>259</height>
            </rect>
           </property>
@@ -1208,7 +1208,7 @@
            <rect>
             <x>0</x>
             <y>0</y>
-            <width>281</width>
+            <width>284</width>
             <height>235</height>
            </rect>
           </property>
@@ -1227,70 +1227,6 @@
         <number>10</number>
        </property>
        <item row="2" column="0">
-        <widget class="QWidget" name="pPauseWhenNotActive" native="true">
-         <layout class="QHBoxLayout" name="horizontalLayout_11">
-          <property name="leftMargin">
-           <number>0</number>
-          </property>
-          <property name="topMargin">
-           <number>0</number>
-          </property>
-          <property name="rightMargin">
-           <number>0</number>
-          </property>
-          <property name="bottomMargin">
-           <number>0</number>
-          </property>
-          <item>
-           <widget class="QLabel" name="label_9">
-            <property name="minimumSize">
-             <size>
-              <width>1</width>
-              <height>0</height>
-             </size>
-            </property>
-            <property name="text">
-             <string>Pause Player when app is not active</string>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <spacer name="horizontalSpacer_12">
-            <property name="orientation">
-             <enum>Qt::Horizontal</enum>
-            </property>
-            <property name="sizeHint" stdset="0">
-             <size>
-              <width>40</width>
-              <height>20</height>
-             </size>
-            </property>
-           </spacer>
-          </item>
-          <item>
-           <widget class="QCheckBox" name="pPauseWhenNotActiveCheckBox">
-            <property name="text">
-             <string/>
-            </property>
-           </widget>
-          </item>
-         </layout>
-        </widget>
-       </item>
-       <item row="4" column="0">
-        <spacer name="verticalSpacer_7">
-         <property name="orientation">
-          <enum>Qt::Vertical</enum>
-         </property>
-         <property name="sizeHint" stdset="0">
-          <size>
-           <width>20</width>
-           <height>40</height>
-          </size>
-         </property>
-        </spacer>
-       </item>
-       <item row="1" column="0">
         <widget class="QWidget" name="pOfflineContainer" native="true">
          <layout class="QHBoxLayout" name="horizontalLayout_10">
           <property name="leftMargin">
@@ -1333,6 +1269,57 @@
           </item>
           <item>
            <widget class="QCheckBox" name="pOfflineModeCheckBox">
+            <property name="text">
+             <string/>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+       </item>
+       <item row="3" column="0">
+        <widget class="QWidget" name="pPauseWhenNotActive" native="true">
+         <layout class="QHBoxLayout" name="horizontalLayout_11">
+          <property name="leftMargin">
+           <number>0</number>
+          </property>
+          <property name="topMargin">
+           <number>0</number>
+          </property>
+          <property name="rightMargin">
+           <number>0</number>
+          </property>
+          <property name="bottomMargin">
+           <number>0</number>
+          </property>
+          <item>
+           <widget class="QLabel" name="label_9">
+            <property name="minimumSize">
+             <size>
+              <width>1</width>
+              <height>0</height>
+             </size>
+            </property>
+            <property name="text">
+             <string>Pause Player when app is not active</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <spacer name="horizontalSpacer_12">
+            <property name="orientation">
+             <enum>Qt::Horizontal</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>40</width>
+              <height>20</height>
+             </size>
+            </property>
+           </spacer>
+          </item>
+          <item>
+           <widget class="QCheckBox" name="pPauseWhenNotActiveCheckBox">
             <property name="text">
              <string/>
             </property>
@@ -1394,7 +1381,7 @@
          </layout>
         </widget>
        </item>
-       <item row="3" column="0">
+       <item row="4" column="0">
         <widget class="QWidget" name="pShowPushNotifications" native="true">
          <layout class="QHBoxLayout" name="horizontalLayout_2">
           <property name="leftMargin">
@@ -1439,6 +1426,78 @@
          </layout>
         </widget>
        </item>
+       <item row="5" column="0">
+        <spacer name="verticalSpacer_7">
+         <property name="orientation">
+          <enum>Qt::Vertical</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>20</width>
+           <height>40</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+       <item row="1" column="0">
+        <widget class="QFrame" name="pDominantHandContainer">
+         <property name="frameShape">
+          <enum>QFrame::StyledPanel</enum>
+         </property>
+         <property name="frameShadow">
+          <enum>QFrame::Raised</enum>
+         </property>
+         <layout class="QHBoxLayout" name="horizontalLayout_23">
+          <property name="leftMargin">
+           <number>0</number>
+          </property>
+          <property name="topMargin">
+           <number>0</number>
+          </property>
+          <property name="rightMargin">
+           <number>0</number>
+          </property>
+          <property name="bottomMargin">
+           <number>0</number>
+          </property>
+          <item>
+           <widget class="QLabel" name="label_23">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="minimumSize">
+             <size>
+              <width>1</width>
+              <height>0</height>
+             </size>
+            </property>
+            <property name="text">
+             <string>Hand Use</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <spacer name="horizontalSpacer_23">
+            <property name="orientation">
+             <enum>Qt::Horizontal</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>40</width>
+              <height>20</height>
+             </size>
+            </property>
+           </spacer>
+          </item>
+          <item>
+           <widget class="QComboBox" name="pDominantHandComboBox"/>
+          </item>
+         </layout>
+        </widget>
+       </item>
       </layout>
      </widget>
      <widget class="QWidget" name="pTabAdvanced">
@@ -1465,7 +1524,7 @@
            <rect>
             <x>0</x>
             <y>0</y>
-            <width>281</width>
+            <width>284</width>
             <height>235</height>
            </rect>
           </property>

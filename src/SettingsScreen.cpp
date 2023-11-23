@@ -41,6 +41,7 @@ namespace  {
   const QString c_sMuteHelpId = "Settings/Mute";
   const QString c_sVolumeHelpId = "Settings/Volume";
   const QString c_sMetronomeHelpId = "Settings/Metronome";
+  const QString c_sDominantHandHelpId = "Settings/DominantHand";
   const QString c_sOfflineHelpId = "Settings/Offline";
   const QString c_sPauseWhenInactiveHelpId = "Settings/PauseWhenInactive";
   const QString c_sPushNotificationsHelpId = "Settings/PushNotifications";
@@ -70,6 +71,13 @@ namespace  {
     { CSettings::eClassic,  QString("Classic (2 Views)")},
     { CSettings::eModern ,  QString("Modern (3 Views)")},
     { CSettings::eCompact , QString("Compact (Mobile Layout)")}
+  };
+
+  std::map<DominantHand::EDominantHand, QString> c_dominantHandStrings =
+  {
+    { DominantHand::EDominantHand::NoDominantHand, QString("None (Not Configured)")},
+    { DominantHand::EDominantHand::Left,  QString("Left handed use")},
+    { DominantHand::EDominantHand::Right ,  QString("Right handed use")}
   };
 }
 
@@ -123,6 +131,8 @@ void CSettingsScreen::Initialize()
     wpHelpFactory->RegisterHelp(c_sVolumeHelpId, ":/resources/help/settings/volume_setting_help.html");
     m_spUi->pMetronomeVolumeContainer->setProperty(helpOverlay::c_sHelpPagePropertyName, c_sMetronomeHelpId);
     wpHelpFactory->RegisterHelp(c_sMetronomeHelpId, ":/resources/help/settings/metronome_setting_help.html");
+    m_spUi->pDominantHandContainer->setProperty(helpOverlay::c_sHelpPagePropertyName, c_sDominantHandHelpId);
+    wpHelpFactory->RegisterHelp(c_sDominantHandHelpId, ":/resources/help/settings/dominanthand_setting_help.html");
     m_spUi->pOfflineContainer->setProperty(helpOverlay::c_sHelpPagePropertyName, c_sOfflineHelpId);
     wpHelpFactory->RegisterHelp(c_sOfflineHelpId, ":/resources/help/settings/offline_setting_help.html");
     m_spUi->pPauseWhenNotActive->setProperty(helpOverlay::c_sHelpPagePropertyName, c_sPauseWhenInactiveHelpId);
@@ -147,6 +157,14 @@ void CSettingsScreen::Initialize()
   }
   qobject_cast<QListView*>(m_spUi->pEditorLayoutComboBox->view())
       ->setRowHidden(CSettings::eNone, true);
+
+  m_spUi->pDominantHandComboBox->clear();
+  for (auto it = c_dominantHandStrings.begin(); c_dominantHandStrings.end() != it; ++it)
+  {
+    m_spUi->pDominantHandComboBox->addItem(it->second, static_cast<qint32>(it->first));
+  }
+  qobject_cast<QListView*>(m_spUi->pDominantHandComboBox->view())
+      ->setRowHidden(DominantHand::EDominantHand::NoDominantHand, true);
 
   // Dynamically create job settings. The jobs define the behavior of these.
   for (const auto& itJob : CDownloadJobFactory::Instance().GetHostSettingMap())
@@ -229,6 +247,7 @@ void CSettingsScreen::Load()
   m_spUi->pVolumeSlider->blockSignals(true);
   m_spUi->pMetronomeVolumeSlider->blockSignals(true);
   m_spUi->pMetronomeSFXComboBox->blockSignals(true);
+  m_spUi->pDominantHandComboBox->blockSignals(true);
   m_spUi->pOfflineModeCheckBox->blockSignals(true);
   m_spUi->pPauseWhenNotActiveCheckBox->blockSignals(true);
   m_spUi->pShowPushNotificationsCeckBox->blockSignals(true);
@@ -381,6 +400,11 @@ void CSettingsScreen::Load()
   // set lineedit
   m_spUi->pFolderLineEdit->setText(m_spSettings->ContentFolder());
 
+  // dominant Hand settings
+  iIndex = m_spUi->pDominantHandComboBox->findData(
+      static_cast<qint32>(m_spSettings->GetDominantHand()));
+  m_spUi->pDominantHandComboBox->setCurrentIndex(iIndex);
+
   // set offline mode
   m_spUi->pOfflineModeCheckBox->setChecked(m_spSettings->Offline());
 
@@ -408,6 +432,7 @@ void CSettingsScreen::Load()
   m_spUi->pVolumeSlider->blockSignals(false);
   m_spUi->pMetronomeVolumeSlider->blockSignals(false);
   m_spUi->pMetronomeSFXComboBox->blockSignals(false);
+  m_spUi->pDominantHandComboBox->blockSignals(false);
   m_spUi->pOfflineModeCheckBox->blockSignals(false);
   m_spUi->pPauseWhenNotActiveCheckBox->blockSignals(false);
   m_spUi->pShowPushNotificationsCeckBox->blockSignals(false);
@@ -665,6 +690,19 @@ void CSettingsScreen::on_pMetronomeSFXComboBox_currentIndexChanged(qint32)
   if (nullptr == m_spSettings) { return; }
 
   m_spSettings->SetMetronomeSfx(m_spUi->pMetronomeSFXComboBox->currentText());
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CSettingsScreen::on_pDominantHandComboBox_currentIndexChanged(qint32 iIndex)
+{
+  WIDGET_INITIALIZED_GUARD
+  assert(nullptr != m_spSettings);
+  if (nullptr == m_spSettings) { return; }
+
+  m_spSettings->SetDominantHand(
+      static_cast<DominantHand::EDominantHand>(
+          m_spUi->pDominantHandComboBox->currentData().toInt()));
 }
 
 //----------------------------------------------------------------------------------------

@@ -297,6 +297,9 @@ void CApplication::RegisterQmlTypes()
   qmlRegisterType<CProjectSceneManagerWrapper>("JOIP.core", 1, 2, "SceneManager");
   qmlRegisterUncreatableType<CSoundInstanceWrapper>("JOIP.core", 1, 2, "SoundInstance", "");
 
+  qmlRegisterUncreatableMetaObject(
+      DominantHand::staticMetaObject, "JOIP.core", 1, 1, "DominantHand", "");
+
   qmlRegisterSingletonType<CQmlApplicationQtNamespaceWrapper>(
         "JOIP.core", 1, 1, "QtApp",
         [](QQmlEngine *engine, QJSEngine *scriptEngine) -> QObject*

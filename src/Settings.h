@@ -11,11 +11,24 @@
 
 class QSettings;
 
+namespace DominantHand
+{
+  Q_NAMESPACE
+  enum EDominantHand
+  {
+    NoDominantHand    = 0, // if not set yet
+    Left              = 1,
+    Right             = 2
+  };
+  Q_ENUM_NS(EDominantHand)
+}
+
 class CSettings : public QObject
 {
   Q_OBJECT
   Q_PROPERTY(bool autoUpdate READ AutoUpdate WRITE SetAutoUpdate NOTIFY autoUpdateChanged)
   Q_PROPERTY(QString contentFolder READ ContentFolder WRITE SetContentFolder NOTIFY contentFolderChanged)
+  Q_PROPERTY(DominantHand::EDominantHand dominantHand READ GetDominantHand WRITE SetDominantHand NOTIFY dominantHandChanged)
   Q_PROPERTY(bool editorCaseInsensitiveSearch READ EditorCaseInsensitiveSearch WRITE SetEditorCaseInsensitiveSearch NOTIFY editorCaseInsensitiveSearchChanged)
   Q_PROPERTY(QString editorFont READ EditorFont WRITE SetEditorFont NOTIFY editorFontChanged)
   Q_PROPERTY(bool editorShowWhitespace READ EditorShowWhitespace WRITE SetEditorShowWhitespace NOTIFY editorShowWhitespaceChanged)
@@ -51,6 +64,7 @@ public:
   static const QString c_sSettingCodeEditorShowWhitespace;
   static const QString c_sSettingCodeEditorTheme;
   static const QString c_sSettingContentFolder;
+  static const QString c_sSettingDominantHand;
   static const QString c_sSettingEditorLayout;
   static const QString c_sSettingFont;
   static const QString c_sSettingFullscreen;
@@ -74,7 +88,7 @@ public:
   static const QString c_sApplicationName;
 
   enum EditorType {
-    eNone    = 0,
+    eNone    = 0, // if not set yet
     eClassic = 1,
     eModern  = 2,
     eCompact = 3
@@ -99,6 +113,8 @@ public:
   bool AutoUpdate();
   void SetContentFolder(const QString& sPath);
   QString ContentFolder();
+  DominantHand::EDominantHand GetDominantHand() const;
+  void SetDominantHand(DominantHand::EDominantHand hand);
   void SetEditorCaseInsensitiveSearch(bool bValue);
   bool EditorCaseInsensitiveSearch() const;
   void SetEditorFont(const QString& sValue);
@@ -159,6 +175,7 @@ public:
 signals:
   void autoUpdateChanged();
   void contentFolderChanged();
+  void dominantHandChanged();
   void editorCaseInsensitiveSearchChanged();
   void editorFontChanged();
   void editorShowWhitespaceChanged();
