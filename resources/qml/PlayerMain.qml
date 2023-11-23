@@ -51,7 +51,7 @@ Rectangle {
                     layoutLoader.setSource(resource.path);
                     bFoundLayout = true;
                 }
-                else if (currentlyLoadedProject.playerLayout.startsWith(":/qml"))
+                else if (currentlyLoadedProject.playerLayout.startsWith("qrc:/qml"))
                 {
                     layoutLoader.setSource(currentlyLoadedProject.playerLayout);
                     bFoundLayout = true;
@@ -369,6 +369,10 @@ Rectangle {
                     root.startLoadingSkript();
                 }
             }
+            onSourceChanged: {
+                console.log("Starting to load: " + source);
+            }
+
             onStatusChanged: {
                 switch(status)
                 {

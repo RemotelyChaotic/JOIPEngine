@@ -146,7 +146,7 @@ void SProject::FromJsonObject(const QJsonObject& json)
     m_sPlayerLayout = it.value().toString();
     if (m_sPlayerLayout.isEmpty())
     {
-      m_sPlayerLayout = ":/qml/resources/qml/PlayerDefaultLayoutClassic.qml";
+      m_sPlayerLayout = "qrc:/qml/resources/qml/PlayerDefaultLayoutClassic.qml";
     }
   }
   it = json.find("tutorialState");

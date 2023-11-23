@@ -12,9 +12,9 @@ Rectangle {
     property int spacing: 5
 
     readonly property bool isMobile: Settings.platform === "Android"
-    readonly property int iconWidth: isMobile ? 24 : 64
-    readonly property int iconHeight: isMobile ? 24 : 64
-    property bool isLandscape: { console.log("isLandscape: " + (width > height ? "true" : "false")); return width > height; }
+    readonly property int iconWidth: isMobile ? 32 : 64
+    readonly property int iconHeight: isMobile ? 32 : 64
+    property bool isLandscape: { return width > height; }
 
     PlayerMediaPlayer {
         id: mediaPlayer
@@ -40,6 +40,7 @@ Rectangle {
     }
 
     Rectangle {
+        id: iconRect
         anchors.top: parent.top
         x: !isMobile  ? 0 : (isLandscape ? mediaPlayer.x + mediaPlayer.width + parent.spacing : 0)
 
@@ -63,6 +64,7 @@ Rectangle {
     }
 
     Rectangle {
+        id: timerRect
         anchors.top: parent.top
         x: parent.width - width
 
@@ -87,18 +89,19 @@ Rectangle {
                 userName: "timer"
             }
         }
-        Rectangle {
-            anchors.bottom: parent.bottom
-            anchors.left: parent.left
-            width: parent.width
-            height: parent.height / 2
-            color: "transparent"
+    }
 
-            PlayerNotification {
-                id: notification
-                anchors.fill: parent
-                userName: "notification"
-            }
+    Rectangle {
+        anchors.bottom: isMobile && isLandscape ? iconRect.bottom : timerRect.bottom
+        anchors.left: isMobile && isLandscape ? iconRect.left : timerRect.left
+        width: isMobile && isLandscape ? iconRect.width : timerRect.width
+        height: isMobile && isLandscape ? iconRect.height * 2 / 3 : timerRect.height / 2
+        color: "transparent"
+
+        PlayerNotification {
+            id: notification
+            anchors.fill: parent
+            userName: "notification"
         }
     }
 

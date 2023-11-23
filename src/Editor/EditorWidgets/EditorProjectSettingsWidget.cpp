@@ -240,8 +240,8 @@ void CEditorProjectSettingsWidget::LoadProject(tspProject spProject)
 
     m_spUi->pDefaultLayoutComboBox->blockSignals(true);
     m_spUi->pDefaultLayoutComboBox->clear();
-    m_spUi->pDefaultLayoutComboBox->addItem("(In-Built) Old Layout", ":/qml/resources/qml/PlayerDefaultLayoutClassic.qml");
-    m_spUi->pDefaultLayoutComboBox->addItem("(In-Built) 1.4.0 Layout", ":/qml/resources/qml/PlayerDefaultLayout.qml");
+    m_spUi->pDefaultLayoutComboBox->addItem("(In-Built) Old Layout", "qrc:/qml/resources/qml/PlayerDefaultLayoutClassic.qml");
+    m_spUi->pDefaultLayoutComboBox->addItem("(In-Built) 1.4.0 Layout", "qrc:/qml/resources/qml/PlayerDefaultLayout.qml");
     for (const auto& [sName, spResource] : m_spCurrentProject->m_spResourcesMap)
     {
       QReadLocker resLocker(&spResource->m_rwLock);
