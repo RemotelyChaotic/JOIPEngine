@@ -87,7 +87,7 @@ Rectangle {
         Rectangle {
             anchors.top: parent.top
             anchors.left: parent.left
-            width: !isMobile ? parent.width : parent.width
+            width: parent.width
             height: !isMobile ? parent.height / 2 : width
             color: "transparent"
 

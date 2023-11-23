@@ -20,17 +20,7 @@ Rectangle {
     PlayerMediaPlayer {
         id: mediaPlayer
 
-        anchors.top: parent.top
-        x: !isMobile ? (parent.width - width) / 2 :
-                       (DominantHand.Left === dominantHand && isLandscape ? parent.width / 2 :
-                                                                            0)
-
-        width: !isMobile ? ((parent.width - parent.spacing * 2) / 2) :
-                           (isLandscape ? parent.width / 2 :
-                                          parent.width)
-        height: !isMobile ? (parent.height * 2 / 3 - parent.spacing / 2) :
-                            (isLandscape ? parent.height :
-                                           (parent.height * 2 / 3 - parent.spacing / 2))
+        anchors.fill: parent
         userName: "mediaPlayer"
         mainMediaPlayer: true
 
@@ -47,21 +37,16 @@ Rectangle {
     Rectangle {
         id: iconRect
         anchors.top: parent.top
-        x: !isMobile ? 0 :
-                       (isLandscape ? (DominantHand.Left === dominantHand ? 0 :
-                                                                            mediaPlayer.x + mediaPlayer.width + parent.spacing) :
-                                       0)
+        x: DominantHand.Left === dominantHand ? 0 : parent.width - width
 
         width: (parent.width - parent.spacing * 2) / 4
-        height: !isMobile ? mediaPlayer.height :
-                            (isLandscape ? ((parent.height - parent.spacing) / 2) :
-                                           mediaPlayer.height)
+        height: parent.height - textBox.height;
         color: "transparent"
 
         PlayerIcons {
             id: icon
-            width: parent.width - layout.spacing
-            height: parent.height - layout.spacing
+            width: parent.width
+            height: parent.height
             iconWidth: layout.iconWidth
             iconHeight: layout.iconHeight
 
@@ -74,14 +59,10 @@ Rectangle {
     Rectangle {
         id: timerRect
         anchors.top: parent.top
-        x: !isMobile || DominantHand.Left !== dominantHand ? parent.width - width :
-                                                             (isLandscape ? mediaPlayer.x - width :
-                                                                            parent.width - width)
+        x: DominantHand.Left === dominantHand ? parent.width - width : 0
 
         width: (parent.width - parent.spacing * 2) / 4
-        height: !isMobile ? mediaPlayer.height :
-                            (isLandscape ? ((parent.height - parent.spacing) / 2) :
-                                           mediaPlayer.height)
+        height: parent.height - textBox.height;
         color: "transparent"
 
         Rectangle {
@@ -102,13 +83,13 @@ Rectangle {
     }
 
     Rectangle {
-        anchors.bottom: isMobile && isLandscape ? iconRect.bottom :
-                                                  timerRect.bottom
-        anchors.left: isMobile && isLandscape ? iconRect.left :
-                                                (DominantHand.Left === dominantHand ? parent.left :
-                                                                                      timerRect.left)
-        width: isMobile && isLandscape ? iconRect.width : timerRect.width
-        height: isMobile && isLandscape ? iconRect.height * 2 / 3 : timerRect.height / 2
+        id: notificationRect
+
+        anchors.bottom: textBox.top
+        x: DominantHand.Left === dominantHand ? 0 : parent.width - width
+
+        width: (parent.width - parent.spacing * 2) / 4
+        height: (parent.height - textBox.height - layout.spacing) / 2
         color: "transparent"
 
         PlayerNotification {
@@ -121,16 +102,11 @@ Rectangle {
     PlayerTextBox {
         id: textBox;
 
+        anchors.left: parent.left
         anchors.bottom: parent.bottom
-        x: !isMobile ? 0 :
-                       (isLandscape && DominantHand.Left !== dominantHand ? (parent.width + parent.spacing) / 2 :
-                                                                            0)
 
-        width: !isMobile ? parent.width :
-                           (isLandscape ? (parent.width - parent.spacing) / 2 : parent.width)
-        height: !isMobile ? (parent.height / 3 - parent.spacing / 2) :
-                            (isLandscape ? ((parent.height - parent.spacing) / 2) :
-                                           (parent.height / 3 - parent.spacing / 2))
+        width: parent.width
+        height: parent.height / 3 - parent.spacing / 2
         iconWidth: layout.iconWidth
         iconHeight: layout.iconHeight
 

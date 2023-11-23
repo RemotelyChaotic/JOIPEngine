@@ -42,6 +42,7 @@ struct SScriptDefinitionData
   QString sHighlightDefinition;
   QString sInitText;
 
+  // as help for users just use a copy-pasta of the current layout here
   constexpr static char c_sDefaultLayout[] = R"(import QtQuick 2.14
 import QtQuick.Controls 2.14
 import QtQuick.Layouts 1.14
@@ -56,7 +57,121 @@ Rectangle {
     property int spacing: 5
 
     readonly property bool isMobile: Settings.platform === "Android"
-    property bool isLandscape: { console.log("isLandscape: " + (width > height ? "true" : "false")); return width > height; }
+    readonly property int dominantHand: Settings.dominantHand
+    readonly property int iconWidth: isMobile ? 32 : 64
+    readonly property int iconHeight: isMobile ? 32 : 64
+    property bool isLandscape: { return width > height; }
+
+    PlayerMediaPlayer {
+        id: mediaPlayer
+
+        anchors.fill: parent
+        userName: "mediaPlayer"
+        mainMediaPlayer: true
+
+        PlayerMetronome {
+            id: metronome
+            anchors.bottom: parent.bottom
+            anchors.horizontalCenter: parent.horizontalCenter
+            width: parent.width
+            height: parent.height / 6
+            userName: "metronome"
+        }
+    }
+
+    Rectangle {
+        id: iconRect
+        anchors.top: parent.top
+        x: DominantHand.Left === dominantHand ? 0 : parent.width - width
+
+        width: (parent.width - parent.spacing * 2) / 4
+        height: parent.height - textBox.height;
+        color: "transparent"
+
+        PlayerIcons {
+            id: icon
+            width: parent.width
+            height: parent.height
+            iconWidth: layout.iconWidth
+            iconHeight: layout.iconHeight
+
+            anchors.right: parent.right
+            anchors.bottom: parent.bottom
+            userName: "icon"
+        }
+    }
+
+    Rectangle {
+        id: timerRect
+        anchors.top: parent.top
+        x: DominantHand.Left === dominantHand ? parent.width - width : 0
+
+        width: (parent.width - parent.spacing * 2) / 4
+        height: parent.height - textBox.height;
+        color: "transparent"
+
+        Rectangle {
+            anchors.top: parent.top
+            anchors.left: parent.left
+            width: !isMobile ? parent.width : parent.width
+            height: !isMobile ? parent.height / 2 : width
+            color: "transparent"
+
+            PlayerTimer {
+                id: timer
+                anchors.centerIn: parent
+                width: Math.min(138, parent.width)
+                height: Math.min(138, parent.width)
+                userName: "timer"
+            }
+        }
+    }
+
+    Rectangle {
+        id: notificationRect
+
+        anchors.bottom: textBox.top
+        x: DominantHand.Left === dominantHand ? 0 : parent.width - width
+
+        width: (parent.width - parent.spacing * 2) / 4
+        height: (parent.height - textBox.height - layout.spacing) / 2
+        color: "transparent"
+
+        PlayerNotification {
+            id: notification
+            anchors.fill: parent
+            userName: "notification"
+        }
+    }
+
+    PlayerTextBox {
+        id: textBox;
+
+        anchors.left: parent.left
+        anchors.bottom: parent.bottom
+
+        width: parent.width
+        height: parent.height / 3 - parent.spacing / 2
+        iconWidth: layout.iconWidth
+        iconHeight: layout.iconHeight
+
+        userName: "textBox"
+        mainTextBox: true
+    }
+
+    PlayerControls {
+        id: sceneControl
+
+        x: textBox.x
+        y: textBox.y - height / 2
+        width: textBox.width - parent.spacing
+        height: 32
+
+        buttonHeight: 32
+        buttonWidth: 48
+        spacing: parent.spacing
+        soundEffects: root.soundEffects
+    }
 })";
 
   constexpr static char c_sScriptTypeJs[] = "js";
