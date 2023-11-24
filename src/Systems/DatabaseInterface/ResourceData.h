@@ -157,6 +157,7 @@ Rectangle {
 
         userName: "textBox"
         mainTextBox: true
+        displayMode: PlayerTextBox.TextBoxMode.TextBox
     }
 
     PlayerControls {
@@ -171,8 +172,56 @@ Rectangle {
         buttonWidth: 48
         spacing: parent.spacing
         soundEffects: root.soundEffects
+
+        Button {
+            id: showLogButton
+            height: sceneControl.height
+            Layout.preferredWidth: 48
+            Layout.alignment: Qt.AlignVCenter
+
+            text: Settings.keyBinding("Tools")
+            contentItem: Text {
+                anchors.fill: parent
+                horizontalAlignment: Text.AlignRight
+                verticalAlignment: Text.AlignBottom
+                rightPadding: 5
+                bottomPadding: 5
+
+                text: parent.text
+                font.family: Settings.font
+                font.pixelSize: 10
+                color: "white"
+            }
+
+            Image {
+                anchors.centerIn: parent
+                width: (parent.width < parent.height ? parent.width : parent.height) - 10
+                height: (parent.width < parent.height ? parent.width : parent.height) - 10
+                fillMode: Image.PreserveAspectFit
+                source: Settings.styleFolderQml() + (textBox.logShown ?
+                            "/ButtonArrowDown.svg" : "/ButtonArrowUp.svg")
+            }
+
+            onHoveredChanged: {
+                if (hovered)
+                {
+                    soundEffects.hoverSound.play();
+                }
+            }
+            onClicked: {
+                textBox.logShown = !textBox.logShown
+            }
+
+            Shortcut {
+                sequence: Settings.keyBinding("Tools")
+                onActivated: {
+                    textBox.logShown = !textBox.logShown
+                }
+            }
+        }
     }
-})";
+}
+)";
 
   constexpr static char c_sScriptTypeJs[] = "js";
   constexpr static char c_sScriptTypeEos[] = "eos";

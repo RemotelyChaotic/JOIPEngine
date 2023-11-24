@@ -8,20 +8,34 @@ import JOIP.script 1.1
 Rectangle {
     id: textBox
     color: "transparent"
+
+    // Define mode enum
+    enum TextBoxMode {
+        Log = 0,
+        TextBox = 1
+    }
+
     property string userName: "textBox"
     property bool mainTextBox: false
     property int iconWidth: 64
     property int iconHeight: 64
+    property int displayMode: PlayerTextBox.TextBoxMode.Log
+    property bool logShown: false
 
     function clearTextBox()
     {
+        boxLoader.setSource("");
+        boxLoaderInput.setSource("");
         textLogModel.clear();
         textLogModel.append({
             "textAlignment": "",
             "textContent": "",
+            "buttonTexts": [],
             "storeIntoStorageInstead": false,
             "backgroundColor": "",
             "textColor": "",
+            "backgroundColors": [],
+            "textColors": [],
             "numButtons": "",
             "portrait": null,
             "sRequestId": "",
@@ -33,61 +47,111 @@ Rectangle {
 
     function showButtonPrompts(vsLabels, sRequestId)
     {
-        textLog.buttonTexts = vsLabels;
-        textLogModel.append({
+        dataContainer.buttonTexts = vsLabels;
+        var dataForInput = {
             "textAlignment": "",
             "textContent": "",
+            "buttonTexts": vsLabels,
             "storeIntoStorageInstead": false,
             "backgroundColor": "",
             "textColor": "",
-            "numButtons": vsLabels.length,
+            "backgroundColors": dataContainer.backgroundColors,
+            "textColors": dataContainer.textColors,
             "portrait": null,
             "sRequestId": sRequestId,
             "type": "TextBoxButtonsDelegate.qml"
-        });
-        textLog.cancelFlick();
-        textLog.flick(0,-1000);
+        };
+        var dataForLoader = {
+            "buttonTexts": vsLabels,
+            "backgroundColors": dataContainer.backgroundColors,
+            "textColors": dataContainer.textColors,
+            "requestId": sRequestId
+        };
+        if (PlayerTextBox.TextBoxMode.Log === textBox.displayMode)
+        {
+            textLogModel.append(dataForInput);
+            textLog.cancelFlick();
+            textLog.flick(0,-1000);
+        }
+        else
+        {
+            boxLoaderInput.setSource("TextBoxButtonsDelegate.qml", dataForLoader);
+        }
     }
 
     signal sceneSelectionRetVal(int iValue)
     function showSceneSelectionPrompts(vsLabels)
     {
-        textLog.sceneSelection = true;
+        dataContainer.sceneSelection = true;
         showButtonPrompts(vsLabels);
     }
 
     function showInput(sStoreIntoVar, sRequestId, bStoreIntoStorageInstead)
     {
-        textLogModel.append({
+        var dataForInput = {
             "textAlignment": "",
             "textContent": sStoreIntoVar,
+            "buttonTexts": [],
             "storeIntoStorageInstead": bStoreIntoStorageInstead,
-            "backgroundColor": undefined !== textLog.backgroundColors  && textLog.backgroundColors.length > 0 ? textLog.backgroundColors[0] : "#ff000000",
-            "textColor": undefined !== textLog.textColors  && textLog.textColors.length > 0 ? textLog.textColors[0] : "#ffffffff",
+            "backgroundColor": undefined !== dataContainer.backgroundColors  && dataContainer.backgroundColors.length > 0 ? dataContainer.backgroundColors[0] : "#ff000000",
+            "textColor": undefined !== dataContainer.textColors  && dataContainer.textColors.length > 0 ? dataContainer.textColors[0] : "#ffffffff",
+            "backgroundColors": [],
+            "textColors": [],
             "numButtons": "",
             "portrait": null,
             "sRequestId": sRequestId,
             "type": "TextBoxInputDelegate.qml"
-        });
-        textLog.cancelFlick();
-        textLog.flick(0,-1000);
+        };
+        var dataForLoader = {
+            "textContent": sStoreIntoVar,
+            "storeIntoStorageInstead": bStoreIntoStorageInstead,
+            "backgroundColor": undefined !== dataContainer.backgroundColors  && dataContainer.backgroundColors.length > 0 ? dataContainer.backgroundColors[0] : "#ff000000",
+            "textColor": undefined !== dataContainer.textColors  && dataContainer.textColors.length > 0 ? dataContainer.textColors[0] : "#ffffffff",
+            "requestId": sRequestId
+        };
+        if (PlayerTextBox.TextBoxMode.Log === textBox.displayMode)
+        {
+            textLogModel.append(dataForInput);
+            textLog.cancelFlick();
+            textLog.flick(0,-1000);
+        }
+        else
+        {
+            boxLoaderInput.setSource("TextBoxInputDelegate.qml", dataForLoader);
+        }
     }
 
-    function showText(sText)
+    function showText(sText, onlyInList)
     {
-        textLogModel.append({
-            "textAlignment": textLog.textAlignment,
+        var dataForList = {
+            "textAlignment": dataContainer.textAlignment,
             "textContent": sText,
+            "buttonTexts": [],
             "storeIntoStorageInstead": false,
-            "backgroundColor": undefined !== textLog.backgroundColors  && textLog.backgroundColors.length > 0 ? textLog.backgroundColors[0] : "#ff000000",
-            "textColor": undefined !== textLog.textColors  && textLog.textColors.length > 0 ? textLog.textColors[0] : "#ffffffff",
+            "backgroundColor": undefined !== dataContainer.backgroundColors  && dataContainer.backgroundColors.length > 0 ? dataContainer.backgroundColors[0] : "#ff000000",
+            "textColor": undefined !== dataContainer.textColors  && dataContainer.textColors.length > 0 ? dataContainer.textColors[0] : "#ffffffff",
+            "backgroundColors": [],
+            "textColors": [],
             "numButtons": "",
-            "portrait": textLog.portrait,
+            "portrait": dataContainer.portrait,
             "sRequestId": "",
             "type": "TextBoxTextDelegate.qml"
-        });
+        };
+        var dataForLoader = {
+            "textAlignment": dataContainer.textAlignment,
+            "textContent": sText,
+            "backgroundColor": undefined !== dataContainer.backgroundColors  && dataContainer.backgroundColors.length > 0 ? dataContainer.backgroundColors[0] : "#ff000000",
+            "textColor": undefined !== dataContainer.textColors  && dataContainer.textColors.length > 0 ? dataContainer.textColors[0] : "#ffffffff",
+            "portrait": dataContainer.portrait
+        };
+        textLogModel.append(dataForList);
         textLog.cancelFlick();
         textLog.flick(0,-1000);
+        if (!onlyInList)
+        {
+            boxLoader.setSource("TextBoxTextDelegate.qml", dataForLoader);
+            boxLoaderInput.setSource("");
+        }
     }
 
     function setPortrait(sName)
@@ -97,18 +161,18 @@ Rectangle {
         {
             if (sName === "")
             {
-                textLog.portrait = null;
+                dataContainer.portrait = null;
             }
             else
             {
                 var pResource = registrator.currentlyLoadedProject.resource(sName);
                 if (null !== pResource && undefined !== pResource)
                 {
-                    textLog.portrait = pResource;
+                    dataContainer.portrait = pResource;
                 }
                 else
                 {
-                    textLog.portrait = null;
+                    dataContainer.portrait = null;
                 }
             }
         }
@@ -116,20 +180,20 @@ Rectangle {
 
     function backgroundColors()
     {
-        return textLog.backgroundColors;
+        return dataContainer.backgroundColors;
     }
     function setBackgroundColors(vColors)
     {
-        textLog.backgroundColors = vColors;
+        dataContainer.backgroundColors = vColors;
     }
 
     function textColors()
     {
-        return textLog.textColors;
+        return dataContainer.textColors;
     }
     function setTextColors(vColors)
     {
-        textLog.textColors = vColors;
+        dataContainer.textColors = vColors;
     }
 
     // accessor object for eval
@@ -152,7 +216,7 @@ Rectangle {
         },
         showText: function(sText)
         {
-            signalEmitter.showInput(sText);
+            signalEmitter.showText(sText);
         },
         setPortrait: function(sName)
         {
@@ -197,16 +261,16 @@ Rectangle {
         }
         onShowText: {
             if (sText.startsWith("<html>") && sText.endsWith("</html>")) {
-                textBox.showText(root.parseHtmlToJS(sText, textBox.userName));
+                textBox.showText(root.parseHtmlToJS(sText, textBox.userName), false);
             } else {
-                textBox.showText(sText);
+                textBox.showText(sText, false);
             }
             if (0 < dSkippableWaitS) {
                 registrator.setSkippableWait(dSkippableWaitS);
             }
         }
         onTextAlignmentChanged: {
-            textLog.textAlignment = alignment;
+            dataContainer.textAlignment = alignment;
         }
         onTextBackgroundColorsChanged: {
             setBackgroundColors(vColors);
@@ -223,26 +287,17 @@ Rectangle {
         id: registrator
 
         onSkippableWait: {
-            textLog.skippable = true;
+            dataContainer.skippable = true;
         }
         onSkippableWaitFinished: {
-            textLog.skippable = false;
+            dataContainer.skippable = false;
             signalEmitter.waitSkipped();
         }
     }
 
-    // gui
-    ListView {
-        id: textLog
-        anchors.horizontalCenter: parent.horizontalCenter
-        anchors.bottom: parent.bottom
-        width: parent.width
-        height: parent.height
 
-        cacheBuffer: 0
-        orientation: ListView.Vertical
-        clip: true
-
+    Item {
+        id: dataContainer
         property var backgroundColors: [ "#ff000000" ]
         property var textColors: [ "#ffffffff" ]
         property var buttonTexts: []
@@ -250,8 +305,6 @@ Rectangle {
         property Resource portrait: null
         property bool sceneSelection: false
         property bool skippable: false
-        property int iconWidth: textBox.iconWidth
-        property int iconHeight: textBox.iconHeight
 
         function inputEditingFinished(sInput, sStoreIntoVar, sRequestId, bStoreIntoStorageInstead)
         {
@@ -279,6 +332,107 @@ Rectangle {
                 sceneSelection = false;
                 textBox.sceneSelectionRetVal(iIndex);
             }
+        }
+    }
+
+    // GUI:
+    // first is the textBox
+    Loader {
+        id: boxLoader
+        anchors.horizontalCenter: parent.horizontalCenter
+        anchors.top: parent.top
+        width: parent.width
+        height: parent.height * 2 / 3
+        asynchronous: true
+
+        active: PlayerTextBox.TextBoxMode.TextBox === textBox.displayMode
+        visible: PlayerTextBox.TextBoxMode.TextBox === textBox.displayMode
+
+        property var buttonTexts: dataContainer.buttonTexts
+        property bool sceneSelection: dataContainer.sceneSelection
+        property bool skippable: dataContainer.skippable
+        property int iconWidth: textBox.iconWidth
+        property int iconHeight: textBox.iconHeight
+        property var model: null
+
+        signal delegateComponentLoaded()
+        onDelegateComponentLoaded: {
+            // nothing to do anymore
+        }
+    }
+    // second is the input Box
+    Loader {
+        id: boxLoaderInput
+        anchors.horizontalCenter: parent.horizontalCenter
+        anchors.bottom: parent.bottom
+        width: parent.width
+        height: parent.height / 2
+        asynchronous: true
+
+        active: PlayerTextBox.TextBoxMode.TextBox === textBox.displayMode
+        visible: PlayerTextBox.TextBoxMode.TextBox === textBox.displayMode
+
+        property var buttonTexts: dataContainer.buttonTexts
+        property bool sceneSelection: dataContainer.sceneSelection
+        property bool skippable: dataContainer.skippable
+        property int iconWidth: textBox.iconWidth
+        property int iconHeight: textBox.iconHeight
+        property var model: null
+
+        signal delegateComponentLoaded()
+        onDelegateComponentLoaded: {
+            // nothing to do anymore
+        }
+
+        function inputEditingFinished(sInput, sStoreIntoVar, sRequestId, bStoreIntoStorageInstead)
+        {
+            dataContainer.inputEditingFinished(sInput, sStoreIntoVar, sRequestId, bStoreIntoStorageInstead);
+            if (PlayerTextBox.TextBoxMode.TextBox === textBox.displayMode)
+            {
+                textBox.showText(sInput, true);
+            }
+        }
+        function buttonPressed(iIndex, sRequestId)
+        {
+            dataContainer.buttonPressed(iIndex, sRequestId);
+            if (PlayerTextBox.TextBoxMode.TextBox === textBox.displayMode)
+            {
+                textBox.showText(dataContainer.buttonTexts[iIndex], true);
+            }
+        }
+    }
+    // second is the log
+    ListView {
+        id: textLog
+        anchors.horizontalCenter: parent.horizontalCenter
+        anchors.bottom: PlayerTextBox.TextBoxMode.Log === textBox.displayMode ? parent.bottom :
+                                                                                parent.top
+        width: parent.width
+        height: visible ? parent.height : 0
+
+        Behavior on height {
+            NumberAnimation { duration: 500; easing.type: Easing.InOutQuad }
+        }
+
+        visible: PlayerTextBox.TextBoxMode.Log === textBox.displayMode || textBox.logShown
+
+        cacheBuffer: 0
+        orientation: ListView.Vertical
+        clip: true
+
+        property var buttonTexts: dataContainer.buttonTexts
+        property bool sceneSelection: dataContainer.sceneSelection
+        property bool skippable: dataContainer.skippable
+        property int iconWidth: textBox.iconWidth
+        property int iconHeight: textBox.iconHeight
+
+        function inputEditingFinished(sInput, sStoreIntoVar, sRequestId, bStoreIntoStorageInstead)
+        {
+            dataContainer.inputEditingFinished(sInput, sStoreIntoVar, sRequestId, bStoreIntoStorageInstead);
+        }
+        function buttonPressed(iIndex, sRequestId)
+        {
+            dataContainer.buttonPressed(iIndex, sRequestId)
         }
 
         signal delegateComponentLoaded()

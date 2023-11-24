@@ -5,14 +5,18 @@ import JOIP.core 1.1
 
 Rectangle {
     id: textDelegate
-    width: parent.ListView.view.width
+
+    property var listView: inList ? parent.ListView.view : null
+    readonly property bool inList : null != model ? true : false
+
+    width: inList ? listView.width : textBox.width
     height: tableView.itemHeight * (tableView.rowCount+1) + tableView.spacing * tableView.rowCount + 40
     color: "transparent"
 
-    property var backgroundColors: []
-    property var textColors: []
-    property var buttonTexts: []
-    property var requestId: sRequestId
+    property var backgroundColors: inList ? model.backgroundColors : []
+    property var textColors: inList ? model.textColors : []
+    property var buttonTexts: inList ? model.buttonTexts : []
+    property string requestId: inList ? model.sRequestId : ""
 
     TextMetrics {
         id: textMetrics
@@ -46,7 +50,7 @@ Rectangle {
 
         Repeater {
             id: repeater
-            model: 0
+            model: buttonTexts
 
             property int currentRowWidth: 0
             property int numAddedItems: 0
@@ -93,6 +97,20 @@ Rectangle {
                 property string bgColor: "#FF000000"
                 property string fgColor: "#FFFFFFFF"
 
+                state: "HIDDEN"
+                property int delayOnShow: index*300
+
+                states: [
+                    State {
+                        name: "HIDDEN"
+                        PropertyChanges { target: button; height: 0; width: 0 }
+                    },
+                    State {
+                        name: "VISIBLE"
+                        PropertyChanges { target: button; height: tableView.itemHeight; width: localTextMetrics.boundingRect.width + 20 }
+                    }
+                ]
+
                 Component.onCompleted: {
                     // don't connect properties directly otherwise all buttons will
                     // have the same text and on new buttons all texts on all buttons change
@@ -105,6 +123,8 @@ Rectangle {
                     if (textDelegate.textColors.length > index) {
                         repeaterItem.fgColor = textDelegate.textColors[index];
                     }
+
+                    repeaterItem.state = "VISIBLE";
                 }
 
                 TextMetrics {
@@ -116,9 +136,22 @@ Rectangle {
 
                 Button {
                     id: button
-                    anchors.fill: parent
+                    anchors.centerIn: parent
                     text: repeaterItem.textForButton.replace("<html>","").replace("</html>","");
                     z: 1
+
+                    Behavior on width  {
+                         animation: SequentialAnimation {
+                             PauseAnimation { duration: repeaterItem.delayOnShow }
+                             SpringAnimation { spring: 5; damping: 0.5 }
+                         }
+                     }
+                     Behavior on height  {
+                         animation: SequentialAnimation {
+                             PauseAnimation { duration: repeaterItem.delayOnShow }
+                             SpringAnimation { spring: 5; damping: 0.5 }
+                         }
+                     }
 
                     onHoveredChanged: {
                         if (hovered)
@@ -128,7 +161,11 @@ Rectangle {
                     }
                     onClicked: {
                         root.soundEffects.clickSound.play();
-                        textDelegate.parent.ListView.view.buttonPressed(index, textDelegate.requestId);
+                        if (inList) {
+                            listView.buttonPressed(index, textDelegate.requestId);
+                        } else {
+                            buttonPressed(index, textDelegate.requestId);
+                        }
                     }
 
                     background: Rectangle {
@@ -149,7 +186,11 @@ Rectangle {
                         sequence: Settings.keyBinding("Answer_" + (index+1));
                         onActivated: {
                             root.soundEffects.clickSound.play();
-                            textDelegate.parent.ListView.view.buttonPressed(index, textDelegate.requestId);
+                            if (inList) {
+                                listView.buttonPressed(index, textDelegate.requestId);
+                            } else {
+                                buttonPressed(index, textDelegate.requestId);
+                            }
                         }
                     }
                 }
@@ -159,10 +200,10 @@ Rectangle {
     }
 
     Component.onCompleted: {
-        backgroundColors = textDelegate.parent.ListView.view.backgroundColors;
-        textColors = textDelegate.parent.ListView.view.textColors;
-        buttonTexts = textDelegate.parent.ListView.view.buttonTexts;
-        repeater.model = buttonTexts;
-        textDelegate.parent.ListView.view.delegateComponentLoaded();
+        if (inList) {
+            listView.delegateComponentLoaded();
+        } else {
+            delegateComponentLoaded();
+        }
     }
 }

@@ -6,21 +6,31 @@ import JOIP.script 1.1
 
 Rectangle {
     id: textDelegate
-    width: parent.ListView.view.width
+
+    property var listView: inList ? parent.ListView.view : null
+    readonly property bool inList : null != model ? true : false
+
+    width: inList ? listView.width : textBox.width
     height: textBackground.height + 40
     color: "transparent"
 
+    // asign model or parent properties for reference in delegate
+    readonly property int iconWidthLocal: inList ? listView.iconWidth : iconWidth;
+    readonly property int iconHeightLocal: inList ? listView.iconHeight : iconHeight
+    property var backgroundColor: inList ? model.backgroundColor : "black"
+    property var textColor: inList ? model.textColor : "white"
+    property string textContent: inList ? model.textContent : ""
+    property int textAlignment: inList ? model.textAlignment : 0
+    property var portrait: inList ? model.portrait : null
+
     smooth: Settings.playerImageSmooth
     antialiasing: Settings.playerAntialiasing
-
-    property int iconWidth: parent.ListView.view.iconWidth
-    property int iconHeight: parent.ListView.view.iconHeight
 
     Rectangle {
         id: textBackground
         anchors.verticalCenter: parent.verticalCenter
         x: {
-            switch (textAlignment)
+            switch (textDelegate.textAlignment)
             {
                 case TextAlignment.AlignCenter: return textDelegate.width / 2 - width / 2;
                 case TextAlignment.AlignLeft: return 20; // a little bit of a margin looks better
@@ -30,7 +40,7 @@ Rectangle {
         }
         width: textContentItem.width + imageSkip.width + 30
         height: textContentItem.height + 20
-        color: backgroundColor
+        color: textDelegate.backgroundColor
         radius: 5
 
         TextItemFormated {
@@ -40,14 +50,14 @@ Rectangle {
             maximumWidth: textDelegate.width - 50 - 24 // 24 is imageSkip.width at it's max
                                                        // 50 is for spacing
 
-            text: textContent
-            textColor: model.textColor
+            text: textDelegate.textContent
+            textColor: textDelegate.textColor
         }
 
         IconResourceDelegate {
-            id: portrait
+            id: portraitDelegate
             x: {
-                switch (textAlignment)
+                switch (textDelegate.textAlignment)
                 {
                     case TextAlignment.AlignCenter: return parent.width / 2 - width / 2;
                     case TextAlignment.AlignLeft: return parent.width - width / 5;
@@ -56,7 +66,7 @@ Rectangle {
                 return parent.width / 2 - width / 2;
             }
             y: {
-                switch (textAlignment)
+                switch (textDelegate.textAlignment)
                 {
                     case TextAlignment.AlignCenter: return -height * 3 / 4;
                     case TextAlignment.AlignLeft: return parent.height / 2 - height / 2;
@@ -64,10 +74,10 @@ Rectangle {
                 }
                 return -height * 3 / 4;
             }
-            width: pResource === null ? 0 : textDelegate.iconWidth
-            height: textDelegate.iconHeight
+            width: pResource === null ? 0 : textDelegate.iconWidthLocal
+            height: textDelegate.iconHeightLocal
 
-            pResource: model.portrait
+            pResource: textDelegate.portrait
         }
 
         Image {
@@ -80,8 +90,8 @@ Rectangle {
 
             source: Settings.styleFolderQml() + "/ButtonPlay.svg";
 
-            property bool bIsLast: index+1 < textDelegate.parent.ListView.view.count ? false : true
-            property bool bShow: bIsLast && textDelegate.parent.ListView.view.skippable
+            property bool bIsLast: inList ? (index+1 < listView.count ? false : true) : true
+            property bool bShow: bIsLast && (inList ? listView.skippable : skippable)
 
             opacity: bShow ? 1.0 : 0.0
             Behavior on opacity {
@@ -97,7 +107,18 @@ Rectangle {
         }
     }
 
+    opacity: 0
+    OpacityAnimator on opacity{
+        from: 0;
+        to: 1;
+        duration: 500
+    }
+
     Component.onCompleted: {
-        textDelegate.parent.ListView.view.delegateComponentLoaded();
+        if (inList) {
+            listView.delegateComponentLoaded();
+        } else {
+            delegateComponentLoaded();
+        }
     }
 }

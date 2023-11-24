@@ -13,6 +13,8 @@ Rectangle {
     property int spacing: 10
     property Item soundEffects: null
 
+    default property alias content: customContent.children
+
     RowLayout {
         anchors.fill: parent
         spacing: parent.spacing
@@ -133,6 +135,14 @@ Rectangle {
                     pauseButton.pausePlayScene();
                 }
             }
+        }
+
+        RowLayout {
+            id: customContent
+            height: parent.height
+            spacing: parent.spacing
+            layoutDirection: DominantHand.Left === Settings.dominantHand ? Qt.LeftToRight :
+                                                                           Qt.RightToLeft
         }
 
         Rectangle {
