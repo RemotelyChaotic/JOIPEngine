@@ -158,6 +158,7 @@ Rectangle {
         userName: "textBox"
         mainTextBox: true
         displayMode: PlayerTextBox.TextBoxMode.TextBox
+        hideLogAfterInactivity: true
     }
 
     PlayerControls {

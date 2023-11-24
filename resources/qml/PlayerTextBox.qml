@@ -21,6 +21,7 @@ Rectangle {
     property int iconHeight: 64
     property int displayMode: PlayerTextBox.TextBoxMode.Log
     property bool logShown: false
+    property bool hideLogAfterInactivity: false
 
     function clearTextBox()
     {
@@ -255,9 +256,11 @@ Rectangle {
                 }
             }
             textBox.showButtonPrompts(vsModifiedPrompts, sRequestId);
+            hideTimer.reset(10*1000);
         }
         onShowInput: {
             textBox.showInput(sStoreIntoVar, sRequestId, bStoreIntoStorageInstead);
+            hideTimer.reset(10*1000);
         }
         onShowText: {
             if (sText.startsWith("<html>") && sText.endsWith("</html>")) {
@@ -268,6 +271,8 @@ Rectangle {
             if (0 < dSkippableWaitS) {
                 registrator.setSkippableWait(dSkippableWaitS);
             }
+
+            hideTimer.reset((10 < dSkippableWaitS ? dSkippableWaitS : 10)*1000);
         }
         onTextAlignmentChanged: {
             dataContainer.textAlignment = alignment;
@@ -295,6 +300,13 @@ Rectangle {
         }
     }
 
+    MouseArea {
+        anchors.fill: parent
+        hoverEnabled: textBox.hideLogAfterInactivity
+        onPositionChanged: {
+            hideTimer.reset(10*1000);
+        }
+    }
 
     Item {
         id: dataContainer
@@ -458,6 +470,27 @@ Rectangle {
         }
     }
 
+    // animations
+    Timer {
+        id: hideTimer
+        interval: 500
+        running: false
+        repeat: false
+        function reset(interv) {
+            if (textBox.hideLogAfterInactivity) {
+                hideTimer.interval = interv;
+                parent.opacity = 1
+                restart();
+            }
+        }
+        onTriggered: {
+            parent.opacity = 0.3
+        }
+    }
+
+    Behavior on opacity {
+        NumberAnimation { duration: 500; easing.type: Easing.InOutQuad }
+    }
 
     Component.onCompleted: {
         ScriptRunner.registerNewComponent(userName, signalEmitter);
