@@ -143,6 +143,9 @@ Rectangle {
                     Behavior on width  {
                          animation: SequentialAnimation {
                              PauseAnimation { duration: repeaterItem.delayOnShow }
+                             ScriptAction {
+                                script: text.opacity = 1
+                             }
                              SpringAnimation { spring: 5; damping: 0.5 }
                          }
                      }
@@ -180,6 +183,11 @@ Rectangle {
                         maximumWidth: textDelegate.width - 50
                         text: repeaterItem.textForButton
                         textColor: repeaterItem.fgColor
+
+                        opacity: 0
+                        Behavior on opacity {
+                            NumberAnimation { duration: 500; easing.type: Easing.InOutQuad }
+                        }
                     }
 
                     Shortcut {
