@@ -10,6 +10,7 @@ class CCommandChangeFont  : public QUndoCommand
 {
 public:
   CCommandChangeFont(QPointer<QFontComboBox> pFontComboBox,
+                     const std::function<void(void)>& fnOnUndoRedo,
                      QUndoCommand* pParent = nullptr);
   ~CCommandChangeFont();
 
@@ -21,6 +22,7 @@ public:
 
 protected:
   QPointer<QFontComboBox> m_pFontComboBox;
+  std::function<void(void)> m_fnOnUndoRedo;
   QString                 m_sOriginalValue;
   QString                 m_sNewValue;
 };

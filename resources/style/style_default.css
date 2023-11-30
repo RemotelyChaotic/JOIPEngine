@@ -1302,5 +1302,6 @@ CResourceDetailView {
 
 CResourceModelView {
   qproperty-cardIcon: url(:/resources/style/img/ButtonTitleCard.png);
-  qproperty-cardIconSize: 16;
+  qproperty-layoutIcon: url(:/resources/style/img/ButtonLayout.png);
+  qproperty-iconSize: 16;
 }

@@ -77,6 +77,9 @@ signals:
   void SignalFileChangedExternally(const QString& sName);
   void SignalProjectEdited();
 
+public slots:
+  void SlotProjectPropertiesEdited();
+
 private slots:
   void SlotFileChanged(const QString& sPath);
   void SlotResourceAdded(qint32 iProjId, const QString& sName);
@@ -94,6 +97,7 @@ private:
   tspProject                                  m_spProject;
   QPointer<QWidget>                           m_pParentWidget;
   std::map<QString, SCachedMapItem>           m_cachedScriptsMap;
+  QString                                     m_sOldProjectLayoutResource;
   bool                                        m_bReloadFileWithoutQuestion;
 };
 

@@ -362,10 +362,13 @@ void CEditorProjectSettingsWidget::on_pProjectMajorVersion_valueChanged(qint32 i
   if (nullptr == m_spCurrentProject) { return; }
   Q_UNUSED(iValue)
 
+  QPointer<CEditorProjectSettingsWidget> pThis(this);
   UndoStack()->push(new CCommandChangeVersion(m_spUi->pProjectMajorVersion,
                                               m_spUi->pProjectMinorVersion,
-                                              m_spUi->pProjectPatchVersion));
-  emit SignalProjectEdited();
+                                              m_spUi->pProjectPatchVersion,
+                                              [pThis]() {
+                                                emit pThis->SignalProjectEdited();
+                                              }));
 }
 
 //----------------------------------------------------------------------------------------
@@ -376,10 +379,13 @@ void CEditorProjectSettingsWidget::on_pProjectMinorVersion_valueChanged(qint32 i
   if (nullptr == m_spCurrentProject) { return; }
   Q_UNUSED(iValue)
 
+  QPointer<CEditorProjectSettingsWidget> pThis(this);
   UndoStack()->push(new CCommandChangeVersion(m_spUi->pProjectMajorVersion,
                                               m_spUi->pProjectMinorVersion,
-                                              m_spUi->pProjectPatchVersion));
-  emit SignalProjectEdited();
+                                              m_spUi->pProjectPatchVersion,
+                                              [pThis]() {
+                                                emit pThis->SignalProjectEdited();
+                                              }));
 }
 
 //----------------------------------------------------------------------------------------
@@ -390,10 +396,13 @@ void CEditorProjectSettingsWidget::on_pProjectPatchVersion_valueChanged(qint32 i
   if (nullptr == m_spCurrentProject) { return; }
   Q_UNUSED(iValue)
 
+  QPointer<CEditorProjectSettingsWidget> pThis(this);
   UndoStack()->push(new CCommandChangeVersion(m_spUi->pProjectMajorVersion,
                                               m_spUi->pProjectMinorVersion,
-                                              m_spUi->pProjectPatchVersion));
-  emit SignalProjectEdited();
+                                              m_spUi->pProjectPatchVersion,
+                                              [pThis]() {
+                                                emit pThis->SignalProjectEdited();
+                                              }));
 }
 
 //----------------------------------------------------------------------------------------
@@ -404,8 +413,11 @@ void CEditorProjectSettingsWidget::on_pSoundEmitterCount_valueChanged(qint32 iVa
   if (nullptr == m_spCurrentProject) { return; }
   Q_UNUSED(iValue)
 
-  UndoStack()->push(new CCommandChangeEmitterCount(m_spUi->pSoundEmitterCount));
-  emit SignalProjectEdited();
+  QPointer<CEditorProjectSettingsWidget> pThis(this);
+  UndoStack()->push(new CCommandChangeEmitterCount(m_spUi->pSoundEmitterCount,
+                                                   [pThis]() {
+                                                     emit pThis->SignalProjectEdited();
+                                                   }));
 }
 
 //----------------------------------------------------------------------------------------
@@ -416,8 +428,11 @@ void CEditorProjectSettingsWidget::on_pFontComboBox_currentFontChanged(const QFo
   if (nullptr == m_spCurrentProject) { return; }
   Q_UNUSED(font)
 
-  UndoStack()->push(new CCommandChangeFont(m_spUi->pFontComboBox));
-  emit SignalProjectEdited();
+  QPointer<CEditorProjectSettingsWidget> pThis(this);
+  UndoStack()->push(new CCommandChangeFont(m_spUi->pFontComboBox,
+                                           [pThis]() {
+                                             emit pThis->SignalProjectEdited();
+                                           }));
 }
 
 //----------------------------------------------------------------------------------------
@@ -428,8 +443,13 @@ void CEditorProjectSettingsWidget::on_pDefaultLayoutComboBox_currentIndexChanged
   if (nullptr == m_spCurrentProject) { return; }
   Q_UNUSED(iIdx)
 
-  UndoStack()->push(new CCommandChangeLayout(m_spUi->pDefaultLayoutComboBox));
-  emit SignalProjectEdited();
+  QPointer<CEditorProjectSettingsWidget> pThis(this);
+  UndoStack()->push(new CCommandChangeLayout(m_spUi->pDefaultLayoutComboBox,
+                                             m_spCurrentProject,
+                                             [pThis]() {
+                                               emit pThis->SignalProjectEdited();
+                                               emit pThis->EditorModel()->SignalProjectPropertiesEdited();
+                                             }));
 }
 
 //----------------------------------------------------------------------------------------
@@ -576,8 +596,13 @@ void CEditorProjectSettingsWidget::SlotResourceRemoved(qint32 iProjId, const QSt
     if (m_spUi->pDefaultLayoutComboBox->currentIndex() == iIdx)
     {
       m_spUi->pDefaultLayoutComboBox->setCurrentIndex(c_iCurrentDefaultLayout);
-      UndoStack()->push(new CCommandChangeLayout(m_spUi->pDefaultLayoutComboBox));
-      emit SignalProjectEdited();
+      QPointer<CEditorProjectSettingsWidget> pThis(this);
+      UndoStack()->push(new CCommandChangeLayout(m_spUi->pDefaultLayoutComboBox,
+                                                 m_spCurrentProject,
+                                                 [pThis]() {
+                                                   emit pThis->SignalProjectEdited();
+                                                   emit pThis->EditorModel()->SignalProjectPropertiesEdited();
+                                                 }));
     }
   }
 }
@@ -620,7 +645,11 @@ void CEditorProjectSettingsWidget::SlotUndoForDescribtionAdded()
   WIDGET_INITIALIZED_GUARD
   if (nullptr == m_spCurrentProject) { return; }
 
-  UndoStack()->push(new CCommandChangeDescribtion(m_spUi->pDescribtionTextEdit->document()));
+  QPointer<CEditorProjectSettingsWidget> pThis(this);
+  UndoStack()->push(new CCommandChangeDescribtion(m_spUi->pDescribtionTextEdit->document(),
+                                                  [pThis]() {
+                                                    emit pThis->SignalProjectEdited();
+                                                  }));
 }
 
 //----------------------------------------------------------------------------------------

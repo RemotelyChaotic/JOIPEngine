@@ -35,8 +35,9 @@ public:
   void InitializeModel(tspProject spProject);
   void DeInitializeModel();
   void SetCardIcon(const QImage& img);
-  void SetCardIconSize(qint32 iValue);
-  qint32 CardIconSize() const { return m_cardIconSize; }
+  void SetLayoutIcon(const QImage& img);
+  void SetIconSize(qint32 iValue);
+  qint32 IconSize() const { return m_iIconSize; }
 
   tspProject Project() const { return m_spProject; };
 
@@ -74,6 +75,9 @@ public:
 signals:
   void SignalProjectEdited();
 
+public slots:
+  void SlotProjectPropertiesEdited();
+
 protected:
   CResourceTreeItem* GetItem(const QModelIndex& index) const;
 
@@ -87,8 +91,11 @@ private:
   CResourceTreeItem*                          m_pRootItem;
   std::map<EResourceType, CResourceTreeItem*> m_categoryMap;
   tspProject                                  m_spProject;
+  QString                                     m_sOldProjectLayoutResource;
+  QString                                     m_sOldProjectTitleResource;
   QImage                                      m_cardIcon;
-  qint32                                      m_cardIconSize;
+  QImage                                      m_layoutIcon;
+  qint32                                      m_iIconSize;
 };
 
 #endif // RESOURCETREEITEMMODEL_H

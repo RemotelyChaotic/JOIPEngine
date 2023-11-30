@@ -4,11 +4,13 @@
 #include <QPointer>
 #include <QUndoCommand>
 #include <QTextDocument>
+#include <functional>
 
 class CCommandChangeDescribtion : public QUndoCommand
 {
 public:
   CCommandChangeDescribtion(QPointer<QTextDocument> pDescribtionDocument,
+                            const std::function<void(void)>& fnOnUndoRedo,
                             QUndoCommand *parent = nullptr);
   ~CCommandChangeDescribtion();
 
@@ -20,6 +22,7 @@ public:
 
 protected:
   QPointer<QTextDocument> m_pDescribtionDocument;
+  std::function<void(void)> m_fnOnUndoRedo;
   bool                    m_bAddedRedoCommand;
 };
 

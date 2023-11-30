@@ -78,6 +78,7 @@ public slots:
 
 signals:
   void SignalProjectEdited();
+  void SignalProjectPropertiesEdited();
 
 private slots:
   void SlotAddNewScriptFileToScene();

@@ -12,6 +12,7 @@ public:
   CCommandChangeVersion(QPointer<QSpinBox> pProjectMajorVersion,
                         QPointer<QSpinBox> pProjectMinorVersion,
                         QPointer<QSpinBox> pProjectPatchVersion,
+                        const std::function<void(void)>& fnOnUndoRedo,
                         QUndoCommand* pParent = nullptr);
   ~CCommandChangeVersion();
 
@@ -27,6 +28,7 @@ protected:
   QPointer<QSpinBox> m_pProjectMajorVersion;
   QPointer<QSpinBox> m_pProjectMinorVersion;
   QPointer<QSpinBox> m_pProjectPatchVersion;
+  std::function<void(void)> m_fnOnUndoRedo;
   SVersion           m_originalVersion;
   SVersion           m_newVersion;
 };

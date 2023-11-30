@@ -52,7 +52,7 @@ public:
       qint32 iIconSize = 16;
       if (auto pTreeModel = dynamic_cast<CResourceTreeItemModel*>(pModel))
       {
-        iIconSize = pTreeModel->CardIconSize();
+        iIconSize = pTreeModel->IconSize();
       }
 
       const QModelIndex indexName = pModel->index(index.row(), resource_item::c_iColumnName, index.parent());

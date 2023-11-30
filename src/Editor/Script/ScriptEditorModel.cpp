@@ -115,6 +115,7 @@ void CScriptEditorModel::DeInitializeModel()
   m_cachedScriptsMap.clear();
   endResetModel();
   m_spProject = nullptr;
+  m_sOldProjectLayoutResource = QString();
 }
 
 //----------------------------------------------------------------------------------------
@@ -238,19 +239,19 @@ QVariant CScriptEditorModel::data(const QModelIndex& index, int iRole) const
     {
       QStringList vsScriptAdditions;
 
+      if (nullptr != m_spProject)
+      {
+        QReadLocker plocker(&m_spProject->m_rwLock);
+        if (m_spProject->m_sPlayerLayout == it->first)
+        {
+          vsScriptAdditions << tr("Layout for Project");
+        }
+      }
       for (const tspScene& spScene : it->second.m_vspScenes)
       {
         if (nullptr != spScene)
         {
           QReadLocker locker(&spScene->m_rwLock);
-          if (nullptr != m_spProject)
-          {
-            QReadLocker plocker(&m_spProject->m_rwLock);
-            if (m_spProject->m_sPlayerLayout == it->first)
-            {
-              vsScriptAdditions << tr("Layout for Project");
-            }
-          }
           if (spScene->m_sScript == it->first)
           {
             vsScriptAdditions << tr("Script for Scene: %1").arg(spScene->m_sName);
@@ -282,6 +283,30 @@ QVariant CScriptEditorModel::data(const QModelIndex& index, int iRole) const
 Qt::ItemFlags CScriptEditorModel::flags(const QModelIndex& index) const
 {
   return QStandardItemModel::flags(index);
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CScriptEditorModel::SlotProjectPropertiesEdited()
+{
+  QReadLocker locker(&m_spProject->m_rwLock);
+  QString sNewLayout;
+  qint32 i = 0;
+  for (auto it = m_cachedScriptsMap.begin(); m_cachedScriptsMap.end() != it; ++it, ++i)
+  {
+    if (m_spProject->m_sPlayerLayout == it->first ||
+        m_sOldProjectLayoutResource == it->first)
+    {
+      QModelIndex idx = index(i, 0);
+      sNewLayout = it->first;
+      emit this->dataChanged(idx, idx);
+    }
+  }
+
+  if (!sNewLayout.isEmpty())
+  {
+    m_sOldProjectLayoutResource = sNewLayout;
+  }
 }
 
 //----------------------------------------------------------------------------------------
@@ -575,6 +600,11 @@ void CScriptEditorModel::AddResourceTo(tspResource spResource,
     auto itMap = mpToAddTo.find(sResourceName);
     if (mpToAddTo.end() == itMap)
     {
+      if (m_spProject->m_sPlayerLayout == sResourceName)
+      {
+        m_sOldProjectLayoutResource = sResourceName;
+      }
+
       mpToAddTo.insert({sResourceName, SCachedMapItem()});
       auto& script = mpToAddTo[sResourceName];
       script.m_sId = sResourceName;

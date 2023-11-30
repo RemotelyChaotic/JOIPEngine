@@ -5,6 +5,7 @@
 CCommandChangeVersion::CCommandChangeVersion(QPointer<QSpinBox> pProjectMajorVersion,
                                              QPointer<QSpinBox> pProjectMinorVersion,
                                              QPointer<QSpinBox> pProjectPatchVersion,
+                                             const std::function<void(void)>& fnOnUndoRedo,
                                              QUndoCommand* pParent) :
   QUndoCommand("Version -> " + static_cast<QString>(SVersion(pProjectMajorVersion->value(),
                                                              pProjectMinorVersion->value(),
@@ -12,6 +13,7 @@ CCommandChangeVersion::CCommandChangeVersion(QPointer<QSpinBox> pProjectMajorVer
   m_pProjectMajorVersion(pProjectMajorVersion),
   m_pProjectMinorVersion(pProjectMinorVersion),
   m_pProjectPatchVersion(pProjectPatchVersion),
+  m_fnOnUndoRedo(fnOnUndoRedo),
   m_originalVersion(pProjectMajorVersion->property(editor::c_sPropertyOldValue).toInt(),
                     pProjectMinorVersion->property(editor::c_sPropertyOldValue).toInt(),
                     pProjectPatchVersion->property(editor::c_sPropertyOldValue).toInt()),
@@ -85,5 +87,9 @@ void CCommandChangeVersion::ApplyValue(const SVersion& value)
     m_pProjectMajorVersion->setProperty(editor::c_sPropertyOldValue, value.m_iPatch);
     m_pProjectPatchVersion->setValue(value.m_iPatch);
     m_pProjectPatchVersion->blockSignals(false);
+  }
+  if (nullptr != m_fnOnUndoRedo)
+  {
+    m_fnOnUndoRedo();
   }
 }

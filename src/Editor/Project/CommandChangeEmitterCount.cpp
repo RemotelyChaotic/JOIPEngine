@@ -3,9 +3,11 @@
 #include "Editor/EditorWidgetTypes.h"
 
 CCommandChangeEmitterCount::CCommandChangeEmitterCount(QPointer<QSpinBox> pEmitterCount,
+                                                       const std::function<void(void)>& fnOnUndoRedo,
                                                        QUndoCommand* pParent) :
   QUndoCommand("Emitters -> " + QString::number(pEmitterCount->value()), pParent),
   m_pEmitterCount(pEmitterCount),
+  m_fnOnUndoRedo(fnOnUndoRedo),
   m_iOriginalValue(pEmitterCount->property(editor::c_sPropertyOldValue).toInt()),
   m_iNewValue(pEmitterCount->value())
 {
@@ -21,6 +23,10 @@ void CCommandChangeEmitterCount::CCommandChangeEmitterCount::undo()
   m_pEmitterCount->setProperty(editor::c_sPropertyOldValue, m_iOriginalValue);
   m_pEmitterCount->setValue(m_iOriginalValue);
   m_pEmitterCount->blockSignals(false);
+  if (nullptr != m_fnOnUndoRedo)
+  {
+    m_fnOnUndoRedo();
+  }
 }
 
 //----------------------------------------------------------------------------------------
@@ -31,6 +37,10 @@ void CCommandChangeEmitterCount::CCommandChangeEmitterCount::redo()
   m_pEmitterCount->setProperty(editor::c_sPropertyOldValue, m_iNewValue);
   m_pEmitterCount->setValue(m_iNewValue);
   m_pEmitterCount->blockSignals(false);
+  if (nullptr != m_fnOnUndoRedo)
+  {
+    m_fnOnUndoRedo();
+  }
 }
 
 //----------------------------------------------------------------------------------------

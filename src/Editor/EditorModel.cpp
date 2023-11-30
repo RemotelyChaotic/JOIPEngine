@@ -65,6 +65,11 @@ CEditorModel::CEditorModel(QWidget* pParent) :
   connect(m_spFlowSceneModel.get(), &CFlowScene::nodeDeleted,
           this, &CEditorModel::SlotNodeDeleted);
 
+  connect(this, &CEditorModel::SignalProjectPropertiesEdited,
+          m_spResourceTreeModel.get(), &CResourceTreeItemModel::SlotProjectPropertiesEdited);
+  connect(this, &CEditorModel::SignalProjectPropertiesEdited,
+          m_spScriptEditorModel.get(), &CScriptEditorModel::SlotProjectPropertiesEdited);
+
   connect(JobWorker(), &CEditorJobWorker::SignalEditorJobStarted,
           this, &CEditorModel::SlotJobStarted);
   connect(JobWorker(), &CEditorJobWorker::SignalEditorJobFinished,

@@ -5,11 +5,13 @@
 #include <QPointer>
 #include <QSpinBox>
 #include <QUndoCommand>
+#include <functional>
 
 class CCommandChangeEmitterCount : public QUndoCommand
 {
 public:
   CCommandChangeEmitterCount(QPointer<QSpinBox> pEmitterCount,
+                             const std::function<void(void)>& fnOnUndoRedo,
                              QUndoCommand* pParent = nullptr);
   ~CCommandChangeEmitterCount();
 
@@ -21,6 +23,7 @@ public:
 
 protected:
   QPointer<QSpinBox> m_pEmitterCount;
+  std::function<void(void)> m_fnOnUndoRedo;
   qint32             m_iOriginalValue;
   qint32             m_iNewValue;
 };

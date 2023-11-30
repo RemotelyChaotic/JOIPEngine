@@ -19,7 +19,7 @@ CResourceTreeItemModel::CResourceTreeItemModel(QPointer<QUndoStack> pUndoStack,
   m_categoryMap(),
   m_spProject(),
   m_cardIcon(),
-  m_cardIconSize(16)
+  m_iIconSize(16)
 {
   auto spDbManager = m_wpDbManager.lock();
   connect(spDbManager.get(), &CDatabaseManager::SignalResourceAdded,
@@ -71,6 +71,15 @@ void CResourceTreeItemModel::InitializeModel(tspProject spProject)
       {
         sPathParts.push_back(sPath.host());
         sPathParts << sPath.path().remove(0, 1).split("/");
+      }
+
+      if (m_spProject->m_sPlayerLayout == it->first)
+      {
+        m_sOldProjectLayoutResource = it->first;
+      }
+      if (m_spProject->m_sTitleCard == it->first)
+      {
+        m_sOldProjectTitleResource == it->first;
       }
 
       // insert item
@@ -135,6 +144,9 @@ void CResourceTreeItemModel::DeInitializeModel()
     m_categoryMap.clear();
     delete m_pRootItem;
     m_pRootItem = nullptr;
+
+    m_sOldProjectLayoutResource = QString();
+    m_sOldProjectTitleResource = QString();
     endRemoveRows();
   }
 }
@@ -148,9 +160,16 @@ void CResourceTreeItemModel::SetCardIcon(const QImage& img)
 
 //----------------------------------------------------------------------------------------
 //
-void CResourceTreeItemModel::SetCardIconSize(qint32 iValue)
+void CResourceTreeItemModel::SetLayoutIcon(const QImage& img)
 {
-  m_cardIconSize = iValue;
+  m_layoutIcon = img;
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CResourceTreeItemModel::SetIconSize(qint32 iValue)
+{
+  m_iIconSize = iValue;
 }
 
 //----------------------------------------------------------------------------------------
@@ -167,9 +186,14 @@ QVariant CResourceTreeItemModel::data(const QModelIndex& index, int iRole, int i
   {
     QReadLocker locker(&m_spProject->m_rwLock);
     CResourceTreeItem* item = static_cast<CResourceTreeItem*>(index.internalPointer());
-    if (item->Data(c_iColumnName) == m_spProject->m_sTitleCard)
+    QString sName = item->Data(c_iColumnName).toString();
+    if (sName == m_spProject->m_sTitleCard)
     {
-      return QPixmap::fromImage(m_cardIcon.scaled(m_cardIconSize,m_cardIconSize));
+      return QPixmap::fromImage(m_cardIcon.scaled(m_iIconSize, m_iIconSize));
+    }
+    if (sName == m_spProject->m_sPlayerLayout)
+    {
+      return QPixmap::fromImage(m_layoutIcon.scaled(m_iIconSize, m_iIconSize));
     }
     return QVariant();
   }
@@ -209,9 +233,14 @@ QVariant CResourceTreeItemModel::data(const QModelIndex& index, int iRole) const
   {
     QReadLocker locker(&m_spProject->m_rwLock);
     CResourceTreeItem* item = static_cast<CResourceTreeItem*>(index.internalPointer());
-    if (item->Data(c_iColumnName) == m_spProject->m_sTitleCard)
+    QString sName = item->Data(c_iColumnName).toString();
+    if (sName == m_spProject->m_sTitleCard)
     {
-      return QPixmap::fromImage(m_cardIcon.scaled(m_cardIconSize,m_cardIconSize));
+      return QPixmap::fromImage(m_cardIcon.scaled(m_iIconSize, m_iIconSize));
+    }
+    if (sName == m_spProject->m_sPlayerLayout)
+    {
+      return QPixmap::fromImage(m_layoutIcon.scaled(m_iIconSize, m_iIconSize));
     }
     return QVariant();
   }
@@ -513,6 +542,37 @@ tspResource CResourceTreeItemModel::ResourceForIndex(const QModelIndex& idx)
     return pItem->Resource();
   }
   return nullptr;
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CResourceTreeItemModel::SlotProjectPropertiesEdited()
+{
+  if (nullptr!= m_spProject)
+  {
+    std::vector<QString> vsChanged;
+    m_spProject->m_rwLock.lockForRead();
+    vsChanged.push_back(m_sOldProjectLayoutResource);
+    vsChanged.push_back(m_sOldProjectTitleResource);
+    vsChanged.push_back(m_spProject->m_sPlayerLayout);
+    vsChanged.push_back(m_spProject->m_sTitleCard);
+    m_sOldProjectLayoutResource = m_spProject->m_sPlayerLayout;
+    m_sOldProjectTitleResource = m_spProject->m_sTitleCard;
+    m_spProject->m_rwLock.unlock();
+
+    for (const QString& sResource : vsChanged)
+    {
+      QModelIndexList indices =
+          QAbstractItemModel::match(createIndex(0, 0, m_pRootItem), CResourceTreeItemModel::eSearchRole,
+                                    QString(EResourceTreeItemType((EResourceTreeItemType::eResource))._to_string()) +
+                                        ";" + sResource, 1,
+                                    Qt::MatchStartsWith | Qt::MatchWrap | Qt::MatchRecursive);
+      if (0 < indices.size())
+      {
+        emit dataChanged(indices[0], indices[0], QVector<int>() << Qt::DecorationRole);
+      }
+    }
+  }
 }
 
 //----------------------------------------------------------------------------------------

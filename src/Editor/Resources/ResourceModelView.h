@@ -31,7 +31,8 @@ class CResourceModelView : public QWidget,
 {
   Q_OBJECT
   Q_PROPERTY(QImage cardIcon READ CardIcon WRITE SetCardIcon NOTIFY SignalCardIconChanged)
-  Q_PROPERTY(qint32 cardIconSize READ CardIconSize WRITE SetCardIconSize NOTIFY SignalCardIconSizeChanged)
+  Q_PROPERTY(QImage layoutIcon READ LayoutIcon WRITE SetLayoutIcon NOTIFY SignalLayoutIconChanged)
+  Q_PROPERTY(qint32 iconSize READ IconSize WRITE SetIconSize NOTIFY SignalIconSizeChanged)
 
 public:
   enum EView
@@ -62,8 +63,10 @@ public:
 
   const QImage& CardIcon() const { return m_cardIcon; }
   void SetCardIcon(const QImage& img);
-  qint32 CardIconSize() const { return m_cardIconSize; }
-  void SetCardIconSize(qint32 iValue);
+  const QImage& LayoutIcon() const { return m_layoutIcon; }
+  void SetLayoutIcon(const QImage& img);
+  qint32 IconSize() const { return m_iIconSize; }
+  void SetIconSize(qint32 iValue);
 
   QStringList Tools() const override;
   void ToolTriggered(const QString& sTool) override;
@@ -75,7 +78,8 @@ public:
 
 signals:
   void SignalCardIconChanged();
-  void SignalCardIconSizeChanged();
+  void SignalLayoutIconChanged();
+  void SignalIconSizeChanged();
   void SignalProjectEdited();
   void SignalResourceSelected(const QString& sName);
 
@@ -100,8 +104,9 @@ private:
   QPointer<CResourceTreeItemModel>                m_pModel;
   QPointer<QUndoStack>                            m_pStack;
   QImage                                          m_cardIcon;
+  QImage                                          m_layoutIcon;
   QString                                         m_sCurrentResourceConversion;
-  qint32                                          m_cardIconSize;
+  qint32                                          m_iIconSize;
   bool                                            m_bInitializing;
   bool                                            m_bLandscape;
 };

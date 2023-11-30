@@ -2,9 +2,11 @@
 #include "Editor/EditorCommandIds.h"
 
 CCommandChangeDescribtion::CCommandChangeDescribtion(QPointer<QTextDocument> pDescribtionDocument,
+                                                     const std::function<void(void)>& fnOnUndoRedo,
                                                      QUndoCommand* pParent) :
   QUndoCommand(QTextDocument::tr("Describtion change"), pParent),
   m_pDescribtionDocument(pDescribtionDocument),
+  m_fnOnUndoRedo(fnOnUndoRedo),
   m_bAddedRedoCommand(false)
 {
 }
@@ -20,6 +22,10 @@ void CCommandChangeDescribtion::undo()
   if (!m_pDescribtionDocument.isNull())
   {
     m_pDescribtionDocument->undo();
+    if (nullptr != m_fnOnUndoRedo)
+    {
+      m_fnOnUndoRedo();
+    }
   }
 }
 
@@ -38,6 +44,10 @@ void CCommandChangeDescribtion::redo()
   if (!m_pDescribtionDocument.isNull())
   {
     m_pDescribtionDocument->redo();
+    if (nullptr != m_fnOnUndoRedo)
+    {
+      m_fnOnUndoRedo();
+    }
   }
 }
 

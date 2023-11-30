@@ -457,6 +457,7 @@ void CEditorResourceWidget::SlotTitleCardButtonClicked()
               if (nullptr != pThis)
               {
                 emit pThis->SignalProjectEdited();
+                emit pThis->EditorModel()->SignalProjectPropertiesEdited();
               }
             }));
 
