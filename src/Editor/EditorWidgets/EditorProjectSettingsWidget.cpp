@@ -569,24 +569,15 @@ void CEditorProjectSettingsWidget::SlotResourceRemoved(qint32 iProjId, const QSt
 
   if (iCurrentId != iProjId) { return; }
 
-  auto spDbManager = CApplication::Instance()->System<CDatabaseManager>().lock();
-  if (nullptr != spDbManager)
+  qint32 iIdx = m_spUi->pDefaultLayoutComboBox->findData(sName);
+  if (-1 != iIdx)
   {
-    auto spResource = spDbManager->FindResourceInProject(m_spCurrentProject, sName);
-    if (nullptr != spResource)
+    m_spUi->pDefaultLayoutComboBox->removeItem(iIdx);
+    if (m_spUi->pDefaultLayoutComboBox->currentIndex() == iIdx)
     {
-      QReadLocker resLocker(&spResource->m_rwLock);
-      if (EResourceType::eLayout == spResource->m_type._to_integral())
-      {
-        qint32 iIdx = m_spUi->pDefaultLayoutComboBox->findData(spResource->m_sName);
-        m_spUi->pDefaultLayoutComboBox->removeItem(iIdx);
-        if (m_spUi->pDefaultLayoutComboBox->currentIndex() == iIdx)
-        {
-          m_spUi->pDefaultLayoutComboBox->setCurrentIndex(c_iCurrentDefaultLayout);
-          UndoStack()->push(new CCommandChangeLayout(m_spUi->pDefaultLayoutComboBox));
-          emit SignalProjectEdited();
-        }
-      }
+      m_spUi->pDefaultLayoutComboBox->setCurrentIndex(c_iCurrentDefaultLayout);
+      UndoStack()->push(new CCommandChangeLayout(m_spUi->pDefaultLayoutComboBox));
+      emit SignalProjectEdited();
     }
   }
 }

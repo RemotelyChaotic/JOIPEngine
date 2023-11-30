@@ -94,7 +94,10 @@ void CSceneNodeModelWidget::OnLayoutRenamed(const QString& sOldName, const QStri
   QSignalBlocker blocker(m_spUi->pLayoutComboBox);
   qint32 iIdx = m_spUi->pLayoutComboBox->findData(sOldName);
   bool bWasSelected = iIdx == m_spUi->pLayoutComboBox->currentIndex();
-  m_spUi->pLayoutComboBox->removeItem(iIdx);
+  if (-1 != iIdx)
+  {
+    m_spUi->pLayoutComboBox->removeItem(iIdx);
+  }
   m_spUi->pLayoutComboBox->addItem(sName, sName);
   if (bWasSelected)
   {
@@ -108,7 +111,10 @@ void CSceneNodeModelWidget::OnLayoutRemoved(const QString& sName)
 {
   QSignalBlocker blocker(m_spUi->pLayoutComboBox);
   qint32 iIdx = m_spUi->pLayoutComboBox->findData(sName);
-  m_spUi->pLayoutComboBox->removeItem(iIdx);
+  if (-1 != iIdx)
+  {
+    m_spUi->pLayoutComboBox->removeItem(iIdx);
+  }
 }
 
 //----------------------------------------------------------------------------------------
@@ -126,7 +132,10 @@ void CSceneNodeModelWidget::OnScriptRenamed(const QString& sOldName, const QStri
   QSignalBlocker blocker(m_spUi->pScriptComboBox);
   qint32 iIdx = m_spUi->pScriptComboBox->findData(sOldName);
   bool bWasSelected = iIdx == m_spUi->pScriptComboBox->currentIndex();
-  m_spUi->pScriptComboBox->removeItem(iIdx);
+  if (-1 != iIdx)
+  {
+    m_spUi->pScriptComboBox->removeItem(iIdx);
+  }
   m_spUi->pScriptComboBox->addItem(sName, sName);
   if (bWasSelected)
   {
@@ -140,7 +149,10 @@ void CSceneNodeModelWidget::OnScriptRemoved(const QString& sName)
 {
   QSignalBlocker blocker(m_spUi->pScriptComboBox);
   qint32 iIdx = m_spUi->pScriptComboBox->findData(sName);
-  m_spUi->pScriptComboBox->removeItem(iIdx);
+  if (-1 != iIdx)
+  {
+    m_spUi->pScriptComboBox->removeItem(iIdx);
+  }
 }
 
 //----------------------------------------------------------------------------------------

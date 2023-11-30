@@ -443,11 +443,14 @@ void CSceneNodeModel::SlotResourceAdded(qint32 iProjId, const QString& sName)
   if (ProjectId() == iProjId && nullptr != m_spScene && nullptr != spDbManager)
   {
     tspResource spResource = spDbManager->FindResourceInProject(m_spProject, sName);
-    QReadLocker locker(&spResource->m_rwLock);
-    if (EResourceType::eScript == spResource->m_type._to_integral() ||
-        EResourceType::eLayout == spResource->m_type._to_integral())
+    if (nullptr != spResource)
     {
-      SlotResourceAddedImpl(sName, spResource->m_type);
+      QReadLocker locker(&spResource->m_rwLock);
+      if (EResourceType::eScript == spResource->m_type._to_integral() ||
+          EResourceType::eLayout == spResource->m_type._to_integral())
+      {
+        SlotResourceAddedImpl(sName, spResource->m_type);
+      }
     }
   }
 }
@@ -461,11 +464,14 @@ void CSceneNodeModel::SlotResourceRenamed(qint32 iProjId,
   if (ProjectId() == iProjId && nullptr != m_spScene && nullptr != spDbManager)
   {
     tspResource spResource = spDbManager->FindResourceInProject(m_spProject, sName);
-    QReadLocker locker(&spResource->m_rwLock);
-    if (EResourceType::eScript == spResource->m_type._to_integral() ||
-        EResourceType::eLayout == spResource->m_type._to_integral())
+    if (nullptr != spResource)
     {
-      SlotResourceRenamedImpl(sOldName, sName, spResource->m_type);
+      QReadLocker locker(&spResource->m_rwLock);
+      if (EResourceType::eScript == spResource->m_type._to_integral() ||
+          EResourceType::eLayout == spResource->m_type._to_integral())
+      {
+        SlotResourceRenamedImpl(sOldName, sName, spResource->m_type);
+      }
     }
   }
 }
@@ -477,13 +483,10 @@ void CSceneNodeModel::SlotResourceRemoved(qint32 iProjId, const QString& sName)
   auto spDbManager = m_wpDbManager.lock();
   if (ProjectId() == iProjId && nullptr != m_spScene && nullptr != spDbManager)
   {
-    tspResource spResource = spDbManager->FindResourceInProject(m_spProject, sName);
-    QReadLocker locker(&spResource->m_rwLock);
-    if (EResourceType::eScript == spResource->m_type._to_integral() ||
-        EResourceType::eLayout == spResource->m_type._to_integral())
-    {
-      SlotResourceRemovedImpl(sName, spResource->m_type);
-    }
+    // the resource is already removed, just remove from both lists, since names
+    // are unique
+    SlotResourceRemovedImpl(sName, EResourceType::eScript);
+    SlotResourceRemovedImpl(sName, EResourceType::eLayout);
   }
 }
 
