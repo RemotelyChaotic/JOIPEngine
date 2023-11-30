@@ -562,15 +562,51 @@ void CScriptEditorWidget::paintEvent(QPaintEvent* pEvent)
     painter.restore();
   }
 
+  QFont font = document()->defaultFont();
+  QFontMetrics metrics(font);
+  const qint32 iFontHeight = metrics.boundingRect(QLatin1Char('9')).height();
+
+  // paint vertical lines
+  painter.save();
+  painter.setFont(font);
+  QColor col = palette().color(QPalette::Text);
+  col.setAlpha(100);
+  painter.setPen(col);
+  for (QTextBlock block = document()->begin(); block != document()->end(); block = block.next())
+  {
+    if (block.isVisible())
+    {
+      if (Highlighter()->startsFoldingRegion(block))
+      {
+        QTextBlock blockEnd = Highlighter()->findFoldingRegionEnd(block);
+        if (blockEnd.previous().isVisible())
+        {
+          static const QRegExp rx("\\S");
+          // find first char
+          QTextCursor cursorStart(block);
+          cursorStart.movePosition(QTextCursor::StartOfBlock, QTextCursor::MoveAnchor);
+          qint32 iLinePos = block.text().indexOf(rx);
+          cursorStart.movePosition(QTextCursor::Right, QTextCursor::MoveAnchor, iLinePos);
+          QPoint topLeft = cursorRect(cursorStart).bottomLeft();
+
+          QTextCursor cursorEnd(blockEnd);
+          cursorEnd.movePosition(QTextCursor::StartOfBlock, QTextCursor::MoveAnchor);
+          QPoint bottomLeft(topLeft.x(), cursorRect(cursorEnd).top());
+
+          painter.drawLine(topLeft, bottomLeft);
+        }
+      }
+    }
+  }
+  painter.restore();
+
+
   QTextBlock block = firstVisibleBlock();
   qint32 iBlockNumber = block.blockNumber();
   qint32 iTop = static_cast<qint32>(blockBoundingGeometry(block).translated(contentOffset()).top());
   const QRectF blockRect = blockBoundingRect(block);
   qint32 iBlockHeight = static_cast<qint32>(blockRect.height());
   qint32 iBottom = iTop + iBlockHeight;
-  QFont font = document()->defaultFont();
-  QFontMetrics metrics(font);
-  const qint32 iFontHeight = metrics.boundingRect(QLatin1Char('9')).height();
 
   while (block.isValid() && iTop <= pEvent->rect().bottom())
   {
@@ -603,27 +639,6 @@ void CScriptEditorWidget::paintEvent(QPaintEvent* pEvent)
           painter.save();
           painter.setPen(QColor(50, 50, 50, 255));
           painter.drawText(blockRectToDraw.adjusted(5, 0, 5, 0), "...");
-          painter.restore();
-        }
-        else // paint vertical line
-        {
-          static const QRegExp rx("\\S");
-          // find first char
-          QTextCursor cursorStart(block);
-          cursorStart.movePosition(QTextCursor::StartOfBlock, QTextCursor::MoveAnchor);
-          qint32 iLinePos = block.text().indexOf(rx);
-          cursorStart.movePosition(QTextCursor::Right, QTextCursor::MoveAnchor, iLinePos);
-          QPoint topLeft = cursorRect(cursorStart).bottomLeft();
-
-          QTextCursor cursorEnd(blockEnd);
-          cursorEnd.movePosition(QTextCursor::StartOfBlock, QTextCursor::MoveAnchor);
-          QPoint bottomLeft(topLeft.x(), cursorRect(cursorEnd).top());
-
-          painter.save();
-          QColor col = palette().color(QPalette::Text);
-          col.setAlpha(100);
-          painter.setPen(col);
-          painter.drawLine(topLeft, bottomLeft);
           painter.restore();
         }
       }
