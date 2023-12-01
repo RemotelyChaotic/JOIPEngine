@@ -25,7 +25,7 @@ public:
 
   QString GetCurrentText() const override;
 
-private:
+protected:
   QPointer<CScriptEditorWidget> m_pCodeEdit;
 };
 

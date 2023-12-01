@@ -3,6 +3,7 @@
 #include "BackgroundSnippetOverlay.h"
 #include "CodeDisplayDefaultEditorImpl.h"
 #include "CodeDisplayEosEditorImpl.h"
+#include "CodeDisplayLayoutEditorImpl.h"
 #include "CommandScriptContentChange.h"
 #include "IconSnippetOverlay.h"
 #include "NotificationSnippetOverlay.h"
@@ -79,7 +80,7 @@ CCodeDisplayWidget::CCodeDisplayWidget(QWidget* pParent) :
   m_displayImplMap[SScriptDefinitionData::c_sScriptTypeJs] = std::make_unique<CCodeDisplayDefaultEditorImpl>(m_spUi->pCodeEdit);
   m_displayImplMap[SScriptDefinitionData::c_sScriptTypeEos] = std::make_unique<CCodeDisplayEosEditorImpl>(m_spUi->pEosEdit);
   m_displayImplMap[SScriptDefinitionData::c_sScriptTypeLua] = std::make_unique<CCodeDisplayDefaultEditorImpl>(m_spUi->pCodeEdit);
-  m_displayImplMap[SScriptDefinitionData::c_sScriptTypeQml] = std::make_unique<CCodeDisplayDefaultEditorImpl>(m_spUi->pCodeEdit);
+  m_displayImplMap[SScriptDefinitionData::c_sScriptTypeQml] = std::make_unique<CCodeDisplayLayoutEditorImpl>(m_spUi->pCodeEdit);
 
   m_spBackgroundSnippetOverlay = std::make_unique<CBackgroundSnippetOverlay>(this);
   m_spIconSnippetOverlay = std::make_unique<CIconSnippetOverlay>(this);

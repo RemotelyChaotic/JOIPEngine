@@ -238,6 +238,8 @@ macro(CreateJOIPProject JOIP_PROJECT_NAME)
     ${JOIPSources}/Editor/Script/CodeDisplayDefaultEditorImpl.h
     ${JOIPSources}/Editor/Script/CodeDisplayEosEditorImpl.cpp
     ${JOIPSources}/Editor/Script/CodeDisplayEosEditorImpl.h
+    ${JOIPSources}/Editor/Script/CodeDisplayLayoutEditorImpl.cpp
+    ${JOIPSources}/Editor/Script/CodeDisplayLayoutEditorImpl.h
     ${JOIPSources}/Editor/Script/CodeDisplayWidget.cpp
     ${JOIPSources}/Editor/Script/CodeDisplayWidget.h
     ${JOIPSources}/Editor/Script/CodeDisplayWidget.ui

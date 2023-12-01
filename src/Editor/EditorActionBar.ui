@@ -1036,6 +1036,7 @@
            </item>
           </layout>
          </widget>
+         <widget class="QWidget" name="pCodeEditorContainerPageLayout"/>
         </widget>
        </item>
       </layout>
