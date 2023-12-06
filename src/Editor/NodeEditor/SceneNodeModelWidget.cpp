@@ -18,6 +18,10 @@ CSceneNodeModelWidget::CSceneNodeModelWidget(QWidget* pParent) :
   m_spUi->AddLayoutFile->setProperty("styleSmall", true);
   m_spUi->AddScriptFile->setProperty("styleSmall", true);
 
+  m_spUi->AddLayoutFile->hide();
+  m_spUi->pLayoutComboBox->hide();
+  m_spUi->label_2->hide();
+
   new CUndoRedoFilter(m_spUi->pSceneNameLineEdit, nullptr);
 }
 
