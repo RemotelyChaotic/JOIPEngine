@@ -29,29 +29,34 @@
 
 
 <body>
-  <h1>Layout File WIP</h1>
+  <h1>Layout File</h1>
 
   <hr>
 
   <div class="container">
-    <p>Layout files are Qml files which define the ui of the player. If a
-    <a href="qrc:/resources/help/project/joi_project_help.html">JOI-Project</a> contains no Layout file,
-    a default Layout file will be used</p>
+    <p>The syntax of Layout files is QML which is a markup language designed by Qt that uses
+    EcmaScript (JavaScript) for the logic.<br>
+    For general JavaScript reference please see:<br>
+    <ul>
+      <li><b>Qt-Script Reference:</b> <a href="https://doc.qt.io/qt-5/ecmascript.html">https://doc.qt.io/qt-5/ecmascript.html</a></li>
+      <li><b>JavaScript Help:</b> <a href="https://www.w3schools.com/js/">https://www.w3schools.com/js/</a></li>
+    </ul>
+    For QML help please see the official documentation:<br>
+    <ul>
+      <li><b>QML Index:</b> <a href="https://doc.qt.io/qt-5/qtqml-index.html">https://doc.qt.io/qt-5/qtqml-index.html</a></li>
+    </ul>
+    </p>
 
     <br>
 
     <table width="100%" class="warning">
       <tr>
         <td width="10%"><img src="qrc:/resources/help/icons/WarningIcon.png" width="64" height="64" alt="Warning"></td>
-        <td width="90%"><br>Layouts have no editor <b>so far</b>, must be edited in an external editor,
-        and are very WIP.<br>if you plan on using custom Layouts you will have to update on each new engine release.</td>
+        <td width="90%"><br>Layouts have no code generation in the editor <b>so far</b>.<br>
+        if you plan on using custom Layouts it is likely, that will have to update them on
+        each new engine release if you want to support new features.</td>
       </tr>
     </table>
-
-    <br>
-
-    <p>For general Qml help, please see the Qt documentation:<br>
-    <i>https://doc-snapshots.qt.io/qt5-5.14/qmlreference.html</i></p>
 
     <br>
 
@@ -68,10 +73,34 @@
     It has the following properties:<br>
 
       <ul>
+        <li><b>autoUpdate: string</b><br>
+        This property contains the Autoupdate Launcher setting.<br>
+        </li>
+
         <li><b>contentFolder: string</b><br>
         This property contains the <a href="qrc:/resources/help/settings/datafolder_setting_help.html">Content Folder</a> setting.
         It lets you access the used content folder path. Since direct file access in Qml
         is not available, this is only accessable for completions sake.<br>
+        </li>
+
+        <li><b>dominantHand: DominantHand</b><br>
+        This property contains the <a href="qrc:/resources/help/settings/dominanthand_setting_help.html">Used Hand</a> setting.<br>
+        </li>
+
+        <li><b>editorCaseInsensitiveSearch: bool</b><br>
+        This property contains the <a href="qrc:/resources/help/settings/editorsettings_setting_help.html">Case Sensitive Search</a> setting of the <a href="qrc:/resources/help/editor/code/script_editor_help.html">Code Editor</a>.<br>
+        </li>
+
+        <li><b>editorFont: string</b><br>
+        This property contains the <a href="qrc:/resources/help/settings/editorsettings_setting_help.html">Font</a> setting of the <a href="qrc:/resources/help/editor/code/script_editor_help.html">Code Editor</a>.<br>
+        </li>
+
+        <li><b>editorShowWhitespace: bool</b><br>
+        This property contains the <a href="qrc:/resources/help/settings/editorsettings_setting_help.html">Show Whitespace</a> setting of the <a href="qrc:/resources/help/editor/code/script_editor_help.html">Code Editor</a>.<br>
+        </li>
+
+        <li><b>editorTheme: string</b><br>
+        This property contains the <a href="qrc:/resources/help/settings/editorsettings_setting_help.html">Theme</a> setting of the <a href="qrc:/resources/help/editor/code/script_editor_help.html">Code Editor</a>.<br>
         </li>
 
         <li><b>font: string</b><br>
@@ -85,6 +114,15 @@
 
         <li><b>keyBindings: string[]</b><br>
         This property lets you access all keys, that can be used as argument to the <i>keyBinding( )</i> function.<br>
+        </li>
+
+        <li><b>metronomeSfx: string</b><br>
+        This property contains the <a href="qrc:/resources/help/settings/metronome_setting_help.html">Metronome SFX</a> setting.<br>
+        </li>
+
+        <li><b>metronomeVolume: real</b><br>
+        This property contains the <a href="qrc:/resources/help/settings/metronome_setting_help.html">Metronome Volume</a> setting
+        as a value between 0.0 and 1.0.<br>
         </li>
 
         <li><b>muted: bool</b><br>
@@ -104,6 +142,39 @@
         the JOIP-Engine is not the currently active window / app.<br>
         </li>
 
+        <li><b>platform: string</b><br>
+        This property contains the name of the platform type currently running the JOIP-Engine
+        (e.g. Windows, Android).<br>
+        </li>
+
+        <li><b>playerAntialiasing: bool</b><br>
+        This property contains the <a href="qrc:/resources/help/settings/playersettings_setting_help.html">Antialiasing</a> setting
+        of the <a href="qrc:/resources/help/play_button_help.html">Player</a>.<br>
+        </li>
+
+        <li><b>playerDropShadow: bool</b><br>
+        This property contains the <a href="qrc:/resources/help/settings/playersettings_setting_help.html">Drop Shadow</a> setting
+        of the <a href="qrc:/resources/help/play_button_help.html">Player</a>.<br>
+        </li>
+
+        <li><b>playerImageMipMap: bool</b><br>
+        This property contains the <a href="qrc:/resources/help/settings/playersettings_setting_help.html">Mipmap</a> setting
+        of the <a href="qrc:/resources/help/play_button_help.html">Player</a>.<br>
+        </li>
+
+        <li><b>playerImageSmooth: bool</b><br>
+        This property contains the <a href="qrc:/resources/help/settings/playersettings_setting_help.html">Smoothing</a> setting
+        of the <a href="qrc:/resources/help/play_button_help.html">Player</a>.<br>
+        </li>
+
+        <li><b>preferedEditorLayout: int</b><br>
+        This property contains the Editor Layout setting of the <a href="qrc:/resources/help/editor_button_help.html">Editor</a>.<br>
+        </li>
+
+        <li><b>pushNotifications: bool</b><br>
+        This property contains the <a href="qrc:/resources/help/settings/push_notification_setting_help.html">Push Notification</a> setting.<br>
+        </li>
+
         <li><b>resolution: size</b><br>
         This property contains the <a href="qrc:/resources/help/settings/resolution_setting_help.html">Resolution</a> setting.
         Useful in combination with the <i>fullscreen</i> property to create dynamic layouts.<br>
@@ -112,6 +183,10 @@
         <li><b>style: string</b><br>
         This property contains the <a href="qrc:/resources/help/settings/style_setting_help.html">Style Name</a> setting.
         It is useful for styling your Layout in a custom way depending on the selected style.<br>
+        </li>
+
+        <li><b>styleHotLoad: bool</b><br>
+        This property contains the <a href="qrc:/resources/help/settings/hotloadstyle_setting_help.html">Style Hotload</a> debug setting.<br>
         </li>
 
         <li><b>version: int</b><br>
@@ -244,7 +319,7 @@
         This property lets you read the <a href="qrc:/resources/help/editor/resources/resource_help.html">Resources</a>
         name representing the map of the
         <a href="qrc:/resources/help/project/joi_project_help.html">JOI-Project</a>.
-        Because this is a currently unused and not fully implemented functionality,
+        Because this is a currently unused and not implemented functionality,
         this property shouldn't be accessed.<br></li>
 
         <li><b>sceneModel: string:</b><br>
@@ -256,8 +331,7 @@
         <li><b>playerLayout: string:</b><br>
         This property lets you read the <a href="qrc:/resources/help/editor/resources/resource_help.html">Resources</a>
         name representing the <a href="qrc:/resources/help/layout/layout_help.html">Layout</a> file of the
-        <a href="qrc:/resources/help/project/joi_project_help.html">JOI-Project</a>.
-        This property is only useful for manually parsing the file.<br></li>
+        <a href="qrc:/resources/help/project/joi_project_help.html">JOI-Project</a></li>
 
         <li><b>kinks: string[]:</b><br>
         This property lets you read the kinks, that the application has been tagged with.<br></li>
@@ -318,6 +392,10 @@
         <li><b>script: string</b><br>
         Gets the script file name that is associated with the scene.<br></li>
 
+        <li><b>sceneLayout: string</b><br>
+        Gets the layout resource file that should be set when the scene is loaded.<br>
+        This is not yet implemented, but planned for future versions.</li>
+
         <li><b>numResources (  ): int:</b><br>
         Returns the number of Resources in the project. Currently unused and will allways return 0.<br></li>
 
@@ -370,6 +448,10 @@
         local resources it contains the local file relave to the
         <a href="qrc:/resources/help/project/joi_project_help.html">JOI-Project</a>
         root folder.<br></li>
+
+        <li><b>source: url</b><br>
+        This property lets you read the source of the Resource.<br>
+        This is not the file path, but the origin where the resource was found (for credit purposes).</li>
 
         <li><b>type: ResourceType</b><br>
         This property lets you read the resource type. The values are:<br>
@@ -436,8 +518,7 @@
       <ul>
         <li>PlayerBackground</li>
         <li>PlayerComponentRegistrator (Do not use)</li>
-        <li>PlayerControls (Do not use)</li>
-        <li>PlayerDefaultLayout (The full default layout)</li>
+        <li>PlayerControls</li>
         <li>PlayerIcons</li>
         <li>PlayerMediaPlayer</li>
         <li>PlayerMetronome</li>

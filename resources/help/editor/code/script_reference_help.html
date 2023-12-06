@@ -38,12 +38,12 @@
     by the JOIP-Engine.<br>
     For general JavaScript reference please see:<br>
       <ul>
-        <li><b>Qt-Script Reference:</b> https://doc.qt.io/qt-5/ecmascript.html</li>
-        <li><b>JavaScript Help:</b> https://www.w3schools.com/js/</li>
+        <li><b>Qt-Script Reference:</b> <a href="https://doc.qt.io/qt-5/ecmascript.html">https://doc.qt.io/qt-5/ecmascript.html</a></li>
+        <li><b>JavaScript Help:</b> <a href="https://www.w3schools.com/js/">https://www.w3schools.com/js/</a></li>
       </ul>
     For general Lua reference please see:<br>
       <ul>
-       <li><b>Programming in Lua (first edition):</b> https://www.lua.org/pil/contents.html</li>
+       <li><b>Programming in Lua (first edition):</b> <a href="https://www.lua.org/pil/contents.html">https://www.lua.org/pil/contents.html</a></li>
       </ul>
     </p>
 
@@ -1047,8 +1047,7 @@
         <li><b>playerLayout: string:</b><br>
         This property lets you read the <a href="qrc:/resources/help/editor/resources/resource_help.html">Resources</a>
         name representing the <a href="qrc:/resources/help/layout/layout_help.html">Layout</a> file of the
-        <a href="qrc:/resources/help/project/joi_project_help.html">JOI-Project</a>.
-        This property is only useful for manually parsing the file.<br>
+        <a href="qrc:/resources/help/project/joi_project_help.html">JOI-Project</a>.<br>
         <br></li>
 
         <li><b>isUsingWeb: bool:</b><br>
@@ -1175,6 +1174,11 @@
         Gets the script file name that is associated with the scene.<br>
         <br></li>
 
+        <li><b>sceneLayout: string</b><br>
+        Gets the <a href="qrc:/resources/help/layout/layout_help.html">Layout</a> resource file that
+        should be set when the scene is loaded.<br> This is not yet implemented,
+        but planned for future versions.</li>
+
         <li><b>numResources (  ): int:</b><br>
         Returns the number of Resources in the project. Currently unused and will allways return 0.<br>
         <br></li>
@@ -1233,6 +1237,10 @@
         local resources it contains the local file relave to the
         <a href="qrc:/resources/help/project/joi_project_help.html">JOI-Project</a>
         root folder.<br></li>
+
+        <li><b>source: url</b><br>
+        This property lets you read the source of the Resource.<br>
+        This is not the file path, but the origin where the resource was found (for credit purposes).</li>
 
         <li><b>type: ResourceType</b><br>
         This property lets you read the resource type. The values are:<br>

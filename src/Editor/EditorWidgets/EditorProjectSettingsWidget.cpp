@@ -41,6 +41,7 @@ namespace
   const QString c_sProjectVersionHelpId =   "Editor/ProjectVersion";
   const QString c_sEngineVersionHelpId =    "Editor/EngineVersion";
   const QString c_sSoundEmitterCountHelpId ="Editor/SoundEmitterCount";
+  const QString c_sLayoutHelpId =           "Editor/Layout";
   const QString c_sProjectFontHelpId       ="Editor/ProjectFont";
   const QString c_sProjectDescribtionHelpId="Editor/ProjectDescribtion";
   const QString c_sFetishListHelpId =       "Editor/FetishList";
@@ -92,6 +93,8 @@ void CEditorProjectSettingsWidget::Initialize()
     wpHelpFactory->RegisterHelp(c_sSoundEmitterCountHelpId, ":/resources/help/editor/projectsettings/number_soundemitters_help.html");
     m_spUi->pFontComboBox->setProperty(helpOverlay::c_sHelpPagePropertyName, c_sProjectFontHelpId);
     wpHelpFactory->RegisterHelp(c_sProjectFontHelpId, ":/resources/help/editor/projectsettings/font_help.html");
+    m_spUi->pDefaultLayoutComboBox->setProperty(helpOverlay::c_sHelpPagePropertyName, c_sLayoutHelpId);
+    wpHelpFactory->RegisterHelp(c_sLayoutHelpId, ":/resources/help/editor/projectsettings/layout_help.html");
     m_spUi->pDescribtionTextEdit->setProperty(helpOverlay::c_sHelpPagePropertyName, c_sProjectDescribtionHelpId);
     wpHelpFactory->RegisterHelp(c_sProjectDescribtionHelpId, ":/resources/help/editor/projectsettings/describtion_textedit_help.html");
     m_spUi->pFetishListWidget->setProperty(helpOverlay::c_sHelpPagePropertyName, c_sFetishListHelpId);

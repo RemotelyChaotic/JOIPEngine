@@ -50,7 +50,7 @@ class CSettings : public QObject
   Q_PROPERTY(bool pushNotifications READ PushNotifications WRITE SetPushNotifications NOTIFY pushNotificationsChanged)
   Q_PROPERTY(QSize resolution READ Resolution WRITE SetResolution NOTIFY resolutionChanged)
   Q_PROPERTY(QString style READ Style WRITE SetStyle NOTIFY styleChanged)
-  Q_PROPERTY(double styleHotLoad READ StyleHotLoad WRITE SetStyleHotLoad NOTIFY styleHotLoadChanged)
+  Q_PROPERTY(bool styleHotLoad READ StyleHotLoad WRITE SetStyleHotLoad NOTIFY styleHotLoadChanged)
   Q_PROPERTY(qint32 version READ Version CONSTANT)
   Q_PROPERTY(double volume READ Volume WRITE SetVolume NOTIFY volumeChanged)
   Q_PROPERTY(WindowMode windowMode READ GetWindowMode WRITE SetWindowMode NOTIFY windowModeChanged)
