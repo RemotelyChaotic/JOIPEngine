@@ -2,8 +2,8 @@
  <author/>
  <comment/>
  <exportmacro/>
- <class>CEditorPatternEditorWidget</class>
- <widget class="QWidget" name="CEditorPatternEditorWidget">
+ <class>CTimelineWidget</class>
+ <widget name="CTimelineWidget" class="QScrollArea">
   <property name="geometry">
    <rect>
     <x>0</x>

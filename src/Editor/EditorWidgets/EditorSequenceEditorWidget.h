@@ -2,12 +2,12 @@
 #define EDITORPATTERNEDITORWIDGET_H
 
 #include "EditorWidgetBase.h"
-#include "ui_EditorPatternEditorWidget.h"
+#include "ui_EditorSequenceEditorWidget.h"
 #include <QPointer>
 #include <memory>
 
 namespace Ui {
-  class CEditorPatternEditorWidget;
+  class CEditorSequenceEditorWidget;
 }
 
 //----------------------------------------------------------------------------------------
@@ -33,7 +33,7 @@ protected:
   void OnActionBarChanged() override;
 
 private:
-  std::shared_ptr<Ui::CEditorPatternEditorWidget> m_spUi;
+  std::shared_ptr<Ui::CEditorSequenceEditorWidget> m_spUi;
 };
 
 #endif // EDITORPATTERNEDITORWIDGET_H

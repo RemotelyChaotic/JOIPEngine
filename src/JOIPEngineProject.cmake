@@ -101,9 +101,6 @@ macro(CreateJOIPProject JOIP_PROJECT_NAME)
     ${JOIPSources}/Editor/EditorWidgets/EditorCodeWidget.cpp
     ${JOIPSources}/Editor/EditorWidgets/EditorCodeWidget.h
     ${JOIPSources}/Editor/EditorWidgets/EditorCodeWidget.ui
-    ${JOIPSources}/Editor/EditorWidgets/EditorPatternEditorWidget.cpp
-    ${JOIPSources}/Editor/EditorWidgets/EditorPatternEditorWidget.h
-    ${JOIPSources}/Editor/EditorWidgets/EditorPatternEditorWidget.ui
     ${JOIPSources}/Editor/EditorWidgets/EditorProjectSettingsWidget.cpp
     ${JOIPSources}/Editor/EditorWidgets/EditorProjectSettingsWidget.h
     ${JOIPSources}/Editor/EditorWidgets/EditorProjectSettingsWidget.ui
@@ -116,6 +113,9 @@ macro(CreateJOIPProject JOIP_PROJECT_NAME)
     ${JOIPSources}/Editor/EditorWidgets/EditorSceneNodeWidget.cpp
     ${JOIPSources}/Editor/EditorWidgets/EditorSceneNodeWidget.h
     ${JOIPSources}/Editor/EditorWidgets/EditorSceneNodeWidget.ui
+    ${JOIPSources}/Editor/EditorWidgets/EditorSequenceEditorWidget.cpp
+    ${JOIPSources}/Editor/EditorWidgets/EditorSequenceEditorWidget.h
+    ${JOIPSources}/Editor/EditorWidgets/EditorSequenceEditorWidget.ui
     ${JOIPSources}/Editor/EditorWidgets/EditorWidgetBase.cpp
     ${JOIPSources}/Editor/EditorWidgets/EditorWidgetBase.h
     ${JOIPSources}/Editor/EditorWidgetRegistry.h
@@ -231,6 +231,18 @@ macro(CreateJOIPProject JOIP_PROJECT_NAME)
     ${JOIPSources}/Editor/Resources/WebResourceOverlay.cpp
     ${JOIPSources}/Editor/Resources/WebResourceOverlay.h
     ${JOIPSources}/Editor/Resources/WebResourceOverlay.ui
+    ${JOIPSources}/Editor/SequenceEditor/SequenceEmentList.cpp
+    ${JOIPSources}/Editor/SequenceEditor/SequenceEmentList.h
+    ${JOIPSources}/Editor/SequenceEditor/SqeuenceElementListModel.cpp
+    ${JOIPSources}/Editor/SequenceEditor/SqeuenceElementListModel.h
+    ${JOIPSources}/Editor/SequenceEditor/SequencePreviewWidget.cpp
+    ${JOIPSources}/Editor/SequenceEditor/SequencePreviewWidget.h
+    ${JOIPSources}/Editor/SequenceEditor/SequencePreviewWidget.ui
+    ${JOIPSources}/Editor/SequenceEditor/TimelineWidget.cpp
+    ${JOIPSources}/Editor/SequenceEditor/TimelineWidget.h
+    ${JOIPSources}/Editor/SequenceEditor/TimelineWidget.ui
+    ${JOIPSources}/Editor/SequenceEditor/TimelineWidgetLayer.cpp
+    ${JOIPSources}/Editor/SequenceEditor/TimelineWidgetLayer.h
     ${JOIPSources}/Editor/Script/BackgroundSnippetOverlay.cpp
     ${JOIPSources}/Editor/Script/BackgroundSnippetOverlay.h
     ${JOIPSources}/Editor/Script/BackgroundSnippetOverlay.ui

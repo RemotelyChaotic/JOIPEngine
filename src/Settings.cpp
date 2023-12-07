@@ -165,14 +165,14 @@ CSettings::CSettings(QObject* pParent) :
       { "LeftTab_Settings",     QKeySequence(Qt::CTRL + Qt::Key_T) },
       { "LeftTab_Nodes",        QKeySequence(Qt::CTRL + Qt::Key_N) },
       { "LeftTab_Code",         QKeySequence(Qt::CTRL + Qt::Key_D) },
-      { "LeftTab_Pattern",      QKeySequence(Qt::CTRL + Qt::Key_P) },
+      { "LeftTab_Sequence",     QKeySequence(Qt::CTRL + Qt::Key_P) },
 
       { "RightTab_Resource",    QKeySequence(Qt::ALT  + Qt::Key_R) },
       { "RightTab_MediaPlayer", QKeySequence(Qt::ALT  + Qt::Key_M) },
       { "RightTab_Settings",    QKeySequence(Qt::ALT  + Qt::Key_T) },
       { "RightTab_Nodes",       QKeySequence(Qt::ALT  + Qt::Key_N) },
       { "RightTab_Code",        QKeySequence(Qt::ALT  + Qt::Key_D) },
-      { "RightTab_Pattern",     QKeySequence(Qt::ALT  + Qt::Key_P) },
+      { "RightTab_Sequence",    QKeySequence(Qt::ALT  + Qt::Key_P) },
 
       { "Cut",        QKeySequence(QKeySequence::Cut)    },
       { "Copy",       QKeySequence(QKeySequence::Copy)   },
