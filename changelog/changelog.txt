@@ -3,10 +3,11 @@ Version 1.4.0.0
 =================
 Fixed Bugs:
 - Fixed Node changes not generating an undo entry on the undo stack.
+- Fixed a crash in the help overlay, when highlighted widgets are 
+  deleted before the overlay can show.
 
 New Features:
-- Added the possibility to configure the Layout of the Player for the project as a whole
-  and for specific scenes.
+- Added the possibility to configure the Layout of the Player for the project as a whole.
 - Created an Auto-Updater for Windows.
 - Added the ability to configure the predominantly used hand. This is taken into 
   account in the default Player Layouts.

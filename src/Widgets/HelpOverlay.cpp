@@ -152,6 +152,8 @@ void CHelpOverlayBackGround::SlotUpdate()
   {
     for (auto pWidget : pHelpwidget->m_vpHelpWidgets)
     {
+      if (nullptr == pWidget) { continue; }
+
       auto it = m_shownIconImages.find(pWidget.data());
       QRect widgetGeometry = pWidget->geometry();
       widgetGeometry.moveTopLeft(parentWidget()->mapFromGlobal(
