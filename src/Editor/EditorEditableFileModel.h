@@ -48,13 +48,13 @@ struct SCachedMapItem
 
 //----------------------------------------------------------------------------------------
 //
-class CScriptEditorModel : public QStandardItemModel
+class CEditorEditableFileModel : public QStandardItemModel
 {
   Q_OBJECT
 
 public:
-  explicit CScriptEditorModel(QWidget* pParent = nullptr);
-  ~CScriptEditorModel() override;
+  explicit CEditorEditableFileModel(QWidget* pParent = nullptr);
+  ~CEditorEditableFileModel() override;
 
   static void InitScript(QIODevice& file, const QString& sType);
 

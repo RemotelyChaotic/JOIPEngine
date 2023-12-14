@@ -9,7 +9,7 @@
 
 class CCodeDisplayWidget;
 class CDatabaseManager;
-class CScriptEditorModel;
+class CEditorEditableFileModel;
 
 class CCommandChangeOpenedScript : public QUndoCommand
 {
@@ -35,7 +35,7 @@ protected:
   std::weak_ptr<CDatabaseManager> m_wpDbManager;
   QPointer<QComboBox> m_pResourcesComboBox;
   QPointer<CCodeDisplayWidget> m_pScriptDisplayWidget;
-  QPointer<CScriptEditorModel> m_pEditorModel;
+  QPointer<CEditorEditableFileModel> m_pEditorModel;
   QPointer<QWidget> m_pGuard;
   std::function<void(qint32)> m_fnReloadEditor;
   bool* m_pbChangingIndexFlag;

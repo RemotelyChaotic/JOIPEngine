@@ -14,7 +14,7 @@ class CMetronomeSnippetOverlay;
 class CNotificationSnippetOverlay;
 class CResourceSnippetOverlay;
 class CResourceTreeItemModel;
-class CScriptEditorModel;
+class CEditorEditableFileModel;
 class CTextSnippetOverlay;
 class CTimerSnippetOverlay;
 class CThreadSnippetOverlay;
@@ -37,7 +37,7 @@ public:
   ~CCodeDisplayWidget();
 
   void Initialize(QPointer<CEditorModel> pEditorModel,
-                  QPointer<CScriptEditorModel> pScriptEditorModel,
+                  QPointer<CEditorEditableFileModel> pScriptEditorModel,
                   QPointer<CResourceTreeItemModel> pResourceTreeModel,
                   QPointer<QUndoStack> pUndoStack);
   void LoadProject(tspProject spProject);
@@ -82,7 +82,7 @@ private:
   std::unique_ptr<CThreadSnippetOverlay>                 m_spThreadSnippetOverlay;
 
   QPointer<CEditorModel>                                 m_pEditorModel;
-  QPointer<CScriptEditorModel>                           m_pScriptEditorModel;
+  QPointer<CEditorEditableFileModel>                     m_pScriptEditorModel;
   QPointer<CResourceTreeItemModel>                       m_pResourceTreeModel;
   QPointer<QUndoStack>                                   m_pUndoStack;
   QString                                                m_sScriptType;

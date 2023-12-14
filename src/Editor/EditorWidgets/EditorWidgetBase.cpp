@@ -1,10 +1,13 @@
 #include "EditorWidgetBase.h"
+
 #include "Editor/EditorActionBar.h"
 #include "Editor/EditorModel.h"
+#include "Editor/EditorEditableFileModel.h"
+
 #include "Editor/NodeEditor/FlowScene.h"
 #include "Editor/Project/KinkTreeModel.h"
 #include "Editor/Resources/ResourceTreeItemModel.h"
-#include "Editor/Script/ScriptEditorModel.h"
+
 #include <QUndoStack>
 
 CEditorWidgetBase::CEditorWidgetBase(QWidget* pParent) :
@@ -82,9 +85,9 @@ QPointer<CResourceTreeItemModel> CEditorWidgetBase::ResourceTreeModel() const
 
 //----------------------------------------------------------------------------------------
 //
-QPointer<CScriptEditorModel> CEditorWidgetBase::ScriptEditorModel() const
+QPointer<CEditorEditableFileModel> CEditorWidgetBase::EditableFileModel() const
 {
-  return m_pEditorModel->ScriptEditorModel();
+  return m_pEditorModel->EditableFileModel();
 }
 
 //----------------------------------------------------------------------------------------

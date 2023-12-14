@@ -1,7 +1,7 @@
 #include "CommandChangeOpenedScript.h"
 #include "Application.h"
 #include "CodeDisplayWidget.h"
-#include "ScriptEditorModel.h"
+#include "Editor/EditorEditableFileModel.h"
 #include "Editor/EditorCommandIds.h"
 #include "Systems/DatabaseManager.h"
 
@@ -18,7 +18,7 @@ CCommandChangeOpenedScript::CCommandChangeOpenedScript(QPointer<QComboBox> pReso
   m_wpDbManager(CApplication::Instance()->System<CDatabaseManager>()),
   m_pResourcesComboBox(pResourcesComboBox),
   m_pScriptDisplayWidget(pScriptDisplayWidget),
-  m_pEditorModel(dynamic_cast<CScriptEditorModel*>(pResourcesComboBox->model())),
+  m_pEditorModel(dynamic_cast<CEditorEditableFileModel*>(pResourcesComboBox->model())),
   m_pGuard(pGuard),
   m_fnReloadEditor(fnReloadEditor),
   m_pbChangingIndexFlag(pbChangingIndexFlag),

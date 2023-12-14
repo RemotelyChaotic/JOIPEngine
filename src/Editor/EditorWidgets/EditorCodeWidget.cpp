@@ -2,13 +2,13 @@
 #include "Application.h"
 
 #include "Editor/EditorActionBar.h"
+#include "Editor/EditorEditableFileModel.h"
 #include "Editor/EditorModel.h"
 
 #include "Editor/Resources/ResourceTreeItemModel.h"
 
 #include "Editor/Script/CodeDisplayWidget.h"
 #include "Editor/Script/CommandChangeOpenedScript.h"
-#include "Editor/Script/ScriptEditorModel.h"
 
 #include "Editor/Tutorial/CodeWidgetTutorialStateSwitchHandler.h"
 
@@ -77,11 +77,11 @@ void CEditorCodeWidget::Initialize()
   m_spTutorialStateSwitchHandler =
       std::make_shared<CCodeWidgetTutorialStateSwitchHandler>(this, m_spUi);
   EditorModel()->AddTutorialStateSwitchHandler(m_spTutorialStateSwitchHandler);
-  ScriptEditorModel()->SetReloadFileWithoutQuestion(true);
+  EditableFileModel()->SetReloadFileWithoutQuestion(true);
 
   m_wpDbManager = CApplication::Instance()->System<CDatabaseManager>();
 
-  m_spUi->pCodeEditorView->Initialize(EditorModel(), ScriptEditorModel(),
+  m_spUi->pCodeEditorView->Initialize(EditorModel(), EditableFileModel(),
                                       ResourceTreeModel(), UndoStack());
 
   auto wpHelpFactory = CApplication::Instance()->System<CHelpFactory>().lock();
@@ -93,7 +93,7 @@ void CEditorCodeWidget::Initialize()
 
   m_spUi->pResourceComboBox->setModel(m_pDummyModel);
 
-  connect(ScriptEditorModel(), &CScriptEditorModel::SignalFileChangedExternally,
+  connect(EditableFileModel(), &CEditorEditableFileModel::SignalFileChangedExternally,
           this, &CEditorCodeWidget::SlotFileChangedExternally);
 
   m_spUi->pStackedWidget->setCurrentIndex(c_iIndexNoScripts);
@@ -108,17 +108,17 @@ void CEditorCodeWidget::LoadProject(tspProject spProject)
   WIDGET_INITIALIZED_GUARD
   if (nullptr == spProject) { return; }
 
-  auto pModel = ScriptEditorModel();
+  auto pModel = EditableFileModel();
   m_spUi->pResourceComboBox->setModel(pModel);
-  connect(pModel, &CScriptEditorModel::rowsInserted,
+  connect(pModel, &CEditorEditableFileModel::rowsInserted,
           this, &CEditorCodeWidget::SlotRowsInserted, Qt::QueuedConnection);
-  connect(pModel, &CScriptEditorModel::rowsRemoved,
+  connect(pModel, &CEditorEditableFileModel::rowsRemoved,
           this, &CEditorCodeWidget::SlotRowsRemoved, Qt::QueuedConnection);
 
   m_spCurrentProject = spProject;
   m_spUi->pCodeEditorView->LoadProject(spProject);
 
-  if (0 < ScriptEditorModel()->rowCount())
+  if (0 < EditableFileModel()->rowCount())
   {
     // force cvhange actionBar to not get dangling references
     // in on_pResourceComboBox_currentIndexChanged
@@ -168,10 +168,10 @@ void CEditorCodeWidget::UnloadProject()
 
   m_sLastCachedScript = QString();
 
-  auto pModel = ScriptEditorModel();
-  disconnect(pModel, &CScriptEditorModel::rowsInserted,
+  auto pModel = EditableFileModel();
+  disconnect(pModel, &CEditorEditableFileModel::rowsInserted,
              this, &CEditorCodeWidget::SlotRowsInserted);
-  disconnect(pModel, &CScriptEditorModel::rowsRemoved,
+  disconnect(pModel, &CEditorEditableFileModel::rowsRemoved,
              this, &CEditorCodeWidget::SlotRowsRemoved);
 
   m_spUi->pResourceComboBox->setModel(m_pDummyModel);
@@ -194,12 +194,12 @@ void CEditorCodeWidget::SaveProject()
   m_spCurrentProject->m_rwLock.unlock();
 
   // save current contents
-  auto pScriptItem = ScriptEditorModel()->CachedScript(
-        ScriptEditorModel()->CachedScriptName(m_spUi->pResourceComboBox->currentIndex()));
+  auto pScriptItem = EditableFileModel()->CachedScript(
+        EditableFileModel()->CachedScriptName(m_spUi->pResourceComboBox->currentIndex()));
   if (nullptr != pScriptItem)
   {
     pScriptItem->m_data = m_spUi->pCodeEditorView->GetCurrentText().toUtf8();
-    ScriptEditorModel()->SetSceneScriptModifiedFlag(pScriptItem->m_sId, pScriptItem->m_bChanged);
+    EditableFileModel()->SetSceneScriptModifiedFlag(pScriptItem->m_sId, pScriptItem->m_bChanged);
   }
 }
 
@@ -207,14 +207,14 @@ void CEditorCodeWidget::SaveProject()
 //
 void CEditorCodeWidget::OnHidden()
 {
-  ScriptEditorModel()->SetReloadFileWithoutQuestion(true);
+  EditableFileModel()->SetReloadFileWithoutQuestion(true);
 }
 
 //----------------------------------------------------------------------------------------
 //
 void CEditorCodeWidget::OnShown()
 {
-  ScriptEditorModel()->SetReloadFileWithoutQuestion(false);
+  EditableFileModel()->SetReloadFileWithoutQuestion(false);
   ReloadEditor(m_spUi->pResourceComboBox->currentIndex());
 }
 
@@ -229,7 +229,7 @@ void CEditorCodeWidget::LoadResource(tspResource spResource)
   const QString sName = spResource->m_sName;
   spResource->m_rwLock.unlock();
 
-  qint32 index = ScriptEditorModel()->ScriptIndex(sName);
+  qint32 index = EditableFileModel()->ScriptIndex(sName);
   if (-1 != index)
   {
     m_spUi->pResourceComboBox->setCurrentIndex(index);
@@ -320,9 +320,9 @@ void CEditorCodeWidget::OnActionBarChanged()
 
     m_spUi->pCodeEditorView->OnActionBarChanged(&ActionBar()->m_spUi);
 
-    if (0 < ScriptEditorModel()->rowCount())
+    if (0 < EditableFileModel()->rowCount())
     {
-      auto pScriptItem = ScriptEditorModel()->CachedScript(ScriptEditorModel()->CachedScriptName(0));
+      auto pScriptItem = EditableFileModel()->CachedScript(EditableFileModel()->CachedScriptName(0));
       if (nullptr != pScriptItem)
       {
         if (nullptr != ActionBar())
@@ -341,14 +341,14 @@ void CEditorCodeWidget::on_pResourceComboBox_currentIndexChanged(qint32 iIndex)
   WIDGET_INITIALIZED_GUARD
   if (nullptr == m_spCurrentProject) { return; }
 
-  if (ScriptEditorModel()->CachedScriptName(iIndex) != m_sLastCachedScript)
+  if (EditableFileModel()->CachedScriptName(iIndex) != m_sLastCachedScript)
   {
     UndoStack()->push(new CCommandChangeOpenedScript(m_spUi->pResourceComboBox,
                                                      m_spUi->pCodeEditorView,
                                                      this, std::bind(&CEditorCodeWidget::ReloadEditor, this, std::placeholders::_1),
                                                      &m_bChangingIndex, &m_sLastCachedScript,
                                                      m_sLastCachedScript,
-                                                     ScriptEditorModel()->CachedScriptName(iIndex)));
+                                                     EditableFileModel()->CachedScriptName(iIndex)));
   }
 }
 
@@ -362,14 +362,14 @@ void CEditorCodeWidget::SlotCodeEditContentsChange(qint32 iPos, qint32 iDel, qin
   // nothing changed
   if ((0 == iDel && 0 == iAdd) || m_bChangingIndex) { return; }
 
-  QString sCachedScript = ScriptEditorModel()->CachedScriptName(
+  QString sCachedScript = EditableFileModel()->CachedScriptName(
         m_spUi->pResourceComboBox->currentIndex());
-  auto pScriptItem = ScriptEditorModel()->CachedScript(sCachedScript);
+  auto pScriptItem = EditableFileModel()->CachedScript(sCachedScript);
   if (nullptr != pScriptItem)
   {
     pScriptItem->m_bChanged = true;
     pScriptItem->m_data = m_spUi->pCodeEditorView->GetCurrentText().toUtf8();
-    ScriptEditorModel()->SetSceneScriptModifiedFlag(pScriptItem->m_sId, true);
+    EditableFileModel()->SetSceneScriptModifiedFlag(pScriptItem->m_sId, true);
   }
 }
 
@@ -393,9 +393,9 @@ void CEditorCodeWidget::SlotDebugStart()
     // get Scene name
     QStringList vsPossibleScenesToDebug;
     QString sSceneName = QString();
-    QString sCachedScript = ScriptEditorModel()->CachedScriptName(
+    QString sCachedScript = EditableFileModel()->CachedScriptName(
           m_spUi->pResourceComboBox->currentIndex());
-    auto pScriptItem = ScriptEditorModel()->CachedScript(sCachedScript);
+    auto pScriptItem = EditableFileModel()->CachedScript(sCachedScript);
     if (nullptr != pScriptItem)
     {
       auto vspScenes = pScriptItem->m_vspScenes;
@@ -538,8 +538,8 @@ void CEditorCodeWidget::SlotDebugUnloadFinished()
 void CEditorCodeWidget::SlotFileChangedExternally(const QString& sName)
 {
   qint32 index = m_spUi->pResourceComboBox->currentIndex();
-  auto pScriptItem = ScriptEditorModel()->CachedScript(sName);
-  if (index == ScriptEditorModel()->ScriptIndex(sName) && nullptr != pScriptItem)
+  auto pScriptItem = EditableFileModel()->CachedScript(sName);
+  if (index == EditableFileModel()->ScriptIndex(sName) && nullptr != pScriptItem)
   {
     m_bChangingIndex = true;
 
@@ -568,7 +568,7 @@ void CEditorCodeWidget::SlotShowOverlay()
 void CEditorCodeWidget::SlotRowsInserted(const QModelIndex& parent, int iFirst, int iLast)
 {
   Q_UNUSED(parent) Q_UNUSED(iFirst) Q_UNUSED(iLast)
-  if (0 < ScriptEditorModel()->rowCount())
+  if (0 < EditableFileModel()->rowCount())
   {
     if (m_spUi->pResourceComboBox->currentIndex() < 0)
     {
@@ -583,7 +583,7 @@ void CEditorCodeWidget::SlotRowsInserted(const QModelIndex& parent, int iFirst, 
 void CEditorCodeWidget::SlotRowsRemoved(const QModelIndex& parent, int iFirst, int iLast)
 {
   Q_UNUSED(parent) Q_UNUSED(iFirst) Q_UNUSED(iLast)
-  if (0 >= ScriptEditorModel()->rowCount())
+  if (0 >= EditableFileModel()->rowCount())
   {
     m_spUi->pStackedWidget->setCurrentIndex(c_iIndexNoScripts);
   }
@@ -599,8 +599,8 @@ void CEditorCodeWidget::ReloadEditor(qint32 iIndex)
   m_spUi->pCodeEditorView->Clear();
 
   // load new contents
-  m_sLastCachedScript = ScriptEditorModel()->CachedScriptName(iIndex);
-  auto  pScriptItem = ScriptEditorModel()->CachedScript(m_sLastCachedScript);
+  m_sLastCachedScript = EditableFileModel()->CachedScriptName(iIndex);
+  auto  pScriptItem = EditableFileModel()->CachedScript(m_sLastCachedScript);
   if (nullptr != pScriptItem)
   {
     if (nullptr != ActionBar())

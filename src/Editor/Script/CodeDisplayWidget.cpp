@@ -9,13 +9,13 @@
 #include "NotificationSnippetOverlay.h"
 #include "MetronomeSnippetOverlay.h"
 #include "ResourceSnippetOverlay.h"
-#include "ScriptEditorModel.h"
 #include "TextSnippetOverlay.h"
 #include "TimerSnippetOverlay.h"
 #include "ThreadSnippetOverlay.h"
 #include "ui_CodeDisplayWidget.h"
 #include "ui_EditorActionBar.h"
 
+#include "Editor/EditorEditableFileModel.h"
 #include "Editor/EditorModel.h"
 #include "Editor/Resources/ResourceTreeItemModel.h"
 
@@ -112,7 +112,7 @@ CCodeDisplayWidget::~CCodeDisplayWidget()
 //----------------------------------------------------------------------------------------
 //
 void CCodeDisplayWidget::Initialize(QPointer<CEditorModel> pEditorModel,
-                                    QPointer<CScriptEditorModel> pScriptEditorModel,
+                                    QPointer<CEditorEditableFileModel> pScriptEditorModel,
                                     QPointer<CResourceTreeItemModel> pResourceTreeModel,
                                     QPointer<QUndoStack> pUndoStack)
 {

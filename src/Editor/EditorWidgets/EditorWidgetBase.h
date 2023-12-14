@@ -12,7 +12,7 @@ class CFlowScene;
 class CEditorModel;
 class CKinkTreeModel;
 class CResourceTreeItemModel;
-class CScriptEditorModel;
+class CEditorEditableFileModel;
 class QUndoStack;
 struct SProject;
 typedef std::shared_ptr<SProject> tspProject;
@@ -50,7 +50,7 @@ protected:
   QPointer<CFlowScene> FlowSceneModel() const;
   QPointer<CKinkTreeModel> KinkModel() const;
   QPointer<CResourceTreeItemModel> ResourceTreeModel() const;
-  QPointer<CScriptEditorModel> ScriptEditorModel() const;
+  QPointer<CEditorEditableFileModel> EditableFileModel() const;
   QPointer<QUndoStack> UndoStack() const;
 
   void SetLoaded(bool bLoaded);

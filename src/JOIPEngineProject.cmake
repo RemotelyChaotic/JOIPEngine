@@ -72,6 +72,8 @@ macro(CreateJOIPProject JOIP_PROJECT_NAME)
     ${JOIPSources}/Editor/EditorChoiceScreen.h
     ${JOIPSources}/Editor/EditorChoiceScreen.ui
     ${JOIPSources}/Editor/EditorCommandIds.h
+    ${JOIPSources}/Editor/EditorEditableFileModel.cpp
+    ${JOIPSources}/Editor/EditorEditableFileModel.h
     ${JOIPSources}/Editor/EditorJobWorker.cpp
     ${JOIPSources}/Editor/EditorJobWorker.h
     ${JOIPSources}/Editor/EditorJobs/EditorExportJob.cpp
@@ -313,8 +315,6 @@ macro(CreateJOIPProject JOIP_PROJECT_NAME)
     ${JOIPSources}/Editor/Script/ScriptEditorCodeToolTip.h
     ${JOIPSources}/Editor/Script/ScriptEditorKeyHandler.cpp
     ${JOIPSources}/Editor/Script/ScriptEditorKeyHandler.h
-    ${JOIPSources}/Editor/Script/ScriptEditorModel.cpp
-    ${JOIPSources}/Editor/Script/ScriptEditorModel.h
     ${JOIPSources}/Editor/Script/ScriptEditorWidget.cpp
     ${JOIPSources}/Editor/Script/ScriptEditorWidget.h
     ${JOIPSources}/Editor/Script/ScriptFooterArea.ui

@@ -1,4 +1,4 @@
-#include "ScriptEditorModel.h"
+#include "EditorEditableFileModel.h"
 #include "Application.h"
 #include "Systems/DatabaseManager.h"
 #include "Systems/Resource.h"
@@ -16,7 +16,7 @@ namespace
 
 //----------------------------------------------------------------------------------------
 //
-CScriptEditorModel::CScriptEditorModel(QWidget* pParent) :
+CEditorEditableFileModel::CEditorEditableFileModel(QWidget* pParent) :
   QStandardItemModel(nullptr),
   m_wpDbManager(CApplication::Instance()->System<CDatabaseManager>()),
   m_spProject(),
@@ -26,28 +26,28 @@ CScriptEditorModel::CScriptEditorModel(QWidget* pParent) :
 {
   auto spDbManager = m_wpDbManager.lock();
   connect(spDbManager.get(), &CDatabaseManager::SignalResourceAdded,
-          this, &CScriptEditorModel::SlotResourceAdded, Qt::QueuedConnection);
+          this, &CEditorEditableFileModel::SlotResourceAdded, Qt::QueuedConnection);
   connect(spDbManager.get(), &CDatabaseManager::SignalResourceRemoved,
-          this, &CScriptEditorModel::SlotResourceRemoved, Qt::QueuedConnection);
+          this, &CEditorEditableFileModel::SlotResourceRemoved, Qt::QueuedConnection);
   connect(spDbManager.get(), &CDatabaseManager::SignalResourceRenamed,
-          this, &CScriptEditorModel::SlotResourceRenamed, Qt::QueuedConnection);
+          this, &CEditorEditableFileModel::SlotResourceRenamed, Qt::QueuedConnection);
 
   connect(spDbManager.get(), &CDatabaseManager::SignalSceneDataChanged,
-          this, &CScriptEditorModel::SlotSceneDatachanged, Qt::QueuedConnection);
+          this, &CEditorEditableFileModel::SlotSceneDatachanged, Qt::QueuedConnection);
   connect(spDbManager.get(), &CDatabaseManager::SignalSceneRemoved,
-          this, &CScriptEditorModel::SlotSceneRemoved, Qt::QueuedConnection);
+          this, &CEditorEditableFileModel::SlotSceneRemoved, Qt::QueuedConnection);
   connect(spDbManager.get(), &CDatabaseManager::SignalSceneRenamed,
-          this, &CScriptEditorModel::SlotSceneRenamed, Qt::QueuedConnection);
+          this, &CEditorEditableFileModel::SlotSceneRenamed, Qt::QueuedConnection);
 }
 
-CScriptEditorModel::~CScriptEditorModel()
+CEditorEditableFileModel::~CEditorEditableFileModel()
 {
   DeInitializeModel();
 }
 
 //----------------------------------------------------------------------------------------
 //
-void CScriptEditorModel::InitScript(QIODevice& file, const QString& sType)
+void CEditorEditableFileModel::InitScript(QIODevice& file, const QString& sType)
 {
   auto itDefinition = SScriptDefinitionData::DefinitionMap().find(sType);
   if (SScriptDefinitionData::DefinitionMap().end() != itDefinition)
@@ -58,7 +58,7 @@ void CScriptEditorModel::InitScript(QIODevice& file, const QString& sType)
 
 //----------------------------------------------------------------------------------------
 //
-SCachedMapItem* CScriptEditorModel::CachedScript(const QString& sName)
+SCachedMapItem* CEditorEditableFileModel::CachedScript(const QString& sName)
 {
   auto it = m_cachedScriptsMap.find(sName);
   if (m_cachedScriptsMap.end() != it)
@@ -74,7 +74,7 @@ SCachedMapItem* CScriptEditorModel::CachedScript(const QString& sName)
 
 //----------------------------------------------------------------------------------------
 //
-QString CScriptEditorModel::CachedScriptName(qint32 iIndex)
+QString CEditorEditableFileModel::CachedScriptName(qint32 iIndex)
 {
   if (static_cast<qint32>(m_cachedScriptsMap.size()) > iIndex && 0 <= iIndex)
   {
@@ -87,7 +87,7 @@ QString CScriptEditorModel::CachedScriptName(qint32 iIndex)
 
 //----------------------------------------------------------------------------------------
 //
-void CScriptEditorModel::InitializeModel(tspProject spProject)
+void CEditorEditableFileModel::InitializeModel(tspProject spProject)
 {
   m_spProject = spProject;
 
@@ -109,7 +109,7 @@ void CScriptEditorModel::InitializeModel(tspProject spProject)
 
 //----------------------------------------------------------------------------------------
 //
-void CScriptEditorModel::DeInitializeModel()
+void CEditorEditableFileModel::DeInitializeModel()
 {
   beginResetModel();
   m_cachedScriptsMap.clear();
@@ -120,7 +120,7 @@ void CScriptEditorModel::DeInitializeModel()
 
 //----------------------------------------------------------------------------------------
 //
-void CScriptEditorModel::SerializeProject()
+void CEditorEditableFileModel::SerializeProject()
 {
   if (nullptr == m_spProject) { return; }
 
@@ -162,7 +162,7 @@ void CScriptEditorModel::SerializeProject()
 
 //----------------------------------------------------------------------------------------
 //
-qint32 CScriptEditorModel::ScriptIndex(const QString& sName)
+qint32 CEditorEditableFileModel::ScriptIndex(const QString& sName)
 {
   auto it = m_cachedScriptsMap.find(sName);
   if (m_cachedScriptsMap.end() != it)
@@ -174,14 +174,14 @@ qint32 CScriptEditorModel::ScriptIndex(const QString& sName)
 
 //----------------------------------------------------------------------------------------
 //
-void CScriptEditorModel::SetReloadFileWithoutQuestion(bool bReload)
+void CEditorEditableFileModel::SetReloadFileWithoutQuestion(bool bReload)
 {
   m_bReloadFileWithoutQuestion = bReload;
 }
 
 //----------------------------------------------------------------------------------------
 //
-void CScriptEditorModel::SetSceneScriptModifiedFlag(const QString& sName, bool bModified)
+void CEditorEditableFileModel::SetSceneScriptModifiedFlag(const QString& sName, bool bModified)
 {
   auto it = m_cachedScriptsMap.find(sName);
   if (m_cachedScriptsMap.end() != it)
@@ -197,7 +197,7 @@ void CScriptEditorModel::SetSceneScriptModifiedFlag(const QString& sName, bool b
 
 //----------------------------------------------------------------------------------------
 //
-QModelIndex CScriptEditorModel::index(int iRow, int iCol, const QModelIndex& parent) const
+QModelIndex CEditorEditableFileModel::index(int iRow, int iCol, const QModelIndex& parent) const
 {
   if (iCol == 0 &&
       0 <= iRow &&
@@ -210,7 +210,7 @@ QModelIndex CScriptEditorModel::index(int iRow, int iCol, const QModelIndex& par
 
 //----------------------------------------------------------------------------------------
 //
-int CScriptEditorModel::rowCount(const QModelIndex& parent) const
+int CEditorEditableFileModel::rowCount(const QModelIndex& parent) const
 {
   Q_UNUSED(parent)
   return static_cast<qint32>(m_cachedScriptsMap.size());
@@ -218,7 +218,7 @@ int CScriptEditorModel::rowCount(const QModelIndex& parent) const
 
 //----------------------------------------------------------------------------------------
 //
-int CScriptEditorModel::columnCount(const QModelIndex& parent) const
+int CEditorEditableFileModel::columnCount(const QModelIndex& parent) const
 {
   Q_UNUSED(parent)
   return 1;
@@ -226,7 +226,7 @@ int CScriptEditorModel::columnCount(const QModelIndex& parent) const
 
 //----------------------------------------------------------------------------------------
 //
-QVariant CScriptEditorModel::data(const QModelIndex& index, int iRole) const
+QVariant CEditorEditableFileModel::data(const QModelIndex& index, int iRole) const
 {
   if (!index.isValid()) { return QVariant(); }
   qint32 iRow = index.row();
@@ -280,14 +280,14 @@ QVariant CScriptEditorModel::data(const QModelIndex& index, int iRole) const
 
 //----------------------------------------------------------------------------------------
 //
-Qt::ItemFlags CScriptEditorModel::flags(const QModelIndex& index) const
+Qt::ItemFlags CEditorEditableFileModel::flags(const QModelIndex& index) const
 {
   return QStandardItemModel::flags(index);
 }
 
 //----------------------------------------------------------------------------------------
 //
-void CScriptEditorModel::SlotProjectPropertiesEdited()
+void CEditorEditableFileModel::SlotProjectPropertiesEdited()
 {
   QReadLocker locker(&m_spProject->m_rwLock);
   QString sNewLayout;
@@ -311,7 +311,7 @@ void CScriptEditorModel::SlotProjectPropertiesEdited()
 
 //----------------------------------------------------------------------------------------
 //
-void CScriptEditorModel::SlotFileChanged(const QString& sPath)
+void CEditorEditableFileModel::SlotFileChanged(const QString& sPath)
 {
   Q_UNUSED(sPath);
   QFileSystemWatcher* pWatcher = qobject_cast<QFileSystemWatcher*>(sender());
@@ -364,7 +364,7 @@ void CScriptEditorModel::SlotFileChanged(const QString& sPath)
 
 //----------------------------------------------------------------------------------------
 //
-void CScriptEditorModel::SlotResourceAdded(qint32 iProjId, const QString& sName)
+void CEditorEditableFileModel::SlotResourceAdded(qint32 iProjId, const QString& sName)
 {
   if (nullptr == m_spProject) { return; }
   m_spProject->m_rwLock.lockForRead();
@@ -412,7 +412,7 @@ void CScriptEditorModel::SlotResourceAdded(qint32 iProjId, const QString& sName)
 
 //----------------------------------------------------------------------------------------
 //
-void CScriptEditorModel::SlotResourceRemoved(qint32 iProjId, const QString& sName)
+void CEditorEditableFileModel::SlotResourceRemoved(qint32 iProjId, const QString& sName)
 {
   if (nullptr == m_spProject) { return; }
   m_spProject->m_rwLock.lockForRead();
@@ -437,7 +437,7 @@ void CScriptEditorModel::SlotResourceRemoved(qint32 iProjId, const QString& sNam
 
 //----------------------------------------------------------------------------------------
 //
-void CScriptEditorModel::SlotResourceRenamed(qint32 iProjId, const QString& sOldName,
+void CEditorEditableFileModel::SlotResourceRenamed(qint32 iProjId, const QString& sOldName,
                                              const QString& sName)
 {
   if (nullptr == m_spProject) { return; }
@@ -457,7 +457,7 @@ void CScriptEditorModel::SlotResourceRenamed(qint32 iProjId, const QString& sOld
 
 //----------------------------------------------------------------------------------------
 //
-void CScriptEditorModel::SlotSceneDatachanged(qint32 iProjId, qint32 iId)
+void CEditorEditableFileModel::SlotSceneDatachanged(qint32 iProjId, qint32 iId)
 {
   if (nullptr == m_spProject) { return; }
   m_spProject->m_rwLock.lockForRead();
@@ -495,7 +495,7 @@ void CScriptEditorModel::SlotSceneDatachanged(qint32 iProjId, qint32 iId)
 
 //----------------------------------------------------------------------------------------
 //
-void CScriptEditorModel::SlotSceneRenamed(qint32 iProjId, qint32 iId)
+void CEditorEditableFileModel::SlotSceneRenamed(qint32 iProjId, qint32 iId)
 {
   if (nullptr == m_spProject) { return; }
   m_spProject->m_rwLock.lockForRead();
@@ -533,7 +533,7 @@ void CScriptEditorModel::SlotSceneRenamed(qint32 iProjId, qint32 iId)
 
 //----------------------------------------------------------------------------------------
 //
-void CScriptEditorModel::SlotSceneRemoved(qint32 iProjId, qint32 iId)
+void CEditorEditableFileModel::SlotSceneRemoved(qint32 iProjId, qint32 iId)
 {
   if (nullptr == m_spProject) { return; }
   m_spProject->m_rwLock.lockForRead();
@@ -574,7 +574,7 @@ void CScriptEditorModel::SlotSceneRemoved(qint32 iProjId, qint32 iId)
 
 //----------------------------------------------------------------------------------------
 //
-void CScriptEditorModel::AddResourceTo(tspResource spResource,
+void CEditorEditableFileModel::AddResourceTo(tspResource spResource,
                                        std::map<QString, SCachedMapItem>& mpToAddTo)
 {
   if (nullptr == m_spProject) { return; }
@@ -622,7 +622,7 @@ void CScriptEditorModel::AddResourceTo(tspResource spResource,
       }
       script.m_spWatcher->setProperty(c_sIdProperty, sResourceName);
       connect(script.m_spWatcher.get(), &QFileSystemWatcher::fileChanged,
-              this, &CScriptEditorModel::SlotFileChanged, Qt::UniqueConnection);
+              this, &CEditorEditableFileModel::SlotFileChanged, Qt::UniqueConnection);
 
       for (const auto& spScene : m_spProject->m_vspScenes)
       {
@@ -639,7 +639,7 @@ void CScriptEditorModel::AddResourceTo(tspResource spResource,
 
 //----------------------------------------------------------------------------------------
 //
-void CScriptEditorModel::LoadScriptFile(const QString& sName)
+void CEditorEditableFileModel::LoadScriptFile(const QString& sName)
 {
   if (nullptr == m_spProject) { return; }
 

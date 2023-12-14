@@ -1,6 +1,7 @@
 #include "EditorModel.h"
 #include "Application.h"
 #include "EditorJobWorker.h"
+#include "EditorEditableFileModel.h"
 
 #include "EditorJobs/IEditorJobStateListener.h"
 
@@ -15,7 +16,6 @@
 
 #include "Project/KinkTreeModel.h"
 #include "Resources/ResourceTreeItemModel.h"
-#include "Script/ScriptEditorModel.h"
 #include "Systems/DatabaseManager.h"
 #include "Systems/PhysFs/PhysFsFileEngine.h"
 #include "Systems/Project.h"
@@ -40,7 +40,7 @@ using QtNodes::Node;
 CEditorModel::CEditorModel(QWidget* pParent) :
   QObject(nullptr),
   m_spKinkTreeModel(std::make_unique<CKinkTreeModel>()),
-  m_spScriptEditorModel(std::make_unique<CScriptEditorModel>(pParent)),
+  m_spEditableFileModel(std::make_unique<CEditorEditableFileModel>(pParent)),
   m_spFlowSceneModel(std::make_unique<CFlowScene>(CNodeEditorRegistry::RegisterDataModels(), nullptr)),
   m_spUndoStack(std::make_unique<QUndoStack>()),
   m_spResourceTreeModel(std::make_unique<CResourceTreeItemModel>(m_spUndoStack.get())),
@@ -58,7 +58,7 @@ CEditorModel::CEditorModel(QWidget* pParent) :
 
   connect(m_spResourceTreeModel.get(), &CResourceTreeItemModel::SignalProjectEdited,
           this, &CEditorModel::SignalProjectEdited, Qt::DirectConnection);
-  connect(m_spScriptEditorModel.get(), &CScriptEditorModel::SignalProjectEdited,
+  connect(m_spEditableFileModel.get(), &CEditorEditableFileModel::SignalProjectEdited,
           this, &CEditorModel::SignalProjectEdited, Qt::DirectConnection);
   connect(m_spFlowSceneModel.get(), &CFlowScene::nodeCreated,
           this, &CEditorModel::SlotNodeCreated);
@@ -68,7 +68,7 @@ CEditorModel::CEditorModel(QWidget* pParent) :
   connect(this, &CEditorModel::SignalProjectPropertiesEdited,
           m_spResourceTreeModel.get(), &CResourceTreeItemModel::SlotProjectPropertiesEdited);
   connect(this, &CEditorModel::SignalProjectPropertiesEdited,
-          m_spScriptEditorModel.get(), &CScriptEditorModel::SlotProjectPropertiesEdited);
+          m_spEditableFileModel.get(), &CEditorEditableFileModel::SlotProjectPropertiesEdited);
 
   connect(JobWorker(), &CEditorJobWorker::SignalEditorJobStarted,
           this, &CEditorModel::SlotJobStarted);
@@ -128,9 +128,9 @@ CResourceTreeItemModel* CEditorModel::ResourceTreeModel() const
 
 //----------------------------------------------------------------------------------------
 //
-CScriptEditorModel* CEditorModel::ScriptEditorModel() const
+CEditorEditableFileModel* CEditorModel::EditableFileModel() const
 {
-  return m_spScriptEditorModel.get();
+  return m_spEditableFileModel.get();
 }
 
 //----------------------------------------------------------------------------------------
@@ -213,7 +213,7 @@ void CEditorModel::AddNewFileToScene(QPointer<QWidget> pParentForDialog,
           QFile scriptFile(info.absoluteFilePath());
           if (scriptFile.open(QIODevice::WriteOnly | QIODevice::Truncate))
           {
-            m_spScriptEditorModel->InitScript(scriptFile, info.suffix());
+            m_spEditableFileModel->InitScript(scriptFile, info.suffix());
 
             tvfnActionsResource vfnActions =
                 {[&spScene, type, spDbManager](const tspResource& spNewResource){
@@ -470,7 +470,7 @@ void CEditorModel::LoadProject(qint32 iId)
   }
 
   m_spResourceTreeModel->InitializeModel(m_spCurrentProject);
-  m_spScriptEditorModel->InitializeModel(m_spCurrentProject);
+  m_spEditableFileModel->InitializeModel(m_spCurrentProject);
 }
 
 //----------------------------------------------------------------------------------------
@@ -580,7 +580,7 @@ void CEditorModel::UnloadProject()
   JobWorker()->StopRunningJobs();
   JobWorker()->WaitForFinished();
 
-  m_spScriptEditorModel->DeInitializeModel();
+  m_spEditableFileModel->DeInitializeModel();
   m_spResourceTreeModel->DeInitializeModel();
   m_spFlowSceneModel->clearScene();
   m_spUndoStack->clear();
@@ -615,7 +615,7 @@ void CEditorModel::SerializeProject()
     return;
   }
 
-  m_spScriptEditorModel->SerializeProject();
+  m_spEditableFileModel->SerializeProject();
 
   auto spDbManager = m_wpDbManager.lock();
   if (nullptr != spDbManager)
