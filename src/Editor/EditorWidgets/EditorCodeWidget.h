@@ -11,6 +11,7 @@ class CBackgroundSnippetOverlay;
 class CCodeWidgetTutorialStateSwitchHandler;
 class CDatabaseManager;
 class CEditorHighlighter;
+class CFilteredEditorEditableFileModel;
 class CScriptRunner;
 class CSettings;
 class QStandardItemModel;
@@ -61,6 +62,7 @@ protected slots:
   void SlotRowsRemoved(const QModelIndex& parent, int iFirst, int iLast);
 
 private:
+  QString CachedResourceName(qint32 iIndex);
   void ReloadEditor(qint32 iIndex);
 
   std::shared_ptr<Ui::CEditorCodeWidget>                 m_spUi;
@@ -69,6 +71,7 @@ private:
   tspProject                                             m_spCurrentProject;
   std::weak_ptr<CDatabaseManager>                        m_wpDbManager;
   std::weak_ptr<CScriptRunner>                           m_wpScriptRunner;
+  QPointer<CFilteredEditorEditableFileModel>             m_pFilteredScriptModel;
   QPointer<QStandardItemModel>                           m_pDummyModel;
   QMetaObject::Connection                                m_debugFinishedConnection;
   bool                                                   m_bDebugging;

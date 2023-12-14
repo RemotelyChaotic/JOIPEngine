@@ -112,14 +112,12 @@ CCodeDisplayWidget::~CCodeDisplayWidget()
 //----------------------------------------------------------------------------------------
 //
 void CCodeDisplayWidget::Initialize(QPointer<CEditorModel> pEditorModel,
-                                    QPointer<CEditorEditableFileModel> pScriptEditorModel,
                                     QPointer<CResourceTreeItemModel> pResourceTreeModel,
                                     QPointer<QUndoStack> pUndoStack)
 {
   m_pInitialized = false;
 
   m_pEditorModel = pEditorModel;
-  m_pScriptEditorModel = pScriptEditorModel;
   m_pResourceTreeModel = pResourceTreeModel;
   m_pUndoStack = pUndoStack;
 

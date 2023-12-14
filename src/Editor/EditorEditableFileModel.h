@@ -5,7 +5,9 @@
 #include <QFileSystemWatcher>
 #include <QStandardItemModel>
 
+#include <QCollator>
 #include <QPointer>
+#include <QSortFilterProxyModel>
 #include <QWidget>
 #include <map>
 #include <memory>
@@ -44,6 +46,33 @@ struct SCachedMapItem
   bool                                 m_bIgnoreNextModification;
   bool                                 m_bAllreadyAsked;
   bool                                 m_bInitialized;
+};
+
+//----------------------------------------------------------------------------------------
+//
+class CEditorEditableFileModel;
+class CFilteredEditorEditableFileModel : public QSortFilterProxyModel
+{
+  Q_OBJECT
+
+public:
+  explicit CFilteredEditorEditableFileModel(QWidget* pParent = nullptr);
+  ~CFilteredEditorEditableFileModel() override;
+
+  void FilterForTypes(const std::vector<QString>& vsEnabledTypes);
+
+  void setSourceModel(QAbstractItemModel* pSourceModel) override;
+
+protected:
+  bool filterAcceptsRow(int iSourceRow, const QModelIndex& sourceParent) const override;
+  bool lessThan(const QModelIndex& left, const QModelIndex& right) const override;
+
+private:
+  void SlotResourceAdded();
+  void SlotResourceRemoved();
+
+  std::vector<QString> m_vsEnabledTypes;
+  QCollator            m_collator;
 };
 
 //----------------------------------------------------------------------------------------

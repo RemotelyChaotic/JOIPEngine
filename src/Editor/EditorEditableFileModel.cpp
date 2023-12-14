@@ -14,6 +14,121 @@ namespace
   const char c_sIdProperty[] = "ID";
 }
 
+CFilteredEditorEditableFileModel::CFilteredEditorEditableFileModel(QWidget* pParent) :
+  QSortFilterProxyModel(pParent)
+{
+  m_collator.setNumericMode(true);
+}
+CFilteredEditorEditableFileModel::~CFilteredEditorEditableFileModel() = default;
+
+//----------------------------------------------------------------------------------------
+//
+void CFilteredEditorEditableFileModel::FilterForTypes(const std::vector<QString>& vsEnabledTypes)
+{
+  if (m_vsEnabledTypes != vsEnabledTypes)
+  {
+    m_vsEnabledTypes = vsEnabledTypes;
+    invalidateFilter();
+  }
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CFilteredEditorEditableFileModel::setSourceModel(QAbstractItemModel* pSourceModel)
+{
+  if (nullptr != sourceModel())
+  {
+    disconnect(sourceModel(), &CEditorEditableFileModel::rowsInserted,
+               this, &CFilteredEditorEditableFileModel::SlotResourceAdded);
+    disconnect(sourceModel(), &CEditorEditableFileModel::rowsRemoved,
+               this, &CFilteredEditorEditableFileModel::SlotResourceRemoved);
+  }
+
+  QSortFilterProxyModel::setSourceModel(pSourceModel);
+
+  if (nullptr != pSourceModel)
+  {
+    connect(pSourceModel, &CEditorEditableFileModel::rowsInserted,
+            this, &CFilteredEditorEditableFileModel::SlotResourceAdded);
+    connect(pSourceModel, &CEditorEditableFileModel::rowsRemoved,
+            this, &CFilteredEditorEditableFileModel::SlotResourceRemoved);
+  }
+}
+
+//----------------------------------------------------------------------------------------
+//
+bool CFilteredEditorEditableFileModel::filterAcceptsRow(int iSourceRow, const QModelIndex& sourceParent) const
+{
+  CEditorEditableFileModel* pSourceModel = dynamic_cast<CEditorEditableFileModel*>(sourceModel());
+  if (nullptr != pSourceModel)
+  {
+    // get source-model index for current row
+    QModelIndex sourceIndex = pSourceModel->index(iSourceRow, 0, sourceParent);
+    if(sourceIndex.isValid())
+    {
+      // check current index itself :
+      QString value = pSourceModel->data(sourceIndex, Qt::DisplayRole).toString();
+      auto pFile = pSourceModel->CachedFile(pSourceModel->CachedResourceName(sourceIndex.row()));
+
+      bool bMatchesTsypeSelector = m_vsEnabledTypes.empty() || nullptr == pFile ||
+                                   !pFile->m_sFileType.isEmpty();
+      if (!bMatchesTsypeSelector)
+      {
+        auto it =
+            std::find(m_vsEnabledTypes.begin(), m_vsEnabledTypes.end(), pFile->m_sFileType);
+        bMatchesTsypeSelector = m_vsEnabledTypes.end() != it;
+      }
+
+      if(!filterRegExp().isEmpty())
+      {
+        return bMatchesTsypeSelector && value.contains(filterRegExp());
+      }
+      else
+      {
+        return bMatchesTsypeSelector;
+      }
+    }
+  }
+
+  return QSortFilterProxyModel::filterAcceptsRow(iSourceRow, sourceParent);
+}
+
+//----------------------------------------------------------------------------------------
+//
+bool CFilteredEditorEditableFileModel::lessThan(const QModelIndex& left, const QModelIndex& right) const
+{
+  QVariant leftData = sourceModel()->data(left, Qt::DisplayRole);
+  QVariant rightData = sourceModel()->data(right, Qt::DisplayRole);
+
+  bool bLeftHasChildren = sourceModel()->hasChildren(left);
+  bool bRightHasChildren = sourceModel()->hasChildren(right);
+
+  if (bLeftHasChildren && !bRightHasChildren)
+  {
+    return true;
+  }
+  else if (!bLeftHasChildren && bRightHasChildren)
+  {
+    return false;
+  }
+
+  return m_collator.compare(leftData.toString(), rightData.toString()) < 0;
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CFilteredEditorEditableFileModel::SlotResourceAdded()
+{
+  invalidateFilter();
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CFilteredEditorEditableFileModel::SlotResourceRemoved()
+{
+  invalidateFilter();
+}
+
 //----------------------------------------------------------------------------------------
 //
 CEditorEditableFileModel::CEditorEditableFileModel(QWidget* pParent) :

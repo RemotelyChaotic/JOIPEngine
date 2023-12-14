@@ -78,10 +78,24 @@ bool CResourceTreeItemSortFilterProxyModel::filterAcceptsRow(int iSourceRow,
   CResourceTreeItemModel* pSourceModel = dynamic_cast<CResourceTreeItemModel*>(sourceModel());
   if (nullptr != pSourceModel)
   {
-    if(!filterRegExp().isEmpty())
+    // get source-model index for current row
+    QModelIndex sourceIndex = pSourceModel->index(iSourceRow, 0, sourceParent);
+    if(sourceIndex.isValid())
     {
-        // get source-model index for current row
-        QModelIndex sourceIndex = pSourceModel->index(iSourceRow, 0, sourceParent);
+      // check current index itself :
+      QString key = pSourceModel->data(sourceIndex, Qt::DisplayRole, resource_item::c_iColumnName).toString();
+      QVariant varType = pSourceModel->data(sourceIndex, Qt::DisplayRole, resource_item::c_iColumnType).toInt();
+      bool bMatchesTsypeSelector = m_vEnabledTypes.empty() || !varType.isValid();
+      if (!bMatchesTsypeSelector)
+      {
+        auto it =
+            std::find(m_vEnabledTypes.begin(), m_vEnabledTypes.end(),
+                      EResourceType::_from_integral(varType.toInt()));
+        bMatchesTsypeSelector = m_vEnabledTypes.end() != it;
+      }
+
+      if(!filterRegExp().isEmpty())
+      {
         if(sourceIndex.isValid())
         {
           // if any of children matches the filter, then current index matches the filter as well
@@ -93,19 +107,23 @@ bool CResourceTreeItemSortFilterProxyModel::filterAcceptsRow(int iSourceRow,
               return true;
             }
           }
-          // check current index itself :
-          QString key = pSourceModel->data(sourceIndex, Qt::DisplayRole, resource_item::c_iColumnName).toString();
-          QVariant varType = pSourceModel->data(sourceIndex, Qt::DisplayRole, resource_item::c_iColumnType).toInt();
-          bool bMatchesTsypeSelector = m_vEnabledTypes.empty() || !varType.isValid();
-          if (!bMatchesTsypeSelector)
-          {
-            auto it =
-                std::find(m_vEnabledTypes.begin(), m_vEnabledTypes.end(),
-                          EResourceType::_from_integral(varType.toInt()));
-            bMatchesTsypeSelector = m_vEnabledTypes.end() != it;
-          }
+
           return bMatchesTsypeSelector && key.contains(filterRegExp());
         }
+      }
+      else
+      {
+        qint32 iNb = pSourceModel->rowCount(sourceIndex) ;
+        for(qint32 i = 0; i < iNb; ++i)
+        {
+          if(filterAcceptsRow(i, sourceIndex))
+          {
+            return true;
+          }
+        }
+
+        return bMatchesTsypeSelector;
+      }
     }
   }
 
