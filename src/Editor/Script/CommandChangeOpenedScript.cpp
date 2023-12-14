@@ -79,7 +79,7 @@ void CCommandChangeOpenedScript::DoUndoRedo(const QString& sScriptNext)
     *m_pbChangingIndexFlag = true;
 
     // save old contents
-    auto pScriptItem = m_pEditorModel->CachedScript(*m_psLastCachedScript);
+    auto pScriptItem = m_pEditorModel->CachedFile(*m_psLastCachedScript);
     if (nullptr != pScriptItem)
     {
       pScriptItem->m_data = m_pScriptDisplayWidget->GetCurrentText().toUtf8();
@@ -88,7 +88,7 @@ void CCommandChangeOpenedScript::DoUndoRedo(const QString& sScriptNext)
 
     if (nullptr != m_fnReloadEditor)
     {
-      m_fnReloadEditor(m_pEditorModel->ScriptIndex(sScriptNext));
+      m_fnReloadEditor(m_pEditorModel->FileIndex(sScriptNext));
     }
 
     *m_pbChangingIndexFlag = false;

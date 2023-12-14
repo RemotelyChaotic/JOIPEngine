@@ -149,6 +149,20 @@ QUndoStack* CEditorModel::UndoStack() const
 
 //----------------------------------------------------------------------------------------
 //
+namespace
+{
+  void InitScript(QIODevice& file, const QString& sType)
+  {
+    auto itDefinition = SScriptDefinitionData::DefinitionMap().find(sType);
+    if (SScriptDefinitionData::DefinitionMap().end() != itDefinition)
+    {
+      file.write(itDefinition->second.sInitText.toUtf8());
+    }
+  }
+}
+
+//----------------------------------------------------------------------------------------
+//
 void CEditorModel::AddNewFileToScene(QPointer<QWidget> pParentForDialog,
                                      tspScene spScene,
                                      EResourceType type)
@@ -213,7 +227,7 @@ void CEditorModel::AddNewFileToScene(QPointer<QWidget> pParentForDialog,
           QFile scriptFile(info.absoluteFilePath());
           if (scriptFile.open(QIODevice::WriteOnly | QIODevice::Truncate))
           {
-            m_spEditableFileModel->InitScript(scriptFile, info.suffix());
+            InitScript(scriptFile, info.suffix());
 
             tvfnActionsResource vfnActions =
                 {[&spScene, type, spDbManager](const tspResource& spNewResource){

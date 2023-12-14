@@ -18,7 +18,7 @@ struct SCachedMapItem
 {
   SCachedMapItem() :
     m_vspScenes(), m_spWatcher(std::make_shared<QFileSystemWatcher>()), m_data(), m_sId(),
-    m_sHighlightDefinition("JavaScript"), m_sScriptType("js"),
+    m_sHighlightDefinition("JavaScript"), m_sFileType("js"),
     m_bChanged(false), m_bIgnoreNextModification(false), m_bAllreadyAsked(false), m_bInitialized(false)
   {}
   SCachedMapItem(const SCachedMapItem& other) :
@@ -26,7 +26,7 @@ struct SCachedMapItem
     m_spWatcher(other.m_spWatcher), m_data(other.m_data),
     m_sId(other.m_sId),
     m_sHighlightDefinition(other.m_sHighlightDefinition),
-    m_sScriptType(other.m_sScriptType),
+    m_sFileType(other.m_sFileType),
     m_bChanged(other.m_bChanged),
     m_bIgnoreNextModification(other.m_bIgnoreNextModification),
     m_bAllreadyAsked(other.m_bAllreadyAsked),
@@ -39,7 +39,7 @@ struct SCachedMapItem
   QByteArray                           m_data;
   QString                              m_sId;
   QString                              m_sHighlightDefinition;
-  QString                              m_sScriptType;
+  QString                              m_sFileType;
   bool                                 m_bChanged;
   bool                                 m_bIgnoreNextModification;
   bool                                 m_bAllreadyAsked;
@@ -56,14 +56,13 @@ public:
   explicit CEditorEditableFileModel(QWidget* pParent = nullptr);
   ~CEditorEditableFileModel() override;
 
-  static void InitScript(QIODevice& file, const QString& sType);
-
-  SCachedMapItem* CachedScript(const QString& sName);
-  QString CachedScriptName(qint32 iName);
+  SCachedMapItem* CachedFile(const QString& sName);
+  QString CachedResourceName(qint32 iName);
   void InitializeModel(tspProject spProject);
   void DeInitializeModel();
   void SerializeProject();
-  qint32 ScriptIndex(const QString& sName);
+  qint32 FileIndex(const QString& sName);
+
   void SetReloadFileWithoutQuestion(bool bReload);
   void SetSceneScriptModifiedFlag(const QString& sName, bool bModified);
 
@@ -91,7 +90,8 @@ private slots:
 
 private:
   void AddResourceTo(tspResource spResource, std::map<QString, SCachedMapItem>& mpToAddTo);
-  void LoadScriptFile(const QString& sName);
+  bool CheckResourceTypeSupported(EResourceType type);
+  void LoadFile(const QString& sName);
 
   std::weak_ptr<CDatabaseManager>             m_wpDbManager;
   tspProject                                  m_spProject;

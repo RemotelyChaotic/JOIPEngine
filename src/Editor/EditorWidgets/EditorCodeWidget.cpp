@@ -194,8 +194,8 @@ void CEditorCodeWidget::SaveProject()
   m_spCurrentProject->m_rwLock.unlock();
 
   // save current contents
-  auto pScriptItem = EditableFileModel()->CachedScript(
-        EditableFileModel()->CachedScriptName(m_spUi->pResourceComboBox->currentIndex()));
+  auto pScriptItem = EditableFileModel()->CachedFile(
+        EditableFileModel()->CachedResourceName(m_spUi->pResourceComboBox->currentIndex()));
   if (nullptr != pScriptItem)
   {
     pScriptItem->m_data = m_spUi->pCodeEditorView->GetCurrentText().toUtf8();
@@ -229,7 +229,7 @@ void CEditorCodeWidget::LoadResource(tspResource spResource)
   const QString sName = spResource->m_sName;
   spResource->m_rwLock.unlock();
 
-  qint32 index = EditableFileModel()->ScriptIndex(sName);
+  qint32 index = EditableFileModel()->FileIndex(sName);
   if (-1 != index)
   {
     m_spUi->pResourceComboBox->setCurrentIndex(index);
@@ -322,12 +322,12 @@ void CEditorCodeWidget::OnActionBarChanged()
 
     if (0 < EditableFileModel()->rowCount())
     {
-      auto pScriptItem = EditableFileModel()->CachedScript(EditableFileModel()->CachedScriptName(0));
+      auto pScriptItem = EditableFileModel()->CachedFile(EditableFileModel()->CachedResourceName(0));
       if (nullptr != pScriptItem)
       {
         if (nullptr != ActionBar())
         {
-          m_spUi->pCodeEditorView->SetScriptType(pScriptItem->m_sScriptType);
+          m_spUi->pCodeEditorView->SetScriptType(pScriptItem->m_sFileType);
         }
       }
     }
@@ -341,14 +341,14 @@ void CEditorCodeWidget::on_pResourceComboBox_currentIndexChanged(qint32 iIndex)
   WIDGET_INITIALIZED_GUARD
   if (nullptr == m_spCurrentProject) { return; }
 
-  if (EditableFileModel()->CachedScriptName(iIndex) != m_sLastCachedScript)
+  if (EditableFileModel()->CachedResourceName(iIndex) != m_sLastCachedScript)
   {
     UndoStack()->push(new CCommandChangeOpenedScript(m_spUi->pResourceComboBox,
                                                      m_spUi->pCodeEditorView,
                                                      this, std::bind(&CEditorCodeWidget::ReloadEditor, this, std::placeholders::_1),
                                                      &m_bChangingIndex, &m_sLastCachedScript,
                                                      m_sLastCachedScript,
-                                                     EditableFileModel()->CachedScriptName(iIndex)));
+                                                     EditableFileModel()->CachedResourceName(iIndex)));
   }
 }
 
@@ -362,9 +362,9 @@ void CEditorCodeWidget::SlotCodeEditContentsChange(qint32 iPos, qint32 iDel, qin
   // nothing changed
   if ((0 == iDel && 0 == iAdd) || m_bChangingIndex) { return; }
 
-  QString sCachedScript = EditableFileModel()->CachedScriptName(
+  QString sCachedScript = EditableFileModel()->CachedResourceName(
         m_spUi->pResourceComboBox->currentIndex());
-  auto pScriptItem = EditableFileModel()->CachedScript(sCachedScript);
+  auto pScriptItem = EditableFileModel()->CachedFile(sCachedScript);
   if (nullptr != pScriptItem)
   {
     pScriptItem->m_bChanged = true;
@@ -393,9 +393,9 @@ void CEditorCodeWidget::SlotDebugStart()
     // get Scene name
     QStringList vsPossibleScenesToDebug;
     QString sSceneName = QString();
-    QString sCachedScript = EditableFileModel()->CachedScriptName(
+    QString sCachedScript = EditableFileModel()->CachedResourceName(
           m_spUi->pResourceComboBox->currentIndex());
-    auto pScriptItem = EditableFileModel()->CachedScript(sCachedScript);
+    auto pScriptItem = EditableFileModel()->CachedFile(sCachedScript);
     if (nullptr != pScriptItem)
     {
       auto vspScenes = pScriptItem->m_vspScenes;
@@ -538,8 +538,8 @@ void CEditorCodeWidget::SlotDebugUnloadFinished()
 void CEditorCodeWidget::SlotFileChangedExternally(const QString& sName)
 {
   qint32 index = m_spUi->pResourceComboBox->currentIndex();
-  auto pScriptItem = EditableFileModel()->CachedScript(sName);
-  if (index == EditableFileModel()->ScriptIndex(sName) && nullptr != pScriptItem)
+  auto pScriptItem = EditableFileModel()->CachedFile(sName);
+  if (index == EditableFileModel()->FileIndex(sName) && nullptr != pScriptItem)
   {
     m_bChangingIndex = true;
 
@@ -599,15 +599,15 @@ void CEditorCodeWidget::ReloadEditor(qint32 iIndex)
   m_spUi->pCodeEditorView->Clear();
 
   // load new contents
-  m_sLastCachedScript = EditableFileModel()->CachedScriptName(iIndex);
-  auto  pScriptItem = EditableFileModel()->CachedScript(m_sLastCachedScript);
+  m_sLastCachedScript = EditableFileModel()->CachedResourceName(iIndex);
+  auto  pScriptItem = EditableFileModel()->CachedFile(m_sLastCachedScript);
   if (nullptr != pScriptItem)
   {
     if (nullptr != ActionBar())
     {
       ActionBar()->m_spUi->DebugButton->setEnabled(!pScriptItem->m_vspScenes.empty());
     }
-    m_spUi->pCodeEditorView->SetScriptType(pScriptItem->m_sScriptType);
+    m_spUi->pCodeEditorView->SetScriptType(pScriptItem->m_sFileType);
     m_spUi->pCodeEditorView->SetContent(QString::fromUtf8(pScriptItem->m_data));
     m_spUi->pCodeEditorView->SetHighlightDefinition(pScriptItem->m_sHighlightDefinition);
   }

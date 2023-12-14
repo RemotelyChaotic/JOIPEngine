@@ -47,25 +47,14 @@ CEditorEditableFileModel::~CEditorEditableFileModel()
 
 //----------------------------------------------------------------------------------------
 //
-void CEditorEditableFileModel::InitScript(QIODevice& file, const QString& sType)
-{
-  auto itDefinition = SScriptDefinitionData::DefinitionMap().find(sType);
-  if (SScriptDefinitionData::DefinitionMap().end() != itDefinition)
-  {
-    file.write(itDefinition->second.sInitText.toUtf8());
-  }
-}
-
-//----------------------------------------------------------------------------------------
-//
-SCachedMapItem* CEditorEditableFileModel::CachedScript(const QString& sName)
+SCachedMapItem* CEditorEditableFileModel::CachedFile(const QString& sName)
 {
   auto it = m_cachedScriptsMap.find(sName);
   if (m_cachedScriptsMap.end() != it)
   {
     if (!it->second.m_bInitialized)
     {
-      LoadScriptFile(it->first);
+      LoadFile(it->first);
     }
     return &it->second;
   }
@@ -74,7 +63,7 @@ SCachedMapItem* CEditorEditableFileModel::CachedScript(const QString& sName)
 
 //----------------------------------------------------------------------------------------
 //
-QString CEditorEditableFileModel::CachedScriptName(qint32 iIndex)
+QString CEditorEditableFileModel::CachedResourceName(qint32 iIndex)
 {
   if (static_cast<qint32>(m_cachedScriptsMap.size()) > iIndex && 0 <= iIndex)
   {
@@ -162,7 +151,7 @@ void CEditorEditableFileModel::SerializeProject()
 
 //----------------------------------------------------------------------------------------
 //
-qint32 CEditorEditableFileModel::ScriptIndex(const QString& sName)
+qint32 CEditorEditableFileModel::FileIndex(const QString& sName)
 {
   auto it = m_cachedScriptsMap.find(sName);
   if (m_cachedScriptsMap.end() != it)
@@ -345,13 +334,13 @@ void CEditorEditableFileModel::SlotFileChanged(const QString& sPath)
 
             if (msgBox.clickedButton() == pReloadButton)
             {
-              LoadScriptFile(sId);
+              LoadFile(sId);
               emit SignalFileChangedExternally(sId);
             }
           }
           else
           {
-            LoadScriptFile(sId);
+            LoadFile(sId);
             emit SignalFileChangedExternally(sId);
           }
           it->second.m_bAllreadyAsked = false;
@@ -381,8 +370,7 @@ void CEditorEditableFileModel::SlotResourceAdded(qint32 iProjId, const QString& 
     if (nullptr != spResource)
     {
       QReadLocker locker(&spResource->m_rwLock);
-      if (spResource->m_type._to_integral() != EResourceType::eScript &&
-          spResource->m_type._to_integral() != EResourceType::eLayout)
+      if (!CheckResourceTypeSupported(spResource->m_type))
       { return; }
       locker.unlock();
 
@@ -582,8 +570,7 @@ void CEditorEditableFileModel::AddResourceTo(tspResource spResource,
   QString sPath = ResourceUrlToAbsolutePath(spResource);
   QReadLocker resourceLocker(&spResource->m_rwLock);
   const QString sResourceName = spResource->m_sName;
-  if (spResource->m_type._to_integral() != EResourceType::eScript &&
-      spResource->m_type._to_integral() != EResourceType::eLayout)
+  if (!CheckResourceTypeSupported(spResource->m_type))
   {
     return;
   }
@@ -612,7 +599,7 @@ void CEditorEditableFileModel::AddResourceTo(tspResource spResource,
             QFileInfo(sResourcePath.toString()).suffix());
       if (SScriptDefinitionData::DefinitionMap().end() != itDefinition)
       {
-        script.m_sScriptType = itDefinition->second.sType;
+        script.m_sFileType = itDefinition->second.sType;
         script.m_sHighlightDefinition = itDefinition->second.sHighlightDefinition;
       }
       if (!script.m_spWatcher->addPath(sPath))
@@ -639,7 +626,15 @@ void CEditorEditableFileModel::AddResourceTo(tspResource spResource,
 
 //----------------------------------------------------------------------------------------
 //
-void CEditorEditableFileModel::LoadScriptFile(const QString& sName)
+bool CEditorEditableFileModel::CheckResourceTypeSupported(EResourceType type)
+{
+  return type._to_integral() == EResourceType::eScript ||
+         type._to_integral() == EResourceType::eLayout;
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CEditorEditableFileModel::LoadFile(const QString& sName)
 {
   if (nullptr == m_spProject) { return; }
 
