@@ -72,9 +72,10 @@ struct SResourceFormats
   static QStringList DatabaseFormats();
   static QStringList FontFormats();
   static QStringList ImageFormats();
+  static QStringList LayoutFormats();
   static QStringList OtherFormats();
   static QStringList ScriptFormats();
-  static QStringList LayoutFormats();
+  static QStringList SequenceFormat();
   static QStringList VideoFormats();
 
   static QString JoinedFormatsForFilePicker();

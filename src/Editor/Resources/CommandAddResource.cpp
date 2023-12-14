@@ -87,6 +87,11 @@ namespace  {
             sResource = spDbManager->AddResource(spCurrentProject, url, EResourceType::eLayout);
             bAddedFiles = true;
           }
+          else if (SResourceFormats::SequenceFormat().contains(sEnding))
+          {
+            sResource = spDbManager->AddResource(spCurrentProject, url, EResourceType::eSequence);
+            bAddedFiles = true;
+          }
           else if (SResourceFormats::ArchiveFormats().contains(sEnding))
           {
             if (spDbManager->AddResourceArchive(spCurrentProject, url))
@@ -101,7 +106,8 @@ namespace  {
                                           SResourceFormats::OtherFormats() <<
                                           SResourceFormats::ScriptFormats() <<
                                           SResourceFormats::DatabaseFormats() <<
-                                          SResourceFormats::LayoutFormats(),
+                                          SResourceFormats::LayoutFormats() <<
+                                          SResourceFormats::SequenceFormat(),
                                         QDir::Files | QDir::NoDotAndDotDot,
                                         QDirIterator::Subdirectories);
               while (itCompressed.hasNext())

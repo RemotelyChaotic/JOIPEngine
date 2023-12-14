@@ -557,5 +557,10 @@
         <file>resources/android_styles/Gummyzilla/ui/ButtonLayout.png</file>
         <file>resources/android_styles/Gummyzilla/ui/ButtonLayoutSelected.png</file>
         <file>resources/android_styles/Somber Dark/ui/ButtonLayout.png</file>
+        <file>resources/android_styles/621 Hexagons/ui/IconSequence.png</file>
+        <file>resources/android_styles/Blue Night/ui/IconSequence.png</file>
+        <file>resources/android_styles/Equestria after Dark/ui/IconSequence.png</file>
+        <file>resources/android_styles/Gummyzilla/ui/IconSequence.png</file>
+        <file>resources/android_styles/Somber Dark/ui/IconSequence.png</file>
     </qresource>
 </RCC>

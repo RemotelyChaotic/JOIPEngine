@@ -629,7 +629,8 @@ void CEditorEditableFileModel::AddResourceTo(tspResource spResource,
 bool CEditorEditableFileModel::CheckResourceTypeSupported(EResourceType type)
 {
   return type._to_integral() == EResourceType::eScript ||
-         type._to_integral() == EResourceType::eLayout;
+         type._to_integral() == EResourceType::eLayout ||
+         type._to_integral() == EResourceType::eSequence;
 }
 
 //----------------------------------------------------------------------------------------

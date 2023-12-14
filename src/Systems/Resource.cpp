@@ -275,6 +275,14 @@ QStringList SResourceFormats::ImageFormats()
 
 //----------------------------------------------------------------------------------------
 //
+QStringList SResourceFormats::LayoutFormats()
+{
+  static QStringList vsFormats = QStringList() << "*.qml" << "*.layout";
+  return vsFormats;
+}
+
+//----------------------------------------------------------------------------------------
+//
 QStringList SResourceFormats::OtherFormats()
 {
   static QStringList vsFormats = QStringList() << "*.json" << "*.proj" << "*.flow";
@@ -291,9 +299,9 @@ QStringList SResourceFormats::ScriptFormats()
 
 //----------------------------------------------------------------------------------------
 //
-QStringList SResourceFormats::LayoutFormats()
+QStringList SResourceFormats::SequenceFormat()
 {
-  static QStringList vsFormats = QStringList() << "*.qml" << "*.layout";
+  static QStringList vsFormats = QStringList() << "*.jseq";
   return vsFormats;
 }
 

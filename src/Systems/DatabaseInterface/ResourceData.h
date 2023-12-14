@@ -19,7 +19,8 @@ BETTER_ENUM(EResourceType, qint32,
             eScript     = 4,
             eDatabase   = 5,
             eFont       = 6,
-            eLayout     = 7);
+            eLayout     = 7,
+            eSequence   = 8);
 
 struct SResourceData
 {
@@ -229,6 +230,7 @@ Rectangle {
   constexpr static char c_sScriptTypeLua[] = "lua";
   constexpr static char c_sScriptTypeQml[] = "qml";
   constexpr static char c_sScriptTypeLayout[] = "layout";
+  constexpr static char c_sFileTypeSequence[] = "jseq";
   static inline const std::map<QString, SScriptDefinitionData>& DefinitionMap()
   {
     static std::map<QString, SScriptDefinitionData> c_sFileEngingDefinitionMap = {
@@ -237,7 +239,8 @@ Rectangle {
         { c_sScriptTypeQml, {c_sScriptTypeQml, "QML", c_sDefaultLayout}},
         { c_sScriptTypeLayout, {c_sScriptTypeQml, "QML", c_sDefaultLayout}},
         { c_sScriptTypeEos, {c_sScriptTypeEos, "JavaScript", "{\n\t\"commands\": [\n\t]\n}"} },
-        { c_sScriptTypeLua, {c_sScriptTypeLua, "Lua", "-- insert code to control scene"} }
+        { c_sScriptTypeLua, {c_sScriptTypeLua, "Lua", "-- insert code to control scene"} },
+        { c_sFileTypeSequence, {c_sFileTypeSequence, "JavaScript", "{}"} }
       };
     return c_sFileEngingDefinitionMap;
   }

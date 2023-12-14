@@ -172,6 +172,20 @@ public:
                                           mode,
                                           m_pView->ReadOnly() ? QIcon::Off : QIcon::On);
             } break;
+            case EResourceType::eSequence:
+            {
+              m_pView->IconFile().paint(pPainter,
+                                        rectIcon, opt.displayAlignment,
+                                        mode,
+                                        m_pView->ReadOnly() ? QIcon::Off : QIcon::On);
+              qint32 iXAdjust = (rectIcon.width()-m_pView->iconSize().width()/2)/2;
+              qint32 iYAdjust = (rectIcon.height()-m_pView->iconSize().height()/2)/2;
+              rectIcon.adjust(iXAdjust, iYAdjust, -iXAdjust, -iYAdjust);
+              m_pView->IconSequence().paint(pPainter,
+                                          rectIcon, opt.displayAlignment,
+                                          mode,
+                                          m_pView->ReadOnly() ? QIcon::Off : QIcon::On);
+            } break;
             case EResourceType::eOther: // fallthrough
             case EResourceType::eDatabase:
               m_pView->IconFile().paint(pPainter,
@@ -282,7 +296,8 @@ CResourceDetailView::CResourceDetailView(QWidget* pParent) :
   m_bReadOnly(false),
   m_iconFile(":/resources/style/img/FileIcon.png"),
   m_iconFolder(":/resources/style/img/FolderIcon.png"),
-  m_iconLayout(":/resources/style/img/ButtonLayout.png")
+  m_iconLayout(":/resources/style/img/ButtonLayout.png"),
+  m_iconSequence(":/resources/style/img/IconSequence.png")
 {
   m_spThreadedLoader->RegisterObject<CResourceDetailViewFetcherThread>();
 
@@ -373,6 +388,20 @@ void CResourceDetailView::SetIconLayout(const QIcon& icon)
 const QIcon& CResourceDetailView::IconLayout() const
 {
   return m_iconLayout;
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CResourceDetailView::SetIconSequence(const QIcon& icon)
+{
+  m_iconSequence = icon;
+}
+
+//----------------------------------------------------------------------------------------
+//
+const QIcon& CResourceDetailView::IconSequence() const
+{
+  return m_iconSequence;
 }
 
 //----------------------------------------------------------------------------------------

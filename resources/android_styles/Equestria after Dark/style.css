@@ -1301,6 +1301,7 @@ CResourceDetailView {
   qproperty-iconFile: url(ui/FileIcon.png);
   qproperty-iconFolder: url(ui/FolderIcon.png);
   qproperty-iconLayout: url(ui/ButtonLayout.png);
+  qproperty-iconSequence: url(ui/IconSequence.png);
   qproperty-spacing: 6;
 }
 
