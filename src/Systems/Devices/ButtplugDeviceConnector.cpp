@@ -527,11 +527,10 @@ bool CInitfaceCentralDeviceConnector::Connect()
 {
   if (!m_spClient->IsLoaded()) { return false; }
 
-  if (!FindInitfaceProcess())
+  if (nullptr == m_pInitfaceCentralProcess && !FindInitfaceProcess())
   {
     if (StartInitface())
     {
-      m_spClient->Connect();
       // we return true, because the engine is started but sadly we can't currently start
       // it with the server already running
       return true;
@@ -539,7 +538,15 @@ bool CInitfaceCentralDeviceConnector::Connect()
   }
   else
   {
-    return m_spClient->Connect();
+    bool bConnectOk = m_spClient->Connect();
+    if (nullptr == m_pInitfaceCentralProcess)
+    {
+      return bConnectOk;
+    }
+    else
+    {
+      return true;
+    }
   }
 
   return false;

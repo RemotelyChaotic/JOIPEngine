@@ -269,6 +269,7 @@
         <file>resources/help/settings/dominanthand_setting_help.html</file>
         <file>resources/help/editor/projectsettings/layout_help.html</file>
         <file>resources/style/img/IconSequence.png</file>
+        <file>resources/help/settings/connecthwonstartup_setting_help.html</file>
     </qresource>
     <qresource prefix="/qml">
         <file>resources/qml/ProjectCardSelection.qml</file>

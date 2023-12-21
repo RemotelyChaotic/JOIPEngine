@@ -27,6 +27,7 @@ class CSettings : public QObject
 {
   Q_OBJECT
   Q_PROPERTY(bool autoUpdate READ AutoUpdate WRITE SetAutoUpdate NOTIFY autoUpdateChanged)
+  Q_PROPERTY(bool connectToHWOnStartup READ ConnectToHWOnStartup WRITE SetConnectToHWOnStartup NOTIFY connectToHWOnStartupChanged)
   Q_PROPERTY(QString contentFolder READ ContentFolder WRITE SetContentFolder NOTIFY contentFolderChanged)
   Q_PROPERTY(DominantHand::EDominantHand dominantHand READ GetDominantHand WRITE SetDominantHand NOTIFY dominantHandChanged)
   Q_PROPERTY(bool editorCaseInsensitiveSearch READ EditorCaseInsensitiveSearch WRITE SetEditorCaseInsensitiveSearch NOTIFY editorCaseInsensitiveSearchChanged)
@@ -63,6 +64,7 @@ public:
   static const QString c_sSettingCodeEditorFont;
   static const QString c_sSettingCodeEditorShowWhitespace;
   static const QString c_sSettingCodeEditorTheme;
+  static const QString c_sSettingConnectToHWOnStartup;
   static const QString c_sSettingContentFolder;
   static const QString c_sSettingDominantHand;
   static const QString c_sSettingEditorLayout;
@@ -113,6 +115,8 @@ public:
   bool AutoUpdate();
   void SetContentFolder(const QString& sPath);
   QString ContentFolder();
+  void SetConnectToHWOnStartup(bool bValue);
+  bool ConnectToHWOnStartup() const;
   DominantHand::EDominantHand GetDominantHand() const;
   void SetDominantHand(DominantHand::EDominantHand hand);
   void SetEditorCaseInsensitiveSearch(bool bValue);
@@ -175,6 +179,7 @@ public:
 signals:
   void autoUpdateChanged();
   void contentFolderChanged();
+  void connectToHWOnStartupChanged();
   void dominantHandChanged();
   void editorCaseInsensitiveSearchChanged();
   void editorFontChanged();

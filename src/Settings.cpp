@@ -87,6 +87,7 @@ const QString CSettings::c_sSettingAutoUpdate = "General/autoUpdate";
 const QString CSettings::c_sSettingCodeEditorCaseInsensitiveSearch = "Content/editorCaseInsensitiveSearch";
 const QString CSettings::c_sSettingCodeEditorFont = "Content/editorFont";
 const QString CSettings::c_sSettingCodeEditorShowWhitespace = "Content/editorShowWhitespace";
+const QString CSettings::c_sSettingConnectToHWOnStartup = "Devices/connectOnStartup";
 const QString CSettings::c_sSettingCodeEditorTheme = "Content/editorTheme";
 const QString CSettings::c_sSettingContentFolder = "Content/folder";
 const QString CSettings::c_sSettingDominantHand  = "Content/dominantHand";
@@ -287,6 +288,28 @@ QString CSettings::ContentFolder()
   }
   return sPath;
 #endif
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CSettings::SetConnectToHWOnStartup(bool bValue)
+{
+  QMutexLocker locker(&m_settingsMutex);
+  bool bOldValue = m_spSettings->value(CSettings::c_sSettingConnectToHWOnStartup).toBool();
+
+  if (bOldValue == bValue) { return; }
+
+  m_spSettings->setValue(CSettings::c_sSettingConnectToHWOnStartup, bValue);
+
+  emit connectToHWOnStartupChanged();
+}
+
+//----------------------------------------------------------------------------------------
+//
+bool CSettings::ConnectToHWOnStartup() const
+{
+  QMutexLocker locker(&m_settingsMutex);
+  return m_spSettings->value(CSettings::c_sSettingConnectToHWOnStartup).toBool();
 }
 
 //----------------------------------------------------------------------------------------
@@ -1062,6 +1085,13 @@ void CSettings::GenerateSettingsIfNotExists()
       QDir::current().mkdir("data");
     }
 #endif
+  }
+
+  // check hardware autoconnect setting
+  if (!m_spSettings->contains(CSettings::c_sSettingConnectToHWOnStartup))
+  {
+    bNeedsSynch = true;
+    m_spSettings->setValue(CSettings::c_sSettingConnectToHWOnStartup, true);
   }
 
   // check code editor settings

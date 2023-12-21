@@ -9,6 +9,7 @@
 #include <memory>
 
 class CBackActionHandler;
+class CDeviceManager;
 class CHelpFactory;
 class CNotificationSender;
 class COverlayManager;
@@ -72,6 +73,7 @@ private:
 };
 
 template<> std::weak_ptr<CDatabaseManager> CApplication::System<CDatabaseManager>();
+template<> std::weak_ptr<CDeviceManager> CApplication::System<CDeviceManager>();
 template<> std::weak_ptr<CHelpFactory> CApplication::System<CHelpFactory>();
 template<> std::weak_ptr<COverlayManager> CApplication::System<COverlayManager>();
 template<> std::weak_ptr<CProjectDownloader> CApplication::System<CProjectDownloader>();

@@ -211,6 +211,12 @@ std::weak_ptr<CDatabaseManager> CApplication::System<CDatabaseManager>()
 }
 
 template<>
+std::weak_ptr<CDeviceManager> CApplication::System<CDeviceManager>()
+{
+  return std::static_pointer_cast<CDeviceManager>(m_spSystemsMap[ECoreSystems::eDeviceManager]->Get());
+}
+
+template<>
 std::weak_ptr<CHelpFactory> CApplication::System<CHelpFactory>()
 {
   return m_spHelpFactory;

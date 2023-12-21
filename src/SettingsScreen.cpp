@@ -6,6 +6,7 @@
 #include "WindowContext.h"
 #include "ui_SettingsScreen.h"
 
+#include "Systems/DeviceManager.h"
 #include "Systems/Devices/DeviceSettings.h"
 #include "Systems/DLJobs/DownloadJobRegistry.h"
 #include "Systems/HelpFactory.h"
@@ -48,6 +49,7 @@ namespace  {
   const QString c_sPauseWhenInactiveHelpId = "Settings/PauseWhenInactive";
   const QString c_sPushNotificationsHelpId = "Settings/PushNotifications";
   const QString c_sHotloadStyleHelpId = "Settings/HotloadStyle";
+  const QString c_sConnectHWOnStartupHelpId = "Settings/ConnectHWOnStartup";
   const QString c_sCancelHelpId = "MainScreen/Cancel";
 
   const char* c_sPropertyKeySequence = "KeyBinding";
@@ -141,6 +143,8 @@ void CSettingsScreen::Initialize()
     wpHelpFactory->RegisterHelp(c_sPauseWhenInactiveHelpId, ":/resources/help/settings/pausewheninactive_setting_help.html");
     m_spUi->pShowPushNotifications->setProperty(helpOverlay::c_sHelpPagePropertyName, c_sPushNotificationsHelpId);
     wpHelpFactory->RegisterHelp(c_sPushNotificationsHelpId, ":/resources/help/settings/push_notification_setting_help.html");
+    m_spUi->pConnectSettingContainer->setProperty(helpOverlay::c_sHelpPagePropertyName, c_sConnectHWOnStartupHelpId);
+    wpHelpFactory->RegisterHelp(c_sConnectHWOnStartupHelpId, ":/resources/help/settings/connecthwonstartup_setting_help.html");
     m_spUi->pStyleHotoadContainer->setProperty(helpOverlay::c_sHelpPagePropertyName, c_sHotloadStyleHelpId);
     wpHelpFactory->RegisterHelp(c_sHotloadStyleHelpId, ":/resources/help/settings/hotloadstyle_setting_help.html");
     m_spUi->pBackButton->setProperty(helpOverlay::c_sHelpPagePropertyName, c_sCancelHelpId);
@@ -254,6 +258,7 @@ void CSettingsScreen::Load()
   m_spUi->pOfflineModeCheckBox->blockSignals(true);
   m_spUi->pPauseWhenNotActiveCheckBox->blockSignals(true);
   m_spUi->pShowPushNotificationsCeckBox->blockSignals(true);
+  m_spUi->pConnectOnStartupCheckBox->blockSignals(true);
   m_spUi->pStyleHotoadCheckBox->blockSignals(true);
   m_spUi->pAntialiasingCheckBox->blockSignals(true);
   m_spUi->pDropShadowCheckBox->blockSignals(true);
@@ -417,6 +422,8 @@ void CSettingsScreen::Load()
   // push notifications
   m_spUi->pShowPushNotificationsCeckBox->setChecked(m_spSettings->PushNotifications());
 
+  m_spUi->pConnectOnStartupCheckBox->setChecked(m_spSettings->ConnectToHWOnStartup());
+
   // hot-loading of style
   m_spUi->pStyleHotoadCheckBox->setChecked(m_spSettings->StyleHotLoad());
 
@@ -439,6 +446,7 @@ void CSettingsScreen::Load()
   m_spUi->pOfflineModeCheckBox->blockSignals(false);
   m_spUi->pPauseWhenNotActiveCheckBox->blockSignals(false);
   m_spUi->pShowPushNotificationsCeckBox->blockSignals(false);
+  m_spUi->pConnectOnStartupCheckBox->blockSignals(false);
   m_spUi->pStyleHotoadCheckBox->blockSignals(false);
   m_spUi->pAntialiasingCheckBox->blockSignals(false);
   m_spUi->pDropShadowCheckBox->blockSignals(false);
@@ -447,7 +455,7 @@ void CSettingsScreen::Load()
 
   // dynamically create the device settings again.
   // The device connectors and devices define the behavior of these.
-  CDeviceSettingFactory::CreateSettingsWidgets(m_spUi->pDevicesContainer);
+  CDeviceSettingFactory::CreateSettingsWidgets(m_spUi->pDeviceConnectionsContainer);
 }
 
 //----------------------------------------------------------------------------------------
@@ -743,6 +751,27 @@ void CSettingsScreen::on_pShowPushNotificationsCeckBox_stateChanged(qint32 iStat
   if (nullptr == m_spSettings) { return; }
 
   m_spSettings->SetPushNotifications(iState == Qt::Checked);
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CSettingsScreen::on_pConnectOnStartupCheckBox_toggled(bool bState)
+{
+  WIDGET_INITIALIZED_GUARD
+  assert(nullptr != m_spSettings);
+  if (nullptr == m_spSettings) { return; }
+
+  m_spSettings->SetConnectToHWOnStartup(bState);
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CSettingsScreen::on_pConnectPushButton_clicked()
+{
+  if (auto spDevManager = CApplication::Instance()->System<CDeviceManager>().lock())
+  {
+    spDevManager->Connect();
+  }
 }
 
 //----------------------------------------------------------------------------------------
