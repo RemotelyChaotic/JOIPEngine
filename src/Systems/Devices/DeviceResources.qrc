@@ -1,0 +1,7 @@
+<RCC>
+    <qresource prefix="/devices">
+        <file>resources/help/settings/initface_port_setting_help.html</file>
+        <file>resources/help/settings/InitfaceWebsocket.png</file>
+        <file>resources/help/settings/initface_install_setting_help.html</file>
+    </qresource>
+</RCC>

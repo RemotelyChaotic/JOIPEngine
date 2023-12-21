@@ -427,6 +427,12 @@ macro(CreateJOIPProject JOIP_PROJECT_NAME)
     ${JOIPSources}/Systems/DatabaseIO.h
     ${JOIPSources}/Systems/DatabaseManager.cpp
     ${JOIPSources}/Systems/DatabaseManager.h
+    ${JOIPSources}/Systems/DeviceManager.cpp
+    ${JOIPSources}/Systems/DeviceManager.h
+    ${JOIPSources}/Systems/Devices/DeviceResources.qrc
+    ${JOIPSources}/Systems/Devices/DeviceSettings.cpp
+    ${JOIPSources}/Systems/Devices/DeviceSettings.h
+    ${JOIPSources}/Systems/Devices/IDeviceConnector.h
     ${JOIPSources}/Systems/DLJobs/IDownloadJob.h
     ${JOIPSources}/Systems/DLJobs/DownloadJobRegistry.h
     ${JOIPSources}/Systems/DLJobs/EosDownloadJob.cpp
@@ -651,6 +657,7 @@ macro(CreateJOIPProject JOIP_PROJECT_NAME)
     ${CMAKE_SOURCE_DIR}/version.h
   )
 
+  #platform sources
   if (WIN32)
     get_target_property(WINTOAST_SRC WinToast SOURCES)
     set(WinSources
@@ -672,6 +679,14 @@ macro(CreateJOIPProject JOIP_PROJECT_NAME)
       ${JOIPSources}/Android/AndroidNotificationClient.h
       ${CMAKE_SOURCE_DIR}/android_resources.qrc
     )
+  endif()
+
+  #aditional conditional sources
+  if (HAS_BUTTPLUG_CPP)
+    set(OptionalSources
+      ${OptionalSources}
+      ${JOIPSources}/Systems/Devices/ButtplugDeviceConnector.cpp
+      ${JOIPSources}/Systems/Devices/ButtplugDeviceConnector.h)
   endif()
 
   set(CMAKE_AUTOUIC_SEARCH_PATHS ${CMAKE_AUTOUIC_SEARCH_PATHS} ${JOIPSources}/Editor)
@@ -704,6 +719,7 @@ macro(CreateJOIPProject JOIP_PROJECT_NAME)
           add_library(${JOIP_PROJECT_NAME} SHARED
               ${Sources}
               ${AndroidSources}
+              ${OptionalSources}
           )
   # Define properties for Android with Qt 5 after find_package() calls as:
   #    set(ANDROID_PACKAGE_SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/android")
@@ -711,10 +727,12 @@ macro(CreateJOIPProject JOIP_PROJECT_NAME)
           add_executable(${JOIP_PROJECT_NAME}
               ${Sources}
               ${WinSources}
+              ${OptionalSources}
           )
       else()
           add_executable(${JOIP_PROJECT_NAME}
               ${Sources}
+              ${OptionalSources}
           )
       endif()
   endif()
@@ -758,6 +776,9 @@ macro(JOIPProjectSettings JOIP_PROJECT_NAME)
       target_link_libraries(${JOIP_PROJECT_NAME}
         PRIVATE
           ButtplugCppClient)
+      target_compile_definitions(${JOIP_PROJECT_NAME}
+        PRIVATE
+          -DHAS_BUTTPLUG_CPP=1)
     endif()
 
     if (KDE_DEBUG)

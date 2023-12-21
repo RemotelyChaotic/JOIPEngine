@@ -4,14 +4,16 @@
 #include "Style.h"
 #include "Themes.h"
 #include "WindowContext.h"
+#include "ui_SettingsScreen.h"
 
+#include "Systems/Devices/DeviceSettings.h"
 #include "Systems/DLJobs/DownloadJobRegistry.h"
 #include "Systems/HelpFactory.h"
+
 #include "Utils/WidgetHelpers.h"
 #include "Utils/MetronomeHelpers.h"
-#include "Widgets/DownloadButtonOverlay.h"
+
 #include "Widgets/HelpOverlay.h"
-#include "ui_SettingsScreen.h"
 
 #include <QApplication>
 #include <QDebug>
@@ -191,9 +193,10 @@ void CSettingsScreen::Initialize()
 
 #if defined (Q_OS_ANDROID)
   // disable settings pages that do not make sense on mobile
-  m_spUi->tabWidget->setTabEnabled(0, false);
+  m_spUi->pDesktopContainer->hide();
+  m_spUi->pDesktopSpacer->hide();
   m_spUi->tabWidget->setTabEnabled(3, false);
-  m_spUi->tabWidget->setTabEnabled(5, false);
+  m_spUi->tabWidget->setTabEnabled(6, false);
   m_spUi->tabWidget->setCurrentIndex(1);
   m_spUi->pWindowModeContainer->hide();
 
@@ -441,6 +444,10 @@ void CSettingsScreen::Load()
   m_spUi->pDropShadowCheckBox->blockSignals(false);
   m_spUi->pMipMapCheckBox->blockSignals(false);
   m_spUi->pSmoothingCheckBox->blockSignals(false);
+
+  // dynamically create the device settings again.
+  // The device connectors and devices define the behavior of these.
+  CDeviceSettingFactory::CreateSettingsWidgets(m_spUi->pDevicesContainer);
 }
 
 //----------------------------------------------------------------------------------------

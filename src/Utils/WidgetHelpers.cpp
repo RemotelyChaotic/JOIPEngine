@@ -35,19 +35,15 @@ namespace
       return false;
     }
   };
-}
 
-#include "WidgetHelpers.moc"
-
-namespace widget_helpers
-{
   //--------------------------------------------------------------------------------------
   // code modified from qfiledialog.cpp
-  QUrl GetExistingDirectoryUrl(QWidget* pParent,
-                               const QString& sCaption,
-                               const QUrl& dir,
-                               QFileDialog::Options options,
-                               const QStringList& vsSupportedSchemes)
+  QUrl GetExistingFileOrDirectoryUrl(QWidget* pParent,
+                                     const QString& sCaption,
+                                     const QUrl& dir,
+                                     QFileDialog::Options options,
+                                     const QStringList& vsSupportedSchemes,
+                                     bool bDirMode)
   {
     QPointer<QWidget> pParentWrapper(pParent);
 
@@ -58,7 +54,14 @@ namespace widget_helpers
 #endif
 QT_WARNING_PUSH
 QT_WARNING_DISABLE_DEPRECATED
-    dialog.setFileMode(options & QFileDialog::ShowDirsOnly ? QFileDialog::DirectoryOnly : QFileDialog::Directory);
+    if (bDirMode)
+    {
+      dialog.setFileMode(options & QFileDialog::ShowDirsOnly ? QFileDialog::DirectoryOnly : QFileDialog::Directory);
+    }
+    else
+    {
+      dialog.setFileMode(QFileDialog::ExistingFile);
+    }
 QT_WARNING_POP
     dialog.setOptions(options);
     dialog.setSupportedSchemes(vsSupportedSchemes);
@@ -93,6 +96,33 @@ QT_WARNING_POP
     }
     return QUrl();
   }
+}
+
+#include "WidgetHelpers.moc"
+
+namespace widget_helpers
+{
+  //--------------------------------------------------------------------------------------
+  //
+  QUrl GetExistingDirectoryUrl(QWidget* pParent,
+                               const QString& sCaption,
+                               const QUrl& dir,
+                               QFileDialog::Options options,
+                               const QStringList& vsSupportedSchemes)
+  {
+    return GetExistingFileOrDirectoryUrl(pParent, sCaption, dir, options, vsSupportedSchemes, true);
+  }
+
+  //--------------------------------------------------------------------------------------
+  //
+  QUrl GetExistingFileUrl(QWidget* pParent,
+                          const QString& sCaption,
+                          const QUrl& dir,
+                          QFileDialog::Options options,
+                          const QStringList& vsSupportedSchemes)
+  {
+    return GetExistingFileOrDirectoryUrl(pParent, sCaption, dir, options, vsSupportedSchemes, false);
+  }
 
   //--------------------------------------------------------------------------------------
   //
@@ -105,6 +135,20 @@ QT_WARNING_POP
     const QUrl selectedUrl = GetExistingDirectoryUrl(pParent, sCaption,
                                                      QUrl::fromLocalFile(dir),
                                                      options, schemes);
+    return selectedUrl.toLocalFile();
+  }
+
+  //--------------------------------------------------------------------------------------
+  //
+  QString GetExistingFile(QWidget* pParent,
+                          const QString& sCaption,
+                          const QString& dir,
+                          QFileDialog::Options options)
+  {
+    const QStringList schemes = QStringList(QStringLiteral("file"));
+    const QUrl selectedUrl = GetExistingFileUrl(pParent, sCaption,
+                                                QUrl::fromLocalFile(dir),
+                                                options, schemes);
     return selectedUrl.toLocalFile();
   }
 

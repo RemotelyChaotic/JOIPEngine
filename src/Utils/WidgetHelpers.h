@@ -11,10 +11,19 @@ namespace widget_helpers
                                const QUrl& dir,
                                QFileDialog::Options options,
                                const QStringList& vsSupportedSchemes);
+  QUrl GetExistingFileUrl(QWidget* pParent,
+                          const QString& sCaption,
+                          const QUrl& dir,
+                          QFileDialog::Options options,
+                          const QStringList& vsSupportedSchemes);
   QString GetExistingDirectory(QWidget* pParent,
                                const QString& sCaption,
                                const QString& dir,
                                QFileDialog::Options options);
+  QString GetExistingFile(QWidget* pParent,
+                          const QString& sCaption,
+                          const QString& dir,
+                          QFileDialog::Options options);
   void RetainSizeAndHide(QWidget* pWidget);
 }
 

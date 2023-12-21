@@ -1,0 +1,60 @@
+<!doctype html>
+<html class="no-js" lang="">
+
+<head>
+  <meta charset="utf-8">
+  <title>Initface Install Location</title>
+  <meta name="description" content="">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <style>
+    h1 {
+      text-align: center;
+    }
+    div.container {
+      min-height: 10em;
+      display: table-cell;
+      margin-left: auto;
+      margin-right: auto;
+      width: 0.6em
+    }
+    table.warning {
+      color: black;
+      background-color: #cccc44;
+      border-color: yellow;
+      border-style: solid;
+    }
+  </style>
+</head>
+
+
+<body>
+  <h1>Initface Install Location</h1>
+
+  <hr>
+
+  <div class="container">
+    <p>Select the install location of Initface Central (<i>https://intiface.com/central/</i>).<br>
+    The application will try to start and connect to Initface Central via the <a href="qrc:/devices/resources/help/settings/initface_port_setting_help.html">Port Setting</a>
+    or connect to an already running Initface Central instance.<br>
+    If unsuccessful, the application will spawn an Initface Engine (<i>https://github.com/intiface/intiface-engine</i>) instance
+    that is shipped with the application as a plugin and connect it to the configured <a href="qrc:/devices/resources/help/settings/initface_port_setting_help.html">Port</a>.<br>
+    Thus if you wish to use a custom Initface Central installation, you need to start it before starting
+    the JOIP Engine and launch the server (click the big play button) or set this path
+    to the correct <i>intiface_central.exe</i> install.</p>
+  </div>
+
+  <br>
+
+  <div class="container">
+    <table width="100%" class="warning">
+      <tr>
+        <td width="10%"><img src="qrc:/resources/help/icons/WarningIcon.png" width="64" height="64" alt="Warning"></td>
+        <td width="90%"><br>Multiple instances of the application share the same configuration file.<br>
+        If you use different versions of the application, your settings for all instances will change.</td>
+      </tr>
+    </table>
+  </div>
+</body>
+
+</html>
