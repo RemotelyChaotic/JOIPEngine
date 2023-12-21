@@ -51,3 +51,7 @@
 	path = 3rdparty/ButtplugCPP
 	url = https://github.com/RemotelyChaotic/ButtplugCPP.git
 	branch = main
+[submodule "3rdparty/protobuf"]
+	path = 3rdparty/protobuf
+	url = https://github.com/RemotelyChaotic/protobuf.git
+    	branch = master
