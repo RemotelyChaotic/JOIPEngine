@@ -432,6 +432,7 @@ macro(CreateJOIPProject JOIP_PROJECT_NAME)
     ${JOIPSources}/Systems/Devices/DeviceResources.qrc
     ${JOIPSources}/Systems/Devices/DeviceSettings.cpp
     ${JOIPSources}/Systems/Devices/DeviceSettings.h
+    ${JOIPSources}/Systems/Devices/IDevice.h
     ${JOIPSources}/Systems/Devices/IDeviceConnector.h
     ${JOIPSources}/Systems/DLJobs/IDownloadJob.h
     ${JOIPSources}/Systems/DLJobs/DownloadJobRegistry.h
@@ -577,6 +578,8 @@ macro(CreateJOIPProject JOIP_PROJECT_NAME)
     ${JOIPSources}/Utils/MultiEmitterSoundPlayer.h
     ${JOIPSources}/Utils/RaiiFunctionCaller.cpp
     ${JOIPSources}/Utils/RaiiFunctionCaller.h
+    ${JOIPSources}/Utils/ThreadUtils.cpp
+    ${JOIPSources}/Utils/ThreadUtils.h
     ${JOIPSources}/Utils/UndoRedoFilter.cpp
     ${JOIPSources}/Utils/UndoRedoFilter.h
     ${JOIPSources}/Utils/WidgetHelpers.cpp
@@ -686,7 +689,12 @@ macro(CreateJOIPProject JOIP_PROJECT_NAME)
     set(OptionalSources
       ${OptionalSources}
       ${JOIPSources}/Systems/Devices/ButtplugDeviceConnector.cpp
-      ${JOIPSources}/Systems/Devices/ButtplugDeviceConnector.h)
+      ${JOIPSources}/Systems/Devices/ButtplugDeviceConnector.h
+      ${JOIPSources}/Systems/Devices/ButtplugDeviceConnectorContext.cpp
+      ${JOIPSources}/Systems/Devices/ButtplugDeviceConnectorContext.h
+      ${JOIPSources}/Systems/Devices/ButtplugDeviceWrapper.cpp
+      ${JOIPSources}/Systems/Devices/ButtplugDeviceWrapper.h
+    )
   endif()
 
   set(CMAKE_AUTOUIC_SEARCH_PATHS ${CMAKE_AUTOUIC_SEARCH_PATHS} ${JOIPSources}/Editor)

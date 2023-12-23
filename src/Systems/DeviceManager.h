@@ -6,6 +6,10 @@
 #include <QMutex>
 #include <QObject>
 
+#include <memory>
+#include <vector>
+
+class IDevice;
 class IDeviceConnector;
 
 class CDeviceManager : public CSystemBase
@@ -18,10 +22,17 @@ public:
   ~CDeviceManager() override;
 
   void Connect();
+  QStringList DeviceNames();
+  std::vector<std::shared_ptr<IDevice>> Devices();
   void Disconnect();
   bool IsConnected() const;
   void StartScanning();
   void StopScanning();
+
+signals:
+  void SignalConnected();
+  void SignalDisconnected();
+  void SignalDeviceCountChanged();
 
 public slots:
   void Initialize() override;
@@ -29,6 +40,8 @@ public slots:
 
 private slots:
   void ConnectImpl();
+  QStringList DeviceNamesImpl();
+  std::vector<std::shared_ptr<IDevice>> DevicesImpl();
   void DisconnectImpl();
   bool IsConnectedImpl();
   void SlotDisconnected();
@@ -38,6 +51,7 @@ private slots:
 private:
   IDeviceConnector*         m_pActiveConnector = nullptr;
   QMetaObject::Connection   m_disconnectConnection;
+  QMetaObject::Connection   m_deviceCountChangedConnection;
 };
 
 #endif // CDEVICEMANAGER_H

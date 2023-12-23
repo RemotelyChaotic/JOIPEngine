@@ -9,6 +9,7 @@
 
 #include <memory>
 
+class CButtplugDeviceConnectorContext;
 class CInitfaceEngineClientWrapper;
 class QProcess;
 
@@ -22,16 +23,20 @@ public:
   CButtplugDeviceConnector();
   ~CButtplugDeviceConnector() override;
 
+  QStringList DeviceNames() const override;
+  std::vector<std::shared_ptr<IDevice>> Devices() const override;
   void StartScanning() override;
   void StopScanning() override;
 
 signals:
+  void SignalDeviceCountChanged() override;
   void SignalDisconnected() override;
 
 protected:
   QString FindPluginPath() const;
 
   std::unique_ptr<CInitfaceEngineClientWrapper> m_spClient;
+  QPointer<CButtplugDeviceConnectorContext>     m_pContext;
 };
 
 //----------------------------------------------------------------------------------------
@@ -78,8 +83,6 @@ protected slots:
 private:
   bool FindInitfaceProcess();
   bool StartInitface();
-
-  QPointer<QProcess>   m_pInitfaceCentralProcess;
 };
 
 #endif // CBUTTPLUGDEVICECONNECTOR_H

@@ -1,5 +1,7 @@
 #include "ButtplugDeviceConnector.h"
 #include "Application.h"
+#include "ButtplugDeviceConnectorContext.h"
+#include "ButtplugDeviceWrapper.h"
 #include "DeviceSettings.h"
 
 #include "Systems/HelpFactory.h"
@@ -208,11 +210,15 @@ namespace
 class CInitfaceEngineClientWrapper
 {
 public:
-  CInitfaceEngineClientWrapper(const QString& sLoadPath);
+  CInitfaceEngineClientWrapper(const QString& sLoadPath,
+                               std::function<void(const QString&)> fnDeviceAdded,
+                               std::function<void(const QString&)> fnDeviceRemoved,
+                               std::function<void()> fnDisconnected);
   ~CInitfaceEngineClientWrapper();
 
   bool Connect();
-  qint32 DeviceCount();
+  qint32 DeviceCount() const;
+  const std::map<QString, std::weak_ptr<Buttplug::Device>>& Devices() const;
   bool Disconnect();
   bool IsConnected();
   bool IsLoaded() const { return m_bIsLoaded; };
@@ -230,11 +236,58 @@ private:
 CButtplugDeviceConnector::CButtplugDeviceConnector() :
   QObject(),
   IDeviceConnector(),
-  m_spClient(std::make_unique<CInitfaceEngineClientWrapper>(FindPluginPath()))
+  m_spClient(nullptr),
+  m_pContext(new CButtplugDeviceConnectorContext(this))
 {
+  m_spClient.reset(new CInitfaceEngineClientWrapper(
+                     FindPluginPath(),
+                     [this](const QString& sDevice) {
+                       emit SignalDeviceCountChanged();
+                     },
+                     [this](const QString& sDevice) {
+                       emit m_pContext->SignalDeviceRemoved(sDevice);
+                       emit SignalDeviceCountChanged();
+                     },
+                     [this]() {
+                       emit SignalDisconnected();
+                     }));
 }
 CButtplugDeviceConnector::~CButtplugDeviceConnector()
 {
+}
+
+//----------------------------------------------------------------------------------------
+//
+QStringList CButtplugDeviceConnector::DeviceNames() const
+{
+  if (!m_spClient->IsLoaded())
+  {
+    return {};
+  }
+
+  QStringList vsRet;
+  for (const auto& [sName, _] : m_spClient->Devices())
+  {
+    vsRet.push_back(sName);
+  }
+  return vsRet;
+}
+
+//----------------------------------------------------------------------------------------
+//
+std::vector<std::shared_ptr<IDevice>> CButtplugDeviceConnector::Devices() const
+{
+  if (!m_spClient->IsLoaded())
+  {
+    return {};
+  }
+
+  std::vector<std::shared_ptr<IDevice>> ret;
+  for (const auto& [_, wpDevice] : m_spClient->Devices())
+  {
+    ret.push_back(std::make_shared<CButtplugDeviceWrapper>(wpDevice, m_pContext));
+  }
+  return ret;
 }
 
 //----------------------------------------------------------------------------------------
@@ -267,7 +320,11 @@ QString CButtplugDeviceConnector::FindPluginPath() const
 
 //----------------------------------------------------------------------------------------
 //
-CInitfaceEngineClientWrapper::CInitfaceEngineClientWrapper(const QString& sLoadPath)
+CInitfaceEngineClientWrapper::CInitfaceEngineClientWrapper(
+    const QString& sLoadPath,
+    std::function<void(const QString&)> fnDeviceAdded,
+    std::function<void(const QString&)> fnDeviceRemoved,
+    std::function<void()> fnDisconnected)
 {
   if(!Buttplug::FFI::Init(sLoadPath.toStdString()))
   {
@@ -280,24 +337,34 @@ CInitfaceEngineClientWrapper::CInitfaceEngineClientWrapper(const QString& sLoadP
   m_bIsLoaded = true;
   m_spClient.reset(new Buttplug::Client("JoipEngineClient"));
 
-  m_spClient->DeviceAddedCb = [this](std::weak_ptr<Buttplug::Device> device)
+  m_spClient->DeviceAddedCb = [this, fnDeviceAdded](std::weak_ptr<Buttplug::Device> device)
   {
     if (auto spDevice = device.lock(); nullptr != spDevice)
     {
       qDebug() << "Initface Client: Device added";
-      m_deviceList.insert({QString::fromStdString(spDevice->Name()), device});
+      const QString sName = QString::fromStdString(spDevice->Name());
+      m_deviceList.insert({sName, device});
+      if (nullptr != fnDeviceAdded)
+      {
+        fnDeviceAdded(sName);
+      }
     }
   };
 
-  m_spClient->DeviceRemovedCb = [this](std::weak_ptr<Buttplug::Device> device)
+  m_spClient->DeviceRemovedCb = [this, fnDeviceRemoved](std::weak_ptr<Buttplug::Device> device)
   {
     if (auto spDevice = device.lock(); nullptr != spDevice)
     {
       qDebug() << "Initface Client: Device removed";
-      auto it = m_deviceList.find(QString::fromStdString(spDevice->Name()));
+      const QString sName = QString::fromStdString(spDevice->Name());
+      auto it = m_deviceList.find(sName);
       if (m_deviceList.end() != it)
       {
         m_deviceList.erase(it);
+        if (nullptr != fnDeviceRemoved)
+        {
+          fnDeviceRemoved(sName);
+        }
       }
     }
   };
@@ -317,14 +384,17 @@ CInitfaceEngineClientWrapper::CInitfaceEngineClientWrapper(const QString& sLoadP
     qWarning() << "Initface Client: Ping timeout";
   };
 
-  m_spClient->ServerDisconnectCb = []()
+  m_spClient->ServerDisconnectCb = [fnDisconnected]()
   {
     qDebug() << "Initface Client Server disconnect";
+    if (nullptr != fnDisconnected)
+    {
+      fnDisconnected();
+    }
   };
 }
 CInitfaceEngineClientWrapper::~CInitfaceEngineClientWrapper()
 {
-
 }
 
 //----------------------------------------------------------------------------------------
@@ -345,10 +415,18 @@ bool CInitfaceEngineClientWrapper::Connect()
 
 //----------------------------------------------------------------------------------------
 //
-qint32 CInitfaceEngineClientWrapper::DeviceCount()
+qint32 CInitfaceEngineClientWrapper::DeviceCount() const
 {
-  if (nullptr == m_spClient) { return 0; }
-  return static_cast<qint32>(m_spClient->DeviceCount());
+  if (nullptr == m_spClient) { return false; }
+  return m_spClient->DeviceCount();
+}
+
+//----------------------------------------------------------------------------------------
+//
+const std::map<QString, std::weak_ptr<Buttplug::Device>>&
+CInitfaceEngineClientWrapper::Devices() const
+{
+  return m_deviceList;
 }
 
 //----------------------------------------------------------------------------------------
@@ -527,7 +605,7 @@ bool CInitfaceCentralDeviceConnector::Connect()
 {
   if (!m_spClient->IsLoaded()) { return false; }
 
-  if (nullptr == m_pInitfaceCentralProcess && !FindInitfaceProcess())
+  if (!FindInitfaceProcess())
   {
     if (StartInitface())
     {
@@ -538,15 +616,7 @@ bool CInitfaceCentralDeviceConnector::Connect()
   }
   else
   {
-    bool bConnectOk = m_spClient->Connect();
-    if (nullptr == m_pInitfaceCentralProcess)
-    {
-      return bConnectOk;
-    }
-    else
-    {
-      return true;
-    }
+    return m_spClient->Connect();
   }
 
   return false;
@@ -559,12 +629,6 @@ void CInitfaceCentralDeviceConnector::Disconnect()
   if (m_spClient->IsLoaded())
   {
     m_spClient->Disconnect();
-  }
-
-  if (nullptr != m_pInitfaceCentralProcess)
-  {
-    m_pInitfaceCentralProcess->terminate();
-    delete m_pInitfaceCentralProcess;
   }
 }
 
@@ -599,31 +663,22 @@ bool CInitfaceCentralDeviceConnector::FindInitfaceProcess()
 //
 bool CInitfaceCentralDeviceConnector::StartInitface()
 {
-  m_pInitfaceCentralProcess = new QProcess(this);
-  connect(m_pInitfaceCentralProcess, &QProcess::errorOccurred, this,
-          &CInitfaceCentralDeviceConnector::SlotProcessError);
-
   const QString sPluginPath = FindPluginPath();
 
   auto pSetting = CDeviceSettingFactory::Setting<QString>(c_sInitFaceLocationSettingName);
   if (nullptr == pSetting)
   {
     qWarning() << "Could not load initface install location setting.";
-    delete m_pInitfaceCentralProcess;
     return false;
   }
 
-  m_pInitfaceCentralProcess->setProgram(pSetting->GetValue());
-  m_pInitfaceCentralProcess->start();
-  m_pInitfaceCentralProcess->waitForStarted();
-
-  if (QProcess::NotRunning != m_pInitfaceCentralProcess->state())
+  QString sPath = pSetting->GetValue();
+  if (sPath.isEmpty())
   {
-    return true;
+    return false;
   }
 
-  delete m_pInitfaceCentralProcess;
-  return false;
+  return QProcess::startDetached(pSetting->GetValue());
 }
 
 //----------------------------------------------------------------------------------------
