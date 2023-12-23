@@ -10,7 +10,7 @@
 #include <memory>
 
 class CButtplugDeviceConnectorContext;
-class CInitfaceEngineClientWrapper;
+class CIntifaceEngineClientWrapper;
 class QProcess;
 
 class CButtplugDeviceConnector : public QObject, public IDeviceConnector
@@ -35,20 +35,20 @@ signals:
 protected:
   QString FindPluginPath() const;
 
-  std::unique_ptr<CInitfaceEngineClientWrapper> m_spClient;
+  std::unique_ptr<CIntifaceEngineClientWrapper> m_spClient;
   QPointer<CButtplugDeviceConnectorContext>     m_pContext;
 };
 
 //----------------------------------------------------------------------------------------
 //
-class CInitfaceEngineDeviceConnector : public CButtplugDeviceConnector
+class CIntifaceEngineDeviceConnector : public CButtplugDeviceConnector
 {
   Q_OBJECT
-  Q_DISABLE_COPY(CInitfaceEngineDeviceConnector)
+  Q_DISABLE_COPY(CIntifaceEngineDeviceConnector)
 
 public:
-  CInitfaceEngineDeviceConnector();
-  ~CInitfaceEngineDeviceConnector() override;
+  CIntifaceEngineDeviceConnector();
+  ~CIntifaceEngineDeviceConnector() override;
 
   bool Connect() override;
   void Disconnect() override;
@@ -60,19 +60,19 @@ protected slots:
 private:
   bool StartEngine();
 
-  QPointer<QProcess>   m_pInitfaceEngineProcess;
+  QPointer<QProcess>   m_pIntifaceEngineProcess;
 };
 
 //----------------------------------------------------------------------------------------
 //
-class CInitfaceCentralDeviceConnector : public CButtplugDeviceConnector
+class CIntifaceCentralDeviceConnector : public CButtplugDeviceConnector
 {
   Q_OBJECT
-  Q_DISABLE_COPY(CInitfaceCentralDeviceConnector)
+  Q_DISABLE_COPY(CIntifaceCentralDeviceConnector)
 
 public:
-  CInitfaceCentralDeviceConnector();
-  ~CInitfaceCentralDeviceConnector() override;
+  CIntifaceCentralDeviceConnector();
+  ~CIntifaceCentralDeviceConnector() override;
 
   bool Connect() override;
   void Disconnect() override;
@@ -81,8 +81,8 @@ protected slots:
   void SlotProcessError(QProcess::ProcessError error);
 
 private:
-  bool FindInitfaceProcess();
-  bool StartInitface();
+  bool FindIntifaceProcess();
+  bool StartIntiface();
 };
 
 #endif // CBUTTPLUGDEVICECONNECTOR_H

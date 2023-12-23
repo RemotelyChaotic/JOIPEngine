@@ -36,8 +36,8 @@ namespace
       // extend here for more connectors (further down means higher priority in lookup)
       // - Register Buttplug.io connectors
       #if defined(HAS_BUTTPLUG_CPP)
-        std::make_unique<CInitfaceEngineDeviceConnector>(),
-        std::make_unique<CInitfaceCentralDeviceConnector>()
+        std::make_unique<CIntifaceEngineDeviceConnector>(),
+        std::make_unique<CIntifaceCentralDeviceConnector>()
       #endif
     });
     return vspAvailableConnectors;

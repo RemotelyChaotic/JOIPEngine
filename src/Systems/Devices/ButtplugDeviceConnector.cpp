@@ -31,25 +31,25 @@
 
 namespace
 {
-  const char c_sInitFacePortSettingName[] = "initfacePort";
-  const char c_sInitFaceLocationSettingName[] = "initfaceInstall";
+  const char c_sIntifacePortSettingName[] = "intifacePort";
+  const char c_sIntifaceLocationSettingName[] = "intifaceInstall";
 
-  const char c_sInitfacePluginFolder[] = "/buttplug";
+  const char c_sIntifacePluginFolder[] = "/buttplug";
 
-  const QString c_sInitfacePortSettingHelpId = "Settings/InitfacePort";
-  const QString c_sInitfaceInstallSettingHelpId = "Settings/InitfaceInstallLocation";
+  const QString c_sIntifacePortSettingHelpId = "Settings/IntifacePort";
+  const QString c_sIntifaceInstallSettingHelpId = "Settings/IntifaceInstallLocation";
 
   //--------------------------------------------------------------------------------------
   //
   QWidget* CreatePortWidget(QWidget* pParent)
   {
-    auto pSetting = CDeviceSettingFactory::Setting<quint16>(c_sInitFacePortSettingName);
+    auto pSetting = CDeviceSettingFactory::Setting<quint16>(c_sIntifacePortSettingName);
 
     QWidget* pRoot = new QWidget(pParent);
-    pRoot->setObjectName("initfacePortWidget");
+    pRoot->setObjectName("intifacePortWidget");
     QHBoxLayout* pLayout = new QHBoxLayout(pRoot);
     pLayout->setContentsMargins(0, 0, 0, 0);
-    QLabel* pLabel = new QLabel("Initface port", pRoot);
+    QLabel* pLabel = new QLabel("Intiface port", pRoot);
     pLayout->addWidget(pLabel);
     pLayout->addItem(new QSpacerItem(20, 0, QSizePolicy::Expanding, QSizePolicy::Fixed));
     QSpinBox* pSpinBox = new QSpinBox(pRoot);
@@ -57,7 +57,7 @@ namespace
     pSpinBox->setValue(pSetting->GetValue());
     QObject::connect(pSpinBox, qOverload<qint32>(&QSpinBox::valueChanged), pSpinBox,
                      [](qint32 iValue) {
-      auto pSetting = CDeviceSettingFactory::Setting<quint16>(c_sInitFacePortSettingName);
+      auto pSetting = CDeviceSettingFactory::Setting<quint16>(c_sIntifacePortSettingName);
       pSetting->Store(static_cast<quint16>(iValue));
     });
     pLayout->addWidget(pSpinBox);
@@ -65,8 +65,8 @@ namespace
     auto wpHelpFactory = CApplication::Instance()->System<CHelpFactory>().lock();
     if (nullptr != wpHelpFactory)
     {
-      pRoot->setProperty(helpOverlay::c_sHelpPagePropertyName, c_sInitfacePortSettingHelpId);
-      wpHelpFactory->RegisterHelp(c_sInitfacePortSettingHelpId, ":/devices/resources/help/settings/initface_port_setting_help.html");
+      pRoot->setProperty(helpOverlay::c_sHelpPagePropertyName, c_sIntifacePortSettingHelpId);
+      wpHelpFactory->RegisterHelp(c_sIntifacePortSettingHelpId, ":/devices/resources/help/settings/intiface_port_setting_help.html");
     }
 
     return pRoot;
@@ -76,20 +76,20 @@ namespace
   //
   QWidget* CreateInstallLocaionWidget(QWidget* pParent)
   {
-    auto pSetting = CDeviceSettingFactory::Setting<QString>(c_sInitFaceLocationSettingName);
+    auto pSetting = CDeviceSettingFactory::Setting<QString>(c_sIntifaceLocationSettingName);
 
     QWidget* pRoot = new QWidget(pParent);
-    pRoot->setObjectName("initfaceInstallLocationWidget");
+    pRoot->setObjectName("intifaceInstallLocationWidget");
     QHBoxLayout* pLayout = new QHBoxLayout(pRoot);
     pLayout->setContentsMargins(0, 0, 0, 0);
-    QLabel* pLabel = new QLabel("Initface Central install location", pRoot);
+    QLabel* pLabel = new QLabel("Intiface Central install location", pRoot);
     pLayout->addWidget(pLabel);
     pLayout->addItem(new QSpacerItem(20, 0, QSizePolicy::Expanding, QSizePolicy::Fixed));
     QLineEdit* pLineEdit = new QLineEdit(pRoot);
     pLineEdit->setText(pSetting->GetValue());
     QObject::connect(pLineEdit, &QLineEdit::editingFinished, pLineEdit,
                      [pLineEdit]() {
-      auto pSetting = CDeviceSettingFactory::Setting<QString>(c_sInitFaceLocationSettingName);
+      auto pSetting = CDeviceSettingFactory::Setting<QString>(c_sIntifaceLocationSettingName);
       pSetting->Store(pLineEdit->text());
     });
     pLayout->addWidget(pLineEdit);
@@ -98,11 +98,11 @@ namespace
     pBrowseButton->setObjectName("BrowseButton");
     QObject::connect(pBrowseButton, &QPushButton::clicked, pBrowseButton,
                      [pLineEdit, pBrowseButton]() {
-      auto pSetting = CDeviceSettingFactory::Setting<QString>(c_sInitFaceLocationSettingName);
+      auto pSetting = CDeviceSettingFactory::Setting<QString>(c_sIntifaceLocationSettingName);
 
       QPointer<QPushButton> pGuard(pBrowseButton);
       QString sPath =
-          widget_helpers::GetExistingFile(pGuard, QObject::tr("Select Initface Central"),
+          widget_helpers::GetExistingFile(pGuard, QObject::tr("Select Intiface Central"),
             pSetting->GetValue(),
             QFileDialog::DontResolveSymlinks);
       if (nullptr == pGuard) { return; }
@@ -116,8 +116,8 @@ namespace
     auto wpHelpFactory = CApplication::Instance()->System<CHelpFactory>().lock();
     if (nullptr != wpHelpFactory)
     {
-      pRoot->setProperty(helpOverlay::c_sHelpPagePropertyName, c_sInitfaceInstallSettingHelpId);
-      wpHelpFactory->RegisterHelp(c_sInitfaceInstallSettingHelpId, ":/devices/resources/help/settings/initface_install_setting_help.html");
+      pRoot->setProperty(helpOverlay::c_sHelpPagePropertyName, c_sIntifaceInstallSettingHelpId);
+      wpHelpFactory->RegisterHelp(c_sIntifaceInstallSettingHelpId, ":/devices/resources/help/settings/intiface_install_setting_help.html");
     }
 
     return pRoot;
@@ -164,6 +164,8 @@ namespace
     QString sFoundProcessName =  QString::fromWCharArray(szProcessName);
     bool matchFound = sFoundProcessName.contains(sProcessNme);
 
+    qDebug() << sFoundProcessName << matchFound;
+
     // Release the handle to the process.
     CloseHandle(hProcess);
 
@@ -171,6 +173,8 @@ namespace
   }
 #endif
 
+  //--------------------------------------------------------------------------------------
+  //
   qint32 FindProcessId(QString sProcess)
   {
     qint32 iRet = -1;
@@ -207,14 +211,14 @@ namespace
 
 //--------------------------------------------------------------------------------------
 //
-class CInitfaceEngineClientWrapper
+class CIntifaceEngineClientWrapper
 {
 public:
-  CInitfaceEngineClientWrapper(const QString& sLoadPath,
+  CIntifaceEngineClientWrapper(const QString& sLoadPath,
                                std::function<void(const QString&)> fnDeviceAdded,
                                std::function<void(const QString&)> fnDeviceRemoved,
                                std::function<void()> fnDisconnected);
-  ~CInitfaceEngineClientWrapper();
+  ~CIntifaceEngineClientWrapper();
 
   bool Connect();
   qint32 DeviceCount() const;
@@ -239,7 +243,7 @@ CButtplugDeviceConnector::CButtplugDeviceConnector() :
   m_spClient(nullptr),
   m_pContext(new CButtplugDeviceConnectorContext(this))
 {
-  m_spClient.reset(new CInitfaceEngineClientWrapper(
+  m_spClient.reset(new CIntifaceEngineClientWrapper(
                      FindPluginPath(),
                      [this](const QString& sDevice) {
                        emit SignalDeviceCountChanged();
@@ -315,12 +319,12 @@ void CButtplugDeviceConnector::StopScanning()
 QString CButtplugDeviceConnector::FindPluginPath() const
 {
   QString sPluginPath = QLibraryInfo::location(QLibraryInfo::PluginsPath);
-  return sPluginPath + c_sInitfacePluginFolder;
+  return sPluginPath + c_sIntifacePluginFolder;
 }
 
 //----------------------------------------------------------------------------------------
 //
-CInitfaceEngineClientWrapper::CInitfaceEngineClientWrapper(
+CIntifaceEngineClientWrapper::CIntifaceEngineClientWrapper(
     const QString& sLoadPath,
     std::function<void(const QString&)> fnDeviceAdded,
     std::function<void(const QString&)> fnDeviceRemoved,
@@ -341,7 +345,7 @@ CInitfaceEngineClientWrapper::CInitfaceEngineClientWrapper(
   {
     if (auto spDevice = device.lock(); nullptr != spDevice)
     {
-      qDebug() << "Initface Client: Device added";
+      qDebug() << "Intiface Client: Device added";
       const QString sName = QString::fromStdString(spDevice->Name());
       m_deviceList.insert({sName, device});
       if (nullptr != fnDeviceAdded)
@@ -355,7 +359,7 @@ CInitfaceEngineClientWrapper::CInitfaceEngineClientWrapper(
   {
     if (auto spDevice = device.lock(); nullptr != spDevice)
     {
-      qDebug() << "Initface Client: Device removed";
+      qDebug() << "Intiface Client: Device removed";
       const QString sName = QString::fromStdString(spDevice->Name());
       auto it = m_deviceList.find(sName);
       if (m_deviceList.end() != it)
@@ -371,38 +375,38 @@ CInitfaceEngineClientWrapper::CInitfaceEngineClientWrapper(
 
   m_spClient->ErrorReceivedCb = [](const std::string& error)
   {
-    qWarning() << QString("Initface Client error: %1").arg(QString::fromStdString(error));
+    qWarning() << QString("Intiface Client error: %1").arg(QString::fromStdString(error));
   };
 
   m_spClient->ScanningFinishedCb = []()
   {
-    qDebug() << "Initface Client: Scanning finished";
+    qDebug() << "Intiface Client: Scanning finished";
   };
 
   m_spClient->PingTimeoutCb = []()
   {
-    qWarning() << "Initface Client: Ping timeout";
+    qWarning() << "Intiface Client: Ping timeout";
   };
 
   m_spClient->ServerDisconnectCb = [fnDisconnected]()
   {
-    qDebug() << "Initface Client Server disconnect";
+    qDebug() << "Intiface Client Server disconnect";
     if (nullptr != fnDisconnected)
     {
       fnDisconnected();
     }
   };
 }
-CInitfaceEngineClientWrapper::~CInitfaceEngineClientWrapper()
+CIntifaceEngineClientWrapper::~CIntifaceEngineClientWrapper()
 {
 }
 
 //----------------------------------------------------------------------------------------
 //
-bool CInitfaceEngineClientWrapper::Connect()
+bool CIntifaceEngineClientWrapper::Connect()
 {
   if (nullptr == m_spClient) { return false; }
-  auto pSetting = CDeviceSettingFactory::Setting<quint16>(c_sInitFacePortSettingName);
+  auto pSetting = CDeviceSettingFactory::Setting<quint16>(c_sIntifacePortSettingName);
   if (nullptr == pSetting)
   {
     return false;
@@ -415,7 +419,7 @@ bool CInitfaceEngineClientWrapper::Connect()
 
 //----------------------------------------------------------------------------------------
 //
-qint32 CInitfaceEngineClientWrapper::DeviceCount() const
+qint32 CIntifaceEngineClientWrapper::DeviceCount() const
 {
   if (nullptr == m_spClient) { return false; }
   return m_spClient->DeviceCount();
@@ -424,14 +428,14 @@ qint32 CInitfaceEngineClientWrapper::DeviceCount() const
 //----------------------------------------------------------------------------------------
 //
 const std::map<QString, std::weak_ptr<Buttplug::Device>>&
-CInitfaceEngineClientWrapper::Devices() const
+CIntifaceEngineClientWrapper::Devices() const
 {
   return m_deviceList;
 }
 
 //----------------------------------------------------------------------------------------
 //
-bool CInitfaceEngineClientWrapper::Disconnect()
+bool CIntifaceEngineClientWrapper::Disconnect()
 {
   if (nullptr == m_spClient) { return false; }
   return m_spClient->Disconnect().get();
@@ -439,14 +443,14 @@ bool CInitfaceEngineClientWrapper::Disconnect()
 
 //----------------------------------------------------------------------------------------
 //
-bool CInitfaceEngineClientWrapper::IsConnected()
+bool CIntifaceEngineClientWrapper::IsConnected()
 {
   return nullptr == m_spClient && m_spClient->Connected();
 }
 
 //----------------------------------------------------------------------------------------
 //
-bool CInitfaceEngineClientWrapper::StartScanning()
+bool CIntifaceEngineClientWrapper::StartScanning()
 {
   if (nullptr == m_spClient)
   {
@@ -458,7 +462,7 @@ bool CInitfaceEngineClientWrapper::StartScanning()
 
 //----------------------------------------------------------------------------------------
 //
-bool CInitfaceEngineClientWrapper::StopScanning()
+bool CIntifaceEngineClientWrapper::StopScanning()
 {
   if (nullptr == m_spClient)
   {
@@ -470,17 +474,17 @@ bool CInitfaceEngineClientWrapper::StopScanning()
 
 //----------------------------------------------------------------------------------------
 //
-CInitfaceEngineDeviceConnector::CInitfaceEngineDeviceConnector() :
+CIntifaceEngineDeviceConnector::CIntifaceEngineDeviceConnector() :
   CButtplugDeviceConnector()
 {
 }
-CInitfaceEngineDeviceConnector::~CInitfaceEngineDeviceConnector()
+CIntifaceEngineDeviceConnector::~CIntifaceEngineDeviceConnector()
 {
 }
 
 //----------------------------------------------------------------------------------------
 //
-bool CInitfaceEngineDeviceConnector::Connect()
+bool CIntifaceEngineDeviceConnector::Connect()
 {
   if (!m_spClient->IsLoaded()) { return false; }
   if (StartEngine())
@@ -490,8 +494,8 @@ bool CInitfaceEngineDeviceConnector::Connect()
 
     if (!m_spClient->Connect())
     {
-      m_pInitfaceEngineProcess->terminate();
-      delete m_pInitfaceEngineProcess;
+      m_pIntifaceEngineProcess->terminate();
+      delete m_pIntifaceEngineProcess;
     }
   }
   return false;
@@ -499,20 +503,20 @@ bool CInitfaceEngineDeviceConnector::Connect()
 
 //----------------------------------------------------------------------------------------
 //
-void CInitfaceEngineDeviceConnector::Disconnect()
+void CIntifaceEngineDeviceConnector::Disconnect()
 {
   if (m_spClient->IsLoaded())
   {
     m_spClient->Disconnect();
   }
 
-  m_pInitfaceEngineProcess->terminate();
-  delete m_pInitfaceEngineProcess;
+  m_pIntifaceEngineProcess->terminate();
+  delete m_pIntifaceEngineProcess;
 }
 
 //----------------------------------------------------------------------------------------
 //
-void CInitfaceEngineDeviceConnector::SlotProcessError(QProcess::ProcessError error)
+void CIntifaceEngineDeviceConnector::SlotProcessError(QProcess::ProcessError error)
 {
   switch(error)
   {
@@ -526,24 +530,24 @@ void CInitfaceEngineDeviceConnector::SlotProcessError(QProcess::ProcessError err
 
 //----------------------------------------------------------------------------------------
 //
-void CInitfaceEngineDeviceConnector::SlotReadyReadStdOut()
+void CIntifaceEngineDeviceConnector::SlotReadyReadStdOut()
 {
 #ifndef NDEBUG
-  qDebug() << "Initface Engine:" << m_pInitfaceEngineProcess->readAllStandardOutput();
+  qDebug() << "Intiface Engine:" << m_pIntifaceEngineProcess->readAllStandardOutput();
 #endif
 }
 
 //----------------------------------------------------------------------------------------
 //
-bool CInitfaceEngineDeviceConnector::StartEngine()
+bool CIntifaceEngineDeviceConnector::StartEngine()
 {
-  m_pInitfaceEngineProcess = new QProcess(this);
-  connect(m_pInitfaceEngineProcess, &QProcess::errorOccurred, this,
-          &CInitfaceEngineDeviceConnector::SlotProcessError);
-  connect(m_pInitfaceEngineProcess, &QProcess::readyReadStandardOutput, this,
-          &CInitfaceEngineDeviceConnector::SlotReadyReadStdOut);
-  connect(m_pInitfaceEngineProcess, &QProcess::readyReadStandardError, this,
-          &CInitfaceEngineDeviceConnector::SlotReadyReadStdOut);
+  m_pIntifaceEngineProcess = new QProcess(this);
+  connect(m_pIntifaceEngineProcess, &QProcess::errorOccurred, this,
+          &CIntifaceEngineDeviceConnector::SlotProcessError);
+  connect(m_pIntifaceEngineProcess, &QProcess::readyReadStandardOutput, this,
+          &CIntifaceEngineDeviceConnector::SlotReadyReadStdOut);
+  connect(m_pIntifaceEngineProcess, &QProcess::readyReadStandardError, this,
+          &CIntifaceEngineDeviceConnector::SlotReadyReadStdOut);
 
   const QString sPluginPath = FindPluginPath();
   QString sExecutable;
@@ -556,16 +560,16 @@ bool CInitfaceEngineDeviceConnector::StartEngine()
   }
   if (sExecutable.isEmpty())
   {
-    qWarning() << "Could not locate the initface-engine executable.";
-    delete m_pInitfaceEngineProcess;
+    qWarning() << "Could not locate the intiface-engine executable.";
+    delete m_pIntifaceEngineProcess;
     return false;
   }
 
-  auto pSetting = CDeviceSettingFactory::Setting<quint16>(c_sInitFacePortSettingName);
+  auto pSetting = CDeviceSettingFactory::Setting<quint16>(c_sIntifacePortSettingName);
   if (nullptr == pSetting)
   {
-    qWarning() << "Could not load initface port setting.";
-    delete m_pInitfaceEngineProcess;
+    qWarning() << "Could not load intiface port setting.";
+    delete m_pIntifaceEngineProcess;
     return false;
   }
 
@@ -575,39 +579,39 @@ bool CInitfaceEngineDeviceConnector::StartEngine()
                      "--use-lovense-dongle-serial" << "--use-lovense-dongle-hid" <<
                      "--use-xinput" << "--use-lovense-connect";
 
-  m_pInitfaceEngineProcess->start(sExecutable + " " + args.join(" "));
-  m_pInitfaceEngineProcess->waitForStarted();
+  m_pIntifaceEngineProcess->start(sExecutable + " " + args.join(" "));
+  m_pIntifaceEngineProcess->waitForStarted();
 
-  if (QProcess::NotRunning != m_pInitfaceEngineProcess->state())
+  if (QProcess::NotRunning != m_pIntifaceEngineProcess->state())
   {
     return true;
   }
 
-  delete m_pInitfaceEngineProcess;
+  delete m_pIntifaceEngineProcess;
   return false;
 }
 
 //----------------------------------------------------------------------------------------
 //
-CInitfaceCentralDeviceConnector::CInitfaceCentralDeviceConnector() :
+CIntifaceCentralDeviceConnector::CIntifaceCentralDeviceConnector() :
   CButtplugDeviceConnector()
 {
 
 }
-CInitfaceCentralDeviceConnector::~CInitfaceCentralDeviceConnector()
+CIntifaceCentralDeviceConnector::~CIntifaceCentralDeviceConnector()
 {
 
 }
 
 //----------------------------------------------------------------------------------------
 //
-bool CInitfaceCentralDeviceConnector::Connect()
+bool CIntifaceCentralDeviceConnector::Connect()
 {
   if (!m_spClient->IsLoaded()) { return false; }
 
-  if (!FindInitfaceProcess())
+  if (!FindIntifaceProcess())
   {
-    if (StartInitface())
+    if (StartIntiface())
     {
       // we return true, because the engine is started but sadly we can't currently start
       // it with the server already running
@@ -624,7 +628,7 @@ bool CInitfaceCentralDeviceConnector::Connect()
 
 //----------------------------------------------------------------------------------------
 //
-void CInitfaceCentralDeviceConnector::Disconnect()
+void CIntifaceCentralDeviceConnector::Disconnect()
 {
   if (m_spClient->IsLoaded())
   {
@@ -634,7 +638,7 @@ void CInitfaceCentralDeviceConnector::Disconnect()
 
 //----------------------------------------------------------------------------------------
 //
-void CInitfaceCentralDeviceConnector::SlotProcessError(QProcess::ProcessError error)
+void CIntifaceCentralDeviceConnector::SlotProcessError(QProcess::ProcessError error)
 {
   switch(error)
   {
@@ -648,9 +652,9 @@ void CInitfaceCentralDeviceConnector::SlotProcessError(QProcess::ProcessError er
 
 //----------------------------------------------------------------------------------------
 //
-bool CInitfaceCentralDeviceConnector::FindInitfaceProcess()
+bool CIntifaceCentralDeviceConnector::FindIntifaceProcess()
 {
-  qint32 iPid = FindProcessId("initface_central");
+  qint32 iPid = FindProcessId("intiface_central");
   if (-1 == iPid)
   {
     return false;
@@ -661,14 +665,14 @@ bool CInitfaceCentralDeviceConnector::FindInitfaceProcess()
 
 //----------------------------------------------------------------------------------------
 //
-bool CInitfaceCentralDeviceConnector::StartInitface()
+bool CIntifaceCentralDeviceConnector::StartIntiface()
 {
   const QString sPluginPath = FindPluginPath();
 
-  auto pSetting = CDeviceSettingFactory::Setting<QString>(c_sInitFaceLocationSettingName);
+  auto pSetting = CDeviceSettingFactory::Setting<QString>(c_sIntifaceLocationSettingName);
   if (nullptr == pSetting)
   {
-    qWarning() << "Could not load initface install location setting.";
+    qWarning() << "Could not load intiface install location setting.";
     return false;
   }
 
@@ -683,7 +687,7 @@ bool CInitfaceCentralDeviceConnector::StartInitface()
 
 //----------------------------------------------------------------------------------------
 // registering settings here
-DECLARE_DEVICE_SETTING(struct SInitfacePort, c_sInitFacePortSettingName, quint16, 12345,
+DECLARE_DEVICE_SETTING(struct SIntifacePort, c_sIntifacePortSettingName, quint16, 12345,
                        ::CreatePortWidget)
-DECLARE_DEVICE_SETTING(struct SInitfaceInstallLocation, c_sInitFaceLocationSettingName, QString, QString(),
+DECLARE_DEVICE_SETTING(struct SIntifaceInstallLocation, c_sIntifaceLocationSettingName, QString, QString(),
                        ::CreateInstallLocaionWidget)
