@@ -8,6 +8,8 @@ CSearchWidget::CSearchWidget(QWidget* pParent) :
   m_pUndoFilter(nullptr)
 {
   m_spUi->setupUi(this);
+  m_spUi->pFilterLineEdit->setPlaceholderText(QStringLiteral("Filter"));
+  m_spUi->pFilterLineEdit->setClearButtonEnabled(true);
 }
 
 CSearchWidget::~CSearchWidget()

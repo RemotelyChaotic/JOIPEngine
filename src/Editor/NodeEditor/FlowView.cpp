@@ -7,6 +7,8 @@
 #include "CommandNodeRemoved.h"
 #include "FlowScene.h"
 
+#include "Widgets/SearchWidget.h"
+
 #include <nodes/Connection>
 #include <nodes/FlowScene>
 #include <nodes/NodeGeometry>
@@ -122,10 +124,7 @@ void CFlowView::OpenContextMenuAt(const QPoint& localPoint, const QPoint& create
   auto skipText = QStringLiteral("skip me");
 
   //Add filterbox to the context menu
-  auto *txtBox = new QLineEdit(&modelMenu);
-
-  txtBox->setPlaceholderText(QStringLiteral("Filter"));
-  txtBox->setClearButtonEnabled(true);
+  auto *txtBox = new CSearchWidget(&modelMenu);
 
   auto *txtBoxAction = new QWidgetAction(&modelMenu);
   txtBoxAction->setDefaultWidget(txtBox);
@@ -164,7 +163,7 @@ void CFlowView::OpenContextMenuAt(const QPoint& localPoint, const QPoint& create
 
   treeView->expandAll();
 
-  connect(treeView, &QTreeWidget::itemClicked, [&](QTreeWidgetItem *item, int)
+  connect(treeView, &QTreeWidget::itemClicked, treeView, [&](QTreeWidgetItem *item, int)
   {
     QString modelName = item->data(0, Qt::UserRole).toString();
 
@@ -186,7 +185,7 @@ void CFlowView::OpenContextMenuAt(const QPoint& localPoint, const QPoint& create
   });
 
   //Setup filtering
-  connect(txtBox, &QLineEdit::textChanged, [&](const QString &text)
+  connect(txtBox, &CSearchWidget::SignalFilterChanged, txtBox, [&](const QString &text)
   {
     for (auto& topLvlItem : topLevelItems)
     {
