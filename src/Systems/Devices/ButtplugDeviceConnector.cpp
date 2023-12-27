@@ -164,7 +164,7 @@ namespace
     QString sFoundProcessName =  QString::fromWCharArray(szProcessName);
     bool matchFound = sFoundProcessName.contains(sProcessNme);
 
-    qDebug() << sFoundProcessName << matchFound;
+    //qDebug() << sFoundProcessName << matchFound;
 
     // Release the handle to the process.
     CloseHandle(hProcess);
