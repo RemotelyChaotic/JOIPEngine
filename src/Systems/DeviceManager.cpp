@@ -10,6 +10,7 @@
 
 #include <QDebug>
 
+Q_DECLARE_METATYPE(std::shared_ptr<IDevice>)
 Q_DECLARE_METATYPE(std::vector<std::shared_ptr<IDevice>>)
 
 namespace
@@ -49,6 +50,7 @@ namespace
 CDeviceManager::CDeviceManager() :
   CSystemBase()
 {
+  qRegisterMetaType<std::shared_ptr<IDevice>>();
   qRegisterMetaType<std::vector<std::shared_ptr<IDevice>>>();
 }
 
@@ -78,6 +80,19 @@ QStringList CDeviceManager::DeviceNames()
 
 //----------------------------------------------------------------------------------------
 //
+std::shared_ptr<IDevice> CDeviceManager::Device(const QString& sName)
+{
+  std::shared_ptr<IDevice> spRet;
+  bool bOk = QMetaObject::invokeMethod(const_cast<CDeviceManager*>(this), "DeviceImpl",
+                                       Qt::BlockingQueuedConnection,
+                                       Q_ARG(QString, sName),
+                                       Q_RETURN_ARG(std::shared_ptr<IDevice>, spRet));
+  assert(bOk); Q_UNUSED(bOk)
+  return spRet;
+}
+
+//----------------------------------------------------------------------------------------
+//
 std::vector<std::shared_ptr<IDevice>> CDeviceManager::Devices()
 {
   std::vector<std::shared_ptr<IDevice>> vspRet;
@@ -102,6 +117,18 @@ bool CDeviceManager::IsConnected() const
 {
   bool bRet = false;
   bool bOk = QMetaObject::invokeMethod(const_cast<CDeviceManager*>(this), "IsConnectedImpl",
+                                       Qt::BlockingQueuedConnection,
+                                       Q_RETURN_ARG(bool, bRet));
+  assert(bOk); Q_UNUSED(bOk)
+  return bRet;
+}
+
+//----------------------------------------------------------------------------------------
+//
+bool CDeviceManager::IsScanning() const
+{
+  bool bRet = false;
+  bool bOk = QMetaObject::invokeMethod(const_cast<CDeviceManager*>(this), "IsScanningImpl",
                                        Qt::BlockingQueuedConnection,
                                        Q_RETURN_ARG(bool, bRet));
   assert(bOk); Q_UNUSED(bOk)
@@ -156,21 +183,31 @@ void CDeviceManager::ConnectImpl()
   const auto& vspConnectors = GetConnectors();
   for (auto it = vspConnectors.rbegin(); vspConnectors.rend() != it; ++it)
   {
+    // need to connect to this signal before connecting, since a connection might list
+    // already connected devices on connect success
+    // ...connect...
+    m_deviceCountChangedConnection =
+        connect(dynamic_cast<QObject*>(it->get()), SIGNAL(SignalDeviceCountChanged()),
+                this, SIGNAL(SignalDeviceCountChanged()), Qt::DirectConnection);
+    assert(m_deviceCountChangedConnection);
+
+    bool bConnected = false;
     if ((*it)->Connect())
     {
+      bConnected = true;
       m_pActiveConnector = it->get();
       m_disconnectConnection =
           connect(dynamic_cast<QObject*>(m_pActiveConnector), SIGNAL(SignalDisconnected()),
                   this, SLOT(SlotDisconnected()), Qt::QueuedConnection);
       assert(m_disconnectConnection);
 
-      m_deviceCountChangedConnection =
-          connect(dynamic_cast<QObject*>(m_pActiveConnector), SIGNAL(SignalDeviceCountChanged()),
-                  this, SIGNAL(SignalDeviceCountChanged()), Qt::DirectConnection);
-      assert(m_deviceCountChangedConnection);
-
       emit SignalConnected();
       break;
+    }
+
+    if (!bConnected)
+    {
+      disconnect(m_deviceCountChangedConnection);
     }
   }
 
@@ -189,6 +226,17 @@ QStringList CDeviceManager::DeviceNamesImpl()
     return m_pActiveConnector->DeviceNames();
   }
   return QStringList();
+}
+
+//----------------------------------------------------------------------------------------
+//
+std::shared_ptr<IDevice> CDeviceManager::DeviceImpl(const QString& sName)
+{
+  if (IsConnectedImpl())
+  {
+    return m_pActiveConnector->Device(sName);
+  }
+  return nullptr;
 }
 
 //----------------------------------------------------------------------------------------
@@ -213,6 +261,12 @@ void CDeviceManager::DisconnectImpl()
     m_pActiveConnector->Disconnect();
     m_pActiveConnector = nullptr;
 
+    if (m_bIsScanning)
+    {
+      emit SignalStopScanning();
+      m_bIsScanning = false;
+    }
+
     emit SignalDisconnected();
   }
 }
@@ -222,6 +276,13 @@ void CDeviceManager::DisconnectImpl()
 bool CDeviceManager::IsConnectedImpl()
 {
   return nullptr != m_pActiveConnector;
+}
+
+//----------------------------------------------------------------------------------------
+//
+bool CDeviceManager::IsScanningImpl()
+{
+  return m_bIsScanning;
 }
 
 //----------------------------------------------------------------------------------------
@@ -238,7 +299,9 @@ void CDeviceManager::StartScanningImpl()
 {
   if (IsConnectedImpl())
   {
+    m_bIsScanning = true;
     m_pActiveConnector->StartScanning();
+    emit SignalStartScanning();
   }
 }
 
@@ -249,5 +312,7 @@ void CDeviceManager::StopScanningImpl()
   if (IsConnectedImpl())
   {
     m_pActiveConnector->StopScanning();
+    m_bIsScanning = false;
+    emit SignalStopScanning();
   }
 }

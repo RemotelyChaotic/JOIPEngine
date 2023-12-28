@@ -24,6 +24,7 @@ public:
   ~CButtplugDeviceConnector() override;
 
   QStringList DeviceNames() const override;
+  std::shared_ptr<IDevice> Device(const QString& sName) const override;
   std::vector<std::shared_ptr<IDevice>> Devices() const override;
   void StartScanning() override;
   void StopScanning() override;

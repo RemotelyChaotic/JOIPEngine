@@ -279,6 +279,23 @@ QStringList CButtplugDeviceConnector::DeviceNames() const
 
 //----------------------------------------------------------------------------------------
 //
+std::shared_ptr<IDevice> CButtplugDeviceConnector::Device(const QString& sName) const
+{
+  if (!m_spClient->IsLoaded())
+  {
+    return nullptr;
+  }
+
+  auto it = m_spClient->Devices().find(sName);
+  if (m_spClient->Devices().end() != it)
+  {
+    return std::make_shared<CButtplugDeviceWrapper>(it->second, m_pContext);
+  }
+  return nullptr;
+}
+
+//----------------------------------------------------------------------------------------
+//
 std::vector<std::shared_ptr<IDevice>> CButtplugDeviceConnector::Devices() const
 {
   if (!m_spClient->IsLoaded())
@@ -438,6 +455,11 @@ CIntifaceEngineClientWrapper::Devices() const
 bool CIntifaceEngineClientWrapper::Disconnect()
 {
   if (nullptr == m_spClient) { return false; }
+
+  while (!m_deviceList.empty())
+  {
+    (*m_spClient->DeviceRemovedCb)(m_deviceList.begin()->second);
+  }
   return m_spClient->Disconnect().get();
 }
 

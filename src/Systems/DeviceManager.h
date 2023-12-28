@@ -23,9 +23,11 @@ public:
 
   void Connect();
   QStringList DeviceNames();
+  std::shared_ptr<IDevice> Device(const QString& sName);
   std::vector<std::shared_ptr<IDevice>> Devices();
   void Disconnect();
   bool IsConnected() const;
+  bool IsScanning() const;
   void StartScanning();
   void StopScanning();
 
@@ -33,6 +35,8 @@ signals:
   void SignalConnected();
   void SignalDisconnected();
   void SignalDeviceCountChanged();
+  void SignalStartScanning();
+  void SignalStopScanning();
 
 public slots:
   void Initialize() override;
@@ -41,9 +45,11 @@ public slots:
 private slots:
   void ConnectImpl();
   QStringList DeviceNamesImpl();
+  std::shared_ptr<IDevice> DeviceImpl(const QString& sName);
   std::vector<std::shared_ptr<IDevice>> DevicesImpl();
   void DisconnectImpl();
   bool IsConnectedImpl();
+  bool IsScanningImpl();
   void SlotDisconnected();
   void StartScanningImpl();
   void StopScanningImpl();
@@ -52,6 +58,7 @@ private:
   IDeviceConnector*         m_pActiveConnector = nullptr;
   QMetaObject::Connection   m_disconnectConnection;
   QMetaObject::Connection   m_deviceCountChangedConnection;
+  bool                      m_bIsScanning = false;
 };
 
 #endif // CDEVICEMANAGER_H
