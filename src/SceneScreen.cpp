@@ -160,7 +160,7 @@ void CSceneScreen::on_pOpenExistingProjectButton_clicked()
     // will eventually emit a signal but we can ignore that
     m_spUi->pProjectCardSelectionWidget->UnloadProjects();
 
-    emit m_spWindowContext->SignalSetDownloadButtonVisible(false);
+    emit m_spWindowContext->SignalSetLeftButtonsVisible(false);
     emit m_spWindowContext->SignalSetHelpButtonVisible(false);
 
     m_spUi->pMainSceneScreen->LoadProject(iId);

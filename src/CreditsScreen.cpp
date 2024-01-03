@@ -46,7 +46,7 @@ void CCreditsScreen::Initialize()
 //
 void CCreditsScreen::Load()
 {
-  emit m_spWindowContext->SignalSetDownloadButtonVisible(false);
+  emit m_spWindowContext->SignalSetLeftButtonsVisible(false);
   emit m_spWindowContext->SignalSetHelpButtonVisible(false);
 
   QFile creditsFile(":/resources/data/credits.txt");

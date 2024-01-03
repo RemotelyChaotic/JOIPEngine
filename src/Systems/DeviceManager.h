@@ -5,6 +5,7 @@
 
 #include <QMutex>
 #include <QObject>
+#include <QTimer>
 
 #include <memory>
 #include <vector>
@@ -28,6 +29,7 @@ public:
   void Disconnect();
   bool IsConnected() const;
   bool IsScanning() const;
+  qint32 NumberRegisteredConnectors() const;
   void StartScanning();
   void StopScanning();
 
@@ -47,17 +49,21 @@ private slots:
   QStringList DeviceNamesImpl();
   std::shared_ptr<IDevice> DeviceImpl(const QString& sName);
   std::vector<std::shared_ptr<IDevice>> DevicesImpl();
+  void DeinitImpl();
   void DisconnectImpl();
   bool IsConnectedImpl();
   bool IsScanningImpl();
   void SlotDisconnected();
+  qint32 NumberRegisteredConnectorsImpl();
   void StartScanningImpl();
   void StopScanningImpl();
+  void SlotReconnectTimerTimeout();
 
 private:
   IDeviceConnector*         m_pActiveConnector = nullptr;
   QMetaObject::Connection   m_disconnectConnection;
   QMetaObject::Connection   m_deviceCountChangedConnection;
+  QPointer<QTimer>          m_pReconnectTimer;
   bool                      m_bIsScanning = false;
 };
 

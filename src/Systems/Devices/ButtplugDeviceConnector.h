@@ -26,6 +26,7 @@ public:
   QStringList DeviceNames() const override;
   std::shared_ptr<IDevice> Device(const QString& sName) const override;
   std::vector<std::shared_ptr<IDevice>> Devices() const override;
+  bool IsConnected() const override;
   void StartScanning() override;
   void StopScanning() override;
 
@@ -51,6 +52,7 @@ public:
   CIntifaceEngineDeviceConnector();
   ~CIntifaceEngineDeviceConnector() override;
 
+  bool CanConnect() override;
   bool Connect() override;
   void Disconnect() override;
 
@@ -75,6 +77,7 @@ public:
   CIntifaceCentralDeviceConnector();
   ~CIntifaceCentralDeviceConnector() override;
 
+  bool CanConnect() override;
   bool Connect() override;
   void Disconnect() override;
 

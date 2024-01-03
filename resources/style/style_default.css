@@ -299,6 +299,7 @@ COverlayButton>CShortcutButton {
   qproperty-iconSize: 48px;
 }
 
+CDeviceButtonOverlay>CShortcutButton,
 CDownloadButtonOverlay>CShortcutButton {
   min-width: 64px;
   min-height: 48px;
@@ -500,6 +501,10 @@ QPushButton#CdUpButton {
 QPushButton#DownloadButton {
   qproperty-icon: url(:/resources/style/img/ButtonDownload.png) off,
                   url(:/resources/style/img/ButtonDownload.png) on;
+}
+QPushButton#DeviceButton {
+  qproperty-icon: url(:/resources/style/img/ButtonPlug.png) off,
+                  url(:/resources/style/img/ButtonPlug.png) on;
 }
 QPushButton#eResourceWidget {
   qproperty-icon: url(:/resources/style/img/ButtonResourceWidget.png) off,
@@ -1073,7 +1078,8 @@ COverlayBase {
   padding: 5px;
 }
 COverlayBase#HelpButtonOverlay,
-COverlayBase#DownloadButtonOverlay {
+COverlayBase#DownloadButtonOverlay,
+COverlayBase#DeviceButtonOverlay {
   color: transparent;
   background-color: transparent;
   border: none;

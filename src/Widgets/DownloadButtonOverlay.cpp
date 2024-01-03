@@ -19,6 +19,7 @@ CDownloadCounterOverlay::CDownloadCounterOverlay(QWidget* pParent) :
   setFrameShape(QFrame::NoFrame);
   setFrameShadow(QFrame::Plain);
 
+  m_pDlCounter->SetDrawShadow(false);
   m_pDlCounter->SetFontSize(14);
   m_pDlCounter->setSizePolicy(QSizePolicy(QSizePolicy::Preferred, QSizePolicy::Preferred));
 

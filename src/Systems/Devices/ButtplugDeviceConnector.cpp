@@ -313,6 +313,18 @@ std::vector<std::shared_ptr<IDevice>> CButtplugDeviceConnector::Devices() const
 
 //----------------------------------------------------------------------------------------
 //
+bool CButtplugDeviceConnector::IsConnected() const
+{
+  if (!m_spClient->IsLoaded())
+  {
+    return false;
+  }
+
+  return m_spClient->IsConnected();
+}
+
+//----------------------------------------------------------------------------------------
+//
 void CButtplugDeviceConnector::StartScanning()
 {
   if (m_spClient->IsLoaded())
@@ -356,7 +368,7 @@ CIntifaceEngineClientWrapper::CIntifaceEngineClientWrapper(
   Buttplug::FFI::ActivateEnvLogger();
 
   m_bIsLoaded = true;
-  m_spClient.reset(new Buttplug::Client("JoipEngineClient"));
+  m_spClient.reset(new Buttplug::Client("JOIPEngine"));
 
   m_spClient->DeviceAddedCb = [this, fnDeviceAdded](std::weak_ptr<Buttplug::Device> device)
   {
@@ -506,21 +518,30 @@ CIntifaceEngineDeviceConnector::~CIntifaceEngineDeviceConnector()
 
 //----------------------------------------------------------------------------------------
 //
-bool CIntifaceEngineDeviceConnector::Connect()
+bool CIntifaceEngineDeviceConnector::CanConnect()
 {
   if (!m_spClient->IsLoaded()) { return false; }
   if (StartEngine())
   {
     // we need to wait for the server to start, sadly we can't synchronize this better
     QThread::sleep(15);
-
-    if (!m_spClient->Connect())
-    {
-      m_pIntifaceEngineProcess->terminate();
-      delete m_pIntifaceEngineProcess;
-    }
+    return true;
   }
   return false;
+}
+
+//----------------------------------------------------------------------------------------
+//
+bool CIntifaceEngineDeviceConnector::Connect()
+{
+  if (!m_spClient->IsLoaded()) { return false; }
+  if (!m_spClient->Connect())
+  {
+    m_pIntifaceEngineProcess->terminate();
+    delete m_pIntifaceEngineProcess;
+    return false;
+  }
+  return true;
 }
 
 //----------------------------------------------------------------------------------------
@@ -627,7 +648,7 @@ CIntifaceCentralDeviceConnector::~CIntifaceCentralDeviceConnector()
 
 //----------------------------------------------------------------------------------------
 //
-bool CIntifaceCentralDeviceConnector::Connect()
+bool CIntifaceCentralDeviceConnector::CanConnect()
 {
   if (!m_spClient->IsLoaded()) { return false; }
 
@@ -642,10 +663,18 @@ bool CIntifaceCentralDeviceConnector::Connect()
   }
   else
   {
-    return m_spClient->Connect();
+    return true;
   }
 
   return false;
+}
+
+//----------------------------------------------------------------------------------------
+//
+bool CIntifaceCentralDeviceConnector::Connect()
+{
+  if (!m_spClient->IsLoaded()) { return false; }
+  return m_spClient->Connect();
 }
 
 //----------------------------------------------------------------------------------------

@@ -9,13 +9,17 @@
 #include "SceneScreen.h"
 #include "Settings.h"
 #include "SettingsScreen.h"
+#include "ui_MainWindow.h"
+
 #include "Systems/BackActionHandler.h"
+#include "Systems/DeviceManager.h"
 #include "Systems/ProjectDownloader.h"
+
 #include "Widgets/AgeCheckOverlay.h"
 #include "Widgets/BackgroundWidget.h"
+#include "Widgets/DeviceButtonOverlay.h"
 #include "Widgets/DownloadButtonOverlay.h"
 #include "Widgets/HelpOverlay.h"
-#include "ui_MainWindow.h"
 
 #include <QDesktopWidget>
 #include <QDir>
@@ -28,6 +32,7 @@ CMainWindow::CMainWindow(QWidget* pParent) :
   m_spHelpButtonOverlay(std::make_unique<CHelpButtonOverlay>(this)),
   m_spHelpOverlay(nullptr),
   m_spDownloadButtonOverlay(std::make_unique<CDownloadButtonOverlay>(this)),
+  m_spDeviceButtonOverlay(std::make_unique<CDeviceButtonOverlay>(this)),
   m_spWindowContext(std::make_shared<CWindowContext>()),
   m_pBackground(new CBackgroundWidget(this)),
   m_bInitialized(false),
@@ -46,6 +51,7 @@ CMainWindow::~CMainWindow()
   m_spHelpOverlay.reset();
   m_spHelpButtonOverlay.reset();
   m_spDownloadButtonOverlay.reset();
+  m_spDeviceButtonOverlay.reset();
 }
 
 //----------------------------------------------------------------------------------------
@@ -55,8 +61,8 @@ void CMainWindow::ConnectSlots()
   connect(m_spWindowContext.get(), &CWindowContext::SignalChangeAppState,
           this, &CMainWindow::SlotChangeAppState, Qt::DirectConnection);
 
-  connect(m_spWindowContext.get(), &CWindowContext::SignalSetDownloadButtonVisible,
-          this, &CMainWindow::SlotSetDownloadButtonVisible, Qt::DirectConnection);
+  connect(m_spWindowContext.get(), &CWindowContext::SignalSetLeftButtonsVisible,
+          this, &CMainWindow::SlotSetLeftButtonsVisible, Qt::DirectConnection);
 
   connect(m_spWindowContext.get(), &CWindowContext::SignalSetHelpButtonVisible,
           this, &CMainWindow::SlotSetHelpButtonVisible, Qt::DirectConnection);
@@ -85,6 +91,19 @@ void CMainWindow::Initialize()
   connect(m_spDownloadButtonOverlay.get(), &CHelpButtonOverlay::SignalButtonClicked,
           this, &CMainWindow::SlotDownloadButtonClicked);
   m_spDownloadButtonOverlay->Show();
+
+  m_spDeviceButtonOverlay->Initialize();
+  if (auto spDeviceManager = CApplication::Instance()->System<CDeviceManager>().lock())
+  {
+    if (spDeviceManager->NumberRegisteredConnectors() > 0)
+    {
+      m_spDeviceButtonOverlay->Show();
+    }
+    else
+    {
+      m_spDeviceButtonOverlay->Hide();
+    }
+  }
 
   m_spAgeCheckOverlay->Show();
 
@@ -177,6 +196,17 @@ void CMainWindow::SlotCurrentAppStateUnloadFinished()
 
   m_spHelpButtonOverlay->Show();
   m_spDownloadButtonOverlay->Show();
+  if (auto spDeviceManager = CApplication::Instance()->System<CDeviceManager>().lock())
+  {
+    if (spDeviceManager->NumberRegisteredConnectors() > 0)
+    {
+      m_spDeviceButtonOverlay->Show();
+    }
+    else
+    {
+      m_spDeviceButtonOverlay->Hide();
+    }
+  }
 
   pScreen =
       dynamic_cast<IAppStateScreen*>(m_spUi->pApplicationStackWidget->widget(m_nextState));
@@ -214,7 +244,7 @@ void CMainWindow::SlotDownloadButtonClicked()
 
 //----------------------------------------------------------------------------------------
 //
-void CMainWindow::SlotSetDownloadButtonVisible(bool bVisible)
+void CMainWindow::SlotSetLeftButtonsVisible(bool bVisible)
 {
   if (bVisible)
   {
@@ -223,6 +253,18 @@ void CMainWindow::SlotSetDownloadButtonVisible(bool bVisible)
   else
   {
     m_spDownloadButtonOverlay->Hide();
+  }
+
+  if (auto spDeviceManager = CApplication::Instance()->System<CDeviceManager>().lock())
+  {
+    if (spDeviceManager->NumberRegisteredConnectors() > 0 && bVisible)
+    {
+      m_spDeviceButtonOverlay->Show();
+    }
+    else
+    {
+      m_spDeviceButtonOverlay->Hide();
+    }
   }
 }
 

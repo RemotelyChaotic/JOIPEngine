@@ -20,7 +20,7 @@ public:
 signals:
   void SignalChangeAppOverlay(const QString& sImage);
   void SignalChangeAppState(EAppState newState, ETransitionDirection direction = eHorizontal);
-  void SignalSetDownloadButtonVisible(bool bVisible);
+  void SignalSetLeftButtonsVisible(bool bVisible);
   void SignalSetHelpButtonVisible(bool bVisible);
 };
 

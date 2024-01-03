@@ -10,6 +10,7 @@
 #include <memory>
 
 class CAgeCheckOverlay;
+class CDeviceButtonOverlay;
 class CDownloadButtonOverlay;
 class CHelpButtonOverlay;
 class CHelpOverlay;
@@ -40,7 +41,7 @@ protected slots:
   void SlotCurrentAppStateUnloadFinished();
   void SlotDownloadButtonClicked();
   void SlotHelpButtonClicked();
-  void SlotSetDownloadButtonVisible(bool bVisible);
+  void SlotSetLeftButtonsVisible(bool bVisible);
   void SlotSetHelpButtonVisible(bool bVisible);
 
   virtual void SlotResolutionChanged() {}
@@ -57,6 +58,7 @@ protected:
   std::unique_ptr<CHelpButtonOverlay>     m_spHelpButtonOverlay;
   std::unique_ptr<CHelpOverlay>           m_spHelpOverlay;
   std::unique_ptr<CDownloadButtonOverlay> m_spDownloadButtonOverlay;
+  std::unique_ptr<CDeviceButtonOverlay>   m_spDeviceButtonOverlay;
   std::shared_ptr<CWindowContext>         m_spWindowContext;
   std::shared_ptr<CSettings>              m_spSettings;
   QPointer<CBackgroundWidget>             m_pBackground;

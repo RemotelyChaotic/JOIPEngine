@@ -80,7 +80,7 @@ void CEditorScreen::SlotNewClicked(const QString& sNewProjectName, bool bTutoria
 
   m_spUi->pChoiceScreen->Unload();
 
-  emit m_spWindowContext->SignalSetDownloadButtonVisible(false);
+  emit m_spWindowContext->SignalSetLeftButtonsVisible(false);
   emit m_spWindowContext->SignalSetHelpButtonVisible(false);
 
   m_spUi->pEditorScreen->InitNewProject(sNewProjectName, bTutorial);
@@ -95,7 +95,7 @@ void CEditorScreen::SlotOpenClicked(qint32 iId)
 
   m_spUi->pChoiceScreen->Unload();
 
-  emit m_spWindowContext->SignalSetDownloadButtonVisible(false);
+  emit m_spWindowContext->SignalSetLeftButtonsVisible(false);
   emit m_spWindowContext->SignalSetHelpButtonVisible(false);
 
   m_spUi->pEditorScreen->LoadProject(iId);

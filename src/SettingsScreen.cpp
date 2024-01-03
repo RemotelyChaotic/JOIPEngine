@@ -219,7 +219,7 @@ void CSettingsScreen::Load()
                                  QSizePolicy::Fixed, QSizePolicy::Fixed);
   layout()->invalidate();
 
-  emit m_spWindowContext->SignalSetDownloadButtonVisible(false);
+  emit m_spWindowContext->SignalSetLeftButtonsVisible(false);
 
 #ifndef Q_OS_ANDROID
   qint32 iThisScreen = QApplication::desktop()->screenNumber(this);

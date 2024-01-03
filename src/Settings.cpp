@@ -23,6 +23,7 @@ namespace {
     "Export",
     "Help",
     "Download",
+    "Devices",
     "Exit",
     "Tools",
 
@@ -128,6 +129,7 @@ CSettings::CSettings(QObject* pParent) :
       { "Export",     QKeySequence(Qt::CTRL + Qt::SHIFT + Qt::Key_S) },
       { "Help",       QKeySequence(Qt::Key_H)                        },
       { "Download",   QKeySequence(Qt::Key_D)                        },
+      { "Devices",    QKeySequence(Qt::CTRL + Qt::Key_D)             },
       { "Exit",       QKeySequence(Qt::Key_Escape)                   },
       { "Tools",      QKeySequence(Qt::CTRL + Qt::Key_T)             },
 

@@ -10,6 +10,7 @@ class CTitleProxyStyle;
 class CTitleLabel : public QLabel
 {
   Q_OBJECT
+  Q_PROPERTY(bool   drawShadow READ DrawShadow WRITE SetDrawShadow)
   Q_PROPERTY(QColor outlineColor READ OutlineColor WRITE SetOutlineColor)
   Q_PROPERTY(qint32 fontSize READ FontSize WRITE SetFontSize)
 
@@ -20,6 +21,8 @@ public:
   void Initialize();
   void Invalidate();
 
+  void SetDrawShadow(bool bDraw);
+  bool DrawShadow() const;
   void SetOutlineColor(const QColor& color);
   const QColor& OutlineColor() const;
   void SetFontSize(qint32 iFontSize) { m_iFontSize = iFontSize; }

@@ -13,11 +13,13 @@ class IDeviceConnector
 public:
   virtual ~IDeviceConnector() {}
 
+  virtual bool CanConnect() = 0;
   virtual bool Connect() = 0;
   virtual void Disconnect() = 0;
   virtual QStringList DeviceNames() const = 0;
   virtual std::shared_ptr<IDevice> Device(const QString& sName) const = 0;
   virtual std::vector<std::shared_ptr<IDevice>> Devices() const = 0;
+  virtual bool IsConnected() const = 0;
   virtual void StartScanning() = 0;
   virtual void StopScanning() = 0;
 

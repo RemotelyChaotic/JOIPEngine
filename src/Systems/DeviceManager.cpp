@@ -43,6 +43,8 @@ namespace
     });
     return vspAvailableConnectors;
   }
+
+  constexpr qint32 c_iReconnectInterval = 5000;
 }
 
 //----------------------------------------------------------------------------------------
@@ -137,6 +139,18 @@ bool CDeviceManager::IsScanning() const
 
 //----------------------------------------------------------------------------------------
 //
+qint32 CDeviceManager::NumberRegisteredConnectors() const
+{
+  qint32 iRet = false;
+  bool bOk = QMetaObject::invokeMethod(const_cast<CDeviceManager*>(this), "NumberRegisteredConnectorsImpl",
+                                       Qt::BlockingQueuedConnection,
+                                       Q_RETURN_ARG(qint32, iRet));
+  assert(bOk); Q_UNUSED(bOk)
+  return iRet;
+}
+
+//----------------------------------------------------------------------------------------
+//
 void CDeviceManager::StartScanning()
 {
   bool bOk = QMetaObject::invokeMethod(this, "StartScanningImpl", Qt::QueuedConnection);
@@ -167,7 +181,7 @@ void CDeviceManager::Initialize()
 //
 void CDeviceManager::Deinitialize()
 {
-  Disconnect();
+  DeinitImpl();
   SetInitialized(false);
 }
 
@@ -177,37 +191,78 @@ void CDeviceManager::ConnectImpl()
 {
   if (nullptr != m_pActiveConnector)
   {
-    Disconnect();
+    DisconnectImpl();
   }
 
-  const auto& vspConnectors = GetConnectors();
-  for (auto it = vspConnectors.rbegin(); vspConnectors.rend() != it; ++it)
+  if (nullptr != m_pActiveConnector)
   {
-    // need to connect to this signal before connecting, since a connection might list
-    // already connected devices on connect success
-    // ...connect...
-    m_deviceCountChangedConnection =
-        connect(dynamic_cast<QObject*>(it->get()), SIGNAL(SignalDeviceCountChanged()),
-                this, SIGNAL(SignalDeviceCountChanged()), Qt::DirectConnection);
-    assert(m_deviceCountChangedConnection);
-
-    bool bConnected = false;
-    if ((*it)->Connect())
+    if (m_pActiveConnector->Connect())
     {
-      bConnected = true;
-      m_pActiveConnector = it->get();
-      m_disconnectConnection =
-          connect(dynamic_cast<QObject*>(m_pActiveConnector), SIGNAL(SignalDisconnected()),
-                  this, SLOT(SlotDisconnected()), Qt::QueuedConnection);
-      assert(m_disconnectConnection);
-
+      if (nullptr != m_pReconnectTimer)
+      {
+        m_pReconnectTimer->stop();
+      }
       emit SignalConnected();
-      break;
     }
-
-    if (!bConnected)
+    else if (nullptr != m_pReconnectTimer)
     {
-      disconnect(m_deviceCountChangedConnection);
+      m_pReconnectTimer->start();
+    }
+  }
+  else
+  {
+    const auto& vspConnectors = GetConnectors();
+    for (auto it = vspConnectors.rbegin(); vspConnectors.rend() != it; ++it)
+    {
+      // need to connect to this signal before connecting, since a connection might list
+      // already connected devices on connect success
+      // ...connect...
+      m_deviceCountChangedConnection =
+          connect(dynamic_cast<QObject*>(it->get()), SIGNAL(SignalDeviceCountChanged()),
+                  this, SIGNAL(SignalDeviceCountChanged()), Qt::DirectConnection);
+      assert(m_deviceCountChangedConnection);
+
+      bool bConnected = false;
+      if ((*it)->CanConnect())
+      {
+        bConnected = true;
+        m_pActiveConnector = it->get();
+        m_disconnectConnection =
+            connect(dynamic_cast<QObject*>(m_pActiveConnector), SIGNAL(SignalDisconnected()),
+                    this, SLOT(SlotDisconnected()), Qt::QueuedConnection);
+        assert(m_disconnectConnection);
+
+        auto spSettings = CApplication::Instance()->Settings();
+        if (nullptr != spSettings && spSettings->ConnectToHWOnStartup())
+        {
+          if (nullptr == m_pReconnectTimer)
+          {
+            m_pReconnectTimer = new QTimer();
+            m_pReconnectTimer->setInterval(c_iReconnectInterval);
+            connect(m_pReconnectTimer, &QTimer::timeout, this,
+                    &CDeviceManager::SlotReconnectTimerTimeout);
+          }
+        }
+
+        if ((*it)->Connect())
+        {
+          if (nullptr != m_pReconnectTimer)
+          {
+            m_pReconnectTimer->stop();
+          }
+          emit SignalConnected();
+        }
+        else if (nullptr != m_pReconnectTimer)
+        {
+          m_pReconnectTimer->start();
+        }
+        break;
+      }
+
+      if (!bConnected)
+      {
+        disconnect(m_deviceCountChangedConnection);
+      }
     }
   }
 
@@ -252,8 +307,14 @@ std::vector<std::shared_ptr<IDevice>> CDeviceManager::DevicesImpl()
 
 //----------------------------------------------------------------------------------------
 //
-void CDeviceManager::DisconnectImpl()
+void CDeviceManager::DeinitImpl()
 {
+  if (nullptr != m_pReconnectTimer)
+  {
+    m_pReconnectTimer->stop();
+    delete m_pReconnectTimer;
+  }
+
   if (nullptr != m_pActiveConnector)
   {
     disconnect(m_disconnectConnection);
@@ -273,9 +334,32 @@ void CDeviceManager::DisconnectImpl()
 
 //----------------------------------------------------------------------------------------
 //
+void CDeviceManager::DisconnectImpl()
+{
+  if (nullptr != m_pReconnectTimer)
+  {
+    m_pReconnectTimer->stop();
+  }
+
+  if (nullptr != m_pActiveConnector)
+  {
+    m_pActiveConnector->Disconnect();
+
+    if (m_bIsScanning)
+    {
+      emit SignalStopScanning();
+      m_bIsScanning = false;
+    }
+
+    emit SignalDisconnected();
+  }
+}
+
+//----------------------------------------------------------------------------------------
+//
 bool CDeviceManager::IsConnectedImpl()
 {
-  return nullptr != m_pActiveConnector;
+  return nullptr != m_pActiveConnector && m_pActiveConnector->IsConnected();
 }
 
 //----------------------------------------------------------------------------------------
@@ -291,6 +375,13 @@ void CDeviceManager::SlotDisconnected()
 {
   // do a manual disconnect to properly clear everything
   DisconnectImpl();
+}
+
+//----------------------------------------------------------------------------------------
+//
+qint32 CDeviceManager::NumberRegisteredConnectorsImpl()
+{
+  return static_cast<qint32>(GetConnectors().size());
 }
 
 //----------------------------------------------------------------------------------------
@@ -315,4 +406,11 @@ void CDeviceManager::StopScanningImpl()
     m_bIsScanning = false;
     emit SignalStopScanning();
   }
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CDeviceManager::SlotReconnectTimerTimeout()
+{
+  ConnectImpl();
 }

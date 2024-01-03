@@ -121,7 +121,8 @@ public:
     m_bDirty(false),
     m_backgroundImage(),
     m_outlineColor(Qt::white),
-    m_dProgress(0.0)
+    m_dProgress(0.0),
+    m_bDrawShadow(true)
   {
     m_pProgressAnimation = new QPropertyAnimation(this, "progress");
     m_pProgressAnimation->setDuration(c_iAnimationTime);
@@ -165,6 +166,20 @@ public:
 
     m_pProgress2Animation->setStartValue(m_dProgress2);
     m_pProgress2Animation->setEndValue(1.0);
+  }
+
+  //--------------------------------------------------------------------------------------
+  //
+  void SetDrawShadow(bool bDraw)
+  {
+    m_bDrawShadow = bDraw;
+  }
+
+  //--------------------------------------------------------------------------------------
+  //
+  bool DrawShadow() const
+  {
+    return m_bDrawShadow;
   }
 
   //--------------------------------------------------------------------------------------
@@ -265,18 +280,21 @@ protected:
     }
 
     // draw shadow
-    pPainter->save();
-    for (double i = 0.0; i < c_iOffsetBorder; i += 1)
+    if (m_bDrawShadow.load())
     {
-      QRect translatedRect =
-          rect.translated(static_cast<qint32>(i), static_cast<qint32>(i));
-      QColor shadowColor(pal.text().color());
-      shadowColor.setAlpha(m_dProgress*255);
-      pPainter->setPen(shadowColor.darker(200));
-      pPainter->setBrush(pal.text());
-      pPainter->drawText(translatedRect, flags, text);
+      pPainter->save();
+      for (double i = 0.0; i < c_iOffsetBorder; i += 1)
+      {
+        QRect translatedRect =
+            rect.translated(static_cast<qint32>(i), static_cast<qint32>(i));
+        QColor shadowColor(pal.text().color());
+        shadowColor.setAlpha(m_dProgress*255);
+        pPainter->setPen(shadowColor.darker(200));
+        pPainter->setBrush(pal.text());
+        pPainter->drawText(translatedRect, flags, text);
+      }
+      pPainter->restore();
     }
-    pPainter->restore();
 
     // draw text
     QColor col = pal.text().color();
@@ -296,6 +314,7 @@ protected:
   double                                m_dProgress;
   QPointer<QPropertyAnimation>          m_pProgress2Animation;
   double                                m_dProgress2;
+  std::atomic<bool>                     m_bDrawShadow;
 };
 
 //----------------------------------------------------------------------------------------
@@ -369,6 +388,20 @@ void CTitleLabel::Initialize()
 void CTitleLabel::Invalidate()
 {
   SlotStyleLoaded();
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CTitleLabel::SetDrawShadow(bool bDraw)
+{
+  m_pStyle->SetDrawShadow(bDraw);
+}
+
+//----------------------------------------------------------------------------------------
+//
+bool CTitleLabel::DrawShadow() const
+{
+  return m_pStyle->DrawShadow();
 }
 
 //----------------------------------------------------------------------------------------
