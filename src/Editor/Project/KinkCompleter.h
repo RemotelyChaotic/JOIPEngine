@@ -2,6 +2,7 @@
 #define CKINKCOMPLETER_H
 
 #include <QCompleter>
+#include <memory>
 
 class CDatabaseManager;
 class CKinkTreeModel;

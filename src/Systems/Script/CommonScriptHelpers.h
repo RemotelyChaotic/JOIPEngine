@@ -4,6 +4,7 @@
 #include <QColor>
 #include <QVariant>
 
+#include <memory>
 #include <optional>
 
 class CDatabaseManager;
