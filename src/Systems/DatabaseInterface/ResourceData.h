@@ -173,7 +173,6 @@ Rectangle {
         buttonHeight: 32
         buttonWidth: 48
         spacing: parent.spacing
-        soundEffects: root.soundEffects
 
         Button {
             id: showLogButton

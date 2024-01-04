@@ -390,6 +390,8 @@ macro(CreateJOIPProject JOIP_PROJECT_NAME)
     ${JOIPSources}/Player/SceneMainScreen.cpp
     ${JOIPSources}/Player/SceneMainScreen.h
     ${JOIPSources}/Player/SceneMainScreen.ui
+    ${JOIPSources}/Player/TeaseDeviceController.cpp
+    ${JOIPSources}/Player/TeaseDeviceController.h
     ${JOIPSources}/Player/TeaseStorage.cpp
     ${JOIPSources}/Player/TeaseStorage.h
     ${JOIPSources}/Player/TextBoxWidget.cpp
@@ -538,6 +540,8 @@ macro(CreateJOIPProject JOIP_PROJECT_NAME)
     ${JOIPSources}/Systems/Script/ScriptBackground.h
     ${JOIPSources}/Systems/Script/ScriptDbWrappers.cpp
     ${JOIPSources}/Systems/Script/ScriptDbWrappers.h
+    ${JOIPSources}/Systems/Script/ScriptDeviceController.cpp
+    ${JOIPSources}/Systems/Script/ScriptDeviceController.h
     ${JOIPSources}/Systems/Script/ScriptEval.cpp
     ${JOIPSources}/Systems/Script/ScriptEval.h
     ${JOIPSources}/Systems/Script/ScriptIcon.cpp

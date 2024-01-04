@@ -11,7 +11,7 @@ public:
   virtual QString Name() const = 0;
   virtual void SendLinearCmd(quint32 iDurationMs, double dPosition) = 0;
   virtual void SendRotateCmd(bool bClockwise, double dSpeed) = 0;
-  virtual void SetndStopCmd() = 0;
+  virtual void SendStopCmd() = 0;
   virtual void SendVibrateCmd(double dSpeed) = 0;
 
 protected:

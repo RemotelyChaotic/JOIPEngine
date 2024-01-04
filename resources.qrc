@@ -271,6 +271,8 @@
         <file>resources/style/img/IconSequence.png</file>
         <file>resources/help/settings/connecthwonstartup_setting_help.html</file>
         <file>resources/style/img/ButtonPlug.png</file>
+        <file>resources/style/qml/ButtonPlug.png</file>
+        <file>resources/style/qml/ButtonPlugHover.png</file>
     </qresource>
     <qresource prefix="/qml">
         <file>resources/qml/ProjectCardSelection.qml</file>

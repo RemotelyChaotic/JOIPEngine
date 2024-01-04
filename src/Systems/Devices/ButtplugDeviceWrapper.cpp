@@ -79,7 +79,7 @@ void CButtplugDeviceWrapper::SendRotateCmd(bool bClockwise, double dSpeed)
 
 //----------------------------------------------------------------------------------------
 //
-void CButtplugDeviceWrapper::SetndStopCmd()
+void CButtplugDeviceWrapper::SendStopCmd()
 {
   if (!m_bDeviceValid.load()) { return; }
 

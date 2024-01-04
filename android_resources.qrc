@@ -568,5 +568,15 @@
         <file>resources/android_styles/Gummyzilla/ui/ButtonPlug.png</file>
         <file>resources/android_styles/Gummyzilla/ui/ButtonPlugSelected.png</file>
         <file>resources/android_styles/Somber Dark/ui/ButtonPlug.png</file>
+        <file>resources/android_styles/621 Hexagons/qml/ButtonPlug.png</file>
+        <file>resources/android_styles/621 Hexagons/qml/ButtonPlugHover.png</file>
+        <file>resources/android_styles/Blue Night/qml/ButtonPlug.png</file>
+        <file>resources/android_styles/Blue Night/qml/ButtonPlugHover.png</file>
+        <file>resources/android_styles/Equestria after Dark/qml/ButtonPlug.png</file>
+        <file>resources/android_styles/Equestria after Dark/qml/ButtonPlugHover.png</file>
+        <file>resources/android_styles/Gummyzilla/qml/ButtonPlug.png</file>
+        <file>resources/android_styles/Gummyzilla/qml/ButtonPlugHover.png</file>
+        <file>resources/android_styles/Somber Dark/qml/ButtonPlug.png</file>
+        <file>resources/android_styles/Somber Dark/qml/ButtonPlugHover.png</file>
     </qresource>
 </RCC>

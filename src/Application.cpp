@@ -10,6 +10,7 @@
 #include "Player/ProjectSceneManager.h"
 #include "Player/ProjectSoundManager.h"
 #include "Player/SceneMainScreen.h"
+#include "Player/TeaseDeviceController.h"
 #include "Player/TeaseStorage.h"
 #include "Player/TimerWidget.h"
 
@@ -29,6 +30,7 @@
 
 // needed to register to qml
 #include "Systems/Script/ScriptBackground.h"
+#include "Systems/Script/ScriptDeviceController.h"
 #include "Systems/Script/ScriptDbWrappers.h"
 #include "Systems/Script/ScriptEval.h"
 #include "Systems/Script/ScriptIcon.h"
@@ -438,6 +440,28 @@ void CApplication::RegisterQmlTypes()
       }
       return nullptr;
   });
+  qmlRegisterSingletonType<CTeaseDeviceController>("JOIP.core", 1, 3, "TeaseDeviceController",
+                                                 [](QQmlEngine *engine, QJSEngine *scriptEngine) -> QObject*
+  {
+    Q_UNUSED(scriptEngine)
+    if (nullptr != engine)
+    {
+      CSceneMainScreen* pMainScreen = engine->property(player::c_sMainPlayerProperty).value<CSceneMainScreen*>();
+      if (nullptr != pMainScreen)
+      {
+        return new CTeaseDeviceController(engine, pMainScreen);
+      }
+    }
+    else if (nullptr != scriptEngine)
+    {
+      CSceneMainScreen* pMainScreen = engine->property(player::c_sMainPlayerProperty).value<CSceneMainScreen*>();
+      if (nullptr != pMainScreen)
+      {
+        return new CTeaseDeviceController(scriptEngine, pMainScreen);
+      }
+    }
+    return nullptr;
+  });
 
   qmlRegisterUncreatableType<CKinkWrapper>("JOIP.db", 1, 1, "Kink", "");
   qmlRegisterUncreatableType<CProjectScriptWrapper>("JOIP.db", 1, 1, "Project", "");
@@ -445,6 +469,7 @@ void CApplication::RegisterQmlTypes()
   qmlRegisterUncreatableType<CResourceScriptWrapper>("JOIP.db", 1, 1, "Resource", "");
 
   qmlRegisterType<CBackgroundSignalEmitter>("JOIP.script", 1, 1, "BackgroundSignalEmitter");
+  qmlRegisterType<CDeviceControllerSignalEmitter>("JOIP.script", 1, 3, "DeviceControllerSignalEmitter");
   qmlRegisterType<CEvalSignalEmiter>("JOIP.script", 1, 2, "EvalSignalEmitter");
   qmlRegisterType<CIconSignalEmitter>("JOIP.script", 1, 1, "IconSignalEmitter");
   qmlRegisterType<CMediaPlayerSignalEmitter>("JOIP.script", 1, 1, "MediaPlayerSignalEmitter");

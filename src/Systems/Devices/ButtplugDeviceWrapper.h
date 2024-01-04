@@ -26,7 +26,7 @@ public:
   QString Name() const override;
   void SendLinearCmd(quint32 iDurationMs, double dPosition) override;
   void SendRotateCmd(bool bClockwise, double dSpeed) override;
-  void SetndStopCmd() override;
+  void SendStopCmd() override;
   void SendVibrateCmd(double dSpeed) override;
 
 private:

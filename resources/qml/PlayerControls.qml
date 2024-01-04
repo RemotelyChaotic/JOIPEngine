@@ -2,7 +2,7 @@ import QtQuick 2.14
 import QtQuick.Controls 2.14
 import QtQuick.Layouts 1.14
 import QtMultimedia 5.14
-import JOIP.core 1.1
+import JOIP.core 1.3
 
 Rectangle {
     id: sceneControl
@@ -11,7 +11,7 @@ Rectangle {
     property int buttonHeight: 48
     property int buttonWidth: 64
     property int spacing: 10
-    property Item soundEffects: null
+    property Item soundEffects: root.soundEffects
 
     default property alias content: customContent.children
 
@@ -133,6 +133,56 @@ Rectangle {
                 sequence: Settings.keyBinding("Pause")
                 onActivated: {
                     pauseButton.pausePlayScene();
+                }
+            }
+        }
+
+        Button {
+            id: devicesButton
+            Layout.preferredHeight: sceneControl.buttonHeight
+            Layout.preferredWidth: sceneControl.buttonWidth
+            Layout.alignment: Qt.AlignVCenter
+
+            text: Settings.keyBinding("Devices")
+            contentItem: Text {
+                anchors.fill: parent
+                horizontalAlignment: Text.AlignRight
+                verticalAlignment: Text.AlignBottom
+                rightPadding: 5
+                bottomPadding: 5
+
+                text: parent.text
+                font.family: Settings.font
+                font.pixelSize: 10
+                color: "white"
+            }
+
+            Image {
+                anchors.centerIn: parent
+                width: (parent.width < parent.height ? parent.width : parent.height) - 10
+                height: (parent.width < parent.height ? parent.width : parent.height) - 10
+                fillMode: Image.PreserveAspectFit
+                source: Settings.styleFolderQml() + (parent.hovered ? "/ButtonPlugHover.png" : "/ButtonPlug.png")
+            }
+
+            visible: TeaseDeviceController.numberRegisteredConnectors > 0
+            onHoveredChanged: {
+                if (hovered)
+                {
+                    soundEffects.hoverSound.play();
+                }
+            }
+            onClicked: {
+                soundEffects.clickSound.play();
+                var globalCoordinares = devicesButton.mapToItem(root, 0, devicesButton.height);
+                TeaseDeviceController.openSelectionScreen(globalCoordinares.x, globalCoordinares.y);
+            }
+
+            Shortcut {
+                sequence: Settings.keyBinding("Devices")
+                onActivated: {
+                    var globalCoordinares = devicesButton.mapToItem(root, 0, devicesButton.height);
+                    TeaseDeviceController.openSelectionScreen(globalCoordinares.x, globalCoordinares.y);
                 }
             }
         }

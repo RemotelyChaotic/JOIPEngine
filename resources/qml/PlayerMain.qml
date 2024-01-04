@@ -3,9 +3,9 @@ import QtQuick.Controls 2.14
 import QtQuick.Layouts 1.14
 import QtGraphicalEffects 1.12
 import QtMultimedia 5.14
-import JOIP.core 1.2
+import JOIP.core 1.3
 import JOIP.db 1.1
-import JOIP.script 1.2
+import JOIP.script 1.3
 
 import "EvalWrapper.js" as EvalWrapper
 import "qrc:/xmldom/dom-parser.mjs" as DOMParser;
@@ -234,6 +234,41 @@ Rectangle {
             storage.store(sId, value);
         }
     }
+    property var deviceController: ({
+       sendLinearCmd: function (iDurationMs, dPosition)
+       {
+            TeaseDeviceController.sendLinearCmd(iDurationMs, dPosition);
+       },
+       sendRotateCmd: function(bClockwise, dSpeed)
+       {
+            TeaseDeviceController.sendRotateCmd(bClockwise, dSpeed);
+       },
+       sendStopCmd: function()
+       {
+            TeaseDeviceController.sendStopCmd();
+       },
+       sendVibrateCmd: function(dSpeed)
+       {
+            TeaseDeviceController.sendVibrateCmd(dSpeed);
+       }
+    })
+    DeviceControllerSignalEmitter {
+        id: deviceControllerEmitter
+        property string userName: "deviceController"
+
+        onSendLinearCmd: {
+            deviceController.sendLinearCmd(iDurationMs, dPosition);
+        }
+        onSendRotateCmd: {
+            deviceController.sendRotateCmd(bClockwise, dSpeed);
+        }
+        onSendStopCmd: {
+            deviceController.sendStopCmd();
+        }
+        onSendVibrateCmd: {
+            deviceController.sendVibrateCmd(dSpeed);
+        }
+    }
     PlayerSceneManager {
         id: sceneManager
     }
@@ -409,10 +444,12 @@ Rectangle {
 
         ScriptRunner.registerNewComponent(thread.userName, thread);
         ScriptRunner.registerNewComponent(storageEmitter.userName, storageEmitter);
+        ScriptRunner.registerNewComponent(deviceControllerEmitter.userName, deviceControllerEmitter);
         ScriptRunner.registerNewComponent(evaluator.userName, evaluator);
-        numReadyComponents += 3;
+        numReadyComponents += 4;
 
         registerUIComponent("teaseStorage", storage);
+        registerUIComponent("deviceController", deviceController);
         evaluate("var window = {};");
     }
 }
