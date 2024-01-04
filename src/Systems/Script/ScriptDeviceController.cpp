@@ -43,13 +43,13 @@ CScriptDeviceController::~CScriptDeviceController()
 
 //----------------------------------------------------------------------------------------
 //
-void CScriptDeviceController::sendLinearCmd(quint32 iDurationMs, double dPosition)
+void CScriptDeviceController::sendLinearCmd(double dDurationS, double dPosition)
 {
   if (!CheckIfScriptCanRun()) { return; }
   auto spSignalEmitter = SignalEmitter<CDeviceControllerSignalEmitter>();
   if (nullptr != spSignalEmitter)
   {
-    emit spSignalEmitter->sendLinearCmd(iDurationMs, dPosition);
+    emit spSignalEmitter->sendLinearCmd(dDurationS, dPosition);
   }
 }
 

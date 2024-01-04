@@ -964,6 +964,54 @@
 
     <br>
 
+    <h2>PlayerDeviceController (default name: <i>deviceController</i>)</h2>
+
+    <br>
+
+    <p>This object is automatically registered by the JOIP-Engine on loading a
+    <a href="qrc:/resources/help/project/joi_project_help.html">JOI-Project</a> and
+    should not be placed in the <a href="qrc:/resources/help/layout/layout_help.html">Layout</a> manually. This object can be used to
+    control connected devices (sex toys).<br>
+    Some commands may not be supported by some devices. and will have no effect.<br>
+      <ul>
+        <li><b>sendVibrateCmd ( real ):</b><br>
+        Sends a vibrate command to start vibrating the device at the given speed.<br>
+        <i>Example Usage (JS):</i><br>
+        deviceController.sendVibrateCmd(10.0);<br>
+        <i>Example Usage (Lua):</i><br>
+        deviceController:sendVibrateCmd(10.0);<br>
+        <br></li>
+
+        <li><b>sendLinearCmd ( real, real ):</b><br>
+        Sends a linear command to the device to start perfoming linear movements (usually thrusts)
+        for a given amount of time (1. argument in seconds) at the given speed (2. argument).<br>
+        <i>Example Usage (JS):</i><br>
+        deviceController.sendLinearCmd(10, 10.0);<br>
+        <i>Example Usage (Lua):</i><br>
+        deviceController:sendLinearCmd(10, 10.0);<br>
+        <br></li>
+
+        <li><b>sendRotateCmd ( bool, real ):</b><br>
+        Sends a rotation command to the device to start perfoming rotational movements
+        in a given direction (1. argument, true = clockwise, false = counter-clockwise) at the given speed (2. argument).<br>
+        <i>Example Usage (JS):</i><br>
+        deviceController.sendRotateCmd(true, 10.0);<br>
+        <i>Example Usage (Lua):</i><br>
+        deviceController:sendRotateCmd(true, 10.0);<br>
+        <br></li>
+
+        <li><b>sendStopCmd (  ):</b><br>
+        Sends the stop command to the device to stop all motion and vibration.<br>
+        <i>Example Usage (JS):</i><br>
+        deviceController.sendStopCmd();<br>
+        <i>Example Usage (Lua):</i><br>
+        deviceController:sendStopCmd();<br>
+        <br></li>
+      </ul>
+    </p>
+
+    <br>
+
     <h2>Project</h2>
 
     <br>

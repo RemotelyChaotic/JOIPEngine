@@ -17,7 +17,7 @@ public:
   std::shared_ptr<CScriptObjectBase> CreateNewScriptObject(QtLua::State* pState) override;
 
 signals:
-  void sendLinearCmd(quint32 iDurationMs, double dPosition);
+  void sendLinearCmd(double dDurationS, double dPosition);
   void sendRotateCmd(bool bClockwise, double dSpeed);
   void sendStopCmd();
   void sendVibrateCmd(double dSpeed);
@@ -39,7 +39,7 @@ public:
   ~CScriptDeviceController();
 
 public slots:
-  void sendLinearCmd(quint32 iDurationMs, double dPosition);
+  void sendLinearCmd(double dDurationS, double dPosition);
   void sendRotateCmd(bool bClockwise, double dSpeed);
   void sendStopCmd();
   void sendVibrateCmd(double dSpeed);

@@ -4,6 +4,9 @@
 #include "DeviceSelectorWidget.h"
 
 #include "Systems/DeviceManager.h"
+#include "Systems/HelpFactory.h"
+
+#include "Widgets/HelpOverlay.h"
 #include "Widgets/ProgressBar.h"
 #include "Widgets/TitleLabel.h"
 
@@ -11,6 +14,11 @@
 #include <QMenu>
 #include <QVBoxLayout>
 #include <QWidgetAction>
+
+namespace
+{
+  const QString c_sDeviceOverlayHelpId =  "Devices/DeviceSelector";
+}
 
 //----------------------------------------------------------------------------------------
 //
@@ -152,6 +160,13 @@ CDeviceButtonOverlay::CDeviceButtonOverlay(QWidget* pParent) :
     OpenContextMenuAt({width(), height()},
                       parentWidget()->mapToGlobal(geometry().bottomLeft()));
   });
+
+  auto wpHelpFactory = CApplication::Instance()->System<CHelpFactory>().lock();
+  if (nullptr != wpHelpFactory)
+  {
+    setProperty(helpOverlay::c_sHelpPagePropertyName, c_sDeviceOverlayHelpId);
+    wpHelpFactory->RegisterHelp(c_sDeviceOverlayHelpId, ":/resources/help/devices_button_help.html");
+  }
 }
 
 CDeviceButtonOverlay::~CDeviceButtonOverlay() = default;

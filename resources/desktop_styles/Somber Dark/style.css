@@ -662,6 +662,7 @@ QPushButton#DownloadButton {
   qproperty-icon: url(ui/ButtonDownload.png) off,
                   url(ui/ButtonDownload.png) on;
 }
+QPushButton#AddDeviceCode,
 QPushButton#DeviceButton {
   border-image: url(ui/IconBg.svg) 0 0 0 0 stretch stretch;
   border-top: 0 transparent;
@@ -940,6 +941,7 @@ QPushButton#AddLayoutFile:hover,
 QPushButton#UndoButton:hover,
 QPushButton#RedoButton:hover,
 QPushButton#DownloadButton:hover,
+QPushButton#AddDeviceCode:hover,
 QPushButton#DeviceButton:hover,
 QPushButton#eResourceWidget:hover,
 QPushButton#eResourceDisplay:hover,
@@ -1018,6 +1020,7 @@ QPushButton#AddLayoutFile:pressed,
 QPushButton#UndoButton:pressed,
 QPushButton#RedoButton:pressed,
 QPushButton#DownloadButton:pressed,
+QPushButton#AddDeviceCode:pressed,
 QPushButton#DeviceButton:pressed,
 QPushButton#eResourceWidget:pressed,
 QPushButton#eResourceDisplay:pressed,
@@ -1096,6 +1099,7 @@ QPushButton#AddLayoutFile:disabled,
 QPushButton#UndoButton:disabled,
 QPushButton#RedoButton:disabled,
 QPushButton#DownloadButton:disabled,
+QPushButton#AddDeviceCode:disabled,
 QPushButton#DeviceButton:disabled,
 QPushButton#eResourceWidget:disabled,
 QPushButton#eResourceDisplay:disabled,

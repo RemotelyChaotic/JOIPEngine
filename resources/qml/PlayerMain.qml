@@ -235,9 +235,9 @@ Rectangle {
         }
     }
     property var deviceController: ({
-       sendLinearCmd: function (iDurationMs, dPosition)
+       sendLinearCmd: function (dDurationS, dPosition)
        {
-            TeaseDeviceController.sendLinearCmd(iDurationMs, dPosition);
+            TeaseDeviceController.sendLinearCmd(dDurationS/1000, dPosition);
        },
        sendRotateCmd: function(bClockwise, dSpeed)
        {
@@ -257,7 +257,7 @@ Rectangle {
         property string userName: "deviceController"
 
         onSendLinearCmd: {
-            deviceController.sendLinearCmd(iDurationMs, dPosition);
+            deviceController.sendLinearCmd(dDurationS, dPosition);
         }
         onSendRotateCmd: {
             deviceController.sendRotateCmd(bClockwise, dSpeed);

@@ -40,6 +40,44 @@ QString CCommonCodeGenerator::Generate(const SBackgroundSnippetData& data,
 
 //----------------------------------------------------------------------------------------
 //
+QString CCommonCodeGenerator::Generate(const SDeviceSnippetData& data,
+                                       tspProject spCurrentProject) const
+{
+  Q_UNUSED(spCurrentProject)
+  QString sCode;
+  if (data.m_bVibrateCommand)
+  {
+    QString sCmd =
+        Statement(Invoke("deviceController", "sendVibrateCmd") +
+                  Call(Array("%1")));
+    sCode += sCmd.arg(data.m_dVibrateSpeed);
+  }
+  if (data.m_bLinearCommand)
+  {
+    QString sCmd =
+        Statement(Invoke("deviceController", "sendLinearCmd") +
+                  Call(String("%1,%2")));
+    sCode += sCmd.arg(data.m_dLinearDurationS).arg(data.m_dLinearPosition);
+  }
+  if (data.m_bRotateCommand)
+  {
+    QString sCmd =
+        Statement(Invoke("deviceController", "sendRotateCmd") +
+                  Call(String("%1,%2")));
+    sCode += sCmd.arg(data.m_bClockwiseRotate ? "true" : "false").arg(data.m_dRotateSpeed);
+  }
+  if (data.m_bStopCommand)
+  {
+    QString sCmd =
+        Statement(Invoke("deviceController", "sendStopCmd") +
+                  Call(""));
+    sCode += sCmd;
+  }
+  return sCode;
+}
+
+//----------------------------------------------------------------------------------------
+//
 QString CCommonCodeGenerator::Generate(const SIconSnippetData& data,
                                        tspProject spCurrentProject) const
 {

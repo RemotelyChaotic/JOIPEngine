@@ -8,6 +8,7 @@
 #include <memory>
 
 class CBackgroundSnippetOverlay;
+class CDeviceSnippetOverlay;
 class CEditorModel;
 class CIconSnippetOverlay;
 class CMetronomeSnippetOverlay;
@@ -72,6 +73,7 @@ private:
   std::map<QString, std::unique_ptr<ICodeDisplayWidgetImpl>> m_displayImplMap;
 
   std::unique_ptr<CBackgroundSnippetOverlay>             m_spBackgroundSnippetOverlay;
+  std::unique_ptr<CDeviceSnippetOverlay>                 m_spDeviceSnippetOverlay;
   std::unique_ptr<CIconSnippetOverlay>                   m_spIconSnippetOverlay;
   std::unique_ptr<CMetronomeSnippetOverlay>              m_spMetronomeSnippetOverlay;
   std::unique_ptr<CNotificationSnippetOverlay>           m_spNotificationSnippetOverlay;

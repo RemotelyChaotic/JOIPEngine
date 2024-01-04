@@ -272,6 +272,8 @@ void CEditorCodeWidget::OnActionBarAboutToChange()
             this, &CEditorCodeWidget::SlotShowOverlay);
     disconnect(ActionBar()->m_spUi->AddThreadCode, &QPushButton::clicked,
             this, &CEditorCodeWidget::SlotShowOverlay);
+    disconnect(ActionBar()->m_spUi->AddDeviceCode, &QPushButton::clicked,
+            this, &CEditorCodeWidget::SlotShowOverlay);
 
     ActionBar()->m_spUi->StopDebugButton->setEnabled(true);
     ActionBar()->m_spUi->AddShowBackgroundCode->setEnabled(true);
@@ -282,6 +284,7 @@ void CEditorCodeWidget::OnActionBarAboutToChange()
     ActionBar()->m_spUi->AddNotificationCode->setEnabled(true);
     ActionBar()->m_spUi->AddTimerCode->setEnabled(true);
     ActionBar()->m_spUi->AddThreadCode->setEnabled(true);
+    ActionBar()->m_spUi->AddDeviceCode->setEnabled(true);
 
     m_spUi->pCodeEditorView->OnActionBarAboutToChange(&ActionBar()->m_spUi);
   }
@@ -314,6 +317,8 @@ void CEditorCodeWidget::OnActionBarChanged()
             this, &CEditorCodeWidget::SlotShowOverlay);
     connect(ActionBar()->m_spUi->AddThreadCode, &QPushButton::clicked,
             this, &CEditorCodeWidget::SlotShowOverlay);
+    connect(ActionBar()->m_spUi->AddDeviceCode, &QPushButton::clicked,
+            this, &CEditorCodeWidget::SlotShowOverlay);
 
     if (EditorModel()->IsReadOnly())
     {
@@ -325,6 +330,7 @@ void CEditorCodeWidget::OnActionBarChanged()
       ActionBar()->m_spUi->AddNotificationCode->setEnabled(false);
       ActionBar()->m_spUi->AddTimerCode->setEnabled(false);
       ActionBar()->m_spUi->AddThreadCode->setEnabled(false);
+      ActionBar()->m_spUi->AddDeviceCode->setEnabled(false);
     }
 
     m_spUi->pCodeEditorView->OnActionBarChanged(&ActionBar()->m_spUi);

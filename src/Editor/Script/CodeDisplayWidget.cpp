@@ -5,6 +5,7 @@
 #include "CodeDisplayEosEditorImpl.h"
 #include "CodeDisplayLayoutEditorImpl.h"
 #include "CommandScriptContentChange.h"
+#include "DeviceSnippetOverlay.h"
 #include "IconSnippetOverlay.h"
 #include "NotificationSnippetOverlay.h"
 #include "MetronomeSnippetOverlay.h"
@@ -67,6 +68,7 @@ CCodeDisplayWidget::CCodeDisplayWidget(QWidget* pParent) :
   m_spUi(std::make_unique<Ui::CCodeDisplayWidget>()),
   m_displayImplMap(),
   m_spBackgroundSnippetOverlay(nullptr),
+  m_spDeviceSnippetOverlay(nullptr),
   m_spIconSnippetOverlay(nullptr),
   m_spMetronomeSnippetOverlay(nullptr),
   m_spNotificationSnippetOverlay(nullptr),
@@ -83,6 +85,7 @@ CCodeDisplayWidget::CCodeDisplayWidget(QWidget* pParent) :
   m_displayImplMap[SScriptDefinitionData::c_sScriptTypeQml] = std::make_unique<CCodeDisplayLayoutEditorImpl>(m_spUi->pCodeEdit);
 
   m_spBackgroundSnippetOverlay = std::make_unique<CBackgroundSnippetOverlay>(this);
+  m_spDeviceSnippetOverlay = std::make_unique<CDeviceSnippetOverlay>(this);
   m_spIconSnippetOverlay = std::make_unique<CIconSnippetOverlay>(this);
   m_spMetronomeSnippetOverlay = std::make_unique<CMetronomeSnippetOverlay>(this);
   m_spNotificationSnippetOverlay = std::make_unique<CNotificationSnippetOverlay>(this);
@@ -106,6 +109,7 @@ CCodeDisplayWidget::~CCodeDisplayWidget()
   m_spNotificationSnippetOverlay.reset();
   m_spMetronomeSnippetOverlay.reset();
   m_spIconSnippetOverlay.reset();
+  m_spDeviceSnippetOverlay.reset();
   m_spBackgroundSnippetOverlay.reset();
 }
 
@@ -135,6 +139,7 @@ void CCodeDisplayWidget::Initialize(QPointer<CEditorModel> pEditorModel,
   m_spTextSnippetOverlay->Initialize(m_pResourceTreeModel);
 
   m_spBackgroundSnippetOverlay->Hide();
+  m_spDeviceSnippetOverlay->Hide();
   m_spIconSnippetOverlay->Hide();
   m_spMetronomeSnippetOverlay->Hide();
   m_spNotificationSnippetOverlay->Hide();
@@ -144,6 +149,8 @@ void CCodeDisplayWidget::Initialize(QPointer<CEditorModel> pEditorModel,
   m_spThreadSnippetOverlay->Hide();
 
   connect(m_spBackgroundSnippetOverlay.get(), &CBackgroundSnippetOverlay::SignalCodeGenerated,
+          this, &CCodeDisplayWidget::SlotInsertGeneratedCode);
+  connect(m_spDeviceSnippetOverlay.get(), &CDeviceSnippetOverlay::SignalCodeGenerated,
           this, &CCodeDisplayWidget::SlotInsertGeneratedCode);
   connect(m_spIconSnippetOverlay.get(), &CIconSnippetOverlay::SignalCodeGenerated,
           this, &CCodeDisplayWidget::SlotInsertGeneratedCode);
@@ -214,6 +221,7 @@ void CCodeDisplayWidget::UnloadProject()
   m_spTextSnippetOverlay->UnloadProject();
 
   m_spBackgroundSnippetOverlay->Hide();
+  m_spDeviceSnippetOverlay->Hide();
   m_spIconSnippetOverlay->Hide();
   m_spMetronomeSnippetOverlay->Hide();
   m_spNotificationSnippetOverlay->Hide();
@@ -315,6 +323,7 @@ void CCodeDisplayWidget::SetScriptType(const QString& sScriptType)
   }
 
   m_spBackgroundSnippetOverlay->SetCurrentScriptType(m_sScriptType);
+  m_spDeviceSnippetOverlay->SetCurrentScriptType(m_sScriptType);
   m_spIconSnippetOverlay->SetCurrentScriptType(m_sScriptType);
   m_spMetronomeSnippetOverlay->SetCurrentScriptType(m_sScriptType);
   m_spNotificationSnippetOverlay->SetCurrentScriptType(m_sScriptType);
@@ -368,6 +377,7 @@ void CCodeDisplayWidget::SlotShowOverlay(const QWidget* pWidget)
 
   if (pWidget == (*m_pspUiActionBar)->AddShowBackgroundCode)
   {
+    m_spDeviceSnippetOverlay->Hide();
     m_spIconSnippetOverlay->Hide();
     m_spMetronomeSnippetOverlay->Hide();
     m_spNotificationSnippetOverlay->Hide();
@@ -377,9 +387,22 @@ void CCodeDisplayWidget::SlotShowOverlay(const QWidget* pWidget)
     m_spThreadSnippetOverlay->Hide();
     m_spBackgroundSnippetOverlay->Toggle();
   }
+  else if (pWidget == (*m_pspUiActionBar)->AddDeviceCode)
+  {
+    m_spBackgroundSnippetOverlay->Hide();
+    m_spIconSnippetOverlay->Hide();
+    m_spMetronomeSnippetOverlay->Hide();
+    m_spNotificationSnippetOverlay->Hide();
+    m_spResourceSnippetOverlay->Hide();
+    m_spTextSnippetOverlay->Hide();
+    m_spTimerSnippetOverlay->Hide();
+    m_spThreadSnippetOverlay->Hide();
+    m_spDeviceSnippetOverlay->Toggle();
+  }
   else if (pWidget == (*m_pspUiActionBar)->AddShowIconCode)
   {
     m_spBackgroundSnippetOverlay->Hide();
+    m_spDeviceSnippetOverlay->Hide();
     m_spMetronomeSnippetOverlay->Hide();
     m_spNotificationSnippetOverlay->Hide();
     m_spResourceSnippetOverlay->Hide();
@@ -391,6 +414,7 @@ void CCodeDisplayWidget::SlotShowOverlay(const QWidget* pWidget)
   else if (pWidget == (*m_pspUiActionBar)->AddShowImageCode)
   {
     m_spBackgroundSnippetOverlay->Hide();
+    m_spDeviceSnippetOverlay->Hide();
     m_spIconSnippetOverlay->Hide();
     m_spMetronomeSnippetOverlay->Hide();
     m_spNotificationSnippetOverlay->Hide();
@@ -402,6 +426,7 @@ void CCodeDisplayWidget::SlotShowOverlay(const QWidget* pWidget)
   else if (pWidget == (*m_pspUiActionBar)->AddTextCode)
   {
     m_spBackgroundSnippetOverlay->Hide();
+    m_spDeviceSnippetOverlay->Hide();
     m_spIconSnippetOverlay->Hide();
     m_spMetronomeSnippetOverlay->Hide();
     m_spNotificationSnippetOverlay->Hide();
@@ -413,6 +438,7 @@ void CCodeDisplayWidget::SlotShowOverlay(const QWidget* pWidget)
   else if (pWidget == (*m_pspUiActionBar)->AddMetronomeCode)
   {
     m_spBackgroundSnippetOverlay->Hide();
+    m_spDeviceSnippetOverlay->Hide();
     m_spIconSnippetOverlay->Hide();
     m_spNotificationSnippetOverlay->Hide();
     m_spResourceSnippetOverlay->Hide();
@@ -424,6 +450,7 @@ void CCodeDisplayWidget::SlotShowOverlay(const QWidget* pWidget)
   else if (pWidget == (*m_pspUiActionBar)->AddNotificationCode)
   {
     m_spBackgroundSnippetOverlay->Hide();
+    m_spDeviceSnippetOverlay->Hide();
     m_spIconSnippetOverlay->Hide();
     m_spMetronomeSnippetOverlay->Hide();
     m_spResourceSnippetOverlay->Hide();
@@ -435,6 +462,7 @@ void CCodeDisplayWidget::SlotShowOverlay(const QWidget* pWidget)
   else if (pWidget == (*m_pspUiActionBar)->AddTimerCode)
   {
     m_spBackgroundSnippetOverlay->Hide();
+    m_spDeviceSnippetOverlay->Hide();
     m_spIconSnippetOverlay->Hide();
     m_spMetronomeSnippetOverlay->Hide();
     m_spNotificationSnippetOverlay->Hide();
@@ -446,6 +474,7 @@ void CCodeDisplayWidget::SlotShowOverlay(const QWidget* pWidget)
   else if (pWidget == (*m_pspUiActionBar)->AddThreadCode)
   {
     m_spBackgroundSnippetOverlay->Hide();
+    m_spDeviceSnippetOverlay->Hide();
     m_spIconSnippetOverlay->Hide();
     m_spMetronomeSnippetOverlay->Hide();
     m_spNotificationSnippetOverlay->Hide();

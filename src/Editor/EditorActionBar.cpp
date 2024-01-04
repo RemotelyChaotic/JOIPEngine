@@ -42,6 +42,7 @@ namespace {
   const QString c_sAddTimerHelpId =       "Editor/AddTimerCode";
   const QString c_sAddThreadHelpId =      "Editor/AddThreadCode";
   const QString c_sAddNotificationHelpId ="Editor/AddNotificationCode";
+  const QString c_sAddDeviceHelpId =      "Editor/AddDeviceCode";
   const QString c_sAddEosImageHelpId =    "Editor/EOS/AddEosImageInstruction";
   const QString c_sAddEosAudioHelpId =    "Editor/EOS/AddEosAudioInstruction";
   const QString c_sAddEosSayHelpId =      "Editor/EOS/AddEosSayInstruction";
@@ -204,6 +205,8 @@ void CEditorActionBar::Initialize()
     wpHelpFactory->RegisterHelp(c_sAddThreadHelpId, ":/resources/help/editor/addthread_button_help.html");
     m_spUi->AddNotificationCode->setProperty(helpOverlay::c_sHelpPagePropertyName, c_sAddNotificationHelpId);
     wpHelpFactory->RegisterHelp(c_sAddNotificationHelpId, ":/resources/help/editor/addnotification_button_help.html");
+    m_spUi->AddDeviceCode->setProperty(helpOverlay::c_sHelpPagePropertyName, c_sAddDeviceHelpId);
+    wpHelpFactory->RegisterHelp(c_sAddDeviceHelpId, ":/resources/help/editor/adddevice_button_help.html");
 
     m_spUi->AddImageCode->setProperty(helpOverlay::c_sHelpPagePropertyName, c_sAddEosImageHelpId);
     wpHelpFactory->RegisterHelp(c_sAddEosImageHelpId, ":/resources/help/editor/add_eos_image_button_help.html");
@@ -381,5 +384,6 @@ void CEditorActionBar::SlotKeyBindingsChanged()
     m_spUi->AddMetronomeCode->SetShortcut(m_spSettings->keyBinding(sKey.arg(8)));
     m_spUi->AddThreadCode->SetShortcut(m_spSettings->keyBinding(sKey.arg(9)));
     //m_spUi->AddNotificationCode->SetShortcut(m_spSettings->keyBinding(sKey.arg(9)));
+    //m_spUi->AddDeviceCode->SetShortcut(m_spSettings->keyBinding(sKey.arg(9)));
   }
 }

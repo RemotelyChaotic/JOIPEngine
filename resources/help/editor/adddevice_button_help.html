@@ -1,0 +1,104 @@
+<!doctype html>
+<html class="no-js" lang="">
+
+<head>
+  <meta charset="utf-8">
+  <title>Add Device Code</title>
+  <meta name="description" content="">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <style>
+    h1 {
+      text-align: center;
+    }
+    div.container {
+      min-height: 10em;
+      display: table-cell;
+      margin-left: auto;
+      margin-right: auto;
+      width: 0.6em
+    }
+    table.warning {
+      color: black;
+      background-color: #cccc44;
+      border-color: yellow;
+      border-style: solid;
+    }
+  </style>
+</head>
+
+
+<body>
+  <h1>Add Device Code</h1>
+
+  <hr>
+
+  <div class="container">
+    <p>This button opens an overlay to add code snippets to the currently opened script in
+    the <a href="qrc:/resources/help/editor/code/script_editor_help.html">Script Editor</a>,
+    to control connected devices (if available and connected).</p>
+
+    <br>
+
+    <p>For more information about the script API, please see the <a href="qrc:/resources/help/editor/code/script_reference_help.html">API Reference</a>.</p>
+
+    <br>
+
+    <p><img src="qrc:/resources/help/editor/images/adddevice_lialog_vibrate.png"><br><i>Add Vibrate Code Dialog Page</i></p>
+
+    <br>
+
+    <p>The vibration speed for the generated code can be configured in the spinn box. This page will only generate code if the checkbox is chcked.<br>
+      <ul>
+        <li><b>Generated code example:</b> deviceController.sendVibrateCmd(10.0);</li>
+      </ul>
+    </p>
+
+    <br>
+
+    <p><img src="qrc:/resources/help/editor/images/adddevice_lialog_linear.png"><br><i>Add Linear Code Dialog Page</i></p>
+
+    <br>
+
+    <p>The time and length for the generated linear command code can be configured in the spinn box. This page will only generate code if the checkbox is chcked.<br>
+      <ul>
+        <li><b>Generated code example:</b> deviceController.sendLinearCmd(10, 100.0);</li>
+      </ul>
+    </p>
+    <br>
+
+    <p><img src="qrc:/resources/help/editor/images/adddevice_lialog_rotate.png"><br><i>Add Roate Code Dialog Page</i></p>
+
+    <br>
+
+    <p>The rotation speed for the generated code can be configured in the spinn box and the checkbox configures if the rotation is clock-wise or counter-clockwise.
+    This page will only generate code if the checkbox is chcked.<br>
+      <ul>
+        <li><b>Generated code example:</b> deviceController.sendRotateCmd(true, 10.0);</li>
+      </ul>
+    </p>
+
+    <br>
+
+    <p><img src="qrc:/resources/help/editor/images/adddevice_lialog_stop.png"><br><i>Add Stop Code Dialog Page</i></p>
+
+    <br>
+
+    <p>This page will generate code for a stop command if the checkbox is chcked.<br>
+      <ul>
+        <li><b>Generated code example:</b> deviceController.sendStopCmd();</li>
+      </ul>
+    </p>
+
+    <br>
+
+    <table width="100%" class="warning">
+      <tr>
+        <td width="10%"><img src="qrc:/resources/help/icons/WarningIcon.png" width="64" height="64" alt="Warning"></td>
+        <td width="90%"><br>Not all devices support all commands.<br>If a command is not supported by the device, it will have no effect.</td>
+      </tr>
+    </table>
+  </div>
+</body>
+
+</html>

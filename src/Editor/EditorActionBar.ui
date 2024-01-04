@@ -656,10 +656,16 @@
              </property>
             </widget>
            </item>
-           <item row="6" column="1">
-            <widget class="CShortcutButton" name="AddNotificationCode">
+           <item row="4" column="1">
+            <widget class="CShortcutButton" name="AddMetronomeCode">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
              <property name="toolTip">
-              <string>Add code to show notifications</string>
+              <string>Add code to control the metronome</string>
              </property>
              <property name="text">
               <string/>
@@ -682,8 +688,8 @@
              </property>
             </widget>
            </item>
-           <item row="4" column="1">
-            <widget class="CShortcutButton" name="AddMetronomeCode">
+           <item row="4" column="0">
+            <widget class="CShortcutButton" name="AddTimerCode">
              <property name="sizePolicy">
               <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
                <horstretch>0</horstretch>
@@ -691,12 +697,41 @@
               </sizepolicy>
              </property>
              <property name="toolTip">
-              <string>Add code to control the metronome</string>
+              <string>Add code to configure timer</string>
              </property>
              <property name="text">
               <string/>
              </property>
             </widget>
+           </item>
+           <item row="6" column="1">
+            <widget class="CShortcutButton" name="AddNotificationCode">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
+             <property name="toolTip">
+              <string>Add code to show notifications</string>
+             </property>
+             <property name="text">
+              <string/>
+             </property>
+            </widget>
+           </item>
+           <item row="8" column="0">
+            <spacer name="verticalSpacer_2">
+             <property name="orientation">
+              <enum>Qt::Vertical</enum>
+             </property>
+             <property name="sizeHint" stdset="0">
+              <size>
+               <width>20</width>
+               <height>40</height>
+              </size>
+             </property>
+            </spacer>
            </item>
            <item row="1" column="1">
             <widget class="CShortcutButton" name="AddShowBackgroundCode">
@@ -708,22 +743,6 @@
              </property>
              <property name="toolTip">
               <string>Add code to change background</string>
-             </property>
-             <property name="text">
-              <string/>
-             </property>
-            </widget>
-           </item>
-           <item row="4" column="0">
-            <widget class="CShortcutButton" name="AddTimerCode">
-             <property name="sizePolicy">
-              <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-               <horstretch>0</horstretch>
-               <verstretch>0</verstretch>
-              </sizepolicy>
-             </property>
-             <property name="toolTip">
-              <string>Add code to configure timer</string>
              </property>
              <property name="text">
               <string/>
@@ -762,18 +781,21 @@
              </property>
             </widget>
            </item>
-           <item row="7" column="0">
-            <spacer name="verticalSpacer_2">
-             <property name="orientation">
-              <enum>Qt::Vertical</enum>
+           <item row="7" column="1">
+            <widget class="CShortcutButton" name="AddDeviceCode">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
              </property>
-             <property name="sizeHint" stdset="0">
-              <size>
-               <width>20</width>
-               <height>40</height>
-              </size>
+             <property name="toolTip">
+              <string>Add code to controll devices</string>
              </property>
-            </spacer>
+             <property name="text">
+              <string/>
+             </property>
+            </widget>
            </item>
           </layout>
          </widget>

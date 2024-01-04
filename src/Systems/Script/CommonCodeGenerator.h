@@ -34,6 +34,7 @@ public:
   ~CCommonCodeGenerator() override;
 
   QString Generate(const SBackgroundSnippetData& data, tspProject spCurrentProject) const override;
+  QString Generate(const SDeviceSnippetData& data, tspProject spCurrentProject) const override;
   QString Generate(const SIconSnippetData& data, tspProject spCurrentProject) const override;
   QString Generate(const SMetronomeSnippetCode& data, tspProject spCurrentProject) const override;
   QString Generate(const SNotificationSnippetCode& data, tspProject spCurrentProject) const override;

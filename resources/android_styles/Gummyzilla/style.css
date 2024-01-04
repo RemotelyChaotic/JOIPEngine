@@ -726,9 +726,13 @@ QPushButton#DownloadButton:pressed,
 QPushButton#DownloadButton:disabled {
   image: url(ui/ButtonDownloadSelected.png);
 }
+QPushButton#AddDeviceCode,
 QPushButton#DeviceButton {
   image: url(ui/ButtonPlug.png);
 }
+QPushButton#AddDeviceCode:hover,
+QPushButton#AddDeviceCode:pressed,
+QPushButton#AddDeviceCode:disabled,
 QPushButton#DeviceButton:hover,
 QPushButton#DeviceButton:pressed,
 QPushButton#DeviceButton:disabled {

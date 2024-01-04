@@ -502,6 +502,7 @@ QPushButton#DownloadButton {
   qproperty-icon: url(:/resources/style/img/ButtonDownload.png) off,
                   url(:/resources/style/img/ButtonDownload.png) on;
 }
+QPushButton#AddDeviceCode,
 QPushButton#DeviceButton {
   qproperty-icon: url(:/resources/style/img/ButtonPlug.png) off,
                   url(:/resources/style/img/ButtonPlug.png) on;

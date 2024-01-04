@@ -273,6 +273,12 @@
         <file>resources/style/img/ButtonPlug.png</file>
         <file>resources/style/qml/ButtonPlug.png</file>
         <file>resources/style/qml/ButtonPlugHover.png</file>
+        <file>resources/help/editor/adddevice_button_help.html</file>
+        <file>resources/help/editor/images/adddevice_lialog_linear.png</file>
+        <file>resources/help/editor/images/adddevice_lialog_rotate.png</file>
+        <file>resources/help/editor/images/adddevice_lialog_stop.png</file>
+        <file>resources/help/editor/images/adddevice_lialog_vibrate.png</file>
+        <file>resources/help/devices_button_help.html</file>
     </qresource>
     <qresource prefix="/qml">
         <file>resources/qml/ProjectCardSelection.qml</file>

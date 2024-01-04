@@ -17,6 +17,19 @@ struct SBackgroundSnippetData
   QColor    m_color = QColor();
 };
 
+struct SDeviceSnippetData
+{
+  bool   m_bVibrateCommand = false;
+  double m_dVibrateSpeed = 0.0;
+  bool   m_bLinearCommand = false;
+  double m_dLinearDurationS = 0.0;
+  double m_dLinearPosition = 0.0;
+  bool   m_bRotateCommand = false;
+  bool   m_bClockwiseRotate = true;
+  double m_dRotateSpeed = 0.0;
+  bool   m_bStopCommand = false;
+};
+
 struct SIconSnippetData
 {
   bool      m_bShow = false;
@@ -143,6 +156,7 @@ public:
   virtual ~ICodeGenerator() = default;
 
   virtual QString Generate(const SBackgroundSnippetData& data, tspProject spCurrentProject) const = 0;
+  virtual QString Generate(const SDeviceSnippetData& data, tspProject spCurrentProject) const = 0;
   virtual QString Generate(const SIconSnippetData& data, tspProject spCurrentProject) const = 0;
   virtual QString Generate(const SMetronomeSnippetCode& data, tspProject spCurrentProject) const = 0;
   virtual QString Generate(const SNotificationSnippetCode& data, tspProject spCurrentProject) const = 0;

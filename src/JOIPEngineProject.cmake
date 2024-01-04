@@ -271,6 +271,9 @@ macro(CreateJOIPProject JOIP_PROJECT_NAME)
     ${JOIPSources}/Editor/Script/CommandToggledEosCommand.h
     ${JOIPSources}/Editor/Script/CommandUpdateEosCommand.cpp
     ${JOIPSources}/Editor/Script/CommandUpdateEosCommand.h
+    ${JOIPSources}/Editor/Script/DeviceSnippetOverlay.cpp
+    ${JOIPSources}/Editor/Script/DeviceSnippetOverlay.h
+    ${JOIPSources}/Editor/Script/DeviceSnippetOverlay.ui
     ${JOIPSources}/Editor/Script/EosCommandModels.cpp
     ${JOIPSources}/Editor/Script/EosCommandModels.h
     ${JOIPSources}/Editor/Script/EosCommandWidgets.cpp
