@@ -12,6 +12,8 @@ New Features:
 - Added the ability to configure the predominantly used hand. This is taken into 
   account in the default Player Layouts.
 - Added a new in-built Layout that wastes less screen real estate.
+- Added the possibility to connect to sex toys and issue commands to sex toys in a tease.
+  - Added a Buttplug.io device client to connect to toys via Initface.
 
 Changes:
 - Changed debug-view to a layout with splitter to support resizing the debugger.
