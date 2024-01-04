@@ -1089,13 +1089,6 @@ void CSettings::GenerateSettingsIfNotExists()
 #endif
   }
 
-  // check hardware autoconnect setting
-  if (!m_spSettings->contains(CSettings::c_sSettingConnectToHWOnStartup))
-  {
-    bNeedsSynch = true;
-    m_spSettings->setValue(CSettings::c_sSettingConnectToHWOnStartup, true);
-  }
-
   // check code editor settings
   if (!m_spSettings->contains(CSettings::c_sSettingCodeEditorCaseInsensitiveSearch))
   {
@@ -1208,6 +1201,21 @@ void CSettings::GenerateSettingsIfNotExists()
   {
     bNeedsSynch = true;
     m_spSettings->setValue(CSettings::c_sSettingOffline, false);
+  }
+
+  // check hardware autoconnect setting, depends on offline setting
+  if (!m_spSettings->contains(CSettings::c_sSettingConnectToHWOnStartup))
+  {
+    bNeedsSynch = true;
+    if (m_spSettings->contains(CSettings::c_sSettingOffline))
+    {
+      m_spSettings->setValue(CSettings::c_sSettingConnectToHWOnStartup,
+                             !m_spSettings->value(CSettings::c_sSettingOffline).toBool());
+    }
+    else
+    {
+      m_spSettings->setValue(CSettings::c_sSettingConnectToHWOnStartup, true);
+    }
   }
 
   // check player graphical settings
