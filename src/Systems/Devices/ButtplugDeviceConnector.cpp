@@ -479,7 +479,7 @@ bool CIntifaceEngineClientWrapper::Disconnect()
 //
 bool CIntifaceEngineClientWrapper::IsConnected()
 {
-  return nullptr == m_spClient && m_spClient->Connected();
+  return nullptr != m_spClient && m_spClient->Connected();
 }
 
 //----------------------------------------------------------------------------------------
