@@ -89,6 +89,7 @@ void CDeviceCounterOverlay::SlotConnected()
   if (auto spDeviceManager = m_wpDeviceManager.lock())
   {
     m_pDlCounter->setText("🟢 " + QString::number(spDeviceManager->DeviceNames().size()));
+    m_pDlCounter->Invalidate();
   }
 }
 
@@ -99,6 +100,7 @@ void CDeviceCounterOverlay::SlotDeviceCountChanged()
   if (auto spDeviceManager = m_wpDeviceManager.lock())
   {
     m_pDlCounter->setText("🟢 " +QString::number(spDeviceManager->DeviceNames().size()));
+    m_pDlCounter->Invalidate();
   }
 }
 
@@ -107,6 +109,7 @@ void CDeviceCounterOverlay::SlotDeviceCountChanged()
 void CDeviceCounterOverlay::SlotDisconnected()
 {
   m_pDlCounter->setText("🔴");
+  m_pDlCounter->Invalidate();
 }
 
 //----------------------------------------------------------------------------------------

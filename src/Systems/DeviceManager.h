@@ -30,6 +30,8 @@ public:
   bool IsConnected() const;
   bool IsScanning() const;
   qint32 NumberRegisteredConnectors() const;
+  void SetSelectedDevice(const QString& sDevice);
+  QString SelectedDevice() const;
   void StartScanning();
   void StopScanning();
 
@@ -37,6 +39,7 @@ signals:
   void SignalConnected();
   void SignalDisconnected();
   void SignalDeviceCountChanged();
+  void SignalDeviceSelected();
   void SignalStartScanning();
   void SignalStopScanning();
 
@@ -64,6 +67,8 @@ private:
   QMetaObject::Connection   m_disconnectConnection;
   QMetaObject::Connection   m_deviceCountChangedConnection;
   QPointer<QTimer>          m_pReconnectTimer;
+  QString                   m_sSelectedDevice;
+  mutable QMutex            m_selectedDeviceMutex;
   bool                      m_bIsScanning = false;
 };
 

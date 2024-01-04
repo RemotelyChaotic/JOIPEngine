@@ -13,6 +13,7 @@ namespace
 {
   const qint32 c_iRoleDeviceName = Qt::UserRole+1;
   const qint32 c_iRoleScanningElement = Qt::UserRole+2;
+  const qint32 c_iRoleSelectedElement = Qt::UserRole+3;
   const qint32 c_iLoadingIconSize = 16;
 }
 
@@ -22,8 +23,10 @@ class CDeviceViewDelegate : public QStyledItemDelegate
 {
   Q_OBJECT
 public:
-  inline CDeviceViewDelegate(QPointer<QListView> pParent) :
+  inline CDeviceViewDelegate(QPointer<QListView> pParent,
+                             QPointer<CDeviceSelectorWidget> pDeviceSelectorWidget) :
     QStyledItemDelegate(pParent),
+    m_pDeviceSelectorWidget(pDeviceSelectorWidget),
     m_pLoading(new QMovie(this))
   {
     m_pLoading.setFileName(":/resources/gif/spinner_transparent.gif");
@@ -83,7 +86,8 @@ protected:
   }
 
 private:
-  QMovie               m_pLoading;
+  QPointer<CDeviceSelectorWidget> m_pDeviceSelectorWidget;
+  QMovie                          m_pLoading;
 };
 
 //----------------------------------------------------------------------------------------
@@ -91,11 +95,12 @@ private:
 CDeviceSelectorWidget::CDeviceSelectorWidget(QWidget* pParent) :
   QWidget(pParent),
   m_spUi(std::make_unique<Ui::CDeviceSelectorWidget>()),
-  m_wpDeviceManager(CApplication::Instance()->System<CDeviceManager>())
+  m_wpDeviceManager(CApplication::Instance()->System<CDeviceManager>()),
+  m_selectionIcon(":/resources/style/img/ButtonPlug.png")
 {
   m_spUi->setupUi(this);
   m_pDeviceModel = new QStandardItemModel(m_spUi->pDeviceListView);
-  m_pDeviceDelegate = new CDeviceViewDelegate(m_spUi->pDeviceListView);
+  m_pDeviceDelegate = new CDeviceViewDelegate(m_spUi->pDeviceListView, this);
   m_spUi->pDeviceListView->setModel(m_pDeviceModel);
   m_spUi->pDeviceListView->setItemDelegate(m_pDeviceDelegate);
 
@@ -104,6 +109,7 @@ CDeviceSelectorWidget::CDeviceSelectorWidget(QWidget* pParent) :
     SetConnectedState(spDeviceManager->IsConnected());
     SetScanningState(spDeviceManager->IsScanning());
     ShowDevices();
+    SlotDeviceSelected();
 
     connect(spDeviceManager.get(), &CDeviceManager::SignalConnected, this,
             &CDeviceSelectorWidget::SlotConnected);
@@ -111,6 +117,8 @@ CDeviceSelectorWidget::CDeviceSelectorWidget(QWidget* pParent) :
             &CDeviceSelectorWidget::SlotDisconnected);
     connect(spDeviceManager.get(), &CDeviceManager::SignalDeviceCountChanged, this,
             &CDeviceSelectorWidget::SlotDeviceCountChanged);
+    connect(spDeviceManager.get(), &CDeviceManager::SignalDeviceSelected, this,
+            &CDeviceSelectorWidget::SlotDeviceSelected);
     connect(spDeviceManager.get(), &CDeviceManager::SignalStartScanning, this,
             &CDeviceSelectorWidget::SlotStartScanning);
     connect(spDeviceManager.get(), &CDeviceManager::SignalStopScanning, this,
@@ -123,6 +131,20 @@ CDeviceSelectorWidget::CDeviceSelectorWidget(QWidget* pParent) :
 
 CDeviceSelectorWidget::~CDeviceSelectorWidget()
 {
+}
+
+//----------------------------------------------------------------------------------------
+//
+const QIcon& CDeviceSelectorWidget::SelectionIcon() const
+{
+  return m_selectionIcon;
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CDeviceSelectorWidget::SetSelectionIcon(const QIcon& icon)
+{
+  m_selectionIcon = icon;
 }
 
 //----------------------------------------------------------------------------------------
@@ -162,12 +184,8 @@ void CDeviceSelectorWidget::SlotActivatedItem(const QModelIndex& idx)
   const QString sName = m_pDeviceModel->data(idx, c_iRoleDeviceName).toString();
   if (auto spDeviceManager = m_wpDeviceManager.lock())
   {
-    auto spDevice = spDeviceManager->Device(sName);
-    if (nullptr != spDevice)
-    {
-      emit SignalSelectedDevice(sName);
-      emit SignalSelectedDevice(spDevice);
-    }
+    spDeviceManager->SetSelectedDevice(sName);
+    emit SignalSelectedDevice(sName);
   }
 }
 
@@ -190,6 +208,31 @@ void CDeviceSelectorWidget::SlotDisconnected()
 void CDeviceSelectorWidget::SlotDeviceCountChanged()
 {
   ShowDevices();
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CDeviceSelectorWidget::SlotDeviceSelected()
+{
+  if (auto spDeviceManager = m_wpDeviceManager.lock())
+  {
+    const QString sDevice = spDeviceManager->SelectedDevice();
+    for (qint32 i = 0; m_pDeviceModel->rowCount() > i; ++i)
+    {
+      QModelIndex idx = m_pDeviceModel->index(i, 0);
+      const QString sName = m_pDeviceModel->data(idx, c_iRoleDeviceName).toString();
+      if (sName == sDevice)
+      {
+        m_pDeviceModel->setData(idx, SelectionIcon(), Qt::DecorationRole);
+        m_pDeviceModel->setData(idx, true, c_iRoleSelectedElement);
+      }
+      else
+      {
+        m_pDeviceModel->setData(idx, QVariant(), Qt::DecorationRole);
+        m_pDeviceModel->setData(idx, false, c_iRoleSelectedElement);
+      }
+    }
+  }
 }
 
 //----------------------------------------------------------------------------------------
@@ -289,6 +332,20 @@ void CDeviceSelectorWidget::SetScanningState(bool bScanning)
     m_pDeviceDelegate->StopScanning();
     m_spUi->pStartScanButton->show();
     m_spUi->pStopScanButton->hide();
+  }
+
+  QModelIndex idx = m_pDeviceModel->index(m_pDeviceModel->rowCount()-1, 0);
+  const bool bScanningElem = m_pDeviceModel->data(idx, c_iRoleScanningElement).toBool();
+  if (bScanningElem && !bScanning)
+  {
+    m_pDeviceModel->removeRows(idx.row(), 1);
+  }
+  else if (!bScanningElem && bScanning)
+  {
+    QStandardItem* pItem = new QStandardItem(QString());
+    pItem->setData(QString(), c_iRoleDeviceName);
+    pItem->setData(true, c_iRoleScanningElement);
+    m_pDeviceModel->appendRow(pItem);
   }
 }
 

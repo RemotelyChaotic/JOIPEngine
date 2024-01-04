@@ -50,7 +50,8 @@ namespace
 //----------------------------------------------------------------------------------------
 //
 CDeviceManager::CDeviceManager() :
-  CSystemBase()
+  CSystemBase(),
+  m_selectedDeviceMutex(QMutex::Recursive)
 {
   qRegisterMetaType<std::shared_ptr<IDevice>>();
   qRegisterMetaType<std::vector<std::shared_ptr<IDevice>>>();
@@ -73,7 +74,7 @@ void CDeviceManager::Connect()
 QStringList CDeviceManager::DeviceNames()
 {
   QStringList vsRet;
-  bool bOk = QMetaObject::invokeMethod(const_cast<CDeviceManager*>(this), "DeviceNamesImpl",
+  bool bOk = QMetaObject::invokeMethod(this, "DeviceNamesImpl",
                                        Qt::BlockingQueuedConnection,
                                        Q_RETURN_ARG(QStringList, vsRet));
   assert(bOk); Q_UNUSED(bOk)
@@ -85,10 +86,10 @@ QStringList CDeviceManager::DeviceNames()
 std::shared_ptr<IDevice> CDeviceManager::Device(const QString& sName)
 {
   std::shared_ptr<IDevice> spRet;
-  bool bOk = QMetaObject::invokeMethod(const_cast<CDeviceManager*>(this), "DeviceImpl",
+  bool bOk = QMetaObject::invokeMethod(this, "DeviceImpl",
                                        Qt::BlockingQueuedConnection,
-                                       Q_ARG(QString, sName),
-                                       Q_RETURN_ARG(std::shared_ptr<IDevice>, spRet));
+                                       Q_RETURN_ARG(std::shared_ptr<IDevice>, spRet),
+                                       Q_ARG(QString, sName));
   assert(bOk); Q_UNUSED(bOk)
   return spRet;
 }
@@ -98,7 +99,7 @@ std::shared_ptr<IDevice> CDeviceManager::Device(const QString& sName)
 std::vector<std::shared_ptr<IDevice>> CDeviceManager::Devices()
 {
   std::vector<std::shared_ptr<IDevice>> vspRet;
-  bool bOk = QMetaObject::invokeMethod(const_cast<CDeviceManager*>(this), "DevicesImpl",
+  bool bOk = QMetaObject::invokeMethod(this, "DevicesImpl",
                                        Qt::BlockingQueuedConnection,
                                        Q_RETURN_ARG(std::vector<std::shared_ptr<IDevice>>, vspRet));
   assert(bOk); Q_UNUSED(bOk)
@@ -151,6 +152,26 @@ qint32 CDeviceManager::NumberRegisteredConnectors() const
 
 //----------------------------------------------------------------------------------------
 //
+void CDeviceManager::SetSelectedDevice(const QString& sDevice)
+{
+  QMutexLocker locker(&m_selectedDeviceMutex);
+  if (sDevice != m_sSelectedDevice)
+  {
+    m_sSelectedDevice = sDevice;
+    emit SignalDeviceSelected();
+  }
+}
+
+//----------------------------------------------------------------------------------------
+//
+QString CDeviceManager::SelectedDevice() const
+{
+  QMutexLocker locker(&m_selectedDeviceMutex);
+  return m_sSelectedDevice;
+}
+
+//----------------------------------------------------------------------------------------
+//
 void CDeviceManager::StartScanning()
 {
   bool bOk = QMetaObject::invokeMethod(this, "StartScanningImpl", Qt::QueuedConnection);
@@ -189,7 +210,7 @@ void CDeviceManager::Deinitialize()
 //
 void CDeviceManager::ConnectImpl()
 {
-  if (nullptr != m_pActiveConnector)
+  if (IsConnectedImpl())
   {
     DisconnectImpl();
   }
@@ -328,6 +349,8 @@ void CDeviceManager::DeinitImpl()
       m_bIsScanning = false;
     }
 
+    SetSelectedDevice(QString());
+
     emit SignalDisconnected();
   }
 }
@@ -351,7 +374,14 @@ void CDeviceManager::DisconnectImpl()
       m_bIsScanning = false;
     }
 
+    SetSelectedDevice(QString());
+
     emit SignalDisconnected();
+
+    if (nullptr != m_pReconnectTimer)
+    {
+      m_pReconnectTimer->start();
+    }
   }
 }
 

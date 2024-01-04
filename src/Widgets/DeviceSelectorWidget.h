@@ -1,6 +1,7 @@
 #ifndef DEVICESELECTORWIDGET_H
 #define DEVICESELECTORWIDGET_H
 
+#include <QIcon>
 #include <QPointer>
 #include <QWidget>
 
@@ -17,14 +18,17 @@ class QStandardItemModel;
 class CDeviceSelectorWidget : public QWidget
 {
   Q_OBJECT
+  Q_PROPERTY(QIcon selectionIcon READ SelectionIcon WRITE SetSelectionIcon)
 
 public:
   explicit CDeviceSelectorWidget(QWidget* pParent = nullptr);
   ~CDeviceSelectorWidget();
 
+  const QIcon& SelectionIcon() const;
+  void SetSelectionIcon(const QIcon& icon);
+
 signals:
   void SignalSelectedDevice(const QString& sName);
-  void SignalSelectedDevice(const std::shared_ptr<IDevice>& sName);
 
 protected slots:
   void on_pReconnectButton_clicked();
@@ -34,6 +38,7 @@ protected slots:
   void SlotConnected();
   void SlotDisconnected();
   void SlotDeviceCountChanged();
+  void SlotDeviceSelected();
   void SlotStartScanning();
   void SlotStopScanning();
 
@@ -46,6 +51,7 @@ private:
   std::weak_ptr<CDeviceManager>              m_wpDeviceManager;
   QPointer<QStandardItemModel>               m_pDeviceModel;
   QPointer<CDeviceViewDelegate>              m_pDeviceDelegate;
+  QIcon                                      m_selectionIcon;
 };
 
 #endif // DEVICESELECTORWIDGET_H

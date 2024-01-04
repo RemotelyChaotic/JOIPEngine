@@ -1300,3 +1300,7 @@ CResourceModelView {
   qproperty-layoutIcon: url(ui/ButtonLayout.png);
   qproperty-iconSize: 16;
 }
+
+CDeviceSelectorWidget {
+  qproperty-selectionIcon: url(ui/ButtonPlug.png);
+}
