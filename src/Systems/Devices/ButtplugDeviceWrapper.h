@@ -4,6 +4,7 @@
 #include "IDevice.h"
 
 #include <QMutex>
+#include <QObject>
 #include <QString>
 
 #include <atomic>
@@ -29,6 +30,7 @@ public:
   void SendVibrateCmd(double dSpeed) override;
 
 private:
+  std::shared_ptr<QMetaObject::Connection> m_spConnection;
   std::weak_ptr<Buttplug::Device> m_wpBpDevice;
   CButtplugDeviceConnectorContext* m_pContext;
 

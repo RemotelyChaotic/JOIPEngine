@@ -17,11 +17,13 @@ CButtplugDeviceWrapper::CButtplugDeviceWrapper(std::weak_ptr<Buttplug::Device> w
     m_sName = QString::fromStdString(spDevice->Name());
   }
 
-  std::shared_ptr<QMetaObject::Connection> spConnection =
+  m_spConnection =
       std::make_shared<QMetaObject::Connection>();
-  *spConnection = QObject::connect(pContext, &CButtplugDeviceConnectorContext::SignalDeviceRemoved,
-                                   pContext, [this, spConnection](QString sName) mutable {
-    if (Name() == sName && m_bDeviceValid.load())
+  std::weak_ptr<QMetaObject::Connection> wpConnection = m_spConnection;
+  *m_spConnection = QObject::connect(pContext, &CButtplugDeviceConnectorContext::SignalDeviceRemoved,
+                                   pContext, [this, wpConnection](QString sName) mutable {
+    if (auto spConnection = wpConnection.lock();
+        nullptr != spConnection && Name() == sName && m_bDeviceValid.load())
     {
       m_bDeviceValid.store(false);
       m_pContext->disconnect(*spConnection);
@@ -32,6 +34,11 @@ CButtplugDeviceWrapper::CButtplugDeviceWrapper(std::weak_ptr<Buttplug::Device> w
 
 CButtplugDeviceWrapper::~CButtplugDeviceWrapper()
 {
+  if (nullptr != m_spConnection)
+  {
+    m_pContext->disconnect(*m_spConnection);
+    m_spConnection.reset();
+  }
 }
 
 //----------------------------------------------------------------------------------------
