@@ -232,6 +232,12 @@ public:
 private:
   std::unique_ptr<Buttplug::Client>                  m_spClient;
   std::map<QString, std::weak_ptr<Buttplug::Device>> m_deviceList;
+  Buttplug::DeviceAddedCallback                      m_fnDeviceAddedCb;
+  Buttplug::DeviceRemovedCallback                    m_fnDeviceRemovedCb;
+  Buttplug::ErrorReceivedCallback                    m_fnErrorReceivedCb;
+  Buttplug::ScanningFinishedCallback                 m_fnScanningFinishedCb;
+  Buttplug::PingTimeoutCallback                      m_fnPingTimeoutCb;
+  Buttplug::ServerDisconnectCallback                 m_fnServerDisconnectCb;
   bool                                               m_bIsLoaded = false;
 };
 
@@ -368,9 +374,8 @@ CIntifaceEngineClientWrapper::CIntifaceEngineClientWrapper(
   Buttplug::FFI::ActivateEnvLogger();
 
   m_bIsLoaded = true;
-  m_spClient.reset(new Buttplug::Client("JOIPEngine"));
 
-  m_spClient->DeviceAddedCb = [this, fnDeviceAdded](std::weak_ptr<Buttplug::Device> device)
+  m_fnDeviceAddedCb = [this, fnDeviceAdded](std::weak_ptr<Buttplug::Device> device)
   {
     if (auto spDevice = device.lock(); nullptr != spDevice)
     {
@@ -384,7 +389,7 @@ CIntifaceEngineClientWrapper::CIntifaceEngineClientWrapper(
     }
   };
 
-  m_spClient->DeviceRemovedCb = [this, fnDeviceRemoved](std::weak_ptr<Buttplug::Device> device)
+  m_fnDeviceRemovedCb = [this, fnDeviceRemoved](std::weak_ptr<Buttplug::Device> device)
   {
     if (auto spDevice = device.lock(); nullptr != spDevice)
     {
@@ -402,22 +407,22 @@ CIntifaceEngineClientWrapper::CIntifaceEngineClientWrapper(
     }
   };
 
-  m_spClient->ErrorReceivedCb = [](const std::string& error)
+  m_fnErrorReceivedCb = [](const std::string& error)
   {
     qWarning() << QString("Intiface Client error: %1").arg(QString::fromStdString(error));
   };
 
-  m_spClient->ScanningFinishedCb = []()
+  m_fnScanningFinishedCb = []()
   {
     qDebug() << "Intiface Client: Scanning finished";
   };
 
-  m_spClient->PingTimeoutCb = []()
+  m_fnPingTimeoutCb = []()
   {
     qWarning() << "Intiface Client: Ping timeout";
   };
 
-  m_spClient->ServerDisconnectCb = [fnDisconnected]()
+  m_fnServerDisconnectCb = [fnDisconnected]()
   {
     qDebug() << "Intiface Client Server disconnect";
     if (nullptr != fnDisconnected)
@@ -434,7 +439,17 @@ CIntifaceEngineClientWrapper::~CIntifaceEngineClientWrapper()
 //
 bool CIntifaceEngineClientWrapper::Connect()
 {
-  if (nullptr == m_spClient) { return false; }
+  if (!m_bIsLoaded) { return false; }
+
+  m_spClient.reset(new Buttplug::Client("JOIPEngine"));
+
+  m_spClient->DeviceAddedCb = m_fnDeviceAddedCb;
+  m_spClient->DeviceRemovedCb = m_fnDeviceRemovedCb;
+  m_spClient->ErrorReceivedCb = m_fnErrorReceivedCb;
+  m_spClient->ScanningFinishedCb = m_fnScanningFinishedCb;
+  m_spClient->PingTimeoutCb = m_fnPingTimeoutCb;
+  m_spClient->ServerDisconnectCb = m_fnServerDisconnectCb;
+
   auto pSetting = CDeviceSettingFactory::Setting<quint16>(c_sIntifacePortSettingName);
   if (nullptr == pSetting)
   {
@@ -472,7 +487,12 @@ bool CIntifaceEngineClientWrapper::Disconnect()
   {
     (*m_spClient->DeviceRemovedCb)(m_deviceList.begin()->second);
   }
-  return m_spClient->Disconnect().get();
+
+  bool bOk = m_spClient->Disconnect().get();
+
+  m_spClient.reset(nullptr);
+
+  return bOk;
 }
 
 //----------------------------------------------------------------------------------------
