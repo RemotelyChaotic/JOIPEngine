@@ -61,6 +61,12 @@ namespace {
 
   const QString c_sAddFetishHelpId =      "Editor/AddFetish";
   const QString c_sRemoveFetishHelpId =   "Editor/RemoveFetish";
+
+  const QString c_sAddSeqHelpId =          "Editor/CreateNewSequence";
+  const QString c_sAddSeqElemHelpId =      "Editor/AddSequenceElement";
+  const QString c_sRemoveSeqElemsHelpId =  "Editor/RemoveSelectedSequenceElements";
+  const QString c_sAddSeqLayerHelpId =     "Editor/AddSequenceLayer";
+  const QString c_sRemoveSeqLayerHelpId =  "Editor/RemoveSelectedSequenceLayers";
 }
 
 CEditorActionBar::CEditorActionBar(QWidget* pParent) :
@@ -111,6 +117,13 @@ void CEditorActionBar::SetSpacing(qint32 iValue)
   fnSetSpacing(m_spUi->pResourcesContainer->layout());
   fnSetSpacing(m_spUi->pCodeEditorContainer->layout());
   fnSetSpacing(m_spUi->pProjectSettingsEditorContainer->layout());
+}
+
+//----------------------------------------------------------------------------------------
+//
+CEditorActionBar::EActionBarPosition CEditorActionBar::ActionBarPosition() const
+{
+  return m_position;
 }
 
 //----------------------------------------------------------------------------------------
@@ -238,6 +251,17 @@ void CEditorActionBar::Initialize()
     wpHelpFactory->RegisterHelp(c_sAddEosDisableHelpId, ":/resources/help/editor/add_eos_disable_button_help.html");
     m_spUi->RemoveCode->setProperty(helpOverlay::c_sHelpPagePropertyName, c_sAddEosRemoveHelpId);
     wpHelpFactory->RegisterHelp(c_sAddEosRemoveHelpId, ":/resources/help/editor/remove_eos_button_help.html");
+
+    m_spUi->NewSequence->setProperty(helpOverlay::c_sHelpPagePropertyName, c_sAddSeqHelpId);
+    wpHelpFactory->RegisterHelp(c_sAddSeqHelpId, ":/resources/help/editor/add_sequenceelem_button_help.html");
+    m_spUi->AddSequenceElement->setProperty(helpOverlay::c_sHelpPagePropertyName, c_sAddSeqElemHelpId);
+    wpHelpFactory->RegisterHelp(c_sAddSeqElemHelpId, ":/resources/help/editor/add_sequenceelem_button_help.html");
+    m_spUi->RemoveSelectedSequenceElements->setProperty(helpOverlay::c_sHelpPagePropertyName, c_sRemoveSeqElemsHelpId);
+    wpHelpFactory->RegisterHelp(c_sRemoveSeqElemsHelpId, ":/resources/help/editor/remove_sequenceelem_button_help.html");
+    m_spUi->AddSequenceLayer->setProperty(helpOverlay::c_sHelpPagePropertyName, c_sAddSeqLayerHelpId);
+    wpHelpFactory->RegisterHelp(c_sAddSeqLayerHelpId, ":/resources/help/editor/add_sequenceelem_button_help.html");
+    m_spUi->RemoveSelectedSequenceLayer->setProperty(helpOverlay::c_sHelpPagePropertyName, c_sRemoveSeqLayerHelpId);
+    wpHelpFactory->RegisterHelp(c_sRemoveSeqLayerHelpId, ":/resources/help/editor/remove_sequenceelem_button_help.html");
   }
 
   connect(m_spSettings.get(), &CSettings::keyBindingsChanged,
@@ -256,6 +280,7 @@ void CEditorActionBar::HideAllBars()
   m_spUi->pResourcesContainer->hide();
   m_spUi->pCodeEditorContainer->hide();
   m_spUi->pProjectSettingsEditorContainer->hide();
+  m_spUi->pSequenceEditorContainer->hide();
 
   m_iCurrentDisplayType = -1;
 }
@@ -325,6 +350,16 @@ void CEditorActionBar::ShowResourceActionBar()
 
 //----------------------------------------------------------------------------------------
 //
+void CEditorActionBar::ShowSequenceEditorActionBar()
+{
+  HideAllBars();
+  m_spUi->pSequenceEditorContainer->show();
+
+  m_iCurrentDisplayType = EEditorWidget::ePatternEditor;
+}
+
+//----------------------------------------------------------------------------------------
+//
 void CEditorActionBar::SlotKeyBindingsChanged()
 {
   // set bindings
@@ -385,5 +420,12 @@ void CEditorActionBar::SlotKeyBindingsChanged()
     m_spUi->AddThreadCode->SetShortcut(m_spSettings->keyBinding(sKey.arg(9)));
     //m_spUi->AddNotificationCode->SetShortcut(m_spSettings->keyBinding(sKey.arg(9)));
     //m_spUi->AddDeviceCode->SetShortcut(m_spSettings->keyBinding(sKey.arg(9)));
+
+    m_spUi->NewSequence->SetShortcut(m_spSettings->keyBinding(sKey.arg(1)));
+    m_spUi->AddSequenceLayer->SetShortcut(m_spSettings->keyBinding(sKey.arg(2)));
+    m_spUi->RemoveSelectedSequenceLayer->SetShortcut(m_spSettings->keyBinding(sKey.arg(3)));
+    m_spUi->AddSequenceElement->SetShortcut(m_spSettings->keyBinding(sKey.arg(4)));
+    m_spUi->RemoveSelectedSequenceElements->SetShortcut(m_spSettings->keyBinding(sKey.arg(5)));
+
   }
 }

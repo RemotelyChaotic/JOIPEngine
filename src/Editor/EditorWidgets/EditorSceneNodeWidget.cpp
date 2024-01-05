@@ -1,14 +1,17 @@
 #include "EditorSceneNodeWidget.h"
 #include "Application.h"
+
 #include "Editor/EditorActionBar.h"
 #include "Editor/EditorModel.h"
 #include "Editor/NodeEditor/FlowScene.h"
 #include "Editor/NodeEditor/FlowView.h"
 #include "Editor/Tutorial/SceneNodeWidgetTutorialStateSwitchHandler.h"
+
 #include "Systems/HelpFactory.h"
 #include "Systems/Project.h"
 #include "Systems/Scene.h"
 #include "Systems/Resource.h"
+
 #include "Widgets/HelpOverlay.h"
 
 #include <nodes/ConnectionStyle>
@@ -281,8 +284,7 @@ void CEditorSceneNodeWidget::SlotAddSceneButtonClicked()
 {
   WIDGET_INITIALIZED_GUARD
   if (nullptr == m_spCurrentProject) { return; }
-  m_pFlowView->OpenContextMenuAt(QPoint(0, 0),
-                                 QPoint(m_pFlowView->width() / 2, m_pFlowView->height() / 2));
+  m_pFlowView->OpenContextMenuAt(QPoint(0, 0), QPoint(0, 0));
 }
 
 //----------------------------------------------------------------------------------------

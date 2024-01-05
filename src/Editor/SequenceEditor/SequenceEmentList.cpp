@@ -175,9 +175,9 @@ CSequenceEmentList::CSequenceEmentList(QWidget *parent) :
   QTreeView{parent},
   m_pModel(new CSqeuenceElementListModel(this))
 {
-  CSqeuenceElementSortFilterProxyModel* pProxy = new CSqeuenceElementSortFilterProxyModel(this);
-  pProxy->setSourceModel(m_pModel);
-  setModel(pProxy);
+  m_pSortFilter = new CSqeuenceElementSortFilterProxyModel(this);
+  m_pSortFilter->setSourceModel(m_pModel);
+  setModel(m_pSortFilter);
   setItemDelegate(new CSequenceEmentDelegate(this));
 
   setHeaderHidden(true);
@@ -214,6 +214,20 @@ void CSequenceEmentList::ExpandAll()
   IterateItems(QModelIndex(), [this](const QModelIndex& idx) {
     expand(idx);
   });
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CSequenceEmentList::SetFilter(const QString& sFilter)
+{
+  if (sFilter.isEmpty())
+  {
+    m_pSortFilter->setFilterRegExp(QRegExp(".*"));
+  }
+  else
+  {
+    m_pSortFilter->setFilterRegExp(QRegExp(sFilter, Qt::CaseInsensitive));
+  }
 }
 
 //----------------------------------------------------------------------------------------

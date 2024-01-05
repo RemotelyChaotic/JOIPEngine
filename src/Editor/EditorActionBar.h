@@ -30,7 +30,7 @@ public:
   qint32 Spacing() const;
   void SetSpacing(qint32 iValue);
   qint32 CurrentActionBar();
-
+  EActionBarPosition ActionBarPosition() const;
   void SetActionBarPosition(EActionBarPosition position);
 
   void EditedProject() override {}
@@ -48,6 +48,7 @@ public:
   void ShowProjectActionBar();
   void ShowProjectSettingsActionBar();
   void ShowResourceActionBar();
+  void ShowSequenceEditorActionBar();
 
   std::unique_ptr<Ui::CEditorActionBar>            m_spUi;
 

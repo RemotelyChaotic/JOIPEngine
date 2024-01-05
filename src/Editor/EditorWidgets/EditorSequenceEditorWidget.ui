@@ -13,8 +13,8 @@
   <property name="windowTitle">
    <string>Form</string>
   </property>
-  <layout class="QVBoxLayout" name="verticalLayout_4">
-   <item>
+  <layout class="QGridLayout" name="gridLayout">
+   <item row="1" column="0">
     <widget class="QSplitter" name="pBottomSplitter">
      <property name="orientation">
       <enum>Qt::Vertical</enum>
@@ -34,31 +34,21 @@
         <number>0</number>
        </property>
        <item>
-        <widget class="QSplitter" name="pTopSplitter">
-         <property name="orientation">
-          <enum>Qt::Horizontal</enum>
-         </property>
-         <widget class="CSequenceEmentList" name="pSequenceElemsView">
-          <property name="alternatingRowColors">
-           <bool>true</bool>
+        <widget class="CSequencePreviewWidget" name="pPreviewWidget" native="true">
+         <layout class="QVBoxLayout" name="verticalLayout_2">
+          <property name="leftMargin">
+           <number>0</number>
           </property>
-         </widget>
-         <widget class="CSequencePreviewWidget" name="pPreviewWidget" native="true">
-          <layout class="QVBoxLayout" name="verticalLayout_2">
-           <property name="leftMargin">
-            <number>0</number>
-           </property>
-           <property name="topMargin">
-            <number>0</number>
-           </property>
-           <property name="rightMargin">
-            <number>0</number>
-           </property>
-           <property name="bottomMargin">
-            <number>0</number>
-           </property>
-          </layout>
-         </widget>
+          <property name="topMargin">
+           <number>0</number>
+          </property>
+          <property name="rightMargin">
+           <number>0</number>
+          </property>
+          <property name="bottomMargin">
+           <number>0</number>
+          </property>
+         </layout>
         </widget>
        </item>
       </layout>
@@ -73,7 +63,7 @@
          <x>0</x>
          <y>0</y>
          <width>439</width>
-         <height>102</height>
+         <height>327</height>
         </rect>
        </property>
        <layout class="QVBoxLayout" name="verticalLayout">
@@ -94,6 +84,9 @@
      </widget>
     </widget>
    </item>
+   <item row="0" column="0">
+    <widget class="QComboBox" name="pResourceComboBox"/>
+   </item>
   </layout>
  </widget>
  <customwidgets>
@@ -108,11 +101,6 @@
    <extends>QScrollArea</extends>
    <header>Editor/SequenceEditor/TimelineWidget.h</header>
    <container>1</container>
-  </customwidget>
-  <customwidget>
-   <class>CSequenceEmentList</class>
-   <extends>QTreeView</extends>
-   <header>Editor/SequenceEditor/SequenceEmentList.h</header>
   </customwidget>
  </customwidgets>
  <resources/>

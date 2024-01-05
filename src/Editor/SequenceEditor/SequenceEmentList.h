@@ -7,6 +7,8 @@
 
 #include <functional>
 
+class CSqeuenceElementSortFilterProxyModel;
+
 class CSequenceEmentList : public QTreeView
 {
   Q_OBJECT
@@ -18,12 +20,14 @@ public:
   void Deinitalize();
 
   void ExpandAll();
+  void SetFilter(const QString& sFilter);
 
 private:
   void IterateItems(const QModelIndex& index,
                     const std::function<void(const QModelIndex&)>& fnToCall);
 
-  QPointer<QStandardItemModel> m_pModel;
+  QPointer<QStandardItemModel>                   m_pModel;
+  QPointer<CSqeuenceElementSortFilterProxyModel> m_pSortFilter;
 };
 
 #endif // CPATTERNELEMENTLIST_H

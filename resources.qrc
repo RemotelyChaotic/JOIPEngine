@@ -279,6 +279,8 @@
         <file>resources/help/editor/images/adddevice_lialog_stop.png</file>
         <file>resources/help/editor/images/adddevice_lialog_vibrate.png</file>
         <file>resources/help/devices_button_help.html</file>
+        <file>resources/help/editor/add_sequenceelem_button_help.html</file>
+        <file>resources/help/editor/remove_sequenceelem_button_help.html</file>
     </qresource>
     <qresource prefix="/qml">
         <file>resources/qml/ProjectCardSelection.qml</file>
