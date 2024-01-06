@@ -573,6 +573,8 @@ macro(CreateJOIPProject JOIP_PROJECT_NAME)
     ${JOIPSources}/Systems/Script/ScriptTimer.h
     ${JOIPSources}/Systems/ScriptRunner.cpp
     ${JOIPSources}/Systems/ScriptRunner.h
+    ${JOIPSources}/Systems/Sequence/Sequence.cpp
+    ${JOIPSources}/Systems/Sequence/Sequence.h
     ${JOIPSources}/Systems/ThreadedSystem.cpp
     ${JOIPSources}/Systems/ThreadedSystem.h
     ${JOIPSources}/Themes.cpp

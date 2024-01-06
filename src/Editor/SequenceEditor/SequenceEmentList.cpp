@@ -1,6 +1,8 @@
 #include "SequenceEmentList.h"
 #include "SqeuenceElementListModel.h"
 
+#include "Systems/Sequence/Sequence.h"
+
 #include <QStyledItemDelegate>
 
 namespace
@@ -14,19 +16,15 @@ namespace
     eScript
   };
 
-  const char c_sCategoryNameMetronome[] = QT_TR_NOOP("Metronome Commands");
-  const char c_sCategoryNameToy[] = QT_TR_NOOP("Toy Commands");
-  const char c_sCategoryNameResource[] = QT_TR_NOOP("Resource Commands");
-  const char c_sCategoryNameText[] = QT_TR_NOOP("Text Commands");
-  const char c_sCategoryNameScript[] = QT_TR_NOOP("Script Commands");
-
   const std::map<ESequenceElemCategory, QString> c_vsAllCategoryStrings = {
-      { eMetronome, c_sCategoryNameMetronome },
-      { eToy, c_sCategoryNameToy },
-      { eResource, c_sCategoryNameResource },
-      { eText, c_sCategoryNameText },
-      { eScript, c_sCategoryNameScript }
+      { eMetronome, sequence::c_sCategoryIdBeat },
+      { eToy, sequence::c_sCategoryIdToy },
+      { eResource, sequence::c_sCategoryIdResource },
+      { eText, sequence::c_sCategoryIdText },
+      { eScript, sequence::c_sCategoryIdScript }
   };
+
+  const qint32 c_iRoleId = Qt::UserRole+1;
 
   //--------------------------------------------------------------------------------------
   //
@@ -34,11 +32,14 @@ namespace
   {
     QList<QStandardItem*> pChildren;
 
-    QStandardItem* pItemChild = new QStandardItem(QObject::tr("Single Beat"));
+    QStandardItem* pItemChild = new QStandardItem(QObject::tr(sequence::c_sInstructionIdBeat));
+    pItemChild->setData(sequence::c_sInstructionIdBeat, c_iRoleId);
     pChildren << pItemChild;
-    pItemChild = new QStandardItem(QObject::tr("Start Pattern"));
+    pItemChild = new QStandardItem(QObject::tr(sequence::c_sInstructionIdStartPattern));
+    pItemChild->setData(sequence::c_sInstructionIdStartPattern, c_iRoleId);
     pChildren << pItemChild;
-    pItemChild = new QStandardItem(QObject::tr("Stop Pattern"));
+    pItemChild = new QStandardItem(QObject::tr(sequence::c_sInstructionIdStopPattern));
+    pItemChild->setData(sequence::c_sInstructionIdStopPattern, c_iRoleId);
     pChildren << pItemChild;
 
     pItem->insertRows(0, pChildren);
@@ -47,13 +48,17 @@ namespace
   {
     QList<QStandardItem*> pChildren;
 
-    QStandardItem* pItemChild = new QStandardItem(QObject::tr("Vibrate"));
+    QStandardItem* pItemChild = new QStandardItem(QObject::tr(sequence::c_sInstructionIdVibrate));
+    pItemChild->setData(sequence::c_sInstructionIdVibrate, c_iRoleId);
     pChildren << pItemChild;
-    pItemChild = new QStandardItem(QObject::tr("Linear Toy Command"));
+    pItemChild = new QStandardItem(QObject::tr(sequence::c_sInstructionIdLinearToy));
+    pItemChild->setData(sequence::c_sInstructionIdLinearToy, c_iRoleId);
     pChildren << pItemChild;
-    pItemChild = new QStandardItem(QObject::tr("Rotate Toy Command"));
+    pItemChild = new QStandardItem(QObject::tr(sequence::c_sInstructionIdRotateToy));
+    pItemChild->setData(sequence::c_sInstructionIdRotateToy, c_iRoleId);
     pChildren << pItemChild;
-    pItemChild = new QStandardItem(QObject::tr("Stop Vibrations"));
+    pItemChild = new QStandardItem(QObject::tr(sequence::c_sInstructionIdStopVibrations));
+    pItemChild->setData(sequence::c_sInstructionIdStopVibrations, c_iRoleId);
     pChildren << pItemChild;
 
     pItem->insertRows(0, pChildren);
@@ -62,15 +67,20 @@ namespace
   {
     QList<QStandardItem*> pChildren;
 
-    QStandardItem* pItemChild = new QStandardItem(QObject::tr("Show"));
+    QStandardItem* pItemChild = new QStandardItem(QObject::tr(sequence::c_sInstructionIdShow));
+    pItemChild->setData(sequence::c_sInstructionIdShow, c_iRoleId);
     pChildren << pItemChild;
-    pItemChild = new QStandardItem(QObject::tr("Play Video"));
+    pItemChild = new QStandardItem(QObject::tr(sequence::c_sInstructionIdPlayVideo));
+    pItemChild->setData(sequence::c_sInstructionIdPlayVideo, c_iRoleId);
     pChildren << pItemChild;
-    pItemChild = new QStandardItem(QObject::tr("Pause Video"));
+    pItemChild = new QStandardItem(QObject::tr(sequence::c_sInstructionIdPauseVideo));
+    pItemChild->setData(sequence::c_sInstructionIdPauseVideo, c_iRoleId);
     pChildren << pItemChild;
-    pItemChild = new QStandardItem(QObject::tr("Play Audio"));
+    pItemChild = new QStandardItem(QObject::tr(sequence::c_sInstructionIdPlayAudio));
+    pItemChild->setData(sequence::c_sInstructionIdPlayAudio, c_iRoleId);
     pChildren << pItemChild;
-    pItemChild = new QStandardItem(QObject::tr("Pause Audio"));
+    pItemChild = new QStandardItem(QObject::tr(sequence::c_sInstructionIdPauseAudio));
+    pItemChild->setData(sequence::c_sInstructionIdPauseAudio, c_iRoleId);
     pChildren << pItemChild;
 
     pItem->insertRows(0, pChildren);
@@ -79,7 +89,8 @@ namespace
   {
     QList<QStandardItem*> pChildren;
 
-    QStandardItem* pItemChild = new QStandardItem(QObject::tr("Show Text"));
+    QStandardItem* pItemChild = new QStandardItem(QObject::tr(sequence::c_sInstructionIdShowText));
+    pItemChild->setData(sequence::c_sInstructionIdShowText, c_iRoleId);
     pChildren << pItemChild;
 
     pItem->insertRows(0, pChildren);
@@ -88,9 +99,11 @@ namespace
   {
     QList<QStandardItem*> pChildren;
 
-    QStandardItem* pItemChild = new QStandardItem(QObject::tr("Run Script"));
+    QStandardItem* pItemChild = new QStandardItem(QObject::tr(sequence::c_sInstructionIdRunScript));
+    pItemChild->setData(sequence::c_sInstructionIdRunScript, c_iRoleId);
     pChildren << pItemChild;
-    pItemChild = new QStandardItem(QObject::tr("Eval"));
+    pItemChild = new QStandardItem(QObject::tr(sequence::c_sInstructionIdEval));
+    pItemChild->setData(sequence::c_sInstructionIdEval, c_iRoleId);
     pChildren << pItemChild;
 
     pItem->insertRows(0, pChildren);
