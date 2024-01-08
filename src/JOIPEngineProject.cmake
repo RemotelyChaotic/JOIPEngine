@@ -233,6 +233,10 @@ macro(CreateJOIPProject JOIP_PROJECT_NAME)
     ${JOIPSources}/Editor/Resources/WebResourceOverlay.cpp
     ${JOIPSources}/Editor/Resources/WebResourceOverlay.h
     ${JOIPSources}/Editor/Resources/WebResourceOverlay.ui
+    ${JOIPSources}/Editor/SequenceEditor/CommandAddNewSequence.cpp
+    ${JOIPSources}/Editor/SequenceEditor/CommandAddNewSequence.h
+    ${JOIPSources}/Editor/SequenceEditor/CommandChangeOpenedSequence.cpp
+    ${JOIPSources}/Editor/SequenceEditor/CommandChangeOpenedSequence.h
     ${JOIPSources}/Editor/SequenceEditor/SequenceEmentList.cpp
     ${JOIPSources}/Editor/SequenceEditor/SequenceEmentList.h
     ${JOIPSources}/Editor/SequenceEditor/SqeuenceElementListModel.cpp

@@ -192,4 +192,8 @@ struct SSequenceFile : public ISerializable
   void FromJsonObject(const QJsonObject& json) override;
 };
 
+//----------------------------------------------------------------------------------------
+//
+typedef std::shared_ptr<SSequenceFile> tspSequence;
+
 #endif // SSEQUENCEFILE_H

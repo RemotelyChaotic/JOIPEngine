@@ -1,22 +1,38 @@
 #include "EditorSequenceEditorWidget.h"
 
+#include "Editor/SequenceEditor/CommandAddNewSequence.h"
+#include "Editor/SequenceEditor/CommandChangeOpenedSequence.h"
+
 #include "Editor/EditorActionBar.h"
+#include "Editor/EditorEditableFileModel.h"
 #include "Editor/EditorModel.h"
 
 #include "Editor/SequenceEditor/SequenceEmentList.h"
 
+#include "Systems/Sequence/Sequence.h"
+
 #include "Widgets/SearchWidget.h"
 
+#include <QJsonDocument>
 #include <QMenu>
+#include <QUndoStack>
 #include <QWidgetAction>
 
 DECLARE_EDITORWIDGET(CEditorPatternEditorWidget, EEditorWidget::ePatternEditor)
 
 CEditorPatternEditorWidget::CEditorPatternEditorWidget(QWidget* pParent) :
-    CEditorWidgetBase(pParent),
-    m_spUi(std::make_unique<Ui::CEditorSequenceEditorWidget>())
+  CEditorWidgetBase(pParent),
+  m_spUi(std::make_unique<Ui::CEditorSequenceEditorWidget>()),
+  m_pDummyModel(new QStandardItemModel(this)),
+  m_sLastCachedSequence(QString()),
+  m_bChangingIndex(false)
 {
   m_spUi->setupUi(this);
+
+  m_pFilteredScriptModel = new CFilteredEditorEditableFileModel(this);
+
+  connect(m_spUi->pTimeLineWidget, &CTimelineWidget::SignalContentsChanged,
+          this, &CEditorPatternEditorWidget::SlotContentsChange);
 }
 
 CEditorPatternEditorWidget::~CEditorPatternEditorWidget()
@@ -30,6 +46,17 @@ void CEditorPatternEditorWidget::Initialize()
 {
   m_bInitialized = false;
 
+  m_spUi->pTimeLineWidget->SetUndoStack(UndoStack());
+
+  EditableFileModel()->SetReloadFileWithoutQuestion(true);
+  m_pFilteredScriptModel->FilterForTypes({SScriptDefinitionData::c_sFileTypeSequence});
+
+  m_spUi->pResourceComboBox->setModel(m_pDummyModel);
+  m_pFilteredScriptModel->setSourceModel(m_pDummyModel);
+
+  connect(EditableFileModel(), &CEditorEditableFileModel::SignalFileChangedExternally,
+          this, &CEditorPatternEditorWidget::SlotFileChangedExternally);
+
   m_bInitialized = true;
 }
 
@@ -39,10 +66,19 @@ void CEditorPatternEditorWidget::LoadProject(tspProject spProject)
 {
   WIDGET_INITIALIZED_GUARD
 
+  auto pModel = EditableFileModel();
+  m_pFilteredScriptModel->setSourceModel(pModel);
+  m_spUi->pResourceComboBox->setModel(m_pFilteredScriptModel);
+
   m_spCurrentProject = spProject;
 
   //m_spUi->pTopSplitter->setSizes({ width()/4, width() *3/4 });
   m_spUi->pBottomSplitter->setSizes({ height()/2, height()/2 });
+
+  if (0 < m_pFilteredScriptModel->rowCount())
+  {
+    on_pResourceComboBox_currentIndexChanged(0);
+  }
 
   SetLoaded(true);
 }
@@ -55,6 +91,15 @@ void CEditorPatternEditorWidget::UnloadProject()
 
   m_spCurrentProject = nullptr;
 
+  m_spCurrentSequence = nullptr;
+  m_sLastCachedSequence = QString();
+
+  m_spUi->pResourceComboBox->setModel(m_pDummyModel);
+  m_spUi->pResourceComboBox->clear();
+
+  m_spUi->pTimeLineWidget->SetSequence(nullptr);
+  m_spUi->pTimeLineWidget->Clear();
+
   SetLoaded(false);
 }
 
@@ -64,20 +109,32 @@ void CEditorPatternEditorWidget::SaveProject()
 {
   WIDGET_INITIALIZED_GUARD
   if (nullptr == m_spCurrentProject) { return; }
+
+  // save current contents
+  auto pScriptItem = EditableFileModel()->CachedFile(
+        CachedResourceName(m_spUi->pResourceComboBox->currentIndex()));
+  if (nullptr != pScriptItem && nullptr != m_spCurrentSequence)
+  {
+    QJsonObject obj = m_spCurrentSequence->ToJsonObject();
+    QJsonDocument doc = QJsonDocument(obj);
+    pScriptItem->m_data = doc.toJson(QJsonDocument::Indented);
+    EditableFileModel()->SetSceneScriptModifiedFlag(pScriptItem->m_sId, pScriptItem->m_bChanged);
+  }
 }
 
 //----------------------------------------------------------------------------------------
 //
 void CEditorPatternEditorWidget::OnHidden()
 {
-
+  EditableFileModel()->SetReloadFileWithoutQuestion(true);
 }
 
 //----------------------------------------------------------------------------------------
 //
 void CEditorPatternEditorWidget::OnShown()
 {
-
+  EditableFileModel()->SetReloadFileWithoutQuestion(false);
+  ReloadEditor(m_spUi->pResourceComboBox->currentIndex());
 }
 
 //----------------------------------------------------------------------------------------
@@ -136,10 +193,31 @@ void CEditorPatternEditorWidget::OnActionBarChanged()
 
 //----------------------------------------------------------------------------------------
 //
+void CEditorPatternEditorWidget::on_pResourceComboBox_currentIndexChanged(qint32 iIndex)
+{
+  WIDGET_INITIALIZED_GUARD
+  if (nullptr == m_spCurrentProject) { return; }
+
+  if (CachedResourceName(iIndex) != m_sLastCachedSequence)
+  {
+    UndoStack()->push(new CCommandChangeOpenedSequence(m_spUi->pResourceComboBox,
+                                                       m_spUi->pTimeLineWidget,
+                                                       this,
+                                                       std::bind(&CEditorPatternEditorWidget::ReloadEditor, this, std::placeholders::_1),
+                                                       &m_bChangingIndex, &m_sLastCachedSequence,
+                                                       m_sLastCachedSequence,
+                                                       CachedResourceName(iIndex)));
+  }
+}
+
+//----------------------------------------------------------------------------------------
+//
 void CEditorPatternEditorWidget::SlotAddNewSequenceButtonClicked()
 {
   WIDGET_INITIALIZED_GUARD
   if (nullptr == m_spCurrentProject) { return; }
+
+  UndoStack()->push(new CCommandAddNewSequence(m_spCurrentProject, this));
 }
 
 //----------------------------------------------------------------------------------------
@@ -147,7 +225,55 @@ void CEditorPatternEditorWidget::SlotAddNewSequenceButtonClicked()
 void CEditorPatternEditorWidget::SlotAddSequenceLayerButtonClicked()
 {
   WIDGET_INITIALIZED_GUARD
-      if (nullptr == m_spCurrentProject) { return; }
+  if (nullptr == m_spCurrentProject) { return; }
+  m_spUi->pTimeLineWidget->AddNewLayer();
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CEditorPatternEditorWidget::SlotContentsChange()
+{
+  WIDGET_INITIALIZED_GUARD
+  if (nullptr == m_spCurrentProject || nullptr == m_spCurrentSequence) { return; }
+
+  QString sCachedScript = CachedResourceName(
+        m_spUi->pResourceComboBox->currentIndex());
+  auto pScriptItem = EditableFileModel()->CachedFile(sCachedScript);
+  if (nullptr != pScriptItem)
+  {
+    pScriptItem->m_bChanged = true;
+    QJsonObject obj = m_spCurrentSequence->ToJsonObject();
+    QJsonDocument doc = QJsonDocument(obj);
+    pScriptItem->m_data = doc.toJson(QJsonDocument::Indented);
+    EditableFileModel()->SetSceneScriptModifiedFlag(pScriptItem->m_sId, true);
+  }
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CEditorPatternEditorWidget::SlotFileChangedExternally(const QString& sName)
+{
+  qint32 index =
+      m_pFilteredScriptModel->mapToSource(
+          m_pFilteredScriptModel->index(m_spUi->pResourceComboBox->currentIndex(), 0)).row();
+  auto pScriptItem = EditableFileModel()->CachedFile(sName);
+  if (index == EditableFileModel()->FileIndex(sName) && nullptr != pScriptItem)
+  {
+    m_bChangingIndex = true;
+
+    m_spUi->pTimeLineWidget->SetSequence(nullptr);
+    m_spUi->pTimeLineWidget->Clear();
+    // load new contents
+    if (nullptr != m_spCurrentSequence)
+    {
+      m_spCurrentSequence->FromJsonObject(QJsonDocument::fromJson(pScriptItem->m_data).object());
+      m_spUi->pTimeLineWidget->SetSequence(m_spCurrentSequence);
+    }
+
+    m_spUi->pTimeLineWidget->Update();
+
+    m_bChangingIndex = false;
+  }
 }
 
 //----------------------------------------------------------------------------------------
@@ -156,6 +282,7 @@ void CEditorPatternEditorWidget::SlotRemoveSequenceLayerButtonClicked()
 {
   WIDGET_INITIALIZED_GUARD
       if (nullptr == m_spCurrentProject) { return; }
+  m_spUi->pTimeLineWidget->RemoveSelectedLayer();
 }
 
 //----------------------------------------------------------------------------------------
@@ -176,6 +303,15 @@ void CEditorPatternEditorWidget::SlotRemoveSequenceElementsButtonClicked()
 {
   WIDGET_INITIALIZED_GUARD
   if (nullptr == m_spCurrentProject) { return; }
+}
+
+//----------------------------------------------------------------------------------------
+//
+QString CEditorPatternEditorWidget::CachedResourceName(qint32 iIndex)
+{
+  return EditableFileModel()->CachedResourceName(
+      m_pFilteredScriptModel->mapToSource(
+          m_pFilteredScriptModel->index(iIndex, 0)).row());
 }
 
 //----------------------------------------------------------------------------------------
@@ -208,13 +344,40 @@ void CEditorPatternEditorWidget::OpenContextMenuAt(const QPoint& localPoint,
             pListView->SetFilter(text);
           });
 
-  connect(pListView, &QTreeView::activated, pListView, [&](QModelIndex idx)
+  connect(pListView, &CSequenceEmentList::SignalSelectedItem, pListView,
+          [&](const QString& sId)
           {
-            Q_UNUSED(idx)
+            m_spUi->pTimeLineWidget->AddNewElement(sId);
             modelMenu.close();
           });
 
   pTxtBox->setFocus();
 
   modelMenu.exec(createPoint);
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CEditorPatternEditorWidget::ReloadEditor(qint32 iIndex)
+{
+  m_bChangingIndex = true;
+
+  m_spUi->pTimeLineWidget->SetSequence(nullptr);
+  m_spUi->pTimeLineWidget->Clear();
+
+  // load new contents
+  m_sLastCachedSequence = CachedResourceName(iIndex);
+  auto  pScriptItem = EditableFileModel()->CachedFile(m_sLastCachedSequence);
+  if (nullptr != pScriptItem)
+  {
+    if (nullptr == m_spCurrentSequence)
+    {
+      m_spCurrentSequence = std::make_shared<SSequenceFile>();
+    }
+    m_spCurrentSequence->FromJsonObject(QJsonDocument::fromJson(pScriptItem->m_data).object());
+    m_spUi->pTimeLineWidget->SetSequence(m_spCurrentSequence);
+  }
+  m_spUi->pTimeLineWidget->Update();
+
+  m_bChangingIndex = false;
 }

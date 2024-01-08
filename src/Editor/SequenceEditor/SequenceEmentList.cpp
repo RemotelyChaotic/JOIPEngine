@@ -194,6 +194,10 @@ CSequenceEmentList::CSequenceEmentList(QWidget *parent) :
   setItemDelegate(new CSequenceEmentDelegate(this));
 
   setHeaderHidden(true);
+  setEditTriggers(QAbstractItemView::NoEditTriggers);
+
+  connect(selectionModel(), &QItemSelectionModel::currentChanged,
+          this, &CSequenceEmentList::SlotSelectionChanged);
 }
 
 CSequenceEmentList::~CSequenceEmentList()
@@ -240,6 +244,17 @@ void CSequenceEmentList::SetFilter(const QString& sFilter)
   else
   {
     m_pSortFilter->setFilterRegExp(QRegExp(sFilter, Qt::CaseInsensitive));
+  }
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CSequenceEmentList::SlotSelectionChanged(const QModelIndex& current,
+                                              const QModelIndex&)
+{
+  if (current.isValid() && !m_pSortFilter->hasChildren(current))
+  {
+    emit SignalSelectedItem(current.data(c_iRoleId).toString());
   }
 }
 

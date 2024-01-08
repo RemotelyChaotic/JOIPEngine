@@ -22,6 +22,12 @@ public:
   void ExpandAll();
   void SetFilter(const QString& sFilter);
 
+signals:
+  void SignalSelectedItem(const QString& sId);
+
+protected slots:
+  void SlotSelectionChanged(const QModelIndex& current, const QModelIndex& previous);
+
 private:
   void IterateItems(const QModelIndex& index,
                     const std::function<void(const QModelIndex&)>& fnToCall);

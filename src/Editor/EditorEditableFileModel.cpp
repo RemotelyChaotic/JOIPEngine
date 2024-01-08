@@ -70,9 +70,9 @@ bool CFilteredEditorEditableFileModel::filterAcceptsRow(int iSourceRow, const QM
       QString value = pSourceModel->data(sourceIndex, Qt::DisplayRole).toString();
       auto pFile = pSourceModel->CachedFile(pSourceModel->CachedResourceName(sourceIndex.row()));
 
-      bool bMatchesTsypeSelector = m_vsEnabledTypes.empty() || nullptr == pFile ||
+      bool bMatchesTsypeSelector = !m_vsEnabledTypes.empty() && nullptr != pFile &&
                                    !pFile->m_sFileType.isEmpty();
-      if (!bMatchesTsypeSelector)
+      if (bMatchesTsypeSelector)
       {
         auto it =
             std::find(m_vsEnabledTypes.begin(), m_vsEnabledTypes.end(), pFile->m_sFileType);

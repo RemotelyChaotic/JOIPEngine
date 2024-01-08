@@ -15,6 +15,63 @@ CTimelineWidget::~CTimelineWidget()
 
 //----------------------------------------------------------------------------------------
 //
+void CTimelineWidget::AddNewLayer()
+{
+
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CTimelineWidget::AddNewElement(const QString& sId)
+{
+  Q_UNUSED(sId)
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CTimelineWidget::Clear()
+{
+
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CTimelineWidget::RemoveSelectedLayer()
+{
+
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CTimelineWidget::SetSequence(const tspSequence& spSeq)
+{
+  m_spCurrentSequence = spSeq;
+  Update();
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CTimelineWidget::SetUndoStack(QPointer<QUndoStack> pUndo)
+{
+  m_pUndoStack = pUndo;
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CTimelineWidget::Update()
+{
+
+}
+
+//----------------------------------------------------------------------------------------
+//
+tspSequence CTimelineWidget::Sequence() const
+{
+  return m_spCurrentSequence;
+}
+
+//----------------------------------------------------------------------------------------
+//
 QSize CTimelineWidget::minimumSizeHint() const
 {
   return QSize(1,1);
