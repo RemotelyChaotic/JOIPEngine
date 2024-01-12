@@ -98,7 +98,6 @@ void CEditorPatternEditorWidget::UnloadProject()
   m_spUi->pResourceComboBox->clear();
 
   m_spUi->pTimeLineWidget->SetSequence(nullptr);
-  m_spUi->pTimeLineWidget->Clear();
 
   SetLoaded(false);
 }
@@ -262,15 +261,12 @@ void CEditorPatternEditorWidget::SlotFileChangedExternally(const QString& sName)
     m_bChangingIndex = true;
 
     m_spUi->pTimeLineWidget->SetSequence(nullptr);
-    m_spUi->pTimeLineWidget->Clear();
     // load new contents
     if (nullptr != m_spCurrentSequence)
     {
       m_spCurrentSequence->FromJsonObject(QJsonDocument::fromJson(pScriptItem->m_data).object());
       m_spUi->pTimeLineWidget->SetSequence(m_spCurrentSequence);
     }
-
-    m_spUi->pTimeLineWidget->Update();
 
     m_bChangingIndex = false;
   }
@@ -363,7 +359,6 @@ void CEditorPatternEditorWidget::ReloadEditor(qint32 iIndex)
   m_bChangingIndex = true;
 
   m_spUi->pTimeLineWidget->SetSequence(nullptr);
-  m_spUi->pTimeLineWidget->Clear();
 
   // load new contents
   m_sLastCachedSequence = CachedResourceName(iIndex);
@@ -377,7 +372,6 @@ void CEditorPatternEditorWidget::ReloadEditor(qint32 iIndex)
     m_spCurrentSequence->FromJsonObject(QJsonDocument::fromJson(pScriptItem->m_data).object());
     m_spUi->pTimeLineWidget->SetSequence(m_spCurrentSequence);
   }
-  m_spUi->pTimeLineWidget->Update();
 
   m_bChangingIndex = false;
 }

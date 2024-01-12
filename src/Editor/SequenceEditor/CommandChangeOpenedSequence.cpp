@@ -22,7 +22,6 @@ CCommandChangeOpenedSequence::CCommandChangeOpenedSequence(QPointer<QComboBox> p
   m_wpDbManager(CApplication::Instance()->System<CDatabaseManager>()),
   m_pResourcesComboBox(pResourcesComboBox),
   m_pTimelineWidget(pScriptDisplayWidget),
-  m_pEditorModel(dynamic_cast<CEditorEditableFileModel*>(pResourcesComboBox->model())),
   m_pGuard(pGuard),
   m_fnReloadEditor(fnReloadEditor),
   m_pbChangingIndexFlag(pbChangingIndexFlag),
@@ -30,6 +29,15 @@ CCommandChangeOpenedSequence::CCommandChangeOpenedSequence(QPointer<QComboBox> p
   m_sOldSequence(sOldSequence),
   m_sNewSequence(sNewSequence)
 {
+  auto pSortModel = dynamic_cast<QSortFilterProxyModel*>(pResourcesComboBox->model());
+  if (nullptr != pSortModel)
+  {
+    m_pEditorModel = dynamic_cast<CEditorEditableFileModel*>(pSortModel->sourceModel());
+  }
+  else
+  {
+    m_pEditorModel = dynamic_cast<CEditorEditableFileModel*>(pResourcesComboBox->model());
+  }
 }
 CCommandChangeOpenedSequence::~CCommandChangeOpenedSequence()
 {}

@@ -18,7 +18,6 @@ CCommandChangeOpenedScript::CCommandChangeOpenedScript(QPointer<QComboBox> pReso
   m_wpDbManager(CApplication::Instance()->System<CDatabaseManager>()),
   m_pResourcesComboBox(pResourcesComboBox),
   m_pScriptDisplayWidget(pScriptDisplayWidget),
-  m_pEditorModel(dynamic_cast<CEditorEditableFileModel*>(pResourcesComboBox->model())),
   m_pGuard(pGuard),
   m_fnReloadEditor(fnReloadEditor),
   m_pbChangingIndexFlag(pbChangingIndexFlag),
@@ -26,6 +25,15 @@ CCommandChangeOpenedScript::CCommandChangeOpenedScript(QPointer<QComboBox> pReso
   m_sOldScript(sOldScript),
   m_sNewScript(sNewScript)
 {
+  auto pSortModel = dynamic_cast<QSortFilterProxyModel*>(pResourcesComboBox->model());
+  if (nullptr != pSortModel)
+  {
+    m_pEditorModel = dynamic_cast<CEditorEditableFileModel*>(pSortModel->sourceModel());
+  }
+  else
+  {
+    m_pEditorModel = dynamic_cast<CEditorEditableFileModel*>(pResourcesComboBox->model());
+  }
 }
 CCommandChangeOpenedScript::~CCommandChangeOpenedScript()
 {}

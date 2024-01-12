@@ -237,6 +237,8 @@ macro(CreateJOIPProject JOIP_PROJECT_NAME)
     ${JOIPSources}/Editor/SequenceEditor/CommandAddNewSequence.h
     ${JOIPSources}/Editor/SequenceEditor/CommandChangeOpenedSequence.cpp
     ${JOIPSources}/Editor/SequenceEditor/CommandChangeOpenedSequence.h
+    ${JOIPSources}/Editor/SequenceEditor/CommandModifyLayers.cpp
+    ${JOIPSources}/Editor/SequenceEditor/CommandModifyLayers.h
     ${JOIPSources}/Editor/SequenceEditor/SequenceEmentList.cpp
     ${JOIPSources}/Editor/SequenceEditor/SequenceEmentList.h
     ${JOIPSources}/Editor/SequenceEditor/SqeuenceElementListModel.cpp
@@ -247,6 +249,8 @@ macro(CreateJOIPProject JOIP_PROJECT_NAME)
     ${JOIPSources}/Editor/SequenceEditor/TimelineWidget.cpp
     ${JOIPSources}/Editor/SequenceEditor/TimelineWidget.h
     ${JOIPSources}/Editor/SequenceEditor/TimelineWidget.ui
+    ${JOIPSources}/Editor/SequenceEditor/TimelineWidgetBackground.cpp
+    ${JOIPSources}/Editor/SequenceEditor/TimelineWidgetBackground.h
     ${JOIPSources}/Editor/SequenceEditor/TimelineWidgetLayer.cpp
     ${JOIPSources}/Editor/SequenceEditor/TimelineWidgetLayer.h
     ${JOIPSources}/Editor/Script/BackgroundSnippetOverlay.cpp

@@ -45,6 +45,9 @@ struct SSequenceInstruction : public ISerializable
 {
   QString                            m_sInstructionType;
 
+  std::shared_ptr<SSequenceInstruction> Clone();
+  virtual std::shared_ptr<SSequenceInstruction> CloneImpl() = 0;
+
   QJsonObject ToJsonObject() override;
   void FromJsonObject(const QJsonObject& json) override;
 };
@@ -52,6 +55,7 @@ struct SSingleBeatInstruction : public SSequenceInstruction
 {
   std::optional<double>              m_dVolume;
 
+  std::shared_ptr<SSequenceInstruction> CloneImpl() override;
   QJsonObject ToJsonObject() override;
   void FromJsonObject(const QJsonObject& json) override;
 };
@@ -61,16 +65,19 @@ struct SStartPatternInstruction : public SSequenceInstruction
   std::optional<QString>             m_sResource;
   std::optional<double>              m_dVolume;
 
+  std::shared_ptr<SSequenceInstruction> CloneImpl() override;
   QJsonObject ToJsonObject() override;
   void FromJsonObject(const QJsonObject& json) override;
 };
 struct SStopPatternInstruction : public SSequenceInstruction
 {
+  std::shared_ptr<SSequenceInstruction> CloneImpl() override;
 };
 struct SVibrateInstruction : public SSequenceInstruction
 {
   double                             m_dSpeed;
 
+  std::shared_ptr<SSequenceInstruction> CloneImpl() override;
   QJsonObject ToJsonObject() override;
   void FromJsonObject(const QJsonObject& json) override;
 };
@@ -79,6 +86,7 @@ struct SLinearToyInstruction : public SSequenceInstruction
   double                             m_dDurationS;
   double                             m_dPosition;
 
+  std::shared_ptr<SSequenceInstruction> CloneImpl() override;
   QJsonObject ToJsonObject() override;
   void FromJsonObject(const QJsonObject& json) override;
 };
@@ -87,16 +95,19 @@ struct SRotateToyInstruction : public SSequenceInstruction
   bool                               m_bClockwise;
   double                             m_dSpeed;
 
+  std::shared_ptr<SSequenceInstruction> CloneImpl() override;
   QJsonObject ToJsonObject() override;
   void FromJsonObject(const QJsonObject& json) override;
 };
 struct SStopVibrationsInstruction : public SSequenceInstruction
 {
+  std::shared_ptr<SSequenceInstruction> CloneImpl() override;
 };
 struct SShowMediaInstruction : public SSequenceInstruction
 {
   QString                            m_sResource;
 
+  std::shared_ptr<SSequenceInstruction> CloneImpl() override;
   QJsonObject ToJsonObject() override;
   void FromJsonObject(const QJsonObject& json) override;
 };
@@ -107,11 +118,13 @@ struct SPlayVideoInstruction : public SSequenceInstruction
   std::optional<qint64>              m_iStartAt;
   std::optional<qint64>              m_iEndAt;
 
+  std::shared_ptr<SSequenceInstruction> CloneImpl() override;
   QJsonObject ToJsonObject() override;
   void FromJsonObject(const QJsonObject& json) override;
 };
 struct SPauseVideoInstruction : public SSequenceInstruction
 {
+  std::shared_ptr<SSequenceInstruction> CloneImpl() override;
 };
 struct SPlayAudioInstruction : public SSequenceInstruction
 {
@@ -121,6 +134,7 @@ struct SPlayAudioInstruction : public SSequenceInstruction
   std::optional<qint64>              m_iStartAt;
   std::optional<qint64>              m_iEndAt;
 
+  std::shared_ptr<SSequenceInstruction> CloneImpl() override;
   QJsonObject ToJsonObject() override;
   void FromJsonObject(const QJsonObject& json) override;
 };
@@ -128,6 +142,7 @@ struct SPauseAudioInstruction : public SSequenceInstruction
 {
   QString                            m_sName;
 
+  std::shared_ptr<SSequenceInstruction> CloneImpl() override;
   QJsonObject ToJsonObject() override;
   void FromJsonObject(const QJsonObject& json) override;
 };
@@ -140,6 +155,7 @@ struct SShowTextInstruction : public SSequenceInstruction
   std::optional<QColor>              m_bgColor;
   std::optional<QString>             m_sPortrait;
 
+  std::shared_ptr<SSequenceInstruction> CloneImpl() override;
   QJsonObject ToJsonObject() override;
   void FromJsonObject(const QJsonObject& json) override;
 };
@@ -147,6 +163,7 @@ struct SRunScriptInstruction : public SSequenceInstruction
 {
   QString                            m_sResource;
 
+  std::shared_ptr<SSequenceInstruction> CloneImpl() override;
   QJsonObject ToJsonObject() override;
   void FromJsonObject(const QJsonObject& json) override;
 };
@@ -154,6 +171,7 @@ struct SEvalInstruction : public SSequenceInstruction
 {
   QString                            m_sScript;
 
+  std::shared_ptr<SSequenceInstruction> CloneImpl() override;
   QJsonObject ToJsonObject() override;
   void FromJsonObject(const QJsonObject& json) override;
 };
@@ -178,6 +196,9 @@ struct SSequenceLayer : public ISerializable
   QString                                  m_sName;
   std::vector<sequence::tTimedInstruction> m_vspInstructions;
 
+  SSequenceLayer();
+  SSequenceLayer(const SSequenceLayer& other);
+
   QJsonObject ToJsonObject() override;
   void FromJsonObject(const QJsonObject& json) override;
 };
@@ -194,6 +215,7 @@ struct SSequenceFile : public ISerializable
 
 //----------------------------------------------------------------------------------------
 //
+typedef std::shared_ptr<SSequenceLayer> tspSequenceLayer;
 typedef std::shared_ptr<SSequenceFile> tspSequence;
 
 #endif // SSEQUENCEFILE_H

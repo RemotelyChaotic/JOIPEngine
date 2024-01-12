@@ -336,6 +336,12 @@ namespace
 
 //--------------------------------------------------------------------------------------
 //
+std::shared_ptr<SSequenceInstruction> SSequenceInstruction::Clone()
+{
+  auto spClone = CloneImpl();
+  spClone->m_sInstructionType = m_sInstructionType;
+  return spClone;
+}
 QJsonObject SSequenceInstruction::ToJsonObject()
 {
   return {
@@ -353,6 +359,12 @@ void SSequenceInstruction::FromJsonObject(const QJsonObject& json)
 
 //--------------------------------------------------------------------------------------
 //
+std::shared_ptr<SSequenceInstruction> SSingleBeatInstruction::CloneImpl()
+{
+  std::shared_ptr<SSingleBeatInstruction> spClone = std::make_shared<SSingleBeatInstruction>();
+  spClone->m_dVolume = m_dVolume;
+  return spClone;
+}
 QJsonObject SSingleBeatInstruction::ToJsonObject()
 {
   QJsonObject obj = SSequenceInstruction::ToJsonObject();
@@ -374,6 +386,14 @@ void SSingleBeatInstruction::FromJsonObject(const QJsonObject& json)
 
 //--------------------------------------------------------------------------------------
 //
+std::shared_ptr<SSequenceInstruction> SStartPatternInstruction::CloneImpl()
+{
+  std::shared_ptr<SStartPatternInstruction> spClone = std::make_shared<SStartPatternInstruction>();
+  spClone->m_vdPattern = m_vdPattern;
+  spClone->m_sResource = m_sResource;
+  spClone->m_dVolume = m_dVolume;
+  return spClone;
+}
 QJsonObject SStartPatternInstruction::ToJsonObject()
 {
   QJsonObject obj = SSequenceInstruction::ToJsonObject();
@@ -420,6 +440,20 @@ void SStartPatternInstruction::FromJsonObject(const QJsonObject& json)
 
 //--------------------------------------------------------------------------------------
 //
+std::shared_ptr<SSequenceInstruction> SStopPatternInstruction::CloneImpl()
+{
+  std::shared_ptr<SStopPatternInstruction> spClone = std::make_shared<SStopPatternInstruction>();
+  return spClone;
+}
+
+//--------------------------------------------------------------------------------------
+//
+std::shared_ptr<SSequenceInstruction> SVibrateInstruction::CloneImpl()
+{
+  std::shared_ptr<SVibrateInstruction> spClone = std::make_shared<SVibrateInstruction>();
+  spClone->m_dSpeed = m_dSpeed;
+  return spClone;
+}
 QJsonObject SVibrateInstruction::ToJsonObject()
 {
   QJsonObject obj = SSequenceInstruction::ToJsonObject();
@@ -438,6 +472,13 @@ void SVibrateInstruction::FromJsonObject(const QJsonObject& json)
 
 //--------------------------------------------------------------------------------------
 //
+std::shared_ptr<SSequenceInstruction> SLinearToyInstruction::CloneImpl()
+{
+  std::shared_ptr<SLinearToyInstruction> spClone = std::make_shared<SLinearToyInstruction>();
+  spClone->m_dDurationS = m_dDurationS;
+  spClone->m_dPosition = m_dPosition;
+  return spClone;
+}
 QJsonObject SLinearToyInstruction::ToJsonObject()
 {
   QJsonObject obj = SSequenceInstruction::ToJsonObject();
@@ -462,6 +503,13 @@ void SLinearToyInstruction::FromJsonObject(const QJsonObject& json)
 
 //--------------------------------------------------------------------------------------
 //
+std::shared_ptr<SSequenceInstruction> SRotateToyInstruction::CloneImpl()
+{
+  std::shared_ptr<SRotateToyInstruction> spClone = std::make_shared<SRotateToyInstruction>();
+  spClone->m_bClockwise = m_bClockwise;
+  spClone->m_dSpeed = m_dSpeed;
+  return spClone;
+}
 QJsonObject SRotateToyInstruction::ToJsonObject()
 {
   QJsonObject obj = SSequenceInstruction::ToJsonObject();
@@ -486,6 +534,20 @@ void SRotateToyInstruction::FromJsonObject(const QJsonObject& json)
 
 //--------------------------------------------------------------------------------------
 //
+std::shared_ptr<SSequenceInstruction> SStopVibrationsInstruction::CloneImpl()
+{
+  std::shared_ptr<SStopVibrationsInstruction> spClone = std::make_shared<SStopVibrationsInstruction>();
+  return spClone;
+}
+
+//--------------------------------------------------------------------------------------
+//
+std::shared_ptr<SSequenceInstruction> SShowMediaInstruction::CloneImpl()
+{
+  std::shared_ptr<SShowMediaInstruction> spClone = std::make_shared<SShowMediaInstruction>();
+  spClone->m_sResource = m_sResource;
+  return spClone;
+}
 QJsonObject SShowMediaInstruction::ToJsonObject()
 {
   QJsonObject obj = SSequenceInstruction::ToJsonObject();
@@ -504,6 +566,15 @@ void SShowMediaInstruction::FromJsonObject(const QJsonObject& json)
 
 //--------------------------------------------------------------------------------------
 //
+std::shared_ptr<SSequenceInstruction> SPlayVideoInstruction::CloneImpl()
+{
+  std::shared_ptr<SPlayVideoInstruction> spClone = std::make_shared<SPlayVideoInstruction>();
+  spClone->m_sResource = m_sResource;
+  spClone->m_iLoops = m_iLoops;
+  spClone->m_iStartAt = m_iStartAt;
+  spClone->m_iEndAt = m_iEndAt;
+  return spClone;
+}
 QJsonObject SPlayVideoInstruction::ToJsonObject()
 {
   QJsonObject obj = SSequenceInstruction::ToJsonObject();
@@ -549,6 +620,24 @@ void SPlayVideoInstruction::FromJsonObject(const QJsonObject& json)
 
 //--------------------------------------------------------------------------------------
 //
+std::shared_ptr<SSequenceInstruction> SPauseVideoInstruction::CloneImpl()
+{
+  std::shared_ptr<SPauseVideoInstruction> spClone = std::make_shared<SPauseVideoInstruction>();
+  return spClone;
+}
+
+//--------------------------------------------------------------------------------------
+//
+std::shared_ptr<SSequenceInstruction> SPlayAudioInstruction::CloneImpl()
+{
+  std::shared_ptr<SPlayAudioInstruction> spClone = std::make_shared<SPlayAudioInstruction>();
+  spClone->m_sResource = m_sResource;
+  spClone->m_sName = m_sName;
+  spClone->m_iLoops = m_iLoops;
+  spClone->m_iStartAt = m_iStartAt;
+  spClone->m_iEndAt = m_iEndAt;
+  return spClone;
+}
 QJsonObject SPlayAudioInstruction::ToJsonObject()
 {
   QJsonObject obj = SSequenceInstruction::ToJsonObject();
@@ -603,6 +692,12 @@ void SPlayAudioInstruction::FromJsonObject(const QJsonObject& json)
 
 //--------------------------------------------------------------------------------------
 //
+std::shared_ptr<SSequenceInstruction> SPauseAudioInstruction::CloneImpl()
+{
+  std::shared_ptr<SPauseAudioInstruction> spClone = std::make_shared<SPauseAudioInstruction>();
+  spClone->m_sName = m_sName;
+  return spClone;
+}
 QJsonObject SPauseAudioInstruction::ToJsonObject()
 {
   QJsonObject obj = SSequenceInstruction::ToJsonObject();
@@ -621,6 +716,17 @@ void SPauseAudioInstruction::FromJsonObject(const QJsonObject& json)
 
 //--------------------------------------------------------------------------------------
 //
+std::shared_ptr<SSequenceInstruction> SShowTextInstruction::CloneImpl()
+{
+  std::shared_ptr<SShowTextInstruction> spClone = std::make_shared<SShowTextInstruction>();
+  spClone->m_sText = m_sText;
+  spClone->m_dSkippableWaitS = m_dSkippableWaitS;
+  spClone->m_bSkippable = m_bSkippable;
+  spClone->m_textColor = m_textColor;
+  spClone->m_bgColor = m_bgColor;
+  spClone->m_sPortrait = m_sPortrait;
+  return spClone;
+}
 QJsonObject SShowTextInstruction::ToJsonObject()
 {
   QJsonObject obj = SSequenceInstruction::ToJsonObject();
@@ -698,6 +804,12 @@ void SShowTextInstruction::FromJsonObject(const QJsonObject& json)
 
 //--------------------------------------------------------------------------------------
 //
+std::shared_ptr<SSequenceInstruction> SRunScriptInstruction::CloneImpl()
+{
+  std::shared_ptr<SRunScriptInstruction> spClone = std::make_shared<SRunScriptInstruction>();
+  spClone->m_sResource = m_sResource;
+  return spClone;
+}
 QJsonObject SRunScriptInstruction::ToJsonObject()
 {
   QJsonObject obj = SSequenceInstruction::ToJsonObject();
@@ -716,6 +828,12 @@ void SRunScriptInstruction::FromJsonObject(const QJsonObject& json)
 
 //--------------------------------------------------------------------------------------
 //
+std::shared_ptr<SSequenceInstruction> SEvalInstruction::CloneImpl()
+{
+  std::shared_ptr<SEvalInstruction> spClone = std::make_shared<SEvalInstruction>();
+  spClone->m_sScript = m_sScript;
+  return spClone;
+}
 QJsonObject SEvalInstruction::ToJsonObject()
 {
   QJsonObject obj = SSequenceInstruction::ToJsonObject();
@@ -734,6 +852,20 @@ void SEvalInstruction::FromJsonObject(const QJsonObject& json)
 
 //--------------------------------------------------------------------------------------
 //
+SSequenceLayer::SSequenceLayer()
+{
+}
+SSequenceLayer::SSequenceLayer(const SSequenceLayer& other) :
+  m_sLayerType(other.m_sLayerType),
+  m_sName(other.m_sName)
+{
+  m_vspInstructions.clear();
+  for (const auto& [time, spInstr] : other.m_vspInstructions)
+  {
+    m_vspInstructions.push_back(
+        sequence::tTimedInstruction{time, spInstr->Clone()});
+  }
+}
 QJsonObject SSequenceLayer::ToJsonObject()
 {
   QJsonArray instructions;
@@ -780,9 +912,15 @@ void SSequenceLayer::FromJsonObject(const QJsonObject& json)
       it = obj.find("instruction");
       if (it != obj.end())
       {
-        std::shared_ptr<SSequenceInstruction> spInstruction = std::make_shared<SSequenceInstruction>();
-        spInstruction->FromJsonObject(it.value().toObject());
-        instr.second = spInstruction;
+        QJsonObject objInstr = it.value().toObject();
+        it = objInstr.find("sInstructionType");
+        if (it != objInstr.end())
+        {
+          std::shared_ptr<SSequenceInstruction> spInstruction =
+              sequence::CreateInstruction(it.value().toString(), {});
+          spInstruction->FromJsonObject(obj);
+          instr.second = spInstruction;
+        }
       }
       m_vspInstructions.push_back(instr);
     }

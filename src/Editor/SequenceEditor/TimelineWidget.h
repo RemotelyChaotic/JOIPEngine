@@ -37,12 +37,18 @@ signals:
   void SignalContentsChanged();
 
 protected:
-  void paintEvent(QPaintEvent *event) override;
+  void AddLayerTo(qint32 index, const tspSequenceLayer& layer,
+                  tspSequence& spCurrentSequence);
+  void RemoveLayerFrom(qint32 index, tspSequence& spCurrentSequence);
+
+  void paintEvent(QPaintEvent* pEvt) override;
+  void resizeEvent(QResizeEvent* pEvt) override;
 
 private:
   std::unique_ptr<Ui::CTimelineWidget> m_spUi;
   tspSequence                          m_spCurrentSequence;
   QPointer<QUndoStack>                 m_pUndoStack;
+  qint32                               m_iSelectedIndex = -1;
 };
 
 #endif // TIMELINEWIDGET_H
