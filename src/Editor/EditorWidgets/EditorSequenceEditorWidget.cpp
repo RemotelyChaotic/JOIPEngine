@@ -72,6 +72,8 @@ void CEditorPatternEditorWidget::LoadProject(tspProject spProject)
 
   m_spCurrentProject = spProject;
 
+  m_spUi->pTimeLineWidget->Clear();
+
   //m_spUi->pTopSplitter->setSizes({ width()/4, width() *3/4 });
   m_spUi->pBottomSplitter->setSizes({ height()/2, height()/2 });
 

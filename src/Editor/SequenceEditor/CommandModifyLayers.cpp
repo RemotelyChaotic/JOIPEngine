@@ -10,7 +10,7 @@ CCommandAddOrRemoveSequenceLayer::CCommandAddOrRemoveSequenceLayer(
     std::function<void(qint32, const tspSequenceLayer&, tspSequence&)> fnDo,
     std::function<void(qint32, const tspSequenceLayer&, tspSequence&)> fnUndo,
     const QString& sOperation) :
-  QUndoCommand(sOperation + " layer at index " + iIndex, nullptr),
+    QUndoCommand(sOperation + " layer at index " + QString::number(iIndex), nullptr),
   m_pParent(pParent),
   m_fnDo(fnDo),
   m_fnUndo(fnUndo),

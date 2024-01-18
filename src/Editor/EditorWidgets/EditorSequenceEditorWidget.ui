@@ -57,7 +57,7 @@
       <property name="widgetResizable">
        <bool>true</bool>
       </property>
-      <widget class="QWidget" name="pTimeLineWidgetContent">
+      <widget class="CTimelineWidgetBackground" name="pTimeLineWidgetContent">
        <property name="geometry">
         <rect>
          <x>0</x>
@@ -67,6 +67,9 @@
         </rect>
        </property>
        <layout class="QVBoxLayout" name="verticalLayout">
+        <property name="spacing">
+         <number>10</number>
+        </property>
         <property name="leftMargin">
          <number>0</number>
         </property>
@@ -100,6 +103,12 @@
    <class>CTimelineWidget</class>
    <extends>QScrollArea</extends>
    <header>Editor/SequenceEditor/TimelineWidget.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>CTimelineWidgetBackground</class>
+   <extends>QWidget</extends>
+   <header>Editor/SequenceEditor/TimelineWidgetBackground.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

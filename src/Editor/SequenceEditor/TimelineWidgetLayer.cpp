@@ -1,22 +1,55 @@
 #include "TimelineWidgetLayer.h"
 
+#include <QApplication>
 #include <QHBoxLayout>
 #include <QLineEdit>
+#include <QPainter>
+#include <QMouseEvent>
 
+#include <QtWidgets/QGraphicsEffect>
+
+class CTimeLinewidgetLayerShadow : public QGraphicsDropShadowEffect
+{
+public:
+  CTimeLinewidgetLayerShadow() : QGraphicsDropShadowEffect() {}
+
+  void SetEnabled(bool bEnabled) { m_bEnabled = bEnabled; }
+
+protected:
+  void draw(QPainter* pPainter) override
+  {
+    if (m_bEnabled)
+    {
+      QGraphicsDropShadowEffect::draw(pPainter);
+    }
+    else
+    {
+      drawSource(pPainter);
+    }
+  }
+
+  bool m_bEnabled = false;
+};
+
+//----------------------------------------------------------------------------------------
+//
 CTimelineWidgetLayer::CTimelineWidgetLayer(const tspSequenceLayer& spLayer, QWidget* pParent) :
-  QWidget{pParent},
+  QFrame{pParent},
   m_spLayer(spLayer)
 {
+  setSizePolicy(QSizePolicy(QSizePolicy::Preferred, QSizePolicy::Fixed));
+
   QHBoxLayout* pLayout = new QHBoxLayout(this);
   pLayout->setContentsMargins({0, 0, 0, 0});
 
-  QWidget* pHeader = new QWidget(this);
-  QGridLayout* pBoxLayout = new QGridLayout(pHeader);
+  m_pHeader = new QWidget(this);
+  m_pHeader->setSizePolicy(QSizePolicy(QSizePolicy::Fixed, QSizePolicy::Preferred));
+  QGridLayout* pBoxLayout = new QGridLayout(m_pHeader);
   pBoxLayout->setHorizontalSpacing(0);
   pBoxLayout->setVerticalSpacing(0);
   pBoxLayout->setContentsMargins({0, 0, 0, 0});
 
-  m_pLayerTypeCombo = new QComboBox(pHeader);
+  m_pLayerTypeCombo = new QComboBox(m_pHeader);
   m_pLayerTypeCombo->addItem(sequence::c_sCategoryIdBeat, sequence::c_sCategoryIdBeat);
   m_pLayerTypeCombo->addItem(sequence::c_sCategoryIdToy, sequence::c_sCategoryIdToy);
   m_pLayerTypeCombo->addItem(sequence::c_sCategoryIdResource, sequence::c_sCategoryIdResource);
@@ -24,15 +57,23 @@ CTimelineWidgetLayer::CTimelineWidgetLayer(const tspSequenceLayer& spLayer, QWid
   m_pLayerTypeCombo->addItem(sequence::c_sCategoryIdScript, sequence::c_sCategoryIdScript);
   pBoxLayout->addWidget(m_pLayerTypeCombo, 0, 0);
 
-  m_pNameLineEdit = new QLineEdit(pHeader);
+  m_pNameLineEdit = new QLineEdit(m_pHeader);
   pBoxLayout->addWidget(m_pNameLineEdit, 1, 0);
 
   pBoxLayout->addItem(new QSpacerItem(0, 20, QSizePolicy::Fixed, QSizePolicy::Preferred), 2, 0);
 
-  pLayout->addWidget(pHeader);
+  pLayout->addWidget(m_pHeader);
 
   m_pTimeLineContent = new QScrollArea(this);
   pLayout->addWidget(m_pTimeLineContent);
+
+  m_pDropShadow = new CTimeLinewidgetLayerShadow;
+  m_pDropShadow->setOffset(0, 0);
+  m_pDropShadow->setBlurRadius(20);
+  m_pDropShadow->setColor(Qt::white);
+  m_pDropShadow->SetEnabled(false);
+
+  setGraphicsEffect(m_pDropShadow);
 
   SetLayer(spLayer);
 }
@@ -54,6 +95,24 @@ void CTimelineWidgetLayer::SetLayer(const tspSequenceLayer& spLayer)
 
 //----------------------------------------------------------------------------------------
 //
+void CTimelineWidgetLayer::SetHighlight(QColor col, QColor alternateCol)
+{
+  m_pDropShadow->SetEnabled(col.isValid());
+  m_pDropShadow->setColor(col);
+  if (alternateCol.isValid())
+  {
+    setStyleSheet("CTimelineWidgetLayer {background-color:" + alternateCol.name() +";}");
+  }
+  else
+  {
+    setStyleSheet(QString());
+  }
+  m_alternateBgCol = alternateCol;
+  repaint();
+}
+
+//----------------------------------------------------------------------------------------
+//
 QString CTimelineWidgetLayer::Name() const
 {
   if (nullptr != m_spLayer)
@@ -61,6 +120,13 @@ QString CTimelineWidgetLayer::Name() const
     return m_spLayer->m_sName;
   }
   return QString();
+}
+
+//----------------------------------------------------------------------------------------
+//
+tspSequenceLayer CTimelineWidgetLayer::Layer() const
+{
+  return m_spLayer;
 }
 
 //----------------------------------------------------------------------------------------
@@ -76,7 +142,56 @@ QString CTimelineWidgetLayer::LayerType() const
 
 //----------------------------------------------------------------------------------------
 //
+void CTimelineWidgetLayer::mousePressEvent(QMouseEvent* pEvent)
+{
+  if (m_pHeader->underMouse())
+  {
+    m_bMousePotentionallyStartedDrag = true;
+    m_dragDistance = QPoint();
+    m_dragOrigin = pEvent->globalPos();
+  }
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CTimelineWidgetLayer::mouseMoveEvent(QMouseEvent* pEvent)
+{
+  if (m_bMousePotentionallyStartedDrag)
+  {
+    if (pEvent->buttons() & Qt::LeftButton)
+    {
+      m_dragDistance = pEvent->globalPos() - m_dragOrigin;
+      if (m_dragDistance.manhattanLength() >= QApplication::startDragDistance())
+      {
+        emit SignalUserStartedDrag();
+        m_bMousePotentionallyStartedDrag = false;
+        m_dragDistance = QPoint();
+      }
+    }
+    else
+    {
+      m_bMousePotentionallyStartedDrag = false;
+      m_dragDistance = QPoint();
+    }
+  }
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CTimelineWidgetLayer::mouseReleaseEvent(QMouseEvent*)
+{
+  m_bMousePotentionallyStartedDrag = false;
+  m_dragDistance = QPoint();
+
+  if (underMouse())
+  {
+    emit SignalSelected();
+  }
+}
+
+//----------------------------------------------------------------------------------------
+//
 void CTimelineWidgetLayer::paintEvent(QPaintEvent* pEvt)
 {
-  QWidget::paintEvent(pEvt);
+  QFrame::paintEvent(pEvt);
 }
