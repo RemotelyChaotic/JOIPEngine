@@ -557,8 +557,11 @@ bool CIntifaceEngineDeviceConnector::Connect()
   if (!m_spClient->IsLoaded()) { return false; }
   if (!m_spClient->Connect())
   {
-    m_pIntifaceEngineProcess->terminate();
-    delete m_pIntifaceEngineProcess;
+    if (nullptr != m_pIntifaceEngineProcess)
+    {
+      m_pIntifaceEngineProcess->terminate();
+      delete m_pIntifaceEngineProcess;
+    }
     return false;
   }
   return true;
@@ -573,8 +576,11 @@ void CIntifaceEngineDeviceConnector::Disconnect()
     m_spClient->Disconnect();
   }
 
-  m_pIntifaceEngineProcess->terminate();
-  delete m_pIntifaceEngineProcess;
+  if (nullptr != m_pIntifaceEngineProcess)
+  {
+    m_pIntifaceEngineProcess->terminate();
+    delete m_pIntifaceEngineProcess;
+  }
 }
 
 //----------------------------------------------------------------------------------------
