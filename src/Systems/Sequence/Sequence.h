@@ -199,6 +199,7 @@ struct SSequenceLayer : public ISerializable
   SSequenceLayer();
   SSequenceLayer(const SSequenceLayer& other);
 
+  std::shared_ptr<SSequenceLayer> Clone();
   QJsonObject ToJsonObject() override;
   void FromJsonObject(const QJsonObject& json) override;
 };
@@ -208,6 +209,7 @@ struct SSequenceLayer : public ISerializable
 struct SSequenceFile : public ISerializable
 {
   std::vector<std::shared_ptr<SSequenceLayer>> m_vspLayers;
+  qint64                                       m_iLengthMili = 15*1000;
 
   QJsonObject ToJsonObject() override;
   void FromJsonObject(const QJsonObject& json) override;

@@ -30,7 +30,7 @@
     <number>0</number>
    </property>
    <item>
-    <widget class="QComboBox" name="pZoomComboBox"/>
+    <widget class="CZoomComboBox" name="pZoomComboBox"/>
    </item>
    <item>
     <widget class="QFrame" name="frame">
@@ -150,6 +150,13 @@
    </item>
   </layout>
  </widget>
+ <customwidgets>
+  <customwidget>
+   <class>CZoomComboBox</class>
+   <extends>QComboBox</extends>
+   <header>Widgets/ZoomComboBox.h</header>
+  </customwidget>
+ </customwidgets>
  <resources/>
  <connections/>
 </ui>

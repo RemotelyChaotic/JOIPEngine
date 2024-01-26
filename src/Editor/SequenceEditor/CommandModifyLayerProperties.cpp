@@ -1,0 +1,79 @@
+#include "CommandModifyLayerProperties.h"
+#include "TimelineWidget.h"
+#include "TimelineWidgetLayer.h"
+
+#include "Editor/EditorCommandIds.h"
+
+CCommandModifyLayerProperties::CCommandModifyLayerProperties(QPointer<CTimelineWidget> pParent,
+                                                             const std::shared_ptr<SSequenceLayer>& layerOld,
+                                                             const std::shared_ptr<SSequenceLayer>& layerNew,
+                                                             qint32 iIndex) :
+  QUndoCommand("Changed properties of layer: " + layerOld->m_sName, nullptr),
+  m_pParent(pParent),
+  m_iIndex(iIndex),
+  m_spLayerOld(layerOld),
+  m_spLayerNew(layerNew)
+{
+}
+CCommandModifyLayerProperties::~CCommandModifyLayerProperties() = default;
+
+//----------------------------------------------------------------------------------------
+//
+void CCommandModifyLayerProperties::undo()
+{
+  DoUnoRedo(m_spLayerOld);
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CCommandModifyLayerProperties::redo()
+{
+  DoUnoRedo(m_spLayerNew);
+}
+
+//----------------------------------------------------------------------------------------
+//
+int CCommandModifyLayerProperties::id() const
+{
+  return EEditorCommandId::eChangeSequenceLayerProperties;
+}
+
+//----------------------------------------------------------------------------------------
+//
+bool CCommandModifyLayerProperties::mergeWith(const QUndoCommand* pOther)
+{
+  if (nullptr == pOther || id() != pOther->id())
+  {
+    return false;
+  }
+
+  const CCommandModifyLayerProperties* pOtherCasted = dynamic_cast<const CCommandModifyLayerProperties*>(pOther);
+  if (nullptr == pOtherCasted) { return false; }
+  if (nullptr == m_spLayerNew) { return false; }
+
+  m_spLayerNew = pOtherCasted->m_spLayerNew;
+
+  setText(QString("Changed properties of layer: ") + m_spLayerOld->m_sName);
+  return true;
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CCommandModifyLayerProperties::DoUnoRedo(const std::shared_ptr<SSequenceLayer>& spLayer)
+{
+  if (nullptr != m_pParent)
+  {
+    if (auto pLayer = m_pParent->Layer(m_iIndex))
+    {
+      auto spLayerToMod = pLayer->Layer();
+      spLayerToMod->m_sName = spLayer->m_sName;
+      spLayerToMod->m_sLayerType = spLayer->m_sLayerType;
+      spLayerToMod->m_vspInstructions.clear();
+      for (const auto& [time, instr] : spLayer->m_vspInstructions)
+      {
+        spLayerToMod->m_vspInstructions.push_back({time, instr->Clone()});
+      }
+      pLayer->UpdateUi();
+    }
+  }
+}

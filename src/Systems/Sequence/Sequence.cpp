@@ -866,6 +866,16 @@ SSequenceLayer::SSequenceLayer(const SSequenceLayer& other) :
         sequence::tTimedInstruction{time, spInstr->Clone()});
   }
 }
+std::shared_ptr<SSequenceLayer> SSequenceLayer::Clone()
+{
+  std::shared_ptr<SSequenceLayer> spRet = std::make_shared<SSequenceLayer>(*this);
+  spRet->m_vspInstructions.clear();
+  for (const auto& [pos, isntr] : m_vspInstructions)
+  {
+    spRet->m_vspInstructions.push_back({pos, isntr->Clone()});
+  }
+  return spRet;
+}
 QJsonObject SSequenceLayer::ToJsonObject()
 {
   QJsonArray instructions;
@@ -938,6 +948,7 @@ QJsonObject SSequenceFile::ToJsonObject()
   }
   return {
     { "vspLayers", layers },
+    { "iLengthMili", double(m_iLengthMili) }
   };
 }
 void SSequenceFile::FromJsonObject(const QJsonObject& json)
@@ -952,6 +963,11 @@ void SSequenceFile::FromJsonObject(const QJsonObject& json)
       spLayer->FromJsonObject(val.toObject());
       m_vspLayers.push_back(spLayer);
     }
+  }
+  it = json.find("iLengthMili");
+  if (it != json.end())
+  {
+    m_iLengthMili = it.value().toDouble();
   }
 }
 

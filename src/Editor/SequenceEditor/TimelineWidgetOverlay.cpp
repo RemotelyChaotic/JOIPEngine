@@ -102,7 +102,7 @@ std::pair<qint32, QRect> CTimelineWidgetOverlay::ItemAt(QPoint p)
     if (auto pLayout = m_pParent->widget()->layout())
     {
       QWidget* pLastWidget = nullptr;
-      for (qint32 i = 0; pLayout->count() > i; ++i)
+      for (qint32 i = 0; m_pParent->LayerCount() > i; ++i)
       {
         if (nullptr != pLayout->itemAt(i) && nullptr != pLayout->itemAt(i)->widget())
         {
@@ -148,7 +148,7 @@ std::pair<qint32, QRect> CTimelineWidgetOverlay::ItemAt(QPoint p)
         {
           tl = mapFromGlobal(pLastWidget->parentWidget()->mapToGlobal(pLastWidget->geometry().topLeft()));
           QPoint br = mapFromGlobal(pLastWidget->parentWidget()->mapToGlobal(pLastWidget->geometry().bottomRight()));
-          return {pLayout->count()-1, QRect(tl, br)};
+          return {m_pParent->LayerCount()-1, QRect(tl, br)};
         }
       }
       else

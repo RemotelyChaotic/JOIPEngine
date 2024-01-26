@@ -8,6 +8,7 @@
 #include <QUndoStack>
 #include <memory>
 
+class CTimelineWidgetControls;
 class CTimelineWidgetLayer;
 class CTimelineWidgetOverlay;
 namespace Ui {
@@ -19,6 +20,7 @@ class CTimelineWidget : public QScrollArea
   Q_OBJECT
   Q_PROPERTY(QColor alternateBackgroundColor READ AlternateBackgroundColor WRITE SetAlternateBackgroundColor NOTIFY SignalAlternateBackgroundColorChanged)
   Q_PROPERTY(QColor dropIndicationColor READ DropIndicationColor WRITE SetDropIndicationColor)
+  Q_PROPERTY(QColor outOfRangeColor READ OutOfRangeColor WRITE SetOutOfRangeColor)
   Q_PROPERTY(QColor selectionColor READ SelectionColor WRITE SetSelectionColor NOTIFY SignalSelectionColorChanged)
 
 public:
@@ -32,12 +34,17 @@ public:
   const QColor& AlternateBackgroundColor() const;
   void SetDropIndicationColor(const QColor& col);
   const QColor& DropIndicationColor() const;
+  void SetOutOfRangeColor(const QColor& col);
+  const QColor& OutOfRangeColor() const;
   void SetSelectionColor(const QColor& col);
   const QColor& SelectionColor() const;
 
   void AddNewLayer();
   void AddNewElement(const QString& sId);
   void Clear();
+  qint32 IndexOf(CTimelineWidgetLayer* pLayer) const;
+  CTimelineWidgetLayer* Layer(qint32 iIndex) const;
+  qint32 LayerCount() const;
   void RemoveSelectedLayer();
   qint32 SelectedIndex() const;
   void SetSequence(const tspSequence& spSeq);
@@ -49,6 +56,9 @@ public:
   QSize minimumSizeHint() const override;
   QSize sizeHint() const override;
 
+public slots:
+  void SlotUpdateSequenceProperties();
+
 signals:
   void SignalAlternateBackgroundColorChanged();
   void SignalContentsChanged();
@@ -59,25 +69,36 @@ protected:
                   tspSequence& spCurrentSequence);
   void RemoveLayerFrom(qint32 index, tspSequence& spCurrentSequence);
 
+  bool eventFilter(QObject* pObj, QEvent* pEvt) override;
   void dragEnterEvent(QDragEnterEvent* pEvent) override;
   void dragMoveEvent(QDragMoveEvent* pEvent) override;
   void dropEvent(QDropEvent* pEvent) override;
+  void mousePressEvent(QMouseEvent* pEvent) override;
+  void mouseMoveEvent(QMouseEvent* pEvent) override;
+  void mouseReleaseEvent(QMouseEvent* pEvent) override;
   void resizeEvent(QResizeEvent* pEvt) override;
+  void wheelEvent(QWheelEvent* pEVt) override;
 
 private slots:
   void SlotUserStartedDrag();
   void SlotLayerSelected();
+  void SlotLayersInserted();
+  void SlotScrollbarValueChanged();
   void SlotSelectionColorChanged();
+  void SlotZoomChanged(qint32 iZoom);
 
 private:
   QWidget* CreateLayerWidget(const tspSequenceLayer& spLayer) const;
-  qint32 IndexOf(CTimelineWidgetLayer* pLayer);
+  QSize HeadersSize() const;
+  bool IsChildOfLayer(QWidget* pLayer) const;
   void Resize(QSize newSize);
 
   std::unique_ptr<Ui::CTimelineWidget> m_spUi;
   tspSequence                          m_spCurrentSequence;
   QPointer<QUndoStack>                 m_pUndoStack;
   QPointer<CTimelineWidgetOverlay>     m_pOverlay;
+  QPointer<CTimelineWidgetControls>    m_pControls;
+  QPointer<QScrollBar>                 m_pCustomScrollbar;
   QColor                               m_alternateBgColor;
   QColor                               m_selectionColor;
   qint32                               m_iSelectedIndex = -1;

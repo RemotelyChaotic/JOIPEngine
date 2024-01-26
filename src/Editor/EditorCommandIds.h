@@ -39,8 +39,10 @@ BETTER_ENUM(EEditorCommandId, qint32,
             eRemoveConnecectionItem,
 
             eAddSequence,
+            eChangeSequenceProperties,
             eChangeOpenedSequence,
-            eAddRemoveSequenceLayer
+            eAddRemoveSequenceLayer,
+            eChangeSequenceLayerProperties
             );
 
 #endif // EDITORCOMMANDIDS_H

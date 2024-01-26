@@ -1,4 +1,6 @@
 #include "TimelineWidgetLayer.h"
+#include "CommandModifyLayerProperties.h"
+#include "TimelineWidget.h"
 
 #include <QApplication>
 #include <QHBoxLayout>
@@ -33,14 +35,17 @@ protected:
 
 //----------------------------------------------------------------------------------------
 //
-CTimelineWidgetLayer::CTimelineWidgetLayer(const tspSequenceLayer& spLayer, QWidget* pParent) :
-  QFrame{pParent},
-  m_spLayer(spLayer)
+CTimelineWidgetLayer::CTimelineWidgetLayer(const tspSequenceLayer& spLayer, CTimelineWidget* pParent,
+                                           QWidget* pWidgetParent) :
+  QFrame{pWidgetParent},
+  m_spLayer(spLayer),
+  m_pParent(pParent)
 {
   setSizePolicy(QSizePolicy(QSizePolicy::Preferred, QSizePolicy::Fixed));
 
   QHBoxLayout* pLayout = new QHBoxLayout(this);
   pLayout->setContentsMargins({0, 0, 0, 0});
+  pLayout->setSpacing(0);
 
   m_pHeader = new QWidget(this);
   m_pHeader->setSizePolicy(QSizePolicy(QSizePolicy::Fixed, QSizePolicy::Preferred));
@@ -55,9 +60,13 @@ CTimelineWidgetLayer::CTimelineWidgetLayer(const tspSequenceLayer& spLayer, QWid
   m_pLayerTypeCombo->addItem(sequence::c_sCategoryIdResource, sequence::c_sCategoryIdResource);
   m_pLayerTypeCombo->addItem(sequence::c_sCategoryIdText, sequence::c_sCategoryIdText);
   m_pLayerTypeCombo->addItem(sequence::c_sCategoryIdScript, sequence::c_sCategoryIdScript);
+  connect(m_pLayerTypeCombo, qOverload<qint32>(&QComboBox::currentIndexChanged),
+          this, &CTimelineWidgetLayer::SlotTypeChanged);
   pBoxLayout->addWidget(m_pLayerTypeCombo, 0, 0);
 
   m_pNameLineEdit = new QLineEdit(m_pHeader);
+  connect(m_pNameLineEdit, &QLineEdit::editingFinished,
+          this, &CTimelineWidgetLayer::SlotLabelChanged);
   pBoxLayout->addWidget(m_pNameLineEdit, 1, 0);
 
   pBoxLayout->addItem(new QSpacerItem(0, 20, QSizePolicy::Fixed, QSizePolicy::Preferred), 2, 0);
@@ -84,13 +93,7 @@ CTimelineWidgetLayer::~CTimelineWidgetLayer() = default;
 void CTimelineWidgetLayer::SetLayer(const tspSequenceLayer& spLayer)
 {
   m_spLayer = spLayer;
-  if (nullptr != spLayer)
-  {
-    QSignalBlocker b1(m_pLayerTypeCombo);
-    QSignalBlocker b2(m_pNameLineEdit);
-    m_pLayerTypeCombo->setCurrentIndex(m_pLayerTypeCombo->findData(spLayer->m_sLayerType, Qt::UserRole));
-    m_pNameLineEdit->setText(spLayer->m_sName);
-  }
+  UpdateUi();
 }
 
 //----------------------------------------------------------------------------------------
@@ -109,6 +112,13 @@ void CTimelineWidgetLayer::SetHighlight(QColor col, QColor alternateCol)
   }
   m_alternateBgCol = alternateCol;
   repaint();
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CTimelineWidgetLayer::SetUndoStack(QPointer<QUndoStack> pUndo)
+{
+  m_pUndoStack = pUndo;
 }
 
 //----------------------------------------------------------------------------------------
@@ -142,9 +152,29 @@ QString CTimelineWidgetLayer::LayerType() const
 
 //----------------------------------------------------------------------------------------
 //
+QSize CTimelineWidgetLayer::HeaderSize() const
+{
+  return m_pHeader->size();
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CTimelineWidgetLayer::UpdateUi()
+{
+  if (nullptr != spLayer)
+  {
+    QSignalBlocker b1(m_pLayerTypeCombo);
+    QSignalBlocker b2(m_pNameLineEdit);
+    m_pLayerTypeCombo->setCurrentIndex(m_pLayerTypeCombo->findData(spLayer->m_sLayerType, Qt::UserRole));
+    m_pNameLineEdit->setText(spLayer->m_sName);
+  }
+}
+
+//----------------------------------------------------------------------------------------
+//
 void CTimelineWidgetLayer::mousePressEvent(QMouseEvent* pEvent)
 {
-  if (m_pHeader->underMouse())
+  if (m_pHeader->underMouse() && nullptr != pEvent)
   {
     m_bMousePotentionallyStartedDrag = true;
     m_dragDistance = QPoint();
@@ -156,22 +186,25 @@ void CTimelineWidgetLayer::mousePressEvent(QMouseEvent* pEvent)
 //
 void CTimelineWidgetLayer::mouseMoveEvent(QMouseEvent* pEvent)
 {
-  if (m_bMousePotentionallyStartedDrag)
+  if (nullptr != pEvent)
   {
-    if (pEvent->buttons() & Qt::LeftButton)
+    if (m_bMousePotentionallyStartedDrag)
     {
-      m_dragDistance = pEvent->globalPos() - m_dragOrigin;
-      if (m_dragDistance.manhattanLength() >= QApplication::startDragDistance())
+      if (pEvent->buttons() & Qt::LeftButton)
       {
-        emit SignalUserStartedDrag();
+        m_dragDistance = pEvent->globalPos() - m_dragOrigin;
+        if (m_dragDistance.manhattanLength() >= QApplication::startDragDistance())
+        {
+          emit SignalUserStartedDrag();
+          m_bMousePotentionallyStartedDrag = false;
+          m_dragDistance = QPoint();
+        }
+      }
+      else
+      {
         m_bMousePotentionallyStartedDrag = false;
         m_dragDistance = QPoint();
       }
-    }
-    else
-    {
-      m_bMousePotentionallyStartedDrag = false;
-      m_dragDistance = QPoint();
     }
   }
 }
@@ -194,4 +227,36 @@ void CTimelineWidgetLayer::mouseReleaseEvent(QMouseEvent*)
 void CTimelineWidgetLayer::paintEvent(QPaintEvent* pEvt)
 {
   QFrame::paintEvent(pEvt);
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CTimelineWidgetLayer::SlotLabelChanged()
+{
+  if (nullptr != m_pUndoStack && nullptr != m_spLayer)
+  {
+    auto spLayerOld = m_spLayer->Clone();
+    auto spLayerNew = m_spLayer->Clone();
+    spLayerNew->m_sName = m_pNameLineEdit->text();
+    m_pUndoStack->push(new CCommandModifyLayerProperties(
+        m_pParent,
+        spLayerOld, spLayerNew,
+        m_pParent->IndexOf(this)));
+  }
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CTimelineWidgetLayer::SlotTypeChanged()
+{
+  if (nullptr != m_pUndoStack && nullptr != m_spLayer)
+  {
+    auto spLayerOld = m_spLayer->Clone();
+    auto spLayerNew = m_spLayer->Clone();
+    spLayerNew->m_sLayerType = m_pLayerTypeCombo->currentData().toString();
+    m_pUndoStack->push(new CCommandModifyLayerProperties(
+        m_pParent,
+        spLayerOld, spLayerNew,
+        m_pParent->IndexOf(this)));
+  }
 }

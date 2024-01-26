@@ -10,6 +10,7 @@
 #include <memory>
 
 class CFilteredEditorEditableFileModel;
+class CSequencePropertiesOverlay;
 namespace Ui {
   class CEditorSequenceEditorWidget;
 }
@@ -40,6 +41,7 @@ protected:
 protected slots:
   void on_pResourceComboBox_currentIndexChanged(qint32 iIndex);
   void SlotAddNewSequenceButtonClicked();
+  void SlotEditSequenceButtonClicked();
   void SlotAddSequenceLayerButtonClicked();
   void SlotContentsChange();
   void SlotFileChangedExternally(const QString& sName);
@@ -52,7 +54,8 @@ private:
   void OpenContextMenuAt(const QPoint& currentAddPoint, const QPoint& createPoint);
   void ReloadEditor(qint32 iIndex);
 
-  std::shared_ptr<Ui::CEditorSequenceEditorWidget> m_spUi;
+  std::unique_ptr<Ui::CEditorSequenceEditorWidget> m_spUi;
+  std::unique_ptr<CSequencePropertiesOverlay>      m_spOverlayProps;
   tspProject                                       m_spCurrentProject;
   tspSequence                                      m_spCurrentSequence;
   QPointer<CFilteredEditorEditableFileModel>       m_pFilteredScriptModel;

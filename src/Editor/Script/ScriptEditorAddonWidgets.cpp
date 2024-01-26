@@ -619,7 +619,6 @@ CFooterArea::CFooterArea(CScriptEditorWidget* pEditor, CWidgetArea* pWidgetArea)
   m_spUi->ErrorPushButton->setProperty("styleSmall", true);
   m_spUi->ErrorPushButton->setText(QString::number(0));
   m_spUi->ErrorPushButton->setProperty("value", 0);
-  m_spUi->pZoomComboBox->setProperty("styleSmall", true);
 
   m_spUi->WhitespacePushButton->setProperty("styleSmall", true);
   QHBoxLayout* pLayout = new QHBoxLayout(m_spUi->WhitespacePushButton);
@@ -633,8 +632,6 @@ CFooterArea::CFooterArea(CScriptEditorWidget* pEditor, CWidgetArea* pWidgetArea)
   connect(m_spUi->WhitespacePushButton, &QPushButton::clicked,
           this, &CFooterArea::WhiteSpaceButtonPressed);
 
-  m_spUi->pZoomComboBox->clear();
-  m_spUi->pZoomComboBox->setEditable(true);
   ZoomChanged(m_pCodeEditor->ZoomEnabler()->Zoom());
 
   CSettings* pSettings = CApplication::Instance()->Settings().get();
@@ -645,10 +642,8 @@ CFooterArea::CFooterArea(CScriptEditorWidget* pEditor, CWidgetArea* pWidgetArea)
 
   connect(m_pCodeEditor->ZoomEnabler(), &CTextEditZoomEnabler::SignalZoomChanged,
           this, &CFooterArea::ZoomChanged);
-  connect(m_spUi->pZoomComboBox, qOverload<qint32>(&QComboBox::currentIndexChanged),
-          this, &CFooterArea::ZoomIndexChanged);
-  connect(m_spUi->pZoomComboBox->lineEdit(), &QLineEdit::editingFinished,
-          this, &CFooterArea::ZoomLineEditingFinished);
+  connect(m_spUi->pZoomComboBox, &CZoomComboBox::SignalZoomChanged,
+          this, &CFooterArea::ZoomValueChanged);
   connect(m_pWidgetArea, &CWidgetArea::SignalAddedError,
           this, &CFooterArea::ErrorAdded);
   connect(m_pWidgetArea, &CWidgetArea::SignalClearErrors,
@@ -805,66 +800,12 @@ void CFooterArea::WhiteSpaceButtonPressed()
 //
 void CFooterArea::ZoomChanged(qint32 iZoom)
 {
-  UpdateZoomComboBox(iZoom);
+  m_spUi->pZoomComboBox->UpdateZoomComboBox(iZoom);
 }
 
 //----------------------------------------------------------------------------------------
 //
-void CFooterArea::ZoomIndexChanged(qint32)
+void CFooterArea::ZoomValueChanged(qint32 iZoom)
 {
-  bool bOk = false;
-  qint32 iZoom = m_spUi->pZoomComboBox->currentData().toInt(&bOk);
-  if (bOk)
-  {
-    m_pCodeEditor->ZoomEnabler()->SetZoom(iZoom);
-  }
-}
-
-//----------------------------------------------------------------------------------------
-//
-void CFooterArea::ZoomLineEditingFinished()
-{
-  bool bOk = false;
-  qint32 iZoom = m_spUi->pZoomComboBox->lineEdit()->text().toInt(&bOk);
-  if (bOk)
-  {
-    m_pCodeEditor->ZoomEnabler()->SetZoom(iZoom);
-  }
-}
-
-//----------------------------------------------------------------------------------------
-//
-void CFooterArea::UpdateZoomComboBox(qint32 iCurrentZoom)
-{
-  bool bWereSignalsBlocked = m_spUi->pZoomComboBox->signalsBlocked();
-  m_spUi->pZoomComboBox->blockSignals(true);
-
-  std::map<qint32, QString> items = {
-      { 20, "20%" },
-      { 50, "50%" },
-      { 70, "70%" },
-      { 100, "100%" },
-      { 150, "150%" },
-      { 200, "200%" }
-  };
-
-  m_spUi->pZoomComboBox->clear();
-  m_spUi->pZoomComboBox->setEditable(true);
-
-  qint32 iIdx = m_spUi->pZoomComboBox->findData(iCurrentZoom);
-  if (-1 == iIdx)
-  {
-    items.insert({iCurrentZoom, QString::number(iCurrentZoom) + "%"});
-  }
-
-  for (const auto& [iValue, sText] : items)
-  {
-    m_spUi->pZoomComboBox->addItem(sText, iValue);
-  }
-  m_spUi->pZoomComboBox->setCurrentIndex(m_spUi->pZoomComboBox->findData(iCurrentZoom));
-
-  m_spUi->pZoomComboBox->lineEdit()->blockSignals(true);
-  m_spUi->pZoomComboBox->lineEdit()->setText(QString::number(iCurrentZoom) + "%");
-  m_spUi->pZoomComboBox->lineEdit()->blockSignals(false);
-  m_spUi->pZoomComboBox->blockSignals(bWereSignalsBlocked);
+  m_pCodeEditor->ZoomEnabler()->SetZoom(iZoom);
 }

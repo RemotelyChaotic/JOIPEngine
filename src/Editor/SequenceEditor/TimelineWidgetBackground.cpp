@@ -8,6 +8,7 @@
 CTimelineWidgetBackground::CTimelineWidgetBackground(QWidget* pParent) :
   QWidget{pParent}
 {
+  setMouseTracking(true);
 }
 CTimelineWidgetBackground::~CTimelineWidgetBackground() = default;
 

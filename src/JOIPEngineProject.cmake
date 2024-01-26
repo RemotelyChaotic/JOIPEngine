@@ -237,8 +237,15 @@ macro(CreateJOIPProject JOIP_PROJECT_NAME)
     ${JOIPSources}/Editor/SequenceEditor/CommandAddNewSequence.h
     ${JOIPSources}/Editor/SequenceEditor/CommandChangeOpenedSequence.cpp
     ${JOIPSources}/Editor/SequenceEditor/CommandChangeOpenedSequence.h
+    ${JOIPSources}/Editor/SequenceEditor/CommandChangeSequenceProperties.cpp
+    ${JOIPSources}/Editor/SequenceEditor/CommandChangeSequenceProperties.h
+    ${JOIPSources}/Editor/SequenceEditor/CommandModifyLayerProperties.cpp
+    ${JOIPSources}/Editor/SequenceEditor/CommandModifyLayerProperties.h
     ${JOIPSources}/Editor/SequenceEditor/CommandModifyLayers.cpp
     ${JOIPSources}/Editor/SequenceEditor/CommandModifyLayers.h
+    ${JOIPSources}/Editor/SequenceEditor/SequencePropertiesOverlay.cpp
+    ${JOIPSources}/Editor/SequenceEditor/SequencePropertiesOverlay.h
+    ${JOIPSources}/Editor/SequenceEditor/SequencePropertiesOverlay.ui
     ${JOIPSources}/Editor/SequenceEditor/SequenceEmentList.cpp
     ${JOIPSources}/Editor/SequenceEditor/SequenceEmentList.h
     ${JOIPSources}/Editor/SequenceEditor/SqeuenceElementListModel.cpp
@@ -251,6 +258,8 @@ macro(CreateJOIPProject JOIP_PROJECT_NAME)
     ${JOIPSources}/Editor/SequenceEditor/TimelineWidget.ui
     ${JOIPSources}/Editor/SequenceEditor/TimelineWidgetBackground.cpp
     ${JOIPSources}/Editor/SequenceEditor/TimelineWidgetBackground.h
+    ${JOIPSources}/Editor/SequenceEditor/TimelineWidgetControls.cpp
+    ${JOIPSources}/Editor/SequenceEditor/TimelineWidgetControls.h
     ${JOIPSources}/Editor/SequenceEditor/TimelineWidgetLayer.cpp
     ${JOIPSources}/Editor/SequenceEditor/TimelineWidgetLayer.h
     ${JOIPSources}/Editor/SequenceEditor/TimelineWidgetOverlay.cpp
@@ -676,6 +685,8 @@ macro(CreateJOIPProject JOIP_PROJECT_NAME)
     ${JOIPSources}/Widgets/TagsView.ui
     ${JOIPSources}/Widgets/TitleLabel.cpp
     ${JOIPSources}/Widgets/TitleLabel.h
+    ${JOIPSources}/Widgets/ZoomComboBox.cpp
+    ${JOIPSources}/Widgets/ZoomComboBox.h
     ${JOIPSources}/WindowContext.cpp
     ${JOIPSources}/WindowContext.h
     ${JOIPSources}/main.cpp

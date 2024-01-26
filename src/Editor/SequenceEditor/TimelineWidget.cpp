@@ -1,7 +1,8 @@
 #include "TimelineWidget.h"
 #include "CommandModifyLayers.h"
-#include "TimelineWidgetLayer.h"
 #include "TimelineWidgetBackground.h"
+#include "TimelineWidgetControls.h"
+#include "TimelineWidgetLayer.h"
 #include "TimelineWidgetOverlay.h"
 #include "ui_TimelineWidget.h"
 
@@ -16,6 +17,7 @@
 #include <QResizeEvent>
 #include <QScrollBar>
 #include <QVBoxLayout>
+#include <QWheelEvent>
 
 namespace
 {
@@ -48,17 +50,36 @@ CTimelineWidget::CTimelineWidget(QWidget* pParent) :
   QScrollArea(pParent),
   m_spUi(std::make_unique<Ui::CTimelineWidget>()),
   m_pOverlay(new CTimelineWidgetOverlay(this)),
+  m_pControls(new CTimelineWidgetControls(this)),
   m_selectionColor(Qt::white)
 {
   m_spUi->setupUi(this);
   m_pOverlay->move(0, 0);
   m_pOverlay->resize(size());
 
+  m_pControls->move(0, 0);
+  m_pControls->resize(width(), m_pControls->minimumSizeHint().height());
+  m_pControls->raise();
+  connect(m_pControls, &CTimelineWidgetControls::SignalZoomChanged,
+          this, &CTimelineWidget::SlotZoomChanged);
+
+  m_pCustomScrollbar = new QScrollBar(Qt::Orientation::Horizontal, this);
+  m_pCustomScrollbar->resize(width(), horizontalScrollBar()->height());
+  m_pCustomScrollbar->move(0, height() - m_pCustomScrollbar->height());
+
   setAcceptDrops(true);
+  setMouseTracking(true);
+  viewport()->setMouseTracking(true);
 
   // we will use the scrollbar for our own purposes, so disconnect it for now
-  setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOn);
+  setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
   horizontalScrollBar()->disconnect();
+  connect(m_pCustomScrollbar, &QScrollBar::valueChanged,
+          this, &CTimelineWidget::SlotScrollbarValueChanged);
+
+  SlotZoomChanged(m_pControls->Zoom());
+
+  setViewportMargins(0, m_pControls->height(), 0, m_pCustomScrollbar->height());
 
   connect(this, &CTimelineWidget::SignalSelectionColorChanged,
           this, &CTimelineWidget::SlotSelectionColorChanged);
@@ -77,7 +98,7 @@ void CTimelineWidget::setWidget(QWidget* pWidget)
   if (auto pBg = dynamic_cast<CTimelineWidgetBackground*>(pWidget))
   {
     pBg->SetTimelineWidget(this);
-
+    m_pControls->SetHeaderSize(HeadersSize());
   }
 }
 
@@ -109,6 +130,20 @@ void CTimelineWidget::SetDropIndicationColor(const QColor& col)
 const QColor& CTimelineWidget::DropIndicationColor() const
 {
   return m_pOverlay->DropIndicationColor();
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CTimelineWidget::SetOutOfRangeColor(const QColor& col)
+{
+  m_pControls->SetOutOfRangeColor(col);
+}
+
+//----------------------------------------------------------------------------------------
+//
+const QColor& CTimelineWidget::OutOfRangeColor() const
+{
+  return m_pControls->OutOfRangeColor();
 }
 
 //----------------------------------------------------------------------------------------
@@ -183,12 +218,62 @@ void CTimelineWidget::Clear()
 
 //----------------------------------------------------------------------------------------
 //
+qint32 CTimelineWidget::IndexOf(CTimelineWidgetLayer* pLayer) const
+{
+  QLayout* pLayout = widget()->layout();
+  if (nullptr != pLayout)
+  {
+    for (qint32 i = 0; pLayout->count() > i; ++i)
+    {
+      if (nullptr != pLayout->itemAt(i) && nullptr != pLayout->itemAt(i)->widget())
+      {
+        auto pWidget = dynamic_cast<CTimelineWidgetLayer*>(pLayout->itemAt(i)->widget());
+        if (nullptr != pWidget)
+        {
+          if (pLayer == pWidget)
+          {
+            return i;
+          }
+        }
+      }
+    }
+  }
+  return -1;
+}
+
+//----------------------------------------------------------------------------------------
+//
+CTimelineWidgetLayer* CTimelineWidget::Layer(qint32 iIndex) const
+{
+  QLayout* pLayout = widget()->layout();
+  if (nullptr != pLayout)
+  {
+    if (pLayout->count() > iIndex && -1 < iIndex)
+    {
+      if (nullptr != pLayout->itemAt(iIndex) && nullptr != pLayout->itemAt(iIndex)->widget())
+      {
+        return dynamic_cast<CTimelineWidgetLayer*>(pLayout->itemAt(iIndex)->widget());
+      }
+    }
+  }
+  return nullptr;
+}
+
+//----------------------------------------------------------------------------------------
+//
+qint32 CTimelineWidget::LayerCount() const
+{
+  return nullptr != m_spCurrentSequence ? static_cast<qint32>(m_spCurrentSequence->m_vspLayers.size()) : 0;
+}
+
+//----------------------------------------------------------------------------------------
+//
 void CTimelineWidget::RemoveSelectedLayer()
 {
   if (nullptr != m_pUndoStack && nullptr != m_spCurrentSequence)
   {
-    if (0 > m_iSelectedIndex &&
-        m_spCurrentSequence->m_vspLayers.size() > static_cast<size_t>(m_iSelectedIndex))
+    if (0 <= m_iSelectedIndex &&
+        m_spCurrentSequence->m_vspLayers.size() < static_cast<size_t>(m_iSelectedIndex))
     {
       auto spLayer = m_spCurrentSequence->m_vspLayers[static_cast<size_t>(m_iSelectedIndex)];
       m_pUndoStack->push(
@@ -274,7 +359,9 @@ void CTimelineWidget::Update()
   }
 
   updateGeometry();
+  SlotUpdateSequenceProperties();
   SlotSelectionColorChanged();
+  QMetaObject::invokeMethod(this, "SlotLayersInserted", Qt::QueuedConnection);
 }
 
 //----------------------------------------------------------------------------------------
@@ -300,6 +387,22 @@ QSize CTimelineWidget::sizeHint() const
 
 //----------------------------------------------------------------------------------------
 //
+void CTimelineWidget::SlotUpdateSequenceProperties()
+{
+  if (nullptr != m_spCurrentSequence)
+  {
+    m_pControls->SetTimeMaximum(m_spCurrentSequence->m_iLengthMili);
+  }
+  else
+  {
+    m_pControls->SetTimeMaximum(timeline::c_iDefaultLength);
+  }
+
+  SlotZoomChanged(m_pControls->Zoom());
+}
+
+//----------------------------------------------------------------------------------------
+//
 void CTimelineWidget::AddLayerTo(qint32 index, const tspSequenceLayer& spLayer,
                                  tspSequence& spCurrentSequence)
 {
@@ -321,6 +424,7 @@ void CTimelineWidget::AddLayerTo(qint32 index, const tspSequenceLayer& spLayer,
   {
     pLayout->insertWidget(index, CreateLayerWidget(spLayer));
     SlotSelectionColorChanged();
+    QMetaObject::invokeMethod(this, "SlotLayersInserted", Qt::QueuedConnection);
   }
 
   emit SignalContentsChanged();
@@ -345,6 +449,30 @@ void CTimelineWidget::RemoveLayerFrom(qint32 index, tspSequence& spCurrentSequen
   }
 
   emit SignalContentsChanged();
+}
+
+//----------------------------------------------------------------------------------------
+//
+bool CTimelineWidget::eventFilter(QObject* pObj, QEvent* pEvt)
+{
+  if (nullptr != pEvt && IsChildOfLayer(dynamic_cast<QWidget*>(pObj)))
+  {
+    switch (pEvt->type())
+    {
+      case QEvent::MouseMove:
+      {
+        QMouseEvent* pEvtM = static_cast<QMouseEvent*>(pEvt);
+        m_pControls->SetCurrentCursorPos(mapFromGlobal(pEvtM->globalPos()).x());
+      } break;
+      case QEvent::Wheel:
+      {
+        QWheelEvent* pEvtM = static_cast<QWheelEvent*>(pEvt);
+        wheelEvent(pEvtM);
+      } break;
+      default: break;
+    }
+  }
+  return false;
 }
 
 //----------------------------------------------------------------------------------------
@@ -392,6 +520,36 @@ void CTimelineWidget::dropEvent(QDropEvent* pEvent)
 
 //----------------------------------------------------------------------------------------
 //
+void CTimelineWidget::mousePressEvent(QMouseEvent* pEvent)
+{
+  if (nullptr != pEvent)
+  {
+
+  }
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CTimelineWidget::mouseMoveEvent(QMouseEvent* pEvent)
+{
+  if (nullptr != pEvent)
+  {
+    m_pControls->SetCurrentCursorPos(pEvent->pos().x());
+  }
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CTimelineWidget::mouseReleaseEvent(QMouseEvent* pEvent)
+{
+  if (nullptr != pEvent)
+  {
+
+  }
+}
+
+//----------------------------------------------------------------------------------------
+//
 void CTimelineWidget::resizeEvent(QResizeEvent* pEvt)
 {
   QSize s = size();
@@ -399,7 +557,34 @@ void CTimelineWidget::resizeEvent(QResizeEvent* pEvt)
   {
     s.setWidth(s.width() - verticalScrollBar()->width());
   }
+
   Resize(s);
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CTimelineWidget::wheelEvent(QWheelEvent* pEvt)
+{
+  if (nullptr != pEvt)
+  {
+    if (QGuiApplication::keyboardModifiers().testFlag(Qt::ControlModifier))
+    {
+      if (pEvt->angleDelta().y() > 0)
+      {
+        m_pControls->ZoomIn();
+      }
+      else
+      {
+        m_pControls->ZoomOut();
+      }
+    }
+    else
+    {
+      m_pCustomScrollbar->setValue(pEvt->angleDelta().y() > 0 ?
+                                       m_pCustomScrollbar->value() + m_pCustomScrollbar->singleStep() :
+                                       m_pCustomScrollbar->value() - m_pCustomScrollbar->singleStep());
+    }
+  }
 }
 
 //----------------------------------------------------------------------------------------
@@ -417,8 +602,9 @@ void CTimelineWidget::SlotUserStartedDrag()
 
       QPixmap widgetPixmap = pWidget->grab();
 
+      qint32 iIndex = IndexOf(pWidget);
       pMimeData->SetLayer(pWidget->Layer());
-      pMimeData->SetIndex(IndexOf(pWidget));
+      pMimeData->SetIndex(iIndex);
 
       pDrag->setMimeData(pMimeData);
       pDrag->setPixmap(widgetPixmap);
@@ -426,7 +612,7 @@ void CTimelineWidget::SlotUserStartedDrag()
       m_pUndoStack->beginMacro("Moved layer " + spLayer->m_sName);
       m_pUndoStack->push(
           new CCommandAddOrRemoveSequenceLayer(
-              this, m_iSelectedIndex, spLayer,
+              this, iIndex, spLayer,
               [this](qint32 iIdx, const tspSequenceLayer&, tspSequence& spSequence){
                 RemoveLayerFrom(iIdx, spSequence);
               },
@@ -489,6 +675,20 @@ void CTimelineWidget::SlotLayerSelected()
 
 //----------------------------------------------------------------------------------------
 //
+void CTimelineWidget::SlotLayersInserted()
+{
+  m_pControls->SetHeaderSize(HeadersSize());
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CTimelineWidget::SlotScrollbarValueChanged()
+{
+  m_pControls->SetCurrentWindow(m_pCustomScrollbar->value(), m_pCustomScrollbar->pageStep());
+}
+
+//----------------------------------------------------------------------------------------
+//
 void CTimelineWidget::SlotSelectionColorChanged()
 {
   QLayout* pLayout = widget()->layout();
@@ -518,39 +718,80 @@ void CTimelineWidget::SlotSelectionColorChanged()
 
 //----------------------------------------------------------------------------------------
 //
+void CTimelineWidget::SlotZoomChanged(qint32 iZoom)
+{
+  qint64 iPageStep = timeline::c_iDefaultStepSize*100/iZoom;
+  qint64 iMax = nullptr != m_spCurrentSequence ? m_spCurrentSequence->m_iLengthMili : timeline::c_iDefaultLength;
+  m_pCustomScrollbar->setMinimum(0);
+  m_pCustomScrollbar->setMaximum(std::max(iMax-iPageStep, 0LL));
+  // default 100% is page step of 10'000
+  m_pCustomScrollbar->setPageStep(iPageStep);
+  m_pCustomScrollbar->setSingleStep(iPageStep / 10);
+
+  m_pControls->SetCurrentWindow(m_pCustomScrollbar->value(), m_pCustomScrollbar->pageStep());
+}
+
+//----------------------------------------------------------------------------------------
+//
 QWidget* CTimelineWidget::CreateLayerWidget(const tspSequenceLayer& spLayer) const
 {
-  auto pWidget = new CTimelineWidgetLayer(spLayer, widget());
+  auto pWidget =
+      new CTimelineWidgetLayer(spLayer, const_cast<CTimelineWidget*>(this), widget());
   connect(pWidget, &CTimelineWidgetLayer::SignalUserStartedDrag,
           this, &CTimelineWidget::SlotUserStartedDrag, Qt::QueuedConnection);
   connect(pWidget, &CTimelineWidgetLayer::SignalSelected,
           this, &CTimelineWidget::SlotLayerSelected, Qt::QueuedConnection);
+  for (QWidget* pW : QObject::findChildren<QWidget*>())
+  {
+    pWidget->installEventFilter(const_cast<CTimelineWidget*>(this));
+    pW->setMouseTracking(true);
+  }
+  pWidget->installEventFilter(const_cast<CTimelineWidget*>(this));
+  pWidget->setMouseTracking(true);
+  pWidget->SetUndoStack(m_pUndoStack);
   return pWidget;
 }
 
 //----------------------------------------------------------------------------------------
 //
-qint32 CTimelineWidget::IndexOf(CTimelineWidgetLayer* pLayer)
+QSize CTimelineWidget::HeadersSize() const
 {
+  QSize s = m_pControls->minimumSizeHint();
   QLayout* pLayout = widget()->layout();
   if (nullptr != pLayout)
   {
     for (qint32 i = 0; pLayout->count() > i; ++i)
     {
-      if (nullptr != pLayout->itemAt(i) && nullptr != pLayout->itemAt(i)->widget())
+      if (nullptr != pLayout->itemAt(i))
       {
-        auto pWidget = dynamic_cast<CTimelineWidgetLayer*>(pLayout->itemAt(i)->widget());
-        if (nullptr != pWidget)
+        if (auto pWidget = dynamic_cast<CTimelineWidgetLayer*>(pLayout->itemAt(i)->widget()))
         {
-          if (pLayer == pWidget)
-          {
-            return i;
-          }
+          QSize s2 = pWidget->HeaderSize();
+          s.setWidth(std::max(s.width(), s2.width()));
+          s.setHeight(std::max(s.height(), s2.height()));
         }
       }
     }
   }
-  return -1;
+  return s;
+}
+
+//----------------------------------------------------------------------------------------
+//
+bool CTimelineWidget::IsChildOfLayer(QWidget* pWidget) const
+{
+  if (nullptr != pWidget)
+  {
+    QWidget* pParent = pWidget->parentWidget();
+    CTimelineWidgetLayer* pLayer = qobject_cast<CTimelineWidgetLayer*>(pWidget);
+    while (nullptr == pLayer && nullptr != pParent)
+    {
+      pLayer = qobject_cast<CTimelineWidgetLayer*>(pParent);
+      pParent = pParent->parentWidget();
+    }
+    return nullptr != pLayer;
+  }
+  return false;
 }
 
 //----------------------------------------------------------------------------------------
@@ -564,6 +805,18 @@ void CTimelineWidget::Resize(QSize newSize)
 
   m_pOverlay->move(0, 0);
   m_pOverlay->resize(newSize);
+
+  m_pControls->move(0, 0);
+  m_pControls->resize(newSize.width(), m_pControls->minimumSizeHint().height());
+  m_pControls->raise();
+  m_pControls->repaint();
+
+  m_pCustomScrollbar->resize(width(), horizontalScrollBar()->height());
+  m_pCustomScrollbar->move(0, height() - m_pCustomScrollbar->height());
+  m_pCustomScrollbar->raise();
+
+  setViewportMargins(0, m_pControls->minimumSizeHint().height(), 0, m_pCustomScrollbar->height());
+  SlotZoomChanged(m_pControls->Zoom());
 }
 
 #include "TimelineWidget.moc"

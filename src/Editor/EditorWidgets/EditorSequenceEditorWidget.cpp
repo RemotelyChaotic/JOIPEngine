@@ -2,6 +2,7 @@
 
 #include "Editor/SequenceEditor/CommandAddNewSequence.h"
 #include "Editor/SequenceEditor/CommandChangeOpenedSequence.h"
+#include "Editor/SequenceEditor/SequencePropertiesOverlay.h"
 
 #include "Editor/EditorActionBar.h"
 #include "Editor/EditorEditableFileModel.h"
@@ -23,6 +24,7 @@ DECLARE_EDITORWIDGET(CEditorPatternEditorWidget, EEditorWidget::ePatternEditor)
 CEditorPatternEditorWidget::CEditorPatternEditorWidget(QWidget* pParent) :
   CEditorWidgetBase(pParent),
   m_spUi(std::make_unique<Ui::CEditorSequenceEditorWidget>()),
+  m_spOverlayProps(std::make_unique<CSequencePropertiesOverlay>(this)),
   m_pDummyModel(new QStandardItemModel(this)),
   m_sLastCachedSequence(QString()),
   m_bChangingIndex(false)
@@ -33,11 +35,17 @@ CEditorPatternEditorWidget::CEditorPatternEditorWidget(QWidget* pParent) :
 
   connect(m_spUi->pTimeLineWidget, &CTimelineWidget::SignalContentsChanged,
           this, &CEditorPatternEditorWidget::SlotContentsChange);
+  connect(m_spOverlayProps.get(), &CSequencePropertiesOverlay::SignalContentsChanged,
+          m_spUi->pTimeLineWidget, &CTimelineWidget::SlotUpdateSequenceProperties);
+  connect(m_spOverlayProps.get(), &CSequencePropertiesOverlay::SignalContentsChanged,
+          this, &CEditorPatternEditorWidget::SlotContentsChange);
 }
 
 CEditorPatternEditorWidget::~CEditorPatternEditorWidget()
 {
   UnloadProject();
+
+  m_spOverlayProps.reset();
 }
 
 //----------------------------------------------------------------------------------------
@@ -56,6 +64,9 @@ void CEditorPatternEditorWidget::Initialize()
 
   connect(EditableFileModel(), &CEditorEditableFileModel::SignalFileChangedExternally,
           this, &CEditorPatternEditorWidget::SlotFileChangedExternally);
+
+  m_spOverlayProps->SetUndoStack(UndoStack());
+  m_spOverlayProps->Hide();
 
   m_bInitialized = true;
 }
@@ -100,6 +111,10 @@ void CEditorPatternEditorWidget::UnloadProject()
   m_spUi->pResourceComboBox->clear();
 
   m_spUi->pTimeLineWidget->SetSequence(nullptr);
+  m_spOverlayProps->SetSequence(nullptr);
+  m_spOverlayProps->SetSequenceName(QString());
+
+  m_spOverlayProps->Hide();
 
   SetLoaded(false);
 }
@@ -146,6 +161,8 @@ void CEditorPatternEditorWidget::OnActionBarAboutToChange()
   {
     disconnect(ActionBar()->m_spUi->NewSequence, &QPushButton::clicked,
                this, &CEditorPatternEditorWidget::SlotAddNewSequenceButtonClicked);
+    disconnect(ActionBar()->m_spUi->SequenceProperties, &QPushButton::clicked,
+              this, &CEditorPatternEditorWidget::SlotEditSequenceButtonClicked);
     disconnect(ActionBar()->m_spUi->AddSequenceLayer, &QPushButton::clicked,
                this, &CEditorPatternEditorWidget::SlotAddSequenceLayerButtonClicked);
     disconnect(ActionBar()->m_spUi->RemoveSelectedSequenceLayer, &QPushButton::clicked,
@@ -172,6 +189,8 @@ void CEditorPatternEditorWidget::OnActionBarChanged()
     ActionBar()->ShowSequenceEditorActionBar();
     connect(ActionBar()->m_spUi->NewSequence, &QPushButton::clicked,
             this, &CEditorPatternEditorWidget::SlotAddNewSequenceButtonClicked);
+    connect(ActionBar()->m_spUi->SequenceProperties, &QPushButton::clicked,
+            this, &CEditorPatternEditorWidget::SlotEditSequenceButtonClicked);
     connect(ActionBar()->m_spUi->AddSequenceLayer, &QPushButton::clicked,
             this, &CEditorPatternEditorWidget::SlotAddSequenceLayerButtonClicked);
     connect(ActionBar()->m_spUi->RemoveSelectedSequenceLayer, &QPushButton::clicked,
@@ -223,6 +242,16 @@ void CEditorPatternEditorWidget::SlotAddNewSequenceButtonClicked()
 
 //----------------------------------------------------------------------------------------
 //
+void CEditorPatternEditorWidget::SlotEditSequenceButtonClicked()
+{
+  WIDGET_INITIALIZED_GUARD
+  if (nullptr == m_spCurrentProject || nullptr == m_spCurrentSequence) { return; }
+
+  m_spOverlayProps->Toggle();
+}
+
+//----------------------------------------------------------------------------------------
+//
 void CEditorPatternEditorWidget::SlotAddSequenceLayerButtonClicked()
 {
   WIDGET_INITIALIZED_GUARD
@@ -263,11 +292,15 @@ void CEditorPatternEditorWidget::SlotFileChangedExternally(const QString& sName)
     m_bChangingIndex = true;
 
     m_spUi->pTimeLineWidget->SetSequence(nullptr);
+    m_spOverlayProps->SetSequence(nullptr);
+    m_spOverlayProps->SetSequenceName(QString());
     // load new contents
     if (nullptr != m_spCurrentSequence)
     {
       m_spCurrentSequence->FromJsonObject(QJsonDocument::fromJson(pScriptItem->m_data).object());
       m_spUi->pTimeLineWidget->SetSequence(m_spCurrentSequence);
+      m_spOverlayProps->SetSequence(m_spCurrentSequence);
+      m_spOverlayProps->SetSequenceName(sName);
     }
 
     m_bChangingIndex = false;
@@ -361,6 +394,8 @@ void CEditorPatternEditorWidget::ReloadEditor(qint32 iIndex)
   m_bChangingIndex = true;
 
   m_spUi->pTimeLineWidget->SetSequence(nullptr);
+  m_spOverlayProps->SetSequence(nullptr);
+  m_spOverlayProps->SetSequenceName(QString());
 
   // load new contents
   m_sLastCachedSequence = CachedResourceName(iIndex);
@@ -373,6 +408,8 @@ void CEditorPatternEditorWidget::ReloadEditor(qint32 iIndex)
     }
     m_spCurrentSequence->FromJsonObject(QJsonDocument::fromJson(pScriptItem->m_data).object());
     m_spUi->pTimeLineWidget->SetSequence(m_spCurrentSequence);
+    m_spOverlayProps->SetSequence(m_spCurrentSequence);
+    m_spOverlayProps->SetSequenceName(m_sLastCachedSequence);
   }
 
   m_bChangingIndex = false;
