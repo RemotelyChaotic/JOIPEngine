@@ -1,6 +1,7 @@
 /*
  ----- QSplitter
 */
+
 QSplitter {
   min-height: 18px;
   min-width: 18px;
@@ -822,7 +823,14 @@ QScrollArea > QWidget > QWidget
 {
   background: transparent;
 }
-
+QScrollArea > QWidget > QScrollBar 
+{ 
+  background: palette(base);
+}
+QScrollArea > QWidget > QScrollBar 
+{
+  background: palette(base);
+}
 
 /*
  ----- QComboBox
@@ -1217,6 +1225,51 @@ QTextBrowser {
     border: 1px solid;
     border-color: rgb(52, 69, 97);
     selection-background-color: rgb(81, 100, 130);
+}
+
+/*
+ ----- Timeline
+*/
+CTimelineWidget,
+CTimelineWidgetBackground,
+CTimelineWidget > QWidget,
+CTimelineWidget > QWidget > QWidget
+{
+  background-color: rgb(19, 28, 40);
+}
+
+CTimelineWidget
+{
+  qproperty-alternateBackgroundColor: rgb(52, 69, 97);
+  qproperty-dropIndicationColor: rgb(50, 97, 159);
+  qproperty-gridColor: rgb(22, 69, 97);
+  qproperty-outOfRangeColor: rgba(200, 200, 200, 100);
+  qproperty-selectionColor: white;
+}
+
+CTimelineWidgetControls
+{
+  background-color: rgb(19, 28, 40);
+  border: 1px solid rgb(52, 69, 97);
+  border-radius: 0px;
+  
+  qproperty-cursorColor: white;
+}
+
+CTimelineWidget > CTimelineWidgetControls > QWidget#Controls
+{
+  border: 1px solid rgb(52, 69, 97);
+}
+
+CTimelineWidgetLayer {
+  background-color: rgb(36, 52, 77);
+  border: 1px solid rgb(52, 69, 97);
+  border-radius: 0px;
+  
+  min-height: 70;
+  max-height: 70;
+  
+  qproperty-timelineBackgroundColor: rgb(19, 28, 40);
 }
 
 /*

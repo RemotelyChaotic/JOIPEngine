@@ -1,6 +1,8 @@
 #ifndef CTIMELINEWIDGETCONTROLS_H
 #define CTIMELINEWIDGETCONTROLS_H
 
+#include "TimelineWidgetUtils.h"
+
 #include <QComboBox>
 #include <QFrame>
 #include <QLabel>
@@ -9,17 +11,10 @@
 
 class CZoomComboBox;
 
-namespace timeline
-{
-  const qint64 c_iDefaultStepSize = 10'000;
-  const qint64 c_iDefaultLength = 15'000;
-}
-
 class CTimelineWidgetControls : public QFrame
 {
   Q_OBJECT
   Q_PROPERTY(QColor cursorColor READ CursorColor WRITE SetCursorColor)
-  Q_PROPERTY(QColor gridColor READ GridColor WRITE SetGridColor)
 
 public:
   explicit CTimelineWidgetControls(QWidget* pParent);

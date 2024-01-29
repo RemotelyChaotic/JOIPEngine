@@ -168,21 +168,8 @@ qint32 CTimelineWidgetControls::CursorFromCurrentTime() const
   const qint32 iGridStartX = m_pControls->width();
   const qint32 iAvailableWidth = width() - iGridStartX;
 
-  if (m_iWindowStartMs > m_iSelectedTime)
-  {
-    return -1;
-  }
-  else
-  {
-    const qint64 iPosRelMs = m_iSelectedTime - m_iWindowStartMs;
-    const double dPosMsRel = static_cast<double>(iAvailableWidth * iPosRelMs) / m_iPageLengthMs;
-    qint32 iRes = iGridStartX + static_cast<qint32>(std::round(dPosMsRel));
-    if (iRes > width())
-    {
-      return -1;
-    }
-    return iRes;
-  }
+  return timeline::PositionFromTime(iGridStartX, iAvailableWidth, width(), m_iWindowStartMs,
+                                    m_iMaximumSizeMs, m_iPageLengthMs, m_iSelectedTime);
 }
 
 //----------------------------------------------------------------------------------------
@@ -241,114 +228,12 @@ void CTimelineWidgetControls::paintEvent(QPaintEvent* pEvt)
   const qint32 iAvailableWidth = width() - iGridStartX;
 
   // draw rect over unused area
-  {
-    painter.save();
-    //m_iPageLengthMs -                       iAvailableWidth
-    //(m_iMaximumSizeMs - m_iWindowStartMs) - X
-    double dEndLength = static_cast<double>((m_iMaximumSizeMs - m_iWindowStartMs) * iAvailableWidth) /
-                     (0 == m_iPageLengthMs ? 1 : m_iPageLengthMs);
-    if (dEndLength < static_cast<double>(iAvailableWidth))
-    {
-      qint32 iEndPos = static_cast<qint32>(std::round(dEndLength));
-      painter.fillRect(QRect(iGridStartX + iEndPos, 0, width() - iEndPos, height()), m_outOfRangeCol);
-    }
-    painter.restore();
-  }
+  timeline::PaintUnusedAreaRect(&painter, iGridStartX, iAvailableWidth, width(), height(),
+                                m_iWindowStartMs, m_iMaximumSizeMs, m_iPageLengthMs, m_outOfRangeCol);
 
   // draw timestamp grid
-  {
-    painter.save();
-    QPen pen(m_gridCol, 1);
-    painter.setPen(pen);
-
-    QFont font = painter.font();
-    font.setPixelSize(9);
-    QFontMetrics fm(font);
-    painter.setFont(font);
-
-    constexpr qint32 c_aPossibleGridTicks[] = {1, 5, 10, 50, 100, 500, 1000, 5000, 10'000,
-                                               30'000, 60'000, 300'000, 600'000};
-    constexpr qint32 c_aPossibleGridTicksLabels[] = {100, 100, 100, 100, 1000, 1000, 5'000, 10'000,
-                                                     30'000, 60'000, 60'000, 60'000, 60'000};
-    constexpr qint32 c_iIdealDistanceOfTicksMin = 100;
-
-    bool bBreakAtNext = false;
-    qint32 iFirstTickMain = 0;
-    double dFirstTickXMain = 0.0;
-    double dWidthBetweenTicksMain = c_iIdealDistanceOfTicksMin;
-    qint32 iFirstTick = 0;
-    double dFirstTickX = 0.0;
-    double dWidthBetweenTicks = c_iIdealDistanceOfTicksMin;
-    qint32 i = static_cast<qint32>(std::size(c_aPossibleGridTicks)) - 1;
-    for (; -1 < i; --i)
-    {
-      iFirstTickMain = iFirstTick;
-      dFirstTickXMain = dFirstTickX;
-      dWidthBetweenTicksMain = dWidthBetweenTicks;
-
-      qint32 iGridToCheck = c_aPossibleGridTicks[static_cast<size_t>(i)];
-      iFirstTick = (0 == m_iWindowStartMs % iGridToCheck) ?
-                    m_iWindowStartMs : (m_iWindowStartMs / iGridToCheck * iGridToCheck);
-      qint32 iFirstTickRelPos = iFirstTick - m_iWindowStartMs;
-      dFirstTickX = static_cast<double>(iAvailableWidth * iFirstTickRelPos) /
-                    (0 == m_iPageLengthMs ? 1 : m_iPageLengthMs);
-      //qint32 iNrTicks = (m_iPageStep - iFirstTick) / iGridToCheck;
-      dWidthBetweenTicks = static_cast<double>(iGridToCheck * iAvailableWidth) /
-                           (0 == m_iPageLengthMs ? 1 : m_iPageLengthMs);
-
-      if (bBreakAtNext)
-      {
-        break;
-      }
-
-      if (c_iIdealDistanceOfTicksMin-70 < dWidthBetweenTicks &&
-          c_iIdealDistanceOfTicksMin+50 > dWidthBetweenTicks)
-      {
-        bBreakAtNext = true;
-      }
-    }
-
-    double dCounterX = dFirstTickX + iGridStartX;
-    while (dCounterX < static_cast<double>(width()) && 0 < dWidthBetweenTicks)
-    {
-      painter.drawLine(QLine(static_cast<qint32>(std::round(dCounterX)), height(),
-                             static_cast<qint32>(std::round(dCounterX)), height() * 4 / 6));
-      dCounterX += dWidthBetweenTicks;
-    }
-    const qint32 indexForMain = std::min(i+1, static_cast<qint32>(std::size(c_aPossibleGridTicks)) - 1);
-    const qint32 iGridDist = c_aPossibleGridTicks[static_cast<size_t>(indexForMain)];
-    const qint32 iLabelDist = c_aPossibleGridTicksLabels[static_cast<size_t>(indexForMain)];
-    dCounterX = dFirstTickXMain + iGridStartX;
-    qint32 iCounterTicks = iFirstTickMain;
-    while (dCounterX < static_cast<double>(width()) && 0 < dWidthBetweenTicksMain)
-    {
-      const qint32 iXCoord = static_cast<qint32>(std::round(dCounterX));
-      painter.drawLine(QLine(iXCoord, height(),
-                             iXCoord, height() * 2 / 6));
-      if (0 == iCounterTicks % iLabelDist)
-      {
-        QTime t(0, 0);
-        t = t.addMSecs(iCounterTicks);
-        const QString sLabel = t.toString(iLabelDist < 1000 ? "ss.zzz" : "mm:ss");
-        QRect r = fm.tightBoundingRect(sLabel);
-        r.translate(iXCoord - r.width() / 2, r.height() + 1);
-        r.adjust(-1, -1, 1, 1);
-        if (r.x() < iGridStartX)
-        {
-          r.setX(iGridStartX);
-        }
-        else if (r.x() + r.width() > width())
-        {
-          r.setX(width()-r.width());
-        }
-        painter.drawText(r, Qt::AlignCenter, sLabel);
-      }
-      dCounterX += dWidthBetweenTicksMain;
-      iCounterTicks += iGridDist;
-    }
-
-    painter.restore();
-  }
+  timeline::PaintTimestampGrid(&painter, iGridStartX, iAvailableWidth, width(), height(),
+                               m_iWindowStartMs, m_iMaximumSizeMs, m_iPageLengthMs, m_gridCol);
 
   // draw current mouse indicator
   if (m_iCursorPos >= m_pControls->width() && m_iCursorPos <= width())

@@ -11,15 +11,25 @@
 #include <QWidget>
 
 class CTimelineWidget;
+class CTimelineWidgetLayerBackground;
 class CTimeLinewidgetLayerShadow;
 
 class CTimelineWidgetLayer : public QFrame
 {
   Q_OBJECT
+  Q_PROPERTY(QColor timelineBackgroundColor READ TimelineBackgroundColor WRITE SetTimelineBackgroundColor)
+
 public:
   explicit CTimelineWidgetLayer(const tspSequenceLayer& spLayer, CTimelineWidget* pParent,
                                 QWidget* pWidgetParent);
   ~CTimelineWidgetLayer() override;
+
+  void SetGridColor(const QColor& col);
+  const QColor& GridColor() const;
+  void SetOutOfRangeColor(const QColor& col);
+  const QColor& OutOfRangeColor() const;
+  void SetTimelineBackgroundColor(const QColor& col);
+  const QColor& TimelineBackgroundColor() const;
 
   void SetLayer(const tspSequenceLayer& spLayer);
   void SetHighlight(QColor col, QColor alternateCol);
@@ -31,6 +41,8 @@ public:
   QSize HeaderSize() const;
 
   void UpdateUi();
+  void SetCurrentWindow(qint64 iStartMs, qint64 iPageLengthMs);
+  void SetTimeMaximum(qint64 iTimeMs);
 
 signals:
   void SignalUserStartedDrag();
@@ -41,6 +53,7 @@ protected:
   void mouseMoveEvent(QMouseEvent* pEvent) override;
   void mouseReleaseEvent(QMouseEvent* pEvent) override;
   void paintEvent(QPaintEvent* pEvt) override;
+  void resizeEvent(QResizeEvent* pEvt) override;
 
 private slots:
   void SlotLabelChanged();
@@ -50,7 +63,7 @@ private:
   tspSequenceLayer      m_spLayer;
   QPointer<CTimelineWidget> m_pParent;
   QPointer<CTimeLinewidgetLayerShadow> m_pDropShadow;
-  QPointer<QScrollArea> m_pTimeLineContent;
+  QPointer<CTimelineWidgetLayerBackground> m_pTimeLineContent;
   QPointer<QLineEdit>   m_pNameLineEdit;
   QPointer<QComboBox>   m_pLayerTypeCombo;
   QPointer<QWidget>     m_pHeader;

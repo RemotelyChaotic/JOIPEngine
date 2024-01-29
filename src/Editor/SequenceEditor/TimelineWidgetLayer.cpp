@@ -1,6 +1,7 @@
 #include "TimelineWidgetLayer.h"
 #include "CommandModifyLayerProperties.h"
 #include "TimelineWidget.h"
+#include "TimelineWidgetLayerBackground.h"
 
 #include <QApplication>
 #include <QHBoxLayout>
@@ -73,7 +74,7 @@ CTimelineWidgetLayer::CTimelineWidgetLayer(const tspSequenceLayer& spLayer, CTim
 
   pLayout->addWidget(m_pHeader);
 
-  m_pTimeLineContent = new QScrollArea(this);
+  m_pTimeLineContent = new CTimelineWidgetLayerBackground(this);
   pLayout->addWidget(m_pTimeLineContent);
 
   m_pDropShadow = new CTimeLinewidgetLayerShadow;
@@ -90,9 +91,52 @@ CTimelineWidgetLayer::~CTimelineWidgetLayer() = default;
 
 //----------------------------------------------------------------------------------------
 //
+void CTimelineWidgetLayer::SetGridColor(const QColor& col)
+{
+  m_pTimeLineContent->SetGridColor(col);
+}
+
+//----------------------------------------------------------------------------------------
+//
+const QColor& CTimelineWidgetLayer::GridColor() const
+{
+  return m_pTimeLineContent->GridColor();
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CTimelineWidgetLayer::SetOutOfRangeColor(const QColor& col)
+{
+  m_pTimeLineContent->SetOutOfRangeColor(col);
+}
+
+//----------------------------------------------------------------------------------------
+//
+const QColor& CTimelineWidgetLayer::OutOfRangeColor() const
+{
+  return m_pTimeLineContent->OutOfRangeColor();
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CTimelineWidgetLayer::SetTimelineBackgroundColor(const QColor& col)
+{
+  m_pTimeLineContent->SetTimelineBackgroundColor(col);
+}
+
+//----------------------------------------------------------------------------------------
+//
+const QColor& CTimelineWidgetLayer::TimelineBackgroundColor() const
+{
+  return m_pTimeLineContent->TimelineBackgroundColor();
+}
+
+//----------------------------------------------------------------------------------------
+//
 void CTimelineWidgetLayer::SetLayer(const tspSequenceLayer& spLayer)
 {
   m_spLayer = spLayer;
+  m_pTimeLineContent->SetLayer(spLayer);
   UpdateUi();
 }
 
@@ -167,7 +211,22 @@ void CTimelineWidgetLayer::UpdateUi()
     QSignalBlocker b2(m_pNameLineEdit);
     m_pLayerTypeCombo->setCurrentIndex(m_pLayerTypeCombo->findData(m_spLayer->m_sLayerType, Qt::UserRole));
     m_pNameLineEdit->setText(m_spLayer->m_sName);
+    m_pTimeLineContent->repaint();
   }
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CTimelineWidgetLayer::SetCurrentWindow(qint64 iStartMs, qint64 iPageLengthMs)
+{
+  m_pTimeLineContent->SetCurrentWindow(iStartMs, iPageLengthMs);
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CTimelineWidgetLayer::SetTimeMaximum(qint64 iTimeMs)
+{
+  m_pTimeLineContent->SetTimeMaximum(iTimeMs);
 }
 
 //----------------------------------------------------------------------------------------
@@ -227,6 +286,13 @@ void CTimelineWidgetLayer::mouseReleaseEvent(QMouseEvent*)
 void CTimelineWidgetLayer::paintEvent(QPaintEvent* pEvt)
 {
   QFrame::paintEvent(pEvt);
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CTimelineWidgetLayer::resizeEvent(QResizeEvent*)
+{
+
 }
 
 //----------------------------------------------------------------------------------------

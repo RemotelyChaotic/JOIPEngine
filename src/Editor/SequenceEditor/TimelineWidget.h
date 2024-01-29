@@ -6,6 +6,8 @@
 #include <QPointer>
 #include <QScrollArea>
 #include <QUndoStack>
+
+#include <functional>
 #include <memory>
 
 class CTimelineWidgetControls;
@@ -20,6 +22,7 @@ class CTimelineWidget : public QScrollArea
   Q_OBJECT
   Q_PROPERTY(QColor alternateBackgroundColor READ AlternateBackgroundColor WRITE SetAlternateBackgroundColor NOTIFY SignalAlternateBackgroundColorChanged)
   Q_PROPERTY(QColor dropIndicationColor READ DropIndicationColor WRITE SetDropIndicationColor)
+  Q_PROPERTY(QColor gridColor READ GridColor WRITE SetGridColor)
   Q_PROPERTY(QColor outOfRangeColor READ OutOfRangeColor WRITE SetOutOfRangeColor)
   Q_PROPERTY(QColor selectionColor READ SelectionColor WRITE SetSelectionColor NOTIFY SignalSelectionColorChanged)
 
@@ -34,6 +37,8 @@ public:
   const QColor& AlternateBackgroundColor() const;
   void SetDropIndicationColor(const QColor& col);
   const QColor& DropIndicationColor() const;
+  void SetGridColor(const QColor& col);
+  const QColor& GridColor() const;
   void SetOutOfRangeColor(const QColor& col);
   const QColor& OutOfRangeColor() const;
   void SetSelectionColor(const QColor& col);
@@ -90,9 +95,11 @@ private slots:
 
 private:
   QWidget* CreateLayerWidget(const tspSequenceLayer& spLayer) const;
+  void ForAllLayers(std::function<void(CTimelineWidgetLayer*,qint32)> fn);
   QSize HeadersSize() const;
   bool IsChildOfLayer(QWidget* pLayer) const;
   void Resize(QSize newSize);
+  void SetCurrentWindow();
   void SetSelectedTime();
   void UpdateTimeSelectionCursor();
 
