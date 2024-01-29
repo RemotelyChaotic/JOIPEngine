@@ -17,9 +17,27 @@ CTimelineWidgetOverlay::~CTimelineWidgetOverlay() = default;
 
 //----------------------------------------------------------------------------------------
 //
+const QColor& CTimelineWidgetOverlay::DropIndicationColor() const
+{
+  return m_pDropIndicationColor;
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CTimelineWidgetOverlay::SetCurrentTimePosIndicator(qint32 iPos)
+{
+  if (m_iCurrentTimePosIndicator != iPos)
+  {
+    m_iCurrentTimePosIndicator = iPos;
+    repaint();
+  }
+}
+
+//----------------------------------------------------------------------------------------
+//
 qint32 CTimelineWidgetOverlay::CurrentDropIndex() const
 {
-  return m_currentDropIndex;
+  return m_iCurrentDropIndex;
 }
 
 //----------------------------------------------------------------------------------------
@@ -27,7 +45,7 @@ qint32 CTimelineWidgetOverlay::CurrentDropIndex() const
 void CTimelineWidgetOverlay::SetShowDropIndicator(bool bShow)
 {
   m_bShowDropIndicator = bShow;
-  m_currentDropIndex = -1;
+  m_iCurrentDropIndex = -1;
   repaint();
 }
 
@@ -41,18 +59,11 @@ void CTimelineWidgetOverlay::SetDropIndicationColor(const QColor& col)
 
 //----------------------------------------------------------------------------------------
 //
-const QColor& CTimelineWidgetOverlay::DropIndicationColor() const
-{
-  return m_pDropIndicationColor;
-}
-
-//----------------------------------------------------------------------------------------
-//
 void CTimelineWidgetOverlay::UpdateDropLine()
 {
   QPoint cursorLocal = mapFromGlobal(QCursor::pos());
   auto item = ItemAt(cursorLocal);
-  m_currentDropIndex = item.first;
+  m_iCurrentDropIndex = item.first;
   if (-1 != item.first)
   {
     bool bBefore = false;
@@ -60,7 +71,7 @@ void CTimelineWidgetOverlay::UpdateDropLine()
 
     if (!bBefore)
     {
-      m_currentDropIndex++;
+      m_iCurrentDropIndex++;
     }
   }
 
@@ -71,13 +82,13 @@ void CTimelineWidgetOverlay::UpdateDropLine()
 //
 void CTimelineWidgetOverlay::paintEvent(QPaintEvent* pEvent)
 {
+  QPainter painter(this);
+  QPen pen(m_pDropIndicationColor);
   if (m_bShowDropIndicator)
   {
-    if (-1 != m_currentDropIndex)
+    if (-1 != m_iCurrentDropIndex)
     {
-      QPainter painter(this);
-      QPen pen(m_pDropIndicationColor);
-
+      painter.save();
       pen.setWidth(4);
       QColor col = m_pDropIndicationColor.lighter();
       col.setAlphaF(0.5);
@@ -89,8 +100,27 @@ void CTimelineWidgetOverlay::paintEvent(QPaintEvent* pEvent)
       pen.setColor(m_pDropIndicationColor);
       painter.setPen(pen);
       painter.drawLine(m_lineDrop);
+      painter.restore();
     }
   }
+
+  if (-1 != m_iCurrentTimePosIndicator)
+  {
+    painter.save();
+    pen.setWidth(4);
+    QColor col = m_pDropIndicationColor.lighter();
+    col.setAlphaF(0.5);
+    pen.setColor(col);
+    painter.setPen(pen);
+    painter.drawLine(QLine(m_iCurrentTimePosIndicator, 0, m_iCurrentTimePosIndicator, height()));
+
+    pen.setWidth(3);
+    pen.setColor(m_pDropIndicationColor);
+    painter.setPen(pen);
+    painter.drawLine(QLine(m_iCurrentTimePosIndicator, 0, m_iCurrentTimePosIndicator, height()));
+    painter.restore();
+  }
+
 }
 
 //----------------------------------------------------------------------------------------

@@ -17,9 +17,6 @@ CTimelineWidgetControls::CTimelineWidgetControls(QWidget* pParent) :
 
   m_pControls = new QWidget(this);
   m_pControls->setObjectName("Controls");
-  pLayout->addWidget(m_pControls);
-  pLayout->addItem(new QSpacerItem(0, 0, QSizePolicy::Expanding, QSizePolicy::Fixed));
-
   QHBoxLayout* pLayoutControls = new QHBoxLayout(m_pControls);
   pLayoutControls->setContentsMargins(0, 0, 0, 0);
   pLayoutControls->setSpacing(0);
@@ -35,8 +32,10 @@ CTimelineWidgetControls::CTimelineWidgetControls(QWidget* pParent) :
 
   pLayoutControls->addItem(new QSpacerItem(0, 0, QSizePolicy::Expanding, QSizePolicy::Fixed));
 
-  m_pControls->setFixedWidth(m_pComboZoom->sizeHint().width() + m_pCurrentLabel->sizeHint().width());
+  pLayout->addWidget(m_pControls);
+  pLayout->addItem(new QSpacerItem(0, 0, QSizePolicy::Expanding, QSizePolicy::Fixed));
 
+  SetHeaderSize(m_pControls->size() + QSize(50, 0));
   setMouseTracking(true);
 }
 CTimelineWidgetControls::~CTimelineWidgetControls() = default;
@@ -100,6 +99,16 @@ void CTimelineWidgetControls::SetCurrentCursorPos(qint32 iX)
 
 //----------------------------------------------------------------------------------------
 //
+void CTimelineWidgetControls::SetCurrentTimeStamp(qint64 iTimeMs)
+{
+  if (m_iSelectedTime != iTimeMs)
+  {
+    m_iSelectedTime = iTimeMs;
+  }
+}
+
+//----------------------------------------------------------------------------------------
+//
 void CTimelineWidgetControls::SetCurrentWindow(qint64 iStartMs, qint64 iPageLengthMs)
 {
   if (m_iWindowStartMs != iStartMs || m_iPageLengthMs != iPageLengthMs)
@@ -150,6 +159,44 @@ void CTimelineWidgetControls::ZoomOut()
   {
     m_pComboZoom->setCurrentIndex(m_pComboZoom->currentIndex()-1);
   }
+}
+
+//----------------------------------------------------------------------------------------
+//
+qint32 CTimelineWidgetControls::CursorFromCurrentTime() const
+{
+  const qint32 iGridStartX = m_pControls->width();
+  const qint32 iAvailableWidth = width() - iGridStartX;
+
+  if (m_iWindowStartMs > m_iSelectedTime)
+  {
+    return -1;
+  }
+  else
+  {
+    const qint64 iPosRelMs = m_iSelectedTime - m_iWindowStartMs;
+    const double dPosMsRel = static_cast<double>(iAvailableWidth * iPosRelMs) / m_iPageLengthMs;
+    qint32 iRes = iGridStartX + static_cast<qint32>(std::round(dPosMsRel));
+    if (iRes > width())
+    {
+      return -1;
+    }
+    return iRes;
+  }
+}
+
+//----------------------------------------------------------------------------------------
+//
+qint32 CTimelineWidgetControls::CurrentCursorPos() const
+{
+  return m_iCursorPos;
+}
+
+//----------------------------------------------------------------------------------------
+//
+qint64 CTimelineWidgetControls::TimeFromCursor() const
+{
+  return m_iCursorTime;
 }
 
 //----------------------------------------------------------------------------------------
@@ -331,14 +378,16 @@ void CTimelineWidgetControls::UpdateCurrentLabel()
 
   if (m_iCursorPos < iGridStartX)
   {
+    m_iCursorTime = -1;
     m_pCurrentLabel->setText("00:00.000");
   }
   else
   {
     const qint32 iPosXRel = m_iCursorPos - iGridStartX;
     const double dPosMsRel = static_cast<double>(m_iPageLengthMs * iPosXRel) / iAvailableWidth;
+    m_iCursorTime = m_iWindowStartMs + static_cast<qint64>(std::round(dPosMsRel));
     m_pCurrentLabel->setText(QTime(0,0)
-                                 .addMSecs(m_iWindowStartMs + static_cast<qint32>(std::round(dPosMsRel)))
+                                 .addMSecs(m_iCursorTime)
                                  .toString("mm:ss.zzz"));
   }
 }

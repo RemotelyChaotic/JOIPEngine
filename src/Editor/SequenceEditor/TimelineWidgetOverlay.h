@@ -13,11 +13,12 @@ public:
   explicit CTimelineWidgetOverlay(CTimelineWidget* pParent = nullptr);
   ~CTimelineWidgetOverlay() override;
 
-  qint32 CurrentDropIndex() const;
-  void SetShowDropIndicator(bool bShow);
   void SetDropIndicationColor(const QColor& col);
   const QColor& DropIndicationColor() const;
 
+  qint32 CurrentDropIndex() const;
+  void SetShowDropIndicator(bool bShow);
+  void SetCurrentTimePosIndicator(qint32 iPos);
   void UpdateDropLine();
 
 protected:
@@ -30,7 +31,8 @@ private:
   QPointer<CTimelineWidget>            m_pParent;
   QColor                               m_pDropIndicationColor;
   QLine                                m_lineDrop;
-  qint32                               m_currentDropIndex = -1;
+  qint32                               m_iCurrentDropIndex = -1;
+  qint32                               m_iCurrentTimePosIndicator = -1;
   bool                                 m_bShowDropIndicator = false;
 };
 

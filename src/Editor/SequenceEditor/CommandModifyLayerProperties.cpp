@@ -7,8 +7,9 @@
 CCommandModifyLayerProperties::CCommandModifyLayerProperties(QPointer<CTimelineWidget> pParent,
                                                              const std::shared_ptr<SSequenceLayer>& layerOld,
                                                              const std::shared_ptr<SSequenceLayer>& layerNew,
-                                                             qint32 iIndex) :
-  QUndoCommand("Changed properties of layer: " + layerOld->m_sName, nullptr),
+                                                             qint32 iIndex,
+                                                             const QString& sCommandDescr) :
+  QUndoCommand("Changed properties of layer: " + sCommandDescr, nullptr),
   m_pParent(pParent),
   m_iIndex(iIndex),
   m_spLayerOld(layerOld),
@@ -53,7 +54,7 @@ bool CCommandModifyLayerProperties::mergeWith(const QUndoCommand* pOther)
 
   m_spLayerNew = pOtherCasted->m_spLayerNew;
 
-  setText(QString("Changed properties of layer: ") + m_spLayerOld->m_sName);
+  setText(QString("Changed multiple properties of layer: ") + m_spLayerOld->m_sName);
   return true;
 }
 

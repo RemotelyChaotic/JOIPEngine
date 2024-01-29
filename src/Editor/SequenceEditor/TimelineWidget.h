@@ -63,6 +63,7 @@ signals:
   void SignalAlternateBackgroundColorChanged();
   void SignalContentsChanged();
   void SignalSelectionColorChanged();
+  void SignalOpenContextMenuAt(QPoint p);
 
 protected:
   void AddLayerTo(qint32 index, const tspSequenceLayer& layer,
@@ -92,6 +93,8 @@ private:
   QSize HeadersSize() const;
   bool IsChildOfLayer(QWidget* pLayer) const;
   void Resize(QSize newSize);
+  void SetSelectedTime();
+  void UpdateTimeSelectionCursor();
 
   std::unique_ptr<Ui::CTimelineWidget> m_spUi;
   tspSequence                          m_spCurrentSequence;

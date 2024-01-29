@@ -33,12 +33,16 @@ public:
   const QColor& OutOfRangeColor() const;
 
   void SetCurrentCursorPos(qint32 iX);
+  void SetCurrentTimeStamp(qint64 iTimeMs);
   void SetCurrentWindow(qint64 iStartMs, qint64 iPageLengthMs);
   void SetHeaderSize(QSize s);
   void SetTimeMaximum(qint64 iTimeMs);
   void ZoomIn();
   void ZoomOut();
 
+  qint32 CursorFromCurrentTime() const;
+  qint32 CurrentCursorPos() const;
+  qint64 TimeFromCursor() const;
   qint32 Zoom() const;
 
   QSize sizeHint() const override;
@@ -64,6 +68,8 @@ private:
   QColor                         m_gridCol;
   QColor                         m_outOfRangeCol;
   qint32                         m_iCursorPos = -1;
+  qint64                         m_iCursorTime = -1;
+  qint64                         m_iSelectedTime = -1;
   qint64                         m_iMaximumSizeMs = timeline::c_iDefaultLength;
   qint64                         m_iPageLengthMs = timeline::c_iDefaultStepSize;
   qint64                         m_iWindowStartMs = 0;

@@ -98,7 +98,6 @@ void CTimelineWidget::setWidget(QWidget* pWidget)
   if (auto pBg = dynamic_cast<CTimelineWidgetBackground*>(pWidget))
   {
     pBg->SetTimelineWidget(this);
-    m_pControls->SetHeaderSize(HeadersSize());
   }
 }
 
@@ -469,6 +468,11 @@ bool CTimelineWidget::eventFilter(QObject* pObj, QEvent* pEvt)
         QWheelEvent* pEvtM = static_cast<QWheelEvent*>(pEvt);
         wheelEvent(pEvtM);
       } break;
+      case QEvent::MouseButtonRelease:
+      {
+        QMouseEvent* pEvtM = static_cast<QMouseEvent*>(pEvt);
+        mouseReleaseEvent(pEvtM);
+      } break;
       default: break;
     }
   }
@@ -544,7 +548,10 @@ void CTimelineWidget::mouseReleaseEvent(QMouseEvent* pEvent)
 {
   if (nullptr != pEvent)
   {
-
+    if (pEvent->button() == Qt::LeftButton)
+    {
+      SetSelectedTime();
+    }
   }
 }
 
@@ -677,7 +684,11 @@ void CTimelineWidget::SlotLayerSelected()
 //
 void CTimelineWidget::SlotLayersInserted()
 {
-  m_pControls->SetHeaderSize(HeadersSize());
+  if (nullptr != m_spCurrentSequence && m_spCurrentSequence->m_vspLayers.size() > 0)
+  {
+    m_pControls->SetHeaderSize(HeadersSize());
+  }
+  UpdateTimeSelectionCursor();
 }
 
 //----------------------------------------------------------------------------------------
@@ -685,6 +696,7 @@ void CTimelineWidget::SlotLayersInserted()
 void CTimelineWidget::SlotScrollbarValueChanged()
 {
   m_pControls->SetCurrentWindow(m_pCustomScrollbar->value(), m_pCustomScrollbar->pageStep());
+  UpdateTimeSelectionCursor();
 }
 
 //----------------------------------------------------------------------------------------
@@ -729,6 +741,7 @@ void CTimelineWidget::SlotZoomChanged(qint32 iZoom)
   m_pCustomScrollbar->setSingleStep(iPageStep / 10);
 
   m_pControls->SetCurrentWindow(m_pCustomScrollbar->value(), m_pCustomScrollbar->pageStep());
+  UpdateTimeSelectionCursor();
 }
 
 //----------------------------------------------------------------------------------------
@@ -817,6 +830,33 @@ void CTimelineWidget::Resize(QSize newSize)
 
   setViewportMargins(0, m_pControls->minimumSizeHint().height(), 0, m_pCustomScrollbar->height());
   SlotZoomChanged(m_pControls->Zoom());
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CTimelineWidget::SetSelectedTime()
+{
+  qint64 iCursorTime = m_pControls->TimeFromCursor();
+  if (-1 < iCursorTime)
+  {
+    m_pControls->SetCurrentTimeStamp(iCursorTime);
+    UpdateTimeSelectionCursor();
+  }
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CTimelineWidget::UpdateTimeSelectionCursor()
+{
+  qint32 iCursor = m_pControls->CursorFromCurrentTime();
+  if (-1 < iCursor)
+  {
+    m_pOverlay->SetCurrentTimePosIndicator(iCursor);
+  }
+  else
+  {
+    m_pOverlay->SetCurrentTimePosIndicator(-1);
+  }
 }
 
 #include "TimelineWidget.moc"

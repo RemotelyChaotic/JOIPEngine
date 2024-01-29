@@ -235,13 +235,16 @@ void CTimelineWidgetLayer::SlotLabelChanged()
 {
   if (nullptr != m_pUndoStack && nullptr != m_spLayer)
   {
+    QString sDescr = QString("%1 -> %2").arg(m_spLayer->m_sName);
     auto spLayerOld = m_spLayer->Clone();
     auto spLayerNew = m_spLayer->Clone();
     spLayerNew->m_sName = m_pNameLineEdit->text();
+    sDescr = sDescr.arg(spLayerNew->m_sName);
     m_pUndoStack->push(new CCommandModifyLayerProperties(
         m_pParent,
         spLayerOld, spLayerNew,
-        m_pParent->IndexOf(this)));
+        m_pParent->IndexOf(this),
+        sDescr));
   }
 }
 
@@ -251,12 +254,15 @@ void CTimelineWidgetLayer::SlotTypeChanged()
 {
   if (nullptr != m_pUndoStack && nullptr != m_spLayer)
   {
+    QString sDescr = QString("%1 -> %2").arg(m_spLayer->m_sLayerType);
     auto spLayerOld = m_spLayer->Clone();
     auto spLayerNew = m_spLayer->Clone();
     spLayerNew->m_sLayerType = m_pLayerTypeCombo->currentData().toString();
+    sDescr = sDescr.arg(spLayerNew->m_sLayerType);
     m_pUndoStack->push(new CCommandModifyLayerProperties(
         m_pParent,
         spLayerOld, spLayerNew,
-        m_pParent->IndexOf(this)));
+        m_pParent->IndexOf(this),
+        sDescr));
   }
 }

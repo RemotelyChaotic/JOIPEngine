@@ -16,7 +16,8 @@ public:
   CCommandModifyLayerProperties(QPointer<CTimelineWidget> pParent,
                                 const std::shared_ptr<SSequenceLayer>& layerOld,
                                 const std::shared_ptr<SSequenceLayer>& layerNew,
-                                qint32 iIndex);
+                                qint32 iIndex,
+                                const QString& sCommandDescr);
   ~CCommandModifyLayerProperties();
 
   void undo() override;
