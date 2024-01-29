@@ -161,12 +161,12 @@ QSize CTimelineWidgetLayer::HeaderSize() const
 //
 void CTimelineWidgetLayer::UpdateUi()
 {
-  if (nullptr != spLayer)
+  if (nullptr != m_spLayer)
   {
     QSignalBlocker b1(m_pLayerTypeCombo);
     QSignalBlocker b2(m_pNameLineEdit);
-    m_pLayerTypeCombo->setCurrentIndex(m_pLayerTypeCombo->findData(spLayer->m_sLayerType, Qt::UserRole));
-    m_pNameLineEdit->setText(spLayer->m_sName);
+    m_pLayerTypeCombo->setCurrentIndex(m_pLayerTypeCombo->findData(m_spLayer->m_sLayerType, Qt::UserRole));
+    m_pNameLineEdit->setText(m_spLayer->m_sName);
   }
 }
 
