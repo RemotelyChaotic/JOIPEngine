@@ -45,13 +45,14 @@ public:
   const QColor& SelectionColor() const;
 
   void AddNewLayer();
-  void AddNewElement(const QString& sId);
+  void AddNewElement(const QString& sId, qint32 iLayer, qint64 iTimestamp);
   void Clear();
   qint32 IndexOf(CTimelineWidgetLayer* pLayer) const;
   CTimelineWidgetLayer* Layer(qint32 iIndex) const;
   qint32 LayerCount() const;
   void RemoveSelectedLayer();
   qint32 SelectedIndex() const;
+  qint64 SelectedTimeStamp() const;
   void SetSequence(const tspSequence& spSeq);
   void SetUndoStack(QPointer<QUndoStack> pUndo);
   void Update();
@@ -63,12 +64,12 @@ public:
 
 public slots:
   void SlotUpdateSequenceProperties();
+  void SlotOpenInsertContextMenuRequested(qint32 iLayerIdx, qint64 iTimestamp, QPoint globalPos);
 
 signals:
   void SignalAlternateBackgroundColorChanged();
   void SignalContentsChanged();
   void SignalSelectionColorChanged();
-  void SignalOpenContextMenuAt(QPoint p);
 
 protected:
   void AddLayerTo(qint32 index, const tspSequenceLayer& layer,
@@ -89,6 +90,7 @@ private slots:
   void SlotUserStartedDrag();
   void SlotLayerSelected();
   void SlotLayersInserted();
+  void SlotOpenInsertContextMenuAt(QPoint p);
   void SlotScrollbarValueChanged();
   void SlotSelectionColorChanged();
   void SlotZoomChanged(qint32 iZoom);
@@ -97,6 +99,7 @@ private:
   QWidget* CreateLayerWidget(const tspSequenceLayer& spLayer) const;
   void ForAllLayers(std::function<void(CTimelineWidgetLayer*,qint32)> fn);
   QSize HeadersSize() const;
+  QString OpenInsertContextMenuAt(const QPoint& currentAddPoint, const QPoint& createPoint);
   bool IsChildOfLayer(QWidget* pLayer) const;
   void Resize(QSize newSize);
   void SetCurrentWindow();

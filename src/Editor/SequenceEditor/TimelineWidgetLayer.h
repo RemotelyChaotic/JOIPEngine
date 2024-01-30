@@ -45,6 +45,7 @@ public:
   void SetTimeMaximum(qint64 iTimeMs);
 
 signals:
+  void SignalOpenInsertContextMenuAt(QPoint p);
   void SignalUserStartedDrag();
   void SignalSelected();
 

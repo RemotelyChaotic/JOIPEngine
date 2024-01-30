@@ -28,8 +28,10 @@ namespace sequence
   const char c_sInstructionIdShow[] = "Show";
   const char c_sInstructionIdPlayVideo[] = "Play Video";
   const char c_sInstructionIdPauseVideo[] = "Pause Video";
+  const char c_sInstructionIdStopVideo[] = "Stop Video";
   const char c_sInstructionIdPlayAudio[] = "Play Audio";
   const char c_sInstructionIdPauseAudio[] = "Pause Audio";
+  const char c_sInstructionIdStopAudio[] = "Stop Audio";
 
   const char c_sCategoryIdText[] = "Text Commands";
   const char c_sInstructionIdShowText[] = "Show Text";
@@ -126,6 +128,10 @@ struct SPauseVideoInstruction : public SSequenceInstruction
 {
   std::shared_ptr<SSequenceInstruction> CloneImpl() override;
 };
+struct SStopVideoInstruction : public SSequenceInstruction
+{
+  std::shared_ptr<SSequenceInstruction> CloneImpl() override;
+};
 struct SPlayAudioInstruction : public SSequenceInstruction
 {
   QString                            m_sResource;
@@ -139,6 +145,14 @@ struct SPlayAudioInstruction : public SSequenceInstruction
   void FromJsonObject(const QJsonObject& json) override;
 };
 struct SPauseAudioInstruction : public SSequenceInstruction
+{
+  QString                            m_sName;
+
+  std::shared_ptr<SSequenceInstruction> CloneImpl() override;
+  QJsonObject ToJsonObject() override;
+  void FromJsonObject(const QJsonObject& json) override;
+};
+struct SStopAudioInstruction : public SSequenceInstruction
 {
   QString                            m_sName;
 

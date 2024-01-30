@@ -75,6 +75,8 @@ CTimelineWidgetLayer::CTimelineWidgetLayer(const tspSequenceLayer& spLayer, CTim
   pLayout->addWidget(m_pHeader);
 
   m_pTimeLineContent = new CTimelineWidgetLayerBackground(this);
+  connect(m_pTimeLineContent, &CTimelineWidgetLayerBackground::SignalOpenInsertContextMenuAt,
+          this, &CTimelineWidgetLayer::SignalOpenInsertContextMenuAt);
   pLayout->addWidget(m_pTimeLineContent);
 
   m_pDropShadow = new CTimeLinewidgetLayerShadow;

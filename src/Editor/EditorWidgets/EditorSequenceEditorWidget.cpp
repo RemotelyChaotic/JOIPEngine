@@ -8,16 +8,10 @@
 #include "Editor/EditorEditableFileModel.h"
 #include "Editor/EditorModel.h"
 
-#include "Editor/SequenceEditor/SequenceEmentList.h"
-
 #include "Systems/Sequence/Sequence.h"
 
-#include "Widgets/SearchWidget.h"
-
 #include <QJsonDocument>
-#include <QMenu>
 #include <QUndoStack>
-#include <QWidgetAction>
 
 DECLARE_EDITORWIDGET(CEditorPatternEditorWidget, EEditorWidget::ePatternEditor)
 
@@ -322,10 +316,12 @@ void CEditorPatternEditorWidget::SlotAddSequenceElementButtonClicked()
 {
   WIDGET_INITIALIZED_GUARD
   if (nullptr == m_spCurrentProject) { return; }
+  if (EditorModel()->IsReadOnly()) { return; }
 
-  OpenContextMenuAt(QPoint(0, 0),
-                    m_spUi->pPreviewWidget->parentWidget()->mapToGlobal(
-                        m_spUi->pPreviewWidget->pos()));
+  m_spUi->pTimeLineWidget->SlotOpenInsertContextMenuRequested(
+      m_spUi->pTimeLineWidget->SelectedIndex(),
+      m_spUi->pTimeLineWidget->SelectedTimeStamp(),
+      mapToGlobal(QPoint(0, 0)));
 }
 
 //----------------------------------------------------------------------------------------
@@ -343,48 +339,6 @@ QString CEditorPatternEditorWidget::CachedResourceName(qint32 iIndex)
   return EditableFileModel()->CachedResourceName(
       m_pFilteredScriptModel->mapToSource(
           m_pFilteredScriptModel->index(iIndex, 0)).row());
-}
-
-//----------------------------------------------------------------------------------------
-//
-void CEditorPatternEditorWidget::OpenContextMenuAt(const QPoint& localPoint,
-                                                   const QPoint& createPoint)
-{
-  if (EditorModel()->IsReadOnly()) { return; }
-
-  QMenu modelMenu;
-
-  //Add filterbox to the context menu
-  auto* pTxtBox = new CSearchWidget(&modelMenu);
-  auto* pTxtBoxAction = new QWidgetAction(&modelMenu);
-  pTxtBoxAction->setDefaultWidget(pTxtBox);
-
-  modelMenu.addAction(pTxtBoxAction);
-
-  //Add to the context menu
-  auto* pListView = new CSequenceEmentList(&modelMenu);
-  auto* pListViewAction = new QWidgetAction(&modelMenu);
-  pListViewAction->setDefaultWidget(pListView);
-  pListView->Initialize();
-
-  modelMenu.addAction(pListViewAction);
-
-  //Setup filtering
-  connect(pTxtBox, &CSearchWidget::SignalFilterChanged, pTxtBox, [&](const QString &text)
-          {
-            pListView->SetFilter(text);
-          });
-
-  connect(pListView, &CSequenceEmentList::SignalSelectedItem, pListView,
-          [&](const QString& sId)
-          {
-            m_spUi->pTimeLineWidget->AddNewElement(sId);
-            modelMenu.close();
-          });
-
-  pTxtBox->setFocus();
-
-  modelMenu.exec(createPoint);
 }
 
 //----------------------------------------------------------------------------------------

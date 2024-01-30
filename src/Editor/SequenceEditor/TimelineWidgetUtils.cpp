@@ -1,5 +1,7 @@
 #include "TimelineWidgetUtils.h"
 
+#include "Systems/Sequence/Sequence.h"
+
 #include <QTime>
 
 void timeline::PaintUnusedAreaRect(QPainter* pPainter,
@@ -146,4 +148,39 @@ qint64 timeline::PositionFromTime(qint32 iGridStartX, qint32 iAvailableWidth, qi
     }
     return iRes;
   }
+}
+
+//----------------------------------------------------------------------------------------
+//
+std::pair<timeline::EInstructionVisualisationType, qint32>
+timeline::InstructionVisualisationType(const QString& sType)
+{
+  // see TimelineWidgetLayerBackground.cpp CTimelineWidgetLayerBackground::paintEvent
+  // the values on the right must be in the lookup
+  static std::map<QString, std::pair<EInstructionVisualisationType, qint32>> c_visuTypeMap = {
+    {sequence::c_sInstructionIdBeat, {EInstructionVisualisationType::eSingle, -1}},
+    {sequence::c_sInstructionIdStartPattern, {EInstructionVisualisationType::eOpening, 1}},
+    {sequence::c_sInstructionIdStopPattern, {EInstructionVisualisationType::eClosing, 1}},
+    {sequence::c_sInstructionIdVibrate, {EInstructionVisualisationType::eOpening, 1}},
+    {sequence::c_sInstructionIdLinearToy, {EInstructionVisualisationType::eOpening, 2}},
+    {sequence::c_sInstructionIdRotateToy, {EInstructionVisualisationType::eOpening, 4}},
+    {sequence::c_sInstructionIdStopVibrations, {EInstructionVisualisationType::eClosing, 7}},
+    {sequence::c_sInstructionIdShow, {EInstructionVisualisationType::eSingle, -1}},
+    {sequence::c_sInstructionIdPlayVideo, {EInstructionVisualisationType::eOpening, 1}},
+    {sequence::c_sInstructionIdPauseVideo, {EInstructionVisualisationType::eSingle, 1}},
+    {sequence::c_sInstructionIdStopVideo, {EInstructionVisualisationType::eClosing, 1}},
+    {sequence::c_sInstructionIdPlayAudio, {EInstructionVisualisationType::eOpening, 2}},
+    {sequence::c_sInstructionIdPauseAudio,{EInstructionVisualisationType::eSingle, 2}},
+    {sequence::c_sInstructionIdStopAudio, {EInstructionVisualisationType::eClosing, 2}},
+    {sequence::c_sInstructionIdShowText, {EInstructionVisualisationType::eSingle, -1}},
+    {sequence::c_sInstructionIdRunScript, {EInstructionVisualisationType::eSingle, -1}},
+    {sequence::c_sInstructionIdEval, {EInstructionVisualisationType::eSingle, -1}}
+  };
+
+  auto it = c_visuTypeMap.find(sType);
+  if (c_visuTypeMap.end() != it)
+  {
+    return it->second;
+  }
+  return { EInstructionVisualisationType::eNoInstructionType, -1 };
 }

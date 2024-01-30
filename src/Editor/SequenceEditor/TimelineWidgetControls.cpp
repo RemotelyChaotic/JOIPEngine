@@ -87,6 +87,13 @@ const QColor& CTimelineWidgetControls::OutOfRangeColor() const
 
 //----------------------------------------------------------------------------------------
 //
+qint64 CTimelineWidgetControls::CurrentTimeStamp() const
+{
+  return m_iSelectedTime;
+}
+
+//----------------------------------------------------------------------------------------
+//
 void CTimelineWidgetControls::SetCurrentCursorPos(qint32 iX)
 {
   if (m_iCursorPos != iX)

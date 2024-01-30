@@ -27,6 +27,7 @@ public:
   void SetOutOfRangeColor(const QColor& col);
   const QColor& OutOfRangeColor() const;
 
+  qint64 CurrentTimeStamp() const;
   void SetCurrentCursorPos(qint32 iX);
   void SetCurrentTimeStamp(qint64 iTimeMs);
   void SetCurrentWindow(qint64 iStartMs, qint64 iPageLengthMs);

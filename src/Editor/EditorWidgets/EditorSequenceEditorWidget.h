@@ -51,7 +51,6 @@ protected slots:
 
 private:
   QString CachedResourceName(qint32 iIndex);
-  void OpenContextMenuAt(const QPoint& currentAddPoint, const QPoint& createPoint);
   void ReloadEditor(qint32 iIndex);
 
   std::unique_ptr<Ui::CEditorSequenceEditorWidget> m_spUi;

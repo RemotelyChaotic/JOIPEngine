@@ -6,11 +6,16 @@
 #include "TimelineWidgetOverlay.h"
 #include "ui_TimelineWidget.h"
 
+#include "Editor/SequenceEditor/SequenceEmentList.h"
+
+#include "Widgets/SearchWidget.h"
+
 #include <QDebug>
 #include <QDrag>
 #include <QDragEnterEvent>
 #include <QDragMoveEvent>
 #include <QDragLeaveEvent>
+#include <QMenu>
 #include <QMimeData>
 #include <QPainter>
 #include <QPaintEvent>
@@ -18,6 +23,7 @@
 #include <QScrollBar>
 #include <QVBoxLayout>
 #include <QWheelEvent>
+#include <QWidgetAction>
 
 namespace
 {
@@ -207,7 +213,7 @@ void CTimelineWidget::AddNewLayer()
 
 //----------------------------------------------------------------------------------------
 //
-void CTimelineWidget::AddNewElement(const QString& sId)
+void CTimelineWidget::AddNewElement(const QString& sId, qint32 iLayer, qint64 iTimestamp)
 {
   Q_UNUSED(sId)
 }
@@ -317,6 +323,13 @@ qint32 CTimelineWidget::SelectedIndex() const
 
 //----------------------------------------------------------------------------------------
 //
+qint64 CTimelineWidget::SelectedTimeStamp() const
+{
+  return m_pControls->CurrentTimeStamp();
+}
+
+//----------------------------------------------------------------------------------------
+//
 void CTimelineWidget::SetSequence(const tspSequence& spSeq)
 {
   m_spCurrentSequence = spSeq;
@@ -402,6 +415,22 @@ QSize CTimelineWidget::minimumSizeHint() const
 QSize CTimelineWidget::sizeHint() const
 {
   return QScrollArea::sizeHint();
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CTimelineWidget::SlotOpenInsertContextMenuRequested(
+    qint32 iLayerIdx, qint64 iTimestamp, QPoint globalPos)
+{
+  if (nullptr == m_spCurrentSequence) { return; }
+  if (m_spCurrentSequence->m_vspLayers.size() <= iLayerIdx || 0 > iLayerIdx) { return; }
+  if (m_spCurrentSequence->m_iLengthMili <= iTimestamp || 0 > iTimestamp) { return; }
+
+  QString sId = OpenInsertContextMenuAt(QPoint(0, 0), globalPos);
+  if (!sId.isEmpty())
+  {
+    AddNewElement(sId, iLayerIdx, iTimestamp);
+  }
 }
 
 //----------------------------------------------------------------------------------------
@@ -707,6 +736,16 @@ void CTimelineWidget::SlotLayersInserted()
 
 //----------------------------------------------------------------------------------------
 //
+void CTimelineWidget::SlotOpenInsertContextMenuAt(QPoint p)
+{
+  qint32 iIndex = IndexOf(qobject_cast<CTimelineWidgetLayer*>(sender()));
+  SetSelectedTime();
+  qint64 iTime = m_pControls->CurrentTimeStamp();
+  SlotOpenInsertContextMenuRequested(iIndex, iTime, p);
+}
+
+//----------------------------------------------------------------------------------------
+//
 void CTimelineWidget::SlotScrollbarValueChanged()
 {
   SetCurrentWindow();
@@ -759,9 +798,11 @@ QWidget* CTimelineWidget::CreateLayerWidget(const tspSequenceLayer& spLayer) con
           this, &CTimelineWidget::SlotUserStartedDrag, Qt::QueuedConnection);
   connect(pWidget, &CTimelineWidgetLayer::SignalSelected,
           this, &CTimelineWidget::SlotLayerSelected, Qt::QueuedConnection);
-  for (QWidget* pW : QObject::findChildren<QWidget*>())
+  connect(pWidget, &CTimelineWidgetLayer::SignalOpenInsertContextMenuAt,
+          this, &CTimelineWidget::SlotOpenInsertContextMenuAt, Qt::QueuedConnection);
+  for (QWidget* pW : pWidget->findChildren<QWidget*>())
   {
-    pWidget->installEventFilter(const_cast<CTimelineWidget*>(this));
+    pW->installEventFilter(const_cast<CTimelineWidget*>(this));
     pW->setMouseTracking(true);
   }
   pWidget->installEventFilter(const_cast<CTimelineWidget*>(this));
@@ -806,6 +847,47 @@ QSize CTimelineWidget::HeadersSize() const
     s.setHeight(std::max(s.height(), s2.height()));
   });
   return s;
+}
+
+//----------------------------------------------------------------------------------------
+//
+QString CTimelineWidget::OpenInsertContextMenuAt(const QPoint& currentAddPoint, const QPoint& createPoint)
+{
+  QMenu modelMenu;
+
+  //Add filterbox to the context menu
+  auto* pTxtBox = new CSearchWidget(&modelMenu);
+  auto* pTxtBoxAction = new QWidgetAction(&modelMenu);
+  pTxtBoxAction->setDefaultWidget(pTxtBox);
+
+  modelMenu.addAction(pTxtBoxAction);
+
+  //Add to the context menu
+  auto* pListView = new CSequenceEmentList(&modelMenu);
+  auto* pListViewAction = new QWidgetAction(&modelMenu);
+  pListViewAction->setDefaultWidget(pListView);
+  pListView->Initialize();
+
+  modelMenu.addAction(pListViewAction);
+
+  //Setup filtering
+  connect(pTxtBox, &CSearchWidget::SignalFilterChanged, pTxtBox, [&](const QString &text)
+          {
+            pListView->SetFilter(text);
+          });
+
+  QString sRetVal;
+  connect(pListView, &CSequenceEmentList::SignalSelectedItem, pListView,
+          [&](const QString& sId)
+          {
+            sRetVal = sId;
+            modelMenu.close();
+          });
+
+  pTxtBox->setFocus();
+
+  modelMenu.exec(createPoint);
+  return sRetVal;
 }
 
 //----------------------------------------------------------------------------------------

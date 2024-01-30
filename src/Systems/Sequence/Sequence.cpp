@@ -192,6 +192,13 @@ namespace
     return spInstr;
   }
 
+  std::shared_ptr<SSequenceInstruction> CreateStopVideoInstruction(const QVariantList& vArgs)
+  {
+    std::shared_ptr<SStopVideoInstruction> spInstr = std::make_shared<SStopVideoInstruction>();
+    spInstr->m_sInstructionType = sequence::c_sInstructionIdStopVideo;
+    return spInstr;
+  }
+
   std::shared_ptr<SSequenceInstruction> CreatePlayAudioInstruction(const QVariantList& vArgs)
   {
     std::shared_ptr<SPlayAudioInstruction> spInstr = std::make_shared<SPlayAudioInstruction>();
@@ -238,6 +245,17 @@ namespace
   {
     std::shared_ptr<SPauseAudioInstruction> spInstr = std::make_shared<SPauseAudioInstruction>();
     spInstr->m_sInstructionType = sequence::c_sInstructionIdPauseAudio;
+    if (vArgs.size() > 0)
+    {
+      spInstr->m_sName = vArgs[0].toString();
+    }
+    return spInstr;
+  }
+
+  std::shared_ptr<SSequenceInstruction> CreateStopAudioInstruction(const QVariantList& vArgs)
+  {
+    std::shared_ptr<SStopAudioInstruction> spInstr = std::make_shared<SStopAudioInstruction>();
+    spInstr->m_sInstructionType = sequence::c_sInstructionIdStopAudio;
     if (vArgs.size() > 0)
     {
       spInstr->m_sName = vArgs[0].toString();
@@ -322,8 +340,10 @@ namespace
       { QString(sequence::c_sInstructionIdShow), CreateShowInstruction },
       { QString(sequence::c_sInstructionIdPlayVideo), CreatePlayVideoInstruction },
       { QString(sequence::c_sInstructionIdPauseVideo), CreatePauseVideoInstruction },
+      { QString(sequence::c_sInstructionIdStopVideo), CreateStopVideoInstruction },
       { QString(sequence::c_sInstructionIdPlayAudio), CreatePlayAudioInstruction },
       { QString(sequence::c_sInstructionIdPauseAudio), CreatePauseAudioInstruction },
+      { QString(sequence::c_sInstructionIdStopAudio), CreateStopAudioInstruction },
 
       { QString(sequence::c_sInstructionIdShowText), CreateTextInstruction },
 
@@ -628,6 +648,14 @@ std::shared_ptr<SSequenceInstruction> SPauseVideoInstruction::CloneImpl()
 
 //--------------------------------------------------------------------------------------
 //
+std::shared_ptr<SSequenceInstruction> SStopVideoInstruction::CloneImpl()
+{
+  std::shared_ptr<SStopVideoInstruction> spClone = std::make_shared<SStopVideoInstruction>();
+  return spClone;
+}
+
+//--------------------------------------------------------------------------------------
+//
 std::shared_ptr<SSequenceInstruction> SPlayAudioInstruction::CloneImpl()
 {
   std::shared_ptr<SPlayAudioInstruction> spClone = std::make_shared<SPlayAudioInstruction>();
@@ -705,6 +733,30 @@ QJsonObject SPauseAudioInstruction::ToJsonObject()
   return obj;
 }
 void SPauseAudioInstruction::FromJsonObject(const QJsonObject& json)
+{
+  SSequenceInstruction::FromJsonObject(json);
+  auto it = json.find("sName");
+  if (it != json.end())
+  {
+    m_sName = it.value().toString();
+  }
+}
+
+//--------------------------------------------------------------------------------------
+//
+std::shared_ptr<SSequenceInstruction> SStopAudioInstruction::CloneImpl()
+{
+  std::shared_ptr<SStopAudioInstruction> spClone = std::make_shared<SStopAudioInstruction>();
+  spClone->m_sName = m_sName;
+  return spClone;
+}
+QJsonObject SStopAudioInstruction::ToJsonObject()
+{
+  QJsonObject obj = SSequenceInstruction::ToJsonObject();
+  obj["sName"] = m_sName;
+  return obj;
+}
+void SStopAudioInstruction::FromJsonObject(const QJsonObject& json)
 {
   SSequenceInstruction::FromJsonObject(json);
   auto it = json.find("sName");
