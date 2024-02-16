@@ -32,6 +32,9 @@ namespace timeline
   };
 
   std::pair<EInstructionVisualisationType, qint32> InstructionVisualisationType(const QString& sType);
+
+  qint64 GetTimeFromCursorPos(qint32 posX, qint32 iGridStartX, qint32 iAvailableWidth,
+                              qint64 iWindowStartMs, qint64 iMaximumSizeMs, qint64 iPageLengthMs);
 }
 
 #endif // CTIMELINEWIDGETUTILS_H

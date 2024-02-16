@@ -48,6 +48,7 @@ void CEditorPatternEditorWidget::Initialize()
 {
   m_bInitialized = false;
 
+  m_spUi->pTimeLineWidget->SetResourceModel(ResourceTreeModel());
   m_spUi->pTimeLineWidget->SetUndoStack(UndoStack());
 
   EditableFileModel()->SetReloadFileWithoutQuestion(true);
@@ -330,6 +331,8 @@ void CEditorPatternEditorWidget::SlotRemoveSequenceElementsButtonClicked()
 {
   WIDGET_INITIALIZED_GUARD
   if (nullptr == m_spCurrentProject) { return; }
+
+  m_spUi->pTimeLineWidget->RemoveSelectedElement();
 }
 
 //----------------------------------------------------------------------------------------

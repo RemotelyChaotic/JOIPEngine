@@ -215,7 +215,11 @@ void CTimelineWidget::AddNewLayer()
 //
 void CTimelineWidget::AddNewElement(const QString& sId, qint32 iLayer, qint64 iTimestamp)
 {
-  Q_UNUSED(sId)
+  auto pLayer = Layer(iLayer);
+  if (nullptr != pLayer)
+  {
+    pLayer->AddNewElement(sId, iTimestamp);
+  }
 }
 
 //----------------------------------------------------------------------------------------
@@ -298,7 +302,7 @@ void CTimelineWidget::RemoveSelectedLayer()
   if (nullptr != m_pUndoStack && nullptr != m_spCurrentSequence)
   {
     if (0 <= m_iSelectedIndex &&
-        m_spCurrentSequence->m_vspLayers.size() < static_cast<size_t>(m_iSelectedIndex))
+        m_spCurrentSequence->m_vspLayers.size() > static_cast<size_t>(m_iSelectedIndex))
     {
       auto spLayer = m_spCurrentSequence->m_vspLayers[static_cast<size_t>(m_iSelectedIndex)];
       m_pUndoStack->push(
@@ -316,6 +320,20 @@ void CTimelineWidget::RemoveSelectedLayer()
 
 //----------------------------------------------------------------------------------------
 //
+void CTimelineWidget::RemoveSelectedElement()
+{
+  if (nullptr != m_spCurrentSequence)
+  {
+    auto pLayer = Layer(m_iSelectedIndex);
+    if (nullptr != pLayer)
+    {
+      pLayer->RemoveSelectedElement();
+    }
+  }
+}
+
+//----------------------------------------------------------------------------------------
+//
 qint32 CTimelineWidget::SelectedIndex() const
 {
   return m_iSelectedIndex;
@@ -326,6 +344,13 @@ qint32 CTimelineWidget::SelectedIndex() const
 qint64 CTimelineWidget::SelectedTimeStamp() const
 {
   return m_pControls->CurrentTimeStamp();
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CTimelineWidget::SetResourceModel(QPointer<CResourceTreeItemModel> pEditorModel)
+{
+  m_pEditorModel = pEditorModel;
 }
 
 //----------------------------------------------------------------------------------------
@@ -426,7 +451,10 @@ void CTimelineWidget::SlotOpenInsertContextMenuRequested(
   if (m_spCurrentSequence->m_vspLayers.size() <= iLayerIdx || 0 > iLayerIdx) { return; }
   if (m_spCurrentSequence->m_iLengthMili <= iTimestamp || 0 > iTimestamp) { return; }
 
-  QString sId = OpenInsertContextMenuAt(QPoint(0, 0), globalPos);
+  QString sLayerType =
+      m_spCurrentSequence->m_vspLayers[static_cast<size_t>(iLayerIdx)]->m_sLayerType;
+
+  QString sId = OpenInsertContextMenuAt(QPoint(0, 0), globalPos, sLayerType);
   if (!sId.isEmpty())
   {
     AddNewElement(sId, iLayerIdx, iTimestamp);
@@ -716,6 +744,8 @@ void CTimelineWidget::SlotLayerSelected()
       }
       else
       {
+        pLayer->ClearSelection();
+        pLayer->CloseConfigOverlay();
         pLayer->SetHighlight(QColor(), QColor());
       }
     }
@@ -736,12 +766,10 @@ void CTimelineWidget::SlotLayersInserted()
 
 //----------------------------------------------------------------------------------------
 //
-void CTimelineWidget::SlotOpenInsertContextMenuAt(QPoint p)
+void CTimelineWidget::SlotOpenInsertContextMenuAt(QPoint p, qint64 iCursorTime)
 {
   qint32 iIndex = IndexOf(qobject_cast<CTimelineWidgetLayer*>(sender()));
-  SetSelectedTime();
-  qint64 iTime = m_pControls->CurrentTimeStamp();
-  SlotOpenInsertContextMenuRequested(iIndex, iTime, p);
+  SlotOpenInsertContextMenuRequested(iIndex, iCursorTime, p);
 }
 
 //----------------------------------------------------------------------------------------
@@ -793,7 +821,8 @@ void CTimelineWidget::SlotZoomChanged(qint32 iZoom)
 QWidget* CTimelineWidget::CreateLayerWidget(const tspSequenceLayer& spLayer) const
 {
   auto pWidget =
-      new CTimelineWidgetLayer(spLayer, const_cast<CTimelineWidget*>(this), widget());
+      new CTimelineWidgetLayer(spLayer, const_cast<CTimelineWidget*>(this), widget(),
+                               m_pEditorModel);
   connect(pWidget, &CTimelineWidgetLayer::SignalUserStartedDrag,
           this, &CTimelineWidget::SlotUserStartedDrag, Qt::QueuedConnection);
   connect(pWidget, &CTimelineWidgetLayer::SignalSelected,
@@ -851,7 +880,8 @@ QSize CTimelineWidget::HeadersSize() const
 
 //----------------------------------------------------------------------------------------
 //
-QString CTimelineWidget::OpenInsertContextMenuAt(const QPoint& currentAddPoint, const QPoint& createPoint)
+QString CTimelineWidget::OpenInsertContextMenuAt(const QPoint& currentAddPoint, const QPoint& createPoint,
+                                                 const QString& sLayerType)
 {
   QMenu modelMenu;
 
@@ -864,6 +894,7 @@ QString CTimelineWidget::OpenInsertContextMenuAt(const QPoint& currentAddPoint, 
 
   //Add to the context menu
   auto* pListView = new CSequenceEmentList(&modelMenu);
+  pListView->SetAllowedCategories(QStringList() << sLayerType);
   auto* pListViewAction = new QWidgetAction(&modelMenu);
   pListViewAction->setDefaultWidget(pListView);
   pListView->Initialize();

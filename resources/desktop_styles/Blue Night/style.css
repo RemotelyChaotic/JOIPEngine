@@ -1269,7 +1269,14 @@ CTimelineWidgetLayer {
   min-height: 70;
   max-height: 70;
   
+  qproperty-selectionColor: white;
   qproperty-timelineBackgroundColor: rgb(19, 28, 40);
+}
+
+CTimelineWidgetLayerBackground {
+  qproperty-iconWidth: 10;
+  qproperty-iconHeight: 10;
+  qproperty-instructionConnectorColor: white;
 }
 
 /*

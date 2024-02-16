@@ -40,14 +40,20 @@ namespace
         }
       }
     }
-    if (vArgs.size() > 1 && vArgs[1].type() == QVariant::String)
+    if (vArgs.size() > 1 && vArgs[1].type() == QVariant::Int)
     {
-      spInstr->m_sResource = vArgs[1].toString();
+      spInstr->m_iBpm = vArgs[1].toInt();
     }
-    if (vArgs.size() > 2)
+    qint32 iCounter = 2;
+    if (vArgs.size() > iCounter && vArgs[iCounter].type() == QVariant::String)
+    {
+      spInstr->m_sResource = vArgs[iCounter].toString();
+      iCounter++;
+    }
+    if (vArgs.size() > iCounter && vArgs[iCounter].type() == QVariant::Double)
     {
       bool bOk = false;
-      double dVal = vArgs[2].toDouble(&bOk);
+      double dVal = vArgs[iCounter].toDouble(&bOk);
       if (bOk)
       {
         spInstr->m_dVolume = dVal;
@@ -155,32 +161,36 @@ namespace
     {
       spInstr->m_sResource = vArgs[0].toString();
     }
-    if (vArgs.size() > 1)
+    qint32 iCurrent = 1;
+    if (vArgs.size() > iCurrent && vArgs[iCurrent].type() == QVariant::LongLong)
     {
       bool bOk = false;
-      qint64 iVal = vArgs[1].toLongLong(&bOk);
+      qint64 iVal = vArgs[iCurrent].toLongLong(&bOk);
       if (bOk)
       {
         spInstr->m_iLoops = iVal;
       }
+      iCurrent++;
     }
-    if (vArgs.size() > 2)
+    if (vArgs.size() > iCurrent && vArgs[iCurrent].type() == QVariant::LongLong)
     {
       bool bOk = false;
-      qint64 iVal = vArgs[2].toLongLong(&bOk);
+      qint64 iVal = vArgs[iCurrent].toLongLong(&bOk);
       if (bOk)
       {
         spInstr->m_iStartAt = iVal;
       }
+      iCurrent++;
     }
-    if (vArgs.size() > 3)
+    if (vArgs.size() > iCurrent && vArgs[iCurrent].type() == QVariant::LongLong)
     {
       bool bOk = false;
-      qint64 iVal = vArgs[3].toLongLong(&bOk);
+      qint64 iVal = vArgs[iCurrent].toLongLong(&bOk);
       if (bOk)
       {
         spInstr->m_iEndAt = iVal;
       }
+      iCurrent++;
     }
     return spInstr;
   }
@@ -207,36 +217,41 @@ namespace
     {
       spInstr->m_sResource = vArgs[0].toString();
     }
-    if (vArgs.size() > 1)
+    qint32 iCurrent = 1;
+    if (vArgs.size() > iCurrent && vArgs[iCurrent].type() == QVariant::String)
     {
-      spInstr->m_sName = vArgs[1].toString();
+      spInstr->m_sName = vArgs[iCurrent].toString();
+      iCurrent++;
     }
-    if (vArgs.size() > 2)
+    if (vArgs.size() > iCurrent && vArgs[iCurrent].type() == QVariant::LongLong)
     {
       bool bOk = false;
-      qint64 iVal = vArgs[2].toLongLong(&bOk);
+      qint64 iVal = vArgs[iCurrent].toLongLong(&bOk);
       if (bOk)
       {
         spInstr->m_iLoops = iVal;
       }
+      iCurrent++;
     }
-    if (vArgs.size() > 3)
+    if (vArgs.size() > iCurrent && vArgs[iCurrent].type() == QVariant::LongLong)
     {
       bool bOk = false;
-      qint64 iVal = vArgs[3].toLongLong(&bOk);
+      qint64 iVal = vArgs[iCurrent].toLongLong(&bOk);
       if (bOk)
       {
         spInstr->m_iStartAt = iVal;
       }
+      iCurrent++;
     }
-    if (vArgs.size() > 4)
+    if (vArgs.size() > iCurrent && vArgs[iCurrent].type() == QVariant::LongLong)
     {
       bool bOk = false;
-      qint64 iVal = vArgs[4].toLongLong(&bOk);
+      qint64 iVal = vArgs[iCurrent].toLongLong(&bOk);
       if (bOk)
       {
         spInstr->m_iEndAt = iVal;
       }
+      iCurrent++;
     }
     return spInstr;
   }
@@ -290,7 +305,7 @@ namespace
     }
     if (vArgs.size() > 4)
     {
-      spInstr->m_textColor = vArgs[4].value<QColor>();
+      spInstr->m_bgColor = vArgs[4].value<QColor>();
     }
     if (vArgs.size() > 5)
     {
@@ -330,7 +345,7 @@ namespace
     {
       { QString(sequence::c_sInstructionIdBeat), CreateBeatInstruction },
       { QString(sequence::c_sInstructionIdStartPattern), CreateStartPatternInstruction },
-      { QString(sequence::c_sInstructionIdStartPattern), CreateStopPatternInstruction },
+      { QString(sequence::c_sInstructionIdStopPattern), CreateStopPatternInstruction },
 
       { QString(sequence::c_sInstructionIdVibrate), CreateVibrateInstruction },
       { QString(sequence::c_sInstructionIdLinearToy), CreateLinearToyInstruction },
@@ -410,6 +425,7 @@ std::shared_ptr<SSequenceInstruction> SStartPatternInstruction::CloneImpl()
 {
   std::shared_ptr<SStartPatternInstruction> spClone = std::make_shared<SStartPatternInstruction>();
   spClone->m_vdPattern = m_vdPattern;
+  spClone->m_iBpm = m_iBpm;
   spClone->m_sResource = m_sResource;
   spClone->m_dVolume = m_dVolume;
   return spClone;
@@ -423,6 +439,7 @@ QJsonObject SStartPatternInstruction::ToJsonObject()
     pattern.push_back(dVal);
   }
   obj["vdPattern"] = pattern;
+  obj["iBpm"] = m_iBpm;
   if (m_sResource.has_value())
   {
     obj["sResource"] = *m_sResource;
@@ -445,6 +462,11 @@ void SStartPatternInstruction::FromJsonObject(const QJsonObject& json)
       double dVal = val.toDouble();
       m_vdPattern.push_back(dVal);
     }
+  }
+  it = json.find("iBpm");
+  if (it != json.end())
+  {
+    m_iBpm = it.value().toInt();
   }
   it = json.find("sResource");
   if (it != json.end())
@@ -782,7 +804,10 @@ std::shared_ptr<SSequenceInstruction> SShowTextInstruction::CloneImpl()
 QJsonObject SShowTextInstruction::ToJsonObject()
 {
   QJsonObject obj = SSequenceInstruction::ToJsonObject();
-  obj["sText"] = m_sText;
+  if (m_sText.has_value())
+  {
+    obj["sText"] = m_sText.value();
+  }
   if (m_dSkippableWaitS.has_value())
   {
     obj["dSkippableWaitS"] = *m_dSkippableWaitS;

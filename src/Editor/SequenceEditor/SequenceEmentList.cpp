@@ -188,6 +188,11 @@ CSequenceEmentList::CSequenceEmentList(QWidget *parent) :
   QTreeView{parent},
   m_pModel(new CSqeuenceElementListModel(this))
 {
+  for (const auto& [_, sCategory] : c_vsAllCategoryStrings)
+  {
+    m_vsCategories << sCategory;
+  }
+
   m_pSortFilter = new CSqeuenceElementSortFilterProxyModel(this);
   m_pSortFilter->setSourceModel(m_pModel);
   setModel(m_pSortFilter);
@@ -209,9 +214,12 @@ void CSequenceEmentList::Initialize()
 {
   for (const auto& [category, sCategory] : c_vsAllCategoryStrings)
   {
-    QStandardItem* pItem = new QStandardItem(sCategory);
-    AddChildrenToCategory(pItem, category);
-    m_pModel->appendRow(pItem);
+    if (m_vsCategories.contains(sCategory))
+    {
+      QStandardItem* pItem = new QStandardItem(sCategory);
+      AddChildrenToCategory(pItem, category);
+      m_pModel->appendRow(pItem);
+    }
   }
 
   ExpandAll();
@@ -231,6 +239,13 @@ void CSequenceEmentList::ExpandAll()
   IterateItems(QModelIndex(), [this](const QModelIndex& idx) {
     expand(idx);
   });
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CSequenceEmentList::SetAllowedCategories(const QStringList& vsCategories)
+{
+  m_vsCategories = vsCategories;
 }
 
 //----------------------------------------------------------------------------------------

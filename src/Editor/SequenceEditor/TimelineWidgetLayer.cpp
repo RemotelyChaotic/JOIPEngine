@@ -1,5 +1,6 @@
 #include "TimelineWidgetLayer.h"
 #include "CommandModifyLayerProperties.h"
+#include "TimelineSeqeunceInstructionConfigOverlay.h"
 #include "TimelineWidget.h"
 #include "TimelineWidgetLayerBackground.h"
 
@@ -37,11 +38,19 @@ protected:
 //----------------------------------------------------------------------------------------
 //
 CTimelineWidgetLayer::CTimelineWidgetLayer(const tspSequenceLayer& spLayer, CTimelineWidget* pParent,
-                                           QWidget* pWidgetParent) :
+                                           QWidget* pWidgetParent, QPointer<CResourceTreeItemModel> pItemModel) :
   QFrame{pWidgetParent},
   m_spLayer(spLayer),
-  m_pParent(pParent)
+  m_pEditorModel(pItemModel),
+  m_pParent(pParent),
+  m_selectionColor(Qt::white)
 {
+  std::sort(m_spLayer->m_vspInstructions.begin(), m_spLayer->m_vspInstructions.end(),
+            [](const sequence::tTimedInstruction& a, const sequence::tTimedInstruction& b){
+              return a.first < b.first;
+            });
+
+  qApp->installEventFilter(this);
   setSizePolicy(QSizePolicy(QSizePolicy::Preferred, QSizePolicy::Fixed));
 
   QHBoxLayout* pLayout = new QHBoxLayout(this);
@@ -77,13 +86,20 @@ CTimelineWidgetLayer::CTimelineWidgetLayer(const tspSequenceLayer& spLayer, CTim
   m_pTimeLineContent = new CTimelineWidgetLayerBackground(this);
   connect(m_pTimeLineContent, &CTimelineWidgetLayerBackground::SignalOpenInsertContextMenuAt,
           this, &CTimelineWidgetLayer::SignalOpenInsertContextMenuAt);
+  connect(m_pTimeLineContent, &CTimelineWidgetLayerBackground::SignalEditInstruction,
+          this, &CTimelineWidgetLayer::SlotSelectedInstruction);
   pLayout->addWidget(m_pTimeLineContent);
 
   m_pDropShadow = new CTimeLinewidgetLayerShadow;
   m_pDropShadow->setOffset(0, 0);
   m_pDropShadow->setBlurRadius(20);
-  m_pDropShadow->setColor(Qt::white);
+  m_pDropShadow->setColor(m_selectionColor);
   m_pDropShadow->SetEnabled(false);
+
+  m_pConfigOverlay = new CTimelineSeqeunceInstructionConfigOverlay(this);
+  m_pConfigOverlay->Hide();
+  connect(m_pConfigOverlay, &CTimelineSeqeunceInstructionConfigOverlay::SignalCurrentItemChanged,
+          this, &CTimelineWidgetLayer::SlotInstructionChanged);
 
   setGraphicsEffect(m_pDropShadow);
 
@@ -121,6 +137,22 @@ const QColor& CTimelineWidgetLayer::OutOfRangeColor() const
 
 //----------------------------------------------------------------------------------------
 //
+void CTimelineWidgetLayer::SetSelectionColor(const QColor& col)
+{
+  m_selectionColor = col;
+  m_pDropShadow->setColor(m_selectionColor);
+  m_pTimeLineContent->SetSelectionColor(col);
+}
+
+//----------------------------------------------------------------------------------------
+//
+const QColor& CTimelineWidgetLayer::SelectionColor() const
+{
+  return m_selectionColor;
+}
+
+//----------------------------------------------------------------------------------------
+//
 void CTimelineWidgetLayer::SetTimelineBackgroundColor(const QColor& col)
 {
   m_pTimeLineContent->SetTimelineBackgroundColor(col);
@@ -131,6 +163,75 @@ void CTimelineWidgetLayer::SetTimelineBackgroundColor(const QColor& col)
 const QColor& CTimelineWidgetLayer::TimelineBackgroundColor() const
 {
   return m_pTimeLineContent->TimelineBackgroundColor();
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CTimelineWidgetLayer::AddNewElement(const QString& sId, qint64 iTimestamp)
+{
+  QString sDescr = QString("added instruction '%2'").arg(sId);
+  auto spLayerOld = m_spLayer->Clone();
+  auto spLayerNew = m_spLayer->Clone();
+  if (nullptr == m_pTimeLineContent->InstructionFromTime(iTimestamp))
+  {
+    spLayerNew->m_vspInstructions.push_back(
+        {iTimestamp, sequence::CreateInstruction(sId, QVariantList())});
+    std::sort(spLayerNew->m_vspInstructions.begin(), spLayerNew->m_vspInstructions.end(),
+              [](const sequence::tTimedInstruction& a, const sequence::tTimedInstruction& b){
+                return a.first < b.first;
+              });
+    m_pUndoStack->push(new CCommandAddOrRemoveInstruction(
+        m_pParent,
+        spLayerOld, spLayerNew,
+        m_pParent->IndexOf(this),
+        sDescr));
+
+    m_pTimeLineContent->SetSelectedInstruction(-1);
+    m_pTimeLineContent->SetSelectedInstruction(iTimestamp);
+
+    emit SignalSelected();
+  }
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CTimelineWidgetLayer::ClearSelection()
+{
+  m_pTimeLineContent->ClearSelection();
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CTimelineWidgetLayer::CloseConfigOverlay()
+{
+  m_pConfigOverlay->Hide();
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CTimelineWidgetLayer::RemoveSelectedElement()
+{
+  auto spLayerOld = m_spLayer->Clone();
+  auto spLayerNew = m_spLayer->Clone();
+  qint64 iTime = m_pTimeLineContent->CurrentlySelectedInstructionTime();
+  auto it = std::find_if(spLayerNew->m_vspInstructions.begin(), spLayerNew->m_vspInstructions.end(),
+                         [&iTime](const sequence::tTimedInstruction& pair) {
+                           return iTime == pair.first;
+                         });
+  if (-1 != iTime && spLayerNew->m_vspInstructions.end() != it)
+  {
+    QString sDescr = QString("removed instruction '%2'").arg(it->second->m_sInstructionType);
+    spLayerNew->m_vspInstructions.erase(it);
+    std::sort(spLayerNew->m_vspInstructions.begin(), spLayerNew->m_vspInstructions.end(),
+              [](const sequence::tTimedInstruction& a, const sequence::tTimedInstruction& b){
+                return a.first < b.first;
+              });
+    m_pUndoStack->push(new CCommandAddOrRemoveInstruction(
+        m_pParent,
+        spLayerOld, spLayerNew,
+        m_pParent->IndexOf(this),
+        sDescr));
+  }
 }
 
 //----------------------------------------------------------------------------------------
@@ -205,6 +306,13 @@ QSize CTimelineWidgetLayer::HeaderSize() const
 
 //----------------------------------------------------------------------------------------
 //
+QPointer<CResourceTreeItemModel> CTimelineWidgetLayer::ResourceItemModel() const
+{
+  return m_pEditorModel;
+}
+
+//----------------------------------------------------------------------------------------
+//
 void CTimelineWidgetLayer::UpdateUi()
 {
   if (nullptr != m_spLayer)
@@ -229,6 +337,27 @@ void CTimelineWidgetLayer::SetCurrentWindow(qint64 iStartMs, qint64 iPageLengthM
 void CTimelineWidgetLayer::SetTimeMaximum(qint64 iTimeMs)
 {
   m_pTimeLineContent->SetTimeMaximum(iTimeMs);
+}
+
+//----------------------------------------------------------------------------------------
+//
+bool CTimelineWidgetLayer::eventFilter(QObject* pObj, QEvent* pEvt)
+{
+  if (auto pWidget = qobject_cast<QWidget*>(pObj);
+      nullptr != pWidget && nullptr != pEvt && pEvt->type() == QEvent::MouseButtonPress)
+  {
+    QMouseEvent* pMouseEvt = static_cast<QMouseEvent*>(pEvt);
+    if (Qt::MouseButton::LeftButton == pMouseEvt->button() ||
+        Qt::MouseButton::RightButton == pMouseEvt->button())
+    {
+      if (!m_pConfigOverlay->isAncestorOf(pWidget) && m_pConfigOverlay->IsForcedOpen())
+      {
+        m_pConfigOverlay->Hide();
+        return false;
+      }
+    }
+  }
+  return false;
 }
 
 //----------------------------------------------------------------------------------------
@@ -294,7 +423,34 @@ void CTimelineWidgetLayer::paintEvent(QPaintEvent* pEvt)
 //
 void CTimelineWidgetLayer::resizeEvent(QResizeEvent*)
 {
+  if (m_pConfigOverlay->isVisible())
+  {
+    m_pConfigOverlay->Resize();
+  }
+}
 
+//----------------------------------------------------------------------------------------
+//
+void CTimelineWidgetLayer::SlotInstructionChanged()
+{
+  auto spLayerOld = m_spLayer->Clone();
+  auto spLayerNew = m_spLayer->Clone();
+  qint64 iTime = m_pTimeLineContent->CurrentlySelectedInstructionTime();
+  auto it = std::find_if(spLayerNew->m_vspInstructions.begin(), spLayerNew->m_vspInstructions.end(),
+                         [&iTime](const sequence::tTimedInstruction& pair) {
+                           return iTime == pair.first;
+                         });
+  if (-1 != iTime && spLayerNew->m_vspInstructions.end() != it)
+  {
+    QString sDescr = QString("changed instruction '%2'").arg(it->second->m_sInstructionType);
+    *it->second = *(m_pConfigOverlay->CurrentInstructionParameters());
+    m_pUndoStack->push(new CCommandChangeInstructionParameters(
+        m_pParent,
+        spLayerOld, spLayerNew,
+        m_pParent->IndexOf(this),
+        iTime,
+        sDescr));
+  }
 }
 
 //----------------------------------------------------------------------------------------
@@ -313,6 +469,22 @@ void CTimelineWidgetLayer::SlotLabelChanged()
         spLayerOld, spLayerNew,
         m_pParent->IndexOf(this),
         sDescr));
+  }
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CTimelineWidgetLayer::SlotSelectedInstruction(qint64 iInstr)
+{
+  auto spInstr = m_pTimeLineContent->InstructionFromTime(iInstr);
+  if (nullptr != spInstr)
+  {
+    m_pConfigOverlay->Show(iInstr, spInstr);
+    emit SignalSelected();
+  }
+  else
+  {
+    m_pConfigOverlay->Hide();
   }
 }
 

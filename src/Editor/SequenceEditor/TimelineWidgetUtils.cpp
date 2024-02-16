@@ -184,3 +184,20 @@ timeline::InstructionVisualisationType(const QString& sType)
   }
   return { EInstructionVisualisationType::eNoInstructionType, -1 };
 }
+
+//----------------------------------------------------------------------------------------
+//
+qint64 timeline::GetTimeFromCursorPos(qint32 posX, qint32 iGridStartX, qint32 iAvailableWidth,
+                                      qint64 iWindowStartMs, qint64, qint64 iPageLengthMs)
+{
+  if (posX < iGridStartX)
+  {
+    return -1;
+  }
+  else
+  {
+    const qint32 iPosXRel = posX - iGridStartX;
+    const double dPosMsRel = static_cast<double>(iPageLengthMs * iPosXRel) / iAvailableWidth;
+    return iWindowStartMs + static_cast<qint64>(std::round(dPosMsRel));
+  }
+}

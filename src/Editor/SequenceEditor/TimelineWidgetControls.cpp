@@ -268,16 +268,15 @@ void CTimelineWidgetControls::UpdateCurrentLabel()
   const qint32 iGridStartX = m_pControls->width();
   const qint32 iAvailableWidth = width() - iGridStartX;
 
-  if (m_iCursorPos < iGridStartX)
+  m_iCursorTime = timeline::GetTimeFromCursorPos(m_iCursorPos, iGridStartX, iAvailableWidth,
+                                                 m_iWindowStartMs, m_iMaximumSizeMs, m_iPageLengthMs);
+
+  if (0 > m_iCursorTime)
   {
-    m_iCursorTime = -1;
     m_pCurrentLabel->setText("00:00.000");
   }
   else
   {
-    const qint32 iPosXRel = m_iCursorPos - iGridStartX;
-    const double dPosMsRel = static_cast<double>(m_iPageLengthMs * iPosXRel) / iAvailableWidth;
-    m_iCursorTime = m_iWindowStartMs + static_cast<qint64>(std::round(dPosMsRel));
     m_pCurrentLabel->setText(QTime(0,0)
                                  .addMSecs(m_iCursorTime)
                                  .toString("mm:ss.zzz"));

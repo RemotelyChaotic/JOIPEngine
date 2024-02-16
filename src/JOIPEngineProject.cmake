@@ -253,6 +253,23 @@ macro(CreateJOIPProject JOIP_PROJECT_NAME)
     ${JOIPSources}/Editor/SequenceEditor/SequencePreviewWidget.cpp
     ${JOIPSources}/Editor/SequenceEditor/SequencePreviewWidget.h
     ${JOIPSources}/Editor/SequenceEditor/SequencePreviewWidget.ui
+    ${JOIPSources}/Editor/SequenceEditor/TimelineSeqeunceInstructionConfigOverlay.cpp
+    ${JOIPSources}/Editor/SequenceEditor/TimelineSeqeunceInstructionConfigOverlay.h
+    ${JOIPSources}/Editor/SequenceEditor/TimelineSeqeunceInstructionWidgetEval.ui
+    ${JOIPSources}/Editor/SequenceEditor/TimelineSeqeunceInstructionWidgetLinearToy.ui
+    ${JOIPSources}/Editor/SequenceEditor/TimelineSeqeunceInstructionWidgetPauseAudio.ui
+    ${JOIPSources}/Editor/SequenceEditor/TimelineSeqeunceInstructionWidgetPlayAudio.ui
+    ${JOIPSources}/Editor/SequenceEditor/TimelineSeqeunceInstructionWidgetPlayVideo.ui
+    ${JOIPSources}/Editor/SequenceEditor/TimelineSeqeunceInstructionWidgetRotateToy.ui
+    ${JOIPSources}/Editor/SequenceEditor/TimelineSeqeunceInstructionWidgetRunScript.ui
+    ${JOIPSources}/Editor/SequenceEditor/TimelineSeqeunceInstructionWidgets.cpp
+    ${JOIPSources}/Editor/SequenceEditor/TimelineSeqeunceInstructionWidgets.h
+    ${JOIPSources}/Editor/SequenceEditor/TimelineSeqeunceInstructionWidgetShowMedia.ui
+    ${JOIPSources}/Editor/SequenceEditor/TimelineSeqeunceInstructionWidgetShowText.ui
+    ${JOIPSources}/Editor/SequenceEditor/TimelineSeqeunceInstructionWidgetSingleBeat.ui
+    ${JOIPSources}/Editor/SequenceEditor/TimelineSeqeunceInstructionWidgetStartPattern.ui
+    ${JOIPSources}/Editor/SequenceEditor/TimelineSeqeunceInstructionWidgetStopAudio.ui
+    ${JOIPSources}/Editor/SequenceEditor/TimelineSeqeunceInstructionWidgetVibrate.ui
     ${JOIPSources}/Editor/SequenceEditor/TimelineWidget.cpp
     ${JOIPSources}/Editor/SequenceEditor/TimelineWidget.h
     ${JOIPSources}/Editor/SequenceEditor/TimelineWidget.ui

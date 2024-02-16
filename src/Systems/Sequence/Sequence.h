@@ -55,7 +55,7 @@ struct SSequenceInstruction : public ISerializable
 };
 struct SSingleBeatInstruction : public SSequenceInstruction
 {
-  std::optional<double>              m_dVolume;
+  std::optional<double>              m_dVolume = std::nullopt;
 
   std::shared_ptr<SSequenceInstruction> CloneImpl() override;
   QJsonObject ToJsonObject() override;
@@ -64,8 +64,9 @@ struct SSingleBeatInstruction : public SSequenceInstruction
 struct SStartPatternInstruction : public SSequenceInstruction
 {
   std::vector<double>                m_vdPattern;
-  std::optional<QString>             m_sResource;
-  std::optional<double>              m_dVolume;
+  qint32                             m_iBpm = 60;
+  std::optional<QString>             m_sResource = std::nullopt;
+  std::optional<double>              m_dVolume = std::nullopt;
 
   std::shared_ptr<SSequenceInstruction> CloneImpl() override;
   QJsonObject ToJsonObject() override;
@@ -77,7 +78,7 @@ struct SStopPatternInstruction : public SSequenceInstruction
 };
 struct SVibrateInstruction : public SSequenceInstruction
 {
-  double                             m_dSpeed;
+  double                             m_dSpeed = 0.0;
 
   std::shared_ptr<SSequenceInstruction> CloneImpl() override;
   QJsonObject ToJsonObject() override;
@@ -85,8 +86,8 @@ struct SVibrateInstruction : public SSequenceInstruction
 };
 struct SLinearToyInstruction : public SSequenceInstruction
 {
-  double                             m_dDurationS;
-  double                             m_dPosition;
+  double                             m_dDurationS = 0.0;
+  double                             m_dPosition = 0.0;
 
   std::shared_ptr<SSequenceInstruction> CloneImpl() override;
   QJsonObject ToJsonObject() override;
@@ -94,8 +95,8 @@ struct SLinearToyInstruction : public SSequenceInstruction
 };
 struct SRotateToyInstruction : public SSequenceInstruction
 {
-  bool                               m_bClockwise;
-  double                             m_dSpeed;
+  bool                               m_bClockwise = false;
+  double                             m_dSpeed = 0.0;
 
   std::shared_ptr<SSequenceInstruction> CloneImpl() override;
   QJsonObject ToJsonObject() override;
@@ -116,9 +117,9 @@ struct SShowMediaInstruction : public SSequenceInstruction
 struct SPlayVideoInstruction : public SSequenceInstruction
 {
   QString                            m_sResource;
-  std::optional<qint64>              m_iLoops;
-  std::optional<qint64>              m_iStartAt;
-  std::optional<qint64>              m_iEndAt;
+  std::optional<qint64>              m_iLoops = std::nullopt;
+  std::optional<qint64>              m_iStartAt = std::nullopt;
+  std::optional<qint64>              m_iEndAt = std::nullopt;
 
   std::shared_ptr<SSequenceInstruction> CloneImpl() override;
   QJsonObject ToJsonObject() override;
@@ -135,10 +136,10 @@ struct SStopVideoInstruction : public SSequenceInstruction
 struct SPlayAudioInstruction : public SSequenceInstruction
 {
   QString                            m_sResource;
-  std::optional<QString>             m_sName;
-  std::optional<qint64>              m_iLoops;
-  std::optional<qint64>              m_iStartAt;
-  std::optional<qint64>              m_iEndAt;
+  std::optional<QString>             m_sName = std::nullopt;
+  std::optional<qint64>              m_iLoops = std::nullopt;
+  std::optional<qint64>              m_iStartAt = std::nullopt;
+  std::optional<qint64>              m_iEndAt = std::nullopt;
 
   std::shared_ptr<SSequenceInstruction> CloneImpl() override;
   QJsonObject ToJsonObject() override;
@@ -162,12 +163,12 @@ struct SStopAudioInstruction : public SSequenceInstruction
 };
 struct SShowTextInstruction : public SSequenceInstruction
 {
-  QString                            m_sText;
-  std::optional<double>              m_dSkippableWaitS;
-  std::optional<bool>                m_bSkippable;
-  std::optional<QColor>              m_textColor;
-  std::optional<QColor>              m_bgColor;
-  std::optional<QString>             m_sPortrait;
+  std::optional<QString>             m_sText = std::nullopt;
+  std::optional<double>              m_dSkippableWaitS = std::nullopt;
+  std::optional<bool>                m_bSkippable = std::nullopt;
+  std::optional<QColor>              m_textColor = std::nullopt;
+  std::optional<QColor>              m_bgColor = std::nullopt;
+  std::optional<QString>             m_sPortrait = std::nullopt;
 
   std::shared_ptr<SSequenceInstruction> CloneImpl() override;
   QJsonObject ToJsonObject() override;

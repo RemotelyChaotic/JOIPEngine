@@ -20,6 +20,7 @@ public:
   void Deinitalize();
 
   void ExpandAll();
+  void SetAllowedCategories(const QStringList& vsCategories);
   void SetFilter(const QString& sFilter);
 
 signals:
@@ -34,6 +35,7 @@ private:
 
   QPointer<QStandardItemModel>                   m_pModel;
   QPointer<CSqeuenceElementSortFilterProxyModel> m_pSortFilter;
+  QStringList                                    m_vsCategories;
 };
 
 #endif // CPATTERNELEMENTLIST_H

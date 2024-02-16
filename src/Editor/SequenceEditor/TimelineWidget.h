@@ -10,6 +10,7 @@
 #include <functional>
 #include <memory>
 
+class CResourceTreeItemModel;
 class CTimelineWidgetControls;
 class CTimelineWidgetLayer;
 class CTimelineWidgetOverlay;
@@ -51,8 +52,10 @@ public:
   CTimelineWidgetLayer* Layer(qint32 iIndex) const;
   qint32 LayerCount() const;
   void RemoveSelectedLayer();
+  void RemoveSelectedElement();
   qint32 SelectedIndex() const;
   qint64 SelectedTimeStamp() const;
+  void SetResourceModel(QPointer<CResourceTreeItemModel> pEditorModel);
   void SetSequence(const tspSequence& spSeq);
   void SetUndoStack(QPointer<QUndoStack> pUndo);
   void Update();
@@ -90,7 +93,7 @@ private slots:
   void SlotUserStartedDrag();
   void SlotLayerSelected();
   void SlotLayersInserted();
-  void SlotOpenInsertContextMenuAt(QPoint p);
+  void SlotOpenInsertContextMenuAt(QPoint p, qint64 iCursorTime);
   void SlotScrollbarValueChanged();
   void SlotSelectionColorChanged();
   void SlotZoomChanged(qint32 iZoom);
@@ -99,7 +102,8 @@ private:
   QWidget* CreateLayerWidget(const tspSequenceLayer& spLayer) const;
   void ForAllLayers(std::function<void(CTimelineWidgetLayer*,qint32)> fn);
   QSize HeadersSize() const;
-  QString OpenInsertContextMenuAt(const QPoint& currentAddPoint, const QPoint& createPoint);
+  QString OpenInsertContextMenuAt(const QPoint& currentAddPoint, const QPoint& createPoint,
+                                  const QString& sLayerType);
   bool IsChildOfLayer(QWidget* pLayer) const;
   void Resize(QSize newSize);
   void SetCurrentWindow();
@@ -108,6 +112,7 @@ private:
 
   std::unique_ptr<Ui::CTimelineWidget> m_spUi;
   tspSequence                          m_spCurrentSequence;
+  QPointer<CResourceTreeItemModel>     m_pEditorModel;
   QPointer<QUndoStack>                 m_pUndoStack;
   QPointer<CTimelineWidgetOverlay>     m_pOverlay;
   QPointer<CTimelineWidgetControls>    m_pControls;

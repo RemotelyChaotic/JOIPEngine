@@ -24,7 +24,7 @@ void CSequencePropertiesOverlay::UpdateUi()
   if (nullptr != m_spCurrentSequence)
   {
     QTime time(0, 0);
-    time.addMSecs(m_spCurrentSequence->m_iLengthMili);
+    time = time.addMSecs(m_spCurrentSequence->m_iLengthMili);
     QSignalBlocker b(m_spUi->pTimeEdit);
     m_spUi->pTimeEdit->setTime(time);
   }

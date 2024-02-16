@@ -78,3 +78,72 @@ void CCommandModifyLayerProperties::DoUnoRedo(const std::shared_ptr<SSequenceLay
     }
   }
 }
+
+//----------------------------------------------------------------------------------------
+//
+CCommandAddOrRemoveInstruction::CCommandAddOrRemoveInstruction(
+    QPointer<CTimelineWidget> pParent,
+    const std::shared_ptr<SSequenceLayer>& layerOld,
+    const std::shared_ptr<SSequenceLayer>& layerNew,
+    qint32 iIndex,
+    const QString& sCommandDescr) :
+  CCommandModifyLayerProperties(pParent, layerOld, layerNew, iIndex, QString())
+{
+  setText(QString("Layer %1: %2").arg(layerOld->m_sName).arg(sCommandDescr));
+}
+CCommandAddOrRemoveInstruction::~CCommandAddOrRemoveInstruction() = default;
+
+//----------------------------------------------------------------------------------------
+//
+int CCommandAddOrRemoveInstruction::id() const
+{
+  return EEditorCommandId::eAddOrRemoveSequenceElement;
+}
+
+//----------------------------------------------------------------------------------------
+//
+bool CCommandAddOrRemoveInstruction::mergeWith(const QUndoCommand*)
+{
+  return false;
+}
+
+//----------------------------------------------------------------------------------------
+//
+CCommandChangeInstructionParameters::CCommandChangeInstructionParameters(
+    QPointer<CTimelineWidget> pParent,
+    const std::shared_ptr<SSequenceLayer>& layerOld,
+    const std::shared_ptr<SSequenceLayer>& layerNew,
+    qint32 iIndex,
+    sequence::tTimePos iInstruction,
+    const QString& sCommandDescr) :
+  CCommandModifyLayerProperties(pParent, layerOld, layerNew, iIndex, QString()),
+  m_iInstruction(iInstruction)
+{
+  setText(QString("Layer %1: %2").arg(layerOld->m_sName).arg(sCommandDescr));
+}
+CCommandChangeInstructionParameters::~CCommandChangeInstructionParameters() = default;
+
+//----------------------------------------------------------------------------------------
+//
+int CCommandChangeInstructionParameters::id() const
+{
+  return EEditorCommandId::eChangeSequenceElementProperties;
+}
+
+//----------------------------------------------------------------------------------------
+//
+bool CCommandChangeInstructionParameters::mergeWith(const QUndoCommand* pOther)
+{
+  if (nullptr == pOther || id() != pOther->id())
+  {
+    return false;
+  }
+
+  const CCommandChangeInstructionParameters* pOtherCasted = dynamic_cast<const CCommandChangeInstructionParameters*>(pOther);
+  if (nullptr == pOtherCasted) { return false; }
+  if (nullptr == m_spLayerNew) { return false; }
+  if (m_iInstruction != pOtherCasted->m_iInstruction) { return false; }
+
+  m_spLayerNew = pOtherCasted->m_spLayerNew;
+  return true;
+}

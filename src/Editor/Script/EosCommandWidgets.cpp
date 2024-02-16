@@ -184,6 +184,9 @@ void CEosCommandWidgetAudio::SetResourceModel(CResourceTreeItemModel* pResourceM
   pProxyModel->sort(resource_item::c_iColumnName, Qt::AscendingOrder);
   pProxyModel->setFilterRegExp(QRegExp(".*", Qt::CaseInsensitive, QRegExp::RegExp));
 
+  connect(m_spUi->pFilter, &CSearchWidget::SignalFilterChanged,
+          pProxyModel, [pProxyModel](const QString sFilter) { pProxyModel->setFilterRegExp(sFilter);} );
+
   // setup Tree
   m_spUi->pResourceSelectTree->setColumnHidden(resource_item::c_iColumnType, true);
   m_spUi->pResourceSelectTree->setColumnHidden(resource_item::c_iColumnPath, true);
