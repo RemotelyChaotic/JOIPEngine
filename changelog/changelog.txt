@@ -30,6 +30,8 @@ Changes:
 
 Fixed Bugs:
 - Fixed a few UI typos.
+- Fixed a crash that occured if a project was loaded that contained a resource of
+  an unknown type.
 
 =================
 Version 1.3.1.0

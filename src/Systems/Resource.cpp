@@ -83,24 +83,31 @@ void SResource::FromJsonObject(const QJsonObject& json)
     locker.relock();
 
     qint32 iValue = it.value().toInt();
-    if (iValue == EResourceType::eOther &&
-        SResourceFormats::DatabaseFormats().contains("*." + sSuffix))
+    if (EResourceType::_size() > iValue)
     {
-      m_type = EResourceType::eDatabase;
-    }
-    else if (iValue == EResourceType::eOther &&
-        SResourceFormats::ScriptFormats().contains("*." + sSuffix))
-    {
-      m_type = EResourceType::eScript;
-    }
-    else if (iValue == EResourceType::eOther &&
-             SResourceFormats::LayoutFormats().contains("*." + sSuffix))
-    {
-      m_type = EResourceType::eLayout;
+      if (iValue == EResourceType::eOther &&
+          SResourceFormats::DatabaseFormats().contains("*." + sSuffix))
+      {
+        m_type = EResourceType::eDatabase;
+      }
+      else if (iValue == EResourceType::eOther &&
+          SResourceFormats::ScriptFormats().contains("*." + sSuffix))
+      {
+        m_type = EResourceType::eScript;
+      }
+      else if (iValue == EResourceType::eOther &&
+               SResourceFormats::LayoutFormats().contains("*." + sSuffix))
+      {
+        m_type = EResourceType::eLayout;
+      }
+      else
+      {
+        m_type = EResourceType::_from_integral(iValue);
+      }
     }
     else
     {
-      m_type = EResourceType::_from_integral(iValue);
+      m_type = EResourceType::eOther;
     }
   }
   it = json.find("sResourceBundle");
