@@ -541,13 +541,7 @@ CIntifaceEngineDeviceConnector::~CIntifaceEngineDeviceConnector()
 bool CIntifaceEngineDeviceConnector::CanConnect()
 {
   if (!m_spClient->IsLoaded()) { return false; }
-  if (StartEngine())
-  {
-    // we need to wait for the server to start, sadly we can't synchronize this better
-    QThread::sleep(15);
-    return true;
-  }
-  return false;
+  return true;
 }
 
 //----------------------------------------------------------------------------------------
@@ -555,6 +549,12 @@ bool CIntifaceEngineDeviceConnector::CanConnect()
 bool CIntifaceEngineDeviceConnector::Connect()
 {
   if (!m_spClient->IsLoaded()) { return false; }
+  if (!StartEngine())
+  {
+    return false;
+  }
+  // we need to wait for the server to start, sadly we can't synchronize this better
+  QThread::sleep(15);
   if (!m_spClient->Connect())
   {
     if (nullptr != m_pIntifaceEngineProcess)
