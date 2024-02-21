@@ -19,8 +19,14 @@
      <property name="orientation">
       <enum>Qt::Vertical</enum>
      </property>
-     <widget class="QWidget" name="widget" native="true">
-      <layout class="QHBoxLayout" name="horizontalLayout">
+     <widget class="QWidget" name="pSceneView" native="true">
+      <property name="sizePolicy">
+       <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+        <horstretch>0</horstretch>
+        <verstretch>2</verstretch>
+       </sizepolicy>
+      </property>
+      <layout class="QGridLayout" name="gridLayout_2">
        <property name="leftMargin">
         <number>0</number>
        </property>
@@ -33,27 +39,15 @@
        <property name="bottomMargin">
         <number>0</number>
        </property>
-       <item>
-        <widget class="CSequencePreviewWidget" name="pPreviewWidget" native="true">
-         <layout class="QVBoxLayout" name="verticalLayout_2">
-          <property name="leftMargin">
-           <number>0</number>
-          </property>
-          <property name="topMargin">
-           <number>0</number>
-          </property>
-          <property name="rightMargin">
-           <number>0</number>
-          </property>
-          <property name="bottomMargin">
-           <number>0</number>
-          </property>
-         </layout>
-        </widget>
-       </item>
       </layout>
      </widget>
      <widget class="CTimelineWidget" name="pTimeLineWidget">
+      <property name="sizePolicy">
+       <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+        <horstretch>0</horstretch>
+        <verstretch>3</verstretch>
+       </sizepolicy>
+      </property>
       <property name="widgetResizable">
        <bool>true</bool>
       </property>
@@ -93,12 +87,6 @@
   </layout>
  </widget>
  <customwidgets>
-  <customwidget>
-   <class>CSequencePreviewWidget</class>
-   <extends>QWidget</extends>
-   <header>Editor/SequenceEditor/SequencePreviewWidget.h</header>
-   <container>1</container>
-  </customwidget>
   <customwidget>
    <class>CTimelineWidget</class>
    <extends>QScrollArea</extends>

@@ -24,8 +24,12 @@ CEditorPatternEditorWidget::CEditorPatternEditorWidget(QWidget* pParent) :
   m_bChangingIndex(false)
 {
   m_spUi->setupUi(this);
+  m_spUi->pSceneView->setVisible(false);
 
   m_pFilteredScriptModel = new CFilteredEditorEditableFileModel(this);
+
+  // set initial splitter sizes
+  m_spUi->pBottomSplitter->setSizes(QList<int>() << height()/2 << height()/2);
 
   connect(m_spUi->pTimeLineWidget, &CTimelineWidget::SignalContentsChanged,
           this, &CEditorPatternEditorWidget::SlotContentsChange);
