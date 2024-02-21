@@ -680,6 +680,8 @@ macro(CreateJOIPProject JOIP_PROJECT_NAME)
     ${JOIPSources}/Widgets/Player/AvSlider.h
     ${JOIPSources}/Widgets/Player/MediaPlayer.cpp
     ${JOIPSources}/Widgets/Player/MediaPlayer.h
+    ${JOIPSources}/Widgets/PositionalMenu.cpp
+    ${JOIPSources}/Widgets/PositionalMenu.h
     ${JOIPSources}/Widgets/ProgressBar.cpp
     ${JOIPSources}/Widgets/ProgressBar.h
     ${JOIPSources}/Widgets/ProjectCardSelectionWidget.cpp

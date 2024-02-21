@@ -16,7 +16,6 @@ class CTimelineWidgetLayerBackground : public QFrame
   Q_PROPERTY(qint32 iconWidth READ IconWidth WRITE SetIconWidth)
   Q_PROPERTY(qint32 iconHeight READ IconHeight WRITE SetIconHeight)
   Q_PROPERTY(QColor instructionConnectorColor READ InstructionConnectorColor WRITE SetInstructionConnectorColor)
-  Q_PROPERTY(QColor instructionConnectorColor READ InstructionConnectorColor WRITE SetInstructionConnectorColor)
   Q_PROPERTY(QIcon instructionInvalidMarker READ InstructionInvalidMarker WRITE SetInstructionInvalidMarker)
   Q_PROPERTY(QIcon instructionMarker READ InstructionMarker WRITE SetInstructionMarker)
   Q_PROPERTY(QIcon instructionMarkerOpenLeft READ InstructionMarkerOpenLeft WRITE SetInstructionMarkerOpenLeft)
@@ -57,6 +56,7 @@ public:
   void SetLayer(const tspSequenceLayer& spLayer);
   void SetCurrentWindow(qint64 iStartMs, qint64 iPageLengthMs);
   void SetSelectedInstruction(qint64 iIdx);
+  void SetTimeGrid(qint64 iGrid);
   void SetTimeMaximum(qint64 iTimeMs);
 
 signals:
@@ -69,6 +69,7 @@ protected:
   void mouseReleaseEvent(QMouseEvent* pEvt) override;
 
 private:
+  qint64 ConstrainToGrid(qint64 iValue);
   std::tuple<qint64, qint64, qint64> GetTimeRangeAroundCursor(QPoint p) const;
   qint64 MostLikelyInstruction(const std::tuple<qint64, qint64, qint64>& timeRange) const;
 
@@ -82,6 +83,7 @@ private:
   QColor                         m_gridCol;
   QColor                         m_timelineBgColor;
   QColor                         m_selectionColor;
+  qint64                         m_iTimeGrid = 100;
   qint64                         m_iSelectedInstr = -1;
   qint64                         m_iHighlightedInstr = -1;
   qint64                         m_iMaximumSizeMs = timeline::c_iDefaultLength;
@@ -89,6 +91,7 @@ private:
   qint64                         m_iWindowStartMs = 0;
   qint32                         m_iIconWidth = 10;
   qint32                         m_iIconHeight = 10;
+
 };
 
 #endif // CTIMELINEWIDGETLAYERBACKGROUND_H

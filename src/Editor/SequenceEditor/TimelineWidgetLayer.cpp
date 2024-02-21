@@ -263,6 +263,13 @@ void CTimelineWidgetLayer::SetHighlight(QColor col, QColor alternateCol)
 
 //----------------------------------------------------------------------------------------
 //
+void CTimelineWidgetLayer::SetTimeGrid(qint64 iGrid)
+{
+  m_pTimeLineContent->SetTimeGrid(iGrid);
+}
+
+//----------------------------------------------------------------------------------------
+//
 void CTimelineWidgetLayer::SetUndoStack(QPointer<QUndoStack> pUndo)
 {
   m_pUndoStack = pUndo;

@@ -266,6 +266,13 @@ void CTimelineWidgetLayerBackground::SetSelectedInstruction(qint64 iIdx)
 
 //----------------------------------------------------------------------------------------
 //
+void CTimelineWidgetLayerBackground::SetTimeGrid(qint64 iGrid)
+{
+  m_iTimeGrid = iGrid;
+}
+
+//----------------------------------------------------------------------------------------
+//
 void CTimelineWidgetLayerBackground::SetTimeMaximum(qint64 iTimeMs)
 {
   if (iTimeMs != m_iMaximumSizeMs)
@@ -484,7 +491,7 @@ void CTimelineWidgetLayerBackground::mouseReleaseEvent(QMouseEvent* pEvt)
       qint64 iCursorTime =
           timeline::GetTimeFromCursorPos(pEvt->pos().x(), 0, width(),
                                          m_iWindowStartMs, m_iMaximumSizeMs, m_iPageLengthMs);
-
+      iCursorTime = ConstrainToGrid(iCursorTime);
       if (-1 != iCursorTime && nullptr != m_spLayer)
       {
         if (nullptr == InstructionFromTime(iCursorTime))
@@ -508,6 +515,19 @@ void CTimelineWidgetLayerBackground::mouseReleaseEvent(QMouseEvent* pEvt)
       }
     }
   }
+}
+
+//----------------------------------------------------------------------------------------
+//
+qint64 CTimelineWidgetLayerBackground::ConstrainToGrid(qint64 iValue)
+{
+  qint64 iGriddedconstrainedPos = iValue;
+  if (0 < m_iTimeGrid)
+  {
+    double dVal = std::round(static_cast<double>(iValue) / m_iTimeGrid) * m_iTimeGrid;
+    iGriddedconstrainedPos = static_cast<qint64>(dVal);
+  }
+  return iGriddedconstrainedPos;
 }
 
 //----------------------------------------------------------------------------------------

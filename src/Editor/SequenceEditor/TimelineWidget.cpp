@@ -66,6 +66,8 @@ CTimelineWidget::CTimelineWidget(QWidget* pParent) :
   m_pControls->move(0, 0);
   m_pControls->resize(width(), m_pControls->minimumSizeHint().height());
   m_pControls->raise();
+  connect(m_pControls, &CTimelineWidgetControls::SignalGridChanged,
+          this, &CTimelineWidget::SlotTimeGridChanged);
   connect(m_pControls, &CTimelineWidgetControls::SignalZoomChanged,
           this, &CTimelineWidget::SlotZoomChanged);
 
@@ -802,6 +804,18 @@ void CTimelineWidget::SlotSelectionColorChanged()
 
 //----------------------------------------------------------------------------------------
 //
+void CTimelineWidget::SlotTimeGridChanged(qint64 iGrid)
+{
+  ForAllLayers([iGrid](CTimelineWidgetLayer* pLayer, qint32 i) {
+    if (nullptr != pLayer)
+    {
+      pLayer->SetTimeGrid(iGrid);
+    }
+  });
+}
+
+//----------------------------------------------------------------------------------------
+//
 void CTimelineWidget::SlotZoomChanged(qint32 iZoom)
 {
   qint64 iPageStep = timeline::c_iDefaultStepSize*100/iZoom;
@@ -839,6 +853,7 @@ QWidget* CTimelineWidget::CreateLayerWidget(const tspSequenceLayer& spLayer) con
   pWidget->SetUndoStack(m_pUndoStack);
   pWidget->SetGridColor(m_pControls->GridColor());
   pWidget->SetOutOfRangeColor(m_pControls->OutOfRangeColor());
+  pWidget->SetTimeGrid(m_pControls->TimeGrid());
   return pWidget;
 }
 

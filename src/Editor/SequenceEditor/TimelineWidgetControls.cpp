@@ -1,11 +1,15 @@
 #include "TimelineWidgetControls.h"
 
+#include "Widgets/PositionalMenu.h"
 #include "Widgets/ZoomComboBox.h"
 
 #include <QDebug>
 #include <QHBoxLayout>
+#include <QMenu>
 #include <QPainter>
 #include <QPaintEvent>
+#include <QSpinBox>
+#include <QWidgetAction>
 #include <QTime>
 
 CTimelineWidgetControls::CTimelineWidgetControls(QWidget* pParent) :
@@ -26,6 +30,45 @@ CTimelineWidgetControls::CTimelineWidgetControls(QWidget* pParent) :
   connect(m_pComboZoom, &CZoomComboBox::SignalZoomChanged, this,
           &CTimelineWidgetControls::SlotZoomChanged);
   pLayoutControls->addWidget(m_pComboZoom);
+
+  QFrame* pFrame = new QFrame(m_pControls);
+  pFrame->setObjectName(QString::fromUtf8("frame"));
+  QSizePolicy sizePolicy(QSizePolicy::Fixed, QSizePolicy::Preferred);
+  sizePolicy.setHorizontalStretch(0);
+  sizePolicy.setVerticalStretch(0);
+  sizePolicy.setHeightForWidth(pFrame->sizePolicy().hasHeightForWidth());
+  pFrame->setSizePolicy(sizePolicy);
+  pFrame->setFrameShape(QFrame::VLine);
+  pFrame->setFrameShadow(QFrame::Raised);
+
+  pLayoutControls->addWidget(pFrame);
+
+  m_pButtonGrid = new QPushButton(m_pControls);
+  sizePolicy = QSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
+  sizePolicy.setHorizontalStretch(0);
+  sizePolicy.setVerticalStretch(0);
+  sizePolicy.setHeightForWidth(m_pButtonGrid->sizePolicy().hasHeightForWidth());
+  m_pButtonGrid->setSizePolicy(sizePolicy);
+  m_pButtonGrid->setObjectName("GridButton");
+  m_pButtonGrid->setProperty("styleSmall", true);
+  m_pButtonGrid->setCheckable(true);
+  m_pButtonGrid->setChecked(true);
+  m_pButtonGrid->setFlat(true);
+  connect(m_pButtonGrid, &QPushButton::clicked, this,
+          &CTimelineWidgetControls::SlotGridButtonClicked);
+  pLayoutControls->addWidget(m_pButtonGrid);
+
+  pFrame = new QFrame(m_pControls);
+  pFrame->setObjectName(QString::fromUtf8("frame"));
+  sizePolicy = QSizePolicy(QSizePolicy::Fixed, QSizePolicy::Preferred);
+  sizePolicy.setHorizontalStretch(0);
+  sizePolicy.setVerticalStretch(0);
+  sizePolicy.setHeightForWidth(pFrame->sizePolicy().hasHeightForWidth());
+  pFrame->setSizePolicy(sizePolicy);
+  pFrame->setFrameShape(QFrame::VLine);
+  pFrame->setFrameShadow(QFrame::Raised);
+
+  pLayoutControls->addWidget(pFrame);
 
   m_pCurrentLabel = new QLabel(m_pControls);
   pLayoutControls->addWidget(m_pCurrentLabel);
@@ -96,9 +139,18 @@ qint64 CTimelineWidgetControls::CurrentTimeStamp() const
 //
 void CTimelineWidgetControls::SetCurrentCursorPos(qint32 iX)
 {
-  if (m_iCursorPos != iX)
+  const qint32 iGridStartX = m_pControls->width();
+  const qint32 iAvailableWidth = width() - iGridStartX;
+
+  qint64 iTime = timeline::GetTimeFromCursorPos(iX, iGridStartX, iAvailableWidth,
+                                                 m_iWindowStartMs, m_iMaximumSizeMs, m_iPageLengthMs);
+  iTime = ConstrainToGrid(iTime);
+  qint32 iPos = timeline::GetCursorPosFromTime(iTime, iGridStartX, iAvailableWidth,
+                                               m_iWindowStartMs, m_iMaximumSizeMs, m_iPageLengthMs);
+
+  if (m_iCursorPos != iPos)
   {
-    m_iCursorPos = iX;
+    m_iCursorPos = iPos;
     UpdateCurrentLabel();
     repaint();
   }
@@ -195,6 +247,13 @@ qint64 CTimelineWidgetControls::TimeFromCursor() const
 
 //----------------------------------------------------------------------------------------
 //
+qint64 CTimelineWidgetControls::TimeGrid() const
+{
+  return m_iTimeGrid;
+}
+
+//----------------------------------------------------------------------------------------
+//
 qint32 CTimelineWidgetControls::Zoom() const
 {
   return m_pComboZoom->Zoom();
@@ -255,10 +314,82 @@ void CTimelineWidgetControls::paintEvent(QPaintEvent* pEvt)
 
 //----------------------------------------------------------------------------------------
 //
+void CTimelineWidgetControls::SlotGridButtonClicked(bool)
+{
+  if (m_pButtonGrid->isChecked())
+  {
+    m_pButtonGrid->setChecked(false);
+    m_pButtonGrid->setCheckable(false);
+    m_iTimeGrid = 0;
+    emit SignalGridChanged(0);
+  }
+  else
+  {
+    QPoint p = m_pButtonGrid->parentWidget()->mapToGlobal(m_pButtonGrid->pos());
+    CPositionalMenu menu(EMenuPopupPosition::eTop);
+
+    QWidget* pMenuRoot = new QWidget(&menu);
+    QHBoxLayout* pLayout = new QHBoxLayout(pMenuRoot);
+    pLayout->setContentsMargins({0, 0, 0, 0});
+
+    QLabel* pLabel = new QLabel("Grid size", pMenuRoot);
+    pLayout->addWidget(pLabel);
+
+    QSpinBox* pConfig = new QSpinBox(pMenuRoot);
+    pConfig->setRange(0, 1000);
+    pConfig->setValue(m_iTimeGrid);
+    pConfig->setSuffix(" ms");
+    connect(pConfig, qOverload<qint32>(&QSpinBox::valueChanged),
+            this, [this] (qint32 iValue) {
+      if (0 < iValue)
+      {
+        m_pButtonGrid->setCheckable(true);
+        m_pButtonGrid->setChecked(true);
+      }
+      else
+      {
+        m_pButtonGrid->setChecked(false);
+        m_pButtonGrid->setCheckable(false);
+      }
+      m_iTimeGrid = iValue;
+      emit SignalGridChanged(iValue);
+    });
+    pLayout->addWidget(pConfig);
+
+    auto* pAction = new QWidgetAction(&menu);
+    pAction->setDefaultWidget(pMenuRoot);
+    menu.addAction(pAction);
+
+    QPointer<CTimelineWidgetControls> pPtr(this);
+    menu.exec(p);
+
+    if (nullptr != pPtr && 0 < m_iTimeGrid)
+    {
+      m_pButtonGrid->setCheckable(true);
+      m_pButtonGrid->setChecked(true);
+    }
+  }
+}
+
+//----------------------------------------------------------------------------------------
+//
 void CTimelineWidgetControls::SlotZoomChanged(qint32 iZoom)
 {
   UpdateCurrentLabel();
   emit SignalZoomChanged(iZoom);
+}
+
+//----------------------------------------------------------------------------------------
+//
+qint64 CTimelineWidgetControls::ConstrainToGrid(qint64 iValue)
+{
+  qint64 iGriddedconstrainedPos = iValue;
+  if (0 < m_iTimeGrid)
+  {
+    double dVal = std::round(static_cast<double>(iValue) / m_iTimeGrid) * m_iTimeGrid;
+    iGriddedconstrainedPos = static_cast<qint64>(dVal);
+  }
+  return iGriddedconstrainedPos;
 }
 
 //----------------------------------------------------------------------------------------
@@ -270,6 +401,7 @@ void CTimelineWidgetControls::UpdateCurrentLabel()
 
   m_iCursorTime = timeline::GetTimeFromCursorPos(m_iCursorPos, iGridStartX, iAvailableWidth,
                                                  m_iWindowStartMs, m_iMaximumSizeMs, m_iPageLengthMs);
+  m_iCursorTime = ConstrainToGrid(m_iCursorTime);
 
   if (0 > m_iCursorTime)
   {

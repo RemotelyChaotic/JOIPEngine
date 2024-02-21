@@ -96,6 +96,7 @@ private slots:
   void SlotOpenInsertContextMenuAt(QPoint p, qint64 iCursorTime);
   void SlotScrollbarValueChanged();
   void SlotSelectionColorChanged();
+  void SlotTimeGridChanged(qint64 iGrid);
   void SlotZoomChanged(qint32 iZoom);
 
 private:

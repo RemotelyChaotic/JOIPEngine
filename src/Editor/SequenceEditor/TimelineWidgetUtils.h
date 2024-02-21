@@ -35,6 +35,8 @@ namespace timeline
 
   qint64 GetTimeFromCursorPos(qint32 posX, qint32 iGridStartX, qint32 iAvailableWidth,
                               qint64 iWindowStartMs, qint64 iMaximumSizeMs, qint64 iPageLengthMs);
+  qint32 GetCursorPosFromTime(qint64 itimeX, qint32 iGridStartX, qint32 iAvailableWidth,
+                              qint64 iWindowStartMs, qint64 iMaximumSizeMs, qint64 iPageLengthMs);
 }
 
 #endif // CTIMELINEWIDGETUTILS_H

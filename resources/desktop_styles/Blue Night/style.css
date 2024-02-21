@@ -601,7 +601,9 @@ QToolButton:hover {
 }
 
 QPushButton:pressed,
-QToolButton:pressed {
+QToolButton:pressed,
+QPushButton:checked,
+QToolButton:checked {
   background: rgb(50, 97, 159);
 }
 

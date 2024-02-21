@@ -42,6 +42,7 @@ public:
   void RemoveSelectedElement();
   void SetLayer(const tspSequenceLayer& spLayer);
   void SetHighlight(QColor col, QColor alternateCol);
+  void SetTimeGrid(qint64 iGrid);
   void SetUndoStack(QPointer<QUndoStack> pUndo);
 
   QString Name() const;

@@ -201,3 +201,13 @@ qint64 timeline::GetTimeFromCursorPos(qint32 posX, qint32 iGridStartX, qint32 iA
     return iWindowStartMs + static_cast<qint64>(std::round(dPosMsRel));
   }
 }
+
+//----------------------------------------------------------------------------------------
+//
+qint32 timeline::GetCursorPosFromTime(qint64 itimeX, qint32 iGridStartX, qint32 iAvailableWidth,
+                                      qint64 iWindowStartMs, qint64, qint64 iPageLengthMs)
+{
+  const qint32 iPosRel = itimeX - iWindowStartMs;
+  const double dPosXRel = static_cast<double>(iAvailableWidth * iPosRel) / iPageLengthMs;
+  return iGridStartX + static_cast<qint64>(std::round(dPosXRel));
+}
