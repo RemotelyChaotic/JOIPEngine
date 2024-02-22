@@ -58,6 +58,10 @@ std::shared_ptr<CScriptObjectBase> CScriptRunnerSignalEmiter::CreateNewScriptObj
 {
   return nullptr;
 }
+std::shared_ptr<CScriptObjectBase> CScriptRunnerSignalEmiter::CreateNewSequenceObject()
+{
+  return nullptr;
+}
 
 //----------------------------------------------------------------------------------------
 //

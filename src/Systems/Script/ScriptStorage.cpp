@@ -30,6 +30,10 @@ std::shared_ptr<CScriptObjectBase> CStorageSignalEmitter::CreateNewScriptObject(
 {
   return std::make_shared<CScriptStorageLua>(this, pState);
 }
+std::shared_ptr<CScriptObjectBase> CStorageSignalEmitter::CreateNewSequenceObject()
+{
+  return nullptr;
+}
 
 //----------------------------------------------------------------------------------------
 //

@@ -7,6 +7,8 @@
 #include "Systems/JSON/JsonInstructionBase.h"
 #include "Systems/JSON/JsonInstructionSetParser.h"
 
+#include "Systems/Sequence/SequenceEvalRunner.h"
+
 #include <QtLua/Value>
 #include <QtLua/State>
 
@@ -34,6 +36,10 @@ std::shared_ptr<CScriptObjectBase> CEvalSignalEmiter::CreateNewScriptObject(QPoi
 std::shared_ptr<CScriptObjectBase> CEvalSignalEmiter::CreateNewScriptObject(QtLua::State* pState)
 {
   return std::make_shared<CScriptEvalLua>(this, pState);
+}
+std::shared_ptr<CScriptObjectBase> CEvalSignalEmiter::CreateNewSequenceObject()
+{
+  return std::make_shared<CSequenceEvalRunner>(this);
 }
 
 //----------------------------------------------------------------------------------------

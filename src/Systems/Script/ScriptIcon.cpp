@@ -26,6 +26,10 @@ std::shared_ptr<CScriptObjectBase> CIconSignalEmitter::CreateNewScriptObject(QtL
 {
   return std::make_shared<CScriptIcon>(this, pState);
 }
+std::shared_ptr<CScriptObjectBase> CIconSignalEmitter::CreateNewSequenceObject()
+{
+  return nullptr;
+}
 
 //----------------------------------------------------------------------------------------
 //

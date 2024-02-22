@@ -14,6 +14,8 @@
 #include "Systems/JSON/JsonInstructionBase.h"
 #include "Systems/JSON/JsonInstructionSetParser.h"
 
+#include "Systems/Sequence/SequenceTextBoxRunner.h"
+
 #include "Systems/Project.h"
 #include "Systems/Resource.h"
 
@@ -71,6 +73,10 @@ std::shared_ptr<CScriptObjectBase> CTextBoxSignalEmitter::CreateNewScriptObject(
 std::shared_ptr<CScriptObjectBase> CTextBoxSignalEmitter::CreateNewScriptObject(QtLua::State* pState)
 {
   return std::make_shared<CScriptTextBox>(this, pState);
+}
+std::shared_ptr<CScriptObjectBase> CTextBoxSignalEmitter::CreateNewSequenceObject()
+{
+  return std::make_shared<CSequenceTextBoxRunner>(this);
 }
 
 //----------------------------------------------------------------------------------------

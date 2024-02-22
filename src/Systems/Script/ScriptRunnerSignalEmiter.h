@@ -37,6 +37,7 @@ public:
   virtual std::shared_ptr<CScriptObjectBase> CreateNewScriptObject(QPointer<QJSEngine>);
   virtual std::shared_ptr<CScriptObjectBase> CreateNewScriptObject(QPointer<CJsonInstructionSetParser>);
   virtual std::shared_ptr<CScriptObjectBase> CreateNewScriptObject(QtLua::State*);
+  virtual std::shared_ptr<CScriptObjectBase> CreateNewSequenceObject();
 
   void Initialize(std::shared_ptr<CScriptRunnerSignalContext> spContext);
   void SetScriptExecutionStatus(ScriptExecStatus status);

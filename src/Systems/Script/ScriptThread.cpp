@@ -25,6 +25,10 @@ std::shared_ptr<CScriptObjectBase> CThreadSignalEmitter::CreateNewScriptObject(Q
 {
   return std::make_shared<CScriptThread>(this, pState);
 }
+std::shared_ptr<CScriptObjectBase> CThreadSignalEmitter::CreateNewSequenceObject()
+{
+  return nullptr;
+}
 
 //----------------------------------------------------------------------------------------
 //

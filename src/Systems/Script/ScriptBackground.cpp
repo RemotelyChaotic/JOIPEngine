@@ -35,6 +35,10 @@ std::shared_ptr<CScriptObjectBase> CBackgroundSignalEmitter::CreateNewScriptObje
 {
   return std::make_shared<CScriptBackground>(this, pState);
 }
+std::shared_ptr<CScriptObjectBase> CBackgroundSignalEmitter::CreateNewSequenceObject()
+{
+  return nullptr;
+}
 
 //----------------------------------------------------------------------------------------
 //

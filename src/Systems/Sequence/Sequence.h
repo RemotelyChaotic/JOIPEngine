@@ -164,8 +164,8 @@ struct SStopAudioInstruction : public SSequenceInstruction
 struct SShowTextInstruction : public SSequenceInstruction
 {
   std::optional<QString>             m_sText = std::nullopt;
-  std::optional<double>              m_dSkippableWaitS = std::nullopt;
-  std::optional<bool>                m_bSkippable = std::nullopt;
+  std::optional<double>              m_dSkippableWaitS = std::nullopt; // unused
+  std::optional<bool>                m_bSkippable = std::nullopt; // unused
   std::optional<QColor>              m_textColor = std::nullopt;
   std::optional<QColor>              m_bgColor = std::nullopt;
   std::optional<QString>             m_sPortrait = std::nullopt;
@@ -201,6 +201,8 @@ namespace sequence
 
   std::shared_ptr<SSequenceInstruction> CreateInstruction(const QString& sId,
                                                           const QVariantList& vArgs);
+
+  qint64 TimeOffsetFromInstructionType(const QString& sId);
 }
 
 //----------------------------------------------------------------------------------------

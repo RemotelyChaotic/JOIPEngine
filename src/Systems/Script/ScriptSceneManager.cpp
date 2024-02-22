@@ -37,6 +37,10 @@ std::shared_ptr<CScriptObjectBase> CSceneManagerSignalEmiter::CreateNewScriptObj
 {
   return std::make_shared<CScriptSceneManager>(this, pState);
 }
+std::shared_ptr<CScriptObjectBase> CSceneManagerSignalEmiter::CreateNewSequenceObject()
+{
+  return nullptr;
+}
 
 //----------------------------------------------------------------------------------------
 //

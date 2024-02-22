@@ -42,6 +42,10 @@ std::shared_ptr<CScriptObjectBase> CNotificationSignalEmiter::CreateNewScriptObj
 {
   return std::make_shared<CScriptNotification>(this, pState);
 }
+std::shared_ptr<CScriptObjectBase> CNotificationSignalEmiter::CreateNewSequenceObject()
+{
+  return nullptr;
+}
 
 //----------------------------------------------------------------------------------------
 //

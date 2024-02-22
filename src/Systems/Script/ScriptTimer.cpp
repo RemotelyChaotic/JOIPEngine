@@ -37,6 +37,10 @@ std::shared_ptr<CScriptObjectBase> CTimerSignalEmitter::CreateNewScriptObject(Qt
 {
   return std::make_shared<CScriptTimer>(this, pState);
 }
+std::shared_ptr<CScriptObjectBase> CTimerSignalEmitter::CreateNewSequenceObject()
+{
+  return nullptr;
+}
 
 //----------------------------------------------------------------------------------------
 //

@@ -10,6 +10,7 @@
 #include "Script/LuaScriptRunner.h"
 #include "Script/ScriptRunnerInstanceController.h"
 #include "Script/ScriptRunnerSignalEmiter.h"
+#include "Script/SequenceRunner.h"
 
 #include <QDebug>
 #include <QFileInfo>
@@ -56,14 +57,19 @@ void CScriptRunner::Initialize()
 {
   m_spSignalEmitterContext = std::make_shared<CScriptRunnerSignalContext>();
 
-  m_spRunnerFactoryMap.insert({"js",
+  auto fnHasRunningScripts = std::bind(&CScriptRunner::HasRunningScripts, this);
+
+  m_spRunnerFactoryMap.insert({SScriptDefinitionData::c_sScriptTypeJs,
                         std::make_unique<CJsScriptRunner>(m_spSignalEmitterContext,
-                                                          std::bind(&CScriptRunner::HasRunningScripts, this))});
-  m_spRunnerFactoryMap.insert({"eos",
+                                                          fnHasRunningScripts)});
+  m_spRunnerFactoryMap.insert({SScriptDefinitionData::c_sScriptTypeEos,
                         std::make_unique<CEosScriptRunner>(m_spSignalEmitterContext, this)});
-  m_spRunnerFactoryMap.insert({"lua",
+  m_spRunnerFactoryMap.insert({SScriptDefinitionData::c_sScriptTypeLua,
                         std::make_unique<CLuaScriptRunner>(m_spSignalEmitterContext,
-                                                           std::bind(&CScriptRunner::HasRunningScripts, this))});
+                                                           fnHasRunningScripts)});
+  m_spRunnerFactoryMap.insert({SScriptDefinitionData::c_sFileTypeSequence,
+                               std::make_unique<CSequenceRunner>(m_spSignalEmitterContext,
+                                                                 fnHasRunningScripts)});
 
   m_vspRunner.clear();
   for (const auto& it : m_spRunnerFactoryMap)
@@ -390,9 +396,10 @@ void CScriptRunner::LoadScriptAndCall(tspScene spScene, tspResource spResource,
   QReadLocker resourceLocker(&spResource->m_rwLock);
   spProject = spResource->m_spParent;
   QUrl sResourceUrl = spResource->m_sPath;
-  if (spResource->m_type._to_integral() != EResourceType::eScript)
+  if (spResource->m_type._to_integral() != EResourceType::eScript ||
+      spResource->m_type._to_integral() != EResourceType::eSequence)
   {
-    QString sError = tr("Script resource is of wrong type.");
+    QString sError = tr("Resource is of wrong type: Script or Sequence type required.");
     qCritical() << sError;
     emit m_spSignalEmitterContext->showError(sError, QtMsgType::QtCriticalMsg);
     return;

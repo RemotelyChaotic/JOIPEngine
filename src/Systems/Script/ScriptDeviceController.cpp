@@ -1,5 +1,7 @@
 #include "ScriptDeviceController.h"
 
+#include "Systems/Sequence/SequenceDeviceControllerRunner.h"
+
 CDeviceControllerSignalEmitter::CDeviceControllerSignalEmitter() :  CScriptRunnerSignalEmiter()
 {
 }
@@ -13,16 +15,18 @@ std::shared_ptr<CScriptObjectBase> CDeviceControllerSignalEmitter::CreateNewScri
 {
   return std::make_shared<CScriptDeviceController>(this, pEngine);
 }
-
 std::shared_ptr<CScriptObjectBase> CDeviceControllerSignalEmitter::CreateNewScriptObject(QPointer<CJsonInstructionSetParser> pParser)
 {
   Q_UNUSED(pParser)
   return nullptr;
 }
-
 std::shared_ptr<CScriptObjectBase> CDeviceControllerSignalEmitter::CreateNewScriptObject(QtLua::State* pState)
 {
   return std::make_shared<CScriptDeviceController>(this, pState);
+}
+std::shared_ptr<CScriptObjectBase> CDeviceControllerSignalEmitter::CreateNewSequenceObject()
+{
+  return std::make_shared<CSequenceDeviceControllerRunner>(this);
 }
 
 //----------------------------------------------------------------------------------------

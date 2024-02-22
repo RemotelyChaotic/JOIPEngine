@@ -611,10 +611,23 @@ macro(CreateJOIPProject JOIP_PROJECT_NAME)
     ${JOIPSources}/Systems/Script/ScriptThread.h
     ${JOIPSources}/Systems/Script/ScriptTimer.cpp
     ${JOIPSources}/Systems/Script/ScriptTimer.h
+    ${JOIPSources}/Systems/Script/SequenceRunner.cpp
+    ${JOIPSources}/Systems/Script/SequenceRunner.h
     ${JOIPSources}/Systems/ScriptRunner.cpp
     ${JOIPSources}/Systems/ScriptRunner.h
+    ${JOIPSources}/Systems/Sequence/ISequenceObjectRunner.h
     ${JOIPSources}/Systems/Sequence/Sequence.cpp
     ${JOIPSources}/Systems/Sequence/Sequence.h
+    ${JOIPSources}/Systems/Sequence/SequenceDeviceControllerRunner.cpp
+    ${JOIPSources}/Systems/Sequence/SequenceDeviceControllerRunner.h
+    ${JOIPSources}/Systems/Sequence/SequenceEvalRunner.cpp
+    ${JOIPSources}/Systems/Sequence/SequenceEvalRunner.h
+    ${JOIPSources}/Systems/Sequence/SequenceMediaPlayerRunner.cpp
+    ${JOIPSources}/Systems/Sequence/SequenceMediaPlayerRunner.h
+    ${JOIPSources}/Systems/Sequence/SequenceMetronomeRunner.cpp
+    ${JOIPSources}/Systems/Sequence/SequenceMetronomeRunner.h
+    ${JOIPSources}/Systems/Sequence/SequenceTextBoxRunner.cpp
+    ${JOIPSources}/Systems/Sequence/SequenceTextBoxRunner.h
     ${JOIPSources}/Systems/ThreadedSystem.cpp
     ${JOIPSources}/Systems/ThreadedSystem.h
     ${JOIPSources}/Themes.cpp

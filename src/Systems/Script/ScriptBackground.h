@@ -20,6 +20,7 @@ public:
   std::shared_ptr<CScriptObjectBase> CreateNewScriptObject(QPointer<QJSEngine> pEngine) override;
   std::shared_ptr<CScriptObjectBase> CreateNewScriptObject(QPointer<CJsonInstructionSetParser> pParser) override;
   std::shared_ptr<CScriptObjectBase> CreateNewScriptObject(QtLua::State* pState) override;
+  std::shared_ptr<CScriptObjectBase> CreateNewSequenceObject() override;
 
 signals:
   void backgroundColorChanged(QColor color);

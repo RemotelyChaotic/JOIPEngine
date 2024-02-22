@@ -13,6 +13,8 @@
 #include "Systems/JSON/JsonInstructionBase.h"
 #include "Systems/JSON/JsonInstructionSetParser.h"
 
+#include "Systems/Sequence/SequenceMediaPlayerRunner.h"
+
 #include "Systems/Project.h"
 #include "Systems/Resource.h"
 
@@ -43,6 +45,10 @@ std::shared_ptr<CScriptObjectBase> CMediaPlayerSignalEmitter::CreateNewScriptObj
 std::shared_ptr<CScriptObjectBase> CMediaPlayerSignalEmitter::CreateNewScriptObject(QtLua::State* pState)
 {
   return std::make_shared<CScriptMediaPlayer>(this, pState);
+}
+std::shared_ptr<CScriptObjectBase> CMediaPlayerSignalEmitter::CreateNewSequenceObject()
+{
+  return std::make_shared<CSequenceMediaPlayerRunner>(this);
 }
 
 //----------------------------------------------------------------------------------------

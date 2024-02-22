@@ -1061,3 +1061,15 @@ std::shared_ptr<SSequenceInstruction> sequence::CreateInstruction(const QString&
   }
   return ret;
 }
+
+//----------------------------------------------------------------------------------------
+//
+qint64 sequence::TimeOffsetFromInstructionType(const QString& sId)
+{
+  if (c_sInstructionIdBeat == sId ||
+      c_sInstructionIdStartPattern == sId)
+  {
+    return -1000;
+  }
+  return 0;
+}

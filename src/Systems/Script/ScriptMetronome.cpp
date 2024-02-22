@@ -2,7 +2,10 @@
 #include "Application.h"
 #include "CommonScriptHelpers.h"
 #include "ScriptDbWrappers.h"
+
 #include "Systems/DatabaseManager.h"
+
+#include "Systems/Sequence/SequenceMetronomeRunner.h"
 
 CMetronomeSignalEmitter::CMetronomeSignalEmitter() :
   CScriptRunnerSignalEmiter()
@@ -23,6 +26,10 @@ std::shared_ptr<CScriptObjectBase> CMetronomeSignalEmitter::CreateNewScriptObjec
 std::shared_ptr<CScriptObjectBase> CMetronomeSignalEmitter::CreateNewScriptObject(QtLua::State* pState)
 {
   return std::make_shared<CScriptMetronome>(this, pState);
+}
+std::shared_ptr<CScriptObjectBase> CMetronomeSignalEmitter::CreateNewSequenceObject()
+{
+  return std::make_shared<CSequenceMetronomeRunner>(this);
 }
 
 //----------------------------------------------------------------------------------------
