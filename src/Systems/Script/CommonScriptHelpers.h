@@ -13,6 +13,7 @@ typedef std::shared_ptr<struct SProject> tspProject;
 namespace script
 {
   bool CouldBeListFromLua(const QVariantMap& map);
+  QVariant ConvertLuaVariant(const QVariant& value);
 
   std::optional<QColor> ParseColorFromScriptVariant(const QVariant& var,
                                                     qint32 iDefaultAlpha,

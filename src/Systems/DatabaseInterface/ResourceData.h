@@ -221,6 +221,10 @@ Rectangle {
             }
         }
     }
+
+    PlayerEventCommunicator {
+        id: eventReciever;
+    }
 }
 )";
 

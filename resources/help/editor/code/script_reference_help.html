@@ -1012,6 +1012,47 @@
 
     <br>
 
+    <h2>PlayerEventCommunicator (name: <i>eventSender</i>)</h2>
+
+    <br>
+
+    <p>This object is never registered in default
+    <a href="qrc:/resources/help/layout/layout_help.html">Layout</a> and needs to be placed in the
+    Layout manually. This object is used to communicate with the Layout via events and
+    allows to directly interact with if from the running Scene script.<br>
+      <ul>
+        <li><b>sendEvent ( string sEvent [, object|string data ] ):</b><br>
+        Sends an event to the Layout with an optional payload. The payload can either be a string
+        or a fully JSON serializable object. This function is fire-and-forget and any possible response
+        is discarded.<br>
+        <i>Example Usage (JS):</i><br>
+        eventSender.sendEvent("testEvt","bla");<br>
+        eventSender.sendEvent("testEvt", {"a":"bla"});<br>
+        eventSender.sendEvent("testEvt");<br>
+        <i>Example Usage (Lua):</i><br>
+        eventSender:sendEvent("testEvt","bla");<br>
+        eventSender:sendEvent("testEvt", {a = "bla"});<br>
+        eventSender:sendEvent("testEvt");<br>
+        <br></li>
+
+        <li><b>sendEventAndWait ( string sEvent [, object|string data ] ): object</b><br>
+        Sends an event to the Layout with an optional payload. The payload can either be a string
+        or a fully JSON serializable object. This function will block the scene or script thread and
+        wait and for the response. The response is always an object.<br>
+        <i>Example Usage (JS):</i><br>
+        var resp = eventSender.sendEventAndWait("testEvt","bla");<br>
+        var resp = eventSender.sendEventAndWait("testEvt", {"a":"bla"});<br>
+        var resp = eventSender.sendEventAndWait("testEvt");<br>
+        <i>Example Usage (Lua):</i><br>
+        local resp = eventSender:sendEventAndWait("testEvt","bla");<br>
+        local resp = eventSender:sendEventAndWait("testEvt", {a = "bla"});<br>
+        local resp = eventSender:sendEventAndWait("testEvt");<br>
+        <br></li>
+      </ul>
+    </p>
+
+    <br>
+
     <h2>Project</h2>
 
     <br>

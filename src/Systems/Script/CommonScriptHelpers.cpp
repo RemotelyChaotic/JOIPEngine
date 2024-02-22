@@ -32,6 +32,54 @@ namespace script
 
   //--------------------------------------------------------------------------------------
   //
+  QVariant ConvertLuaVariant(const QVariant& var)
+  {
+    QVariant varConverted;
+    switch (var.type())
+    {
+      case QVariant::Map:
+      {
+        QVariantList convertedList;
+        QVariantMap map = var.toMap();
+        if (script::CouldBeListFromLua(map))
+        {
+          // we need to convert these types of maps to a list
+          for (const auto& v : qAsConst(map))
+          {
+            convertedList << ConvertLuaVariant(v);
+          }
+          varConverted = convertedList;
+        }
+        else
+        {
+          QVariantMap convertedMap;
+          for (auto it = map.begin(); map.end() != it; ++it)
+          {
+            convertedMap.insert(it.key(), ConvertLuaVariant(it.value()));
+          }
+          varConverted = convertedMap;
+        }
+      } break;
+      case QVariant::List:
+      {
+        QVariantList convertedList;
+        QVariantList list = var.toList();
+        for (const auto& v : qAsConst(list))
+        {
+          convertedList << ConvertLuaVariant(v);
+        }
+        varConverted = convertedList;
+      }
+      default:
+      {
+        varConverted = var;
+      } break;
+    }
+    return varConverted;
+  }
+
+  //--------------------------------------------------------------------------------------
+  //
   std::optional<QColor> ParseColorValsList(const std::vector<qint32>& viColorComponents,
                                            qint32 iDefaultAlpha,
                                            const QString& sContext,

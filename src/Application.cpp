@@ -33,6 +33,7 @@
 #include "Systems/Script/ScriptDeviceController.h"
 #include "Systems/Script/ScriptDbWrappers.h"
 #include "Systems/Script/ScriptEval.h"
+#include "Systems/Script/ScriptEventSender.h"
 #include "Systems/Script/ScriptIcon.h"
 #include "Systems/Script/ScriptMediaPlayer.h"
 #include "Systems/Script/ScriptMetronome.h"
@@ -471,6 +472,7 @@ void CApplication::RegisterQmlTypes()
   qmlRegisterType<CBackgroundSignalEmitter>("JOIP.script", 1, 1, "BackgroundSignalEmitter");
   qmlRegisterType<CDeviceControllerSignalEmitter>("JOIP.script", 1, 3, "DeviceControllerSignalEmitter");
   qmlRegisterType<CEvalSignalEmiter>("JOIP.script", 1, 2, "EvalSignalEmitter");
+  qmlRegisterType<CEventSenderSignalEmitter>("JOIP.script", 1, 3, "EventSenderSignalEmitter");
   qmlRegisterType<CIconSignalEmitter>("JOIP.script", 1, 1, "IconSignalEmitter");
   qmlRegisterType<CMediaPlayerSignalEmitter>("JOIP.script", 1, 1, "MediaPlayerSignalEmitter");
   qmlRegisterType<CMetronomeSignalEmitter>("JOIP.script", 1, 1, "MetronomeSignalEmitter");

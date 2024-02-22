@@ -587,6 +587,8 @@ macro(CreateJOIPProject JOIP_PROJECT_NAME)
     ${JOIPSources}/Systems/Script/ScriptDeviceController.h
     ${JOIPSources}/Systems/Script/ScriptEval.cpp
     ${JOIPSources}/Systems/Script/ScriptEval.h
+    ${JOIPSources}/Systems/Script/ScriptEventSender.cpp
+    ${JOIPSources}/Systems/Script/ScriptEventSender.h
     ${JOIPSources}/Systems/Script/ScriptIcon.cpp
     ${JOIPSources}/Systems/Script/ScriptIcon.h
     ${JOIPSources}/Systems/Script/ScriptMediaPlayer.cpp

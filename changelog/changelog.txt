@@ -14,6 +14,8 @@ New Features:
 - Added a new in-built Layout that wastes less screen real estate.
 - Added the possibility to connect to sex toys and issue commands to sex toys in a tease.
   - Added a Buttplug.io device client to connect to toys via Initface.
+- Added an event communication mechanism to the script interface via the PlayerEventCommunicator.
+  This lets a Script communicate and exchange data with the Layout.
 
 Changes:
 - Changed debug-view to a layout with splitter to support resizing the debugger.

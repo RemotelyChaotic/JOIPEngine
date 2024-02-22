@@ -315,5 +315,6 @@
         <file>resources/qml/PlayerSceneManager.qml</file>
         <file>resources/qml/TextItemFormated.qml</file>
         <file>resources/qml/PlayerDefaultLayoutClassic.qml</file>
+        <file>resources/qml/PlayerEventCommunicator.qml</file>
     </qresource>
 </RCC>
