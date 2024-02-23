@@ -101,6 +101,9 @@ void CSceneMainScreen::Initialize(const std::shared_ptr<CWindowContext>& spWindo
   connect(m_spScriptRunner.get(), &CScriptRunner::SignalSceneLoaded,
           this, &CSceneMainScreen::SlotSceneLoaded);
 
+  connect(m_spUi->pQmlWidget->engine(), &QQmlEngine::warnings,
+          this, &CSceneMainScreen::SlotQmlEngineWarning);
+
   m_wpDbManager = CApplication::Instance()->System<CDatabaseManager>();
 
   InitQmlMain();
@@ -285,22 +288,27 @@ void CSceneMainScreen::on_pQmlWidget_statusChanged(QQuickWidget::Status status)
 {
   if (QQuickWidget::Error == status)
   {
-    QStringList errors;
     const auto widgetErrors = m_spUi->pQmlWidget->errors();
     for (const QQmlError &error : widgetErrors)
     {
-      errors.append(error.toString());
+      if (QtMsgType::QtWarningMsg == error.messageType() ||
+          QtMsgType::QtCriticalMsg == error.messageType() ||
+          QtMsgType::QtFatalMsg == error.messageType())
+      {
+        QString sErr = error.toString();
+        emit SignalExecutionError(error.description(), error.line()-1, sErr);
+        qWarning() << sErr;
+      }
     }
-    QString sErrors = errors.join(QStringLiteral(", "));
-    qWarning() << sErrors;
   }
 }
 
 //----------------------------------------------------------------------------------------
 //
-void CSceneMainScreen::on_pQmlWidget_sceneGraphError(QQuickWindow::SceneGraphError /*error*/,
+void CSceneMainScreen::on_pQmlWidget_sceneGraphError(QQuickWindow::SceneGraphError error,
                                                      const QString &message)
 {
+  emit SignalExecutionError(tr("Layout: Scene graph error: %1"), 0, QString());
   qWarning() << message;
 }
 
@@ -390,6 +398,23 @@ void CSceneMainScreen::SlotNextSkript(bool bMightBeRegex)
 
   m_spProjectRunner->ResolveScenes();
   NextSkript(bMightBeRegex);
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CSceneMainScreen::SlotQmlEngineWarning(const QList<QQmlError>& vWarnings)
+{
+  for (const QQmlError& error : vWarnings)
+  {
+    if (QtMsgType::QtWarningMsg == error.messageType() ||
+        QtMsgType::QtCriticalMsg == error.messageType() ||
+        QtMsgType::QtFatalMsg == error.messageType())
+    {
+      QString sErr = error.toString();
+      emit SignalExecutionError(error.description(), error.line()-1, sErr);
+      qWarning() << sErr;
+    }
+  }
 }
 
 //----------------------------------------------------------------------------------------
@@ -607,18 +632,20 @@ void CSceneMainScreen::InitQmlMain()
   m_spUi->pQmlWidget->setClearColor(Qt::transparent);
   m_spUi->pQmlWidget->setStyleSheet("background-color: transparent;");
 
-  xmldom::RegisterWrapper(m_spUi->pQmlWidget->engine());
+  QQmlEngine* pEngine = m_spUi->pQmlWidget->engine();
+  xmldom::RegisterWrapper(pEngine);
 
-  m_spUi->pQmlWidget->engine()->setProperty(player::c_sMainPlayerProperty, QVariant::fromValue(this));
+  pEngine->setProperty(player::c_sMainPlayerProperty, QVariant::fromValue(this));
 
-  QQmlEngine::setObjectOwnership(m_spUi->pQmlWidget->engine(), QQmlEngine::CppOwnership);
+  QQmlEngine::setObjectOwnership(pEngine, QQmlEngine::CppOwnership);
+
   // engine will allways take owership of this object
   CDatabaseImageProvider* pProvider = new CDatabaseImageProvider(m_wpDbManager);
-  m_spUi->pQmlWidget->engine()->addImageProvider("DataBaseImageProivider", pProvider);
+  pEngine->addImageProvider("DataBaseImageProivider", pProvider);
 
   // for eos compatibility
-  QJSValue jsSceneManagerMetaObject = m_spUi->pQmlWidget->engine()->newQMetaObject(&CProjectEventWrapper::staticMetaObject);
-  m_spUi->pQmlWidget->engine()->globalObject().setProperty("Event", jsSceneManagerMetaObject);
+  QJSValue jsSceneManagerMetaObject = pEngine->newQMetaObject(&CProjectEventWrapper::staticMetaObject);
+  pEngine->globalObject().setProperty("Event", jsSceneManagerMetaObject);
 }
 
 //----------------------------------------------------------------------------------------

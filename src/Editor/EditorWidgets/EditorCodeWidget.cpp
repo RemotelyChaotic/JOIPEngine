@@ -461,6 +461,9 @@ void CEditorCodeWidget::SlotDebugStart()
 
     connect(pMainSceneScreen, &CSceneMainScreen::SignalUnloadFinished,
             this, &CEditorCodeWidget::SlotDebugUnloadFinished);
+    connect(pMainSceneScreen, &CSceneMainScreen::SignalExecutionError,
+            m_spUi->pCodeEditorView, &CCodeDisplayWidget::SlotExecutionError,
+            Qt::QueuedConnection);
 
     auto spScriptRunner = pMainSceneScreen->ScriptRunner().lock();
     if (nullptr != spScriptRunner)
@@ -538,6 +541,8 @@ void CEditorCodeWidget::SlotDebugUnloadFinished()
 
       disconnect(pMainSceneScreen, &CSceneMainScreen::SignalUnloadFinished,
                  this, &CEditorCodeWidget::SlotDebugUnloadFinished);
+      disconnect(pMainSceneScreen, &CSceneMainScreen::SignalExecutionError,
+                 m_spUi->pCodeEditorView, &CCodeDisplayWidget::SlotExecutionError);
 
       delete pMainSceneScreen;
       delete pItem;

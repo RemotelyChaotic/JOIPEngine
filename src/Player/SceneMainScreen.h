@@ -8,6 +8,7 @@
 
 class CBackgroundWidget;
 class CDatabaseManager;
+class CPlayerConsoleError;
 class CProjectEventCallbackRegistry;
 class CProjectScriptWrapper;
 class CProjectRunner;
@@ -49,6 +50,7 @@ public slots:
   void SlotQuit();
 
 signals:
+  void SignalExecutionError(QString sException, qint32 iLine, QString sStack);
   void SignalExitClicked();
   void SignalUnloadFinished();
 
@@ -62,6 +64,7 @@ private slots:
   void SlotError(QString sError, QtMsgType type);
   void SlotExecutionError(QString sException, qint32 iLine, QString sStack);
   void SlotNextSkript(bool bMightBeRegex);
+  void SlotQmlEngineWarning(const QList<QQmlError>& vWarnings);
   void SlotResizeDone();
   void SlotSceneSelectReturnValue(int iIndex);
   void SlotSceneLoaded(const QString& sScene);
@@ -89,6 +92,7 @@ private:
   std::shared_ptr<CSettings>                                  m_spSettings;
   tspProject                                                  m_spCurrentProject;
   QPointer<CProjectScriptWrapper>                             m_pCurrentProjectWrapper;
+  QPointer<CPlayerConsoleError>                               m_pErrorConsole;
   std::weak_ptr<CDatabaseManager>                             m_wpDbManager;
   qint32                                                      m_lastScriptExecutionStatus;
   bool                                                        m_bInitialized;

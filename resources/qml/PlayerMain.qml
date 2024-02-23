@@ -24,6 +24,7 @@ Rectangle {
     property PlayerMediaPlayer registeredMediaPlayer: null
     property int numReadyComponents: 0
     property var componentsRegistered: []
+
     signal startLoadingSkript()
     signal unloadFinished()
     signal quit()
@@ -48,7 +49,8 @@ Rectangle {
                 var resource = currentlyLoadedProject.resource(currentlyLoadedProject.playerLayout);
                 if (null !== resource && undefined !== resource)
                 {
-                    layoutLoader.setSource(resource.path);
+                    var path = resource.path;
+                    layoutLoader.setSource(path);
                     bFoundLayout = true;
                 }
                 else if (currentlyLoadedProject.playerLayout.startsWith("qrc:/qml"))
@@ -414,13 +416,12 @@ Rectangle {
                   case Loader.Null: console.log("The loader is inactive or no QML source has been set"); break;
                   case Loader.Ready: console.log("The QML source has been loaded"); break;
                   case Loader.Loading: console.log("The QML source is currently being loaded"); break;
-                  case Loader.Error: console.log("An error occurred while loading the QML source"); break;
+                  case Loader.Error: console.error("An error occurred while loading the QML source"); break;
                 }
 
                 if (status === Loader.Error)
                 {
                     console.error(qsTr("Could not load layout."));
-                    layoutLoader.setSource("qrc:/qml/resources/qml/PlayerDefaultLayout.qml");
                 }
             }
             onProgressChanged: {

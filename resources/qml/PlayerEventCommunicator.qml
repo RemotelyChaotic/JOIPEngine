@@ -39,6 +39,7 @@ Item {
     }
 
     Component.onCompleted: {
+        ScriptRunner.registerNewComponent(userName, signalEmitter);
         registrator.componentLoaded();
     }
 }

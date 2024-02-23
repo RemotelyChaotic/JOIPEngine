@@ -55,7 +55,7 @@ Rectangle {
             {
                 if (status === Image.Error || status === Image.Null)
                 {
-                    console.error(qsTr("Resource %1 not found.").arg(source));
+                    console.warn(qsTr("Resource %1 not found.").arg(source));
                     startedBackgroundLoad = false;
                 }
                 else if (status === Image.Ready)
