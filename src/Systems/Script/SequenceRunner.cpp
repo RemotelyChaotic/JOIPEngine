@@ -401,8 +401,8 @@ void CSequenceRunner::UnregisterComponents()
 //----------------------------------------------------------------------------------------
 //
 std::shared_ptr<IScriptRunnerInstanceController>
-CSequenceRunner::OverlayRunAsync(const QString& sId, const QString& sScript,
-                tspResource spResource)
+CSequenceRunner::RunAsync(const QString& sId, const QString& sScript,
+                          tspResource spResource)
 {
   if (nullptr == spResource)
   {
@@ -457,12 +457,12 @@ std::shared_ptr<CScriptRunnerInstanceController> CSequenceRunner::CreateRunner(c
   connect(spController.get(), &CScriptRunnerInstanceController::SignalSceneLoaded,
           this, &CSequenceRunner::SignalSceneLoaded);
 
-  connect(spController.get(), &CScriptRunnerInstanceController::SignalOverlayCleared,
-          this, &CSequenceRunner::SignalOverlayCleared);
-  connect(spController.get(), &CScriptRunnerInstanceController::SignalOverlayClosed,
-          this, &CSequenceRunner::SignalOverlayClosed);
-  connect(spController.get(), &CScriptRunnerInstanceController::SignalOverlayRunAsync,
-          this, &CSequenceRunner::SignalOverlayRunAsync);
+  connect(spController.get(), &CScriptRunnerInstanceController::SignalClearThreads,
+          this, &CSequenceRunner::SignalClearThreads);
+  connect(spController.get(), &CScriptRunnerInstanceController::SignalKill,
+          this, &CSequenceRunner::SignalKill);
+  connect(spController.get(), &CScriptRunnerInstanceController::SignalRunAsync,
+          this, &CSequenceRunner::SignalRunAsync);
 
   QMutexLocker lockerEmiter(&m_signalEmiterMutex);
   for (auto& itEmiter : m_pSignalEmiters)

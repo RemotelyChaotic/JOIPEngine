@@ -39,7 +39,7 @@ std::shared_ptr<IScriptRunnerInstanceController> CScriptRunner::RunnerController
   auto it = m_vspRunner.find(sId);
   if (m_vspRunner.end() != it)
   {
-    return it->second;
+    return it->second.second;
   }
   return nullptr;
 }
@@ -76,18 +76,18 @@ void CScriptRunner::Initialize()
   {
     it.second->Initialize();
     bool bOk = connect(dynamic_cast<QObject*>(it.second.get()),
-                       SIGNAL(SignalAddScriptRunner(const QString&,std::shared_ptr<IScriptRunnerInstanceController>)),
+                       SIGNAL(SignalAddScriptRunner(const QString&,std::shared_ptr<IScriptRunnerInstanceController>,EScriptRunnerType)),
                        this,
-                       SLOT(SlotAddScriptController(const QString&,std::shared_ptr<IScriptRunnerInstanceController>)));
+                       SLOT(SlotAddScriptController(const QString&,std::shared_ptr<IScriptRunnerInstanceController>,EScriptRunnerType)));
     assert(bOk); Q_UNUSED(bOk);
-    bOk = connect(dynamic_cast<QObject*>(it.second.get()), SIGNAL(SignalOverlayCleared()),
-                  this, SLOT(SlotOverlayCleared()));
+    bOk = connect(dynamic_cast<QObject*>(it.second.get()), SIGNAL(SignalClearThreads(EScriptRunnerType)),
+                  this, SLOT(SlotClearThreads(EScriptRunnerType)));
     assert(bOk); Q_UNUSED(bOk);
-    bOk = connect(dynamic_cast<QObject*>(it.second.get()), SIGNAL(SignalOverlayClosed(const QString&)),
-                  this, SLOT(SlotOverlayClosed(const QString&)));
+    bOk = connect(dynamic_cast<QObject*>(it.second.get()), SIGNAL(SignalKill(const QString&)),
+                  this, SLOT(SlotKill(const QString&)));
     assert(bOk); Q_UNUSED(bOk);
-    bOk = connect(dynamic_cast<QObject*>(it.second.get()), SIGNAL(SignalOverlayRunAsync(tspProject,const QString&,const QString&)),
-                  this, SLOT(SlotOverlayRunAsync(tspProject,const QString&,const QString&)));
+    bOk = connect(dynamic_cast<QObject*>(it.second.get()), SIGNAL(SignalRunAsync(tspProject,const QString&,const QString&,EScriptRunnerType)),
+                  this, SLOT(SlotSignalRunAsync(tspProject,const QString&,const QString&,EScriptRunnerType)));
     assert(bOk); Q_UNUSED(bOk);
     bOk = connect(dynamic_cast<QObject*>(it.second.get()), SIGNAL(SignalRemoveScriptRunner(const QString&)),
                   this, SLOT(SlotRemoveScriptRunner(const QString&)));
@@ -131,11 +131,15 @@ void CScriptRunner::LoadScript(tspScene spScene, tspResource spResource)
                     [this](std::unique_ptr<IScriptRunnerFactory>& spRunner,
                        const QString& sScript, tspScene spScene, tspResource spResource) {
     QMutexLocker locker(&m_runnerMutex);
-    auto it = m_vspRunner.find(IScriptRunnerFactory::c_sMainRunner);
+    auto it = std::find_if(m_vspRunner.begin(), m_vspRunner.end(),
+                           [](const std::pair<QString, std::pair<EScriptRunnerType,
+                                                                 std::shared_ptr<IScriptRunnerInstanceController>>>& pair) {
+      return pair.second.first == EScriptRunnerType::eMain;
+    });
     if (m_vspRunner.end() != it)
     {
-      it->second->InterruptExecution();
-      it->second->ResetEngine();
+      it->second.second->InterruptExecution();
+      it->second.second->ResetEngine();
       m_vspRunner.erase(it);
     }
 
@@ -144,7 +148,8 @@ void CScriptRunner::LoadScript(tspScene spScene, tspResource spResource)
 
     if (nullptr != spController)
     {
-      m_vspRunner.insert({IScriptRunnerFactory::c_sMainRunner, spController});
+      m_vspRunner.insert({IScriptRunnerFactory::c_sMainRunner,
+                          {EScriptRunnerType::eMain, spController}});
     }
   });
 }
@@ -162,7 +167,7 @@ void CScriptRunner::InterruptExecution()
   }
   for (const auto& it : m_vspRunner)
   {
-    it.second->InterruptExecution();
+    it.second.second->InterruptExecution();
   }
 }
 
@@ -187,7 +192,7 @@ bool CScriptRunner::HasRunningScripts() const
   bool bHasRunningScripts = false;
   for (const auto& it : m_vspRunner)
   {
-    bHasRunningScripts |= it.second->IsRunning();
+    bHasRunningScripts |= it.second.second->IsRunning();
   }
   return bHasRunningScripts;
 }
@@ -225,7 +230,7 @@ void CScriptRunner::RegisterNewComponent(const QString sName, QJSValue signalEmi
     QMutexLocker locker(&m_runnerMutex);
     for (auto& it : m_vspRunner)
     {
-      it.second->RegisterNewComponent(sName, pObject);
+      it.second.second->RegisterNewComponent(sName, pObject);
     }
   }
 }
@@ -243,7 +248,7 @@ void CScriptRunner::UnregisterComponents()
     QMutexLocker locker(&m_runnerMutex);
     for (auto& it : m_vspRunner)
     {
-      it.second->UnregisterComponents();
+      it.second.second->UnregisterComponents();
     }
   }
 }
@@ -251,34 +256,34 @@ void CScriptRunner::UnregisterComponents()
 //----------------------------------------------------------------------------------------
 //
 void CScriptRunner::SlotAddScriptController(const QString& sId,
-                                            std::shared_ptr<IScriptRunnerInstanceController> spController)
+                                            std::shared_ptr<IScriptRunnerInstanceController> spController,
+                                            EScriptRunnerType type)
 {
   QMutexLocker locker(&m_runnerMutex);
   auto it = m_vspRunner.find(sId);
   if (m_vspRunner.end() != it)
   {
-    it->second->InterruptExecution();
-    it->second->ResetEngine();
+    it->second.second->InterruptExecution();
+    it->second.second->ResetEngine();
     m_vspRunner.erase(it);
   }
 
   if (nullptr != spController)
   {
-    m_vspRunner.insert({sId, spController});
+    m_vspRunner.insert({sId, {type, spController}});
   }
 }
 
 //----------------------------------------------------------------------------------------
 //
-void CScriptRunner::SlotOverlayCleared()
+void CScriptRunner::SlotClearThreads(EScriptRunnerType type)
 {
   QMutexLocker locker(&m_runnerMutex);
-  auto it = m_vspRunner.begin();
-  while (m_vspRunner.end() != it)
+  for (auto it = m_vspRunner.begin(); m_vspRunner.end() != it;)
   {
-    if (IScriptRunnerFactory::c_sMainRunner != it->first)
+    if (type == it->second.first)
     {
-      it->second->ResetEngine();
+      it->second.second->ResetEngine();
       it = m_vspRunner.erase(it);
     }
     else
@@ -290,7 +295,7 @@ void CScriptRunner::SlotOverlayCleared()
 
 //----------------------------------------------------------------------------------------
 //
-void CScriptRunner::SlotOverlayClosed(const QString& sId)
+void CScriptRunner::SlotKill(const QString& sId)
 {
   QMutexLocker locker(&m_runnerMutex);
   auto it = m_vspRunner.find(sId);
@@ -299,9 +304,9 @@ void CScriptRunner::SlotOverlayClosed(const QString& sId)
     return;
   }
 
-  it->second->ResetEngine();
+  it->second.second->ResetEngine();
 
-  if (IScriptRunnerFactory::c_sMainRunner != sId)
+  if (EScriptRunnerType::eMain != it->second.first)
   {
     m_vspRunner.erase(it);
   }
@@ -309,34 +314,22 @@ void CScriptRunner::SlotOverlayClosed(const QString& sId)
 
 //----------------------------------------------------------------------------------------
 //
-void CScriptRunner::SlotOverlayRunAsync(tspProject spProject, const QString& sId,
-                                        const QString& sScriptResource)
+void CScriptRunner::SlotSignalRunAsync(tspProject spProject, const QString& sId,
+                                       const QString& sScriptResource,
+                                       EScriptRunnerType type)
 {
   if (auto spDbManager = CApplication::Instance()->System<CDatabaseManager>().lock())
   {
     tspResource spResource = spDbManager->FindResourceInProject(spProject, sScriptResource);
 
     LoadScriptAndCall(nullptr, spResource,
-                      [this, sId](std::unique_ptr<IScriptRunnerFactory>& spRunner,
+                      [this, sId, type](std::unique_ptr<IScriptRunnerFactory>& spRunner,
                          const QString& sScript, tspScene, tspResource spResource) {
 
-      QMutexLocker locker(&m_runnerMutex);
-      auto it = m_vspRunner.find(sId);
-      if (m_vspRunner.end() != it)
-      {
-        it->second->InterruptExecution();
-        it->second->ResetEngine();
-        m_vspRunner.erase(it);
-      }
-
       std::shared_ptr<IScriptRunnerInstanceController> spController =
-          spRunner->OverlayRunAsync(sId, sScript, spResource);
+          spRunner->RunAsync(sId, sScript, spResource);
 
-      if (nullptr != spController)
-      {
-        m_vspRunner.insert({sId, spController});
-      }
-
+      SlotAddScriptController(sId, spController, type);
     });
   }
 }
@@ -353,7 +346,7 @@ void CScriptRunner::SlotRemoveScriptRunner(const QString& sId)
     return;
   }
 
-  it->second->ResetEngine();
+  it->second.second->ResetEngine();
 
   m_vspRunner.erase(it);
 }
@@ -396,7 +389,7 @@ void CScriptRunner::LoadScriptAndCall(tspScene spScene, tspResource spResource,
   QReadLocker resourceLocker(&spResource->m_rwLock);
   spProject = spResource->m_spParent;
   QUrl sResourceUrl = spResource->m_sPath;
-  if (spResource->m_type._to_integral() != EResourceType::eScript ||
+  if (spResource->m_type._to_integral() != EResourceType::eScript &&
       spResource->m_type._to_integral() != EResourceType::eSequence)
   {
     QString sError = tr("Resource is of wrong type: Script or Sequence type required.");

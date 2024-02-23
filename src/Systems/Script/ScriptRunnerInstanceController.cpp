@@ -48,12 +48,12 @@ CScriptRunnerInstanceController::CScriptRunnerInstanceController(
   connect(m_spWorker.get(), &CScriptRunnerInstanceWorkerBase::SignalSceneLoaded,
           this, &CScriptRunnerInstanceController::SignalSceneLoaded);
 
-  connect(m_spWorker.get(), &CScriptRunnerInstanceWorkerBase::SignalOverlayCleared,
-          this, &CScriptRunnerInstanceController::SignalOverlayCleared, Qt::QueuedConnection);
-  connect(m_spWorker.get(), &CScriptRunnerInstanceWorkerBase::SignalOverlayClosed,
-          this, &CScriptRunnerInstanceController::SignalOverlayClosed, Qt::QueuedConnection);
-  connect(m_spWorker.get(), &CScriptRunnerInstanceWorkerBase::SignalOverlayRunAsync,
-          this, &CScriptRunnerInstanceController::SignalOverlayRunAsync, Qt::QueuedConnection);
+  connect(m_spWorker.get(), &CScriptRunnerInstanceWorkerBase::SignalClearThreads,
+          this, &CScriptRunnerInstanceController::SignalClearThreads, Qt::QueuedConnection);
+  connect(m_spWorker.get(), &CScriptRunnerInstanceWorkerBase::SignalKill,
+          this, &CScriptRunnerInstanceController::SignalKill, Qt::QueuedConnection);
+  connect(m_spWorker.get(), &CScriptRunnerInstanceWorkerBase::SignalRunAsync,
+          this, &CScriptRunnerInstanceController::SignalRunAsync, Qt::QueuedConnection);
 
   m_pThread->setObjectName("ScriptController::"+sName);
   m_pThread->start();

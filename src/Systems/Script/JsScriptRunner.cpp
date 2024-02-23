@@ -377,12 +377,15 @@ public slots:
           if (auto pNotification = dynamic_cast<CScriptNotification*>(spObject.get()))
           {
             connect(pNotification, &CScriptNotification::SignalOverlayCleared,
-                    this, &CJsScriptRunnerInstanceWorker::SignalOverlayCleared);
+                    this, [this](){
+              emit SignalClearThreads(EScriptRunnerType::eOverlay);
+            });
             connect(pNotification, &CScriptNotification::SignalOverlayClosed,
-                    this, &CJsScriptRunnerInstanceWorker::SignalOverlayClosed);
+                    this, &CJsScriptRunnerInstanceWorker::SignalKill);
             connect(pNotification, &CScriptNotification::SignalOverlayRunAsync,
                     this, [this](const QString& sId, const QString& sScriptResource){
-              emit SignalOverlayRunAsync(m_spProject, sId, sScriptResource);
+              emit SignalRunAsync(m_spProject, sId, sScriptResource,
+                                  EScriptRunnerType::eOverlay);
             });
           }
 
@@ -494,7 +497,7 @@ void CJsScriptRunner::UnregisterComponents()
 
 //----------------------------------------------------------------------------------------
 //
-std::shared_ptr<IScriptRunnerInstanceController> CJsScriptRunner::OverlayRunAsync(
+std::shared_ptr<IScriptRunnerInstanceController> CJsScriptRunner::RunAsync(
     const QString& sId, const QString& sScript, tspResource spResource)
 {
   std::shared_ptr<CScriptRunnerInstanceController> spController = CreateRunner(sId);
@@ -560,12 +563,12 @@ std::shared_ptr<CScriptRunnerInstanceController> CJsScriptRunner::CreateRunner(c
   connect(spController.get(), &CScriptRunnerInstanceController::SignalSceneLoaded,
           this, &CJsScriptRunner::SignalSceneLoaded);
 
-  connect(spController.get(), &CScriptRunnerInstanceController::SignalOverlayCleared,
-          this, &CJsScriptRunner::SignalOverlayCleared);
-  connect(spController.get(), &CScriptRunnerInstanceController::SignalOverlayClosed,
-          this, &CJsScriptRunner::SignalOverlayClosed);
-  connect(spController.get(), &CScriptRunnerInstanceController::SignalOverlayRunAsync,
-          this, &CJsScriptRunner::SignalOverlayRunAsync);
+  connect(spController.get(), &CScriptRunnerInstanceController::SignalClearThreads,
+          this, &CJsScriptRunner::SignalClearThreads);
+  connect(spController.get(), &CScriptRunnerInstanceController::SignalKill,
+          this, &CJsScriptRunner::SignalKill);
+  connect(spController.get(), &CScriptRunnerInstanceController::SignalRunAsync,
+          this, &CJsScriptRunner::SignalRunAsync);
 
   QMutexLocker lockerEmiter(&m_signalEmiterMutex);
   for (auto& itEmiter : m_pSignalEmiters)

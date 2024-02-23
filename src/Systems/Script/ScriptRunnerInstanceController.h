@@ -1,6 +1,8 @@
 #ifndef CSCRIPTRUNNERINSTANCECONTROLLER_H
 #define CSCRIPTRUNNERINSTANCECONTROLLER_H
 
+#include "IScriptRunner.h"
+
 #include "Systems/Project.h"
 #include "Systems/Resource.h"
 #include "Systems/Scene.h"
@@ -38,9 +40,10 @@ public slots:
 signals:
   void HandleScriptFinish(bool bSuccess, const QVariant& sRetVal);
   void SignalInterruptExecution();
-  void SignalOverlayCleared();
-  void SignalOverlayClosed(const QString& sId);
-  void SignalOverlayRunAsync(tspProject spProject, const QString& sId, const QString& sScriptResource);
+  void SignalClearThreads(EScriptRunnerType type);
+  void SignalKill(const QString& sId);
+  void SignalRunAsync(tspProject spProject, const QString& sId, const QString& sScriptResource,
+                      EScriptRunnerType type);
   void SignalSceneLoaded(const QString& sScene);
 
 protected:
@@ -96,9 +99,10 @@ public:
 
 signals:
   void HandleScriptFinish(const QString& sName, bool bSuccess, const QVariant& sRetVal) override;
-  void SignalOverlayCleared();
-  void SignalOverlayClosed(const QString& sId);
-  void SignalOverlayRunAsync(tspProject spProject, const QString& sId, const QString& sScriptResource);
+  void SignalClearThreads(EScriptRunnerType type);
+  void SignalKill(const QString& sId);
+  void SignalRunAsync(tspProject spProject, const QString& sId, const QString& sScriptResource,
+                      EScriptRunnerType type);
   void SignalSceneLoaded(const QString& sScene);
 
 private slots:

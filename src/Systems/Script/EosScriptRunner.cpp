@@ -245,7 +245,9 @@ void CEosScriptRunner::RegisterNewComponent(const QString sName, QJSValue signal
           if (auto spNotification = std::dynamic_pointer_cast<CEosScriptNotification>(spObject))
           {
             connect(spNotification.get(), &CEosScriptNotification::SignalOverlayClosed,
-                    this, &CEosScriptRunner::SignalOverlayClosed);
+                    this, [this](){
+              emit SignalClearThreads(EScriptRunnerType::eOverlay);
+            });
             connect(spNotification.get(), &CEosScriptNotification::SignalOverlayRunAsync,
                     this, [this](const QString& sId) {
               auto spRunner =
@@ -293,8 +295,8 @@ void CEosScriptRunner::UnregisterComponents()
 //----------------------------------------------------------------------------------------
 //
 std::shared_ptr<IScriptRunnerInstanceController>
-CEosScriptRunner::OverlayRunAsync(const QString& sId, const QString& sScript,
-                                  tspResource spResource)
+CEosScriptRunner::RunAsync(const QString& sId, const QString& sScript,
+                           tspResource spResource)
 {
   // create runner
   std::shared_ptr<CJsonInstructionSetRunner> spEosRunner =
@@ -392,7 +394,7 @@ void CEosScriptRunner::SlotFork(
 
   emit SignalAddScriptRunner(sForkCommandsName,
                              std::make_shared<CEosScriptRunnerInstanceController>(
-                                 sForkCommandsName, spNewRunner));
+                                 sForkCommandsName, spNewRunner), EScriptRunnerType::eAsync);
 
   spNewRunner->setObjectName(sForkCommandsName);
   connect(spNewRunner.get(), &CJsonInstructionSetRunner::CommandRetVal,

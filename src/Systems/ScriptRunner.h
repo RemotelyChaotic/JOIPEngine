@@ -48,10 +48,14 @@ public slots:
   void UnregisterComponents();
 
 protected slots:
-  void SlotAddScriptController(const QString& sId, std::shared_ptr<IScriptRunnerInstanceController>);
-  void SlotOverlayCleared();
-  void SlotOverlayClosed(const QString& sId);
-  void SlotOverlayRunAsync(tspProject spProject, const QString& sId, const QString& sScriptResource);
+  void SlotAddScriptController(const QString& sId,
+                               std::shared_ptr<IScriptRunnerInstanceController> spRunner,
+                               EScriptRunnerType type);
+  void SlotClearThreads(EScriptRunnerType type);
+  void SlotKill(const QString& sId);
+  void SlotSignalRunAsync(tspProject spProject, const QString& sId,
+                          const QString& sScriptResource,
+                          EScriptRunnerType type);
   void SlotRemoveScriptRunner(const QString& sId);
   void SlotScriptRunFinished(bool bOk, const QString& sRetVal);
 
@@ -62,7 +66,8 @@ private:
 
   std::map<QString, std::unique_ptr<IScriptRunnerFactory>> m_spRunnerFactoryMap;
   mutable QMutex                                           m_runnerMutex;
-  std::map<QString, std::shared_ptr<IScriptRunnerInstanceController>>
+  std::map<QString, std::pair<EScriptRunnerType,
+                              std::shared_ptr<IScriptRunnerInstanceController>>>
                                                            m_vspRunner;
   std::shared_ptr<CScriptRunnerSignalContext>              m_spSignalEmitterContext;
 };

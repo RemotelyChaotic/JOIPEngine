@@ -371,12 +371,14 @@ public slots:
           if (auto pNotification = dynamic_cast<CScriptNotification*>(spObject.get()))
           {
             connect(pNotification, &CScriptNotification::SignalOverlayCleared,
-                    this, &CLuaScriptRunnerInstanceWorker::SignalOverlayCleared);
+                    this, [this](){
+              emit SignalClearThreads(EScriptRunnerType::eOverlay);
+            });
             connect(pNotification, &CScriptNotification::SignalOverlayClosed,
-                    this, &CLuaScriptRunnerInstanceWorker::SignalOverlayClosed);
+                    this, &CLuaScriptRunnerInstanceWorker::SignalKill);
             connect(pNotification, &CScriptNotification::SignalOverlayRunAsync,
                     this, [this](const QString& sId, const QString& sScriptResource){
-              emit SignalOverlayRunAsync(m_spProject, sId, sScriptResource);
+              emit SignalRunAsync(m_spProject, sId, sScriptResource, EScriptRunnerType::eOverlay);
             });
           }
 
@@ -776,8 +778,8 @@ void CLuaScriptRunner::UnregisterComponents()
 //----------------------------------------------------------------------------------------
 //
 std::shared_ptr<IScriptRunnerInstanceController>
-CLuaScriptRunner::OverlayRunAsync(const QString& sId,
-                                  const QString& sScript, tspResource spResource)
+CLuaScriptRunner::RunAsync(const QString& sId,
+                           const QString& sScript, tspResource spResource)
 {
   std::shared_ptr<CScriptRunnerInstanceController> spRunner = CreateRunner(sId);
 
@@ -842,12 +844,12 @@ std::shared_ptr<CScriptRunnerInstanceController> CLuaScriptRunner::CreateRunner(
   connect(spRunner.get(), &CScriptRunnerInstanceController::SignalSceneLoaded,
           this, &CLuaScriptRunner::SignalSceneLoaded);
 
-  connect(spRunner.get(), &CScriptRunnerInstanceController::SignalOverlayCleared,
-          this, &CLuaScriptRunner::SignalOverlayCleared);
-  connect(spRunner.get(), &CScriptRunnerInstanceController::SignalOverlayClosed,
-          this, &CLuaScriptRunner::SignalOverlayClosed);
-  connect(spRunner.get(), &CScriptRunnerInstanceController::SignalOverlayRunAsync,
-          this, &CLuaScriptRunner::SignalOverlayRunAsync);
+  connect(spRunner.get(), &CScriptRunnerInstanceController::SignalClearThreads,
+          this, &CLuaScriptRunner::SignalClearThreads);
+  connect(spRunner.get(), &CScriptRunnerInstanceController::SignalKill,
+          this, &CLuaScriptRunner::SignalKill);
+  connect(spRunner.get(), &CScriptRunnerInstanceController::SignalRunAsync,
+          this, &CLuaScriptRunner::SignalRunAsync);
 
   QMutexLocker lockerEmiter(&m_signalEmiterMutex);
   for (auto& itEmiter : m_pSignalEmiters)

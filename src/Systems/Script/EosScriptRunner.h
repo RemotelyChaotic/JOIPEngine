@@ -70,17 +70,19 @@ public:
   void UnregisterComponents() override;
 
   std::shared_ptr<IScriptRunnerInstanceController>
-       OverlayRunAsync(const QString& sId, const QString& sScript,
-                       tspResource spResource) override;
+       RunAsync(const QString& sId, const QString& sScript,
+                tspResource spResource) override;
 
   void HandleScriptFinish(bool bSuccess, const QVariant& sRetVal);
 
 signals:
-  void SignalAddScriptRunner(const QString& sId, std::shared_ptr<IScriptRunnerInstanceController> spController) override;
-  void SignalOverlayCleared() override;
-  void SignalOverlayClosed(const QString& sId) override;
-  void SignalOverlayRunAsync(tspProject spProject, const QString& sId,
-                             const QString& sScriptResource) override;
+  void SignalAddScriptRunner(const QString& sId,
+                             std::shared_ptr<IScriptRunnerInstanceController> spController,
+                             EScriptRunnerType type) override;
+  void SignalClearThreads(EScriptRunnerType type) override;
+  void SignalKill(const QString& sId) override;
+  void SignalRunAsync(tspProject spProject, const QString& sId,
+                      const QString& sScriptResource, EScriptRunnerType type) override;
   void SignalRemoveScriptRunner(const QString& sId) override;
   void SignalSceneLoaded(const QString& sScene) override;
   void SignalScriptRunFinished(bool bOk, const QString& sRetVal) override;
