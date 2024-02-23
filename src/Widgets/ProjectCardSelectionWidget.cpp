@@ -208,7 +208,7 @@ void CProjectCardSelectionWidget::SlotCardClicked(int iProjId)
 void CProjectCardSelectionWidget::SlotLoadProjectsPrivate(EDownLoadStateFlags flags)
 {
   m_flags = flags;
-  m_spUi->pQmlWidget->setSource(QUrl("qrc:/qml/resources/qml/ProjectCardSelection.qml"));
+  m_spUi->pQmlWidget->setSource(QUrl("qrc:/qml/resources/qml/JoipEngine/ProjectCardSelection.qml"));
 
   connect(m_spUi->pQmlWidget->rootObject(), SIGNAL(selectedProjectIndex(int)),
           this, SLOT(SlotCardClicked(int)));

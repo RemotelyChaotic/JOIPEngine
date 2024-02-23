@@ -10,6 +10,7 @@
 #include "Systems/BackActionHandler.h"
 #include "Systems/DatabaseManager.h"
 #include "Systems/DatabaseImageProvider.h"
+#include "Systems/PhysFs/PhysFsFileEngine.h"
 #include "Systems/Project.h"
 #include "Systems/ScriptRunner.h"
 #include "Systems/Script/ScriptDbWrappers.h"
@@ -133,13 +134,18 @@ void CSceneMainScreen::LoadProject(qint32 iId, const QString sStartScene)
   }
 
   m_bCanLoadNewScene = true;
-  m_spUi->pQmlWidget->setSource(QUrl("qrc:/qml/resources/qml/PlayerMain.qml"));
+  m_spUi->pQmlWidget->setSource(QUrl("qrc:/qml/resources/qml/JoipEngine/PlayerMain.qml"));
 
   auto spDbManager = m_wpDbManager.lock();
   if (nullptr != spDbManager)
   {
     m_spCurrentProject = spDbManager->FindProject(iId);
     if (nullptr == m_spCurrentProject) { return; }
+
+    QStringList vsPaths = m_vsBaseImportPathList;
+    vsPaths << "qrc:/qml/resources/qml/";
+    vsPaths << PhysicalProjectPath(m_spCurrentProject);
+    m_spUi->pQmlWidget->engine()->setImportPathList(vsPaths);
 
     CDatabaseManager::LoadProject(m_spCurrentProject);
     m_spProjectRunner->LoadProject(m_spCurrentProject, sStartScene);
@@ -634,6 +640,8 @@ void CSceneMainScreen::InitQmlMain()
 
   QQmlEngine* pEngine = m_spUi->pQmlWidget->engine();
   xmldom::RegisterWrapper(pEngine);
+
+  m_vsBaseImportPathList = pEngine->importPathList();
 
   pEngine->setProperty(player::c_sMainPlayerProperty, QVariant::fromValue(this));
 

@@ -1,0 +1,19 @@
+module JoipEngine
+ImageResourceView 1.3 ImageResourceView.qml
+MetronomeItem 1.3 MetronomeItem.qml
+MovieResourceView 1.3 MovieResourceView.qml
+PlayerBackground 1.3 PlayerBackground.qml
+PlayerComponentRegistrator 1.3 PlayerComponentRegistrator.qml
+PlayerControls 1.3 PlayerControls.qml
+PlayerEventCommunicator 1.3 PlayerEventCommunicator.qml
+PlayerIcons 1.3 PlayerIcons.qml
+PlayerMediaPlayer 1.3 PlayerMediaPlayer.qml
+PlayerMetronome 1.3 PlayerMetronome.qml
+PlayerNotification 1.3 PlayerNotification.qml
+PlayerTextBox 1.3 PlayerTextBox.qml
+PlayerTimer 1.3 PlayerTimer.qml
+SoundResourceView 1.3 SoundResourceView.qml
+TextItemFormated 1.3 TextItemFormated.qml
+TimedItem 1.3 TimedItem.qml
+WebResourceComponent 1.3 WebResourceComponent.qml
+WebResourceView 1.3 WebResourceView.qml

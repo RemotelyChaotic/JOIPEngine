@@ -94,6 +94,7 @@ private:
   QPointer<CProjectScriptWrapper>                             m_pCurrentProjectWrapper;
   QPointer<CPlayerConsoleError>                               m_pErrorConsole;
   std::weak_ptr<CDatabaseManager>                             m_wpDbManager;
+  QStringList                                                 m_vsBaseImportPathList;
   qint32                                                      m_lastScriptExecutionStatus;
   bool                                                        m_bInitialized;
   bool                                                        m_bShuttingDown;

@@ -62,7 +62,7 @@ Rectangle {
 
             if (!bFoundLayout)
             {
-                layoutLoader.setSource("qrc:/qml/resources/qml/PlayerDefaultLayout.qml");
+                layoutLoader.setSource("qrc:/qml/resources/qml/JoipEngine/PlayerDefaultLayout.qml");
             }
         }
         else
