@@ -337,7 +337,8 @@ void CEditorCodeWidget::OnActionBarChanged()
 
     if (0 < EditableFileModel()->rowCount())
     {
-      auto pScriptItem = EditableFileModel()->CachedFile(CachedResourceName(0));
+      auto pScriptItem = EditableFileModel()->CachedFile(
+            CachedResourceName(m_spUi->pResourceComboBox->currentIndex()));
       if (nullptr != pScriptItem)
       {
         if (nullptr != ActionBar())

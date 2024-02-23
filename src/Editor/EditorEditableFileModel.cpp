@@ -572,24 +572,53 @@ void CEditorEditableFileModel::SlotSceneDatachanged(qint32 iProjId, qint32 iId)
   auto spDbManager = m_wpDbManager.lock();
   if (nullptr != spDbManager)
   {
+    QString sScript;
+    QString sLayout;
+    tspScene spSceneChanged = spDbManager->FindScene(m_spProject, iId);
+    {
+      QReadLocker locker(&spSceneChanged->m_rwLock);
+      sScript = spSceneChanged->m_sScript;
+      sLayout = spSceneChanged->m_sSceneLayout;
+    }
+
     for (auto it = m_cachedScriptsMap.begin(); m_cachedScriptsMap.end() != it; ++it)
     {
-      auto vspScene = it->second.m_vspScenes;
-      if (!vspScene.empty())
+      // update scenes of this caced script if needed
+      auto itFound = std::find_if(
+            it->second.m_vspScenes.begin(), it->second.m_vspScenes.end(),
+            [iId](const tspScene& spScene) {
+        QReadLocker locker(&spScene->m_rwLock);
+        qint32 iIdSaved = spScene->m_iId;
+        return iIdSaved == iId;
+      });
+      if ((!sScript.isEmpty() && it->first == sScript) ||
+          (!sLayout.isEmpty() && it->first == sLayout))
       {
-        for (tspScene spScene : vspScene)
+        if (it->second.m_vspScenes.end() == itFound)
         {
-          QReadLocker locker(&spScene->m_rwLock);
-          qint32 iIdSaved = spScene->m_iId;
-          locker.unlock();
+          it->second.m_vspScenes.push_back(spSceneChanged);
+        }
+      }
+      else
+      {
+        if (it->second.m_vspScenes.end() != itFound)
+        {
+          it->second.m_vspScenes.erase(itFound);
+        }
+      }
 
-          if (iId == iIdSaved)
-          {
-            QModelIndex index =
-                createIndex(static_cast<qint32>(std::distance(m_cachedScriptsMap.begin(), it)),
-                            0, nullptr);
-            emit dataChanged(index, index);
-          }
+      for (tspScene spScene : it->second.m_vspScenes)
+      {
+        QReadLocker locker(&spScene->m_rwLock);
+        qint32 iIdSaved = spScene->m_iId;
+        locker.unlock();
+
+        if (iId == iIdSaved)
+        {
+          QModelIndex index =
+              createIndex(static_cast<qint32>(std::distance(m_cachedScriptsMap.begin(), it)),
+                          0, nullptr);
+          emit dataChanged(index, index);
         }
       }
     }

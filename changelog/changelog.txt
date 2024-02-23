@@ -9,6 +9,7 @@ Fixed Bugs:
   but the folder failed to rename.
 - Fixed a crash when loading scene nodes which are not linked to a scene because of
   faulty project configuration.
+- Fixed a few bugs with updating the script list and the ui for the selected scripts.
 
 New Features:
 - Added the possibility to configure the Layout of the Player for the project as a whole.

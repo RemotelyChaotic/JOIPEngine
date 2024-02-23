@@ -78,6 +78,12 @@ CEditorModel::CEditorModel(QWidget* pParent) :
           this, &CEditorModel::SlotJobMessage);
   connect(JobWorker(), &CEditorJobWorker::SignalEditorJobProgress,
           this, &CEditorModel::SlotJobProgressChanged);
+
+  if (auto spDbManager = m_wpDbManager.lock())
+  {
+    connect(spDbManager.get(), &CDatabaseManager::SignalSceneDataChanged,
+            this, &CEditorModel::SignalProjectEdited, Qt::DirectConnection);
+  }
 }
 
 CEditorModel::~CEditorModel()
