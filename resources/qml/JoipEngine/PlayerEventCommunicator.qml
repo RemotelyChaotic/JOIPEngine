@@ -1,4 +1,5 @@
 import QtQuick 2.14
+import JOIP.core 1.1
 import JOIP.script 1.3
 
 Item {
@@ -7,11 +8,11 @@ Item {
 
     function registerEventHandler(event, fnHandler)
     {
-        if (null == handlers[event]) {
-            handlers[event] = [fnHandler];
+        if (null == signalEmitter.handlers[event]) {
+            signalEmitter.handlers[event] = [fnHandler];
         }
         else {
-            handlers[event].push(fnHandler);
+            signalEmitter.handlers[event].push(fnHandler);
         }
     }
     function sendEventResponse(event, response)
