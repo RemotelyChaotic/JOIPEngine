@@ -44,26 +44,39 @@ void CSceneNodeModel::SetProjectId(qint32 iId)
   auto spDbManager = m_wpDbManager.lock();
   if (nullptr != spDbManager)
   {
+    auto fnAddScene = [this, &spDbManager](){
+        qint32 iNewId = spDbManager->AddScene(m_spProject);
+        m_spScene = spDbManager->FindScene(m_spProject, iNewId);
+        if (nullptr != m_spScene)
+        {
+          m_spScene->m_rwLock.lockForRead();
+          m_sSceneName = m_spScene->m_sName;
+          m_sOldSceneName = m_sSceneName;
+          m_spScene->m_rwLock.unlock();
+        }
+    };
     m_spProject = spDbManager->FindProject(iId);
     if (m_sSceneName.isNull() || m_sSceneName.isEmpty())
     {
-      qint32 iNewId = spDbManager->AddScene(m_spProject);
-      m_spScene = spDbManager->FindScene(m_spProject, iNewId);
-      if (nullptr != m_spScene)
-      {
-        m_spScene->m_rwLock.lockForRead();
-        m_sSceneName = m_spScene->m_sName;
-        m_sOldSceneName = m_sSceneName;
-        m_spScene->m_rwLock.unlock();
-      }
+      fnAddScene();
     }
     else
     {
       m_spScene = spDbManager->FindScene(m_spProject, m_sSceneName);
+      if (nullptr == m_spScene)
+      {
+        // try and recover in case of faulty configuration project file
+        QString sOldScene = m_sSceneName;
+        fnAddScene();
+        spDbManager->RenameScene(m_spProject, m_sSceneName, sOldScene);
+        m_sSceneName = sOldScene;
+        m_sOldSceneName = sOldScene;
+        m_spScene = spDbManager->FindScene(m_spProject, m_sSceneName);
+      }
     }
 
     // compatibility with old versions that didn't save the script
-    if (m_sScript.isEmpty())
+    if (m_sScript.isEmpty() && nullptr != m_spScene)
     {
       QReadLocker locker(&m_spScene->m_rwLock);
       m_sScript = m_spScene->m_sScript;

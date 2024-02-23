@@ -247,9 +247,15 @@ protected:
       {
         if (QFileInfo(sOldProjectFolder).exists())
         {
-          sNewFolderName = sName + "." + sSuffix;
+          sNewFolderName = sName + (sSuffix.isEmpty() ? "" : "." + sSuffix);
           sNewProjectFolder = sProjectPath + QDir::separator() + sNewFolderName;
           bOk = sContentFolder.rename(sFolderName, sNewFolderName);
+          if (!bOk)
+          {
+            // reset error so serialization oif the rest doesn't fail
+            bOk = true;
+            qWarning() << "Serialize: Could not rename folder: " + sOldProjectFolder;
+          }
         }
         else
         {

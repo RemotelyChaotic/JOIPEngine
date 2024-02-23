@@ -5,6 +5,8 @@ Fixed Bugs:
 - Fixed Node changes not generating an undo entry on the undo stack.
 - Fixed a crash in the help overlay, when highlighted widgets are 
   deleted before the overlay can show.
+- Fixed a bug that prevented projects from being saved, when a rename was requested
+  but the folder failed to rename.
 
 New Features:
 - Added the possibility to configure the Layout of the Player for the project as a whole.
