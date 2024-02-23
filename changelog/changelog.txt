@@ -10,6 +10,7 @@ Fixed Bugs:
 - Fixed a crash when loading scene nodes which are not linked to a scene because of
   faulty project configuration.
 - Fixed a few bugs with updating the script list and the ui for the selected scripts.
+- Fixed QML binding loop for buttons.
 
 New Features:
 - Added the possibility to configure the Layout of the Player for the project as a whole.
@@ -34,6 +35,7 @@ Changes:
   a new one.
 - Script files reload without a user prompt if changed externally and not changed in 
   the Editor.
+- Layout / QML errors are reported in the editor.
 
 Fixed Bugs:
 - Fixed a few UI typos.

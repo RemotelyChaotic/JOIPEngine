@@ -23,7 +23,9 @@ Rectangle {
 
         // yes, this causes a binding loop for property "width" too bad we ignore it
         // otherwise we can't get the width of the content
-        anchors.fill: parent
+        anchors.centerIn: parent
+        height: contentHeight
+        width: Math.min(contentWidth, maximumWidth)
 
         font.family: root.currentlyLoadedProject.font
         font.pointSize: 14
