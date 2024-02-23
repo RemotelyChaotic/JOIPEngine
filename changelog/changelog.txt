@@ -7,6 +7,8 @@ Fixed Bugs:
   deleted before the overlay can show.
 - Fixed a bug that prevented projects from being saved, when a rename was requested
   but the folder failed to rename.
+- Fixed a crash when loading scene nodes which are not linked to a scene because of
+  faulty project configuration.
 
 New Features:
 - Added the possibility to configure the Layout of the Player for the project as a whole.
