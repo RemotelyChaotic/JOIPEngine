@@ -75,6 +75,8 @@ public:
 public slots:
   void SlotNodeCreated(QtNodes::Node &n);
   void SlotNodeDeleted(QtNodes::Node &n);
+  void SlotAddNewScriptFile();
+  void SlotAddNewLayoutFile();
 
 signals:
   void SignalProjectEdited();

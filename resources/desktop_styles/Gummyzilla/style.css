@@ -655,20 +655,24 @@ QPushButton#ExportButton:disabled {
   image: url(ui/ButtonExportSelected.png);
 }
 QPushButton#AddScriptFile {
-  image: url(ui/ButtonCode.png);
+  image: url(ui/ButtonAddScript.png);
 }
 QPushButton#AddScriptFile:hover,
 QPushButton#AddScriptFile:pressed,
 QPushButton#AddScriptFile:disabled {
-  image: url(ui/ButtonCodeSelected.png);
+  image: url(ui/ButtonAddScriptSelected.png);
 }
+QPushButton#AddLayoutButton,
 QPushButton#AddLayoutFile {
-  image: url(ui/ButtonLayout.png);
+  image: url(ui/ButtonAddLayout.png);
 }
+QPushButton#AddLayoutButton:hover,
+QPushButton#AddLayoutButton:pressed,
+QPushButton#AddLayoutButton:disabled,
 QPushButton#AddLayoutFile:hover,
 QPushButton#AddLayoutFile:pressed,
 QPushButton#AddLayoutFile:disabled {
-  image: url(ui/ButtonLayoutSelected.png);
+  image: url(ui/ButtonAddLayoutSelected.png);
 }
 QPushButton#UndoButton,
 QToolButton#f_undo {

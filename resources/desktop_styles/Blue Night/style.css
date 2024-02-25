@@ -455,12 +455,13 @@ QPushButton#ExportButton {
                   url(ui/ButtonExport.png) on;
 }
 QPushButton#AddScriptFile {
-  qproperty-icon: url(ui/ButtonCode.png) off,
-                  url(ui/ButtonCode.png) on;
+  qproperty-icon: url(ui/ButtonAddScript.png) off,
+                  url(ui/ButtonAddScript.png) on;
 }
+QPushButton#AddLayoutButton,
 QPushButton#AddLayoutFile {
-  qproperty-icon: url(ui/ButtonLayout.png) off,
-                  url(ui/ButtonLayout.png) on;
+  qproperty-icon: url(ui/ButtonAddLayout.png) off,
+                  url(ui/ButtonAddLayout.png) on;
 }
 QPushButton#UndoButton,
 QToolButton#f_undo {

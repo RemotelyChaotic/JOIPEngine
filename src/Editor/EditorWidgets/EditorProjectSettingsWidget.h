@@ -39,6 +39,7 @@ protected slots:
   void on_pSoundEmitterCount_valueChanged(qint32 iValue);
   void on_pFontComboBox_currentFontChanged(const QFont& font);
   void on_pDefaultLayoutComboBox_currentIndexChanged(qint32 iIdx);
+  void on_AddLayoutButton_clicked();
   void on_pDescribtionTextEdit_textChanged();
   void on_pFetishLineEdit_editingFinished();
   void on_FetishOverlayButton_clicked();

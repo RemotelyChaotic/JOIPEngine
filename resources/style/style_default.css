@@ -469,12 +469,13 @@ QPushButton#ExportButton {
                   url(:/resources/style/img/ButtonExport.png) on;
 }
 QPushButton#AddScriptFile {
-  qproperty-icon: url(:/resources/style/img/ButtonCode.png) off,
-                  url(:/resources/style/img/ButtonCode.png) on;
+  qproperty-icon: url(:/resources/style/img/ButtonAddScript.png) off,
+                  url(:/resources/style/img/ButtonAddScript.png) on;
 }
+QPushButton#AddLayoutButton,
 QPushButton#AddLayoutFile {
-  qproperty-icon: url(:/resources/style/img/ButtonLayout.png) off,
-                  url(:/resources/style/img/ButtonLayout.png) on;
+  qproperty-icon: url(:/resources/style/img/ButtonAddLayout.png) off,
+                  url(:/resources/style/img/ButtonAddLayout.png) on;
 }
 QPushButton#UndoButton,
 QToolButton#f_undo {

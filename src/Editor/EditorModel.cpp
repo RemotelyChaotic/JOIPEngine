@@ -174,7 +174,7 @@ void CEditorModel::AddNewFileToScene(QPointer<QWidget> pParentForDialog,
                                      EResourceType type)
 {
   auto spDbManager = m_wpDbManager.lock();
-  if (nullptr != spScene && nullptr != spDbManager)
+  if (nullptr != spDbManager)
   {
     QStringList formats;
     if (EResourceType::eScript == type._to_integral())
@@ -186,8 +186,6 @@ void CEditorModel::AddNewFileToScene(QPointer<QWidget> pParentForDialog,
       formats = SResourceFormats::LayoutFormats();
     }
 
-    // if there is no script -> create
-    QReadLocker locker(&spScene->m_rwLock);
     QRegExp rxTypeFilter(m_sScriptTypesFilter);
     for (qint32 i = 0; formats.size() > i; ++i)
     {
@@ -198,11 +196,20 @@ void CEditorModel::AddNewFileToScene(QPointer<QWidget> pParentForDialog,
       }
     }
 
+    // if there is no script -> create
+    QString sSceneName;
+    if (nullptr != spScene)
+    {
+      QReadLocker locker(&spScene->m_rwLock);
+      sSceneName = spScene->m_sName;
+    }
+
     const QString sProjectPath = PhysicalProjectPath(m_spCurrentProject);
     QDir projectDir(sProjectPath);
     QPointer<CEditorModel> pThisGuard(this);
-    QFileDialog* dlg = new QFileDialog(pParentForDialog,
-                                       tr("Create File for %1").arg(spScene->m_sName));
+    QString sTitle = sSceneName.isEmpty() ? tr("Create File") :
+                                            tr("Create File for %1").arg(sSceneName);
+    QFileDialog* dlg = new QFileDialog(pParentForDialog, sTitle);
     dlg->setViewMode(QFileDialog::Detail);
     dlg->setFileMode(QFileDialog::AnyFile);
     dlg->setAcceptMode(QFileDialog::AcceptSave);
@@ -237,6 +244,7 @@ void CEditorModel::AddNewFileToScene(QPointer<QWidget> pParentForDialog,
 
             tvfnActionsResource vfnActions =
                 {[&spScene, type, spDbManager](const tspResource& spNewResource){
+              if (nullptr == spScene) { return; }
               qint32 iProjId = -1;
               spScene->m_spParent->m_rwLock.lockForRead();
               iProjId = spScene->m_spParent->m_iId;
@@ -733,6 +741,32 @@ void CEditorModel::SlotNodeDeleted(QtNodes::Node &n)
     }
     emit SignalProjectEdited();
   }
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CEditorModel::SlotAddNewScriptFile()
+{
+  if (nullptr == m_spCurrentProject)
+  {
+    qWarning() << "Node created in null-project.";
+    return;
+  }
+
+  AddNewFileToScene(m_pParentWidget, nullptr, EResourceType::eScript);
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CEditorModel::SlotAddNewLayoutFile()
+{
+  if (nullptr == m_spCurrentProject)
+  {
+    qWarning() << "Node created in null-project.";
+    return;
+  }
+
+  AddNewFileToScene(m_pParentWidget, nullptr, EResourceType::eLayout);
 }
 
 //----------------------------------------------------------------------------------------

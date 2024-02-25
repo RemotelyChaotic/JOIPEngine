@@ -58,6 +58,7 @@ CEditorProjectSettingsWidget::CEditorProjectSettingsWidget(QWidget *parent) :
   m_spCurrentProject(nullptr)
 {
   m_spUi->setupUi(this);
+  m_spUi->AddLayoutButton->setProperty("styleSmall", true);
 }
 
 CEditorProjectSettingsWidget::~CEditorProjectSettingsWidget()
@@ -93,7 +94,7 @@ void CEditorProjectSettingsWidget::Initialize()
     wpHelpFactory->RegisterHelp(c_sSoundEmitterCountHelpId, ":/resources/help/editor/projectsettings/number_soundemitters_help.html");
     m_spUi->pFontComboBox->setProperty(helpOverlay::c_sHelpPagePropertyName, c_sProjectFontHelpId);
     wpHelpFactory->RegisterHelp(c_sProjectFontHelpId, ":/resources/help/editor/projectsettings/font_help.html");
-    m_spUi->pDefaultLayoutComboBox->setProperty(helpOverlay::c_sHelpPagePropertyName, c_sLayoutHelpId);
+    m_spUi->pLayoutWidget->setProperty(helpOverlay::c_sHelpPagePropertyName, c_sLayoutHelpId);
     wpHelpFactory->RegisterHelp(c_sLayoutHelpId, ":/resources/help/editor/projectsettings/layout_help.html");
     m_spUi->pDescribtionTextEdit->setProperty(helpOverlay::c_sHelpPagePropertyName, c_sProjectDescribtionHelpId);
     wpHelpFactory->RegisterHelp(c_sProjectDescribtionHelpId, ":/resources/help/editor/projectsettings/describtion_textedit_help.html");
@@ -453,6 +454,16 @@ void CEditorProjectSettingsWidget::on_pDefaultLayoutComboBox_currentIndexChanged
                                                emit pThis->SignalProjectEdited();
                                                emit pThis->EditorModel()->SignalProjectPropertiesEdited();
                                              }));
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CEditorProjectSettingsWidget::on_AddLayoutButton_clicked()
+{
+  WIDGET_INITIALIZED_GUARD
+  if (nullptr == m_spCurrentProject) { return; }
+
+  EditorModel()->SlotAddNewLayoutFile();
 }
 
 //----------------------------------------------------------------------------------------
