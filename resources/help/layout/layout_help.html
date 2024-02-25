@@ -265,6 +265,72 @@
       </ul>
     </p>
 
+    <h2>TeaseDeviceController (JOIP.core 1.3)</h2>
+
+    <br>
+
+    <p>The TeaseDeviceController singleton object handles communication with connected devices.
+    It allows for direct control of those devices.<br>
+
+      <ul>
+        <li><b>openSelectionScreen( int x, int y ):</b><br>
+        Open the device selection overlay at the given screen coordinates.
+        The coordinates are absolute in the player; meaning that for a player in the debugger
+        the coordinates do <i>not</i> equal the absolute window coordinates.<br>
+        </li>
+
+        <li><b>selectDevice( string sDevice ):</b><br>
+        Programmatically select a device and set it as the current device used by the Scene scripts.<br>
+        </li>
+
+        <li><b>sendLinearCmd( int iDurationMs, real dPosition ): Resource</b><br>
+        Send a linear command to the connected device.<br>
+        </li>
+
+        <li><b>sendRotateCmd( bool bClockwise, real dSpeed ):</b><br>
+        Send a rotate command to the connected device.<br>
+        </li>
+
+        <li><b>sendStopCmd(  ):</b><br>
+        Send a stop command to the connected device, stopping all action.<br>
+        </li>
+
+        <li><b>sendVibrateCmd( real dSpeed ):</b><br>
+        Send a vibrate command to the connected device.<br>
+        </li>
+      </ul>
+    </p>
+
+    <br>
+
+    <br>
+
+    <h2>SoundManager (JOIP.core 1.2)</h2>
+
+    <br>
+
+    <p>The SoundManager singleton object holds played Sound resoures should not be used directly,
+    unless you know what you are doing.<br>
+
+      <ul>
+        <li><b>clearRegistry(  ):</b><br>
+        Clears all registered Sound resources.<br>
+        </li>
+
+        <li><b>deRregisterId( string sId ):</b><br>
+        De-registers a Sound resource.<br>
+        </li>
+
+        <li><b>get( string sId ): Resource</b><br>
+        Get the resource associated with an id.<br>
+        </li>
+
+        <li><b>registerId( string sId, Resource sound, int iLoops, int iStartAt, int iEndAt  ):</b><br>
+        Register a Sound resource.<br>
+        </li>
+      </ul>
+    </p>
+
     <br>
 
     <h2>Project (JOIP.db 1.1)</h2>
@@ -497,7 +563,7 @@
 
     <br>
 
-    <h2>Custom Components (no include needed)</h2>
+    <h2>Custom Components (JoipEngine 1.3)</h2>
 
     <br>
 
@@ -523,6 +589,7 @@
         <li>PlayerBackground</li>
         <li>PlayerComponentRegistrator (Do not use)</li>
         <li>PlayerControls</li>
+        <li>PlayerEventCommunicator (see below for more details)</li>
         <li>PlayerIcons</li>
         <li>PlayerMediaPlayer</li>
         <li>PlayerMetronome</li>
@@ -530,6 +597,29 @@
         <li>PlayerTimer</li>
       </ul>
     </p>
+
+    <h2>PlayerEventCommunicator (JoipEngine 1.3)</h2>
+
+    <br>
+
+    <p>This object is automatically registered by the JOIP-Engine on loading a
+    <a href="qrc:/resources/help/project/joi_project_help.html">JOI-Project</a> and
+    should not be placed in the Layout manually. This object should not be placed in the Layout manually.<br>
+      <ul>
+        <li><b>userName: string</b><br>
+        As with any other component, this can be set to change under what name the component is
+        registered with scene scripts.<br></li>
+
+        <li><b>registerEventHandler ( string event, function eventHandler( string event ) ):</b><br>
+        Registers a function as a callback to a certain event. This way custom interaction
+        with Scene Script can be implemented.<br></li>
+
+        <li><b>signal sendEventResponse ( string event, object | string data ):</b><br>
+        Sends a response to a given event back to the Scene Script.<br></li>
+      </ul>
+    </p>
+
+    <br>
 
     <br>
 
