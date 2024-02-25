@@ -249,6 +249,32 @@ std::vector<QPointer<QItemSelectionModel>> CResourceModelView::SelectionModels()
 QStringList CResourceModelView::SelectedResources() const
 {
   QStringList vsResources;
+
+  auto fnAddResource = [this, &vsResources](const QModelIndex& sourceIndex) {
+    const QString sName = m_pModel->data(sourceIndex, Qt::DisplayRole).toString();
+    if (!vsResources.contains(sName))
+    {
+      vsResources << sName;
+    }
+  };
+
+  std::function<void(const QModelIndex&)> fnForChildren =
+      [&](const QModelIndex& idx)
+  {
+    for (qint32 i = 0; m_pModel->rowCount(idx) > i; i++)
+    {
+      const QModelIndex& childIdx = m_pModel->index(i, idx.column(), idx);
+      if (m_pModel->IsResourceType(childIdx))
+      {
+        fnAddResource(childIdx);
+      }
+      else if (m_pModel->IsFolderType(childIdx))
+      {
+        fnForChildren(childIdx);
+      }
+    }
+  };
+
   for (QPointer<QItemSelectionModel> pSelectionModel : SelectionModels())
   {
     if (nullptr != m_pProxy && nullptr != m_pModel && nullptr != pSelectionModel)
@@ -257,16 +283,18 @@ QStringList CResourceModelView::SelectedResources() const
       pSelectionModel->clearSelection();
       foreach (QModelIndex index, indexes)
       {
-        if (m_pModel->IsResourceType(m_pProxy->mapToSource(index)))
+        QModelIndex sourceIndex = m_pProxy->mapToSource(index);
+        if (m_pModel->IsResourceType(sourceIndex))
         {
-          const QString sName = m_pModel->data(m_pProxy->mapToSource(index), Qt::DisplayRole).toString();
-          if (!vsResources.contains(sName))
-          {
-            vsResources << sName;
-          }
-          // only interrested in first item which is the actual item we need
-          break;
+          fnAddResource(sourceIndex);
         }
+        else if (m_pModel->IsFolderType(sourceIndex))
+        {
+          fnForChildren(sourceIndex);
+        }
+
+        // only interrested in first item which is the actual item we need
+        break;
       }
     }
   }

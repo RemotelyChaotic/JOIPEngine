@@ -500,6 +500,16 @@ bool CResourceTreeItemModel::IsResourceType(const QModelIndex& index)
 
 //----------------------------------------------------------------------------------------
 //
+bool CResourceTreeItemModel::IsFolderType(const QModelIndex& index)
+{
+  if (!index.isValid()) { return false; }
+
+  CResourceTreeItem* pItem = GetItem(index);
+  return pItem->Type()._to_integral() == EResourceTreeItemType::eFolder;
+}
+
+//----------------------------------------------------------------------------------------
+//
 QModelIndex CResourceTreeItemModel::IndexForResource(const tspResource& spResource)
 {
   if (nullptr == m_spProject || nullptr == spResource) { return QModelIndex(); }

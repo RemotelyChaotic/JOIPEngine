@@ -69,6 +69,7 @@ public:
 
   // convenience-functions
   bool IsResourceType(const QModelIndex& index = QModelIndex());
+  bool IsFolderType(const QModelIndex& index = QModelIndex());
   QModelIndex IndexForResource(const tspResource& spResource);
   tspResource ResourceForIndex(const QModelIndex& idx);
 

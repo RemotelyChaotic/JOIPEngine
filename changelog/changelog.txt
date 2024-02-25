@@ -36,6 +36,8 @@ Changes:
 - Script files reload without a user prompt if changed externally and not changed in 
   the Editor.
 - Layout / QML errors are reported in the editor.
+- Enabled to remove all resources in a folder by selecting a folder of resources 
+  in the view.
 
 Fixed Bugs:
 - Fixed a few UI typos.
