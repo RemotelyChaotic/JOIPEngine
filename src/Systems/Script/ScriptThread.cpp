@@ -1,4 +1,9 @@
 #include "ScriptThread.h"
+#include "Application.h"
+#include "CommonScriptHelpers.h"
+#include "IScriptRunner.h"
+
+#include "Systems/DatabaseManager.h"
 
 #include <QEventLoop>
 #include <QDateTime>
@@ -34,18 +39,76 @@ std::shared_ptr<CScriptObjectBase> CThreadSignalEmitter::CreateNewSequenceObject
 //
 CScriptThread::CScriptThread(QPointer<CScriptRunnerSignalEmiter> pEmitter,
                              QPointer<QJSEngine> pEngine) :
-  CJsScriptObjectBase(pEmitter, pEngine)
+  CJsScriptObjectBase(pEmitter, pEngine),
+  m_wpDbManager(CApplication::Instance()->System<CDatabaseManager>())
 {
 }
 CScriptThread::CScriptThread(QPointer<CScriptRunnerSignalEmiter> pEmitter,
                              QtLua::State* pState)  :
-  CJsScriptObjectBase(pEmitter, pState)
+  CJsScriptObjectBase(pEmitter, pState),
+  m_wpDbManager(CApplication::Instance()->System<CDatabaseManager>())
 {
 }
 
 CScriptThread::~CScriptThread()
 {
 
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CScriptThread::kill(QString sId)
+{
+  if (!CheckIfScriptCanRun()) { return; }
+
+  if (IScriptRunnerFactory::c_sMainRunner == sId)
+  {
+    emit m_pSignalEmitter->showError(
+          tr("Can not kill %1.").arg(IScriptRunnerFactory::c_sMainRunner),
+          QtMsgType::QtWarningMsg);
+    return;
+  }
+
+  emit SignalKill(sId);
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CScriptThread::runAsynch(QVariant resource)
+{
+  runAsynch(resource, QVariant());
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CScriptThread::runAsynch(QVariant resource, QVariant id)
+{
+  if (!CheckIfScriptCanRun()) { return; }
+
+  QString sId;
+  if (id.type() == QVariant::String)
+  {
+    sId = id.toString();
+  }
+
+  bool bOk = false;
+  QString sResource = GetResourceName(resource, "runAsynch", false, &bOk);
+  if (!bOk) { return; }
+
+  if (sId.isEmpty())
+  {
+    sId = sResource;
+  }
+
+  if (IScriptRunnerFactory::c_sMainRunner == sId)
+  {
+    emit m_pSignalEmitter->showError(
+          tr("Id of asynch thread must not be %1").arg(IScriptRunnerFactory::c_sMainRunner),
+          QtMsgType::QtWarningMsg);
+    return;
+  }
+
+  emit SignalOverlayRunAsync(sId, sResource);
 }
 
 //----------------------------------------------------------------------------------------
@@ -131,5 +194,32 @@ void CScriptThread::sleep(qint32 iTimeS, QVariant bSkippable)
     {
       disconnect(skipLoop);
     }
+  }
+}
+
+//----------------------------------------------------------------------------------------
+//
+QString CScriptThread::GetResourceName(const QVariant& resource, const QString& sMethod,
+                                       bool bStringCanBeId, bool* pbOk)
+{
+  QString sError;
+  std::optional<QString> optRes =
+      script::ParseResourceFromScriptVariant(resource, m_wpDbManager.lock(),
+                                             m_spProject,
+                                             sMethod, &sError);
+
+  if (nullptr != pbOk)
+  {
+    *pbOk = optRes.has_value();
+  }
+
+  if (optRes.has_value())
+  {
+    return optRes.value();
+  }
+  else
+  {
+    emit m_pSignalEmitter->showError(sError, QtMsgType::QtWarningMsg);
+    return QString();
   }
 }

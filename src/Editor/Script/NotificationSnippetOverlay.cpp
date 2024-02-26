@@ -61,12 +61,12 @@ void CNotificationSnippetOverlay::Initialize(CResourceTreeItemModel* pResourceTr
   m_spUi->pPortraitResourceSelectTree->setModel(pPortraitProxyModel);
   CResourceTreeItemSortFilterProxyModel* pOnClickProxyModel =
       new CResourceTreeItemSortFilterProxyModel(m_spUi->pOnClickResourceSelectTree);
-  pOnClickProxyModel->FilterForTypes({EResourceType::eScript});
+  pOnClickProxyModel->FilterForTypes({EResourceType::eScript, EResourceType::eSequence});
   pOnClickProxyModel->setSourceModel(pResourceTreeModel);
   m_spUi->pOnClickResourceSelectTree->setModel(pOnClickProxyModel);
   CResourceTreeItemSortFilterProxyModel* pOnTimeoutProxyModel =
       new CResourceTreeItemSortFilterProxyModel(m_spUi->pOnTimeoutResourceSelectTree);
-  pOnTimeoutProxyModel->FilterForTypes({EResourceType::eScript});
+  pOnTimeoutProxyModel->FilterForTypes({EResourceType::eScript, EResourceType::eSequence});
   pOnTimeoutProxyModel->setSourceModel(pResourceTreeModel);
   m_spUi->pOnTimeoutResourceSelectTree->setModel(pOnTimeoutProxyModel);
 

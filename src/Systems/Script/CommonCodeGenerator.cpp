@@ -607,10 +607,27 @@ QString CCommonCodeGenerator::Generate(const SThreadSnippetOverlay& data,
                                        tspProject spCurrentProject) const
 {
   Q_UNUSED(spCurrentProject)
-  QString sCode = Statement(Invoke("thread", "sleep") + Call("%1,%2"))
-      .arg(data.m_bSleepTimeS)
-      .arg(data.m_bSkippable ? m_codeConfig.sTrue : m_codeConfig.sFalse);
-  return sCode;
+  QString sFinalString;
+  if (data.m_bSleep)
+  {
+    QString sCode = Statement(Invoke("thread", "sleep") + Call("%1,%2"))
+        .arg(data.m_bSleepTimeS)
+        .arg(data.m_bSkippable ? m_codeConfig.sTrue : m_codeConfig.sFalse);
+    sFinalString += sCode + "\n";
+  }
+  if (data.m_bKill)
+  {
+    QString sCode = Statement(Invoke("thread", "kill") + Call(String(data.m_sKillId)));
+    sFinalString += sCode + "\n";
+  }
+  if (data.m_bAsynch)
+  {
+    QString sCode = Statement(Invoke("thread", "runAsynch") + Call("%1%2"))
+        .arg(String(data.m_sAsynchScript))
+        .arg(data.m_sAsynchId.isEmpty() ? "" : "," + String(data.m_sAsynchId));
+    sFinalString += sCode + "\n";
+  }
+  return sFinalString;
 }
 
 //----------------------------------------------------------------------------------------

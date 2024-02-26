@@ -22,6 +22,8 @@ New Features:
   - Added a Buttplug.io device client to connect to toys via Initface.
 - Added an event communication mechanism to the script interface via the PlayerEventCommunicator.
   This lets a Script communicate and exchange data with the Layout.
+- The PlayerThread can now spawn and kill threads with the "runAsynch" and "kill" methods
+  respectively.
 
 Changes:
 - Changed debug-view to a layout with splitter to support resizing the debugger.

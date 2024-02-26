@@ -3,6 +3,7 @@
 #include "ScriptDbWrappers.h"
 #include "ScriptNotification.h"
 #include "ScriptTextBox.h"
+#include "ScriptThread.h"
 #include "ScriptRunnerInstanceController.h"
 #include "ScriptRunnerSignalEmiter.h"
 
@@ -379,6 +380,16 @@ public slots:
             connect(pNotification, &CScriptNotification::SignalOverlayRunAsync,
                     this, [this](const QString& sId, const QString& sScriptResource){
               emit SignalRunAsync(m_spProject, sId, sScriptResource, EScriptRunnerType::eOverlay);
+            });
+          }
+          else if (auto pThread = dynamic_cast<CScriptThread*>(spObject.get()))
+          {
+            connect(pThread, &CScriptThread::SignalKill,
+                    this, &CLuaScriptRunnerInstanceWorker::SignalKill);
+            connect(pThread, &CScriptThread::SignalOverlayRunAsync,
+                    this, [this](const QString& sId, const QString& sScriptResource){
+              emit SignalRunAsync(m_spProject, sId, sScriptResource,
+                                  EScriptRunnerType::eAsync);
             });
           }
 

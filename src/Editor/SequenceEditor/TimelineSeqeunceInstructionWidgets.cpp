@@ -1263,7 +1263,7 @@ void CTimelineSeqeunceInstructionWidgetRunScript::SetResourceModel(CResourceTree
 
   CResourceTreeItemSortFilterProxyModel* pProxyModel =
       new CResourceTreeItemSortFilterProxyModel(m_spUi->pResourceSelectTree);
-  pProxyModel->FilterForTypes({EResourceType::eScript});
+  pProxyModel->FilterForTypes({EResourceType::eScript, EResourceType::eSequence});
   pProxyModel->setSourceModel(pResourceModel);
   m_spUi->pResourceSelectTree->setModel(pProxyModel);
 

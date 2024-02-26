@@ -6,6 +6,7 @@
 #include <QJSValue>
 #include <memory>
 
+class CDatabaseManager;
 
 class CThreadSignalEmitter : public CScriptRunnerSignalEmiter
 {
@@ -39,9 +40,21 @@ public:
   ~CScriptThread();
 
 public slots:
+  void kill(QString sId);
+  void runAsynch(QVariant resource);
+  void runAsynch(QVariant resource, QVariant sId);
   void sleep(qint32 iTimeS);
   void sleep(qint32 iTimeS, QVariant bSkippable);
 
+signals:
+  void SignalOverlayRunAsync(const QString& sId, const QString& sScriptResource);
+  void SignalKill(const QString& sId);
+
+private:
+  QString GetResourceName(const QVariant& resource, const QString& sMethod,
+                          bool bStringCanBeId = false, bool* pbOk = nullptr);
+
+  std::weak_ptr<CDatabaseManager>  m_wpDbManager;
 };
 
 #endif // SCRIPTTHREAD_H

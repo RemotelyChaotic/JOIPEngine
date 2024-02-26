@@ -5,6 +5,8 @@
 #include "ScriptRunnerInstanceController.h"
 #include "ScriptRunnerSignalEmiter.h"
 #include "ScriptTextBox.h"
+#include "ScriptThread.h"
+
 #include "Systems/Project.h"
 #include "Systems/Resource.h"
 #include "Systems/Scene.h"
@@ -386,6 +388,16 @@ public slots:
                     this, [this](const QString& sId, const QString& sScriptResource){
               emit SignalRunAsync(m_spProject, sId, sScriptResource,
                                   EScriptRunnerType::eOverlay);
+            });
+          }
+          else if (auto pThread = dynamic_cast<CScriptThread*>(spObject.get()))
+          {
+            connect(pThread, &CScriptThread::SignalKill,
+                    this, &CJsScriptRunnerInstanceWorker::SignalKill);
+            connect(pThread, &CScriptThread::SignalOverlayRunAsync,
+                    this, [this](const QString& sId, const QString& sScriptResource){
+              emit SignalRunAsync(m_spProject, sId, sScriptResource,
+                                  EScriptRunnerType::eAsync);
             });
           }
 

@@ -131,8 +131,14 @@ struct STextSnippetCode
 
 struct SThreadSnippetOverlay
 {
+  bool m_bSleep = false;
   double m_bSleepTimeS;
-  bool   m_bSkippable;
+  bool   m_bSkippable = true;
+  bool m_bKill = false;
+  QString m_sKillId;
+  bool m_bAsynch = false;
+  QString m_sAsynchScript;
+  QString m_sAsynchId;
 };
 
 struct STimerSnippetData

@@ -779,7 +779,8 @@
           object obtained from the current Scene object or <i>null</i>.</li>
         </ol>
         This function will show a new notification with the provided id.
-        If a notification of the given id already exists, the old notification will be hidden.<br>
+        If a notification of the given id already exists, the old notification will be hidden.
+        The scripts can be of any script type (JS, Lua, EOS) or a Sequence.<br>
         <i>Example Usage (JS):</i><br>
         notification.show("myid", ""); // shows a notification with the id "myid"<br>
         notification.show("myid", "MyTitle"); // shows a notification with the id "myid" and the text "MyTitle"<br>
@@ -864,17 +865,40 @@
 
     <p>This object is automatically registered by the JOIP-Engine on loading a
     <a href="qrc:/resources/help/project/joi_project_help.html">JOI-Project</a> and
-    should not be placed in the <a href="qrc:/resources/help/layout/layout_help.html">Layout</a> manually. This object is only used to idle the script for
-    a certain time.<br>
+    should not be placed in the <a href="qrc:/resources/help/layout/layout_help.html">Layout</a> manually.
+    This object is only used to idle the script for a certain time or start/kill new asynchronous
+    threads.<br>
       <ul>
+        <li><b>kill ( string id ):</b><br>
+        Kills a running thread with the given id. The id can not be <b>&quot;~main&quot;.</b><br>
+        <i>Example Usage (JS):</i><br>
+        thread.kill("myHelperThread");<br>
+        <i>Example Usage (Lua):</i><br>
+        thread:kill("myHelperThread");<br>
+        <br></li>
+
+        <li><b>runAsynch ( Resource | string resource [, string id ] ):</b><br>
+        Starts a new asynch thread and runs the given Script or Sequence Resource in the thread.
+        The id can not be <b>&quot;~main&quot; and is optional. If no id is given, the
+        id of the thred equals the Resource name. If a thread with the given id is already
+        running, it will be killed before starting the new thread. The Resource can be of any script
+        type (JS, Lua, EOS) or a Sequence.<br>
+        <i>Example Usage (JS):</i><br>
+        thread.runAsynch(myScriptResource); /* thread has id myScriptResource.name */<br>
+        thread.runAsynch(myScriptResource, "myThread"); /* thread has id &quot;myThread&quot; */<br>
+        <i>Example Usage (Lua):</i><br>
+        thread:runAsynch(myScriptResource); /* thread has id myScriptResource.name */<br>
+        thread:runAsynch(myScriptResource, "myThread"); /* thread has id &quot;myThread&quot; */<br>
+        <br></li>
+
         <li><b>sleep ( int timeout [, bool skippable ] ):</b><br>
         Blocks and waits for <i>timeout</i> seconds. <i>Skippable</i> is optional and if
         it is set to true, the wait can by skipped by the player.<br>
-        <i>Example Usage:</i><br>
+        <i>Example Usage (JS):</i><br>
         thread.sleep(10,true); /* Skippable 10s wait */<br>
         thread.sleep(10,false); /* Unskippable 10s wait */<br>
         thread.sleep(10); /* Unskippable 10s wait */<br>
-        <i>Example Usage:</i><br>
+        <i>Example Usage (Lua):</i><br>
         thread:sleep(10,true); -- Skippable 10s wait<br>
         thread:sleep(10,false); -- Unskippable 10s wait<br>
         thread:sleep(10); -- Unskippable 10s wait<br>

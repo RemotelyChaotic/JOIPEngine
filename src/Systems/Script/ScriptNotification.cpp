@@ -1,6 +1,7 @@
 #include "ScriptNotification.h"
 #include "Application.h"
 #include "CommonScriptHelpers.h"
+#include "IScriptRunner.h"
 #include "ScriptDbWrappers.h"
 
 #include "Systems/DatabaseManager.h"
@@ -81,6 +82,15 @@ void CScriptNotification::clear()
 void CScriptNotification::hide(QString sId)
 {
   if (!CheckIfScriptCanRun()) { return; }
+
+  if (IScriptRunnerFactory::c_sMainRunner == sId)
+  {
+    emit m_pSignalEmitter->showError(
+          tr("Can not hide %1.").arg(IScriptRunnerFactory::c_sMainRunner),
+          QtMsgType::QtWarningMsg);
+    return;
+  }
+
   emit SignalEmitter<CNotificationSignalEmiter>()->hideNotification(sId);
   emit SignalOverlayClosed(sId);
 }
@@ -251,6 +261,13 @@ void CScriptNotification::Initialize()
     sCopy.detach();
     if (!sCopy.isEmpty())
     {
+      if (IScriptRunnerFactory::c_sMainRunner == sId)
+      {
+        emit m_pSignalEmitter->showError(
+              tr("Id of overlay must not be %1").arg(IScriptRunnerFactory::c_sMainRunner),
+              QtMsgType::QtWarningMsg);
+        return;
+      }
       emit SignalOverlayRunAsync(sId, sOnEvt);
     }
   }, Qt::QueuedConnection);
@@ -260,6 +277,13 @@ void CScriptNotification::Initialize()
     sCopy.detach();
     if (!sCopy.isEmpty())
     {
+      if (IScriptRunnerFactory::c_sMainRunner == sId)
+      {
+        emit m_pSignalEmitter->showError(
+              tr("Id of overlay must not be %1").arg(IScriptRunnerFactory::c_sMainRunner),
+              QtMsgType::QtWarningMsg);
+        return;
+      }
       emit SignalOverlayRunAsync(sId, sOnEvt);
     }
   }, Qt::QueuedConnection);
@@ -505,10 +529,24 @@ CEosScriptNotification::CEosScriptNotification(QPointer<CScriptRunnerSignalEmite
   auto spEmiter = SignalEmitter<CNotificationSignalEmiter>();
   connect(spEmiter, &CNotificationSignalEmiter::showNotificationClick,
           this, [this] (QString, QString sOnEvt){
+    if (IScriptRunnerFactory::c_sMainRunner == sOnEvt)
+    {
+      emit m_pSignalEmitter->showError(
+            tr("Id of overlay must not be %1").arg(IScriptRunnerFactory::c_sMainRunner),
+            QtMsgType::QtWarningMsg);
+      return;
+    }
     emit SignalOverlayRunAsync(sOnEvt);
   }, Qt::QueuedConnection);
   connect(spEmiter, &CNotificationSignalEmiter::showNotificationTimeout,
           this, [this] (QString, QString sOnEvt){
+    if (IScriptRunnerFactory::c_sMainRunner == sOnEvt)
+    {
+      emit m_pSignalEmitter->showError(
+            tr("Id of overlay must not be %1").arg(IScriptRunnerFactory::c_sMainRunner),
+            QtMsgType::QtWarningMsg);
+      return;
+    }
     emit SignalOverlayRunAsync(sOnEvt);
   }, Qt::QueuedConnection);
 }
@@ -521,6 +559,15 @@ CEosScriptNotification::~CEosScriptNotification()
 void CEosScriptNotification::Hide(QString sId)
 {
   if (!CheckIfScriptCanRun()) { return; }
+
+  if (IScriptRunnerFactory::c_sMainRunner == sId)
+  {
+    emit m_pSignalEmitter->showError(
+          tr("Can not hide %1.").arg(IScriptRunnerFactory::c_sMainRunner),
+          QtMsgType::QtWarningMsg);
+    return;
+  }
+
   emit SignalEmitter<CNotificationSignalEmiter>()->hideNotification(sId);
   emit SignalOverlayClosed(sId);
 }

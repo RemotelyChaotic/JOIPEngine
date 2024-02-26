@@ -137,6 +137,7 @@ void CCodeDisplayWidget::Initialize(QPointer<CEditorModel> pEditorModel,
   m_spNotificationSnippetOverlay->Initialize(m_pResourceTreeModel);
   m_spResourceSnippetOverlay->Initialize(m_pResourceTreeModel);
   m_spTextSnippetOverlay->Initialize(m_pResourceTreeModel);
+  m_spThreadSnippetOverlay->Initialize(m_pResourceTreeModel);
 
   m_spBackgroundSnippetOverlay->Hide();
   m_spDeviceSnippetOverlay->Hide();

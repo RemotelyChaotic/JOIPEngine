@@ -36,7 +36,7 @@
   <div class="container">
     <p>This button opens an overlay to add code snippets to the currently opened script in
     the <a href="qrc:/resources/help/editor/code/script_editor_help.html">Script Editor</a>,
-    to sleep the script thread.</p>
+    to sleep the script thread and create or kill threads.</p>
 
     <br>
 
@@ -52,6 +52,24 @@
     is checked it will generate code for a skippable sleep.<br>
       <ul>
         <li><b>Generated code example:</b> thread.sleep(120,true); // skippable 120s wait</li>
+      </ul>
+    </p>
+
+    <br>
+
+    <p>Id for the thread to kill can be entered in the line edit below the sleep settings.<br>
+      <ul>
+        <li><b>Generated code example:</b> thread.kill("myThread");</li>
+      </ul>
+    </p>
+
+    <br>
+
+    <p>Finally the id for the thread to create and the <a href="qrc:/resources/help/editor/resources/resource_help.html">Resource</a>
+    of the thread can be entered in the line edits below the kill settings.
+    The resource can also be browsed in the tree at the bottom.<br>
+      <ul>
+        <li><b>Generated code example:</b> thread.runAsynch("myResource", "MyId");</li>
       </ul>
     </p>
   </div>
