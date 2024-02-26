@@ -589,5 +589,49 @@
         <file>resources/android_styles/Gummyzilla/ui/ButtonAddLayout.png</file>
         <file>resources/android_styles/Gummyzilla/ui/ButtonAddLayoutSelected.png</file>
         <file>resources/android_styles/Somber Dark/ui/ButtonAddLayout.png</file>
+        <file>resources/android_styles/621 Hexagons/ui/ButtonAddLayout.png</file>
+        <file>resources/android_styles/621 Hexagons/ui/ButtonGrid.png</file>
+        <file>resources/android_styles/621 Hexagons/ui/ButtonNewSequence.png</file>
+        <file>resources/android_styles/621 Hexagons/ui/ButtonNewSequenceLayer.png</file>
+        <file>resources/android_styles/621 Hexagons/ui/ButtonRemoveSequenceLayer.png</file>
+        <file>resources/android_styles/621 Hexagons/ui/ButtonSequenceProperties.png</file>
+        <file>resources/android_styles/621 Hexagons/ui/InstructionIcon.png</file>
+        <file>resources/android_styles/621 Hexagons/ui/InstructionIconClosed.png</file>
+        <file>resources/android_styles/621 Hexagons/ui/InstructionIconOpen.png</file>
+        <file>resources/android_styles/Blue Night/ui/ButtonGrid.png</file>
+        <file>resources/android_styles/Blue Night/ui/ButtonNewSequence.png</file>
+        <file>resources/android_styles/Blue Night/ui/ButtonNewSequenceLayer.png</file>
+        <file>resources/android_styles/Blue Night/ui/ButtonRemoveSequenceLayer.png</file>
+        <file>resources/android_styles/Blue Night/ui/ButtonSequenceProperties.png</file>
+        <file>resources/android_styles/Blue Night/ui/InstructionIcon.png</file>
+        <file>resources/android_styles/Blue Night/ui/InstructionIconClosed.png</file>
+        <file>resources/android_styles/Blue Night/ui/InstructionIconOpen.png</file>
+        <file>resources/android_styles/Equestria after Dark/ui/ButtonGrid.png</file>
+        <file>resources/android_styles/Equestria after Dark/ui/ButtonNewSequence.png</file>
+        <file>resources/android_styles/Equestria after Dark/ui/ButtonNewSequenceLayer.png</file>
+        <file>resources/android_styles/Equestria after Dark/ui/ButtonRemoveSequenceLayer.png</file>
+        <file>resources/android_styles/Equestria after Dark/ui/ButtonSequenceProperties.png</file>
+        <file>resources/android_styles/Equestria after Dark/ui/InstructionIcon.png</file>
+        <file>resources/android_styles/Equestria after Dark/ui/InstructionIconClosed.png</file>
+        <file>resources/android_styles/Equestria after Dark/ui/InstructionIconOpen.png</file>
+        <file>resources/android_styles/Gummyzilla/ui/ButtonAddSequenceLayer.png</file>
+        <file>resources/android_styles/Gummyzilla/ui/ButtonGrid.png</file>
+        <file>resources/android_styles/Gummyzilla/ui/ButtonGridSelected.png</file>
+        <file>resources/android_styles/Gummyzilla/ui/ButtonNewSequence.png</file>
+        <file>resources/android_styles/Gummyzilla/ui/ButtonNewSequenceSelected.png</file>
+        <file>resources/android_styles/Gummyzilla/ui/ButtonRemoveSequenceLayer.png</file>
+        <file>resources/android_styles/Gummyzilla/ui/ButtonSequenceProperties.png</file>
+        <file>resources/android_styles/Gummyzilla/ui/ButtonSequencePropertiesSelected.png</file>
+        <file>resources/android_styles/Gummyzilla/ui/InstructionIcon.png</file>
+        <file>resources/android_styles/Gummyzilla/ui/InstructionIconClosed.png</file>
+        <file>resources/android_styles/Gummyzilla/ui/InstructionIconOpen.png</file>
+        <file>resources/android_styles/Somber Dark/ui/ButtonGrid.png</file>
+        <file>resources/android_styles/Somber Dark/ui/ButtonNewSequence.png</file>
+        <file>resources/android_styles/Somber Dark/ui/ButtonNewSequenceLayer.png</file>
+        <file>resources/android_styles/Somber Dark/ui/ButtonRemoveSequenceLayer.png</file>
+        <file>resources/android_styles/Somber Dark/ui/ButtonSequenceProperties.png</file>
+        <file>resources/android_styles/Somber Dark/ui/InstructionIcon.png</file>
+        <file>resources/android_styles/Somber Dark/ui/InstructionIconClosed.png</file>
+        <file>resources/android_styles/Somber Dark/ui/InstructionIconOpen.png</file>
     </qresource>
 </RCC>

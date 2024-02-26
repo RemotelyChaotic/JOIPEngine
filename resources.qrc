@@ -283,6 +283,14 @@
         <file>resources/help/editor/remove_sequenceelem_button_help.html</file>
         <file>resources/style/img/ButtonAddScript.png</file>
         <file>resources/style/img/ButtonAddLayout.png</file>
+        <file>resources/style/img/InstructionIcon.png</file>
+        <file>resources/style/img/InstructionIconClosed.png</file>
+        <file>resources/style/img/InstructionIconOpen.png</file>
+        <file>resources/style/img/ButtonGrid.png</file>
+        <file>resources/style/img/ButtonNewSequence.png</file>
+        <file>resources/style/img/ButtonNewSequenceLayer.png</file>
+        <file>resources/style/img/ButtonRemoveSequenceLayer.png</file>
+        <file>resources/style/img/ButtonSequenceProperties.png</file>
     </qresource>
     <qresource prefix="/qml">
         <file>resources/qml/JoipEngine/EmptyDummy.qml</file>
