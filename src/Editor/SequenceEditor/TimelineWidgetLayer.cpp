@@ -257,6 +257,12 @@ void CTimelineWidgetLayer::SetHighlight(QColor col, QColor alternateCol)
   {
     setStyleSheet(QString());
   }
+  QStyle* pStyle = style();
+  if (nullptr != pStyle)
+  {
+    pStyle->unpolish(this);
+    pStyle->polish(this);
+  }
   m_alternateBgCol = alternateCol;
   repaint();
 }
@@ -357,7 +363,7 @@ bool CTimelineWidgetLayer::eventFilter(QObject* pObj, QEvent* pEvt)
     if (Qt::MouseButton::LeftButton == pMouseEvt->button() ||
         Qt::MouseButton::RightButton == pMouseEvt->button())
     {
-      if (!m_pConfigOverlay->isAncestorOf(pWidget) && m_pConfigOverlay->IsForcedOpen())
+      if (!m_pConfigOverlay->isAncestorOf(pWidget) && !m_pConfigOverlay->IsForcedOpen())
       {
         m_pConfigOverlay->Hide();
         return false;

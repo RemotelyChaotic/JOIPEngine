@@ -528,6 +528,11 @@ void CTimelineWidget::RemoveLayerFrom(qint32 index, tspSequence& spCurrentSequen
     if (nullptr != pItem) { delete pItem; }
   }
 
+  if (m_iSelectedIndex == index)
+  {
+    m_iSelectedIndex--;
+  }
+
   emit SignalContentsChanged();
 }
 

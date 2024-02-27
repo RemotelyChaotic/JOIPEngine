@@ -26,5 +26,6 @@ void CPositionalMenu::showEvent(QShowEvent* event)
     p.setX(p.x()- width());
   }
 
-   move(p.x(), p.y());
+  move(p.x(), p.y());
+  resize(sizeHint());
 }

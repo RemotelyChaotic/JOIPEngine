@@ -334,16 +334,16 @@ namespace
                                                        iWidth, iHeight));
         break;
       case eOpening:
-        instructionMarker.paint(pPainter, QRect(data.m_iPos-iWidth/2, -iHeight/2,
-                                                iWidth, iHeight));
-        break;
-      case eClosing:
         instructionMarkerOpenLeft.paint(pPainter, QRect(data.m_iPos-iWidth/2, -iHeight/2,
                                                         iWidth, iHeight));
         break;
-      case eSingle:
+      case eClosing:
         instructionMarkerOpenRight.paint(pPainter, QRect(data.m_iPos-iWidth/2, -iHeight/2,
                                                          iWidth, iHeight));
+        break;
+      case eSingle:
+        instructionMarker.paint(pPainter, QRect(data.m_iPos-iWidth/2, -iHeight/2,
+                                                iWidth, iHeight));
         break;
     }
   }
