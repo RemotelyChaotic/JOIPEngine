@@ -382,7 +382,8 @@ QPushButton#AddButtonButton,
 QPushButton#AddTextColorButton,
 QPushButton#AddBGColorButton,
 QPushButton#AddFetishButton,
-QPushButton#AddButtonButton {
+QPushButton#AddButtonButton,
+QPushButton#AddSequenceElement {
   padding: 0px;
   min-width: 24px;
   min-height: 24px;
@@ -408,7 +409,8 @@ QPushButton#RemoveTextColorButton,
 QPushButton#RemoveBGColorButton,
 QPushButton#RemoveFetishButton,
 QPushButton#RemoveCode,
-QPushButton#RemoveButtonButton {
+QPushButton#RemoveButtonButton,
+QPushButton#RemoveSelectedSequenceElements {
   padding: 0px;
   min-width: 24px;
   min-height: 24px;
@@ -609,6 +611,26 @@ QPushButton#ErrorPushButton {
                   url(:/resources/style/img/ButtonIcon.png) on;
   min-width: 32;
 }
+QPushButton#GridButton {
+  qproperty-icon: url(:/resources/style/img/ButtonGrid.png) off,
+                  url(:/resources/style/img/ButtonGrid.png) on;
+}
+QPushButton#NewSequence {
+  qproperty-icon: url(:/resources/style/img/ButtonNewSequence.png) off,
+                  url(:/resources/style/img/ButtonNewSequence.png) on;
+}
+QPushButton#SequenceProperties {
+  qproperty-icon: url(:/resources/style/img/ButtonSequenceProperties.png) off,
+                  url(:/resources/style/img/ButtonSequenceProperties.png) on;
+}
+QPushButton#AddSequenceLayer {
+  qproperty-icon: url(:/resources/style/img/ButtonNewSequenceLayer.png) off,
+                  url(:/resources/style/img/ButtonNewSequenceLayer.png) on;
+}
+QPushButton#RemoveSelectedSequenceLayer {
+  qproperty-icon: url(:/resources/style/img/ButtonRemoveSequenceLayer.png) off,
+                  url(:/resources/style/img/ButtonRemoveSequenceLayer.png) on;
+}
 
 QPushButton:hover,
 QToolButton:hover {
@@ -616,7 +638,9 @@ QToolButton:hover {
 }
 
 QPushButton:pressed,
-QToolButton:pressed {
+QToolButton:pressed,
+QPushButton:checked,
+QToolButton:checked {
   background: qradialgradient(cx: 0.4, cy: -0.1, fx: 0.4, fy: -0.1, radius: 1.35, stop: 0 #dd00dd, stop: 1 #aa00aa);
 }
 
@@ -839,7 +863,14 @@ QScrollArea > QWidget > QWidget
 {
   background: transparent;
 }
-
+QScrollArea > QWidget > QScrollBar
+{
+  background: palette(base);
+}
+QScrollArea > QWidget > QScrollBar
+{
+  background: palette(base);
+}
 
 /*
  ----- QComboBox
@@ -1235,6 +1266,62 @@ QTextBrowser {
     border: 1px solid;
     border-color: grey;
     selection-background-color: rgb(38, 38, 38);
+}
+
+/*
+ ----- Timeline
+*/
+CTimelineWidget,
+CTimelineWidgetBackground,
+CTimelineWidget > QWidget,
+CTimelineWidget > QWidget > QWidget
+{
+  background-color: black;
+}
+
+CTimelineWidget
+{
+  qproperty-alternateBackgroundColor: rgb(100, 100, 100);
+  qproperty-dropIndicationColor: grey;
+  qproperty-gridColor: silver;
+  qproperty-outOfRangeColor: rgba(169,169,169, 100);
+  qproperty-selectionColor: white;
+}
+
+CTimelineWidgetControls
+{
+  background-color: black;
+  border: 1px solid grey;
+  border-radius: 0px;
+
+  qproperty-cursorColor: white;
+}
+
+CTimelineWidget > CTimelineWidgetControls > QWidget#Controls
+{
+  border: 1px solid grey;
+}
+
+CTimelineWidgetLayer {
+  background-color: rgb(38, 38, 38);
+  border: 1px solid grey;
+  border-radius: 0px;
+
+  min-height: 70;
+  max-height: 70;
+
+  qproperty-selectionColor: white;
+  qproperty-timelineBackgroundColor: black;
+}
+
+CTimelineWidgetLayerBackground {
+  qproperty-iconWidth: 16;
+  qproperty-iconHeight: 16;
+  qproperty-instructionConnectorColor: white;
+
+  qproperty-instructionMarker: url(:/resources/style/img/InstructionIcon.png);
+  qproperty-instructionMarkerOpenLeft: url(:/resources/style/img/InstructionIconOpen.png);
+  qproperty-instructionMarkerOpenRight: url(:/resources/style/img/InstructionIconClosed.png);
 }
 
 /*

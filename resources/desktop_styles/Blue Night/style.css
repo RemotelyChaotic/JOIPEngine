@@ -1299,12 +1299,13 @@ CTimelineWidgetLayer {
 }
 
 CTimelineWidgetLayerBackground {
-  qproperty-iconWidth: 10;
-  qproperty-iconHeight: 10;
+  qproperty-iconWidth: 16;
+  qproperty-iconHeight: 16;
   qproperty-instructionConnectorColor: white;
+  
   qproperty-instructionMarker: url(ui/InstructionIcon.png);
-  qproperty-instructionMarkerOpenLeft: url(ui/InstructionIconClosed.png);
-  qproperty-instructionMarkerOpenRight: url(ui/InstructionIconOpen.png);
+  qproperty-instructionMarkerOpenLeft: url(ui/InstructionIconOpen.png);
+  qproperty-instructionMarkerOpenRight: url(ui/InstructionIconClosed.png);
 }
 
 /*

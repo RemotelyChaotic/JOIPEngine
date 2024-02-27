@@ -614,7 +614,6 @@
         <file>resources/android_styles/Equestria after Dark/ui/InstructionIcon.png</file>
         <file>resources/android_styles/Equestria after Dark/ui/InstructionIconClosed.png</file>
         <file>resources/android_styles/Equestria after Dark/ui/InstructionIconOpen.png</file>
-        <file>resources/android_styles/Gummyzilla/ui/ButtonAddSequenceLayer.png</file>
         <file>resources/android_styles/Gummyzilla/ui/ButtonGrid.png</file>
         <file>resources/android_styles/Gummyzilla/ui/ButtonGridSelected.png</file>
         <file>resources/android_styles/Gummyzilla/ui/ButtonNewSequence.png</file>
@@ -631,7 +630,6 @@
         <file>resources/android_styles/Somber Dark/ui/ButtonRemoveSequenceLayer.png</file>
         <file>resources/android_styles/Somber Dark/ui/ButtonSequenceProperties.png</file>
         <file>resources/android_styles/Somber Dark/ui/InstructionIcon.png</file>
-        <file>resources/android_styles/Somber Dark/ui/InstructionIconClosed.png</file>
-        <file>resources/android_styles/Somber Dark/ui/InstructionIconOpen.png</file>
+        <file>resources/android_styles/Gummyzilla/ui/ButtonNewSequenceLayer.png</file>
     </qresource>
 </RCC>

@@ -426,7 +426,8 @@ QPushButton#AddButtonButton,
 QPushButton#AddTextColorButton,
 QPushButton#AddBGColorButton,
 QPushButton#AddFetishButton,
-QPushButton#AddButtonButton {
+QPushButton#AddButtonButton,
+QPushButton#AddSequenceElement {
   padding: 0px;
   min-width: 24px;
   min-height: 24px;
@@ -467,7 +468,8 @@ QPushButton#RemoveTextColorButton,
 QPushButton#RemoveBGColorButton,
 QPushButton#RemoveFetishButton,
 QPushButton#RemoveCode,
-QPushButton#RemoveButtonButton {
+QPushButton#RemoveButtonButton,
+QPushButton#RemoveSelectedSequenceElements {
   padding: 0px;
   min-width: 24px;
   min-height: 24px;
@@ -902,6 +904,51 @@ QPushButton#ErrorPushButton {
   border-right: 0 transparent;
   border-left: 0 transparent;
 }
+QPushButton#GridButton {
+  border-image: url(ui/IconBg.svg) 0 0 0 0 stretch stretch;
+  border-top: 0 transparent;
+  border-bottom: 0 transparent;
+  border-right: 0 transparent;
+  border-left: 0 transparent;
+  qproperty-icon: url(ui/ButtonGrid.png) off,
+                  url(ui/ButtonGrid.png) on;
+}
+QPushButton#NewSequence {
+  border-image: url(ui/IconBg.svg) 0 0 0 0 stretch stretch;
+  border-top: 0 transparent;
+  border-bottom: 0 transparent;
+  border-right: 0 transparent;
+  border-left: 0 transparent;
+  qproperty-icon: url(ui/ButtonNewSequence.png) off,
+                  url(ui/ButtonNewSequence.png) on;
+}
+QPushButton#SequenceProperties {
+  border-image: url(ui/IconBg.svg) 0 0 0 0 stretch stretch;
+  border-top: 0 transparent;
+  border-bottom: 0 transparent;
+  border-right: 0 transparent;
+  border-left: 0 transparent;
+  qproperty-icon: url(ui/ButtonSequenceProperties.png) off,
+                  url(ui/ButtonSequenceProperties.png) on;
+}
+QPushButton#AddSequenceLayer {
+  border-image: url(ui/IconBg.svg) 0 0 0 0 stretch stretch;
+  border-top: 0 transparent;
+  border-bottom: 0 transparent;
+  border-right: 0 transparent;
+  border-left: 0 transparent;
+  qproperty-icon: url(ui/ButtonNewSequenceLayer.png) off,
+                  url(ui/ButtonNewSequenceLayer.png) on;
+}
+QPushButton#RemoveSelectedSequenceLayer {
+  border-image: url(ui/IconBg.svg) 0 0 0 0 stretch stretch;
+  border-top: 0 transparent;
+  border-bottom: 0 transparent;
+  border-right: 0 transparent;
+  border-left: 0 transparent;
+  qproperty-icon: url(ui/ButtonRemoveSequenceLayer.png) off,
+                  url(ui/ButtonRemoveSequenceLayer.png) on;
+}
 
 QPushButton#AddShowBackgroundCode:hover,
 QPushButton#AddShowIconCode:hover,
@@ -965,7 +1012,9 @@ QPushButton#AddEndCode:hover,
 QPushButton#RemoveCode:hover,
 QPushButton#SearchButton:hover,
 QPushButton#RemoveButtonButton:hover,
+QPushButton#RemoveSelectedSequenceElements:hover,
 QPushButton#AddButtonButton:hover,
+QPushButton#AddSequenceElement:hover,
 QToolButton#f_image:hover,
 QToolButton#f_link:hover,
 QToolButton#f_undo:hover,
@@ -979,7 +1028,12 @@ QToolButton#f_list_ordered:hover,
 QToolButton#f_indent_dec:hover,
 QToolButton#f_indent_inc:hover,
 QPushButton#ToolsButton:hover,
-QPushButton#ErrorPushButton:hover {
+QPushButton#ErrorPushButton:hover,
+QPushButton#GridButton:hover,
+QPushButton#NewSequence:hover,
+QPushButton#SequenceProperties:hover,
+QPushButton#AddSequenceLayer:hover,
+QPushButton#RemoveSelectedSequenceLayer:hover {
   border-image: url(ui/IconBgHover.svg) 0 0 0 0 stretch stretch;
 }
 
@@ -1045,7 +1099,9 @@ QPushButton#AddEndCode:pressed,
 QPushButton#RemoveCode:pressed,
 QPushButton#SearchButton:pressed,
 QPushButton#RemoveButtonButton:pressed,
+QPushButton#RemoveSelectedSequenceElements:pressed,
 QPushButton#AddButtonButton:pressed,
+QPushButton#AddSequenceElement:pressed,
 QToolButton#f_image:pressed,
 QToolButton#f_link:pressed,
 QToolButton#f_undo:pressed,
@@ -1059,7 +1115,12 @@ QToolButton#f_list_ordered:pressed,
 QToolButton#f_indent_dec:pressed,
 QToolButton#f_indent_inc:pressed,
 QPushButton#ToolsButton:pressed,
-QPushButton#ErrorPushButton:pressed {
+QPushButton#ErrorPushButton:pressed,
+QPushButton#GridButton:pressed,
+QPushButton#NewSequence:pressed,
+QPushButton#SequenceProperties:pressed,
+QPushButton#AddSequenceLayer:pressed,
+QPushButton#RemoveSelectedSequenceLayer:pressed {
   border-image: url(ui/IconBgPressed.svg) 0 0 0 0 stretch stretch;
 }
 
@@ -1125,7 +1186,9 @@ QPushButton#AddEndCode:disabled,
 QPushButton#RemoveCode:disabled,
 QPushButton#SearchButton:disabled,
 QPushButton#RemoveButtonButton:disabled,
+QPushButton#RemoveSelectedSequenceElements:disabled,
 QPushButton#AddButtonButton:disabled,
+QPushButton#AddSequenceElement:disabled,
 QToolButton#f_image:disabled,
 QToolButton#f_link:disabled,
 QToolButton#f_undo:disabled,
@@ -1139,7 +1202,12 @@ QToolButton#f_list_ordered:disabled,
 QToolButton#f_indent_dec:disabled,
 QToolButton#f_indent_inc:disabled,
 QPushButton#ToolsButton:disabled,
-QPushButton#ErrorPushButton:disabled {
+QPushButton#ErrorPushButton:disabled,
+QPushButton#GridButton:disabled,
+QPushButton#NewSequence:disabled,
+QPushButton#SequenceProperties:disabled,
+QPushButton#AddSequenceLayer:disabled,
+QPushButton#RemoveSelectedSequenceLayer:disabled {
   border-image: url(ui/IconBgDisabled.svg) 0 0 0 0 stretch stretch;
 }
 
@@ -1149,7 +1217,9 @@ QToolButton:hover {
 }
 
 QPushButton:pressed,
-QToolButton:pressed {
+QToolButton:pressed,
+QPushButton:checked,
+QToolButton:checked {
   border-image: url(ui/ButtonPressed.png) 0 50 0 50 stretch stretch;
 }
 
@@ -1510,6 +1580,14 @@ QScrollArea > QWidget {
 }
 QScrollArea > QWidget > QWidget {
   background: transparent;
+}
+QScrollArea > QWidget > QScrollBar
+{
+  background: palette(base);
+}
+QScrollArea > QWidget > QScrollBar
+{
+  background: palette(base);
 }
 QAbstractScrollArea::corner {
   background: transparent;
@@ -1906,6 +1984,66 @@ QTextBrowser {
     border-right: 20px transparent;
     border-left: 20px transparent;
     selection-background-color: rgb(23, 7, 56);
+}
+
+/*
+ ----- Timeline
+*/
+CTimelineWidget,
+CTimelineWidgetBackground,
+CTimelineWidget > QWidget,
+CTimelineWidget > QWidget > QWidget
+{
+  background-color: black;
+}
+
+CTimelineWidget
+{
+  qproperty-alternateBackgroundColor: rgb(23, 7, 56);
+  qproperty-dropIndicationColor: white;
+  qproperty-gridColor: silver;
+  qproperty-outOfRangeColor: rgba(23, 7, 56, 200);
+  qproperty-selectionColor: white;
+}
+
+CTimelineWidgetControls
+{
+  background-color: black;
+  border: 1px solid white;
+  border-radius: 0px;
+
+  qproperty-cursorColor: white;
+}
+
+CTimelineWidget > CTimelineWidgetControls > QWidget#Controls
+{
+  border: 1px solid white;
+}
+
+CTimelineWidgetLayer {
+  background-color: transparent;
+  border-radius: 0px;
+  border-image: url(ui/WindowBG.png) 50 50 50 50 repeat repeat;
+  border-top: 15px transparent;
+  border-bottom: 15px transparent;
+  border-right: 15px transparent;
+  border-left: 15px transparent;
+
+  min-height: 70;
+  max-height: 70;
+
+  qproperty-selectionColor: white;
+  qproperty-timelineBackgroundColor: black;
+}
+
+CTimelineWidgetLayerBackground {
+  qproperty-iconWidth: 16;
+  qproperty-iconHeight: 16;
+  qproperty-instructionConnectorColor: silver;
+
+  qproperty-instructionMarker: url(ui/InstructionIcon.png);
+  qproperty-instructionMarkerOpenLeft: url(ui/ButtonArrowLeft.png);
+  qproperty-instructionMarkerOpenRight: url(ui/ButtonArrowRight.png);
 }
 
 /*
