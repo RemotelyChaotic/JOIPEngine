@@ -16,10 +16,11 @@ class CSystemBase : public QObject
   Q_DISABLE_COPY(CSystemBase)
 
 public:
-  CSystemBase();
+  CSystemBase(QThread::Priority prio = QThread::Priority::NormalPriority);
   virtual ~CSystemBase();
 
   bool IsInitialized() const { return m_bInitialized; }
+  QThread::Priority Priority() const { return m_priority; };
 
 public slots:
   virtual void Initialize() = 0;
@@ -29,6 +30,7 @@ protected:
   void SetInitialized(bool bInit) { m_bInitialized = bInit; }
 
   std::atomic<bool> m_bInitialized;
+  QThread::Priority m_priority;
 };
 
 //----------------------------------------------------------------------------------------
@@ -55,7 +57,7 @@ public:
     connect(m_pThread.data(), &QThread::finished, this, &CThreadedSystem::Cleanup, Qt::DirectConnection);
     connect(m_pThread.data(), &QThread::finished, this, &CSystemBase::deleteLater);
 
-    m_pThread->start();
+    m_pThread->start(m_spSystem->Priority());
     while (!m_pThread->isRunning())
     {
       thread()->wait(5);

@@ -2,10 +2,8 @@
 #include "Application.h"
 #include "Settings.h"
 
-#include "Systems/Resource.h"
-#include "Utils/MetronomeHelpers.h"
+#include "Systems/MetronomeManager.h"
 
-#include "Utils/MultiEmitterSoundPlayer.h"
 #include <QFileInfo>
 #include <QPainter>
 
@@ -15,31 +13,26 @@ namespace  {
 
 CMetronomeCanvasQml::CMetronomeCanvasQml(QQuickItem* pParent) :
   QQuickPaintedItem(pParent),
-  m_spSoundEmitters(
-    std::make_unique<CMultiEmitterSoundPlayer>(CMultiEmitterSoundPlayer::c_iDefaultNumAutioEmitters,
-                                               ":/resources/sound/metronome_default.wav")),
-  m_spSettings(CApplication::Instance()->Settings()),
-  m_tickColor(Qt::white),
-  m_vdTickmap(),
-  m_dVolume(1.0)
+  m_spMetronomeManager(CApplication::Instance()->System<CMetronomeManager>().lock()),
+  m_id(QUuid::createUuid()),
+  m_tickColor(Qt::white)
 {
-  if (nullptr != m_spSettings)
+  if (nullptr != m_spMetronomeManager)
   {
-    m_spSoundEmitters->SetSoundEffect(metronome::MetronomeSfxFromKey(m_spSettings->MetronomeSfx()));
-
-    connect(m_spSettings.get(), &CSettings::mutedChanged,
-            this, &CMetronomeCanvasQml::SlotMutedChanged, Qt::QueuedConnection);
-    connect(m_spSettings.get(), &CSettings::volumeChanged,
-            this, &CMetronomeCanvasQml::SlotVolumeChanged, Qt::QueuedConnection);
+    m_spDataBlockThread = m_spMetronomeManager->RegisterUi(m_id);
+    connect(m_spMetronomeManager.get(), &CMetronomeManager::SignalPatternChanged,
+            this, &CMetronomeCanvasQml::SlotUpdate, Qt::DirectConnection);
+    connect(m_spMetronomeManager.get(), &CMetronomeManager::SignalTickReachedCenter,
+            this, &CMetronomeCanvasQml::SlotTickReachedCenter, Qt::QueuedConnection);
   }
-
-  SlotMutedChanged();
-  SlotVolumeChanged();
 }
 
 CMetronomeCanvasQml::~CMetronomeCanvasQml()
 {
-
+  if (nullptr != m_spMetronomeManager)
+  {
+    m_spMetronomeManager->DeregisterUi(m_id);
+  }
 }
 
 //----------------------------------------------------------------------------------------
@@ -49,47 +42,70 @@ void CMetronomeCanvasQml::paint(QPainter* pPainter)
   pPainter->save();
   pPainter->setPen(m_tickColor);
 
-  for (const auto& it : m_vdTickmap)
   {
-    double dLeftPosition = 0 + width() / 2 * it - c_dTickWidth / 2;
-    pPainter->drawRoundedRect(QRectF(dLeftPosition, 0, c_dTickWidth, height()),
-                              c_dTickWidth / 2, c_dTickWidth / 2, Qt::AbsoluteSize);
+    QMutexLocker locker(&m_localDataMutex);
+    for (const auto& it : m_vdTickmap)
+    {
+      double dLeftPosition = 0 + width() / 2 * it - c_dTickWidth / 2;
+      pPainter->drawRoundedRect(QRectF(dLeftPosition, 0, c_dTickWidth, height()),
+                                c_dTickWidth / 2, c_dTickWidth / 2, Qt::AbsoluteSize);
 
-    double dRightPosition = width() - width() / 2 * it + c_dTickWidth / 2;
-    pPainter->drawRoundedRect(QRectF(dRightPosition, 0, c_dTickWidth, height()),
-                              c_dTickWidth / 2, c_dTickWidth / 2, Qt::AbsoluteSize);
+      double dRightPosition = width() - width() / 2 * it + c_dTickWidth / 2;
+      pPainter->drawRoundedRect(QRectF(dRightPosition, 0, c_dTickWidth, height()),
+                                c_dTickWidth / 2, c_dTickWidth / 2, Qt::AbsoluteSize);
+    }
   }
   pPainter->restore();
 }
 
 //----------------------------------------------------------------------------------------
 //
-const QString& CMetronomeCanvasQml::BeatResource() const
+QString CMetronomeCanvasQml::BeatResource() const
 {
-  return m_spSoundEmitters->SoundEffect();
+  if (nullptr != m_spDataBlockThread)
+  {
+    QMutexLocker l(&m_spDataBlockThread->m_mutex);
+    return m_spDataBlockThread->m_sBeatResource;
+  }
+  return QString();
 }
 
 //----------------------------------------------------------------------------------------
 //
 void CMetronomeCanvasQml::SetBeatResource(const QString& sResource)
 {
-  const QString sOldResource = m_spSoundEmitters->SoundEffect();
-  if (sResource.isEmpty())
+  QString sOldResource;
+  if (nullptr != m_spDataBlockThread)
   {
-    if (nullptr != m_spSettings)
-    {
-      m_spSoundEmitters->SetSoundEffect(
-            metronome::MetronomeSfxFromKey(m_spSettings->MetronomeSfx()));
-    }
-  }
-  else
-  {
-    m_spSoundEmitters->SetSoundEffect(sResource);
+    QMutexLocker l(&m_spDataBlockThread->m_mutex);
+    sOldResource = m_spDataBlockThread->m_sBeatResource;
+    m_spDataBlockThread->m_sBeatResource = sResource;
   }
 
-  if (sOldResource != m_spSoundEmitters->SoundEffect())
+  if (sOldResource != sResource && nullptr != m_spMetronomeManager)
   {
+    emit m_spMetronomeManager->SignalBlockChanged(m_id);
     emit beatResourceChanged();
+  }
+}
+
+//----------------------------------------------------------------------------------------
+//
+qint32 CMetronomeCanvasQml::Bpm() const
+{
+  return m_iBpm;
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CMetronomeCanvasQml::SetBpm(qint32 iValue)
+{
+  if (m_iBpm != iValue)
+  {
+    m_iBpm = iValue;
+
+    UpdatePattern();
+    emit bpmChanged();
   }
 }
 
@@ -97,18 +113,50 @@ void CMetronomeCanvasQml::SetBeatResource(const QString& sResource)
 //
 bool CMetronomeCanvasQml::Muted() const
 {
-  return m_bMuted;
+  if (nullptr != m_spDataBlockThread)
+  {
+    QMutexLocker l(&m_spDataBlockThread->m_mutex);
+    return m_spDataBlockThread->m_bMuted;
+  }
+  return false;
 }
 
 //----------------------------------------------------------------------------------------
 //
 void CMetronomeCanvasQml::SetMuted(bool bMuted)
 {
-  if (m_bMuted != bMuted)
+  bool bOldValue = false;
+  if (nullptr != m_spDataBlockThread)
   {
-    m_bMuted = bMuted;
-    SlotMutedChanged();
+    QMutexLocker l(&m_spDataBlockThread->m_mutex);
+    bOldValue = m_spDataBlockThread->m_bMuted;
+    m_spDataBlockThread->m_bMuted = bMuted;
+  }
+
+  if (bOldValue != bMuted && nullptr != m_spMetronomeManager)
+  {
+    emit m_spMetronomeManager->SignalBlockChanged(m_id);
     emit mutedChanged();
+  }
+}
+
+//----------------------------------------------------------------------------------------
+//
+QList<double> CMetronomeCanvasQml::Pattern() const
+{
+  return m_vdPattern;
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CMetronomeCanvasQml::SetPattern(const QList<double>& vdVals)
+{
+  if (m_vdPattern != vdVals)
+  {
+    m_vdPattern = vdVals;
+
+    UpdatePattern();
+    emit patternChanged();
   }
 }
 
@@ -134,56 +182,136 @@ void CMetronomeCanvasQml::SetTickColor(const QColor& color)
 //
 double CMetronomeCanvasQml::Volume() const
 {
-  return m_dVolume;
+  if (nullptr != m_spDataBlockThread)
+  {
+    QMutexLocker l(&m_spDataBlockThread->m_mutex);
+    return m_spDataBlockThread->m_dVolume;
+  }
+  return false;
 }
 
 //----------------------------------------------------------------------------------------
 //
 void CMetronomeCanvasQml::SetVolume(double dValue)
 {
-  if (!qFuzzyCompare(m_dVolume, dValue))
+  double dOldValue = false;
+  if (nullptr != m_spDataBlockThread)
   {
-    m_dVolume = dValue;
-    SlotVolumeChanged();
+    QMutexLocker l(&m_spDataBlockThread->m_mutex);
+    dOldValue = m_spDataBlockThread->m_dVolume;
+    m_spDataBlockThread->m_dVolume = dValue;
+  }
+
+  if (!qFuzzyCompare(dOldValue, dValue) && nullptr != m_spMetronomeManager)
+  {
+    emit m_spMetronomeManager->SignalBlockChanged(m_id);
     emit volumeChanged();
   }
 }
 
 //----------------------------------------------------------------------------------------
 //
-void CMetronomeCanvasQml::clear()
+void CMetronomeCanvasQml::pause()
 {
-  m_vdTickmap.clear();
-  m_spSoundEmitters->Stop();
-}
-
-//----------------------------------------------------------------------------------------
-//
-void CMetronomeCanvasQml::spawnNewMetronomeTicks()
-{
-  m_vdTickmap.push_back(0.0);
-}
-
-//----------------------------------------------------------------------------------------
-//
-void CMetronomeCanvasQml::update(double dIntervalMs)
-{
-  for (auto it = m_vdTickmap.begin(); m_vdTickmap.end() != it;)
+  if (nullptr != m_spMetronomeManager)
   {
-    // 1s to reach the center, tickmap is percentage based
-    *it += dIntervalMs / 3000;
-    if (1.0 < *it)
-    {
-      *it = 1.0;
-      it = m_vdTickmap.erase(it);
+    emit m_spMetronomeManager->SignalPause(m_id);
+  }
+}
 
-      m_spSoundEmitters->Play();
+//----------------------------------------------------------------------------------------
+//
+void CMetronomeCanvasQml::resume()
+{
+  if (nullptr != m_spMetronomeManager)
+  {
+    emit m_spMetronomeManager->SignalResume(m_id);
+  }
+}
 
-      emit tickReachedCenter();
-    }
-    else
+//----------------------------------------------------------------------------------------
+//
+void CMetronomeCanvasQml::start()
+{
+  if (nullptr != m_spMetronomeManager)
+  {
+    emit m_spMetronomeManager->SignalStart(m_id);
+  }
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CMetronomeCanvasQml::stop()
+{
+  if (nullptr != m_spMetronomeManager)
+  {
+    m_vdTickmap.clear();
+    emit m_spMetronomeManager->SignalStop(m_id);
+  }
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CMetronomeCanvasQml::registerUi(const QString& sUserName)
+{
+  if (nullptr != m_spDataBlockThread && nullptr != m_spMetronomeManager)
+  {
+    QMutexLocker locker(&m_spDataBlockThread->m_mutex);
+    m_spDataBlockThread->sUserName = sUserName;
+    emit m_spMetronomeManager->SignalBlockChanged(m_id);
+  }
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CMetronomeCanvasQml::SlotTickReachedCenter(const QUuid& id)
+{
+  if (id != m_id) { return; }
+  emit tickReachedCenter();
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CMetronomeCanvasQml::SlotUpdate(const QUuid& id, const std::vector<double>& vdTicks)
+{
+  if (id != m_id) { return; }
+
+  auto calltime = std::chrono::high_resolution_clock::now();
+
+  // update is direct so we don't lose thread switching time
+  // we will correct thread switch time with the internal clock
+  {
+    QMutexLocker l(&m_localDataMutex);
+    m_lastUpdate = calltime;
+  }
+
+  bool bOk = QMetaObject::invokeMethod(this, "SlotUpdateImpl",
+                                       Q_ARG(const std::vector<double>&, vdTicks));
+  assert(bOk); Q_UNUSED(bOk)
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CMetronomeCanvasQml::SlotUpdateImpl(const std::vector<double>& vdTicks)
+{
+  // calculate thread switch time with the internal clock
+  qint64 iCorrectionMs = 0;
+  {
+    QMutexLocker l(&m_localDataMutex);
+    auto now = std::chrono::high_resolution_clock::now();
+    auto diffMs = std::chrono::duration_cast<std::chrono::milliseconds>(now - m_lastUpdate);
+    iCorrectionMs = diffMs.count();
+  }
+
+  // 1s to reach center, correct with difference since last Update from the thread
+  m_vdTickmap.clear();
+  for (const double& dVal : vdTicks)
+  {
+    // fix thread switch error
+    const double dModified = dVal + (static_cast<double>(iCorrectionMs) / 1'000.0);
+    if (1.0 >= dModified && 0.0 <= dModified)
     {
-      ++it;
+      m_vdTickmap.push_back(dModified);
     }
   }
 
@@ -192,21 +320,17 @@ void CMetronomeCanvasQml::update(double dIntervalMs)
 
 //----------------------------------------------------------------------------------------
 //
-void CMetronomeCanvasQml::SlotMutedChanged()
+void CMetronomeCanvasQml::UpdatePattern()
 {
-  if (nullptr != m_spSettings)
+  if (nullptr != m_spDataBlockThread && nullptr != m_spMetronomeManager)
   {
-    m_spSoundEmitters->SetMuted(m_bMuted || m_spSettings->Muted());
-  }
-}
-
-//----------------------------------------------------------------------------------------
-//
-void CMetronomeCanvasQml::SlotVolumeChanged()
-{
-  if (nullptr != m_spSettings)
-  {
-    m_spSoundEmitters->SetVolume(m_spSettings->Volume() * m_spSettings->MetronomeVolume() *
-                                 m_dVolume);
+    QMutexLocker locker(&m_spDataBlockThread->m_mutex);
+    m_spDataBlockThread->m_vdTickPattern.clear();
+    double dDefaultIntervalMs = 60'000.0 / double(m_iBpm);
+    for (double dValue : m_vdPattern)
+    {
+      m_spDataBlockThread->m_vdTickPattern.push_back(dValue*dDefaultIntervalMs);
+    }
+    emit m_spMetronomeManager->SignalBlockChanged(m_id);
   }
 }

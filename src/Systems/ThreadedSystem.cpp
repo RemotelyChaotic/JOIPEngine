@@ -1,8 +1,9 @@
 #include "ThreadedSystem.h"
 
-CSystemBase::CSystemBase() :
+CSystemBase::CSystemBase(QThread::Priority prio) :
   QObject(nullptr),
-  m_bInitialized(false)
+  m_bInitialized(false),
+  m_priority(prio)
 {}
 
 CSystemBase::~CSystemBase()

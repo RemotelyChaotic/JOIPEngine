@@ -1,0 +1,368 @@
+#include "MetronomeManager.h"
+#include "Application.h"
+#include "Settings.h"
+
+#include "Systems/Resource.h"
+
+#include "Utils/MetronomeHelpers.h"
+#include "Utils/MultiEmitterSoundPlayer.h"
+
+#include <QTimer>
+
+namespace
+{
+  // we want a high update resolution, but only want to update the UI
+  // at 60-90 fps to reduce system load
+  constexpr qint32 c_iTimerInterval = 8; // ~120fps
+  constexpr qint32 c_iUpdateThresholdInterval = 12; // 1.5* c_iTimerInterval; ~60fps == 16ms
+}
+
+Q_DECLARE_METATYPE(std::shared_ptr<SMetronomeDataBlock>)
+
+//----------------------------------------------------------------------------------------
+//
+SMetronomeDataBlock::SMetronomeDataBlock() :
+  m_mutex(QMutex::Recursive)
+{
+}
+SMetronomeDataBlock::SMetronomeDataBlock(const SMetronomeDataBlock& other)
+{
+  *this = other;
+}
+SMetronomeDataBlock& SMetronomeDataBlock::operator=(const SMetronomeDataBlock& other)
+{
+  sUserName = other.sUserName;
+  m_sBeatResource = other.m_sBeatResource;
+  m_bMuted = other.m_bMuted;
+  m_dVolume = other.m_dVolume;
+  m_vdTickPattern = other.m_vdTickPattern;
+  return *this;
+}
+
+struct SMetronomeDataBlockImpl : public SMetronomeDataBlock
+{
+  SMetronomeDataBlockImpl() :
+      SMetronomeDataBlock()
+  {}
+  SMetronomeDataBlockImpl& operator=(const SMetronomeDataBlock& other)
+  {
+    SMetronomeDataBlock::operator=(other);
+    return *this;
+  }
+
+  std::unique_ptr<CMultiEmitterSoundPlayer> m_spSoundEmitters;
+  std::vector<double>                       m_vdSpawnedTicks;
+  bool m_bStarted = false;
+  bool m_bPaused = false;
+};
+struct SMetronomeDataBlockPrivate
+{
+  SMetronomeDataBlockPrivate() :
+      m_spPublicBlock(std::make_shared<SMetronomeDataBlock>())
+  { }
+
+  std::shared_ptr<SMetronomeDataBlock> m_spPublicBlock;
+  SMetronomeDataBlockImpl m_privateBlock; // mutex is not used here
+};
+
+//----------------------------------------------------------------------------------------
+//
+CMetronomeManager::CMetronomeManager() :
+  CSystemBase(QThread::Priority::HighPriority), // the high thread priority is important otherwise
+                                                // the update might starve for too long and we
+                                                // get a choppy metronome
+  m_spSettings(CApplication::Instance()->Settings())
+{
+  qRegisterMetaType<std::shared_ptr<SMetronomeDataBlock>>();
+  qRegisterMetaType<std::vector<double>>();
+
+  connect(this, &CMetronomeManager::SignalStart,
+          this, &CMetronomeManager::SlotStart, Qt::QueuedConnection);
+  connect(this, &CMetronomeManager::SignalPause,
+          this, &CMetronomeManager::SlotPause, Qt::QueuedConnection);
+  connect(this, &CMetronomeManager::SignalResume,
+          this, &CMetronomeManager::SlotResume, Qt::QueuedConnection);
+  connect(this, &CMetronomeManager::SignalStop,
+          this, &CMetronomeManager::SlotStop, Qt::QueuedConnection);
+  connect(this, &CMetronomeManager::SignalBlockChanged,
+          this, &CMetronomeManager::SlotBlockChanged, Qt::QueuedConnection);
+}
+CMetronomeManager::~CMetronomeManager()
+{
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CMetronomeManager::DeregisterUi(const QUuid& sName)
+{
+  bool bOk = QMetaObject::invokeMethod(this, "SlotDeregisterUiImpl",
+                                       Qt::QueuedConnection,
+                                       Q_ARG(QUuid, sName));
+  assert(bOk); Q_UNUSED(bOk)
+}
+
+//----------------------------------------------------------------------------------------
+//
+std::shared_ptr<SMetronomeDataBlock> CMetronomeManager::RegisterUi(const QUuid& sName)
+{
+  std::shared_ptr<SMetronomeDataBlock> spRet;
+  bool bOk = QMetaObject::invokeMethod(this, "SlotRegisterUiImpl",
+                                       Qt::BlockingQueuedConnection,
+                                       Q_RETURN_ARG(std::shared_ptr<SMetronomeDataBlock>, spRet),
+                                       Q_ARG(QUuid, sName));
+  assert(bOk); Q_UNUSED(bOk)
+  return spRet;
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CMetronomeManager::Initialize()
+{
+  if (nullptr != m_spSettings)
+  {
+    connect(m_spSettings.get(), &CSettings::mutedChanged,
+            this, &CMetronomeManager::SlotMutedChanged, Qt::QueuedConnection);
+    connect(m_spSettings.get(), &CSettings::volumeChanged,
+            this, &CMetronomeManager::SlotVolumeChanged, Qt::QueuedConnection);
+  }
+
+  SlotMutedChanged();
+  SlotVolumeChanged();
+
+  m_pTimer = new QTimer(this);
+  // the timer has to be precise, otherwise we get jumps in the metronome
+  m_pTimer->setTimerType(Qt::TimerType::PreciseTimer);
+  m_pTimer->setInterval(std::chrono::milliseconds(c_iTimerInterval));
+  m_pTimer->setSingleShot(false);
+  connect(m_pTimer, &QTimer::timeout, this, &CMetronomeManager::SlotTimeout);
+
+  SetInitialized(true);
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CMetronomeManager::Deinitialize()
+{
+  m_pTimer->stop();
+  delete m_pTimer;
+
+  SetInitialized(false);
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CMetronomeManager::SlotStart(const QUuid& id)
+{
+  auto it = m_metronomeBlocks.find(id);
+  if (m_metronomeBlocks.end() != it)
+  {
+    it->second->m_privateBlock.m_bStarted = true;
+    if (nullptr != m_pTimer && !m_pTimer->isActive())
+    {
+      m_pTimer->start();
+      m_lastUpdate = std::chrono::high_resolution_clock::now();
+      m_iCumulativeTime = 0.0;
+    }
+  }
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CMetronomeManager::SlotPause(const QUuid& id)
+{
+  auto it = m_metronomeBlocks.find(id);
+  if (m_metronomeBlocks.end() != it)
+  {
+    it->second->m_privateBlock.m_bPaused = true;
+  }
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CMetronomeManager::SlotResume(const QUuid& id)
+{
+  auto it = m_metronomeBlocks.find(id);
+  if (m_metronomeBlocks.end() != it)
+  {
+    it->second->m_privateBlock.m_bPaused = false;
+  }
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CMetronomeManager::SlotStop(const QUuid& id)
+{
+  auto it = m_metronomeBlocks.find(id);
+  if (m_metronomeBlocks.end() != it)
+  {
+    it->second->m_privateBlock.m_bStarted = false;
+
+    bool bAnyRunning = false;
+    for (const auto& [_, block] : m_metronomeBlocks)
+    {
+      bAnyRunning |= block->m_privateBlock.m_bStarted;
+    }
+
+    if (!bAnyRunning && nullptr != m_pTimer && m_pTimer->isActive())
+    {
+      m_pTimer->stop();
+    }
+  }
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CMetronomeManager::SlotBlockChanged(const QUuid& sName)
+{
+  auto it = m_metronomeBlocks.find(sName);
+  if (m_metronomeBlocks.end() != it)
+  {
+    {
+      QMutexLocker locker(&it->second->m_spPublicBlock->m_mutex);
+      it->second->m_privateBlock = *it->second->m_spPublicBlock;
+    }
+
+    if (it->second->m_privateBlock.m_sBeatResource.isEmpty())
+    {
+      if (nullptr != m_spSettings)
+      {
+        it->second->m_privateBlock.m_spSoundEmitters->SetSoundEffect(
+            metronome::MetronomeSfxFromKey(m_spSettings->MetronomeSfx()));
+      }
+    }
+    else
+    {
+      it->second->m_privateBlock.m_spSoundEmitters->SetSoundEffect(
+          it->second->m_privateBlock.m_sBeatResource);
+    }
+
+    it->second->m_privateBlock.m_spSoundEmitters->SetMuted(
+        it->second->m_privateBlock.m_bMuted || m_bMuted);
+    it->second->m_privateBlock.m_spSoundEmitters->SetVolume(
+        it->second->m_privateBlock.m_dVolume * m_dVolume);
+  }
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CMetronomeManager::SlotDeregisterUiImpl(const QUuid& sName)
+{
+  auto it = m_metronomeBlocks.find(sName);
+  if (m_metronomeBlocks.end() != it)
+  {
+    m_metronomeBlocks.erase(it);
+  }
+}
+
+//----------------------------------------------------------------------------------------
+//
+std::shared_ptr<SMetronomeDataBlock> CMetronomeManager::SlotRegisterUiImpl(const QUuid& sName)
+{
+  m_metronomeBlocks[sName] = std::make_shared<SMetronomeDataBlockPrivate>();
+  auto block = m_metronomeBlocks[sName];
+
+  if (nullptr != m_spSettings)
+  {
+    block->m_spPublicBlock->m_sBeatResource =
+        metronome::MetronomeSfxFromKey(m_spSettings->MetronomeSfx());
+    block->m_spPublicBlock->m_bMuted = m_bMuted;
+    block->m_spPublicBlock->m_dVolume = m_dVolume;
+  }
+
+  block->m_privateBlock = *block->m_spPublicBlock;
+  block->m_privateBlock.m_spSoundEmitters =
+      std::make_unique<CMultiEmitterSoundPlayer>(CMultiEmitterSoundPlayer::c_iDefaultNumAutioEmitters,
+                                                 block->m_spPublicBlock->m_sBeatResource);
+  return block->m_spPublicBlock;
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CMetronomeManager::SlotTimeout()
+{
+  auto now = std::chrono::high_resolution_clock::now();
+  qint64 iDiffMs = std::chrono::duration_cast<std::chrono::milliseconds>(now - m_lastUpdate).count();
+  m_lastUpdate = now;
+  m_iCumulativeTime += iDiffMs;
+
+  for (const auto& [id, spBlock] : m_metronomeBlocks)
+  {
+    if (spBlock->m_privateBlock.m_bStarted && !spBlock->m_privateBlock.m_bPaused)
+    {
+      for (qint32 i = 0; spBlock->m_privateBlock.m_vdSpawnedTicks.size() > static_cast<size_t>(i); ++i)
+      {
+        double& dVal = spBlock->m_privateBlock.m_vdSpawnedTicks[static_cast<size_t>(i)];
+        // 1s to reach end
+        dVal += static_cast<double>(iDiffMs / 1'000.0);
+        if (dVal >= 1.0)
+        {
+          spBlock->m_privateBlock.m_spSoundEmitters->Play();
+          emit SignalTickReachedCenter(id);
+          spBlock->m_privateBlock.m_vdSpawnedTicks.erase(
+              spBlock->m_privateBlock.m_vdSpawnedTicks.begin()+static_cast<size_t>(i));
+          --i;
+        }
+      }
+
+      if (spBlock->m_privateBlock.m_vdSpawnedTicks.empty() ||
+          spBlock->m_privateBlock.m_vdSpawnedTicks.back() >= 0.0)
+      {
+        for (size_t i = 0; spBlock->m_privateBlock.m_vdTickPattern.size()+1 > i; ++i)
+        {
+          if (0 == i)
+          {
+            if (spBlock->m_privateBlock.m_vdSpawnedTicks.empty())
+            {
+              spBlock->m_privateBlock.m_vdSpawnedTicks.push_back(0.0);
+            }
+            continue;
+          }
+          auto dDistMsTick = spBlock->m_privateBlock.m_vdTickPattern[i-1];
+          spBlock->m_privateBlock.m_vdSpawnedTicks.push_back(
+              spBlock->m_privateBlock.m_vdSpawnedTicks.back() -
+              static_cast<double>(dDistMsTick / 1'000.0));
+        }
+      }
+
+      if (c_iUpdateThresholdInterval < m_iCumulativeTime)
+      {
+        emit SignalPatternChanged(id, spBlock->m_privateBlock.m_vdSpawnedTicks);
+      }
+    }
+  }
+
+  if (c_iUpdateThresholdInterval < m_iCumulativeTime)
+  {
+    m_iCumulativeTime = 0.0;
+  }
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CMetronomeManager::SlotMutedChanged()
+{
+  if (nullptr != m_spSettings)
+  {
+    m_bMuted = m_spSettings->Muted();
+    for (const auto& [_, spBlock] : m_metronomeBlocks)
+    {
+      spBlock->m_privateBlock.m_spSoundEmitters->SetMuted(
+          m_bMuted || spBlock->m_privateBlock.m_bMuted);
+    }
+  }
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CMetronomeManager::SlotVolumeChanged()
+{
+  if (nullptr != m_spSettings)
+  {
+    m_dVolume = m_spSettings->Volume() * m_spSettings->MetronomeVolume();
+    for (const auto& [_, spBlock] : m_metronomeBlocks)
+    {
+      spBlock->m_privateBlock.m_spSoundEmitters->SetVolume(
+          m_dVolume * spBlock->m_privateBlock.m_dVolume);
+    }
+  }
+}

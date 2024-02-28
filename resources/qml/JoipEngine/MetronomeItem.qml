@@ -8,88 +8,46 @@ Rectangle {
     id: metronomeItem
     color: "transparent"
 
+    property string userName: "metronome"
+    onUserNameChanged: {
+        metronomeDisplay.registerUi(metronomeItem.userName);
+    }
+
     property string beatResource: ""
     property int bpm: 60
     property var pattern: [ 1 ]
-    property bool running: counter.running
+    property bool running: metronomeDisplay.running
     property bool muted: false
     property double volume: 1.0
 
     function start()
     {
-        counter.lastDateMs = new Date().getTime();
-        counter.currentInterval = 0.0;
-        counter.currentPatternIndex = 0;
-        counter.start();
+        metronomeDisplay.start();
+        metronomeDisplay.running = true;
     }
 
     function resume()
     {
-        if (!counter.running)
+        if (!metronomeDisplay.running)
         {
-            counter.lastDateMs = new Date().getTime();
-            counter.start();
+            metronomeDisplay.resume();
+            metronomeDisplay.running = true;
         }
     }
 
     function pause()
     {
-        if (counter.running)
+        if (metronomeDisplay.running)
         {
-            counter.stop();
+            metronomeDisplay.pause();
+            metronomeDisplay.running = false;
         }
     }
 
     function stop()
     {
-        counter.stop();
-        counter.currentInterval = 0.0;
-        counter.currentPatternIndex = 0;
-        metronomeDisplay.clear();
-    }
-
-    Timer {
-        id: counter
-        interval: 10
-        running: false
-        repeat: true
-
-        property real currentInterval: 0.0
-        property int currentPatternIndex: 0
-        property real bpmInterval: 60 / metronomeItem.bpm * 1000
-        property var lastDateMs: { return new Date().getTime(); }
-        onTriggered: {
-            var newDateMs = new Date().getTime();
-            var diffMs = newDateMs - lastDateMs;
-            lastDateMs = newDateMs;
-
-            currentInterval = currentInterval + diffMs;
-            if (metronomeItem.pattern.length > currentPatternIndex && -1 < currentPatternIndex)
-            {
-                if (currentInterval >= metronomeItem.pattern[currentPatternIndex] * bpmInterval)
-                {
-                    currentInterval = currentInterval - metronomeItem.pattern[currentPatternIndex] * bpmInterval;
-                    metronomeDisplay.spawnNewMetronomeTicks();
-
-                    currentPatternIndex = currentPatternIndex + 1;
-                    if (metronomeItem.pattern.length <= currentPatternIndex)
-                    {
-                        currentPatternIndex = 0;
-                    }
-                }
-            }
-            else
-            {
-                if (currentInterval >= bpmInterval)
-                {
-                    currentInterval = currentInterval - bpmInterval;
-                    metronomeDisplay.spawnNewMetronomeTicks();
-                }
-                currentPatternIndex = 0;
-            }
-
-            metronomeDisplay.update(diffMs);
-        }
+        metronomeDisplay.stop();
+        metronomeDisplay.running = false;
     }
 
     Rectangle {
@@ -108,8 +66,12 @@ Rectangle {
         width: parent.width
         height: parent.height
 
+        property bool running: false
+
         beatResource: metronomeItem.beatResource
+        bpm: metronomeItem.bpm
         muted: metronomeItem.muted
+        pattern: metronomeItem.pattern
         tickColor: root.style.metronomeDisplay.ticksColor
         volume: metronomeItem.volume
 
@@ -259,5 +221,7 @@ Rectangle {
         }
     }
 
-
+    Component.onCompleted: {
+        metronomeDisplay.registerUi(metronomeItem.userName);
+    }
 }

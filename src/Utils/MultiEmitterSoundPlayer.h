@@ -16,6 +16,8 @@ public:
                            const QString& sSoundEffect = QString());
   ~CMultiEmitterSoundPlayer();
 
+  void Resize(qint32 iNewNrSoundEmitters, const QString& sSoundEffect = QString());
+
   const QString& SoundEffect() const;
   void SetSoundEffect(const QString& sPath);
 

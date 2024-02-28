@@ -40,6 +40,9 @@ Changes:
 - Layout / QML errors are reported in the editor.
 - Enabled to remove all resources in a folder by selecting a folder of resources 
   in the view.
+- Updated the PlayerMetronome to be way more reliable and precise by over-engineering the 
+  <buy some apples> out of it. It should now not get out of synch even at lower 
+  frame rates and high BPMs.
 
 Fixed Bugs:
 - Fixed a few UI typos.

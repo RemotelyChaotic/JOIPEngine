@@ -19,6 +19,7 @@
 #include "Systems/DeviceManager.h"
 #include "Systems/Devices/DeviceSettings.h"
 #include "Systems/HelpFactory.h"
+#include "Systems/MetronomeManager.h"
 #include "Systems/NotificationSender.h"
 #include "Systems/OverlayManager.h"
 #include "Systems/Project.h"
@@ -181,11 +182,13 @@ void CApplication::Initialize()
   m_spSystemsMap.insert({ECoreSystems::eDatabaseManager, std::make_shared<CThreadedSystem>("DatabaseManager")});
   m_spSystemsMap.insert({ECoreSystems::eProjectDownloader, std::make_shared<CThreadedSystem>("ProjectDownloader")});
   m_spSystemsMap.insert({ECoreSystems::eDeviceManager, std::make_shared<CThreadedSystem>("DeviceManager")});
+  m_spSystemsMap.insert({ECoreSystems::eMetronomeManager, std::make_shared<CThreadedSystem>("MetronomeManager")});
 
   // init subsystems
   m_spSystemsMap[ECoreSystems::eDatabaseManager]->RegisterObject<CDatabaseManager>();
   m_spSystemsMap[ECoreSystems::eProjectDownloader]->RegisterObject<CProjectDownloader>(vJobCfg);
   m_spSystemsMap[ECoreSystems::eDeviceManager]->RegisterObject<CDeviceManager>();
+  m_spSystemsMap[ECoreSystems::eMetronomeManager]->RegisterObject<CMetronomeManager>();
 
   // qml
   RegisterQmlTypes();
@@ -241,6 +244,11 @@ template<>
 std::weak_ptr<CBackActionHandler> CApplication::System<CBackActionHandler>()
 {
   return m_spBackActionHandler;
+}
+template<>
+std::weak_ptr<CMetronomeManager> CApplication::System<CMetronomeManager>()
+{
+  return std::static_pointer_cast<CMetronomeManager>(m_spSystemsMap[ECoreSystems::eMetronomeManager]->Get());
 }
 
 //----------------------------------------------------------------------------------------

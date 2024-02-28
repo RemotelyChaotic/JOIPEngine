@@ -529,6 +529,8 @@ macro(CreateJOIPProject JOIP_PROJECT_NAME)
     ${JOIPSources}/Systems/Kink.cpp
     ${JOIPSources}/Systems/Kink.h
     ${JOIPSources}/Systems/Lockable.h
+    ${JOIPSources}/Systems/MetronomeManager.cpp
+    ${JOIPSources}/Systems/MetronomeManager.h
     ${JOIPSources}/Systems/NotificationSender.cpp
     ${JOIPSources}/Systems/NotificationSender.h
     ${JOIPSources}/Systems/OverlayManager.cpp

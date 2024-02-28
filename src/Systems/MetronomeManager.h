@@ -1,0 +1,87 @@
+#ifndef CMETRONOMEMANAGER_H
+#define CMETRONOMEMANAGER_H
+
+#include "ThreadedSystem.h"
+
+#include <QMutex>
+#include <QUuid>
+
+#include <chrono>
+#include <memory>
+
+class CMultiEmitterSoundPlayer;
+class CSettings;
+
+//----------------------------------------------------------------------------------------
+//
+struct SMetronomeDataBlock
+{
+  SMetronomeDataBlock();
+  SMetronomeDataBlock(const SMetronomeDataBlock& other);
+  SMetronomeDataBlock& operator=(const SMetronomeDataBlock& other);
+
+  mutable QMutex      m_mutex;
+
+  QString             sUserName;
+
+  QString             m_sBeatResource;
+  bool                m_bMuted = false;
+  double              m_dVolume = 1.0;
+
+  std::vector<double> m_vdTickPattern;
+};
+struct SMetronomeDataBlockPrivate;
+
+//----------------------------------------------------------------------------------------
+//
+class CMetronomeManager : public CSystemBase
+{
+  Q_OBJECT
+  Q_DISABLE_COPY(CMetronomeManager)
+
+public:
+  CMetronomeManager();
+  ~CMetronomeManager() override;
+
+  void DeregisterUi(const QUuid& sName);
+  std::shared_ptr<SMetronomeDataBlock> RegisterUi(const QUuid& sName);
+  void Start();
+
+public slots:
+  void Initialize() override;
+  void Deinitialize() override;
+
+signals:
+  // incomming
+  void SignalStart(const QUuid& id);
+  void SignalPause(const QUuid& id);
+  void SignalResume(const QUuid& id);
+  void SignalStop(const QUuid& id);
+  void SignalBlockChanged(const QUuid& sName);
+  // outgoing
+  void SignalPatternChanged(const QUuid& id, const std::vector<double>& vdTicks);
+  void SignalTickReachedCenter(const QUuid& id);
+
+private slots:
+  void SlotStart(const QUuid& id);
+  void SlotPause(const QUuid& id);
+  void SlotResume(const QUuid& id);
+  void SlotStop(const QUuid& id);
+  void SlotBlockChanged(const QUuid& sName);
+  void SlotDeregisterUiImpl(const QUuid& sName);
+  std::shared_ptr<SMetronomeDataBlock> SlotRegisterUiImpl(const QUuid& sName);
+  void SlotTimeout();
+  void SlotMutedChanged();
+  void SlotVolumeChanged();
+
+private:
+  std::map<QUuid, std::shared_ptr<SMetronomeDataBlockPrivate>>   m_metronomeBlocks;
+  std::shared_ptr<CSettings>                                     m_spSettings;
+  QPointer<QTimer>                                               m_pTimer;
+  std::chrono::time_point<std::chrono::high_resolution_clock>    m_lastUpdate;
+  qint64                                                         m_iCumulativeTime = 0.0;
+  double                                                         m_dVolume = 1.0;
+  bool                                                           m_bMuted = false;
+};
+
+#endif // CMETRONOMEMANAGER_H

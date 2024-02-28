@@ -11,6 +11,7 @@
 class CBackActionHandler;
 class CDeviceManager;
 class CHelpFactory;
+class CMetronomeManager;
 class CNotificationSender;
 class COverlayManager;
 class CProjectDownloader;
@@ -78,5 +79,6 @@ template<> std::weak_ptr<CHelpFactory> CApplication::System<CHelpFactory>();
 template<> std::weak_ptr<COverlayManager> CApplication::System<COverlayManager>();
 template<> std::weak_ptr<CProjectDownloader> CApplication::System<CProjectDownloader>();
 template<> std::weak_ptr<CBackActionHandler> CApplication::System<CBackActionHandler>();
+template<> std::weak_ptr<CMetronomeManager> CApplication::System<CMetronomeManager>();
 
 #endif // CAPPLICATION_H

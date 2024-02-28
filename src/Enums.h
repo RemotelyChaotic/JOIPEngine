@@ -17,7 +17,8 @@ BETTER_ENUM(EAppState, qint32,
 BETTER_ENUM(ECoreSystems, qint32,
             eDatabaseManager = 0,
             eProjectDownloader = 1,
-            eDeviceManager = 2);
+            eDeviceManager = 2,
+            eMetronomeManager = 3);
 
 BETTER_ENUM(ELoadState, qint32,
             eUnstarted = 0,

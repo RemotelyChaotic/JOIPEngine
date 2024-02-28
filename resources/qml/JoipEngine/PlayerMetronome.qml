@@ -100,6 +100,7 @@ Rectangle {
         width: parent.width - 10
         height: parent.height - 10
 
+        userName: parent.userName
         property bool requestedRun: false
 
         opacity: 0.0
