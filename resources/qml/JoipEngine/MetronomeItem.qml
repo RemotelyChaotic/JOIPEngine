@@ -83,10 +83,17 @@ Rectangle {
             }
         }
 
+        property int currentRipple: 0
         onTickReachedCenter: {
-            beginAnim.start();
-            rippleAnim.start();
-            endAnim.start();
+            switch(currentRipple)
+            {
+            case 0: gradient1.start(); break;
+            case 1: gradient2.start(); break;
+            case 2: gradient3.start(); break;
+            case 3: gradient4.start(); break;
+            }
+            currentRipple++
+            if (4 == currentRipple) { currentRipple = 0; }
         }
     }
 
@@ -152,72 +159,41 @@ Rectangle {
             }
         }
 
-        RadialGradient {
-            id: gradient
+        MetronomeRippleItem {
+            id: gradient1
             anchors.centerIn: parent
             width: parent.width
             height: parent.height
 
-            source: Rectangle {
-                color: "white"
-                anchors.centerIn: parent
-                width: centerLayer.width
-                height: centerLayer.height
-                radius: width / 2
-            }
-            gradient: Gradient {
-                GradientStop { position: 0.0; color: "#00000000" }
-                GradientStop {
-                    id: rippleBegin
-                    position: 0.05
-                    color: "#00000000"
+            centerLayerWidth: centerLayer.width
+            centerLayerHeight: centerLayer.height
+        }
+        MetronomeRippleItem {
+            id: gradient2
+            anchors.centerIn: parent
+            width: parent.width
+            height: parent.height
 
-                    NumberAnimation on position {
-                        id: beginAnim
-                        duration: 500
-                        to: 0.85
-                        onRunningChanged: {
-                            if (!running) {
-                                rippleBegin.position = 0.05;
-                            }
-                        }
-                    }
-                }
-                GradientStop {
-                    id: ripplePos
-                    position: 0.1
-                    color: root.style.metronomeDisplay.rippleColor
+            centerLayerWidth: centerLayer.width
+            centerLayerHeight: centerLayer.height
+        }
+        MetronomeRippleItem {
+            id: gradient3
+            anchors.centerIn: parent
+            width: parent.width
+            height: parent.height
 
-                    NumberAnimation on position {
-                        id: rippleAnim
-                        duration: 500
-                        to: 0.9
-                        onRunningChanged: {
-                            if (!running) {
-                                ripplePos.position = 0.1;
-                            }
-                        }
-                    }
-                }
-                GradientStop {
-                    id: rippleEnd
-                    position: 0.15
-                    color: "#00000000"
+            centerLayerWidth: centerLayer.width
+            centerLayerHeight: centerLayer.height
+        }
+        MetronomeRippleItem {
+            id: gradient4
+            anchors.centerIn: parent
+            width: parent.width
+            height: parent.height
 
-                    NumberAnimation on position {
-                        id: endAnim
-                        duration: 500
-                        to: 0.95
-                        onRunningChanged: {
-                            if (!running) {
-                                rippleEnd.position = 0.15;
-                            }
-                        }
-
-                    }
-                }
-                GradientStop { position: 1.0; color: "#00000000" }
-            }
+            centerLayerWidth: centerLayer.width
+            centerLayerHeight: centerLayer.height
         }
     }
 
