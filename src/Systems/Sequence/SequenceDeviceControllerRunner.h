@@ -14,7 +14,8 @@ public:
   CSequenceDeviceControllerRunner(QPointer<CScriptRunnerSignalEmiter> pEmitter);
   ~CSequenceDeviceControllerRunner() override;
 
-  void RunSequenceInstruction(const std::shared_ptr<SSequenceInstruction>& spInstr) override;
+  void RunSequenceInstruction(const QString& sName,
+                              const std::shared_ptr<SSequenceInstruction>& spInstr) override;
 
 private:
   void RunVibrate(const std::shared_ptr<SSequenceInstruction>& spInstr);

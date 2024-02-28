@@ -24,6 +24,9 @@ New Features:
   This lets a Script communicate and exchange data with the Layout.
 - The PlayerThread can now spawn and kill threads with the "runAsynch" and "kill" methods
   respectively.
+- Added the possibility to create and play instruction sequences. These are played in parallel
+  to the script and run instructions based on an internal timeline. They are stored in a new 
+  type of Resource: Sequences.
 
 Changes:
 - Changed debug-view to a layout with splitter to support resizing the debugger.

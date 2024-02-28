@@ -14,7 +14,8 @@ public:
   CSequenceMediaPlayerRunner(QPointer<CScriptRunnerSignalEmiter> pEmitter);
   ~CSequenceMediaPlayerRunner() override;
 
-  void RunSequenceInstruction(const std::shared_ptr<SSequenceInstruction>& spInstr) override;
+  void RunSequenceInstruction(const QString& sName,
+                              const std::shared_ptr<SSequenceInstruction>& spInstr) override;
 
 private:
   void RunShow(const std::shared_ptr<SSequenceInstruction>& spInstr);

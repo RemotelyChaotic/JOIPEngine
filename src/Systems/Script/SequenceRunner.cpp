@@ -318,9 +318,14 @@ void CSequenceRunnerInstanceWorker::RunInstruction(const STimedInstruction& inst
   auto it = m_objectMap.find(instr.m_sLayerName);
   if (m_objectMap.end() == it)
   {
-    if (auto pSequenceRunner = dynamic_cast<ISequenceObjectRunner*>(it->second.get()))
+    if (auto pRunInstr = dynamic_cast<SRunScriptInstruction*>(instr.m_spInstr.get()))
     {
-      pSequenceRunner->RunSequenceInstruction(instr.m_spInstr);
+      emit SignalRunAsync(m_spProject, pRunInstr->m_sResource, pRunInstr->m_sResource,
+                          EScriptRunnerType::eAsync);
+    }
+    else if (auto pSequenceRunner = dynamic_cast<ISequenceObjectRunner*>(it->second.get()))
+    {
+      pSequenceRunner->RunSequenceInstruction(instr.m_sLayerName, instr.m_spInstr);
     }
   }
 }

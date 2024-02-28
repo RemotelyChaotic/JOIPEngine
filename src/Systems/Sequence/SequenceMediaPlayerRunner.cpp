@@ -24,7 +24,8 @@ CSequenceMediaPlayerRunner::~CSequenceMediaPlayerRunner()
 
 //----------------------------------------------------------------------------------------
 //
-void CSequenceMediaPlayerRunner::RunSequenceInstruction(const std::shared_ptr<SSequenceInstruction>& spInstr)
+void CSequenceMediaPlayerRunner::RunSequenceInstruction(const QString&,
+                                                        const std::shared_ptr<SSequenceInstruction>& spInstr)
 {
   auto it = m_functionMap.find(spInstr->m_sInstructionType);
   if (m_functionMap.end() != it)

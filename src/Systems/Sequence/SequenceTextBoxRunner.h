@@ -11,7 +11,8 @@ public:
   CSequenceTextBoxRunner(QPointer<CScriptRunnerSignalEmiter> pEmitter);
   ~CSequenceTextBoxRunner() override;
 
-  void RunSequenceInstruction(const std::shared_ptr<SSequenceInstruction>& spInstr) override;
+  void RunSequenceInstruction(const QString& sName,
+                              const std::shared_ptr<SSequenceInstruction>& spInstr) override;
 };
 
 #endif // CSEQUENCETEXTBOXRUNNER_H

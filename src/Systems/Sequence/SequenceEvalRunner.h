@@ -11,7 +11,8 @@ public:
   CSequenceEvalRunner(QPointer<CScriptRunnerSignalEmiter> pEmitter);
   ~CSequenceEvalRunner() override;
 
-  void RunSequenceInstruction(const std::shared_ptr<SSequenceInstruction>& spInstr) override;
+  void RunSequenceInstruction(const QString& sName,
+                              const std::shared_ptr<SSequenceInstruction>& spInstr) override;
 };
 
 #endif // CSEQUENCEEVALRUNNER_H

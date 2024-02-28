@@ -116,6 +116,26 @@ std::shared_ptr<SMetronomeDataBlock> CMetronomeManager::RegisterUi(const QUuid& 
 
 //----------------------------------------------------------------------------------------
 //
+void CMetronomeManager::SpawnSingleBeat(const QString& sName)
+{
+  bool bOk = QMetaObject::invokeMethod(this, "SlotSpawnSingleBeatImpl",
+                                       Qt::QueuedConnection,
+                                       Q_ARG(QString, sName));
+  assert(bOk); Q_UNUSED(bOk)
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CMetronomeManager::SpawnSingleBeat(const QUuid& uid)
+{
+  bool bOk = QMetaObject::invokeMethod(this, "SlotSpawnSingleBeatImpl",
+                                       Qt::QueuedConnection,
+                                       Q_ARG(QUuid, uid));
+  assert(bOk); Q_UNUSED(bOk)
+}
+
+//----------------------------------------------------------------------------------------
+//
 void CMetronomeManager::Initialize()
 {
   if (nullptr != m_spSettings)
@@ -147,6 +167,37 @@ void CMetronomeManager::Deinitialize()
   delete m_pTimer;
 
   SetInitialized(false);
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CMetronomeManager::SlotSpawnSingleBeatImpl(const QString& sName)
+{
+  auto it = std::find_if(m_metronomeBlocks.begin(), m_metronomeBlocks.end(),
+                         [&sName](const std::pair<QUuid, std::shared_ptr<SMetronomeDataBlockPrivate>>& pair) {
+    return pair.second->m_privateBlock.sUserName == sName;
+  });
+  if (m_metronomeBlocks.end() != it)
+  {
+    it->second->m_privateBlock.m_vdSpawnedTicks.push_back(0.0);
+    std::sort(it->second->m_privateBlock.m_vdSpawnedTicks.begin(),
+              it->second->m_privateBlock.m_vdSpawnedTicks.end(),
+              std::less<double>());
+  }
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CMetronomeManager::SlotSpawnSingleBeatImpl(const QUuid& uid)
+{
+  auto it = m_metronomeBlocks.find(uid);
+  if (m_metronomeBlocks.end() != it)
+  {
+    it->second->m_privateBlock.m_vdSpawnedTicks.push_back(0.0);
+    std::sort(it->second->m_privateBlock.m_vdSpawnedTicks.begin(),
+              it->second->m_privateBlock.m_vdSpawnedTicks.end(),
+              std::less<double>());
+  }
 }
 
 //----------------------------------------------------------------------------------------

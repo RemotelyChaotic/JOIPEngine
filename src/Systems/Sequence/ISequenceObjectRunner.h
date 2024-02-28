@@ -8,7 +8,8 @@ class ISequenceObjectRunner
 public:
   virtual ~ISequenceObjectRunner(){}
 
-  virtual void RunSequenceInstruction(const std::shared_ptr<SSequenceInstruction>& spInstr) = 0;
+  virtual void RunSequenceInstruction(const QString& sName,
+                                      const std::shared_ptr<SSequenceInstruction>& spInstr) = 0;
 };
 
 #endif // ISEQUENCEOBJECTRUNNER_H

@@ -15,7 +15,8 @@ CSequenceEvalRunner::~CSequenceEvalRunner()
 
 //----------------------------------------------------------------------------------------
 //
-void CSequenceEvalRunner::RunSequenceInstruction(const std::shared_ptr<SSequenceInstruction>& spInstr)
+void CSequenceEvalRunner::RunSequenceInstruction(const QString&,
+                                                 const std::shared_ptr<SSequenceInstruction>& spInstr)
 {
   auto pSignalEmitter = SignalEmitter<CEvalSignalEmiter>();
   if (const auto& spI = std::dynamic_pointer_cast<SEvalInstruction>(spInstr);

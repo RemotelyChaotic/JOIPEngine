@@ -21,7 +21,8 @@ CSequenceDeviceControllerRunner::~CSequenceDeviceControllerRunner()
 
 //----------------------------------------------------------------------------------------
 //
-void CSequenceDeviceControllerRunner::RunSequenceInstruction(const std::shared_ptr<SSequenceInstruction>& spInstr)
+void CSequenceDeviceControllerRunner::RunSequenceInstruction(const QString&,
+                                                             const std::shared_ptr<SSequenceInstruction>& spInstr)
 {
   auto it = m_functionMap.find(spInstr->m_sInstructionType);
   if (m_functionMap.end() != it)

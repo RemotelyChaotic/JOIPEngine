@@ -45,7 +45,8 @@ public:
 
   void DeregisterUi(const QUuid& sName);
   std::shared_ptr<SMetronomeDataBlock> RegisterUi(const QUuid& sName);
-  void Start();
+  void SpawnSingleBeat(const QString& sName);
+  void SpawnSingleBeat(const QUuid& uid);
 
 public slots:
   void Initialize() override;
@@ -63,6 +64,8 @@ signals:
   void SignalTickReachedCenter(const QUuid& id);
 
 private slots:
+  void SlotSpawnSingleBeatImpl(const QString& sName);
+  void SlotSpawnSingleBeatImpl(const QUuid& uid);
   void SlotStart(const QUuid& id);
   void SlotPause(const QUuid& id);
   void SlotResume(const QUuid& id);

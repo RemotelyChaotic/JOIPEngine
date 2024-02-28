@@ -7,6 +7,7 @@
 #include <functional>
 #include <map>
 
+class CMetronomeManager;
 class CSequenceMetronomeRunner : public CScriptObjectBase,
                                  public ISequenceObjectRunner
 {
@@ -14,15 +15,17 @@ public:
   CSequenceMetronomeRunner(QPointer<CScriptRunnerSignalEmiter> pEmitter);
   ~CSequenceMetronomeRunner() override;
 
-  void RunSequenceInstruction(const std::shared_ptr<SSequenceInstruction>& spInstr) override;
+  void RunSequenceInstruction(const QString& sName,
+                              const std::shared_ptr<SSequenceInstruction>& spInstr) override;
 
 private:
-  void RunSingleBeat(const std::shared_ptr<SSequenceInstruction>& spInstr);
-  void RunStartPattern(const std::shared_ptr<SSequenceInstruction>& spInstr);
-  void RunStopPattern(const std::shared_ptr<SSequenceInstruction>& spInstr);
+  void RunSingleBeat(const QString& sName, const std::shared_ptr<SSequenceInstruction>& spInstr);
+  void RunStartPattern(const QString& sName, const std::shared_ptr<SSequenceInstruction>& spInstr);
+  void RunStopPattern(const QString& sName, const std::shared_ptr<SSequenceInstruction>& spInstr);
 
-  std::map<QString, std::function<void(const std::shared_ptr<SSequenceInstruction>&)>>
+  std::map<QString, std::function<void(const QString&,const std::shared_ptr<SSequenceInstruction>&)>>
       m_functionMap;
+  std::weak_ptr<CMetronomeManager> m_wpMetronomeManager;
 };
 
 #endif // CSEQUENCEMETRONOMERUNNER_H
