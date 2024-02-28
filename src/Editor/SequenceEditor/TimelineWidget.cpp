@@ -228,12 +228,6 @@ void CTimelineWidget::AddNewElement(const QString& sId, qint32 iLayer, qint64 iT
 //
 void CTimelineWidget::Clear()
 {
-  if (nullptr != m_spCurrentSequence)
-  {
-    assert(false);
-    m_spCurrentSequence->m_vspLayers.clear();
-  }
-
   QVBoxLayout* pLayout = dynamic_cast<QVBoxLayout*>(widget()->layout());
   if (nullptr != pLayout)
   {
@@ -359,6 +353,7 @@ void CTimelineWidget::SetResourceModel(QPointer<CResourceTreeItemModel> pEditorM
 //
 void CTimelineWidget::SetSequence(const tspSequence& spSeq)
 {
+  Clear();
   m_spCurrentSequence = spSeq;
   Update();
 }
@@ -379,13 +374,15 @@ void CTimelineWidget::Update()
     QVBoxLayout* pLayout = dynamic_cast<QVBoxLayout*>(widget()->layout());
     if (nullptr != pLayout)
     {
-      for (qint32 i = 0; std::max(pLayout->count(),
-                                  static_cast<qint32>(m_spCurrentSequence->m_vspLayers.size())); ++i)
+      qint32 iMax = std::max(pLayout->count()-1,
+                             static_cast<qint32>(m_spCurrentSequence->m_vspLayers.size()));
+      for (qint32 i = 0; iMax > i; ++i)
       {
+        qint32 iCount = pLayout->count()-1;
         if (m_spCurrentSequence->m_vspLayers.size() > static_cast<size_t>(i))
         {
           auto spLayer = m_spCurrentSequence->m_vspLayers[static_cast<size_t>(i)];
-          if (pLayout->count() > i)
+          if (iCount > i)
           {
             auto pItem = pLayout->itemAt(i);
             if (nullptr != pItem)
@@ -401,21 +398,21 @@ void CTimelineWidget::Update()
             pLayout->insertWidget(i, CreateLayerWidget(spLayer));
           }
         }
-        else if (pLayout->count() > i)
+        else if (iCount > i)
         {
           auto pItem = pLayout->takeAt(i);
           if (nullptr != pItem->widget()) { delete pItem->widget(); }
           if (nullptr != pItem) { delete pItem; }
         }
       }
-
-      pLayout->insertItem(0, new QSpacerItem(0, 0, QSizePolicy::Fixed, QSizePolicy::Expanding));
     }
   }
-  else
-  {
-    Clear();
-  }
+
+  // qt only recalculates layouts in the event loop and we need the layout from here on,
+  // since there's no way to force it here's this badness
+  QPointer<CTimelineWidget> pThis(this);
+  qApp->processEvents();
+  if (nullptr == pThis) { return; }
 
   updateGeometry();
   SlotUpdateSequenceProperties();
@@ -652,6 +649,16 @@ void CTimelineWidget::resizeEvent(QResizeEvent* pEvt)
   }
 
   Resize(s);
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CTimelineWidget::showEvent(QShowEvent*)
+{
+  updateGeometry();
+  SlotUpdateSequenceProperties();
+  SlotSelectionColorChanged();
+  SlotLayersInserted();
 }
 
 //----------------------------------------------------------------------------------------

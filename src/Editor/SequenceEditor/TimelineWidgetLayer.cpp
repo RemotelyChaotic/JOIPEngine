@@ -314,7 +314,8 @@ QString CTimelineWidgetLayer::LayerType() const
 //
 QSize CTimelineWidgetLayer::HeaderSize() const
 {
-  return m_pHeader->size();
+  return QSize{std::max(m_pHeader->minimumSize().width(), m_pHeader->size().width()),
+               std::max(m_pHeader->minimumSize().height(), m_pHeader->size().height())};
 }
 
 //----------------------------------------------------------------------------------------

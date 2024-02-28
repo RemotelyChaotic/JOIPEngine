@@ -87,6 +87,7 @@ protected:
   void mouseMoveEvent(QMouseEvent* pEvent) override;
   void mouseReleaseEvent(QMouseEvent* pEvent) override;
   void resizeEvent(QResizeEvent* pEvt) override;
+  void showEvent(QShowEvent* pEvt) override;
   void wheelEvent(QWheelEvent* pEVt) override;
 
 private slots:
