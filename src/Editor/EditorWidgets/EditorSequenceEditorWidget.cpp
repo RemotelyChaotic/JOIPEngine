@@ -12,11 +12,12 @@
 
 #include <QJsonDocument>
 #include <QUndoStack>
+#include <QUuid>
 
 DECLARE_EDITORWIDGET(CEditorPatternEditorWidget, EEditorWidget::ePatternEditor)
 
 CEditorPatternEditorWidget::CEditorPatternEditorWidget(QWidget* pParent) :
-  CEditorWidgetBase(pParent),
+  CEditorDebuggableWidget(pParent),
   m_spUi(std::make_unique<Ui::CEditorSequenceEditorWidget>()),
   m_spOverlayProps(std::make_unique<CSequencePropertiesOverlay>(this)),
   m_pDummyModel(new QStandardItemModel(this)),
@@ -51,6 +52,14 @@ CEditorPatternEditorWidget::~CEditorPatternEditorWidget()
 void CEditorPatternEditorWidget::Initialize()
 {
   m_bInitialized = false;
+
+  // initalize Debugger view
+  CEditorDebuggableWidget::Initalize(m_spUi->pSceneView,
+                                     std::bind(&CEditorPatternEditorWidget::GetSequenceScene, this));
+  //connect(this, &CEditorDebuggableWidget::SignalDebugStarted,
+  //        this, &CEditorPatternEditorWidget::SlotDebugStarted);
+  //connect(this, &CEditorDebuggableWidget::SignalExecutionError,
+  //        this, &CEditorPatternEditorWidget::SlotExecutionError);
 
   m_spUi->pTimeLineWidget->SetResourceModel(ResourceTreeModel());
   m_spUi->pTimeLineWidget->SetUndoStack(UndoStack());
@@ -97,7 +106,7 @@ void CEditorPatternEditorWidget::LoadProject(tspProject spProject)
 
 //----------------------------------------------------------------------------------------
 //
-void CEditorPatternEditorWidget::UnloadProject()
+void CEditorPatternEditorWidget::UnloadProjectImpl()
 {
   WIDGET_INITIALIZED_GUARD
 
@@ -114,8 +123,6 @@ void CEditorPatternEditorWidget::UnloadProject()
   m_spOverlayProps->SetSequenceName(QString());
 
   m_spOverlayProps->Hide();
-
-  SetLoaded(false);
 }
 
 //----------------------------------------------------------------------------------------
@@ -158,6 +165,10 @@ void CEditorPatternEditorWidget::OnActionBarAboutToChange()
 {
   if (nullptr != ActionBar())
   {
+    disconnect(ActionBar()->m_spUi->DebugLayoutButton, &QPushButton::clicked,
+               this, &CEditorPatternEditorWidget::SlotDebugStart);
+    disconnect(ActionBar()->m_spUi->StopDebugLayoutButton, &QPushButton::clicked,
+               this, &CEditorPatternEditorWidget::SlotDebugStop);
     disconnect(ActionBar()->m_spUi->NewSequence, &QPushButton::clicked,
                this, &CEditorPatternEditorWidget::SlotAddNewSequenceButtonClicked);
     disconnect(ActionBar()->m_spUi->SequenceProperties, &QPushButton::clicked,
@@ -171,11 +182,14 @@ void CEditorPatternEditorWidget::OnActionBarAboutToChange()
     disconnect(ActionBar()->m_spUi->RemoveSelectedSequenceElements, &QPushButton::clicked,
                this, &CEditorPatternEditorWidget::SlotRemoveSequenceElementsButtonClicked);
 
+    ActionBar()->m_spUi->StopDebugLayoutButton->setEnabled(true);
     ActionBar()->m_spUi->NewSequence->setEnabled(true);
     ActionBar()->m_spUi->AddSequenceLayer->setEnabled(true);
     ActionBar()->m_spUi->RemoveSelectedSequenceLayer->setEnabled(true);
     ActionBar()->m_spUi->AddSequenceElement->setEnabled(true);
     ActionBar()->m_spUi->RemoveSelectedSequenceElements->setEnabled(true);
+
+    UpdateButtons(nullptr, nullptr);
   }
 }
 
@@ -186,6 +200,14 @@ void CEditorPatternEditorWidget::OnActionBarChanged()
   if (nullptr != ActionBar())
   {
     ActionBar()->ShowSequenceEditorActionBar();
+
+    UpdateButtons(ActionBar()->m_spUi->DebugLayoutButton,
+                  ActionBar()->m_spUi->StopDebugLayoutButton);
+
+    connect(ActionBar()->m_spUi->DebugLayoutButton, &QPushButton::clicked,
+            this, &CEditorPatternEditorWidget::SlotDebugStart);
+    connect(ActionBar()->m_spUi->StopDebugLayoutButton, &QPushButton::clicked,
+            this, &CEditorPatternEditorWidget::SlotDebugStop);
     connect(ActionBar()->m_spUi->NewSequence, &QPushButton::clicked,
             this, &CEditorPatternEditorWidget::SlotAddNewSequenceButtonClicked);
     connect(ActionBar()->m_spUi->SequenceProperties, &QPushButton::clicked,
@@ -350,6 +372,25 @@ QString CEditorPatternEditorWidget::CachedResourceName(qint32 iIndex)
 
 //----------------------------------------------------------------------------------------
 //
+CEditorPatternEditorWidget::tSceneToDebug CEditorPatternEditorWidget::GetSequenceScene()
+{
+  if (!IsInitialized()) { return nullptr; }
+  if (nullptr == m_spCurrentProject) { return nullptr; }
+
+  // we create a mock-scene that will get injected into the runner
+  std::shared_ptr<SScene> spMockScene = std::make_shared<SScene>();
+  spMockScene->m_spParent = m_spCurrentProject;
+
+  QReadLocker locker(&m_spCurrentProject->m_rwLock);
+  spMockScene->m_sSceneLayout = m_spCurrentProject->m_sPlayerLayout;
+  spMockScene->m_sName = QUuid::createUuid().toString();
+  spMockScene->m_iId = INT_MAX;
+  spMockScene->m_sScript = m_sLastCachedSequence;
+  return spMockScene;
+}
+
+//----------------------------------------------------------------------------------------
+//
 void CEditorPatternEditorWidget::ReloadEditor(qint32 iIndex)
 {
   m_bChangingIndex = true;
@@ -363,6 +404,10 @@ void CEditorPatternEditorWidget::ReloadEditor(qint32 iIndex)
   auto  pScriptItem = EditableFileModel()->CachedFile(m_sLastCachedSequence);
   if (nullptr != pScriptItem)
   {
+    if (nullptr != ActionBar())
+    {
+      ActionBar()->m_spUi->DebugLayoutButton->setEnabled(!m_sLastCachedSequence.isEmpty());
+    }
     if (nullptr == m_spCurrentSequence)
     {
       m_spCurrentSequence = std::make_shared<SSequenceFile>();

@@ -62,47 +62,15 @@ bool CProjectRunner::MightBeRegexScene(const QString& sName)
 //
 void CProjectRunner::LoadProject(tspProject spProject, const QString sStartScene)
 {
+  bool bOk = Setup(spProject, sStartScene);
   QString sError;
-  if (nullptr != m_spCurrentProject)
-  {
-    assert(false);
-    sError = tr("Old Project was not unloaded before loading project.");
-    qWarning() << sError;
-    emit SignalError(sError, QtMsgType::QtCriticalMsg);
-  }
-
-  m_spCurrentProject = spProject;
-
-  if (nullptr != m_pFlowScene)
-  {
-    m_pFlowScene->clearScene();
-    delete m_pFlowScene;
-  }
-  m_pFlowScene = new CFlowScene(CNodeEditorRegistry::RegisterDataModels());
-  connect(m_pFlowScene, &CFlowScene::nodeCreated, this, &CProjectRunner::SlotNodeCreated);
-
-  bool bOk = LoadFlowScene();
-  assert(bOk && "Could not load Flow scene. Why????");
   if (!bOk)
   {
-    sError = tr("Could not load Flow scene.");
-    qWarning() << sError;
-    emit SignalError(sError, QtMsgType::QtCriticalMsg);
-    return;
-  }
-
-  bOk = ResolveStart(sStartScene);
-  assert(bOk && "Starting scene could not be resolved.");
-  if (!bOk)
-  {
-    sError = QString(tr("Starting scene '%1' could not be resolved.")).arg(sStartScene);
-    qWarning() << sError;
-    emit SignalError(sError, QtMsgType::QtCriticalMsg);
     return;
   }
 
   CSceneNodeModel* pNodeDataModel = dynamic_cast<CSceneNodeModel*>(m_pCurrentNode->nodeDataModel());
-  if (!sStartScene.isNull() && !sStartScene.isEmpty() && nullptr != pNodeDataModel)
+  if (!sStartScene.isEmpty() && nullptr != pNodeDataModel)
   {
     m_nodeMap.clear();
     m_nodeMap.insert({pNodeDataModel->SceneName(), m_pCurrentNode});
@@ -121,10 +89,36 @@ void CProjectRunner::LoadProject(tspProject spProject, const QString sStartScene
 
 //----------------------------------------------------------------------------------------
 //
+void CProjectRunner::LoadProject(tspProject spProject, tspScene spStartScene)
+{
+  bool bOk = Setup(spProject, QString());
+  QString sError;
+
+  if (!bOk)
+  {
+    return;
+  }
+
+  m_nodeMap.clear();
+
+  if (nullptr == spStartScene)
+  {
+    sError = tr("Injected scene is null.");
+    qWarning() << sError;
+    emit SignalError(sError, QtMsgType::QtCriticalMsg);
+    return;
+  }
+
+  m_spInjectedScene = spStartScene;
+}
+
+//----------------------------------------------------------------------------------------
+//
 void CProjectRunner::UnloadProject()
 {
   m_pCurrentNode = nullptr;
   m_spCurrentProject = nullptr;
+  m_spInjectedScene = nullptr;
   m_spCurrentScene = nullptr;
   m_nodeMap.clear();
   m_disabledScenes.clear();
@@ -195,6 +189,20 @@ tspScene CProjectRunner::NextScene(const QString sName)
       }
     }
   }
+  else if (nullptr != m_spInjectedScene)
+  {
+    QReadLocker l(&m_spInjectedScene->m_rwLock);
+    if (m_spInjectedScene->m_sName == sName)
+    {
+      if (!ResolveStart(QString()))
+      {
+        return nullptr;
+      }
+      m_spCurrentScene = m_spInjectedScene;
+      return m_spInjectedScene;
+    }
+  }
+
   return nullptr;
 }
 
@@ -206,6 +214,11 @@ QStringList CProjectRunner::PossibleScenes()
   for (auto it = m_nodeMap.begin(); m_nodeMap.end() != it; ++it)
   {
     out << it->first;
+  }
+  if (nullptr != m_spInjectedScene)
+  {
+    QReadLocker locker(&m_spInjectedScene->m_rwLock);
+    out << m_spInjectedScene->m_sName;
   }
   return out;
 }
@@ -264,6 +277,52 @@ void CProjectRunner::ResolveFindScenes(const QString sName)
 void CProjectRunner::ResolveScenes()
 {
   ResolveNextScene();
+}
+
+//----------------------------------------------------------------------------------------
+//
+bool CProjectRunner::Setup(tspProject spProject, const QString sStartScene)
+{
+  QString sError;
+  if (nullptr != m_spCurrentProject)
+  {
+    assert(false);
+    sError = tr("Old Project was not unloaded before loading project.");
+    qWarning() << sError;
+    emit SignalError(sError, QtMsgType::QtCriticalMsg);
+  }
+
+  m_spCurrentProject = spProject;
+
+  if (nullptr != m_pFlowScene)
+  {
+    m_pFlowScene->clearScene();
+    delete m_pFlowScene;
+  }
+  m_pFlowScene = new CFlowScene(CNodeEditorRegistry::RegisterDataModels());
+  connect(m_pFlowScene, &CFlowScene::nodeCreated, this, &CProjectRunner::SlotNodeCreated);
+
+  bool bOk = LoadFlowScene();
+  assert(bOk && "Could not load Flow scene. Why????");
+  if (!bOk)
+  {
+    sError = tr("Could not load Flow scene.");
+    qWarning() << sError;
+    emit SignalError(sError, QtMsgType::QtCriticalMsg);
+    return false;
+  }
+
+  bOk = ResolveStart(sStartScene);
+  assert(bOk && "Starting scene could not be resolved.");
+  if (!bOk)
+  {
+    sError = QString(tr("Starting scene '%1' could not be resolved.")).arg(sStartScene);
+    qWarning() << sError;
+    emit SignalError(sError, QtMsgType::QtCriticalMsg);
+    return false;
+  }
+
+  return bOk;
 }
 
 //----------------------------------------------------------------------------------------

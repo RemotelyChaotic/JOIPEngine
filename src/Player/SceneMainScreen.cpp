@@ -124,7 +124,7 @@ void CSceneMainScreen::Initialize(const std::shared_ptr<CWindowContext>& spWindo
 
 //----------------------------------------------------------------------------------------
 //
-void CSceneMainScreen::LoadProject(qint32 iId, const QString sStartScene)
+void CSceneMainScreen::LoadProject(qint32 iId, const tSceneToLoad& sStartScene)
 {
   if (!m_bInitialized) { return; }
   if (nullptr != m_spCurrentProject)
@@ -148,7 +148,15 @@ void CSceneMainScreen::LoadProject(qint32 iId, const QString sStartScene)
     m_spUi->pQmlWidget->engine()->setImportPathList(vsPaths);
 
     CDatabaseManager::LoadProject(m_spCurrentProject);
-    m_spProjectRunner->LoadProject(m_spCurrentProject, sStartScene);
+
+    if (std::holds_alternative<QString>(sStartScene))
+    {
+      m_spProjectRunner->LoadProject(m_spCurrentProject, std::get<QString>(sStartScene));
+    }
+    else if (std::holds_alternative<tspScene>(sStartScene))
+    {
+      m_spProjectRunner->LoadProject(m_spCurrentProject, std::get<tspScene>(sStartScene));
+    }
 
     if (nullptr != m_spWindowContext && !m_bBeingDebugged)
     {

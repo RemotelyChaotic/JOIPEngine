@@ -5,6 +5,7 @@
 #include <QQuickWidget>
 #include <QWidget>
 #include <memory>
+#include <variant>
 
 class CBackgroundWidget;
 class CDatabaseManager;
@@ -21,6 +22,8 @@ namespace Ui {
 }
 struct SProject;
 typedef std::shared_ptr<SProject> tspProject;
+struct SScene;
+typedef std::shared_ptr<SScene> tspScene;
 
 namespace player {
   extern const char* c_sMainPlayerProperty;
@@ -36,9 +39,11 @@ public:
   explicit CSceneMainScreen(QWidget* pParent = nullptr);
   ~CSceneMainScreen() override;
 
+  using tSceneToLoad = std::variant<QString, tspScene>;
+
   bool CloseApplication();
   void Initialize(const std::shared_ptr<CWindowContext>& spWindowContext, bool bDebug);
-  void LoadProject(qint32 iId, const QString sStartScene = QString());
+  void LoadProject(qint32 iId, const tSceneToLoad& sStartScene = QString());
   std::weak_ptr<CProjectEventCallbackRegistry> EventCallbackRegistry();
   std::weak_ptr<CProjectRunner> ProjectRunner();
   std::weak_ptr<CScriptRunner> ScriptRunner();

@@ -12,14 +12,10 @@
 
 #include "Editor/Tutorial/CodeWidgetTutorialStateSwitchHandler.h"
 
-#include "Player/SceneMainScreen.h"
-
 #include "Systems/DatabaseManager.h"
 #include "Systems/HelpFactory.h"
 #include "Systems/Project.h"
 #include "Systems/Scene.h"
-#include "Systems/ScriptRunner.h"
-#include "Systems/Script/ScriptRunnerSignalEmiter.h"
 
 #include "Widgets/HelpOverlay.h"
 
@@ -40,16 +36,12 @@ namespace {
 //----------------------------------------------------------------------------------------
 //
 CEditorCodeWidget::CEditorCodeWidget(QWidget* pParent) :
-  CEditorWidgetBase(pParent),
+  CEditorDebuggableWidget(pParent),
   m_spUi(std::make_shared<Ui::CEditorCodeWidget>()),
   m_spTutorialStateSwitchHandler(nullptr),
   m_spSettings(CApplication::Instance()->Settings()),
-  m_spCurrentProject(nullptr),
   m_wpDbManager(),
-  m_wpScriptRunner(),
   m_pDummyModel(new QStandardItemModel(this)),
-  m_debugFinishedConnection(),
-  m_bDebugging(false),
   m_bChangingIndex(false),
   m_sLastCachedScript(QString())
 {
@@ -67,7 +59,6 @@ CEditorCodeWidget::CEditorCodeWidget(QWidget* pParent) :
 
 CEditorCodeWidget::~CEditorCodeWidget()
 {
-
 }
 
 //----------------------------------------------------------------------------------------
@@ -75,6 +66,14 @@ CEditorCodeWidget::~CEditorCodeWidget()
 void CEditorCodeWidget::Initialize()
 {
   m_bInitialized = false;
+
+  // initalize Debugger view
+  CEditorDebuggableWidget::Initalize(m_spUi->pSceneView,
+                                     std::bind(&CEditorCodeWidget::GetScene, this));
+  connect(this, &CEditorDebuggableWidget::SignalDebugStarted,
+          this, &CEditorCodeWidget::SlotDebugStarted);
+  connect(this, &CEditorDebuggableWidget::SignalExecutionError,
+          m_spUi->pCodeEditorView, &CCodeDisplayWidget::SlotExecutionError);
 
   m_spTutorialStateSwitchHandler =
       std::make_shared<CCodeWidgetTutorialStateSwitchHandler>(this, m_spUi);
@@ -155,21 +154,9 @@ void CEditorCodeWidget::LoadProject(tspProject spProject)
 
 //----------------------------------------------------------------------------------------
 //
-void CEditorCodeWidget::UnloadProject()
+void CEditorCodeWidget::UnloadProjectImpl()
 {
   WIDGET_INITIALIZED_GUARD
-
-  if (m_bDebugging)
-  {
-    m_debugFinishedConnection =
-        connect(this, &CEditorCodeWidget::SignalDebugFinished, this,
-                [this](){
-      disconnect(m_debugFinishedConnection);
-      SetLoaded(false);
-    }, Qt::QueuedConnection);
-
-    SlotDebugStop();
-  }
 
   m_spUi->pCodeEditorView->UnloadProject();
 
@@ -185,11 +172,6 @@ void CEditorCodeWidget::UnloadProject()
 
   m_spUi->pResourceComboBox->setModel(m_pDummyModel);
   m_spUi->pResourceComboBox->clear();
-
-  if (!m_bDebugging)
-  {
-    SetLoaded(false);
-  }
 }
 
 //----------------------------------------------------------------------------------------
@@ -287,6 +269,8 @@ void CEditorCodeWidget::OnActionBarAboutToChange()
     ActionBar()->m_spUi->AddDeviceCode->setEnabled(true);
 
     m_spUi->pCodeEditorView->OnActionBarAboutToChange(&ActionBar()->m_spUi);
+
+    UpdateButtons(nullptr, nullptr);
   }
 }
 
@@ -297,6 +281,10 @@ void CEditorCodeWidget::OnActionBarChanged()
   if (nullptr != ActionBar())
   {
     ActionBar()->ShowCodeActionBar();
+
+    UpdateButtons(ActionBar()->m_spUi->DebugButton,
+                  ActionBar()->m_spUi->StopDebugButton);
+
     connect(ActionBar()->m_spUi->DebugButton, &QPushButton::clicked,
             this, &CEditorCodeWidget::SlotDebugStart);
     connect(ActionBar()->m_spUi->StopDebugButton, &QPushButton::clicked,
@@ -391,167 +379,9 @@ void CEditorCodeWidget::SlotCodeEditContentsChange(qint32 iPos, qint32 iDel, qin
 
 //----------------------------------------------------------------------------------------
 //
-void CEditorCodeWidget::SlotDebugStart()
+void CEditorCodeWidget::SlotDebugStarted()
 {
-  WIDGET_INITIALIZED_GUARD
-
-  m_spUi->pSceneView->setVisible(true);
-  QLayout* pLayout = m_spUi->pSceneView->layout();
-  if (nullptr != pLayout)
-  {
-    if (nullptr != ActionBar())
-    {
-      ActionBar()->m_spUi->DebugButton->hide();
-      ActionBar()->m_spUi->StopDebugButton->setEnabled(true);
-      ActionBar()->m_spUi->StopDebugButton->show();
-    }
-
-    // get Scene name
-    QStringList vsPossibleScenesToDebug;
-    QString sSceneName = QString();
-    QString sCachedScript = CachedResourceName(
-          m_spUi->pResourceComboBox->currentIndex());
-    auto pScriptItem = EditableFileModel()->CachedFile(sCachedScript);
-    if (nullptr != pScriptItem)
-    {
-      auto vspScenes = pScriptItem->m_vspScenes;
-      if (!vspScenes.empty())
-      {
-        for (const tspScene& spScene : vspScenes)
-        {
-          if (nullptr != spScene)
-          {
-            QReadLocker locker(&spScene->m_rwLock);
-            vsPossibleScenesToDebug << spScene->m_sName;
-          }
-        }
-      }
-    }
-
-    if (vsPossibleScenesToDebug.size() == 1)
-    {
-      sSceneName = vsPossibleScenesToDebug[0];
-    }
-    else if (vsPossibleScenesToDebug.size() > 1)
-    {
-      QMenu menu;
-
-      for (const QString& sSceneNameLoc : qAsConst(vsPossibleScenesToDebug))
-      {
-        QAction* pAction = new QAction(sSceneNameLoc, &menu);
-        connect(pAction, &QAction::triggered, pAction,
-                [&sSceneName, sSceneNameLoc]() { sSceneName = sSceneNameLoc; });
-        menu.addAction(pAction);
-      }
-
-      QPointer<CEditorCodeWidget> pThis(this);
-      menu.exec(ActionBar()->m_spUi->DebugButton->parentWidget()->mapToGlobal(
-          ActionBar()->m_spUi->DebugButton->pos()));
-      if (nullptr == pThis)
-      {
-        return;
-      }
-    }
-
-    m_spCurrentProject->m_rwLock.lockForRead();
-    qint32 iCurrProject = m_spCurrentProject->m_iId;
-    m_spCurrentProject->m_rwLock.unlock();
-    CSceneMainScreen* pMainSceneScreen = new CSceneMainScreen(m_spUi->pSceneView);
-    pMainSceneScreen->Initialize(nullptr, true);
-
-    connect(pMainSceneScreen, &CSceneMainScreen::SignalUnloadFinished,
-            this, &CEditorCodeWidget::SlotDebugUnloadFinished);
-    connect(pMainSceneScreen, &CSceneMainScreen::SignalExecutionError,
-            m_spUi->pCodeEditorView, &CCodeDisplayWidget::SlotExecutionError,
-            Qt::QueuedConnection);
-
-    auto spScriptRunner = pMainSceneScreen->ScriptRunner().lock();
-    if (nullptr != spScriptRunner)
-    {
-      auto spSignalEmmiter = spScriptRunner->SignalEmmitterContext();
-      connect(spSignalEmmiter.get(), &CScriptRunnerSignalContext::executionError,
-              m_spUi->pCodeEditorView, &CCodeDisplayWidget::SlotExecutionError,
-              Qt::QueuedConnection);
-    }
-
-    pMainSceneScreen->LoadProject(iCurrProject, sSceneName);
-
-    pLayout->addWidget(pMainSceneScreen);
-
-    m_spUi->pCodeEditorView->ResetWidget();
-
-    m_bDebugging = true;
-  }
-}
-
-//----------------------------------------------------------------------------------------
-//
-void CEditorCodeWidget::SlotDebugStop()
-{
-  WIDGET_INITIALIZED_GUARD
-
-  if (nullptr != ActionBar())
-  {
-    ActionBar()->m_spUi->StopDebugButton->setEnabled(false);
-  }
-
-  QLayout* pLayout = m_spUi->pSceneView->layout();
-  if (nullptr != pLayout)
-  {
-    auto pItem = pLayout->itemAt(0);
-    if (nullptr != pItem)
-    {
-      CSceneMainScreen* pMainSceneScreen =
-          qobject_cast<CSceneMainScreen*>(pItem->widget());
-
-      auto spScriptRunner = m_wpScriptRunner.lock();
-      if (nullptr != spScriptRunner)
-      {
-        auto spSignalEmmiter = spScriptRunner->SignalEmmitterContext();
-        disconnect(spSignalEmmiter.get(), &CScriptRunnerSignalContext::executionError,
-                   m_spUi->pCodeEditorView, &CCodeDisplayWidget::SlotExecutionError);
-      }
-
-      pMainSceneScreen->SlotQuit();
-    }
-  }
-}
-
-//----------------------------------------------------------------------------------------
-//
-void CEditorCodeWidget::SlotDebugUnloadFinished()
-{
-  WIDGET_INITIALIZED_GUARD
-
-  if (nullptr != ActionBar())
-  {
-    ActionBar()->m_spUi->DebugButton->show();
-    ActionBar()->m_spUi->StopDebugButton->setEnabled(true);
-    ActionBar()->m_spUi->StopDebugButton->hide();
-  }
-
-  QLayout* pLayout = m_spUi->pSceneView->layout();
-  if (nullptr != pLayout)
-  {
-    auto pItem = pLayout->takeAt(0);
-    if (nullptr != pItem)
-    {
-      CSceneMainScreen* pMainSceneScreen =
-          qobject_cast<CSceneMainScreen*>(pItem->widget());
-
-      disconnect(pMainSceneScreen, &CSceneMainScreen::SignalUnloadFinished,
-                 this, &CEditorCodeWidget::SlotDebugUnloadFinished);
-      disconnect(pMainSceneScreen, &CSceneMainScreen::SignalExecutionError,
-                 m_spUi->pCodeEditorView, &CCodeDisplayWidget::SlotExecutionError);
-
-      delete pMainSceneScreen;
-      delete pItem;
-    }
-  }
-
-  m_spUi->pSceneView->setVisible(false);
-  m_bDebugging = false;
-  emit SignalDebugFinished();
+  m_spUi->pCodeEditorView->ResetWidget();
 }
 
 //----------------------------------------------------------------------------------------
@@ -619,6 +449,61 @@ QString CEditorCodeWidget::CachedResourceName(qint32 iIndex)
   return EditableFileModel()->CachedResourceName(
       m_pFilteredScriptModel->mapToSource(
           m_pFilteredScriptModel->index(iIndex, 0)).row());
+}
+
+//----------------------------------------------------------------------------------------
+//
+CEditorCodeWidget::tSceneToDebug CEditorCodeWidget::GetScene()
+{
+  QStringList vsPossibleScenesToDebug;
+
+  QString sCachedScript = CachedResourceName(
+      m_spUi->pResourceComboBox->currentIndex());
+  auto pScriptItem = EditableFileModel()->CachedFile(sCachedScript);
+  if (nullptr != pScriptItem)
+  {
+    auto vspScenes = pScriptItem->m_vspScenes;
+    if (!vspScenes.empty())
+    {
+      for (const tspScene& spScene : vspScenes)
+      {
+        if (nullptr != spScene)
+        {
+          QReadLocker locker(&spScene->m_rwLock);
+          vsPossibleScenesToDebug << spScene->m_sName;
+        }
+      }
+    }
+  }
+
+  QString sSceneName = QString();
+
+  if (vsPossibleScenesToDebug.size() == 1)
+  {
+    sSceneName = vsPossibleScenesToDebug[0];
+  }
+  else if (vsPossibleScenesToDebug.size() > 1)
+  {
+    QMenu menu;
+
+    for (const QString& sSceneNameLoc : qAsConst(vsPossibleScenesToDebug))
+    {
+      QAction* pAction = new QAction(sSceneNameLoc, &menu);
+      connect(pAction, &QAction::triggered, pAction,
+              [&sSceneName, sSceneNameLoc]() { sSceneName = sSceneNameLoc; });
+      menu.addAction(pAction);
+    }
+
+    QPointer<CEditorDebuggableWidget> pThis(this);
+    menu.exec(ActionBar()->m_spUi->DebugButton->parentWidget()->mapToGlobal(
+        ActionBar()->m_spUi->DebugButton->pos()));
+    if (nullptr == pThis)
+    {
+      return nullptr;
+    }
+  }
+
+  return sSceneName;
 }
 
 //----------------------------------------------------------------------------------------

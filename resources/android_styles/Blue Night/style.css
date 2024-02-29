@@ -328,11 +328,13 @@ QPushButton#AddNotificationCreateCode {
   qproperty-icon: url(ui/ButtonNotification.png) off,
                   url(ui/ButtonNotification.png) on;
 }
-QPushButton#DebugButton {
+QPushButton#DebugButton,
+QPushButton#DebugLayoutButton {
   qproperty-icon: url(ui/ButtonPlay.png) off,
                   url(ui/ButtonPlay.png) on;
 }
-QPushButton#StopDebugButton {
+QPushButton#StopDebugButton,
+QPushButton#StopDebugLayoutButton {
   qproperty-icon: url(ui/ButtonStop.png) off,
                   url(ui/ButtonStop.png) on;
 }

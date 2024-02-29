@@ -27,6 +27,7 @@ public:
   static bool MightBeRegexScene(const QString& sName);
 
   void LoadProject(tspProject spProject, const QString sStartScene);
+  void LoadProject(tspProject spProject, tspScene spStartScene);
   void UnloadProject();
 
   tspScene CurrentScene() const;
@@ -43,6 +44,7 @@ signals:
   void SignalError(QString sError, QtMsgType type);
 
 private:
+  bool Setup(tspProject spProject, const QString sStartScene);
   bool LoadFlowScene();
   void ResolveNextPossibleNodes(QtNodes::Node* pNode, std::vector<std::pair<QString, QtNodes::Node*>>& vpRet);
   bool ResolveNextScene();
@@ -54,6 +56,7 @@ private slots:
 private:
   tspProject                        m_spCurrentProject;
   tspScene                          m_spCurrentScene;
+  tspScene                          m_spInjectedScene;
   std::weak_ptr<CDatabaseManager>   m_wpDbManager;
   std::map<QString, QtNodes::Node*> m_nodeMap;
   std::set<QString>                 m_disabledScenes;

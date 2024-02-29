@@ -1,7 +1,7 @@
 #ifndef EDITORCODEWIDGET_H
 #define EDITORCODEWIDGET_H
 
-#include "EditorWidgetBase.h"
+#include "EditorDebuggableWidget.h"
 #include "ui_EditorCodeWidget.h"
 #include "ui_EditorActionBar.h"
 #include <QPointer>
@@ -12,7 +12,6 @@ class CCodeWidgetTutorialStateSwitchHandler;
 class CDatabaseManager;
 class CEditorHighlighter;
 class CFilteredEditorEditableFileModel;
-class CScriptRunner;
 class CSettings;
 class QStandardItemModel;
 namespace Ui {
@@ -25,7 +24,7 @@ typedef std::shared_ptr<SScene> tspScene;
 
 //----------------------------------------------------------------------------------------
 //
-class CEditorCodeWidget : public CEditorWidgetBase
+class CEditorCodeWidget : public CEditorDebuggableWidget
 {
   Q_OBJECT
 
@@ -36,15 +35,12 @@ public:
   void EditedProject() override {}
   void Initialize() override;
   void LoadProject(tspProject spProject) override;
-  void UnloadProject() override;
+  void UnloadProjectImpl() override;
   void SaveProject() override;
   void OnHidden() override;
   void OnShown() override;
 
   void LoadResource(tspResource spResource);
-
-signals:
-  void SignalDebugFinished();
 
 protected:
   void OnActionBarAboutToChange() override;
@@ -53,9 +49,7 @@ protected:
 protected slots:
   void on_pResourceComboBox_currentIndexChanged(qint32 iIndex);
   void SlotCodeEditContentsChange(qint32 iPos, qint32 iDel, qint32 iAdd);
-  void SlotDebugStart();
-  void SlotDebugStop();
-  void SlotDebugUnloadFinished();
+  void SlotDebugStarted();
   void SlotFileChangedExternally(const QString& sName);
   void SlotShowOverlay();
   void SlotRowsInserted(const QModelIndex& parent, int iFirst, int iLast);
@@ -63,18 +57,16 @@ protected slots:
 
 private:
   QString CachedResourceName(qint32 iIndex);
+  tSceneToDebug GetScene();
   void ReloadEditor(qint32 iIndex);
 
   std::shared_ptr<Ui::CEditorCodeWidget>                 m_spUi;
   std::shared_ptr<CCodeWidgetTutorialStateSwitchHandler> m_spTutorialStateSwitchHandler;
   std::shared_ptr<CSettings>                             m_spSettings;
-  tspProject                                             m_spCurrentProject;
   std::weak_ptr<CDatabaseManager>                        m_wpDbManager;
-  std::weak_ptr<CScriptRunner>                           m_wpScriptRunner;
   QPointer<CFilteredEditorEditableFileModel>             m_pFilteredScriptModel;
   QPointer<QStandardItemModel>                           m_pDummyModel;
-  QMetaObject::Connection                                m_debugFinishedConnection;
-  bool                                                   m_bDebugging;
+
   bool                                                   m_bChangingIndex;
   QString                                                m_sLastCachedScript;
 };

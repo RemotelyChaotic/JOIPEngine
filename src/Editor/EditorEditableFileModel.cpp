@@ -186,7 +186,7 @@ QString CEditorEditableFileModel::CachedResourceName(qint32 iIndex)
     std::advance(it, iIndex);
     return it->first;
   }
-  return nullptr;
+  return QString();
 }
 
 //----------------------------------------------------------------------------------------

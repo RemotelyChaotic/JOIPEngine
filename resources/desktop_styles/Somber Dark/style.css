@@ -352,7 +352,8 @@ QPushButton#AddNotificationCreateCode {
   qproperty-icon: url(ui/ButtonNotification.png) off,
                   url(ui/ButtonNotification.png) on;
 }
-QPushButton#DebugButton {
+QPushButton#DebugButton,
+QPushButton#DebugLayoutButton {
   border-image: url(ui/IconBg.svg) 0 0 0 0 stretch stretch;
   border-top: 0 transparent;
   border-bottom: 0 transparent;
@@ -361,7 +362,8 @@ QPushButton#DebugButton {
   qproperty-icon: url(ui/ButtonPlay.png) off,
                   url(ui/ButtonPlay.png) on;
 }
-QPushButton#StopDebugButton {
+QPushButton#StopDebugButton,
+QPushButton#StopDebugLayoutButton {
   border-image: url(ui/IconBg.svg) 0 0 0 0 stretch stretch;
   border-top: 0 transparent;
   border-bottom: 0 transparent;
@@ -962,6 +964,8 @@ QPushButton#AddTimerCode:hover,
 QPushButton#AddNotificationCode:hover,
 QPushButton#DebugButton:hover,
 QPushButton#StopDebugButton:hover,
+QPushButton#DebugLayoutButton:hover,
+QPushButton#StopDebugLayoutButton:hover,
 QPushButton#PauseButton:hover,
 QPushButton#PlayButton:hover,
 QPushButton#StopButton:hover,
@@ -1049,6 +1053,8 @@ QPushButton#AddTimerCode:pressed,
 QPushButton#AddNotificationCode:pressed,
 QPushButton#DebugButton:pressed,
 QPushButton#StopDebugButton:pressed,
+QPushButton#DebugLayoutButton:pressed,
+QPushButton#StopDebugLayoutButton:pressed,
 QPushButton#PauseButton:pressed,
 QPushButton#PlayButton:pressed,
 QPushButton#StopButton:pressed,
@@ -1136,6 +1142,8 @@ QPushButton#AddTimerCode:disabled,
 QPushButton#AddNotificationCode:disabled,
 QPushButton#DebugButton:disabled,
 QPushButton#StopDebugButton:disabled,
+QPushButton#DebugLayoutButton:disabled,
+QPushButton#StopDebugLayoutButton:disabled,
 QPushButton#PauseButton:disabled,
 QPushButton#PlayButton:disabled,
 QPushButton#StopButton:disabled,

@@ -1,7 +1,7 @@
 #ifndef EDITORPATTERNEDITORWIDGET_H
 #define EDITORPATTERNEDITORWIDGET_H
 
-#include "EditorWidgetBase.h"
+#include "EditorDebuggableWidget.h"
 #include "ui_EditorSequenceEditorWidget.h"
 #include "ui_EditorActionBar.h"
 
@@ -18,7 +18,7 @@ typedef std::shared_ptr<struct SSequenceFile> tspSequence;
 
 //----------------------------------------------------------------------------------------
 //
-class CEditorPatternEditorWidget : public CEditorWidgetBase
+class CEditorPatternEditorWidget : public CEditorDebuggableWidget
 {
   Q_OBJECT
 
@@ -29,7 +29,7 @@ public:
   void EditedProject() override {}
   void Initialize() override;
   void LoadProject(tspProject spProject) override;
-  void UnloadProject() override;
+  void UnloadProjectImpl() override;
   void SaveProject() override;
   void OnHidden() override;
   void OnShown() override;
@@ -51,11 +51,11 @@ protected slots:
 
 private:
   QString CachedResourceName(qint32 iIndex);
+  tSceneToDebug GetSequenceScene();
   void ReloadEditor(qint32 iIndex);
 
   std::unique_ptr<Ui::CEditorSequenceEditorWidget> m_spUi;
   std::unique_ptr<CSequencePropertiesOverlay>      m_spOverlayProps;
-  tspProject                                       m_spCurrentProject;
   tspSequence                                      m_spCurrentSequence;
   QPointer<CFilteredEditorEditableFileModel>       m_pFilteredScriptModel;
   QPointer<QStandardItemModel>                     m_pDummyModel;

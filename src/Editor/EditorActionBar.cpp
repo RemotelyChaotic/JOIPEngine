@@ -253,6 +253,9 @@ void CEditorActionBar::Initialize()
     m_spUi->RemoveCode->setProperty(helpOverlay::c_sHelpPagePropertyName, c_sAddEosRemoveHelpId);
     wpHelpFactory->RegisterHelp(c_sAddEosRemoveHelpId, ":/resources/help/editor/remove_eos_button_help.html");
 
+    m_spUi->DebugLayoutButton->setProperty(helpOverlay::c_sHelpPagePropertyName, c_sStartDebugHelpId);
+    m_spUi->StopDebugLayoutButton->setProperty(helpOverlay::c_sHelpPagePropertyName, c_sStopDebugHelpId);
+
     m_spUi->NewSequence->setProperty(helpOverlay::c_sHelpPagePropertyName, c_sAddSeqHelpId);
     wpHelpFactory->RegisterHelp(c_sAddSeqHelpId, ":/resources/help/editor/add_sequenceelem_button_help.html");
     m_spUi->SequenceProperties->setProperty(helpOverlay::c_sHelpPagePropertyName, c_sEditSeqHelpId);
@@ -357,6 +360,8 @@ void CEditorActionBar::ShowSequenceEditorActionBar()
 {
   HideAllBars();
   m_spUi->pSequenceEditorContainer->show();
+  m_spUi->DebugLayoutButton->show();
+  m_spUi->StopDebugLayoutButton->hide();
 
   m_iCurrentDisplayType = EEditorWidget::ePatternEditor;
 }
@@ -424,12 +429,14 @@ void CEditorActionBar::SlotKeyBindingsChanged()
     //m_spUi->AddNotificationCode->SetShortcut(m_spSettings->keyBinding(sKey.arg(9)));
     //m_spUi->AddDeviceCode->SetShortcut(m_spSettings->keyBinding(sKey.arg(9)));
 
-    m_spUi->NewSequence->SetShortcut(m_spSettings->keyBinding(sKey.arg(1)));
-    m_spUi->SequenceProperties->SetShortcut(m_spSettings->keyBinding(sKey.arg(2)));
-    m_spUi->AddSequenceLayer->SetShortcut(m_spSettings->keyBinding(sKey.arg(3)));
-    m_spUi->RemoveSelectedSequenceLayer->SetShortcut(m_spSettings->keyBinding(sKey.arg(4)));
-    m_spUi->AddSequenceElement->SetShortcut(m_spSettings->keyBinding(sKey.arg(5)));
-    m_spUi->RemoveSelectedSequenceElements->SetShortcut(m_spSettings->keyBinding(sKey.arg(6)));
+    m_spUi->DebugLayoutButton->SetShortcut(m_spSettings->keyBinding(sKey.arg(1)));
+    m_spUi->StopDebugLayoutButton->SetShortcut(m_spSettings->keyBinding(sKey.arg(2)));
+    m_spUi->NewSequence->SetShortcut(m_spSettings->keyBinding(sKey.arg(3)));
+    m_spUi->SequenceProperties->SetShortcut(m_spSettings->keyBinding(sKey.arg(4)));
+    m_spUi->AddSequenceLayer->SetShortcut(m_spSettings->keyBinding(sKey.arg(5)));
+    m_spUi->RemoveSelectedSequenceLayer->SetShortcut(m_spSettings->keyBinding(sKey.arg(6)));
+    m_spUi->AddSequenceElement->SetShortcut(m_spSettings->keyBinding(sKey.arg(7)));
+    m_spUi->RemoveSelectedSequenceElements->SetShortcut(m_spSettings->keyBinding(sKey.arg(8)));
 
   }
 }

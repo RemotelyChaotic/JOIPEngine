@@ -374,20 +374,28 @@ QPushButton#AddNotificationCreateCode:pressed,
 QPushButton#AddNotificationCreateCode:disabled {
   image: url(ui/ButtonNotificationSelected.png);
 }
-QPushButton#DebugButton {
+QPushButton#DebugButton,
+QPushButton#DebugLayoutButton {
   image: url(ui/ButtonPlay.png);
 }
 QPushButton#DebugButton:hover,
 QPushButton#DebugButton:pressed,
-QPushButton#DebugButton:disabled {
+QPushButton#DebugButton:disabled,
+QPushButton#DebugLayoutButton:hover,
+QPushButton#DebugLayoutButton:pressed,
+QPushButton#DebugLayoutButton:disabled {
   image: url(ui/ButtonPlaySelected.png);
 }
-QPushButton#StopDebugButton {
+QPushButton#StopDebugButton,
+QPushButton#StopDebugLayoutButton {
   image: url(ui/ButtonStop.png);
 }
 QPushButton#StopDebugButton:hover,
 QPushButton#StopDebugButton:pressed,
-QPushButton#StopDebugButton:disabled {
+QPushButton#StopDebugButton:disabled,
+QPushButton#StopDebugLayoutButton:hover,
+QPushButton#StopDebugLayoutButton:pressed,
+QPushButton#StopDebugLayoutButton:disabled {
   image: url(ui/ButtonStopSelected.png);
 }
 QPushButton#PauseButton {

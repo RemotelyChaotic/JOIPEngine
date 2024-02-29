@@ -343,11 +343,13 @@ QPushButton#AddNotificationCreateCode {
   qproperty-icon: url(:/resources/style/img/ButtonNotification.png) off,
                   url(:/resources/style/img/ButtonNotification.png) on;
 }
-QPushButton#DebugButton {
+QPushButton#DebugButton,
+QPushButton#DebugLayoutButton {
   qproperty-icon: url(:/resources/style/img/ButtonPlay.png) off,
                   url(:/resources/style/img/ButtonPlay.png) on;
 }
-QPushButton#StopDebugButton {
+QPushButton#StopDebugButton,
+QPushButton#StopDebugLayoutButton {
   qproperty-icon: url(:/resources/style/img/ButtonStop.png) off,
                   url(:/resources/style/img/ButtonStop.png) on;
 }
