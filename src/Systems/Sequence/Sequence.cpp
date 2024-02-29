@@ -64,7 +64,7 @@ namespace
 
   std::shared_ptr<SSequenceInstruction> CreateStopPatternInstruction(const QVariantList&)
   {
-    std::shared_ptr<SStartPatternInstruction> spInstr = std::make_shared<SStartPatternInstruction>();
+    std::shared_ptr<SStopPatternInstruction> spInstr = std::make_shared<SStopPatternInstruction>();
     spInstr->m_sInstructionType = sequence::c_sInstructionIdStopPattern;
     return spInstr;
   }
