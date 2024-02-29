@@ -14,6 +14,7 @@ CTimelineWidgetLayerBackground::CTimelineWidgetLayerBackground(QWidget* pParent)
   m_selectionColor(Qt::white)
 {
   setMouseTracking(true);
+  installEventFilter(this);
 }
 CTimelineWidgetLayerBackground::~CTimelineWidgetLayerBackground() = default;
 
@@ -351,6 +352,31 @@ namespace
 
 //----------------------------------------------------------------------------------------
 //
+bool CTimelineWidgetLayerBackground::eventFilter(QObject* pObj, QEvent* pEvt)
+{
+  if (nullptr != pObj && pObj == this && nullptr != pEvt)
+  {
+    if (QEvent::ToolTip == pEvt->type())
+    {
+      QHelpEvent* pHelpEvent = static_cast<QHelpEvent*>(pEvt);
+
+      auto range = GetTimeRangeAroundCursor(pHelpEvent->pos());
+      qint64 iSelectedInstr = MostLikelyInstruction(range);
+
+      if (-1 != iSelectedInstr && nullptr != m_spLayer)
+      {
+        if (auto spInstr = InstructionFromTime(iSelectedInstr))
+        {
+          timeline::ShowToolTip(pHelpEvent->globalPos(), spInstr, this);
+        }
+      }
+    }
+  }
+  return false;
+}
+
+//----------------------------------------------------------------------------------------
+//
 void CTimelineWidgetLayerBackground::paintEvent(QPaintEvent* pEvt)
 {
   QFrame::paintEvent(pEvt);
@@ -414,7 +440,7 @@ void CTimelineWidgetLayerBackground::paintEvent(QPaintEvent* pEvt)
     static const std::map<qint32,qint32> c_viOffsetLookup = {
       {1, 1}, {2, 2}, {4, 3}, {8, 4}, {16, 5}
     };
-    constexpr qint32 c_iYOffsetFactor = 10;
+    constexpr qint32 c_iYOffsetFactor = 20;
 
     {
       painter.save();

@@ -1,8 +1,8 @@
 #include "TimelineWidgetUtils.h"
 
-#include "Systems/Sequence/Sequence.h"
-
+#include <QJsonDocument>
 #include <QTime>
+#include <QToolTip>
 
 void timeline::PaintUnusedAreaRect(QPainter* pPainter,
                                    qint32 iGridStartX, qint32 iAvailableWidth, qint32 iWidth, qint32 iHeight,
@@ -210,4 +210,15 @@ qint32 timeline::GetCursorPosFromTime(qint64 itimeX, qint32 iGridStartX, qint32 
   const qint32 iPosRel = itimeX - iWindowStartMs;
   const double dPosXRel = static_cast<double>(iAvailableWidth * iPosRel) / iPageLengthMs;
   return iGridStartX + static_cast<qint64>(std::round(dPosXRel));
+}
+
+//----------------------------------------------------------------------------------------
+//
+void timeline::ShowToolTip(const QPoint& p, const std::shared_ptr<SSequenceInstruction>& spInstr,
+                           QWidget* pWidget)
+{
+  QString sText;
+  QJsonDocument doc(spInstr->ToJsonObject());
+  sText = doc.toJson();
+  QToolTip::showText(p, sText, pWidget);
 }

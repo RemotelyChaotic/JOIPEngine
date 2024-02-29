@@ -1,6 +1,8 @@
 #ifndef CTIMELINEWIDGETUTILS_H
 #define CTIMELINEWIDGETUTILS_H
 
+#include "Systems/Sequence/Sequence.h"
+
 #include <QPainter>
 #include <QtGlobal>
 
@@ -37,6 +39,9 @@ namespace timeline
                               qint64 iWindowStartMs, qint64 iMaximumSizeMs, qint64 iPageLengthMs);
   qint32 GetCursorPosFromTime(qint64 itimeX, qint32 iGridStartX, qint32 iAvailableWidth,
                               qint64 iWindowStartMs, qint64 iMaximumSizeMs, qint64 iPageLengthMs);
+
+  void ShowToolTip(const QPoint& p, const std::shared_ptr<SSequenceInstruction>& spInstr,
+                   QWidget* pWidget);
 }
 
 #endif // CTIMELINEWIDGETUTILS_H
