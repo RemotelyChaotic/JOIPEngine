@@ -158,9 +158,9 @@ timeline::InstructionVisualisationType(const QString& sType)
   // see TimelineWidgetLayerBackground.cpp CTimelineWidgetLayerBackground::paintEvent
   // the values on the right must be in the lookup
   static std::map<QString, std::pair<EInstructionVisualisationType, qint32>> c_visuTypeMap = {
-    {sequence::c_sInstructionIdBeat, {EInstructionVisualisationType::eSingle, -1}},
-    {sequence::c_sInstructionIdStartPattern, {EInstructionVisualisationType::eOpening, 1}},
-    {sequence::c_sInstructionIdStopPattern, {EInstructionVisualisationType::eClosing, 1}},
+    {sequence::c_sInstructionIdBeat, {EInstructionVisualisationType::eSingle, 1}},
+    {sequence::c_sInstructionIdStartPattern, {EInstructionVisualisationType::eOpening, 2}},
+    {sequence::c_sInstructionIdStopPattern, {EInstructionVisualisationType::eClosing, 3}},
     {sequence::c_sInstructionIdVibrate, {EInstructionVisualisationType::eOpening, 1}},
     {sequence::c_sInstructionIdLinearToy, {EInstructionVisualisationType::eOpening, 2}},
     {sequence::c_sInstructionIdRotateToy, {EInstructionVisualisationType::eOpening, 4}},

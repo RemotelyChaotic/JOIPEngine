@@ -388,7 +388,7 @@ void CTimelineWidgetLayerBackground::paintEvent(QPaintEvent* pEvt)
         }
         else if (EInstructionVisualisationType::eClosing == type.first)
         {
-          bool bTerminatedAny = false;
+          //bool bTerminatedAny = false;
           for (auto it = vPaintLineInstr.rbegin(); vPaintLineInstr.rend() != it; ++it)
           {
             if (!it->m_bTerminated)
@@ -397,14 +397,15 @@ void CTimelineWidgetLayerBackground::paintEvent(QPaintEvent* pEvt)
               {
                 it->m_line.setPoints(it->m_line.p1(), QPoint(iPos, it->m_line.p1().y()));
                 it->m_bTerminated = true;
-                bTerminatedAny = true;
+                //bTerminatedAny = true;
               }
             }
           }
-          if (!bTerminatedAny)
-          {
-            vPaintLineInstr.push_back({QLine(0, height() / 2, iPos, height() / 2), type.second, true});
-          }
+          //if (!bTerminatedAny)
+          //{
+            // looks better without
+            //vPaintLineInstr.push_back({QLine(0, height() / 2, iPos, height() / 2), type.second, true});
+          //}
         }
       }
     }
@@ -421,7 +422,12 @@ void CTimelineWidgetLayerBackground::paintEvent(QPaintEvent* pEvt)
       painter.setPen(pen);
       for (const auto& lineData : vPaintLineInstr)
       {
-        qint32 iPower = c_viOffsetLookup.find(lineData.m_iOpenType)->second;
+        qint32 iPower = 1;
+        auto it = c_viOffsetLookup.find(lineData.m_iOpenType);
+        if (c_viOffsetLookup.end() != it)
+        {
+          iPower = it->second;
+        }
         qint32 iOffset = (iPower%2 == 0 ? 1 : -1) * iPower/2 * c_iYOffsetFactor;
         painter.drawLine(lineData.m_line.x1(), lineData.m_line.y1() + iOffset,
                          lineData.m_line.x2(), lineData.m_line.y2() + iOffset);
