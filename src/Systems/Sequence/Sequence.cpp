@@ -371,11 +371,14 @@ namespace
 
 //--------------------------------------------------------------------------------------
 //
-std::shared_ptr<SSequenceInstruction> SSequenceInstruction::Clone()
+void SSequenceInstruction::CopyFrom(const SSequenceInstruction* pOther)
 {
-  auto spClone = CloneImpl();
-  spClone->m_sInstructionType = m_sInstructionType;
-  return spClone;
+  m_sInstructionType = pOther->m_sInstructionType;
+  CopyFromImpl(pOther);
+}
+void SSequenceInstruction::CopyFrom(const std::shared_ptr<SSequenceInstruction> spOther)
+{
+  CopyFrom(spOther.get());
 }
 QJsonObject SSequenceInstruction::ToJsonObject()
 {
@@ -394,11 +397,12 @@ void SSequenceInstruction::FromJsonObject(const QJsonObject& json)
 
 //--------------------------------------------------------------------------------------
 //
-std::shared_ptr<SSequenceInstruction> SSingleBeatInstruction::CloneImpl()
+void SSingleBeatInstruction::CopyFromImpl(const SSequenceInstruction* pOther)
 {
-  std::shared_ptr<SSingleBeatInstruction> spClone = std::make_shared<SSingleBeatInstruction>();
-  spClone->m_dVolume = m_dVolume;
-  return spClone;
+  const SSingleBeatInstruction* pOtherCasted =
+      dynamic_cast<const SSingleBeatInstruction*>(pOther);
+  if (nullptr == pOtherCasted) { return; }
+  m_dVolume = pOtherCasted->m_dVolume;
 }
 QJsonObject SSingleBeatInstruction::ToJsonObject()
 {
@@ -421,14 +425,15 @@ void SSingleBeatInstruction::FromJsonObject(const QJsonObject& json)
 
 //--------------------------------------------------------------------------------------
 //
-std::shared_ptr<SSequenceInstruction> SStartPatternInstruction::CloneImpl()
+void SStartPatternInstruction::CopyFromImpl(const SSequenceInstruction* pOther)
 {
-  std::shared_ptr<SStartPatternInstruction> spClone = std::make_shared<SStartPatternInstruction>();
-  spClone->m_vdPattern = m_vdPattern;
-  spClone->m_iBpm = m_iBpm;
-  spClone->m_sResource = m_sResource;
-  spClone->m_dVolume = m_dVolume;
-  return spClone;
+  const SStartPatternInstruction* pOtherCasted =
+      dynamic_cast<const SStartPatternInstruction*>(pOther);
+  if (nullptr == pOtherCasted) { return; }
+  m_vdPattern = pOtherCasted->m_vdPattern;
+  m_iBpm = pOtherCasted->m_iBpm;
+  m_sResource = pOtherCasted->m_sResource;
+  m_dVolume = pOtherCasted->m_dVolume;
 }
 QJsonObject SStartPatternInstruction::ToJsonObject()
 {
@@ -482,19 +487,18 @@ void SStartPatternInstruction::FromJsonObject(const QJsonObject& json)
 
 //--------------------------------------------------------------------------------------
 //
-std::shared_ptr<SSequenceInstruction> SStopPatternInstruction::CloneImpl()
+void SStopPatternInstruction::CopyFromImpl(const SSequenceInstruction*)
 {
-  std::shared_ptr<SStopPatternInstruction> spClone = std::make_shared<SStopPatternInstruction>();
-  return spClone;
 }
 
 //--------------------------------------------------------------------------------------
 //
-std::shared_ptr<SSequenceInstruction> SVibrateInstruction::CloneImpl()
+void SVibrateInstruction::CopyFromImpl(const SSequenceInstruction* pOther)
 {
-  std::shared_ptr<SVibrateInstruction> spClone = std::make_shared<SVibrateInstruction>();
-  spClone->m_dSpeed = m_dSpeed;
-  return spClone;
+  const SVibrateInstruction* pOtherCasted =
+      dynamic_cast<const SVibrateInstruction*>(pOther);
+  if (nullptr == pOtherCasted) { return; }
+  m_dSpeed = pOtherCasted->m_dSpeed;
 }
 QJsonObject SVibrateInstruction::ToJsonObject()
 {
@@ -514,12 +518,13 @@ void SVibrateInstruction::FromJsonObject(const QJsonObject& json)
 
 //--------------------------------------------------------------------------------------
 //
-std::shared_ptr<SSequenceInstruction> SLinearToyInstruction::CloneImpl()
+void SLinearToyInstruction::CopyFromImpl(const SSequenceInstruction* pOther)
 {
-  std::shared_ptr<SLinearToyInstruction> spClone = std::make_shared<SLinearToyInstruction>();
-  spClone->m_dDurationS = m_dDurationS;
-  spClone->m_dPosition = m_dPosition;
-  return spClone;
+  const SLinearToyInstruction* pOtherCasted =
+      dynamic_cast<const SLinearToyInstruction*>(pOther);
+  if (nullptr == pOtherCasted) { return; }
+  m_dDurationS = pOtherCasted->m_dDurationS;
+  m_dPosition = pOtherCasted->m_dPosition;
 }
 QJsonObject SLinearToyInstruction::ToJsonObject()
 {
@@ -545,12 +550,12 @@ void SLinearToyInstruction::FromJsonObject(const QJsonObject& json)
 
 //--------------------------------------------------------------------------------------
 //
-std::shared_ptr<SSequenceInstruction> SRotateToyInstruction::CloneImpl()
+void SRotateToyInstruction::CopyFromImpl(const SSequenceInstruction* pOther)
 {
-  std::shared_ptr<SRotateToyInstruction> spClone = std::make_shared<SRotateToyInstruction>();
-  spClone->m_bClockwise = m_bClockwise;
-  spClone->m_dSpeed = m_dSpeed;
-  return spClone;
+  const SRotateToyInstruction* pOtherCasted =
+      dynamic_cast<const SRotateToyInstruction*>(pOther);
+  m_bClockwise = pOtherCasted->m_bClockwise;
+  m_dSpeed = pOtherCasted->m_dSpeed;
 }
 QJsonObject SRotateToyInstruction::ToJsonObject()
 {
@@ -576,19 +581,17 @@ void SRotateToyInstruction::FromJsonObject(const QJsonObject& json)
 
 //--------------------------------------------------------------------------------------
 //
-std::shared_ptr<SSequenceInstruction> SStopVibrationsInstruction::CloneImpl()
+void SStopVibrationsInstruction::CopyFromImpl(const SSequenceInstruction*)
 {
-  std::shared_ptr<SStopVibrationsInstruction> spClone = std::make_shared<SStopVibrationsInstruction>();
-  return spClone;
 }
 
 //--------------------------------------------------------------------------------------
 //
-std::shared_ptr<SSequenceInstruction> SShowMediaInstruction::CloneImpl()
+void SShowMediaInstruction::CopyFromImpl(const SSequenceInstruction* pOther)
 {
-  std::shared_ptr<SShowMediaInstruction> spClone = std::make_shared<SShowMediaInstruction>();
-  spClone->m_sResource = m_sResource;
-  return spClone;
+  const SShowMediaInstruction* pOtherCasted =
+      dynamic_cast<const SShowMediaInstruction*>(pOther);
+  m_sResource = pOtherCasted-> m_sResource;
 }
 QJsonObject SShowMediaInstruction::ToJsonObject()
 {
@@ -608,14 +611,14 @@ void SShowMediaInstruction::FromJsonObject(const QJsonObject& json)
 
 //--------------------------------------------------------------------------------------
 //
-std::shared_ptr<SSequenceInstruction> SPlayVideoInstruction::CloneImpl()
+void SPlayVideoInstruction::CopyFromImpl(const SSequenceInstruction* pOther)
 {
-  std::shared_ptr<SPlayVideoInstruction> spClone = std::make_shared<SPlayVideoInstruction>();
-  spClone->m_sResource = m_sResource;
-  spClone->m_iLoops = m_iLoops;
-  spClone->m_iStartAt = m_iStartAt;
-  spClone->m_iEndAt = m_iEndAt;
-  return spClone;
+  const SPlayVideoInstruction* pOtherCasted =
+      dynamic_cast<const SPlayVideoInstruction*>(pOther);
+  m_sResource = pOtherCasted->m_sResource;
+  m_iLoops = pOtherCasted->m_iLoops;
+  m_iStartAt = pOtherCasted->m_iStartAt;
+  m_iEndAt = pOtherCasted->m_iEndAt;
 }
 QJsonObject SPlayVideoInstruction::ToJsonObject()
 {
@@ -662,31 +665,27 @@ void SPlayVideoInstruction::FromJsonObject(const QJsonObject& json)
 
 //--------------------------------------------------------------------------------------
 //
-std::shared_ptr<SSequenceInstruction> SPauseVideoInstruction::CloneImpl()
+void SPauseVideoInstruction::CopyFromImpl(const SSequenceInstruction*)
 {
-  std::shared_ptr<SPauseVideoInstruction> spClone = std::make_shared<SPauseVideoInstruction>();
-  return spClone;
 }
 
 //--------------------------------------------------------------------------------------
 //
-std::shared_ptr<SSequenceInstruction> SStopVideoInstruction::CloneImpl()
+void SStopVideoInstruction::CopyFromImpl(const SSequenceInstruction*)
 {
-  std::shared_ptr<SStopVideoInstruction> spClone = std::make_shared<SStopVideoInstruction>();
-  return spClone;
 }
 
 //--------------------------------------------------------------------------------------
 //
-std::shared_ptr<SSequenceInstruction> SPlayAudioInstruction::CloneImpl()
+void SPlayAudioInstruction::CopyFromImpl(const SSequenceInstruction* pOther)
 {
-  std::shared_ptr<SPlayAudioInstruction> spClone = std::make_shared<SPlayAudioInstruction>();
-  spClone->m_sResource = m_sResource;
-  spClone->m_sName = m_sName;
-  spClone->m_iLoops = m_iLoops;
-  spClone->m_iStartAt = m_iStartAt;
-  spClone->m_iEndAt = m_iEndAt;
-  return spClone;
+  const SPlayAudioInstruction* pOtherCasted =
+      dynamic_cast<const SPlayAudioInstruction*>(pOther);
+  m_sResource = pOtherCasted->m_sResource;
+  m_sName = pOtherCasted->m_sName;
+  m_iLoops = pOtherCasted->m_iLoops;
+  m_iStartAt = pOtherCasted->m_iStartAt;
+  m_iEndAt = pOtherCasted->m_iEndAt;
 }
 QJsonObject SPlayAudioInstruction::ToJsonObject()
 {
@@ -742,11 +741,11 @@ void SPlayAudioInstruction::FromJsonObject(const QJsonObject& json)
 
 //--------------------------------------------------------------------------------------
 //
-std::shared_ptr<SSequenceInstruction> SPauseAudioInstruction::CloneImpl()
+void SPauseAudioInstruction::CopyFromImpl(const SSequenceInstruction* pOther)
 {
-  std::shared_ptr<SPauseAudioInstruction> spClone = std::make_shared<SPauseAudioInstruction>();
-  spClone->m_sName = m_sName;
-  return spClone;
+  const SPauseAudioInstruction* pOtherCasted =
+      dynamic_cast<const SPauseAudioInstruction*>(pOther);
+  m_sName = pOtherCasted->m_sName;
 }
 QJsonObject SPauseAudioInstruction::ToJsonObject()
 {
@@ -766,11 +765,11 @@ void SPauseAudioInstruction::FromJsonObject(const QJsonObject& json)
 
 //--------------------------------------------------------------------------------------
 //
-std::shared_ptr<SSequenceInstruction> SStopAudioInstruction::CloneImpl()
+void SStopAudioInstruction::CopyFromImpl(const SSequenceInstruction* pOther)
 {
-  std::shared_ptr<SStopAudioInstruction> spClone = std::make_shared<SStopAudioInstruction>();
-  spClone->m_sName = m_sName;
-  return spClone;
+  const SStopAudioInstruction* pOtherCasted =
+      dynamic_cast<const SStopAudioInstruction*>(pOther);
+  m_sName = pOtherCasted->m_sName;
 }
 QJsonObject SStopAudioInstruction::ToJsonObject()
 {
@@ -790,16 +789,16 @@ void SStopAudioInstruction::FromJsonObject(const QJsonObject& json)
 
 //--------------------------------------------------------------------------------------
 //
-std::shared_ptr<SSequenceInstruction> SShowTextInstruction::CloneImpl()
+void SShowTextInstruction::CopyFromImpl(const SSequenceInstruction* pOther)
 {
-  std::shared_ptr<SShowTextInstruction> spClone = std::make_shared<SShowTextInstruction>();
-  spClone->m_sText = m_sText;
-  spClone->m_dSkippableWaitS = m_dSkippableWaitS;
-  spClone->m_bSkippable = m_bSkippable;
-  spClone->m_textColor = m_textColor;
-  spClone->m_bgColor = m_bgColor;
-  spClone->m_sPortrait = m_sPortrait;
-  return spClone;
+  const SShowTextInstruction* pOtherCasted =
+      dynamic_cast<const SShowTextInstruction*>(pOther);
+  m_sText = pOtherCasted->m_sText;
+  m_dSkippableWaitS = pOtherCasted->m_dSkippableWaitS;
+  m_bSkippable = pOtherCasted->m_bSkippable;
+  m_textColor = pOtherCasted->m_textColor;
+  m_bgColor = pOtherCasted->m_bgColor;
+  m_sPortrait = pOtherCasted->m_sPortrait;
 }
 QJsonObject SShowTextInstruction::ToJsonObject()
 {
@@ -881,11 +880,11 @@ void SShowTextInstruction::FromJsonObject(const QJsonObject& json)
 
 //--------------------------------------------------------------------------------------
 //
-std::shared_ptr<SSequenceInstruction> SRunScriptInstruction::CloneImpl()
+void SRunScriptInstruction::CopyFromImpl(const SSequenceInstruction* pOther)
 {
-  std::shared_ptr<SRunScriptInstruction> spClone = std::make_shared<SRunScriptInstruction>();
-  spClone->m_sResource = m_sResource;
-  return spClone;
+  const SRunScriptInstruction* pOtherCasted =
+      dynamic_cast<const SRunScriptInstruction*>(pOther);
+  m_sResource = pOtherCasted->m_sResource;
 }
 QJsonObject SRunScriptInstruction::ToJsonObject()
 {
@@ -905,11 +904,11 @@ void SRunScriptInstruction::FromJsonObject(const QJsonObject& json)
 
 //--------------------------------------------------------------------------------------
 //
-std::shared_ptr<SSequenceInstruction> SEvalInstruction::CloneImpl()
+void SEvalInstruction::CopyFromImpl(const SSequenceInstruction* pOther)
 {
-  std::shared_ptr<SEvalInstruction> spClone = std::make_shared<SEvalInstruction>();
-  spClone->m_sScript = m_sScript;
-  return spClone;
+  const SEvalInstruction* pOtherCasted =
+      dynamic_cast<const SEvalInstruction*>(pOther);
+  m_sScript = pOtherCasted->m_sScript;
 }
 QJsonObject SEvalInstruction::ToJsonObject()
 {

@@ -9,6 +9,7 @@
 #include <QLineEdit>
 #include <QPainter>
 #include <QMouseEvent>
+#include <QTime>
 
 #include <QtWidgets/QGraphicsEffect>
 
@@ -456,8 +457,12 @@ void CTimelineWidgetLayer::SlotInstructionChanged()
                          });
   if (-1 != iTime && spLayerNew->m_vspInstructions.end() != it)
   {
-    QString sDescr = QString("changed instruction '%2'").arg(it->second->m_sInstructionType);
-    *it->second = *(m_pConfigOverlay->CurrentInstructionParameters());
+    QString sDescr = QString("changed instruction '%1' at %2")
+                         .arg(it->second->m_sInstructionType)
+                         .arg(QTime(0,0)
+                                  .addMSecs(iTime)
+                                  .toString("mm:ss.zzz"));
+    it->second->CopyFrom(m_pConfigOverlay->CurrentInstructionParameters());
     m_pUndoStack->push(new CCommandChangeInstructionParameters(
         m_pParent,
         spLayerOld, spLayerNew,

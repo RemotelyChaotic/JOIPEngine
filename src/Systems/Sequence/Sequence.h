@@ -47,93 +47,107 @@ struct SSequenceInstruction : public ISerializable
 {
   QString                            m_sInstructionType;
 
-  std::shared_ptr<SSequenceInstruction> Clone();
-  virtual std::shared_ptr<SSequenceInstruction> CloneImpl() = 0;
+  void CopyFrom(const SSequenceInstruction* pOther);
+  void CopyFrom(const std::shared_ptr<SSequenceInstruction> spOther);
+
+  virtual std::shared_ptr<SSequenceInstruction> Clone() = 0;
+  virtual void CopyFromImpl(const SSequenceInstruction* pOther) = 0;
 
   QJsonObject ToJsonObject() override;
   void FromJsonObject(const QJsonObject& json) override;
 };
-struct SSingleBeatInstruction : public SSequenceInstruction
+template <typename T>
+struct SSequenceTypedInstruction : public SSequenceInstruction
+{
+  std::shared_ptr<SSequenceInstruction> Clone() override final
+  {
+    std::shared_ptr<SSequenceInstruction> spClone = std::make_shared<T>();
+    spClone->m_sInstructionType = m_sInstructionType;
+    spClone->CopyFrom(this);
+    return spClone;
+  }
+};
+struct SSingleBeatInstruction : public SSequenceTypedInstruction<SSingleBeatInstruction>
 {
   std::optional<double>              m_dVolume = std::nullopt;
 
-  std::shared_ptr<SSequenceInstruction> CloneImpl() override;
+  void CopyFromImpl(const SSequenceInstruction* pOther) override;
   QJsonObject ToJsonObject() override;
   void FromJsonObject(const QJsonObject& json) override;
 };
-struct SStartPatternInstruction : public SSequenceInstruction
+struct SStartPatternInstruction : public SSequenceTypedInstruction<SStartPatternInstruction>
 {
   std::vector<double>                m_vdPattern;
   qint32                             m_iBpm = 60;
   std::optional<QString>             m_sResource = std::nullopt;
   std::optional<double>              m_dVolume = std::nullopt;
 
-  std::shared_ptr<SSequenceInstruction> CloneImpl() override;
+  void CopyFromImpl(const SSequenceInstruction* pOther) override;
   QJsonObject ToJsonObject() override;
   void FromJsonObject(const QJsonObject& json) override;
 };
-struct SStopPatternInstruction : public SSequenceInstruction
+struct SStopPatternInstruction : public SSequenceTypedInstruction<SStartPatternInstruction>
 {
-  std::shared_ptr<SSequenceInstruction> CloneImpl() override;
+  void CopyFromImpl(const SSequenceInstruction* pOther) override;
 };
-struct SVibrateInstruction : public SSequenceInstruction
+struct SVibrateInstruction : public SSequenceTypedInstruction<SVibrateInstruction>
 {
   double                             m_dSpeed = 0.0;
 
-  std::shared_ptr<SSequenceInstruction> CloneImpl() override;
+  void CopyFromImpl(const SSequenceInstruction* pOther) override;
   QJsonObject ToJsonObject() override;
   void FromJsonObject(const QJsonObject& json) override;
 };
-struct SLinearToyInstruction : public SSequenceInstruction
+struct SLinearToyInstruction : public SSequenceTypedInstruction<SLinearToyInstruction>
 {
   double                             m_dDurationS = 0.0;
   double                             m_dPosition = 0.0;
 
-  std::shared_ptr<SSequenceInstruction> CloneImpl() override;
+  void CopyFromImpl(const SSequenceInstruction* pOther) override;
   QJsonObject ToJsonObject() override;
   void FromJsonObject(const QJsonObject& json) override;
 };
-struct SRotateToyInstruction : public SSequenceInstruction
+struct SRotateToyInstruction : public SSequenceTypedInstruction<SRotateToyInstruction>
 {
   bool                               m_bClockwise = false;
   double                             m_dSpeed = 0.0;
 
-  std::shared_ptr<SSequenceInstruction> CloneImpl() override;
+  void CopyFromImpl(const SSequenceInstruction* pOther) override;
   QJsonObject ToJsonObject() override;
   void FromJsonObject(const QJsonObject& json) override;
 };
-struct SStopVibrationsInstruction : public SSequenceInstruction
+struct SStopVibrationsInstruction : public SSequenceTypedInstruction<SStopVibrationsInstruction>
 {
-  std::shared_ptr<SSequenceInstruction> CloneImpl() override;
+  void CopyFromImpl(const SSequenceInstruction* pOther) override;
 };
-struct SShowMediaInstruction : public SSequenceInstruction
+struct SShowMediaInstruction : public SSequenceTypedInstruction<SShowMediaInstruction>
 {
   QString                            m_sResource;
 
-  std::shared_ptr<SSequenceInstruction> CloneImpl() override;
+  void CopyFromImpl(const SSequenceInstruction* pOther) override;
   QJsonObject ToJsonObject() override;
   void FromJsonObject(const QJsonObject& json) override;
 };
-struct SPlayVideoInstruction : public SSequenceInstruction
+struct SPlayVideoInstruction : public SSequenceTypedInstruction<SPlayVideoInstruction>
 {
   QString                            m_sResource;
   std::optional<qint64>              m_iLoops = std::nullopt;
   std::optional<qint64>              m_iStartAt = std::nullopt;
   std::optional<qint64>              m_iEndAt = std::nullopt;
 
-  std::shared_ptr<SSequenceInstruction> CloneImpl() override;
+  void CopyFromImpl(const SSequenceInstruction* pOther) override;
   QJsonObject ToJsonObject() override;
   void FromJsonObject(const QJsonObject& json) override;
 };
-struct SPauseVideoInstruction : public SSequenceInstruction
+struct SPauseVideoInstruction : public SSequenceTypedInstruction<SPauseVideoInstruction>
 {
-  std::shared_ptr<SSequenceInstruction> CloneImpl() override;
+  void CopyFromImpl(const SSequenceInstruction* pOther) override;
 };
-struct SStopVideoInstruction : public SSequenceInstruction
+struct SStopVideoInstruction : public SSequenceTypedInstruction<SStopVideoInstruction>
 {
-  std::shared_ptr<SSequenceInstruction> CloneImpl() override;
+  void CopyFromImpl(const SSequenceInstruction* pOther) override;
 };
-struct SPlayAudioInstruction : public SSequenceInstruction
+struct SPlayAudioInstruction : public SSequenceTypedInstruction<SPlayAudioInstruction>
 {
   QString                            m_sResource;
   std::optional<QString>             m_sName = std::nullopt;
@@ -141,27 +155,27 @@ struct SPlayAudioInstruction : public SSequenceInstruction
   std::optional<qint64>              m_iStartAt = std::nullopt;
   std::optional<qint64>              m_iEndAt = std::nullopt;
 
-  std::shared_ptr<SSequenceInstruction> CloneImpl() override;
+  void CopyFromImpl(const SSequenceInstruction* pOther) override;
   QJsonObject ToJsonObject() override;
   void FromJsonObject(const QJsonObject& json) override;
 };
-struct SPauseAudioInstruction : public SSequenceInstruction
+struct SPauseAudioInstruction : public SSequenceTypedInstruction<SPauseAudioInstruction>
 {
   QString                            m_sName;
 
-  std::shared_ptr<SSequenceInstruction> CloneImpl() override;
+  void CopyFromImpl(const SSequenceInstruction* pOther) override;
   QJsonObject ToJsonObject() override;
   void FromJsonObject(const QJsonObject& json) override;
 };
-struct SStopAudioInstruction : public SSequenceInstruction
+struct SStopAudioInstruction : public SSequenceTypedInstruction<SStopAudioInstruction>
 {
   QString                            m_sName;
 
-  std::shared_ptr<SSequenceInstruction> CloneImpl() override;
+  void CopyFromImpl(const SSequenceInstruction* pOther) override;
   QJsonObject ToJsonObject() override;
   void FromJsonObject(const QJsonObject& json) override;
 };
-struct SShowTextInstruction : public SSequenceInstruction
+struct SShowTextInstruction : public SSequenceTypedInstruction<SShowTextInstruction>
 {
   std::optional<QString>             m_sText = std::nullopt;
   std::optional<double>              m_dSkippableWaitS = std::nullopt; // unused
@@ -170,23 +184,23 @@ struct SShowTextInstruction : public SSequenceInstruction
   std::optional<QColor>              m_bgColor = std::nullopt;
   std::optional<QString>             m_sPortrait = std::nullopt;
 
-  std::shared_ptr<SSequenceInstruction> CloneImpl() override;
+  void CopyFromImpl(const SSequenceInstruction* pOther) override;
   QJsonObject ToJsonObject() override;
   void FromJsonObject(const QJsonObject& json) override;
 };
-struct SRunScriptInstruction : public SSequenceInstruction
+struct SRunScriptInstruction : public SSequenceTypedInstruction<SRunScriptInstruction>
 {
   QString                            m_sResource;
 
-  std::shared_ptr<SSequenceInstruction> CloneImpl() override;
+  void CopyFromImpl(const SSequenceInstruction* pOther) override;
   QJsonObject ToJsonObject() override;
   void FromJsonObject(const QJsonObject& json) override;
 };
-struct SEvalInstruction : public SSequenceInstruction
+struct SEvalInstruction : public SSequenceTypedInstruction<SEvalInstruction>
 {
   QString                            m_sScript;
 
-  std::shared_ptr<SSequenceInstruction> CloneImpl() override;
+  void CopyFromImpl(const SSequenceInstruction* pOther) override;
   QJsonObject ToJsonObject() override;
   void FromJsonObject(const QJsonObject& json) override;
 };
