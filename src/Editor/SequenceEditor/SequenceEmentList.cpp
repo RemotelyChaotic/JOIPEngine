@@ -76,11 +76,18 @@ namespace
     pItemChild = new QStandardItem(QObject::tr(sequence::c_sInstructionIdPauseVideo));
     pItemChild->setData(sequence::c_sInstructionIdPauseVideo, c_iRoleId);
     pChildren << pItemChild;
+    pItemChild = new QStandardItem(QObject::tr(sequence::c_sInstructionIdStopVideo));
+    pItemChild->setData(sequence::c_sInstructionIdStopVideo, c_iRoleId);
+    pChildren << pItemChild;
+
     pItemChild = new QStandardItem(QObject::tr(sequence::c_sInstructionIdPlayAudio));
     pItemChild->setData(sequence::c_sInstructionIdPlayAudio, c_iRoleId);
     pChildren << pItemChild;
     pItemChild = new QStandardItem(QObject::tr(sequence::c_sInstructionIdPauseAudio));
     pItemChild->setData(sequence::c_sInstructionIdPauseAudio, c_iRoleId);
+    pChildren << pItemChild;
+    pItemChild = new QStandardItem(QObject::tr(sequence::c_sInstructionIdStopAudio));
+    pItemChild->setData(sequence::c_sInstructionIdStopAudio, c_iRoleId);
     pChildren << pItemChild;
 
     pItem->insertRows(0, pChildren);
