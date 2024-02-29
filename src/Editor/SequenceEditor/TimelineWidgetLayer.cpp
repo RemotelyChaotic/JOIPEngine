@@ -512,6 +512,7 @@ void CTimelineWidgetLayer::SlotTypeChanged()
     auto spLayerOld = m_spLayer->Clone();
     auto spLayerNew = m_spLayer->Clone();
     spLayerNew->m_sLayerType = m_pLayerTypeCombo->currentData().toString();
+    spLayerNew->m_vspInstructions.clear();
     sDescr = sDescr.arg(spLayerNew->m_sLayerType);
     m_pUndoStack->push(new CCommandModifyLayerProperties(
         m_pParent,
