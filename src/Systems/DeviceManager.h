@@ -55,9 +55,7 @@ private slots:
   void DeinitImpl();
   void DisconnectImpl();
   bool IsConnectedImpl();
-  bool IsScanningImpl();
   void SlotDisconnected();
-  qint32 NumberRegisteredConnectorsImpl();
   void StartScanningImpl();
   void StopScanningImpl();
   void SlotReconnectTimerTimeout();
@@ -69,7 +67,7 @@ private:
   QPointer<QTimer>          m_pReconnectTimer;
   QString                   m_sSelectedDevice;
   mutable QMutex            m_selectedDeviceMutex;
-  bool                      m_bIsScanning = false;
+  std::atomic<bool>         m_bIsScanning = false;
 };
 
 #endif // CDEVICEMANAGER_H

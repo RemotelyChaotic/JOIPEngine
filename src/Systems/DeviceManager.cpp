@@ -30,6 +30,12 @@ namespace
     return r;
   }
 
+  std::atomic<qint32>& RegisteredConnectorCount()
+  {
+    static std::atomic<qint32> iCount = 0;
+    return iCount;
+  }
+
   const std::vector<std::unique_ptr<IDeviceConnector>>& GetConnectors()
   {
     static std::vector<std::unique_ptr<IDeviceConnector>> vspAvailableConnectors =
@@ -41,6 +47,7 @@ namespace
         std::make_unique<CIntifaceCentralDeviceConnector>()
       #endif
     });
+    RegisteredConnectorCount().store(static_cast<qint32>(vspAvailableConnectors.size()));
     return vspAvailableConnectors;
   }
 
@@ -130,24 +137,14 @@ bool CDeviceManager::IsConnected() const
 //
 bool CDeviceManager::IsScanning() const
 {
-  bool bRet = false;
-  bool bOk = QMetaObject::invokeMethod(const_cast<CDeviceManager*>(this), "IsScanningImpl",
-                                       Qt::BlockingQueuedConnection,
-                                       Q_RETURN_ARG(bool, bRet));
-  assert(bOk); Q_UNUSED(bOk)
-  return bRet;
+  return m_bIsScanning.load();
 }
 
 //----------------------------------------------------------------------------------------
 //
 qint32 CDeviceManager::NumberRegisteredConnectors() const
 {
-  qint32 iRet = false;
-  bool bOk = QMetaObject::invokeMethod(const_cast<CDeviceManager*>(this), "NumberRegisteredConnectorsImpl",
-                                       Qt::BlockingQueuedConnection,
-                                       Q_RETURN_ARG(qint32, iRet));
-  assert(bOk); Q_UNUSED(bOk)
-  return iRet;
+  return RegisteredConnectorCount().load();
 }
 
 //----------------------------------------------------------------------------------------
@@ -394,24 +391,10 @@ bool CDeviceManager::IsConnectedImpl()
 
 //----------------------------------------------------------------------------------------
 //
-bool CDeviceManager::IsScanningImpl()
-{
-  return m_bIsScanning;
-}
-
-//----------------------------------------------------------------------------------------
-//
 void CDeviceManager::SlotDisconnected()
 {
   // do a manual disconnect to properly clear everything
   DisconnectImpl();
-}
-
-//----------------------------------------------------------------------------------------
-//
-qint32 CDeviceManager::NumberRegisteredConnectorsImpl()
-{
-  return static_cast<qint32>(GetConnectors().size());
 }
 
 //----------------------------------------------------------------------------------------
