@@ -38,6 +38,34 @@ protected:
 
 //----------------------------------------------------------------------------------------
 //
+class CHeaderWidget : public QWidget
+{
+public:
+  CHeaderWidget(CTimelineWidgetLayer* pLayer) :
+    QWidget(pLayer),
+    m_pLayer(pLayer)
+  { }
+
+protected:
+  void paintEvent(QPaintEvent* pEvt) override
+  {
+    if (m_pLayer->AlternateBackgroundColor().isValid())
+    {
+      QPainter p(this);
+      p.fillRect(pEvt->rect(), m_pLayer->AlternateBackgroundColor());
+    }
+    else
+    {
+      QWidget::paintEvent(pEvt);
+    }
+  }
+
+private:
+  CTimelineWidgetLayer* m_pLayer;
+};
+
+//----------------------------------------------------------------------------------------
+//
 CTimelineWidgetLayer::CTimelineWidgetLayer(const tspSequenceLayer& spLayer, CTimelineWidget* pParent,
                                            QWidget* pWidgetParent, QPointer<CResourceTreeItemModel> pItemModel) :
   QFrame{pWidgetParent},
@@ -58,7 +86,7 @@ CTimelineWidgetLayer::CTimelineWidgetLayer(const tspSequenceLayer& spLayer, CTim
   pLayout->setContentsMargins({0, 0, 0, 0});
   pLayout->setSpacing(0);
 
-  m_pHeader = new QWidget(this);
+  m_pHeader = new CHeaderWidget(this);
   m_pHeader->setSizePolicy(QSizePolicy(QSizePolicy::Fixed, QSizePolicy::Preferred));
   QGridLayout* pBoxLayout = new QGridLayout(m_pHeader);
   pBoxLayout->setHorizontalSpacing(0);
@@ -108,6 +136,13 @@ CTimelineWidgetLayer::CTimelineWidgetLayer(const tspSequenceLayer& spLayer, CTim
   SetLayer(spLayer);
 }
 CTimelineWidgetLayer::~CTimelineWidgetLayer() = default;
+
+//----------------------------------------------------------------------------------------
+//
+const QColor& CTimelineWidgetLayer::AlternateBackgroundColor() const
+{
+  return m_alternateBgCol;
+}
 
 //----------------------------------------------------------------------------------------
 //
@@ -251,20 +286,14 @@ void CTimelineWidgetLayer::SetHighlight(QColor col, QColor alternateCol)
 {
   m_pDropShadow->SetEnabled(col.isValid());
   m_pDropShadow->setColor(col);
-  if (alternateCol.isValid())
-  {
-    setStyleSheet("CTimelineWidgetLayer {background-color:" + alternateCol.name() +";}");
-  }
-  else
-  {
-    setStyleSheet(QString());
-  }
+
   QStyle* pStyle = style();
   if (nullptr != pStyle)
   {
     pStyle->unpolish(this);
     pStyle->polish(this);
   }
+
   m_alternateBgCol = alternateCol;
   repaint();
 }

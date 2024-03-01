@@ -21,12 +21,14 @@ class CTimelineWidgetLayer : public QFrame
   Q_OBJECT
   Q_PROPERTY(QColor selectionColor READ SelectionColor WRITE SetSelectionColor)
   Q_PROPERTY(QColor timelineBackgroundColor READ TimelineBackgroundColor WRITE SetTimelineBackgroundColor)
+  friend class CHeaderProxyStyle;
 
 public:
   explicit CTimelineWidgetLayer(const tspSequenceLayer& spLayer, CTimelineWidget* pParent,
                                 QWidget* pWidgetParent, QPointer<CResourceTreeItemModel> pItemModel);
   ~CTimelineWidgetLayer() override;
 
+  const QColor& AlternateBackgroundColor() const;
   void SetGridColor(const QColor& col);
   const QColor& GridColor() const;
   void SetOutOfRangeColor(const QColor& col);

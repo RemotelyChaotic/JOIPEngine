@@ -2007,7 +2007,6 @@ CTimelineWidget > QWidget > QWidget
 
 CTimelineWidget
 {
-  qproperty-alternateBackgroundColor: rgb(23, 7, 56);
   qproperty-dropIndicationColor: white;
   qproperty-gridColor: silver;
   qproperty-outOfRangeColor: rgba(23, 7, 56, 200);
