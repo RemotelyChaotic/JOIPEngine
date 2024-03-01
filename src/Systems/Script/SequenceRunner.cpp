@@ -132,6 +132,7 @@ void CSequenceRunnerInstanceWorker::InterruptExecution()
   if (nullptr != m_pTimer)
   {
     m_pTimer->stop();
+    emit HandleScriptFinish(false, QString());
   }
   emit SignalInterruptExecution();
 }
@@ -263,7 +264,7 @@ void CSequenceRunnerInstanceWorker::TimerTimeout()
       std::chrono::duration_cast<std::chrono::milliseconds>(newPoint - m_lastPoint).count();
   m_lastPoint = newPoint;
 
-  if (m_vBuiltInstructions.empty())
+  if (m_vBuiltInstructions.empty() || 0 == m_bRunning)
   {
     m_bRunning = 0;
     emit HandleScriptFinish(true, QString());
@@ -281,7 +282,7 @@ void CSequenceRunnerInstanceWorker::TimerTimeout()
     }
   }
 
-  if (m_vBuiltInstructions.empty())
+  if (m_vBuiltInstructions.empty() || 0 == m_bRunning)
   {
     m_bRunning = 0;
     emit HandleScriptFinish(true, QString());
