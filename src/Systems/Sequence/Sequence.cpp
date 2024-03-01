@@ -989,7 +989,7 @@ void SSequenceLayer::FromJsonObject(const QJsonObject& json)
     for (QJsonValue val : it.value().toArray())
     {
       sequence::tTimedInstruction instr;
-      QJsonObject obj = it.value().toObject();
+      QJsonObject obj = val.toObject();
       it = obj.find("iTimePos");
       if (it != obj.end())
       {
