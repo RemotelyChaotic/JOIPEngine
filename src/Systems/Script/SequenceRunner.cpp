@@ -316,7 +316,7 @@ void CSequenceRunnerInstanceWorker::BuildInstructions(const tspSequence& spSeque
 void CSequenceRunnerInstanceWorker::RunInstruction(const STimedInstruction& instr)
 {
   auto it = m_objectMap.find(instr.m_sLayerName);
-  if (m_objectMap.end() == it)
+  if (m_objectMap.end() != it)
   {
     if (auto pRunInstr = dynamic_cast<SRunScriptInstruction*>(instr.m_spInstr.get()))
     {
@@ -327,6 +327,10 @@ void CSequenceRunnerInstanceWorker::RunInstruction(const STimedInstruction& inst
     {
       pSequenceRunner->RunSequenceInstruction(instr.m_sLayerName, instr.m_spInstr);
     }
+  }
+  else
+  {
+    qWarning() << tr("No object registered under \"%1\".").arg(instr.m_sLayerName);
   }
 }
 
