@@ -144,7 +144,8 @@ void SProject::FromJsonObject(const QJsonObject& json)
   if (it != json.end())
   {
     m_sPlayerLayout = it.value().toString();
-    if (m_sPlayerLayout.isEmpty())
+    if (m_sPlayerLayout.isEmpty() ||
+        "qrc:/qml/resources/qml/PlayerDefaultLayout.qml" == m_sPlayerLayout)
     {
       m_sPlayerLayout = "qrc:/qml/resources/qml/JoipEngine/PlayerDefaultLayoutClassic.qml";
     }
