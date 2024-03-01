@@ -560,12 +560,20 @@ void CUpdater::CopyFiles()
     emit SignalMessage(tr("Patching... backup local files..."));
 
     const QString sThisRoot = QFileInfo(QCoreApplication::applicationDirPath() + "/..").absoluteFilePath();
+    QDir root(sThisRoot);
+    if (!root.mkpath(sThisRoot + "/" + c_sBackupFolder))
+    {
+      HandleError(tr("Could not create backup folder"));
+      return false;
+    }
+
     QDirIterator iterThis(sThisRoot,
-                          QDir::NoDotAndDotDot | QDir::Dirs,
+                          QDir::NoDotAndDotDot | QDir::Dirs | QDir::Files,
                           QDirIterator::NoIteratorFlags);
     while (iterThis.hasNext())
     {
-      QString sPath = iterThis.next();
+      QString sAbsolutePath = iterThis.next();
+      QString sPath = sAbsolutePath;
       QString sPathShortened = sPath;
       if (!sThisRoot.endsWith("/"))
       {
@@ -576,16 +584,29 @@ void CUpdater::CopyFiles()
         sPathShortened = sPath.replace(sThisRoot + "/", "");
       }
 
-      if (!sPathShortened.startsWith(c_sUpDaterFolder) &&
-          !sPathShortened.startsWith(c_sDataFolder) &&
-          !sPathShortened.startsWith(c_sStylesFolder) &&
-          !sPathShortened.startsWith(c_sBackupFolder))
+      QFileInfo item(sAbsolutePath);
+      if (item.isDir())
       {
-        QDir dir(sPath);
-        bool bOk = QFile::rename(sPath, sThisRoot + "/" + c_sBackupFolder + "/" + dir.dirName());
+        QDir dir(sAbsolutePath);
+        if (!dir.dirName().startsWith(c_sUpDaterFolder) &&
+            !dir.dirName().startsWith(c_sDataFolder) &&
+            !dir.dirName().startsWith(c_sStylesFolder) &&
+            !dir.dirName().startsWith(c_sBackupFolder))
+        {
+          bool bOk = QFile::rename(sAbsolutePath, sThisRoot + "/" + c_sBackupFolder + "/" + dir.dirName());
+          if (!bOk)
+          {
+            HandleError(tr("Could not backup folder '%1'").arg(dir.dirName()));
+            return false;
+          }
+        }
+      }
+      else
+      {
+        bool bOk = QFile::rename(sAbsolutePath, sThisRoot + "/" + c_sBackupFolder + "/" + item.fileName());
         if (!bOk)
         {
-          HandleError(tr("Could backup folder %1").arg(sPath));
+          HandleError(tr("Could not backup folder '%1'").arg(item.fileName()));
           return false;
         }
       }
@@ -594,7 +615,7 @@ void CUpdater::CopyFiles()
     emit SignalMessage(tr("Patching... gathering files..."));
 
     // gather the files to copy
-    QStringList vsData;
+    QStringList vData;
     const QString sAbsolutePath = info.absolutePath();
     QDirIterator iter(info.absoluteFilePath(),
                       QDir::NoDotAndDotDot | QDir::Dirs | QDir::Files,
@@ -611,36 +632,89 @@ void CUpdater::CopyFiles()
       {
         sPathShortened = sPath.replace(sAbsolutePath + "/", "");
       }
-
-      if (!sPathShortened.startsWith(c_sUpDaterFolder) &&
-          !sPathShortened.startsWith(c_sDataFolder))
+      if (sPathShortened.startsWith("/"))
       {
-        vsData << sPathShortened;
+        sPathShortened = sPathShortened.mid(1);
+      }
+
+      if (!sPathShortened.startsWith(c_sFolderUnpacked + "/" + c_sUpDaterFolder) &&
+          !sPathShortened.startsWith(c_sFolderUnpacked + "/" + c_sDataFolder))
+      {
+        vData << sPathShortened;
       }
     }
 
     // copy everything
-    for (qint32 i = 0; vsData.size() > i; ++i)
+    for (qint32 i = 0; vData.size() > i; ++i)
     {
-      emit SignalMessage(tr("Patching...%1/%2").arg(i+1).arg(vsData.size()));
-      emit SignalProgress(i+1, vsData.size());
+      emit SignalMessage(tr("Patching...%1/%2").arg(i+1).arg(vData.size()));
+      emit SignalProgress(i+1, vData.size());
 
-      QFileInfo info(sAbsolutePath + "/" + vsData[i]);
-      if (info.isDir())
+      QDir thisRootFolder(sThisRoot);
+
+      QString sRelPathDl = vData[i];
+      if (sRelPathDl.startsWith("/"))
       {
-        if (!QDir(sThisRoot).mkpath(vsData[i]))
+        sRelPathDl = sRelPathDl.mid(1);
+      }
+      QString sRelPathFolder = sRelPathDl;
+      if (sRelPathFolder.startsWith(c_sFolderUnpacked))
+      {
+        sRelPathFolder = sRelPathFolder.mid(QString(c_sFolderUnpacked + "/").size());
+      }
+
+      QFileInfo infoDl(sAbsolutePath + "/" + sRelPathDl);
+      // for folders, just mkpath
+      if (infoDl.isDir())
+      {
+        if (!thisRootFolder.mkpath(sRelPathFolder))
         {
-          HandleError(tr("Could not create directory %1").arg(vsData[i]));
+          HandleError(tr("Could not create directory %1").arg(sRelPathFolder));
           return false;
         }
       }
+      // for files...
       else
       {
-        QFile file(info.absoluteFilePath());
-        if (!file.copy(sThisRoot + "/" + vsData[i]))
+        QDir folder(infoDl.absolutePath());
+        QFile file(infoDl.absoluteFilePath());
+        // mkpath if needed
+        if (!folder.exists())
         {
-          HandleError(tr("Could not create directory %1").arg(vsData[i]));
-          return false;
+          QString sRelPathFolder2 = QString(sRelPathFolder).replace(file.fileName(), "");
+          if (!thisRootFolder.mkpath(sRelPathFolder2))
+          {
+            HandleError(tr("Could not create directory %1").arg(sRelPathFolder2));
+            return false;
+          }
+        }
+        // can copy files without issue
+        if (!QFileInfo(sThisRoot + "/" + sRelPathFolder).exists())
+        {
+          if (!file.copy(sThisRoot + "/" + sRelPathFolder))
+          {
+            HandleError(tr("Could not copy file %1").arg(sRelPathDl));
+            return false;
+          }
+        }
+        // conflicts
+        else
+        {
+          // only copy styles contents
+          if (sRelPathFolder.startsWith(c_sStylesFolder))
+          {
+            const QString sFileToRemove = sThisRoot + "/" + sRelPathFolder;
+            if (!QFile().remove(sFileToRemove))
+            {
+              HandleError(tr("Could not replace file %1 (remove failed)").arg(sRelPathFolder));
+              return false;
+            }
+            if (!file.copy(sThisRoot + "/" + sRelPathFolder))
+            {
+              HandleError(tr("Could not replace file %1 (copy failed)").arg(sRelPathFolder));
+              return false;
+            }
+          }
         }
       }
     }

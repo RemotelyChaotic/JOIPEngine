@@ -18,7 +18,7 @@ endfunction(ExecuteDeployQt)
 
 
 execute_process(COMMAND "${CMAKE_COMMAND}" -E copy
-  "${CMAKE_SOURCE_DIR}/bin/qt.conf"
+  "${CMAKE_SOURCE_DIR}/bin/qt.conf.updater"
   "${CMAKE_INSTALL_PREFIX}/updater/qt.conf")
 execute_process(COMMAND "${CMAKE_COMMAND}" -E copy
   "${CMAKE_BINARY_DIR}/bin/JOIPEngineUpdater${CMAKE_EXECUTABLE_SUFFIX}"
