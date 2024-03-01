@@ -76,7 +76,8 @@ CTimelineWidgetLayer::CTimelineWidgetLayer(const tspSequenceLayer& spLayer, CTim
   pBoxLayout->addWidget(m_pLayerTypeCombo, 0, 0);
 
   m_pNameLineEdit = new QLineEdit(m_pHeader);
-  connect(m_pNameLineEdit, &QLineEdit::editingFinished,
+  m_pNameLineEdit->setPlaceholderText("<object name>");
+  connect(m_pNameLineEdit, &QLineEdit::textChanged,
           this, &CTimelineWidgetLayer::SlotLabelChanged);
   pBoxLayout->addWidget(m_pNameLineEdit, 1, 0);
 

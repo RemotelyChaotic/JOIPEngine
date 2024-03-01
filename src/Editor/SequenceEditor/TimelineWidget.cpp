@@ -849,6 +849,8 @@ QWidget* CTimelineWidget::CreateLayerWidget(const tspSequenceLayer& spLayer) con
   auto pWidget =
       new CTimelineWidgetLayer(spLayer, const_cast<CTimelineWidget*>(this), widget(),
                                m_pEditorModel);
+  connect(pWidget, &CTimelineWidgetLayer::SignalContentsChanged,
+          this, &CTimelineWidget::SignalContentsChanged, Qt::DirectConnection);
   connect(pWidget, &CTimelineWidgetLayer::SignalUserStartedDrag,
           this, &CTimelineWidget::SlotUserStartedDrag, Qt::QueuedConnection);
   connect(pWidget, &CTimelineWidgetLayer::SignalSelected,

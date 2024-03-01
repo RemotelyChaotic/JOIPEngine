@@ -75,6 +75,7 @@ void CCommandModifyLayerProperties::DoUnoRedo(const std::shared_ptr<SSequenceLay
         spLayerToMod->m_vspInstructions.push_back({time, instr->Clone()});
       }
       pLayer->UpdateUi();
+      emit pLayer->SignalContentsChanged();
     }
   }
 }
