@@ -11,9 +11,9 @@ CSequenceMetronomeRunner::CSequenceMetronomeRunner(
     QPointer<CScriptRunnerSignalEmiter> pEmitter) :
   CScriptObjectBase(pEmitter),
   ISequenceObjectRunner(),
-  m_functionMap({{sequence::c_sInstructionIdShow, std::bind(&CSequenceMetronomeRunner::RunSingleBeat, this, _1, _2)},
-                 {sequence::c_sInstructionIdPlayVideo, std::bind(&CSequenceMetronomeRunner::RunStartPattern, this, _1, _2)},
-                 {sequence::c_sInstructionIdPauseVideo, std::bind(&CSequenceMetronomeRunner::RunStopPattern, this, _1, _2)}}),
+  m_functionMap({{sequence::c_sInstructionIdBeat, std::bind(&CSequenceMetronomeRunner::RunSingleBeat, this, _1, _2)},
+                 {sequence::c_sInstructionIdStartPattern, std::bind(&CSequenceMetronomeRunner::RunStartPattern, this, _1, _2)},
+                 {sequence::c_sInstructionIdStopPattern, std::bind(&CSequenceMetronomeRunner::RunStopPattern, this, _1, _2)}}),
   m_wpMetronomeManager(CApplication::Instance()->System<CMetronomeManager>())
 {
 }
