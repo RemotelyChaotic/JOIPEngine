@@ -247,6 +247,7 @@ void CMetronomeManager::SlotStop(const QUuid& id)
   if (m_metronomeBlocks.end() != it)
   {
     it->second->m_privateBlock.m_bStarted = false;
+    it->second->m_privateBlock.m_vdSpawnedTicks.clear();
 
     bool bAnyRunning = false;
     for (const auto& [_, block] : m_metronomeBlocks)
@@ -362,16 +363,16 @@ void CMetronomeManager::SlotTimeout()
         {
           if (0 == i)
           {
-            if (spBlock->m_privateBlock.m_vdSpawnedTicks.empty())
-            {
-              spBlock->m_privateBlock.m_vdSpawnedTicks.push_back(0.0);
-            }
             continue;
           }
           auto dDistMsTick = spBlock->m_privateBlock.m_vdTickPattern[i-1];
+          double dLastTick = 1.0;
+          if (!spBlock->m_privateBlock.m_vdSpawnedTicks.empty())
+          {
+            dLastTick = spBlock->m_privateBlock.m_vdSpawnedTicks.back();
+          }
           spBlock->m_privateBlock.m_vdSpawnedTicks.push_back(
-              spBlock->m_privateBlock.m_vdSpawnedTicks.back() -
-              static_cast<double>(dDistMsTick / 1'000.0));
+              dLastTick - static_cast<double>(dDistMsTick / 1'000.0));
         }
       }
 
