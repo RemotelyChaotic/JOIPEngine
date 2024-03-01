@@ -310,6 +310,9 @@ void CSequenceRunnerInstanceWorker::BuildInstructions(const tspSequence& spSeque
   {
     return instrA.m_iTime < instrB.m_iTime;
   });
+
+  // add an end marker
+  m_vBuiltInstructions.push_back({spSequence->m_iLengthMili, QString(), QString(), nullptr});
 }
 
 //----------------------------------------------------------------------------------------
@@ -329,7 +332,7 @@ void CSequenceRunnerInstanceWorker::RunInstruction(const STimedInstruction& inst
       pSequenceRunner->RunSequenceInstruction(instr.m_sLayerName, instr.m_spInstr);
     }
   }
-  else
+  else if (!instr.m_sLayerName.isEmpty())
   {
     qWarning() << tr("No object registered under \"%1\".").arg(instr.m_sLayerName);
   }

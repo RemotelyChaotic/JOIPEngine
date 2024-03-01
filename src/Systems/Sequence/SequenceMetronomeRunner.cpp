@@ -44,7 +44,9 @@ void CSequenceMetronomeRunner::RunSingleBeat(const QString& sName,
   {
     if (auto spMetronomeManager = m_wpMetronomeManager.lock())
     {
-      spMetronomeManager->SpawnSingleBeat(sName);
+      QUuid uid = spMetronomeManager->IdForName(sName);
+      spMetronomeManager->SpawnSingleBeat(uid);
+      emit spMetronomeManager->SignalStart(uid, ETickType::eSingle);
     }
   }
 }

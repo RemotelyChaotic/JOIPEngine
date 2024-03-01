@@ -47,8 +47,6 @@ Rectangle {
 
         onStart: {
             metronomeDisplay.start();
-            metronomeDisplay.opacity = 1.0;
-            metronomeDisplay.requestedRun = true;
         }
         onSetBpm: {
             metronomeDisplay.bpm = iBpm;
@@ -84,9 +82,7 @@ Rectangle {
             metronomeDisplay.volume = dVolume;
         }
         onStop: {
-            metronomeDisplay.opacity = 0.0;
             metronomeDisplay.stop();
-            metronomeDisplay.requestedRun = false;
         }
     }
 
@@ -101,9 +97,8 @@ Rectangle {
         height: parent.height - 10
 
         userName: parent.userName
-        property bool requestedRun: false
 
-        opacity: 0.0
+        opacity: running ? 1.0 : 0.0
         Behavior on opacity {
             NumberAnimation { duration: 500; easing.type: Easing.InOutQuad }
         }
@@ -119,10 +114,7 @@ Rectangle {
             }
             else
             {
-                if (metronomeDisplay.requestedRun)
-                {
-                    metronomeDisplay.resume();
-                }
+                metronomeDisplay.resume();
             }
         }
     }

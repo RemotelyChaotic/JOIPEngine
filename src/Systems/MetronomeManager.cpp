@@ -51,7 +51,8 @@ struct SMetronomeDataBlockImpl : public SMetronomeDataBlock
   }
 
   std::unique_ptr<CMultiEmitterSoundPlayer> m_spSoundEmitters;
-  std::vector<double>                       m_vdSpawnedTicks;
+  std::vector<std::pair<ETickType, double>> m_vdSpawnedTicks;
+  ETickTypeFlags m_playFlags;
   bool m_bStarted = false;
   bool m_bPaused = false;
 };
@@ -75,6 +76,7 @@ CMetronomeManager::CMetronomeManager() :
 {
   qRegisterMetaType<std::shared_ptr<SMetronomeDataBlock>>();
   qRegisterMetaType<std::vector<double>>();
+  qRegisterMetaType<ETickTypeFlags>();
 
   connect(this, &CMetronomeManager::SignalStart,
           this, &CMetronomeManager::SlotStart, Qt::QueuedConnection);
@@ -112,6 +114,19 @@ std::shared_ptr<SMetronomeDataBlock> CMetronomeManager::RegisterUi(const QUuid& 
                                        Q_ARG(QUuid, sName));
   assert(bOk); Q_UNUSED(bOk)
   return spRet;
+}
+
+//----------------------------------------------------------------------------------------
+//
+QUuid CMetronomeManager::IdForName(const QString& sName)
+{
+  QUuid retId;
+  bool bOk = QMetaObject::invokeMethod(this, "SlotIdForNameImpl",
+                                       Qt::BlockingQueuedConnection,
+                                       Q_RETURN_ARG(QUuid, retId),
+                                       Q_ARG(QString, sName));
+  assert(bOk); Q_UNUSED(bOk)
+  return retId;
 }
 
 //----------------------------------------------------------------------------------------
@@ -171,6 +186,21 @@ void CMetronomeManager::Deinitialize()
 
 //----------------------------------------------------------------------------------------
 //
+QUuid CMetronomeManager::SlotIdForNameImpl(const QString& sName)
+{
+  auto it = std::find_if(m_metronomeBlocks.begin(), m_metronomeBlocks.end(),
+                         [&sName](const std::pair<QUuid, std::shared_ptr<SMetronomeDataBlockPrivate>>& pair) {
+    return pair.second->m_privateBlock.sUserName == sName;
+  });
+  if (m_metronomeBlocks.end() != it)
+  {
+    return it->first;
+  }
+  return QUuid();
+}
+
+//----------------------------------------------------------------------------------------
+//
 void CMetronomeManager::SlotSpawnSingleBeatImpl(const QString& sName)
 {
   auto it = std::find_if(m_metronomeBlocks.begin(), m_metronomeBlocks.end(),
@@ -179,10 +209,13 @@ void CMetronomeManager::SlotSpawnSingleBeatImpl(const QString& sName)
   });
   if (m_metronomeBlocks.end() != it)
   {
-    it->second->m_privateBlock.m_vdSpawnedTicks.push_back(0.0);
+    it->second->m_privateBlock.m_vdSpawnedTicks.push_back({ETickType::eSingle, 0.0});
     std::sort(it->second->m_privateBlock.m_vdSpawnedTicks.begin(),
               it->second->m_privateBlock.m_vdSpawnedTicks.end(),
-              std::less<double>());
+              [](const std::pair<ETickType, double>& pairA,
+                 const std::pair<ETickType, double>& pairB) {
+      return pairA.second < pairB.second;
+    });
   }
 }
 
@@ -193,26 +226,37 @@ void CMetronomeManager::SlotSpawnSingleBeatImpl(const QUuid& uid)
   auto it = m_metronomeBlocks.find(uid);
   if (m_metronomeBlocks.end() != it)
   {
-    it->second->m_privateBlock.m_vdSpawnedTicks.push_back(0.0);
+    it->second->m_privateBlock.m_vdSpawnedTicks.push_back({ETickType::eSingle, 0.0});
     std::sort(it->second->m_privateBlock.m_vdSpawnedTicks.begin(),
               it->second->m_privateBlock.m_vdSpawnedTicks.end(),
-              std::less<double>());
+              [](const std::pair<ETickType, double>& pairA,
+                 const std::pair<ETickType, double>& pairB) {
+      return pairA.second < pairB.second;
+    });
   }
 }
 
 //----------------------------------------------------------------------------------------
 //
-void CMetronomeManager::SlotStart(const QUuid& id)
+void CMetronomeManager::SlotStart(const QUuid& id, ETickTypeFlags ticksToPlay)
 {
   auto it = m_metronomeBlocks.find(id);
   if (m_metronomeBlocks.end() != it)
   {
-    it->second->m_privateBlock.m_bStarted = true;
-    if (nullptr != m_pTimer && !m_pTimer->isActive())
+    it->second->m_privateBlock.m_playFlags |= ticksToPlay;
+
+    if (!it->second->m_privateBlock.m_bStarted)
     {
-      m_pTimer->start();
-      m_lastUpdate = std::chrono::high_resolution_clock::now();
-      m_iCumulativeTime = 0.0;
+      it->second->m_privateBlock.m_bStarted = true;
+
+      if (nullptr != m_pTimer && !m_pTimer->isActive())
+      {
+        m_pTimer->start();
+        m_lastUpdate = std::chrono::high_resolution_clock::now();
+        m_iCumulativeTime = 0.0;
+      }
+
+      emit SignalStarted(id);
     }
   }
 }
@@ -224,7 +268,11 @@ void CMetronomeManager::SlotPause(const QUuid& id)
   auto it = m_metronomeBlocks.find(id);
   if (m_metronomeBlocks.end() != it)
   {
-    it->second->m_privateBlock.m_bPaused = true;
+    if (it->second->m_privateBlock.m_bStarted)
+    {
+      it->second->m_privateBlock.m_bPaused = true;
+      emit SignalPaused(id);
+    }
   }
 }
 
@@ -235,7 +283,11 @@ void CMetronomeManager::SlotResume(const QUuid& id)
   auto it = m_metronomeBlocks.find(id);
   if (m_metronomeBlocks.end() != it)
   {
-    it->second->m_privateBlock.m_bPaused = false;
+    if (it->second->m_privateBlock.m_bStarted)
+    {
+      it->second->m_privateBlock.m_bPaused = false;
+      emit SignalResumed(id);
+    }
   }
 }
 
@@ -246,18 +298,24 @@ void CMetronomeManager::SlotStop(const QUuid& id)
   auto it = m_metronomeBlocks.find(id);
   if (m_metronomeBlocks.end() != it)
   {
-    it->second->m_privateBlock.m_bStarted = false;
-    it->second->m_privateBlock.m_vdSpawnedTicks.clear();
-
-    bool bAnyRunning = false;
-    for (const auto& [_, block] : m_metronomeBlocks)
+    if (it->second->m_privateBlock.m_bStarted)
     {
-      bAnyRunning |= block->m_privateBlock.m_bStarted;
-    }
+      it->second->m_privateBlock.m_bStarted = false;
+      it->second->m_privateBlock.m_vdSpawnedTicks.clear();
+      it->second->m_privateBlock.m_playFlags = 0;
 
-    if (!bAnyRunning && nullptr != m_pTimer && m_pTimer->isActive())
-    {
-      m_pTimer->stop();
+      emit SignalStopped(id);
+
+      bool bAnyRunning = false;
+      for (const auto& [_, block] : m_metronomeBlocks)
+      {
+        bAnyRunning |= block->m_privateBlock.m_bStarted;
+      }
+
+      if (!bAnyRunning && nullptr != m_pTimer && m_pTimer->isActive())
+      {
+        m_pTimer->stop();
+      }
     }
   }
 }
@@ -302,6 +360,7 @@ void CMetronomeManager::SlotDeregisterUiImpl(const QUuid& sName)
   auto it = m_metronomeBlocks.find(sName);
   if (m_metronomeBlocks.end() != it)
   {
+    SlotStop(sName);
     m_metronomeBlocks.erase(it);
   }
 }
@@ -330,6 +389,48 @@ std::shared_ptr<SMetronomeDataBlock> CMetronomeManager::SlotRegisterUiImpl(const
 
 //----------------------------------------------------------------------------------------
 //
+namespace
+{
+  bool NeedsToSpawnTicks(const std::vector<std::pair<ETickType, double>>& vdSpawnedTicks,
+                         const ETickTypeFlags& ticksToPlay,
+                         double& dLastPatternTick,
+                         bool& bFoundLastPatternTick)
+  {
+    bFoundLastPatternTick = false;
+    if (!ticksToPlay.testFlag(ETickType::ePattern)) { return false; }
+
+    bool bRet = vdSpawnedTicks.empty();
+    dLastPatternTick = 1.0;
+    if (!bRet)
+    {
+      for (auto it = vdSpawnedTicks.rbegin(); vdSpawnedTicks.rend() != it; ++it)
+      {
+        if (ETickType::ePattern == it->first)
+        {
+          bFoundLastPatternTick = true;
+          dLastPatternTick = it->second;
+          return it->second >= 0.0;
+        }
+      }
+    }
+    return bRet;
+  }
+
+  //--------------------------------------------------------------------------------------
+  //
+  std::vector<double> TransformTicks(const std::vector<std::pair<ETickType, double>>& vdSpawnedTicks)
+  {
+    std::vector<double> vdRet;
+    for (const auto& [_, dVal] : vdSpawnedTicks)
+    {
+      vdRet.push_back(dVal);
+    }
+    return vdRet;
+  }
+}
+
+//----------------------------------------------------------------------------------------
+//
 void CMetronomeManager::SlotTimeout()
 {
   auto now = std::chrono::high_resolution_clock::now();
@@ -343,10 +444,11 @@ void CMetronomeManager::SlotTimeout()
     {
       for (qint32 i = 0; spBlock->m_privateBlock.m_vdSpawnedTicks.size() > static_cast<size_t>(i); ++i)
       {
-        double& dVal = spBlock->m_privateBlock.m_vdSpawnedTicks[static_cast<size_t>(i)];
+        std::pair<ETickType, double>& dVal =
+            spBlock->m_privateBlock.m_vdSpawnedTicks[static_cast<size_t>(i)];
         // 1s to reach end
-        dVal += static_cast<double>(iDiffMs / 1'000.0);
-        if (dVal >= 1.0)
+        dVal.second += static_cast<double>(iDiffMs / 1'000.0);
+        if (dVal.second >= 1.0)
         {
           spBlock->m_privateBlock.m_spSoundEmitters->Play();
           emit SignalTickReachedCenter(id);
@@ -356,29 +458,26 @@ void CMetronomeManager::SlotTimeout()
         }
       }
 
-      if (spBlock->m_privateBlock.m_vdSpawnedTicks.empty() ||
-          spBlock->m_privateBlock.m_vdSpawnedTicks.back() >= 0.0)
+      // spawn repeating ticks
+      bool bFoundLastPatternTick = false;
+      double dLastPatternTick = 0.0;
+      if (NeedsToSpawnTicks(spBlock->m_privateBlock.m_vdSpawnedTicks,
+                            spBlock->m_privateBlock.m_playFlags,
+                            dLastPatternTick, bFoundLastPatternTick))
       {
-        for (size_t i = 0; spBlock->m_privateBlock.m_vdTickPattern.size()+1 > i; ++i)
+        for (size_t i = 0; spBlock->m_privateBlock.m_vdTickPattern.size() > i; ++i)
         {
-          if (0 == i)
-          {
-            continue;
-          }
-          auto dDistMsTick = spBlock->m_privateBlock.m_vdTickPattern[i-1];
-          double dLastTick = 1.0;
-          if (!spBlock->m_privateBlock.m_vdSpawnedTicks.empty())
-          {
-            dLastTick = spBlock->m_privateBlock.m_vdSpawnedTicks.back();
-          }
-          spBlock->m_privateBlock.m_vdSpawnedTicks.push_back(
-              dLastTick - static_cast<double>(dDistMsTick / 1'000.0));
+          auto dDistMsTick = spBlock->m_privateBlock.m_vdTickPattern[i];
+          double dLastTickLoc = dLastPatternTick - static_cast<double>(dDistMsTick / 1'000.0);
+          spBlock->m_privateBlock.m_vdSpawnedTicks.push_back({
+              ETickType::ePattern, dLastTickLoc});
+          dLastPatternTick = dLastTickLoc;
         }
       }
 
       if (c_iUpdateThresholdInterval < m_iCumulativeTime)
       {
-        emit SignalPatternChanged(id, spBlock->m_privateBlock.m_vdSpawnedTicks);
+        emit SignalPatternChanged(id, TransformTicks(spBlock->m_privateBlock.m_vdSpawnedTicks));
       }
     }
   }

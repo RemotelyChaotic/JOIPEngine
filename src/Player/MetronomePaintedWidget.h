@@ -27,6 +27,15 @@ class CMetronomeCanvasQml : public QQuickPaintedItem
   Q_PROPERTY(double  volume READ Volume WRITE SetVolume NOTIFY volumeChanged)
 
 public:
+  enum MetronomeStateChange
+  {
+    Started,
+    Paused,
+    Resumed,
+    Stopped
+  };
+  Q_ENUM(MetronomeStateChange)
+
   CMetronomeCanvasQml(QQuickItem* pParent = nullptr);
   ~CMetronomeCanvasQml() override;
 
@@ -56,6 +65,7 @@ signals:
   void beatResourceChanged();
   void bpmChanged();
   void mutedChanged();
+  void metronomeStateChanged(CMetronomeCanvasQml::MetronomeStateChange state);
   void patternChanged();
   void tickColorChanged();
   void tickReachedCenter();

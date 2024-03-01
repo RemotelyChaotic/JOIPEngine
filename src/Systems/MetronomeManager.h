@@ -3,6 +3,7 @@
 
 #include "ThreadedSystem.h"
 
+#include <QFlags>
 #include <QMutex>
 #include <QUuid>
 
@@ -34,6 +35,17 @@ struct SMetronomeDataBlockPrivate;
 
 //----------------------------------------------------------------------------------------
 //
+enum ETickType
+{
+  eSingle,
+  ePattern
+};
+Q_DECLARE_FLAGS(ETickTypeFlags, ETickType)
+Q_DECLARE_OPERATORS_FOR_FLAGS(ETickTypeFlags)
+Q_DECLARE_METATYPE(ETickTypeFlags)
+
+//----------------------------------------------------------------------------------------
+//
 class CMetronomeManager : public CSystemBase
 {
   Q_OBJECT
@@ -45,6 +57,7 @@ public:
 
   void DeregisterUi(const QUuid& sName);
   std::shared_ptr<SMetronomeDataBlock> RegisterUi(const QUuid& sName);
+  QUuid IdForName(const QString& sName);
   void SpawnSingleBeat(const QString& sName);
   void SpawnSingleBeat(const QUuid& uid);
 
@@ -54,19 +67,24 @@ public slots:
 
 signals:
   // incomming
-  void SignalStart(const QUuid& id);
+  void SignalStart(const QUuid& id, ETickTypeFlags ticksToPlay);
   void SignalPause(const QUuid& id);
   void SignalResume(const QUuid& id);
   void SignalStop(const QUuid& id);
   void SignalBlockChanged(const QUuid& sName);
   // outgoing
+  void SignalStarted(const QUuid& id);
+  void SignalPaused(const QUuid& id);
+  void SignalResumed(const QUuid& id);
+  void SignalStopped(const QUuid& id);
   void SignalPatternChanged(const QUuid& id, const std::vector<double>& vdTicks);
   void SignalTickReachedCenter(const QUuid& id);
 
 private slots:
+  QUuid SlotIdForNameImpl(const QString& sName);
   void SlotSpawnSingleBeatImpl(const QString& sName);
   void SlotSpawnSingleBeatImpl(const QUuid& uid);
-  void SlotStart(const QUuid& id);
+  void SlotStart(const QUuid& id, ETickTypeFlags ticksToPlay);
   void SlotPause(const QUuid& id);
   void SlotResume(const QUuid& id);
   void SlotStop(const QUuid& id);

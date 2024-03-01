@@ -20,6 +20,37 @@ CMetronomeCanvasQml::CMetronomeCanvasQml(QQuickItem* pParent) :
   if (nullptr != m_spMetronomeManager)
   {
     m_spDataBlockThread = m_spMetronomeManager->RegisterUi(m_id);
+    connect(m_spMetronomeManager.get(), &CMetronomeManager::SignalStarted,
+            this, [this](QUuid id){
+      if (m_id == id)
+      {
+        emit metronomeStateChanged(MetronomeStateChange::Started);
+      }
+    }, Qt::QueuedConnection);
+    connect(m_spMetronomeManager.get(), &CMetronomeManager::SignalPaused,
+            this, [this](QUuid id){
+      if (m_id == id)
+      {
+        emit metronomeStateChanged(MetronomeStateChange::Paused);
+      }
+    }, Qt::QueuedConnection);
+    connect(m_spMetronomeManager.get(), &CMetronomeManager::SignalResumed,
+            this, [this](QUuid id){
+      if (m_id == id)
+      {
+        emit metronomeStateChanged(MetronomeStateChange::Resumed);
+      }
+    }, Qt::QueuedConnection);
+    connect(m_spMetronomeManager.get(), &CMetronomeManager::SignalStopped,
+            this, [this](QUuid id){
+      if (m_id == id)
+      {
+        emit metronomeStateChanged(MetronomeStateChange::Stopped);
+      }
+    }, Qt::QueuedConnection);
+
+    UpdatePattern();
+
     connect(m_spMetronomeManager.get(), &CMetronomeManager::SignalPatternChanged,
             this, &CMetronomeCanvasQml::SlotUpdate, Qt::DirectConnection);
     connect(m_spMetronomeManager.get(), &CMetronomeManager::SignalTickReachedCenter,
@@ -235,7 +266,7 @@ void CMetronomeCanvasQml::start()
 {
   if (nullptr != m_spMetronomeManager)
   {
-    emit m_spMetronomeManager->SignalStart(m_id);
+    emit m_spMetronomeManager->SignalStart(m_id, ETickType::ePattern);
   }
 }
 

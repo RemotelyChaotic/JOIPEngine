@@ -23,31 +23,21 @@ Rectangle {
     function start()
     {
         metronomeDisplay.start();
-        metronomeDisplay.running = true;
     }
 
     function resume()
     {
-        if (!metronomeDisplay.running)
-        {
-            metronomeDisplay.resume();
-            metronomeDisplay.running = true;
-        }
+        metronomeDisplay.resume();
     }
 
     function pause()
     {
-        if (metronomeDisplay.running)
-        {
-            metronomeDisplay.pause();
-            metronomeDisplay.running = false;
-        }
+        metronomeDisplay.pause();
     }
 
     function stop()
     {
         metronomeDisplay.stop();
-        metronomeDisplay.running = false;
     }
 
     Rectangle {
@@ -94,6 +84,15 @@ Rectangle {
             }
             currentRipple++
             if (4 == currentRipple) { currentRipple = 0; }
+        }
+        onMetronomeStateChanged: {
+            switch (state)
+            {
+            case MetronomeDisplay.Started: running = true; break;
+            case MetronomeDisplay.Paused: running = true; break;
+            case MetronomeDisplay.Resumed: running = true; break;
+            case MetronomeDisplay.Stopped: running = false; break;
+            }
         }
     }
 
