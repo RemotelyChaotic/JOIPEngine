@@ -373,6 +373,14 @@ void CUpdater::EvaluateJson(const QByteArray& arr)
     m_bUpdateLauncher = false;
   }
 
+  // don't launch update if upstream is 1.4.0 or higher and exisitng version is lower
+  if (static_cast<qint32>(SVersion("1.4.0")) <= iLatestUpdaterVersionCode &&
+      static_cast<qint32>(SVersion("1.4.0")) > iCompareUpdaterVersion)
+  {
+    bUpdate = false;
+    m_bUpdateLauncher = false;
+  }
+
   // DEBUG:
   //bUpdate = true;
   if (bUpdate)
