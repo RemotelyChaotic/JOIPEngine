@@ -192,6 +192,7 @@ void CDeviceButtonOverlay::Resize()
   m_pCounterOverlay->Resize();
   m_pCounterOverlay->move(pos.x() - m_pCounterOverlay->size().width() / 2,
                           pos.y() - m_pCounterOverlay->size().height() / 2);
+  m_pCounterOverlay->Climb();
 }
 
 //----------------------------------------------------------------------------------------
@@ -199,6 +200,8 @@ void CDeviceButtonOverlay::Resize()
 void CDeviceButtonOverlay::Show()
 {
   COverlayButton::Show();
+  m_pCounterOverlay->Climb();
+  m_pCounterOverlay->Show();
 }
 
 //----------------------------------------------------------------------------------------
