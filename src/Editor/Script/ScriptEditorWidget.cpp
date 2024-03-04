@@ -579,7 +579,7 @@ void CScriptEditorWidget::paintEvent(QPaintEvent* pEvent)
       if (Highlighter()->startsFoldingRegion(block))
       {
         QTextBlock blockEnd = Highlighter()->findFoldingRegionEnd(block);
-        if (blockEnd.previous().isVisible())
+        if (blockEnd.previous().isVisible() && blockEnd.isValid())
         {
           static const QRegExp rx("\\S");
           // find first char
