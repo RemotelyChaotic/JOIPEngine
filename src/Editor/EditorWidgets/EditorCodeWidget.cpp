@@ -522,7 +522,10 @@ void CEditorCodeWidget::ReloadEditor(qint32 iIndex)
   {
     if (nullptr != ActionBar())
     {
-      ActionBar()->m_spUi->DebugButton->setEnabled(!pScriptItem->m_vspScenes.empty());
+      QReadLocker l(&m_spCurrentProject->m_rwLock);
+      bool bEnabled = !pScriptItem->m_vspScenes.empty() ||
+          pScriptItem->m_sId == m_spCurrentProject->m_sPlayerLayout;
+      ActionBar()->m_spUi->DebugButton->setEnabled(bEnabled);
     }
     m_spUi->pCodeEditorView->SetScriptType(pScriptItem->m_sFileType);
     m_spUi->pCodeEditorView->SetContent(QString::fromUtf8(pScriptItem->m_data));
