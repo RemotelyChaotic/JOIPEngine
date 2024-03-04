@@ -144,7 +144,19 @@ void CSceneMainScreen::LoadProject(qint32 iId, const tSceneToLoad& sStartScene)
 
     QStringList vsPaths = m_vsBaseImportPathList;
     vsPaths << "qrc:/qml/resources/qml/";
-    vsPaths << PhysicalProjectPath(m_spCurrentProject);
+    vsPaths << CPhysFsFileEngineHandler::c_sScheme;
+    {
+      QReadLocker l(&m_spCurrentProject->m_rwLock);
+      tspResource spRes =
+          spDbManager->FindResourceInProject(m_spCurrentProject,
+                                             m_spCurrentProject->m_sPlayerLayout);
+      if (nullptr != spRes)
+      {
+        QReadLocker lRes(&spRes->m_rwLock);
+        QString sPath = spRes->m_sPath.toString();
+        vsPaths << sPath.left(sPath.lastIndexOf("/"));
+      }
+    }
     m_spUi->pQmlWidget->engine()->setImportPathList(vsPaths);
 
     CDatabaseManager::LoadProject(m_spCurrentProject);
