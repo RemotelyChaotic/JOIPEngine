@@ -31,6 +31,7 @@ CEditorChoiceScreen::CEditorChoiceScreen(QWidget* pParent) :
   m_bInitialized(false)
 {
   m_spUi->setupUi(this);
+  m_spUi->pEnableTutorialCheckBox->hide();
   Initialize();
 }
 
@@ -156,7 +157,7 @@ void CEditorChoiceScreen::on_pCreateProjectButton_clicked()
     else
     {
       m_spUi->pErrorLabel->setVisible(false);
-      emit SignalNewClicked(sNewName, m_spUi->pEnableTutorialCheckBox->isChecked());
+      emit SignalNewClicked(sNewName, /*m_spUi->pEnableTutorialCheckBox->isChecked()*/false);
       m_spUi->pStackedWidget->SlideInIdx(c_iPageIndexChoice);
     }
   }
