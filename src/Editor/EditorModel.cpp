@@ -157,6 +157,67 @@ QUndoStack* CEditorModel::UndoStack() const
 //
 namespace
 {
+  void UpdateQmldir(const QFileInfo& sAbsoluteFile, const QString& sRelativePath,
+                    std::shared_ptr<CDatabaseManager> spDbManager,
+                    tspProject spProject)
+  {
+    const QString sQmlDir = sAbsoluteFile.absolutePath() + "/qmldir";
+    QString sImport;
+    {
+      QString sContent;
+      qint32 iPos = sRelativePath.lastIndexOf("/");
+      if (-1 != iPos)
+      {
+        sImport = sRelativePath.left(iPos).replace("/", ".").replace("\\", ".");
+      }
+    }
+
+    if (sImport.isEmpty()) { return; }
+
+    // if qmldir does not exist, create it
+    if (!QFileInfo(sQmlDir).exists())
+    {
+      QFile qmldirFile(sQmlDir);
+      if (qmldirFile.open(QIODevice::ReadWrite))
+      {
+        QString sContent = QString("module %1").arg(sImport);
+        qmldirFile.write(sContent.toUtf8());
+      }
+      else
+      {
+        qWarning() << QObject::tr("Could not create qmldir for new Layout file.");
+        return;
+      }
+    }
+
+    // update qmldir file
+    QFile qmldirFile(sQmlDir);
+    if (qmldirFile.open(QIODevice::ReadWrite | QIODevice::Append))
+    {
+      QString sNewModule = "\n%1 1.0 %2";
+      QString sModule = sNewModule.arg(sAbsoluteFile.baseName())
+                                   .arg(sAbsoluteFile.fileName());
+      qmldirFile.write(sModule.toUtf8());
+    }
+    else
+    {
+      qWarning() << QObject::tr("Could not update qmldir with new Layout file.");
+      return;
+    }
+
+    // update resources to include the file
+    QUrl url = ResourceUrlFromLocalFile(QString(sRelativePath)
+                                        .replace(sAbsoluteFile.fileName(), "qmldir"));
+    QString sResource = QString("qmldir_%1").arg(sImport);
+    tspResource spRes = spDbManager->FindResourceInProject(spProject, sResource);
+    if (nullptr == spRes)
+    {
+      spDbManager->AddResource(spProject, url, EResourceType::eOther, sResource);
+    }
+  }
+
+  //--------------------------------------------------------------------------------------
+  //
   void InitScript(QIODevice& file, const QString& sType)
   {
     auto itDefinition = SScriptDefinitionData::DefinitionMap().find(sType);
@@ -240,6 +301,10 @@ void CEditorModel::AddNewFileToScene(QPointer<QWidget> pParentForDialog,
           QFile scriptFile(info.absoluteFilePath());
           if (scriptFile.open(QIODevice::WriteOnly | QIODevice::Truncate))
           {
+            if (EResourceType::eLayout == type._to_integral())
+            {
+              UpdateQmldir(info, sRelativePath, spDbManager, m_spCurrentProject);
+            }
             InitScript(scriptFile, info.suffix());
 
             tvfnActionsResource vfnActions =
