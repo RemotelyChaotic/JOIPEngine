@@ -279,8 +279,6 @@
         <file>resources/help/editor/images/adddevice_lialog_stop.png</file>
         <file>resources/help/editor/images/adddevice_lialog_vibrate.png</file>
         <file>resources/help/devices_button_help.html</file>
-        <file>resources/help/editor/add_sequenceelem_button_help.html</file>
-        <file>resources/help/editor/remove_sequenceelem_button_help.html</file>
         <file>resources/style/img/ButtonAddScript.png</file>
         <file>resources/style/img/ButtonAddLayout.png</file>
         <file>resources/style/img/InstructionIcon.png</file>
@@ -291,6 +289,19 @@
         <file>resources/style/img/ButtonNewSequenceLayer.png</file>
         <file>resources/style/img/ButtonRemoveSequenceLayer.png</file>
         <file>resources/style/img/ButtonSequenceProperties.png</file>
+        <file>resources/help/editor/sequence/startdebug_button_help.html</file>
+        <file>resources/help/editor/sequence/add_sequenceelem_button_help.html</file>
+        <file>resources/help/editor/sequence/remove_sequenceelem_button_help.html</file>
+        <file>resources/help/editor/sequence/add_sequencelayer_button_help.html</file>
+        <file>resources/help/editor/sequence/remove_sequencelayer_button_help.html</file>
+        <file>resources/help/editor/sequence/createsequence_button_help.html</file>
+        <file>resources/help/editor/sequence/editsequence_button_help.html</file>
+        <file>resources/help/editor/sequence/sequence_editor_help.html</file>
+        <file>resources/help/editor/sequence/images/sequence_properties.png</file>
+        <file>resources/help/editor/sequence/images/sequence_instruction.png</file>
+        <file>resources/help/editor/sequence/images/editor_controls.png</file>
+        <file>resources/help/editor/sequence/images/editor_layer.png</file>
+        <file>resources/help/editor/sequence/images/instruction_metronome_start.png</file>
     </qresource>
     <qresource prefix="/qml">
         <file>resources/qml/JoipEngine/EmptyDummy.qml</file>

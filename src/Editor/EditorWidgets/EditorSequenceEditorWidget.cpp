@@ -1,4 +1,5 @@
 #include "EditorSequenceEditorWidget.h"
+#include "Application.h"
 
 #include "Editor/SequenceEditor/CommandAddNewSequence.h"
 #include "Editor/SequenceEditor/CommandChangeOpenedSequence.h"
@@ -8,11 +9,19 @@
 #include "Editor/EditorEditableFileModel.h"
 #include "Editor/EditorModel.h"
 
+#include "Systems/HelpFactory.h"
+
 #include "Systems/Sequence/Sequence.h"
+
+#include "Widgets/HelpOverlay.h"
 
 #include <QJsonDocument>
 #include <QUndoStack>
 #include <QUuid>
+
+namespace {
+  const QString c_sSequenceEditorHelpId =  "Editor/SequenceEditor";
+}
 
 DECLARE_EDITORWIDGET(CEditorPatternEditorWidget, EEditorWidget::ePatternEditor)
 
@@ -75,6 +84,13 @@ void CEditorPatternEditorWidget::Initialize()
 
   m_spOverlayProps->SetUndoStack(UndoStack());
   m_spOverlayProps->Hide();
+
+  auto wpHelpFactory = CApplication::Instance()->System<CHelpFactory>().lock();
+  if (nullptr != wpHelpFactory)
+  {
+    m_spUi->pTimeLineWidget->setProperty(helpOverlay::c_sHelpPagePropertyName, c_sSequenceEditorHelpId);
+    wpHelpFactory->RegisterHelp(c_sSequenceEditorHelpId, ":/resources/help/editor/sequence/sequence_editor_help.html");
+  }
 
   m_bInitialized = true;
 }

@@ -1107,7 +1107,7 @@
          </sizepolicy>
         </property>
         <property name="toolTip">
-         <string>Debug layout</string>
+         <string>Debug sequence</string>
         </property>
         <property name="text">
          <string/>

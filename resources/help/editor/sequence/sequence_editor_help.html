@@ -1,0 +1,91 @@
+<!doctype html>
+<html class="no-js" lang="">
+
+<head>
+  <meta charset="utf-8">
+  <title>Sequence Editor</title>
+  <meta name="description" content="">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <style>
+    h1 {
+      text-align: center;
+    }
+    div.container {
+      min-height: 10em;
+      display: table-cell;
+      margin-left: auto;
+      margin-right: auto;
+      width: 0.6em
+    }
+    table.warning {
+      color: black;
+      background-color: #cccc44;
+      border-color: yellow;
+      border-style: solid;
+    }
+  </style>
+</head>
+
+
+<body>
+  <h1>Sequence Editor</h1>
+
+  <hr>
+
+  <div class="container">
+    <p>The sequence editor allows for editing a sequence and its layers.</p>
+
+    <br>
+
+    <p>At the top of the editor, the controls allow to change certain editor properties.
+    These are, from left to right:
+      <ul>
+        <li><b>Zoom Level</b>: Sets the zoom level. You can either select a pre-defined value,
+        or enter a custom value.</li>
+        <li><b>Grid</b>: Sets the interval that the cursor will be constrained to in milliseconds.
+        It allows for more controlled placement of Instructions. Setting a value of 0 or 1 will disable the grid and
+        enable free placement of instructions.</li>
+        <li><b>Cursor Time</b>: Shows the current time stamp of the cursor.</li>
+      </ul>
+    </p>
+
+    <br>
+
+    <p><img src="qrc:/resources/help/editor/sequence/images/editor_controls.png"><br><i>Error Controls</i></p>
+
+    <br>
+
+    <p>Below the controls, the list of layers, present in the sequence, can be edited.
+    The header of the layer is to the left. Grabbing the empty space below the properties allows for re-ordering the layers.
+    The properties are, from top to bottom:
+      <ul>
+        <li><b>Layer Type</b>: The type of instructions that can be placed on the layer.
+        Each layer is limited to one type of instructions. The types are:
+        Metronome Commands, Toy Commands, Resource Commands, Text Commands and Script Commands.</li>
+        <li><b>Reference Object</b>: This defines the object in the
+        <a href="qrc:/resources/help/layout/layout_help.html">Layout</a> that the commands will be sent to.
+        This can be thought of as the object in <a href="qrc:/resources/help/editor/code/script_reference_help.html">Scene Scripts</a>
+        whose methods are called. Multiple layers can reference the same object.</li>
+      </ul>
+    </p>
+
+    <br>
+
+    <p><img src="qrc:/resources/help/editor/sequence/images/editor_layer.png"><br><i>Sequence Layer</i></p>
+
+    <br>
+
+    <p>The timeline in the right part of the editor can be used to place Instructions.
+    Selecting an instruction opens the editor for the specific instruction. The editor is mostly the
+    same as it is for the Code editor. Below is an example for a "Start Patern" instruction.
+    Hovering over an instruction will display the serialized instruction in a tooltip.
+    </p>
+
+    <br>
+
+    <p><img src="qrc:/resources/help/editor/sequence/images/instruction_metronome_start.png"><br><i>Instruction Editor for Metronome Start</i></p>
+  </div>
+</body>
+
+</html>

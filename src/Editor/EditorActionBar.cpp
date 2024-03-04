@@ -62,6 +62,7 @@ namespace {
   const QString c_sAddFetishHelpId =      "Editor/AddFetish";
   const QString c_sRemoveFetishHelpId =   "Editor/RemoveFetish";
 
+  const QString c_sDebugSeqHelpId =        "Editor/DebugSequence";
   const QString c_sAddSeqHelpId =          "Editor/CreateNewSequence";
   const QString c_sEditSeqHelpId =         "Editor/EditSequenceProperties";
   const QString c_sAddSeqElemHelpId =      "Editor/AddSequenceElement";
@@ -253,21 +254,21 @@ void CEditorActionBar::Initialize()
     m_spUi->RemoveCode->setProperty(helpOverlay::c_sHelpPagePropertyName, c_sAddEosRemoveHelpId);
     wpHelpFactory->RegisterHelp(c_sAddEosRemoveHelpId, ":/resources/help/editor/remove_eos_button_help.html");
 
-    m_spUi->DebugLayoutButton->setProperty(helpOverlay::c_sHelpPagePropertyName, c_sStartDebugHelpId);
-    m_spUi->StopDebugLayoutButton->setProperty(helpOverlay::c_sHelpPagePropertyName, c_sStopDebugHelpId);
-
+    m_spUi->DebugLayoutButton->setProperty(helpOverlay::c_sHelpPagePropertyName, c_sDebugSeqHelpId);
+    m_spUi->StopDebugLayoutButton->setProperty(helpOverlay::c_sHelpPagePropertyName, c_sDebugSeqHelpId);
+    wpHelpFactory->RegisterHelp(c_sDebugSeqHelpId, ":/resources/help/editor/sequence/startdebug_button_help.html");
     m_spUi->NewSequence->setProperty(helpOverlay::c_sHelpPagePropertyName, c_sAddSeqHelpId);
-    wpHelpFactory->RegisterHelp(c_sAddSeqHelpId, ":/resources/help/editor/add_sequenceelem_button_help.html");
+    wpHelpFactory->RegisterHelp(c_sAddSeqHelpId, ":/resources/help/editor/sequence/createsequence_button_help.html");
     m_spUi->SequenceProperties->setProperty(helpOverlay::c_sHelpPagePropertyName, c_sEditSeqHelpId);
-    wpHelpFactory->RegisterHelp(c_sEditSeqHelpId, ":/resources/help/editor/add_sequenceelem_button_help.html");
+    wpHelpFactory->RegisterHelp(c_sEditSeqHelpId, ":/resources/help/editor/sequence/editsequence_button_help.html");
     m_spUi->AddSequenceElement->setProperty(helpOverlay::c_sHelpPagePropertyName, c_sAddSeqElemHelpId);
     wpHelpFactory->RegisterHelp(c_sAddSeqElemHelpId, ":/resources/help/editor/add_sequenceelem_button_help.html");
     m_spUi->RemoveSelectedSequenceElements->setProperty(helpOverlay::c_sHelpPagePropertyName, c_sRemoveSeqElemsHelpId);
     wpHelpFactory->RegisterHelp(c_sRemoveSeqElemsHelpId, ":/resources/help/editor/remove_sequenceelem_button_help.html");
     m_spUi->AddSequenceLayer->setProperty(helpOverlay::c_sHelpPagePropertyName, c_sAddSeqLayerHelpId);
-    wpHelpFactory->RegisterHelp(c_sAddSeqLayerHelpId, ":/resources/help/editor/add_sequenceelem_button_help.html");
+    wpHelpFactory->RegisterHelp(c_sAddSeqLayerHelpId, ":/resources/help/editor/sequence/add_sequencelayer_button_help.html");
     m_spUi->RemoveSelectedSequenceLayer->setProperty(helpOverlay::c_sHelpPagePropertyName, c_sRemoveSeqLayerHelpId);
-    wpHelpFactory->RegisterHelp(c_sRemoveSeqLayerHelpId, ":/resources/help/editor/remove_sequenceelem_button_help.html");
+    wpHelpFactory->RegisterHelp(c_sRemoveSeqLayerHelpId, ":/resources/help/editor/sequence/remove_sequencelayer_button_help.html");
   }
 
   connect(m_spSettings.get(), &CSettings::keyBindingsChanged,
