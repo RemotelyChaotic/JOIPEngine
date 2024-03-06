@@ -62,10 +62,12 @@ public:
 signals:
   void SignalEditInstruction(qint64 iInstr);
   void SignalOpenInsertContextMenuAt(QPoint p, qint64 iCursorTime);
+  void SignalSelected();
 
 protected:
   bool eventFilter(QObject* pObj, QEvent* pEvt) override;
   void paintEvent(QPaintEvent* pEvt) override;
+  void mousePressEvent(QMouseEvent* pEvt) override;
   void mouseMoveEvent(QMouseEvent* pMouse) override;
   void mouseReleaseEvent(QMouseEvent* pEvt) override;
 

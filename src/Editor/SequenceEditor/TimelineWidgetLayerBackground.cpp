@@ -498,6 +498,19 @@ void CTimelineWidgetLayerBackground::paintEvent(QPaintEvent* pEvt)
 
 //----------------------------------------------------------------------------------------
 //
+void CTimelineWidgetLayerBackground::mousePressEvent(QMouseEvent* pEvt)
+{
+  if (nullptr != pEvt)
+  {
+    if (Qt::RightButton == pEvt->button() || Qt::LeftButton == pEvt->button())
+    {
+      emit SignalSelected();
+    }
+  }
+}
+
+//----------------------------------------------------------------------------------------
+//
 void CTimelineWidgetLayerBackground::mouseMoveEvent(QMouseEvent* pEvt)
 {
   if (nullptr != pEvt)
