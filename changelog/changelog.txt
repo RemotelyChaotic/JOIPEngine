@@ -27,6 +27,8 @@ New Features:
 - Added the possibility to create and play instruction sequences. These are played in parallel
   to the script and run instructions based on an internal timeline. They are stored in a new 
   type of Resource: Sequences.
+- Resource tags can have custom types. To set a tag type, separate the tag name with ":".
+  Everything to the left of the first ":" will be interpreted as the tag's type.
 
 Changes:
 - Changed debug-view to a layout with splitter to support resizing the debugger.

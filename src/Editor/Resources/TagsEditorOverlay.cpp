@@ -135,6 +135,14 @@ void CTagsEditorOverlay::on_pLineEdit_editingFinished()
       sProject = m_spCurrentProject->m_sName;
     }
 
+    auto fnTagTypeFromName = [](const QString& sName, const QString& sTagDefault) -> QString {
+      if (sName.contains(":"))
+      {
+        return sName.left(sName.indexOf(":"));
+      }
+      return sTagDefault;
+    };
+
     if (nullptr == spTag)
     {
       spTag = std::make_unique<STag>(QString(), sTagName, sTagDescribtion);
@@ -142,7 +150,7 @@ void CTagsEditorOverlay::on_pLineEdit_editingFinished()
       {
         {
           QReadLocker resLocker(&spResource->m_rwLock);
-          spTag->m_sType = spResource->m_type._to_string();
+          spTag->m_sType = fnTagTypeFromName(sTagName, spResource->m_type._to_string());
         }
         m_pUndoStack->push(new CCommandAddTag(sProject, m_sResource, spTag));
       }
@@ -150,16 +158,18 @@ void CTagsEditorOverlay::on_pLineEdit_editingFinished()
     else
     {
       QString sOldDescribtion;
-      QString sType;
+      QString sOldType;
+      QString sNewType;
       {
         QReadLocker resLocker(&spResource->m_rwLock);
         QReadLocker tagLocker(&spTag->m_rwLock);
         sOldDescribtion = spTag->m_sDescribtion;
-        sType = spResource->m_type._to_string();
+        sOldType = spTag->m_sType;
+        sNewType = fnTagTypeFromName(sTagName, sOldType);
       }
       if (sOldDescribtion != sTagDescribtion && !sTagDescribtion.isEmpty())
       {
-        m_pUndoStack->push(new CCommandChangeTag(sProject, sTagName, sType, sType,
+        m_pUndoStack->push(new CCommandChangeTag(sProject, sTagName, sNewType, sOldType,
                                                  sTagDescribtion, sOldDescribtion));
         m_spUi->pTagsFrame->UpdateToolTip(sTagName, sTagDescribtion);
         emit SignalTagsChanged();
