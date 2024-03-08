@@ -49,7 +49,7 @@ QString CCommonCodeGenerator::Generate(const SDeviceSnippetData& data,
   {
     QString sCmd =
         Statement(Invoke("deviceController", "sendVibrateCmd") +
-                  Call(Array("%1")));
+                  Call("%1"));
     sCode += sCmd.arg(data.m_dVibrateSpeed);
   }
   if (data.m_bLinearCommand)

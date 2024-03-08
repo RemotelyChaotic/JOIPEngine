@@ -998,30 +998,31 @@
     control connected devices (sex toys).<br>
     Some commands may not be supported by some devices. and will have no effect.<br>
       <ul>
-        <li><b>sendVibrateCmd ( real ):</b><br>
-        Sends a vibrate command to start vibrating the device at the given speed.<br>
+        <li><b>sendVibrateCmd ( real speed ):</b><br>
+        Sends a vibrate command to start vibrating the device at the given speed.
+        The range for speed is 0.0 - 1.0, where 1.0 is the full vibration strength.<br>
         <i>Example Usage (JS):</i><br>
-        deviceController.sendVibrateCmd(10.0);<br>
+        deviceController.sendVibrateCmd(0.1);<br>
         <i>Example Usage (Lua):</i><br>
-        deviceController:sendVibrateCmd(10.0);<br>
+        deviceController:sendVibrateCmd(0.1);<br>
         <br></li>
 
-        <li><b>sendLinearCmd ( real, real ):</b><br>
+        <li><b>sendLinearCmd ( real time, real speed ):</b><br>
         Sends a linear command to the device to start perfoming linear movements (usually thrusts)
-        for a given amount of time (1. argument in seconds) at the given speed (2. argument).<br>
+        for a given amount of time (1. argument in seconds) at the given speed (2. argument from 0.0 - 1.0).<br>
         <i>Example Usage (JS):</i><br>
-        deviceController.sendLinearCmd(10, 10.0);<br>
+        deviceController.sendLinearCmd(10, 0.1);<br>
         <i>Example Usage (Lua):</i><br>
-        deviceController:sendLinearCmd(10, 10.0);<br>
+        deviceController:sendLinearCmd(10, 0.1);<br>
         <br></li>
 
-        <li><b>sendRotateCmd ( bool, real ):</b><br>
+        <li><b>sendRotateCmd ( bool, real speed ):</b><br>
         Sends a rotation command to the device to start perfoming rotational movements
-        in a given direction (1. argument, true = clockwise, false = counter-clockwise) at the given speed (2. argument).<br>
+        in a given direction (1. argument, true = clockwise, false = counter-clockwise) at the given speed (2. argument from 0.0 - 1.0).<br>
         <i>Example Usage (JS):</i><br>
-        deviceController.sendRotateCmd(true, 10.0);<br>
+        deviceController.sendRotateCmd(true, 0.1);<br>
         <i>Example Usage (Lua):</i><br>
-        deviceController:sendRotateCmd(true, 10.0);<br>
+        deviceController:sendRotateCmd(true, 0.1);<br>
         <br></li>
 
         <li><b>sendStopCmd (  ):</b><br>

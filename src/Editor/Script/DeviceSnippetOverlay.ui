@@ -125,7 +125,14 @@
         </widget>
        </item>
        <item row="1" column="1">
-        <widget class="QDoubleSpinBox" name="pSpeedVibrateSpinBox"/>
+        <widget class="QDoubleSpinBox" name="pSpeedVibrateSpinBox">
+         <property name="suffix">
+          <string> %</string>
+         </property>
+         <property name="maximum">
+          <double>100.000000000000000</double>
+         </property>
+        </widget>
        </item>
        <item row="0" column="0">
         <widget class="QCheckBox" name="pVibrateGroupBox">
@@ -176,7 +183,14 @@
         </widget>
        </item>
        <item row="2" column="1">
-        <widget class="QDoubleSpinBox" name="pPositionSpinBox"/>
+        <widget class="QDoubleSpinBox" name="pPositionSpinBox">
+         <property name="suffix">
+          <string> %</string>
+         </property>
+         <property name="maximum">
+          <double>100.000000000000000</double>
+         </property>
+        </widget>
        </item>
        <item row="2" column="0">
         <widget class="QLabel" name="label_3">
@@ -207,7 +221,14 @@
         </widget>
        </item>
        <item row="2" column="1">
-        <widget class="QDoubleSpinBox" name="pSpeedRotateSpinBox"/>
+        <widget class="QDoubleSpinBox" name="pSpeedRotateSpinBox">
+         <property name="suffix">
+          <string> %</string>
+         </property>
+         <property name="maximum">
+          <double>100.000000000000000</double>
+         </property>
+        </widget>
        </item>
        <item row="1" column="1">
         <widget class="QCheckBox" name="pClockwiseCheckBox">

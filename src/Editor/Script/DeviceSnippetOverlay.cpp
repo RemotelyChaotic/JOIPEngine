@@ -46,7 +46,7 @@ void CDeviceSnippetOverlay::on_pVibrateGroupBox_toggled(bool bChecked)
 //
 void CDeviceSnippetOverlay::on_pSpeedVibrateSpinBox_valueChanged(double dValue)
 {
-  m_data.m_dVibrateSpeed = dValue;
+  m_data.m_dVibrateSpeed = dValue / 100.0;
 }
 
 //----------------------------------------------------------------------------------------
@@ -67,7 +67,7 @@ void CDeviceSnippetOverlay::on_pDurationSpinBox_valueChanged(double dValue)
 //
 void CDeviceSnippetOverlay::on_pPositionSpinBox_valueChanged(double dValue)
 {
-  m_data.m_dLinearPosition = dValue;
+  m_data.m_dLinearPosition = dValue / 100.0;
 }
 
 //----------------------------------------------------------------------------------------
@@ -88,7 +88,7 @@ void CDeviceSnippetOverlay::on_pClockwiseCheckBox_toggled(bool bChecked)
 //
 void CDeviceSnippetOverlay::on_pSpeedRotateSpinBox_valueChanged(double dValue)
 {
-  m_data.m_dRotateSpeed = dValue;
+  m_data.m_dRotateSpeed = dValue / 100.0;
 }
 
 //----------------------------------------------------------------------------------------
