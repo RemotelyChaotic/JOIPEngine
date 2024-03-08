@@ -176,7 +176,7 @@ CDeviceButtonOverlay::~CDeviceButtonOverlay() = default;
 void CDeviceButtonOverlay::Hide()
 {
   COverlayButton::Hide();
-  m_pCounterOverlay->hide();
+  m_pCounterOverlay->Hide();
 }
 
 //----------------------------------------------------------------------------------------

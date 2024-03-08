@@ -62,7 +62,7 @@ private:
   void OpenContextMenuAt(const QPoint& localPoint, const QPoint& createPoint);
 
   std::weak_ptr<CDeviceManager>   m_wpDeviceManager;
-  QPointer<CProgressBar>            m_pProgressBar;
+  QPointer<CProgressBar>          m_pProgressBar;
   QPointer<CDeviceCounterOverlay> m_pCounterOverlay;
 };
 
