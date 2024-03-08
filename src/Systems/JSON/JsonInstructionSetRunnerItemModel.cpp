@@ -96,10 +96,10 @@ QModelIndex CJsonInstructionSetRunnerItemModel::index(int iRow, int iColumn,
     if (nullptr != m_spRunner)
     {
       const auto& nodes = m_spRunner->Nodes();
-      if (0 <= iRow && nodes.size() > iRow)
+      if (0 <= iRow && nodes.size() > static_cast<size_t>(iRow))
       {
         CJsonInstructionNode* pspChildItem =
-            const_cast<CJsonInstructionNode*>(nodes[iRow].second.get());
+            const_cast<CJsonInstructionNode*>(nodes[static_cast<size_t>(iRow)].second.get());
         return createIndex(iRow, iColumn, pspChildItem);
       }
     }

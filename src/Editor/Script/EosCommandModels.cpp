@@ -549,9 +549,9 @@ void CCommandEosNotificationCreateModel::InsertedChildAt(tInstructionMapValue* p
     tInstructionArrayValue arrCommands;
 
     qint32 iIndexToInsertAt = iIndex;
-    for (size_t i = 0; groups.size() > i && iIndexOfGroup > i; ++i)
+    for (size_t i = 0; groups.size() > static_cast<size_t>(i) && static_cast<size_t>(iIndexOfGroup) > i; ++i)
     {
-      QString sAttrLoop = std::get<1>(groups[i]);
+      QString sAttrLoop = std::get<1>(groups[static_cast<size_t>(i)]);
       const auto& itCommandsLoop = GetValue<EArgumentType::eArray>(*pArgs, sAttrLoop);
       if (HasValue(*pArgs, sAttrLoop) && IsOk<EArgumentType::eArray>(itCommandsLoop))
       {

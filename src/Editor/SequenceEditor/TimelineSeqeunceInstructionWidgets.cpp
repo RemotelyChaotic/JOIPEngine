@@ -380,7 +380,7 @@ void CTimelineSeqeunceInstructionWidgetStartPattern::on_RemovePatternElemButton_
 
   QModelIndex index = m_spUi->pPatternTableWidget->currentIndex();
   if (index.row() >= 0 &&
-      m_spUi->pPatternTableWidget->rowCount() > static_cast<size_t>(index.row()))
+      m_spUi->pPatternTableWidget->rowCount() > index.row())
   {
     m_spUi->pPatternTableWidget->removeRow(index.row());
     EmitPropertiesChanged();

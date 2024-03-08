@@ -515,10 +515,10 @@ void CEosCommandWidgetChoice::on_pTableWidget_itemChanged(QTableWidgetItem* pIte
    if (HasValue(*m_pProps, "options") && IsOk<EArgumentType::eArray>(itOptions))
    {
      tInstructionArrayValue arrOptions = std::get<tInstructionArrayValue>(itOptions);
-     if (arrOptions.size() > iIndex && 0 < iIndex &&
-         std::holds_alternative<tInstructionMapValue>(arrOptions[iIndex].m_value))
+     if (arrOptions.size() > static_cast<size_t>(iIndex) && 0 < iIndex &&
+         std::holds_alternative<tInstructionMapValue>(arrOptions[static_cast<size_t>(iIndex)].m_value))
      {
-       tInstructionMapValue values = std::get<tInstructionMapValue>(arrOptions[iIndex].m_value);
+       tInstructionMapValue values = std::get<tInstructionMapValue>(arrOptions[static_cast<size_t>(iIndex)].m_value);
        Qt::CheckState state = pItem->data(Qt::CheckStateRole).value<Qt::CheckState>();
        SetValue<EArgumentType::eBool>(&values, "visible", Qt::Checked == state);
        SetValue<EArgumentType::eString>(&values, "label",
@@ -544,10 +544,10 @@ void CEosCommandWidgetChoice::SlotColorChanged(const QColor& color)
     if (HasValue(*m_pProps, "options") && IsOk<EArgumentType::eArray>(itOptions))
     {
       tInstructionArrayValue arrOptions = std::get<tInstructionArrayValue>(itOptions);
-      if (arrOptions.size() > iIndex && 0 < iIndex &&
-          std::holds_alternative<tInstructionMapValue>(arrOptions[iIndex].m_value))
+      if (arrOptions.size() > static_cast<size_t>(iIndex) && 0 < iIndex &&
+          std::holds_alternative<tInstructionMapValue>(arrOptions[static_cast<size_t>(iIndex)].m_value))
       {
-        tInstructionMapValue values = std::get<tInstructionMapValue>(arrOptions[iIndex].m_value);
+        tInstructionMapValue values = std::get<tInstructionMapValue>(arrOptions[static_cast<size_t>(iIndex)].m_value);
         SetValue<EArgumentType::eString>(&values, "color",
                                          pColorPicker->Color().name(QColor::HexRgb));
         arrOptions[iIndex].m_value = values;

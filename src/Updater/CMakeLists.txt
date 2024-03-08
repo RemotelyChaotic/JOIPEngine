@@ -47,7 +47,7 @@ endif()
 target_compile_definitions(${PROJECT_NAME} PRIVATE QT_FEATURE_zstd=-1)
 if (WIN32)
   if (32BIT)
-    target_compile_definitions(${PROJECT_NAME} PRIVATE DOWNLOAD_POSTFIX=32_)
+    target_compile_definitions(${PROJECT_NAME} PRIVATE DOWNLOAD_POSTFIX="32_")
   endif()
 endif()
 

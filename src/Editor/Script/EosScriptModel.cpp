@@ -513,7 +513,7 @@ QModelIndex CEosScriptModel::InsertInstructionAtImpl(
   // on handled cases start the insertion
   beginInsertRows(parent, iModelItemInsertPoint, iModelItemInsertPoint);
   std::shared_ptr<CJsonInstructionNode> spNewNode = std::make_shared<CJsonInstructionNode>();
-  if (spNodeParent->m_spChildren.size() > iInsertPoint && iInsertPoint)
+  if (spNodeParent->m_spChildren.size() > static_cast<size_t>(iInsertPoint) && iInsertPoint)
   {
     spNodeParent->m_spChildren.insert(spNodeParent->m_spChildren.begin()+iInsertPoint, spNewNode);
   }
@@ -740,7 +740,7 @@ void CEosScriptModel::RecursivelyConstruct(
 
       for (qint32 i = iCurrent; iCurrent+std::get<2>(pair) > i; ++i)
       {
-        if (spParentInstruction->m_spChildren.size() <= i) { assert(false); break; }
+        if (spParentInstruction->m_spChildren.size() <= static_cast<size_t>(i)) { assert(false); break; }
         RecursivelyConstructChild(pChild, spParentInstruction->m_spChildren[i],
                                   std::bind(&CEosScriptModel::RecursivelyConstruct, this,
                                             std::placeholders::_1, std::placeholders::_2));

@@ -447,7 +447,7 @@ void CTimelineWidget::SlotOpenInsertContextMenuRequested(
     qint32 iLayerIdx, qint64 iTimestamp, QPoint globalPos)
 {
   if (nullptr == m_spCurrentSequence) { return; }
-  if (m_spCurrentSequence->m_vspLayers.size() <= iLayerIdx || 0 > iLayerIdx) { return; }
+  if (m_spCurrentSequence->m_vspLayers.size() <= static_cast<size_t>(iLayerIdx) || 0 > iLayerIdx) { return; }
   if (m_spCurrentSequence->m_iLengthMili <= iTimestamp || 0 > iTimestamp) { return; }
 
   QString sLayerType =
@@ -485,7 +485,7 @@ void CTimelineWidget::AddLayerTo(qint32 index, const tspSequenceLayer& spLayer,
 {
   if (nullptr == spCurrentSequence || nullptr == spLayer) { return; }
 
-  if (0 > index || spCurrentSequence->m_vspLayers.size() < index) { return; }
+  if (0 > index || spCurrentSequence->m_vspLayers.size() < static_cast<size_t>(index)) { return; }
 
   if (spCurrentSequence->m_vspLayers.size() == index)
   {
@@ -513,7 +513,7 @@ void CTimelineWidget::RemoveLayerFrom(qint32 index, tspSequence& spCurrentSequen
 {
   if (nullptr == spCurrentSequence) { return; }
 
-  if (0 > index || spCurrentSequence->m_vspLayers.size() <= index) { return; }
+  if (0 > index || spCurrentSequence->m_vspLayers.size() <= static_cast<size_t>(index)) { return; }
 
   spCurrentSequence->m_vspLayers.erase(spCurrentSequence->m_vspLayers.begin() + index);
 

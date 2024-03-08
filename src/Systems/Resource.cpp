@@ -83,7 +83,7 @@ void SResource::FromJsonObject(const QJsonObject& json)
     locker.relock();
 
     qint32 iValue = it.value().toInt();
-    if (EResourceType::_size() > iValue)
+    if (EResourceType::_size() > static_cast<size_t>(iValue))
     {
       if (iValue == EResourceType::eOther &&
           SResourceFormats::DatabaseFormats().contains("*." + sSuffix))

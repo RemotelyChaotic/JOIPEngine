@@ -392,7 +392,7 @@ void CUpdater::EvaluateJson(const QByteArray& arr)
                        .arg(QString::fromStdString(static_cast<std::string>(itUrl.value())))
                        .arg(sLatestVersion)
 #if defined(DOWNLOAD_POSTFIX)
-                       .arg(DOWNLOAD_POSTFIX);
+                       .arg(QString(DOWNLOAD_POSTFIX))
 #else
                         .arg("")
 #endif
