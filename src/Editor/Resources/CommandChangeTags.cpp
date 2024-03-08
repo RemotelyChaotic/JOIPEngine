@@ -40,12 +40,8 @@ void CCommandAddTag::redo()
     auto spProject = spDbManager->FindProject(m_sCurrentProject);
     if (nullptr != spProject)
     {
-      auto spTag = spDbManager->FindTagInProject(spProject, m_spTag->m_sName);
-      if (nullptr == spTag)
-      {
-        spDbManager->AddTag(spProject, m_sResource,
-                            m_spTag->m_sType, m_spTag->m_sName, m_spTag->m_sDescribtion);
-      }
+      spDbManager->AddTag(spProject, m_sResource,
+                          m_spTag->m_sType, m_spTag->m_sName, m_spTag->m_sDescribtion);
     }
   }
 }
@@ -99,7 +95,7 @@ void CCommandChangeTag::undo()
     if (nullptr != spProject)
     {
       auto spTag = spDbManager->FindTagInProject(spProject, m_sTag);
-      if (nullptr == spTag)
+      if (nullptr != spTag)
       {
         QWriteLocker locker(&spTag->m_rwLock);
         spTag->m_sType = m_sOldCategory;
@@ -119,7 +115,7 @@ void CCommandChangeTag::redo()
     if (nullptr != spProject)
     {
       auto spTag = spDbManager->FindTagInProject(spProject, m_sTag);
-      if (nullptr == spTag)
+      if (nullptr != spTag)
       {
         QWriteLocker locker(&spTag->m_rwLock);
         spTag->m_sType = m_sNewCategory;

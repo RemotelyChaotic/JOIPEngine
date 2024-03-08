@@ -11,6 +11,7 @@ Fixed Bugs:
   faulty project configuration.
 - Fixed a few bugs with updating the script list and the ui for the selected scripts.
 - Fixed QML binding loop for buttons.
+- Fixed adding tags to resources. Now they actually work as intended.
 
 New Features:
 - Added the possibility to configure the Layout of the Player for the project as a whole.

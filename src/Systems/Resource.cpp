@@ -121,7 +121,11 @@ void SResource::FromJsonObject(const QJsonObject& json)
   {
     for (const QJsonValue& val : it.value().toArray())
     {
-      m_vsResourceTags.insert(it.value().toString());
+      const QString sValue = val.toString();
+      if (!sValue.isEmpty())
+      {
+        m_vsResourceTags.insert(sValue);
+      }
     }
   }
 }

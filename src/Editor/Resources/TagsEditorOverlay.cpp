@@ -31,7 +31,7 @@ CTagsEditorOverlay::CTagsEditorOverlay(QWidget* pParent) :
   m_pCompleterModel = new QStandardItemModel(this);
 
   m_pCompleter = new CTagCompleter(m_pCompleterModel, m_spUi->pLineEdit);
-  m_pCompleter->setFilterMode(Qt::MatchRecursive | Qt::MatchContains);
+  m_pCompleter->setFilterMode(Qt::MatchContains);
   m_pCompleter->setModelSorting(QCompleter::CaseInsensitivelySortedModel);
   m_pCompleter->setCompletionMode(QCompleter::PopupCompletion);
   m_pCompleter->setCompletionRole(Qt::DisplayRole);
@@ -160,22 +160,34 @@ void CTagsEditorOverlay::on_pLineEdit_editingFinished()
       QString sOldDescribtion;
       QString sOldType;
       QString sNewType;
+      bool bTagFound = false;
       {
         QReadLocker resLocker(&spResource->m_rwLock);
         QReadLocker tagLocker(&spTag->m_rwLock);
+        bTagFound =
+            spResource->m_vsResourceTags.end() !=
+            spResource->m_vsResourceTags.find(sTagName);
         sOldDescribtion = spTag->m_sDescribtion;
         sOldType = spTag->m_sType;
         sNewType = fnTagTypeFromName(sTagName, sOldType);
       }
-      if (sOldDescribtion != sTagDescribtion && !sTagDescribtion.isEmpty())
+      if ((sOldDescribtion != sTagDescribtion && !sTagDescribtion.isEmpty()) ||
+          (sOldType != sNewType && !sNewType.isEmpty()))
       {
         m_pUndoStack->push(new CCommandChangeTag(sProject, sTagName, sNewType, sOldType,
                                                  sTagDescribtion, sOldDescribtion));
         m_spUi->pTagsFrame->UpdateToolTip(sTagName, sTagDescribtion);
         emit SignalTagsChanged();
       }
+      if (!bTagFound)
+      {
+        m_pUndoStack->push(new CCommandAddTag(sProject, m_sResource, spTag));
+      }
     }
   }
+
+  QSignalBlocker b(m_spUi->pDescribtionLineEdit);
+  m_spUi->pDescribtionLineEdit->setText(QString());
 }
 
 //----------------------------------------------------------------------------------------
@@ -266,9 +278,9 @@ void CTagsEditorOverlay::Initialize()
       QReadLocker pLocker(&m_spCurrentProject->m_rwLock);
       for (const auto& [sName, spTag] : m_spCurrentProject->m_vspTags)
       {
+        vpTagItemsToAdd.push_back(new QStandardItem(sName));
         if (vsTags.find(sName) != vsTags.end())
         {
-          vpTagItemsToAdd.push_back(new QStandardItem(sName));
           vspTagsToAdd.push_back(spTag);
         }
       }

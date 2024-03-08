@@ -16,7 +16,6 @@ public:
   void SetCurrentProject(const tspProject& spProject);
 
   QStringList splitPath(const QString& sPath) const override;
-  QString pathFromIndex(const QModelIndex& index) const override;
 
 private:
   tspProject                      m_spCurrentProject;

@@ -880,9 +880,27 @@ void CDatabaseManager::RenameResource(tspProject& spProj, const QString& sName, 
 QString CDatabaseManager::AddTag(tspProject& spProj, const QString& sResource, const QString& sCategory,
                                  const QString& sName, const QString& sDescribtion)
 {
-  if (!IsInitialized() || nullptr == spProj) { return QString(); }
+  if (!IsInitialized() || nullptr == spProj || sName.isEmpty()) { return QString(); }
 
-  tspTag spTag = std::make_shared<STag>(sCategory, sName, sDescribtion);
+  bool bChanged = false;
+
+  tspTag spTag = nullptr;
+  qint32 iId = -1;
+  if (auto tagIt = spProj->m_vspTags.find(sName); spProj->m_vspTags.end() == tagIt)
+  {
+    spTag = std::make_shared<STag>(sCategory, sName, sDescribtion);
+
+    QWriteLocker locker(&spProj->m_rwLock);
+    spTag->m_spParent = spProj;
+    spProj->m_vspTags.insert({sName, spTag});
+    iId = spProj->m_iId;
+    bChanged = true;
+  }
+  else
+  {
+    spTag = tagIt->second;
+  }
+
   tspResource spResource = FindResourceInProject(spProj, sResource);
   if (sResource.isEmpty() || nullptr == spResource)
   {
@@ -891,19 +909,19 @@ QString CDatabaseManager::AddTag(tspProject& spProj, const QString& sResource, c
   else
   {
     QReadLocker locker(&spResource->m_rwLock);
-    spResource->m_vsResourceTags.insert(sName);
-    spTag->m_vsResourceRefs.insert(sResource);
+    auto it = spResource->m_vsResourceTags.find(sName);
+    if (spResource->m_vsResourceTags.end() == it)
+    {
+      spResource->m_vsResourceTags.insert(sName);
+      spTag->m_vsResourceRefs.insert(sResource);
+      bChanged = true;
+    }
   }
 
-  qint32 iId = -1;
+  if (bChanged)
   {
-    QWriteLocker locker(&spProj->m_rwLock);
-    spTag->m_spParent = spProj;
-    spProj->m_vspTags.insert({sName, spTag});
-    iId = spProj->m_iId;
+    emit SignalTagAdded(iId, sResource, sName);
   }
-
-  emit SignalTagAdded(iId, sResource, sName);
 
   return sName;
 }

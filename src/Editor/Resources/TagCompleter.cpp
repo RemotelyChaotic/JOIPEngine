@@ -39,24 +39,3 @@ QStringList CTagCompleter::splitPath(const QString& sPath) const
     return sPath.split(":");
   }
 }
-
-//----------------------------------------------------------------------------------------
-//
-QString CTagCompleter::pathFromIndex(const QModelIndex& index) const
-{
-  if (!index.isValid()) { return QString(); }
-
-  QAbstractItemModel* pModel = model();
-  if (nullptr == pModel) { return QString(); }
-
-  QModelIndex idx = index;
-  QStringList vsList;
-  do {
-    QString sData = pModel->data(index, completionRole()).toString();
-    vsList.prepend(sData);
-    QModelIndex parent = idx.parent();
-    idx = parent.sibling(parent.row(), index.column());
-  } while (idx.isValid());
-
-  return vsList.last();
-}
