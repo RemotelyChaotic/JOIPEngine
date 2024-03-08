@@ -112,7 +112,7 @@ if(32BIT)
 else()
   file(GLOB aditionalFiles
     "${CMAKE_SOURCE_DIR}/3rdparty/QtAV/ffmpeg/QtAV-depends-windows-x86+x64/bin/x64/*${CMAKE_SHARED_LIBRARY_SUFFIX}"
-    "${CMAKE_SOURCE_DIR}/3rdparty/win_openssl/*x64${CMAKE_SHARED_LIBRARY_SUFFIX}"
+    "${CMAKE_SOURCE_DIR}/3rdparty/win_openssl/x64/*x64${CMAKE_SHARED_LIBRARY_SUFFIX}"
   )
 endif()
 file(COPY ${aditionalFiles} DESTINATION "${CMAKE_INSTALL_PREFIX}/bin")
