@@ -711,7 +711,7 @@ void CEditorEditableFileModel::AddResourceTo(tspResource spResource,
 {
   if (nullptr == m_spProject) { return; }
 
-  QString sPath = ResourceUrlToAbsolutePath(spResource);
+  QString sPath = PhysicalResourcePath(spResource);
   QReadLocker resourceLocker(&spResource->m_rwLock);
   const QString sResourceName = spResource->m_sName;
   if (!CheckResourceTypeSupported(spResource->m_type))
