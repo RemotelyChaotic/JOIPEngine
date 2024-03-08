@@ -57,7 +57,9 @@ public:
   ~CScriptEventSenderJs();
 
 public slots:
+  void sendEvent(const QString& sEvent);
   void sendEvent(const QString& sEvent, QVariant data);
+  QVariant sendEventAndWait(const QString& sEvent);
   QVariant sendEventAndWait(const QString& sEvent, QVariant data);
 
 private:
@@ -77,7 +79,9 @@ public:
   ~CScriptEventSenderLua();
 
 public slots:
+  void sendEvent(const QString& sEvent);
   void sendEvent(const QString& sEvent, QVariant data);
+  QVariant sendEventAndWait(const QString& sEvent);
   QVariant sendEventAndWait(const QString& sEvent, QVariant data);
 
 private:

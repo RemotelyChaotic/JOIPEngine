@@ -105,10 +105,24 @@ CScriptEventSenderJs::~CScriptEventSenderJs() = default;
 
 //----------------------------------------------------------------------------------------
 //
+void CScriptEventSenderJs::sendEvent(const QString& sEvent)
+{
+  sendEvent(sEvent, QVariant());
+}
+
+//----------------------------------------------------------------------------------------
+//
 void CScriptEventSenderJs::sendEvent(const QString& sEvent, QVariant data)
 {
   if (!CheckIfScriptCanRun()) { return; }
   SendEventImpl(sEvent, PrepareInput(data));
+}
+
+//----------------------------------------------------------------------------------------
+//
+QVariant CScriptEventSenderJs::sendEventAndWait(const QString& sEvent)
+{
+  return sendEventAndWait(sEvent, QVariant());
 }
 
 //----------------------------------------------------------------------------------------
@@ -155,10 +169,24 @@ CScriptEventSenderLua::~CScriptEventSenderLua() = default;
 
 //----------------------------------------------------------------------------------------
 //
+void CScriptEventSenderLua::sendEvent(const QString& sEvent)
+{
+  sendEvent(sEvent, QVariant());
+}
+
+//----------------------------------------------------------------------------------------
+//
 void CScriptEventSenderLua::sendEvent(const QString& sEvent, QVariant data)
 {
   if (!CheckIfScriptCanRun()) { return; }
   SendEventImpl(sEvent, PrepareInput(data));
+}
+
+//----------------------------------------------------------------------------------------
+//
+QVariant CScriptEventSenderLua::sendEventAndWait(const QString& sEvent)
+{
+  return sendEventAndWait(sEvent, QVariant());
 }
 
 //----------------------------------------------------------------------------------------
