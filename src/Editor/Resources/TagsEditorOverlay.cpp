@@ -278,7 +278,7 @@ void CTagsEditorOverlay::Initialize()
       QReadLocker pLocker(&m_spCurrentProject->m_rwLock);
       for (const auto& [sName, spTag] : m_spCurrentProject->m_vspTags)
       {
-        vpTagItemsToAdd.push_back(new QStandardItem(sName));
+        m_pCompleterModel->appendRow(new QStandardItem(sName));
         if (vsTags.find(sName) != vsTags.end())
         {
           vspTagsToAdd.push_back(spTag);
@@ -286,7 +286,6 @@ void CTagsEditorOverlay::Initialize()
       }
     }
 
-    m_pCompleterModel->appendRow(vpTagItemsToAdd);
     m_spUi->pTagsFrame->AddTags(vspTagsToAdd);
   }
 }
