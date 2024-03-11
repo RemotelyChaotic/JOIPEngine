@@ -198,7 +198,11 @@ void CSettingsScreen::Initialize()
 #if defined (Q_OS_ANDROID)
   // disable settings pages that do not make sense on mobile
   m_spUi->pDesktopContainer->hide();
-  m_spUi->pDesktopSpacer->hide();
+  {
+    QLayout* pLayout = m_spUi->pGraphicsScrollAreaWidgetContents->layout();
+    pLayout->removeItem(m_spUi->pDesktopSpacer);
+    delete m_spUi->pDesktopSpacer;
+  }
   m_spUi->tabWidget->setTabEnabled(3, false);
   m_spUi->tabWidget->setTabEnabled(6, false);
   m_spUi->tabWidget->setCurrentIndex(1);

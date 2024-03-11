@@ -5,6 +5,7 @@
 
 #include <QFlags>
 #include <QMutex>
+#include <QTimer>
 #include <QUuid>
 
 #include <chrono>
