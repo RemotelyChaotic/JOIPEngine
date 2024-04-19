@@ -1,6 +1,14 @@
 =================
+Version 1.4.1.0
+=================
+
+Changes:
+- Tags objects in scripts have new getter methods: numResources & resources.
+
+=================
 Version 1.4.0.0
 =================
+
 Fixed Bugs:
 - Fixed Node changes not generating an undo entry on the undo stack.
 - Fixed a crash in the help overlay, when highlighted widgets are 

@@ -253,6 +253,9 @@ public:
 
   Q_INVOKABLE QColor color();
 
+  Q_INVOKABLE qint32 numResources();
+  Q_INVOKABLE QStringList resources();
+
   std::shared_ptr<STag> Data() { return m_spData; }
 
 private:

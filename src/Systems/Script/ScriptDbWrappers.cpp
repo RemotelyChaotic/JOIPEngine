@@ -841,3 +841,24 @@ QColor CTagWrapper::color()
   QReadLocker locker(&m_spData->m_rwLock);
   return CalculateTagColor(*m_spData);
 }
+
+//----------------------------------------------------------------------------------------
+//
+qint32 CTagWrapper::numResources()
+{
+  QReadLocker locker(&m_spData->m_rwLock);
+  return static_cast<qint32>(m_spData->m_vsResourceRefs.size());
+}
+
+//----------------------------------------------------------------------------------------
+//
+QStringList CTagWrapper::resources()
+{
+  QReadLocker locker(&m_spData->m_rwLock);
+  QStringList vsRet;
+  for (const QString& sRes : m_spData->m_vsResourceRefs)
+  {
+    vsRet << sRes;
+  }
+  return vsRet;
+}
