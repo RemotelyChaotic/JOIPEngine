@@ -22,6 +22,7 @@ public:
   qint32 NumberRegisteredConnectors() const;
 
 public slots:
+  bool isDeviceConnected();
   void openSelectionScreen(double x, double y);
   void selectDevice(const QString& sDevice);
   void sendLinearCmd(quint32 iDurationMs, double dPosition);

@@ -2,9 +2,11 @@
 #define PATHSPLITTERMODEL_H
 
 #include "EditorNodeModelBase.h"
+#include "Systems/Project.h"
 #include "Systems/Scene.h"
 #include <QPointer>
 
+class CDatabaseManager;
 class CPathSplitterModelWidget;
 class CSceneTranstitionData;
 
@@ -22,6 +24,8 @@ public:
   CPathSplitterModel();
    ~CPathSplitterModel() override {}
 
+  virtual void SetProjectId(qint32 iId);
+  qint32 ProjectId();
   ESceneTransitionType TransitionType() { return m_transitonType; }
   QString TransitionLabel(PortIndex port);
   void SetTransitionLabel(PortIndex index, const QString& sLabelValue);
@@ -46,19 +50,35 @@ public:
 
   ConnectionPolicy portOutConnectionPolicy(PortIndex) const override { return ConnectionPolicy::One; }
 
+signals:
+  void SignalAddLayoutFileRequested();
+
 protected slots:
+  void SlotResourceAdded(qint32 iProjId, const QString& sName);
+  void SlotResourceRenamed(qint32 iProjId, const QString& sOldName, const QString& sName);
+  void SlotResourceRemoved(qint32 iProjId, const QString& sName);
+  void SlotCustomTransitionChanged(bool bEnabled, const QString& sResource);
   void SlotTransitionTypeChanged(qint32 iType);
   void SlotTransitionLabelChanged(PortIndex index, const QString& sLabelValue);
 
 protected:
+  virtual void OnProjectSetImpl() {}
+  virtual void SlotResourceAddedImpl(const QString&, EResourceType) {}
+  virtual void SlotResourceRenamedImpl(const QString& sOldName, const QString& sName, EResourceType) {}
+  virtual void SlotResourceRemovedImpl(const QString&, EResourceType) {}
+
   std::weak_ptr<CSceneTranstitionData>                m_wpInData;
   std::shared_ptr<CSceneTranstitionData>              m_spOutData;
 
   NodeValidationState m_modelValidationState;
   QString m_modelValidationError;
 
-  std::vector<QString>          m_vsLabelNames;
-  ESceneTransitionType          m_transitonType;
+  tspProject                       m_spProject;
+  std::weak_ptr<CDatabaseManager>  m_wpDbManager;
+  std::vector<QString>             m_vsLabelNames;
+  ESceneTransitionType             m_transitonType;
+  bool                             m_bCustomLayoutEnabled = false;
+  QString                          m_sCustomLayout;
 };
 
 //----------------------------------------------------------------------------------------
@@ -76,7 +96,11 @@ public:
   QWidget* embeddedWidget() override;
 
 protected:
+  void OnProjectSetImpl() override;
   void OnUndoStackSet() override;
+  void SlotResourceAddedImpl(const QString& sName, EResourceType type) override;
+  void SlotResourceRenamedImpl(const QString& sOldName, const QString& sName, EResourceType type) override;
+  void SlotResourceRemovedImpl(const QString& sName, EResourceType type) override;
 
   QPointer<CPathSplitterModelWidget>                  m_pWidget;
 };

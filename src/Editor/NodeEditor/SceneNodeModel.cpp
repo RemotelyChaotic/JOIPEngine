@@ -3,6 +3,7 @@
 #include "CommandNodeEdited.h"
 #include "SceneNodeModelWidget.h"
 #include "SceneTranstitionData.h"
+
 #include "Systems/DatabaseManager.h"
 #include "Systems/Project.h"
 

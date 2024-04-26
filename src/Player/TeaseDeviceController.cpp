@@ -41,6 +41,13 @@ qint32 CTeaseDeviceController::NumberRegisteredConnectors() const
 
 //----------------------------------------------------------------------------------------
 //
+bool CTeaseDeviceController::isDeviceConnected()
+{
+  return nullptr != m_spCurrentDevice;
+}
+
+//----------------------------------------------------------------------------------------
+//
 void CTeaseDeviceController::openSelectionScreen(double x, double y)
 {
   if (nullptr == m_pMainScreen) { return; }

@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>200</width>
-    <height>250</height>
+    <width>380</width>
+    <height>272</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -36,66 +36,117 @@
        <number>0</number>
       </property>
       <item>
-       <widget class="QRadioButton" name="pRandomRadio">
+       <widget class="QCheckBox" name="pRandomRadio">
         <property name="text">
          <string>Random</string>
         </property>
        </widget>
       </item>
       <item>
-       <widget class="QRadioButton" name="pSelectionRadio">
-        <property name="text">
-         <string>Selectable</string>
+       <widget class="QGroupBox" name="pButtonLabelsGroupBox">
+        <property name="title">
+         <string>Button Labels</string>
         </property>
-       </widget>
-      </item>
-     </layout>
-    </widget>
-   </item>
-   <item>
-    <widget class="QGroupBox" name="pButtonLabelsGroupBox">
-     <property name="title">
-      <string>Button Labels</string>
-     </property>
-     <layout class="QVBoxLayout" name="verticalLayout_3">
-      <item>
-       <widget class="QLineEdit" name="pLabel1">
-        <property name="text">
-         <string>Scene 1</string>
+        <property name="checkable">
+         <bool>true</bool>
         </property>
-        <property name="alignment">
-         <set>Qt::AlignCenter</set>
+        <property name="checked">
+         <bool>false</bool>
         </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QLineEdit" name="pLabel2">
-        <property name="text">
-         <string>Scene 2</string>
-        </property>
-        <property name="alignment">
-         <set>Qt::AlignCenter</set>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QLineEdit" name="pLabel3">
-        <property name="text">
-         <string>Scene 3</string>
-        </property>
-        <property name="alignment">
-         <set>Qt::AlignCenter</set>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QLineEdit" name="pLabel4">
-        <property name="text">
-         <string>Scene 4</string>
-        </property>
-        <property name="alignment">
-         <set>Qt::AlignCenter</set>
-        </property>
+        <layout class="QVBoxLayout" name="verticalLayout_3">
+         <property name="topMargin">
+          <number>15</number>
+         </property>
+         <item>
+          <widget class="QLineEdit" name="pLabel1">
+           <property name="text">
+            <string>Scene 1</string>
+           </property>
+           <property name="alignment">
+            <set>Qt::AlignCenter</set>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QLineEdit" name="pLabel2">
+           <property name="text">
+            <string>Scene 2</string>
+           </property>
+           <property name="alignment">
+            <set>Qt::AlignCenter</set>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QLineEdit" name="pLabel3">
+           <property name="text">
+            <string>Scene 3</string>
+           </property>
+           <property name="alignment">
+            <set>Qt::AlignCenter</set>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QLineEdit" name="pLabel4">
+           <property name="text">
+            <string>Scene 4</string>
+           </property>
+           <property name="alignment">
+            <set>Qt::AlignCenter</set>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QGroupBox" name="pCustomTransitionCheckBox">
+           <property name="title">
+            <string>Custom Transition</string>
+           </property>
+           <property name="checkable">
+            <bool>true</bool>
+           </property>
+           <property name="checked">
+            <bool>false</bool>
+           </property>
+           <layout class="QGridLayout" name="gridLayout">
+            <property name="topMargin">
+             <number>15</number>
+            </property>
+            <item row="0" column="0">
+             <widget class="QComboBox" name="pLayoutComboBox"/>
+            </item>
+            <item row="0" column="1">
+             <widget class="QPushButton" name="AddLayoutFile">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="minimumSize">
+               <size>
+                <width>24</width>
+                <height>24</height>
+               </size>
+              </property>
+              <property name="maximumSize">
+               <size>
+                <width>24</width>
+                <height>24</height>
+               </size>
+              </property>
+              <property name="toolTip">
+               <string>Add new layout file</string>
+              </property>
+              <property name="text">
+               <string/>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </widget>
+         </item>
+        </layout>
        </widget>
       </item>
      </layout>

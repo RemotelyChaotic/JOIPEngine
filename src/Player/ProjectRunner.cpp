@@ -597,12 +597,21 @@ bool CProjectRunner::ResolveStart(const QString sStartScene)
 void CProjectRunner::SlotNodeCreated(QtNodes::Node &n)
 {
   auto spDbManager = m_wpDbManager.lock();
-  CSceneNodeModel* pSceneModel = dynamic_cast<CSceneNodeModel*>(n.nodeDataModel());
-  if (nullptr != pSceneModel && nullptr != spDbManager)
+  if (nullptr != spDbManager)
   {
     m_spCurrentProject->m_rwLock.lockForRead();
     qint32 iId = m_spCurrentProject->m_iId;
     m_spCurrentProject->m_rwLock.unlock();
-    pSceneModel->SetProjectId(iId);
+
+    CSceneNodeModel* pSceneModel = dynamic_cast<CSceneNodeModel*>(n.nodeDataModel());
+    if (nullptr != pSceneModel)
+    {
+      pSceneModel->SetProjectId(iId);
+    }
+    CPathSplitterModel* pPathSplitterModel = dynamic_cast<CPathSplitterModel*>(n.nodeDataModel());
+    if (nullptr != pPathSplitterModel)
+    {
+      pPathSplitterModel->SetProjectId(iId);
+    }
   }
 }

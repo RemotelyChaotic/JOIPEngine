@@ -768,17 +768,24 @@ void CEditorModel::SlotNodeCreated(Node &n)
   auto spDbManager = m_wpDbManager.lock();
   if (nullptr != spDbManager)
   {
+    m_spCurrentProject->m_rwLock.lockForRead();
+    qint32 iId = m_spCurrentProject->m_iId;
+    m_spCurrentProject->m_rwLock.unlock();
+
     CSceneNodeModel* pSceneModel = dynamic_cast<CSceneNodeModel*>(n.nodeDataModel());
     if (nullptr != pSceneModel)
     {
-      m_spCurrentProject->m_rwLock.lockForRead();
-      qint32 iId = m_spCurrentProject->m_iId;
-      m_spCurrentProject->m_rwLock.unlock();
       pSceneModel->SetProjectId(iId);
-
       connect(pSceneModel, &CSceneNodeModel::SignalAddScriptFileRequested,
               this, &CEditorModel::SlotAddNewScriptFileToScene, Qt::UniqueConnection);
       connect(pSceneModel, &CSceneNodeModel::SignalAddLayoutFileRequested,
+              this, &CEditorModel::SlotAddNewLayoutFileToScene, Qt::UniqueConnection);
+    }
+    CPathSplitterModel* pPathSplitterModel = dynamic_cast<CPathSplitterModel*>(n.nodeDataModel());
+    if (nullptr != pPathSplitterModel)
+    {
+      pPathSplitterModel->SetProjectId(iId);
+      connect(pPathSplitterModel, &CPathSplitterModel::SignalAddLayoutFileRequested,
               this, &CEditorModel::SlotAddNewLayoutFileToScene, Qt::UniqueConnection);
     }
     emit SignalProjectEdited();
@@ -876,6 +883,11 @@ void CEditorModel::SlotAddNewLayoutFileToScene()
       qint32 iSceneId = pSceneModel->SceneId();
       auto spScene = spDbManager->FindScene(m_spCurrentProject, iSceneId);
       AddNewFileToScene(m_pParentWidget, spScene, EResourceType::eLayout);
+    }
+    CPathSplitterModel* pSplitterModel = dynamic_cast<CPathSplitterModel*>(sender());
+    if (nullptr != pSplitterModel)
+    {
+      AddNewFileToScene(m_pParentWidget, nullptr, EResourceType::eLayout);
     }
   }
 }

@@ -1,7 +1,11 @@
 #include "PathSplitterModel.h"
+
+#include "Application.h"
 #include "PathSplitterModelWidget.h"
 #include "CommandNodeEdited.h"
 #include "SceneTranstitionData.h"
+
+#include "Systems/DatabaseManager.h"
 
 #include <QJsonArray>
 
@@ -16,6 +20,7 @@ CPathSplitterModel::CPathSplitterModel() :
   m_spOutData(std::make_shared<CSceneTranstitionData>()),
   m_modelValidationState(NodeValidationState::Warning),
   m_modelValidationError(QString(tr("Missing or incorrect input"))),
+  m_wpDbManager(CApplication::Instance()->System<CDatabaseManager>()),
   m_vsLabelNames(),
   m_transitonType(ESceneTransitionType::eRandom)
 {
@@ -23,6 +28,41 @@ CPathSplitterModel::CPathSplitterModel() :
   {
     m_vsLabelNames.push_back(QString());
   }
+
+  auto spDbManager = m_wpDbManager.lock();
+  if (nullptr != spDbManager)
+  {
+    connect(spDbManager.get(), &CDatabaseManager::SignalResourceAdded,
+            this, &CPathSplitterModel::SlotResourceAdded);
+    connect(spDbManager.get(), &CDatabaseManager::SignalResourceRenamed,
+            this, &CPathSplitterModel::SlotResourceRenamed);
+    connect(spDbManager.get(), &CDatabaseManager::SignalResourceRemoved,
+            this, &CPathSplitterModel::SlotResourceRemoved);
+  }
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CPathSplitterModel::SetProjectId(qint32 iId)
+{
+  auto spDbManager = m_wpDbManager.lock();
+  if (nullptr != spDbManager)
+  {
+    m_spProject = spDbManager->FindProject(iId);
+    OnProjectSetImpl();
+  }
+}
+
+//----------------------------------------------------------------------------------------
+//
+qint32 CPathSplitterModel::ProjectId()
+{
+  if (nullptr != m_spProject)
+  {
+    QReadLocker locker(&m_spProject->m_rwLock);
+    return m_spProject->m_iId;
+  }
+  return -1;
 }
 
 //----------------------------------------------------------------------------------------
@@ -64,6 +104,8 @@ QJsonObject CPathSplitterModel::save() const
     aLabels.push_back(sLabel);
   }
   modelJson["vsLabelNames"] = aLabels;
+  modelJson["bCustomLayoutEnabled"] = m_bCustomLayoutEnabled;
+  modelJson["sCustomLayout"] = m_sCustomLayout;
   return modelJson;
 }
 
@@ -89,6 +131,18 @@ void CPathSplitterModel::restore(QJsonObject const& p)
         i++;
       }
     }
+  }
+  v = p["bCustomLayoutEnabled"];
+  m_bCustomLayoutEnabled = false;
+  if (!v.isUndefined())
+  {
+    m_bCustomLayoutEnabled = v.toBool(false);
+  }
+  v = p["sCustomLayout"];
+  m_sCustomLayout = QString();
+  if (!v.isUndefined())
+  {
+    m_sCustomLayout = v.toString(QString());
   }
 }
 
@@ -165,6 +219,73 @@ QString CPathSplitterModel::validationMessage() const
 
 //----------------------------------------------------------------------------------------
 //
+void CPathSplitterModel::SlotResourceAdded(qint32 iProjId, const QString& sName)
+{
+  auto spDbManager = m_wpDbManager.lock();
+  if (ProjectId() == iProjId && nullptr != spDbManager)
+  {
+    tspResource spResource = spDbManager->FindResourceInProject(m_spProject, sName);
+    if (nullptr != spResource)
+    {
+      QReadLocker locker(&spResource->m_rwLock);
+      if (EResourceType::eLayout == spResource->m_type._to_integral())
+      {
+        SlotResourceAddedImpl(sName, spResource->m_type);
+      }
+    }
+  }
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CPathSplitterModel::SlotResourceRenamed(qint32 iProjId,
+                                          const QString& sOldName, const QString& sName)
+{
+  auto spDbManager = m_wpDbManager.lock();
+  if (ProjectId() == iProjId && nullptr != spDbManager)
+  {
+    tspResource spResource = spDbManager->FindResourceInProject(m_spProject, sName);
+    if (nullptr != spResource)
+    {
+      QReadLocker locker(&spResource->m_rwLock);
+      if (EResourceType::eLayout == spResource->m_type._to_integral())
+      {
+        SlotResourceRenamedImpl(sOldName, sName, spResource->m_type);
+      }
+    }
+  }
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CPathSplitterModel::SlotResourceRemoved(qint32 iProjId, const QString& sName)
+{
+  auto spDbManager = m_wpDbManager.lock();
+  if (ProjectId() == iProjId && nullptr != spDbManager)
+  {
+    // the resource is already removed, just remove from both lists, since names
+    // are unique
+    SlotResourceRemovedImpl(sName, EResourceType::eLayout);
+  }
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CPathSplitterModel::SlotCustomTransitionChanged(bool bEnabled, const QString& sResource)
+{
+  QJsonObject oldState = save();
+  m_bCustomLayoutEnabled = bEnabled;
+  m_sCustomLayout = sResource;
+  QJsonObject newState = save();
+
+  if (nullptr != UndoStack())
+  {
+    UndoStack()->push(new CCommandNodeEdited(m_pScene, m_id, oldState, newState));
+  }
+}
+
+//----------------------------------------------------------------------------------------
+//
 void CPathSplitterModel::SlotTransitionTypeChanged(qint32 iType)
 {
   QJsonObject oldState = save();
@@ -200,6 +321,10 @@ CPathSplitterModelWithWidget::CPathSplitterModelWithWidget() :
   CPathSplitterModel(),
   m_pWidget(new CPathSplitterModelWidget())
 {
+  connect(m_pWidget, &CPathSplitterModelWidget::SignalAddLayoutFileClicked,
+          this, &CPathSplitterModelWithWidget::SignalAddLayoutFileRequested);
+  connect(m_pWidget, &CPathSplitterModelWidget::SignalCustomTransitionChanged,
+          this, &CPathSplitterModelWithWidget::SlotCustomTransitionChanged);
   connect(m_pWidget, &CPathSplitterModelWidget::SignalTransitionTypeChanged,
           this, &CPathSplitterModelWithWidget::SlotTransitionTypeChanged);
   connect(m_pWidget, &CPathSplitterModelWidget::SignalTransitionLabelChanged,
@@ -221,6 +346,8 @@ void CPathSplitterModelWithWidget::restore(QJsonObject const& p)
   {
     m_pWidget->SetTransitionLabel(static_cast<qint32>(i), m_vsLabelNames[i]);
   }
+
+  m_pWidget->SetCustomLayout(m_bCustomLayoutEnabled, m_sCustomLayout);
 }
 
 //----------------------------------------------------------------------------------------
@@ -232,10 +359,62 @@ QWidget* CPathSplitterModelWithWidget::embeddedWidget()
 
 //----------------------------------------------------------------------------------------
 //
+void CPathSplitterModelWithWidget::OnProjectSetImpl()
+{
+  if (nullptr != m_pWidget)
+  {
+    m_pWidget->SetProject(m_spProject);
+  }
+}
+
+//----------------------------------------------------------------------------------------
+//
 void CPathSplitterModelWithWidget::OnUndoStackSet()
 {
   if (nullptr != m_pWidget)
   {
     m_pWidget->SetUndoStack(m_pUndoStack);
+  }
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CPathSplitterModelWithWidget::SlotResourceAddedImpl(const QString& sName, EResourceType type)
+{
+  if (nullptr != m_pWidget)
+  {
+    if (EResourceType::eLayout == type._to_integral())
+    {
+      m_pWidget->OnLayoutAdded(sName);
+    }
+  }
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CPathSplitterModelWithWidget::SlotResourceRenamedImpl(const QString& sOldName,
+                                                        const QString& sName,
+                                                        EResourceType type)
+{
+  if (nullptr != m_pWidget)
+  {
+    if (EResourceType::eLayout == type._to_integral())
+    {
+      m_pWidget->OnLayoutRenamed(sOldName, sName);
+    }
+  }
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CPathSplitterModelWithWidget::SlotResourceRemovedImpl(const QString& sName,
+                                                        EResourceType type)
+{
+  if (nullptr != m_pWidget)
+  {
+    if (EResourceType::eLayout == type._to_integral())
+    {
+      m_pWidget->OnLayoutRemoved(sName);
+    }
   }
 }

@@ -91,15 +91,24 @@ tspScene CEosPagesToScenesTransformer::AddPageToScene(const qint32 iProjectId,
       pSplitter->SetTransitionLabel(0, page.m_sName);
     }
 
-    CSceneNodeModel* pSceneModel =
-        dynamic_cast<CSceneNodeModel*>(pSceneNode->nodeDataModel());
     auto spDbManager = CApplication::Instance()->System<CDatabaseManager>().lock();
-    if (nullptr != pSceneModel && nullptr != spDbManager)
+    if (nullptr != spDbManager)
     {
-      pSceneModel->SetProjectId(iProjectId);
-      qint32 iSceneId = pSceneModel->SceneId();
-      spScene = spDbManager->FindScene(spProject, iSceneId);
-      pSceneModel->SetSceneName(page.m_sName);
+      CSceneNodeModel* pSceneModel =
+          dynamic_cast<CSceneNodeModel*>(pSceneNode->nodeDataModel());
+      if (nullptr != pSceneModel)
+      {
+        pSceneModel->SetProjectId(iProjectId);
+        qint32 iSceneId = pSceneModel->SceneId();
+        spScene = spDbManager->FindScene(spProject, iSceneId);
+        pSceneModel->SetSceneName(page.m_sName);
+      }
+      CPathSplitterModel* pSplitterModel =
+          dynamic_cast<CPathSplitterModel*>(pSceneNode->nodeDataModel());
+      if (nullptr != pSplitterModel)
+      {
+        pSceneModel->SetProjectId(iProjectId);
+      }
     }
   }
 
