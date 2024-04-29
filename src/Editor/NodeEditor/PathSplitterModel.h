@@ -27,7 +27,7 @@ public:
    ~CPathSplitterModel() override {}
 
   std::optional<QString> CustomTransition() const;
-  void SetProjectId(qint32 iId);
+  virtual void SetProjectId(qint32 iId);
   qint32 ProjectId();
   ESceneTransitionType TransitionType() { return m_transitonType; }
   QString TransitionLabel(PortIndex port);
@@ -42,6 +42,7 @@ public:
 
   QJsonObject save() const override;
   void restore(QJsonObject const& p) override;
+  void UndoRestore(QJsonObject const& p) override;
 
   unsigned int nPorts(PortType portType) const override;
   NodeDataType dataType(PortType portType, PortIndex portIndex) const override;
@@ -66,6 +67,7 @@ protected slots:
 
 protected:
   virtual void OnProjectSetImpl() {}
+  virtual void SlotCustomTransitionChangedImpl(bool, const QString&) {}
   virtual void SlotResourceAddedImpl(const QString&, EResourceType) {}
   virtual void SlotResourceRenamedImpl(const QString& sOldName, const QString& sName, EResourceType) {}
   virtual void SlotResourceRemovedImpl(const QString&, EResourceType) {}
@@ -82,6 +84,7 @@ protected:
   ESceneTransitionType             m_transitonType;
   bool                             m_bCustomLayoutEnabled = false;
   QString                          m_sCustomLayout;
+  bool                             m_bIsInUndoOperation = false;
 };
 
 //----------------------------------------------------------------------------------------
@@ -94,6 +97,8 @@ public:
   CPathSplitterModelWithWidget();
   ~CPathSplitterModelWithWidget() override;
 
+  void SetProjectId(qint32 iId) override;
+
   void restore(QJsonObject const& p) override;
 
   QWidget* embeddedWidget() override;
@@ -101,6 +106,7 @@ public:
 protected:
   void OnProjectSetImpl() override;
   void OnUndoStackSet() override;
+  void SlotCustomTransitionChangedImpl(bool bEnabled, const QString& sResource) override;
   void SlotResourceAddedImpl(const QString& sName, EResourceType type) override;
   void SlotResourceRenamedImpl(const QString& sOldName, const QString& sName, EResourceType type) override;
   void SlotResourceRemovedImpl(const QString& sName, EResourceType type) override;

@@ -16,7 +16,7 @@ import JOIP.core 1.3
 import JOIP.db 1.1
 
 PlayerTansition {
-    // use function returnValue(index) to return the player choice
+    // TODO: use function returnValue(index) to return the player choice
     anchors.fill: parent
 
     property int spacing: 5
