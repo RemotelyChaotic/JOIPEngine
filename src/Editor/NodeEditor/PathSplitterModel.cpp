@@ -43,6 +43,13 @@ CPathSplitterModel::CPathSplitterModel() :
 
 //----------------------------------------------------------------------------------------
 //
+std::optional<QString> CPathSplitterModel::CustomTransition() const
+{
+  return m_bCustomLayoutEnabled ? std::optional<QString>{m_sCustomLayout} : std::nullopt;
+}
+
+//----------------------------------------------------------------------------------------
+//
 void CPathSplitterModel::SetProjectId(qint32 iId)
 {
   auto spDbManager = m_wpDbManager.lock();

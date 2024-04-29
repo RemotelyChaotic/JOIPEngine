@@ -5,6 +5,33 @@
 
 #include <QButtonGroup>
 
+namespace
+{
+  constexpr static char c_sDefaultLayout[] = R"(import QtQuick 2.14
+import QtQuick.Controls 2.14
+import QtQuick.Layouts 1.14
+import QtGraphicalEffects 1.14
+import JoipEngine 1.3
+import JOIP.core 1.3
+import JOIP.db 1.1
+
+PlayerTansition {
+    // use function returnValue(index) to return the player choice
+    anchors.fill: parent
+
+    property int spacing: 5
+
+    readonly property bool isMobile: Settings.platform === "Android"
+    readonly property int dominantHand: Settings.dominantHand
+    readonly property int iconWidth: isMobile ? 32 : 64
+    readonly property int iconHeight: isMobile ? 32 : 64
+    property bool isLandscape: { return width > height; }
+}
+)";
+}
+
+//----------------------------------------------------------------------------------------
+//
 CPathSplitterModelWidget::CPathSplitterModelWidget(QWidget* pParent) :
   QWidget(pParent),
   m_spUi(std::make_unique<Ui::CPathSplitterModelWidget>())
@@ -237,5 +264,5 @@ void CPathSplitterModelWidget::on_pLayoutComboBox_currentIndexChanged(qint32)
 //
 void CPathSplitterModelWidget::on_AddLayoutFile_clicked()
 {
-  emit SignalAddLayoutFileClicked();
+  emit SignalAddLayoutFileClicked(QString(c_sDefaultLayout));
 }

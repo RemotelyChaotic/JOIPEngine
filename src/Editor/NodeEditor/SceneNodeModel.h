@@ -58,8 +58,8 @@ public:
   ConnectionPolicy portOutConnectionPolicy(PortIndex) const override { return ConnectionPolicy::One; }
 
 signals:
-  void SignalAddScriptFileRequested();
-  void SignalAddLayoutFileRequested();
+  void SignalAddScriptFileRequested(const QString&);
+  void SignalAddLayoutFileRequested(const QString&);
 
 protected slots:
   void SlotNameChanged(const QString& sName);

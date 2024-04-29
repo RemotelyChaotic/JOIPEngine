@@ -3,6 +3,7 @@
 
 #include <QObject>
 #include <memory>
+#include <optional>
 #include <random>
 #include <set>
 
@@ -16,6 +17,19 @@ struct SScene;
 typedef std::shared_ptr<SProject> tspProject;
 typedef std::shared_ptr<SScene> tspScene;
 
+//----------------------------------------------------------------------------------------
+//
+struct NodeResolveReslt
+{
+  QString m_sLabel;
+  QtNodes::Node* m_pNode;
+  qint32 m_iDepth;
+  qint32 m_bNeedsUserResolvement = false;
+  QString m_sResolvementData;
+};
+
+//----------------------------------------------------------------------------------------
+//
 class CProjectRunner : public QObject
 {
   Q_OBJECT
@@ -35,8 +49,9 @@ public:
   void EnableScene(const QString& sScene);
   bool IsSceneEnabled(const QString& sScene) const;
   tspScene NextScene(const QString sName);
-  QStringList PossibleScenes();
+  QStringList PossibleScenes(std::optional<QString>* unresolvedData);
   void ResolveFindScenes(const QString sName);
+  void ResolvePossibleScenes(const QStringList vsNames, qint32 iIndex);
   void ResolveScenes();
 
 signals:
@@ -44,9 +59,9 @@ signals:
   void SignalError(QString sError, QtMsgType type);
 
 private:
+  bool GenerateNodesFromResolved();
   bool Setup(tspProject spProject, const QString sStartScene);
   bool LoadFlowScene();
-  void ResolveNextPossibleNodes(QtNodes::Node* pNode, std::vector<std::pair<QString, QtNodes::Node*>>& vpRet);
   bool ResolveNextScene();
   bool ResolveStart(const QString sStartScene);
 
@@ -58,6 +73,7 @@ private:
   tspScene                          m_spCurrentScene;
   tspScene                          m_spInjectedScene;
   std::weak_ptr<CDatabaseManager>   m_wpDbManager;
+  std::vector<NodeResolveReslt>     m_resolveResult;
   std::map<QString, QtNodes::Node*> m_nodeMap;
   std::set<QString>                 m_disabledScenes;
   CFlowScene*                       m_pFlowScene;

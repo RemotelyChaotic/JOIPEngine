@@ -12,6 +12,7 @@ PlayerMetronome 1.3 PlayerMetronome.qml
 PlayerNotification 1.3 PlayerNotification.qml
 PlayerTextBox 1.3 PlayerTextBox.qml
 PlayerTimer 1.3 PlayerTimer.qml
+PlayerTansition 1.3 PlayerTansition.qml
 SoundResourceView 1.3 SoundResourceView.qml
 TextItemFormated 1.3 TextItemFormated.qml
 TimedItem 1.3 TimedItem.qml

@@ -163,14 +163,14 @@ void CSceneNodeModelWidget::OnScriptRemoved(const QString& sName)
 //
 void CSceneNodeModelWidget::on_AddScriptFile_clicked()
 {
-  emit SignalAddScriptFileClicked();
+  emit SignalAddScriptFileClicked(QString());
 }
 
 //----------------------------------------------------------------------------------------
 //
 void CSceneNodeModelWidget::on_AddLayoutFile_clicked()
 {
-  emit SignalAddLayoutFileClicked();
+  emit SignalAddLayoutFileClicked(QString());
 }
 
 //----------------------------------------------------------------------------------------

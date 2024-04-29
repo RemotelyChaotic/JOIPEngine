@@ -6,6 +6,8 @@
 #include "Systems/Scene.h"
 #include <QPointer>
 
+#include <optional>
+
 class CDatabaseManager;
 class CPathSplitterModelWidget;
 class CSceneTranstitionData;
@@ -24,7 +26,8 @@ public:
   CPathSplitterModel();
    ~CPathSplitterModel() override {}
 
-  virtual void SetProjectId(qint32 iId);
+  std::optional<QString> CustomTransition() const;
+  void SetProjectId(qint32 iId);
   qint32 ProjectId();
   ESceneTransitionType TransitionType() { return m_transitonType; }
   QString TransitionLabel(PortIndex port);
@@ -51,7 +54,7 @@ public:
   ConnectionPolicy portOutConnectionPolicy(PortIndex) const override { return ConnectionPolicy::One; }
 
 signals:
-  void SignalAddLayoutFileRequested();
+  void SignalAddLayoutFileRequested(const QString& sCustomInitContent);
 
 protected slots:
   void SlotResourceAdded(qint32 iProjId, const QString& sName);

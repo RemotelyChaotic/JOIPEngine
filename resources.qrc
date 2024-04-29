@@ -339,5 +339,6 @@
         <file>resources/qml/JoipEngine/WebResourceComponent.qml</file>
         <file>resources/qml/JoipEngine/WebResourceView.qml</file>
         <file>resources/qml/JoipEngine/MetronomeRippleItem.qml</file>
+        <file>resources/qml/JoipEngine/PlayerTansition.qml</file>
     </qresource>
 </RCC>

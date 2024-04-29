@@ -218,12 +218,19 @@ namespace
 
   //--------------------------------------------------------------------------------------
   //
-  void InitScript(QIODevice& file, const QString& sType)
+  void InitScript(QIODevice& file, const QString& sType, const QString& sCustomInitContent)
   {
-    auto itDefinition = SScriptDefinitionData::DefinitionMap().find(sType);
-    if (SScriptDefinitionData::DefinitionMap().end() != itDefinition)
+    if (sCustomInitContent.isEmpty())
     {
-      file.write(itDefinition->second.sInitText.toUtf8());
+      auto itDefinition = SScriptDefinitionData::DefinitionMap().find(sType);
+      if (SScriptDefinitionData::DefinitionMap().end() != itDefinition)
+      {
+        file.write(itDefinition->second.sInitText.toUtf8());
+      }
+    }
+    else
+    {
+      file.write(sCustomInitContent.toUtf8());
     }
   }
 }
@@ -232,7 +239,8 @@ namespace
 //
 void CEditorModel::AddNewFileToScene(QPointer<QWidget> pParentForDialog,
                                      tspScene spScene,
-                                     EResourceType type)
+                                     EResourceType type,
+                                     const QString& sCustomInitContent)
 {
   auto spDbManager = m_wpDbManager.lock();
   if (nullptr != spDbManager)
@@ -305,7 +313,7 @@ void CEditorModel::AddNewFileToScene(QPointer<QWidget> pParentForDialog,
             {
               UpdateQmldir(info, sRelativePath, spDbManager, m_spCurrentProject);
             }
-            InitScript(scriptFile, info.suffix());
+            InitScript(scriptFile, info.suffix(), sCustomInitContent);
 
             tvfnActionsResource vfnActions =
                 {[&spScene, type, spDbManager](const tspResource& spNewResource){
@@ -817,7 +825,7 @@ void CEditorModel::SlotNodeDeleted(QtNodes::Node &n)
 
 //----------------------------------------------------------------------------------------
 //
-void CEditorModel::SlotAddNewScriptFile()
+void CEditorModel::SlotAddNewScriptFile(const QString& sCustomInitContent)
 {
   if (nullptr == m_spCurrentProject)
   {
@@ -825,12 +833,12 @@ void CEditorModel::SlotAddNewScriptFile()
     return;
   }
 
-  AddNewFileToScene(m_pParentWidget, nullptr, EResourceType::eScript);
+  AddNewFileToScene(m_pParentWidget, nullptr, EResourceType::eScript, sCustomInitContent);
 }
 
 //----------------------------------------------------------------------------------------
 //
-void CEditorModel::SlotAddNewLayoutFile()
+void CEditorModel::SlotAddNewLayoutFile(const QString& sCustomInitContent)
 {
   if (nullptr == m_spCurrentProject)
   {
@@ -838,12 +846,12 @@ void CEditorModel::SlotAddNewLayoutFile()
     return;
   }
 
-  AddNewFileToScene(m_pParentWidget, nullptr, EResourceType::eLayout);
+  AddNewFileToScene(m_pParentWidget, nullptr, EResourceType::eLayout, sCustomInitContent);
 }
 
 //----------------------------------------------------------------------------------------
 //
-void CEditorModel::SlotAddNewScriptFileToScene()
+void CEditorModel::SlotAddNewScriptFileToScene(const QString& sCustomInitContent)
 {
   if (nullptr == m_spCurrentProject)
   {
@@ -859,14 +867,14 @@ void CEditorModel::SlotAddNewScriptFileToScene()
     {
       qint32 iSceneId = pSceneModel->SceneId();
       auto spScene = spDbManager->FindScene(m_spCurrentProject, iSceneId);
-      AddNewFileToScene(m_pParentWidget, spScene, EResourceType::eScript);
+      AddNewFileToScene(m_pParentWidget, spScene, EResourceType::eScript, sCustomInitContent);
     }
   }
 }
 
 //----------------------------------------------------------------------------------------
 //
-void CEditorModel::SlotAddNewLayoutFileToScene()
+void CEditorModel::SlotAddNewLayoutFileToScene(const QString& sCustomInitContent)
 {
   if (nullptr == m_spCurrentProject)
   {
@@ -882,12 +890,12 @@ void CEditorModel::SlotAddNewLayoutFileToScene()
     {
       qint32 iSceneId = pSceneModel->SceneId();
       auto spScene = spDbManager->FindScene(m_spCurrentProject, iSceneId);
-      AddNewFileToScene(m_pParentWidget, spScene, EResourceType::eLayout);
+      AddNewFileToScene(m_pParentWidget, spScene, EResourceType::eLayout, sCustomInitContent);
     }
     CPathSplitterModel* pSplitterModel = dynamic_cast<CPathSplitterModel*>(sender());
     if (nullptr != pSplitterModel)
     {
-      AddNewFileToScene(m_pParentWidget, nullptr, EResourceType::eLayout);
+      AddNewFileToScene(m_pParentWidget, nullptr, EResourceType::eLayout, sCustomInitContent);
     }
   }
 }

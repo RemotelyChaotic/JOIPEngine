@@ -470,36 +470,61 @@ void CSceneMainScreen::SlotSceneSelectReturnValue(int iIndex)
   auto spDbManager = m_wpDbManager.lock();
   if (nullptr == spDbManager) { return; }
 
-  QStringList sScenes = m_spProjectRunner->PossibleScenes();
-  if (0 <= iIndex && sScenes.size() > iIndex)
+  if (0 > iIndex)
   {
-    tspScene spScene = m_spProjectRunner->NextScene(sScenes[iIndex]);
-    if (nullptr != spScene)
+    qWarning() << tr("Scene selection failed.");
+    SlotQuit();
+    return;
+  }
+
+  std::optional<QString> unresolvedData = std::nullopt;
+  QStringList sScenes = m_spProjectRunner->PossibleScenes(&unresolvedData);
+  if (unresolvedData.has_value())
+  {
+    m_spProjectRunner->ResolvePossibleScenes(sScenes, iIndex);
+  }
+
+  // do we still have unresolved scenes?
+  sScenes = m_spProjectRunner->PossibleScenes(&unresolvedData);
+
+  // resolved an unresolved scene set
+  if (unresolvedData.has_value())
+  {
+    NextSkript(false);
+  }
+  // no scenes needed resolvement
+  else
+  {
+    if (0 <= iIndex && sScenes.size() > iIndex)
     {
-      // load script
-      QReadLocker lockerScene(&spScene->m_rwLock);
-      QString sScript = spScene->m_sScript;
-      lockerScene.unlock();
-      bool bOk = QMetaObject::invokeMethod(m_spScriptRunner.get(), "LoadScript", Qt::QueuedConnection,
-                                           Q_ARG(tspScene, spScene),
-                                           Q_ARG(tspResource, spDbManager->FindResourceInProject(m_spCurrentProject, sScript)));
-      assert(bOk);
-      if (!bOk)
+      tspScene spScene = m_spProjectRunner->NextScene(sScenes[iIndex]);
+      if (nullptr != spScene)
       {
-        qWarning() << tr("LoadScript could not be called.");
-        SlotQuit();
+        // load script
+        QReadLocker lockerScene(&spScene->m_rwLock);
+        QString sScript = spScene->m_sScript;
+        lockerScene.unlock();
+        bool bOk = QMetaObject::invokeMethod(m_spScriptRunner.get(), "LoadScript", Qt::QueuedConnection,
+                                             Q_ARG(tspScene, spScene),
+                                             Q_ARG(tspResource, spDbManager->FindResourceInProject(m_spCurrentProject, sScript)));
+        assert(bOk);
+        if (!bOk)
+        {
+          qWarning() << tr("LoadScript could not be called.");
+          SlotQuit();
+        }
+      }
+      else
+      {
+        qInfo() << tr("Next scene is null or end.");
+        SlotFinish();
       }
     }
     else
     {
-      qInfo() << tr("Next scene is null or end.");
+      qWarning() << tr("No more scenes to load was unexpected.");
       SlotFinish();
     }
-  }
-  else
-  {
-    qWarning() << tr("No more scenes to load was unexpected.");
-    SlotFinish();
   }
 }
 
@@ -703,73 +728,106 @@ void CSceneMainScreen::NextSkript(bool bMightBeRegex)
   QQuickItem* pRootObject =  m_spUi->pQmlWidget->rootObject();
   QMetaObject::invokeMethod(pRootObject, "clearTextBox");
 
-  QStringList sScenes = m_spProjectRunner->PossibleScenes();
+  std::optional<QString> unresolvedData = std::nullopt;
+  QStringList sScenes = m_spProjectRunner->PossibleScenes(&unresolvedData);
   if (sScenes.size() > 0)
   {
-    if (sScenes.size() == 1)
+    // no unresolved scenes found
+    if (!unresolvedData.has_value())
     {
-      tspScene spScene = m_spProjectRunner->NextScene(sScenes[0]);
-      if (nullptr != spScene)
+      if (sScenes.size() == 1)
       {
-        // load script
-        QReadLocker lockerScene(&spScene->m_rwLock);
-        QString sScript = spScene->m_sScript;
-        lockerScene.unlock();
-        bool bOk = QMetaObject::invokeMethod(m_spScriptRunner.get(), "LoadScript", Qt::QueuedConnection,
-                                             Q_ARG(tspScene, spScene),
-                                             Q_ARG(tspResource, spDbManager->FindResourceInProject(m_spCurrentProject, sScript)));
-        assert(bOk);
-        if (!bOk)
+        tspScene spScene = m_spProjectRunner->NextScene(sScenes[0]);
+        if (nullptr != spScene)
         {
-          qWarning() << tr("LoadScript could not be called.");
-          SlotQuit();
+          // load script
+          QReadLocker lockerScene(&spScene->m_rwLock);
+          QString sScript = spScene->m_sScript;
+          lockerScene.unlock();
+          bool bOk = QMetaObject::invokeMethod(m_spScriptRunner.get(), "LoadScript", Qt::QueuedConnection,
+                                               Q_ARG(tspScene, spScene),
+                                               Q_ARG(tspResource, spDbManager->FindResourceInProject(m_spCurrentProject, sScript)));
+          assert(bOk);
+          if (!bOk)
+          {
+            qWarning() << tr("LoadScript could not be called.");
+            SlotQuit();
+          }
+        }
+        else
+        {
+          qInfo() << tr("Next scene is null or end.");
+          SlotFinish();
+        }
+      }
+      else if (bMightBeRegex)
+      {
+        long unsigned int seed =
+          static_cast<long unsigned int>(std::chrono::high_resolution_clock::now().time_since_epoch().count());
+        std::mt19937 generator(static_cast<long unsigned int>(seed));
+        std::uniform_int_distribution<> dis(0, static_cast<qint32>(sScenes.size() - 1));
+        qint32 iGeneratedIndex = dis(generator);
+        tspScene spScene = m_spProjectRunner->NextScene(sScenes[iGeneratedIndex]);
+        if (nullptr != spScene)
+        {
+          // load script
+          QReadLocker lockerScene(&spScene->m_rwLock);
+          QString sScript = spScene->m_sScript;
+          lockerScene.unlock();
+          bool bOk = QMetaObject::invokeMethod(m_spScriptRunner.get(), "LoadScript", Qt::QueuedConnection,
+                                               Q_ARG(tspScene, spScene),
+                                               Q_ARG(tspResource, spDbManager->FindResourceInProject(m_spCurrentProject, sScript)));
+          assert(bOk);
+          if (!bOk)
+          {
+            qWarning() << tr("LoadScript could not be called.");
+            SlotQuit();
+          }
+        }
+        else
+        {
+          qInfo() << tr("Next scene is null or end.");
+          SlotFinish();
         }
       }
       else
       {
-        qInfo() << tr("Next scene is null or end.");
-        SlotFinish();
-      }
-    }
-    else if (bMightBeRegex)
-    {
-      long unsigned int seed =
-        static_cast<long unsigned int>(std::chrono::high_resolution_clock::now().time_since_epoch().count());
-      std::mt19937 generator(static_cast<long unsigned int>(seed));
-      std::uniform_int_distribution<> dis(0, static_cast<qint32>(sScenes.size() - 1));
-      qint32 iGeneratedIndex = dis(generator);
-      tspScene spScene = m_spProjectRunner->NextScene(sScenes[iGeneratedIndex]);
-      if (nullptr != spScene)
-      {
-        // load script
-        QReadLocker lockerScene(&spScene->m_rwLock);
-        QString sScript = spScene->m_sScript;
-        lockerScene.unlock();
-        bool bOk = QMetaObject::invokeMethod(m_spScriptRunner.get(), "LoadScript", Qt::QueuedConnection,
-                                             Q_ARG(tspScene, spScene),
-                                             Q_ARG(tspResource, spDbManager->FindResourceInProject(m_spCurrentProject, sScript)));
+        bool bOk = QMetaObject::invokeMethod(pRootObject, "showSceneSelection",
+                                             Q_ARG(QVariant, sScenes));
         assert(bOk);
         if (!bOk)
         {
-          qWarning() << tr("LoadScript could not be called.");
+          qWarning() << tr("showSceneSelection could not be called.");
           SlotQuit();
         }
       }
-      else
-      {
-        qInfo() << tr("Next scene is null or end.");
-        SlotFinish();
-      }
     }
+    // found unresolved scenes
     else
     {
-      bool bOk = QMetaObject::invokeMethod(pRootObject, "showSceneSelection",
-                                           Q_ARG(QVariant, sScenes));
-      assert(bOk);
-      if (!bOk)
+      QString sUnResolveData = unresolvedData.value();
+      if (!sUnResolveData.isEmpty())
       {
-        qWarning() << tr("showSceneSelection could not be called.");
-        SlotQuit();
+        bool bOk = QMetaObject::invokeMethod(pRootObject, "showSceneSelection",
+                                             Q_ARG(QVariant, sScenes),
+                                             Q_ARG(QString, sUnResolveData));
+        assert(bOk);
+        if (!bOk)
+        {
+          qWarning() << tr("showSceneSelection could not be called.");
+          SlotQuit();
+        }
+      }
+      else
+      {
+        bool bOk = QMetaObject::invokeMethod(pRootObject, "showSceneSelection",
+                                             Q_ARG(QVariant, sScenes));
+        assert(bOk);
+        if (!bOk)
+        {
+          qWarning() << tr("showSceneSelection could not be called.");
+          SlotQuit();
+        }
       }
     }
   }

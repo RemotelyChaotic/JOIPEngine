@@ -27,10 +27,180 @@ using QtNodes::Node;
 
 //----------------------------------------------------------------------------------------
 //
+void ResolveNextPossibleNodes(qint32 iDepth, Node* pNode, std::vector<NodeResolveReslt>& vpRet)
+{
+  if (nullptr == pNode) { return; }
+
+  quint32 iOutPorts = pNode->nodeDataModel()->nPorts(PortType::Out);
+
+  CPathSplitterModel* pSplitterModel =
+    dynamic_cast<CPathSplitterModel*>(pNode->nodeDataModel());
+
+  if (pSplitterModel == nullptr ||
+      pSplitterModel->TransitionType()._to_integral() == ESceneTransitionType::eSelection)
+  {
+    for (quint32 i = 0; iOutPorts > i; i++)
+    {
+      auto pConnectionsMap =
+          pNode->nodeState().connections(PortType::Out, static_cast<qint32>(i));
+      for (auto it = pConnectionsMap.begin(); pConnectionsMap.end() != it; ++it)
+      {
+        QtNodes::Node* pNextNode = it->second->getNode(PortType::In);
+        CSceneNodeModel* pSceneModel =
+          dynamic_cast<CSceneNodeModel*>(pNextNode->nodeDataModel());
+        CEndNodeModel* pEndModel =
+          dynamic_cast<CEndNodeModel*>(pNextNode->nodeDataModel());
+
+        if (nullptr != pSceneModel || nullptr != pEndModel)
+        {
+          // splitter path name or scene name
+          if (nullptr != pSplitterModel)
+          {
+            std::optional<QString> optCustomTransition = pSplitterModel->CustomTransition();
+            vpRet.push_back(
+                  NodeResolveReslt{pSplitterModel->TransitionLabel(static_cast<qint32>(i)),
+                                   pNextNode, iDepth, optCustomTransition.has_value(),
+                                   optCustomTransition.value_or(QString())});
+          }
+          else if(nullptr != pEndModel)
+          {
+            vpRet.push_back(NodeResolveReslt{"End", pNextNode, iDepth, false, QString()});
+          }
+          else
+          {
+            vpRet.push_back(NodeResolveReslt{pSceneModel->SceneName(), pNextNode, iDepth, false, QString()});
+          }
+        }
+        else
+        {
+          ResolveNextPossibleNodes(iDepth+1, pNextNode, vpRet);
+        }
+      }
+    }
+  }
+  else
+  {
+    // check which maps lead to anything
+    std::vector<quint32> viValidIndicees;
+    for (quint32 i = 0; iOutPorts > i; i++)
+    {
+      auto pConnectionsMap =
+          pNode->nodeState().connections(PortType::Out, static_cast<qint32>(i));
+      if (pConnectionsMap.size() > 0)
+      {
+        viValidIndicees.push_back(i);
+      }
+    }
+
+    long unsigned int seed =
+      static_cast<long unsigned int>(std::chrono::high_resolution_clock::now().time_since_epoch().count());
+    std::mt19937 generator(static_cast<long unsigned int>(seed));
+    std::uniform_int_distribution<> dis(0, static_cast<qint32>(viValidIndicees.size() - 1));
+    qint32 iGeneratedIndex = dis(generator);
+    qDebug() << "Seed:" << seed << "casted:" << static_cast<long unsigned int>(seed);
+    qDebug() << "Generated value:" << iGeneratedIndex << "from 0 -" << static_cast<qint32>(viValidIndicees.size() - 1);
+
+    auto pConnectionsMap =
+        pNode->nodeState().connections(PortType::Out,
+                                       static_cast<qint32>(viValidIndicees[static_cast<quint32>(iGeneratedIndex)]));
+    for (auto it = pConnectionsMap.begin(); pConnectionsMap.end() != it; ++it)
+    {
+      QtNodes::Node* pNextNode = it->second->getNode(PortType::In);
+      CSceneNodeModel* pSceneModel =
+        dynamic_cast<CSceneNodeModel*>(pNextNode->nodeDataModel());
+      CEndNodeModel* pEndModel =
+        dynamic_cast<CEndNodeModel*>(pNextNode->nodeDataModel());
+
+      if (nullptr != pSceneModel || nullptr != pEndModel)
+      {
+        vpRet.push_back(
+              NodeResolveReslt{pSplitterModel->TransitionLabel(static_cast<qint32>(iGeneratedIndex)),
+                               pNextNode, iDepth, false, QString()});
+      }
+      else
+      {
+        ResolveNextPossibleNodes(iDepth+1, pNextNode, vpRet);
+      }
+    }
+  }
+}
+
+//----------------------------------------------------------------------------------------
+//
+QStringList GetFirstUnresolvedNodes(std::vector<NodeResolveReslt>& resolveResult,
+                                    std::optional<QString>* unresolvedData)
+{
+  if (nullptr != unresolvedData)
+  {
+    *unresolvedData = std::nullopt;
+  }
+
+  QStringList vsUnresolved;
+  qint32 iLowestDepthOfUnresolved = INT_MAX;
+
+  // find the unresolved nodes with the lowest depth
+  for (const auto& node : resolveResult)
+  {
+    if (iLowestDepthOfUnresolved > node.m_iDepth && node.m_bNeedsUserResolvement)
+    {
+      iLowestDepthOfUnresolved = node.m_iDepth;
+      vsUnresolved.clear();
+    }
+
+    if (iLowestDepthOfUnresolved == node.m_iDepth && node.m_bNeedsUserResolvement)
+    {
+      vsUnresolved.push_back(node.m_sLabel);
+      if (nullptr != unresolvedData)
+      {
+        *unresolvedData = node.m_sResolvementData;
+      }
+    }
+  }
+
+  return vsUnresolved;
+}
+
+//----------------------------------------------------------------------------------------
+//
+void ResolveNodes(std::vector<NodeResolveReslt>& resolveResult, const QStringList& vsNodes,
+                  qint32 iResolve)
+{
+  QStringList vsToResolve = vsNodes;
+
+  // find the unresolved nodes with the lowest depth
+  while (vsToResolve.size() > 0)
+  {
+    auto it = std::find_if(resolveResult.begin(), resolveResult.end(),
+                           [s = vsToResolve.front()](const NodeResolveReslt& node) {
+      return node.m_sLabel == s;
+    });
+    if (resolveResult.end() != it)
+    {
+      NodeResolveReslt node = *it;
+      resolveResult.erase(it);
+
+      if (0 == iResolve)
+      {
+        ResolveNextPossibleNodes(it->m_iDepth+1, it->m_pNode, resolveResult);
+      }
+      else
+      {
+        --iResolve;
+      }
+    }
+
+    vsToResolve.erase(vsToResolve.begin());
+  }
+}
+
+
+//----------------------------------------------------------------------------------------
+//
 CProjectRunner::CProjectRunner(QObject* pParent) :
   QObject (pParent),
   m_spCurrentProject(nullptr),
   m_wpDbManager(CApplication::Instance()->System<CDatabaseManager>()),
+  m_resolveResult(),
   m_nodeMap(),
   m_disabledScenes(),
   m_pFlowScene(nullptr),
@@ -73,6 +243,7 @@ void CProjectRunner::LoadProject(tspProject spProject, const QString sStartScene
   if (!sStartScene.isEmpty() && nullptr != pNodeDataModel)
   {
     m_nodeMap.clear();
+    m_resolveResult.clear();
     m_nodeMap.insert({pNodeDataModel->SceneName(), m_pCurrentNode});
     return;
   }
@@ -100,6 +271,7 @@ void CProjectRunner::LoadProject(tspProject spProject, tspScene spStartScene)
   }
 
   m_nodeMap.clear();
+  m_resolveResult.clear();
 
   if (nullptr == spStartScene)
   {
@@ -121,6 +293,7 @@ void CProjectRunner::UnloadProject()
   m_spInjectedScene = nullptr;
   m_spCurrentScene = nullptr;
   m_nodeMap.clear();
+  m_resolveResult.clear();
   m_disabledScenes.clear();
   if (nullptr != m_pFlowScene)
   {
@@ -167,6 +340,9 @@ bool CProjectRunner::IsSceneEnabled(const QString& sScene) const
 //
 tspScene CProjectRunner::NextScene(const QString sName)
 {
+  // we found a scene, so clear resolve cache
+  m_resolveResult.clear();
+
   auto it = m_nodeMap.find(sName);
   if (m_nodeMap.end() != it)
   {
@@ -208,8 +384,16 @@ tspScene CProjectRunner::NextScene(const QString sName)
 
 //----------------------------------------------------------------------------------------
 //
-QStringList CProjectRunner::PossibleScenes()
+QStringList CProjectRunner::PossibleScenes(std::optional<QString>* unresolvedData)
 {
+  QStringList vsUnresolved =
+      GetFirstUnresolvedNodes(m_resolveResult, unresolvedData);
+  if (!vsUnresolved.isEmpty())
+  {
+    return vsUnresolved;
+  }
+
+  if (nullptr != unresolvedData) { *unresolvedData = std::nullopt; }
   QStringList out;
   for (auto it = m_nodeMap.begin(); m_nodeMap.end() != it; ++it)
   {
@@ -274,9 +458,64 @@ void CProjectRunner::ResolveFindScenes(const QString sName)
 
 //----------------------------------------------------------------------------------------
 //
+void CProjectRunner::ResolvePossibleScenes(const QStringList vsNames, qint32 iIndex)
+{
+  ResolveNodes(m_resolveResult, vsNames, iIndex);
+  m_nodeMap.clear();
+  GenerateNodesFromResolved();
+}
+
+//----------------------------------------------------------------------------------------
+//
 void CProjectRunner::ResolveScenes()
 {
   ResolveNextScene();
+}
+
+//----------------------------------------------------------------------------------------
+//
+bool CProjectRunner::GenerateNodesFromResolved()
+{
+  if (m_resolveResult.size() > 0)
+  {
+    for (auto pNode : m_resolveResult)
+    {
+      CSceneNodeModel* pSceneModel =
+        dynamic_cast<CSceneNodeModel*>(pNode.m_pNode->nodeDataModel());
+      CEndNodeModel* pEndModel =
+        dynamic_cast<CEndNodeModel*>(pNode.m_pNode->nodeDataModel());
+
+      if (nullptr != pSceneModel)
+      {
+        qint32 iId = pSceneModel->SceneId();
+        auto spDbManager = m_wpDbManager.lock();
+        if (nullptr != spDbManager)
+        {
+          tspScene spScene = spDbManager->FindScene(m_spCurrentProject, iId);
+          if (nullptr != spScene)
+          {
+            auto it = m_disabledScenes.find(pNode.m_sLabel);
+            if (m_disabledScenes.end() == it)
+            {
+              m_nodeMap.insert({pNode.m_sLabel, pNode.m_pNode});
+            }
+          }
+        }
+      }
+      else if (nullptr != pEndModel)
+      {
+        m_nodeMap["End"] = pNode.m_pNode;
+      }
+    }
+  }
+  else
+  {
+    QString sError(tr("More than one nodes attached to start."));
+    qWarning() << sError;
+    emit SignalError(sError, QtMsgType::QtCriticalMsg);
+    return false;
+  }
+  return true;
 }
 
 //----------------------------------------------------------------------------------------
@@ -379,99 +618,6 @@ bool CProjectRunner::LoadFlowScene()
   return true;
 }
 
-//----------------------------------------------------------------------------------------
-//
-void CProjectRunner::ResolveNextPossibleNodes(Node* pNode, std::vector<std::pair<QString, QtNodes::Node*>>& vpRet)
-{
-  if (nullptr == pNode) { return; }
-
-  quint32 iOutPorts = pNode->nodeDataModel()->nPorts(PortType::Out);
-
-  CPathSplitterModel* pSplitterModel =
-    dynamic_cast<CPathSplitterModel*>(pNode->nodeDataModel());
-
-  if (pSplitterModel == nullptr ||
-      pSplitterModel->TransitionType()._to_integral() == ESceneTransitionType::eSelection)
-  {
-    for (quint32 i = 0; iOutPorts > i; i++)
-    {
-      auto pConnectionsMap =
-          pNode->nodeState().connections(PortType::Out, static_cast<qint32>(i));
-      for (auto it = pConnectionsMap.begin(); pConnectionsMap.end() != it; ++it)
-      {
-        QtNodes::Node* pNextNode = it->second->getNode(PortType::In);
-        CSceneNodeModel* pSceneModel =
-          dynamic_cast<CSceneNodeModel*>(pNextNode->nodeDataModel());
-        CEndNodeModel* pEndModel =
-          dynamic_cast<CEndNodeModel*>(pNextNode->nodeDataModel());
-
-        if (nullptr != pSceneModel || nullptr != pEndModel)
-        {
-          // splitter path name or scene name
-          if (nullptr != pSplitterModel)
-          {
-            vpRet.push_back({pSplitterModel->TransitionLabel(static_cast<qint32>(i)), pNextNode});
-          }
-          else if(nullptr != pEndModel)
-          {
-            vpRet.push_back({"End", pNextNode});
-          }
-          else
-          {
-            vpRet.push_back({pSceneModel->SceneName(), pNextNode});
-          }
-        }
-        else
-        {
-          ResolveNextPossibleNodes(pNextNode, vpRet);
-        }
-      }
-    }
-  }
-  else
-  {
-    // check which maps lead to anything
-    std::vector<quint32> viValidIndicees;
-    for (quint32 i = 0; iOutPorts > i; i++)
-    {
-      auto pConnectionsMap =
-          pNode->nodeState().connections(PortType::Out, static_cast<qint32>(i));
-      if (pConnectionsMap.size() > 0)
-      {
-        viValidIndicees.push_back(i);
-      }
-    }
-
-    long unsigned int seed =
-      static_cast<long unsigned int>(std::chrono::high_resolution_clock::now().time_since_epoch().count());
-    std::mt19937 generator(static_cast<long unsigned int>(seed));
-    std::uniform_int_distribution<> dis(0, static_cast<qint32>(viValidIndicees.size() - 1));
-    qint32 iGeneratedIndex = dis(generator);
-    qDebug() << "Seed:" << seed << "casted:" << static_cast<long unsigned int>(seed);
-    qDebug() << "Generated value:" << iGeneratedIndex << "from 0 -" << static_cast<qint32>(viValidIndicees.size() - 1);
-
-    auto pConnectionsMap =
-        pNode->nodeState().connections(PortType::Out,
-                                       static_cast<qint32>(viValidIndicees[static_cast<quint32>(iGeneratedIndex)]));
-    for (auto it = pConnectionsMap.begin(); pConnectionsMap.end() != it; ++it)
-    {
-      QtNodes::Node* pNextNode = it->second->getNode(PortType::In);
-      CSceneNodeModel* pSceneModel =
-        dynamic_cast<CSceneNodeModel*>(pNextNode->nodeDataModel());
-      CEndNodeModel* pEndModel =
-        dynamic_cast<CEndNodeModel*>(pNextNode->nodeDataModel());
-
-      if (nullptr != pSceneModel || nullptr != pEndModel)
-      {
-        vpRet.push_back({pSplitterModel->TransitionLabel(static_cast<qint32>(iGeneratedIndex)), pNextNode});
-      }
-      else
-      {
-        ResolveNextPossibleNodes(pNextNode, vpRet);
-      }
-    }
-  }
-}
 
 //----------------------------------------------------------------------------------------
 //
@@ -486,49 +632,8 @@ bool CProjectRunner::ResolveNextScene()
   }
 
   m_nodeMap.clear();
-  std::vector<std::pair<QString, Node*>> vpNodes;
-  ResolveNextPossibleNodes(m_pCurrentNode, vpNodes);
-  if (vpNodes.size() > 0)
-  {
-    for (auto pNode : vpNodes)
-    {
-      CSceneNodeModel* pSceneModel =
-        dynamic_cast<CSceneNodeModel*>(pNode.second->nodeDataModel());
-      CEndNodeModel* pEndModel =
-        dynamic_cast<CEndNodeModel*>(pNode.second->nodeDataModel());
-
-      if (nullptr != pSceneModel)
-      {
-        qint32 iId = pSceneModel->SceneId();
-        auto spDbManager = m_wpDbManager.lock();
-        if (nullptr != spDbManager)
-        {
-          tspScene spScene = spDbManager->FindScene(m_spCurrentProject, iId);
-          if (nullptr != spScene)
-          {
-            auto it = m_disabledScenes.find(pNode.first);
-            if (m_disabledScenes.end() == it)
-            {
-              m_nodeMap.insert({pNode.first, pNode.second});
-            }
-          }
-        }
-      }
-      else if (nullptr != pEndModel)
-      {
-        m_nodeMap["End"] = pNode.second;
-      }
-    }
-  }
-  else
-  {
-    QString sError(tr("More than one nodes attached to start."));
-    qWarning() << sError;
-    emit SignalError(sError, QtMsgType::QtCriticalMsg);
-    return false;
-  }
-
-  return true;
+  ResolveNextPossibleNodes(0, m_pCurrentNode, m_resolveResult);
+  return GenerateNodesFromResolved();
 }
 
 //----------------------------------------------------------------------------------------

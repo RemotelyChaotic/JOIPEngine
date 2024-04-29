@@ -115,17 +115,50 @@ Rectangle {
     }
 
     signal sceneSelectionReturnValue(int iValue)
-    function showSceneSelection(vsInput)
+    onSceneSelectionReturnValue: {
+        layoutLoader.unload();
+    }
+    function showSceneSelection(vsInput, aditionalData)
     {
-        if (null !== registeredTextBox && undefined !== registeredTextBox)
+        if (null == aditionalData || "" === aditionalData)
         {
-            registeredTextBox.showSceneSelectionPrompts(vsInput);
+            if (null !== registeredTextBox && undefined !== registeredTextBox)
+            {
+                registeredTextBox.showSceneSelectionPrompts(vsInput);
+            }
+            else
+            {
+                console.error(qsTr("Could not show scene selection."));
+                root.sceneSelectionReturnValue(-1);
+            }
+        }
+        else
+        {
+            if (null !== currentlyLoadedProject && undefined !== currentlyLoadedProject)
+            {
+                var resource = currentlyLoadedProject.resource(aditionalData);
+                if (null !== resource && undefined !== resource)
+                {
+                    var path = resource.path;
+                    transitionLoader.setSource(path);
+                }
+                else
+                {
+                    console.error(qsTr("Could not load layout."));
+                    root.sceneSelectionReturnValue(-1);
+                }
+            }
+            else
+            {
+                console.error(qsTr("Could not load layout."));
+                root.sceneSelectionReturnValue(-1);
+            }
         }
     }
     Connections {
         target: registeredTextBox
         onSceneSelectionRetVal: {
-            sceneSelectionReturnValue(iValue)
+            sceneSelectionReturnValue(iValue);
         }
     }
 
@@ -394,10 +427,18 @@ Rectangle {
             id: layoutLoader
             anchors.fill: parent
             asynchronous: true
-            active: true
+            active: false
+
+            visible: opacity > 0.0;
+            Behavior on opacity {
+                NumberAnimation { duration: 500; easing.type: Easing.InOutQuad }
+            }
 
             function unload(){
                 sourceComponent = undefined;
+                source = "";
+                opacity = 0.0;
+                active = false;
             }
 
             onLoaded: {
@@ -407,7 +448,12 @@ Rectangle {
                 }
             }
             onSourceChanged: {
-                console.log("Starting to load: " + source);
+                if ("" !== source)
+                {
+                    console.log("Starting to load: " + source);
+                    opacity = 1.0;
+                    active = true;
+                }
             }
 
             onStatusChanged: {
@@ -422,6 +468,54 @@ Rectangle {
                 if (status === Loader.Error)
                 {
                     console.error(qsTr("Could not load layout."));
+                }
+            }
+            onProgressChanged: {
+                console.log("Loading Layout: " + progress + "%");
+            }
+        }
+
+        // this is the custom scene transition
+        Loader {
+            id: transitionLoader
+            anchors.fill: parent
+            asynchronous: true
+            active: false
+
+            visible: opacity > 0.0;
+            Behavior on opacity {
+                NumberAnimation { duration: 500; easing.type: Easing.InOutQuad }
+            }
+
+            function unload(){
+                sourceComponent = undefined;
+                source = "";
+                opacity = 0.0;
+                active = false;
+            }
+
+            onSourceChanged: {
+                if ("" !== source)
+                {
+                    console.log("Starting to load: " + source);
+                    opacity = 1.0;
+                    active = true;
+                }
+            }
+
+            onStatusChanged: {
+                switch(status)
+                {
+                  case Loader.Null: console.log("The loader is inactive or no QML source has been set"); break;
+                  case Loader.Ready: console.log("The QML source has been loaded"); break;
+                  case Loader.Loading: console.log("The QML source is currently being loaded"); break;
+                  case Loader.Error: console.error("An error occurred while loading the QML source"); break;
+                }
+
+                if (status === Loader.Error)
+                {
+                    console.error(qsTr("Could not load layout."));
+                    root.sceneSelectionReturnValue(-1);
                 }
             }
             onProgressChanged: {

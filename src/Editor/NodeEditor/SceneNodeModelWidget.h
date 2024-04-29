@@ -34,8 +34,8 @@ public:
   void OnScriptRemoved(const QString& sName);
 
 signals:
-  void SignalAddScriptFileClicked();
-  void SignalAddLayoutFileClicked();
+  void SignalAddScriptFileClicked(const QString&);
+  void SignalAddLayoutFileClicked(const QString&);
   void SignalNameChanged(const QString& sName);
   void SignalScriptChanged(const QString& sName);
   void SignalLayoutChanged(const QString& sName);

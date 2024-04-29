@@ -463,7 +463,7 @@ void CEditorProjectSettingsWidget::on_AddLayoutButton_clicked()
   WIDGET_INITIALIZED_GUARD
   if (nullptr == m_spCurrentProject) { return; }
 
-  EditorModel()->SlotAddNewLayoutFile();
+  EditorModel()->SlotAddNewLayoutFile(QString());
 }
 
 //----------------------------------------------------------------------------------------

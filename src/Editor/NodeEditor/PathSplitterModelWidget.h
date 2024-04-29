@@ -38,7 +38,7 @@ signals:
   void SignalTransitionTypeChanged(qint32 iType);
   void SignalTransitionLabelChanged(PortIndex index, const QString& sLabelValue);
   void SignalCustomTransitionChanged(bool bEnabled, const QString& sResource);
-  void SignalAddLayoutFileClicked();
+  void SignalAddLayoutFileClicked(const QString& sCustomInitContent);
 
 protected slots:
   void on_pRandomRadio_clicked(bool bChecked);

@@ -52,7 +52,8 @@ public:
 
   void AddNewFileToScene(QPointer<QWidget> pParentForDialog,
                          tspScene spScene,
-                         EResourceType type);
+                         EResourceType type,
+                         const QString& sCustomInitContent);
 
   void AddTutorialStateSwitchHandler(std::weak_ptr<ITutorialStateSwitchHandler> wpSwitcher);
   void NextTutorialState();
@@ -75,16 +76,16 @@ public:
 public slots:
   void SlotNodeCreated(QtNodes::Node &n);
   void SlotNodeDeleted(QtNodes::Node &n);
-  void SlotAddNewScriptFile();
-  void SlotAddNewLayoutFile();
+  void SlotAddNewScriptFile(const QString& sCustomInitContent);
+  void SlotAddNewLayoutFile(const QString& sCustomInitContent);
 
 signals:
   void SignalProjectEdited();
   void SignalProjectPropertiesEdited();
 
 private slots:
-  void SlotAddNewScriptFileToScene();
-  void SlotAddNewLayoutFileToScene();
+  void SlotAddNewScriptFileToScene(const QString& sCustomInitContent);
+  void SlotAddNewLayoutFileToScene(const QString& sCustomInitContent);
   void SlotJobFinished(qint32 iId, QString type);
   void SlotJobStarted(qint32 iId, QString type);
   void SlotJobMessage(qint32 iId, QString type, QString sMsg);
