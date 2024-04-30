@@ -810,7 +810,7 @@ void CSceneMainScreen::NextSkript(bool bMightBeRegex)
       {
         bool bOk = QMetaObject::invokeMethod(pRootObject, "showSceneSelection",
                                              Q_ARG(QVariant, sScenes),
-                                             Q_ARG(QString, sUnResolveData));
+                                             Q_ARG(QVariant, QVariant::fromValue(sUnResolveData)));
         assert(bOk);
         if (!bOk)
         {

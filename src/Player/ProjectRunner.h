@@ -24,7 +24,7 @@ struct NodeResolveReslt
   QString m_sLabel;
   QtNodes::Node* m_pNode;
   qint32 m_iDepth;
-  qint32 m_bNeedsUserResolvement = false;
+  bool m_bNeedsUserResolvement = false;
   QString m_sResolvementData;
 };
 
