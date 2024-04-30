@@ -32,6 +32,11 @@ QImage CDatabaseImageProvider::requestImage(const QString& id, QSize* pSize,
     if (auto spDbManager = m_wpDatabase.lock())
     {
       auto spProject = spDbManager->FindProject(vsParts[0].toInt());
+      if (nullptr == spProject)
+      {
+        return QImage();
+      }
+
       QReadLocker projLocker(&spProject->m_rwLock);
       bool bLoadedBefore = spProject->m_bLoaded;
       projLocker.unlock();

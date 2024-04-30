@@ -5,6 +5,10 @@ Version 1.4.1.0
 Changes:
 - Tags objects in scripts have new getter methods: numResources & resources.
 
+Fixed Bugs:
+- Fixed a crash when removing a resource with tags.
+- Fixed a crash when loading an image and giving an invalid project-id.
+
 =================
 Version 1.4.0.0
 =================

@@ -777,8 +777,8 @@ void CDatabaseManager::RemoveResource(tspProject& spProj, const QString& sName)
 
       if (itTag->second->m_vsResourceRefs.empty())
       {
-        itTag = spProj->m_vspTags.erase(itTag);
         tagLocker.unlock();
+        itTag = spProj->m_vspTags.erase(itTag);
         locker.unlock();
         emit SignalTagRemoved(iId, QString(), sTagName);
       }
