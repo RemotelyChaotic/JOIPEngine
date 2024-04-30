@@ -8,6 +8,7 @@ Changes:
 Fixed Bugs:
 - Fixed a crash when removing a resource with tags.
 - Fixed a crash when loading an image and giving an invalid project-id.
+- Fix for potential crash on closing the app while in the editor.
 
 =================
 Version 1.4.0.0

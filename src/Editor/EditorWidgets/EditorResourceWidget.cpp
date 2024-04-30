@@ -88,9 +88,9 @@ CEditorResourceWidget::~CEditorResourceWidget()
     m_pResponse = nullptr;
   }
 
-  m_spWebOverlay.reset();
-  m_spSourceOverlay.reset();
-  m_spTagsOverlay.reset();
+  if (nullptr != m_spWebOverlay) m_spWebOverlay.reset();
+  if (nullptr != m_spSourceOverlay) m_spSourceOverlay.reset();
+  if (nullptr != m_spTagsOverlay) m_spTagsOverlay.reset();
 }
 
 //----------------------------------------------------------------------------------------
