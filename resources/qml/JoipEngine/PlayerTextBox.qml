@@ -46,14 +46,14 @@ Rectangle {
         textLog.flick(0,-1000);
     }
 
-    function showButtonPrompts(vsLabels, sRequestId)
+    function showButtonPrompts(vsLabels, sStoreIntoVar, sRequestId, bStoreIntoStorageInstead)
     {
         dataContainer.buttonTexts = vsLabels;
         var dataForInput = {
             "textAlignment": "",
-            "textContent": "",
+            "textContent": sStoreIntoVar,
             "buttonTexts": vsLabels,
-            "storeIntoStorageInstead": false,
+            "storeIntoStorageInstead": bStoreIntoStorageInstead,
             "backgroundColor": "",
             "textColor": "",
             "backgroundColors": dataContainer.backgroundColors,
@@ -64,6 +64,8 @@ Rectangle {
         };
         var dataForLoader = {
             "buttonTexts": vsLabels,
+            "textContent": sStoreIntoVar,
+            "storeIntoStorageInstead": bStoreIntoStorageInstead,
             "backgroundColors": dataContainer.backgroundColors,
             "textColors": dataContainer.textColors,
             "requestId": sRequestId
@@ -203,9 +205,14 @@ Rectangle {
         {
             textBox.clearTextBox();
         },
-        showButtonPrompts: function(vsLabels, sRequestId)
+        showButtonPrompts: function(vsLabels, sStoreIntoVarOrId, sRequestId, bStoreIntoStorageInstead)
         {
-            signalEmitter.showButtonPrompts(vsLabels, sRequestId);
+            if (null == sRequestId) {
+                // compatibility for teases before 1.4.1
+                signalEmitter.showButtonPrompts(vsLabels, null, sStoreIntoVarOrId, false);
+            } else {
+                signalEmitter.showButtonPrompts(vsLabels, sStoreIntoVarOrId, sRequestId, bStoreIntoStorageInstead);
+            }
         },
         showSceneSelectionPrompts: function(vsLabels)
         {
@@ -217,7 +224,7 @@ Rectangle {
         },
         showText: function(sText)
         {
-            signalEmitter.showText(sText);
+            signalEmitter.showText(sText, -1);
         },
         setPortrait: function(sName)
         {
@@ -255,7 +262,8 @@ Rectangle {
                     vsModifiedPrompts[i] = root.parseHtmlToJS(vsModifiedPrompts[i],  textBox.userName);
                 }
             }
-            textBox.showButtonPrompts(vsModifiedPrompts, sRequestId);
+            textBox.showButtonPrompts(vsModifiedPrompts, sStoreIntoVar, sRequestId,
+                                      bStoreIntoStorageInstead);
             hideTimer.reset(10*1000);
         }
         onShowInput: {
@@ -320,11 +328,11 @@ Rectangle {
 
         function inputEditingFinished(sInput, sStoreIntoVar, sRequestId, bStoreIntoStorageInstead)
         {
-            if ("" !== sStoreIntoVar)
+            if (null != sStoreIntoVar && "" !== sStoreIntoVar)
             {
                 if (bStoreIntoStorageInstead)
                 {
-                    root.storage.store(sStoreIntoVar, sInput);
+                    root.evaluate("teaseStorage.store('"+sStoreIntoVar+"',"+sInput+");");
                 }
                 else
                 {
@@ -333,8 +341,20 @@ Rectangle {
             }
             signalEmitter.showInputReturnValue(sInput, sRequestId);
         }
-        function buttonPressed(iIndex, sRequestId)
+        function buttonPressed(iIndex, sStoreIntoVar, sRequestId, bStoreIntoStorageInstead)
         {
+            if (null != sStoreIntoVar && "" !== sStoreIntoVar)
+            {
+                if (bStoreIntoStorageInstead)
+                {
+                    root.evaluate("teaseStorage.store('"+sStoreIntoVar+"',"+iIndex+");");
+                }
+                else
+                {
+                    root.evaluate(sStoreIntoVar + "='" + iIndex + "'");
+                }
+            }
+
             if (!sceneSelection)
             {
                 signalEmitter.showButtonReturnValue(iIndex, sRequestId);
@@ -404,9 +424,9 @@ Rectangle {
                 textBox.showText(sInput, true);
             }
         }
-        function buttonPressed(iIndex, sRequestId)
+        function buttonPressed(iIndex, sStoreIntoVar, sRequestId, bStoreIntoStorageInstead)
         {
-            dataContainer.buttonPressed(iIndex, sRequestId);
+            dataContainer.buttonPressed(iIndex, sStoreIntoVar, sRequestId, bStoreIntoStorageInstead);
             if (PlayerTextBox.TextBoxMode.TextBox === textBox.displayMode)
             {
                 textBox.showText(dataContainer.buttonTexts[iIndex], true);
@@ -442,9 +462,9 @@ Rectangle {
         {
             dataContainer.inputEditingFinished(sInput, sStoreIntoVar, sRequestId, bStoreIntoStorageInstead);
         }
-        function buttonPressed(iIndex, sRequestId)
+        function buttonPressed(iIndex, sStoreIntoVar, sRequestId, bStoreIntoStorageInstead)
         {
-            dataContainer.buttonPressed(iIndex, sRequestId)
+            dataContainer.buttonPressed(iIndex, sStoreIntoVar, sRequestId, bStoreIntoStorageInstead)
         }
 
         signal delegateComponentLoaded()

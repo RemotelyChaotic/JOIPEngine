@@ -37,7 +37,7 @@ public:
 
 signals:
   void clearText();
-  void showButtonPrompts(QStringList vsLabels, QString sRequestId);
+  void showButtonPrompts(QStringList vsLabels, QString sStoreIntoVar, QString sRequestId, bool bStoreIntoStorageInstead);
   void showButtonReturnValue(qint32 iIndex, QString sRequestId);
   void showInput(QString sStoreIntoVar, QString sRequestId, bool bStoreIntoStorageInstead);
   void showInputReturnValue(QString sValue, QString sRequestId);
@@ -70,7 +70,9 @@ public slots:
   void setTextColors(QVariant color);
   void setTextPortrait(QVariant resource);
   qint32 showButtonPrompts(QVariant vsLabels);
+  qint32 showButtonPrompts(QVariant vsLabels, QString sStoreInto);
   QString showInput();
+  QString showInput(QString sStoreInto);
   void showText(QString sText);
   void showText(QString sText, double dWaitTime);
   void showText(QString sText, double dWaitTime, bool bSkipable);

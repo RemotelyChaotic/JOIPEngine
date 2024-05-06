@@ -16,7 +16,9 @@ Rectangle {
     property var backgroundColors: inList ? model.backgroundColors : []
     property var textColors: inList ? model.textColors : []
     property var buttonTexts: inList ? model.buttonTexts : []
+    property string textContent: inList ? model.textContent : ""
     property string requestId: inList ? model.sRequestId : ""
+    property bool storeIntoStorageInstead: inList ? model.storeIntoStorageInstead : false
 
     TextMetrics {
         id: textMetrics
@@ -165,9 +167,13 @@ Rectangle {
                     onClicked: {
                         root.soundEffects.clickSound.play();
                         if (inList) {
-                            listView.buttonPressed(index, textDelegate.requestId);
+                            listView.buttonPressed(index, textDelegate.textContent,
+                                                   textDelegate.requestId,
+                                                   textDelegate.storeIntoStorageInstead);
                         } else {
-                            buttonPressed(index, textDelegate.requestId);
+                            buttonPressed(index, textDelegate.textContent,
+                                          textDelegate.requestId,
+                                          textDelegate.storeIntoStorageInstead);
                         }
                     }
 
@@ -195,9 +201,13 @@ Rectangle {
                         onActivated: {
                             root.soundEffects.clickSound.play();
                             if (inList) {
-                                listView.buttonPressed(index, textDelegate.requestId);
+                                listView.buttonPressed(index, textDelegate.textContent,
+                                                       textDelegate.requestId,
+                                                       textDelegate.storeIntoStorageInstead);
                             } else {
-                                buttonPressed(index, textDelegate.requestId);
+                                buttonPressed(index, textDelegate.textContent,
+                                              textDelegate.requestId,
+                                              textDelegate.storeIntoStorageInstead);
                             }
                         }
                     }

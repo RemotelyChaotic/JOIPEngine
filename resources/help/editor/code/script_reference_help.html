@@ -566,27 +566,35 @@
         textBox:setTextPortrait(myIconVar); -- note: in this example myIconVar is a Resource<br>
         <br></li>
 
-        <li><b>showButtonPrompts ( string[] ):</b><br>
+        <li><b>showButtonPrompts ( string[] [, string varName ] ):</b><br>
         Shows a set of buttons. The array of input strings will be used for the button
         texts and the colors set by setBackgroundColors and setTextColors will be used for
         text and background coloring. This function blocks until the player clicks a
         button, upon which the index of the pressed button will be returned (the returned values
         are 0 indexed). It is possible to use a subset of html tags in the buton texts
         (see https://doc.qt.io/qt-5/richtext-html-subset.html for the supported subset).<br>
+        The optional second argument determines if the input should be written to local storage. If set
+        the result will be written into &lt;<i>varName</i>&gt;.<br>
         <i>Example Usage (JS):</i><br>
         var choice = textBox.showButtonPrompts(["Yes","No"]); /* Will return 0 if the player presses "Yes" and 1 if the player presses "No". */<br>
+        var choice = textBox.showInput(["Yes","No"], "myInputVar"); // acts as if localStorage.store("myInputVar", choice) was called after<br>
         <i>Example Usage (Lua):</i><br>
         local choice = textBox:showButtonPrompts({'Yes','No'}); -- Will return 0 if the player presses "Yes" and 1 if the player presses "No".<br>
+        local choice = textBox:showInput({'Yes','No'}, 'myInputVar'); -- acts as if localStorage:store("myInputVar", choice) was called after<br>
         <br></li>
 
-        <li><b>showInput (  ): string:</b><br>
+        <li><b>showInput ( [ string varName ] ): string:</b><br>
         Shows a text input editor. The colors set by setBackgroundColors and setTextColors will be used for
         text and background coloring. This function blocks until the player enters a
         text, upon which the text will be returned.<br>
+        The optional second argument determines if the input should be written to local storage. If set
+        the result will be written into &lt;<i>varName</i>&gt;.<br>
         <i>Example Usage (JS):</i><br>
         var input = textBox.showInput();<br>
+        var input = textBox.showInput("myInputVar"); // acts as if localStorage.store("myInputVar", input) was called after<br>
         <i>Example Usage (Lua):</i><br>
         local input = textBox:showInput();<br>
+        local input = textBox:showInput("myInputVar"); // acts as if localStorage:store("myInputVar", input) was called after<br>
         <br></li>
 
         <li><b>showText ( string [, double [, bool ] ] ):</b><br>

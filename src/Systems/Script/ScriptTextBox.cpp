@@ -156,6 +156,13 @@ void CScriptTextBox::setTextPortrait(QVariant resource)
 //
 qint32 CScriptTextBox::showButtonPrompts(QVariant vsLabels)
 {
+  return showButtonPrompts(vsLabels, QString());
+}
+
+//----------------------------------------------------------------------------------------
+//
+qint32 CScriptTextBox::showButtonPrompts(QVariant vsLabels, QString sStoreInto)
+{
   if (!CheckIfScriptCanRun()) { return -1; }
   auto pSignalEmitter = SignalEmitter<CTextBoxSignalEmitter>();
   if (nullptr == pSignalEmitter) { return -1; }
@@ -170,7 +177,8 @@ qint32 CScriptTextBox::showButtonPrompts(QVariant vsLabels)
     return -1;
   }
 
-  emit pSignalEmitter->showButtonPrompts(optvsStringLabels.value(), sRequestId);
+  emit pSignalEmitter->showButtonPrompts(optvsStringLabels.value(), sStoreInto, sRequestId,
+                                         true);
 
   // local loop to wait for answer
   qint32 iReturnValue = -1;
@@ -304,12 +312,19 @@ void CScriptTextBox::showText(QString sText, double dWaitTime, bool bSkipable)
 //
 QString CScriptTextBox::showInput()
 {
+  return showInput(QString());
+}
+
+//----------------------------------------------------------------------------------------
+//
+QString CScriptTextBox::showInput(QString sStoreInto)
+{
   if (!CheckIfScriptCanRun()) { return QString(); }
 
   QString sRequestId = QUuid::createUuid().toString();
   auto pSignalEmitter = SignalEmitter<CTextBoxSignalEmitter>();
-  QTimer::singleShot(0, this, [&pSignalEmitter, sRequestId]() {
-    emit pSignalEmitter->showInput(QString(), sRequestId, true);
+  QTimer::singleShot(0, this, [&pSignalEmitter, sStoreInto, sRequestId]() {
+    emit pSignalEmitter->showInput(sStoreInto, sRequestId, false);
   });
 
   // local loop to wait for answer
@@ -699,7 +714,7 @@ qint32 CEosScriptTextBox::showButtonPrompts(const QStringList& vsLabels)
   auto pSignalEmitter = SignalEmitter<CTextBoxSignalEmitter>();
   if (vsLabels.size() > 0)
   {
-    emit pSignalEmitter->showButtonPrompts(vsLabels, sRequestId);
+    emit pSignalEmitter->showButtonPrompts(vsLabels, QString(), sRequestId, false);
 
     // local loop to wait for answer
     qint32 iReturnValue = -1;
