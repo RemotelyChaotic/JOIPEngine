@@ -65,11 +65,16 @@
         <li><b>Path Splitters</b>: These nodes split the flow of a project into up to four
         possible paths. Depending on the type of the "Path Splitter" node the flow in the player will either continue
         with a <i>random</i> node, or prompt the user to <i>select</i> the path.<br>
+        By selecting &qout;Button Labels&qout; and putting the splitter into <i>select</i>
+        mode, a custom transition can be used if needed. This transition uses a
+        <a href="qrc:/resources/help/layout/layout_help.html">Layout Resource</a> to display the selection UI.
+        To create a new transition from a template, click the button next to the Resource selector.<br>
         "Path Splitter" and "Path Merger" nodes can be combined and chained freely to cerate more path alternatives and
         a mix between <i>random</i> and <i>selectable</i> flow.
         Any empty connectors will be ignored during playing and you do not need to worry about them.<br>
         The four line edits are for the user visible path names if the node is of type <i>selectable</i>.
-        They corespond to the user visible button labels in the editor.<br>
+        They corespond to the user visible button labels in the editor and the labels available to
+        custom transitions (variable: vsInput).<br>
         </li>
 
         <li><b>Path Merger</b>: These nodes merge the flow of a project from up to four
