@@ -140,6 +140,7 @@ Rectangle {
                 if (null !== resource && undefined !== resource)
                 {
                     var path = resource.path;
+                    transitionLoader.vsInput = vsInput;
                     transitionLoader.setSource(path);
                 }
                 else
@@ -487,11 +488,14 @@ Rectangle {
                 NumberAnimation { duration: 500; easing.type: Easing.InOutQuad }
             }
 
+            property var vsInput: []
+
             function unload(){
                 sourceComponent = undefined;
                 source = "";
                 opacity = 0.0;
                 active = false;
+                vsInput = [];
             }
 
             onSourceChanged: {

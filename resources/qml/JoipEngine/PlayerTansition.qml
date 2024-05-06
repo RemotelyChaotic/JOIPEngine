@@ -10,6 +10,7 @@ Rectangle {
     color: "transparent"
 
     property Project currentlyLoadedProject: null
+    property var vsInput: parent.vsInput
 
     function returnValue(iValue)
     {

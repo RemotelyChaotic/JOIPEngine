@@ -17,6 +17,7 @@ import JOIP.db 1.1
 
 PlayerTansition {
     // TODO: use function returnValue(index) to return the player choice
+    //       vsInput holds the button names
     anchors.fill: parent
 
     property int spacing: 5
