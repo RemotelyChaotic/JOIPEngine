@@ -2,6 +2,9 @@
 Version 1.4.1.0
 =================
 
+New Features:
+- A Splitter Node can have a custom transition UI via Layout (Qml) Resource.
+
 Changes:
 - Tags objects in scripts have new getter methods: numResources & resources.
 
