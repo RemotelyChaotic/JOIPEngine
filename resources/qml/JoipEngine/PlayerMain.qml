@@ -116,7 +116,7 @@ Rectangle {
 
     signal sceneSelectionReturnValue(int iValue)
     onSceneSelectionReturnValue: {
-        layoutLoader.unload();
+        transitionLoader.unload();
     }
     function showSceneSelection(vsInput, aditionalData)
     {

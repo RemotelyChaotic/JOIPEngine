@@ -482,49 +482,42 @@ void CSceneMainScreen::SlotSceneSelectReturnValue(int iIndex)
   if (unresolvedData.has_value())
   {
     m_spProjectRunner->ResolvePossibleScenes(sScenes, iIndex);
-  }
-
-  // do we still have unresolved scenes?
-  sScenes = m_spProjectRunner->PossibleScenes(&unresolvedData);
-
-  // resolved an unresolved scene set
-  if (unresolvedData.has_value())
-  {
+    // do we still have unresolved scenes?
+    sScenes = m_spProjectRunner->PossibleScenes(&unresolvedData);
     NextSkript(false);
+    return;
   }
+
   // no scenes needed resolvement
-  else
+  if (0 <= iIndex && sScenes.size() > iIndex)
   {
-    if (0 <= iIndex && sScenes.size() > iIndex)
+    tspScene spScene = m_spProjectRunner->NextScene(sScenes[iIndex]);
+    if (nullptr != spScene)
     {
-      tspScene spScene = m_spProjectRunner->NextScene(sScenes[iIndex]);
-      if (nullptr != spScene)
+      // load script
+      QReadLocker lockerScene(&spScene->m_rwLock);
+      QString sScript = spScene->m_sScript;
+      lockerScene.unlock();
+      bool bOk = QMetaObject::invokeMethod(m_spScriptRunner.get(), "LoadScript", Qt::QueuedConnection,
+                                           Q_ARG(tspScene, spScene),
+                                           Q_ARG(tspResource, spDbManager->FindResourceInProject(m_spCurrentProject, sScript)));
+      assert(bOk);
+      if (!bOk)
       {
-        // load script
-        QReadLocker lockerScene(&spScene->m_rwLock);
-        QString sScript = spScene->m_sScript;
-        lockerScene.unlock();
-        bool bOk = QMetaObject::invokeMethod(m_spScriptRunner.get(), "LoadScript", Qt::QueuedConnection,
-                                             Q_ARG(tspScene, spScene),
-                                             Q_ARG(tspResource, spDbManager->FindResourceInProject(m_spCurrentProject, sScript)));
-        assert(bOk);
-        if (!bOk)
-        {
-          qWarning() << tr("LoadScript could not be called.");
-          SlotQuit();
-        }
-      }
-      else
-      {
-        qInfo() << tr("Next scene is null or end.");
-        SlotFinish();
+        qWarning() << tr("LoadScript could not be called.");
+        SlotQuit();
       }
     }
     else
     {
-      qWarning() << tr("No more scenes to load was unexpected.");
+      qInfo() << tr("Next scene is null or end.");
       SlotFinish();
     }
+  }
+  else
+  {
+    qWarning() << tr("No more scenes to load was unexpected.");
+    SlotFinish();
   }
 }
 

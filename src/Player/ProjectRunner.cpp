@@ -181,12 +181,27 @@ void ResolveNodes(std::vector<NodeResolveReslt>& resolveResult, const QStringLis
 
       if (0 == iResolve)
       {
-        ResolveNextPossibleNodes(it->m_iDepth+1, it->m_pNode, resolveResult);
+        CSceneNodeModel* pSceneModel =
+          dynamic_cast<CSceneNodeModel*>(node.m_pNode->nodeDataModel());
+        CEndNodeModel* pEndModel =
+          dynamic_cast<CEndNodeModel*>(node.m_pNode->nodeDataModel());
+        if (nullptr != pSceneModel)
+        {
+          resolveResult.push_back(NodeResolveReslt{pSceneModel->SceneName(), node.m_pNode,
+                                                   node.m_iDepth+1, false, QString()});
+        }
+        else if (nullptr != pEndModel)
+        {
+          resolveResult.push_back(NodeResolveReslt{"End", node.m_pNode, node.m_iDepth+1,
+                                                   false, QString()});
+        }
+        else
+        {
+          ResolveNextPossibleNodes(node.m_iDepth+1, node.m_pNode, resolveResult);
+        }
       }
-      else
-      {
-        --iResolve;
-      }
+
+      --iResolve;
     }
 
     vsToResolve.erase(vsToResolve.begin());
