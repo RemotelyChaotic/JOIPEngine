@@ -10,6 +10,8 @@
 #include "NotificationSnippetOverlay.h"
 #include "MetronomeSnippetOverlay.h"
 #include "ResourceSnippetOverlay.h"
+#include "ScriptEditorCompleter.h"
+#include "ScriptEditorCompleterModel.h"
 #include "TextSnippetOverlay.h"
 #include "TimerSnippetOverlay.h"
 #include "ThreadSnippetOverlay.h"
@@ -334,6 +336,28 @@ void CCodeDisplayWidget::SetScriptType(const QString& sScriptType)
   m_spThreadSnippetOverlay->SetCurrentScriptType(m_sScriptType);
 
   m_spUi->pEditorStackedWidget->setCurrentIndex(PageIndexFromScriptType(sScriptType));
+
+  m_spUi->pCodeEdit->Completer()->SetCompleterColumn(
+      m_pEditorModel->EditorCompleterModel()->ColumnForType(sScriptType));
+
+  auto spCompleterProcessor = m_pEditorModel->EditorCompleterModel()->FileProcessor(sScriptType);
+  if (nullptr != spCompleterProcessor)
+  {
+    m_spUi->pCodeEdit->Completer()->SetEndOfwordFunction([spCompleterProcessor](const QString& s) {
+      if (s.size() > 0)
+      {
+        return spCompleterProcessor->IsEndOfWordChar(s[0]);
+      }
+      return false;
+    });
+  }
+  else
+  {
+    m_spUi->pCodeEdit->Completer()->SetEndOfwordFunction([](QString s) {
+      static QString sEow("~!@#$%^&*()+{}|:\"<>?,./;'[]\\-=");
+      return sEow.contains(s);
+    });
+  }
 }
 
 //----------------------------------------------------------------------------------------

@@ -1,5 +1,10 @@
 #include "CodeDisplayDefaultEditorImpl.h"
+#include "ScriptEditorCompleter.h"
+#include "ScriptEditorCompleterModel.h"
 #include "ScriptEditorWidget.h"
+
+#include "Editor/EditorModel.h"
+
 #include "ui_EditorActionBar.h"
 
 CCodeDisplayDefaultEditorImpl::CCodeDisplayDefaultEditorImpl(QPointer<CScriptEditorWidget> pTarget) :
@@ -11,6 +16,16 @@ CCodeDisplayDefaultEditorImpl::CCodeDisplayDefaultEditorImpl(QPointer<CScriptEdi
 CCodeDisplayDefaultEditorImpl::~CCodeDisplayDefaultEditorImpl()
 {
 
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CCodeDisplayDefaultEditorImpl::Initialize(CEditorModel* pModel)
+{
+  if (nullptr != pModel)
+  {
+    m_pCodeEdit->Completer()->SetModel(pModel->EditorCompleterModel());
+  }
 }
 
 //----------------------------------------------------------------------------------------

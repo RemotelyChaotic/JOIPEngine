@@ -2,6 +2,7 @@
 #include "Application.h"
 #include "ScriptEditorAddonWidgets.h"
 #include "ScriptEditorCodeToolTip.h"
+#include "ScriptEditorCompleter.h"
 #include "ScriptEditorKeyHandler.h"
 #include "Settings.h"
 #include "Themes.h"
@@ -29,6 +30,7 @@ CScriptEditorWidget::CScriptEditorWidget(QWidget* pParent) :
   QPlainTextEdit(pParent),
   m_spRepository(std::make_unique<KSyntaxHighlighting::Repository>()),
   m_spSettings(CApplication::Instance()->Settings()),
+  m_pCompleter(new CScriptEditorCompleter(this)),
   m_pHighlightedSearchableEdit(nullptr),
   m_foldedIcon(":/resources/style/img/ButtonPlay.png"),
   m_unfoldedIcon(":/resources/style/img/ButtonArrowDown.png"),
@@ -224,6 +226,8 @@ void CScriptEditorWidget::SetTheme(const QString& sTheme)
 
 //----------------------------------------------------------------------------------------
 //
+QPointer<CScriptEditorCompleter> CScriptEditorWidget::Completer() const
+{ return m_pCompleter; }
 QPointer<CEditorHighlighter> CScriptEditorWidget::Highlighter() const
 { return m_pHighlightedSearchableEdit->Highlighter(); }
 QPointer<CEditorSearchBar>   CScriptEditorWidget::SearchBar() const
@@ -539,6 +543,32 @@ bool CScriptEditorWidget::eventFilter(QObject* pTarget, QEvent* pEvent)
   }
 
   return QPlainTextEdit::eventFilter(pTarget, pEvent);
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CScriptEditorWidget::keyPressEvent(QKeyEvent* pEvt)
+{
+  // needed otherwise completer doesn't work correctly.
+  qint32 k = pEvt->key();
+  if (m_pCompleter->IsCompleterOpen())
+  {
+    switch (k)
+    {
+      case Qt::Key_Escape:
+      case Qt::Key_Backtab:
+      case Qt::Key_Up:
+      case Qt::Key_Down:
+      case Qt::Key_Tab:
+      case Qt::Key_Enter:
+      case Qt::Key_Return:
+        pEvt->ignore();
+        return;
+      default:
+        break;
+    }
+  }
+  QPlainTextEdit::keyPressEvent(pEvt);
 }
 
 //----------------------------------------------------------------------------------------

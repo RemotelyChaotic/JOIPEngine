@@ -11,7 +11,7 @@ public:
   CCodeDisplayDefaultEditorImpl(QPointer<CScriptEditorWidget> pTarget);
   ~CCodeDisplayDefaultEditorImpl() override;
 
-  void Initialize(CEditorModel*) override {}
+  void Initialize(CEditorModel*) override;
 
   void Clear() override;
   void ExecutionError(QString sException, qint32 iLine, QString sStack) override;

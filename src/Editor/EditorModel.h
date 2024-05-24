@@ -18,6 +18,7 @@ class CFlowScene;
 class CEditorJobWorker;
 class CKinkTreeModel;
 class CResourceTreeItemModel;
+class CScriptEditorCompleterModel;
 class CEditorEditableFileModel;
 class CSettings;
 class CThreadedSystem;
@@ -47,6 +48,7 @@ public:
   CKinkTreeModel* KinkTreeModel() const;
   CResourceTreeItemModel* ResourceTreeModel() const;
   CEditorEditableFileModel* EditableFileModel() const;
+  CScriptEditorCompleterModel* EditorCompleterModel() const;
   QString ScriptTypeFilterForNewScripts() const;
   QUndoStack* UndoStack() const;
 
@@ -94,6 +96,7 @@ private slots:
 private:
   std::unique_ptr<CKinkTreeModel>                             m_spKinkTreeModel;
   std::unique_ptr<CEditorEditableFileModel>                   m_spEditableFileModel;
+  std::unique_ptr<CScriptEditorCompleterModel>                m_spEditorCompleterModel;
   std::unique_ptr<CFlowScene>                                 m_spFlowSceneModel;
   std::unique_ptr<QUndoStack>                                 m_spUndoStack;
   std::unique_ptr<CResourceTreeItemModel>                     m_spResourceTreeModel;

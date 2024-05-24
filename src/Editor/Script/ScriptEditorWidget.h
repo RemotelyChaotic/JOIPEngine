@@ -21,6 +21,7 @@ class CLineNumberArea;
 class CHighlightedSearchableTextEdit;
 class CEditorSearchBar;
 class CSettings;
+class CScriptEditorCompleter;
 class CTextEditZoomEnabler;
 class CWidgetArea;
 class IScriptEditorKeyHandler;
@@ -101,6 +102,7 @@ public:
   void SetWidgetsBackgroundColor(const QColor& color) { m_widgetsBackgroundColor = color; }
   const QColor& WidgetsBackgroundColor() { return m_widgetsBackgroundColor; }
 
+  QPointer<CScriptEditorCompleter> Completer() const;
   QPointer<CEditorHighlighter> Highlighter() const;
   QPointer<CEditorSearchBar>   SearchBar() const;
   QPointer<CTextEditZoomEnabler> ZoomEnabler() const;
@@ -115,6 +117,7 @@ public slots:
 
 protected:
   bool eventFilter(QObject* pTarget, QEvent* pEvent) override;
+  void keyPressEvent(QKeyEvent* pEvt) override;
   void paintEvent(QPaintEvent* pEvent) override;
   void resizeEvent(QResizeEvent* pEvent) override;
 
@@ -138,6 +141,7 @@ private:
 
   std::unique_ptr<KSyntaxHighlighting::Repository> m_spRepository;
   std::shared_ptr<CSettings>                       m_spSettings;
+  QPointer<CScriptEditorCompleter>                 m_pCompleter;
   QPointer<CHighlightedSearchableTextEdit>         m_pHighlightedSearchableEdit;
   QPointer<CTextEditZoomEnabler>                   m_pZoomEnabler;
   std::map<EScriptEditorAddonPosition, std::vector<IScriptEditorAddon*>>

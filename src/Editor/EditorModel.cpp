@@ -14,6 +14,9 @@
 #include "NodeEditor/SceneTranstitionData.h"
 #include "NodeEditor/StartNodeModel.h"
 
+#include "Script/ScriptCompleterFileProcessors.h"
+#include "Script/ScriptEditorCompleterModel.h"
+
 #include "Project/KinkTreeModel.h"
 #include "Resources/ResourceTreeItemModel.h"
 #include "Systems/DatabaseManager.h"
@@ -41,6 +44,7 @@ CEditorModel::CEditorModel(QWidget* pParent) :
   QObject(nullptr),
   m_spKinkTreeModel(std::make_unique<CKinkTreeModel>()),
   m_spEditableFileModel(std::make_unique<CEditorEditableFileModel>(pParent)),
+  m_spEditorCompleterModel(std::make_unique<CScriptEditorCompleterModel>(pParent)),
   m_spFlowSceneModel(std::make_unique<CFlowScene>(CNodeEditorRegistry::RegisterDataModels(), nullptr)),
   m_spUndoStack(std::make_unique<QUndoStack>()),
   m_spResourceTreeModel(std::make_unique<CResourceTreeItemModel>(m_spUndoStack.get())),
@@ -55,6 +59,14 @@ CEditorModel::CEditorModel(QWidget* pParent) :
   m_bReadOnly(false)
 {
   m_spJobWorkerSystem->RegisterObject<CEditorJobWorker>();
+
+  m_spEditorCompleterModel->RegisterFileProcessor<CScriptCompleterFileProcessorJs>(
+      SScriptDefinitionData::c_sScriptTypeJs);
+  m_spEditorCompleterModel->RegisterFileProcessor<CScriptCompleterFileProcessorLua>(
+      SScriptDefinitionData::c_sScriptTypeLua);
+  auto qmlProcessor = std::make_shared<CScriptCompleterFileProcessorQml>();
+  m_spEditorCompleterModel->RegisterFileProcessor(SScriptDefinitionData::c_sScriptTypeQml, qmlProcessor);
+  m_spEditorCompleterModel->RegisterFileProcessor(SScriptDefinitionData::c_sScriptTypeLayout, qmlProcessor);
 
   connect(m_spResourceTreeModel.get(), &CResourceTreeItemModel::SignalProjectEdited,
           this, &CEditorModel::SignalProjectEdited, Qt::DirectConnection);
@@ -137,6 +149,13 @@ CResourceTreeItemModel* CEditorModel::ResourceTreeModel() const
 CEditorEditableFileModel* CEditorModel::EditableFileModel() const
 {
   return m_spEditableFileModel.get();
+}
+
+//----------------------------------------------------------------------------------------
+//
+CScriptEditorCompleterModel* CEditorModel::EditorCompleterModel() const
+{
+  return m_spEditorCompleterModel.get();
 }
 
 //----------------------------------------------------------------------------------------
@@ -553,6 +572,8 @@ void CEditorModel::LoadProject(qint32 iId)
       projectLocker.unlock();
     }
 
+    m_spEditorCompleterModel->SetProject(m_spCurrentProject);
+
     if (tutorialState._to_integral() == ETutorialState::eUnstarted)
     {
       NextTutorialState();
@@ -685,6 +706,8 @@ void CEditorModel::UnloadProject()
   m_spResourceTreeModel->DeInitializeModel();
   m_spFlowSceneModel->clearScene();
   m_spUndoStack->clear();
+
+  m_spEditorCompleterModel->SetProject(nullptr);
 
   // reset to what is in the database
   auto spDbManager = m_wpDbManager.lock();

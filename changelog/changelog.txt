@@ -9,6 +9,9 @@ Changes:
 - PlayerTextBox methods showButtonPrompts & showInput take an aditional optional
   argument that denotes which storage variable the result should be written to.
 - Tags objects in scripts have new getter methods: numResources & resources.
+- The Script Editor has a basic autocomplete functionality that suggests
+  words based on language keywords, registered types and words already
+  present in all scripts.
 
 Fixed Bugs:
 - Fixed a crash when removing a resource with tags.
