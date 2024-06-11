@@ -550,23 +550,10 @@ bool CScriptEditorWidget::eventFilter(QObject* pTarget, QEvent* pEvent)
 void CScriptEditorWidget::keyPressEvent(QKeyEvent* pEvt)
 {
   // needed otherwise completer doesn't work correctly.
-  qint32 k = pEvt->key();
-  if (m_pCompleter->IsCompleterOpen())
+  bool bRet = m_pCompleter->keyPressEvent(pEvt);
+  if (bRet)
   {
-    switch (k)
-    {
-      case Qt::Key_Escape:
-      case Qt::Key_Backtab:
-      case Qt::Key_Up:
-      case Qt::Key_Down:
-      case Qt::Key_Tab:
-      case Qt::Key_Enter:
-      case Qt::Key_Return:
-        pEvt->ignore();
-        return;
-      default:
-        break;
-    }
+    return;
   }
   QPlainTextEdit::keyPressEvent(pEvt);
 }

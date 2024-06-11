@@ -314,6 +314,7 @@ void CCodeDisplayWidget::SetScriptType(const QString& sScriptType)
     }
   }
 
+  disconnect(m_lineChangedConn);
   m_sScriptType = sScriptType;
 
   it = m_displayImplMap.find(m_sScriptType);
@@ -349,6 +350,11 @@ void CCodeDisplayWidget::SetScriptType(const QString& sScriptType)
         return spCompleterProcessor->IsEndOfWordChar(s[0]);
       }
       return false;
+    });
+    m_lineChangedConn =
+        connect(m_spUi->pCodeEdit->Completer(), &CScriptEditorCompleter::SignalLineChanged,
+                m_spUi->pCodeEdit->Completer(), [this](const QString& sLine){
+      m_pEditorModel->EditorCompleterModel()->ProcessLine(m_sScriptType, sLine);
     });
   }
   else

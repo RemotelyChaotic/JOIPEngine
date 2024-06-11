@@ -116,20 +116,30 @@ namespace
   void InsertInbuiltMethodsAndProps(std::set<QString>& vsInbuiltKeywords)
   {
     InsertMetaObjectMethods(vsInbuiltKeywords, CScriptBackground::staticMetaObject);
+    vsInbuiltKeywords.insert("background");
     InsertMetaObjectMethods(vsInbuiltKeywords, CProjectScriptWrapper::staticMetaObject);
     InsertMetaObjectMethods(vsInbuiltKeywords, CResourceScriptWrapper::staticMetaObject);
     InsertMetaObjectMethods(vsInbuiltKeywords, CSceneScriptWrapper::staticMetaObject);
+    vsInbuiltKeywords.insert("scene");
     InsertMetaObjectMethods(vsInbuiltKeywords, CKinkWrapper::staticMetaObject);
     InsertMetaObjectMethods(vsInbuiltKeywords, CTagWrapper::staticMetaObject);
     InsertMetaObjectMethods(vsInbuiltKeywords, CScriptDeviceController::staticMetaObject);
+    vsInbuiltKeywords.insert("deviceController");
     InsertMetaObjectMethods(vsInbuiltKeywords, CScriptIcon::staticMetaObject);
+    vsInbuiltKeywords.insert("icon");
     InsertMetaObjectMethods(vsInbuiltKeywords, CScriptMediaPlayer::staticMetaObject);
+    vsInbuiltKeywords.insert("mediaPlayer");
     InsertMetaObjectMethods(vsInbuiltKeywords, CScriptMetronome::staticMetaObject);
+    vsInbuiltKeywords.insert("metronome");
     InsertMetaObjectMethods(vsInbuiltKeywords, CScriptNotification::staticMetaObject);
+    vsInbuiltKeywords.insert("notification");
     InsertMetaObjectMethods(vsInbuiltKeywords, CScriptSceneManager::staticMetaObject);
     InsertMetaObjectMethods(vsInbuiltKeywords, CScriptTextBox::staticMetaObject);
+    vsInbuiltKeywords.insert("textBox");
     InsertMetaObjectMethods(vsInbuiltKeywords, CScriptThread::staticMetaObject);
+    vsInbuiltKeywords.insert("thread");
     InsertMetaObjectMethods(vsInbuiltKeywords, CScriptTimer::staticMetaObject);
+    vsInbuiltKeywords.insert("timer");
   }
 }
 
@@ -174,8 +184,11 @@ CScriptCompleterFileProcessorJs::CScriptCompleterFileProcessorJs() :
 
   InsertInbuiltMethodsAndProps(m_vsInbuiltKeywords);
   InsertMetaObjectMethods(m_vsInbuiltKeywords, CScriptEvalJs::staticMetaObject);
+  m_vsInbuiltKeywords.insert("evalRunner");
   InsertMetaObjectMethods(m_vsInbuiltKeywords, CScriptEventSenderJs::staticMetaObject);
+  m_vsInbuiltKeywords.insert("eventSender");
   InsertMetaObjectMethods(m_vsInbuiltKeywords, CScriptStorageJs::staticMetaObject);
+  m_vsInbuiltKeywords.insert("localStorage");
 }
 
 CScriptCompleterFileProcessorJs::~CScriptCompleterFileProcessorJs() = default;
@@ -249,8 +262,11 @@ CScriptCompleterFileProcessorLua::CScriptCompleterFileProcessorLua() :
 
   InsertInbuiltMethodsAndProps(m_vsInbuiltKeywords);
   InsertMetaObjectMethods(m_vsInbuiltKeywords, CScriptEvalLua::staticMetaObject);
+  m_vsInbuiltKeywords.insert("evalRunner");
   InsertMetaObjectMethods(m_vsInbuiltKeywords, CScriptEventSenderLua::staticMetaObject);
+  m_vsInbuiltKeywords.insert("eventSender");
   InsertMetaObjectMethods(m_vsInbuiltKeywords, CScriptStorageLua::staticMetaObject);
+  m_vsInbuiltKeywords.insert("localStorage");
 }
 CScriptCompleterFileProcessorLua::~CScriptCompleterFileProcessorLua() = default;
 

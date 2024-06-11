@@ -5,6 +5,7 @@
 #include <QPointer>
 #include <QPlainTextEdit>
 #include <QTextEdit>
+#include <QTimer>
 
 #include <functional>
 
@@ -25,20 +26,27 @@ public:
   void SetEndOfwordFunction(std::function<bool(QString)> fn);
   void SetModel(QAbstractItemModel* pModel);
 
+  bool keyPressEvent(QKeyEvent* pEvt);
+
+signals:
+  void SignalLineChanged(const QString& sLine);
+
 protected:
   bool eventFilter(QObject* pObj, QEvent* pEvt) override;
 
 private slots:
-  void InsertCompletion(const QString& sCompletion);
+  void SlotInsertCompletion(const QString& sCompletion);
+  void SlotTimeoutInteraction(bool bForce = false);
 
 private:
   void Init(QWidget* pWidget);
-  QString TextUnderCursor();
+  QString TextUnderCursor(QKeyEvent* pKeyEvt);
 
   QPointer<QCompleter>          m_pCompleter;
   QPointer<CEditorModelWrapper> m_pModelWrapper;
   QPointer<QTextEdit>           m_pEditor;
   QPointer<QPlainTextEdit>      m_pEditorPlain;
+  QTimer                        m_changedTimer;
   std::function<bool(const QString&)> m_fnEndOfWord;
 };
 

@@ -41,6 +41,7 @@ public:
 
   qint32 ColumnForType(const QString& sType);
   std::shared_ptr<IScriptCompleterFileProcessor> FileProcessor(const QString& sType) const;
+  void ProcessLine(const QString& sType, const QString& sLine);
 
   template<typename T, typename = std::enable_if_t<std::is_base_of_v<IScriptCompleterFileProcessor, T>>>
   void RegisterFileProcessor(const QString& sFileType)

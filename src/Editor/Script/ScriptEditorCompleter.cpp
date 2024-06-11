@@ -3,7 +3,15 @@
 
 #include <QAbstractItemView>
 #include <QScrollBar>
+#include <QTextDocumentFragment>
 
+namespace
+{
+  constexpr qint32 c_iTimerInterval = 2000;
+}
+
+//----------------------------------------------------------------------------------------
+//
 class CEditorModelWrapper : public QAbstractItemModel
 {
   Q_OBJECT
@@ -252,7 +260,85 @@ void CScriptEditorCompleter::SetModel(QAbstractItemModel* pModel)
 
 //----------------------------------------------------------------------------------------
 //
-#include <QDebug>
+bool CScriptEditorCompleter::keyPressEvent(QKeyEvent* pKeyEvt)
+{
+  qint32 k = pKeyEvt->key();
+  if (IsCompleterOpen())
+  {
+    switch (k)
+    {
+      case Qt::Key_Escape:
+      case Qt::Key_Backtab:
+      case Qt::Key_Up:
+      case Qt::Key_Down:
+      case Qt::Key_Tab:
+      case Qt::Key_Enter:
+      case Qt::Key_Return:
+        pKeyEvt->ignore();
+        return true;
+      default:
+        break;
+    }
+  }
+  else
+  {
+    switch (k)
+    {
+      case Qt::Key_Escape:
+      case Qt::Key_Backtab:
+      case Qt::Key_Up:
+      case Qt::Key_Down:
+      case Qt::Key_Tab:
+      case Qt::Key_Enter:
+      case Qt::Key_Return:
+        SlotTimeoutInteraction();
+        break;
+    }
+  }
+
+  const bool bCtrlOrShift = pKeyEvt->modifiers().testFlag(Qt::ControlModifier) ||
+                            pKeyEvt->modifiers().testFlag(Qt::ShiftModifier);
+  if (bCtrlOrShift && pKeyEvt->text().isEmpty())
+  {
+    return false;
+  }
+
+  m_changedTimer.start(c_iTimerInterval);
+
+  const bool bHasModifier = (pKeyEvt->modifiers() != Qt::NoModifier) && !bCtrlOrShift;
+  QString sCompletionPrefix = TextUnderCursor(pKeyEvt);
+
+  if (bHasModifier || pKeyEvt->text().isEmpty() || sCompletionPrefix.length() < 3 ||
+      (nullptr != m_fnEndOfWord && m_fnEndOfWord(pKeyEvt->text().right(1))) )
+  {
+    m_pCompleter->setCompletionPrefix(QString());
+    m_pCompleter->popup()->hide();
+    return false;
+  }
+
+  if (sCompletionPrefix != m_pCompleter->completionPrefix())
+  {
+    m_pCompleter->setCompletionPrefix(sCompletionPrefix);
+    m_pCompleter->popup()->setCurrentIndex(m_pCompleter->completionModel()->index(0, 0));
+  }
+  QRect cr;
+  if (nullptr != m_pEditor)
+  {
+    cr = m_pEditor->cursorRect();
+  }
+  else if (nullptr != m_pEditorPlain)
+  {
+    cr = m_pEditorPlain->cursorRect();
+  }
+  cr.setWidth(m_pCompleter->popup()->sizeHintForColumn(0)
+              + m_pCompleter->popup()->verticalScrollBar()->sizeHint().width());
+  m_pCompleter->complete(cr); // popup it up!
+
+  return false;
+}
+
+//----------------------------------------------------------------------------------------
+//
 bool CScriptEditorCompleter::eventFilter(QObject* pObj, QEvent* pEvt)
 {
   if ((nullptr != m_pEditor || nullptr != m_pEditorPlain) && nullptr != pObj &&
@@ -269,14 +355,16 @@ bool CScriptEditorCompleter::eventFilter(QObject* pObj, QEvent* pEvt)
         m_pCompleter->setWidget(m_pEditorPlain);
       }
     }
+    else if (QEvent::FocusOut == pEvt->type())
+    {
+      SlotTimeoutInteraction(true);
+    }
     else if (QEvent::KeyPress == pEvt->type())
     {
       QKeyEvent* pKeyEvt = static_cast<QKeyEvent*>(pEvt);
       qint32 k = pKeyEvt->key();
-      qDebug() << "Key_Pre:" << k;
       if (IsCompleterOpen())
       {
-        qDebug() << "Key:" << k;
         switch (k)
         {
           case Qt::Key_Escape:
@@ -299,34 +387,6 @@ bool CScriptEditorCompleter::eventFilter(QObject* pObj, QEvent* pEvt)
       {
         return false;
       }
-
-      const bool bHasModifier = (pKeyEvt->modifiers() != Qt::NoModifier) && !bCtrlOrShift;
-      QString sCompletionPrefix = TextUnderCursor();
-
-      if (bHasModifier || pKeyEvt->text().isEmpty() || sCompletionPrefix.length() < 3
-         || (nullptr != m_fnEndOfWord && m_fnEndOfWord(pKeyEvt->text().right(1))) )
-      {
-        m_pCompleter->popup()->hide();
-        return false;
-      }
-
-      if (sCompletionPrefix != m_pCompleter->completionPrefix())
-      {
-        m_pCompleter->setCompletionPrefix(sCompletionPrefix);
-        m_pCompleter->popup()->setCurrentIndex(m_pCompleter->completionModel()->index(0, 0));
-      }
-      QRect cr;
-      if (nullptr != m_pEditor)
-      {
-        cr = m_pEditor->cursorRect();
-      }
-      else if (nullptr != m_pEditorPlain)
-      {
-        cr = m_pEditorPlain->cursorRect();
-      }
-      cr.setWidth(m_pCompleter->popup()->sizeHintForColumn(0)
-                  + m_pCompleter->popup()->verticalScrollBar()->sizeHint().width());
-      m_pCompleter->complete(cr); // popup it up!
     }
   }
   return false;
@@ -334,7 +394,7 @@ bool CScriptEditorCompleter::eventFilter(QObject* pObj, QEvent* pEvt)
 
 //----------------------------------------------------------------------------------------
 //
-void CScriptEditorCompleter::InsertCompletion(const QString& sCompletion)
+void CScriptEditorCompleter::SlotInsertCompletion(const QString& sCompletion)
 {
   QTextCursor tc;
   if (nullptr != m_pEditor)
@@ -363,6 +423,34 @@ void CScriptEditorCompleter::InsertCompletion(const QString& sCompletion)
 
 //----------------------------------------------------------------------------------------
 //
+void CScriptEditorCompleter::SlotTimeoutInteraction(bool bForce)
+{
+  if (IsCompleterOpen() && !bForce)
+  {
+    m_changedTimer.start(c_iTimerInterval);
+    return;
+  }
+
+  m_changedTimer.stop();
+
+  QTextCursor tc;
+  if (nullptr != m_pEditor)
+  {
+    tc = m_pEditor->textCursor();
+  }
+  else if (nullptr != m_pEditorPlain)
+  {
+    tc = m_pEditorPlain->textCursor();
+  }
+
+  tc.select(QTextCursor::LineUnderCursor);
+
+  const QString s = tc.selectedText();
+  emit SignalLineChanged(s);
+}
+
+//----------------------------------------------------------------------------------------
+//
 void CScriptEditorCompleter::Init(QWidget* pWidget)
 {
   pWidget->installEventFilter(this);
@@ -374,12 +462,16 @@ void CScriptEditorCompleter::Init(QWidget* pWidget)
   m_pCompleter->setCaseSensitivity(Qt::CaseInsensitive);
   m_pCompleter->setWrapAround(false);
   QObject::connect(m_pCompleter, QOverload<const QString &>::of(&QCompleter::activated),
-                   this, &CScriptEditorCompleter::InsertCompletion);
+                   this, &CScriptEditorCompleter::SlotInsertCompletion);
+
+  m_changedTimer.setInterval(c_iTimerInterval);
+  m_changedTimer.setSingleShot(true);
+  connect(&m_changedTimer, &QTimer::timeout, this, [this]() { SlotTimeoutInteraction(); });
 }
 
 //----------------------------------------------------------------------------------------
 //
-QString CScriptEditorCompleter::TextUnderCursor()
+QString CScriptEditorCompleter::TextUnderCursor(QKeyEvent* pKeyEvt)
 {
   QTextCursor tc;
   if (nullptr != m_pEditor)
@@ -391,6 +483,24 @@ QString CScriptEditorCompleter::TextUnderCursor()
     tc = m_pEditorPlain->textCursor();
   }
 
+  qint32 iPosRel = tc.anchor();
   tc.select(QTextCursor::WordUnderCursor);
-  return tc.selectedText();
+
+  qint32 k = pKeyEvt->key();
+  if (Qt::Key_Backspace == k)
+  {
+    QString s = tc.selectedText();
+    return s.left(s.length()-1);
+  }
+  else if (Qt::Key_Delete == k)
+  {
+    QString s = tc.selectedText();
+    qint32 iBegin = tc.anchor();
+    qint32 iLeft = iPosRel-iBegin;
+    return s.left(iLeft) + s.right(s.length()-1-iLeft);
+  }
+  else
+  {
+    return tc.selectedText() + pKeyEvt->text();
+  }
 }

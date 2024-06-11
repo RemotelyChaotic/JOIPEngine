@@ -86,6 +86,7 @@ private:
   QPointer<CResourceTreeItemModel>                       m_pResourceTreeModel;
   QPointer<QUndoStack>                                   m_pUndoStack;
   QString                                                m_sScriptType;
+  QMetaObject::Connection                                m_lineChangedConn;
   bool                                                   m_pInitialized = false;
 };
 

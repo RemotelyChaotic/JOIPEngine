@@ -41,6 +41,20 @@ CScriptEditorCompleterModel::FileProcessor(const QString& sType) const
 
 //----------------------------------------------------------------------------------------
 //
+void CScriptEditorCompleterModel::ProcessLine(const QString& sType, const QString& sLine)
+{
+  auto spProcessor = FileProcessor(sType);
+  auto iType = ColumnForType(sType);
+  if (nullptr != spProcessor)
+  {
+    beginResetModel();
+    spProcessor->ProcessLine(iType, sLine, &m_data);
+    endResetModel();
+  }
+}
+
+//----------------------------------------------------------------------------------------
+//
 void CScriptEditorCompleterModel::RegisterFileProcessor(
     const QString& sFileType, std::shared_ptr<IScriptCompleterFileProcessor> spProcessor)
 {
