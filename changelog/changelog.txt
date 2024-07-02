@@ -4,6 +4,8 @@ Version 1.4.1.0
 
 New Features:
 - A Splitter Node can have a custom transition UI via Layout (Qml) Resource.
+- Metronomes can automatically emit Toy commands. Project default is to emit
+  vibration commands.
 
 Changes:
 - PlayerTextBox methods showButtonPrompts & showInput take an aditional optional

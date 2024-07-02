@@ -219,12 +219,12 @@ void CMetronomeManager::SlotSpawnSingleBeatImpl(const QString& sName)
   });
   if (m_metronomeBlocks.end() != it)
   {
-    it->second->m_privateBlock.m_vdSpawnedTicks.push_back({ETickType::eSingle, 0.0});
+    it->second->m_privateBlock.m_vdSpawnedTicks.push_back({ETickType::eSingle, 0.0, -1});
     std::sort(it->second->m_privateBlock.m_vdSpawnedTicks.begin(),
               it->second->m_privateBlock.m_vdSpawnedTicks.end(),
-              [](const std::pair<ETickType, double>& pairA,
-                 const std::pair<ETickType, double>& pairB) {
-      return pairA.second < pairB.second;
+              [](const SMetronomeTick& pairA,
+                 const SMetronomeTick& pairB) {
+      return pairA.dTimePos < pairB.dTimePos;
     });
   }
 }
@@ -236,12 +236,12 @@ void CMetronomeManager::SlotSpawnSingleBeatImpl(const QUuid& uid)
   auto it = m_metronomeBlocks.find(uid);
   if (m_metronomeBlocks.end() != it)
   {
-    it->second->m_privateBlock.m_vdSpawnedTicks.push_back({ETickType::eSingle, 0.0});
+    it->second->m_privateBlock.m_vdSpawnedTicks.push_back({ETickType::eSingle, 0.0, -1});
     std::sort(it->second->m_privateBlock.m_vdSpawnedTicks.begin(),
               it->second->m_privateBlock.m_vdSpawnedTicks.end(),
-              [](const std::pair<ETickType, double>& pairA,
-                 const std::pair<ETickType, double>& pairB) {
-      return pairA.second < pairB.second;
+              [](const SMetronomeTick& pairA,
+                 const SMetronomeTick& pairB) {
+      return pairA.dTimePos < pairB.dTimePos;
     });
   }
 }
@@ -510,22 +510,25 @@ void CMetronomeManager::SlotTimeout()
             emit SignalTickReachedCenter(id);
           }
           // run toy commands
-          else if (ETickType::eVibrateTick == tick.type)
+          if (nullptr != spBlock->m_privateBlock.m_spCurrentDevice)
           {
-            spBlock->m_privateBlock.m_spCurrentDevice->SendVibrateCmd(
-                double(tick.iData) / 100.0);
-          }
-          else if (ETickType::eLinearTick == tick.type)
-          {
-            spBlock->m_privateBlock.m_spCurrentDevice->SendLinearCmd(
-                tick.iData/1000,
-                double(tick.iData%1000) / 100.0);
-          }
-          else if (ETickType::eRotateTick == tick.type)
-          {
-            spBlock->m_privateBlock.m_spCurrentDevice->SendRotateCmd(
-                tick.iData > 0,
-                double(std::abs(tick.iData)) / 100.0);
+            if (ETickType::eVibrateTick == tick.type)
+            {
+              spBlock->m_privateBlock.m_spCurrentDevice->SendVibrateCmd(
+                  double(tick.iData) / 100.0);
+            }
+            else if (ETickType::eLinearTick == tick.type)
+            {
+              spBlock->m_privateBlock.m_spCurrentDevice->SendLinearCmd(
+                  tick.iData/1000,
+                  double(tick.iData%1000) / 100.0);
+            }
+            else if (ETickType::eRotateTick == tick.type)
+            {
+              spBlock->m_privateBlock.m_spCurrentDevice->SendRotateCmd(
+                  tick.iData > 0,
+                  double(std::abs(tick.iData)) / 100.0);
+            }
           }
           spBlock->m_privateBlock.m_vdSpawnedTicks.erase(
               spBlock->m_privateBlock.m_vdSpawnedTicks.begin()+static_cast<size_t>(i));
