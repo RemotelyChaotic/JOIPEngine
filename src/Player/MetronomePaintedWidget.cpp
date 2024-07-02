@@ -142,6 +142,24 @@ void CMetronomeCanvasQml::SetBpm(qint32 iValue)
 
 //----------------------------------------------------------------------------------------
 //
+qint32 CMetronomeCanvasQml::MetCmdMode() const
+{
+  return m_metCmdMode;
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CMetronomeCanvasQml::SetMetCmdMode(qint32 iValue)
+{
+  if (static_cast<qint32>(m_metCmdMode) != iValue)
+  {
+    m_metCmdMode = EToyMetronomeCommandModeFlags(iValue);
+    emit metCmdModeChanged();
+  }
+}
+
+//----------------------------------------------------------------------------------------
+//
 bool CMetronomeCanvasQml::Muted() const
 {
   if (nullptr != m_spDataBlockThread)
@@ -266,7 +284,11 @@ void CMetronomeCanvasQml::start()
 {
   if (nullptr != m_spMetronomeManager)
   {
-    emit m_spMetronomeManager->SignalStart(m_id, ETickType::ePattern);
+    ETickTypeFlags flags = ETickType::ePattern;
+    if (m_metCmdMode.testFlag(EToyMetronomeCommandModeFlag::eVibrate)) flags |= ETickType::eVibrateTick;
+    if (m_metCmdMode.testFlag(EToyMetronomeCommandModeFlag::eLinear)) flags |= ETickType::eLinearTick;
+    if (m_metCmdMode.testFlag(EToyMetronomeCommandModeFlag::eRotate)) flags |= ETickType::eRotateTick;
+    emit m_spMetronomeManager->SignalStart(m_id, flags);
   }
 }
 

@@ -12,7 +12,8 @@ public:
   ~CSequenceEvalRunner() override;
 
   void RunSequenceInstruction(const QString& sName,
-                              const std::shared_ptr<SSequenceInstruction>& spInstr) override;
+                              const std::shared_ptr<SSequenceInstruction>& spInstr,
+                              const SProjectData& proj) override;
 };
 
 #endif // CSEQUENCEEVALRUNNER_H

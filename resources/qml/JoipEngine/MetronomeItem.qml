@@ -63,6 +63,7 @@ Rectangle {
         muted: metronomeItem.muted
         pattern: metronomeItem.pattern
         tickColor: root.style.metronomeDisplay.ticksColor
+        metCmdMode: root.currentlyLoadedProject.metCmdMode
         volume: metronomeItem.volume
 
         Behavior on volume {

@@ -15,7 +15,8 @@ public:
   ~CSequenceMediaPlayerRunner() override;
 
   void RunSequenceInstruction(const QString& sName,
-                              const std::shared_ptr<SSequenceInstruction>& spInstr) override;
+                              const std::shared_ptr<SSequenceInstruction>& spInstr,
+                              const SProjectData& proj) override;
 
 private:
   void RunShow(const std::shared_ptr<SSequenceInstruction>& spInstr);

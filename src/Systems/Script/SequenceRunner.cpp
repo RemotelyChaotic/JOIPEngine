@@ -72,6 +72,7 @@ private:
   void RunInstruction(const STimedInstruction& instr);
 
   tspProject                                     m_spProject;
+  SProjectData                                   m_projectSettings;
   QPointer<QTimer>                               m_pTimer;
   std::vector<STimedInstruction>                 m_vBuiltInstructions;
   std::chrono::time_point<std::chrono::high_resolution_clock> m_lastPoint;
@@ -168,6 +169,7 @@ void CSequenceRunnerInstanceWorker::RunScript(const QString& sScript,
   {
     QReadLocker scriptLocker(&spResource->m_rwLock);
     m_spProject = spResource->m_spParent;
+    m_projectSettings = *spResource->m_spParent;
     for (auto it = m_objectMap.begin(); m_objectMap.end() != it; ++it)
     {
       it->second->SetCurrentProject(spResource->m_spParent);
@@ -329,7 +331,8 @@ void CSequenceRunnerInstanceWorker::RunInstruction(const STimedInstruction& inst
     }
     else if (auto pSequenceRunner = dynamic_cast<ISequenceObjectRunner*>(it->second.get()))
     {
-      pSequenceRunner->RunSequenceInstruction(instr.m_sLayerName, instr.m_spInstr);
+      pSequenceRunner->RunSequenceInstruction(instr.m_sLayerName, instr.m_spInstr,
+                                              m_projectSettings);
     }
   }
   else if (!instr.m_sLayerName.isEmpty())

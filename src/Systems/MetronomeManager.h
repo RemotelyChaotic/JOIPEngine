@@ -38,8 +38,14 @@ struct SMetronomeDataBlockPrivate;
 //
 enum ETickType
 {
+  // auditory ticks
   eSingle,
-  ePattern
+  ePattern,
+
+  // toy ticks
+  eVibrateTick,
+  eLinearTick,
+  eRotateTick
 };
 Q_DECLARE_FLAGS(ETickTypeFlags, ETickType)
 Q_DECLARE_OPERATORS_FOR_FLAGS(ETickTypeFlags)

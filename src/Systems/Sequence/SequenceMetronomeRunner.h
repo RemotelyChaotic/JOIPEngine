@@ -16,14 +16,21 @@ public:
   ~CSequenceMetronomeRunner() override;
 
   void RunSequenceInstruction(const QString& sName,
-                              const std::shared_ptr<SSequenceInstruction>& spInstr) override;
+                              const std::shared_ptr<SSequenceInstruction>& spInstr,
+                              const SProjectData& proj) override;
 
 private:
-  void RunSingleBeat(const QString& sName, const std::shared_ptr<SSequenceInstruction>& spInstr);
-  void RunStartPattern(const QString& sName, const std::shared_ptr<SSequenceInstruction>& spInstr);
-  void RunStopPattern(const QString& sName, const std::shared_ptr<SSequenceInstruction>& spInstr);
+  void RunSingleBeat(const QString& sName, const std::shared_ptr<SSequenceInstruction>& spInstr,
+                     const SProjectData& proj);
+  void RunStartPattern(const QString& sName, const std::shared_ptr<SSequenceInstruction>& spInstr,
+                       const SProjectData& proj);
+  void RunStopPattern(const QString& sName, const std::shared_ptr<SSequenceInstruction>& spInstr,
+                      const SProjectData& proj);
 
-  std::map<QString, std::function<void(const QString&,const std::shared_ptr<SSequenceInstruction>&)>>
+  std::map<QString,
+           std::function<void(const QString&,
+                              const std::shared_ptr<SSequenceInstruction>&,
+                              const SProjectData&)>>
       m_functionMap;
   std::weak_ptr<CMetronomeManager> m_wpMetronomeManager;
 };

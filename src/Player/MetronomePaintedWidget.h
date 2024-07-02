@@ -1,6 +1,8 @@
 #ifndef CMETRONOMEPAINTEDWIDGET_H
 #define CMETRONOMEPAINTEDWIDGET_H
 
+#include "Systems/DatabaseInterface/ProjectData.h"
+
 #include <QQuickPaintedItem>
 #include <QMutex>
 #include <QUuid>
@@ -21,6 +23,7 @@ class CMetronomeCanvasQml : public QQuickPaintedItem
   Q_OBJECT
   Q_PROPERTY(QString beatResource READ BeatResource WRITE SetBeatResource NOTIFY beatResourceChanged)
   Q_PROPERTY(qint32  bpm READ Bpm WRITE SetBpm NOTIFY bpmChanged)
+  Q_PROPERTY(qint32  metCmdMode READ MetCmdMode WRITE SetMetCmdMode NOTIFY metCmdModeChanged)
   Q_PROPERTY(bool    muted READ Muted WRITE SetMuted NOTIFY mutedChanged)
   Q_PROPERTY(QList<double> pattern READ Pattern WRITE SetPattern NOTIFY patternChanged)
   Q_PROPERTY(QColor  tickColor READ TickColor WRITE SetTickColor NOTIFY tickColorChanged)
@@ -45,6 +48,8 @@ public:
   void SetBeatResource(const QString& sResource);
   qint32 Bpm()const;
   void SetBpm(qint32 iValue);
+  qint32 MetCmdMode() const;
+  void SetMetCmdMode(qint32 iValue);
   bool Muted() const;
   void SetMuted(bool bMuted);
   QList<double> Pattern() const;
@@ -64,6 +69,7 @@ public slots:
 signals:
   void beatResourceChanged();
   void bpmChanged();
+  void metCmdModeChanged();
   void mutedChanged();
   void metronomeStateChanged(CMetronomeCanvasQml::MetronomeStateChange state);
   void patternChanged();
@@ -84,6 +90,7 @@ private:
   QUuid                                        m_id;
   QColor                                       m_tickColor;
   qint32                                       m_iBpm = 60;
+  EToyMetronomeCommandModeFlags                m_metCmdMode = EToyMetronomeCommandModeFlag::eDefault;
   QList<double>                                m_vdPattern = { 1.0 };
   std::vector<double>                          m_vdTickmap;
 

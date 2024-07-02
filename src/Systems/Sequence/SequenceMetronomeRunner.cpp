@@ -2,6 +2,7 @@
 #include "Application.h"
 
 #include "Systems/MetronomeManager.h"
+#include "Systems/Project.h"
 
 #include "Systems/Script/ScriptMetronome.h"
 
@@ -11,9 +12,9 @@ CSequenceMetronomeRunner::CSequenceMetronomeRunner(
     QPointer<CScriptRunnerSignalEmiter> pEmitter) :
   CScriptObjectBase(pEmitter),
   ISequenceObjectRunner(),
-  m_functionMap({{sequence::c_sInstructionIdBeat, std::bind(&CSequenceMetronomeRunner::RunSingleBeat, this, _1, _2)},
-                 {sequence::c_sInstructionIdStartPattern, std::bind(&CSequenceMetronomeRunner::RunStartPattern, this, _1, _2)},
-                 {sequence::c_sInstructionIdStopPattern, std::bind(&CSequenceMetronomeRunner::RunStopPattern, this, _1, _2)}}),
+  m_functionMap({{sequence::c_sInstructionIdBeat, std::bind(&CSequenceMetronomeRunner::RunSingleBeat, this, _1, _2, _3)},
+                 {sequence::c_sInstructionIdStartPattern, std::bind(&CSequenceMetronomeRunner::RunStartPattern, this, _1, _2, _3)},
+                 {sequence::c_sInstructionIdStopPattern, std::bind(&CSequenceMetronomeRunner::RunStopPattern, this, _1, _2, _3)}}),
   m_wpMetronomeManager(CApplication::Instance()->System<CMetronomeManager>())
 {
 }
@@ -24,19 +25,21 @@ CSequenceMetronomeRunner::~CSequenceMetronomeRunner()
 //----------------------------------------------------------------------------------------
 //
 void CSequenceMetronomeRunner::RunSequenceInstruction(const QString& sName,
-                                                      const std::shared_ptr<SSequenceInstruction>& spInstr)
+                                                      const std::shared_ptr<SSequenceInstruction>& spInstr,
+                                                      const SProjectData& proj)
 {
   auto it = m_functionMap.find(spInstr->m_sInstructionType);
   if (m_functionMap.end() != it)
   {
-    it->second(sName, spInstr);
+    it->second(sName, spInstr, proj);
   }
 }
 
 //----------------------------------------------------------------------------------------
 //
 void CSequenceMetronomeRunner::RunSingleBeat(const QString& sName,
-                                             const std::shared_ptr<SSequenceInstruction>& spInstr)
+                                             const std::shared_ptr<SSequenceInstruction>& spInstr,
+                                             const SProjectData& proj)
 {
   auto pSignalEmitter = SignalEmitter<CMetronomeSignalEmitter>();
   if (const auto& spI = std::dynamic_pointer_cast<SSingleBeatInstruction>(spInstr);
@@ -46,7 +49,13 @@ void CSequenceMetronomeRunner::RunSingleBeat(const QString& sName,
     {
       QUuid uid = spMetronomeManager->IdForName(sName);
       spMetronomeManager->SpawnSingleBeat(uid);
-      emit spMetronomeManager->SignalStart(uid, ETickType::eSingle);
+      ETickTypeFlags flags = ETickType::eSingle;
+      {
+        if (0 != (proj.m_metCmdMode & EToyMetronomeCommandModeFlag::eVibrate)) flags |= ETickType::eVibrateTick;
+        if (0 != (proj.m_metCmdMode & EToyMetronomeCommandModeFlag::eLinear)) flags |= ETickType::eLinearTick;
+        if (0 != (proj.m_metCmdMode & EToyMetronomeCommandModeFlag::eRotate)) flags |= ETickType::eRotateTick;
+      }
+      emit spMetronomeManager->SignalStart(uid, flags);
     }
   }
 }
@@ -54,7 +63,8 @@ void CSequenceMetronomeRunner::RunSingleBeat(const QString& sName,
 //----------------------------------------------------------------------------------------
 //
 void CSequenceMetronomeRunner::RunStartPattern(const QString&,
-                                               const std::shared_ptr<SSequenceInstruction>& spInstr)
+                                               const std::shared_ptr<SSequenceInstruction>& spInstr,
+                                               const SProjectData&)
 {
   auto pSignalEmitter = SignalEmitter<CMetronomeSignalEmitter>();
   if (const auto& spI = std::dynamic_pointer_cast<SStartPatternInstruction>(spInstr);
@@ -82,7 +92,8 @@ void CSequenceMetronomeRunner::RunStartPattern(const QString&,
 //----------------------------------------------------------------------------------------
 //
 void CSequenceMetronomeRunner::RunStopPattern(const QString&,
-                                              const std::shared_ptr<SSequenceInstruction>& spInstr)
+                                              const std::shared_ptr<SSequenceInstruction>& spInstr,
+                                              const SProjectData&)
 {
   auto pSignalEmitter = SignalEmitter<CMetronomeSignalEmitter>();
   if (const auto& spI = std::dynamic_pointer_cast<SStopPatternInstruction>(spInstr);

@@ -40,7 +40,8 @@ CSequenceTextBoxRunner::~CSequenceTextBoxRunner()
 //----------------------------------------------------------------------------------------
 //
 void CSequenceTextBoxRunner::RunSequenceInstruction(const QString&,
-                                                    const std::shared_ptr<SSequenceInstruction>& spInstr)
+                                                    const std::shared_ptr<SSequenceInstruction>& spInstr,
+                                                    const SProjectData&)
 {
   auto pSignalEmitter = SignalEmitter<CTextBoxSignalEmitter>();
   if (const auto& spI = std::dynamic_pointer_cast<SShowTextInstruction>(spInstr);

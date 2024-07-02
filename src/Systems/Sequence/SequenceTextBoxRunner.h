@@ -12,7 +12,8 @@ public:
   ~CSequenceTextBoxRunner() override;
 
   void RunSequenceInstruction(const QString& sName,
-                              const std::shared_ptr<SSequenceInstruction>& spInstr) override;
+                              const std::shared_ptr<SSequenceInstruction>& spInstr,
+                              const SProjectData& proj) override;
 };
 
 #endif // CSEQUENCETEXTBOXRUNNER_H

@@ -2,6 +2,8 @@
 #include "Application.h"
 #include "Settings.h"
 
+#include "Systems/DeviceManager.h"
+#include "Systems/Devices/IDevice.h"
 #include "Systems/Resource.h"
 
 #include "Utils/MetronomeHelpers.h"
@@ -39,6 +41,13 @@ SMetronomeDataBlock& SMetronomeDataBlock::operator=(const SMetronomeDataBlock& o
   return *this;
 }
 
+struct SMetronomeTick
+{
+  ETickType type;
+  double dTimePos;
+  qint32 iData = -1;
+};
+
 struct SMetronomeDataBlockImpl : public SMetronomeDataBlock
 {
   SMetronomeDataBlockImpl() :
@@ -51,7 +60,8 @@ struct SMetronomeDataBlockImpl : public SMetronomeDataBlock
   }
 
   std::unique_ptr<CMultiEmitterSoundPlayer> m_spSoundEmitters;
-  std::vector<std::pair<ETickType, double>> m_vdSpawnedTicks;
+  std::shared_ptr<IDevice>    m_spCurrentDevice;
+  std::vector<SMetronomeTick> m_vdSpawnedTicks;
   ETickTypeFlags m_playFlags;
   bool m_bStarted = false;
   bool m_bPaused = false;
@@ -251,6 +261,17 @@ void CMetronomeManager::SlotStart(const QUuid& id, ETickTypeFlags ticksToPlay)
 
       if (nullptr != m_pTimer && !m_pTimer->isActive())
       {
+        // find active device
+        if (auto spDeviceMan = CApplication::Instance()->System<CDeviceManager>().lock())
+        {
+          it->second->m_privateBlock.m_spCurrentDevice =
+              spDeviceMan->Device(spDeviceMan->SelectedDevice());
+        }
+        else
+        {
+          it->second->m_privateBlock.m_spCurrentDevice = nullptr;
+        }
+
         m_pTimer->start();
         m_lastUpdate = std::chrono::high_resolution_clock::now();
         m_iCumulativeTime = 0.0;
@@ -285,6 +306,16 @@ void CMetronomeManager::SlotResume(const QUuid& id)
   {
     if (it->second->m_privateBlock.m_bStarted)
     {
+      // refecth active device
+      if (auto spDeviceMan = CApplication::Instance()->System<CDeviceManager>().lock())
+      {
+        it->second->m_privateBlock.m_spCurrentDevice =
+            spDeviceMan->Device(spDeviceMan->SelectedDevice());
+      }
+      else
+      {
+        it->second->m_privateBlock.m_spCurrentDevice = nullptr;
+      }
       it->second->m_privateBlock.m_bPaused = false;
       emit SignalResumed(id);
     }
@@ -302,6 +333,7 @@ void CMetronomeManager::SlotStop(const QUuid& id)
     {
       it->second->m_privateBlock.m_bStarted = false;
       it->second->m_privateBlock.m_vdSpawnedTicks.clear();
+      it->second->m_privateBlock.m_spCurrentDevice = nullptr;
       it->second->m_privateBlock.m_playFlags = 0;
 
       emit SignalStopped(id);
@@ -391,10 +423,11 @@ std::shared_ptr<SMetronomeDataBlock> CMetronomeManager::SlotRegisterUiImpl(const
 //
 namespace
 {
-  bool NeedsToSpawnTicks(const std::vector<std::pair<ETickType, double>>& vdSpawnedTicks,
+  bool NeedsToSpawnTicks(const std::vector<SMetronomeTick>& vdSpawnedTicks,
                          const ETickTypeFlags& ticksToPlay,
                          double& dLastPatternTick,
-                         bool& bFoundLastPatternTick)
+                         bool& bFoundLastPatternTick,
+                         qint32& iLastRotateData)
   {
     bFoundLastPatternTick = false;
     if (!ticksToPlay.testFlag(ETickType::ePattern)) { return false; }
@@ -403,13 +436,26 @@ namespace
     dLastPatternTick = 1.0;
     if (!bRet)
     {
+      bool bRotatefound = false;
       for (auto it = vdSpawnedTicks.rbegin(); vdSpawnedTicks.rend() != it; ++it)
       {
-        if (ETickType::ePattern == it->first)
+        if (ETickType::ePattern == it->type)
         {
           bFoundLastPatternTick = true;
-          dLastPatternTick = it->second;
-          return it->second >= 0.0;
+          dLastPatternTick = it->dTimePos;
+          if (bRotatefound && bFoundLastPatternTick)
+          {
+            return dLastPatternTick >= 0.0;
+          }
+        }
+        else if (ETickType::eRotateTick == it->type)
+        {
+          bRotatefound = true;
+          iLastRotateData = it->iData;
+          if (bRotatefound && bFoundLastPatternTick)
+          {
+            return dLastPatternTick >= 0.0;
+          }
         }
       }
     }
@@ -418,12 +464,17 @@ namespace
 
   //--------------------------------------------------------------------------------------
   //
-  std::vector<double> TransformTicks(const std::vector<std::pair<ETickType, double>>& vdSpawnedTicks)
+  std::vector<double> TransformTicksForUi(const std::vector<SMetronomeTick>& vdSpawnedTicks)
   {
+    // only these two flags have a visual representation for now
+    constexpr ETickTypeFlags c_mask = ETickType::eSingle | ETickType::ePattern;
     std::vector<double> vdRet;
-    for (const auto& [_, dVal] : vdSpawnedTicks)
+    for (const auto& tick : vdSpawnedTicks)
     {
-      vdRet.push_back(dVal);
+      if (c_mask.testFlag(tick.type))
+      {
+        vdRet.push_back(tick.dTimePos);
+      }
     }
     return vdRet;
   }
@@ -433,6 +484,8 @@ namespace
 //
 void CMetronomeManager::SlotTimeout()
 {
+  constexpr ETickTypeFlags c_maskAudio = ETickType::eSingle | ETickType::ePattern;
+
   auto now = std::chrono::high_resolution_clock::now();
   qint64 iDiffMs = std::chrono::duration_cast<std::chrono::milliseconds>(now - m_lastUpdate).count();
   m_lastUpdate = now;
@@ -444,14 +497,36 @@ void CMetronomeManager::SlotTimeout()
     {
       for (qint32 i = 0; spBlock->m_privateBlock.m_vdSpawnedTicks.size() > static_cast<size_t>(i); ++i)
       {
-        std::pair<ETickType, double>& dVal =
+        SMetronomeTick& tick =
             spBlock->m_privateBlock.m_vdSpawnedTicks[static_cast<size_t>(i)];
         // 1s to reach end
-        dVal.second += static_cast<double>(iDiffMs / 1'000.0);
-        if (dVal.second >= 1.0)
+        tick.dTimePos += static_cast<double>(iDiffMs / 1'000.0);
+        if (tick.dTimePos >= 1.0)
         {
-          spBlock->m_privateBlock.m_spSoundEmitters->Play();
-          emit SignalTickReachedCenter(id);
+          // play tick audio if type is auditory
+          if (c_maskAudio.testFlag(tick.type))
+          {
+            spBlock->m_privateBlock.m_spSoundEmitters->Play();
+            emit SignalTickReachedCenter(id);
+          }
+          // run toy commands
+          else if (ETickType::eVibrateTick == tick.type)
+          {
+            spBlock->m_privateBlock.m_spCurrentDevice->SendVibrateCmd(
+                double(tick.iData) / 100.0);
+          }
+          else if (ETickType::eLinearTick == tick.type)
+          {
+            spBlock->m_privateBlock.m_spCurrentDevice->SendLinearCmd(
+                tick.iData/1000,
+                double(tick.iData%1000) / 100.0);
+          }
+          else if (ETickType::eRotateTick == tick.type)
+          {
+            spBlock->m_privateBlock.m_spCurrentDevice->SendRotateCmd(
+                tick.iData > 0,
+                double(std::abs(tick.iData)) / 100.0);
+          }
           spBlock->m_privateBlock.m_vdSpawnedTicks.erase(
               spBlock->m_privateBlock.m_vdSpawnedTicks.begin()+static_cast<size_t>(i));
           --i;
@@ -461,23 +536,46 @@ void CMetronomeManager::SlotTimeout()
       // spawn repeating ticks
       bool bFoundLastPatternTick = false;
       double dLastPatternTick = 0.0;
+      qint32 iLastRotateData = 0;
       if (NeedsToSpawnTicks(spBlock->m_privateBlock.m_vdSpawnedTicks,
                             spBlock->m_privateBlock.m_playFlags,
-                            dLastPatternTick, bFoundLastPatternTick))
+                            dLastPatternTick, bFoundLastPatternTick, iLastRotateData))
       {
         for (size_t i = 0; spBlock->m_privateBlock.m_vdTickPattern.size() > i; ++i)
         {
           auto dDistMsTick = spBlock->m_privateBlock.m_vdTickPattern[i];
           double dLastTickLoc = dLastPatternTick - static_cast<double>(dDistMsTick / 1'000.0);
-          spBlock->m_privateBlock.m_vdSpawnedTicks.push_back({
-              ETickType::ePattern, dLastTickLoc});
+          if (bFoundLastPatternTick)
+          {
+            qint32 iDistEncoded = 0+static_cast<qint32>(dDistMsTick*1000)/1000;
+            spBlock->m_privateBlock.m_vdSpawnedTicks.push_back(SMetronomeTick{
+              ETickType::eVibrateTick, dLastPatternTick-dLastTickLoc/2, 25});
+            spBlock->m_privateBlock.m_vdSpawnedTicks.push_back(SMetronomeTick{
+              ETickType::eLinearTick, dLastPatternTick-dLastTickLoc/2, iDistEncoded});
+          }
+
+          // + -> clockwise, - -> anti-clockwise, abs() -> speed
+          iLastRotateData = iLastRotateData <= 0 ? 25 : -25;
+          // iDistEncoded = e.g.: 100'000 -> (ms)(ms)(ms)'(pos)(pos)(pos)
+          qint32 iDistEncoded = 100+static_cast<qint32>(dDistMsTick*1000)/1000;
+
+          spBlock->m_privateBlock.m_vdSpawnedTicks.push_back(SMetronomeTick{
+              ETickType::ePattern, dLastTickLoc, -1});
+          spBlock->m_privateBlock.m_vdSpawnedTicks.push_back(SMetronomeTick{
+              ETickType::eVibrateTick, dLastTickLoc, 75});
+          spBlock->m_privateBlock.m_vdSpawnedTicks.push_back(SMetronomeTick{
+              ETickType::eLinearTick, dLastTickLoc, iDistEncoded});
+          spBlock->m_privateBlock.m_vdSpawnedTicks.push_back(SMetronomeTick{
+              ETickType::eRotateTick, dLastTickLoc, iLastRotateData});
+
           dLastPatternTick = dLastTickLoc;
+          bFoundLastPatternTick = true;
         }
       }
 
       if (c_iUpdateThresholdInterval < m_iCumulativeTime)
       {
-        emit SignalPatternChanged(id, TransformTicks(spBlock->m_privateBlock.m_vdSpawnedTicks));
+        emit SignalPatternChanged(id, TransformTicksForUi(spBlock->m_privateBlock.m_vdSpawnedTicks));
       }
     }
   }
