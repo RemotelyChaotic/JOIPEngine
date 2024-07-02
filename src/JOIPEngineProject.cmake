@@ -177,6 +177,8 @@ macro(CreateJOIPProject JOIP_PROJECT_NAME)
     ${JOIPSources}/Editor/Project/CommandChangeLayout.h
     ${JOIPSources}/Editor/Project/CommandChangeProjectName.cpp
     ${JOIPSources}/Editor/Project/CommandChangeProjectName.h
+    ${JOIPSources}/Editor/Project/CommandChangeToyCmd.cpp
+    ${JOIPSources}/Editor/Project/CommandChangeToyCmd.h
     ${JOIPSources}/Editor/Project/CommandChangeVersion.cpp
     ${JOIPSources}/Editor/Project/CommandChangeVersion.h
     ${JOIPSources}/Editor/Project/KinkCompleter.cpp

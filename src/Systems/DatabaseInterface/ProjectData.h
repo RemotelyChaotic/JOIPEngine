@@ -25,6 +25,36 @@ Q_DECLARE_FLAGS(EDownLoadStateFlags, EDownloadStateFlag)
 Q_DECLARE_OPERATORS_FOR_FLAGS(EDownLoadStateFlags)
 Q_DECLARE_METATYPE(EDownLoadStateFlags)
 
+enum EToyMetronomeCommandModeFlag : qint32
+{
+  eNone             = 0x00,
+
+  eVibrate          = 0x01,
+  eLinear           = 0x02,
+  eRotate           = 0x04,
+
+  eDefault          = eVibrate,
+};
+
+BETTER_ENUM(EToyMetronomeCommandMode, qint32,
+            eNone             = EToyMetronomeCommandModeFlag::eNone,
+
+            eVibrate          = EToyMetronomeCommandModeFlag::eVibrate,
+            eLinear           = EToyMetronomeCommandModeFlag::eLinear,
+            eRotate           = EToyMetronomeCommandModeFlag::eRotate,
+
+            eDefault          = 0x100)
+
+Q_DECLARE_FLAGS(EToyMetronomeCommandModeFlags, EToyMetronomeCommandModeFlag)
+Q_DECLARE_OPERATORS_FOR_FLAGS(EToyMetronomeCommandModeFlags)
+Q_DECLARE_METATYPE(EToyMetronomeCommandModeFlags)
+
+inline EToyMetronomeCommandModeFlags MapCmdModeToFlags(qint32 mode)
+{
+  return EToyMetronomeCommandMode::eDefault == mode ?
+      EToyMetronomeCommandModeFlag::eDefault : EToyMetronomeCommandModeFlags(mode);
+}
+
 struct SProjectData
 {
   SProjectData() = default;
@@ -43,6 +73,7 @@ struct SProjectData
   QString                   m_sPlayerLayout;
   ETutorialState            m_tutorialState = ETutorialState::eFinished;
   qint32                    m_iNumberOfSoundEmitters = 5;
+  qint32                    m_metCmdMode = EToyMetronomeCommandMode::eDefault;
   bool                      m_bUsesWeb = false;
   bool                      m_bNeedsCodecs = false;
   bool                      m_bBundled = false;

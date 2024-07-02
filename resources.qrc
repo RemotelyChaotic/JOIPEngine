@@ -302,6 +302,7 @@
         <file>resources/help/editor/sequence/images/editor_controls.png</file>
         <file>resources/help/editor/sequence/images/editor_layer.png</file>
         <file>resources/help/editor/sequence/images/instruction_metronome_start.png</file>
+        <file>resources/help/editor/projectsettings/metronome_command_mode_help.html</file>
     </qresource>
     <qresource prefix="/qml">
         <file>resources/qml/JoipEngine/EmptyDummy.qml</file>

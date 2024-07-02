@@ -36,6 +36,7 @@ class CProjectScriptWrapper : public QObject, public CLockable
   Q_PROPERTY(QString        sceneModel        READ getSceneModel        CONSTANT)
   Q_PROPERTY(QString        playerLayout      READ getPlayerLayout      CONSTANT)
   Q_PROPERTY(qint32         numberOfSoundEmitters READ getNumberOfSoundEmitters CONSTANT)
+  Q_PROPERTY(qint32         metCmdMode        READ getMetCmdMode        CONSTANT)
   Q_PROPERTY(bool           isUsingWeb        READ isUsingWeb           CONSTANT)
   Q_PROPERTY(bool           isUsingCodecs     READ isUsingCodecs        CONSTANT)
   Q_PROPERTY(bool           isBundled         READ isBundled            CONSTANT)
@@ -55,6 +56,16 @@ public:
   };
   Q_ENUM(EDownLoadState)
 
+  enum ToyMetronomeCommandMode
+  {
+    Vibrate         = EToyMetronomeCommandModeFlag::eVibrate,
+    Linear          = EToyMetronomeCommandModeFlag::eLinear,
+    Rotate          = EToyMetronomeCommandModeFlag::eRotate,
+
+    Default         = EToyMetronomeCommandModeFlag::eDefault,
+  };
+  Q_ENUM(ToyMetronomeCommandMode)
+
   explicit CProjectScriptWrapper(tEngineType pEngine, const std::shared_ptr<SProject>& spProject);
   ~CProjectScriptWrapper();
 
@@ -71,6 +82,7 @@ public:
   QString getSceneModel();
   QString getPlayerLayout();
   qint32 getNumberOfSoundEmitters();
+  qint32 getMetCmdMode();
   bool isUsingWeb();
   bool isUsingCodecs();
   bool isBundled();

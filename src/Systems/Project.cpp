@@ -86,6 +86,7 @@ QJsonObject SProject::ToJsonObject()
     { "sPlayerLayout", m_sPlayerLayout },
     { "tutorialState", m_tutorialState._to_integral() },
     { "iNumberOfSoundEmitters", m_iNumberOfSoundEmitters },
+    { "metCmdMode", m_metCmdMode },
     { "bUsesWeb", m_bUsesWeb },
     { "bNeedsCodecs", m_bNeedsCodecs },
     { "vsKinks", kinks },
@@ -153,12 +154,21 @@ void SProject::FromJsonObject(const QJsonObject& json)
   it = json.find("tutorialState");
   if (it != json.end())
   {
-    m_tutorialState = ETutorialState::_from_integral(it.value().toInt());
+    qint32 iVal = it.value().toInt();
+    if (ETutorialState::_is_valid(iVal))
+    {
+      m_tutorialState = ETutorialState::_from_integral(iVal);
+    }
   }
   it = json.find("iNumberOfSoundEmitters");
   if (it != json.end())
   {
     m_iNumberOfSoundEmitters = it.value().toInt();
+  }
+  it = json.find("metCmdMode");
+  if (it != json.end())
+  {
+    m_metCmdMode = it.value().toInt();
   }
   it = json.find("bUsesWeb");
   if (it != json.end())
@@ -267,7 +277,11 @@ void SProject::FromJsonObject(const QJsonObject& json)
   it = json.find("dlState");
   if (it != json.end())
   {
-    m_dlState = EDownLoadState::_from_integral(it.value().toInt());
+    qint32 iValue = it.value().toInt();
+    if (EDownLoadState::_is_valid(iValue))
+    {
+      m_dlState = EDownLoadState::_from_integral(iValue);
+    }
   }
   it = json.find("sFont");
   if (it != json.end())

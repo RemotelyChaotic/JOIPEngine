@@ -11,6 +11,7 @@
 #include "Editor/Project/CommandChangeFont.h"
 #include "Editor/Project/CommandChangeLayout.h"
 #include "Editor/Project/CommandChangeProjectName.h"
+#include "Editor/Project/CommandChangeToyCmd.h"
 #include "Editor/Project/CommandChangeVersion.h"
 #include "Editor/Project/KinkCompleter.h"
 #include "Editor/Project/KinkSelectionOverlay.h"
@@ -41,6 +42,7 @@ namespace
   const QString c_sProjectVersionHelpId =   "Editor/ProjectVersion";
   const QString c_sEngineVersionHelpId =    "Editor/EngineVersion";
   const QString c_sSoundEmitterCountHelpId ="Editor/SoundEmitterCount";
+  const QString c_sMetronomeToyCmdModeId   ="Editor/MetronomeToyCmdMode";
   const QString c_sLayoutHelpId =           "Editor/Layout";
   const QString c_sProjectFontHelpId       ="Editor/ProjectFont";
   const QString c_sProjectDescribtionHelpId="Editor/ProjectDescribtion";
@@ -92,6 +94,8 @@ void CEditorProjectSettingsWidget::Initialize()
     wpHelpFactory->RegisterHelp(c_sEngineVersionHelpId, ":/resources/help/editor/projectsettings/engineversion_help.html");
     m_spUi->pSoundEmitterCount->setProperty(helpOverlay::c_sHelpPagePropertyName, c_sSoundEmitterCountHelpId);
     wpHelpFactory->RegisterHelp(c_sSoundEmitterCountHelpId, ":/resources/help/editor/projectsettings/number_soundemitters_help.html");
+    m_spUi->pSoundEmitterCount->setProperty(helpOverlay::c_sHelpPagePropertyName, c_sMetronomeToyCmdModeId);
+    wpHelpFactory->RegisterHelp(c_sMetronomeToyCmdModeId, ":/resources/help/editor/projectsettings/metronome_command_mode_help.html");
     m_spUi->pFontComboBox->setProperty(helpOverlay::c_sHelpPagePropertyName, c_sProjectFontHelpId);
     wpHelpFactory->RegisterHelp(c_sProjectFontHelpId, ":/resources/help/editor/projectsettings/font_help.html");
     m_spUi->pLayoutWidget->setProperty(helpOverlay::c_sHelpPagePropertyName, c_sLayoutHelpId);
@@ -171,6 +175,14 @@ void CEditorProjectSettingsWidget::Initialize()
   new CUndoRedoFilter(m_spUi->pFetishLineEdit, nullptr);
   new CUndoRedoFilter(m_spUi->pFontComboBox, nullptr);
 
+  m_spUi->pToyCommandComboBox->clear();
+  for (qint32 iVal : EToyMetronomeCommandMode::_values())
+  {
+    auto mode = EToyMetronomeCommandMode::_from_integral(iVal);
+    m_spUi->pToyCommandComboBox->addItem(QString(mode._to_string()).mid(1),
+                                         iVal);
+  }
+
   m_spUi->pDescribtionTextEdit->setPlaceholderText("No describtion set");
   connect(m_spUi->pDescribtionTextEdit->document(), &QTextDocument::undoCommandAdded,
           this, &CEditorProjectSettingsWidget::SlotUndoForDescribtionAdded);
@@ -235,6 +247,15 @@ void CEditorProjectSettingsWidget::LoadProject(tspProject spProject)
     m_spUi->pSoundEmitterCount->setProperty(editor::c_sPropertyOldValue, m_spCurrentProject->m_iNumberOfSoundEmitters);
     m_spUi->pSoundEmitterCount->setEnabled(!bReadOnly);
     m_spUi->pSoundEmitterCount->blockSignals(false);
+
+    m_spUi->pToyCommandComboBox->blockSignals(true);
+    qint32 iIdxCmdMode = m_spUi->pToyCommandComboBox->findData(m_spCurrentProject->m_metCmdMode);
+    if (-1 == iIdxCmdMode)
+    {
+      iIdxCmdMode = m_spUi->pToyCommandComboBox->findData(EToyMetronomeCommandMode::eDefault);
+    }
+    m_spUi->pToyCommandComboBox->setCurrentIndex(iIdxCmdMode);
+    m_spUi->pToyCommandComboBox->blockSignals(false);
 
     m_spUi->pFontComboBox->blockSignals(true);
     m_spUi->pFontComboBox->setCurrentFont(m_spCurrentProject->m_sFont);
@@ -332,6 +353,8 @@ void CEditorProjectSettingsWidget::SaveProject()
   m_spUi->WarningIcon->setVisible(false);
 
   m_spCurrentProject->m_iNumberOfSoundEmitters = m_spUi->pSoundEmitterCount->value();
+
+  m_spCurrentProject->m_metCmdMode = m_spUi->pToyCommandComboBox->currentData().toInt();
 
   m_spCurrentProject->m_sFont = m_spUi->pFontComboBox->currentFont().family();
 
@@ -449,6 +472,23 @@ void CEditorProjectSettingsWidget::on_pDefaultLayoutComboBox_currentIndexChanged
 
   QPointer<CEditorProjectSettingsWidget> pThis(this);
   UndoStack()->push(new CCommandChangeLayout(m_spUi->pDefaultLayoutComboBox,
+                                             m_spCurrentProject,
+                                             [pThis]() {
+                                               emit pThis->SignalProjectEdited();
+                                               emit pThis->EditorModel()->SignalProjectPropertiesEdited();
+                                             }));
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CEditorProjectSettingsWidget::on_pToyCommandComboBox_currentIndexChanged(qint32 iIdx)
+{
+  WIDGET_INITIALIZED_GUARD
+      if (nullptr == m_spCurrentProject) { return; }
+  Q_UNUSED(iIdx)
+
+  QPointer<CEditorProjectSettingsWidget> pThis(this);
+  UndoStack()->push(new CCommandChangeToyCmd(m_spUi->pToyCommandComboBox,
                                              m_spCurrentProject,
                                              [pThis]() {
                                                emit pThis->SignalProjectEdited();

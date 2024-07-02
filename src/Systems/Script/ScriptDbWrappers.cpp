@@ -163,6 +163,14 @@ qint32 CProjectScriptWrapper::getNumberOfSoundEmitters()
 
 //----------------------------------------------------------------------------------------
 //
+qint32 CProjectScriptWrapper::getMetCmdMode()
+{
+  QReadLocker locker(&m_spData->m_rwLock);
+  return MapCmdModeToFlags(m_spData->m_metCmdMode);
+}
+
+//----------------------------------------------------------------------------------------
+//
 bool CProjectScriptWrapper::isUsingWeb()
 {
   QReadLocker locker(&m_spData->m_rwLock);
