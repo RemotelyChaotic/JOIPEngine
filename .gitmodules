@@ -47,11 +47,6 @@
 	path = 3rdparty/libzip
 	url = https://github.com/RemotelyChaotic/libzip.git
 	branch = v.1.10.0
-[submodule "3rdparty/ButtplugCPP"]
-	path = 3rdparty/ButtplugCPP
-	url = https://github.com/RemotelyChaotic/ButtplugCPP.git
-	branch = main
-[submodule "3rdparty/protobuf"]
-	path = 3rdparty/protobuf
-	url = https://github.com/RemotelyChaotic/protobuf.git
-    	branch = master
+[submodule "3rdparty/intiface-engine"]
+	path = 3rdparty/intiface-engine
+	url = https://github.com/intiface/intiface-engine
