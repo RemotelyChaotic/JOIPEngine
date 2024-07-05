@@ -3,18 +3,18 @@
 
 #include "Utils/ThreadUtils.h"
 
-#include <ButtplugDevice.h>
-
-CButtplugDeviceWrapper::CButtplugDeviceWrapper(std::weak_ptr<Buttplug::Device> wpBpDevice,
+CButtplugDeviceWrapper::CButtplugDeviceWrapper(QButtplugClientDevice device,
                                                CButtplugDeviceConnectorContext* pContext) :
   IDevice(),
-  m_wpBpDevice(wpBpDevice),
+  m_device(device),
   m_pContext(pContext),
   m_nameMutex(QMutex::Recursive)
 {
-  if (auto spDevice = m_wpBpDevice.lock())
+  if (m_device.isValid())
   {
-    m_sName = QString::fromStdString(spDevice->Name());
+    m_sName = QString::number(device.id());
+    m_sDisplayName = !device.displayName().isEmpty() ? device.displayName() :
+                                                       device.name();
   }
 
   m_spConnection =
@@ -51,14 +51,22 @@ QString CButtplugDeviceWrapper::Name() const
 
 //----------------------------------------------------------------------------------------
 //
+QString CButtplugDeviceWrapper::DisplayName() const
+{
+  QMutexLocker locker(&m_nameMutex);
+  return m_sDisplayName;
+}
+
+//----------------------------------------------------------------------------------------
+//
 void CButtplugDeviceWrapper::SendLinearCmd(quint32 iDurationMs, double dPosition)
 {
   if (!m_bDeviceValid.load()) { return; }
 
-  utils::RunInThread(m_pContext->thread(), [wpDevice = m_wpBpDevice, iDurationMs, dPosition]() {
-    if (auto spDevice = wpDevice.lock())
+  utils::RunInThread(m_pContext->thread(), [device = m_device, iDurationMs, dPosition]() mutable {
+    if (device.isValid())
     {
-      spDevice->SendLinearCmd(iDurationMs, dPosition);
+      device.sendLinearCmd(iDurationMs, dPosition, -1);
     }
   });
 }
@@ -69,10 +77,10 @@ void CButtplugDeviceWrapper::SendRotateCmd(bool bClockwise, double dSpeed)
 {
   if (!m_bDeviceValid.load()) { return; }
 
-  utils::RunInThread(m_pContext->thread(), [wpDevice = m_wpBpDevice, bClockwise, dSpeed]() {
-    if (auto spDevice = wpDevice.lock())
+  utils::RunInThread(m_pContext->thread(), [device = m_device, bClockwise, dSpeed]() mutable {
+    if (device.isValid())
     {
-      spDevice->SendRotateCmd(bClockwise, dSpeed);
+      device.sendRotateCmd(bClockwise, dSpeed, -1);
     }
   });
 }
@@ -83,10 +91,10 @@ void CButtplugDeviceWrapper::SendStopCmd()
 {
   if (!m_bDeviceValid.load()) { return; }
 
-  utils::RunInThread(m_pContext->thread(), [wpDevice = m_wpBpDevice]() {
-    if (auto spDevice = wpDevice.lock())
+  utils::RunInThread(m_pContext->thread(), [device = m_device]() mutable {
+    if (device.isValid())
     {
-      spDevice->SetndStopCmd();
+      device.sendStopDeviceCmd();
     }
   });
 }
@@ -97,10 +105,10 @@ void CButtplugDeviceWrapper::SendVibrateCmd(double dSpeed)
 {
   if (!m_bDeviceValid.load()) { return; }
 
-  utils::RunInThread(m_pContext->thread(), [wpDevice = m_wpBpDevice, dSpeed]() {
-    if (auto spDevice = wpDevice.lock())
+  utils::RunInThread(m_pContext->thread(), [device = m_device, dSpeed]() mutable {
+    if (device.isValid())
     {
-      spDevice->SendVibrateCmd(dSpeed);
+      device.sendVibrateCmd(dSpeed, -1);
     }
   });
 }

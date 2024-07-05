@@ -3,6 +3,8 @@
 
 #include "IDevice.h"
 
+#include <QButtplugClientDevice>
+
 #include <QMutex>
 #include <QObject>
 #include <QString>
@@ -19,11 +21,12 @@ namespace Buttplug
 class CButtplugDeviceWrapper : public IDevice
 {
 public:
-  CButtplugDeviceWrapper(std::weak_ptr<Buttplug::Device> wpBpDevice,
+  CButtplugDeviceWrapper(QButtplugClientDevice device,
                          CButtplugDeviceConnectorContext* pContext);
   ~CButtplugDeviceWrapper() override;
 
   QString Name() const override;
+  QString DisplayName() const override;
   void SendLinearCmd(quint32 iDurationMs, double dPosition) override;
   void SendRotateCmd(bool bClockwise, double dSpeed) override;
   void SendStopCmd() override;
@@ -31,11 +34,12 @@ public:
 
 private:
   std::shared_ptr<QMetaObject::Connection> m_spConnection;
-  std::weak_ptr<Buttplug::Device> m_wpBpDevice;
+  QButtplugClientDevice            m_device;
   CButtplugDeviceConnectorContext* m_pContext;
 
   mutable QMutex                   m_nameMutex;
   QString                          m_sName;
+  QString                          m_sDisplayName;
 
   std::atomic<bool>                m_bDeviceValid = true;
 };

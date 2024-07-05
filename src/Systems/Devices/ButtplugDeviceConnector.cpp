@@ -10,8 +10,8 @@
 
 #include "Utils/WidgetHelpers.h"
 
-#include <ButtplugClient.h>
-#include <ButtplugDevice.h>
+#include <QButtplugClient>
+#include <QButtplugClientDevice>
 
 #include <QDebug>
 #include <QDirIterator>
@@ -214,31 +214,27 @@ namespace
 class CIntifaceEngineClientWrapper
 {
 public:
-  CIntifaceEngineClientWrapper(const QString& sLoadPath,
-                               std::function<void(const QString&)> fnDeviceAdded,
-                               std::function<void(const QString&)> fnDeviceRemoved,
+  CIntifaceEngineClientWrapper(std::function<void(quint32)> fnDeviceAdded,
+                               std::function<void(quint32)> fnDeviceRemoved,
                                std::function<void()> fnDisconnected);
   ~CIntifaceEngineClientWrapper();
 
   bool Connect();
+  void ConnectSignals();
   qint32 DeviceCount() const;
-  const std::map<QString, std::weak_ptr<Buttplug::Device>>& Devices() const;
+  void DeviceRemoved(quint32 iId);
+  const std::map<quint32, QButtplugClientDevice>& Devices() const;
   bool Disconnect();
   bool IsConnected();
-  bool IsLoaded() const { return m_bIsLoaded; };
   bool StartScanning();
   bool StopScanning();
 
 private:
-  std::unique_ptr<Buttplug::Client>                  m_spClient;
-  std::map<QString, std::weak_ptr<Buttplug::Device>> m_deviceList;
-  Buttplug::DeviceAddedCallback                      m_fnDeviceAddedCb;
-  Buttplug::DeviceRemovedCallback                    m_fnDeviceRemovedCb;
-  Buttplug::ErrorReceivedCallback                    m_fnErrorReceivedCb;
-  Buttplug::ScanningFinishedCallback                 m_fnScanningFinishedCb;
-  Buttplug::PingTimeoutCallback                      m_fnPingTimeoutCb;
-  Buttplug::ServerDisconnectCallback                 m_fnServerDisconnectCb;
-  bool                                               m_bIsLoaded = false;
+  std::unique_ptr<QButtplugClient>         m_spClient;
+  std::map<quint32, QButtplugClientDevice> m_deviceList;
+  std::function<void(quint32)> m_fnDeviceAdded;
+  std::function<void(quint32)> m_fnDeviceRemoved;
+  std::function<void()> m_fnDisconnected;
 };
 
 //----------------------------------------------------------------------------------------
@@ -250,12 +246,11 @@ CButtplugDeviceConnector::CButtplugDeviceConnector() :
   m_pContext(new CButtplugDeviceConnectorContext(this))
 {
   m_spClient.reset(new CIntifaceEngineClientWrapper(
-                     FindPluginPath(),
-                     [this](const QString& sDevice) {
+                     [this](quint32) {
                        emit SignalDeviceCountChanged();
                      },
-                     [this](const QString& sDevice) {
-                       emit m_pContext->SignalDeviceRemoved(sDevice);
+                     [this](quint32 id) {
+                       emit m_pContext->SignalDeviceRemoved(QString::number(id));
                        emit SignalDeviceCountChanged();
                      },
                      [this]() {
@@ -270,15 +265,10 @@ CButtplugDeviceConnector::~CButtplugDeviceConnector()
 //
 QStringList CButtplugDeviceConnector::DeviceNames() const
 {
-  if (!m_spClient->IsLoaded())
-  {
-    return {};
-  }
-
   QStringList vsRet;
-  for (const auto& [sName, _] : m_spClient->Devices())
+  for (const auto& [id, _] : m_spClient->Devices())
   {
-    vsRet.push_back(sName);
+    vsRet.push_back(QString::number(id));
   }
   return vsRet;
 }
@@ -287,12 +277,7 @@ QStringList CButtplugDeviceConnector::DeviceNames() const
 //
 std::shared_ptr<IDevice> CButtplugDeviceConnector::Device(const QString& sName) const
 {
-  if (!m_spClient->IsLoaded())
-  {
-    return nullptr;
-  }
-
-  auto it = m_spClient->Devices().find(sName);
+  auto it = m_spClient->Devices().find(static_cast<quint32>(sName.toLongLong()));
   if (m_spClient->Devices().end() != it)
   {
     return std::make_shared<CButtplugDeviceWrapper>(it->second, m_pContext);
@@ -304,15 +289,10 @@ std::shared_ptr<IDevice> CButtplugDeviceConnector::Device(const QString& sName) 
 //
 std::vector<std::shared_ptr<IDevice>> CButtplugDeviceConnector::Devices() const
 {
-  if (!m_spClient->IsLoaded())
-  {
-    return {};
-  }
-
   std::vector<std::shared_ptr<IDevice>> ret;
-  for (const auto& [_, wpDevice] : m_spClient->Devices())
+  for (const auto& [_, device] : m_spClient->Devices())
   {
-    ret.push_back(std::make_shared<CButtplugDeviceWrapper>(wpDevice, m_pContext));
+    ret.push_back(std::make_shared<CButtplugDeviceWrapper>(device, m_pContext));
   }
   return ret;
 }
@@ -321,11 +301,6 @@ std::vector<std::shared_ptr<IDevice>> CButtplugDeviceConnector::Devices() const
 //
 bool CButtplugDeviceConnector::IsConnected() const
 {
-  if (!m_spClient->IsLoaded())
-  {
-    return false;
-  }
-
   return m_spClient->IsConnected();
 }
 
@@ -333,20 +308,14 @@ bool CButtplugDeviceConnector::IsConnected() const
 //
 void CButtplugDeviceConnector::StartScanning()
 {
-  if (m_spClient->IsLoaded())
-  {
-    m_spClient->StartScanning();
-  }
+  m_spClient->StartScanning();
 }
 
 //----------------------------------------------------------------------------------------
 //
 void CButtplugDeviceConnector::StopScanning()
 {
-  if (m_spClient->IsLoaded())
-  {
-    m_spClient->StopScanning();
-  }
+  m_spClient->StopScanning();
 }
 
 //----------------------------------------------------------------------------------------
@@ -360,76 +329,13 @@ QString CButtplugDeviceConnector::FindPluginPath() const
 //----------------------------------------------------------------------------------------
 //
 CIntifaceEngineClientWrapper::CIntifaceEngineClientWrapper(
-    const QString& sLoadPath,
-    std::function<void(const QString&)> fnDeviceAdded,
-    std::function<void(const QString&)> fnDeviceRemoved,
-    std::function<void()> fnDisconnected)
+    std::function<void(quint32)> fnDeviceAdded,
+    std::function<void(quint32)> fnDeviceRemoved,
+    std::function<void()> fnDisconnected) :
+  m_fnDeviceAdded(fnDeviceAdded),
+  m_fnDeviceRemoved(fnDeviceRemoved),
+  m_fnDisconnected(fnDisconnected)
 {
-  if(!Buttplug::FFI::Init(sLoadPath.toStdString()))
-  {
-    qWarning() << "Failed to load buttplug_rs_ffi functions.";
-    return;
-  }
-
-  Buttplug::FFI::ActivateEnvLogger();
-
-  m_bIsLoaded = true;
-
-  m_fnDeviceAddedCb = [this, fnDeviceAdded](std::weak_ptr<Buttplug::Device> device)
-  {
-    if (auto spDevice = device.lock(); nullptr != spDevice)
-    {
-      qDebug() << "Intiface Client: Device added";
-      const QString sName = QString::fromStdString(spDevice->Name());
-      m_deviceList.insert({sName, device});
-      if (nullptr != fnDeviceAdded)
-      {
-        fnDeviceAdded(sName);
-      }
-    }
-  };
-
-  m_fnDeviceRemovedCb = [this, fnDeviceRemoved](std::weak_ptr<Buttplug::Device> device)
-  {
-    if (auto spDevice = device.lock(); nullptr != spDevice)
-    {
-      qDebug() << "Intiface Client: Device removed";
-      const QString sName = QString::fromStdString(spDevice->Name());
-      auto it = m_deviceList.find(sName);
-      if (m_deviceList.end() != it)
-      {
-        m_deviceList.erase(it);
-        if (nullptr != fnDeviceRemoved)
-        {
-          fnDeviceRemoved(sName);
-        }
-      }
-    }
-  };
-
-  m_fnErrorReceivedCb = [](const std::string& error)
-  {
-    qWarning() << QString("Intiface Client error: %1").arg(QString::fromStdString(error));
-  };
-
-  m_fnScanningFinishedCb = []()
-  {
-    qDebug() << "Intiface Client: Scanning finished";
-  };
-
-  m_fnPingTimeoutCb = []()
-  {
-    qWarning() << "Intiface Client: Ping timeout";
-  };
-
-  m_fnServerDisconnectCb = [fnDisconnected]()
-  {
-    qDebug() << "Intiface Client Server disconnect";
-    if (nullptr != fnDisconnected)
-    {
-      fnDisconnected();
-    }
-  };
 }
 CIntifaceEngineClientWrapper::~CIntifaceEngineClientWrapper()
 {
@@ -439,16 +345,11 @@ CIntifaceEngineClientWrapper::~CIntifaceEngineClientWrapper()
 //
 bool CIntifaceEngineClientWrapper::Connect()
 {
-  if (!m_bIsLoaded) { return false; }
+  m_spClient.reset();
+  m_spClient->setClientName("JOIPEngine");
+  m_spClient->setProtocolVersion(QtButtplug::AnyProtocolVersion);
 
-  m_spClient.reset(new Buttplug::Client("JOIPEngine"));
-
-  m_spClient->DeviceAddedCb = m_fnDeviceAddedCb;
-  m_spClient->DeviceRemovedCb = m_fnDeviceRemovedCb;
-  m_spClient->ErrorReceivedCb = m_fnErrorReceivedCb;
-  m_spClient->ScanningFinishedCb = m_fnScanningFinishedCb;
-  m_spClient->PingTimeoutCb = m_fnPingTimeoutCb;
-  m_spClient->ServerDisconnectCb = m_fnServerDisconnectCb;
+  ConnectSignals();
 
   auto pSetting = CDeviceSettingFactory::Setting<quint16>(c_sIntifacePortSettingName);
   if (nullptr == pSetting)
@@ -456,9 +357,58 @@ bool CIntifaceEngineClientWrapper::Connect()
     return false;
   }
 
-  return m_spClient->ConnectWebsocket(
-        QString("ws://127.0.0.1:%1/buttplug")
-        .arg(pSetting->GetValue()).toStdString(), true).get();
+  m_spClient->connect(QHostAddress::LocalHost, pSetting->GetValue());
+  return m_spClient->waitConnected();
+  //return m_spClient->connect(
+  //      QString("ws://127.0.0.1:%1/buttplug")
+  //      .arg(pSetting->GetValue()).toStdString(), true).get();
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CIntifaceEngineClientWrapper::ConnectSignals()
+{
+  QObject::connect(m_spClient.get(), &QButtplugClient::connected, m_spClient.get(),
+          []() {
+    qDebug() << "Intiface Client Server connected";
+  });
+  QObject::connect(m_spClient.get(), &QButtplugClient::disconnected, m_spClient.get(),
+          [this]() {
+    qDebug() << "Intiface Client Server disconnected";
+    if (nullptr != m_fnDisconnected)
+    {
+      m_fnDisconnected();
+    }
+  });
+  QObject::connect(m_spClient.get(), &QButtplugClient::connectionStateChanged, m_spClient.get(),
+          [](QtButtplug::ConnectionState state) {
+    qDebug() << "Intiface client connection state changed" << state;
+  });
+  QObject::connect(m_spClient.get(), &QButtplugClient::scanningFinished, m_spClient.get(),
+          []() {
+    qDebug() << "Intiface Client Scanning finished";
+  });
+  QObject::connect(m_spClient.get(), &QButtplugClient::errorRecieved, m_spClient.get(),
+          [](QtButtplug::Error error) {
+    qDebug() << "Intiface Client error recieved:" << QButtplugClient::errorString(error);
+  });
+  QObject::connect(m_spClient.get(), &QButtplugClient::deviceAdded, m_spClient.get(),
+          [this](quint32 iId, QButtplugClientDevice device) {
+    if (device.isValid())
+    {
+      qDebug() << "Intiface Client: Device added";
+      m_deviceList.insert({iId, device});
+      if (nullptr != m_fnDeviceAdded)
+      {
+        m_fnDeviceAdded(iId);
+      }
+    }
+  });
+  QObject::connect(m_spClient.get(), &QButtplugClient::deviceRemoved, m_spClient.get(),
+          [this](quint32 iId) {
+    qDebug() << "Intiface Client: Device removed";
+    DeviceRemoved(iId);
+  });
 }
 
 //----------------------------------------------------------------------------------------
@@ -466,12 +416,27 @@ bool CIntifaceEngineClientWrapper::Connect()
 qint32 CIntifaceEngineClientWrapper::DeviceCount() const
 {
   if (nullptr == m_spClient) { return false; }
-  return m_spClient->DeviceCount();
+  return m_spClient->deviceCount();
 }
 
 //----------------------------------------------------------------------------------------
 //
-const std::map<QString, std::weak_ptr<Buttplug::Device>>&
+void CIntifaceEngineClientWrapper::DeviceRemoved(quint32 iId)
+{
+  auto it = m_deviceList.find(iId);
+  if (m_deviceList.end() != it)
+  {
+    m_deviceList.erase(it);
+    if (nullptr != m_fnDeviceRemoved)
+    {
+      m_fnDeviceRemoved(iId);
+    }
+  }
+}
+
+//----------------------------------------------------------------------------------------
+//
+const std::map<quint32, QButtplugClientDevice>&
 CIntifaceEngineClientWrapper::Devices() const
 {
   return m_deviceList;
@@ -485,10 +450,11 @@ bool CIntifaceEngineClientWrapper::Disconnect()
 
   while (!m_deviceList.empty())
   {
-    (*m_spClient->DeviceRemovedCb)(m_deviceList.begin()->second);
+    DeviceRemoved(m_deviceList.begin()->first);
   }
 
-  bool bOk = m_spClient->Disconnect().get();
+  m_spClient->disconnect();
+  bool bOk = m_spClient->waitDisconnected();
 
   m_spClient.reset(nullptr);
 
@@ -499,7 +465,7 @@ bool CIntifaceEngineClientWrapper::Disconnect()
 //
 bool CIntifaceEngineClientWrapper::IsConnected()
 {
-  return nullptr != m_spClient && m_spClient->Connected();
+  return nullptr != m_spClient && m_spClient->connectionState() == QtButtplug::Connected;
 }
 
 //----------------------------------------------------------------------------------------
@@ -511,7 +477,9 @@ bool CIntifaceEngineClientWrapper::StartScanning()
     return false;
   }
 
-  return m_spClient->StartScanning().get();
+  m_spClient->startScan();
+
+  return m_spClient->isScanning();
 }
 
 //----------------------------------------------------------------------------------------
@@ -523,7 +491,9 @@ bool CIntifaceEngineClientWrapper::StopScanning()
     return false;
   }
 
-  return m_spClient->StopScanning().get();
+  m_spClient->stopScan();
+
+  return !m_spClient->isScanning();
 }
 
 //----------------------------------------------------------------------------------------
@@ -540,7 +510,6 @@ CIntifaceEngineDeviceConnector::~CIntifaceEngineDeviceConnector()
 //
 bool CIntifaceEngineDeviceConnector::CanConnect()
 {
-  if (!m_spClient->IsLoaded()) { return false; }
   return true;
 }
 
@@ -548,7 +517,6 @@ bool CIntifaceEngineDeviceConnector::CanConnect()
 //
 bool CIntifaceEngineDeviceConnector::Connect()
 {
-  if (!m_spClient->IsLoaded()) { return false; }
   if (!StartEngine())
   {
     return false;
@@ -571,10 +539,7 @@ bool CIntifaceEngineDeviceConnector::Connect()
 //
 void CIntifaceEngineDeviceConnector::Disconnect()
 {
-  if (m_spClient->IsLoaded())
-  {
-    m_spClient->Disconnect();
-  }
+  m_spClient->Disconnect();
 
   if (nullptr != m_pIntifaceEngineProcess)
   {
@@ -676,8 +641,6 @@ CIntifaceCentralDeviceConnector::~CIntifaceCentralDeviceConnector()
 //
 bool CIntifaceCentralDeviceConnector::CanConnect()
 {
-  if (!m_spClient->IsLoaded()) { return false; }
-
   if (!FindIntifaceProcess())
   {
     if (StartIntiface())
@@ -699,7 +662,6 @@ bool CIntifaceCentralDeviceConnector::CanConnect()
 //
 bool CIntifaceCentralDeviceConnector::Connect()
 {
-  if (!m_spClient->IsLoaded()) { return false; }
   return m_spClient->Connect();
 }
 
@@ -707,10 +669,7 @@ bool CIntifaceCentralDeviceConnector::Connect()
 //
 void CIntifaceCentralDeviceConnector::Disconnect()
 {
-  if (m_spClient->IsLoaded())
-  {
-    m_spClient->Disconnect();
-  }
+  m_spClient->Disconnect();
 }
 
 //----------------------------------------------------------------------------------------

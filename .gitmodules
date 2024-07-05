@@ -50,3 +50,6 @@
 [submodule "3rdparty/intiface-engine"]
 	path = 3rdparty/intiface-engine
 	url = https://github.com/intiface/intiface-engine
+[submodule "3rdparty/QButtplug"]
+	path = 3rdparty/QButtplug
+	url = https://github.com/RemotelyChaotic/QButtplug.git

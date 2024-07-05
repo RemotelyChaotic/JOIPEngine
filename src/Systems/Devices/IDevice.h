@@ -9,6 +9,7 @@ public:
   virtual ~IDevice() {}
 
   virtual QString Name() const = 0;
+  virtual QString DisplayName() const = 0;
   virtual void SendLinearCmd(quint32 iDurationMs, double dPosition) = 0;
   virtual void SendRotateCmd(bool bClockwise, double dSpeed) = 0;
   virtual void SendStopCmd() = 0;

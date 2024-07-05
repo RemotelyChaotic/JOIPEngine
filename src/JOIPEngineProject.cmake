@@ -868,7 +868,7 @@ macro(JOIPProjectSettings JOIP_PROJECT_NAME)
     if (HAS_BUTTPLUG_CPP)
       target_link_libraries(${JOIP_PROJECT_NAME}
         PRIVATE
-          ButtplugCppClient)
+          Qt${QT_VERSION_MAJOR}Buttplug)
       target_compile_definitions(${JOIP_PROJECT_NAME}
         PRIVATE
           -DHAS_BUTTPLUG_CPP=1)
@@ -886,7 +886,6 @@ macro(JOIPProjectSettings JOIP_PROJECT_NAME)
       target_link_libraries(${JOIP_PROJECT_NAME}
         PRIVATE
           Qt${QT_VERSION_MAJOR}::WinExtras
-          #ButtplugCppClient
           WinToast
           Psapi)
     endif()
