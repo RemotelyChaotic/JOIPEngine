@@ -345,7 +345,7 @@ CIntifaceEngineClientWrapper::~CIntifaceEngineClientWrapper()
 //
 bool CIntifaceEngineClientWrapper::Connect()
 {
-  m_spClient.reset();
+  m_spClient.reset(new QButtplugClient());
   m_spClient->setClientName("JOIPEngine");
   m_spClient->setProtocolVersion(QtButtplug::AnyProtocolVersion);
 
@@ -357,11 +357,8 @@ bool CIntifaceEngineClientWrapper::Connect()
     return false;
   }
 
-  m_spClient->connect(QHostAddress::LocalHost, pSetting->GetValue());
+  m_spClient->connectToHost(QHostAddress::LocalHost, pSetting->GetValue());
   return m_spClient->waitConnected();
-  //return m_spClient->connect(
-  //      QString("ws://127.0.0.1:%1/buttplug")
-  //      .arg(pSetting->GetValue()).toStdString(), true).get();
 }
 
 //----------------------------------------------------------------------------------------

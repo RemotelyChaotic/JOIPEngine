@@ -262,12 +262,14 @@ void CDeviceManager::ConnectImpl()
           }
         }
 
+        // we don't want the timeout to trigger during connection
+        if (nullptr != m_pReconnectTimer)
+        {
+          m_pReconnectTimer->stop();
+        }
+
         if ((*it)->Connect())
         {
-          if (nullptr != m_pReconnectTimer)
-          {
-            m_pReconnectTimer->stop();
-          }
           emit SignalConnected();
         }
         else if (nullptr != m_pReconnectTimer)
