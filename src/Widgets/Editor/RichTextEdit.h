@@ -14,6 +14,7 @@ public:
 signals:
   void UndoTriggered();
   void RedoTriggered();
+  void textChanged(); // match qt interface
 };
 
 #endif // CRICHTEXTEDIT_H

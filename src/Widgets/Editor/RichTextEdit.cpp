@@ -32,6 +32,8 @@ CRichTextEdit::CRichTextEdit(QWidget* pParent)
   connect(pFilter, &CUndoRedoFilter::UndoTriggered, this, &CRichTextEdit::UndoTriggered);
   connect(pFilter, &CUndoRedoFilter::RedoTriggered, this, &CRichTextEdit::RedoTriggered);
 
+  connect(textEdit(), &QTextEdit::textChanged, this, &CRichTextEdit::textChanged);
+
   // hide unneeded buttons
   QToolButton* pPtrCut = findChild<QToolButton*>("f_cut");
   QToolButton* pPtrCopy = findChild<QToolButton*>("f_copy");
