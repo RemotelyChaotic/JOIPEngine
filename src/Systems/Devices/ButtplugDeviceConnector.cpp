@@ -450,7 +450,7 @@ bool CIntifaceEngineClientWrapper::Disconnect()
     DeviceRemoved(m_deviceList.begin()->first);
   }
 
-  m_spClient->disconnect();
+  m_spClient->disconnectFromHost();
   bool bOk = m_spClient->waitDisconnected();
 
   m_spClient.reset(nullptr);
