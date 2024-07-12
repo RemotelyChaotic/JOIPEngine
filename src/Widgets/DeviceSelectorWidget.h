@@ -2,6 +2,8 @@
 #define DEVICESELECTORWIDGET_H
 
 #include <QIcon>
+#include <QLabel>
+#include <QMovie>
 #include <QPointer>
 #include <QWidget>
 
@@ -42,6 +44,9 @@ protected slots:
   void SlotStartScanning();
   void SlotStopScanning();
 
+protected:
+  void resizeEvent(QResizeEvent* pEvt) override;
+
 private:
   void ShowDevices();
   void SetConnectedState(bool bConnected);
@@ -51,6 +56,8 @@ private:
   std::weak_ptr<CDeviceManager>              m_wpDeviceManager;
   QPointer<QStandardItemModel>               m_pDeviceModel;
   QPointer<CDeviceViewDelegate>              m_pDeviceDelegate;
+  QPointer<QLabel>                           m_pLoadingLabel;
+  QMovie                                     m_loading;
   QIcon                                      m_selectionIcon;
 };
 

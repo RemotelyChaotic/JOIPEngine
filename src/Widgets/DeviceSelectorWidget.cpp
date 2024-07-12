@@ -3,6 +3,7 @@
 #include "ui_DeviceSelectorWidget.h"
 
 #include "Systems/DeviceManager.h"
+#include "Systems/Devices/IDevice.h"
 
 #include <QMovie>
 #include <QPainter>
@@ -11,84 +12,10 @@
 
 namespace
 {
-  const qint32 c_iRoleDeviceName = Qt::UserRole+1;
-  const qint32 c_iRoleScanningElement = Qt::UserRole+2;
-  const qint32 c_iRoleSelectedElement = Qt::UserRole+3;
+  const qint32 c_iRoleDeviceId = Qt::UserRole+1;
+  const qint32 c_iRoleSelectedElement = Qt::UserRole+2;
   const qint32 c_iLoadingIconSize = 16;
 }
-
-//----------------------------------------------------------------------------------------
-//
-class CDeviceViewDelegate : public QStyledItemDelegate
-{
-  Q_OBJECT
-public:
-  inline CDeviceViewDelegate(QPointer<QListView> pParent,
-                             QPointer<CDeviceSelectorWidget> pDeviceSelectorWidget) :
-    QStyledItemDelegate(pParent),
-    m_pDeviceSelectorWidget(pDeviceSelectorWidget),
-    m_pLoading(new QMovie(this))
-  {
-    m_pLoading.setFileName(":/resources/gif/spinner_transparent.gif");
-    connect(&m_pLoading, &QMovie::frameChanged, [pParent]() {
-      if (nullptr != pParent)
-      {
-        pParent->viewport()->update();
-      }
-    });
-  }
-
-  //--------------------------------------------------------------------------------------
-  //
-  void StartScanning()
-  {
-    m_pLoading.start();
-  }
-
-  //--------------------------------------------------------------------------------------
-  //
-  void StopScanning()
-  {
-    m_pLoading.stop();
-  }
-
-protected:
-  //--------------------------------------------------------------------------------------
-  //
-  void paint(QPainter* pPainter, const QStyleOptionViewItem& option,
-             const QModelIndex& index) const override
-  {
-    QStyledItemDelegate::paint(pPainter, option, index);
-    if (index.data(c_iRoleScanningElement).toBool())
-    {
-      QSize iconSize = {c_iLoadingIconSize, c_iLoadingIconSize};
-      QRect rectIconBounding = option.rect;
-      rectIconBounding.setHeight(iconSize.height());
-      qint32 iOffsetX = (rectIconBounding.width() - iconSize.width()) / 2;
-      qint32 iOffsetY = (rectIconBounding.height() - iconSize.height()) / 2;
-      QRect rectIcon({option.rect.x() + iOffsetX, option.rect.y() + iOffsetY}, iconSize);
-
-      QImage img = m_pLoading.currentImage();
-      pPainter->drawImage(rectIcon, img, img.rect());
-    }
-  }
-
-  //--------------------------------------------------------------------------------------
-  //
-  QSize sizeHint(
-      const QStyleOptionViewItem& options, const QModelIndex& index) const override
-  {
-    if (index.data(c_iRoleScanningElement).toBool())
-    {
-      return QSize(QStyledItemDelegate::sizeHint(options, index).width(), c_iLoadingIconSize);
-    }
-    return QStyledItemDelegate::sizeHint(options, index);
-  }
-
-private:
-  QPointer<CDeviceSelectorWidget> m_pDeviceSelectorWidget;
-  QMovie                          m_pLoading;
-};
 
 //----------------------------------------------------------------------------------------
 //
@@ -96,13 +23,18 @@ CDeviceSelectorWidget::CDeviceSelectorWidget(QWidget* pParent) :
   QWidget(pParent),
   m_spUi(std::make_unique<Ui::CDeviceSelectorWidget>()),
   m_wpDeviceManager(CApplication::Instance()->System<CDeviceManager>()),
+  m_pLoadingLabel(new QLabel(this)),
   m_selectionIcon(":/resources/style/img/ButtonPlug.png")
 {
   m_spUi->setupUi(this);
   m_pDeviceModel = new QStandardItemModel(m_spUi->pDeviceListView);
-  m_pDeviceDelegate = new CDeviceViewDelegate(m_spUi->pDeviceListView, this);
   m_spUi->pDeviceListView->setModel(m_pDeviceModel);
-  m_spUi->pDeviceListView->setItemDelegate(m_pDeviceDelegate);
+
+  m_loading.setFileName(":/resources/gif/spinner_transparent.gif");
+  m_loading.setScaledSize({40, 40});
+  m_pLoadingLabel->setMovie(&m_loading);
+  m_pLoadingLabel->setScaledContents(true);
+  m_pLoadingLabel->setFixedSize(40, 40);
 
   if (auto spDeviceManager = m_wpDeviceManager.lock())
   {
@@ -181,7 +113,7 @@ void CDeviceSelectorWidget::on_pStopScanButton_clicked()
 //
 void CDeviceSelectorWidget::SlotActivatedItem(const QModelIndex& idx)
 {
-  const QString sName = m_pDeviceModel->data(idx, c_iRoleDeviceName).toString();
+  const QString sName = m_pDeviceModel->data(idx, c_iRoleDeviceId).toString();
   if (auto spDeviceManager = m_wpDeviceManager.lock())
   {
     spDeviceManager->SetSelectedDevice(sName);
@@ -220,7 +152,7 @@ void CDeviceSelectorWidget::SlotDeviceSelected()
     for (qint32 i = 0; m_pDeviceModel->rowCount() > i; ++i)
     {
       QModelIndex idx = m_pDeviceModel->index(i, 0);
-      const QString sName = m_pDeviceModel->data(idx, c_iRoleDeviceName).toString();
+      const QString sName = m_pDeviceModel->data(idx, c_iRoleDeviceId).toString();
       if (sName == sDevice)
       {
         m_pDeviceModel->setData(idx, SelectionIcon(), Qt::DecorationRole);
@@ -256,45 +188,27 @@ void CDeviceSelectorWidget::ShowDevices()
   if (auto spDeviceManager = m_wpDeviceManager.lock())
   {
     QStringList vsDeviceNames = spDeviceManager->DeviceNames();
-    QStringList vsDeviceNamesInUi;
-    bool bHasScanningElement = false;
-    for (qint32 i = 0; m_pDeviceModel->rowCount() > i; ++i)
-    {
-      QModelIndex idx = m_pDeviceModel->index(i, 0);
-      const QString sName = m_pDeviceModel->data(idx, c_iRoleDeviceName).toString();
-      bool bScanningElement =
-          m_pDeviceModel->data(idx, c_iRoleScanningElement).toBool();
-      if (!bScanningElement)
-      {
-        vsDeviceNamesInUi << sName;
-      }
-      else
-      {
-        bHasScanningElement = true;
-      }
-    }
 
-    if (vsDeviceNames != vsDeviceNamesInUi)
+    m_pDeviceModel->clear();
+    QList<QStandardItem*> vpItems;
+    for (const QString& sName : qAsConst(vsDeviceNames))
     {
-      m_pDeviceModel->clear();
-      QList<QStandardItem*> vpItems;
-      for (const QString& sName : qAsConst(vsDeviceNames))
-      {
-        QStandardItem* pItem = new QStandardItem(sName);
-        pItem->setData(sName, c_iRoleDeviceName);
-        pItem->setData(false, c_iRoleScanningElement);
-        vpItems << pItem;
-      }
-      if (bHasScanningElement)
-      {
-        QStandardItem* pItem = new QStandardItem(QString());
-        pItem->setData(QString(), c_iRoleDeviceName);
-        pItem->setData(true, c_iRoleScanningElement);
-        vpItems << pItem;
-      }
-      m_pDeviceModel->appendRow(vpItems);
+      const QString sDisplayName = spDeviceManager->Device(sName)->DisplayName();
+      QStandardItem* pItem = new QStandardItem(sDisplayName);
+      pItem->setData(sName, c_iRoleDeviceId);
+      vpItems << pItem;
     }
+    m_pDeviceModel->appendRow(vpItems);
   }
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CDeviceSelectorWidget::resizeEvent(QResizeEvent* pEvt)
+{
+  m_pLoadingLabel->move(width()/2-m_pLoadingLabel->width()/2,
+                        height()- m_pLoadingLabel->height());
+  m_pLoadingLabel->raise();
 }
 
 //----------------------------------------------------------------------------------------
@@ -323,31 +237,16 @@ void CDeviceSelectorWidget::SetScanningState(bool bScanning)
 {
   if (bScanning)
   {
-    m_pDeviceDelegate->StartScanning();
+    m_loading.start();
+    m_pLoadingLabel->show();
     m_spUi->pStartScanButton->hide();
     m_spUi->pStopScanButton->show();
   }
   else
   {
-    m_pDeviceDelegate->StopScanning();
+    m_loading.stop();
+    m_pLoadingLabel->hide();
     m_spUi->pStartScanButton->show();
     m_spUi->pStopScanButton->hide();
   }
-
-  QModelIndex idx = m_pDeviceModel->index(m_pDeviceModel->rowCount()-1, 0);
-  const bool bScanningElem = m_pDeviceModel->data(idx, c_iRoleScanningElement).toBool();
-  if (bScanningElem && !bScanning)
-  {
-    m_pDeviceModel->removeRows(idx.row(), 1);
-  }
-  else if (!bScanningElem && bScanning)
-  {
-    QStandardItem* pItem = new QStandardItem(QString());
-    pItem->setData(QString(), c_iRoleDeviceName);
-    pItem->setData(true, c_iRoleScanningElement);
-    m_pDeviceModel->appendRow(pItem);
-  }
 }
-
-// private class CDeviceViewDelegate
-#include "DeviceSelectorWidget.moc"

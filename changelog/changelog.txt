@@ -14,6 +14,7 @@ Changes:
 - The Script Editor has a basic autocomplete functionality that suggests
   words based on language keywords, registered types and words already
   present in all scripts.
+- Buttplug.io client was swapped out with a more up-to-date implementation.
 
 Fixed Bugs:
 - Fixed a crash when removing a resource with tags.

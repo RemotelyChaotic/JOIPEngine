@@ -4,23 +4,12 @@
 ### Prerequisites:
 - Building requires [CMake](https://cmake.org/) and the builds have been tested with [Ninja](https://ninja-build.org/) (with MSVC 2022) and [Clang](https://clang.llvm.org/get_started.html).
 - Building QtAV with CMake also requires [pkg-config](https://www.freedesktop.org/wiki/Software/pkg-config/) for easy installation, see [how-to-install-pkg-config-in-windows](https://stackoverflow.com/questions/1710922/how-to-install-pkg-config-in-windows).
-- Building intiface-engine and buttplug-rs-ffi requires [Rust](https://www.rust-lang.org/tools/install)
+- Building intiface-engine and requires [Rust](https://www.rust-lang.org/tools/install)
 - A version of Pearl is also required for building the highlight definitions. Recommended for Windows is: [Strawberry Pearl](https://strawberryperl.com/)
 - Get [Qt 5.14+.*](https://download.qt.io/) and either install a pre-built version or build all required modules from source ( Core Multimedia MultimediaWidgets Network PrintSupport Qml Quick QuickControls2 QuickWidgets Svg Widgets WebChannel Xml XmlPatterns). Qt 6 is not fully supported as some libraries do not support it and a lot of the API has changed.
 - Build the provided [QtAV](https://github.com/RemotelyChaotic/QtAV) fork for your target platform with FFmpeg and OpenAL support. A CMake build is recommended. If you want to build it with qmake and have trubble building for Android, follow this [guide](https://github.com/wang-bin/QtAV/issues/1262#issuecomment-597193360) and build all architectures separately. Don't forget, that mingw32-make.exe must be in the Path for qmake builds.
-- Build the provided [protobuf](https://github.com/RemotelyChaotic/protobuf) fork for your target platform and install into your main project build directory ([...]/protobuf/install). Use the following build flags:
-```
-"-Dprotobuf_ABSL_PROVIDER:STRING=module"
-"-Dprotobuf_BUILD_TESTS=OFF"
-"-Dprotobuf_BUILD_EXAMPLES:BOOL=OFF"
-"-Dprotobuf_BUILD_LIBPROTOC=ON"
-"-Dprotobuf_INSTALL=ON"
-"-Dprotobuf_WITH_ZLIB=OFF"
-"-Dprotobuf_MSVC_STATIC_RUNTIME=OFF"
-"-Dutf8_range_ENABLE_INSTALL:BOOL=ON"
-```
 - Get a pre-built version of [OpenSSL 1.1.*](https://www.openssl.org/), build it from source, or use the provided version in 3rd-party (1.1.1g was used for testing but newer versions should work).
-- Optionally build intiface-engine and buttplug-rs-ffi or download the releases from the respective repositories
+- Optionally build intiface-engine or download the releases from the respective repositories
 
 ### Build:
 Make sure you recursively update all submodules before building, as the dependencies are kept as separate repos.
