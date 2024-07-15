@@ -25,6 +25,8 @@ import android.graphics.Color;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 
+import java.util.List;
+
 public class JOIPEngineActivity extends QtActivity
 {
   private final static String TAG = "JOIPEngine";
@@ -68,6 +70,20 @@ public class JOIPEngineActivity extends QtActivity
                                     View.SYSTEM_UI_FLAG_HIDE_NAVIGATION |
                                     View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY));
     }
+  }
+
+  public boolean isAppRunning(final String packageName) {
+    final ActivityManager activityManager = (ActivityManager) this.getSystemService(Context.ACTIVITY_SERVICE);
+    final List<ActivityManager.RunningAppProcessInfo> procInfos = activityManager.getRunningAppProcesses();
+    if (procInfos != null)
+    {
+      for (final ActivityManager.RunningAppProcessInfo processInfo : procInfos) {
+        if (processInfo.processName.contains(packageName)) {
+            return true;
+        }
+      }
+    }
+    return false;
   }
 
   protected boolean checkWritePermission()

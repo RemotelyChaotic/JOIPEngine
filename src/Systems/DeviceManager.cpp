@@ -42,10 +42,12 @@ namespace
     vector_from_il<std::unique_ptr<IDeviceConnector>> ({
       // extend here for more connectors (further down means higher priority in lookup)
       // - Register Buttplug.io connectors
-      #if defined(HAS_BUTTPLUG_CPP)
+#if defined(HAS_BUTTPLUG_CPP)
+  #ifndef Q_OS_ANDROID
         std::make_unique<CIntifaceEngineDeviceConnector>(),
+  #endif
         std::make_unique<CIntifaceCentralDeviceConnector>()
-      #endif
+#endif
     });
     RegisteredConnectorCount().store(static_cast<qint32>(vspAvailableConnectors.size()));
     return vspAvailableConnectors;

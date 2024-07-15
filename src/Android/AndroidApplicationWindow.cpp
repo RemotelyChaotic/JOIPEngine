@@ -28,3 +28,11 @@ void ClearAndroidWindowFlags(QAndroidJniObject& window, qint32 iFlags)
 {
   window.callMethod<void>("clearFlags", "(I)V", iFlags);
 }
+
+//----------------------------------------------------------------------------------------
+//
+bool IsAppRunning(QAndroidJniObject& activity, QString sApplication)
+{
+  QAndroidJniObject string = QAndroidJniObject::fromString(sApplication);
+  return activity.callMethod<jboolean>("isAppRunning", "(Ljava/lang/String;)I", string.object<jstring>());
+}

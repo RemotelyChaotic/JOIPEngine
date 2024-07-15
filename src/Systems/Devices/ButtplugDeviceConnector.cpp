@@ -4,6 +4,10 @@
 #include "ButtplugDeviceWrapper.h"
 #include "DeviceSettings.h"
 
+#if defined(Q_OS_ANDROID)
+#include "Android/AndroidApplicationWindow.h"
+#endif
+
 #include "Systems/HelpFactory.h"
 
 #include "Widgets/HelpOverlay.h"
@@ -203,6 +207,9 @@ namespace
         }
       }
     }
+#elif defined(Q_OS_ANDROID)
+    auto activity = GetAndroidActivity();
+    iRet = IsAppRunning(activity, sProcess) ? 0 : -1;
 #endif
 
     return iRet;
@@ -700,6 +707,8 @@ bool CIntifaceCentralDeviceConnector::FindIntifaceProcess()
 //
 bool CIntifaceCentralDeviceConnector::StartIntiface()
 {
+  // we can't start a process on android
+#ifndef Q_OS_ANDROID
   const QString sPluginPath = FindPluginPath();
 
   auto pSetting = CDeviceSettingFactory::Setting<QString>(c_sIntifaceLocationSettingName);
@@ -716,6 +725,9 @@ bool CIntifaceCentralDeviceConnector::StartIntiface()
   }
 
   return QProcess::startDetached(pSetting->GetValue());
+#else
+  return true;
+#endif
 }
 
 //----------------------------------------------------------------------------------------

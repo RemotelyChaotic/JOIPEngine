@@ -13,5 +13,6 @@ QAndroidJniObject GetAndroidWindow();
 QAndroidJniObject GetAndroidActivity();
 void SetAndroidWindowFlags(QAndroidJniObject& window, qint32 iFlags);
 void ClearAndroidWindowFlags(QAndroidJniObject& window, qint32 iFlags);
+bool IsAppRunning(QAndroidJniObject& activity, QString sApplication);
 
 #endif // ANDROIDAPPLICATIONWINDOW_H
