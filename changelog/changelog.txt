@@ -15,6 +15,7 @@ Changes:
   words based on language keywords, registered types and words already
   present in all scripts.
 - Buttplug.io client was swapped out with a more up-to-date implementation.
+- Buttplug.io works now on andoid.
 
 Fixed Bugs:
 - Fixed a crash when removing a resource with tags.
