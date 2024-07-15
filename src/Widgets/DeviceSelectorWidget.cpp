@@ -190,15 +190,15 @@ void CDeviceSelectorWidget::ShowDevices()
     QStringList vsDeviceNames = spDeviceManager->DeviceNames();
 
     m_pDeviceModel->clear();
-    QList<QStandardItem*> vpItems;
     for (const QString& sName : qAsConst(vsDeviceNames))
     {
+      QList<QStandardItem*> vpItems;
       const QString sDisplayName = spDeviceManager->Device(sName)->DisplayName();
       QStandardItem* pItem = new QStandardItem(sDisplayName);
       pItem->setData(sName, c_iRoleDeviceId);
       vpItems << pItem;
+      m_pDeviceModel->appendRow(vpItems);
     }
-    m_pDeviceModel->appendRow(vpItems);
   }
 }
 
