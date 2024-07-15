@@ -25,6 +25,8 @@ namespace detail
 //
 struct SDeviceSettingBase
 {
+  virtual ~SDeviceSettingBase() {}
+
   QString m_sName;
   detail::tFnCreateWidget m_fnCreatorFunction;
 
