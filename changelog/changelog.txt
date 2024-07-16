@@ -8,6 +8,7 @@ Fixed Bugs:
   to the device resulting in 0ms linear movements.
 - Fixed generaed device command snippets.
 - Fixed the PlayerMetronome not stoping and interrupting devices when needed.
+- Fixed pausing the player not stopping the device temporarily.
 
 =================
 Version 1.4.1.0

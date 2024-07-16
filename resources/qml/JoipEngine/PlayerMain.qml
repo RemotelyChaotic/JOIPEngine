@@ -271,6 +271,14 @@ Rectangle {
         }
     }
     property var deviceController: ({
+       pause: function ()
+       {
+           TeaseDeviceController.pause();
+       },
+       resume: function()
+       {
+           TeaseDeviceController.resume();
+       },
        sendLinearCmd: function (dDurationS, dPosition)
        {
             TeaseDeviceController.sendLinearCmd(Math.floor(dDurationS*1000), dPosition);
@@ -550,5 +558,20 @@ Rectangle {
         registerUIComponent("teaseStorage", storage);
         registerUIComponent("deviceController", deviceController);
         evaluate("var window = {};");
+    }
+
+    // handle interrupt
+    Connections {
+        target: ScriptRunner
+        onRunningChanged: {
+            if (!bRunning)
+            {
+                deviceController.pause();
+            }
+            else
+            {
+                deviceController.resume();
+            }
+        }
     }
 }

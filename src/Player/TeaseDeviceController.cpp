@@ -75,6 +75,34 @@ void CTeaseDeviceController::openSelectionScreen(double x, double y)
 
 //----------------------------------------------------------------------------------------
 //
+void CTeaseDeviceController::pause()
+{
+  if (nullptr != m_spCurrentDevice)
+  {
+    m_spCurrentDevice->SendStopCmd();
+  }
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CTeaseDeviceController::resume()
+{
+  if (m_dlastRoateSpeed > 0)
+  {
+    sendRotateCmd(m_bLastRotateClockwise, m_dlastRoateSpeed);
+  }
+  if (m_ilastLinarDurationMs > 0)
+  {
+    sendLinearCmd(m_ilastLinarDurationMs, m_dlastLinearPosition);
+  }
+  if (m_dLastVibrateSpeed > 0)
+  {
+    sendVibrateCmd(m_dLastVibrateSpeed);
+  }
+}
+
+//----------------------------------------------------------------------------------------
+//
 void CTeaseDeviceController::selectDevice(const QString& sDevice)
 {
   if (auto spDeviceManager = m_wpDeviceManager.lock())
@@ -97,6 +125,8 @@ void CTeaseDeviceController::sendLinearCmd(quint32 iDurationMs, double dPosition
 {
   if (nullptr != m_spCurrentDevice)
   {
+    m_ilastLinarDurationMs = iDurationMs;
+    m_dlastLinearPosition = dPosition;
     m_spCurrentDevice->SendLinearCmd(iDurationMs, dPosition);
   }
 }
@@ -107,6 +137,8 @@ void CTeaseDeviceController::sendRotateCmd(bool bClockwise, double dSpeed)
 {
   if (nullptr != m_spCurrentDevice)
   {
+    m_bLastRotateClockwise = bClockwise;
+    m_dlastRoateSpeed = dSpeed;
     m_spCurrentDevice->SendRotateCmd(bClockwise, dSpeed);
   }
 }
@@ -117,6 +149,11 @@ void CTeaseDeviceController::sendStopCmd()
 {
   if (nullptr != m_spCurrentDevice)
   {
+    m_dLastVibrateSpeed = 0.0;
+    m_ilastLinarDurationMs = 0;
+    m_dlastLinearPosition = 0.0;
+    m_bLastRotateClockwise = false;
+    m_dlastRoateSpeed = 0.0;
     m_spCurrentDevice->SendStopCmd();
   }
 }
@@ -127,6 +164,7 @@ void CTeaseDeviceController::sendVibrateCmd(double dSpeed)
 {
   if (nullptr != m_spCurrentDevice)
   {
+    m_dLastVibrateSpeed = dSpeed;
     m_spCurrentDevice->SendVibrateCmd(dSpeed);
   }
 }
