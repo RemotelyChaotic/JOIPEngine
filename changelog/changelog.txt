@@ -9,6 +9,7 @@ Fixed Bugs:
 - Fixed generaed device command snippets.
 - Fixed the PlayerMetronome not stoping and interrupting devices when needed.
 - Fixed pausing the player not stopping the device temporarily.
+- Fixed unloading the Player not sending a stop command.
 
 =================
 Version 1.4.1.0

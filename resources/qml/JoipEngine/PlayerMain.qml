@@ -75,6 +75,9 @@ Rectangle {
     {
         if (null != currentlyLoadedProject)
         {
+            // stop toys
+            TeaseDeviceController.sendStopCmd();
+
             // clear eval environement and storage
             storage.clear();
             SoundManager.clearRegistry();
