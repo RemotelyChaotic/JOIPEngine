@@ -56,14 +56,14 @@ QString CCommonCodeGenerator::Generate(const SDeviceSnippetData& data,
   {
     QString sCmd =
         Statement(Invoke("deviceController", "sendLinearCmd") +
-                  Call(String("%1,%2")));
+                  Call("%1,%2"));
     sCode += sCmd.arg(data.m_dLinearDurationS).arg(data.m_dLinearPosition);
   }
   if (data.m_bRotateCommand)
   {
     QString sCmd =
         Statement(Invoke("deviceController", "sendRotateCmd") +
-                  Call(String("%1,%2")));
+                  Call("%1,%2"));
     sCode += sCmd.arg(data.m_bClockwiseRotate ? "true" : "false").arg(data.m_dRotateSpeed);
   }
   if (data.m_bStopCommand)

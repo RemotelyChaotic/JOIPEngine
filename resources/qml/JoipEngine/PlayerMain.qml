@@ -273,7 +273,7 @@ Rectangle {
     property var deviceController: ({
        sendLinearCmd: function (dDurationS, dPosition)
        {
-            TeaseDeviceController.sendLinearCmd(dDurationS/1000, dPosition);
+            TeaseDeviceController.sendLinearCmd(Math.floor(dDurationS*1000), dPosition);
        },
        sendRotateCmd: function(bClockwise, dSpeed)
        {

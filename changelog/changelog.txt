@@ -4,6 +4,9 @@ Version 1.4.2.0
 
 Fixed Bugs:
 - Fixed sendLinearCmd and sendRotateCmd not working properly.
+- Fixed a bug with sendLinearCmd using sending the movement in the wrong unit 
+  to the device resulting in 0ms linear movements.
+- Fixed generaed device command snippets.
 
 =================
 Version 1.4.1.0
