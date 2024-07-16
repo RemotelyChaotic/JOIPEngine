@@ -7,6 +7,7 @@ Fixed Bugs:
 - Fixed a bug with sendLinearCmd using sending the movement in the wrong unit 
   to the device resulting in 0ms linear movements.
 - Fixed generaed device command snippets.
+- Fixed the PlayerMetronome not stoping and interrupting devices when needed.
 
 =================
 Version 1.4.1.0

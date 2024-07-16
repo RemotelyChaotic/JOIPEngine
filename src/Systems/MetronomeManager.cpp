@@ -61,6 +61,7 @@ struct SMetronomeDataBlockImpl : public SMetronomeDataBlock
 
   std::unique_ptr<CMultiEmitterSoundPlayer> m_spSoundEmitters;
   std::shared_ptr<IDevice>    m_spCurrentDevice;
+  std::optional<SMetronomeTick> m_lastDeviceTick;
   std::vector<SMetronomeTick> m_vdSpawnedTicks;
   ETickTypeFlags m_playFlags;
   bool m_bStarted = false;
@@ -75,6 +76,35 @@ struct SMetronomeDataBlockPrivate
   std::shared_ptr<SMetronomeDataBlock> m_spPublicBlock;
   SMetronomeDataBlockImpl m_privateBlock; // mutex is not used here
 };
+
+namespace
+{
+  void RunDeviceTick(const SMetronomeTick& tick,
+                     std::shared_ptr<IDevice> spDevice)
+  {
+    if (nullptr != spDevice)
+    {
+      if (ETickType::eVibrateTick == tick.type)
+      {
+        spDevice->SendVibrateCmd(
+            double(tick.iData) / 100.0);
+      }
+      else if (ETickType::eLinearTick == tick.type)
+      {
+        spDevice->SendLinearCmd(
+            tick.iData/1000,
+            double(tick.iData%1000) / 100.0);
+      }
+      else if (ETickType::eRotateTick == tick.type)
+      {
+        spDevice->SendRotateCmd(
+            tick.iData > 0,
+            double(std::abs(tick.iData)) / 100.0);
+      }
+    }
+  }
+}
+
 
 //----------------------------------------------------------------------------------------
 //
@@ -272,6 +302,8 @@ void CMetronomeManager::SlotStart(const QUuid& id, ETickTypeFlags ticksToPlay)
           it->second->m_privateBlock.m_spCurrentDevice = nullptr;
         }
 
+        it->second->m_privateBlock.m_lastDeviceTick = std::nullopt;
+
         m_pTimer->start();
         m_lastUpdate = std::chrono::high_resolution_clock::now();
         m_iCumulativeTime = 0.0;
@@ -291,6 +323,11 @@ void CMetronomeManager::SlotPause(const QUuid& id)
   {
     if (it->second->m_privateBlock.m_bStarted)
     {
+      if (nullptr != it->second->m_privateBlock.m_spCurrentDevice)
+      {
+        it->second->m_privateBlock.m_spCurrentDevice->SendStopCmd();
+      }
+
       it->second->m_privateBlock.m_bPaused = true;
       emit SignalPaused(id);
     }
@@ -311,6 +348,14 @@ void CMetronomeManager::SlotResume(const QUuid& id)
       {
         it->second->m_privateBlock.m_spCurrentDevice =
             spDeviceMan->Device(spDeviceMan->SelectedDevice());
+
+        if (it->second->m_privateBlock.m_lastDeviceTick.has_value())
+        {
+          RunDeviceTick(it->second->m_privateBlock.m_lastDeviceTick.value(),
+                        it->second->m_privateBlock.m_spCurrentDevice);
+
+          it->second->m_privateBlock.m_lastDeviceTick = std::nullopt;
+        }
       }
       else
       {
@@ -331,9 +376,15 @@ void CMetronomeManager::SlotStop(const QUuid& id)
   {
     if (it->second->m_privateBlock.m_bStarted)
     {
+      if (nullptr != it->second->m_privateBlock.m_spCurrentDevice)
+      {
+        it->second->m_privateBlock.m_spCurrentDevice->SendStopCmd();
+      }
+
       it->second->m_privateBlock.m_bStarted = false;
       it->second->m_privateBlock.m_vdSpawnedTicks.clear();
       it->second->m_privateBlock.m_spCurrentDevice = nullptr;
+      it->second->m_privateBlock.m_lastDeviceTick = std::nullopt;
       it->second->m_privateBlock.m_playFlags = 0;
 
       emit SignalStopped(id);
@@ -509,27 +560,11 @@ void CMetronomeManager::SlotTimeout()
             spBlock->m_privateBlock.m_spSoundEmitters->Play();
             emit SignalTickReachedCenter(id);
           }
+
           // run toy commands
-          if (nullptr != spBlock->m_privateBlock.m_spCurrentDevice)
-          {
-            if (ETickType::eVibrateTick == tick.type)
-            {
-              spBlock->m_privateBlock.m_spCurrentDevice->SendVibrateCmd(
-                  double(tick.iData) / 100.0);
-            }
-            else if (ETickType::eLinearTick == tick.type)
-            {
-              spBlock->m_privateBlock.m_spCurrentDevice->SendLinearCmd(
-                  tick.iData/1000,
-                  double(tick.iData%1000) / 100.0);
-            }
-            else if (ETickType::eRotateTick == tick.type)
-            {
-              spBlock->m_privateBlock.m_spCurrentDevice->SendRotateCmd(
-                  tick.iData > 0,
-                  double(std::abs(tick.iData)) / 100.0);
-            }
-          }
+          RunDeviceTick(tick, spBlock->m_privateBlock.m_spCurrentDevice);
+          spBlock->m_privateBlock.m_lastDeviceTick = tick;
+
           spBlock->m_privateBlock.m_vdSpawnedTicks.erase(
               spBlock->m_privateBlock.m_vdSpawnedTicks.begin()+static_cast<size_t>(i));
           --i;
