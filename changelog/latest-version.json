@@ -1,20 +1,15 @@
 {
-  "latestVersion": "1.4.0",
-  "latestVersionCode": 66561,
+  "latestVersion": "1.4.2",
+  "latestVersionCode": 66562,
   "latestUpdaterVersion": "1.0.0",
   "latestUpdaterVersionCode": 65536,
   "url": "https://github.com/RemotelyChaotic/JOIPEngine/releases/download",
   "releaseNotes": [
-    "- A Splitter Node can have a custom transition UI via Layout (Qml) Resource.",
-    "- Metronomes can automatically emit Toy commands. Project default is to emit vibration commands.",
-    "- PlayerTextBox methods showButtonPrompts & showInput take an aditional optional argument that denotes which storage variable the result should be written to.",
-    "- Tags objects in scripts have new getter methods: numResources & resources.",
-    "- The Script Editor has a basic autocomplete functionality that suggests words based on language keywords, registered types and words already present in all scripts.",
-    "- Buttplug.io client was swapped out with a more up-to-date implementation.",
-    "- Buttplug.io works now on andoid.",
-    "- Fixed a crash when removing a resource with tags.",
-    "- Fixed a crash when loading an image and giving an invalid project-id.",
-    "- Fix for potential crash on closing the app while in the editor.",
-    "- Fixed storing values from showInput into storage. It works now as intended."
+    "- Fixed sendLinearCmd and sendRotateCmd not working properly.",
+    "- Fixed a bug with sendLinearCmd using sending the movement in the wrong unit to the device resulting in 0ms linear movements.",
+    "- Fixed generaed device command snippets.",
+    "- Fixed the PlayerMetronome not stoping and interrupting devices when needed.",
+    "- Fixed pausing the player not stopping the device temporarily.",
+    "- Fixed unloading the Player not sending a stop command."
   ]
 }
