@@ -216,12 +216,14 @@ void CDeviceManager::ConnectImpl()
 
   if (nullptr != m_pActiveConnector)
   {
+    // we don't want the connect timer to trigger during connection, since we might be waiting here a while
+    if (nullptr != m_pReconnectTimer)
+    {
+      m_pReconnectTimer->stop();
+    }
+
     if (m_pActiveConnector->Connect())
     {
-      if (nullptr != m_pReconnectTimer)
-      {
-        m_pReconnectTimer->stop();
-      }
       emit SignalConnected();
     }
     else if (nullptr != m_pReconnectTimer)
