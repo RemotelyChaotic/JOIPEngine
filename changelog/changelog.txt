@@ -2,6 +2,10 @@
 Version 1.4.3.0
 =================
 
+Fixed Bugs:
+- Fixed Metronome sending invalid LinearCmd for fast BPMs.
+- Implemented bounds checking on the client side for commands.
+
 =================
 Version 1.4.2.0
 =================

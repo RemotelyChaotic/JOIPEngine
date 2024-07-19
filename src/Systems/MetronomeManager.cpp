@@ -585,7 +585,7 @@ void CMetronomeManager::SlotTimeout()
           double dLastTickLoc = dLastPatternTick - static_cast<double>(dDistMsTick / 1'000.0);
           if (bFoundLastPatternTick)
           {
-            qint32 iDistEncoded = 0+static_cast<qint32>(dDistMsTick*1000)/1000;
+            qint32 iDistEncoded = 0+static_cast<qint32>(dDistMsTick*1000)/1000*1000;
             spBlock->m_privateBlock.m_vdSpawnedTicks.push_back(SMetronomeTick{
               ETickType::eVibrateTick, dLastPatternTick-dLastTickLoc/2, 25});
             spBlock->m_privateBlock.m_vdSpawnedTicks.push_back(SMetronomeTick{
@@ -595,7 +595,7 @@ void CMetronomeManager::SlotTimeout()
           // + -> clockwise, - -> anti-clockwise, abs() -> speed
           iLastRotateData = iLastRotateData <= 0 ? 25 : -25;
           // iDistEncoded = e.g.: 100'000 -> (ms)(ms)(ms)'(pos)(pos)(pos)
-          qint32 iDistEncoded = 100+static_cast<qint32>(dDistMsTick*1000)/1000;
+          qint32 iDistEncoded = 100+static_cast<qint32>(dDistMsTick*1000)/1000*1000;
 
           spBlock->m_privateBlock.m_vdSpawnedTicks.push_back(SMetronomeTick{
               ETickType::ePattern, dLastTickLoc, -1});
