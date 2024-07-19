@@ -249,6 +249,7 @@ void CDeviceManager::ConnectImpl()
       {
         bConnected = true;
         m_pActiveConnector = it->get();
+
         m_disconnectConnection =
             connect(dynamic_cast<QObject*>(m_pActiveConnector), SIGNAL(SignalDisconnected()),
                     this, SLOT(SlotDisconnected()), Qt::QueuedConnection);
@@ -341,8 +342,8 @@ void CDeviceManager::DeinitImpl()
 
   if (nullptr != m_pActiveConnector)
   {
-    disconnect(m_disconnectConnection);
-    disconnect(m_deviceCountChangedConnection);
+    if (m_disconnectConnection) disconnect(m_disconnectConnection);
+    if (m_deviceCountChangedConnection) disconnect(m_deviceCountChangedConnection);
     m_pActiveConnector->Disconnect();
     m_pActiveConnector = nullptr;
 

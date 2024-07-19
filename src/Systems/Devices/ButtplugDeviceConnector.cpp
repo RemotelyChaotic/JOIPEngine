@@ -365,7 +365,20 @@ bool CIntifaceEngineClientWrapper::Connect()
   }
 
   m_spClient->connectToHost(QHostAddress::LocalHost, pSetting->GetValue());
-  return m_spClient->waitConnected();
+  bool bOk = m_spClient->waitConnected(15000);
+
+  if (bOk)
+  {
+    QObject::connect(m_spClient.get(), &QButtplugClient::disconnected, m_spClient.get(),
+            [this]() {
+      qDebug() << "Intiface Client Server disconnected";
+      if (nullptr != m_fnDisconnected)
+      {
+        m_fnDisconnected();
+      }
+    });
+  }
+  return bOk;
 }
 
 //----------------------------------------------------------------------------------------
@@ -375,14 +388,6 @@ void CIntifaceEngineClientWrapper::ConnectSignals()
   QObject::connect(m_spClient.get(), &QButtplugClient::connected, m_spClient.get(),
           []() {
     qDebug() << "Intiface Client Server connected";
-  });
-  QObject::connect(m_spClient.get(), &QButtplugClient::disconnected, m_spClient.get(),
-          [this]() {
-    qDebug() << "Intiface Client Server disconnected";
-    if (nullptr != m_fnDisconnected)
-    {
-      m_fnDisconnected();
-    }
   });
   QObject::connect(m_spClient.get(), &QButtplugClient::connectionStateChanged, m_spClient.get(),
           [](QtButtplug::ConnectionState state) {
