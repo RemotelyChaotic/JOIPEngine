@@ -586,10 +586,12 @@ void CMetronomeManager::SlotTimeout()
           if (bFoundLastPatternTick)
           {
             qint32 iDistEncoded = 0+static_cast<qint32>(dDistMsTick*1000)/1000*1000;
-            spBlock->m_privateBlock.m_vdSpawnedTicks.push_back(SMetronomeTick{
-              ETickType::eVibrateTick, dLastPatternTick-dLastTickLoc/2, 25});
-            spBlock->m_privateBlock.m_vdSpawnedTicks.push_back(SMetronomeTick{
-              ETickType::eLinearTick, dLastPatternTick-dLastTickLoc/2, iDistEncoded});
+            if (spBlock->m_privateBlock.m_playFlags.testFlag(ETickType::eVibrateTick))
+              spBlock->m_privateBlock.m_vdSpawnedTicks.push_back(SMetronomeTick{
+                ETickType::eVibrateTick, dLastPatternTick-dLastTickLoc/2, 25});
+            if (spBlock->m_privateBlock.m_playFlags.testFlag(ETickType::eLinearTick))
+              spBlock->m_privateBlock.m_vdSpawnedTicks.push_back(SMetronomeTick{
+                ETickType::eLinearTick, dLastPatternTick-dLastTickLoc/2, iDistEncoded});
           }
 
           // + -> clockwise, - -> anti-clockwise, abs() -> speed
@@ -599,12 +601,15 @@ void CMetronomeManager::SlotTimeout()
 
           spBlock->m_privateBlock.m_vdSpawnedTicks.push_back(SMetronomeTick{
               ETickType::ePattern, dLastTickLoc, -1});
-          spBlock->m_privateBlock.m_vdSpawnedTicks.push_back(SMetronomeTick{
-              ETickType::eVibrateTick, dLastTickLoc, 75});
-          spBlock->m_privateBlock.m_vdSpawnedTicks.push_back(SMetronomeTick{
-              ETickType::eLinearTick, dLastTickLoc, iDistEncoded});
-          spBlock->m_privateBlock.m_vdSpawnedTicks.push_back(SMetronomeTick{
-              ETickType::eRotateTick, dLastTickLoc, iLastRotateData});
+          if (spBlock->m_privateBlock.m_playFlags.testFlag(ETickType::eVibrateTick))
+            spBlock->m_privateBlock.m_vdSpawnedTicks.push_back(SMetronomeTick{
+                ETickType::eVibrateTick, dLastTickLoc, 75});
+          if (spBlock->m_privateBlock.m_playFlags.testFlag(ETickType::eLinearTick))
+            spBlock->m_privateBlock.m_vdSpawnedTicks.push_back(SMetronomeTick{
+                ETickType::eLinearTick, dLastTickLoc, iDistEncoded});
+          if (spBlock->m_privateBlock.m_playFlags.testFlag(ETickType::eRotateTick))
+            spBlock->m_privateBlock.m_vdSpawnedTicks.push_back(SMetronomeTick{
+                ETickType::eRotateTick, dLastTickLoc, iLastRotateData});
 
           dLastPatternTick = dLastTickLoc;
           bFoundLastPatternTick = true;
