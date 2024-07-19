@@ -786,7 +786,8 @@ void CSceneMainScreen::NextSkript(bool bMightBeRegex)
       else
       {
         bool bOk = QMetaObject::invokeMethod(pRootObject, "showSceneSelection",
-                                             Q_ARG(QVariant, sScenes));
+                                             Q_ARG(QVariant, sScenes),
+                                             Q_ARG(QVariant, QVariant()));
         assert(bOk);
         if (!bOk)
         {
@@ -814,7 +815,8 @@ void CSceneMainScreen::NextSkript(bool bMightBeRegex)
       else
       {
         bool bOk = QMetaObject::invokeMethod(pRootObject, "showSceneSelection",
-                                             Q_ARG(QVariant, sScenes));
+                                             Q_ARG(QVariant, sScenes),
+                                             Q_ARG(QVariant, QVariant()));
         assert(bOk);
         if (!bOk)
         {

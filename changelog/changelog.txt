@@ -7,6 +7,7 @@ Fixed Bugs:
 - Implemented bounds checking on the client side for commands.
 - Fixed a stack owerflow when waiting for a connector connection that is
   already attempting a connection, but runs into timeout.
+- Fixe scene selecion via pre-defined Splitter nodes not working.
 
 =================
 Version 1.4.2.0
@@ -16,7 +17,7 @@ Fixed Bugs:
 - Fixed sendLinearCmd and sendRotateCmd not working properly.
 - Fixed a bug with sendLinearCmd using sending the movement in the wrong unit 
   to the device resulting in 0ms linear movements.
-- Fixed generaed device command snippets.
+- Fixed generated device command snippets.
 - Fixed the PlayerMetronome not stoping and interrupting devices when needed.
 - Fixed pausing the player not stopping the device temporarily.
 - Fixed unloading the Player not sending a stop command.
