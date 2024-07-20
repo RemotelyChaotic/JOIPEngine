@@ -2,6 +2,9 @@
 Version 1.4.4.0
 =================
 
+Fixed Bugs:
+- Fixed Metronome spawning the wrong device commands in some cases.
+
 =================
 Version 1.4.3.0
 =================
