@@ -1,14 +1,10 @@
 {
-  "latestVersion": "1.4.3",
-  "latestVersionCode": 66563,
+  "latestVersion": "1.4.4",
+  "latestVersionCode": 66564,
   "latestUpdaterVersion": "1.0.0",
   "latestUpdaterVersionCode": 65536,
   "url": "https://github.com/RemotelyChaotic/JOIPEngine/releases/download",
   "releaseNotes": [
-    "- Fixed Metronome sending invalid LinearCmd for fast BPMs.",
-    "- Implemented bounds checking on the client side for commands.",
-    "- Fixed a stack owerflow when waiting for a connector connection that is already attempting a connection, but runs into timeout.",
-    "- Fixed scene selecion via pre-defined Splitter nodes not working.",
-    "- Fixed Metronome device setting not working correctly."
+    "- Fixed Metronome spawning the wrong device commands in some cases."
   ]
 }
