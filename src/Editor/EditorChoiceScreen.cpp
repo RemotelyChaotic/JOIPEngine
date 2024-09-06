@@ -177,7 +177,15 @@ void CEditorChoiceScreen::on_pOpenExistingProjectButton_clicked()
     tspProject spProject = spDbManager->FindProject(iId);
     if (spProject != nullptr)
     {
+#ifndef NDEBUG
+#if defined(Q_OS_WIN)
+      if (false)
+#else
       if (!eos::VerifyProjectEditable(spProject))
+#endif
+#else
+      if (!eos::VerifyProjectEditable(spProject))
+#endif
       {
         bOk = false;
         m_spUi->pProjectCardSelectionWidget->ShowWarning(
