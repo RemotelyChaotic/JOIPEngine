@@ -2,6 +2,9 @@
 Version 1.4.5.0
 =================
 
+Fixed Bugs:
+- Fixd a crash occurring when stopping a debug session mid Scene transition.
+
 =================
 Version 1.4.4.0
 =================

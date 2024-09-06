@@ -160,7 +160,8 @@ void CScriptRunner::InterruptExecution()
 {
   // interrupt, in case of infinite loop
   m_spSignalEmitterContext->SetScriptExecutionStatus(CScriptRunnerSignalEmiter::eStopped);
-  // TODO: check if needed
+
+  QMutexLocker locker(&m_runnerMutex);
   if (0 >= m_vspRunner.size())
   {
     emit SignalScriptRunFinished(false, QString());
