@@ -13,8 +13,8 @@ Rectangle {
     height: tableView.itemHeight * (tableView.rowCount+1) + tableView.spacing * tableView.rowCount + 40
     color: "transparent"
 
-    property var backgroundColors: inList ? model.backgroundColors : []
-    property var textColors: inList ? model.textColors : []
+    property var backgroundColors: inList ? JSON.parse(model.backgroundColors) : []
+    property var textColors: inList ? JSON.parse(model.textColors) : []
     property var buttonTexts: inList ? model.buttonTexts : []
     property string textContent: inList ? model.textContent : ""
     property string requestId: inList ? model.sRequestId : ""
@@ -96,8 +96,8 @@ Rectangle {
                 height: tableView.itemHeight
                 property int rowIndex: 0
                 property string textForButton: ""
-                property string bgColor: "#FF000000"
-                property string fgColor: "#FFFFFFFF"
+                property color bgColor: "#FF000000"
+                property color fgColor: "#FFFFFFFF"
 
                 state: "HIDDEN"
                 property int delayOnShow: index*300
@@ -120,10 +120,12 @@ Rectangle {
                         repeaterItem.textForButton = textDelegate.buttonTexts[index];
                     }
                     if (textDelegate.backgroundColors.length > index) {
-                        repeaterItem.bgColor = textDelegate.backgroundColors[index];
+                        let colObj = textDelegate.backgroundColors[index];
+                        repeaterItem.bgColor = Qt.rgba(colObj.r, colObj.g, colObj.b, colObj.a);
                     }
                     if (textDelegate.textColors.length > index) {
-                        repeaterItem.fgColor = textDelegate.textColors[index];
+                        let colObj = textDelegate.textColors[index];
+                        repeaterItem.fgColor = Qt.rgba(colObj.r, colObj.g, colObj.b, colObj.a);
                     }
 
                     repeaterItem.state = "VISIBLE";

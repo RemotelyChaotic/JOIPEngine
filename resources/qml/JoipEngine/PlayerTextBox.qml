@@ -56,8 +56,8 @@ Rectangle {
             "storeIntoStorageInstead": bStoreIntoStorageInstead,
             "backgroundColor": "",
             "textColor": "",
-            "backgroundColors": dataContainer.backgroundColors,
-            "textColors": dataContainer.textColors,
+            "backgroundColors": JSON.stringify(dataContainer.backgroundColors), /*needed becase QML ListModel can't work with arrays of objects*/
+            "textColors": JSON.stringify(dataContainer.textColors), /*needed becase QML ListModel can't work with arrays of objects*/
             "portrait": null,
             "sRequestId": sRequestId,
             "type": "TextBoxButtonsDelegate.qml"
