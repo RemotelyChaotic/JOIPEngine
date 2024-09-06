@@ -125,6 +125,22 @@ Rectangle {
                 console.error(qsTr("SoundResourceView should be valid here."));
             }
         }
+        // no emitters found, cannibalize paused emitters
+        for (var j = 0; soundRepeater.count > j; ++j)
+        {
+            var player2 = soundRepeater.itemAt(j);
+            if (null !== player2 && undefined !== player2)
+            {
+                if (player2.playbackState === MediaPlayer.PausedState && player2.state === Resource.Loaded)
+                {
+                    return player2;
+                }
+            }
+            else
+            {
+                console.error(qsTr("SoundResourceView should be valid here."));
+            }
+        }
         return null;
     }
 

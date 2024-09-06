@@ -552,6 +552,10 @@ public:
         {
           m_pParent->setVolume(sId, std::get<double>(itVolume));
         }
+        else
+        {
+          m_pParent->setVolume(sId, 1.0);
+        }
 
         return SRunRetVal<ENextCommandToCall::eSibling>();
       }
