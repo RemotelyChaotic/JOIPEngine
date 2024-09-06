@@ -66,7 +66,7 @@ bool CProjectSceneManagerWrapper::isEnabled(QString sScene)
 {
   if (auto spRunner = m_wpProjectRunner.lock())
   {
-    spRunner->IsSceneEnabled(sScene);
+    return spRunner->IsSceneEnabled(sScene);
   }
   return true;
 }

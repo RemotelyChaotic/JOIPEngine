@@ -11,6 +11,7 @@ Fixed Bugs:
 - Fixed a crash occurring when stopping a debug session mid Scene transition.
 - Fixed a UI bug causing colors of buttons in button prompts being ignored.
 - Fixed buttons always being rendered as html when comming from EOS scripts.
+- Fixed SceneManager (pages) function: isEnabled in eval expressions.
 
 =================
 Version 1.4.4.0
