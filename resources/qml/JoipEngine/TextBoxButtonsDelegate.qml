@@ -141,7 +141,9 @@ Rectangle {
                 Button {
                     id: button
                     anchors.centerIn: parent
-                    text: repeaterItem.textForButton.replace("<html>","").replace("</html>","");
+                    text: repeaterItem.textForButton
+                                        .replace("<html>","").replace("</html>","")
+                                        .replace("<body>", "").replace("</body>", "");
                     z: 1
 
                     Behavior on width  {

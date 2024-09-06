@@ -34,7 +34,8 @@ Rectangle {
         horizontalAlignment: Text.AlignHCenter
         elide: Text.ElideNone
         text: {
-            var sText = textItemRoot.text.replace("<html>","").replace("</html>","");
+            var sText = textItemRoot.text.replace("<html>","").replace("</html>","")
+                                         .replace("<body>", "").replace("</body>", "");
             if (bIsHtml) {
                 if (contentWidth > textItemRoot.maximumWidth) {
                     sText = sText.replace("<nobr>","").replace("</nobr>","");

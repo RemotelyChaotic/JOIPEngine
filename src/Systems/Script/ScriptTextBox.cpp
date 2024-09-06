@@ -22,6 +22,7 @@
 #include <QDateTime>
 #include <QDebug>
 #include <QEventLoop>
+#include <QTextDocument>
 #include <QTextDocumentFragment>
 #include <QTimer>
 #include <QUuid>
@@ -429,7 +430,11 @@ public:
             QString sLabel;
             if (HasValue(optionsArg, "label") && IsOk<EArgumentType::eString>(itLabel))
             {
-              sLabel = "<html><body>" + std::get<QString>(itLabel) + "</body></html>";
+              sLabel = std::get<QString>(itLabel);
+              if (Qt::mightBeRichText(sLabel))
+              {
+                sLabel = "<html><body>" + sLabel + "</body></html>";
+              }
             }
             if (HasValue(optionsArg, "commands") && IsOk<EArgumentType::eArray>(itCommands))
             {
