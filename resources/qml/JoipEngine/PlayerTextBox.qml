@@ -49,6 +49,8 @@ Rectangle {
     function showButtonPrompts(vsLabels, sStoreIntoVar, sRequestId, bStoreIntoStorageInstead)
     {
         dataContainer.buttonTexts = vsLabels;
+        var colObjBg = dataContainer.backgroundColors;
+        var colObjTx = dataContainer.textColors;
         var dataForInput = {
             "textAlignment": "",
             "textContent": sStoreIntoVar,
@@ -318,8 +320,8 @@ Rectangle {
 
     Item {
         id: dataContainer
-        property var backgroundColors: [ "#ff000000" ]
-        property var textColors: [ "#ffffffff" ]
+        property var backgroundColors: [ Qt.rgba(0, 0, 0, 1) ]
+        property var textColors: [ Qt.rgba(1, 1, 1, 1) ]
         property var buttonTexts: []
         property var textAlignment: TextAlignment.AlignCenter
         property Resource portrait: null
