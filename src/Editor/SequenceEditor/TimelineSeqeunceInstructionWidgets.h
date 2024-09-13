@@ -94,18 +94,21 @@ public:
   std::shared_ptr<SSequenceInstruction> Properties() const override;
 
 protected slots:
-  void on_pEnableResource_toggled(bool bOn);
   void on_pVolumeCheckBox_toggled(bool bOn);
   void on_pResourceSelectTree_doubleClicked(const QModelIndex& index);
+  void on_AddButton_clicked();
+  void on_RemoveButton_clicked();
   void on_AddPatternElemButton_clicked();
   void on_RemovePatternElemButton_clicked();
 
 protected:
   void AddPatternElement(double dValue);
+  void AddResourceElement(const QString& sElem);
   bool eventFilter(QObject* pObj, QEvent* pEvt) override;
 
 private:
   std::unique_ptr<Ui::CTimelineSeqeunceInstructionWidgetStartPattern> m_spUi;
+  qint32                                                              m_iEditingRow = -1;
 };
 
 //----------------------------------------------------------------------------------------

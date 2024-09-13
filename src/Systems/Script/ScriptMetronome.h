@@ -22,7 +22,7 @@ public:
 
 signals:
   void setBpm(qint32 iBpm);
-  void setBeatResource(const QString& sResource);
+  void setBeatResource(const QStringList& sResource);
   void setMuted(bool bMuted);
   void setPattern(const QList<double>& vdPattern);
   void setVolume(double dVolume);

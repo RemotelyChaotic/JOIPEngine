@@ -22,7 +22,16 @@ Rectangle {
         },
         setBeatResource: function(sResource)
         {
-            signalEmitter.setBeatResource(sResource);
+            if (typeof sResource === "string")
+            {
+                var arr = [];
+                arr.push(sResource);
+                signalEmitter.setBeatResource(arr);
+            }
+            else
+            {
+                signalEmitter.setBeatResource(sResource);
+            }
         },
         setMuted: function(bMuted)
         {
@@ -52,23 +61,28 @@ Rectangle {
             metronomeDisplay.bpm = iBpm;
         }
         onSetBeatResource: {
-            if (sResource === "")
+            if (sResource.length === 0)
             {
-                metronomeDisplay.beatResource = "";
+                metronomeDisplay.beatResources = [];
             }
             else
             {
                 if (null !== registrator.currentlyLoadedProject &&
                     undefined !== registrator.currentlyLoadedProject)
                 {
-                    var pResource = registrator.currentlyLoadedProject.resource(sResource);
-                    if (null !== pResource && undefined !== pResource)
+                    var paths = [];
+                    for (var i = 0; sResource.length > i; ++i)
                     {
-                        if (pResource.type === Resource.Sound)
+                        var pResource = registrator.currentlyLoadedProject.resource(sResource[i]);
+                        if (null !== pResource && undefined !== pResource)
                         {
-                            metronomeDisplay.beatResource = pResource.path;
+                            if (pResource.type === Resource.Sound)
+                            {
+                                paths.push(pResource.path);
+                            }
                         }
                     }
+                    metronomeDisplay.beatResources = paths;
                 }
             }
         }

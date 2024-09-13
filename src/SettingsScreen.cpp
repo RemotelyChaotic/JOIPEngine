@@ -95,6 +95,8 @@ CSettingsScreen::CSettingsScreen(const std::shared_ptr<CWindowContext>& spWindow
   m_spPlayer(std::make_unique<QtAV::AVPlayer>())
 {
   m_spUi->setupUi(this);
+  connect(m_spPlayer.get(), &QtAV::AVPlayer::stopped,
+          this, &CSettingsScreen::SlotSoundPlaybackFinished);
   Initialize();
 }
 
@@ -402,9 +404,9 @@ void CSettingsScreen::Load()
   m_spUi->pMetronomeVolumeSlider->setValue(static_cast<qint32>(m_spSettings->MetronomeVolume() * c_dSliderScaling));
 
   const auto& sfxMap = metronome::MetronomeSfxMap();
-  for (const auto& [sSfxKEy, sPath] : sfxMap)
+  for (const auto& [sSfxKEy, vsPaths] : sfxMap)
   {
-    m_spUi->pMetronomeSFXComboBox->addItem(sSfxKEy, sPath);
+    m_spUi->pMetronomeSFXComboBox->addItem(sSfxKEy, QVariant::fromValue(vsPaths));
   }
   qint32 iIndexSfx = m_spUi->pMetronomeSFXComboBox->findText(m_spSettings->MetronomeSfx());
   m_spUi->pMetronomeSFXComboBox->setCurrentIndex(iIndexSfx);
@@ -811,14 +813,27 @@ void CSettingsScreen::SlotKeySequenceChanged(const QKeySequence& keySequence)
 void CSettingsScreen::SlotMetronomeSfxItemHovered(qint32 iIndex)
 {
   WIDGET_INITIALIZED_GUARD
-  const QString sSfx = m_spUi->pMetronomeSFXComboBox->itemData(iIndex).toString();
-  if (!m_spSettings->Muted())
+  m_vsSoundsToPlay = m_spUi->pMetronomeSFXComboBox->itemData(iIndex).toStringList();
+  SlotSoundPlaybackFinished();
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CSettingsScreen::SlotSoundPlaybackFinished()
+{
+  WIDGET_INITIALIZED_GUARD
+  if (m_vsSoundsToPlay.size() > 0)
   {
-    if (m_spPlayer->isPlaying())
+    const QString sSfx = m_vsSoundsToPlay.front();
+    m_vsSoundsToPlay.erase(m_vsSoundsToPlay.begin());
+    if (!m_spSettings->Muted())
     {
-      m_spPlayer->stop();
+      if (m_spPlayer->isPlaying())
+      {
+        m_spPlayer->stop();
+      }
+      m_spPlayer->play(sSfx);
+      m_spPlayer->audio()->setVolume(m_spSettings->Volume()*m_spSettings->MetronomeVolume());
     }
-    m_spPlayer->play(sSfx);
-    m_spPlayer->audio()->setVolume(m_spSettings->Volume()*m_spSettings->MetronomeVolume());
   }
 }

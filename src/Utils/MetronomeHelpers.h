@@ -3,6 +3,7 @@
 
 #include <QString>
 #include <map>
+#include <vector>
 
 namespace metronome
 {
@@ -13,8 +14,8 @@ namespace metronome
   const char c_sSfxTic[] = "Tick";
   const char c_sSfxToc[] = "Tock";
 
-  const std::map<QString, QString>& MetronomeSfxMap();
-  QString MetronomeSfxFromKey(const QString& sKey);
+  const std::map<QString, QStringList>& MetronomeSfxMap();
+  QStringList MetronomeSfxFromKey(const QString& sKey);
 }
 
 #endif // METRONOMEHELPERS_H

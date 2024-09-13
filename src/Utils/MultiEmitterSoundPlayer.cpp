@@ -4,20 +4,27 @@
 
 const qint32 CMultiEmitterSoundPlayer::c_iDefaultNumAutioEmitters = 5;
 
-CMultiEmitterSoundPlayer::CMultiEmitterSoundPlayer(qint32 iNrSoundEmitters,
-                                                   const QString& sSoundEffect) :
+CMultiEmitterSoundPlayer::CMultiEmitterSoundPlayer(qint32 iNrSoundEmitters) :
   m_vspPlayers(),
   m_iNrSoundEmitters(iNrSoundEmitters),
-  m_sSoundEffect(sSoundEffect),
-  m_iLastAutioPlayer(0),
+  m_iCurrentAutioPlayer(-1),
+  m_iNextSfxToLoad(0),
   m_bMuted(false)
 {
-  for (qint32 i = 0; m_iNrSoundEmitters > i; ++i)
-  {
-    m_vspPlayers.push_back(std::make_unique<QtAV::AVPlayer>());
-    m_vspPlayers.back()->setRepeat(0);
-    m_vspPlayers.back()->setFile(m_sSoundEffect);
-  }
+}
+CMultiEmitterSoundPlayer::CMultiEmitterSoundPlayer(qint32 iNrSoundEmitters,
+                                                   const QString& sSoundEffect) :
+  CMultiEmitterSoundPlayer(iNrSoundEmitters)
+{
+  m_sSoundEffects = QStringList{} << sSoundEffect;
+  Initialize();
+}
+CMultiEmitterSoundPlayer::CMultiEmitterSoundPlayer(qint32 iNrSoundEmitters,
+                                                   const QStringList& sSoundEffects) :
+  CMultiEmitterSoundPlayer(iNrSoundEmitters)
+{
+  m_sSoundEffects = sSoundEffects;
+  Initialize();
 }
 CMultiEmitterSoundPlayer::~CMultiEmitterSoundPlayer()
 {
@@ -26,23 +33,33 @@ CMultiEmitterSoundPlayer::~CMultiEmitterSoundPlayer()
 
 //----------------------------------------------------------------------------------------
 //
-const QString& CMultiEmitterSoundPlayer::SoundEffect() const
+const QStringList& CMultiEmitterSoundPlayer::SoundEffects() const
 {
-  return m_sSoundEffect;
+  return m_sSoundEffects;
 }
 
 //----------------------------------------------------------------------------------------
 //
 void CMultiEmitterSoundPlayer::SetSoundEffect(const QString& sPath)
 {
-  if (m_sSoundEffect != sPath && (sPath.isEmpty() || QFileInfo(sPath).exists()))
+  QStringList vsNew = QStringList() << sPath;
+  SetSoundEffects(vsNew);
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CMultiEmitterSoundPlayer::SetSoundEffects(const QStringList& vsNew)
+{
+  if (m_sSoundEffects != vsNew && !vsNew.isEmpty())
   {
-    if (!sPath.isEmpty())
+    if (!vsNew.isEmpty())
     {
-      m_sSoundEffect = sPath;
+      m_sSoundEffects = vsNew;
       for (qint32 i = 0; static_cast<qint32>(m_vspPlayers.size()) > i; ++i)
       {
-        m_vspPlayers[i]->setFile(m_sSoundEffect);
+        m_vspPlayers[i]->setFile(m_sSoundEffects[i%m_sSoundEffects.size()]);
+        m_vspPlayers[i]->load();
+        AdvanceNextSfxToLoad();
       }
     }
   }
@@ -101,20 +118,32 @@ void CMultiEmitterSoundPlayer::Play()
 {
   if (!m_bMuted)
   {
-    // play sound
-    if (-1 < m_iLastAutioPlayer && static_cast<qint32>(m_vspPlayers.size()) > m_iLastAutioPlayer)
+    // next audio player
+    qint32 iLastPlayer = m_iCurrentAutioPlayer;
+    if (static_cast<qint32>(m_vspPlayers.size()) <= ++m_iCurrentAutioPlayer)
     {
-      if (m_vspPlayers[m_iLastAutioPlayer]->isPlaying())
-      {
-        m_vspPlayers[m_iLastAutioPlayer]->stop();
-      }
-      m_vspPlayers[m_iLastAutioPlayer]->play();
+      m_iCurrentAutioPlayer = 0;
     }
 
-    // next audio player
-    if (static_cast<qint32>(m_vspPlayers.size()) <= ++m_iLastAutioPlayer)
+    // play sound
+    if (-1 < m_iCurrentAutioPlayer && static_cast<qint32>(m_vspPlayers.size()) > m_iCurrentAutioPlayer)
     {
-      m_iLastAutioPlayer = 0;
+      if (m_vspPlayers[m_iCurrentAutioPlayer]->isPlaying())
+      {
+        m_vspPlayers[m_iCurrentAutioPlayer]->stop();
+      }
+      m_vspPlayers[m_iCurrentAutioPlayer]->play();
+    }
+
+    // cycle sound files
+    if (-1 < iLastPlayer && static_cast<qint32>(m_vspPlayers.size()) > iLastPlayer)
+    {
+      if (m_vspPlayers[iLastPlayer]->file() != m_sSoundEffects[m_iNextSfxToLoad])
+      {
+        m_vspPlayers[iLastPlayer]->setFile(m_sSoundEffects[m_iNextSfxToLoad]);
+        m_vspPlayers[iLastPlayer]->load();
+      }
+      AdvanceNextSfxToLoad();
     }
   }
 }
@@ -129,5 +158,30 @@ void CMultiEmitterSoundPlayer::Stop()
     {
       m_vspPlayers[i]->stop();
     }
+  }
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CMultiEmitterSoundPlayer::AdvanceNextSfxToLoad()
+{
+  ++m_iNextSfxToLoad;
+  if (m_sSoundEffects.size() >= m_iNextSfxToLoad)
+  {
+    m_iNextSfxToLoad = 0;
+  }
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CMultiEmitterSoundPlayer::Initialize()
+{
+  for (qint32 i = 0; m_iNrSoundEmitters > i; ++i)
+  {
+    m_vspPlayers.push_back(std::make_unique<QtAV::AVPlayer>());
+    m_vspPlayers.back()->setRepeat(0);
+    m_vspPlayers.back()->setFile(m_sSoundEffects[i%m_sSoundEffects.size()]);
+    m_vspPlayers.back()->load();
+    AdvanceNextSfxToLoad();
   }
 }

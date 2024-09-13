@@ -26,7 +26,7 @@ struct SMetronomeDataBlock
 
   QString             sUserName;
 
-  QString             m_sBeatResource;
+  QStringList         m_sBeatResources;
   bool                m_bMuted = false;
   double              m_dVolume = 1.0;
 

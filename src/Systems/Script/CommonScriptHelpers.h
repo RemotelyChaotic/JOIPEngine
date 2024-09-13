@@ -30,6 +30,11 @@ namespace script
                                          tspProject spProject,
                                          const QString& sContext,
                                          QString* sError);
+  std::optional<QStringList> ParseResourceListFromScriptVariant(const QVariant& var,
+                                         std::shared_ptr<CDatabaseManager> spDbManager,
+                                         tspProject spProject,
+                                         const QString& sContext,
+                                         QString* sError);
   std::optional<QString> ParseSceneFromScriptVariant(const QVariant& var,
                                          std::shared_ptr<CDatabaseManager> spDbManager,
                                          tspProject spProject,

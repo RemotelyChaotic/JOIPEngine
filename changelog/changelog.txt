@@ -2,6 +2,12 @@
 Version 1.4.5.0
 =================
 
+New Features:
+- PlayerMetronome: setBeatResource accepts now an array of Sound Resources.
+- Metronomes can now use a set of Sound Resoures to play instead of only a single one.
+- Custom Metronome SFX with multiple sound files can be registered by putting a 
+  folder of sound files into the sfx folder.
+
 Changes:
 - If no more sound emitters are found when trying to play a sound an there are
   paused emitters waiting, cannibalize the first waiting emitter to be able to play

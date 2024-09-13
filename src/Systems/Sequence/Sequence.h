@@ -79,7 +79,7 @@ struct SStartPatternInstruction : public SSequenceTypedInstruction<SStartPattern
 {
   std::vector<double>                m_vdPattern;
   qint32                             m_iBpm = 60;
-  std::optional<QString>             m_sResource = std::nullopt;
+  std::optional<QStringList>         m_vsResources = std::nullopt;
   std::optional<double>              m_dVolume = std::nullopt;
 
   void CopyFromImpl(const SSequenceInstruction* pOther) override;

@@ -66,7 +66,7 @@ namespace
   //
   bool ResourceClickHandler(const QModelIndex& index, QTreeView* pResourceSelectTree,
                             CSlidingStackedWidget* pStackedWidget,
-                            QLineEdit* pResourceLineEdit)
+                            std::function<void(const QString&)> fnOnEdit)
   {
     auto pProxy =
         dynamic_cast<CResourceTreeItemSortFilterProxyModel*>(
@@ -82,7 +82,10 @@ namespace
         {
           QReadLocker locker(&spResource->m_rwLock);
           pStackedWidget->SlideInPrev();
-          pResourceLineEdit->setText(spResource->m_sName);
+          if (nullptr != fnOnEdit)
+          {
+            fnOnEdit(spResource->m_sName);
+          }
           return true;
         }
       }
@@ -95,7 +98,7 @@ namespace
   bool ResourceTreeEventFilter(QObject* pObj, QEvent* pEvt,
                                QTreeView* pResourceSelectTree,
                                CSlidingStackedWidget* pStackedWidget,
-                               QLineEdit* pResourceLineEdit)
+                               std::function<void(const QString&)> fnOnEdit)
   {
     if (pObj == pResourceSelectTree && nullptr != pEvt)
     {
@@ -106,7 +109,7 @@ namespace
         {
           QModelIndex idxProxy = pResourceSelectTree->currentIndex();
           return ResourceClickHandler(idxProxy, pResourceSelectTree, pStackedWidget,
-                                      pResourceLineEdit);
+                                      fnOnEdit);
         }
       }
     }
@@ -224,11 +227,25 @@ CTimelineSeqeunceInstructionWidgetStartPattern::CTimelineSeqeunceInstructionWidg
     m_spUi(std::make_unique<Ui::CTimelineSeqeunceInstructionWidgetStartPattern>())
 {
   m_spUi->setupUi(this);
+  m_spUi->pResourcesTableWidget->horizontalHeader()->setSectionResizeMode(0, QHeaderView::Stretch);
+  m_spUi->pResourcesTableWidget->horizontalHeader()->setSectionResizeMode(1, QHeaderView::Fixed);
+  m_spUi->pResourcesTableWidget->horizontalHeader()->setStretchLastSection(false);
+  m_spUi->pResourcesTableWidget->horizontalHeader()->resizeSection(1, 30);
+  m_spUi->pResourcesTableWidget->setSelectionBehavior(QAbstractItemView::SelectRows);
 
-  connect(m_spUi->pResourceLineEdit, &QLineEdit::editingFinished,
-          this, &CTimelineSeqeunceInstructionWidgetStartPattern::EmitPropertiesChanged);
-  connect(m_spUi->SearchButton, &QPushButton::clicked,
-          m_spUi->pStackedWidget, &CSlidingStackedWidget::SlideInNext);
+  m_spUi->AddButton->setProperty("styleSmall", true);
+  m_spUi->RemoveButton->setProperty("styleSmall", true);
+  m_spUi->AddPatternElemButton->setProperty("styleSmall", true);
+  m_spUi->RemovePatternElemButton->setProperty("styleSmall", true);
+
+  connect(m_spUi->AddButton, &QPushButton::clicked,
+          this, &CTimelineSeqeunceInstructionWidgetStartPattern::on_AddButton_clicked);
+  connect(m_spUi->RemoveButton, &QPushButton::clicked,
+          this, &CTimelineSeqeunceInstructionWidgetStartPattern::on_RemoveButton_clicked);
+  connect(m_spUi->AddPatternElemButton, &QPushButton::clicked,
+          this, &CTimelineSeqeunceInstructionWidgetStartPattern::on_AddPatternElemButton_clicked);
+  connect(m_spUi->RemovePatternElemButton, &QPushButton::clicked,
+          this, &CTimelineSeqeunceInstructionWidgetStartPattern::on_RemovePatternElemButton_clicked);
 
   m_spUi->pResourceSelectTree->installEventFilter(this);
   m_spUi->pResourceSelectTree->viewport()->installEventFilter(this);
@@ -236,10 +253,6 @@ CTimelineSeqeunceInstructionWidgetStartPattern::CTimelineSeqeunceInstructionWidg
           this, &CTimelineSeqeunceInstructionWidgetStartPattern::on_pResourceSelectTree_doubleClicked);
 
   connect(m_spUi->pBpmSpinBox, qOverload<qint32>(&QSpinBox::valueChanged),
-          this, &CTimelineSeqeunceInstructionWidgetStartPattern::EmitPropertiesChanged);
-  connect(m_spUi->pEnableResource, &QCheckBox::toggled, this,
-          &CTimelineSeqeunceInstructionWidgetStartPattern::on_pEnableResource_toggled);
-  connect(m_spUi->pResourceLineEdit, &QLineEdit::editingFinished,
           this, &CTimelineSeqeunceInstructionWidgetStartPattern::EmitPropertiesChanged);
   connect(m_spUi->pVolumeCheckBox, &QCheckBox::toggled, this,
           &CTimelineSeqeunceInstructionWidgetStartPattern::on_pVolumeCheckBox_toggled);
@@ -291,6 +304,16 @@ void CTimelineSeqeunceInstructionWidgetStartPattern::SetProperties(const std::sh
   m_bIsInitializing = true;
 
   m_sType = spInstr->m_sInstructionType;
+  m_iEditingRow = -1;
+
+  while (m_spUi->pPatternTableWidget->rowCount() > 0)
+  {
+    m_spUi->pPatternTableWidget->removeRow(0);
+  }
+  while (m_spUi->pResourcesTableWidget->rowCount() > 0)
+  {
+    m_spUi->pResourcesTableWidget->removeRow(0);
+  }
 
   auto spInstrCasted = std::dynamic_pointer_cast<SStartPatternInstruction>(spInstr);
   for (double dValue : spInstrCasted->m_vdPattern)
@@ -298,8 +321,13 @@ void CTimelineSeqeunceInstructionWidgetStartPattern::SetProperties(const std::sh
     AddPatternElement(dValue);
   }
   m_spUi->pBpmSpinBox->setValue(spInstrCasted->m_iBpm);
-  m_spUi->pEnableResource->setChecked(spInstrCasted->m_sResource.has_value());
-  m_spUi->pResourceLineEdit->setText(spInstrCasted->m_sResource.value_or(QString()));
+  if (spInstrCasted->m_vsResources.has_value())
+  {
+    for (const QString& sResource : spInstrCasted->m_vsResources.value())
+    {
+      AddResourceElement(sResource);
+    }
+  }
   m_spUi->pVolumeCheckBox->setChecked(spInstrCasted->m_dVolume.has_value());
   m_spUi->pVolumeSlider->setValue(spInstrCasted->m_dVolume.value_or(0.0) * c_dSliderScaling);
 
@@ -321,24 +349,18 @@ std::shared_ptr<SSequenceInstruction> CTimelineSeqeunceInstructionWidgetStartPat
   }
   args << QVariant::fromValue(vdPattern);
   args << QVariant::fromValue(m_spUi->pBpmSpinBox->value());
-  if (m_spUi->pEnableResource->isChecked())
+  QStringList vsResources;
+  for (qint32 i = 0; m_spUi->pResourcesTableWidget->rowCount() > i; ++i)
   {
-    args << QVariant::fromValue(m_spUi->pResourceLineEdit->text());
+    QModelIndex index = m_spUi->pPatternTableWidget->model()->index(i, 0);
+    vsResources << m_spUi->pPatternTableWidget->model()->data(index, Qt::EditRole).toString();
   }
+  args << QVariant::fromValue(vsResources);
   if (m_spUi->pVolumeCheckBox->isChecked())
   {
     args << QVariant::fromValue(static_cast<double>(m_spUi->pVolumeSlider->value()) / c_dSliderScaling);
   }
   return sequence::CreateInstruction(m_sType, args);
-}
-
-//----------------------------------------------------------------------------------------
-//
-void CTimelineSeqeunceInstructionWidgetStartPattern::on_pEnableResource_toggled(bool bOn)
-{
-  m_spUi->pResourceLineEdit->setEnabled(bOn);
-  m_spUi->SearchButton->setEnabled(bOn);
-  EmitPropertiesChanged();
 }
 
 //----------------------------------------------------------------------------------------
@@ -354,9 +376,40 @@ void CTimelineSeqeunceInstructionWidgetStartPattern::on_pVolumeCheckBox_toggled(
 void CTimelineSeqeunceInstructionWidgetStartPattern::on_pResourceSelectTree_doubleClicked(const QModelIndex& index)
 {
   bool bFiltered = ResourceClickHandler(index, m_spUi->pResourceSelectTree,
-                                        m_spUi->pStackedWidget, m_spUi->pResourceLineEdit);
+                                        m_spUi->pStackedWidget,
+                                        [this](const QString& sResource) {
+      QModelIndex idx = m_spUi->pResourcesTableWidget->model()->index(m_iEditingRow, 0);
+      m_spUi->pResourcesTableWidget->model()->setData(idx, sResource);
+      m_iEditingRow = -1;
+  });
   if (bFiltered)
   {
+    EmitPropertiesChanged();
+  }
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CTimelineSeqeunceInstructionWidgetStartPattern::on_AddButton_clicked()
+{
+  if (m_bIsInitializing) { return; }
+
+  AddResourceElement(QString());
+
+  EmitPropertiesChanged();
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CTimelineSeqeunceInstructionWidgetStartPattern::on_RemoveButton_clicked()
+{
+  if (m_bIsInitializing) { return; }
+
+  QModelIndex index = m_spUi->pResourcesTableWidget->currentIndex();
+  if (index.row() >= 0 &&
+      m_spUi->pResourcesTableWidget->rowCount() > index.row())
+  {
+    m_spUi->pResourcesTableWidget->removeRow(index.row());
     EmitPropertiesChanged();
   }
 }
@@ -407,10 +460,39 @@ void CTimelineSeqeunceInstructionWidgetStartPattern::AddPatternElement(double dV
 
 //----------------------------------------------------------------------------------------
 //
+void CTimelineSeqeunceInstructionWidgetStartPattern::AddResourceElement(const QString& sElem)
+{
+  qint32 iIndex = m_spUi->pPatternTableWidget->rowCount();
+  QPushButton* pButton = new QPushButton();
+  pButton->setObjectName("SearchButton");
+  pButton->setProperty("styleSmall", true);
+
+  connect(pButton, &QPushButton::clicked,
+          m_spUi->pStackedWidget, [this, iIndex]() mutable
+  {
+    m_iEditingRow = iIndex;
+    m_spUi->pStackedWidget->SlideInNext();
+  });
+
+  m_spUi->pPatternTableWidget->insertRow(iIndex);
+  QTableWidgetItem* item = new QTableWidgetItem("");
+  item->setFlags(item->flags() | Qt::ItemIsEditable);
+  m_spUi->pPatternTableWidget->setItem(iIndex, 0, item);
+  m_spUi->pPatternTableWidget->setCellWidget(iIndex, 1, pButton);
+  pButton->setProperty(c_sIndexProperty, iIndex);
+}
+
+//----------------------------------------------------------------------------------------
+//
 bool CTimelineSeqeunceInstructionWidgetStartPattern::eventFilter(QObject* pObj, QEvent* pEvt)
 {
   bool bFiltered = ResourceTreeEventFilter(pObj, pEvt, m_spUi->pResourceSelectTree,
-                                           m_spUi->pStackedWidget, m_spUi->pResourceLineEdit);
+                                           m_spUi->pStackedWidget,
+                                           [this](const QString& sResource) {
+    QModelIndex idx = m_spUi->pResourcesTableWidget->model()->index(m_iEditingRow, 0);
+    m_spUi->pResourcesTableWidget->model()->setData(idx, sResource);
+    m_iEditingRow = -1;
+  });
   if (bFiltered)
   {
     EmitPropertiesChanged();
@@ -615,7 +697,9 @@ std::shared_ptr<SSequenceInstruction> CTimelineSeqeunceInstructionWidgetShowMedi
 void CTimelineSeqeunceInstructionWidgetShowMedia::on_pResourceSelectTree_doubleClicked(const QModelIndex& index)
 {
   bool bFiltered = ResourceClickHandler(index, m_spUi->pResourceSelectTree,
-                                        m_spUi->pStackedWidget, m_spUi->pResourceLineEdit);
+                                        m_spUi->pStackedWidget, [this](const QString& sResource) {
+    m_spUi->pResourceLineEdit->setText(sResource);
+  });
   if (bFiltered)
   {
     EmitPropertiesChanged();
@@ -627,7 +711,9 @@ void CTimelineSeqeunceInstructionWidgetShowMedia::on_pResourceSelectTree_doubleC
 bool CTimelineSeqeunceInstructionWidgetShowMedia::eventFilter(QObject* pObj, QEvent* pEvt)
 {
   bool bFiltered = ResourceTreeEventFilter(pObj, pEvt, m_spUi->pResourceSelectTree,
-                                           m_spUi->pStackedWidget, m_spUi->pResourceLineEdit);
+                                           m_spUi->pStackedWidget, [this](const QString& sResource) {
+    m_spUi->pResourceLineEdit->setText(sResource);
+  });
   if (bFiltered)
   {
     emit SignalChangedProperties();
@@ -774,7 +860,9 @@ void CTimelineSeqeunceInstructionWidgetPlayVideo::on_pEndAtCheckBox_toggled(bool
 void CTimelineSeqeunceInstructionWidgetPlayVideo::on_pResourceSelectTree_doubleClicked(const QModelIndex& index)
 {
   bool bFiltered = ResourceClickHandler(index, m_spUi->pResourceSelectTree,
-                                        m_spUi->pStackedWidget, m_spUi->pResourceLineEdit);
+                                        m_spUi->pStackedWidget, [this](const QString& sResource) {
+    m_spUi->pResourceLineEdit->setText(sResource);
+  });
   if (bFiltered)
   {
     EmitPropertiesChanged();
@@ -786,7 +874,9 @@ void CTimelineSeqeunceInstructionWidgetPlayVideo::on_pResourceSelectTree_doubleC
 bool CTimelineSeqeunceInstructionWidgetPlayVideo::eventFilter(QObject* pObj, QEvent* pEvt)
 {
   bool bFiltered = ResourceTreeEventFilter(pObj, pEvt, m_spUi->pResourceSelectTree,
-                                           m_spUi->pStackedWidget, m_spUi->pResourceLineEdit);
+                                           m_spUi->pStackedWidget, [this](const QString& sResource) {
+    m_spUi->pResourceLineEdit->setText(sResource);
+  });
   if (bFiltered)
   {
     emit SignalChangedProperties();
@@ -941,7 +1031,9 @@ void CTimelineSeqeunceInstructionWidgetPlayAudio::on_pEndAtCheckBox_toggled(bool
 void CTimelineSeqeunceInstructionWidgetPlayAudio::on_pResourceSelectTree_doubleClicked(const QModelIndex& index)
 {
   bool bFiltered = ResourceClickHandler(index, m_spUi->pResourceSelectTree,
-                                        m_spUi->pStackedWidget, m_spUi->pResourceLineEdit);
+                                        m_spUi->pStackedWidget, [this](const QString& sResource) {
+    m_spUi->pResourceLineEdit->setText(sResource);
+  });
   if (bFiltered)
   {
     EmitPropertiesChanged();
@@ -953,7 +1045,9 @@ void CTimelineSeqeunceInstructionWidgetPlayAudio::on_pResourceSelectTree_doubleC
 bool CTimelineSeqeunceInstructionWidgetPlayAudio::eventFilter(QObject* pObj, QEvent* pEvt)
 {
   bool bFiltered = ResourceTreeEventFilter(pObj, pEvt, m_spUi->pResourceSelectTree,
-                                           m_spUi->pStackedWidget, m_spUi->pResourceLineEdit);
+                                           m_spUi->pStackedWidget, [this](const QString& sResource) {
+    m_spUi->pResourceLineEdit->setText(sResource);
+  });
   if (bFiltered)
   {
     emit SignalChangedProperties();
@@ -1209,7 +1303,9 @@ void CTimelineSeqeunceInstructionWidgetShowText::on_pEnableBgColorCheckBox_toggl
 void CTimelineSeqeunceInstructionWidgetShowText::on_pResourceSelectTree_doubleClicked(const QModelIndex& index)
 {
   bool bFiltered = ResourceClickHandler(index, m_spUi->pResourceSelectTree,
-                                        m_spUi->pStackedWidget, m_spUi->pResourceLineEdit);
+                                        m_spUi->pStackedWidget, [this](const QString& sResource) {
+    m_spUi->pResourceLineEdit->setText(sResource);
+  });
   if (bFiltered)
   {
     EmitPropertiesChanged();
@@ -1221,7 +1317,9 @@ void CTimelineSeqeunceInstructionWidgetShowText::on_pResourceSelectTree_doubleCl
 bool CTimelineSeqeunceInstructionWidgetShowText::eventFilter(QObject* pObj, QEvent* pEvt)
 {
   bool bFiltered = ResourceTreeEventFilter(pObj, pEvt, m_spUi->pResourceSelectTree,
-                                           m_spUi->pStackedWidget, m_spUi->pResourceLineEdit);
+                                           m_spUi->pStackedWidget, [this](const QString& sResource) {
+    m_spUi->pResourceLineEdit->setText(sResource);
+  });
   if (bFiltered)
   {
     emit SignalChangedProperties();
@@ -1313,7 +1411,9 @@ std::shared_ptr<SSequenceInstruction> CTimelineSeqeunceInstructionWidgetRunScrip
 void CTimelineSeqeunceInstructionWidgetRunScript::on_pResourceSelectTree_doubleClicked(const QModelIndex& index)
 {
   bool bFiltered = ResourceClickHandler(index, m_spUi->pResourceSelectTree,
-                                        m_spUi->pStackedWidget, m_spUi->pResourceLineEdit);
+                                        m_spUi->pStackedWidget, [this](const QString& sResource) {
+    m_spUi->pResourceLineEdit->setText(sResource);
+  });
   if (bFiltered)
   {
     EmitPropertiesChanged();
@@ -1325,7 +1425,9 @@ void CTimelineSeqeunceInstructionWidgetRunScript::on_pResourceSelectTree_doubleC
 bool CTimelineSeqeunceInstructionWidgetRunScript::eventFilter(QObject* pObj, QEvent* pEvt)
 {
   bool bFiltered = ResourceTreeEventFilter(pObj, pEvt, m_spUi->pResourceSelectTree,
-                                           m_spUi->pStackedWidget, m_spUi->pResourceLineEdit);
+                                           m_spUi->pStackedWidget, [this](const QString& sResource) {
+    m_spUi->pResourceLineEdit->setText(sResource);
+  });
   if (bFiltered)
   {
     emit SignalChangedProperties();

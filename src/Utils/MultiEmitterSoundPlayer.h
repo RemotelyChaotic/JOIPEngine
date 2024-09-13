@@ -2,6 +2,7 @@
 #define CMULTIEMITTERSOUNDPLAYER_H
 
 #include <QString>
+#include <QStringList>
 #include <memory>
 #include <vector>
 
@@ -12,14 +13,18 @@ class CMultiEmitterSoundPlayer
 public:
   static const qint32 c_iDefaultNumAutioEmitters;
 
-  CMultiEmitterSoundPlayer(qint32 iNrSoundEmitters = c_iDefaultNumAutioEmitters,
-                           const QString& sSoundEffect = QString());
+  CMultiEmitterSoundPlayer(qint32 iNrSoundEmitters = c_iDefaultNumAutioEmitters);
+  CMultiEmitterSoundPlayer(qint32 iNrSoundEmitters,
+                           const QString& sSoundEffect);
+  CMultiEmitterSoundPlayer(qint32 iNrSoundEmitters,
+                           const QStringList& sSoundEffects);
   ~CMultiEmitterSoundPlayer();
 
-  void Resize(qint32 iNewNrSoundEmitters, const QString& sSoundEffect = QString());
+  void Resize(qint32 iNewNrSoundEmitters);
 
-  const QString& SoundEffect() const;
+  const QStringList& SoundEffects() const;
   void SetSoundEffect(const QString& sPath);
+  void SetSoundEffects(const QStringList& sPath);
 
   bool Muted() const;
   void SetMuted(bool bMuted);
@@ -31,10 +36,14 @@ public:
   void Stop();
 
 private:
+  void AdvanceNextSfxToLoad();
+  void Initialize();
+
   std::vector<std::unique_ptr<QtAV::AVPlayer>> m_vspPlayers;
   qint32                                       m_iNrSoundEmitters;
-  QString                                      m_sSoundEffect;
-  qint32                                       m_iLastAutioPlayer;
+  QStringList                                  m_sSoundEffects;
+  qint32                                       m_iCurrentAutioPlayer;
+  qint32                                       m_iNextSfxToLoad;
   bool                                         m_bMuted;
   double                                       m_dVolume;
 };

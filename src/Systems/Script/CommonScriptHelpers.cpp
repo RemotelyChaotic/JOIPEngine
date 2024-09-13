@@ -382,6 +382,100 @@ namespace script
 
   //--------------------------------------------------------------------------------------
   //
+  std::optional<QStringList> ParseResourceListFromScriptVariant(const QVariant& var,
+                                         std::shared_ptr<CDatabaseManager> spDbManager,
+                                         tspProject spProject,
+                                         const QString& sContext,
+                                         QString* sError)
+  {
+    QStringList vsOutValues;
+    QJSValue valFromJS = var.value<QJSValue>();
+    if (var.type() == QVariant::List)
+    {
+      QVariantList varList = var.toList();
+      for (qint32 iIndex = 0; varList.size() > iIndex; iIndex++)
+      {
+        auto optRes = ParseItemFromScriptVariant<SResource>(
+              varList[iIndex], spDbManager, spProject, sContext, sError);
+        if (optRes.has_value())
+        {
+          vsOutValues.push_back(*optRes);
+        }
+        else
+        {
+          if (nullptr != sError)
+          {
+            *sError =
+              QObject::tr("Wrong argument-type to %1(). Array of resources was expected.")
+              .arg(sContext);
+          }
+          return std::nullopt;
+        }
+      }
+    }
+    // lua tables can currently only be converted to VariantMap
+    else if (var.type() == QVariant::Map)
+    {
+      QVariantMap varList = var.toMap();
+      for (auto it = varList.begin(); varList.end() != it; ++it)
+      {
+        auto optRes = ParseItemFromScriptVariant<SResource>(
+              it.value(), spDbManager, spProject, sContext, sError);
+        if (optRes.has_value())
+        {
+          vsOutValues.push_back(*optRes);
+        }
+        else
+        {
+          if (nullptr != sError)
+          {
+            *sError =
+              QObject::tr("Wrong argument-type to %1(). Array of resources was expected.")
+              .arg(sContext);
+          }
+          return std::nullopt;
+        }
+      }
+    }
+    else if (valFromJS.isArray())
+    {
+      const qint32 iLength = valFromJS.property("length").toInt();
+      for (qint32 iIndex = 0; iLength > iIndex; iIndex++)
+      {
+        QJSValue val = valFromJS.property(static_cast<quint32>(iIndex));
+        auto optRes = ParseItemFromScriptVariant<SResource>(
+              val.toVariant(), spDbManager, spProject, sContext, sError);
+        if (optRes.has_value())
+        {
+          vsOutValues.push_back(*optRes);
+        }
+        else
+        {
+          if (nullptr != sError)
+          {
+            *sError =
+              QObject::tr("Wrong argument-type to %1(). Array of resources was expected.")
+              .arg(sContext);
+          }
+          return std::nullopt;
+        }
+      }
+    }
+    else
+    {
+      if (nullptr != sError)
+      {
+        *sError =
+          QObject::tr("Wrong argument-type to %1(). Array of resources was expected.")
+          .arg(sContext);
+      }
+      return std::nullopt;
+    }
+    return vsOutValues;
+  }
+
+  //--------------------------------------------------------------------------------------
+  //
   std::optional<QString> ParseSceneFromScriptVariant(const QVariant& var,
                                          std::shared_ptr<CDatabaseManager> spDbManager,
                                          tspProject spProject,

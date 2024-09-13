@@ -45,9 +45,9 @@ namespace
       spInstr->m_iBpm = vArgs[1].toInt();
     }
     qint32 iCounter = 2;
-    if (vArgs.size() > iCounter && vArgs[iCounter].type() == QVariant::String)
+    if (vArgs.size() > iCounter && vArgs[iCounter].type() == QVariant::StringList)
     {
-      spInstr->m_sResource = vArgs[iCounter].toString();
+      spInstr->m_vsResources = vArgs[iCounter].toStringList();
       iCounter++;
     }
     if (vArgs.size() > iCounter && vArgs[iCounter].type() == QVariant::Double)
@@ -432,22 +432,30 @@ void SStartPatternInstruction::CopyFromImpl(const SSequenceInstruction* pOther)
   if (nullptr == pOtherCasted) { return; }
   m_vdPattern = pOtherCasted->m_vdPattern;
   m_iBpm = pOtherCasted->m_iBpm;
-  m_sResource = pOtherCasted->m_sResource;
+  m_vsResources = pOtherCasted->m_vsResources;
   m_dVolume = pOtherCasted->m_dVolume;
 }
 QJsonObject SStartPatternInstruction::ToJsonObject()
 {
   QJsonObject obj = SSequenceInstruction::ToJsonObject();
   QJsonArray pattern;
+  QJsonArray resources;
   for (double dVal : m_vdPattern)
   {
     pattern.push_back(dVal);
   }
+  if (m_vsResources.has_value())
+  {
+    for (const QString& sValue : *m_vsResources)
+    {
+      resources.push_back(sValue);
+    }
+  }
   obj["vdPattern"] = pattern;
   obj["iBpm"] = m_iBpm;
-  if (m_sResource.has_value())
+  if (m_vsResources.has_value())
   {
-    obj["sResource"] = *m_sResource;
+    obj["sResources"] = resources;
   }
   if (m_dVolume.has_value())
   {
@@ -459,6 +467,7 @@ void SStartPatternInstruction::FromJsonObject(const QJsonObject& json)
 {
   SSequenceInstruction::FromJsonObject(json);
   m_vdPattern.clear();
+  m_vsResources = std::nullopt;
   auto it = json.find("vdPattern");
   if (it != json.end())
   {
@@ -476,7 +485,18 @@ void SStartPatternInstruction::FromJsonObject(const QJsonObject& json)
   it = json.find("sResource");
   if (it != json.end())
   {
-    m_sResource = it.value().toString();
+    m_vsResources = QStringList() << it.value().toString();
+  }
+  it = json.find("sResources");
+  if (it != json.end())
+  {
+    QStringList vsResources;
+    for (QJsonValue val : it.value().toArray())
+    {
+      QString sVal = val.toString();
+      vsResources.push_back(sVal);
+    }
+    m_vsResources = vsResources;
   }
   it = json.find("dVolume");
   if (it != json.end())

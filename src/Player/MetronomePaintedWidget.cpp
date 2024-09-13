@@ -91,32 +91,32 @@ void CMetronomeCanvasQml::paint(QPainter* pPainter)
 
 //----------------------------------------------------------------------------------------
 //
-QString CMetronomeCanvasQml::BeatResource() const
+QStringList CMetronomeCanvasQml::BeatResources() const
 {
   if (nullptr != m_spDataBlockThread)
   {
     QMutexLocker l(&m_spDataBlockThread->m_mutex);
-    return m_spDataBlockThread->m_sBeatResource;
+    return m_spDataBlockThread->m_sBeatResources;
   }
-  return QString();
+  return QStringList();
 }
 
 //----------------------------------------------------------------------------------------
 //
-void CMetronomeCanvasQml::SetBeatResource(const QString& sResource)
+void CMetronomeCanvasQml::SetBeatResources(const QStringList& sResource)
 {
-  QString sOldResource;
+  QStringList sOldResource;
   if (nullptr != m_spDataBlockThread)
   {
     QMutexLocker l(&m_spDataBlockThread->m_mutex);
-    sOldResource = m_spDataBlockThread->m_sBeatResource;
-    m_spDataBlockThread->m_sBeatResource = sResource;
+    sOldResource = m_spDataBlockThread->m_sBeatResources;
+    m_spDataBlockThread->m_sBeatResources = sResource;
   }
 
   if (sOldResource != sResource && nullptr != m_spMetronomeManager)
   {
     emit m_spMetronomeManager->SignalBlockChanged(m_id);
-    emit beatResourceChanged();
+    emit beatResourcesChanged();
   }
 }
 

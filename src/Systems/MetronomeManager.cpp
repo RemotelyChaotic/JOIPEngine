@@ -34,7 +34,7 @@ SMetronomeDataBlock::SMetronomeDataBlock(const SMetronomeDataBlock& other)
 SMetronomeDataBlock& SMetronomeDataBlock::operator=(const SMetronomeDataBlock& other)
 {
   sUserName = other.sUserName;
-  m_sBeatResource = other.m_sBeatResource;
+  m_sBeatResources = other.m_sBeatResources;
   m_bMuted = other.m_bMuted;
   m_dVolume = other.m_dVolume;
   m_vdTickPattern = other.m_vdTickPattern;
@@ -418,18 +418,18 @@ void CMetronomeManager::SlotBlockChanged(const QUuid& sName)
       it->second->m_privateBlock = *it->second->m_spPublicBlock;
     }
 
-    if (it->second->m_privateBlock.m_sBeatResource.isEmpty())
+    if (it->second->m_privateBlock.m_sBeatResources.isEmpty())
     {
       if (nullptr != m_spSettings)
       {
-        it->second->m_privateBlock.m_spSoundEmitters->SetSoundEffect(
+        it->second->m_privateBlock.m_spSoundEmitters->SetSoundEffects(
             metronome::MetronomeSfxFromKey(m_spSettings->MetronomeSfx()));
       }
     }
     else
     {
-      it->second->m_privateBlock.m_spSoundEmitters->SetSoundEffect(
-          it->second->m_privateBlock.m_sBeatResource);
+      it->second->m_privateBlock.m_spSoundEmitters->SetSoundEffects(
+          it->second->m_privateBlock.m_sBeatResources);
     }
 
     it->second->m_privateBlock.m_spSoundEmitters->SetMuted(
@@ -460,7 +460,7 @@ std::shared_ptr<SMetronomeDataBlock> CMetronomeManager::SlotRegisterUiImpl(const
 
   if (nullptr != m_spSettings)
   {
-    block->m_spPublicBlock->m_sBeatResource =
+    block->m_spPublicBlock->m_sBeatResources =
         metronome::MetronomeSfxFromKey(m_spSettings->MetronomeSfx());
     block->m_spPublicBlock->m_bMuted = m_bMuted;
     block->m_spPublicBlock->m_dVolume = m_dVolume;
@@ -469,7 +469,7 @@ std::shared_ptr<SMetronomeDataBlock> CMetronomeManager::SlotRegisterUiImpl(const
   block->m_privateBlock = *block->m_spPublicBlock;
   block->m_privateBlock.m_spSoundEmitters =
       std::make_unique<CMultiEmitterSoundPlayer>(CMultiEmitterSoundPlayer::c_iDefaultNumAutioEmitters,
-                                                 block->m_spPublicBlock->m_sBeatResource);
+                                                 block->m_spPublicBlock->m_sBeatResources);
   return block->m_spPublicBlock;
 }
 

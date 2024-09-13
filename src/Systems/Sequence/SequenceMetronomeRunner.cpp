@@ -79,9 +79,9 @@ void CSequenceMetronomeRunner::RunStartPattern(const QString&,
     {
       emit pSignalEmitter->setVolume(spI->m_dVolume.value());
     }
-    if (spI->m_sResource.has_value())
+    if (spI->m_vsResources.has_value())
     {
-      emit pSignalEmitter->setBeatResource(spI->m_sResource.value());
+      emit pSignalEmitter->setBeatResource(spI->m_vsResources.value());
     }
     emit pSignalEmitter->setBpm(spI->m_iBpm);
     emit pSignalEmitter->setPattern(vdVals);

@@ -62,12 +62,14 @@ protected slots:
   void on_pBackButton_clicked();
   void SlotKeySequenceChanged(const QKeySequence& keySequence);
   void SlotMetronomeSfxItemHovered(qint32 iIndex);
+  void SlotSoundPlaybackFinished();
 
 private:
   std::unique_ptr<Ui::CSettingsScreen> m_spUi;
   std::unique_ptr<QtAV::AVPlayer>      m_spPlayer;
   std::shared_ptr<CSettings>           m_spSettings;
   QPointer<CHelpButtonOverlay>         m_pHelpButtonOverlay;
+  QStringList                          m_vsSoundsToPlay;
 };
 
 #endif // SETTINGSSCREEN_H

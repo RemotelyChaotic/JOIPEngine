@@ -68,19 +68,43 @@ void CScriptMetronome::setBeatResource(QVariant resource)
   auto pSignalEmitter = SignalEmitter<CMetronomeSignalEmitter>();
   if (nullptr != pSignalEmitter)
   {
-    QString sError;
-    std::optional<QString> optRes =
-        script::ParseResourceFromScriptVariant(resource, m_wpDbManager.lock(),
-                                               m_spProject,
-                                               "setBeatResource", &sError);
-    if (optRes.has_value())
+    // the input can either be a string, a bytearray, null, a resource...
+    CResourceScriptWrapper* pItemWrapper = dynamic_cast<CResourceScriptWrapper*>(resource.value<QObject*>());
+    if (resource.type() == QVariant::String || resource.type() == QVariant::ByteArray ||
+        resource.isNull() || nullptr != pItemWrapper)
     {
-      QString resRet = optRes.value();
-      emit pSignalEmitter->setBeatResource(resRet);
+      QString sError;
+      std::optional<QString> optRes =
+          script::ParseResourceFromScriptVariant(resource, m_wpDbManager.lock(),
+                                                 m_spProject,
+                                                 "setBeatResource", &sError);
+      if (optRes.has_value())
+      {
+        QStringList vsResRet = QStringList() << optRes.value();
+        emit pSignalEmitter->setBeatResource(vsResRet);
+      }
+      else
+      {
+        emit m_pSignalEmitter->showError(sError, QtMsgType::QtWarningMsg);
+      }
     }
+    // ...or an array of the above.
     else
     {
-      emit m_pSignalEmitter->showError(sError, QtMsgType::QtWarningMsg);
+      QString sError;
+      std::optional<QStringList> optRes =
+          script::ParseResourceListFromScriptVariant(resource, m_wpDbManager.lock(),
+                                                 m_spProject,
+                                                 "setBeatResource", &sError);
+      if (optRes.has_value())
+      {
+        QStringList vsResRet = optRes.value();
+        emit pSignalEmitter->setBeatResource(vsResRet);
+      }
+      else
+      {
+        emit m_pSignalEmitter->showError(sError, QtMsgType::QtWarningMsg);
+      }
     }
   }
 }

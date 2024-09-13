@@ -21,7 +21,7 @@ typedef std::shared_ptr<SResource>      tspResource;
 class CMetronomeCanvasQml : public QQuickPaintedItem
 {
   Q_OBJECT
-  Q_PROPERTY(QString beatResource READ BeatResource WRITE SetBeatResource NOTIFY beatResourceChanged)
+  Q_PROPERTY(QStringList beatResources READ BeatResources WRITE SetBeatResources NOTIFY beatResourcesChanged)
   Q_PROPERTY(qint32  bpm READ Bpm WRITE SetBpm NOTIFY bpmChanged)
   Q_PROPERTY(qint32  metCmdMode READ MetCmdMode WRITE SetMetCmdMode NOTIFY metCmdModeChanged)
   Q_PROPERTY(bool    muted READ Muted WRITE SetMuted NOTIFY mutedChanged)
@@ -44,8 +44,8 @@ public:
 
   void paint(QPainter* pPainter) override;
 
-  QString BeatResource() const;
-  void SetBeatResource(const QString& sResource);
+  QStringList BeatResources() const;
+  void SetBeatResources(const QStringList& sResource);
   qint32 Bpm()const;
   void SetBpm(qint32 iValue);
   qint32 MetCmdMode() const;
@@ -67,7 +67,7 @@ public slots:
   void registerUi(const QString& sUserName);
 
 signals:
-  void beatResourceChanged();
+  void beatResourcesChanged();
   void bpmChanged();
   void metCmdModeChanged();
   void mutedChanged();
