@@ -13,7 +13,7 @@ Rectangle {
         metronomeDisplay.registerUi(metronomeItem.userName);
     }
 
-    property string beatResources: []
+    property var beatResources: []
     property int bpm: 60
     property var pattern: [ 1 ]
     property bool running: metronomeDisplay.running
