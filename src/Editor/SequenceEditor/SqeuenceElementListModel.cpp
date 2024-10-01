@@ -24,7 +24,9 @@ CSqeuenceElementSortFilterProxyModel::~CSqeuenceElementSortFilterProxyModel()
 //
 void CSqeuenceElementSortFilterProxyModel::setSourceModel(QAbstractItemModel* pSourceModel)
 {
+  beginResetModel();
   QSortFilterProxyModel::setSourceModel(pSourceModel);
+  endResetModel();
 }
 
 //----------------------------------------------------------------------------------------

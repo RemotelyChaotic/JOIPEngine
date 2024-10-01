@@ -40,6 +40,9 @@
      <property name="alternatingRowColors">
       <bool>true</bool>
      </property>
+     <property name="animated">
+      <bool>true</bool>
+     </property>
      <attribute name="headerStretchLastSection">
       <bool>false</bool>
      </attribute>
@@ -54,7 +57,7 @@
       </sizepolicy>
      </property>
      <property name="dragDropMode">
-      <enum>QAbstractItemView::NoDragDrop</enum>
+      <enum>QAbstractItemView::DragDrop</enum>
      </property>
      <property name="flow">
       <enum>QListView::LeftToRight</enum>

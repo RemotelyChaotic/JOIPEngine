@@ -65,6 +65,32 @@ macro(CreateJOIPProject JOIP_PROJECT_NAME)
     ${JOIPSources}/DownloadScreen.cpp
     ${JOIPSources}/DownloadScreen.h
     ${JOIPSources}/DownloadScreen.ui
+    ${JOIPSources}/Editor/CommandChangeTag.cpp
+    ${JOIPSources}/Editor/CommandChangeTag.h
+    ${JOIPSources}/Editor/DialogEditor/CommandAddNewDialogFile.cpp
+    ${JOIPSources}/Editor/DialogEditor/CommandAddNewDialogFile.h
+    ${JOIPSources}/Editor/DialogEditor/CommandAddRemoveDialogTags.cpp
+    ${JOIPSources}/Editor/DialogEditor/CommandAddRemoveDialogTags.h
+    ${JOIPSources}/Editor/DialogEditor/CommandAddRemoveNode.cpp
+    ${JOIPSources}/Editor/DialogEditor/CommandAddRemoveNode.h
+    ${JOIPSources}/Editor/DialogEditor/CommandChangeModelViaGui.cpp
+    ${JOIPSources}/Editor/DialogEditor/CommandChangeModelViaGui.h
+    ${JOIPSources}/Editor/DialogEditor/CommandChangeParameters.cpp
+    ${JOIPSources}/Editor/DialogEditor/CommandChangeParameters.h
+    ${JOIPSources}/Editor/DialogEditor/DialogEditorDelegate.cpp
+    ${JOIPSources}/Editor/DialogEditor/DialogEditorDelegate.h
+    ${JOIPSources}/Editor/DialogEditor/DialogEditorSortFilterProxyModel.cpp
+    ${JOIPSources}/Editor/DialogEditor/DialogEditorSortFilterProxyModel.h
+    ${JOIPSources}/Editor/DialogEditor/DialogEditorTreeItem.cpp
+    ${JOIPSources}/Editor/DialogEditor/DialogEditorTreeItem.h
+    ${JOIPSources}/Editor/DialogEditor/DialogEditorTreeModel.cpp
+    ${JOIPSources}/Editor/DialogEditor/DialogEditorTreeModel.h
+    ${JOIPSources}/Editor/DialogEditor/DialogPropertyEditor.cpp
+    ${JOIPSources}/Editor/DialogEditor/DialogPropertyEditor.h
+    ${JOIPSources}/Editor/DialogEditor/DialogPropertyEditor.ui
+    ${JOIPSources}/Editor/DialogEditor/DialogTagsEditorOverlay.cpp
+    ${JOIPSources}/Editor/DialogEditor/DialogTagsEditorOverlay.h
+    ${JOIPSources}/Editor/DialogEditor/DialogTagsEditorOverlay.ui
     ${JOIPSources}/Editor/EditorActionBar.cpp
     ${JOIPSources}/Editor/EditorActionBar.h
     ${JOIPSources}/Editor/EditorActionBar.ui
@@ -105,6 +131,9 @@ macro(CreateJOIPProject JOIP_PROJECT_NAME)
     ${JOIPSources}/Editor/EditorWidgets/EditorCodeWidget.ui
     ${JOIPSources}/Editor/EditorWidgets/EditorDebuggableWidget.cpp
     ${JOIPSources}/Editor/EditorWidgets/EditorDebuggableWidget.h
+    ${JOIPSources}/Editor/EditorWidgets/EditorDialogWidget.cpp
+    ${JOIPSources}/Editor/EditorWidgets/EditorDialogWidget.h
+    ${JOIPSources}/Editor/EditorWidgets/EditorDialogWidget.ui
     ${JOIPSources}/Editor/EditorWidgets/EditorProjectSettingsWidget.cpp
     ${JOIPSources}/Editor/EditorWidgets/EditorProjectSettingsWidget.h
     ${JOIPSources}/Editor/EditorWidgets/EditorProjectSettingsWidget.ui
@@ -229,8 +258,6 @@ macro(CreateJOIPProject JOIP_PROJECT_NAME)
     ${JOIPSources}/Editor/Resources/ResourceTreeItemModel.h
     ${JOIPSources}/Editor/Resources/ResourceTreeItemSortFilterProxyModel.cpp
     ${JOIPSources}/Editor/Resources/ResourceTreeItemSortFilterProxyModel.h
-    ${JOIPSources}/Editor/Resources/TagCompleter.cpp
-    ${JOIPSources}/Editor/Resources/TagCompleter.h
     ${JOIPSources}/Editor/Resources/TagsEditorOverlay.cpp
     ${JOIPSources}/Editor/Resources/TagsEditorOverlay.h
     ${JOIPSources}/Editor/Resources/TagsEditorOverlay.ui
@@ -489,6 +516,8 @@ macro(CreateJOIPProject JOIP_PROJECT_NAME)
     ${JOIPSources}/Systems/Devices/DeviceSettings.h
     ${JOIPSources}/Systems/Devices/IDevice.h
     ${JOIPSources}/Systems/Devices/IDeviceConnector.h
+    ${JOIPSources}/Systems/DialogTree.cpp
+    ${JOIPSources}/Systems/DialogTree.h
     ${JOIPSources}/Systems/DLJobs/IDownloadJob.h
     ${JOIPSources}/Systems/DLJobs/DownloadJobRegistry.h
     ${JOIPSources}/Systems/DLJobs/EosDownloadJob.cpp
@@ -692,6 +721,8 @@ macro(CreateJOIPProject JOIP_PROJECT_NAME)
     ${JOIPSources}/Widgets/HelpOverlay.cpp
     ${JOIPSources}/Widgets/HelpOverlay.h
     ${JOIPSources}/Widgets/HelpOverlay.ui
+    ${JOIPSources}/Widgets/HtmlViewDelegate.cpp
+    ${JOIPSources}/Widgets/HtmlViewDelegate.h
     ${JOIPSources}/Widgets/IWidgetBaseInterface.h
     ${JOIPSources}/Widgets/LongLongSpinBox.cpp
     ${JOIPSources}/Widgets/LongLongSpinBox.h
@@ -730,6 +761,8 @@ macro(CreateJOIPProject JOIP_PROJECT_NAME)
     ${JOIPSources}/Widgets/SlidingTabWidget.h
     ${JOIPSources}/Widgets/SlidingWidget.cpp
     ${JOIPSources}/Widgets/SlidingWidget.h
+    ${JOIPSources}/Widgets/TagCompleter.cpp
+    ${JOIPSources}/Widgets/TagCompleter.h
     ${JOIPSources}/Widgets/TagsView.cpp
     ${JOIPSources}/Widgets/TagsView.h
     ${JOIPSources}/Widgets/TagsView.ui

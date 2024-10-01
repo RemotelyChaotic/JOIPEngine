@@ -51,6 +51,7 @@ void CResourceTreeItemSortFilterProxyModel::FilterForTypes(
 //
 void CResourceTreeItemSortFilterProxyModel::setSourceModel(QAbstractItemModel* pSourceModel)
 {
+  beginResetModel();
   if (nullptr != sourceModel())
   {
     disconnect(sourceModel(), &CResourceTreeItemModel::rowsInserted,
@@ -68,6 +69,7 @@ void CResourceTreeItemSortFilterProxyModel::setSourceModel(QAbstractItemModel* p
     connect(pSourceModel, &CResourceTreeItemModel::rowsRemoved,
             this, &CResourceTreeItemSortFilterProxyModel::SlotResourceRemoved);
   }
+  endResetModel();
 }
 
 //----------------------------------------------------------------------------------------

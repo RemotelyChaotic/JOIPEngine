@@ -6,9 +6,11 @@
 #include <QtGlobal>
 
 BETTER_ENUM(EEditorCommandId, qint32,
-            eNone               = -1,
+            eNone = -1,
 
-            eChangeEmitterCount = 0,
+            eChangeTag = 0,
+
+            eChangeEmitterCount,
             eAddFetishes,
             eRemoveFetishes,
             eChangeProjectName,
@@ -25,7 +27,6 @@ BETTER_ENUM(EEditorCommandId, qint32,
             eChangeTitleCard,
             eRemoveResource,
             eAddTag,
-            eChangeTag,
             eRemoveTag,
 
             eChangeOpenedScript,
@@ -45,7 +46,15 @@ BETTER_ENUM(EEditorCommandId, qint32,
             eAddRemoveSequenceLayer,
             eChangeSequenceLayerProperties,
             eAddOrRemoveSequenceElement,
-            eChangeSequenceElementProperties
+            eChangeSequenceElementProperties,
+
+            eAddDialogNode,
+            eRemoveDialogNode,
+            eAddNewDialogFile,
+            eChangeDialogPropertyViaGui,
+            eChangeDialogParams,
+            eAddDialogTags,
+            eRemoveDialogTags
             )
 
 #endif // EDITORCOMMANDIDS_H

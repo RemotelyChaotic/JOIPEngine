@@ -1,10 +1,14 @@
 #include "TagsEditorOverlay.h"
 #include "Application.h"
 #include "CommandChangeTags.h"
-#include "TagCompleter.h"
+
 #include "ui_TagsEditorOverlay.h"
 
+#include "Editor/CommandChangeTag.h"
+
 #include "Systems/DatabaseManager.h"
+
+#include "Widgets/TagCompleter.h"
 
 #include <QStandardItemModel>
 #include <QUndoStack>
@@ -272,7 +276,6 @@ void CTagsEditorOverlay::Initialize()
     tvsTags vsTags = spResource->m_vsResourceTags;
     rLocker.unlock();
 
-    QList<QStandardItem*> vpTagItemsToAdd;
     std::vector<std::shared_ptr<SLockableTagData>> vspTagsToAdd;
     {
       QReadLocker pLocker(&m_spCurrentProject->m_rwLock);

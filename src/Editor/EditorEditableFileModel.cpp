@@ -36,6 +36,7 @@ void CFilteredEditorEditableFileModel::FilterForTypes(const std::vector<QString>
 //
 void CFilteredEditorEditableFileModel::setSourceModel(QAbstractItemModel* pSourceModel)
 {
+  beginResetModel();
   if (nullptr != sourceModel())
   {
     disconnect(sourceModel(), &CEditorEditableFileModel::rowsInserted,
@@ -53,6 +54,7 @@ void CFilteredEditorEditableFileModel::setSourceModel(QAbstractItemModel* pSourc
     connect(pSourceModel, &CEditorEditableFileModel::rowsRemoved,
             this, &CFilteredEditorEditableFileModel::SlotResourceRemoved);
   }
+  endResetModel();
 }
 
 //----------------------------------------------------------------------------------------

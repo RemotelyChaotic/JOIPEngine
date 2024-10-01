@@ -4,6 +4,7 @@
 #include "Editor/EditorModel.h"
 #include "Editor/EditorEditableFileModel.h"
 
+#include "Editor/DialogEditor/DialogEditorTreeModel.h"
 #include "Editor/NodeEditor/FlowScene.h"
 #include "Editor/Project/KinkTreeModel.h"
 #include "Editor/Resources/ResourceTreeItemModel.h"
@@ -53,6 +54,13 @@ void CEditorWidgetBase::TakeFromLayout()
 QPointer<CEditorActionBar> CEditorWidgetBase::ActionBar() const
 {
   return m_pActionBar;
+}
+
+//----------------------------------------------------------------------------------------
+//
+QPointer<CDialogEditorTreeModel> CEditorWidgetBase::DialogModel() const
+{
+  return m_pEditorModel->DialogModel();
 }
 
 //----------------------------------------------------------------------------------------

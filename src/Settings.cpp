@@ -69,12 +69,16 @@ namespace {
     "LeftTab_Settings",
     "LeftTab_Nodes",
     "LeftTab_Code",
+    "LeftTab_Sequence",
+    "LeftTab_Dialog",
 
     "RightTab_Resource",
     "RightTab_MediaPlayer",
     "RightTab_Settings",
     "RightTab_Nodes",
     "RightTab_Code",
+    "RightTab_Sequence",
+    "RightTab_Dialog",
 
     "Cut",
     "Copy",
@@ -186,6 +190,7 @@ CSettings::CSettings(QObject* pParent) :
       { "LeftTab_Nodes",        QKeySequence(Qt::CTRL + Qt::Key_N) },
       { "LeftTab_Code",         QKeySequence(Qt::CTRL + Qt::Key_D) },
       { "LeftTab_Sequence",     QKeySequence(Qt::CTRL + Qt::Key_P) },
+      { "LeftTab_Dialog",       QKeySequence(Qt::CTRL + Qt::Key_I) },
 
       { "RightTab_Resource",    QKeySequence(Qt::ALT  + Qt::Key_R) },
       { "RightTab_MediaPlayer", QKeySequence(Qt::ALT  + Qt::Key_M) },
@@ -193,6 +198,7 @@ CSettings::CSettings(QObject* pParent) :
       { "RightTab_Nodes",       QKeySequence(Qt::ALT  + Qt::Key_N) },
       { "RightTab_Code",        QKeySequence(Qt::ALT  + Qt::Key_D) },
       { "RightTab_Sequence",    QKeySequence(Qt::ALT  + Qt::Key_P) },
+      { "RightTab_Dialog",      QKeySequence(Qt::ALT  + Qt::Key_I) },
 
       { "Cut",        QKeySequence(QKeySequence::Cut)    },
       { "Copy",       QKeySequence(QKeySequence::Copy)   },

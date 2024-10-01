@@ -69,6 +69,14 @@ namespace {
   const QString c_sRemoveSeqElemsHelpId =  "Editor/RemoveSelectedSequenceElements";
   const QString c_sAddSeqLayerHelpId =     "Editor/AddSequenceLayer";
   const QString c_sRemoveSeqLayerHelpId =  "Editor/RemoveSelectedSequenceLayers";
+
+  const QString c_sAddDialogHelpId =        "Editor/AddDialog";
+  const QString c_sAddCondDialogHelpId =    "Editor/AddConditionalDialog";
+  const QString c_sRemoveDialogHelpId =     "Editor/RemoveDialog";
+  const QString c_sAddDialogCategoryHelpId ="Editor/AddDialogCategory";
+  const QString c_sRemoveDialogCategoryHelpId ="Editor/RemoveDialogCategory";
+  const QString c_sEditDialogHelpId =       "Editor/EditDialog";
+  const QString c_sEditDialogTagsHelpId =   "Editor/EditDialogTags";
 }
 
 CEditorActionBar::CEditorActionBar(QWidget* pParent) :
@@ -269,6 +277,19 @@ void CEditorActionBar::Initialize()
     wpHelpFactory->RegisterHelp(c_sAddSeqLayerHelpId, ":/resources/help/editor/sequence/add_sequencelayer_button_help.html");
     m_spUi->RemoveSelectedSequenceLayer->setProperty(helpOverlay::c_sHelpPagePropertyName, c_sRemoveSeqLayerHelpId);
     wpHelpFactory->RegisterHelp(c_sRemoveSeqLayerHelpId, ":/resources/help/editor/sequence/remove_sequencelayer_button_help.html");
+
+    m_spUi->AddDialog->setProperty(helpOverlay::c_sHelpPagePropertyName, c_sAddDialogHelpId);
+    wpHelpFactory->RegisterHelp(c_sAddDialogHelpId, ":/resources/help/editor/sequence/createsequence_button_help.html");
+    m_spUi->AddDialogFrament->setProperty(helpOverlay::c_sHelpPagePropertyName, c_sAddCondDialogHelpId);
+    wpHelpFactory->RegisterHelp(c_sAddCondDialogHelpId, ":/resources/help/editor/sequence/createsequence_button_help.html");
+    m_spUi->AddDialogCategoryButton->setProperty(helpOverlay::c_sHelpPagePropertyName, c_sAddDialogCategoryHelpId);
+    wpHelpFactory->RegisterHelp(c_sAddDialogCategoryHelpId, ":/resources/help/editor/add_sequenceelem_button_help.html");
+    m_spUi->RemoveDialog->setProperty(helpOverlay::c_sHelpPagePropertyName, c_sRemoveDialogHelpId);
+    wpHelpFactory->RegisterHelp(c_sRemoveDialogHelpId, ":/resources/help/editor/sequence/editsequence_button_help.html");
+    m_spUi->EditDialogContent->setProperty(helpOverlay::c_sHelpPagePropertyName, c_sEditDialogHelpId);
+    wpHelpFactory->RegisterHelp(c_sEditDialogHelpId, ":/resources/help/editor/sequence/add_sequencelayer_button_help.html");
+    m_spUi->EditDialogTags->setProperty(helpOverlay::c_sHelpPagePropertyName, c_sEditDialogTagsHelpId);
+    wpHelpFactory->RegisterHelp(c_sEditDialogTagsHelpId, ":/resources/help/editor/sequence/remove_sequencelayer_button_help.html");
   }
 
   connect(m_spSettings.get(), &CSettings::keyBindingsChanged,
@@ -288,6 +309,7 @@ void CEditorActionBar::HideAllBars()
   m_spUi->pCodeEditorContainer->hide();
   m_spUi->pProjectSettingsEditorContainer->hide();
   m_spUi->pSequenceEditorContainer->hide();
+  m_spUi->pDialogEditorContainer->hide();
 
   m_iCurrentDisplayType = -1;
 }
@@ -369,6 +391,15 @@ void CEditorActionBar::ShowSequenceEditorActionBar()
 
 //----------------------------------------------------------------------------------------
 //
+void CEditorActionBar::ShowDialogActionBar()
+{
+  HideAllBars();
+  m_spUi->pDialogEditorContainer->show();
+  m_iCurrentDisplayType = EEditorWidget::eDialogEditor;
+}
+
+//----------------------------------------------------------------------------------------
+//
 void CEditorActionBar::SlotKeyBindingsChanged()
 {
   // set bindings
@@ -439,5 +470,11 @@ void CEditorActionBar::SlotKeyBindingsChanged()
     m_spUi->AddSequenceElement->SetShortcut(m_spSettings->keyBinding(sKey.arg(7)));
     m_spUi->RemoveSelectedSequenceElements->SetShortcut(m_spSettings->keyBinding(sKey.arg(8)));
 
+    m_spUi->AddDialog->SetShortcut(m_spSettings->keyBinding(sKey.arg(1)));
+    m_spUi->AddDialogFrament->SetShortcut(m_spSettings->keyBinding(sKey.arg(2)));
+    m_spUi->AddDialogCategoryButton->SetShortcut(m_spSettings->keyBinding(sKey.arg(3)));
+    m_spUi->RemoveDialog->SetShortcut(m_spSettings->keyBinding(sKey.arg(4)));
+    m_spUi->EditDialogContent->SetShortcut(m_spSettings->keyBinding(sKey.arg(5)));
+    m_spUi->EditDialogTags->SetShortcut(m_spSettings->keyBinding(sKey.arg(6)));
   }
 }

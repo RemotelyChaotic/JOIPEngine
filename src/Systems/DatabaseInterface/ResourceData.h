@@ -29,6 +29,16 @@ struct SResourceData
   {}
   SResourceData(const SResourceData& other) = default;
 
+  void CopyFrom(const SResourceData& other)
+  {
+    m_sName = other.m_sName;
+    m_sPath = other.m_sPath;
+    m_sSource = other.m_sSource;
+    m_type = other.m_type;
+    m_sResourceBundle = other.m_sResourceBundle;
+    m_vsResourceTags = other.m_vsResourceTags;
+  }
+
   QString                   m_sName;
   QUrl                      m_sPath;
   QUrl                      m_sSource;

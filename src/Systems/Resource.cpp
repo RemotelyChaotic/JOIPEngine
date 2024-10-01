@@ -261,7 +261,8 @@ QStringList SResourceFormats::ArchiveFormats()
 //
 QStringList SResourceFormats::DatabaseFormats()
 {
-  static QStringList vsFormats = QStringList() << "*.json" << "*.xml";
+  static QStringList vsFormats = QStringList() << "*.json" << "*.xml" <<
+                                 ("*." + joip_resource::c_sDialogFileType);
   return vsFormats;
 }
 
@@ -336,12 +337,13 @@ QStringList SResourceFormats::VideoFormats()
 //
 QString SResourceFormats::JoinedFormatsForFilePicker()
 {
-  QString sFormatSelection = "Image Files (%1);;Video Files (%2);;Sound Files (%3);;Script Files (%4);;Archives (%5);;Fonts (%6);;Other Files (%7)";
+  QString sFormatSelection = "Image Files (%1);;Video Files (%2);;Sound Files (%3);;Script Files (%4);;Archives (%5);;Fonts (%6);;Database Files (%7);;Other Files (%8)";
   return sFormatSelection.arg(ImageFormats().join(" "))
                          .arg(VideoFormats().join(" "))
                          .arg(AudioFormats().join(" "))
                          .arg(ScriptFormats().join(" "))
                          .arg(ArchiveFormats().join(" "))
                          .arg(FontFormats().join(" "))
+                         .arg(DatabaseFormats().join(" "))
                          .arg(OtherFormats().join(" "));
 }

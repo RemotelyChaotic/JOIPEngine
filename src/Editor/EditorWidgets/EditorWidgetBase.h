@@ -8,6 +8,7 @@
 #include <memory>
 
 class CEditorActionBar;
+class CDialogEditorTreeModel;
 class CFlowScene;
 class CEditorModel;
 class CKinkTreeModel;
@@ -46,6 +47,7 @@ protected:
   virtual void OnActionBarChanged() {}
 
   QPointer<CEditorActionBar> ActionBar() const;
+  QPointer<CDialogEditorTreeModel> DialogModel() const;
   QPointer<CEditorModel> EditorModel() const;
   QPointer<CFlowScene> FlowSceneModel() const;
   QPointer<CKinkTreeModel> KinkModel() const;

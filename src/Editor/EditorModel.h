@@ -15,6 +15,7 @@
 
 class CDatabaseManager;
 class CFlowScene;
+class CDialogEditorTreeModel;
 class CEditorJobWorker;
 class CKinkTreeModel;
 class CResourceTreeItemModel;
@@ -44,6 +45,7 @@ public:
   const tspProject& CurrentProject() const;
   CFlowScene* FlowSceneModel() const;
   bool IsReadOnly() const;
+  CDialogEditorTreeModel* DialogModel() const;
   CEditorJobWorker* JobWorker() const;
   CKinkTreeModel* KinkTreeModel() const;
   CResourceTreeItemModel* ResourceTreeModel() const;
@@ -52,10 +54,11 @@ public:
   QString ScriptTypeFilterForNewScripts() const;
   QUndoStack* UndoStack() const;
 
-  void AddNewFileToScene(QPointer<QWidget> pParentForDialog,
-                         tspScene spScene,
-                         EResourceType type,
-                         const QString& sCustomInitContent);
+  QString AddNewFileToScene(QPointer<QWidget> pParentForDialog,
+                            tspScene spScene,
+                            EResourceType type,
+                            const QString& sCustomInitContent,
+                            const QStringList& vsFormats = QStringList());
 
   void AddTutorialStateSwitchHandler(std::weak_ptr<ITutorialStateSwitchHandler> wpSwitcher);
   void NextTutorialState();
@@ -102,6 +105,7 @@ private:
   std::unique_ptr<CResourceTreeItemModel>                     m_spResourceTreeModel;
   std::shared_ptr<CSettings>                                  m_spSettings;
   std::shared_ptr<CThreadedSystem>                            m_spJobWorkerSystem;
+  std::shared_ptr<CDialogEditorTreeModel>                     m_spDialogModel;
   tspProject                                                  m_spCurrentProject;
   std::weak_ptr<CDatabaseManager>                             m_wpDbManager;
   std::vector<std::weak_ptr<ITutorialStateSwitchHandler>>     m_vwpTutorialStateSwitchHandlers;

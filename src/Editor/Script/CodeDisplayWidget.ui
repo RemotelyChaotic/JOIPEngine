@@ -79,7 +79,14 @@
         <number>0</number>
        </property>
        <item row="0" column="0">
-        <widget class="CEosScriptEditorView" name="pEosEdit"/>
+        <widget class="CEosScriptEditorView" name="pEosEdit">
+         <property name="alternatingRowColors">
+          <bool>true</bool>
+         </property>
+         <property name="animated">
+          <bool>true</bool>
+         </property>
+        </widget>
        </item>
       </layout>
      </widget>

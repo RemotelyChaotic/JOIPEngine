@@ -377,9 +377,9 @@ void CCommandAddResource::redo()
         tspResource spAdded = spDbManager->FindResourceInProject(m_spCurrentProject, sName);
         if (nullptr != spAdded)
         {
-          // set source by hand
+          // set old data manually
           spAdded->m_rwLock.lockForWrite();
-          spAdded->m_sSource = resourceIt.second->m_sSource;
+          spAdded->CopyFrom(*resourceIt.second);
           spAdded->m_rwLock.unlock();
           // store a copy
           resourceIt.second.reset(new SResource(*spAdded));

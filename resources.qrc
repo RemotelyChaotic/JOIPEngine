@@ -311,6 +311,7 @@
         <file>resources/help/player/images/MediaIcon.svg</file>
         <file>resources/help/player/images/WarningIcon.svg</file>
         <file>resources/help/player/images/WebIcon.svg</file>
+        <file>resources/data/dialog_schema.json</file>
     </qresource>
     <qresource prefix="/qml">
         <file>resources/qml/JoipEngine/EmptyDummy.qml</file>

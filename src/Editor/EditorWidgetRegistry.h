@@ -74,6 +74,7 @@ namespace detail
   struct SRegistryEntry
   {
     static bool m_bRegistered;
+    static qint32 m_iId;
   };
 }
 
@@ -81,10 +82,12 @@ namespace detail
 //
 #define DECLARE_EDITORWIDGET(Class, Type) \
   template<> bool detail::SRegistryEntry<Class>::m_bRegistered =  \
-    CEditorFactory::Register<Class>(Type);
+    CEditorFactory::Register<Class>(Type); \
+  template<> qint32 detail::SRegistryEntry<Class>::m_iId = static_cast<qint32>(Type);
 
 #define DECLARE_EDITORLAYOUT(Class, Type) \
   template<> bool detail::SRegistryEntry<Class>::m_bRegistered =  \
-    CEditorFactory::Register<Class>(Type);
+    CEditorFactory::Register<Class>(Type); \
+  template<> qint32 detail::SRegistryEntry<Class>::m_iId = static_cast<qint32>(Type);
 
 #endif // EDITORWIDGETREGISTRY_H

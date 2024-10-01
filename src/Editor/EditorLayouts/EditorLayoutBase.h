@@ -2,9 +2,16 @@
 #define IEDITORLAYOUT_H
 
 #include "IEditorLayoutViewProvider.h"
+
+#include "Editor/EditorWidgetRegistry.h"
+#include "Editor/EditorWidgetTypes.h"
+
 #include "Widgets/IWidgetBaseInterface.h"
+
+#include <QPointer>
 #include <QWidget>
 #include <memory>
+
 #include <type_traits>
 
 class CEditorModel;
@@ -33,8 +40,23 @@ public:
 
 protected:
   QPointer<CEditorTutorialOverlay> GetTutorialOverlay() const;
-  template<class T, typename std::enable_if<std::is_base_of<CEditorWidgetBase, T>::value, bool>::type = true>
-  QPointer<T> GetWidget() const;
+  template<class T,
+           typename std::enable_if<
+               std::is_base_of<CEditorWidgetBase, T>::value &&
+               !std::is_same_v<CEditorWidgetBase, T>, bool>::type = true>
+  QPointer<T> GetWidget() const
+  {
+    if (auto spLayoutProvider = m_pLayoutViewProvider.lock())
+    {
+      qint32 iId = detail::SRegistryEntry<T>::m_iId;
+      if (EEditorWidget::_is_valid(iId))
+      {
+        return qobject_cast<T*>(
+            spLayoutProvider->GetEditorWidget(EEditorWidget::_from_integral(iId)).data());
+      }
+    }
+    return nullptr;
+  }
   QPointer<CEditorWidgetBase> GetWidget(EEditorWidget widget) const;
   void VisitWidgets(const std::function<void(QPointer<CEditorWidgetBase>, EEditorWidget)>& fnVisitor);
 

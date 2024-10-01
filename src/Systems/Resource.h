@@ -20,6 +20,7 @@ namespace joip_resource
 {
   const QString c_sProjectFileName  = "JOIPData.json";
   const QString c_sSceneModelFile   = "SceneModel.flow";
+  const QString c_sDialogFileType   = "joipdlg";
 }
 
 //----------------------------------------------------------------------------------------

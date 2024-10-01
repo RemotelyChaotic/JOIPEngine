@@ -3,6 +3,8 @@
 #include "EditorJobWorker.h"
 #include "EditorEditableFileModel.h"
 
+#include "DialogEditor/DialogEditorTreeModel.h"
+
 #include "EditorJobs/IEditorJobStateListener.h"
 
 #include "NodeEditor/EndNodeModel.h"
@@ -50,6 +52,7 @@ CEditorModel::CEditorModel(QWidget* pParent) :
   m_spResourceTreeModel(std::make_unique<CResourceTreeItemModel>(m_spUndoStack.get())),
   m_spSettings(CApplication::Instance()->Settings()),
   m_spJobWorkerSystem(std::make_shared<CThreadedSystem>("EditorJobWorker")),
+  m_spDialogModel(std::make_shared<CDialogEditorTreeModel>(pParent)),
   m_spCurrentProject(nullptr),
   m_wpDbManager(CApplication::Instance()->System<CDatabaseManager>()),
   m_vwpTutorialStateSwitchHandlers(),
@@ -121,6 +124,13 @@ CFlowScene* CEditorModel::FlowSceneModel() const
 bool CEditorModel::IsReadOnly() const
 {
   return m_bReadOnly;
+}
+
+//----------------------------------------------------------------------------------------
+//
+CDialogEditorTreeModel* CEditorModel::DialogModel() const
+{
+  return m_spDialogModel.get();
 }
 
 //----------------------------------------------------------------------------------------
@@ -256,22 +266,32 @@ namespace
 
 //----------------------------------------------------------------------------------------
 //
-void CEditorModel::AddNewFileToScene(QPointer<QWidget> pParentForDialog,
-                                     tspScene spScene,
-                                     EResourceType type,
-                                     const QString& sCustomInitContent)
+QString CEditorModel::AddNewFileToScene(QPointer<QWidget> pParentForDialog,
+                                        tspScene spScene,
+                                        EResourceType type,
+                                        const QString& sCustomInitContent,
+                                        const QStringList& vsFormats)
 {
   auto spDbManager = m_wpDbManager.lock();
   if (nullptr != spDbManager)
   {
-    QStringList formats;
-    if (EResourceType::eScript == type._to_integral())
+    QStringList formats = vsFormats;
+    if (formats.isEmpty())
     {
-      formats = SResourceFormats::ScriptFormats();
-    }
-    else if (EResourceType::eLayout == type._to_integral())
-    {
-      formats = SResourceFormats::LayoutFormats();
+      switch (type)
+      {
+        case EResourceType::eScript:
+        {
+          formats = SResourceFormats::ScriptFormats();
+        } break;
+        case EResourceType::eLayout:
+        {
+          formats = SResourceFormats::LayoutFormats();
+        } break;
+        default:
+          qWarning() << tr("No formats specified for editor model dialog.");
+          return QString();
+      }
     }
 
     QRegExp rxTypeFilter(m_sScriptTypesFilter);
@@ -309,7 +329,7 @@ void CEditorModel::AddNewFileToScene(QPointer<QWidget> pParentForDialog,
 
     if (dlg->exec())
     {
-      if (nullptr == pThisGuard) { return; }
+      if (nullptr == pThisGuard) { return QString(); }
       QList<QUrl> urls = dlg->selectedUrls();
       delete dlg;
 
@@ -357,6 +377,7 @@ void CEditorModel::AddNewFileToScene(QPointer<QWidget> pParentForDialog,
             QString sResource = spDbManager->AddResource(m_spCurrentProject, sUrlToSave,
                                                          type, QString(),
                                                          vfnActions);
+            return sResource;
           }
           else
           {
@@ -367,10 +388,11 @@ void CEditorModel::AddNewFileToScene(QPointer<QWidget> pParentForDialog,
     }
     else
     {
-      if (nullptr == pThisGuard) { return; }
+      if (nullptr == pThisGuard) { return QString(); }
       delete dlg;
     }
   }
+  return QString();
 }
 
 
@@ -527,10 +549,11 @@ void CEditorModel::LoadProject(qint32 iId)
     }
 
     const QString sProjName = PhysicalProjectName(m_spCurrentProject);
+    Q_UNUSED(sProjName)
     CDatabaseManager::LoadProject(m_spCurrentProject);
 
     QReadLocker projectLocker(&m_spCurrentProject->m_rwLock);
-    m_bReadOnly = m_spCurrentProject->m_bBundled | m_spCurrentProject->m_bReadOnly;
+    m_bReadOnly = m_spCurrentProject->m_bBundled || m_spCurrentProject->m_bReadOnly;
     ETutorialState tutorialState = m_spCurrentProject->m_tutorialState;
 
     if (!m_bReadOnly)
@@ -593,6 +616,7 @@ void CEditorModel::LoadProject(qint32 iId)
 
   m_spResourceTreeModel->InitializeModel(m_spCurrentProject);
   m_spEditableFileModel->InitializeModel(m_spCurrentProject);
+  m_spDialogModel->InitializeModel(m_spCurrentProject);
 }
 
 //----------------------------------------------------------------------------------------
@@ -702,6 +726,7 @@ void CEditorModel::UnloadProject()
   JobWorker()->StopRunningJobs();
   JobWorker()->WaitForFinished();
 
+  m_spDialogModel->DeInitializeModel();
   m_spEditableFileModel->DeInitializeModel();
   m_spResourceTreeModel->DeInitializeModel();
   m_spFlowSceneModel->clearScene();
