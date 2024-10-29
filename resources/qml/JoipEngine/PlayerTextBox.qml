@@ -266,11 +266,11 @@ Rectangle {
             }
             textBox.showButtonPrompts(vsModifiedPrompts, sStoreIntoVar, sRequestId,
                                       bStoreIntoStorageInstead);
-            hideTimer.reset(10*1000);
+            hideTimer.reset(2*1000);
         }
         onShowInput: {
             textBox.showInput(sStoreIntoVar, sRequestId, bStoreIntoStorageInstead);
-            hideTimer.reset(10*1000);
+            hideTimer.reset(2*1000);
         }
         onShowText: {
             if (sText.startsWith("<html>") && sText.endsWith("</html>")) {
@@ -282,7 +282,7 @@ Rectangle {
                 registrator.setSkippableWait(dSkippableWaitS);
             }
 
-            hideTimer.reset((10 < dSkippableWaitS ? dSkippableWaitS : 10)*1000);
+            hideTimer.reset((2 < dSkippableWaitS ? dSkippableWaitS : 2)*1000);
         }
         onTextAlignmentChanged: {
             dataContainer.textAlignment = alignment;
@@ -314,7 +314,7 @@ Rectangle {
         anchors.fill: parent
         hoverEnabled: textBox.hideLogAfterInactivity
         onPositionChanged: {
-            hideTimer.reset(10*1000);
+            hideTimer.reset(2*1000);
         }
     }
 
