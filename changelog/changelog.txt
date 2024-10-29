@@ -13,6 +13,8 @@ Changes:
   paused emitters waiting, cannibalize the first waiting emitter to be able to play
   the sound.
 - Added a new default SFX to the Metronome: Lub-Dub
+- Project preview shows the project name instead of 404 if no Title Card is set.
+- Project name is displayed in the Project Card details above the describtion.
 
 Fixed Bugs:
 - Fixed a crash occurring when stopping a debug session mid Scene transition.

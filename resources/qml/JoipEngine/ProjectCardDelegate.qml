@@ -527,8 +527,11 @@ Rectangle {
             }
         }
 
+        errorResource.text = dto.name;
         versionText.text = dto.versionText + " / " + dto.targetVersionText;
-        describtion.text = (dto.describtion.length > 0 ? dto.describtion : qsTr("<i>No describtion</i>")) +
+        describtion.text =
+                "<h3>" + dto.name + "</h3>" +
+                (dto.describtion.length > 0 ? dto.describtion : qsTr("<i>No describtion</i>")) +
                 "<br><br>";
         if (dto.targetVersion > Settings.version)
         {

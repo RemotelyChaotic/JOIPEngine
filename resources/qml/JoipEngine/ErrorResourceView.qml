@@ -12,6 +12,7 @@ Rectangle {
 
     property real fontSize: 100
     property real glowRadius: 10
+    property string text: "404"
 
     color: "transparent"
 
@@ -34,7 +35,7 @@ Rectangle {
 
     Text {
         id: text404
-        text: "404"
+        text: text404Rect.text
         anchors.fill: parent
         color: "black"
         font.family: Settings.font
