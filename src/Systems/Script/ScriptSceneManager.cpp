@@ -87,7 +87,20 @@ void CScriptSceneManager::gotoScene(QVariant scene)
   QString sScene = GetScene(scene, "gotoScene");
 
   auto pSignalEmitter = SignalEmitter<CSceneManagerSignalEmiter>();
+
+  // goto needs to wait here otherwise we accidentally run commands after the call
+  QEventLoop loop;
+  QMetaObject::Connection interruptThisLoop =
+      connect(this, &CScriptObjectBase::SignalInterruptExecution,
+              &loop, &QEventLoop::quit, Qt::QueuedConnection);
   emit pSignalEmitter->gotoScene(sScene);
+  loop.exec();
+
+  QPointer<CScriptSceneManager> pThis(this);
+  if (nullptr != pThis)
+  {
+    disconnect(interruptThisLoop);
+  }
 }
 
 //----------------------------------------------------------------------------------------
