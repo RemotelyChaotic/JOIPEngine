@@ -27,7 +27,8 @@ using QtNodes::Node;
 
 //----------------------------------------------------------------------------------------
 //
-void ResolveNextPossibleNodes(qint32 iDepth, Node* pNode, std::vector<NodeResolveReslt>& vpRet)
+void ResolveNextPossibleNodes(qint32 iDepth, Node* pNode, const std::set<QString>& disabledScenes,
+                              std::vector<NodeResolveReslt>& vpRet)
 {
   if (nullptr == pNode) { return; }
 
@@ -36,9 +37,11 @@ void ResolveNextPossibleNodes(qint32 iDepth, Node* pNode, std::vector<NodeResolv
   CPathSplitterModel* pSplitterModel =
     dynamic_cast<CPathSplitterModel*>(pNode->nodeDataModel());
 
+  // selection transition, merger or a scene of sorts
   if (pSplitterModel == nullptr ||
       pSplitterModel->TransitionType()._to_integral() == ESceneTransitionType::eSelection)
   {
+    // iterate out-ports
     for (quint32 i = 0; iOutPorts > i; i++)
     {
       auto pConnectionsMap =
@@ -51,9 +54,11 @@ void ResolveNextPossibleNodes(qint32 iDepth, Node* pNode, std::vector<NodeResolv
         CEndNodeModel* pEndModel =
           dynamic_cast<CEndNodeModel*>(pNextNode->nodeDataModel());
 
+        // we have a scene or end
         if (nullptr != pSceneModel || nullptr != pEndModel)
         {
           // splitter path name or scene name
+          // push resolver
           if (nullptr != pSplitterModel)
           {
             std::optional<QString> optCustomTransition = pSplitterModel->CustomTransition();
@@ -62,25 +67,29 @@ void ResolveNextPossibleNodes(qint32 iDepth, Node* pNode, std::vector<NodeResolv
                                    pNextNode, iDepth, optCustomTransition.has_value(),
                                    optCustomTransition.value_or(QString())});
           }
+          // push end
           else if(nullptr != pEndModel)
           {
             vpRet.push_back(NodeResolveReslt{"End", pNextNode, iDepth, false, QString()});
           }
-          else
+          // only push enabled scenes
+          else if (disabledScenes.end() == disabledScenes.find(pSceneModel->SceneName()))
           {
             vpRet.push_back(NodeResolveReslt{pSceneModel->SceneName(), pNextNode, iDepth, false, QString()});
           }
         }
+        // we have a merger
         else
         {
-          ResolveNextPossibleNodes(iDepth+1, pNextNode, vpRet);
+          ResolveNextPossibleNodes(iDepth+1, pNextNode, disabledScenes, vpRet);
         }
       }
     }
   }
+  // random selection
   else
   {
-    // check which maps lead to anything
+    // pre-check which ports lead to anything
     std::vector<quint32> viValidIndicees;
     for (quint32 i = 0; iOutPorts > i; i++)
     {
@@ -95,33 +104,58 @@ void ResolveNextPossibleNodes(qint32 iDepth, Node* pNode, std::vector<NodeResolv
     long unsigned int seed =
       static_cast<long unsigned int>(std::chrono::high_resolution_clock::now().time_since_epoch().count());
     std::mt19937 generator(static_cast<long unsigned int>(seed));
-    std::uniform_int_distribution<> dis(0, static_cast<qint32>(viValidIndicees.size() - 1));
-    qint32 iGeneratedIndex = dis(generator);
     qDebug() << "Seed:" << seed << "casted:" << static_cast<long unsigned int>(seed);
-    qDebug() << "Generated value:" << iGeneratedIndex << "from 0 -" << static_cast<qint32>(viValidIndicees.size() - 1);
 
-    auto pConnectionsMap =
-        pNode->nodeState().connections(PortType::Out,
-                                       static_cast<qint32>(viValidIndicees[static_cast<quint32>(iGeneratedIndex)]));
-    for (auto it = pConnectionsMap.begin(); pConnectionsMap.end() != it; ++it)
+    // Do a second pass and check the following nodes. If empty, remove from the possible list.
+    std::vector<std::pair<qint32, std::vector<NodeResolveReslt>>> vResult2Pass;
+    for (qint32 iValidIndex : viValidIndicees)
     {
-      QtNodes::Node* pNextNode = it->second->getNode(PortType::In);
-      CSceneNodeModel* pSceneModel =
-        dynamic_cast<CSceneNodeModel*>(pNextNode->nodeDataModel());
-      CEndNodeModel* pEndModel =
-        dynamic_cast<CEndNodeModel*>(pNextNode->nodeDataModel());
+      std::vector<NodeResolveReslt> vpCachedRet;
+      auto pConnectionsMap =
+          pNode->nodeState().connections(PortType::Out, iValidIndex);
+      for (auto it = pConnectionsMap.begin(); pConnectionsMap.end() != it; ++it)
+      {
+        QtNodes::Node* pNextNode = it->second->getNode(PortType::In);
+        CSceneNodeModel* pSceneModel =
+          dynamic_cast<CSceneNodeModel*>(pNextNode->nodeDataModel());
+        CEndNodeModel* pEndModel =
+          dynamic_cast<CEndNodeModel*>(pNextNode->nodeDataModel());
 
-      if (nullptr != pSceneModel || nullptr != pEndModel)
-      {
-        vpRet.push_back(
-              NodeResolveReslt{pSplitterModel->TransitionLabel(static_cast<qint32>(iGeneratedIndex)),
-                               pNextNode, iDepth, false, QString()});
+        // we found an end model
+        if (nullptr != pEndModel)
+        {
+          vpCachedRet.push_back(
+              NodeResolveReslt{"End", pNextNode, iDepth, false, QString()});
+        }
+        // we found a scene model, only insert if not disabled
+        else if (nullptr != pSceneModel)
+        {
+          if (disabledScenes.end() == disabledScenes.find(pSceneModel->SceneName()))
+          {
+            vpCachedRet.push_back(
+                NodeResolveReslt{pSplitterModel->TransitionLabel(iValidIndex),
+                                 pNextNode, iDepth, false, QString()});
+          }
+        }
+        // might be a merger or splitter, iterate recursively
+        else
+        {
+          ResolveNextPossibleNodes(iDepth+1, pNextNode, disabledScenes, vpCachedRet);
+        }
       }
-      else
+
+      if (!vpCachedRet.empty())
       {
-        ResolveNextPossibleNodes(iDepth+1, pNextNode, vpRet);
+        vResult2Pass.push_back({iValidIndex, vpCachedRet});
       }
     }
+
+    std::uniform_int_distribution<> dis(0, static_cast<qint32>(vResult2Pass.size() - 1));
+    qint32 iGeneratedIndex = dis(generator);
+    qDebug() << "Generated value:" << iGeneratedIndex << "from 0 -" << static_cast<qint32>(vResult2Pass.size() - 1);
+
+    auto vRolledRes = vResult2Pass[static_cast<size_t>(iGeneratedIndex)].second;
+    vpRet.insert(vpRet.end(), vRolledRes.begin(), vRolledRes.end());
   }
 }
 
@@ -163,7 +197,7 @@ QStringList GetFirstUnresolvedNodes(std::vector<NodeResolveReslt>& resolveResult
 //----------------------------------------------------------------------------------------
 //
 void ResolveNodes(std::vector<NodeResolveReslt>& resolveResult, const QStringList& vsNodes,
-                  qint32 iResolve)
+                  qint32 iResolve, const std::set<QString>& disabledScenes)
 {
   QStringList vsToResolve = vsNodes;
 
@@ -197,7 +231,7 @@ void ResolveNodes(std::vector<NodeResolveReslt>& resolveResult, const QStringLis
         }
         else
         {
-          ResolveNextPossibleNodes(node.m_iDepth+1, node.m_pNode, resolveResult);
+          ResolveNextPossibleNodes(node.m_iDepth+1, node.m_pNode, disabledScenes, resolveResult);
         }
       }
 
@@ -475,7 +509,7 @@ void CProjectRunner::ResolveFindScenes(const QString sName)
 //
 void CProjectRunner::ResolvePossibleScenes(const QStringList vsNames, qint32 iIndex)
 {
-  ResolveNodes(m_resolveResult, vsNames, iIndex);
+  ResolveNodes(m_resolveResult, vsNames, iIndex, m_disabledScenes);
   m_nodeMap.clear();
   GenerateNodesFromResolved();
 }
@@ -647,7 +681,7 @@ bool CProjectRunner::ResolveNextScene()
   }
 
   m_nodeMap.clear();
-  ResolveNextPossibleNodes(0, m_pCurrentNode, m_resolveResult);
+  ResolveNextPossibleNodes(0, m_pCurrentNode, m_disabledScenes, m_resolveResult);
   return GenerateNodesFromResolved();
 }
 
