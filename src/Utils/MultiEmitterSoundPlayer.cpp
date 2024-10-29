@@ -128,10 +128,7 @@ void CMultiEmitterSoundPlayer::Play()
     // play sound
     if (-1 < m_iCurrentAutioPlayer && static_cast<qint32>(m_vspPlayers.size()) > m_iCurrentAutioPlayer)
     {
-      if (m_vspPlayers[m_iCurrentAutioPlayer]->isPlaying())
-      {
-        m_vspPlayers[m_iCurrentAutioPlayer]->stop();
-      }
+      m_vspPlayers[m_iCurrentAutioPlayer]->stop();
       m_vspPlayers[m_iCurrentAutioPlayer]->play();
     }
 
@@ -166,7 +163,7 @@ void CMultiEmitterSoundPlayer::Stop()
 void CMultiEmitterSoundPlayer::AdvanceNextSfxToLoad()
 {
   ++m_iNextSfxToLoad;
-  if (m_sSoundEffects.size() >= m_iNextSfxToLoad)
+  if (m_sSoundEffects.size() <= m_iNextSfxToLoad)
   {
     m_iNextSfxToLoad = 0;
   }

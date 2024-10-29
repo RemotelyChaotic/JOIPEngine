@@ -13,6 +13,7 @@ namespace metronome
   const char c_sSfxSnapp[] = "Snapp";
   const char c_sSfxTic[] = "Tick";
   const char c_sSfxToc[] = "Tock";
+  const char c_sSfxLubDub[] = "Lub-Dub";
 
   const std::map<QString, QStringList>& MetronomeSfxMap();
   QStringList MetronomeSfxFromKey(const QString& sKey);

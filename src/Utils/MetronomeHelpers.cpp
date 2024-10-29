@@ -61,7 +61,9 @@ namespace metronome
         { c_sSfxPlopp, {":/resources/sound/plop-sound-mouth-100690.wav"} },
         { c_sSfxSnapp, {":/resources/sound/finger-snap-43482.wav"} },
         { c_sSfxTic, {":/resources/sound/menu_selection_soft.wav"} },
-        { c_sSfxToc, {":/resources/sound/metronome_default.wav"} }
+        { c_sSfxToc, {":/resources/sound/metronome_default.wav"} },
+        { c_sSfxLubDub, {":/resources/sound/lubdub/HB (bass boost 5.0 -10dB) pt1.wav",
+                         ":/resources/sound/lubdub/HB (bass boost 5.0 -10dB) pt2 (trim).wav"} }
       };
       constexpr char c_sSfxFolder[] = "sfx";
       const QString sFolder = QLibraryInfo::location(QLibraryInfo::PrefixPath) +
