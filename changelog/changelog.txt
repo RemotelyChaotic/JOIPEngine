@@ -12,12 +12,17 @@ Changes:
 - If no more sound emitters are found when trying to play a sound an there are
   paused emitters waiting, cannibalize the first waiting emitter to be able to play
   the sound.
+- Added a new default SFX to the Metronome: Lub-Dub
 
 Fixed Bugs:
 - Fixed a crash occurring when stopping a debug session mid Scene transition.
 - Fixed a UI bug causing colors of buttons in button prompts being ignored.
 - Fixed buttons always being rendered as html when comming from EOS scripts.
 - Fixed SceneManager (pages) function: isEnabled in eval expressions.
+- Fixed resolving of Scenes when a Layout contains disabled Scenes after a 
+  random Splitter Node.
+- Fixed PlayerSceneManager gotoScene not blocking the execution as intended
+  until the scene changes.
 
 =================
 Version 1.4.4.0
