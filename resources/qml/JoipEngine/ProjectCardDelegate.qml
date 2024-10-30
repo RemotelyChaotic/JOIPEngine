@@ -527,7 +527,7 @@ Rectangle {
             }
         }
 
-        errorResource.text = dto.name;
+        errorResource.text = dto.name.replace(/\r/gi, "\n");
         versionText.text = dto.versionText + " / " + dto.targetVersionText;
         describtion.text =
                 "<h3>" + dto.name + "</h3>" +
