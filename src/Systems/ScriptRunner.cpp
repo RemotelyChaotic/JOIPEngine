@@ -284,6 +284,7 @@ void CScriptRunner::SlotClearThreads(EScriptRunnerType type)
   {
     if (type == it->second.first)
     {
+      it->second.second->InterruptExecution();
       it->second.second->ResetEngine();
       it = m_vspRunner.erase(it);
     }
@@ -305,6 +306,7 @@ void CScriptRunner::SlotKill(const QString& sId)
     return;
   }
 
+  it->second.second->InterruptExecution();
   it->second.second->ResetEngine();
 
   if (EScriptRunnerType::eMain != it->second.first)
@@ -347,6 +349,7 @@ void CScriptRunner::SlotRemoveScriptRunner(const QString& sId)
     return;
   }
 
+  it->second.second->InterruptExecution();
   it->second.second->ResetEngine();
 
   m_vspRunner.erase(it);

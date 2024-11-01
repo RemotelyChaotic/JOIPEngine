@@ -27,6 +27,7 @@ Fixed Bugs:
   until the scene changes.
 - Fixed the border in the player.
 - Fixed a crash when killing running threads that are stuck in a wait.
+- Fixed threads not interrupting correctly when waiting in a sleep.
 
 =================
 Version 1.4.4.0

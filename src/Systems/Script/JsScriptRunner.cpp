@@ -242,7 +242,14 @@ public slots:
       emit SignalInterruptExecution();
       m_pScriptEngine->setInterrupted(true);
     }
-    while (m_bRunning) QThread::sleep(1);
+    if (thread() == QThread::currentThread())
+    {
+      while (m_bRunning) QCoreApplication::processEvents();
+    }
+    else
+    {
+      while (m_bRunning) QThread::sleep(1);
+    }
   }
 
   //----------------------------------------------------------------------------------------

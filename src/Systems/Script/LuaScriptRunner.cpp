@@ -240,11 +240,18 @@ public slots:
   //
   void InterruptExecution() override
   {
-    m_bRunning = 0;
     if (nullptr != m_pLuaState)
     {
       emit SignalInterruptExecution();
       SetInterrupted(true);
+    }
+    if (thread() == QThread::currentThread())
+    {
+      while (m_bRunning) QCoreApplication::processEvents();
+    }
+    else
+    {
+      while (m_bRunning) QThread::sleep(1);
     }
   }
 
@@ -323,23 +330,23 @@ public slots:
       m_pLuaState->exec_statements(sSkript);
       if (IsInterrupted())
       {
-        m_bRunning = 0;
         emit HandleScriptFinish(false, QString());
       }
+      m_bRunning = 0;
       m_pLuaState->gc_collect();
     }
     catch (QtLua::String& s)
     {
       if (!IsInterrupted())
       {
-        m_bRunning = 0;
         HandleError(s);
         m_pLuaState->gc_collect();
+        m_bRunning = 0;
       }
       else
       {
-        m_bRunning = 0;
         emit HandleScriptFinish(false, QString());
+        m_bRunning = 0;
       }
       m_pLuaState->gc_collect();
       return;
