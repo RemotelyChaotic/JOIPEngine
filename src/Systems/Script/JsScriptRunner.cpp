@@ -155,12 +155,11 @@ public slots:
   //
   void HandleError(QJSValue& value)
   {
-    m_bRunning = 0;
-
     auto spSignalEmitterContext = m_wpSignalEmiterContext.lock();
     if (nullptr == spSignalEmitterContext)
     {
       qCritical() << "SignalEmitter is null";
+      m_bRunning = 0;
       return;
     }
 
@@ -174,6 +173,8 @@ public slots:
 
     emit spSignalEmitterContext->showError(sError, QtMsgType::QtCriticalMsg);
     emit spSignalEmitterContext->executionError(value.toString(), iLineNr, sStack);
+
+    m_bRunning = 0;
   }
 
   //--------------------------------------------------------------------------------------
@@ -236,12 +237,12 @@ public slots:
   //
   void InterruptExecution() override
   {
-    m_bRunning = 0;
     if (nullptr != m_pScriptEngine)
     {
       emit SignalInterruptExecution();
       m_pScriptEngine->setInterrupted(true);
     }
+    while (m_bRunning) QThread::sleep(1);
   }
 
   //----------------------------------------------------------------------------------------
@@ -334,11 +335,12 @@ public slots:
         {
           HandleError(ret);
         }
+        m_bRunning = 0;
       }
       else
       {
-        m_bRunning = 0;
         emit HandleScriptFinish(false, QString());
+        m_bRunning = 0;
       }
     }
     else
@@ -348,8 +350,9 @@ public slots:
       emit spSignalEmitterContext->showError(sError, QtMsgType::QtCriticalMsg);
       emit spSignalEmitterContext->executionError(sError, 0, "");
 
-      m_bRunning = 0;
+
       emit HandleScriptFinish(false, QString());
+      m_bRunning = 0;
     }
   }
 
