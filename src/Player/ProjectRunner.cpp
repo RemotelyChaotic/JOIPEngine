@@ -150,12 +150,16 @@ void ResolveNextPossibleNodes(qint32 iDepth, Node* pNode, const std::set<QString
       }
     }
 
-    std::uniform_int_distribution<> dis(0, static_cast<qint32>(vResult2Pass.size() - 1));
-    qint32 iGeneratedIndex = dis(generator);
-    qDebug() << "Generated value:" << iGeneratedIndex << "from 0 -" << static_cast<qint32>(vResult2Pass.size() - 1);
+    // do we have results?
+    if (!vResult2Pass.empty())
+    {
+      std::uniform_int_distribution<> dis(0, static_cast<qint32>(vResult2Pass.size() - 1));
+      qint32 iGeneratedIndex = dis(generator);
+      qDebug() << "Generated value:" << iGeneratedIndex << "from 0 -" << static_cast<qint32>(vResult2Pass.size() - 1);
 
-    auto vRolledRes = vResult2Pass[static_cast<size_t>(iGeneratedIndex)].second;
-    vpRet.insert(vpRet.end(), vRolledRes.begin(), vRolledRes.end());
+      auto vRolledRes = vResult2Pass[static_cast<size_t>(iGeneratedIndex)].second;
+      vpRet.insert(vpRet.end(), vRolledRes.begin(), vRolledRes.end());
+    }
   }
 }
 
