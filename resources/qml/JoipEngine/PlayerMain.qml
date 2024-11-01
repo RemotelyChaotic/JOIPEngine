@@ -418,7 +418,9 @@ Rectangle {
     }
     Rectangle {
         color: "transparent"
-        anchors.fill: parent
+        anchors.centerIn: parent
+        width: parent.width+8 // needed to not have a border because of the dropshadow
+        height: parent.height+8 // needed to not have a border because of the dropshadow
         layer.enabled: Settings.playerDropShadow
         layer.effect: DropShadow {
             transparentBorder: true
