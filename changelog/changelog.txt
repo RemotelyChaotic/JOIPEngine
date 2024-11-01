@@ -25,6 +25,7 @@ Fixed Bugs:
   random Splitter Node.
 - Fixed PlayerSceneManager gotoScene not blocking the execution as intended
   until the scene changes.
+- Fixed the border in the player.
 
 =================
 Version 1.4.4.0
