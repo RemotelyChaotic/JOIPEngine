@@ -631,5 +631,35 @@
         <file>resources/android_styles/Somber Dark/ui/ButtonSequenceProperties.png</file>
         <file>resources/android_styles/Somber Dark/ui/InstructionIcon.png</file>
         <file>resources/android_styles/Gummyzilla/ui/ButtonNewSequenceLayer.png</file>
+        <file>resources/android_styles/621 Hexagons/ui/ButtonDialogAdd.png</file>
+        <file>resources/android_styles/621 Hexagons/ui/ButtonDialogAddCondition.png</file>
+        <file>resources/android_styles/621 Hexagons/ui/ButtonDialogAddFolder.png</file>
+        <file>resources/android_styles/621 Hexagons/ui/ButtonDialogConfigure.png</file>
+        <file>resources/android_styles/Blue Night/ui/ButtonDialogAdd.png</file>
+        <file>resources/android_styles/Blue Night/ui/ButtonDialogAddCondition.png</file>
+        <file>resources/android_styles/Blue Night/ui/ButtonDialogAddFolder.png</file>
+        <file>resources/android_styles/Blue Night/ui/ButtonDialogConfigure.png</file>
+        <file>resources/android_styles/Equestria after Dark/ui/ButtonDialogAdd.png</file>
+        <file>resources/android_styles/Equestria after Dark/ui/ButtonDialogAddCondition.png</file>
+        <file>resources/android_styles/Equestria after Dark/ui/ButtonDialogAddFolder.png</file>
+        <file>resources/android_styles/Equestria after Dark/ui/ButtonDialogConfigure.png</file>
+        <file>resources/android_styles/Gummyzilla/ui/ButtonDialogAdd.png</file>
+        <file>resources/android_styles/Gummyzilla/ui/ButtonDialogAddCondition.png</file>
+        <file>resources/android_styles/Gummyzilla/ui/ButtonDialogAddConditionSelected.png</file>
+        <file>resources/android_styles/Gummyzilla/ui/ButtonDialogAddFolder.png</file>
+        <file>resources/android_styles/Gummyzilla/ui/ButtonDialogAddFolderSelected.png</file>
+        <file>resources/android_styles/Gummyzilla/ui/ButtonDialogAddSelected.png</file>
+        <file>resources/android_styles/Gummyzilla/ui/ButtonDialogConfigure.png</file>
+        <file>resources/android_styles/Gummyzilla/ui/ButtonDialogConfigureSelected.png</file>
+        <file>resources/android_styles/Somber Dark/ui/ButtonDialogAdd.png</file>
+        <file>resources/android_styles/Somber Dark/ui/ButtonDialogAddCondition.png</file>
+        <file>resources/android_styles/Somber Dark/ui/ButtonDialogAddFolder.png</file>
+        <file>resources/android_styles/Somber Dark/ui/ButtonDialogConfigure.png</file>
+        <file>resources/android_styles/621 Hexagons/ui/ButtonSequence.png</file>
+        <file>resources/android_styles/Blue Night/ui/ButtonSequence.png</file>
+        <file>resources/android_styles/Equestria after Dark/ui/ButtonSequence.png</file>
+        <file>resources/android_styles/Gummyzilla/ui/ButtonSequence.png</file>
+        <file>resources/android_styles/Gummyzilla/ui/ButtonSequenceSelected.png</file>
+        <file>resources/android_styles/Somber Dark/ui/ButtonSequence.png</file>
     </qresource>
 </RCC>

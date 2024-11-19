@@ -312,6 +312,11 @@
         <file>resources/help/player/images/WarningIcon.svg</file>
         <file>resources/help/player/images/WebIcon.svg</file>
         <file>resources/data/dialog_schema.json</file>
+        <file>resources/style/img/ButtonDialogAdd.png</file>
+        <file>resources/style/img/ButtonDialogAddCondition.png</file>
+        <file>resources/style/img/ButtonDialogAddFolder.png</file>
+        <file>resources/style/img/ButtonDialogConfigure.png</file>
+        <file>resources/style/img/ButtonSequence.png</file>
     </qresource>
     <qresource prefix="/qml">
         <file>resources/qml/JoipEngine/EmptyDummy.qml</file>

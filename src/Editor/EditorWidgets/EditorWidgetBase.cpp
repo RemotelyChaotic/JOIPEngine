@@ -44,6 +44,13 @@ void CEditorWidgetBase::SetEditorModel(CEditorModel* pItemModel)
 
 //----------------------------------------------------------------------------------------
 //
+void CEditorWidgetBase::SetIcon(const QIcon& icon)
+{
+  m_icon = icon;
+}
+
+//----------------------------------------------------------------------------------------
+//
 void CEditorWidgetBase::TakeFromLayout()
 {
   setParent(m_pOriginalParent);

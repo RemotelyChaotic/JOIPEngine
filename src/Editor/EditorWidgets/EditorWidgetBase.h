@@ -3,6 +3,7 @@
 
 #include "Widgets/IWidgetBaseInterface.h"
 #include "Editor/EditorWidgetRegistry.h"
+#include <QIcon>
 #include <QPointer>
 #include <QWidget>
 #include <memory>
@@ -21,6 +22,8 @@ typedef std::shared_ptr<SProject> tspProject;
 class CEditorWidgetBase : public QWidget, public IWidgetBaseInterface
 {
   Q_OBJECT
+  Q_PROPERTY(QIcon icon READ Icon WRITE SetIcon)
+
 public:
   explicit CEditorWidgetBase(QWidget* pParent = nullptr);
   ~CEditorWidgetBase() override;
@@ -34,8 +37,10 @@ public:
   virtual void OnShown() = 0;
 
   bool IsLoaded() { return m_bLoaded; }
+  QIcon Icon() const { return m_icon; }
   void SetActionBar(CEditorActionBar* pActionBar);
   void SetEditorModel(CEditorModel* pItemModel);
+  void SetIcon(const QIcon& icon);
   void TakeFromLayout();
 
 signals:
@@ -60,6 +65,7 @@ protected:
   QPointer<QWidget>                                m_pOriginalParent;
   QPointer<CEditorActionBar>                       m_pActionBar;
   QPointer<CEditorModel>                           m_pEditorModel;
+  QIcon                                            m_icon;
   bool                                             m_bLoaded;
 };
 

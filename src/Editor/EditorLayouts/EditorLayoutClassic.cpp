@@ -377,6 +377,12 @@ void CEditorLayoutClassic::InitializeImpl(bool bWithTutorial)
                                    type._to_integral());
     m_spUi->pRightComboBox->addItem(m_sEditorNamesMap.find(type)->second.arg(""),
                                     type._to_integral());
+    qint32 iIdx = m_spUi->pLeftComboBox->findData(type._to_integral());
+    m_spUi->pLeftComboBox->model()->setData(m_spUi->pLeftComboBox->model()->index(iIdx, 0),
+                                            pWidget->Icon(), Qt::DecorationRole);
+    iIdx = m_spUi->pRightComboBox->findData(type._to_integral());
+    m_spUi->pRightComboBox->model()->setData(m_spUi->pRightComboBox->model()->index(iIdx, 0),
+                                             pWidget->Icon(), Qt::DecorationRole);
   });
   m_spUi->pLeftComboBox->blockSignals(false);
   m_spUi->pRightComboBox->blockSignals(false);

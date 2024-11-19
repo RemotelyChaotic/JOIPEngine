@@ -806,6 +806,22 @@ QPushButton#eSceneCodeEditorWidget:pressed,
 QPushButton#eSceneCodeEditorWidget:disabled {
   image: url(ui/ButtonCodeSelected.png);
 }
+QPushButton#ePatternEditor {
+  icon: url(ui/ButtonSequence.png);
+}
+QPushButton#ePatternEditor:hover,
+QPushButton#ePatternEditor:pressed,
+QPushButton#ePatternEditor:disabled {
+  image: url(ui/ButtonSequenceSelected.png);
+}
+QPushButton#eDialogEditor {
+  icon: url(ui/ButtonNotification.png);
+}
+QPushButton#eDialogEditor:hover,
+QPushButton#eDialogEditor:pressed,
+QPushButton#eDialogEditor:disabled {
+  image: url(ui/ButtonNotificationSelected.png);
+}
 QPushButton#AddAutioCode {
   image: url(ui/ButtonAudio.png);
 }
@@ -1954,4 +1970,33 @@ CDeviceSelectorWidget {
 
 CHelpOverlay {
   qproperty-linkColor: rgb(27, 188, 157);
+}
+
+CEditorResourceWidget {
+  qproperty-icon: url(ui/ButtonResourceWidget.png) off,
+                  url(ui/ButtonResourceWidget.png) on;
+}
+CEditorResourceDisplayWidget {
+  qproperty-icon: url(ui/ButtonResourceDisplay.png) off,
+                  url(ui/ButtonResourceDisplay.png) on;
+}
+CEditorProjectSettingsWidget {
+  qproperty-icon: url(ui/ButtonProjectSettings.png) off,
+                  url(ui/ButtonProjectSettings.png) on;
+}
+CEditorSceneNodeWidget {
+  qproperty-icon: url(ui/ButtonSceneNodeWidget.png) off,
+                  url(ui/ButtonSceneNodeWidget.png) on;
+}
+CEditorCodeWidget {
+  qproperty-icon: url(ui/ButtonCode.png) off,
+                  url(ui/ButtonCode.png) on;
+}
+CEditorPatternEditorWidget {
+  qproperty-icon: url(ui/ButtonSequence.png) off,
+                  url(ui/ButtonSequence.png) on;
+}
+CEditorDialogWidget {
+  qproperty-icon: url(ui/ButtonNotification.png) off,
+                  url(ui/ButtonNotification.png) on;
 }

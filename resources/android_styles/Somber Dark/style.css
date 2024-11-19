@@ -678,51 +678,6 @@ QPushButton#DeviceButton {
   qproperty-icon: url(ui/ButtonPlug.png) off,
                   url(ui/ButtonPlug.png) on;
 }
-QPushButton#eResourceWidget {
-  border-image: url(ui/IconBg.svg) 0 0 0 0 stretch stretch;
-  border-top: 0 transparent;
-  border-bottom: 0 transparent;
-  border-right: 0 transparent;
-  border-left: 0 transparent;
-  qproperty-icon: url(ui/ButtonResourceWidget.png) off,
-                  url(ui/ButtonResourceWidget.png) on;
-}
-QPushButton#eResourceDisplay {
-  border-image: url(ui/IconBg.svg) 0 0 0 0 stretch stretch;
-  border-top: 0 transparent;
-  border-bottom: 0 transparent;
-  border-right: 0 transparent;
-  border-left: 0 transparent;
-  qproperty-icon: url(ui/ButtonResourceDisplay.png) off,
-                  url(ui/ButtonResourceDisplay.png) on;
-}
-QPushButton#eProjectSettings {
-  border-image: url(ui/IconBg.svg) 0 0 0 0 stretch stretch;
-  border-top: 0 transparent;
-  border-bottom: 0 transparent;
-  border-right: 0 transparent;
-  border-left: 0 transparent;
-  qproperty-icon: url(ui/ButtonProjectSettings.png) off,
-                  url(ui/ButtonProjectSettings.png) on;
-}
-QPushButton#eSceneNodeWidget {
-  border-image: url(ui/IconBg.svg) 0 0 0 0 stretch stretch;
-  border-top: 0 transparent;
-  border-bottom: 0 transparent;
-  border-right: 0 transparent;
-  border-left: 0 transparent;
-  qproperty-icon: url(ui/ButtonSceneNodeWidget.png) off,
-                  url(ui/ButtonSceneNodeWidget.png) on;
-}
-QPushButton#eSceneCodeEditorWidget {
-  border-image: url(ui/IconBg.svg) 0 0 0 0 stretch stretch;
-  border-top: 0 transparent;
-  border-bottom: 0 transparent;
-  border-right: 0 transparent;
-  border-left: 0 transparent;
-  qproperty-icon: url(ui/ButtonCode.png) off,
-                  url(ui/ButtonCode.png) on;
-}
 QPushButton#AddAutioCode {
   border-image: url(ui/IconBg.svg) 0 0 0 0 stretch stretch;
   border-top: 0 transparent;
@@ -1033,11 +988,6 @@ QPushButton#RedoButton:hover,
 QPushButton#DownloadButton:hover,
 QPushButton#AddDeviceCode:hover,
 QPushButton#DeviceButton:hover,
-QPushButton#eResourceWidget:hover,
-QPushButton#eResourceDisplay:hover,
-QPushButton#eProjectSettings:hover,
-QPushButton#eSceneNodeWidget:hover,
-QPushButton#eSceneCodeEditorWidget:hover,
 QPushButton#AddAutioCode:hover,
 QPushButton#AddPromptCode:hover,
 QPushButton#AddChoiceCode:hover,
@@ -1128,11 +1078,6 @@ QPushButton#RedoButton:pressed,
 QPushButton#DownloadButton:pressed,
 QPushButton#AddDeviceCode:pressed,
 QPushButton#DeviceButton:pressed,
-QPushButton#eResourceWidget:pressed,
-QPushButton#eResourceDisplay:pressed,
-QPushButton#eProjectSettings:pressed,
-QPushButton#eSceneNodeWidget:pressed,
-QPushButton#eSceneCodeEditorWidget:pressed,
 QPushButton#AddAutioCode:pressed,
 QPushButton#AddPromptCode:pressed,
 QPushButton#AddChoiceCode:pressed,
@@ -1223,11 +1168,6 @@ QPushButton#RedoButton:disabled,
 QPushButton#DownloadButton:disabled,
 QPushButton#AddDeviceCode:disabled,
 QPushButton#DeviceButton:disabled,
-QPushButton#eResourceWidget:disabled,
-QPushButton#eResourceDisplay:disabled,
-QPushButton#eProjectSettings:disabled,
-QPushButton#eSceneNodeWidget:disabled,
-QPushButton#eSceneCodeEditorWidget:disabled,
 QPushButton#AddAutioCode:disabled,
 QPushButton#AddPromptCode:disabled,
 QPushButton#AddChoiceCode:disabled,
@@ -2200,4 +2140,33 @@ CDeviceSelectorWidget {
 
 CHelpOverlay {
   qproperty-linkColor: rgb(100, 40, 183);
+}
+
+CEditorResourceWidget {
+  qproperty-icon: url(ui/ButtonResourceWidget.png) off,
+                  url(ui/ButtonResourceWidget.png) on;
+}
+CEditorResourceDisplayWidget {
+  qproperty-icon: url(ui/ButtonResourceDisplay.png) off,
+                  url(ui/ButtonResourceDisplay.png) on;
+}
+CEditorProjectSettingsWidget {
+  qproperty-icon: url(ui/ButtonProjectSettings.png) off,
+                  url(ui/ButtonProjectSettings.png) on;
+}
+CEditorSceneNodeWidget {
+  qproperty-icon: url(ui/ButtonSceneNodeWidget.png) off,
+                  url(ui/ButtonSceneNodeWidget.png) on;
+}
+CEditorCodeWidget {
+  qproperty-icon: url(ui/ButtonCode.png) off,
+                  url(ui/ButtonCode.png) on;
+}
+CEditorPatternEditorWidget {
+  qproperty-icon: url(ui/ButtonSequence.png) off,
+                  url(ui/ButtonSequence.png) on;
+}
+CEditorDialogWidget {
+  qproperty-icon: url(ui/ButtonNotification.png) off,
+                  url(ui/ButtonNotification.png) on;
 }

@@ -2,6 +2,9 @@
 Version 1.5.0.0
 =================
 
+Changes:
+- Editor icons visible in the dropdown menu.
+
 =================
 Version 1.4.5.0
 =================

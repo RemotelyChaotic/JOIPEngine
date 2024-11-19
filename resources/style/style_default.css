@@ -514,26 +514,6 @@ QPushButton#DeviceButton {
   qproperty-icon: url(:/resources/style/img/ButtonPlug.png) off,
                   url(:/resources/style/img/ButtonPlug.png) on;
 }
-QPushButton#eResourceWidget {
-  qproperty-icon: url(:/resources/style/img/ButtonResourceWidget.png) off,
-                  url(:/resources/style/img/ButtonResourceWidget.png) on;
-}
-QPushButton#eResourceDisplay {
-  qproperty-icon: url(:/resources/style/img/ButtonResourceDisplay.png) off,
-                  url(:/resources/style/img/ButtonResourceDisplay.png) on;
-}
-QPushButton#eProjectSettings {
-  qproperty-icon: url(:/resources/style/img/ButtonProjectSettings.png) off,
-                  url(:/resources/style/img/ButtonProjectSettings.png) on;
-}
-QPushButton#eSceneNodeWidget {
-  qproperty-icon: url(:/resources/style/img/ButtonSceneNodeWidget.png) off,
-                  url(:/resources/style/img/ButtonSceneNodeWidget.png) on;
-}
-QPushButton#eSceneCodeEditorWidget {
-  qproperty-icon: url(:/resources/style/img/ButtonCode.png) off,
-                  url(:/resources/style/img/ButtonCode.png) on;
-}
 QPushButton#AddAutioCode {
   qproperty-icon: url(:/resources/style/img/ButtonAudio.png) off,
                   url(:/resources/style/img/ButtonAudio.png) on;
@@ -1429,4 +1409,33 @@ CDeviceSelectorWidget {
 
 CHelpOverlay {
   qproperty-linkColor: #aa00aa;
+}
+
+CEditorResourceWidget {
+  qproperty-icon: url(:/resources/style/img/ButtonResourceWidget.png) off,
+                  url(:/resources/style/img/ButtonResourceWidget.png) on;
+}
+CEditorResourceDisplayWidget {
+  qproperty-icon: url(:/resources/style/img/ButtonResourceDisplay.png) off,
+                  url(:/resources/style/img/ButtonResourceDisplay.png) on;
+}
+CEditorProjectSettingsWidget {
+  qproperty-icon: url(:/resources/style/img/ButtonProjectSettings.png) off,
+                  url(:/resources/style/img/ButtonProjectSettings.png) on;
+}
+CEditorSceneNodeWidget {
+  qproperty-icon: url(:/resources/style/img/ButtonSceneNodeWidget.png) off,
+                  url(:/resources/style/img/ButtonSceneNodeWidget.png) on;
+}
+CEditorCodeWidget {
+  qproperty-icon: url(:/resources/style/img/ButtonCode.png) off,
+                  url(:/resources/style/img/ButtonCode.png) on;
+}
+CEditorPatternEditorWidget {
+  qproperty-icon: url(:/resources/style/img/ButtonSequence.png) off,
+                  url(:/resources/style/img/ButtonSequence.png) on;
+}
+CEditorDialogWidget {
+  qproperty-icon: url(:/resources/style/img/ButtonNotification.png) off,
+                  url(:/resources/style/img/ButtonNotification.png) on;
 }

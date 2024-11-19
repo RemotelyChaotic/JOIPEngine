@@ -499,26 +499,6 @@ QPushButton#DeviceButton {
   qproperty-icon: url(ui/ButtonPlug.png) off,
                   url(ui/ButtonPlug.png) on;
 }
-QPushButton#eResourceWidget {
-  qproperty-icon: url(ui/ButtonResourceWidget.png) off,
-                  url(ui/ButtonResourceWidget.png) on;
-}
-QPushButton#eResourceDisplay {
-  qproperty-icon: url(ui/ButtonResourceDisplay.png) off,
-                  url(ui/ButtonResourceDisplay.png) on;
-}
-QPushButton#eProjectSettings {
-  qproperty-icon: url(ui/ButtonProjectSettings.png) off,
-                  url(ui/ButtonProjectSettings.png) on;
-}
-QPushButton#eSceneNodeWidget {
-  qproperty-icon: url(ui/ButtonSceneNodeWidget.png) off,
-                  url(ui/ButtonSceneNodeWidget.png) on;
-}
-QPushButton#eSceneCodeEditorWidget {
-  qproperty-icon: url(ui/ButtonCode.png) off,
-                  url(ui/ButtonCode.png) on;
-}
 QPushButton#AddAutioCode {
   qproperty-icon: url(ui/ButtonAudio.png) off,
                   url(ui/ButtonAudio.png) on;
@@ -1417,4 +1397,33 @@ CDeviceSelectorWidget {
 
 CHelpOverlay {
   qproperty-linkColor: rgb(66, 129, 210);
+}
+
+CEditorResourceWidget {
+  qproperty-icon: url(ui/ButtonResourceWidget.png) off,
+                  url(ui/ButtonResourceWidget.png) on;
+}
+CEditorResourceDisplayWidget {
+  qproperty-icon: url(ui/ButtonResourceDisplay.png) off,
+                  url(ui/ButtonResourceDisplay.png) on;
+}
+CEditorProjectSettingsWidget {
+  qproperty-icon: url(ui/ButtonProjectSettings.png) off,
+                  url(ui/ButtonProjectSettings.png) on;
+}
+CEditorSceneNodeWidget {
+  qproperty-icon: url(ui/ButtonSceneNodeWidget.png) off,
+                  url(ui/ButtonSceneNodeWidget.png) on;
+}
+CEditorCodeWidget {
+  qproperty-icon: url(ui/ButtonCode.png) off,
+                  url(ui/ButtonCode.png) on;
+}
+CEditorPatternEditorWidget {
+  qproperty-icon: url(ui/ButtonSequence.png) off,
+                  url(ui/ButtonSequence.png) on;
+}
+CEditorDialogWidget {
+  qproperty-icon: url(ui/ButtonNotification.png) off,
+                  url(ui/ButtonNotification.png) on;
 }

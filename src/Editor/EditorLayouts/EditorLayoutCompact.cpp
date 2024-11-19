@@ -162,6 +162,7 @@ void CEditorLayoutCompact::InitializeImpl(bool bWithTutorial)
     pButton->setObjectName(type._to_string());
     pButton->setSizePolicy(QSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed));
     pButton->setProperty(c_sEditorProperty, type._to_integral());
+    pButton->setIcon(pWidget->Icon());
     auto it = m_sEditorToolTipMap.find(type);
     if (m_sEditorToolTipMap.end() != it)
     {
