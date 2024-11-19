@@ -426,6 +426,7 @@ QPushButton#TitleCardButton {
   qproperty-icon: url(ui/ButtonTitleCard.png) off,
                   url(ui/ButtonTitleCard.png) on;
 }
+QPushButton#EditDialogTags,
 QPushButton#TagsButton {
   qproperty-icon: url(ui/ButtonTag.png) off,
                   url(ui/ButtonTag.png) on;
@@ -434,6 +435,7 @@ QPushButton#AddNodeButton {
   qproperty-icon: url(ui/ButtonPlusDisabled.png) off,
                   url(ui/ButtonPlus.png) on;
 }
+QPushButton#RemoveDialog,
 QPushButton#RemoveNodeButton {
   qproperty-icon: url(ui/ButtonMinus.png) off,
                   url(ui/ButtonMinus.png) on;
@@ -633,6 +635,23 @@ QPushButton#RemoveSelectedSequenceLayer {
   qproperty-icon: url(ui/ButtonRemoveSequenceLayer.png) off,
                   url(ui/ButtonRemoveSequenceLayer.png) on;
 }
+QPushButton#AddDialog {
+  qproperty-icon: url(ui/ButtonDialogAdd.png) off,
+                  url(ui/ButtonDialogAdd.png) on;
+}
+QPushButton#AddDialogFrament {
+  qproperty-icon: url(ui/ButtonDialogAddCondition.png) off,
+                  url(ui/ButtonDialogAddCondition.png) on;
+}
+QPushButton#AddDialogCategoryButton {
+  qproperty-icon: url(ui/ButtonDialogAddFolder.png) off,
+                  url(ui/ButtonDialogAddFolder.png) on;
+}
+QPushButton#EditDialogContent {
+  qproperty-icon: url(ui/ButtonDialogConfigure.png) off,
+                  url(ui/ButtonDialogConfigure.png) on;
+}
+
 
 QPushButton:hover,
 QToolButton:hover {

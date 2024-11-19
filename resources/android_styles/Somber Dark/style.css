@@ -495,6 +495,7 @@ QPushButton#TitleCardButton {
   qproperty-icon: url(ui/ButtonTitleCard.png) off,
                   url(ui/ButtonTitleCard.png) on;
 }
+QPushButton#EditDialogTags,
 QPushButton#TagsButton {
   border-image: url(ui/IconBg.svg) 0 0 0 0 stretch stretch;
   border-top: 0 transparent;
@@ -513,6 +514,7 @@ QPushButton#AddNodeButton {
   qproperty-icon: url(ui/ButtonPlus.png) off,
                   url(ui/ButtonPlus.png) on;
 }
+QPushButton#RemoveDialog,
 QPushButton#RemoveNodeButton {
   border-image: url(ui/IconBg.svg) 0 0 0 0 stretch stretch;
   border-top: 0 transparent;
@@ -951,6 +953,43 @@ QPushButton#RemoveSelectedSequenceLayer {
   qproperty-icon: url(ui/ButtonRemoveSequenceLayer.png) off,
                   url(ui/ButtonRemoveSequenceLayer.png) on;
 }
+QPushButton#AddDialog {
+  border-image: url(ui/IconBg.svg) 0 0 0 0 stretch stretch;
+  border-top: 0 transparent;
+  border-bottom: 0 transparent;
+  border-right: 0 transparent;
+  border-left: 0 transparent;
+  qproperty-icon: url(ui/ButtonDialogAdd.png) off,
+                  url(ui/ButtonDialogAdd.png) on;
+}
+QPushButton#AddDialogFrament {
+  border-image: url(ui/IconBg.svg) 0 0 0 0 stretch stretch;
+  border-top: 0 transparent;
+  border-bottom: 0 transparent;
+  border-right: 0 transparent;
+  border-left: 0 transparent;
+  qproperty-icon: url(ui/ButtonDialogAddCondition.png) off,
+                  url(ui/ButtonDialogAddCondition.png) on;
+}
+QPushButton#AddDialogCategoryButton {
+  border-image: url(ui/IconBg.svg) 0 0 0 0 stretch stretch;
+  border-top: 0 transparent;
+  border-bottom: 0 transparent;
+  border-right: 0 transparent;
+  border-left: 0 transparent;
+  qproperty-icon: url(ui/ButtonDialogAddFolder.png) off,
+                  url(ui/ButtonDialogAddFolder.png) on;
+}
+QPushButton#EditDialogContent {
+  border-image: url(ui/IconBg.svg) 0 0 0 0 stretch stretch;
+  border-top: 0 transparent;
+  border-bottom: 0 transparent;
+  border-right: 0 transparent;
+  border-left: 0 transparent;
+  qproperty-icon: url(ui/ButtonDialogConfigure.png) off,
+                  url(ui/ButtonDialogConfigure.png) on;
+}
+
 
 QPushButton#AddShowBackgroundCode:hover,
 QPushButton#AddShowIconCode:hover,
@@ -1037,7 +1076,13 @@ QPushButton#GridButton:hover,
 QPushButton#NewSequence:hover,
 QPushButton#SequenceProperties:hover,
 QPushButton#AddSequenceLayer:hover,
-QPushButton#RemoveSelectedSequenceLayer:hover {
+QPushButton#RemoveSelectedSequenceLayer:hover,
+QPushButton#EditDialogTags:hover,
+QPushButton#RemoveDialog:hover,
+QPushButton#AddDialog:hover,
+QPushButton#AddDialogFrament:hover,
+QPushButton#AddDialogCategoryButton:hover,
+QPushButton#EditDialogContent:hover {
   border-image: url(ui/IconBgHover.svg) 0 0 0 0 stretch stretch;
 }
 
@@ -1126,7 +1171,13 @@ QPushButton#GridButton:pressed,
 QPushButton#NewSequence:pressed,
 QPushButton#SequenceProperties:pressed,
 QPushButton#AddSequenceLayer:pressed,
-QPushButton#RemoveSelectedSequenceLayer:pressed {
+QPushButton#RemoveSelectedSequenceLayer:pressed,
+QPushButton#EditDialogTags:pressed,
+QPushButton#RemoveDialog:pressed,
+QPushButton#AddDialog:pressed,
+QPushButton#AddDialogFrament:pressed,
+QPushButton#AddDialogCategoryButton:pressed,
+QPushButton#EditDialogContent:pressed {
   border-image: url(ui/IconBgPressed.svg) 0 0 0 0 stretch stretch;
 }
 
@@ -1215,7 +1266,13 @@ QPushButton#GridButton:disabled,
 QPushButton#NewSequence:disabled,
 QPushButton#SequenceProperties:disabled,
 QPushButton#AddSequenceLayer:disabled,
-QPushButton#RemoveSelectedSequenceLayer:disabled {
+QPushButton#RemoveSelectedSequenceLayer:disabled,
+QPushButton#EditDialogTags:disabled,
+QPushButton#RemoveDialog:disabled,
+QPushButton#AddDialog:disabled,
+QPushButton#AddDialogFrament:disabled,
+QPushButton#AddDialogCategoryButton:disabled,
+QPushButton#EditDialogContent:disabled {
   border-image: url(ui/IconBgDisabled.svg) 0 0 0 0 stretch stretch;
 }
 

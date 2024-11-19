@@ -578,9 +578,13 @@ QPushButton#TitleCardButton:pressed,
 QPushButton#TitleCardButton:disabled {
   image: url(ui/ButtonTitleCardSelected.png);
 }
+QPushButton#EditDialogTags,
 QPushButton#TagsButton {
   image: url(ui/ButtonTag.png);
 }
+QPushButton#EditDialogTags:hover,
+QPushButton#EditDialogTags:pressed,
+QPushButton#EditDialogTags:disabled,
 QPushButton#TagsButton:hover,
 QPushButton#TagsButton:pressed,
 QPushButton#TagsButton:disabled {
@@ -594,9 +598,13 @@ QPushButton#AddNodeButton:pressed,
 QPushButton#AddNodeButton:disabled {
   image: url(ui/ButtonPlusSelected.png);
 }
+QPushButton#RemoveDialog,
 QPushButton#RemoveNodeButton {
   image: url(ui/ButtonMinus.png);
 }
+QPushButton#RemoveDialog:hover,
+QPushButton#RemoveDialog:pressed,
+QPushButton#RemoveDialog:disabled,
 QPushButton#RemoveNodeButton:hover,
 QPushButton#RemoveNodeButton:pressed,
 QPushButton#RemoveNodeButton:disabled {
@@ -999,6 +1007,39 @@ QPushButton#RemoveSelectedSequenceLayer:pressed,
 QPushButton#RemoveSelectedSequenceLayer:disabled {
   image: url(ui/ButtonRemoveSequenceLayerSelected.png);
 }
+QPushButton#AddDialog {
+  image: url(ui/ButtonDialogAdd.png);
+}
+QPushButton#AddDialog:hover,
+QPushButton#AddDialog:pressed,
+QPushButton#AddDialog:disabled {
+  image: url(ui/ButtonDialogAddSelected.png);
+}
+QPushButton#AddDialogFrament {
+  image: url(ui/ButtonDialogAddCondition.png);
+}
+QPushButton#AddDialogFrament:hover,
+QPushButton#AddDialogFrament:pressed,
+QPushButton#AddDialogFrament:disabled {
+  image: url(ui/ButtonDialogAddConditionSelected.png);
+}
+QPushButton#AddDialogCategoryButton {
+  image: url(ui/ButtonDialogAddFolder.png);
+}
+QPushButton#AddDialogCategoryButton:hover,
+QPushButton#AddDialogCategoryButton:pressed,
+QPushButton#AddDialogCategoryButton:disabled {
+  image: url(ui/ButtonDialogAddFolderSelected.png);
+}
+QPushButton#EditDialogContent {
+  image: url(ui/ButtonDialogConfigure.png);
+}
+QPushButton#EditDialogContent:hover,
+QPushButton#EditDialogContent:pressed,
+QPushButton#EditDialogContent:disabled {
+  image: url(ui/ButtonDialogConfigureSelected.png);
+}
+
 
 QPushButton:hover,
 QToolButton:hover {
