@@ -97,6 +97,7 @@ const QString CSettings::c_sSettingDominantHand  = "Content/dominantHand";
 const QString CSettings::c_sSettingEditorLayout = "Content/preferededitorlayout";
 const QString CSettings::c_sSettingFont = "Graphics/font";
 const QString CSettings::c_sSettingFullscreen = "Graphics/fullscreen";
+const QString CSettings::c_sSettingHideTextbox = "Content/hideTextBox";
 const QString CSettings::c_sSettingKeyBindings = "KeyBindings/";
 const QString CSettings::c_sSettingMetronomeDefCommands = "Devices/metronomeDefCmd";
 const QString CSettings::c_sSettingMetronomeSfx = "Audio/metronomeSfx";
@@ -479,6 +480,29 @@ bool CSettings::Fullscreen()
 #else
   return GetWindowMode() == WindowMode::eFullscreen;
 #endif
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CSettings::SetHideSettingsTimeout(int iValue)
+{
+  QMutexLocker locker(&m_settingsMutex);
+
+  qint32 iOldVal = m_spSettings->value(CSettings::c_sSettingHideTextbox).toInt();
+
+  if (iOldVal == iValue) { return; }
+
+  m_spSettings->setValue(CSettings::c_sSettingHideTextbox, iValue);
+
+  emit hideSettingsTimeoutChanged();
+}
+
+//----------------------------------------------------------------------------------------
+//
+int CSettings::HideSettingsTimeout() const
+{
+  QMutexLocker locker(&m_settingsMutex);
+  return m_spSettings->value(CSettings::c_sSettingHideTextbox).toInt();
 }
 
 //----------------------------------------------------------------------------------------
@@ -1177,6 +1201,12 @@ void CSettings::GenerateSettingsIfNotExists()
       bNeedsSynch = true;
       m_spSettings->setValue(CSettings::c_sWindowMode, WindowMode::eFullscreen);
     }
+  }
+
+  if (!m_spSettings->contains(CSettings::c_sSettingHideTextbox))
+  {
+    bNeedsSynch = true;
+    m_spSettings->setValue(CSettings::c_sSettingHideTextbox, 2000);
   }
 
   // Keybindings

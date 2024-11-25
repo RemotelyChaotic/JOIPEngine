@@ -41,6 +41,7 @@ namespace  {
   const QString c_sEditorSettingsHelpId = "Settings/EditorSettings";
   const QString c_sFontHelpId = "Settings/Font";
   const QString c_sStyleHelpId = "Settings/Style";
+  const QString c_sTimeoutTextboxHelpId = "Settings/TextboxHideTimeout";
   const QString c_sResolutionHelpId = "Settings/Resolution";
   const QString c_sMuteHelpId = "Settings/Mute";
   const QString c_sVolumeHelpId = "Settings/Volume";
@@ -131,6 +132,8 @@ void CSettingsScreen::Initialize()
     wpHelpFactory->RegisterHelp(c_sFontHelpId, ":/resources/help/settings/font_setting_help.html");
     m_spUi->pStyleContainer->setProperty(helpOverlay::c_sHelpPagePropertyName, c_sStyleHelpId);
     wpHelpFactory->RegisterHelp(c_sStyleHelpId, ":/resources/help/settings/style_setting_help.html");
+    m_spUi->pHideTextBoxContainer->setProperty(helpOverlay::c_sHelpPagePropertyName, c_sTimeoutTextboxHelpId);
+    wpHelpFactory->RegisterHelp(c_sTimeoutTextboxHelpId, ":/resources/help/settings/timeouttextboxhide_setting_help.html");
     m_spUi->pResolutionContainer->setProperty(helpOverlay::c_sHelpPagePropertyName, c_sResolutionHelpId);
     wpHelpFactory->RegisterHelp(c_sResolutionHelpId, ":/resources/help/settings/resolution_setting_help.html");
     m_spUi->pMuteContainer->setProperty(helpOverlay::c_sHelpPagePropertyName, c_sMuteHelpId);
@@ -147,7 +150,7 @@ void CSettingsScreen::Initialize()
     wpHelpFactory->RegisterHelp(c_sPauseWhenInactiveHelpId, ":/resources/help/settings/pausewheninactive_setting_help.html");
     m_spUi->pShowPushNotifications->setProperty(helpOverlay::c_sHelpPagePropertyName, c_sPushNotificationsHelpId);
     wpHelpFactory->RegisterHelp(c_sPushNotificationsHelpId, ":/resources/help/settings/push_notification_setting_help.html");
-    m_spUi->pConnectSettingContainer->setProperty(helpOverlay::c_sHelpPagePropertyName, c_sConnectHWOnStartupHelpId);
+    m_spUi->pDefMetronomeToyCmdContainer->setProperty(helpOverlay::c_sHelpPagePropertyName, c_sConnectHWOnStartupHelpId);
     wpHelpFactory->RegisterHelp(c_sConnectHWOnStartupHelpId, ":/resources/help/settings/connecthwonstartup_setting_help.html");
     m_spUi->pConnectSettingContainer->setProperty(helpOverlay::c_sHelpPagePropertyName, c_sMetronomeDefCmdHelpId);
     wpHelpFactory->RegisterHelp(c_sMetronomeDefCmdHelpId, ":/resources/help/settings/metdefcommand_setting_help.html");
@@ -255,6 +258,7 @@ void CSettingsScreen::Load()
   m_spUi->pFontComboBox->blockSignals(true);
   m_spUi->pStyleComboBox->blockSignals(true);
   m_spUi->pEditorLayoutComboBox->blockSignals(true);
+  m_spUi->pHideTextBoxSpinBox->blockSignals(true);
   m_spUi->pCaseSensitiveCheckBox->blockSignals(true);
   m_spUi->pCodeFontComboBox->blockSignals(true);
   m_spUi->pShowWhiteSpaceCheckBox->blockSignals(true);
@@ -377,6 +381,9 @@ void CSettingsScreen::Load()
         static_cast<qint32>(m_spSettings->PreferedEditorLayout()));
   m_spUi->pEditorLayoutComboBox->setCurrentIndex(iIndex);
 
+  // misc ui settings
+  m_spUi->pHideTextBoxSpinBox->setValue(m_spSettings->HideSettingsTimeout());
+
   // code editor
   {
     m_spUi->pCaseSensitiveCheckBox->setChecked(!m_spSettings->EditorCaseInsensitiveSearch());
@@ -453,6 +460,7 @@ void CSettingsScreen::Load()
   m_spUi->pFontComboBox->blockSignals(false);
   m_spUi->pStyleComboBox->blockSignals(false);
   m_spUi->pEditorLayoutComboBox->blockSignals(false);
+  m_spUi->pHideTextBoxSpinBox->blockSignals(false);
   m_spUi->pCaseSensitiveCheckBox->blockSignals(false);
   m_spUi->pCodeFontComboBox->blockSignals(false);
   m_spUi->pShowWhiteSpaceCheckBox->blockSignals(false);
@@ -602,6 +610,17 @@ void CSettingsScreen::on_pEditorLayoutComboBox_currentIndexChanged(qint32 iIndex
   m_spSettings->SetPreferedEditorLayout(
         static_cast<CSettings::EditorType>(
           m_spUi->pEditorLayoutComboBox->currentData().toInt()));
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CSettingsScreen::on_pHideTextBoxSpinBox_valueChanged(qint32 iValue)
+{
+  WIDGET_INITIALIZED_GUARD
+  assert(nullptr != m_spSettings);
+  if (nullptr == m_spSettings) { return; }
+
+  m_spSettings->SetHideSettingsTimeout(iValue);
 }
 
 //----------------------------------------------------------------------------------------

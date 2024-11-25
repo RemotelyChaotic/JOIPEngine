@@ -37,6 +37,7 @@ class CSettings : public QObject
   Q_PROPERTY(QString font READ Font WRITE SetFont NOTIFY fontChanged)
   Q_PROPERTY(bool fullscreen READ Fullscreen WRITE SetFullscreen NOTIFY fullscreenChanged)
   Q_PROPERTY(QStringList keyBindings READ KeyBindings CONSTANT)
+  Q_PROPERTY(int hideSettingsTimeout READ HideSettingsTimeout WRITE SetHideSettingsTimeout NOTIFY hideSettingsTimeoutChanged)
   Q_PROPERTY(int metronomeDefaultCommands READ MetronomeDefCommands WRITE SetMetronomeDefCommands NOTIFY metronomeDefaultCommandsChanged)
   Q_PROPERTY(QString metronomeSfx READ MetronomeSfx WRITE SetMetronomeSfx NOTIFY metronomeSfxChanged)
   Q_PROPERTY(double metronomeVolume READ MetronomeVolume WRITE SetMetronomeVolume NOTIFY metronomeVolumeChanged)
@@ -71,6 +72,7 @@ public:
   static const QString c_sSettingEditorLayout;
   static const QString c_sSettingFont;
   static const QString c_sSettingFullscreen;
+  static const QString c_sSettingHideTextbox;
   static const QString c_sSettingKeyBindings;
   static const QString c_sSettingMetronomeDefCommands;
   static const QString c_sSettingMetronomeSfx;
@@ -133,6 +135,8 @@ public:
   QString Font();
   void SetFullscreen(bool bValue);
   bool Fullscreen();
+  void SetHideSettingsTimeout(int iValue);
+  int HideSettingsTimeout() const;
   QStringList KeyBindings();
   Q_INVOKABLE QKeySequence keyBinding(const QString& sRole);
   Q_INVOKABLE void setKeyBinding(const QKeySequence& sKeySequence, const QString& sRole);
@@ -191,6 +195,7 @@ signals:
   void editorThemeChanged();
   void fontChanged();
   void fullscreenChanged();
+  void hideSettingsTimeoutChanged();
   void keyBindingsChanged();
   void metronomeDefaultCommandsChanged();
   void metronomeSfxChanged();

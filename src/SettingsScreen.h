@@ -42,6 +42,7 @@ protected slots:
   void on_pFontComboBox_currentFontChanged(const QFont& font);
   void on_pStyleComboBox_currentIndexChanged(qint32 iIndex);
   void on_pEditorLayoutComboBox_currentIndexChanged(qint32 iIndex);
+  void on_pHideTextBoxSpinBox_valueChanged(qint32 iValue);
   void on_pCaseSensitiveCheckBox_toggled(bool bState);
   void on_pCodeFontComboBox_currentFontChanged(const QFont& font);
   void on_pShowWhiteSpaceCheckBox_toggled(bool bState);

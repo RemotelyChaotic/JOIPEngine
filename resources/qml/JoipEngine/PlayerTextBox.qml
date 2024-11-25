@@ -22,6 +22,7 @@ Rectangle {
     property int displayMode: PlayerTextBox.TextBoxMode.Log
     property bool logShown: false
     property bool hideLogAfterInactivity: false
+    property int hideTimerIntervalMS: Settings.hideSettingsTimeout
 
     function clearTextBox()
     {
@@ -266,11 +267,11 @@ Rectangle {
             }
             textBox.showButtonPrompts(vsModifiedPrompts, sStoreIntoVar, sRequestId,
                                       bStoreIntoStorageInstead);
-            hideTimer.reset(2*1000);
+            hideTimer.reset(textBox.hideTimerIntervalMS);
         }
         onShowInput: {
             textBox.showInput(sStoreIntoVar, sRequestId, bStoreIntoStorageInstead);
-            hideTimer.reset(2*1000);
+            hideTimer.reset(textBox.hideTimerIntervalMS);
         }
         onShowText: {
             if (sText.startsWith("<html>") && sText.endsWith("</html>")) {
@@ -282,7 +283,7 @@ Rectangle {
                 registrator.setSkippableWait(dSkippableWaitS);
             }
 
-            hideTimer.reset((2 < dSkippableWaitS ? dSkippableWaitS : 2)*1000);
+            hideTimer.reset((textBox.hideTimerIntervalMS < dSkippableWaitS*1000 ? dSkippableWaitS*1000 : textBox.hideTimerIntervalMS));
         }
         onTextAlignmentChanged: {
             dataContainer.textAlignment = alignment;
@@ -314,7 +315,7 @@ Rectangle {
         anchors.fill: parent
         hoverEnabled: textBox.hideLogAfterInactivity
         onPositionChanged: {
-            hideTimer.reset(2*1000);
+            hideTimer.reset(textBox.hideTimerIntervalMS);
         }
     }
 
@@ -495,7 +496,7 @@ Rectangle {
     // animations
     Timer {
         id: hideTimer
-        interval: 500
+        interval: textBox.hideTimerIntervalMS
         running: false
         repeat: false
         function reset(interv) {
