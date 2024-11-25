@@ -40,7 +40,9 @@ class CSettings : public QObject
   Q_PROPERTY(int hideSettingsTimeout READ HideSettingsTimeout WRITE SetHideSettingsTimeout NOTIFY hideSettingsTimeoutChanged)
   Q_PROPERTY(int metronomeDefaultCommands READ MetronomeDefCommands WRITE SetMetronomeDefCommands NOTIFY metronomeDefaultCommandsChanged)
   Q_PROPERTY(QString metronomeSfx READ MetronomeSfx WRITE SetMetronomeSfx NOTIFY metronomeSfxChanged)
-  Q_PROPERTY(double metronomeVolume READ MetronomeVolume WRITE SetMetronomeVolume NOTIFY metronomeVolumeChanged)
+  Q_PROPERTY(double metronomeSizeRel READ MetronomeSizeRel WRITE SetMetronomeSizeRel NOTIFY metronomeSizeRelChanged)
+  Q_PROPERTY(int metronomeSizeMin READ MetronomeSizeMin WRITE SetMetronomeSizeMin NOTIFY metronomeSizeMinChanged)
+  Q_PROPERTY(double metronomeVolume READ MetronomeVolume WRITE SetMetronomeVolume NOTIFY metronomeSizeMinChanged)
   Q_PROPERTY(bool muted READ Muted WRITE SetMuted NOTIFY mutedChanged)
   Q_PROPERTY(bool offline READ Offline WRITE SetOffline NOTIFY offlineChanged)
   Q_PROPERTY(bool pauseWhenInactive READ PauseWhenInactive WRITE SetPauseWhenInactive NOTIFY pauseWhenInactiveChanged)
@@ -76,6 +78,8 @@ public:
   static const QString c_sSettingKeyBindings;
   static const QString c_sSettingMetronomeDefCommands;
   static const QString c_sSettingMetronomeSfx;
+  static const QString c_sSettingMetronomeSizeRel;
+  static const QString c_sSettingMetronomeSizeMin;
   static const QString c_sSettingMetronomeVolume;
   static const QString c_sSettingMuted;
   static const QString c_sSettingOffline;
@@ -144,6 +148,10 @@ public:
   int MetronomeDefCommands() const;
   void SetMetronomeSfx(const QString& sResource);
   QString MetronomeSfx() const;
+  void SetMetronomeSizeRel(double dVal);
+  double MetronomeSizeRel() const;
+  void SetMetronomeSizeMin(int iValue);
+  int MetronomeSizeMin() const;
   void SetMetronomeVolume(double dVolume);
   double MetronomeVolume() const;
   void SetMuted(bool bValue);
@@ -199,6 +207,8 @@ signals:
   void keyBindingsChanged();
   void metronomeDefaultCommandsChanged();
   void metronomeSfxChanged();
+  void metronomeSizeRelChanged();
+  void metronomeSizeMinChanged();
   void metronomeVolumeChanged();
   void mutedChanged();
   void offlineChanged();

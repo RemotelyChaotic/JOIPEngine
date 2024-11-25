@@ -42,6 +42,7 @@ namespace  {
   const QString c_sFontHelpId = "Settings/Font";
   const QString c_sStyleHelpId = "Settings/Style";
   const QString c_sTimeoutTextboxHelpId = "Settings/TextboxHideTimeout";
+  const QString c_sMetronomeSizeHelpId = "Settings/MetronomeSize";
   const QString c_sResolutionHelpId = "Settings/Resolution";
   const QString c_sMuteHelpId = "Settings/Mute";
   const QString c_sVolumeHelpId = "Settings/Volume";
@@ -134,6 +135,8 @@ void CSettingsScreen::Initialize()
     wpHelpFactory->RegisterHelp(c_sStyleHelpId, ":/resources/help/settings/style_setting_help.html");
     m_spUi->pHideTextBoxContainer->setProperty(helpOverlay::c_sHelpPagePropertyName, c_sTimeoutTextboxHelpId);
     wpHelpFactory->RegisterHelp(c_sTimeoutTextboxHelpId, ":/resources/help/settings/timeouttextboxhide_setting_help.html");
+    m_spUi->pMetronomeSizeContainer->setProperty(helpOverlay::c_sHelpPagePropertyName, c_sMetronomeSizeHelpId);
+    wpHelpFactory->RegisterHelp(c_sMetronomeSizeHelpId, ":/resources/help/settings/metronomesize_setting_help.html");
     m_spUi->pResolutionContainer->setProperty(helpOverlay::c_sHelpPagePropertyName, c_sResolutionHelpId);
     wpHelpFactory->RegisterHelp(c_sResolutionHelpId, ":/resources/help/settings/resolution_setting_help.html");
     m_spUi->pMuteContainer->setProperty(helpOverlay::c_sHelpPagePropertyName, c_sMuteHelpId);
@@ -259,6 +262,8 @@ void CSettingsScreen::Load()
   m_spUi->pStyleComboBox->blockSignals(true);
   m_spUi->pEditorLayoutComboBox->blockSignals(true);
   m_spUi->pHideTextBoxSpinBox->blockSignals(true);
+  m_spUi->pMetronomeRelSizeSpinBox->blockSignals(true);
+  m_spUi->pMetronomeMinSizeSpinBox->blockSignals(true);
   m_spUi->pCaseSensitiveCheckBox->blockSignals(true);
   m_spUi->pCodeFontComboBox->blockSignals(true);
   m_spUi->pShowWhiteSpaceCheckBox->blockSignals(true);
@@ -383,6 +388,8 @@ void CSettingsScreen::Load()
 
   // misc ui settings
   m_spUi->pHideTextBoxSpinBox->setValue(m_spSettings->HideSettingsTimeout());
+  m_spUi->pMetronomeRelSizeSpinBox->setValue(static_cast<qint32>(m_spSettings->MetronomeSizeRel()*100));
+  m_spUi->pMetronomeMinSizeSpinBox->setValue(m_spSettings->MetronomeSizeMin());
 
   // code editor
   {
@@ -461,6 +468,8 @@ void CSettingsScreen::Load()
   m_spUi->pStyleComboBox->blockSignals(false);
   m_spUi->pEditorLayoutComboBox->blockSignals(false);
   m_spUi->pHideTextBoxSpinBox->blockSignals(false);
+  m_spUi->pMetronomeRelSizeSpinBox->blockSignals(false);
+  m_spUi->pMetronomeMinSizeSpinBox->blockSignals(false);
   m_spUi->pCaseSensitiveCheckBox->blockSignals(false);
   m_spUi->pCodeFontComboBox->blockSignals(false);
   m_spUi->pShowWhiteSpaceCheckBox->blockSignals(false);
@@ -621,6 +630,28 @@ void CSettingsScreen::on_pHideTextBoxSpinBox_valueChanged(qint32 iValue)
   if (nullptr == m_spSettings) { return; }
 
   m_spSettings->SetHideSettingsTimeout(iValue);
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CSettingsScreen::on_pMetronomeRelSizeSpinBox_valueChanged(qint32 iValue)
+{
+  WIDGET_INITIALIZED_GUARD
+  assert(nullptr != m_spSettings);
+  if (nullptr == m_spSettings) { return; }
+
+  m_spSettings->SetMetronomeSizeRel(static_cast<double>(iValue)/100);
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CSettingsScreen::on_pMetronomeMinSizeSpinBox_valueChanged(qint32 iValue)
+{
+  WIDGET_INITIALIZED_GUARD
+  assert(nullptr != m_spSettings);
+  if (nullptr == m_spSettings) { return; }
+
+  m_spSettings->SetMetronomeSizeMin(iValue);
 }
 
 //----------------------------------------------------------------------------------------

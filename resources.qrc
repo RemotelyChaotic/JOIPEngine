@@ -307,6 +307,7 @@
         <file>resources/sound/lubdub/HB (bass boost 5.0 -10dB) pt2 (trim).wav</file>
         <file>resources/help/settings/metdefcommand_setting_help.html</file>
         <file>resources/help/settings/timeouttextboxhide_setting_help.html</file>
+        <file>resources/help/settings/metronomesize_setting_help.html</file>
     </qresource>
     <qresource prefix="/qml">
         <file>resources/qml/JoipEngine/EmptyDummy.qml</file>

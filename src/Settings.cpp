@@ -101,6 +101,8 @@ const QString CSettings::c_sSettingHideTextbox = "Content/hideTextBox";
 const QString CSettings::c_sSettingKeyBindings = "KeyBindings/";
 const QString CSettings::c_sSettingMetronomeDefCommands = "Devices/metronomeDefCmd";
 const QString CSettings::c_sSettingMetronomeSfx = "Audio/metronomeSfx";
+const QString CSettings::c_sSettingMetronomeSizeRel = "Content/metronomeMinSize";
+const QString CSettings::c_sSettingMetronomeSizeMin = "Content/metronomeRelSize";
 const QString CSettings::c_sSettingMetronomeVolume = "Audio/metronomeVolume";
 const QString CSettings::c_sSettingMuted = "Audio/muted";
 const QString CSettings::c_sSettingOffline = "Content/offline";
@@ -615,6 +617,52 @@ QString CSettings::MetronomeSfx() const
 {
   QMutexLocker locker(&m_settingsMutex);
   return m_spSettings->value(CSettings::c_sSettingMetronomeSfx).toString();
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CSettings::SetMetronomeSizeRel(double dValue)
+{
+  QMutexLocker locker(&m_settingsMutex);
+
+  double dVolume = m_spSettings->value(CSettings::c_sSettingMetronomeSizeRel).toDouble();
+
+  if (dVolume == dValue) { return; }
+
+  m_spSettings->setValue(CSettings::c_sSettingMetronomeSizeRel, dValue);
+
+  emit metronomeSizeRelChanged();
+}
+
+//----------------------------------------------------------------------------------------
+//
+double CSettings::MetronomeSizeRel() const
+{
+  QMutexLocker locker(&m_settingsMutex);
+  return m_spSettings->value(CSettings::c_sSettingMetronomeSizeRel).toDouble();
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CSettings::SetMetronomeSizeMin(int iValue)
+{
+  QMutexLocker locker(&m_settingsMutex);
+
+  int iOldVal = m_spSettings->value(CSettings::c_sSettingMetronomeSizeMin).toInt();
+
+  if (iOldVal == iValue) { return; }
+
+  m_spSettings->setValue(CSettings::c_sSettingMetronomeSizeMin, iValue);
+
+  emit metronomeSizeMinChanged();
+}
+
+//----------------------------------------------------------------------------------------
+//
+int CSettings::MetronomeSizeMin() const
+{
+  QMutexLocker locker(&m_settingsMutex);
+  return m_spSettings->value(CSettings::c_sSettingMetronomeSizeMin).toInt();
 }
 
 //----------------------------------------------------------------------------------------
@@ -1243,6 +1291,18 @@ void CSettings::GenerateSettingsIfNotExists()
   {
     bNeedsSynch = true;
     m_spSettings->setValue(CSettings::c_sSettingMetronomeSfx, QString(metronome::c_sSfxToc));
+  }
+
+  // check metronome size settings
+  if (!m_spSettings->contains(CSettings::c_sSettingMetronomeSizeRel))
+  {
+    bNeedsSynch = true;
+    m_spSettings->setValue(CSettings::c_sSettingMetronomeSizeRel, 0.167);
+  }
+  if (!m_spSettings->contains(CSettings::c_sSettingMetronomeSizeMin))
+  {
+    bNeedsSynch = true;
+    m_spSettings->setValue(CSettings::c_sSettingMetronomeSizeMin, 100);
   }
 
   // check metronome volume

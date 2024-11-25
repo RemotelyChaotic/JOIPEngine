@@ -77,7 +77,7 @@ Rectangle {
             anchors.bottom: parent.bottom
             anchors.horizontalCenter: parent.horizontalCenter
             width: parent.width
-            height: parent.height / 6
+            height: Math.max(parent.height * Settings.metronomeSizeRel, Settings.metronomeSizeMin)
             userName: "metronome"
         }
     }
