@@ -6,6 +6,10 @@ include(JOIPEngineProject.cmake)
 CreateJOIPProject(${PROJECT_NAME})
 JOIPProjectSettings(${PROJECT_NAME})
 
+if (WIN32)
+  target_compile_definitions(${PROJECT_NAME} PUBLIC _SILENCE_STDEXT_ARR_ITERS_DEPRECATION_WARNING)
+endif()
+
 #-----------------------------------------------------------------------------------------
 # install
 #-----------------------------------------------------------------------------------------
