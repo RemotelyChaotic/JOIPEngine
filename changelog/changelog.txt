@@ -32,6 +32,7 @@ Fixed Bugs:
 - Fixed the border in the player.
 - Fixed a crash when killing running threads that are stuck in a wait.
 - Fixed threads not interrupting correctly when waiting in a sleep.
+- Fixed folders in the Resource Views not showing up on top in some cases.
 
 =================
 Version 1.4.4.0

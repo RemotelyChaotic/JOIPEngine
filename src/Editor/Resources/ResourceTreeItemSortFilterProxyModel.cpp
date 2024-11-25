@@ -138,8 +138,11 @@ bool CResourceTreeItemSortFilterProxyModel::lessThan(const QModelIndex& left,
   QVariant leftData = sourceModel()->data(left, Qt::DisplayRole);
   QVariant rightData = sourceModel()->data(right, Qt::DisplayRole);
 
-  bool bLeftHasChildren = sourceModel()->hasChildren(left);
-  bool bRightHasChildren = sourceModel()->hasChildren(right);
+  qint32 optTypeLeft = sourceModel()->data(left, CResourceTreeItemModel::eItemTypeRole).toInt();
+  qint32 optTypeRight = sourceModel()->data(right, CResourceTreeItemModel::eItemTypeRole).toInt();
+
+  bool bLeftHasChildren = optTypeLeft != EResourceTreeItemType::eResource;
+  bool bRightHasChildren = optTypeRight != EResourceTreeItemType::eResource;
 
   if (bLeftHasChildren && !bRightHasChildren)
   {
