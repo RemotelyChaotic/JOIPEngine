@@ -3,6 +3,8 @@
 #include "Style.h"
 #include "SVersion.h"
 
+#include "Systems/DatabaseInterface/ProjectData.h"
+
 #include "Utils/MetronomeHelpers.h"
 
 #include <QCoreApplication>
@@ -96,6 +98,7 @@ const QString CSettings::c_sSettingEditorLayout = "Content/preferededitorlayout"
 const QString CSettings::c_sSettingFont = "Graphics/font";
 const QString CSettings::c_sSettingFullscreen = "Graphics/fullscreen";
 const QString CSettings::c_sSettingKeyBindings = "KeyBindings/";
+const QString CSettings::c_sSettingMetronomeDefCommands = "Devices/metronomeDefCmd";
 const QString CSettings::c_sSettingMetronomeSfx = "Audio/metronomeSfx";
 const QString CSettings::c_sSettingMetronomeVolume = "Audio/metronomeVolume";
 const QString CSettings::c_sSettingMuted = "Audio/muted";
@@ -542,6 +545,29 @@ void CSettings::setKeyBinding(const QKeySequence& sKeySequence, const QString& s
     }
   }
 #endif
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CSettings::SetMetronomeDefCommands(int iValue)
+{
+  QMutexLocker locker(&m_settingsMutex);
+
+  qint32 iOldVal = m_spSettings->value(CSettings::c_sSettingMetronomeDefCommands).toInt();
+
+  if (iOldVal == iValue) { return; }
+
+  m_spSettings->setValue(CSettings::c_sSettingMetronomeDefCommands, iValue);
+
+  emit metronomeDefaultCommandsChanged();
+}
+
+//----------------------------------------------------------------------------------------
+//
+int CSettings::MetronomeDefCommands() const
+{
+  QMutexLocker locker(&m_settingsMutex);
+  return m_spSettings->value(CSettings::c_sSettingMetronomeDefCommands).toInt();
 }
 
 //----------------------------------------------------------------------------------------
@@ -1174,6 +1200,13 @@ void CSettings::GenerateSettingsIfNotExists()
     m_spSettings->setValue(CSettings::c_sSettingResolution, size);
   }
 #endif
+
+  // check metronome commands
+  if (!m_spSettings->contains(CSettings::c_sSettingMetronomeDefCommands))
+  {
+    bNeedsSynch = true;
+    m_spSettings->setValue(CSettings::c_sSettingMetronomeDefCommands, EToyMetronomeCommandModeFlag::eDefault);
+  }
 
   // check metronome sfx
   if (!m_spSettings->contains(CSettings::c_sSettingMetronomeSfx))

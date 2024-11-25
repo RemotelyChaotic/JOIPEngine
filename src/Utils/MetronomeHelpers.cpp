@@ -1,4 +1,6 @@
 #include "MetronomeHelpers.h"
+#include "Application.h"
+#include "Settings.h"
 
 #include "Systems/Resource.h"
 
@@ -48,6 +50,15 @@ namespace
 
 namespace metronome
 {
+  //--------------------------------------------------------------------------------------
+  //
+  EToyMetronomeCommandModeFlags MapCmdModeToFlags(qint32 mode)
+  {
+    return EToyMetronomeCommandMode::eDefault == mode ?
+             EToyMetronomeCommandModeFlags(CApplication::Instance()->Settings()->MetronomeDefCommands()) :
+             EToyMetronomeCommandModeFlags(mode);
+  }
+
   //--------------------------------------------------------------------------------------
   //
   const std::map<QString, QStringList>& MetronomeSfxMap()

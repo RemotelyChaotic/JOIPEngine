@@ -305,6 +305,7 @@
         <file>resources/help/editor/projectsettings/metronome_command_mode_help.html</file>
         <file>resources/sound/lubdub/HB (bass boost 5.0 -10dB) pt1.wav</file>
         <file>resources/sound/lubdub/HB (bass boost 5.0 -10dB) pt2 (trim).wav</file>
+        <file>resources/help/settings/metdefcommand_setting_help.html</file>
     </qresource>
     <qresource prefix="/qml">
         <file>resources/qml/JoipEngine/EmptyDummy.qml</file>

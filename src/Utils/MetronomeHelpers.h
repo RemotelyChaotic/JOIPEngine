@@ -1,6 +1,8 @@
 #ifndef METRONOMEHELPERS_H
 #define METRONOMEHELPERS_H
 
+#include "Systems/DatabaseInterface/ProjectData.h"
+
 #include <QString>
 #include <map>
 #include <vector>
@@ -15,6 +17,7 @@ namespace metronome
   const char c_sSfxToc[] = "Tock";
   const char c_sSfxLubDub[] = "Lub-Dub";
 
+  EToyMetronomeCommandModeFlags MapCmdModeToFlags(qint32 mode);
   const std::map<QString, QStringList>& MetronomeSfxMap();
   QStringList MetronomeSfxFromKey(const QString& sKey);
 }

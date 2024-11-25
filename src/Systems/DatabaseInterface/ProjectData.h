@@ -33,7 +33,7 @@ enum EToyMetronomeCommandModeFlag : qint32
   eLinear           = 0x02,
   eRotate           = 0x04,
 
-  eDefault          = eVibrate,
+  eDefault          = eVibrate | eLinear | eRotate,
 };
 
 BETTER_ENUM(EToyMetronomeCommandMode, qint32,
@@ -48,12 +48,6 @@ BETTER_ENUM(EToyMetronomeCommandMode, qint32,
 Q_DECLARE_FLAGS(EToyMetronomeCommandModeFlags, EToyMetronomeCommandModeFlag)
 Q_DECLARE_OPERATORS_FOR_FLAGS(EToyMetronomeCommandModeFlags)
 Q_DECLARE_METATYPE(EToyMetronomeCommandModeFlags)
-
-inline EToyMetronomeCommandModeFlags MapCmdModeToFlags(qint32 mode)
-{
-  return EToyMetronomeCommandMode::eDefault == mode ?
-      EToyMetronomeCommandModeFlag::eDefault : EToyMetronomeCommandModeFlags(mode);
-}
 
 struct SProjectData
 {

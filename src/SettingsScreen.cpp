@@ -6,6 +6,7 @@
 #include "WindowContext.h"
 #include "ui_SettingsScreen.h"
 
+#include "Systems/DatabaseInterface/ProjectData.h"
 #include "Systems/DeviceManager.h"
 #include "Systems/Devices/DeviceSettings.h"
 #include "Systems/DLJobs/DownloadJobRegistry.h"
@@ -43,6 +44,7 @@ namespace  {
   const QString c_sResolutionHelpId = "Settings/Resolution";
   const QString c_sMuteHelpId = "Settings/Mute";
   const QString c_sVolumeHelpId = "Settings/Volume";
+  const QString c_sMetronomeDefCmdHelpId = "Settings/MetronomeDefaultCommands";
   const QString c_sMetronomeHelpId = "Settings/Metronome";
   const QString c_sDominantHandHelpId = "Settings/DominantHand";
   const QString c_sOfflineHelpId = "Settings/Offline";
@@ -147,6 +149,8 @@ void CSettingsScreen::Initialize()
     wpHelpFactory->RegisterHelp(c_sPushNotificationsHelpId, ":/resources/help/settings/push_notification_setting_help.html");
     m_spUi->pConnectSettingContainer->setProperty(helpOverlay::c_sHelpPagePropertyName, c_sConnectHWOnStartupHelpId);
     wpHelpFactory->RegisterHelp(c_sConnectHWOnStartupHelpId, ":/resources/help/settings/connecthwonstartup_setting_help.html");
+    m_spUi->pConnectSettingContainer->setProperty(helpOverlay::c_sHelpPagePropertyName, c_sMetronomeDefCmdHelpId);
+    wpHelpFactory->RegisterHelp(c_sMetronomeDefCmdHelpId, ":/resources/help/settings/metdefcommand_setting_help.html");
     m_spUi->pStyleHotoadContainer->setProperty(helpOverlay::c_sHelpPagePropertyName, c_sHotloadStyleHelpId);
     wpHelpFactory->RegisterHelp(c_sHotloadStyleHelpId, ":/resources/help/settings/hotloadstyle_setting_help.html");
     m_spUi->pBackButton->setProperty(helpOverlay::c_sHelpPagePropertyName, c_sCancelHelpId);
@@ -270,6 +274,9 @@ void CSettingsScreen::Load()
   m_spUi->pDropShadowCheckBox->blockSignals(true);
   m_spUi->pMipMapCheckBox->blockSignals(true);
   m_spUi->pSmoothingCheckBox->blockSignals(true);
+  m_spUi->pVibrateCmdCheckBox->blockSignals(true);
+  m_spUi->pLinearCmdCheckBox->blockSignals(true);
+  m_spUi->pRotateCmdCheckBox->blockSignals(true);
 
   // set fullscreen
   m_spUi->pWindowModeComboBox->setCurrentIndex(static_cast<qint32>(m_spSettings->GetWindowMode()));
@@ -428,7 +435,14 @@ void CSettingsScreen::Load()
   // push notifications
   m_spUi->pShowPushNotificationsCeckBox->setChecked(m_spSettings->PushNotifications());
 
+  // devices
   m_spUi->pConnectOnStartupCheckBox->setChecked(m_spSettings->ConnectToHWOnStartup());
+  m_spUi->pVibrateCmdCheckBox->setChecked(m_spSettings->MetronomeDefCommands() &
+                                          EToyMetronomeCommandModeFlag::eVibrate);
+  m_spUi->pLinearCmdCheckBox->setChecked(m_spSettings->MetronomeDefCommands() &
+                                           EToyMetronomeCommandModeFlag::eLinear);
+  m_spUi->pRotateCmdCheckBox->setChecked(m_spSettings->MetronomeDefCommands() &
+                                           EToyMetronomeCommandModeFlag::eRotate);
 
   // hot-loading of style
   m_spUi->pStyleHotoadCheckBox->setChecked(m_spSettings->StyleHotLoad());
@@ -458,6 +472,9 @@ void CSettingsScreen::Load()
   m_spUi->pDropShadowCheckBox->blockSignals(false);
   m_spUi->pMipMapCheckBox->blockSignals(false);
   m_spUi->pSmoothingCheckBox->blockSignals(false);
+  m_spUi->pVibrateCmdCheckBox->blockSignals(false);
+  m_spUi->pLinearCmdCheckBox->blockSignals(false);
+  m_spUi->pRotateCmdCheckBox->blockSignals(false);
 
   // dynamically create the device settings again.
   // The device connectors and devices define the behavior of these.
@@ -768,6 +785,66 @@ void CSettingsScreen::on_pConnectOnStartupCheckBox_toggled(bool bState)
   if (nullptr == m_spSettings) { return; }
 
   m_spSettings->SetConnectToHWOnStartup(bState);
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CSettingsScreen::on_pVibrateCmdCheckBox_toggled(bool bState)
+{
+  WIDGET_INITIALIZED_GUARD
+  assert(nullptr != m_spSettings);
+  if (nullptr == m_spSettings) { return; }
+
+  if (bState)
+  {
+    m_spSettings->SetMetronomeDefCommands(m_spSettings->MetronomeDefCommands() |
+                                          EToyMetronomeCommandModeFlag::eVibrate);
+  }
+  else
+  {
+    m_spSettings->SetMetronomeDefCommands(m_spSettings->MetronomeDefCommands() &
+                                          ~EToyMetronomeCommandModeFlag::eVibrate);
+  }
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CSettingsScreen::on_pLinearCmdCheckBox_toggled(bool bState)
+{
+  WIDGET_INITIALIZED_GUARD
+  assert(nullptr != m_spSettings);
+  if (nullptr == m_spSettings) { return; }
+
+  if (bState)
+  {
+    m_spSettings->SetMetronomeDefCommands(m_spSettings->MetronomeDefCommands() |
+                                          EToyMetronomeCommandModeFlag::eLinear);
+  }
+  else
+  {
+    m_spSettings->SetMetronomeDefCommands(m_spSettings->MetronomeDefCommands() &
+                                          ~EToyMetronomeCommandModeFlag::eLinear);
+  }
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CSettingsScreen::on_pRotateCmdCheckBox_toggled(bool bState)
+{
+  WIDGET_INITIALIZED_GUARD
+  assert(nullptr != m_spSettings);
+  if (nullptr == m_spSettings) { return; }
+
+  if (bState)
+  {
+    m_spSettings->SetMetronomeDefCommands(m_spSettings->MetronomeDefCommands() |
+                                          EToyMetronomeCommandModeFlag::eRotate);
+  }
+  else
+  {
+    m_spSettings->SetMetronomeDefCommands(m_spSettings->MetronomeDefCommands() &
+                                          ~EToyMetronomeCommandModeFlag::eRotate);
+  }
 }
 
 //----------------------------------------------------------------------------------------

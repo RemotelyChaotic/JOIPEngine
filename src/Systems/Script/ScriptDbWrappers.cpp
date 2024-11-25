@@ -1,6 +1,8 @@
 #include "ScriptDbWrappers.h"
 #include "Application.h"
+
 #include "Systems/Tag.h"
+#include "Utils/MetronomeHelpers.h"
 
 #include <QtLua/State>
 #include <QImageReader>
@@ -166,7 +168,7 @@ qint32 CProjectScriptWrapper::getNumberOfSoundEmitters()
 qint32 CProjectScriptWrapper::getMetCmdMode()
 {
   QReadLocker locker(&m_spData->m_rwLock);
-  return MapCmdModeToFlags(m_spData->m_metCmdMode);
+  return metronome::MapCmdModeToFlags(m_spData->m_metCmdMode);
 }
 
 //----------------------------------------------------------------------------------------
