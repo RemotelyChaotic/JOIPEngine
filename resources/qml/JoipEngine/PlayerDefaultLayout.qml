@@ -134,6 +134,8 @@ Rectangle {
             Layout.preferredWidth: 48
             Layout.alignment: Qt.AlignVCenter
 
+            focusPolicy: Qt.NoFocus
+
             text: Settings.keyBinding("Tools")
             contentItem: Text {
                 anchors.fill: parent

@@ -146,6 +146,8 @@ Rectangle {
                                         .replace("<body>", "").replace("</body>", "");
                     z: 1
 
+                    focusPolicy: Qt.NoFocus
+
                     Behavior on width  {
                          animation: SequentialAnimation {
                              PauseAnimation { duration: repeaterItem.delayOnShow }

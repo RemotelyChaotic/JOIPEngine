@@ -29,6 +29,8 @@ Rectangle {
 
             visible: !root.debug
 
+            focusPolicy: Qt.NoFocus
+
             text: Settings.keyBinding("Exit")
             contentItem: Text {
                 anchors.fill: parent
@@ -80,6 +82,8 @@ Rectangle {
             Layout.preferredHeight: sceneControl.buttonHeight
             Layout.preferredWidth: sceneControl.buttonWidth
             Layout.alignment: Qt.AlignVCenter
+
+            focusPolicy: Qt.NoFocus
 
             text: Settings.keyBinding("Pause")
             contentItem: Text {
@@ -142,6 +146,8 @@ Rectangle {
             Layout.preferredHeight: sceneControl.buttonHeight
             Layout.preferredWidth: sceneControl.buttonWidth
             Layout.alignment: Qt.AlignVCenter
+
+            focusPolicy: Qt.NoFocus
 
             text: Settings.keyBinding("Devices")
             contentItem: Text {

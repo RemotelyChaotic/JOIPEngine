@@ -33,6 +33,8 @@ Fixed Bugs:
 - Fixed a crash when killing running threads that are stuck in a wait.
 - Fixed threads not interrupting correctly when waiting in a sleep.
 - Fixed folders in the Resource Views not showing up on top in some cases.
+- Fixed a focus issue in the player. Buttons should now not steal the focus
+  anymore.
 
 =================
 Version 1.4.4.0

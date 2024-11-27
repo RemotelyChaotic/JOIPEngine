@@ -53,6 +53,8 @@ Rectangle {
                 Layout.alignment: Qt.AlignHCenter
                 text: model.buttonText;
 
+                focusPolicy: Qt.NoFocus
+
                 visible: model.buttonText !== ""
 
                 onHoveredChanged: {
