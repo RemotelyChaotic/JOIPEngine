@@ -212,6 +212,14 @@ void CScriptNotification::show(QString sId, QString sTitle, QString sButtonText,
 
 //----------------------------------------------------------------------------------------
 //
+void CScriptNotification::setShortcut(QString sShortcut)
+{
+  if (!CheckIfScriptCanRun()) { return; }
+  emit SignalEmitter<CNotificationSignalEmiter>()->shortcutChanged(sShortcut);
+}
+
+//----------------------------------------------------------------------------------------
+//
 void CScriptNotification::setTextBackgroundColor(QVariant color)
 {
   if (!CheckIfScriptCanRun()) { return; }

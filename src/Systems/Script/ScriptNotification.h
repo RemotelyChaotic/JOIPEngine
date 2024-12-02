@@ -40,6 +40,7 @@ signals:
   void hideNotification(QString sId);
   void iconAlignmentChanged(qint32 alignment);
   void portraitChanged(QString sResource);
+  void shortcutChanged(QString sShortcut);
   void showNotification(QString sId, QString sTitle, QString sButtonText, double iTimeS, QString sOnButton, QString sOnTimeout);
   void showNotificationClick(QString sId, QString sOnButton);
   void showNotificationTimeout(QString sId, QString sOnTimeout);
@@ -74,6 +75,7 @@ public slots:
   void show(QString sId, QString sTitle, QVariant sButtonTextOrTimeout, QVariant onButtonOnTimeoutOrTime);
   void show(QString sId, QString sTitle, QString sButtonText, double dTimeS, QVariant sOnButton);
   void show(QString sId, QString sTitle, QString sButtonText, double dTimeS, QVariant sOnButton, QVariant sOnTimeout);
+  void setShortcut(QString sShortcut);
   void setTextBackgroundColor(QVariant color);
   void setTextColor(QVariant color);
   void setWidgetBackgroundColor(QVariant color);

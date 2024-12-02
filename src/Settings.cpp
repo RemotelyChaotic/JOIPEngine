@@ -39,6 +39,12 @@ namespace {
     "Answer_8",
     "Answer_9",
 
+    "Notification_1",
+    "Notification_2",
+    "Notification_3",
+    "Notification_4",
+    "Notification_5",
+
     "Left_1",
     "Left_2",
     "Left_3",
@@ -148,6 +154,12 @@ CSettings::CSettings(QObject* pParent) :
       { "Answer_7",   QKeySequence(Qt::Key_7)            },
       { "Answer_8",   QKeySequence(Qt::Key_8)            },
       { "Answer_9",   QKeySequence(Qt::Key_9)            },
+
+      { "Notification_1", QKeySequence(Qt::Key_C)        },
+      { "Notification_2", QKeySequence(Qt::Key_V)        },
+      { "Notification_3", QKeySequence(Qt::Key_B)        },
+      { "Notification_4", QKeySequence(Qt::Key_N)        },
+      { "Notification_5", QKeySequence(Qt::Key_M)        },
 
       { "Left_1",     QKeySequence(Qt::Key_1)            },
       { "Left_2",     QKeySequence(Qt::Key_2)            },

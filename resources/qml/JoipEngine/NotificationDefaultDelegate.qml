@@ -47,6 +47,7 @@ Rectangle {
                 id: button
 
                 property real visibleHeight: visible ? (buttonText.contentHeight + 10) : 0
+                property string bShortcut: model.shortcut === "" ? Settings.keyBinding("Notification_" + (index+1)) : model.shortcut
 
                 Layout.preferredWidth: buttonText.contentWidth + 10
                 Layout.preferredHeight: visibleHeight
@@ -89,8 +90,23 @@ Rectangle {
                     textFormat: QtApp.mightBeRichtext(text) ? Text.RichText : Text.PlainText
                 }
 
+                Text {
+                    id: shortcutText
+                    visible: parent.visible
+                    anchors.right: parent.right
+                    anchors.bottom: parent.bottom
+                    font.pointSize: 8
+                    font.hintingPreference: Font.PreferNoHinting
+                    elide: Text.ElideNone
+                    text: button.bShortcut
+                    wrapMode: Text.NoWrap
+                    horizontalAlignment: Text.AlignHCenter
+                    verticalAlignment: Text.AlignVCenter
+                }
+
                 Shortcut {
-                    sequence: Settings.keyBinding("Right_" + (index+1));
+                    sequences: [ button.bShortcut ];
+                    context: Qt.ApplicationShortcut
                     onActivated: {
                         root.soundEffects.clickSound.play();
                         defaultDelegate.parent.ListView.view.buttonPressed(model.sId, model.sOnButton);

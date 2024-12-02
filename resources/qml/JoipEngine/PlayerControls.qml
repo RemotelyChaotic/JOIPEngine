@@ -41,7 +41,7 @@ Rectangle {
 
                 text: parent.text
                 font.family: Settings.font
-                font.pixelSize: 10
+                font.pixelSize: 8
                 color: "white"
             }
 
@@ -71,6 +71,7 @@ Rectangle {
 
             Shortcut {
                 sequence: Settings.keyBinding("Exit")
+                context: Qt.ApplicationShortcut
                 onActivated: {
                     pauseButton.quit();
                 }
@@ -95,7 +96,7 @@ Rectangle {
 
                 text: parent.text
                 font.family: Settings.font
-                font.pixelSize: 10
+                font.pixelSize: 8
                 color: "white"
             }
 
@@ -135,6 +136,7 @@ Rectangle {
 
             Shortcut {
                 sequence: Settings.keyBinding("Pause")
+                context: Qt.ApplicationShortcut
                 onActivated: {
                     pauseButton.pausePlayScene();
                 }
@@ -159,7 +161,7 @@ Rectangle {
 
                 text: parent.text
                 font.family: Settings.font
-                font.pixelSize: 10
+                font.pixelSize: 8
                 color: "white"
             }
 
@@ -186,6 +188,7 @@ Rectangle {
 
             Shortcut {
                 sequence: Settings.keyBinding("Devices")
+                context: Qt.ApplicationShortcut
                 onActivated: {
                     var globalCoordinares = devicesButton.mapToItem(root, 0, devicesButton.height);
                     TeaseDeviceController.openSelectionScreen(globalCoordinares.x, globalCoordinares.y);

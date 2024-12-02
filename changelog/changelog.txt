@@ -11,6 +11,9 @@ New Features:
   - Default device commands of PlayerMetronome.
   - Size of PlayerMetronome
   - Hide timeout of PlayerTextBox
+- Keyboard shortcuts of PlayerNotification can be oerriden via setShortcut and 
+  the default shortcuts were changed to more easilly accessable keys, which now have 
+  their own settings bindings.
 
 Changes:
 - If no more sound emitters are found when trying to play a sound an there are
@@ -19,6 +22,7 @@ Changes:
 - Added a new default SFX to the Metronome: Lub-Dub
 - Project preview shows the project name instead of 404 if no Title Card is set.
 - Project name is displayed in the Project Card details above the describtion.
+- Buttons in the Player now show the shortcut needed to activate them.
 
 Fixed Bugs:
 - Fixed a crash occurring when stopping a debug session mid Scene transition.

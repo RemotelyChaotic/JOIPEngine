@@ -26,6 +26,7 @@ Rectangle {
             "textColorWidget": widgetDisplay.textColorWidget,
             "iconAlignment": widgetDisplay.iconAlignment,
             "portrait": widgetDisplay.portrait,
+            "shortcut": widgetDisplay.shortcut,
             "type": "NotificationDefaultDelegate.qml"
         });
     }
@@ -78,6 +79,10 @@ Rectangle {
         setPortrait: function(sResource)
         {
             signalEmitter.portraitChanged(sResource);
+        },
+        setShortcut: function(sShortcut)
+        {
+            signalEmitter.shortcutChanged(sShortcut);
         },
         setTextBackgroundColor: function(color)
         {
@@ -134,6 +139,9 @@ Rectangle {
         onShowNotification: {
             notification.showNotification(sId, sTitle, sButtonText, iTimeS, sOnButton, sOnTimeout);
         }
+        onShortcutChanged: {
+            widgetDisplay.shortcut = sShortcut;
+        }
         onTextBackgroundColorChanged: {
             widgetDisplay.backgroundColor = color;
         }
@@ -164,6 +172,7 @@ Rectangle {
         property var backgroundColorWidget: "#ff333333"
         property var textColorWidget: "#ffffffff"
         property var iconAlignment: TextAlignment.AlignLeft
+        property string shortcut: ""
         property Resource portrait: null
 
         function buttonPressed(sId, sOnButton)

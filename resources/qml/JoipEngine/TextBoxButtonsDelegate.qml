@@ -148,6 +148,8 @@ Rectangle {
 
                     focusPolicy: Qt.NoFocus
 
+                    property string bShortcut: Settings.keyBinding("Answer_" + (index+1))
+
                     Behavior on width  {
                          animation: SequentialAnimation {
                              PauseAnimation { duration: repeaterItem.delayOnShow }
@@ -202,8 +204,26 @@ Rectangle {
                         }
                     }
 
+                    Text {
+                        id: shortcutText
+                        visible: text.opacity > 0.8
+                        x: -1
+                        y: -1
+                        anchors.right: parent.right
+                        anchors.bottom: parent.bottom
+                        font.pointSize: 8
+                        font.hintingPreference: Font.PreferNoHinting
+                        elide: Text.ElideNone
+                        text: button.bShortcut
+                        wrapMode: Text.NoWrap
+                        horizontalAlignment: Text.AlignHCenter
+                        verticalAlignment: Text.AlignVCenter
+                    }
+
+
                     Shortcut {
-                        sequence: Settings.keyBinding("Answer_" + (index+1));
+                        sequences: [ button.bShortcut ];
+                        context: Qt.ApplicationShortcut
                         onActivated: {
                             root.soundEffects.clickSound.play();
                             if (inList) {

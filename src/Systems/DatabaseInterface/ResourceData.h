@@ -192,7 +192,7 @@ Rectangle {
 
                 text: parent.text
                 font.family: Settings.font
-                font.pixelSize: 10
+                font.pixelSize: 8
                 color: "white"
             }
 
@@ -217,6 +217,7 @@ Rectangle {
 
             Shortcut {
                 sequence: Settings.keyBinding("Tools")
+                context: Qt.ApplicationShortcut
                 onActivated: {
                     textBox.logShown = !textBox.logShown
                 }

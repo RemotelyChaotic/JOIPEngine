@@ -813,6 +813,18 @@
         notification:show('myid', '', 'MyButton', 10, 'OnClickScript', 'OnTimeoutScript'); -- On timeout will call OnTimeoutScript<br>
         <br></li>
 
+        <li><b>setShortcut ( string ):</b><br>
+        Overrides the keyboard shortcut for the next call(s) to <i>show</i>.<br>
+        The key sequences can be described with strings containing sequences of up to four key
+        presses that are needed to activate the shortcut.<br>
+        <i>Example Usage (JS):</i><br>
+        notification.setShortcut("Ctrl+E");<br>
+        notification.setShortcut("c");<br>
+        <i>Example Usage (Lua):</i><br>
+        notification:setShortcut('Ctrl+E');<br>
+        notification:setShortcut('c');<br>
+        <br></li>
+
         <li><b>setTextBackgroundColor | setWidgetBackgroundColor ( string | int[3 | 4] ):</b><br>
         As the name implies, this will set the background color of elements in the notification box.
         The given argument can be an html-style color string ("#argb")
