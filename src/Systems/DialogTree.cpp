@@ -198,15 +198,7 @@ namespace
               itTags->is_array() && itFragments->is_array())
           {
             QString sKey = QString::fromStdString(it.key());
-            auto itFound = std::find_if(spRoot->m_vspChildren.begin(), spRoot->m_vspChildren.end(),
-                                        [sKey](const std::shared_ptr<CDialogNode>& spChild) {
-                                          return sKey == spChild->m_sName &&
-                                                 EDialogTreeNodeType::eCategory == spChild->m_type._to_integral();
-                                        });
-            if (spRoot->m_vspChildren.end() != itFound)
-            {
-              sKey = dialog_tree::EnsureUniqueName(sKey, spRoot, nullptr);
-            }
+            sKey = dialog_tree::EnsureUniqueName(sKey, spRoot, nullptr);
 
             auto spChild = std::make_shared<CDialogNodeDialog>();
             spRoot->m_vspChildren.push_back(spChild);
@@ -255,15 +247,7 @@ namespace
               itWaitTime->is_number_integer() && itSkippable->is_boolean())
           {
             QString sKey = QString::fromStdString(itName.value().get<std::string>());
-            auto itFound = std::find_if(spRoot->m_vspChildren.begin(), spRoot->m_vspChildren.end(),
-                                        [sKey](const std::shared_ptr<CDialogNode>& spChild) {
-                                          return sKey == spChild->m_sName &&
-                                                 EDialogTreeNodeType::eCategory == spChild->m_type._to_integral();
-                                        });
-            if (spRoot->m_vspChildren.end() != itFound)
-            {
-              sKey = dialog_tree::EnsureUniqueName(sKey, spRoot, nullptr);
-            }
+            sKey = dialog_tree::EnsureUniqueName(sKey, spRoot, nullptr);
 
             auto spFrag = std::make_shared<CDialogData>();
             spRoot->m_vspChildren.push_back(spFrag);
@@ -288,6 +272,7 @@ namespace
         else
         {
           QString sKey = QString::fromStdString(it.key());
+          sKey = dialog_tree::EnsureUniqueName(sKey, spRoot, nullptr);
           std::shared_ptr<CDialogNodeCategory> spChild = nullptr;
           auto itFound = std::find_if(spRoot->m_vspChildren.begin(), spRoot->m_vspChildren.end(),
                                  [sKey](const std::shared_ptr<CDialogNode>& spChild) {
@@ -307,7 +292,6 @@ namespace
             spChild = std::dynamic_pointer_cast<CDialogNodeCategory>(*itFound);
             if (nullptr == spChild)
             {
-              sKey = dialog_tree::EnsureUniqueName(sKey, spRoot, nullptr);
               spChild = std::make_shared<CDialogNodeCategory>();
               spChild->m_sName = sKey;
               spChild->m_wpParent = spRoot;
@@ -596,6 +580,25 @@ namespace
   }
 }
 
+//----------------------------------------------------------------------------------------
+//
+namespace
+{
+  void IterateNodeChildrenAdgGetName(QStringList* pvsList,
+                                     const std::shared_ptr<CDialogNode>& spRoot,
+                                     const std::shared_ptr<CDialogNode>& spExcept)
+  {
+    for (const auto& spChild : spRoot->m_vspChildren)
+    {
+      if (spExcept != spChild)
+      {
+        (*pvsList) << spChild->m_sName;
+      }
+      IterateNodeChildrenAdgGetName(pvsList, spChild, spExcept);
+    }
+  }
+}
+
 namespace dialog_tree
 {
   //--------------------------------------------------------------------------------------
@@ -606,16 +609,20 @@ namespace dialog_tree
   {
     QString sOut = sStr;
     QStringList vsForbidden;
-    if (nullptr != spParent)
+
+    // get root
+    auto spRoot = spParent;
+    auto spRootTest = spParent;
+    while (nullptr != spRootTest)
     {
-      for (const auto& spChild : spParent->m_vspChildren)
+      spRootTest = spRoot->m_wpParent.lock();
+      if (nullptr != spRootTest)
       {
-        if (spExcept != spChild)
-        {
-        vsForbidden << spChild->m_sName;
-        }
+        spRoot = spRootTest;
       }
     }
+
+    IterateNodeChildrenAdgGetName(&vsForbidden, spRoot, spExcept);
 
     // insert a counter
     qint32 iNrIterations = 1;

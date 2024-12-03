@@ -270,6 +270,8 @@ namespace script
                                                  static constexpr char c_sName[] = "Resource"; };
     template<> struct SWraperToType<SScene> { using type = CSceneScriptWrapper;
                                               static constexpr char c_sName[] = "Scene";};
+    template<> struct SWraperToType<STag> { using type = CTagWrapper;
+                                            static constexpr char c_sName[] = "Tag";};
 
     template<typename T> std::shared_ptr<T> FindInProject(
         std::shared_ptr<CDatabaseManager>,
@@ -283,6 +285,10 @@ namespace script
         std::shared_ptr<CDatabaseManager> spDbManager,
         tspProject spProject, const QString& sName)
     { return spDbManager->FindScene(spProject, sName); }
+    template<> std::shared_ptr<STag> FindInProject<STag>(
+        std::shared_ptr<CDatabaseManager> spDbManager,
+        tspProject spProject, const QString& sName)
+    { return spDbManager->FindTagInProject(spProject, sName); }
   }
 
   //--------------------------------------------------------------------------------------
@@ -498,7 +504,7 @@ namespace script
     if (var.type() == QVariant::List)
     {
       QVariantList vVarList = var.toList();
-      for (QVariant v : qAsConst(vVarList))
+      for (const QVariant& v : qAsConst(vVarList))
       {
         vsList << v.toString();
       }
@@ -508,7 +514,7 @@ namespace script
     else if (var.type() == QVariant::Map)
     {
       QVariantMap map = var.toMap();
-      for (QVariant v : qAsConst(map))
+      for (const QVariant& v : qAsConst(map))
       {
         vsList << v.toString();
       }
@@ -530,6 +536,124 @@ namespace script
         *sError =
           QObject::tr("Wrong argument-type to %1(). Array of strings was expected.")
           .arg(sContext);
+      }
+      return std::nullopt;
+    }
+  }
+
+  //--------------------------------------------------------------------------------------
+  //
+  std::optional<QStringList> ParseTagListFromScriptVariant(const QVariant& var,
+                                                           std::shared_ptr<CDatabaseManager> spDbManager,
+                                                           tspProject spProject,
+                                                           const QString& sContext,
+                                                           QString* sError)
+  {
+    QStringList vsList;
+    // js arrays and objects are not converted correctly, so we handle them manually
+    QJSValue valFromJS = var.value<QJSValue>();
+    if (var.type() == QVariant::List)
+    {
+      QVariantList vVarList = var.toList();
+      for (const QVariant& v : qAsConst(vVarList))
+      {
+        if (QVariant::String == v.type())
+        {
+          vsList << v.toString();
+        }
+        else
+        {
+          auto optRes = ParseItemFromScriptVariant<STag>(
+              v, spDbManager, spProject, sContext, sError);
+          if (optRes.has_value())
+          {
+            vsList.push_back(*optRes);
+          }
+          else
+          {
+            if (nullptr != sError)
+            {
+              *sError =
+                  QObject::tr("Wrong argument-type to %1(). Array of strings or Tags was expected.")
+                      .arg(sContext);
+            }
+            return std::nullopt;
+          }
+        }
+      }
+      return vsList;
+    }
+    // lua tables can currently only be converted to VariantMap
+    else if (var.type() == QVariant::Map)
+    {
+      QVariantMap map = var.toMap();
+      for (const QVariant& v : qAsConst(map))
+      {
+        if (QVariant::String == v.type())
+        {
+          vsList << v.toString();
+        }
+        else
+        {
+          auto optRes = ParseItemFromScriptVariant<STag>(
+              v, spDbManager, spProject, sContext, sError);
+          if (optRes.has_value())
+          {
+            vsList.push_back(*optRes);
+          }
+          else
+          {
+            if (nullptr != sError)
+            {
+              *sError =
+                  QObject::tr("Wrong argument-type to %1(). Array of strings or Tags was expected.")
+                      .arg(sContext);
+            }
+            return std::nullopt;
+          }
+        }
+      }
+      return vsList;
+    }
+    else if (valFromJS.isArray())
+    {
+      const qint32 iLength = valFromJS.property("length").toInt();
+      for (qint32 iIndex = 0; iLength > iIndex; iIndex++)
+      {
+        QJSValue val = valFromJS.property(static_cast<quint32>(iIndex));
+        if (val.isString())
+        {
+          vsList << val.toString();
+        }
+        else
+        {
+          auto optRes = ParseItemFromScriptVariant<STag>(
+              val.toVariant(), spDbManager, spProject, sContext, sError);
+          if (optRes.has_value())
+          {
+            vsList.push_back(*optRes);
+          }
+          else
+          {
+            if (nullptr != sError)
+            {
+              *sError =
+                  QObject::tr("Wrong argument-type to %1(). Array of strings or Tags was expected.")
+                      .arg(sContext);
+            }
+            return std::nullopt;
+          }
+        }
+      }
+      return vsList;
+    }
+    else
+    {
+      if (nullptr != sError)
+      {
+        *sError =
+            QObject::tr("Wrong argument-type to %1(). Array of strings or Tags was expected.")
+                .arg(sContext);
       }
       return std::nullopt;
     }

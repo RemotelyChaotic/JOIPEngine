@@ -44,6 +44,12 @@ namespace script
   std::optional<QStringList> ParseStringListFromScriptVariant(const QVariant& var,
                                          const QString& sContext,
                                          QString* sError);
+
+  std::optional<QStringList> ParseTagListFromScriptVariant(const QVariant& var,
+                                                           std::shared_ptr<CDatabaseManager> spDbManager,
+                                                           tspProject spProject,
+                                                           const QString& sContext,
+                                                           QString* sError);
 }
 
 #endif // COMMONSCRIPTHELPERS_H

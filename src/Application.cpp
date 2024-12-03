@@ -6,6 +6,7 @@
 
 // needed to register to qml
 #include "Player/MetronomePaintedWidget.h"
+#include "Player/ProjectDialogManager.h"
 #include "Player/ProjectNotificationManager.h"
 #include "Player/ProjectSceneManager.h"
 #include "Player/ProjectSoundManager.h"
@@ -467,6 +468,28 @@ void CApplication::RegisterQmlTypes()
       if (nullptr != pMainScreen)
       {
         return new CTeaseDeviceController(scriptEngine, pMainScreen);
+      }
+    }
+    return nullptr;
+  });
+  qmlRegisterSingletonType<CTeaseDeviceController>("JOIP.core", 1, 5, "DialogManager",
+                                                   [](QQmlEngine *engine, QJSEngine *scriptEngine) -> QObject*
+  {
+    Q_UNUSED(scriptEngine)
+    if (nullptr != engine)
+    {
+      CSceneMainScreen* pMainScreen = engine->property(player::c_sMainPlayerProperty).value<CSceneMainScreen*>();
+      if (nullptr != pMainScreen)
+      {
+        return new CProjectDialogManagerWrapper(engine, pMainScreen->ProjectDialogManager());
+      }
+    }
+    else if (nullptr != scriptEngine)
+    {
+      CSceneMainScreen* pMainScreen = engine->property(player::c_sMainPlayerProperty).value<CSceneMainScreen*>();
+      if (nullptr != pMainScreen)
+      {
+        return new CProjectDialogManagerWrapper(scriptEngine, pMainScreen->ProjectDialogManager());
       }
     }
     return nullptr;

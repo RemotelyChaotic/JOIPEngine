@@ -37,11 +37,14 @@ public:
 
 signals:
   void clearText();
+  void getDialog(QString sRequestId, QString sId, QStringList vsTags);
+  void getDialogReturnValue(QString sRequestId, QString sString, qint64 iTime, bool bWait,
+                            QString sSoundResource, QStringList vsTags);
   void showButtonPrompts(QStringList vsLabels, QString sStoreIntoVar, QString sRequestId, bool bStoreIntoStorageInstead);
   void showButtonReturnValue(qint32 iIndex, QString sRequestId);
   void showInput(QString sStoreIntoVar, QString sRequestId, bool bStoreIntoStorageInstead);
   void showInputReturnValue(QString sValue, QString sRequestId);
-  void showText(QString sText, double dSkippableWaitS);
+  void showText(QString sText, double dSkippableWaitS, QString sResource);
   void textAlignmentChanged(qint32 alignment);
   void textBackgroundColorsChanged(std::vector<QColor> vColors);
   void textColorsChanged(std::vector<QColor> vColors);
@@ -73,9 +76,12 @@ public slots:
   qint32 showButtonPrompts(QVariant vsLabels, QString sStoreInto);
   QString showInput();
   QString showInput(QString sStoreInto);
+  QVariant getDialog(QVariant data);
+  void showDialog(QVariant data);
   void showText(QString sText);
   void showText(QString sText, double dWaitTime);
   void showText(QString sText, double dWaitTime, bool bSkipable);
+  void showText(QString sText, double dWaitTime, bool bSkipable, QString sResource);
   void clear();
 
 signals:
@@ -83,6 +89,11 @@ signals:
 
 private:
   std::vector<QColor> GetColors(const QVariant& color, const QString& sSource);
+  bool GetDialogData(QVariant data, QString& sStringRet, qint32& iTimeRet, bool& bWaitRet,
+                     QString& sSoundResource, QStringList& vsTagsRet);
+  bool GetDialogFromUi(QString sId, QString sString, QStringList vsTags,
+                       QString& sStringRet, qint32& iTimeRet, bool& bWaitRet,
+                       QString& sSoundResource, QStringList& vsTagsRet);
 
   std::weak_ptr<CDatabaseManager>  m_wpDbManager;
 };

@@ -3,7 +3,7 @@ import QtQuick.Controls 2.14
 import QtGraphicalEffects 1.14
 import QtGui 5.14
 import QtAV 1.7
-import JOIP.core 1.2
+import JOIP.core 1.5
 import JOIP.db 1.1
 import JOIP.script 1.1
 

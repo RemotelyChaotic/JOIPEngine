@@ -457,6 +457,8 @@ macro(CreateJOIPProject JOIP_PROJECT_NAME)
     ${JOIPSources}/Player/InformationWidget.ui
     ${JOIPSources}/Player/MetronomePaintedWidget.cpp
     ${JOIPSources}/Player/MetronomePaintedWidget.h
+    ${JOIPSources}/Player/ProjectDialogManager.cpp
+    ${JOIPSources}/Player/ProjectDialogManager.h
     ${JOIPSources}/Player/ProjectRunner.cpp
     ${JOIPSources}/Player/ProjectRunner.h
     ${JOIPSources}/Player/ProjectEventTarget.cpp

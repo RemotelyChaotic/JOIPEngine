@@ -1,7 +1,7 @@
 import QtQuick 2.14
 import QtQuick.Controls 2.14
 import QtGraphicalEffects 1.12
-import JOIP.core 1.1
+import JOIP.core 1.5
 
 Rectangle {
     id: text404Rect

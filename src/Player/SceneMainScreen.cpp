@@ -1,6 +1,7 @@
 #include "SceneMainScreen.h"
 #include "Application.h"
 #include "Constants.h"
+#include "ProjectDialogManager.h"
 #include "ProjectEventTarget.h"
 #include "ProjectRunner.h"
 #include "ProjectSceneManager.h"
@@ -40,6 +41,7 @@ CSceneMainScreen::CSceneMainScreen(QWidget* pParent) :
   m_spUi(std::make_unique<Ui::CSceneMainScreen>()),
   m_spEventCallbackRegistry(std::make_shared<CProjectEventCallbackRegistry>()),
   m_spProjectRunner(std::make_shared<CProjectRunner>()),
+  m_spDialogManager(std::make_shared<CProjectDialogManager>()),
   m_spScriptRunnerSystem(std::make_shared<CThreadedSystem>("ScriptRunner")),
   m_spScriptRunner(nullptr),
   m_spSettings(CApplication::Instance()->Settings()),
@@ -170,6 +172,8 @@ void CSceneMainScreen::LoadProject(qint32 iId, const tSceneToLoad& sStartScene)
       m_spProjectRunner->LoadProject(m_spCurrentProject, std::get<tspScene>(sStartScene));
     }
 
+    m_spDialogManager->LoadProject(m_spCurrentProject);
+
     if (nullptr != m_spWindowContext && !m_bBeingDebugged)
     {
       m_spWindowContext->SignalChangeAppOverlay(":/resources/style/img/ButtonPlay.png");
@@ -200,6 +204,13 @@ std::weak_ptr<CProjectEventCallbackRegistry> CSceneMainScreen::EventCallbackRegi
 
 //----------------------------------------------------------------------------------------
 //
+std::weak_ptr<CProjectDialogManager> CSceneMainScreen::ProjectDialogManager()
+{
+  return m_spDialogManager;
+}
+
+//----------------------------------------------------------------------------------------
+//
 std::weak_ptr<CProjectRunner> CSceneMainScreen::ProjectRunner()
 {
   return m_spProjectRunner;
@@ -219,6 +230,7 @@ void CSceneMainScreen::UnloadProject()
   if (!m_bInitialized) { return; }
 
   m_bShuttingDown = true;
+  m_spDialogManager->UnloadProject();
   m_spScriptRunner->InterruptExecution();
 }
 

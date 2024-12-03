@@ -1,5 +1,5 @@
 import QtQuick 2.14
-import JOIP.core 1.2
+import JOIP.core 1.5
 import JOIP.db 1.1
 import QtAV 1.7
 

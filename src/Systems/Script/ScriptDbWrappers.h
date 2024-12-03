@@ -1,6 +1,7 @@
 #ifndef SCRIPTDBWRAPPERS_H
 #define SCRIPTDBWRAPPERS_H
 
+#include "Systems/DialogTree.h"
 #include "Systems/Kink.h"
 #include "Systems/Lockable.h"
 #include "Systems/Project.h"
@@ -277,10 +278,100 @@ private:
 
 //----------------------------------------------------------------------------------------
 //
+class CDialogWrapperBase : public QObject
+{
+  Q_OBJECT
+  Q_DISABLE_COPY(CDialogWrapperBase)
+  CDialogWrapperBase() = delete;
+  Q_PROPERTY(QString  resource                READ getResource       CONSTANT)
+  Q_PROPERTY(QString  name                    READ getName           CONSTANT)
+
+public:
+  explicit CDialogWrapperBase(tEngineType pEngine, const std::shared_ptr<CDialogNode>& spData);
+  ~CDialogWrapperBase();
+
+  QString getResource() const;
+  QString getName() const;
+
+  std::shared_ptr<CDialogNode> DataBase() { return m_spData; }
+
+protected:
+  tEngineType                         m_pEngine;
+
+private:
+  std::shared_ptr<CDialogNode>        m_spData;
+};
+
+//----------------------------------------------------------------------------------------
+//
+class CDialogWrapper : public CDialogWrapperBase
+{
+  Q_OBJECT
+  Q_DISABLE_COPY(CDialogWrapper)
+  CDialogWrapper() = delete;
+  Q_PROPERTY(QString  hasCondition            READ getHasCondition   CONSTANT)
+
+public:
+  explicit CDialogWrapper(tEngineType pEngine, const std::shared_ptr<CDialogNodeDialog>& spData);
+  ~CDialogWrapper();
+
+  bool getHasCondition() const;
+
+  Q_INVOKABLE qint32 numDialogData();
+  Q_INVOKABLE QStringList dialogDataList();
+  Q_INVOKABLE QVariant dialogData(const QString& sValue);
+  Q_INVOKABLE QVariant dialogData(qint32 iIndex);
+
+  Q_INVOKABLE qint32 numTags();
+  Q_INVOKABLE QStringList tags();
+  Q_INVOKABLE QVariant tag(const QString& sValue);
+  Q_INVOKABLE QVariant tag(qint32 iIndex);
+
+  std::shared_ptr<CDialogNodeDialog> Data() { return m_spData; }
+
+private:
+  std::shared_ptr<CDialogNodeDialog>  m_spData;
+};
+
+//----------------------------------------------------------------------------------------
+//
+class CDialogDataWrapper : public CDialogWrapperBase
+{
+  Q_OBJECT
+  Q_DISABLE_COPY(CDialogDataWrapper)
+  CDialogDataWrapper() = delete;
+  Q_PROPERTY(QString  condition               READ getCondition      CONSTANT)
+  Q_PROPERTY(QString  string                  READ getString         CONSTANT)
+  Q_PROPERTY(QString  soundResource           READ getSoundResource  CONSTANT)
+  Q_PROPERTY(qint64   waitTimeMs              READ getWaitTime       CONSTANT)
+  Q_PROPERTY(bool     skipable                READ getSkipable       CONSTANT)
+
+public:
+  explicit CDialogDataWrapper(tEngineType pEngine, const std::shared_ptr<CDialogData>& spData);
+  ~CDialogDataWrapper();
+
+  QString getCondition() const;
+  QString getString() const;
+  QString getSoundResource() const;
+  qint64 getWaitTime() const;
+  bool getSkipable() const;
+
+  std::shared_ptr<CDialogData> Data() { return m_spData; }
+
+private:
+  std::shared_ptr<CDialogData>        m_spData;
+};
+
+
+//----------------------------------------------------------------------------------------
+//
 Q_DECLARE_METATYPE(CResourceScriptWrapper*)
 Q_DECLARE_METATYPE(CProjectScriptWrapper*)
 Q_DECLARE_METATYPE(CSceneScriptWrapper*)
 Q_DECLARE_METATYPE(CKinkWrapper*)
 Q_DECLARE_METATYPE(CTagWrapper*)
+Q_DECLARE_METATYPE(CDialogWrapperBase*)
+Q_DECLARE_METATYPE(CDialogWrapper*)
+Q_DECLARE_METATYPE(CDialogDataWrapper*)
 
 #endif // SCRIPTDBWRAPPERS_H

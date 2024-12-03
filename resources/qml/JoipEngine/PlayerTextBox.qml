@@ -1,7 +1,7 @@
 import QtQuick 2.14
 import QtQuick.Controls 2.14
 import QtGraphicalEffects 1.14
-import JOIP.core 1.1
+import JOIP.core 1.5
 import JOIP.db 1.1
 import JOIP.script 1.1
 
@@ -258,6 +258,60 @@ Rectangle {
         onClearText: {
             textBox.clearTextBox();
         }
+        onGetDialog: {
+            var dialog = null;
+            if ("" !== sId)
+            {
+                if (sId.includes('+') || sId.includes('*') || sId.includes('|') || sId.includes('{') ||
+                    sId.includes('}') || sId.includes('[') || sId.includes(']'))
+                {
+                    var dialgsRx = DialogManager.dialogFromRx(sId);
+                    dialog = dialgsRx[Math.floor(Math.random() * dialgsRx.length)];
+                }
+                else
+                {
+                    dialog = DialogManager.dialog(sId);
+                }
+            }
+            else if (vsTags.length > 0)
+            {
+                var dialgs = DialogManager.dialogFromTags(vsTags);
+                dialog = dialgs[Math.floor(Math.random() * dialgs.length)];
+            }
+
+            var dialogData = null;
+            if (null != dialog)
+            {
+                if (dialog.hasCondition && dialog.numDialogData() > 0)
+                {
+                    dialogData = dialog.dialogData(0);
+                }
+                else if (!dialog.hasCondition && dialog.numDialogData() > 0)
+                {
+                    for (var i = 0; dialog.numDialogData() > i; ++i)
+                    {
+                        var data = dialog.dialogData(i);
+                        if (root.evaluate(data.condition))
+                        {
+                            dialogData = data;
+                            break;
+                        }
+                    }
+                }
+            }
+
+            if (null != dialogData)
+            {
+                signalEmitter.getDialogReturnValue(sRequestId, dialogData.string,
+                                                   dialogData.waitTimeMs, dialogData.skipable,
+                                                   dialogData.soundResource,
+                                                   dialog.tags());
+            }
+            else
+            {
+                signalEmitter.getDialogReturnValue(sRequestId, "", -1, false, "", []);
+            }
+        }
         onShowButtonPrompts: {
             var vsModifiedPrompts = vsLabels;
             for (var i = 0; i < vsModifiedPrompts.length; ++i) {
@@ -274,6 +328,7 @@ Rectangle {
             hideTimer.reset(textBox.hideTimerIntervalMS);
         }
         onShowText: {
+            sResource;
             if (sText.startsWith("<html>") && sText.endsWith("</html>")) {
                 textBox.showText(root.parseHtmlToJS(sText, textBox.userName), false);
             } else {
