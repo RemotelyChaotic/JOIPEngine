@@ -50,98 +50,12 @@ Rectangle {
                     }
                     break;
 
-                case Resource.Sound:
-                    if (pResource.isLocal)
-                    {
-                        var soundPlayer = findFirstIdleSoundView();
-                        if (null !== soundPlayer && undefined !== soundPlayer)
-                        {
-                            pResource.load(); // load bundles now
-                            if (null !== soundPlayer.resource &&
-                                sName === soundPlayer.resource.name)
-                            {
-                                soundPlayer.play();
-                            }
-                            else
-                            {
-                                soundPlayer.nameId = sId;
-                                soundPlayer.loops = iLoops;
-                                soundPlayer.startAt = iStartAt;
-                                soundPlayer.endAt = iEndAt;
-                                soundPlayer.resource = pResource;
-                            }
-                        }
-                    }
-                    else
-                    {
-                        console.error(qsTr("Sound resources need to be local."));
-                    }
-                    break;
-
                 default:
                     console.error(qsTr("Cannot display or play a resource of type other than 'Image' 'Movie' or 'Sound'"));
                     break;
                 }
             }
         }
-    }
-
-    function findSoundView(sResource) {
-        for (var i = 0; soundRepeater.count > i; ++i)
-        {
-            var player = soundRepeater.itemAt(i);
-            if (null !== player && undefined !== player)
-            {
-                if (null !== player.resource &&
-                    (player.nameId !== "" && player.nameId === sResource ||
-                     player.nameId === "" && player.resource.name === sResource))
-                {
-                    return player;
-                }
-            }
-            else
-            {
-                console.error(qsTr("SoundResourceView should be valid here."));
-            }
-        }
-        return null;
-    }
-
-    function findFirstIdleSoundView() {
-        for (var i = 0; soundRepeater.count > i; ++i)
-        {
-            var player = soundRepeater.itemAt(i);
-            if (null !== player && undefined !== player)
-            {
-                if (player.state === Resource.Null ||
-                    player.state === Resource.Error ||
-                    player.playbackState === MediaPlayer.StoppedState && player.state === Resource.Loaded)
-                {
-                    return player;
-                }
-            }
-            else
-            {
-                console.error(qsTr("SoundResourceView should be valid here."));
-            }
-        }
-        // no emitters found, cannibalize paused emitters
-        for (var j = 0; soundRepeater.count > j; ++j)
-        {
-            var player2 = soundRepeater.itemAt(j);
-            if (null !== player2 && undefined !== player2)
-            {
-                if (player2.playbackState === MediaPlayer.PausedState && player2.state === Resource.Loaded)
-                {
-                    return player2;
-                }
-            }
-            else
-            {
-                console.error(qsTr("SoundResourceView should be valid here."));
-            }
-        }
-        return null;
     }
 
     // accessor object for eval
@@ -207,80 +121,18 @@ Rectangle {
     MediaPlayerSignalEmitter {
         id: signalEmitter
 
-        function tryToCall(sResource, fn) {
-            var args = Array.prototype.slice.call(arguments);
-            args = args.slice(2);
-
-            var player = null;
-            if ("" !== sResource)
-            {
-                player = findSoundView(sResource);
-                if (null !== player)
-                {
-                    var fnToCall = player[fn];
-                    fnToCall.apply(player, args);
-                }
-            }
-            if ("" === sResource || null === player)
-            {
-                for (var i = 0; soundRepeater.count > i; ++i)
-                {
-                    var playerI = soundRepeater.itemAt(i);
-                    if (null !== playerI && undefined !== playerI &&
-                        null !== playerI.resource)
-                    {
-                        var fnToCallI = playerI[fn];
-                        fnToCallI.apply(playerI, args);
-                    }
-                }
-            }
-        }
-
         function tryToPlaySoundOrMovie(sResource, sId, iLoops, iStartAt, iEndAt) {
             if ("" !== sResource || "" !== sId)
             {
                 var pResource = registrator.currentlyLoadedProject.resource(sResource);
                 if (null !== pResource && undefined !== pResource &&
-                    Resource.Sound === pResource.type)
+                    Resource.Sound !== pResource.type)
                 {
-                    SoundManager.registerId(sId || sResource, pResource, iLoops, iStartAt, iEndAt);
+                    showOrPlayMedia(sResource, sId, iLoops, iStartAt, iEndAt);
                 }
-
-                // first do id lookup
-                var player = findSoundView(sId);
-                if (null !== player && player.state === Resource.Loaded)
+                else if (Resource.Sound === pResource.type)
                 {
-                    if (null !== player.resource &&
-                        sId === player.nameId)
-                    {
-                        player.play();
-                    }
-                    else
-                    {
-                        player.resource = pResource;
-                    }
-                }
-                else
-                {
-                    // next do name lookup
-                    var player2 = findSoundView(sResource);
-                    if (null !== player2 && player2.state === Resource.Loaded)
-                    {
-                        if (null !== player2.resource &&
-                            (sResource === player2.nameId || sResource === player2.resource.name))
-                        {
-                            player2.play();
-                        }
-                        else
-                        {
-                            player2.resource = pResource;
-                        }
-                    }
-                    else
-                    {
-                        // if none found, start playing new media
-                        showOrPlayMedia(sResource, sId, iLoops, iStartAt, iEndAt);
-                    }
+                    registrator.playAudio(sResource, sId, iLoops, iStartAt, iEndAt);
                 }
             }
         }
@@ -296,14 +148,14 @@ Rectangle {
             }
             else
             {
-                signalEmitter.tryToCall(sResource, "play");
+                registrator.tryToCallAudio(sResource, "play");
             }
         }
         onPauseVideo: {
             movieResource.pause();
         }
         onPauseSound: {
-            signalEmitter.tryToCall(sResource, "pause");
+            registrator.tryToCallAudio(sResource, "pause");
         }
         onPlayMedia: {
             if ("" !== sResource)
@@ -317,11 +169,11 @@ Rectangle {
                 {
                     movieResource.play();
                 }
-                signalEmitter.tryToCall(sResource, "play");
+                registrator.tryToCallAudio(sResource, "play");
             }
         }
         onSeekAudio: {
-            signalEmitter.tryToCall(sResource, "seek", iSeek);
+            registrator.tryToCallAudio(sResource, "seek", iSeek);
         }
         onSeekMedia: {
             if (null !== movieResource.resource &&
@@ -330,7 +182,7 @@ Rectangle {
             {
                 movieResource.seek(iSeek);
             }
-            signalEmitter.tryToCall(sResource, "seek", iSeek);
+            registrator.tryToCallAudio(sResource, "seek", iSeek);
         }
         onSeekVideo: {
             movieResource.seek(iSeek);
@@ -343,21 +195,7 @@ Rectangle {
                 movieResource.setVolume(dValue);
             }
 
-            if (sResource === "")
-            {
-                for (var i = 0; soundRepeater.count > i; ++i)
-                {
-                    var player = soundRepeater.itemAt(i);
-                    if (null !== player && undefined !== player)
-                    {
-                        player.setVolume(dValue);
-                    }
-                }
-            }
-            else
-            {
-                signalEmitter.tryToCall(sResource, "setVolume", dValue);
-            }
+            registrator.setVolume(sResource, dValue);
         }
         onShowMedia: {
             showOrPlayMedia(sResource, "", 1, 0, -1);
@@ -366,22 +204,23 @@ Rectangle {
             movieResource.stop();
         }
         onStopSound: {
-            signalEmitter.tryToCall(sResource, "stop");
+            registrator.tryToCallAudio(sResource, "stop");
         }
         onStartPlaybackWait: {
             var player = null;
             if ("" !== sResource)
             {
-                player = findSoundView(sResource);
-                if (null !== player)
-                {
-                    if (player.state === Resource.Null || player.state === Resource.Error)
-                    {
-                        player.playbackFinished(sResource);
-                    }
-                }
+                registrator.tryToCallAudio(sResource, "checkIfFinished", sResource,
+                                           function(state, fnFinished) {
+                                                return function() {
+                                                    if (state === Resource.Null || state === Resource.Error)
+                                                    {
+                                                        fnFinished("");
+                                                    }
+                                                }
+                                           }(movieResource.state, signalEmitter.playbackFinished));
             }
-            if ("" === sResource || null === player)
+            if ("" === sResource)
             {
                 if (movieResource.state === Resource.Null || movieResource.state === Resource.Error)
                 {
@@ -398,18 +237,12 @@ Rectangle {
         onStartSoundWait: {
             if ("" !== sResource)
             {
-                var player = findSoundView(sResource);
-                if (null !== player)
-                {
-                    if (player.state === Resource.Null || player.state === Resource.Error)
-                    {
-                        signalEmitter.soundFinished(sResource);
-                    }
-                }
-                else
-                {
-                    signalEmitter.soundFinished(sResource);
-                }
+                registrator.tryToCallAudio(sResource, "checkIfFinished", sResource,
+                                           function(fnFinished, _sResource) {
+                                                return function() {
+                                                    fnFinished(_sResource);
+                                                }
+                                           }(signalEmitter.playbackFinished, sResource));
             }
             else
             {
@@ -420,6 +253,11 @@ Rectangle {
 
     PlayerComponentRegistrator {
         id: registrator
+
+        onSoundFinished: {
+            signalEmitter.playbackFinished(sResource);
+            signalEmitter.soundFinished(sResource);
+        }
     }
 
     // actual UI
@@ -502,23 +340,6 @@ Rectangle {
         }
     }
 
-    Repeater {
-        id: soundRepeater
-        model: registrator.currentlyLoadedProject.numberOfSoundEmitters
-
-        SoundResourceView {
-            width: 0
-            height: 0
-            resource: null
-            visible: true
-
-            onFinishedPlaying: {
-                signalEmitter.playbackFinished(resource.name);
-                signalEmitter.soundFinished(resource.name);
-            }
-        }
-    }
-
     // handle interrupt
     Connections {
         target: ScriptRunner
@@ -534,16 +355,6 @@ Rectangle {
                 {
                     movieResource.pause();
                 }
-                for (var i = 0; soundRepeater.count > i; ++i)
-                {
-                    player = soundRepeater.itemAt(i);
-                    if (null !== player && undefined !== player &&
-                        player.state === Resource.Loaded &&
-                        player.playbackState === MediaPlayer.PlayingState)
-                    {
-                        player.pause();
-                    }
-                }
             }
             else
             {
@@ -555,44 +366,21 @@ Rectangle {
                 {
                     movieResource.play();
                 }
-                for (var j = 0; soundRepeater.count > j; ++j)
-                {
-                    player = soundRepeater.itemAt(j);
-                    if (null !== player && undefined !== player &&
-                        player.state === Resource.Loaded &&
-                        player.playbackState === MediaPlayer.PausedState)
-                    {
-                        player.play();
-                    }
-                }
             }
         }
     }
     Connections {
-        target: SoundManager
-        onSignalPlay: {
-            signalEmitter.tryToPlaySoundOrMovie(sResource, sId, iLoops, iStartAt, iEndAt);
-        }
-        onSignalPause: {
-            signalEmitter.tryToCall(sId, "pause");
-        }
-        onSignalStop: {
-            signalEmitter.tryToCall(sId, "stop");
-        }
-        onSignalSeek: {
-            signalEmitter.tryToCall(sId, "seek", dTime);
-        }
-        onSignalSetVolume: {
-            signalEmitter.tryToCall(sId, "setVolume", dVal);
+        target: root
+        onStartLoadingSkript: {
+            if (null != registrator.currentlyLoadedProject)
+            {
+                showOrPlayMedia(registrator.currentlyLoadedProject.titleCard);
+            }
         }
     }
 
     Component.onCompleted: {
         ScriptRunner.registerNewComponent(userName, signalEmitter);
-        if (mainMediaPlayer)
-        {
-            registrator.registerMediaPlayer(mediaPlayer);
-        }
         registrator.componentLoaded();
 
         root.registerUIComponent(mediaPlayer.userName, evalAccessor);

@@ -43,6 +43,8 @@ Rectangle {
     {
         if (null !== currentlyLoadedProject && undefined !== currentlyLoadedProject)
         {
+            audioPlayer.numberOfSoundEmitters = currentlyLoadedProject.numberOfSoundEmitters;
+
             var bFoundLayout = false;
             if (currentlyLoadedProject.playerLayout !== "")
             {
@@ -95,6 +97,8 @@ Rectangle {
 
             hoverSound.source = "";
             clickSound.source = "";
+
+            audioPlayer.numberOfSoundEmitters = 5;
 
             currentlyLoadedProject = null;
 
@@ -185,26 +189,6 @@ Rectangle {
 
     //------------------------------------------------------------------------------------
     //
-    // MediaPlayer access
-    function showMedia(sName)
-    {
-        if (null !== registeredMediaPlayer && undefined !== registeredMediaPlayer)
-        {
-            registeredMediaPlayer.showOrPlayMedia(sName);
-        }
-    }
-    Connections {
-        target: root
-        onStartLoadingSkript: {
-            if (null !== currentlyLoadedProject && undefined !== currentlyLoadedProject)
-            {
-                showMedia(currentlyLoadedProject.titleCard);
-            }
-        }
-    }
-
-    //------------------------------------------------------------------------------------
-    //
     // Sound
     Item {
         id: playerSoundEffects
@@ -222,6 +206,19 @@ Rectangle {
             source: "qrc:/resources/sound/menu_click_soft_main.wav"
             volume: Settings.volume
             muted: Settings.muted
+        }
+    }
+    PlayerAudioPlayer {
+        id: audioPlayer
+
+        onPlaybackFinishedCallback: {
+            for (var i = 0; root.componentsRegistered.length > i; ++i)
+            {
+                if (null !== root.componentsRegistered[i] && undefined !== root.componentsRegistered[i])
+                {
+                    root.componentsRegistered[i].soundFinished(resource);
+                }
+            }
         }
     }
 

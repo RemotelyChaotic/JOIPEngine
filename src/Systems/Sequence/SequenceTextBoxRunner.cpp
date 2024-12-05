@@ -68,7 +68,7 @@ void CSequenceTextBoxRunner::RunSequenceInstruction(const QString&,
         dWaitTime = static_cast<double>(EstimateDurationBasedOnText(spI->m_sText.value())) / 1000.0;
       }
 
-      emit pSignalEmitter->showText(spI->m_sText.value(), bSkipable ? dWaitTime : 0);
+      emit pSignalEmitter->showText(spI->m_sText.value(), bSkipable ? dWaitTime : 0, QString());
     }
   }
 }

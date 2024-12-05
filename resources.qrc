@@ -355,5 +355,6 @@
         <file>resources/qml/JoipEngine/WebResourceView.qml</file>
         <file>resources/qml/JoipEngine/MetronomeRippleItem.qml</file>
         <file>resources/qml/JoipEngine/PlayerTansition.qml</file>
+        <file>resources/qml/JoipEngine/PlayerAudioPlayer.qml</file>
     </qresource>
 </RCC>

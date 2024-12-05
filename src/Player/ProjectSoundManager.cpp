@@ -74,42 +74,42 @@ void CSoundInstanceWrapper::play()
     QReadLocker locker(&m_spResource->m_rwLock);
     sName = m_spResource->m_sName;
   }
-  m_spMsgSender->SignalPlay(m_sId, sName, m_iLoops, m_iStartAt, m_iStartAt);
+  emit m_spMsgSender->SignalPlay(m_sId, sName, m_iLoops, m_iStartAt, m_iStartAt);
 }
 
 //----------------------------------------------------------------------------------------
 //
 void CSoundInstanceWrapper::pause()
 {
-  m_spMsgSender->SignalPause(m_sId);
+  emit m_spMsgSender->SignalPause(m_sId);
 }
 
 //----------------------------------------------------------------------------------------
 //
 void CSoundInstanceWrapper::stop()
 {
-  m_spMsgSender->SignalStop(m_sId);
+  emit m_spMsgSender->SignalStop(m_sId);
 }
 
 //----------------------------------------------------------------------------------------
 //
 void CSoundInstanceWrapper::seek(double dTime)
 {
-  m_spMsgSender->SignalSeek(m_sId, dTime);
+  emit m_spMsgSender->SignalSeek(m_sId, dTime);
 }
 
 //----------------------------------------------------------------------------------------
 //
 void CSoundInstanceWrapper::setVolume(double dVal)
 {
-  m_spMsgSender->SignalSetVolume(m_sId, dVal);
+  emit m_spMsgSender->SignalSetVolume(m_sId, dVal);
 }
 
 //----------------------------------------------------------------------------------------
 //
 void CSoundInstanceWrapper::destroy()
 {
-  m_spMsgSender->SignalDestroy(m_sId);
+  emit m_spMsgSender->SignalDestroy(m_sId);
 }
 
 //----------------------------------------------------------------------------------------

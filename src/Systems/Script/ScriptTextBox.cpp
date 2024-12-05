@@ -974,7 +974,7 @@ QString CEosScriptTextBox::showInput(const QString& sStoreIntoVar)
 void CEosScriptTextBox::showText(QString sText)
 {
   if (!CheckIfScriptCanRun()) { return; }
-  emit SignalEmitter<CTextBoxSignalEmitter>()->showText(sText, -1);
+  emit SignalEmitter<CTextBoxSignalEmitter>()->showText(sText, -1, QString());
 }
 
 //----------------------------------------------------------------------------------------
@@ -1031,7 +1031,7 @@ void CEosScriptTextBox::showText(QString sText, double dWaitTime, bool bSkipable
                 &loop, &QEventLoop::quit, Qt::QueuedConnection);
     }
 
-    emit pSignalEmitter->showText(sText, bSkipable ? dWaitTime : 0);
+    emit pSignalEmitter->showText(sText, bSkipable ? dWaitTime : 0, QString());
 
     timer.start();
     loop.exec();

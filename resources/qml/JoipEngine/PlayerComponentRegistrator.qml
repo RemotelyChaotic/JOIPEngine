@@ -35,8 +35,39 @@ Item {
         root.registeredTextBox = item;
     }
 
-    function registerMediaPlayer(item)
+    signal soundFinished(string sResource)
+    signal volumeSet(string sResource, real dValue)
+    signal audioTryToCallWith(string sResource, string fn, var data, var fnNotFound)
+    signal playAudioRequested(string sResource, string sId, int iLoops, int iStartAt, int iEndAt)
+
+    function setVolume(sResource, dValue)
     {
-        root.registeredMediaPlayer = item;
+        for (var i = 0; root.componentsRegistered.length > i; ++i)
+        {
+            if (null !== root.componentsRegistered[i] && undefined !== root.componentsRegistered[i])
+            {
+                root.componentsRegistered[i].volumeSet(sResource, dValue);
+            }
+        }
+    }
+    function tryToCallAudio(sResource, fn, data, fnNotFound)
+    {
+        for (var i = 0; root.componentsRegistered.length > i; ++i)
+        {
+            if (null !== root.componentsRegistered[i] && undefined !== root.componentsRegistered[i])
+            {
+                root.componentsRegistered[i].audioTryToCallWith(sResource, fn, data, fnNotFound);
+            }
+        }
+    }
+    function playAudio(sName, sId, iLoops, iStartAt, iEndAt)
+    {
+        for (var i = 0; root.componentsRegistered.length > i; ++i)
+        {
+            if (null !== root.componentsRegistered[i] && undefined !== root.componentsRegistered[i])
+            {
+                root.componentsRegistered[i].playAudioRequested(sName, sId, iLoops, iStartAt, iEndAt);
+            }
+        }
     }
 }
