@@ -85,12 +85,13 @@ std::shared_ptr<CDialogNodeDialog> CProjectDialogManager::FindDialog(const QStri
 
 //----------------------------------------------------------------------------------------
 //
-std::vector<std::shared_ptr<CDialogNodeDialog>> CProjectDialogManager::FindDialog(const QRegExp& rx)
+std::vector<std::shared_ptr<CDialogNodeDialog>> CProjectDialogManager::FindDialog(const QRegularExpression& rx)
 {
   std::vector<std::shared_ptr<CDialogNodeDialog>> vspOut;
   for (const auto& [sPath, nodeData]: m_vspDialogsOnlyFlat)
   {
-    if (-1 != rx.indexIn(sPath))
+    QRegularExpressionMatch match = rx.match(sPath);
+    if (match.hasMatch())
     {
       vspOut.push_back(nodeData);
     }
@@ -153,8 +154,8 @@ QJSValue CProjectDialogManagerWrapper::dialogFromRx(const QString& sId)
 {
   if (auto spInst = m_wpInstance.lock())
   {
-    auto vspDial = spInst->FindDialog(QRegExp(sId));
-    QJSValue val = m_pEngine->newArray(vspDial.size());
+    auto vspDial = spInst->FindDialog(QRegularExpression(sId));
+    QJSValue val = m_pEngine->newArray(static_cast<qint32>(vspDial.size()));
     int iIndex = 0;
     for (const auto& spDial : vspDial)
     {
@@ -174,7 +175,7 @@ QJSValue CProjectDialogManagerWrapper::dialogFromTags(const QStringList& vsId)
   if (auto spInst = m_wpInstance.lock())
   {
     auto vspDial = spInst->FindDialogByTag(vsId);
-    QJSValue val = m_pEngine->newArray(vspDial.size());
+    QJSValue val = m_pEngine->newArray(static_cast<qint32>(vspDial.size()));
     int iIndex = 0;
     for (const auto& spDial : vspDial)
     {

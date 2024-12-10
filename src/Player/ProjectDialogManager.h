@@ -6,6 +6,7 @@
 
 #include <QObject>
 #include <QPointer>
+#include <QRegularExpression>
 
 #include <tuple>
 #include <vector>
@@ -22,7 +23,7 @@ public:
   void UnloadProject();
 
   std::shared_ptr<CDialogNodeDialog> FindDialog(const QString& sId);
-  std::vector<std::shared_ptr<CDialogNodeDialog>> FindDialog(const QRegExp& rx);
+  std::vector<std::shared_ptr<CDialogNodeDialog>> FindDialog(const QRegularExpression& rx);
   std::vector<std::shared_ptr<CDialogNodeDialog>> FindDialogByTag(const QStringList& vsTags);
 
 private:

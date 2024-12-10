@@ -262,8 +262,7 @@ Rectangle {
             var dialog = null;
             if ("" !== sId)
             {
-                if (sId.includes('+') || sId.includes('*') || sId.includes('|') || sId.includes('{') ||
-                    sId.includes('}') || sId.includes('[') || sId.includes(']'))
+                if (bIsRegexp)
                 {
                     var dialgsRx = DialogManager.dialogFromRx(sId);
                     dialog = dialgsRx[Math.floor(Math.random() * dialgsRx.length)];
@@ -328,7 +327,6 @@ Rectangle {
             hideTimer.reset(textBox.hideTimerIntervalMS);
         }
         onShowText: {
-            sResource;
             if (sText.startsWith("<html>") && sText.endsWith("</html>")) {
                 textBox.showText(root.parseHtmlToJS(sText, textBox.userName), false);
             } else {
@@ -337,8 +335,19 @@ Rectangle {
             if (0 < dSkippableWaitS) {
                 registrator.setSkippableWait(dSkippableWaitS);
             }
+            if ("" !== sResource) {
+                var pResource = registrator.currentlyLoadedProject.resource(sResource);
+                if (null !== pResource && undefined !== pResource &&
+                    Resource.Sound === pResource.type)
+                {
+                    registrator.playAudio(sResource, pResource, 1, 0, -1);
+                }
+            }
 
             hideTimer.reset((textBox.hideTimerIntervalMS < dSkippableWaitS*1000 ? dSkippableWaitS*1000 : textBox.hideTimerIntervalMS));
+        }
+        onStopResource: {
+            registrator.tryToCallAudio(sResource, "stop");
         }
         onTextAlignmentChanged: {
             dataContainer.textAlignment = alignment;
@@ -363,6 +372,9 @@ Rectangle {
         onSkippableWaitFinished: {
             dataContainer.skippable = false;
             signalEmitter.waitSkipped();
+        }
+        onSoundFinished: {
+            signalEmitter.soundFinished(sResource);
         }
     }
 

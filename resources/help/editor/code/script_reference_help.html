@@ -597,7 +597,48 @@
         local input = textBox:showInput("myInputVar"); // acts as if localStorage:store("myInputVar", input) was called after<br>
         <br></li>
 
-        <li><b>showText ( string [, double [, bool ] ] ):</b><br>
+        <li><b>getDialog ( string | regex | string[] | Tag[] ): Dialog:</b><br>
+        Get the data of a Dialog and return it as an object.<br>
+        The input can either be the id of a Dialog entry, a regular expression for the Dialog id,
+        a list of strings that denote Dialog Tags, or a list of Dialog Tags gotten from a Project or Resource.
+        The return value is an object with the following structure:<br>
+        "string": &lt;string&gt;,<br>
+        "waitTimeMs": &lt;real ms&gt;,<br>
+        "skipable": &lt;bool flag&gt;,<br>
+        "soundResource": &lt;string associated sound Resource&gt;,<br>
+        "tags": &lt;string[] all tags&gt;<br>
+        <i>Example Usage (JS):</i><br>
+        var dialog = textBox.getDialog("dialog_a");<br>
+        var dialog = textBox.getDialog(/.*_a/);<br>
+        var dialog = textBox.getDialog(["male", "red"]);<br>
+        var dialog = textBox.getDialog([tagA, tagB]);<br>
+        <i>Example Usage (Lua):</i><br>
+        local dialog = textBox:showDialog('dialog_a');<br>
+        local dialog = textBox:showDialog(['male', 'red']);<br>
+        local dialog = textBox:showDialog([tagA, tagB]);<br>
+        <br></li>
+
+        <li><b>showDialog ( string | regex | Dialog | string[] | Tag[] ):</b><br>
+        Show the Dialog querried.<br>
+        The input can either be the id of a Dialog entry, a regular expression for the Dialog id,
+        a Dialog object gotten from <i>getDialog</i>,
+        a list of strings that denote Dialog Tags, or a list of Dialog Tags gotten from a Project or Resource.
+        The found dialog will be shown.<br>
+        This is equivalent of calling (JS):<br>
+        var dialog = textBox.getDialog(&lt;in&gt;);<br>
+        textBox.showText(dialog.string, dialog.waitTimeMs, dialog.skipable, dialog.soundResource);<br>
+        <i>Example Usage (JS):</i><br>
+        textBox.showDialog("dialog_a");<br>
+        textBox.showDialog(/.*_a/);<br>
+        textBox.showDialog(["male", "red"]);<br>
+        textBox.showDialog([tagA, tagB]);<br>
+        <i>Example Usage (Lua):</i><br>
+        textBox:showDialog('dialog_a');<br>
+        textBox:showDialog(['male', 'red']);<br>
+        textBox:showDialog([tagA, tagB]);<br>
+        <br></li>
+
+        <li><b>showText ( string [, double [, bool [, string | Resource] ] ] ):</b><br>
         Shows text. The input string will be used for the text content and the first colors
         set by setBackgroundColors and setTextColors will be used for
         text and background coloring. It is always possible to use HTML 3.2 tags in text.
@@ -609,8 +650,12 @@
         If the second value is &lt; 0 the wait time will be automatically determined based on the number of characters
         in the text.<br>
         The third argument is also optional and is a flag if the wait should be skipable or not.<br>
-        These two arguments are provided for convenience only and have the same effect as if
+        The second and third arguments are provided for convenience only and have the same effect as if
         </i>thread.sleep(...)</i> was called after the <i>showText</i> call.
+        The fourth argument is also optional and should be a string or Resource reference
+        to a Sound type Resource. It will be played together with the text and stopped if the
+        line is skipped by the user. If given the text will be displayed for as long as the audio runs
+        at minimum.
         <i>Example Usage (JS):</i><br>
         textBox.showText("Hello world!"); /* default text */<br>
         textBox.showText("Hello&lt;br&gt;world!"); /* Will insert a newline between Hello and world! */<br>
@@ -618,6 +663,7 @@
         textBox.showText("Hello world!", -1); /* show Hello world for an automatically determined time (non-skippable)*/<br>
         textBox.showText("Hello world!", 10); /* show Hello world for 10 seconds (non-skippable)*/<br>
         textBox.showText("Hello world!", 10, true); /* show Hello world for 10 seconds (skippable)*/<br>
+        textBox.showText("Hello world!", 10, true, "hello.mp3"); /* show Hello world for 10 seconds (skippable) and the audio will play*/<br>
         <i>Example Usage (Lua):</i><br>
         textBox:showText('Hello world!'); --default text<br>
         textBox:showText('Hello&lt;br&gt;world!'); --Will insert a newline between Hello and world!<br>
@@ -625,6 +671,7 @@
         textBox:showText('Hello world!', -1); -- show Hello world for an automatically determined time (non-skippable)<br>
         textBox:showText('Hello world!', 10); -- show Hello world for 10 seconds (non-skippable)<br>
         textBox:showText('Hello world!', 10, true); -- show Hello world for 10 seconds (skippable)<br>
+        textBox:showText('Hello world!', 10, true, 'hello.mp3'); -- show Hello world for 10 seconds (skippable) and the audio will play<br>
         <br></li>
 
         <li><b>clear (  ):</b><br>

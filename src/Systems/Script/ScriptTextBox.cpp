@@ -288,7 +288,7 @@ void CScriptTextBox::showText(QString sText, double dWaitTime, bool bSkipable)
 
 //----------------------------------------------------------------------------------------
 //
-void CScriptTextBox::showText(QString sText, double dWaitTime, bool bSkipable, QString sResource)
+void CScriptTextBox::showText(QString sText, double dWaitTime, bool bSkipable, QVariant resource)
 {
   if (!CheckIfScriptCanRun()) { return; }
 
@@ -299,8 +299,17 @@ void CScriptTextBox::showText(QString sText, double dWaitTime, bool bSkipable, Q
     dWaitTime = static_cast<double>(EstimateDurationBasedOnText(sText)) / 1000.0;
   }
 
+  bool bOk = true;
+  QString sResource = resource.isValid() && !resource.isNull() ?
+                          GetResourceName(resource, "showText", &bOk) : QString();
+  if (!bOk)
+  {
+    return;
+  }
+
   if (0 < dWaitTime)
   {
+    bool bSoundFinished = sResource.isEmpty();
     QDateTime lastTime = QDateTime::currentDateTime();
     qint32 iTimeLeft = dWaitTime * 1000;
 
@@ -327,22 +336,48 @@ void CScriptTextBox::showText(QString sText, double dWaitTime, bool bSkipable, Q
       }, Qt::QueuedConnection);
 
     QMetaObject::Connection timeoutLoop =
-      connect(&timer, &QTimer::timeout, &loop, [&loop, &iTimeLeft, &lastTime]() {
+      connect(&timer, &QTimer::timeout, &loop, [&loop, &iTimeLeft, &lastTime, &bSoundFinished]() {
         QDateTime newTime = QDateTime::currentDateTime();
         iTimeLeft -= newTime.toMSecsSinceEpoch() - lastTime.toMSecsSinceEpoch();
         lastTime = newTime;
-        if (0 >= iTimeLeft)
+        if (0 >= iTimeLeft && bSoundFinished)
         {
           emit loop.exit();
         }
       });
 
+    QMetaObject::Connection resourceFinished;
+    if (!sResource.isEmpty())
+    {
+      resourceFinished =
+          connect(pSignalEmitter, &CTextBoxSignalEmitter::soundFinished,
+                  &loop, [&loop, &sResource, &iTimeLeft, &bSoundFinished](const QString& sResourceRet) {
+                if (sResource == sResourceRet)
+                {
+                  bSoundFinished = true;
+                  if (0 >= iTimeLeft)
+                  {
+                    loop.quit();
+                  }
+                }
+              }, Qt::QueuedConnection);
+    }
+
     QMetaObject::Connection skipLoop;
+    QMetaObject::Connection sendSkipRes;
     if (bSkipable)
     {
       skipLoop =
-        connect(pSignalEmitter, &CTextBoxSignalEmitter::waitSkipped,
-                &loop, &QEventLoop::quit, Qt::QueuedConnection);
+          connect(pSignalEmitter, &CTextBoxSignalEmitter::waitSkipped,
+                  &loop, &QEventLoop::quit, Qt::QueuedConnection);
+      if (!sResource.isEmpty())
+      {
+        sendSkipRes =
+            connect(pSignalEmitter, &CTextBoxSignalEmitter::waitSkipped,
+                               pSignalEmitter, [pSignalEmitter, sResource](){
+                      emit pSignalEmitter->stopResource(sResource);
+                    });
+      }
     }
 
     QTimer::singleShot(0, this, [&pSignalEmitter,sText,bSkipable,dWaitTime,sResource]() {
@@ -360,9 +395,19 @@ void CScriptTextBox::showText(QString sText, double dWaitTime, bool bSkipable, Q
     disconnect(pauseLoop);
     disconnect(resumeLoop);
     disconnect(timeoutLoop);
+
+    if (!sResource.isEmpty())
+    {
+      disconnect(resourceFinished);
+    }
+
     if (bSkipable)
     {
       disconnect(skipLoop);
+      if (!sResource.isEmpty())
+      {
+        disconnect(sendSkipRes);
+      }
     }
   }
 }
@@ -455,10 +500,37 @@ bool CScriptTextBox::GetDialogData(QVariant data, QString& sStringRet, qint32& i
   QString sId = QUuid::createUuid().toString();
   QString sString = QString();
   QStringList vsTags;
+  bool bIsRegexp = false;
 
-  if (data.type() == QVariant::String)
+  QVariant::Type t = data.type();
+  if (QVariant::String == t)
   {
     sString = data.toString();
+  }
+  else if (QVariant::RegExp == t)
+  {
+    bIsRegexp = true;
+    sString = data.toRegExp().pattern();
+  }
+  else if (QVariant::RegularExpression == t)
+  {
+    bIsRegexp = true;
+    sString = data.toRegularExpression().pattern();
+  }
+  else if (QVariant::Map == t)
+  {
+    auto map = data.toMap();
+    if (map.contains("string") && map.contains("waitTimeMs") && map.contains("skipable") &&
+        map.contains("soundResource") && map.contains("tags"))
+    {
+      sStringRet = map["string"].toString();
+      iTimeRet = map["waitTimeMs"].toInt();
+      bWaitRet = map["skipable"].toBool();
+      sSoundResource = map["soundResource"].toString();
+      vsTagsRet = map["tags"].toStringList();
+      // we already have everything
+      return true;
+    }
   }
 
   if (sString.isEmpty())
@@ -475,23 +547,22 @@ bool CScriptTextBox::GetDialogData(QVariant data, QString& sStringRet, qint32& i
     vsTags = *optvsStringLabels;
   }
 
-  return GetDialogFromUi(sId, sString, vsTags, sStringRet, iTimeRet, bWaitRet,
+  return GetDialogFromUi(sId, sString, bIsRegexp, vsTags, sStringRet, iTimeRet, bWaitRet,
                          sSoundResource, vsTagsRet);
 }
 
 //----------------------------------------------------------------------------------------
 //
-bool CScriptTextBox::GetDialogFromUi(QString sId, QString sString, QStringList vsTags,
+bool CScriptTextBox::GetDialogFromUi(QString sId, QString sString, bool bIsRegexp, QStringList vsTags,
                                      QString& sStringRet, qint32& iTimeRet, bool& bWaitRet,
                                      QString& sSoundResourceRet, QStringList& vsTagsRet)
 {
 
   auto pSignalEmitter = SignalEmitter<CTextBoxSignalEmitter>();
 
-  QTimer timer;
-  timer.setSingleShot(false);
-  timer.setInterval(1000);
   QEventLoop loop;
+  QMetaObject::Connection quitLoop =
+      connect(this, &CScriptTextBox::SignalQuitLoop, &loop, &QEventLoop::quit);
   QMetaObject::Connection interruptLoop =
       connect(pSignalEmitter, &CTextBoxSignalEmitter::interrupt,
               &loop, &QEventLoop::quit, Qt::QueuedConnection);
@@ -519,40 +590,46 @@ bool CScriptTextBox::GetDialogFromUi(QString sId, QString sString, QStringList v
             // direct connection to fix cross thread issues with QString content being deleted
           }, Qt::DirectConnection);
 
-  // connect lambdas in loop context, so events are processed, but capture timer,
-  // to start / stop
-  QMetaObject::Connection pauseLoop =
-      connect(pSignalEmitter, &CTextBoxSignalEmitter::pauseExecution, &loop, [&timer]() {
-            timer.stop();
-          }, Qt::QueuedConnection);
-  QMetaObject::Connection resumeLoop =
-      connect(pSignalEmitter, &CTextBoxSignalEmitter::resumeExecution, &loop, [&timer]() {
-            timer.start();
-          }, Qt::QueuedConnection);
-
   bool bOk = true;
-  QMetaObject::Connection timeoutLoop =
-      connect(&timer, &QTimer::timeout, &loop, [this, &loop, &bOk]() {
-        bOk = false;
-        emit m_pSignalEmitter->showError("Timeout waiting for dialog request.", QtMsgType::QtWarningMsg);
-        emit loop.exit();
-      });
+  QTimer::singleShot(0, this, [&pSignalEmitter, sId, sString, bIsRegexp, vsTags]() {
+    emit pSignalEmitter->getDialog(sId, sString, bIsRegexp, vsTags);
+  });
 
-  QTimer::singleShot(0, this, [&pSignalEmitter, sId, sString, vsTags]() { emit pSignalEmitter->getDialog(sId, sString, vsTags); });
-
-  timer.start();
   loop.exec();
-  timer.stop();
-  timer.disconnect();
   loop.disconnect();
 
+  disconnect(quitLoop);
   disconnect(interruptLoop);
   disconnect(interruptThisLoop);
-  disconnect(pauseLoop);
-  disconnect(resumeLoop);
-  disconnect(timeoutLoop);
 
   return bOk;
+}
+
+//----------------------------------------------------------------------------------------
+//
+QString CScriptTextBox::GetResourceName(const QVariant& resource, const QString& sMethod,
+                                        bool* pbOk)
+{
+  QString sError;
+  std::optional<QString> optRes =
+      script::ParseResourceFromScriptVariant(resource, m_wpDbManager.lock(),
+                                             m_spProject,
+                                             sMethod, &sError);
+
+  if (nullptr != pbOk)
+  {
+    *pbOk = optRes.has_value();
+  }
+
+  if (optRes.has_value())
+  {
+    return optRes.value();
+  }
+  else
+  {
+    emit m_pSignalEmitter->showError(sError, QtMsgType::QtWarningMsg);
+    return QString();
+  }
 }
 
 //----------------------------------------------------------------------------------------
