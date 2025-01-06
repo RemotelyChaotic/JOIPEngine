@@ -4,6 +4,8 @@
 #include "Android/AndroidMainWindow.h"
 #elif defined(WIN32)
 #include "Windows/WindowsMainWindow.h"
+#elif defined(Q_OS_LINUX)
+#include "Linux/LinuxMainWindow.h"
 #else
 #endif
 
@@ -23,6 +25,8 @@ std::unique_ptr<CMainWindowBase> CMainWindowFactory::CreateMainWindow(QWidget* p
   return std::make_unique<CAndroidMainWindow>(pParent);
 #elif defined(Q_OS_WIN) && !defined(Q_OS_ANDROID)
   return std::make_unique<CWindowsMainWindow>(pParent);
+#elif defined(Q_OS_LINUX) && !defined(Q_OS_ANDROID)
+  return std::make_unique<CLinuxMainWindow>(pParent);
 #else
   return nullptr;
 #endif

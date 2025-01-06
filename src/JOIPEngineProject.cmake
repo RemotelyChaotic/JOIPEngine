@@ -755,6 +755,11 @@ macro(CreateJOIPProject JOIP_PROJECT_NAME)
       ${JOIPSources}/Windows/WindowsNativePushNotification.h
       ${WINTOAST_SRC}
     )
+  elseif(LINUX)
+    set(LinuxSources
+      ${JOIPSources}/Linux/LinuxMainWindow.cpp
+      ${JOIPSources}/Linux/LinuxMainWindow.h
+    )
   elseif(ANDROID)
     set(AndroidSources
       ${JOIPSources}/Android/AndroidApplicationWindow.cpp
@@ -789,6 +794,7 @@ macro(CreateJOIPProject JOIP_PROJECT_NAME)
       qt_add_executable(${JOIP_PROJECT_NAME}
           MANUAL_FINALIZATION
           ${Sources}
+          ${OptionalSources}
           ${CMAKE_SOURCE_DIR}/android_resources.qrc
       )
     elseif(WIN32)
@@ -796,6 +802,14 @@ macro(CreateJOIPProject JOIP_PROJECT_NAME)
           MANUAL_FINALIZATION
           ${Sources}
           ${WinSources}
+          ${OptionalSources}
+      )
+    elseif(LINUX)
+      qt_add_executable(${JOIP_PROJECT_NAME}
+          MANUAL_FINALIZATION
+          ${Sources}
+          ${LinuxSources}
+          ${OptionalSources}
       )
     else()
       qt_add_executable(${JOIP_PROJECT_NAME}
@@ -822,6 +836,12 @@ macro(CreateJOIPProject JOIP_PROJECT_NAME)
               ${WinSources}
               ${OptionalSources}
           )
+      elseif(LINUX)
+        add_executable(${JOIP_PROJECT_NAME}
+            ${Sources}
+            ${LinuxSources}
+            ${OptionalSources}
+        )
       else()
           add_executable(${JOIP_PROJECT_NAME}
               ${Sources}
