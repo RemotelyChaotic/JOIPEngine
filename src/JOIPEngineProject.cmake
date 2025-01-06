@@ -811,6 +811,7 @@ macro(CreateJOIPProject JOIP_PROJECT_NAME)
           ${LinuxSources}
           ${OptionalSources}
       )
+      target_compile_options(${JOIP_PROJECT_NAME} PUBLIC -fPIC)
     else()
       qt_add_executable(${JOIP_PROJECT_NAME}
           MANUAL_FINALIZATION
@@ -842,6 +843,7 @@ macro(CreateJOIPProject JOIP_PROJECT_NAME)
             ${LinuxSources}
             ${OptionalSources}
         )
+        target_compile_options(${JOIP_PROJECT_NAME} PUBLIC -fPIC)
       else()
           add_executable(${JOIP_PROJECT_NAME}
               ${Sources}
