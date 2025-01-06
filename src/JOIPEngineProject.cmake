@@ -936,7 +936,7 @@ macro(JOIPProjectSettings JOIP_PROJECT_NAME)
   # Windows stuff
   #-----------------------------------------------------------------------------------------
   if (WIN32)
-    foreach(win_extra_lib ${CUSTOM_WINDOWS_EXTRA_LIBS})
+    foreach(win_extra_lib ${CUSTOM_DESKTOP_EXTRA_LIBS})
       add_custom_command(
               TARGET ${JOIP_PROJECT_NAME} POST_BUILD
               COMMAND ${CMAKE_COMMAND} -E copy_if_different

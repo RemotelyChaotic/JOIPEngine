@@ -28,6 +28,11 @@ if(CMAKE_BUILD_TYPE STREQUAL "Debug" OR CMAKE_BUILD_TYPE STREQUAL "Default")
   set(KDE_DEBUG ON)
 endif()
 
+# define LINUX variable for ease of access
+if(UNIX AND NOT APPLE)
+    set(LINUX TRUE)
+endif()
+
 #include scripts
 include(src/JOIPEngineProject.cmake)
 include(JOIPCommon)
@@ -90,7 +95,7 @@ if (ANDROID)
 endif()
 
 # actual targets
-if(WIN32)
+if(WIN32 OR LINUX)
   #libs
   add_subdirectory(3rdparty)
   include(QtAV/FindQtAV)
@@ -98,10 +103,14 @@ if(WIN32)
   # executable targets
   add_subdirectory(src)
   add_subdirectory(src/RCC)
+  # Only for MSVC builds
   if(MSVC)
     add_subdirectory(src/Windows/Launcher)
   endif()
-  add_subdirectory(src/Updater)
+  # Only supported on Windows so far
+  if (WIN32)
+    add_subdirectory(src/Updater)
+  endif()
 
 elseif (ANDROID)
   # For android the executable project *needs* to be in the root project folder because of
