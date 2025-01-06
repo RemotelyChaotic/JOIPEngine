@@ -23,7 +23,7 @@
 
 namespace QtLua {
 
-  void Member::assign(QObjectWrapper &obj, const Value &value)
+  void Member::assign(QObjectWrapper&, const Value&)
   {
     QTLUA_THROW(QtLua::Member, "Can not assign a value to the `%' member of the QObject.",
 		.arg(get_type_name()));

@@ -92,13 +92,13 @@ Qt::ItemFlags UserItemModel::flags(const QModelIndex &index) const
   return res;
 }
 
-UserItem::ptr UserItemModel::from_mimedata(const QMimeData *data)
+UserItem::ptr UserItemModel::from_mimedata(const QMimeData*)
 {
   return UserItem::ptr();
 }
 
 bool UserItemModel::dropMimeData(const QMimeData *data, Qt::DropAction action,
-			     int row, int column, const QModelIndex &parent)
+           int row, int, const QModelIndex &parent)
 {
   UserListItem *pi = parent.isValid()
     ? static_cast<UserListItem*>(parent.internalPointer())
@@ -201,7 +201,7 @@ Qt::DropActions UserItemModel::supportedDropActions() const
   return Qt::MoveAction /* | Qt::CopyAction*/;
 }
 
-QVariant UserItemModel::headerData(int section, Qt::Orientation orientation, int role) const
+QVariant UserItemModel::headerData(int, Qt::Orientation, int) const
 {
   return QVariant();
 }

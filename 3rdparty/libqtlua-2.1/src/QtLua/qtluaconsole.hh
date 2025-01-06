@@ -54,12 +54,12 @@ namespace QtLua {
 
 class Console : public QTextEdit
 {
-  Q_OBJECT;
-  Q_PROPERTY(int history_size READ get_history_size WRITE set_history_size);
-  Q_PROPERTY(int text_width READ get_text_width WRITE set_text_width);
-  Q_PROPERTY(int text_height READ get_text_height WRITE set_text_height);
-  Q_PROPERTY(int scroll_back READ get_scroll_back WRITE set_scroll_back);
-  Q_PROPERTY(QString prompt READ get_prompt WRITE set_prompt);
+  Q_OBJECT
+  Q_PROPERTY(int history_size READ get_history_size WRITE set_history_size)
+  Q_PROPERTY(int text_width READ get_text_width WRITE set_text_width)
+  Q_PROPERTY(int text_height READ get_text_height WRITE set_text_height)
+  Q_PROPERTY(int scroll_back READ get_scroll_back WRITE set_scroll_back)
+  Q_PROPERTY(QString prompt READ get_prompt WRITE set_prompt)
 
 public:
 
@@ -153,7 +153,7 @@ private:
   int                   _print_timer;
   int                   _scroll_back;
 
-  QSize sizeHint() const;
+  QSize sizeHint() const override;
 
   void init();
   // Internal actions
@@ -169,13 +169,13 @@ private:
   void print_flush();
 
   // Handle mouse events on console
-  void mousePressEvent(QMouseEvent *e);
-  void mouseReleaseEvent(QMouseEvent *e);
-  void mouseDoubleClickEvent(QMouseEvent *e);
-  void timerEvent(QTimerEvent *event);
+  void mousePressEvent(QMouseEvent *e) override;
+  void mouseReleaseEvent(QMouseEvent *e) override;
+  void mouseDoubleClickEvent(QMouseEvent *e) override;
+  void timerEvent(QTimerEvent *event) override;
 
   // Handle keypress
-  void keyPressEvent(QKeyEvent * e);
+  void keyPressEvent(QKeyEvent * e) override;
 };
 
 /*

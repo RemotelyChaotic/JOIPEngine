@@ -123,7 +123,7 @@ Value TableIterator::get_value() const
 ValueRef TableIterator::get_value_ref()
 {
   if (!_st)
-    QTLUA_THROW(QtLua::TableIterator, "State object has been destoyed.");
+    QTLUA_THROW_NOARG(QtLua::TableIterator, "State object has been destoyed.");
 
   lua_pushlightuserdata(_st->_lst, this);
   lua_rawget(_st->_lst, LUA_REGISTRYINDEX);

@@ -48,7 +48,7 @@ namespace QtLua {
     friend class QObjectIterator;
 
   public:
-    QTLUA_REFTYPE(QObjectWrapper);
+    QTLUA_REFTYPE(QObjectWrapper)
 
     /** Create or find existing QObjectWrapper associated with given
 	QObject. QObject will be deleted when wrapper is destroyed
@@ -86,7 +86,7 @@ namespace QtLua {
     static QObject * get_child(QObject &obj, const String &name);
 
     // internal use only
-    int qt_metacall(QMetaObject::Call c, int id, void **args);
+    int qt_metacall(QMetaObject::Call c, int id, void **args) override;
     void _lua_connect(int sigindex, const Value &v);
     bool _lua_disconnect(int sigindex, const Value &v);
     void _lua_disconnect_all(int sigindex);
@@ -100,16 +100,16 @@ namespace QtLua {
     QObjectWrapper(State *st, QObject *obj);
     QObjectWrapper(const QObjectWrapper &qow);
 
-    Value meta_index(State *ls, const Value &key);
-    void meta_newindex(State *ls, const Value &key, const Value &value);
-    Ref<Iterator> new_iterator(State *ls);
-    bool support(Value::Operation c) const;
+    Value meta_index(State *ls, const Value &key) override;
+    void meta_newindex(State *ls, const Value &key, const Value &value) override;
+    Ref<Iterator> new_iterator(State *ls) override;
+    bool support(Value::Operation c) const override;
 
-    void completion_patch(String &path, String &entry, int &offset);
-    String get_type_name() const;
-    String get_value_str() const;
+    void completion_patch(String &path, String &entry, int &offset) override;
+    String get_type_name() const override;
+    String get_value_str() const override;
     void obj_destroyed();
-    void ref_single();
+    void ref_single() override;
 
   private:
 

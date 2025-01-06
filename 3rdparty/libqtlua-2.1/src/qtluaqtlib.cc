@@ -142,6 +142,7 @@ namespace QtLua {
 		 "usage: qt.connect(qobjectwrapper, \"qt_signal_signature()\", qobjectwrapper, \"qt_slot_signature()\")\n"
 		 "       qt.connect(qobjectwrapper, \"qt_signal_signature()\", lua_function)\n")
   {
+    Q_UNUSED(ls)
     meta_call_check_args(args, 3, 4, Value::TUserData, Value::TString, Value::TNone, Value::TString);
 
     QObjectWrapper::ptr sigqow = args[0].to_userdata_cast<QObjectWrapper>();
@@ -175,7 +176,7 @@ namespace QtLua {
 		      .arg(signame.constData()).arg(slotname.constData()));
 
 	if (!QMetaObject::connect(&sigobj, sigindex, &sloobj, slotindex))
-	  QTLUA_THROW(qt.connect, "Unable to connect signal to slot.");
+    QTLUA_THROW_NOARG(qt.connect, "Unable to connect signal to slot.");
       }
       }
 
@@ -259,7 +260,7 @@ namespace QtLua {
       }
 
       default:
-	QTLUA_THROW(qt.meta_type, "Bad argument type, string or number expected.");
+  QTLUA_THROW_NOARG(qt.meta_type, "Bad argument type, string or number expected.");
 	break;
       }
   }
@@ -280,6 +281,8 @@ namespace QtLua {
   QTLUA_FUNCTION(load_ui, "Load a Qt ui file.",
 		 "usage: qt.ui.load_ui(\"file.ui\", [ parent ])\n")
   {
+    Q_UNUSED(ls)
+    Q_UNUSED(args)
 #ifdef HAVE_QT_UITOOLS
     static QUiLoader uil;
 
@@ -297,7 +300,7 @@ namespace QtLua {
 
     return Value(ls, w, true, true);
 #else
-    QTLUA_THROW(new_qobject, "QtLua has been compiled without support for Qt uitools module.");
+    QTLUA_THROW_NOARG(new_qobject, "QtLua has been compiled without support for Qt uitools module.");
 #endif
   }
 
@@ -305,6 +308,8 @@ namespace QtLua {
   QTLUA_FUNCTION(new_widget, "Dynamically create a new Qt Widget using QUiLoader.",
 		 "usage: qt.ui.new_widget(\"QtClassName\", [ \"name\", parent ] )\n")
   {
+    Q_UNUSED(ls)
+    Q_UNUSED(args)
 #ifdef HAVE_QT_UITOOLS
     static QUiLoader uil;
 
@@ -326,7 +331,7 @@ namespace QtLua {
 
     return Value(ls, w, true, true);
 #else
-    QTLUA_THROW(new_qobject, "QtLua has been compiled without support for Qt uitools module.");
+    QTLUA_THROW_NOARG(new_qobject, "QtLua has been compiled without support for Qt uitools module.");
 #endif
   }
 
@@ -376,7 +381,7 @@ namespace QtLua {
 	    int col = get_arg<int>(args, 3);
 	    int col_span = get_arg<int>(args, 4, 1);
 	    if (col + col_span > 2)
-	      QTLUA_THROW(qt.ui.layout_add, "Bad QFormLayout spanning.");
+        QTLUA_THROW_NOARG(qt.ui.layout_add, "Bad QFormLayout spanning.");
 
 	    QFormLayout::ItemRole role = (col_span > 1 ? QFormLayout::SpanningRole :
 					  col ? QFormLayout::FieldRole : QFormLayout::LabelRole);
@@ -466,7 +471,7 @@ namespace QtLua {
       }
 
   err:
-    QTLUA_THROW(qt.ui.layout_add, "Bad object type.");
+    QTLUA_THROW_NOARG(qt.ui.layout_add, "Bad object type.");
   }
 
 
@@ -536,7 +541,7 @@ namespace QtLua {
     else if (QMenuBar *menubar = dynamic_cast<QMenuBar*>(obj))
       result = menubar->addMenu(text);
     else
-      QTLUA_THROW(qt.ui.menu.add_menu, "Bad object type.");
+      QTLUA_THROW_NOARG(qt.ui.menu.add_menu, "Bad object type.");
 
     if (args.size() > 2)
       result->setObjectName(args[2]);
@@ -558,7 +563,7 @@ namespace QtLua {
     else if (QToolBar *tb = dynamic_cast<QToolBar*>(obj))
       result = tb->addSeparator();
     else
-      QTLUA_THROW(qt.ui.menu.add_separator, "Bad object type.");
+      QTLUA_THROW_NOARG(qt.ui.menu.add_separator, "Bad object type.");
 
     if (args.size() > 1)
       result->setObjectName(args[1]);
@@ -585,7 +590,7 @@ namespace QtLua {
     else if (QToolBar *tb = dynamic_cast<QToolBar*>(obj))
       result = tb->addAction(text);
     else
-      QTLUA_THROW(qt.ui.menu.add_action, "Bad object type.");
+      QTLUA_THROW_NOARG(qt.ui.menu.add_action, "Bad object type.");
 
     if (args.size() > 2)
       result->setObjectName(args[2].to_string());
@@ -680,14 +685,14 @@ namespace QtLua {
     else if ((menu = dynamic_cast<QMenu*>(obj)))
       action = menu->menuAction();
     else
-      QTLUA_THROW(qt.ui.menu.remove, "Bad object type.");
+      QTLUA_THROW_NOARG(qt.ui.menu.remove, "Bad object type.");
 
     if (QWidget *w = dynamic_cast<QWidget*>(pobj))
       w->removeAction(action);
     else if (QActionGroup *group = dynamic_cast<QActionGroup*>(pobj))
       group->removeAction(action);
     else
-      QTLUA_THROW(qt.ui.menu.remove, "Bad QWidget object type.");
+      QTLUA_THROW_NOARG(qt.ui.menu.remove, "Bad QWidget object type.");
 
     return QtLua::Value(ls);
   }
@@ -936,6 +941,7 @@ namespace QtLua {
   QTLUA_FUNCTION(tree_view, "Expose a lua table in a QTreeView.",
 		 "usage: qt.dialog.tree_view( table [ , TableTreeModel::Attribute, \"title\" ] )\n")
   {
+    Q_UNUSED(ls)
     meta_call_check_args(args, 1, 3, Value::TNone, Value::TNumber, Value::TString);
 
     TableTreeModel::tree_dialog(QApplication::activeWindow(),
@@ -950,6 +956,7 @@ namespace QtLua {
   QTLUA_FUNCTION(table_view, "Expose a lua table in a QTableView with key, value and type columns.",
 		 "usage: qt.dialog.table_view( table [ , TableTreeModel::Attribute, \"title\" ] )\n")
   {
+    Q_UNUSED(ls)
     meta_call_check_args(args, 1, 3, Value::TNone, Value::TNumber, Value::TString);
 
     TableTreeModel::table_dialog(QApplication::activeWindow(),
@@ -964,6 +971,7 @@ namespace QtLua {
   QTLUA_FUNCTION(grid_view, "Expose 2 dimensions nested lua tables in a QTableView.",
 		 "usage: qt.dialog.grid_view( table [ , TableGridModel::Attribute, \"title\", {column keys}, {row keys} ] )\n")
   {
+    Q_UNUSED(ls)
     meta_call_check_args(args, 1, 5, Value::TNone, Value::TNumber,
 			 Value::TString, Value::TTable, Value::TTable);
     Value::List rk, *rkptr = 0;
@@ -1005,7 +1013,7 @@ namespace QtLua {
     else
       {
 	delete m;
-	QTLUA_THROW(qt.mvc.new_*_model, "Unable to set the MVC model for this object type.");
+  QTLUA_THROW_NOARG(qt.mvc.new_*_model, "Unable to set the MVC model for this object type.");
       }
   }
 
@@ -1058,6 +1066,7 @@ namespace QtLua {
   QTLUA_FUNCTION(set_model, "Set a MVC model of one or more Qt views.",
 		 "usage: qt.mvc.set_model( model, view_widget [, view_widget, ... ] )\n")
   {
+    Q_UNUSED(ls)
     meta_call_check_args(args, 2, 0, Value::TUserData, Value::TUserData);
 
     QAbstractItemModel *m = get_arg_qobject<QAbstractItemModel>(args, 0);

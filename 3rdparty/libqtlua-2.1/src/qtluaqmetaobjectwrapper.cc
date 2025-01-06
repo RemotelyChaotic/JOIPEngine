@@ -114,7 +114,7 @@ namespace QtLua {
       }
   }
 
-  void QMetaObjectWrapper::completion_patch(String &path, String &entry, int &offset)
+  void QMetaObjectWrapper::completion_patch(String&, String &entry, int&)
   {
     entry += ".";
   }
@@ -141,5 +141,5 @@ namespace QtLua {
     return res;
   }
 
-};
+}
 

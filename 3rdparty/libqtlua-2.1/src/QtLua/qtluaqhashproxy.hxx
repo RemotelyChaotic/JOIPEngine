@@ -71,7 +71,7 @@ namespace QtLua {
   }
 
   template <class Container>
-  bool QHashProxyRo<Container>::meta_contains(State *ls, const Value &key)
+  bool QHashProxyRo<Container>::meta_contains(State*, const Value &key)
   {
     return _hash->contains(key);
   }
@@ -125,7 +125,7 @@ namespace QtLua {
   void QHashProxy<Container>::meta_newindex(State *ls, const Value &key, const Value &value)
   {
     if (!_hash)
-      QTLUA_THROW(QtLua::QHashProxy, "Can not index a null container.");
+      QTLUA_THROW_NOARG(QtLua::QHashProxy, "Can not index a null container.");
 
     else if (value.type() == Value::TNil)
       _hash->remove(key);
@@ -137,7 +137,7 @@ namespace QtLua {
   Ref<Iterator> QHashProxyRo<Container>::new_iterator(State *ls)
   {
     if (!_hash)
-      QTLUA_THROW(QtLua::QHashProxyRo, "Can not iterate on a null container.");
+      QTLUA_THROW_NOARG(QtLua::QHashProxyRo, "Can not iterate on a null container.");
 
     return QTLUA_REFNEW(ProxyIterator, ls, *this);
   }

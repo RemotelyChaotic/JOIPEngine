@@ -61,7 +61,7 @@ class UserItemModel : public QAbstractItemModel
   friend class UserItem;
   friend class UserListItem;
 
-  Q_OBJECT;
+  Q_OBJECT
 
 public:
   /** Create a new item model with pointer to root item */
@@ -81,25 +81,25 @@ protected:
   virtual Ref<UserItem> from_mimedata(const QMimeData *data);
 
   /** Return supported mime type. May be reimplemented to add more types. */
-  virtual QStringList mimeTypes() const;
+  QStringList mimeTypes() const override;
 
 public:
   /** @multiple @internal */
-  QVariant data(const QModelIndex &index, int role) const;
-  Qt::ItemFlags flags(const QModelIndex &index) const;
-  QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const;
-  QModelIndex index(int row, int column, const QModelIndex &parent) const;
-  QModelIndex parent(const QModelIndex &index) const;
-  int rowCount(const QModelIndex &parent) const;
-  int columnCount(const QModelIndex &parent) const;
-  bool setData(const QModelIndex & index, const QVariant & value, int role);
+  QVariant data(const QModelIndex &index, int role) const override;
+  Qt::ItemFlags flags(const QModelIndex &index) const override;
+  QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const override;
+  QModelIndex index(int row, int column, const QModelIndex &parent) const override;
+  QModelIndex parent(const QModelIndex &index) const override;
+  int rowCount(const QModelIndex &parent) const override;
+  int columnCount(const QModelIndex &parent) const override;
+  bool setData(const QModelIndex & index, const QVariant & value, int role) override;
   /** */
 
 private:
   bool dropMimeData(const QMimeData *data, Qt::DropAction action,
-		    int row, int column, const QModelIndex & parent);
-  QMimeData * mimeData(const QModelIndexList &indexes) const;
-  Qt::DropActions supportedDropActions() const;
+        int row, int column, const QModelIndex & parent) override;
+  QMimeData * mimeData(const QModelIndexList &indexes) const override;
+  Qt::DropActions supportedDropActions() const override;
 
   struct ItemQMimeData : public QMimeData
   {

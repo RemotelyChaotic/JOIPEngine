@@ -66,9 +66,9 @@ namespace QtLua {
 
   class TableTreeModel : public QAbstractItemModel
   {
-    Q_OBJECT;
-    Q_ENUMS(Attribute);
-    Q_FLAGS(Attributes);
+    Q_OBJECT
+    Q_ENUMS(Attribute)
+    Q_FLAGS(Attributes)
 
   public:
 
@@ -92,7 +92,7 @@ namespace QtLua {
 	EditAll		= 0x00039000,	//< Editable, EditInsert, EditRemove and EditKey allowed
       };
 
-    Q_DECLARE_FLAGS(Attributes, Attribute);
+    Q_DECLARE_FLAGS(Attributes, Attribute)
 
     /** Create a new lua table model. */
     TableTreeModel(const Value &root, Attributes attr, QObject *parent = 0);
@@ -138,18 +138,18 @@ namespace QtLua {
 
   protected:
     /** @multiple @internal */
-    QModelIndex index(int row, int column, const QModelIndex &parent) const;
-    QModelIndex parent(const QModelIndex &index) const;
-    QModelIndex buddy(const QModelIndex &index) const;
-    int rowCount(const QModelIndex &parent) const;
-    bool hasChildren(const QModelIndex & parent) const;
-    int columnCount(const QModelIndex &parent) const;
-    QVariant data(const QModelIndex &index, int role) const;
-    QVariant headerData(int section, Qt::Orientation orientation, int role) const;
-    bool setData(const QModelIndex & index, const QVariant & value, int role);
-    Qt::ItemFlags flags(const QModelIndex &index) const;
-    bool removeRows(int row, int count, const QModelIndex &parent);
-    bool insertRows(int row, int count, const QModelIndex &parent);
+    QModelIndex index(int row, int column, const QModelIndex &parent) const override;
+    QModelIndex parent(const QModelIndex &index) const override;
+    QModelIndex buddy(const QModelIndex &index) const override;
+    int rowCount(const QModelIndex &parent) const override;
+    bool hasChildren(const QModelIndex & parent) const override;
+    int columnCount(const QModelIndex &parent) const override;
+    QVariant data(const QModelIndex &index, int role) const override;
+    QVariant headerData(int section, Qt::Orientation orientation, int role) const override;
+    bool setData(const QModelIndex & index, const QVariant & value, int role) override;
+    Qt::ItemFlags flags(const QModelIndex &index) const override;
+    bool removeRows(int row, int count, const QModelIndex &parent) override;
+    bool insertRows(int row, int count, const QModelIndex &parent) override;
     /** */
 
   private:
@@ -163,7 +163,7 @@ namespace QtLua {
     TableTreeKeys *_table;
   };
 
-  Q_DECLARE_OPERATORS_FOR_FLAGS(TableTreeModel::Attributes);
+  Q_DECLARE_OPERATORS_FOR_FLAGS(TableTreeModel::Attributes)
 
 }
 

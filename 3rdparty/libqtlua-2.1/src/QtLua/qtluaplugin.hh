@@ -95,7 +95,7 @@ namespace QtLua {
     friend class Function;
   public:
 
-    QTLUA_REFTYPE(Plugin);
+    QTLUA_REFTYPE(Plugin)
 
     /** Load a new plugin */
     Plugin(const String &filename);
@@ -126,12 +126,12 @@ namespace QtLua {
      */
     struct Loader : public QPluginLoader, public UserData
     {
-      QTLUA_REFTYPE(Loader);
+      QTLUA_REFTYPE(Loader)
       Loader(const String &filename);
       ~Loader();
     };
 
-    void completion_patch(String &path, String &entry, int &offset);
+    void completion_patch(String &path, String &entry, int &offset) override;
 
     plugin_map_t	_map;
     Ref<Loader>		_loader;

@@ -61,7 +61,7 @@ namespace QtLua {
     return String(me.scope()) + "::" + me.name();
   }
 
-  void Enum::completion_patch(String &path, String &entry, int &offset)
+  void Enum::completion_patch(String&, String &entry, int&)
   {
     entry += ".";
   }

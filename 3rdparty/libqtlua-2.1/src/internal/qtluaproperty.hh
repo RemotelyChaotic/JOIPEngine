@@ -41,13 +41,13 @@ namespace QtLua {
   class Property : public Member
   {
   public:
-    QTLUA_REFTYPE(Property);
+    QTLUA_REFTYPE(Property)
 
     Property(const QMetaObject *mo, int index);
 
   private:
-    void assign(QObjectWrapper &qow, const Value &value);
-    Value access(QObjectWrapper &qow);
+    void assign(QObjectWrapper &qow, const Value &value) override;
+    Value access(QObjectWrapper &qow) override;
 
 #if 0
     // FIXME handle enumerator
@@ -56,8 +56,8 @@ namespace QtLua {
     bool support(Value::Operation c) const;
 #endif
 
-    String get_value_str() const;
-    String get_type_name() const;
+    String get_value_str() const override;
+    String get_type_name() const override;
   };
 
 }

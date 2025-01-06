@@ -174,7 +174,7 @@ namespace QtLua {
 	      return Value(ls);
 	  }
 
-	metatype_map_t::const_iterator i = types_map.find(type);
+  metatype_map_t::iterator i = types_map.find(type);
 
 	if (i != types_map.end())
 	  return i.value()->qt2lua(ls, data);
@@ -354,7 +354,7 @@ namespace QtLua {
 	    break;
 	  }
 
-	metatype_map_t::const_iterator i = types_map.find(type);
+  metatype_map_t::iterator i = types_map.find(type);
 
 	if (i != types_map.end() && i.value()->lua2qt(data, v))
 	  break;

@@ -133,7 +133,7 @@ void UserItem::data_changed(int column) const
     emit _model->dataChanged(get_model_index(column), get_model_index(column));  
 }
 
-UserItem * UserItem::get_child_row(int row) const
+UserItem * UserItem::get_child_row(int) const
 {
   return 0;
 }
@@ -170,17 +170,17 @@ QIcon &	UserItem::get_icon() const
   return i;
 }
 
-bool UserItem::set_data(int column, int role)
+bool UserItem::set_data(int, int)
 {
   return false;
 }
 
-QVariant UserItem::get_data(int column, int role) const
+QVariant UserItem::get_data(int, int) const
 {
   return QVariant();
 }
 
-Qt::ItemFlags UserItem::get_flags(int column) const
+Qt::ItemFlags UserItem::get_flags(int) const
 {
   return Qt::ItemIsEnabled;
 }

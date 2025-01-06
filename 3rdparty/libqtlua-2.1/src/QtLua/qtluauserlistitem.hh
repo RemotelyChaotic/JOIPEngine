@@ -55,7 +55,7 @@ class UserListItem : public UserItem
 
 public:
 
-  QTLUA_REFTYPE(UserListItem);
+  QTLUA_REFTYPE(UserListItem)
 
   UserListItem();
   ~UserListItem();
@@ -67,14 +67,14 @@ public:
   inline const QList<Ref<UserItem> > & get_list() const;
 
   /** Get number of childs */
-  inline int get_child_count() const;
+  inline int get_child_count() const override;
 
-  Value meta_operation(State *ls, Value::Operation op, const Value &a, const Value &b);
-  bool support(Value::Operation c) const;
-  void meta_newindex(State *ls, const Value &key, const Value &value);
-  Value meta_index(State *ls, const Value &key);
-  bool meta_contains(State *ls, const Value &key);
-  Ref<Iterator> new_iterator(State *ls);
+  Value meta_operation(State *ls, Value::Operation op, const Value &a, const Value &b) override;
+  bool support(Value::Operation c) const override;
+  void meta_newindex(State *ls, const Value &key, const Value &value) override;
+  Value meta_index(State *ls, const Value &key) override;
+  bool meta_contains(State *ls, const Value &key) override;
+  Ref<Iterator> new_iterator(State *ls) override;
 
 protected:
 
@@ -99,9 +99,9 @@ protected:
 
 private:
 
-  void completion_patch(String &path, String &entry, int &offset);
+  void completion_patch(String &path, String &entry, int &offset) override;
 
-  void set_model(UserItemModel* model);
+  void set_model(UserItemModel* model) override;
 
   void change_indexes(int first);
   void insert_child(UserItem *item, int row);

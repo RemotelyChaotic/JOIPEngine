@@ -58,7 +58,7 @@ template <class Container>
 class QHashProxyRo : public UserData
 {
 public:
-  QTLUA_REFTYPE(QHashProxyRo);
+  QTLUA_REFTYPE(QHashProxyRo)
 
   /** Create a @ref QHashProxy object with no attached container */
   QHashProxyRo();
@@ -68,15 +68,15 @@ public:
   /** Attach or detach container. argument may be NULL */
   void set_container(Container *hash);
 
-  Value meta_index(State *ls, const Value &key);
-  bool meta_contains(State *ls, const Value &key);
-  Ref<Iterator> new_iterator(State *ls);
-  Value meta_operation(State *ls, Value::Operation op, const Value &a, const Value &b);
-  bool support(Value::Operation c) const;
+  Value meta_index(State *ls, const Value &key) override;
+  bool meta_contains(State *ls, const Value &key) override;
+  Ref<Iterator> new_iterator(State *ls) override;
+  Value meta_operation(State *ls, Value::Operation op, const Value &a, const Value &b) override;
+  bool support(Value::Operation c) const override;
 
 private:
-  void completion_patch(String &path, String &entry, int &offset);
-  String get_type_name() const;
+  void completion_patch(String &path, String &entry, int &offset) override;
+  String get_type_name() const override;
 
   /**
    * @short QHashProxyRo iterator class
@@ -85,7 +85,7 @@ private:
   class ProxyIterator : public Iterator
   {
   public:
-    QTLUA_REFTYPE(ProxyIterator);
+    QTLUA_REFTYPE(ProxyIterator)
     ProxyIterator(State *ls, const Ref<QHashProxyRo> &proxy);
 
   private:
@@ -139,7 +139,7 @@ class QHashProxy : public QHashProxyRo<Container>
   using QHashProxyRo<Container>::_hash;
 
 public:
-  QTLUA_REFTYPE(QHashProxy);
+  QTLUA_REFTYPE(QHashProxy)
 
   /** Create a @ref QHashProxy object */
   QHashProxy();

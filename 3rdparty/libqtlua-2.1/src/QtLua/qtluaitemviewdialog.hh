@@ -51,11 +51,11 @@ namespace QtLua {
 
   class ItemViewDialog : public QDialog
   {
-    Q_OBJECT;
-    Q_PROPERTY(bool resize_on_expand READ get_resize_on_expand WRITE set_resize_on_expand);
-    Q_PROPERTY(float column_margin_factor READ get_column_margin_factor WRITE set_column_margin_factor);
-    Q_PROPERTY(int edit_actions READ get_edit_actions WRITE set_edit_actions_);
-    Q_ENUMS(EditAction);
+    Q_OBJECT
+    Q_PROPERTY(bool resize_on_expand READ get_resize_on_expand WRITE set_resize_on_expand)
+    Q_PROPERTY(float column_margin_factor READ get_column_margin_factor WRITE set_column_margin_factor)
+    Q_PROPERTY(int edit_actions READ get_edit_actions WRITE set_edit_actions_)
+    Q_ENUMS(EditAction)
 
   public:
 
@@ -78,7 +78,7 @@ namespace QtLua {
         EditColumnAll         = 0x00f00,
       };
 
-    Q_DECLARE_FLAGS(EditActions, EditAction);
+    Q_DECLARE_FLAGS(EditActions, EditAction)
 
     /**
      * Create a table dialog.
@@ -133,7 +133,7 @@ namespace QtLua {
     void remove_column() const;
 
   protected:
-    virtual QSize sizeHint() const;
+    virtual QSize sizeHint() const override;
 
   private:
 
@@ -151,7 +151,7 @@ namespace QtLua {
     float _column_margin_factor;
   };
 
-  Q_DECLARE_OPERATORS_FOR_FLAGS(ItemViewDialog::EditActions);
+  Q_DECLARE_OPERATORS_FOR_FLAGS(ItemViewDialog::EditActions)
 
 }
 

@@ -59,7 +59,7 @@ void Function::register_(Plugin &plugin, const String &name)
   plugin._map.insert(name, this);
 }
 
-void Function::completion_patch(String &path, String &entry, int &offset)
+void Function::completion_patch(String&, String &entry, int &offset)
 {
   entry += "()";
   offset--;

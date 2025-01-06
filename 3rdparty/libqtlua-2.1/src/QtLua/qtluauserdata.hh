@@ -73,7 +73,7 @@ class UserData : public QtLua::Refobj<UserData>
   friend uint qHash(const Value &lv);
 
 public:
-  QTLUA_REFTYPE(UserData);
+  QTLUA_REFTYPE(UserData)
 
   virtual inline ~UserData();
 
@@ -246,7 +246,7 @@ private:
 
 }
 
-Q_DECLARE_METATYPE(QtLua::UserData::ptr);
+Q_DECLARE_METATYPE(QtLua::UserData::ptr)
 
 #endif
 

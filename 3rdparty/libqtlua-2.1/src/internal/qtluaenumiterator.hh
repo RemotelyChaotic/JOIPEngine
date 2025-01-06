@@ -44,16 +44,16 @@ namespace QtLua {
 class EnumIterator : public Iterator
 {
 public:
-  QTLUA_REFTYPE(EnumIterator);
+  QTLUA_REFTYPE(EnumIterator)
 
   EnumIterator(State *ls, QMetaEnum me);
 
 private:
-  bool more() const;
-  void next();
-  Value get_key() const;
-  Value get_value() const;
-  ValueRef get_value_ref();
+  bool more() const override;
+  void next() override;
+  Value get_key() const override;
+  Value get_value() const override;
+  ValueRef get_value_ref() override;
 
   QPointer<State> _ls;
   QMetaEnum _me;

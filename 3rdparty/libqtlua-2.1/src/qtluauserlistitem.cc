@@ -39,7 +39,7 @@ Value UserListItem::meta_operation(State *ls, Value::Operation op, const Value &
     }
 }
 
-void UserListItem::meta_newindex(State *ls, const Value &key, const Value &value)
+void UserListItem::meta_newindex(State*, const Value &key, const Value &value)
   
 {
   UserItem::ptr old;
@@ -61,7 +61,7 @@ void UserListItem::meta_newindex(State *ls, const Value &key, const Value &value
     }
 
     default:
-      QTLUA_THROW(QtLua::UserListItem, "Bad item key type, a `lua::string' or a `lua::number' value is expected.");
+      QTLUA_THROW_NOARG(QtLua::UserListItem, "Bad item key type, a `lua::string' or a `lua::number' value is expected.");
     }
 
   switch (value.type())
@@ -163,7 +163,7 @@ Value UserListItem::meta_index(State *ls, const Value &key)
   return Value(ls);
 }
 
-bool UserListItem::meta_contains(State *ls, const Value &key)
+bool UserListItem::meta_contains(State*, const Value &key)
 {
   switch (key.type())
     {
@@ -260,7 +260,7 @@ void UserListItem::insert_name(UserItem *item, int row)
   _child_hash.insert(name, item);
 }
 
-bool UserListItem::accept_child(const UserItem::ptr &item) const
+bool UserListItem::accept_child(const UserItem::ptr&) const
 {
   return true;
 }
@@ -296,7 +296,7 @@ void UserListItem::set_model(UserItemModel* model)
   UserItem::set_model(model);
 }
 
-void UserListItem::completion_patch(String &path, String &entry, int &offset)
+void UserListItem::completion_patch(String&, String &entry, int&)
 {
   entry += ".";
 }
@@ -305,7 +305,7 @@ void UserListItem::child_changed()
 {
 }
 
-String UserListItem::default_child_name(int row) const
+String UserListItem::default_child_name(int) const
 {
   return "noname";
 }

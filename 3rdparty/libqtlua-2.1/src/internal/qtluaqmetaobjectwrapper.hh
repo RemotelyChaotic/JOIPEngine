@@ -52,7 +52,7 @@ namespace QtLua {
   class QMetaObjectWrapper : public UserData
   {
   public:
-    QTLUA_REFTYPE(QMetaObjectWrapper);
+    QTLUA_REFTYPE(QMetaObjectWrapper)
 
     QMetaObjectWrapper(const QMetaObject *mo, qobject_creator *creator = 0);
 
@@ -62,18 +62,18 @@ namespace QtLua {
     QObject *create(const Value::List &lua_args) const;
 
   private:
-    Value meta_index(State *ls, const Value &key);
-    Ref<Iterator> new_iterator(State *ls);
-    bool support(Value::Operation c) const;
+    Value meta_index(State *ls, const Value &key) override;
+    Ref<Iterator> new_iterator(State *ls) override;
+    bool support(Value::Operation c) const override;
 
-    void completion_patch(String &path, String &entry, int &offset);
-    String get_value_str() const;
+    void completion_patch(String &path, String &entry, int &offset) override;
+    String get_value_str() const override;
 
     const QMetaObject *_mo;
     qobject_creator *_creator;
   };
 
-};
+}
 
 #endif
 

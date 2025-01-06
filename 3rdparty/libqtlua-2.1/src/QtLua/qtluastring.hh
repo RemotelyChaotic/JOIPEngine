@@ -28,6 +28,7 @@ namespace QtLua {
 
 /** @internal */
 #define QTLUA_THROW(context, str, ...) do { throw QtLua::String(#context ":" str) __VA_ARGS__; } while (0)
+#define QTLUA_THROW_NOARG(context, str) do { throw QtLua::String(#context ":" str); } while (0)
 
   /**
    * @short Character string class

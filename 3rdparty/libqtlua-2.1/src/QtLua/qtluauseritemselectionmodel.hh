@@ -41,15 +41,15 @@ namespace QtLua {
 
   class UserItemSelectionModel : public QItemSelectionModel
   {
-    Q_OBJECT;
+    Q_OBJECT
 
   public:
     inline UserItemSelectionModel(UserItemModel *model);
     inline UserItemSelectionModel(UserItemModel *model, QObject *parent);
 
   public slots:
-    virtual void select(const QModelIndex &index, QItemSelectionModel::SelectionFlags command);
-    virtual void select(const QItemSelection &selection, QItemSelectionModel::SelectionFlags command);
+    virtual void select(const QModelIndex &index, QItemSelectionModel::SelectionFlags command) override;
+    virtual void select(const QItemSelection &selection, QItemSelectionModel::SelectionFlags command) override;
 
   private:
     static void select_childs(const QModelIndex &index, QItemSelection &selection);

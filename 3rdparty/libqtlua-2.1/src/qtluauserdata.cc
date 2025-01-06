@@ -77,7 +77,7 @@ inline QtLua::Ref<UserData> UserData::get_ud_(lua_State *st, int i)
   if (pop)
     lua_pop(st, 1);
 
-  QTLUA_THROW(QtLua::UserData, "The `lua::userdata' value is not a `QtLua::UserData'.");
+  QTLUA_THROW_NOARG(QtLua::UserData, "The `lua::userdata' value is not a `QtLua::UserData'.");
 #endif
 }
 
@@ -106,24 +106,24 @@ String UserData::get_value_str() const
   return QString().sprintf("%p", this);
 }
 
-Value UserData::meta_operation(State *ls, Value::Operation op,
-			       const Value &a, const Value &b) 
+Value UserData::meta_operation(State*, Value::Operation op,
+             const Value&, const Value&)
 {
   QTLUA_THROW(QtLua::UserData, "The operation `%' is not handled by the `%' class.",
 	      .arg((int)op).arg(get_type_name()));
-};
+}
 
-void UserData::meta_newindex(State *ls, const Value &key, const Value &value) 
+void UserData::meta_newindex(State*, const Value&, const Value&)
 {
   QTLUA_THROW(QtLua::UserData, "The table newindex operation not is handled by the `%' class.",
 	      .arg(get_type_name()));
-};
+}
 
-Value UserData::meta_index(State *ls, const Value &key) 
+Value UserData::meta_index(State*, const Value&)
 {
   QTLUA_THROW(QtLua::UserData, "The table index operation is not handled by the `%' class.",
 	      .arg(get_type_name()));
-};
+}
 
 bool UserData::meta_contains(State *ls, const Value &key)
 {
@@ -134,19 +134,19 @@ bool UserData::meta_contains(State *ls, const Value &key)
   }
 }
 
-Value::List UserData::meta_call(State *ls, const Value::List &args) 
+Value::List UserData::meta_call(State*, const Value::List&)
 {
   QTLUA_THROW(QtLua::UserData, "The call operation is not handled by the `%' class.",
 	      .arg(get_type_name()));
-};
+}
 
-Ref<Iterator> UserData::new_iterator(State *ls)
+Ref<Iterator> UserData::new_iterator(State*)
 {
   QTLUA_THROW(QtLua::UserData, "Table iteration is not handled by the `%' class",
 	      .arg(get_type_name()));
 }
 
-bool UserData::support(Value::Operation c) const
+bool UserData::support(Value::Operation) const
 {
   return false;
 }
@@ -213,7 +213,7 @@ bool UserData::operator<(const UserData &ud)
   return this < &ud;
 }
 
-void UserData::completion_patch(String &path, String &entry, int &offset)
+void UserData::completion_patch(String&, String&, int&)
 {
 }
 
@@ -238,7 +238,7 @@ Value UserData::yield(State *ls) const
     }
 #else
   int r = lua_pushthread(lst);
-  assert(r != 1);
+  assert(r != 1); Q_UNUSED(r)
 #endif
   Value res(-1, ls);
   lua_pop(lst, 1);

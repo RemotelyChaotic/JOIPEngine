@@ -32,7 +32,7 @@
 #include <internal/MetaCache>
 #include <internal/QObjectIterator>
 
-#define assert_do(x) { bool res_ = (x); assert (((void)#x, res_)); }
+#define assert_do(x) { bool res_ = (x); assert (((void)#x, res_)); Q_UNUSED(res_) }
 
 namespace QtLua {
 
@@ -199,7 +199,7 @@ namespace QtLua {
 	    return;
 	  }
 
-	QTLUA_THROW(QtLua::QObjectWrapper, "Failed to connect the Qt signal to a lua function.");
+  QTLUA_THROW_NOARG(QtLua::QObjectWrapper, "Failed to connect the Qt signal to a lua function.");
       }
 
       default:
@@ -220,7 +220,7 @@ namespace QtLua {
 	if (i.value()._sigindex == sigindex && value == i.value()._value)
 	  {
 	    bool ok = QMetaObject::disconnect(_obj, sigindex, this, metaObject()->methodCount() + i.key());
-	    assert(ok);
+      assert(ok); Q_UNUSED(ok)
 	    _lua_next_slot = std::min(_lua_next_slot, i.key());
 	    i = _lua_slots.erase(i);
 	    return true;
@@ -244,7 +244,7 @@ namespace QtLua {
 	if (i.value()._sigindex == sigindex)
 	  {
 	    bool ok = QMetaObject::disconnect(_obj, sigindex, this, metaObject()->methodCount() + i.key());
-	    assert(ok);
+      assert(ok); Q_UNUSED(ok)
 	    _lua_next_slot = std::min(_lua_next_slot, i.key());
 	    i = _lua_slots.erase(i);
 	  }
@@ -263,7 +263,7 @@ namespace QtLua {
     for (i = _lua_slots.begin(); i != _lua_slots.end(); )
       {
 	bool ok = QMetaObject::disconnect(_obj, i.value()._sigindex, this, metaObject()->methodCount() + i.key());
-	assert(ok);
+  assert(ok); Q_UNUSED(ok)
 	++i;
       }
     _lua_slots.clear();

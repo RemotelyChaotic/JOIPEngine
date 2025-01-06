@@ -54,7 +54,7 @@ class DispatchProxy : public UserData
 {
 
 public:
-  QTLUA_REFTYPE(DispatchProxy);
+  QTLUA_REFTYPE(DispatchProxy)
 
   DispatchProxy();
   ~DispatchProxy();
@@ -97,7 +97,7 @@ public:
    * the operation and had associated operations enabled when
    * registered with the @ref add_target function.
    */
-  Value meta_operation(State *ls, Value::Operation op, const Value &a, const Value &b);
+  Value meta_operation(State *ls, Value::Operation op, const Value &a, const Value &b) override;
 
   /** 
    * This function handles the @ref Value::OpIndex operation by
@@ -105,7 +105,7 @@ public:
    * {support} this operation and had this operation enabled when
    * registered with the @ref add_target function.
    */
-  Value meta_index(State *ls, const Value &key);
+  Value meta_index(State *ls, const Value &key) override;
 
   /**
    * This function handles the @ref Value::OpNewindex operation by
@@ -124,7 +124,7 @@ public:
    * before the call to @ref meta_newindex is forwarded. This avoids
    * shadowing a table entry.
    */
-  void meta_newindex(State *ls, const Value &key, const Value &value);
+  void meta_newindex(State *ls, const Value &key, const Value &value) override;
 
   /** 
    * This function queries all registered object which @ref
@@ -132,7 +132,7 @@ public:
    * Value::OpNewindex operations and had one of these operations
    * enabled when registered with the @ref add_target function.
    */
-  bool meta_contains(State *ls, const Value &key);
+  bool meta_contains(State *ls, const Value &key) override;
 
   /** 
    * This function handles the @ref Value::OpCall operation by relying
@@ -140,7 +140,7 @@ public:
    * {supports} this operation and had this operation enabled when
    * registered with the @ref add_target function.
    */
-  Value::List meta_call(State *ls, const Value::List &args);
+  Value::List meta_call(State *ls, const Value::List &args) override;
 
   /**
    * This function handles the @ref Value::OpIterate operation by
@@ -150,14 +150,14 @@ public:
    * underlying objects are created in registration order to expose
    * all entries.
    */
-  Ref<Iterator> new_iterator(State *ls);
+  Ref<Iterator> new_iterator(State *ls) override;
 
   /**
    * This function check if one of the underlying objects can handle
    * the specified operation and had this operation enabled when
    * registered with the @ref add_target function.
    */
-  bool support(enum Value::Operation c) const;
+  bool support(enum Value::Operation c) const override;
 
 private:
 
@@ -207,11 +207,11 @@ private:
     inline ProxyIterator(State *ls, const DispatchProxy &dp);
 
     bool _more();
-    bool more() const;
-    void next();
-    Value get_key() const;
-    Value get_value() const;
-    ValueRef get_value_ref();
+    bool more() const override;
+    void next() override;
+    Value get_key() const override;
+    Value get_value() const override;
+    ValueRef get_value_ref() override;
 
     QPointer<State> _state;
     const DispatchProxy &_dp;

@@ -65,7 +65,7 @@ class Iterator : public UserData
 {
 public:
 
-  QTLUA_REFTYPE(Iterator);
+  QTLUA_REFTYPE(Iterator)
 
   /** @return true if more entries are available. */
   virtual bool more() const = 0;

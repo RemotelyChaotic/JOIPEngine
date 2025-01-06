@@ -72,31 +72,31 @@ namespace QtLua {
     _QTLUA_POOL_ARRAY_CREATE((), (), );
 
     _QTLUA_POOL_ARRAY_CREATE((const P1 &p1), (p1), \
-			     template <typename P1>);
+           template <typename P1>)
 
     _QTLUA_POOL_ARRAY_CREATE((const P1 &p1, const P2 &p2), (p1, p2), \
-			     template <typename P1, typename P2>);
+           template <typename P1, typename P2>)
 
     _QTLUA_POOL_ARRAY_CREATE((const P1 &p1, const P2 &p2, const P3 &p3), (p1, p2, p3),
-			     template <typename P1, typename P2, typename P3>);
+           template <typename P1, typename P2, typename P3>)
 
     _QTLUA_POOL_ARRAY_CREATE((const P1 &p1, const P2 &p2, const P3 &p3,
 			     const P4 &p4),
 			    (p1, p2, p3, p4),
 			     template <typename P1, typename P2, typename P3,
-			     typename P4>);
+           typename P4>)
 
     _QTLUA_POOL_ARRAY_CREATE((const P1 &p1, const P2 &p2, const P3 &p3,
 			     const P4 &p4, const P5 &p5),
 			    (p1, p2, p3, p4, p5),
 			     template <typename P1, typename P2, typename P3,
-			     typename P4, typename P5>);
+           typename P4, typename P5>)
 
     _QTLUA_POOL_ARRAY_CREATE((const P1 &p1, const P2 &p2, const P3 &p3,
 			     const P4 &p4, const P5 &p5, const P6 &p6),
 			    (p1, p2, p3, p4, p5, p6),
 			     template <typename P1, typename P2, typename P3,
-			     typename P4, typename P5, typename P6>);
+           typename P4, typename P5, typename P6>)
 
   private:
     uint64_t _storage[sizeof(X) * max_size / 8 + 8];

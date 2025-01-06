@@ -47,7 +47,7 @@ void Value::push_value(lua_State *st) const
   lua_rawget(st, LUA_REGISTRYINDEX);  
 }
 
-int Value::empty_fcn(lua_State *st)
+int Value::empty_fcn(lua_State*)
 {
   return 0;
 }
@@ -101,7 +101,7 @@ void Value::init_thread(const Value &main)
   if (main.type() != TFunction)
     {
       lua_pop(lst, 3);
-      QTLUA_THROW(QtLua::Value, "A `lua::function' value is expected as coroutine entry point.");
+      QTLUA_THROW_NOARG(QtLua::Value, "A `lua::function' value is expected as coroutine entry point.");
     }
 
   lua_xmove(lst, th, 1);

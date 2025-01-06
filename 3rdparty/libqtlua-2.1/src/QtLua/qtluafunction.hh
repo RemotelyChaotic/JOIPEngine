@@ -65,7 +65,7 @@ namespace QtLua {
   class Function : public UserData
   {
   public:
-    QTLUA_REFTYPE(Function);
+    QTLUA_REFTYPE(Function)
 
     /** @internal */
     void register_(State *ls, const String &path);
@@ -87,9 +87,9 @@ namespace QtLua {
 #define QTLUA_FUNCTION_DECL(name)					\
     class QtLua_Function_##name : public QtLua::Function		\
     {									\
-      QtLua::Value::List meta_call(QtLua::State *ls, const QtLua::Value::List &args); \
-      QtLua::String get_description() const;				\
-      QtLua::String get_help() const;					\
+      QtLua::Value::List meta_call(QtLua::State *ls, const QtLua::Value::List &args) override; \
+      QtLua::String get_description() const override;				\
+      QtLua::String get_help() const override;					\
     public:								\
       QtLua_Function_##name();						\
       QtLua_Function_##name(QtLua::State *ls, const QtLua::String &path); \
@@ -140,7 +140,7 @@ namespace QtLua {
 
   protected:
 
-    virtual Value::List meta_call(State *ls, const Value::List &args) = 0;
+    Value::List meta_call(State *ls, const Value::List &args) override = 0;
 
   public:
 
@@ -235,10 +235,10 @@ namespace QtLua {
     static inline X* get_arg_qobject(const Value::List &args, int n);
 
   private:
-    String get_value_str() const;
-    String get_type_name() const;
-    bool support(Value::Operation c) const;
-    void completion_patch(String &path, String &entry, int &offset);
+    String get_value_str() const override;
+    String get_type_name() const override;
+    bool support(Value::Operation c) const override;
+    void completion_patch(String &path, String &entry, int &offset) override;
   };
 
 }

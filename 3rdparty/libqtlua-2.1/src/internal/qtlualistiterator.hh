@@ -43,16 +43,16 @@ namespace QtLua {
 class ListIterator : public Iterator
 {
 public:
-  QTLUA_REFTYPE(ListIterator);
+  QTLUA_REFTYPE(ListIterator)
 
   ListIterator(State *ls, const UserListItem::ptr &list);
 
 private:
-  bool more() const;
-  void next();
-  Value get_key() const;
-  Value get_value() const;
-  ValueRef get_value_ref();
+  bool more() const override;
+  void next() override;
+  Value get_key() const override;
+  Value get_value() const override;
+  ValueRef get_value_ref() override;
 
   QPointer<State> _ls;
   UserListItem::ptr _list;

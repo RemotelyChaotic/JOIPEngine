@@ -139,8 +139,8 @@ function remove_cols(check, parent_id, pos, count)
 
   class LuaModel : public QAbstractItemModel
   {
-    Q_OBJECT;
-    Q_ENUMS(ItemDataRole);
+    Q_OBJECT
+    Q_ENUMS(ItemDataRole)
 
   public:
 
@@ -164,9 +164,13 @@ function remove_cols(check, parent_id, pos, count)
 	// Metadata
 	FontRole =		    ::Qt::FontRole,
 	TextAlignmentRole =	    ::Qt::TextAlignmentRole,
+#if QT_VERSION < QT_VERSION_CHECK(5,13,0)
 	BackgroundColorRole =	    ::Qt::BackgroundColorRole,
+#endif
 	BackgroundRole =	    ::Qt::BackgroundRole,
+#if QT_VERSION < QT_VERSION_CHECK(5,13,0)
 	TextColorRole =	            ::Qt::TextColorRole,
+#endif
 	ForegroundRole =	    ::Qt::ForegroundRole,
 	CheckStateRole =	    ::Qt::CheckStateRole,
 
@@ -183,17 +187,17 @@ function remove_cols(check, parent_id, pos, count)
 
   private:
 
-    QModelIndex index(int row, int column, const QModelIndex &parent) const;
-    QModelIndex parent(const QModelIndex &index) const;
-    int rowCount(const QModelIndex &parent) const;
-    int columnCount(const QModelIndex &parent) const;
-    QVariant data(const QModelIndex &index, int role) const;
-    Qt::ItemFlags flags(const QModelIndex &index) const;
-    bool setData(const QModelIndex &index, const QVariant &value, int role);
-    bool insertRows(int row, int count, const QModelIndex& parent);
-    bool removeRows(int row, int count, const QModelIndex& parent);
-    bool insertColumns(int col, int count, const QModelIndex& parent);
-    bool removeColumns(int col, int count, const QModelIndex& parent);
+    QModelIndex index(int row, int column, const QModelIndex &parent) const override;
+    QModelIndex parent(const QModelIndex &index) const override;
+    int rowCount(const QModelIndex &parent) const override;
+    int columnCount(const QModelIndex &parent) const override;
+    QVariant data(const QModelIndex &index, int role) const override;
+    Qt::ItemFlags flags(const QModelIndex &index) const override;
+    bool setData(const QModelIndex &index, const QVariant &value, int role) override;
+    bool insertRows(int row, int count, const QModelIndex& parent) override;
+    bool removeRows(int row, int count, const QModelIndex& parent) override;
+    bool insertColumns(int col, int count, const QModelIndex& parent) override;
+    bool removeColumns(int col, int count, const QModelIndex& parent) override;
     void error(const String &err) const;
 
     void cached_get(intptr_t item_id, int child_row, int child_col) const;

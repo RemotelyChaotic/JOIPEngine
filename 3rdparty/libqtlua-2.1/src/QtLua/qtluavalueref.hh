@@ -73,7 +73,7 @@ namespace QtLua {
 
     inline ValueRef(const ValueRef &ref);
 
-    Value value() const;
+    Value value() const override;
 
     /** Assign new value to referenced value. @multiple */
     inline const Value & operator=(const Value &v) const;
@@ -103,7 +103,7 @@ namespace QtLua {
     void copy_table(double id);
     void copy_key(double id);
 
-    void push_value(lua_State *st) const;
+    void push_value(lua_State *st) const override;
     void cleanup();
 
     double _table_id;

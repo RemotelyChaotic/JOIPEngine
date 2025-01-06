@@ -145,7 +145,7 @@ namespace QtLua {
 	UserData::ptr ud = UserData::pop_ud(lst);
 
 	if (!ud.valid())
-	  QTLUA_THROW(QtLua::ValueRef, "Can not index a null `QtLua::UserData' value.");
+    QTLUA_THROW_NOARG(QtLua::ValueRef, "Can not index a null `QtLua::UserData' value.");
 
 	Value k(_st);
 	k._id = _key_id;	// reuse stored key id for temp Value

@@ -40,17 +40,17 @@ namespace QtLua {
   Value::List Method::meta_call(State *ls, const Value::List &lua_args)
   {
     if (lua_args.size() < 1)
-      QTLUA_THROW(QtLua::Method, "Can't call method without object. (use ':' instead of '.')");
+      QTLUA_THROW_NOARG(QtLua::Method, "Can't call method without object. (use ':' instead of '.')");
 
     QObjectWrapper::ptr qow = lua_args[0].to_userdata_cast<QObjectWrapper>();
 
     if (!qow.valid())
-      QTLUA_THROW(QtLua::Method, "The method first argument must be a QObject. (use ':' instead of '.')");
+      QTLUA_THROW_NOARG(QtLua::Method, "The method first argument must be a QObject. (use ':' instead of '.')");
 
     QObject &obj = qow->get_object();
 
     if (!check_class(obj.metaObject()))
-      QTLUA_THROW(QtLua::Method, "The method doesn't belong to the class of the passed QObject.");
+      QTLUA_THROW_NOARG(QtLua::Method, "The method doesn't belong to the class of the passed QObject.");
 
     QMetaMethod mm = _mo->method(_index);
 

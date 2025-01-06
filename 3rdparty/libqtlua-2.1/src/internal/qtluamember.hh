@@ -45,7 +45,7 @@ namespace QtLua {
   class Member : public UserData
   {
   public:
-    QTLUA_REFTYPE(Member);
+    QTLUA_REFTYPE(Member)
 
     inline Member(const QMetaObject *mo, int index);
     inline Member();

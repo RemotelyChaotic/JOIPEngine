@@ -34,8 +34,8 @@ namespace QtLua {
       _supreme_mo(mc._supreme_mo),
       _lua_name(mc._lua_name),
       _index_toString(mc._index_toString),
-      _index_getDP(mc._index_getDP),
       _index_setDP(mc._index_setDP),
+      _index_getDP(mc._index_getDP),
       _auto_property(mc._auto_property)
   {
   }

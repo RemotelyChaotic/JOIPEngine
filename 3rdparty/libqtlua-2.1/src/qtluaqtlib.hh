@@ -38,9 +38,9 @@ namespace QtLua {
   class SizePolicy
     : public QObject
   {
-    Q_OBJECT;
+    Q_OBJECT
 
-    Q_ENUMS(Policy);
+    Q_ENUMS(Policy)
   public:
     enum Policy
       {

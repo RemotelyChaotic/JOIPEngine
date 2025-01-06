@@ -73,7 +73,7 @@ class UserItem : public UserData
 
 public:
 
-  QTLUA_REFTYPE(UserItem);
+  QTLUA_REFTYPE(UserItem)
 
   /** Create a new UserItem with given name */
   UserItem(const String &name = "");

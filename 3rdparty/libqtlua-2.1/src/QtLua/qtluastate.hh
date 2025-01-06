@@ -86,7 +86,7 @@ namespace QtLua {
                 JitLib | FfiLib |
                 QtLuaLib | QtLib,
     };
-  Q_DECLARE_FLAGS(Librarys, Library);
+  Q_DECLARE_FLAGS(Librarys, Library)
 
   /**
    * @short Lua interpreter state wrapper class
@@ -348,6 +348,6 @@ private:
 };
 
 }
-Q_DECLARE_OPERATORS_FOR_FLAGS(QtLua::Librarys);
+Q_DECLARE_OPERATORS_FOR_FLAGS(QtLua::Librarys)
 
 #endif

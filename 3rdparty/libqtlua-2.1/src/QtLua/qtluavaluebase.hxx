@@ -401,7 +401,7 @@ namespace QtLua {
     Ref<UserData> ud = to_userdata();
 
     if (!ud.valid())
-      QTLUA_THROW(QtLua::ValueBase, "The value contains a null `QtLua::UserData' reference.");
+      QTLUA_THROW_NOARG(QtLua::ValueBase, "The value contains a null `QtLua::UserData' reference.");
 
     Ref<X> ref = ud.dynamiccast<X>();
 
@@ -432,7 +432,7 @@ namespace QtLua {
     Ref<UserData> ud = to_userdata();
 
     if (!ud.valid())
-      QTLUA_THROW(QtLua::ValueBase, "The value contains a null `QtLua::UserData' reference.");
+      QTLUA_THROW_NOARG(QtLua::ValueBase, "The value contains a null `QtLua::UserData' reference.");
 
     X* ref = dynamic_cast<X*>(ud.ptr());
 

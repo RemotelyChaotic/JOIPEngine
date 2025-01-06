@@ -40,7 +40,7 @@ namespace QtLua {
   void TableTreeModel::check_state() const
   {
     if (!_st)
-      QTLUA_THROW(QtLua::TableTreeModel, "The associated State object has been destroyed.");
+      QTLUA_THROW_NOARG(QtLua::TableTreeModel, "The associated State object has been destroyed.");
   }
 
   TableTreeModel::TableTreeModel(const Value &root, Attributes attr, QObject *parent)
@@ -277,7 +277,7 @@ namespace QtLua {
 	case ColValue: {
 
 	  if (!(t->_attr & EditRemove) && newvalue.is_nil())
-	    QTLUA_THROW(QtLua::TableTreeModel, "Can not change the entry value to nil.");
+      QTLUA_THROW_NOARG(QtLua::TableTreeModel, "Can not change the entry value to nil.");
 
 	  // check type change
 	  if ((t->_attr & EditFixedType) &&
@@ -295,10 +295,10 @@ namespace QtLua {
 	case ColKey: {
 
 	  if (newvalue.is_nil())
-	    QTLUA_THROW(QtLua::TableTreeModel, "The entry key can not be a nil value.");
+      QTLUA_THROW_NOARG(QtLua::TableTreeModel, "The entry key can not be a nil value.");
 
 	  if (!t->_value.at(newvalue).is_nil())
-	    QTLUA_THROW(QtLua::TableTreeModel, "An entry with the same key already exists.");
+      QTLUA_THROW_NOARG(QtLua::TableTreeModel, "An entry with the same key already exists.");
 
 	  Value old = t->get_value(index.row());
 	  t->set_value(index.row(), Value(_st));

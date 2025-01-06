@@ -59,7 +59,7 @@ double ValueBase::_id_counter = LUA_RIDX_LAST + 1;
 void ValueBase::check_state() const
 {
   if (!_st)
-    QTLUA_THROW(QtLua::ValueBase, "The associated State object has been destroyed.");
+    QTLUA_THROW_NOARG(QtLua::ValueBase, "The associated State object has been destroyed.");
 }
 
 bool ValueBase::connect(QObject *obj, const char *signal)
@@ -141,7 +141,7 @@ Value::List ValueBase::call(const List &args) const
       UserData::ptr ud = UserData::pop_ud(lst);
 
       if (!ud.valid())
-	QTLUA_THROW(QtLua::ValueBase, "Can not call a null `QtLua::UserData' value.");
+  QTLUA_THROW_NOARG(QtLua::ValueBase, "Can not call a null `QtLua::UserData' value.");
 
       return ud->meta_call(_st, args);
     }
@@ -155,7 +155,7 @@ Value::List ValueBase::call(const List &args) const
 
 #if LUA_VERSION_NUM >= 501
       if ((lua_status(th) != 0 || lua_gettop(th) == 0) && (lua_status(th) != LUA_YIELD))
-	QTLUA_THROW(QtLua::ValueBase, "Can not resume a dead coroutine.");
+  QTLUA_THROW_NOARG(QtLua::ValueBase, "Can not resume a dead coroutine.");
 #endif
 
       int oldtop_th = lua_gettop(th);
@@ -245,7 +245,7 @@ Value ValueBase::at(const Value &key) const
       UserData::ptr ud = UserData::pop_ud(lst);
 
       if (!ud.valid())
-	QTLUA_THROW(QtLua::ValueBase, "Can not index a null `QtLua::UserData' value.");
+  QTLUA_THROW_NOARG(QtLua::ValueBase, "Can not index a null `QtLua::UserData' value.");
 
       return ud->meta_index(_st, key);
     }
@@ -322,7 +322,7 @@ void ValueBase::table_shift(int pos, int count, const Value &init, int len)
   if (lua_type(lst, -1) != LUA_TTABLE)
     {
       lua_pop(lst, 1);
-      QTLUA_THROW(QtLua::ValueBase, "Can only shift values inside a `lua::table' value.");
+      QTLUA_THROW_NOARG(QtLua::ValueBase, "Can only shift values inside a `lua::table' value.");
     }
 
   int i;
@@ -390,7 +390,7 @@ Ref<Iterator> ValueBase::new_iterator() const
       UserData::ptr ud = UserData::pop_ud(lst);
 
       if (!ud.valid())
-	QTLUA_THROW(QtLua::ValueBase, "Can not iterate on a null `QtLua::UserData' value.");
+  QTLUA_THROW_NOARG(QtLua::ValueBase, "Can not iterate on a null `QtLua::UserData' value.");
 
       return ud->new_iterator(_st);
     }
@@ -655,7 +655,7 @@ QVariant ValueBase::to_qvariant(int qt_type) const
   return QMetaValue(qt_type, *this).to_qvariant();
 }
 
-static int lua_writer(lua_State *L, const void* p, size_t sz, void* pv)
+static int lua_writer(lua_State*, const void* p, size_t sz, void* pv)
 {
   QByteArray *ba = (QByteArray*)pv;
   ba->append((const char*)p, (int)sz);

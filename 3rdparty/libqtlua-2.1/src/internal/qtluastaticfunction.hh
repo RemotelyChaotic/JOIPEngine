@@ -49,7 +49,7 @@ namespace QtLua {
   class StaticFunction : public Member, FunctionWrapperData
   {
   public:
-    QTLUA_REFTYPE(StaticFunction);
+    QTLUA_REFTYPE(StaticFunction)
 
     StaticFunction(const QMetaObject *mo, 
                    const String &name, FunctionSignature func, 
@@ -59,11 +59,11 @@ namespace QtLua {
                    const QList<String> &argv);
 
   private:
-    Value::List meta_call(State *ls, const Value::List &args);
-    bool support(Value::Operation c) const;
-    String get_type_name() const;
-    String get_value_str() const;
-    void completion_patch(String &path, String &entry, int &offset);
+    Value::List meta_call(State *ls, const Value::List &args) override;
+    bool support(Value::Operation c) const override;
+    String get_type_name() const override;
+    String get_value_str() const override;
+    void completion_patch(String &path, String &entry, int &offset) override;
     
     String _name;
   };

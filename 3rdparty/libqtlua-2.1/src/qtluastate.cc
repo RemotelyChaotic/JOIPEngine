@@ -334,7 +334,7 @@ int State::lua_meta_item_index(lua_State *st)
     UserData::ptr ud = UserData::get_ud(st, 1);
 
     if (!ud.valid())
-      QTLUA_THROW(QtLua::UserData, "Can not index a null `QtLua::UserData' value.");
+      QTLUA_THROW_NOARG(QtLua::UserData, "Can not index a null `QtLua::UserData' value.");
 
     Value	op(2, this_);
 
@@ -360,7 +360,7 @@ int State::lua_meta_item_newindex(lua_State *st)
     UserData::ptr ud = UserData::get_ud(st, 1);
 
     if (!ud.valid())
-      QTLUA_THROW(QtLua::UserData, "Can not index a null `QtLua::UserData' value.");
+      QTLUA_THROW_NOARG(QtLua::UserData, "Can not index a null `QtLua::UserData' value.");
 
     Value	op1(2, this_);
     Value	op2(3, this_);
@@ -387,7 +387,7 @@ int State::lua_meta_item_call(lua_State *st)
     UserData::ptr ud = UserData::get_ud(st, 1);
 
     if (!ud.valid())
-      QTLUA_THROW(QtLua::UserData, "Can not call a null `QtLua::UserData' value.");
+      QTLUA_THROW_NOARG(QtLua::UserData, "Can not call a null `QtLua::UserData' value.");
 
     Value::List	args;
 
@@ -825,7 +825,7 @@ State::~State()
   lua_close(_mst);
 
   // wipe QObjectWrapper objects
-  wrapper_hash_t::const_iterator i;
+  wrapper_hash_t::iterator i;
 
   while ((i = _whash.begin()) != _whash.end())
     i.value()->_drop();

@@ -91,7 +91,7 @@ namespace QtLua {
     MetaType(const char *type_name);
 
     /** Unregister conversion handler */
-    ~MetaType();
+    virtual ~MetaType();
 
     /** This function must be implemented to converts a C++ value to a
 	lua value. */

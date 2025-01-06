@@ -77,9 +77,9 @@ namespace QtLua {
 
   class TableGridModel : public QAbstractItemModel
   {
-    Q_OBJECT;
-    Q_ENUMS(Attribute);
-    Q_FLAGS(Attributes);
+    Q_OBJECT
+    Q_ENUMS(Attribute)
+    Q_FLAGS(Attributes)
 
   public:
 
@@ -101,7 +101,7 @@ namespace QtLua {
 	EditRemoveCol = 0x00040000,	//< Allow deletion of existing columns.
       };
 
-    Q_DECLARE_FLAGS(Attributes, Attribute);
+    Q_DECLARE_FLAGS(Attributes, Attribute)
 
     /** 
      * Create a new lua grid table model. 
@@ -195,20 +195,20 @@ namespace QtLua {
     virtual Value new_column_key(State *st, int col) const; 
 
     /** @multiple @internal */
-    QModelIndex index(int row, int column, const QModelIndex &parent) const;
-    QModelIndex parent(const QModelIndex &index) const;
-    int rowCount(const QModelIndex &parent) const;
-    bool hasChildren(const QModelIndex & parent) const;
-    int columnCount(const QModelIndex &parent) const;
-    QVariant data(const QModelIndex &index, int role) const;
-    bool setData(const QModelIndex & index, const QVariant & value, int role);
-    QVariant headerData(int section, Qt::Orientation orientation, int role) const;
-    bool setHeaderData(int section, Qt::Orientation orientation, const QVariant &value, int role);
-    Qt::ItemFlags flags(const QModelIndex &index) const;
-    bool removeRows(int row, int count, const QModelIndex &parent);
-    bool insertRows(int row, int count, const QModelIndex &parent);
-    bool removeColumns(int column, int count, const QModelIndex &parent);
-    bool insertColumns(int column, int count, const QModelIndex &parent);
+    QModelIndex index(int row, int column, const QModelIndex &parent) const override;
+    QModelIndex parent(const QModelIndex &index) const override;
+    int rowCount(const QModelIndex &parent) const override;
+    bool hasChildren(const QModelIndex & parent) const override;
+    int columnCount(const QModelIndex &parent) const override;
+    QVariant data(const QModelIndex &index, int role) const override;
+    bool setData(const QModelIndex & index, const QVariant & value, int role) override;
+    QVariant headerData(int section, Qt::Orientation orientation, int role) const override;
+    bool setHeaderData(int section, Qt::Orientation orientation, const QVariant &value, int role) override;
+    Qt::ItemFlags flags(const QModelIndex &index) const override;
+    bool removeRows(int row, int count, const QModelIndex &parent) override;
+    bool insertRows(int row, int count, const QModelIndex &parent) override;
+    bool removeColumns(int column, int count, const QModelIndex &parent) override;
+    bool insertColumns(int column, int count, const QModelIndex &parent) override;
     /** */
 
   private:
@@ -232,7 +232,7 @@ namespace QtLua {
     int _num_col_count;
   };
 
-  Q_DECLARE_OPERATORS_FOR_FLAGS(TableGridModel::Attributes);
+  Q_DECLARE_OPERATORS_FOR_FLAGS(TableGridModel::Attributes)
 
 }
 

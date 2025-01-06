@@ -352,7 +352,7 @@ namespace QtLua {
 	_obj->_inc();
     }
 
-    X *_obj;
+    X *_obj = nullptr;
   };
 
   /**
@@ -494,19 +494,19 @@ namespace QtLua {
   class Refobj : public RefobjBase
   {
   public:
-    QTLUA_REFTYPE(X);
+    QTLUA_REFTYPE(X)
 
     Refobj()
       : RefobjBase()
     {
     }
 
-    Refobj(const Refobj &r)
+    Refobj(const Refobj&)
       : RefobjBase()
     {
     }
 
-    Refobj & operator=(const Refobj &r)
+    Refobj & operator=(const Refobj&)
     {
       assert(ref_count() == 0 || !"Can not overwrite object with live references");
       return *this;

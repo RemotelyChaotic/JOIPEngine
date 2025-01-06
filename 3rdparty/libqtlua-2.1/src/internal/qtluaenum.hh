@@ -42,16 +42,16 @@ namespace QtLua {
   class Enum : public Member
   {
   public:
-    QTLUA_REFTYPE(Enum);
+    QTLUA_REFTYPE(Enum)
 
     Enum(const QMetaObject *mo, int index);
 
   private:
-    Value meta_index(State *ls, const Value &key);
-    Ref<Iterator> new_iterator(State *ls);
-    bool support(Value::Operation c) const;
-    String get_value_str() const;
-    void completion_patch(String &path, String &entry, int &offset);
+    Value meta_index(State *ls, const Value &key) override;
+    Ref<Iterator> new_iterator(State *ls) override;
+    bool support(Value::Operation c) const override;
+    String get_value_str() const override;
+    void completion_patch(String &path, String &entry, int &offset) override;
   };
 
 }

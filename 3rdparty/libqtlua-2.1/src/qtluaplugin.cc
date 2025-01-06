@@ -38,7 +38,7 @@ Plugin::Plugin(const String &filename)
 
 Plugin::~Plugin()
 {
-  for (plugin_map_t::const_iterator i = _map.begin(); i != _map.end(); i++)
+  for (auto i = _map.begin(); i != _map.end(); i++)
     delete *i;
 }
 
@@ -66,7 +66,7 @@ const String & Plugin::get_plugin_ext()
   return s;
 }
 
-void Plugin::completion_patch(String &path, String &entry, int &offset)
+void Plugin::completion_patch(String &, String &entry, int &)
 {
   entry += ".";
 }

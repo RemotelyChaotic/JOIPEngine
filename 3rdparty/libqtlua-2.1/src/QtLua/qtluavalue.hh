@@ -246,8 +246,8 @@ private:
   inline void from_list(const State *ls, const ListContainer &list);
 
   /** push value on lua stack. */
-  void push_value(lua_State *st) const;
-  inline Value value() const;
+  void push_value(lua_State *st) const override;
+  inline Value value() const override;
 
   /** set value to nil in registry, _st must not be NULL */
   void cleanup();

@@ -36,7 +36,7 @@ namespace QtLua {
   void TableGridModel::check_state() const
   {
     if (!_st)
-      QTLUA_THROW(TableGridModel, "The associated State object has been destroyed.");
+      QTLUA_THROW_NOARG(TableGridModel, "The associated State object has been destroyed.");
   }
 
   TableGridModel::TableGridModel(const Value &table, Attributes attr,
