@@ -317,6 +317,16 @@
         <file>resources/style/img/ButtonDialogAddFolder.png</file>
         <file>resources/style/img/ButtonDialogConfigure.png</file>
         <file>resources/style/img/ButtonSequence.png</file>
+        <file>resources/help/editor/add_conditionaldialog_button_help.html</file>
+        <file>resources/help/editor/add_dialog_button_help.html</file>
+        <file>resources/help/editor/add_dialogcategory_button_help.html</file>
+        <file>resources/help/editor/remove_dialog_button_help.html</file>
+        <file>resources/help/editor/edit_dialog_button_help.html</file>
+        <file>resources/help/editor/edit_dialogtags_button_help.html</file>
+        <file>resources/help/editor/dialog/dialogtree_button_help.html</file>
+        <file>resources/help/editor/images/dialog_tree.png</file>
+        <file>resources/help/editor/images/dialog_editor_tree.png</file>
+        <file>resources/help/editor/images/editdialog_dialog.png</file>
     </qresource>
     <qresource prefix="/qml">
         <file>resources/qml/JoipEngine/EmptyDummy.qml</file>

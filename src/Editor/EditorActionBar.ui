@@ -1303,7 +1303,7 @@
          </sizepolicy>
         </property>
         <property name="toolTip">
-         <string>Edit the dialog content and resources</string>
+         <string>Edit the dialog node properties</string>
         </property>
         <property name="text">
          <string/>
@@ -1347,7 +1347,7 @@
          </sizepolicy>
         </property>
         <property name="toolTip">
-         <string>Remove the selected dialog line</string>
+         <string>Remove the selected dialog node</string>
         </property>
         <property name="text">
          <string/>

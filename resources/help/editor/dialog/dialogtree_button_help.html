@@ -1,0 +1,150 @@
+<!doctype html>
+<html class="no-js" lang="">
+
+<head>
+  <meta charset="utf-8">
+  <title>Dialog Tree</title>
+  <meta name="description" content="">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <style>
+    h1 {
+      text-align: center;
+    }
+    div.container {
+      min-height: 10em;
+      display: table-cell;
+      margin-left: auto;
+      margin-right: auto;
+      width: 0.6em
+    }
+    table.warning {
+      color: black;
+      background-color: #cccc44;
+      border-color: yellow;
+      border-style: solid;
+    }
+  </style>
+</head>
+
+
+<body>
+  <h1>Dialog Tree</h1>
+
+  <hr>
+
+  <div class="container">
+    <p>The dialog tree is a visualisation and editor for all registered dialog lines from the different
+    dialog <a href="qrc:/resources/help/editor/resources/resource_help.html">Resources</a> (.joipdlg) in a project.
+    It merges all Dialog lines and Categories into a single tree and lets you edit their properties
+    in one view for all Resources.<br>
+    The Resource files themselves are serialized into JSON and can also be edited via text editor.</p>
+
+    <br>
+
+    <table>
+    <tr><th>Tree UI</th></tr>
+    <tr><th><img src="qrc:/resources/help/editor/images/dialog_editor_tree.png"></th></tr>
+    </table>
+
+    <br>
+
+    <p>There's three types of Dialog nodes in a tree:<br>
+      <ul>
+        <li><b>Category</b>: A Dialog Category. Serves no functional purpose and serves
+        only to "sort" your dialog lines. If the same Category is present in multiple Resources, they
+        will be merged into one. The Id must currently be globally unique in a Project.<br>
+        Too edit the Id, double click the Id cell and enter the new name.</li>
+
+        <li><b>Dialog</b>: One line of Dialog or a parent for multiple Conditional Dialog elements.
+        The Id of these must be globally unique and these are the elements that are searched when calling
+        <i>getDialog</i> (<a href="qrc:/resources/help/editor/code/script_reference_help.html">API</a>).
+        Dialogs without Conditional Dialog children define all properties of the dialog, while
+        Dialogs with Conditional children can have different properties per child except for the tags.<br>
+        The following properties are supported:<br>
+        <ul>
+          <li><i>Id</i>: The identifier of the Dialog. Is enforced to be globally unique.</li>
+          <li><i>(Only without children) Text</i>: The line of dialog shown in a TextBox.</li>
+          <li><i>(Only without children) Wait</i>: The wait time in ms that determines how long the text is shown.<br>
+          -1 means the time is determined automatically based on the Text.</li>
+          <li><i>(Only without children) Skippable</i>: Skippable flag. If set, the line of dialog is skippable.</li>
+          <li><i>(Only without children) Resource</i>: A Sound type <a href="qrc:/resources/help/editor/resources/resource_help.html">Resource</a>.
+          It is played when the Text is shown and stopped if the Text is skipped. If duration of the audio is longer than the Wait time,
+          the text is shown for as long as the audio plays.</li>
+          <li><i>Tags</i>: Tags attatched to the dialog. Dialogs can be searched via tags and they can be used for user defined logic.</li>
+        </ul>
+        </li>
+
+        <li><b>Conditional Dialog</b>: One conditional line of Dialog.
+        The first Conditional Dialog whose condition evaluates to true will be used when the parent is querried by, for example,
+        calling <i>getDialog</i> (<a href="qrc:/resources/help/editor/code/script_reference_help.html">API</a>).
+        The following properties are supported:<br>
+        <ul>
+          <li><i>Id</i>: The identifier of the Conditional Dialog. Is enforced to be globally unique.</li>
+          <li><i>Text</i>: The line of dialog shown in a TextBox.</li>
+          <li><i>Wait</i>: The wait time in ms that determines how long the text is shown.<br>
+          -1 means the time is determined automatically based on the Text.</li>
+          <li><i>Skippable</i>: Skippable flag. If set, the line of dialog is skippable.</li>
+          <li><i>Resource</i>: A Sound type <a href="qrc:/resources/help/editor/resources/resource_help.html">Resource</a>.
+          It is played when the Text is shown and stopped if the Text is skipped. If duration of the audio is longer than the Wait time,
+          the text is shown for as long as the audio plays.</li>
+          <li><i>Condition</i>: The condition under which the dialog is selected.
+          This is <a href="qrc:/resources/help/editor/code/eval_api_reference_help.html">UI eval code</a>.
+          The first condition that evaluates to true in a Dialog will be used.</li>
+        </ul>
+        </li>
+      </ul>
+    </p>
+
+    <br>
+
+    <p>The full definition of the Dialog resource schema:<br>
+      <pre style="font-family: courier,monospace;">
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "JOIP-Engine Dialog schema",
+  "version": 1,
+  "description": "The JSON format for serialized dialog files.",
+  "type": "object",
+  "$defs": {
+    "dialog_frag": {
+      "type": "object",
+      "properties": {
+        "sName": { "type": "string", "description": "Identifier of the data." },
+        "sCondition": { "type": "string", "description": "JS-condition for string. If trouthy the string is shown." },
+        "sString": { "type": "string", "description": "The line of dialog." },
+        "sSoundResource": { "type": "string", "description": "The referenced sound resource." },
+        "iWaitTimeMs": { "type": "integer", "minimum": -1, "description": "The wait time in Ms. -1 for automatic." },
+        "bSkipable": { "type": "boolean", "description": "Skippable flag." }
+      },
+      "required": ["sName", "sCondition", "sString", "sSoundResource", "iWaitTimeMs", "bSkipable"],
+      "additionalProperties" : false
+    },
+    "dialog": {
+      "type": "object",
+      "properties": {
+        "tags": { "type": "array", "items": { "type": "string", "description": "The Tag references." } },
+        "fragments": { "type": "array", "items": { "$ref": "#/$defs/dialog_frag" } },
+        "bHasCondition": { "type": "boolean", "description": "Flag if a condition has been set." }
+      },
+      "required": ["tags", "fragments", "bHasCondition"],
+      "additionalProperties" : false
+    }
+  },
+  "patternProperties" : {
+     "^.*$": {
+        "$anchor": "category",
+        "type": "object",
+        "anyOf": [
+          { "$ref": "#" },
+          { "$ref": "#/$defs/dialog" }
+        ]
+     }
+  }
+}
+      </pre>
+    </p>
+  </div>
+</body>
+
+</html>

@@ -20,6 +20,7 @@
 #include "Systems/HelpFactory.h"
 #include "Systems/Project.h"
 
+#include "Widgets/HelpOverlay.h"
 #include "Widgets/PositionalMenu.h"
 
 #include <QClipboard>
@@ -29,6 +30,10 @@
 #include <QWidgetAction>
 #include <QListWidget>
 #include <QUuid>
+
+namespace {
+  const QString c_sDialogTreeHelpId =  "Editor/Dialog/DialogTree";
+}
 
 DECLARE_EDITORWIDGET(CEditorDialogWidget, EEditorWidget::eDialogEditor)
 
@@ -115,6 +120,13 @@ void CEditorDialogWidget::Initialize()
   setAcceptDrops(true);
 
   m_spUi->pFilter->SetFilterUndo(true);
+
+  auto wpHelpFactory = CApplication::Instance()->System<CHelpFactory>().lock();
+  if (nullptr != wpHelpFactory)
+  {
+    m_spUi->pTreeView->setProperty(helpOverlay::c_sHelpPagePropertyName, c_sDialogTreeHelpId);
+    wpHelpFactory->RegisterHelp(c_sDialogTreeHelpId, ":/resources/help/editor/dialog/dialogtree_button_help.html");
+  }
 
   m_spPropertiesOverlay->Initialize(ResourceTreeModel());
 

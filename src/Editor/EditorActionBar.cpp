@@ -279,17 +279,17 @@ void CEditorActionBar::Initialize()
     wpHelpFactory->RegisterHelp(c_sRemoveSeqLayerHelpId, ":/resources/help/editor/sequence/remove_sequencelayer_button_help.html");
 
     m_spUi->AddDialog->setProperty(helpOverlay::c_sHelpPagePropertyName, c_sAddDialogHelpId);
-    wpHelpFactory->RegisterHelp(c_sAddDialogHelpId, ":/resources/help/editor/sequence/createsequence_button_help.html");
+    wpHelpFactory->RegisterHelp(c_sAddDialogHelpId, ":/resources/help/editor/add_dialog_button_help.html");
     m_spUi->AddDialogFrament->setProperty(helpOverlay::c_sHelpPagePropertyName, c_sAddCondDialogHelpId);
-    wpHelpFactory->RegisterHelp(c_sAddCondDialogHelpId, ":/resources/help/editor/sequence/createsequence_button_help.html");
+    wpHelpFactory->RegisterHelp(c_sAddCondDialogHelpId, ":/resources/help/editor/add_conditionaldialog_button_help.html");
     m_spUi->AddDialogCategoryButton->setProperty(helpOverlay::c_sHelpPagePropertyName, c_sAddDialogCategoryHelpId);
-    wpHelpFactory->RegisterHelp(c_sAddDialogCategoryHelpId, ":/resources/help/editor/add_sequenceelem_button_help.html");
+    wpHelpFactory->RegisterHelp(c_sAddDialogCategoryHelpId, ":/resources/help/editor/add_dialogcategory_button_help.html");
     m_spUi->RemoveDialog->setProperty(helpOverlay::c_sHelpPagePropertyName, c_sRemoveDialogHelpId);
-    wpHelpFactory->RegisterHelp(c_sRemoveDialogHelpId, ":/resources/help/editor/sequence/editsequence_button_help.html");
+    wpHelpFactory->RegisterHelp(c_sRemoveDialogHelpId, ":/resources/help/editor/remove_dialog_button_help.html");
     m_spUi->EditDialogContent->setProperty(helpOverlay::c_sHelpPagePropertyName, c_sEditDialogHelpId);
-    wpHelpFactory->RegisterHelp(c_sEditDialogHelpId, ":/resources/help/editor/sequence/add_sequencelayer_button_help.html");
+    wpHelpFactory->RegisterHelp(c_sEditDialogHelpId, ":/resources/help/editor/edit_dialog_button_help.html");
     m_spUi->EditDialogTags->setProperty(helpOverlay::c_sHelpPagePropertyName, c_sEditDialogTagsHelpId);
-    wpHelpFactory->RegisterHelp(c_sEditDialogTagsHelpId, ":/resources/help/editor/sequence/remove_sequencelayer_button_help.html");
+    wpHelpFactory->RegisterHelp(c_sEditDialogTagsHelpId, ":/resources/help/editor/edit_dialogtags_button_help.html");
   }
 
   connect(m_spSettings.get(), &CSettings::keyBindingsChanged,
