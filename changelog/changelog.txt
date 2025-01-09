@@ -2,6 +2,11 @@
 Version 1.5.0.0
 =================
 
+New Features:
+- Dialog editor and PlayerTextBox functions to support Dialogs has been added.
+  - getDialog: Gets a Dialog object's data.
+  - showDialog: Shows a Dialog with the configured parameters
+
 Changes:
 - Editor icons visible in the dropdown menu.
 - PlayerTextBox.showText has an optional 4th argument that is the name of a Sound resource
