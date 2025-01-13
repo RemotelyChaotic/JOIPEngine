@@ -10,9 +10,11 @@ set(Sources
   ${CMAKE_SOURCE_DIR}/version.h)
 
 add_executable(${PROJECT_NAME} ${Sources})
-set_target_properties(${PROJECT_NAME} PROPERTIES
-  MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>"
-  LINK_FLAGS /SUBSYSTEM:CONSOLE)
+if (WIN32)
+  set_target_properties(${PROJECT_NAME} PROPERTIES
+    MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>"
+    LINK_FLAGS /SUBSYSTEM:CONSOLE)
+endif()
 
 #-----------------------------------------------------------------------------------------
 # Version and icon

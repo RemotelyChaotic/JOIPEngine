@@ -19,9 +19,11 @@ set(Sources
   ../Utils/RaiiFunctionCaller.h)
 
 add_executable(${PROJECT_NAME} ${Sources})
-set_target_properties(${PROJECT_NAME} PROPERTIES
-  MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>"
-  LINK_FLAGS /SUBSYSTEM:CONSOLE)
+if (WIN32)
+  set_target_properties(${PROJECT_NAME} PROPERTIES
+    MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>"
+    LINK_FLAGS /SUBSYSTEM:CONSOLE)
+endif()
 
 # TODO: not used in default build of Qt 5.14.2
 target_compile_definitions(${PROJECT_NAME} PRIVATE QT_FEATURE_zstd=-1)

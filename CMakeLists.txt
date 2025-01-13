@@ -40,7 +40,7 @@ include(JOIPCommon)
 if (ANDROID)
   set(DISABLE_PARALLEL_CONFIGURE ON)
 endif()
-# For wondows use KDE common settings
+# For wondows & Linux use KDE common settings
 if(NOT ANDROID)
   include(KDEInstallDirs)
   include(KDEFrameworkCompilerSettings NO_POLICY_SCOPE)

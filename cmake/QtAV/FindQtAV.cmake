@@ -86,6 +86,22 @@ find_package(PackageHandleStandardArgs REQUIRED)
 find_package_handle_standard_args(QtAV REQUIRED_VARS QTAV_LIBRARIES QTAV_INCLUDE_DIRS)
 mark_as_advanced(QTAV_INCLUDE_DIRS QTAV_LIBRARIES QTAVWIDGETS_INCLUDE_DIRS QTAVWIDGETS_LIBRARIES)
 
+# add as library
+add_library(Qt::AV UNKNOWN IMPORTED)
+set_target_properties(Qt::AV PROPERTIES
+  IMPORTED_LINK_INTERFACE_LANGUAGES "CXX"
+  IMPORTED_LOCATION "${QTAV_LIBRARY}"
+  INTERFACE_INCLUDE_DIRECTORIES "${QTAV_INCLUDE_DIRS}"
+  IMPORTED_GLOBAL TRUE
+)
+add_library(Qt::AVWidgets UNKNOWN IMPORTED)
+set_target_properties(Qt::AVWidgets PROPERTIES
+  IMPORTED_LINK_INTERFACE_LANGUAGES "CXX"
+  IMPORTED_LOCATION "${QTAVWIDGETS_LIBRARY}"
+  INTERFACE_INCLUDE_DIRECTORIES "${QTAVWIDGETS_INCLUDE_DIRS}"
+  IMPORTED_GLOBAL TRUE
+)
+
 message("QtAV_FOUND                 = ${QTAV_FOUND}")
 message("QTAV_INCLUDE_DIRS          = ${QTAV_INCLUDE_DIRS}")
 message("QTAV_LIBRARIES             = ${QTAV_LIBRARIES}")
@@ -134,9 +150,12 @@ elseif(LINUX)
     set(ffmpeg_dir)
     set(FFMPEG_INCLUDE_DIRS)
   else()
-    set(ffmpeg_dir ${CMAKE_SOURCE_DIR}/3rdparty/QtAV/ffmpeg/ffmpeg-4.4-linux-clang-default/lib/amd64)
-    set(FFMPEG_INCLUDE_DIRS ${ffmpeg_dir}/../../include)
+    set(ffmpeg_dir ${CMAKE_SOURCE_DIR}/3rdparty/QtAV/ffmpeg/ffmpeg-4.3-linux-gcc/lib)
+    set(FFMPEG_INCLUDE_DIRS ${ffmpeg_dir}/../include)
   endif()
+
+  target_link_directories(Qt::AV INTERFACE ${ffmpeg_dir})
+  target_link_directories(Qt::AVWidgets INTERFACE ${ffmpeg_dir})
 
   message("QTAV Linux                 = ${ffmpeg_dir}")
   set(ffmpeg_libs)

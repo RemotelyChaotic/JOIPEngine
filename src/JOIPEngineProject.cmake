@@ -874,7 +874,8 @@ macro(JOIPProjectSettings JOIP_PROJECT_NAME)
       #Qt${QT_VERSION_MAJOR}::WidgetsPrivate
       Qt${QT_VERSION_MAJOR}::WebChannel
       Qt${QT_VERSION_MAJOR}::Xml
-      ${QTAVWIDGETS_LIBRARIES}
+      Qt::AV
+      Qt::AVWidgets
       NodeEditor::nodes
       KF5SyntaxHighlighting
       better_enums
@@ -923,7 +924,6 @@ macro(JOIPProjectSettings JOIP_PROJECT_NAME)
       ${Qt${QT_VERSION_MAJOR}Core_PRIVATE_INCLUDE_DIRS}
       ${Qt${QT_VERSION_MAJOR}Gui_PRIVATE_INCLUDE_DIRS}
       ${Qt${QT_VERSION_MAJOR}Widgets_PRIVATE_INCLUDE_DIRS}
-      ${QTAVWIDGETS_INCLUDE_DIRS}
       ${FFMPEG_INCLUDE_DIRS}
       ${NodeEditor_INCLUDE_DIRS}
       ${PhysicsFS_INCLUDE_DIRS}
@@ -965,6 +965,14 @@ macro(JOIPProjectSettings JOIP_PROJECT_NAME)
                       ${win_extra_lib}
                       "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}")
     endforeach()
+  endif()
+
+  #-----------------------------------------------------------------------------------------
+  # Linux stuff
+  #-----------------------------------------------------------------------------------------
+  if (LINUX)
+    set_property(TARGET ${JOIP_PROJECT_NAME}  APPEND_STRING PROPERTY
+      LINK_FLAGS " -Wl,-rpath-link,${ffmpeg_dir}")
   endif()
 
   #-----------------------------------------------------------------------------------------
