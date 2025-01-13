@@ -345,7 +345,7 @@ static QString write_widget(QDomElement w, const QString &parent, const QString 
   return wname;
 }
 
-static void write_action(QDomElement w, const QString &parent, const QString &parent_class)
+static void write_action(QDomElement w, const QString &parent, const QString&)
 {
   QString aname(w.attribute("name"));
 
