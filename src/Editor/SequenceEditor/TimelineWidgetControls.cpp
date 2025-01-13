@@ -12,6 +12,8 @@
 #include <QWidgetAction>
 #include <QTime>
 
+#include <cmath>
+
 CTimelineWidgetControls::CTimelineWidgetControls(QWidget* pParent) :
   QFrame(pParent)
 {

@@ -784,6 +784,7 @@ void CSettingsScreen::on_pMetronomeSFXComboBox_currentIndexChanged(qint32)
 //
 void CSettingsScreen::on_pDominantHandComboBox_currentIndexChanged(qint32 iIndex)
 {
+  Q_UNUSED(iIndex)
   WIDGET_INITIALIZED_GUARD
   assert(nullptr != m_spSettings);
   if (nullptr == m_spSettings) { return; }

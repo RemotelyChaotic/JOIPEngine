@@ -102,11 +102,11 @@ void CModernTutorialStateSwitchHandler::OnStateSwitchImpl(ETutorialState newStat
             ->setRowHidden(val - 1, false);
       }
     } // fallthrough
-    case ETutorialState::eNodePanelAdvanced: // fallthrough
+    case ETutorialState::eNodePanelAdvanced:
       if (ETutorialState::eNodePanelAdvanced == newState._to_integral())
       {
         m_ParentWidget->EditorModel()->SetScriptTypeFilterForNewScripts(".*");
-      }
+      } // fallthrough
     case ETutorialState::eNodePanelDone:
     {
       bool bOk = QMetaObject::invokeMethod(this, "SlotSwitchRightPanel",

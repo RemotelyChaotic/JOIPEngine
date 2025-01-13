@@ -131,6 +131,7 @@ bool CEditorImageCompressionJob::Run(const QVariantList& args)
       {
         for (const auto& [sName, spResource] : m_spProject->m_spResourcesMap)
         {
+          Q_UNUSED(sName)
           QReadLocker resLocker(&spResource->m_rwLock);
           if (IsLocalFile(spResource->m_sPath) && spResource->m_sResourceBundle.isEmpty() &&
               EResourceType::eImage == spResource->m_type._to_integral())

@@ -29,7 +29,7 @@ namespace
 
   //--------------------------------------------------------------------------------------
   //
-  bool CheckEngineNotNull(tEngineType pEngine)
+  [[maybe_unused]] bool CheckEngineNotNull(tEngineType pEngine)
   {
     if (std::holds_alternative<QJSEngine*>(pEngine))
     {

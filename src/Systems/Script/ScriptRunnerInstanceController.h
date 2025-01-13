@@ -60,7 +60,7 @@ class IScriptRunnerInstanceController
 {
 public:
   IScriptRunnerInstanceController() = default;
-  ~IScriptRunnerInstanceController() = default;
+  virtual ~IScriptRunnerInstanceController() = default;
 
   virtual void InterruptExecution() = 0;
   virtual bool IsRunning() const = 0;

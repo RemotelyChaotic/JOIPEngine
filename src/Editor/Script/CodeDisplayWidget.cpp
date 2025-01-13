@@ -245,6 +245,7 @@ void CCodeDisplayWidget::SaveProject()
 //
 void CCodeDisplayWidget::OnActionBarAboutToChange(std::unique_ptr<Ui::CEditorActionBar>* pspUiActionBar)
 {
+  Q_UNUSED(pspUiActionBar)
   m_pspUiActionBar = nullptr;
 }
 

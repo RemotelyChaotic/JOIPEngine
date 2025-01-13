@@ -41,6 +41,7 @@ CScriptRunnerInstanceController::CScriptRunnerInstanceController(
   m_spWorker(spWorkerBase),
   m_pThread(new QThread(this))
 {
+  Q_UNUSED(wpSignalEmitterContext)
   qRegisterMetaType<CScriptRunnerSignalEmiter*>();
 
   connect(m_spWorker.get(), &CScriptRunnerInstanceWorkerBase::HandleScriptFinish,

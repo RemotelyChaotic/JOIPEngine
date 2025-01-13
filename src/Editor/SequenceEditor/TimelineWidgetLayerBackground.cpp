@@ -4,6 +4,8 @@
 #include <QPainter>
 #include <QRadialGradient>
 
+#include <cmath>
+
 CTimelineWidgetLayerBackground::CTimelineWidgetLayerBackground(QWidget* pParent) :
   QFrame{pParent},
   m_instructionInvalidMarker(":/resources/style/img/WarningIcon.png"),

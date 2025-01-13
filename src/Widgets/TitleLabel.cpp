@@ -252,7 +252,7 @@ protected:
   //
   virtual void drawItemText(QPainter* pPainter, const QRect &rect,
       int flags, const QPalette &pal, bool /*enabled*/,
-      const QString &text, QPalette::ColorRole /*textRole*/) const
+      const QString &text, QPalette::ColorRole /*textRole*/) const override
   {
     // draw background to offscreen buffer
     if (m_bDirty)

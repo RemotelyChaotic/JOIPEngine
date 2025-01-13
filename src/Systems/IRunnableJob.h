@@ -46,7 +46,7 @@ private:
 
 typedef std::shared_ptr<IRunnableJob> tspRunnableJob;
 
-Q_DECLARE_INTERFACE(IRunnableJob, "IRunnableJob");
+Q_DECLARE_INTERFACE(IRunnableJob, "IRunnableJob")
 Q_DECLARE_METATYPE(tspRunnableJob)
 
 #endif // IRUNNABLEJOB_H

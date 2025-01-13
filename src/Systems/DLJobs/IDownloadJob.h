@@ -36,7 +36,7 @@ private:
 
 typedef std::shared_ptr<IDownloadJob> tspDownloadJob;
 
-Q_DECLARE_INTERFACE(IDownloadJob, "IDownloadJob");
+Q_DECLARE_INTERFACE(IDownloadJob, "IDownloadJob")
 Q_DECLARE_METATYPE(tspDownloadJob)
 
 #endif // IDOWNLOADJOB_H

@@ -663,7 +663,7 @@ void CEditorProjectSettingsWidget::SlotResourceRemoved(qint32 iProjId, const QSt
 
 //----------------------------------------------------------------------------------------
 //
-void CEditorProjectSettingsWidget::SlotResourceRenamed(qint32 iProjId, const QString& sOldName,
+void CEditorProjectSettingsWidget::SlotResourceRenamed(qint32 iProjId, const QString&,
                                                        const QString& sName)
 {
   WIDGET_INITIALIZED_GUARD

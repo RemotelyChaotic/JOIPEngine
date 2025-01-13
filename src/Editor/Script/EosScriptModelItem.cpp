@@ -363,7 +363,7 @@ void CEosScriptModelItem::SetCheckedWithoutNodeInteraction(bool bValue)
 
 //----------------------------------------------------------------------------------------
 //
-bool CEosScriptModelItem::SetData(qint32 iColumn, qint32 iRole, const QVariant &value)
+bool CEosScriptModelItem::SetData(qint32, qint32, const QVariant&)
 {
   return false;
 }

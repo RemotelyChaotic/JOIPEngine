@@ -16,6 +16,8 @@ CPositionalMenu::~CPositionalMenu() = default;
 //
 void CPositionalMenu::showEvent(QShowEvent* event)
 {
+  Q_UNUSED(event)
+
   QPoint p = this->pos();
   if (m_pos.testFlag(EMenuPopupPosition::eTop))
   {

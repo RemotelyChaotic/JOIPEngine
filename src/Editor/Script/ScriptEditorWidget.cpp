@@ -250,13 +250,13 @@ void CScriptEditorWidget::UpdateArea(EScriptEditorAddonPosition pos,
   switch (pos)
   {
     case EScriptEditorAddonPosition::eLeft:
-      UpdateLeftAreaWidth(iNewBlockCount);
+      UpdateLeftAreaWidth(iNewBlockCount); break;
     case EScriptEditorAddonPosition::eRight:
-      UpdateRightAreaWidth(iNewBlockCount);
+      UpdateRightAreaWidth(iNewBlockCount); break;
     case EScriptEditorAddonPosition::eTop:
-      UpdateTopAreaHeight(iNewBlockCount);
+      UpdateTopAreaHeight(iNewBlockCount); break;
     case EScriptEditorAddonPosition::eBottom:
-      UpdateBottomAreaHeight(iNewBlockCount);
+      UpdateBottomAreaHeight(iNewBlockCount); break;
   }
 }
 
@@ -266,6 +266,7 @@ void CScriptEditorWidget::ResetAddons()
 {
   for (const auto& [pos, vpAddons] : m_vpEditorAddonsMap)
   {
+    Q_UNUSED(pos)
     for (IScriptEditorAddon* pAddon : vpAddons)
     {
       pAddon->Reset();
@@ -448,6 +449,7 @@ void CScriptEditorWidget::SlotExecutionError(QString sException, qint32 iLine, Q
 {
   for (auto [pos, vpAddons] : m_vpEditorAddonsMap)
   {
+    Q_UNUSED(pos)
     for (IScriptEditorAddon* pAddon : vpAddons)
     {
       pAddon->Reset();
@@ -469,6 +471,7 @@ void CScriptEditorWidget::SlotUpdateAllAddons(const QRect& rect, qint32 iDy)
 {
   for (auto [pos, vpAddons] : m_vpEditorAddonsMap)
   {
+    Q_UNUSED(pos)
     for (IScriptEditorAddon* pAddon : vpAddons)
     {
       pAddon->Update(rect, iDy);

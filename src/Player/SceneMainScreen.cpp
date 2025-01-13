@@ -334,6 +334,7 @@ void CSceneMainScreen::on_pQmlWidget_statusChanged(QQuickWidget::Status status)
 void CSceneMainScreen::on_pQmlWidget_sceneGraphError(QQuickWindow::SceneGraphError error,
                                                      const QString &message)
 {
+  Q_UNUSED(error)
   emit SignalExecutionError(tr("Layout: Scene graph error: %1"), 0, QString());
   qWarning() << message;
 }

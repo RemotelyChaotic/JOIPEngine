@@ -23,7 +23,7 @@ qint32 CEditorJobWorker::GenerateNewId()
 
 //----------------------------------------------------------------------------------------
 //
-void CEditorJobWorker::JobFinalizeImpl(tspRunnableJob spJob)
+void CEditorJobWorker::JobFinalizeImpl(tspRunnableJob)
 {
   disconnect(m_finalizeConn);
 }
@@ -71,7 +71,7 @@ void CEditorJobWorker::JobFinishedImpl(qint32 iId, tspRunnableJob spJob)
 
 //----------------------------------------------------------------------------------------
 //
-void CEditorJobWorker::JobPreRunImpl(qint32 iId, tspRunnableJob spJob)
+void CEditorJobWorker::JobPreRunImpl(qint32, tspRunnableJob)
 {
   // connections (will be removed once the object is deleted, so we won't disconnect
   connect(dynamic_cast<QObject*>(m_spCurrentJob.get()), SIGNAL(SignalFinished(qint32)),

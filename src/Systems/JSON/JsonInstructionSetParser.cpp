@@ -200,7 +200,7 @@ protected:
     else if (std::holds_alternative<SRunRetVal<ENextCommandToCall::eFinish>>(vRetVal))
     {
       m_spNextNode = nullptr;
-      return SRunnerRetVal{false, std::get<SRunRetVal<ENextCommandToCall::eFinish>>(vRetVal).m_retVal};
+      return SRunnerRetVal{false, std::get<SRunRetVal<ENextCommandToCall::eFinish>>(vRetVal).m_retVal.m_any};
     }
     else return SRunnerRetVal{NextCommand(ENextCommandToCall::eChild, 0), std::any()};
   }

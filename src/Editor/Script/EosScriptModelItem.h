@@ -14,7 +14,7 @@ BETTER_ENUM(EosScriptModelItem, qint32,
             eRoot            = 0,
             eInstructionSet  = 1,
             eInstruction     = 2,
-            eInstructionChild= 3);
+            eInstructionChild= 3)
 
 namespace eos_item
 {

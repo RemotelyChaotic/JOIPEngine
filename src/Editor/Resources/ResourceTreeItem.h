@@ -10,7 +10,7 @@ BETTER_ENUM(EResourceTreeItemType, qint32,
             eRoot      = 0,
             eCategory  = 1,
             eFolder    = 2,
-            eResource  = 3);
+            eResource  = 3)
 
 namespace resource_item
 {

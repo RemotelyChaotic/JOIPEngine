@@ -534,6 +534,7 @@ void CEosCommandWidgetChoice::on_pTableWidget_itemChanged(QTableWidgetItem* pIte
 //
 void CEosCommandWidgetChoice::SlotColorChanged(const QColor& color)
 {
+  Q_UNUSED(color)
   if (m_bIsInitializing) { return; }
   CColorPicker* pColorPicker = dynamic_cast<CColorPicker*>(sender());
   if (nullptr != pColorPicker)
@@ -600,6 +601,7 @@ CEosCommandWidgetEnd::~CEosCommandWidgetEnd()
 //
 void CEosCommandWidgetEnd::SetProperties(tInstructionMapValue* props)
 {
+  Q_UNUSED(props)
   m_bIsInitializing = true;
 
   m_bIsInitializing = false;
@@ -1244,6 +1246,7 @@ void CEosCommandWidgetSay::on_pAlignComboBox_currentIndexChanged(qint32)
 //
 void CEosCommandWidgetSay::on_pModeComboBox_currentIndexChanged(qint32 iIndex)
 {
+  Q_UNUSED(iIndex)
   if (m_bIsInitializing) { return; }
   SetValue<EArgumentType::eString>(m_pProps, "mode",
                                    m_spUi->pModeComboBox->currentText());

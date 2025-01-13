@@ -232,6 +232,8 @@ void CDeviceButtonOverlay::SlotStopScanning()
 void CDeviceButtonOverlay::OpenContextMenuAt(const QPoint& localPoint,
                                              const QPoint& createPoint)
 {
+  Q_UNUSED(localPoint)
+
   QMenu modelMenu;
   auto* pWidget = new CDeviceSelectorWidget(&modelMenu);
   auto* pAction = new QWidgetAction(&modelMenu);

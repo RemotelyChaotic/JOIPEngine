@@ -24,6 +24,8 @@
 #include <QVBoxLayout>
 #include <QTextBrowser>
 
+#include <cmath>
+
 namespace  {
   const qint32 c_iOffsetOfHelpWindow = 40;
   const qint32 c_iAnimationTime = 1500;
@@ -225,7 +227,7 @@ void CHelpOverlayBackGround::paintEvent(QPaintEvent* pEvt)
   painter.drawEllipse(m_circleOrigin, m_iCircleRadius, m_iCircleRadius);
   painter.restore();
 
-  bool bSomethingSelected = false;
+  [[maybe_unused]] bool bSomethingSelected = false;
   QRect selection;
   QPixmap selectionImage;
 

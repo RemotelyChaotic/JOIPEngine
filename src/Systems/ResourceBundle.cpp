@@ -14,6 +14,7 @@ SResourceBundle::SResourceBundle() :
 {
 }
 SResourceBundle::SResourceBundle(const SResourceBundle& other) :
+  std::enable_shared_from_this<SResourceBundle>(other),
   m_rwLock(QReadWriteLock::Recursive),
   m_spParent(other.m_spParent),
   m_sName(other.m_sName),

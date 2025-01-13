@@ -139,6 +139,7 @@ void CBackgroundWidget::paintEvent(QPaintEvent* /*pEvent*/)
 //
 void CBackgroundWidget::resizeEvent(QResizeEvent* pEvent)
 {
+  Q_UNUSED(pEvent)
   SetBackgroundTexture(m_sBgTexture);
   style()->unpolish(this);
   style()->polish(this);

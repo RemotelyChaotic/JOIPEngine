@@ -70,6 +70,6 @@ protected:
   bool m_bActive;
 };
 
-Q_DECLARE_INTERFACE(CSlidingWidget, "CSlidingWidget");
+Q_DECLARE_INTERFACE(CSlidingWidget, "CSlidingWidget")
 
 #endif // CSLIDINGWIDGET_H

@@ -444,6 +444,8 @@ std::shared_ptr<CScriptRunnerSignalContext> CSequenceRunner::SignalEmmitterConte
 //
 void CSequenceRunner::SlotHandleScriptFinish(const QString& sName, bool bSuccess, const QVariant& sRetVal)
 {
+  Q_UNUSED(sRetVal)
+
   emit SignalRemoveScriptRunner(sName);
 
   if (!bSuccess)

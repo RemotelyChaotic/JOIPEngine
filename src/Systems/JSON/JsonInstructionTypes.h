@@ -11,7 +11,7 @@
 #include <memory>
 #include <type_traits>
 #include <variant>
-
+#include <vector>
 
 BETTER_ENUM(EArgumentType, qint32,
             eBool = QVariant::Bool,
@@ -240,12 +240,18 @@ template<> struct SRunRetVal<ENextCommandToCall::eForkThis>
   ENextCommandToCall     m_type = ENextCommandToCall::eForkThis;
   std::vector<SForkData> m_vForks;
 };
+// needed because of a compiler bug with gcc that causes a conflict in this case
+// https://gcc.gnu.org/bugzilla/show_bug.cgi?id=90415
+struct SRunRetValAnyWrapper
+{
+  SRunRetValAnyWrapper(std::any a) : m_any(a) {}
+  std::any           m_any;
+};
 template<> struct SRunRetVal<ENextCommandToCall::eFinish>
 {
-  SRunRetVal(std::any retVal) : m_retVal(retVal) {}
+  SRunRetVal(SRunRetValAnyWrapper retVal) : m_retVal(retVal) {}
   ENextCommandToCall m_type = ENextCommandToCall::eFinish;
-  std::any           m_retVal;
+  SRunRetValAnyWrapper m_retVal;
 };
-
 
 #endif // JSONINSTRUCTIONTYPES_H

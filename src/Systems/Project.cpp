@@ -27,6 +27,7 @@ SProject::SProject() :
 {
 }
 SProject::SProject(const SProject& other) :
+  std::enable_shared_from_this<SProject>(other),
   SProjectData(other),
   m_rwLock(QReadWriteLock::Recursive),
   m_vsKinks(other.m_vsKinks),

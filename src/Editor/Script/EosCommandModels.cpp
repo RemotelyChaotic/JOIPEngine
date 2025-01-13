@@ -259,6 +259,7 @@ tInstructionMapValue CCommandEosEndModel::DefaultArgs()
 //
 QString CCommandEosEndModel::DisplayName(const tInstructionMapValue& args)
 {
+  Q_UNUSED(args)
   return QString("<b>%1</b>").arg(eos::c_sCommandEnd);
 }
 
@@ -284,6 +285,7 @@ tInstructionMapValue CCommandEosEvalModel::DefaultArgs()
 //
 QString CCommandEosEvalModel::DisplayName(const tInstructionMapValue& args)
 {
+  Q_UNUSED(args)
   return QString("<b>%1</b>: ...").arg(eos::c_sCommandEval);
 }
 
@@ -469,6 +471,7 @@ tInstructionMapValue CCommandEosNoopModel::DefaultArgs()
 //
 QString CCommandEosNoopModel::DisplayName(const tInstructionMapValue& args)
 {
+  Q_UNUSED(args)
   return QString("<b>%1</b>").arg(eos::c_sCommandNoop);
 }
 

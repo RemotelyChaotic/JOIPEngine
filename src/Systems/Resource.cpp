@@ -17,6 +17,7 @@ SResource::SResource(EResourceType type) :
 {}
 
 SResource::SResource(const SResource& other) :
+  std::enable_shared_from_this<SResource>(other),
   SResourceData(other),
   m_rwLock(QReadWriteLock::Recursive),
   m_spParent(other.m_spParent),

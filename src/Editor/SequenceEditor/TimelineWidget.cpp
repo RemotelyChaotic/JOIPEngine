@@ -487,7 +487,7 @@ void CTimelineWidget::AddLayerTo(qint32 index, const tspSequenceLayer& spLayer,
 
   if (0 > index || spCurrentSequence->m_vspLayers.size() < static_cast<size_t>(index)) { return; }
 
-  if (spCurrentSequence->m_vspLayers.size() == index)
+  if (static_cast<qint32>(spCurrentSequence->m_vspLayers.size()) == index)
   {
     spCurrentSequence->m_vspLayers.push_back(spLayer);
   }
@@ -640,7 +640,7 @@ void CTimelineWidget::mouseReleaseEvent(QMouseEvent* pEvent)
 
 //----------------------------------------------------------------------------------------
 //
-void CTimelineWidget::resizeEvent(QResizeEvent* pEvt)
+void CTimelineWidget::resizeEvent(QResizeEvent*)
 {
   QSize s = size();
   if (verticalScrollBar()->isVisible())
@@ -818,7 +818,7 @@ void CTimelineWidget::SlotSelectionColorChanged()
 //
 void CTimelineWidget::SlotTimeGridChanged(qint64 iGrid)
 {
-  ForAllLayers([iGrid](CTimelineWidgetLayer* pLayer, qint32 i) {
+  ForAllLayers([iGrid](CTimelineWidgetLayer* pLayer, qint32 /*i*/) {
     if (nullptr != pLayer)
     {
       pLayer->SetTimeGrid(iGrid);
@@ -909,7 +909,7 @@ QSize CTimelineWidget::HeadersSize() const
 
 //----------------------------------------------------------------------------------------
 //
-QString CTimelineWidget::OpenInsertContextMenuAt(const QPoint& currentAddPoint, const QPoint& createPoint,
+QString CTimelineWidget::OpenInsertContextMenuAt(const QPoint&, const QPoint& createPoint,
                                                  const QString& sLayerType)
 {
   QMenu modelMenu;

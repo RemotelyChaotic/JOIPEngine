@@ -12,7 +12,7 @@
 #include <QApplication>
 #include <QImageReader>
 #include <QtAVWidgets>
-#include <QtAV\QtAV_Global.h>
+#include <QtAV_Global.h>
 #include <QOpenGLContext>
 #if defined(QT_QML_DEBUG)
 #include <QQmlDebuggingEnabler>

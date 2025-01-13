@@ -14,6 +14,7 @@ STag::STag(QString sType, QString sName, QString sDescribtion) :
 }
 
 STag::STag(const STag& other) :
+    std::enable_shared_from_this<STag>(other),
     SLockableTagData(other),
     m_spParent(other.m_spParent),
     m_vsResourceRefs(other.m_vsResourceRefs)

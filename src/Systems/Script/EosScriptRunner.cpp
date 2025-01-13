@@ -32,7 +32,7 @@ public:
   IJsonInstructionBase::tRetVal Call(const tInstructionMapValue& args) override
   {
     Q_UNUSED(args)
-    return SRunRetVal<ENextCommandToCall::eFinish>(SFinishTag());
+    return SRunRetVal<ENextCommandToCall::eFinish>(SRunRetValAnyWrapper{SFinishTag()});
   }
 };
 
@@ -51,7 +51,7 @@ public:
     {
       QString sTarget = std::get<QString>(itTarget);
       sTarget.replace("*", "(.*)");
-      return SRunRetVal<ENextCommandToCall::eFinish>(sTarget);
+      return SRunRetVal<ENextCommandToCall::eFinish>(SRunRetValAnyWrapper{sTarget});
     }
     return SJsonException{"internal Error: No target for goto.", "target", eos::c_sCommandGoto, 0, 0};
   }
@@ -80,7 +80,7 @@ CEosScriptRunnerInstanceController::CEosScriptRunnerInstanceController(
   IScriptRunnerInstanceController(),
   m_spEosRunner(spEosRunner)
 {
-
+  Q_UNUSED(sName)
 }
 CEosScriptRunnerInstanceController::~CEosScriptRunnerInstanceController()
 {}
@@ -298,6 +298,7 @@ std::shared_ptr<IScriptRunnerInstanceController>
 CEosScriptRunner::RunAsync(const QString& sId, const QString& sScript,
                            tspResource spResource)
 {
+  Q_UNUSED(spResource)
   // create runner
   std::shared_ptr<CJsonInstructionSetRunner> spEosRunner =
       m_spEosParser->ParseJson(sScript);

@@ -197,6 +197,7 @@ namespace
 
   std::shared_ptr<SSequenceInstruction> CreatePauseVideoInstruction(const QVariantList& vArgs)
   {
+    Q_UNUSED(vArgs)
     std::shared_ptr<SPauseVideoInstruction> spInstr = std::make_shared<SPauseVideoInstruction>();
     spInstr->m_sInstructionType = sequence::c_sInstructionIdPauseVideo;
     return spInstr;
@@ -204,6 +205,7 @@ namespace
 
   std::shared_ptr<SSequenceInstruction> CreateStopVideoInstruction(const QVariantList& vArgs)
   {
+    Q_UNUSED(vArgs)
     std::shared_ptr<SStopVideoInstruction> spInstr = std::make_shared<SStopVideoInstruction>();
     spInstr->m_sInstructionType = sequence::c_sInstructionIdStopVideo;
     return spInstr;

@@ -206,6 +206,7 @@ void CDeviceSelectorWidget::ShowDevices()
 //
 void CDeviceSelectorWidget::resizeEvent(QResizeEvent* pEvt)
 {
+  Q_UNUSED(pEvt)
   m_pLoadingLabel->move(width()/2-m_pLoadingLabel->width()/2,
                         height()- m_pLoadingLabel->height());
   m_pLoadingLabel->raise();

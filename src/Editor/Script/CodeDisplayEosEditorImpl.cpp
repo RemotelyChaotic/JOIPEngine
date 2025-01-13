@@ -288,6 +288,7 @@ void CCodeDisplayEosEditorImpl::CurrentItemInvalidated()
 void CCodeDisplayEosEditorImpl::SlotItemModelDataChanged(
     const QModelIndex& begin, const QModelIndex& end)
 {
+  Q_UNUSED(end)
   // testing
   //QAbstractItemModelTester test(m_pJsonParserModel,
   //                              QAbstractItemModelTester::FailureReportingMode::Warning);

@@ -12,6 +12,7 @@ CJsonInstructionNodeBuildData::CJsonInstructionNodeBuildData(CJsonInstructionNod
 }
 
 CJsonInstructionNode::CJsonInstructionNode(CJsonInstructionNode& other) :
+  std::enable_shared_from_this<CJsonInstructionNode>(),
   CJsonInstructionNodeBuildData(other),
   // actually useful things
   m_wpCommand(other.m_wpCommand),

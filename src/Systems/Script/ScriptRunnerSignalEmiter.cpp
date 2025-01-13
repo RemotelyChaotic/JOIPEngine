@@ -35,6 +35,7 @@ CScriptRunnerSignalEmiter::CScriptRunnerSignalEmiter() :
 }
 
 CScriptRunnerSignalEmiter::CScriptRunnerSignalEmiter(const CScriptRunnerSignalEmiter& other) :
+  QObject(),
   m_spContext(other.m_spContext)
 {
 }

@@ -182,14 +182,14 @@ void CSceneNodeModelWidget::on_pSceneNameLineEdit_editingFinished()
 
 //----------------------------------------------------------------------------------------
 //
-void CSceneNodeModelWidget::on_pScriptComboBox_currentIndexChanged(qint32 iIdx)
+void CSceneNodeModelWidget::on_pScriptComboBox_currentIndexChanged(qint32)
 {
   emit SignalScriptChanged(m_spUi->pScriptComboBox->currentData().toString());
 }
 
 //----------------------------------------------------------------------------------------
 //
-void CSceneNodeModelWidget::on_pLayoutComboBox_currentIndexChanged(qint32 iIdx)
+void CSceneNodeModelWidget::on_pLayoutComboBox_currentIndexChanged(qint32)
 {
   emit SignalLayoutChanged(m_spUi->pLayoutComboBox->currentData().toString());
 }

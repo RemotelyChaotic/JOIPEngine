@@ -4,7 +4,7 @@
 
 #include <QDebug>
 #include <QEventLoop>
-#include <QJsValue>
+#include <QJSValue>
 #include <QTimer>
 #include <QUuid>
 

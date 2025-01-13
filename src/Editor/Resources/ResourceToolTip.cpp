@@ -353,7 +353,7 @@ QString CResourceToolTipPrivate::GetTipString(const STipData& data,
     {
       sTags += sTagFormated + "<br>";
     }
-    else if (data.spResource->m_vsResourceTags.size()-1 == iCounter)
+    else if (static_cast<qint32>(data.spResource->m_vsResourceTags.size())-1 == iCounter)
     {
       sTags += sTagFormated;
     }
@@ -401,6 +401,7 @@ QT_WARNING_DISABLE_DEPRECATED
       ->findChildren<QLabel*>("qtooltip_label");
 QT_WARNING_POP
 #else
+  Q_UNUSED(pos)
   QList<QLabel*> vpLabels = pW->findChildren<QLabel*>("qtooltip_label");
 #endif
   auto it = std::find_if(vpLabels.begin(), vpLabels.end(), [](QLabel* pLabel) -> bool {

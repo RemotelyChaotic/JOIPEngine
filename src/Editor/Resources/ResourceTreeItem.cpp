@@ -243,7 +243,7 @@ bool CResourceTreeItem::SetData(qint32 iColumn, const QVariant &value)
       {
         return false;
       }
-    }
+    } break;
     case EResourceTreeItemType::eResource:
     {
       auto spDbManager = CApplication::Instance()->System<CDatabaseManager>().lock();

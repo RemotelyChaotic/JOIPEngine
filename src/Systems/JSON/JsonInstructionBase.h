@@ -2,6 +2,7 @@
 #define JSONINSTRUCTIONBASE_H
 
 #include "JsonInstructionSetRunner.h"
+#include "JsonInstructionTypes.h"
 #include <QVariant>
 #include <tuple>
 

@@ -7,7 +7,7 @@
 #include "Systems/Scene.h"
 
 #include <QDebug>
-#include <QJsValue>
+#include <QJSValue>
 
 namespace script
 {
@@ -69,7 +69,7 @@ namespace script
           convertedList << ConvertLuaVariant(v);
         }
         varConverted = convertedList;
-      }
+      } break;
       default:
       {
         varConverted = var;

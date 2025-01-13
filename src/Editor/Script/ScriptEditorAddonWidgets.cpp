@@ -689,6 +689,8 @@ void CFooterArea::Reset()
 //
 void CFooterArea::Update(const QRect& rect, qint32 iDy)
 {
+  Q_UNUSED(rect)
+  Q_UNUSED(iDy)
   update(0, 0, width(), height());
   m_pCodeEditor->UpdateArea(CScriptEditorWidget::eBottom, 0);
 }
@@ -729,6 +731,7 @@ void CFooterArea::ErrorAdded()
   qint32 iErrs = 0;
   qint32 iSize = 0;
   m_pWidgetArea->ForEach([&iErrs, &iSize, this](qint32 iLine, QPointer<QLabel> pLbl) mutable {
+    Q_UNUSED(iLine)
     m_pListView->addItem(pLbl->toolTip());
     iSize += m_pListView->sizeHintForRow(iErrs);
     iErrs++;

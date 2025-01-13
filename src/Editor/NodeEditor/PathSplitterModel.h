@@ -69,7 +69,7 @@ protected:
   virtual void OnProjectSetImpl() {}
   virtual void SlotCustomTransitionChangedImpl(bool, const QString&) {}
   virtual void SlotResourceAddedImpl(const QString&, EResourceType) {}
-  virtual void SlotResourceRenamedImpl(const QString& sOldName, const QString& sName, EResourceType) {}
+  virtual void SlotResourceRenamedImpl(const QString&, const QString&, EResourceType) {}
   virtual void SlotResourceRemovedImpl(const QString&, EResourceType) {}
 
   std::weak_ptr<CSceneTranstitionData>                m_wpInData;

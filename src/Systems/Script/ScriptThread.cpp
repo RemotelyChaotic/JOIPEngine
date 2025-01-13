@@ -204,6 +204,7 @@ void CScriptThread::sleep(qint32 iTimeS, QVariant bSkippable)
 QString CScriptThread::GetResourceName(const QVariant& resource, const QString& sMethod,
                                        bool bStringCanBeId, bool* pbOk)
 {
+  Q_UNUSED(bStringCanBeId)
   QString sError;
   std::optional<QString> optRes =
       script::ParseResourceFromScriptVariant(resource, m_wpDbManager.lock(),

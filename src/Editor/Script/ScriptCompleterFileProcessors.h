@@ -7,7 +7,7 @@ class CScriptCompleterFileProcessorJs : public IScriptCompleterFileProcessor
 {
 public:
   CScriptCompleterFileProcessorJs();
-  ~CScriptCompleterFileProcessorJs();
+  virtual ~CScriptCompleterFileProcessorJs();
 
   bool IsEndOfWordChar(QChar c) const override;
   void ProcessFile(int destRole, QTextStream& data, SCompleterModelData* pOutData) override;
@@ -21,7 +21,7 @@ class CScriptCompleterFileProcessorLua : public IScriptCompleterFileProcessor
 {
 public:
   CScriptCompleterFileProcessorLua();
-  ~CScriptCompleterFileProcessorLua();
+  virtual ~CScriptCompleterFileProcessorLua();
 
   bool IsEndOfWordChar(QChar c) const override;
   void ProcessFile(int destRole, QTextStream& data, SCompleterModelData* pOutData) override;
@@ -35,7 +35,7 @@ class CScriptCompleterFileProcessorQml : public IScriptCompleterFileProcessor
 {
 public:
   CScriptCompleterFileProcessorQml();
-  ~CScriptCompleterFileProcessorQml();
+  virtual ~CScriptCompleterFileProcessorQml();
 
   bool IsEndOfWordChar(QChar c) const override;
   void ProcessFile(int destRole, QTextStream& data, SCompleterModelData* pOutData) override;

@@ -67,6 +67,7 @@ void CProjectDownloader::SlotJobStarted(qint32 iId)
 //
 void CProjectDownloader::JobFinalizeImpl(tspRunnableJob spJob)
 {
+  Q_UNUSED(spJob)
   disconnect(m_finalizeConn);
 }
 
@@ -105,6 +106,8 @@ void CProjectDownloader::JobFinishedImpl(qint32 iId, tspRunnableJob spJob)
 //
 void CProjectDownloader::JobPreRunImpl(qint32 iId, tspRunnableJob spJob)
 {
+  Q_UNUSED(iId)
+  Q_UNUSED(spJob)
   // connections (will be removed once the object is deleted, so we won't disconnect
   connect(dynamic_cast<QObject*>(m_spCurrentJob.get()), SIGNAL(SignalFinished(qint32)),
           this, SLOT(SlotJobFinished(qint32)), Qt::DirectConnection);
@@ -123,6 +126,7 @@ void CProjectDownloader::JobPreRunImpl(qint32 iId, tspRunnableJob spJob)
 //
 void CProjectDownloader::JobPostRunImpl(qint32 iId, bool bOk, tspRunnableJob spJob)
 {
+  Q_UNUSED(iId)
   if (!bOk)
   {
     if (!spJob->WasStopped())

@@ -64,7 +64,7 @@ namespace
   bool IsWindowsHost() { return HostOs() == EHostOsType::eOsTypeWindows; }
   bool IsMacHost() { return HostOs() == EHostOsType::eOsTypeMac; }
 
-  void ShowInGraphicalShell(const QString& sPathIn)
+  [[maybe_unused]] void ShowInGraphicalShell(const QString& sPathIn)
   {
     const QFileInfo fileInfo(sPathIn);
     // Mac, Windows support folder or file.

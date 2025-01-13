@@ -91,7 +91,7 @@ private:
 class CPhysFsFileEngineHandler : public QAbstractFileEngineHandler
 {
 public:
-  QAbstractFileEngine* create(const QString &filename) const;
+  QAbstractFileEngine* create(const QString &filename) const override;
 
   static QStringList SupportedFileTypes();
   static const QString c_sScheme;

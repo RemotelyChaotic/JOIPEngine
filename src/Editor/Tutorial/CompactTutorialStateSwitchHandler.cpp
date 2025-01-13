@@ -121,10 +121,10 @@ void CCompactTutorialStateSwitchHandler::OnStateSwitchImpl(ETutorialState newSta
       assert(bOk);
       Q_UNUSED(bOk);
     } break;
-    case ETutorialState::eNodePanel: // fallthrough
+    case ETutorialState::eNodePanel:
     {
       m_ParentWidget->EditorModel()->SetScriptTypeFilterForNewScripts("^\\*\\.(?!eos$).*$");
-    }
+    } // fallthrough
     case ETutorialState::eNodePanelAdvanced:
     {
       if (ETutorialState::eNodePanelAdvanced == newState._to_integral())

@@ -76,6 +76,7 @@ void CScriptEditorCompleterModel::SetProject(tspProject spProject)
 QModelIndex CScriptEditorCompleterModel::index(int row, int column,
                                                const QModelIndex& parent) const
 {
+  Q_UNUSED(parent)
   if (0 > column || static_cast<qint32>(m_data.m_vsAllData.size()) <= column)
   {
     return QModelIndex();
@@ -96,6 +97,7 @@ QModelIndex CScriptEditorCompleterModel::index(int row, int column,
 //
 QModelIndex CScriptEditorCompleterModel::parent(const QModelIndex& child) const
 {
+  Q_UNUSED(child)
   return QModelIndex();
 }
 

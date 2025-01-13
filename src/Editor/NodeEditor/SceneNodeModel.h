@@ -78,7 +78,7 @@ protected:
   virtual void SlotScriptChangedImpl(const QString&) {}
   virtual void SlotSceneRenamedImpl(const QString&) {}
   virtual void SlotResourceAddedImpl(const QString&, EResourceType) {}
-  virtual void SlotResourceRenamedImpl(const QString& sOldName, const QString& sName, EResourceType) {}
+  virtual void SlotResourceRenamedImpl(const QString&, const QString&, EResourceType) {}
   virtual void SlotResourceRemovedImpl(const QString&, EResourceType) {}
 
   std::weak_ptr<CDatabaseManager>                     m_wpDbManager;

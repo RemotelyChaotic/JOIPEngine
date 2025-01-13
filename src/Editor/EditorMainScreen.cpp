@@ -386,14 +386,15 @@ void CEditorMainScreen::SlotToolsClicked(bool bClick)
 
   qint32 i = 0;
   const auto& toolBoxMap = m_spEditorModel->EditorToolboxes();
-  for (const auto& [sTool, pToolBox] : toolBoxMap)
+  for (const auto& [sName, pToolBox] : toolBoxMap)
   {
+    Q_UNUSED(sName)
     for (const QString& sTool : pToolBox->Tools())
     {
       QPointer<CEditorModel> pModel(m_spEditorModel.get());
       QAction* pAction = new QAction(sTool, &menu);
       connect(pAction, &QAction::triggered, this,
-              [pModel, pToolBoxCopy = pToolBox, sTool](bool bChecked) {
+              [pModel, pToolBoxCopy = pToolBox, sTool](bool) {
         if (nullptr != pModel)
         {
           pToolBoxCopy->ToolTriggered(sTool);
@@ -401,7 +402,7 @@ void CEditorMainScreen::SlotToolsClicked(bool bClick)
       });
       menu.addAction(pAction);
     }
-    if (toolBoxMap.size() - 1 != i)
+    if (static_cast<qint32>(toolBoxMap.size()) - 1 != i)
     {
       menu.addSeparator();
     }

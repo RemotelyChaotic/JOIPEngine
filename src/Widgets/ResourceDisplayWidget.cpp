@@ -16,7 +16,7 @@ BETTER_ENUM(EResourceDisplayType, qint32,
             eLoading = 0,
             eLocalImage = 1,
             eLocalMedia = 2,
-            eError = 3);
+            eError = 3)
 
 //----------------------------------------------------------------------------------------
 //

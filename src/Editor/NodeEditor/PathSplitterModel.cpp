@@ -124,7 +124,7 @@ void CPathSplitterModel::restore(QJsonObject const& p)
   if (!v.isUndefined())
   {
     qint32 iValue = v.toInt();
-    if (-1 < iValue && ESceneTransitionType::_size() > iValue)
+    if (-1 < iValue && static_cast<qint32>(ESceneTransitionType::_size()) > iValue)
     {
       m_transitonType = ESceneTransitionType::_from_integral(iValue);
     }
@@ -166,7 +166,7 @@ void CPathSplitterModel::UndoRestore(QJsonObject const& p)
   if (!v.isUndefined())
   {
     qint32 iValue = v.toInt();
-    if (-1 < iValue && ESceneTransitionType::_size() > iValue)
+    if (-1 < iValue && static_cast<qint32>(ESceneTransitionType::_size()) > iValue)
     {
       m_transitonType = ESceneTransitionType::_from_integral(iValue);
     }

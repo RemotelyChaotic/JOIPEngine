@@ -12,19 +12,19 @@ BETTER_ENUM(EAppState, qint32,
             eSettingsScreen = 2,
             eEditorScreen = 3,
             eCreditsScreen = 4,
-            eDownloadScreen = 5);
+            eDownloadScreen = 5)
 
 BETTER_ENUM(ECoreSystems, qint32,
             eDatabaseManager = 0,
             eProjectDownloader = 1,
             eDeviceManager = 2,
-            eMetronomeManager = 3);
+            eMetronomeManager = 3)
 
 BETTER_ENUM(ELoadState, qint32,
             eUnstarted = 0,
             eLoading   = 1,
             eFinished  = 2,
-            eError     = 3);
+            eError     = 3)
 
 BETTER_ENUM(ETutorialState, qint32,
             eUnstarted = 0,
@@ -39,7 +39,7 @@ BETTER_ENUM(ETutorialState, qint32,
             eNodePanelDone,
             eCodePanel,
             eCodePanelEOS,
-            eFinished  = 63); // maximum value for Better-Enum
+            eFinished  = 63) // maximum value for Better-Enum
 
 BETTER_ENUM(EAnchors, qint32,
             eCenter = 0,
@@ -50,6 +50,6 @@ BETTER_ENUM(EAnchors, qint32,
             eTopLeft = 5,
             eTopRight = 6,
             eBottomLeft = 7,
-            eBottomRight = 8);
+            eBottomRight = 8)
 
 #endif // ENUMS_H

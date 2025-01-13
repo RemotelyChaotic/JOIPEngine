@@ -4,6 +4,8 @@
 #include <QStyleOption>
 #include <QStylePainter>
 
+#include <cmath>
+
 namespace
 {
   const double c_dDegToRad  =  0.01745329251994; // PI/180

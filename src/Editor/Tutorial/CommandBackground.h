@@ -2,6 +2,7 @@
 #define CTUTORIALCOMMANDBACKGROUND_H
 
 #include "Systems/JSON/JsonInstructionBase.h"
+
 #include "EditorTutorialOverlay.h"
 #include <QPointer>
 

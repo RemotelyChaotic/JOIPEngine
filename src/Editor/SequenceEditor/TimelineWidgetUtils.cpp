@@ -4,6 +4,8 @@
 #include <QTime>
 #include <QToolTip>
 
+#include <cmath>
+
 void timeline::PaintUnusedAreaRect(QPainter* pPainter,
                                    qint32 iGridStartX, qint32 iAvailableWidth, qint32 iWidth, qint32 iHeight,
                                    qint64 iWindowStartMs, qint64 iMaximumSizeMs, qint64 iPageLengthMs,

@@ -6,7 +6,7 @@
 
 BETTER_ENUM(ESceneTransitionType, qint32,
             eRandom = 0,
-            eSelection = 1);
+            eSelection = 1)
 
 struct SSceneData
 {

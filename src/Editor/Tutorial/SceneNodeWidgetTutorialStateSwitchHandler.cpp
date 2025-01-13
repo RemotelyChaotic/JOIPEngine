@@ -196,6 +196,7 @@ void CSceneNodeWidgetTutorialStateSwitchHandler::SlotNodeCreated(QtNodes::Node& 
     {
       if (auto pModel = dynamic_cast<CStartNodeModel*>(node.nodeDataModel()))
       {
+        Q_UNUSED(pModel)
         m_bFirstStartNodeCreated = true;
         m_pParentWidget->FlowView()->SetModelHiddenInContextMenu(CEndNodeModel::staticCaption(), false);
         TriggerNextInstruction();
@@ -205,6 +206,7 @@ void CSceneNodeWidgetTutorialStateSwitchHandler::SlotNodeCreated(QtNodes::Node& 
     {
       if (auto pModel = dynamic_cast<CEndNodeModel*>(node.nodeDataModel()))
       {
+        Q_UNUSED(pModel)
         m_bFirstEndNodeCreated = true;
         m_pParentWidget->FlowView()->SetModelHiddenInContextMenu(CSceneNodeModel::staticCaption(), false);
         TriggerNextInstruction();
@@ -214,6 +216,7 @@ void CSceneNodeWidgetTutorialStateSwitchHandler::SlotNodeCreated(QtNodes::Node& 
     {
       if (auto pModel = dynamic_cast<CSceneNodeModel*>(node.nodeDataModel()))
       {
+        Q_UNUSED(pModel)
         m_bFirstDefaultNodeCreated = true;
         TriggerNextInstruction();
       }

@@ -517,7 +517,7 @@ QModelIndex CEosScriptModel::InsertInstructionAtImpl(
   {
     spNodeParent->m_spChildren.insert(spNodeParent->m_spChildren.begin()+iInsertPoint, spNewNode);
   }
-  else if (spNodeParent->m_spChildren.size() == iInsertPoint)
+  else if (static_cast<qint32>(spNodeParent->m_spChildren.size()) == iInsertPoint)
   {
     spNodeParent->m_spChildren.push_back(spNewNode);
   }

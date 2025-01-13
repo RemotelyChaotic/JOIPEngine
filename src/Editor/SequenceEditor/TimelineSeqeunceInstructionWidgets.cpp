@@ -462,6 +462,7 @@ void CTimelineSeqeunceInstructionWidgetStartPattern::AddPatternElement(double dV
 //
 void CTimelineSeqeunceInstructionWidgetStartPattern::AddResourceElement(const QString& sElem)
 {
+  Q_UNUSED(sElem)
   qint32 iIndex = m_spUi->pPatternTableWidget->rowCount();
   QPushButton* pButton = new QPushButton();
   pButton->setObjectName("SearchButton");
