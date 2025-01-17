@@ -36,6 +36,13 @@ void CDialogEditorDelegate::SetCurrentProject(const tspProject& spProject)
 
 //----------------------------------------------------------------------------------------
 //
+void CDialogEditorDelegate::SetReadOnly(bool bReadOnly)
+{
+  m_bReadOnly = bReadOnly;
+}
+
+//----------------------------------------------------------------------------------------
+//
 void CDialogEditorDelegate::SetUndoStack(QPointer<QUndoStack> pUndo)
 {
   m_pUndo = pUndo;
@@ -48,6 +55,7 @@ QWidget* CDialogEditorDelegate::createEditor(QWidget* pParent,
                                              const QModelIndex& index) const
 {
   if (!index.isValid()) { return nullptr; }
+  if (m_bReadOnly) { return nullptr; }
 
   QWidget* pWidget = nullptr;
   switch (index.column())

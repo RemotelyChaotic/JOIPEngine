@@ -18,6 +18,7 @@ public:
   ~CDialogEditorDelegate() override;
 
   void SetCurrentProject(const tspProject& spProject);
+  void SetReadOnly(bool bReadOnly);
   void SetUndoStack(QPointer<QUndoStack> pUndo);
 
   QWidget* createEditor(QWidget* pParent,
@@ -34,6 +35,7 @@ private:
   QPointer<QTreeView>  m_pParent;
   QPointer<CEditorModel> m_pEditorModel;
   QPointer<QUndoStack> m_pUndo;
+  bool m_bReadOnly = false;
 };
 
 #endif // CDIALOGEDITORDELEGATE_H

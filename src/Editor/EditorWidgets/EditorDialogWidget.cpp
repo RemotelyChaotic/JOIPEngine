@@ -142,8 +142,11 @@ void CEditorDialogWidget::LoadProject(tspProject spCurrentProject)
 {
   m_spCurrentProject = spCurrentProject;
 
+  bool bReadOnly = EditorModel()->IsReadOnly();
+
   auto pDelegate = dynamic_cast<CDialogEditorDelegate*>(m_spUi->pTreeView->itemDelegate());
   pDelegate->SetCurrentProject(m_spCurrentProject);
+  pDelegate->SetReadOnly(bReadOnly);
 
   m_spPropertiesOverlay->LoadProject(spCurrentProject);
   m_spTagOverlay->SetProject(spCurrentProject);
