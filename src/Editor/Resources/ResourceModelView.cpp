@@ -22,6 +22,7 @@
 
 #include <QClipboard>
 #include <QContextMenuEvent>
+#include <QDesktopServices>
 #include <QHelpEvent>
 #include <QHostInfo>
 #include <QItemSelectionModel>
@@ -93,7 +94,7 @@ namespace
     }
     else
     {
-      // we cannot select a file here, because no file browser really supports it...
+      QDesktopServices::openUrl(QUrl::fromLocalFile(fileInfo.isDir() ? fileInfo.absoluteFilePath() : fileInfo.absolutePath()));
     }
   }
 }
@@ -457,7 +458,7 @@ void CResourceModelView::ShowContextMenu(CResourceTreeItemModel* pModel, const Q
 
       menu.addSeparator();
 
-#if defined(Q_OS_WIN)
+#if defined(Q_OS_WIN) || defined(Q_OS_LINUX)
       pAction = new QAction("Show in Explorer", &menu);
       connect(pAction, &QAction::triggered, pModel, [idx]() {
         CResourceTreeItem* item = static_cast<CResourceTreeItem*>(idx.internalPointer());

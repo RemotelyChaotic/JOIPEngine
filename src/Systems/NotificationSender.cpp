@@ -68,7 +68,7 @@ void CNotificationSender::SlotSendNotification(const QString& sTitle, const QStr
                                                bool bExternalOnly)
 {
   using namespace std::chrono_literals;
-  const auto showTime = 5s;
+  [[maybe_unused]] const auto showTime = 5s;
 
   if (!m_spSettings->PushNotifications())
   {

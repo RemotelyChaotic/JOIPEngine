@@ -912,6 +912,8 @@ QString CSettings::Platform() const
   return "Android";
 #elif defined(Q_OS_WINDOWS)
   return "Windows";
+#elif defined(Q_OS_LINUX)
+  return "Linux";
 #else
   return QString();
 #endif

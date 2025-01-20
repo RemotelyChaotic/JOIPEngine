@@ -210,6 +210,19 @@ namespace
 #elif defined(Q_OS_ANDROID)
     auto activity = GetAndroidActivity();
     iRet = IsAppRunning(activity, sProcess) ? 0 : -1;
+#elif defined(Q_OS_LINUX) && !defined(Q_OS_ANDROID)
+    constexpr size_t c_iBuffSize = 512;
+    char buf[c_iBuffSize];
+    const QString sCommand = QString("pidof -s %1").arg(sProcess);
+    FILE *cmd_pipe = popen(sCommand.toStdString().c_str(), "r");
+
+    char* sRet = fgets(buf, c_iBuffSize, cmd_pipe);
+    Q_UNUSED(sRet)
+    pid_t pid = strtoul(buf, NULL, 10);
+
+    pclose( cmd_pipe );
+
+    iRet = static_cast<qint32>(pid);
 #endif
 
     return iRet;
