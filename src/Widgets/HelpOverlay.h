@@ -73,6 +73,7 @@ private:
 class CHelpOverlay : public COverlayBase
 {
   Q_OBJECT
+  Q_PROPERTY(QColor linkColor READ LinkColor WRITE SetLinkColor NOTIFY SignalLinkColorChanged)
   friend class CHelpOverlayBackGround;
 
 public:
@@ -81,6 +82,9 @@ public:
 
   static QPointer<CHelpOverlay> Instance();
 
+  QColor LinkColor() const;
+  void SetLinkColor(const QColor& col);
+
 public slots:
   void Climb() override;
   void Hide() override;
@@ -88,6 +92,7 @@ public slots:
   void Show(const QPoint& animationOrigin, QWidget* pRootToSearch);
 
 signals:
+  void SignalLinkColorChanged();
   void SignalOverlayOpened();
   void SignalOverlayClosed();
 
@@ -123,6 +128,7 @@ private:
   QPointer<CTextEditZoomEnabler>    m_pZoomEnabler;
   QPointer<CHelpButtonOverlay>      m_pHelpButton;
   QPointer<CHelpOverlayBackGround>  m_pBackground;
+  QColor                            m_linkColor;
 };
 
 //----------------------------------------------------------------------------------------

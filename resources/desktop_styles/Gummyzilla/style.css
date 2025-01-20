@@ -1911,3 +1911,7 @@ CResourceModelView {
 CDeviceSelectorWidget {
   qproperty-selectionIcon: url(ui/ButtonPlug.png);
 }
+
+CHelpOverlay {
+  qproperty-linkColor: rgb(27, 188, 157);
+}

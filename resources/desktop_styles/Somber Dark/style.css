@@ -900,7 +900,7 @@ QPushButton#ErrorPushButton {
   max-width: 18px;
   max-height: 18px;
   qproperty-iconSize: 18px;
-  
+
   border-image: url(ui/IconBg.svg) 0 0 0 0 stretch stretch;
   border-top: 0 transparent;
   border-bottom: 0 transparent;
@@ -1256,7 +1256,7 @@ CEditorSearchBar>QPushButton {
   max-width: 24px;
   max-height: 24px;
   qproperty-iconSize: 24px;
-  
+
   border-image: url(ui/IconBg.svg) 0 0 0 0 stretch stretch;
   border-top: 0 transparent;
   border-bottom: 0 transparent;
@@ -2129,4 +2129,8 @@ CResourceModelView {
 
 CDeviceSelectorWidget {
   qproperty-selectionIcon: url(ui/ButtonPlug.png);
+}
+
+CHelpOverlay {
+  qproperty-linkColor: rgb(100, 40, 183);
 }

@@ -850,11 +850,11 @@ QScrollArea > QWidget > QWidget
 {
   background: transparent;
 }
-QScrollArea > QWidget > QScrollBar 
-{ 
+QScrollArea > QWidget > QScrollBar
+{
   background: palette(base);
 }
-QScrollArea > QWidget > QScrollBar 
+QScrollArea > QWidget > QScrollBar
 {
   background: palette(base);
 }
@@ -1279,7 +1279,7 @@ CTimelineWidgetControls
   background-color: rgb(19, 28, 40);
   border: 1px solid rgb(52, 69, 97);
   border-radius: 0px;
-  
+
   qproperty-cursorColor: white;
 }
 
@@ -1292,10 +1292,10 @@ CTimelineWidgetLayer {
   background-color: rgb(36, 52, 77);
   border: 1px solid rgb(52, 69, 97);
   border-radius: 0px;
-  
+
   min-height: 70;
   max-height: 70;
-  
+
   qproperty-selectionColor: white;
   qproperty-timelineBackgroundColor: rgb(19, 28, 40);
 }
@@ -1304,7 +1304,7 @@ CTimelineWidgetLayerBackground {
   qproperty-iconWidth: 16;
   qproperty-iconHeight: 16;
   qproperty-instructionConnectorColor: white;
-  
+
   qproperty-instructionMarker: url(ui/InstructionIcon.png);
   qproperty-instructionMarkerOpenLeft: url(ui/InstructionIconOpen.png);
   qproperty-instructionMarkerOpenRight: url(ui/InstructionIconClosed.png);
@@ -1390,4 +1390,8 @@ CResourceModelView {
 
 CDeviceSelectorWidget {
   qproperty-selectionIcon: url(ui/ButtonPlug.png);
+}
+
+CHelpOverlay {
+  qproperty-linkColor: rgb(66, 129, 210);
 }

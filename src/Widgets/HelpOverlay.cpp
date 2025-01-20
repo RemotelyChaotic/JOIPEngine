@@ -318,7 +318,8 @@ CHelpOverlay::CHelpOverlay(QPointer<CHelpButtonOverlay> pHelpButton, QWidget* pP
   m_spSettings(CApplication::Instance()->Settings()),
   m_wpHelpFactory(CApplication::Instance()->System<CHelpFactory>()),
   m_pHighlightedSearchableEdit(nullptr),
-  m_pHelpButton(pHelpButton)
+  m_pHelpButton(pHelpButton),
+  m_linkColor(Qt::blue)
 {
   setAttribute(Qt::WA_TranslucentBackground);
 
@@ -354,6 +355,8 @@ CHelpOverlay::CHelpOverlay(QPointer<CHelpButtonOverlay> pHelpButton, QWidget* pP
   connect(m_spSettings.get(), &CSettings::keyBindingsChanged,
           this, &CHelpOverlay::SlotKeyBindingsChanged);
 
+  SetLinkColor(Qt::red);
+
   SlotKeyBindingsChanged();
 }
 
@@ -367,6 +370,26 @@ CHelpOverlay::~CHelpOverlay()
 QPointer<CHelpOverlay> CHelpOverlay::Instance()
 {
   return m_pHelpOverlay;
+}
+
+//----------------------------------------------------------------------------------------
+//
+QColor CHelpOverlay::LinkColor() const
+{
+  return m_linkColor;
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CHelpOverlay::SetLinkColor(const QColor& col)
+{
+  if (m_linkColor != col)
+  {
+    m_linkColor = col;
+    QString sheet = QString::fromLatin1("a { text-decoration: underline; color: %1 }").arg(m_linkColor.name());
+    m_spUi->pHtmlBrowser->document()->setDefaultStyleSheet(sheet);
+    emit SignalLinkColorChanged();
+  }
 }
 
 //----------------------------------------------------------------------------------------
