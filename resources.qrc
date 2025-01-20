@@ -308,6 +308,9 @@
         <file>resources/help/settings/metdefcommand_setting_help.html</file>
         <file>resources/help/settings/timeouttextboxhide_setting_help.html</file>
         <file>resources/help/settings/metronomesize_setting_help.html</file>
+        <file>resources/help/player/images/MediaIcon.svg</file>
+        <file>resources/help/player/images/WarningIcon.svg</file>
+        <file>resources/help/player/images/WebIcon.svg</file>
     </qresource>
     <qresource prefix="/qml">
         <file>resources/qml/JoipEngine/EmptyDummy.qml</file>

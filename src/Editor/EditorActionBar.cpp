@@ -262,9 +262,9 @@ void CEditorActionBar::Initialize()
     m_spUi->SequenceProperties->setProperty(helpOverlay::c_sHelpPagePropertyName, c_sEditSeqHelpId);
     wpHelpFactory->RegisterHelp(c_sEditSeqHelpId, ":/resources/help/editor/sequence/editsequence_button_help.html");
     m_spUi->AddSequenceElement->setProperty(helpOverlay::c_sHelpPagePropertyName, c_sAddSeqElemHelpId);
-    wpHelpFactory->RegisterHelp(c_sAddSeqElemHelpId, ":/resources/help/editor/add_sequenceelem_button_help.html");
+    wpHelpFactory->RegisterHelp(c_sAddSeqElemHelpId, ":/resources/help/editor/sequence/add_sequenceelem_button_help.html");
     m_spUi->RemoveSelectedSequenceElements->setProperty(helpOverlay::c_sHelpPagePropertyName, c_sRemoveSeqElemsHelpId);
-    wpHelpFactory->RegisterHelp(c_sRemoveSeqElemsHelpId, ":/resources/help/editor/remove_sequenceelem_button_help.html");
+    wpHelpFactory->RegisterHelp(c_sRemoveSeqElemsHelpId, ":/resources/help/editor/sequence/remove_sequenceelem_button_help.html");
     m_spUi->AddSequenceLayer->setProperty(helpOverlay::c_sHelpPagePropertyName, c_sAddSeqLayerHelpId);
     wpHelpFactory->RegisterHelp(c_sAddSeqLayerHelpId, ":/resources/help/editor/sequence/add_sequencelayer_button_help.html");
     m_spUi->RemoveSelectedSequenceLayer->setProperty(helpOverlay::c_sHelpPagePropertyName, c_sRemoveSeqLayerHelpId);

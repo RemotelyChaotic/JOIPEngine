@@ -70,7 +70,7 @@ namespace
     if (nullptr != wpHelpFactory)
     {
       pRoot->setProperty(helpOverlay::c_sHelpPagePropertyName, c_sIntifacePortSettingHelpId);
-      wpHelpFactory->RegisterHelp(c_sIntifacePortSettingHelpId, ":/devices/resources/help/settings/intiface_port_setting_help.html");
+      wpHelpFactory->RegisterHelp(c_sIntifacePortSettingHelpId, ":/devices/resources/help/settings/initface_port_setting_help.html");
     }
 
     return pRoot;
@@ -121,7 +121,7 @@ namespace
     if (nullptr != wpHelpFactory)
     {
       pRoot->setProperty(helpOverlay::c_sHelpPagePropertyName, c_sIntifaceInstallSettingHelpId);
-      wpHelpFactory->RegisterHelp(c_sIntifaceInstallSettingHelpId, ":/devices/resources/help/settings/intiface_install_setting_help.html");
+      wpHelpFactory->RegisterHelp(c_sIntifaceInstallSettingHelpId, ":/devices/resources/help/settings/initface_install_setting_help.html");
     }
 
     return pRoot;
