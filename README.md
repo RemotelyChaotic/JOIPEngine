@@ -32,6 +32,12 @@ cmake -GNinja -DCMAKE_BUILD_TYPE=RelWithDebInfo -DQTDIR=C:\Qt\5.14.2\msvc2017 sr
 cmake --build . --target install
 ```
 
+### Running and Debugging in QtCreator
+On Linux make sure to add your Qt-path and the ffmpeg path to your run environement LD_LIBRARY_PATH:
+```
+LD_LIBRARY_PATH=<path to Qt>/Qt5.14.2/5.14.2/gcc_64/lib:<path to engine>/JOIPEngine/3rdparty/QtAV/ffmpeg/ffmpeg-4.3-linux-gcc/lib
+```
+
 #### Deploying
 Install creates a directory in your build directory called deploy.
 

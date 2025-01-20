@@ -67,18 +67,26 @@ set(PROJECT_VERSION ${${PROJECT_NAME}_VERSION})
 get_target_property(OUTPUT_BASENAME ${PROJECT_NAME} OUTPUT_NAME)
 set(OUTPUT_FILENAME "$<TARGET_FILE_NAME:${PROJECT_NAME}>")
 
-target_sources(${PROJECT_NAME}
-  PRIVATE
-  "${CMAKE_SOURCE_DIR}/version.cpp"
-  "${CMAKE_SOURCE_DIR}/version.h.in"
-  "${CMAKE_SOURCE_DIR}/version_win.rc.in"
-  "${PROJECT_BINARY_DIR}/version_win.rc"
-  )
+if (WIN32)
+  target_sources(${PROJECT_NAME}
+    PRIVATE
+      "${CMAKE_SOURCE_DIR}/version.cpp"
+      "${CMAKE_SOURCE_DIR}/version.h.in"
+      "${CMAKE_SOURCE_DIR}/version_win.rc.in"
+      "${PROJECT_BINARY_DIR}/version_win.rc"
+    )
 
-configure_file(
-  "${CMAKE_SOURCE_DIR}/version_win.rc.in"
-  "${PROJECT_BINARY_DIR}/version_win.rc"
-)
+    configure_file(
+      "${CMAKE_SOURCE_DIR}/version_win.rc.in"
+      "${PROJECT_BINARY_DIR}/version_win.rc"
+    )
+else()
+  target_sources(${PROJECT_NAME}
+    PRIVATE
+      "${CMAKE_SOURCE_DIR}/version.cpp"
+      "${CMAKE_SOURCE_DIR}/version.h.in"
+    )
+endif()
 
 configure_file_generate(
   "${CMAKE_SOURCE_DIR}/version.h.in"
