@@ -42,14 +42,14 @@
     <p>
       <ul>
         <li><b>Entry Point</b>: The start of a <a href="qrc:/resources/help/project/joi_project_help.html">JOI-Project</a>
-        in the player is allways an "Entry Point" node. There must allways be exactly one "Entry Point" node in a Project, otherwise
+        in the player is always an "Entry Point" node. There must always be exactly one "Entry Point" node in a Project, otherwise
         the behavior is undefined and the Project can start at any "Entry Point" node.<br>This is not a scene, and no script
         is associated with an "Entry Point" node.<br></li>
 
         <li><b>Exit Point</b>: The end of a <a href="qrc:/resources/help/project/joi_project_help.html">JOI-Project</a>
-        in the player is allways an "Exit Point" node. There's no limit on the number of
+        in the player is always an "Exit Point" node. There's no limit on the number of
         "Exit Point" nodes per Project. One thing to consider is:
-        every path in the project should allways eventually lead to an "Exit Point".<br>
+        every path in the project should always eventually lead to an "Exit Point".<br>
         This is not a scene, and no script is associated with an "Exit Point" node.<br></li>
 
         <li><b>Scene</b>: Scene nodes represent logical units, that contain a set of instructions
@@ -69,7 +69,7 @@
         mode, a custom transition can be used if needed. This transition uses a
         <a href="qrc:/resources/help/layout/layout_help.html">Layout Resource</a> to display the selection UI.
         To create a new transition from a template, click the button next to the Resource selector.<br>
-        "Path Splitter" and "Path Merger" nodes can be combined and chained freely to cerate more path alternatives and
+        "Path Splitter" and "Path Merger" nodes can be combined and chained freely to create more path alternatives and
         a mix between <i>random</i> and <i>selectable</i> flow.
         Any empty connectors will be ignored during playing and you do not need to worry about them.<br>
         The four line edits are for the user visible path names if the node is of type <i>selectable</i>.
@@ -79,7 +79,7 @@
 
         <li><b>Path Merger</b>: These nodes merge the flow of a project from up to four
         possible paths.<br>
-        "Path Splitter" and "Path Merger" nodes can be combined and chained freely to cerate more path alternatives and
+        "Path Splitter" and "Path Merger" nodes can be combined and chained freely to create more path alternatives and
         a mix between <i>random</i> and <i>selectable</i> flow.
         Any empty connectors will be ignored during playing and you do not need to worry about them.<br></li>
       </tr>
@@ -93,7 +93,7 @@
 
     <p>Scene nodes are linked together by paths, splitters and mergers.
     The entry point of a <a href="qrc:/resources/help/project/joi_project_help.html">JOI-Project</a>
-    is allways an "Entry Point" node and the Project ends with an "Exit Point" node.
+    is always an "Entry Point" node and the Project ends with an "Exit Point" node.
     "Scenes" are the scripted part of a project and "Path Splitters" and "Path Mergers" link together other nodes.</p>
 
     <br>

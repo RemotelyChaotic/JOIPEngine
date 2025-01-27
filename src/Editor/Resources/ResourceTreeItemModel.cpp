@@ -64,7 +64,7 @@ void CResourceTreeItemModel::InitializeModel(tspProject spProject)
       {
         locker.unlock();
         sPathParts = ResourceUrlToAbsolutePath(it->second).split("/");
-        sPathParts.removeAt(0); // first element is allways the scheme
+        sPathParts.removeAt(0); // first element is always the scheme
         locker.relock();
       }
       else
@@ -620,7 +620,7 @@ void CResourceTreeItemModel::SlotResourceAdded(qint32 iProjId, const QString& sN
       if (IsLocalFile(sPath))
       {
         sPathParts = ResourceUrlToAbsolutePath(spResource).split("/");
-        sPathParts.removeAt(0); // first element is allways the scheme
+        sPathParts.removeAt(0); // first element is always the scheme
       }
       else
       {

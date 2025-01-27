@@ -226,7 +226,7 @@ Rectangle {
     }
 
     PlayerEventCommunicator {
-        id: eventReciever;
+        id: eventReceiver;
     }
 }
 )";

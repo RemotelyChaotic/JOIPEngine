@@ -16,7 +16,7 @@ KDE syntax-highlighting (https://github.com/KDE/syntax-highlighting)
 Libzip by Dieter Baron and Thomas Klausner (https://libzip.org/)
 Lua 5.4.4 (https://www.lua.org/)
 Lua JSON Library by "Tyler Neylon" (https://gist.github.com/tylerneylon/59f4bcf316be525b30ab)
-QButtplug by "RemotlyChaotic" (https://github.com/RemotelyChaotic/QButtplug)
+QButtplug by "RemotelyChaotic" (https://github.com/RemotelyChaotic/QButtplug)
 QtLua (http://www.nongnu.org/libqtlua/)
 QtLua modifications by "Li, Kwue-Ron" (https://github.com/likwueron/libqtlua_fork)
 MRichTextEditor by "Anchakor" (https://github.com/Anchakor/MRichTextEditor)
@@ -29,17 +29,17 @@ WinToast by "mohabouje" (https://github.com/mohabouje/WinToast)
 zlib by "Greg Roelofs" and maintained by "Mark Adler" (https://www.zlib.net/)
 
 Software Design & Programming:
-"RemotlyChaotic"
+"RemotelyChaotic"
 
 Custom Fonts:
 Equestria by "Pixel Sagas"
 Cloister Black Font by Dieter Steffmann (https://www.dafont.com/)
 
 Icons:
-By "RemotlyChaotic"
-Save Icon made by "Picol" (www.flaticon.com) edited by RemotlyChaotic
-Equestria map by "Gameloft" (https://derpibooru.org/1553160) edited by cheezedoodle96 and RemotlyChaotic
-Pony Icon made with MLP Pony Creator by "generalzoi" (https://www.deviantart.com/generalzoi) edited by RemotlyChaotic
+By "RemotelyChaotic"
+Save Icon made by "Picol" (www.flaticon.com) edited by RemotelyChaotic
+Equestria map by "Gameloft" (https://derpibooru.org/1553160) edited by cheezedoodle96 and RemotelyChaotic
+Pony Icon made with MLP Pony Creator by "generalzoi" (https://www.deviantart.com/generalzoi) edited by RemotelyChaotic
 
 Spinner:
 "Amaan Cheval" 2019 (https://codepen.io/AmaanC/pen/GJqPdX)

@@ -150,7 +150,7 @@ void CEditorTutorialOverlay::SetClickFilterWidgets(const QStringList& vsWidgetNa
 
 //----------------------------------------------------------------------------------------
 //
-void CEditorTutorialOverlay::SetHighlightedWidgets(const QStringList& vsWidgetNames, bool bAllwaysOnTop)
+void CEditorTutorialOverlay::SetHighlightedWidgets(const QStringList& vsWidgetNames, bool bAlwaysOnTop)
 {
   m_updateTimer.stop();
   m_highlightedImages.clear();
@@ -174,7 +174,7 @@ void CEditorTutorialOverlay::SetHighlightedWidgets(const QStringList& vsWidgetNa
 
   repaint();
 
-  if (bAllwaysOnTop)
+  if (bAlwaysOnTop)
   {
     m_updateTimer.start();
   }

@@ -686,7 +686,7 @@ void CSceneMainScreen::InitQmlMain()
 
   QQmlEngine::setObjectOwnership(pEngine, QQmlEngine::CppOwnership);
 
-  // engine will allways take owership of this object
+  // engine will always take owership of this object
   CDatabaseImageProvider* pProvider = new CDatabaseImageProvider(m_wpDbManager);
   pEngine->addImageProvider("DataBaseImageProivider", pProvider);
 

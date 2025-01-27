@@ -790,7 +790,7 @@
               </sizepolicy>
              </property>
              <property name="toolTip">
-              <string>Add code to controll devices</string>
+              <string>Add code to control devices</string>
              </property>
              <property name="text">
               <string/>
@@ -1203,7 +1203,7 @@
          </sizepolicy>
         </property>
         <property name="toolTip">
-         <string>Remove the currently seleted Sequence Elements</string>
+         <string>Remove the currently selected Sequence Elements</string>
         </property>
         <property name="text">
          <string/>

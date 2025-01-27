@@ -133,7 +133,7 @@ void CSceneScreen::on_pOpenExistingProjectButton_clicked()
       msgBox.setInformativeText("The JOIP-Project Player was developped with one-handed use in mind.\n"
                                 "Please select the hand, you will be using this\n"
                                 "application with predominantly, to configure it properly.\n"
-                                "(You can allways change this in the settings.)");
+                                "(You can always change this in the settings.)");
       auto pLeft = new QPushButton("Left");
       auto pRight = new QPushButton("Right");
       msgBox.addButton(pLeft, QMessageBox::ApplyRole);

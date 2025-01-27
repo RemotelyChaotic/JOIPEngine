@@ -410,9 +410,9 @@ void CIntifaceEngineClientWrapper::ConnectSignals()
           []() {
     qDebug() << "Intiface Client Scanning finished";
   });
-  QObject::connect(m_spClient.get(), &QButtplugClient::errorRecieved, m_spClient.get(),
+  QObject::connect(m_spClient.get(), &QButtplugClient::errorReceived, m_spClient.get(),
           [](QtButtplug::Error error) {
-    qDebug() << "Intiface Client error recieved:" << QButtplugClient::errorString(error);
+    qDebug() << "Intiface Client error receive:" << QButtplugClient::errorString(error);
   });
   QObject::connect(m_spClient.get(), &QButtplugClient::deviceAdded, m_spClient.get(),
           [this](quint32 iId, QButtplugClientDevice device) {

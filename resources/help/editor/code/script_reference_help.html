@@ -61,7 +61,7 @@
 
     <p>This object is automatically registered by the JOIP-Engine on loading a
     <a href="qrc:/resources/help/project/joi_project_help.html">JOI-Project</a> but
-    can also be placed in the <a href="qrc:/resources/help/layout/layout_help.html">Layout</a> manually. The default object is allways registered
+    can also be placed in the <a href="qrc:/resources/help/layout/layout_help.html">Layout</a> manually. The default object is always registered
     under the name <i>background</i> and spans the entire background. It only has a few callable
     functions:<br>
       <ul>
@@ -288,10 +288,10 @@
         The Resource input can be the name of a Resource, a Resource object obtained from the
         current Scene object of the custom id of a Sound Resource.<br>
         <i>Example Usage (JS):</i><br>
-        mediaPlayer.seekMedia(10); // skips the curently playing movie to frame 10 <br>
+        mediaPlayer.seekMedia(10); // skips the currently playing movie to frame 10 <br>
         mediaPlayer.seekMedia("mySound", 10); // skips "mySound" to frame 10<br>
         <i>Example Usage (Lua):</i><br>
-        mediaPlayer.seekMedia(10); -- skips the curently playing movie to frame 10 <br>
+        mediaPlayer.seekMedia(10); -- skips the currently playing movie to frame 10 <br>
         mediaPlayer.seekMedia('mySound', 10); -- skips "mySound" to frame 10<br>
         <br></li>
 
@@ -304,11 +304,11 @@
         <br></li>
 
         <li><b>seekVideo ( int ):</b><br>
-        Does the same as <i>seekMedia</i> but only for the curently playing <i>Movie</i> type Resource.<br>
+        Does the same as <i>seekMedia</i> but only for the currently playing <i>Movie</i> type Resource.<br>
         <i>Example Usage (JS):</i><br>
-        mediaPlayer.seekMedia(10); // skips the curently playing movie to frame 10<br>
+        mediaPlayer.seekMedia(10); // skips the currently playing movie to frame 10<br>
         <i>Example Usage (Lua):</i><br>
-        mediaPlayer:seekMedia(10); -- skips the curently playing movie to frame 10<br>
+        mediaPlayer:seekMedia(10); -- skips the currently playing movie to frame 10<br>
         <br></li>
 
         <li><b>setVolume ( [ string | Resource ], double ):</b><br>
@@ -488,7 +488,7 @@
     <br>
 
     <p>This object is registered by the JOIP-Engine if it is present in the current <a href="qrc:/resources/help/layout/layout_help.html">Layout</a>.
-    This is the main way to display text or recieve player input.<br>
+    This is the main way to display text or receive player input.<br>
       <ul>
         <li><b>setBackgroundColors ( string[] | int[][3 | 4] ):</b><br>
         As the name implies, this will set the background color of elements in the text box.
@@ -513,7 +513,7 @@
         This will set the text alignment of texts resulting from <i>showText</i> calls in the text box.
         Once set, all future <i>showText</i> calls will display text with the set alignment.
         The given argument needs to be one of the enum values: <i>TextAlignment.AlignLeft</i>,
-        <i>TextAlignment.AlignRight</i>, <i>TextAlignment.AlignCenter</i> or their coresponding nummerical
+        <i>TextAlignment.AlignRight</i>, <i>TextAlignment.AlignCenter</i> or their corresponding nummerical
         values (<i>1</i>, <i>2</i>, <i>4</i> respectively).<br>
         Changing the alignment will change the position of portraits set by <i>setTextPortrait</i>.<br>
         This will <b>not</b> influence calls to <i>showButtonPrompts</i> or <i>showInput</i>.<br>
@@ -600,7 +600,7 @@
         <li><b>showText ( string [, double [, bool ] ] ):</b><br>
         Shows text. The input string will be used for the text content and the first colors
         set by setBackgroundColors and setTextColors will be used for
-        text and background coloring. It is allways possible to use HTML 3.2 tags in text.
+        text and background coloring. It is always possible to use HTML 3.2 tags in text.
         If you need more, you can surround the text with &lt;html&gt;...&lt;/html&gt; to
         use a subset of html HTML 4 tags in the text (see
         https://doc.qt.io/qt-5/richtext-html-subset.html for the supported subset). This mode can also
@@ -738,7 +738,7 @@
         This will set the icon alignment of icons for notifications resulting from <i>show</i> calls.
         Once set, all future <i>show</i> calls will display the icon of the notification with the set alignment.
         The given argument needs to be one of the enum values: <i>IconAlignment.AlignLeft</i>,
-        <i>IconAlignment.AlignRight</i> or their coresponding nummerical
+        <i>IconAlignment.AlignRight</i> or their corresponding nummerical
         values (<i>1</i>, <i>2</i> respectively).<br>
         Changing the alignment will change the position of portraits set by <i>setPortrait</i> an the position
         of the timer set by <i>show</i>.<br>
@@ -1149,8 +1149,8 @@
         This property lets you read the Project's folder name.<br>
         <br></li>
 
-        <li><b>describtion: string:</b><br>
-        This property lets you read the Project's describtion.<br>
+        <li><b>description: string:</b><br>
+        This property lets you read the Project's description.<br>
         <br></li>
 
         <li><b>titleCard: string:</b><br>
@@ -1314,16 +1314,16 @@
         but planned for future versions.</li>
 
         <li><b>numResources (  ): int:</b><br>
-        Returns the number of Resources in the project. Currently unused and will allways return 0.<br>
+        Returns the number of Resources in the project. Currently unused and will always return 0.<br>
         <br></li>
 
         <li><b>resources (  ): string[]:</b><br>
-        Returns all Resource names. Currently unused and will allways return an empty list.<br>
+        Returns all Resource names. Currently unused and will always return an empty list.<br>
         <br></li>
 
         <li><b>resource ( string name ): Resource:</b><br>
         Returns a Resource object with the name <i>name</i>.
-        Currently unused and will allways return <i>undefined</i>.<br>
+        Currently unused and will always return <i>undefined</i>.<br>
         <br></li>
 
         <li><b>project (  ): Project:</b><br>
@@ -1425,8 +1425,8 @@
         <li><b>name: string</b><br>
         This property lets you read the Tag name. This also serves as the Tag identifier.<br>
 
-        <li><b>describtion: string</b><br>
-        This property lets you read the describtion of the Tag.<br></li>
+        <li><b>description: string</b><br>
+        This property lets you read the description of the Tag.<br></li>
 
         <li><b>color ( ): color</b><br>
         This property lets you read the color of the Tag that is used in the UI.
@@ -1464,8 +1464,8 @@
         <li><b>name: string</b><br>
         This property lets you read the Kink name. This also serves as the Kink identifier.<br>
 
-        <li><b>describtion: string</b><br>
-        This property lets you read the describtion of the Kink.<br></li>
+        <li><b>description: string</b><br>
+        This property lets you read the description of the Kink.<br></li>
 
         <li><b>color ( ): color</b><br>
         This property lets you read the color of the Kink that is used in the UI.

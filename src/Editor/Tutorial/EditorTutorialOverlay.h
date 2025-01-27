@@ -32,7 +32,7 @@ public slots:
   void NextTutorialState();
   void SetClickToAdvanceEnabled(bool bEnabled);
   void SetClickFilterWidgets(const QStringList& vsWidgetNames, bool bTriggerNextAfterClick = true);
-  void SetHighlightedWidgets(const QStringList& vsWidgetNames, bool bAllwaysOnTop);
+  void SetHighlightedWidgets(const QStringList& vsWidgetNames, bool bAlwaysOnTop);
   void SetMouseTransparecny(bool bEnabled);
   void ShowTutorialText(int anchor, double dPosX, double dPosY,
                         bool bHideButtons, QString sText);

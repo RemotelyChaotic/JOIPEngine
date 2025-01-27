@@ -4,7 +4,7 @@
 CCommandChangeDescribtion::CCommandChangeDescribtion(QPointer<QTextDocument> pDescribtionDocument,
                                                      const std::function<void(void)>& fnOnUndoRedo,
                                                      QUndoCommand* pParent) :
-  QUndoCommand(QTextDocument::tr("Describtion change"), pParent),
+  QUndoCommand(QTextDocument::tr("Description change"), pParent),
   m_pDescribtionDocument(pDescribtionDocument),
   m_fnOnUndoRedo(fnOnUndoRedo),
   m_bAddedRedoCommand(false)

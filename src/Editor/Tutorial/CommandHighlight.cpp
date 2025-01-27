@@ -4,7 +4,7 @@ CCommandHighlight::CCommandHighlight(QPointer<CEditorTutorialOverlay> pTutorialO
   IJsonInstructionBase(),
   m_argTypes({{"items", SInstructionArgumentType{EArgumentType::eArray,
                                                  MakeArgArray(EArgumentType::eString)}},
-              {"allwaysOnTop", SInstructionArgumentType{EArgumentType::eBool}}}),
+              {"alwaysOnTop", SInstructionArgumentType{EArgumentType::eBool}}}),
   m_pTutorialOverlay(pTutorialOverlay)
 {
 }
@@ -25,12 +25,12 @@ tInstructionMapType& CCommandHighlight::ArgList()
 //
 IJsonInstructionBase::tRetVal CCommandHighlight::Call(const tInstructionMapValue& args)
 {
-  const auto& itAllwaysOnTop = GetValue<EArgumentType::eBool>(args, "allwaysOnTop");
+  const auto& itAlwaysOnTop = GetValue<EArgumentType::eBool>(args, "alwaysOnTop");
   const auto& itItems = GetValue<EArgumentType::eArray>(args, "items");
-  bool bAllwaysOnTop = false;
-  if (HasValue(args, "allwaysOnTop") && IsOk<EArgumentType::eBool>(itAllwaysOnTop))
+  bool bAlwaysOnTop = false;
+  if (HasValue(args, "alwaysOnTop") && IsOk<EArgumentType::eBool>(itAlwaysOnTop))
   {
-    bAllwaysOnTop = std::get<bool>(itAllwaysOnTop);
+    bAlwaysOnTop = std::get<bool>(itAlwaysOnTop);
   }
   if (HasValue(args, "items") && IsOk<EArgumentType::eArray>(itItems))
   {
@@ -46,7 +46,7 @@ IJsonInstructionBase::tRetVal CCommandHighlight::Call(const tInstructionMapValue
     }
     bool bOk = QMetaObject::invokeMethod(m_pTutorialOverlay, "SetHighlightedWidgets", Qt::QueuedConnection,
                                          Q_ARG(QStringList, vList),
-                                         Q_ARG(bool, bAllwaysOnTop));
+                                         Q_ARG(bool, bAlwaysOnTop));
     bOk &= QMetaObject::invokeMethod(m_pTutorialOverlay, "SlotTriggerNextInstruction", Qt::QueuedConnection);
     assert(bOk); Q_UNUSED(bOk);
   }

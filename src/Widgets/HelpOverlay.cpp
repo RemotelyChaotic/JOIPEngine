@@ -481,7 +481,7 @@ void CHelpOverlay::SlotKeyBindingsChanged()
   m_spUi->CloseButton->SetShortcut(m_spSettings->keyBinding("Exit"));
   m_spUi->BackButton->SetShortcut(m_spSettings->keyBinding("Backward"));
   m_spUi->HomeButton->SetShortcut(m_spSettings->keyBinding("Help"));
-  m_spUi->ForardButton->SetShortcut(m_spSettings->keyBinding("Foreward"));
+  m_spUi->ForardButton->SetShortcut(m_spSettings->keyBinding("Forward"));
 }
 
 //----------------------------------------------------------------------------------------

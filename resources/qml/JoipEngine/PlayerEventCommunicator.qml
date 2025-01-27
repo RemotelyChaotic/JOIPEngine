@@ -3,7 +3,7 @@ import JOIP.core 1.1
 import JOIP.script 1.3
 
 Item {
-    id: reciever
+    id: receiver
     property string userName: "eventSender"
 
     function registerEventHandler(event, fnHandler)

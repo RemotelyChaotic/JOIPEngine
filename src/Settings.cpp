@@ -83,7 +83,7 @@ namespace {
     "Redo",
     "Search",
     "Backward",
-    "Foreward"
+    "Forward"
   };
 }
 
@@ -201,7 +201,7 @@ CSettings::CSettings(QObject* pParent) :
       { "Redo",       QKeySequence(QKeySequence::Redo)   },
       { "Search",     QKeySequence(QKeySequence::Find)   },
       { "Backward",   QKeySequence(QKeySequence::Back)   },
-      { "Foreward",   QKeySequence(QKeySequence::Forward)}
+      { "Forward",   QKeySequence(QKeySequence::Forward)}
     })
 {
   qRegisterMetaType<CSettings::EditorType>();
@@ -1145,7 +1145,7 @@ bool CSettings::IsAllowedToOverwriteKeyBinding(const QString& sRole)
       sRole == "Redo" ||
       sRole == "Search" ||
       sRole == "Backward" ||
-      sRole == "Foreward")
+      sRole == "Forward")
   {
     return false;
   }

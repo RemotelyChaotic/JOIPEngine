@@ -45,7 +45,7 @@ namespace
   const QString c_sMetronomeToyCmdModeId   ="Editor/MetronomeToyCmdMode";
   const QString c_sLayoutHelpId =           "Editor/Layout";
   const QString c_sProjectFontHelpId       ="Editor/ProjectFont";
-  const QString c_sProjectDescribtionHelpId="Editor/ProjectDescribtion";
+  const QString c_sProjectDescriptionHelpId="Editor/ProjectDescription";
   const QString c_sFetishListHelpId =       "Editor/FetishList";
   const QString c_sAddFetishHelpId =        "Editor/AddFetish";
 }
@@ -100,8 +100,8 @@ void CEditorProjectSettingsWidget::Initialize()
     wpHelpFactory->RegisterHelp(c_sProjectFontHelpId, ":/resources/help/editor/projectsettings/font_help.html");
     m_spUi->pLayoutWidget->setProperty(helpOverlay::c_sHelpPagePropertyName, c_sLayoutHelpId);
     wpHelpFactory->RegisterHelp(c_sLayoutHelpId, ":/resources/help/editor/projectsettings/layout_help.html");
-    m_spUi->pDescribtionTextEdit->setProperty(helpOverlay::c_sHelpPagePropertyName, c_sProjectDescribtionHelpId);
-    wpHelpFactory->RegisterHelp(c_sProjectDescribtionHelpId, ":/resources/help/editor/projectsettings/describtion_textedit_help.html");
+    m_spUi->pDescribtionTextEdit->setProperty(helpOverlay::c_sHelpPagePropertyName, c_sProjectDescriptionHelpId);
+    wpHelpFactory->RegisterHelp(c_sProjectDescriptionHelpId, ":/resources/help/editor/projectsettings/describtion_textedit_help.html");
     m_spUi->pFetishListWidget->setProperty(helpOverlay::c_sHelpPagePropertyName, c_sFetishListHelpId);
     wpHelpFactory->RegisterHelp(c_sFetishListHelpId, ":/resources/help/editor/projectsettings/fetish_tree_help.html");
     m_spUi->pFetishLineEdit->setProperty(helpOverlay::c_sHelpPagePropertyName, c_sAddFetishHelpId);
@@ -183,7 +183,7 @@ void CEditorProjectSettingsWidget::Initialize()
                                          iVal);
   }
 
-  m_spUi->pDescribtionTextEdit->setPlaceholderText("No describtion set");
+  m_spUi->pDescribtionTextEdit->setPlaceholderText("No description set");
   connect(m_spUi->pDescribtionTextEdit->document(), &QTextDocument::undoCommandAdded,
           this, &CEditorProjectSettingsWidget::SlotUndoForDescribtionAdded);
   connect(m_spUi->pDescribtionTextEdit, &CRichTextEdit::UndoTriggered,

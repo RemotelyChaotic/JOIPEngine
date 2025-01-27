@@ -234,7 +234,7 @@
       {
         "highlight": {
           "items" : ["pDescribtionTextEdit"],
-          "allwaysOnTop": 1
+          "alwaysOnTop": 1
         }
       },
       {
@@ -300,7 +300,7 @@
       {
         "highlight": {
           "items" : ["pFetishListWidget", "pFetishInput"],
-          "allwaysOnTop": 1
+          "alwaysOnTop": 1
         }
       },
       {
@@ -514,7 +514,7 @@
       {
         "highlight": {
           "items" : ["pResourceModelView", "AddResourceButton"],
-          "allwaysOnTop": 1
+          "alwaysOnTop": 1
         }
       },
       {
@@ -588,7 +588,7 @@
       {
         "text": {
           "posX" : 0.1, "posY": 0.2, "anchor": "eLeft",
-          "text": "Web-Resources allways automatically add the address as source."
+          "text": "Web-Resources always automatically add the address as source."
         }
       },
       {
@@ -703,7 +703,7 @@
       {
         "highlight": {
           "items" : ["AddNodeButton", "FlowView"],
-          "allwaysOnTop": 1
+          "alwaysOnTop": 1
         }
       },
       {
@@ -784,7 +784,7 @@
       {
         "highlight": {
           "items" : ["FlowView"],
-          "allwaysOnTop": 1
+          "alwaysOnTop": 1
         }
       },
       {
@@ -829,7 +829,7 @@
       {
         "highlight": {
           "items" : ["FlowView"],
-          "allwaysOnTop": 1
+          "alwaysOnTop": 1
         }
       },
       {
