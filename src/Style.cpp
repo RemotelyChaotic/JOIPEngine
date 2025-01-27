@@ -104,6 +104,14 @@ QString joip_style::StyleFolder()
 {
 #if defined(Q_OS_ANDROID)
   return c_sDefaultAndroidStyleFolder;
+#elif defined(Q_OS_LINUX)
+  QString sRootPath = QLibraryInfo::location(QLibraryInfo::PrefixPath);
+  const QString sAppImg = qgetenv("APPIMAGE");
+  if (!sAppImg.isEmpty())
+  {
+    sRootPath = QFileInfo(sAppImg).absolutePath();
+  }
+  return sRootPath + QDir::separator() + c_sStyleFolder;
 #else
   return QLibraryInfo::location(QLibraryInfo::PrefixPath) +
       QDir::separator() + c_sStyleFolder;

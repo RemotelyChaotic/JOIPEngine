@@ -10,7 +10,6 @@
 #include <QCoreApplication>
 #include <QDir>
 #include <QFileInfo>
-#include <QLibraryInfo>
 #include <QMutexLocker>
 #include <QSettings>
 #include <QScreen>
@@ -1183,22 +1182,29 @@ void CSettings::GenerateSettingsIfNotExists()
     QString sContentPath = QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation) + "/Teases";
     QFileInfo contentFileInfo(sContentPath);
     m_spSettings->setValue(CSettings::c_sSettingContentFolder, sContentPath);
-    if (!contentFileInfo.exists())
+#elif defined(Q_OS_LINUX)
+    QString sContentPath = QCoreApplication::instance()->applicationDirPath() +
+        QDir::separator() + ".." + QDir::separator() + "data";
+    const QString sAppImg = qgetenv("APPIMAGE");
+    if (!sAppImg.isEmpty())
     {
-      QDir(QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation)).mkdir("Teases");
+      sContentPath = QFileInfo(sAppImg).absolutePath() +
+              QDir::separator() + "data";
     }
+    QFileInfo contentFileInfo(sContentPath);
+    m_spSettings->setValue(CSettings::c_sSettingContentFolder,
+                           contentFileInfo.absoluteFilePath());
 #else
     QString sContentPath = QCoreApplication::instance()->applicationDirPath() +
         QDir::separator() + ".." + QDir::separator() + "data";
     QFileInfo contentFileInfo(sContentPath);
     m_spSettings->setValue(CSettings::c_sSettingContentFolder,
                            contentFileInfo.absoluteFilePath());
-
+#endif
     if (!contentFileInfo.exists())
     {
       QDir::current().mkdir("data");
     }
-#endif
   }
 
   // check code editor settings

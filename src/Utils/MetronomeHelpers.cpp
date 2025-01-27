@@ -77,7 +77,17 @@ namespace metronome
                          ":/resources/sound/lubdub/HB (bass boost 5.0 -10dB) pt2 (trim).wav"} }
       };
       constexpr char c_sSfxFolder[] = "sfx";
+#if defined(Q_OS_LINUX)
+      QString sFolder = QLibraryInfo::location(QLibraryInfo::PrefixPath);
+      const QString sAppImg = qgetenv("APPIMAGE");
+      if (!sAppImg.isEmpty())
+      {
+        sFolder = QFileInfo(sAppImg).absolutePath();
+      }
+      sFolder = sFolder +
+#else
       const QString sFolder = QLibraryInfo::location(QLibraryInfo::PrefixPath) +
+#endif
         QDir::separator() + c_sSfxFolder;
       LoadCustomMetronomeSfxClips(metronomeSfxMap, sFolder);
     }

@@ -44,6 +44,14 @@ QString joip_style::ThemeFolder()
   // "/themes" is appended to the given path by the library
 #if defined(Q_OS_ANDROID)
   return QString(":/android/resources");
+#elif defined(Q_OS_LINUX)
+  QString sRootPath = QLibraryInfo::location(QLibraryInfo::PrefixPath);
+  const QString sAppImg = qgetenv("APPIMAGE");
+  if (!sAppImg.isEmpty())
+  {
+    sRootPath = QFileInfo(sAppImg).absolutePath();
+  }
+  return sRootPath;
 #else
   return QLibraryInfo::location(QLibraryInfo::PrefixPath);
 #endif
