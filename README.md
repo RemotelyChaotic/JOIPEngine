@@ -39,10 +39,13 @@ LD_LIBRARY_PATH=<path to Qt>/Qt5.14.2/5.14.2/gcc_64/lib:<path to engine>/JOIPEng
 ```
 
 #### Deploying
-Install creates a directory in your build directory called deploy.
+CMake Install (cmake.exe --insstll) creates a directory in your build directory called deploy containing all the nesseccary files for deployment.
+
+On linux this requires wget and an internet connection to get the linuxdeploy (qt) packages.
 
 Now you can:
 - copy all license files from the sources to deploy/license
-- copy your built version of intiface-engine and buttplug-rs-ffi into the bin directory
+- WIN: copy your built version of intiface-engine into the plugins/buttplug directory
+- LINUX: chmod +x JOIPEngine.AppImage
 
 And you are done.

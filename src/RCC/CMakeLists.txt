@@ -96,6 +96,12 @@ configure_file_generate(
 #-----------------------------------------------------------------------------------------
 # install
 #-----------------------------------------------------------------------------------------
-install(
-  TARGETS ${PROJECT_NAME}
-  DESTINATION "${CMAKE_INSTALL_PREFIX}/bin")
+if (LINUX)
+  install(
+    TARGETS ${PROJECT_NAME}
+    DESTINATION "${CMAKE_INSTALL_PREFIX}/AppDir/usr/bin")
+else()
+  install(
+    TARGETS ${PROJECT_NAME}
+    DESTINATION "${CMAKE_INSTALL_PREFIX}/bin")
+endif()
