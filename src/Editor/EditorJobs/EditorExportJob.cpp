@@ -209,7 +209,11 @@ bool CEditorExportJob::RunBinaryExport(const QString& sName, const QString& sFol
   {
     QString sRccFileName = (sFolder + "/" + c_sTempRCCFileName);
     QString sOutFileName = (sFolder + "/" + sName + ".proj");
+#if defined(Q_OS_WIN)
     QString rccExe = QApplication::applicationDirPath() + "/rcc.exe";
+#else
+    QString rccExe = QApplication::applicationDirPath() + "/rcc";
+#endif
     m_spExportProcess->setProperty(c_sTemporaryRccFileProperty, rccFile.fileName());
     m_spExportProcess->setProperty(c_sTemporaryOutFileProperty, sOutFileName);
     m_spExportProcess->setWorkingDirectory(sFolder);
