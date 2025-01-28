@@ -29,7 +29,7 @@ if(CMAKE_BUILD_TYPE STREQUAL "Debug" OR CMAKE_BUILD_TYPE STREQUAL "Default")
 endif()
 
 # define LINUX variable for ease of access
-if(UNIX AND NOT APPLE)
+if(UNIX AND NOT APPLE AND NOT ANDROID)
     set(LINUX TRUE)
 endif()
 
