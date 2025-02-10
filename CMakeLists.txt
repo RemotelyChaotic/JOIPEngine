@@ -5,8 +5,8 @@ set(BUILD_TESTING OFF)  # Disable tests of all libraries
 set(BUILD_EXAMPLES OFF) # Disable examples for all libraries
 
 set(JOIP_VERSION_MAJOR 1)
-set(JOIP_VERSION_MINOR 4)
-set(JOIP_VERSION_PATCH 5)
+set(JOIP_VERSION_MINOR 5)
+set(JOIP_VERSION_PATCH 0)
 
 set(JOIP_UPDATER_VERSION_MAJOR 1)
 set(JOIP_UPDATER_VERSION_MINOR 0)
