@@ -946,6 +946,10 @@ macro(JOIPProjectSettings JOIP_PROJECT_NAME)
   if (ANDROID)
     target_link_libraries(${JOIP_PROJECT_NAME} PRIVATE Qt5::AndroidExtras)
 
+    set_target_properties(${JOIP_PROJECT_NAME} PROPERTIES
+        QT_ANDROID_TARGET_SDK_VERSION 31
+        QT_ANDROID_SDK_BUILD_TOOLS_REVISION 31.0.0)
+
     set(ANDROID_PERMISSIONS
       "android.permission.INTERNET"
       "android.permission.WRITE_EXTERNAL_STORAGE"

@@ -11,20 +11,29 @@
 - Get a pre-built version of [OpenSSL 1.1.*](https://www.openssl.org/), build it from source, or use the provided version in 3rd-party (1.1.1g was used for testing but newer versions should work).
 - Optionally build intiface-engine or download the releases from the respective repositories
 
+#### Android:
+- Make sure you use JDK 8.x and NOT above
+- Make sure you use exactly Command-Line Tools 7.0 and rename the 7.0 folder to "latest"
+- Otherwise follow the setup as required by QtCreator
+
 ### Build:
 Make sure you recursively update all submodules before building, as the dependencies are kept as separate repos.
 ```
 git submodule update --init --recursive
 ```
 
-For Android, add jom.exe to your PATH, be it in the Qt-Creator Project settings, or in the console.
-It's typically in a path like [...]\Qt5.14.1\Tools\QtCreator\bin\ if you downloaded Qt.
+#### Building in QtCreator
+Open src_dir/CMakeList.txt in QtCreator -> Run CMake and build
+
+##### Android
+Make sure you download the components as detailed in AndroidSetup.txt
+- Do NOT use the latest build tools, use 7.0
+- Manually Downgrade the platform-tools to r31.0.0
+- In your project settings in QtCreator set `Build Steps > Build Android APK > Application > Andoid build-tools version` to 31.0.0
+
 On startup, if you get an error that libavutil.so or similar was not found, check if <build>/android-build/libs/<abi>/ contains the av libraries and if not, rerun cmake.
 
 Next you can build the Application.
-
-#### Building in QtCreator
-Open src_dir/CMakeList.txt in QtCreator -> Run CMake and build
 
 #### Building and installing in Console with Ninja
 ```

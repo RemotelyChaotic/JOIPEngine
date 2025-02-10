@@ -1,0 +1,21 @@
+Android:
+- 21
+- 28
+- 31
+
+SDK Build Tools:
+- 31.0.0
+
+Platform Tools: 
+- r31.0.0 (http://dl.google.com/android/repository/platform-tools_r31.0.0-windows.zip) 
+
+NDK:
+- 21.3.6528147
+- 25.1.8937393
+
+CMD-Line Tools:
+- latest (7.0)
+
+SDK location: C:\Users\jtekf\AppData\Local\Android\Sdk
+SDK Platform Tools: 35.0.2
+USB Driver
