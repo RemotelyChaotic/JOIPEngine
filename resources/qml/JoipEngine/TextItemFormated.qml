@@ -27,7 +27,8 @@ Rectangle {
         height: contentHeight
         width: Math.min(contentWidth, maximumWidth)
 
-        font.family: root.currentlyLoadedProject.font
+        font.family: null != root.currentlyLoadedProject ?
+                         root.currentlyLoadedProject.font : "Arial"
         font.pointSize: 14
         font.hintingPreference: Font.PreferNoHinting
 

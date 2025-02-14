@@ -15,12 +15,14 @@ class CProjectScriptWrapper;
 class CSceneScriptWrapper;
 class CSettings;
 struct SProject;
+struct SSaveData;
 struct SScene;
 struct SResourceBundle;
 struct STag;
 typedef std::shared_ptr<SProject>       tspProject;
 typedef std::vector<tspProject>         tvspProject;
 typedef std::shared_ptr<SResourceBundle>tspResourceBundle;
+typedef std::shared_ptr<SSaveData>      tspSaveData;
 typedef std::shared_ptr<SScene>         tspScene;
 typedef std::shared_ptr<STag>           tspTag;
 
@@ -102,6 +104,14 @@ public:
   QStringList FindKinks(QString sCategory);
   QStringList KinkCategories();
 
+  // Achievements
+  QString AddAchievement(tspProject& spProj, const QString& sName, const QString& sDescribtion,
+                         qint32 iType, const QString& sResource, const QVariant& data);
+  void ClearAchievement(tspProject& spProj);
+  tspSaveData FindAchievementInProject(tspProject& spProj, QString sName);
+  void RemoveAchievement(tspProject& spProj, const QString& sName);
+  void RenameAchievement(tspProject& spProj, const QString& sName, const QString& sNewName);
+
   qint32 FindNewProjectId();
   bool IsDbLoaded() const;
 
@@ -124,6 +134,10 @@ signals:
   void SignalResourceRemoved(qint32 iProjId, const QString& sName);
   void SignalTagAdded(qint32 iProjId, const QString& sResource, const QString& sName);
   void SignalTagRemoved(qint32 iProjId, const QString& sResource, const QString& sName);
+  void SignalAchievementAdded(qint32 iProjId, const QString& sName);
+  void SignalAchievementRemoved(qint32 iProjId, const QString& sName);
+  void SignalAchievementDataChanged(qint32 iProjId, const QString& sName);
+  void SignalAchievementRenamed(qint32 iProjId, const QString& sOldName, const QString& sName);
 
 private slots:
   void SlotContentFolderChanged();

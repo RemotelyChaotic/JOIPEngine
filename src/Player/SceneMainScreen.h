@@ -45,6 +45,7 @@ public:
   bool CloseApplication();
   void Initialize(const std::shared_ptr<CWindowContext>& spWindowContext, bool bDebug);
   void LoadProject(qint32 iId, const tSceneToLoad& sStartScene = QString());
+  tspProject LoadedProject();
   std::weak_ptr<CProjectEventCallbackRegistry> EventCallbackRegistry();
   std::weak_ptr<CProjectDialogManager> ProjectDialogManager();
   std::weak_ptr<CProjectRunner> ProjectRunner();

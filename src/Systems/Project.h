@@ -6,6 +6,7 @@
 #include "Enums.h"
 #include "Resource.h"
 #include "ResourceBundle.h"
+#include "SaveData.h"
 #include "Scene.h"
 #include "Tag.h"
 #include <QObject>
@@ -30,6 +31,7 @@ struct SProject : public ISerializable, std::enable_shared_from_this<SProject>,
   tspResourceMap            m_spResourcesMap;
   tspResourceBundleMap      m_spResourceBundleMap;
   tspTagMap                 m_vspTags;
+  tspSaveDataMap            m_vspAchievements;
   QStringList               m_vsMountPoints;          // Archives need to be mounted via physFS to access content
                                                       // WARNING: root is NOT included in this list
 

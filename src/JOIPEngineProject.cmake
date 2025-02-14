@@ -194,6 +194,10 @@ macro(CreateJOIPProject JOIP_PROJECT_NAME)
     ${JOIPSources}/Editor/NodeEditor/SceneTranstitionData.h
     ${JOIPSources}/Editor/NodeEditor/StartNodeModel.cpp
     ${JOIPSources}/Editor/NodeEditor/StartNodeModel.h
+    ${JOIPSources}/Editor/Project/AchievementWidget.cpp
+    ${JOIPSources}/Editor/Project/AchievementWidget.h
+    ${JOIPSources}/Editor/Project/CommandChangeAchievements.cpp
+    ${JOIPSources}/Editor/Project/CommandChangeAchievements.h
     ${JOIPSources}/Editor/Project/CommandChangeDescribtion.cpp
     ${JOIPSources}/Editor/Project/CommandChangeDescribtion.h
     ${JOIPSources}/Editor/Project/CommandChangeEmitterCount.cpp
@@ -221,6 +225,8 @@ macro(CreateJOIPProject JOIP_PROJECT_NAME)
     ${JOIPSources}/Editor/Project/KinkTreeModel.h
     ${JOIPSources}/Editor/Project/KinkTreeSortFilterProxyModel.cpp
     ${JOIPSources}/Editor/Project/KinkTreeSortFilterProxyModel.h
+    ${JOIPSources}/Editor/Project/SelectableResourceLabel.cpp
+    ${JOIPSources}/Editor/Project/SelectableResourceLabel.h
     ${JOIPSources}/Editor/Resources/CommandAddResource.cpp
     ${JOIPSources}/Editor/Resources/CommandAddResource.h
     ${JOIPSources}/Editor/Resources/CommandChangeCurrentResource.cpp
@@ -465,6 +471,8 @@ macro(CreateJOIPProject JOIP_PROJECT_NAME)
     ${JOIPSources}/Player/ProjectEventTarget.h
     ${JOIPSources}/Player/ProjectNotificationManager.cpp
     ${JOIPSources}/Player/ProjectNotificationManager.h
+    ${JOIPSources}/Player/ProjectSavegameManager.cpp
+    ${JOIPSources}/Player/ProjectSavegameManager.h
     ${JOIPSources}/Player/ProjectSceneManager.cpp
     ${JOIPSources}/Player/ProjectSceneManager.h
     ${JOIPSources}/Player/ProjectSoundManager.cpp
@@ -505,6 +513,7 @@ macro(CreateJOIPProject JOIP_PROJECT_NAME)
     ${JOIPSources}/Systems/DatabaseImageProvider.h
     ${JOIPSources}/Systems/DatabaseInterface/ProjectData.h
     ${JOIPSources}/Systems/DatabaseInterface/ResourceData.h
+    ${JOIPSources}/Systems/DatabaseInterface/SaveData.h
     ${JOIPSources}/Systems/DatabaseInterface/SceneData.h
     ${JOIPSources}/Systems/DatabaseInterface/TagData.h
     ${JOIPSources}/Systems/DatabaseIO.cpp
@@ -590,6 +599,8 @@ macro(CreateJOIPProject JOIP_PROJECT_NAME)
     ${JOIPSources}/Systems/Resource.h
     ${JOIPSources}/Systems/ResourceBundle.cpp
     ${JOIPSources}/Systems/ResourceBundle.h
+    ${JOIPSources}/Systems/SaveData.cpp
+    ${JOIPSources}/Systems/SaveData.h
     ${JOIPSources}/Systems/Scene.cpp
     ${JOIPSources}/Systems/Scene.h
     ${JOIPSources}/Systems/Tag.cpp

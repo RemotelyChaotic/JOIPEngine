@@ -443,6 +443,61 @@ QVariant CProjectScriptWrapper::tag(qint32 iIndex)
 
 //----------------------------------------------------------------------------------------
 //
+qint32 CProjectScriptWrapper::numAchievements()
+{
+  QReadLocker locker(&m_spData->m_rwLock);
+  return static_cast<qint32>(m_spData->m_vspAchievements.size());
+}
+
+//----------------------------------------------------------------------------------------
+//
+QStringList CProjectScriptWrapper::achievements()
+{
+  QReadLocker locker(&m_spData->m_rwLock);
+  QStringList ret;
+  for (auto it = m_spData->m_vspAchievements.begin(); m_spData->m_vspAchievements.end() != it; ++it)
+  {
+    ret << it->second->m_sName;
+  }
+  return ret;
+}
+
+//----------------------------------------------------------------------------------------
+//
+QVariant CProjectScriptWrapper::achievement(const QString& sValue)
+{
+  QReadLocker locker(&m_spData->m_rwLock);
+  auto it = m_spData->m_vspAchievements.find(sValue);
+  if (m_spData->m_vspAchievements.end() != it)
+  {
+    CSaveDataWrapper* pTag =
+        new CSaveDataWrapper(m_pEngine, std::make_shared<SSaveData>(*it->second));
+    return CreateScriptObject(pTag, m_pEngine);
+  }
+  return QVariant();
+}
+
+//----------------------------------------------------------------------------------------
+//
+QVariant CProjectScriptWrapper::achievement(qint32 iIndex)
+{
+  QReadLocker locker(&m_spData->m_rwLock);
+  auto it = m_spData->m_vspAchievements.begin();
+  if (0 <= iIndex && m_spData->m_vspAchievements.size() > static_cast<size_t>(iIndex))
+  {
+    std::advance(it, iIndex);
+    if (m_spData->m_vspAchievements.end() != it)
+    {
+      CSaveDataWrapper* pTag =
+          new CSaveDataWrapper(m_pEngine, std::make_shared<SSaveData>(*it->second));
+      return CreateScriptObject(pTag, m_pEngine);
+    }
+  }
+  return QVariant();
+}
+
+//----------------------------------------------------------------------------------------
+//
 CResourceScriptWrapper::CResourceScriptWrapper(tEngineType pEngine, const std::shared_ptr<SResource>& spResource) :
   QObject(),
   CLockable(&spResource->m_rwLock),
@@ -1065,4 +1120,56 @@ qint64 CDialogDataWrapper::getWaitTime() const
 bool CDialogDataWrapper::getSkipable() const
 {
   return m_spData->m_bSkipable;
+}
+
+//----------------------------------------------------------------------------------------
+//
+CSaveDataWrapper::CSaveDataWrapper(tEngineType pEngine, const std::shared_ptr<SSaveData>& spData) :
+  m_spData(spData),
+  m_pEngine(pEngine)
+{
+  assert(nullptr != m_spData);
+  assert(CheckEngineNotNull(pEngine));
+}
+CSaveDataWrapper::~CSaveDataWrapper()
+{}
+
+//----------------------------------------------------------------------------------------
+//
+QString CSaveDataWrapper::getName() const
+{
+  QReadLocker locker(&m_spData->m_rwLock);
+  return m_spData->m_sName;
+}
+
+//----------------------------------------------------------------------------------------
+//
+QString CSaveDataWrapper::getDescribtion() const
+{
+  QReadLocker locker(&m_spData->m_rwLock);
+  return m_spData->m_sDescribtion;
+}
+
+//----------------------------------------------------------------------------------------
+//
+CSaveDataWrapper::SaveDataType CSaveDataWrapper::getType() const
+{
+  QReadLocker locker(&m_spData->m_rwLock);
+  return CSaveDataWrapper::SaveDataType(m_spData->m_type._to_integral());
+}
+
+//----------------------------------------------------------------------------------------
+//
+QString CSaveDataWrapper::getResource() const
+{
+  QReadLocker locker(&m_spData->m_rwLock);
+  return m_spData->m_sResource;
+}
+
+//----------------------------------------------------------------------------------------
+//
+QVariant CSaveDataWrapper::getData() const
+{
+  QReadLocker locker(&m_spData->m_rwLock);
+  return m_spData->m_data;
 }

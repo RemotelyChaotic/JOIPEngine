@@ -115,6 +115,7 @@ public:
   explicit CSettings(QObject* pParent = nullptr);
   ~CSettings() override;
 
+  QString FileName() const;
   bool HasRaw(const QString& sSetting);
   QVariant ReadRaw(const QString& sSetting, const QVariant& sDefaultValue);
   void WriteRaw(const QString& sSetting, const QVariant& value);

@@ -661,5 +661,16 @@
         <file>resources/android_styles/Gummyzilla/ui/ButtonSequence.png</file>
         <file>resources/android_styles/Gummyzilla/ui/ButtonSequenceSelected.png</file>
         <file>resources/android_styles/Somber Dark/ui/ButtonSequence.png</file>
+        <file>resources/android_styles/621 Hexagons/qml/ButtonAchievement.svg</file>
+        <file>resources/android_styles/621 Hexagons/ui/ButtonAchievement.png</file>
+        <file>resources/android_styles/Blue Night/qml/ButtonAchievement.svg</file>
+        <file>resources/android_styles/Blue Night/ui/ButtonAchievement.png</file>
+        <file>resources/android_styles/Equestria after Dark/qml/ButtonAchievement.svg</file>
+        <file>resources/android_styles/Equestria after Dark/ui/ButtonAchievement.png</file>
+        <file>resources/android_styles/Gummyzilla/qml/ButtonAchievement.svg</file>
+        <file>resources/android_styles/Gummyzilla/ui/ButtonAchievement.png</file>
+        <file>resources/android_styles/Gummyzilla/ui/ButtonAchievementSelected.png</file>
+        <file>resources/android_styles/Somber Dark/qml/ButtonAchievement.svg</file>
+        <file>resources/android_styles/Somber Dark/ui/ButtonAchievement.png</file>
     </qresource>
 </RCC>

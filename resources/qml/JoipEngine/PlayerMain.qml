@@ -24,6 +24,7 @@ Rectangle {
     property PlayerMediaPlayer registeredMediaPlayer: null
     property int numReadyComponents: 0
     property var componentsRegistered: []
+    property var startTime: new Date()
 
     signal startLoadingSkript()
     signal unloadFinished()
@@ -43,6 +44,13 @@ Rectangle {
     {
         if (null !== currentlyLoadedProject && undefined !== currentlyLoadedProject)
         {
+            if (!root.debug) {
+                var played = saveManager.load("numPlayed", "stats");
+                saveManager.store("numPlayed", played == null ? 1 : played+1, "stats");
+
+                root.startTime = new Date();
+            }
+
             audioPlayer.numberOfSoundEmitters = currentlyLoadedProject.numberOfSoundEmitters;
 
             var bFoundLayout = false;
@@ -73,10 +81,21 @@ Rectangle {
         }
     }
 
-    function onUnLoadProject()
+    function onUnLoadProject(bReachedEnd)
     {
         if (null != currentlyLoadedProject)
         {
+            if (!root.debug) {
+                if (bReachedEnd) {
+                    var finished = saveManager.load("numFinished", "stats");
+                    saveManager.store("numFinished", finished == null ? 1 : finished+1, "stats");
+                }
+
+                var timeDiff = new Date() - root.startTime;
+                var playTime = saveManager.load("playTime", "stats");
+                saveManager.store("playTime", playTime == null ? timeDiff : playTime+timeDiff, "stats");
+            }
+
             // stop toys
             TeaseDeviceController.sendStopCmd();
 
@@ -241,6 +260,14 @@ Rectangle {
     }
     TeaseStorage {
         id: storage
+        saveManager: SavegameManager {
+            id: saveManager
+            project: currentlyLoadedProject
+
+            onAchievementValueChanged: {
+                achievements.updateAchievementView(sId, value, oldValue);
+            }
+        }
 
         function setItem(sId, value)
         {
@@ -263,11 +290,20 @@ Rectangle {
             storage.clear();
         }
         onLoad: {
-            var loaded = storage.load(sId);
+            var loaded = storage.load(sId, sContext);
             loadReturnValue(loaded, sRequestId);
         }
+        onLoadPersistent: {
+            storage.loadPersistent(sId, "");
+        }
+        onRemoveData: {
+            saveManager.removeData(sId, sContext);
+        }
         onStore: {
-            storage.store(sId, value);
+            storage.store(sId, value, sContext);
+        }
+        onStorePersistent: {
+            storage.storePersistent(sId, "");
         }
     }
     property var deviceController: ({
@@ -538,6 +574,17 @@ Rectangle {
         }
     }
 
+    PlayerAchievementView {
+        id: achievements
+        project: currentlyLoadedProject
+
+        width: Math.min(itemHeight*3, root.width)
+        height: itemHeight*3
+
+        x: parent.width - width - 5
+        y: parent.height - height - 5
+    }
+
     //------------------------------------------------------------------------------------
     //
     // Loadtime initialization
@@ -558,6 +605,7 @@ Rectangle {
         numReadyComponents += 4;
 
         registerUIComponent("teaseStorage", storage);
+        registerUIComponent("localStorage", storage);
         registerUIComponent("deviceController", deviceController);
         evaluate("var window = {};");
     }

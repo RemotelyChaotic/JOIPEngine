@@ -10,6 +10,7 @@
 #include "Player/ProjectNotificationManager.h"
 #include "Player/ProjectSceneManager.h"
 #include "Player/ProjectSoundManager.h"
+#include "Player/ProjectSavegameManager.h"
 #include "Player/SceneMainScreen.h"
 #include "Player/TeaseDeviceController.h"
 #include "Player/TeaseStorage.h"
@@ -321,6 +322,7 @@ void CApplication::RegisterQmlTypes()
   qmlRegisterUncreatableType<CNotificationInstanceWrapper>("JOIP.core", 1, 2, "NotificationInstance", "");
   qmlRegisterType<CProjectSceneManagerWrapper>("JOIP.core", 1, 2, "SceneManager");
   qmlRegisterUncreatableType<CSoundInstanceWrapper>("JOIP.core", 1, 2, "SoundInstance", "");
+  qmlRegisterType<CProjectSavegameManager>("JOIP.core", 1, 5, "SavegameManager");
 
   qmlRegisterUncreatableMetaObject(
       DominantHand::staticMetaObject, "JOIP.core", 1, 1, "DominantHand", "");
@@ -472,7 +474,7 @@ void CApplication::RegisterQmlTypes()
     }
     return nullptr;
   });
-  qmlRegisterSingletonType<CTeaseDeviceController>("JOIP.core", 1, 5, "DialogManager",
+  qmlRegisterSingletonType<CProjectDialogManagerWrapper>("JOIP.core", 1, 5, "DialogManager",
                                                    [](QQmlEngine *engine, QJSEngine *scriptEngine) -> QObject*
   {
     Q_UNUSED(scriptEngine)
@@ -499,6 +501,9 @@ void CApplication::RegisterQmlTypes()
   qmlRegisterUncreatableType<CProjectScriptWrapper>("JOIP.db", 1, 1, "Project", "");
   qmlRegisterUncreatableType<CSceneScriptWrapper>("JOIP.db", 1, 1, "Scene", "");
   qmlRegisterUncreatableType<CResourceScriptWrapper>("JOIP.db", 1, 1, "Resource", "");
+  qmlRegisterUncreatableType<CDialogWrapper>("JOIP.db", 1, 5, "Dialog", "");
+  qmlRegisterUncreatableType<CDialogDataWrapper>("JOIP.db", 1, 5, "DialogData", "");
+  qmlRegisterUncreatableType<CSaveDataWrapper>("JOIP.db", 1, 5, "SaveData", "");
 
   qmlRegisterType<CBackgroundSignalEmitter>("JOIP.script", 1, 1, "BackgroundSignalEmitter");
   qmlRegisterType<CDeviceControllerSignalEmitter>("JOIP.script", 1, 3, "DeviceControllerSignalEmitter");

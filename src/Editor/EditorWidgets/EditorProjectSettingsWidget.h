@@ -7,6 +7,7 @@
 #include "ui_EditorActionBar.h"
 #include <memory>
 
+struct SSaveDataData;
 class CKinkSelectionOverlay;
 class CProjectSettingsTutorialStateSwitchHandler;
 namespace Ui {
@@ -44,8 +45,12 @@ protected slots:
   void on_pDescribtionTextEdit_textChanged();
   void on_pFetishLineEdit_editingFinished();
   void on_FetishOverlayButton_clicked();
+  void on_pAchievementLineEdit_editingFinished();
+  void on_AddNewAchievement_clicked();
+  void SlotChangeAchievementData(const SSaveDataData& oldData, const SSaveDataData& saveData);
   void SlotKinkChecked(const QModelIndex& index, bool bChecked);
   void SlotProjectRenamed(qint32 iId);
+  void SlotRemoveAchievement(const SSaveDataData& saveData);
   void SlotRemoveKinkClicked();
   void SlotResourceAdded(qint32 iProjId, const QString& sName);
   void SlotResourceRemoved(qint32 iProjId, const QString& sName);
@@ -53,7 +58,9 @@ protected slots:
   void SlotUndoForDescribtionAdded();
 
 protected:
+  void AddAchievement(const SSaveDataData& saveData, bool bEmitChanged);
   void AddKinks(QStringList vsKinks);
+  void ClearAchievements();
   void OnActionBarAboutToChange() override;
   void OnActionBarChanged() override;
 

@@ -327,6 +327,8 @@
         <file>resources/help/editor/images/dialog_tree.png</file>
         <file>resources/help/editor/images/dialog_editor_tree.png</file>
         <file>resources/help/editor/images/editdialog_dialog.png</file>
+        <file>resources/style/img/ButtonAchievement.png</file>
+        <file>resources/style/qml/ButtonAchievement.svg</file>
     </qresource>
     <qresource prefix="/qml">
         <file>resources/qml/JoipEngine/EmptyDummy.qml</file>
@@ -366,5 +368,10 @@
         <file>resources/qml/JoipEngine/MetronomeRippleItem.qml</file>
         <file>resources/qml/JoipEngine/PlayerTansition.qml</file>
         <file>resources/qml/JoipEngine/PlayerAudioPlayer.qml</file>
+        <file>resources/qml/JoipEngine/AchievementsView.qml</file>
+        <file>resources/qml/JoipEngine/CenteredFlow.qml</file>
+        <file>resources/qml/JoipEngine/AchievementItemDelegate.qml</file>
+        <file>resources/qml/JoipEngine/PlayerAchievementView.qml</file>
+        <file>resources/qml/JoipEngine/AchievementPopupItem.qml</file>
     </qresource>
 </RCC>

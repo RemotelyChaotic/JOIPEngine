@@ -6,6 +6,7 @@
 #include "Systems/Lockable.h"
 #include "Systems/Project.h"
 #include "Systems/Resource.h"
+#include "Systems/SaveData.h"
 #include "Systems/Scene.h"
 #include <QObject>
 #include <variant>
@@ -111,6 +112,11 @@ public:
   Q_INVOKABLE QStringList tags();
   Q_INVOKABLE QVariant tag(const QString& sValue);
   Q_INVOKABLE QVariant tag(qint32 iIndex);
+
+  Q_INVOKABLE qint32 numAchievements();
+  Q_INVOKABLE QStringList achievements();
+  Q_INVOKABLE QVariant achievement(const QString& sValue);
+  Q_INVOKABLE QVariant achievement(qint32 iIndex);
 
   std::shared_ptr<SProject> Data() { return m_spData; }
 
@@ -362,6 +368,49 @@ private:
   std::shared_ptr<CDialogData>        m_spData;
 };
 
+//----------------------------------------------------------------------------------------
+//
+class CSaveDataWrapper : public QObject
+{
+  Q_OBJECT
+  Q_DISABLE_COPY(CSaveDataWrapper)
+  CSaveDataWrapper() = delete;
+  Q_PROPERTY(QString      name               READ getName           CONSTANT)
+  Q_PROPERTY(QString      describtion        READ getDescribtion    CONSTANT)
+  Q_PROPERTY(SaveDataType type               READ getType           CONSTANT)
+  Q_PROPERTY(QString      resource           READ getResource       CONSTANT)
+  Q_PROPERTY(QVariant     data               READ getData           CONSTANT)
+
+public:
+  enum SaveDataType {
+    Bool = ESaveDataType::eBool,
+    Int = ESaveDataType::eInt,
+    Double = ESaveDataType::eDouble,
+    String = ESaveDataType::eString,
+    Regexp = ESaveDataType::eRegexp,
+    Date = ESaveDataType::eDate,
+    Url = ESaveDataType::eUrl, // reserved for Qt6
+    Array = ESaveDataType::eArray,
+    Object = ESaveDataType::eObject,
+    Null = ESaveDataType::eNull
+  };
+  Q_ENUM(SaveDataType)
+
+  explicit CSaveDataWrapper(tEngineType pEngine, const std::shared_ptr<SSaveData>& spData);
+  ~CSaveDataWrapper();
+
+  QString getName() const;
+  QString getDescribtion() const;
+  SaveDataType getType() const;
+  QString getResource() const;
+  QVariant getData() const;
+
+  const std::shared_ptr<SSaveData>& Data() { return m_spData; }
+
+private:
+  std::shared_ptr<SSaveData>          m_spData;
+  tEngineType                         m_pEngine;
+};
 
 //----------------------------------------------------------------------------------------
 //
@@ -373,5 +422,6 @@ Q_DECLARE_METATYPE(CTagWrapper*)
 Q_DECLARE_METATYPE(CDialogWrapperBase*)
 Q_DECLARE_METATYPE(CDialogWrapper*)
 Q_DECLARE_METATYPE(CDialogDataWrapper*)
+Q_DECLARE_METATYPE(CSaveDataWrapper*)
 
 #endif // SCRIPTDBWRAPPERS_H

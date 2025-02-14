@@ -197,6 +197,13 @@ void CSceneMainScreen::LoadProject(qint32 iId, const tSceneToLoad& sStartScene)
 
 //----------------------------------------------------------------------------------------
 //
+tspProject CSceneMainScreen::LoadedProject()
+{
+  return m_spCurrentProject;
+}
+
+//----------------------------------------------------------------------------------------
+//
 std::weak_ptr<CProjectEventCallbackRegistry> CSceneMainScreen::EventCallbackRegistry()
 {
   return m_spEventCallbackRegistry;

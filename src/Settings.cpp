@@ -237,6 +237,14 @@ CSettings::~CSettings()
 
 //----------------------------------------------------------------------------------------
 //
+QString CSettings::FileName() const
+{
+  QMutexLocker locker(&m_settingsMutex);
+  return m_spSettings->fileName();
+}
+
+//----------------------------------------------------------------------------------------
+//
 bool CSettings::HasRaw(const QString& sSetting)
 {
   QMutexLocker locker(&m_settingsMutex);

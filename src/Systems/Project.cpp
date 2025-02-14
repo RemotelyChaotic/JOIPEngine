@@ -23,6 +23,7 @@ SProject::SProject() :
   m_spResourcesMap(),
   m_spResourceBundleMap(),
   m_vspTags(),
+  m_vspAchievements(),
   m_vsMountPoints()
 {
 }
@@ -35,6 +36,7 @@ SProject::SProject(const SProject& other) :
   m_spResourcesMap(other.m_spResourcesMap),
   m_spResourceBundleMap(other.m_spResourceBundleMap),
   m_vspTags(other.m_vspTags),
+  m_vspAchievements(other.m_vspAchievements),
   m_vsMountPoints(other.m_vsMountPoints)
 {}
 
@@ -71,6 +73,11 @@ QJsonObject SProject::ToJsonObject()
   {
     tags.push_back(spTag.second->ToJsonObject());
   }
+  QJsonArray achievements;
+  for (auto& spAchievement : m_vspAchievements)
+  {
+    achievements.push_back(spAchievement.second->ToJsonObject());
+  }
   QJsonArray mountPoints;
   for (auto& sMountPoint : m_vsMountPoints)
   {
@@ -95,6 +102,7 @@ QJsonObject SProject::ToJsonObject()
     { "vspResources", resources },
     { "vspResourceBundles", resourceBundles },
     { "vspTags", tags },
+    { "vspAchievements", achievements },
     { "vsMountPoints", mountPoints },
     { "dlState", m_dlState._to_integral() },
     { "sFont", m_sFont },
@@ -247,6 +255,20 @@ void SProject::FromJsonObject(const QJsonObject& json)
       spTag->FromJsonObject(val.toObject());
       locker.relock();
       m_vspTags.insert(std::pair<QString, tspTag>{spTag->m_sName, spTag});
+    }
+  }
+  it = json.find("vspAchievements");
+  m_vspAchievements.clear();
+  if (it != json.end())
+  {
+    for (QJsonValue val : it.value().toArray())
+    {
+      tspSaveData spAchievement = std::make_shared<SSaveData>();
+      spAchievement->m_spParent = GetPtr();
+      locker.unlock();
+      spAchievement->FromJsonObject(val.toObject());
+      locker.relock();
+      m_vspAchievements.insert(std::pair<QString, tspSaveData>{spAchievement->m_sName, spAchievement});
     }
   }
 

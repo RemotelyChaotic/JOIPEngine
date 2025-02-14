@@ -2159,3 +2159,22 @@ CEditorDialogWidget {
   qproperty-icon: url(ui/ButtonNotification.png) off,
                   url(ui/ButtonNotification.png) on;
 }
+
+CAchievementWidget {
+  background-color: transparent;
+  border-radius: 0px;
+  padding: 0px;
+  border-image: url(ui/WindowBG.png) 50 50 50 50 repeat repeat;
+  border-top: 20px transparent;
+  border-bottom: 20px transparent;
+  border-right: 20px transparent;
+  border-left: 20px transparent;
+}
+
+CSelectableResourceLabel {
+  min-height: 120px;
+  min-width: 120px;
+  max-height: 120px;
+  max-width: 120px;
+  qproperty-unsetIcon: url(ui/ButtonBackground.png);
+}

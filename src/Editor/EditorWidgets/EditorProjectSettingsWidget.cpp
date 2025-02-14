@@ -2,9 +2,12 @@
 #include "Application.h"
 #include "SVersion.h"
 #include "out_Version.h"
+
 #include "Editor/EditorActionBar.h"
 #include "Editor/EditorModel.h"
 #include "Editor/EditorWidgetTypes.h"
+#include "Editor/Project/AchievementWidget.h"
+#include "Editor/Project/CommandChangeAchievements.h"
 #include "Editor/Project/CommandChangeDescribtion.h"
 #include "Editor/Project/CommandChangeEmitterCount.h"
 #include "Editor/Project/CommandChangeFetishes.h"
@@ -17,12 +20,15 @@
 #include "Editor/Project/KinkSelectionOverlay.h"
 #include "Editor/Project/KinkTreeModel.h"
 #include "Editor/Tutorial/ProjectSettingsTutorialStateSwitchHandler.h"
+
 #include "Systems/DatabaseManager.h"
 #include "Systems/HelpFactory.h"
 #include "Systems/Kink.h"
 #include "Systems/Project.h"
+#include "Systems/SaveData.h"
+
 #include "Utils/UndoRedoFilter.h"
-#include "Widgets/FlowLayout.h"
+
 #include "Widgets/HelpOverlay.h"
 
 #include <QCompleter>
@@ -36,6 +42,7 @@ DECLARE_EDITORWIDGET(CEditorProjectSettingsWidget, EEditorWidget::eProjectSettin
 namespace
 {
   const qint32 c_iCurrentDefaultLayout = 1;
+
   const char c_sKinkRootWidgetProperty[] = "KinkRootWidget";
 
   const QString c_sRenameProjectHelpId =    "Editor/RenameProject";
@@ -293,6 +300,15 @@ void CEditorProjectSettingsWidget::LoadProject(tspProject spProject)
 
     m_spKinkSelectionOverlay->LoadProject(bReadOnly);
 
+    m_spUi->pAchievementLineEdit->setEnabled(!bReadOnly);
+    m_spUi->AddNewAchievement->setEnabled(!bReadOnly);
+    m_spUi->pAchievementList->setEnabled(!bReadOnly);
+    for (const auto& [_, spAch] :m_spCurrentProject->m_vspAchievements)
+    {
+      QReadLocker l(&spAch->m_rwLock);
+      AddAchievement(*spAch, false);
+    }
+
     SetLoaded(true);
   }
 }
@@ -327,6 +343,8 @@ void CEditorProjectSettingsWidget::UnloadProject()
 
   m_spKinkSelectionOverlay->Hide();
   m_spKinkSelectionOverlay->UnloadProject();
+
+  ClearAchievements();
 
   SetLoaded(false);
 }
@@ -544,10 +562,82 @@ void CEditorProjectSettingsWidget::on_FetishOverlayButton_clicked()
 
 //----------------------------------------------------------------------------------------
 //
+void CEditorProjectSettingsWidget::on_pAchievementLineEdit_editingFinished()
+{
+  WIDGET_INITIALIZED_GUARD
+  if (nullptr == m_spCurrentProject) { return; }
+  // Nothing to do
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CEditorProjectSettingsWidget::on_AddNewAchievement_clicked()
+{
+  WIDGET_INITIALIZED_GUARD
+  if (nullptr == m_spCurrentProject) { return; }
+
+  QString sProjName;
+  {
+    QReadLocker l(&m_spCurrentProject->m_rwLock);
+    sProjName = m_spCurrentProject->m_sName;
+  }
+  QString sAchName = m_spUi->pAchievementLineEdit->text();
+
+  if (!sAchName.isEmpty())
+  {
+    UndoStack()->push(
+        new CCommandAddAchievements(
+            SSaveDataData(sAchName,
+                          QString(), ESaveDataType::eInt,
+                          QString(), QVariant(10)),
+            sProjName,
+            std::bind(&CEditorProjectSettingsWidget::AddAchievement, this, std::placeholders::_1, true),
+            std::bind(&CEditorProjectSettingsWidget::SlotRemoveAchievement, this, std::placeholders::_1)));
+  }
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CEditorProjectSettingsWidget::SlotChangeAchievementData(const SSaveDataData& oldData,
+                                                             const SSaveDataData& saveData)
+{
+  WIDGET_INITIALIZED_GUARD
+  if (nullptr == m_spCurrentProject) { return; }
+
+  CAchievementWidget* pRootFound = nullptr;
+  QLayout* pLayout = m_spUi->pAchievementList->layout();
+  if (nullptr != pLayout)
+  {
+    for (qint32 i = 0; pLayout->count() > i; ++i)
+    {
+      if (nullptr != pLayout->itemAt(i))
+      {
+        CAchievementWidget* pRoot = dynamic_cast<CAchievementWidget*>(pLayout->itemAt(i)->widget());
+        if (nullptr != pRoot &&
+            (pRoot->AchievementData().m_sName == oldData.m_sName ||
+             pRoot->AchievementData().m_sName == saveData.m_sName))
+        {
+          pRootFound = pRoot;
+          break;
+        }
+      }
+    }
+  }
+
+  if (nullptr != pRootFound)
+  {
+    pRootFound->SetAchievementData(saveData);
+    emit SignalProjectEdited();
+  }
+}
+
+//----------------------------------------------------------------------------------------
+//
 void CEditorProjectSettingsWidget::SlotKinkChecked(const QModelIndex& index, bool bChecked)
 {
   WIDGET_INITIALIZED_GUARD
   if (nullptr == m_spCurrentProject) { return; }
+
   QString sKink = KinkModel()->data(index, Qt::DisplayRole).toString();
   if (bChecked)
   {
@@ -584,6 +674,35 @@ void CEditorProjectSettingsWidget::SlotProjectRenamed(qint32 iId)
     m_spUi->pTitleLineEdit->blockSignals(true);
     m_spUi->pTitleLineEdit->setText(sName);
     m_spUi->pTitleLineEdit->blockSignals(false);
+    emit SignalProjectEdited();
+  }
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CEditorProjectSettingsWidget::SlotRemoveAchievement(const SSaveDataData& saveData)
+{
+  WIDGET_INITIALIZED_GUARD
+  if (nullptr == m_spCurrentProject) { return; }
+
+  CAchievementWidget* pRootFound = nullptr;
+  QLayout* pLayout = m_spUi->pAchievementList->layout();
+  if (nullptr != pLayout)
+  {
+    for (qint32 i = 0; pLayout->count() > i; ++i)
+    {
+      CAchievementWidget* pRoot = dynamic_cast<CAchievementWidget*>(pLayout->widget());
+      if (pRoot->AchievementData().m_sName == saveData.m_sName)
+      {
+        pRootFound = pRoot;
+        break;
+      }
+    }
+  }
+  if (nullptr != pRootFound)
+  {
+    pLayout->removeWidget(pRootFound);
+    delete pRootFound;
     emit SignalProjectEdited();
   }
 }
@@ -708,6 +827,68 @@ void CEditorProjectSettingsWidget::SlotUndoForDescribtionAdded()
 
 //----------------------------------------------------------------------------------------
 //
+void CEditorProjectSettingsWidget::AddAchievement(const SSaveDataData& saveData,
+                                                  bool bEmitChanged)
+{
+  WIDGET_INITIALIZED_GUARD
+  if (nullptr == m_spCurrentProject) { return; }
+
+  QString sProjName;
+  {
+    QReadLocker l(&m_spCurrentProject->m_rwLock);
+    sProjName = m_spCurrentProject->m_sName;
+  }
+
+  CAchievementWidget* pRoot = new CAchievementWidget(m_spCurrentProject, ResourceTreeModel(),
+                                                     m_spUi->pAchievementList);
+  pRoot->SetAchievementData(saveData);
+  connect(pRoot, &CAchievementWidget::SignalAchievementChanged, this,
+          [pRoot, sProjName, this](const SSaveDataData& oldData, const SSaveDataData& newData) {
+            bool bOk = false;
+            if (auto spDb = CApplication::Instance()->System<CDatabaseManager>().lock())
+            {
+              if (oldData.m_sName != newData.m_sName)
+              {
+                // only let a rename happen if the name is not yet used
+                bOk = nullptr == spDb->FindAchievementInProject(m_spCurrentProject, newData.m_sName);
+              }
+              else
+              {
+                bOk = true;
+              }
+            }
+            if (bOk)
+            {
+              UndoStack()->push(
+                  new CCommandChangeAchievements(
+                      newData, oldData,
+                      sProjName,
+                      std::bind(&CEditorProjectSettingsWidget::SlotChangeAchievementData, this,
+                                std::placeholders::_1, std::placeholders::_2)));
+            }
+            else
+            {
+              pRoot->SetAchievementData(oldData);
+            }
+          });
+  connect(pRoot, &CAchievementWidget::SignalRemove, this,
+          [pRoot, sProjName, this]() {
+            UndoStack()->push(
+                new CCommandRemoveAchievements(
+                    pRoot->AchievementData(),
+                    sProjName,
+                    std::bind(&CEditorProjectSettingsWidget::AddAchievement, this, std::placeholders::_1, false),
+                    std::bind(&CEditorProjectSettingsWidget::SlotRemoveAchievement, this, std::placeholders::_1)));
+          });
+  m_spUi->pAchievementList->layout()->addWidget(pRoot);
+  if (bEmitChanged)
+  {
+    emit SignalProjectEdited();
+  }
+}
+
+//----------------------------------------------------------------------------------------
+//
 void CEditorProjectSettingsWidget::AddKinks(QStringList vsKinks)
 {
   WIDGET_INITIALIZED_GUARD
@@ -734,6 +915,28 @@ void CEditorProjectSettingsWidget::AddKinks(QStringList vsKinks)
     }
 
     m_spUi->pFetishListWidget->AddTags(vspKinksAdded);
+  }
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CEditorProjectSettingsWidget::ClearAchievements()
+{
+  WIDGET_INITIALIZED_GUARD
+
+  QLayout* pLayout = m_spUi->pAchievementList->layout();
+  if (nullptr != pLayout)
+  {
+    while (pLayout->count() > 0)
+    {
+      auto pItem = pLayout->itemAt(0);
+      if (nullptr != pItem)
+      {
+        pItem = pLayout->takeAt(0);
+        if (nullptr != pItem->widget()) delete pItem->widget();
+        delete pItem;
+      }
+    }
   }
 }
 

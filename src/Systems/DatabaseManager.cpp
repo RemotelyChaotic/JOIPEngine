@@ -791,6 +791,19 @@ void CDatabaseManager::RemoveResource(tspProject& spProj, const QString& sName)
       }
     }
 
+    // rename refs in achievements
+    for (const auto& [sAchName, spAchievements] : spProj->m_vspAchievements)
+    {
+      if (sAchName == sName)
+      {
+        {
+          QWriteLocker acLocker(&spAchievements->m_rwLock);
+          spAchievements->m_sResource = QString();
+        }
+        emit SignalAchievementDataChanged(iId, sAchName);
+      }
+    }
+
     locker.unlock();
     emit SignalResourceRemoved(iId, sName);
   }
@@ -867,6 +880,13 @@ void CDatabaseManager::RenameResource(tspProject& spProj, const QString& sName, 
           spTag->m_vsResourceRefs.erase(itResRef);
         }
         spTag->m_vsResourceRefs.insert(sNewName);
+      }
+
+      // rename refs in achievements
+      for (const auto& [_, spAchievements] : spProj->m_vspAchievements)
+      {
+        QWriteLocker acLocker(&spAchievements->m_rwLock);
+        spAchievements->m_sResource = sNewName;
       }
 
       locker.unlock();
@@ -1126,6 +1146,135 @@ QStringList CDatabaseManager::KinkCategories()
     vsRet << it->first;
   }
   return vsRet;
+}
+
+//----------------------------------------------------------------------------------------
+//
+QString CDatabaseManager::AddAchievement(
+    tspProject& spProj, const QString& sName, const QString& sDescribtion,
+    qint32 iType, const QString& sResource, const QVariant& data)
+{
+  if (!IsInitialized() || nullptr == spProj || sName.isEmpty()) { return QString(); }
+
+  bool bChanged = false;
+
+  tspSaveData spAchievement = nullptr;
+  qint32 iId = -1;
+  if (auto tagIt = spProj->m_vspAchievements.find(sName); spProj->m_vspAchievements.end() == tagIt)
+  {
+    spAchievement = std::make_shared<SSaveData>(sName, sDescribtion,
+                                                ESaveDataType::_from_integral(iType),
+                                                sResource, data);
+
+    QWriteLocker locker(&spProj->m_rwLock);
+    spAchievement->m_spParent = spProj;
+    spProj->m_vspAchievements.insert({sName, spAchievement});
+    iId = spProj->m_iId;
+    bChanged = true;
+  }
+  else
+  {
+    spAchievement = tagIt->second;
+  }
+
+  if (bChanged)
+  {
+    emit SignalAchievementAdded(iId, sName);
+  }
+
+  return sName;
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CDatabaseManager::ClearAchievement(tspProject& spProj)
+{
+  if (!IsInitialized() || nullptr == spProj) { return; }
+
+  QWriteLocker locker(&spProj->m_rwLock);
+  qint32 iId = spProj->m_iId;
+  while (0 < spProj->m_vspAchievements.size())
+  {
+    auto it = spProj->m_vspAchievements.begin();
+    QString sName = it->first;
+
+    spProj->m_vspAchievements.erase(it);
+
+    locker.unlock();
+    emit SignalAchievementRemoved(iId, sName);
+    locker.relock();
+  }
+}
+
+//----------------------------------------------------------------------------------------
+//
+tspSaveData CDatabaseManager::FindAchievementInProject(tspProject& spProj, QString sName)
+{
+  if (!IsInitialized() || nullptr == spProj) { return nullptr; }
+
+  QReadLocker locker(&spProj->m_rwLock);
+  auto it = spProj->m_vspAchievements.find(sName);
+  if (spProj->m_vspAchievements.end() != it)
+  {
+    return it->second;
+  }
+  return nullptr;
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CDatabaseManager::RemoveAchievement(tspProject& spProj, const QString& sName)
+{
+  if (!IsInitialized() || nullptr == spProj) { return; }
+
+  bool bRemoved = false;
+  qint32 iProjId = -1;
+  {
+    QWriteLocker locker(&spProj->m_rwLock);
+    iProjId = spProj->m_iId;
+
+    auto it = spProj->m_vspAchievements.find(sName);
+    if (spProj->m_vspAchievements.end() != it)
+    {
+      spProj->m_vspAchievements.erase(it);
+      bRemoved = true;
+    }
+  }
+
+  if (bRemoved)
+  {
+    emit SignalAchievementRemoved(iProjId, sName);
+  }
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CDatabaseManager::RenameAchievement(tspProject& spProj, const QString& sName,
+                                         const QString& sNewName)
+{
+  if (!IsInitialized() || nullptr == spProj) { return; }
+
+  tspSaveData spNewAchievement = FindAchievementInProject(spProj, sNewName);
+  if (nullptr == spNewAchievement)
+  {
+    tspSaveData spAchievement = FindAchievementInProject(spProj, sName);
+
+    QWriteLocker locker(&spProj->m_rwLock);
+    qint32 iProjId = spProj->m_iId;
+    auto it = spProj->m_vspAchievements.find(sName);
+    if (it != spProj->m_vspAchievements.end())
+    {
+      spProj->m_vspAchievements.erase(it);
+      {
+        QWriteLocker l(&spAchievement->m_rwLock);
+        spAchievement->m_sName = sNewName;
+      }
+      spProj->m_vspAchievements[sNewName] = spAchievement;
+
+      locker.unlock();
+      emit SignalAchievementRenamed(iProjId, sName, sNewName);
+    }
+  }
 }
 
 //----------------------------------------------------------------------------------------

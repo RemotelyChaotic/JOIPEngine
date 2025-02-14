@@ -1,7 +1,9 @@
 module JoipEngine
+CenteredFlow 1.3 CenteredFlow.qml
 ImageResourceView 1.3 ImageResourceView.qml
 MetronomeItem 1.3 MetronomeItem.qml
 MovieResourceView 1.3 MovieResourceView.qml
+PlayerAchievementView 1.5 PlayerAchievementView.qml
 PlayerAudioPlayer 1.5 PlayerAudioPlayer.qml
 PlayerBackground 1.3 PlayerBackground.qml
 PlayerComponentRegistrator 1.3 PlayerComponentRegistrator.qml

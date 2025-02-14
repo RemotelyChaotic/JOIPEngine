@@ -24,4 +24,11 @@ QtObject {
         property color ticksColor: "white"
         property color rippleColor: "#ff1bbc9d"
     }
+    property QtObject achievementDisplay: QtObject {
+        property color backgroundColor: "white"
+        property color borderColor: "#ff1bbc9d"
+        property color textColor: "black"
+        property int borderWidth: 2
+        property int borderRadius: 0
+    }
 }

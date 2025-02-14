@@ -2,6 +2,8 @@
 #include "CommonScriptHelpers.h"
 #include "ScriptRunnerSignalEmiter.h"
 
+#include "Systems/SaveData.h"
+
 #include <QDebug>
 #include <QEventLoop>
 #include <QJSValue>
@@ -54,19 +56,40 @@ CScriptStorageBase::~CScriptStorageBase()
 
 //----------------------------------------------------------------------------------------
 //
+void CScriptStorageBase::loadPersistent(QString sId)
+{
+  emit SignalEmitter<CStorageSignalEmitter>()->loadPersistent(sId);
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CScriptStorageBase::removeData(QString sId)
+{
+  emit SignalEmitter<CStorageSignalEmitter>()->removeData(sId, QString());
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CScriptStorageBase::storePersistent(QString sId)
+{
+  emit SignalEmitter<CStorageSignalEmitter>()->storePersistent(sId);
+}
+
+//----------------------------------------------------------------------------------------
+//
 void CScriptStorageBase::Cleanup_Impl()
 {
 }
 
 //----------------------------------------------------------------------------------------
 //
-QVariant CScriptStorageBase::LoadImpl(QString sId)
+QVariant CScriptStorageBase::LoadImpl(QString sId, QString sContext)
 {
   QString sRequestId = QUuid::createUuid().toString();
 
   auto pSignalEmitter = SignalEmitter<CStorageSignalEmitter>();
-  QTimer::singleShot(0, this, [&pSignalEmitter,sId,sRequestId]() {
-    emit pSignalEmitter->load(sId, sRequestId);
+  QTimer::singleShot(0, this, [&pSignalEmitter,sId,sContext,sRequestId]() {
+    emit pSignalEmitter->load(sId, sRequestId,sContext);
   });
 
   // local loop to wait for answer
@@ -105,9 +128,9 @@ QVariant CScriptStorageBase::LoadImpl(QString sId)
 
 //----------------------------------------------------------------------------------------
 //
-void CScriptStorageBase::StoreImpl(QString sId, QVariant value)
+void CScriptStorageBase::StoreImpl(QString sId, QVariant value, QString sContext)
 {
-  emit SignalEmitter<CStorageSignalEmitter>()->store(sId, value);
+  emit SignalEmitter<CStorageSignalEmitter>()->store(sId, value, sContext);
 }
 
 //----------------------------------------------------------------------------------------
@@ -126,7 +149,15 @@ CScriptStorageJs::~CScriptStorageJs()
 QVariant CScriptStorageJs::load(QString sId)
 {
   if (!CheckIfScriptCanRun()) { return QVariant(); }
-  return LoadImpl(sId);
+  return LoadImpl(sId, QString());
+}
+
+//----------------------------------------------------------------------------------------
+//
+QVariant CScriptStorageJs::loadAchievement(QString sId)
+{
+  if (!CheckIfScriptCanRun()) { return QVariant(); }
+  return LoadImpl(sId, save_data::c_sFileAchievements);
 }
 
 //----------------------------------------------------------------------------------------
@@ -146,7 +177,27 @@ void CScriptStorageJs::store(QString sId, QVariant value)
     valueToWrite = valFromJS.toVariant();
   }
 
-  StoreImpl(sId, valueToWrite);
+  StoreImpl(sId, valueToWrite, QString());
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CScriptStorageJs::storeAchievement(QString sId, QVariant value)
+{
+  if (!CheckIfScriptCanRun()) { return ; }
+
+  QVariant valueToWrite = value;
+  QJSValue valFromJS = value.value<QJSValue>();
+  if (valFromJS.isArray())
+  {
+    valueToWrite = valFromJS.toVariant();
+  }
+  else if (valFromJS.isObject())
+  {
+    valueToWrite = valFromJS.toVariant();
+  }
+
+  StoreImpl(sId, valueToWrite, save_data::c_sFileAchievements);
 }
 
 //----------------------------------------------------------------------------------------
@@ -165,7 +216,15 @@ CScriptStorageLua::~CScriptStorageLua()
 QVariant CScriptStorageLua::load(QString sId)
 {
   if (!CheckIfScriptCanRun()) { return QVariant(); }
-  return LoadImpl(sId);
+  return LoadImpl(sId, QString());
+}
+
+//----------------------------------------------------------------------------------------
+//
+QVariant CScriptStorageLua::loadAchievement(QString sId)
+{
+  if (!CheckIfScriptCanRun()) { return QVariant(); }
+  return LoadImpl(sId, save_data::c_sFileAchievements);
 }
 
 //----------------------------------------------------------------------------------------
@@ -173,5 +232,13 @@ QVariant CScriptStorageLua::load(QString sId)
 void CScriptStorageLua::store(QString sId, QVariant value)
 {
   if (!CheckIfScriptCanRun()) { return; }
-  StoreImpl(sId, script::ConvertLuaVariant(value));
+  StoreImpl(sId, script::ConvertLuaVariant(value), QString());
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CScriptStorageLua::storeAchievement(QString sId, QVariant value)
+{
+  if (!CheckIfScriptCanRun()) { return ; }
+  StoreImpl(sId, script::ConvertLuaVariant(value), save_data::c_sFileAchievements);
 }

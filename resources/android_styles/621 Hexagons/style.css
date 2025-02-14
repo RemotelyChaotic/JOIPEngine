@@ -1476,3 +1476,17 @@ CEditorDialogWidget {
                   url(ui/ButtonNotification.png) on;
 }
 
+CAchievementWidget {
+  background-color: rgb(21, 47, 86);
+  border: 2px solid rgb(0, 117, 159);
+  border-radius: 5px;
+  padding: 6px;
+}
+
+CSelectableResourceLabel {
+  min-height: 120px;
+  min-width: 120px;
+  max-height: 120px;
+  max-width: 120px;
+  qproperty-unsetIcon: url(ui/ButtonBackground.png);
+}

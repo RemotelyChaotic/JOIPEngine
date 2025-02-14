@@ -16,6 +16,7 @@ Rectangle {
     property int progress: -1
     property bool isHovered: false
     property bool isSelected: describtionDelegate.parent.ListView.isCurrentItem
+    property bool openedAchievements: false
     property bool openedDetails: false
     property Project dto: project
 
@@ -48,7 +49,9 @@ Rectangle {
                 describtionDelegate.parent.ListView.view.currentIndex = index;
             }
             onEntered: isHovered = true
-            onExited: isHovered = false
+            onExited: isHovered = containsMouse
+
+            children: achievementsView.mouseArea
         }
 
         // title card
@@ -175,6 +178,47 @@ Rectangle {
                     GradientStop {
                         position: Math.max(1.0, gradientProgress.progressPosition+0.3)
                         color: root.selectionColor
+                    }
+                }
+            }
+        }
+
+        // Achievements
+        Rectangle {
+            id: achievementsOverlay
+            anchors.fill: parent
+            color: "transparent"
+
+            // icon to click
+            Button {
+                id: buttonOpenCloseAchievements
+                anchors.top: parent.top
+                anchors.right: parent.right
+                height: hovered ? 48 : 32
+                width: hovered ? 48 : 32
+                background: Image {
+                    anchors.fill: parent
+                    source: Settings.styleFolderQml() + "/ButtonAchievement.svg"
+                }
+                onClicked: openedAchievements = !openedAchievements
+                onHoveredChanged: isHovered = true
+            }
+
+            AchievementsView {
+                id: achievementsView
+                x: 0
+                y: 32
+                width: parent.width
+                height: openedAchievements ? parent.height - 32 : 0
+                opacity: visible ? 1.0 : 0.0
+                visible: openedAchievements || height > 0
+                color: "#88000000"
+
+                dto: openedAchievements ? describtionDelegate.dto : null
+
+                Behavior on height {
+                    animation: ParallelAnimation {
+                        NumberAnimation { duration: 500; easing.type: Easing.InOutQuad }
                     }
                 }
             }

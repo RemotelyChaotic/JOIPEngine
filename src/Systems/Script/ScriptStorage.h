@@ -21,9 +21,12 @@ public:
 
 signals:
   void clear();
-  void load(QString sId, QString sRequestId);
+  void load(QString sId, QString sRequestId, QString sContext);
+  void loadPersistent(QString sId);
   void loadReturnValue(QJSValue value, QString sRequestId);
-  void store(QString sId, QVariant value);
+  void removeData(QString sId, QString sContext);
+  void store(QString sId, QVariant value, QString sContext);
+  void storePersistent(QString sId);
 };
 Q_DECLARE_METATYPE(CStorageSignalEmitter)
 
@@ -41,13 +44,18 @@ public:
                      QtLua::State* pState);
   ~CScriptStorageBase();
 
+public slots:
+  void loadPersistent(QString sId);
+  void removeData(QString sId);
+  void storePersistent(QString sId);
+
 signals:
   void SignalQuitLoop();
 
 protected:
   void Cleanup_Impl() override;
-  QVariant LoadImpl(QString sId);
-  void StoreImpl(QString sId, QVariant value);
+  QVariant LoadImpl(QString sId, QString sContext);
+  void StoreImpl(QString sId, QVariant value, QString sContext);
 };
 
 //----------------------------------------------------------------------------------------
@@ -63,7 +71,10 @@ public:
 
 public slots:
   QVariant load(QString sId);
+  QVariant loadAchievement(QString sId);
   void store(QString sId, QVariant value);
+  void storeAchievement(QString sId, QVariant value);
+
 };
 
 //----------------------------------------------------------------------------------------
@@ -80,7 +91,9 @@ public:
 
 public slots:
   QVariant load(QString sId);
+  QVariant loadAchievement(QString sId);
   void store(QString sId, QVariant value);
+  void storeAchievement(QString sId, QVariant value);
 };
 
 #endif // SCRIPTSTORAGE_H
