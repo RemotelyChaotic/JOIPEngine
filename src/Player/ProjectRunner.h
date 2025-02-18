@@ -48,7 +48,7 @@ public:
   void DisableScene(const QString& sScene);
   void EnableScene(const QString& sScene);
   bool IsSceneEnabled(const QString& sScene) const;
-  tspScene NextScene(const QString sName);
+  tspScene NextScene(const QString sName, bool* bEnd);
   QStringList PossibleScenes(std::optional<QString>* unresolvedData);
   void ResolveFindScenes(const QString sName);
   void ResolvePossibleScenes(const QStringList vsNames, qint32 iIndex);

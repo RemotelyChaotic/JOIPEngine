@@ -50,10 +50,11 @@ CSceneMainScreen::CSceneMainScreen(QWidget* pParent) :
   m_wpDbManager(),
   m_lastScriptExecutionStatus(static_cast<qint32>(CScriptRunnerSignalEmiter::ScriptExecStatus::eRunning)),
   m_bInitialized(false),
-  m_bShuttingDown(false),
+  m_runningState(eShutDown),
   m_bErrorState(false),
   m_bBeingDebugged(false),
   m_bCloseRequested(false),
+  m_bReachedEnd(false),
   m_bCanLoadNewScene(true)
 {
   m_spUi->setupUi(this);
@@ -113,7 +114,7 @@ void CSceneMainScreen::Initialize(const std::shared_ptr<CWindowContext>& spWindo
 
   connect(m_spProjectRunner.get(), &CProjectRunner::SignalChangeSceneRequest,
           this, [this](const QString& sScene) {
-    SlotScriptRunFinished(true, sScene);
+    SlotScriptRunFinished(true, m_bReachedEnd, sScene);
   });
   connect(m_spProjectRunner.get(), &CProjectRunner::SignalError,
           this, &CSceneMainScreen::SlotError);
@@ -182,8 +183,9 @@ void CSceneMainScreen::LoadProject(qint32 iId, const tSceneToLoad& sStartScene)
     ConnectAllSignals();
     LoadQml();
 
-    m_bShuttingDown = false;
+    m_runningState = eRunning;
     m_bErrorState = false;
+    m_bReachedEnd = false;
   }
 
   if (!m_bBeingDebugged)
@@ -236,7 +238,7 @@ void CSceneMainScreen::UnloadProject()
 {
   if (!m_bInitialized) { return; }
 
-  m_bShuttingDown = true;
+  m_runningState = eShuttingDown;
   m_spDialogManager->UnloadProject();
   m_spScriptRunner->InterruptExecution();
 }
@@ -263,7 +265,7 @@ void CSceneMainScreen::SetDebugging(bool bDebugging)
 
 //----------------------------------------------------------------------------------------
 //
-void CSceneMainScreen::SlotFinish()
+void CSceneMainScreen::SlotFinish(bool bReachedEnd)
 {
   if (!m_bInitialized || nullptr == m_spCurrentProject) { return; }
 
@@ -277,9 +279,12 @@ void CSceneMainScreen::SlotFinish()
 
     emit SignalExitClicked();
 
+    m_bReachedEnd = bReachedEnd;
+
     bool bOk =
         QMetaObject::invokeMethod(this, "SlotScriptRunFinished", Qt::QueuedConnection,
-                                  Q_ARG(bool, false), Q_ARG(QString, QString()));
+                                  Q_ARG(bool, false), Q_ARG(bool, m_bReachedEnd),
+                                  Q_ARG(QString, QString()));
     assert(bOk);
     Q_UNUSED(bOk);
   }
@@ -310,7 +315,8 @@ void CSceneMainScreen::SlotQuit()
   {
     bool bOk =
         QMetaObject::invokeMethod(this, "SlotScriptRunFinished", Qt::QueuedConnection,
-                                  Q_ARG(bool, false), Q_ARG(QString, QString()));
+                                  Q_ARG(bool, false), Q_ARG(bool, m_bReachedEnd),
+                                  Q_ARG(QString, QString()));
     assert(bOk);
     Q_UNUSED(bOk);
   }
@@ -511,7 +517,8 @@ void CSceneMainScreen::SlotSceneSelectReturnValue(int iIndex)
   // no scenes needed resolvement
   if (0 <= iIndex && sScenes.size() > iIndex)
   {
-    tspScene spScene = m_spProjectRunner->NextScene(sScenes[iIndex]);
+    bool bEnd = false;
+    tspScene spScene = m_spProjectRunner->NextScene(sScenes[iIndex], &bEnd);
     if (nullptr != spScene)
     {
       // load script
@@ -531,13 +538,13 @@ void CSceneMainScreen::SlotSceneSelectReturnValue(int iIndex)
     else
     {
       qInfo() << tr("Next scene is null or end.");
-      SlotFinish();
+      SlotFinish(bEnd);
     }
   }
   else
   {
     qWarning() << tr("No more scenes to load was unexpected.");
-    SlotFinish();
+    SlotFinish(false);
   }
 }
 
@@ -553,12 +560,12 @@ void CSceneMainScreen::SlotSceneLoaded(const QString&)
 
 //----------------------------------------------------------------------------------------
 //
-void CSceneMainScreen::SlotScriptRunFinished(bool bOk, const QString& sRetVal)
+void CSceneMainScreen::SlotScriptRunFinished(bool bOk, bool bEndReached, const QString& sRetVal)
 {
   if (!m_bInitialized || nullptr == m_spCurrentProject) { return; }
 
   // normal handling
-  if (!m_bShuttingDown)
+  if (eRunning == m_runningState)
   {
     if (bOk)
     {
@@ -586,12 +593,14 @@ void CSceneMainScreen::SlotScriptRunFinished(bool bOk, const QString& sRetVal)
   }
 
   // during shutdown this slot is called, when the engine has unloaded safely
-  else
+  else if (eShuttingDown == m_runningState)
   {
     DisconnectAllSignals();
     UnloadRunner();
-    UnloadQml();
+    UnloadQml(bEndReached);
+    m_runningState = eShutDown;
   }
+  // else ignore
 }
 
 //----------------------------------------------------------------------------------------
@@ -657,8 +666,12 @@ void CSceneMainScreen::ConnectAllSignals()
 
   connect(spSignalEmmiterContext.get(), &CScriptRunnerSignalContext::showError,
           this, &CSceneMainScreen::SlotError, Qt::QueuedConnection);
-  connect(m_spScriptRunner.get(), &CScriptRunner::SignalScriptRunFinished,
-          this, &CSceneMainScreen::SlotScriptRunFinished, Qt::QueuedConnection);
+  m_runFinishedConn =
+      connect(m_spScriptRunner.get(), &CScriptRunner::SignalScriptRunFinished,
+              this, [this](bool bOk, const QString& sRetVal) {
+                SlotScriptRunFinished(bOk, m_bReachedEnd, sRetVal);
+              },
+              Qt::QueuedConnection);
 
   bOk = connect(pRootObject, SIGNAL(sceneSelectionReturnValue(int)),
                 this, SLOT(SlotSceneSelectReturnValue(int)), Qt::QueuedConnection);
@@ -680,8 +693,10 @@ void CSceneMainScreen::DisconnectAllSignals()
 
   disconnect(spSignalEmmiterContext.get(), &CScriptRunnerSignalContext::showError,
           this, &CSceneMainScreen::SlotError);
-  disconnect(m_spScriptRunner.get(), &CScriptRunner::SignalScriptRunFinished,
-          this, &CSceneMainScreen::SlotScriptRunFinished);
+  if (m_runFinishedConn)
+  {
+    disconnect(m_runFinishedConn);
+  }
 
   disconnect(pRootObject, SIGNAL(sceneSelectionReturnValue(int)),
              this, SLOT(SlotSceneSelectReturnValue(int)));
@@ -724,10 +739,8 @@ void CSceneMainScreen::LoadQml()
     m_pCurrentProjectWrapper = new CProjectScriptWrapper(m_spUi->pQmlWidget->engine(), m_spCurrentProject);
     QQmlEngine::setObjectOwnership(m_pCurrentProjectWrapper, QQmlEngine::CppOwnership);
     pRootObject->setProperty("currentlyLoadedProject", QVariant::fromValue(m_pCurrentProjectWrapper.data()));
-
-    QMetaObject::invokeMethod(pRootObject, "onLoadProject");
-
     pRootObject->setProperty("debug", m_bBeingDebugged);
+    QMetaObject::invokeMethod(pRootObject, "onLoadProject");
   }
 }
 
@@ -750,7 +763,8 @@ void CSceneMainScreen::NextSkript(bool bMightBeRegex)
     {
       if (sScenes.size() == 1)
       {
-        tspScene spScene = m_spProjectRunner->NextScene(sScenes[0]);
+        bool bEnd = false;
+        tspScene spScene = m_spProjectRunner->NextScene(sScenes[0], &bEnd);
         if (nullptr != spScene)
         {
           // load script
@@ -770,7 +784,7 @@ void CSceneMainScreen::NextSkript(bool bMightBeRegex)
         else
         {
           qInfo() << tr("Next scene is null or end.");
-          SlotFinish();
+          SlotFinish(bEnd);
         }
       }
       else if (bMightBeRegex)
@@ -780,7 +794,8 @@ void CSceneMainScreen::NextSkript(bool bMightBeRegex)
         std::mt19937 generator(static_cast<long unsigned int>(seed));
         std::uniform_int_distribution<> dis(0, static_cast<qint32>(sScenes.size() - 1));
         qint32 iGeneratedIndex = dis(generator);
-        tspScene spScene = m_spProjectRunner->NextScene(sScenes[iGeneratedIndex]);
+        bool bEnd = false;
+        tspScene spScene = m_spProjectRunner->NextScene(sScenes[iGeneratedIndex], &bEnd);
         if (nullptr != spScene)
         {
           // load script
@@ -800,7 +815,7 @@ void CSceneMainScreen::NextSkript(bool bMightBeRegex)
         else
         {
           qInfo() << tr("Next scene is null or end.");
-          SlotFinish();
+          SlotFinish(bEnd);
         }
       }
       else
@@ -849,7 +864,7 @@ void CSceneMainScreen::NextSkript(bool bMightBeRegex)
   else
   {
     qInfo() << tr("No more scenes to load.");
-    SlotFinish();
+    SlotFinish(false);
   }
 }
 
@@ -863,12 +878,13 @@ void CSceneMainScreen::UnloadRunner()
 
 //----------------------------------------------------------------------------------------
 //
-void CSceneMainScreen::UnloadQml()
+void CSceneMainScreen::UnloadQml(bool bReachedEnd)
 {
   QQuickItem* pRootObject =  m_spUi->pQmlWidget->rootObject();
   if (nullptr != pRootObject)
   {
-    QMetaObject::invokeMethod(pRootObject, "onUnLoadProject");
+    QMetaObject::invokeMethod(pRootObject, "onUnLoadProject",
+                              Q_ARG(QVariant, QVariant::fromValue(bReachedEnd)));
   }
 }
 

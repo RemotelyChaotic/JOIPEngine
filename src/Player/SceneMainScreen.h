@@ -35,6 +35,12 @@ namespace player {
 class CSceneMainScreen : public QWidget
 {
   Q_OBJECT
+  enum ERunningState
+  {
+    eRunning,
+    eShuttingDown,
+    eShutDown
+  };
 
 public:
   explicit CSceneMainScreen(QWidget* pParent = nullptr);
@@ -54,7 +60,7 @@ public:
   void SetDebugging(bool bDebugging);
 
 public slots:
-  void SlotFinish();
+  void SlotFinish(bool bReachedEnd);
   void SlotQuit();
 
 signals:
@@ -76,7 +82,7 @@ private slots:
   void SlotResizeDone();
   void SlotSceneSelectReturnValue(int iIndex);
   void SlotSceneLoaded(const QString& sScene);
-  void SlotScriptRunFinished(bool bOk, const QString& sRetVal);
+  void SlotScriptRunFinished(bool bOk, bool bEnd, const QString& sRetVal);
   void SlotStartLoadingSkript();
   void SlotUnloadFinished();
 
@@ -88,7 +94,7 @@ private:
   void LoadQml();
   void NextSkript(bool bMightBeRegex);
   void UnloadRunner();
-  void UnloadQml();
+  void UnloadQml(bool bReachedEnd);
 
 private:
   std::unique_ptr<Ui::CSceneMainScreen>                       m_spUi;
@@ -103,13 +109,15 @@ private:
   QPointer<CProjectScriptWrapper>                             m_pCurrentProjectWrapper;
   QPointer<CPlayerConsoleError>                               m_pErrorConsole;
   std::weak_ptr<CDatabaseManager>                             m_wpDbManager;
+  QMetaObject::Connection                                     m_runFinishedConn;
   QStringList                                                 m_vsBaseImportPathList;
   qint32                                                      m_lastScriptExecutionStatus;
   bool                                                        m_bInitialized;
-  bool                                                        m_bShuttingDown;
+  ERunningState                                               m_runningState;
   bool                                                        m_bErrorState;
   bool                                                        m_bBeingDebugged;
   bool                                                        m_bCloseRequested;
+  bool                                                        m_bReachedEnd;
   bool                                                        m_bCanLoadNewScene;
 };
 

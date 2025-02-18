@@ -25,6 +25,11 @@
 
 using QtNodes::Node;
 
+namespace
+{
+  const char c_sEndNode[] = "~End";
+}
+
 //----------------------------------------------------------------------------------------
 //
 void ResolveNextPossibleNodes(qint32 iDepth, Node* pNode, const std::set<QString>& disabledScenes,
@@ -70,7 +75,7 @@ void ResolveNextPossibleNodes(qint32 iDepth, Node* pNode, const std::set<QString
           // push end
           else if(nullptr != pEndModel)
           {
-            vpRet.push_back(NodeResolveReslt{"End", pNextNode, iDepth, false, QString()});
+            vpRet.push_back(NodeResolveReslt{c_sEndNode, pNextNode, iDepth, false, QString()});
           }
           // only push enabled scenes
           else if (disabledScenes.end() == disabledScenes.find(pSceneModel->SceneName()))
@@ -125,7 +130,7 @@ void ResolveNextPossibleNodes(qint32 iDepth, Node* pNode, const std::set<QString
         if (nullptr != pEndModel)
         {
           vpCachedRet.push_back(
-              NodeResolveReslt{"End", pNextNode, iDepth, false, QString()});
+              NodeResolveReslt{c_sEndNode, pNextNode, iDepth, false, QString()});
         }
         // we found a scene model, only insert if not disabled
         else if (nullptr != pSceneModel)
@@ -230,7 +235,7 @@ void ResolveNodes(std::vector<NodeResolveReslt>& resolveResult, const QStringLis
         }
         else if (nullptr != pEndModel)
         {
-          resolveResult.push_back(NodeResolveReslt{"End", node.m_pNode, node.m_iDepth+1,
+          resolveResult.push_back(NodeResolveReslt{c_sEndNode, node.m_pNode, node.m_iDepth+1,
                                                    false, QString()});
         }
         else
@@ -391,16 +396,23 @@ bool CProjectRunner::IsSceneEnabled(const QString& sScene) const
 
 //----------------------------------------------------------------------------------------
 //
-tspScene CProjectRunner::NextScene(const QString sName)
+tspScene CProjectRunner::NextScene(const QString sName, bool* bEnd)
 {
   // we found a scene, so clear resolve cache
   m_resolveResult.clear();
+
+  if (nullptr != bEnd)
+  {
+    *bEnd = false;
+  }
 
   auto it = m_nodeMap.find(sName);
   if (m_nodeMap.end() != it)
   {
     CSceneNodeModel* pSceneModel =
       dynamic_cast<CSceneNodeModel*>(it->second->nodeDataModel());
+    CEndNodeModel* pEndNodeModel =
+        dynamic_cast<CEndNodeModel*>(it->second->nodeDataModel());
 
     if (nullptr != pSceneModel)
     {
@@ -416,6 +428,10 @@ tspScene CProjectRunner::NextScene(const QString sName)
           return spScene;
         }
       }
+    }
+    else if (nullptr != pEndNodeModel && nullptr != bEnd)
+    {
+      *bEnd = true;
     }
   }
   else if (nullptr != m_spInjectedScene)
@@ -557,7 +573,7 @@ bool CProjectRunner::GenerateNodesFromResolved()
       }
       else if (nullptr != pEndModel)
       {
-        m_nodeMap["End"] = pNode.m_pNode;
+        m_nodeMap[c_sEndNode] = pNode.m_pNode;
       }
     }
   }
