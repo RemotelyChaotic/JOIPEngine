@@ -1,6 +1,8 @@
 #include "TeaseStorage.h"
 #include "ProjectSavegameManager.h"
 
+#include "Systems/SaveData.h"
+
 #include <QQmlContext>
 #include <QQmlEngine>
 
@@ -95,7 +97,7 @@ void CTeaseStorageWrapper::loadPersistent(const QString& sId, const QString& sCo
 {
   if (nullptr != m_pSaveManager)
   {
-    const QString sFile = sContext.isEmpty() ? "savefile" : sContext;
+    const QString sFile = sContext.isEmpty() ? save_data::c_sFileSavefile : sContext;
     QQmlContext* pCurrentContext = QQmlEngine::contextForObject(this);
     QQmlEngine* pEngine = pCurrentContext->engine();
     QJSValue val = pEngine->toScriptValue(m_pSaveManager->load(sId, sFile));
@@ -113,7 +115,7 @@ void CTeaseStorageWrapper::storePersistent(const QString& sId, const QString& sC
   QJSValue val = load(sId);
   if (!val.isNull() && !val.isUndefined() && nullptr != m_pSaveManager)
   {
-    const QString sFile = sContext.isEmpty() ? "savefile" : sContext;
+    const QString sFile = sContext.isEmpty() ? save_data::c_sFileSavefile : sContext;
     m_pSaveManager->store(sId, val.toVariant(), sFile);
   }
 }

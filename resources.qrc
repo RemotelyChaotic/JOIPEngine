@@ -329,6 +329,9 @@
         <file>resources/help/editor/images/editdialog_dialog.png</file>
         <file>resources/style/img/ButtonAchievement.png</file>
         <file>resources/style/qml/ButtonAchievement.svg</file>
+        <file>resources/help/editor/addachievement_button_help.html</file>
+        <file>resources/help/editor/projectsettings/achievements_help.html</file>
+        <file>resources/help/editor/projectsettings/images/achievement_editors.png</file>
     </qresource>
     <qresource prefix="/qml">
         <file>resources/qml/JoipEngine/EmptyDummy.qml</file>

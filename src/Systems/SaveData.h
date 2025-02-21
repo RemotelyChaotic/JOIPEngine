@@ -13,6 +13,7 @@ namespace save_data
 {
   [[maybe_unused]] const char c_sFileAchievements[] = "achievements";
   [[maybe_unused]] const char c_sFileStats[] = "stats";
+  [[maybe_unused]] const char c_sFileSavefile[] = "savefile";
   [[maybe_unused]] const char c_sSaveFileEnding[] = "joipsave";
 
   [[maybe_unused]] const char c_sFileStatNumPlayed[] = "numPlayed";

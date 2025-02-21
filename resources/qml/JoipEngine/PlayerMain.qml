@@ -273,13 +273,25 @@ Rectangle {
         {
             store(sId, value);
         }
+        function storeAchievement(sId, value)
+        {
+            store(sId, value, "achievements");
+        }
         function getItem(sId)
         {
             return load(sId);
         }
+        function loadAchievement(sId)
+        {
+            return load(sId, "achievements");
+        }
         function removeItem(sId)
         {
             store(sId, null);
+        }
+        function removeData(sId)
+        {
+            saveManager.removeData(sId, "savefile");
         }
     }
     StorageSignalEmitter {

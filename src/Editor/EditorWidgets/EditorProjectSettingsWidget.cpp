@@ -55,6 +55,8 @@ namespace
   const QString c_sProjectDescriptionHelpId="Editor/ProjectDescription";
   const QString c_sFetishListHelpId =       "Editor/FetishList";
   const QString c_sAddFetishHelpId =        "Editor/AddFetish";
+  const QString c_sAchievementListHelpId =  "Editor/AchievementList";
+  const QString c_sAddAchievementHelpId =   "Editor/AddAchievement";
 }
 
 //----------------------------------------------------------------------------------------
@@ -115,6 +117,12 @@ void CEditorProjectSettingsWidget::Initialize()
     wpHelpFactory->RegisterHelp(c_sAddFetishHelpId, ":/resources/help/editor/addfetish_button_help.html");
     m_spUi->FetishOverlayButton->setProperty(helpOverlay::c_sHelpPagePropertyName, c_sAddFetishHelpId);
     wpHelpFactory->RegisterHelp(c_sAddFetishHelpId, ":/resources/help/editor/addfetish_button_help.html");
+    m_spUi->pAchievementArea->setProperty(helpOverlay::c_sHelpPagePropertyName, c_sAchievementListHelpId);
+    wpHelpFactory->RegisterHelp(c_sAchievementListHelpId, ":/resources/help/editor/projectsettings/achievements_help.html");
+    m_spUi->pAchievementLineEdit->setProperty(helpOverlay::c_sHelpPagePropertyName, c_sAddAchievementHelpId);
+    wpHelpFactory->RegisterHelp(c_sAddAchievementHelpId, ":/resources/help/editor/addachievement_button_help.html");
+    m_spUi->AddNewAchievement->setProperty(helpOverlay::c_sHelpPagePropertyName, c_sAddAchievementHelpId);
+    wpHelpFactory->RegisterHelp(c_sAddAchievementHelpId, ":/resources/help/editor/addachievement_button_help.html");
   }
 
   auto spDataBaseManager = CApplication::Instance()->System<CDatabaseManager>().lock();

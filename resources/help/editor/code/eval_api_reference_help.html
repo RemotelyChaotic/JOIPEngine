@@ -429,7 +429,7 @@
 
     <br>
 
-    <h2>TeaseStorage (name: <i>teaseStorage</i>)</h2>
+    <h2>TeaseStorage (name: <i>teaseStorage / localStorage</i>)</h2>
 
     <br>
 
@@ -441,22 +441,55 @@
     <a href="qrc:/resources/help/project/joi_project_help.html">JOI-Project</a> finishes
     playing. Methods marked with <i>Extension</i> are not part of the EOS API.<br>
       <ul>
-        <li><b>setItem ( string id, var value ):</b><br>
+        <li><b>setItem / store ( string id, var value ):</b><br>
         Stores a value with the given id in the storage. Any value can be stored and loaded, even complex objects.<br>
         <i>Example Usage:</i><br>
         teaseStorage.setItem("value", 5);<br>
         <br></li>
 
-        <li><b>getItem ( string id ):</b><br>
+        <li><b>storePersistent ( string id ):</b><br>
+        Stores the value with the given id from the storage in a persistent save-file.<br>
+        <i>Example Usage:</i><br>
+        localStorage.store("value", 5); // store in storage<br>
+        localStorage.storePersistent("value"); // persist the value<br>
+        <br></li>
+
+        <li><b>storeAchievement ( string id, [int | bool] value ):</b><br>
+        Asigns the value given to the achievement with the given id.<br>
+        Only accepts numerical values and bools.<br>
+        <i>Example Usage:</i><br>
+        localStorage.storeAchievement("Awesome Achievement", 5);<br>
+        <br></li>
+
+        <li><b>getItem / load ( string id ):</b><br>
         Loads a value with the given id from the storage. Any value can be stored and loaded, even complex objects.<br>
         <i>Example Usage:</i><br>
         var value = teaseStorage.getItem("value");<br>
+        <br></li>
+
+        <li><b>loadPersistent ( string id ):</b><br>
+        Loads a value with the given id from the persistent save-file and writes it to storage.<br>
+        <i>Example Usage:</i><br>
+        localStorage.loadPersistent("value");<br>
+        var value = localStorage.load("value");<br>
+        <br></li>
+
+        <li><b>loadAchievement ( string id ): value:</b><br>
+        Reads the value of the achievement with the given id from the storage.<br>
+        <i>Example Usage:</i><br>
+        var value = localStorage.loadAchievement("Awesome Achievement");<br>
         <br></li>
 
         <li><b>removeItem ( string id ):</b> <i>Extension</i><br>
         Removes a value with the given id from the storage.<br>
         <i>Example Usage:</i><br>
         teaseStorage.removeItem("value");<br>
+        <br></li>
+
+        <li><b>removeData ( string id ):</b><br>
+        Removes all data with the given id from the save-file. This can not be undone.<br>
+        <i>Example Usage:</i><br>
+        localStorage.removeData("value");<br>
         <br></li>
       </ul>
     </p>

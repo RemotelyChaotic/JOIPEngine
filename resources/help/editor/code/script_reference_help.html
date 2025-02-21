@@ -471,12 +471,57 @@
         localStorage:store('value', 5);<br>
         <br></li>
 
+        <li><b>storePersistent ( string id ):</b><br>
+        Stores the value with the given id from the storage in a persistent save-file.<br>
+        <i>Example Usage (JS):</i><br>
+        localStorage.store("value", 5); // store in storage<br>
+        localStorage.storePersistent("value"); // persist the value<br>
+        <i>Example Usage (Lua):</i><br>
+        localStorage:store('value', 5); -- store in storage<br>
+        localStorage:storePersistent('value'); -- persist the value<br>
+        <br></li>
+
+        <li><b>storeAchievement ( string id, [int | bool] value ):</b><br>
+        Asigns the value given to the achievement with the given id.<br>
+        Only accepts numerical values and bools.<br>
+        <i>Example Usage (JS):</i><br>
+        localStorage.storeAchievement("Awesome Achievement", 5);<br>
+        <i>Example Usage (Lua):</i><br>
+        localStorage:storeAchievement('Awesome Achievement', 5);<br>
+        <br></li>
+
         <li><b>load ( string id ): value:</b><br>
         Loads a value with the given id from the storage. Any value can be stored and loaded, even complex objects.<br>
         <i>Example Usage (JS):</i><br>
         var value = localStorage.load("value");<br>
         <i>Example Usage (Lua):</i><br>
         local value = localStorage:load('value');<br>
+        <br></li>
+
+        <li><b>loadPersistent ( string id ):</b><br>
+        Loads a value with the given id from the persistent save-file and writes it to storage.<br>
+        <i>Example Usage (JS):</i><br>
+        localStorage.loadPersistent("value");<br>
+        var value = localStorage.load("value");<br>
+        <i>Example Usage (Lua):</i><br>
+        localStorage:loadPersistent('value');<br>
+        local value = localStorage:load('value');<br>
+        <br></li>
+
+        <li><b>loadAchievement ( string id ): value:</b><br>
+        Reads the value of the achievement with the given id from the storage.<br>
+        <i>Example Usage (JS):</i><br>
+        var value = localStorage.loadAchievement("Awesome Achievement");<br>
+        <i>Example Usage (Lua):</i><br>
+        local value = localStorage:loadAchievement('Awesome Achievement');<br>
+        <br></li>
+
+        <li><b>removeData ( string id ):</b><br>
+        Removes all data with the given id from the save-file. This can not be undone.<br>
+        <i>Example Usage (JS):</i><br>
+        localStorage.removeData("value");<br>
+        <i>Example Usage (Lua):</i><br>
+        localStorage:removeData('value');<br>
         <br></li>
       </ul>
     </p>
@@ -946,7 +991,7 @@
 
         <li><b>runAsynch ( Resource | string resource [, string id ] ):</b><br>
         Starts a new asynch thread and runs the given Script or Sequence Resource in the thread.
-        The id can not be <b>&quot;~main&quot; and is optional. If no id is given, the
+        The id can not be <b>&quot;~main&quot;</b> and is optional. If no id is given, the
         id of the thred equals the Resource name. If a thread with the given id is already
         running, it will be killed before starting the new thread. The Resource can be of any script
         type (JS, Lua, EOS) or a Sequence.<br>
@@ -1326,10 +1371,22 @@
         need to use the Tag for custom logic.<br>
         <br></li>
 
+        <li><b>numAchievements (  ): int:</b><br>
+        Returns the number of Achievements in the project. Usefull for iteration.<br>
+        <br></li>
+
+        <li><b>achievements (  ): string[]:</b><br>
+        Returns all Achievements names. Useful for iteration.<br>
+        <br></li>
+
+        <li><b>achievement ( string name | int index ): SaveData:</b><br>
+        Returns a SaveData object representing an achievement at index index or with the name
+        <i>name</i>. Useful if you need to use the Achievement for custom logic.<br>
+        <br></li>
+
         <li><b>font: string:</b><br>
         Returns the font used in the player. Mainly in the PlayerTextBox.<br>
         <br></li>
-      <br></li>
       </ul>
     </p>
 
@@ -1381,7 +1438,6 @@
         <i>Example Usage (Lua):</i><br>
         local project = scene:project();<br>
         <br></li>
-      <br></li>
       </ul>
     </p>
 
@@ -1453,7 +1509,6 @@
         <i>Example Usage (Lua):</i><br>
         local project = resource:project();<br>
         <br></li>
-      <br></li>
       </ul>
     </p>
 
@@ -1486,9 +1541,51 @@
         </li>
 
         <li><b>resources ( ): string[]</b><br>
-        The resource names that are assigned with this tag.<br>
+        The resource names that are assigned with this tag.<br></li>
+      </ul>
+    </p>
+
+    <br>
+
+    <h2>SaveData</h2>
+
+    <br>
+
+    <p>This type of object can be returned by a Project object and contains information
+    about an Achievement. The type name is SaveData, because this is a generic persistent
+    Data wrapper.<br>
+      <ul>
+        <li><b>name: string</b><br>
+        This property lets you read the name / ID of the element.
+        This serves as the identifier in the project and in any persistent file.<br>
+
+        <li><b>description: string</b><br>
+        This property lets you read the description of the SaveData if there is any.<br></li>
+
+        <li><b>type: string</b><br>
+        This property lets you read the SaveData type. The possible types are:<br>
+        <ul>
+          <li><b>SaveDataType.Bool</b>: Contains a boolean value.</li>
+          <li><b>SaveDataType.Int</b>: Contains an integer 32bit value.</li>
+          <li><b>SaveDataType.Double</b>: Contains a double (real) 64bit value.</li>
+          <li><b>SaveDataType.String</b>: Contains a string object.</li>
+          <li><b>SaveDataType.Regexp</b>: Contains a regular expression.</li>
+          <li><b>SaveDataType.Date</b>: Contains a Date object.</li>
+          <li><b>SaveDataType.Url</b>: Contains an Url object.</li>
+          <li><b>SaveDataType.Array</b>: Contains an array of elements.</li>
+          <li><b>SaveDataType.Object</b>: Contains a complex JSON object.</li>
+          <li><b>SaveDataType.Null</b>: Contains a null object.</li>
+        </ul>
+        Only Bool and Int are supported by Achievements.
         </li>
-      <br></li>
+
+        <li><b>resource: string</b><br>
+        The number of resource that is assigned to this SaveData element. In case of an
+        Achievement this is the icon.
+        </li>
+
+        <li><b>data: var</b><br>
+        The resource data. Type depends on the type of the SaveData.<br></li>
       </ul>
     </p>
 
@@ -1519,7 +1616,6 @@
         The red green and blue values are generated from an MD4 Hash of the category where
         red is the first byte green the second and blue the third.<br>
         </li>
-      <br></li>
       </ul>
     </p>
 
