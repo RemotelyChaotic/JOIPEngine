@@ -581,7 +581,7 @@ Rectangle {
         width: Math.min(itemHeight*3, root.width)
         height: itemHeight*3
 
-        x: parent.width - width - 5
+        x: Settings.dominantHand === DominantHand.Right ? 5 : parent.width - width - 5
         y: parent.height - height - 5
     }
 

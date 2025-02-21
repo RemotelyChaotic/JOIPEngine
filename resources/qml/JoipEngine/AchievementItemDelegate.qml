@@ -11,7 +11,7 @@ Rectangle {
     color: "transparent"
 
     property var gridView: inGrid ? parent.GridView.view : null
-    readonly property bool inGrid : null != model ? true : false
+    readonly property bool inGrid : typeof model !== "undefined" && null != model ? true : false
 
     property real margin: 4
     width: inGrid ? gridView.cellWidth : 64
@@ -20,7 +20,13 @@ Rectangle {
     property SaveData dto: model.saveData
     property Resource resource: model.resource
     property bool showText: true
+    property bool showProgress: true
     property int value: model.saveValue ? model.saveValue : 0
+    property bool bgVisible: true
+
+    onValueChanged: {
+        progressDisplay.update();
+    }
 
     IconResourceDelegate {
         id: resourceIcon
@@ -28,6 +34,7 @@ Rectangle {
         width: parent.width - 2*parent.margin
         height: parent.width - 2*parent.margin
         pResource: achievementItem.resource
+        bgVisible: achievementItem.bgVisible
 
         // Gloss
         Rectangle {
@@ -60,7 +67,7 @@ Rectangle {
         id: desaturateEffect
         anchors.fill: resourceIcon
         source: resourceIcon
-        desaturation: progressRect.progress < progressRect.progressMax ? 1.0 : 0.0
+        desaturation: progressDisplay.progress < progressDisplay.progressMax ? 1.0 : 0.0
     }
 
     // progressBar
@@ -69,32 +76,22 @@ Rectangle {
         anchors.fill: parent
         fillColor: "transparent"
 
+        visible: achievementItem.showProgress
+
         smooth: Settings.playerImageSmooth
         antialiasing: Settings.playerAntialiasing
 
-        primaryColor: root.style ? root.style.timerDisplay.primaryColor : "transparent"
+        primaryColor: root.style ? root.style.timerDisplay.primaryColor : "transparent";
         secondaryColor: root.style ? root.style.timerDisplay.secondaryColor : "transparent"
         tertiaryColor: root.style ? root.style.timerDisplay.tertiaryColor : "transparent"
 
         borderWidth: root.style ? root.style.timerDisplay.borderWidth : 0
         groveWidth: root.style ? root.style.timerDisplay.groveWidth : 0
 
-        timeMsMax: progressRect.progressMax
-        timeMsCurrent: progressRect.progressMax - progressRect.progress
+        timeMsMax: progressMax
+        timeMsCurrent: progressMax - progress
         updateCounter: 0
         visibleCounter: true
-    }
-
-    // Progress Background
-    Rectangle {
-        id: progressRect
-        anchors.bottom: parent.bottom
-        anchors.horizontalCenter: parent.horizontalCenter
-        height: 10
-        width: parent.width
-        color: "#88000000"
-
-        visible: achievementItem.showText
 
         property int progress: achievementItem.value
         property int progressMax: {
@@ -110,6 +107,18 @@ Rectangle {
         }
     }
 
+    // Progress Background
+    Rectangle {
+        id: progressRect
+        anchors.bottom: parent.bottom
+        anchors.horizontalCenter: parent.horizontalCenter
+        height: 10
+        width: parent.width
+        color: "#88000000"
+
+        visible: achievementItem.showText
+    }
+
     Label {
         id: text
         anchors.bottom: parent.bottom
@@ -120,7 +129,7 @@ Rectangle {
 
         horizontalAlignment: Text.AlignHCenter
 
-        text: "" + progressRect.progress + "/" + progressRect.progressMax
+        text: "" + progressDisplay.progress + "/" + progressDisplay.progressMax
 
         visible: achievementItem.showText
     }

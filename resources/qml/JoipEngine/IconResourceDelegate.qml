@@ -9,8 +9,16 @@ Item {
     height: 64
 
     property Resource pResource: null
+    property bool bgVisible: true
 
     Component.onCompleted: {
+        reloadResource();
+    }
+    onPResourceChanged: {
+        reloadResource();
+    }
+
+    function reloadResource() {
         if (null !== pResource && undefined !== pResource)
         {
             switch (pResource.type)
@@ -89,6 +97,7 @@ Item {
             smooth: Settings.playerImageSmooth
             antialiasing: Settings.playerAntialiasing
             mipmap: Settings.playerImageMipMap
+            visible: bgVisible
         }
 
         Image {

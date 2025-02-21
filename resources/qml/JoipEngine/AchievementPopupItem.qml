@@ -10,14 +10,19 @@ Rectangle {
     id: achievement
     color: "transparent"
 
+    property int orientation: Settings.dominantHand
     property int value: 0
+    property real openState: 1.0
     property SaveData save: null
     property Resource resource: null
 
     Rectangle {
-        anchors.right: parent.right
+        id: bgBox
+        x: achievement.orientation === DominantHand.Right ?
+               parent.height/2 :
+               (parent.width - parent.height/2) * (1-achievement.openState)
         anchors.verticalCenter: parent.verticalCenter
-        width: parent.width - parent.height/2
+        width: (parent.width - parent.height/2) * achievement.openState
         height: parent.height
 
         color: root.style ? root.style.achievementDisplay.backgroundColor : "transparent"
@@ -26,7 +31,7 @@ Rectangle {
         border.width: root.style ? root.style.achievementDisplay.borderWidth : 1
     }
     Rectangle {
-        anchors.left: parent.left
+        x: achievement.orientation === DominantHand.Right ? 0 : parent.width - parent.height
         anchors.verticalCenter: parent.verticalCenter
         width: parent.height
         height: parent.height
@@ -38,22 +43,33 @@ Rectangle {
     }
     AchievementItemDelegate {
         id: achDelegate
-        x: 5
+        x: achievement.orientation === DominantHand.Right ? 5 : parent.width - 5
         anchors.verticalCenter: parent.verticalCenter
         width: parent.height-10
         height: parent.height-10
 
         dto: achievement.save
         resource: achievement.resource
-        showText: false
+        showProgress: showText
+        showText: null != save ? (save.data == achievement.value ? false : true) : false
         value: achievement.value
+        bgVisible: false
+
+        layer.enabled: true
+        layer.effect: Glow {
+            radius: 8
+            samples: 17
+            spread: 0.5
+            color: root.style ? root.style.achievementDisplay.glowColor : "white"
+            transparentBorder: false
+        }
     }
     TextItemFormated {
         id: textContentItem
-        x: parent.height + 5
+        x: achievement.orientation === DominantHand.Right ? parent.height + 5 : bgBox.x + 5
         anchors.verticalCenter: parent.verticalCenter
 
-        maximumWidth: parent.width - parent.height - 10
+        maximumWidth: bgBox.width - 10 - parent.height/2
 
         text: null != save ? save.name : ""
         textColor: root.style ? root.style.achievementDisplay.textColor : "white"

@@ -28,6 +28,7 @@ QtObject {
         property color backgroundColor: "#ff152f56"
         property color borderColor: "#ff00759f"
         property color textColor: "#ffb4c7db"
+        property color glowColor: "white"
         property int borderWidth: 2
         property int borderRadius: 5
     }
