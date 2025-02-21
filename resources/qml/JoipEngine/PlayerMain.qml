@@ -213,6 +213,7 @@ Rectangle {
         id: playerSoundEffects
         property alias hoverSound: hoverSound
         property alias clickSound: clickSound
+        property alias achievementSound: achievement
 
         SoundEffect {
             id: hoverSound
@@ -223,6 +224,12 @@ Rectangle {
         SoundEffect {
             id: clickSound
             source: "qrc:/resources/sound/menu_click_soft_main.wav"
+            volume: Settings.volume
+            muted: Settings.muted
+        }
+        SoundEffect {
+            id: achievement
+            source: "qrc:/resources/sound/new-notification.mp3"
             volume: Settings.volume
             muted: Settings.muted
         }

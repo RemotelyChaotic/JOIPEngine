@@ -80,6 +80,10 @@ Rectangle {
                 item.value = firstElement.oldValue
                 anim.targetValue = firstElement.value;
                 anim.start();
+
+                if (firstElement.value == ach.data) {
+                    root.soundEffects.achievementSound.play();
+                }
             }
         }
     }

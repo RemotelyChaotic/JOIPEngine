@@ -332,6 +332,7 @@
         <file>resources/help/editor/addachievement_button_help.html</file>
         <file>resources/help/editor/projectsettings/achievements_help.html</file>
         <file>resources/help/editor/projectsettings/images/achievement_editors.png</file>
+        <file>resources/sound/new-notification.mp3</file>
     </qresource>
     <qresource prefix="/qml">
         <file>resources/qml/JoipEngine/EmptyDummy.qml</file>
