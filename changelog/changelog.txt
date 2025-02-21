@@ -6,11 +6,12 @@ New Features:
 - Dialog editor and PlayerTextBox functions to support Dialogs has been added.
   - getDialog: Gets a Dialog object's data.
   - showDialog: Shows a Dialog with the configured parameters
+- Achievement and Save systems implemented
 
 Changes:
 - Editor icons visible in the dropdown menu.
 - PlayerTextBox.showText has an optional 4th argument that is the name of a Sound resource
-  or a reference to a Resource object. If given it will play the Resource, as well as 
+  or a reference to a Resource object. If given it will play the Resource, as well as
   show the text.
 
 =================
@@ -20,14 +21,14 @@ Version 1.4.5.0
 New Features:
 - PlayerMetronome: setBeatResource accepts now an array of Sound Resources.
 - Metronomes can now use a set of Sound Resoures to play instead of only a single one.
-- Custom Metronome SFX with multiple sound files can be registered by putting a 
+- Custom Metronome SFX with multiple sound files can be registered by putting a
   folder of sound files into the sfx folder.
 - New Settings:
   - Default device commands of PlayerMetronome.
   - Size of PlayerMetronome
   - Hide timeout of PlayerTextBox
-- Keyboard shortcuts of PlayerNotification can be oerriden via setShortcut and 
-  the default shortcuts were changed to more easilly accessable keys, which now have 
+- Keyboard shortcuts of PlayerNotification can be oerriden via setShortcut and
+  the default shortcuts were changed to more easilly accessable keys, which now have
   their own settings bindings.
 
 Changes:
@@ -45,7 +46,7 @@ Fixed Bugs:
 - Fixed a UI bug causing colors of buttons in button prompts being ignored.
 - Fixed buttons always being rendered as html when comming from EOS scripts.
 - Fixed SceneManager (pages) function: isEnabled in eval expressions.
-- Fixed resolving of Scenes when a Layout contains disabled Scenes after a 
+- Fixed resolving of Scenes when a Layout contains disabled Scenes after a
   random Splitter Node.
 - Fixed PlayerSceneManager gotoScene not blocking the execution as intended
   until the scene changes.
@@ -82,7 +83,7 @@ Version 1.4.2.0
 
 Fixed Bugs:
 - Fixed sendLinearCmd and sendRotateCmd not working properly.
-- Fixed a bug with sendLinearCmd using sending the movement in the wrong unit 
+- Fixed a bug with sendLinearCmd using sending the movement in the wrong unit
   to the device resulting in 0ms linear movements.
 - Fixed generated device command snippets.
 - Fixed the PlayerMetronome not stoping and interrupting devices when needed.
@@ -120,7 +121,7 @@ Version 1.4.0.0
 
 Fixed Bugs:
 - Fixed Node changes not generating an undo entry on the undo stack.
-- Fixed a crash in the help overlay, when highlighted widgets are 
+- Fixed a crash in the help overlay, when highlighted widgets are
   deleted before the overlay can show.
 - Fixed a bug that prevented projects from being saved, when a rename was requested
   but the folder failed to rename.
@@ -133,7 +134,7 @@ Fixed Bugs:
 New Features:
 - Added the possibility to configure the Layout of the Player for the project as a whole.
 - Created an Auto-Updater for Windows.
-- Added the ability to configure the predominantly used hand. This is taken into 
+- Added the ability to configure the predominantly used hand. This is taken into
   account in the default Player Layouts.
 - Added a new in-built Layout that wastes less screen real estate.
 - Added the possibility to connect to sex toys and issue commands to sex toys in a tease.
@@ -143,7 +144,7 @@ New Features:
 - The PlayerThread can now spawn and kill threads with the "runAsynch" and "kill" methods
   respectively.
 - Added the possibility to create and play instruction sequences. These are played in parallel
-  to the script and run instructions based on an internal timeline. They are stored in a new 
+  to the script and run instructions based on an internal timeline. They are stored in a new
   type of Resource: Sequences.
 - Resource tags can have custom types. To set a tag type, separate the tag name with ":".
   Everything to the left of the first ":" will be interpreted as the tag's type.
@@ -158,13 +159,13 @@ Changes:
   - Better input completion.
 - Scenes now allow to select an existing Script Resource instead of having to create
   a new one.
-- Script files reload without a user prompt if changed externally and not changed in 
+- Script files reload without a user prompt if changed externally and not changed in
   the Editor.
 - Layout / QML errors are reported in the editor.
-- Enabled to remove all resources in a folder by selecting a folder of resources 
+- Enabled to remove all resources in a folder by selecting a folder of resources
   in the view.
-- Updated the PlayerMetronome to be way more reliable and precise by over-engineering the 
-  <buy some apples> out of it. It should now not get out of synch even at lower 
+- Updated the PlayerMetronome to be way more reliable and precise by over-engineering the
+  <buy some apples> out of it. It should now not get out of synch even at lower
   frame rates and high BPMs.
 
 Fixed Bugs:
@@ -185,7 +186,7 @@ Fixed Bugs:
 - Fixed EOS notifications not working correctly.
 - Fixed EOS Scripts not terminating after the last scene ended if there was an open
   notification running.
-- Fixed some code generation overlays messing up the initial enabled state of certain 
+- Fixed some code generation overlays messing up the initial enabled state of certain
   elements.
 - Fixed global constants missing from sanboxed Lua scripts.
 - Fixed race condition that prevented sceneManager.gotoScene() to transition to scenes
@@ -269,7 +270,7 @@ Changes:
   the current engine version.
 - Sorting of Resource View improved. It now sorts items like the Explorer would
   (Folders first, and using natural sort) when sorting for names.
-- Removed auto-replay of Audio Resources in the Editor because it felt 
+- Removed auto-replay of Audio Resources in the Editor because it felt
   irritating when working with audio.
 
 =================
@@ -289,7 +290,7 @@ Version 1.2.1.0
 =================
 
 New Features:
-- JS-Style import statements for Modules implemented without defaultMember suport 
+- JS-Style import statements for Modules implemented without defaultMember suport
   for now.
 - PlayerMediaPlayer supports a stop frame argument for play functions.
 - PlayerMediaPlayer supports setting the volume of Resources via setVolume.
@@ -341,7 +342,7 @@ New Features:
 - Updated Node Editor with copy-paste functionality.
 - Undo and Redo functionality implemented for the entire editor.
 - Hotload for styles implemented for developping new application styles.
-- Resource Viewer has an alternate Explorer View and can display Tree and 
+- Resource Viewer has an alternate Explorer View and can display Tree and
   Explorer View next to each other.
 - Added support for Font type Resources. Fonts are automatically loaded on loading
   a JOI-Project and can be used in 'font-family' attributes in the PlayerTextBox.
@@ -351,11 +352,11 @@ New Features:
 - PlayerBackground finally accepts animated images as well. Animated images
   will not be tiled, but instead stretched.
 - Changeable Layouts in Player implemented
-- New PlayerMediaPlayer features: seek, looping and startAt. Works with Sound and 
+- New PlayerMediaPlayer features: seek, looping and startAt. Works with Sound and
   Movie type resources.
-- showText can now execute code during the printing of text if it is encased in a 
+- showText can now execute code during the printing of text if it is encased in a
   <eval></eval> block in html mode.
-- New component: PlayerEval for when you need to run arbitrary code in the UI thread. 
+- New component: PlayerEval for when you need to run arbitrary code in the UI thread.
   This is not usually recomended, but is a way to give a script more UI control.
 - New Component: PlayerNotification for when you need to asynchronously run code
   after a timeout or on button press. Styleable like the PlayerTextbox via script.
@@ -377,11 +378,11 @@ Changes:
 - Changelog visible in the "About" menu.
 - Help has a tree view containing all topics and pages can be searched.
 - Code editor allows folding blocks.
-- New PlayerMediaPlayer feature: give resources an ID and refer to them in 
+- New PlayerMediaPlayer feature: give resources an ID and refer to them in
   functions via id instead of resource name.
 - New PlayerTextBox feature: can set duration of message and skippable flag
   in setText call itself instead of having to call the thread.sleep() method.
-  The duration of a message can also be determined automatically with the 
+  The duration of a message can also be determined automatically with the
   argument -1 (or any number < 0).
 
 Fixed Bugs:
@@ -434,10 +435,10 @@ Version 1.1.0.0
 =================
 
 New Features:
-- Help overlay added that can interactively display help based on clicked engine 
+- Help overlay added that can interactively display help based on clicked engine
   component.
 - Editor has a new view to configure project properties
-- Kink tag list added to project configuration describing all kinks used in the 
+- Kink tag list added to project configuration describing all kinks used in the
   project.
 - Target verision and project version added to project configuration describing
   the project's version and the engine version the project was saved in.
