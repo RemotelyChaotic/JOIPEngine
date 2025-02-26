@@ -186,6 +186,14 @@ Rectangle {
         buttonWidth: 48
         spacing: parent.spacing
 
+        onSetUiVisible: {
+            mediaPlayer.visible = visible;
+            iconRect.visible = visible;
+            timerRect.visible = visible;
+            notificationRect.visible = visible;
+            textBox.visible = visible;
+        }
+
         Button {
             id: showLogButton
             height: sceneControl.height

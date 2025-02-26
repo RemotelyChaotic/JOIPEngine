@@ -672,5 +672,25 @@
         <file>resources/android_styles/Gummyzilla/ui/ButtonAchievementSelected.png</file>
         <file>resources/android_styles/Somber Dark/qml/ButtonAchievement.svg</file>
         <file>resources/android_styles/Somber Dark/ui/ButtonAchievement.png</file>
+        <file>resources/android_styles/621 Hexagons/qml/ButtonInvisible.svg</file>
+        <file>resources/android_styles/621 Hexagons/qml/ButtonInvisibleHover.svg</file>
+        <file>resources/android_styles/621 Hexagons/qml/ButtonVisible.svg</file>
+        <file>resources/android_styles/621 Hexagons/qml/ButtonVisibleHover.svg</file>
+        <file>resources/android_styles/Blue Night/qml/ButtonInvisible.svg</file>
+        <file>resources/android_styles/Blue Night/qml/ButtonInvisibleHover.svg</file>
+        <file>resources/android_styles/Blue Night/qml/ButtonVisible.svg</file>
+        <file>resources/android_styles/Blue Night/qml/ButtonVisibleHover.svg</file>
+        <file>resources/android_styles/Equestria after Dark/qml/ButtonInvisible.svg</file>
+        <file>resources/android_styles/Equestria after Dark/qml/ButtonInvisibleHover.svg</file>
+        <file>resources/android_styles/Equestria after Dark/qml/ButtonVisible.svg</file>
+        <file>resources/android_styles/Equestria after Dark/qml/ButtonVisibleHover.svg</file>
+        <file>resources/android_styles/Gummyzilla/qml/ButtonInvisible.svg</file>
+        <file>resources/android_styles/Gummyzilla/qml/ButtonInvisibleHover.svg</file>
+        <file>resources/android_styles/Gummyzilla/qml/ButtonVisible.svg</file>
+        <file>resources/android_styles/Gummyzilla/qml/ButtonVisibleHover.svg</file>
+        <file>resources/android_styles/Somber Dark/qml/ButtonInvisible.svg</file>
+        <file>resources/android_styles/Somber Dark/qml/ButtonInvisibleHover.svg</file>
+        <file>resources/android_styles/Somber Dark/qml/ButtonVisible.svg</file>
+        <file>resources/android_styles/Somber Dark/qml/ButtonVisibleHover.svg</file>
     </qresource>
 </RCC>

@@ -102,6 +102,8 @@ Rectangle {
     }
 
     Rectangle {
+        id: notificationRect
+
         anchors.bottom: isMobile && isLandscape ? iconRect.bottom :
                                                   timerRect.bottom
         anchors.left: isMobile && isLandscape ? iconRect.left :
@@ -119,7 +121,7 @@ Rectangle {
     }
 
     PlayerTextBox {
-        id: textBox;
+        id: textBox
 
         anchors.bottom: parent.bottom
         x: !isMobile ? 0 :
@@ -150,5 +152,12 @@ Rectangle {
         buttonWidth: 48
         spacing: parent.spacing
         soundEffects: root.soundEffects
+
+        onSetUiVisible: {
+            iconRect.opacity = visible ? 1.0 : 0.0;
+            timerRect.opacity = visible ? 1.0 : 0.0;
+            notificationRect.opacity = visible ? 1.0 : 0.0;
+            textBox.opacity = visible ? 1.0 : 0.0;
+        }
     }
 }

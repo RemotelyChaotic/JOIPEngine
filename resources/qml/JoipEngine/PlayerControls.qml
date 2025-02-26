@@ -15,6 +15,8 @@ Rectangle {
 
     default property alias content: customContent.children
 
+    signal setUiVisible(bool visible)
+
     RowLayout {
         anchors.fill: parent
         spacing: parent.spacing
@@ -139,6 +141,62 @@ Rectangle {
                 context: Qt.ApplicationShortcut
                 onActivated: {
                     pauseButton.pausePlayScene();
+                }
+            }
+        }
+
+        Button {
+            id: hideButton
+            Layout.preferredHeight: sceneControl.buttonHeight
+            Layout.preferredWidth: sceneControl.buttonWidth
+            Layout.alignment: Qt.AlignVCenter
+
+            focusPolicy: Qt.NoFocus
+
+            text: Settings.keyBinding("ToggleUI")
+            contentItem: Text {
+                anchors.fill: parent
+                horizontalAlignment: Text.AlignRight
+                verticalAlignment: Text.AlignBottom
+                rightPadding: 5
+                bottomPadding: 5
+
+                text: parent.text
+                font.family: Settings.font
+                font.pixelSize: 8
+                color: "white"
+            }
+
+            property bool visibleUi: true
+
+            Image {
+                anchors.centerIn: parent
+                width: (parent.width < parent.height ? parent.width : parent.height) - 10
+                height: (parent.width < parent.height ? parent.width : parent.height) - 10
+                fillMode: Image.PreserveAspectFit
+                source: Settings.styleFolderQml() +
+                        (parent.visibleUi ? (parent.hovered ? "/ButtonVisibleHover.svg" : "/ButtonVisible.svg") :
+                                            (parent.hovered ? "/ButtonInvisibleHover.svg" : "/ButtonInvisible.svg"))
+            }
+
+            onHoveredChanged: {
+                if (hovered)
+                {
+                    soundEffects.hoverSound.play();
+                }
+            }
+            onClicked: {
+                soundEffects.clickSound.play();
+                hideButton.visibleUi = !hideButton.visibleUi;
+                sceneControl.setUiVisible(hideButton.visibleUi);
+            }
+
+            Shortcut {
+                sequence: Settings.keyBinding("ToggleUI")
+                context: Qt.ApplicationShortcut
+                onActivated: {
+                    hideButton.visibleUi = !hideButton.visibleUi;
+                    sceneControl.setUiVisible(hideButton.visibleUi);
                 }
             }
         }

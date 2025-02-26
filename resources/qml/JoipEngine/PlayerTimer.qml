@@ -98,6 +98,10 @@ Rectangle {
         }
     }
 
+    Behavior on opacity {
+        NumberAnimation { duration: 500; easing.type: Easing.InOutQuad }
+    }
+
     Component.onCompleted: {
         ScriptRunner.registerNewComponent(userName, signalEmitter);
         registrator.componentLoaded();

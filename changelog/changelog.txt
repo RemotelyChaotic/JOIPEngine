@@ -7,6 +7,7 @@ New Features:
   - getDialog: Gets a Dialog object's data.
   - showDialog: Shows a Dialog with the configured parameters
 - Achievement and Save systems implemented
+- New button in Layout to hide the UI of the player.
 
 Changes:
 - Editor icons visible in the dropdown menu.

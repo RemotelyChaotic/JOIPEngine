@@ -218,6 +218,10 @@ Rectangle {
         }
     }
 
+    Behavior on opacity {
+        NumberAnimation { duration: 500; easing.type: Easing.InOutQuad }
+    }
+
     // needs to be declared outside because of https://bugreports.qt.io/browse/QTBUG-86428
     ListModel {
         id: widgetModel

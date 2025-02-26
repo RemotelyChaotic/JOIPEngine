@@ -27,6 +27,7 @@ namespace {
     "Devices",
     "Exit",
     "Tools",
+    "ToggleUI",
 
     "Answer_1",
     "Answer_2",
@@ -147,6 +148,7 @@ CSettings::CSettings(QObject* pParent) :
       { "Devices",    QKeySequence(Qt::CTRL + Qt::Key_D)             },
       { "Exit",       QKeySequence(Qt::Key_Escape)                   },
       { "Tools",      QKeySequence(Qt::CTRL + Qt::Key_T)             },
+      { "ToggleUI",   QKeySequence(Qt::Key_T)                        },
 
       { "Answer_1",   QKeySequence(Qt::Key_1)            },
       { "Answer_2",   QKeySequence(Qt::Key_2)            },
@@ -207,7 +209,7 @@ CSettings::CSettings(QObject* pParent) :
       { "Redo",       QKeySequence(QKeySequence::Redo)   },
       { "Search",     QKeySequence(QKeySequence::Find)   },
       { "Backward",   QKeySequence(QKeySequence::Back)   },
-      { "Forward",   QKeySequence(QKeySequence::Forward)}
+      { "Forward",    QKeySequence(QKeySequence::Forward)}
     })
 {
   qRegisterMetaType<CSettings::EditorType>();

@@ -128,6 +128,13 @@ Rectangle {
         buttonWidth: 48
         spacing: parent.spacing
 
+        onSetUiVisible: {
+            iconRect.opacity = visible ? 1.0 : 0.0;
+            timerRect.opacity = visible ? 1.0 : 0.0;
+            notificationRect.opacity = visible ? 1.0 : 0.0;
+            textBox.opacity = visible ? 1.0 : 0.0;
+        }
+
         Button {
             id: showLogButton
             height: sceneControl.height
