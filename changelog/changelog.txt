@@ -14,6 +14,7 @@ Changes:
 - PlayerTextBox.showText has an optional 4th argument that is the name of a Sound resource
   or a reference to a Resource object. If given it will play the Resource, as well as
   show the text.
+- Player buttons have a tooltip.
 
 =================
 Version 1.4.5.0

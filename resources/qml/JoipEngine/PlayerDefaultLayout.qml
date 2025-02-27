@@ -157,6 +157,11 @@ Rectangle {
                 color: "white"
             }
 
+            ToolTip.delay: 1000
+            ToolTip.timeout: 5000
+            ToolTip.visible: hovered
+            ToolTip.text: qsTr("Show or hide log") + " (" + Settings.keyBinding("Tools") + ")"
+
             Image {
                 anchors.centerIn: parent
                 width: (parent.width < parent.height ? parent.width : parent.height) - 10

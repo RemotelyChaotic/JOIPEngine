@@ -47,6 +47,11 @@ Rectangle {
                 color: "white"
             }
 
+            ToolTip.delay: 1000
+            ToolTip.timeout: 5000
+            ToolTip.visible: hovered
+            ToolTip.text: qsTr("Exit tease") + " (" + Settings.keyBinding("Exit") + ")"
+
             function quit()
             {
                 root.quit();
@@ -101,6 +106,11 @@ Rectangle {
                 font.pixelSize: 8
                 color: "white"
             }
+
+            ToolTip.delay: 1000
+            ToolTip.timeout: 5000
+            ToolTip.visible: hovered
+            ToolTip.text: qsTr("Pause or resume execution") + " (" + Settings.keyBinding("Pause") + ")"
 
             property bool paused: false
             function pausePlayScene()
@@ -167,6 +177,11 @@ Rectangle {
                 color: "white"
             }
 
+            ToolTip.delay: 1000
+            ToolTip.timeout: 5000
+            ToolTip.visible: hovered
+            ToolTip.text: qsTr("Show or hide UI") + " (" + Settings.keyBinding("ToggleUI") + ")"
+
             property bool visibleUi: true
 
             Image {
@@ -222,6 +237,11 @@ Rectangle {
                 font.pixelSize: 8
                 color: "white"
             }
+
+            ToolTip.delay: 1000
+            ToolTip.timeout: 5000
+            ToolTip.visible: hovered
+            ToolTip.text: qsTr("Show device list") + " (" + Settings.keyBinding("Devices") + ")"
 
             Image {
                 anchors.centerIn: parent
