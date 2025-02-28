@@ -14,6 +14,7 @@
 #include "Systems/PhysFs/PhysFsFileEngine.h"
 #include "Systems/Project.h"
 #include "Systems/ScriptRunner.h"
+#include "Systems/Script/ScriptCacheFileEngine.h"
 #include "Systems/Script/ScriptDbWrappers.h"
 #include "Systems/Script/ScriptRunnerSignalEmiter.h"
 #include "Systems/ThreadedSystem.h"
@@ -635,6 +636,12 @@ void CSceneMainScreen::SlotUnloadFinished()
       qWarning() << "Failed to unload project";
     }
   }
+
+  {
+    QReadLocker l(&m_spCurrentProject->m_rwLock);
+    CScriptCacheFileEngineHandler::ClearFiles(m_spCurrentProject->m_iId);
+  }
+
   m_spCurrentProject = nullptr;
 
   if (nullptr != m_spWindowContext && !m_bBeingDebugged)

@@ -384,6 +384,11 @@ QAbstractFileEngine* CPhysFsFileEngineHandler::create(const QString &filename) c
   {
     return new CPhysFsFileEngine(filename);
   }
+  // handling for QUrl(file:///pfs:/...).toLocalFile() because sometimes we don't have a choice
+  if (filename.startsWith("/" + c_sScheme))
+  {
+    return new CPhysFsFileEngine(filename.mid(1));
+  }
 
   return nullptr;
 }

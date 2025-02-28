@@ -16,6 +16,9 @@ Changes:
   show the text.
 - Player buttons have a tooltip.
 
+Fixed Bugs:
+- JS imports work even when the files are in different directories.
+
 =================
 Version 1.4.5.0
 =================

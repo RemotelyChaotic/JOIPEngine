@@ -4,7 +4,8 @@
 #include "IScriptRunner.h"
 #include <QObject>
 #include <QPointer>
-#include <QJSEngine>
+#include <QQmlAbstractUrlInterceptor>
+#include <QQmlEngine>
 #include <QMutex>
 
 #include <functional>
@@ -76,6 +77,21 @@ private:
 
 //----------------------------------------------------------------------------------------
 //
+class CResourceUrlInterceptor : public QQmlAbstractUrlInterceptor
+{
+public:
+  CResourceUrlInterceptor();
+  ~CResourceUrlInterceptor() override;
+
+  void SetCurrentProject(tspProject spProject);
+
+  QUrl intercept(const QUrl& url, QQmlAbstractUrlInterceptor::DataType type) override;
+
+  tspProject                                      m_spProject;
+};
+
+//----------------------------------------------------------------------------------------
+//
 class CScriptRunnerUtilsJs : public QObject
 {
   Q_OBJECT
@@ -83,8 +99,8 @@ class CScriptRunnerUtilsJs : public QObject
 
 public:
   CScriptRunnerUtilsJs(QObject* pParent,
-                     QPointer<QJSEngine> pEngine,
-                     std::shared_ptr<CScriptRunnerSignalContext> pSignalEmiterContext);
+                       QPointer<QQmlEngine> pEngine,
+                       std::shared_ptr<CScriptRunnerSignalContext> pSignalEmiterContext);
   ~CScriptRunnerUtilsJs() override;
 
   void SetCurrentProject(tspProject spProject);
@@ -101,7 +117,7 @@ private:
 
   std::shared_ptr<CScriptRunnerSignalContext>     m_spSignalEmiterContext;
   tspProject                                      m_spProject;
-  QPointer<QJSEngine>                             m_pEngine;
+  QPointer<QQmlEngine>                            m_pEngine;
 };
 
 #endif // CJSSCRIPTRUNNER_H

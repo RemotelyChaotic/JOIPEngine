@@ -2,9 +2,13 @@
 #include "Settings.h"
 #include "MainWindow.h"
 #include "MainWindowFactory.h"
+
 #include "Systems/NotificationSender.h"
+
 #include "Systems/PhysFs/PhysFsFileEngine.h"
 #include "Systems/PhysFs/PhysFsQtAVIntegration.h"
+
+#include "Systems/Script/ScriptCacheFileEngine.h"
 
 #include <JsonLuaWrapper.h>
 #include <LuaSandboxWrapper.h>
@@ -39,6 +43,7 @@ int main(int argc, char *argv[])
 
   CPhysFsFileEngine::init(argv[0]);
   CPhysFsFileEngineHandler engine;
+  CScriptCacheFileEngineHandler scriptFileEngine;
   QtAV::RegisterPhysFsFileHandler();
 
   qDebug() << "SSL suport:" << QSslSocket::supportsSsl() <<

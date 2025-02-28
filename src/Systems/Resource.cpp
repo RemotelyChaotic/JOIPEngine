@@ -162,30 +162,36 @@ QString PhysicalResourcePath(const tspResource& spResource)
     return QString();
   }
 
-  QReadLocker projectLocker(&spResource->m_spParent->m_rwLock);
-  const QString sTrueProjectName = spResource->m_spParent->m_sName;
-  bool bBundled = spResource->m_spParent->m_bBundled;
+  QReadLocker locker(&spResource->m_rwLock);
+  return PhysicalResourcePath(spResource->m_sPath, spResource->m_spParent,
+                              spResource->m_sResourceBundle, spResource->m_sName);
+}
+
+//----------------------------------------------------------------------------------------
+//
+QString PhysicalResourcePath(const QUrl& url, const tspProject& spProject,
+                             const QString& sResourceBundle, const QString& sResourceName)
+{
+  QReadLocker projectLocker(&spProject->m_rwLock);
+  const QString sTrueProjectName = spProject->m_sName;
+  bool bBundled = spProject->m_bBundled;
   projectLocker.unlock();
 
-  QReadLocker locker(&spResource->m_rwLock);
-  if (IsLocalFile(spResource->m_sPath))
+  if (IsLocalFile(url))
   {
-    if (!bBundled && spResource->m_sResourceBundle.isEmpty())
+    if (!bBundled && sResourceBundle.isEmpty())
     {
-      QUrl urlCopy(spResource->m_sPath);
+      QUrl urlCopy(url);
       urlCopy.setScheme(QString());
-      QString sBasePath = PhysicalProjectPath(spResource->m_spParent);
+      QString sBasePath = PhysicalProjectPath(spProject);
       return sBasePath + "/" + QUrl().resolved(urlCopy).toString();
     }
     else
     {
-      return ":/" + sTrueProjectName + "/" + spResource->m_sName;
+      return ":/" + sTrueProjectName + "/" + sResourceName;
     }
   }
-  else
-  {
-    return spResource->m_sPath.toString();
-  }
+  return url.toString();
 }
 
 //----------------------------------------------------------------------------------------

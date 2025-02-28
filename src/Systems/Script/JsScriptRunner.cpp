@@ -1,11 +1,14 @@
 #include "JsScriptRunner.h"
 #include "Application.h"
+#include "ScriptCacheFileEngine.h"
 #include "ScriptDbWrappers.h"
 #include "ScriptNotification.h"
 #include "ScriptRunnerInstanceController.h"
 #include "ScriptRunnerSignalEmiter.h"
 #include "ScriptTextBox.h"
 #include "ScriptThread.h"
+
+#include "Systems/PhysFs/PhysFsFileEngine.h"
 
 #include "Systems/Project.h"
 #include "Systems/Resource.h"
@@ -16,6 +19,8 @@
 #include <QFileInfo>
 #include <QQmlEngine>
 #include <QTimer>
+
+#include <functional>
 #include <vector>
 
 enum EImportMode
@@ -54,7 +59,9 @@ namespace  {
       .arg(c_rxImportStatement0).arg(c_rxImportStatement1)
       .arg(c_rxImportStatement2).arg(c_rxImportStatement3);
 
-  QString ReplaceImportStatements(QString& sScript)
+  using tfnImportConstructor = std::function<QString(const SReplaceExp&)>;
+
+  QString ReplaceImportStatements(QString& sScript, tfnImportConstructor fnConst)
   {
     QRegularExpression rx(c_rxImportStatementFinal,
                           QRegularExpression::MultilineOption);
@@ -109,28 +116,35 @@ namespace  {
     for (qint32 i = static_cast<qint32>(vExps.size())-1; 0 <= i; --i)
     {
       SReplaceExp& exp = vExps[i];
-      QString sNewExp = QString("utils_1337.import(\"%1\");").arg(exp.m_sModule);
-      if (exp.m_vsExps.size() > 0)
-      {
-        if (eModuleName == exp.m_mode)
-        {
-          sNewExp.prepend(QString("var %1 = ").arg(exp.m_vsExps.front().m_sTo));
-        }
-        else
-        {
-          sNewExp.prepend(QString("var _var_temp_dont_asign = "));
-          for (auto& exp : exp.m_vsExps)
-          {
-            sNewExp.append(QString("var %2 = _var_temp_dont_asign.%1;").arg(exp.m_sFrom).arg(exp.m_sTo));
-          }
-        }
-      }
+      QString sNewExp = fnConst(exp);
       sScript.replace(exp.m_iBegin, exp.m_iNum, sNewExp);
     }
 
     return sScript;
   }
 
+  //--------------------------------------------------------------------------------------
+  //
+  QString EvalImportReplacer(const SReplaceExp& exp)
+  {
+    QString sNewExp = QString("utils_1337.import(\"%1\");").arg(exp.m_sModule);
+    if (exp.m_vsExps.size() > 0)
+    {
+      if (eModuleName == exp.m_mode)
+      {
+        sNewExp.prepend(QString("var %1 = ").arg(exp.m_vsExps.front().m_sTo));
+      }
+      else
+      {
+        sNewExp.prepend(QString("var _var_temp_dont_asign = "));
+        for (auto& exp : exp.m_vsExps)
+        {
+          sNewExp.append(QString("var %2 = _var_temp_dont_asign.%1;").arg(exp.m_sFrom).arg(exp.m_sTo));
+        }
+      }
+    }
+    return sNewExp;
+  }
 }
 
 //----------------------------------------------------------------------------------------
@@ -181,10 +195,13 @@ public slots:
   //
   void Init() override
   {
-    m_pScriptEngine = new QJSEngine();
+    m_pScriptEngine = new QQmlEngine();
     m_pScriptEngine->installExtensions(QJSEngine::TranslationExtension |
                                        QJSEngine::ConsoleExtension |
                                        QJSEngine::GarbageCollectionExtension);
+
+    m_pUrlInterceptor = new CResourceUrlInterceptor();
+    m_pScriptEngine->setUrlInterceptor(m_pUrlInterceptor);
 
     m_pScriptUtils = new CScriptRunnerUtilsJs(this, m_pScriptEngine, m_wpSignalEmiterContext.lock());
     connect(m_pScriptUtils, &CScriptRunnerUtilsJs::finishedScript,
@@ -226,6 +243,10 @@ public slots:
 
     delete m_pScriptUtils;
     m_pScriptUtils = nullptr;
+
+    m_pScriptEngine->setUrlInterceptor(nullptr);
+    delete m_pUrlInterceptor;
+    m_pUrlInterceptor = nullptr;
 
     if (nullptr != m_pScriptEngine)
     {
@@ -279,6 +300,7 @@ public slots:
       {
         it->second->SetCurrentProject(spResource->m_spParent);
       }
+      m_pUrlInterceptor->SetCurrentProject(spResource->m_spParent);
       m_pScriptUtils->SetCurrentProject(spResource->m_spParent);
     }
 
@@ -319,7 +341,7 @@ public slots:
         .arg(sSceneName)
         .arg(sScript)
         .arg(sSceneName);
-    ReplaceImportStatements(sSkript);
+    ReplaceImportStatements(sSkript, ::EvalImportReplacer);
     QJSValue runFunction = m_pScriptEngine->evaluate(sSkript);
 
     if (runFunction.isError())
@@ -374,7 +396,7 @@ public slots:
       {
         pObject->Initialize(m_wpSignalEmiterContext.lock());
         std::shared_ptr<CScriptObjectBase> spObject =
-            pObject->CreateNewScriptObject(m_pScriptEngine);
+            pObject->CreateNewScriptObject(QPointer<QJSEngine>(m_pScriptEngine));
         if (nullptr != spObject)
         {
           connect(this, &CJsScriptRunnerInstanceWorker::SignalInterruptExecution,
@@ -427,6 +449,7 @@ public slots:
     // remove ref to run function
     m_pScriptEngine->globalObject().setProperty("scene", QJSValue());
 
+    m_pUrlInterceptor->SetCurrentProject(nullptr);
     m_pScriptUtils->SetCurrentProject(nullptr);
 
     for (auto it = m_objectMap.begin(); m_objectMap.end() != it; ++it)
@@ -446,8 +469,9 @@ public slots:
 
 private:
   tspProject                                     m_spProject;
-  QPointer<QJSEngine>                            m_pScriptEngine;
+  QPointer<QQmlEngine>                           m_pScriptEngine;
   QPointer<CScriptRunnerUtilsJs>                 m_pScriptUtils;
+  CResourceUrlInterceptor*                       m_pUrlInterceptor;
   QPointer<CSceneScriptWrapper>                  m_pCurrentScene;
   std::map<QString /*name*/,
            std::shared_ptr<CScriptObjectBase>>   m_objectMap;
@@ -618,8 +642,49 @@ std::shared_ptr<CScriptRunnerSignalContext> CJsScriptRunner::SignalEmmitterConte
 
 //----------------------------------------------------------------------------------------
 //
+CResourceUrlInterceptor::CResourceUrlInterceptor() :
+  QQmlAbstractUrlInterceptor()
+{
+}
+CResourceUrlInterceptor::~CResourceUrlInterceptor()
+{
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CResourceUrlInterceptor::SetCurrentProject(tspProject spProject)
+{
+  m_spProject = spProject;
+}
+
+//----------------------------------------------------------------------------------------
+//
+QUrl CResourceUrlInterceptor::intercept(const QUrl& url, QQmlAbstractUrlInterceptor::DataType type)
+{
+  if (nullptr != m_spProject)
+  {
+    switch (type)
+    {
+      case QQmlAbstractUrlInterceptor::DataType::JavaScriptFile: [[fallthrough]];
+      case QQmlAbstractUrlInterceptor::DataType::UrlString:
+        if (CPhysFsFileEngineHandler::c_sScheme.contains(url.scheme()))
+        {
+          return PhysicalResourcePath(url, m_spProject);
+        }
+        return url;
+      case QQmlAbstractUrlInterceptor::DataType::QmlFile:
+        break;
+      case QQmlAbstractUrlInterceptor::DataType::QmldirFile:
+        break;
+    }
+  }
+  return url;
+}
+
+//----------------------------------------------------------------------------------------
+//
 CScriptRunnerUtilsJs::CScriptRunnerUtilsJs(QObject* pParent,
-                                           QPointer<QJSEngine> pEngine,
+                                           QPointer<QQmlEngine> pEngine,
                                            std::shared_ptr<CScriptRunnerSignalContext> spSignalEmiterContext) :
   QObject(pParent),
   m_spSignalEmiterContext(spSignalEmiterContext),
@@ -654,7 +719,7 @@ QJSValue CScriptRunnerUtilsJs::include(QJSValue resource)
       if (sciptFile.exists() && sciptFile.open(QIODevice::ReadOnly))
       {
         QString sScript = QString::fromUtf8(sciptFile.readAll());
-        ReplaceImportStatements(sScript);
+        ReplaceImportStatements(sScript, ::EvalImportReplacer);
         if (sScript.startsWith("{") && sScript.endsWith("}"))
         {
           return m_pEngine->evaluate("(" + sScript + ")", spResource->m_sName);
@@ -680,11 +745,27 @@ QJSValue CScriptRunnerUtilsJs::import(QJSValue resource)
     if (EResourceType::eScript == spResource->m_type._to_integral())
     {
       QString sPath = ResourceUrlToAbsolutePath(spResource);
-      QFile sciptFile(sPath);
-      if (sciptFile.exists() && sciptFile.open(QIODevice::ReadOnly))
+      QFile fModule(sPath);
+      if (sPath.isEmpty() || !fModule.exists())
       {
-        return m_pEngine->importModule(sPath);
+        m_pEngine->throwError(tr("Module %1 is missing.").arg(spResource->m_sName));
+        return QJSValue();
       }
+      if (!fModule.open(QIODevice::ReadOnly))
+      {
+        m_pEngine->throwError(tr("Module %1 could not be opened.").arg(spResource->m_sName));
+        return QJSValue();
+      }
+      QString sScript = QString::fromUtf8(fModule.readAll());
+      ReplaceImportStatements(sScript, ::EvalImportReplacer);
+      qint32 iProjId = -1;
+      {
+        QReadLocker l(&m_spProject->m_rwLock);
+        iProjId = m_spProject->m_iId;
+      }
+      CScriptCacheFileEngineHandler::RegisterFile(iProjId, spResource->m_sName, sScript);
+      return m_pEngine->importModule(CScriptCacheFileEngineHandler::c_sScheme +
+                                     QString::number(iProjId) + "/" + spResource->m_sName);
     }
   }
   return QJSValue();

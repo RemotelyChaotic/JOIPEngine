@@ -635,6 +635,8 @@ macro(CreateJOIPProject JOIP_PROJECT_NAME)
     ${JOIPSources}/Systems/Script/LuaScriptRunner.h
     ${JOIPSources}/Systems/Script/ScriptBackground.cpp
     ${JOIPSources}/Systems/Script/ScriptBackground.h
+    ${JOIPSources}/Systems/Script/ScriptCacheFileEngine.cpp
+    ${JOIPSources}/Systems/Script/ScriptCacheFileEngine.h
     ${JOIPSources}/Systems/Script/ScriptDbWrappers.cpp
     ${JOIPSources}/Systems/Script/ScriptDbWrappers.h
     ${JOIPSources}/Systems/Script/ScriptDeviceController.cpp

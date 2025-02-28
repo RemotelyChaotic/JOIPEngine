@@ -15,6 +15,7 @@
 class CProjectScriptWrapper;
 class QJSEngine;
 struct SProject;
+typedef std::shared_ptr<SProject>      tspProject;
 
 namespace joip_resource
 {
@@ -61,6 +62,8 @@ Q_DECLARE_METATYPE(tspResource)
 //
 bool IsLocalFile(const QUrl& url);
 QString PhysicalResourcePath(const tspResource& spResource);
+QString PhysicalResourcePath(const QUrl& url, const tspProject& spProject,
+                             const QString& sResourceBundle = QString(), const QString& sResourceName = QString());
 QString ResourceUrlToAbsolutePath(const tspResource& spResource, const QString& sResourceScheme = ":");
 QUrl ResourceUrlFromLocalFile(const QString& sPath);
 
