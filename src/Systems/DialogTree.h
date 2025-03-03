@@ -1,5 +1,5 @@
-#ifndef CDIALOGNODE_H
-#define CDIALOGNODE_H
+#ifndef CDIALOGUENODE_H
+#define CDIALOGUENODE_H
 
 #include "Resource.h"
 #include "Tag.h"
@@ -11,71 +11,71 @@
 #include <memory>
 #include <vector>
 
-BETTER_ENUM(EDialogTreeNodeType, qint32,
+BETTER_ENUM(EDialogueTreeNodeType, qint32,
             eRoot            = 0,
             eCategory        = 1,
-            eDialog          = 2,
-            eDialogFragment  = 3);
+            eDialogue        = 2,
+            eDialogueFragment= 3);
 
-namespace dialog_tree
+namespace dialogue_tree
 {
   [[maybe_unused]] const char c_sRootNodeName[] = "<Root>";
 }
 
-struct CDialogNode
+struct CDialogueNode
 {
-  CDialogNode();
-  virtual ~CDialogNode();
+  CDialogueNode();
+  virtual ~CDialogueNode();
 
-  std::shared_ptr<CDialogNode> Clone();
-  void CopyFrom(const std::shared_ptr<CDialogNode>& spNode);
+  std::shared_ptr<CDialogueNode> Clone();
+  void CopyFrom(const std::shared_ptr<CDialogueNode>& spNode);
 
 private:
-  virtual std::shared_ptr<CDialogNode> CloneImpl();
-  virtual void CopyFromImpl(const std::shared_ptr<CDialogNode>& spNode);
+  virtual std::shared_ptr<CDialogueNode> CloneImpl();
+  virtual void CopyFromImpl(const std::shared_ptr<CDialogueNode>& spNode);
 
 public:
-  std::weak_ptr<CDialogNode>                m_wpParent;
-  std::vector<std::shared_ptr<CDialogNode>> m_vspChildren;
+  std::weak_ptr<CDialogueNode>                m_wpParent;
+  std::vector<std::shared_ptr<CDialogueNode>> m_vspChildren;
 
   QString                                   m_sFileId;
-  EDialogTreeNodeType                       m_type;
+  EDialogueTreeNodeType                     m_type;
   QString                                   m_sName;
   bool                                      m_bReadOnly;
 };
 
-struct CDialogNodeCategory : public CDialogNode
+struct CDialogueNodeCategory : public CDialogueNode
 {
-  CDialogNodeCategory();
-  ~CDialogNodeCategory() override;
+  CDialogueNodeCategory();
+  ~CDialogueNodeCategory() override;
 
 private:
-  std::shared_ptr<CDialogNode> CloneImpl() override;
-  void CopyFromImpl(const std::shared_ptr<CDialogNode>& spNode) override;
+  std::shared_ptr<CDialogueNode> CloneImpl() override;
+  void CopyFromImpl(const std::shared_ptr<CDialogueNode>& spNode) override;
 };
 
-struct CDialogNodeDialog : public CDialogNode
+struct CDialogueNodeDialogue : public CDialogueNode
 {
-  CDialogNodeDialog();
-  ~CDialogNodeDialog() override;
+  CDialogueNodeDialogue();
+  ~CDialogueNodeDialogue() override;
 
 private:
-  std::shared_ptr<CDialogNode> CloneImpl() override;
-  void CopyFromImpl(const std::shared_ptr<CDialogNode>& spNode) override;
+  std::shared_ptr<CDialogueNode> CloneImpl() override;
+  void CopyFromImpl(const std::shared_ptr<CDialogueNode>& spNode) override;
 
 public:
   tspTagMap                                 m_tags;
   bool                                      m_bHasCondition = false;
 };
 
-struct CDialogData : public CDialogNode
+struct CDialogueData : public CDialogueNode
 {
-  CDialogData();
-  ~CDialogData() override;
+  CDialogueData();
+  ~CDialogueData() override;
 
 private:
-  std::shared_ptr<CDialogNode> CloneImpl() override;
-  void CopyFromImpl(const std::shared_ptr<CDialogNode>& spNode) override;
+  std::shared_ptr<CDialogueNode> CloneImpl() override;
+  void CopyFromImpl(const std::shared_ptr<CDialogueNode>& spNode) override;
 
 public:
   QString                                   m_sCondition;
@@ -87,18 +87,18 @@ public:
 
 typedef std::shared_ptr<struct SProject> tspProject;
 
-namespace dialog_tree
+namespace dialogue_tree
 {
-  QString EnsureUniqueName(const QString& sStr, const std::shared_ptr<CDialogNode>& spParent,
-                           const std::shared_ptr<CDialogNode>& spExcept);
+  QString EnsureUniqueName(const QString& sStr, const std::shared_ptr<CDialogueNode>& spParent,
+                           const std::shared_ptr<CDialogueNode>& spExcept);
 
-  std::shared_ptr<CDialogNode> DeserializeNode(const QByteArray& arr, const tspProject& spProject);
-  std::shared_ptr<CDialogNode> LoadDialogs(const std::vector<tspResource>& vsFiles, bool* bpErrors = nullptr);
-  std::shared_ptr<CDialogNode> LoadDialogsFromSource(const std::vector<QUrl>& vsFiles,
+  std::shared_ptr<CDialogueNode> DeserializeNode(const QByteArray& arr, const tspProject& spProject);
+  std::shared_ptr<CDialogueNode> LoadDialogues(const std::vector<tspResource>& vsFiles, bool* bpErrors = nullptr);
+  std::shared_ptr<CDialogueNode> LoadDialoguesFromSource(const std::vector<QUrl>& vsFiles,
                                                      const tspProject& spProject,
                                                      bool* bpErrors = nullptr);
-  void SaveDialogs(const std::shared_ptr<CDialogNode>& spDialogNodeTree, const tspProject& spProject);
-  QByteArray SerializeNode(const std::shared_ptr<CDialogNode>& spNode);
+  void SaveDialogues(const std::shared_ptr<CDialogueNode>& spDialogueNodeTree, const tspProject& spProject);
+  QByteArray SerializeNode(const std::shared_ptr<CDialogueNode>& spNode);
 }
 
-#endif // CDIALOGNODE_H
+#endif // CDIALOGUENODE_H

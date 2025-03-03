@@ -31,18 +31,18 @@ namespace
   const char c_sNameNode[] = "sName";
 }
 
-CDialogNode::CDialogNode() :
+CDialogueNode::CDialogueNode() :
   m_sFileId(),
-  m_type(EDialogTreeNodeType::eRoot),
-  m_sName(dialog_tree::c_sRootNodeName),
+  m_type(EDialogueTreeNodeType::eRoot),
+  m_sName(dialogue_tree::c_sRootNodeName),
   m_bReadOnly(false)
 {
 }
-CDialogNode::~CDialogNode() = default;
+CDialogueNode::~CDialogueNode() = default;
 
-std::shared_ptr<CDialogNode> CDialogNode::Clone()
+std::shared_ptr<CDialogueNode> CDialogueNode::Clone()
 {
-  std::shared_ptr<CDialogNode> spRet = CloneImpl();
+  std::shared_ptr<CDialogueNode> spRet = CloneImpl();
   spRet->m_sFileId = m_sFileId;
   spRet->m_type = m_type;
   spRet->m_sName = m_sName;
@@ -50,7 +50,7 @@ std::shared_ptr<CDialogNode> CDialogNode::Clone()
   return spRet;
 }
 
-void CDialogNode::CopyFrom(const std::shared_ptr<CDialogNode>& spNode)
+void CDialogueNode::CopyFrom(const std::shared_ptr<CDialogueNode>& spNode)
 {
   CopyFromImpl(spNode);
   m_sFileId = spNode->m_sFileId;
@@ -59,16 +59,16 @@ void CDialogNode::CopyFrom(const std::shared_ptr<CDialogNode>& spNode)
   m_bReadOnly = spNode->m_bReadOnly;
 }
 
-std::shared_ptr<CDialogNode> CDialogNode::CloneImpl()
+std::shared_ptr<CDialogueNode> CDialogueNode::CloneImpl()
 {
-  std::shared_ptr<CDialogNode> spRet = std::make_shared<CDialogNode>();
+  std::shared_ptr<CDialogueNode> spRet = std::make_shared<CDialogueNode>();
   spRet->m_sFileId = m_sFileId;
   spRet->m_type = m_type;
   spRet->m_sName = m_sName;
   spRet->m_bReadOnly = m_bReadOnly;
   return spRet;
 }
-void CDialogNode::CopyFromImpl(const std::shared_ptr<CDialogNode>& spNode)
+void CDialogueNode::CopyFromImpl(const std::shared_ptr<CDialogueNode>& spNode)
 {
   m_sFileId = spNode->m_sFileId;
   m_type = spNode->m_type;
@@ -78,57 +78,57 @@ void CDialogNode::CopyFromImpl(const std::shared_ptr<CDialogNode>& spNode)
 
 //----------------------------------------------------------------------------------------
 //
-CDialogNodeCategory::CDialogNodeCategory() :
-  CDialogNode()
+CDialogueNodeCategory::CDialogueNodeCategory() :
+  CDialogueNode()
 {
-  m_type = EDialogTreeNodeType::eCategory;
+  m_type = EDialogueTreeNodeType::eCategory;
 }
-CDialogNodeCategory::~CDialogNodeCategory() = default;
+CDialogueNodeCategory::~CDialogueNodeCategory() = default;
 
-std::shared_ptr<CDialogNode> CDialogNodeCategory::CloneImpl()
+std::shared_ptr<CDialogueNode> CDialogueNodeCategory::CloneImpl()
 {
-  std::shared_ptr<CDialogNodeCategory> spRet = std::make_shared<CDialogNodeCategory>();
+  std::shared_ptr<CDialogueNodeCategory> spRet = std::make_shared<CDialogueNodeCategory>();
   return spRet;
 }
-void CDialogNodeCategory::CopyFromImpl(const std::shared_ptr<CDialogNode>&)
+void CDialogueNodeCategory::CopyFromImpl(const std::shared_ptr<CDialogueNode>&)
 {
 }
 
 //----------------------------------------------------------------------------------------
 //
-CDialogNodeDialog::CDialogNodeDialog() :
-  CDialogNode()
+CDialogueNodeDialogue::CDialogueNodeDialogue() :
+  CDialogueNode()
 {
-  m_type = EDialogTreeNodeType::eDialog;
+  m_type = EDialogueTreeNodeType::eDialogue;
 }
-CDialogNodeDialog::~CDialogNodeDialog() = default;
+CDialogueNodeDialogue::~CDialogueNodeDialogue() = default;
 
-std::shared_ptr<CDialogNode> CDialogNodeDialog::CloneImpl()
+std::shared_ptr<CDialogueNode> CDialogueNodeDialogue::CloneImpl()
 {
-  std::shared_ptr<CDialogNodeDialog> spRet = std::make_shared<CDialogNodeDialog>();
+  std::shared_ptr<CDialogueNodeDialogue> spRet = std::make_shared<CDialogueNodeDialogue>();
   spRet->m_tags = m_tags;
   spRet->m_bHasCondition = m_bHasCondition;
   return spRet;
 }
-void CDialogNodeDialog::CopyFromImpl(const std::shared_ptr<CDialogNode>& spNode)
+void CDialogueNodeDialogue::CopyFromImpl(const std::shared_ptr<CDialogueNode>& spNode)
 {
-  auto spImpl = std::dynamic_pointer_cast<CDialogNodeDialog>(spNode);
+  auto spImpl = std::dynamic_pointer_cast<CDialogueNodeDialogue>(spNode);
   m_tags = spImpl->m_tags;
   m_bHasCondition = spImpl->m_bHasCondition;
 }
 
 //----------------------------------------------------------------------------------------
 //
-CDialogData::CDialogData() :
-  CDialogNode()
+CDialogueData::CDialogueData() :
+  CDialogueNode()
 {
-  m_type = EDialogTreeNodeType::eDialogFragment;
+  m_type = EDialogueTreeNodeType::eDialogueFragment;
 }
-CDialogData::~CDialogData() = default;
+CDialogueData::~CDialogueData() = default;
 
-std::shared_ptr<CDialogNode> CDialogData::CloneImpl()
+std::shared_ptr<CDialogueNode> CDialogueData::CloneImpl()
 {
-  std::shared_ptr<CDialogData> spRet = std::make_shared<CDialogData>();
+  std::shared_ptr<CDialogueData> spRet = std::make_shared<CDialogueData>();
   spRet->m_sCondition = m_sCondition;
   spRet->m_sString = m_sString;
   spRet->m_sSoundResource = m_sSoundResource;
@@ -136,9 +136,9 @@ std::shared_ptr<CDialogNode> CDialogData::CloneImpl()
   spRet->m_bSkipable = m_bSkipable;
   return spRet;
 }
-void CDialogData::CopyFromImpl(const std::shared_ptr<CDialogNode>& spNode)
+void CDialogueData::CopyFromImpl(const std::shared_ptr<CDialogueNode>& spNode)
 {
-  auto spImpl = std::dynamic_pointer_cast<CDialogData>(spNode);
+  auto spImpl = std::dynamic_pointer_cast<CDialogueData>(spNode);
   m_sCondition = spImpl->m_sCondition;
   m_sString = spImpl->m_sString;
   m_sSoundResource = spImpl->m_sSoundResource;
@@ -152,10 +152,10 @@ namespace
   //--------------------------------------------------------------------------------------
   //
   /* json-parse the people - with custom error handler */
-  class CDialogJsonErrorHandler : public nlohmann::json_schema::basic_error_handler
+  class CDialogueJsonErrorHandler : public nlohmann::json_schema::basic_error_handler
   {
   public:
-    CDialogJsonErrorHandler(QString* pError) : m_pError(pError)
+    CDialogueJsonErrorHandler(QString* pError) : m_pError(pError)
     {
     }
 
@@ -180,14 +180,14 @@ namespace
   void RecursiveRead(const nlohmann::json& root,
                      const tspProject& spProj,
                      const QString& sFileId,
-                     std::shared_ptr<CDialogNode> spRoot,
+                     std::shared_ptr<CDialogueNode> spRoot,
                      bool bReadOnly)
   {
     for(auto it = root.begin(); it != root.end(); ++it)
     {
       if (it->is_object())
       {
-        // dialog node
+        // dialogue node
         if (it->contains(c_sHasConditionNode))
         {
           auto itHasCondition = it->find(c_sHasConditionNode);
@@ -198,9 +198,9 @@ namespace
               itTags->is_array() && itFragments->is_array())
           {
             QString sKey = QString::fromStdString(it.key());
-            sKey = dialog_tree::EnsureUniqueName(sKey, spRoot, nullptr);
+            sKey = dialogue_tree::EnsureUniqueName(sKey, spRoot, nullptr);
 
-            auto spChild = std::make_shared<CDialogNodeDialog>();
+            auto spChild = std::make_shared<CDialogueNodeDialogue>();
             spRoot->m_vspChildren.push_back(spChild);
             spChild->m_wpParent = spRoot;
             spChild->m_bReadOnly = bReadOnly;
@@ -230,7 +230,7 @@ namespace
             RecursiveRead(itFragments.value(), spProj, sFileId, spChild, bReadOnly);
           }
         }
-        // dialog fragment
+        // dialogue fragment
         else if (it->contains(c_sStringNode))
         {
           auto itName = it->find(c_sNameNode);
@@ -247,9 +247,9 @@ namespace
               itWaitTime->is_number_integer() && itSkippable->is_boolean())
           {
             QString sKey = QString::fromStdString(itName.value().get<std::string>());
-            sKey = dialog_tree::EnsureUniqueName(sKey, spRoot, nullptr);
+            sKey = dialogue_tree::EnsureUniqueName(sKey, spRoot, nullptr);
 
-            auto spFrag = std::make_shared<CDialogData>();
+            auto spFrag = std::make_shared<CDialogueData>();
             spRoot->m_vspChildren.push_back(spFrag);
             spFrag->m_wpParent = spRoot;
             spFrag->m_bReadOnly = bReadOnly;
@@ -272,16 +272,16 @@ namespace
         else
         {
           QString sKey = QString::fromStdString(it.key());
-          sKey = dialog_tree::EnsureUniqueName(sKey, spRoot, nullptr);
-          std::shared_ptr<CDialogNodeCategory> spChild = nullptr;
+          sKey = dialogue_tree::EnsureUniqueName(sKey, spRoot, nullptr);
+          std::shared_ptr<CDialogueNodeCategory> spChild = nullptr;
           auto itFound = std::find_if(spRoot->m_vspChildren.begin(), spRoot->m_vspChildren.end(),
-                                 [sKey](const std::shared_ptr<CDialogNode>& spChild) {
+                                 [sKey](const std::shared_ptr<CDialogueNode>& spChild) {
               return sKey == spChild->m_sName &&
-                   EDialogTreeNodeType::eCategory == spChild->m_type._to_integral();
+                   EDialogueTreeNodeType::eCategory == spChild->m_type._to_integral();
           });
           if (spRoot->m_vspChildren.end() == itFound)
           {
-            spChild = std::make_shared<CDialogNodeCategory>();
+            spChild = std::make_shared<CDialogueNodeCategory>();
             spChild->m_sName = sKey;
             spChild->m_wpParent = spRoot;
             spChild->m_bReadOnly = bReadOnly;
@@ -289,10 +289,10 @@ namespace
           }
           else
           {
-            spChild = std::dynamic_pointer_cast<CDialogNodeCategory>(*itFound);
+            spChild = std::dynamic_pointer_cast<CDialogueNodeCategory>(*itFound);
             if (nullptr == spChild)
             {
-              spChild = std::make_shared<CDialogNodeCategory>();
+              spChild = std::make_shared<CDialogueNodeCategory>();
               spChild->m_sName = sKey;
               spChild->m_wpParent = spRoot;
               spChild->m_bReadOnly = bReadOnly;
@@ -309,10 +309,10 @@ namespace
 
   //--------------------------------------------------------------------------------------
   //
-  bool ParseDialogFile(const QByteArray& arr,
-                       std::shared_ptr<CDialogNode>& spRoot,
-                       bool bReadOnly, const tspProject& spProj,
-                       const QString& sFileId)
+  bool ParseDialogueFile(const QByteArray& arr,
+                         std::shared_ptr<CDialogueNode>& spRoot,
+                         bool bReadOnly, const tspProject& spProj,
+                         const QString& sFileId)
   {
     static QString c_sSchema = []() -> QString {
       QFile f(":/resources/data/dialog_schema.json");
@@ -320,19 +320,19 @@ namespace
       {
         return QString::fromUtf8(f.readAll());
       }
-      qWarning() << QObject::tr("Could not open inbuilt dialog json.");
+      qWarning() << QObject::tr("Could not open inbuilt dialogue json.");
       return QString();
     }();
 
     QString sError;
 
-    CDialogJsonErrorHandler errorHandler(&sError);
+    CDialogueJsonErrorHandler errorHandler(&sError);
     nlohmann::json_schema::json_validator validator;
-    nlohmann::json dialog;
+    nlohmann::json dialogue;
 
     try
     {
-      dialog = nlohmann::json::parse(QString::fromUtf8(arr).toStdString());
+      dialogue = nlohmann::json::parse(QString::fromUtf8(arr).toStdString());
     }
     catch (const std::exception &e)
     {
@@ -362,20 +362,20 @@ namespace
     }
 
     bool bOk = true;
-    validator.validate(dialog, errorHandler);
+    validator.validate(dialogue, errorHandler);
     if (static_cast<bool>(errorHandler))
     {
       bOk = false;
     }
 
-    RecursiveRead(dialog, spProj, sFileId, spRoot, bReadOnly);
+    RecursiveRead(dialogue, spProj, sFileId, spRoot, bReadOnly);
 
     return bOk;
   }
 
   //--------------------------------------------------------------------------------------
   //
-  bool ReadFialogFile(std::shared_ptr<CDialogNode>& spRoot,
+  bool ReadFialogFile(std::shared_ptr<CDialogueNode>& spRoot,
                       const QString& sPath, const QString& sFileId, bool bReadOnly,
                       const tspProject& spProj)
   {
@@ -383,7 +383,7 @@ namespace
     if (f.exists() && f.open(QIODevice::ReadOnly))
     {
       QByteArray arr = f.readAll();
-      return ParseDialogFile(arr, spRoot, bReadOnly, spProj, sFileId);
+      return ParseDialogueFile(arr, spRoot, bReadOnly, spProj, sFileId);
     }
 
     return false;
@@ -391,9 +391,9 @@ namespace
 
   //--------------------------------------------------------------------------------------
   //
-  bool FetchDialogFile(std::shared_ptr<CDialogNode>& spRoot,
-                       const QUrl& sPath, const QString& sFileId,
-                       const tspProject& spProj)
+  bool FetchDialogueFile(std::shared_ptr<CDialogueNode>& spRoot,
+                         const QUrl& sPath, const QString& sFileId,
+                         const tspProject& spProj)
   {
     QByteArray arr;
     QEventLoop loop;
@@ -432,26 +432,26 @@ namespace
 
     if (nullptr != pReply) { delete pReply; }
 
-    return ParseDialogFile(arr, spRoot, true, spProj, sFileId);
+    return ParseDialogueFile(arr, spRoot, true, spProj, sFileId);
   }
 
   //--------------------------------------------------------------------------------------
   //
-  using tSeparatedTree = std::map<tspResource, std::vector<std::shared_ptr<CDialogNode>>>;
-  tSeparatedTree SeparateTree(const std::shared_ptr<CDialogNode>& spDialogNodeTree,
+  using tSeparatedTree = std::map<tspResource, std::vector<std::shared_ptr<CDialogueNode>>>;
+  tSeparatedTree SeparateTree(const std::shared_ptr<CDialogueNode>& spDialogueNodeTree,
                               const tspProject& spProject)
   {
     tSeparatedTree out;
-    for (const auto& spNode : spDialogNodeTree->m_vspChildren)
+    for (const auto& spNode : spDialogueNodeTree->m_vspChildren)
     {
-      if (EDialogTreeNodeType::eDialog == spNode->m_type._to_integral() ||
-          EDialogTreeNodeType::eCategory == spNode->m_type._to_integral())
+      if (EDialogueTreeNodeType::eDialogue == spNode->m_type._to_integral() ||
+          EDialogueTreeNodeType::eCategory == spNode->m_type._to_integral())
       {
         tSeparatedTree temp = SeparateTree(spNode, spProject);
 
         for (auto& [spRes, vspFileChildren] : temp)
         {
-          std::shared_ptr<CDialogNode> spNodeCopy = nullptr;
+          std::shared_ptr<CDialogueNode> spNodeCopy = nullptr;
           auto it = out.find(spRes);
           if (out.end() == it)
           {
@@ -461,7 +461,7 @@ namespace
           else
           {
             auto itFound = std::find_if(it->second.begin(), it->second.end(),
-                                      [&spNode](const std::shared_ptr<CDialogNode>& spCheck) {
+                                      [&spNode](const std::shared_ptr<CDialogueNode>& spCheck) {
               return spNode->m_sName == spCheck->m_sName;
             });
             if (it->second.end() != itFound)
@@ -481,9 +481,9 @@ namespace
           }
         }
       }
-      else if (EDialogTreeNodeType::eDialogFragment == spNode->m_type._to_integral())
+      else if (EDialogueTreeNodeType::eDialogueFragment == spNode->m_type._to_integral())
       {
-        std::shared_ptr<CDialogNode> spNodeCopy = spNode->Clone();
+        std::shared_ptr<CDialogueNode> spNodeCopy = spNode->Clone();
         auto it = spProject->m_spResourcesMap.find(spNodeCopy->m_sFileId);
         if (spProject->m_spResourcesMap.end() != it)
         {
@@ -501,26 +501,26 @@ namespace
   //--------------------------------------------------------------------------------------
   //
   void WriteNodeChildren(QJsonObject& parent,
-                         const std::vector<std::shared_ptr<CDialogNode>>& vspRootNodes,
+                         const std::vector<std::shared_ptr<CDialogueNode>>& vspRootNodes,
                          bool bWriteFileId)
   {
     for (const auto& spNode : vspRootNodes)
     {
       switch (spNode->m_type)
       {
-        case EDialogTreeNodeType::eCategory:
+        case EDialogueTreeNodeType::eCategory:
         {
           QJsonObject obj;
           WriteNodeChildren(obj, spNode->m_vspChildren, bWriteFileId);
           parent.insert(spNode->m_sName, obj);
         } break;
-        case EDialogTreeNodeType::eDialog:
+        case EDialogueTreeNodeType::eDialogue:
         {
-          auto spDialog = std::static_pointer_cast<CDialogNodeDialog>(spNode);
+          auto spDialogue = std::static_pointer_cast<CDialogueNodeDialogue>(spNode);
           QJsonObject obj;
           QJsonArray arrTags;
           QJsonArray arrFragments;
-          for (const auto& [sName, _] : spDialog->m_tags)
+          for (const auto& [sName, _] : spDialogue->m_tags)
           {
             arrTags.push_back(sName);
           }
@@ -530,32 +530,32 @@ namespace
           {
             arrFragments.push_back((arrFragmentsO.begin()+i).value());
           }
-          obj.insert(c_sHasConditionNode, spDialog->m_bHasCondition);
+          obj.insert(c_sHasConditionNode, spDialogue->m_bHasCondition);
           obj.insert(c_sTagsNode, arrTags);
           obj.insert(c_sFragmentsNode, arrFragments);
           if (bWriteFileId)
           {
-            obj.insert(c_sFileNode, spDialog->m_sFileId);
+            obj.insert(c_sFileNode, spDialogue->m_sFileId);
           }
           parent.insert(spNode->m_sName, obj);
         } break;
-        case EDialogTreeNodeType::eDialogFragment:
+        case EDialogueTreeNodeType::eDialogueFragment:
         {
-          auto spDialog = std::static_pointer_cast<CDialogData>(spNode);
+          auto spDialogue = std::static_pointer_cast<CDialogueData>(spNode);
           QJsonObject obj;
-          obj.insert(c_sNameNode, spDialog->m_sName);
-          obj.insert(c_sConditionNode, spDialog->m_sCondition);
-          obj.insert(c_sStringNode, spDialog->m_sString);
-          obj.insert(c_sSoundResourceNode, spDialog->m_sSoundResource);
-          obj.insert(c_sWaitTimeMsNode, spDialog->m_iWaitTimeMs);
-          obj.insert(c_sSkipableNode, spDialog->m_bSkipable);
+          obj.insert(c_sNameNode, spDialogue->m_sName);
+          obj.insert(c_sConditionNode, spDialogue->m_sCondition);
+          obj.insert(c_sStringNode, spDialogue->m_sString);
+          obj.insert(c_sSoundResourceNode, spDialogue->m_sSoundResource);
+          obj.insert(c_sWaitTimeMsNode, spDialogue->m_iWaitTimeMs);
+          obj.insert(c_sSkipableNode, spDialogue->m_bSkipable);
           if (bWriteFileId)
           {
-            obj.insert(c_sFileNode, spDialog->m_sFileId);
+            obj.insert(c_sFileNode, spDialogue->m_sFileId);
           }
           parent.insert(spNode->m_sName, obj);
         } break;
-        case EDialogTreeNodeType::eRoot: break;
+        case EDialogueTreeNodeType::eRoot: break;
       }
     }
   }
@@ -563,7 +563,7 @@ namespace
   //--------------------------------------------------------------------------------------
   //
   bool WriteSingleFile(const tspResource& spResource,
-                       const std::vector<std::shared_ptr<CDialogNode>>& vspRootNodes)
+                       const std::vector<std::shared_ptr<CDialogueNode>>& vspRootNodes)
   {
     QJsonObject root;
     WriteNodeChildren(root, vspRootNodes, false);
@@ -585,8 +585,8 @@ namespace
 namespace
 {
   void IterateNodeChildrenAdgGetName(QStringList* pvsList,
-                                     const std::shared_ptr<CDialogNode>& spRoot,
-                                     const std::shared_ptr<CDialogNode>& spExcept)
+                                     const std::shared_ptr<CDialogueNode>& spRoot,
+                                     const std::shared_ptr<CDialogueNode>& spExcept)
   {
     for (const auto& spChild : spRoot->m_vspChildren)
     {
@@ -599,13 +599,13 @@ namespace
   }
 }
 
-namespace dialog_tree
+namespace dialogue_tree
 {
   //--------------------------------------------------------------------------------------
   //
   QString EnsureUniqueName(const QString& sStr,
-                           const std::shared_ptr<CDialogNode>& spParent,
-                           const std::shared_ptr<CDialogNode>& spExcept)
+                           const std::shared_ptr<CDialogueNode>& spParent,
+                           const std::shared_ptr<CDialogueNode>& spExcept)
   {
     QString sOut = sStr;
     QStringList vsForbidden;
@@ -647,13 +647,13 @@ namespace dialog_tree
 
   //--------------------------------------------------------------------------------------
   //
-  std::shared_ptr<CDialogNode> DeserializeNode(const QByteArray& arr, const tspProject& spProject)
+  std::shared_ptr<CDialogueNode> DeserializeNode(const QByteArray& arr, const tspProject& spProject)
   {
-    nlohmann::json dialog;
+    nlohmann::json dialogue;
 
     try
     {
-      dialog = nlohmann::json::parse(QString::fromUtf8(arr).toStdString());
+      dialogue = nlohmann::json::parse(QString::fromUtf8(arr).toStdString());
     }
     catch (const std::exception &e)
     {
@@ -661,8 +661,8 @@ namespace dialog_tree
       return nullptr;
     }
 
-    std::shared_ptr<CDialogNode> spRoot = std::make_shared<CDialogNode>();
-    RecursiveRead(dialog, spProject, QString(), spRoot, false);
+    std::shared_ptr<CDialogueNode> spRoot = std::make_shared<CDialogueNode>();
+    RecursiveRead(dialogue, spProject, QString(), spRoot, false);
 
     if (spRoot->m_vspChildren.size() > 0)
     {
@@ -675,15 +675,15 @@ namespace dialog_tree
 
   //--------------------------------------------------------------------------------------
   //
-  std::shared_ptr<CDialogNode> LoadDialogs(const std::vector<tspResource>& vsFiles, bool* bpErrors)
+  std::shared_ptr<CDialogueNode> LoadDialogues(const std::vector<tspResource>& vsFiles, bool* bpErrors)
   {
     if (nullptr != bpErrors) { *bpErrors = true; }
-    std::shared_ptr<CDialogNode> spRoot = std::make_shared<CDialogNode>();
+    std::shared_ptr<CDialogueNode> spRoot = std::make_shared<CDialogueNode>();
     for (const tspResource& spResource : vsFiles)
     {
       QReadLocker locker(&spResource->m_rwLock);
       if (EResourceType::eDatabase != spResource->m_type._to_integral()) { continue; }
-      if (QFileInfo(PhysicalResourcePath(spResource)).suffix() != joip_resource::c_sDialogFileType)
+      if (QFileInfo(PhysicalResourcePath(spResource)).suffix() != joip_resource::c_sDialogueFileType)
       { continue; }
 
       if (IsLocalFile(spResource->m_sPath))
@@ -699,10 +699,10 @@ namespace dialog_tree
       }
       else
       {
-        bool bOk = FetchDialogFile(spRoot,
-                                   spResource->m_sPath,
-                                   spResource->m_sName,
-                                   spResource->m_spParent);
+        bool bOk = FetchDialogueFile(spRoot,
+                                     spResource->m_sPath,
+                                     spResource->m_sName,
+                                     spResource->m_spParent);
         if (nullptr != bpErrors) { *bpErrors &= bOk; }
       }
     }
@@ -712,12 +712,12 @@ namespace dialog_tree
 
   //--------------------------------------------------------------------------------------
   //
-  std::shared_ptr<CDialogNode> LoadDialogsFromSource(const std::vector<QUrl>& vsFiles,
-                                                     const tspProject& spProject,
-                                                     bool* bpErrors)
+  std::shared_ptr<CDialogueNode> LoadDialoguesFromSource(const std::vector<QUrl>& vsFiles,
+                                                         const tspProject& spProject,
+                                                         bool* bpErrors)
   {
     if (nullptr != bpErrors) { *bpErrors = true; }
-    std::shared_ptr<CDialogNode> spRoot = std::make_shared<CDialogNode>();
+    std::shared_ptr<CDialogueNode> spRoot = std::make_shared<CDialogueNode>();
     for (const QUrl& sPathUrl : vsFiles)
     {
       if (IsLocalFile(sPathUrl))
@@ -732,10 +732,10 @@ namespace dialog_tree
       }
       else
       {
-        bool bOk = FetchDialogFile(spRoot,
-                                   sPathUrl,
-                                   QString(),
-                                   spProject);
+        bool bOk = FetchDialogueFile(spRoot,
+                                     sPathUrl,
+                                     QString(),
+                                     spProject);
         if (nullptr != bpErrors) { *bpErrors &= bOk; }
       }
     }
@@ -745,10 +745,10 @@ namespace dialog_tree
 
   //--------------------------------------------------------------------------------------
   //
-  void SaveDialogs(const std::shared_ptr<CDialogNode>& spDialogNodeTree, const tspProject& spProject)
+  void SaveDialogues(const std::shared_ptr<CDialogueNode>& spDialogueNodeTree, const tspProject& spProject)
   {
     QReadLocker locker(&spProject->m_rwLock);
-    tSeparatedTree vSeparatedTree = SeparateTree(spDialogNodeTree, spProject);
+    tSeparatedTree vSeparatedTree = SeparateTree(spDialogueNodeTree, spProject);
 
     for (const auto& [spResource, vspNodeRoot] : vSeparatedTree)
     {
@@ -758,14 +758,14 @@ namespace dialog_tree
       if (!bOk)
       {
         QReadLocker l(&spResource->m_rwLock);
-        qWarning() << QObject::tr("Error writing dialog file: %1.").arg(spResource->m_sName);
+        qWarning() << QObject::tr("Error writing dialogue file: %1.").arg(spResource->m_sName);
       }
     }
   }
 
   //--------------------------------------------------------------------------------------
   //
-  QByteArray SerializeNode(const std::shared_ptr<CDialogNode>& spNode)
+  QByteArray SerializeNode(const std::shared_ptr<CDialogueNode>& spNode)
   {
     QJsonObject root;
     WriteNodeChildren(root, {spNode}, true);

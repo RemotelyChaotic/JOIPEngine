@@ -15,7 +15,7 @@
 
 class CDatabaseManager;
 class CFlowScene;
-class CDialogEditorTreeModel;
+class CDialogueEditorTreeModel;
 class CEditorJobWorker;
 class CKinkTreeModel;
 class CResourceTreeItemModel;
@@ -45,7 +45,7 @@ public:
   const tspProject& CurrentProject() const;
   CFlowScene* FlowSceneModel() const;
   bool IsReadOnly() const;
-  CDialogEditorTreeModel* DialogModel() const;
+  CDialogueEditorTreeModel* DialogueModel() const;
   CEditorJobWorker* JobWorker() const;
   CKinkTreeModel* KinkTreeModel() const;
   CResourceTreeItemModel* ResourceTreeModel() const;
@@ -105,7 +105,7 @@ private:
   std::unique_ptr<CResourceTreeItemModel>                     m_spResourceTreeModel;
   std::shared_ptr<CSettings>                                  m_spSettings;
   std::shared_ptr<CThreadedSystem>                            m_spJobWorkerSystem;
-  std::shared_ptr<CDialogEditorTreeModel>                     m_spDialogModel;
+  std::shared_ptr<CDialogueEditorTreeModel>                     m_spDialogModel;
   tspProject                                                  m_spCurrentProject;
   std::weak_ptr<CDatabaseManager>                             m_wpDbManager;
   std::vector<std::weak_ptr<ITutorialStateSwitchHandler>>     m_vwpTutorialStateSwitchHandlers;

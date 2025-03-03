@@ -37,8 +37,8 @@ public:
 
 signals:
   void clearText();
-  void getDialog(QString sRequestId, QString sId, bool bIsRegexp, QStringList vsTags);
-  void getDialogReturnValue(QString sRequestId, QString sString, qint64 iTime, bool bWait,
+  void getDialogue(QString sRequestId, QString sId, bool bIsRegexp, QStringList vsTags);
+  void getDialogueReturnValue(QString sRequestId, QString sString, qint64 iTime, bool bWait,
                             QString sSoundResource, QStringList vsTags);
   void showButtonPrompts(QStringList vsLabels, QString sStoreIntoVar, QString sRequestId, bool bStoreIntoStorageInstead);
   void showButtonReturnValue(qint32 iIndex, QString sRequestId);
@@ -78,8 +78,8 @@ public slots:
   qint32 showButtonPrompts(QVariant vsLabels, QString sStoreInto);
   QString showInput();
   QString showInput(QString sStoreInto);
-  QVariant getDialog(QVariant data);
-  void showDialog(QVariant data);
+  QVariant getDialogue(QVariant data);
+  void showDialogue(QVariant data);
   void showText(QString sText);
   void showText(QString sText, double dWaitTime);
   void showText(QString sText, double dWaitTime, bool bSkipable);
@@ -91,11 +91,11 @@ signals:
 
 private:
   std::vector<QColor> GetColors(const QVariant& color, const QString& sSource);
-  bool GetDialogData(QVariant data, QString& sStringRet, qint32& iTimeRet, bool& bWaitRet,
-                     QString& sSoundResource, QStringList& vsTagsRet);
-  bool GetDialogFromUi(QString sId, QString sString, bool bIsRegexp, QStringList vsTags,
-                       QString& sStringRet, qint32& iTimeRet, bool& bWaitRet,
+  bool GetDialogueData(QVariant data, QString& sStringRet, qint32& iTimeRet, bool& bWaitRet,
                        QString& sSoundResource, QStringList& vsTagsRet);
+  bool GetDialogueFromUi(QString sId, QString sString, bool bIsRegexp, QStringList vsTags,
+                         QString& sStringRet, qint32& iTimeRet, bool& bWaitRet,
+                         QString& sSoundResource, QStringList& vsTagsRet);
   QString GetResourceName(const QVariant& resource, const QString& sMethod, bool* pbOk);
 
   std::weak_ptr<CDatabaseManager>  m_wpDbManager;

@@ -4,29 +4,29 @@
 
 #include <optional>
 
-using namespace dialog_item;
+using namespace dialogue_item;
 
-CDialogEditorTreeItem::CDialogEditorTreeItem(std::shared_ptr<CDialogNode> spNode,
-                                             CDialogEditorTreeItem* pParentItem) :
+CDialogueEditorTreeItem::CDialogueEditorTreeItem(std::shared_ptr<CDialogueNode> spNode,
+                                             CDialogueEditorTreeItem* pParentItem) :
     m_pParentItem(pParentItem),
     m_spNode(spNode)
 {}
 
-CDialogEditorTreeItem::~CDialogEditorTreeItem()
+CDialogueEditorTreeItem::~CDialogueEditorTreeItem()
 {
   qDeleteAll(m_vpChildItems);
 }
 
 //----------------------------------------------------------------------------------------
 //
-void CDialogEditorTreeItem::AppendChild(CDialogEditorTreeItem* pItem)
+void CDialogueEditorTreeItem::AppendChild(CDialogueEditorTreeItem* pItem)
 {
   m_vpChildItems.append(pItem);
 }
 
 //----------------------------------------------------------------------------------------
 //
-CDialogEditorTreeItem* CDialogEditorTreeItem::Child(qint32 iRow)
+CDialogueEditorTreeItem* CDialogueEditorTreeItem::Child(qint32 iRow)
 {
   if (iRow < 0 || iRow >= m_vpChildItems.size())
   {
@@ -37,7 +37,7 @@ CDialogEditorTreeItem* CDialogEditorTreeItem::Child(qint32 iRow)
 
 //----------------------------------------------------------------------------------------
 //
-qint32 CDialogEditorTreeItem::ChildIndex(CDialogEditorTreeItem* pCompare)
+qint32 CDialogueEditorTreeItem::ChildIndex(CDialogueEditorTreeItem* pCompare)
 {
   for (qint32 i = 0; ChildCount() > i; ++i)
   {
@@ -51,21 +51,21 @@ qint32 CDialogEditorTreeItem::ChildIndex(CDialogEditorTreeItem* pCompare)
 
 //----------------------------------------------------------------------------------------
 //
-qint32 CDialogEditorTreeItem::ChildCount() const
+qint32 CDialogueEditorTreeItem::ChildCount() const
 {
   return m_vpChildItems.count();
 }
 
 //----------------------------------------------------------------------------------------
 //
-qint32 CDialogEditorTreeItem::ColumnCount() const
+qint32 CDialogueEditorTreeItem::ColumnCount() const
 {
   return c_iNumColumns;
 }
 
 //----------------------------------------------------------------------------------------
 //
-QVariant CDialogEditorTreeItem::Data(qint32 iColumn) const
+QVariant CDialogueEditorTreeItem::Data(qint32 iColumn) const
 {
   if (iColumn < 0 || iColumn >= c_iNumOptItems || nullptr == m_spNode)
   {
@@ -75,8 +75,8 @@ QVariant CDialogEditorTreeItem::Data(qint32 iColumn) const
   {
     switch (m_spNode->m_type)
     {
-      case EDialogTreeNodeType::eRoot:    // fallthrough
-      case EDialogTreeNodeType::eCategory:// fallthrough
+      case EDialogueTreeNodeType::eRoot:    // fallthrough
+      case EDialogueTreeNodeType::eCategory:// fallthrough
       {
         switch(iColumn)
         {
@@ -94,9 +94,9 @@ QVariant CDialogEditorTreeItem::Data(qint32 iColumn) const
             return QVariant();
         }
       } break;
-      case EDialogTreeNodeType::eDialog:
+      case EDialogueTreeNodeType::eDialogue:
       {
-        auto spNode = std::static_pointer_cast<CDialogNodeDialog>(m_spNode);
+        auto spNode = std::static_pointer_cast<CDialogueNodeDialogue>(m_spNode);
         switch(iColumn)
         {
           case c_iColumnId:
@@ -176,9 +176,9 @@ QVariant CDialogEditorTreeItem::Data(qint32 iColumn) const
             return QVariant();
         }
       } break;
-      case EDialogTreeNodeType::eDialogFragment:
+      case EDialogueTreeNodeType::eDialogueFragment:
       {
-        auto spNode = std::static_pointer_cast<CDialogData>(m_spNode);
+        auto spNode = std::static_pointer_cast<CDialogueData>(m_spNode);
         switch(iColumn)
         {
           case c_iColumnId:
@@ -219,7 +219,7 @@ QVariant CDialogEditorTreeItem::Data(qint32 iColumn) const
 
 //----------------------------------------------------------------------------------------
 //
-Qt::ItemFlags CDialogEditorTreeItem::Flags(qint32 iColumn) const
+Qt::ItemFlags CDialogueEditorTreeItem::Flags(qint32 iColumn) const
 {
   Qt::ItemFlags flags;
   if (iColumn < 0 || iColumn >= c_iNumOptItems || nullptr == m_spNode)
@@ -230,8 +230,8 @@ Qt::ItemFlags CDialogEditorTreeItem::Flags(qint32 iColumn) const
 
   switch (m_spNode->m_type)
   {
-    case EDialogTreeNodeType::eRoot: [[fallthrough]];
-    case EDialogTreeNodeType::eCategory:
+    case EDialogueTreeNodeType::eRoot: [[fallthrough]];
+    case EDialogueTreeNodeType::eCategory:
     {
       switch(iColumn)
       {
@@ -241,9 +241,9 @@ Qt::ItemFlags CDialogEditorTreeItem::Flags(qint32 iColumn) const
         default: break;
       }
     } break;
-    case EDialogTreeNodeType::eDialog:
+    case EDialogueTreeNodeType::eDialogue:
     {
-      auto spNode = std::static_pointer_cast<CDialogNodeDialog>(m_spNode);
+      auto spNode = std::static_pointer_cast<CDialogueNodeDialogue>(m_spNode);
       switch(iColumn)
       {
         case c_iColumnId:
@@ -273,7 +273,7 @@ Qt::ItemFlags CDialogEditorTreeItem::Flags(qint32 iColumn) const
         default: break;
       }
     } break;
-    case EDialogTreeNodeType::eDialogFragment:
+    case EDialogueTreeNodeType::eDialogueFragment:
     {
       switch(iColumn)
       {
@@ -297,7 +297,7 @@ Qt::ItemFlags CDialogEditorTreeItem::Flags(qint32 iColumn) const
 
 //----------------------------------------------------------------------------------------
 //
-QVariant CDialogEditorTreeItem::HeaderData(qint32 iColumn) const
+QVariant CDialogueEditorTreeItem::HeaderData(qint32 iColumn) const
 {
   if (iColumn < 0 || iColumn >= c_iNumColumns)
   {
@@ -324,7 +324,7 @@ QVariant CDialogEditorTreeItem::HeaderData(qint32 iColumn) const
 
 //----------------------------------------------------------------------------------------
 //
-bool CDialogEditorTreeItem::InsertChildren(qint32 iPosition, qint32 iCount, qint32 iColumns)
+bool CDialogueEditorTreeItem::InsertChildren(qint32 iPosition, qint32 iCount, qint32 iColumns)
 {
   Q_UNUSED(iColumns)
   if (iPosition < 0 || iPosition > m_vpChildItems.size())
@@ -334,8 +334,8 @@ bool CDialogEditorTreeItem::InsertChildren(qint32 iPosition, qint32 iCount, qint
 
   for (qint32 iRow = 0; iRow < iCount; ++iRow)
   {
-    CDialogEditorTreeItem* pItem =
-        new CDialogEditorTreeItem(nullptr, this);
+    CDialogueEditorTreeItem* pItem =
+        new CDialogueEditorTreeItem(nullptr, this);
     m_vpChildItems.insert(iPosition, pItem);
   }
 
@@ -344,7 +344,7 @@ bool CDialogEditorTreeItem::InsertChildren(qint32 iPosition, qint32 iCount, qint
 
 //----------------------------------------------------------------------------------------
 //
-bool CDialogEditorTreeItem::InsertColumns(qint32 iPosition, qint32 iColumns)
+bool CDialogueEditorTreeItem::InsertColumns(qint32 iPosition, qint32 iColumns)
 {
   Q_UNUSED(iPosition)
   Q_UNUSED(iColumns)
@@ -353,7 +353,7 @@ bool CDialogEditorTreeItem::InsertColumns(qint32 iPosition, qint32 iColumns)
 
 //----------------------------------------------------------------------------------------
 //
-bool CDialogEditorTreeItem::RemoveChildren(qint32 iPosition, qint32 iCount)
+bool CDialogueEditorTreeItem::RemoveChildren(qint32 iPosition, qint32 iCount)
 {
   if (iPosition < 0 || iPosition + iCount > m_vpChildItems.size())
   {
@@ -370,7 +370,7 @@ bool CDialogEditorTreeItem::RemoveChildren(qint32 iPosition, qint32 iCount)
 
 //----------------------------------------------------------------------------------------
 //
-bool CDialogEditorTreeItem::RemoveColumns(qint32 iPosition, qint32 iColumns)
+bool CDialogueEditorTreeItem::RemoveColumns(qint32 iPosition, qint32 iColumns)
 {
   Q_UNUSED(iPosition)
   Q_UNUSED(iColumns)
@@ -379,25 +379,25 @@ bool CDialogEditorTreeItem::RemoveColumns(qint32 iPosition, qint32 iColumns)
 
 //----------------------------------------------------------------------------------------
 //
-CDialogEditorTreeItem* CDialogEditorTreeItem::Parent()
+CDialogueEditorTreeItem* CDialogueEditorTreeItem::Parent()
 {
   return m_pParentItem;
 }
 
 //----------------------------------------------------------------------------------------
 //
-int CDialogEditorTreeItem::Row() const
+int CDialogueEditorTreeItem::Row() const
 {
   if (m_pParentItem)
   {
-    return m_pParentItem->m_vpChildItems.indexOf(const_cast<CDialogEditorTreeItem*>(this));
+    return m_pParentItem->m_vpChildItems.indexOf(const_cast<CDialogueEditorTreeItem*>(this));
   }
   return 0;
 }
 
 //----------------------------------------------------------------------------------------
 //
-bool CDialogEditorTreeItem::SetData(qint32 iColumn, const QVariant &value)
+bool CDialogueEditorTreeItem::SetData(qint32 iColumn, const QVariant &value)
 {
   if (iColumn < 0 || iColumn >= c_iNumColumns)
   {
@@ -406,26 +406,26 @@ bool CDialogEditorTreeItem::SetData(qint32 iColumn, const QVariant &value)
 
   switch (m_spNode->m_type)
   {
-    case EDialogTreeNodeType::eRoot:    // fallthrough
-    case EDialogTreeNodeType::eCategory:// fallthrough
+    case EDialogueTreeNodeType::eRoot:    // fallthrough
+    case EDialogueTreeNodeType::eCategory:// fallthrough
     {
       if (iColumn == c_iColumnId)
       {
-        m_spNode->m_sName = dialog_tree::EnsureUniqueName(value.toString(), m_spNode->m_wpParent.lock(), m_spNode);
+        m_spNode->m_sName = dialogue_tree::EnsureUniqueName(value.toString(), m_spNode->m_wpParent.lock(), m_spNode);
       }
       else
       {
         return false;
       }
     } break;
-    case EDialogTreeNodeType::eDialog:
+    case EDialogueTreeNodeType::eDialogue:
     {
-      auto spNode = std::static_pointer_cast<CDialogNodeDialog>(m_spNode);
+      auto spNode = std::static_pointer_cast<CDialogueNodeDialogue>(m_spNode);
       switch(iColumn)
       {
         case c_iColumnId:
         {
-          spNode->m_sName = dialog_tree::EnsureUniqueName(value.toString(), spNode->m_wpParent.lock(), spNode);
+          spNode->m_sName = dialogue_tree::EnsureUniqueName(value.toString(), spNode->m_wpParent.lock(), spNode);
         } break;
         case c_iColumnString: [[fallthrough]];
         case c_iColumnMedia:
@@ -451,13 +451,13 @@ bool CDialogEditorTreeItem::SetData(qint32 iColumn, const QVariant &value)
         default: return false;
       }
     } break;
-    case EDialogTreeNodeType::eDialogFragment:
+    case EDialogueTreeNodeType::eDialogueFragment:
     {
-      auto spNode = std::static_pointer_cast<CDialogData>(m_spNode);
+      auto spNode = std::static_pointer_cast<CDialogueData>(m_spNode);
       switch(iColumn)
       {
         case c_iColumnId:
-          spNode->m_sName = dialog_tree::EnsureUniqueName(value.toString(), spNode->m_wpParent.lock(), spNode);
+          spNode->m_sName = dialogue_tree::EnsureUniqueName(value.toString(), spNode->m_wpParent.lock(), spNode);
           break;
         case c_iColumnWaitMS:
           spNode->m_iWaitTimeMs = value.toLongLong();

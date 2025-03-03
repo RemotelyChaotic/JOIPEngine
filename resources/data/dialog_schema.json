@@ -1,16 +1,16 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "title": "JOIP-Engine Dialog schema",
+  "title": "JOIP-Engine Dialogue schema",
   "version": 1,
-  "description": "The JSON format for serialized dialog files.",
+  "description": "The JSON format for serialized dialogue files.",
   "type": "object",
   "$defs": {
-    "dialog_frag": {
+    "dialogue_frag": {
       "type": "object",
       "properties": {
         "sName": { "type": "string", "description": "Identifier of the data." },
         "sCondition": { "type": "string", "description": "JS-condition for string. If trouthy the string is shown." },
-        "sString": { "type": "string", "description": "The line of dialog." },
+        "sString": { "type": "string", "description": "The line of dialogue." },
         "sSoundResource": { "type": "string", "description": "The referenced sound resource." },
         "iWaitTimeMs": { "type": "integer", "minimum": -1, "description": "The wait time in Ms. -1 for automatic." },
         "bSkipable": { "type": "boolean", "description": "Skippable flag." }
@@ -18,11 +18,11 @@
       "required": ["sName", "sCondition", "sString", "sSoundResource", "iWaitTimeMs", "bSkipable"],
       "additionalProperties" : false
     },
-    "dialog": {
+    "dialogue": {
       "type": "object",
       "properties": {
         "tags": { "type": "array", "items": { "type": "string", "description": "The Tag references." } },
-        "fragments": { "type": "array", "items": { "$ref": "#/$defs/dialog_frag" } },
+        "fragments": { "type": "array", "items": { "$ref": "#/$defs/dialogue_frag" } },
         "bHasCondition": { "type": "boolean", "description": "Flag if a condition has been set." }
       },
       "required": ["tags", "fragments", "bHasCondition"],
@@ -35,7 +35,7 @@
         "type": "object",
         "anyOf": [
           { "$ref": "#" },
-          { "$ref": "#/$defs/dialog" }
+          { "$ref": "#/$defs/dialogue" }
         ]
      }
   }

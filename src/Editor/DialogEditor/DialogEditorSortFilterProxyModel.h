@@ -1,14 +1,14 @@
-#ifndef CDIALOGEDITORSORTFILTERPROXYMODEL_H
-#define CDIALOGEDITORSORTFILTERPROXYMODEL_H
+#ifndef CDIALOGueEDITORSORTFILTERPROXYMODEL_H
+#define CDIALOGueEDITORSORTFILTERPROXYMODEL_H
 
 #include <QCollator>
 #include <QSortFilterProxyModel>
 
-class CDialogEditorSortFilterProxyModel : public QSortFilterProxyModel
+class CDialogueEditorSortFilterProxyModel : public QSortFilterProxyModel
 {
 public:
-  CDialogEditorSortFilterProxyModel(QObject* pParent = nullptr);
-  ~CDialogEditorSortFilterProxyModel() override;
+  CDialogueEditorSortFilterProxyModel(QObject* pParent = nullptr);
+  ~CDialogueEditorSortFilterProxyModel() override;
 
   void setSourceModel(QAbstractItemModel* pSourceModel) override;
 
@@ -24,4 +24,4 @@ private:
   QCollator                  m_collator;
 };
 
-#endif // CDIALOGEDITORSORTFILTERPROXYMODEL_H
+#endif // CDIALOGueEDITORSORTFILTERPROXYMODEL_H

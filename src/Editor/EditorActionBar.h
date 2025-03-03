@@ -49,7 +49,7 @@ public:
   void ShowProjectSettingsActionBar();
   void ShowResourceActionBar();
   void ShowSequenceEditorActionBar();
-  void ShowDialogActionBar();
+  void ShowDialogueActionBar();
 
   std::unique_ptr<Ui::CEditorActionBar>            m_spUi;
 

@@ -11,26 +11,26 @@
 #include <QPointer>
 #include <QUndoStack>
 
-CDialogEditorTreeModel::CDialogEditorTreeModel(QObject* pParent) :
+CDialogueEditorTreeModel::CDialogueEditorTreeModel(QObject* pParent) :
   m_wpDbManager(CApplication::Instance()->System<CDatabaseManager>()),
   m_spProject(),
   m_pRootItem(nullptr)
 {
   auto spDbManager = m_wpDbManager.lock();
   connect(spDbManager.get(), &CDatabaseManager::SignalResourceAdded,
-          this, &CDialogEditorTreeModel::SlotResourceAdded, Qt::QueuedConnection);
+          this, &CDialogueEditorTreeModel::SlotResourceAdded, Qt::QueuedConnection);
   connect(spDbManager.get(), &CDatabaseManager::SignalResourceRemoved,
-          this, &CDialogEditorTreeModel::SlotResourceRemoved, Qt::QueuedConnection);
+          this, &CDialogueEditorTreeModel::SlotResourceRemoved, Qt::QueuedConnection);
 }
 
-CDialogEditorTreeModel::~CDialogEditorTreeModel()
+CDialogueEditorTreeModel::~CDialogueEditorTreeModel()
 {
   DeInitializeModel();
 }
 
 //----------------------------------------------------------------------------------------
 //
-void CDialogEditorTreeModel::InitializeModel(tspProject spProject)
+void CDialogueEditorTreeModel::InitializeModel(tspProject spProject)
 {
   beginResetModel();
 
@@ -43,7 +43,7 @@ void CDialogEditorTreeModel::InitializeModel(tspProject spProject)
     {
       QReadLocker rLock(&spResource->m_rwLock);
       if (EResourceType::eDatabase == spResource->m_type._to_integral() &&
-          QFileInfo(PhysicalResourcePath(spResource)).suffix() == joip_resource::c_sDialogFileType)
+          QFileInfo(PhysicalResourcePath(spResource)).suffix() == joip_resource::c_sDialogueFileType)
       {
         vsResFiles.push_back(spResource);
       }
@@ -56,13 +56,13 @@ void CDialogEditorTreeModel::InitializeModel(tspProject spProject)
     m_pRootItem = nullptr;
   }
 
-  m_spDataRootNode = dialog_tree::LoadDialogs(vsResFiles);
+  m_spDataRootNode = dialogue_tree::LoadDialogues(vsResFiles);
   if (nullptr == m_spDataRootNode)
   {
-    m_spDataRootNode = std::make_shared<CDialogNode>();
+    m_spDataRootNode = std::make_shared<CDialogueNode>();
   }
 
-  m_pRootItem = new CDialogEditorTreeItem(m_spDataRootNode, nullptr);
+  m_pRootItem = new CDialogueEditorTreeItem(m_spDataRootNode, nullptr);
   BuildTreeItems(m_pRootItem, m_spDataRootNode);
 
   endResetModel();
@@ -70,7 +70,7 @@ void CDialogEditorTreeModel::InitializeModel(tspProject spProject)
 
 //----------------------------------------------------------------------------------------
 //
-void CDialogEditorTreeModel::DeInitializeModel()
+void CDialogueEditorTreeModel::DeInitializeModel()
 {
   beginResetModel();
 
@@ -89,48 +89,48 @@ void CDialogEditorTreeModel::DeInitializeModel()
 
 //----------------------------------------------------------------------------------------
 //
-QVariant CDialogEditorTreeModel::data(const QModelIndex& index, int iRole, int iColumnOverride) const
+QVariant CDialogueEditorTreeModel::data(const QModelIndex& index, int iRole, int iColumnOverride) const
 {
   if (!index.isValid()) { return QVariant(); }
-  return CDialogEditorTreeModel::data(
+  return CDialogueEditorTreeModel::data(
       this->index(index.row(), iColumnOverride, index.parent()), iRole);
 }
 
 //----------------------------------------------------------------------------------------
 //
-QVariant CDialogEditorTreeModel::data(const QModelIndex& index, int iRole) const
+QVariant CDialogueEditorTreeModel::data(const QModelIndex& index, int iRole) const
 {
   if (!index.isValid()) { return QVariant(); }
-  CDialogEditorTreeItem* item = static_cast<CDialogEditorTreeItem*>(index.internalPointer());
+  CDialogueEditorTreeItem* item = static_cast<CDialogueEditorTreeItem*>(index.internalPointer());
   if (Qt::ToolTipRole == iRole)
   {
     return GetToolTip(index);
   }
-  else if (CDialogEditorTreeModel::eSearchRole == iRole)
+  else if (CDialogueEditorTreeModel::eSearchRole == iRole)
   {
-    using namespace dialog_item;
+    using namespace dialogue_item;
     return item->Data(c_iColumnMedia).toString() + ";" +
            item->Data(c_iColumnCondition).toString()  + ";" +
            item->Data(c_iColumnString).toString()  + ";" +
            QString(item->Type()._to_string())  + ";" +
            item->Data(c_iColumnResource).toString();
   }
-  else if (CDialogEditorTreeModel::eSearchRole < iRole &&
-           CDialogEditorTreeModel::eItemWarningRole >= iRole)
+  else if (CDialogueEditorTreeModel::eSearchRole < iRole &&
+           CDialogueEditorTreeModel::eItemWarningRole >= iRole)
   {
-    return item->Data(iRole - (CDialogEditorTreeModel::eSearchRole+1) + dialog_item::c_iNumColumns);
+    return item->Data(iRole - (CDialogueEditorTreeModel::eSearchRole+1) + dialogue_item::c_iNumColumns);
   }
   else if (Qt::DisplayRole == iRole || Qt::EditRole == iRole || Qt::CheckStateRole == iRole)
   {
-    if (dialog_item::c_iColumnString == index.column())
+    if (dialogue_item::c_iColumnString == index.column())
     {
       if (Qt::DisplayRole == iRole)
       {
-        return item->Data(dialog_item::c_iColumnDisplayString);
+        return item->Data(dialogue_item::c_iColumnDisplayString);
       }
       else if (Qt::EditRole == iRole)
       {
-        return item->Data(dialog_item::c_iColumnString);
+        return item->Data(dialogue_item::c_iColumnString);
       }
       else
       {
@@ -167,10 +167,10 @@ QVariant CDialogEditorTreeModel::data(const QModelIndex& index, int iRole) const
 
 //----------------------------------------------------------------------------------------
 //
-Qt::ItemFlags CDialogEditorTreeModel::flags(const QModelIndex& index) const
+Qt::ItemFlags CDialogueEditorTreeModel::flags(const QModelIndex& index) const
 {
   if (!index.isValid()) { return Qt::NoItemFlags; }
-  CDialogEditorTreeItem* pItem = GetItem(index);
+  CDialogueEditorTreeItem* pItem = GetItem(index);
   if (nullptr != pItem)
   {
     return pItem->Flags(index.column());
@@ -183,7 +183,7 @@ Qt::ItemFlags CDialogEditorTreeModel::flags(const QModelIndex& index) const
 
 //----------------------------------------------------------------------------------------
 //
-QVariant CDialogEditorTreeModel::headerData(int iSection, Qt::Orientation orientation, int iRole) const
+QVariant CDialogueEditorTreeModel::headerData(int iSection, Qt::Orientation orientation, int iRole) const
 {
   if (Qt::Horizontal == orientation && Qt::DisplayRole == iRole)
   {
@@ -194,14 +194,14 @@ QVariant CDialogEditorTreeModel::headerData(int iSection, Qt::Orientation orient
 
 //----------------------------------------------------------------------------------------
 //
-QModelIndex CDialogEditorTreeModel::index(int iRow, int iColumn, const QModelIndex& parent) const
+QModelIndex CDialogueEditorTreeModel::index(int iRow, int iColumn, const QModelIndex& parent) const
 {
   // hasIndex checks if the values are in the valid ranges by using
   // rowCount and columnCount
   if (!hasIndex(iRow, iColumn, parent)) { return QModelIndex(); }
 
-  CDialogEditorTreeItem* pParentItem = GetItem(parent);
-  CDialogEditorTreeItem* pChildItem = pParentItem->Child(iRow);
+  CDialogueEditorTreeItem* pParentItem = GetItem(parent);
+  CDialogueEditorTreeItem* pChildItem = pParentItem->Child(iRow);
   if (nullptr != pChildItem)
   {
     return createIndex(iRow, iColumn, pChildItem);
@@ -211,12 +211,12 @@ QModelIndex CDialogEditorTreeModel::index(int iRow, int iColumn, const QModelInd
 
 //----------------------------------------------------------------------------------------
 //
-QModelIndex CDialogEditorTreeModel::parent(const QModelIndex& index) const
+QModelIndex CDialogueEditorTreeModel::parent(const QModelIndex& index) const
 {
   if (!index.isValid()) { return QModelIndex(); }
 
-  CDialogEditorTreeItem* pChildItem = GetItem(index);
-  CDialogEditorTreeItem* pParentItem = nullptr != pChildItem ? pChildItem->Parent() : nullptr;
+  CDialogueEditorTreeItem* pChildItem = GetItem(index);
+  CDialogueEditorTreeItem* pParentItem = nullptr != pChildItem ? pChildItem->Parent() : nullptr;
 
   if (pParentItem == m_pRootItem || nullptr == pParentItem) { return QModelIndex(); }
   return createIndex(pParentItem->Row(), 0, pParentItem);
@@ -224,9 +224,9 @@ QModelIndex CDialogEditorTreeModel::parent(const QModelIndex& index) const
 
 //----------------------------------------------------------------------------------------
 //
-int CDialogEditorTreeModel::rowCount(const QModelIndex& parent) const
+int CDialogueEditorTreeModel::rowCount(const QModelIndex& parent) const
 {
-  const CDialogEditorTreeItem* pParentItem = GetItem(parent);
+  const CDialogueEditorTreeItem* pParentItem = GetItem(parent);
   if (nullptr == pParentItem) { return 0; }
   if (IsDialogType(parent))
   {
@@ -237,25 +237,25 @@ int CDialogEditorTreeModel::rowCount(const QModelIndex& parent) const
 
 //----------------------------------------------------------------------------------------
 //
-int CDialogEditorTreeModel::columnCount(const QModelIndex& parent) const
+int CDialogueEditorTreeModel::columnCount(const QModelIndex& parent) const
 {
   if (parent.isValid())
   {
-    return static_cast<CDialogEditorTreeItem*>(parent.internalPointer())->ColumnCount();
+    return static_cast<CDialogueEditorTreeItem*>(parent.internalPointer())->ColumnCount();
   }
   return m_pRootItem->ColumnCount();
 }
 
 //----------------------------------------------------------------------------------------
 //
-bool CDialogEditorTreeModel::setData(const QModelIndex& index, const QVariant& value, qint32 iRole)
+bool CDialogueEditorTreeModel::setData(const QModelIndex& index, const QVariant& value, qint32 iRole)
 {
   if (!(Qt::EditRole == iRole || Qt::CheckStateRole == iRole ||
-        (CDialogEditorTreeModel::eItemWarningRole >= iRole &&
-         CDialogEditorTreeModel::eSearchRole < iRole)) ||
-      CDialogEditorTreeModel::eTypeRole == iRole) { return false; }
+        (CDialogueEditorTreeModel::eItemWarningRole >= iRole &&
+         CDialogueEditorTreeModel::eSearchRole < iRole)) ||
+      CDialogueEditorTreeModel::eTypeRole == iRole) { return false; }
 
-  CDialogEditorTreeItem* pItem = GetItem(index);
+  CDialogueEditorTreeItem* pItem = GetItem(index);
   bool bResult = false;
   if (Qt::EditRole == iRole || Qt::CheckStateRole == iRole)
   {
@@ -263,7 +263,7 @@ bool CDialogEditorTreeModel::setData(const QModelIndex& index, const QVariant& v
   }
   else
   {
-    bResult = pItem->SetData(iRole - CDialogEditorTreeModel::eSearchRole+1 + dialog_item::c_iNumColumns, value);
+    bResult = pItem->SetData(iRole - CDialogueEditorTreeModel::eSearchRole+1 + dialogue_item::c_iNumColumns, value);
   }
 
   if (bResult)
@@ -290,7 +290,7 @@ bool CDialogEditorTreeModel::setData(const QModelIndex& index, const QVariant& v
 
 //----------------------------------------------------------------------------------------
 //
-bool CDialogEditorTreeModel::setHeaderData(qint32 iSection, Qt::Orientation orientation, const QVariant& value, qint32 iRole)
+bool CDialogueEditorTreeModel::setHeaderData(qint32 iSection, Qt::Orientation orientation, const QVariant& value, qint32 iRole)
 {
   if (iRole != Qt::EditRole || orientation != Qt::Horizontal) { return false; }
 
@@ -302,11 +302,11 @@ bool CDialogEditorTreeModel::setHeaderData(qint32 iSection, Qt::Orientation orie
 
 //----------------------------------------------------------------------------------------
 //
-bool CDialogEditorTreeModel::insertRow(qint32 iPosition, EDialogTreeNodeType type,
+bool CDialogueEditorTreeModel::insertRow(qint32 iPosition, EDialogueTreeNodeType type,
                                        const QString& sName,
                                        const QModelIndex& parent)
 {
-  CDialogEditorTreeItem* pParentItem = GetItem(parent);
+  CDialogueEditorTreeItem* pParentItem = GetItem(parent);
   if (!pParentItem) { return false; }
 
   beginInsertRows(parent, iPosition, iPosition);
@@ -316,24 +316,24 @@ bool CDialogEditorTreeModel::insertRow(qint32 iPosition, EDialogTreeNodeType typ
   if (success)
   {
     auto spNode = pParentItem->Node();
-    std::shared_ptr<CDialogNode> spNewNode = nullptr;
+    std::shared_ptr<CDialogueNode> spNewNode = nullptr;
     switch (type)
     {
-      case EDialogTreeNodeType::eRoot:
-        spNewNode = std::make_shared<CDialogNode>();
+      case EDialogueTreeNodeType::eRoot:
+        spNewNode = std::make_shared<CDialogueNode>();
         break;
-      case EDialogTreeNodeType::eCategory:
-        spNewNode = std::make_shared<CDialogNodeCategory>();
+      case EDialogueTreeNodeType::eCategory:
+        spNewNode = std::make_shared<CDialogueNodeCategory>();
         break;
-      case EDialogTreeNodeType::eDialog:
-        spNewNode = std::make_shared<CDialogNodeDialog>();
+      case EDialogueTreeNodeType::eDialogue:
+        spNewNode = std::make_shared<CDialogueNodeDialogue>();
         break;
-      case EDialogTreeNodeType::eDialogFragment:
-        spNewNode = std::make_shared<CDialogData>();
+      case EDialogueTreeNodeType::eDialogueFragment:
+        spNewNode = std::make_shared<CDialogueData>();
         break;
     }
     spNewNode->m_wpParent = spNode;
-    spNewNode->m_sName = dialog_tree::EnsureUniqueName(sName, spNode, spNewNode);
+    spNewNode->m_sName = dialogue_tree::EnsureUniqueName(sName, spNode, spNewNode);
 
     if (iPosition >= spNode->m_vspChildren.size())
     {
@@ -345,7 +345,7 @@ bool CDialogEditorTreeModel::insertRow(qint32 iPosition, EDialogTreeNodeType typ
                                    spNewNode);
     }
 
-    CDialogEditorTreeItem* pChildItem = pParentItem->Child(iPosition);
+    CDialogueEditorTreeItem* pChildItem = pParentItem->Child(iPosition);
     pChildItem->SetNode(spNewNode);
   }
 
@@ -356,11 +356,11 @@ bool CDialogEditorTreeModel::insertRow(qint32 iPosition, EDialogTreeNodeType typ
 
 //----------------------------------------------------------------------------------------
 //
-bool CDialogEditorTreeModel::insertNode(qint32 iPosition,
-                                        const std::shared_ptr<CDialogNode>& spNode,
+bool CDialogueEditorTreeModel::insertNode(qint32 iPosition,
+                                        const std::shared_ptr<CDialogueNode>& spNode,
                                         const QModelIndex& parent)
 {
-  CDialogEditorTreeItem* pParentItem = GetItem(parent);
+  CDialogueEditorTreeItem* pParentItem = GetItem(parent);
   if (!pParentItem) { return false; }
 
   auto spParentNode = pParentItem->Node();
@@ -370,7 +370,7 @@ bool CDialogEditorTreeModel::insertNode(qint32 iPosition,
     iPosition = static_cast<qint32>(spParentNode->m_vspChildren.size());
   }
 
-  spNode->m_sName = dialog_tree::EnsureUniqueName(spNode->m_sName, spParentNode, spNode);
+  spNode->m_sName = dialogue_tree::EnsureUniqueName(spNode->m_sName, spParentNode, spNode);
 
   beginResetModel();
   if (spParentNode->m_vspChildren.size() <= static_cast<size_t>(iPosition))
@@ -389,7 +389,7 @@ bool CDialogEditorTreeModel::insertNode(qint32 iPosition,
     m_pRootItem = nullptr;
   }
 
-  m_pRootItem = new CDialogEditorTreeItem(m_spDataRootNode, nullptr);
+  m_pRootItem = new CDialogueEditorTreeItem(m_spDataRootNode, nullptr);
   BuildTreeItems(m_pRootItem, m_spDataRootNode);
 
   endResetModel();
@@ -398,9 +398,9 @@ bool CDialogEditorTreeModel::insertNode(qint32 iPosition,
 
 //----------------------------------------------------------------------------------------
 //
-bool CDialogEditorTreeModel::removeRow(qint32 iPosition, const QModelIndex& parent)
+bool CDialogueEditorTreeModel::removeRow(qint32 iPosition, const QModelIndex& parent)
 {
-  CDialogEditorTreeItem* pParentItem = GetItem(parent);
+  CDialogueEditorTreeItem* pParentItem = GetItem(parent);
   if (nullptr == pParentItem) { return false; }
 
   beginRemoveRows(parent, iPosition, iPosition);
@@ -421,12 +421,12 @@ bool CDialogEditorTreeModel::removeRow(qint32 iPosition, const QModelIndex& pare
 
 //----------------------------------------------------------------------------------------
 //
-bool CDialogEditorTreeModel::HasCondition(const QModelIndex& index) const
+bool CDialogueEditorTreeModel::HasCondition(const QModelIndex& index) const
 {
-  CDialogEditorTreeItem* pParentItem = GetItem(index);
+  CDialogueEditorTreeItem* pParentItem = GetItem(index);
   if (nullptr == pParentItem) { return false; }
 
-  auto spNode = std::dynamic_pointer_cast<CDialogNodeDialog>(pParentItem->Node());
+  auto spNode = std::dynamic_pointer_cast<CDialogueNodeDialogue>(pParentItem->Node());
   if (nullptr == spNode) { return false; }
 
   return spNode->m_bHasCondition;
@@ -434,11 +434,11 @@ bool CDialogEditorTreeModel::HasCondition(const QModelIndex& index) const
 
 //----------------------------------------------------------------------------------------
 //
-QModelIndex CDialogEditorTreeModel::Index(const QStringList& vsPath) const
+QModelIndex CDialogueEditorTreeModel::Index(const QStringList& vsPath) const
 {
   QStringList vsCopy = vsPath;
   QModelIndex idx;
-  CDialogEditorTreeItem* pItem = m_pRootItem;
+  CDialogueEditorTreeItem* pItem = m_pRootItem;
   while (!vsCopy.isEmpty() && nullptr != m_pRootItem)
   {
     const QString sElem = vsCopy[0];
@@ -459,34 +459,34 @@ QModelIndex CDialogEditorTreeModel::Index(const QStringList& vsPath) const
 
 //----------------------------------------------------------------------------------------
 //
-bool CDialogEditorTreeModel::IsCategoryType(const QModelIndex& index) const
+bool CDialogueEditorTreeModel::IsCategoryType(const QModelIndex& index) const
 {
   if (!index.isValid()) { return false; }
-  CDialogEditorTreeItem* pItem = GetItem(index);
-  return pItem->Type()._to_integral() == EDialogTreeNodeType::eCategory;
+  CDialogueEditorTreeItem* pItem = GetItem(index);
+  return pItem->Type()._to_integral() == EDialogueTreeNodeType::eCategory;
 }
 
 //----------------------------------------------------------------------------------------
 //
-bool CDialogEditorTreeModel::IsDialogType(const QModelIndex& index) const
+bool CDialogueEditorTreeModel::IsDialogType(const QModelIndex& index) const
 {
   if (!index.isValid()) { return false; }
-  CDialogEditorTreeItem* pItem = GetItem(index);
-  return pItem->Type()._to_integral() == EDialogTreeNodeType::eDialog;
+  CDialogueEditorTreeItem* pItem = GetItem(index);
+  return pItem->Type()._to_integral() == EDialogueTreeNodeType::eDialogue;
 }
 
 //----------------------------------------------------------------------------------------
 //
-bool CDialogEditorTreeModel::IsDialogFragmentType(const QModelIndex& index) const
+bool CDialogueEditorTreeModel::IsDialogFragmentType(const QModelIndex& index) const
 {
   if (!index.isValid()) { return false; }
-  CDialogEditorTreeItem* pItem = GetItem(index);
-  return pItem->Type()._to_integral() == EDialogTreeNodeType::eDialogFragment;
+  CDialogueEditorTreeItem* pItem = GetItem(index);
+  return pItem->Type()._to_integral() == EDialogueTreeNodeType::eDialogueFragment;
 }
 
 //----------------------------------------------------------------------------------------
 //
-QStringList CDialogEditorTreeModel::Path(QModelIndex idx) const
+QStringList CDialogueEditorTreeModel::Path(QModelIndex idx) const
 {
   auto spNode = Node(idx);
   QStringList vsPath;
@@ -500,7 +500,7 @@ QStringList CDialogEditorTreeModel::Path(QModelIndex idx) const
 
 //----------------------------------------------------------------------------------------
 //
-std::shared_ptr<CDialogNode> CDialogEditorTreeModel::Node(QModelIndex idx) const
+std::shared_ptr<CDialogueNode> CDialogueEditorTreeModel::Node(QModelIndex idx) const
 {
   auto pItem = GetItem(idx);
   if (nullptr == pItem || !idx.isValid()) { return nullptr; }
@@ -509,7 +509,7 @@ std::shared_ptr<CDialogNode> CDialogEditorTreeModel::Node(QModelIndex idx) const
 
 //----------------------------------------------------------------------------------------
 //
-std::shared_ptr<CDialogNode> CDialogEditorTreeModel::Root() const
+std::shared_ptr<CDialogueNode> CDialogueEditorTreeModel::Root() const
 {
   return m_spDataRootNode;
 }
@@ -518,8 +518,8 @@ std::shared_ptr<CDialogNode> CDialogEditorTreeModel::Root() const
 //
 namespace
 {
-  void UpdateChild(std::shared_ptr<CDialogNode>& spCopyTo,
-                   const std::shared_ptr<CDialogNode>& spCopyFrom)
+  void UpdateChild(std::shared_ptr<CDialogueNode>& spCopyTo,
+                   const std::shared_ptr<CDialogueNode>& spCopyFrom)
   {
     spCopyTo->CopyFrom(spCopyFrom);
     for (qint32 i = 0; spCopyFrom->m_vspChildren.size() > static_cast<size_t>(i); ++i)
@@ -534,7 +534,7 @@ namespace
 
 //----------------------------------------------------------------------------------------
 //
-void CDialogEditorTreeModel::UpdateFrom(const QModelIndex& idx, const std::shared_ptr<CDialogNode>& spNode)
+void CDialogueEditorTreeModel::UpdateFrom(const QModelIndex& idx, const std::shared_ptr<CDialogueNode>& spNode)
 {
   auto pItem = GetItem(idx);
   if (nullptr == pItem || !idx.isValid()) { return; }
@@ -566,12 +566,12 @@ void CDialogEditorTreeModel::UpdateFrom(const QModelIndex& idx, const std::share
 
 //----------------------------------------------------------------------------------------
 //
-void CDialogEditorTreeModel::BuildTreeItems(CDialogEditorTreeItem* pLocalRoot,
-                                            const std::shared_ptr<CDialogNode>& spNode)
+void CDialogueEditorTreeModel::BuildTreeItems(CDialogueEditorTreeItem* pLocalRoot,
+                                            const std::shared_ptr<CDialogueNode>& spNode)
 {
   for (const auto& spChildNode : spNode->m_vspChildren)
   {
-    CDialogEditorTreeItem* pChild = new CDialogEditorTreeItem(spChildNode,
+    CDialogueEditorTreeItem* pChild = new CDialogueEditorTreeItem(spChildNode,
                                                               pLocalRoot);
     pLocalRoot->AppendChild(pChild);
     BuildTreeItems(pChild, spChildNode);
@@ -580,11 +580,11 @@ void CDialogEditorTreeModel::BuildTreeItems(CDialogEditorTreeItem* pLocalRoot,
 
 //----------------------------------------------------------------------------------------
 //
-CDialogEditorTreeItem* CDialogEditorTreeModel::GetItem(const QModelIndex& index) const
+CDialogueEditorTreeItem* CDialogueEditorTreeModel::GetItem(const QModelIndex& index) const
 {
   if (index.isValid())
   {
-    CDialogEditorTreeItem* pItem = static_cast<CDialogEditorTreeItem*>(index.internalPointer());
+    CDialogueEditorTreeItem* pItem = static_cast<CDialogueEditorTreeItem*>(index.internalPointer());
     if (nullptr != pItem) { return pItem; }
   }
   return m_pRootItem;
@@ -592,16 +592,16 @@ CDialogEditorTreeItem* CDialogEditorTreeModel::GetItem(const QModelIndex& index)
 
 //----------------------------------------------------------------------------------------
 //
-QString CDialogEditorTreeModel::GetToolTip(const QModelIndex& index) const
+QString CDialogueEditorTreeModel::GetToolTip(const QModelIndex& index) const
 {
   QFont font = CApplication::Instance()->font();
   QString sFontFace = font.family();
   qint32 iFontsize = font.pointSize();
 
-  CDialogEditorTreeItem* item = static_cast<CDialogEditorTreeItem*>(index.internalPointer());
+  CDialogueEditorTreeItem* item = static_cast<CDialogueEditorTreeItem*>(index.internalPointer());
   auto spNode = item->Node();
 
-  auto fnDialogData = [](const std::shared_ptr<CDialogData>& spDial, bool bNoCond)
+  auto fnDialogData = [](const std::shared_ptr<CDialogueData>& spDial, bool bNoCond)
   {
     QString sCond = spDial->m_sCondition;
     if (sCond.isEmpty()) { sCond = "<nobr>&lt;No Condition&gt;</nobr>"; }
@@ -630,16 +630,16 @@ QString CDialogEditorTreeModel::GetToolTip(const QModelIndex& index) const
   QString sRet;
   switch (spNode->m_type)
   {
-    case EDialogTreeNodeType::eRoot:
+    case EDialogueTreeNodeType::eRoot:
       return QString();
-    case EDialogTreeNodeType::eCategory:
+    case EDialogueTreeNodeType::eCategory:
       sRet = "<p style=\"font-family:'%1';font-size:%2px\">"
              "<nobr>Category: %3</nobr>"
              "</p>";
       sRet = sRet.arg(sFontFace).arg(iFontsize).arg(spNode->m_sName);
       break;
-    case EDialogTreeNodeType::eDialog: [[fallthrough]];
-    case EDialogTreeNodeType::eDialogFragment:
+    case EDialogueTreeNodeType::eDialogue: [[fallthrough]];
+    case EDialogueTreeNodeType::eDialogueFragment:
     {
       sRet =
           "<p style=\"font-family:'%1';font-size:%2px\">"
@@ -649,44 +649,44 @@ QString CDialogEditorTreeModel::GetToolTip(const QModelIndex& index) const
           "</p>";
       sRet = sRet.arg(sFontFace).arg(iFontsize)
                  .arg(spNode->m_sFileId);
-      if (EDialogTreeNodeType::eDialog == spNode->m_type._to_integral())
+      if (EDialogueTreeNodeType::eDialogue == spNode->m_type._to_integral())
       {
-        auto spDial = std::static_pointer_cast<CDialogNodeDialog>(spNode);
+        auto spDial = std::static_pointer_cast<CDialogueNodeDialogue>(spNode);
         if (!spDial->m_bHasCondition && spDial->m_vspChildren.size() > 0)
         {
-          auto spDialFrag = std::static_pointer_cast<CDialogData>(spDial->m_vspChildren[0]);
+          auto spDialFrag = std::static_pointer_cast<CDialogueData>(spDial->m_vspChildren[0]);
           sRet = sRet.arg(fnDialogData(spDialFrag, true));
         }
         else
         {
-          qint32 iCheckState = item->Data(dialog_item::c_iColumnSkippable).toInt();
+          qint32 iCheckState = item->Data(dialogue_item::c_iColumnSkippable).toInt();
           QString sDetail = "<nobr>Sleep Ms: %1, Skippable: %2</nobr><br>";
-          sDetail = sDetail.arg(item->Data(dialog_item::c_iColumnWaitMS).toLongLong())
+          sDetail = sDetail.arg(item->Data(dialogue_item::c_iColumnWaitMS).toLongLong())
               .arg(iCheckState == Qt::Unchecked ?
                    "false" : (iCheckState == 1 ? "varying" : "true"));
           sRet = sRet.arg(sDetail);
         }
       }
-      else if (EDialogTreeNodeType::eDialogFragment == spNode->m_type._to_integral())
+      else if (EDialogueTreeNodeType::eDialogueFragment == spNode->m_type._to_integral())
       {
-        auto spDial = std::static_pointer_cast<CDialogData>(spNode);
+        auto spDial = std::static_pointer_cast<CDialogueData>(spNode);
         sRet = sRet.arg(fnDialogData(spDial, false));
       }
     } break;
   }
 
   qint32 iCounter = 0;
-  if (EDialogTreeNodeType::eDialog == spNode->m_type._to_integral() ||
-      EDialogTreeNodeType::eDialogFragment == spNode->m_type._to_integral())
+  if (EDialogueTreeNodeType::eDialogue == spNode->m_type._to_integral() ||
+      EDialogueTreeNodeType::eDialogueFragment == spNode->m_type._to_integral())
   {
-    std::shared_ptr<CDialogNodeDialog> spDial = nullptr;
-    if (EDialogTreeNodeType::eDialog == spNode->m_type._to_integral())
+    std::shared_ptr<CDialogueNodeDialogue> spDial = nullptr;
+    if (EDialogueTreeNodeType::eDialogue == spNode->m_type._to_integral())
     {
-      spDial = std::static_pointer_cast<CDialogNodeDialog>(spNode);
+      spDial = std::static_pointer_cast<CDialogueNodeDialogue>(spNode);
     }
-    else if (EDialogTreeNodeType::eDialogFragment == spNode->m_type._to_integral())
+    else if (EDialogueTreeNodeType::eDialogueFragment == spNode->m_type._to_integral())
     {
-      spDial = std::static_pointer_cast<CDialogNodeDialog>(spNode->m_wpParent.lock());
+      spDial = std::static_pointer_cast<CDialogueNodeDialogue>(spNode->m_wpParent.lock());
     }
 
     QString sTags = nullptr == spDial || spDial->m_tags.empty() ? "&lt;no tags&gt;" : "";
@@ -744,7 +744,7 @@ QString CDialogEditorTreeModel::GetToolTip(const QModelIndex& index) const
 
 //----------------------------------------------------------------------------------------
 //
-void CDialogEditorTreeModel::SlotResourceAdded(qint32 iProjId, const QString& sName)
+void CDialogueEditorTreeModel::SlotResourceAdded(qint32 iProjId, const QString& sName)
 {
   if (nullptr != m_spProject)
   {
@@ -767,7 +767,7 @@ void CDialogEditorTreeModel::SlotResourceAdded(qint32 iProjId, const QString& sN
 
 //----------------------------------------------------------------------------------------
 //
-void CDialogEditorTreeModel::SlotResourceRemoved(qint32 iProjId, const QString& sName)
+void CDialogueEditorTreeModel::SlotResourceRemoved(qint32 iProjId, const QString& sName)
 {
   if (nullptr!= m_spProject)
   {

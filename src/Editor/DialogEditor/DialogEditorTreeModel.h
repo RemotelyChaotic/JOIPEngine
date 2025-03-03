@@ -1,5 +1,5 @@
-#ifndef CDIALOGEDITORTREEMODEL_H
-#define CDIALOGEDITORTREEMODEL_H
+#ifndef CDIALOGueEDITORTREEMODEL_H
+#define CDIALOGueEDITORTREEMODEL_H
 
 #include "Systems/DialogTree.h"
 #include "Systems/Project.h"
@@ -9,11 +9,11 @@
 #include <QVariant>
 
 class CDatabaseManager;
-class CDialogEditorTreeItem;
+class CDialogueEditorTreeItem;
 class QUndoStack;
-struct CDialogNode;
+struct CDialogueNode;
 
-class CDialogEditorTreeModel : public QAbstractItemModel
+class CDialogueEditorTreeModel : public QAbstractItemModel
 {
   Q_OBJECT
 public:
@@ -26,8 +26,8 @@ public:
     eItemWarningRole = Qt::UserRole+4
   };
 
-  CDialogEditorTreeModel(QObject* pParent = nullptr);
-  ~CDialogEditorTreeModel() override;
+  CDialogueEditorTreeModel(QObject* pParent = nullptr);
+  ~CDialogueEditorTreeModel() override;
 
   void InitializeModel(tspProject spProject);
   void DeInitializeModel();
@@ -49,11 +49,11 @@ public:
                qint32 iRole = Qt::EditRole) override;
   bool setHeaderData(qint32 iSection, Qt::Orientation orientation,
                      const QVariant& value, qint32 iRole = Qt::EditRole) override;
-  bool insertRow(qint32 iPosition, EDialogTreeNodeType type,
+  bool insertRow(qint32 iPosition, EDialogueTreeNodeType type,
                  const QString& sName,
                  const QModelIndex& parent = QModelIndex());
   bool insertNode(qint32 iPosition,
-                  const std::shared_ptr<CDialogNode>& spNode,
+                  const std::shared_ptr<CDialogueNode>& spNode,
                   const QModelIndex& parent = QModelIndex());
   bool removeRow(qint32 iPosition,
                  const QModelIndex& parent = QModelIndex());
@@ -65,18 +65,18 @@ public:
   bool IsDialogType(const QModelIndex& index = QModelIndex()) const;
   bool IsDialogFragmentType(const QModelIndex& index = QModelIndex()) const;
   QStringList Path(QModelIndex idx) const;
-  std::shared_ptr<CDialogNode> Node(QModelIndex idx) const;
-  std::shared_ptr<CDialogNode> Root() const;
-  void UpdateFrom(const QModelIndex& index, const std::shared_ptr<CDialogNode>& spNode);
+  std::shared_ptr<CDialogueNode> Node(QModelIndex idx) const;
+  std::shared_ptr<CDialogueNode> Root() const;
+  void UpdateFrom(const QModelIndex& index, const std::shared_ptr<CDialogueNode>& spNode);
 
 signals:
   void SignalProjectEdited();
 
 protected:
-  CDialogEditorTreeItem* GetItem(const QModelIndex& index) const;
+  CDialogueEditorTreeItem* GetItem(const QModelIndex& index) const;
   QString GetToolTip(const QModelIndex& index) const;
-  void BuildTreeItems(CDialogEditorTreeItem* pLocalRoot,
-                      const std::shared_ptr<CDialogNode>& spNode);
+  void BuildTreeItems(CDialogueEditorTreeItem* pLocalRoot,
+                      const std::shared_ptr<CDialogueNode>& spNode);
 
 private slots:
   void SlotResourceAdded(qint32 iProjId, const QString& sName);
@@ -85,8 +85,8 @@ private slots:
 private:
   std::weak_ptr<CDatabaseManager>             m_wpDbManager;
   tspProject                                  m_spProject;
-  std::shared_ptr<CDialogNode>                m_spDataRootNode;
-  CDialogEditorTreeItem*                      m_pRootItem = nullptr;
+  std::shared_ptr<CDialogueNode>                m_spDataRootNode;
+  CDialogueEditorTreeItem*                      m_pRootItem = nullptr;
 };
 
-#endif // CDIALOGEDITORTREEMODEL_H
+#endif // CDIALOGueEDITORTREEMODEL_H

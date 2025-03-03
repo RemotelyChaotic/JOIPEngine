@@ -25,7 +25,7 @@ namespace
     { EEditorWidget::eSceneNodeWidget, "Scene Node Editor (%1)" },
     { EEditorWidget::eSceneCodeEditorWidget, "Scene Code Editor (%1)" },
     { EEditorWidget::ePatternEditor, "Sequence Editor (%1)" },
-    { EEditorWidget::eDialogEditor, "Dialog Editor (%1)" }
+    { EEditorWidget::eDialogueEditor, "Dialogue Editor (%1)" }
   };
 
   const std::map<EEditorWidget, QString> m_sEditorKeyBindingMap =
@@ -36,7 +36,7 @@ namespace
     { EEditorWidget::eSceneNodeWidget, "Nodes" },
     { EEditorWidget::eSceneCodeEditorWidget, "Code" },
     { EEditorWidget::ePatternEditor, "Sequence" },
-    { EEditorWidget::eDialogEditor, "Dialog" }
+    { EEditorWidget::eDialogueEditor, "Dialogue" }
   };
 
   const std::map<CEditorActionBar::EActionBarPosition, QString> m_sSideKeyBindingMap =

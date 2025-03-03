@@ -1,5 +1,5 @@
-#ifndef CCOMMANDADDNEWDIALOGFILE_H
-#define CCOMMANDADDNEWDIALOGFILE_H
+#ifndef CCOMMANDADDNEWDIALOGUEFILE_H
+#define CCOMMANDADDNEWDIALOGUEFILE_H
 
 #include "Systems/Project.h"
 #include <QPointer>
@@ -10,13 +10,13 @@
 class CDatabaseManager;
 class CEditorModel;
 
-class CCommandAddNewDialogFile : public QUndoCommand
+class CCommandAddNewDialogueFile : public QUndoCommand
 {
 public:
-  CCommandAddNewDialogFile(const tspProject& spProject,
+  CCommandAddNewDialogueFile(const tspProject& spProject,
                            QPointer<CEditorModel> pEditorModel,
                            QPointer<QWidget> pParent);
-  ~CCommandAddNewDialogFile();
+  ~CCommandAddNewDialogueFile();
 
   void undo() override;
   void redo() override;
@@ -34,4 +34,4 @@ protected:
   SResourceData m_data;
 };
 
-#endif // CCOMMANDADDNEWDIALOGFILE_H
+#endif // CCOMMANDADDNEWDIALOGUEFILE_H

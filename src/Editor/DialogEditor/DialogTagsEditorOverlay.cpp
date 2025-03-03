@@ -19,18 +19,18 @@ namespace
   const char c_sTagNameProperty[] = "TagName";
 }
 
-CDialogTagsEditorOverlay::CDialogTagsEditorOverlay(QWidget* pParent) :
+CDialogueTagsEditorOverlay::CDialogueTagsEditorOverlay(QWidget* pParent) :
     COverlayBase(0, pParent),
-    m_spUi(std::make_unique<Ui::CDialogTagsEditorOverlay>()),
+    m_spUi(std::make_unique<Ui::CDialogueTagsEditorOverlay>()),
     m_wpDbManager(CApplication::Instance()->System<CDatabaseManager>())
 {
   m_spUi->setupUi(this);
 
-  m_spUi->pTagsFrame->SetCallbacks(std::bind(&CDialogTagsEditorOverlay::TagAdded, this,
+  m_spUi->pTagsFrame->SetCallbacks(std::bind(&CDialogueTagsEditorOverlay::TagAdded, this,
                                              std::placeholders::_1, std::placeholders::_2),
-                                   std::bind(&CDialogTagsEditorOverlay::TagRemoved, this,
+                                   std::bind(&CDialogueTagsEditorOverlay::TagRemoved, this,
                                              std::placeholders::_1));
-  m_spUi->pTagsFrame->SetSortFunction(std::bind(&CDialogTagsEditorOverlay::SortTags, this,
+  m_spUi->pTagsFrame->SetSortFunction(std::bind(&CDialogueTagsEditorOverlay::SortTags, this,
                                                 std::placeholders::_1));
 
   m_pCompleterModel = new QStandardItemModel(this);
@@ -45,20 +45,20 @@ CDialogTagsEditorOverlay::CDialogTagsEditorOverlay(QWidget* pParent) :
   m_spUi->pLineEdit->setCompleter(m_pCompleter);
 }
 
-CDialogTagsEditorOverlay::~CDialogTagsEditorOverlay()
+CDialogueTagsEditorOverlay::~CDialogueTagsEditorOverlay()
 {
 }
 
 //----------------------------------------------------------------------------------------
 //
-void CDialogTagsEditorOverlay::SetPath(const QStringList& vsPath)
+void CDialogueTagsEditorOverlay::SetPath(const QStringList& vsPath)
 {
   m_vsPath = vsPath;
 }
 
 //----------------------------------------------------------------------------------------
 //
-void CDialogTagsEditorOverlay::SetProject(const tspProject& spCurrentProject)
+void CDialogueTagsEditorOverlay::SetProject(const tspProject& spCurrentProject)
 {
   m_spCurrentProject = spCurrentProject;
   m_pCompleter->SetCurrentProject(m_spCurrentProject);
@@ -66,36 +66,36 @@ void CDialogTagsEditorOverlay::SetProject(const tspProject& spCurrentProject)
 
 //----------------------------------------------------------------------------------------
 //
-void CDialogTagsEditorOverlay::SetUndoStack(QPointer<QUndoStack> pUndoStack)
+void CDialogueTagsEditorOverlay::SetUndoStack(QPointer<QUndoStack> pUndoStack)
 {
   m_pUndoStack = pUndoStack;
 }
 
 //----------------------------------------------------------------------------------------
 //
-void CDialogTagsEditorOverlay::SetModel(QPointer<CDialogEditorTreeModel> pModel)
+void CDialogueTagsEditorOverlay::SetModel(QPointer<CDialogueEditorTreeModel> pModel)
 {
   m_pModel = pModel;
 }
 
 //----------------------------------------------------------------------------------------
 //
-void CDialogTagsEditorOverlay::Climb()
+void CDialogueTagsEditorOverlay::Climb()
 {
   ClimbToFirstInstanceOf("CEditorMainScreen", false);
 }
 
 //----------------------------------------------------------------------------------------
 //
-void CDialogTagsEditorOverlay::Hide()
+void CDialogueTagsEditorOverlay::Hide()
 {
   /*
   if (auto spDbManager = m_wpDbManager.lock())
   {
     disconnect(spDbManager.get(), &CDatabaseManager::SignalTagAdded,
-               this, &CDialogTagsEditorOverlay::SlotTagAdded);
+               this, &CDialogueTagsEditorOverlay::SlotTagAdded);
     disconnect(spDbManager.get(), &CDatabaseManager::SignalTagRemoved,
-               this, &CDialogTagsEditorOverlay::SlotTagRemoved);
+               this, &CDialogueTagsEditorOverlay::SlotTagRemoved);
   }
 */
 
@@ -104,7 +104,7 @@ void CDialogTagsEditorOverlay::Hide()
 
 //----------------------------------------------------------------------------------------
 //
-void CDialogTagsEditorOverlay::Show()
+void CDialogueTagsEditorOverlay::Show()
 {
   Initialize();
 
@@ -112,9 +112,9 @@ void CDialogTagsEditorOverlay::Show()
   if (auto spDbManager = m_wpDbManager.lock())
   {
     connect(spDbManager.get(), &CDatabaseManager::SignalTagAdded,
-            this, &CDialogTagsEditorOverlay::SlotTagAdded, Qt::UniqueConnection);
+            this, &CDialogueTagsEditorOverlay::SlotTagAdded, Qt::UniqueConnection);
     connect(spDbManager.get(), &CDatabaseManager::SignalTagRemoved,
-            this, &CDialogTagsEditorOverlay::SlotTagRemoved, Qt::UniqueConnection);
+            this, &CDialogueTagsEditorOverlay::SlotTagRemoved, Qt::UniqueConnection);
   }
   */
 
@@ -123,7 +123,7 @@ void CDialogTagsEditorOverlay::Show()
 
 //----------------------------------------------------------------------------------------
 //
-void CDialogTagsEditorOverlay::Resize()
+void CDialogueTagsEditorOverlay::Resize()
 {
   QPoint newPos =
       QPoint(m_pTargetWidget->geometry().width() / 2, m_pTargetWidget->geometry().height() / 2) -
@@ -135,15 +135,15 @@ void CDialogTagsEditorOverlay::Resize()
 
 //----------------------------------------------------------------------------------------
 //
-void CDialogTagsEditorOverlay::on_pLineEdit_editingFinished()
+void CDialogueTagsEditorOverlay::on_pLineEdit_editingFinished()
 {
   const QString& sTagName = m_spUi->pLineEdit->text();
-  const QString& sTagDescribtion = m_spUi->pDescribtionLineEdit->text();
+  const QString& sTagDescription = m_spUi->pDescriptionLineEdit->text();
   if (auto spDbManager = m_wpDbManager.lock();
       nullptr != m_pUndoStack && nullptr != spDbManager && nullptr != m_spCurrentProject &&
       !sTagName.isEmpty())
   {
-    auto spNode = std::dynamic_pointer_cast<CDialogNodeDialog>(m_pModel->Node(m_pModel->Index(m_vsPath)));
+    auto spNode = std::dynamic_pointer_cast<CDialogueNodeDialogue>(m_pModel->Node(m_pModel->Index(m_vsPath)));
     if (nullptr != spNode)
     {
       QString sProject;
@@ -164,20 +164,20 @@ void CDialogTagsEditorOverlay::on_pLineEdit_editingFinished()
 
       if (nullptr == spTag)
       {
-        spTag = std::make_unique<STag>(QString(), sTagName, sTagDescribtion);
+        spTag = std::make_unique<STag>(QString(), sTagName, sTagDescription);
         if (nullptr != spResource)
         {
           {
             QReadLocker resLocker(&spResource->m_rwLock);
             spTag->m_sType = fnTagTypeFromName(sTagName, spResource->m_type._to_string());
           }
-          m_pUndoStack->push(new CCommandAddDialogTag(sProject, m_vsPath, spNode, spTag, m_pModel));
+          m_pUndoStack->push(new CCommandAddDialogueTag(sProject, m_vsPath, spNode, spTag, m_pModel));
           SlotTagAdded(sTagName);
         }
       }
       else
       {
-        QString sOldDescribtion;
+        QString sOldDescription;
         QString sOldType;
         QString sNewType;
         bool bTagFound = false;
@@ -187,41 +187,41 @@ void CDialogTagsEditorOverlay::on_pLineEdit_editingFinished()
           bTagFound =
               spNode->m_tags.end() !=
               spNode->m_tags.find(sTagName);
-          sOldDescribtion = spTag->m_sDescribtion;
+          sOldDescription = spTag->m_sDescribtion;
           sOldType = spTag->m_sType;
           sNewType = fnTagTypeFromName(sTagName, sOldType);
         }
-        if ((sOldDescribtion != sTagDescribtion && !sTagDescribtion.isEmpty()) ||
+        if ((sOldDescription != sTagDescription && !sTagDescription.isEmpty()) ||
             (sOldType != sNewType && !sNewType.isEmpty()))
         {
           m_pUndoStack->push(new CCommandChangeTag(sProject, sTagName, sNewType, sOldType,
-                                                   sTagDescribtion, sOldDescribtion));
-          m_spUi->pTagsFrame->UpdateToolTip(sTagName, sTagDescribtion);
+                                                   sTagDescription, sOldDescription));
+          m_spUi->pTagsFrame->UpdateToolTip(sTagName, sTagDescription);
           emit SignalTagsChanged();
         }
         if (!bTagFound)
         {
-          m_pUndoStack->push(new CCommandAddDialogTag(sProject, m_vsPath, spNode, spTag, m_pModel));
+          m_pUndoStack->push(new CCommandAddDialogueTag(sProject, m_vsPath, spNode, spTag, m_pModel));
           SlotTagAdded(sTagName);
         }
       }
     }
   }
 
-  QSignalBlocker b(m_spUi->pDescribtionLineEdit);
-  m_spUi->pDescribtionLineEdit->setText(QString());
+  QSignalBlocker b(m_spUi->pDescriptionLineEdit);
+  m_spUi->pDescriptionLineEdit->setText(QString());
 }
 
 //----------------------------------------------------------------------------------------
 //
-void CDialogTagsEditorOverlay::on_pDescribtionLineEdit_editingFinished()
+void CDialogueTagsEditorOverlay::on_pDescriptionLineEdit_editingFinished()
 {
   on_pLineEdit_editingFinished();
 }
 
 //----------------------------------------------------------------------------------------
 //
-void CDialogTagsEditorOverlay::on_pConfirmButton_clicked()
+void CDialogueTagsEditorOverlay::on_pConfirmButton_clicked()
 {
   m_spUi->pTagsFrame->ClearTags();
   Hide();
@@ -229,7 +229,7 @@ void CDialogTagsEditorOverlay::on_pConfirmButton_clicked()
 
 //----------------------------------------------------------------------------------------
 //
-void CDialogTagsEditorOverlay::SlotRemoveTagClicked()
+void CDialogueTagsEditorOverlay::SlotRemoveTagClicked()
 {
   QString sTagName = sender()->property(c_sTagNameProperty).toString();
   if (auto spDbManager = m_wpDbManager.lock();
@@ -246,7 +246,7 @@ void CDialogTagsEditorOverlay::SlotRemoveTagClicked()
     }
     if (nullptr != spTag)
     {
-      m_pUndoStack->push(new CCommandRemoveDialogTag(sProject, m_vsPath, spNode, spTag, m_pModel));
+      m_pUndoStack->push(new CCommandRemoveDialogueTag(sProject, m_vsPath, spNode, spTag, m_pModel));
       SlotTagRemoved(sTagName);
     }
   }
@@ -254,7 +254,7 @@ void CDialogTagsEditorOverlay::SlotRemoveTagClicked()
 
 //----------------------------------------------------------------------------------------
 //
-void CDialogTagsEditorOverlay::SlotTagAdded(const QString& sName)
+void CDialogueTagsEditorOverlay::SlotTagAdded(const QString& sName)
 {
   if (nullptr != m_pModel)
   {
@@ -272,7 +272,7 @@ void CDialogTagsEditorOverlay::SlotTagAdded(const QString& sName)
 //----------------------------------------------------------------------------------------
 //
 
-void CDialogTagsEditorOverlay::SlotTagRemoved(const QString& sName)
+void CDialogueTagsEditorOverlay::SlotTagRemoved(const QString& sName)
 {
   QList<QStandardItem*> vpItems = m_pCompleterModel->findItems(sName);
   if (vpItems.size() > 0)
@@ -285,14 +285,14 @@ void CDialogTagsEditorOverlay::SlotTagRemoved(const QString& sName)
 
 //----------------------------------------------------------------------------------------
 //
-void CDialogTagsEditorOverlay::Initialize()
+void CDialogueTagsEditorOverlay::Initialize()
 {
   m_spUi->pTagsFrame->ClearTags();
   m_pCompleterModel->clear();
 
   if (nullptr != m_spCurrentProject && nullptr != m_pModel)
   {
-    auto spNode = std::dynamic_pointer_cast<CDialogNodeDialog>(
+    auto spNode = std::dynamic_pointer_cast<CDialogueNodeDialogue>(
         m_pModel->Node(m_pModel->Index(m_vsPath)));
     if (nullptr != spNode)
     {
@@ -318,7 +318,7 @@ void CDialogTagsEditorOverlay::Initialize()
 
 //----------------------------------------------------------------------------------------
 //
-void CDialogTagsEditorOverlay::SortTags(std::vector<std::shared_ptr<SLockableTagData>>& vspTags)
+void CDialogueTagsEditorOverlay::SortTags(std::vector<std::shared_ptr<SLockableTagData>>& vspTags)
 {
   std::sort(vspTags.begin(), vspTags.end(),
             [](const std::shared_ptr<SLockableTagData>& left,
@@ -331,20 +331,20 @@ void CDialogTagsEditorOverlay::SortTags(std::vector<std::shared_ptr<SLockableTag
 
 //----------------------------------------------------------------------------------------
 //
-void CDialogTagsEditorOverlay::TagAdded(QPushButton* pButton, const QString& sTag)
+void CDialogueTagsEditorOverlay::TagAdded(QPushButton* pButton, const QString& sTag)
 {
   if (nullptr != pButton)
   {
     pButton->setProperty(c_sTagNameProperty, sTag);
     connect(pButton, &QPushButton::clicked,
-            this, &CDialogTagsEditorOverlay::SlotRemoveTagClicked);
+            this, &CDialogueTagsEditorOverlay::SlotRemoveTagClicked);
   }
   emit SignalTagsChanged();
 }
 
 //----------------------------------------------------------------------------------------
 //
-void CDialogTagsEditorOverlay::TagRemoved(const QStringList&)
+void CDialogueTagsEditorOverlay::TagRemoved(const QStringList&)
 {
   emit SignalTagsChanged();
 }

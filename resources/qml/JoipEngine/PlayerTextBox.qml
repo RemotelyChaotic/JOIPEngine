@@ -258,57 +258,57 @@ Rectangle {
         onClearText: {
             textBox.clearTextBox();
         }
-        onGetDialog: {
-            var dialog = null;
+        onGetDialogue: {
+            var dialogue = null;
             if ("" !== sId)
             {
                 if (bIsRegexp)
                 {
-                    var dialgsRx = DialogManager.dialogFromRx(sId);
-                    dialog = dialgsRx[Math.floor(Math.random() * dialgsRx.length)];
+                    var dialgsRx = DialogueManager.dialogueFromRx(sId);
+                    dialogue = dialgsRx[Math.floor(Math.random() * dialgsRx.length)];
                 }
                 else
                 {
-                    dialog = DialogManager.dialog(sId);
+                    dialogue = DialogueManager.dialogue(sId);
                 }
             }
             else if (vsTags.length > 0)
             {
-                var dialgs = DialogManager.dialogFromTags(vsTags);
-                dialog = dialgs[Math.floor(Math.random() * dialgs.length)];
+                var dialgs = DialogueManager.dialogueFromTags(vsTags);
+                dialogue = dialgs[Math.floor(Math.random() * dialgs.length)];
             }
 
-            var dialogData = null;
-            if (null != dialog)
+            var dialogueData = null;
+            if (null != dialogue)
             {
-                if (dialog.hasCondition && dialog.numDialogData() > 0)
+                if (dialogue.hasCondition && dialogue.numDialogueData() > 0)
                 {
-                    dialogData = dialog.dialogData(0);
+                    dialogueData = dialogue.dialogueData(0);
                 }
-                else if (!dialog.hasCondition && dialog.numDialogData() > 0)
+                else if (!dialogue.hasCondition && dialogue.numDialogueData() > 0)
                 {
-                    for (var i = 0; dialog.numDialogData() > i; ++i)
+                    for (var i = 0; dialogue.numDialogueData() > i; ++i)
                     {
-                        var data = dialog.dialogData(i);
+                        var data = dialogue.dialogueData(i);
                         if (root.evaluate(data.condition))
                         {
-                            dialogData = data;
+                            dialogueData = data;
                             break;
                         }
                     }
                 }
             }
 
-            if (null != dialogData)
+            if (null != dialogueData)
             {
-                signalEmitter.getDialogReturnValue(sRequestId, dialogData.string,
-                                                   dialogData.waitTimeMs, dialogData.skipable,
-                                                   dialogData.soundResource,
-                                                   dialog.tags());
+                signalEmitter.getDialogueReturnValue(sRequestId, dialogueData.string,
+                                                     dialogueData.waitTimeMs, dialogueData.skipable,
+                                                     dialogueData.soundResource,
+                                                     dialogue.tags());
             }
             else
             {
-                signalEmitter.getDialogReturnValue(sRequestId, "", -1, false, "", []);
+                signalEmitter.getDialogueReturnValue(sRequestId, "", -1, false, "", []);
             }
         }
         onShowButtonPrompts: {

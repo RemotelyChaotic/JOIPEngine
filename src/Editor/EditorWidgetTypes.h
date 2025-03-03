@@ -12,7 +12,7 @@ BETTER_ENUM(EEditorWidget, qint32,
             eSceneNodeWidget = 3,
             eSceneCodeEditorWidget = 4,
             ePatternEditor   = 5,
-            eDialogEditor    = 6)
+            eDialogueEditor  = 6)
 
 namespace editor {
   inline const char* c_sPropertyOldValue = "OldValue";

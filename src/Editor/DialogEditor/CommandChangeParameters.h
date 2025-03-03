@@ -1,5 +1,5 @@
-#ifndef CCOMMANDCHANGEPARAMETERS_H
-#define CCOMMANDCHANGEPARAMETERS_H
+#ifndef CCOMMANDCHANGEDialoguePARAMETERS_H
+#define CCOMMANDCHANGEDialoguePARAMETERS_H
 
 #include "Systems/DialogTree.h"
 #include "Systems/Project.h"
@@ -7,17 +7,17 @@
 #include <QUndoCommand>
 #include <memory>
 
-class CDialogEditorTreeModel;
+class CDialogueEditorTreeModel;
 
-class CCommandChangeParameters : public QUndoCommand
+class CCommandChangeDialogueParameters : public QUndoCommand
 {
 public:
-  CCommandChangeParameters(const tspProject& spProject,
+  CCommandChangeDialogueParameters(const tspProject& spProject,
                            const QStringList& vsPath,
-                           std::shared_ptr<CDialogNode> spNode,
-                           QPointer<CDialogEditorTreeModel> pModel,
+                           std::shared_ptr<CDialogueNode> spNode,
+                           QPointer<CDialogueEditorTreeModel> pModel,
                            QUndoCommand* pParent = nullptr);
-  ~CCommandChangeParameters();
+  ~CCommandChangeDialogueParameters();
 
   void undo() override;
   void redo() override;
@@ -29,11 +29,11 @@ private:
   void DoUndoRedo(const QByteArray& arr, const QStringList& vsPath);
 
   tspProject m_spProject;
-  QPointer<CDialogEditorTreeModel> m_pModel;
+  QPointer<CDialogueEditorTreeModel> m_pModel;
   QStringList m_vsPathNew;
   QStringList m_vsPathOld;
   QByteArray m_nodeNew;
   QByteArray m_nodeOld;
 };
 
-#endif // CCOMMANDCHANGEPARAMETERS_H
+#endif // CCOMMANDCHANGEDialoguePARAMETERS_H

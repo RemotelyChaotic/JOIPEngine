@@ -1,27 +1,27 @@
 #include "DialogEditorSortFilterProxyModel.h"
 
-CDialogEditorSortFilterProxyModel::CDialogEditorSortFilterProxyModel(QObject* pParent) :
+CDialogueEditorSortFilterProxyModel::CDialogueEditorSortFilterProxyModel(QObject* pParent) :
     QSortFilterProxyModel(pParent)
 {
   m_collator.setNumericMode(true);
 }
 
-CDialogEditorSortFilterProxyModel::~CDialogEditorSortFilterProxyModel()
+CDialogueEditorSortFilterProxyModel::~CDialogueEditorSortFilterProxyModel()
 {
 
 }
 
 //----------------------------------------------------------------------------------------
 //
-void CDialogEditorSortFilterProxyModel::setSourceModel(QAbstractItemModel* pSourceModel)
+void CDialogueEditorSortFilterProxyModel::setSourceModel(QAbstractItemModel* pSourceModel)
 {
   beginResetModel();
   if (nullptr != sourceModel())
   {
     disconnect(sourceModel(), &QAbstractItemModel::rowsInserted,
-               this, &CDialogEditorSortFilterProxyModel::SlotResourceAdded);
+               this, &CDialogueEditorSortFilterProxyModel::SlotResourceAdded);
     disconnect(sourceModel(), &QAbstractItemModel::rowsRemoved,
-               this, &CDialogEditorSortFilterProxyModel::SlotResourceRemoved);
+               this, &CDialogueEditorSortFilterProxyModel::SlotResourceRemoved);
   }
 
   QSortFilterProxyModel::setSourceModel(pSourceModel);
@@ -29,16 +29,16 @@ void CDialogEditorSortFilterProxyModel::setSourceModel(QAbstractItemModel* pSour
   if (nullptr != pSourceModel)
   {
     connect(pSourceModel, &QAbstractItemModel::rowsInserted,
-            this, &CDialogEditorSortFilterProxyModel::SlotResourceAdded);
+            this, &CDialogueEditorSortFilterProxyModel::SlotResourceAdded);
     connect(pSourceModel, &QAbstractItemModel::rowsRemoved,
-            this, &CDialogEditorSortFilterProxyModel::SlotResourceRemoved);
+            this, &CDialogueEditorSortFilterProxyModel::SlotResourceRemoved);
   }
   endResetModel();
 }
 
 //----------------------------------------------------------------------------------------
 //
-bool CDialogEditorSortFilterProxyModel::filterAcceptsRow(int iSourceRow,
+bool CDialogueEditorSortFilterProxyModel::filterAcceptsRow(int iSourceRow,
                                                          const QModelIndex &sourceParent) const
 {
   return QSortFilterProxyModel::filterAcceptsRow(iSourceRow, sourceParent);
@@ -46,7 +46,7 @@ bool CDialogEditorSortFilterProxyModel::filterAcceptsRow(int iSourceRow,
 
 //----------------------------------------------------------------------------------------
 //
-bool CDialogEditorSortFilterProxyModel::lessThan(const QModelIndex& left,
+bool CDialogueEditorSortFilterProxyModel::lessThan(const QModelIndex& left,
                                                  const QModelIndex& right) const
 {
   QVariant leftData = sourceModel()->data(left, Qt::DisplayRole);
@@ -69,14 +69,14 @@ bool CDialogEditorSortFilterProxyModel::lessThan(const QModelIndex& left,
 
 //----------------------------------------------------------------------------------------
 //
-void CDialogEditorSortFilterProxyModel::SlotResourceAdded()
+void CDialogueEditorSortFilterProxyModel::SlotResourceAdded()
 {
   invalidateFilter();
 }
 
 //----------------------------------------------------------------------------------------
 //
-void CDialogEditorSortFilterProxyModel::SlotResourceRemoved()
+void CDialogueEditorSortFilterProxyModel::SlotResourceRemoved()
 {
   invalidateFilter();
 }

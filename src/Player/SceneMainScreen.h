@@ -10,7 +10,7 @@
 class CBackgroundWidget;
 class CDatabaseManager;
 class CPlayerConsoleError;
-class CProjectDialogManager;
+class CProjectDialogueManager;
 class CProjectEventCallbackRegistry;
 class CProjectScriptWrapper;
 class CProjectRunner;
@@ -53,7 +53,7 @@ public:
   void LoadProject(qint32 iId, const tSceneToLoad& sStartScene = QString());
   tspProject LoadedProject();
   std::weak_ptr<CProjectEventCallbackRegistry> EventCallbackRegistry();
-  std::weak_ptr<CProjectDialogManager> ProjectDialogManager();
+  std::weak_ptr<CProjectDialogueManager> ProjectDialogueManager();
   std::weak_ptr<CProjectRunner> ProjectRunner();
   std::weak_ptr<CScriptRunner> ScriptRunner();
   void UnloadProject();
@@ -101,7 +101,7 @@ private:
   std::shared_ptr<CWindowContext>                             m_spWindowContext;
   std::shared_ptr<CProjectEventCallbackRegistry>              m_spEventCallbackRegistry;
   std::shared_ptr<CProjectRunner>                             m_spProjectRunner;
-  std::shared_ptr<CProjectDialogManager>                      m_spDialogManager;
+  std::shared_ptr<CProjectDialogueManager>                      m_spDialogueManager;
   std::shared_ptr<CThreadedSystem>                            m_spScriptRunnerSystem;
   std::shared_ptr<CScriptRunner>                              m_spScriptRunner;
   std::shared_ptr<CSettings>                                  m_spSettings;

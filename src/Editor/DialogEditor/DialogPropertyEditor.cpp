@@ -10,9 +10,9 @@
 
 #include <QScrollBar>
 
-CDialogPropertyEditor::CDialogPropertyEditor(QWidget* pParent) :
+CDialoguePropertyEditor::CDialoguePropertyEditor(QWidget* pParent) :
   COverlayBase(0, pParent),
-  m_spUi(std::make_unique<Ui::CDialogPropertyEditor>()),
+  m_spUi(std::make_unique<Ui::CDialoguePropertyEditor>()),
   m_wpDbManager(CApplication::Instance()->System<CDatabaseManager>())
 {
   m_spUi->setupUi(this);
@@ -23,7 +23,7 @@ CDialogPropertyEditor::CDialogPropertyEditor(QWidget* pParent) :
   m_preferredSize = size();
 }
 
-CDialogPropertyEditor::~CDialogPropertyEditor()
+CDialoguePropertyEditor::~CDialoguePropertyEditor()
 {
   dynamic_cast<CResourceTreeItemSortFilterProxyModel*>(m_spUi->pResourceSelectTree->model())
       ->setSourceModel(nullptr);
@@ -31,7 +31,7 @@ CDialogPropertyEditor::~CDialogPropertyEditor()
 
 //----------------------------------------------------------------------------------------
 //
-void CDialogPropertyEditor::Initialize(CResourceTreeItemModel* pResourceTreeModel)
+void CDialoguePropertyEditor::Initialize(CResourceTreeItemModel* pResourceTreeModel)
 {
   m_bInitialized = false;
 
@@ -42,7 +42,7 @@ void CDialogPropertyEditor::Initialize(CResourceTreeItemModel* pResourceTreeMode
 
   QItemSelectionModel* pSelectionModel = m_spUi->pResourceSelectTree->selectionModel();
   connect(pSelectionModel, &QItemSelectionModel::currentChanged,
-          this, &CDialogPropertyEditor::SlotCurrentChanged);
+          this, &CDialoguePropertyEditor::SlotCurrentChanged);
 
   pProxyModel->sort(resource_item::c_iColumnName, Qt::AscendingOrder);
   pProxyModel->setFilterRegExp(QRegExp(".*", Qt::CaseInsensitive, QRegExp::RegExp));
@@ -58,8 +58,8 @@ void CDialogPropertyEditor::Initialize(CResourceTreeItemModel* pResourceTreeMode
 
 //----------------------------------------------------------------------------------------
 //
-void CDialogPropertyEditor::SetNode(QStringList vsPath,
-                                    const std::shared_ptr<CDialogNode>& spNode)
+void CDialoguePropertyEditor::SetNode(QStringList vsPath,
+                                    const std::shared_ptr<CDialogueNode>& spNode)
 {
   m_bInitialized = false;
 
@@ -74,7 +74,7 @@ void CDialogPropertyEditor::SetNode(QStringList vsPath,
     {
       QReadLocker l(&spResource->m_rwLock);
       if (EResourceType::eDatabase != spResource->m_type._to_integral()) { continue; }
-      if (QFileInfo(PhysicalResourcePath(spResource)).suffix() != joip_resource::c_sDialogFileType)
+      if (QFileInfo(PhysicalResourcePath(spResource)).suffix() != joip_resource::c_sDialogueFileType)
       { continue; }
       m_spUi->pFileComboBox->addItem(sName, sName);
     }
@@ -82,50 +82,50 @@ void CDialogPropertyEditor::SetNode(QStringList vsPath,
 
   switch (spNode->m_type)
   {
-    case EDialogTreeNodeType::eDialog:
+    case EDialogueTreeNodeType::eDialogue:
     {
-      auto spDialog = std::dynamic_pointer_cast<CDialogNodeDialog>(spNode);
-      if (!spDialog->m_vspChildren.empty())
+      auto spDialogue = std::dynamic_pointer_cast<CDialogueNodeDialogue>(spNode);
+      if (!spDialogue->m_vspChildren.empty())
       {
-        auto spDialogData = std::dynamic_pointer_cast<CDialogData>(spDialog->m_vspChildren[0]);
-        m_spNode->m_vspChildren.push_back(spDialogData->Clone());
-        spDialogData->m_wpParent = m_spNode;
+        auto spDialogueData = std::dynamic_pointer_cast<CDialogueData>(spDialogue->m_vspChildren[0]);
+        m_spNode->m_vspChildren.push_back(spDialogueData->Clone());
+        spDialogueData->m_wpParent = m_spNode;
 
-        m_spUi->pNameLineEdit->setText(spDialog->m_sName);
-        qint32 iIdx = m_spUi->pFileComboBox->findData(spDialog->m_sFileId);
+        m_spUi->pNameLineEdit->setText(spDialogue->m_sName);
+        qint32 iIdx = m_spUi->pFileComboBox->findData(spDialogue->m_sFileId);
         if (-1 != iIdx)
         {
           m_spUi->pFileComboBox->setCurrentIndex(iIdx);
         }
         m_spUi->pConditionContainer->setVisible(false);
-        m_spUi->pSkippableCheckBox->setChecked(spDialogData->m_bSkipable);
-        m_spUi->pAutoCheckBox->setChecked(spDialogData->m_iWaitTimeMs < 0);
-        m_spUi->pWaitTimeEdit->setEnabled(spDialogData->m_iWaitTimeMs >= 0);
-        m_spUi->pWaitTimeEdit->setTime(spDialogData->m_iWaitTimeMs < 0 ?
+        m_spUi->pSkippableCheckBox->setChecked(spDialogueData->m_bSkipable);
+        m_spUi->pAutoCheckBox->setChecked(spDialogueData->m_iWaitTimeMs < 0);
+        m_spUi->pWaitTimeEdit->setEnabled(spDialogueData->m_iWaitTimeMs >= 0);
+        m_spUi->pWaitTimeEdit->setTime(spDialogueData->m_iWaitTimeMs < 0 ?
                                            QTime() :
-                                           QTime().addMSecs(qint32(spDialogData->m_iWaitTimeMs)));
-        m_spUi->pTextEdit->setText(spDialogData->m_sString);
-        m_spUi->pResourceLineEdit->setText(spDialogData->m_sSoundResource);
+                                           QTime().addMSecs(qint32(spDialogueData->m_iWaitTimeMs)));
+        m_spUi->pTextEdit->setText(spDialogueData->m_sString);
+        m_spUi->pResourceLineEdit->setText(spDialogueData->m_sSoundResource);
       }
     } break;
-    case EDialogTreeNodeType::eDialogFragment:
+    case EDialogueTreeNodeType::eDialogueFragment:
     {
-      auto spDialogData = std::dynamic_pointer_cast<CDialogData>(m_spNode);
-      m_spUi->pNameLineEdit->setText(spDialogData->m_sName);
-      qint32 iIdx = m_spUi->pFileComboBox->findData(spDialogData->m_sFileId);
+      auto spDialogueData = std::dynamic_pointer_cast<CDialogueData>(m_spNode);
+      m_spUi->pNameLineEdit->setText(spDialogueData->m_sName);
+      qint32 iIdx = m_spUi->pFileComboBox->findData(spDialogueData->m_sFileId);
       if (-1 != iIdx)
       {
         m_spUi->pFileComboBox->setCurrentIndex(iIdx);
       }
       m_spUi->pConditionContainer->setVisible(true);
-      m_spUi->pConditionLineEdit->setText(spDialogData->m_sCondition);
-      m_spUi->pAutoCheckBox->setChecked(spDialogData->m_iWaitTimeMs < 0);
-      m_spUi->pWaitTimeEdit->setEnabled(spDialogData->m_iWaitTimeMs >= 0);
-      m_spUi->pWaitTimeEdit->setTime(spDialogData->m_iWaitTimeMs < 0 ?
+      m_spUi->pConditionLineEdit->setText(spDialogueData->m_sCondition);
+      m_spUi->pAutoCheckBox->setChecked(spDialogueData->m_iWaitTimeMs < 0);
+      m_spUi->pWaitTimeEdit->setEnabled(spDialogueData->m_iWaitTimeMs >= 0);
+      m_spUi->pWaitTimeEdit->setTime(spDialogueData->m_iWaitTimeMs < 0 ?
                                          QTime() :
-                                         QTime().addMSecs(qint32(spDialogData->m_iWaitTimeMs)));
-      m_spUi->pTextEdit->setText(spDialogData->m_sString);
-      m_spUi->pResourceLineEdit->setText(spDialogData->m_sSoundResource);
+                                         QTime().addMSecs(qint32(spDialogueData->m_iWaitTimeMs)));
+      m_spUi->pTextEdit->setText(spDialogueData->m_sString);
+      m_spUi->pResourceLineEdit->setText(spDialogueData->m_sSoundResource);
     } break;
     default: break;
   }
@@ -135,14 +135,14 @@ void CDialogPropertyEditor::SetNode(QStringList vsPath,
 
 //----------------------------------------------------------------------------------------
 //
-void CDialogPropertyEditor::LoadProject(tspProject spProject)
+void CDialoguePropertyEditor::LoadProject(tspProject spProject)
 {
   m_spCurrentProject = spProject;
 }
 
 //----------------------------------------------------------------------------------------
 //
-void CDialogPropertyEditor::UnloadProject()
+void CDialoguePropertyEditor::UnloadProject()
 {
   m_spCurrentProject = nullptr;
   m_vsPath = QStringList();
@@ -150,7 +150,7 @@ void CDialogPropertyEditor::UnloadProject()
 
 //----------------------------------------------------------------------------------------
 //
-void CDialogPropertyEditor::Resize()
+void CDialoguePropertyEditor::Resize()
 {
   QSize newSize = m_preferredSize;
   if (m_pTargetWidget->geometry().width() < m_preferredSize.width())
@@ -178,14 +178,14 @@ void CDialogPropertyEditor::Resize()
 
 //----------------------------------------------------------------------------------------
 //
-void CDialogPropertyEditor::Climb()
+void CDialoguePropertyEditor::Climb()
 {
   ClimbToFirstInstanceOf("QStackedWidget", false);
 }
 
 //----------------------------------------------------------------------------------------
 //
-void CDialogPropertyEditor::on_pNameLineEdit_editingFinished()
+void CDialoguePropertyEditor::on_pNameLineEdit_editingFinished()
 {
   if (!m_bInitialized) { return; }
   m_spNode->m_sName = m_spUi->pNameLineEdit->text();
@@ -193,7 +193,7 @@ void CDialogPropertyEditor::on_pNameLineEdit_editingFinished()
 
 //----------------------------------------------------------------------------------------
 //
-void CDialogPropertyEditor::on_pFileComboBox_currentIndexChanged(qint32 iIdx)
+void CDialoguePropertyEditor::on_pFileComboBox_currentIndexChanged(qint32 iIdx)
 {
   if (!m_bInitialized) { return; }
   const QString sFile = m_spUi->pFileComboBox->currentData().toString();
@@ -206,101 +206,101 @@ void CDialogPropertyEditor::on_pFileComboBox_currentIndexChanged(qint32 iIdx)
 
 //----------------------------------------------------------------------------------------
 //
-void CDialogPropertyEditor::on_pConditionLineEdit_editingFinished()
+void CDialoguePropertyEditor::on_pConditionLineEdit_editingFinished()
 {
   if (!m_bInitialized) { return; }
-  if (auto spDialog = std::dynamic_pointer_cast<CDialogData>(m_spNode))
+  if (auto spDialogue = std::dynamic_pointer_cast<CDialogueData>(m_spNode))
   {
-    spDialog->m_sCondition = m_spUi->pConditionLineEdit->text();
+    spDialogue->m_sCondition = m_spUi->pConditionLineEdit->text();
   }
 }
 
 //----------------------------------------------------------------------------------------
 //
-void CDialogPropertyEditor::on_pSkippableCheckBox_toggled(bool bChecked)
+void CDialoguePropertyEditor::on_pSkippableCheckBox_toggled(bool bChecked)
 {
   if (!m_bInitialized) { return; }
-  auto spDialog = std::dynamic_pointer_cast<CDialogData>(m_spNode);
-  if (nullptr == spDialog && !m_spNode->m_vspChildren.empty())
+  auto spDialogue = std::dynamic_pointer_cast<CDialogueData>(m_spNode);
+  if (nullptr == spDialogue && !m_spNode->m_vspChildren.empty())
   {
-    spDialog = std::dynamic_pointer_cast<CDialogData>(m_spNode->m_vspChildren[0]);
+    spDialogue = std::dynamic_pointer_cast<CDialogueData>(m_spNode->m_vspChildren[0]);
   }
-  if (nullptr != spDialog)
+  if (nullptr != spDialogue)
   {
-    spDialog->m_bSkipable = m_spUi->pSkippableCheckBox->isChecked();
+    spDialogue->m_bSkipable = m_spUi->pSkippableCheckBox->isChecked();
   }
 }
 
 //----------------------------------------------------------------------------------------
 //
-void CDialogPropertyEditor::on_pAutoCheckBox_toggled(bool bChecked)
+void CDialoguePropertyEditor::on_pAutoCheckBox_toggled(bool bChecked)
 {
   if (!m_bInitialized) { return; }
 
   m_spUi->pWaitTimeEdit->setEnabled(!bChecked);
 
-  auto spDialog = std::dynamic_pointer_cast<CDialogData>(m_spNode);
-  if (nullptr == spDialog && !m_spNode->m_vspChildren.empty())
+  auto spDialogue = std::dynamic_pointer_cast<CDialogueData>(m_spNode);
+  if (nullptr == spDialogue && !m_spNode->m_vspChildren.empty())
   {
-    spDialog = std::dynamic_pointer_cast<CDialogData>(m_spNode->m_vspChildren[0]);
+    spDialogue = std::dynamic_pointer_cast<CDialogueData>(m_spNode->m_vspChildren[0]);
   }
-  if (nullptr != spDialog)
+  if (nullptr != spDialogue)
   {
-    spDialog->m_iWaitTimeMs = bChecked ? -1 : m_spUi->pWaitTimeEdit->time().msecsSinceStartOfDay();
+    spDialogue->m_iWaitTimeMs = bChecked ? -1 : m_spUi->pWaitTimeEdit->time().msecsSinceStartOfDay();
   }
 }
 
 //----------------------------------------------------------------------------------------
 //
-void CDialogPropertyEditor::on_pWaitTimeEdit_timeChanged(const QTime &time)
+void CDialoguePropertyEditor::on_pWaitTimeEdit_timeChanged(const QTime &time)
 {
   if (!m_bInitialized) { return; }
-  auto spDialog = std::dynamic_pointer_cast<CDialogData>(m_spNode);
-  if (nullptr == spDialog && !m_spNode->m_vspChildren.empty())
+  auto spDialogue = std::dynamic_pointer_cast<CDialogueData>(m_spNode);
+  if (nullptr == spDialogue && !m_spNode->m_vspChildren.empty())
   {
-    spDialog = std::dynamic_pointer_cast<CDialogData>(m_spNode->m_vspChildren[0]);
+    spDialogue = std::dynamic_pointer_cast<CDialogueData>(m_spNode->m_vspChildren[0]);
   }
-  if (nullptr != spDialog)
+  if (nullptr != spDialogue)
   {
-    spDialog->m_iWaitTimeMs = time.msecsSinceStartOfDay();
+    spDialogue->m_iWaitTimeMs = time.msecsSinceStartOfDay();
   }
 }
 
 //----------------------------------------------------------------------------------------
 //
-void CDialogPropertyEditor::on_pResourceLineEdit_editingFinished()
+void CDialoguePropertyEditor::on_pResourceLineEdit_editingFinished()
 {
   if (!m_bInitialized) { return; }
-  auto spDialog = std::dynamic_pointer_cast<CDialogData>(m_spNode);
-  if (nullptr == spDialog && !m_spNode->m_vspChildren.empty())
+  auto spDialogue = std::dynamic_pointer_cast<CDialogueData>(m_spNode);
+  if (nullptr == spDialogue && !m_spNode->m_vspChildren.empty())
   {
-    spDialog = std::dynamic_pointer_cast<CDialogData>(m_spNode->m_vspChildren[0]);
+    spDialogue = std::dynamic_pointer_cast<CDialogueData>(m_spNode->m_vspChildren[0]);
   }
-  if (nullptr != spDialog)
+  if (nullptr != spDialogue)
   {
-    spDialog->m_sSoundResource = m_spUi->pResourceLineEdit->text();
+    spDialogue->m_sSoundResource = m_spUi->pResourceLineEdit->text();
   }
 }
 
 //----------------------------------------------------------------------------------------
 //
-void CDialogPropertyEditor::on_pTextEdit_textChanged()
+void CDialoguePropertyEditor::on_pTextEdit_textChanged()
 {
   if (!m_bInitialized) { return; }
-  auto spDialog = std::dynamic_pointer_cast<CDialogData>(m_spNode);
-  if (nullptr == spDialog && !m_spNode->m_vspChildren.empty())
+  auto spDialogue = std::dynamic_pointer_cast<CDialogueData>(m_spNode);
+  if (nullptr == spDialogue && !m_spNode->m_vspChildren.empty())
   {
-    spDialog = std::dynamic_pointer_cast<CDialogData>(m_spNode->m_vspChildren[0]);
+    spDialogue = std::dynamic_pointer_cast<CDialogueData>(m_spNode->m_vspChildren[0]);
   }
-  if (nullptr != spDialog)
+  if (nullptr != spDialogue)
   {
-    spDialog->m_sString = m_spUi->pTextEdit->toPlainText();
+    spDialogue->m_sString = m_spUi->pTextEdit->toPlainText();
   }
 }
 
 //----------------------------------------------------------------------------------------
 //
-void CDialogPropertyEditor::on_CloseButton_clicked()
+void CDialoguePropertyEditor::on_CloseButton_clicked()
 {
   if (!m_bInitialized) { return; }
   m_spUi->pResourceLineEdit->clear();
@@ -309,7 +309,7 @@ void CDialogPropertyEditor::on_CloseButton_clicked()
 
 //----------------------------------------------------------------------------------------
 //
-void CDialogPropertyEditor::on_pFilter_SignalFilterChanged(const QString& sText)
+void CDialoguePropertyEditor::on_pFilter_SignalFilterChanged(const QString& sText)
 {
   if (!m_bInitialized) { return; }
 
@@ -328,7 +328,7 @@ void CDialogPropertyEditor::on_pFilter_SignalFilterChanged(const QString& sText)
 
 //----------------------------------------------------------------------------------------
 //
-void CDialogPropertyEditor::on_pConfirmButton_clicked()
+void CDialoguePropertyEditor::on_pConfirmButton_clicked()
 {
   if (!m_bInitialized) { return; }
   emit SignalDialogChanged(m_vsPath, m_spNode);
@@ -338,7 +338,7 @@ void CDialogPropertyEditor::on_pConfirmButton_clicked()
 
 //----------------------------------------------------------------------------------------
 //
-void CDialogPropertyEditor::on_pCancelButton_clicked()
+void CDialoguePropertyEditor::on_pCancelButton_clicked()
 {
   Hide();
   m_spNode = nullptr;
@@ -346,7 +346,7 @@ void CDialogPropertyEditor::on_pCancelButton_clicked()
 
 //----------------------------------------------------------------------------------------
 //
-void CDialogPropertyEditor::SlotCurrentChanged(const QModelIndex &current,
+void CDialoguePropertyEditor::SlotCurrentChanged(const QModelIndex &current,
                                                const QModelIndex &previous)
 {
   if (!m_bInitialized) { return; }

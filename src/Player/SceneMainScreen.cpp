@@ -42,7 +42,7 @@ CSceneMainScreen::CSceneMainScreen(QWidget* pParent) :
   m_spUi(std::make_unique<Ui::CSceneMainScreen>()),
   m_spEventCallbackRegistry(std::make_shared<CProjectEventCallbackRegistry>()),
   m_spProjectRunner(std::make_shared<CProjectRunner>()),
-  m_spDialogManager(std::make_shared<CProjectDialogManager>()),
+  m_spDialogueManager(std::make_shared<CProjectDialogueManager>()),
   m_spScriptRunnerSystem(std::make_shared<CThreadedSystem>("ScriptRunner")),
   m_spScriptRunner(nullptr),
   m_spSettings(CApplication::Instance()->Settings()),
@@ -174,7 +174,7 @@ void CSceneMainScreen::LoadProject(qint32 iId, const tSceneToLoad& sStartScene)
       m_spProjectRunner->LoadProject(m_spCurrentProject, std::get<tspScene>(sStartScene));
     }
 
-    m_spDialogManager->LoadProject(m_spCurrentProject);
+    m_spDialogueManager->LoadProject(m_spCurrentProject);
 
     if (nullptr != m_spWindowContext && !m_bBeingDebugged)
     {
@@ -214,9 +214,9 @@ std::weak_ptr<CProjectEventCallbackRegistry> CSceneMainScreen::EventCallbackRegi
 
 //----------------------------------------------------------------------------------------
 //
-std::weak_ptr<CProjectDialogManager> CSceneMainScreen::ProjectDialogManager()
+std::weak_ptr<CProjectDialogueManager> CSceneMainScreen::ProjectDialogueManager()
 {
-  return m_spDialogManager;
+  return m_spDialogueManager;
 }
 
 //----------------------------------------------------------------------------------------
@@ -240,7 +240,7 @@ void CSceneMainScreen::UnloadProject()
   if (!m_bInitialized) { return; }
 
   m_runningState = eShuttingDown;
-  m_spDialogManager->UnloadProject();
+  m_spDialogueManager->UnloadProject();
   m_spScriptRunner->InterruptExecution();
 }
 

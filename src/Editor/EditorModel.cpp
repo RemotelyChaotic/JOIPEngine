@@ -52,7 +52,7 @@ CEditorModel::CEditorModel(QWidget* pParent) :
   m_spResourceTreeModel(std::make_unique<CResourceTreeItemModel>(m_spUndoStack.get())),
   m_spSettings(CApplication::Instance()->Settings()),
   m_spJobWorkerSystem(std::make_shared<CThreadedSystem>("EditorJobWorker")),
-  m_spDialogModel(std::make_shared<CDialogEditorTreeModel>(pParent)),
+  m_spDialogModel(std::make_shared<CDialogueEditorTreeModel>(pParent)),
   m_spCurrentProject(nullptr),
   m_wpDbManager(CApplication::Instance()->System<CDatabaseManager>()),
   m_vwpTutorialStateSwitchHandlers(),
@@ -128,7 +128,7 @@ bool CEditorModel::IsReadOnly() const
 
 //----------------------------------------------------------------------------------------
 //
-CDialogEditorTreeModel* CEditorModel::DialogModel() const
+CDialogueEditorTreeModel* CEditorModel::DialogueModel() const
 {
   return m_spDialogModel.get();
 }

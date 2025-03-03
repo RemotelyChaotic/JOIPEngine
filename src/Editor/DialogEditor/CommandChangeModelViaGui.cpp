@@ -3,9 +3,9 @@
 
 #include "Editor/EditorCommandIds.h"
 
-CCommandChangeModelViaGui::CCommandChangeModelViaGui(const QVariant& oldValue, const QVariant& newValue,
+CCommandChangeDialogueModelViaGui::CCommandChangeDialogueModelViaGui(const QVariant& oldValue, const QVariant& newValue,
                                                      const QString& sHeader, const QStringList& vsPath,
-                                                     QPointer<CDialogEditorTreeModel> pModel) :
+                                                     QPointer<CDialogueEditorTreeModel> pModel) :
   QUndoCommand(QString("Changed '%1' value").arg(sHeader)),
   m_pModel(pModel),
   m_vsPath(vsPath),
@@ -15,41 +15,41 @@ CCommandChangeModelViaGui::CCommandChangeModelViaGui(const QVariant& oldValue, c
 {
 
 }
-CCommandChangeModelViaGui::~CCommandChangeModelViaGui()
+CCommandChangeDialogueModelViaGui::~CCommandChangeDialogueModelViaGui()
 {
 
 }
 
 //----------------------------------------------------------------------------------------
 //
-void CCommandChangeModelViaGui::undo()
+void CCommandChangeDialogueModelViaGui::undo()
 {
   DoUndo(m_oldValue);
 }
 
 //----------------------------------------------------------------------------------------
 //
-void CCommandChangeModelViaGui::redo()
+void CCommandChangeDialogueModelViaGui::redo()
 {
   DoUndo(m_newValue);
 }
 
 //----------------------------------------------------------------------------------------
 //
-int CCommandChangeModelViaGui::id() const
+int CCommandChangeDialogueModelViaGui::id() const
 {
-  return EEditorCommandId::eChangeDialogPropertyViaGui;
+  return EEditorCommandId::eChangeDialoguePropertyViaGui;
 }
 
 //----------------------------------------------------------------------------------------
 //
-bool CCommandChangeModelViaGui::mergeWith(const QUndoCommand* pOther)
+bool CCommandChangeDialogueModelViaGui::mergeWith(const QUndoCommand* pOther)
 {
   if (nullptr == pOther || id() != pOther->id())
   {
     return false;
   }
-  const CCommandChangeModelViaGui* pOtherCasted = dynamic_cast<const CCommandChangeModelViaGui*>(pOther);
+  const CCommandChangeDialogueModelViaGui* pOtherCasted = dynamic_cast<const CCommandChangeDialogueModelViaGui*>(pOther);
   if (nullptr == pOtherCasted) { return false; }
   if (m_vsPath != pOtherCasted->m_vsPath || m_sHeader != pOtherCasted->m_sHeader) { return false; }
 
@@ -60,7 +60,7 @@ bool CCommandChangeModelViaGui::mergeWith(const QUndoCommand* pOther)
 
 //----------------------------------------------------------------------------------------
 //
-void CCommandChangeModelViaGui::DoUndo(const QVariant& val)
+void CCommandChangeDialogueModelViaGui::DoUndo(const QVariant& val)
 {
   if (nullptr != m_pModel)
   {

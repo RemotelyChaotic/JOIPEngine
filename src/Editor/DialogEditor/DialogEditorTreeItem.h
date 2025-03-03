@@ -1,12 +1,12 @@
-#ifndef CDIALOGEDITORTREEITEM_H
-#define CDIALOGEDITORTREEITEM_H
+#ifndef CDIALOGueEDITORTREEITEM_H
+#define CDIALOGueEDITORTREEITEM_H
 
 #include "Systems/DialogTree.h"
 
 #include <QVariant>
 #include <QVector>
 
-namespace dialog_item
+namespace dialogue_item
 {
   [[maybe_unused]] const qint32 c_iColumnId       = 0;
   [[maybe_unused]] const qint32 c_iColumnString   = 1;
@@ -28,22 +28,22 @@ namespace dialog_item
   [[maybe_unused]] const qint32 c_iNumOptItems            = 10;
 }
 
-class CDialogEditorTreeItem
+class CDialogueEditorTreeItem
 {
 public:
-  CDialogEditorTreeItem(std::shared_ptr<CDialogNode> spNode,
-                        CDialogEditorTreeItem* pParentItem = nullptr);
-  ~CDialogEditorTreeItem();
+  CDialogueEditorTreeItem(std::shared_ptr<CDialogueNode> spNode,
+                        CDialogueEditorTreeItem* pParentItem = nullptr);
+  ~CDialogueEditorTreeItem();
 
-  void AppendChild(CDialogEditorTreeItem* pChild);
+  void AppendChild(CDialogueEditorTreeItem* pChild);
   QString Name() const { return m_spNode->m_sName; }
-  std::shared_ptr<CDialogNode> Node() const { return m_spNode; };
-  EDialogTreeNodeType Type() const { return m_spNode->m_type; }
-  void SetNode(const std::shared_ptr<CDialogNode>& spNode) { m_spNode = spNode; }
+  std::shared_ptr<CDialogueNode> Node() const { return m_spNode; };
+  EDialogueTreeNodeType Type() const { return m_spNode->m_type; }
+  void SetNode(const std::shared_ptr<CDialogueNode>& spNode) { m_spNode = spNode; }
   void SetWarning(const QString& sWarning) { m_sWarning = sWarning; }
 
-  CDialogEditorTreeItem* Child(qint32 iRow);
-  qint32 ChildIndex(CDialogEditorTreeItem* pCompare);
+  CDialogueEditorTreeItem* Child(qint32 iRow);
+  qint32 ChildIndex(CDialogueEditorTreeItem* pCompare);
   qint32 ChildCount() const;
   qint32 ColumnCount() const;
   QVariant Data(qint32 iColumn) const;
@@ -53,15 +53,15 @@ public:
   bool InsertColumns(qint32 iPosition, qint32 iColumns);
   bool RemoveChildren(qint32 iPosition, qint32 iCount);
   bool RemoveColumns(qint32 iPosition, qint32 iColumns);
-  CDialogEditorTreeItem* Parent();
+  CDialogueEditorTreeItem* Parent();
   qint32 Row() const;
   bool SetData(qint32 iColumn, const QVariant &value);
 
 private:
-  CDialogEditorTreeItem*          m_pParentItem;
-  QVector<CDialogEditorTreeItem*> m_vpChildItems;
-  std::shared_ptr<CDialogNode>    m_spNode;
-  QString                         m_sWarning;
+  CDialogueEditorTreeItem*          m_pParentItem;
+  QVector<CDialogueEditorTreeItem*> m_vpChildItems;
+  std::shared_ptr<CDialogueNode>    m_spNode;
+  QString                           m_sWarning;
 };
 
-#endif // CDIALOGEDITORTREEITEM_H
+#endif // CDIALOGueEDITORTREEITEM_H

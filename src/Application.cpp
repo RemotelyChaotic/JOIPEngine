@@ -474,7 +474,7 @@ void CApplication::RegisterQmlTypes()
     }
     return nullptr;
   });
-  qmlRegisterSingletonType<CProjectDialogManagerWrapper>("JOIP.core", 1, 5, "DialogManager",
+  qmlRegisterSingletonType<CProjectDialogueManagerWrapper>("JOIP.core", 1, 5, "DialogueManager",
                                                    [](QQmlEngine *engine, QJSEngine *scriptEngine) -> QObject*
   {
     Q_UNUSED(scriptEngine)
@@ -483,7 +483,7 @@ void CApplication::RegisterQmlTypes()
       CSceneMainScreen* pMainScreen = engine->property(player::c_sMainPlayerProperty).value<CSceneMainScreen*>();
       if (nullptr != pMainScreen)
       {
-        return new CProjectDialogManagerWrapper(engine, pMainScreen->ProjectDialogManager());
+        return new CProjectDialogueManagerWrapper(engine, pMainScreen->ProjectDialogueManager());
       }
     }
     else if (nullptr != scriptEngine)
@@ -491,7 +491,7 @@ void CApplication::RegisterQmlTypes()
       CSceneMainScreen* pMainScreen = engine->property(player::c_sMainPlayerProperty).value<CSceneMainScreen*>();
       if (nullptr != pMainScreen)
       {
-        return new CProjectDialogManagerWrapper(scriptEngine, pMainScreen->ProjectDialogManager());
+        return new CProjectDialogueManagerWrapper(scriptEngine, pMainScreen->ProjectDialogueManager());
       }
     }
     return nullptr;
@@ -501,8 +501,8 @@ void CApplication::RegisterQmlTypes()
   qmlRegisterUncreatableType<CProjectScriptWrapper>("JOIP.db", 1, 1, "Project", "");
   qmlRegisterUncreatableType<CSceneScriptWrapper>("JOIP.db", 1, 1, "Scene", "");
   qmlRegisterUncreatableType<CResourceScriptWrapper>("JOIP.db", 1, 1, "Resource", "");
-  qmlRegisterUncreatableType<CDialogWrapper>("JOIP.db", 1, 5, "Dialog", "");
-  qmlRegisterUncreatableType<CDialogDataWrapper>("JOIP.db", 1, 5, "DialogData", "");
+  qmlRegisterUncreatableType<CDialogueWrapper>("JOIP.db", 1, 5, "Dialogue", "");
+  qmlRegisterUncreatableType<CDialogueDataWrapper>("JOIP.db", 1, 5, "DialogueData", "");
   qmlRegisterUncreatableType<CSaveDataWrapper>("JOIP.db", 1, 5, "SaveData", "");
 
   qmlRegisterType<CBackgroundSignalEmitter>("JOIP.script", 1, 1, "BackgroundSignalEmitter");

@@ -1,5 +1,5 @@
-#ifndef CDIALOGEDITORDELEGATE_H
-#define CDIALOGEDITORDELEGATE_H
+#ifndef CDIALOGueEDITORDELEGATE_H
+#define CDIALOGueEDITORDELEGATE_H
 
 #include "Systems/Project.h"
 
@@ -11,11 +11,11 @@
 
 class CEditorModel;
 
-class CDialogEditorDelegate : public CHtmlViewDelegate
+class CDialogueEditorDelegate : public CHtmlViewDelegate
 {
 public:
-  CDialogEditorDelegate(QTreeView* pTree);
-  ~CDialogEditorDelegate() override;
+  CDialogueEditorDelegate(QTreeView* pTree);
+  ~CDialogueEditorDelegate() override;
 
   void SetCurrentProject(const tspProject& spProject);
   void SetReadOnly(bool bReadOnly);
@@ -38,4 +38,4 @@ private:
   bool m_bReadOnly = false;
 };
 
-#endif // CDIALOGEDITORDELEGATE_H
+#endif // CDIALOGueEDITORDELEGATE_H

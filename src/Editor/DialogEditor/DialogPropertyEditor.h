@@ -11,24 +11,24 @@
 class CDatabaseManager;
 class CResourceTreeItemModel;
 namespace Ui {
-  class CDialogPropertyEditor;
+  class CDialoguePropertyEditor;
 }
 
-class CDialogPropertyEditor : public COverlayBase
+class CDialoguePropertyEditor : public COverlayBase
 {
   Q_OBJECT
 
 public:
-  explicit CDialogPropertyEditor(QWidget* pParent = nullptr);
-  ~CDialogPropertyEditor();
+  explicit CDialoguePropertyEditor(QWidget* pParent = nullptr);
+  ~CDialoguePropertyEditor();
 
   void Initialize(CResourceTreeItemModel* pResourceTreeModel);
-  void SetNode(QStringList vsPath, const std::shared_ptr<CDialogNode>& spNode);
+  void SetNode(QStringList vsPath, const std::shared_ptr<CDialogueNode>& spNode);
   void LoadProject(tspProject spProject);
   void UnloadProject();
 
 signals:
-  void SignalDialogChanged(QStringList vsPath, const std::shared_ptr<CDialogNode>& spNode);
+  void SignalDialogChanged(QStringList vsPath, const std::shared_ptr<CDialogueNode>& spNode);
 
 public slots:
   void Resize() override;
@@ -50,9 +50,9 @@ protected slots:
   void SlotCurrentChanged(const QModelIndex &current, const QModelIndex &previous);
 
 private:
-  std::unique_ptr<Ui::CDialogPropertyEditor> m_spUi;
+  std::unique_ptr<Ui::CDialoguePropertyEditor> m_spUi;
   tspProject                                 m_spCurrentProject;
-  std::shared_ptr<CDialogNode>               m_spNode;
+  std::shared_ptr<CDialogueNode>             m_spNode;
   std::weak_ptr<CDatabaseManager>            m_wpDbManager;
   QStringList                                m_vsPath;
   QSize                                      m_preferredSize;

@@ -7,18 +7,18 @@
 #include <QUndoCommand>
 #include <memory>
 
-class CDialogEditorTreeModel;
+class CDialogueEditorTreeModel;
 
-class CCommandAddDialogNode : public QUndoCommand
+class CCommandAddDialogueNode : public QUndoCommand
 {
 public:
-  CCommandAddDialogNode(const tspProject& spProject,
+  CCommandAddDialogueNode(const tspProject& spProject,
                         const QStringList& vsPath,
                         qint32 iIndex,
-                        std::shared_ptr<CDialogNode> spNode,
-                        QPointer<CDialogEditorTreeModel> pModel,
+                        std::shared_ptr<CDialogueNode> spNode,
+                        QPointer<CDialogueEditorTreeModel> pModel,
                         QUndoCommand* pParent = nullptr);
-  ~CCommandAddDialogNode();
+  ~CCommandAddDialogueNode();
 
   void undo() override;
   void redo() override;
@@ -28,7 +28,7 @@ public:
 
 protected:
   tspProject m_spProject;
-  QPointer<CDialogEditorTreeModel> m_pModel;
+  QPointer<CDialogueEditorTreeModel> m_pModel;
   QStringList m_vsPath;
   QByteArray m_node;
   qint32 m_iPos = -1;
@@ -36,14 +36,14 @@ protected:
 
 //----------------------------------------------------------------------------------------
 //
-class CCommandRemoveDialogNode : public QUndoCommand
+class CCommandRemoveDialogueNode : public QUndoCommand
 {
 public:
-  CCommandRemoveDialogNode(const tspProject& spProject,
+  CCommandRemoveDialogueNode(const tspProject& spProject,
                            const QStringList& vsPath,
-                           QPointer<CDialogEditorTreeModel> pModel,
+                           QPointer<CDialogueEditorTreeModel> pModel,
                            QUndoCommand* pParent = nullptr);
-  ~CCommandRemoveDialogNode();
+  ~CCommandRemoveDialogueNode();
 
   void undo() override;
   void redo() override;
@@ -53,7 +53,7 @@ public:
 
 protected:
   tspProject m_spProject;
-  QPointer<CDialogEditorTreeModel> m_pModel;
+  QPointer<CDialogueEditorTreeModel> m_pModel;
   QStringList m_vsPath;
   QByteArray m_node;
   qint32 m_iPos = -1;

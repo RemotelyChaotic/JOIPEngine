@@ -4,12 +4,12 @@
 
 #include <QFileInfo>
 
-CProjectDialogManager::CProjectDialogManager()
+CProjectDialogueManager::CProjectDialogueManager()
 {
 
 }
 
-CProjectDialogManager::~CProjectDialogManager()
+CProjectDialogueManager::~CProjectDialogueManager()
 {
 
 }
@@ -18,15 +18,15 @@ CProjectDialogManager::~CProjectDialogManager()
 //
 namespace
 {
-  void ParseTreeItems(const std::shared_ptr<CDialogNode>& spNode,
-                      std::vector<std::pair<QString, std::shared_ptr<CDialogNodeDialog>>>* pvspDataFlat)
+  void ParseTreeItems(const std::shared_ptr<CDialogueNode>& spNode,
+                      std::vector<std::pair<QString, std::shared_ptr<CDialogueNodeDialogue>>>* pvspDataFlat)
   {
     for (const auto& spChildNode : spNode->m_vspChildren)
     {
-      if (EDialogTreeNodeType::eDialog == spChildNode->m_type._to_integral())
+      if (EDialogueTreeNodeType::eDialogue == spChildNode->m_type._to_integral())
       {
         pvspDataFlat->push_back({spChildNode->m_sName,
-                                 std::dynamic_pointer_cast<CDialogNodeDialog>(spChildNode)});
+                                 std::dynamic_pointer_cast<CDialogueNodeDialogue>(spChildNode)});
       }
       ParseTreeItems(spChildNode, pvspDataFlat);
     }
@@ -35,7 +35,7 @@ namespace
 
 //----------------------------------------------------------------------------------------
 //
-void CProjectDialogManager::LoadProject(const tspProject& spProject)
+void CProjectDialogueManager::LoadProject(const tspProject& spProject)
 {
   std::vector<tspResource> vsResFiles;
   {
@@ -44,36 +44,36 @@ void CProjectDialogManager::LoadProject(const tspProject& spProject)
     {
       QReadLocker rLock(&spResource->m_rwLock);
       if (EResourceType::eDatabase == spResource->m_type._to_integral() &&
-          QFileInfo(PhysicalResourcePath(spResource)).suffix() == joip_resource::c_sDialogFileType)
+          QFileInfo(PhysicalResourcePath(spResource)).suffix() == joip_resource::c_sDialogueFileType)
       {
         vsResFiles.push_back(spResource);
       }
     }
   }
 
-  m_vspDialogsOnlyFlat.clear();
-  m_spDataRootNode = dialog_tree::LoadDialogs(vsResFiles);
+  m_vspDialoguesOnlyFlat.clear();
+  m_spDataRootNode = dialogue_tree::LoadDialogues(vsResFiles);
   if (nullptr == m_spDataRootNode)
   {
-    m_spDataRootNode = std::make_shared<CDialogNode>();
+    m_spDataRootNode = std::make_shared<CDialogueNode>();
   }
 
-  ParseTreeItems(m_spDataRootNode, &m_vspDialogsOnlyFlat);
+  ParseTreeItems(m_spDataRootNode, &m_vspDialoguesOnlyFlat);
 }
 
 //----------------------------------------------------------------------------------------
 //
-void CProjectDialogManager::UnloadProject()
+void CProjectDialogueManager::UnloadProject()
 {
-  m_vspDialogsOnlyFlat.clear();
+  m_vspDialoguesOnlyFlat.clear();
   m_spDataRootNode = nullptr;
 }
 
 //----------------------------------------------------------------------------------------
 //
-std::shared_ptr<CDialogNodeDialog> CProjectDialogManager::FindDialog(const QString& sId)
+std::shared_ptr<CDialogueNodeDialogue> CProjectDialogueManager::FindDialog(const QString& sId)
 {
-  for (const auto& [sPathRef, nodeData] : m_vspDialogsOnlyFlat)
+  for (const auto& [sPathRef, nodeData] : m_vspDialoguesOnlyFlat)
   {
     if (sPathRef == sId)
     {
@@ -85,10 +85,10 @@ std::shared_ptr<CDialogNodeDialog> CProjectDialogManager::FindDialog(const QStri
 
 //----------------------------------------------------------------------------------------
 //
-std::vector<std::shared_ptr<CDialogNodeDialog>> CProjectDialogManager::FindDialog(const QRegularExpression& rx)
+std::vector<std::shared_ptr<CDialogueNodeDialogue>> CProjectDialogueManager::FindDialogue(const QRegularExpression& rx)
 {
-  std::vector<std::shared_ptr<CDialogNodeDialog>> vspOut;
-  for (const auto& [sPath, nodeData]: m_vspDialogsOnlyFlat)
+  std::vector<std::shared_ptr<CDialogueNodeDialogue>> vspOut;
+  for (const auto& [sPath, nodeData]: m_vspDialoguesOnlyFlat)
   {
     QRegularExpressionMatch match = rx.match(sPath);
     if (match.hasMatch())
@@ -101,10 +101,10 @@ std::vector<std::shared_ptr<CDialogNodeDialog>> CProjectDialogManager::FindDialo
 
 //----------------------------------------------------------------------------------------
 //
-std::vector<std::shared_ptr<CDialogNodeDialog>> CProjectDialogManager::FindDialogByTag(const QStringList& vsTags)
+std::vector<std::shared_ptr<CDialogueNodeDialogue>> CProjectDialogueManager::FindDialogueByTag(const QStringList& vsTags)
 {
-  std::vector<std::shared_ptr<CDialogNodeDialog>> vspOut;
-  for (const auto& [vsPath, nodeData]: m_vspDialogsOnlyFlat)
+  std::vector<std::shared_ptr<CDialogueNodeDialogue>> vspOut;
+  for (const auto& [vsPath, nodeData]: m_vspDialoguesOnlyFlat)
   {
     bool bFoundAll = true;
     for (const QString& sTag : vsTags)
@@ -121,27 +121,27 @@ std::vector<std::shared_ptr<CDialogNodeDialog>> CProjectDialogManager::FindDialo
 
 //----------------------------------------------------------------------------------------
 //
-CProjectDialogManagerWrapper::CProjectDialogManagerWrapper(QPointer<QJSEngine> pEngine,
-                                                           std::weak_ptr<CProjectDialogManager> wpInstance) :
+CProjectDialogueManagerWrapper::CProjectDialogueManagerWrapper(QPointer<QJSEngine> pEngine,
+                                                           std::weak_ptr<CProjectDialogueManager> wpInstance) :
   m_wpInstance(wpInstance),
   m_pEngine(pEngine)
 {
 }
-CProjectDialogManagerWrapper::~CProjectDialogManagerWrapper()
+CProjectDialogueManagerWrapper::~CProjectDialogueManagerWrapper()
 {
 }
 
 //----------------------------------------------------------------------------------------
 //
-QJSValue CProjectDialogManagerWrapper::dialog(const QString& sId)
+QJSValue CProjectDialogueManagerWrapper::dialogue(const QString& sId)
 {
   if (auto spInst = m_wpInstance.lock())
   {
     auto spDial = spInst->FindDialog(sId);
     if (nullptr != spDial)
     {
-      CDialogWrapper* pWrapper =
-          new CDialogWrapper(m_pEngine, spDial);
+      CDialogueWrapper* pWrapper =
+          new CDialogueWrapper(m_pEngine, spDial);
       return m_pEngine->newQObject(pWrapper);
     }
   }
@@ -150,17 +150,17 @@ QJSValue CProjectDialogManagerWrapper::dialog(const QString& sId)
 
 //----------------------------------------------------------------------------------------
 //
-QJSValue CProjectDialogManagerWrapper::dialogFromRx(const QString& sId)
+QJSValue CProjectDialogueManagerWrapper::dialogueFromRx(const QString& sId)
 {
   if (auto spInst = m_wpInstance.lock())
   {
-    auto vspDial = spInst->FindDialog(QRegularExpression(sId));
+    auto vspDial = spInst->FindDialogue(QRegularExpression(sId));
     QJSValue val = m_pEngine->newArray(static_cast<qint32>(vspDial.size()));
     int iIndex = 0;
     for (const auto& spDial : vspDial)
     {
-      CDialogWrapper* pWrapper =
-          new CDialogWrapper(m_pEngine, spDial);
+      CDialogueWrapper* pWrapper =
+          new CDialogueWrapper(m_pEngine, spDial);
       val.setProperty(iIndex++, m_pEngine->newQObject(pWrapper));
     }
     return val;
@@ -170,17 +170,17 @@ QJSValue CProjectDialogManagerWrapper::dialogFromRx(const QString& sId)
 
 //----------------------------------------------------------------------------------------
 //
-QJSValue CProjectDialogManagerWrapper::dialogFromTags(const QStringList& vsId)
+QJSValue CProjectDialogueManagerWrapper::dialogueFromTags(const QStringList& vsId)
 {
   if (auto spInst = m_wpInstance.lock())
   {
-    auto vspDial = spInst->FindDialogByTag(vsId);
+    auto vspDial = spInst->FindDialogueByTag(vsId);
     QJSValue val = m_pEngine->newArray(static_cast<qint32>(vspDial.size()));
     int iIndex = 0;
     for (const auto& spDial : vspDial)
     {
-      CDialogWrapper* pWrapper =
-          new CDialogWrapper(m_pEngine, spDial);
+      CDialogueWrapper* pWrapper =
+          new CDialogueWrapper(m_pEngine, spDial);
       val.setProperty(iIndex++, m_pEngine->newQObject(pWrapper));
     }
     return val;

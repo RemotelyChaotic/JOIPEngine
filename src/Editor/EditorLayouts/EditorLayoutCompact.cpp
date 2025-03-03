@@ -23,7 +23,7 @@ namespace
     { EEditorWidget::eSceneNodeWidget, "LeftTab_Nodes" },
     { EEditorWidget::eSceneCodeEditorWidget, "LeftTab_Code" },
     { EEditorWidget::ePatternEditor, "LeftTab_Sequence" },
-    { EEditorWidget::eDialogEditor, "LeftTab_Dialog" }
+    { EEditorWidget::eDialogueEditor, "LeftTab_Dialogue" }
   };
   const std::map<EEditorWidget, QString> m_sEditorToolTipMap =
   {
@@ -33,7 +33,7 @@ namespace
     { EEditorWidget::eSceneNodeWidget, "Switch to panel for scene node configuration" },
     { EEditorWidget::eSceneCodeEditorWidget, "Switch to panel for editing scene code" },
     { EEditorWidget::ePatternEditor, "Switch to panel for editing sequences" },
-    { EEditorWidget::eDialogEditor, "Switch to panel for editing dialogs" }
+    { EEditorWidget::eDialogueEditor, "Switch to panel for editing dialogues" }
   };
 
   const char*   c_sEditorProperty = "Editor";

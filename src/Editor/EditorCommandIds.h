@@ -51,13 +51,13 @@ BETTER_ENUM(EEditorCommandId, qint32,
             eAddOrRemoveSequenceElement,
             eChangeSequenceElementProperties,
 
-            eAddDialogNode,
-            eRemoveDialogNode,
-            eAddNewDialogFile,
-            eChangeDialogPropertyViaGui,
-            eChangeDialogParams,
-            eAddDialogTags,
-            eRemoveDialogTags
+            eAddDialogueNode,
+            eRemoveDialogueNode,
+            eAddNewDialogueFile,
+            eChangeDialoguePropertyViaGui,
+            eChangeDialogueParams,
+            eAddDialogueTags,
+            eRemoveDialogueTags
             )
 
 #endif // EDITORCOMMANDIDS_H

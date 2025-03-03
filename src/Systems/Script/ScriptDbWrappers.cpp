@@ -930,58 +930,58 @@ QStringList CTagWrapper::resources()
 
 //----------------------------------------------------------------------------------------
 //
-CDialogWrapperBase::CDialogWrapperBase(tEngineType pEngine, const std::shared_ptr<CDialogNode>& spData) :
+CDialogueWrapperBase::CDialogueWrapperBase(tEngineType pEngine, const std::shared_ptr<CDialogueNode>& spData) :
   m_pEngine(pEngine),
   m_spData(spData)
 {
 }
-CDialogWrapperBase::~CDialogWrapperBase()
+CDialogueWrapperBase::~CDialogueWrapperBase()
 {
 
 }
 
 //----------------------------------------------------------------------------------------
 //
-QString CDialogWrapperBase::getResource() const
+QString CDialogueWrapperBase::getResource() const
 {
   return m_spData->m_sFileId;
 }
 
 //----------------------------------------------------------------------------------------
 //
-QString CDialogWrapperBase::getName() const
+QString CDialogueWrapperBase::getName() const
 {
   return m_spData->m_sName;
 }
 
 //----------------------------------------------------------------------------------------
 //
-CDialogWrapper::CDialogWrapper(tEngineType pEngine, const std::shared_ptr<CDialogNodeDialog>& spData) :
-  CDialogWrapperBase(pEngine, spData),
+CDialogueWrapper::CDialogueWrapper(tEngineType pEngine, const std::shared_ptr<CDialogueNodeDialogue>& spData) :
+  CDialogueWrapperBase(pEngine, spData),
   m_spData(spData)
 {
 }
-CDialogWrapper::~CDialogWrapper()
+CDialogueWrapper::~CDialogueWrapper()
 {
 }
 
 //----------------------------------------------------------------------------------------
 //
-bool CDialogWrapper::getHasCondition() const
+bool CDialogueWrapper::getHasCondition() const
 {
   return m_spData->m_bHasCondition;
 }
 
 //----------------------------------------------------------------------------------------
 //
-qint32 CDialogWrapper::numDialogData()
+qint32 CDialogueWrapper::numDialogueData()
 {
   return static_cast<qint32>(m_spData->m_vspChildren.size());
 }
 
 //----------------------------------------------------------------------------------------
 //
-QStringList CDialogWrapper::dialogDataList()
+QStringList CDialogueWrapper::dialogueDataList()
 {
   QStringList ret;
   for (auto it = m_spData->m_vspChildren.begin(); m_spData->m_vspChildren.end() != it; ++it)
@@ -993,16 +993,16 @@ QStringList CDialogWrapper::dialogDataList()
 
 //----------------------------------------------------------------------------------------
 //
-QVariant CDialogWrapper::dialogData(const QString& sValue)
+QVariant CDialogueWrapper::dialogueData(const QString& sValue)
 {
   auto it = std::find_if(m_spData->m_vspChildren.begin(), m_spData->m_vspChildren.end(),
-                         [&](const std::shared_ptr<CDialogNode>& spData) {
+                         [&](const std::shared_ptr<CDialogueNode>& spData) {
                            return sValue == spData->m_sName;
                          });
   if (m_spData->m_vspChildren.end() != it)
   {
-    CDialogDataWrapper* pWrapper =
-        new CDialogDataWrapper(m_pEngine, std::dynamic_pointer_cast<CDialogData>(*it));
+    CDialogueDataWrapper* pWrapper =
+        new CDialogueDataWrapper(m_pEngine, std::dynamic_pointer_cast<CDialogueData>(*it));
     return CreateScriptObject(pWrapper, m_pEngine);
   }
   return QVariant();
@@ -1010,7 +1010,7 @@ QVariant CDialogWrapper::dialogData(const QString& sValue)
 
 //----------------------------------------------------------------------------------------
 //
-QVariant CDialogWrapper::dialogData(qint32 iIndex)
+QVariant CDialogueWrapper::dialogueData(qint32 iIndex)
 {
   if (0 > iIndex || static_cast<qint32>(m_spData->m_vspChildren.size()) <= iIndex)
   {
@@ -1020,8 +1020,8 @@ QVariant CDialogWrapper::dialogData(qint32 iIndex)
   std::advance(it, iIndex);
   if (m_spData->m_vspChildren.end() != it)
   {
-    CDialogDataWrapper* pWrapper =
-        new CDialogDataWrapper(m_pEngine, std::dynamic_pointer_cast<CDialogData>(*it));
+    CDialogueDataWrapper* pWrapper =
+        new CDialogueDataWrapper(m_pEngine, std::dynamic_pointer_cast<CDialogueData>(*it));
     return CreateScriptObject(pWrapper, m_pEngine);
   }
   return QVariant();
@@ -1029,14 +1029,14 @@ QVariant CDialogWrapper::dialogData(qint32 iIndex)
 
 //----------------------------------------------------------------------------------------
 //
-qint32 CDialogWrapper::numTags()
+qint32 CDialogueWrapper::numTags()
 {
   return static_cast<qint32>(m_spData->m_tags.size());
 }
 
 //----------------------------------------------------------------------------------------
 //
-QStringList CDialogWrapper::tags()
+QStringList CDialogueWrapper::tags()
 {
   QStringList ret;
   for (auto it = m_spData->m_tags.begin(); m_spData->m_tags.end() != it; ++it)
@@ -1048,7 +1048,7 @@ QStringList CDialogWrapper::tags()
 
 //----------------------------------------------------------------------------------------
 //
-QVariant CDialogWrapper::tag(const QString& sValue)
+QVariant CDialogueWrapper::tag(const QString& sValue)
 {
   auto it = m_spData->m_tags.find(sValue);
   if (m_spData->m_tags.end() != it)
@@ -1062,7 +1062,7 @@ QVariant CDialogWrapper::tag(const QString& sValue)
 
 //----------------------------------------------------------------------------------------
 //
-QVariant CDialogWrapper::tag(qint32 iIndex)
+QVariant CDialogueWrapper::tag(qint32 iIndex)
 {
   if (m_spData->m_tags.size() > iIndex && 0 <= iIndex)
   {
@@ -1078,46 +1078,46 @@ QVariant CDialogWrapper::tag(qint32 iIndex)
 
 //----------------------------------------------------------------------------------------
 //
-CDialogDataWrapper::CDialogDataWrapper(tEngineType pEngine, const std::shared_ptr<CDialogData>& spData) :
-  CDialogWrapperBase(pEngine, spData),
+CDialogueDataWrapper::CDialogueDataWrapper(tEngineType pEngine, const std::shared_ptr<CDialogueData>& spData) :
+  CDialogueWrapperBase(pEngine, spData),
   m_spData(spData)
 {
 }
-CDialogDataWrapper::~CDialogDataWrapper()
+CDialogueDataWrapper::~CDialogueDataWrapper()
 {
 }
 
 //----------------------------------------------------------------------------------------
 //
-QString CDialogDataWrapper::getCondition() const
+QString CDialogueDataWrapper::getCondition() const
 {
   return m_spData->m_sCondition;
 }
 
 //----------------------------------------------------------------------------------------
 //
-QString CDialogDataWrapper::getString() const
+QString CDialogueDataWrapper::getString() const
 {
   return m_spData->m_sString;
 }
 
 //----------------------------------------------------------------------------------------
 //
-QString CDialogDataWrapper::getSoundResource() const
+QString CDialogueDataWrapper::getSoundResource() const
 {
   return m_spData->m_sSoundResource;
 }
 
 //----------------------------------------------------------------------------------------
 //
-qint64 CDialogDataWrapper::getWaitTime() const
+qint64 CDialogueDataWrapper::getWaitTime() const
 {
   return m_spData->m_iWaitTimeMs;
 }
 
 //----------------------------------------------------------------------------------------
 //
-bool CDialogDataWrapper::getSkipable() const
+bool CDialogueDataWrapper::getSkipable() const
 {
   return m_spData->m_bSkipable;
 }

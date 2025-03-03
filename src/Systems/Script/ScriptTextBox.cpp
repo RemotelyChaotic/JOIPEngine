@@ -215,7 +215,7 @@ qint32 CScriptTextBox::showButtonPrompts(QVariant vsLabels, QString sStoreInto)
 
 //----------------------------------------------------------------------------------------
 //
-QVariant CScriptTextBox::getDialog(QVariant data)
+QVariant CScriptTextBox::getDialogue(QVariant data)
 {
   if (!CheckIfScriptCanRun()) { return QVariant(); }
 
@@ -225,7 +225,7 @@ QVariant CScriptTextBox::getDialog(QVariant data)
   QString sSoundResource;
   QStringList vsTagsRet;
 
-  bool bOk = GetDialogData(data, sStringRet, iTimeRet, bWaitRet, sSoundResource, vsTagsRet);
+  bool bOk = GetDialogueData(data, sStringRet, iTimeRet, bWaitRet, sSoundResource, vsTagsRet);
 
   if (bOk)
   {
@@ -243,7 +243,7 @@ QVariant CScriptTextBox::getDialog(QVariant data)
 
 //----------------------------------------------------------------------------------------
 //
-void CScriptTextBox::showDialog(QVariant data)
+void CScriptTextBox::showDialogue(QVariant data)
 {
   if (!CheckIfScriptCanRun()) { return; }
 
@@ -253,7 +253,7 @@ void CScriptTextBox::showDialog(QVariant data)
   QString sSoundResource;
   QStringList vsTagsRet;
 
-  bool bOk = GetDialogData(data, sStringRet, iTimeRet, bWaitRet, sSoundResource, vsTagsRet);
+  bool bOk = GetDialogueData(data, sStringRet, iTimeRet, bWaitRet, sSoundResource, vsTagsRet);
 
   if (bOk)
   {
@@ -494,8 +494,8 @@ std::vector<QColor> CScriptTextBox::GetColors(const QVariant& colors, const QStr
 
 //----------------------------------------------------------------------------------------
 //
-bool CScriptTextBox::GetDialogData(QVariant data, QString& sStringRet, qint32& iTimeRet, bool& bWaitRet,
-                                   QString& sSoundResource, QStringList& vsTagsRet)
+bool CScriptTextBox::GetDialogueData(QVariant data, QString& sStringRet, qint32& iTimeRet, bool& bWaitRet,
+                                     QString& sSoundResource, QStringList& vsTagsRet)
 {
   QString sId = QUuid::createUuid().toString();
   QString sString = QString();
@@ -538,7 +538,7 @@ bool CScriptTextBox::GetDialogData(QVariant data, QString& sStringRet, qint32& i
     QString sError;
     auto optvsStringLabels =
         script::ParseTagListFromScriptVariant(data, m_wpDbManager.lock(),
-                                              m_spProject, "showDialog", &sError);
+                                              m_spProject, "showDialogue", &sError);
     if (!optvsStringLabels.has_value())
     {
       emit m_pSignalEmitter->showError(sError, QtMsgType::QtWarningMsg);
@@ -547,15 +547,15 @@ bool CScriptTextBox::GetDialogData(QVariant data, QString& sStringRet, qint32& i
     vsTags = *optvsStringLabels;
   }
 
-  return GetDialogFromUi(sId, sString, bIsRegexp, vsTags, sStringRet, iTimeRet, bWaitRet,
-                         sSoundResource, vsTagsRet);
+  return GetDialogueFromUi(sId, sString, bIsRegexp, vsTags, sStringRet, iTimeRet, bWaitRet,
+                           sSoundResource, vsTagsRet);
 }
 
 //----------------------------------------------------------------------------------------
 //
-bool CScriptTextBox::GetDialogFromUi(QString sId, QString sString, bool bIsRegexp, QStringList vsTags,
-                                     QString& sStringRet, qint32& iTimeRet, bool& bWaitRet,
-                                     QString& sSoundResourceRet, QStringList& vsTagsRet)
+bool CScriptTextBox::GetDialogueFromUi(QString sId, QString sString, bool bIsRegexp, QStringList vsTags,
+                                       QString& sStringRet, qint32& iTimeRet, bool& bWaitRet,
+                                       QString& sSoundResourceRet, QStringList& vsTagsRet)
 {
 
   auto pSignalEmitter = SignalEmitter<CTextBoxSignalEmitter>();
@@ -571,7 +571,7 @@ bool CScriptTextBox::GetDialogFromUi(QString sId, QString sString, bool bIsRegex
               &loop, &QEventLoop::quit, Qt::QueuedConnection);
 
   QMetaObject::Connection showRetValLoop =
-      connect(pSignalEmitter, &::CTextBoxSignalEmitter::getDialogReturnValue,
+      connect(pSignalEmitter, &::CTextBoxSignalEmitter::getDialogueReturnValue,
           this, [this, sId, &sStringRet, &iTimeRet, &bWaitRet, &sSoundResourceRet, &vsTagsRet]
           (QString sRequestIdRet, QString sString, qint64 iTime, bool bWait, QString sResource, QStringList vsTags)
           {
@@ -592,7 +592,7 @@ bool CScriptTextBox::GetDialogFromUi(QString sId, QString sString, bool bIsRegex
 
   bool bOk = true;
   QTimer::singleShot(0, this, [&pSignalEmitter, sId, sString, bIsRegexp, vsTags]() {
-    emit pSignalEmitter->getDialog(sId, sString, bIsRegexp, vsTags);
+    emit pSignalEmitter->getDialogue(sId, sString, bIsRegexp, vsTags);
   });
 
   loop.exec();

@@ -7,22 +7,22 @@
 #include <QPointer>
 #include <memory>
 
-class CDialogEditorSortFilterProxyModel;
-class CDialogEditorTreeModel;
-class CDialogPropertyEditor;
-class CDialogTagsEditorOverlay;
-struct CDialogNode;
+class CDialogueEditorSortFilterProxyModel;
+class CDialogueEditorTreeModel;
+class CDialoguePropertyEditor;
+class CDialogueTagsEditorOverlay;
+struct CDialogueNode;
 namespace Ui {
-  class CEditorDialogWidget;
+  class CEditorDialogueWidget;
 }
 
-class CEditorDialogWidget : public CEditorWidgetBase
+class CEditorDialogueWidget : public CEditorWidgetBase
 {
   Q_OBJECT
 
 public:
-  explicit CEditorDialogWidget(QWidget *parent = nullptr);
-  ~CEditorDialogWidget();
+  explicit CEditorDialogueWidget(QWidget *parent = nullptr);
+  ~CEditorDialogueWidget();
 
   void EditedProject() override {}
   void Initialize() override;
@@ -40,27 +40,27 @@ protected:
   void dropEvent(QDropEvent* pEvent) override;
 
 protected slots:
-  void SlotAddDialogClicked();
-  void SlotAddDialogFragmentClicked();
-  void SlotAddDialogcategoryClicked();
-  void SlotRemoveDialogClicked();
-  void SlotEditDialogClicked();
-  void SlotDialogChanged(QStringList vsPath, const std::shared_ptr<CDialogNode>& spNode);
-  void SlotEditDialogTagsClicked();
+  void SlotAddDialogueClicked();
+  void SlotAddDialogueFragmentClicked();
+  void SlotAddDialogueCategoryClicked();
+  void SlotRemoveDialogueClicked();
+  void SlotEditDialogueClicked();
+  void SlotDialogueChanged(QStringList vsPath, const std::shared_ptr<CDialogueNode>& spNode);
+  void SlotEditDialogueTagsClicked();
   void SlotExpandAllNodes();
   void SlotFilterChanged(const QString& sText);
   void SlotCopy();
   void SlotPaste();
 
 private:
-  void ShowContextMenu(CDialogEditorTreeModel* pModel, const QModelIndex& idx,
+  void ShowContextMenu(CDialogueEditorTreeModel* pModel, const QModelIndex& idx,
                        const QPoint& globalPos);
 
-  std::unique_ptr<Ui::CEditorDialogWidget>                    m_spUi;
-  std::unique_ptr<CDialogPropertyEditor>                      m_spPropertiesOverlay;
-  std::unique_ptr<CDialogTagsEditorOverlay>                   m_spTagOverlay;
+  std::unique_ptr<Ui::CEditorDialogueWidget>                    m_spUi;
+  std::unique_ptr<CDialoguePropertyEditor>                      m_spPropertiesOverlay;
+  std::unique_ptr<CDialogueTagsEditorOverlay>                   m_spTagOverlay;
   tspProject                                                  m_spCurrentProject;
-  QPointer<CDialogEditorSortFilterProxyModel>                 m_pProxy;
+  QPointer<CDialogueEditorSortFilterProxyModel>                 m_pProxy;
   QPointer<QAction>                                           m_pCopyAction;
   QPointer<QAction>                                           m_pPasteAction;
 };

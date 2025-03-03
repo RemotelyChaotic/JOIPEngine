@@ -1,5 +1,5 @@
-#ifndef CPROJECTDIALOGMANAGER_H
-#define CPROJECTDIALOGMANAGER_H
+#ifndef CPROJECTDIALOGueMANAGER_H
+#define CPROJECTDIALOGueMANAGER_H
 
 #include "Systems/DialogTree.h"
 #include "Systems/Project.h"
@@ -11,43 +11,43 @@
 #include <tuple>
 #include <vector>
 
-class CProjectDialogManager : public QObject
+class CProjectDialogueManager : public QObject
 {
   Q_OBJECT
 
 public:
-  CProjectDialogManager();
-  ~CProjectDialogManager();
+  CProjectDialogueManager();
+  ~CProjectDialogueManager();
 
   void LoadProject(const tspProject& spProject);
   void UnloadProject();
 
-  std::shared_ptr<CDialogNodeDialog> FindDialog(const QString& sId);
-  std::vector<std::shared_ptr<CDialogNodeDialog>> FindDialog(const QRegularExpression& rx);
-  std::vector<std::shared_ptr<CDialogNodeDialog>> FindDialogByTag(const QStringList& vsTags);
+  std::shared_ptr<CDialogueNodeDialogue> FindDialog(const QString& sId);
+  std::vector<std::shared_ptr<CDialogueNodeDialogue>> FindDialogue(const QRegularExpression& rx);
+  std::vector<std::shared_ptr<CDialogueNodeDialogue>> FindDialogueByTag(const QStringList& vsTags);
 
 private:
-  std::shared_ptr<CDialogNode>                                        m_spDataRootNode;
-  std::vector<std::pair<QString, std::shared_ptr<CDialogNodeDialog>>> m_vspDialogsOnlyFlat;
+  std::shared_ptr<CDialogueNode>                                        m_spDataRootNode;
+  std::vector<std::pair<QString, std::shared_ptr<CDialogueNodeDialogue>>> m_vspDialoguesOnlyFlat;
 };
 
 //----------------------------------------------------------------------------------------
 //
-class CProjectDialogManagerWrapper : public QObject
+class CProjectDialogueManagerWrapper : public QObject
 {
   Q_OBJECT
 
 public:
-  CProjectDialogManagerWrapper(QPointer<QJSEngine> pEngine, std::weak_ptr<CProjectDialogManager> wpInstance);
-  ~CProjectDialogManagerWrapper();
+  CProjectDialogueManagerWrapper(QPointer<QJSEngine> pEngine, std::weak_ptr<CProjectDialogueManager> wpInstance);
+  ~CProjectDialogueManagerWrapper();
 
-  Q_INVOKABLE QJSValue dialog(const QString& sId);
-  Q_INVOKABLE QJSValue dialogFromRx(const QString& sId);
-  Q_INVOKABLE QJSValue dialogFromTags(const QStringList& vsId);
+  Q_INVOKABLE QJSValue dialogue(const QString& sId);
+  Q_INVOKABLE QJSValue dialogueFromRx(const QString& sId);
+  Q_INVOKABLE QJSValue dialogueFromTags(const QStringList& vsId);
 
 private:
-  std::weak_ptr<CProjectDialogManager> m_wpInstance;
+  std::weak_ptr<CProjectDialogueManager> m_wpInstance;
   QPointer<QJSEngine> m_pEngine;
 };
 
-#endif // CPROJECTDIALOGMANAGER_H
+#endif // CPROJECTDIALOGueMANAGER_H

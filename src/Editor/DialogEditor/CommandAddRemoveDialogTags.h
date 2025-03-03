@@ -10,16 +10,16 @@
 #include <memory>
 
 class CDatabaseManager;
-class CDialogEditorTreeModel;
+class CDialogueEditorTreeModel;
 
-class CCommandAddDialogTag : public QUndoCommand
+class CCommandAddDialogueTag : public QUndoCommand
 {
 public:
-  CCommandAddDialogTag(const QString& sProject, const QStringList& vsPath,
-                       std::shared_ptr<CDialogNode> spNode,
+  CCommandAddDialogueTag(const QString& sProject, const QStringList& vsPath,
+                       std::shared_ptr<CDialogueNode> spNode,
                        const tspTag& spTag,
-                       QPointer<CDialogEditorTreeModel> pModel);
-  ~CCommandAddDialogTag();
+                       QPointer<CDialogueEditorTreeModel> pModel);
+  ~CCommandAddDialogueTag();
 
   void undo() override;
   void redo() override;
@@ -30,21 +30,21 @@ public:
 protected:
   QString                         m_sCurrentProject;
   std::weak_ptr<CDatabaseManager> m_wpDbManager;
-  QPointer<CDialogEditorTreeModel>m_pModel;
+  QPointer<CDialogueEditorTreeModel>m_pModel;
   tspTag                          m_spTag;
   QStringList                     m_vsPath;
 };
 
 //----------------------------------------------------------------------------------------
 //
-class CCommandRemoveDialogTag : public QUndoCommand
+class CCommandRemoveDialogueTag : public QUndoCommand
 {
 public:
-  CCommandRemoveDialogTag(const QString& sProject, const QStringList& vsPath,
-                          std::shared_ptr<CDialogNode> spNode,
+  CCommandRemoveDialogueTag(const QString& sProject, const QStringList& vsPath,
+                          std::shared_ptr<CDialogueNode> spNode,
                           const tspTag& spTag,
-                          QPointer<CDialogEditorTreeModel> pModel);
-  ~CCommandRemoveDialogTag();
+                          QPointer<CDialogueEditorTreeModel> pModel);
+  ~CCommandRemoveDialogueTag();
 
   void undo() override;
   void redo() override;
@@ -55,7 +55,7 @@ public:
 protected:
   QString                         m_sCurrentProject;
   std::weak_ptr<CDatabaseManager> m_wpDbManager;
-  QPointer<CDialogEditorTreeModel>m_pModel;
+  QPointer<CDialogueEditorTreeModel>m_pModel;
   tspTag                          m_spTag;
   QStringList                     m_vsPath;
 };

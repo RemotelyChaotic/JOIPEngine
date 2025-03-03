@@ -65,9 +65,9 @@ QPointer<CEditorActionBar> CEditorWidgetBase::ActionBar() const
 
 //----------------------------------------------------------------------------------------
 //
-QPointer<CDialogEditorTreeModel> CEditorWidgetBase::DialogModel() const
+QPointer<CDialogueEditorTreeModel> CEditorWidgetBase::DialogueModel() const
 {
-  return m_pEditorModel->DialogModel();
+  return m_pEditorModel->DialogueModel();
 }
 
 //----------------------------------------------------------------------------------------

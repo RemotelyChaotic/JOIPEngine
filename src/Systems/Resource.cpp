@@ -268,7 +268,7 @@ QStringList SResourceFormats::ArchiveFormats()
 QStringList SResourceFormats::DatabaseFormats()
 {
   static QStringList vsFormats = QStringList() << "*.json" << "*.xml" <<
-                                 ("*." + joip_resource::c_sDialogFileType);
+                                 ("*." + joip_resource::c_sDialogueFileType);
   return vsFormats;
 }
 

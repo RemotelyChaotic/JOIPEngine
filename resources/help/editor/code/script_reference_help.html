@@ -642,10 +642,10 @@
         local input = textBox:showInput("myInputVar"); // acts as if localStorage:store("myInputVar", input) was called after<br>
         <br></li>
 
-        <li><b>getDialog ( string | regex | string[] | Tag[] ): Dialog:</b><br>
-        Get the data of a Dialog and return it as an object.<br>
-        The input can either be the id of a Dialog entry, a regular expression for the Dialog id,
-        a list of strings that denote Dialog Tags, or a list of Dialog Tags gotten from a Project or Resource.
+        <li><b>getDialogue ( string | regex | string[] | Tag[] ): Dialogue:</b><br>
+        Get the data of a Dialogue and return it as an object.<br>
+        The input can either be the id of a Dialogue entry, a regular expression for the Dialogue id,
+        a list of strings that denote Dialogue Tags, or a list of Dialogue Tags gotten from a Project or Resource.
         The return value is an object with the following structure:<br>
         "string": &lt;string&gt;,<br>
         "waitTimeMs": &lt;real ms&gt;,<br>
@@ -653,34 +653,34 @@
         "soundResource": &lt;string associated sound Resource&gt;,<br>
         "tags": &lt;string[] all tags&gt;<br>
         <i>Example Usage (JS):</i><br>
-        var dialog = textBox.getDialog("dialog_a");<br>
-        var dialog = textBox.getDialog(/.*_a/);<br>
-        var dialog = textBox.getDialog(["male", "red"]);<br>
-        var dialog = textBox.getDialog([tagA, tagB]);<br>
+        var dialogue = textBox.getDialogue("dialogue_a");<br>
+        var dialogue = textBox.getDialogue(/.*_a/);<br>
+        var dialogue = textBox.getDialogue(["male", "red"]);<br>
+        var dialogue = textBox.getDialogue([tagA, tagB]);<br>
         <i>Example Usage (Lua):</i><br>
-        local dialog = textBox:showDialog('dialog_a');<br>
-        local dialog = textBox:showDialog(['male', 'red']);<br>
-        local dialog = textBox:showDialog([tagA, tagB]);<br>
+        local dialogue = textBox:getDialogue('dialogue_a');<br>
+        local dialogue = textBox:getDialogue(['male', 'red']);<br>
+        local dialogue = textBox:getDialogue([tagA, tagB]);<br>
         <br></li>
 
-        <li><b>showDialog ( string | regex | Dialog | string[] | Tag[] ):</b><br>
-        Show the Dialog querried.<br>
-        The input can either be the id of a Dialog entry, a regular expression for the Dialog id,
-        a Dialog object gotten from <i>getDialog</i>,
-        a list of strings that denote Dialog Tags, or a list of Dialog Tags gotten from a Project or Resource.
-        The found dialog will be shown.<br>
+        <li><b>showDialogue ( string | regex | Dialogue | string[] | Tag[] ):</b><br>
+        Show the Dialogue querried.<br>
+        The input can either be the id of a Dialogue entry, a regular expression for the Dialogue id,
+        a Dialogue object gotten from <i>getDialogue</i>,
+        a list of strings that denote Dialogue Tags, or a list of Dialogue Tags gotten from a Project or Resource.
+        The found dialogue will be shown.<br>
         This is equivalent of calling (JS):<br>
-        var dialog = textBox.getDialog(&lt;in&gt;);<br>
-        textBox.showText(dialog.string, dialog.waitTimeMs, dialog.skipable, dialog.soundResource);<br>
+        var dialogue = textBox.getDialogue(&lt;in&gt;);<br>
+        textBox.showText(dialogue.string, dialogue.waitTimeMs, dialogue.skipable, dialogue.soundResource);<br>
         <i>Example Usage (JS):</i><br>
-        textBox.showDialog("dialog_a");<br>
-        textBox.showDialog(/.*_a/);<br>
-        textBox.showDialog(["male", "red"]);<br>
-        textBox.showDialog([tagA, tagB]);<br>
+        textBox.showDialogue("dialogue_a");<br>
+        textBox.showDialogue(/.*_a/);<br>
+        textBox.showDialogue(["male", "red"]);<br>
+        textBox.showDialogue([tagA, tagB]);<br>
         <i>Example Usage (Lua):</i><br>
-        textBox:showDialog('dialog_a');<br>
-        textBox:showDialog(['male', 'red']);<br>
-        textBox:showDialog([tagA, tagB]);<br>
+        textBox:showDialogue('dialogue_a');<br>
+        textBox:showDialogue(['male', 'red']);<br>
+        textBox:showDialogue([tagA, tagB]);<br>
         <br></li>
 
         <li><b>showText ( string [, double [, bool [, string | Resource] ] ] ):</b><br>
@@ -1563,7 +1563,7 @@
         This property lets you read the description of the SaveData if there is any.<br></li>
 
         <li><b>type: string</b><br>
-        This property lets you read the SaveData type. The possible types are:<br>
+        This property lets you read the SaveData type. Only Bool and Int are supported by Achievements. The possible types are:<br>
         <ul>
           <li><b>SaveDataType.Bool</b>: Contains a boolean value.</li>
           <li><b>SaveDataType.Int</b>: Contains an integer 32bit value.</li>
@@ -1576,7 +1576,6 @@
           <li><b>SaveDataType.Object</b>: Contains a complex JSON object.</li>
           <li><b>SaveDataType.Null</b>: Contains a null object.</li>
         </ul>
-        Only Bool and Int are supported by Achievements.
         </li>
 
         <li><b>resource: string</b><br>

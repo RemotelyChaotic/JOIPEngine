@@ -9,7 +9,7 @@
 #include <memory>
 
 class CEditorActionBar;
-class CDialogEditorTreeModel;
+class CDialogueEditorTreeModel;
 class CFlowScene;
 class CEditorModel;
 class CKinkTreeModel;
@@ -52,7 +52,7 @@ protected:
   virtual void OnActionBarChanged() {}
 
   QPointer<CEditorActionBar> ActionBar() const;
-  QPointer<CDialogEditorTreeModel> DialogModel() const;
+  QPointer<CDialogueEditorTreeModel> DialogueModel() const;
   QPointer<CEditorModel> EditorModel() const;
   QPointer<CFlowScene> FlowSceneModel() const;
   QPointer<CKinkTreeModel> KinkModel() const;

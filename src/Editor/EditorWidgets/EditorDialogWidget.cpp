@@ -32,90 +32,90 @@
 #include <QUuid>
 
 namespace {
-  const QString c_sDialogTreeHelpId =  "Editor/Dialog/DialogTree";
+  const QString c_sDialogueTreeHelpId =  "Editor/Dialogue/DialogueTree";
 }
 
-DECLARE_EDITORWIDGET(CEditorDialogWidget, EEditorWidget::eDialogEditor)
+DECLARE_EDITORWIDGET(CEditorDialogueWidget, EEditorWidget::eDialogueEditor)
 
 //----------------------------------------------------------------------------------------
 //
-CEditorDialogWidget::CEditorDialogWidget(QWidget *parent) :
+CEditorDialogueWidget::CEditorDialogueWidget(QWidget *parent) :
   CEditorWidgetBase(parent),
-  m_spUi(std::make_unique<Ui::CEditorDialogWidget>()),
-  m_spPropertiesOverlay(std::make_unique<CDialogPropertyEditor>(this)),
-  m_spTagOverlay(std::make_unique<CDialogTagsEditorOverlay>(this)),
+  m_spUi(std::make_unique<Ui::CEditorDialogueWidget>()),
+  m_spPropertiesOverlay(std::make_unique<CDialoguePropertyEditor>(this)),
+  m_spTagOverlay(std::make_unique<CDialogueTagsEditorOverlay>(this)),
   m_spCurrentProject(nullptr),
-  m_pProxy(new CDialogEditorSortFilterProxyModel(this))
+  m_pProxy(new CDialogueEditorSortFilterProxyModel(this))
 {
   m_spUi->setupUi(this);
-  m_spUi->pTreeView->setItemDelegate(new CDialogEditorDelegate(m_spUi->pTreeView));
+  m_spUi->pTreeView->setItemDelegate(new CDialogueEditorDelegate(m_spUi->pTreeView));
 
   m_pCopyAction = new QAction("Copy", m_spUi->pTreeView);
   m_pCopyAction->setShortcut(QKeySequence(QKeySequence::StandardKey::Copy));
   m_pCopyAction->setShortcutContext(Qt::ShortcutContext::WidgetShortcut);
   m_spUi->pTreeView->addAction(m_pCopyAction);
-  connect(m_pCopyAction, &QAction::triggered, this, &CEditorDialogWidget::SlotCopy);
+  connect(m_pCopyAction, &QAction::triggered, this, &CEditorDialogueWidget::SlotCopy);
 
   m_pPasteAction = new QAction("Paste", m_spUi->pTreeView);
   m_pPasteAction->setShortcut(QKeySequence(QKeySequence::StandardKey::Paste));
   m_pPasteAction->setShortcutContext(Qt::ShortcutContext::WidgetShortcut);
   m_spUi->pTreeView->addAction(m_pPasteAction);
-  connect(m_pPasteAction, &QAction::triggered, this, &CEditorDialogWidget::SlotPaste);
+  connect(m_pPasteAction, &QAction::triggered, this, &CEditorDialogueWidget::SlotPaste);
 
-  connect(m_spPropertiesOverlay.get(), &CDialogPropertyEditor::SignalDialogChanged,
-          this, &CEditorDialogWidget::SlotDialogChanged);
+  connect(m_spPropertiesOverlay.get(), &CDialoguePropertyEditor::SignalDialogChanged,
+          this, &CEditorDialogueWidget::SlotDialogueChanged);
 
   connect(m_spUi->pFilter, &CSearchWidget::SignalFilterChanged,
-          this, &CEditorDialogWidget::SlotFilterChanged);
+          this, &CEditorDialogueWidget::SlotFilterChanged);
 }
 
-CEditorDialogWidget::~CEditorDialogWidget()
+CEditorDialogueWidget::~CEditorDialogueWidget()
 {
   if (nullptr != m_spPropertiesOverlay) m_spPropertiesOverlay.reset();
   if (nullptr != m_spTagOverlay) m_spTagOverlay.reset();
 
   disconnect(m_spUi->pTreeView->model(), &QAbstractItemModel::modelReset,
-             this, &CEditorDialogWidget::SlotExpandAllNodes);
+             this, &CEditorDialogueWidget::SlotExpandAllNodes);
 
-  dynamic_cast<CDialogEditorSortFilterProxyModel*>(m_spUi->pTreeView->model())
+  dynamic_cast<CDialogueEditorSortFilterProxyModel*>(m_spUi->pTreeView->model())
       ->setSourceModel(nullptr);
 }
 
 //----------------------------------------------------------------------------------------
 //
-void CEditorDialogWidget::Initialize()
+void CEditorDialogueWidget::Initialize()
 {
   m_bInitialized = false;
 
   m_spUi->pTreeView->installEventFilter(this);
   m_spUi->pTreeView->viewport()->installEventFilter(this);
 
-  m_pProxy->sort(dialog_item::c_iColumnId, Qt::AscendingOrder);
+  m_pProxy->sort(dialogue_item::c_iColumnId, Qt::AscendingOrder);
   m_pProxy->setFilterRegExp(QRegExp(".*", Qt::CaseInsensitive, QRegExp::RegExp));
 
-  m_pProxy->setSourceModel(DialogModel());
+  m_pProxy->setSourceModel(DialogueModel());
 
-  connect(DialogModel(), &CDialogEditorTreeModel::SignalProjectEdited,
-          this, &CEditorDialogWidget::SignalProjectEdited);
+  connect(DialogueModel(), &CDialogueEditorTreeModel::SignalProjectEdited,
+          this, &CEditorDialogueWidget::SignalProjectEdited);
 
-  auto pDelegate = dynamic_cast<CDialogEditorDelegate*>(m_spUi->pTreeView->itemDelegate());
+  auto pDelegate = dynamic_cast<CDialogueEditorDelegate*>(m_spUi->pTreeView->itemDelegate());
   pDelegate->SetUndoStack(UndoStack());
   m_spUi->pTreeView->setModel(m_pProxy);
 
   QHeaderView* pHeader = m_spUi->pTreeView->header();
-  pHeader->setSectionResizeMode(dialog_item::c_iColumnId, QHeaderView::Interactive);
-  pHeader->setSectionResizeMode(dialog_item::c_iColumnString, QHeaderView::Stretch);
-  pHeader->setSectionResizeMode(dialog_item::c_iColumnWaitMS, QHeaderView::Interactive);
-  pHeader->setSectionResizeMode(dialog_item::c_iColumnSkippable, QHeaderView::Fixed);
-  pHeader->setSectionResizeMode(dialog_item::c_iColumnMedia, QHeaderView::Interactive);
+  pHeader->setSectionResizeMode(dialogue_item::c_iColumnId, QHeaderView::Interactive);
+  pHeader->setSectionResizeMode(dialogue_item::c_iColumnString, QHeaderView::Stretch);
+  pHeader->setSectionResizeMode(dialogue_item::c_iColumnWaitMS, QHeaderView::Interactive);
+  pHeader->setSectionResizeMode(dialogue_item::c_iColumnSkippable, QHeaderView::Fixed);
+  pHeader->setSectionResizeMode(dialogue_item::c_iColumnMedia, QHeaderView::Interactive);
   pHeader->setStretchLastSection(false);
-  pHeader->resizeSection(dialog_item::c_iColumnId, 150);
-  pHeader->resizeSection(dialog_item::c_iColumnWaitMS, 50);
-  pHeader->resizeSection(dialog_item::c_iColumnSkippable, 50);
-  pHeader->resizeSection(dialog_item::c_iColumnMedia, 150);
+  pHeader->resizeSection(dialogue_item::c_iColumnId, 150);
+  pHeader->resizeSection(dialogue_item::c_iColumnWaitMS, 50);
+  pHeader->resizeSection(dialogue_item::c_iColumnSkippable, 50);
+  pHeader->resizeSection(dialogue_item::c_iColumnMedia, 150);
 
   connect(m_spUi->pTreeView->model(), &QAbstractItemModel::modelReset,
-          this, &CEditorDialogWidget::SlotExpandAllNodes);
+          this, &CEditorDialogueWidget::SlotExpandAllNodes);
 
   setAcceptDrops(true);
 
@@ -124,27 +124,27 @@ void CEditorDialogWidget::Initialize()
   auto wpHelpFactory = CApplication::Instance()->System<CHelpFactory>().lock();
   if (nullptr != wpHelpFactory)
   {
-    m_spUi->pTreeView->setProperty(helpOverlay::c_sHelpPagePropertyName, c_sDialogTreeHelpId);
-    wpHelpFactory->RegisterHelp(c_sDialogTreeHelpId, ":/resources/help/editor/dialog/dialogtree_button_help.html");
+    m_spUi->pTreeView->setProperty(helpOverlay::c_sHelpPagePropertyName, c_sDialogueTreeHelpId);
+    wpHelpFactory->RegisterHelp(c_sDialogueTreeHelpId, ":/resources/help/editor/dialog/dialogtree_button_help.html");
   }
 
   m_spPropertiesOverlay->Initialize(ResourceTreeModel());
 
   m_spTagOverlay->SetUndoStack(UndoStack());
-  m_spTagOverlay->SetModel(DialogModel());
+  m_spTagOverlay->SetModel(DialogueModel());
 
   m_bInitialized = true;
 }
 
 //----------------------------------------------------------------------------------------
 //
-void CEditorDialogWidget::LoadProject(tspProject spCurrentProject)
+void CEditorDialogueWidget::LoadProject(tspProject spCurrentProject)
 {
   m_spCurrentProject = spCurrentProject;
 
   bool bReadOnly = EditorModel()->IsReadOnly();
 
-  auto pDelegate = dynamic_cast<CDialogEditorDelegate*>(m_spUi->pTreeView->itemDelegate());
+  auto pDelegate = dynamic_cast<CDialogueEditorDelegate*>(m_spUi->pTreeView->itemDelegate());
   pDelegate->SetCurrentProject(m_spCurrentProject);
   pDelegate->SetReadOnly(bReadOnly);
 
@@ -154,9 +154,9 @@ void CEditorDialogWidget::LoadProject(tspProject spCurrentProject)
 
 //----------------------------------------------------------------------------------------
 //
-void CEditorDialogWidget::UnloadProject()
+void CEditorDialogueWidget::UnloadProject()
 {
-  auto pDelegate = dynamic_cast<CDialogEditorDelegate*>(m_spUi->pTreeView->itemDelegate());
+  auto pDelegate = dynamic_cast<CDialogueEditorDelegate*>(m_spUi->pTreeView->itemDelegate());
   pDelegate->SetCurrentProject(nullptr);
 
   m_spPropertiesOverlay->UnloadProject();
@@ -169,76 +169,76 @@ void CEditorDialogWidget::UnloadProject()
 
 //----------------------------------------------------------------------------------------
 //
-void CEditorDialogWidget::SaveProject()
+void CEditorDialogueWidget::SaveProject()
 {
-  auto spRoot = DialogModel()->Root();
+  auto spRoot = DialogueModel()->Root();
   if (nullptr != spRoot)
   {
-    dialog_tree::SaveDialogs(spRoot, m_spCurrentProject);
+    dialogue_tree::SaveDialogues(spRoot, m_spCurrentProject);
   }
 }
 
 //----------------------------------------------------------------------------------------
 //
-void CEditorDialogWidget::OnActionBarAboutToChange()
+void CEditorDialogueWidget::OnActionBarAboutToChange()
 {
   if (nullptr != ActionBar())
   {
-    disconnect(ActionBar()->m_spUi->AddDialog, &QPushButton::clicked,
-            this, &CEditorDialogWidget::SlotAddDialogClicked);
-    disconnect(ActionBar()->m_spUi->AddDialogFrament, &QPushButton::clicked,
-            this, &CEditorDialogWidget::SlotAddDialogFragmentClicked);
-    disconnect(ActionBar()->m_spUi->AddDialogCategoryButton, &QPushButton::clicked,
-            this, &CEditorDialogWidget::SlotAddDialogcategoryClicked);
-    disconnect(ActionBar()->m_spUi->RemoveDialog, &QPushButton::clicked,
-               this, &CEditorDialogWidget::SlotRemoveDialogClicked);
-    disconnect(ActionBar()->m_spUi->EditDialogContent, &QPushButton::clicked,
-            this, &CEditorDialogWidget::SlotEditDialogClicked);
-    disconnect(ActionBar()->m_spUi->EditDialogTags, &QPushButton::clicked,
-            this, &CEditorDialogWidget::SlotEditDialogTagsClicked);
+    disconnect(ActionBar()->m_spUi->AddDialogue, &QPushButton::clicked,
+            this, &CEditorDialogueWidget::SlotAddDialogueClicked);
+    disconnect(ActionBar()->m_spUi->AddDialogueFrament, &QPushButton::clicked,
+            this, &CEditorDialogueWidget::SlotAddDialogueFragmentClicked);
+    disconnect(ActionBar()->m_spUi->AddDialogueCategoryButton, &QPushButton::clicked,
+            this, &CEditorDialogueWidget::SlotAddDialogueCategoryClicked);
+    disconnect(ActionBar()->m_spUi->RemoveDialogue, &QPushButton::clicked,
+               this, &CEditorDialogueWidget::SlotRemoveDialogueClicked);
+    disconnect(ActionBar()->m_spUi->EditDialogueContent, &QPushButton::clicked,
+            this, &CEditorDialogueWidget::SlotEditDialogueClicked);
+    disconnect(ActionBar()->m_spUi->EditDialogueTags, &QPushButton::clicked,
+            this, &CEditorDialogueWidget::SlotEditDialogueTagsClicked);
 
-    ActionBar()->m_spUi->AddDialog->setEnabled(true);
-    ActionBar()->m_spUi->RemoveDialog->setEnabled(true);
-    ActionBar()->m_spUi->AddDialogCategoryButton->setEnabled(true);
-    ActionBar()->m_spUi->EditDialogContent->setEnabled(true);
-    ActionBar()->m_spUi->EditDialogTags->setEnabled(true);
+    ActionBar()->m_spUi->AddDialogue->setEnabled(true);
+    ActionBar()->m_spUi->RemoveDialogue->setEnabled(true);
+    ActionBar()->m_spUi->AddDialogueCategoryButton->setEnabled(true);
+    ActionBar()->m_spUi->EditDialogueContent->setEnabled(true);
+    ActionBar()->m_spUi->EditDialogueTags->setEnabled(true);
   }
 }
 
 //----------------------------------------------------------------------------------------
 //
-void CEditorDialogWidget::OnActionBarChanged()
+void CEditorDialogueWidget::OnActionBarChanged()
 {
   if (nullptr != ActionBar())
   {
-    ActionBar()->ShowDialogActionBar();
-    connect(ActionBar()->m_spUi->AddDialog, &QPushButton::clicked,
-            this, &CEditorDialogWidget::SlotAddDialogClicked);
-    connect(ActionBar()->m_spUi->AddDialogFrament, &QPushButton::clicked,
-            this, &CEditorDialogWidget::SlotAddDialogFragmentClicked);
-    connect(ActionBar()->m_spUi->AddDialogCategoryButton, &QPushButton::clicked,
-            this, &CEditorDialogWidget::SlotAddDialogcategoryClicked);
-    connect(ActionBar()->m_spUi->RemoveDialog, &QPushButton::clicked,
-            this, &CEditorDialogWidget::SlotRemoveDialogClicked);
-    connect(ActionBar()->m_spUi->EditDialogContent, &QPushButton::clicked,
-            this, &CEditorDialogWidget::SlotEditDialogClicked);
-    connect(ActionBar()->m_spUi->EditDialogTags, &QPushButton::clicked,
-            this, &CEditorDialogWidget::SlotEditDialogTagsClicked);
+    ActionBar()->ShowDialogueActionBar();
+    connect(ActionBar()->m_spUi->AddDialogue, &QPushButton::clicked,
+            this, &CEditorDialogueWidget::SlotAddDialogueClicked);
+    connect(ActionBar()->m_spUi->AddDialogueFrament, &QPushButton::clicked,
+            this, &CEditorDialogueWidget::SlotAddDialogueFragmentClicked);
+    connect(ActionBar()->m_spUi->AddDialogueCategoryButton, &QPushButton::clicked,
+            this, &CEditorDialogueWidget::SlotAddDialogueCategoryClicked);
+    connect(ActionBar()->m_spUi->RemoveDialogue, &QPushButton::clicked,
+            this, &CEditorDialogueWidget::SlotRemoveDialogueClicked);
+    connect(ActionBar()->m_spUi->EditDialogueContent, &QPushButton::clicked,
+            this, &CEditorDialogueWidget::SlotEditDialogueClicked);
+    connect(ActionBar()->m_spUi->EditDialogueTags, &QPushButton::clicked,
+            this, &CEditorDialogueWidget::SlotEditDialogueTagsClicked);
 
     if (EditorModel()->IsReadOnly())
     {
-      ActionBar()->m_spUi->AddDialog->setEnabled(false);
-      ActionBar()->m_spUi->RemoveDialog->setEnabled(false);
-      ActionBar()->m_spUi->AddDialogCategoryButton->setEnabled(false);
-      ActionBar()->m_spUi->EditDialogContent->setEnabled(false);
-      ActionBar()->m_spUi->EditDialogTags->setEnabled(false);
+      ActionBar()->m_spUi->AddDialogue->setEnabled(false);
+      ActionBar()->m_spUi->RemoveDialogue->setEnabled(false);
+      ActionBar()->m_spUi->AddDialogueCategoryButton->setEnabled(false);
+      ActionBar()->m_spUi->EditDialogueContent->setEnabled(false);
+      ActionBar()->m_spUi->EditDialogueTags->setEnabled(false);
     }
   }
 }
 
 //----------------------------------------------------------------------------------------
 //
-bool CEditorDialogWidget::eventFilter(QObject* pObj, QEvent* pEvt)
+bool CEditorDialogueWidget::eventFilter(QObject* pObj, QEvent* pEvt)
 {
   if (nullptr == pObj || nullptr == pEvt) { return QWidget::eventFilter(pObj, pEvt); }
   if (m_spUi->pTreeView == pObj ||
@@ -247,7 +247,7 @@ bool CEditorDialogWidget::eventFilter(QObject* pObj, QEvent* pEvt)
     if (QEvent::ContextMenu == pEvt->type())
     {
       QContextMenuEvent* pContextEvt = static_cast<QContextMenuEvent*>(pEvt);
-      CDialogEditorTreeModel* pModel = nullptr;
+      CDialogueEditorTreeModel* pModel = nullptr;
       QModelIndex index;
       if (m_spUi->pTreeView == pObj)
       {
@@ -255,7 +255,7 @@ bool CEditorDialogWidget::eventFilter(QObject* pObj, QEvent* pEvt)
             m_spUi->pTreeView->viewport()->mapFromGlobal(pContextEvt->globalPos()));
         if (auto pProxy = dynamic_cast<QSortFilterProxyModel*>(m_spUi->pTreeView->model()))
         {
-          pModel = dynamic_cast<CDialogEditorTreeModel*>(pProxy->sourceModel());
+          pModel = dynamic_cast<CDialogueEditorTreeModel*>(pProxy->sourceModel());
           index = pProxy->mapToSource(index);
         }
       }
@@ -267,7 +267,7 @@ bool CEditorDialogWidget::eventFilter(QObject* pObj, QEvent* pEvt)
 
 //----------------------------------------------------------------------------------------
 //
-void CEditorDialogWidget::dragEnterEvent(QDragEnterEvent* pEvent)
+void CEditorDialogueWidget::dragEnterEvent(QDragEnterEvent* pEvent)
 {
   if (EditorModel()->IsReadOnly()) { return; }
 
@@ -282,7 +282,7 @@ void CEditorDialogWidget::dragEnterEvent(QDragEnterEvent* pEvent)
 
 //----------------------------------------------------------------------------------------
 //
-void CEditorDialogWidget::dropEvent(QDropEvent* pEvent)
+void CEditorDialogueWidget::dropEvent(QDropEvent* pEvent)
 {
   if (EditorModel()->IsReadOnly()) { return; }
 
@@ -298,7 +298,7 @@ void CEditorDialogWidget::dropEvent(QDropEvent* pEvent)
     {
       // Try to read first to see if there are errros.
       bool bOk = true;
-      if (nullptr != dialog_tree::LoadDialogsFromSource({sPath}, m_spCurrentProject, &bOk) && bOk)
+      if (nullptr != dialogue_tree::LoadDialoguesFromSource({sPath}, m_spCurrentProject, &bOk) && bOk)
       {
         vsFiles.insert({sPath, QByteArray()});
       }
@@ -316,7 +316,7 @@ void CEditorDialogWidget::dropEvent(QDropEvent* pEvent)
 //
 namespace
 {
-  QString GetResourceSource(CEditorDialogWidget* pThis,
+  QString GetResourceSource(CEditorDialogueWidget* pThis,
                             QPointer<CEditorActionBar> pActionBar,
                             QPointer<CEditorModel> pEditorModel,
                             QPointer<QUndoStack> pUndo,
@@ -353,7 +353,7 @@ namespace
       {
         QReadLocker l(&spResource->m_rwLock);
         if (EResourceType::eDatabase != spResource->m_type._to_integral()) { continue; }
-        if (QFileInfo(PhysicalResourcePath(spResource)).suffix() != joip_resource::c_sDialogFileType)
+        if (QFileInfo(PhysicalResourcePath(spResource)).suffix() != joip_resource::c_sDialogueFileType)
         { continue; }
 
         auto item = new QListWidgetItem(pListView);
@@ -378,8 +378,8 @@ namespace
               }
               else
               {
-                CCommandAddNewDialogFile* pCmd =
-                    new CCommandAddNewDialogFile(spCurrentProject, pEditorModel, pThis);
+                CCommandAddNewDialogueFile* pCmd =
+                    new CCommandAddNewDialogueFile(spCurrentProject, pEditorModel, pThis);
                 pUndo->push(pCmd);
                 sSourceResource = pCmd->AddedResource();
               }
@@ -402,8 +402,8 @@ namespace
     txtBox->setFocus();
 
     QPoint p =
-        pActionBar->m_spUi->AddDialog->parentWidget()->mapToGlobal(
-            pActionBar->m_spUi->AddDialog->pos());
+        pActionBar->m_spUi->AddDialogue->parentWidget()->mapToGlobal(
+            pActionBar->m_spUi->AddDialogue->pos());
     modelMenu.exec(p);
 
     return sSourceResource;
@@ -412,32 +412,32 @@ namespace
 
 //----------------------------------------------------------------------------------------
 //
-void CEditorDialogWidget::SlotAddDialogClicked()
+void CEditorDialogueWidget::SlotAddDialogueClicked()
 {
   WIDGET_INITIALIZED_GUARD
   if (nullptr == m_spCurrentProject) { return; }
   if (nullptr == ActionBar() || nullptr == EditorModel()) { return; }
 
-  QPointer<CEditorDialogWidget> pThis(this);
+  QPointer<CEditorDialogueWidget> pThis(this);
 
   qint32 iInsertPos = -1;
   QModelIndex idxSelected = m_pProxy->mapToSource(m_spUi->pTreeView->currentIndex());
-  QStringList vsPath = DialogModel()->Path(idxSelected);
+  QStringList vsPath = DialogueModel()->Path(idxSelected);
   qint32 iTypeOfSelectedNode =
-    DialogModel()->data(idxSelected, CDialogEditorTreeModel::eTypeRole).toInt();
+    DialogueModel()->data(idxSelected, CDialogueEditorTreeModel::eTypeRole).toInt();
   QString sSourceResource;
 
   switch(iTypeOfSelectedNode)
   {
-    case EDialogTreeNodeType::eDialogFragment:
+    case EDialogueTreeNodeType::eDialogueFragment:
       // not allowed
       return;
-    case EDialogTreeNodeType::eRoot: [[fallthrough]];
-    case EDialogTreeNodeType::eCategory:
+    case EDialogueTreeNodeType::eRoot: [[fallthrough]];
+    case EDialogueTreeNodeType::eCategory:
     {
-      iInsertPos = DialogModel()->rowCount(idxSelected);
+      iInsertPos = DialogueModel()->rowCount(idxSelected);
     } break;
-    case EDialogTreeNodeType::eDialog:
+    case EDialogueTreeNodeType::eDialogue:
     {
       iInsertPos = idxSelected.row()+1;
       vsPath.erase(vsPath.begin()+vsPath.size()-1);
@@ -452,12 +452,12 @@ void CEditorDialogWidget::SlotAddDialogClicked()
 
   if (nullptr != UndoStack())
   {
-    std::shared_ptr<CDialogNodeDialog> spNewNode = std::make_shared<CDialogNodeDialog>();
+    std::shared_ptr<CDialogueNodeDialogue> spNewNode = std::make_shared<CDialogueNodeDialogue>();
     spNewNode->m_sName = QUuid::createUuid().toString();
     spNewNode->m_sFileId = sSourceResource;
     spNewNode->m_bHasCondition = false;
 
-    std::shared_ptr<CDialogData> spNewNodeData = std::make_shared<CDialogData>();
+    std::shared_ptr<CDialogueData> spNewNodeData = std::make_shared<CDialogueData>();
     spNewNodeData->m_wpParent = spNewNode;
     spNewNodeData->m_sName = QUuid::createUuid().toString();
     spNewNodeData->m_sFileId = sSourceResource;
@@ -465,52 +465,52 @@ void CEditorDialogWidget::SlotAddDialogClicked()
     spNewNode->m_vspChildren.push_back(spNewNodeData);
     vsPath << spNewNode->m_sName;
 
-    UndoStack()->push(new CCommandAddDialogNode(m_spCurrentProject, vsPath,
-                                                iInsertPos, spNewNode, DialogModel()));
+    UndoStack()->push(new CCommandAddDialogueNode(m_spCurrentProject, vsPath,
+                                                iInsertPos, spNewNode, DialogueModel()));
   }
 }
 
 //----------------------------------------------------------------------------------------
 //
-void CEditorDialogWidget::SlotAddDialogFragmentClicked()
+void CEditorDialogueWidget::SlotAddDialogueFragmentClicked()
 {
   WIDGET_INITIALIZED_GUARD
   if (nullptr == m_spCurrentProject) { return; }
   if (nullptr == ActionBar() || nullptr == EditorModel()) { return; }
 
-  QPointer<CEditorDialogWidget> pThis(this);
+  QPointer<CEditorDialogueWidget> pThis(this);
 
   qint32 iInsertPos = -1;
   QModelIndex idxSelected = m_pProxy->mapToSource(m_spUi->pTreeView->currentIndex());
-  QStringList vsPath = DialogModel()->Path(idxSelected);
+  QStringList vsPath = DialogueModel()->Path(idxSelected);
   qint32 iTypeOfSelectedNode =
-      DialogModel()->data(idxSelected, CDialogEditorTreeModel::eTypeRole).toInt();
+      DialogueModel()->data(idxSelected, CDialogueEditorTreeModel::eTypeRole).toInt();
   QString sSourceResource;
   bool bNewNode = false;
 
   switch(iTypeOfSelectedNode)
   {
-    case EDialogTreeNodeType::eRoot: [[fallthrough]];
-    case EDialogTreeNodeType::eCategory:
+    case EDialogueTreeNodeType::eRoot: [[fallthrough]];
+    case EDialogueTreeNodeType::eCategory:
     {
       bNewNode = true;
-      iInsertPos = DialogModel()->rowCount(idxSelected);
+      iInsertPos = DialogueModel()->rowCount(idxSelected);
     } break;
-    case EDialogTreeNodeType::eDialogFragment:
+    case EDialogueTreeNodeType::eDialogueFragment:
       bNewNode = false;
       iInsertPos = idxSelected.row()+1;
       vsPath.erase(vsPath.begin()+vsPath.size()-1);
       sSourceResource =
-          DialogModel()->data(idxSelected.parent(), CDialogEditorTreeModel::eResourceRole).toString();
+          DialogueModel()->data(idxSelected.parent(), CDialogueEditorTreeModel::eResourceRole).toString();
       break;
-    case EDialogTreeNodeType::eDialog:
+    case EDialogueTreeNodeType::eDialogue:
     {
-      if (DialogModel()->HasCondition(idxSelected))
+      if (DialogueModel()->HasCondition(idxSelected))
       {
         bNewNode = false;
-        iInsertPos = DialogModel()->rowCount(idxSelected);
+        iInsertPos = DialogueModel()->rowCount(idxSelected);
         sSourceResource =
-            DialogModel()->data(idxSelected, CDialogEditorTreeModel::eResourceRole).toString();
+            DialogueModel()->data(idxSelected, CDialogueEditorTreeModel::eResourceRole).toString();
       }
       else
       {
@@ -532,15 +532,15 @@ void CEditorDialogWidget::SlotAddDialogFragmentClicked()
 
   if (nullptr != UndoStack())
   {
-    std::shared_ptr<CDialogNode> spNewNode;
+    std::shared_ptr<CDialogueNode> spNewNode;
     if (bNewNode)
     {
-      std::shared_ptr<CDialogNodeDialog> spNewNodeI = std::make_shared<CDialogNodeDialog>();
+      std::shared_ptr<CDialogueNodeDialogue> spNewNodeI = std::make_shared<CDialogueNodeDialogue>();
       spNewNodeI->m_sName = QUuid::createUuid().toString();
       spNewNodeI->m_sFileId = sSourceResource;
       spNewNodeI->m_bHasCondition = true;
 
-      std::shared_ptr<CDialogData> spNewNodeData = std::make_shared<CDialogData>();
+      std::shared_ptr<CDialogueData> spNewNodeData = std::make_shared<CDialogueData>();
       spNewNodeData->m_wpParent = spNewNodeI;
       spNewNodeData->m_sName = QUuid::createUuid().toString();
       spNewNodeData->m_sFileId = sSourceResource;
@@ -552,36 +552,36 @@ void CEditorDialogWidget::SlotAddDialogFragmentClicked()
     }
     else
     {
-      std::shared_ptr<CDialogData> spNewNodeData = std::make_shared<CDialogData>();
+      std::shared_ptr<CDialogueData> spNewNodeData = std::make_shared<CDialogueData>();
       spNewNodeData->m_sName = QUuid::createUuid().toString();
       spNewNodeData->m_sFileId = sSourceResource;
       spNewNode = spNewNodeData;
     }
 
-    UndoStack()->push(new CCommandAddDialogNode(m_spCurrentProject, vsPath,
-                                                iInsertPos, spNewNode, DialogModel()));
+    UndoStack()->push(new CCommandAddDialogueNode(m_spCurrentProject, vsPath,
+                                                iInsertPos, spNewNode, DialogueModel()));
   }
 }
 
 //----------------------------------------------------------------------------------------
 //
-void CEditorDialogWidget::SlotAddDialogcategoryClicked()
+void CEditorDialogueWidget::SlotAddDialogueCategoryClicked()
 {
   WIDGET_INITIALIZED_GUARD
   if (nullptr == m_spCurrentProject) { return; }
 
   QModelIndex idxSelected = m_pProxy->mapToSource(m_spUi->pTreeView->currentIndex());
-  QStringList vsPath = DialogModel()->Path(idxSelected);
-  qint32 iInsertPos = DialogModel()->rowCount(idxSelected);
+  QStringList vsPath = DialogueModel()->Path(idxSelected);
+  qint32 iInsertPos = DialogueModel()->rowCount(idxSelected);
 
   qint32 iTypeOfSelectedNode =
-      DialogModel()->data(idxSelected, CDialogEditorTreeModel::eTypeRole).toInt();
+      DialogueModel()->data(idxSelected, CDialogueEditorTreeModel::eTypeRole).toInt();
 
-  if (nullptr != UndoStack() && EDialogTreeNodeType::eDialogFragment != iTypeOfSelectedNode)
+  if (nullptr != UndoStack() && EDialogueTreeNodeType::eDialogueFragment != iTypeOfSelectedNode)
   {
     switch (iTypeOfSelectedNode)
     {
-      case EDialogTreeNodeType::eDialog:
+      case EDialogueTreeNodeType::eDialogue:
       {
         vsPath.erase(vsPath.begin() + vsPath.size()-1);
         iInsertPos += idxSelected.row()+1;
@@ -589,45 +589,45 @@ void CEditorDialogWidget::SlotAddDialogcategoryClicked()
       default: break;
     }
 
-    std::shared_ptr<CDialogNodeCategory> spNewNode = std::make_shared<CDialogNodeCategory>();
+    std::shared_ptr<CDialogueNodeCategory> spNewNode = std::make_shared<CDialogueNodeCategory>();
     spNewNode->m_sName = "New Category";
     vsPath << spNewNode->m_sName;
 
-    UndoStack()->push(new CCommandAddDialogNode(m_spCurrentProject, vsPath,
-                                                iInsertPos, spNewNode, DialogModel()));
+    UndoStack()->push(new CCommandAddDialogueNode(m_spCurrentProject, vsPath,
+                                                iInsertPos, spNewNode, DialogueModel()));
   }
 }
 
 //----------------------------------------------------------------------------------------
 //
-void CEditorDialogWidget::SlotRemoveDialogClicked()
+void CEditorDialogueWidget::SlotRemoveDialogueClicked()
 {
   WIDGET_INITIALIZED_GUARD
       if (nullptr == m_spCurrentProject) { return; }
   QModelIndex idxSelected = m_pProxy->mapToSource(m_spUi->pTreeView->currentIndex());
-  QStringList vsPath = DialogModel()->Path(idxSelected);
+  QStringList vsPath = DialogueModel()->Path(idxSelected);
   if (nullptr != UndoStack())
   {
-    UndoStack()->push(new CCommandRemoveDialogNode(m_spCurrentProject, vsPath,
-                                                   DialogModel()));
+    UndoStack()->push(new CCommandRemoveDialogueNode(m_spCurrentProject, vsPath,
+                                                   DialogueModel()));
   }
 }
 
 //----------------------------------------------------------------------------------------
 //
-void CEditorDialogWidget::SlotEditDialogClicked()
+void CEditorDialogueWidget::SlotEditDialogueClicked()
 {
   WIDGET_INITIALIZED_GUARD
   if (nullptr == m_spCurrentProject) { return; }
 
   QModelIndex idxSelected = m_pProxy->mapToSource(m_spUi->pTreeView->currentIndex());
-  QStringList vsPath = DialogModel()->Path(idxSelected);
-  std::shared_ptr<CDialogNode> spNode = DialogModel()->Node(idxSelected);
-  std::shared_ptr<CDialogNodeDialog> spDNode =
-      std::dynamic_pointer_cast<CDialogNodeDialog>(spNode);
+  QStringList vsPath = DialogueModel()->Path(idxSelected);
+  std::shared_ptr<CDialogueNode> spNode = DialogueModel()->Node(idxSelected);
+  std::shared_ptr<CDialogueNodeDialogue> spDNode =
+      std::dynamic_pointer_cast<CDialogueNodeDialogue>(spNode);
 
-  if (EDialogTreeNodeType::eDialogFragment == spNode->m_type._to_integral() ||
-      (EDialogTreeNodeType::eDialog == spNode->m_type._to_integral() && !spDNode->m_bHasCondition))
+  if (EDialogueTreeNodeType::eDialogueFragment == spNode->m_type._to_integral() ||
+      (EDialogueTreeNodeType::eDialogue == spNode->m_type._to_integral() && !spDNode->m_bHasCondition))
   {
     m_spPropertiesOverlay->SetNode(vsPath, spNode);
     m_spPropertiesOverlay->Toggle();
@@ -636,32 +636,32 @@ void CEditorDialogWidget::SlotEditDialogClicked()
 
 //----------------------------------------------------------------------------------------
 //
-void CEditorDialogWidget::SlotDialogChanged(QStringList vsPath, const std::shared_ptr<CDialogNode>& spNode)
+void CEditorDialogueWidget::SlotDialogueChanged(QStringList vsPath, const std::shared_ptr<CDialogueNode>& spNode)
 {
   WIDGET_INITIALIZED_GUARD
   if (nullptr == m_spCurrentProject) { return; }
 
   if (nullptr != UndoStack())
   {
-    UndoStack()->push(new CCommandChangeParameters(m_spCurrentProject, vsPath, spNode,
-                                                   DialogModel()));
+    UndoStack()->push(new CCommandChangeDialogueParameters(m_spCurrentProject, vsPath, spNode,
+                                                   DialogueModel()));
   }
 }
 
 //----------------------------------------------------------------------------------------
 //
-void CEditorDialogWidget::SlotEditDialogTagsClicked()
+void CEditorDialogueWidget::SlotEditDialogueTagsClicked()
 {
   WIDGET_INITIALIZED_GUARD
   if (nullptr == m_spCurrentProject) { return; }
 
   QModelIndex idxSelected = m_pProxy->mapToSource(m_spUi->pTreeView->currentIndex());
-  QStringList vsPath = DialogModel()->Path(idxSelected);
-  std::shared_ptr<CDialogNode> spNode = DialogModel()->Node(idxSelected);
-  std::shared_ptr<CDialogNodeDialog> spDNode =
-      std::dynamic_pointer_cast<CDialogNodeDialog>(spNode);
+  QStringList vsPath = DialogueModel()->Path(idxSelected);
+  std::shared_ptr<CDialogueNode> spNode = DialogueModel()->Node(idxSelected);
+  std::shared_ptr<CDialogueNodeDialogue> spDNode =
+      std::dynamic_pointer_cast<CDialogueNodeDialogue>(spNode);
 
-  if (EDialogTreeNodeType::eDialog == spNode->m_type._to_integral() && nullptr != spDNode)
+  if (EDialogueTreeNodeType::eDialogue == spNode->m_type._to_integral() && nullptr != spDNode)
   {
     m_spTagOverlay->SetPath(vsPath);
     m_spTagOverlay->Toggle();
@@ -694,7 +694,7 @@ namespace
 
 //----------------------------------------------------------------------------------------
 //
-void CEditorDialogWidget::SlotExpandAllNodes()
+void CEditorDialogueWidget::SlotExpandAllNodes()
 {
   IterateTreeItems(m_spUi->pTreeView, QModelIndex(), [this](const QModelIndex& idx) {
     m_spUi->pTreeView->expand(idx);
@@ -703,12 +703,12 @@ void CEditorDialogWidget::SlotExpandAllNodes()
 
 //----------------------------------------------------------------------------------------
 //
-void CEditorDialogWidget::SlotFilterChanged(const QString& sText)
+void CEditorDialogueWidget::SlotFilterChanged(const QString& sText)
 {
   WIDGET_INITIALIZED_GUARD
 
-  QPointer<CDialogEditorSortFilterProxyModel> pProxyModel =
-      dynamic_cast<CDialogEditorSortFilterProxyModel*>(m_spUi->pTreeView->model());
+  QPointer<CDialogueEditorSortFilterProxyModel> pProxyModel =
+      dynamic_cast<CDialogueEditorSortFilterProxyModel*>(m_spUi->pTreeView->model());
 
   if (nullptr != pProxyModel)
   {
@@ -725,19 +725,19 @@ void CEditorDialogWidget::SlotFilterChanged(const QString& sText)
 
 //----------------------------------------------------------------------------------------
 //
-void CEditorDialogWidget::SlotCopy()
+void CEditorDialogueWidget::SlotCopy()
 {
   QModelIndex idxSelected = m_pProxy->mapToSource(m_spUi->pTreeView->currentIndex());
-  QStringList vsPath = DialogModel()->Path(idxSelected);
-  std::shared_ptr<CDialogNode> spNode = DialogModel()->Node(idxSelected);
+  QStringList vsPath = DialogueModel()->Path(idxSelected);
+  std::shared_ptr<CDialogueNode> spNode = DialogueModel()->Node(idxSelected);
 
   QClipboard* pClipboard = QGuiApplication::clipboard();
-  pClipboard->setText(QString::fromUtf8(dialog_tree::SerializeNode(spNode)));
+  pClipboard->setText(QString::fromUtf8(dialogue_tree::SerializeNode(spNode)));
 }
 
 //----------------------------------------------------------------------------------------
 //
-void CEditorDialogWidget::SlotPaste()
+void CEditorDialogueWidget::SlotPaste()
 {
   WIDGET_INITIALIZED_GUARD
   if (nullptr == m_spCurrentProject) { return; }
@@ -746,58 +746,58 @@ void CEditorDialogWidget::SlotPaste()
   QString sCopied = pClipboard->text();
 
   // Try to read first to see if there are errros.
-  std::shared_ptr<CDialogNode> spNode =
-      dialog_tree::DeserializeNode(sCopied.toUtf8(), m_spCurrentProject);
+  std::shared_ptr<CDialogueNode> spNode =
+      dialogue_tree::DeserializeNode(sCopied.toUtf8(), m_spCurrentProject);
   if (nullptr == spNode)
   {
     return;
   }
 
   QModelIndex idxSelected = m_pProxy->mapToSource(m_spUi->pTreeView->currentIndex());
-  QStringList vsPath = DialogModel()->Path(idxSelected);
-  qint32 iInsertPos = DialogModel()->rowCount(idxSelected);
+  QStringList vsPath = DialogueModel()->Path(idxSelected);
+  qint32 iInsertPos = DialogueModel()->rowCount(idxSelected);
   qint32 iTypeOfSelectedNode =
-      DialogModel()->data(idxSelected, CDialogEditorTreeModel::eTypeRole).toInt();
+      DialogueModel()->data(idxSelected, CDialogueEditorTreeModel::eTypeRole).toInt();
 
   switch(iTypeOfSelectedNode)
   {
-    case EDialogTreeNodeType::eRoot: [[fallthrough]];
-    case EDialogTreeNodeType::eCategory:
+    case EDialogueTreeNodeType::eRoot: [[fallthrough]];
+    case EDialogueTreeNodeType::eCategory:
     {
       switch(spNode->m_type)
       {
-        case EDialogTreeNodeType::eRoot: return;
-        case EDialogTreeNodeType::eCategory:
+        case EDialogueTreeNodeType::eRoot: return;
+        case EDialogueTreeNodeType::eCategory:
         {
-          iInsertPos = DialogModel()->rowCount(idxSelected);
+          iInsertPos = DialogueModel()->rowCount(idxSelected);
         } break;
-        case EDialogTreeNodeType::eDialog:
+        case EDialogueTreeNodeType::eDialogue:
         {
-          iInsertPos = DialogModel()->rowCount(idxSelected);
+          iInsertPos = DialogueModel()->rowCount(idxSelected);
         } break;
-        case EDialogTreeNodeType::eDialogFragment: return;
+        case EDialogueTreeNodeType::eDialogueFragment: return;
       }
     } break;
-    case EDialogTreeNodeType::eDialog:
+    case EDialogueTreeNodeType::eDialogue:
     {
       switch(spNode->m_type)
       {
-        case EDialogTreeNodeType::eRoot: return;
-        case EDialogTreeNodeType::eCategory:
+        case EDialogueTreeNodeType::eRoot: return;
+        case EDialogueTreeNodeType::eCategory:
         {
           iInsertPos = idxSelected.row()+1;
           vsPath.erase(vsPath.begin()+vsPath.size()-1);
         } break;
-        case EDialogTreeNodeType::eDialog:
+        case EDialogueTreeNodeType::eDialogue:
         {
           iInsertPos = idxSelected.row()+1;
           vsPath.erase(vsPath.begin()+vsPath.size()-1);
         } break;
-        case EDialogTreeNodeType::eDialogFragment:
+        case EDialogueTreeNodeType::eDialogueFragment:
         {
-          if (DialogModel()->HasCondition(idxSelected))
+          if (DialogueModel()->HasCondition(idxSelected))
           {
-            iInsertPos = DialogModel()->rowCount(idxSelected);
+            iInsertPos = DialogueModel()->rowCount(idxSelected);
           }
           else
           {
@@ -806,14 +806,14 @@ void CEditorDialogWidget::SlotPaste()
         } break;
       }
     } break;
-    case EDialogTreeNodeType::eDialogFragment:
+    case EDialogueTreeNodeType::eDialogueFragment:
     {
       switch(spNode->m_type)
       {
-        case EDialogTreeNodeType::eRoot: [[fallthrough]];
-        case EDialogTreeNodeType::eCategory: [[fallthrough]];
-        case EDialogTreeNodeType::eDialog: return;
-        case EDialogTreeNodeType::eDialogFragment:
+        case EDialogueTreeNodeType::eRoot: [[fallthrough]];
+        case EDialogueTreeNodeType::eCategory: [[fallthrough]];
+        case EDialogueTreeNodeType::eDialogue: return;
+        case EDialogueTreeNodeType::eDialogueFragment:
         {
           iInsertPos = idxSelected.row()+1;
           vsPath.erase(vsPath.begin()+vsPath.size()-1);
@@ -825,17 +825,17 @@ void CEditorDialogWidget::SlotPaste()
   if (nullptr != UndoStack())
   {
     vsPath << spNode->m_sName;
-    UndoStack()->push(new CCommandAddDialogNode(m_spCurrentProject, vsPath,
-                                                iInsertPos, spNode, DialogModel()));
+    UndoStack()->push(new CCommandAddDialogueNode(m_spCurrentProject, vsPath,
+                                                iInsertPos, spNode, DialogueModel()));
   }
 }
 
 //----------------------------------------------------------------------------------------
 //
-void CEditorDialogWidget::ShowContextMenu(CDialogEditorTreeModel* pModel, const QModelIndex& idx,
+void CEditorDialogueWidget::ShowContextMenu(CDialogueEditorTreeModel* pModel, const QModelIndex& idx,
                                           const QPoint& globalPos)
 {
-  if (nullptr != pModel && pModel == dynamic_cast<const CDialogEditorTreeModel*>(idx.model()))
+  if (nullptr != pModel && pModel == dynamic_cast<const CDialogueEditorTreeModel*>(idx.model()))
   {
     auto spNode = pModel->Node(idx);
 
@@ -854,17 +854,17 @@ void CEditorDialogWidget::ShowContextMenu(CDialogEditorTreeModel* pModel, const 
     menu.addAction(pAction);
 
     pAction = new QAction("Copy Text", &menu);
-    pAction->setEnabled(EDialogTreeNodeType::eDialog == spNode->m_type._to_integral() ||
-                        EDialogTreeNodeType::eDialogFragment == spNode->m_type._to_integral());
+    pAction->setEnabled(EDialogueTreeNodeType::eDialogue == spNode->m_type._to_integral() ||
+                        EDialogueTreeNodeType::eDialogueFragment == spNode->m_type._to_integral());
     connect(pAction, &QAction::triggered, pModel, [spNode]() {
       QClipboard* pClipboard = QGuiApplication::clipboard();
-      auto spNodeDat = std::dynamic_pointer_cast<CDialogData>(spNode);
+      auto spNodeDat = std::dynamic_pointer_cast<CDialogueData>(spNode);
       QStringList vsStr;
       if (nullptr == spNodeDat && spNode->m_vspChildren.size() > 0)
       {
         for (const auto& spChild : spNode->m_vspChildren)
         {
-          auto spChildCasted = std::dynamic_pointer_cast<CDialogData>(spChild);
+          auto spChildCasted = std::dynamic_pointer_cast<CDialogueData>(spChild);
           vsStr << spChildCasted->m_sString;
         }
       }
@@ -876,16 +876,16 @@ void CEditorDialogWidget::ShowContextMenu(CDialogEditorTreeModel* pModel, const 
     menu.addAction(pAction);
 
     pAction = new QAction("Copy Condition", &menu);
-    pAction->setEnabled(EDialogTreeNodeType::eDialogFragment == spNode->m_type._to_integral());
+    pAction->setEnabled(EDialogueTreeNodeType::eDialogueFragment == spNode->m_type._to_integral());
     connect(pAction, &QAction::triggered, pModel, [spNode]() {
       QClipboard* pClipboard = QGuiApplication::clipboard();
-      auto spNodeDat = std::dynamic_pointer_cast<CDialogData>(spNode);
+      auto spNodeDat = std::dynamic_pointer_cast<CDialogueData>(spNode);
       QStringList vsStr;
       if (nullptr == spNodeDat && spNode->m_vspChildren.size() > 0)
       {
         for (const auto& spChild : spNode->m_vspChildren)
         {
-          auto spChildCasted = std::dynamic_pointer_cast<CDialogData>(spChild);
+          auto spChildCasted = std::dynamic_pointer_cast<CDialogueData>(spChild);
           vsStr << spChildCasted->m_sString;
         }
       }
@@ -905,7 +905,7 @@ void CEditorDialogWidget::ShowContextMenu(CDialogEditorTreeModel* pModel, const 
 
     QMenu* pSubMenu = new QMenu("Copy Tag", &menu);
     {
-      auto spNodeDat = std::dynamic_pointer_cast<CDialogNodeDialog>(spNode);
+      auto spNodeDat = std::dynamic_pointer_cast<CDialogueNodeDialogue>(spNode);
       if (nullptr != spNodeDat)
       {
         for (const auto& spTag : spNodeDat->m_tags)

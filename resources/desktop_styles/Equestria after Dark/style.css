@@ -426,7 +426,7 @@ QPushButton#TitleCardButton {
   qproperty-icon: url(ui/ButtonTitleCard.png) off,
                   url(ui/ButtonTitleCard.png) on;
 }
-QPushButton#EditDialogTags,
+QPushButton#EditDialogueTags,
 QPushButton#TagsButton {
   qproperty-icon: url(ui/ButtonTag.png) off,
                   url(ui/ButtonTag.png) on;
@@ -435,7 +435,7 @@ QPushButton#AddNodeButton {
   qproperty-icon: url(ui/ButtonPlusDisabled.png) off,
                   url(ui/ButtonPlus.png) on;
 }
-QPushButton#RemoveDialog,
+QPushButton#RemoveDialogue,
 QPushButton#RemoveNodeButton {
   qproperty-icon: url(ui/ButtonMinus.png) off,
                   url(ui/ButtonMinus.png) on;
@@ -615,19 +615,19 @@ QPushButton#RemoveSelectedSequenceLayer {
   qproperty-icon: url(ui/ButtonRemoveSequenceLayer.png) off,
                   url(ui/ButtonRemoveSequenceLayer.png) on;
 }
-QPushButton#AddDialog {
+QPushButton#AddDialogue {
   qproperty-icon: url(ui/ButtonDialogAdd.png) off,
                   url(ui/ButtonDialogAdd.png) on;
 }
-QPushButton#AddDialogFrament {
+QPushButton#AddDialogueFrament {
   qproperty-icon: url(ui/ButtonDialogAddCondition.png) off,
                   url(ui/ButtonDialogAddCondition.png) on;
 }
-QPushButton#AddDialogCategoryButton {
+QPushButton#AddDialogueCategoryButton {
   qproperty-icon: url(ui/ButtonDialogAddFolder.png) off,
                   url(ui/ButtonDialogAddFolder.png) on;
 }
-QPushButton#EditDialogContent {
+QPushButton#EditDialogueContent {
   qproperty-icon: url(ui/ButtonDialogConfigure.png) off,
                   url(ui/ButtonDialogConfigure.png) on;
 }
@@ -1438,7 +1438,7 @@ CEditorPatternEditorWidget {
   qproperty-icon: url(ui/ButtonSequence.png) off,
                   url(ui/ButtonSequence.png) on;
 }
-CEditorDialogWidget {
+CEditorDialogueWidget {
   qproperty-icon: url(ui/ButtonNotification.png) off,
                   url(ui/ButtonNotification.png) on;
 }

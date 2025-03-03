@@ -578,13 +578,13 @@ QPushButton#TitleCardButton:pressed,
 QPushButton#TitleCardButton:disabled {
   image: url(ui/ButtonTitleCardSelected.png);
 }
-QPushButton#EditDialogTags,
+QPushButton#EditDialogueTags,
 QPushButton#TagsButton {
   image: url(ui/ButtonTag.png);
 }
-QPushButton#EditDialogTags:hover,
-QPushButton#EditDialogTags:pressed,
-QPushButton#EditDialogTags:disabled,
+QPushButton#EditDialogueTags:hover,
+QPushButton#EditDialogueTags:pressed,
+QPushButton#EditDialogueTags:disabled,
 QPushButton#TagsButton:hover,
 QPushButton#TagsButton:pressed,
 QPushButton#TagsButton:disabled {
@@ -598,13 +598,13 @@ QPushButton#AddNodeButton:pressed,
 QPushButton#AddNodeButton:disabled {
   image: url(ui/ButtonPlusSelected.png);
 }
-QPushButton#RemoveDialog,
+QPushButton#RemoveDialogue,
 QPushButton#RemoveNodeButton {
   image: url(ui/ButtonMinus.png);
 }
-QPushButton#RemoveDialog:hover,
-QPushButton#RemoveDialog:pressed,
-QPushButton#RemoveDialog:disabled,
+QPushButton#RemoveDialogue:hover,
+QPushButton#RemoveDialogue:pressed,
+QPushButton#RemoveDialogue:disabled,
 QPushButton#RemoveNodeButton:hover,
 QPushButton#RemoveNodeButton:pressed,
 QPushButton#RemoveNodeButton:disabled {
@@ -814,12 +814,12 @@ QPushButton#ePatternEditor:pressed,
 QPushButton#ePatternEditor:disabled {
   image: url(ui/ButtonSequenceSelected.png);
 }
-QPushButton#eDialogEditor {
+QPushButton#eDialogueEditor {
   icon: url(ui/ButtonNotification.png);
 }
-QPushButton#eDialogEditor:hover,
-QPushButton#eDialogEditor:pressed,
-QPushButton#eDialogEditor:disabled {
+QPushButton#eDialogueEditor:hover,
+QPushButton#eDialogueEditor:pressed,
+QPushButton#eDialogueEditor:disabled {
   image: url(ui/ButtonNotificationSelected.png);
 }
 QPushButton#AddAutioCode {
@@ -1023,36 +1023,36 @@ QPushButton#RemoveSelectedSequenceLayer:pressed,
 QPushButton#RemoveSelectedSequenceLayer:disabled {
   image: url(ui/ButtonRemoveSequenceLayerSelected.png);
 }
-QPushButton#AddDialog {
+QPushButton#AddDialogue {
   image: url(ui/ButtonDialogAdd.png);
 }
-QPushButton#AddDialog:hover,
-QPushButton#AddDialog:pressed,
-QPushButton#AddDialog:disabled {
+QPushButton#AddDialogue:hover,
+QPushButton#AddDialogue:pressed,
+QPushButton#AddDialogue:disabled {
   image: url(ui/ButtonDialogAddSelected.png);
 }
-QPushButton#AddDialogFrament {
+QPushButton#AddDialogueFrament {
   image: url(ui/ButtonDialogAddCondition.png);
 }
-QPushButton#AddDialogFrament:hover,
-QPushButton#AddDialogFrament:pressed,
-QPushButton#AddDialogFrament:disabled {
+QPushButton#AddDialogueFrament:hover,
+QPushButton#AddDialogueFrament:pressed,
+QPushButton#AddDialogueFrament:disabled {
   image: url(ui/ButtonDialogAddConditionSelected.png);
 }
-QPushButton#AddDialogCategoryButton {
+QPushButton#AddDialogueCategoryButton {
   image: url(ui/ButtonDialogAddFolder.png);
 }
-QPushButton#AddDialogCategoryButton:hover,
-QPushButton#AddDialogCategoryButton:pressed,
-QPushButton#AddDialogCategoryButton:disabled {
+QPushButton#AddDialogueCategoryButton:hover,
+QPushButton#AddDialogueCategoryButton:pressed,
+QPushButton#AddDialogueCategoryButton:disabled {
   image: url(ui/ButtonDialogAddFolderSelected.png);
 }
-QPushButton#EditDialogContent {
+QPushButton#EditDialogueContent {
   image: url(ui/ButtonDialogConfigure.png);
 }
-QPushButton#EditDialogContent:hover,
-QPushButton#EditDialogContent:pressed,
-QPushButton#EditDialogContent:disabled {
+QPushButton#EditDialogueContent:hover,
+QPushButton#EditDialogueContent:pressed,
+QPushButton#EditDialogueContent:disabled {
   image: url(ui/ButtonDialogConfigureSelected.png);
 }
 
@@ -1996,7 +1996,7 @@ CEditorPatternEditorWidget {
   qproperty-icon: url(ui/ButtonSequence.png) off,
                   url(ui/ButtonSequence.png) on;
 }
-CEditorDialogWidget {
+CEditorDialogueWidget {
   qproperty-icon: url(ui/ButtonNotification.png) off,
                   url(ui/ButtonNotification.png) on;
 }

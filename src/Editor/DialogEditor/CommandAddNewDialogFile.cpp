@@ -6,23 +6,23 @@
 
 #include "Systems/DatabaseManager.h"
 
-CCommandAddNewDialogFile::CCommandAddNewDialogFile(const tspProject& spProject,
+CCommandAddNewDialogueFile::CCommandAddNewDialogueFile(const tspProject& spProject,
                                                    QPointer<CEditorModel> pEditorModel,
                                                    QPointer<QWidget> pParent) :
-  QUndoCommand("Added new dialog file"),
+  QUndoCommand("Added new dialogue file"),
   m_spProject(spProject),
   m_pEditorModel(pEditorModel),
   m_pParent(pParent)
 {
 }
-CCommandAddNewDialogFile::~CCommandAddNewDialogFile()
+CCommandAddNewDialogueFile::~CCommandAddNewDialogueFile()
 {
 
 }
 
 //----------------------------------------------------------------------------------------
 //
-void CCommandAddNewDialogFile::undo()
+void CCommandAddNewDialogueFile::undo()
 {
   auto spDbManager = m_wpDbManager.lock();
   if (nullptr != spDbManager && !m_data.m_sName.isEmpty())
@@ -33,15 +33,15 @@ void CCommandAddNewDialogFile::undo()
 
 //----------------------------------------------------------------------------------------
 //
-void CCommandAddNewDialogFile::redo()
+void CCommandAddNewDialogueFile::redo()
 {
   if (m_data.m_sName.isEmpty() && nullptr != m_pEditorModel)
   {
     m_data.m_sName = m_pEditorModel->AddNewFileToScene(
         m_pParent, nullptr, EResourceType::eDatabase, "{}",
-        QStringList() << QString("*.%1").arg(joip_resource::c_sDialogFileType));
+        QStringList() << QString("*.%1").arg(joip_resource::c_sDialogueFileType));
 
-    setText("Added new dialog file " + m_data.m_sName);
+    setText("Added new dialogue file " + m_data.m_sName);
 
     auto spDbManager = m_wpDbManager.lock();
     if (nullptr != spDbManager && !m_data.m_sName.isEmpty())
@@ -74,14 +74,14 @@ void CCommandAddNewDialogFile::redo()
 
 //----------------------------------------------------------------------------------------
 //
-int CCommandAddNewDialogFile::id() const
+int CCommandAddNewDialogueFile::id() const
 {
-  return EEditorCommandId::eAddNewDialogFile;
+  return EEditorCommandId::eAddNewDialogueFile;
 }
 
 //----------------------------------------------------------------------------------------
 //
-bool CCommandAddNewDialogFile::mergeWith(const QUndoCommand* pOther)
+bool CCommandAddNewDialogueFile::mergeWith(const QUndoCommand* pOther)
 {
   Q_UNUSED(pOther)
   return false;
@@ -89,7 +89,7 @@ bool CCommandAddNewDialogFile::mergeWith(const QUndoCommand* pOther)
 
 //----------------------------------------------------------------------------------------
 //
-QString CCommandAddNewDialogFile::AddedResource() const
+QString CCommandAddNewDialogueFile::AddedResource() const
 {
   return m_data.m_sName;
 }

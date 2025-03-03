@@ -9,27 +9,27 @@
 #include <vector>
 
 class CDatabaseManager;
-class CDialogEditorTreeModel;
+class CDialogueEditorTreeModel;
 class CTagCompleter;
 class QPushButton;
 class QStandardItemModel;
 class QUndoStack;
 namespace Ui {
-  class CDialogTagsEditorOverlay;
+  class CDialogueTagsEditorOverlay;
 }
 
-class CDialogTagsEditorOverlay : public COverlayBase
+class CDialogueTagsEditorOverlay : public COverlayBase
 {
   Q_OBJECT
 
 public:
-  explicit CDialogTagsEditorOverlay(QWidget* pParent = nullptr);
-  ~CDialogTagsEditorOverlay();
+  explicit CDialogueTagsEditorOverlay(QWidget* pParent = nullptr);
+  ~CDialogueTagsEditorOverlay();
 
   void SetPath(const QStringList& vsPath);
   void SetProject(const tspProject& spCurrentProject);
   void SetUndoStack(QPointer<QUndoStack> pUndoStack);
-  void SetModel(QPointer<CDialogEditorTreeModel> pModel);
+  void SetModel(QPointer<CDialogueEditorTreeModel> pModel);
 
 public slots:
   void Climb() override;
@@ -42,7 +42,7 @@ signals:
 
 protected slots:
   void on_pLineEdit_editingFinished();
-  void on_pDescribtionLineEdit_editingFinished();
+  void on_pDescriptionLineEdit_editingFinished();
   void on_pConfirmButton_clicked();
   void SlotRemoveTagClicked();
   void SlotTagAdded(const QString& sName);
@@ -54,11 +54,11 @@ private:
   void TagAdded(QPushButton* pButton, const QString& sTag);
   void TagRemoved(const QStringList& vsTags);
 
-  std::unique_ptr<Ui::CDialogTagsEditorOverlay> m_spUi;
+  std::unique_ptr<Ui::CDialogueTagsEditorOverlay> m_spUi;
   tspProject                                    m_spCurrentProject;
   std::weak_ptr<CDatabaseManager>               m_wpDbManager;
   QPointer<QUndoStack>                          m_pUndoStack;
-  QPointer<CDialogEditorTreeModel>              m_pModel;
+  QPointer<CDialogueEditorTreeModel>            m_pModel;
   QPointer<CTagCompleter>                       m_pCompleter;
   QPointer<QStandardItemModel>                  m_pCompleterModel;
   QStringList                                   m_vsPath;

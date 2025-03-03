@@ -20,37 +20,37 @@ namespace
 
 //----------------------------------------------------------------------------------------
 //
-CDialogEditorDelegate::CDialogEditorDelegate(QTreeView* pTree) :
+CDialogueEditorDelegate::CDialogueEditorDelegate(QTreeView* pTree) :
   CHtmlViewDelegate(pTree),
   m_pParent(pTree)
 {
 }
-CDialogEditorDelegate::~CDialogEditorDelegate() = default;
+CDialogueEditorDelegate::~CDialogueEditorDelegate() = default;
 
 //----------------------------------------------------------------------------------------
 //
-void CDialogEditorDelegate::SetCurrentProject(const tspProject& spProject)
+void CDialogueEditorDelegate::SetCurrentProject(const tspProject& spProject)
 {
   m_spProject = spProject;
 }
 
 //----------------------------------------------------------------------------------------
 //
-void CDialogEditorDelegate::SetReadOnly(bool bReadOnly)
+void CDialogueEditorDelegate::SetReadOnly(bool bReadOnly)
 {
   m_bReadOnly = bReadOnly;
 }
 
 //----------------------------------------------------------------------------------------
 //
-void CDialogEditorDelegate::SetUndoStack(QPointer<QUndoStack> pUndo)
+void CDialogueEditorDelegate::SetUndoStack(QPointer<QUndoStack> pUndo)
 {
   m_pUndo = pUndo;
 }
 
 //----------------------------------------------------------------------------------------
 //
-QWidget* CDialogEditorDelegate::createEditor(QWidget* pParent,
+QWidget* CDialogueEditorDelegate::createEditor(QWidget* pParent,
                                              const QStyleOptionViewItem& option,
                                              const QModelIndex& index) const
 {
@@ -60,31 +60,31 @@ QWidget* CDialogEditorDelegate::createEditor(QWidget* pParent,
   QWidget* pWidget = nullptr;
   switch (index.column())
   {
-    case dialog_item::c_iColumnId: [[fallthrough]];
-    case dialog_item::c_iColumnString:
+    case dialogue_item::c_iColumnId: [[fallthrough]];
+    case dialogue_item::c_iColumnString:
     {
       QLineEdit* pLineEdit = new QLineEdit(pParent);
       pWidget = pLineEdit;
       connect(pLineEdit, &QLineEdit::editingFinished, pLineEdit, [this, pWidget]() mutable {
-        emit const_cast<CDialogEditorDelegate*>(this)->commitData(pWidget);
+        emit const_cast<CDialogueEditorDelegate*>(this)->commitData(pWidget);
       });
     } break;
-    case dialog_item::c_iColumnWaitMS:
+    case dialogue_item::c_iColumnWaitMS:
     {
       CLongLongSpinBox* pSpinbox = new CLongLongSpinBox(pParent);
       pWidget = pSpinbox;
       pSpinbox->setMinimum(-1);
       pSpinbox->setMaximum(std::numeric_limits<qint64>::max());
       connect(pSpinbox, &CLongLongSpinBox::valueChanged, pSpinbox, [this, pWidget]() mutable {
-        emit const_cast<CDialogEditorDelegate*>(this)->commitData(pWidget);
+        emit const_cast<CDialogueEditorDelegate*>(this)->commitData(pWidget);
       });
     } break;
-    case dialog_item::c_iColumnMedia:
+    case dialogue_item::c_iColumnMedia:
     {
       QComboBox* pCombo = new QComboBox(pParent);
       pWidget = pCombo;
       connect(pCombo, qOverload<int>(&QComboBox::currentIndexChanged), pCombo, [this, pWidget]() mutable {
-        emit const_cast<CDialogEditorDelegate*>(this)->commitData(pWidget);
+        emit const_cast<CDialogueEditorDelegate*>(this)->commitData(pWidget);
       });
     } break;
     default: break;
@@ -94,14 +94,14 @@ QWidget* CDialogEditorDelegate::createEditor(QWidget* pParent,
 
 //----------------------------------------------------------------------------------------
 //
-void CDialogEditorDelegate::setEditorData(QWidget* pEditor, const QModelIndex& index) const
+void CDialogueEditorDelegate::setEditorData(QWidget* pEditor, const QModelIndex& index) const
 {
   if (!index.isValid()) { return; }
 
   switch (index.column())
   {
-    case dialog_item::c_iColumnId: [[fallthrough]];
-    case dialog_item::c_iColumnString:
+    case dialogue_item::c_iColumnId: [[fallthrough]];
+    case dialogue_item::c_iColumnString:
     {
       QLineEdit* pWidget = dynamic_cast<QLineEdit*>(pEditor);
       if (nullptr != pWidget)
@@ -110,7 +110,7 @@ void CDialogEditorDelegate::setEditorData(QWidget* pEditor, const QModelIndex& i
         pWidget->setText(index.data(Qt::EditRole).toString());
       }
     } break;
-    case dialog_item::c_iColumnWaitMS:
+    case dialogue_item::c_iColumnWaitMS:
     {
       CLongLongSpinBox* pWidget = dynamic_cast<CLongLongSpinBox*>(pEditor);
       if (nullptr != pWidget)
@@ -119,7 +119,7 @@ void CDialogEditorDelegate::setEditorData(QWidget* pEditor, const QModelIndex& i
         pWidget->setValue(index.data(Qt::EditRole).toLongLong());
       }
     } break;
-    case dialog_item::c_iColumnMedia:
+    case dialogue_item::c_iColumnMedia:
     {
       QComboBox* pWidget = dynamic_cast<QComboBox*>(pEditor);
       if (nullptr != pWidget)
@@ -154,7 +154,7 @@ void CDialogEditorDelegate::setEditorData(QWidget* pEditor, const QModelIndex& i
 
 //----------------------------------------------------------------------------------------
 //
-void CDialogEditorDelegate::setModelData(QWidget* pEditor,
+void CDialogueEditorDelegate::setModelData(QWidget* pEditor,
                                          QAbstractItemModel* pModel,
                                          const QModelIndex& index) const
 {
@@ -166,25 +166,25 @@ void CDialogEditorDelegate::setModelData(QWidget* pEditor,
   QVariant oldValue = index.data(Qt::EditRole);
 
   QStringList vsPath;
-  CDialogEditorTreeModel* pTree = nullptr;
+  CDialogueEditorTreeModel* pTree = nullptr;
   QSortFilterProxyModel* pSourtFilter = dynamic_cast<QSortFilterProxyModel*>(pModel);
   if (nullptr != pSourtFilter)
   {
-    pTree = dynamic_cast<CDialogEditorTreeModel*>(pSourtFilter->sourceModel());
+    pTree = dynamic_cast<CDialogueEditorTreeModel*>(pSourtFilter->sourceModel());
     if (nullptr != pTree)
     {
       vsPath = pTree->Path(pSourtFilter->mapToSource(index));
     }
   }
-  else if ((pTree = dynamic_cast<CDialogEditorTreeModel*>(pModel)))
+  else if ((pTree = dynamic_cast<CDialogueEditorTreeModel*>(pModel)))
   {
     vsPath = pTree->Path(index);
   }
 
   switch (index.column())
   {
-    case dialog_item::c_iColumnId: [[fallthrough]];
-    case dialog_item::c_iColumnString:
+    case dialogue_item::c_iColumnId: [[fallthrough]];
+    case dialogue_item::c_iColumnString:
     {
       QLineEdit* pWidget = dynamic_cast<QLineEdit*>(pEditor);
       if (nullptr != pWidget)
@@ -192,7 +192,7 @@ void CDialogEditorDelegate::setModelData(QWidget* pEditor,
         newValue = pWidget->text();
       }
     } break;
-    case dialog_item::c_iColumnWaitMS:
+    case dialogue_item::c_iColumnWaitMS:
     {
       CLongLongSpinBox* pWidget = dynamic_cast<CLongLongSpinBox*>(pEditor);
       if (nullptr != pWidget)
@@ -200,7 +200,7 @@ void CDialogEditorDelegate::setModelData(QWidget* pEditor,
         newValue = pWidget->value();
       }
     } break;
-    case dialog_item::c_iColumnMedia:
+    case dialogue_item::c_iColumnMedia:
     {
       QComboBox* pWidget = dynamic_cast<QComboBox*>(pEditor);
       if (nullptr != pWidget)
@@ -213,7 +213,7 @@ void CDialogEditorDelegate::setModelData(QWidget* pEditor,
 
   if (nullptr != m_pUndo)
   {
-    m_pUndo->push(new CCommandChangeModelViaGui(oldValue, newValue, sHeader, vsPath, pTree));
+    m_pUndo->push(new CCommandChangeDialogueModelViaGui(oldValue, newValue, sHeader, vsPath, pTree));
   }
   else
   {

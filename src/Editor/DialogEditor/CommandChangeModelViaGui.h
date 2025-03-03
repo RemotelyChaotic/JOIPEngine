@@ -1,21 +1,21 @@
-#ifndef CCOMMANDCHANGEMODELVIAGUI_H
-#define CCOMMANDCHANGEMODELVIAGUI_H
+#ifndef CCOMMANDCHANGEDialogueMODELVIAGUI_H
+#define CCOMMANDCHANGEDialogueMODELVIAGUI_H
 
 #include <QAbstractItemModel>
 #include <QPointer>
 #include <QUndoCommand>
 #include <memory>
 
-class CDialogEditorTreeModel;
+class CDialogueEditorTreeModel;
 
-class CCommandChangeModelViaGui : public QUndoCommand
+class CCommandChangeDialogueModelViaGui : public QUndoCommand
 {
 public:
-  CCommandChangeModelViaGui(const QVariant& oldValue, const QVariant& newValue,
+  CCommandChangeDialogueModelViaGui(const QVariant& oldValue, const QVariant& newValue,
                             const QString& sHeader,
                             const QStringList& vsPath,
-                            QPointer<CDialogEditorTreeModel> pModel);
-  ~CCommandChangeModelViaGui();
+                            QPointer<CDialogueEditorTreeModel> pModel);
+  ~CCommandChangeDialogueModelViaGui();
 
   void undo() override;
   void redo() override;
@@ -26,11 +26,11 @@ public:
 private:
   void DoUndo(const QVariant& val);
 
-  QPointer<CDialogEditorTreeModel> m_pModel;
+  QPointer<CDialogueEditorTreeModel> m_pModel;
   QStringList m_vsPath;
   QVariant m_oldValue;
   QVariant m_newValue;
   QString m_sHeader;
 };
 
-#endif // CCOMMANDCHANGEMODELVIAGUI_H
+#endif // CCOMMANDCHANGEDialogueMODELVIAGUI_H

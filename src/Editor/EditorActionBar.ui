@@ -1236,7 +1236,7 @@
     </widget>
    </item>
    <item>
-    <widget class="QWidget" name="pDialogEditorContainer" native="true">
+    <widget class="QWidget" name="pDialogueEditorContainer" native="true">
      <layout class="QGridLayout" name="gridLayout_6">
       <property name="leftMargin">
        <number>0</number>
@@ -1251,7 +1251,7 @@
        <number>0</number>
       </property>
       <item row="1" column="0">
-       <widget class="CShortcutButton" name="AddDialogCategoryButton">
+       <widget class="CShortcutButton" name="AddDialogueCategoryButton">
         <property name="sizePolicy">
          <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
           <horstretch>0</horstretch>
@@ -1259,7 +1259,7 @@
          </sizepolicy>
         </property>
         <property name="toolTip">
-         <string>Add dialog (sub)category</string>
+         <string>Add dialogue (sub)category</string>
         </property>
         <property name="text">
          <string/>
@@ -1273,7 +1273,7 @@
        </widget>
       </item>
       <item row="0" column="0">
-       <widget class="CShortcutButton" name="AddDialog">
+       <widget class="CShortcutButton" name="AddDialogue">
         <property name="sizePolicy">
          <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
           <horstretch>0</horstretch>
@@ -1281,7 +1281,7 @@
          </sizepolicy>
         </property>
         <property name="toolTip">
-         <string>Add a new line of dialog</string>
+         <string>Add a new line of dialogue</string>
         </property>
         <property name="text">
          <string/>
@@ -1295,7 +1295,7 @@
        </widget>
       </item>
       <item row="2" column="0">
-       <widget class="CShortcutButton" name="EditDialogContent">
+       <widget class="CShortcutButton" name="EditDialogueContent">
         <property name="sizePolicy">
          <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
           <horstretch>0</horstretch>
@@ -1303,7 +1303,7 @@
          </sizepolicy>
         </property>
         <property name="toolTip">
-         <string>Edit the dialog node properties</string>
+         <string>Edit the dialogue node properties</string>
         </property>
         <property name="text">
          <string/>
@@ -1317,7 +1317,7 @@
        </widget>
       </item>
       <item row="2" column="1">
-       <widget class="CShortcutButton" name="EditDialogTags">
+       <widget class="CShortcutButton" name="EditDialogueTags">
         <property name="sizePolicy">
          <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
           <horstretch>0</horstretch>
@@ -1325,7 +1325,7 @@
          </sizepolicy>
         </property>
         <property name="toolTip">
-         <string>Edit the dialog line tags</string>
+         <string>Edit the dialogue line tags</string>
         </property>
         <property name="text">
          <string/>
@@ -1339,7 +1339,7 @@
        </widget>
       </item>
       <item row="1" column="1">
-       <widget class="CShortcutButton" name="RemoveDialog">
+       <widget class="CShortcutButton" name="RemoveDialogue">
         <property name="sizePolicy">
          <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
           <horstretch>0</horstretch>
@@ -1347,7 +1347,7 @@
          </sizepolicy>
         </property>
         <property name="toolTip">
-         <string>Remove the selected dialog node</string>
+         <string>Remove the selected dialogue node</string>
         </property>
         <property name="text">
          <string/>
@@ -1361,7 +1361,7 @@
        </widget>
       </item>
       <item row="0" column="1">
-       <widget class="CShortcutButton" name="AddDialogFrament">
+       <widget class="CShortcutButton" name="AddDialogueFrament">
         <property name="sizePolicy">
          <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
           <horstretch>0</horstretch>
@@ -1369,7 +1369,7 @@
          </sizepolicy>
         </property>
         <property name="toolTip">
-         <string>Add a conditional line of dialog</string>
+         <string>Add a conditional line of dialogue</string>
         </property>
         <property name="text">
          <string/>
