@@ -1,4 +1,4 @@
-#include "DialogEditorSortFilterProxyModel.h"
+#include "DialogueEditorSortFilterProxyModel.h"
 
 CDialogueEditorSortFilterProxyModel::CDialogueEditorSortFilterProxyModel(QObject* pParent) :
     QSortFilterProxyModel(pParent)

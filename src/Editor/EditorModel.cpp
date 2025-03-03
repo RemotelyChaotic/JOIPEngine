@@ -3,7 +3,7 @@
 #include "EditorJobWorker.h"
 #include "EditorEditableFileModel.h"
 
-#include "DialogEditor/DialogEditorTreeModel.h"
+#include "DialogueEditor/DialogueEditorTreeModel.h"
 
 #include "EditorJobs/IEditorJobStateListener.h"
 

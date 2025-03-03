@@ -1,11 +1,11 @@
-#include "DialogTagsEditorOverlay.h"
+#include "DialogueTagsEditorOverlay.h"
 #include "Application.h"
-#include "CommandAddRemoveDialogTags.h"
+#include "CommandAddRemoveDialogueTags.h"
 
-#include "ui_DialogTagsEditorOverlay.h"
+#include "ui_DialogueTagsEditorOverlay.h"
 
 #include "Editor/CommandChangeTag.h"
-#include "Editor/DialogEditor/DialogEditorTreeModel.h"
+#include "Editor/DialogueEditor/DialogueEditorTreeModel.h"
 
 #include "Systems/DatabaseManager.h"
 

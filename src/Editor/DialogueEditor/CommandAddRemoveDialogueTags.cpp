@@ -1,8 +1,8 @@
-#include "CommandAddRemoveDialogTags.h"
+#include "CommandAddRemoveDialogueTags.h"
 #include "Application.h"
 
 #include "Editor/EditorCommandIds.h"
-#include "Editor/DialogEditor/DialogEditorTreeModel.h"
+#include "Editor/DialogueEditor/DialogueEditorTreeModel.h"
 
 #include "Systems/DatabaseManager.h"
 

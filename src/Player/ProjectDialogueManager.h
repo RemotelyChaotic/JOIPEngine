@@ -1,7 +1,7 @@
 #ifndef CPROJECTDIALOGueMANAGER_H
 #define CPROJECTDIALOGueMANAGER_H
 
-#include "Systems/DialogTree.h"
+#include "Systems/DialogueTree.h"
 #include "Systems/Project.h"
 
 #include <QObject>

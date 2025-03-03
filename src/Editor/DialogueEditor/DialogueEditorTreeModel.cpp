@@ -1,9 +1,9 @@
-#include "DialogEditorTreeModel.h"
-#include "DialogEditorTreeItem.h"
+#include "DialogueEditorTreeModel.h"
+#include "DialogueEditorTreeItem.h"
 
 #include "Application.h"
 
-#include "Systems/DialogTree.h"
+#include "Systems/DialogueTree.h"
 #include "Systems/Resource.h"
 
 #include <QFileInfo>

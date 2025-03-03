@@ -1,7 +1,7 @@
-#include "DialogEditorDelegate.h"
+#include "DialogueEditorDelegate.h"
 #include "CommandChangeModelViaGui.h"
-#include "DialogEditorTreeItem.h"
-#include "DialogEditorTreeModel.h"
+#include "DialogueEditorTreeItem.h"
+#include "DialogueEditorTreeModel.h"
 
 #include "Editor/EditorModel.h"
 

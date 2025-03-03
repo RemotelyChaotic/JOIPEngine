@@ -1,7 +1,7 @@
 #ifndef COMMANDADDREMOVEDIALOGTAGS_H
 #define COMMANDADDREMOVEDIALOGTAGS_H
 
-#include "Systems/DialogTree.h"
+#include "Systems/DialogueTree.h"
 #include "Systems/Project.h"
 
 #include <QStringList>

@@ -1,7 +1,7 @@
 #ifndef SCRIPTDBWRAPPERS_H
 #define SCRIPTDBWRAPPERS_H
 
-#include "Systems/DialogTree.h"
+#include "Systems/DialogueTree.h"
 #include "Systems/Kink.h"
 #include "Systems/Lockable.h"
 #include "Systems/Project.h"

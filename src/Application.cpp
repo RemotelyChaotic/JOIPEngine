@@ -6,7 +6,7 @@
 
 // needed to register to qml
 #include "Player/MetronomePaintedWidget.h"
-#include "Player/ProjectDialogManager.h"
+#include "Player/ProjectDialogueManager.h"
 #include "Player/ProjectNotificationManager.h"
 #include "Player/ProjectSceneManager.h"
 #include "Player/ProjectSoundManager.h"

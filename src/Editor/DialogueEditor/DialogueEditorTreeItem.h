@@ -1,7 +1,7 @@
 #ifndef CDIALOGueEDITORTREEITEM_H
 #define CDIALOGueEDITORTREEITEM_H
 
-#include "Systems/DialogTree.h"
+#include "Systems/DialogueTree.h"
 
 #include <QVariant>
 #include <QVector>

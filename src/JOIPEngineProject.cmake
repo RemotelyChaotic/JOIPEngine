@@ -67,30 +67,30 @@ macro(CreateJOIPProject JOIP_PROJECT_NAME)
     ${JOIPSources}/DownloadScreen.ui
     ${JOIPSources}/Editor/CommandChangeTag.cpp
     ${JOIPSources}/Editor/CommandChangeTag.h
-    ${JOIPSources}/Editor/DialogEditor/CommandAddNewDialogFile.cpp
-    ${JOIPSources}/Editor/DialogEditor/CommandAddNewDialogFile.h
-    ${JOIPSources}/Editor/DialogEditor/CommandAddRemoveDialogTags.cpp
-    ${JOIPSources}/Editor/DialogEditor/CommandAddRemoveDialogTags.h
-    ${JOIPSources}/Editor/DialogEditor/CommandAddRemoveNode.cpp
-    ${JOIPSources}/Editor/DialogEditor/CommandAddRemoveNode.h
-    ${JOIPSources}/Editor/DialogEditor/CommandChangeModelViaGui.cpp
-    ${JOIPSources}/Editor/DialogEditor/CommandChangeModelViaGui.h
-    ${JOIPSources}/Editor/DialogEditor/CommandChangeParameters.cpp
-    ${JOIPSources}/Editor/DialogEditor/CommandChangeParameters.h
-    ${JOIPSources}/Editor/DialogEditor/DialogEditorDelegate.cpp
-    ${JOIPSources}/Editor/DialogEditor/DialogEditorDelegate.h
-    ${JOIPSources}/Editor/DialogEditor/DialogEditorSortFilterProxyModel.cpp
-    ${JOIPSources}/Editor/DialogEditor/DialogEditorSortFilterProxyModel.h
-    ${JOIPSources}/Editor/DialogEditor/DialogEditorTreeItem.cpp
-    ${JOIPSources}/Editor/DialogEditor/DialogEditorTreeItem.h
-    ${JOIPSources}/Editor/DialogEditor/DialogEditorTreeModel.cpp
-    ${JOIPSources}/Editor/DialogEditor/DialogEditorTreeModel.h
-    ${JOIPSources}/Editor/DialogEditor/DialogPropertyEditor.cpp
-    ${JOIPSources}/Editor/DialogEditor/DialogPropertyEditor.h
-    ${JOIPSources}/Editor/DialogEditor/DialogPropertyEditor.ui
-    ${JOIPSources}/Editor/DialogEditor/DialogTagsEditorOverlay.cpp
-    ${JOIPSources}/Editor/DialogEditor/DialogTagsEditorOverlay.h
-    ${JOIPSources}/Editor/DialogEditor/DialogTagsEditorOverlay.ui
+    ${JOIPSources}/Editor/DialogueEditor/CommandAddNewDialogueFile.cpp
+    ${JOIPSources}/Editor/DialogueEditor/CommandAddNewDialogueFile.h
+    ${JOIPSources}/Editor/DialogueEditor/CommandAddRemoveDialogueTags.cpp
+    ${JOIPSources}/Editor/DialogueEditor/CommandAddRemoveDialogueTags.h
+    ${JOIPSources}/Editor/DialogueEditor/CommandAddRemoveNode.cpp
+    ${JOIPSources}/Editor/DialogueEditor/CommandAddRemoveNode.h
+    ${JOIPSources}/Editor/DialogueEditor/CommandChangeModelViaGui.cpp
+    ${JOIPSources}/Editor/DialogueEditor/CommandChangeModelViaGui.h
+    ${JOIPSources}/Editor/DialogueEditor/CommandChangeParameters.cpp
+    ${JOIPSources}/Editor/DialogueEditor/CommandChangeParameters.h
+    ${JOIPSources}/Editor/DialogueEditor/DialogueEditorDelegate.cpp
+    ${JOIPSources}/Editor/DialogueEditor/DialogueEditorDelegate.h
+    ${JOIPSources}/Editor/DialogueEditor/DialogueEditorSortFilterProxyModel.cpp
+    ${JOIPSources}/Editor/DialogueEditor/DialogueEditorSortFilterProxyModel.h
+    ${JOIPSources}/Editor/DialogueEditor/DialogueEditorTreeItem.cpp
+    ${JOIPSources}/Editor/DialogueEditor/DialogueEditorTreeItem.h
+    ${JOIPSources}/Editor/DialogueEditor/DialogueEditorTreeModel.cpp
+    ${JOIPSources}/Editor/DialogueEditor/DialogueEditorTreeModel.h
+    ${JOIPSources}/Editor/DialogueEditor/DialoguePropertyEditor.cpp
+    ${JOIPSources}/Editor/DialogueEditor/DialoguePropertyEditor.h
+    ${JOIPSources}/Editor/DialogueEditor/DialoguePropertyEditor.ui
+    ${JOIPSources}/Editor/DialogueEditor/DialogueTagsEditorOverlay.cpp
+    ${JOIPSources}/Editor/DialogueEditor/DialogueTagsEditorOverlay.h
+    ${JOIPSources}/Editor/DialogueEditor/DialogueTagsEditorOverlay.ui
     ${JOIPSources}/Editor/EditorActionBar.cpp
     ${JOIPSources}/Editor/EditorActionBar.h
     ${JOIPSources}/Editor/EditorActionBar.ui
@@ -131,9 +131,9 @@ macro(CreateJOIPProject JOIP_PROJECT_NAME)
     ${JOIPSources}/Editor/EditorWidgets/EditorCodeWidget.ui
     ${JOIPSources}/Editor/EditorWidgets/EditorDebuggableWidget.cpp
     ${JOIPSources}/Editor/EditorWidgets/EditorDebuggableWidget.h
-    ${JOIPSources}/Editor/EditorWidgets/EditorDialogWidget.cpp
-    ${JOIPSources}/Editor/EditorWidgets/EditorDialogWidget.h
-    ${JOIPSources}/Editor/EditorWidgets/EditorDialogWidget.ui
+    ${JOIPSources}/Editor/EditorWidgets/EditorDialogueWidget.cpp
+    ${JOIPSources}/Editor/EditorWidgets/EditorDialogueWidget.h
+    ${JOIPSources}/Editor/EditorWidgets/EditorDialogueWidget.ui
     ${JOIPSources}/Editor/EditorWidgets/EditorProjectSettingsWidget.cpp
     ${JOIPSources}/Editor/EditorWidgets/EditorProjectSettingsWidget.h
     ${JOIPSources}/Editor/EditorWidgets/EditorProjectSettingsWidget.ui
@@ -463,8 +463,8 @@ macro(CreateJOIPProject JOIP_PROJECT_NAME)
     ${JOIPSources}/Player/InformationWidget.ui
     ${JOIPSources}/Player/MetronomePaintedWidget.cpp
     ${JOIPSources}/Player/MetronomePaintedWidget.h
-    ${JOIPSources}/Player/ProjectDialogManager.cpp
-    ${JOIPSources}/Player/ProjectDialogManager.h
+    ${JOIPSources}/Player/ProjectDialogueManager.cpp
+    ${JOIPSources}/Player/ProjectDialogueManager.h
     ${JOIPSources}/Player/ProjectRunner.cpp
     ${JOIPSources}/Player/ProjectRunner.h
     ${JOIPSources}/Player/ProjectEventTarget.cpp
@@ -527,8 +527,8 @@ macro(CreateJOIPProject JOIP_PROJECT_NAME)
     ${JOIPSources}/Systems/Devices/DeviceSettings.h
     ${JOIPSources}/Systems/Devices/IDevice.h
     ${JOIPSources}/Systems/Devices/IDeviceConnector.h
-    ${JOIPSources}/Systems/DialogTree.cpp
-    ${JOIPSources}/Systems/DialogTree.h
+    ${JOIPSources}/Systems/DialogueTree.cpp
+    ${JOIPSources}/Systems/DialogueTree.h
     ${JOIPSources}/Systems/DLJobs/IDownloadJob.h
     ${JOIPSources}/Systems/DLJobs/DownloadJobRegistry.h
     ${JOIPSources}/Systems/DLJobs/EosDownloadJob.cpp

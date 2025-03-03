@@ -1,5 +1,5 @@
 #include "CommandAddRemoveNode.h"
-#include "DialogEditorTreeModel.h"
+#include "DialogueEditorTreeModel.h"
 
 #include "Editor/EditorCommandIds.h"
 

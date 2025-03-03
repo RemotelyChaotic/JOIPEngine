@@ -1,4 +1,4 @@
-#include "CommandAddNewDialogFile.h"
+#include "CommandAddNewDialogueFile.h"
 #include "Application.h"
 
 #include "Editor/EditorCommandIds.h"

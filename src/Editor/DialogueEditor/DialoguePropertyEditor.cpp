@@ -1,5 +1,5 @@
-#include "DialogPropertyEditor.h"
-#include "ui_DialogPropertyEditor.h"
+#include "DialoguePropertyEditor.h"
+#include "ui_DialoguePropertyEditor.h"
 #include "Application.h"
 
 #include "Editor/Resources/ResourceTreeItem.h"

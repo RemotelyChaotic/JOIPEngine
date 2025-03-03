@@ -1,7 +1,7 @@
 #ifndef CCOMMANDADDREMOVENODE_H
 #define CCOMMANDADDREMOVENODE_H
 
-#include "Systems/DialogTree.h"
+#include "Systems/DialogueTree.h"
 #include "Systems/Project.h"
 #include <QPointer>
 #include <QUndoCommand>

@@ -2,7 +2,7 @@
 #define EDITORDIALOGWIDGET_H
 
 #include "EditorWidgetBase.h"
-#include "ui_EditorDialogWidget.h"
+#include "ui_EditorDialogueWidget.h"
 #include "ui_EditorActionBar.h"
 #include <QPointer>
 #include <memory>

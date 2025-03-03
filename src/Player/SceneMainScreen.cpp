@@ -1,7 +1,7 @@
 #include "SceneMainScreen.h"
 #include "Application.h"
 #include "Constants.h"
-#include "ProjectDialogManager.h"
+#include "ProjectDialogueManager.h"
 #include "ProjectEventTarget.h"
 #include "ProjectRunner.h"
 #include "ProjectSceneManager.h"

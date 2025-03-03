@@ -1,4 +1,4 @@
-#include "DialogEditorTreeItem.h"
+#include "DialogueEditorTreeItem.h"
 
 #include <QApplication>
 

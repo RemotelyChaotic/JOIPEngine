@@ -1,7 +1,7 @@
 #ifndef CDIALOGueEDITORTREEMODEL_H
 #define CDIALOGueEDITORTREEMODEL_H
 
-#include "Systems/DialogTree.h"
+#include "Systems/DialogueTree.h"
 #include "Systems/Project.h"
 
 #include <QAbstractItemModel>
