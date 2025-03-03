@@ -101,6 +101,7 @@ Rectangle {
             let index = gridView.indexAt(posInContentItem.x, posInContentItem.y);
             gridView.currentIndex = index;
         }
+        enabled: achievementsView.visible
     }
 
     Component {
