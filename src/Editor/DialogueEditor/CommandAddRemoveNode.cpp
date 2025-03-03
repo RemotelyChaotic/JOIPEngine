@@ -46,7 +46,7 @@ CCommandAddDialogueNode::CCommandAddDialogueNode(const tspProject& spProject,
                                              std::shared_ptr<CDialogueNode> spNode,
                                              QPointer<CDialogueEditorTreeModel> pModel,
                                              QUndoCommand* pParent) :
-  QUndoCommand("Added dialog node: " + (nullptr != spNode && !spNode->m_sName.isEmpty() ? spNode->m_sName : "<empty>"), pParent),
+  QUndoCommand("Added dialogue node: " + (nullptr != spNode && !spNode->m_sName.isEmpty() ? spNode->m_sName : "<empty>"), pParent),
   m_spProject(spProject),
   m_pModel(pModel),
   m_vsPath(vsPath),
@@ -104,7 +104,7 @@ CCommandRemoveDialogueNode::CCommandRemoveDialogueNode(const tspProject& spProje
     auto spNode = pModel->Node(idx);
     if (nullptr != spNode)
     {
-      setText("Removed dialog node: " + (nullptr != spNode && !spNode->m_sName.isEmpty() ? spNode->m_sName : "<empty>"));
+      setText("Removed dialogue node: " + (nullptr != spNode && !spNode->m_sName.isEmpty() ? spNode->m_sName : "<empty>"));
       m_node = dialogue_tree::SerializeNode(spNode);
       m_iPos = idx.row();
     }

@@ -62,8 +62,8 @@ public:
   bool HasCondition(const QModelIndex& index = QModelIndex()) const;
   QModelIndex Index(const QStringList& vsPath) const;
   bool IsCategoryType(const QModelIndex& index = QModelIndex()) const;
-  bool IsDialogType(const QModelIndex& index = QModelIndex()) const;
-  bool IsDialogFragmentType(const QModelIndex& index = QModelIndex()) const;
+  bool IsDialogueType(const QModelIndex& index = QModelIndex()) const;
+  bool IsDialogueFragmentType(const QModelIndex& index = QModelIndex()) const;
   QStringList Path(QModelIndex idx) const;
   std::shared_ptr<CDialogueNode> Node(QModelIndex idx) const;
   std::shared_ptr<CDialogueNode> Root() const;

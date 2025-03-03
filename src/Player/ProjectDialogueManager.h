@@ -22,7 +22,7 @@ public:
   void LoadProject(const tspProject& spProject);
   void UnloadProject();
 
-  std::shared_ptr<CDialogueNodeDialogue> FindDialog(const QString& sId);
+  std::shared_ptr<CDialogueNodeDialogue> FindDialogue(const QString& sId);
   std::vector<std::shared_ptr<CDialogueNodeDialogue>> FindDialogue(const QRegularExpression& rx);
   std::vector<std::shared_ptr<CDialogueNodeDialogue>> FindDialogueByTag(const QStringList& vsTags);
 

@@ -71,7 +71,7 @@ void CProjectDialogueManager::UnloadProject()
 
 //----------------------------------------------------------------------------------------
 //
-std::shared_ptr<CDialogueNodeDialogue> CProjectDialogueManager::FindDialog(const QString& sId)
+std::shared_ptr<CDialogueNodeDialogue> CProjectDialogueManager::FindDialogue(const QString& sId)
 {
   for (const auto& [sPathRef, nodeData] : m_vspDialoguesOnlyFlat)
   {
@@ -137,7 +137,7 @@ QJSValue CProjectDialogueManagerWrapper::dialogue(const QString& sId)
 {
   if (auto spInst = m_wpInstance.lock())
   {
-    auto spDial = spInst->FindDialog(sId);
+    auto spDial = spInst->FindDialogue(sId);
     if (nullptr != spDial)
     {
       CDialogueWrapper* pWrapper =

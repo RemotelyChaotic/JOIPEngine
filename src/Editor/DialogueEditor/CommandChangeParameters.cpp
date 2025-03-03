@@ -9,7 +9,7 @@ CCommandChangeDialogueParameters::CCommandChangeDialogueParameters(const tspProj
                                                    std::shared_ptr<CDialogueNode> spNode,
                                                    QPointer<CDialogueEditorTreeModel> pModel,
                                                    QUndoCommand* pParent) :
-  QUndoCommand("Changed dialog parameters: " + (nullptr != spNode && !spNode->m_sName.isEmpty() ? spNode->m_sName : "<empty>"), pParent),
+  QUndoCommand("Changed dialogue parameters: " + (nullptr != spNode && !spNode->m_sName.isEmpty() ? spNode->m_sName : "<empty>"), pParent),
   m_spProject(spProject),
   m_pModel(pModel),
   m_vsPathNew(vsPath)

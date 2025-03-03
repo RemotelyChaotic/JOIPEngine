@@ -52,7 +52,7 @@ CEditorModel::CEditorModel(QWidget* pParent) :
   m_spResourceTreeModel(std::make_unique<CResourceTreeItemModel>(m_spUndoStack.get())),
   m_spSettings(CApplication::Instance()->Settings()),
   m_spJobWorkerSystem(std::make_shared<CThreadedSystem>("EditorJobWorker")),
-  m_spDialogModel(std::make_shared<CDialogueEditorTreeModel>(pParent)),
+  m_spDialogueModel(std::make_shared<CDialogueEditorTreeModel>(pParent)),
   m_spCurrentProject(nullptr),
   m_wpDbManager(CApplication::Instance()->System<CDatabaseManager>()),
   m_vwpTutorialStateSwitchHandlers(),
@@ -130,7 +130,7 @@ bool CEditorModel::IsReadOnly() const
 //
 CDialogueEditorTreeModel* CEditorModel::DialogueModel() const
 {
-  return m_spDialogModel.get();
+  return m_spDialogueModel.get();
 }
 
 //----------------------------------------------------------------------------------------
@@ -289,7 +289,7 @@ QString CEditorModel::AddNewFileToScene(QPointer<QWidget> pParentForDialog,
           formats = SResourceFormats::LayoutFormats();
         } break;
         default:
-          qWarning() << tr("No formats specified for editor model dialog.");
+          qWarning() << tr("No formats specified for editor model dialogue.");
           return QString();
       }
     }
@@ -616,7 +616,7 @@ void CEditorModel::LoadProject(qint32 iId)
 
   m_spResourceTreeModel->InitializeModel(m_spCurrentProject);
   m_spEditableFileModel->InitializeModel(m_spCurrentProject);
-  m_spDialogModel->InitializeModel(m_spCurrentProject);
+  m_spDialogueModel->InitializeModel(m_spCurrentProject);
 }
 
 //----------------------------------------------------------------------------------------
@@ -726,7 +726,7 @@ void CEditorModel::UnloadProject()
   JobWorker()->StopRunningJobs();
   JobWorker()->WaitForFinished();
 
-  m_spDialogModel->DeInitializeModel();
+  m_spDialogueModel->DeInitializeModel();
   m_spEditableFileModel->DeInitializeModel();
   m_spResourceTreeModel->DeInitializeModel();
   m_spFlowSceneModel->clearScene();

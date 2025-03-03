@@ -331,7 +331,7 @@ void CDialoguePropertyEditor::on_pFilter_SignalFilterChanged(const QString& sTex
 void CDialoguePropertyEditor::on_pConfirmButton_clicked()
 {
   if (!m_bInitialized) { return; }
-  emit SignalDialogChanged(m_vsPath, m_spNode);
+  emit SignalDialogueChanged(m_vsPath, m_spNode);
   Hide();
   m_spNode = nullptr;
 }

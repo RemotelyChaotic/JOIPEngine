@@ -28,7 +28,7 @@ public:
   void UnloadProject();
 
 signals:
-  void SignalDialogChanged(QStringList vsPath, const std::shared_ptr<CDialogueNode>& spNode);
+  void SignalDialogueChanged(QStringList vsPath, const std::shared_ptr<CDialogueNode>& spNode);
 
 public slots:
   void Resize() override;

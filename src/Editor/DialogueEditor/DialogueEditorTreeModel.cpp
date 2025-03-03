@@ -228,7 +228,7 @@ int CDialogueEditorTreeModel::rowCount(const QModelIndex& parent) const
 {
   const CDialogueEditorTreeItem* pParentItem = GetItem(parent);
   if (nullptr == pParentItem) { return 0; }
-  if (IsDialogType(parent))
+  if (IsDialogueType(parent))
   {
     return HasCondition(parent) ? pParentItem->ChildCount() : 0;
   }
@@ -270,13 +270,13 @@ bool CDialogueEditorTreeModel::setData(const QModelIndex& index, const QVariant&
   {
     emit dataChanged(index, index, {Qt::DisplayRole, iRole});
 
-    if (IsDialogType(index))
+    if (IsDialogueType(index))
     {
       QModelIndex tl = this->index(0, index.column(), index);
       QModelIndex br = this->index(rowCount(index)-1, index.column(), index);
       emit dataChanged(tl, br, {Qt::DisplayRole, iRole});
     }
-    else if (IsDialogFragmentType(index))
+    else if (IsDialogueFragmentType(index))
     {
       QModelIndex par = parent(index);
       emit dataChanged(par, par, {Qt::DisplayRole, iRole});
@@ -468,7 +468,7 @@ bool CDialogueEditorTreeModel::IsCategoryType(const QModelIndex& index) const
 
 //----------------------------------------------------------------------------------------
 //
-bool CDialogueEditorTreeModel::IsDialogType(const QModelIndex& index) const
+bool CDialogueEditorTreeModel::IsDialogueType(const QModelIndex& index) const
 {
   if (!index.isValid()) { return false; }
   CDialogueEditorTreeItem* pItem = GetItem(index);
@@ -477,7 +477,7 @@ bool CDialogueEditorTreeModel::IsDialogType(const QModelIndex& index) const
 
 //----------------------------------------------------------------------------------------
 //
-bool CDialogueEditorTreeModel::IsDialogFragmentType(const QModelIndex& index) const
+bool CDialogueEditorTreeModel::IsDialogueFragmentType(const QModelIndex& index) const
 {
   if (!index.isValid()) { return false; }
   CDialogueEditorTreeItem* pItem = GetItem(index);
@@ -601,7 +601,7 @@ QString CDialogueEditorTreeModel::GetToolTip(const QModelIndex& index) const
   CDialogueEditorTreeItem* item = static_cast<CDialogueEditorTreeItem*>(index.internalPointer());
   auto spNode = item->Node();
 
-  auto fnDialogData = [](const std::shared_ptr<CDialogueData>& spDial, bool bNoCond)
+  auto fnDialogueData = [](const std::shared_ptr<CDialogueData>& spDial, bool bNoCond)
   {
     QString sCond = spDial->m_sCondition;
     if (sCond.isEmpty()) { sCond = "<nobr>&lt;No Condition&gt;</nobr>"; }
@@ -655,7 +655,7 @@ QString CDialogueEditorTreeModel::GetToolTip(const QModelIndex& index) const
         if (!spDial->m_bHasCondition && spDial->m_vspChildren.size() > 0)
         {
           auto spDialFrag = std::static_pointer_cast<CDialogueData>(spDial->m_vspChildren[0]);
-          sRet = sRet.arg(fnDialogData(spDialFrag, true));
+          sRet = sRet.arg(fnDialogueData(spDialFrag, true));
         }
         else
         {
@@ -670,7 +670,7 @@ QString CDialogueEditorTreeModel::GetToolTip(const QModelIndex& index) const
       else if (EDialogueTreeNodeType::eDialogueFragment == spNode->m_type._to_integral())
       {
         auto spDial = std::static_pointer_cast<CDialogueData>(spNode);
-        sRet = sRet.arg(fnDialogData(spDial, false));
+        sRet = sRet.arg(fnDialogueData(spDial, false));
       }
     } break;
   }

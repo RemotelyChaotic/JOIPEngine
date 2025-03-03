@@ -62,7 +62,7 @@ CEditorDialogueWidget::CEditorDialogueWidget(QWidget *parent) :
   m_spUi->pTreeView->addAction(m_pPasteAction);
   connect(m_pPasteAction, &QAction::triggered, this, &CEditorDialogueWidget::SlotPaste);
 
-  connect(m_spPropertiesOverlay.get(), &CDialoguePropertyEditor::SignalDialogChanged,
+  connect(m_spPropertiesOverlay.get(), &CDialoguePropertyEditor::SignalDialogueChanged,
           this, &CEditorDialogueWidget::SlotDialogueChanged);
 
   connect(m_spUi->pFilter, &CSearchWidget::SignalFilterChanged,

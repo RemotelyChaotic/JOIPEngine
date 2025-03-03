@@ -29,14 +29,14 @@ void CCommandAddDialogueTag::undo()
   {
     QModelIndex idx = m_pModel->Index(m_vsPath);
     auto spNode = m_pModel->Node(idx);
-    auto spDialogNode = std::dynamic_pointer_cast<CDialogueNodeDialogue>(spNode);
-    if (nullptr != spDialogNode)
+    auto spDialogueNode = std::dynamic_pointer_cast<CDialogueNodeDialogue>(spNode);
+    if (nullptr != spDialogueNode)
     {
       QReadLocker l(&m_spTag->m_rwLock);
-      auto it = spDialogNode->m_tags.find(m_spTag->m_sName);
-      if (spDialogNode->m_tags.end() != it)
+      auto it = spDialogueNode->m_tags.find(m_spTag->m_sName);
+      if (spDialogueNode->m_tags.end() != it)
       {
-        spDialogNode->m_tags.erase(it);
+        spDialogueNode->m_tags.erase(it);
       }
     }
   }
@@ -50,22 +50,22 @@ void CCommandAddDialogueTag::redo()
   {
     QModelIndex idx = m_pModel->Index(m_vsPath);
     auto spNode = m_pModel->Node(idx);
-    auto spDialogNode = std::dynamic_pointer_cast<CDialogueNodeDialogue>(spNode);
-    if (nullptr != spDialogNode)
+    auto spDialogueNode = std::dynamic_pointer_cast<CDialogueNodeDialogue>(spNode);
+    if (nullptr != spDialogueNode)
     {
       {
         QReadLocker l(&m_spTag->m_rwLock);
-        auto it = spDialogNode->m_tags.find(m_spTag->m_sName);
-        if (spDialogNode->m_tags.end() == it)
+        auto it = spDialogueNode->m_tags.find(m_spTag->m_sName);
+        if (spDialogueNode->m_tags.end() == it)
         {
-          spDialogNode->m_tags.insert({m_spTag->m_sName, m_spTag});
+          spDialogueNode->m_tags.insert({m_spTag->m_sName, m_spTag});
         }
       }
 
       auto spProject = spDbManager->FindProject(m_sCurrentProject);
       if (nullptr != spProject)
       {
-        spDbManager->AddTag(spProject, spDialogNode->m_sFileId,
+        spDbManager->AddTag(spProject, spDialogueNode->m_sFileId,
                             m_spTag->m_sType, m_spTag->m_sName, m_spTag->m_sDescribtion);
       }
     }
@@ -119,22 +119,22 @@ void CCommandRemoveDialogueTag::undo()
   {
     QModelIndex idx = m_pModel->Index(m_vsPath);
     auto spNode = m_pModel->Node(idx);
-    auto spDialogNode = std::dynamic_pointer_cast<CDialogueNodeDialogue>(spNode);
-    if (nullptr != spDialogNode)
+    auto spDialogueNode = std::dynamic_pointer_cast<CDialogueNodeDialogue>(spNode);
+    if (nullptr != spDialogueNode)
     {
       {
         QReadLocker l(&m_spTag->m_rwLock);
-        auto it = spDialogNode->m_tags.find(m_spTag->m_sName);
-        if (spDialogNode->m_tags.end() == it)
+        auto it = spDialogueNode->m_tags.find(m_spTag->m_sName);
+        if (spDialogueNode->m_tags.end() == it)
         {
-          spDialogNode->m_tags.insert({m_spTag->m_sName, m_spTag});
+          spDialogueNode->m_tags.insert({m_spTag->m_sName, m_spTag});
         }
       }
 
       auto spProject = spDbManager->FindProject(m_sCurrentProject);
       if (nullptr != spProject)
       {
-        spDbManager->AddTag(spProject, spDialogNode->m_sFileId,
+        spDbManager->AddTag(spProject, spDialogueNode->m_sFileId,
                             m_spTag->m_sType, m_spTag->m_sName, m_spTag->m_sDescribtion);
       }
     }
@@ -149,14 +149,14 @@ void CCommandRemoveDialogueTag::redo()
   {
     QModelIndex idx = m_pModel->Index(m_vsPath);
     auto spNode = m_pModel->Node(idx);
-    auto spDialogNode = std::dynamic_pointer_cast<CDialogueNodeDialogue>(spNode);
-    if (nullptr != spDialogNode)
+    auto spDialogueNode = std::dynamic_pointer_cast<CDialogueNodeDialogue>(spNode);
+    if (nullptr != spDialogueNode)
     {
       QReadLocker l(&m_spTag->m_rwLock);
-      auto it = spDialogNode->m_tags.find(m_spTag->m_sName);
-      if (spDialogNode->m_tags.end() != it)
+      auto it = spDialogueNode->m_tags.find(m_spTag->m_sName);
+      if (spDialogueNode->m_tags.end() != it)
       {
-        spDialogNode->m_tags.erase(it);
+        spDialogueNode->m_tags.erase(it);
       }
     }
   }
