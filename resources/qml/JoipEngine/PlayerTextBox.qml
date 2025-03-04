@@ -30,6 +30,7 @@ Rectangle {
         boxLoaderInput.setSource("");
         textLogModel.clear();
         textLogModel.append({
+            "defaultText": "",
             "textAlignment": "",
             "textContent": "",
             "buttonTexts": [],
@@ -53,6 +54,7 @@ Rectangle {
         var colObjBg = dataContainer.backgroundColors;
         var colObjTx = dataContainer.textColors;
         var dataForInput = {
+            "defaultText": "",
             "textAlignment": "",
             "textContent": sStoreIntoVar,
             "buttonTexts": vsLabels,
@@ -66,6 +68,7 @@ Rectangle {
             "type": "TextBoxButtonsDelegate.qml"
         };
         var dataForLoader = {
+            "defaultText": "",
             "buttonTexts": vsLabels,
             "textContent": sStoreIntoVar,
             "storeIntoStorageInstead": bStoreIntoStorageInstead,
@@ -92,9 +95,10 @@ Rectangle {
         showButtonPrompts(vsLabels);
     }
 
-    function showInput(sStoreIntoVar, sRequestId, bStoreIntoStorageInstead)
+    function showInput(sDefault, sStoreIntoVar, sRequestId, bStoreIntoStorageInstead)
     {
         var dataForInput = {
+            "defaultText": sDefault,
             "textAlignment": "",
             "textContent": sStoreIntoVar,
             "buttonTexts": [],
@@ -109,6 +113,7 @@ Rectangle {
             "type": "TextBoxInputDelegate.qml"
         };
         var dataForLoader = {
+            "defaultText": sDefault,
             "textContent": sStoreIntoVar,
             "storeIntoStorageInstead": bStoreIntoStorageInstead,
             "backgroundColor": undefined !== dataContainer.backgroundColors  && dataContainer.backgroundColors.length > 0 ? dataContainer.backgroundColors[0] : "#ff000000",
@@ -130,6 +135,7 @@ Rectangle {
     function showText(sText, onlyInList)
     {
         var dataForList = {
+            "defaultText": "",
             "textAlignment": dataContainer.textAlignment,
             "textContent": sText,
             "buttonTexts": [],
@@ -144,6 +150,7 @@ Rectangle {
             "type": "TextBoxTextDelegate.qml"
         };
         var dataForLoader = {
+            "defaultText": "",
             "textAlignment": dataContainer.textAlignment,
             "textContent": sText,
             "backgroundColor": undefined !== dataContainer.backgroundColors  && dataContainer.backgroundColors.length > 0 ? dataContainer.backgroundColors[0] : "#ff000000",
@@ -221,9 +228,10 @@ Rectangle {
         {
             textBox.showButtonPrompts(vsLabels);
         },
-        showInput: function(sStoreIntoVar, sRequestId, bStoreIntoStorageInstead)
+        //sDefault nees to be in last place because of EOS compatibility
+        showInput: function(sStoreIntoVar, sRequestId, bStoreIntoStorageInstead, sDefault = "")
         {
-            signalEmitter.showInput(sStoreIntoVar, sRequestId, bStoreIntoStorageInstead);
+            signalEmitter.showInput(sDefault, sStoreIntoVar, sRequestId, bStoreIntoStorageInstead);
         },
         showText: function(sText)
         {
@@ -323,7 +331,7 @@ Rectangle {
             hideTimer.reset(textBox.hideTimerIntervalMS);
         }
         onShowInput: {
-            textBox.showInput(sStoreIntoVar, sRequestId, bStoreIntoStorageInstead);
+            textBox.showInput(sDefault, sStoreIntoVar, sRequestId, bStoreIntoStorageInstead);
             hideTimer.reset(textBox.hideTimerIntervalMS);
         }
         onShowText: {

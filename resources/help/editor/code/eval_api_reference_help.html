@@ -578,14 +578,20 @@
         var choice = textBox.showButtonPrompts(["Yes","No"]); /* Will return 0 if the player presses "Yes" and 1 if the player presses "No". */<br>
         <br></li>
 
-        <li><b>showInput ( [ string varName, string id, bool ] ): string:</b><br>
+        <li><b>showInput ( [ string varName, string id, bool [, string defaultText ] ] ): string:</b><br>
         Shows a text input editor. The colors set by setBackgroundColors and setTextColors will be used for
         text and background coloring. This function blocks until the player enters a
         text, upon which the text will be returned.<br>
         The optional arguments determine if the input should be written to local storage. If set
         the result will be written into &lt;<i>varName</i>&gt;.<br>
+        The optional last argument is the default value of the text field on creation. This signature
+        differs from the <a href="qrc:/resources/help/editor/code/script_reference_help.html">API</a>,
+        where the default text is the first argument. This is to make Eval-Scripts work with the EOS interface.<br>
         <i>Example Usage:</i><br>
         var input = textBox.showInput();<br>
+        var input = textBox.showInput("", "storeVal", true); // store in storage<br>
+        var input = textBox.showInput("storeVal", "", false); // store in var storeVal<br>
+        var input = textBox.showInput("", "", false, "default");<br>
         <br></li>
 
         <li><b>showText ( string [, double [, bool ] ] ):</b><br>

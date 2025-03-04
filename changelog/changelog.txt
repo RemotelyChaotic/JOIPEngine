@@ -15,6 +15,10 @@ Changes:
   or a reference to a Resource object. If given it will play the Resource, as well as
   show the text.
 - Player buttons have a tooltip.
+- The first argument of PlayerTextBox showInput if now the default value. If you save an
+  older project in 1.5.0+ make sure to check showInput uses if you used the old first
+  parameter and change to showInput("", ...). Old Projects that aren't saved in 1.5.0+
+  continue to work as they did before.
 
 Fixed Bugs:
 - JS imports work even when the files are in different directories.

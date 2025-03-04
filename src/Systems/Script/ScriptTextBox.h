@@ -42,7 +42,7 @@ signals:
                             QString sSoundResource, QStringList vsTags);
   void showButtonPrompts(QStringList vsLabels, QString sStoreIntoVar, QString sRequestId, bool bStoreIntoStorageInstead);
   void showButtonReturnValue(qint32 iIndex, QString sRequestId);
-  void showInput(QString sStoreIntoVar, QString sRequestId, bool bStoreIntoStorageInstead);
+  void showInput(QString sDefault, QString sStoreIntoVar, QString sRequestId, bool bStoreIntoStorageInstead);
   void showInputReturnValue(QString sValue, QString sRequestId);
   void showText(QString sText, double dSkippableWaitS, QString sResource);
   void soundFinished(QString sResource);
@@ -77,7 +77,8 @@ public slots:
   qint32 showButtonPrompts(QVariant vsLabels);
   qint32 showButtonPrompts(QVariant vsLabels, QString sStoreInto);
   QString showInput();
-  QString showInput(QString sStoreInto);
+  QString showInput(QString sDefault);
+  QString showInput(QString sDefault, QString sStoreInto);
   QVariant getDialogue(QVariant data);
   void showDialogue(QVariant data);
   void showText(QString sText);

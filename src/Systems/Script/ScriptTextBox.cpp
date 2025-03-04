@@ -421,14 +421,27 @@ QString CScriptTextBox::showInput()
 
 //----------------------------------------------------------------------------------------
 //
-QString CScriptTextBox::showInput(QString sStoreInto)
+QString CScriptTextBox::showInput(QString sDefault)
+{
+  bool bBefore15 = false;
+  QReadLocker rl(&m_spProject->m_rwLock);
+  {
+    bBefore15 = m_spProject->m_iTargetVersion < SVersion(1, 5, 0);
+  }
+  // before 1.5 the first parameter was the sStoreInto param...
+  return bBefore15 ? showInput(QString(), sDefault) : showInput(sDefault, QString());
+}
+
+//----------------------------------------------------------------------------------------
+//
+QString CScriptTextBox::showInput(QString sDefault, QString sStoreInto)
 {
   if (!CheckIfScriptCanRun()) { return QString(); }
 
   QString sRequestId = QUuid::createUuid().toString();
   auto pSignalEmitter = SignalEmitter<CTextBoxSignalEmitter>();
-  QTimer::singleShot(0, this, [&pSignalEmitter, sStoreInto, sRequestId]() {
-    emit pSignalEmitter->showInput(sStoreInto, sRequestId, false);
+  QTimer::singleShot(0, this, [&pSignalEmitter, sDefault, sStoreInto, sRequestId]() {
+    emit pSignalEmitter->showInput(sDefault, sStoreInto, sRequestId, false);
   });
 
   // local loop to wait for answer
@@ -1009,7 +1022,7 @@ QString CEosScriptTextBox::showInput(const QString& sStoreIntoVar)
 
   auto pSignalEmitter = SignalEmitter<CTextBoxSignalEmitter>();
   QTimer::singleShot(0, this, [&pSignalEmitter,sStoreIntoVar,sRequestId]() {
-    emit pSignalEmitter->showInput(sStoreIntoVar, sRequestId, false);
+    emit pSignalEmitter->showInput(QString(), sStoreIntoVar, sRequestId, false);
   });
 
   // local loop to wait for answer

@@ -14,6 +14,7 @@ Rectangle {
     color: "transparent"
 
     // asign model or parent properties for reference in delegate
+    property string defaultTextValue: inList ? model.defaultText : ""
     property var backgroundColor: inList ? model.backgroundColor : "black"
     property var textColor: inList ? model.textColor : "white"
     property string textContent: inList ? model.textContent : ""
@@ -88,6 +89,12 @@ Rectangle {
     }
 
     Component.onCompleted: {
+        if ("" !== textDelegate.defaultTextValue) {
+            textInput.text = textDelegate.defaultTextValue;
+            textInput.focus = true;
+            textInput.forceActiveFocus();
+        }
+
         if (inList) {
             listView.delegateComponentLoaded();
         } else {

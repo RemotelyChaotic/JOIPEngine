@@ -628,18 +628,24 @@
         local choice = textBox:showInput({'Yes','No'}, 'myInputVar'); -- acts as if localStorage:store("myInputVar", choice) was called after<br>
         <br></li>
 
-        <li><b>showInput ( [ string varName ] ): string:</b><br>
+        <li><b>showInput ( [ string defaultText [, string varName ] ] ): string:</b><br>
         Shows a text input editor. The colors set by setBackgroundColors and setTextColors will be used for
         text and background coloring. This function blocks until the player enters a
         text, upon which the text will be returned.<br>
+        The optional first argument is the default value of the text field on creation.<br>
         The optional second argument determines if the input should be written to local storage. If set
         the result will be written into &lt;<i>varName</i>&gt;.<br>
+        Before 1.5.0 the first argument was the storage value and Projects saved with engine value &lt; 1.5.0
+        treat it as such. If thhe project was saved in 1.5.0 or greater, the first argument is treated as
+        the default value.<br>
         <i>Example Usage (JS):</i><br>
         var input = textBox.showInput();<br>
-        var input = textBox.showInput("myInputVar"); // acts as if localStorage.store("myInputVar", input) was called after<br>
+        var input = textBox.showInput("defaultText");<br>
+        var input = textBox.showInput("", "myInputVar"); // acts as if localStorage.store("myInputVar", input) was called after<br>
         <i>Example Usage (Lua):</i><br>
         local input = textBox:showInput();<br>
-        local input = textBox:showInput("myInputVar"); // acts as if localStorage:store("myInputVar", input) was called after<br>
+        var input = textBox.showInput('defaultText');<br>
+        local input = textBox:showInput('', 'myInputVar'); // acts as if localStorage:store("myInputVar", input) was called after<br>
         <br></li>
 
         <li><b>getDialogue ( string | regex | string[] | Tag[] ): Dialogue:</b><br>
