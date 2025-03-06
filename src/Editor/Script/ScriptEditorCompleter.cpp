@@ -33,56 +33,59 @@ public:
 
     beginResetModel();
 
-    disconnect(m_pSource, &QAbstractItemModel::dataChanged,
-               this, &CEditorModelWrapper::dataChanged);
+    if (nullptr != m_pSource)
+    {
+      disconnect(m_pSource, &QAbstractItemModel::dataChanged,
+                 this, &CEditorModelWrapper::dataChanged);
 
-    disconnect(m_pSource, &QAbstractItemModel::headerDataChanged,
-               this, &CEditorModelWrapper::headerDataChanged);
+      disconnect(m_pSource, &QAbstractItemModel::headerDataChanged,
+                 this, &CEditorModelWrapper::headerDataChanged);
 
-    disconnect(m_pSource, &QAbstractItemModel::rowsAboutToBeInserted,
-               this, &CEditorModelWrapper::rowsAboutToBeInserted);
+      disconnect(m_pSource, &QAbstractItemModel::rowsAboutToBeInserted,
+                 this, &CEditorModelWrapper::rowsAboutToBeInserted);
 
-    disconnect(m_pSource, &QAbstractItemModel::rowsInserted,
-               this, &CEditorModelWrapper::rowsInserted);
+      disconnect(m_pSource, &QAbstractItemModel::rowsInserted,
+                 this, &CEditorModelWrapper::rowsInserted);
 
-    disconnect(m_pSource, &QAbstractItemModel::columnsAboutToBeInserted,
-               this, &CEditorModelWrapper::columnsAboutToBeInserted);
+      disconnect(m_pSource, &QAbstractItemModel::columnsAboutToBeInserted,
+                 this, &CEditorModelWrapper::columnsAboutToBeInserted);
 
-    disconnect(m_pSource, &QAbstractItemModel::columnsInserted,
-               this, &CEditorModelWrapper::columnsInserted);
+      disconnect(m_pSource, &QAbstractItemModel::columnsInserted,
+                 this, &CEditorModelWrapper::columnsInserted);
 
-    disconnect(m_pSource, &QAbstractItemModel::rowsAboutToBeRemoved,
-               this, &CEditorModelWrapper::rowsAboutToBeRemoved);
+      disconnect(m_pSource, &QAbstractItemModel::rowsAboutToBeRemoved,
+                 this, &CEditorModelWrapper::rowsAboutToBeRemoved);
 
-    disconnect(m_pSource, &QAbstractItemModel::rowsRemoved,
-               this, &CEditorModelWrapper::rowsRemoved);
+      disconnect(m_pSource, &QAbstractItemModel::rowsRemoved,
+                 this, &CEditorModelWrapper::rowsRemoved);
 
-    disconnect(m_pSource, &QAbstractItemModel::columnsAboutToBeRemoved,
-               this, &CEditorModelWrapper::columnsAboutToBeRemoved);
+      disconnect(m_pSource, &QAbstractItemModel::columnsAboutToBeRemoved,
+                 this, &CEditorModelWrapper::columnsAboutToBeRemoved);
 
-    disconnect(m_pSource, &QAbstractItemModel::columnsRemoved,
-               this, &CEditorModelWrapper::columnsRemoved);
+      disconnect(m_pSource, &QAbstractItemModel::columnsRemoved,
+                 this, &CEditorModelWrapper::columnsRemoved);
 
-    disconnect(m_pSource, &QAbstractItemModel::rowsAboutToBeMoved,
-               this, &CEditorModelWrapper::rowsAboutToBeMoved);
+      disconnect(m_pSource, &QAbstractItemModel::rowsAboutToBeMoved,
+                 this, &CEditorModelWrapper::rowsAboutToBeMoved);
 
-    disconnect(m_pSource, &QAbstractItemModel::rowsMoved,
-               this, &CEditorModelWrapper::rowsMoved);
+      disconnect(m_pSource, &QAbstractItemModel::rowsMoved,
+                 this, &CEditorModelWrapper::rowsMoved);
 
-    disconnect(m_pSource, &QAbstractItemModel::columnsAboutToBeMoved,
-               this, &CEditorModelWrapper::columnsAboutToBeMoved);
+      disconnect(m_pSource, &QAbstractItemModel::columnsAboutToBeMoved,
+                 this, &CEditorModelWrapper::columnsAboutToBeMoved);
 
-    disconnect(m_pSource, &QAbstractItemModel::columnsMoved,
-               this, &CEditorModelWrapper::columnsMoved);
+      disconnect(m_pSource, &QAbstractItemModel::columnsMoved,
+                 this, &CEditorModelWrapper::columnsMoved);
 
-    disconnect(m_pSource, &QAbstractItemModel::layoutAboutToBeChanged,
-               this, &CEditorModelWrapper::layoutAboutToBeChanged);
+      disconnect(m_pSource, &QAbstractItemModel::layoutAboutToBeChanged,
+                 this, &CEditorModelWrapper::layoutAboutToBeChanged);
 
-    disconnect(m_pSource, &QAbstractItemModel::layoutChanged,
-               this, &CEditorModelWrapper::layoutChanged);
+      disconnect(m_pSource, &QAbstractItemModel::layoutChanged,
+                 this, &CEditorModelWrapper::layoutChanged);
 
-    disconnect(m_pSource, &QAbstractItemModel::modelAboutToBeReset, this, &CEditorModelWrapper::modelAboutToBeReset);
-    disconnect(m_pSource, &QAbstractItemModel::modelReset, this, &CEditorModelWrapper::modelReset);
+      disconnect(m_pSource, &QAbstractItemModel::modelAboutToBeReset, this, &CEditorModelWrapper::modelAboutToBeReset);
+      disconnect(m_pSource, &QAbstractItemModel::modelReset, this, &CEditorModelWrapper::modelReset);
+    }
 
     m_pSource = pSource;
     if (nullptr == m_pSource)

@@ -111,8 +111,12 @@ void CProjectCardSelectionWidget::UnloadProjects()
   QQuickItem* pRootObject =  m_spUi->pQmlWidget->rootObject();
   QMetaObject::invokeMethod(pRootObject, "onUnLoad");
 
-  disconnect(m_spUi->pQmlWidget->rootObject(), SIGNAL(selectedProjectIndex(int)),
-             this, SLOT(SlotCardClicked(int)));
+  pRootObject = m_spUi->pQmlWidget->rootObject();
+  if (nullptr != pRootObject)
+  {
+    disconnect(pRootObject, SIGNAL(selectedProjectIndex(int)),
+               this, SLOT(SlotCardClicked(int)));
+  }
 
   bool bOk = QMetaObject::invokeMethod(this, "SlotUnloadFinished", Qt::QueuedConnection);
   assert(bOk);

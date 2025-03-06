@@ -524,10 +524,18 @@ bool CResourceScriptWrapper::isAnimatedImpl()
       if (IsLocalFile(m_spData->m_sPath))
       {
         locker.unlock();
-        QImageReader reader(ResourceUrlToAbsolutePath(m_spData));
-        if (reader.canRead())
+        QString sPath = ResourceUrlToAbsolutePath(m_spData);
+        if (QFileInfo::exists(sPath))
         {
-          return reader.supportsAnimation();
+          QImageReader reader(sPath);
+          if (reader.canRead())
+          {
+            return reader.supportsAnimation();
+          }
+          else
+          {
+            return false;
+          }
         }
         else
         {
