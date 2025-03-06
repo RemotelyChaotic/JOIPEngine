@@ -10,6 +10,11 @@
 
 using namespace resource_item;
 
+namespace
+{
+  const qint32 c_iResourceTimerIntervalMs = 100;
+}
+
 CResourceTreeItemModel::CResourceTreeItemModel(QPointer<QUndoStack> pUndoStack,
                                                QObject* pParent) :
   QAbstractItemModel(pParent),
@@ -26,6 +31,11 @@ CResourceTreeItemModel::CResourceTreeItemModel(QPointer<QUndoStack> pUndoStack,
           this, &CResourceTreeItemModel::SlotResourceAdded, Qt::QueuedConnection);
   connect(spDbManager.get(), &CDatabaseManager::SignalResourceRemoved,
           this, &CResourceTreeItemModel::SlotResourceRemoved, Qt::QueuedConnection);
+
+  m_resourcecheckTimer.setSingleShot(false);
+  m_resourcecheckTimer.setInterval(c_iResourceTimerIntervalMs);
+  connect(&m_resourcecheckTimer, &QTimer::timeout, this,
+          &CResourceTreeItemModel::SlotResourceCheckerTimeout);
 }
 
 CResourceTreeItemModel::~CResourceTreeItemModel()
@@ -79,7 +89,7 @@ void CResourceTreeItemModel::InitializeModel(tspProject spProject)
       }
       if (m_spProject->m_sTitleCard == it->first)
       {
-        m_sOldProjectTitleResource == it->first;
+        m_sOldProjectTitleResource = it->first;
       }
 
       // insert item
@@ -130,6 +140,11 @@ void CResourceTreeItemModel::InitializeModel(tspProject spProject)
       }
     }
     endInsertRows();
+
+    if (nullptr != m_spProject)
+    {
+      m_resourcecheckTimer.start();
+    }
   }
 }
 
@@ -148,6 +163,11 @@ void CResourceTreeItemModel::DeInitializeModel()
     m_sOldProjectLayoutResource = QString();
     m_sOldProjectTitleResource = QString();
     endRemoveRows();
+
+    if (m_resourcecheckTimer.isActive())
+    {
+      m_resourcecheckTimer.stop();
+    }
   }
 }
 
@@ -380,19 +400,14 @@ int CResourceTreeItemModel::columnCount(const QModelIndex& parent) const
 bool CResourceTreeItemModel::setData(const QModelIndex& index, const QVariant& value,
                                      qint32 iRole)
 {
-  if (Qt::EditRole != iRole && CResourceTreeItemModel::eItemWarningRole != iRole) { return false; }
+  if (Qt::EditRole != iRole) { return false; }
 
   CResourceTreeItem* pItem = GetItem(index);
 
   if (nullptr != m_pUndoStack)
   {
     if (index.column() == resource_item::c_iColumnName &&
-        CResourceTreeItemModel::eItemWarningRole == iRole)
-    {
-      pItem->SetWarning(value.toString());
-      emit dataChanged(index, index, {Qt::DisplayRole, CResourceTreeItemModel::eItemWarningRole});
-    }
-    else
+        CResourceTreeItemModel::eItemWarningRole != iRole)
     {
       m_pUndoStack->push(
           new CCommandChangeResourceData(this, m_spProject,
@@ -587,6 +602,40 @@ void CResourceTreeItemModel::SlotProjectPropertiesEdited()
 
 //----------------------------------------------------------------------------------------
 //
+void CResourceTreeItemModel::CheckChildResources(CResourceTreeItem* pParent)
+{
+  for (qint32 i = 0; pParent->ChildCount() > i; ++i)
+  {
+    auto pChild = pParent->Child(i);
+    if (pChild->Type()._to_integral() == EResourceTreeItemType::eResource)
+    {
+      auto spResource = pChild->Resource();
+      QReadLocker l(&spResource->m_rwLock);
+      bool bExists = QFileInfo::exists(ResourceUrlToAbsolutePath(spResource));
+      if (!bExists)
+      {
+        pChild->AddWarning(EWarningType::eMissingResource,
+                           QCoreApplication::tr("Media for Resource %1 missing.", "CResourceTreeItemModel")
+                               .arg(spResource->m_sName));
+        QModelIndex idx = createIndex(i, resource_item::c_iColumnName, pChild);
+        emit dataChanged(idx, idx, {Qt::DisplayRole, CResourceTreeItemModel::eItemWarningRole});
+      }
+      else
+      {
+        bool bChanged = pChild->ClearWarning(EWarningType::eMissingResource);
+        if (bChanged)
+        {
+          QModelIndex idx = createIndex(i, resource_item::c_iColumnName, pChild);
+          emit dataChanged(idx, idx, {Qt::DisplayRole, CResourceTreeItemModel::eItemWarningRole});
+        }
+      }
+    }
+    CheckChildResources(pChild);
+  }
+}
+
+//----------------------------------------------------------------------------------------
+//
 CResourceTreeItem* CResourceTreeItemModel::GetItem(const QModelIndex& index) const
 {
   if (index.isValid())
@@ -595,6 +644,16 @@ CResourceTreeItem* CResourceTreeItemModel::GetItem(const QModelIndex& index) con
     if (nullptr != pItem) { return pItem; }
   }
   return m_pRootItem;
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CResourceTreeItemModel::SlotResourceCheckerTimeout()
+{
+  if (nullptr != m_pRootItem)
+  {
+    CheckChildResources(m_pRootItem);
+  }
 }
 
 //----------------------------------------------------------------------------------------

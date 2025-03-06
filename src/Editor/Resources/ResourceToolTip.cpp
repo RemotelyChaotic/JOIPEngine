@@ -163,12 +163,19 @@ void CResourceToolTipPrivate::ShowResource(const QPoint& pos, const tspResource&
     if (EResourceType::eImage == type._to_integral() ||
         EResourceType::eMovie == type._to_integral())
     {
-      if (ResourceFetcher()->IsLoading())
+      if (QFileInfo::exists(ResourceUrlToAbsolutePath(spResource)))
       {
-        ResourceFetcher()->AbortLoading();
+        if (ResourceFetcher()->IsLoading())
+        {
+          ResourceFetcher()->AbortLoading();
+        }
+        ResourceFetcher()->RequestResources(iProject, QStringList() << sName,
+                                            QSize(c_iPreviewImageSize, c_iPreviewImageSize));
       }
-      ResourceFetcher()->RequestResources(iProject, QStringList() << sName,
-                                          QSize(c_iPreviewImageSize, c_iPreviewImageSize));
+      else
+      {
+        SlotResourceLoadFinished(sName, QString());
+      }
     }
     else
     {

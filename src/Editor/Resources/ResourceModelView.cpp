@@ -586,8 +586,9 @@ void CResourceModelView::JobMessage(qint32 iId, const QString& sMsg)
         if (nullptr != spResource && nullptr != m_pModel)
         {
           QModelIndex idx = m_pModel->IndexForResource(spResource);
-          m_pModel->setData(idx, sMsg,
-                            CResourceTreeItemModel::eItemWarningRole);
+          auto item = m_pModel->GetItem(idx);
+          item->AddWarning(EWarningType::eConversionError, sMsg);
+          emit m_pModel->dataChanged(idx, idx, {Qt::DisplayRole, CResourceTreeItemModel::eItemWarningRole});
         }
       }
     }

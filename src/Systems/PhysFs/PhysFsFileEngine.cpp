@@ -218,7 +218,7 @@ QStringList CPhysFsFileEngine::entryList(QDir::Filters filters, const QStringLis
 
 CPhysFsFileEngine::FileFlags CPhysFsFileEngine::fileFlags(FileFlags type) const
 {
-  return type & m_flags;
+  return m_flags & type;
 }
 
 QString CPhysFsFileEngine::fileName(FileName file) const

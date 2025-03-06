@@ -23,12 +23,30 @@ CResourceTreeItem::~CResourceTreeItem()
   qDeleteAll(m_vpChildItems);
 }
 
+//----------------------------------------------------------------------------------------
+//
+void CResourceTreeItem::AddWarning(EWarningType type, const QString& sWarning)
+{
+  m_vsWarnings[type] = sWarning;
+}
 
 //----------------------------------------------------------------------------------------
 //
 void CResourceTreeItem::AppendChild(CResourceTreeItem* pItem)
 {
   m_vpChildItems.append(pItem);
+}
+
+//----------------------------------------------------------------------------------------
+//
+bool CResourceTreeItem::ClearWarning(EWarningType type)
+{
+  if (auto it = m_vsWarnings.find(type); m_vsWarnings.end() != it)
+  {
+    m_vsWarnings.erase(it);
+    return true;
+  }
+  return false;
 }
 
 //----------------------------------------------------------------------------------------
@@ -114,7 +132,16 @@ QVariant CResourceTreeItem::Data(qint32 iColumn) const
           case c_iColumnLoadedID:
             return m_spResource->m_iLoadedId;
           case c_iColumnWarning:
-            return m_sWarning;
+            if (!m_vsWarnings.empty())
+            {
+              QStringList vsRet;
+              for (const auto& [_, str] : m_vsWarnings)
+              {
+                vsRet << str;
+              }
+              return vsRet.join("\n");
+            }
+            return QString();
         default: return QVariant();
         }
       }

@@ -6,6 +6,7 @@
 #include <QImage>
 #include <QModelIndex>
 #include <QPointer>
+#include <QTimer>
 #include <QVariant>
 #include <map>
 #include <memory>
@@ -72,6 +73,7 @@ public:
   bool IsFolderType(const QModelIndex& index = QModelIndex());
   QModelIndex IndexForResource(const tspResource& spResource);
   tspResource ResourceForIndex(const QModelIndex& idx);
+  CResourceTreeItem* GetItem(const QModelIndex& index) const;
 
 signals:
   void SignalProjectEdited();
@@ -80,9 +82,10 @@ public slots:
   void SlotProjectPropertiesEdited();
 
 protected:
-  CResourceTreeItem* GetItem(const QModelIndex& index) const;
+  void CheckChildResources(CResourceTreeItem* pParent);
 
 private slots:
+  void SlotResourceCheckerTimeout();
   void SlotResourceAdded(qint32 iProjId, const QString& sName);
   void SlotResourceRemoved(qint32 iProjId, const QString& sName);
 
@@ -92,6 +95,7 @@ private:
   CResourceTreeItem*                          m_pRootItem;
   std::map<EResourceType, CResourceTreeItem*> m_categoryMap;
   tspProject                                  m_spProject;
+  QTimer                                      m_resourcecheckTimer;
   QString                                     m_sOldProjectLayoutResource;
   QString                                     m_sOldProjectTitleResource;
   QImage                                      m_cardIcon;

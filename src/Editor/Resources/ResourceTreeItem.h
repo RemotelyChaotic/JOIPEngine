@@ -12,6 +12,10 @@ BETTER_ENUM(EResourceTreeItemType, qint32,
             eFolder    = 2,
             eResource  = 3)
 
+BETTER_ENUM(EWarningType, qint32,
+            eConversionError = 0,
+            eMissingResource = 1)
+
 namespace resource_item
 {
   const qint32 c_iColumnName    = 0;
@@ -38,14 +42,15 @@ public:
                              CResourceTreeItem* pParentItem = nullptr);
   ~CResourceTreeItem();
 
+  void AddWarning(EWarningType type, const QString& sWarning);
   void AppendChild(CResourceTreeItem* pChild);
+  bool ClearWarning(EWarningType type);
   QString Label() { return m_sLabel; }
   tspResource Resource() { return m_spResource; }
   EResourceTreeItemType Type() { return m_type; }
   void SetLabel(const QString& sLabel) { m_sLabel = sLabel; }
   void SetResource(const tspResource& spResource) { m_spResource = spResource; }
   void SetType(const EResourceTreeItemType& type) { m_type = type; }
-  void SetWarning(const QString& sWarning) { m_sWarning = sWarning; }
 
   CResourceTreeItem* Child(qint32 iRow);
   qint32 ChildIndex(CResourceTreeItem* pCompare);
@@ -67,7 +72,7 @@ private:
   EResourceTreeItemType       m_type;
   std::optional<EResourceType>m_resourceType;
   QString                     m_sLabel;
-  QString                     m_sWarning;
+  std::map<EWarningType, QString> m_vsWarnings;
   tspResource                 m_spResource;
 };
 

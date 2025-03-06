@@ -19,6 +19,7 @@ Changes:
   older project in 1.5.0+ make sure to check showInput uses if you used the old first
   parameter and change to showInput("", ...). Old Projects that aren't saved in 1.5.0+
   continue to work as they did before.
+- Missing Resources show a warning in the Resource Tree.
 
 Fixed Bugs:
 - JS imports work even when the files are in different directories.
