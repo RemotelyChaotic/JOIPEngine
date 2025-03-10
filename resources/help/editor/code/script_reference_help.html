@@ -1196,12 +1196,14 @@
 
     <br>
 
-    <h2>Project</h2>
+    <h2>Project (name: <i>project</i>)</h2>
 
     <br>
 
     <p>A reference to the current Project object can be retrieved from the currently playing
-    Scene object. This object can be used to retrieve resources and data about
+    Scene object. This object is automatically registered by the JOIP-Engine on loading an
+    asynch Script. Scene Scripts will not have this object. Those can use the &lt;scene&gt; variable instead.
+    This object can be used to retrieve resources and data about
     the current <a href="qrc:/resources/help/project/joi_project_help.html">JOI-Project</a>.
     This object should not be placed in the <a href="qrc:/resources/help/layout/layout_help.html">Layout</a> manually.<br>
       <ul>
@@ -1403,8 +1405,9 @@
     <br>
 
     <p>This object is automatically registered by the JOIP-Engine on loading a
-    <a href="qrc:/resources/help/project/joi_project_help.html">JOI-Project</a> and
-    should not be placed in the <a href="qrc:/resources/help/layout/layout_help.html">Layout</a> manually. This object should not be placed in the Layout manually.<br>
+    Scene Script and should not be placed in the
+    <a href="qrc:/resources/help/layout/layout_help.html">Layout</a> manually.
+    Asynch Scripts will not have this object. Those can use the &lt;project&gt; variable instead.<br>
       <ul>
         <li><b>id: int</b><br>
         This property lets you read the internal Scene id.<br>

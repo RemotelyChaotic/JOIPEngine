@@ -122,6 +122,7 @@ public:
     m_pLuaState(nullptr),
     m_pScriptUtils(nullptr),
     m_pCurrentScene(nullptr),
+    m_pCurrentProject(nullptr),
     m_bLoadingInbuiltLibraries(false)
   {}
   ~CLuaScriptRunnerInstanceWorker()
@@ -280,6 +281,12 @@ public slots:
         it->second->SetCurrentProject(spResource->m_spParent);
       }
       m_pScriptUtils->SetCurrentProject(spResource->m_spParent);
+
+      if (nullptr == spScene)
+      {
+        m_pCurrentProject = new CProjectScriptWrapper(m_pLuaState, m_spProject);
+        (*m_pLuaState)["project"] = QtLua::Value(m_pLuaState, m_pCurrentProject.data(), false, false);
+      }
     }
 
     // resume engine if interrupetd
@@ -424,6 +431,10 @@ public slots:
     {
       delete m_pCurrentScene;
     }
+    if (nullptr != m_pCurrentProject)
+    {
+      delete m_pCurrentProject;
+    }
   }
 
   //--------------------------------------------------------------------------------------
@@ -566,6 +577,7 @@ private:
   QPointer<QtLua::State>                         m_pLuaState;
   QPointer<CScriptRunnerUtilsLua>                m_pScriptUtils;
   QPointer<CSceneScriptWrapper>                  m_pCurrentScene;
+  QPointer<CProjectScriptWrapper>                m_pCurrentProject;
   std::map<QString /*name*/,
            std::shared_ptr<CScriptObjectBase>>   m_objectMap;
   std::set<QString>                              m_vGlobalValues;

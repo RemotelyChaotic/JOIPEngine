@@ -158,7 +158,8 @@ public:
     CScriptRunnerInstanceWorkerBase(sName, wpSignalEmitterContext),
     m_pScriptEngine(nullptr),
     m_pScriptUtils(nullptr),
-    m_pCurrentScene(nullptr)
+    m_pCurrentScene(nullptr),
+    m_pCurrentProject(nullptr)
   {}
   ~CJsScriptRunnerInstanceWorker()
   {
@@ -286,7 +287,7 @@ public slots:
     if (nullptr != spScene)
     {
       m_pCurrentScene = new CSceneScriptWrapper(m_pScriptEngine, spScene);
-      // yes we need to call the static method of QQmlEngine, not QJSEngine, WHY Qt, WHY???
+      // we need to change ownership
       QQmlEngine::setObjectOwnership(m_pCurrentScene, QQmlEngine::CppOwnership);
       QJSValue sceneValue = m_pScriptEngine->newQObject(m_pCurrentScene);
       m_pScriptEngine->globalObject().setProperty("scene", sceneValue);
@@ -302,6 +303,15 @@ public slots:
       }
       m_pUrlInterceptor->SetCurrentProject(spResource->m_spParent);
       m_pScriptUtils->SetCurrentProject(spResource->m_spParent);
+
+      if (nullptr == spScene)
+      {
+        m_pCurrentProject = new CProjectScriptWrapper(m_pScriptEngine, m_spProject);
+        // we need to change ownership
+        QQmlEngine::setObjectOwnership(m_pCurrentProject, QQmlEngine::CppOwnership);
+        QJSValue projectValue = m_pScriptEngine->newQObject(m_pCurrentProject);
+        m_pScriptEngine->globalObject().setProperty("project", projectValue);
+      }
     }
 
     // resume engine if interrupetd
@@ -448,6 +458,7 @@ public slots:
   {
     // remove ref to run function
     m_pScriptEngine->globalObject().setProperty("scene", QJSValue());
+    m_pScriptEngine->globalObject().setProperty("project", QJSValue());
 
     m_pUrlInterceptor->SetCurrentProject(nullptr);
     m_pScriptUtils->SetCurrentProject(nullptr);
@@ -465,6 +476,10 @@ public slots:
     {
       delete m_pCurrentScene;
     }
+    if (nullptr != m_pCurrentProject)
+    {
+      delete m_pCurrentProject;
+    }
   }
 
 private:
@@ -473,6 +488,7 @@ private:
   QPointer<CScriptRunnerUtilsJs>                 m_pScriptUtils;
   CResourceUrlInterceptor*                       m_pUrlInterceptor;
   QPointer<CSceneScriptWrapper>                  m_pCurrentScene;
+  QPointer<CProjectScriptWrapper>                m_pCurrentProject;
   std::map<QString /*name*/,
            std::shared_ptr<CScriptObjectBase>>   m_objectMap;
   QString                                        m_sName;

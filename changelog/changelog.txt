@@ -8,6 +8,8 @@ New Features:
   - showDialog: Shows a Dialog with the configured parameters
 - Achievement and Save systems implemented
 - New button in Layout to hide the UI of the player.
+- Asynch scripts now instanciate a variable "project" by default. Similar to how
+  Scene Scripts instanciate "scene" to access data in the project.
 
 Changes:
 - Editor icons visible in the dropdown menu.
