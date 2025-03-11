@@ -13,19 +13,43 @@ Rectangle {
     property string text: ""
     property var textColor: "#ffffff"
 
-    width: Math.min(textContentItem.contentWidth, maximumWidth)
+    property bool isHtml: text.startsWith("<html>") && text.endsWith("</html>")
+    property string textFormated: {
+        var sText = text.replace("<html>","").replace("</html>","")
+                        .replace("<body>", "").replace("</body>", "");
+        if (isHtml) {
+            if (metrics.boundingRect.width > maximumWidth) {
+                sText = sText.replace("<nobr>","").replace("</nobr>","");
+            }
+        }
+        return sText;
+    }
+    property int textFormat: (textItemRoot.isHtml ?
+                                Text.RichText :
+                                (QtApp.mightBeRichtext(textItemRoot.text) ?
+                                     Text.StyledText : Text.PlainText))
+
+    width: Math.min(metrics.boundingRect.width, maximumWidth)
     height: textContentItem.contentHeight
+
+    TextMetrics {
+        id: metrics
+        text: QtApp.decodeHTML(textItemRoot.text)
+
+        font.family: null != root.currentlyLoadedProject ?
+                         root.currentlyLoadedProject.font : "Arial"
+        font.pointSize: 14
+        font.hintingPreference: Font.PreferNoHinting
+
+        elide: Text.ElideNone
+    }
 
     Text {
         id: textContentItem
 
-        property bool bIsHtml: textItemRoot.text.startsWith("<html>") && parent.text.endsWith("</html>")
-
-        // yes, this causes a binding loop for property "width" too bad we ignore it
-        // otherwise we can't get the width of the content
         anchors.centerIn: parent
         height: contentHeight
-        width: Math.min(contentWidth, maximumWidth)
+        width: textItemRoot.width
 
         font.family: null != root.currentlyLoadedProject ?
                          root.currentlyLoadedProject.font : "Arial"
@@ -34,21 +58,9 @@ Rectangle {
 
         horizontalAlignment: Text.AlignHCenter
         elide: Text.ElideNone
-        text: {
-            var sText = textItemRoot.text.replace("<html>","").replace("</html>","")
-                                         .replace("<body>", "").replace("</body>", "");
-            if (bIsHtml) {
-                if (contentWidth > textItemRoot.maximumWidth) {
-                    sText = sText.replace("<nobr>","").replace("</nobr>","");
-                }
-            }
-            return sText;
-        }
+        text: textItemRoot.textFormated
         wrapMode: Text.WordWrap
         color: textItemRoot.textColor
-        textFormat: (bIsHtml ?
-                        Text.RichText :
-                        (QtApp.mightBeRichtext(textItemRoot.text) ?
-                             Text.StyledText : Text.PlainText))
+        textFormat: textItemRoot.textFormat
     }
 }

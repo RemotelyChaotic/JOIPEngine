@@ -25,6 +25,8 @@ Changes:
 
 Fixed Bugs:
 - JS imports work even when the files are in different directories.
+- QML Warnings fixed when calling "showButtonPrompts".
+- Fixed html text width calculation in the PlayerTextBox.
 
 =================
 Version 1.4.5.0

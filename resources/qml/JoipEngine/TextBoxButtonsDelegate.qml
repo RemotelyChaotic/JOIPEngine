@@ -133,17 +133,20 @@ Rectangle {
 
                 TextMetrics {
                     id: localTextMetrics
-                    font.family: root.currentlyLoadedProject.font
+                    text: QtApp.decodeHTML(repeaterItem.textForButton)
+
+                    font.family: null != root.currentlyLoadedProject ?
+                                     root.currentlyLoadedProject.font : "Arial"
                     font.pointSize: 14
-                    text: text.text
+                    font.hintingPreference: Font.PreferNoHinting
+
+                    elide: Text.ElideNone
                 }
 
                 Button {
                     id: button
                     anchors.centerIn: parent
-                    text: repeaterItem.textForButton
-                                        .replace("<html>","").replace("</html>","")
-                                        .replace("<body>", "").replace("</body>", "");
+                    text: textItem.textFormated
                     z: 1
 
                     focusPolicy: Qt.NoFocus
@@ -154,7 +157,7 @@ Rectangle {
                          animation: SequentialAnimation {
                              PauseAnimation { duration: repeaterItem.delayOnShow }
                              ScriptAction {
-                                script: text.opacity = 1
+                                script: textItem.opacity = 1
                              }
                              SpringAnimation { spring: 5; damping: 0.5 }
                          }
@@ -192,7 +195,7 @@ Rectangle {
                     }
 
                     contentItem: TextItemFormated {
-                        id: text
+                        id: textItem
                         anchors.centerIn: parent
                         maximumWidth: textDelegate.width - 50
                         text: repeaterItem.textForButton
@@ -206,7 +209,7 @@ Rectangle {
 
                     Text {
                         id: shortcutText
-                        visible: text.opacity > 0.8
+                        visible: textItem.opacity > 0.8
                         x: -1
                         y: -1
                         anchors.right: parent.right
