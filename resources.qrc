@@ -332,7 +332,7 @@
         <file>resources/help/editor/addachievement_button_help.html</file>
         <file>resources/help/editor/projectsettings/achievements_help.html</file>
         <file>resources/help/editor/projectsettings/images/achievement_editors.png</file>
-        <file>resources/sound/new-notification.mp3</file>
+        <file>resources/sound/new-notification.wav</file>
         <file>resources/style/qml/ButtonInvisible.svg</file>
         <file>resources/style/qml/ButtonInvisibleHover.svg</file>
         <file>resources/style/qml/ButtonVisible.svg</file>

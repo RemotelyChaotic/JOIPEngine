@@ -229,7 +229,7 @@ Rectangle {
         }
         SoundEffect {
             id: achievement
-            source: "qrc:/resources/sound/new-notification.mp3"
+            source: "qrc:/resources/sound/new-notification.wav"
             volume: Settings.volume
             muted: Settings.muted
         }
