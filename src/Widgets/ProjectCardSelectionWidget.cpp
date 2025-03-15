@@ -236,7 +236,7 @@ void CProjectCardSelectionWidget::SlotLoadProjectsPrivate(EDownLoadStateFlags fl
   {
     connect(spDbManager.get(), &CDatabaseManager::SignalProjectAdded,
             this, &CProjectCardSelectionWidget::SlotProjectAdded);
-    connect(spDbManager.get(), &CDatabaseManager::SignalProjectAdded,
+    connect(spDbManager.get(), &CDatabaseManager::SignalProjectRemoved,
             this, &CProjectCardSelectionWidget::SlotProjectRemoved);
   }
 }
@@ -393,7 +393,7 @@ void CProjectCardSelectionWidget::FinishUnloadPrivate()
   {
     disconnect(spDbManager.get(), &CDatabaseManager::SignalProjectAdded,
             this, &CProjectCardSelectionWidget::SlotProjectAdded);
-    disconnect(spDbManager.get(), &CDatabaseManager::SignalProjectAdded,
+    disconnect(spDbManager.get(), &CDatabaseManager::SignalProjectRemoved,
             this, &CProjectCardSelectionWidget::SlotProjectRemoved);
   }
 
