@@ -32,7 +32,7 @@ protected slots:
   void on_pOpenProjectButton_clicked();
   void on_pCancelButton_clicked();
 
-  void on_pProjectNameLineEdit_editingFinished();
+  void on_pProjectNameLineEdit_textChanged(const QString &text);
   void on_pCreateProjectButton_clicked();
 
   void on_pOpenExistingProjectButton_clicked();

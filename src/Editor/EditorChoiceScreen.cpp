@@ -118,16 +118,15 @@ void CEditorChoiceScreen::on_pCancelButton_clicked()
 
 //----------------------------------------------------------------------------------------
 //
-void CEditorChoiceScreen::on_pProjectNameLineEdit_editingFinished()
+void CEditorChoiceScreen::on_pProjectNameLineEdit_textChanged(const QString &text)
 {
   if (!m_bInitialized) { return; }
 
   auto spDbManager = m_wpDbManager.lock();
   if (nullptr != spDbManager)
   {
-    QString sNewName = m_spUi->pProjectNameLineEdit->text();
     QString sErrorText;
-    if (!ProjectNameCheck(sNewName, &sErrorText))
+    if (!ProjectNameCheck(text, &sErrorText))
     {
       m_spUi->pErrorLabel->setText(sErrorText);
       m_spUi->pErrorLabel->setVisible(true);
