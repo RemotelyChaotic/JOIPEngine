@@ -699,7 +699,12 @@ void CEditorProjectSettingsWidget::SlotRemoveAchievement(const SSaveDataData& sa
   {
     for (qint32 i = 0; pLayout->count() > i; ++i)
     {
-      CAchievementWidget* pRoot = dynamic_cast<CAchievementWidget*>(pLayout->widget());
+      CAchievementWidget* pRoot = dynamic_cast<CAchievementWidget*>(pLayout->itemAt(i)->widget());
+      if (nullptr == pRoot)
+      {
+        assert(false);
+        continue;
+      }
       if (pRoot->AchievementData().m_sName == saveData.m_sName)
       {
         pRootFound = pRoot;
