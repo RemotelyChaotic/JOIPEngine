@@ -457,7 +457,8 @@ QPushButton#AddTextColorButton,
 QPushButton#AddBGColorButton,
 QPushButton#AddFetishButton,
 QPushButton#AddButtonButton,
-QPushButton#AddSequenceElement {
+QPushButton#AddSequenceElement,
+QPushButton#AddNewAchievement {
   padding: 0px;
   min-width: 24px;
   min-height: 24px;
@@ -489,7 +490,10 @@ QPushButton#AddButtonButton:pressed,
 QPushButton#AddButtonButton:disabled,
 QPushButton#AddSequenceElement:hover,
 QPushButton#AddSequenceElement:pressed,
-QPushButton#AddSequenceElement:disabled {
+QPushButton#AddSequenceElement:disabled,
+QPushButton#AddNewAchievement:hover,
+QPushButton#AddNewAchievement:pressed,
+QPushButton#AddNewAchievement:disabled {
   padding: 0px;
   min-width: 24px;
   min-height: 24px;

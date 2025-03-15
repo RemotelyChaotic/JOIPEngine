@@ -128,7 +128,7 @@ Saving will overwrite old target version.</string>
           <item>
            <widget class="CShortcutButton" name="AddLayoutButton">
             <property name="sizePolicy">
-             <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
+             <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
               <horstretch>0</horstretch>
               <verstretch>0</verstretch>
              </sizepolicy>
@@ -275,18 +275,12 @@ Saving will overwrite old target version.</string>
            <widget class="QLineEdit" name="pFetishLineEdit"/>
           </item>
           <item>
-           <widget class="QPushButton" name="FetishOverlayButton">
-            <property name="minimumSize">
-             <size>
-              <width>24</width>
-              <height>0</height>
-             </size>
-            </property>
-            <property name="maximumSize">
-             <size>
-              <width>24</width>
-              <height>16777215</height>
-             </size>
+           <widget class="CShortcutButton" name="FetishOverlayButton">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
             </property>
             <property name="text">
              <string/>
@@ -326,6 +320,12 @@ Saving will overwrite old target version.</string>
           </item>
           <item>
            <widget class="CShortcutButton" name="AddNewAchievement">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
             <property name="text">
              <string/>
             </property>

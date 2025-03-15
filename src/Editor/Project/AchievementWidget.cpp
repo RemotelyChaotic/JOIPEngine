@@ -100,7 +100,7 @@ CAchievementWidget::CAchievementWidget(const tspProject& spProj,
           });
   m_pTextEdit = new QTextEdit(pBody);
   m_pTextEdit->setSizePolicy(QSizePolicy(QSizePolicy::Preferred, QSizePolicy::Preferred));
-  m_pTextEdit->setPlaceholderText(tr("No describtion set"));
+  m_pTextEdit->setPlaceholderText(tr("No description set"));
   new CUndoRedoFilter(m_pTextEdit, nullptr);
   connect(m_pTextEdit, &QTextEdit::textChanged, this, &CAchievementWidget::EmitParamsChanged);
   pBodyLayout->addWidget(m_pTextEdit, 1, 0, 1, 2);

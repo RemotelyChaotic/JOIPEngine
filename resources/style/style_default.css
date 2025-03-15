@@ -385,7 +385,8 @@ QPushButton#AddTextColorButton,
 QPushButton#AddBGColorButton,
 QPushButton#AddFetishButton,
 QPushButton#AddButtonButton,
-QPushButton#AddSequenceElement {
+QPushButton#AddSequenceElement,
+QPushButton#AddNewAchievement {
   padding: 0px;
   min-width: 24px;
   min-height: 24px;
