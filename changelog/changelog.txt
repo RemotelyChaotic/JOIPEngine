@@ -30,6 +30,7 @@ Fixed Bugs:
 - Fixed html text width calculation in the PlayerTextBox.
 - New Projects show up in the Poject list again.
 - The Default Layout is shown and set when a new Project is created.
+- Fixed Project lookup for newly created Projects.
 
 =================
 Version 1.4.5.0

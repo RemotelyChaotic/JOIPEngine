@@ -489,14 +489,13 @@ void CEditorModel::InitNewProject(const QString& sNewProjectName, bool bTutorial
     const QString sBaseProjectPath = m_spSettings->ContentFolder();
 #endif
 
-    spDbManager->AddProject(QDir(sBaseProjectPath + "/" + sNewProjectName));
-    m_spCurrentProject = spDbManager->FindProject(sNewProjectName);
+    qint32 iId = spDbManager->AddProject(QDir(sBaseProjectPath + "/" + sNewProjectName));
+    m_spCurrentProject = spDbManager->FindProject(iId);
     const QString sProjName = PhysicalProjectName(m_spCurrentProject);
 
     if (nullptr != m_spCurrentProject)
     {
       m_spCurrentProject->m_rwLock.lockForRead();
-      qint32 iId = m_spCurrentProject->m_iId;
       if (bTutorial)
       {
         m_spCurrentProject->m_tutorialState = ETutorialState::eUnstarted;
