@@ -29,6 +29,7 @@ Fixed Bugs:
 - QML Warnings fixed when calling "showButtonPrompts".
 - Fixed html text width calculation in the PlayerTextBox.
 - New Projects show up in the Poject list again.
+- The Default Layout is shown and set when a new Project is created.
 
 =================
 Version 1.4.5.0

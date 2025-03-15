@@ -290,8 +290,8 @@ void CEditorProjectSettingsWidget::LoadProject(tspProject spProject)
         m_spUi->pDefaultLayoutComboBox->addItem(sName, sName);
       }
     }
-    m_spUi->pDefaultLayoutComboBox->setCurrentIndex(
-        m_spUi->pDefaultLayoutComboBox->findData(m_spCurrentProject->m_sPlayerLayout));
+    qint32 iLayout = m_spUi->pDefaultLayoutComboBox->findData(m_spCurrentProject->m_sPlayerLayout);
+    m_spUi->pDefaultLayoutComboBox->setCurrentIndex(0 > iLayout ? 1 : iLayout);
     m_spUi->pDefaultLayoutComboBox->setProperty(editor::c_sPropertyOldValue, m_spCurrentProject->m_sPlayerLayout);
     m_spUi->pDefaultLayoutComboBox->blockSignals(false);
 

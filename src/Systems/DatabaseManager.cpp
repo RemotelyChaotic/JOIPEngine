@@ -1347,6 +1347,7 @@ qint32 CDatabaseManager::AddProjectPrivate(const QString& sName,
     m_spData->m_vspProjectDatabase.back()->m_iVersion = iVersion;
     m_spData->m_vspProjectDatabase.back()->m_bBundled = bBundled;
     m_spData->m_vspProjectDatabase.back()->m_bReadOnly = bReadOnly;
+    m_spData->m_vspProjectDatabase.back()->m_sPlayerLayout = "qrc:/qml/resources/qml/JoipEngine/PlayerDefaultLayout.qml";
     locker.unlock();
 
     for (auto fn : vfnActionsAfterAdding)
