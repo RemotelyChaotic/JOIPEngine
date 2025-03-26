@@ -18,7 +18,7 @@ Rectangle {
         var sText = text.replace("<html>","").replace("</html>","")
                         .replace("<body>", "").replace("</body>", "");
         if (isHtml) {
-            if (metrics.boundingRect.width > maximumWidth) {
+            if (metrics.contentWidth > maximumWidth) {
                 sText = sText.replace("<nobr>","").replace("</nobr>","");
             }
         }
@@ -29,18 +29,21 @@ Rectangle {
                                 (QtApp.mightBeRichtext(textItemRoot.text) ?
                                      Text.StyledText : Text.PlainText))
 
-    width: Math.min(metrics.boundingRect.width, maximumWidth)
+    width: Math.min(metrics.contentWidth, maximumWidth)
     height: textContentItem.contentHeight
 
-    TextMetrics {
+    Text {
         id: metrics
-        text: QtApp.decodeHTML(textItemRoot.text)
+        opacity: 0
 
         font.family: null != root.currentlyLoadedProject ?
                          root.currentlyLoadedProject.font : "Arial"
         font.pointSize: 14
         font.hintingPreference: Font.PreferNoHinting
 
+        text: QtApp.decodeHTML(textItemRoot.text)
+
+        horizontalAlignment: Text.AlignHCenter
         elide: Text.ElideNone
     }
 
@@ -56,9 +59,10 @@ Rectangle {
         font.pointSize: 14
         font.hintingPreference: Font.PreferNoHinting
 
+        text: textItemRoot.textFormated
+
         horizontalAlignment: Text.AlignHCenter
         elide: Text.ElideNone
-        text: textItemRoot.textFormated
         wrapMode: Text.WordWrap
         color: textItemRoot.textColor
         textFormat: textItemRoot.textFormat
