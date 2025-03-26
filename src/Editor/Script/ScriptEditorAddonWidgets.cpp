@@ -52,7 +52,11 @@ qint32 CLineNumberArea::AreaWidth() const
     ++iDigits;
   }
 
+#if QT_VERSION_CHECK(6, 0, 0) <= QT_VERSION
+  qint32 iSpace = 3 + fontMetrics().horizontalAdvance(QLatin1Char('9')).width() * iDigits;
+#else
   qint32 iSpace = 3 + fontMetrics().boundingRect(QLatin1Char('9')).width() * iDigits;
+#endif
   return iSpace;
 }
 
