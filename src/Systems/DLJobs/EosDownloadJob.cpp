@@ -12,8 +12,6 @@
 #include "Settings.h"
 #include "ui_EosDownloadJobWidget.h"
 
-#include "RCC/rcc.h"
-
 #include "Systems/DatabaseManager.h"
 #include "Systems/EOS/EosHelpers.h"
 #include "Systems/Project.h"
@@ -24,6 +22,7 @@
 #include "Utils/RaiiFunctionCaller.h"
 
 #include <nlohmann/json-schema.hpp>
+#include <rcc.h>
 
 #include <QBuffer>
 #include <QCryptographicHash>
@@ -388,7 +387,7 @@ bool CEosDownloadJob::Run(const QVariantList& args)
   QBuffer errorBuffer;
   errorBuffer.open(QIODevice::ReadOnly);
   m_spResourceLib  = std::make_shared<RCCResourceLibrary>(c_iResourceLibraryFormatVersion);
-  m_spResourceLib->setCompressionAlgorithm(RCCResourceLibrary::CompressionAlgorithm::None);
+  m_spResourceLib->setCompressionAlgorithm(CompressionAlgorithm::None);
   m_spResourceLib->setFormat(RCCResourceLibrary::Binary);
   m_spResourceLib->readFiles(false, errorBuffer);
 
@@ -869,7 +868,7 @@ void CEosDownloadJob::ResetResourceLibrary(QBuffer& errorBuffer)
 {
   errorBuffer.reset();
   m_spResourceLib.reset(new RCCResourceLibrary(c_iResourceLibraryFormatVersion));
-  m_spResourceLib->setCompressionAlgorithm(RCCResourceLibrary::CompressionAlgorithm::None);
+  m_spResourceLib->setCompressionAlgorithm(CompressionAlgorithm::None);
   m_spResourceLib->setFormat(RCCResourceLibrary::Binary);
   m_spResourceLib->readFiles(false, errorBuffer);
 }

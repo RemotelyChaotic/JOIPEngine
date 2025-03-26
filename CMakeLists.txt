@@ -102,7 +102,6 @@ if(WIN32 OR LINUX)
 
   # executable targets
   add_subdirectory(src)
-  add_subdirectory(src/RCC)
   # Only for MSVC builds
   if(MSVC)
     add_subdirectory(src/Windows/Launcher)

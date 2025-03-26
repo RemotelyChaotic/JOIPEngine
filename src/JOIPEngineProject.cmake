@@ -492,8 +492,6 @@ macro(CreateJOIPProject JOIP_PROJECT_NAME)
     ${JOIPSources}/Player/TimerDisplayWidget.ui
     ${JOIPSources}/Player/TimerWidget.cpp
     ${JOIPSources}/Player/TimerWidget.h
-    ${JOIPSources}/RCC/rcc.cpp
-    ${JOIPSources}/RCC/rcc.h
     ${JOIPSources}/SVersion.h
     ${JOIPSources}/SceneScreen.cpp
     ${JOIPSources}/SceneScreen.h
@@ -925,6 +923,7 @@ macro(JOIPProjectSettings JOIP_PROJECT_NAME)
       Qt${QT_VERSION_MAJOR}::Xml
       Qt::AV
       Qt::AVWidgets
+      Qt::Rcc_static
       NodeEditor::nodes
       KF5SyntaxHighlighting
       better_enums
