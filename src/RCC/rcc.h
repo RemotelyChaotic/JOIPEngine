@@ -34,6 +34,9 @@
 #ifndef RCC_H
 #define RCC_H
 
+#include "rcc_static_export.h"
+#include "rcc_options.h"
+
 #include <qstringlist.h>
 #include <qfileinfo.h>
 #include <qlocale.h>
@@ -44,19 +47,21 @@ typedef struct ZSTD_CCtx_s ZSTD_CCtx;
 
 QT_BEGIN_NAMESPACE
 
+using namespace QRcc;
+
 #if QT_CONFIG(zstd) && QT_VERSION >= QT_VERSION_CHECK(6,0,0)
-#  define CONSTANT_COMPRESSALGO_DEFAULT     RCCResourceLibrary::CompressionAlgorithm::Zstd
+#  define CONSTANT_COMPRESSALGO_DEFAULT     CompressionAlgorithm::Zstd
 #elif !defined(QT_NO_COMPRESS)
-#  define CONSTANT_COMPRESSALGO_DEFAULT     RCCResourceLibrary::CompressionAlgorithm::Zlib
+#  define CONSTANT_COMPRESSALGO_DEFAULT     CompressionAlgorithm::Zlib
 #else
-#  define CONSTANT_COMPRESSALGO_DEFAULT     RCCResourceLibrary::CompressionAlgorithm::None
+#  define CONSTANT_COMPRESSALGO_DEFAULT     CompressionAlgorithm::None
 #endif
 
 class QIODevice;
 class QTextStream;
 class RCCFileInfo;
 
-class RCCResourceLibrary
+class RCC_STATIC_EXPORT RCCResourceLibrary
 {
     RCCResourceLibrary(const RCCResourceLibrary &);
     RCCResourceLibrary &operator=(const RCCResourceLibrary &);
@@ -99,19 +104,12 @@ public:
     void setOutputName(const QString &name) { m_outputName = name; }
     QString outputName() const { return m_outputName; }
 
-    enum class CompressionAlgorithm {
-        Zlib,
-        Zstd,
-
-        Best = 99,
-        None = -1
-    };
-
     static CompressionAlgorithm parseCompressionAlgorithm(QStringView algo, QString *errorMsg);
     void setCompressionAlgorithm(CompressionAlgorithm algo) { m_compressionAlgo = algo; }
     CompressionAlgorithm compressionAlgorithm() const { return m_compressionAlgo; }
 
     static int parseCompressionLevel(CompressionAlgorithm algo, const QString &level, QString *errorMsg);
+    static int parseCompressionLevel(CompressionAlgorithm algo, const qint32 &level, QString *errorMsg);
     void setCompressLevel(int c) { m_compressLevel = c; }
     int compressLevel() const { return m_compressLevel; }
 
@@ -192,7 +190,7 @@ private:
 };
 
 
-class RCCFileInfo
+class RCC_STATIC_EXPORT RCCFileInfo
 {
 public:
     enum Flags
@@ -208,7 +206,7 @@ public:
                 QLocale::Language language = QLocale::C,
                 QLocale::Country country = QLocale::AnyCountry,
                 uint flags = NoFlags,
-                RCCResourceLibrary::CompressionAlgorithm compressAlgo = RCCResourceLibrary::CONSTANT_COMPRESSALGO_DEFAULT,
+                CompressionAlgorithm compressAlgo = CONSTANT_COMPRESSALGO_DEFAULT,
                 int compressLevel = RCCResourceLibrary::CONSTANT_COMPRESSLEVEL_DEFAULT,
                 int compressThreshold = RCCResourceLibrary::CONSTANT_COMPRESSTHRESHOLD_DEFAULT);
     ~RCCFileInfo();
@@ -228,7 +226,7 @@ public:
     QByteArray m_prefilledContent;
     RCCFileInfo *m_parent;
     QHash<QString, RCCFileInfo*> m_children;
-    RCCResourceLibrary::CompressionAlgorithm m_compressAlgo;
+    CompressionAlgorithm m_compressAlgo;
     int m_compressLevel;
     int m_compressThreshold;
 

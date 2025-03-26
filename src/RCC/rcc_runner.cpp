@@ -28,9 +28,8 @@
 ** 06.09:2021: Adapted for the JOIP-Engine to handle PhysFs Files by RemotelyChaotic
 ****************************************************************************/
 
+#include <rcc_runner.h>
 #include <rcc.h>
-#include "PhysFsFileEngine.h"
-#include "RaiiFunctionCaller.h"
 
 #include <qdebug.h>
 #include <qdir.h>
@@ -51,6 +50,9 @@
 #endif // Q_OS_WIN
 
 QT_BEGIN_NAMESPACE
+
+namespace QRcc
+{
 
 void dumpRecursive(const QDir &dir, QTextStream &out)
 {
@@ -133,105 +135,14 @@ void writeDepFile(QIODevice &iodev, const QStringList &depsList, const QString &
     out << QLatin1Char('\n');
 }
 
-int runRcc(int argc, char *argv[])
+int runRcc(SRCCOptions opts)
 {
-    QCoreApplication app(argc, argv);
-    QCoreApplication::setApplicationVersion(QStringLiteral(QT_VERSION_STR));
-
-    // Note that rcc isn't translated.
-    // If you use this code as an example for a translated app, make sure to translate the strings.
-    QCommandLineParser parser;
-    parser.setSingleDashWordOptionMode(QCommandLineParser::ParseAsLongOptions);
-    parser.setApplicationDescription(QLatin1String("Qt Resource Compiler version " QT_VERSION_STR));
-    parser.addHelpOption();
-    parser.addVersionOption();
-
-    QCommandLineOption outputOption(QStringList() << QStringLiteral("o") << QStringLiteral("output"));
-    outputOption.setDescription(QStringLiteral("Write output to <file> rather than stdout."));
-    outputOption.setValueName(QStringLiteral("file"));
-    parser.addOption(outputOption);
-
-    QCommandLineOption tempOption(QStringList() << QStringLiteral("t") << QStringLiteral("temp"));
-    tempOption.setDescription(QStringLiteral("Use temporary <file> for big resources."));
-    tempOption.setValueName(QStringLiteral("file"));
-    parser.addOption(tempOption);
-
-    QCommandLineOption nameOption(QStringLiteral("name"), QStringLiteral("Create an external initialization function with <name>."), QStringLiteral("name"));
-    parser.addOption(nameOption);
-
-    QCommandLineOption rootOption(QStringLiteral("root"), QStringLiteral("Prefix resource access path with root path."), QStringLiteral("path"));
-    parser.addOption(rootOption);
-
-#if QT_CONFIG(zstd) && !defined(QT_NO_COMPRESS)
-#  define ALGOS     "[zstd], zlib, none"
-#elif QT_CONFIG(zstd)
-#  define ALGOS     "[zstd], none"
-#elif !defined(QT_NO_COMPRESS)
-#  define ALGOS     "[zlib], none"
-#else
-#  define ALGOS     "[none]"
-#endif
-    const QString &algoDescription =
-            QStringLiteral("Compress input files using algorithm <algo> (" ALGOS ").");
-    QCommandLineOption compressionAlgoOption(QStringLiteral("compress-algo"), algoDescription, QStringLiteral("algo"));
-    parser.addOption(compressionAlgoOption);
-#undef ALGOS
-
-    QCommandLineOption compressOption(QStringLiteral("compress"), QStringLiteral("Compress input files by <level>."), QStringLiteral("level"));
-    parser.addOption(compressOption);
-
-    QCommandLineOption nocompressOption(QStringLiteral("no-compress"), QStringLiteral("Disable all compression. Same as --compress-algo=none."));
-    parser.addOption(nocompressOption);
-
-    QCommandLineOption thresholdOption(QStringLiteral("threshold"), QStringLiteral("Threshold to consider compressing files."), QStringLiteral("level"));
-    parser.addOption(thresholdOption);
-
-    QCommandLineOption binaryOption(QStringLiteral("binary"), QStringLiteral("Output a binary file for use as a dynamic resource."));
-    parser.addOption(binaryOption);
-
-    QCommandLineOption generatorOption(QStringList{QStringLiteral("g"), QStringLiteral("generator")});
-    generatorOption.setDescription(QStringLiteral("Select generator."));
-    generatorOption.setValueName(QStringLiteral("cpp|python|python2"));
-    parser.addOption(generatorOption);
-
-    QCommandLineOption passOption(QStringLiteral("pass"), QStringLiteral("Pass number for big resources"), QStringLiteral("number"));
-    parser.addOption(passOption);
-
-    QCommandLineOption namespaceOption(QStringLiteral("namespace"), QStringLiteral("Turn off namespace macros."));
-    parser.addOption(namespaceOption);
-
-    QCommandLineOption verboseOption(QStringLiteral("verbose"), QStringLiteral("Enable verbose mode."));
-    parser.addOption(verboseOption);
-
-    QCommandLineOption listOption(QStringLiteral("list"), QStringLiteral("Only list .qrc file entries, do not generate code."));
-    parser.addOption(listOption);
-
-    QCommandLineOption mapOption(QStringLiteral("list-mapping"),
-                                 QStringLiteral("Only output a mapping of resource paths to file system paths defined in the .qrc file, do not generate code."));
-    parser.addOption(mapOption);
-
-    QCommandLineOption depFileOption(QStringList{QStringLiteral("d"), QStringLiteral("depfile")},
-                                     QStringLiteral("Write a depfile with the .qrc dependencies to <file>."), QStringLiteral("file"));
-    parser.addOption(depFileOption);
-
-    QCommandLineOption projectOption(QStringLiteral("project"), QStringLiteral("Output a resource file containing all files from the current directory."));
-    parser.addOption(projectOption);
-
-    QCommandLineOption formatVersionOption(QStringLiteral("format-version"), QStringLiteral("The RCC format version to write"), QStringLiteral("number"));
-    parser.addOption(formatVersionOption);
-
-    parser.addPositionalArgument(QStringLiteral("inputs"), QStringLiteral("Input files (*.qrc)."));
-
-
-    //parse options
-    parser.process(app);
-
     QString errorMsg;
 
     quint8 formatVersion = 3;
-    if (parser.isSet(formatVersionOption)) {
+    if (opts.formatVersionOption.has_value()) {
         bool ok = false;
-        formatVersion = parser.value(formatVersionOption).toUInt(&ok);
+        formatVersion = opts.formatVersionOption.value();
         if (!ok) {
             errorMsg = QLatin1String("Invalid format version specified");
         } else if (formatVersion < 1 || formatVersion > 3) {
@@ -240,31 +151,31 @@ int runRcc(int argc, char *argv[])
     }
 
     RCCResourceLibrary library(formatVersion);
-    if (parser.isSet(nameOption))
-        library.setInitName(parser.value(nameOption));
-    if (parser.isSet(rootOption)) {
-        library.setResourceRoot(QDir::cleanPath(parser.value(rootOption)));
+    if (opts.nameOption.has_value())
+        library.setInitName(opts.nameOption.value());
+    if (opts.rootOption.has_value()) {
+        library.setResourceRoot(QDir::cleanPath(opts.rootOption.value()));
         if (library.resourceRoot().isEmpty()
                 || library.resourceRoot().at(0) != QLatin1Char('/'))
             errorMsg = QLatin1String("Root must start with a /");
     }
 
-    if (parser.isSet(compressionAlgoOption))
-        library.setCompressionAlgorithm(RCCResourceLibrary::parseCompressionAlgorithm(parser.value(compressionAlgoOption), &errorMsg));
-    if (formatVersion < 3 && library.compressionAlgorithm() == RCCResourceLibrary::CompressionAlgorithm::Zstd)
+    if (std::holds_alternative<std::pair<CompressionAlgorithm, qint32>>(opts.compressionOption))
+        library.setCompressionAlgorithm(std::get<std::pair<CompressionAlgorithm, qint32>>(opts.compressionOption).first);
+    if (formatVersion < 3 && library.compressionAlgorithm() == CompressionAlgorithm::Zstd)
         errorMsg = QLatin1String("Zstandard compression requires format version 3 or higher");
-    if (parser.isSet(nocompressOption))
-        library.setCompressionAlgorithm(RCCResourceLibrary::CompressionAlgorithm::None);
-    if (parser.isSet(compressOption) && errorMsg.isEmpty()) {
-        int level = library.parseCompressionLevel(library.compressionAlgorithm(), parser.value(compressOption), &errorMsg);
+    if (std::holds_alternative<std::nullopt_t>(opts.compressionOption))
+        library.setCompressionAlgorithm(CompressionAlgorithm::None);
+    if (std::holds_alternative<std::pair<CompressionAlgorithm, qint32>>(opts.compressionOption)) {
+        int level = library.parseCompressionLevel(library.compressionAlgorithm(), std::get<std::pair<CompressionAlgorithm, qint32>>(opts.compressionOption).second, &errorMsg);
         library.setCompressLevel(level);
     }
-    if (parser.isSet(thresholdOption))
-        library.setCompressThreshold(parser.value(thresholdOption).toInt());
-    if (parser.isSet(binaryOption))
+    if (opts.thresholdOption.has_value())
+        library.setCompressThreshold(opts.thresholdOption.value());
+    if (opts.binaryOption.has_value())
         library.setFormat(RCCResourceLibrary::Binary);
-    if (parser.isSet(generatorOption)) {
-        auto value = parser.value(generatorOption);
+    if (opts.generatorOption.has_value()) {
+        auto value = opts.generatorOption.value();
         if (value == QLatin1String("cpp"))
             library.setFormat(RCCResourceLibrary::C_Code);
         else if (value == QLatin1String("python"))
@@ -275,45 +186,36 @@ int runRcc(int argc, char *argv[])
             errorMsg = QLatin1String("Invalid generator: ") + value;
     }
 
-    if (parser.isSet(passOption)) {
-        if (parser.value(passOption) == QLatin1String("1"))
+    if (opts.passOption.has_value()) {
+        if (opts.passOption.value() == PassFormat::Pass1)
             library.setFormat(RCCResourceLibrary::Pass1);
-        else if (parser.value(passOption) == QLatin1String("2"))
+        else if (opts.passOption.value() == PassFormat::Pass2)
             library.setFormat(RCCResourceLibrary::Pass2);
         else
             errorMsg = QLatin1String("Pass number must be 1 or 2");
     }
-    if (parser.isSet(namespaceOption))
+    if (opts.namespaceOption)
         library.setUseNameSpace(!library.useNameSpace());
-    if (parser.isSet(verboseOption))
+    if (opts.verboseOption)
         library.setVerbose(true);
 
-    const bool list = parser.isSet(listOption);
-    const bool map = parser.isSet(mapOption);
-    const bool projectRequested = parser.isSet(projectOption);
-    const QStringList filenamesIn = parser.positionalArguments();
+    const bool list = opts.listOption;
+    const bool map = opts.mapOption;
+    const bool projectRequested = opts.projectOption;
+    const QStringList filenamesIn = opts.filenamesIn;
 
     for (const QString &file : filenamesIn) {
         if (file == QLatin1String("-"))
             continue;
         else if (!QFile::exists(file)) {
-            qWarning("%s: File does not exist '%s'", argv[0], qPrintable(file));
+            qWarning("RCC: File does not exist '%s'", qPrintable(file));
             return 1;
-        }
-        else {
-          CPhysFsFileEngine::mount(QFileInfo(file).absolutePath().toStdString().data(), nullptr);
         }
     }
 
-    CRaiiFunctionCaller raiiFnCaller([filenamesIn]() {
-      for (const QString &file : filenamesIn) {
-        CPhysFsFileEngine::unmount(QFileInfo(file).absolutePath().toStdString().data());
-      }
-    });
-
-    QString outFilename = parser.value(outputOption);
-    QString tempFilename = parser.value(tempOption);
-    QString depFilename = parser.value(depFileOption);
+    QString outFilename = opts.outputOption.value_or(QString());
+    QString tempFilename = opts.tempOption.value_or(QString());
+    QString depFilename = opts.depFileOption.value_or(QString());
 
     if (projectRequested) {
         return createProject(outFilename);
@@ -323,8 +225,7 @@ int runRcc(int argc, char *argv[])
         errorMsg = QStringLiteral("No input files specified.");
 
     if (!errorMsg.isEmpty()) {
-        fprintf(stderr, "%s: %s\n", argv[0], qPrintable(errorMsg));
-        parser.showHelp(1);
+        fprintf(stderr, "RCC: %s\n", qPrintable(errorMsg));
         return 1;
     }
     QFile errorDevice;
@@ -441,24 +342,6 @@ int runRcc(int argc, char *argv[])
     return 0;
 }
 
-QT_END_NAMESPACE
-
-int main(int argc, char *argv[])
-{
-    // rcc uses a QHash to store files in the resource system.
-    // we must force a certain hash order when testing or tst_rcc will fail, see QTBUG-25078
-    if (Q_UNLIKELY(!qEnvironmentVariableIsEmpty("QT_RCC_TEST"))) {
-        qSetGlobalQHashSeed(0);
-        if (qGlobalQHashSeed() != 0)
-            qFatal("Cannot force QHash seed for testing as requested");
-    }
-
-    CPhysFsFileEngine::init(argv[0]);
-    CPhysFsFileEngineHandler engine;
-    Q_UNUSED(engine)
-
-    qint32 iRetVal = QT_PREPEND_NAMESPACE(runRcc)(argc, argv);
-
-    CPhysFsFileEngine::deInit();
-    return iRetVal;
 }
+
+QT_END_NAMESPACE

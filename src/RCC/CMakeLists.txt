@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.5)
 
-project(rcc LANGUAGES CXX)
+project(Rcc_static LANGUAGES CXX)
 
 include(JOIPCommon)
 
@@ -10,23 +10,25 @@ find_package(Qt5 COMPONENTS
   REQUIRED)
 
 set(Sources
-  main.cpp
   rcc.cpp
   rcc.h
-  ../Systems/PhysFs/PhysFsFileEngine.cpp
-  ../Systems/PhysFs/PhysFsFileEngine.h
-  ../Utils/RaiiFunctionCaller.cpp
-  ../Utils/RaiiFunctionCaller.h)
+  rcc_options.h
+  rcc_runner.cpp
+  rcc_runner.h
+)
 
-add_executable(${PROJECT_NAME} ${Sources})
+add_library(${PROJECT_NAME} STATIC ${Sources})
+add_library(Qt::${PROJECT_NAME} ALIAS ${PROJECT_NAME})
 if (WIN32)
   set_target_properties(${PROJECT_NAME} PROPERTIES
-    MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>"
-    LINK_FLAGS /SUBSYSTEM:CONSOLE)
+    MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
 endif()
 
 # TODO: not used in default build of Qt 5.14.2
 target_compile_definitions(${PROJECT_NAME} PRIVATE QT_FEATURE_zstd=-1)
+
+include(GenerateExportHeader)
+generate_export_header(${PROJECT_NAME} BASE_NAME ${PROJECT_NAME})
 
 #-----------------------------------------------------------------------------------------
 # Libs
@@ -35,14 +37,14 @@ target_link_libraries(${PROJECT_NAME}
   PRIVATE
     Qt5::Core
     Qt5::Xml
-    physfs-static)
+  )
 
 target_include_directories(${PROJECT_NAME}
+  PUBLIC
+    ${CMAKE_CURRENT_SOURCE_DIR}
   PRIVATE
-  ${CMAKE_CURRENT_SOURCE_DIR}/../Systems/PhysFs
-  ${CMAKE_CURRENT_SOURCE_DIR}/../Utils
-  ${Qt5Core_PRIVATE_INCLUDE_DIRS}
-  ${PhysicsFS_INCLUDE_DIRS}
+    ${Qt5Core_PRIVATE_INCLUDE_DIRS}
+    ${PhysicsFS_INCLUDE_DIRS}
   )
 
 #-----------------------------------------------------------------------------------------
@@ -92,16 +94,3 @@ configure_file_generate(
   "${CMAKE_SOURCE_DIR}/version.h.in"
   "${CMAKE_CURRENT_BINARY_DIR}/out_Version.h"
 )
-
-#-----------------------------------------------------------------------------------------
-# install
-#-----------------------------------------------------------------------------------------
-if (LINUX)
-  install(
-    TARGETS ${PROJECT_NAME}
-    DESTINATION "${CMAKE_INSTALL_PREFIX}/AppDir/usr/bin")
-else()
-  install(
-    TARGETS ${PROJECT_NAME}
-    DESTINATION "${CMAKE_INSTALL_PREFIX}/bin")
-endif()
