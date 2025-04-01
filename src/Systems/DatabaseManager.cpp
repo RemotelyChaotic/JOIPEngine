@@ -106,17 +106,15 @@ qint32 CDatabaseManager::AddProject(const QString& sDirName, quint32 iVersion,
   const QString sBaseName = QFileInfo(sDirName).completeBaseName();
   const QString sProjectPath = QFileInfo(sDirName).absolutePath();
   QString sName = sBaseName;
-  QString sDirNameResolved;
+  QString sDirNameResolved = sBaseName + "." + QFileInfo(sDirName).suffix();
   QString sError;
   if (!ProjectNameCheck(sBaseName, &sError))
   {
     sName = ToValidProjectName(sBaseName);
-    sDirNameResolved = sName + "." + QFileInfo(sDirName).suffix();
   }
   else
   {
     sName = sBaseName;
-    sDirNameResolved = sBaseName + "." + QFileInfo(sDirName).suffix();
   }
 
   return AddProjectPrivate(sName, sDirNameResolved, sProjectPath,

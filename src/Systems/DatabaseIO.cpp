@@ -84,10 +84,18 @@ protected:
 
             spProject->m_rwLock.lockForRead();
             qint32 iOldId = spProject->m_iId;
+            QString sProjName = spProject->m_sName;
             spProject->m_rwLock.unlock();
+            // we need to fix naming collisions again here
+            QString sError;
+            if (!ProjectNameCheck(sProjName, &sError, spProject))
+            {
+              sProjName = ToValidProjectName(sProjName);
+            }
             qint32 iNewId = (-1 == iOldId) ? m_pManager->FindNewProjectId() : -1;
             spProject->m_rwLock.lockForWrite();
             spProject->m_iId = (-1 == iOldId) ? iNewId : iOldId;
+            spProject->m_sName = sProjName;
             spProject->m_rwLock.unlock();
             bOk = true;
           }
@@ -417,15 +425,19 @@ bool CDatabaseIO::LoadProject(tspProject& spProject)
 //
 bool CDatabaseIO::SetProjectEditing(tspProject& spProject, bool bEnabled)
 {
-  const QString sProjPath = PhysicalProjectPath(spProject);
-  if (bEnabled)
+  if (nullptr != spProject)
   {
-    return CPhysFsFileEngine::setWriteDir(QString(sProjPath).toStdString().data());
+    const QString sProjPath = PhysicalProjectPath(spProject);
+    if (bEnabled)
+    {
+      return CPhysFsFileEngine::setWriteDir(QString(sProjPath).toStdString().data());
+    }
+    else
+    {
+      return CPhysFsFileEngine::setWriteDir(nullptr);
+    }
   }
-  else
-  {
-    return CPhysFsFileEngine::setWriteDir(nullptr);
-  }
+  return false;
 }
 
 //----------------------------------------------------------------------------------------

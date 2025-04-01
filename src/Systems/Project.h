@@ -61,7 +61,8 @@ QString PhysicalProjectPath(const tspProject& spProject);
 
 //----------------------------------------------------------------------------------------
 //
-bool ProjectNameCheck(const QString& sProjectName, QString* sErrorText = nullptr);
+bool ProjectNameCheck(const QString& sProjectName, QString* sErrorText = nullptr,
+                      const tspProject& spExclude = nullptr);
 
 //----------------------------------------------------------------------------------------
 //

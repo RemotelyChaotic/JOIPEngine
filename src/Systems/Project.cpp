@@ -342,7 +342,8 @@ QString PhysicalProjectPath(const tspProject& spProject)
 
 //----------------------------------------------------------------------------------------
 //
-bool ProjectNameCheck(const QString& sProjectName, QString* sErrorText)
+bool ProjectNameCheck(const QString& sProjectName, QString* sErrorText,
+                      const tspProject& spExclude)
 {
   auto spDbManager = CApplication::Instance()->System<CDatabaseManager>().lock();
   if (nullptr == spDbManager) { return false; }
@@ -401,7 +402,8 @@ bool ProjectNameCheck(const QString& sProjectName, QString* sErrorText)
     }
     return false;
   }
-  else if (nullptr != spDbManager && spDbManager->FindProject(sProjectName) != nullptr)
+  else if (auto spProj = spDbManager->FindProject(sProjectName);
+           spProj != nullptr && spExclude != spProj)
   {
     if (nullptr != sErrorText)
     {

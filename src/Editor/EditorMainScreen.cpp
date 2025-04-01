@@ -272,7 +272,10 @@ void CEditorMainScreen::UnloadProject()
   m_spCurrentProject = nullptr;
   m_spEditorModel->UnloadProject();
 
-  m_pLayout->ProjectUnloaded();
+  if (nullptr != m_pLayout)
+  {
+    m_pLayout->ProjectUnloaded();
+  }
 
   if (nullptr != m_spWindowContext)
   {
