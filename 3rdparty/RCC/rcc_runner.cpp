@@ -172,7 +172,7 @@ int runRcc(SRCCOptions opts)
     }
     if (opts.thresholdOption.has_value())
         library.setCompressThreshold(opts.thresholdOption.value());
-    if (opts.binaryOption.has_value())
+    if (opts.binaryOption)
         library.setFormat(RCCResourceLibrary::Binary);
     if (opts.generatorOption.has_value()) {
         auto value = opts.generatorOption.value();

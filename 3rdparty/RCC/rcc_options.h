@@ -46,7 +46,7 @@ struct SRCCOptions
   // Or Disable all compression. Same as --compress-algo=none.
   std::variant<std::pair<CompressionAlgorithm, qint32>, std::nullopt_t> compressionOption;
   std::optional<qint32> thresholdOption; // Threshold to consider compressing files.
-  std::optional<qint32> binaryOption; // Output a binary file for use as a dynamic resource.
+  bool binaryOption; // Output a binary file for use as a dynamic resource.
   std::optional<QString> generatorOption; // Select generator: cpp|python|python2
   std::optional<PassFormat> passOption; // Pass number for big resources
   bool namespaceOption = false; // Turn off namespace macros.

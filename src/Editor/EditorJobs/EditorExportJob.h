@@ -47,15 +47,6 @@ public:
 
 protected:
   void AbortImpl() override;
-  void CreateProcess();
-
-protected slots:
-  void SlotExportErrorOccurred(QProcess::ProcessError error);
-  void SlotExportFinished(int exitCode, QProcess::ExitStatus exitStatus);
-  void SlotExportStarted();
-  void SlotExportStateChanged(QProcess::ProcessState newState);
-  void SlotReadErrorOut();
-  void SlotReadStandardOut();
 
 protected:
   struct SExportFile
@@ -64,7 +55,6 @@ protected:
     QString                   m_sPath;
   };
 
-  std::unique_ptr<QProcess>              m_spExportProcess;
   tspProject                             m_spProject;
   qint32                                 m_iId = -1;
   qint32                                 m_iProgress = 0;

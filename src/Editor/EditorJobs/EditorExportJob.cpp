@@ -6,6 +6,10 @@
 #include "Systems/PhysFs/PhysFsFileEngine.h"
 #include "Systems/Project.h"
 
+#include <rcc.h>
+#include <rcc_options.h>
+#include <rcc_runner.h>
+
 #undef VERSION
 
 #include <zip.h>
@@ -22,14 +26,12 @@
 namespace
 {
   const char c_sTempRCCFileName[] = "JOIPEngineExport.qrc";
-  const char c_sLogFileName[] = "export.log.txt";
   const char c_sTemporaryRccFileProperty[] = "RccFile";
   const char c_sTemporaryOutFileProperty[] = "OutFile";
 }
 
 CEditorExportJob::CEditorExportJob(QObject* pParent) :
     IEditorJob(pParent),
-    m_spExportProcess(nullptr),
     m_spProject(nullptr),
     m_iProgress(0),
     m_sName("Export"),
@@ -163,6 +165,8 @@ bool CEditorExportJob::Run(const QVariantList& args)
 //
 bool CEditorExportJob::RunBinaryExport(const QString& sName, const QString& sFolder)
 {
+  emit SignalJobMessage(m_iId, JobType(), tr("Collecting Resources."));
+
   QFile rccFile(CPhysFsFileEngineHandler::c_sScheme + c_sTempRCCFileName);
   if (!rccFile.open(QIODevice::WriteOnly | QIODevice::Truncate))
   {
@@ -197,41 +201,57 @@ bool CEditorExportJob::RunBinaryExport(const QString& sName, const QString& sFol
 
   rccFile.close();
 
-  CreateProcess();
+  QString sRccFileName = (sFolder + "/" + c_sTempRCCFileName);
+  QString sOutFileName = (sFolder + "/" + sName + ".proj");
+  QRcc::SRCCOptions opts {
+      sOutFileName,
+      std::nullopt,
+      std::nullopt,
+      std::nullopt,
+      std::nullopt,
+      std::nullopt,
+      true,
+      std::nullopt,
+      std::nullopt,
+      false, true, false, false,
+      std::nullopt,
+      false,
+      std::nullopt,
+      QStringList() << sRccFileName
+  };
 
-  QFile exportLog(CPhysFsFileEngineHandler::c_sScheme + c_sLogFileName);
-  if (exportLog.open(QIODevice::WriteOnly | QIODevice::Truncate))
-  {
-    exportLog.write("Export log:\n\n");
-  }
+  emit SignalJobMessage(m_iId, JobType(), tr("Packing into: %1").arg(sOutFileName));
 
-  if (m_spExportProcess->state() == QProcess::ProcessState::NotRunning)
+  qint32 iRet = QRcc::runRcc(opts);
+  if (0 != iRet)
   {
-    QString sRccFileName = (sFolder + "/" + c_sTempRCCFileName);
-    QString sOutFileName = (sFolder + "/" + sName + ".proj");
-#if defined(Q_OS_WIN)
-    QString rccExe = QApplication::applicationDirPath() + "/rcc.exe";
-#else
-    QString rccExe = QApplication::applicationDirPath() + "/rcc";
-#endif
-    m_spExportProcess->setProperty(c_sTemporaryRccFileProperty, rccFile.fileName());
-    m_spExportProcess->setProperty(c_sTemporaryOutFileProperty, sOutFileName);
-    m_spExportProcess->setWorkingDirectory(sFolder);
-    m_spExportProcess->start(rccExe,
-                             QStringList() << "--binary" << "--no-compress" << "--verbose"
-                                           //<< "--output" << (sFolder + "/export.log")
-                                           << sRccFileName
-                                           << "--output" << sOutFileName);
-  }
-  else
-  {
-    m_sError = tr("Export is allready running.");
+    m_sError = tr("Could not write project file %1:\n%2")
+                   .arg(sOutFileName).arg("");
     m_bHasError = true;
     m_bFinished = true;
     return false;
   }
 
-  m_bFinished = false;
+  if (!rccFile.remove())
+  {
+    m_sError += tr("Could not remove temporary qrc file '%1'.")
+                    .arg(rccFile.fileName());
+    m_bHasError = true;
+    m_bFinished = true;
+    return false;
+  }
+
+  if (!QFile(sOutFileName).exists())
+  {
+    m_sError += tr("Could not create exported project File.");
+    m_bHasError = true;
+    m_bFinished = true;
+    return false;
+  }
+
+  m_sReturnValue = QString("Exported to: %2").arg(sOutFileName);
+  m_bHasError = false;
+  m_bFinished = true;
   return true;
 }
 
@@ -388,145 +408,4 @@ void CEditorExportJob::Stop()
 //
 void CEditorExportJob::AbortImpl()
 {
-  if (nullptr != m_spExportProcess)
-  {
-    if (m_spExportProcess->state() != QProcess::ProcessState::NotRunning)
-    {
-      if (!m_spExportProcess->waitForFinished())
-      {
-        m_spExportProcess->kill();
-      }
-    }
-  }
-}
-
-//----------------------------------------------------------------------------------------
-//
-void CEditorExportJob::CreateProcess()
-{
-  m_spExportProcess.reset(new QProcess());
-
-  connect(m_spExportProcess.get(), &QProcess::errorOccurred,
-          this, &CEditorExportJob::SlotExportErrorOccurred);
-  connect(m_spExportProcess.get(), qOverload<int,QProcess::ExitStatus>(&QProcess::finished),
-          this, &CEditorExportJob::SlotExportFinished);
-  connect(m_spExportProcess.get(), &QProcess::started,
-          this, &CEditorExportJob::SlotExportStarted);
-  connect(m_spExportProcess.get(), &QProcess::stateChanged,
-          this, &CEditorExportJob::SlotExportStateChanged);
-  connect(m_spExportProcess.get(), &QProcess::readyReadStandardError,
-          this, &CEditorExportJob::SlotReadErrorOut);
-  connect(m_spExportProcess.get(), &QProcess::readyReadStandardOutput,
-          this, &CEditorExportJob::SlotReadStandardOut);
-}
-
-//----------------------------------------------------------------------------------------
-//
-void CEditorExportJob::SlotExportErrorOccurred(QProcess::ProcessError error)
-{
-  switch (error)
-  {
-    case QProcess::ProcessError::Crashed: m_sError = tr("Export process crashed."); break;
-    case QProcess::ProcessError::Timedout: m_sError = tr("Export process timed out."); break;
-    case QProcess::ProcessError::ReadError: m_sError = tr("Export process read error."); break;
-    case QProcess::ProcessError::WriteError: m_sError = tr("Export process write error."); break;
-    case QProcess::ProcessError::UnknownError: m_sError = tr("Unknown error in export process."); break;
-    case QProcess::ProcessError::FailedToStart: m_sError = tr("Export process failed to start."); break;
-    default: break;
-  }
-
-  m_bHasError = true;
-
-  emit SignalJobMessage(m_iId, JobType(), m_sError);
-  qWarning() << m_spExportProcess->errorString();
-}
-
-//----------------------------------------------------------------------------------------
-//
-void CEditorExportJob::SlotExportFinished(int exitCode, QProcess::ExitStatus exitStatus)
-{
-  m_bFinished = true;
-
-  m_sError = QString();
-  if (exitStatus == QProcess::ExitStatus::CrashExit)
-  {
-    m_sError += tr("Export process crashed with code %1 (%2).")
-                  .arg(exitCode).arg(m_spExportProcess->errorString());
-    m_bHasError = true;
-  }
-
-  const QString sOutFile(m_spExportProcess->property(c_sTemporaryOutFileProperty).toString());
-  QFile rccFile(m_spExportProcess->property(c_sTemporaryRccFileProperty).toString());
-  if (!rccFile.remove())
-  {
-    m_sError += tr("Could not remove temporary qrc file '%1'.")
-                  .arg(rccFile.fileName());
-    m_bHasError = true;
-  }
-
-  if (!QFile(sOutFile).exists())
-  {
-    m_sError += tr("Could not create exported project File.");
-    m_bHasError = true;
-  }
-
-  if (!m_bHasError)
-  {
-    m_sReturnValue = QString("Exported to: %2").arg(sOutFile);
-  }
-  else
-  {
-    m_sError += tr("\nSee %1 for errors.").arg(c_sLogFileName);
-  }
-  emit SignalFinished(m_iId);
-}
-
-//----------------------------------------------------------------------------------------
-//
-void CEditorExportJob::SlotExportStarted()
-{
-  m_iProgress = 0;
-  emit SignalProgressChanged(m_iId, Progress());
-}
-
-//----------------------------------------------------------------------------------------
-//
-void CEditorExportJob::SlotExportStateChanged(QProcess::ProcessState newState)
-{
-  QString sMsg;
-  switch (newState)
-  {
-    case QProcess::ProcessState::Running: sMsg = tr("Running export."); break;
-    case QProcess::ProcessState::Starting: sMsg = tr("Starting export."); break;
-    //case QProcess::ProcessState::NotRunning: sMsg = tr("Export finished."); break;
-    default: break;
-  }
-  if (!sMsg.isEmpty())
-  {
-    emit SignalJobMessage(m_iId, JobType(), sMsg);
-  }
-}
-
-//----------------------------------------------------------------------------------------
-//
-void CEditorExportJob::SlotReadErrorOut()
-{
-  QByteArray arr = m_spExportProcess->readAllStandardError();
-  QFile exportLog(CPhysFsFileEngineHandler::c_sScheme + c_sLogFileName);
-  if (exportLog.open(QIODevice::WriteOnly | QIODevice::Append))
-  {
-    exportLog.write(arr);
-  }
-}
-
-//----------------------------------------------------------------------------------------
-//
-void CEditorExportJob::SlotReadStandardOut()
-{
-  QByteArray arr = m_spExportProcess->readAllStandardOutput();
-  QFile exportLog(CPhysFsFileEngineHandler::c_sScheme + c_sLogFileName);
-  if (exportLog.open(QIODevice::WriteOnly | QIODevice::Append))
-  {
-    exportLog.write(arr);
-  }
 }
