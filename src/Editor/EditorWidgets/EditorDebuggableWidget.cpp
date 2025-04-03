@@ -154,7 +154,7 @@ void CEditorDebuggableWidget::SlotDebugStop()
                    this, &CEditorDebuggableWidget::SignalExecutionError);
       }
 
-      pMainSceneScreen->SlotQuit();
+      pMainSceneScreen->SlotTerminate();
     }
   }
 }

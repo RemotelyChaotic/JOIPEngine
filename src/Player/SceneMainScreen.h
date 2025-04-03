@@ -13,7 +13,7 @@ class CPlayerConsoleError;
 class CProjectDialogueManager;
 class CProjectEventCallbackRegistry;
 class CProjectScriptWrapper;
-class CProjectRunner;
+class CSceneNodeResolver;
 class CScriptRunner;
 class CSettings;
 class CThreadedSystem;
@@ -54,14 +54,14 @@ public:
   tspProject LoadedProject();
   std::weak_ptr<CProjectEventCallbackRegistry> EventCallbackRegistry();
   std::weak_ptr<CProjectDialogueManager> ProjectDialogueManager();
-  std::weak_ptr<CProjectRunner> ProjectRunner();
+  std::weak_ptr<CSceneNodeResolver> SceneResolver();
   std::weak_ptr<CScriptRunner> ScriptRunner();
   void UnloadProject();
   void SetDebugging(bool bDebugging);
 
 public slots:
   void SlotFinish(bool bReachedEnd);
-  void SlotQuit();
+  void SlotTerminate();
 
 signals:
   void SignalExecutionError(QString sException, qint32 iLine, QString sStack);
@@ -100,8 +100,8 @@ private:
   std::unique_ptr<Ui::CSceneMainScreen>                       m_spUi;
   std::shared_ptr<CWindowContext>                             m_spWindowContext;
   std::shared_ptr<CProjectEventCallbackRegistry>              m_spEventCallbackRegistry;
-  std::shared_ptr<CProjectRunner>                             m_spProjectRunner;
-  std::shared_ptr<CProjectDialogueManager>                      m_spDialogueManager;
+  std::shared_ptr<CSceneNodeResolver>                         m_spSceneNodeResolver;
+  std::shared_ptr<CProjectDialogueManager>                    m_spDialogueManager;
   std::shared_ptr<CThreadedSystem>                            m_spScriptRunnerSystem;
   std::shared_ptr<CScriptRunner>                              m_spScriptRunner;
   std::shared_ptr<CSettings>                                  m_spSettings;
@@ -116,8 +116,8 @@ private:
   ERunningState                                               m_runningState;
   bool                                                        m_bErrorState;
   bool                                                        m_bBeingDebugged;
-  bool                                                        m_bCloseRequested;
-  bool                                                        m_bReachedEnd;
+  bool                                                        m_bAppCloseRequested;
+  bool                                                        m_bReachedEndNode;
   bool                                                        m_bCanLoadNewScene;
 };
 

@@ -1,4 +1,4 @@
-#include "ProjectRunner.h"
+#include "SceneNodeResolver.h"
 #include "Application.h"
 #include "Editor/NodeEditor/EndNodeModel.h"
 #include "Editor/NodeEditor/FlowScene.h"
@@ -254,7 +254,7 @@ void ResolveNodes(std::vector<NodeResolveReslt>& resolveResult, const QStringLis
 
 //----------------------------------------------------------------------------------------
 //
-CProjectRunner::CProjectRunner(QObject* pParent) :
+CSceneNodeResolver::CSceneNodeResolver(QObject* pParent) :
   QObject (pParent),
   m_spCurrentProject(nullptr),
   m_wpDbManager(CApplication::Instance()->System<CDatabaseManager>()),
@@ -267,7 +267,7 @@ CProjectRunner::CProjectRunner(QObject* pParent) :
 
 }
 
-CProjectRunner::~CProjectRunner()
+CSceneNodeResolver::~CSceneNodeResolver()
 {
   UnloadProject();
   if (nullptr != m_pFlowScene)
@@ -280,7 +280,7 @@ CProjectRunner::~CProjectRunner()
 
 //----------------------------------------------------------------------------------------
 //
-bool CProjectRunner::MightBeRegexScene(const QString& sName)
+bool CSceneNodeResolver::MightBeRegexScene(const QString& sName)
 {
   return sName.contains('+') || sName.contains('*') || sName.contains('|') || sName.contains('{') ||
          sName.contains('}') || sName.contains('[') || sName.contains(']');
@@ -288,7 +288,7 @@ bool CProjectRunner::MightBeRegexScene(const QString& sName)
 
 //----------------------------------------------------------------------------------------
 //
-void CProjectRunner::LoadProject(tspProject spProject, const QString sStartScene)
+void CSceneNodeResolver::LoadProject(tspProject spProject, const QString sStartScene)
 {
   bool bOk = Setup(spProject, sStartScene);
   QString sError;
@@ -318,7 +318,7 @@ void CProjectRunner::LoadProject(tspProject spProject, const QString sStartScene
 
 //----------------------------------------------------------------------------------------
 //
-void CProjectRunner::LoadProject(tspProject spProject, tspScene spStartScene)
+void CSceneNodeResolver::LoadProject(tspProject spProject, tspScene spStartScene)
 {
   bool bOk = Setup(spProject, QString());
   QString sError;
@@ -344,7 +344,7 @@ void CProjectRunner::LoadProject(tspProject spProject, tspScene spStartScene)
 
 //----------------------------------------------------------------------------------------
 //
-void CProjectRunner::UnloadProject()
+void CSceneNodeResolver::UnloadProject()
 {
   m_pCurrentNode = nullptr;
   m_spCurrentProject = nullptr;
@@ -363,21 +363,21 @@ void CProjectRunner::UnloadProject()
 
 //----------------------------------------------------------------------------------------
 //
-tspScene CProjectRunner::CurrentScene() const
+tspScene CSceneNodeResolver::CurrentScene() const
 {
   return m_spCurrentScene;
 }
 
 //----------------------------------------------------------------------------------------
 //
-void CProjectRunner::DisableScene(const QString& sScene)
+void CSceneNodeResolver::DisableScene(const QString& sScene)
 {
   m_disabledScenes.insert(sScene);
 }
 
 //----------------------------------------------------------------------------------------
 //
-void CProjectRunner::EnableScene(const QString& sScene)
+void CSceneNodeResolver::EnableScene(const QString& sScene)
 {
   auto it = m_disabledScenes.find(sScene);
   if (m_disabledScenes.end() != it)
@@ -388,7 +388,7 @@ void CProjectRunner::EnableScene(const QString& sScene)
 
 //----------------------------------------------------------------------------------------
 //
-bool CProjectRunner::IsSceneEnabled(const QString& sScene) const
+bool CSceneNodeResolver::IsSceneEnabled(const QString& sScene) const
 {
   auto it = m_disabledScenes.find(sScene);
   return m_disabledScenes.end() == it;
@@ -396,7 +396,7 @@ bool CProjectRunner::IsSceneEnabled(const QString& sScene) const
 
 //----------------------------------------------------------------------------------------
 //
-tspScene CProjectRunner::NextScene(const QString sName, bool* bEnd)
+tspScene CSceneNodeResolver::NextScene(const QString sName, bool* bEnd)
 {
   // we found a scene, so clear resolve cache
   m_resolveResult.clear();
@@ -453,7 +453,7 @@ tspScene CProjectRunner::NextScene(const QString sName, bool* bEnd)
 
 //----------------------------------------------------------------------------------------
 //
-QStringList CProjectRunner::PossibleScenes(std::optional<QString>* unresolvedData)
+QStringList CSceneNodeResolver::PossibleScenes(std::optional<QString>* unresolvedData)
 {
   QStringList vsUnresolved =
       GetFirstUnresolvedNodes(m_resolveResult, unresolvedData);
@@ -478,7 +478,7 @@ QStringList CProjectRunner::PossibleScenes(std::optional<QString>* unresolvedDat
 
 //----------------------------------------------------------------------------------------
 //
-void CProjectRunner::ResolveFindScenes(const QString sName)
+void CSceneNodeResolver::ResolveFindScenes(const QString sName)
 {
   if (nullptr == m_pFlowScene)
   {
@@ -527,7 +527,7 @@ void CProjectRunner::ResolveFindScenes(const QString sName)
 
 //----------------------------------------------------------------------------------------
 //
-void CProjectRunner::ResolvePossibleScenes(const QStringList vsNames, qint32 iIndex)
+void CSceneNodeResolver::ResolvePossibleScenes(const QStringList vsNames, qint32 iIndex)
 {
   ResolveNodes(m_resolveResult, vsNames, iIndex, m_disabledScenes);
   m_nodeMap.clear();
@@ -536,14 +536,14 @@ void CProjectRunner::ResolvePossibleScenes(const QStringList vsNames, qint32 iIn
 
 //----------------------------------------------------------------------------------------
 //
-void CProjectRunner::ResolveScenes()
+void CSceneNodeResolver::ResolveScenes()
 {
   ResolveNextScene();
 }
 
 //----------------------------------------------------------------------------------------
 //
-bool CProjectRunner::GenerateNodesFromResolved()
+bool CSceneNodeResolver::GenerateNodesFromResolved()
 {
   if (m_resolveResult.size() > 0)
   {
@@ -589,7 +589,7 @@ bool CProjectRunner::GenerateNodesFromResolved()
 
 //----------------------------------------------------------------------------------------
 //
-bool CProjectRunner::Setup(tspProject spProject, const QString sStartScene)
+bool CSceneNodeResolver::Setup(tspProject spProject, const QString sStartScene)
 {
   QString sError;
   if (nullptr != m_spCurrentProject)
@@ -608,7 +608,7 @@ bool CProjectRunner::Setup(tspProject spProject, const QString sStartScene)
     delete m_pFlowScene;
   }
   m_pFlowScene = new CFlowScene(CNodeEditorRegistry::RegisterDataModels());
-  connect(m_pFlowScene, &CFlowScene::nodeCreated, this, &CProjectRunner::SlotNodeCreated);
+  connect(m_pFlowScene, &CFlowScene::nodeCreated, this, &CSceneNodeResolver::SlotNodeCreated);
 
   bool bOk = LoadFlowScene();
   assert(bOk && "Could not load Flow scene. Why????");
@@ -635,7 +635,7 @@ bool CProjectRunner::Setup(tspProject spProject, const QString sStartScene)
 
 //----------------------------------------------------------------------------------------
 //
-bool CProjectRunner::LoadFlowScene()
+bool CSceneNodeResolver::LoadFlowScene()
 {
   auto spDbManager = m_wpDbManager.lock();
   if (nullptr != spDbManager)
@@ -690,7 +690,7 @@ bool CProjectRunner::LoadFlowScene()
 
 //----------------------------------------------------------------------------------------
 //
-bool CProjectRunner::ResolveNextScene()
+bool CSceneNodeResolver::ResolveNextScene()
 {
   if (nullptr == m_pFlowScene || nullptr == m_pCurrentNode)
   {
@@ -707,7 +707,7 @@ bool CProjectRunner::ResolveNextScene()
 
 //----------------------------------------------------------------------------------------
 //
-bool CProjectRunner::ResolveStart(const QString sStartScene)
+bool CSceneNodeResolver::ResolveStart(const QString sStartScene)
 {
   if (nullptr == m_pFlowScene)
   {
@@ -768,7 +768,7 @@ bool CProjectRunner::ResolveStart(const QString sStartScene)
 
 //----------------------------------------------------------------------------------------
 //
-void CProjectRunner::SlotNodeCreated(QtNodes::Node &n)
+void CSceneNodeResolver::SlotNodeCreated(QtNodes::Node &n)
 {
   auto spDbManager = m_wpDbManager.lock();
   if (nullptr != spDbManager)

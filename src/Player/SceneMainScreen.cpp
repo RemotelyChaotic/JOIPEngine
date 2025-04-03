@@ -3,8 +3,8 @@
 #include "Constants.h"
 #include "ProjectDialogueManager.h"
 #include "ProjectEventTarget.h"
-#include "ProjectRunner.h"
 #include "ProjectSceneManager.h"
+#include "SceneNodeResolver.h"
 #include "Settings.h"
 #include "WindowContext.h"
 
@@ -41,7 +41,7 @@ CSceneMainScreen::CSceneMainScreen(QWidget* pParent) :
   QWidget(pParent),
   m_spUi(std::make_unique<Ui::CSceneMainScreen>()),
   m_spEventCallbackRegistry(std::make_shared<CProjectEventCallbackRegistry>()),
-  m_spProjectRunner(std::make_shared<CProjectRunner>()),
+  m_spSceneNodeResolver(std::make_shared<CSceneNodeResolver>()),
   m_spDialogueManager(std::make_shared<CProjectDialogueManager>()),
   m_spScriptRunnerSystem(std::make_shared<CThreadedSystem>("ScriptRunner")),
   m_spScriptRunner(nullptr),
@@ -54,8 +54,8 @@ CSceneMainScreen::CSceneMainScreen(QWidget* pParent) :
   m_runningState(eShutDown),
   m_bErrorState(false),
   m_bBeingDebugged(false),
-  m_bCloseRequested(false),
-  m_bReachedEnd(false),
+  m_bAppCloseRequested(false),
+  m_bReachedEndNode(false),
   m_bCanLoadNewScene(true)
 {
   m_spUi->setupUi(this);
@@ -69,11 +69,11 @@ CSceneMainScreen::~CSceneMainScreen()
 //
 bool CSceneMainScreen::CloseApplication()
 {
-  if (!m_bCloseRequested)
+  if (!m_bAppCloseRequested)
   {
-    bool bOk = QMetaObject::invokeMethod(this, "SlotQuit", Qt::QueuedConnection);
+    bool bOk = QMetaObject::invokeMethod(this, "SlotTerminate", Qt::QueuedConnection);
     assert(bOk);
-    m_bCloseRequested = bOk;
+    m_bAppCloseRequested = bOk;
     return bOk;
   }
   return false;
@@ -93,7 +93,7 @@ void CSceneMainScreen::Initialize(const std::shared_ptr<CWindowContext>& spWindo
 
   connect(m_spEventCallbackRegistry.get(), &CProjectEventCallbackRegistry::SignalError,
           this, &CSceneMainScreen::SlotError);
-  connect(m_spProjectRunner.get(), &CProjectRunner::SignalChangeSceneRequest,
+  connect(m_spSceneNodeResolver.get(), &CSceneNodeResolver::SignalChangeSceneRequest,
           m_spEventCallbackRegistry.get(), [this](const QString&) {
     m_spEventCallbackRegistry->Dispatch("CProjectSceneManagerWrapper", "change");
   });
@@ -113,11 +113,11 @@ void CSceneMainScreen::Initialize(const std::shared_ptr<CWindowContext>& spWindo
 
   InitQmlMain();
 
-  connect(m_spProjectRunner.get(), &CProjectRunner::SignalChangeSceneRequest,
+  connect(m_spSceneNodeResolver.get(), &CSceneNodeResolver::SignalChangeSceneRequest,
           this, [this](const QString& sScene) {
-    SlotScriptRunFinished(true, m_bReachedEnd, sScene);
+    SlotScriptRunFinished(true, m_bReachedEndNode, sScene);
   });
-  connect(m_spProjectRunner.get(), &CProjectRunner::SignalError,
+  connect(m_spSceneNodeResolver.get(), &CSceneNodeResolver::SignalError,
           this, &CSceneMainScreen::SlotError);
 
   SetDebugging(bDebug);
@@ -167,18 +167,18 @@ void CSceneMainScreen::LoadProject(qint32 iId, const tSceneToLoad& sStartScene)
 
     if (std::holds_alternative<QString>(sStartScene))
     {
-      m_spProjectRunner->LoadProject(m_spCurrentProject, std::get<QString>(sStartScene));
+      m_spSceneNodeResolver->LoadProject(m_spCurrentProject, std::get<QString>(sStartScene));
     }
     else if (std::holds_alternative<tspScene>(sStartScene))
     {
-      m_spProjectRunner->LoadProject(m_spCurrentProject, std::get<tspScene>(sStartScene));
+      m_spSceneNodeResolver->LoadProject(m_spCurrentProject, std::get<tspScene>(sStartScene));
     }
 
     m_spDialogueManager->LoadProject(m_spCurrentProject);
 
     if (nullptr != m_spWindowContext && !m_bBeingDebugged)
     {
-      m_spWindowContext->SignalChangeAppOverlay(":/resources/style/img/ButtonPlay.png");
+      emit m_spWindowContext->SignalChangeAppOverlay(":/resources/style/img/ButtonPlay.png");
     }
 
     ConnectAllSignals();
@@ -186,14 +186,14 @@ void CSceneMainScreen::LoadProject(qint32 iId, const tSceneToLoad& sStartScene)
 
     m_runningState = eRunning;
     m_bErrorState = false;
-    m_bReachedEnd = false;
+    m_bReachedEndNode = false;
   }
 
   if (!m_bBeingDebugged)
   {
     if (auto spBackActionHandler = CApplication::Instance()->System<CBackActionHandler>().lock())
     {
-      spBackActionHandler->RegisterSlotToCall(this, "SlotQuit");
+      spBackActionHandler->RegisterSlotToCall(this, "SlotTerminate");
     }
   }
 }
@@ -221,9 +221,9 @@ std::weak_ptr<CProjectDialogueManager> CSceneMainScreen::ProjectDialogueManager(
 
 //----------------------------------------------------------------------------------------
 //
-std::weak_ptr<CProjectRunner> CSceneMainScreen::ProjectRunner()
+std::weak_ptr<CSceneNodeResolver> CSceneMainScreen::SceneResolver()
 {
-  return m_spProjectRunner;
+  return m_spSceneNodeResolver;
 }
 
 //----------------------------------------------------------------------------------------
@@ -266,7 +266,7 @@ void CSceneMainScreen::SetDebugging(bool bDebugging)
 
 //----------------------------------------------------------------------------------------
 //
-void CSceneMainScreen::SlotFinish(bool bReachedEnd)
+void CSceneMainScreen::SlotFinish(bool bReachedEndNode)
 {
   if (!m_bInitialized || nullptr == m_spCurrentProject) { return; }
 
@@ -280,11 +280,11 @@ void CSceneMainScreen::SlotFinish(bool bReachedEnd)
 
     emit SignalExitClicked();
 
-    m_bReachedEnd = bReachedEnd;
+    m_bReachedEndNode = bReachedEndNode;
 
     bool bOk =
         QMetaObject::invokeMethod(this, "SlotScriptRunFinished", Qt::QueuedConnection,
-                                  Q_ARG(bool, false), Q_ARG(bool, m_bReachedEnd),
+                                  Q_ARG(bool, false), Q_ARG(bool, m_bReachedEndNode),
                                   Q_ARG(QString, QString()));
     assert(bOk);
     Q_UNUSED(bOk);
@@ -293,7 +293,7 @@ void CSceneMainScreen::SlotFinish(bool bReachedEnd)
 
 //----------------------------------------------------------------------------------------
 //
-void CSceneMainScreen::SlotQuit()
+void CSceneMainScreen::SlotTerminate()
 {
   if (!m_bInitialized || nullptr == m_spCurrentProject) { return; }
 
@@ -316,7 +316,7 @@ void CSceneMainScreen::SlotQuit()
   {
     bool bOk =
         QMetaObject::invokeMethod(this, "SlotScriptRunFinished", Qt::QueuedConnection,
-                                  Q_ARG(bool, false), Q_ARG(bool, m_bReachedEnd),
+                                  Q_ARG(bool, false), Q_ARG(bool, m_bReachedEndNode),
                                   Q_ARG(QString, QString()));
     assert(bOk);
     Q_UNUSED(bOk);
@@ -330,8 +330,8 @@ void CSceneMainScreen::resizeEvent(QResizeEvent* pEvent)
   if (nullptr != pEvent)
   {
     QMetaObject::invokeMethod(this, "SlotResizeDone", Qt::QueuedConnection);
+    pEvent->accept();
   }
-  pEvent->accept();
 }
 
 //----------------------------------------------------------------------------------------
@@ -449,7 +449,7 @@ void CSceneMainScreen::SlotNextSkript(bool bMightBeRegex)
 {
   if (!m_bInitialized || nullptr == m_spCurrentProject) { return; }
 
-  m_spProjectRunner->ResolveScenes();
+  m_spSceneNodeResolver->ResolveScenes();
   NextSkript(bMightBeRegex);
 }
 
@@ -500,17 +500,17 @@ void CSceneMainScreen::SlotSceneSelectReturnValue(int iIndex)
   if (0 > iIndex)
   {
     qWarning() << tr("Scene selection failed.");
-    SlotQuit();
+    SlotTerminate();
     return;
   }
 
   std::optional<QString> unresolvedData = std::nullopt;
-  QStringList sScenes = m_spProjectRunner->PossibleScenes(&unresolvedData);
+  QStringList sScenes = m_spSceneNodeResolver->PossibleScenes(&unresolvedData);
   if (unresolvedData.has_value())
   {
-    m_spProjectRunner->ResolvePossibleScenes(sScenes, iIndex);
+    m_spSceneNodeResolver->ResolvePossibleScenes(sScenes, iIndex);
     // do we still have unresolved scenes?
-    sScenes = m_spProjectRunner->PossibleScenes(&unresolvedData);
+    sScenes = m_spSceneNodeResolver->PossibleScenes(&unresolvedData);
     NextSkript(false);
     return;
   }
@@ -519,7 +519,7 @@ void CSceneMainScreen::SlotSceneSelectReturnValue(int iIndex)
   if (0 <= iIndex && sScenes.size() > iIndex)
   {
     bool bEnd = false;
-    tspScene spScene = m_spProjectRunner->NextScene(sScenes[iIndex], &bEnd);
+    tspScene spScene = m_spSceneNodeResolver->NextScene(sScenes[iIndex], &bEnd);
     if (nullptr != spScene)
     {
       // load script
@@ -530,10 +530,10 @@ void CSceneMainScreen::SlotSceneSelectReturnValue(int iIndex)
                                            Q_ARG(tspScene, spScene),
                                            Q_ARG(tspResource, spDbManager->FindResourceInProject(m_spCurrentProject, sScript)));
       assert(bOk);
-      if (!bOk)
+      if (Q_UNLIKELY(!bOk))
       {
         qWarning() << tr("LoadScript could not be called.");
-        SlotQuit();
+        SlotTerminate();
       }
     }
     else
@@ -575,21 +575,21 @@ void CSceneMainScreen::SlotScriptRunFinished(bool bOk, bool bEndReached, const Q
       {
         m_bCanLoadNewScene = false;
 
-        bool bMightBeRegex = CProjectRunner::MightBeRegexScene(sRetVal);
+        bool bMightBeRegex = CSceneNodeResolver::MightBeRegexScene(sRetVal);
         if (sRetVal.isNull() || sRetVal.isEmpty())
         {
           SlotNextSkript(bMightBeRegex);
         }
         else
         {
-          m_spProjectRunner->ResolveFindScenes(sRetVal);
+          m_spSceneNodeResolver->ResolveFindScenes(sRetVal);
           NextSkript(bMightBeRegex);
         }
       }
     }
     else
     {
-      SlotQuit();
+      SlotTerminate();
     }
   }
 
@@ -646,10 +646,10 @@ void CSceneMainScreen::SlotUnloadFinished()
 
   if (nullptr != m_spWindowContext && !m_bBeingDebugged)
   {
-    m_spWindowContext->SignalChangeAppOverlay(QString());
+    emit m_spWindowContext->SignalChangeAppOverlay(QString());
   }
 
-  if (m_bCloseRequested)
+  if (m_bAppCloseRequested)
   {
     qApp->quit();
   }
@@ -666,7 +666,7 @@ void CSceneMainScreen::ConnectAllSignals()
 
   bOk = connect(pRootObject, SIGNAL(startLoadingSkript()), this, SLOT(SlotStartLoadingSkript()));
   assert(bOk);
-  bOk = connect(pRootObject, SIGNAL(quit()), this, SLOT(SlotQuit()));
+  bOk = connect(pRootObject, SIGNAL(quit()), this, SLOT(SlotTerminate()));
   assert(bOk);
 
   auto spSignalEmmiterContext = m_spScriptRunner->SignalEmmitterContext();
@@ -676,7 +676,7 @@ void CSceneMainScreen::ConnectAllSignals()
   m_runFinishedConn =
       connect(m_spScriptRunner.get(), &CScriptRunner::SignalScriptRunFinished,
               this, [this](bool bOk, const QString& sRetVal) {
-                SlotScriptRunFinished(bOk, m_bReachedEnd, sRetVal);
+                SlotScriptRunFinished(bOk, m_bReachedEndNode, sRetVal);
               },
               Qt::QueuedConnection);
 
@@ -694,7 +694,7 @@ void CSceneMainScreen::DisconnectAllSignals()
 {
   QQuickItem* pRootObject =  m_spUi->pQmlWidget->rootObject();
   disconnect(pRootObject, SIGNAL(startLoadingSkript()), this, SLOT(SlotStartLoadingSkript()));
-  disconnect(pRootObject, SIGNAL(quit()), this, SLOT(SlotQuit()));
+  disconnect(pRootObject, SIGNAL(quit()), this, SLOT(SlotTerminate()));
 
   auto spSignalEmmiterContext = m_spScriptRunner->SignalEmmitterContext();
 
@@ -762,7 +762,7 @@ void CSceneMainScreen::NextSkript(bool bMightBeRegex)
   QMetaObject::invokeMethod(pRootObject, "clearTextBox");
 
   std::optional<QString> unresolvedData = std::nullopt;
-  QStringList sScenes = m_spProjectRunner->PossibleScenes(&unresolvedData);
+  QStringList sScenes = m_spSceneNodeResolver->PossibleScenes(&unresolvedData);
   if (sScenes.size() > 0)
   {
     // no unresolved scenes found
@@ -771,7 +771,7 @@ void CSceneMainScreen::NextSkript(bool bMightBeRegex)
       if (sScenes.size() == 1)
       {
         bool bEnd = false;
-        tspScene spScene = m_spProjectRunner->NextScene(sScenes[0], &bEnd);
+        tspScene spScene = m_spSceneNodeResolver->NextScene(sScenes[0], &bEnd);
         if (nullptr != spScene)
         {
           // load script
@@ -782,10 +782,10 @@ void CSceneMainScreen::NextSkript(bool bMightBeRegex)
                                                Q_ARG(tspScene, spScene),
                                                Q_ARG(tspResource, spDbManager->FindResourceInProject(m_spCurrentProject, sScript)));
           assert(bOk);
-          if (!bOk)
+          if (Q_UNLIKELY(!bOk))
           {
             qWarning() << tr("LoadScript could not be called.");
-            SlotQuit();
+            SlotTerminate();
           }
         }
         else
@@ -802,7 +802,7 @@ void CSceneMainScreen::NextSkript(bool bMightBeRegex)
         std::uniform_int_distribution<> dis(0, static_cast<qint32>(sScenes.size() - 1));
         qint32 iGeneratedIndex = dis(generator);
         bool bEnd = false;
-        tspScene spScene = m_spProjectRunner->NextScene(sScenes[iGeneratedIndex], &bEnd);
+        tspScene spScene = m_spSceneNodeResolver->NextScene(sScenes[iGeneratedIndex], &bEnd);
         if (nullptr != spScene)
         {
           // load script
@@ -813,10 +813,10 @@ void CSceneMainScreen::NextSkript(bool bMightBeRegex)
                                                Q_ARG(tspScene, spScene),
                                                Q_ARG(tspResource, spDbManager->FindResourceInProject(m_spCurrentProject, sScript)));
           assert(bOk);
-          if (!bOk)
+          if (Q_UNLIKELY(!bOk))
           {
             qWarning() << tr("LoadScript could not be called.");
-            SlotQuit();
+            SlotTerminate();
           }
         }
         else
@@ -831,10 +831,10 @@ void CSceneMainScreen::NextSkript(bool bMightBeRegex)
                                              Q_ARG(QVariant, sScenes),
                                              Q_ARG(QVariant, QVariant()));
         assert(bOk);
-        if (!bOk)
+        if (Q_UNLIKELY(!bOk))
         {
           qWarning() << tr("showSceneSelection could not be called.");
-          SlotQuit();
+          SlotTerminate();
         }
       }
     }
@@ -848,10 +848,10 @@ void CSceneMainScreen::NextSkript(bool bMightBeRegex)
                                              Q_ARG(QVariant, sScenes),
                                              Q_ARG(QVariant, QVariant::fromValue(sUnResolveData)));
         assert(bOk);
-        if (!bOk)
+        if (Q_UNLIKELY(!bOk))
         {
           qWarning() << tr("showSceneSelection could not be called.");
-          SlotQuit();
+          SlotTerminate();
         }
       }
       else
@@ -860,10 +860,10 @@ void CSceneMainScreen::NextSkript(bool bMightBeRegex)
                                              Q_ARG(QVariant, sScenes),
                                              Q_ARG(QVariant, QVariant()));
         assert(bOk);
-        if (!bOk)
+        if (Q_UNLIKELY(!bOk))
         {
           qWarning() << tr("showSceneSelection could not be called.");
-          SlotQuit();
+          SlotTerminate();
         }
       }
     }
@@ -880,7 +880,7 @@ void CSceneMainScreen::NextSkript(bool bMightBeRegex)
 void CSceneMainScreen::UnloadRunner()
 {
   m_spScriptRunner->UnregisterComponents();
-  m_spProjectRunner->UnloadProject();
+  m_spSceneNodeResolver->UnloadProject();
 }
 
 //----------------------------------------------------------------------------------------
@@ -922,7 +922,7 @@ void CSceneMainScreenWrapper::initObject(QJSValue wrapper)
           qobject_cast<CProjectSceneManagerWrapper*>(pObject);
       if (nullptr != pSceneManager)
       {
-        pSceneManager->Initalize(m_pPlayer->ProjectRunner(), m_pPlayer->EventCallbackRegistry());
+        pSceneManager->Initalize(m_pPlayer->SceneResolver(), m_pPlayer->EventCallbackRegistry());
       }
     }
   }

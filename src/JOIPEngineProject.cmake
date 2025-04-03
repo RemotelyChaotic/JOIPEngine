@@ -465,8 +465,6 @@ macro(CreateJOIPProject JOIP_PROJECT_NAME)
     ${JOIPSources}/Player/MetronomePaintedWidget.h
     ${JOIPSources}/Player/ProjectDialogueManager.cpp
     ${JOIPSources}/Player/ProjectDialogueManager.h
-    ${JOIPSources}/Player/ProjectRunner.cpp
-    ${JOIPSources}/Player/ProjectRunner.h
     ${JOIPSources}/Player/ProjectEventTarget.cpp
     ${JOIPSources}/Player/ProjectEventTarget.h
     ${JOIPSources}/Player/ProjectNotificationManager.cpp
@@ -477,6 +475,8 @@ macro(CreateJOIPProject JOIP_PROJECT_NAME)
     ${JOIPSources}/Player/ProjectSceneManager.h
     ${JOIPSources}/Player/ProjectSoundManager.cpp
     ${JOIPSources}/Player/ProjectSoundManager.h
+    ${JOIPSources}/Player/SceneNodeResolver.cpp
+    ${JOIPSources}/Player/SceneNodeResolver.h
     ${JOIPSources}/Player/SceneMainScreen.cpp
     ${JOIPSources}/Player/SceneMainScreen.h
     ${JOIPSources}/Player/SceneMainScreen.ui

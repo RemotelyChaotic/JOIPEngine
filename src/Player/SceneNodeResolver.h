@@ -30,13 +30,13 @@ struct NodeResolveReslt
 
 //----------------------------------------------------------------------------------------
 //
-class CProjectRunner : public QObject
+class CSceneNodeResolver : public QObject
 {
   Q_OBJECT
 
 public:
-  explicit CProjectRunner(QObject* pParent = nullptr);
-  ~CProjectRunner();
+  explicit CSceneNodeResolver(QObject* pParent = nullptr);
+  ~CSceneNodeResolver();
 
   static bool MightBeRegexScene(const QString& sName);
 

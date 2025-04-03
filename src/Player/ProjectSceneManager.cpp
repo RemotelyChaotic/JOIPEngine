@@ -1,10 +1,11 @@
 #include "ProjectSceneManager.h"
-#include "ProjectRunner.h"
+#include "SceneNodeResolver.h"
+
 #include "Systems/Scene.h"
 
 CProjectSceneManagerWrapper::CProjectSceneManagerWrapper(QObject* pParent) :
   CProjectEventTargetWrapper(pParent),
-  m_wpProjectRunner()
+  m_wpSceneNodeResolver()
 {
 
 }
@@ -29,10 +30,10 @@ QString CProjectSceneManagerWrapper::EventTarget()
 
 //----------------------------------------------------------------------------------------
 //
-void CProjectSceneManagerWrapper::Initalize(std::weak_ptr<CProjectRunner> wpProjectRunner,
+void CProjectSceneManagerWrapper::Initalize(std::weak_ptr<CSceneNodeResolver> wpSceneNodeResolver,
                                             std::weak_ptr<CProjectEventCallbackRegistry> wpRegistry)
 {
-  m_wpProjectRunner = wpProjectRunner;
+  m_wpSceneNodeResolver = wpSceneNodeResolver;
   InitializeEventRegistry(wpRegistry);
   if (auto spRegistry = m_wpRegistry.lock())
   {
@@ -44,9 +45,9 @@ void CProjectSceneManagerWrapper::Initalize(std::weak_ptr<CProjectRunner> wpProj
 //
 void CProjectSceneManagerWrapper::disable(QString sScene)
 {
-  if (auto spRunner = m_wpProjectRunner.lock())
+  if (auto spResolver = m_wpSceneNodeResolver.lock())
   {
-    spRunner->DisableScene(sScene);
+    spResolver->DisableScene(sScene);
   }
 }
 
@@ -54,9 +55,9 @@ void CProjectSceneManagerWrapper::disable(QString sScene)
 //
 void CProjectSceneManagerWrapper::enable(QString sScene)
 {
-  if (auto spRunner = m_wpProjectRunner.lock())
+  if (auto spResolver = m_wpSceneNodeResolver.lock())
   {
-    spRunner->EnableScene(sScene);
+    spResolver->EnableScene(sScene);
   }
 }
 
@@ -64,9 +65,9 @@ void CProjectSceneManagerWrapper::enable(QString sScene)
 //
 bool CProjectSceneManagerWrapper::isEnabled(QString sScene)
 {
-  if (auto spRunner = m_wpProjectRunner.lock())
+  if (auto spResolver = m_wpSceneNodeResolver.lock())
   {
-    return spRunner->IsSceneEnabled(sScene);
+    return spResolver->IsSceneEnabled(sScene);
   }
   return true;
 }
@@ -75,9 +76,9 @@ bool CProjectSceneManagerWrapper::isEnabled(QString sScene)
 //
 QString CProjectSceneManagerWrapper::getCurrentSceneId()
 {
-  if (auto spRunner = m_wpProjectRunner.lock())
+  if (auto spResolver = m_wpSceneNodeResolver.lock())
   {
-    tspScene spScene = spRunner->CurrentScene();
+    tspScene spScene = spResolver->CurrentScene();
     QReadLocker locker(&spScene->m_rwLock);
     return spScene->m_sName;
   }
@@ -88,8 +89,8 @@ QString CProjectSceneManagerWrapper::getCurrentSceneId()
 //
 void CProjectSceneManagerWrapper::gotoScene(QString sScene)
 {
-  if (auto spRunner = m_wpProjectRunner.lock())
+  if (auto spResolver = m_wpSceneNodeResolver.lock())
   {
-    emit spRunner->SignalChangeSceneRequest(sScene);
+    emit spResolver->SignalChangeSceneRequest(sScene);
   }
 }

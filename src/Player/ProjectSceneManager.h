@@ -4,7 +4,7 @@
 #include "ProjectEventTarget.h"
 #include <memory>
 
-class CProjectRunner;
+class CSceneNodeResolver;
 
 class CProjectSceneManagerWrapper : public CProjectEventTargetWrapper
 {
@@ -15,7 +15,7 @@ public:
 
   void Dispatched(const QString& sEvent) override;
   QString EventTarget() override;
-  void Initalize(std::weak_ptr<CProjectRunner> wpProjectRunner,
+  void Initalize(std::weak_ptr<CSceneNodeResolver> wpSceneNodeResolver,
                  std::weak_ptr<CProjectEventCallbackRegistry> wpRegistry);
 
 public slots:
@@ -26,7 +26,7 @@ public slots:
   void gotoScene(QString sScene);
 
 private:
-  std::weak_ptr<CProjectRunner>     m_wpProjectRunner;
+  std::weak_ptr<CSceneNodeResolver>     m_wpSceneNodeResolver;
 };
 
 #endif // CPROJECTSCENEMANAGER_H
