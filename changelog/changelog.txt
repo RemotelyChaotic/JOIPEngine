@@ -23,6 +23,8 @@ Changes:
   continue to work as they did before.
 - Missing Resources show a warning in the Resource Tree.
 - Project name checks for new Projects update while typing.
+- Rcc is now a library and not a sepearate executable, meaning bundles do not require
+  an aditional process to be started, making it work on Android.
 
 Fixed Bugs:
 - JS imports work even when the files are in different directories.
@@ -31,6 +33,7 @@ Fixed Bugs:
 - New Projects show up in the Poject list again.
 - The Default Layout is shown and set when a new Project is created.
 - Fixed Project lookup for newly created Projects.
+- Fixed naming clash handling of Projects.
 
 =================
 Version 1.4.5.0
