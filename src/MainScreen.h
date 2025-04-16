@@ -6,11 +6,11 @@
 #include <QWidget>
 #include <memory>
 
+class CDownloadButtonOverlay;
+class CHelpButtonOverlay;
 namespace Ui {
   class CMainScreen;
 }
-class CHelpButtonOverlay;
-class CDownloadButtonOverlay;
 
 class CMainScreen : public QWidget, public IAppStateScreen
 {

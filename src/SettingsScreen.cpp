@@ -216,9 +216,9 @@ void CSettingsScreen::Initialize()
     delete m_spUi->pDesktopSpacer;
   }
   m_spUi->tabWidget->setTabEnabled(3, false);
-  m_spUi->tabWidget->setTabEnabled(6, false);
   m_spUi->tabWidget->setCurrentIndex(1);
   m_spUi->pWindowModeContainer->hide();
+  m_spUi->pStyleHotoadContainer->hide();
 
   widget_helpers::RetainSizeAndHide(m_spUi->pBackButton);
 #endif
@@ -278,6 +278,7 @@ void CSettingsScreen::Load()
   m_spUi->pPauseWhenNotActiveCheckBox->blockSignals(true);
   m_spUi->pShowPushNotificationsCeckBox->blockSignals(true);
   m_spUi->pConnectOnStartupCheckBox->blockSignals(true);
+  m_spUi->pDebugOverlayCheckBox->blockSignals(true);
   m_spUi->pStyleHotoadCheckBox->blockSignals(true);
   m_spUi->pAntialiasingCheckBox->blockSignals(true);
   m_spUi->pDropShadowCheckBox->blockSignals(true);
@@ -459,6 +460,7 @@ void CSettingsScreen::Load()
                                            EToyMetronomeCommandModeFlag::eRotate);
 
   // hot-loading of style
+  m_spUi->pDebugOverlayCheckBox->setChecked(m_spSettings->DebugOverlayEnabled());
   m_spUi->pStyleHotoadCheckBox->setChecked(m_spSettings->StyleHotLoad());
 
   // unblock signals
@@ -484,6 +486,7 @@ void CSettingsScreen::Load()
   m_spUi->pPauseWhenNotActiveCheckBox->blockSignals(false);
   m_spUi->pShowPushNotificationsCeckBox->blockSignals(false);
   m_spUi->pConnectOnStartupCheckBox->blockSignals(false);
+  m_spUi->pDebugOverlayCheckBox->blockSignals(false);
   m_spUi->pStyleHotoadCheckBox->blockSignals(false);
   m_spUi->pAntialiasingCheckBox->blockSignals(false);
   m_spUi->pDropShadowCheckBox->blockSignals(false);
@@ -906,6 +909,17 @@ void CSettingsScreen::on_pConnectPushButton_clicked()
   {
     spDevManager->Connect();
   }
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CSettingsScreen::on_pDebugOverlayCheckBox_toggled(bool bState)
+{
+  WIDGET_INITIALIZED_GUARD
+  assert(nullptr != m_spSettings);
+  if (nullptr == m_spSettings) { return; }
+
+  m_spSettings->SetDebugOverlayEnabled(bState);
 }
 
 //----------------------------------------------------------------------------------------

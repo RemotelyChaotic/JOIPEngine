@@ -945,7 +945,13 @@ QPushButton#EditDialogueContent {
   qproperty-icon: url(ui/ButtonDialogConfigure.png) off,
                   url(ui/ButtonDialogConfigure.png) on;
 }
-
+QPushButton#CliButton {
+  border-image: url(ui/IconBg.svg) 0 0 0 0 stretch stretch;
+  border-top: 0 transparent;
+  border-bottom: 0 transparent;
+  border-right: 0 transparent;
+  border-left: 0 transparent;
+}
 
 QPushButton#AddShowBackgroundCode:hover,
 QPushButton#AddShowIconCode:hover,
@@ -1034,7 +1040,8 @@ QPushButton#RemoveDialogue:hover,
 QPushButton#AddDialogue:hover,
 QPushButton#AddDialogueFrament:hover,
 QPushButton#AddDialogueCategoryButton:hover,
-QPushButton#EditDialogueContent:hover {
+QPushButton#EditDialogueContent:hover,
+QPushButton#CliButton:hover {
   border-image: url(ui/IconBgHover.svg) 0 0 0 0 stretch stretch;
 }
 
@@ -1125,7 +1132,8 @@ QPushButton#RemoveDialogue:pressed,
 QPushButton#AddDialogue:pressed,
 QPushButton#AddDialogueFrament:pressed,
 QPushButton#AddDialogueCategoryButton:pressed,
-QPushButton#EditDialogueContent:pressed {
+QPushButton#EditDialogueContent:pressed,
+QPushButton#CliButton:pressed {
   border-image: url(ui/IconBgPressed.svg) 0 0 0 0 stretch stretch;
 }
 
@@ -1216,7 +1224,8 @@ QPushButton#RemoveDialogue:disabled,
 QPushButton#AddDialogue:disabled,
 QPushButton#AddDialogueFrament:disabled,
 QPushButton#AddDialogueCategoryButton:disabled,
-QPushButton#EditDialogueContent:disabled {
+QPushButton#EditDialogueContent:disabled,
+QPushButton#CliButton:disabled {
   border-image: url(ui/IconBgDisabled.svg) 0 0 0 0 stretch stretch;
 }
 
@@ -2192,4 +2201,10 @@ CSelectableResourceLabel {
   max-height: 120px;
   max-width: 120px;
   qproperty-unsetIcon: url(ui/ButtonBackground.png);
+}
+
+CDebugOverlay {
+  background-color: rgba(0, 0, 0, 150);
+  border: 0px;
+  border-radius: 0px;
 }

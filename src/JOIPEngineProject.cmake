@@ -518,6 +518,12 @@ macro(CreateJOIPProject JOIP_PROJECT_NAME)
     ${JOIPSources}/Systems/DatabaseIO.h
     ${JOIPSources}/Systems/DatabaseManager.cpp
     ${JOIPSources}/Systems/DatabaseManager.h
+    ${JOIPSources}/Systems/Debug/ICustomMessageHandler.h
+    ${JOIPSources}/Systems/Debug/DebugOverlay.cpp
+    ${JOIPSources}/Systems/Debug/DebugOverlay.h
+    ${JOIPSources}/Systems/Debug/DebugOverlay.ui
+    ${JOIPSources}/Systems/Debug/JoipMessageHandler.cpp
+    ${JOIPSources}/Systems/Debug/JoipMessageHandler.h
     ${JOIPSources}/Systems/DeviceManager.cpp
     ${JOIPSources}/Systems/DeviceManager.h
     ${JOIPSources}/Systems/Devices/DeviceResources.qrc

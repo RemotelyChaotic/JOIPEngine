@@ -155,7 +155,7 @@
            <rect>
             <x>0</x>
             <y>0</y>
-            <width>285</width>
+            <width>284</width>
             <height>235</height>
            </rect>
           </property>
@@ -542,7 +542,7 @@
            <rect>
             <x>0</x>
             <y>0</y>
-            <width>268</width>
+            <width>267</width>
             <height>396</height>
            </rect>
           </property>
@@ -1370,7 +1370,7 @@
            <rect>
             <x>0</x>
             <y>0</y>
-            <width>285</width>
+            <width>284</width>
             <height>235</height>
            </rect>
           </property>
@@ -1904,9 +1904,9 @@ commands</string>
        </item>
       </layout>
      </widget>
-     <widget class="QWidget" name="pTabAdvanced">
+     <widget class="QWidget" name="pTabDebug">
       <attribute name="title">
-       <string>Advanced</string>
+       <string>Debug</string>
       </attribute>
       <layout class="QGridLayout" name="gridLayout_9">
        <item row="0" column="0">
@@ -1928,7 +1928,7 @@ commands</string>
            <rect>
             <x>0</x>
             <y>0</y>
-            <width>285</width>
+            <width>284</width>
             <height>235</height>
            </rect>
           </property>
@@ -1976,6 +1976,51 @@ commands</string>
               </item>
               <item>
                <widget class="QCheckBox" name="pStyleHotoadCheckBox">
+                <property name="text">
+                 <string/>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </widget>
+           </item>
+           <item>
+            <widget class="QWidget" name="pDebugOverlayContainer" native="true">
+             <layout class="QHBoxLayout" name="horizontalLayout_27">
+              <property name="leftMargin">
+               <number>0</number>
+              </property>
+              <property name="topMargin">
+               <number>0</number>
+              </property>
+              <property name="rightMargin">
+               <number>0</number>
+              </property>
+              <property name="bottomMargin">
+               <number>0</number>
+              </property>
+              <item>
+               <widget class="QLabel" name="label_32">
+                <property name="text">
+                 <string>Debug Overlay</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <spacer name="horizontalSpacer_30">
+                <property name="orientation">
+                 <enum>Qt::Horizontal</enum>
+                </property>
+                <property name="sizeHint" stdset="0">
+                 <size>
+                  <width>166</width>
+                  <height>20</height>
+                 </size>
+                </property>
+               </spacer>
+              </item>
+              <item>
+               <widget class="QCheckBox" name="pDebugOverlayCheckBox">
                 <property name="text">
                  <string/>
                 </property>

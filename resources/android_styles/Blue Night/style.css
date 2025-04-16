@@ -294,6 +294,11 @@ CDownloadButtonOverlay>CShortcutButton {
   qproperty-iconSize: 24px;
 }
 
+QPushButton#CliButton {
+  min-height: 24px;
+  max-height: 24px;
+}
+
 QPushButton#AddShowBackgroundCode {
   qproperty-icon: url(ui/ButtonBackground.png) off,
                   url(ui/ButtonBackground.png) on;
@@ -1442,4 +1447,10 @@ CSelectableResourceLabel {
   max-height: 120px;
   max-width: 120px;
   qproperty-unsetIcon: url(ui/ButtonBackground.png);
+}
+
+CDebugOverlay {
+  background-color: rgba(0, 0, 0, 150);
+  border: 0px;
+  border-radius: 0px;
 }

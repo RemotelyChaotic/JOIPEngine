@@ -64,6 +64,7 @@ protected slots:
   void on_pLinearCmdCheckBox_toggled(bool bState);
   void on_pRotateCmdCheckBox_toggled(bool bState);
   void on_pConnectPushButton_clicked();
+  void on_pDebugOverlayCheckBox_toggled(bool bState);
   void on_pStyleHotoadCheckBox_stateChanged(qint32 iState);
   void on_pBackButton_clicked();
   void SlotKeySequenceChanged(const QKeySequence& keySequence);

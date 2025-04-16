@@ -29,6 +29,7 @@ class CSettings : public QObject
   Q_PROPERTY(bool autoUpdate READ AutoUpdate WRITE SetAutoUpdate NOTIFY autoUpdateChanged)
   Q_PROPERTY(bool connectToHWOnStartup READ ConnectToHWOnStartup WRITE SetConnectToHWOnStartup NOTIFY connectToHWOnStartupChanged)
   Q_PROPERTY(QString contentFolder READ ContentFolder WRITE SetContentFolder NOTIFY contentFolderChanged)
+  Q_PROPERTY(bool debugOverlayEnabled READ DebugOverlayEnabled WRITE SetDebugOverlayEnabled NOTIFY debugOverlayEnabledChanged)
   Q_PROPERTY(DominantHand::EDominantHand dominantHand READ GetDominantHand WRITE SetDominantHand NOTIFY dominantHandChanged)
   Q_PROPERTY(bool editorCaseInsensitiveSearch READ EditorCaseInsensitiveSearch WRITE SetEditorCaseInsensitiveSearch NOTIFY editorCaseInsensitiveSearchChanged)
   Q_PROPERTY(QString editorFont READ EditorFont WRITE SetEditorFont NOTIFY editorFontChanged)
@@ -70,6 +71,7 @@ public:
   static const QString c_sSettingCodeEditorTheme;
   static const QString c_sSettingConnectToHWOnStartup;
   static const QString c_sSettingContentFolder;
+  static const QString c_sSettingDebugOverlayEnabled;
   static const QString c_sSettingDominantHand;
   static const QString c_sSettingEditorLayout;
   static const QString c_sSettingFont;
@@ -126,6 +128,8 @@ public:
   QString ContentFolder();
   void SetConnectToHWOnStartup(bool bValue);
   bool ConnectToHWOnStartup() const;
+  void SetDebugOverlayEnabled(bool value);
+  bool DebugOverlayEnabled() const;
   DominantHand::EDominantHand GetDominantHand() const;
   void SetDominantHand(DominantHand::EDominantHand hand);
   void SetEditorCaseInsensitiveSearch(bool bValue);
@@ -197,6 +201,7 @@ signals:
   void autoUpdateChanged();
   void contentFolderChanged();
   void connectToHWOnStartupChanged();
+  void debugOverlayEnabledChanged();
   void dominantHandChanged();
   void editorCaseInsensitiveSearchChanged();
   void editorFontChanged();

@@ -5,6 +5,8 @@
 
 #include "Systems/NotificationSender.h"
 
+#include "Systems/Debug/JoipMessageHandler.h"
+
 #include "Systems/PhysFs/PhysFsFileEngine.h"
 #include "Systems/PhysFs/PhysFsQtAVIntegration.h"
 
@@ -45,6 +47,8 @@ int main(int argc, char *argv[])
   CPhysFsFileEngineHandler engine;
   CScriptCacheFileEngineHandler scriptFileEngine;
   QtAV::RegisterPhysFsFileHandler();
+
+  CJoipMessageHandler::InstallMsgHandler();
 
   qDebug() << "SSL suport:" << QSslSocket::supportsSsl() <<
               "- SLL Build version:" << QSslSocket::sslLibraryBuildVersionString() <<

@@ -10,6 +10,7 @@
 #include <memory>
 
 class CAgeCheckOverlay;
+class CDebugOverlay;
 class CDeviceButtonOverlay;
 class CDownloadButtonOverlay;
 class CHelpButtonOverlay;
@@ -62,6 +63,7 @@ protected:
   std::shared_ptr<CWindowContext>         m_spWindowContext;
   std::shared_ptr<CSettings>              m_spSettings;
   QPointer<CBackgroundWidget>             m_pBackground;
+  QPointer<CDebugOverlay>                 m_pDebugOverlay;
 
 private slots:
   virtual void OldSettingsDetected() {};

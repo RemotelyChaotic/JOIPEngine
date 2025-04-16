@@ -81,6 +81,8 @@ namespace {
     "RightTab_Sequence",
     "RightTab_Dialogue",
 
+    "Debug",
+
     "Cut",
     "Copy",
     "Pase",
@@ -103,6 +105,7 @@ const QString CSettings::c_sSettingCodeEditorShowWhitespace = "Content/editorSho
 const QString CSettings::c_sSettingConnectToHWOnStartup = "Devices/connectOnStartup";
 const QString CSettings::c_sSettingCodeEditorTheme = "Content/editorTheme";
 const QString CSettings::c_sSettingContentFolder = "Content/folder";
+const QString CSettings::c_sSettingDebugOverlayEnabled = "Debug/debugOverlayEnabled";
 const QString CSettings::c_sSettingDominantHand  = "Content/dominantHand";
 const QString CSettings::c_sSettingEditorLayout = "Content/preferededitorlayout";
 const QString CSettings::c_sSettingFont = "Graphics/font";
@@ -201,6 +204,8 @@ CSettings::CSettings(QObject* pParent) :
       { "RightTab_Code",        QKeySequence(Qt::ALT  + Qt::Key_D) },
       { "RightTab_Sequence",    QKeySequence(Qt::ALT  + Qt::Key_P) },
       { "RightTab_Dialogue",    QKeySequence(Qt::ALT  + Qt::Key_I) },
+
+      { "Debug",      QKeySequence(Qt::Key_section) },
 
       { "Cut",        QKeySequence(QKeySequence::Cut)    },
       { "Copy",       QKeySequence(QKeySequence::Copy)   },
@@ -345,6 +350,28 @@ bool CSettings::ConnectToHWOnStartup() const
 {
   QMutexLocker locker(&m_settingsMutex);
   return m_spSettings->value(CSettings::c_sSettingConnectToHWOnStartup).toBool();
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CSettings::SetDebugOverlayEnabled(bool value)
+{
+  QMutexLocker locker(&m_settingsMutex);
+  bool bOldValue = m_spSettings->value(CSettings::c_sSettingDebugOverlayEnabled).toBool();
+
+  if (bOldValue == value) { return; }
+
+  m_spSettings->setValue(CSettings::c_sSettingDebugOverlayEnabled, value);
+
+  emit debugOverlayEnabledChanged();
+}
+
+//----------------------------------------------------------------------------------------
+//
+bool CSettings::DebugOverlayEnabled() const
+{
+  QMutexLocker locker(&m_settingsMutex);
+  return m_spSettings->value(CSettings::c_sSettingDebugOverlayEnabled).toBool();
 }
 
 //----------------------------------------------------------------------------------------
@@ -1411,6 +1438,13 @@ void CSettings::GenerateSettingsIfNotExists()
   {
     bNeedsSynch = true;
     m_spSettings->setValue(CSettings::c_sSettingStyle, "Blue Night");
+  }
+
+  // check debug overlay setting
+  if (!m_spSettings->contains(CSettings::c_sSettingDebugOverlayEnabled))
+  {
+    bNeedsSynch = true;
+    m_spSettings->setValue(CSettings::c_sSettingDebugOverlayEnabled, false);
   }
 
 #if !defined(Q_OS_ANDROID)

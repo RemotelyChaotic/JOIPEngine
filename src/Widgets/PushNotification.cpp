@@ -12,7 +12,7 @@ CPushNotification::CPushNotification(const QString& sMsg,
                                      std::optional<std::chrono::milliseconds> displayTime,
                                      bool bSingleShot,
                                      QWidget* pParent) :
-  COverlayBase(INT_MAX, pParent),
+  COverlayBase(INT_MAX-2, pParent),
   m_pPopInOutAnim(new QPropertyAnimation(this, "iYOffset", this)),
   m_pMsg(new QLabel(sMsg, this)),
   m_iYOffset(0)

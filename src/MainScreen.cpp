@@ -3,9 +3,12 @@
 #include "out_Version.h"
 #include "WindowContext.h"
 #include "ui_MainScreen.h"
+
 #include "Systems/HelpFactory.h"
+
 #include "Widgets/DownloadButtonOverlay.h"
 #include "Widgets/HelpOverlay.h"
+
 #include <QApplication>
 #include <QDebug>
 #include <QResizeEvent>

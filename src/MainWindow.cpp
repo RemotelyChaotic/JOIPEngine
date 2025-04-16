@@ -12,6 +12,7 @@
 #include "ui_MainWindow.h"
 
 #include "Systems/BackActionHandler.h"
+#include "Systems/Debug/DebugOverlay.h"
 #include "Systems/DeviceManager.h"
 #include "Systems/ProjectDownloader.h"
 
@@ -41,6 +42,9 @@ CMainWindow::CMainWindow(QWidget* pParent) :
 {
   m_spHelpOverlay.reset(new CHelpOverlay(m_spHelpButtonOverlay.get(), this));
   m_spUi->setupUi(this);
+
+  m_pDebugOverlay = new CDebugOverlay(this);
+  m_pDebugOverlay->Hide();
 
   m_pBackground->setFixedSize(size());
   m_pBackground->lower();
