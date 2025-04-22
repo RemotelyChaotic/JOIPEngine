@@ -17,6 +17,7 @@
 #include "Player/TimerWidget.h"
 
 #include "Systems/BackActionHandler.h"
+#include "Systems/Debug/DebugInterface.h"
 #include "Systems/DatabaseManager.h"
 #include "Systems/DeviceManager.h"
 #include "Systems/Devices/DeviceSettings.h"
@@ -97,6 +98,7 @@ CApplication::CApplication(int& argc, char *argv[]) :
   m_spSettings(nullptr),
   m_spNotifier(std::make_shared<CNotificationSender>()),
   m_spBackActionHandler(nullptr),
+  m_spDebugInterface(nullptr),
   m_styleWatcher(),
   m_bStyleDirty(true),
   m_bInitialized(false)
@@ -160,6 +162,10 @@ void CApplication::Initialize()
     QVariant varRet = m_spSettings->ReadRaw(it.second.m_sSettingsEntry, it.second.m_vsAllowedHosts);
     vJobCfg.push_back({it.second.m_sClassType, it.second.m_sSettingsEntry, varRet.toStringList()});
   }
+
+  // create and init debug interface
+  m_spDebugInterface = std::make_shared<CDebugInterface>();
+  m_spDebugInterface->Register("app", this);
 
   // create device settings
   CDeviceSettingFactory::InitializeSettings();
@@ -533,3 +539,9 @@ void CApplication::RegisterQmlTypes()
   qmlRegisterType<qqsfpm::StringSorter>("SortFilterProxyModel", 0, 2, "StringSorter");
 }
 
+//----------------------------------------------------------------------------------------
+//
+CSettings* CApplication::SettingsImpl()
+{
+  return m_spSettings.get();
+}

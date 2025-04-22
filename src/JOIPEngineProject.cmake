@@ -519,6 +519,8 @@ macro(CreateJOIPProject JOIP_PROJECT_NAME)
     ${JOIPSources}/Systems/DatabaseManager.cpp
     ${JOIPSources}/Systems/DatabaseManager.h
     ${JOIPSources}/Systems/Debug/ICustomMessageHandler.h
+    ${JOIPSources}/Systems/Debug/DebugInterface.cpp
+    ${JOIPSources}/Systems/Debug/DebugInterface.h
     ${JOIPSources}/Systems/Debug/DebugOverlay.cpp
     ${JOIPSources}/Systems/Debug/DebugOverlay.h
     ${JOIPSources}/Systems/Debug/DebugOverlay.ui

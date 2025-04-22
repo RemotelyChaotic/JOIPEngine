@@ -1,11 +1,13 @@
 #include "DebugOverlay.h"
 #include "Application.h"
+#include "DebugInterface.h"
 #include "JoipMessageHandler.h"
 #include "Settings.h"
 #include "ui_DebugOverlay.h"
 
 #include "Widgets/Editor/HighlightedSearchableTextEdit.h"
 #include "Widgets/Editor/TextEditZoomEnabler.h"
+#include "Widgets/PositionalMenu.h"
 
 #include <QAction>
 #include <QDateTime>
@@ -16,7 +18,8 @@ CDebugOverlay::CDebugOverlay(QWidget* pParent) :
     COverlayBase(INT_MAX-1, pParent),
     ICustomMessageHandler(),
     m_spUi(new Ui::CDebugOverlay),
-    m_spSettings(CApplication::Instance()->Settings())
+    m_spSettings(CApplication::Instance()->Settings()),
+    m_wpDebugInterface(CApplication::Instance()->DebugInterface())
 {
   m_spUi->setupUi(this);
   //setAttribute(Qt::WA_TranslucentBackground);
@@ -109,6 +112,37 @@ bool CDebugOverlay::MessageImpl(QtMsgType type, const QMessageLogContext& contex
 void CDebugOverlay::on_CloseButton_clicked()
 {
   Hide();
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CDebugOverlay::on_CliButton_clicked()
+{
+  CPositionalMenu modelMenu(EMenuPopupPosition::eRight | EMenuPopupPosition::eTop);
+
+  QAction* pAction = new QAction(tr("js"), &modelMenu);
+  QObject::connect(pAction, &QAction::triggered, pAction, [&]()
+                   {
+                     m_spUi->CliButton->setText(tr("js:"));
+                     // TODO: logic
+                   });
+  modelMenu.addAction(pAction);
+
+  QPoint p =
+      m_spUi->CliButton->parentWidget()->mapToGlobal(
+          m_spUi->CliButton->pos());
+  modelMenu.exec(p);
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CDebugOverlay::on_LogInput_editingFinished()
+{
+  if (auto spDebugInterface = m_wpDebugInterface.lock())
+  {
+    QString sRet = spDebugInterface->TryEval(m_spUi->LogInput->text());
+    m_spUi->LogOutput->setText(sRet);
+  }
 }
 
 //----------------------------------------------------------------------------------------

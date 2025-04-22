@@ -11,6 +11,7 @@
 #include "Systems/BackActionHandler.h"
 #include "Systems/DatabaseManager.h"
 #include "Systems/DatabaseImageProvider.h"
+#include "Systems/Debug/DebugInterface.h"
 #include "Systems/PhysFs/PhysFsFileEngine.h"
 #include "Systems/Project.h"
 #include "Systems/ScriptRunner.h"
@@ -140,6 +141,8 @@ void CSceneMainScreen::LoadProject(qint32 iId, const tSceneToLoad& sStartScene)
   m_bCanLoadNewScene = true;
   m_spUi->pQmlWidget->setSource(QUrl("qrc:/qml/resources/qml/JoipEngine/PlayerMain.qml"));
 
+  CApplication::Instance()->DebugInterface()->Register("tease", m_spUi->pQmlWidget->rootObject());
+
   auto spDbManager = m_wpDbManager.lock();
   if (nullptr != spDbManager)
   {
@@ -252,8 +255,8 @@ void CSceneMainScreen::SetDebugging(bool bDebugging)
   {
     m_bBeingDebugged = bDebugging;
 
-    m_spUi->pQmlWidget->setAttribute(Qt::WA_AlwaysStackOnTop, !m_bBeingDebugged);
-    m_spUi->pQmlWidget->setAttribute(Qt::WA_TranslucentBackground, !m_bBeingDebugged);
+    //m_spUi->pQmlWidget->setAttribute(Qt::WA_AlwaysStackOnTop, !m_bBeingDebugged);
+    //m_spUi->pQmlWidget->setAttribute(Qt::WA_TranslucentBackground, !m_bBeingDebugged);
 
     // set size properties manually setzen, since this isn't done automatically
     QQuickItem* pRootObject =  m_spUi->pQmlWidget->rootObject();
@@ -608,6 +611,8 @@ void CSceneMainScreen::SlotStartLoadingSkript()
 //
 void CSceneMainScreen::SlotUnloadFinished()
 {
+  CApplication::Instance()->DebugInterface()->UnRegister("tease");
+
   m_spEventCallbackRegistry->Clear();
 
   // disconnect this after unloading
@@ -705,10 +710,10 @@ void CSceneMainScreen::DisconnectAllSignals()
 //
 void CSceneMainScreen::InitQmlMain()
 {
-  m_spUi->pQmlWidget->setAttribute(Qt::WA_AlwaysStackOnTop, true);
-  m_spUi->pQmlWidget->setAttribute(Qt::WA_TranslucentBackground, true);
-  m_spUi->pQmlWidget->setClearColor(Qt::transparent);
-  m_spUi->pQmlWidget->setStyleSheet("background-color: transparent;");
+  //m_spUi->pQmlWidget->setAttribute(Qt::WA_AlwaysStackOnTop, true);
+  //m_spUi->pQmlWidget->setAttribute(Qt::WA_TranslucentBackground, true);
+  //m_spUi->pQmlWidget->setClearColor(Qt::transparent);
+  //m_spUi->pQmlWidget->setStyleSheet("background-color: transparent;");
 
   QQmlEngine* pEngine = m_spUi->pQmlWidget->engine();
   xmldom::RegisterWrapper(pEngine);

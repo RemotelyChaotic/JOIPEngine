@@ -9,6 +9,7 @@
 #include <memory>
 
 class CBackActionHandler;
+class CDebugInterface;
 class CDeviceManager;
 class CHelpFactory;
 class CMetronomeManager;
@@ -37,6 +38,7 @@ public slots:
 class CApplication : public QApplication
 {
   Q_OBJECT
+  Q_PROPERTY(CSettings* settings READ SettingsImpl CONSTANT)
 
 public:
   explicit CApplication(int& argc, char *argv[]);
@@ -46,6 +48,7 @@ public:
 
   void Initialize();
 
+  std::shared_ptr<CDebugInterface> DebugInterface() { return m_spDebugInterface; }
   std::shared_ptr<CSettings> Settings() { return m_spSettings; }
   template<typename T> std::weak_ptr<T> System();
   void SendNotification(const QString& sTitle, const QString& sMsg);
@@ -60,6 +63,7 @@ private slots:
 
 private:
   void RegisterQmlTypes();
+  CSettings* SettingsImpl();
 
   std::map<qint32, std::shared_ptr<CThreadedSystem>> m_spSystemsMap;
   std::unique_ptr<CUISoundEmitter>                   m_spSoundEmitter;
@@ -68,6 +72,7 @@ private:
   std::shared_ptr<CSettings>                         m_spSettings;
   std::shared_ptr<CNotificationSender>               m_spNotifier;
   std::shared_ptr<CBackActionHandler>                m_spBackActionHandler;
+  std::shared_ptr<CDebugInterface>                   m_spDebugInterface;
   QFileSystemWatcher                                 m_styleWatcher;
   bool                                               m_bStyleDirty;
   bool                                               m_bInitialized;
