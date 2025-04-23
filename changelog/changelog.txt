@@ -1,4 +1,11 @@
 =================
+Version 1.6.0.0
+=================
+
+New Features:
+- New Debug interface for reading the debug log and running debug commands.
+
+=================
 Version 1.5.0.0
 =================
 
