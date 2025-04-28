@@ -884,7 +884,10 @@ void CDatabaseManager::RenameResource(tspProject& spProj, const QString& sName, 
       for (const auto& [_, spAchievements] : spProj->m_vspAchievements)
       {
         QWriteLocker acLocker(&spAchievements->m_rwLock);
-        spAchievements->m_sResource = sNewName;
+        if (spAchievements->m_sResource == sName)
+        {
+          spAchievements->m_sResource = sNewName;
+        }
       }
 
       locker.unlock();
