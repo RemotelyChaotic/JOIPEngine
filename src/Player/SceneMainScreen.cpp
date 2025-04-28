@@ -297,12 +297,9 @@ void CSceneMainScreen::SlotTerminate()
 {
   if (!m_bInitialized || nullptr == m_spCurrentProject) { return; }
 
-  CScriptRunnerSignalEmiter::ScriptExecStatus statusBefore =
-      CScriptRunnerSignalEmiter::ScriptExecStatus::eStopped;
   auto spSignalEmmiterContext = m_spScriptRunner->SignalEmmitterContext();
   if (nullptr != spSignalEmmiterContext)
   {
-    statusBefore = spSignalEmmiterContext->ScriptExecutionStatus();
     spSignalEmmiterContext->SetScriptExecutionStatus(CScriptRunnerSignalEmiter::eStopped);
     emit spSignalEmmiterContext->interrupt();
   }
@@ -311,16 +308,12 @@ void CSceneMainScreen::SlotTerminate()
 
   emit SignalExitClicked();
 
-  // no signal is giong to be emitted
-  if (CScriptRunnerSignalEmiter::ScriptExecStatus::eStopped == statusBefore || m_bErrorState)
-  {
-    bool bOk =
-        QMetaObject::invokeMethod(this, "SlotScriptRunFinished", Qt::QueuedConnection,
-                                  Q_ARG(bool, false), Q_ARG(bool, m_bReachedEndNode),
-                                  Q_ARG(QString, QString()));
-    assert(bOk);
-    Q_UNUSED(bOk);
-  }
+  bool bOk =
+      QMetaObject::invokeMethod(this, "SlotScriptRunFinished", Qt::QueuedConnection,
+                                Q_ARG(bool, false), Q_ARG(bool, m_bReachedEndNode),
+                                Q_ARG(QString, QString()));
+  assert(bOk);
+  Q_UNUSED(bOk);
 }
 
 //----------------------------------------------------------------------------------------
@@ -662,12 +655,11 @@ void CSceneMainScreen::ConnectAllSignals()
 {
   QQuickItem* pRootObject =  m_spUi->pQmlWidget->rootObject();
   bool bOk = true;
-  Q_UNUSED(bOk)
 
   bOk = connect(pRootObject, SIGNAL(startLoadingSkript()), this, SLOT(SlotStartLoadingSkript()));
-  assert(bOk);
+  assert(bOk); Q_UNUSED(bOk)
   bOk = connect(pRootObject, SIGNAL(quit()), this, SLOT(SlotTerminate()));
-  assert(bOk);
+  assert(bOk); Q_UNUSED(bOk)
 
   auto spSignalEmmiterContext = m_spScriptRunner->SignalEmmitterContext();
 
@@ -682,10 +674,10 @@ void CSceneMainScreen::ConnectAllSignals()
 
   bOk = connect(pRootObject, SIGNAL(sceneSelectionReturnValue(int)),
                 this, SLOT(SlotSceneSelectReturnValue(int)), Qt::QueuedConnection);
-  assert(bOk);
+  assert(bOk); Q_UNUSED(bOk)
   bOk = connect(pRootObject, SIGNAL(unloadFinished()),
                 this, SLOT(SlotUnloadFinished()), Qt::QueuedConnection);
-  assert(bOk);
+  assert(bOk); Q_UNUSED(bOk)
 }
 
 //----------------------------------------------------------------------------------------
