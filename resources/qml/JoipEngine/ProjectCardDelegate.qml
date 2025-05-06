@@ -55,75 +55,16 @@ Rectangle {
         }
 
         // title card
-        Rectangle {
+        TitleCard {
+            id: card
             anchors.centerIn: parent
             width: parent.width
             height: parent.height
 
-            color: "transparent"
-            layer.enabled: describtionDelegate.isSelected
-            layer.effect: Glow {
-                radius: 8
-                samples: 17
-                spread: 0.5
-                color: root.selectionColor
-                transparentBorder: false
-            }
-
-            AnimatedImage {
-                id: loadingAnimation
-                anchors.fill: parent
-                visible: resource.state === Resource.Loading
-                source: "qrc:/resources/gif/spinner_transparent.gif"
-                fillMode: Image.Pad
-            }
-
-            ImageResourceView {
-                id: resource
-                anchors.centerIn: parent
-                width: parent.width - 10
-                height: parent.height - 10
-                resource: null
-
-                // Gloss
-                Rectangle {
-                    id: glossRect
-                    x: (resource.width - resource.paintedWidth) / 2
-                    y: (resource.height - resource.paintedHeight) / 2
-                    width: resource.paintedWidth
-                    height: resource.paintedHeight
-                    color: "transparent"
-
-                    LinearGradient {
-                        anchors.fill: parent
-                        start: Qt.point(parent.width, 0)
-                        end: Qt.point(parent.width * 2 / 3, parent.height / 2)
-                        gradient: Gradient {
-                            GradientStop {
-                                position: 0.0
-                                color: describtionDelegate.isSelected ? "#DDF0F0F0" : "#AAF0F0F0"
-                            }
-                            GradientStop {
-                                position: 1.0
-                                color: "#00F0F0F0"
-                            }
-                        }
-                    }
-                }
-            }
-
-            Desaturate {
-                id: desaturateEffect
-                anchors.fill: resource
-                source: resource
-                desaturation: 0.0
-            }
-
-            ErrorResourceView {
-                id: errorResource
-                visible: resource.state === Resource.Null || resource.state === Resource.Error
-                fontSize: describtionDelegate.isHovered ? 100 : 90
-            }
+            resource: null
+            selectionColor: root.selectionColor
+            isSelected: describtionDelegate.isSelected
+            isHovered: describtionDelegate.isHovered
         }
 
         // ProgressBar
@@ -565,13 +506,13 @@ Rectangle {
         var pResource = dto.resource(dto.titleCard);
         if (null !== pResource && undefined !== pResource)
         {
-            if (resource.resource == null || resource.resource.name !== pResource.name)
+            if (card.resource == null || card.resource.name !== pResource.name)
             {
-                resource.resource = pResource;
+                card.resource = pResource;
             }
         }
 
-        errorResource.text = dto.name.replace(/\r/gi, "\n");
+        card.errorText = dto.name.replace(/\r/gi, "\n");
         versionText.text = dto.versionText + " / " + dto.targetVersionText;
         describtion.text =
                 "<h3>" + dto.name + "</h3>" +

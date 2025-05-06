@@ -19,6 +19,7 @@
 #include "Editor/Project/KinkCompleter.h"
 #include "Editor/Project/KinkSelectionOverlay.h"
 #include "Editor/Project/KinkTreeModel.h"
+#include "Editor/Resources/ResourceTreeItemModel.h"
 #include "Editor/Tutorial/ProjectSettingsTutorialStateSwitchHandler.h"
 
 #include "Systems/DatabaseManager.h"
@@ -852,7 +853,7 @@ void CEditorProjectSettingsWidget::AddAchievement(const SSaveDataData& saveData,
     sProjName = m_spCurrentProject->m_sName;
   }
 
-  CAchievementWidget* pRoot = new CAchievementWidget(m_spCurrentProject, ResourceTreeModel(),
+  CAchievementWidget* pRoot = new CAchievementWidget(m_spCurrentProject, ResourceTreeModel().data(),
                                                      m_spUi->pAchievementList);
   pRoot->SetAchievementData(saveData);
   connect(pRoot, &CAchievementWidget::SignalAchievementChanged, this,

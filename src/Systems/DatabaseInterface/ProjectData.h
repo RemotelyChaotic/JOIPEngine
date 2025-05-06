@@ -68,6 +68,7 @@ struct SProjectData
   ETutorialState            m_tutorialState = ETutorialState::eFinished;
   qint32                    m_iNumberOfSoundEmitters = 5;
   qint32                    m_metCmdMode = EToyMetronomeCommandMode::eDefault;
+  bool                      m_bCanStartAtAnyScene = false;
   bool                      m_bUsesWeb = false;
   bool                      m_bNeedsCodecs = false;
   bool                      m_bBundled = false;

@@ -20,13 +20,8 @@
 
 CSelectableResourceLabel::CSelectableResourceLabel(QWidget* pParent) :
   QLabel{pParent},
-  m_spThreadedLoader(std::make_unique<CThreadedSystem>("ResourceToolTipFetcher"))
+  m_spThreadedLoader(nullptr)
 {
-  m_spThreadedLoader->RegisterObject<CResourceDetailViewFetcherThread>();
-  connect(ResourceFetcher().get(),
-          qOverload<const QString&,const QPixmap&>(&CResourceDetailViewFetcherThread::LoadFinished),
-          this, &CSelectableResourceLabel::SlotResourceLoadFinished);
-
   installEventFilter(this);
   setScaledContents(false);
 }
@@ -41,9 +36,9 @@ void CSelectableResourceLabel::SetCurrentProject(const tspProject& spProj)
 
 //----------------------------------------------------------------------------------------
 //
-void CSelectableResourceLabel::SetResourceModel(QPointer<CResourceTreeItemModel> pResourceModel)
+void CSelectableResourceLabel::SetResourceModel(QPointer<QAbstractItemModel> pResourceModel)
 {
-  m_pResourceModel = pResourceModel;
+  m_pResourceModel = dynamic_cast<CResourceTreeItemModel*>(pResourceModel.data());
 }
 
 //----------------------------------------------------------------------------------------
@@ -84,7 +79,11 @@ void CSelectableResourceLabel::SetUnsetIcon(const QIcon& icon)
 //
 std::shared_ptr<CResourceDetailViewFetcherThread> CSelectableResourceLabel::ResourceFetcher() const
 {
-  return std::static_pointer_cast<CResourceDetailViewFetcherThread>(m_spThreadedLoader->Get());
+  if (nullptr != m_spThreadedLoader)
+  {
+    return std::static_pointer_cast<CResourceDetailViewFetcherThread>(m_spThreadedLoader->Get());
+  }
+  return nullptr;
 }
 
 //----------------------------------------------------------------------------------------
@@ -97,6 +96,7 @@ void CSelectableResourceLabel::SlotResourceLoadFinished(const QString& sName,
   {
     setPixmap(pixmap);
   }
+  m_spThreadedLoader = nullptr;
 }
 
 //----------------------------------------------------------------------------------------
@@ -105,13 +105,27 @@ bool CSelectableResourceLabel::eventFilter(QObject* pObj, QEvent* pEvt)
 {
   if (nullptr != pObj && nullptr != pEvt)
   {
-    if (pEvt->type() == QEvent::MouseButtonRelease)
+    if (pEvt->type() == QEvent::MouseButtonPress)
     {
       QMouseEvent* pMEvt = static_cast<QMouseEvent*>(pEvt);
-      OpenSelectResource(pMEvt->globalPos());
+      if (nullptr != m_pResourceModel)
+      {
+        OpenSelectResource(pMEvt->globalPos());
+      }
     }
   }
   return false;
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CSelectableResourceLabel::CreateResourceFetcher()
+{
+  m_spThreadedLoader = std::make_unique<CThreadedSystem>("ResourceToolTipFetcher");
+  m_spThreadedLoader->RegisterObject<CResourceDetailViewFetcherThread>();
+  connect(ResourceFetcher().get(),
+          qOverload<const QString&,const QPixmap&>(&CResourceDetailViewFetcherThread::LoadFinished),
+          this, &CSelectableResourceLabel::SlotResourceLoadFinished);
 }
 
 //----------------------------------------------------------------------------------------
@@ -196,6 +210,7 @@ void CSelectableResourceLabel::OpenSelectResource(const QPoint& createPoint)
 void CSelectableResourceLabel::UpdateResource()
 {
   qint32 iId = -1;
+  if (nullptr != m_spCurrentProject)
   {
     QReadLocker l(&m_spCurrentProject->m_rwLock);
     iId = m_spCurrentProject->m_iId;
@@ -203,6 +218,11 @@ void CSelectableResourceLabel::UpdateResource()
 
   if (-1 != iId && !m_sCurrentResource.isEmpty())
   {
+    if (!ResourceFetcher())
+    {
+      CreateResourceFetcher();
+    }
+
     if (ResourceFetcher()->IsLoading())
     {
       ResourceFetcher()->AbortLoading();

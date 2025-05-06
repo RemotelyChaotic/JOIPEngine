@@ -46,13 +46,55 @@
          </property>
          <layout class="QVBoxLayout" name="verticalLayout_2">
           <item>
-           <widget class="CProjectCardSelectionWidget" name="pProjectCardSelectionWidget" native="true">
-            <property name="sizePolicy">
-             <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
-              <horstretch>0</horstretch>
-              <verstretch>0</verstretch>
-             </sizepolicy>
+           <widget class="CSlidingStackedWidget" name="pStackedWidgetSelection">
+            <property name="currentIndex">
+             <number>0</number>
             </property>
+            <widget class="QWidget" name="pPageProject">
+             <layout class="QGridLayout" name="gridLayout">
+              <property name="leftMargin">
+               <number>0</number>
+              </property>
+              <property name="topMargin">
+               <number>0</number>
+              </property>
+              <property name="rightMargin">
+               <number>0</number>
+              </property>
+              <property name="bottomMargin">
+               <number>0</number>
+              </property>
+              <item row="0" column="0">
+               <widget class="CProjectCardSelectionWidget" name="pProjectCardSelectionWidget" native="true">
+                <property name="sizePolicy">
+                 <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
+                  <horstretch>0</horstretch>
+                  <verstretch>0</verstretch>
+                 </sizepolicy>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </widget>
+            <widget class="QWidget" name="pPageScene_2">
+             <layout class="QGridLayout" name="gridLayout_5">
+              <property name="leftMargin">
+               <number>0</number>
+              </property>
+              <property name="topMargin">
+               <number>0</number>
+              </property>
+              <property name="rightMargin">
+               <number>0</number>
+              </property>
+              <property name="bottomMargin">
+               <number>0</number>
+              </property>
+              <item row="0" column="0">
+               <widget class="CSceneCardSelectionWidget" name="pSceneCardSelectionWidget" native="true"/>
+              </item>
+             </layout>
+            </widget>
            </widget>
           </item>
           <item>
@@ -87,6 +129,12 @@
                <property name="orientation">
                 <enum>Qt::Horizontal</enum>
                </property>
+               <property name="sizeHint" stdset="0">
+                <size>
+                 <width>0</width>
+                 <height>0</height>
+                </size>
+               </property>
               </spacer>
              </item>
              <item>
@@ -97,9 +145,22 @@
               </widget>
              </item>
              <item>
+              <widget class="QPushButton" name="pOpenExistingProjectAtSceneButton">
+               <property name="text">
+                <string>Open at Scene</string>
+               </property>
+              </widget>
+             </item>
+             <item>
               <spacer name="horizontalSpacer_4">
                <property name="orientation">
                 <enum>Qt::Horizontal</enum>
+               </property>
+               <property name="sizeHint" stdset="0">
+                <size>
+                 <width>0</width>
+                 <height>0</height>
+                </size>
                </property>
               </spacer>
              </item>
@@ -283,6 +344,18 @@
    <class>CSceneMainScreen</class>
    <extends>QWidget</extends>
    <header>Player/SceneMainScreen.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>CSlidingStackedWidget</class>
+   <extends>QStackedWidget</extends>
+   <header>Widgets/SlidingStackedWidget.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>CSceneCardSelectionWidget</class>
+   <extends>QWidget</extends>
+   <header>Widgets/SceneCardSelectionWidget.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

@@ -120,6 +120,13 @@ void CSceneNodeModel::SetSceneName(const QString& sScene)
 
 //----------------------------------------------------------------------------------------
 //
+void CSceneNodeModel::SetResourceItemModel(QAbstractItemModel* pModel)
+{
+  ResourceItemModelSetImpl(pModel);
+}
+
+//----------------------------------------------------------------------------------------
+//
 QString CSceneNodeModel::caption() const
 {
   return staticCaption();
@@ -140,6 +147,7 @@ QJsonObject CSceneNodeModel::save() const
   modelJson["sName"] = m_sSceneName;
   modelJson["sScript"] = m_sScript;
   modelJson["sLayout"] = m_sLayout;
+  modelJson["sTitle"] = m_sTitle;
   return modelJson;
 }
 
@@ -163,6 +171,11 @@ void CSceneNodeModel::restore(QJsonObject const& p)
   {
     m_sLayout = v.toString();
   }
+  v = p["sTitle"];
+  if (!v.isUndefined())
+  {
+    m_sTitle = v.toString();
+  }
 }
 
 //----------------------------------------------------------------------------------------
@@ -185,6 +198,11 @@ void CSceneNodeModel::UndoRestore(QJsonObject const& p)
   if (!v.isUndefined())
   {
     SlotLayoutChanged(v.toString());
+  }
+  v = p["sTitle"];
+  if (!v.isUndefined())
+  {
+    SlotTitleResourceChanged(QString(), v.toString());
   }
   m_bIsInUndoOperation = false;
 }
@@ -421,12 +439,14 @@ void CSceneNodeModel::SlotSceneDataChanged(qint32 iProjId, qint32 iSceneId)
   qint32 iId = m_spScene->m_iId;
   const QString sScript = m_spScene->m_sScript;
   const QString sLayout = m_spScene->m_sSceneLayout;
+  const QString sTitle = m_spScene->m_sTitleCard;
   m_spScene->m_rwLock.unlock();
 
   if (iProjId == ProjectId() && iSceneId == iId)
   {
     SlotLayoutChanged(sLayout);
     SlotScriptChanged(sScript);
+    SlotTitleResourceChanged(QString(), sTitle);
   }
 }
 
@@ -506,6 +526,46 @@ void CSceneNodeModel::SlotResourceRemoved(qint32 iProjId, const QString& sName)
 
 //----------------------------------------------------------------------------------------
 //
+void CSceneNodeModel::SlotTitleResourceChanged(const QString& sOld, const QString& sNew)
+{
+  QJsonObject oldState = save();
+  auto spDbManager = m_wpDbManager.lock();
+  if (nullptr != spDbManager)
+  {
+    if (nullptr != m_spScene)
+    {
+      qint32 iProjId = -1;
+      m_spProject->m_rwLock.lockForRead();
+      iProjId = m_spProject->m_iId;
+      m_spProject->m_rwLock.unlock();
+
+      bool bChanged = false;
+      qint32 iSceneId = -1;
+      m_spScene->m_rwLock.lockForRead();
+      bChanged = m_spScene->m_sTitleCard != sNew;
+      m_spScene->m_sTitleCard = sNew;
+      iSceneId = m_spScene->m_iId;
+      m_spScene->m_rwLock.unlock();
+
+      if (bChanged)
+      {
+        SlotTitleResourceChangedImpl(sOld, sNew);
+        emit spDbManager->SignalSceneDataChanged(iProjId, iSceneId);
+      }
+
+      m_sTitle = sNew;
+
+      if (nullptr != UndoStack() && !m_bIsInUndoOperation)
+      {
+        QJsonObject newState = save();
+        UndoStack()->push(new CCommandNodeEdited(m_pScene, m_id, oldState, newState));
+      }
+    }
+  }
+}
+
+//----------------------------------------------------------------------------------------
+//
 CSceneNodeModelWithWidget::CSceneNodeModelWithWidget() :
   CSceneNodeModel(),
   m_pWidget(new CSceneNodeModelWidget())
@@ -516,6 +576,8 @@ CSceneNodeModelWithWidget::CSceneNodeModelWithWidget() :
           this, &CSceneNodeModelWithWidget::SlotLayoutChanged);
   connect(m_pWidget, &CSceneNodeModelWidget::SignalScriptChanged,
           this, &CSceneNodeModelWithWidget::SlotScriptChanged);
+  connect(m_pWidget, &CSceneNodeModelWidget::SignalTitleResourceChanged,
+          this, &CSceneNodeModelWithWidget::SlotTitleResourceChanged);
   connect(m_pWidget, &CSceneNodeModelWidget::SignalAddScriptFileClicked,
           this, &CSceneNodeModelWithWidget::SignalAddScriptFileRequested);
   connect(m_pWidget, &CSceneNodeModelWidget::SignalAddLayoutFileClicked,
@@ -597,6 +659,16 @@ void CSceneNodeModelWithWidget::ProjectSetImpl()
   if (nullptr != m_pWidget)
   {
     m_pWidget->SetProject(m_spProject);
+  }
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CSceneNodeModelWithWidget::ResourceItemModelSetImpl(QAbstractItemModel* pModel)
+{
+  if (nullptr != m_pWidget)
+  {
+    m_pWidget->SetResourceItemModel(pModel);
   }
 }
 
@@ -691,5 +763,15 @@ void CSceneNodeModelWithWidget::SlotResourceRemovedImpl(const QString& sName,
     {
       m_pWidget->OnLayoutRemoved(sName);
     }
+  }
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CSceneNodeModelWithWidget::SlotTitleResourceChangedImpl(const QString& sOld, const QString& sNew)
+{
+  if (nullptr != m_pWidget)
+  {
+    m_pWidget->OnTitleResourceChanged(sOld, sNew);
   }
 }

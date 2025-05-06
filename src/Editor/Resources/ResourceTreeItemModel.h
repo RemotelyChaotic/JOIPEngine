@@ -88,6 +88,7 @@ private slots:
   void SlotResourceCheckerTimeout();
   void SlotResourceAdded(qint32 iProjId, const QString& sName);
   void SlotResourceRemoved(qint32 iProjId, const QString& sName);
+  void SlotSceneDataChanged(qint32 iProjId, qint32 iId);
 
 private:
   std::weak_ptr<CDatabaseManager>             m_wpDbManager;

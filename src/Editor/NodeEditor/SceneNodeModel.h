@@ -10,6 +10,8 @@ class CDatabaseManager;
 class CSceneTranstitionData;
 class CSceneNodeModelWidget;
 
+class QAbstractItemModel;
+
 using QtNodes::PortType;
 using QtNodes::PortIndex;
 using QtNodes::NodeData;
@@ -31,6 +33,8 @@ public:
 
   virtual void SetSceneName(const QString& sScene);
   QString SceneName() { return m_sSceneName; }
+
+  void SetResourceItemModel(QAbstractItemModel* pModel);
 
   static QString Name() { return staticCaption(); }
   static QString staticCaption() { return QStringLiteral("Scene"); }
@@ -70,9 +74,11 @@ protected slots:
   void SlotResourceAdded(qint32 iProjId, const QString& sName);
   void SlotResourceRenamed(qint32 iProjId, const QString& sOldName, const QString& sName);
   void SlotResourceRemoved(qint32 iProjId, const QString& sName);
+  void SlotTitleResourceChanged(const QString& sOld, const QString& sNew);
 
 protected:
   virtual void ProjectSetImpl() {}
+  virtual void ResourceItemModelSetImpl(QAbstractItemModel* pModel){}
   virtual void SlotNameChangedImpl(const QString&) {}
   virtual void SlotLayoutChangedImpl(const QString&) {}
   virtual void SlotScriptChangedImpl(const QString&) {}
@@ -80,6 +86,7 @@ protected:
   virtual void SlotResourceAddedImpl(const QString&, EResourceType) {}
   virtual void SlotResourceRenamedImpl(const QString&, const QString&, EResourceType) {}
   virtual void SlotResourceRemovedImpl(const QString&, EResourceType) {}
+  virtual void SlotTitleResourceChangedImpl(const QString& sOld, const QString& sNew) {}
 
   std::weak_ptr<CDatabaseManager>                     m_wpDbManager;
   std::weak_ptr<CSceneTranstitionData>                m_wpInData;
@@ -94,6 +101,7 @@ protected:
   QString             m_sOldSceneName;
   QString             m_sScript;
   QString             m_sLayout;
+  QString             m_sTitle;
   bool                m_bIsInUndoOperation = false;
 };
 
@@ -117,6 +125,7 @@ public:
 protected:
   void OnUndoStackSet() override;
   void ProjectSetImpl() override;
+  void ResourceItemModelSetImpl(QAbstractItemModel* pModel) override;
   void SlotNameChangedImpl(const QString& sName) override;
   void SlotLayoutChangedImpl(const QString& sName) override;
   void SlotScriptChangedImpl(const QString& sName) override;
@@ -124,6 +133,7 @@ protected:
   void SlotResourceAddedImpl(const QString& sName, EResourceType type) override;
   void SlotResourceRenamedImpl(const QString& sOldName, const QString& sName, EResourceType type) override;
   void SlotResourceRemovedImpl(const QString& sName, EResourceType type) override;
+  void SlotTitleResourceChangedImpl(const QString& sOld, const QString& sNew) override;
 
   QPointer<CSceneNodeModelWidget>                   m_pWidget;
 };

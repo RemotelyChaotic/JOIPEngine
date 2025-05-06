@@ -839,6 +839,7 @@ void CEditorModel::SlotNodeCreated(Node &n)
     if (nullptr != pSceneModel)
     {
       pSceneModel->SetProjectId(iId);
+      pSceneModel->SetResourceItemModel(ResourceTreeModel());
       connect(pSceneModel, &CSceneNodeModel::SignalAddScriptFileRequested,
               this, &CEditorModel::SlotAddNewScriptFileToScene, Qt::UniqueConnection);
       connect(pSceneModel, &CSceneNodeModel::SignalAddLayoutFileRequested,

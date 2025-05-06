@@ -36,6 +36,8 @@ QJsonObject SScene::ToJsonObject()
     { "sScript", m_sScript },
     { "sSceneLayout", m_sSceneLayout },
     { "vsResourceRefs", resourceRefs },
+    { "bCanStartHere", m_bCanStartHere},
+    { "sTitleCard", m_sTitleCard }
   };
 }
 
@@ -72,5 +74,15 @@ void SScene::FromJsonObject(const QJsonObject& json)
     {
       m_vsResourceRefs.insert(val.toString());
     }
+  }
+  it = json.find("bCanStartHere");
+  if (it != json.end())
+  {
+    m_bCanStartHere = it.value().toBool();
+  }
+  it = json.find("sTitleCard");
+  if (it != json.end())
+  {
+    m_sTitleCard = it.value().toString();
   }
 }

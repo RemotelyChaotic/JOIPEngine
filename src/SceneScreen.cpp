@@ -19,6 +19,9 @@ namespace
   const qint32 c_iPageIndexChoice = 0;
   const qint32 c_iPageIndexScene = 1;
 
+  const qint32 c_iPageIndexProjects = 0;
+  const qint32 c_iPageIndexScenes = 1;
+
   const QString c_sOpenHelpId = "Player/Open";
   const QString c_sCancelHelpId = "MainScreen/Cancel";
 }
@@ -53,6 +56,8 @@ void CSceneScreen::Initialize()
 
   m_spUi->pMainSceneScreen->Initialize(m_spWindowContext, false);
 
+  m_spUi->pStackedWidgetSelection->SetSlideDirection(CSlidingWidget::ESlideDirection::eBottom2Top);
+
   m_wpDbManager = CApplication::Instance()->System<CDatabaseManager>();
 
   auto wpHelpFactory = CApplication::Instance()->System<CHelpFactory>().lock();
@@ -84,6 +89,9 @@ void CSceneScreen::Initialize()
 //
 void CSceneScreen::Load()
 {
+  m_spUi->pOpenExistingProjectButton->setEnabled(true);
+  m_spUi->pOpenExistingProjectAtSceneButton->setEnabled(true);
+  m_spUi->pOpenExistingProjectAtSceneButton->setToolTip(tr("Open at Scene"));
   m_spUi->pProjectCardSelectionWidget->LoadProjects(EDownloadStateFlag::eFinished);
 }
 
@@ -100,71 +108,35 @@ void CSceneScreen::on_pOpenExistingProjectButton_clicked()
 {
   WIDGET_INITIALIZED_GUARD
 
-  qint32 iId = -1;
-  tspProject spProject = nullptr;
-  auto spDbManager = m_wpDbManager.lock();
-  if (nullptr != spDbManager)
+  QStringList vsScenes;
+  qint32 iId = GetProjectDataFromSelection(vsScenes);
+  if (-1 < iId)
   {
-    iId = m_spUi->pProjectCardSelectionWidget->SelectedId();
-    spProject = spDbManager->FindProject(iId);
-    if (nullptr == spProject)
-    {
-      return;
-    }
+    OpenProject(iId, QString());
   }
+}
 
-  auto spSettings = CApplication::Instance()->Settings();
+//----------------------------------------------------------------------------------------
+//
+void CSceneScreen::on_pOpenExistingProjectAtSceneButton_clicked()
+{
+  WIDGET_INITIALIZED_GUARD
 
-  QReadLocker locker(&spProject->m_rwLock);
-  if (spProject->m_bUsesWeb && spSettings->Offline())
+  QStringList vsScenes;
+  qint32 iId = GetProjectDataFromSelection(vsScenes);
+  if (-1 < iId)
   {
-    m_spUi->pProjectCardSelectionWidget->ShowWarning(
-          tr("Can't open JOIP-Project that requires online resources in offline mode in the player."));
-  }
-  else
-  {
-    locker.unlock();
-
-    // set dominant hand now, if not set yet
-    if (DominantHand::EDominantHand::NoDominantHand == spSettings->GetDominantHand())
+    if (m_spUi->pStackedWidgetSelection->CurrentIndex() == c_iPageIndexProjects)
     {
-      QMessageBox msgBox;
-      msgBox.setText("Predominantly used hand has not been configured");
-      msgBox.setInformativeText("The JOIP-Project Player was developped with one-handed use in mind.\n"
-                                "Please select the hand, you will be using this\n"
-                                "application with predominantly, to configure it properly.\n"
-                                "(You can always change this in the settings.)");
-      auto pLeft = new QPushButton("Left");
-      auto pRight = new QPushButton("Right");
-      msgBox.addButton(pLeft, QMessageBox::ApplyRole);
-      msgBox.addButton(pRight, QMessageBox::ApplyRole);
-      msgBox.setModal(true);
-      msgBox.setWindowFlag(Qt::FramelessWindowHint);
-      QPointer<CSceneScreen> pMeMyselfMyPointerAndI(this);
-      msgBox.exec();
-      if (nullptr == pMeMyselfMyPointerAndI)
-      {
-        return;
-      }
-
-      if (msgBox.clickedButton() == pLeft)
-      {
-        spSettings->SetDominantHand(DominantHand::EDominantHand::Left);
-      }
-      else
-      {
-        spSettings->SetDominantHand(DominantHand::EDominantHand::Right);
-      }
+      m_spUi->pOpenExistingProjectButton->setEnabled(false);
+      m_spUi->pSceneCardSelectionWidget->LoadScenes(iId, vsScenes);
+      m_spUi->pStackedWidgetSelection->SlideInIdx(c_iPageIndexScenes);
     }
-
-    // will eventually emit a signal but we can ignore that
-    m_spUi->pProjectCardSelectionWidget->UnloadProjects();
-
-    emit m_spWindowContext->SignalSetLeftButtonsVisible(false);
-    emit m_spWindowContext->SignalSetHelpButtonVisible(false);
-
-    m_spUi->pMainSceneScreen->LoadProject(iId);
-    m_spUi->pStackedWidget->setCurrentIndex(c_iPageIndexScene);
+    else
+    {
+      QString sScene = m_spUi->pSceneCardSelectionWidget->SelectedScene();
+      OpenProject(iId, sScene);
+    }
   }
 }
 
@@ -173,8 +145,44 @@ void CSceneScreen::on_pOpenExistingProjectButton_clicked()
 void CSceneScreen::on_pCancelButton_clicked()
 {
   WIDGET_INITIALIZED_GUARD
-  m_spUi->pStackedWidget->setCurrentIndex(c_iPageIndexChoice);
-  emit m_spWindowContext->SignalChangeAppState(EAppState::eMainScreen);
+
+  if (m_spUi->pStackedWidgetSelection->CurrentIndex() == c_iPageIndexProjects)
+  {
+    m_spUi->pStackedWidget->setCurrentIndex(c_iPageIndexChoice);
+    emit m_spWindowContext->SignalChangeAppState(EAppState::eMainScreen);
+  }
+  else
+  {
+    m_spUi->pOpenExistingProjectButton->setEnabled(true);
+    m_spUi->pSceneCardSelectionWidget->UnloadScenes();
+    m_spUi->pStackedWidgetSelection->SlideInIdx(c_iPageIndexProjects);
+  }
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CSceneScreen::on_pProjectCardSelectionWidget_SingalSelected(qint32 iId)
+{
+  QStringList vsScenes;
+  tspProject spProj = GetDataAndProject(iId, vsScenes);
+  if (nullptr != spProj)
+  {
+    m_spUi->pOpenExistingProjectButton->setEnabled(true);
+    m_spUi->pOpenExistingProjectAtSceneButton->setEnabled(!vsScenes.isEmpty());
+    if (vsScenes.isEmpty())
+    {
+      m_spUi->pOpenExistingProjectAtSceneButton->setToolTip(tr("No suitable Scenes found as entry point."));
+    }
+    else
+    {
+      m_spUi->pOpenExistingProjectAtSceneButton->setToolTip(tr("Open at Scene"));
+    }
+  }
+  else
+  {
+    m_spUi->pOpenExistingProjectButton->setEnabled(false);
+    m_spUi->pOpenExistingProjectAtSceneButton->setEnabled(false);
+  }
 }
 
 //----------------------------------------------------------------------------------------
@@ -200,4 +208,116 @@ void CSceneScreen::SlotCardsUnloadFinished()
 {
   WIDGET_INITIALIZED_GUARD
   emit UnloadFinished();
+}
+
+//----------------------------------------------------------------------------------------
+//
+tspProject CSceneScreen::GetDataAndProject(qint32 iId, QStringList& vsScenes)
+{
+  tspProject spProject = nullptr;
+  auto spDbManager = m_wpDbManager.lock();
+  if (nullptr != spDbManager)
+  {
+    spProject = spDbManager->FindProject(iId);
+  }
+
+  vsScenes.clear();
+  if (nullptr != spProject)
+  {
+    QReadLocker locker(&spProject->m_rwLock);
+    for (const auto& spScene : spProject->m_vspScenes)
+    {
+      QReadLocker l(&spScene->m_rwLock);
+      if (spScene->m_bCanStartHere || spProject->m_bCanStartAtAnyScene)
+      {
+        vsScenes << spScene->m_sName;
+      }
+    }
+  }
+
+  return spProject;
+}
+
+//----------------------------------------------------------------------------------------
+//
+qint32 CSceneScreen::GetProjectDataFromSelection(QStringList& vsScenes)
+{
+  vsScenes.clear();
+
+  qint32 iId = m_spUi->pProjectCardSelectionWidget->SelectedId();
+  tspProject spProject =
+      GetDataAndProject(m_spUi->pProjectCardSelectionWidget->SelectedId(), vsScenes);
+  if (nullptr == spProject)
+  {
+    return -1;
+  }
+
+  auto spSettings = CApplication::Instance()->Settings();
+
+  QReadLocker locker(&spProject->m_rwLock);
+  if (spProject->m_bUsesWeb && spSettings->Offline())
+  {
+    m_spUi->pProjectCardSelectionWidget->ShowWarning(
+        tr("Can't open JOIP-Project that requires online resources in offline mode in the player."));
+  }
+  else
+  {
+    locker.unlock();
+
+    // set dominant hand now, if not set yet
+    if (DominantHand::EDominantHand::NoDominantHand == spSettings->GetDominantHand())
+    {
+      QMessageBox msgBox;
+      msgBox.setText("Predominantly used hand has not been configured");
+      msgBox.setInformativeText("The JOIP-Project Player was developped with one-handed use in mind.\n"
+                                "Please select the hand, you will be using this\n"
+                                "application with predominantly, to configure it properly.\n"
+                                "(You can always change this in the settings.)");
+      auto pLeft = new QPushButton("Left");
+      auto pRight = new QPushButton("Right");
+      msgBox.addButton(pLeft, QMessageBox::ApplyRole);
+      msgBox.addButton(pRight, QMessageBox::ApplyRole);
+      msgBox.setModal(true);
+      msgBox.setWindowFlag(Qt::FramelessWindowHint);
+      QPointer<CSceneScreen> pMeMyselfMyPointerAndI(this);
+      msgBox.exec();
+      if (nullptr == pMeMyselfMyPointerAndI)
+      {
+        return -1;
+      }
+
+      if (msgBox.clickedButton() == pLeft)
+      {
+        spSettings->SetDominantHand(DominantHand::EDominantHand::Left);
+      }
+      else
+      {
+        spSettings->SetDominantHand(DominantHand::EDominantHand::Right);
+      }
+    }
+
+    return iId;
+  }
+  return -1;
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CSceneScreen::OpenProject(qint32 iId, const QString& sScene)
+{
+  // reset UI
+  m_spUi->pStackedWidgetSelection->setCurrentIndex(c_iPageIndexProjects);
+
+  m_spUi->pOpenExistingProjectButton->setEnabled(true);
+
+  // will eventually emit a signal but we can ignore that
+  m_spUi->pProjectCardSelectionWidget->UnloadProjects();
+  m_spUi->pSceneCardSelectionWidget->UnloadScenes();
+
+  emit m_spWindowContext->SignalSetLeftButtonsVisible(false);
+  emit m_spWindowContext->SignalSetHelpButtonVisible(false);
+
+  // load editor
+  m_spUi->pMainSceneScreen->LoadProject(iId, sScene);
+  m_spUi->pStackedWidget->setCurrentIndex(c_iPageIndexScene);
 }

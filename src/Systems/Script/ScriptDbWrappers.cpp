@@ -173,6 +173,14 @@ qint32 CProjectScriptWrapper::getMetCmdMode()
 
 //----------------------------------------------------------------------------------------
 //
+bool CProjectScriptWrapper::getCanStartAtAnyScene()
+{
+  QReadLocker locker(&m_spData->m_rwLock);
+  return m_spData->m_bCanStartAtAnyScene;
+}
+
+//----------------------------------------------------------------------------------------
+//
 bool CProjectScriptWrapper::isUsingWeb()
 {
   QReadLocker locker(&m_spData->m_rwLock);
@@ -750,6 +758,22 @@ QString CSceneScriptWrapper::getSceneLayout()
 {
   QReadLocker locker(&m_spData->m_rwLock);
   return m_spData->m_sSceneLayout;
+}
+
+//----------------------------------------------------------------------------------------
+//
+bool CSceneScriptWrapper::getCanStartHere()
+{
+  QReadLocker locker(&m_spData->m_rwLock);
+  return m_spData->m_bCanStartHere;
+}
+
+//----------------------------------------------------------------------------------------
+//
+QString CSceneScriptWrapper::getTitleCard()
+{
+  QReadLocker locker(&m_spData->m_rwLock);
+  return m_spData->m_sTitleCard;
 }
 
 //----------------------------------------------------------------------------------------

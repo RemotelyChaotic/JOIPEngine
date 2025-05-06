@@ -13,10 +13,12 @@ struct SSceneData
   SSceneData() = default;
   SSceneData(const SSceneData& other) = default;
 
-  qint32                    m_iId;
+  qint32                    m_iId = -1;
   QString                   m_sName;
   QString                   m_sScript;
   QString                   m_sSceneLayout;
+  bool                      m_bCanStartHere = false;
+  QString                   m_sTitleCard;
 };
 
 #endif // SCENEDATA_H

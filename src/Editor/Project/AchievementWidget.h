@@ -3,6 +3,7 @@
 
 #include "Systems/DatabaseInterface/SaveData.h"
 
+#include <QAbstractItemModel>
 #include <QComboBox>
 #include <QLineEdit>
 #include <QPointer>
@@ -20,7 +21,7 @@ class CAchievementWidget : public QFrame
   Q_OBJECT
 
 public:
-  explicit CAchievementWidget(const tspProject& spProj, QPointer<CResourceTreeItemModel> pResourceModel,
+  explicit CAchievementWidget(const tspProject& spProj, QPointer<QAbstractItemModel> pResourceModel,
                               QWidget *parent = nullptr);
   ~CAchievementWidget() override;
 
@@ -37,7 +38,6 @@ private:
   void EmitParamsChanged();
 
   tspProject m_spCurrentProject;
-  QPointer<CResourceTreeItemModel> m_pResourceModel;
   QPointer<CSelectableResourceLabel> m_pButtonIcon;
   QPointer<QLineEdit> m_pLineEditHeader;
   QPointer<CShortcutButton> m_pRemoveButton;

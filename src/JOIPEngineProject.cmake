@@ -225,8 +225,6 @@ macro(CreateJOIPProject JOIP_PROJECT_NAME)
     ${JOIPSources}/Editor/Project/KinkTreeModel.h
     ${JOIPSources}/Editor/Project/KinkTreeSortFilterProxyModel.cpp
     ${JOIPSources}/Editor/Project/KinkTreeSortFilterProxyModel.h
-    ${JOIPSources}/Editor/Project/SelectableResourceLabel.cpp
-    ${JOIPSources}/Editor/Project/SelectableResourceLabel.h
     ${JOIPSources}/Editor/Resources/CommandAddResource.cpp
     ${JOIPSources}/Editor/Resources/CommandAddResource.h
     ${JOIPSources}/Editor/Resources/CommandChangeCurrentResource.cpp
@@ -733,6 +731,8 @@ macro(CreateJOIPProject JOIP_PROJECT_NAME)
     ${JOIPSources}/Widgets/Editor/EditorSearchBar.h
     ${JOIPSources}/Widgets/Editor/HighlightedSearchableTextEdit.cpp
     ${JOIPSources}/Widgets/Editor/HighlightedSearchableTextEdit.h
+    ${JOIPSources}/Widgets/Editor/SelectableResourceLabel.cpp
+    ${JOIPSources}/Widgets/Editor/SelectableResourceLabel.h
     ${JOIPSources}/Widgets/Editor/RichTextEdit.cpp
     ${JOIPSources}/Widgets/Editor/RichTextEdit.h
     ${JOIPSources}/Widgets/Editor/TextEditZoomEnabler.cpp
@@ -771,6 +771,9 @@ macro(CreateJOIPProject JOIP_PROJECT_NAME)
     ${JOIPSources}/Widgets/ResourceDisplayWidget.cpp
     ${JOIPSources}/Widgets/ResourceDisplayWidget.h
     ${JOIPSources}/Widgets/ResourceDisplayWidget.ui
+    ${JOIPSources}/Widgets/SceneCardSelectionWidget.cpp
+    ${JOIPSources}/Widgets/SceneCardSelectionWidget.h
+    ${JOIPSources}/Widgets/SceneCardSelectionWidget.ui
     ${JOIPSources}/Widgets/SearchWidget.cpp
     ${JOIPSources}/Widgets/SearchWidget.h
     ${JOIPSources}/Widgets/SearchWidget.ui

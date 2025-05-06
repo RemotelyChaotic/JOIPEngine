@@ -63,6 +63,8 @@ void CSceneNodeModelWidget::SetProject(const tspProject& spProject)
       default: break;
     }
   }
+
+  m_spUi->FileIcon->SetCurrentProject(spProject);
 }
 
 //----------------------------------------------------------------------------------------
@@ -81,6 +83,13 @@ void CSceneNodeModelWidget::SetLayout(const QString& sName)
   QSignalBlocker blocker(m_spUi->pLayoutComboBox);
   qint32 iIdx = m_spUi->pLayoutComboBox->findData(sName);
   m_spUi->pLayoutComboBox->setCurrentIndex(iIdx);
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CSceneNodeModelWidget::SetResourceItemModel(QAbstractItemModel* pModel)
+{
+  m_spUi->FileIcon->SetResourceModel(pModel);
 }
 
 //----------------------------------------------------------------------------------------
@@ -157,6 +166,14 @@ void CSceneNodeModelWidget::OnScriptRemoved(const QString& sName)
   {
     m_spUi->pScriptComboBox->removeItem(iIdx);
   }
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CSceneNodeModelWidget::on_FileIcon_SignalResourcePicked(const QString& sOld,
+                                                             const QString& sNew)
+{
+  emit SignalTitleResourceChanged(sOld, sNew);
 }
 
 //----------------------------------------------------------------------------------------

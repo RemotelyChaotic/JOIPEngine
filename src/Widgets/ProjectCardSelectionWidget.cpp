@@ -85,7 +85,7 @@ void CProjectCardSelectionWidget::Initialize()
 //
 void CProjectCardSelectionWidget::LoadProjects(EDownLoadStateFlags flags)
 {
-  m_iSelectedProjectId = -1;
+  SlotCardClicked(-1);
 
   if (!IsLoaded())
   {
@@ -106,19 +106,25 @@ void CProjectCardSelectionWidget::LoadProjects(EDownLoadStateFlags flags)
 //
 void CProjectCardSelectionWidget::UnloadProjects()
 {
-  m_iSelectedProjectId = -1;
+  SlotCardClicked(-1);
 
+  bool bOk = false;
   QQuickItem* pRootObject =  m_spUi->pQmlWidget->rootObject();
-  QMetaObject::invokeMethod(pRootObject, "onUnLoad");
-
-  pRootObject = m_spUi->pQmlWidget->rootObject();
   if (nullptr != pRootObject)
   {
-    disconnect(pRootObject, SIGNAL(selectedProjectIndex(int)),
-               this, SLOT(SlotCardClicked(int)));
+    bOk = QMetaObject::invokeMethod(pRootObject, "onUnLoad");
+    assert(bOk);
+    Q_UNUSED(bOk);
+
+    pRootObject = m_spUi->pQmlWidget->rootObject();
+    if (nullptr != pRootObject)
+    {
+      disconnect(pRootObject, SIGNAL(selectedProjectIndex(int)),
+                 this, SLOT(SlotCardClicked(int)));
+    }
   }
 
-  bool bOk = QMetaObject::invokeMethod(this, "SlotUnloadFinished", Qt::QueuedConnection);
+  bOk = QMetaObject::invokeMethod(this, "SlotUnloadFinished", Qt::QueuedConnection);
   assert(bOk);
   Q_UNUSED(bOk);
 }
@@ -205,6 +211,7 @@ void CProjectCardSelectionWidget::on_pQmlWidget_sceneGraphError(QQuickWindow::Sc
 void CProjectCardSelectionWidget::SlotCardClicked(int iProjId)
 {
   m_iSelectedProjectId = iProjId;
+  emit SingalSelected(m_iSelectedProjectId);
 }
 
 //----------------------------------------------------------------------------------------
@@ -214,8 +221,10 @@ void CProjectCardSelectionWidget::SlotLoadProjectsPrivate(EDownLoadStateFlags fl
   m_flags = flags;
   m_spUi->pQmlWidget->setSource(QUrl("qrc:/qml/resources/qml/JoipEngine/ProjectCardSelection.qml"));
 
-  connect(m_spUi->pQmlWidget->rootObject(), SIGNAL(selectedProjectIndex(int)),
-          this, SLOT(SlotCardClicked(int)));
+  bool bConnect =
+      connect(m_spUi->pQmlWidget->rootObject(), SIGNAL(selectedProjectIndex(int)),
+              this, SLOT(SlotCardClicked(int)));
+  assert(bConnect); Q_UNUSED(bConnect)
 
   QQuickItem* pRootObject =  m_spUi->pQmlWidget->rootObject();
   pRootObject->setProperty("selectionColor", QVariant::fromValue(m_selectionColor));
@@ -277,7 +286,7 @@ void CProjectCardSelectionWidget::SlotProjectAdded(qint32 iId)
       if (-1 == m_iSelectedProjectId)
       {
         QReadLocker locker(&spProject->m_rwLock);
-        m_iSelectedProjectId = spProject->m_iId;
+        SlotCardClicked(spProject->m_iId);
       }
 
       {
@@ -289,7 +298,9 @@ void CProjectCardSelectionWidget::SlotProjectAdded(qint32 iId)
       {
         CProjectScriptWrapper* pValue = new CProjectScriptWrapper(pEngine, spProject);
         m_spUi->pQmlWidget->rootObject()->setProperty("currentlyAddedProject", QVariant::fromValue(pValue));
-        QMetaObject::invokeMethod(pRootObject, "onAddProject");
+        bool bOk = QMetaObject::invokeMethod(pRootObject, "onAddProject");
+        assert(bOk);
+        Q_UNUSED(bOk);
         m_vpProjects.push_back(pValue);
       }
     }
@@ -326,9 +337,11 @@ void CProjectCardSelectionWidget::SlotProjectDownloadProgressChanged(qint32 iPro
   }
 
   QQuickItem* pRootObject =  m_spUi->pQmlWidget->rootObject();
-  QMetaObject::invokeMethod(pRootObject, "onUpdateProject",
+  bool bOk = QMetaObject::invokeMethod(pRootObject, "onUpdateProject",
                             Q_ARG(QVariant, QVariant(iProjId)),
                             Q_ARG(QVariant, QVariant(iProgress)));
+  assert(bOk);
+  Q_UNUSED(bOk);
 }
 
 //----------------------------------------------------------------------------------------
@@ -338,7 +351,9 @@ void CProjectCardSelectionWidget::SlotProjectRemoved(qint32 iId)
   QQuickItem* pRootObject =  m_spUi->pQmlWidget->rootObject();
 
   m_spUi->pQmlWidget->rootObject()->setProperty("currentlyRemovedProject", iId);
-  QMetaObject::invokeMethod(pRootObject, "onRemoveProject");
+  bool bOk = QMetaObject::invokeMethod(pRootObject, "onRemoveProject");
+  assert(bOk);
+  Q_UNUSED(bOk);
 
   for (auto it = m_vpProjects.begin(); m_vpProjects.end() != it; ++it)
   {
@@ -363,7 +378,8 @@ void CProjectCardSelectionWidget::SlotResizeDone()
   {
     pRootObject->setProperty("width", QVariant::fromValue(newSize.width()));
     pRootObject->setProperty("height",QVariant::fromValue(newSize.height()));
-    QMetaObject::invokeMethod(pRootObject, "onResize");
+    bool bOk = QMetaObject::invokeMethod(pRootObject, "onResize");
+    assert(bOk); Q_UNUSED(bOk)
   }
 }
 

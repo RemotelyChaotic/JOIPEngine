@@ -31,6 +31,8 @@ CResourceTreeItemModel::CResourceTreeItemModel(QPointer<QUndoStack> pUndoStack,
           this, &CResourceTreeItemModel::SlotResourceAdded, Qt::QueuedConnection);
   connect(spDbManager.get(), &CDatabaseManager::SignalResourceRemoved,
           this, &CResourceTreeItemModel::SlotResourceRemoved, Qt::QueuedConnection);
+  connect(spDbManager.get(), &CDatabaseManager::SignalSceneDataChanged,
+          this, &CResourceTreeItemModel::SlotSceneDataChanged, Qt::QueuedConnection);
 
   m_resourcecheckTimer.setSingleShot(false);
   m_resourcecheckTimer.setInterval(c_iResourceTimerIntervalMs);
@@ -254,7 +256,13 @@ QVariant CResourceTreeItemModel::data(const QModelIndex& index, int iRole) const
     QReadLocker locker(&m_spProject->m_rwLock);
     CResourceTreeItem* item = static_cast<CResourceTreeItem*>(index.internalPointer());
     QString sName = item->Data(c_iColumnName).toString();
-    if (sName == m_spProject->m_sTitleCard)
+    bool bIsSceneCard = false;
+    for (const tspScene& spScene : m_spProject->m_vspScenes)
+    {
+      QReadLocker l(&spScene->m_rwLock);
+      bIsSceneCard |= spScene->m_sTitleCard == sName;
+    }
+    if (sName == m_spProject->m_sTitleCard || bIsSceneCard)
     {
       return QPixmap::fromImage(m_cardIcon.scaled(m_iIconSize, m_iIconSize));
     }
@@ -819,6 +827,40 @@ void CResourceTreeItemModel::SlotResourceRemoved(qint32 iProjId, const QString& 
             iParentIndex = pParent->Parent()->ChildIndex(pParent);
           }
         }
+      }
+    }
+  }
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CResourceTreeItemModel::SlotSceneDataChanged(qint32 iProjId, qint32 iId)
+{
+  if (nullptr!= m_spProject)
+  {
+    m_spProject->m_rwLock.lockForRead();
+    qint32 iThisId = m_spProject->m_iId;
+    QString sResourceName;
+    for (const tspScene& spScene : m_spProject->m_vspScenes)
+    {
+      QReadLocker l(&spScene->m_rwLock);
+      if (spScene->m_iId == iId)
+      {
+        sResourceName = spScene->m_sTitleCard;
+      }
+    }
+    m_spProject->m_rwLock.unlock();
+
+    if (iProjId == iThisId)
+    {
+      QModelIndexList indices =
+          QAbstractItemModel::match(createIndex(0, 0, m_pRootItem), CResourceTreeItemModel::eSearchRole,
+                                    QString(EResourceTreeItemType((EResourceTreeItemType::eResource))._to_string()) +
+                                        ";" + sResourceName, 1,
+                                    Qt::MatchStartsWith | Qt::MatchWrap | Qt::MatchRecursive);
+      for (const QModelIndex& idx : indices)
+      {
+        emit dataChanged(idx, idx, {Qt::DecorationRole});
       }
     }
   }

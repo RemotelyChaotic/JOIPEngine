@@ -382,5 +382,8 @@
         <file>resources/qml/JoipEngine/AchievementItemDelegate.qml</file>
         <file>resources/qml/JoipEngine/PlayerAchievementView.qml</file>
         <file>resources/qml/JoipEngine/AchievementPopupItem.qml</file>
+        <file>resources/qml/JoipEngine/SceneCardSelection.qml</file>
+        <file>resources/qml/JoipEngine/SceneCardDelegate.qml</file>
+        <file>resources/qml/JoipEngine/TitleCard.qml</file>
     </qresource>
 </RCC>

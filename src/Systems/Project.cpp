@@ -95,6 +95,7 @@ QJsonObject SProject::ToJsonObject()
     { "tutorialState", m_tutorialState._to_integral() },
     { "iNumberOfSoundEmitters", m_iNumberOfSoundEmitters },
     { "metCmdMode", m_metCmdMode },
+    { "bCanStartAtAnyScene", m_bCanStartAtAnyScene },
     { "bUsesWeb", m_bUsesWeb },
     { "bNeedsCodecs", m_bNeedsCodecs },
     { "vsKinks", kinks },
@@ -178,6 +179,11 @@ void SProject::FromJsonObject(const QJsonObject& json)
   if (it != json.end())
   {
     m_metCmdMode = it.value().toInt();
+  }
+  it = json.find("bCanStartAtAnyScene");
+  if (it != json.end())
+  {
+    m_bCanStartAtAnyScene = it.value().toBool();
   }
   it = json.find("bUsesWeb");
   if (it != json.end())

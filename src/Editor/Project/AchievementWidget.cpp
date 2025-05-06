@@ -1,13 +1,13 @@
 #include "AchievementWidget.h"
 
-#include "Editor/Project/SelectableResourceLabel.h"
-
 #include "Systems/Project.h"
 
 #include "Utils/UndoRedoFilter.h"
 
+#include "Widgets/Editor/SelectableResourceLabel.h"
 #include "Widgets/ShortcutButton.h"
 
+#include <QAbstractItemModel>
 #include <QGridLayout>
 #include <QSignalBlocker>
 
@@ -24,11 +24,10 @@ const char CAchievementWidget::c_sAchievementItemRootWidgetProperty[] = "Achieve
 //----------------------------------------------------------------------------------------
 //
 CAchievementWidget::CAchievementWidget(const tspProject& spProj,
-                                       QPointer<CResourceTreeItemModel> pResourceModel,
+                                       QPointer<QAbstractItemModel> pResourceModel,
                                        QWidget *parent) :
   QFrame{parent},
-  m_spCurrentProject(spProj),
-  m_pResourceModel(pResourceModel)
+  m_spCurrentProject(spProj)
 {
   setFrameStyle(QFrame::Raised);
   setLineWidth(1);

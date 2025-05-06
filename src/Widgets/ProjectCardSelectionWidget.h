@@ -36,6 +36,7 @@ public:
   bool IsLoaded() { return m_bLoadedQml; }
 
 signals:
+  void SingalSelected(qint32 iId);
   void SignalUnloadFinished();
 
 protected slots:

@@ -8,6 +8,7 @@
 #include <QWidget>
 #include <memory>
 
+class QAbstractItemModel;
 namespace Ui {
   class CSceneNodeModelWidget;
 }
@@ -24,6 +25,7 @@ public:
   void SetProject(const tspProject& spProject);
   void SetScript(const QString& sName);
   void SetLayout(const QString& sName);
+  void SetResourceItemModel(QAbstractItemModel* pModel);
 
   void OnLayoutAdded(const QString& sName);
   void OnLayoutRenamed(const QString& sOldName, const QString& sName);
@@ -34,6 +36,7 @@ public:
   void OnScriptRemoved(const QString& sName);
 
 signals:
+  void SignalTitleResourceChanged(const QString& sOld, const QString& sNew);
   void SignalAddScriptFileClicked(const QString&);
   void SignalAddLayoutFileClicked(const QString&);
   void SignalNameChanged(const QString& sName);
@@ -41,6 +44,7 @@ signals:
   void SignalLayoutChanged(const QString& sName);
 
 protected slots:
+  void on_FileIcon_SignalResourcePicked(const QString& sOld, const QString& sNew);
   void on_AddScriptFile_clicked();
   void on_AddLayoutFile_clicked();
   void on_pSceneNameLineEdit_editingFinished();

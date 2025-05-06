@@ -39,6 +39,7 @@ class CProjectScriptWrapper : public QObject, public CLockable
   Q_PROPERTY(QString        playerLayout      READ getPlayerLayout      CONSTANT)
   Q_PROPERTY(qint32         numberOfSoundEmitters READ getNumberOfSoundEmitters CONSTANT)
   Q_PROPERTY(qint32         metCmdMode        READ getMetCmdMode        CONSTANT)
+  Q_PROPERTY(bool           canStartAtAnyScene READ getCanStartAtAnyScene CONSTANT)
   Q_PROPERTY(bool           isUsingWeb        READ isUsingWeb           CONSTANT)
   Q_PROPERTY(bool           isUsingCodecs     READ isUsingCodecs        CONSTANT)
   Q_PROPERTY(bool           isBundled         READ isBundled            CONSTANT)
@@ -85,6 +86,7 @@ public:
   QString getPlayerLayout();
   qint32 getNumberOfSoundEmitters();
   qint32 getMetCmdMode();
+  bool getCanStartAtAnyScene();
   bool isUsingWeb();
   bool isUsingCodecs();
   bool isBundled();
@@ -198,6 +200,8 @@ class CSceneScriptWrapper : public QObject, public CLockable
   Q_PROPERTY(QString name             READ getName   CONSTANT)
   Q_PROPERTY(QString script           READ getScript CONSTANT)
   Q_PROPERTY(QString sceneLayout      READ getSceneLayout CONSTANT)
+  Q_PROPERTY(bool    canStartHere     READ getCanStartHere CONSTANT)
+  Q_PROPERTY(QString titleCard        READ getTitleCard CONSTANT)
 
 public:
   explicit CSceneScriptWrapper(tEngineType pEngine, const std::shared_ptr<SScene>& spScene);
@@ -207,6 +211,8 @@ public:
   QString getName();
   QString getScript();
   QString getSceneLayout();
+  bool getCanStartHere();
+  QString getTitleCard();
 
   Q_INVOKABLE qint32 numResources();
   Q_INVOKABLE QStringList resources();

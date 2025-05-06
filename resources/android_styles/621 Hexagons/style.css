@@ -1490,11 +1490,14 @@ CAchievementWidget {
 }
 
 CSelectableResourceLabel {
+  qproperty-unsetIcon: url(ui/ButtonBackground.png);
+}
+
+CAchievementWidget > CSelectableResourceLabel {
   min-height: 120px;
   min-width: 120px;
   max-height: 120px;
   max-width: 120px;
-  qproperty-unsetIcon: url(ui/ButtonBackground.png);
 }
 
 CDebugOverlay {

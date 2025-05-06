@@ -6,6 +6,7 @@
 #include <memory>
 
 class CDatabaseManager;
+typedef std::shared_ptr<struct SProject> tspProject;
 namespace Ui {
   class CSceneScreen;
 }
@@ -30,12 +31,18 @@ signals:
 
 protected slots:
   void on_pOpenExistingProjectButton_clicked();
+  void on_pOpenExistingProjectAtSceneButton_clicked();
   void on_pCancelButton_clicked();
+  void on_pProjectCardSelectionWidget_SingalSelected(qint32 iId);
   void SlotCardsUnloadFinished();
   void SlotExitClicked();
   void SlotSceneUnloadFinished();
 
 private:
+  tspProject GetDataAndProject(qint32 iId, QStringList& vsScenes);
+  qint32 GetProjectDataFromSelection(QStringList& vsScenes);
+  void OpenProject(qint32 iId, const QString& sScene);
+
   std::unique_ptr<Ui::CSceneScreen>        m_spUi;
   std::weak_ptr<CDatabaseManager>          m_wpDbManager;
 };

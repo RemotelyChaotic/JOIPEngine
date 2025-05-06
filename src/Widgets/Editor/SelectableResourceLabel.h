@@ -10,6 +10,7 @@
 class CResourceDetailViewFetcherThread;
 class CResourceTreeItemModel;
 class CThreadedSystem;
+class QAbstractItemModel;
 typedef std::shared_ptr<struct SProject> tspProject;
 
 class CSelectableResourceLabel : public QLabel
@@ -22,7 +23,7 @@ public:
   ~CSelectableResourceLabel() override;
 
   void SetCurrentProject(const tspProject& spProj);
-  void SetResourceModel(QPointer<CResourceTreeItemModel> pResourceModel);
+  void SetResourceModel(QPointer<QAbstractItemModel> pResourceModel);
   QString CurrentResource() const;
   void SetCurrentResource(const QString& sResource);
   const QIcon& UnsetIcon() const;
@@ -38,6 +39,7 @@ protected slots:
 
 protected:
   bool eventFilter(QObject* pObj, QEvent* pEvt) override;
+  void CreateResourceFetcher();
   void OpenSelectResource(const QPoint& createPoint);
   void UpdateResource();
 
