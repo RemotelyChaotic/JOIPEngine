@@ -31,7 +31,11 @@ CSelectableResourceLabel::~CSelectableResourceLabel() = default;
 //
 void CSelectableResourceLabel::SetCurrentProject(const tspProject& spProj)
 {
-  m_spCurrentProject = spProj;
+  if (m_spCurrentProject != spProj)
+  {
+    m_spCurrentProject = spProj;
+    UpdateResource();
+  }
 }
 
 //----------------------------------------------------------------------------------------

@@ -5,6 +5,9 @@ Version 1.6.0.0
 New Features:
 - New Debug interface for reading the debug log and running debug commands.
 
+Fixed Bugs:
+- Scene Resources update if the resource is removed or changed somewhere else.
+
 =================
 Version 1.5.0.0
 =================

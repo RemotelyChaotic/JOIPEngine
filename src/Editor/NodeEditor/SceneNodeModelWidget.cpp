@@ -94,6 +94,13 @@ void CSceneNodeModelWidget::SetResourceItemModel(QAbstractItemModel* pModel)
 
 //----------------------------------------------------------------------------------------
 //
+void CSceneNodeModelWidget::SetTileResource(const QString& sName)
+{
+  m_spUi->FileIcon->SetCurrentResource(sName);
+}
+
+//----------------------------------------------------------------------------------------
+//
 void CSceneNodeModelWidget::OnLayoutAdded(const QString& sName)
 {
   QSignalBlocker blocker(m_spUi->pLayoutComboBox);

@@ -26,6 +26,7 @@ public:
   void SetScript(const QString& sName);
   void SetLayout(const QString& sName);
   void SetResourceItemModel(QAbstractItemModel* pModel);
+  void SetTileResource(const QString& sName);
 
   void OnLayoutAdded(const QString& sName);
   void OnLayoutRenamed(const QString& sOldName, const QString& sName);

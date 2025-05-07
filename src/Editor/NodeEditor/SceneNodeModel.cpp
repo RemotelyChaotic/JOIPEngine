@@ -444,9 +444,12 @@ void CSceneNodeModel::SlotSceneDataChanged(qint32 iProjId, qint32 iSceneId)
 
   if (iProjId == ProjectId() && iSceneId == iId)
   {
-    SlotLayoutChanged(sLayout);
-    SlotScriptChanged(sScript);
-    SlotTitleResourceChanged(QString(), sTitle);
+    m_sLayout = sLayout;
+    m_sScript = sScript;
+    m_sTitle = sTitle;
+    SlotLayoutChangedImpl(sLayout);
+    SlotScriptChangedImpl(sScript);
+    SlotTitleResourceChangedImpl(QString(), sTitle);
   }
 }
 
@@ -500,11 +503,18 @@ void CSceneNodeModel::SlotResourceRenamed(qint32 iProjId,
     tspResource spResource = spDbManager->FindResourceInProject(m_spProject, sName);
     if (nullptr != spResource)
     {
-      QReadLocker locker(&spResource->m_rwLock);
-      if (EResourceType::eScript == spResource->m_type._to_integral() ||
-          EResourceType::eLayout == spResource->m_type._to_integral())
+      SlotResourceRenamedImpl(sOldName, sName, spResource->m_type);
+      if (sOldName == m_sLayout)
       {
-        SlotResourceRenamedImpl(sOldName, sName, spResource->m_type);
+        m_sLayout = sName;
+      }
+      if (sOldName == m_sScript)
+      {
+        m_sScript = sName;
+      }
+      if (sOldName == m_sTitle)
+      {
+        m_sTitle = sName;
       }
     }
   }
@@ -521,6 +531,18 @@ void CSceneNodeModel::SlotResourceRemoved(qint32 iProjId, const QString& sName)
     // are unique
     SlotResourceRemovedImpl(sName, EResourceType::eScript);
     SlotResourceRemovedImpl(sName, EResourceType::eLayout);
+    if (sName == m_sLayout)
+    {
+      m_sLayout = QString();
+    }
+    if (sName == m_sScript)
+    {
+      m_sScript = QString();
+    }
+    if (sName == m_sTitle)
+    {
+      m_sTitle = QString();
+    }
   }
 }
 
@@ -632,6 +654,7 @@ void CSceneNodeModelWithWidget::restore(QJsonObject const& p)
     m_pWidget->SetName(m_sSceneName);
     m_pWidget->SetScript(m_sScript);
     m_pWidget->SetLayout(m_sLayout);
+    m_pWidget->SetTileResource(m_sTitle);
   }
 }
 
@@ -745,6 +768,10 @@ void CSceneNodeModelWithWidget::SlotResourceRenamedImpl(const QString& sOldName,
     {
       m_pWidget->OnLayoutRenamed(sOldName, sName);
     }
+    if (sOldName == m_sTitle)
+    {
+      m_pWidget->SetTileResource(sName);
+    }
   }
 }
 
@@ -763,15 +790,19 @@ void CSceneNodeModelWithWidget::SlotResourceRemovedImpl(const QString& sName,
     {
       m_pWidget->OnLayoutRemoved(sName);
     }
+    if (sName == m_sTitle)
+    {
+      m_pWidget->SetTileResource(QString());
+    }
   }
 }
 
 //----------------------------------------------------------------------------------------
 //
-void CSceneNodeModelWithWidget::SlotTitleResourceChangedImpl(const QString& sOld, const QString& sNew)
+void CSceneNodeModelWithWidget::SlotTitleResourceChangedImpl(const QString&, const QString& sNew)
 {
   if (nullptr != m_pWidget)
   {
-    m_pWidget->OnTitleResourceChanged(sOld, sNew);
+    m_pWidget->SetTileResource(sNew);
   }
 }
