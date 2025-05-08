@@ -66,6 +66,7 @@ signals:
   void SignalAddLayoutFileRequested(const QString&);
 
 protected slots:
+  void SlotCanStartHereChanged(bool bValue);
   void SlotNameChanged(const QString& sName);
   void SlotLayoutChanged(const QString& sName);
   void SlotScriptChanged(const QString& sName);
@@ -79,6 +80,7 @@ protected slots:
 protected:
   virtual void ProjectSetImpl() {}
   virtual void ResourceItemModelSetImpl(QAbstractItemModel* pModel){}
+  virtual void SlotCanStartHereChangedImpl(bool bValue) {}
   virtual void SlotNameChangedImpl(const QString&) {}
   virtual void SlotLayoutChangedImpl(const QString&) {}
   virtual void SlotScriptChangedImpl(const QString&) {}
@@ -102,6 +104,7 @@ protected:
   QString             m_sScript;
   QString             m_sLayout;
   QString             m_sTitle;
+  bool                m_bCanStartHere = false;
   bool                m_bIsInUndoOperation = false;
 };
 
@@ -126,6 +129,7 @@ protected:
   void OnUndoStackSet() override;
   void ProjectSetImpl() override;
   void ResourceItemModelSetImpl(QAbstractItemModel* pModel) override;
+  void SlotCanStartHereChangedImpl(bool bValue) override;
   void SlotNameChangedImpl(const QString& sName) override;
   void SlotLayoutChangedImpl(const QString& sName) override;
   void SlotScriptChangedImpl(const QString& sName) override;

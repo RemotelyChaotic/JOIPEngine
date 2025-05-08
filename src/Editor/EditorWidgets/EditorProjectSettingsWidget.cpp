@@ -8,6 +8,7 @@
 #include "Editor/EditorWidgetTypes.h"
 #include "Editor/Project/AchievementWidget.h"
 #include "Editor/Project/CommandChangeAchievements.h"
+#include "Editor/Project/CommandChangeCanStartFromAnyScene.h"
 #include "Editor/Project/CommandChangeDescribtion.h"
 #include "Editor/Project/CommandChangeEmitterCount.h"
 #include "Editor/Project/CommandChangeFetishes.h"
@@ -52,6 +53,7 @@ namespace
   const QString c_sSoundEmitterCountHelpId ="Editor/SoundEmitterCount";
   const QString c_sMetronomeToyCmdModeId   ="Editor/MetronomeToyCmdMode";
   const QString c_sLayoutHelpId =           "Editor/Layout";
+  const QString c_sCanStartFromAnySceneId = "Editor/CanStartFromAnyScene";
   const QString c_sProjectFontHelpId       ="Editor/ProjectFont";
   const QString c_sProjectDescriptionHelpId="Editor/ProjectDescription";
   const QString c_sFetishListHelpId =       "Editor/FetishList";
@@ -110,6 +112,8 @@ void CEditorProjectSettingsWidget::Initialize()
     wpHelpFactory->RegisterHelp(c_sProjectFontHelpId, ":/resources/help/editor/projectsettings/font_help.html");
     m_spUi->pLayoutWidget->setProperty(helpOverlay::c_sHelpPagePropertyName, c_sLayoutHelpId);
     wpHelpFactory->RegisterHelp(c_sLayoutHelpId, ":/resources/help/editor/projectsettings/layout_help.html");
+    m_spUi->pCanStartFromAnySceneContainer->setProperty(helpOverlay::c_sHelpPagePropertyName, c_sCanStartFromAnySceneId);
+    wpHelpFactory->RegisterHelp(c_sCanStartFromAnySceneId, ":/resources/help/editor/projectsettings/canstartfromanyscene_help.html");
     m_spUi->pDescribtionTextEdit->setProperty(helpOverlay::c_sHelpPagePropertyName, c_sProjectDescriptionHelpId);
     wpHelpFactory->RegisterHelp(c_sProjectDescriptionHelpId, ":/resources/help/editor/projectsettings/describtion_textedit_help.html");
     m_spUi->pFetishListWidget->setProperty(helpOverlay::c_sHelpPagePropertyName, c_sFetishListHelpId);
@@ -296,6 +300,11 @@ void CEditorProjectSettingsWidget::LoadProject(tspProject spProject)
     m_spUi->pDefaultLayoutComboBox->setProperty(editor::c_sPropertyOldValue, m_spCurrentProject->m_sPlayerLayout);
     m_spUi->pDefaultLayoutComboBox->blockSignals(false);
 
+    m_spUi->pCanStartFromAnySceneCheckBox->blockSignals(true);
+    m_spUi->pCanStartFromAnySceneCheckBox->setChecked(m_spCurrentProject->m_bCanStartAtAnyScene);
+    m_spUi->pCanStartFromAnySceneCheckBox->setProperty(editor::c_sPropertyOldValue, m_spCurrentProject->m_bCanStartAtAnyScene);
+    m_spUi->pCanStartFromAnySceneCheckBox->blockSignals(false);
+
     m_spUi->pDescribtionTextEdit->setPlainText(m_spCurrentProject->m_sDescribtion);
     m_spUi->pDescribtionTextEdit->setReadOnly(bReadOnly);
 
@@ -384,6 +393,8 @@ void CEditorProjectSettingsWidget::SaveProject()
   m_spCurrentProject->m_metCmdMode = m_spUi->pToyCommandComboBox->currentData().toInt();
 
   m_spCurrentProject->m_sFont = m_spUi->pFontComboBox->currentFont().family();
+
+  m_spCurrentProject->m_bCanStartAtAnyScene = m_spUi->pCanStartFromAnySceneCheckBox->isChecked();
 
   m_spCurrentProject->m_sDescribtion = m_spUi->pDescribtionTextEdit->toPlainText();
 
@@ -531,6 +542,21 @@ void CEditorProjectSettingsWidget::on_AddLayoutButton_clicked()
   if (nullptr == m_spCurrentProject) { return; }
 
   EditorModel()->SlotAddNewLayoutFile(QString());
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CEditorProjectSettingsWidget::on_pCanStartFromAnySceneCheckBox_toggled(bool bChecked)
+{
+  WIDGET_INITIALIZED_GUARD
+  if (nullptr == m_spCurrentProject) { return; }
+  Q_UNUSED(bChecked)
+
+  QPointer<CEditorProjectSettingsWidget> pThis(this);
+  UndoStack()->push(new CCommandChangeCanStartFromAnyScene(m_spUi->pCanStartFromAnySceneCheckBox,
+                                                           [pThis]() {
+                                                             emit pThis->SignalProjectEdited();
+                                                           }));
 }
 
 //----------------------------------------------------------------------------------------

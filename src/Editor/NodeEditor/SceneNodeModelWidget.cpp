@@ -31,6 +31,14 @@ CSceneNodeModelWidget::~CSceneNodeModelWidget()
 
 //----------------------------------------------------------------------------------------
 //
+void CSceneNodeModelWidget::SetCanStartHere(bool bValue)
+{
+  QSignalBlocker blocker(m_spUi->pCanStartHere);
+  m_spUi->pCanStartHere->setChecked(bValue);
+}
+
+//----------------------------------------------------------------------------------------
+//
 void CSceneNodeModelWidget::SetName(const QString& sName)
 {
   QSignalBlocker blocker(m_spUi->pSceneNameLineEdit);
@@ -181,6 +189,13 @@ void CSceneNodeModelWidget::on_FileIcon_SignalResourcePicked(const QString& sOld
                                                              const QString& sNew)
 {
   emit SignalTitleResourceChanged(sOld, sNew);
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CSceneNodeModelWidget::on_pCanStartHere_toggled(bool bCanStartHere)
+{
+  emit SignalCanStartHereChanged(bCanStartHere);
 }
 
 //----------------------------------------------------------------------------------------

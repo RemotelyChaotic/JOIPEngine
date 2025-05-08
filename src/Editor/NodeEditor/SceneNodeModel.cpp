@@ -148,6 +148,7 @@ QJsonObject CSceneNodeModel::save() const
   modelJson["sScript"] = m_sScript;
   modelJson["sLayout"] = m_sLayout;
   modelJson["sTitle"] = m_sTitle;
+  modelJson["bCanStartHere"] = m_bCanStartHere;
   return modelJson;
 }
 
@@ -176,6 +177,11 @@ void CSceneNodeModel::restore(QJsonObject const& p)
   {
     m_sTitle = v.toString();
   }
+  v = p["bCanStartHere"];
+  if (!v.isUndefined())
+  {
+    m_bCanStartHere = v.toBool();
+  }
 }
 
 //----------------------------------------------------------------------------------------
@@ -203,6 +209,11 @@ void CSceneNodeModel::UndoRestore(QJsonObject const& p)
   if (!v.isUndefined())
   {
     SlotTitleResourceChanged(QString(), v.toString());
+  }
+  v = p["bCanStartHere"];
+  if (!v.isUndefined())
+  {
+    SlotCanStartHereChanged(v.toBool());
   }
   m_bIsInUndoOperation = false;
 }
@@ -317,6 +328,46 @@ void CSceneNodeModel::outputConnectionDeleted(QtNodes::Connection const& c)
   m_bOutConnected = false;
   m_modelValidationState = NodeValidationState::Warning;
   m_modelValidationError = QString(tr("Missing or incorrect inputs or output"));
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CSceneNodeModel::SlotCanStartHereChanged(bool bValue)
+{
+  QJsonObject oldState = save();
+  auto spDbManager = m_wpDbManager.lock();
+  if (nullptr != spDbManager)
+  {
+    if (nullptr != m_spScene)
+    {
+      qint32 iProjId = -1;
+      m_spProject->m_rwLock.lockForRead();
+      iProjId = m_spProject->m_iId;
+      m_spProject->m_rwLock.unlock();
+
+      bool bChanged = false;
+      qint32 iSceneId = -1;
+      m_spScene->m_rwLock.lockForRead();
+      bChanged = m_spScene->m_bCanStartHere != bValue;
+      m_spScene->m_bCanStartHere = bValue;
+      iSceneId = m_spScene->m_iId;
+      m_spScene->m_rwLock.unlock();
+
+      if (bChanged)
+      {
+        SlotCanStartHereChangedImpl(bValue);
+        emit spDbManager->SignalSceneDataChanged(iProjId, iSceneId);
+      }
+
+      m_bCanStartHere = bValue;
+
+      if (nullptr != UndoStack() && !m_bIsInUndoOperation)
+      {
+        QJsonObject newState = save();
+        UndoStack()->push(new CCommandNodeEdited(m_pScene, m_id, oldState, newState));
+      }
+    }
+  }
 }
 
 //----------------------------------------------------------------------------------------
@@ -440,6 +491,7 @@ void CSceneNodeModel::SlotSceneDataChanged(qint32 iProjId, qint32 iSceneId)
   const QString sScript = m_spScene->m_sScript;
   const QString sLayout = m_spScene->m_sSceneLayout;
   const QString sTitle = m_spScene->m_sTitleCard;
+  const bool bCanStartHere = m_spScene->m_bCanStartHere;
   m_spScene->m_rwLock.unlock();
 
   if (iProjId == ProjectId() && iSceneId == iId)
@@ -447,6 +499,8 @@ void CSceneNodeModel::SlotSceneDataChanged(qint32 iProjId, qint32 iSceneId)
     m_sLayout = sLayout;
     m_sScript = sScript;
     m_sTitle = sTitle;
+    m_bCanStartHere = bCanStartHere;
+    SlotCanStartHereChangedImpl(bCanStartHere);
     SlotLayoutChangedImpl(sLayout);
     SlotScriptChangedImpl(sScript);
     SlotTitleResourceChangedImpl(QString(), sTitle);
@@ -592,6 +646,8 @@ CSceneNodeModelWithWidget::CSceneNodeModelWithWidget() :
   CSceneNodeModel(),
   m_pWidget(new CSceneNodeModelWidget())
 {
+  connect(m_pWidget, &CSceneNodeModelWidget::SignalCanStartHereChanged,
+          this, &CSceneNodeModelWithWidget::SlotCanStartHereChanged);
   connect(m_pWidget, &CSceneNodeModelWidget::SignalNameChanged,
           this, &CSceneNodeModelWithWidget::SlotNameChanged);
   connect(m_pWidget, &CSceneNodeModelWidget::SignalLayoutChanged,
@@ -651,6 +707,7 @@ void CSceneNodeModelWithWidget::restore(QJsonObject const& p)
   CSceneNodeModel::restore(p);
   if (nullptr != m_pWidget)
   {
+    m_pWidget->SetCanStartHere(m_bCanStartHere);
     m_pWidget->SetName(m_sSceneName);
     m_pWidget->SetScript(m_sScript);
     m_pWidget->SetLayout(m_sLayout);
@@ -692,6 +749,16 @@ void CSceneNodeModelWithWidget::ResourceItemModelSetImpl(QAbstractItemModel* pMo
   if (nullptr != m_pWidget)
   {
     m_pWidget->SetResourceItemModel(pModel);
+  }
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CSceneNodeModelWithWidget::SlotCanStartHereChangedImpl(bool bValue)
+{
+  if (nullptr != m_pWidget)
+  {
+    m_pWidget->SetCanStartHere(bValue);
   }
 }
 

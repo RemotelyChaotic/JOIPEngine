@@ -198,6 +198,8 @@ macro(CreateJOIPProject JOIP_PROJECT_NAME)
     ${JOIPSources}/Editor/Project/AchievementWidget.h
     ${JOIPSources}/Editor/Project/CommandChangeAchievements.cpp
     ${JOIPSources}/Editor/Project/CommandChangeAchievements.h
+    ${JOIPSources}/Editor/Project/CommandChangeCanStartFromAnyScene.cpp
+    ${JOIPSources}/Editor/Project/CommandChangeCanStartFromAnyScene.h
     ${JOIPSources}/Editor/Project/CommandChangeDescribtion.cpp
     ${JOIPSources}/Editor/Project/CommandChangeDescribtion.h
     ${JOIPSources}/Editor/Project/CommandChangeEmitterCount.cpp

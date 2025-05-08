@@ -42,6 +42,7 @@ protected slots:
   void on_pDefaultLayoutComboBox_currentIndexChanged(qint32 iIdx);
   void on_pToyCommandComboBox_currentIndexChanged(qint32 iIdx);
   void on_AddLayoutButton_clicked();
+  void on_pCanStartFromAnySceneCheckBox_toggled(bool bChecked);
   void on_pDescribtionTextEdit_textChanged();
   void on_pFetishLineEdit_editingFinished();
   void on_FetishOverlayButton_clicked();

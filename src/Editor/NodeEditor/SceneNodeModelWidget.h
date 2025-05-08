@@ -21,6 +21,7 @@ public:
   explicit CSceneNodeModelWidget(QWidget* pParent = nullptr);
   ~CSceneNodeModelWidget();
 
+  void SetCanStartHere(bool bValue);
   void SetName(const QString& sName);
   void SetProject(const tspProject& spProject);
   void SetScript(const QString& sName);
@@ -38,6 +39,7 @@ public:
 
 signals:
   void SignalTitleResourceChanged(const QString& sOld, const QString& sNew);
+  void SignalCanStartHereChanged(bool bCanStartHere);
   void SignalAddScriptFileClicked(const QString&);
   void SignalAddLayoutFileClicked(const QString&);
   void SignalNameChanged(const QString& sName);
@@ -46,6 +48,7 @@ signals:
 
 protected slots:
   void on_FileIcon_SignalResourcePicked(const QString& sOld, const QString& sNew);
+  void on_pCanStartHere_toggled(bool bCanStartHere);
   void on_AddScriptFile_clicked();
   void on_AddLayoutFile_clicked();
   void on_pSceneNameLineEdit_editingFinished();

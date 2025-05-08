@@ -338,6 +338,7 @@
         <file>resources/style/qml/ButtonVisible.svg</file>
         <file>resources/style/qml/ButtonVisibleHover.svg</file>
         <file>resources/help/settings/debugoverlay_setting_help.html</file>
+        <file>resources/help/editor/projectsettings/canstartfromanyscene_help.html</file>
     </qresource>
     <qresource prefix="/qml">
         <file>resources/qml/JoipEngine/EmptyDummy.qml</file>
