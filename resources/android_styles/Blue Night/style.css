@@ -1330,7 +1330,8 @@ QQuickWidget {
   background-color: rgb(36, 52, 77);
 }
 
-CProjectCardSelectionWidget {
+CProjectCardSelectionWidget,
+CSceneCardSelectionWidget {
   qproperty-selectionColor: white;
 }
 
