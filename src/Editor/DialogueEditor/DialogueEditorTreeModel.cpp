@@ -11,6 +11,8 @@
 #include <QPointer>
 #include <QUndoStack>
 
+#include <functional>
+
 CDialogueEditorTreeModel::CDialogueEditorTreeModel(QObject* pParent) :
   m_wpDbManager(CApplication::Instance()->System<CDatabaseManager>()),
   m_spProject(),
@@ -775,12 +777,25 @@ void CDialogueEditorTreeModel::SlotResourceRemoved(qint32 iProjId, const QString
     qint32 iThisId = m_spProject->m_iId;
     m_spProject->m_rwLock.unlock();
 
-    auto spDbManager = m_wpDbManager.lock();
-    if (iProjId == iThisId && nullptr != spDbManager)
+    if (iProjId == iThisId && !sName.isEmpty() && nullptr != m_spDataRootNode)
     {
-      tspResource spResource = spDbManager->FindResourceInProject(m_spProject, sName);
-      QReadLocker l(&spResource->m_rwLock);
-      if (EResourceType::eDatabase == spResource->m_type._to_integral())
+      bool bWasInTree = false;
+      if (m_spDataRootNode->m_sFileId == sName)
+      {
+        bWasInTree = true;
+      }
+      std::function<bool(const std::vector<std::shared_ptr<CDialogueNode>>&)> fnCheckChildren =
+          [&](const std::vector<std::shared_ptr<CDialogueNode>>& vspChildren) -> bool {
+        for (const auto& spChild : qAsConst(vspChildren))
+        {
+          if (spChild->m_sFileId == sName) { return true; }
+          if (fnCheckChildren(spChild->m_vspChildren)) { return true; }
+        }
+        return false;
+      };
+      bWasInTree |= fnCheckChildren(m_spDataRootNode->m_vspChildren);
+
+      if (bWasInTree)
       {
         InitializeModel(m_spProject);
       }
