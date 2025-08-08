@@ -142,6 +142,7 @@ Rectangle {
             Layout.alignment: Qt.AlignVCenter
 
             focusPolicy: Qt.NoFocus
+            enabled: textBox.opacity > 0
 
             text: Settings.keyBinding("Tools")
             contentItem: Text {
