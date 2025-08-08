@@ -447,27 +447,54 @@ Rectangle {
 
     // GUI:
     // first is the textBox
-    Loader {
-        id: boxLoader
+    Rectangle {
+        color: "transparent"
         anchors.horizontalCenter: parent.horizontalCenter
         anchors.top: parent.top
         width: parent.width
         height: parent.height * 2 / 3
-        asynchronous: true
 
-        active: PlayerTextBox.TextBoxMode.TextBox === textBox.displayMode
-        visible: PlayerTextBox.TextBoxMode.TextBox === textBox.displayMode
+        Loader {
+            id: boxLoader
+            anchors.fill: parent
+            asynchronous: true
 
-        property var buttonTexts: dataContainer.buttonTexts
-        property bool sceneSelection: dataContainer.sceneSelection
-        property bool skippable: dataContainer.skippable
-        property int iconWidth: textBox.iconWidth
-        property int iconHeight: textBox.iconHeight
-        property var model: null
+            active: PlayerTextBox.TextBoxMode.TextBox === textBox.displayMode
+            visible: PlayerTextBox.TextBoxMode.TextBox === textBox.displayMode
 
-        signal delegateComponentLoaded()
-        onDelegateComponentLoaded: {
-            // nothing to do anymore
+            property var buttonTexts: dataContainer.buttonTexts
+            property bool sceneSelection: dataContainer.sceneSelection
+            property bool skippable: dataContainer.skippable
+            property int iconWidth: textBox.iconWidth
+            property int iconHeight: textBox.iconHeight
+            property var model: null
+
+            signal delegateComponentLoaded()
+            onDelegateComponentLoaded: {
+                // nothing to do anymore
+            }
+        }
+
+        // animations
+        Timer {
+            id: hideTimer
+            interval: textBox.hideTimerIntervalMS
+            running: false
+            repeat: false
+            function reset(interv) {
+                if (textBox.hideLogAfterInactivity) {
+                    hideTimer.interval = interv;
+                    parent.opacity = 1
+                    restart();
+                }
+            }
+            onTriggered: {
+                parent.opacity = 0.3
+            }
+        }
+
+        Behavior on opacity {
+            NumberAnimation { duration: 500; easing.type: Easing.InOutQuad }
         }
     }
     // second is the input Box
@@ -566,28 +593,6 @@ Rectangle {
             id: textScrollBar
             visible: true
         }
-    }
-
-    // animations
-    Timer {
-        id: hideTimer
-        interval: textBox.hideTimerIntervalMS
-        running: false
-        repeat: false
-        function reset(interv) {
-            if (textBox.hideLogAfterInactivity) {
-                hideTimer.interval = interv;
-                parent.opacity = 1
-                restart();
-            }
-        }
-        onTriggered: {
-            parent.opacity = 0.3
-        }
-    }
-
-    Behavior on opacity {
-        NumberAnimation { duration: 500; easing.type: Easing.InOutQuad }
     }
 
     Component.onCompleted: {
