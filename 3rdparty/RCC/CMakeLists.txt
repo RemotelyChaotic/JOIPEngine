@@ -30,6 +30,9 @@ target_compile_definitions(${PROJECT_NAME} PRIVATE QT_FEATURE_zstd=-1)
 include(GenerateExportHeader)
 generate_export_header(${PROJECT_NAME} BASE_NAME ${PROJECT_NAME})
 
+target_include_directories(${PROJECT_NAME} INTERFACE "$<INSTALL_INTERFACE:include/${PROJECT_NAME}>")
+target_include_directories(${PROJECT_NAME} PUBLIC "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR};${CMAKE_CURRENT_BINARY_DIR};>")
+
 #-----------------------------------------------------------------------------------------
 # Libs
 #-----------------------------------------------------------------------------------------
