@@ -2,8 +2,14 @@
 #define CFLOWSCENE_H
 
 #include <nodes/FlowScene>
+#include <nodes/Node>
+
 #include <QPointer>
 #include <QUndoStack>
+
+#include <type_traits>
+
+class CNodeGraphicsObjectProvider;
 
 class CFlowScene : public QtNodes::FlowScene
 {
@@ -11,6 +17,7 @@ public:
   const static char* c_sUndoRedoingOperation;
 
   CFlowScene(std::shared_ptr<QtNodes::DataModelRegistry> spRegistry,
+             std::shared_ptr<CNodeGraphicsObjectProvider> spGraphicsObjectProvider,
              QObject* pParent = Q_NULLPTR);
   ~CFlowScene() override;
 
@@ -19,7 +26,10 @@ public:
   QPointer<QUndoStack> UndoStack();
 
   // shadow
+  QtNodes::Node& createNode(std::unique_ptr<QtNodes::NodeDataModel>&& dataModel);
   void loadFromMemory(const QByteArray& data);
+  void loadFromObject(const QJsonObject& data);
+  QtNodes::Node& restoreNode(QJsonObject const& nodeJson);
 
 protected:
   void SlotConnectionCreated(QtNodes::Connection const &c);
@@ -29,6 +39,7 @@ protected:
   void SlotNodeMoved(QtNodes::Node& node, const QPointF& newPosition);
 
 private:
+  std::shared_ptr<CNodeGraphicsObjectProvider> m_spGraphicsObjectProvider;
   QPointer<QUndoStack>     m_pUndoStack;
   bool                     m_bUndoRedoOperationInProgress;
   bool                     m_bLoading;

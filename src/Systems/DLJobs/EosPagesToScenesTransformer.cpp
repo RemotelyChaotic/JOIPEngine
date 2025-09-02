@@ -6,6 +6,7 @@
 #include "Editor/NodeEditor/PathMergerModel.h"
 #include "Editor/NodeEditor/PathSplitterModel.h"
 #include "Editor/NodeEditor/NodeEditorRegistry.h"
+#include "Editor/NodeEditor/NodegraphicsObjectProvider.h"
 #include "Editor/NodeEditor/SceneNodeModel.h"
 #include "Editor/NodeEditor/SceneTranstitionData.h"
 #include "Editor/NodeEditor/StartNodeModel.h"
@@ -36,7 +37,9 @@ namespace
 //
 CEosPagesToScenesTransformer::CEosPagesToScenesTransformer(const QJsonDocument& script) :
   m_vPages(),
-  m_spScene(std::make_unique<CFlowScene>(CNodeEditorRegistry::RegisterDataModelsWithoutUi(), nullptr)),
+  m_spScene(std::make_unique<CFlowScene>(
+          CNodeEditorRegistry::RegisterDataModelsWithoutUi(),
+          std::make_shared<CDefaultGraphicsObjectProvider>(), nullptr)),
   m_script(script),
   m_startId(),
   m_endId()

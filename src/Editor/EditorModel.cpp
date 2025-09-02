@@ -12,6 +12,7 @@
 #include "NodeEditor/PathMergerModel.h"
 #include "NodeEditor/PathSplitterModel.h"
 #include "NodeEditor/NodeEditorRegistry.h"
+#include "NodeEditor/NodeGraphicsObjectProvider.h"
 #include "NodeEditor/SceneNodeModel.h"
 #include "NodeEditor/SceneTranstitionData.h"
 #include "NodeEditor/StartNodeModel.h"
@@ -47,7 +48,10 @@ CEditorModel::CEditorModel(QWidget* pParent) :
   m_spKinkTreeModel(std::make_unique<CKinkTreeModel>()),
   m_spEditableFileModel(std::make_unique<CEditorEditableFileModel>(pParent)),
   m_spEditorCompleterModel(std::make_unique<CScriptEditorCompleterModel>(pParent)),
-  m_spFlowSceneModel(std::make_unique<CFlowScene>(CNodeEditorRegistry::RegisterDataModels(), nullptr)),
+  m_spFlowSceneModel(std::make_unique<CFlowScene>(
+          CNodeEditorRegistry::RegisterDataModels(),
+          std::make_shared<CDefaultGraphicsObjectProvider>(),
+          nullptr)),
   m_spUndoStack(std::make_unique<QUndoStack>()),
   m_spResourceTreeModel(std::make_unique<CResourceTreeItemModel>(m_spUndoStack.get())),
   m_spSettings(CApplication::Instance()->Settings()),

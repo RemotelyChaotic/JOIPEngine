@@ -178,6 +178,8 @@ macro(CreateJOIPProject JOIP_PROJECT_NAME)
     ${JOIPSources}/Editor/NodeEditor/IUndoStackAwareModel.h
     ${JOIPSources}/Editor/NodeEditor/NodeEditorRegistry.cpp
     ${JOIPSources}/Editor/NodeEditor/NodeEditorRegistry.h
+    ${JOIPSources}/Editor/NodeEditor/NodeGraphicsObjectProvider.cpp
+    ${JOIPSources}/Editor/NodeEditor/NodeGraphicsObjectProvider.h
     ${JOIPSources}/Editor/NodeEditor/PathMergerModel.cpp
     ${JOIPSources}/Editor/NodeEditor/PathMergerModel.h
     ${JOIPSources}/Editor/NodeEditor/PathSplitterModel.cpp

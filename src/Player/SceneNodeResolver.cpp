@@ -6,6 +6,7 @@
 #include "Editor/NodeEditor/PathMergerModel.h"
 #include "Editor/NodeEditor/PathSplitterModel.h"
 #include "Editor/NodeEditor/NodeEditorRegistry.h"
+#include "Editor/NodeEditor/NodeGraphicsObjectProvider.h"
 #include "Editor/NodeEditor/SceneNodeModel.h"
 #include "Editor/NodeEditor/SceneTranstitionData.h"
 #include "Editor/NodeEditor/StartNodeModel.h"
@@ -607,7 +608,8 @@ bool CSceneNodeResolver::Setup(tspProject spProject, const QString sStartScene)
     m_pFlowScene->clearScene();
     delete m_pFlowScene;
   }
-  m_pFlowScene = new CFlowScene(CNodeEditorRegistry::RegisterDataModels());
+  m_pFlowScene = new CFlowScene(CNodeEditorRegistry::RegisterDataModels(),
+                                std::make_shared<CDefaultGraphicsObjectProvider>());
   connect(m_pFlowScene, &CFlowScene::nodeCreated, this, &CSceneNodeResolver::SlotNodeCreated);
 
   bool bOk = LoadFlowScene();
