@@ -4,7 +4,6 @@
 #include "ProjectDialogueManager.h"
 #include "ProjectEventTarget.h"
 #include "ProjectSceneManager.h"
-#include "SceneNodeResolver.h"
 #include "Settings.h"
 #include "WindowContext.h"
 
@@ -13,6 +12,7 @@
 #include "Systems/DatabaseImageProvider.h"
 #include "Systems/Debug/DebugInterface.h"
 #include "Systems/PhysFs/PhysFsFileEngine.h"
+#include "Systems/Player/SceneNodeResolver.h"
 #include "Systems/Project.h"
 #include "Systems/ScriptRunner.h"
 #include "Systems/Script/ScriptCacheFileEngine.h"

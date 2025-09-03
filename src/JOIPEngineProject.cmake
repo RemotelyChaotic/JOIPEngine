@@ -169,33 +169,9 @@ macro(CreateJOIPProject JOIP_PROJECT_NAME)
     ${JOIPSources}/Editor/NodeEditor/CommandNodeRemoved.h
     ${JOIPSources}/Editor/NodeEditor/EditorNodeModelBase.cpp
     ${JOIPSources}/Editor/NodeEditor/EditorNodeModelBase.h
-    ${JOIPSources}/Editor/NodeEditor/EndNodeModel.cpp
-    ${JOIPSources}/Editor/NodeEditor/EndNodeModel.h
-    ${JOIPSources}/Editor/NodeEditor/FlowScene.cpp
-    ${JOIPSources}/Editor/NodeEditor/FlowScene.h
-    ${JOIPSources}/Editor/NodeEditor/FlowView.cpp
-    ${JOIPSources}/Editor/NodeEditor/FlowView.h
     ${JOIPSources}/Editor/NodeEditor/IUndoStackAwareModel.h
     ${JOIPSources}/Editor/NodeEditor/NodeEditorRegistry.cpp
     ${JOIPSources}/Editor/NodeEditor/NodeEditorRegistry.h
-    ${JOIPSources}/Editor/NodeEditor/NodeGraphicsObjectProvider.cpp
-    ${JOIPSources}/Editor/NodeEditor/NodeGraphicsObjectProvider.h
-    ${JOIPSources}/Editor/NodeEditor/PathMergerModel.cpp
-    ${JOIPSources}/Editor/NodeEditor/PathMergerModel.h
-    ${JOIPSources}/Editor/NodeEditor/PathSplitterModel.cpp
-    ${JOIPSources}/Editor/NodeEditor/PathSplitterModel.h
-    ${JOIPSources}/Editor/NodeEditor/PathSplitterModelWidget.cpp
-    ${JOIPSources}/Editor/NodeEditor/PathSplitterModelWidget.h
-    ${JOIPSources}/Editor/NodeEditor/PathSplitterModelWidget.ui
-    ${JOIPSources}/Editor/NodeEditor/SceneNodeModel.cpp
-    ${JOIPSources}/Editor/NodeEditor/SceneNodeModel.h
-    ${JOIPSources}/Editor/NodeEditor/SceneNodeModelWidget.cpp
-    ${JOIPSources}/Editor/NodeEditor/SceneNodeModelWidget.h
-    ${JOIPSources}/Editor/NodeEditor/SceneNodeModelWidget.ui
-    ${JOIPSources}/Editor/NodeEditor/SceneTranstitionData.cpp
-    ${JOIPSources}/Editor/NodeEditor/SceneTranstitionData.h
-    ${JOIPSources}/Editor/NodeEditor/StartNodeModel.cpp
-    ${JOIPSources}/Editor/NodeEditor/StartNodeModel.h
     ${JOIPSources}/Editor/Project/AchievementWidget.cpp
     ${JOIPSources}/Editor/Project/AchievementWidget.h
     ${JOIPSources}/Editor/Project/CommandChangeAchievements.cpp
@@ -477,8 +453,6 @@ macro(CreateJOIPProject JOIP_PROJECT_NAME)
     ${JOIPSources}/Player/ProjectSceneManager.h
     ${JOIPSources}/Player/ProjectSoundManager.cpp
     ${JOIPSources}/Player/ProjectSoundManager.h
-    ${JOIPSources}/Player/SceneNodeResolver.cpp
-    ${JOIPSources}/Player/SceneNodeResolver.h
     ${JOIPSources}/Player/SceneMainScreen.cpp
     ${JOIPSources}/Player/SceneMainScreen.h
     ${JOIPSources}/Player/SceneMainScreen.ui
@@ -589,6 +563,30 @@ macro(CreateJOIPProject JOIP_PROJECT_NAME)
     ${JOIPSources}/Systems/Lockable.h
     ${JOIPSources}/Systems/MetronomeManager.cpp
     ${JOIPSources}/Systems/MetronomeManager.h
+    ${JOIPSources}/Systems/Nodes/EndNodeModel.cpp
+    ${JOIPSources}/Systems/Nodes/EndNodeModel.h
+    ${JOIPSources}/Systems/Nodes/FlowScene.cpp
+    ${JOIPSources}/Systems/Nodes/FlowScene.h
+    ${JOIPSources}/Systems/Nodes/FlowView.cpp
+    ${JOIPSources}/Systems/Nodes/FlowView.h
+    ${JOIPSources}/Systems/Nodes/NodeGraphicsObjectProvider.cpp
+    ${JOIPSources}/Systems/Nodes/NodeGraphicsObjectProvider.h
+    ${JOIPSources}/Systems/Nodes/PathMergerModel.cpp
+    ${JOIPSources}/Systems/Nodes/PathMergerModel.h
+    ${JOIPSources}/Systems/Nodes/PathSplitterModel.cpp
+    ${JOIPSources}/Systems/Nodes/PathSplitterModel.h
+    ${JOIPSources}/Systems/Nodes/PathSplitterModelWidget.cpp
+    ${JOIPSources}/Systems/Nodes/PathSplitterModelWidget.h
+    ${JOIPSources}/Systems/Nodes/PathSplitterModelWidget.ui
+    ${JOIPSources}/Systems/Nodes/SceneNodeModel.cpp
+    ${JOIPSources}/Systems/Nodes/SceneNodeModel.h
+    ${JOIPSources}/Systems/Nodes/SceneNodeModelWidget.cpp
+    ${JOIPSources}/Systems/Nodes/SceneNodeModelWidget.h
+    ${JOIPSources}/Systems/Nodes/SceneNodeModelWidget.ui
+    ${JOIPSources}/Systems/Nodes/SceneTranstitionData.cpp
+    ${JOIPSources}/Systems/Nodes/SceneTranstitionData.h
+    ${JOIPSources}/Systems/Nodes/StartNodeModel.cpp
+    ${JOIPSources}/Systems/Nodes/StartNodeModel.h
     ${JOIPSources}/Systems/NotificationSender.cpp
     ${JOIPSources}/Systems/NotificationSender.h
     ${JOIPSources}/Systems/OverlayManager.cpp
@@ -597,6 +595,8 @@ macro(CreateJOIPProject JOIP_PROJECT_NAME)
     ${JOIPSources}/Systems/PhysFs/PhysFsFileEngine.h
     ${JOIPSources}/Systems/PhysFs/PhysFsQtAVIntegration.cpp
     ${JOIPSources}/Systems/PhysFs/PhysFsQtAVIntegration.h
+    ${JOIPSources}/Systems/Player/SceneNodeResolver.cpp
+    ${JOIPSources}/Systems/Player/SceneNodeResolver.h
     ${JOIPSources}/Systems/Project.cpp
     ${JOIPSources}/Systems/Project.h
     ${JOIPSources}/Systems/ProjectDownloader.cpp
