@@ -2,7 +2,6 @@
 
 #include "Application.h"
 #include "PathSplitterModelWidget.h"
-#include "CommandNodeEdited.h"
 #include "SceneTranstitionData.h"
 
 #include "Systems/DatabaseManager.h"
@@ -16,7 +15,7 @@ namespace {
 
 
 CPathSplitterModel::CPathSplitterModel() :
-  CEditorNodeModelBase(),
+  CNodeModelBase(),
   m_spOutData(std::make_shared<CSceneTranstitionData>()),
   m_modelValidationState(NodeValidationState::Warning),
   m_modelValidationError(QString(tr("Missing or incorrect input"))),
@@ -159,50 +158,6 @@ void CPathSplitterModel::restore(QJsonObject const& p)
 
 //----------------------------------------------------------------------------------------
 //
-void CPathSplitterModel::UndoRestore(QJsonObject const& p)
-{
-  m_bIsInUndoOperation = true;
-  QJsonValue v = p["transitonType"];
-  if (!v.isUndefined())
-  {
-    qint32 iValue = v.toInt();
-    if (-1 < iValue && static_cast<qint32>(ESceneTransitionType::_size()) > iValue)
-    {
-      m_transitonType = ESceneTransitionType::_from_integral(iValue);
-    }
-  }
-  QJsonValue arr = p["vsLabelNames"];
-  if (!arr.isUndefined())
-  {
-    size_t i = 0;
-    for (QJsonValue val : arr.toArray())
-    {
-      if (m_vsLabelNames.size() > i)
-      {
-        const QString sLabel = val.toString();
-        m_vsLabelNames[i] = sLabel;
-        i++;
-      }
-    }
-  }
-  v = p["bCustomLayoutEnabled"];
-  bool bCustomLayoutEnabled = false;
-  if (!v.isUndefined())
-  {
-    bCustomLayoutEnabled = v.toBool(false);
-  }
-  v = p["sCustomLayout"];
-  QString sCustomLayout = QString();
-  if (!v.isUndefined())
-  {
-    sCustomLayout = v.toString(QString());
-  }
-  SlotCustomTransitionChanged(bCustomLayoutEnabled, sCustomLayout);
-  m_bIsInUndoOperation = false;
-}
-
-//----------------------------------------------------------------------------------------
-//
 unsigned int CPathSplitterModel::nPorts(PortType portType) const
 {
   unsigned int result = 1;
@@ -330,19 +285,9 @@ void CPathSplitterModel::SlotCustomTransitionChanged(bool bEnabled, const QStrin
 {
   bool bChanged = m_bCustomLayoutEnabled != bEnabled || m_sCustomLayout != sResource;
 
-  QJsonObject oldState = save();
-  m_bCustomLayoutEnabled = bEnabled;
-  m_sCustomLayout = sResource;
-  QJsonObject newState = save();
-
   if (bChanged)
   {
     SlotCustomTransitionChangedImpl(bEnabled, sResource);
-  }
-
-  if (nullptr != UndoStack() && !m_bIsInUndoOperation)
-  {
-    UndoStack()->push(new CCommandNodeEdited(m_pScene, m_id, oldState, newState));
   }
 }
 
@@ -350,13 +295,11 @@ void CPathSplitterModel::SlotCustomTransitionChanged(bool bEnabled, const QStrin
 //
 void CPathSplitterModel::SlotTransitionTypeChanged(qint32 iType)
 {
-  QJsonObject oldState = save();
-  m_transitonType = ESceneTransitionType::_from_integral(iType);
-  QJsonObject newState = save();
+  bool bChanged = m_transitonType != iType;
 
-  if (nullptr != UndoStack() && !m_bIsInUndoOperation)
+  if (bChanged)
   {
-    UndoStack()->push(new CCommandNodeEdited(m_pScene, m_id, oldState, newState));
+    SlotTransitionTypeChangedImpl(iType);
   }
 }
 
@@ -364,16 +307,31 @@ void CPathSplitterModel::SlotTransitionTypeChanged(qint32 iType)
 //
 void CPathSplitterModel::SlotTransitionLabelChanged(PortIndex index, const QString& sLabelValue)
 {
-  QJsonObject oldState = save();
+  SlotTransitionLabelChangedImpl(index, sLabelValue);
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CPathSplitterModel::SlotCustomTransitionChangedImpl(bool bEnabled, const QString& sResource)
+{
+  m_bCustomLayoutEnabled = bEnabled;
+  m_sCustomLayout = sResource;
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CPathSplitterModel::SlotTransitionTypeChangedImpl(qint32 iType)
+{
+  m_transitonType = ESceneTransitionType::_from_integral(iType);
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CPathSplitterModel::SlotTransitionLabelChangedImpl(PortIndex index, const QString& sLabelValue)
+{
   if (-1 < index && m_vsLabelNames.size() > static_cast<size_t>(index))
   {
     m_vsLabelNames[static_cast<size_t>(index)] = sLabelValue;
-  }
-  QJsonObject newState = save();
-
-  if (nullptr != UndoStack() && !m_bIsInUndoOperation)
-  {
-    UndoStack()->push(new CCommandNodeEdited(m_pScene, m_id, oldState, newState));
   }
 }
 
@@ -452,18 +410,10 @@ void CPathSplitterModelWithWidget::OnProjectSetImpl()
 
 //----------------------------------------------------------------------------------------
 //
-void CPathSplitterModelWithWidget::OnUndoStackSet()
-{
-  if (nullptr != m_pWidget)
-  {
-    m_pWidget->SetUndoStack(m_pUndoStack);
-  }
-}
-
-//----------------------------------------------------------------------------------------
-//
 void CPathSplitterModelWithWidget::SlotCustomTransitionChangedImpl(bool bEnabled, const QString& sResource)
 {
+  CPathSplitterModel::SlotCustomTransitionChangedImpl(bEnabled, sResource);
+
   if (nullptr != m_pWidget)
   {
     m_pWidget->SetCustomLayout(bEnabled, sResource);

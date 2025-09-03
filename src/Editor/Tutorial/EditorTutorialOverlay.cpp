@@ -2,8 +2,8 @@
 #include "Application.h"
 #include "Settings.h"
 #include "Editor/EditorModel.h"
-#include "Editor/NodeEditor/FlowScene.h"
-#include "Editor/NodeEditor/FlowView.h"
+#include "Editor/NodeEditor/NodeEditorFlowScene.h"
+#include "Editor/NodeEditor/NodeEditorFlowView.h"
 #include "Widgets/ShortcutButton.h"
 
 #include <nodes/Node>

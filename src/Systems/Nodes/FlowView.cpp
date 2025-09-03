@@ -1,10 +1,4 @@
 #include "FlowView.h"
-#include "CommandConnectionAdded.h"
-#include "CommandConnectionRemoved.h"
-#include "CommandNodeAdded.h"
-#include "CommandNodeEdited.h"
-#include "CommandNodeMoved.h"
-#include "CommandNodeRemoved.h"
 #include "FlowScene.h"
 
 #include "Widgets/SearchWidget.h"
@@ -30,8 +24,7 @@ using QtNodes::Node;
 CFlowView::CFlowView(QWidget* pParent) :
   FlowView(pParent),
   m_bReadOnly(false),
-  m_contextMenuItemVisibility(),
-  m_pUndoStack(new QUndoStack(this))
+  m_contextMenuItemVisibility()
 {
   setViewportUpdateMode(QGraphicsView::SmartViewportUpdate);
 }
@@ -39,8 +32,7 @@ CFlowView::CFlowView(QWidget* pParent) :
 CFlowView::CFlowView(CFlowScene* pScene, QWidget* pParent) :
   FlowView(pScene, pParent),
   m_bReadOnly(false),
-  m_contextMenuItemVisibility(),
-  m_pUndoStack(new QUndoStack(this))
+  m_contextMenuItemVisibility()
 {
   setViewportUpdateMode(QGraphicsView::SmartViewportUpdate);
 }
@@ -51,10 +43,7 @@ CFlowView::~CFlowView() {}
 //
 void CFlowView::SetScene(CFlowScene* pScene)
 {
-  if (nullptr != pScene)
-  {
-    pScene->SetUndoStack(m_pUndoStack);
-  }
+  SetSceneImpl(pScene);
   FlowView::setScene(pScene);
   clearSelectionAction()->disconnect();
   deleteSelectionAction()->disconnect();
@@ -67,25 +56,6 @@ void CFlowView::SetScene(CFlowScene* pScene)
 CFlowScene* CFlowView::Scene()
 {
   return dynamic_cast<CFlowScene*>(scene());
-}
-
-//----------------------------------------------------------------------------------------
-//
-void CFlowView::SetUndoStack(QPointer<QUndoStack> pUndoStack)
-{
-  if (nullptr != m_pUndoStack) { delete m_pUndoStack; }
-  m_pUndoStack = pUndoStack;
-  if (CFlowScene* pScene = dynamic_cast<CFlowScene*>(scene()))
-  {
-    pScene->SetUndoStack(m_pUndoStack);
-  }
-}
-
-//----------------------------------------------------------------------------------------
-//
-QPointer<QUndoStack> CFlowView::UndoStack()
-{
-  return m_pUndoStack;
 }
 
 //----------------------------------------------------------------------------------------
@@ -172,14 +142,7 @@ void CFlowView::OpenContextMenuAt(const QPoint& localPoint, const QPoint& create
       return;
     }
 
-    if (nullptr != m_pUndoStack)
-    {
-      UndoStack()->push(new CCommandNodeAdded(this, modelName, localPoint, UndoStack()));
-    }
-    else
-    {
-      assert(false && "QUndoStack must never be null.");
-    }
+    NodeAboutToBeCreated(modelName, localPoint);
 
     modelMenu.close();
   });
@@ -263,46 +226,7 @@ void CFlowView::SlotClearSelectionTriggered()
 //
 void CFlowView::SlotDeleteTriggered()
 {
-  if (nullptr != scene())
-  {
-    // HACK HACK HACK: since ConnectionGraphicsObject is private, we check the class name
-    // and iterate over all connections. We then get the connectionGraphicsObject of those and just
-    // cast them to graphicsitems to compare the pointer vlues
-    // TODO: Change library, so we have a getGraphicsObject method that returns a Qt-Object
-    // instead of a private type
-    const auto& mapConnecitons = scene()->connections();
-    for (QGraphicsItem* pItem : scene()->selectedItems())
-    {
-      QGraphicsObject* pGraphicsObj = qgraphicsitem_cast<QGraphicsObject*>(pItem);
-      if (nullptr != pGraphicsObj && pGraphicsObj->metaObject()->className() ==
-          QString("ConnectionGraphicsObject"))
-      {
-        for (auto& connectionPair : mapConnecitons)
-        {
-          if (&reinterpret_cast<QGraphicsObject&>(connectionPair.second->getConnectionGraphicsObject()) ==
-              pGraphicsObj)
-          {
-            scene()->deleteConnection(*connectionPair.second);
-          }
-        }
-      }
-    }
 
-    std::vector<QUuid> vIds;
-    for (Node* pNode : scene()->selectedNodes())
-    {
-      vIds.push_back(pNode->id());
-    }
-
-    if (nullptr != m_pUndoStack)
-    {
-      UndoStack()->push(new CCommandNodesRemoved(this, vIds, UndoStack()));
-    }
-    else
-    {
-      assert(false && "QUndoStack must never be null.");
-    }
-  }
 }
 
 //----------------------------------------------------------------------------------------
@@ -319,27 +243,4 @@ void CFlowView::contextMenuEvent(QContextMenuEvent* pEvent)
 
     OpenContextMenuAt(pEvent->pos(), pEvent->globalPos());
   }
-}
-
-//----------------------------------------------------------------------------------------
-//
-void CFlowView::keyPressEvent(QKeyEvent *event)
-{
-  switch (event->key())
-  {
-    case Qt::Key_V:
-       if (event->modifiers() & Qt::ControlModifier)
-       {
-         Scene()->SetUndoOperationInProgress(true);
-         QtNodes::FlowView::keyPressEvent(event);
-         Scene()->SetUndoOperationInProgress(false);
-         return;
-       }
-       break;
-
-    default:
-      break;
-  }
-
-  QtNodes::FlowView::keyPressEvent(event);
 }

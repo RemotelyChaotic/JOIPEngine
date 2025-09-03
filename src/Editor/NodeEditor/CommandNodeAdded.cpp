@@ -1,7 +1,9 @@
 #include "CommandNodeAdded.h"
-#include "FlowScene.h"
-#include "FlowView.h"
+#include "NodeEditorFlowScene.h"
+#include "NodeEditorFlowView.h"
+
 #include "Editor/EditorCommandIds.h"
+
 #include <nodes/FlowScene>
 #include <nodes/Node>
 #include <QDebug>
@@ -101,9 +103,12 @@ void CCommandNodeAdded::redo()
     }
     else if (!m_bFirstRedo)
     {
-      m_pScene->SetUndoOperationInProgress(true);
-      m_pScene->restoreNode(m_node);
-      m_pScene->SetUndoOperationInProgress(false);
+      if (auto pScene = dynamic_cast<CNodeEditorFlowScene*>(m_pScene.data()))
+      {
+        pScene->SetUndoOperationInProgress(true);
+        pScene->restoreNode(m_node);
+        pScene->SetUndoOperationInProgress(false);
+      }
     }
   }
 

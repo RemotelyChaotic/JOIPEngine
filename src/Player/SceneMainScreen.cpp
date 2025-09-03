@@ -11,6 +11,7 @@
 #include "Systems/DatabaseManager.h"
 #include "Systems/DatabaseImageProvider.h"
 #include "Systems/Debug/DebugInterface.h"
+#include "Systems/Nodes/NodeEditorRegistryBase.h"
 #include "Systems/PhysFs/PhysFsFileEngine.h"
 #include "Systems/Player/SceneNodeResolver.h"
 #include "Systems/Project.h"
@@ -42,7 +43,8 @@ CSceneMainScreen::CSceneMainScreen(QWidget* pParent) :
   QWidget(pParent),
   m_spUi(std::make_unique<Ui::CSceneMainScreen>()),
   m_spEventCallbackRegistry(std::make_shared<CProjectEventCallbackRegistry>()),
-  m_spSceneNodeResolver(std::make_shared<CSceneNodeResolver>()),
+    m_spSceneNodeResolver(std::make_shared<CSceneNodeResolver>(
+          CNodeEditorRegistryBase::RegisterDataModelsWithoutUi())),
   m_spDialogueManager(std::make_shared<CProjectDialogueManager>()),
   m_spScriptRunnerSystem(std::make_shared<CThreadedSystem>("ScriptRunner")),
   m_spScriptRunner(nullptr),

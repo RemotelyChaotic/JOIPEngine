@@ -10,7 +10,7 @@
 
 class CEditorActionBar;
 class CDialogueEditorTreeModel;
-class CFlowScene;
+class CNodeEditorFlowScene;
 class CEditorModel;
 class CKinkTreeModel;
 class CResourceTreeItemModel;
@@ -54,7 +54,7 @@ protected:
   QPointer<CEditorActionBar> ActionBar() const;
   QPointer<CDialogueEditorTreeModel> DialogueModel() const;
   QPointer<CEditorModel> EditorModel() const;
-  QPointer<CFlowScene> FlowSceneModel() const;
+  QPointer<CNodeEditorFlowScene> FlowSceneModel() const;
   QPointer<CKinkTreeModel> KinkModel() const;
   QPointer<CResourceTreeItemModel> ResourceTreeModel() const;
   QPointer<CEditorEditableFileModel> EditableFileModel() const;

@@ -5,16 +5,17 @@
 #include "Systems/Nodes/FlowView.h"
 #include "Systems/Nodes/PathMergerModel.h"
 #include "Systems/Nodes/PathSplitterModel.h"
-#include "Systems/Nodes/NodeEditorRegistry.h"
 #include "Systems/Nodes/NodeGraphicsObjectProvider.h"
 #include "Systems/Nodes/SceneNodeModel.h"
 #include "Systems/Nodes/SceneTranstitionData.h"
 #include "Systems/Nodes/StartNodeModel.h"
+
 #include "Systems/DatabaseManager.h"
 #include "Systems/Project.h"
 #include "Systems/Resource.h"
 #include "Systems/Scene.h"
 
+#include <nodes/DataModelRegistry>
 #include <nodes/Node>
 #include <nodes/NodeData>
 
@@ -255,8 +256,10 @@ void ResolveNodes(std::vector<NodeResolveReslt>& resolveResult, const QStringLis
 
 //----------------------------------------------------------------------------------------
 //
-CSceneNodeResolver::CSceneNodeResolver(QObject* pParent) :
+CSceneNodeResolver::CSceneNodeResolver(std::shared_ptr<QtNodes::DataModelRegistry> spRegistry,
+                                       QObject* pParent) :
   QObject (pParent),
+  m_spNodeModelRegistry(spRegistry),
   m_spCurrentProject(nullptr),
   m_wpDbManager(CApplication::Instance()->System<CDatabaseManager>()),
   m_resolveResult(),
@@ -608,7 +611,7 @@ bool CSceneNodeResolver::Setup(tspProject spProject, const QString sStartScene)
     m_pFlowScene->clearScene();
     delete m_pFlowScene;
   }
-  m_pFlowScene = new CFlowScene(CNodeEditorRegistry::RegisterDataModels(),
+  m_pFlowScene = new CFlowScene(m_spNodeModelRegistry,
                                 std::make_shared<CDefaultGraphicsObjectProvider>());
   connect(m_pFlowScene, &CFlowScene::nodeCreated, this, &CSceneNodeResolver::SlotNodeCreated);
 

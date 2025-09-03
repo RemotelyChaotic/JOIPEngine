@@ -1,7 +1,9 @@
 #include "CommandNodeEdited.h"
-#include "FlowScene.h"
-#include "IUndoStackAwareModel.h"
+#include "NodeEditorFlowScene.h"
+#include "UndoStackAwareModel.h"
+
 #include "Editor/EditorCommandIds.h"
+
 #include <nodes/Node>
 
 CCommandNodeEdited::CCommandNodeEdited(QPointer<CFlowScene> pFlowScene,
@@ -79,7 +81,7 @@ void CCommandNodeEdited::DoUndoRedo(const QJsonObject& obj)
     if (nodes.end() != it && nullptr != it->second && nullptr != it->second->nodeDataModel())
     {
       auto pModel = it->second->nodeDataModel();
-      IUndoStackAwareModel* pUndoAware = dynamic_cast<IUndoStackAwareModel*>(pModel);
+      CUndoStackAwareModel* pUndoAware = dynamic_cast<CUndoStackAwareModel*>(pModel);
       if (nullptr != pUndoAware)
       {
         pUndoAware->UndoRestore(obj);

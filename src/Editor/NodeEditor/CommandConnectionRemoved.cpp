@@ -1,5 +1,6 @@
 #include "CommandConnectionRemoved.h"
-#include "FlowScene.h"
+#include "NodeEditorFlowScene.h"
+
 #include "Editor/EditorCommandIds.h"
 
 CCommandConnectionRemoved::CCommandConnectionRemoved(QPointer<CFlowScene> pFlowScene,
@@ -23,10 +24,10 @@ CCommandConnectionRemoved::~CCommandConnectionRemoved()
 //
 void CCommandConnectionRemoved::undo()
 {
-  if (nullptr != m_pFlowScene)
+  if (auto pScene = dynamic_cast<CNodeEditorFlowScene*>(m_pFlowScene.data()))
   {
-    CSceneUndoOperationLocker locker(m_pFlowScene);
-    m_pFlowScene->restoreConnection(m_connection);
+    CSceneUndoOperationLocker locker(pScene);
+    pScene->restoreConnection(m_connection);
   }
 }
 
@@ -46,8 +47,11 @@ void CCommandConnectionRemoved::redo()
       auto it = map.find(m_connId);
       if (map.end() != it && nullptr != it->second)
       {
-        CSceneUndoOperationLocker locker(m_pFlowScene);
-        m_pFlowScene->deleteConnection(*it->second);
+        if (auto pScene = dynamic_cast<CNodeEditorFlowScene*>(m_pFlowScene.data()))
+        {
+          CSceneUndoOperationLocker locker(pScene);
+          pScene->deleteConnection(*it->second);
+        }
       }
     }
   }

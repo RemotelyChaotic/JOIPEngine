@@ -7,7 +7,7 @@
 #include <memory>
 
 class CDatabaseManager;
-class CFlowView;
+class CNodeEditorFlowView;
 class CSceneNodeWidgetTutorialStateSwitchHandler;
 class CSettings;
 namespace Ui {
@@ -62,7 +62,7 @@ protected:
   void OnActionBarAboutToChange() override;
   void OnActionBarChanged() override;
 
-  CFlowView* FlowView() { return m_pFlowView; }
+  CNodeEditorFlowView* FlowView() { return m_pFlowView; }
 
 protected slots:
   void SlotAddSceneButtonClicked();
@@ -75,7 +75,7 @@ private:
   std::shared_ptr<CSettings>                                  m_spSettings;
   tspProject                                                  m_spCurrentProject;
   std::weak_ptr<CDatabaseManager>                             m_wpDbManager;
-  CFlowView*                                                  m_pFlowView;
+  CNodeEditorFlowView*                                        m_pFlowView;
 
   QColor                                                      m_normalBoundaryColor;
   QColor                                                      m_selectedBoundaryColor;

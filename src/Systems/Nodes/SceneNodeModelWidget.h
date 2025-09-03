@@ -1,8 +1,6 @@
 #ifndef SCENENODEMODELWIDGET_H
 #define SCENENODEMODELWIDGET_H
 
-#include "IUndoStackAwareModel.h"
-
 #include "Systems/Project.h"
 
 #include <QWidget>
@@ -13,7 +11,7 @@ namespace Ui {
   class CSceneNodeModelWidget;
 }
 
-class CSceneNodeModelWidget : public QWidget, public IUndoStackAwareModel
+class CSceneNodeModelWidget : public QWidget
 {
   Q_OBJECT
 

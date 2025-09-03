@@ -1,12 +1,15 @@
 #include "SceneNodeWidgetTutorialStateSwitchHandler.h"
 #include "Application.h"
+
 #include "EditorTutorialOverlay.h"
 #include "Editor/EditorWidgets/EditorSceneNodeWidget.h"
-#include "Editor/NodeEditor/EndNodeModel.h"
-#include "Editor/NodeEditor/FlowScene.h"
-#include "Editor/NodeEditor/FlowView.h"
-#include "Editor/NodeEditor/SceneNodeModel.h"
-#include "Editor/NodeEditor/StartNodeModel.h"
+#include "Editor/NodeEditor/NodeEditorFlowScene.h"
+#include "Editor/NodeEditor/NodeEditorFlowView.h"
+
+#include "Systems/Nodes/EndNodeModel.h"
+#include "Systems/Nodes/SceneNodeModel.h"
+#include "Systems/Nodes/StartNodeModel.h"
+
 #include "Systems/DatabaseManager.h"
 
 #include <nodes/Node>

@@ -153,8 +153,6 @@ macro(CreateJOIPProject JOIP_PROJECT_NAME)
     ${JOIPSources}/Editor/EditorWidgets/EditorWidgetBase.h
     ${JOIPSources}/Editor/EditorWidgetRegistry.h
     ${JOIPSources}/Editor/EditorWidgetTypes.h
-    ${JOIPSources}/Editor/NodeEditor/CommandChangeSelection.cpp
-    ${JOIPSources}/Editor/NodeEditor/CommandChangeSelection.h
     ${JOIPSources}/Editor/NodeEditor/CommandConnectionAdded.cpp
     ${JOIPSources}/Editor/NodeEditor/CommandConnectionAdded.h
     ${JOIPSources}/Editor/NodeEditor/CommandConnectionRemoved.cpp
@@ -167,11 +165,17 @@ macro(CreateJOIPProject JOIP_PROJECT_NAME)
     ${JOIPSources}/Editor/NodeEditor/CommandNodeMoved.h
     ${JOIPSources}/Editor/NodeEditor/CommandNodeRemoved.cpp
     ${JOIPSources}/Editor/NodeEditor/CommandNodeRemoved.h
-    ${JOIPSources}/Editor/NodeEditor/EditorNodeModelBase.cpp
-    ${JOIPSources}/Editor/NodeEditor/EditorNodeModelBase.h
-    ${JOIPSources}/Editor/NodeEditor/IUndoStackAwareModel.h
+    ${JOIPSources}/Editor/NodeEditor/NodeEditorFlowScene.cpp
+    ${JOIPSources}/Editor/NodeEditor/NodeEditorFlowScene.h
+    ${JOIPSources}/Editor/NodeEditor/NodeEditorFlowView.cpp
+    ${JOIPSources}/Editor/NodeEditor/NodeEditorFlowView.h
     ${JOIPSources}/Editor/NodeEditor/NodeEditorRegistry.cpp
     ${JOIPSources}/Editor/NodeEditor/NodeEditorRegistry.h
+    ${JOIPSources}/Editor/NodeEditor/UndoPathSplitterModel.cpp
+    ${JOIPSources}/Editor/NodeEditor/UndoPathSplitterModel.h
+    ${JOIPSources}/Editor/NodeEditor/UndoSceneNodeModel.cpp
+    ${JOIPSources}/Editor/NodeEditor/UndoSceneNodeModel.h
+    ${JOIPSources}/Editor/NodeEditor/UndoStackAwareModel.h
     ${JOIPSources}/Editor/Project/AchievementWidget.cpp
     ${JOIPSources}/Editor/Project/AchievementWidget.h
     ${JOIPSources}/Editor/Project/CommandChangeAchievements.cpp
@@ -569,8 +573,12 @@ macro(CreateJOIPProject JOIP_PROJECT_NAME)
     ${JOIPSources}/Systems/Nodes/FlowScene.h
     ${JOIPSources}/Systems/Nodes/FlowView.cpp
     ${JOIPSources}/Systems/Nodes/FlowView.h
+    ${JOIPSources}/Systems/Nodes/NodeEditorRegistryBase.cpp
+    ${JOIPSources}/Systems/Nodes/NodeEditorRegistryBase.h
     ${JOIPSources}/Systems/Nodes/NodeGraphicsObjectProvider.cpp
     ${JOIPSources}/Systems/Nodes/NodeGraphicsObjectProvider.h
+    ${JOIPSources}/Systems/Nodes/NodeModelBase.cpp
+    ${JOIPSources}/Systems/Nodes/NodeModelBase.h
     ${JOIPSources}/Systems/Nodes/PathMergerModel.cpp
     ${JOIPSources}/Systems/Nodes/PathMergerModel.h
     ${JOIPSources}/Systems/Nodes/PathSplitterModel.cpp

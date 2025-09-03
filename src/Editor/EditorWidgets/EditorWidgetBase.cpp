@@ -5,7 +5,7 @@
 #include "Editor/EditorEditableFileModel.h"
 
 #include "Editor/DialogueEditor/DialogueEditorTreeModel.h"
-#include "Editor/NodeEditor/FlowScene.h"
+#include "Editor/NodeEditor/NodeEditorFlowScene.h"
 #include "Editor/Project/KinkTreeModel.h"
 #include "Editor/Resources/ResourceTreeItemModel.h"
 
@@ -79,7 +79,7 @@ QPointer<CEditorModel> CEditorWidgetBase::EditorModel() const
 
 //----------------------------------------------------------------------------------------
 //
-QPointer<CFlowScene> CEditorWidgetBase::FlowSceneModel() const
+QPointer<CNodeEditorFlowScene> CEditorWidgetBase::FlowSceneModel() const
 {
   return m_pEditorModel->FlowSceneModel();
 }

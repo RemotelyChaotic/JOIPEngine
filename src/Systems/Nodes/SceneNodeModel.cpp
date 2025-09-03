@@ -1,6 +1,5 @@
 #include "SceneNodeModel.h"
 #include "Application.h"
-#include "CommandNodeEdited.h"
 #include "SceneNodeModelWidget.h"
 #include "SceneTranstitionData.h"
 
@@ -13,7 +12,7 @@ namespace {
 }
 
 CSceneNodeModel::CSceneNodeModel() :
-  CEditorNodeModelBase(),
+  CNodeModelBase(),
   m_wpDbManager(CApplication::Instance()->System<CDatabaseManager>()),
   m_spOutData(std::make_shared<CSceneTranstitionData>()),
   m_spProject(nullptr),
@@ -186,40 +185,6 @@ void CSceneNodeModel::restore(QJsonObject const& p)
 
 //----------------------------------------------------------------------------------------
 //
-void CSceneNodeModel::UndoRestore(QJsonObject const& p)
-{
-  m_bIsInUndoOperation = true;
-  QJsonValue v = p["sName"];
-  if (!v.isUndefined())
-  {
-    SlotNameChanged(v.toString());
-    m_sOldSceneName = m_sSceneName;
-  }
-  v = p["sScript"];
-  if (!v.isUndefined())
-  {
-    SlotScriptChanged(v.toString());
-  }
-  v = p["sLayout"];
-  if (!v.isUndefined())
-  {
-    SlotLayoutChanged(v.toString());
-  }
-  v = p["sTitle"];
-  if (!v.isUndefined())
-  {
-    SlotTitleResourceChanged(QString(), v.toString());
-  }
-  v = p["bCanStartHere"];
-  if (!v.isUndefined())
-  {
-    SlotCanStartHereChanged(v.toBool());
-  }
-  m_bIsInUndoOperation = false;
-}
-
-//----------------------------------------------------------------------------------------
-//
 unsigned int CSceneNodeModel::nPorts(PortType portType) const
 {
   unsigned int result;
@@ -334,7 +299,6 @@ void CSceneNodeModel::outputConnectionDeleted(QtNodes::Connection const& c)
 //
 void CSceneNodeModel::SlotCanStartHereChanged(bool bValue)
 {
-  QJsonObject oldState = save();
   auto spDbManager = m_wpDbManager.lock();
   if (nullptr != spDbManager)
   {
@@ -357,14 +321,6 @@ void CSceneNodeModel::SlotCanStartHereChanged(bool bValue)
       {
         SlotCanStartHereChangedImpl(bValue);
         emit spDbManager->SignalSceneDataChanged(iProjId, iSceneId);
-      }
-
-      m_bCanStartHere = bValue;
-
-      if (nullptr != UndoStack() && !m_bIsInUndoOperation)
-      {
-        QJsonObject newState = save();
-        UndoStack()->push(new CCommandNodeEdited(m_pScene, m_id, oldState, newState));
       }
     }
   }
@@ -391,13 +347,6 @@ void CSceneNodeModel::SlotNameChanged(const QString& sName)
       m_spScene->m_rwLock.unlock();
 
       SlotNameChangedImpl(sSceneNameAfterChange);
-      m_sSceneName = sSceneNameAfterChange;
-
-      if (nullptr != UndoStack() && !m_bIsInUndoOperation)
-      {
-        QJsonObject newState = save();
-        UndoStack()->push(new CCommandNodeEdited(m_pScene, m_id, oldState, newState));
-      }
     }
   }
 }
@@ -429,14 +378,6 @@ void CSceneNodeModel::SlotLayoutChanged(const QString& sName)
       {
         SlotLayoutChangedImpl(sName);
         emit spDbManager->SignalSceneDataChanged(iProjId, iSceneId);
-      }
-
-      m_sLayout = sName;
-
-      if (nullptr != UndoStack() && !m_bIsInUndoOperation)
-      {
-        QJsonObject newState = save();
-        UndoStack()->push(new CCommandNodeEdited(m_pScene, m_id, oldState, newState));
       }
     }
   }
@@ -470,14 +411,6 @@ void CSceneNodeModel::SlotScriptChanged(const QString& sName)
         SlotScriptChangedImpl(sName);
         emit spDbManager->SignalSceneDataChanged(iProjId, iSceneId);
       }
-
-      m_sScript = sName;
-
-      if (nullptr != UndoStack() && !m_bIsInUndoOperation)
-      {
-        QJsonObject newState = save();
-        UndoStack()->push(new CCommandNodeEdited(m_pScene, m_id, oldState, newState));
-      }
     }
   }
 }
@@ -496,10 +429,6 @@ void CSceneNodeModel::SlotSceneDataChanged(qint32 iProjId, qint32 iSceneId)
 
   if (iProjId == ProjectId() && iSceneId == iId)
   {
-    m_sLayout = sLayout;
-    m_sScript = sScript;
-    m_sTitle = sTitle;
-    m_bCanStartHere = bCanStartHere;
     SlotCanStartHereChangedImpl(bCanStartHere);
     SlotLayoutChangedImpl(sLayout);
     SlotScriptChangedImpl(sScript);
@@ -628,16 +557,43 @@ void CSceneNodeModel::SlotTitleResourceChanged(const QString& sOld, const QStrin
         SlotTitleResourceChangedImpl(sOld, sNew);
         emit spDbManager->SignalSceneDataChanged(iProjId, iSceneId);
       }
-
-      m_sTitle = sNew;
-
-      if (nullptr != UndoStack() && !m_bIsInUndoOperation)
-      {
-        QJsonObject newState = save();
-        UndoStack()->push(new CCommandNodeEdited(m_pScene, m_id, oldState, newState));
-      }
     }
   }
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CSceneNodeModel::SlotCanStartHereChangedImpl(bool bValue)
+{
+  m_bCanStartHere = bValue;
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CSceneNodeModel::SlotNameChangedImpl(const QString& sName)
+{
+  m_sSceneName = sName;
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CSceneNodeModel::SlotLayoutChangedImpl(const QString& sName)
+{
+  m_sLayout = sName;
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CSceneNodeModel::SlotScriptChangedImpl(const QString& sName)
+{
+  m_sScript = sName;
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CSceneNodeModel::SlotTitleResourceChangedImpl(const QString& sOld, const QString& sNew)
+{
+  m_sTitle = sNew;
 }
 
 //----------------------------------------------------------------------------------------
@@ -724,16 +680,6 @@ QWidget* CSceneNodeModelWithWidget::embeddedWidget()
 
 //----------------------------------------------------------------------------------------
 //
-void CSceneNodeModelWithWidget::OnUndoStackSet()
-{
-  if (nullptr != m_pWidget)
-  {
-    m_pWidget->SetUndoStack(m_pUndoStack);
-  }
-}
-
-//----------------------------------------------------------------------------------------
-//
 void CSceneNodeModelWithWidget::ProjectSetImpl()
 {
   if (nullptr != m_pWidget)
@@ -756,6 +702,8 @@ void CSceneNodeModelWithWidget::ResourceItemModelSetImpl(QAbstractItemModel* pMo
 //
 void CSceneNodeModelWithWidget::SlotCanStartHereChangedImpl(bool bValue)
 {
+  CSceneNodeModel::SlotCanStartHereChangedImpl(bValue);
+
   if (nullptr != m_pWidget)
   {
     m_pWidget->SetCanStartHere(bValue);
@@ -766,6 +714,8 @@ void CSceneNodeModelWithWidget::SlotCanStartHereChangedImpl(bool bValue)
 //
 void CSceneNodeModelWithWidget::SlotNameChangedImpl(const QString& sName)
 {
+  CSceneNodeModel::SlotNameChangedImpl(sName);
+
   if (nullptr != m_pWidget)
   {
     m_pWidget->SetName(sName);
@@ -776,6 +726,8 @@ void CSceneNodeModelWithWidget::SlotNameChangedImpl(const QString& sName)
 //
 void CSceneNodeModelWithWidget::SlotLayoutChangedImpl(const QString& sName)
 {
+  CSceneNodeModel::SlotLayoutChangedImpl(sName);
+
   if (nullptr != m_pWidget)
   {
     m_pWidget->SetLayout(sName);
@@ -786,6 +738,8 @@ void CSceneNodeModelWithWidget::SlotLayoutChangedImpl(const QString& sName)
 //
 void CSceneNodeModelWithWidget::SlotScriptChangedImpl(const QString& sName)
 {
+  CSceneNodeModel::SlotScriptChangedImpl(sName);
+
   if (nullptr != m_pWidget)
   {
     m_pWidget->SetScript(sName);
@@ -866,8 +820,11 @@ void CSceneNodeModelWithWidget::SlotResourceRemovedImpl(const QString& sName,
 
 //----------------------------------------------------------------------------------------
 //
-void CSceneNodeModelWithWidget::SlotTitleResourceChangedImpl(const QString&, const QString& sNew)
+void CSceneNodeModelWithWidget::SlotTitleResourceChangedImpl(const QString& sOld,
+                                                             const QString& sNew)
 {
+  CSceneNodeModel::SlotTitleResourceChangedImpl(sOld, sNew);
+
   if (nullptr != m_pWidget)
   {
     m_pWidget->SetTileResource(sNew);

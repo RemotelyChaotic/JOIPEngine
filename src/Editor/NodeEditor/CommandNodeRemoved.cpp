@@ -1,7 +1,9 @@
 #include "CommandNodeRemoved.h"
-#include "FlowScene.h"
-#include "FlowView.h"
+#include "NodeEditorFlowScene.h"
+#include "NodeEditorFlowView.h"
+
 #include "Editor/EditorCommandIds.h"
+
 #include <nodes/Node>
 
 CCommandNodesRemoved::CCommandNodesRemoved(QPointer<CFlowView> pFlowView,
@@ -33,11 +35,13 @@ void CCommandNodesRemoved::undo()
 
       if (m_nodesSaved.end() != it)
       {
-        m_pScene->SetUndoOperationInProgress(true);
-        auto& node = m_pScene->restoreNode(it->second);
-        m_pScene->SetUndoOperationInProgress(false);
-
-        node.nodeGraphicsObject().setSelected(true);
+        if (auto pScene = dynamic_cast<CNodeEditorFlowScene*>(m_pScene.data()))
+        {
+          pScene->SetUndoOperationInProgress(true);
+          auto& node = m_pScene->restoreNode(it->second);
+          pScene->SetUndoOperationInProgress(false);
+          node.nodeGraphicsObject().setSelected(true);
+        }
       }
     }
   }

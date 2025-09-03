@@ -7,24 +7,27 @@
 
 #include "EditorJobs/IEditorJobStateListener.h"
 
-#include "NodeEditor/EndNodeModel.h"
-#include "NodeEditor/FlowScene.h"
-#include "NodeEditor/PathMergerModel.h"
-#include "NodeEditor/PathSplitterModel.h"
-#include "NodeEditor/NodeEditorRegistry.h"
-#include "NodeEditor/NodeGraphicsObjectProvider.h"
-#include "NodeEditor/SceneNodeModel.h"
-#include "NodeEditor/SceneTranstitionData.h"
-#include "NodeEditor/StartNodeModel.h"
+#include "Editor/NodeEditor/NodeEditorFlowScene.h"
+#include "Editor/NodeEditor/UndoPathSplitterModel.h"
+#include "Editor/NodeEditor/NodeEditorRegistry.h"
+#include "Editor/NodeEditor/UndoSceneNodeModel.h"
 
 #include "Script/ScriptCompleterFileProcessors.h"
 #include "Script/ScriptEditorCompleterModel.h"
 
 #include "Project/KinkTreeModel.h"
+
 #include "Resources/ResourceTreeItemModel.h"
+
 #include "Systems/DatabaseManager.h"
+#include "Systems/Nodes/EndNodeModel.h"
+#include "Systems/Nodes/NodeGraphicsObjectProvider.h"
+#include "Systems/Nodes/PathMergerModel.h"
+#include "Systems/Nodes/SceneTranstitionData.h"
+#include "Systems/Nodes/StartNodeModel.h"
 #include "Systems/PhysFs/PhysFsFileEngine.h"
 #include "Systems/Project.h"
+
 #include "Tutorial/ITutorialStateSwitchHandler.h"
 
 #include <nodes/ConnectionStyle>
@@ -48,7 +51,7 @@ CEditorModel::CEditorModel(QWidget* pParent) :
   m_spKinkTreeModel(std::make_unique<CKinkTreeModel>()),
   m_spEditableFileModel(std::make_unique<CEditorEditableFileModel>(pParent)),
   m_spEditorCompleterModel(std::make_unique<CScriptEditorCompleterModel>(pParent)),
-  m_spFlowSceneModel(std::make_unique<CFlowScene>(
+  m_spFlowSceneModel(std::make_unique<CNodeEditorFlowScene>(
           CNodeEditorRegistry::RegisterDataModels(),
           std::make_shared<CDefaultGraphicsObjectProvider>(),
           nullptr)),
@@ -118,7 +121,7 @@ const tspProject& CEditorModel::CurrentProject() const
 
 //----------------------------------------------------------------------------------------
 //
-CFlowScene* CEditorModel::FlowSceneModel() const
+CNodeEditorFlowScene* CEditorModel::FlowSceneModel() const
 {
   return m_spFlowSceneModel.get();
 }

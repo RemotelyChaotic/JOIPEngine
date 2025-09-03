@@ -22,13 +22,11 @@ public:
   ~CFlowView() override;
 
   void SetScene(CFlowScene* pScene);
+  virtual void SetSceneImpl(CFlowScene* pScene) {}
   CFlowScene* Scene();
 
-  void SetUndoStack(QPointer<QUndoStack> pUndoStack);
-  QPointer<QUndoStack> UndoStack();
-
   void FitAllNodesInView();
-  void OpenContextMenuAt(const QPoint& localPoint, const QPoint& createPoint = QPoint());
+  virtual void OpenContextMenuAt(const QPoint& localPoint, const QPoint& createPoint = QPoint());
 
   bool IsReadOnly();
   void SetReadOnly(bool bReadOnly);
@@ -36,18 +34,17 @@ public:
   void SetModelHiddenInContextMenu(const QString& sId, bool bHidden);
   bool IsModelHiddenInContextMenu(const QString& sId);
 
-protected:
-  void SlotClearSelectionTriggered();
-  void SlotDeleteTriggered();
+protected slots:
+  virtual void SlotClearSelectionTriggered();
+  virtual void SlotDeleteTriggered();
 
 protected:
   void contextMenuEvent(QContextMenuEvent* pEvent) override;
-  void keyPressEvent(QKeyEvent *event) override;
 
-private:
+  virtual void NodeAboutToBeCreated(const QString& modelName, const QPoint& createPoint){}
+
   bool                     m_bReadOnly;
   std::map<QString, bool>  m_contextMenuItemVisibility;
-  QPointer<QUndoStack>     m_pUndoStack;
 };
 
 #endif // FLOWVIEW_H

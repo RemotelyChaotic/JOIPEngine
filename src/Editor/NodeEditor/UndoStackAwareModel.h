@@ -1,10 +1,12 @@
 #ifndef IUNDOSTACKAWAREMODEL_H
 #define IUNDOSTACKAWAREMODEL_H
 
+#include "Systems/Nodes/NodeModelBase.h"
+
 #include <QPointer>
 #include <QUndoStack>
 
-class IUndoStackAwareModel
+class CUndoStackAwareModel
 {
 public:
   void SetUndoStack(QPointer<QUndoStack> pUndostack)
@@ -14,10 +16,16 @@ public:
   }
   QPointer<QUndoStack> UndoStack() { return m_pUndoStack; }
 
-  virtual void UndoRestore(const QJsonObject&) {}
+  virtual void UndoRestore(const QJsonObject& obj)
+  {
+    if (auto pNModel = dynamic_cast<CNodeModelBase*>(this))
+    {
+      pNModel->restore(obj);
+    }
+  }
 
 protected:
-  virtual ~IUndoStackAwareModel() {}
+  virtual ~CUndoStackAwareModel() {}
   virtual void OnUndoStackSet() {}
 
   QPointer<QUndoStack> m_pUndoStack = nullptr;

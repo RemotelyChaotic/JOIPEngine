@@ -1,7 +1,7 @@
 #ifndef STARTNODEMODEL_H
 #define STARTNODEMODEL_H
 
-#include "EditorNodeModelBase.h"
+#include "NodeModelBase.h"
 
 class CSceneTranstitionData;
 
@@ -11,9 +11,10 @@ using QtNodes::NodeData;
 using QtNodes::NodeDataType;
 using QtNodes::NodeValidationState;
 
-class CStartNodeModel : public CEditorNodeModelBase
+class CStartNodeModel : public CNodeModelBase
 {
   Q_OBJECT
+
 public:
   CStartNodeModel();
   ~CStartNodeModel() override {}

@@ -3,8 +3,8 @@
 
 #include "Editor/EditorActionBar.h"
 #include "Editor/EditorModel.h"
-#include "Editor/NodeEditor/FlowScene.h"
-#include "Editor/NodeEditor/FlowView.h"
+#include "Editor/NodeEditor/NodeEditorFlowView.h"
+#include "Editor/NodeEditor/NodeEditorFlowScene.h"
 #include "Editor/Tutorial/SceneNodeWidgetTutorialStateSwitchHandler.h"
 
 #include "Systems/HelpFactory.h"
@@ -148,7 +148,7 @@ CEditorSceneNodeWidget::CEditorSceneNodeWidget(QWidget* pParent) :
 {
   m_spUi->setupUi(this);
 
-  m_pFlowView = new CFlowView(this);
+  m_pFlowView = new CNodeEditorFlowView(this);
   m_pFlowView->setObjectName("FlowView");
   m_pFlowView->setWindowTitle("Node-based flow editor");
   m_pFlowView->show();

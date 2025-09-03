@@ -14,7 +14,7 @@
 #include <vector>
 
 class CDatabaseManager;
-class CFlowScene;
+class CNodeEditorFlowScene;
 class CDialogueEditorTreeModel;
 class CEditorJobWorker;
 class CKinkTreeModel;
@@ -43,7 +43,7 @@ public:
   ~CEditorModel();
 
   const tspProject& CurrentProject() const;
-  CFlowScene* FlowSceneModel() const;
+  CNodeEditorFlowScene* FlowSceneModel() const;
   bool IsReadOnly() const;
   CDialogueEditorTreeModel* DialogueModel() const;
   CEditorJobWorker* JobWorker() const;
@@ -100,7 +100,7 @@ private:
   std::unique_ptr<CKinkTreeModel>                             m_spKinkTreeModel;
   std::unique_ptr<CEditorEditableFileModel>                   m_spEditableFileModel;
   std::unique_ptr<CScriptEditorCompleterModel>                m_spEditorCompleterModel;
-  std::unique_ptr<CFlowScene>                                 m_spFlowSceneModel;
+  std::unique_ptr<CNodeEditorFlowScene>                       m_spFlowSceneModel;
   std::unique_ptr<QUndoStack>                                 m_spUndoStack;
   std::unique_ptr<CResourceTreeItemModel>                     m_spResourceTreeModel;
   std::shared_ptr<CSettings>                                  m_spSettings;

@@ -1,8 +1,10 @@
 #include "CommandNodeMoved.h"
-#include "FlowView.h"
-#include "FlowScene.h"
+#include "NodeEditorFlowView.h"
+#include "NodeEditorFlowScene.h"
+
 #include "Editor/EditorCommandIds.h"
 #include "Editor/EditorWidgetTypes.h"
+
 #include <nodes/Node>
 
 CCommandNodeMoved::CCommandNodeMoved(QPointer<CFlowView> pFlowView,
@@ -77,9 +79,12 @@ void CCommandNodeMoved::DoUndoRedo(const QPointF& point)
 
     if (nodes.end() != it && nullptr != it->second)
     {
-      it->second->nodeGraphicsObject().setProperty(editor::c_sPropertyOldValue, point);
-      CSceneUndoOperationLocker locker(m_pScene);
-      it->second->nodeGraphicsObject().setPos(point);
+      if (auto pScene = dynamic_cast<CNodeEditorFlowScene*>(m_pScene.data()))
+      {
+        it->second->nodeGraphicsObject().setProperty(editor::c_sPropertyOldValue, point);
+        CSceneUndoOperationLocker locker(pScene);
+        it->second->nodeGraphicsObject().setPos(point);
+      }
     }
   }
 }

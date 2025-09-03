@@ -1,8 +1,6 @@
 #ifndef PATHSPLITTERMODELWIDGET_H
 #define PATHSPLITTERMODELWIDGET_H
 
-#include "IUndoStackAwareModel.h"
-
 #include "Systems/Project.h"
 
 #include <nodes/Node>
@@ -17,7 +15,7 @@ namespace Ui {
 
 using QtNodes::PortIndex;
 
-class CPathSplitterModelWidget : public QWidget, public IUndoStackAwareModel
+class CPathSplitterModelWidget : public QWidget
 {
   Q_OBJECT
 

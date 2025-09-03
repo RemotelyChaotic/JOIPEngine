@@ -10,6 +10,7 @@
 class CDatabaseManager;
 class CFlowScene;
 namespace QtNodes {
+  class DataModelRegistry;
   class Node;
 }
 struct SProject;
@@ -35,7 +36,8 @@ class CSceneNodeResolver : public QObject
   Q_OBJECT
 
 public:
-  explicit CSceneNodeResolver(QObject* pParent = nullptr);
+  explicit CSceneNodeResolver(std::shared_ptr<QtNodes::DataModelRegistry> spRegistry,
+                              QObject* pParent = nullptr);
   ~CSceneNodeResolver();
 
   static bool MightBeRegexScene(const QString& sName);
@@ -69,16 +71,17 @@ private slots:
   void SlotNodeCreated(QtNodes::Node &n);
 
 private:
-  tspProject                        m_spCurrentProject;
-  tspScene                          m_spCurrentScene;
-  tspScene                          m_spInjectedScene;
-  std::weak_ptr<CDatabaseManager>   m_wpDbManager;
-  std::vector<NodeResolveReslt>     m_resolveResult;
-  std::map<QString, QtNodes::Node*> m_nodeMap;
-  std::set<QString>                 m_disabledScenes;
-  CFlowScene*                       m_pFlowScene;
-  QtNodes::Node*                    m_pCurrentNode;
-  std::mt19937                      m_generator;
+  std::shared_ptr<QtNodes::DataModelRegistry> m_spNodeModelRegistry;
+  tspProject                                  m_spCurrentProject;
+  tspScene                                    m_spCurrentScene;
+  tspScene                                    m_spInjectedScene;
+  std::weak_ptr<CDatabaseManager>             m_wpDbManager;
+  std::vector<NodeResolveReslt>               m_resolveResult;
+  std::map<QString, QtNodes::Node*>           m_nodeMap;
+  std::set<QString>                           m_disabledScenes;
+  CFlowScene*                                 m_pFlowScene;
+  QtNodes::Node*                              m_pCurrentNode;
+  std::mt19937                                m_generator;
 };
 
 #endif // PROJECTRUNNER_H

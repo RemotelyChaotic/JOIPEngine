@@ -1,7 +1,8 @@
 #ifndef PATHMERGERMODEL_H
 #define PATHMERGERMODEL_H
 
-#include "EditorNodeModelBase.h"
+#include "NodeModelBase.h"
+
 #include <nodes/NodeDataModel>
 #include <map>
 
@@ -13,7 +14,7 @@ using QtNodes::NodeData;
 using QtNodes::NodeDataType;
 using QtNodes::NodeValidationState;
 
-class CPathMergerModel : public CEditorNodeModelBase
+class CPathMergerModel : public CNodeModelBase
 {
   Q_OBJECT
 public:

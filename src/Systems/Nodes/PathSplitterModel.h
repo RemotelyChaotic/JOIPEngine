@@ -1,9 +1,11 @@
 #ifndef PATHSPLITTERMODEL_H
 #define PATHSPLITTERMODEL_H
 
-#include "EditorNodeModelBase.h"
+#include "NodeModelBase.h"
+
 #include "Systems/Project.h"
 #include "Systems/Scene.h"
+
 #include <QPointer>
 
 #include <optional>
@@ -18,7 +20,7 @@ using QtNodes::NodeData;
 using QtNodes::NodeDataType;
 using QtNodes::NodeValidationState;
 
-class CPathSplitterModel : public CEditorNodeModelBase
+class CPathSplitterModel : public CNodeModelBase
 {
   Q_OBJECT
 
@@ -42,7 +44,6 @@ public:
 
   QJsonObject save() const override;
   void restore(QJsonObject const& p) override;
-  void UndoRestore(QJsonObject const& p) override;
 
   unsigned int nPorts(PortType portType) const override;
   NodeDataType dataType(PortType portType, PortIndex portIndex) const override;
@@ -67,7 +68,9 @@ protected slots:
 
 protected:
   virtual void OnProjectSetImpl() {}
-  virtual void SlotCustomTransitionChangedImpl(bool, const QString&) {}
+  virtual void SlotCustomTransitionChangedImpl(bool, const QString&);
+  virtual void SlotTransitionTypeChangedImpl(qint32 iType);
+  virtual void SlotTransitionLabelChangedImpl(PortIndex index, const QString& sLabelValue);
   virtual void SlotResourceAddedImpl(const QString&, EResourceType) {}
   virtual void SlotResourceRenamedImpl(const QString&, const QString&, EResourceType) {}
   virtual void SlotResourceRemovedImpl(const QString&, EResourceType) {}
@@ -84,7 +87,6 @@ protected:
   ESceneTransitionType             m_transitonType;
   bool                             m_bCustomLayoutEnabled = false;
   QString                          m_sCustomLayout;
-  bool                             m_bIsInUndoOperation = false;
 };
 
 //----------------------------------------------------------------------------------------
@@ -105,7 +107,6 @@ public:
 
 protected:
   void OnProjectSetImpl() override;
-  void OnUndoStackSet() override;
   void SlotCustomTransitionChangedImpl(bool bEnabled, const QString& sResource) override;
   void SlotResourceAddedImpl(const QString& sName, EResourceType type) override;
   void SlotResourceRenamedImpl(const QString& sOldName, const QString& sName, EResourceType type) override;

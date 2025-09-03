@@ -1,7 +1,7 @@
 #ifndef SCENENODEMODEL_H
 #define SCENENODEMODEL_H
 
-#include "EditorNodeModelBase.h"
+#include "NodeModelBase.h"
 #include "Systems/Project.h"
 #include "Systems/Scene.h"
 #include <memory>
@@ -18,7 +18,7 @@ using QtNodes::NodeData;
 using QtNodes::NodeDataType;
 using QtNodes::NodeValidationState;
 
-class CSceneNodeModel : public CEditorNodeModelBase
+class CSceneNodeModel : public CNodeModelBase
 {
   Q_OBJECT
 
@@ -45,7 +45,6 @@ public:
 
   QJsonObject save() const override;
   void restore(QJsonObject const& p) override;
-  void UndoRestore(QJsonObject const& p) override;
 
   unsigned int nPorts(PortType portType) const override;
   NodeDataType dataType(PortType portType,
@@ -80,15 +79,15 @@ protected slots:
 protected:
   virtual void ProjectSetImpl() {}
   virtual void ResourceItemModelSetImpl(QAbstractItemModel* pModel){}
-  virtual void SlotCanStartHereChangedImpl(bool bValue) {}
-  virtual void SlotNameChangedImpl(const QString&) {}
-  virtual void SlotLayoutChangedImpl(const QString&) {}
-  virtual void SlotScriptChangedImpl(const QString&) {}
+  virtual void SlotCanStartHereChangedImpl(bool bValue);
+  virtual void SlotNameChangedImpl(const QString&);
+  virtual void SlotLayoutChangedImpl(const QString&);
+  virtual void SlotScriptChangedImpl(const QString&);
   virtual void SlotSceneRenamedImpl(const QString&) {}
   virtual void SlotResourceAddedImpl(const QString&, EResourceType) {}
   virtual void SlotResourceRenamedImpl(const QString&, const QString&, EResourceType) {}
   virtual void SlotResourceRemovedImpl(const QString&, EResourceType) {}
-  virtual void SlotTitleResourceChangedImpl(const QString& sOld, const QString& sNew) {}
+  virtual void SlotTitleResourceChangedImpl(const QString& sOld, const QString& sNew);
 
   std::weak_ptr<CDatabaseManager>                     m_wpDbManager;
   std::weak_ptr<CSceneTranstitionData>                m_wpInData;
@@ -105,7 +104,6 @@ protected:
   QString             m_sLayout;
   QString             m_sTitle;
   bool                m_bCanStartHere = false;
-  bool                m_bIsInUndoOperation = false;
 };
 
 //----------------------------------------------------------------------------------------
@@ -126,7 +124,6 @@ public:
   QWidget* embeddedWidget() override;
 
 protected:
-  void OnUndoStackSet() override;
   void ProjectSetImpl() override;
   void ResourceItemModelSetImpl(QAbstractItemModel* pModel) override;
   void SlotCanStartHereChangedImpl(bool bValue) override;
