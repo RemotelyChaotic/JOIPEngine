@@ -153,6 +153,8 @@ CEditorSceneNodeWidget::CEditorSceneNodeWidget(QWidget* pParent) :
   m_pFlowView->setWindowTitle("Node-based flow editor");
   m_pFlowView->show();
 
+  m_spUi->pDebugView->hide();
+
   QLayout* pLayout = m_spUi->pContainerWidget->layout();
   pLayout->addWidget(m_pFlowView);
 }
@@ -252,6 +254,7 @@ void CEditorSceneNodeWidget::OnActionBarAboutToChange()
     disconnect(ActionBar()->m_spUi->RemoveNodeButton, &QPushButton::clicked,
             this, &CEditorSceneNodeWidget::SlotRemoveNodeButtonClicked);
 
+    ActionBar()->m_spUi->NextSceneButton->setEnabled(false);
     ActionBar()->m_spUi->AddNodeButton->setEnabled(true);
     ActionBar()->m_spUi->RemoveNodeButton->setEnabled(true);
   }
@@ -265,11 +268,13 @@ void CEditorSceneNodeWidget::OnActionBarChanged()
   if (nullptr != ActionBar())
   {
     ActionBar()->ShowNodeEditorActionBar();
+
     connect(ActionBar()->m_spUi->AddNodeButton, &QPushButton::clicked,
             this, &CEditorSceneNodeWidget::SlotAddSceneButtonClicked);
     connect(ActionBar()->m_spUi->RemoveNodeButton, &QPushButton::clicked,
             this, &CEditorSceneNodeWidget::SlotRemoveNodeButtonClicked);
 
+    ActionBar()->m_spUi->NextSceneButton->setEnabled(false);
     if (EditorModel()->IsReadOnly())
     {
       ActionBar()->m_spUi->AddNodeButton->setEnabled(false);

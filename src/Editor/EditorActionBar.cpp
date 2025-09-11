@@ -332,6 +332,7 @@ void CEditorActionBar::ShowNodeEditorActionBar()
 {
   HideAllBars();
   m_spUi->pSceneNodeEditorContainer->show();
+  m_spUi->pNodeDebugStack->setCurrentIndex(0);
 
   m_iCurrentDisplayType = EEditorWidget::eSceneNodeWidget;
 }
@@ -446,8 +447,11 @@ void CEditorActionBar::SlotKeyBindingsChanged()
     m_spUi->PauseButton->SetShortcut(m_spSettings->keyBinding(sKey.arg(2)));
     m_spUi->StopButton->SetShortcut(m_spSettings->keyBinding(sKey.arg(3)));
 
-    m_spUi->AddNodeButton->SetShortcut(m_spSettings->keyBinding(sKey.arg(1)));
-    m_spUi->RemoveNodeButton->SetShortcut(m_spSettings->keyBinding(sKey.arg(2)));
+    m_spUi->DebugNodeButton->SetShortcut(m_spSettings->keyBinding(sKey.arg(1)));
+    m_spUi->StopDebugNodeButton->SetShortcut(m_spSettings->keyBinding(sKey.arg(2)));
+    m_spUi->NextSceneButton->SetShortcut(m_spSettings->keyBinding(sKey.arg(3)));
+    m_spUi->AddNodeButton->SetShortcut(m_spSettings->keyBinding(sKey.arg(4)));
+    m_spUi->RemoveNodeButton->SetShortcut(m_spSettings->keyBinding(sKey.arg(5)));
 
     m_spUi->DebugButton->SetShortcut(m_spSettings->keyBinding(sKey.arg(1)));
     m_spUi->StopDebugButton->SetShortcut(m_spSettings->keyBinding(sKey.arg(2)));

@@ -334,14 +334,20 @@ QPushButton#AddNotificationCreateCode {
                   url(ui/ButtonNotification.png) on;
 }
 QPushButton#DebugButton,
-QPushButton#DebugLayoutButton {
+QPushButton#DebugLayoutButton,
+QPushButton#DebugNodeButton {
   qproperty-icon: url(ui/ButtonPlay.png) off,
                   url(ui/ButtonPlay.png) on;
 }
 QPushButton#StopDebugButton,
-QPushButton#StopDebugLayoutButton {
+QPushButton#StopDebugLayoutButton,
+QPushButton#StopDebugNodeButton {
   qproperty-icon: url(ui/ButtonStop.png) off,
                   url(ui/ButtonStop.png) on;
+}
+QPushButton#NextSceneButton {
+  qproperty-icon: url(ui/ButtonNextStep.png) off,
+                  url(ui/ButtonNextStep.png) on;
 }
 QPushButton#PauseButton {
   qproperty-icon: url(ui/ButtonPause.png) off,

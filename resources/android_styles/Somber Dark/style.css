@@ -352,7 +352,8 @@ QPushButton#AddNotificationCreateCode {
                   url(ui/ButtonNotification.png) on;
 }
 QPushButton#DebugButton,
-QPushButton#DebugLayoutButton {
+QPushButton#DebugLayoutButton,
+QPushButton#DebugNodeButton {
   border-image: url(ui/IconBg.svg) 0 0 0 0 stretch stretch;
   border-top: 0 transparent;
   border-bottom: 0 transparent;
@@ -362,7 +363,8 @@ QPushButton#DebugLayoutButton {
                   url(ui/ButtonPlay.png) on;
 }
 QPushButton#StopDebugButton,
-QPushButton#StopDebugLayoutButton {
+QPushButton#StopDebugLayoutButton,
+QPushButton#StopDebugNodeButton {
   border-image: url(ui/IconBg.svg) 0 0 0 0 stretch stretch;
   border-top: 0 transparent;
   border-bottom: 0 transparent;
@@ -370,6 +372,15 @@ QPushButton#StopDebugLayoutButton {
   border-left: 0 transparent;
   qproperty-icon: url(ui/ButtonStop.png) off,
                   url(ui/ButtonStop.png) on;
+}
+QPushButton#NextSceneButton {
+  border-image: url(ui/IconBg.svg) 0 0 0 0 stretch stretch;
+  border-top: 0 transparent;
+  border-bottom: 0 transparent;
+  border-right: 0 transparent;
+  border-left: 0 transparent;
+  qproperty-icon: url(ui/ButtonNextStep.png) off,
+                  url(ui/ButtonNextStep.png) on;
 }
 QPushButton#PauseButton {
   border-image: url(IconBg.svg) 0 0 0 0 stretch stretch;
@@ -965,6 +976,9 @@ QPushButton#DebugButton:hover,
 QPushButton#StopDebugButton:hover,
 QPushButton#DebugLayoutButton:hover,
 QPushButton#StopDebugLayoutButton:hover,
+QPushButton#DebugNodeButton:hover,
+QPushButton#StopDebugNodeButton:hover,
+QPushButton#NextSceneButton:hover,
 QPushButton#PauseButton:hover,
 QPushButton#PlayButton:hover,
 QPushButton#StopButton:hover,
@@ -1057,6 +1071,9 @@ QPushButton#DebugButton:pressed,
 QPushButton#StopDebugButton:pressed,
 QPushButton#DebugLayoutButton:pressed,
 QPushButton#StopDebugLayoutButton:pressed,
+QPushButton#DebugNodeButton:pressed,
+QPushButton#StopDebugNodeButton:pressed,
+QPushButton#NextSceneButton:pressed,
 QPushButton#PauseButton:pressed,
 QPushButton#PlayButton:pressed,
 QPushButton#StopButton:pressed,
@@ -1149,6 +1166,9 @@ QPushButton#DebugButton:disabled,
 QPushButton#StopDebugButton:disabled,
 QPushButton#DebugLayoutButton:disabled,
 QPushButton#StopDebugLayoutButton:disabled,
+QPushButton#DebugNodeButton:disabled,
+QPushButton#StopDebugNodeButton:disabled,
+QPushButton#NextSceneButton:disabled,
 QPushButton#PauseButton:disabled,
 QPushButton#PlayButton:disabled,
 QPushButton#StopButton:disabled,

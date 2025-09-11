@@ -349,14 +349,20 @@ QPushButton#AddNotificationCreateCode {
                   url(:/resources/style/img/ButtonNotification.png) on;
 }
 QPushButton#DebugButton,
-QPushButton#DebugLayoutButton {
+QPushButton#DebugLayoutButton,
+QPushButton#DebugNodeButton {
   qproperty-icon: url(:/resources/style/img/ButtonPlay.png) off,
                   url(:/resources/style/img/ButtonPlay.png) on;
 }
 QPushButton#StopDebugButton,
-QPushButton#StopDebugLayoutButton {
+QPushButton#StopDebugLayoutButton,
+QPushButton#StopDebugNodeButton {
   qproperty-icon: url(:/resources/style/img/ButtonStop.png) off,
                   url(:/resources/style/img/ButtonStop.png) on;
+}
+QPushButton#NextSceneButton {
+  qproperty-icon: url(:/resources/style/img/ButtonNextStep.png) off,
+                  url(:/resources/style/img/ButtonNextStep.png) on;
 }
 QPushButton#PauseButton {
   qproperty-icon: url(:/resources/style/img/ButtonPause.png) off,

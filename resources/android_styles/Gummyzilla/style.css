@@ -380,7 +380,8 @@ QPushButton#AddNotificationCreateCode:disabled {
   image: url(ui/ButtonNotificationSelected.png);
 }
 QPushButton#DebugButton,
-QPushButton#DebugLayoutButton {
+QPushButton#DebugLayoutButton,
+QPushButton#DebugNodeButton {
   image: url(ui/ButtonPlay.png);
 }
 QPushButton#DebugButton:hover,
@@ -388,11 +389,15 @@ QPushButton#DebugButton:pressed,
 QPushButton#DebugButton:disabled,
 QPushButton#DebugLayoutButton:hover,
 QPushButton#DebugLayoutButton:pressed,
-QPushButton#DebugLayoutButton:disabled {
+QPushButton#DebugLayoutButton:disabled,
+QPushButton#DebugNodeButton:hover,
+QPushButton#DebugNodeButton:pressed,
+QPushButton#DebugNodeButton:disabled {
   image: url(ui/ButtonPlaySelected.png);
 }
 QPushButton#StopDebugButton,
-QPushButton#StopDebugLayoutButton {
+QPushButton#StopDebugLayoutButton,
+QPushButton#StopDebugNodeButton {
   image: url(ui/ButtonStop.png);
 }
 QPushButton#StopDebugButton:hover,
@@ -400,8 +405,19 @@ QPushButton#StopDebugButton:pressed,
 QPushButton#StopDebugButton:disabled,
 QPushButton#StopDebugLayoutButton:hover,
 QPushButton#StopDebugLayoutButton:pressed,
-QPushButton#StopDebugLayoutButton:disabled {
+QPushButton#StopDebugLayoutButton:disabled,
+QPushButton#StopDebugNodeButton:hover,
+QPushButton#StopDebugNodeButton:pressed,
+QPushButton#StopDebugNodeButton:disabled {
   image: url(ui/ButtonStopSelected.png);
+}
+QPushButton#NextSceneButton {
+  image: url(ui/ButtonNextStep.png);
+}
+QPushButton#NextSceneButton:hover,
+QPushButton#NextSceneButton:pressed,
+QPushButton#NextSceneButton:disabled {
+  image: url(ui/ButtonNextStepSelected.png);
 }
 QPushButton#PauseButton {
   image: url(ui/ButtonPause.png);
