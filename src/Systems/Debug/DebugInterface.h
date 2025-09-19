@@ -21,8 +21,8 @@ public:
 private:
   void DeleteEngine();
 
-  QPointer<QJSEngine> m_spEngine;
-  std::map<QString, QPointer<QObject>> m_registeredObjects;
+  QPointer<QJSEngine> m_spOwnEngine;
+  std::map<QString, std::pair<QPointer<QJSEngine>, QPointer<QObject>>> m_registeredObjects;
 };
 
 #endif // CDEBUGINTERFACE_H
