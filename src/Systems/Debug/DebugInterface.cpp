@@ -1,6 +1,7 @@
 #include "DebugInterface.h"
 
 #include <QDebug>
+#include <QQmlEngine>
 
 CDebugInterface::CDebugInterface(QObject* pParent) :
     QObject{pParent},
@@ -34,6 +35,7 @@ void CDebugInterface::Register(const QString& objectName, QObject* pObj)
   if (nullptr != m_spEngine)
   {
     QJSValue wrapped = m_spEngine->newQObject(pObj);
+    QQmlEngine::setObjectOwnership(pObj, QQmlEngine::CppOwnership);
     m_spEngine->globalObject().setProperty(objectName, wrapped);
   }
 }
@@ -86,6 +88,13 @@ void CDebugInterface::DeleteEngine()
   if (nullptr != m_spEngine)
   {
     m_spEngine->collectGarbage();
+
+    // reset objects
+    for (const auto& [objectName, _] : m_registeredObjects)
+    {
+      m_spEngine->globalObject().setProperty(objectName, QJSValue(QJSValue::UndefinedValue));
+    }
+
     m_spEngine->setInterrupted(true);
     delete m_spEngine;
   }
