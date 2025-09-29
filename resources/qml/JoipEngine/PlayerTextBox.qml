@@ -235,7 +235,7 @@ Rectangle {
         },
         showText: function(sText)
         {
-            signalEmitter.showText(sText, -1);
+            signalEmitter.showText(sText, -1, "");
         },
         setPortrait: function(sName)
         {
