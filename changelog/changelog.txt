@@ -1,4 +1,11 @@
 =================
+Version 1.5.1.0
+=================
+
+Fixed Bugs:
+- Fixed a bug calling showText in the EvalRunner not workng.
+
+=================
 Version 1.5.0.0
 =================
 
