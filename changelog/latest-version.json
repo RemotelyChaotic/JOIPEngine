@@ -1,27 +1,10 @@
 {
-  "latestVersion": "1.5.0",
-  "latestVersionCode": 66816,
+  "latestVersion": "1.5.1",
+  "latestVersionCode": 66566,
   "latestUpdaterVersion": "1.0.0",
   "latestUpdaterVersionCode": 65536,
   "url": "https://github.com/RemotelyChaotic/JOIPEngine/releases/download",
   "releaseNotes": [
-    "- Dialog editor and PlayerTextBox functions to support Dialogs has been added.",
-	"- Achievement and Save systems implemented",
-	"- New button in Layout to hide the UI of the player.",
-	"- Asynch scripts now instantiate a variable project by default. Similar to how Scene Scripts instantiate scene to access data in the project.",
-	"- Editor icons visible in the drop-down menu.",
-	"- PlayerTextBox.showText has an optional 4th argument that is the name of a Sound resource or a reference to a Resource object. If given it will play the Resource, as well as show the text.",
-	"- Player buttons have a tooltip.",
-	"- The first argument of PlayerTextBox showInput if now the default value. If you save an older project in 1.5.0+ make sure to check showInput uses if you used the old first parameter and change to showInput('', ...). Old Projects that aren't saved in 1.5.0+ continue to work as they did before.",
-	"- Missing Resources show a warning in the Resource Tree.",
-	"- Project name checks for new Projects update while typing.",
-	"- Rcc is now a library and not a separate executable, meaning bundles do not require an additional process to be started, making it work on Android.",
-	"- JS imports work even when the files are in different directories.",
-	"- QML Warnings fixed when calling showButtonPrompts.",
-	"- Fixed html text width calculation in the PlayerTextBox.",
-	"- New Projects show up in the Poject list again.",
-	"- The Default Layout is shown and set when a new Project is created.",
-	"- Fixed Project lookup for newly created Projects.",
-	"- Fixed naming clash handling of Projects."
+    "- Fixed a bug calling showText in the EvalRunner not workng."
   ]
 }
