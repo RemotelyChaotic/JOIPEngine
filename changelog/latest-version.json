@@ -1,31 +1,10 @@
 {
-  "latestVersion": "1.4.5",
-  "latestVersionCode": 66565,
+  "latestVersion": "1.5.1",
+  "latestVersionCode": 66566,
   "latestUpdaterVersion": "1.0.0",
   "latestUpdaterVersionCode": 65536,
   "url": "https://github.com/RemotelyChaotic/JOIPEngine/releases/download",
   "releaseNotes": [
-    "- PlayerMetronome: setBeatResource accepts now an array of Sound Resources.",
-	"- Metronomes can now use a set of Sound Resoures to play instead of only a single one.",
-	"- Custom Metronome SFX with multiple sound files can be registered.",
-	"- New Settings: Default device commands, Size of PlayerMetronome, Hide timeout of PlayerTextBox.",
-	"- Keyboard shortcuts of PlayerNotification can be oerriden via setShortcut.",
-	"- Added a new default SFX to the Metronome: Lub-Dub.",
-	"- Project preview shows the project name instead of 404 if no Title Card is set.",
-	"- Project name is displayed in the Project Card details above the describtion.",
-	"- Buttons in the Player now show the shortcut needed to activate them.",
-	"- Linux builds are now supprted with gcc.",
-	"- Fixed a crash occurring when stopping a debug session mid Scene transition.",
-	"- Fixed a UI bug causing colors of buttons in button prompts being ignored.",
-	"- Fixed buttons always being rendered as html when comming from EOS scripts.",
-	"- Fixed SceneManager (pages) function: isEnabled in eval expressions.",
-    "- Fixed resolving of Scenes when a Layout contains disabled Scenes after a random Splitter Node.",
-	"- Fixed PlayerSceneManager gotoScene not blocking the execution as intended until the scene changes.",
-    "- Fixed the border in the player.",
-    "- Fixed a crash when killing running threads that are stuck in a wait.",
-	"- Fixed threads not interrupting correctly when waiting in a sleep.",
-	"- Fixed folders in the Resource Views not showing up on top in some cases.",
-	"- Fixed a focus issue in the player. Buttons should now not steal the focus anymore.",
-	"- Fixed nummerous help issues and missing help pages."
+    "- Fixed a bug calling showText in the EvalRunner not workng."
   ]
 }
