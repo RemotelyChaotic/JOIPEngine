@@ -6,6 +6,7 @@
 #include <optional>
 #include <random>
 #include <set>
+#include <variant>
 
 class CDatabaseManager;
 class CFlowScene;
@@ -42,8 +43,9 @@ public:
 
   static bool MightBeRegexScene(const QString& sName);
 
-  void LoadProject(tspProject spProject, const QString sStartScene);
-  void LoadProject(tspProject spProject, tspScene spStartScene);
+  void LoadProject(tspProject spProject, const QUuid& nodeId);
+  void LoadProject(tspProject spProject, const QString& sStartScene);
+  void LoadProject(tspProject spProject, const tspScene& spStartScene);
   void UnloadProject();
 
   tspScene CurrentScene() const;
@@ -62,10 +64,10 @@ signals:
 
 private:
   bool GenerateNodesFromResolved();
-  bool Setup(tspProject spProject, const QString sStartScene);
+  bool Setup(tspProject spProject, const std::variant<QString, QUuid>& start);
   bool LoadFlowScene();
   bool ResolveNextScene();
-  bool ResolveStart(const QString sStartScene);
+  bool ResolveStart(const std::variant<QString, QUuid>& start);
 
 private slots:
   void SlotNodeCreated(QtNodes::Node &n);

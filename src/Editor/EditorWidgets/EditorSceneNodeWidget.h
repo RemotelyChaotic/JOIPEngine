@@ -65,6 +65,9 @@ protected:
   CNodeEditorFlowView* FlowView() { return m_pFlowView; }
 
 protected slots:
+  void SlotStartDebugClicked();
+  void SlotStopDebugClicked();
+  void SlotNextSceneClicked();
   void SlotAddSceneButtonClicked();
   void SlotRemoveNodeButtonClicked();
   void SlotStyleChanged();

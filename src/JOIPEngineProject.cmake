@@ -165,6 +165,9 @@ macro(CreateJOIPProject JOIP_PROJECT_NAME)
     ${JOIPSources}/Editor/NodeEditor/CommandNodeMoved.h
     ${JOIPSources}/Editor/NodeEditor/CommandNodeRemoved.cpp
     ${JOIPSources}/Editor/NodeEditor/CommandNodeRemoved.h
+    ${JOIPSources}/Editor/NodeEditor/NodeDebugWidget.cpp
+    ${JOIPSources}/Editor/NodeEditor/NodeDebugWidget.h
+    ${JOIPSources}/Editor/NodeEditor/NodeDebugWidget.ui
     ${JOIPSources}/Editor/NodeEditor/NodeEditorFlowScene.cpp
     ${JOIPSources}/Editor/NodeEditor/NodeEditorFlowScene.h
     ${JOIPSources}/Editor/NodeEditor/NodeEditorFlowView.cpp

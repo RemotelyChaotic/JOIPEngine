@@ -1363,7 +1363,7 @@ CScriptEditorWidget {
 CEditorSceneNodeWidget {
   background: transparent;
   qproperty-normalBoundaryColor: rgb(52, 69, 97);
-  qproperty-selectedBoundaryColor: rgb(52, 69, 97);
+  qproperty-selectedBoundaryColor: rgb(72, 141, 230);
   qproperty-gradientColor0: rgb(36, 52, 77);
   qproperty-gradientColor1: rgb(36, 52, 77);
   qproperty-gradientColor2: rgb(36, 52, 77);
@@ -1379,6 +1379,10 @@ CEditorSceneNodeWidget {
   qproperty-selectedConnectionColor: rgb(50, 97, 159);
   qproperty-selectedConnectionHaloColor: rgb(52, 69, 97);
   qproperty-hoveredConnectionColor: rgb(72, 141, 230);
+}
+
+CNodeDebugWidget {
+  qproperty-backgroundColor: rgb(52, 52, 52);
 }
 
 CEditorActionBar {

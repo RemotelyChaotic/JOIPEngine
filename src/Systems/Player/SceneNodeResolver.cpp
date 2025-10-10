@@ -292,7 +292,37 @@ bool CSceneNodeResolver::MightBeRegexScene(const QString& sName)
 
 //----------------------------------------------------------------------------------------
 //
-void CSceneNodeResolver::LoadProject(tspProject spProject, const QString sStartScene)
+void CSceneNodeResolver::LoadProject(tspProject spProject, const QUuid& nodeId)
+{
+  bool bOk = Setup(spProject, nodeId);
+  QString sError;
+  if (!bOk)
+  {
+    return;
+  }
+
+  CSceneNodeModel* pNodeDataModel = dynamic_cast<CSceneNodeModel*>(m_pCurrentNode->nodeDataModel());
+  if (!nodeId.isNull() && nullptr != pNodeDataModel)
+  {
+    m_nodeMap.clear();
+    m_resolveResult.clear();
+    m_nodeMap.insert({pNodeDataModel->SceneName(), m_pCurrentNode});
+    return;
+  }
+
+  bOk = ResolveNextScene();
+  if (!bOk)
+  {
+    sError = tr("Could not resolve next scene.");
+    qWarning() << sError;
+    emit SignalError(sError, QtMsgType::QtCriticalMsg);
+    return;
+  }
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CSceneNodeResolver::LoadProject(tspProject spProject, const QString& sStartScene)
 {
   bool bOk = Setup(spProject, sStartScene);
   QString sError;
@@ -322,7 +352,7 @@ void CSceneNodeResolver::LoadProject(tspProject spProject, const QString sStartS
 
 //----------------------------------------------------------------------------------------
 //
-void CSceneNodeResolver::LoadProject(tspProject spProject, tspScene spStartScene)
+void CSceneNodeResolver::LoadProject(tspProject spProject, const tspScene& spStartScene)
 {
   bool bOk = Setup(spProject, QString());
   QString sError;
@@ -583,7 +613,7 @@ bool CSceneNodeResolver::GenerateNodesFromResolved()
   }
   else
   {
-    QString sError(tr("More than one nodes attached to start."));
+    QString sError(tr("Next node not found."));
     qWarning() << sError;
     emit SignalError(sError, QtMsgType::QtCriticalMsg);
     return false;
@@ -593,7 +623,7 @@ bool CSceneNodeResolver::GenerateNodesFromResolved()
 
 //----------------------------------------------------------------------------------------
 //
-bool CSceneNodeResolver::Setup(tspProject spProject, const QString sStartScene)
+bool CSceneNodeResolver::Setup(tspProject spProject, const std::variant<QString, QUuid>& start)
 {
   QString sError;
   if (nullptr != m_spCurrentProject)
@@ -625,11 +655,20 @@ bool CSceneNodeResolver::Setup(tspProject spProject, const QString sStartScene)
     return false;
   }
 
-  bOk = ResolveStart(sStartScene);
+  bOk = ResolveStart(start);
   assert(bOk && "Starting scene could not be resolved.");
   if (!bOk)
   {
-    sError = QString(tr("Starting scene '%1' could not be resolved.")).arg(sStartScene);
+    if (std::holds_alternative<QString>(start))
+    {
+      sError = QString(tr("Starting scene '%1' could not be resolved."))
+                   .arg(std::get<QString>(start));
+    }
+    else if (std::holds_alternative<QUuid>(start))
+    {
+      sError = QString(tr("Starting scene '%1' could not be resolved."))
+                   .arg(std::get<QUuid>(start).toString());
+    }
     qWarning() << sError;
     emit SignalError(sError, QtMsgType::QtCriticalMsg);
     return false;
@@ -712,7 +751,7 @@ bool CSceneNodeResolver::ResolveNextScene()
 
 //----------------------------------------------------------------------------------------
 //
-bool CSceneNodeResolver::ResolveStart(const QString sStartScene)
+bool CSceneNodeResolver::ResolveStart(const std::variant<QString, QUuid>& start)
 {
   if (nullptr == m_pFlowScene)
   {
@@ -722,27 +761,58 @@ bool CSceneNodeResolver::ResolveStart(const QString sStartScene)
     return false;
   }
 
+  bool bIsEmpty = false;
+  if (std::holds_alternative<QString>(start))
+  {
+    bIsEmpty = std::get<QString>(start).isEmpty();
+  }
+  else if (std::holds_alternative<QUuid>(start))
+  {
+    bIsEmpty = std::get<QUuid>(start).isNull();
+  }
+
   bool bFound = false;
   QStringList vsFoundNames;
   auto vpNodes = m_pFlowScene->allNodes();
-  for (auto pNode : vpNodes)
+  if (std::holds_alternative<QString>(start))
   {
-    CSceneNodeModel* pSceneModel = dynamic_cast<CSceneNodeModel*>(pNode->nodeDataModel());
-    CStartNodeModel* pStartModel = dynamic_cast<CStartNodeModel*>(pNode->nodeDataModel());
-    if (nullptr != pSceneModel && !sStartScene.isEmpty())
+    for (auto pNode : vpNodes)
     {
-      if (pSceneModel->SceneName() == sStartScene)
+      CSceneNodeModel* pSceneModel = dynamic_cast<CSceneNodeModel*>(pNode->nodeDataModel());
+      if (nullptr != pSceneModel && !bIsEmpty)
       {
-        vsFoundNames.push_back(pSceneModel->SceneName());
-        bFound = true;
-        m_pCurrentNode = pNode;
+        if (pSceneModel->SceneName() == std::get<QString>(start))
+        {
+          vsFoundNames.push_back(pSceneModel->SceneName());
+          bFound = true;
+          m_pCurrentNode = pNode;
+        }
       }
     }
-    if (nullptr != pStartModel)
+    if (!bFound)
     {
-      if (!bFound)
+      for (auto pNode : vpNodes)
       {
-        vsFoundNames.push_back(pStartModel->Name());
+        CStartNodeModel* pStartModel = dynamic_cast<CStartNodeModel*>(pNode->nodeDataModel());
+        if (nullptr != pStartModel)
+        {
+          if (!bFound)
+          {
+            vsFoundNames.push_back(pStartModel->Name());
+            bFound = true;
+            m_pCurrentNode = pNode;
+          }
+        }
+      }
+    }
+  }
+  else if (std::holds_alternative<QUuid>(start))
+  {
+    for (auto pNode : vpNodes)
+    {
+      if (pNode->id() == std::get<QUuid>(start))
+      {
+        vsFoundNames.push_back(pNode->id().toString());
         bFound = true;
         m_pCurrentNode = pNode;
       }

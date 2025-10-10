@@ -12,6 +12,9 @@
 #include "Systems/Scene.h"
 #include "Systems/Resource.h"
 
+#include "Systems/Nodes/SceneNodeModel.h"
+#include "Systems/Nodes/StartNodeModel.h"
+
 #include "Widgets/HelpOverlay.h"
 
 #include <nodes/ConnectionStyle>
@@ -148,14 +151,16 @@ CEditorSceneNodeWidget::CEditorSceneNodeWidget(QWidget* pParent) :
 {
   m_spUi->setupUi(this);
 
-  m_pFlowView = new CNodeEditorFlowView(this);
-  m_pFlowView->setObjectName("FlowView");
-  m_pFlowView->setWindowTitle("Node-based flow editor");
-  m_pFlowView->show();
-
   m_spUi->pDebugView->hide();
 
   QLayout* pLayout = m_spUi->pContainerWidget->layout();
+
+  m_pFlowView = new CNodeEditorFlowView(m_spUi->pContainerWidget);
+  m_pFlowView->setObjectName("FlowView");
+  m_pFlowView->resetTransform();
+  m_pFlowView->scale(0.8, 0.8);
+  m_pFlowView->centerOn(0,0);
+
   pLayout->addWidget(m_pFlowView);
 }
 
@@ -175,9 +180,8 @@ void CEditorSceneNodeWidget::Initialize()
 
   m_pFlowView->SetUndoStack(UndoStack());
   m_pFlowView->SetScene(FlowSceneModel());
-  m_pFlowView->resetTransform();
-  m_pFlowView->scale(0.8, 0.8);
-  m_pFlowView->centerOn(0,0);
+
+  m_spUi->pDebugView->Initialize(m_pFlowView, FlowSceneModel());
 
   m_spStateSwitchHandler =
       std::make_shared<CSceneNodeWidgetTutorialStateSwitchHandler>(this, m_spUi);
@@ -224,6 +228,8 @@ void CEditorSceneNodeWidget::UnloadProject()
 {
   WIDGET_INITIALIZED_GUARD
 
+  m_spUi->pDebugView->StopDebug();
+
   m_spCurrentProject = nullptr;
 
   m_pFlowView->resetTransform();
@@ -247,8 +253,16 @@ void CEditorSceneNodeWidget::SaveProject()
 //
 void CEditorSceneNodeWidget::OnActionBarAboutToChange()
 {
+  m_spUi->pDebugView->StopDebug();
+
   if (nullptr != ActionBar())
   {
+    disconnect(ActionBar()->m_spUi->DebugNodeButton, &QPushButton::clicked,
+               this, &CEditorSceneNodeWidget::SlotStartDebugClicked);
+    disconnect(ActionBar()->m_spUi->StopDebugNodeButton, &QPushButton::clicked,
+               this, &CEditorSceneNodeWidget::SlotStopDebugClicked);
+    disconnect(ActionBar()->m_spUi->NextSceneButton, &QPushButton::clicked,
+               this, &CEditorSceneNodeWidget::SlotNextSceneClicked);
     disconnect(ActionBar()->m_spUi->AddNodeButton, &QPushButton::clicked,
             this, &CEditorSceneNodeWidget::SlotAddSceneButtonClicked);
     disconnect(ActionBar()->m_spUi->RemoveNodeButton, &QPushButton::clicked,
@@ -269,6 +283,12 @@ void CEditorSceneNodeWidget::OnActionBarChanged()
   {
     ActionBar()->ShowNodeEditorActionBar();
 
+    connect(ActionBar()->m_spUi->DebugNodeButton, &QPushButton::clicked,
+            this, &CEditorSceneNodeWidget::SlotStartDebugClicked);
+    connect(ActionBar()->m_spUi->StopDebugNodeButton, &QPushButton::clicked,
+            this, &CEditorSceneNodeWidget::SlotStopDebugClicked);
+    connect(ActionBar()->m_spUi->NextSceneButton, &QPushButton::clicked,
+            this, &CEditorSceneNodeWidget::SlotNextSceneClicked);
     connect(ActionBar()->m_spUi->AddNodeButton, &QPushButton::clicked,
             this, &CEditorSceneNodeWidget::SlotAddSceneButtonClicked);
     connect(ActionBar()->m_spUi->RemoveNodeButton, &QPushButton::clicked,
@@ -282,6 +302,67 @@ void CEditorSceneNodeWidget::OnActionBarChanged()
     }
   }
 }
+
+//----------------------------------------------------------------------------------------
+//
+void CEditorSceneNodeWidget::SlotStartDebugClicked()
+{
+  WIDGET_INITIALIZED_GUARD
+  if (nullptr == m_spCurrentProject) { return; }
+  std::vector<QtNodes::Node*> vpNodes = FlowSceneModel()->selectedNodes();
+  if (!vpNodes.empty())
+  {
+    QtNodes::Node* pNode = vpNodes.front();
+    if (dynamic_cast<CStartNodeModel*>(pNode->nodeDataModel()))
+    {
+      m_spUi->pDebugView->StartDebug(m_spCurrentProject, pNode->id());
+    }
+    else if (auto pSceneModel = dynamic_cast<CSceneNodeModel*>(vpNodes.front()->nodeDataModel()))
+    {
+      m_spUi->pDebugView->StartDebug(m_spCurrentProject, pSceneModel->SceneName());
+    }
+    else
+    {
+      m_spUi->pDebugView->StartDebug(m_spCurrentProject, pNode->id());
+    }
+  }
+  else
+  {
+    m_spUi->pDebugView->StartDebug(m_spCurrentProject, QString());
+  }
+
+  if (nullptr != ActionBar())
+  {
+    ActionBar()->m_spUi->pNodeDebugStack->setCurrentIndex(1);
+    ActionBar()->m_spUi->NextSceneButton->setEnabled(true);
+  }
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CEditorSceneNodeWidget::SlotStopDebugClicked()
+{
+  WIDGET_INITIALIZED_GUARD
+  if (nullptr == m_spCurrentProject) { return; }
+
+  m_spUi->pDebugView->StopDebug();
+
+  if (nullptr != ActionBar())
+  {
+    ActionBar()->m_spUi->pNodeDebugStack->setCurrentIndex(0);
+    ActionBar()->m_spUi->NextSceneButton->setEnabled(false);
+  }
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CEditorSceneNodeWidget::SlotNextSceneClicked()
+{
+  WIDGET_INITIALIZED_GUARD
+  if (nullptr == m_spCurrentProject) { return; }
+  m_spUi->pDebugView->NextScene();
+}
+
 
 //----------------------------------------------------------------------------------------
 //
