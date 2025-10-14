@@ -1971,6 +1971,8 @@ CEditorSceneNodeWidget {
   qproperty-selectedConnectionColor: rgb(27, 188, 157);
   qproperty-selectedConnectionHaloColor: white;
   qproperty-hoveredConnectionColor: rgb(27, 188, 157);
+  qproperty-warningColor: rgb(255, 109, 0);
+  qproperty-errorColor: rgb(255, 0, 0);
 }
 
 CNodeDebugWidget {

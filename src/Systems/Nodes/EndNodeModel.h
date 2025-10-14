@@ -1,7 +1,7 @@
 #ifndef ENDNODEMODEL_H
 #define ENDNODEMODEL_H
 
-#include <nodes/NodeDataModel>
+#include "NodeModelBase.h"
 
 class CSceneTranstitionData;
 
@@ -13,7 +13,7 @@ using QtNodes::NodeDataModel;
 using QtNodes::NodeValidationState;
 
 
-class CEndNodeModel : public NodeDataModel
+class CEndNodeModel : public CNodeModelBase
 {
   Q_OBJECT
 public:

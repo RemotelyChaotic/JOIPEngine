@@ -1,6 +1,8 @@
 #ifndef NODEDEBUGWIDGET_H
 #define NODEDEBUGWIDGET_H
 
+#include "Systems/Nodes/NodeModelBase.h"
+
 #include <nodes/NodeGeometry>
 #include <nodes/NodeState>
 #include <nodes/internal/NodeGraphicsObject.hpp>
@@ -27,12 +29,27 @@ typedef std::shared_ptr<SProject> tspProject;
 typedef std::shared_ptr<SScene> tspScene;
 
 
-class CNodeMock : public QFrame
+class CNodeContainingItem
+{
+public:
+  CNodeContainingItem(QtNodes::Node* pNode);
+  virtual ~CNodeContainingItem();
+
+  QtNodes::Node* Node() const;
+
+protected:
+  QtNodes::Node*        m_pNode;
+};
+
+//----------------------------------------------------------------------------------------
+//
+class CNodeMock : public QFrame, public CNodeContainingItem
 {
   Q_OBJECT
 
 public:
   explicit CNodeMock(std::unique_ptr<QtNodes::NodeDataModel>&& dataModel,
+                     QtNodes::Node* pNode,
                      QWidget* pParent = nullptr, QWidget* pView = nullptr);
   ~CNodeMock();
 
@@ -40,10 +57,12 @@ public:
 
 protected:
   bool eventFilter(QObject* pObj, QEvent* pEvt) override;
+  void mouseDoubleClickEvent(QMouseEvent* pEvt) override;
   void paintEvent(QPaintEvent* pEvt) override;
   QSize sizeHint() const override;
 
   std::unique_ptr<QtNodes::NodeDataModel> m_spDataModel;
+  QPointer<QWidget>     m_pActualParent;
   QtNodes::NodeGeometry m_geometry;
   QtNodes::NodeState    m_state;
   qint32                m_iConnectionPointDiameter = 0;
@@ -56,7 +75,7 @@ class CNodeDebugNodeStartEnd : public CNodeMock
   Q_OBJECT
 
 public:
-  explicit CNodeDebugNodeStartEnd(bool bStart,
+  explicit CNodeDebugNodeStartEnd(bool bStart, QtNodes::Node* pNode,
                                   QWidget* pParent = nullptr, QWidget* pView = nullptr);
   ~CNodeDebugNodeStartEnd();
 
@@ -75,6 +94,7 @@ class CNodeDebugNode : public CNodeMock
 
 public:
   explicit CNodeDebugNode(const tspProject& spProject, const QString& sScene,
+                          QtNodes::Node* pNode,
                           QWidget* pParent = nullptr, QWidget* pView = nullptr);
   ~CNodeDebugNode();
 
@@ -115,6 +135,7 @@ class CNodeDebugSelection : public CNodeMock
 
 public:
   explicit CNodeDebugSelection(const QStringList& vsScenes,
+                               QtNodes::Node* pNode,
                                QWidget* pParent = nullptr,
                                CNodeDebugWidget* pView = nullptr);
   ~CNodeDebugSelection();
@@ -170,14 +191,22 @@ public:
   QColor BackgroundColor() const;
   void SetBackgroundColor(const QColor& col);
 
+  void FocusNode(QtNodes::Node* pNode);
+
 private slots:
   void SlotSceneError(QString sError, QtMsgType type);
+  void SlotUpdateScene();
+  void SlotUpdateScrollAndScene();
 
 private:
   void AddWidget(QWidget* pWidget);
   void Clear();
   bool IsInErrorState() const;
   QWidget* LastWidget() const;
+  QtNodes::Node* NodeFromScene(QtNodes::Node* pLocalNode);
+  void ScrollToEnd();
+  void UpdateNodeContainingItemNode(CNodeContainingItem* pItem,
+                                    CNodeModelBase::EDebugState state);
 
   std::unique_ptr<Ui::CNodeDebugWidget> m_spUi;
   std::unique_ptr<CSceneNodeResolver>   m_spNodeResolver;

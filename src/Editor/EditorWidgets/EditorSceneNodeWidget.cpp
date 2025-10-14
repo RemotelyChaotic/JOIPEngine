@@ -65,7 +65,9 @@ namespace
     const QColor& normalColor,
     const QColor& selectedColor,
     const QColor& selectedHaloColor,
-    const QColor& hoveredColor)
+    const QColor& hoveredColor,
+    const QColor& warningColor,
+    const QColor& errorColor)
   {
     QString sStyleNode(QStringLiteral(
     R"(
@@ -81,6 +83,8 @@ namespace
         "FontColor": %8,
         "FontColorFaded": %9,
         "ConnectionPointColor": %10,
+        "WarningColor": %11,
+        "ErrorColor": %12,
         "PenWidth": 2.0,
         "HoveredPenWidth": 2.5,
         "ConnectionPointDiameter": 10.0,
@@ -97,7 +101,9 @@ namespace
                                            ColorToString(shadowColor),
                                            ColorToString(fontColor),
                                            ColorToString(fontColorFaded))
-                                      .arg(ColorToString(connectionPointColor)));
+                                      .arg(ColorToString(connectionPointColor))
+                                      .arg(ColorToString(warningColor))
+                                      .arg(ColorToString(errorColor)));
 
     QString sStyleView(QStringLiteral(
       R"(
@@ -412,6 +418,8 @@ void CEditorSceneNodeWidget::SlotStyleChanged()
                m_normalColor,
                m_selectedColor,
                m_selectedHaloColor,
-               m_hoveredColor);
+               m_hoveredColor,
+               m_warningColor,
+               m_errorColor);
 }
 

@@ -3,6 +3,7 @@
 #include "CommandConnectionRemoved.h"
 #include "CommandNodeAdded.h"
 #include "CommandNodeMoved.h"
+#include "NodeEditorGraphicsObjectProvider.h"
 #include "UndoStackAwareModel.h"
 
 #include "Editor/EditorWidgetTypes.h"
@@ -14,9 +15,8 @@ using QtNodes::FlowScene;
 const char* CNodeEditorFlowScene::c_sUndoRedoingOperation = "UndoRedoingOperation";
 
 CNodeEditorFlowScene::CNodeEditorFlowScene(std::shared_ptr<QtNodes::DataModelRegistry> spRegistry,
-                                           std::shared_ptr<CNodeGraphicsObjectProvider> spGraphicsObjectProvider,
                                            QObject* pParent) :
-  CFlowScene(spRegistry, spGraphicsObjectProvider, pParent),
+    CFlowScene(spRegistry, std::make_unique<CNodeEditorGraphicsObjectProvider>(), pParent),
   m_pUndoStack(nullptr),
   m_bUndoRedoOperationInProgress(false)
 {

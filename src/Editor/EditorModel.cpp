@@ -21,7 +21,6 @@
 
 #include "Systems/DatabaseManager.h"
 #include "Systems/Nodes/EndNodeModel.h"
-#include "Systems/Nodes/NodeGraphicsObjectProvider.h"
 #include "Systems/Nodes/PathMergerModel.h"
 #include "Systems/Nodes/SceneTranstitionData.h"
 #include "Systems/Nodes/StartNodeModel.h"
@@ -53,7 +52,6 @@ CEditorModel::CEditorModel(QWidget* pParent) :
   m_spEditorCompleterModel(std::make_unique<CScriptEditorCompleterModel>(pParent)),
   m_spFlowSceneModel(std::make_unique<CNodeEditorFlowScene>(
           CNodeEditorRegistry::RegisterDataModels(),
-          std::make_shared<CDefaultGraphicsObjectProvider>(),
           nullptr)),
   m_spUndoStack(std::make_unique<QUndoStack>()),
   m_spResourceTreeModel(std::make_unique<CResourceTreeItemModel>(m_spUndoStack.get())),

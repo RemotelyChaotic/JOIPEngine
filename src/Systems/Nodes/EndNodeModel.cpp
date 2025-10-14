@@ -8,7 +8,7 @@ namespace {
 
 
 CEndNodeModel::CEndNodeModel() :
-  NodeDataModel(),
+  CNodeModelBase(),
   m_modelValidationState(NodeValidationState::Warning),
   m_modelValidationError(QString(tr("Missing input")))
 {

@@ -48,6 +48,7 @@ public:
   void LoadProject(tspProject spProject, const tspScene& spStartScene);
   void UnloadProject();
 
+  QtNodes::Node* CurrentNode() const;
   tspScene CurrentScene() const;
   void DisableScene(const QString& sScene);
   void EnableScene(const QString& sScene);

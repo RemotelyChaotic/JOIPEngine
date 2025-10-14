@@ -16,21 +16,40 @@
 
 #include <nodes/internal/NodePainter.hpp>
 #include <nodes/internal/StyleCollection.hpp>
+#include <nodes/Node>
 
 #include <QHBoxLayout>
 #include <QLayout>
 #include <QPainter>
 #include <QPaintEvent>
 #include <QPushButton>
+#include <QScrollBar>
 #include <QSpacerItem>
 #include <QTimer>
 
 //----------------------------------------------------------------------------------------
 //
-CNodeMock::CNodeMock(std::unique_ptr<QtNodes::NodeDataModel>&& dataModel,
+CNodeContainingItem::CNodeContainingItem(QtNodes::Node* pNode) :
+  m_pNode(pNode)
+{
+}
+CNodeContainingItem::~CNodeContainingItem() = default;
+
+//----------------------------------------------------------------------------------------
+//
+QtNodes::Node* CNodeContainingItem::Node() const
+{
+  return m_pNode;
+}
+
+//----------------------------------------------------------------------------------------
+//
+CNodeMock::CNodeMock(std::unique_ptr<QtNodes::NodeDataModel>&& dataModel, QtNodes::Node* pNode,
                      QWidget* pParent, QWidget* pView) :
   QFrame(pParent),
+  CNodeContainingItem(pNode),
   m_spDataModel(std::move(dataModel)),
+  m_pActualParent(pView),
   m_geometry(m_spDataModel),
   m_state(m_spDataModel)
 {
@@ -218,6 +237,19 @@ bool CNodeMock::eventFilter(QObject* pObj, QEvent* pEvt)
 
 //----------------------------------------------------------------------------------------
 //
+void CNodeMock::mouseDoubleClickEvent(QMouseEvent* pEvt)
+{
+  if (nullptr != pEvt)
+  {
+    if (auto pDebugger = dynamic_cast<CNodeDebugWidget*>(m_pActualParent.data()))
+    {
+      pDebugger->FocusNode(m_pNode);
+    }
+  }
+}
+
+//----------------------------------------------------------------------------------------
+//
 void CNodeMock::paintEvent(QPaintEvent* pEvt)
 {
   // rebuild what NodePainter::paint does but without needing scene or View
@@ -289,9 +321,10 @@ namespace
 
 //----------------------------------------------------------------------------------------
 //
-CNodeDebugNodeStartEnd::CNodeDebugNodeStartEnd(bool bStart,
+CNodeDebugNodeStartEnd::CNodeDebugNodeStartEnd(bool bStart, QtNodes::Node* pNode,
                                                QWidget* pParent, QWidget* pView) :
-  CNodeMock(GetNodeModel(bStart ? NodeMockType::eStart : NodeMockType::eEnd), pParent, pView),
+  CNodeMock(GetNodeModel(bStart ? NodeMockType::eStart : NodeMockType::eEnd), pNode,
+            pParent, pView),
   m_geometryFixed(m_spDataModel)
 {
   m_geometryFixed.recalculateSize(font());
@@ -319,8 +352,9 @@ QSize CNodeDebugNodeStartEnd::sizeHint() const
 //
 CNodeDebugNode::CNodeDebugNode(const tspProject& spProject,
                                const QString& sScene,
+                               QtNodes::Node* pNode,
                                QWidget* pParent, QWidget* pView) :
-  CNodeMock(GetNodeModel(NodeMockType::eScene), pParent, pView)
+  CNodeMock(GetNodeModel(NodeMockType::eScene), pNode, pParent, pView)
 {
 }
 CNodeDebugNode::~CNodeDebugNode() = default;
@@ -427,9 +461,9 @@ QSize CNodeDebugError::sizeHint() const
 
 //----------------------------------------------------------------------------------------
 //
-CNodeDebugSelection::CNodeDebugSelection(const QStringList& vsScenes,
+CNodeDebugSelection::CNodeDebugSelection(const QStringList& vsScenes, QtNodes::Node* pNode,
                                          QWidget* pParent, CNodeDebugWidget* pView) :
-  CNodeMock(GetNodeModel(NodeMockType::eSplitter), pParent, pView),
+  CNodeMock(GetNodeModel(NodeMockType::eSplitter), pNode, pParent, pView),
   m_vsScenes(vsScenes)
 {
   QVBoxLayout* pRootLayout = new QVBoxLayout(this);
@@ -560,13 +594,16 @@ void CNodeDebugWidget::NextScene(qint32 iIndex)
           if (nullptr != spScene)
           {
             AddWidget(new CNodeDebugNode(m_spCurrentProject, vsScenes[0],
+                                         NodeFromScene(m_spNodeResolver->CurrentNode()),
                                          m_spUi->pScrollAreaWidgetContents,
                                          this));
             m_spNodeResolver->ResolveScenes();
           }
           else if (bEnd)
           {
-            AddWidget(new CNodeDebugNodeStartEnd(false, m_spUi->pScrollAreaWidgetContents,
+            AddWidget(new CNodeDebugNodeStartEnd(false,
+                                                 NodeFromScene(m_spNodeResolver->CurrentNode()),
+                                                 m_spUi->pScrollAreaWidgetContents,
                                                  this));
           }
         }
@@ -577,20 +614,23 @@ void CNodeDebugWidget::NextScene(qint32 iIndex)
           if (nullptr != spScene)
           {
             AddWidget(new CNodeDebugNode(m_spCurrentProject, vsScenes[iIndex],
+                                         NodeFromScene(m_spNodeResolver->CurrentNode()),
                                          m_spUi->pScrollAreaWidgetContents,
                                          this));
             m_spNodeResolver->ResolveScenes();
           }
           else if (bEnd)
           {
-            AddWidget(new CNodeDebugNodeStartEnd(false, m_spUi->pScrollAreaWidgetContents,
+            AddWidget(new CNodeDebugNodeStartEnd(false,
+                                                 NodeFromScene(m_spNodeResolver->CurrentNode()),
+                                                 m_spUi->pScrollAreaWidgetContents,
                                                  this));
           }
         }
         else
         {
-          AddWidget(new CNodeDebugSelection(vsScenes, m_spUi->pScrollAreaWidgetContents,
-                                            this));
+          AddWidget(new CNodeDebugSelection(vsScenes, nullptr,
+                                            m_spUi->pScrollAreaWidgetContents, this));
         }
       }
       else
@@ -605,20 +645,20 @@ void CNodeDebugWidget::NextScene(qint32 iIndex)
         }
         else if (!sUnResolveData.isEmpty())
         {
-          AddWidget(new CNodeDebugSelection(vsScenes, m_spUi->pScrollAreaWidgetContents,
-                                            this));
+          AddWidget(new CNodeDebugSelection(vsScenes, nullptr,
+                                            m_spUi->pScrollAreaWidgetContents, this));
         }
         else
         {
-          AddWidget(new CNodeDebugSelection(vsScenes, m_spUi->pScrollAreaWidgetContents,
-                                            this));
+          AddWidget(new CNodeDebugSelection(vsScenes, nullptr,
+                                            m_spUi->pScrollAreaWidgetContents, this));
         }
       }
     }
     else
     {
-      AddWidget(new CNodeDebugNodeStartEnd(false, m_spUi->pScrollAreaWidgetContents,
-                                           this));
+      AddWidget(new CNodeDebugNodeStartEnd(false, nullptr,
+                                           m_spUi->pScrollAreaWidgetContents, this));
     }
   }
 }
@@ -651,7 +691,9 @@ void CNodeDebugWidget::StartDebug(const tspProject& spProject,
 
     if (bIsEmpty || nullptr == spStartScene)
     {
-      AddWidget(new CNodeDebugNodeStartEnd(true, m_spUi->pScrollAreaWidgetContents,
+      AddWidget(new CNodeDebugNodeStartEnd(true,
+                                           NodeFromScene(m_spNodeResolver->CurrentNode()),
+                                           m_spUi->pScrollAreaWidgetContents,
                                            this));
     }
     else
@@ -661,7 +703,9 @@ void CNodeDebugWidget::StartDebug(const tspProject& spProject,
         QReadLocker l(&spStartScene->m_rwLock);
         sStartScene = spStartScene->m_sName;
       }
-      AddWidget(new CNodeDebugNode(m_spCurrentProject, sStartScene,
+      AddWidget(new CNodeDebugNode(m_spCurrentProject,
+                                   sStartScene,
+                                   NodeFromScene(m_spNodeResolver->CurrentNode()),
                                    m_spUi->pScrollAreaWidgetContents,
                                    this));
     }
@@ -696,6 +740,23 @@ void CNodeDebugWidget::SetBackgroundColor(const QColor& col)
 
 //----------------------------------------------------------------------------------------
 //
+void CNodeDebugWidget::FocusNode(QtNodes::Node* pNode)
+{
+  if (nullptr != pNode && nullptr != m_pScene && nullptr != m_pFlowView)
+  {
+    QGraphicsObject& go = pNode->nodeGraphicsObject();
+    QPointF pointCenter = go.sceneBoundingRect().center();
+
+    QRectF r = m_pScene->sceneRect();
+    r.translate(-r.topLeft());
+    r.translate(pointCenter - QPointF(r.width()/2, r.height()/2));
+    m_pFlowView->setSceneRect(r);
+    m_pFlowView->update();
+  }
+}
+
+//----------------------------------------------------------------------------------------
+//
 void CNodeDebugWidget::SlotSceneError(QString sError, QtMsgType type)
 {
   auto pLastError = dynamic_cast<CNodeDebugError*>(LastWidget());
@@ -711,14 +772,43 @@ void CNodeDebugWidget::SlotSceneError(QString sError, QtMsgType type)
 
 //----------------------------------------------------------------------------------------
 //
+void CNodeDebugWidget::SlotUpdateScene()
+{
+  if (auto pW = dynamic_cast<CNodeContainingItem*>(LastWidget()))
+  {
+    FocusNode(pW->Node());
+  }
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CNodeDebugWidget::SlotUpdateScrollAndScene()
+{
+  QTimer::singleShot(0, this, [this](){
+    SlotUpdateScene();
+    ScrollToEnd();
+  });
+}
+
+//----------------------------------------------------------------------------------------
+//
 void CNodeDebugWidget::AddWidget(QWidget* pWidget)
 {
   QHBoxLayout* pLayout = dynamic_cast<QHBoxLayout*>(m_spUi->pScrollAreaWidgetContents->layout());
   assert(nullptr != pLayout);
   if (nullptr != pLayout)
   {
+    UpdateNodeContainingItemNode(dynamic_cast<CNodeContainingItem*>(LastWidget()),
+                                 CNodeModelBase::eDebugPassive);
+
     qint32 iCount = pLayout->count();
     pLayout->insertWidget(iCount-1, pWidget);
+
+    UpdateNodeContainingItemNode(dynamic_cast<CNodeContainingItem*>(LastWidget()),
+                                 CNodeModelBase::eDebugActive);
+
+    bool bOk = QMetaObject::invokeMethod(this, "SlotUpdateScrollAndScene", Qt::QueuedConnection);
+    assert(bOk); Q_UNUSED(bOk)
   }
 }
 
@@ -735,7 +825,12 @@ void CNodeDebugWidget::Clear()
       QLayoutItem* pItem = pLayout->takeAt(0);
       if (nullptr != pItem)
       {
-        if (nullptr != pItem->widget()) { delete pItem->widget(); }
+        if (nullptr != pItem->widget())
+        {
+          UpdateNodeContainingItemNode(dynamic_cast<CNodeContainingItem*>(pItem->widget()),
+                                       CNodeModelBase::eNotDebugged);
+          delete pItem->widget();
+        }
         delete pItem;
       }
     }
@@ -765,4 +860,48 @@ QWidget* CNodeDebugWidget::LastWidget() const
     }
   }
   return nullptr;
+}
+
+//----------------------------------------------------------------------------------------
+//
+QtNodes::Node* CNodeDebugWidget::NodeFromScene(QtNodes::Node* pLocalNode)
+{
+  if (nullptr != pLocalNode && nullptr != m_pScene)
+  {
+    QUuid id = pLocalNode->id();
+    const auto& nodes = m_pScene->nodes();
+    auto it = nodes.find(id);
+    if (nodes.end() != it)
+    {
+      return it->second.get();
+    }
+  }
+  return nullptr;
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CNodeDebugWidget::ScrollToEnd()
+{
+  QScrollBar* pScroll = m_spUi->pScrollArea->horizontalScrollBar();
+  pScroll->setValue(pScroll->maximum());
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CNodeDebugWidget::UpdateNodeContainingItemNode(CNodeContainingItem* pItem,
+                                                    CNodeModelBase::EDebugState state)
+{
+  if (nullptr != pItem)
+  {
+    QtNodes::Node* pNode = pItem->Node();
+    if (nullptr != pNode)
+    {
+      if (auto pDebuggableModel = dynamic_cast<CNodeModelBase*>(pNode->nodeDataModel()))
+      {
+        pDebuggableModel->SetDebuggState(state);
+        pNode->nodeGraphicsObject().update();
+      }
+    }
+  }
 }

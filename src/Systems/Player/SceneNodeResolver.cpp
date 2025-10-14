@@ -397,6 +397,13 @@ void CSceneNodeResolver::UnloadProject()
 
 //----------------------------------------------------------------------------------------
 //
+QtNodes::Node* CSceneNodeResolver::CurrentNode() const
+{
+  return m_pCurrentNode;
+}
+
+//----------------------------------------------------------------------------------------
+//
 tspScene CSceneNodeResolver::CurrentScene() const
 {
   return m_spCurrentScene;

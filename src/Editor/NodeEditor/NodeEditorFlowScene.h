@@ -12,7 +12,6 @@ class CNodeEditorFlowScene : public CFlowScene
 
 public:
   CNodeEditorFlowScene(std::shared_ptr<QtNodes::DataModelRegistry> spRegistry,
-                       std::shared_ptr<CNodeGraphicsObjectProvider> spGraphicsObjectProvider,
                        QObject* pParent = Q_NULLPTR);
   ~CNodeEditorFlowScene() override;
 
