@@ -581,6 +581,12 @@ void CNodeDebugWidget::NextScene(qint32 iIndex)
 {
   if (!IsInErrorState())
   {
+    if (auto pSelect = dynamic_cast<CNodeDebugSelection*>(LastWidget());
+        nullptr != pSelect && -1 == iIndex)
+    {
+      iIndex = pSelect->CurrentIndex();
+    }
+
     std::optional<QString> unresolvedData;
     QStringList vsScenes = m_spNodeResolver->PossibleScenes(&unresolvedData);
     if (vsScenes.size() > 0)
