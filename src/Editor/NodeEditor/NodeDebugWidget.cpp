@@ -1,5 +1,7 @@
 #include "NodeDebugWidget.h"
 #include "ui_NodeDebugWidget.h"
+
+#include "Application.h"
 #include "NodeEditorFlowView.h"
 #include "NodeEditorFlowScene.h"
 #include "NodeEditorRegistry.h"
@@ -9,8 +11,10 @@
 #include "Systems/Nodes/EndNodeModel.h"
 #include "Systems/Nodes/PathSplitterModel.h"
 #include "Systems/Nodes/SceneNodeModel.h"
+#include "Systems/Nodes/SceneNodeModelWidget.h"
 #include "Systems/Nodes/StartNodeModel.h"
 
+#include "Systems/DatabaseManager.h"
 #include "Systems/Project.h"
 #include "Systems/Scene.h"
 
@@ -26,6 +30,179 @@
 #include <QScrollBar>
 #include <QSpacerItem>
 #include <QTimer>
+
+struct SResolvementNode
+{
+  SResolvementNode(QtNodes::Node* pNode, const IResolverDebugger::NodeData& data) :
+      m_pNode(pNode), m_data(data)
+  {}
+
+  QtNodes::Node* m_pNode = nullptr;
+
+  IResolverDebugger::NodeData m_data;
+
+  std::vector<std::shared_ptr<SResolvementNode>> m_vspChildren;
+};
+
+//----------------------------------------------------------------------------------------
+//
+class CNodeDebugger : public IResolverDebugger
+{
+public:
+  CNodeDebugger(CNodeDebugWidget* pWidget) :
+      IResolverDebugger(),
+      m_pWidget(pWidget)
+  {}
+  ~CNodeDebugger() override = default;
+
+  //--------------------------------------------------------------------------------------
+  //
+  QtNodes::Node* CurrentNode() const
+  {
+    return nullptr != m_spCurrentResolveRoot ? m_spCurrentResolveRoot->m_pNode : nullptr;
+  }
+
+  //--------------------------------------------------------------------------------------
+  //
+  std::vector<NodeData*> ChildBlocks(const QtNodes::Node* pNode) const override
+  {
+    std::vector<NodeData*> vpRet;
+    std::shared_ptr<SResolvementNode> pResNode = const_cast<CNodeDebugger*>(this)->FindResolvementNode(pNode->id());
+    if (nullptr != pResNode)
+    {
+      for (auto& spChild : pResNode->m_vspChildren)
+      {
+        vpRet.push_back(&spChild->m_data);
+      }
+    }
+    return vpRet;
+  }
+
+  //--------------------------------------------------------------------------------------
+  //
+  NodeData* DataBlock(const QtNodes::Node* pNode) const override
+  {
+    std::shared_ptr<SResolvementNode> pResNode = const_cast<CNodeDebugger*>(this)->FindResolvementNode(pNode->id());
+    if (nullptr != pResNode)
+    {
+      return &pResNode->m_data;
+    }
+    return nullptr;
+  }
+
+  //--------------------------------------------------------------------------------------
+  //
+  void Error(const QString& sError, QtMsgType type) override
+  {
+    if (nullptr != m_pWidget)
+    {
+      m_pWidget->SlotSceneError(sError, type);
+    }
+  }
+
+  //--------------------------------------------------------------------------------------
+  //
+  void PoppUntilNextSelectable()
+  {
+    if (nullptr == m_spCurrentResolveRoot)
+    {
+      return;
+    }
+
+    std::map<qint32, std::vector<std::shared_ptr<SResolvementNode>>> depthMap;
+
+    std::function<void(SResolvementNode*,qint32)> fnSearch =
+        [&](SResolvementNode* pStart, qint32 iDepth) {
+      for (const auto& spChild : pStart->m_vspChildren)
+      {
+        if (spChild->m_data.bSelection && spChild->m_data.bEnabled)
+        {
+          depthMap[iDepth].push_back(spChild);
+        }
+        fnSearch(spChild.get(), iDepth+1);
+      }
+    };
+    fnSearch(m_spCurrentResolveRoot.get(), 1);
+
+    if (!depthMap.empty())
+    {
+      m_spCurrentResolveRoot = depthMap.begin()->second.front();
+    }
+    else
+    {
+      m_spCurrentResolveRoot = nullptr;
+    }
+  }
+
+  //--------------------------------------------------------------------------------------
+  //
+  void ResolveTo(const QtNodes::Node* const pNode) override
+  {
+    std::shared_ptr<SResolvementNode> pResNode = FindResolvementNode(pNode->id());
+    if (nullptr != pResNode)
+    {
+      m_spCurrentResolveRoot = pResNode;
+    }
+  }
+
+  //--------------------------------------------------------------------------------------
+  //
+  void PushNode(const QtNodes::Node* const pParent, QtNodes::Node* const pNext,
+                NodeData data) override
+  {
+    std::shared_ptr<SResolvementNode> pResNode = FindResolvementNode(pParent->id());
+    if (nullptr != pResNode)
+    {
+      pResNode->m_vspChildren.push_back(
+          std::make_shared<SResolvementNode>(
+              pNext, data));
+    }
+  }
+
+  //--------------------------------------------------------------------------------------
+  //
+  void SetCurrentNode(QtNodes::Node* const pNode) override
+  {
+    m_spCurrentResolveRoot =
+        std::make_shared<SResolvementNode>(const_cast<QtNodes::Node*>(pNode),
+                                           NodeData{true, false, "Current", -1});
+  }
+
+private:
+  //--------------------------------------------------------------------------------------
+  //
+  std::shared_ptr<SResolvementNode> FindResolvementNode(
+      QUuid parentId, std::shared_ptr<SResolvementNode> pStart = nullptr)
+  {
+    if (nullptr == pStart)
+    {
+      pStart = m_spCurrentResolveRoot;
+    }
+
+    if (nullptr == pStart)
+    {
+      return nullptr;
+    }
+
+    if (pStart->m_pNode->id() == parentId)
+    {
+      return pStart;
+    }
+
+    for (auto& spChild : pStart->m_vspChildren)
+    {
+      auto pRes = FindResolvementNode(parentId, spChild);
+      if (nullptr != pRes)
+      {
+        return pRes;
+      }
+    }
+    return nullptr;
+  }
+
+  QPointer<CNodeDebugWidget>            m_pWidget;
+  std::shared_ptr<SResolvementNode>     m_spCurrentResolveRoot;
+};
 
 //----------------------------------------------------------------------------------------
 //
@@ -350,12 +527,32 @@ QSize CNodeDebugNodeStartEnd::sizeHint() const
 
 //----------------------------------------------------------------------------------------
 //
-CNodeDebugNode::CNodeDebugNode(const tspProject& spProject,
+CNodeDebugNode::CNodeDebugNode(tspProject spProject,
                                const QString& sScene,
                                QtNodes::Node* pNode,
                                QWidget* pParent, QWidget* pView) :
   CNodeMock(GetNodeModel(NodeMockType::eScene), pNode, pParent, pView)
 {
+  auto pWidget = dynamic_cast<CSceneNodeModelWidget*>(m_spDataModel->embeddedWidget());
+  auto pModel = dynamic_cast<CSceneNodeModel*>(pNode->nodeDataModel());
+  if (nullptr != pModel && nullptr != pWidget)
+  {
+    pWidget->SetProject(spProject);
+    pWidget->SetName(pModel->SceneName());
+    if (auto spDbManager = CApplication::Instance()->System<CDatabaseManager>().lock())
+    {
+      qint32 iId = pModel->SceneId();
+      auto spScene = spDbManager->FindScene(spProject, iId);
+      if (nullptr != spScene)
+      {
+        QReadLocker l(&spScene->m_rwLock);
+        pWidget->SetTileResource(spScene->m_sTitleCard);
+        pWidget->SetCanStartHere(spScene->m_bCanStartHere);
+        pWidget->SetScript(spScene->m_sScript);
+        pWidget->SetLayout(spScene->m_sSceneLayout);
+      }
+    }
+  }
 }
 CNodeDebugNode::~CNodeDebugNode() = default;
 
@@ -491,7 +688,7 @@ CNodeDebugSelection::CNodeDebugSelection(const QStringList& vsScenes, QtNodes::N
   pLayout->addWidget(pButtonContinue);
 
   connect(pButtonContinue, &QPushButton::clicked, pView, [pView, this]() {
-    pView->NextScene(CurrentIndex());
+    pView->NextScene(CurrentIndex(), true);
   });
 }
 CNodeDebugSelection::~CNodeDebugSelection() = default;
@@ -542,17 +739,18 @@ void CNodeDebugBackground::paintEvent(QPaintEvent* pEvt)
 //----------------------------------------------------------------------------------------
 //
 CNodeDebugWidget::CNodeDebugWidget(QWidget* pParent) :
-    QWidget(pParent),
-    m_spUi(std::make_unique<Ui::CNodeDebugWidget>()),
-    m_spNodeResolver(std::make_unique<CSceneNodeResolver>(
-          CNodeEditorRegistryBase::RegisterDataModelsWithoutUi()))
+  QWidget(pParent),
+  m_spUi(std::make_unique<Ui::CNodeDebugWidget>()),
+  m_spNodeResolver(std::make_unique<CSceneNodeResolver>(
+        CNodeEditorRegistryBase::RegisterDataModelsWithoutUi())),
+  m_spNodeDebugger(std::make_shared<CNodeDebugger>(this))
 {
   m_spUi->setupUi(this);
 
   //connect(m_spNodeResolver.get(), &CSceneNodeResolver::SignalChangeSceneRequest,
   //        this, &CNodeDebugWidget::SlotSceneError);
-  connect(m_spNodeResolver.get(), &CSceneNodeResolver::SignalError,
-          this, &CNodeDebugWidget::SlotSceneError);
+  //connect(m_spNodeResolver.get(), &CSceneNodeResolver::SignalError,
+  //        this, &CNodeDebugWidget::SlotSceneError);
 
   QLayout* pLayout = m_spUi->pScrollAreaWidgetContents->layout();
   assert(nullptr != pLayout);
@@ -560,6 +758,8 @@ CNodeDebugWidget::CNodeDebugWidget(QWidget* pParent) :
   {
     pLayout->addItem(new QSpacerItem(0, 0, QSizePolicy::Expanding, QSizePolicy::Preferred));
   }
+
+  m_spNodeResolver->AttatchDebugger(m_spNodeDebugger);
 }
 
 CNodeDebugWidget::~CNodeDebugWidget()
@@ -577,14 +777,17 @@ void CNodeDebugWidget::Initialize(QPointer<CNodeEditorFlowView> pFlowView,
 
 //----------------------------------------------------------------------------------------
 //
-void CNodeDebugWidget::NextScene(qint32 iIndex)
+void CNodeDebugWidget::NextScene(qint32 iIndex, bool bSkipLastElementcheck)
 {
   if (!IsInErrorState())
   {
-    if (auto pSelect = dynamic_cast<CNodeDebugSelection*>(LastWidget());
-        nullptr != pSelect && -1 == iIndex)
+    if (!bSkipLastElementcheck)
     {
-      iIndex = pSelect->CurrentIndex();
+      if (auto pSelect = dynamic_cast<CNodeDebugSelection*>(LastWidget());
+          nullptr != pSelect && -1 == iIndex)
+      {
+        iIndex = pSelect->CurrentIndex();
+      }
     }
 
     std::optional<QString> unresolvedData;
@@ -600,7 +803,7 @@ void CNodeDebugWidget::NextScene(qint32 iIndex)
           if (nullptr != spScene)
           {
             AddWidget(new CNodeDebugNode(m_spCurrentProject, vsScenes[0],
-                                         NodeFromScene(m_spNodeResolver->CurrentNode()),
+                                         NodeFromScene(m_spNodeDebugger->CurrentNode()),
                                          m_spUi->pScrollAreaWidgetContents,
                                          this));
             m_spNodeResolver->ResolveScenes();
@@ -608,7 +811,7 @@ void CNodeDebugWidget::NextScene(qint32 iIndex)
           else if (bEnd)
           {
             AddWidget(new CNodeDebugNodeStartEnd(false,
-                                                 NodeFromScene(m_spNodeResolver->CurrentNode()),
+                                                 NodeFromScene(m_spNodeDebugger->CurrentNode()),
                                                  m_spUi->pScrollAreaWidgetContents,
                                                  this));
           }
@@ -620,7 +823,7 @@ void CNodeDebugWidget::NextScene(qint32 iIndex)
           if (nullptr != spScene)
           {
             AddWidget(new CNodeDebugNode(m_spCurrentProject, vsScenes[iIndex],
-                                         NodeFromScene(m_spNodeResolver->CurrentNode()),
+                                         NodeFromScene(m_spNodeDebugger->CurrentNode()),
                                          m_spUi->pScrollAreaWidgetContents,
                                          this));
             m_spNodeResolver->ResolveScenes();
@@ -628,14 +831,15 @@ void CNodeDebugWidget::NextScene(qint32 iIndex)
           else if (bEnd)
           {
             AddWidget(new CNodeDebugNodeStartEnd(false,
-                                                 NodeFromScene(m_spNodeResolver->CurrentNode()),
+                                                 NodeFromScene(m_spNodeDebugger->CurrentNode()),
                                                  m_spUi->pScrollAreaWidgetContents,
                                                  this));
           }
         }
         else
         {
-          AddWidget(new CNodeDebugSelection(vsScenes, nullptr,
+          m_spNodeDebugger->PoppUntilNextSelectable();
+          AddWidget(new CNodeDebugSelection(vsScenes, NodeFromScene(m_spNodeDebugger->CurrentNode()),
                                             m_spUi->pScrollAreaWidgetContents, this));
         }
       }
@@ -647,16 +851,12 @@ void CNodeDebugWidget::NextScene(qint32 iIndex)
           m_spNodeResolver->ResolvePossibleScenes(vsScenes, iIndex);
           // do we still have unresolved scenes?
           vsScenes = m_spNodeResolver->PossibleScenes(&unresolvedData);
-          NextScene();
-        }
-        else if (!sUnResolveData.isEmpty())
-        {
-          AddWidget(new CNodeDebugSelection(vsScenes, nullptr,
-                                            m_spUi->pScrollAreaWidgetContents, this));
+          NextScene(-1, true);
         }
         else
         {
-          AddWidget(new CNodeDebugSelection(vsScenes, nullptr,
+          m_spNodeDebugger->PoppUntilNextSelectable();
+          AddWidget(new CNodeDebugSelection(vsScenes, NodeFromScene(m_spNodeDebugger->CurrentNode()),
                                             m_spUi->pScrollAreaWidgetContents, this));
         }
       }
@@ -698,7 +898,7 @@ void CNodeDebugWidget::StartDebug(const tspProject& spProject,
     if (bIsEmpty || nullptr == spStartScene)
     {
       AddWidget(new CNodeDebugNodeStartEnd(true,
-                                           NodeFromScene(m_spNodeResolver->CurrentNode()),
+                                           NodeFromScene(m_spNodeDebugger->CurrentNode()),
                                            m_spUi->pScrollAreaWidgetContents,
                                            this));
     }
@@ -711,7 +911,7 @@ void CNodeDebugWidget::StartDebug(const tspProject& spProject,
       }
       AddWidget(new CNodeDebugNode(m_spCurrentProject,
                                    sStartScene,
-                                   NodeFromScene(m_spNodeResolver->CurrentNode()),
+                                   NodeFromScene(m_spNodeDebugger->CurrentNode()),
                                    m_spUi->pScrollAreaWidgetContents,
                                    this));
     }

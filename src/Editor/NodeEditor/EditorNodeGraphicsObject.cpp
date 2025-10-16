@@ -29,8 +29,7 @@ namespace
                     QtNodes::NodeGeometry const& geom,
                     QtNodes::NodeDataModel const* model,
                     QtNodes::NodeGraphicsObject const & graphicsObject,
-                    const QColor& nodeDebugColor0, const QColor& nodeDebugColor1,
-                    const QColor& nodeDebugColor2, const QColor& nodeDebugColor3,
+                    const QColor& nodeDebugColor,
                     bool bBeingdebugged)
   {
     QtNodes::NodeStyle const& nodeStyle = model->nodeStyle();
@@ -67,10 +66,10 @@ namespace
       QLinearGradient gradient(QPointF(0.0, 0.0),
                                QPointF(2.0, geom.height()));
 
-      gradient.setColorAt(0.0, nodeDebugColor0);
-      gradient.setColorAt(0.03, nodeDebugColor1);
-      gradient.setColorAt(0.97, nodeDebugColor2);
-      gradient.setColorAt(1.0, nodeDebugColor3);
+      gradient.setColorAt(0.0, nodeDebugColor);
+      gradient.setColorAt(0.03, nodeDebugColor);
+      gradient.setColorAt(0.97, nodeStyle.GradientColor1);
+      gradient.setColorAt(1.0, nodeStyle.GradientColor1);
 
       painter->setBrush(gradient);
     }
@@ -112,33 +111,24 @@ void CEditorNodeGraphicsObject::paint(QPainter* pPainter,
   QtNodes::NodeStyle const& nodeStyle = model->nodeStyle();
 
   bool bBeingdebugged = false;
-  QColor col0;
-  QColor col1;
-  QColor col2;
-  QColor col3;
+  QColor col;
   if (auto pModel = dynamic_cast<CNodeModelBase const *>(model))
   {
     bBeingdebugged = pModel->DebugState() != CNodeModelBase::eNotDebugged;
     switch (pModel->DebugState())
     {
       case CNodeModelBase::eDebugPassive:
-        col0 = nodeStyle.WarningColor;
-        col1 = nodeStyle.WarningColor;
-        col2 = nodeStyle.WarningColor;
-        col3 = nodeStyle.WarningColor;
+        col = nodeStyle.WarningColor;
         break;
       case CNodeModelBase::eDebugActive:
-        col0 = nodeStyle.ErrorColor;
-        col1 = nodeStyle.ErrorColor;
-        col2 = nodeStyle.ErrorColor;
-        col3 = nodeStyle.ErrorColor;
+        col = nodeStyle.ErrorColor;
         break;
       case CNodeModelBase::eNotDebugged:
         break;
     }
   }
   drawNodeRect(pPainter, geom, model, graphicsObject,
-               col0, col1, col2, col3, bBeingdebugged);
+               col, bBeingdebugged);
 
   QtNodes::NodePainter::drawConnectionPoints(pPainter, geom, state, model, m_scene);
 

@@ -16,6 +16,7 @@
 #include <memory>
 #include <variant>
 
+class CNodeDebugger;
 class CNodeDebugWidget;
 class CNodeEditorFlowScene;
 class CNodeEditorFlowView;
@@ -29,6 +30,8 @@ typedef std::shared_ptr<SProject> tspProject;
 typedef std::shared_ptr<SScene> tspScene;
 
 
+//----------------------------------------------------------------------------------------
+//
 class CNodeContainingItem
 {
 public:
@@ -93,7 +96,7 @@ class CNodeDebugNode : public CNodeMock
   Q_OBJECT
 
 public:
-  explicit CNodeDebugNode(const tspProject& spProject, const QString& sScene,
+  explicit CNodeDebugNode(tspProject spProject, const QString& sScene,
                           QtNodes::Node* pNode,
                           QWidget* pParent = nullptr, QWidget* pView = nullptr);
   ~CNodeDebugNode();
@@ -177,6 +180,7 @@ class CNodeDebugWidget : public QWidget
 {
   Q_OBJECT
   Q_PROPERTY(QColor backgroundColor READ BackgroundColor WRITE SetBackgroundColor)
+  friend class CNodeDebugger;
 
 public:
   explicit CNodeDebugWidget(QWidget* pParent = nullptr);
@@ -184,7 +188,7 @@ public:
 
   void Initialize(QPointer<CNodeEditorFlowView> pFlowView,
                   QPointer<CNodeEditorFlowScene> pScene);
-  void NextScene(qint32 iIndex = -1);
+  void NextScene(qint32 iIndex = -1, bool bSkipLastelementcheck = false);
   void StartDebug(const tspProject& spProject, const std::variant<QString, QUuid>& start);
   void StopDebug();
 
@@ -193,7 +197,7 @@ public:
 
   void FocusNode(QtNodes::Node* pNode);
 
-private slots:
+protected slots:
   void SlotSceneError(QString sError, QtMsgType type);
   void SlotUpdateScene();
   void SlotUpdateScrollAndScene();
@@ -210,6 +214,7 @@ private:
 
   std::unique_ptr<Ui::CNodeDebugWidget> m_spUi;
   std::unique_ptr<CSceneNodeResolver>   m_spNodeResolver;
+  std::shared_ptr<CNodeDebugger>        m_spNodeDebugger;
   tspProject                            m_spCurrentProject;
   QPointer<CNodeEditorFlowView>         m_pFlowView;
   QPointer<CNodeEditorFlowScene>        m_pScene;

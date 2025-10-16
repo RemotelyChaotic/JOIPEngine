@@ -6,9 +6,12 @@ New Features:
 - New Debug interface for reading the debug log and running debug commands.
 - Scene selection inplemented. Teases can define which Scenes are eligible
   to start from and the Title Card of those Scenes.
+- Node debugger implemented.
 
 Fixed Bugs:
 - Scene Resources update if the resource is removed or changed somewhere else.
+- Fixed some constellations of Scene transitions that failed to transition
+  correctly.
 
 =================
 Version 1.5.1.0

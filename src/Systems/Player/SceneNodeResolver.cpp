@@ -34,8 +34,21 @@ namespace
 
 //----------------------------------------------------------------------------------------
 //
-void ResolveNextPossibleNodes(qint32 iDepth, Node* pNode, const std::set<QString>& disabledScenes,
-                              std::vector<NodeResolveReslt>& vpRet)
+bool IsSelectableTransiation(Node const * const pNode)
+{
+  CPathSplitterModel* pSplitterModel =
+      dynamic_cast<CPathSplitterModel*>(pNode->nodeDataModel());
+  return nullptr != pSplitterModel &&
+         pSplitterModel->TransitionType()._to_integral() == ESceneTransitionType::eSelection;
+}
+
+//----------------------------------------------------------------------------------------
+//
+void ResolveNextPossibleNodes(qint32 iDepth, Node const * const pNode,
+                              const QString& sDefaultTransitionName,
+                              const std::set<QString>& disabledScenes,
+                              std::vector<NodeResolveReslt>& vpRet,
+                              std::shared_ptr<IResolverDebugger> spDebugger)
 {
   if (nullptr == pNode) { return; }
 
@@ -73,22 +86,144 @@ void ResolveNextPossibleNodes(qint32 iDepth, Node* pNode, const std::set<QString
                   NodeResolveReslt{pSplitterModel->TransitionLabel(static_cast<qint32>(i)),
                                    pNextNode, iDepth, optCustomTransition.has_value(),
                                    optCustomTransition.value_or(QString())});
+            if (nullptr != spDebugger)
+            {
+              spDebugger->PushNode(pNode, pNextNode,
+                                   IResolverDebugger::NodeData{true, IsSelectableTransiation(pNextNode),
+                                                               pSplitterModel->TransitionLabel(static_cast<qint32>(i)),
+                                                               static_cast<qint32>(i)});
+            }
           }
           // push end
           else if(nullptr != pEndModel)
           {
             vpRet.push_back(NodeResolveReslt{c_sEndNode, pNextNode, iDepth, false, QString()});
+            if (nullptr != spDebugger)
+            {
+              spDebugger->PushNode(pNode, pNextNode,
+                                   IResolverDebugger::NodeData{true, false,
+                                                               c_sEndNode,
+                                                               static_cast<qint32>(i)});
+            }
           }
           // only push enabled scenes
           else if (disabledScenes.end() == disabledScenes.find(pSceneModel->SceneName()))
           {
-            vpRet.push_back(NodeResolveReslt{pSceneModel->SceneName(), pNextNode, iDepth, false, QString()});
+            vpRet.push_back(NodeResolveReslt{sDefaultTransitionName.isEmpty() ?
+                                                 pSceneModel->SceneName() : sDefaultTransitionName,
+                                             pNextNode, iDepth, false, QString()});
+            if (nullptr != spDebugger)
+            {
+              spDebugger->PushNode(pNode, pNextNode,
+                                   IResolverDebugger::NodeData{true, false, pSceneModel->SceneName(),
+                                                               static_cast<qint32>(i)});
+            }
+          }
+          // for debugging purposes
+          else
+          {
+            if (nullptr != spDebugger)
+            {
+              spDebugger->PushNode(pNode, pNextNode,
+                                   IResolverDebugger::NodeData{false, false, pSceneModel->SceneName(),
+                                                               static_cast<qint32>(i)});
+            }
           }
         }
-        // we have a merger
+        // we have a merger or splitter next, iterate recursively
         else
         {
-          ResolveNextPossibleNodes(iDepth+1, pNextNode, disabledScenes, vpRet);
+          if (nullptr != spDebugger)
+          {
+            QString sLabel;
+            bool bSelection = false;
+            if (nullptr == pNextNode)
+            {
+              sLabel = "Empty";
+            }
+            else if (nullptr != dynamic_cast<CPathSplitterModel*>(pNextNode->nodeDataModel()))
+            {
+              if (nullptr != pSplitterModel)
+              {
+                sLabel = pSplitterModel->TransitionLabel(static_cast<qint32>(i));
+              }
+              else
+              {
+                sLabel = "Splitter";
+              }
+              bSelection = IsSelectableTransiation(pNextNode);
+            }
+            else
+            {
+              sLabel = "Merger";
+            }
+            spDebugger->PushNode(pNode, pNextNode,
+                                 IResolverDebugger::NodeData{nullptr != pNextNode, bSelection,
+                                                             sLabel, static_cast<qint32>(i)});
+          }
+
+          QString sDefaultTransitionLabel = sDefaultTransitionName;
+          if (nullptr != pSplitterModel)
+          {
+            sDefaultTransitionLabel = pSplitterModel->TransitionLabel(static_cast<qint32>(i));
+          }
+
+          std::vector<NodeResolveReslt> vpCachedRet;
+          ResolveNextPossibleNodes(iDepth+1, pNextNode, sDefaultTransitionLabel,
+                                   disabledScenes, vpCachedRet, spDebugger);
+
+          // if we have a Splitter here, we migth need user resolvement
+          if (nullptr != pSplitterModel)
+          {
+            std::optional<QString> optCustomTransition = pSplitterModel->CustomTransition();
+            bool bPushThisNodeAsToResolve = false;
+            for (auto& ret : vpCachedRet)
+            {
+              if (ret.m_bNeedsUserResolvement)
+              {
+                bPushThisNodeAsToResolve = true;
+              }
+            }
+            if (bPushThisNodeAsToResolve)
+            {
+              vpRet.push_back(NodeResolveReslt{pSplitterModel->TransitionLabel(static_cast<qint32>(i)),
+                                               pNextNode, iDepth,
+                                               optCustomTransition.has_value(),
+                                               optCustomTransition.value_or(QString())});
+            }
+            for (auto& ret : vpCachedRet)
+            {
+              if (!ret.m_bNeedsUserResolvement)
+              {
+                ret.m_iDepth--;
+              }
+              if (ret.m_iDepth == iDepth && !ret.m_bNeedsUserResolvement)
+              {
+                ret.m_bNeedsUserResolvement = optCustomTransition.has_value();
+                ret.m_sResolvementData = optCustomTransition.value_or(QString());
+              }
+              if (nullptr != spDebugger)
+              {
+                auto pBlock = spDebugger->DataBlock(ret.m_pNode);
+                assert(nullptr != pBlock);
+                if (nullptr != pBlock)
+                {
+                  pBlock->bSelection = ret.m_bNeedsUserResolvement;
+                }
+              }
+            }
+          }
+          else
+          {
+            for (auto& ret : vpCachedRet)
+            {
+              if (!ret.m_bNeedsUserResolvement)
+              {
+                ret.m_iDepth--;
+              }
+            }
+          }
+          vpRet.insert(vpRet.end(), vpCachedRet.begin(), vpCachedRet.end());
         }
       }
     }
@@ -133,6 +268,12 @@ void ResolveNextPossibleNodes(qint32 iDepth, Node* pNode, const std::set<QString
         {
           vpCachedRet.push_back(
               NodeResolveReslt{c_sEndNode, pNextNode, iDepth, false, QString()});
+          if (nullptr != spDebugger)
+          {
+            spDebugger->PushNode(pNode, pNextNode,
+                                 IResolverDebugger::NodeData{true, false, c_sEndNode,
+                                                             iValidIndex});
+          }
         }
         // we found a scene model, only insert if not disabled
         else if (nullptr != pSceneModel)
@@ -142,12 +283,62 @@ void ResolveNextPossibleNodes(qint32 iDepth, Node* pNode, const std::set<QString
             vpCachedRet.push_back(
                 NodeResolveReslt{pSplitterModel->TransitionLabel(iValidIndex),
                                  pNextNode, iDepth, false, QString()});
+            if (nullptr != spDebugger)
+            {
+              spDebugger->PushNode(pNode, pNextNode,
+                                   IResolverDebugger::NodeData{true, false,
+                                                               pSplitterModel->TransitionLabel(iValidIndex),
+                                                               iValidIndex});
+            }
+          }
+          else
+          {
+            if (nullptr != spDebugger)
+            {
+              spDebugger->PushNode(pNode, pNextNode,
+                                   IResolverDebugger::NodeData{false, false,
+                                                               pSplitterModel->TransitionLabel(iValidIndex),
+                                                               iValidIndex});
+            }
           }
         }
-        // might be a merger or splitter, iterate recursively
+        // we have a merger or splitter next, iterate recursively
         else
         {
-          ResolveNextPossibleNodes(iDepth+1, pNextNode, disabledScenes, vpCachedRet);
+          if (nullptr != spDebugger)
+          {
+            QString sLabel;
+            bool bSelection = false;
+            if (nullptr == pNextNode)
+            {
+              sLabel = "Empty";
+            }
+            else if (nullptr != dynamic_cast<CPathSplitterModel*>(pNextNode->nodeDataModel()))
+            {
+              if (nullptr != pSplitterModel)
+              {
+                sLabel = pSplitterModel->TransitionLabel(iValidIndex);
+              }
+              else
+              {
+                sLabel = "Splitter";
+              }
+              bSelection = IsSelectableTransiation(pNextNode);
+            }
+            else
+            {
+              sLabel = "Merger";
+            }
+            spDebugger->PushNode(pNode, pNextNode,
+                                 IResolverDebugger::NodeData{nullptr != pNextNode, bSelection,
+                                                             sLabel, iValidIndex});
+          }
+          QString sDefaultTransitionLabel = sDefaultTransitionName;
+          if (nullptr != pSplitterModel)
+          {
+            sDefaultTransitionLabel = pSplitterModel->TransitionLabel(iValidIndex);
+          }
+          ResolveNextPossibleNodes(iDepth+1, pNextNode, sDefaultTransitionLabel, disabledScenes, vpCachedRet, spDebugger);
         }
       }
 
@@ -165,7 +356,21 @@ void ResolveNextPossibleNodes(qint32 iDepth, Node* pNode, const std::set<QString
       qDebug() << "Generated value:" << iGeneratedIndex << "from 0 -" << static_cast<qint32>(vResult2Pass.size() - 1);
 
       auto vRolledRes = vResult2Pass[static_cast<size_t>(iGeneratedIndex)].second;
+      for (auto& ret : vRolledRes)
+      {
+        ret.m_iDepth--;
+      }
       vpRet.insert(vpRet.end(), vRolledRes.begin(), vRolledRes.end());
+
+      if (nullptr != spDebugger)
+      {
+        auto vpChildDataBlocks = spDebugger->ChildBlocks(pNode);
+        for (size_t iBlock = 0; vpChildDataBlocks.size() != iBlock; ++iBlock)
+        {
+          auto pBlock = vpChildDataBlocks[static_cast<size_t>(iBlock)];
+          pBlock->bEnabled = pBlock->iPortIndex == vResult2Pass[static_cast<size_t>(iGeneratedIndex)].first;
+        }
+      }
     }
   }
 }
@@ -208,9 +413,12 @@ QStringList GetFirstUnresolvedNodes(std::vector<NodeResolveReslt>& resolveResult
 //----------------------------------------------------------------------------------------
 //
 void ResolveNodes(std::vector<NodeResolveReslt>& resolveResult, const QStringList& vsNodes,
-                  qint32 iResolve, const std::set<QString>& disabledScenes)
+                  qint32 iResolve, const std::set<QString>& disabledScenes,
+                  std::shared_ptr<IResolverDebugger> spDebugger)
 {
   QStringList vsToResolve = vsNodes;
+
+  std::optional<NodeResolveReslt> resolved = std::nullopt;
 
   // find the unresolved nodes with the lowest depth
   while (vsToResolve.size() > 0)
@@ -226,23 +434,19 @@ void ResolveNodes(std::vector<NodeResolveReslt>& resolveResult, const QStringLis
 
       if (0 == iResolve)
       {
-        CSceneNodeModel* pSceneModel =
-          dynamic_cast<CSceneNodeModel*>(node.m_pNode->nodeDataModel());
-        CEndNodeModel* pEndModel =
-          dynamic_cast<CEndNodeModel*>(node.m_pNode->nodeDataModel());
-        if (nullptr != pSceneModel)
+        // splitters and mergers are dummies here, so ignore
+        CPathSplitterModel* pSplitterModel =
+          dynamic_cast<CPathSplitterModel*>(node.m_pNode->nodeDataModel());
+        CPathMergerModel* pMerger =
+            dynamic_cast<CPathMergerModel*>(node.m_pNode->nodeDataModel());
+        if (nullptr == pSplitterModel && nullptr == pMerger)
         {
-          resolveResult.push_back(NodeResolveReslt{pSceneModel->SceneName(), node.m_pNode,
-                                                   node.m_iDepth+1, false, QString()});
+          resolved = node;
         }
-        else if (nullptr != pEndModel)
+
+        if (nullptr != spDebugger)
         {
-          resolveResult.push_back(NodeResolveReslt{c_sEndNode, node.m_pNode, node.m_iDepth+1,
-                                                   false, QString()});
-        }
-        else
-        {
-          ResolveNextPossibleNodes(node.m_iDepth+1, node.m_pNode, disabledScenes, resolveResult);
+          spDebugger->ResolveTo(node.m_pNode);
         }
       }
 
@@ -251,8 +455,33 @@ void ResolveNodes(std::vector<NodeResolveReslt>& resolveResult, const QStringLis
 
     vsToResolve.erase(vsToResolve.begin());
   }
+
+  qint32 iNextDepth = INT_MAX;
+  bool bNeedsResolvement = false;
+  QString sResolvementData;
+  for (const auto& res : resolveResult)
+  {
+    if (iNextDepth > res.m_iDepth)
+    {
+      iNextDepth = res.m_iDepth;
+      bNeedsResolvement = res.m_bNeedsUserResolvement;
+      sResolvementData = res.m_sResolvementData;
+    }
+  }
+
+  if (resolved.has_value())
+  {
+    resolveResult.push_back(resolved.value());
+    resolveResult.back().m_iDepth = iNextDepth;
+    resolveResult.back().m_bNeedsUserResolvement = bNeedsResolvement;
+    resolveResult.back().m_sResolvementData = sResolvementData;
+  }
 }
 
+//----------------------------------------------------------------------------------------
+//
+IResolverDebugger::IResolverDebugger() {}
+IResolverDebugger::~IResolverDebugger() = default;
 
 //----------------------------------------------------------------------------------------
 //
@@ -288,6 +517,13 @@ bool CSceneNodeResolver::MightBeRegexScene(const QString& sName)
 {
   return sName.contains('+') || sName.contains('*') || sName.contains('|') || sName.contains('{') ||
          sName.contains('}') || sName.contains('[') || sName.contains(']');
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CSceneNodeResolver::AttatchDebugger(const std::weak_ptr<IResolverDebugger>& wpDebugger)
+{
+  m_wpDebugger = wpDebugger;
 }
 
 //----------------------------------------------------------------------------------------
@@ -380,6 +616,10 @@ void CSceneNodeResolver::LoadProject(tspProject spProject, const tspScene& spSta
 //
 void CSceneNodeResolver::UnloadProject()
 {
+  if (auto spDebugger = m_wpDebugger.lock())
+  {
+    spDebugger->SetCurrentNode(nullptr);
+  }
   m_pCurrentNode = nullptr;
   m_spCurrentProject = nullptr;
   m_spInjectedScene = nullptr;
@@ -393,13 +633,6 @@ void CSceneNodeResolver::UnloadProject()
     delete m_pFlowScene;
     m_pFlowScene = nullptr;
   }
-}
-
-//----------------------------------------------------------------------------------------
-//
-QtNodes::Node* CSceneNodeResolver::CurrentNode() const
-{
-  return m_pCurrentNode;
 }
 
 //----------------------------------------------------------------------------------------
@@ -458,6 +691,11 @@ tspScene CSceneNodeResolver::NextScene(const QString sName, bool* bEnd)
     if (nullptr != pSceneModel)
     {
       m_pCurrentNode = it->second;
+      if (auto spDebugger = m_wpDebugger.lock())
+      {
+        spDebugger->SetCurrentNode(m_pCurrentNode);
+      }
+
       qint32 iId = pSceneModel->SceneId();
       auto spDbManager = m_wpDbManager.lock();
       if (nullptr != spDbManager)
@@ -473,6 +711,14 @@ tspScene CSceneNodeResolver::NextScene(const QString sName, bool* bEnd)
     else if (nullptr != pEndNodeModel && nullptr != bEnd)
     {
       *bEnd = true;
+      if (nullptr != pEndNodeModel)
+      {
+        m_pCurrentNode = it->second;
+        if (auto spDebugger = m_wpDebugger.lock())
+        {
+          spDebugger->SetCurrentNode(m_pCurrentNode);
+        }
+      }
     }
   }
   else if (nullptr != m_spInjectedScene)
@@ -570,7 +816,7 @@ void CSceneNodeResolver::ResolveFindScenes(const QString sName)
 //
 void CSceneNodeResolver::ResolvePossibleScenes(const QStringList vsNames, qint32 iIndex)
 {
-  ResolveNodes(m_resolveResult, vsNames, iIndex, m_disabledScenes);
+  ResolveNodes(m_resolveResult, vsNames, iIndex, m_disabledScenes, m_wpDebugger.lock());
   m_nodeMap.clear();
   GenerateNodesFromResolved();
 }
@@ -580,6 +826,18 @@ void CSceneNodeResolver::ResolvePossibleScenes(const QStringList vsNames, qint32
 void CSceneNodeResolver::ResolveScenes()
 {
   ResolveNextScene();
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CSceneNodeResolver::Error(const QString& sError, QtMsgType type)
+{
+  qWarning() << sError;
+  if (auto spDebugger = m_wpDebugger.lock())
+  {
+    spDebugger->Error(sError, type);
+  }
+  emit SignalError(sError, type);
 }
 
 //----------------------------------------------------------------------------------------
@@ -620,9 +878,7 @@ bool CSceneNodeResolver::GenerateNodesFromResolved()
   }
   else
   {
-    QString sError(tr("Next node not found."));
-    qWarning() << sError;
-    emit SignalError(sError, QtMsgType::QtCriticalMsg);
+    Error(tr("Next node not found."), QtMsgType::QtCriticalMsg);
     return false;
   }
   return true;
@@ -632,13 +888,10 @@ bool CSceneNodeResolver::GenerateNodesFromResolved()
 //
 bool CSceneNodeResolver::Setup(tspProject spProject, const std::variant<QString, QUuid>& start)
 {
-  QString sError;
   if (nullptr != m_spCurrentProject)
   {
     assert(false);
-    sError = tr("Old Project was not unloaded before loading project.");
-    qWarning() << sError;
-    emit SignalError(sError, QtMsgType::QtCriticalMsg);
+    Error(tr("Old Project was not unloaded before loading project."), QtMsgType::QtCriticalMsg);
   }
 
   m_spCurrentProject = spProject;
@@ -656,9 +909,7 @@ bool CSceneNodeResolver::Setup(tspProject spProject, const std::variant<QString,
   assert(bOk && "Could not load Flow scene. Why????");
   if (!bOk)
   {
-    sError = tr("Could not load Flow scene.");
-    qWarning() << sError;
-    emit SignalError(sError, QtMsgType::QtCriticalMsg);
+    Error(tr("Could not load Flow scene."), QtMsgType::QtCriticalMsg);
     return false;
   }
 
@@ -666,6 +917,7 @@ bool CSceneNodeResolver::Setup(tspProject spProject, const std::variant<QString,
   assert(bOk && "Starting scene could not be resolved.");
   if (!bOk)
   {
+    QString sError;
     if (std::holds_alternative<QString>(start))
     {
       sError = QString(tr("Starting scene '%1' could not be resolved."))
@@ -676,8 +928,7 @@ bool CSceneNodeResolver::Setup(tspProject spProject, const std::variant<QString,
       sError = QString(tr("Starting scene '%1' could not be resolved."))
                    .arg(std::get<QUuid>(start).toString());
     }
-    qWarning() << sError;
-    emit SignalError(sError, QtMsgType::QtCriticalMsg);
+    Error(sError, QtMsgType::QtCriticalMsg);
     return false;
   }
 
@@ -716,18 +967,14 @@ bool CSceneNodeResolver::LoadFlowScene()
         }
         else
         {
-          QString sError(tr("Could not open scene model file: %1.").arg(modelFile.errorString()));
-          qWarning() << sError;
-          emit SignalError(sError, QtMsgType::QtWarningMsg);
+          Error(tr("Could not open scene model file: %1.").arg(modelFile.errorString()), QtMsgType::QtWarningMsg);
           return false;
         }
       }
     }
     else
     {
-      QString sError(tr("Could not open scene model file: scene not found."));
-      qWarning() << sError;
-      emit SignalError(sError, QtMsgType::QtWarningMsg);
+      Error(tr("Could not open scene model file: scene not found."), QtMsgType::QtWarningMsg);
       return false;
     }
   }
@@ -745,14 +992,12 @@ bool CSceneNodeResolver::ResolveNextScene()
 {
   if (nullptr == m_pFlowScene || nullptr == m_pCurrentNode)
   {
-    QString sError(tr("Internal error."));
-    qWarning() << sError;
-    emit SignalError(sError, QtMsgType::QtCriticalMsg);
+    Error(tr("Internal error."), QtMsgType::QtCriticalMsg);
     return false;
   }
 
   m_nodeMap.clear();
-  ResolveNextPossibleNodes(0, m_pCurrentNode, m_disabledScenes, m_resolveResult);
+  ResolveNextPossibleNodes(0, m_pCurrentNode, QString(), m_disabledScenes, m_resolveResult, m_wpDebugger.lock());
   return GenerateNodesFromResolved();
 }
 
@@ -762,9 +1007,7 @@ bool CSceneNodeResolver::ResolveStart(const std::variant<QString, QUuid>& start)
 {
   if (nullptr == m_pFlowScene)
   {
-    QString sError(tr("Internal error."));
-    qWarning() << sError;
-    emit SignalError(sError, QtMsgType::QtCriticalMsg);
+    Error(tr("Internal error."), QtMsgType::QtCriticalMsg);
     return false;
   }
 
@@ -793,6 +1036,10 @@ bool CSceneNodeResolver::ResolveStart(const std::variant<QString, QUuid>& start)
           vsFoundNames.push_back(pSceneModel->SceneName());
           bFound = true;
           m_pCurrentNode = pNode;
+          if (auto spDebugger = m_wpDebugger.lock())
+          {
+            spDebugger->SetCurrentNode(m_pCurrentNode);
+          }
         }
       }
     }
@@ -808,6 +1055,10 @@ bool CSceneNodeResolver::ResolveStart(const std::variant<QString, QUuid>& start)
             vsFoundNames.push_back(pStartModel->Name());
             bFound = true;
             m_pCurrentNode = pNode;
+            if (auto spDebugger = m_wpDebugger.lock())
+            {
+              spDebugger->SetCurrentNode(m_pCurrentNode);
+            }
           }
         }
       }
@@ -822,6 +1073,10 @@ bool CSceneNodeResolver::ResolveStart(const std::variant<QString, QUuid>& start)
         vsFoundNames.push_back(pNode->id().toString());
         bFound = true;
         m_pCurrentNode = pNode;
+        if (auto spDebugger = m_wpDebugger.lock())
+        {
+          spDebugger->SetCurrentNode(m_pCurrentNode);
+        }
       }
     }
   }
@@ -830,17 +1085,13 @@ bool CSceneNodeResolver::ResolveStart(const std::variant<QString, QUuid>& start)
   {
     if (vsFoundNames.size() > 0)
     {
-      QString sError = QString(tr("Multiple entry points in project: %1 (%2)"))
-                       .arg(vsFoundNames.size()).arg(vsFoundNames.join(", "));
-      qWarning() << sError;
-      emit SignalError(sError, QtMsgType::QtCriticalMsg);
+      Error(tr("Multiple entry points in project: %1 (%2)")
+              .arg(vsFoundNames.size()).arg(vsFoundNames.join(", ")), QtMsgType::QtCriticalMsg);
       return false;
     }
     else
     {
-      QString sError = QString(tr("No entry points in project."));
-      qWarning() << sError;
-      emit SignalError(sError, QtMsgType::QtCriticalMsg);
+      Error(tr("No entry points in project."), QtMsgType::QtCriticalMsg);
       return false;
     }
   }
