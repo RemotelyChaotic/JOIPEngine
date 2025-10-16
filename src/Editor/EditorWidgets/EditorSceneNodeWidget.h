@@ -42,6 +42,7 @@ class CEditorSceneNodeWidget : public CEditorWidgetBase
   Q_PROPERTY(QColor normalConnectionColor       MEMBER m_normalColor)
   Q_PROPERTY(QColor selectedConnectionColor     MEMBER m_selectedColor)
   Q_PROPERTY(QColor selectedConnectionHaloColor MEMBER m_selectedHaloColor)
+  Q_PROPERTY(QColor hoveredConnectionColor      MEMBER m_hoveredConnectionColor)
   Q_PROPERTY(QColor warningColor                MEMBER m_warningColor)
   Q_PROPERTY(QColor errorColor                  MEMBER m_errorColor)
 
@@ -99,7 +100,7 @@ private:
   QColor                                                      m_normalColor;
   QColor                                                      m_selectedColor;
   QColor                                                      m_selectedHaloColor;
-  QColor                                                      m_hoveredColor;
+  QColor                                                      m_hoveredConnectionColor;
 
   QColor                                                      m_warningColor;
   QColor                                                      m_errorColor;

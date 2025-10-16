@@ -418,7 +418,7 @@ void CEditorSceneNodeWidget::SlotStyleChanged()
                m_normalColor,
                m_selectedColor,
                m_selectedHaloColor,
-               m_hoveredColor,
+               m_hoveredConnectionColor,
                m_warningColor,
                m_errorColor);
 }

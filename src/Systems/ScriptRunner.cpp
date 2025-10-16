@@ -216,15 +216,29 @@ void CScriptRunner::ResumeExecution()
 //
 void CScriptRunner::RegisterNewComponent(const QString sName, QJSValue signalEmitter)
 {
-  for (const auto& it : m_spRunnerFactoryMap)
+  if (QThread::currentThread() != qApp->thread())
   {
-    it.second->RegisterNewComponent(sName, signalEmitter);
+    assert(false && "Called RegisterNewComponent in wrong thread.");
+    qWarning() << tr("Called RegisterNewComponent in wrong thread.");
+    return;
   }
 
   CScriptRunnerSignalEmiter* pObject = nullptr;
   if (signalEmitter.isObject())
   {
     pObject = qobject_cast<CScriptRunnerSignalEmiter*>(signalEmitter.toQObject());
+  }
+
+  if (nullptr == pObject)
+  {
+    assert(false && "SignalEmitter is not a QObject");
+    qWarning() << tr("SignalEmitter is not a QObject");
+    return;
+  }
+
+  for (const auto& it : m_spRunnerFactoryMap)
+  {
+    it.second->RegisterNewComponent(sName, signalEmitter);
   }
 
   {
