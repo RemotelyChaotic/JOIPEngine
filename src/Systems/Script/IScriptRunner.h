@@ -7,6 +7,7 @@
 
 #include <memory>
 
+class CScriptCommunicator;
 class CScriptObjectBase;
 class IScriptRunnerInstanceController;
 struct SProject;
@@ -39,7 +40,9 @@ public:
 
   virtual std::shared_ptr<IScriptRunnerInstanceController>
                LoadScript(const QString& sScript, tspScene spScene, tspResource spResource) = 0;
-  virtual void RegisterNewComponent(const QString sName, QJSValue signalEmitter) = 0;
+  virtual void RegisterNewComponent(const QString& sName,
+                                    std::weak_ptr<CScriptCommunicator> wpCommunicator) = 0;
+  virtual void UnregisterComponent(const QString& sName) = 0;
   virtual void UnregisterComponents() = 0;
 
   virtual std::shared_ptr<IScriptRunnerInstanceController> RunAsync(

@@ -11,7 +11,7 @@ class CSequenceMediaPlayerRunner : public CScriptObjectBase,
                                    public ISequenceObjectRunner
 {
 public:
-  CSequenceMediaPlayerRunner(QPointer<CScriptRunnerSignalEmiter> pEmitter);
+  CSequenceMediaPlayerRunner(std::weak_ptr<CScriptCommunicator> pCommunicator);
   ~CSequenceMediaPlayerRunner() override;
 
   void RunSequenceInstruction(const QString& sName,

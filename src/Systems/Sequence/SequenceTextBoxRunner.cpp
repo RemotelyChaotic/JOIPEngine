@@ -27,8 +27,8 @@ namespace
 //----------------------------------------------------------------------------------------
 //
 CSequenceTextBoxRunner::CSequenceTextBoxRunner(
-    QPointer<CScriptRunnerSignalEmiter> pEmitter) :
-  CScriptObjectBase(pEmitter),
+    std::weak_ptr<CScriptCommunicator> pCommunicator) :
+  CScriptObjectBase(pCommunicator),
   ISequenceObjectRunner()
 {
 }
@@ -43,32 +43,37 @@ void CSequenceTextBoxRunner::RunSequenceInstruction(const QString&,
                                                     const std::shared_ptr<SSequenceInstruction>& spInstr,
                                                     const SProjectData&)
 {
-  auto pSignalEmitter = SignalEmitter<CTextBoxSignalEmitter>();
-  if (const auto& spI = std::dynamic_pointer_cast<SShowTextInstruction>(spInstr);
-      nullptr != spI && nullptr != pSignalEmitter)
+  if (auto spComm = m_wpCommunicator.lock())
   {
-    if (spI->m_textColor.has_value())
+    if (auto spSignalEmitter = spComm->LockedEmitter<CTextBoxSignalEmitter>())
     {
-      emit pSignalEmitter->textColorsChanged({spI->m_textColor.value()});
-    }
-    if (spI->m_bgColor.has_value())
-    {
-      emit pSignalEmitter->textBackgroundColorsChanged({spI->m_bgColor.value()});
-    }
-    if (spI->m_sPortrait.has_value())
-    {
-      emit pSignalEmitter->textPortraitChanged(spI->m_sPortrait.value());
-    }
-    if (spI->m_sText.has_value())
-    {
-      double dWaitTime = 0.0;
-      bool bSkipable = false;
-      if (0 > dWaitTime)
+      if (const auto& spI = std::dynamic_pointer_cast<SShowTextInstruction>(spInstr);
+          nullptr != spI)
       {
-        dWaitTime = static_cast<double>(EstimateDurationBasedOnText(spI->m_sText.value())) / 1000.0;
-      }
+        if (spI->m_textColor.has_value())
+        {
+          emit spSignalEmitter->textColorsChanged({spI->m_textColor.value()});
+        }
+        if (spI->m_bgColor.has_value())
+        {
+          emit spSignalEmitter->textBackgroundColorsChanged({spI->m_bgColor.value()});
+        }
+        if (spI->m_sPortrait.has_value())
+        {
+          emit spSignalEmitter->textPortraitChanged(spI->m_sPortrait.value());
+        }
+        if (spI->m_sText.has_value())
+        {
+          double dWaitTime = 0.0;
+          bool bSkipable = false;
+          if (0 > dWaitTime)
+          {
+            dWaitTime = static_cast<double>(EstimateDurationBasedOnText(spI->m_sText.value())) / 1000.0;
+          }
 
-      emit pSignalEmitter->showText(spI->m_sText.value(), bSkipable ? dWaitTime : 0, QString());
+          emit spSignalEmitter->showText(spI->m_sText.value(), bSkipable ? dWaitTime : 0, QString());
+        }
+      }
     }
   }
 }

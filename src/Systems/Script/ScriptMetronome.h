@@ -16,10 +16,6 @@ public:
   CMetronomeSignalEmitter();
   ~CMetronomeSignalEmitter();
 
-  std::shared_ptr<CScriptObjectBase> CreateNewScriptObject(QPointer<QJSEngine> pEngine) override;
-  std::shared_ptr<CScriptObjectBase> CreateNewScriptObject(QtLua::State* pState) override;
-  std::shared_ptr<CScriptObjectBase> CreateNewSequenceObject() override;
-
 signals:
   void setBpm(qint32 iBpm);
   void setBeatResource(const QStringList& sResource);
@@ -28,8 +24,25 @@ signals:
   void setVolume(double dVolume);
   void start();
   void stop();
+
+protected:
+  std::shared_ptr<CScriptCommunicator>
+  CreateCommunicatorImpl(std::shared_ptr<CScriptRunnerSignalEmiterAccessor> spAccessor) override;
 };
-Q_DECLARE_METATYPE(CMetronomeSignalEmitter)
+
+//----------------------------------------------------------------------------------------
+//
+class CMetronomeScriptCommunicator : public CScriptCommunicator
+{
+  public:
+  CMetronomeScriptCommunicator(const std::weak_ptr<CScriptRunnerSignalEmiterAccessor>& spEmitter);
+  ~CMetronomeScriptCommunicator() override;
+
+  CScriptObjectBase* CreateNewScriptObject(QPointer<QJSEngine> pEngine) override;
+  CScriptObjectBase* CreateNewScriptObject(QPointer<CJsonInstructionSetParser> pParser) override;
+  CScriptObjectBase* CreateNewScriptObject(QtLua::State* pState) override;
+  CScriptObjectBase* CreateNewSequenceObject() override;
+};
 
 //----------------------------------------------------------------------------------------
 //
@@ -39,9 +52,9 @@ class CScriptMetronome : public CJsScriptObjectBase
   Q_DISABLE_COPY(CScriptMetronome)
 
 public:
-  CScriptMetronome(QPointer<CScriptRunnerSignalEmiter> pEmitter,
+  CScriptMetronome(std::weak_ptr<CScriptCommunicator> pCommunicator,
                    QPointer<QJSEngine> pEngine);
-  CScriptMetronome(QPointer<CScriptRunnerSignalEmiter> pEmitter,
+  CScriptMetronome(std::weak_ptr<CScriptCommunicator> pCommunicator,
                    QtLua::State* pState);
   ~CScriptMetronome();
 

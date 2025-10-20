@@ -8,6 +8,8 @@
 #include <QtLua/Value>
 #include <QtLua/State>
 
+#include <QDebug>
+
 CBackgroundSignalEmitter::CBackgroundSignalEmitter() :
   CScriptRunnerSignalEmiter()
 {
@@ -20,37 +22,53 @@ CBackgroundSignalEmitter::~CBackgroundSignalEmitter()
 
 //----------------------------------------------------------------------------------------
 //
-std::shared_ptr<CScriptObjectBase> CBackgroundSignalEmitter::CreateNewScriptObject(QPointer<QJSEngine> pEngine)
+std::shared_ptr<CScriptCommunicator>
+CBackgroundSignalEmitter::CreateCommunicatorImpl(std::shared_ptr<CScriptRunnerSignalEmiterAccessor> spAccessor)
 {
-  return std::make_shared<CScriptBackground>(this, pEngine);
+  return std::make_shared<CBackgroundScriptCommunicator>(spAccessor);
 }
 
-std::shared_ptr<CScriptObjectBase> CBackgroundSignalEmitter::CreateNewScriptObject(QPointer<CJsonInstructionSetParser> pParser)
+//----------------------------------------------------------------------------------------
+//
+CBackgroundScriptCommunicator::CBackgroundScriptCommunicator(
+  const std::weak_ptr<CScriptRunnerSignalEmiterAccessor>& spEmitter) :
+  CScriptCommunicator(spEmitter)
+{}
+CBackgroundScriptCommunicator::~CBackgroundScriptCommunicator() = default;
+
+//----------------------------------------------------------------------------------------
+//
+CScriptObjectBase* CBackgroundScriptCommunicator::CreateNewScriptObject(QPointer<QJSEngine> pEngine)
+{
+  return new CScriptBackground(weak_from_this(), pEngine);
+}
+
+CScriptObjectBase* CBackgroundScriptCommunicator::CreateNewScriptObject(QPointer<CJsonInstructionSetParser> pParser)
 {
   Q_UNUSED(pParser)
   return nullptr;
 }
 
-std::shared_ptr<CScriptObjectBase> CBackgroundSignalEmitter::CreateNewScriptObject(QtLua::State* pState)
+CScriptObjectBase* CBackgroundScriptCommunicator::CreateNewScriptObject(QtLua::State* pState)
 {
-  return std::make_shared<CScriptBackground>(this, pState);
+  return new CScriptBackground(weak_from_this(), pState);
 }
-std::shared_ptr<CScriptObjectBase> CBackgroundSignalEmitter::CreateNewSequenceObject()
+CScriptObjectBase* CBackgroundScriptCommunicator::CreateNewSequenceObject()
 {
   return nullptr;
 }
 
 //----------------------------------------------------------------------------------------
 //
-CScriptBackground::CScriptBackground(QPointer<CScriptRunnerSignalEmiter> pEmitter,
+CScriptBackground::CScriptBackground(std::weak_ptr<CScriptCommunicator> pCommunicator,
                                      QPointer<QJSEngine> pEngine) :
-  CJsScriptObjectBase(pEmitter, pEngine),
+  CJsScriptObjectBase(pCommunicator, pEngine),
   m_wpDbManager(CApplication::Instance()->System<CDatabaseManager>())
 {
 }
-CScriptBackground::CScriptBackground(QPointer<CScriptRunnerSignalEmiter> pEmitter,
+CScriptBackground::CScriptBackground(std::weak_ptr<CScriptCommunicator> pCommunicator,
                                      QtLua::State* pState) :
-  CJsScriptObjectBase(pEmitter, pState),
+  CJsScriptObjectBase(pCommunicator, pState),
   m_wpDbManager(CApplication::Instance()->System<CDatabaseManager>())
 {
 }
@@ -75,23 +93,29 @@ void CScriptBackground::setBackgroundColor(QVariant color)
     }
   }
 
-  auto spSignalEmitter = SignalEmitter<CBackgroundSignalEmitter>();
-  if (nullptr != spSignalEmitter)
+  if (auto spComm = m_wpCommunicator.lock())
   {
-    QString sError;
-    std::optional<QColor> optCol =
-        script::ParseColorFromScriptVariant(color, 128, "setBackgroundColor", &sError);
-    if (optCol.has_value())
+    if (auto spSignalEmitter = spComm->LockedEmitter<CBackgroundSignalEmitter>())
     {
-      QColor colorRet = optCol.value();
-      colorRet.setAlpha(colorRet.alpha()*dAlphaMultiplierFromOldVersion);
-      emit spSignalEmitter->backgroundColorChanged(colorRet);
-    }
-    else
-    {
-      emit m_pSignalEmitter->showError(sError, QtMsgType::QtWarningMsg);
+      QString sError;
+      std::optional<QColor> optCol =
+          script::ParseColorFromScriptVariant(color, 128, "setBackgroundColor", &sError);
+      if (optCol.has_value())
+      {
+        QColor colorRet = optCol.value();
+        colorRet.setAlpha(colorRet.alpha()*dAlphaMultiplierFromOldVersion);
+        emit spSignalEmitter->backgroundColorChanged(colorRet);
+      }
+      else
+      {
+        emit spSignalEmitter->showError(sError, QtMsgType::QtWarningMsg);
+      }
+
+      return;
     }
   }
+
+  qWarning() << tr("Emitter or Communicator out of scope.");
 }
 
 //----------------------------------------------------------------------------------------
@@ -100,22 +124,26 @@ void CScriptBackground::setBackgroundTexture(QVariant resource)
 {
   if (!CheckIfScriptCanRun()) { return; }
 
-  auto spSignalEmitter = SignalEmitter<CBackgroundSignalEmitter>();
-  if (nullptr != spSignalEmitter)
+  if (auto spComm = m_wpCommunicator.lock())
   {
-    QString sError;
-    std::optional<QString> optRes =
-        script::ParseResourceFromScriptVariant(resource, m_wpDbManager.lock(),
-                                               m_spProject,
-                                               "setBackgroundTexture", &sError);
-    if (optRes.has_value())
-    {
-      QString resRet = optRes.value();
-      emit spSignalEmitter->backgroundTextureChanged(resRet);
-    }
-    else
-    {
-      emit m_pSignalEmitter->showError(sError, QtMsgType::QtWarningMsg);
+      if (auto spSignalEmitter = spComm->LockedEmitter<CBackgroundSignalEmitter>())
+      {
+      QString sError;
+      std::optional<QString> optRes =
+          script::ParseResourceFromScriptVariant(resource, m_wpDbManager.lock(),
+                                                 m_spProject,
+                                                 "setBackgroundTexture", &sError);
+      if (optRes.has_value())
+      {
+        QString resRet = optRes.value();
+        emit spSignalEmitter->backgroundTextureChanged(resRet);
+      }
+      else
+      {
+        emit spSignalEmitter->showError(sError, QtMsgType::QtWarningMsg);
+      }
     }
   }
+
+  qWarning() << tr("Emitter or Communicator out of scope.");
 }

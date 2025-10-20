@@ -24,55 +24,112 @@ CStorageSignalEmitter::~CStorageSignalEmitter()
 
 //----------------------------------------------------------------------------------------
 //
-std::shared_ptr<CScriptObjectBase> CStorageSignalEmitter::CreateNewScriptObject(QPointer<QJSEngine> pEngine)
+std::shared_ptr<CScriptCommunicator>
+CStorageSignalEmitter::CreateCommunicatorImpl(std::shared_ptr<CScriptRunnerSignalEmiterAccessor> spAccessor)
 {
-  return std::make_shared<CScriptStorageJs>(this, pEngine);
+  return std::make_shared<CStorageScriptCommunicator>(spAccessor);
 }
-std::shared_ptr<CScriptObjectBase> CStorageSignalEmitter::CreateNewScriptObject(QtLua::State* pState)
+
+//----------------------------------------------------------------------------------------
+//
+CStorageScriptCommunicator::CStorageScriptCommunicator(
+  const std::weak_ptr<CScriptRunnerSignalEmiterAccessor>& spEmitter) :
+  CScriptCommunicator(spEmitter)
+{}
+CStorageScriptCommunicator::~CStorageScriptCommunicator() = default;
+
+//----------------------------------------------------------------------------------------
+//
+CScriptObjectBase* CStorageScriptCommunicator::CreateNewScriptObject(QPointer<QJSEngine> pEngine)
 {
-  return std::make_shared<CScriptStorageLua>(this, pState);
+  return new CScriptStorageJs(weak_from_this(), pEngine);
 }
-std::shared_ptr<CScriptObjectBase> CStorageSignalEmitter::CreateNewSequenceObject()
+CScriptObjectBase* CStorageScriptCommunicator::CreateNewScriptObject(QPointer<CJsonInstructionSetParser> pParser)
+{
+  Q_UNUSED(pParser)
+  return nullptr;
+}
+CScriptObjectBase* CStorageScriptCommunicator::CreateNewScriptObject(QtLua::State* pState)
+{
+  return new CScriptStorageLua(weak_from_this(), pState);
+}
+CScriptObjectBase* CStorageScriptCommunicator::CreateNewSequenceObject()
 {
   return nullptr;
 }
 
 //----------------------------------------------------------------------------------------
 //
-CScriptStorageBase::CScriptStorageBase(QPointer<CScriptRunnerSignalEmiter> pEmitter,
+CScriptStorageBase::CScriptStorageBase(std::weak_ptr<CScriptCommunicator> pCommunicator,
                                        QPointer<QJSEngine> pEngine) :
-  CJsScriptObjectBase(pEmitter, pEngine)
+  CJsScriptObjectBase(pCommunicator, pEngine)
 {
+  m_spStop = std::make_shared<std::function<void()>>([this]() {
+    emit SignalQuitLoop();
+  });
+  if (auto spComm = pCommunicator.lock())
+  {
+    spComm->RegisterStopCallback(m_spStop);
+  }
 }
-CScriptStorageBase::CScriptStorageBase(QPointer<CScriptRunnerSignalEmiter> pEmitter,
+CScriptStorageBase::CScriptStorageBase(std::weak_ptr<CScriptCommunicator> pCommunicator,
                                        QtLua::State* pState) :
-  CJsScriptObjectBase(pEmitter, pState)
+  CJsScriptObjectBase(pCommunicator, pState)
 {
+  m_spStop = std::make_shared<std::function<void()>>([this]() {
+    emit SignalQuitLoop();
+  });
+  if (auto spComm = pCommunicator.lock())
+  {
+    spComm->RegisterStopCallback(m_spStop);
+  }
 }
 
 CScriptStorageBase::~CScriptStorageBase()
 {
+  if (auto spComm = m_wpCommunicator.lock())
+  {
+    spComm->RemoveStopCallback(m_spStop);
+  }
 }
 
 //----------------------------------------------------------------------------------------
 //
 void CScriptStorageBase::loadPersistent(QString sId)
 {
-  emit SignalEmitter<CStorageSignalEmitter>()->loadPersistent(sId);
+  if (auto spComm = m_wpCommunicator.lock())
+  {
+    if (auto spSignalEmitter = spComm->LockedEmitter<CStorageSignalEmitter>())
+    {
+      emit spSignalEmitter->loadPersistent(sId);
+    }
+  }
 }
 
 //----------------------------------------------------------------------------------------
 //
 void CScriptStorageBase::removeData(QString sId)
 {
-  emit SignalEmitter<CStorageSignalEmitter>()->removeData(sId, QString());
+  if (auto spComm = m_wpCommunicator.lock())
+  {
+    if (auto spSignalEmitter = spComm->LockedEmitter<CStorageSignalEmitter>())
+    {
+      spSignalEmitter->removeData(sId, QString());
+    }
+  }
 }
 
 //----------------------------------------------------------------------------------------
 //
 void CScriptStorageBase::storePersistent(QString sId)
 {
-  emit SignalEmitter<CStorageSignalEmitter>()->storePersistent(sId);
+  if (auto spComm = m_wpCommunicator.lock())
+  {
+    if (auto spSignalEmitter = spComm->LockedEmitter<CStorageSignalEmitter>())
+    {
+      spSignalEmitter->storePersistent(sId);
+    }
+  }
 }
 
 //----------------------------------------------------------------------------------------
@@ -87,57 +144,76 @@ QVariant CScriptStorageBase::LoadImpl(QString sId, QString sContext)
 {
   QString sRequestId = QUuid::createUuid().toString();
 
-  auto pSignalEmitter = SignalEmitter<CStorageSignalEmitter>();
-  QTimer::singleShot(0, this, [&pSignalEmitter,sId,sContext,sRequestId]() {
-    emit pSignalEmitter->load(sId, sRequestId,sContext);
-  });
-
-  // local loop to wait for answer
-  QVariant varRetVal = QString();
-  QEventLoop loop;
-  QMetaObject::Connection quitLoop =
-    connect(this, &CScriptStorageBase::SignalQuitLoop, &loop, &QEventLoop::quit);
-  QMetaObject::Connection interruptLoop =
-    connect(pSignalEmitter, &CStorageSignalEmitter::interrupt,
-            &loop, &QEventLoop::quit, Qt::QueuedConnection);
-  QMetaObject::Connection interruptThisLoop =
-    connect(this, &CScriptObjectBase::SignalInterruptExecution,
-            &loop, &QEventLoop::quit, Qt::QueuedConnection);
-  QMetaObject::Connection showRetValLoop =
-    connect(pSignalEmitter, &CStorageSignalEmitter::loadReturnValue,
-            this, [this, &varRetVal, sRequestId](QJSValue var, QString sRequestIdRet)
+  if (auto spComm = m_wpCommunicator.lock())
   {
-    if (sRequestId == sRequestIdRet)
+    if (auto spSignalEmitter = spComm->LockedEmitter<CStorageSignalEmitter>())
     {
-      varRetVal = var.toVariant();
-      varRetVal.detach(); // fixes some crashes with QJSEngine
-      emit this->SignalQuitLoop();
+      QTimer::singleShot(0, this, [this,sId,sContext,sRequestId]() {
+        if (auto spComm = m_wpCommunicator.lock())
+        {
+          if (auto spSignalEmitter = spComm->LockedEmitter<CStorageSignalEmitter>())
+          {
+            emit spSignalEmitter->load(sId, sRequestId, sContext);
+          }
+        }
+      });
+
+      // local loop to wait for answer
+      QPointer<CScriptStorageBase> pThis(this);
+      std::shared_ptr<QVariant> spReturnValue = std::make_shared<QVariant>();
+      QEventLoop loop;
+      QMetaObject::Connection quitLoop =
+        connect(this, &CScriptStorageBase::SignalQuitLoop, &loop, &QEventLoop::quit);
+      QMetaObject::Connection interruptThisLoop =
+        connect(this, &CScriptObjectBase::SignalInterruptExecution,
+                &loop, &QEventLoop::quit, Qt::QueuedConnection);
+      QMetaObject::Connection showRetValLoop =
+        connect(spSignalEmitter.Get(), &CStorageSignalEmitter::loadReturnValue,
+                &loop, [&loop, spReturnValue, sRequestId](QJSValue var, QString sRequestIdRet)
+      {
+        if (sRequestId == sRequestIdRet)
+        {
+          *spReturnValue = var.toVariant();
+          spReturnValue->detach(); // fixes some crashes with QJSEngine
+          bool bOk = QMetaObject::invokeMethod(&loop, "quit", Qt::QueuedConnection);
+          assert(bOk); Q_UNUSED(bOk)
+        }
+        // direct connection to fix cross thread issues with QString content being deleted
+      }, Qt::DirectConnection);
+      loop.exec();
+      loop.disconnect();
+
+      if (nullptr != pThis)
+      {
+        disconnect(quitLoop);
+        disconnect(interruptThisLoop);
+        disconnect(showRetValLoop);
+      }
+
+      return *spReturnValue;
     }
-    // direct connection to fix cross thread issues with QString content being deleted
-  }, Qt::DirectConnection);
-  loop.exec();
-  loop.disconnect();
-
-  disconnect(quitLoop);
-  disconnect(interruptLoop);
-  disconnect(interruptThisLoop);
-  disconnect(showRetValLoop);
-
-  return varRetVal;
+  }
+  return QVariant();
 }
 
 //----------------------------------------------------------------------------------------
 //
 void CScriptStorageBase::StoreImpl(QString sId, QVariant value, QString sContext)
 {
-  emit SignalEmitter<CStorageSignalEmitter>()->store(sId, value, sContext);
+  if (auto spComm = m_wpCommunicator.lock())
+  {
+    if (auto spSignalEmitter = spComm->LockedEmitter<CStorageSignalEmitter>())
+    {
+      spSignalEmitter->store(sId, value, sContext);
+    }
+  }
 }
 
 //----------------------------------------------------------------------------------------
 //
-CScriptStorageJs::CScriptStorageJs(QPointer<CScriptRunnerSignalEmiter> pEmitter,
+CScriptStorageJs::CScriptStorageJs(std::weak_ptr<CScriptCommunicator> pCommunicator,
                                    QPointer<QJSEngine> pEngine) :
-  CScriptStorageBase(pEmitter, pEngine)
+  CScriptStorageBase(pCommunicator, pEngine)
 {
 }
 CScriptStorageJs::~CScriptStorageJs()
@@ -202,9 +278,9 @@ void CScriptStorageJs::storeAchievement(QString sId, QVariant value)
 
 //----------------------------------------------------------------------------------------
 //
-CScriptStorageLua::CScriptStorageLua(QPointer<CScriptRunnerSignalEmiter> pEmitter,
+CScriptStorageLua::CScriptStorageLua(std::weak_ptr<CScriptCommunicator> pCommunicator,
                                      QtLua::State* pState) :
-  CScriptStorageBase(pEmitter, pState)
+  CScriptStorageBase(pCommunicator, pState)
 {
 }
 CScriptStorageLua::~CScriptStorageLua()

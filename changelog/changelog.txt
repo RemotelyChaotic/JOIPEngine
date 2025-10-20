@@ -12,6 +12,9 @@ Fixed Bugs:
 - Scene Resources update if the resource is removed or changed somewhere else.
 - Fixed some constellations of Scene transitions that failed to transition
   correctly.
+- Fixed a race condition when executing scripts. The new implementation is completely
+  decoupled from the UI. Even if the UI elements are deleted while executing
+  the scripts, the script will continue to execute though the commands will do nothing.
 
 =================
 Version 1.5.1.0

@@ -5,8 +5,8 @@
 using namespace std::placeholders;
 
 CSequenceMediaPlayerRunner::CSequenceMediaPlayerRunner(
-    QPointer<CScriptRunnerSignalEmiter> pEmitter) :
-  CScriptObjectBase(pEmitter),
+    std::weak_ptr<CScriptCommunicator> pCommunicator) :
+  CScriptObjectBase(pCommunicator),
   ISequenceObjectRunner(),
   m_functionMap({{sequence::c_sInstructionIdShow, std::bind(&CSequenceMediaPlayerRunner::RunShow, this, _1)},
                  {sequence::c_sInstructionIdPlayVideo, std::bind(&CSequenceMediaPlayerRunner::RunPlayVideo, this, _1)},
@@ -39,11 +39,16 @@ void CSequenceMediaPlayerRunner::RunSequenceInstruction(const QString&,
 //
 void CSequenceMediaPlayerRunner::RunShow(const std::shared_ptr<SSequenceInstruction>& spInstr)
 {
-  auto pSignalEmitter = SignalEmitter<CMediaPlayerSignalEmitter>();
-  if (const auto& spI = std::dynamic_pointer_cast<SShowMediaInstruction>(spInstr);
-      nullptr != spI && nullptr != pSignalEmitter)
+  if (auto spComm = m_wpCommunicator.lock())
   {
-    emit pSignalEmitter->playMedia(spI->m_sResource, 1, 0, -1);
+    if (auto spSignalEmitter = spComm->LockedEmitter<CMediaPlayerSignalEmitter>())
+    {
+      if (const auto& spI = std::dynamic_pointer_cast<SShowMediaInstruction>(spInstr);
+          nullptr != spI)
+      {
+        emit spSignalEmitter->playMedia(spI->m_sResource, 1, 0, -1);
+      }
+    }
   }
 }
 
@@ -51,12 +56,17 @@ void CSequenceMediaPlayerRunner::RunShow(const std::shared_ptr<SSequenceInstruct
 //
 void CSequenceMediaPlayerRunner::RunPlayVideo(const std::shared_ptr<SSequenceInstruction>& spInstr)
 {
-  auto pSignalEmitter = SignalEmitter<CMediaPlayerSignalEmitter>();
-  if (const auto& spI = std::dynamic_pointer_cast<SPlayVideoInstruction>(spInstr);
-      nullptr != spI && nullptr != pSignalEmitter)
+  if (auto spComm = m_wpCommunicator.lock())
   {
-    emit pSignalEmitter->playMedia(spI->m_sResource, spI->m_iLoops.value_or(1),
-                                   spI->m_iStartAt.value_or(0), spI->m_iEndAt.value_or(-1));
+    if (auto spSignalEmitter = spComm->LockedEmitter<CMediaPlayerSignalEmitter>())
+    {
+      if (const auto& spI = std::dynamic_pointer_cast<SPlayVideoInstruction>(spInstr);
+          nullptr != spI)
+      {
+        emit spSignalEmitter->playMedia(spI->m_sResource, spI->m_iLoops.value_or(1),
+                                        spI->m_iStartAt.value_or(0), spI->m_iEndAt.value_or(-1));
+      }
+    }
   }
 }
 
@@ -64,11 +74,16 @@ void CSequenceMediaPlayerRunner::RunPlayVideo(const std::shared_ptr<SSequenceIns
 //
 void CSequenceMediaPlayerRunner::RunPauseVideo(const std::shared_ptr<SSequenceInstruction>& spInstr)
 {
-  auto pSignalEmitter = SignalEmitter<CMediaPlayerSignalEmitter>();
-  if (const auto& spI = std::dynamic_pointer_cast<SPauseVideoInstruction>(spInstr);
-      nullptr != spI && nullptr != pSignalEmitter)
+  if (auto spComm = m_wpCommunicator.lock())
   {
-    emit pSignalEmitter->pauseVideo();
+    if (auto spSignalEmitter = spComm->LockedEmitter<CMediaPlayerSignalEmitter>())
+    {
+      if (const auto& spI = std::dynamic_pointer_cast<SPauseVideoInstruction>(spInstr);
+          nullptr != spI)
+      {
+        emit spSignalEmitter->pauseVideo();
+      }
+    }
   }
 }
 
@@ -76,11 +91,16 @@ void CSequenceMediaPlayerRunner::RunPauseVideo(const std::shared_ptr<SSequenceIn
 //
 void CSequenceMediaPlayerRunner::RunStopVideo(const std::shared_ptr<SSequenceInstruction>& spInstr)
 {
-  auto pSignalEmitter = SignalEmitter<CMediaPlayerSignalEmitter>();
-  if (const auto& spI = std::dynamic_pointer_cast<SStopVideoInstruction>(spInstr);
-      nullptr != spI && nullptr != pSignalEmitter)
+  if (auto spComm = m_wpCommunicator.lock())
   {
-    emit pSignalEmitter->stopVideo();
+    if (auto spSignalEmitter = spComm->LockedEmitter<CMediaPlayerSignalEmitter>())
+    {
+      if (const auto& spI = std::dynamic_pointer_cast<SStopVideoInstruction>(spInstr);
+          nullptr != spI)
+      {
+        emit spSignalEmitter->stopVideo();
+      }
+    }
   }
 }
 
@@ -88,13 +108,18 @@ void CSequenceMediaPlayerRunner::RunStopVideo(const std::shared_ptr<SSequenceIns
 //
 void CSequenceMediaPlayerRunner::RunPlayAudio(const std::shared_ptr<SSequenceInstruction>& spInstr)
 {
-  auto pSignalEmitter = SignalEmitter<CMediaPlayerSignalEmitter>();
-  if (const auto& spI = std::dynamic_pointer_cast<SPlayAudioInstruction>(spInstr);
-      nullptr != spI && nullptr != pSignalEmitter)
+  if (auto spComm = m_wpCommunicator.lock())
   {
-    emit pSignalEmitter->playSound(spI->m_sResource, spI->m_sName.value_or(QString()),
-                                   spI->m_iLoops.value_or(1), spI->m_iStartAt.value_or(0),
-                                   spI->m_iEndAt.value_or(-1));
+    if (auto spSignalEmitter = spComm->LockedEmitter<CMediaPlayerSignalEmitter>())
+    {
+      if (const auto& spI = std::dynamic_pointer_cast<SPlayAudioInstruction>(spInstr);
+          nullptr != spI)
+      {
+        emit spSignalEmitter->playSound(spI->m_sResource, spI->m_sName.value_or(QString()),
+                                        spI->m_iLoops.value_or(1), spI->m_iStartAt.value_or(0),
+                                        spI->m_iEndAt.value_or(-1));
+      }
+    }
   }
 }
 
@@ -102,11 +127,16 @@ void CSequenceMediaPlayerRunner::RunPlayAudio(const std::shared_ptr<SSequenceIns
 //
 void CSequenceMediaPlayerRunner::RunPauseAudio(const std::shared_ptr<SSequenceInstruction>& spInstr)
 {
-  auto pSignalEmitter = SignalEmitter<CMediaPlayerSignalEmitter>();
-  if (const auto& spI = std::dynamic_pointer_cast<SPauseAudioInstruction>(spInstr);
-      nullptr != spI && nullptr != pSignalEmitter)
+  if (auto spComm = m_wpCommunicator.lock())
   {
-    emit pSignalEmitter->pauseSound(spI->m_sName);
+    if (auto spSignalEmitter = spComm->LockedEmitter<CMediaPlayerSignalEmitter>())
+    {
+      if (const auto& spI = std::dynamic_pointer_cast<SPauseAudioInstruction>(spInstr);
+          nullptr != spI)
+      {
+        emit spSignalEmitter->pauseSound(spI->m_sName);
+      }
+    }
   }
 }
 
@@ -114,10 +144,15 @@ void CSequenceMediaPlayerRunner::RunPauseAudio(const std::shared_ptr<SSequenceIn
 //
 void CSequenceMediaPlayerRunner::RunStopAudio(const std::shared_ptr<SSequenceInstruction>& spInstr)
 {
-  auto pSignalEmitter = SignalEmitter<CMediaPlayerSignalEmitter>();
-  if (const auto& spI = std::dynamic_pointer_cast<SStopAudioInstruction>(spInstr);
-      nullptr != spI && nullptr != pSignalEmitter)
+  if (auto spComm = m_wpCommunicator.lock())
   {
-    emit pSignalEmitter->stopSound(spI->m_sName);
+    if (auto spSignalEmitter = spComm->LockedEmitter<CMediaPlayerSignalEmitter>())
+    {
+      if (const auto& spI = std::dynamic_pointer_cast<SStopAudioInstruction>(spInstr);
+          nullptr != spI)
+      {
+        emit spSignalEmitter->stopSound(spI->m_sName);
+      }
+    }
   }
 }

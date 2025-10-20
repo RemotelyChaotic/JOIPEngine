@@ -15,11 +15,6 @@ public:
   CMediaPlayerSignalEmitter();
   ~CMediaPlayerSignalEmitter();
 
-  std::shared_ptr<CScriptObjectBase> CreateNewScriptObject(QPointer<QJSEngine> pEngine) override;
-  std::shared_ptr<CScriptObjectBase> CreateNewScriptObject(QPointer<CJsonInstructionSetParser> pParser) override;
-  std::shared_ptr<CScriptObjectBase> CreateNewScriptObject(QtLua::State* pState) override;
-  std::shared_ptr<CScriptObjectBase> CreateNewSequenceObject() override;
-
 signals:
   void playVideo();
   void playSound(const QString& sResource, const QString& sId,
@@ -41,8 +36,25 @@ signals:
   void playbackFinished(const QString& sResource);
   void videoFinished();
   void soundFinished(const QString& sResource);
+
+protected:
+  std::shared_ptr<CScriptCommunicator>
+  CreateCommunicatorImpl(std::shared_ptr<CScriptRunnerSignalEmiterAccessor> spAccessor) override;
 };
-Q_DECLARE_METATYPE(CMediaPlayerSignalEmitter)
+
+//----------------------------------------------------------------------------------------
+//
+class CMediaPlayerScriptCommunicator : public CScriptCommunicator
+{
+  public:
+  CMediaPlayerScriptCommunicator(const std::weak_ptr<CScriptRunnerSignalEmiterAccessor>& spEmitter);
+  ~CMediaPlayerScriptCommunicator() override;
+
+  CScriptObjectBase* CreateNewScriptObject(QPointer<QJSEngine> pEngine) override;
+  CScriptObjectBase* CreateNewScriptObject(QPointer<CJsonInstructionSetParser> pParser) override;
+  CScriptObjectBase* CreateNewScriptObject(QtLua::State* pState) override;
+  CScriptObjectBase* CreateNewSequenceObject() override;
+};
 
 //----------------------------------------------------------------------------------------
 //
@@ -52,9 +64,9 @@ class CScriptMediaPlayer : public CJsScriptObjectBase
   Q_DISABLE_COPY(CScriptMediaPlayer)
 
 public:
-  CScriptMediaPlayer(QPointer<CScriptRunnerSignalEmiter> pEmitter,
+  CScriptMediaPlayer(std::weak_ptr<CScriptCommunicator> pCommunicator,
                      QPointer<QJSEngine> pEngine);
-  CScriptMediaPlayer(QPointer<CScriptRunnerSignalEmiter> pEmitter,
+  CScriptMediaPlayer(std::weak_ptr<CScriptCommunicator> pCommunicator,
                      QtLua::State* pState);
   ~CScriptMediaPlayer();
 
@@ -86,6 +98,9 @@ public slots:
   void waitForSound();
   void waitForSound(QVariant resource);
 
+signals:
+  void SignalQuitLoop();
+
 private:
   QString GetResourceName(const QVariant& resource, const QString& sMethod,
                           bool bStringCanBeId = false, bool* pbOk = nullptr);
@@ -93,6 +108,7 @@ private:
   void WaitForSoundImpl(const QString& sResource);
 
   std::weak_ptr<CDatabaseManager>  m_wpDbManager;
+  std::shared_ptr<std::function<void()>> m_spStop;
 };
 
 //----------------------------------------------------------------------------------------
@@ -105,7 +121,7 @@ class CEosScriptMediaPlayer : public CEosScriptObjectBase
   Q_DISABLE_COPY(CEosScriptMediaPlayer)
 
 public:
-  CEosScriptMediaPlayer(QPointer<CScriptRunnerSignalEmiter> pEmitter,
+  CEosScriptMediaPlayer(std::weak_ptr<CScriptCommunicator> pCommunicator,
                         QPointer<CJsonInstructionSetParser> pParser);
   ~CEosScriptMediaPlayer();
 
@@ -115,12 +131,16 @@ public:
   void seek(const QString& iId = QString(), qint64 iSeek = 1);
   void setVolume(const QString& iId, double dValue);
 
+signals:
+  void SignalQuitLoop();
+
 private:
   QString GetResourceName(const QString& sResourceLocator, bool* pbError = nullptr);
 
   std::weak_ptr<CDatabaseManager>   m_wpDbManager;
   std::shared_ptr<CCommandEosImage> m_spCommandImg;
   std::shared_ptr<CCommandEosAudio> m_spCommandAudio;
+  std::shared_ptr<std::function<void()>> m_spStop;
 };
 
 #endif // SCRIPTMEDIAPLAYER_H

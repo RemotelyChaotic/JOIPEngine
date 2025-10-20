@@ -19,30 +19,51 @@ CMetronomeSignalEmitter::~CMetronomeSignalEmitter()
 
 //----------------------------------------------------------------------------------------
 //
-std::shared_ptr<CScriptObjectBase> CMetronomeSignalEmitter::CreateNewScriptObject(QPointer<QJSEngine> pEngine)
+std::shared_ptr<CScriptCommunicator>
+CMetronomeSignalEmitter::CreateCommunicatorImpl(std::shared_ptr<CScriptRunnerSignalEmiterAccessor> spAccessor)
 {
-  return std::make_shared<CScriptMetronome>(this, pEngine);
-}
-std::shared_ptr<CScriptObjectBase> CMetronomeSignalEmitter::CreateNewScriptObject(QtLua::State* pState)
-{
-  return std::make_shared<CScriptMetronome>(this, pState);
-}
-std::shared_ptr<CScriptObjectBase> CMetronomeSignalEmitter::CreateNewSequenceObject()
-{
-  return std::make_shared<CSequenceMetronomeRunner>(this);
+  return std::make_shared<CMetronomeScriptCommunicator>(spAccessor);
 }
 
 //----------------------------------------------------------------------------------------
 //
-CScriptMetronome::CScriptMetronome(QPointer<CScriptRunnerSignalEmiter> pEmitter,
+CMetronomeScriptCommunicator::CMetronomeScriptCommunicator(
+  const std::weak_ptr<CScriptRunnerSignalEmiterAccessor>& spEmitter) :
+  CScriptCommunicator(spEmitter)
+{}
+CMetronomeScriptCommunicator::~CMetronomeScriptCommunicator() = default;
+
+//----------------------------------------------------------------------------------------
+//
+CScriptObjectBase* CMetronomeScriptCommunicator::CreateNewScriptObject(QPointer<QJSEngine> pEngine)
+{
+  return new CScriptMetronome(weak_from_this(), pEngine);
+}
+CScriptObjectBase* CMetronomeScriptCommunicator::CreateNewScriptObject(QPointer<CJsonInstructionSetParser> pParser)
+{
+  Q_UNUSED(pParser)
+  return nullptr;
+}
+CScriptObjectBase* CMetronomeScriptCommunicator::CreateNewScriptObject(QtLua::State* pState)
+{
+  return new CScriptMetronome(weak_from_this(), pState);
+}
+CScriptObjectBase* CMetronomeScriptCommunicator::CreateNewSequenceObject()
+{
+  return new CSequenceMetronomeRunner(weak_from_this());
+}
+
+//----------------------------------------------------------------------------------------
+//
+CScriptMetronome::CScriptMetronome(std::weak_ptr<CScriptCommunicator> pCommunicator,
                                    QPointer<QJSEngine> pEngine) :
-  CJsScriptObjectBase(pEmitter, pEngine),
+  CJsScriptObjectBase(pCommunicator, pEngine),
   m_wpDbManager(CApplication::Instance()->System<CDatabaseManager>())
 {
 }
-CScriptMetronome::CScriptMetronome(QPointer<CScriptRunnerSignalEmiter> pEmitter,
+CScriptMetronome::CScriptMetronome(std::weak_ptr<CScriptCommunicator> pCommunicator,
                                    QtLua::State* pState) :
-  CJsScriptObjectBase(pEmitter, pState),
+  CJsScriptObjectBase(pCommunicator, pState),
   m_wpDbManager(CApplication::Instance()->System<CDatabaseManager>())
 {
 }
@@ -56,7 +77,14 @@ CScriptMetronome::~CScriptMetronome()
 void CScriptMetronome::setBpm(qint32 iBpm)
 {
   if (!CheckIfScriptCanRun()) { return; }
-  emit SignalEmitter<CMetronomeSignalEmitter>()->setBpm(iBpm);
+
+  if (auto spComm = m_wpCommunicator.lock())
+  {
+    if (auto spSignalEmitter = spComm->LockedEmitter<CMetronomeSignalEmitter>())
+    {
+      emit spSignalEmitter->setBpm(iBpm);
+    }
+  }
 }
 
 //----------------------------------------------------------------------------------------
@@ -65,45 +93,47 @@ void CScriptMetronome::setBeatResource(QVariant resource)
 {
   if (!CheckIfScriptCanRun()) { return; }
 
-  auto pSignalEmitter = SignalEmitter<CMetronomeSignalEmitter>();
-  if (nullptr != pSignalEmitter)
+  if (auto spComm = m_wpCommunicator.lock())
   {
-    // the input can either be a string, a bytearray, null, a resource...
-    CResourceScriptWrapper* pItemWrapper = dynamic_cast<CResourceScriptWrapper*>(resource.value<QObject*>());
-    if (resource.type() == QVariant::String || resource.type() == QVariant::ByteArray ||
-        resource.isNull() || nullptr != pItemWrapper)
+    if (auto spSignalEmitter = spComm->LockedEmitter<CMetronomeSignalEmitter>())
     {
-      QString sError;
-      std::optional<QString> optRes =
-          script::ParseResourceFromScriptVariant(resource, m_wpDbManager.lock(),
-                                                 m_spProject,
-                                                 "setBeatResource", &sError);
-      if (optRes.has_value())
+      // the input can either be a string, a bytearray, null, a resource...
+      CResourceScriptWrapper* pItemWrapper = dynamic_cast<CResourceScriptWrapper*>(resource.value<QObject*>());
+      if (resource.type() == QVariant::String || resource.type() == QVariant::ByteArray ||
+          resource.isNull() || nullptr != pItemWrapper)
       {
-        QStringList vsResRet = QStringList() << optRes.value();
-        emit pSignalEmitter->setBeatResource(vsResRet);
+        QString sError;
+        std::optional<QString> optRes =
+            script::ParseResourceFromScriptVariant(resource, m_wpDbManager.lock(),
+                                                   m_spProject,
+                                                   "setBeatResource", &sError);
+        if (optRes.has_value())
+        {
+          QStringList vsResRet = QStringList() << optRes.value();
+          emit spSignalEmitter->setBeatResource(vsResRet);
+        }
+        else
+        {
+          emit spSignalEmitter->showError(sError, QtMsgType::QtWarningMsg);
+        }
       }
+      // ...or an array of the above.
       else
       {
-        emit m_pSignalEmitter->showError(sError, QtMsgType::QtWarningMsg);
-      }
-    }
-    // ...or an array of the above.
-    else
-    {
-      QString sError;
-      std::optional<QStringList> optRes =
-          script::ParseResourceListFromScriptVariant(resource, m_wpDbManager.lock(),
-                                                 m_spProject,
-                                                 "setBeatResource", &sError);
-      if (optRes.has_value())
-      {
-        QStringList vsResRet = optRes.value();
-        emit pSignalEmitter->setBeatResource(vsResRet);
-      }
-      else
-      {
-        emit m_pSignalEmitter->showError(sError, QtMsgType::QtWarningMsg);
+        QString sError;
+        std::optional<QStringList> optRes =
+            script::ParseResourceListFromScriptVariant(resource, m_wpDbManager.lock(),
+                                                   m_spProject,
+                                                   "setBeatResource", &sError);
+        if (optRes.has_value())
+        {
+          QStringList vsResRet = optRes.value();
+          emit spSignalEmitter->setBeatResource(vsResRet);
+        }
+        else
+        {
+          emit spSignalEmitter->showError(sError, QtMsgType::QtWarningMsg);
+        }
       }
     }
   }
@@ -114,7 +144,14 @@ void CScriptMetronome::setBeatResource(QVariant resource)
 void CScriptMetronome::setMuted(bool bMuted)
 {
   if (!CheckIfScriptCanRun()) { return; }
-  emit SignalEmitter<CMetronomeSignalEmitter>()->setMuted(bMuted);
+
+  if (auto spComm = m_wpCommunicator.lock())
+  {
+    if (auto spSignalEmitter = spComm->LockedEmitter<CMetronomeSignalEmitter>())
+    {
+      emit spSignalEmitter->setMuted(bMuted);
+    }
+  }
 }
 
 //----------------------------------------------------------------------------------------
@@ -122,7 +159,14 @@ void CScriptMetronome::setMuted(bool bMuted)
 void CScriptMetronome::setPattern(const QList<double>& vdPattern)
 {
   if (!CheckIfScriptCanRun()) { return; }
-  emit SignalEmitter<CMetronomeSignalEmitter>()->setPattern(vdPattern);
+
+  if (auto spComm = m_wpCommunicator.lock())
+  {
+    if (auto spSignalEmitter = spComm->LockedEmitter<CMetronomeSignalEmitter>())
+    {
+      spSignalEmitter->setPattern(vdPattern);
+    }
+  }
 }
 
 //----------------------------------------------------------------------------------------
@@ -130,7 +174,14 @@ void CScriptMetronome::setPattern(const QList<double>& vdPattern)
 void CScriptMetronome::setVolume(double dVolume)
 {
   if (!CheckIfScriptCanRun()) { return; }
-  emit SignalEmitter<CMetronomeSignalEmitter>()->setVolume(dVolume);
+
+  if (auto spComm = m_wpCommunicator.lock())
+  {
+    if (auto spSignalEmitter = spComm->LockedEmitter<CMetronomeSignalEmitter>())
+    {
+      spSignalEmitter->setVolume(dVolume);
+    }
+  }
 }
 
 //----------------------------------------------------------------------------------------
@@ -138,7 +189,14 @@ void CScriptMetronome::setVolume(double dVolume)
 void CScriptMetronome::start()
 {
   if (!CheckIfScriptCanRun()) { return; }
-  emit SignalEmitter<CMetronomeSignalEmitter>()->start();
+
+  if (auto spComm = m_wpCommunicator.lock())
+  {
+    if (auto spSignalEmitter = spComm->LockedEmitter<CMetronomeSignalEmitter>())
+    {
+      spSignalEmitter->start();
+    }
+  }
 }
 
 //----------------------------------------------------------------------------------------
@@ -146,5 +204,12 @@ void CScriptMetronome::start()
 void CScriptMetronome::stop()
 {
   if (!CheckIfScriptCanRun()) { return; }
-  emit SignalEmitter<CMetronomeSignalEmitter>()->stop();
+
+  if (auto spComm = m_wpCommunicator.lock())
+  {
+    if (auto spSignalEmitter = spComm->LockedEmitter<CMetronomeSignalEmitter>())
+    {
+      emit spSignalEmitter->stop();
+    }
+  }
 }

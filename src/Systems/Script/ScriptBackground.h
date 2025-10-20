@@ -17,17 +17,28 @@ public:
   CBackgroundSignalEmitter();
   ~CBackgroundSignalEmitter();
 
-  std::shared_ptr<CScriptObjectBase> CreateNewScriptObject(QPointer<QJSEngine> pEngine) override;
-  std::shared_ptr<CScriptObjectBase> CreateNewScriptObject(QPointer<CJsonInstructionSetParser> pParser) override;
-  std::shared_ptr<CScriptObjectBase> CreateNewScriptObject(QtLua::State* pState) override;
-  std::shared_ptr<CScriptObjectBase> CreateNewSequenceObject() override;
-
 signals:
   void backgroundColorChanged(QColor color);
   void backgroundTextureChanged(const QString& sResource);
-};
-Q_DECLARE_METATYPE(CBackgroundSignalEmitter)
 
+protected:
+  std::shared_ptr<CScriptCommunicator>
+  CreateCommunicatorImpl(std::shared_ptr<CScriptRunnerSignalEmiterAccessor> spAccessor) override;
+};
+
+//----------------------------------------------------------------------------------------
+//
+class CBackgroundScriptCommunicator : public CScriptCommunicator
+{
+public:
+  CBackgroundScriptCommunicator(const std::weak_ptr<CScriptRunnerSignalEmiterAccessor>& spEmitter);
+  ~CBackgroundScriptCommunicator() override;
+
+  CScriptObjectBase* CreateNewScriptObject(QPointer<QJSEngine> pEngine) override;
+  CScriptObjectBase* CreateNewScriptObject(QPointer<CJsonInstructionSetParser> pParser) override;
+  CScriptObjectBase* CreateNewScriptObject(QtLua::State* pState) override;
+  CScriptObjectBase* CreateNewSequenceObject() override;
+};
 
 //----------------------------------------------------------------------------------------
 //
@@ -37,9 +48,9 @@ class CScriptBackground : public CJsScriptObjectBase
   Q_DISABLE_COPY(CScriptBackground)
 
 public:
-  CScriptBackground(QPointer<CScriptRunnerSignalEmiter> pEmitter,
+  CScriptBackground(std::weak_ptr<CScriptCommunicator> pCommunicator,
                     QPointer<QJSEngine> pEngine);
-  CScriptBackground(QPointer<CScriptRunnerSignalEmiter> pEmitter,
+  CScriptBackground(std::weak_ptr<CScriptCommunicator> pCommunicator,
                     QtLua::State* pState);
   ~CScriptBackground();
 

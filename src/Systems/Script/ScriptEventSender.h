@@ -13,14 +13,28 @@ public:
   CEventSenderSignalEmitter();
   ~CEventSenderSignalEmitter();
 
-  std::shared_ptr<CScriptObjectBase> CreateNewScriptObject(QPointer<QJSEngine> pEngine) override;
-  std::shared_ptr<CScriptObjectBase> CreateNewScriptObject(QtLua::State* pState) override;
-
 signals:
   void sendEvent(const QString& event, const QString& dataJson);
   void sendReturnValue(QJSValue value, QString sRequestEvtRet);
+
+protected:
+  std::shared_ptr<CScriptCommunicator>
+  CreateCommunicatorImpl(std::shared_ptr<CScriptRunnerSignalEmiterAccessor> spAccessor) override;
 };
-Q_DECLARE_METATYPE(CEventSenderSignalEmitter)
+
+//----------------------------------------------------------------------------------------
+//
+class CEventScriptCommunicator : public CScriptCommunicator
+{
+  public:
+  CEventScriptCommunicator(const std::weak_ptr<CScriptRunnerSignalEmiterAccessor>& spEmitter);
+  ~CEventScriptCommunicator() override;
+
+  CScriptObjectBase* CreateNewScriptObject(QPointer<QJSEngine> pEngine) override;
+  CScriptObjectBase* CreateNewScriptObject(QPointer<CJsonInstructionSetParser> pParser) override;
+  CScriptObjectBase* CreateNewScriptObject(QtLua::State* pState) override;
+  CScriptObjectBase* CreateNewSequenceObject() override;
+};
 
 //----------------------------------------------------------------------------------------
 //
@@ -30,9 +44,9 @@ class CScriptEventSenderBase : public CJsScriptObjectBase
   Q_DISABLE_COPY(CScriptEventSenderBase)
 
 public:
-  CScriptEventSenderBase(QPointer<CScriptRunnerSignalEmiter> pEmitter,
+  CScriptEventSenderBase(std::weak_ptr<CScriptCommunicator> pCommunicator,
                          QPointer<QJSEngine> pEngine);
-  CScriptEventSenderBase(QPointer<CScriptRunnerSignalEmiter> pEmitter,
+  CScriptEventSenderBase(std::weak_ptr<CScriptCommunicator> pCommunicator,
                          QtLua::State* pState);
   ~CScriptEventSenderBase();
 
@@ -42,6 +56,9 @@ signals:
 protected:
   void SendEventImpl(const QString& sEvent, const QString& sData);
   QVariant SendEventAndWaitImpl(const QString& sEvent, const QString& sData);
+
+private:
+  std::shared_ptr<std::function<void()>> m_spStop;
 };
 
 //----------------------------------------------------------------------------------------
@@ -52,7 +69,7 @@ class CScriptEventSenderJs : public CScriptEventSenderBase
   Q_DISABLE_COPY(CScriptEventSenderJs)
 
 public:
-  CScriptEventSenderJs(QPointer<CScriptRunnerSignalEmiter> pEmitter,
+  CScriptEventSenderJs(std::weak_ptr<CScriptCommunicator> pCommunicator,
                        QPointer<QJSEngine> pEngine);
   ~CScriptEventSenderJs();
 
@@ -74,7 +91,7 @@ class CScriptEventSenderLua : public CScriptEventSenderBase
   Q_DISABLE_COPY(CScriptEventSenderLua)
 
 public:
-  CScriptEventSenderLua(QPointer<CScriptRunnerSignalEmiter> pEmitter,
+  CScriptEventSenderLua(std::weak_ptr<CScriptCommunicator> pCommunicator,
                          QtLua::State* pState);
   ~CScriptEventSenderLua();
 

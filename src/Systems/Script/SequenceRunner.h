@@ -37,7 +37,9 @@ public:
 
   std::shared_ptr<IScriptRunnerInstanceController>
   LoadScript(const QString& sScript, tspScene spScene, tspResource spResource) override;
-  void RegisterNewComponent(const QString sName, QJSValue signalEmitter) override;
+  void RegisterNewComponent(const QString& sName,
+                            std::weak_ptr<CScriptCommunicator> wpCommunicator) override;
+  void UnregisterComponent(const QString& sName) override;
   void UnregisterComponents() override;
 
   std::shared_ptr<IScriptRunnerInstanceController>
@@ -68,12 +70,12 @@ private:
                  const QString& sScript,
                  tspScene spScene, tspResource spResource);
 
-  std::weak_ptr<CScriptRunnerSignalContext>      m_wpSignalEmitterContext;
-  CScriptRunner*                                 m_pRunnerParent;
-  mutable QMutex                                 m_signalEmiterMutex;
-  std::map<QString, CScriptRunnerSignalEmiter*>  m_pSignalEmiters;
-  tRunningScriptsCheck                           m_fnRunningScriptsCheck;
-  QAtomicInt                                     m_bInitialized;
+  std::weak_ptr<CScriptRunnerSignalContext>             m_wpSignalEmitterContext;
+  CScriptRunner*                                        m_pRunnerParent;
+  mutable QMutex                                        m_communicatorMutex;
+  std::map<QString, std::weak_ptr<CScriptCommunicator>> m_wpCommunicators;
+  tRunningScriptsCheck                                  m_fnRunningScriptsCheck;
+  QAtomicInt                                            m_bInitialized;
 };
 
 #endif // CSEQUENCERUNNERINSTANCECONTROLLER_H

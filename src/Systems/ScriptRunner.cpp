@@ -176,14 +176,7 @@ void CScriptRunner::InterruptExecution()
 //
 void CScriptRunner::PauseExecution()
 {
-  if (CScriptRunnerSignalEmiter::ePaused != m_spSignalEmitterContext->ScriptExecutionStatus() &&
-      CScriptRunnerSignalEmiter::eStopped != m_spSignalEmitterContext->ScriptExecutionStatus())
-  {
-    m_spSignalEmitterContext->SetScriptExecutionStatus(CScriptRunnerSignalEmiter::ePaused);
-
-    emit m_spSignalEmitterContext->pauseExecution();
-    emit SignalRunningChanged(false);
-  }
+  m_spSignalEmitterContext->SetScriptExecutionStatus(CScriptRunnerSignalEmiter::ePaused);
 }
 
 //----------------------------------------------------------------------------------------
@@ -202,31 +195,19 @@ bool CScriptRunner::HasRunningScripts() const
 //
 void CScriptRunner::ResumeExecution()
 {
-  if (CScriptRunnerSignalEmiter::ePaused == m_spSignalEmitterContext->ScriptExecutionStatus() &&
-      CScriptRunnerSignalEmiter::eStopped != m_spSignalEmitterContext->ScriptExecutionStatus())
-  {
-    m_spSignalEmitterContext->SetScriptExecutionStatus(CScriptRunnerSignalEmiter::eRunning);
-
-    emit m_spSignalEmitterContext->resumeExecution();
-    emit SignalRunningChanged(true);
-  }
+  m_spSignalEmitterContext->SetScriptExecutionStatus(CScriptRunnerSignalEmiter::eRunning);
 }
 
 //----------------------------------------------------------------------------------------
 //
-void CScriptRunner::RegisterNewComponent(const QString sName, QJSValue signalEmitter)
+void CScriptRunner::RegisterNewComponent(const QString sName,
+                                         CScriptRunnerSignalEmiter* pObject)
 {
   if (QThread::currentThread() != qApp->thread())
   {
     assert(false && "Called RegisterNewComponent in wrong thread.");
     qWarning() << tr("Called RegisterNewComponent in wrong thread.");
     return;
-  }
-
-  CScriptRunnerSignalEmiter* pObject = nullptr;
-  if (signalEmitter.isObject())
-  {
-    pObject = qobject_cast<CScriptRunnerSignalEmiter*>(signalEmitter.toQObject());
   }
 
   if (nullptr == pObject)
@@ -236,17 +217,44 @@ void CScriptRunner::RegisterNewComponent(const QString sName, QJSValue signalEmi
     return;
   }
 
+  pObject->Initialize(m_spSignalEmitterContext);
+
   for (const auto& it : m_spRunnerFactoryMap)
   {
-    it.second->RegisterNewComponent(sName, signalEmitter);
+    it.second->RegisterNewComponent(sName, pObject->Communicator());
   }
 
   {
     QMutexLocker locker(&m_runnerMutex);
     for (auto& it : m_vspRunner)
     {
-      it.second.second->RegisterNewComponent(sName, pObject);
+      it.second.second->RegisterNewComponent(sName, pObject->Communicator());
     }
+  }
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CScriptRunner::UnregisterComponent(const QString sName)
+{
+  if (QThread::currentThread() != qApp->thread())
+  {
+    assert(false && "Called RegisterNewComponent in wrong thread.");
+    qWarning() << tr("Called RegisterNewComponent in wrong thread.");
+    return;
+  }
+
+  {
+    QMutexLocker locker(&m_runnerMutex);
+    for (auto& it : m_vspRunner)
+    {
+      it.second.second->UnregisterComponent(sName);
+    }
+  }
+
+  for (const auto& it : m_spRunnerFactoryMap)
+  {
+    it.second->UnregisterComponent(sName);
   }
 }
 
@@ -458,8 +466,20 @@ CScriptRunnerWrapper::CScriptRunnerWrapper(QObject* pParent, std::weak_ptr<CScri
   QObject(pParent),
   m_wpRunner(wpRunner)
 {
-  connect(wpRunner.lock().get(), &CScriptRunner::SignalRunningChanged,
-          this, &CScriptRunnerWrapper::runningChanged, Qt::QueuedConnection);
+  if (auto spRunner = wpRunner.lock())
+  {
+    connect(spRunner.get()->SignalEmmitterContext().get(),
+            &CScriptRunnerSignalContext::pauseExecution,
+            this, [this](){ runningChanged(false); }, Qt::QueuedConnection);
+    connect(spRunner.get()->SignalEmmitterContext().get(),
+            &CScriptRunnerSignalContext::resumeExecution,
+            this, [this](){ runningChanged(true); }, Qt::QueuedConnection);
+  }
+  else
+  {
+    assert(false && "Runner not available.");
+    qWarning() << tr("Runner not available.");
+  }
 }
 CScriptRunnerWrapper::~CScriptRunnerWrapper()
 {
@@ -474,15 +494,51 @@ void CScriptRunnerWrapper::pauseExecution()
   {
     spRunner->PauseExecution();
   }
+  else
+  {
+    assert(false && "Runner not available.");
+    qWarning() << tr("Runner not available.");
+  }
 }
 
 //----------------------------------------------------------------------------------------
 //
 void CScriptRunnerWrapper::registerNewComponent(const QString sName, QJSValue signalEmitter)
 {
+  if (QThread::currentThread() != qApp->thread())
+  {
+    assert(false && "Called RegisterNewComponent in wrong thread.");
+    qWarning() << tr("Called RegisterNewComponent in wrong thread.");
+    return;
+  }
+
   if (auto spRunner = m_wpRunner.lock())
   {
-    spRunner->RegisterNewComponent(sName, signalEmitter);
+    CScriptRunnerSignalEmiter* pObject = nullptr;
+    if (signalEmitter.isObject())
+    {
+      pObject = qobject_cast<CScriptRunnerSignalEmiter*>(signalEmitter.toQObject());
+    }
+
+    if (nullptr == pObject)
+    {
+      assert(false && "SignalEmitter is not a QObject");
+      qWarning() << tr("SignalEmitter is not a QObject");
+      return;
+    }
+
+    connect(pObject, &QObject::destroyed, this, [this, sName]() {
+      unregisterComponent(sName);
+    });
+
+    m_vpEmitters[sName] = pObject;
+
+    spRunner->RegisterNewComponent(sName, pObject);
+  }
+  else
+  {
+    assert(false && "Runner not available.");
+    qWarning() << tr("Runner not available.");
   }
 }
 
@@ -493,5 +549,36 @@ void CScriptRunnerWrapper::resumeExecution()
   if (auto spRunner = m_wpRunner.lock())
   {
     spRunner->ResumeExecution();
+  }
+  else
+  {
+    assert(false && "Runner not available.");
+    qWarning() << tr("Runner not available.");
+  }
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CScriptRunnerWrapper::unregisterComponent(const QString sName)
+{
+  if (QThread::currentThread() != qApp->thread())
+  {
+    assert(false && "Called RegisterNewComponent in wrong thread.");
+    qWarning() << tr("Called RegisterNewComponent in wrong thread.");
+    return;
+  }
+
+  if (auto spRunner = m_wpRunner.lock())
+  {
+    if (auto it = m_vpEmitters.find(sName); m_vpEmitters.end() != it)
+    {
+      spRunner->UnregisterComponent(sName);
+      m_vpEmitters.erase(it);
+    }
+  }
+  else
+  {
+    assert(false && "Runner not available.");
+    qWarning() << tr("Runner not available.");
   }
 }

@@ -22,37 +22,93 @@ CThreadSignalEmitter::~CThreadSignalEmitter()
 
 //----------------------------------------------------------------------------------------
 //
-std::shared_ptr<CScriptObjectBase> CThreadSignalEmitter::CreateNewScriptObject(QPointer<QJSEngine> pEngine)
+std::shared_ptr<CScriptCommunicator>
+CThreadSignalEmitter::CreateCommunicatorImpl(std::shared_ptr<CScriptRunnerSignalEmiterAccessor> spAccessor)
 {
-  return std::make_shared<CScriptThread>(this, pEngine);
+  return std::make_shared<CThreadScriptCommunicator>(spAccessor);
 }
-std::shared_ptr<CScriptObjectBase> CThreadSignalEmitter::CreateNewScriptObject(QtLua::State* pState)
+
+//----------------------------------------------------------------------------------------
+//
+CThreadScriptCommunicator::CThreadScriptCommunicator(
+  const std::weak_ptr<CScriptRunnerSignalEmiterAccessor>& spEmitter) :
+  CScriptCommunicator(spEmitter)
+{}
+CThreadScriptCommunicator::~CThreadScriptCommunicator() = default;
+
+//----------------------------------------------------------------------------------------
+//
+CScriptObjectBase* CThreadScriptCommunicator::CreateNewScriptObject(QPointer<QJSEngine> pEngine)
 {
-  return std::make_shared<CScriptThread>(this, pState);
+  return new CScriptThread(weak_from_this(), pEngine);
 }
-std::shared_ptr<CScriptObjectBase> CThreadSignalEmitter::CreateNewSequenceObject()
+CScriptObjectBase* CThreadScriptCommunicator::CreateNewScriptObject(QPointer<CJsonInstructionSetParser> pParser)
+{
+  Q_UNUSED(pParser)
+  return nullptr;
+}
+CScriptObjectBase* CThreadScriptCommunicator::CreateNewScriptObject(QtLua::State* pState)
+{
+  return new CScriptThread(weak_from_this(), pState);
+}
+CScriptObjectBase* CThreadScriptCommunicator::CreateNewSequenceObject()
 {
   return nullptr;
 }
 
 //----------------------------------------------------------------------------------------
 //
-CScriptThread::CScriptThread(QPointer<CScriptRunnerSignalEmiter> pEmitter,
+CScriptThread::CScriptThread(std::weak_ptr<CScriptCommunicator> pCommunicator,
                              QPointer<QJSEngine> pEngine) :
-  CJsScriptObjectBase(pEmitter, pEngine),
+  CJsScriptObjectBase(pCommunicator, pEngine),
   m_wpDbManager(CApplication::Instance()->System<CDatabaseManager>())
 {
+  m_spStop = std::make_shared<std::function<void()>>([this]() {
+    emit SignalQuitLoop();
+  });
+  m_spPause = std::make_shared<std::function<void()>>([this]() {
+    emit SignalPauseTimer();
+  });
+  m_spResume = std::make_shared<std::function<void()>>([this]() {
+    emit SignalResumeTimer();
+  });
+  if (auto spComm = pCommunicator.lock())
+  {
+    spComm->RegisterStopCallback(m_spStop);
+    spComm->RegisterPauseCallback(m_spPause);
+    spComm->RegisterResumeCallback(m_spResume);
+  }
 }
-CScriptThread::CScriptThread(QPointer<CScriptRunnerSignalEmiter> pEmitter,
+CScriptThread::CScriptThread(std::weak_ptr<CScriptCommunicator> pCommunicator,
                              QtLua::State* pState)  :
-  CJsScriptObjectBase(pEmitter, pState),
+  CJsScriptObjectBase(pCommunicator, pState),
   m_wpDbManager(CApplication::Instance()->System<CDatabaseManager>())
 {
+  m_spStop = std::make_shared<std::function<void()>>([this]() {
+    emit SignalQuitLoop();
+  });
+  m_spPause = std::make_shared<std::function<void()>>([this]() {
+    emit SignalPauseTimer();
+  });
+  m_spResume = std::make_shared<std::function<void()>>([this]() {
+    emit SignalResumeTimer();
+  });
+  if (auto spComm = pCommunicator.lock())
+  {
+    spComm->RegisterStopCallback(m_spStop);
+    spComm->RegisterPauseCallback(m_spPause);
+    spComm->RegisterResumeCallback(m_spResume);
+  }
 }
 
 CScriptThread::~CScriptThread()
 {
-
+  if (auto spComm = m_wpCommunicator.lock())
+  {
+    spComm->RemoveResumeCallback(m_spResume);
+    spComm->RemovePauseCallback(m_spPause);
+    spComm->RemoveStopCallback(m_spStop);
+  }
 }
 
 //----------------------------------------------------------------------------------------
@@ -61,12 +117,18 @@ void CScriptThread::kill(QString sId)
 {
   if (!CheckIfScriptCanRun()) { return; }
 
-  if (IScriptRunnerFactory::c_sMainRunner == sId)
+  if (auto spComm = m_wpCommunicator.lock())
   {
-    emit m_pSignalEmitter->showError(
-          tr("Can not kill %1.").arg(IScriptRunnerFactory::c_sMainRunner),
-          QtMsgType::QtWarningMsg);
-    return;
+    if (auto spSignalEmitter = spComm->LockedEmitter<CThreadSignalEmitter>())
+    {
+      if (IScriptRunnerFactory::c_sMainRunner == sId)
+      {
+        emit spSignalEmitter->showError(
+              tr("Can not kill %1.").arg(IScriptRunnerFactory::c_sMainRunner),
+              QtMsgType::QtWarningMsg);
+        return;
+      }
+    }
   }
 
   emit SignalKill(sId);
@@ -102,9 +164,15 @@ void CScriptThread::runAsynch(QVariant resource, QVariant id)
 
   if (IScriptRunnerFactory::c_sMainRunner == sId)
   {
-    emit m_pSignalEmitter->showError(
-          tr("Id of asynch thread must not be %1").arg(IScriptRunnerFactory::c_sMainRunner),
-          QtMsgType::QtWarningMsg);
+    if (auto spComm = m_wpCommunicator.lock())
+    {
+      if (auto spSignalEmitter = spComm->LockedEmitter<CThreadSignalEmitter>())
+      {
+        emit spSignalEmitter->showError(
+              tr("Id of asynch thread must not be %1").arg(IScriptRunnerFactory::c_sMainRunner),
+              QtMsgType::QtWarningMsg);
+      }
+    }
     return;
   }
 
@@ -124,77 +192,94 @@ void CScriptThread::sleep(qint32 iTimeS, QVariant bSkippable)
 {
   if (!CheckIfScriptCanRun()) { return; }
 
-  auto pSignalEmitter = SignalEmitter<CThreadSignalEmitter>();
-
-  bool bSkippableFlag = false;
-  if (bSkippable.type() == QVariant::Bool)
+  if (auto spComm = m_wpCommunicator.lock())
   {
-    bSkippableFlag = bSkippable.toBool();
-  }
+    if (auto spSignalEmitter = spComm->LockedEmitter<CThreadSignalEmitter>())
+    {
+      bool bSkippableFlag = false;
+      if (bSkippable.type() == QVariant::Bool)
+      {
+        bSkippableFlag = bSkippable.toBool();
+      }
 
-  if (0 < iTimeS)
-  {
-    QDateTime lastTime = QDateTime::currentDateTime();
-    qint32 iTimeLeft = iTimeS * 1000;
+      if (0 < iTimeS)
+      {
+        QTimer::singleShot(0, this, [this, bSkippableFlag, iTimeS]() {
+          if (auto spComm = m_wpCommunicator.lock())
+          {
+            if (auto spSignalEmitter = spComm->LockedEmitter<CThreadSignalEmitter>())
+            {
+              emit spSignalEmitter->skippableWait(bSkippableFlag ? iTimeS : 0);
+            }
+          }
+        });
 
-    QTimer timer;
-    timer.setSingleShot(false);
-    timer.setInterval(20);
-    QEventLoop loop;
-    QMetaObject::Connection interruptLoop =
-      connect(pSignalEmitter, &CThreadSignalEmitter::interrupt,
-              &loop, &QEventLoop::quit, Qt::QueuedConnection);
-    QMetaObject::Connection interruptThisLoop =
-      connect(this, &CScriptObjectBase::SignalInterruptExecution,
-              &loop, [&loop]{
-      loop.quit();
-    }, Qt::QueuedConnection);
+        QDateTime lastTime = QDateTime::currentDateTime();
+        qint32 iTimeLeft = iTimeS * 1000;
 
-    // connect lambdas in loop context, so events are processed, but capture timer,
-    // to start / stop
-    QMetaObject::Connection pauseLoop =
-      connect(pSignalEmitter, &CThreadSignalEmitter::pauseExecution, &loop, [&timer]() {
-        timer.stop();
-      }, Qt::QueuedConnection);
-    QMetaObject::Connection resumeLoop =
-      connect(pSignalEmitter, &CThreadSignalEmitter::resumeExecution, &loop, [&timer]() {
-        timer.start();
-      }, Qt::QueuedConnection);
+        QPointer<CScriptThread> pThis(this);
+        QTimer timer;
+        timer.setSingleShot(false);
+        timer.setInterval(20);
+        QEventLoop loop;
 
-    QMetaObject::Connection timeoutLoop =
-      connect(&timer, &QTimer::timeout, &loop, [&loop, &iTimeLeft, &lastTime]() {
-        QDateTime newTime = QDateTime::currentDateTime();
-        iTimeLeft -= newTime.toMSecsSinceEpoch() - lastTime.toMSecsSinceEpoch();
-        lastTime = newTime;
-        if (0 >= iTimeLeft)
+        QMetaObject::Connection quitLoop =
+          connect(this, &CScriptThread::SignalQuitLoop,
+                  &loop, &QEventLoop::quit, Qt::QueuedConnection);
+        QMetaObject::Connection interruptThisLoop =
+          connect(this, &CScriptObjectBase::SignalInterruptExecution,
+                  &loop, &QEventLoop::quit, Qt::QueuedConnection);
+
+        // connect lambdas in loop context, so events are processed, but capture timer,
+        // to start / stop
+        QMetaObject::Connection pauseLoop =
+          connect(this, &CScriptThread::SignalPauseTimer, &timer, &QTimer::stop,
+                  Qt::QueuedConnection);
+        QMetaObject::Connection resumeLoop =
+          connect(this, &CScriptThread::SignalResumeTimer, &timer, [&timer, &lastTime]() {
+            lastTime = QDateTime::currentDateTime();
+            timer.start();
+          }, Qt::QueuedConnection);
+
+        QMetaObject::Connection timeoutLoop =
+          connect(&timer, &QTimer::timeout, &loop, [&loop, &iTimeLeft, &lastTime]() {
+            QDateTime newTime = QDateTime::currentDateTime();
+            iTimeLeft -= newTime.toMSecsSinceEpoch() - lastTime.toMSecsSinceEpoch();
+            lastTime = newTime;
+            if (0 >= iTimeLeft)
+            {
+              emit loop.exit();
+            }
+          });
+
+        QMetaObject::Connection skipLoop;
+        if (bSkippableFlag)
         {
-          emit loop.exit();
+          skipLoop =
+            connect(spSignalEmitter.Get(), &CThreadSignalEmitter::waitSkipped,
+                    &loop, &QEventLoop::quit, Qt::QueuedConnection);
         }
-      });
 
-    QMetaObject::Connection skipLoop;
-    if (bSkippableFlag)
-    {
-      skipLoop =
-        connect(pSignalEmitter, &CThreadSignalEmitter::waitSkipped,
-                &loop, &QEventLoop::quit, Qt::QueuedConnection);
-    }
-    emit pSignalEmitter->skippableWait(bSkippableFlag ? iTimeS : 0);
+        timer.start();
+        loop.exec();
+        timer.stop();
+        timer.disconnect();
+        loop.disconnect();
 
-    timer.start();
-    loop.exec();
-    timer.stop();
-    timer.disconnect();
-    loop.disconnect();
+        if (nullptr != pThis)
+        {
+          disconnect(quitLoop);
+          disconnect(interruptThisLoop);
 
-    disconnect(interruptLoop);
-    disconnect(interruptThisLoop);
-    disconnect(pauseLoop);
-    disconnect(resumeLoop);
-    disconnect(timeoutLoop);
-    if (bSkippableFlag)
-    {
-      disconnect(skipLoop);
+          disconnect(pauseLoop);
+          disconnect(resumeLoop);
+          disconnect(timeoutLoop);
+          if (bSkippableFlag)
+          {
+            disconnect(skipLoop);
+          }
+        }
+      }
     }
   }
 }
@@ -222,7 +307,13 @@ QString CScriptThread::GetResourceName(const QVariant& resource, const QString& 
   }
   else
   {
-    emit m_pSignalEmitter->showError(sError, QtMsgType::QtWarningMsg);
+    if (auto spComm = m_wpCommunicator.lock())
+    {
+      if (auto spSignalEmitter = spComm->LockedEmitter<CThreadSignalEmitter>())
+      {
+        emit spSignalEmitter->showError(sError, QtMsgType::QtWarningMsg);
+      }
+    }
     return QString();
   }
 }

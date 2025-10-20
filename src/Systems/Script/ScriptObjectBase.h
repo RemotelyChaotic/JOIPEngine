@@ -5,8 +5,9 @@
 #include <QJSEngine>
 #include <QPointer>
 #include <memory>
+#include <type_traits>
 
-class CScriptRunnerSignalEmiter;
+class CScriptCommunicator;
 class CJsonInstructionSetParser;
 namespace QtLua {
   class State;
@@ -21,15 +22,21 @@ class CScriptObjectBase : public QObject
   Q_DISABLE_COPY(CScriptObjectBase)
 
 public:
-  CScriptObjectBase(QPointer<CScriptRunnerSignalEmiter> pEmitter);
+  CScriptObjectBase(std::weak_ptr<CScriptCommunicator> pCommunicator);
   ~CScriptObjectBase();
 
   void Cleanup();
   void SetCurrentProject(tspProject spProject);
 
-  template<typename T> T* SignalEmitter()
+  template<typename T,
+           typename std::enable_if_t<std::is_base_of_v<CScriptCommunicator, T>, void>>
+  std::shared_ptr<T> SignalEmitter()
   {
-    return qobject_cast<T*>(m_pSignalEmitter);
+    if (auto spComm = m_wpCommunicator.lock())
+    {
+      return std::dynamic_pointer_cast<T*>(m_wpCommunicator);
+    }
+    return nullptr;
   }
 
 signals:
@@ -41,7 +48,7 @@ protected:
   virtual void Cleanup_Impl();
 
   tspProject                                 m_spProject;
-  QPointer<CScriptRunnerSignalEmiter>        m_pSignalEmitter;
+  std::weak_ptr<CScriptCommunicator>         m_wpCommunicator;
 };
 
 //----------------------------------------------------------------------------------------
@@ -52,9 +59,9 @@ class CJsScriptObjectBase : public CScriptObjectBase
   Q_DISABLE_COPY(CJsScriptObjectBase)
 
 public:
-  CJsScriptObjectBase(QPointer<CScriptRunnerSignalEmiter> pEmitter,
+  CJsScriptObjectBase(std::weak_ptr<CScriptCommunicator> pCommunicator,
                       QPointer<QJSEngine> pEngine);
-  CJsScriptObjectBase(QPointer<CScriptRunnerSignalEmiter> pEmitter,
+  CJsScriptObjectBase(std::weak_ptr<CScriptCommunicator> pCommunicator,
                       QtLua::State* pState);
   ~CJsScriptObjectBase();
 
@@ -71,7 +78,7 @@ class CEosScriptObjectBase : public CScriptObjectBase
   Q_DISABLE_COPY(CEosScriptObjectBase)
 
 public:
-  CEosScriptObjectBase(QPointer<CScriptRunnerSignalEmiter> pEmitter,
+  CEosScriptObjectBase(std::weak_ptr<CScriptCommunicator> pCommunicator,
                        QPointer<CJsonInstructionSetParser> pParser);
   ~CEosScriptObjectBase();
 

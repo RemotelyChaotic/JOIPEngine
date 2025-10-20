@@ -25,40 +25,73 @@ CSceneManagerSignalEmiter::~CSceneManagerSignalEmiter()
 
 //----------------------------------------------------------------------------------------
 //
-std::shared_ptr<CScriptObjectBase> CSceneManagerSignalEmiter::CreateNewScriptObject(QPointer<QJSEngine> pEngine)
+std::shared_ptr<CScriptCommunicator>
+CSceneManagerSignalEmiter::CreateCommunicatorImpl(std::shared_ptr<CScriptRunnerSignalEmiterAccessor> spAccessor)
 {
-  return std::make_shared<CScriptSceneManager>(this, pEngine);
+  return std::make_shared<CSceneManagerScriptCommunicator>(spAccessor);
 }
-std::shared_ptr<CScriptObjectBase> CSceneManagerSignalEmiter::CreateNewScriptObject(QPointer<CJsonInstructionSetParser> pParser)
+
+//----------------------------------------------------------------------------------------
+//
+CSceneManagerScriptCommunicator::CSceneManagerScriptCommunicator(
+  const std::weak_ptr<CScriptRunnerSignalEmiterAccessor>& spEmitter) :
+  CScriptCommunicator(spEmitter)
+{}
+CSceneManagerScriptCommunicator::~CSceneManagerScriptCommunicator() = default;
+
+//----------------------------------------------------------------------------------------
+//
+CScriptObjectBase* CSceneManagerScriptCommunicator::CreateNewScriptObject(QPointer<QJSEngine> pEngine)
 {
-  return std::make_shared<CEosScriptSceneManager>(this, pParser);
+  return new CScriptSceneManager(weak_from_this(), pEngine);
 }
-std::shared_ptr<CScriptObjectBase> CSceneManagerSignalEmiter::CreateNewScriptObject(QtLua::State* pState)
+CScriptObjectBase* CSceneManagerScriptCommunicator::CreateNewScriptObject(QPointer<CJsonInstructionSetParser> pParser)
 {
-  return std::make_shared<CScriptSceneManager>(this, pState);
+  return new CEosScriptSceneManager(weak_from_this(), pParser);
 }
-std::shared_ptr<CScriptObjectBase> CSceneManagerSignalEmiter::CreateNewSequenceObject()
+CScriptObjectBase* CSceneManagerScriptCommunicator::CreateNewScriptObject(QtLua::State* pState)
+{
+  return new CScriptSceneManager(weak_from_this(), pState);
+}
+CScriptObjectBase* CSceneManagerScriptCommunicator::CreateNewSequenceObject()
 {
   return nullptr;
 }
 
 //----------------------------------------------------------------------------------------
 //
-CScriptSceneManager::CScriptSceneManager(QPointer<CScriptRunnerSignalEmiter> pEmitter,
+CScriptSceneManager::CScriptSceneManager(std::weak_ptr<CScriptCommunicator> pCommunicator,
                                          QPointer<QJSEngine> pEngine) :
-  CJsScriptObjectBase(pEmitter, pEngine),
+  CJsScriptObjectBase(pCommunicator, pEngine),
   m_wpDbManager(CApplication::Instance()->System<CDatabaseManager>())
 {
+  m_spStop = std::make_shared<std::function<void()>>([this]() {
+    emit SignalQuitLoop();
+  });
+  if (auto spComm = pCommunicator.lock())
+  {
+    spComm->RegisterStopCallback(m_spStop);
+  }
 }
-CScriptSceneManager::CScriptSceneManager(QPointer<CScriptRunnerSignalEmiter> pEmitter,
+CScriptSceneManager::CScriptSceneManager(std::weak_ptr<CScriptCommunicator> pCommunicator,
                                          QtLua::State* pState) :
-  CJsScriptObjectBase(pEmitter, pState),
+  CJsScriptObjectBase(pCommunicator, pState),
   m_wpDbManager(CApplication::Instance()->System<CDatabaseManager>())
 {
+  m_spStop = std::make_shared<std::function<void()>>([this]() {
+    emit SignalQuitLoop();
+  });
+  if (auto spComm = pCommunicator.lock())
+  {
+    spComm->RegisterStopCallback(m_spStop);
+  }
 }
 CScriptSceneManager::~CScriptSceneManager()
 {
-
+  if (auto spComm = m_wpCommunicator.lock())
+  {
+    spComm->RemoveStopCallback(m_spStop);
+  }
 }
 
 //----------------------------------------------------------------------------------------
@@ -66,8 +99,15 @@ CScriptSceneManager::~CScriptSceneManager()
 void CScriptSceneManager::disable(QVariant scene)
 {
   if (!CheckIfScriptCanRun()) { return; }
-  QString sScene = GetScene(scene, "disable");
-  emit SignalEmitter<CSceneManagerSignalEmiter>()->disable(sScene);
+
+  if (auto spComm = m_wpCommunicator.lock())
+  {
+    if (auto spSignalEmitter = spComm->LockedEmitter<CSceneManagerSignalEmiter>())
+    {
+      QString sScene = GetScene(scene, "disable");
+      emit spSignalEmitter->disable(sScene);
+    }
+  }
 }
 
 //----------------------------------------------------------------------------------------
@@ -75,8 +115,15 @@ void CScriptSceneManager::disable(QVariant scene)
 void CScriptSceneManager::enable(QVariant scene)
 {
   if (!CheckIfScriptCanRun()) { return; }
-  QString sScene = GetScene(scene, "enable");
-  emit SignalEmitter<CSceneManagerSignalEmiter>()->enable(sScene);
+
+  if (auto spComm = m_wpCommunicator.lock())
+  {
+    if (auto spSignalEmitter = spComm->LockedEmitter<CSceneManagerSignalEmiter>())
+    {
+      QString sScene = GetScene(scene, "enable");
+      emit spSignalEmitter->enable(sScene);
+    }
+  }
 }
 
 //----------------------------------------------------------------------------------------
@@ -84,22 +131,32 @@ void CScriptSceneManager::enable(QVariant scene)
 void CScriptSceneManager::gotoScene(QVariant scene)
 {
   if (!CheckIfScriptCanRun()) { return; }
-  QString sScene = GetScene(scene, "gotoScene");
 
-  auto pSignalEmitter = SignalEmitter<CSceneManagerSignalEmiter>();
-
-  // goto needs to wait here otherwise we accidentally run commands after the call
-  QEventLoop loop;
-  QMetaObject::Connection interruptThisLoop =
-      connect(this, &CScriptObjectBase::SignalInterruptExecution,
-              &loop, &QEventLoop::quit, Qt::QueuedConnection);
-  emit pSignalEmitter->gotoScene(sScene);
-  loop.exec();
-
-  QPointer<CScriptSceneManager> pThis(this);
-  if (nullptr != pThis)
+  if (auto spComm = m_wpCommunicator.lock())
   {
-    disconnect(interruptThisLoop);
+    if (auto spSignalEmitter = spComm->LockedEmitter<CSceneManagerSignalEmiter>())
+    {
+      QPointer<CScriptSceneManager> pThis(this);
+      QString sScene = GetScene(scene, "gotoScene");
+
+      // goto needs to wait here otherwise we accidentally run commands after the call
+      QEventLoop loop;
+      QMetaObject::Connection quitLoop =
+        connect(this, &CScriptSceneManager::SignalQuitLoop, &loop, &QEventLoop::quit,
+                Qt::QueuedConnection);
+      QMetaObject::Connection interruptThisLoop =
+          connect(this, &CScriptObjectBase::SignalInterruptExecution,
+                  &loop, &QEventLoop::quit, Qt::QueuedConnection);
+      emit spSignalEmitter->gotoScene(sScene);
+      loop.exec();
+      loop.disconnect();
+
+      if (nullptr != pThis)
+      {
+        disconnect(quitLoop);
+        disconnect(interruptThisLoop);
+      }
+    }
   }
 }
 
@@ -107,21 +164,23 @@ void CScriptSceneManager::gotoScene(QVariant scene)
 //
 QString CScriptSceneManager::GetScene(const QVariant& scene, const QString& sSource)
 {
-  auto spSignalEmitter = SignalEmitter<CSceneManagerSignalEmiter>();
-  if (nullptr != spSignalEmitter)
+  if (auto spComm = m_wpCommunicator.lock())
   {
-    QString sError;
-    std::optional<QString> optRes =
-        script::ParseSceneFromScriptVariant(scene, m_wpDbManager.lock(),
-                                            m_spProject,
-                                            sSource, &sError);
-    if (optRes.has_value())
+    if (auto spSignalEmitter = spComm->LockedEmitter<CSceneManagerSignalEmiter>())
     {
-      return optRes.value();
-    }
-    else
-    {
-      emit m_pSignalEmitter->showError(sError, QtMsgType::QtWarningMsg);
+      QString sError;
+      std::optional<QString> optRes =
+          script::ParseSceneFromScriptVariant(scene, m_wpDbManager.lock(),
+                                              m_spProject,
+                                              sSource, &sError);
+      if (optRes.has_value())
+      {
+        return optRes.value();
+      }
+      else
+      {
+        emit spSignalEmitter->showError(sError, QtMsgType::QtWarningMsg);
+      }
     }
   }
 
@@ -193,18 +252,28 @@ private:
 
 //----------------------------------------------------------------------------------------
 //
-CEosScriptSceneManager::CEosScriptSceneManager(QPointer<CScriptRunnerSignalEmiter> pEmitter,
+CEosScriptSceneManager::CEosScriptSceneManager(std::weak_ptr<CScriptCommunicator> pCommunicator,
                                                QPointer<CJsonInstructionSetParser> pParser) :
-  CEosScriptObjectBase(pEmitter, pParser),
+  CEosScriptObjectBase(pCommunicator, pParser),
   m_spCommandDisable(std::make_shared<CCommandEosDisableScene>(this)),
   m_spCommandEnable(std::make_shared<CCommandEosEnableScene>(this))
 {
+  m_spStop = std::make_shared<std::function<void()>>([this]() {
+    emit SignalQuitLoop();
+  });
+  if (auto spComm = pCommunicator.lock())
+  {
+    spComm->RegisterStopCallback(m_spStop);
+  }
   pParser->RegisterInstruction(eos::c_sCommandDisableScreen, m_spCommandDisable);
   pParser->RegisterInstruction(eos::c_sCommandEnableScreen, m_spCommandEnable);
 }
 CEosScriptSceneManager::~CEosScriptSceneManager()
 {
-
+  if (auto spComm = m_wpCommunicator.lock())
+  {
+    spComm->RemoveStopCallback(m_spStop);
+  }
 }
 
 //----------------------------------------------------------------------------------------
@@ -212,7 +281,14 @@ CEosScriptSceneManager::~CEosScriptSceneManager()
 void CEosScriptSceneManager::Disable(const QString& sScene)
 {
   if (!CheckIfScriptCanRun()) { return; }
-  emit SignalEmitter<CSceneManagerSignalEmiter>()->disable(sScene);
+
+  if (auto spComm = m_wpCommunicator.lock())
+  {
+    if (auto spSignalEmitter = spComm->LockedEmitter<CSceneManagerSignalEmiter>())
+    {
+      emit spSignalEmitter->disable(sScene);
+    }
+  }
 }
 
 //----------------------------------------------------------------------------------------
@@ -220,5 +296,12 @@ void CEosScriptSceneManager::Disable(const QString& sScene)
 void CEosScriptSceneManager::Enable(const QString& sScene)
 {
   if (!CheckIfScriptCanRun()) { return; }
-  emit SignalEmitter<CSceneManagerSignalEmiter>()->enable(sScene);
+
+  if (auto spComm = m_wpCommunicator.lock())
+  {
+    if (auto spSignalEmitter = spComm->LockedEmitter<CSceneManagerSignalEmiter>())
+    {
+      emit spSignalEmitter->enable(sScene);
+    }
+  }
 }

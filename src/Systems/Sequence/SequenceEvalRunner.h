@@ -8,7 +8,7 @@ class CSequenceEvalRunner : public CScriptObjectBase,
                             public ISequenceObjectRunner
 {
 public:
-  CSequenceEvalRunner(QPointer<CScriptRunnerSignalEmiter> pEmitter);
+  CSequenceEvalRunner(std::weak_ptr<CScriptCommunicator> pCommunicator);
   ~CSequenceEvalRunner() override;
 
   void RunSequenceInstruction(const QString& sName,

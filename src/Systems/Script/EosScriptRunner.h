@@ -34,8 +34,10 @@ public:
 
   void InterruptExecution() override;
   bool IsRunning() const override;
-  void RegisterNewComponent(const QString sName, CScriptRunnerSignalEmiter* pObject) override;
+  void RegisterNewComponent(const QString& sName,
+                            std::weak_ptr<CScriptCommunicator> wpCommunicator) override;
   void ResetEngine() override;
+  void UnregisterComponent(const QString& sName) override;
   void UnregisterComponents() override;
 
   std::shared_ptr<CJsonInstructionSetRunner> Runner() const;
@@ -66,7 +68,9 @@ public:
 
   std::shared_ptr<IScriptRunnerInstanceController>
        LoadScript(const QString& sScript, tspScene spScene, tspResource spResource) override;
-  void RegisterNewComponent(const QString sName, QJSValue signalEmitter) override;
+  void RegisterNewComponent(const QString& sName,
+                            std::weak_ptr<CScriptCommunicator> wpCommunicator) override;
+  void UnregisterComponent(const QString& sName) override;
   void UnregisterComponents() override;
 
   std::shared_ptr<IScriptRunnerInstanceController>

@@ -38,7 +38,7 @@ int main(int argc, char *argv[])
 
   // Too many debug messages in debug, if needed set to debug temporarilly
 #ifndef NDEBUG
-  QtAV::setLogLevel(QtAV::LogLevel::LogWarning);
+  QtAV::setLogLevel(QtAV::LogLevel::LogCritical);
 #else
   QtAV::setLogLevel(QtAV::LogLevel::LogCritical);
 #endif

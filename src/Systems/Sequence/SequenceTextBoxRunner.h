@@ -8,7 +8,7 @@ class CSequenceTextBoxRunner : public CScriptObjectBase,
                                public ISequenceObjectRunner
 {
 public:
-  CSequenceTextBoxRunner(QPointer<CScriptRunnerSignalEmiter> pEmitter);
+  CSequenceTextBoxRunner(std::weak_ptr<CScriptCommunicator> pCommunicator);
   ~CSequenceTextBoxRunner() override;
 
   void RunSequenceInstruction(const QString& sName,

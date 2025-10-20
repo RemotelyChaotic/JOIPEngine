@@ -17,17 +17,29 @@ public:
   CSceneManagerSignalEmiter();
   ~CSceneManagerSignalEmiter();
 
-  std::shared_ptr<CScriptObjectBase> CreateNewScriptObject(QPointer<QJSEngine> pEngine) override;
-  std::shared_ptr<CScriptObjectBase> CreateNewScriptObject(QPointer<CJsonInstructionSetParser> pParser) override;
-  std::shared_ptr<CScriptObjectBase> CreateNewScriptObject(QtLua::State* pState) override;
-  std::shared_ptr<CScriptObjectBase> CreateNewSequenceObject() override;
-
 signals:
   void disable(QString sScene);
   void enable(QString sScene);
   void gotoScene(QString sScene);
+
+protected:
+  std::shared_ptr<CScriptCommunicator>
+  CreateCommunicatorImpl(std::shared_ptr<CScriptRunnerSignalEmiterAccessor> spAccessor) override;
 };
-Q_DECLARE_METATYPE(CSceneManagerSignalEmiter)
+
+//----------------------------------------------------------------------------------------
+//
+class CSceneManagerScriptCommunicator : public CScriptCommunicator
+{
+  public:
+  CSceneManagerScriptCommunicator(const std::weak_ptr<CScriptRunnerSignalEmiterAccessor>& spEmitter);
+  ~CSceneManagerScriptCommunicator() override;
+
+  CScriptObjectBase* CreateNewScriptObject(QPointer<QJSEngine> pEngine) override;
+  CScriptObjectBase* CreateNewScriptObject(QPointer<CJsonInstructionSetParser> pParser) override;
+  CScriptObjectBase* CreateNewScriptObject(QtLua::State* pState) override;
+  CScriptObjectBase* CreateNewSequenceObject() override;
+};
 
 //----------------------------------------------------------------------------------------
 //
@@ -37,9 +49,9 @@ class CScriptSceneManager : public CJsScriptObjectBase
   Q_DISABLE_COPY(CScriptSceneManager)
 
 public:
-  CScriptSceneManager(QPointer<CScriptRunnerSignalEmiter> pEmitter,
+  CScriptSceneManager(std::weak_ptr<CScriptCommunicator> pCommunicator,
                       QPointer<QJSEngine> pEngine);
-  CScriptSceneManager(QPointer<CScriptRunnerSignalEmiter> pEmitter,
+  CScriptSceneManager(std::weak_ptr<CScriptCommunicator> pCommunicator,
                       QtLua::State* pState);
   ~CScriptSceneManager();
 
@@ -48,9 +60,13 @@ public slots:
   void enable(QVariant scene);
   void gotoScene(QVariant scene);
 
+signals:
+  void SignalQuitLoop();
+
 private:
   QString GetScene(const QVariant& scene, const QString& sSource);
 
+  std::shared_ptr<std::function<void()>> m_spStop;
   std::weak_ptr<CDatabaseManager>  m_wpDbManager;
 };
 
@@ -64,16 +80,20 @@ class CEosScriptSceneManager : public CEosScriptObjectBase
   Q_DISABLE_COPY(CEosScriptSceneManager)
 
 public:
-  CEosScriptSceneManager(QPointer<CScriptRunnerSignalEmiter> pEmitter,
+  CEosScriptSceneManager(std::weak_ptr<CScriptCommunicator> pCommunicator,
                          QPointer<CJsonInstructionSetParser> pParser);
   ~CEosScriptSceneManager();
 
   void Disable(const QString& sScene);
   void Enable(const QString& sScene);
 
+signals:
+  void SignalQuitLoop();
+
 private:
   std::shared_ptr<CCommandEosDisableScene> m_spCommandDisable;
   std::shared_ptr<CCommandEosEnableScene>  m_spCommandEnable;
+  std::shared_ptr<std::function<void()>> m_spStop;
 };
 
 #endif // SCRIPTSCENEMANAGER_H

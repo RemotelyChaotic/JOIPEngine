@@ -306,7 +306,6 @@ void CSceneMainScreen::SlotTerminate()
   if (nullptr != spSignalEmmiterContext)
   {
     spSignalEmmiterContext->SetScriptExecutionStatus(CScriptRunnerSignalEmiter::eStopped);
-    emit spSignalEmmiterContext->interrupt();
   }
 
   UnloadProject();

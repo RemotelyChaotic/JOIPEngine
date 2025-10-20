@@ -12,7 +12,7 @@ class CSequenceMetronomeRunner : public CScriptObjectBase,
                                  public ISequenceObjectRunner
 {
 public:
-  CSequenceMetronomeRunner(QPointer<CScriptRunnerSignalEmiter> pEmitter);
+  CSequenceMetronomeRunner(std::weak_ptr<CScriptCommunicator> pCommunicator);
   ~CSequenceMetronomeRunner() override;
 
   void RunSequenceInstruction(const QString& sName,

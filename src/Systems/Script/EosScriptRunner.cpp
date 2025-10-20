@@ -101,8 +101,8 @@ bool CEosScriptRunnerInstanceController::IsRunning() const
 
 //----------------------------------------------------------------------------------------
 //
-void CEosScriptRunnerInstanceController::RegisterNewComponent(const QString,
-                                                              CScriptRunnerSignalEmiter*)
+void CEosScriptRunnerInstanceController::RegisterNewComponent(const QString&,
+                                                              std::weak_ptr<CScriptCommunicator> wpCommunicator)
 {
 }
 
@@ -111,6 +111,12 @@ void CEosScriptRunnerInstanceController::RegisterNewComponent(const QString,
 void CEosScriptRunnerInstanceController::ResetEngine()
 {
   m_spEosRunner->Interrupt();
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CEosScriptRunnerInstanceController::UnregisterComponent(const QString&)
+{
 }
 
 //----------------------------------------------------------------------------------------
@@ -222,19 +228,18 @@ CEosScriptRunner::LoadScript(const QString& sScript, tspScene spScene, tspResour
 
 //----------------------------------------------------------------------------------------
 //
-void CEosScriptRunner::RegisterNewComponent(const QString sName, QJSValue signalEmitter)
+void CEosScriptRunner::RegisterNewComponent(const QString& sName,
+                                            std::weak_ptr<CScriptCommunicator> wpCommunicator)
 {
   QMutexLocker locker(&m_objectMapMutex);
   auto it = m_objectMap.find(sName);
   if (m_objectMap.end() == it)
   {
-    if (signalEmitter.isObject())
+    if (auto spComm = wpCommunicator.lock())
     {
-      CScriptRunnerSignalEmiter* pObject =
-          qobject_cast<CScriptRunnerSignalEmiter*>(signalEmitter.toQObject());
-      pObject->Initialize(m_wpSignalEmitterContext.lock());
       std::shared_ptr<CScriptObjectBase> spObject =
-          pObject->CreateNewScriptObject(m_spEosParser.get());
+          std::shared_ptr<CScriptObjectBase>(
+          spComm->CreateNewScriptObject(m_spEosParser.get()));
       if (nullptr != spObject)
       {
         if (spObject->thread() != thread())
@@ -271,10 +276,15 @@ void CEosScriptRunner::RegisterNewComponent(const QString sName, QJSValue signal
 
 //----------------------------------------------------------------------------------------
 //
+void CEosScriptRunner::UnregisterComponent(const QString& sName)
+{
+
+}
+
+//----------------------------------------------------------------------------------------
+//
 void CEosScriptRunner::UnregisterComponents()
 {
-  //m_spScriptEngine->globalObject().setProperty("scene", QJSValue());
-
   m_objectMapMutex.lock();
   for (auto it = m_objectMap.begin(); m_objectMap.end() != it; ++it)
   {
@@ -337,7 +347,7 @@ void CEosScriptRunner::HandleScriptFinish(bool bSuccess, const QVariant& sRetVal
 
   if (!bSuccess)
   {
-    qWarning() << tr("Error in script, unloading project.");
+    qWarning() << tr("Error in script or debugger closed, unloading project.");
   }
 
   if (c_sMainRunner == sId || QVariant::String == sRetVal.type() ||
@@ -444,12 +454,12 @@ void CEosScriptRunner::HandleError(const SJsonException& value)
 {
   QString sException = value.m_sException;
   QString sError = "Uncaught exception: " + sException;
-  qCritical() << sError;
+  qWarning() << sError;
 
   auto spSignalEmitterContext = m_wpSignalEmitterContext.lock();
   if (nullptr == spSignalEmitterContext)
   {
-    qCritical() << "SignalEmitter is null";
+    qWarning() << "SignalEmitter is null";
     return;
   }
 

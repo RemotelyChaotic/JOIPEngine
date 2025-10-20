@@ -14,11 +14,6 @@ public:
   CTimerSignalEmitter();
   ~CTimerSignalEmitter();
 
-  std::shared_ptr<CScriptObjectBase> CreateNewScriptObject(QPointer<QJSEngine> pEngine) override;
-  std::shared_ptr<CScriptObjectBase> CreateNewScriptObject(QPointer<CJsonInstructionSetParser> pParser) override;
-  std::shared_ptr<CScriptObjectBase> CreateNewScriptObject(QtLua::State* pState) override;
-  std::shared_ptr<CScriptObjectBase> CreateNewSequenceObject() override;
-
 signals:
   void hideTimer();
   void setTime(double dTimeS);
@@ -28,8 +23,25 @@ signals:
   void stopTimer();
   void waitForTimer();
   void timerFinished();
+
+protected:
+  std::shared_ptr<CScriptCommunicator>
+  CreateCommunicatorImpl(std::shared_ptr<CScriptRunnerSignalEmiterAccessor> spAccessor) override;
 };
-Q_DECLARE_METATYPE(CTimerSignalEmitter)
+
+//----------------------------------------------------------------------------------------
+//
+class CTimerScriptCommunicator : public CScriptCommunicator
+{
+  public:
+  CTimerScriptCommunicator(const std::weak_ptr<CScriptRunnerSignalEmiterAccessor>& spEmitter);
+  ~CTimerScriptCommunicator() override;
+
+  CScriptObjectBase* CreateNewScriptObject(QPointer<QJSEngine> pEngine) override;
+  CScriptObjectBase* CreateNewScriptObject(QPointer<CJsonInstructionSetParser> pParser) override;
+  CScriptObjectBase* CreateNewScriptObject(QtLua::State* pState) override;
+  CScriptObjectBase* CreateNewSequenceObject() override;
+};
 
 //----------------------------------------------------------------------------------------
 //
@@ -39,9 +51,9 @@ class CScriptTimer : public CJsScriptObjectBase
   Q_DISABLE_COPY(CScriptTimer)
 
 public:
-  CScriptTimer(QPointer<CScriptRunnerSignalEmiter> pEmitter,
+  CScriptTimer(std::weak_ptr<CScriptCommunicator> pCommunicator,
                QPointer<QJSEngine> pEngine);
-  CScriptTimer(QPointer<CScriptRunnerSignalEmiter> pEmitter,
+  CScriptTimer(std::weak_ptr<CScriptCommunicator> pCommunicator,
                QtLua::State* pState);
   ~CScriptTimer();
 
@@ -53,6 +65,12 @@ public slots:
   void start();
   void stop();
   void waitForTimer();
+
+signals:
+  void SignalQuitLoop();
+
+private:
+  std::shared_ptr<std::function<void()>> m_spStop;
 };
 
 //----------------------------------------------------------------------------------------
@@ -64,7 +82,7 @@ class CEosScriptTimer : public CEosScriptObjectBase
   Q_DISABLE_COPY(CEosScriptTimer)
 
 public:
-  CEosScriptTimer(QPointer<CScriptRunnerSignalEmiter> pEmitter,
+  CEosScriptTimer(std::weak_ptr<CScriptCommunicator> pCommunicator,
                   QPointer<CJsonInstructionSetParser> pParser);
   ~CEosScriptTimer();
 
@@ -76,8 +94,16 @@ public:
   void start();
   void waitForTimer();
 
+signals:
+  void SignalQuitLoop();
+  void SignalPauseTimer();
+  void SignalResumeTimer();
+
 private:
   std::shared_ptr<CCommandEosTimer> m_spCommandTimer;
+  std::shared_ptr<std::function<void()>> m_spStop;
+  std::shared_ptr<std::function<void()>> m_spPause;
+  std::shared_ptr<std::function<void()>> m_spResume;
 };
 
 #endif // SCRIPTTIMER_H

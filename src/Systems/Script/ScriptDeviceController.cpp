@@ -11,34 +11,50 @@ CDeviceControllerSignalEmitter::~CDeviceControllerSignalEmitter()
 
 //----------------------------------------------------------------------------------------
 //
-std::shared_ptr<CScriptObjectBase> CDeviceControllerSignalEmitter::CreateNewScriptObject(QPointer<QJSEngine> pEngine)
+std::shared_ptr<CScriptCommunicator>
+CDeviceControllerSignalEmitter::CreateCommunicatorImpl(std::shared_ptr<CScriptRunnerSignalEmiterAccessor> spAccessor)
 {
-  return std::make_shared<CScriptDeviceController>(this, pEngine);
-}
-std::shared_ptr<CScriptObjectBase> CDeviceControllerSignalEmitter::CreateNewScriptObject(QPointer<CJsonInstructionSetParser> pParser)
-{
-  Q_UNUSED(pParser)
-  return nullptr;
-}
-std::shared_ptr<CScriptObjectBase> CDeviceControllerSignalEmitter::CreateNewScriptObject(QtLua::State* pState)
-{
-  return std::make_shared<CScriptDeviceController>(this, pState);
-}
-std::shared_ptr<CScriptObjectBase> CDeviceControllerSignalEmitter::CreateNewSequenceObject()
-{
-  return std::make_shared<CSequenceDeviceControllerRunner>(this);
+  return std::make_shared<CDeviceControllerScriptCommunicator>(spAccessor);
 }
 
 //----------------------------------------------------------------------------------------
 //
-CScriptDeviceController::CScriptDeviceController(QPointer<CScriptRunnerSignalEmiter> pEmitter,
+CDeviceControllerScriptCommunicator::CDeviceControllerScriptCommunicator(
+  const std::weak_ptr<CScriptRunnerSignalEmiterAccessor>& spEmitter) :
+  CScriptCommunicator(spEmitter)
+{}
+CDeviceControllerScriptCommunicator::~CDeviceControllerScriptCommunicator() = default;
+
+//----------------------------------------------------------------------------------------
+//
+CScriptObjectBase* CDeviceControllerScriptCommunicator::CreateNewScriptObject(QPointer<QJSEngine> pEngine)
+{
+  return new CScriptDeviceController(weak_from_this(), pEngine);
+}
+CScriptObjectBase* CDeviceControllerScriptCommunicator::CreateNewScriptObject(QPointer<CJsonInstructionSetParser> pParser)
+{
+  Q_UNUSED(pParser)
+  return nullptr;
+}
+CScriptObjectBase* CDeviceControllerScriptCommunicator::CreateNewScriptObject(QtLua::State* pState)
+{
+  return new CScriptDeviceController(weak_from_this(), pState);
+}
+CScriptObjectBase* CDeviceControllerScriptCommunicator::CreateNewSequenceObject()
+{
+  return new CSequenceDeviceControllerRunner(weak_from_this());
+}
+
+//----------------------------------------------------------------------------------------
+//
+CScriptDeviceController::CScriptDeviceController(std::weak_ptr<CScriptCommunicator> pCommunicator,
                                                  QPointer<QJSEngine> pEngine):
-  CJsScriptObjectBase(pEmitter, pEngine)
+  CJsScriptObjectBase(pCommunicator, pEngine)
 {
 }
-CScriptDeviceController::CScriptDeviceController(QPointer<CScriptRunnerSignalEmiter> pEmitter,
+CScriptDeviceController::CScriptDeviceController(std::weak_ptr<CScriptCommunicator> pCommunicator,
                                                  QtLua::State* pState):
-  CJsScriptObjectBase(pEmitter, pState)
+  CJsScriptObjectBase(pCommunicator, pState)
 {
 }
 CScriptDeviceController::~CScriptDeviceController()
@@ -50,10 +66,13 @@ CScriptDeviceController::~CScriptDeviceController()
 void CScriptDeviceController::sendLinearCmd(double dDurationS, double dPosition)
 {
   if (!CheckIfScriptCanRun()) { return; }
-  auto spSignalEmitter = SignalEmitter<CDeviceControllerSignalEmitter>();
-  if (nullptr != spSignalEmitter)
+
+  if (auto spComm = m_wpCommunicator.lock())
   {
-    emit spSignalEmitter->sendLinearCmd(dDurationS, dPosition);
+    if (auto spSignalEmitter = spComm->LockedEmitter<CDeviceControllerSignalEmitter>())
+    {
+      emit spSignalEmitter->sendLinearCmd(dDurationS, dPosition);
+    }
   }
 }
 
@@ -62,10 +81,12 @@ void CScriptDeviceController::sendLinearCmd(double dDurationS, double dPosition)
 void CScriptDeviceController::sendRotateCmd(bool bClockwise, double dSpeed)
 {
   if (!CheckIfScriptCanRun()) { return; }
-  auto spSignalEmitter = SignalEmitter<CDeviceControllerSignalEmitter>();
-  if (nullptr != spSignalEmitter)
+  if (auto spComm = m_wpCommunicator.lock())
   {
-    emit spSignalEmitter->sendRotateCmd(bClockwise, dSpeed);
+    if (auto spSignalEmitter = spComm->LockedEmitter<CDeviceControllerSignalEmitter>())
+    {
+      emit spSignalEmitter->sendRotateCmd(bClockwise, dSpeed);
+    }
   }
 }
 
@@ -74,10 +95,12 @@ void CScriptDeviceController::sendRotateCmd(bool bClockwise, double dSpeed)
 void CScriptDeviceController::sendStopCmd()
 {
   if (!CheckIfScriptCanRun()) { return; }
-  auto spSignalEmitter = SignalEmitter<CDeviceControllerSignalEmitter>();
-  if (nullptr != spSignalEmitter)
+  if (auto spComm = m_wpCommunicator.lock())
   {
-    emit spSignalEmitter->sendStopCmd();
+    if (auto spSignalEmitter = spComm->LockedEmitter<CDeviceControllerSignalEmitter>())
+    {
+      emit spSignalEmitter->sendStopCmd();
+    }
   }
 }
 
@@ -86,9 +109,11 @@ void CScriptDeviceController::sendStopCmd()
 void CScriptDeviceController::sendVibrateCmd(double dSpeed)
 {
   if (!CheckIfScriptCanRun()) { return; }
-  auto spSignalEmitter = SignalEmitter<CDeviceControllerSignalEmitter>();
-  if (nullptr != spSignalEmitter)
+  if (auto spComm = m_wpCommunicator.lock())
   {
-    emit spSignalEmitter->sendVibrateCmd(dSpeed);
+    if (auto spSignalEmitter = spComm->LockedEmitter<CDeviceControllerSignalEmitter>())
+    {
+      emit spSignalEmitter->sendVibrateCmd(dSpeed);
+    }
   }
 }

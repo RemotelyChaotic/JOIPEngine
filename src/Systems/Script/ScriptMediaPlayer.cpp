@@ -34,40 +34,74 @@ CMediaPlayerSignalEmitter::~CMediaPlayerSignalEmitter()
 
 //----------------------------------------------------------------------------------------
 //
-std::shared_ptr<CScriptObjectBase> CMediaPlayerSignalEmitter::CreateNewScriptObject(QPointer<QJSEngine> pEngine)
+std::shared_ptr<CScriptCommunicator>
+CMediaPlayerSignalEmitter::CreateCommunicatorImpl(std::shared_ptr<CScriptRunnerSignalEmiterAccessor> spAccessor)
 {
-  return std::make_shared<CScriptMediaPlayer>(this, pEngine);
-}
-std::shared_ptr<CScriptObjectBase> CMediaPlayerSignalEmitter::CreateNewScriptObject(QPointer<CJsonInstructionSetParser> pParser)
-{
-  return std::make_shared<CEosScriptMediaPlayer>(this, pParser);
-}
-std::shared_ptr<CScriptObjectBase> CMediaPlayerSignalEmitter::CreateNewScriptObject(QtLua::State* pState)
-{
-  return std::make_shared<CScriptMediaPlayer>(this, pState);
-}
-std::shared_ptr<CScriptObjectBase> CMediaPlayerSignalEmitter::CreateNewSequenceObject()
-{
-  return std::make_shared<CSequenceMediaPlayerRunner>(this);
+  return std::make_shared<CMediaPlayerScriptCommunicator>(spAccessor);
 }
 
 //----------------------------------------------------------------------------------------
 //
-CScriptMediaPlayer::CScriptMediaPlayer(QPointer<CScriptRunnerSignalEmiter> pEmitter,
-                                       QPointer<QJSEngine> pEngine) :
-  CJsScriptObjectBase(pEmitter, pEngine),
-  m_wpDbManager(CApplication::Instance()->System<CDatabaseManager>())
+CMediaPlayerScriptCommunicator::CMediaPlayerScriptCommunicator(
+  const std::weak_ptr<CScriptRunnerSignalEmiterAccessor>& spEmitter) :
+  CScriptCommunicator(spEmitter)
+{}
+CMediaPlayerScriptCommunicator::~CMediaPlayerScriptCommunicator() = default;
+
+//----------------------------------------------------------------------------------------
+//
+CScriptObjectBase* CMediaPlayerScriptCommunicator::CreateNewScriptObject(QPointer<QJSEngine> pEngine)
 {
+  return new CScriptMediaPlayer(weak_from_this(), pEngine);
 }
-CScriptMediaPlayer::CScriptMediaPlayer(QPointer<CScriptRunnerSignalEmiter> pEmitter,
-                                       QtLua::State* pState) :
-  CJsScriptObjectBase(pEmitter, pState),
+CScriptObjectBase* CMediaPlayerScriptCommunicator::CreateNewScriptObject(QPointer<CJsonInstructionSetParser> pParser)
+{
+  return new CEosScriptMediaPlayer(weak_from_this(), pParser);
+}
+CScriptObjectBase* CMediaPlayerScriptCommunicator::CreateNewScriptObject(QtLua::State* pState)
+{
+  return new CScriptMediaPlayer(weak_from_this(), pState);
+}
+CScriptObjectBase* CMediaPlayerScriptCommunicator::CreateNewSequenceObject()
+{
+  return new CSequenceMediaPlayerRunner(weak_from_this());
+}
+
+//----------------------------------------------------------------------------------------
+//
+CScriptMediaPlayer::CScriptMediaPlayer(std::weak_ptr<CScriptCommunicator> pCommunicator,
+                                       QPointer<QJSEngine> pEngine) :
+  CJsScriptObjectBase(pCommunicator, pEngine),
   m_wpDbManager(CApplication::Instance()->System<CDatabaseManager>())
 {
+  m_spStop = std::make_shared<std::function<void()>>([this]() {
+    emit SignalQuitLoop();
+  });
+  if (auto spComm = pCommunicator.lock())
+  {
+    spComm->RegisterStopCallback(m_spStop);
+  }
+}
+CScriptMediaPlayer::CScriptMediaPlayer(std::weak_ptr<CScriptCommunicator> pCommunicator,
+                                       QtLua::State* pState) :
+  CJsScriptObjectBase(pCommunicator, pState),
+  m_wpDbManager(CApplication::Instance()->System<CDatabaseManager>())
+{
+  m_spStop = std::make_shared<std::function<void()>>([this]() {
+    emit SignalQuitLoop();
+  });
+  if (auto spComm = pCommunicator.lock())
+  {
+    spComm->RegisterStopCallback(m_spStop);
+  }
 }
 
 CScriptMediaPlayer::~CScriptMediaPlayer()
 {
+  if (auto spComm = m_wpCommunicator.lock())
+  {
+    spComm->RemoveStopCallback(m_spStop);
+  }
 }
 
 //----------------------------------------------------------------------------------------
@@ -76,13 +110,17 @@ void CScriptMediaPlayer::show(QVariant resource)
 {
   if (!CheckIfScriptCanRun()) { return; }
 
-  auto spSignalEmitter = SignalEmitter<CMediaPlayerSignalEmitter>();
+  if (auto spComm = m_wpCommunicator.lock())
+  {
+    if (auto spSignalEmitter = spComm->LockedEmitter<CMediaPlayerSignalEmitter>())
+    {
+      bool bOk = false;
+      QString sResource = GetResourceName(resource, "show", false, &bOk);
+      if (!bOk) { return; }
 
-  bool bOk = false;
-  QString sResource = GetResourceName(resource, "show", false, &bOk);
-  if (!bOk) { return; }
-
-  emit spSignalEmitter->showMedia(sResource);
+      emit spSignalEmitter->showMedia(sResource);
+    }
+  }
 }
 
 //----------------------------------------------------------------------------------------
@@ -90,7 +128,14 @@ void CScriptMediaPlayer::show(QVariant resource)
 void CScriptMediaPlayer::play()
 {
   if (!CheckIfScriptCanRun()) { return; }
-  emit SignalEmitter<CMediaPlayerSignalEmitter>()->playMedia(QString(), 1, 0, -1);
+
+  if (auto spComm = m_wpCommunicator.lock())
+  {
+    if (auto spSignalEmitter = spComm->LockedEmitter<CMediaPlayerSignalEmitter>())
+    {
+      emit spSignalEmitter->playMedia(QString(), 1, 0, -1);
+    }
+  }
 }
 
 //----------------------------------------------------------------------------------------
@@ -120,12 +165,17 @@ void CScriptMediaPlayer::play(QVariant resource, qint64 iLoops, qint64 iStartAt,
 {
   if (!CheckIfScriptCanRun()) { return; }
 
-  auto pSignalEmitter = SignalEmitter<CMediaPlayerSignalEmitter>();
-  bool bOk = false;
-  QString sResource = GetResourceName(resource, "play", true, &bOk);
-  if (!bOk) { return; }
+  if (auto spComm = m_wpCommunicator.lock())
+  {
+    if (auto spSignalEmitter = spComm->LockedEmitter<CMediaPlayerSignalEmitter>())
+    {
+      bool bOk = false;
+      QString sResource = GetResourceName(resource, "play", true, &bOk);
+      if (!bOk) { return; }
 
-  emit pSignalEmitter->playMedia(sResource, iLoops, iStartAt, iEndAt);
+      emit spSignalEmitter->playMedia(sResource, iLoops, iStartAt, iEndAt);
+    }
+  }
 }
 
 //----------------------------------------------------------------------------------------
@@ -134,7 +184,13 @@ void CScriptMediaPlayer::playVideo()
 {
   if (!CheckIfScriptCanRun()) { return; }
 
-  emit SignalEmitter<CMediaPlayerSignalEmitter>()->playVideo();
+  if (auto spComm = m_wpCommunicator.lock())
+  {
+    if (auto spSignalEmitter = spComm->LockedEmitter<CMediaPlayerSignalEmitter>())
+    {
+      emit spSignalEmitter->playVideo();
+    }
+  }
 }
 
 //----------------------------------------------------------------------------------------
@@ -143,12 +199,17 @@ void CScriptMediaPlayer::seek(QVariant resource, qint64 iSeek)
 {
   if (!CheckIfScriptCanRun()) { return; }
 
-  auto pSignalEmitter = SignalEmitter<CMediaPlayerSignalEmitter>();
-  bool bOk = false;
-  QString sResource = GetResourceName(resource, "seek", true, &bOk);
-  if (!bOk) { return; }
+  if (auto spComm = m_wpCommunicator.lock())
+  {
+    if (auto spSignalEmitter = spComm->LockedEmitter<CMediaPlayerSignalEmitter>())
+    {
+      bool bOk = false;
+      QString sResource = GetResourceName(resource, "seek", true, &bOk);
+      if (!bOk) { return; }
 
-  emit pSignalEmitter->seekMedia(sResource, iSeek);
+      emit spSignalEmitter->seekMedia(sResource, iSeek);
+    }
+  }
 }
 
 //----------------------------------------------------------------------------------------
@@ -156,7 +217,14 @@ void CScriptMediaPlayer::seek(QVariant resource, qint64 iSeek)
 void CScriptMediaPlayer::pauseVideo()
 {
   if (!CheckIfScriptCanRun()) { return; }
-  emit SignalEmitter<CMediaPlayerSignalEmitter>()->pauseVideo();
+
+  if (auto spComm = m_wpCommunicator.lock())
+  {
+    if (auto spSignalEmitter = spComm->LockedEmitter<CMediaPlayerSignalEmitter>())
+    {
+      spSignalEmitter->pauseVideo();
+    }
+  }
 }
 
 //----------------------------------------------------------------------------------------
@@ -164,7 +232,14 @@ void CScriptMediaPlayer::pauseVideo()
 void CScriptMediaPlayer::seekVideo(qint64 iSeek)
 {
   if (!CheckIfScriptCanRun()) { return; }
-  emit SignalEmitter<CMediaPlayerSignalEmitter>()->seekVideo(iSeek);
+
+  if (auto spComm = m_wpCommunicator.lock())
+  {
+    if (auto spSignalEmitter = spComm->LockedEmitter<CMediaPlayerSignalEmitter>())
+    {
+      emit spSignalEmitter->seekVideo(iSeek);
+    }
+  }
 }
 
 //----------------------------------------------------------------------------------------
@@ -172,7 +247,14 @@ void CScriptMediaPlayer::seekVideo(qint64 iSeek)
 void CScriptMediaPlayer::stopVideo()
 {
   if (!CheckIfScriptCanRun()) { return; }
-  emit SignalEmitter<CMediaPlayerSignalEmitter>()->stopVideo();
+
+  if (auto spComm = m_wpCommunicator.lock())
+  {
+    if (auto spSignalEmitter = spComm->LockedEmitter<CMediaPlayerSignalEmitter>())
+    {
+      emit spSignalEmitter->stopVideo();
+    }
+  }
 }
 
 
@@ -211,11 +293,17 @@ void CScriptMediaPlayer::playSound(QVariant resource, const QString& sId, qint64
 {
   if (!CheckIfScriptCanRun()) { return; }
 
-  bool bOk = false;
-  QString sResource = GetResourceName(resource, "playSound", false, &bOk);
-  if (!bOk) { return; }
+  if (auto spComm = m_wpCommunicator.lock())
+  {
+    if (auto spSignalEmitter = spComm->LockedEmitter<CMediaPlayerSignalEmitter>())
+    {
+      bool bOk = false;
+      QString sResource = GetResourceName(resource, "playSound", false, &bOk);
+      if (!bOk) { return; }
 
-  emit SignalEmitter<CMediaPlayerSignalEmitter>()->playSound(sResource, sId, iLoops, iStartAt, iEndAt);
+      emit spSignalEmitter->playSound(sResource, sId, iLoops, iStartAt, iEndAt);
+    }
+  }
 }
 
 //----------------------------------------------------------------------------------------
@@ -224,11 +312,17 @@ void CScriptMediaPlayer::pauseSound(QVariant resource)
 {
   if (!CheckIfScriptCanRun()) { return; }
 
-  bool bOk = false;
-  QString sResource = GetResourceName(resource, "pauseSound", true, &bOk);
-  if (!bOk) { return; }
+  if (auto spComm = m_wpCommunicator.lock())
+  {
+    if (auto spSignalEmitter = spComm->LockedEmitter<CMediaPlayerSignalEmitter>())
+    {
+      bool bOk = false;
+      QString sResource = GetResourceName(resource, "pauseSound", true, &bOk);
+      if (!bOk) { return; }
 
-  emit SignalEmitter<CMediaPlayerSignalEmitter>()->pauseSound(sResource);
+      emit spSignalEmitter->pauseSound(sResource);
+    }
+  }
 }
 
 //----------------------------------------------------------------------------------------
@@ -237,11 +331,17 @@ void CScriptMediaPlayer::seekSound(QVariant resource, qint64 iSeek)
 {
   if (!CheckIfScriptCanRun()) { return; }
 
-  bool bOk = false;
-  QString sResource = GetResourceName(resource, "seekSound", true, &bOk);
-  if (!bOk) { return; }
+  if (auto spComm = m_wpCommunicator.lock())
+  {
+    if (auto spSignalEmitter = spComm->LockedEmitter<CMediaPlayerSignalEmitter>())
+    {
+      bool bOk = false;
+      QString sResource = GetResourceName(resource, "seekSound", true, &bOk);
+      if (!bOk) { return; }
 
-  emit SignalEmitter<CMediaPlayerSignalEmitter>()->seekAudio(sResource, iSeek);
+      emit spSignalEmitter->seekAudio(sResource, iSeek);
+    }
+  }
 }
 
 //----------------------------------------------------------------------------------------
@@ -250,11 +350,17 @@ void CScriptMediaPlayer::stopSound(QVariant resource)
 {
   if (!CheckIfScriptCanRun()) { return; }
 
-  bool bOk = false;
-  QString sResource = GetResourceName(resource, "stopSound", true, &bOk);
-  if (!bOk) { return; }
+  if (auto spComm = m_wpCommunicator.lock())
+  {
+    if (auto spSignalEmitter = spComm->LockedEmitter<CMediaPlayerSignalEmitter>())
+    {
+      bool bOk = false;
+      QString sResource = GetResourceName(resource, "stopSound", true, &bOk);
+      if (!bOk) { return; }
 
-  emit SignalEmitter<CMediaPlayerSignalEmitter>()->stopSound(sResource);
+      emit spSignalEmitter->stopSound(sResource);
+    }
+  }
 }
 
 //----------------------------------------------------------------------------------------
@@ -262,7 +368,14 @@ void CScriptMediaPlayer::stopSound(QVariant resource)
 void CScriptMediaPlayer::setVolume(double dValue)
 {
   if (!CheckIfScriptCanRun()) { return; }
-  emit SignalEmitter<CMediaPlayerSignalEmitter>()->setVolume(QString(), dValue);
+
+  if (auto spComm = m_wpCommunicator.lock())
+  {
+    if (auto spSignalEmitter = spComm->LockedEmitter<CMediaPlayerSignalEmitter>())
+    {
+      emit spSignalEmitter->setVolume(QString(), dValue);
+    }
+  }
 }
 
 //----------------------------------------------------------------------------------------
@@ -271,11 +384,17 @@ void CScriptMediaPlayer::setVolume(QVariant resource, double dValue)
 {
   if (!CheckIfScriptCanRun()) { return; }
 
-  bool bOk = false;
-  QString sResource = GetResourceName(resource, "setVolume", true, &bOk);
-  if (!bOk) { return; }
+  if (auto spComm = m_wpCommunicator.lock())
+  {
+    if (auto spSignalEmitter = spComm->LockedEmitter<CMediaPlayerSignalEmitter>())
+    {
+      bool bOk = false;
+      QString sResource = GetResourceName(resource, "setVolume", true, &bOk);
+      if (!bOk) { return; }
 
-  emit SignalEmitter<CMediaPlayerSignalEmitter>()->setVolume(sResource, dValue);
+      emit spSignalEmitter->setVolume(sResource, dValue);
+    }
+  }
 }
 
 //----------------------------------------------------------------------------------------
@@ -305,31 +424,42 @@ void CScriptMediaPlayer::waitForVideo()
 {
   if (!CheckIfScriptCanRun()) { return; }
 
-  auto pSignalEmitter = SignalEmitter<CMediaPlayerSignalEmitter>();
+  if (auto spComm = m_wpCommunicator.lock())
+  {
+    if (auto spSignalEmitter = spComm->LockedEmitter<CMediaPlayerSignalEmitter>())
+    {
+      QPointer<CScriptMediaPlayer> pThis(this);
 
-  connect(pSignalEmitter, &CMediaPlayerSignalEmitter::videoFinished,
-          pSignalEmitter, &CMediaPlayerSignalEmitter::stopVideo, Qt::DirectConnection);
+      QMetaObject::Connection finishedConn =
+        connect(spSignalEmitter.Get(), &CMediaPlayerSignalEmitter::videoFinished,
+                spSignalEmitter.Get(), &CMediaPlayerSignalEmitter::stopVideo,
+                Qt::DirectConnection);
 
-  QEventLoop loop;
-  connect(pSignalEmitter, &CMediaPlayerSignalEmitter::videoFinished,
-          &loop, &QEventLoop::quit, Qt::QueuedConnection);
-  connect(pSignalEmitter, &CMediaPlayerSignalEmitter::interrupt,
-          &loop, &QEventLoop::quit, Qt::QueuedConnection);
-  QMetaObject::Connection interruptThisLoop =
-    connect(this, &CScriptObjectBase::SignalInterruptExecution,
-            &loop, &QEventLoop::quit, Qt::QueuedConnection);
-  emit pSignalEmitter->startVideoWait();
-  loop.exec();
+      QEventLoop loop;
+      QMetaObject::Connection finishedLoopConn =
+        connect(spSignalEmitter.Get(), &CMediaPlayerSignalEmitter::videoFinished,
+                &loop, &QEventLoop::quit, Qt::QueuedConnection);
+      QMetaObject::Connection quitLoop =
+        connect(this, &CScriptMediaPlayer::SignalQuitLoop, &loop, &QEventLoop::quit,
+                Qt::QueuedConnection);
+      QMetaObject::Connection interruptThisLoop =
+        connect(this, &CScriptObjectBase::SignalInterruptExecution,
+                &loop, &QEventLoop::quit, Qt::QueuedConnection);
 
-  disconnect(pSignalEmitter, &CMediaPlayerSignalEmitter::videoFinished,
-             &loop, &QEventLoop::quit);
-  disconnect(pSignalEmitter, &CMediaPlayerSignalEmitter::interrupt,
-             &loop, &QEventLoop::quit);
-  disconnect(interruptThisLoop);
-  loop.disconnect();
+      emit spSignalEmitter->startVideoWait();
+      loop.exec();
+      loop.disconnect();
 
-  disconnect(pSignalEmitter, &CMediaPlayerSignalEmitter::videoFinished,
-             pSignalEmitter, &CMediaPlayerSignalEmitter::stopVideo);
+      if (nullptr != pThis)
+      {
+        disconnect(interruptThisLoop);
+        disconnect(quitLoop);
+        disconnect(finishedLoopConn);
+      }
+
+      QObject::disconnect(finishedConn);
+    }
+  }
 }
 
 //----------------------------------------------------------------------------------------
@@ -375,7 +505,13 @@ QString CScriptMediaPlayer::GetResourceName(const QVariant& resource, const QStr
   }
   else
   {
-    emit m_pSignalEmitter->showError(sError, QtMsgType::QtWarningMsg);
+    if (auto spComm = m_wpCommunicator.lock())
+    {
+      if (auto spSignalEmitter = spComm->LockedEmitter<CMediaPlayerSignalEmitter>())
+      {
+        emit spSignalEmitter->showError(sError, QtMsgType::QtWarningMsg);
+      }
+    }
     return QString();
   }
 }
@@ -384,91 +520,118 @@ QString CScriptMediaPlayer::GetResourceName(const QVariant& resource, const QStr
 //
 void CScriptMediaPlayer::WaitForPlayBackImpl(const QString& sResource)
 {
-  auto pSignalEmitter = SignalEmitter<CMediaPlayerSignalEmitter>();
-
-  QMetaObject::Connection connStopPlayback =
-    connect(pSignalEmitter, &CMediaPlayerSignalEmitter::playbackFinished,
-            pSignalEmitter, [pSignalEmitter](const QString& sResourceRet) {
-    if (sResourceRet.isEmpty())
+  if (auto spComm = m_wpCommunicator.lock())
+  {
+    if (auto spSignalEmitter = spComm->LockedEmitter<CMediaPlayerSignalEmitter>())
     {
-      emit pSignalEmitter->stopVideo();
-    }
-  }, Qt::DirectConnection);
-  QMetaObject::Connection connStopSound =
-    connect(pSignalEmitter, &CMediaPlayerSignalEmitter::playbackFinished,
-            pSignalEmitter, [pSignalEmitter, &sResource](const QString& sResourceRet) {
-    if (sResource == sResourceRet && !sResourceRet.isEmpty())
-    {
-      emit pSignalEmitter->stopSound(sResourceRet);
-    }
-  }, Qt::DirectConnection);
+      QPointer<CScriptMediaPlayer> pThis(this);
+      QString sRes = sResource;
+      sRes.detach();
 
-  QEventLoop loop;
-  QMetaObject::Connection connQuit =
-    connect(pSignalEmitter, &CMediaPlayerSignalEmitter::playbackFinished,
-          &loop, [&loop, &sResource](const QString& sResourceRet) {
-    if (sResource == sResourceRet || sResourceRet.isEmpty())
-    {
-      loop.quit();
+      QMetaObject::Connection connStopPlayback =
+        connect(spSignalEmitter.Get(), &CMediaPlayerSignalEmitter::playbackFinished,
+                spSignalEmitter.Get(),
+                [pSignalEmitter = spSignalEmitter.Get()](const QString& sResourceRet) {
+                  if (sResourceRet.isEmpty())
+                  {
+                    emit pSignalEmitter->stopVideo();
+                  }
+                }, Qt::DirectConnection);
+      QMetaObject::Connection connStopSound =
+        connect(spSignalEmitter.Get(), &CMediaPlayerSignalEmitter::playbackFinished,
+                spSignalEmitter.Get(),
+                [pSignalEmitter = spSignalEmitter.Get(), sRes](const QString& sResourceRet) {
+                  if (sRes == sResourceRet && !sResourceRet.isEmpty())
+                  {
+                    emit pSignalEmitter->stopSound(sResourceRet);
+                  }
+                }, Qt::DirectConnection);
+
+      QEventLoop loop;
+      QMetaObject::Connection connFinished =
+        connect(spSignalEmitter.Get(), &CMediaPlayerSignalEmitter::playbackFinished,
+                &loop, [&loop, sRes](const QString& sResourceRet) {
+                  if (sRes == sResourceRet || sResourceRet.isEmpty())
+                  {
+                    bool bOk = QMetaObject::invokeMethod(&loop, "quit", Qt::QueuedConnection);
+                    assert(bOk); Q_UNUSED(bOk)
+                  }
+                }, Qt::QueuedConnection);
+      QMetaObject::Connection connQuit =
+        connect(this, &CScriptMediaPlayer::SignalQuitLoop,
+                &loop, &QEventLoop::quit, Qt::QueuedConnection);
+      QMetaObject::Connection interruptThisLoop =
+        connect(this, &CScriptObjectBase::SignalInterruptExecution,
+                &loop, &QEventLoop::quit, Qt::QueuedConnection);
+      emit spSignalEmitter->startPlaybackWait(sResource);
+      loop.exec();
+      loop.disconnect();
+
+      if (nullptr != pThis)
+      {
+        disconnect(connFinished);
+        disconnect(connQuit);
+        disconnect(interruptThisLoop);
+      }
+
+      QObject::disconnect(connStopPlayback);
+      QObject::disconnect(connStopSound);
     }
-  }, Qt::QueuedConnection);
-  connect(pSignalEmitter, &CMediaPlayerSignalEmitter::interrupt,
-          &loop, &QEventLoop::quit, Qt::QueuedConnection);
-  QMetaObject::Connection interruptThisLoop =
-    connect(this, &CScriptObjectBase::SignalInterruptExecution,
-            &loop, &QEventLoop::quit, Qt::QueuedConnection);
-  emit pSignalEmitter->startPlaybackWait(sResource);
-  loop.exec();
-
-  disconnect(connQuit);
-  disconnect(pSignalEmitter, &CMediaPlayerSignalEmitter::interrupt,
-             &loop, &QEventLoop::quit);
-  disconnect(interruptThisLoop);
-  loop.disconnect();
-
-  disconnect(connStopPlayback);
-  disconnect(connStopSound);
+  }
 }
 
 //----------------------------------------------------------------------------------------
 //
 void CScriptMediaPlayer::WaitForSoundImpl(const QString& sResource)
 {
-  auto pSignalEmitter = SignalEmitter<CMediaPlayerSignalEmitter>();
-
-  QMetaObject::Connection connStop =
-    connect(pSignalEmitter, &CMediaPlayerSignalEmitter::soundFinished,
-            pSignalEmitter, [pSignalEmitter, &sResource](const QString& sResourceRet) {
-    if (sResource == sResourceRet && !sResourceRet.isEmpty())
+  if (auto spComm = m_wpCommunicator.lock())
+  {
+    if (auto spSignalEmitter = spComm->LockedEmitter<CMediaPlayerSignalEmitter>())
     {
-      emit pSignalEmitter->stopSound(sResourceRet);
+      QPointer<CScriptMediaPlayer> pThis(this);
+      QString sRes = sResource;
+      sRes.detach();
+
+      QMetaObject::Connection connStopSound =
+        connect(spSignalEmitter.Get(), &CMediaPlayerSignalEmitter::playbackFinished,
+                spSignalEmitter.Get(),
+                [pSignalEmitter = spSignalEmitter.Get(), sRes](const QString& sResourceRet) {
+                  if (sRes == sResourceRet && !sResourceRet.isEmpty())
+                  {
+                    emit pSignalEmitter->stopSound(sResourceRet);
+                  }
+                }, Qt::DirectConnection);
+
+      QEventLoop loop;
+      QMetaObject::Connection connFinished =
+        connect(spSignalEmitter.Get(), &CMediaPlayerSignalEmitter::playbackFinished,
+                &loop, [&loop, sRes](const QString& sResourceRet) {
+                  if (sRes == sResourceRet || sResourceRet.isEmpty())
+                  {
+                    bool bOk = QMetaObject::invokeMethod(&loop, "quit", Qt::QueuedConnection);
+                    assert(bOk); Q_UNUSED(bOk)
+                  }
+                }, Qt::QueuedConnection);
+      QMetaObject::Connection connQuit =
+        connect(this, &CScriptMediaPlayer::SignalQuitLoop,
+                &loop, &QEventLoop::quit, Qt::QueuedConnection);
+      QMetaObject::Connection interruptThisLoop =
+        connect(this, &CScriptObjectBase::SignalInterruptExecution,
+                &loop, &QEventLoop::quit, Qt::QueuedConnection);
+      emit spSignalEmitter->startSoundWait(sResource);
+      loop.exec();
+      loop.disconnect();
+
+      if (nullptr != pThis)
+      {
+        disconnect(connFinished);
+        disconnect(connQuit);
+        disconnect(interruptThisLoop);
+      }
+
+      QObject::disconnect(connStopSound);
     }
-  }, Qt::DirectConnection);
-
-  QEventLoop loop;
-  QMetaObject::Connection connQuit =
-      connect(pSignalEmitter, &CMediaPlayerSignalEmitter::soundFinished,
-          &loop, [&loop, &sResource](const QString& sResourceRet) {
-    if (sResource == sResourceRet || sResourceRet.isEmpty())
-    {
-      loop.quit();
-    }
-  }, Qt::QueuedConnection);
-  connect(pSignalEmitter, &CMediaPlayerSignalEmitter::interrupt,
-          &loop, &QEventLoop::quit, Qt::QueuedConnection);
-  QMetaObject::Connection interruptThisLoop =
-    connect(this, &CScriptObjectBase::SignalInterruptExecution,
-            &loop, &QEventLoop::quit, Qt::QueuedConnection);
-  emit pSignalEmitter->startSoundWait(sResource);
-  loop.exec();
-
-  disconnect(connQuit);
-  disconnect(pSignalEmitter, &CMediaPlayerSignalEmitter::interrupt,
-             &loop, &QEventLoop::quit);
-  disconnect(interruptThisLoop);
-  loop.disconnect();
-
-  disconnect(connStop);
+  }
 }
 
 //----------------------------------------------------------------------------------------
@@ -593,18 +756,29 @@ private:
 
 //----------------------------------------------------------------------------------------
 //
-CEosScriptMediaPlayer::CEosScriptMediaPlayer(QPointer<CScriptRunnerSignalEmiter> pEmitter,
+CEosScriptMediaPlayer::CEosScriptMediaPlayer(std::weak_ptr<CScriptCommunicator> pCommunicator,
                                              QPointer<CJsonInstructionSetParser> pParser) :
-  CEosScriptObjectBase(pEmitter, pParser),
+  CEosScriptObjectBase(pCommunicator, pParser),
   m_wpDbManager(CApplication::Instance()->System<CDatabaseManager>()),
   m_spCommandImg(std::make_shared<CCommandEosImage>(this)),
   m_spCommandAudio(std::make_shared<CCommandEosAudio>(this))
 {
+  m_spStop = std::make_shared<std::function<void()>>([this]() {
+    emit SignalQuitLoop();
+  });
+  if (auto spComm = pCommunicator.lock())
+  {
+    spComm->RegisterStopCallback(m_spStop);
+  }
   pParser->RegisterInstruction(eos::c_sCommandImage, m_spCommandImg);
   pParser->RegisterInstruction(eos::c_sCommandAudioPlay, m_spCommandAudio);
 }
 CEosScriptMediaPlayer::~CEosScriptMediaPlayer()
 {
+  if (auto spComm = m_wpCommunicator.lock())
+  {
+    spComm->RemoveStopCallback(m_spStop);
+  }
 }
 
 //----------------------------------------------------------------------------------------
@@ -613,13 +787,17 @@ void CEosScriptMediaPlayer::show(const QString& sResourceLocator)
 {
   if (!CheckIfScriptCanRun()) { return; }
 
-  auto spSignalEmitter = SignalEmitter<CMediaPlayerSignalEmitter>();
+  if (auto spComm = m_wpCommunicator.lock())
+  {
+    if (auto spSignalEmitter = spComm->LockedEmitter<CMediaPlayerSignalEmitter>())
+    {
+      bool bOk = false;
+      QString sResource = GetResourceName(sResourceLocator, &bOk);
+      if (!bOk) { return; }
 
-  bool bOk = false;
-  QString sResource = GetResourceName(sResourceLocator, &bOk);
-  if (!bOk) { return; }
-
-  emit spSignalEmitter->showMedia(sResource);
+      emit spSignalEmitter->showMedia(sResource);
+    }
+  }
 }
 
 //----------------------------------------------------------------------------------------
@@ -629,13 +807,17 @@ void CEosScriptMediaPlayer::playSound(const QString& sResourceLocator, const QSt
 {
   if (!CheckIfScriptCanRun()) { return; }
 
-  auto spSignalEmitter = SignalEmitter<CMediaPlayerSignalEmitter>();
+  if (auto spComm = m_wpCommunicator.lock())
+  {
+    if (auto spSignalEmitter = spComm->LockedEmitter<CMediaPlayerSignalEmitter>())
+    {
+      bool bOk = false;
+      QString sResource = GetResourceName(sResourceLocator, &bOk);
+      if (!bOk) { return; }
 
-  bool bOk = false;
-  QString sResource = GetResourceName(sResourceLocator, &bOk);
-  if (!bOk) { return; }
-
-  emit spSignalEmitter->playSound(sResource, iId, iLoops, iStartAt, -1);
+      emit spSignalEmitter->playSound(sResource, iId, iLoops, iStartAt, -1);
+    }
+  }
 }
 
 //----------------------------------------------------------------------------------------
@@ -643,8 +825,13 @@ void CEosScriptMediaPlayer::playSound(const QString& sResourceLocator, const QSt
 void CEosScriptMediaPlayer::seek(const QString& iId, qint64 iSeek)
 {
   if (!CheckIfScriptCanRun()) { return; }
-  auto spSignalEmitter = SignalEmitter<CMediaPlayerSignalEmitter>();
-  emit spSignalEmitter->seekMedia(iId, iSeek);
+  if (auto spComm = m_wpCommunicator.lock())
+  {
+    if (auto spSignalEmitter = spComm->LockedEmitter<CMediaPlayerSignalEmitter>())
+    {
+      emit spSignalEmitter->seekMedia(iId, iSeek);
+    }
+  }
 }
 
 //----------------------------------------------------------------------------------------
@@ -652,8 +839,13 @@ void CEosScriptMediaPlayer::seek(const QString& iId, qint64 iSeek)
 void CEosScriptMediaPlayer::setVolume(const QString& iId, double dValue)
 {
   if (!CheckIfScriptCanRun()) { return; }
-  auto spSignalEmitter = SignalEmitter<CMediaPlayerSignalEmitter>();
-  emit spSignalEmitter->setVolume(iId, dValue);
+  if (auto spComm = m_wpCommunicator.lock())
+  {
+    if (auto spSignalEmitter = spComm->LockedEmitter<CMediaPlayerSignalEmitter>())
+    {
+      emit spSignalEmitter->setVolume(iId, dValue);
+    }
+  }
 }
 
 //----------------------------------------------------------------------------------------

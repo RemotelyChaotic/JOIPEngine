@@ -31,35 +31,51 @@ CNotificationSignalEmiter::~CNotificationSignalEmiter()
 
 //----------------------------------------------------------------------------------------
 //
-std::shared_ptr<CScriptObjectBase> CNotificationSignalEmiter::CreateNewScriptObject(QPointer<QJSEngine> pEngine)
+std::shared_ptr<CScriptCommunicator>
+CNotificationSignalEmiter::CreateCommunicatorImpl(std::shared_ptr<CScriptRunnerSignalEmiterAccessor> spAccessor)
 {
-  return std::make_shared<CScriptNotification>(this, pEngine);
+  return std::make_shared<CNotificationScriptCommunicator>(spAccessor);
 }
-std::shared_ptr<CScriptObjectBase> CNotificationSignalEmiter::CreateNewScriptObject(QPointer<CJsonInstructionSetParser> pParser)
+
+//----------------------------------------------------------------------------------------
+//
+CNotificationScriptCommunicator::CNotificationScriptCommunicator(
+  const std::weak_ptr<CScriptRunnerSignalEmiterAccessor>& spEmitter) :
+  CScriptCommunicator(spEmitter)
+{}
+CNotificationScriptCommunicator::~CNotificationScriptCommunicator() = default;
+
+//----------------------------------------------------------------------------------------
+//
+CScriptObjectBase* CNotificationScriptCommunicator::CreateNewScriptObject(QPointer<QJSEngine> pEngine)
 {
-  return std::make_shared<CEosScriptNotification>(this, pParser);
+  return new CScriptNotification(weak_from_this(), pEngine);
 }
-std::shared_ptr<CScriptObjectBase> CNotificationSignalEmiter::CreateNewScriptObject(QtLua::State* pState)
+CScriptObjectBase* CNotificationScriptCommunicator::CreateNewScriptObject(QPointer<CJsonInstructionSetParser> pParser)
 {
-  return std::make_shared<CScriptNotification>(this, pState);
+  return new CEosScriptNotification(weak_from_this(), pParser);
 }
-std::shared_ptr<CScriptObjectBase> CNotificationSignalEmiter::CreateNewSequenceObject()
+CScriptObjectBase* CNotificationScriptCommunicator::CreateNewScriptObject(QtLua::State* pState)
+{
+  return new CScriptNotification(weak_from_this(), pState);
+}
+CScriptObjectBase* CNotificationScriptCommunicator::CreateNewSequenceObject()
 {
   return nullptr;
 }
 
 //----------------------------------------------------------------------------------------
 //
-CScriptNotification::CScriptNotification(QPointer<CScriptRunnerSignalEmiter> pEmitter,
+CScriptNotification::CScriptNotification(std::weak_ptr<CScriptCommunicator> pCommunicator,
                                          QPointer<QJSEngine> pEngine) :
-  CJsScriptObjectBase(pEmitter, pEngine),
+  CJsScriptObjectBase(pCommunicator, pEngine),
   m_wpDbManager(CApplication::Instance()->System<CDatabaseManager>())
 {
   Initialize();
 }
-CScriptNotification::CScriptNotification(QPointer<CScriptRunnerSignalEmiter> pEmitter,
+CScriptNotification::CScriptNotification(std::weak_ptr<CScriptCommunicator> pCommunicator,
                                          QtLua::State* pState) :
-  CJsScriptObjectBase(pEmitter, pState),
+  CJsScriptObjectBase(pCommunicator, pState),
   m_wpDbManager(CApplication::Instance()->System<CDatabaseManager>())
 {
   Initialize();
@@ -73,8 +89,15 @@ CScriptNotification::~CScriptNotification()
 void CScriptNotification::clear()
 {
   if (!CheckIfScriptCanRun()) { return; }
-  emit SignalEmitter<CNotificationSignalEmiter>()->clearNotifications();
-  emit SignalOverlayCleared();
+
+  if (auto spComm = m_wpCommunicator.lock())
+  {
+    if (auto spSignalEmitter = spComm->LockedEmitter<CNotificationSignalEmiter>())
+    {
+      emit spSignalEmitter->clearNotifications();
+      emit SignalOverlayCleared();
+    }
+  }
 }
 
 //----------------------------------------------------------------------------------------
@@ -83,16 +106,22 @@ void CScriptNotification::hide(QString sId)
 {
   if (!CheckIfScriptCanRun()) { return; }
 
-  if (IScriptRunnerFactory::c_sMainRunner == sId)
+  if (auto spComm = m_wpCommunicator.lock())
   {
-    emit m_pSignalEmitter->showError(
-          tr("Can not hide %1.").arg(IScriptRunnerFactory::c_sMainRunner),
-          QtMsgType::QtWarningMsg);
-    return;
-  }
+    if (auto spSignalEmitter = spComm->LockedEmitter<CNotificationSignalEmiter>())
+    {
+      if (IScriptRunnerFactory::c_sMainRunner == sId)
+      {
+        emit spSignalEmitter->showError(
+              tr("Can not hide %1.").arg(IScriptRunnerFactory::c_sMainRunner),
+              QtMsgType::QtWarningMsg);
+        return;
+      }
 
-  emit SignalEmitter<CNotificationSignalEmiter>()->hideNotification(sId);
-  emit SignalOverlayClosed(sId);
+      emit spSignalEmitter->hideNotification(sId);
+      emit SignalOverlayClosed(sId);
+    }
+  }
 }
 
 //----------------------------------------------------------------------------------------
@@ -100,7 +129,14 @@ void CScriptNotification::hide(QString sId)
 void CScriptNotification::setIconAlignment(qint32 alignment)
 {
   if (!CheckIfScriptCanRun()) { return; }
-  emit SignalEmitter<CNotificationSignalEmiter>()->iconAlignmentChanged(alignment);
+
+  if (auto spComm = m_wpCommunicator.lock())
+  {
+    if (auto spSignalEmitter = spComm->LockedEmitter<CNotificationSignalEmiter>())
+    {
+      spSignalEmitter->iconAlignmentChanged(alignment);
+    }
+  }
 }
 
 //----------------------------------------------------------------------------------------
@@ -110,7 +146,13 @@ void CScriptNotification::setPortrait(QVariant resource)
   if (!CheckIfScriptCanRun()) { return; }
 
   QString sResource = GetResource(resource, "setPortrait");
-  emit SignalEmitter<CNotificationSignalEmiter>()->portraitChanged(sResource);
+  if (auto spComm = m_wpCommunicator.lock())
+  {
+    if (auto spSignalEmitter = spComm->LockedEmitter<CNotificationSignalEmiter>())
+    {
+      emit spSignalEmitter->portraitChanged(sResource);
+    }
+  }
 }
 
 //----------------------------------------------------------------------------------------
@@ -215,7 +257,14 @@ void CScriptNotification::show(QString sId, QString sTitle, QString sButtonText,
 void CScriptNotification::setShortcut(QString sShortcut)
 {
   if (!CheckIfScriptCanRun()) { return; }
-  emit SignalEmitter<CNotificationSignalEmiter>()->shortcutChanged(sShortcut);
+
+  if (auto spComm = m_wpCommunicator.lock())
+  {
+    if (auto spSignalEmitter = spComm->LockedEmitter<CNotificationSignalEmiter>())
+    {
+      emit spSignalEmitter->shortcutChanged(sShortcut);
+    }
+  }
 }
 
 //----------------------------------------------------------------------------------------
@@ -225,7 +274,13 @@ void CScriptNotification::setTextBackgroundColor(QVariant color)
   if (!CheckIfScriptCanRun()) { return; }
 
   QColor colorConverted = GetColor(color, "setTextBackgroundColor");
-  emit SignalEmitter<CNotificationSignalEmiter>()->textBackgroundColorChanged(colorConverted);
+  if (auto spComm = m_wpCommunicator.lock())
+  {
+    if (auto spSignalEmitter = spComm->LockedEmitter<CNotificationSignalEmiter>())
+    {
+      emit spSignalEmitter->textBackgroundColorChanged(colorConverted);
+    }
+  }
 }
 
 //----------------------------------------------------------------------------------------
@@ -235,7 +290,13 @@ void CScriptNotification::setTextColor(QVariant color)
   if (!CheckIfScriptCanRun()) { return; }
 
   QColor colorConverted = GetColor(color, "setTextColor");
-  emit SignalEmitter<CNotificationSignalEmiter>()->textColorChanged(colorConverted);
+  if (auto spComm = m_wpCommunicator.lock())
+  {
+    if (auto spSignalEmitter = spComm->LockedEmitter<CNotificationSignalEmiter>())
+    {
+      spSignalEmitter->textColorChanged(colorConverted);
+    }
+  }
 }
 
 //----------------------------------------------------------------------------------------
@@ -245,7 +306,13 @@ void CScriptNotification::setWidgetBackgroundColor(QVariant color)
   if (!CheckIfScriptCanRun()) { return; }
 
   QColor colorConverted = GetColor(color, "setWidgetBackgroundColor");
-  emit SignalEmitter<CNotificationSignalEmiter>()->widgetBackgroundColorChanged(colorConverted);
+  if (auto spComm = m_wpCommunicator.lock())
+  {
+    if (auto spSignalEmitter = spComm->LockedEmitter<CNotificationSignalEmiter>())
+    {
+      emit spSignalEmitter->widgetBackgroundColorChanged(colorConverted);
+    }
+  }
 }
 
 //----------------------------------------------------------------------------------------
@@ -255,64 +322,90 @@ void CScriptNotification::setWidgetColor(QVariant color)
   if (!CheckIfScriptCanRun()) { return; }
 
   QColor colorConverted = GetColor(color, "setWidgetColor");
-  emit SignalEmitter<CNotificationSignalEmiter>()->widgetColorChanged(colorConverted);
+  if (auto spComm = m_wpCommunicator.lock())
+  {
+    if (auto spSignalEmitter = spComm->LockedEmitter<CNotificationSignalEmiter>())
+    {
+      spSignalEmitter->widgetColorChanged(colorConverted);
+    }
+  }
 }
 
 //----------------------------------------------------------------------------------------
 //
 void CScriptNotification::Initialize()
 {
-  auto spEmiter = SignalEmitter<CNotificationSignalEmiter>();
-  connect(spEmiter, &CNotificationSignalEmiter::showNotificationClick,
-          this, [this] (QString sId, QString sOnEvt){
-    QString sCopy = sOnEvt;
-    sCopy.detach();
-    if (!sCopy.isEmpty())
+  if (auto spComm = m_wpCommunicator.lock())
+  {
+    if (auto spSignalEmitter = spComm->LockedEmitter<CNotificationSignalEmiter>())
     {
-      if (IScriptRunnerFactory::c_sMainRunner == sId)
-      {
-        emit m_pSignalEmitter->showError(
-              tr("Id of overlay must not be %1").arg(IScriptRunnerFactory::c_sMainRunner),
-              QtMsgType::QtWarningMsg);
-        return;
-      }
-      emit SignalOverlayRunAsync(sId, sOnEvt);
+      connect(spSignalEmitter.Get(), &CNotificationSignalEmiter::showNotificationClick,
+              this, [this] (QString sId, QString sOnEvt){
+        QString sCopy = sOnEvt;
+        sCopy.detach();
+        if (!sCopy.isEmpty())
+        {
+          if (IScriptRunnerFactory::c_sMainRunner == sId)
+          {
+            if (auto spComm = m_wpCommunicator.lock())
+            {
+              if (auto spSignalEmitter = spComm->LockedEmitter<CNotificationSignalEmiter>())
+              {
+                emit spSignalEmitter->showError(
+                      tr("Id of overlay must not be %1").arg(IScriptRunnerFactory::c_sMainRunner),
+                      QtMsgType::QtWarningMsg);
+              }
+            }
+            return;
+          }
+          emit SignalOverlayRunAsync(sId, sOnEvt);
+        }
+      }, Qt::QueuedConnection);
+      connect(spSignalEmitter.Get(), &CNotificationSignalEmiter::showNotificationTimeout,
+              this, [this] (QString sId, QString sOnEvt){
+        QString sCopy = sOnEvt;
+        sCopy.detach();
+        if (!sCopy.isEmpty())
+        {
+          if (IScriptRunnerFactory::c_sMainRunner == sId)
+          {
+            if (auto spComm = m_wpCommunicator.lock())
+            {
+              if (auto spSignalEmitter = spComm->LockedEmitter<CNotificationSignalEmiter>())
+              {
+                emit spSignalEmitter->showError(
+                      tr("Id of overlay must not be %1").arg(IScriptRunnerFactory::c_sMainRunner),
+                      QtMsgType::QtWarningMsg);
+              }
+            }
+            return;
+          }
+          emit SignalOverlayRunAsync(sId, sOnEvt);
+        }
+      }, Qt::QueuedConnection);
     }
-  }, Qt::QueuedConnection);
-  connect(spEmiter, &CNotificationSignalEmiter::showNotificationTimeout,
-          this, [this] (QString sId, QString sOnEvt){
-    QString sCopy = sOnEvt;
-    sCopy.detach();
-    if (!sCopy.isEmpty())
-    {
-      if (IScriptRunnerFactory::c_sMainRunner == sId)
-      {
-        emit m_pSignalEmitter->showError(
-              tr("Id of overlay must not be %1").arg(IScriptRunnerFactory::c_sMainRunner),
-              QtMsgType::QtWarningMsg);
-        return;
-      }
-      emit SignalOverlayRunAsync(sId, sOnEvt);
-    }
-  }, Qt::QueuedConnection);
+  }
 }
 
 //----------------------------------------------------------------------------------------
 //
 QColor CScriptNotification::GetColor(const QVariant& color, const QString& sSource)
 {
-  if (nullptr != m_pSignalEmitter)
+  if (auto spComm = m_wpCommunicator.lock())
   {
-    QString sError;
-    std::optional<QColor> optCol =
-        script::ParseColorFromScriptVariant(color, 255, sSource, &sError);
-    if (optCol.has_value())
+    if (auto spSignalEmitter = spComm->LockedEmitter<CNotificationSignalEmiter>())
     {
-      return optCol.value();
-    }
-    else
-    {
-      emit m_pSignalEmitter->showError(sError, QtMsgType::QtWarningMsg);
+      QString sError;
+      std::optional<QColor> optCol =
+          script::ParseColorFromScriptVariant(color, 255, sSource, &sError);
+      if (optCol.has_value())
+      {
+        return optCol.value();
+      }
+      else
+      {
+        emit spSignalEmitter->showError(sError, QtMsgType::QtWarningMsg);
+      }
     }
   }
 
@@ -323,20 +416,23 @@ QColor CScriptNotification::GetColor(const QVariant& color, const QString& sSour
 //
 QString CScriptNotification::GetResource(const QVariant& resource, const QString& sSource)
 {
-  if (nullptr != m_pSignalEmitter)
+  if (auto spComm = m_wpCommunicator.lock())
   {
-    QString sError;
-    std::optional<QString> optRes =
-        script::ParseResourceFromScriptVariant(resource, m_wpDbManager.lock(),
-                                               m_spProject,
-                                               sSource, &sError);
-    if (optRes.has_value())
+    if (auto spSignalEmitter = spComm->LockedEmitter<CNotificationSignalEmiter>())
     {
-      return optRes.value();
-    }
-    else
-    {
-      emit m_pSignalEmitter->showError(sError, QtMsgType::QtWarningMsg);
+      QString sError;
+      std::optional<QString> optRes =
+          script::ParseResourceFromScriptVariant(resource, m_wpDbManager.lock(),
+                                                 m_spProject,
+                                                 sSource, &sError);
+      if (optRes.has_value())
+      {
+        return optRes.value();
+      }
+      else
+      {
+        emit spSignalEmitter->showError(sError, QtMsgType::QtWarningMsg);
+      }
     }
   }
   return QString();
@@ -347,8 +443,13 @@ QString CScriptNotification::GetResource(const QVariant& resource, const QString
 void CScriptNotification::Show(QString sId, QString sTitle, QString sButtonText,
                                double dTimeS, QString sOnButton, QString sOnTimeout)
 {
-  emit SignalEmitter<CNotificationSignalEmiter>()->showNotification(sId, sTitle, sButtonText,
-                                                                    dTimeS, sOnButton, sOnTimeout);
+  if (auto spComm = m_wpCommunicator.lock())
+  {
+    if (auto spSignalEmitter = spComm->LockedEmitter<CNotificationSignalEmiter>())
+    {
+      spSignalEmitter->showNotification(sId, sTitle, sButtonText, dTimeS, sOnButton, sOnTimeout);
+    }
+  }
 }
 
 //----------------------------------------------------------------------------------------
@@ -525,38 +626,55 @@ private:
 
 //----------------------------------------------------------------------------------------
 //
-CEosScriptNotification::CEosScriptNotification(QPointer<CScriptRunnerSignalEmiter> pEmitter,
+CEosScriptNotification::CEosScriptNotification(std::weak_ptr<CScriptCommunicator> pCommunicator,
                                                QPointer<CJsonInstructionSetParser> pParser) :
-  CEosScriptObjectBase(pEmitter, pParser),
+  CEosScriptObjectBase(pCommunicator, pParser),
   m_spCommandCreate(std::make_shared<CCommandEosNotificationCreate>(this)),
   m_spCommandClose(std::make_shared<CCommandEosNotificationClose>(this))
 {
   pParser->RegisterInstruction(eos::c_sCommandNotificationCreate, m_spCommandCreate);
   pParser->RegisterInstruction(eos::c_sCommandNotificationClose, m_spCommandClose);
 
-  auto spEmiter = SignalEmitter<CNotificationSignalEmiter>();
-  connect(spEmiter, &CNotificationSignalEmiter::showNotificationClick,
-          this, [this] (QString, QString sOnEvt){
-    if (IScriptRunnerFactory::c_sMainRunner == sOnEvt)
+  if (auto spComm = m_wpCommunicator.lock())
+  {
+    if (auto spSignalEmitter = spComm->LockedEmitter<CNotificationSignalEmiter>())
     {
-      emit m_pSignalEmitter->showError(
-            tr("Id of overlay must not be %1").arg(IScriptRunnerFactory::c_sMainRunner),
-            QtMsgType::QtWarningMsg);
-      return;
+      connect(spSignalEmitter.Get(), &CNotificationSignalEmiter::showNotificationClick,
+              this, [this] (QString, QString sOnEvt){
+        if (IScriptRunnerFactory::c_sMainRunner == sOnEvt)
+        {
+          if (auto spComm = m_wpCommunicator.lock())
+          {
+            if (auto spSignalEmitter = spComm->LockedEmitter<CNotificationSignalEmiter>())
+            {
+              emit spSignalEmitter->showError(
+                    tr("Id of overlay must not be %1").arg(IScriptRunnerFactory::c_sMainRunner),
+                    QtMsgType::QtWarningMsg);
+            }
+          }
+          return;
+        }
+        emit SignalOverlayRunAsync(sOnEvt);
+      }, Qt::QueuedConnection);
+      connect(spSignalEmitter.Get(), &CNotificationSignalEmiter::showNotificationTimeout,
+              this, [this] (QString, QString sOnEvt){
+        if (IScriptRunnerFactory::c_sMainRunner == sOnEvt)
+        {
+          if (auto spComm = m_wpCommunicator.lock())
+          {
+            if (auto spSignalEmitter = spComm->LockedEmitter<CNotificationSignalEmiter>())
+            {
+              emit spSignalEmitter->showError(
+                    tr("Id of overlay must not be %1").arg(IScriptRunnerFactory::c_sMainRunner),
+                    QtMsgType::QtWarningMsg);
+            }
+          }
+          return;
+        }
+        emit SignalOverlayRunAsync(sOnEvt);
+      }, Qt::QueuedConnection);
     }
-    emit SignalOverlayRunAsync(sOnEvt);
-  }, Qt::QueuedConnection);
-  connect(spEmiter, &CNotificationSignalEmiter::showNotificationTimeout,
-          this, [this] (QString, QString sOnEvt){
-    if (IScriptRunnerFactory::c_sMainRunner == sOnEvt)
-    {
-      emit m_pSignalEmitter->showError(
-            tr("Id of overlay must not be %1").arg(IScriptRunnerFactory::c_sMainRunner),
-            QtMsgType::QtWarningMsg);
-      return;
-    }
-    emit SignalOverlayRunAsync(sOnEvt);
-  }, Qt::QueuedConnection);
+  }
 }
 CEosScriptNotification::~CEosScriptNotification()
 {
@@ -568,16 +686,22 @@ void CEosScriptNotification::Hide(QString sId)
 {
   if (!CheckIfScriptCanRun()) { return; }
 
-  if (IScriptRunnerFactory::c_sMainRunner == sId)
+  if (auto spComm = m_wpCommunicator.lock())
   {
-    emit m_pSignalEmitter->showError(
-          tr("Can not hide %1.").arg(IScriptRunnerFactory::c_sMainRunner),
-          QtMsgType::QtWarningMsg);
-    return;
-  }
+    if (auto spSignalEmitter = spComm->LockedEmitter<CNotificationSignalEmiter>())
+    {
+      if (IScriptRunnerFactory::c_sMainRunner == sId)
+      {
+        emit spSignalEmitter->showError(
+              tr("Can not hide %1.").arg(IScriptRunnerFactory::c_sMainRunner),
+              QtMsgType::QtWarningMsg);
+        return;
+      }
 
-  emit SignalEmitter<CNotificationSignalEmiter>()->hideNotification(sId);
-  emit SignalOverlayClosed(sId);
+      emit spSignalEmitter->hideNotification(sId);
+      emit SignalOverlayClosed(sId);
+    }
+  }
 }
 
 //----------------------------------------------------------------------------------------
@@ -586,6 +710,12 @@ void CEosScriptNotification::Show(QString sId, const QString& sTitle, const QStr
                                   double dTimeS, const QString&  sOnButton, const QString& sOnTimeout)
 {
   if (!CheckIfScriptCanRun()) { return; }
-  emit SignalEmitter<CNotificationSignalEmiter>()->showNotification(sId, sTitle, sButtonText,
-                                                                    dTimeS, sOnButton, sOnTimeout);
+
+  if (auto spComm = m_wpCommunicator.lock())
+  {
+    if (auto spSignalEmitter = spComm->LockedEmitter<CNotificationSignalEmiter>())
+    {
+      emit spSignalEmitter->showNotification(sId, sTitle, sButtonText, dTimeS, sOnButton, sOnTimeout);
+    }
+  }
 }

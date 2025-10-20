@@ -15,15 +15,28 @@ public:
   CThreadSignalEmitter();
   ~CThreadSignalEmitter();
 
-  std::shared_ptr<CScriptObjectBase> CreateNewScriptObject(QPointer<QJSEngine> pEngine) override;
-  std::shared_ptr<CScriptObjectBase> CreateNewScriptObject(QtLua::State* pState) override;
-  std::shared_ptr<CScriptObjectBase> CreateNewSequenceObject() override;
-
 signals:
   void skippableWait(qint32 iTimeS);
   void waitSkipped();
+
+protected:
+  std::shared_ptr<CScriptCommunicator>
+  CreateCommunicatorImpl(std::shared_ptr<CScriptRunnerSignalEmiterAccessor> spAccessor) override;
 };
-Q_DECLARE_METATYPE(CThreadSignalEmitter)
+
+//----------------------------------------------------------------------------------------
+//
+class CThreadScriptCommunicator : public CScriptCommunicator
+{
+  public:
+  CThreadScriptCommunicator(const std::weak_ptr<CScriptRunnerSignalEmiterAccessor>& spEmitter);
+  ~CThreadScriptCommunicator() override;
+
+  CScriptObjectBase* CreateNewScriptObject(QPointer<QJSEngine> pEngine) override;
+  CScriptObjectBase* CreateNewScriptObject(QPointer<CJsonInstructionSetParser> pParser) override;
+  CScriptObjectBase* CreateNewScriptObject(QtLua::State* pState) override;
+  CScriptObjectBase* CreateNewSequenceObject() override;
+};
 
 //----------------------------------------------------------------------------------------
 //
@@ -33,9 +46,9 @@ class CScriptThread : public CJsScriptObjectBase
   Q_DISABLE_COPY(CScriptThread)
 
 public:
-  CScriptThread(QPointer<CScriptRunnerSignalEmiter> pEmitter,
+  CScriptThread(std::weak_ptr<CScriptCommunicator> pCommunicator,
                 QPointer<QJSEngine> pEngine);
-  CScriptThread(QPointer<CScriptRunnerSignalEmiter> pEmitter,
+  CScriptThread(std::weak_ptr<CScriptCommunicator> pCommunicator,
                 QtLua::State* pState);
   ~CScriptThread();
 
@@ -49,11 +62,17 @@ public slots:
 signals:
   void SignalOverlayRunAsync(const QString& sId, const QString& sScriptResource);
   void SignalKill(const QString& sId);
+  void SignalQuitLoop();
+  void SignalPauseTimer();
+  void SignalResumeTimer();
 
 private:
   QString GetResourceName(const QVariant& resource, const QString& sMethod,
                           bool bStringCanBeId = false, bool* pbOk = nullptr);
 
+  std::shared_ptr<std::function<void()>> m_spStop;
+  std::shared_ptr<std::function<void()>> m_spPause;
+  std::shared_ptr<std::function<void()>> m_spResume;
   std::weak_ptr<CDatabaseManager>  m_wpDbManager;
 };
 

@@ -97,12 +97,12 @@ bool CScriptRunnerInstanceController::IsRunning() const
 
 //----------------------------------------------------------------------------------------
 //
-void CScriptRunnerInstanceController::RegisterNewComponent(const QString sName,
-                                                           CScriptRunnerSignalEmiter* pObject)
+void CScriptRunnerInstanceController::RegisterNewComponent(const QString& sName,
+                                                           std::weak_ptr<CScriptCommunicator> wpCommunicator)
 {
   bool bOk = QMetaObject::invokeMethod(m_spWorker.get(), "RegisterNewComponent", Qt::BlockingQueuedConnection,
                                        Q_ARG(QString, sName),
-                                       Q_ARG(CScriptRunnerSignalEmiter*, pObject));
+                                       Q_ARG(std::weak_ptr<CScriptCommunicator>, wpCommunicator));
   assert(bOk); Q_UNUSED(bOk)
 }
 
@@ -123,6 +123,15 @@ void CScriptRunnerInstanceController::RunScript(const QString& sScript,
 void CScriptRunnerInstanceController::ResetEngine()
 {
   bool bOk = QMetaObject::invokeMethod(m_spWorker.get(), "ResetEngine", Qt::BlockingQueuedConnection);
+  assert(bOk); Q_UNUSED(bOk)
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CScriptRunnerInstanceController::UnregisterComponent(const QString& sName)
+{
+  bool bOk = QMetaObject::invokeMethod(m_spWorker.get(), "UnregisterComponent", Qt::BlockingQueuedConnection,
+                                       Q_ARG(QString, sName));
   assert(bOk); Q_UNUSED(bOk)
 }
 

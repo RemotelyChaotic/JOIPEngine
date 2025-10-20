@@ -30,11 +30,6 @@ public:
   CTextBoxSignalEmitter();
   ~CTextBoxSignalEmitter();
 
-  std::shared_ptr<CScriptObjectBase> CreateNewScriptObject(QPointer<QJSEngine> pEngine) override;
-  std::shared_ptr<CScriptObjectBase> CreateNewScriptObject(QPointer<CJsonInstructionSetParser> pParser) override;
-  std::shared_ptr<CScriptObjectBase> CreateNewScriptObject(QtLua::State* pState) override;
-  std::shared_ptr<CScriptObjectBase> CreateNewSequenceObject() override;
-
 signals:
   void clearText();
   void getDialogue(QString sRequestId, QString sId, bool bIsRegexp, QStringList vsTags);
@@ -52,8 +47,25 @@ signals:
   void textColorsChanged(std::vector<QColor> vColors);
   void textPortraitChanged(QString sResource);
   void waitSkipped();
+
+protected:
+  std::shared_ptr<CScriptCommunicator>
+  CreateCommunicatorImpl(std::shared_ptr<CScriptRunnerSignalEmiterAccessor> spAccessor) override;
 };
-Q_DECLARE_METATYPE(CTextBoxSignalEmitter)
+
+//----------------------------------------------------------------------------------------
+//
+class CTextBoxScriptCommunicator : public CScriptCommunicator
+{
+  public:
+  CTextBoxScriptCommunicator(const std::weak_ptr<CScriptRunnerSignalEmiterAccessor>& spEmitter);
+  ~CTextBoxScriptCommunicator() override;
+
+  CScriptObjectBase* CreateNewScriptObject(QPointer<QJSEngine> pEngine) override;
+  CScriptObjectBase* CreateNewScriptObject(QPointer<CJsonInstructionSetParser> pParser) override;
+  CScriptObjectBase* CreateNewScriptObject(QtLua::State* pState) override;
+  CScriptObjectBase* CreateNewSequenceObject() override;
+};
 
 //----------------------------------------------------------------------------------------
 //
@@ -63,9 +75,9 @@ class CScriptTextBox : public CJsScriptObjectBase
   Q_DISABLE_COPY(CScriptTextBox)
 
 public:
-  CScriptTextBox(QPointer<CScriptRunnerSignalEmiter> pEmitter,
+  CScriptTextBox(std::weak_ptr<CScriptCommunicator> pCommunicator,
                  QPointer<QJSEngine> pEngine);
-  CScriptTextBox(QPointer<CScriptRunnerSignalEmiter> pEmitter,
+  CScriptTextBox(std::weak_ptr<CScriptCommunicator> pCommunicator,
                  QtLua::State* pState);
   ~CScriptTextBox();
 
@@ -89,16 +101,24 @@ public slots:
 
 signals:
   void SignalQuitLoop();
+  void SignalPauseTimer();
+  void SignalResumeTimer();
 
 private:
   std::vector<QColor> GetColors(const QVariant& color, const QString& sSource);
-  bool GetDialogueData(QVariant data, QString& sStringRet, qint32& iTimeRet, bool& bWaitRet,
-                       QString& sSoundResource, QStringList& vsTagsRet);
+  bool GetDialogueData(QVariant data, std::shared_ptr<QString>& sStringRet,
+                       std::shared_ptr<qint32>& iTimeRet, std::shared_ptr<bool>& bWaitRet,
+                       std::shared_ptr<QString>& sSoundResource,
+                       std::shared_ptr<QStringList>& vsTagsRet);
   bool GetDialogueFromUi(QString sId, QString sString, bool bIsRegexp, QStringList vsTags,
-                         QString& sStringRet, qint32& iTimeRet, bool& bWaitRet,
-                         QString& sSoundResource, QStringList& vsTagsRet);
+                         std::shared_ptr<QString>& sStringRet, std::shared_ptr<qint32>& iTimeRet,
+                         std::shared_ptr<bool>& bWaitRet, std::shared_ptr<QString>& sSoundResource,
+                         std::shared_ptr<QStringList>& vsTagsRet);
   QString GetResourceName(const QVariant& resource, const QString& sMethod, bool* pbOk);
 
+  std::shared_ptr<std::function<void()>> m_spStop;
+  std::shared_ptr<std::function<void()>> m_spPause;
+  std::shared_ptr<std::function<void()>> m_spResume;
   std::weak_ptr<CDatabaseManager>  m_wpDbManager;
 };
 
@@ -121,7 +141,7 @@ public:
     eCustom
   };
 
-  CEosScriptTextBox(QPointer<CScriptRunnerSignalEmiter> pEmitter,
+  CEosScriptTextBox(std::weak_ptr<CScriptCommunicator> pCommunicator,
                     QPointer<CJsonInstructionSetParser> pParser);
   ~CEosScriptTextBox();
 
@@ -135,11 +155,16 @@ public:
 
 signals:
   void SignalQuitLoop();
+  void SignalPauseTimer();
+  void SignalResumeTimer();
 
 private:
   std::shared_ptr<CCommandEosChoice> m_spCommandChoice;
   std::shared_ptr<CCommandEosPrompt> m_spCommandPrompt;
   std::shared_ptr<CCommandEosSay>    m_spCommandSay;
+  std::shared_ptr<std::function<void()>> m_spStop;
+  std::shared_ptr<std::function<void()>> m_spPause;
+  std::shared_ptr<std::function<void()>> m_spResume;
 };
 
 #endif // SCRIPTTEXTBOX_H

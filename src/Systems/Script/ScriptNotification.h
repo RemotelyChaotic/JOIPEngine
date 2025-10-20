@@ -30,11 +30,6 @@ public:
   CNotificationSignalEmiter();
   ~CNotificationSignalEmiter();
 
-  std::shared_ptr<CScriptObjectBase> CreateNewScriptObject(QPointer<QJSEngine> pEngine) override;
-  std::shared_ptr<CScriptObjectBase> CreateNewScriptObject(QPointer<CJsonInstructionSetParser> pParser) override;
-  std::shared_ptr<CScriptObjectBase> CreateNewScriptObject(QtLua::State* pState) override;
-  std::shared_ptr<CScriptObjectBase> CreateNewSequenceObject() override;
-
 signals:
   void clearNotifications();
   void hideNotification(QString sId);
@@ -48,8 +43,25 @@ signals:
   void textColorChanged(QColor color);
   void widgetBackgroundColorChanged(QColor color);
   void widgetColorChanged(QColor color);
+
+protected:
+  std::shared_ptr<CScriptCommunicator>
+  CreateCommunicatorImpl(std::shared_ptr<CScriptRunnerSignalEmiterAccessor> spAccessor) override;
 };
-Q_DECLARE_METATYPE(CNotificationSignalEmiter)
+
+//----------------------------------------------------------------------------------------
+//
+class CNotificationScriptCommunicator : public CScriptCommunicator
+{
+  public:
+  CNotificationScriptCommunicator(const std::weak_ptr<CScriptRunnerSignalEmiterAccessor>& spEmitter);
+  ~CNotificationScriptCommunicator() override;
+
+  CScriptObjectBase* CreateNewScriptObject(QPointer<QJSEngine> pEngine) override;
+  CScriptObjectBase* CreateNewScriptObject(QPointer<CJsonInstructionSetParser> pParser) override;
+  CScriptObjectBase* CreateNewScriptObject(QtLua::State* pState) override;
+  CScriptObjectBase* CreateNewSequenceObject() override;
+};
 
 //----------------------------------------------------------------------------------------
 //
@@ -59,9 +71,9 @@ class CScriptNotification : public CJsScriptObjectBase
   Q_DISABLE_COPY(CScriptNotification)
 
 public:
-  CScriptNotification(QPointer<CScriptRunnerSignalEmiter> pEmitter,
+  CScriptNotification(std::weak_ptr<CScriptCommunicator> pCommunicator,
                       QPointer<QJSEngine> pEngine);
-  CScriptNotification(QPointer<CScriptRunnerSignalEmiter> pEmitter,
+  CScriptNotification(std::weak_ptr<CScriptCommunicator> pCommunicator,
                       QtLua::State* pState);
   ~CScriptNotification();
 
@@ -105,7 +117,7 @@ class CEosScriptNotification : public CEosScriptObjectBase
   Q_DISABLE_COPY(CEosScriptNotification)
 
 public:
-  CEosScriptNotification(QPointer<CScriptRunnerSignalEmiter> pEmitter,
+  CEosScriptNotification(std::weak_ptr<CScriptCommunicator> pCommunicator,
                          QPointer<CJsonInstructionSetParser> pParser);
   ~CEosScriptNotification();
 

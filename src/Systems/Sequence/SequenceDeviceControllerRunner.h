@@ -11,7 +11,7 @@ class CSequenceDeviceControllerRunner : public CScriptObjectBase,
                                         public ISequenceObjectRunner
 {
 public:
-  CSequenceDeviceControllerRunner(QPointer<CScriptRunnerSignalEmiter> pEmitter);
+  CSequenceDeviceControllerRunner(std::weak_ptr<CScriptCommunicator> pCommunicator);
   ~CSequenceDeviceControllerRunner() override;
 
   void RunSequenceInstruction(const QString& sName,

@@ -5,8 +5,8 @@
 using namespace std::placeholders;
 
 CSequenceDeviceControllerRunner::CSequenceDeviceControllerRunner(
-    QPointer<CScriptRunnerSignalEmiter> pEmitter) :
-  CScriptObjectBase(pEmitter),
+    std::weak_ptr<CScriptCommunicator> pCommunicator) :
+  CScriptObjectBase(pCommunicator),
   ISequenceObjectRunner(),
   m_functionMap({{sequence::c_sInstructionIdVibrate, std::bind(&CSequenceDeviceControllerRunner::RunVibrate, this, _1)},
                  {sequence::c_sInstructionIdLinearToy, std::bind(&CSequenceDeviceControllerRunner::RunLinear, this, _1)},
@@ -36,11 +36,16 @@ void CSequenceDeviceControllerRunner::RunSequenceInstruction(const QString&,
 //
 void CSequenceDeviceControllerRunner::RunVibrate(const std::shared_ptr<SSequenceInstruction>& spInstr)
 {
-  auto pSignalEmitter = SignalEmitter<CDeviceControllerSignalEmitter>();
-  if (const auto& spI = std::dynamic_pointer_cast<SVibrateInstruction>(spInstr);
-      nullptr != spI && nullptr != pSignalEmitter)
+  if (auto spComm = m_wpCommunicator.lock())
   {
-    emit pSignalEmitter->sendVibrateCmd(spI->m_dSpeed);
+    if (auto spSignalEmitter = spComm->LockedEmitter<CDeviceControllerSignalEmitter>())
+    {
+      if (const auto& spI = std::dynamic_pointer_cast<SVibrateInstruction>(spInstr);
+          nullptr != spI)
+      {
+        emit spSignalEmitter->sendVibrateCmd(spI->m_dSpeed);
+      }
+    }
   }
 }
 
@@ -48,11 +53,16 @@ void CSequenceDeviceControllerRunner::RunVibrate(const std::shared_ptr<SSequence
 //
 void CSequenceDeviceControllerRunner::RunLinear(const std::shared_ptr<SSequenceInstruction>& spInstr)
 {
-  auto pSignalEmitter = SignalEmitter<CDeviceControllerSignalEmitter>();
-  if (const auto& spI = std::dynamic_pointer_cast<SLinearToyInstruction>(spInstr);
-      nullptr != spI && nullptr != pSignalEmitter)
+  if (auto spComm = m_wpCommunicator.lock())
   {
-    emit pSignalEmitter->sendLinearCmd(spI->m_dDurationS, spI->m_dPosition);
+    if (auto spSignalEmitter = spComm->LockedEmitter<CDeviceControllerSignalEmitter>())
+    {
+      if (const auto& spI = std::dynamic_pointer_cast<SLinearToyInstruction>(spInstr);
+          nullptr != spI)
+      {
+        emit spSignalEmitter->sendLinearCmd(spI->m_dDurationS, spI->m_dPosition);
+      }
+    }
   }
 }
 
@@ -60,11 +70,16 @@ void CSequenceDeviceControllerRunner::RunLinear(const std::shared_ptr<SSequenceI
 //
 void CSequenceDeviceControllerRunner::RunRotate(const std::shared_ptr<SSequenceInstruction>& spInstr)
 {
-  auto pSignalEmitter = SignalEmitter<CDeviceControllerSignalEmitter>();
-  if (const auto& spI = std::dynamic_pointer_cast<SRotateToyInstruction>(spInstr);
-      nullptr != spI && nullptr != pSignalEmitter)
+  if (auto spComm = m_wpCommunicator.lock())
   {
-    emit pSignalEmitter->sendRotateCmd(spI->m_bClockwise, spI->m_dSpeed);
+    if (auto spSignalEmitter = spComm->LockedEmitter<CDeviceControllerSignalEmitter>())
+    {
+      if (const auto& spI = std::dynamic_pointer_cast<SRotateToyInstruction>(spInstr);
+          nullptr != spI)
+      {
+        emit spSignalEmitter->sendRotateCmd(spI->m_bClockwise, spI->m_dSpeed);
+      }
+    }
   }
 }
 
@@ -72,10 +87,15 @@ void CSequenceDeviceControllerRunner::RunRotate(const std::shared_ptr<SSequenceI
 //
 void CSequenceDeviceControllerRunner::RunStop(const std::shared_ptr<SSequenceInstruction>& spInstr)
 {
-  auto pSignalEmitter = SignalEmitter<CDeviceControllerSignalEmitter>();
-  if (const auto& spI = std::dynamic_pointer_cast<SStopVibrationsInstruction>(spInstr);
-      nullptr != spI && nullptr != pSignalEmitter)
+  if (auto spComm = m_wpCommunicator.lock())
   {
-    emit pSignalEmitter->sendStopCmd();
+    if (auto spSignalEmitter = spComm->LockedEmitter<CDeviceControllerSignalEmitter>())
+    {
+      if (const auto& spI = std::dynamic_pointer_cast<SStopVibrationsInstruction>(spInstr);
+          nullptr != spI)
+      {
+        emit spSignalEmitter->sendStopCmd();
+      }
+    }
   }
 }

@@ -19,86 +19,152 @@ CEventSenderSignalEmitter::~CEventSenderSignalEmitter() = default;
 
 //----------------------------------------------------------------------------------------
 //
-std::shared_ptr<CScriptObjectBase> CEventSenderSignalEmitter::CreateNewScriptObject(QPointer<QJSEngine> pEngine)
+std::shared_ptr<CScriptCommunicator>
+CEventSenderSignalEmitter::CreateCommunicatorImpl(std::shared_ptr<CScriptRunnerSignalEmiterAccessor> spAccessor)
 {
-  return std::make_shared<CScriptEventSenderJs>(this, pEngine);
-}
-std::shared_ptr<CScriptObjectBase> CEventSenderSignalEmitter::CreateNewScriptObject(QtLua::State* pState)
-{
-  return std::make_shared<CScriptEventSenderLua>(this, pState);
+  return std::make_shared<CEventScriptCommunicator>(spAccessor);
 }
 
 //----------------------------------------------------------------------------------------
 //
-CScriptEventSenderBase::CScriptEventSenderBase(QPointer<CScriptRunnerSignalEmiter> pEmitter,
-                                               QPointer<QJSEngine> pEngine) :
-  CJsScriptObjectBase(pEmitter, pEngine)
+CEventScriptCommunicator::CEventScriptCommunicator(
+  const std::weak_ptr<CScriptRunnerSignalEmiterAccessor>& spEmitter) :
+  CScriptCommunicator(spEmitter)
+{}
+CEventScriptCommunicator::~CEventScriptCommunicator() = default;
+
+//----------------------------------------------------------------------------------------
+//
+CScriptObjectBase* CEventScriptCommunicator::CreateNewScriptObject(QPointer<QJSEngine> pEngine)
 {
+  return new CScriptEventSenderJs(weak_from_this(), pEngine);
 }
-CScriptEventSenderBase::CScriptEventSenderBase(QPointer<CScriptRunnerSignalEmiter> pEmitter,
-                                               QtLua::State* pState) :
-  CJsScriptObjectBase(pEmitter, pState)
+CScriptObjectBase* CEventScriptCommunicator::CreateNewScriptObject(QPointer<CJsonInstructionSetParser> pParser)
 {
+  Q_UNUSED(pParser)
+  return nullptr;
+}
+CScriptObjectBase* CEventScriptCommunicator::CreateNewScriptObject(QtLua::State* pState)
+{
+  return new CScriptEventSenderLua(weak_from_this(), pState);
+}
+CScriptObjectBase* CEventScriptCommunicator::CreateNewSequenceObject()
+{
+  return nullptr;
 }
 
-CScriptEventSenderBase::~CScriptEventSenderBase() = default;
+//----------------------------------------------------------------------------------------
+//
+CScriptEventSenderBase::CScriptEventSenderBase(std::weak_ptr<CScriptCommunicator> pCommunicator,
+                                               QPointer<QJSEngine> pEngine) :
+  CJsScriptObjectBase(pCommunicator, pEngine)
+{
+  m_spStop = std::make_shared<std::function<void()>>([this]() {
+    emit SignalQuitLoop();
+  });
+  if (auto spComm = pCommunicator.lock())
+  {
+    spComm->RegisterStopCallback(m_spStop);
+  }
+}
+CScriptEventSenderBase::CScriptEventSenderBase(std::weak_ptr<CScriptCommunicator> pCommunicator,
+                                               QtLua::State* pState) :
+  CJsScriptObjectBase(pCommunicator, pState)
+{
+  m_spStop = std::make_shared<std::function<void()>>([this]() {
+    emit SignalQuitLoop();
+  });
+  if (auto spComm = pCommunicator.lock())
+  {
+    spComm->RegisterStopCallback(m_spStop);
+  }
+}
+
+CScriptEventSenderBase::~CScriptEventSenderBase()
+{
+  if (auto spComm = m_wpCommunicator.lock())
+  {
+    spComm->RemoveStopCallback(m_spStop);
+  }
+}
 
 //----------------------------------------------------------------------------------------
 //
 void CScriptEventSenderBase::SendEventImpl(const QString& sEvent, const QString& sData)
 {
-  auto pSignalEmitter = SignalEmitter<CEventSenderSignalEmitter>();
-  emit pSignalEmitter->sendEvent(sEvent, sData);
+  if (auto spComm = m_wpCommunicator.lock())
+  {
+    if (auto spSignalEmitter = spComm->LockedEmitter<CEventSenderSignalEmitter>())
+    {
+      emit spSignalEmitter->sendEvent(sEvent, sData);
+    }
+  }
 }
 
 //----------------------------------------------------------------------------------------
 //
 QVariant CScriptEventSenderBase::SendEventAndWaitImpl(const QString& sEvent, const QString& sData)
 {
-  auto pSignalEmitter = SignalEmitter<CEventSenderSignalEmitter>();
-  QTimer::singleShot(0, this, [&pSignalEmitter,sEvent,sData]() {
-    emit pSignalEmitter->sendEvent(sEvent, sData);
-  });
-
-  // local loop to wait for answer
-  QVariant varRetVal = QString();
-  QEventLoop loop;
-  QMetaObject::Connection quitLoop =
-    connect(this, &CScriptEventSenderBase::SignalQuitLoop, &loop, &QEventLoop::quit);
-  QMetaObject::Connection interruptLoop =
-    connect(pSignalEmitter, &CEventSenderSignalEmitter::interrupt,
-            &loop, &QEventLoop::quit, Qt::QueuedConnection);
-  QMetaObject::Connection interruptThisLoop =
-    connect(this, &CScriptObjectBase::SignalInterruptExecution,
-            &loop, &QEventLoop::quit, Qt::QueuedConnection);
-  QMetaObject::Connection showRetValLoop =
-    connect(pSignalEmitter, &CEventSenderSignalEmitter::sendReturnValue,
-            this, [this, &varRetVal, sEvent](QJSValue var, QString sRequestEvtRet)
+  if (auto spComm = m_wpCommunicator.lock())
   {
-    if (sEvent == sRequestEvtRet)
+    if (auto spSignalEmitter = spComm->LockedEmitter<CEventSenderSignalEmitter>())
     {
-      varRetVal = var.toVariant();
-      varRetVal.detach(); // fixes some crashes with QJSEngine
-      emit this->SignalQuitLoop();
+      QTimer::singleShot(0, this, [this, sEvent, sData]() {
+        if (auto spComm = m_wpCommunicator.lock())
+        {
+          if (auto spSignalEmitter = spComm->LockedEmitter<CEventSenderSignalEmitter>())
+          {
+            emit spSignalEmitter->sendEvent(sEvent, sData);
+          }
+        }
+      });
+
+      // local loop to wait for answer
+      QPointer<CScriptEventSenderBase> pThis(this);
+      std::shared_ptr<QVariant> spReturnValue = std::make_shared<QVariant>();
+      QString sEvt = sEvent;
+      sEvt.detach();
+
+      QEventLoop loop;
+      QMetaObject::Connection quitLoop =
+        connect(this, &CScriptEventSenderBase::SignalQuitLoop, &loop, &QEventLoop::quit);
+      QMetaObject::Connection interruptThisLoop =
+        connect(this, &CScriptObjectBase::SignalInterruptExecution,
+                &loop, &QEventLoop::quit, Qt::QueuedConnection);
+      QMetaObject::Connection showRetValLoop =
+        connect(spSignalEmitter.Get(), &CEventSenderSignalEmitter::sendReturnValue,
+                &loop, [&loop, spReturnValue, sEvt](QJSValue var, QString sRequestEvtRet)
+      {
+        if (sEvt == sRequestEvtRet)
+        {
+          *spReturnValue = var.toVariant();
+          spReturnValue->detach(); // fixes some crashes with QJSEngine
+          bool bOk = QMetaObject::invokeMethod(&loop, "quit", Qt::QueuedConnection);
+          assert(bOk); Q_UNUSED(bOk)
+        }
+        // direct connection to fix cross thread issues with QString content being deleted
+      }, Qt::DirectConnection);
+      loop.exec();
+      loop.disconnect();
+
+      if (nullptr != pThis)
+      {
+        disconnect(quitLoop);
+        disconnect(interruptThisLoop);
+        disconnect(showRetValLoop);
+      }
+
+      return *spReturnValue;
     }
-    // direct connection to fix cross thread issues with QString content being deleted
-  }, Qt::DirectConnection);
-  loop.exec();
-  loop.disconnect();
-
-  disconnect(quitLoop);
-  disconnect(interruptLoop);
-  disconnect(interruptThisLoop);
-  disconnect(showRetValLoop);
-
-  return varRetVal;
+  }
+  return QVariant();
 }
 
 //----------------------------------------------------------------------------------------
 //
-CScriptEventSenderJs::CScriptEventSenderJs(QPointer<CScriptRunnerSignalEmiter> pEmitter,
+CScriptEventSenderJs::CScriptEventSenderJs(std::weak_ptr<CScriptCommunicator> pCommunicator,
                                            QPointer<QJSEngine> pEngine):
-  CScriptEventSenderBase(pEmitter, pEngine)
+  CScriptEventSenderBase(pCommunicator, pEngine)
 {
 }
 CScriptEventSenderJs::~CScriptEventSenderJs() = default;
@@ -154,15 +220,21 @@ QString CScriptEventSenderJs::PrepareInput(const QVariant& data)
     return QString("{\"data\": \"%1\"}").arg(data.toString());
   }
 
-  emit m_pSignalEmitter->showError(tr("Invalid data for event data."), QtMsgType::QtWarningMsg);
+  if (auto spComm = m_wpCommunicator.lock())
+  {
+    if (auto spSignalEmitter = spComm->LockedEmitter<CEventSenderSignalEmitter>())
+    {
+      emit spSignalEmitter->showError(tr("Invalid data for event data."), QtMsgType::QtWarningMsg);
+    }
+  }
   return QString();
 }
 
 //----------------------------------------------------------------------------------------
 //
-CScriptEventSenderLua::CScriptEventSenderLua(QPointer<CScriptRunnerSignalEmiter> pEmitter,
+CScriptEventSenderLua::CScriptEventSenderLua(std::weak_ptr<CScriptCommunicator> pCommunicator,
                                              QtLua::State* pState) :
-  CScriptEventSenderBase(pEmitter, pState)
+  CScriptEventSenderBase(pCommunicator, pState)
 {
 }
 CScriptEventSenderLua::~CScriptEventSenderLua() = default;
@@ -217,6 +289,12 @@ QString CScriptEventSenderLua::PrepareInput(const QVariant& data)
     return QString("{\"data\": \"%1\"}").arg(data.toString());
   }
 
-  emit m_pSignalEmitter->showError(tr("Invalid data for event data."), QtMsgType::QtWarningMsg);
+  if (auto spComm = m_wpCommunicator.lock())
+  {
+    if (auto spSignalEmitter = spComm->LockedEmitter<CEventSenderSignalEmitter>())
+    {
+      emit spSignalEmitter->showError(tr("Invalid data for event data."), QtMsgType::QtWarningMsg);
+    }
+  }
   return QString();
 }

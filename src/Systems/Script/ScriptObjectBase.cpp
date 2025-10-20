@@ -3,13 +3,13 @@
 #include "Systems/Project.h"
 #include <QtLua/State>
 #include <QEventLoop>
+#include <QThread>
 
-CScriptObjectBase::CScriptObjectBase(QPointer<CScriptRunnerSignalEmiter> pEmitter) :
+CScriptObjectBase::CScriptObjectBase(std::weak_ptr<CScriptCommunicator> wpCommunicator) :
   QObject(nullptr),
   m_spProject(nullptr),
-  m_pSignalEmitter(pEmitter)
+  m_wpCommunicator(wpCommunicator)
 {
-
 }
 
 CScriptObjectBase::~CScriptObjectBase()
@@ -35,12 +35,13 @@ void CScriptObjectBase::SetCurrentProject(tspProject spProject)
 //
 bool CScriptObjectBase::CheckIfScriptCanRun()
 {
-  if (nullptr == m_pSignalEmitter)
+  auto spComm = m_wpCommunicator.lock();
+  if (nullptr == spComm)
   {
     return false;
   }
 
-  switch (m_pSignalEmitter->ScriptExecutionStatus())
+  switch (spComm->ScriptExecutionStatus())
   {
     case CScriptRunnerSignalEmiter::eStopped:
     {
@@ -52,26 +53,21 @@ bool CScriptObjectBase::CheckIfScriptCanRun()
     }
     case CScriptRunnerSignalEmiter::ePaused:
     {
-      if (!m_pSignalEmitter.isNull())
+      CScriptRunnerSignalEmiter::ScriptExecStatus status = CScriptRunnerSignalEmiter::ePaused;
+      do
       {
-        QEventLoop loop;
-        connect(m_pSignalEmitter, &CScriptRunnerSignalEmiter::interrupt,
-                &loop, &QEventLoop::quit, Qt::QueuedConnection);
-        connect(m_pSignalEmitter, &CScriptRunnerSignalEmiter::resumeExecution,
-                &loop, &QEventLoop::quit, Qt::QueuedConnection);
-        loop.exec();
-        if (m_pSignalEmitter->ScriptExecutionStatus() == CScriptRunnerSignalEmiter::eStopped)
-        {
-          return false;
-        }
-        else
-        {
-          return true;
-        }
+        QThread::sleep(10);
+        status = spComm->ScriptExecutionStatus();
+      }
+      while (CScriptRunnerSignalEmiter::ePaused == status);
+
+      if (CScriptRunnerSignalEmiter::eStopped == status)
+      {
+        return false;
       }
       else
       {
-        return false;
+        return true;
       }
     }
     default: return false;
@@ -87,24 +83,23 @@ void CScriptObjectBase::Cleanup_Impl()
 
 //----------------------------------------------------------------------------------------
 //
-CJsScriptObjectBase::CJsScriptObjectBase(QPointer<CScriptRunnerSignalEmiter> pEmitter,
+CJsScriptObjectBase::CJsScriptObjectBase(std::weak_ptr<CScriptCommunicator> pCommunicator,
                                          QPointer<QJSEngine> pEngine) :
-  CScriptObjectBase(pEmitter),
+  CScriptObjectBase(pCommunicator),
   m_pEngine(pEngine)
 {}
-CJsScriptObjectBase::CJsScriptObjectBase(QPointer<CScriptRunnerSignalEmiter> pEmitter,
+CJsScriptObjectBase::CJsScriptObjectBase(std::weak_ptr<CScriptCommunicator> pCommunicator,
                                          QtLua::State* pState) :
-  CScriptObjectBase(pEmitter),
+  CScriptObjectBase(pCommunicator),
   m_pState(pState)
 {}
 CJsScriptObjectBase::~CJsScriptObjectBase()
 {}
-
 //----------------------------------------------------------------------------------------
 //
-CEosScriptObjectBase::CEosScriptObjectBase(QPointer<CScriptRunnerSignalEmiter> pEmitter,
+CEosScriptObjectBase::CEosScriptObjectBase(std::weak_ptr<CScriptCommunicator> pCommunicator,
                                            QPointer<CJsonInstructionSetParser> pParser) :
-  CScriptObjectBase(pEmitter),
+  CScriptObjectBase(pCommunicator),
   m_pParser(pParser)
 {}
 CEosScriptObjectBase::~CEosScriptObjectBase()

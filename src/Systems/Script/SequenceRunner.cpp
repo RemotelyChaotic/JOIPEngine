@@ -63,8 +63,10 @@ public slots:
   void ResumeExecution();
   void RunScript(const QString& sScript,
                  tspScene spScene, tspResource spResource) override;
-  void RegisterNewComponent(const QString sName, CScriptRunnerSignalEmiter* pObject) override;
+  void RegisterNewComponent(const QString& sName,
+                            std::weak_ptr<CScriptCommunicator> wpCommunicator) override;
   void ResetEngine() override;
+  void UnregisterComponent(const QString& sName) override;
   void TimerTimeout();
 
 private:
@@ -74,6 +76,7 @@ private:
   tspProject                                     m_spProject;
   SProjectData                                   m_projectSettings;
   QPointer<QTimer>                               m_pTimer;
+  std::vector<QString>                           m_vsObjectToDeleteMap;
   std::vector<STimedInstruction>                 m_vBuiltInstructions;
   std::chrono::time_point<std::chrono::high_resolution_clock> m_lastPoint;
   qint64                                         m_iEllapsedTime;
@@ -89,11 +92,11 @@ void CSequenceRunnerInstanceWorker::HandleError(const QString& sValue)
   auto spSignalEmitterContext = m_wpSignalEmiterContext.lock();
   if (nullptr == spSignalEmitterContext)
   {
-    qCritical() << "SignalEmitter is null";
+    qWarning() << "SignalEmitter is null";
     return;
   }
 
-  qCritical() << sValue;
+  qWarning() << sValue;
   emit spSignalEmitterContext->showError(sValue, QtMsgType::QtCriticalMsg);
   emit spSignalEmitterContext->executionError(sValue, -1, QString());
 }
@@ -213,16 +216,17 @@ void CSequenceRunnerInstanceWorker::RunScript(const QString& sScript,
 
 //----------------------------------------------------------------------------------------
 //
-void CSequenceRunnerInstanceWorker::RegisterNewComponent(const QString sName, CScriptRunnerSignalEmiter* pObject)
+void CSequenceRunnerInstanceWorker::RegisterNewComponent(const QString& sName,
+                                                         std::weak_ptr<CScriptCommunicator> wpCommunicator)
 {
   auto it = m_objectMap.find(sName);
   if (m_objectMap.end() == it)
   {
-    if (nullptr != pObject)
+    if (auto spComm = wpCommunicator.lock())
     {
-      pObject->Initialize(m_wpSignalEmiterContext.lock());
       std::shared_ptr<CScriptObjectBase> spObject =
-          pObject->CreateNewSequenceObject();
+          std::shared_ptr<CScriptObjectBase>(
+          spComm->CreateNewSequenceObject());
       if (nullptr != spObject)
       {
         connect(this, &CSequenceRunnerInstanceWorker::SignalInterruptExecution,
@@ -253,7 +257,29 @@ void CSequenceRunnerInstanceWorker::ResetEngine()
     it->second->SetCurrentProject(nullptr);
   }
 
+  for (const QString& sToDelete : m_vsObjectToDeleteMap)
+  {
+    auto it = m_objectMap.find(sToDelete);
+    if (m_objectMap.end() != it)
+    {
+      m_objectMap.erase(it);
+    }
+  }
+
+  m_vsObjectToDeleteMap.clear();
+
   m_vBuiltInstructions.clear();
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CSequenceRunnerInstanceWorker::UnregisterComponent(const QString& sName)
+{
+  auto it = std::find(m_vsObjectToDeleteMap.begin(), m_vsObjectToDeleteMap.end(), sName);
+  if (m_vsObjectToDeleteMap.end() == it)
+  {
+    m_vsObjectToDeleteMap.push_back(sName);
+  }
 }
 
 //----------------------------------------------------------------------------------------
@@ -349,8 +375,8 @@ CSequenceRunner::CSequenceRunner(std::weak_ptr<CScriptRunnerSignalContext> spSig
   QObject(pParent),
   IScriptRunnerFactory(),
   m_wpSignalEmitterContext(spSignalEmitterContext),
-  m_signalEmiterMutex(QMutex::Recursive),
-  m_pSignalEmiters(),
+  m_communicatorMutex(QMutex::Recursive),
+  m_wpCommunicators(),
   m_fnRunningScriptsCheck(fnRunningScriptsCheck),
   m_bInitialized(0)
 {
@@ -382,7 +408,7 @@ CSequenceRunner::LoadScript(const QString& sScript, tspScene spScene, tspResourc
   if (nullptr == spResource)
   {
     QString sError = tr("Resource file is null");
-    qCritical() << sError;
+    qWarning() << sError;
     emit SignalEmmitterContext()->showError(sError, QtMsgType::QtCriticalMsg);
     return nullptr;
   }
@@ -394,24 +420,45 @@ CSequenceRunner::LoadScript(const QString& sScript, tspScene spScene, tspResourc
 
 //----------------------------------------------------------------------------------------
 //
-void CSequenceRunner::RegisterNewComponent(const QString sName, QJSValue signalEmitter)
+void CSequenceRunner::RegisterNewComponent(const QString& sName,
+                                           std::weak_ptr<CScriptCommunicator> wpCommunicator)
 {
-  CScriptRunnerSignalEmiter* pObject = nullptr;
-  if (signalEmitter.isObject())
+  auto spComm = wpCommunicator.lock();
+  assert(nullptr != spComm && "Communicator is null in JS runner");
+  if (spComm == nullptr)
   {
-    pObject = qobject_cast<CScriptRunnerSignalEmiter*>(signalEmitter.toQObject());
+    qWarning() << tr("Communicator is null in JS runner");
+    return;
   }
+  QMutexLocker lockerEmiter(&m_communicatorMutex);
+  m_wpCommunicators.insert({sName, wpCommunicator});
+}
 
-  QMutexLocker lockerEmiter(&m_signalEmiterMutex);
-  m_pSignalEmiters.insert({sName, pObject});
+//----------------------------------------------------------------------------------------
+//
+void CSequenceRunner::UnregisterComponent(const QString& sName)
+{
+  QMutexLocker lockerEmiter(&m_communicatorMutex);
+  auto it = m_wpCommunicators.find(sName);
+  if (m_wpCommunicators.end() != it)
+  {
+    m_wpCommunicators.erase(it);
+  }
+  else
+  {
+    if (Q_UNLIKELY(!m_wpCommunicators.empty()))
+    {
+      qWarning() << tr("Communicator %1 not found in Sequence runner.").arg(sName);
+    }
+  }
 }
 
 //----------------------------------------------------------------------------------------
 //
 void CSequenceRunner::UnregisterComponents()
 {
-  QMutexLocker lockerEmiter(&m_signalEmiterMutex);
-  m_pSignalEmiters.clear();
+  QMutexLocker lockerEmiter(&m_communicatorMutex);
+  m_wpCommunicators.clear();
 }
 
 //----------------------------------------------------------------------------------------
@@ -423,7 +470,7 @@ CSequenceRunner::RunAsync(const QString& sId, const QString& sScript,
   if (nullptr == spResource)
   {
     QString sError = tr("Resource file is null");
-    qCritical() << sError;
+    qWarning() << sError;
     emit SignalEmmitterContext()->showError(sError, QtMsgType::QtCriticalMsg);
     return nullptr;
   }
@@ -482,8 +529,8 @@ std::shared_ptr<CScriptRunnerInstanceController> CSequenceRunner::CreateRunner(c
   connect(spController.get(), &CScriptRunnerInstanceController::SignalRunAsync,
           this, &CSequenceRunner::SignalRunAsync);
 
-  QMutexLocker lockerEmiter(&m_signalEmiterMutex);
-  for (auto& itEmiter : m_pSignalEmiters)
+  QMutexLocker lockerEmiter(&m_communicatorMutex);
+  for (auto& itEmiter : m_wpCommunicators)
   {
     spController->RegisterNewComponent(itEmiter.first, itEmiter.second);
   }

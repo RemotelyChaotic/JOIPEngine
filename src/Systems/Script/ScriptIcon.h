@@ -18,15 +18,28 @@ public:
   CIconSignalEmitter();
   ~CIconSignalEmitter();
 
-  std::shared_ptr<CScriptObjectBase> CreateNewScriptObject(QPointer<QJSEngine> pEngine) override;
-  std::shared_ptr<CScriptObjectBase> CreateNewScriptObject(QtLua::State* pState) override;
-  std::shared_ptr<CScriptObjectBase> CreateNewSequenceObject() override;
-
 signals:
   void hideIcon(QString sResource);
   void showIcon(QString sResource);
+
+protected:
+  std::shared_ptr<CScriptCommunicator>
+  CreateCommunicatorImpl(std::shared_ptr<CScriptRunnerSignalEmiterAccessor> spAccessor) override;
 };
-Q_DECLARE_METATYPE(CIconSignalEmitter)
+
+//----------------------------------------------------------------------------------------
+//
+class CIconScriptCommunicator : public CScriptCommunicator
+{
+  public:
+  CIconScriptCommunicator(const std::weak_ptr<CScriptRunnerSignalEmiterAccessor>& spEmitter);
+  ~CIconScriptCommunicator() override;
+
+  CScriptObjectBase* CreateNewScriptObject(QPointer<QJSEngine> pEngine) override;
+  CScriptObjectBase* CreateNewScriptObject(QPointer<CJsonInstructionSetParser> pParser) override;
+  CScriptObjectBase* CreateNewScriptObject(QtLua::State* pState) override;
+  CScriptObjectBase* CreateNewSequenceObject() override;
+};
 
 //----------------------------------------------------------------------------------------
 //
@@ -36,9 +49,9 @@ class CScriptIcon : public CJsScriptObjectBase
   Q_DISABLE_COPY(CScriptIcon)
 
 public:
-  CScriptIcon(QPointer<CScriptRunnerSignalEmiter> pEmitter,
+  CScriptIcon(std::weak_ptr<CScriptCommunicator> pCommunicator,
               QPointer<QJSEngine> pEngine);
-  CScriptIcon(QPointer<CScriptRunnerSignalEmiter> pEmitter,
+  CScriptIcon(std::weak_ptr<CScriptCommunicator> pCommunicator,
               QtLua::State* pState);
   ~CScriptIcon();
 

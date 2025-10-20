@@ -18,33 +18,53 @@ CIconSignalEmitter::~CIconSignalEmitter()
 
 //----------------------------------------------------------------------------------------
 //
-std::shared_ptr<CScriptObjectBase> CIconSignalEmitter::CreateNewScriptObject(QPointer<QJSEngine> pEngine)
+std::shared_ptr<CScriptCommunicator>
+CIconSignalEmitter::CreateCommunicatorImpl(std::shared_ptr<CScriptRunnerSignalEmiterAccessor> spAccessor)
 {
-  return std::make_shared<CScriptIcon>(this, pEngine);
+  return std::make_shared<CIconScriptCommunicator>(spAccessor);
 }
-std::shared_ptr<CScriptObjectBase> CIconSignalEmitter::CreateNewScriptObject(QtLua::State* pState)
+
+//----------------------------------------------------------------------------------------
+//
+CIconScriptCommunicator::CIconScriptCommunicator(
+  const std::weak_ptr<CScriptRunnerSignalEmiterAccessor>& spEmitter) :
+  CScriptCommunicator(spEmitter)
+{}
+CIconScriptCommunicator::~CIconScriptCommunicator() = default;
+
+//----------------------------------------------------------------------------------------
+//
+CScriptObjectBase* CIconScriptCommunicator::CreateNewScriptObject(QPointer<QJSEngine> pEngine)
 {
-  return std::make_shared<CScriptIcon>(this, pState);
+  return new CScriptIcon(weak_from_this(), pEngine);
 }
-std::shared_ptr<CScriptObjectBase> CIconSignalEmitter::CreateNewSequenceObject()
+CScriptObjectBase* CIconScriptCommunicator::CreateNewScriptObject(QPointer<CJsonInstructionSetParser> pParser)
+{
+  Q_UNUSED(pParser)
+  return nullptr;
+}
+CScriptObjectBase* CIconScriptCommunicator::CreateNewScriptObject(QtLua::State* pState)
+{
+  return new CScriptIcon(weak_from_this(), pState);
+}
+CScriptObjectBase* CIconScriptCommunicator::CreateNewSequenceObject()
 {
   return nullptr;
 }
 
 //----------------------------------------------------------------------------------------
 //
-CScriptIcon::CScriptIcon(QPointer<CScriptRunnerSignalEmiter> pEmitter,
+CScriptIcon::CScriptIcon(std::weak_ptr<CScriptCommunicator> pCommunicator,
                          QPointer<QJSEngine> pEngine) :
-  CJsScriptObjectBase(pEmitter, pEngine),
+  CJsScriptObjectBase(pCommunicator, pEngine),
   m_wpDbManager(CApplication::Instance()->System<CDatabaseManager>())
 {
 }
-CScriptIcon::CScriptIcon(QPointer<CScriptRunnerSignalEmiter> pEmitter,
+CScriptIcon::CScriptIcon(std::weak_ptr<CScriptCommunicator> pCommunicator,
                          QtLua::State* pState) :
-  CJsScriptObjectBase(pEmitter, pState),
+  CJsScriptObjectBase(pCommunicator, pState),
   m_wpDbManager(CApplication::Instance()->System<CDatabaseManager>())
 {
-
 }
 
 CScriptIcon::~CScriptIcon()
@@ -65,39 +85,41 @@ void CScriptIcon::hide(QVariant resource)
 {
   if (!CheckIfScriptCanRun()) { return; }
 
-  auto spSignalEmitter = SignalEmitter<CIconSignalEmitter>();
-  if (nullptr != spSignalEmitter)
+  if (auto spComm = m_wpCommunicator.lock())
   {
-    QString sError;
-    std::optional<QString> optRes =
-        script::ParseResourceFromScriptVariant(resource, m_wpDbManager.lock(),
-                                               m_spProject,
-                                               "hide", &sError);
-    if (optRes.has_value())
+    if (auto spSignalEmitter = spComm->LockedEmitter<CIconSignalEmitter>())
     {
-      QString resRet = optRes.value();
-      if (!resRet.isEmpty() && resRet != "~all")
+      QString sError;
+      std::optional<QString> optRes =
+          script::ParseResourceFromScriptVariant(resource, m_wpDbManager.lock(),
+                                                 m_spProject,
+                                                 "hide", &sError);
+      if (optRes.has_value())
       {
-        emit spSignalEmitter->hideIcon(resRet);
+        QString resRet = optRes.value();
+        if (!resRet.isEmpty() && resRet != "~all")
+        {
+          emit spSignalEmitter->hideIcon(resRet);
+        }
+        else
+        {
+          emit spSignalEmitter->hideIcon(QString());
+        }
       }
       else
       {
-        emit spSignalEmitter->hideIcon(QString());
-      }
-    }
-    else
-    {
-      if (resource.type() == QVariant::String ||
-          resource.type() == QVariant::ByteArray)
-      {
-        QString resRet = resource.toString();
-        if ("~all" == resRet)
+        if (resource.type() == QVariant::String ||
+            resource.type() == QVariant::ByteArray)
         {
-          emit spSignalEmitter->hideIcon(QString());
-          return;
+          QString resRet = resource.toString();
+          if ("~all" == resRet)
+          {
+            emit spSignalEmitter->hideIcon(QString());
+            return;
+          }
         }
+        emit spSignalEmitter->showError(sError, QtMsgType::QtWarningMsg);
       }
-      emit m_pSignalEmitter->showError(sError, QtMsgType::QtWarningMsg);
     }
   }
 }
@@ -108,23 +130,25 @@ void CScriptIcon::show(QVariant resource)
 {
   if (!CheckIfScriptCanRun()) { return; }
 
-  auto spSignalEmitter = SignalEmitter<CIconSignalEmitter>();
-  auto spDbManager = m_wpDbManager.lock();
-  if (nullptr != spSignalEmitter)
+  if (auto spComm = m_wpCommunicator.lock())
   {
-    QString sError;
-    std::optional<QString> optRes =
-        script::ParseResourceFromScriptVariant(resource, m_wpDbManager.lock(),
-                                               m_spProject,
-                                               "show", &sError);
-    if (optRes.has_value())
+    if (auto spSignalEmitter = spComm->LockedEmitter<CIconSignalEmitter>())
     {
-      QString resRet = optRes.value();
-      emit spSignalEmitter->showIcon(resRet);
-    }
-    else
-    {
-      emit m_pSignalEmitter->showError(sError, QtMsgType::QtWarningMsg);
+      auto spDbManager = m_wpDbManager.lock();
+      QString sError;
+      std::optional<QString> optRes =
+          script::ParseResourceFromScriptVariant(resource, m_wpDbManager.lock(),
+                                                 m_spProject,
+                                                 "show", &sError);
+      if (optRes.has_value())
+      {
+        QString resRet = optRes.value();
+        emit spSignalEmitter->showIcon(resRet);
+      }
+      else
+      {
+        emit spSignalEmitter->showError(sError, QtMsgType::QtWarningMsg);
+      }
     }
   }
 }

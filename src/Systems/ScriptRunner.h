@@ -12,6 +12,7 @@
 #include <memory>
 
 class CScriptRunnerSignalContext;
+class CScriptRunnerSignalEmiter;
 class CSettings;
 class IScriptRunnerInstanceController;
 
@@ -32,10 +33,9 @@ public:
 
   bool HasRunningScripts() const;
   std::shared_ptr<IScriptRunnerInstanceController> RunnerController(const QString& sId) const;
-  std::shared_ptr<CScriptRunnerSignalContext> SignalEmmitterContext()const ;
+  std::shared_ptr<CScriptRunnerSignalContext> SignalEmmitterContext() const;
 
 signals:
-  void SignalRunningChanged(bool bRunning);
   void SignalSceneLoaded(const QString& sScene);
   void SignalScriptRunFinished(bool bOk, const QString& sRetVal);
 
@@ -44,7 +44,8 @@ public slots:
   void Deinitialize() override;
 
   void LoadScript(tspScene spScene, tspResource spResource);
-  void RegisterNewComponent(const QString sName, QJSValue signalEmitter);
+  void RegisterNewComponent(const QString sName, CScriptRunnerSignalEmiter* pObject);
+  void UnregisterComponent(const QString sName);
   void UnregisterComponents();
 
 protected slots:
@@ -86,12 +87,14 @@ public:
   Q_INVOKABLE void pauseExecution();
   Q_INVOKABLE void registerNewComponent(const QString sName, QJSValue signalEmitter);
   Q_INVOKABLE void resumeExecution();
+  Q_INVOKABLE void unregisterComponent(const QString sName);
 
 signals:
   void runningChanged(bool bRunning);
 
 private:
-  std::weak_ptr<CScriptRunner>                    m_wpRunner;
+  std::weak_ptr<CScriptRunner>                           m_wpRunner;
+  std::map<QString, QPointer<CScriptRunnerSignalEmiter>> m_vpEmitters;
 };
 
 #endif // SCRIPTRUNNER_H

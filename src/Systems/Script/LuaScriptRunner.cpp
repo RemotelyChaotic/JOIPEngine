@@ -362,16 +362,17 @@ public slots:
 
   //--------------------------------------------------------------------------------------
   //
-  void RegisterNewComponent(const QString sName, CScriptRunnerSignalEmiter* pObject) override
+  void RegisterNewComponent(const QString& sName,
+                            std::weak_ptr<CScriptCommunicator> wpCommunicator) override
   {
     auto it = m_objectMap.find(sName);
     if (m_objectMap.end() == it)
     {
-      if (nullptr != pObject)
+      if (auto spComm = wpCommunicator.lock())
       {
-        pObject->Initialize(m_wpSignalEmiterContext.lock());
         std::shared_ptr<CScriptObjectBase> spObject =
-            pObject->CreateNewScriptObject(m_pLuaState);
+            std::shared_ptr<CScriptObjectBase>(
+            spComm->CreateNewScriptObject(m_pLuaState));
         if (nullptr != spObject)
         {
           connect(this, &CLuaScriptRunnerInstanceWorker::SignalInterruptExecution,
@@ -379,6 +380,8 @@ public slots:
 
           if (spObject->thread() != thread())
           {
+            assert(false && "Thread of Object not correct.");
+            qWarning() << tr("Thread of Object %1 not correct.").arg(sName);
             spObject->moveToThread(thread());
           }
           m_objectMap.insert({ sName, spObject });
@@ -425,6 +428,17 @@ public slots:
       it->second->SetCurrentProject(nullptr);
     }
 
+    for (const QString& sToDelete : m_vsObjectToDeleteMap)
+    {
+      auto it = m_objectMap.find(sToDelete);
+      if (m_objectMap.end() != it)
+      {
+        m_objectMap.erase(it);
+      }
+    }
+
+    m_vsObjectToDeleteMap.clear();
+
     m_pLuaState->gc_collect();
 
     if (nullptr != m_pCurrentScene)
@@ -434,6 +448,17 @@ public slots:
     if (nullptr != m_pCurrentProject)
     {
       delete m_pCurrentProject;
+    }
+  }
+
+  //--------------------------------------------------------------------------------------
+  //
+  void UnregisterComponent(const QString& sName) override
+  {
+    auto it = std::find(m_vsObjectToDeleteMap.begin(), m_vsObjectToDeleteMap.end(), sName);
+    if (m_vsObjectToDeleteMap.end() == it)
+    {
+      m_vsObjectToDeleteMap.push_back(sName);
     }
   }
 
@@ -580,6 +605,7 @@ private:
   QPointer<CProjectScriptWrapper>                m_pCurrentProject;
   std::map<QString /*name*/,
            std::shared_ptr<CScriptObjectBase>>   m_objectMap;
+  std::vector<QString>                           m_vsObjectToDeleteMap;
   std::set<QString>                              m_vGlobalValues;
   QString                                        m_sName;
   QAtomicInt                                     m_bInterrupted;
@@ -751,8 +777,8 @@ CLuaScriptRunner::CLuaScriptRunner(std::weak_ptr<CScriptRunnerSignalContext> spS
   QObject(pParent),
   IScriptRunnerFactory(),
   m_wpSignalEmitterContext(spSignalEmitterContext),
-  m_signalEmiterMutex(QMutex::Recursive),
-  m_pSignalEmiters(),
+  m_communicatorMutex(QMutex::Recursive),
+  m_wpCommunicators(),
   m_fnRunningScriptsCheck(fnRunningScriptsCheck)
 {
 }
@@ -785,24 +811,46 @@ CLuaScriptRunner::LoadScript(const QString& sScript,
 
 //----------------------------------------------------------------------------------------
 //
-void CLuaScriptRunner::RegisterNewComponent(const QString sName, QJSValue signalEmitter)
+void CLuaScriptRunner::RegisterNewComponent(const QString& sName,
+                                            std::weak_ptr<CScriptCommunicator> wpCommunicator)
 {
-  CScriptRunnerSignalEmiter* pObject = nullptr;
-  if (signalEmitter.isObject())
+  auto spComm = wpCommunicator.lock();
+  assert(nullptr != spComm && "Communicator is null in JS runner");
+  if (spComm == nullptr)
   {
-    pObject = qobject_cast<CScriptRunnerSignalEmiter*>(signalEmitter.toQObject());
+    qWarning() << tr("Communicator is null in JS runner");
+    return;
   }
 
-  QMutexLocker lockerEmiter(&m_signalEmiterMutex);
-  m_pSignalEmiters.insert({sName, pObject});
+  QMutexLocker lockerEmiter(&m_communicatorMutex);
+  m_wpCommunicators.insert({sName, wpCommunicator});
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CLuaScriptRunner::UnregisterComponent(const QString& sName)
+{
+  QMutexLocker lockerEmiter(&m_communicatorMutex);
+  auto it = m_wpCommunicators.find(sName);
+  if (m_wpCommunicators.end() != it)
+  {
+    m_wpCommunicators.erase(it);
+  }
+  else
+  {
+    if (Q_UNLIKELY(!m_wpCommunicators.empty()))
+    {
+      qWarning() << tr("Communicator %1 not found in Lua runner.").arg(sName);
+    }
+  }
 }
 
 //----------------------------------------------------------------------------------------
 //
 void CLuaScriptRunner::UnregisterComponents()
 {
-  QMutexLocker lockerEmiter(&m_signalEmiterMutex);
-  m_pSignalEmiters.clear();
+  QMutexLocker lockerEmiter(&m_communicatorMutex);
+  m_wpCommunicators.clear();
 }
 
 //----------------------------------------------------------------------------------------
@@ -842,7 +890,7 @@ void CLuaScriptRunner::SlotHandleScriptFinish(const QString& sName, bool bSucces
 
   if (!bSuccess)
   {
-    qWarning() << tr("Error in script, unloading project.");
+    qWarning() << tr("Error in script or debugger closed, unloading project.");
   }
 
   if (c_sMainRunner == sName || QVariant::String == sRetVal.type() || !m_fnRunningScriptsCheck())
@@ -881,10 +929,10 @@ std::shared_ptr<CScriptRunnerInstanceController> CLuaScriptRunner::CreateRunner(
   connect(spRunner.get(), &CScriptRunnerInstanceController::SignalRunAsync,
           this, &CLuaScriptRunner::SignalRunAsync);
 
-  QMutexLocker lockerEmiter(&m_signalEmiterMutex);
-  for (auto& itEmiter : m_pSignalEmiters)
+  QMutexLocker lockerEmiter(&m_communicatorMutex);
+  for (auto& itComm : m_wpCommunicators)
   {
-    spRunner->RegisterNewComponent(itEmiter.first, itEmiter.second);
+    spRunner->RegisterNewComponent(itComm.first, itComm.second);
   }
   return spRunner;
 }

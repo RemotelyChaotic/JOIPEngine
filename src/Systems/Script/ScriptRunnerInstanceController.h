@@ -33,8 +33,10 @@ public slots:
   virtual void InterruptExecution() = 0;
   virtual void RunScript(const QString& sScript,
                          tspScene spScene, tspResource spResource) = 0;
-  virtual void RegisterNewComponent(const QString sName, CScriptRunnerSignalEmiter* pObject) = 0;
+  virtual void RegisterNewComponent(const QString& sName,
+                                    std::weak_ptr<CScriptCommunicator> wpCommunicator) = 0;
   virtual void ResetEngine() = 0;
+  virtual void UnregisterComponent(const QString& sName) = 0;
   virtual void UnregisterComponents();
 
 signals:
@@ -64,8 +66,10 @@ public:
 
   virtual void InterruptExecution() = 0;
   virtual bool IsRunning() const = 0;
-  virtual void RegisterNewComponent(const QString sName, CScriptRunnerSignalEmiter* pObject) = 0;
+  virtual void RegisterNewComponent(const QString& sName,
+                                    std::weak_ptr<CScriptCommunicator> wpCommunicator) = 0;
   virtual void ResetEngine() = 0;
+  virtual void UnregisterComponent(const QString& sName) = 0;
   virtual void UnregisterComponents() = 0;
 
   // putting the signals here leads to compile errors because of MOC for no
@@ -92,9 +96,11 @@ public:
 
   void InterruptExecution() override;
   bool IsRunning() const override;
-  void RegisterNewComponent(const QString sName, CScriptRunnerSignalEmiter* pObject) override;
+  void RegisterNewComponent(const QString& sName,
+                            std::weak_ptr<CScriptCommunicator> wpCommunicator) override;
   void RunScript(const QString& sScript, tspScene spScene, tspResource spResource);
   void ResetEngine() override;
+  void UnregisterComponent(const QString& sName) override;
   void UnregisterComponents() override;
 
 signals:

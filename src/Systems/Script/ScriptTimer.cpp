@@ -22,42 +22,74 @@ CTimerSignalEmitter::~CTimerSignalEmitter()
 
 }
 
+//----------------------------------------------------------------------------------------
+//
+std::shared_ptr<CScriptCommunicator>
+CTimerSignalEmitter::CreateCommunicatorImpl(std::shared_ptr<CScriptRunnerSignalEmiterAccessor> spAccessor)
+{
+  return std::make_shared<CTimerScriptCommunicator>(spAccessor);
+}
 
 //----------------------------------------------------------------------------------------
 //
-std::shared_ptr<CScriptObjectBase> CTimerSignalEmitter::CreateNewScriptObject(QPointer<QJSEngine> pEngine)
+CTimerScriptCommunicator::CTimerScriptCommunicator(
+  const std::weak_ptr<CScriptRunnerSignalEmiterAccessor>& spEmitter) :
+  CScriptCommunicator(spEmitter)
+{}
+CTimerScriptCommunicator::~CTimerScriptCommunicator() = default;
+
+//----------------------------------------------------------------------------------------
+//
+CScriptObjectBase* CTimerScriptCommunicator::CreateNewScriptObject(QPointer<QJSEngine> pEngine)
 {
-  return std::make_shared<CScriptTimer>(this, pEngine);
+  return new CScriptTimer(weak_from_this(), pEngine);
 }
-std::shared_ptr<CScriptObjectBase> CTimerSignalEmitter::CreateNewScriptObject(QPointer<CJsonInstructionSetParser> pParser)
+CScriptObjectBase* CTimerScriptCommunicator::CreateNewScriptObject(QPointer<CJsonInstructionSetParser> pParser)
 {
-  return std::make_shared<CEosScriptTimer>(this, pParser);
+  return new CEosScriptTimer(weak_from_this(), pParser);
 }
-std::shared_ptr<CScriptObjectBase> CTimerSignalEmitter::CreateNewScriptObject(QtLua::State* pState)
+CScriptObjectBase* CTimerScriptCommunicator::CreateNewScriptObject(QtLua::State* pState)
 {
-  return std::make_shared<CScriptTimer>(this, pState);
+  return new CScriptTimer(weak_from_this(), pState);
 }
-std::shared_ptr<CScriptObjectBase> CTimerSignalEmitter::CreateNewSequenceObject()
+CScriptObjectBase* CTimerScriptCommunicator::CreateNewSequenceObject()
 {
   return nullptr;
 }
 
 //----------------------------------------------------------------------------------------
 //
-CScriptTimer::CScriptTimer(QPointer<CScriptRunnerSignalEmiter> pEmitter,
+CScriptTimer::CScriptTimer(std::weak_ptr<CScriptCommunicator> pCommunicator,
                            QPointer<QJSEngine> pEngine) :
-  CJsScriptObjectBase(pEmitter, pEngine)
+  CJsScriptObjectBase(pCommunicator, pEngine)
 {
+  m_spStop = std::make_shared<std::function<void()>>([this]() {
+    emit SignalQuitLoop();
+  });
+  if (auto spComm = pCommunicator.lock())
+  {
+    spComm->RegisterStopCallback(m_spStop);
+  }
 }
-CScriptTimer::CScriptTimer(QPointer<CScriptRunnerSignalEmiter> pEmitter,
+CScriptTimer::CScriptTimer(std::weak_ptr<CScriptCommunicator> pCommunicator,
                            QtLua::State* pState) :
-  CJsScriptObjectBase(pEmitter, pState)
+  CJsScriptObjectBase(pCommunicator, pState)
 {
+  m_spStop = std::make_shared<std::function<void()>>([this]() {
+    emit SignalQuitLoop();
+  });
+  if (auto spComm = pCommunicator.lock())
+  {
+    spComm->RegisterStopCallback(m_spStop);
+  }
 }
 
 CScriptTimer::~CScriptTimer()
 {
-
+  if (auto spComm = m_wpCommunicator.lock())
+  {
+    spComm->RemoveStopCallback(m_spStop);
+  }
 }
 
 //----------------------------------------------------------------------------------------
@@ -65,7 +97,14 @@ CScriptTimer::~CScriptTimer()
 void CScriptTimer::hide()
 {
   if (!CheckIfScriptCanRun()) { return; }
-  emit SignalEmitter<CTimerSignalEmitter>()->hideTimer();
+
+  if (auto spComm = m_wpCommunicator.lock())
+  {
+    if (auto spSignalEmitter = spComm->LockedEmitter<CTimerSignalEmitter>())
+    {
+      emit spSignalEmitter->hideTimer();
+    }
+  }
 }
 
 //----------------------------------------------------------------------------------------
@@ -73,7 +112,14 @@ void CScriptTimer::hide()
 void CScriptTimer::setTime(double dTimeS)
 {
   if (!CheckIfScriptCanRun()) { return; }
-  emit SignalEmitter<CTimerSignalEmitter>()->setTime(dTimeS);
+
+  if (auto spComm = m_wpCommunicator.lock())
+  {
+    if (auto spSignalEmitter = spComm->LockedEmitter<CTimerSignalEmitter>())
+    {
+      emit spSignalEmitter->setTime(dTimeS);
+    }
+  }
 }
 
 //----------------------------------------------------------------------------------------
@@ -81,7 +127,14 @@ void CScriptTimer::setTime(double dTimeS)
 void CScriptTimer::setTimeVisible(bool bVisible)
 {
   if (!CheckIfScriptCanRun()) { return; }
-  emit SignalEmitter<CTimerSignalEmitter>()->setTimeVisible(bVisible);
+
+  if (auto spComm = m_wpCommunicator.lock())
+  {
+    if (auto spSignalEmitter = spComm->LockedEmitter<CTimerSignalEmitter>())
+    {
+      emit spSignalEmitter->setTimeVisible(bVisible);
+    }
+  }
 }
 
 //----------------------------------------------------------------------------------------
@@ -89,7 +142,14 @@ void CScriptTimer::setTimeVisible(bool bVisible)
 void CScriptTimer::show()
 {
   if (!CheckIfScriptCanRun()) { return; }
-  emit SignalEmitter<CTimerSignalEmitter>()->showTimer();
+
+  if (auto spComm = m_wpCommunicator.lock())
+  {
+    if (auto spSignalEmitter = spComm->LockedEmitter<CTimerSignalEmitter>())
+    {
+      emit spSignalEmitter->showTimer();
+    }
+  }
 }
 
 //----------------------------------------------------------------------------------------
@@ -97,7 +157,14 @@ void CScriptTimer::show()
 void CScriptTimer::start()
 {
   if (!CheckIfScriptCanRun()) { return; }
-  emit SignalEmitter<CTimerSignalEmitter>()->startTimer();
+
+  if (auto spComm = m_wpCommunicator.lock())
+  {
+    if (auto spSignalEmitter = spComm->LockedEmitter<CTimerSignalEmitter>())
+    {
+      spSignalEmitter->startTimer();
+    }
+  }
 }
 
 //----------------------------------------------------------------------------------------
@@ -105,7 +172,14 @@ void CScriptTimer::start()
 void CScriptTimer::stop()
 {
   if (!CheckIfScriptCanRun()) { return; }
-  emit SignalEmitter<CTimerSignalEmitter>()->stopTimer();
+
+  if (auto spComm = m_wpCommunicator.lock())
+  {
+    if (auto spSignalEmitter = spComm->LockedEmitter<CTimerSignalEmitter>())
+    {
+      emit spSignalEmitter->stopTimer();
+    }
+  }
 }
 
 //----------------------------------------------------------------------------------------
@@ -114,23 +188,43 @@ void CScriptTimer::waitForTimer()
 {
   if (!CheckIfScriptCanRun()) { return; }
 
-  auto pSignalEmitter = SignalEmitter<CTimerSignalEmitter>();
-  QEventLoop loop;
-  QMetaObject::Connection timeoutLoop =
-    connect(pSignalEmitter, &CTimerSignalEmitter::timerFinished,
-            &loop, &QEventLoop::quit, Qt::QueuedConnection);
-  QMetaObject::Connection quitLoop =
-    connect(pSignalEmitter, &CTimerSignalEmitter::interrupt,
-            &loop, &QEventLoop::quit, Qt::QueuedConnection);
-  QMetaObject::Connection interruptThisLoop =
-    connect(this, &CScriptObjectBase::SignalInterruptExecution,
-            &loop, &QEventLoop::quit, Qt::QueuedConnection);
-  emit pSignalEmitter->waitForTimer();
-  loop.exec();
-  loop.disconnect();
-  disconnect(timeoutLoop);
-  disconnect(interruptThisLoop);
-  disconnect(quitLoop);
+  if (auto spComm = m_wpCommunicator.lock())
+  {
+    if (auto spSignalEmitter = spComm->LockedEmitter<CTimerSignalEmitter>())
+    {
+      QTimer::singleShot(0, this, [this]() {
+        if (auto spComm = m_wpCommunicator.lock())
+        {
+          if (auto spSignalEmitter = spComm->LockedEmitter<CTimerSignalEmitter>())
+          {
+            emit spSignalEmitter->waitForTimer();
+          }
+        }
+      });
+
+      QPointer<CScriptTimer> pThis(this);
+      QEventLoop loop;
+      QMetaObject::Connection timeoutLoop =
+        connect(spSignalEmitter.Get(), &CTimerSignalEmitter::timerFinished,
+                &loop, &QEventLoop::quit, Qt::QueuedConnection);
+      QMetaObject::Connection quitLoop =
+        connect(this, &CScriptTimer::SignalQuitLoop,
+                &loop, &QEventLoop::quit, Qt::QueuedConnection);
+      QMetaObject::Connection interruptThisLoop =
+        connect(this, &CScriptObjectBase::SignalInterruptExecution,
+                &loop, &QEventLoop::quit, Qt::QueuedConnection);
+
+      loop.exec();
+      loop.disconnect();
+
+      if (nullptr != pThis)
+      {
+        disconnect(timeoutLoop);
+        disconnect(quitLoop);
+        disconnect(interruptThisLoop);
+      }
+    }
+  }
 }
 
 //----------------------------------------------------------------------------------------
@@ -255,15 +349,37 @@ private:
 
 //----------------------------------------------------------------------------------------
 //
-CEosScriptTimer::CEosScriptTimer(QPointer<CScriptRunnerSignalEmiter> pEmitter,
+CEosScriptTimer::CEosScriptTimer(std::weak_ptr<CScriptCommunicator> pCommunicator,
                                  QPointer<CJsonInstructionSetParser> pParser) :
-  CEosScriptObjectBase(pEmitter, pParser),
+  CEosScriptObjectBase(pCommunicator, pParser),
   m_spCommandTimer(std::make_shared<CCommandEosTimer>(this))
 {
+  m_spStop = std::make_shared<std::function<void()>>([this]() {
+    emit SignalQuitLoop();
+  });
+  m_spPause = std::make_shared<std::function<void()>>([this]() {
+    emit SignalPauseTimer();
+  });
+  m_spResume = std::make_shared<std::function<void()>>([this]() {
+    emit SignalResumeTimer();
+  });
+  if (auto spComm = pCommunicator.lock())
+  {
+    spComm->RegisterStopCallback(m_spStop);
+    spComm->RegisterPauseCallback(m_spPause);
+    spComm->RegisterResumeCallback(m_spResume);
+  }
+
   pParser->RegisterInstruction(eos::c_sCommandTimer, m_spCommandTimer);
 }
 CEosScriptTimer::~CEosScriptTimer()
 {
+  if (auto spComm = m_wpCommunicator.lock())
+  {
+    spComm->RemoveResumeCallback(m_spResume);
+    spComm->RemovePauseCallback(m_spPause);
+    spComm->RemoveStopCallback(m_spStop);
+  }
 }
 
 //----------------------------------------------------------------------------------------
@@ -271,7 +387,14 @@ CEosScriptTimer::~CEosScriptTimer()
 void CEosScriptTimer::hide()
 {
   if (!CheckIfScriptCanRun()) { return; }
-  emit SignalEmitter<CTimerSignalEmitter>()->hideTimer();
+
+  if (auto spComm = m_wpCommunicator.lock())
+  {
+    if (auto spSignalEmitter = spComm->LockedEmitter<CTimerSignalEmitter>())
+    {
+      emit spSignalEmitter->hideTimer();
+    }
+  }
 }
 
 //----------------------------------------------------------------------------------------
@@ -279,7 +402,14 @@ void CEosScriptTimer::hide()
 void CEosScriptTimer::setTime(double dTimeS)
 {
   if (!CheckIfScriptCanRun()) { return; }
-  emit SignalEmitter<CTimerSignalEmitter>()->setTime(dTimeS);
+
+  if (auto spComm = m_wpCommunicator.lock())
+  {
+    if (auto spSignalEmitter = spComm->LockedEmitter<CTimerSignalEmitter>())
+    {
+      emit spSignalEmitter->setTime(dTimeS);
+    }
+  }
 }
 
 //----------------------------------------------------------------------------------------
@@ -287,7 +417,14 @@ void CEosScriptTimer::setTime(double dTimeS)
 void CEosScriptTimer::setTimeVisible(bool bVisible)
 {
   if (!CheckIfScriptCanRun()) { return; }
-  emit SignalEmitter<CTimerSignalEmitter>()->setTimeVisible(bVisible);
+
+  if (auto spComm = m_wpCommunicator.lock())
+  {
+    if (auto spSignalEmitter = spComm->LockedEmitter<CTimerSignalEmitter>())
+    {
+      emit spSignalEmitter->setTimeVisible(bVisible);
+    }
+  }
 }
 
 //----------------------------------------------------------------------------------------
@@ -296,57 +433,67 @@ void CEosScriptTimer::sleep(qint64 iTimeMs)
 {
   if (!CheckIfScriptCanRun()) { return; }
 
-  auto pSignalEmitter = SignalEmitter<CTimerSignalEmitter>();
-
-  if (0 < iTimeMs)
+  if (auto spComm = m_wpCommunicator.lock())
   {
-    QDateTime lastTime = QDateTime::currentDateTime();
-    qint64 iTimeLeft = iTimeMs;
+    if (auto spSignalEmitter = spComm->LockedEmitter<CTimerSignalEmitter>())
+    {
+      if (0 < iTimeMs)
+      {
+        QDateTime lastTime = QDateTime::currentDateTime();
+        qint64 iTimeLeft = iTimeMs;
 
-    QTimer timer;
-    timer.setSingleShot(false);
-    timer.setInterval(20);
-    QEventLoop loop;
-    QMetaObject::Connection interruptLoop =
-      connect(pSignalEmitter, &CTimerSignalEmitter::interrupt,
-              &loop, &QEventLoop::quit, Qt::QueuedConnection);
-    QMetaObject::Connection interruptThisLoop =
-      connect(this, &CScriptObjectBase::SignalInterruptExecution,
-              &loop, &QEventLoop::quit, Qt::QueuedConnection);
+        QPointer<CEosScriptTimer> pThis(this);
+        QTimer timer;
+        timer.setSingleShot(false);
+        timer.setInterval(20);
+        QEventLoop loop;
 
-    // connect lambdas in loop context, so events are processed, but capture timer,
-    // to start / stop
-    QMetaObject::Connection pauseLoop =
-      connect(pSignalEmitter, &CTimerSignalEmitter::pauseExecution, &loop, [&timer]() {
-        timer.stop();
-      }, Qt::QueuedConnection);
-    QMetaObject::Connection resumeLoop =
-      connect(pSignalEmitter, &CTimerSignalEmitter::resumeExecution, &loop, [&timer]() {
+        QMetaObject::Connection quitLoop =
+          connect(this, &CEosScriptTimer::SignalQuitLoop,
+                  &loop, &QEventLoop::quit, Qt::QueuedConnection);
+        QMetaObject::Connection interruptThisLoop =
+          connect(this, &CScriptObjectBase::SignalInterruptExecution,
+                  &loop, &QEventLoop::quit, Qt::QueuedConnection);
+
+        // connect lambdas in loop context, so events are processed, but capture timer,
+        // to start / stop
+        QMetaObject::Connection pauseLoop =
+          connect(this, &CEosScriptTimer::SignalPauseTimer, &timer, &QTimer::stop,
+                  Qt::QueuedConnection);
+        QMetaObject::Connection resumeLoop =
+          connect(this, &CEosScriptTimer::SignalResumeTimer, &timer, [&timer, &lastTime]() {
+            lastTime = QDateTime::currentDateTime();
+            timer.start();
+          }, Qt::QueuedConnection);
+
+        QMetaObject::Connection timeoutLoop =
+          connect(&timer, &QTimer::timeout, &loop, [&loop, &iTimeLeft, &lastTime]() {
+            QDateTime newTime = QDateTime::currentDateTime();
+            iTimeLeft -= newTime.toMSecsSinceEpoch() - lastTime.toMSecsSinceEpoch();
+            lastTime = newTime;
+            if (0 >= iTimeLeft)
+            {
+              emit loop.exit();
+            }
+          });
+
         timer.start();
-      }, Qt::QueuedConnection);
+        loop.exec();
+        timer.stop();
+        timer.disconnect();
+        loop.disconnect();
 
-    QMetaObject::Connection timeoutLoop =
-      connect(&timer, &QTimer::timeout, &loop, [&loop, &iTimeLeft, &lastTime]() {
-        QDateTime newTime = QDateTime::currentDateTime();
-        iTimeLeft -= newTime.toMSecsSinceEpoch() - lastTime.toMSecsSinceEpoch();
-        lastTime = newTime;
-        if (0 >= iTimeLeft)
+        if (nullptr != pThis)
         {
-          emit loop.exit();
+          disconnect(quitLoop);
+          disconnect(interruptThisLoop);
+
+          disconnect(pauseLoop);
+          disconnect(resumeLoop);
+          disconnect(timeoutLoop);
         }
-      });
-
-    timer.start();
-    loop.exec();
-    timer.stop();
-    timer.disconnect();
-    loop.disconnect();
-
-    disconnect(interruptLoop);
-    disconnect(interruptThisLoop);
-    disconnect(pauseLoop);
-    disconnect(resumeLoop);
-    disconnect(timeoutLoop);
+      }
+    }
   }
 }
 
@@ -355,7 +502,14 @@ void CEosScriptTimer::sleep(qint64 iTimeMs)
 void CEosScriptTimer::show()
 {
   if (!CheckIfScriptCanRun()) { return; }
-  emit SignalEmitter<CTimerSignalEmitter>()->showTimer();
+
+  if (auto spComm = m_wpCommunicator.lock())
+  {
+    if (auto spSignalEmitter = spComm->LockedEmitter<CTimerSignalEmitter>())
+    {
+      emit spSignalEmitter->showTimer();
+    }
+  }
 }
 
 //----------------------------------------------------------------------------------------
@@ -363,7 +517,14 @@ void CEosScriptTimer::show()
 void CEosScriptTimer::start()
 {
   if (!CheckIfScriptCanRun()) { return; }
-  emit SignalEmitter<CTimerSignalEmitter>()->startTimer();
+
+  if (auto spComm = m_wpCommunicator.lock())
+  {
+    if (auto spSignalEmitter = spComm->LockedEmitter<CTimerSignalEmitter>())
+    {
+      emit spSignalEmitter->startTimer();
+    }
+  }
 }
 
 //----------------------------------------------------------------------------------------
@@ -372,21 +533,41 @@ void CEosScriptTimer::waitForTimer()
 {
   if (!CheckIfScriptCanRun()) { return; }
 
-  auto pSignalEmitter = SignalEmitter<CTimerSignalEmitter>();
-  QEventLoop loop;
-  QMetaObject::Connection timeoutLoop =
-    connect(pSignalEmitter, &CTimerSignalEmitter::timerFinished,
-            &loop, &QEventLoop::quit, Qt::QueuedConnection);
-  QMetaObject::Connection quitLoop =
-    connect(pSignalEmitter, &CTimerSignalEmitter::interrupt,
-            &loop, &QEventLoop::quit, Qt::QueuedConnection);
-  QMetaObject::Connection interruptThisLoop =
-    connect(this, &CScriptObjectBase::SignalInterruptExecution,
-            &loop, &QEventLoop::quit, Qt::QueuedConnection);
-  emit pSignalEmitter->waitForTimer();
-  loop.exec();
-  loop.disconnect();
-  disconnect(timeoutLoop);
-  disconnect(interruptThisLoop);
-  disconnect(quitLoop);
+  if (auto spComm = m_wpCommunicator.lock())
+  {
+    if (auto spSignalEmitter = spComm->LockedEmitter<CTimerSignalEmitter>())
+    {
+      QTimer::singleShot(0, this, [this]() {
+        if (auto spComm = m_wpCommunicator.lock())
+        {
+          if (auto spSignalEmitter = spComm->LockedEmitter<CTimerSignalEmitter>())
+          {
+            emit spSignalEmitter->waitForTimer();
+          }
+        }
+      });
+
+      QPointer<CEosScriptTimer> pThis(this);
+      QEventLoop loop;
+      QMetaObject::Connection timeoutLoop =
+        connect(spSignalEmitter.Get(), &CTimerSignalEmitter::timerFinished,
+                &loop, &QEventLoop::quit, Qt::QueuedConnection);
+      QMetaObject::Connection quitLoop =
+        connect(this, &CEosScriptTimer::SignalQuitLoop,
+                &loop, &QEventLoop::quit, Qt::QueuedConnection);
+      QMetaObject::Connection interruptThisLoop =
+        connect(this, &CScriptObjectBase::SignalInterruptExecution,
+                &loop, &QEventLoop::quit, Qt::QueuedConnection);
+
+      loop.exec();
+      loop.disconnect();
+
+      if (nullptr != pThis)
+      {
+        disconnect(timeoutLoop);
+        disconnect(interruptThisLoop);
+        disconnect(quitLoop);
+      }
+    }
+  }
 }

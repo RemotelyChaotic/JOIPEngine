@@ -25,35 +25,72 @@ CEvalSignalEmiter::~CEvalSignalEmiter() {}
 
 //----------------------------------------------------------------------------------------
 //
-std::shared_ptr<CScriptObjectBase> CEvalSignalEmiter::CreateNewScriptObject(QPointer<QJSEngine> pEngine)
+std::shared_ptr<CScriptCommunicator>
+CEvalSignalEmiter::CreateCommunicatorImpl(std::shared_ptr<CScriptRunnerSignalEmiterAccessor> spAccessor)
 {
-  return std::make_shared<CScriptEvalJs>(this, pEngine);
-}
-std::shared_ptr<CScriptObjectBase> CEvalSignalEmiter::CreateNewScriptObject(QPointer<CJsonInstructionSetParser> pParser)
-{
-  return std::make_shared<CEosScriptEval>(this, pParser);
-}
-std::shared_ptr<CScriptObjectBase> CEvalSignalEmiter::CreateNewScriptObject(QtLua::State* pState)
-{
-  return std::make_shared<CScriptEvalLua>(this, pState);
-}
-std::shared_ptr<CScriptObjectBase> CEvalSignalEmiter::CreateNewSequenceObject()
-{
-  return std::make_shared<CSequenceEvalRunner>(this);
+  return std::make_shared<CEvalScriptCommunicator>(spAccessor);
 }
 
 //----------------------------------------------------------------------------------------
 //
-CScriptEvalBase::CScriptEvalBase(QPointer<CScriptRunnerSignalEmiter> pEmitter,
+CEvalScriptCommunicator::CEvalScriptCommunicator(
+  const std::weak_ptr<CScriptRunnerSignalEmiterAccessor>& spEmitter) :
+  CScriptCommunicator(spEmitter)
+{}
+CEvalScriptCommunicator::~CEvalScriptCommunicator() = default;
+
+//----------------------------------------------------------------------------------------
+//
+CScriptObjectBase* CEvalScriptCommunicator::CreateNewScriptObject(QPointer<QJSEngine> pEngine)
+{
+  return new CScriptEvalJs(weak_from_this(), pEngine);
+}
+CScriptObjectBase* CEvalScriptCommunicator::CreateNewScriptObject(QPointer<CJsonInstructionSetParser> pParser)
+{
+  return new CEosScriptEval(weak_from_this(), pParser);
+}
+CScriptObjectBase* CEvalScriptCommunicator::CreateNewScriptObject(QtLua::State* pState)
+{
+  return new CScriptEvalLua(weak_from_this(), pState);
+}
+CScriptObjectBase* CEvalScriptCommunicator::CreateNewSequenceObject()
+{
+  return new CSequenceEvalRunner(weak_from_this());
+}
+
+//----------------------------------------------------------------------------------------
+//
+CScriptEvalBase::CScriptEvalBase(std::weak_ptr<CScriptCommunicator> pCommunicator,
                                  QPointer<QJSEngine> pEngine) :
-  CJsScriptObjectBase(pEmitter, pEngine)
-{}
-CScriptEvalBase::CScriptEvalBase(QPointer<CScriptRunnerSignalEmiter> pEmitter,
+  CJsScriptObjectBase(pCommunicator, pEngine)
+{
+  m_spStop = std::make_shared<std::function<void()>>([this]() {
+    emit SignalQuitLoop();
+  });
+  if (auto spComm = pCommunicator.lock())
+  {
+    spComm->RegisterStopCallback(m_spStop);
+  }
+}
+CScriptEvalBase::CScriptEvalBase(std::weak_ptr<CScriptCommunicator> pCommunicator,
                                  QtLua::State* pState) :
-  CJsScriptObjectBase(pEmitter, pState)
-{}
+  CJsScriptObjectBase(pCommunicator, pState)
+{
+  m_spStop = std::make_shared<std::function<void()>>([this]() {
+    emit SignalQuitLoop();
+  });
+  if (auto spComm = pCommunicator.lock())
+  {
+    spComm->RegisterStopCallback(m_spStop);
+  }
+}
 CScriptEvalBase::~CScriptEvalBase()
-{}
+{
+  if (auto spComm = m_wpCommunicator.lock())
+  {
+    spComm->RemoveStopCallback(m_spStop);
+  }
+}
 
 //----------------------------------------------------------------------------------------
 //
@@ -61,45 +98,61 @@ QVariant CScriptEvalBase::EvalImpl(const QString& sScript)
 {
   if (!CheckIfScriptCanRun()) { return QVariant(); }
 
-  auto pSignalEmitter = SignalEmitter<CEvalSignalEmiter>();
-  QTimer::singleShot(0, this, [&pSignalEmitter,sScript]() { emit pSignalEmitter->evalQuery(sScript); });
-
-  // local loop to wait for answer
-  QVariant returnValue = QVariant();
-  QEventLoop loop;
-  QMetaObject::Connection quitLoop =
-    connect(this, &CScriptEvalBase::SignalQuitLoop, &loop, &QEventLoop::quit);
-  QMetaObject::Connection interruptLoop =
-    connect(pSignalEmitter, &CEvalSignalEmiter::interrupt,
-            &loop, &QEventLoop::quit, Qt::QueuedConnection);
-  QMetaObject::Connection interruptThisLoop =
-    connect(this, &CScriptObjectBase::SignalInterruptExecution,
-            &loop, &QEventLoop::quit, Qt::QueuedConnection);
-  QMetaObject::Connection showRetValLoop =
-    connect(pSignalEmitter, &CEvalSignalEmiter::evalReturn,
-            this, [this, &returnValue](QJSValue input)
+  if (auto spComm = m_wpCommunicator.lock())
   {
-    returnValue = input.toVariant();
-    returnValue.detach(); // fixes some crashes with QJSEngine
-    emit this->SignalQuitLoop();
-    // direct connection to fix cross thread issues with QString content being deleted
-  }, Qt::DirectConnection);
-  loop.exec();
-  loop.disconnect();
+    if (auto spSignalEmitter = spComm->LockedEmitter<CEvalSignalEmiter>())
+    {
+      QTimer::singleShot(0, this, [this,sScript]() {
+        if (auto spComm = m_wpCommunicator.lock())
+        {
+          if (auto spSignalEmitter = spComm->LockedEmitter<CEvalSignalEmiter>())
+          {
+            emit spSignalEmitter->evalQuery(sScript);
+          }
+        }
+      });
 
-  disconnect(quitLoop);
-  disconnect(interruptLoop);
-  disconnect(interruptThisLoop);
-  disconnect(showRetValLoop);
+      // local loop to wait for answer
+      QPointer<CScriptEvalBase> pThis(this);
+      std::shared_ptr<QVariant> spReturnValue = std::make_shared<QVariant>();
+      QEventLoop loop;
+      QMetaObject::Connection quitLoop =
+        connect(this, &CScriptEvalBase::SignalQuitLoop, &loop, &QEventLoop::quit,
+                Qt::QueuedConnection);
+      QMetaObject::Connection interruptThisLoop =
+        connect(this, &CScriptObjectBase::SignalInterruptExecution,
+                &loop, &QEventLoop::quit, Qt::QueuedConnection);
+      QMetaObject::Connection showRetValLoop =
+        connect(spSignalEmitter.Get(), &CEvalSignalEmiter::evalReturn,
+                &loop, [spReturnValue, &loop](QJSValue input)
+      {
+        *spReturnValue = input.toVariant();
+        spReturnValue->detach(); // fixes some crashes with QJSEngine
+        bool bOk = QMetaObject::invokeMethod(&loop, "quit", Qt::QueuedConnection);
+        assert(bOk); Q_UNUSED(bOk)
+        // direct connection to fix cross thread issues with QString content being deleted
+      }, Qt::DirectConnection);
+      loop.exec();
+      loop.disconnect();
 
-  return returnValue;
+      if (nullptr != pThis)
+      {
+        disconnect(quitLoop);
+        disconnect(interruptThisLoop);
+        disconnect(showRetValLoop);
+      }
+
+      return *spReturnValue;
+    }
+  }
+  return QVariant();
 }
 
 //----------------------------------------------------------------------------------------
 //
-CScriptEvalJs::CScriptEvalJs(QPointer<CScriptRunnerSignalEmiter> pEmitter,
+CScriptEvalJs::CScriptEvalJs(std::weak_ptr<CScriptCommunicator> pCommunicator,
                              QPointer<QJSEngine> pEngine) :
-  CScriptEvalBase(pEmitter, pEngine)
+  CScriptEvalBase(pCommunicator, pEngine)
 {}
 CScriptEvalJs::~CScriptEvalJs() {}
 
@@ -107,15 +160,20 @@ CScriptEvalJs::~CScriptEvalJs() {}
 //
 QJSValue CScriptEvalJs::eval(const QString& sScript)
 {
+  QPointer<CScriptEvalJs> pThis(this);
   QVariant retVal = EvalImpl(sScript);
-  return m_pEngine->toScriptValue(retVal);
+  if (nullptr != pThis)
+  {
+    return m_pEngine->toScriptValue(retVal);
+  }
+  return QJSValue();
 }
 
 //----------------------------------------------------------------------------------------
 //
-CScriptEvalLua::CScriptEvalLua(QPointer<CScriptRunnerSignalEmiter> pEmitter,
+CScriptEvalLua::CScriptEvalLua(std::weak_ptr<CScriptCommunicator> pCommunicator,
                                QtLua::State* pState) :
-  CScriptEvalBase(pEmitter, pState)
+  CScriptEvalBase(pCommunicator, pState)
 {}
 CScriptEvalLua::~CScriptEvalLua() {}
 
@@ -221,17 +279,29 @@ private:
 
 //----------------------------------------------------------------------------------------
 //
-CEosScriptEval::CEosScriptEval(QPointer<CScriptRunnerSignalEmiter> pEmitter,
+CEosScriptEval::CEosScriptEval(std::weak_ptr<CScriptCommunicator> pCommunicator,
                                QPointer<CJsonInstructionSetParser> pParser) :
-  CEosScriptObjectBase(pEmitter, pParser),
+  CEosScriptObjectBase(pCommunicator, pParser),
   m_spCommandIf(std::make_shared<CCommandEosIf>(this)),
   m_spCommandEval(std::make_shared<CCommandEosEval>(this))
 {
+  m_spStop = std::make_shared<std::function<void()>>([this]() {
+    emit SignalQuitLoop();
+  });
+  if (auto spComm = pCommunicator.lock())
+  {
+    spComm->RegisterStopCallback(m_spStop);
+  }
   pParser->RegisterInstruction(eos::c_sCommandIf, m_spCommandIf);
   pParser->RegisterInstruction(eos::c_sCommandEval, m_spCommandEval);
 }
 CEosScriptEval::~CEosScriptEval()
-{}
+{
+  if (auto spComm = m_wpCommunicator.lock())
+  {
+    spComm->RemoveStopCallback(m_spStop);
+  }
+}
 
 //----------------------------------------------------------------------------------------
 //
@@ -239,38 +309,52 @@ QVariant CEosScriptEval::eval(const QString& sScript)
 {
   if (!CheckIfScriptCanRun()) { return QVariant(); }
 
-  auto pSignalEmitter = SignalEmitter<CEvalSignalEmiter>();
-  QTimer::singleShot(0, this, [pSignalEmitter,sScript]() {
-    emit pSignalEmitter->evalQuery(sScript);
-  });
-
-  // local loop to wait for answer
-  QVariant returnValue = QVariant();
-  QEventLoop loop;
-  QMetaObject::Connection quitLoop =
-    connect(this, &CEosScriptEval::SignalQuitLoop, &loop, &QEventLoop::quit);
-  QMetaObject::Connection interruptLoop =
-    connect(pSignalEmitter, &CEvalSignalEmiter::interrupt,
-            &loop, &QEventLoop::quit, Qt::QueuedConnection);
-  QMetaObject::Connection interruptThisLoop =
-    connect(this, &CScriptObjectBase::SignalInterruptExecution,
-            &loop, &QEventLoop::quit, Qt::QueuedConnection);
-  QMetaObject::Connection showRetValLoop =
-    connect(pSignalEmitter, &CEvalSignalEmiter::evalReturn,
-            this, [this, &returnValue](QJSValue input)
+  if (auto spComm = m_wpCommunicator.lock())
   {
-    returnValue = input.toVariant();
-    returnValue.detach(); // fixes some crashes with QJSEngine
-    emit this->SignalQuitLoop();
-    // direct connection to fix cross thread issues with QString content being deleted
-  }, Qt::DirectConnection);
-  loop.exec();
-  loop.disconnect();
+    if (auto spSignalEmitter = spComm->LockedEmitter<CEvalSignalEmiter>())
+    {
+      QTimer::singleShot(0, this, [this,sScript]() {
+        if (auto spComm = m_wpCommunicator.lock())
+        {
+          if (auto spSignalEmitter = spComm->LockedEmitter<CEvalSignalEmiter>())
+          {
+            emit spSignalEmitter->evalQuery(sScript);
+          }
+        }
+      });
 
-  disconnect(quitLoop);
-  disconnect(interruptLoop);
-  disconnect(interruptThisLoop);
-  disconnect(showRetValLoop);
+      // local loop to wait for answer
+      QPointer<CEosScriptEval> pThis(this);
+      std::shared_ptr<QVariant> spReturnValue = std::make_shared<QVariant>();
+      QEventLoop loop;
+      QMetaObject::Connection quitLoop =
+        connect(this, &CEosScriptEval::SignalQuitLoop, &loop, &QEventLoop::quit,
+                Qt::QueuedConnection);
+      QMetaObject::Connection interruptThisLoop =
+        connect(this, &CScriptObjectBase::SignalInterruptExecution,
+                &loop, &QEventLoop::quit, Qt::QueuedConnection);
+      QMetaObject::Connection showRetValLoop =
+        connect(spSignalEmitter.Get(), &CEvalSignalEmiter::evalReturn,
+                &loop, [spReturnValue, &loop](QJSValue input)
+                {
+                  *spReturnValue = input.toVariant();
+                  spReturnValue->detach(); // fixes some crashes with QJSEngine
+                  bool bOk = QMetaObject::invokeMethod(&loop, "quit", Qt::QueuedConnection);
+                  assert(bOk); Q_UNUSED(bOk)
+                  // direct connection to fix cross thread issues with QString content being deleted
+                }, Qt::DirectConnection);
+      loop.exec();
+      loop.disconnect();
 
-  return returnValue;
+      if (nullptr != pThis)
+      {
+        disconnect(quitLoop);
+        disconnect(interruptThisLoop);
+        disconnect(showRetValLoop);
+      }
+
+      return *spReturnValue;
+    }
+  }
+  return QVariant();
 }

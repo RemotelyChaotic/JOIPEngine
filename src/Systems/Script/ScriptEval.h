@@ -14,16 +14,28 @@ public:
   CEvalSignalEmiter();
   ~CEvalSignalEmiter();
 
-  std::shared_ptr<CScriptObjectBase> CreateNewScriptObject(QPointer<QJSEngine> pEngine) override;
-  std::shared_ptr<CScriptObjectBase> CreateNewScriptObject(QPointer<CJsonInstructionSetParser> pParser) override;
-  std::shared_ptr<CScriptObjectBase> CreateNewScriptObject(QtLua::State* pState) override;
-  std::shared_ptr<CScriptObjectBase> CreateNewSequenceObject() override;
-
 signals:
   void evalQuery(QString sScript);
   void evalReturn(QJSValue value);
+
+protected:
+  std::shared_ptr<CScriptCommunicator>
+  CreateCommunicatorImpl(std::shared_ptr<CScriptRunnerSignalEmiterAccessor> spAccessor) override;
 };
-Q_DECLARE_METATYPE(CEvalSignalEmiter)
+
+//----------------------------------------------------------------------------------------
+//
+class CEvalScriptCommunicator : public CScriptCommunicator
+{
+  public:
+  CEvalScriptCommunicator(const std::weak_ptr<CScriptRunnerSignalEmiterAccessor>& spEmitter);
+  ~CEvalScriptCommunicator() override;
+
+  CScriptObjectBase* CreateNewScriptObject(QPointer<QJSEngine> pEngine) override;
+  CScriptObjectBase* CreateNewScriptObject(QPointer<CJsonInstructionSetParser> pParser) override;
+  CScriptObjectBase* CreateNewScriptObject(QtLua::State* pState) override;
+  CScriptObjectBase* CreateNewSequenceObject() override;
+};
 
 //----------------------------------------------------------------------------------------
 //
@@ -31,10 +43,11 @@ class CScriptEvalBase : public CJsScriptObjectBase
 {
   Q_OBJECT
   Q_DISABLE_COPY(CScriptEvalBase)
+
 public:
-  CScriptEvalBase(QPointer<CScriptRunnerSignalEmiter> pEmitter,
+  CScriptEvalBase(std::weak_ptr<CScriptCommunicator> pCommunicator,
                   QPointer<QJSEngine> pEngine);
-  CScriptEvalBase(QPointer<CScriptRunnerSignalEmiter> pEmitter,
+  CScriptEvalBase(std::weak_ptr<CScriptCommunicator> pCommunicator,
                   QtLua::State* pState);
   ~CScriptEvalBase();
 
@@ -43,6 +56,9 @@ protected:
 
 signals:
   void SignalQuitLoop();
+
+private:
+  std::shared_ptr<std::function<void()>> m_spStop;
 };
 
 //----------------------------------------------------------------------------------------
@@ -52,8 +68,8 @@ class CScriptEvalJs : public CScriptEvalBase
   Q_OBJECT
   Q_DISABLE_COPY(CScriptEvalJs)
 public:
-  CScriptEvalJs(QPointer<CScriptRunnerSignalEmiter> pEmitter,
-              QPointer<QJSEngine> pEngine);
+  CScriptEvalJs(std::weak_ptr<CScriptCommunicator> pCommunicator,
+                QPointer<QJSEngine> pEngine);
   ~CScriptEvalJs();
 
 public slots:
@@ -68,8 +84,8 @@ class CScriptEvalLua : public CScriptEvalBase
   Q_DISABLE_COPY(CScriptEvalLua)
 
 public:
-  CScriptEvalLua(QPointer<CScriptRunnerSignalEmiter> pEmitter,
-              QtLua::State* pState);
+  CScriptEvalLua(std::weak_ptr<CScriptCommunicator> pCommunicator,
+                 QtLua::State* pState);
   ~CScriptEvalLua();
 
 public slots:
@@ -86,7 +102,7 @@ class CEosScriptEval : public CEosScriptObjectBase
   Q_DISABLE_COPY(CEosScriptEval)
 
 public:
-  CEosScriptEval(QPointer<CScriptRunnerSignalEmiter> pEmitter,
+  CEosScriptEval(std::weak_ptr<CScriptCommunicator> pCommunicator,
                  QPointer<CJsonInstructionSetParser> pParser);
   ~CEosScriptEval();
 
@@ -98,6 +114,7 @@ signals:
 private:
   std::shared_ptr<CCommandEosIf> m_spCommandIf;
   std::shared_ptr<CCommandEosEval> m_spCommandEval;
+  std::shared_ptr<std::function<void()>> m_spStop;
 };
 
 #endif // CSCRIPTEVAL_H

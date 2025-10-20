@@ -12,18 +12,30 @@ public:
   CDeviceControllerSignalEmitter();
   ~CDeviceControllerSignalEmitter();
 
-  std::shared_ptr<CScriptObjectBase> CreateNewScriptObject(QPointer<QJSEngine> pEngine) override;
-  std::shared_ptr<CScriptObjectBase> CreateNewScriptObject(QPointer<CJsonInstructionSetParser> pParser) override;
-  std::shared_ptr<CScriptObjectBase> CreateNewScriptObject(QtLua::State* pState) override;
-  std::shared_ptr<CScriptObjectBase> CreateNewSequenceObject() override;
-
 signals:
   void sendLinearCmd(double dDurationS, double dPosition);
   void sendRotateCmd(bool bClockwise, double dSpeed);
   void sendStopCmd();
   void sendVibrateCmd(double dSpeed);
+
+protected:
+  std::shared_ptr<CScriptCommunicator>
+  CreateCommunicatorImpl(std::shared_ptr<CScriptRunnerSignalEmiterAccessor> spAccessor) override;
 };
-Q_DECLARE_METATYPE(CDeviceControllerSignalEmitter)
+
+//----------------------------------------------------------------------------------------
+//
+class CDeviceControllerScriptCommunicator : public CScriptCommunicator
+{
+  public:
+  CDeviceControllerScriptCommunicator(const std::weak_ptr<CScriptRunnerSignalEmiterAccessor>& spEmitter);
+  ~CDeviceControllerScriptCommunicator() override;
+
+  CScriptObjectBase* CreateNewScriptObject(QPointer<QJSEngine> pEngine) override;
+  CScriptObjectBase* CreateNewScriptObject(QPointer<CJsonInstructionSetParser> pParser) override;
+  CScriptObjectBase* CreateNewScriptObject(QtLua::State* pState) override;
+  CScriptObjectBase* CreateNewSequenceObject() override;
+};
 
 //----------------------------------------------------------------------------------------
 //
@@ -33,9 +45,9 @@ class CScriptDeviceController : public CJsScriptObjectBase
   Q_DISABLE_COPY(CScriptDeviceController)
 
 public:
-  CScriptDeviceController(QPointer<CScriptRunnerSignalEmiter> pEmitter,
+  CScriptDeviceController(std::weak_ptr<CScriptCommunicator> pCommunicator,
                           QPointer<QJSEngine> pEngine);
-  CScriptDeviceController(QPointer<CScriptRunnerSignalEmiter> pEmitter,
+  CScriptDeviceController(std::weak_ptr<CScriptCommunicator> pCommunicator,
                           QtLua::State* pState);
   ~CScriptDeviceController();
 
