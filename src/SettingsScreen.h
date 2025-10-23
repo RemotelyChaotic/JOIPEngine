@@ -66,6 +66,7 @@ protected slots:
   void on_pConnectPushButton_clicked();
   void on_pDebugOverlayCheckBox_toggled(bool bState);
   void on_pStyleHotoadCheckBox_stateChanged(qint32 iState);
+  void on_pOpenSettingsFolderButton_clicked();
   void on_pBackButton_clicked();
   void SlotKeySequenceChanged(const QKeySequence& keySequence);
   void SlotMetronomeSfxItemHovered(qint32 iIndex);

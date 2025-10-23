@@ -12,8 +12,9 @@
 #include "Systems/DLJobs/DownloadJobRegistry.h"
 #include "Systems/HelpFactory.h"
 
-#include "Utils/WidgetHelpers.h"
 #include "Utils/MetronomeHelpers.h"
+#include "Utils/PlatformHelpers.h"
+#include "Utils/WidgetHelpers.h"
 
 #include "Widgets/HelpOverlay.h"
 
@@ -219,6 +220,7 @@ void CSettingsScreen::Initialize()
   m_spUi->tabWidget->setCurrentIndex(1);
   m_spUi->pWindowModeContainer->hide();
   m_spUi->pStyleHotoadContainer->hide();
+  m_spUi->pOpenSettingsFolderContainer->hide();
 
   widget_helpers::RetainSizeAndHide(m_spUi->pBackButton);
 #endif
@@ -931,6 +933,16 @@ void CSettingsScreen::on_pStyleHotoadCheckBox_stateChanged(qint32 iState)
   if (nullptr == m_spSettings) { return; }
 
   m_spSettings->SetStyleHotLoad(iState == Qt::Checked);
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CSettingsScreen::on_pOpenSettingsFolderButton_clicked()
+{
+  WIDGET_INITIALIZED_GUARD
+  assert(nullptr != m_spSettings);
+  if (nullptr == m_spSettings) { return; }
+  helpers::ShowInGraphicalShell(m_spSettings->FileName());
 }
 
 //----------------------------------------------------------------------------------------
