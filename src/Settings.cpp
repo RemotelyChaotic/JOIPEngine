@@ -135,6 +135,15 @@ const QString CSettings::c_sApplicationName = "JOIPEngine";
 
 //----------------------------------------------------------------------------------------
 //
+QString settings::GetSettingsPath()
+{
+  QSettings s(QSettings::IniFormat, QSettings::UserScope,
+              CSettings::c_sOrganisation, CSettings::c_sApplicationName);
+  return s.fileName();
+}
+
+//----------------------------------------------------------------------------------------
+//
 CSettings::CSettings(QObject* pParent) :
   QObject (pParent),
   m_settingsMutex(QMutex::Recursive),

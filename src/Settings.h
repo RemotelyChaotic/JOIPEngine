@@ -23,6 +23,11 @@ namespace DominantHand
   Q_ENUM_NS(EDominantHand)
 }
 
+namespace settings
+{
+  QString GetSettingsPath();
+}
+
 class CSettings : public QObject
 {
   Q_OBJECT

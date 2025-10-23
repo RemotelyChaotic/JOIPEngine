@@ -24,9 +24,56 @@
 #include <QQmlDebuggingEnabler>
 #endif
 #include <QSslSocket>
+#include <QStandardPaths>
 //#include <QtWebEngine>
 //#include <QtWebView/QtWebView>
 
+void ClearOldQmlCache()
+{
+#if defined(Q_OS_WIN)
+  // clear old cache folder
+  QStringList vsOldLocs = QStandardPaths::standardLocations(QStandardPaths::CacheLocation);
+  for (const QString& s : vsOldLocs)
+  {
+    QDir d(s);
+    if (QFileInfo::exists(s))
+    {
+      d.cdUp();
+      if (d.dirName() == CSettings::c_sApplicationName)
+      {
+        d.removeRecursively();
+      }
+      else
+      {
+        QDir d2(s);
+        d2.removeRecursively();
+      }
+    }
+  }
+#endif
+}
+
+//----------------------------------------------------------------------------------------
+//
+void SetQmlCache()
+{
+#if defined(Q_OS_WIN)
+  {
+    QFileInfo settingsPath(settings::GetSettingsPath());
+    QString sFolder = settingsPath.absolutePath() + "/cache";
+    QDir().mkpath(sFolder);
+    qputenv("QML_DISK_CACHE_PATH", sFolder.toUtf8());
+    qDebug() << "QML cache:" << sFolder.toUtf8();
+  }
+#else
+  QStringList vsOldLocs = QStandardPaths::standardLocations(QStandardPaths::CacheLocation);
+  qputenv("QML_DISK_CACHE_PATH", vsOldLocs[0].toUtf8());
+  qDebug() << "QML cache:" << vsOldLocs[0].toUtf8();
+#endif
+}
+
+//----------------------------------------------------------------------------------------
+//
 int main(int argc, char *argv[])
 {
   QCoreApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
@@ -56,7 +103,11 @@ int main(int argc, char *argv[])
   qDebug() << "Supported image formats:" << QImageReader::supportedImageFormats();
   qDebug() << "Supported archive formats:" << CPhysFsFileEngineHandler::SupportedFileTypes();
 
+  SetQmlCache();
+
   CApplication app(argc, argv);
+
+  ClearOldQmlCache();
 
 #if defined(QT_QML_DEBUG)
   QQmlDebuggingEnabler enabler;

@@ -9,6 +9,10 @@ New Features:
 - Node debugger implemented.
 - Button to open the Engine Settings folder added to debug tab.
 
+Changes:
+- Qml cache on Windows is in the same Folder as the settings since Windows
+  doesn't have a dedicated cache folder.
+
 Fixed Bugs:
 - Scene Resources update if the resource is removed or changed somewhere else.
 - Fixed some constellations of Scene transitions that failed to transition
