@@ -719,6 +719,8 @@ macro(CreateJOIPProject JOIP_PROJECT_NAME)
     ${JOIPSources}/Utils/MetronomeHelpers.h
     ${JOIPSources}/Utils/MultiEmitterSoundPlayer.cpp
     ${JOIPSources}/Utils/MultiEmitterSoundPlayer.h
+    ${JOIPSources}/Utils/PlatformHelpers.cpp
+    ${JOIPSources}/Utils/PlatformHelpers.h
     ${JOIPSources}/Utils/RaiiFunctionCaller.cpp
     ${JOIPSources}/Utils/RaiiFunctionCaller.h
     ${JOIPSources}/Utils/ThreadUtils.cpp
