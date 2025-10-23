@@ -221,10 +221,10 @@ bool CProjectScriptWrapper::isLoaded()
 
 //----------------------------------------------------------------------------------------
 //
-CProjectScriptWrapper::DownLoadState CProjectScriptWrapper::getDlState()
+qint32 CProjectScriptWrapper::getDlState()
 {
   QReadLocker locker(&m_spData->m_rwLock);
-  return static_cast<DownLoadState>(m_spData->m_dlState._to_integral());
+  return m_spData->m_dlState._to_integral();
 }
 
 //----------------------------------------------------------------------------------------

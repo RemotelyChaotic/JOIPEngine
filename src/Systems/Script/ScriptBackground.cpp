@@ -114,8 +114,6 @@ void CScriptBackground::setBackgroundColor(QVariant color)
       return;
     }
   }
-
-  qWarning() << tr("Emitter or Communicator out of scope.");
 }
 
 //----------------------------------------------------------------------------------------
@@ -144,6 +142,4 @@ void CScriptBackground::setBackgroundTexture(QVariant resource)
       }
     }
   }
-
-  qWarning() << tr("Emitter or Communicator out of scope.");
 }

@@ -45,7 +45,7 @@ class CProjectScriptWrapper : public QObject, public CLockable
   Q_PROPERTY(bool           isBundled         READ isBundled            CONSTANT)
   Q_PROPERTY(bool           isReadOnly        READ isReadOnly           CONSTANT)
   Q_PROPERTY(bool           isLoaded          READ isLoaded             CONSTANT)
-  Q_PROPERTY(DownLoadState  dlState           READ getDlState           CONSTANT)
+  Q_PROPERTY(qint32         dlState           READ getDlState           CONSTANT)
   Q_PROPERTY(QString        font              READ getFont              CONSTANT)
   Q_PROPERTY(QString        userData          READ getUserData          CONSTANT)
 
@@ -92,7 +92,7 @@ public:
   bool isBundled();
   bool isReadOnly();
   bool isLoaded();
-  DownLoadState getDlState();
+  qint32 getDlState();
   QString getFont();
   QString getUserData();
 
