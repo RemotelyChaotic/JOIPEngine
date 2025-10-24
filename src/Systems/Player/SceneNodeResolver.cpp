@@ -246,7 +246,7 @@ void ResolveNextPossibleNodes(qint32 iDepth, Node const * const pNode,
     long unsigned int seed =
       static_cast<long unsigned int>(std::chrono::high_resolution_clock::now().time_since_epoch().count());
     std::mt19937 generator(static_cast<long unsigned int>(seed));
-    qDebug() << "Seed:" << seed << "casted:" << static_cast<long unsigned int>(seed);
+    //qDebug() << "Seed:" << seed << "casted:" << static_cast<long unsigned int>(seed);
 
     // Do a second pass and check the following nodes. If empty, remove from the possible list.
     std::vector<std::pair<qint32, std::vector<NodeResolveReslt>>> vResult2Pass;
@@ -353,7 +353,7 @@ void ResolveNextPossibleNodes(qint32 iDepth, Node const * const pNode,
     {
       std::uniform_int_distribution<> dis(0, static_cast<qint32>(vResult2Pass.size() - 1));
       qint32 iGeneratedIndex = dis(generator);
-      qDebug() << "Generated value:" << iGeneratedIndex << "from 0 -" << static_cast<qint32>(vResult2Pass.size() - 1);
+      //qDebug() << "Generated value:" << iGeneratedIndex << "from 0 -" << static_cast<qint32>(vResult2Pass.size() - 1);
 
       auto vRolledRes = vResult2Pass[static_cast<size_t>(iGeneratedIndex)].second;
       for (auto& ret : vRolledRes)
