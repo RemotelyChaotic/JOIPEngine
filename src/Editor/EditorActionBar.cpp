@@ -29,6 +29,8 @@ namespace {
   const QString c_sPauseHelpId =          "Editor/Pause";
   const QString c_sStopHelpId =           "Editor/Stop";
 
+  const QString c_sDebugNodeHelpId =      "Editor/DebugNode";
+  const QString c_sStepNodeHelpId =       "Editor/StepNode";
   const QString c_sAddNodeHelpId =        "Editor/AddNode";
   const QString c_sRemoveNodeHelpId =     "Editor/RemoveNode";
 
@@ -202,6 +204,10 @@ void CEditorActionBar::Initialize()
     m_spUi->StopButton->setProperty(helpOverlay::c_sHelpPagePropertyName, c_sStopHelpId);
     wpHelpFactory->RegisterHelp(c_sStopHelpId, ":/resources/help/editor/stop_button_help.html");
 
+    m_spUi->pNodeDebugStack->setProperty(helpOverlay::c_sHelpPagePropertyName, c_sDebugNodeHelpId);
+    wpHelpFactory->RegisterHelp(c_sDebugNodeHelpId, ":/resources/help/editor/nodes/nodeeditor_debug_help.html");
+    m_spUi->NextSceneButton->setProperty(helpOverlay::c_sHelpPagePropertyName, c_sStepNodeHelpId);
+    wpHelpFactory->RegisterHelp(c_sStepNodeHelpId, ":/resources/help/editor/nodes/nodeeditor_step_help.html");
     m_spUi->AddNodeButton->setProperty(helpOverlay::c_sHelpPagePropertyName, c_sAddNodeHelpId);
     wpHelpFactory->RegisterHelp(c_sAddNodeHelpId, ":/resources/help/editor/addnode_button_help.html");
     m_spUi->RemoveNodeButton->setProperty(helpOverlay::c_sHelpPagePropertyName, c_sRemoveNodeHelpId);

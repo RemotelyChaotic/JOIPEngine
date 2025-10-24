@@ -40,6 +40,7 @@ DECLARE_EDITORWIDGET(CEditorSceneNodeWidget, EEditorWidget::eSceneNodeWidget)
 
 namespace
 {
+  const QString c_sDebugNodeHelpId = "Editor/DebugNode";
   const QString c_sNodeHelpId =      "Editor/NodeHelp";
   const QString c_sNodeNodeHelpId =  "Editor/Node/Node";
 
@@ -200,6 +201,8 @@ void CEditorSceneNodeWidget::Initialize()
   auto wpHelpFactory = CApplication::Instance()->System<CHelpFactory>().lock();
   if (nullptr != wpHelpFactory)
   {
+    m_spUi->pDebugView->setProperty(helpOverlay::c_sHelpPagePropertyName, c_sDebugNodeHelpId);
+    wpHelpFactory->RegisterHelp(c_sDebugNodeHelpId, ":/resources/help/editor/nodes/nodeeditor_debug_help.html");
     m_pFlowView->setProperty(helpOverlay::c_sHelpPagePropertyName, c_sNodeHelpId);
     wpHelpFactory->RegisterHelp(c_sNodeHelpId, ":/resources/help/editor/nodes/nodeeditor_help.html");
 
