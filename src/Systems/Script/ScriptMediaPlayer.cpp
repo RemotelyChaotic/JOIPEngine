@@ -424,42 +424,54 @@ void CScriptMediaPlayer::waitForVideo()
 {
   if (!CheckIfScriptCanRun()) { return; }
 
+  QTimer::singleShot(0, this, [this]() {
+    if (auto spComm = m_wpCommunicator.lock())
+    {
+      if (auto spSignalEmitter = spComm->LockedEmitter<CMediaPlayerSignalEmitter>())
+      {
+        emit spSignalEmitter->startVideoWait();
+      }
+    }
+  });
+
+  QPointer<CScriptMediaPlayer> pThis(this);
+  QEventLoop loop;
+
+  QMetaObject::Connection finishedConn;
+  QMetaObject::Connection finishedLoopConn;
   if (auto spComm = m_wpCommunicator.lock())
   {
     if (auto spSignalEmitter = spComm->LockedEmitter<CMediaPlayerSignalEmitter>())
     {
-      QPointer<CScriptMediaPlayer> pThis(this);
-
-      QMetaObject::Connection finishedConn =
+      finishedConn =
         connect(spSignalEmitter.Get(), &CMediaPlayerSignalEmitter::videoFinished,
                 spSignalEmitter.Get(), &CMediaPlayerSignalEmitter::stopVideo,
                 Qt::DirectConnection);
 
-      QEventLoop loop;
-      QMetaObject::Connection finishedLoopConn =
+
+      finishedLoopConn =
         connect(spSignalEmitter.Get(), &CMediaPlayerSignalEmitter::videoFinished,
                 &loop, &QEventLoop::quit, Qt::QueuedConnection);
-      QMetaObject::Connection quitLoop =
-        connect(this, &CScriptMediaPlayer::SignalQuitLoop, &loop, &QEventLoop::quit,
-                Qt::QueuedConnection);
-      QMetaObject::Connection interruptThisLoop =
-        connect(this, &CScriptObjectBase::SignalInterruptExecution,
-                &loop, &QEventLoop::quit, Qt::QueuedConnection);
-
-      emit spSignalEmitter->startVideoWait();
-      loop.exec();
-      loop.disconnect();
-
-      if (nullptr != pThis)
-      {
-        disconnect(interruptThisLoop);
-        disconnect(quitLoop);
-        disconnect(finishedLoopConn);
-      }
-
-      QObject::disconnect(finishedConn);
     }
   }
+
+  QMetaObject::Connection quitLoop =
+    connect(this, &CScriptMediaPlayer::SignalQuitLoop, &loop, &QEventLoop::quit,
+            Qt::QueuedConnection);
+  QMetaObject::Connection interruptThisLoop =
+    connect(this, &CScriptObjectBase::SignalInterruptExecution,
+            &loop, &QEventLoop::quit, Qt::QueuedConnection);
+  loop.exec();
+  loop.disconnect();
+
+  if (nullptr != pThis)
+  {
+    disconnect(interruptThisLoop);
+    disconnect(quitLoop);
+    if (finishedLoopConn) disconnect(finishedLoopConn);
+  }
+
+  if (finishedConn) QObject::disconnect(finishedConn);
 }
 
 //----------------------------------------------------------------------------------------
@@ -520,15 +532,30 @@ QString CScriptMediaPlayer::GetResourceName(const QVariant& resource, const QStr
 //
 void CScriptMediaPlayer::WaitForPlayBackImpl(const QString& sResource)
 {
+  QPointer<CScriptMediaPlayer> pThis(this);
+  QEventLoop loop;
+
+  QString sRes = sResource;
+  sRes.detach();
+
+  QTimer::singleShot(0, this, [this, sRes]() {
+    if (auto spComm = m_wpCommunicator.lock())
+    {
+      if (auto spSignalEmitter = spComm->LockedEmitter<CMediaPlayerSignalEmitter>())
+      {
+        emit spSignalEmitter->startPlaybackWait(sRes);
+      }
+    }
+  });
+
+  QMetaObject::Connection connStopPlayback;
+  QMetaObject::Connection connStopSound;
+  QMetaObject::Connection connFinished;
   if (auto spComm = m_wpCommunicator.lock())
   {
     if (auto spSignalEmitter = spComm->LockedEmitter<CMediaPlayerSignalEmitter>())
     {
-      QPointer<CScriptMediaPlayer> pThis(this);
-      QString sRes = sResource;
-      sRes.detach();
-
-      QMetaObject::Connection connStopPlayback =
+      connStopPlayback =
         connect(spSignalEmitter.Get(), &CMediaPlayerSignalEmitter::playbackFinished,
                 spSignalEmitter.Get(),
                 [pSignalEmitter = spSignalEmitter.Get()](const QString& sResourceRet) {
@@ -537,7 +564,7 @@ void CScriptMediaPlayer::WaitForPlayBackImpl(const QString& sResource)
                     emit pSignalEmitter->stopVideo();
                   }
                 }, Qt::DirectConnection);
-      QMetaObject::Connection connStopSound =
+      connStopSound =
         connect(spSignalEmitter.Get(), &CMediaPlayerSignalEmitter::playbackFinished,
                 spSignalEmitter.Get(),
                 [pSignalEmitter = spSignalEmitter.Get(), sRes](const QString& sResourceRet) {
@@ -546,9 +573,7 @@ void CScriptMediaPlayer::WaitForPlayBackImpl(const QString& sResource)
                     emit pSignalEmitter->stopSound(sResourceRet);
                   }
                 }, Qt::DirectConnection);
-
-      QEventLoop loop;
-      QMetaObject::Connection connFinished =
+      connFinished =
         connect(spSignalEmitter.Get(), &CMediaPlayerSignalEmitter::playbackFinished,
                 &loop, [&loop, sRes](const QString& sResourceRet) {
                   if (sRes == sResourceRet || sResourceRet.isEmpty())
@@ -557,42 +582,55 @@ void CScriptMediaPlayer::WaitForPlayBackImpl(const QString& sResource)
                     assert(bOk); Q_UNUSED(bOk)
                   }
                 }, Qt::QueuedConnection);
-      QMetaObject::Connection connQuit =
-        connect(this, &CScriptMediaPlayer::SignalQuitLoop,
-                &loop, &QEventLoop::quit, Qt::QueuedConnection);
-      QMetaObject::Connection interruptThisLoop =
-        connect(this, &CScriptObjectBase::SignalInterruptExecution,
-                &loop, &QEventLoop::quit, Qt::QueuedConnection);
-      emit spSignalEmitter->startPlaybackWait(sResource);
-      loop.exec();
-      loop.disconnect();
-
-      if (nullptr != pThis)
-      {
-        disconnect(connFinished);
-        disconnect(connQuit);
-        disconnect(interruptThisLoop);
-      }
-
-      QObject::disconnect(connStopPlayback);
-      QObject::disconnect(connStopSound);
     }
   }
+
+  QMetaObject::Connection connQuit =
+    connect(this, &CScriptMediaPlayer::SignalQuitLoop,
+            &loop, &QEventLoop::quit, Qt::QueuedConnection);
+  QMetaObject::Connection interruptThisLoop =
+    connect(this, &CScriptObjectBase::SignalInterruptExecution,
+            &loop, &QEventLoop::quit, Qt::QueuedConnection);
+  loop.exec();
+  loop.disconnect();
+
+  if (nullptr != pThis)
+  {
+    if (connFinished) disconnect(connFinished);
+    disconnect(connQuit);
+    disconnect(interruptThisLoop);
+  }
+
+  if (connStopPlayback) QObject::disconnect(connStopPlayback);
+  if (connStopSound) QObject::disconnect(connStopSound);
 }
 
 //----------------------------------------------------------------------------------------
 //
 void CScriptMediaPlayer::WaitForSoundImpl(const QString& sResource)
 {
+  QPointer<CScriptMediaPlayer> pThis(this);
+  QEventLoop loop;
+  QString sRes = sResource;
+  sRes.detach();
+
+  QTimer::singleShot(0, this, [this, sRes]() {
+    if (auto spComm = m_wpCommunicator.lock())
+    {
+      if (auto spSignalEmitter = spComm->LockedEmitter<CMediaPlayerSignalEmitter>())
+      {
+        emit spSignalEmitter->startSoundWait(sRes);
+      }
+    }
+  });
+
+  QMetaObject::Connection connStopSound;
+  QMetaObject::Connection connFinished;
   if (auto spComm = m_wpCommunicator.lock())
   {
     if (auto spSignalEmitter = spComm->LockedEmitter<CMediaPlayerSignalEmitter>())
     {
-      QPointer<CScriptMediaPlayer> pThis(this);
-      QString sRes = sResource;
-      sRes.detach();
-
-      QMetaObject::Connection connStopSound =
+      connStopSound =
         connect(spSignalEmitter.Get(), &CMediaPlayerSignalEmitter::playbackFinished,
                 spSignalEmitter.Get(),
                 [pSignalEmitter = spSignalEmitter.Get(), sRes](const QString& sResourceRet) {
@@ -601,9 +639,7 @@ void CScriptMediaPlayer::WaitForSoundImpl(const QString& sResource)
                     emit pSignalEmitter->stopSound(sResourceRet);
                   }
                 }, Qt::DirectConnection);
-
-      QEventLoop loop;
-      QMetaObject::Connection connFinished =
+      connFinished =
         connect(spSignalEmitter.Get(), &CMediaPlayerSignalEmitter::playbackFinished,
                 &loop, [&loop, sRes](const QString& sResourceRet) {
                   if (sRes == sResourceRet || sResourceRet.isEmpty())
@@ -612,26 +648,26 @@ void CScriptMediaPlayer::WaitForSoundImpl(const QString& sResource)
                     assert(bOk); Q_UNUSED(bOk)
                   }
                 }, Qt::QueuedConnection);
-      QMetaObject::Connection connQuit =
-        connect(this, &CScriptMediaPlayer::SignalQuitLoop,
-                &loop, &QEventLoop::quit, Qt::QueuedConnection);
-      QMetaObject::Connection interruptThisLoop =
-        connect(this, &CScriptObjectBase::SignalInterruptExecution,
-                &loop, &QEventLoop::quit, Qt::QueuedConnection);
-      emit spSignalEmitter->startSoundWait(sResource);
-      loop.exec();
-      loop.disconnect();
-
-      if (nullptr != pThis)
-      {
-        disconnect(connFinished);
-        disconnect(connQuit);
-        disconnect(interruptThisLoop);
-      }
-
-      QObject::disconnect(connStopSound);
     }
   }
+
+  QMetaObject::Connection connQuit =
+    connect(this, &CScriptMediaPlayer::SignalQuitLoop,
+            &loop, &QEventLoop::quit, Qt::QueuedConnection);
+  QMetaObject::Connection interruptThisLoop =
+    connect(this, &CScriptObjectBase::SignalInterruptExecution,
+            &loop, &QEventLoop::quit, Qt::QueuedConnection);
+  loop.exec();
+  loop.disconnect();
+
+  if (nullptr != pThis)
+  {
+    if (connFinished) disconnect(connFinished);
+    disconnect(connQuit);
+    disconnect(interruptThisLoop);
+  }
+
+  if (connStopSound) QObject::disconnect(connStopSound);
 }
 
 //----------------------------------------------------------------------------------------

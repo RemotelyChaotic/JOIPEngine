@@ -119,9 +119,10 @@ void CScriptNotification::hide(QString sId)
       }
 
       emit spSignalEmitter->hideNotification(sId);
-      emit SignalOverlayClosed(sId);
     }
   }
+
+  emit SignalOverlayClosed(sId);
 }
 
 //----------------------------------------------------------------------------------------
@@ -699,9 +700,10 @@ void CEosScriptNotification::Hide(QString sId)
       }
 
       emit spSignalEmitter->hideNotification(sId);
-      emit SignalOverlayClosed(sId);
     }
   }
+
+  emit SignalOverlayClosed(sId);
 }
 
 //----------------------------------------------------------------------------------------

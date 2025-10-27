@@ -98,31 +98,32 @@ QVariant CScriptEvalBase::EvalImpl(const QString& sScript)
 {
   if (!CheckIfScriptCanRun()) { return QVariant(); }
 
+  QTimer::singleShot(0, this, [this,sScript]() {
+    if (auto spComm = m_wpCommunicator.lock())
+    {
+      if (auto spSignalEmitter = spComm->LockedEmitter<CEvalSignalEmiter>())
+      {
+        emit spSignalEmitter->evalQuery(sScript);
+      }
+    }
+  });
+
+  // local loop to wait for answer
+  QPointer<CScriptEvalBase> pThis(this);
+  std::shared_ptr<QVariant> spReturnValue = std::make_shared<QVariant>();
+  QEventLoop loop;
+  QMetaObject::Connection quitLoop =
+    connect(this, &CScriptEvalBase::SignalQuitLoop, &loop, &QEventLoop::quit,
+            Qt::QueuedConnection);
+  QMetaObject::Connection interruptThisLoop =
+    connect(this, &CScriptObjectBase::SignalInterruptExecution,
+            &loop, &QEventLoop::quit, Qt::QueuedConnection);
+  QMetaObject::Connection showRetValLoop;
   if (auto spComm = m_wpCommunicator.lock())
   {
     if (auto spSignalEmitter = spComm->LockedEmitter<CEvalSignalEmiter>())
     {
-      QTimer::singleShot(0, this, [this,sScript]() {
-        if (auto spComm = m_wpCommunicator.lock())
-        {
-          if (auto spSignalEmitter = spComm->LockedEmitter<CEvalSignalEmiter>())
-          {
-            emit spSignalEmitter->evalQuery(sScript);
-          }
-        }
-      });
-
-      // local loop to wait for answer
-      QPointer<CScriptEvalBase> pThis(this);
-      std::shared_ptr<QVariant> spReturnValue = std::make_shared<QVariant>();
-      QEventLoop loop;
-      QMetaObject::Connection quitLoop =
-        connect(this, &CScriptEvalBase::SignalQuitLoop, &loop, &QEventLoop::quit,
-                Qt::QueuedConnection);
-      QMetaObject::Connection interruptThisLoop =
-        connect(this, &CScriptObjectBase::SignalInterruptExecution,
-                &loop, &QEventLoop::quit, Qt::QueuedConnection);
-      QMetaObject::Connection showRetValLoop =
+      showRetValLoop =
         connect(spSignalEmitter.Get(), &CEvalSignalEmiter::evalReturn,
                 &loop, [spReturnValue, &loop](QJSValue input)
       {
@@ -132,20 +133,19 @@ QVariant CScriptEvalBase::EvalImpl(const QString& sScript)
         assert(bOk); Q_UNUSED(bOk)
         // direct connection to fix cross thread issues with QString content being deleted
       }, Qt::DirectConnection);
-      loop.exec();
-      loop.disconnect();
-
-      if (nullptr != pThis)
-      {
-        disconnect(quitLoop);
-        disconnect(interruptThisLoop);
-        disconnect(showRetValLoop);
-      }
-
-      return *spReturnValue;
     }
   }
-  return QVariant();
+  loop.exec();
+  loop.disconnect();
+
+  if (nullptr != pThis)
+  {
+    disconnect(quitLoop);
+    disconnect(interruptThisLoop);
+    if (showRetValLoop) disconnect(showRetValLoop);
+  }
+
+  return *spReturnValue;
 }
 
 //----------------------------------------------------------------------------------------
@@ -309,31 +309,32 @@ QVariant CEosScriptEval::eval(const QString& sScript)
 {
   if (!CheckIfScriptCanRun()) { return QVariant(); }
 
+  QTimer::singleShot(0, this, [this,sScript]() {
+    if (auto spComm = m_wpCommunicator.lock())
+    {
+      if (auto spSignalEmitter = spComm->LockedEmitter<CEvalSignalEmiter>())
+      {
+        emit spSignalEmitter->evalQuery(sScript);
+      }
+    }
+  });
+
+  // local loop to wait for answer
+  QPointer<CEosScriptEval> pThis(this);
+  std::shared_ptr<QVariant> spReturnValue = std::make_shared<QVariant>();
+  QEventLoop loop;
+  QMetaObject::Connection quitLoop =
+    connect(this, &CEosScriptEval::SignalQuitLoop, &loop, &QEventLoop::quit,
+            Qt::QueuedConnection);
+  QMetaObject::Connection interruptThisLoop =
+    connect(this, &CScriptObjectBase::SignalInterruptExecution,
+            &loop, &QEventLoop::quit, Qt::QueuedConnection);
+  QMetaObject::Connection showRetValLoop;
   if (auto spComm = m_wpCommunicator.lock())
   {
     if (auto spSignalEmitter = spComm->LockedEmitter<CEvalSignalEmiter>())
     {
-      QTimer::singleShot(0, this, [this,sScript]() {
-        if (auto spComm = m_wpCommunicator.lock())
-        {
-          if (auto spSignalEmitter = spComm->LockedEmitter<CEvalSignalEmiter>())
-          {
-            emit spSignalEmitter->evalQuery(sScript);
-          }
-        }
-      });
-
-      // local loop to wait for answer
-      QPointer<CEosScriptEval> pThis(this);
-      std::shared_ptr<QVariant> spReturnValue = std::make_shared<QVariant>();
-      QEventLoop loop;
-      QMetaObject::Connection quitLoop =
-        connect(this, &CEosScriptEval::SignalQuitLoop, &loop, &QEventLoop::quit,
-                Qt::QueuedConnection);
-      QMetaObject::Connection interruptThisLoop =
-        connect(this, &CScriptObjectBase::SignalInterruptExecution,
-                &loop, &QEventLoop::quit, Qt::QueuedConnection);
-      QMetaObject::Connection showRetValLoop =
+      showRetValLoop =
         connect(spSignalEmitter.Get(), &CEvalSignalEmiter::evalReturn,
                 &loop, [spReturnValue, &loop](QJSValue input)
                 {
@@ -343,18 +344,17 @@ QVariant CEosScriptEval::eval(const QString& sScript)
                   assert(bOk); Q_UNUSED(bOk)
                   // direct connection to fix cross thread issues with QString content being deleted
                 }, Qt::DirectConnection);
-      loop.exec();
-      loop.disconnect();
-
-      if (nullptr != pThis)
-      {
-        disconnect(quitLoop);
-        disconnect(interruptThisLoop);
-        disconnect(showRetValLoop);
-      }
-
-      return *spReturnValue;
     }
   }
-  return QVariant();
+  loop.exec();
+  loop.disconnect();
+
+  if (nullptr != pThis)
+  {
+    disconnect(quitLoop);
+    disconnect(interruptThisLoop);
+    if (showRetValLoop) disconnect(showRetValLoop);
+  }
+
+  return *spReturnValue;
 }

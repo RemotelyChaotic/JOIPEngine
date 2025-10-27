@@ -105,33 +105,34 @@ void CScriptEventSenderBase::SendEventImpl(const QString& sEvent, const QString&
 //
 QVariant CScriptEventSenderBase::SendEventAndWaitImpl(const QString& sEvent, const QString& sData)
 {
+  QTimer::singleShot(0, this, [this, sEvent, sData]() {
+    if (auto spComm = m_wpCommunicator.lock())
+    {
+      if (auto spSignalEmitter = spComm->LockedEmitter<CEventSenderSignalEmitter>())
+      {
+        emit spSignalEmitter->sendEvent(sEvent, sData);
+      }
+    }
+  });
+
+  // local loop to wait for answer
+  QPointer<CScriptEventSenderBase> pThis(this);
+  std::shared_ptr<QVariant> spReturnValue = std::make_shared<QVariant>();
+  QString sEvt = sEvent;
+  sEvt.detach();
+
+  QEventLoop loop;
+  QMetaObject::Connection quitLoop =
+    connect(this, &CScriptEventSenderBase::SignalQuitLoop, &loop, &QEventLoop::quit);
+  QMetaObject::Connection interruptThisLoop =
+    connect(this, &CScriptObjectBase::SignalInterruptExecution,
+            &loop, &QEventLoop::quit, Qt::QueuedConnection);
+  QMetaObject::Connection showRetValLoop;
   if (auto spComm = m_wpCommunicator.lock())
   {
     if (auto spSignalEmitter = spComm->LockedEmitter<CEventSenderSignalEmitter>())
     {
-      QTimer::singleShot(0, this, [this, sEvent, sData]() {
-        if (auto spComm = m_wpCommunicator.lock())
-        {
-          if (auto spSignalEmitter = spComm->LockedEmitter<CEventSenderSignalEmitter>())
-          {
-            emit spSignalEmitter->sendEvent(sEvent, sData);
-          }
-        }
-      });
-
-      // local loop to wait for answer
-      QPointer<CScriptEventSenderBase> pThis(this);
-      std::shared_ptr<QVariant> spReturnValue = std::make_shared<QVariant>();
-      QString sEvt = sEvent;
-      sEvt.detach();
-
-      QEventLoop loop;
-      QMetaObject::Connection quitLoop =
-        connect(this, &CScriptEventSenderBase::SignalQuitLoop, &loop, &QEventLoop::quit);
-      QMetaObject::Connection interruptThisLoop =
-        connect(this, &CScriptObjectBase::SignalInterruptExecution,
-                &loop, &QEventLoop::quit, Qt::QueuedConnection);
-      QMetaObject::Connection showRetValLoop =
+      showRetValLoop =
         connect(spSignalEmitter.Get(), &CEventSenderSignalEmitter::sendReturnValue,
                 &loop, [&loop, spReturnValue, sEvt](QJSValue var, QString sRequestEvtRet)
       {
@@ -144,20 +145,19 @@ QVariant CScriptEventSenderBase::SendEventAndWaitImpl(const QString& sEvent, con
         }
         // direct connection to fix cross thread issues with QString content being deleted
       }, Qt::DirectConnection);
-      loop.exec();
-      loop.disconnect();
-
-      if (nullptr != pThis)
-      {
-        disconnect(quitLoop);
-        disconnect(interruptThisLoop);
-        disconnect(showRetValLoop);
-      }
-
-      return *spReturnValue;
     }
   }
-  return QVariant();
+  loop.exec();
+  loop.disconnect();
+
+  if (nullptr != pThis)
+  {
+    disconnect(quitLoop);
+    disconnect(interruptThisLoop);
+    if (showRetValLoop) disconnect(showRetValLoop);
+  }
+
+  return *spReturnValue;
 }
 
 //----------------------------------------------------------------------------------------

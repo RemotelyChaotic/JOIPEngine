@@ -15,6 +15,8 @@
 #include "Systems/Project.h"
 #include "Systems/Scene.h"
 
+#include <QTimer>
+
 CSceneManagerSignalEmiter::CSceneManagerSignalEmiter() :
   CScriptRunnerSignalEmiter()
 {
@@ -132,31 +134,34 @@ void CScriptSceneManager::gotoScene(QVariant scene)
 {
   if (!CheckIfScriptCanRun()) { return; }
 
-  if (auto spComm = m_wpCommunicator.lock())
-  {
-    if (auto spSignalEmitter = spComm->LockedEmitter<CSceneManagerSignalEmiter>())
+  QPointer<CScriptSceneManager> pThis(this);
+  QString sScene = GetScene(scene, "gotoScene");
+
+  QTimer::singleShot(0, this, [this,sScene]() {
+    if (auto spComm = m_wpCommunicator.lock())
     {
-      QPointer<CScriptSceneManager> pThis(this);
-      QString sScene = GetScene(scene, "gotoScene");
-
-      // goto needs to wait here otherwise we accidentally run commands after the call
-      QEventLoop loop;
-      QMetaObject::Connection quitLoop =
-        connect(this, &CScriptSceneManager::SignalQuitLoop, &loop, &QEventLoop::quit,
-                Qt::QueuedConnection);
-      QMetaObject::Connection interruptThisLoop =
-          connect(this, &CScriptObjectBase::SignalInterruptExecution,
-                  &loop, &QEventLoop::quit, Qt::QueuedConnection);
-      emit spSignalEmitter->gotoScene(sScene);
-      loop.exec();
-      loop.disconnect();
-
-      if (nullptr != pThis)
+      if (auto spSignalEmitter = spComm->LockedEmitter<CSceneManagerSignalEmiter>())
       {
-        disconnect(quitLoop);
-        disconnect(interruptThisLoop);
+        emit spSignalEmitter->gotoScene(sScene);
       }
     }
+  });
+
+  // goto needs to wait here otherwise we accidentally run commands after the call
+  QEventLoop loop;
+  QMetaObject::Connection quitLoop =
+    connect(this, &CScriptSceneManager::SignalQuitLoop, &loop, &QEventLoop::quit,
+            Qt::QueuedConnection);
+  QMetaObject::Connection interruptThisLoop =
+      connect(this, &CScriptObjectBase::SignalInterruptExecution,
+              &loop, &QEventLoop::quit, Qt::QueuedConnection);
+  loop.exec();
+  loop.disconnect();
+
+  if (nullptr != pThis)
+  {
+    disconnect(quitLoop);
+    disconnect(interruptThisLoop);
   }
 }
 

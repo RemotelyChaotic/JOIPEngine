@@ -192,93 +192,93 @@ void CScriptThread::sleep(qint32 iTimeS, QVariant bSkippable)
 {
   if (!CheckIfScriptCanRun()) { return; }
 
-  if (auto spComm = m_wpCommunicator.lock())
+  bool bSkippableFlag = false;
+  if (bSkippable.type() == QVariant::Bool)
   {
-    if (auto spSignalEmitter = spComm->LockedEmitter<CThreadSignalEmitter>())
-    {
-      bool bSkippableFlag = false;
-      if (bSkippable.type() == QVariant::Bool)
+    bSkippableFlag = bSkippable.toBool();
+  }
+
+  if (0 < iTimeS)
+  {
+    QTimer::singleShot(0, this, [this, bSkippableFlag, iTimeS]() {
+      if (auto spComm = m_wpCommunicator.lock())
       {
-        bSkippableFlag = bSkippable.toBool();
+        if (auto spSignalEmitter = spComm->LockedEmitter<CThreadSignalEmitter>())
+        {
+          emit spSignalEmitter->skippableWait(bSkippableFlag ? iTimeS : 0);
+        }
       }
+    });
 
-      if (0 < iTimeS)
+    QDateTime lastTime = QDateTime::currentDateTime();
+    qint32 iTimeLeft = iTimeS * 1000;
+
+    QPointer<CScriptThread> pThis(this);
+    QTimer timer;
+    timer.setSingleShot(false);
+    timer.setInterval(20);
+    QEventLoop loop;
+
+    QMetaObject::Connection quitLoop =
+      connect(this, &CScriptThread::SignalQuitLoop,
+              &loop, &QEventLoop::quit, Qt::QueuedConnection);
+    QMetaObject::Connection interruptThisLoop =
+      connect(this, &CScriptObjectBase::SignalInterruptExecution,
+              &loop, &QEventLoop::quit, Qt::QueuedConnection);
+
+    // connect lambdas in loop context, so events are processed, but capture timer,
+    // to start / stop
+    QMetaObject::Connection pauseLoop =
+      connect(this, &CScriptThread::SignalPauseTimer, &timer, &QTimer::stop,
+              Qt::QueuedConnection);
+    QMetaObject::Connection resumeLoop =
+      connect(this, &CScriptThread::SignalResumeTimer, &timer, [&timer, &lastTime]() {
+        lastTime = QDateTime::currentDateTime();
+        timer.start();
+      }, Qt::QueuedConnection);
+
+    QMetaObject::Connection timeoutLoop =
+      connect(&timer, &QTimer::timeout, &loop, [&loop, &iTimeLeft, &lastTime]() {
+        QDateTime newTime = QDateTime::currentDateTime();
+        iTimeLeft -= newTime.toMSecsSinceEpoch() - lastTime.toMSecsSinceEpoch();
+        lastTime = newTime;
+        if (0 >= iTimeLeft)
+        {
+          emit loop.exit();
+        }
+      });
+
+    QMetaObject::Connection skipLoop;
+    if (bSkippableFlag)
+    {
+      if (auto spComm = m_wpCommunicator.lock())
       {
-        QTimer::singleShot(0, this, [this, bSkippableFlag, iTimeS]() {
-          if (auto spComm = m_wpCommunicator.lock())
-          {
-            if (auto spSignalEmitter = spComm->LockedEmitter<CThreadSignalEmitter>())
-            {
-              emit spSignalEmitter->skippableWait(bSkippableFlag ? iTimeS : 0);
-            }
-          }
-        });
-
-        QDateTime lastTime = QDateTime::currentDateTime();
-        qint32 iTimeLeft = iTimeS * 1000;
-
-        QPointer<CScriptThread> pThis(this);
-        QTimer timer;
-        timer.setSingleShot(false);
-        timer.setInterval(20);
-        QEventLoop loop;
-
-        QMetaObject::Connection quitLoop =
-          connect(this, &CScriptThread::SignalQuitLoop,
-                  &loop, &QEventLoop::quit, Qt::QueuedConnection);
-        QMetaObject::Connection interruptThisLoop =
-          connect(this, &CScriptObjectBase::SignalInterruptExecution,
-                  &loop, &QEventLoop::quit, Qt::QueuedConnection);
-
-        // connect lambdas in loop context, so events are processed, but capture timer,
-        // to start / stop
-        QMetaObject::Connection pauseLoop =
-          connect(this, &CScriptThread::SignalPauseTimer, &timer, &QTimer::stop,
-                  Qt::QueuedConnection);
-        QMetaObject::Connection resumeLoop =
-          connect(this, &CScriptThread::SignalResumeTimer, &timer, [&timer, &lastTime]() {
-            lastTime = QDateTime::currentDateTime();
-            timer.start();
-          }, Qt::QueuedConnection);
-
-        QMetaObject::Connection timeoutLoop =
-          connect(&timer, &QTimer::timeout, &loop, [&loop, &iTimeLeft, &lastTime]() {
-            QDateTime newTime = QDateTime::currentDateTime();
-            iTimeLeft -= newTime.toMSecsSinceEpoch() - lastTime.toMSecsSinceEpoch();
-            lastTime = newTime;
-            if (0 >= iTimeLeft)
-            {
-              emit loop.exit();
-            }
-          });
-
-        QMetaObject::Connection skipLoop;
-        if (bSkippableFlag)
+        if (auto spSignalEmitter = spComm->LockedEmitter<CThreadSignalEmitter>())
         {
           skipLoop =
             connect(spSignalEmitter.Get(), &CThreadSignalEmitter::waitSkipped,
                     &loop, &QEventLoop::quit, Qt::QueuedConnection);
         }
+      }
+    }
 
-        timer.start();
-        loop.exec();
-        timer.stop();
-        timer.disconnect();
-        loop.disconnect();
+    timer.start();
+    loop.exec();
+    timer.stop();
+    timer.disconnect();
+    loop.disconnect();
 
-        if (nullptr != pThis)
-        {
-          disconnect(quitLoop);
-          disconnect(interruptThisLoop);
+    if (nullptr != pThis)
+    {
+      disconnect(quitLoop);
+      disconnect(interruptThisLoop);
 
-          disconnect(pauseLoop);
-          disconnect(resumeLoop);
-          disconnect(timeoutLoop);
-          if (bSkippableFlag)
-          {
-            disconnect(skipLoop);
-          }
-        }
+      disconnect(pauseLoop);
+      disconnect(resumeLoop);
+      disconnect(timeoutLoop);
+      if (bSkippableFlag)
+      {
+        if (skipLoop) disconnect(skipLoop);
       }
     }
   }

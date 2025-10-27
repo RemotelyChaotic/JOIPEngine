@@ -239,69 +239,75 @@ qint32 CScriptTextBox::showButtonPrompts(QVariant vsLabels, QString sStoreInto)
 {
   if (!CheckIfScriptCanRun()) { return -1; }
 
+  QString sStoreIntoLoc = sStoreInto;
+  sStoreIntoLoc.detach();
+  QString sRequestId = QUuid::createUuid().toString();
+  QString sError;
+  auto optvsStringLabels =
+    script::ParseStringListFromScriptVariant(vsLabels, "showButtonPrompts", &sError);
+  if (!optvsStringLabels.has_value())
+  {
+    if (auto spComm = m_wpCommunicator.lock())
+    {
+      if (auto spSignalEmitter = spComm->LockedEmitter<CTextBoxSignalEmitter>())
+      {
+        emit spSignalEmitter->showError(sError, QtMsgType::QtWarningMsg);
+      }
+    }
+    return -1;
+  }
+
+  QTimer::singleShot(0, this, [this, vsStringLabels = optvsStringLabels.value(),
+                               sStoreIntoLoc, sRequestId]() {
+    if (auto spComm = m_wpCommunicator.lock())
+    {
+      if (auto spSignalEmitter = spComm->LockedEmitter<CTextBoxSignalEmitter>())
+      {
+        emit spSignalEmitter->showButtonPrompts(vsStringLabels, sStoreIntoLoc, sRequestId,
+                                                true);
+      }
+    }
+  });
+
+  QPointer<CScriptTextBox> pThis(this);
+
+  // local loop to wait for answer
+  std::shared_ptr<qint32> spiReturnValue = std::make_shared<qint32>(-1);
+  QEventLoop loop;
+  QMetaObject::Connection quitLoop =
+    connect(this, &CScriptTextBox::SignalQuitLoop, &loop, &QEventLoop::quit);
+  QMetaObject::Connection interruptThisLoop =
+    connect(this, &CScriptObjectBase::SignalInterruptExecution,
+            &loop, &QEventLoop::quit, Qt::QueuedConnection);
+  QMetaObject::Connection showRetValLoop;
   if (auto spComm = m_wpCommunicator.lock())
   {
     if (auto spSignalEmitter = spComm->LockedEmitter<CTextBoxSignalEmitter>())
     {
-      QString sStoreIntoLoc = sStoreInto;
-      sStoreIntoLoc.detach();
-      QString sRequestId = QUuid::createUuid().toString();
-      QString sError;
-      auto optvsStringLabels =
-        script::ParseStringListFromScriptVariant(vsLabels, "showButtonPrompts", &sError);
-      if (!optvsStringLabels.has_value())
-      {
-        emit spSignalEmitter->showError(sError, QtMsgType::QtWarningMsg);
-        return -1;
-      }
-
-      QTimer::singleShot(0, this, [this, vsStringLabels = optvsStringLabels.value(),
-                                   sStoreIntoLoc, sRequestId]() {
-        if (auto spComm = m_wpCommunicator.lock())
-        {
-          if (auto spSignalEmitter = spComm->LockedEmitter<CTextBoxSignalEmitter>())
-          {
-            emit spSignalEmitter->showButtonPrompts(vsStringLabels, sStoreIntoLoc, sRequestId,
-                                                    true);
-          }
-        }
-      });
-
-      QPointer<CScriptTextBox> pThis(this);
-
-      // local loop to wait for answer
-      std::shared_ptr<qint32> spiReturnValue = std::make_shared<qint32>(-1);
-      QEventLoop loop;
-      QMetaObject::Connection quitLoop =
-        connect(this, &CScriptTextBox::SignalQuitLoop, &loop, &QEventLoop::quit);
-      QMetaObject::Connection interruptThisLoop =
-        connect(this, &CScriptObjectBase::SignalInterruptExecution,
-                &loop, &QEventLoop::quit, Qt::QueuedConnection);
-      QMetaObject::Connection showRetValLoop =
-        connect(spSignalEmitter.Get(), &CTextBoxSignalEmitter::showButtonReturnValue,
-                &loop, [&loop, spiReturnValue, sRequestId](qint32 iIndexSelected, QString sRequestIdRet)
+      showRetValLoop =
+      connect(spSignalEmitter.Get(), &CTextBoxSignalEmitter::showButtonReturnValue,
+              &loop, [&loop, spiReturnValue, sRequestId](qint32 iIndexSelected, QString sRequestIdRet)
+              {
+                if (sRequestId == sRequestIdRet)
                 {
-                  if (sRequestId == sRequestIdRet)
-                  {
-                    *spiReturnValue = iIndexSelected;
-                    bool bOk = QMetaObject::invokeMethod(&loop, "quit", Qt::QueuedConnection);
-                    assert(bOk); Q_UNUSED(bOk)
-                  }
-                }, Qt::QueuedConnection);
-      loop.exec();
-      loop.disconnect();
-
-      if (nullptr != pThis)
-      {
-        disconnect(quitLoop);
-        disconnect(interruptThisLoop);
-        disconnect(showRetValLoop);
-      }
-
-      return *spiReturnValue;
+                  *spiReturnValue = iIndexSelected;
+                  bool bOk = QMetaObject::invokeMethod(&loop, "quit", Qt::QueuedConnection);
+                  assert(bOk); Q_UNUSED(bOk)
+                }
+              }, Qt::QueuedConnection);
     }
   }
-  return -1;
+  loop.exec();
+  loop.disconnect();
+
+  if (nullptr != pThis)
+  {
+    disconnect(quitLoop);
+    disconnect(interruptThisLoop);
+    if (showRetValLoop) disconnect(showRetValLoop);
+  }
+
+  return *spiReturnValue;
 }
 
 //----------------------------------------------------------------------------------------
@@ -389,79 +395,81 @@ void CScriptTextBox::showText(QString sText, double dWaitTime, bool bSkipable, Q
 {
   if (!CheckIfScriptCanRun()) { return; }
 
-  if (auto spComm = m_wpCommunicator.lock())
+  if (0 > dWaitTime)
   {
-    if (auto spSignalEmitter = spComm->LockedEmitter<CTextBoxSignalEmitter>())
+    dWaitTime = static_cast<double>(EstimateDurationBasedOnText(sText)) / 1000.0;
+  }
+
+  bool bOk = true;
+  QString sResource = resource.isValid() && !resource.isNull() ?
+                          GetResourceName(resource, "showText", &bOk) : QString();
+  sResource.detach();
+
+  if (!bOk)
+  {
+    return;
+  }
+
+  if (0 < dWaitTime)
+  {
+    QString sTextCopy = sText;
+    sTextCopy.detach();
+    QTimer::singleShot(0, this, [this,sText = sTextCopy,bSkipable,dWaitTime, sResource]() {
+      if (auto spComm = m_wpCommunicator.lock())
+      {
+        if (auto spSignalEmitter = spComm->LockedEmitter<CTextBoxSignalEmitter>())
+        {
+          emit spSignalEmitter->showText(sText, bSkipable ? dWaitTime : 0, sResource);
+        }
+      }
+    });
+
+    bool bSoundFinished = sResource.isEmpty();
+    QDateTime lastTime = QDateTime::currentDateTime();
+    qint32 iTimeLeft = dWaitTime * 1000;
+
+    QPointer<CScriptTextBox> pThis(this);
+    QTimer timer;
+    timer.setSingleShot(false);
+    timer.setInterval(20);
+    QEventLoop loop;
+
+    QMetaObject::Connection quitLoop =
+      connect(this, &CScriptTextBox::SignalQuitLoop,
+              &loop, &QEventLoop::quit, Qt::QueuedConnection);
+    QMetaObject::Connection interruptThisLoop =
+      connect(this, &CScriptObjectBase::SignalInterruptExecution,
+              &loop, &QEventLoop::quit, Qt::QueuedConnection);
+
+    // connect lambdas in loop context, so events are processed, but capture timer,
+    // to start / stop
+    QMetaObject::Connection pauseLoop =
+      connect(this, &CScriptTextBox::SignalPauseTimer, &timer, &QTimer::stop,
+              Qt::QueuedConnection);
+    QMetaObject::Connection resumeLoop =
+      connect(this, &CScriptTextBox::SignalResumeTimer, &timer, [&timer, &lastTime]() {
+        lastTime = QDateTime::currentDateTime();
+        timer.start();
+      }, Qt::QueuedConnection);
+
+    QMetaObject::Connection timeoutLoop =
+      connect(&timer, &QTimer::timeout, &loop, [&loop, &iTimeLeft, &lastTime, &bSoundFinished]() {
+        QDateTime newTime = QDateTime::currentDateTime();
+        iTimeLeft -= newTime.toMSecsSinceEpoch() - lastTime.toMSecsSinceEpoch();
+        lastTime = newTime;
+        if (0 >= iTimeLeft && bSoundFinished)
+        {
+          emit loop.exit();
+        }
+      });
+
+    QMetaObject::Connection resourceFinished;
+    QMetaObject::Connection skipLoop;
+    QMetaObject::Connection sendSkipRes;
+    if (auto spComm = m_wpCommunicator.lock())
     {
-      if (0 > dWaitTime)
+      if (auto spSignalEmitter = spComm->LockedEmitter<CTextBoxSignalEmitter>())
       {
-        dWaitTime = static_cast<double>(EstimateDurationBasedOnText(sText)) / 1000.0;
-      }
-
-      bool bOk = true;
-      QString sResource = resource.isValid() && !resource.isNull() ?
-                              GetResourceName(resource, "showText", &bOk) : QString();
-      sResource.detach();
-
-      if (!bOk)
-      {
-        return;
-      }
-
-      if (0 < dWaitTime)
-      {
-        QString sTextCopy = sText;
-        sTextCopy.detach();
-        QTimer::singleShot(0, this, [this,sText = sTextCopy,bSkipable,dWaitTime, sResource]() {
-          if (auto spComm = m_wpCommunicator.lock())
-          {
-            if (auto spSignalEmitter = spComm->LockedEmitter<CTextBoxSignalEmitter>())
-            {
-              emit spSignalEmitter->showText(sText, bSkipable ? dWaitTime : 0, sResource);
-            }
-          }
-        });
-
-        bool bSoundFinished = sResource.isEmpty();
-        QDateTime lastTime = QDateTime::currentDateTime();
-        qint32 iTimeLeft = dWaitTime * 1000;
-
-        QPointer<CScriptTextBox> pThis(this);
-        QTimer timer;
-        timer.setSingleShot(false);
-        timer.setInterval(20);
-        QEventLoop loop;
-
-        QMetaObject::Connection quitLoop =
-          connect(this, &CScriptTextBox::SignalQuitLoop,
-                  &loop, &QEventLoop::quit, Qt::QueuedConnection);
-        QMetaObject::Connection interruptThisLoop =
-          connect(this, &CScriptObjectBase::SignalInterruptExecution,
-                  &loop, &QEventLoop::quit, Qt::QueuedConnection);
-
-        // connect lambdas in loop context, so events are processed, but capture timer,
-        // to start / stop
-        QMetaObject::Connection pauseLoop =
-          connect(this, &CScriptTextBox::SignalPauseTimer, &timer, &QTimer::stop,
-                  Qt::QueuedConnection);
-        QMetaObject::Connection resumeLoop =
-          connect(this, &CScriptTextBox::SignalResumeTimer, &timer, [&timer, &lastTime]() {
-            lastTime = QDateTime::currentDateTime();
-            timer.start();
-          }, Qt::QueuedConnection);
-
-        QMetaObject::Connection timeoutLoop =
-          connect(&timer, &QTimer::timeout, &loop, [&loop, &iTimeLeft, &lastTime, &bSoundFinished]() {
-            QDateTime newTime = QDateTime::currentDateTime();
-            iTimeLeft -= newTime.toMSecsSinceEpoch() - lastTime.toMSecsSinceEpoch();
-            lastTime = newTime;
-            if (0 >= iTimeLeft && bSoundFinished)
-            {
-              emit loop.exit();
-            }
-          });
-
-        QMetaObject::Connection resourceFinished;
         if (!sResource.isEmpty())
         {
           resourceFinished =
@@ -479,8 +487,6 @@ void CScriptTextBox::showText(QString sText, double dWaitTime, bool bSkipable, Q
                   }, Qt::QueuedConnection);
         }
 
-        QMetaObject::Connection skipLoop;
-        QMetaObject::Connection sendSkipRes;
         if (bSkipable)
         {
           skipLoop =
@@ -495,34 +501,34 @@ void CScriptTextBox::showText(QString sText, double dWaitTime, bool bSkipable, Q
                         });
           }
         }
+      }
+    }
 
-        timer.start();
-        loop.exec();
-        timer.stop();
-        timer.disconnect();
-        loop.disconnect();
+    timer.start();
+    loop.exec();
+    timer.stop();
+    timer.disconnect();
+    loop.disconnect();
 
-        if (nullptr != pThis)
+    if (nullptr != pThis)
+    {
+      disconnect(quitLoop);
+      disconnect(interruptThisLoop);
+      disconnect(pauseLoop);
+      disconnect(resumeLoop);
+      disconnect(timeoutLoop);
+
+      if (!sResource.isEmpty())
+      {
+        if (resourceFinished) disconnect(resourceFinished);
+      }
+
+      if (bSkipable)
+      {
+        if (skipLoop) disconnect(skipLoop);
+        if (!sResource.isEmpty())
         {
-          disconnect(quitLoop);
-          disconnect(interruptThisLoop);
-          disconnect(pauseLoop);
-          disconnect(resumeLoop);
-          disconnect(timeoutLoop);
-
-          if (!sResource.isEmpty())
-          {
-            disconnect(resourceFinished);
-          }
-
-          if (bSkipable)
-          {
-            disconnect(skipLoop);
-            if (!sResource.isEmpty())
-            {
-              disconnect(sendSkipRes);
-            }
-          }
+          if (sendSkipRes) disconnect(sendSkipRes);
         }
       }
     }
@@ -557,33 +563,34 @@ QString CScriptTextBox::showInput(QString sDefault, QString sStoreInto)
 
   QString sRequestId = QUuid::createUuid().toString();
 
+  QString sDefaultLoc = sDefault;
+  QString sStoreIntoLoc = sStoreInto;
+    QTimer::singleShot(0, this, [this,sDefaultLoc,sStoreIntoLoc, sRequestId]() {
+      if (auto spComm = m_wpCommunicator.lock())
+      {
+        if (auto spSignalEmitter = spComm->LockedEmitter<CTextBoxSignalEmitter>())
+        {
+          emit spSignalEmitter->showInput(sDefaultLoc, sStoreIntoLoc, sRequestId, false);
+        }
+      }
+  });
+
+  QPointer<CScriptTextBox> pThis(this);
+
+  // local loop to wait for answer
+  std::shared_ptr<QString> spsReturnValue = std::make_shared<QString>();
+  QEventLoop loop;
+  QMetaObject::Connection quitLoop =
+    connect(this, &CScriptTextBox::SignalQuitLoop, &loop, &QEventLoop::quit);
+  QMetaObject::Connection interruptThisLoop =
+    connect(this, &CScriptObjectBase::SignalInterruptExecution,
+            &loop, &QEventLoop::quit, Qt::QueuedConnection);
+  QMetaObject::Connection showRetValLoop;
   if (auto spComm = m_wpCommunicator.lock())
   {
     if (auto spSignalEmitter = spComm->LockedEmitter<CTextBoxSignalEmitter>())
     {
-      QString sDefaultLoc = sDefault;
-      QString sStoreIntoLoc = sStoreInto;
-        QTimer::singleShot(0, this, [this,sDefaultLoc,sStoreIntoLoc, sRequestId]() {
-          if (auto spComm = m_wpCommunicator.lock())
-          {
-            if (auto spSignalEmitter = spComm->LockedEmitter<CTextBoxSignalEmitter>())
-            {
-              emit spSignalEmitter->showInput(sDefaultLoc, sStoreIntoLoc, sRequestId, false);
-            }
-          }
-      });
-
-      QPointer<CScriptTextBox> pThis(this);
-
-      // local loop to wait for answer
-      std::shared_ptr<QString> spsReturnValue = std::make_shared<QString>();
-      QEventLoop loop;
-      QMetaObject::Connection quitLoop =
-        connect(this, &CScriptTextBox::SignalQuitLoop, &loop, &QEventLoop::quit);
-      QMetaObject::Connection interruptThisLoop =
-        connect(this, &CScriptObjectBase::SignalInterruptExecution,
-                &loop, &QEventLoop::quit, Qt::QueuedConnection);
-      QMetaObject::Connection showRetValLoop =
+      showRetValLoop =
         connect(spSignalEmitter.Get(), &CTextBoxSignalEmitter::showInputReturnValue,
                 &loop, [&loop, spsReturnValue, sRequestId](QString sInput, QString sRequestIdRet)
       {
@@ -596,20 +603,19 @@ QString CScriptTextBox::showInput(QString sDefault, QString sStoreInto)
         }
         // direct connection to fix cross thread issues with QString content being deleted
       }, Qt::DirectConnection);
-      loop.exec();
-      loop.disconnect();
-
-      if (nullptr != pThis)
-      {
-        disconnect(quitLoop);
-        disconnect(interruptThisLoop);
-        disconnect(showRetValLoop);
-      }
-
-      return *spsReturnValue;
     }
   }
-  return QString();
+  loop.exec();
+  loop.disconnect();
+
+  if (nullptr != pThis)
+  {
+    disconnect(quitLoop);
+    disconnect(interruptThisLoop);
+    if (showRetValLoop) disconnect(showRetValLoop);
+  }
+
+  return *spsReturnValue;
 }
 
 //----------------------------------------------------------------------------------------
@@ -725,32 +731,33 @@ bool CScriptTextBox::GetDialogueFromUi(QString sId, QString sString, bool bIsReg
                                        std::shared_ptr<bool>& bWaitRet, std::shared_ptr<QString>& sSoundResourceRet,
                                        std::shared_ptr<QStringList>& vsTagsRet)
 {
+  sId.detach();
+  sString.detach();
+  vsTags.detach();
 
+  QTimer::singleShot(0, this, [this, sId, sString, bIsRegexp, vsTags]() {
+      if (auto spComm = m_wpCommunicator.lock())
+      {
+        if (auto spSignalEmitter = spComm->LockedEmitter<CTextBoxSignalEmitter>())
+        {
+          emit spSignalEmitter->getDialogue(sId, sString, bIsRegexp, vsTags);
+        }
+      }
+  });
+
+  QPointer<CScriptTextBox> pThis(this);
+  QEventLoop loop;
+  QMetaObject::Connection quitLoop =
+      connect(this, &CScriptTextBox::SignalQuitLoop, &loop, &QEventLoop::quit);
+  QMetaObject::Connection interruptThisLoop =
+      connect(this, &CScriptObjectBase::SignalInterruptExecution,
+              &loop, &QEventLoop::quit, Qt::QueuedConnection);
+
+  QMetaObject::Connection showRetValLoop;
   if (auto spComm = m_wpCommunicator.lock())
   {
-    sId.detach();
-    sString.detach();
-    vsTags.detach();
     if (auto spSignalEmitter = spComm->LockedEmitter<CTextBoxSignalEmitter>())
     {
-      QTimer::singleShot(0, this, [this, sId, sString, bIsRegexp, vsTags]() {
-          if (auto spComm = m_wpCommunicator.lock())
-          {
-            if (auto spSignalEmitter = spComm->LockedEmitter<CTextBoxSignalEmitter>())
-            {
-              emit spSignalEmitter->getDialogue(sId, sString, bIsRegexp, vsTags);
-            }
-          }
-      });
-
-      QPointer<CScriptTextBox> pThis(this);
-      QEventLoop loop;
-      QMetaObject::Connection quitLoop =
-          connect(this, &CScriptTextBox::SignalQuitLoop, &loop, &QEventLoop::quit);
-      QMetaObject::Connection interruptThisLoop =
-          connect(this, &CScriptObjectBase::SignalInterruptExecution,
-                  &loop, &QEventLoop::quit, Qt::QueuedConnection);
-
       QMetaObject::Connection showRetValLoop =
           connect(spSignalEmitter.Get(), &::CTextBoxSignalEmitter::getDialogueReturnValue,
               &loop, [&loop, sId, sStringRet, iTimeRet, bWaitRet, sSoundResourceRet, vsTagsRet]
@@ -772,20 +779,19 @@ bool CScriptTextBox::GetDialogueFromUi(QString sId, QString sString, bool bIsReg
                 }
                 // direct connection to fix cross thread issues with QString content being deleted
               }, Qt::DirectConnection);
-
-      loop.exec();
-      loop.disconnect();
-
-      if (nullptr != pThis)
-      {
-        disconnect(quitLoop);
-        disconnect(interruptThisLoop);
-      }
-
-      return true;
     }
   }
-  return false;
+  loop.exec();
+  loop.disconnect();
+
+  if (nullptr != pThis)
+  {
+    disconnect(quitLoop);
+    disconnect(interruptThisLoop);
+    if (showRetValLoop) disconnect(showRetValLoop);
+  }
+
+  return true;
 }
 
 //----------------------------------------------------------------------------------------
@@ -1188,34 +1194,37 @@ void CEosScriptTextBox::setBackgroundColors(const std::vector<QColor>& vColors)
 qint32 CEosScriptTextBox::showButtonPrompts(const QStringList& vsLabels)
 {
   if (!CheckIfScriptCanRun()) { return -1; }
+
+  QString sRequestId = QUuid::createUuid().toString();
+
+  QTimer::singleShot(0, this, [this, vsLabels, sRequestId]() {
+    if (auto spComm = m_wpCommunicator.lock())
+    {
+      if (auto spSignalEmitter = spComm->LockedEmitter<CTextBoxSignalEmitter>())
+      {
+        emit spSignalEmitter->showButtonPrompts(vsLabels, QString(), sRequestId,
+                                                true);
+      }
+    }
+  });
+
+  QPointer<CEosScriptTextBox> pThis(this);
+
+  // local loop to wait for answer
+  std::shared_ptr<qint32> spiReturnValue = std::make_shared<qint32>(-1);
+  QEventLoop loop;
+  QMetaObject::Connection quitLoop =
+    connect(this, &CEosScriptTextBox::SignalQuitLoop, &loop, &QEventLoop::quit);
+  QMetaObject::Connection interruptThisLoop =
+    connect(this, &CScriptObjectBase::SignalInterruptExecution,
+            &loop, &QEventLoop::quit, Qt::QueuedConnection);
+
+  QMetaObject::Connection showRetValLoop;
   if (auto spComm = m_wpCommunicator.lock())
   {
     if (auto spSignalEmitter = spComm->LockedEmitter<CTextBoxSignalEmitter>())
     {
-      QString sRequestId = QUuid::createUuid().toString();
-
-      QTimer::singleShot(0, this, [this, vsLabels, sRequestId]() {
-        if (auto spComm = m_wpCommunicator.lock())
-        {
-          if (auto spSignalEmitter = spComm->LockedEmitter<CTextBoxSignalEmitter>())
-          {
-            emit spSignalEmitter->showButtonPrompts(vsLabels, QString(), sRequestId,
-                                                    true);
-          }
-        }
-      });
-
-      QPointer<CEosScriptTextBox> pThis(this);
-
-      // local loop to wait for answer
-      std::shared_ptr<qint32> spiReturnValue = std::make_shared<qint32>(-1);
-      QEventLoop loop;
-      QMetaObject::Connection quitLoop =
-        connect(this, &CEosScriptTextBox::SignalQuitLoop, &loop, &QEventLoop::quit);
-      QMetaObject::Connection interruptThisLoop =
-        connect(this, &CScriptObjectBase::SignalInterruptExecution,
-                &loop, &QEventLoop::quit, Qt::QueuedConnection);
-      QMetaObject::Connection showRetValLoop =
+      showRetValLoop =
         connect(spSignalEmitter.Get(), &CTextBoxSignalEmitter::showButtonReturnValue,
                 &loop, [&loop, spiReturnValue, sRequestId](qint32 iIndexSelected, QString sRequestIdRet)
                 {
@@ -1226,20 +1235,19 @@ qint32 CEosScriptTextBox::showButtonPrompts(const QStringList& vsLabels)
                     assert(bOk); Q_UNUSED(bOk)
                   }
                 }, Qt::QueuedConnection);
-      loop.exec();
-      loop.disconnect();
-
-      if (nullptr != pThis)
-      {
-        disconnect(quitLoop);
-        disconnect(interruptThisLoop);
-        disconnect(showRetValLoop);
-      }
-
-      return *spiReturnValue;
     }
   }
-  return -1;
+  loop.exec();
+  loop.disconnect();
+
+  if (nullptr != pThis)
+  {
+    disconnect(quitLoop);
+    disconnect(interruptThisLoop);
+    if (showRetValLoop) disconnect(showRetValLoop);
+  }
+
+  return *spiReturnValue;
 }
 
 //----------------------------------------------------------------------------------------
@@ -1250,32 +1258,33 @@ QString CEosScriptTextBox::showInput(const QString& sStoreIntoVar)
 
   QString sRequestId = QUuid::createUuid().toString();
 
+  QString sStoreIntoLoc = sStoreIntoVar;
+  QTimer::singleShot(0, this, [this,sStoreIntoVar,sRequestId]() {
+      if (auto spComm = m_wpCommunicator.lock())
+      {
+        if (auto spSignalEmitter = spComm->LockedEmitter<CTextBoxSignalEmitter>())
+        {
+          emit spSignalEmitter->showInput(QString(), sStoreIntoVar, sRequestId, false);
+        }
+      }
+  });
+
+  QPointer<CEosScriptTextBox> pThis(this);
+
+  // local loop to wait for answer
+  std::shared_ptr<QString> spsReturnValue = std::make_shared<QString>();
+  QEventLoop loop;
+  QMetaObject::Connection quitLoop =
+    connect(this, &CEosScriptTextBox::SignalQuitLoop, &loop, &QEventLoop::quit);
+  QMetaObject::Connection interruptThisLoop =
+    connect(this, &CScriptObjectBase::SignalInterruptExecution,
+            &loop, &QEventLoop::quit, Qt::QueuedConnection);
+  QMetaObject::Connection showRetValLoop;
   if (auto spComm = m_wpCommunicator.lock())
   {
     if (auto spSignalEmitter = spComm->LockedEmitter<CTextBoxSignalEmitter>())
     {
-      QString sStoreIntoLoc = sStoreIntoVar;
-      QTimer::singleShot(0, this, [this,sStoreIntoVar,sRequestId]() {
-          if (auto spComm = m_wpCommunicator.lock())
-          {
-            if (auto spSignalEmitter = spComm->LockedEmitter<CTextBoxSignalEmitter>())
-            {
-              emit spSignalEmitter->showInput(QString(), sStoreIntoVar, sRequestId, false);
-            }
-          }
-      });
-
-      QPointer<CEosScriptTextBox> pThis(this);
-
-      // local loop to wait for answer
-      std::shared_ptr<QString> spsReturnValue = std::make_shared<QString>();
-      QEventLoop loop;
-      QMetaObject::Connection quitLoop =
-        connect(this, &CEosScriptTextBox::SignalQuitLoop, &loop, &QEventLoop::quit);
-      QMetaObject::Connection interruptThisLoop =
-        connect(this, &CScriptObjectBase::SignalInterruptExecution,
-                &loop, &QEventLoop::quit, Qt::QueuedConnection);
-      QMetaObject::Connection showRetValLoop =
+      showRetValLoop =
         connect(spSignalEmitter.Get(), &CTextBoxSignalEmitter::showInputReturnValue,
                 &loop, [&loop, spsReturnValue,sRequestId](QString sInput, QString sRequestIdRet)
       {
@@ -1288,20 +1297,19 @@ QString CEosScriptTextBox::showInput(const QString& sStoreIntoVar)
         }
         // direct connection to fix cross thread issues with QString content being deleted
       }, Qt::DirectConnection);
-      loop.exec();
-      loop.disconnect();
-
-      if (nullptr != pThis)
-      {
-        disconnect(quitLoop);
-        disconnect(interruptThisLoop);
-        disconnect(showRetValLoop);
-      }
-
-      return *spsReturnValue;
     }
   }
-  return QString();
+  loop.exec();
+  loop.disconnect();
+
+  if (nullptr != pThis)
+  {
+    disconnect(quitLoop);
+    disconnect(interruptThisLoop);
+    if (showRetValLoop) disconnect(showRetValLoop);
+  }
+
+  return *spsReturnValue;
 }
 
 //----------------------------------------------------------------------------------------
@@ -1325,88 +1333,88 @@ void CEosScriptTextBox::showText(QString sText, double dWaitTime, bool bSkipable
 {
   if (!CheckIfScriptCanRun()) { return; }
 
-  if (auto spComm = m_wpCommunicator.lock())
+  if (0 < dWaitTime)
   {
-    if (auto spSignalEmitter = spComm->LockedEmitter<CTextBoxSignalEmitter>())
-    {
-      if (0 < dWaitTime)
+    QString sTextCopy = sText;
+    sTextCopy.detach();
+    QTimer::singleShot(0, this, [this, sText = sTextCopy,bSkipable,dWaitTime]() {
+      if (auto spComm = m_wpCommunicator.lock())
       {
-        QString sTextCopy = sText;
-        sTextCopy.detach();
-        QTimer::singleShot(0, this, [this, sText = sTextCopy,bSkipable,dWaitTime]() {
-          if (auto spComm = m_wpCommunicator.lock())
-          {
-            if (auto spSignalEmitter = spComm->LockedEmitter<CTextBoxSignalEmitter>())
-            {
-              emit spSignalEmitter->showText(sText, bSkipable ? dWaitTime : 0, QString());
-            }
-          }
-        });
+        if (auto spSignalEmitter = spComm->LockedEmitter<CTextBoxSignalEmitter>())
+        {
+          emit spSignalEmitter->showText(sText, bSkipable ? dWaitTime : 0, QString());
+        }
+      }
+    });
 
-        QDateTime lastTime = QDateTime::currentDateTime();
-        qint32 iTimeLeft = dWaitTime * 1000;
+    QDateTime lastTime = QDateTime::currentDateTime();
+    qint32 iTimeLeft = dWaitTime * 1000;
 
-        QPointer<CEosScriptTextBox> pThis(this);
-        QTimer timer;
-        timer.setSingleShot(false);
-        timer.setInterval(20);
-        QEventLoop loop;
+    QPointer<CEosScriptTextBox> pThis(this);
+    QTimer timer;
+    timer.setSingleShot(false);
+    timer.setInterval(20);
+    QEventLoop loop;
 
-        QMetaObject::Connection quitLoop =
-          connect(this, &CEosScriptTextBox::SignalQuitLoop,
-                  &loop, &QEventLoop::quit, Qt::QueuedConnection);
-        QMetaObject::Connection interruptThisLoop =
-          connect(this, &CScriptObjectBase::SignalInterruptExecution,
-                  &loop, &QEventLoop::quit, Qt::QueuedConnection);
+    QMetaObject::Connection quitLoop =
+      connect(this, &CEosScriptTextBox::SignalQuitLoop,
+              &loop, &QEventLoop::quit, Qt::QueuedConnection);
+    QMetaObject::Connection interruptThisLoop =
+      connect(this, &CScriptObjectBase::SignalInterruptExecution,
+              &loop, &QEventLoop::quit, Qt::QueuedConnection);
 
-        // connect lambdas in loop context, so events are processed, but capture timer,
-        // to start / stop
-        QMetaObject::Connection pauseLoop =
-          connect(this, &CEosScriptTextBox::SignalPauseTimer, &timer, &QTimer::stop,
-                  Qt::QueuedConnection);
-        QMetaObject::Connection resumeLoop =
-          connect(this, &CEosScriptTextBox::SignalResumeTimer, &timer, [&timer, &lastTime]() {
-            lastTime = QDateTime::currentDateTime();
-            timer.start();
-          }, Qt::QueuedConnection);
+    // connect lambdas in loop context, so events are processed, but capture timer,
+    // to start / stop
+    QMetaObject::Connection pauseLoop =
+      connect(this, &CEosScriptTextBox::SignalPauseTimer, &timer, &QTimer::stop,
+              Qt::QueuedConnection);
+    QMetaObject::Connection resumeLoop =
+      connect(this, &CEosScriptTextBox::SignalResumeTimer, &timer, [&timer, &lastTime]() {
+        lastTime = QDateTime::currentDateTime();
+        timer.start();
+      }, Qt::QueuedConnection);
 
-        QMetaObject::Connection timeoutLoop =
-          connect(&timer, &QTimer::timeout, &loop, [&loop, &iTimeLeft, &lastTime]() {
-            QDateTime newTime = QDateTime::currentDateTime();
-            iTimeLeft -= newTime.toMSecsSinceEpoch() - lastTime.toMSecsSinceEpoch();
-            lastTime = newTime;
-            if (0 >= iTimeLeft)
-            {
-              emit loop.exit();
-            }
-          });
+    QMetaObject::Connection timeoutLoop =
+      connect(&timer, &QTimer::timeout, &loop, [&loop, &iTimeLeft, &lastTime]() {
+        QDateTime newTime = QDateTime::currentDateTime();
+        iTimeLeft -= newTime.toMSecsSinceEpoch() - lastTime.toMSecsSinceEpoch();
+        lastTime = newTime;
+        if (0 >= iTimeLeft)
+        {
+          emit loop.exit();
+        }
+      });
 
-        QMetaObject::Connection skipLoop;
-        if (bSkipable)
+    QMetaObject::Connection skipLoop;
+    if (bSkipable)
+    {
+      if (auto spComm = m_wpCommunicator.lock())
+      {
+        if (auto spSignalEmitter = spComm->LockedEmitter<CTextBoxSignalEmitter>())
         {
           skipLoop =
             connect(spSignalEmitter.Get(), &CTextBoxSignalEmitter::waitSkipped,
                     &loop, &QEventLoop::quit, Qt::QueuedConnection);
         }
+      }
+    }
 
-        timer.start();
-        loop.exec();
-        timer.stop();
-        timer.disconnect();
-        loop.disconnect();
+    timer.start();
+    loop.exec();
+    timer.stop();
+    timer.disconnect();
+    loop.disconnect();
 
-        if (nullptr != pThis)
-        {
-          disconnect(quitLoop);
-          disconnect(interruptThisLoop);
-          disconnect(pauseLoop);
-          disconnect(resumeLoop);
-          disconnect(timeoutLoop);
-          if (bSkipable)
-          {
-            disconnect(skipLoop);
-          }
-        }
+    if (nullptr != pThis)
+    {
+      disconnect(quitLoop);
+      disconnect(interruptThisLoop);
+      disconnect(pauseLoop);
+      disconnect(resumeLoop);
+      disconnect(timeoutLoop);
+      if (bSkipable)
+      {
+        if (skipLoop) disconnect(skipLoop);
       }
     }
   }

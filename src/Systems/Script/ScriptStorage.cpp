@@ -144,30 +144,31 @@ QVariant CScriptStorageBase::LoadImpl(QString sId, QString sContext)
 {
   QString sRequestId = QUuid::createUuid().toString();
 
+  QTimer::singleShot(0, this, [this,sId,sContext,sRequestId]() {
+    if (auto spComm = m_wpCommunicator.lock())
+    {
+      if (auto spSignalEmitter = spComm->LockedEmitter<CStorageSignalEmitter>())
+      {
+        emit spSignalEmitter->load(sId, sRequestId, sContext);
+      }
+    }
+  });
+
+  // local loop to wait for answer
+  QPointer<CScriptStorageBase> pThis(this);
+  std::shared_ptr<QVariant> spReturnValue = std::make_shared<QVariant>();
+  QEventLoop loop;
+  QMetaObject::Connection quitLoop =
+    connect(this, &CScriptStorageBase::SignalQuitLoop, &loop, &QEventLoop::quit);
+  QMetaObject::Connection interruptThisLoop =
+    connect(this, &CScriptObjectBase::SignalInterruptExecution,
+            &loop, &QEventLoop::quit, Qt::QueuedConnection);
+  QMetaObject::Connection showRetValLoop;
   if (auto spComm = m_wpCommunicator.lock())
   {
     if (auto spSignalEmitter = spComm->LockedEmitter<CStorageSignalEmitter>())
     {
-      QTimer::singleShot(0, this, [this,sId,sContext,sRequestId]() {
-        if (auto spComm = m_wpCommunicator.lock())
-        {
-          if (auto spSignalEmitter = spComm->LockedEmitter<CStorageSignalEmitter>())
-          {
-            emit spSignalEmitter->load(sId, sRequestId, sContext);
-          }
-        }
-      });
-
-      // local loop to wait for answer
-      QPointer<CScriptStorageBase> pThis(this);
-      std::shared_ptr<QVariant> spReturnValue = std::make_shared<QVariant>();
-      QEventLoop loop;
-      QMetaObject::Connection quitLoop =
-        connect(this, &CScriptStorageBase::SignalQuitLoop, &loop, &QEventLoop::quit);
-      QMetaObject::Connection interruptThisLoop =
-        connect(this, &CScriptObjectBase::SignalInterruptExecution,
-                &loop, &QEventLoop::quit, Qt::QueuedConnection);
-      QMetaObject::Connection showRetValLoop =
+      showRetValLoop =
         connect(spSignalEmitter.Get(), &CStorageSignalEmitter::loadReturnValue,
                 &loop, [&loop, spReturnValue, sRequestId](QJSValue var, QString sRequestIdRet)
       {
@@ -180,20 +181,19 @@ QVariant CScriptStorageBase::LoadImpl(QString sId, QString sContext)
         }
         // direct connection to fix cross thread issues with QString content being deleted
       }, Qt::DirectConnection);
-      loop.exec();
-      loop.disconnect();
-
-      if (nullptr != pThis)
-      {
-        disconnect(quitLoop);
-        disconnect(interruptThisLoop);
-        disconnect(showRetValLoop);
-      }
-
-      return *spReturnValue;
     }
   }
-  return QVariant();
+  loop.exec();
+  loop.disconnect();
+
+  if (nullptr != pThis)
+  {
+    disconnect(quitLoop);
+    disconnect(interruptThisLoop);
+    if (showRetValLoop) disconnect(showRetValLoop);
+  }
+
+  return *spReturnValue;
 }
 
 //----------------------------------------------------------------------------------------

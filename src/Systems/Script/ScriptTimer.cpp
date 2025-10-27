@@ -188,42 +188,43 @@ void CScriptTimer::waitForTimer()
 {
   if (!CheckIfScriptCanRun()) { return; }
 
+  QTimer::singleShot(0, this, [this]() {
+    if (auto spComm = m_wpCommunicator.lock())
+    {
+      if (auto spSignalEmitter = spComm->LockedEmitter<CTimerSignalEmitter>())
+      {
+        emit spSignalEmitter->waitForTimer();
+      }
+    }
+  });
+
+  QPointer<CScriptTimer> pThis(this);
+  QEventLoop loop;
+  QMetaObject::Connection timeoutLoop;
   if (auto spComm = m_wpCommunicator.lock())
   {
     if (auto spSignalEmitter = spComm->LockedEmitter<CTimerSignalEmitter>())
     {
-      QTimer::singleShot(0, this, [this]() {
-        if (auto spComm = m_wpCommunicator.lock())
-        {
-          if (auto spSignalEmitter = spComm->LockedEmitter<CTimerSignalEmitter>())
-          {
-            emit spSignalEmitter->waitForTimer();
-          }
-        }
-      });
-
-      QPointer<CScriptTimer> pThis(this);
-      QEventLoop loop;
-      QMetaObject::Connection timeoutLoop =
+      timeoutLoop =
         connect(spSignalEmitter.Get(), &CTimerSignalEmitter::timerFinished,
                 &loop, &QEventLoop::quit, Qt::QueuedConnection);
-      QMetaObject::Connection quitLoop =
-        connect(this, &CScriptTimer::SignalQuitLoop,
-                &loop, &QEventLoop::quit, Qt::QueuedConnection);
-      QMetaObject::Connection interruptThisLoop =
-        connect(this, &CScriptObjectBase::SignalInterruptExecution,
-                &loop, &QEventLoop::quit, Qt::QueuedConnection);
-
-      loop.exec();
-      loop.disconnect();
-
-      if (nullptr != pThis)
-      {
-        disconnect(timeoutLoop);
-        disconnect(quitLoop);
-        disconnect(interruptThisLoop);
-      }
     }
+  }
+  QMetaObject::Connection quitLoop =
+    connect(this, &CScriptTimer::SignalQuitLoop,
+            &loop, &QEventLoop::quit, Qt::QueuedConnection);
+  QMetaObject::Connection interruptThisLoop =
+    connect(this, &CScriptObjectBase::SignalInterruptExecution,
+            &loop, &QEventLoop::quit, Qt::QueuedConnection);
+
+  loop.exec();
+  loop.disconnect();
+
+  if (nullptr != pThis)
+  {
+    if (timeoutLoop) disconnect(timeoutLoop);
+    disconnect(quitLoop);
+    disconnect(interruptThisLoop);
   }
 }
 
@@ -433,66 +434,60 @@ void CEosScriptTimer::sleep(qint64 iTimeMs)
 {
   if (!CheckIfScriptCanRun()) { return; }
 
-  if (auto spComm = m_wpCommunicator.lock())
+  if (0 < iTimeMs)
   {
-    if (auto spSignalEmitter = spComm->LockedEmitter<CTimerSignalEmitter>())
-    {
-      if (0 < iTimeMs)
-      {
-        QDateTime lastTime = QDateTime::currentDateTime();
-        qint64 iTimeLeft = iTimeMs;
+    QDateTime lastTime = QDateTime::currentDateTime();
+    qint64 iTimeLeft = iTimeMs;
 
-        QPointer<CEosScriptTimer> pThis(this);
-        QTimer timer;
-        timer.setSingleShot(false);
-        timer.setInterval(20);
-        QEventLoop loop;
+    QPointer<CEosScriptTimer> pThis(this);
+    QTimer timer;
+    timer.setSingleShot(false);
+    timer.setInterval(20);
+    QEventLoop loop;
 
-        QMetaObject::Connection quitLoop =
-          connect(this, &CEosScriptTimer::SignalQuitLoop,
-                  &loop, &QEventLoop::quit, Qt::QueuedConnection);
-        QMetaObject::Connection interruptThisLoop =
-          connect(this, &CScriptObjectBase::SignalInterruptExecution,
-                  &loop, &QEventLoop::quit, Qt::QueuedConnection);
+    QMetaObject::Connection quitLoop =
+      connect(this, &CEosScriptTimer::SignalQuitLoop,
+              &loop, &QEventLoop::quit, Qt::QueuedConnection);
+    QMetaObject::Connection interruptThisLoop =
+      connect(this, &CScriptObjectBase::SignalInterruptExecution,
+              &loop, &QEventLoop::quit, Qt::QueuedConnection);
 
-        // connect lambdas in loop context, so events are processed, but capture timer,
-        // to start / stop
-        QMetaObject::Connection pauseLoop =
-          connect(this, &CEosScriptTimer::SignalPauseTimer, &timer, &QTimer::stop,
-                  Qt::QueuedConnection);
-        QMetaObject::Connection resumeLoop =
-          connect(this, &CEosScriptTimer::SignalResumeTimer, &timer, [&timer, &lastTime]() {
-            lastTime = QDateTime::currentDateTime();
-            timer.start();
-          }, Qt::QueuedConnection);
-
-        QMetaObject::Connection timeoutLoop =
-          connect(&timer, &QTimer::timeout, &loop, [&loop, &iTimeLeft, &lastTime]() {
-            QDateTime newTime = QDateTime::currentDateTime();
-            iTimeLeft -= newTime.toMSecsSinceEpoch() - lastTime.toMSecsSinceEpoch();
-            lastTime = newTime;
-            if (0 >= iTimeLeft)
-            {
-              emit loop.exit();
-            }
-          });
-
+    // connect lambdas in loop context, so events are processed, but capture timer,
+    // to start / stop
+    QMetaObject::Connection pauseLoop =
+      connect(this, &CEosScriptTimer::SignalPauseTimer, &timer, &QTimer::stop,
+              Qt::QueuedConnection);
+    QMetaObject::Connection resumeLoop =
+      connect(this, &CEosScriptTimer::SignalResumeTimer, &timer, [&timer, &lastTime]() {
+        lastTime = QDateTime::currentDateTime();
         timer.start();
-        loop.exec();
-        timer.stop();
-        timer.disconnect();
-        loop.disconnect();
+      }, Qt::QueuedConnection);
 
-        if (nullptr != pThis)
+    QMetaObject::Connection timeoutLoop =
+      connect(&timer, &QTimer::timeout, &loop, [&loop, &iTimeLeft, &lastTime]() {
+        QDateTime newTime = QDateTime::currentDateTime();
+        iTimeLeft -= newTime.toMSecsSinceEpoch() - lastTime.toMSecsSinceEpoch();
+        lastTime = newTime;
+        if (0 >= iTimeLeft)
         {
-          disconnect(quitLoop);
-          disconnect(interruptThisLoop);
-
-          disconnect(pauseLoop);
-          disconnect(resumeLoop);
-          disconnect(timeoutLoop);
+          emit loop.exit();
         }
-      }
+      });
+
+    timer.start();
+    loop.exec();
+    timer.stop();
+    timer.disconnect();
+    loop.disconnect();
+
+    if (nullptr != pThis)
+    {
+      disconnect(quitLoop);
+      disconnect(interruptThisLoop);
+
+      disconnect(pauseLoop);
+      disconnect(resumeLoop);
+      disconnect(timeoutLoop);
     }
   }
 }
@@ -533,41 +528,42 @@ void CEosScriptTimer::waitForTimer()
 {
   if (!CheckIfScriptCanRun()) { return; }
 
+  QTimer::singleShot(0, this, [this]() {
+    if (auto spComm = m_wpCommunicator.lock())
+    {
+      if (auto spSignalEmitter = spComm->LockedEmitter<CTimerSignalEmitter>())
+      {
+        emit spSignalEmitter->waitForTimer();
+      }
+    }
+  });
+
+  QPointer<CEosScriptTimer> pThis(this);
+  QEventLoop loop;
+  QMetaObject::Connection timeoutLoop;
   if (auto spComm = m_wpCommunicator.lock())
   {
     if (auto spSignalEmitter = spComm->LockedEmitter<CTimerSignalEmitter>())
     {
-      QTimer::singleShot(0, this, [this]() {
-        if (auto spComm = m_wpCommunicator.lock())
-        {
-          if (auto spSignalEmitter = spComm->LockedEmitter<CTimerSignalEmitter>())
-          {
-            emit spSignalEmitter->waitForTimer();
-          }
-        }
-      });
-
-      QPointer<CEosScriptTimer> pThis(this);
-      QEventLoop loop;
-      QMetaObject::Connection timeoutLoop =
+      timeoutLoop =
         connect(spSignalEmitter.Get(), &CTimerSignalEmitter::timerFinished,
                 &loop, &QEventLoop::quit, Qt::QueuedConnection);
-      QMetaObject::Connection quitLoop =
-        connect(this, &CEosScriptTimer::SignalQuitLoop,
-                &loop, &QEventLoop::quit, Qt::QueuedConnection);
-      QMetaObject::Connection interruptThisLoop =
-        connect(this, &CScriptObjectBase::SignalInterruptExecution,
-                &loop, &QEventLoop::quit, Qt::QueuedConnection);
-
-      loop.exec();
-      loop.disconnect();
-
-      if (nullptr != pThis)
-      {
-        disconnect(timeoutLoop);
-        disconnect(interruptThisLoop);
-        disconnect(quitLoop);
-      }
     }
+  }
+  QMetaObject::Connection quitLoop =
+    connect(this, &CEosScriptTimer::SignalQuitLoop,
+            &loop, &QEventLoop::quit, Qt::QueuedConnection);
+  QMetaObject::Connection interruptThisLoop =
+    connect(this, &CScriptObjectBase::SignalInterruptExecution,
+            &loop, &QEventLoop::quit, Qt::QueuedConnection);
+
+  loop.exec();
+  loop.disconnect();
+
+  if (nullptr != pThis)
+  {
+    if (timeoutLoop) disconnect(timeoutLoop);
+    disconnect(interruptThisLoop);
+    disconnect(quitLoop);
   }
 }
