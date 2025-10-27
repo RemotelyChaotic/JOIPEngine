@@ -6,7 +6,7 @@
 #include "Systems/Nodes/PathMergerModel.h"
 #include "Systems/Nodes/PathSplitterModel.h"
 #include "Systems/Nodes/NodeEditorRegistryBase.h"
-#include "Systems/Nodes/NodegraphicsObjectProvider.h"
+#include "Systems/Nodes/NodeGraphicsObjectProvider.h"
 #include "Systems/Nodes/SceneNodeModel.h"
 #include "Systems/Nodes/SceneTranstitionData.h"
 #include "Systems/Nodes/StartNodeModel.h"
