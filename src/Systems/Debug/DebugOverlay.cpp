@@ -14,6 +14,8 @@
 
 #include <cassert>
 
+CDebugOverlay* CDebugOverlay::m_pInstance = nullptr;
+
 CDebugOverlay::CDebugOverlay(QWidget* pParent) :
     COverlayBase(INT_MAX-1, pParent),
     ICustomMessageHandler(),
@@ -50,12 +52,23 @@ CDebugOverlay::CDebugOverlay(QWidget* pParent) :
           &CDebugOverlay::SlotDebugOverlayEnabledChanged);
   connect(m_spSettings.get(), &CSettings::keyBindingsChanged, this,
           &CDebugOverlay::SlotKeyBindingsChanged);
+
+  m_pInstance = this;
 }
 
 CDebugOverlay::~CDebugOverlay()
 {
+  m_pInstance = nullptr;
+
   parentWidget()->removeAction(m_pActionToggle);
   CJoipMessageHandler::RemoveHandler(this);
+}
+
+//----------------------------------------------------------------------------------------
+//
+CDebugOverlay* CDebugOverlay::GetInstance()
+{
+  return m_pInstance;
 }
 
 //----------------------------------------------------------------------------------------

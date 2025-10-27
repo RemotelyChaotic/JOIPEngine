@@ -11,6 +11,7 @@
 
 class CAgeCheckOverlay;
 class CDebugOverlay;
+class CDebugButtonOverlay;
 class CDeviceButtonOverlay;
 class CDownloadButtonOverlay;
 class CHelpButtonOverlay;
@@ -60,6 +61,7 @@ protected:
   std::unique_ptr<CHelpOverlay>           m_spHelpOverlay;
   std::unique_ptr<CDownloadButtonOverlay> m_spDownloadButtonOverlay;
   std::unique_ptr<CDeviceButtonOverlay>   m_spDeviceButtonOverlay;
+  std::unique_ptr<CDebugButtonOverlay>    m_spDebugButtonOverlay;
   std::shared_ptr<CWindowContext>         m_spWindowContext;
   std::shared_ptr<CSettings>              m_spSettings;
   QPointer<CBackgroundWidget>             m_pBackground;

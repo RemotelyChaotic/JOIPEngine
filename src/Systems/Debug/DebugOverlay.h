@@ -26,6 +26,8 @@ public:
   explicit CDebugOverlay(QWidget* pParent = nullptr);
   ~CDebugOverlay() override;
 
+  static CDebugOverlay* GetInstance();
+
   void Climb() override;
   void Hide() override;
   void Resize() override;
@@ -43,6 +45,8 @@ private slots:
   void SlotMessageImpl(QtMsgType type, const QString& sMsg);
 
 private:
+  static CDebugOverlay*              m_pInstance;
+
   std::unique_ptr<Ui::CDebugOverlay> m_spUi;
   std::shared_ptr<CSettings>         m_spSettings;
   std::weak_ptr<CDebugInterface>     m_wpDebugInterface;

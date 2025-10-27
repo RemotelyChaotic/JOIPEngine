@@ -737,6 +737,8 @@ macro(CreateJOIPProject JOIP_PROJECT_NAME)
     ${JOIPSources}/Widgets/ColorPicker.cpp
     ${JOIPSources}/Widgets/ColorPicker.h
     ${JOIPSources}/Widgets/ColorPicker.ui
+    ${JOIPSources}/Widgets/DebugButtonOverlay.cpp
+    ${JOIPSources}/Widgets/DebugButtonOverlay.h
     ${JOIPSources}/Widgets/DeviceButtonOverlay.cpp
     ${JOIPSources}/Widgets/DeviceButtonOverlay.h
     ${JOIPSources}/Widgets/DeviceSelectorWidget.cpp

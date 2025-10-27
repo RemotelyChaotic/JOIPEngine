@@ -646,7 +646,10 @@ QPushButton#EditDialogueContent {
   qproperty-icon: url(ui/ButtonDialogConfigure.png) off,
                   url(ui/ButtonDialogConfigure.png) on;
 }
-
+QPushButton#DebugLogButton {
+  qproperty-icon: url(ui/ButtonUList.png) off,
+                  url(ui/ButtonUList.png) on;
+}
 
 QPushButton:hover,
 QToolButton:hover {
@@ -1151,7 +1154,8 @@ COverlayBase {
 }
 COverlayBase#HelpButtonOverlay,
 COverlayBase#DownloadButtonOverlay,
-COverlayBase#DeviceButtonOverlay {
+COverlayBase#DeviceButtonOverlay,
+COverlayBase#DebugLogButtonOverlay {
   color: transparent;
   background-color: transparent;
   border: none;

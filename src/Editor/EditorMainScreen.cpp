@@ -12,6 +12,7 @@
 
 #include "Systems/BackActionHandler.h"
 #include "Systems/DatabaseManager.h"
+#include "Systems/Debug/DebugOverlay.h"
 #include "Systems/NotificationSender.h"
 #include "Systems/Project.h"
 
@@ -176,6 +177,8 @@ void CEditorMainScreen::Initialize(const std::shared_ptr<CWindowContext>& spWind
           this, &CEditorMainScreen::SlotToolsClicked);
   connect(m_spUi->pProjectActionBar->m_spUi->HelpButton, &QPushButton::clicked,
           this, &CEditorMainScreen::SlotHelpClicked);
+  connect(m_spUi->pProjectActionBar->m_spUi->DebugLogButton, &QPushButton::clicked,
+          this, &CEditorMainScreen::SlotDebugLogClicked);
   connect(m_spUi->pProjectActionBar->m_spUi->ExitButton, &QPushButton::clicked,
           this, &CEditorMainScreen::SlotExitClicked);
 
@@ -424,6 +427,18 @@ void CEditorMainScreen::SlotHelpClicked(bool bClick)
         m_spUi->pProjectActionBar->m_spUi->HelpButton->parentWidget()->mapFromGlobal(
           mapToGlobal(m_spUi->pProjectActionBar->m_spUi->HelpButton->geometry().center())),
         this);
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CEditorMainScreen::SlotDebugLogClicked(bool bClick)
+{
+  Q_UNUSED(bClick)
+  auto pDebugView = CDebugOverlay::GetInstance();
+  if (nullptr != pDebugView)
+  {
+    pDebugView->Show();
+  }
 }
 
 //----------------------------------------------------------------------------------------

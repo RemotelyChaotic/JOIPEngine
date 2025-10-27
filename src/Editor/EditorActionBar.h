@@ -54,6 +54,7 @@ public:
   std::unique_ptr<Ui::CEditorActionBar>            m_spUi;
 
 protected slots:
+  void SlotDebugOverlayEnabledChanged();
   void SlotKeyBindingsChanged();
 
 private:

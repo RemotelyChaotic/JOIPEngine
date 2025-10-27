@@ -49,6 +49,7 @@ protected slots:
   void SlotExportClicked(bool bClick);
   void SlotToolsClicked(bool bClick);
   void SlotHelpClicked(bool bClick);
+  void SlotDebugLogClicked(bool bClick);
   void SlotProjectEdited();
   //void SlotProjectExportError(CEditorModel::EExportError error, const QString& sErrorString);
   void SlotProjectNameEditingFinished();

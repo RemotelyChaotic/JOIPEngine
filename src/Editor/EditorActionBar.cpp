@@ -298,6 +298,8 @@ void CEditorActionBar::Initialize()
     wpHelpFactory->RegisterHelp(c_sEditDialogueTagsHelpId, ":/resources/help/editor/edit_dialogtags_button_help.html");
   }
 
+  connect(m_spSettings.get(), &CSettings::debugOverlayEnabledChanged,
+          this, &CEditorActionBar::SlotDebugOverlayEnabledChanged);
   connect(m_spSettings.get(), &CSettings::keyBindingsChanged,
           this, &CEditorActionBar::SlotKeyBindingsChanged);
 
@@ -407,6 +409,13 @@ void CEditorActionBar::ShowDialogueActionBar()
 
 //----------------------------------------------------------------------------------------
 //
+void CEditorActionBar::SlotDebugOverlayEnabledChanged()
+{
+  m_spUi->DebugLogButton->setVisible(m_spSettings->DebugOverlayEnabled());
+}
+
+//----------------------------------------------------------------------------------------
+//
 void CEditorActionBar::SlotKeyBindingsChanged()
 {
   // set bindings
@@ -431,6 +440,7 @@ void CEditorActionBar::SlotKeyBindingsChanged()
   {
     m_spUi->ExitButton->SetShortcut(m_spSettings->keyBinding("Exit"));
     m_spUi->HelpButton->SetShortcut(m_spSettings->keyBinding("Help"));
+    m_spUi->DebugLogButton->SetShortcut(m_spSettings->keyBinding("Debug"));
     m_spUi->SaveButton->SetShortcut(m_spSettings->keyBinding("Save"));
     m_spUi->UndoButton->SetShortcut(m_spSettings->keyBinding("Undo"));
     m_spUi->RedoButton->SetShortcut(m_spSettings->keyBinding("Redo"));

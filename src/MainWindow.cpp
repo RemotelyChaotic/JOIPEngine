@@ -19,6 +19,7 @@
 
 #include "Widgets/AgeCheckOverlay.h"
 #include "Widgets/BackgroundWidget.h"
+#include "Widgets/DebugButtonOverlay.h"
 #include "Widgets/DeviceButtonOverlay.h"
 #include "Widgets/DownloadButtonOverlay.h"
 #include "Widgets/HelpOverlay.h"
@@ -35,6 +36,7 @@ CMainWindow::CMainWindow(QWidget* pParent) :
   m_spHelpOverlay(nullptr),
   m_spDownloadButtonOverlay(std::make_unique<CDownloadButtonOverlay>(this)),
   m_spDeviceButtonOverlay(std::make_unique<CDeviceButtonOverlay>(this)),
+  m_spDebugButtonOverlay(std::make_unique<CDebugButtonOverlay>(this)),
   m_spWindowContext(std::make_shared<CWindowContext>()),
   m_pBackground(new CBackgroundWidget(this)),
   m_bInitialized(false),
@@ -43,6 +45,8 @@ CMainWindow::CMainWindow(QWidget* pParent) :
 {
   m_spHelpOverlay.reset(new CHelpOverlay(m_spHelpButtonOverlay.get(), this));
   m_spUi->setupUi(this);
+
+  m_spDebugButtonOverlay->Hide();
 
   m_pDebugOverlay = new CDebugOverlay(this);
   m_pDebugOverlay->Hide();
@@ -59,6 +63,7 @@ CMainWindow::~CMainWindow()
   m_spHelpButtonOverlay.reset();
   m_spDownloadButtonOverlay.reset();
   m_spDeviceButtonOverlay.reset();
+  m_spDebugButtonOverlay.reset();
 }
 
 //----------------------------------------------------------------------------------------
@@ -110,6 +115,20 @@ void CMainWindow::Initialize()
     {
       m_spDeviceButtonOverlay->Hide();
     }
+  }
+
+  m_spDebugButtonOverlay->Initialize();
+  connect(m_spDebugButtonOverlay.get(), &CDebugButtonOverlay::SignalButtonClicked,
+          this, [this]() {
+    m_pDebugOverlay->Show();
+  });
+  if (m_spSettings->DebugOverlayEnabled())
+  {
+    m_spDebugButtonOverlay->Show();
+  }
+  else
+  {
+    m_spDebugButtonOverlay->Hide();
   }
 
   m_spAgeCheckOverlay->Show();
@@ -203,6 +222,16 @@ void CMainWindow::SlotCurrentAppStateUnloadFinished()
 
   m_spHelpButtonOverlay->Show();
   m_spDownloadButtonOverlay->Show();
+
+  if (m_spSettings->DebugOverlayEnabled())
+  {
+    m_spDebugButtonOverlay->Show();
+  }
+  else
+  {
+    m_spDebugButtonOverlay->Hide();
+  }
+
   if (auto spDeviceManager = CApplication::Instance()->System<CDeviceManager>().lock())
   {
     if (spDeviceManager->NumberRegisteredConnectors() > 0)
@@ -282,10 +311,20 @@ void CMainWindow::SlotSetHelpButtonVisible(bool bVisible)
   if (bVisible)
   {
     m_spHelpButtonOverlay->Show();
+
+    if (m_spSettings->DebugOverlayEnabled())
+    {
+      m_spDebugButtonOverlay->Show();
+    }
+    else
+    {
+      m_spDebugButtonOverlay->Hide();
+    }
   }
   else
   {
     m_spHelpButtonOverlay->Hide();
+    m_spDebugButtonOverlay->Hide();
   }
 }
 

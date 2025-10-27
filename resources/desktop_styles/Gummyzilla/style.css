@@ -1085,6 +1085,14 @@ QPushButton#EditDialogueContent:pressed,
 QPushButton#EditDialogueContent:disabled {
   image: url(ui/ButtonDialogConfigureSelected.png);
 }
+QPushButton#DebugLogButton {
+  image: url(ui/ButtonUList.png);
+}
+QPushButton#DebugLogButton:hover,
+QPushButton#DebugLogButton:pressed,
+QPushButton#DebugLogButton:disabled {
+  image: url(ui/ButtonUListSelected.png);
+}
 
 
 QPushButton:hover,
@@ -1694,7 +1702,8 @@ COverlayBase {
 }
 COverlayBase#HelpButtonOverlay,
 COverlayBase#DownloadButtonOverlay,
-COverlayBase#DeviceButtonOverlay {
+COverlayBase#DeviceButtonOverlay,
+COverlayBase#DebugLogButtonOverlay {
   color: transparent;
   background-color: transparent;
   border: none;
