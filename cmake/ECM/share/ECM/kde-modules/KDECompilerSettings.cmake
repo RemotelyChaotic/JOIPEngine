@@ -395,7 +395,8 @@ if (CMAKE_CXX_COMPILER_ID STREQUAL "Intel" AND NOT WIN32)
 endif()
 
 if (MSVC)
-    # FIXME: do we not want to set the warning level up to level 3? (/W3)
+    # We want to set the warning level up to level 3 (/W3)
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /W3")
     # Disable warnings:
     # C4250: 'class1' : inherits 'class2::member' via dominance
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /wd4250")
@@ -409,6 +410,29 @@ if (MSVC)
     # C4661: 'identifier' : no suitable definition provided for explicit
     #         template instantiation request
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /wd4661")
+
+    #'identifier' : unreferenced formal parameter
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /w34100")
+    #'identifier' : local variable is initialized but not referenced
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /w34189")
+    #'expression': signed/unsigned mismatch
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /w34018")
+    #'expression': signed/unsigned mismatch
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /w34388")
+    #'operator': signed/unsigned mismatch
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /w34389")
+    #data member 'member1' will be initialized after data member 'member2'
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /w35038")
+    #enumerator 'identifier' in switch of enum 'enumeration' is not handled
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /w34062")
+    #uninitialized local variable 'name' used
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /w34700")
+    #potentially uninitialized local variable 'name' used
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /w34701")
+    #unreachable code
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /w34702")
+    #potentially uninitialized local pointer variable '%s' used
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /w34703")
 endif()
 
 if (WIN32)
