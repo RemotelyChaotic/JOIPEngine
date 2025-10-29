@@ -18,6 +18,7 @@ CDialogueEditorTreeModel::CDialogueEditorTreeModel(QObject* pParent) :
   m_spProject(),
   m_pRootItem(nullptr)
 {
+  Q_UNUSED(pParent)
   auto spDbManager = m_wpDbManager.lock();
   connect(spDbManager.get(), &CDatabaseManager::SignalResourceAdded,
           this, &CDialogueEditorTreeModel::SlotResourceAdded, Qt::QueuedConnection);
@@ -337,7 +338,7 @@ bool CDialogueEditorTreeModel::insertRow(qint32 iPosition, EDialogueTreeNodeType
     spNewNode->m_wpParent = spNode;
     spNewNode->m_sName = dialogue_tree::EnsureUniqueName(sName, spNode, spNewNode);
 
-    if (iPosition >= spNode->m_vspChildren.size())
+    if (static_cast<size_t>(iPosition) >= spNode->m_vspChildren.size())
     {
       spNode->m_vspChildren.push_back(spNewNode);
     }
@@ -726,7 +727,7 @@ QString CDialogueEditorTreeModel::GetToolTip(const QModelIndex& index) const
         {
           sTags += sTagFormated + "<br>";
         }
-        else if (spDial->m_tags.size()-1 == iCounter)
+        else if (spDial->m_tags.size()-1 == static_cast<size_t>(iCounter))
         {
           sTags += sTagFormated;
         }

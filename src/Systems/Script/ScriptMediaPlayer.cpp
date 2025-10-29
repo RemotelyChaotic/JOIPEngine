@@ -222,7 +222,7 @@ void CScriptMediaPlayer::pauseVideo()
   {
     if (auto spSignalEmitter = spComm->LockedEmitter<CMediaPlayerSignalEmitter>())
     {
-      spSignalEmitter->pauseVideo();
+      emit spSignalEmitter->pauseVideo();
     }
   }
 }
@@ -500,6 +500,7 @@ void CScriptMediaPlayer::waitForSound(QVariant resource)
 QString CScriptMediaPlayer::GetResourceName(const QVariant& resource, const QString& sMethod,
                                             bool bStringCanBeId, bool* pbOk)
 {
+  Q_UNUSED(bStringCanBeId)
   QString sError;
   std::optional<QString> optRes =
       script::ParseResourceFromScriptVariant(resource, m_wpDbManager.lock(),

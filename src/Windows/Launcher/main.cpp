@@ -3,6 +3,8 @@
 
 int main(int argc, char *argv[])
 {
+  (void)(argc);
+  (void)(argv);
   bool bNotFound =
       INVALID_FILE_ATTRIBUTES == GetFileAttributes(L"updater\\JOIPEngineUpdater.exe");
   if(bNotFound)

@@ -278,7 +278,7 @@ void CEosScriptRunner::RegisterNewComponent(const QString& sName,
 //
 void CEosScriptRunner::UnregisterComponent(const QString& sName)
 {
-
+  Q_UNUSED(sName)
 }
 
 //----------------------------------------------------------------------------------------

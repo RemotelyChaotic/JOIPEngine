@@ -222,8 +222,9 @@ QStringList CResourceModelView::SelectedResources() const
     {
       QModelIndexList indexes = pSelectionModel->selectedIndexes();
       pSelectionModel->clearSelection();
-      foreach (QModelIndex index, indexes)
+      if (!indexes.empty())
       {
+        QModelIndex index = indexes[0];
         QModelIndex sourceIndex = m_pProxy->mapToSource(index);
         if (m_pModel->IsResourceType(sourceIndex))
         {

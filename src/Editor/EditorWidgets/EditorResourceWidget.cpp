@@ -423,13 +423,11 @@ void CEditorResourceWidget::SlotSetSourceButtonClicked()
   auto spDbManager = m_wpDbManager.lock();
   if (nullptr != spDbManager)
   {
-    for (QString sName : m_spUi->pResourceModelView->SelectedResources())
+    if (!m_spUi->pResourceModelView->SelectedResources().isEmpty())
     {
+      QString sName = m_spUi->pResourceModelView->SelectedResources()[0];
       m_spSourceOverlay->setProperty(c_sProperty, sName);
       m_spSourceOverlay->Show();
-
-      // only interrested in first item which is the actual item we need
-      break;
     }
   }
 }
@@ -444,8 +442,9 @@ void CEditorResourceWidget::SlotTitleCardButtonClicked()
   auto spDbManager = m_wpDbManager.lock();
   if (nullptr != spDbManager)
   {
-    for (QString sName : m_spUi->pResourceModelView->SelectedResources())
+    if (!m_spUi->pResourceModelView->SelectedResources().isEmpty())
     {
+      QString sName = m_spUi->pResourceModelView->SelectedResources()[0];
       QWriteLocker locker(&m_spCurrentProject->m_rwLock);
       const QString sOldTitleCard = m_spCurrentProject->m_sTitleCard;
       locker.unlock();
@@ -460,9 +459,6 @@ void CEditorResourceWidget::SlotTitleCardButtonClicked()
                 emit pThis->EditorModel()->SignalProjectPropertiesEdited();
               }
             }));
-
-      // only interrested in first item which is the actual item we need
-      break;
     }
   }
 }
@@ -477,13 +473,11 @@ void CEditorResourceWidget::SlotTagsButtonClicked()
   auto spDbManager = m_wpDbManager.lock();
   if (nullptr != spDbManager)
   {
-    for (QString sName : m_spUi->pResourceModelView->SelectedResources())
+    if (!m_spUi->pResourceModelView->SelectedResources().isEmpty())
     {
+      QString sName = m_spUi->pResourceModelView->SelectedResources()[0];
       m_spTagsOverlay->SetResource(sName);
       m_spTagsOverlay->Show();
-
-      // only interrested in first item which is the actual item we need
-      break;
     }
   }
 }
@@ -498,8 +492,9 @@ void CEditorResourceWidget::SlotMapButtonClicked()
   auto spDbManager = m_wpDbManager.lock();
   if (nullptr != spDbManager)
   {
-    for (QString sName : m_spUi->pResourceModelView->SelectedResources())
+    if (!m_spUi->pResourceModelView->SelectedResources().isEmpty())
     {
+      QString sName = m_spUi->pResourceModelView->SelectedResources()[0];
       tspResource spResource = spDbManager->FindResourceInProject(m_spCurrentProject, sName);
       if (nullptr != spResource)
       {
@@ -507,9 +502,6 @@ void CEditorResourceWidget::SlotMapButtonClicked()
         m_spCurrentProject->m_sMap = sName;
 
         emit SignalProjectEdited();
-
-        // only interrested in first item which is the actual item we need
-        break;
       }
     }
   }

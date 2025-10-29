@@ -416,6 +416,7 @@ void ResolveNodes(std::vector<NodeResolveReslt>& resolveResult, const QStringLis
                   qint32 iResolve, const std::set<QString>& disabledScenes,
                   std::shared_ptr<IResolverDebugger> spDebugger)
 {
+  Q_UNUSED(disabledScenes)
   QStringList vsToResolve = vsNodes;
 
   std::optional<NodeResolveReslt> resolved = std::nullopt;

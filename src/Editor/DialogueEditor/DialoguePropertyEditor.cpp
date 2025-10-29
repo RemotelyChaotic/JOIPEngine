@@ -195,6 +195,7 @@ void CDialoguePropertyEditor::on_pNameLineEdit_editingFinished()
 //
 void CDialoguePropertyEditor::on_pFileComboBox_currentIndexChanged(qint32 iIdx)
 {
+  Q_UNUSED(iIdx)
   if (!m_bInitialized) { return; }
   const QString sFile = m_spUi->pFileComboBox->currentData().toString();
   m_spNode->m_sFileId = sFile;
@@ -219,6 +220,7 @@ void CDialoguePropertyEditor::on_pConditionLineEdit_editingFinished()
 //
 void CDialoguePropertyEditor::on_pSkippableCheckBox_toggled(bool bChecked)
 {
+  Q_UNUSED(bChecked)
   if (!m_bInitialized) { return; }
   auto spDialogue = std::dynamic_pointer_cast<CDialogueData>(m_spNode);
   if (nullptr == spDialogue && !m_spNode->m_vspChildren.empty())

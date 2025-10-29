@@ -322,6 +322,7 @@ void CSplash::SlotSetProgress(qint32 iCurrent, qint32 iMax)
 //
 void CSplash::paintEvent(QPaintEvent* pEvt)
 {
+  Q_UNUSED(pEvt)
   QPainter painter(this);
   QPainter::CompositionMode oldCompositionMode = painter.compositionMode();
   painter.setRenderHints(QPainter::Antialiasing | QPainter::SmoothPixmapTransform |

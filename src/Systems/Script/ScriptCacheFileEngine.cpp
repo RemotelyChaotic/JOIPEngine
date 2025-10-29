@@ -130,6 +130,7 @@ CScriptCacheFileEngine::FileFlags CScriptCacheFileEngine::fileFlags(FileFlags ty
 //
 QString CScriptCacheFileEngine::fileName(FileName file) const
 {
+  Q_UNUSED(file)
   return CScriptCacheFileEngineHandler::c_sScheme + m_sFilename;
 }
 

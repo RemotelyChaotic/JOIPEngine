@@ -90,6 +90,8 @@ void CEditorNodeGraphicsObject::paint(QPainter* pPainter,
                                       QStyleOptionGraphicsItem const* pOption,
                                       QWidget*                        pWidget)
 {
+  Q_UNUSED(pWidget)
+
   pPainter->setClipRect(pOption->exposedRect);
 
   //adjusted from 3rdparty\nodeeditor\src\NodePainter.cpp

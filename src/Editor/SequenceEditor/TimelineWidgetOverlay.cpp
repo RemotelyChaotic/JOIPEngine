@@ -82,6 +82,7 @@ void CTimelineWidgetOverlay::UpdateDropLine()
 //
 void CTimelineWidgetOverlay::paintEvent(QPaintEvent* pEvent)
 {
+  Q_UNUSED(pEvent)
   QPainter painter(this);
   QPen pen(m_pDropIndicationColor);
   if (m_bShowDropIndicator)

@@ -162,7 +162,7 @@ void CScriptTimer::start()
   {
     if (auto spSignalEmitter = spComm->LockedEmitter<CTimerSignalEmitter>())
     {
-      spSignalEmitter->startTimer();
+      emit spSignalEmitter->startTimer();
     }
   }
 }
@@ -341,7 +341,6 @@ public:
       }
       return SJsonException{"internal Error.", "", eos::c_sCommandTimer, 0, 0};
     }
-    return SJsonException{"Invalid timer call.", "", eos::c_sCommandTimer, 0, 0};
   }
 
 private:

@@ -159,6 +159,7 @@ void CSceneCardSelectionWidget::on_pQmlWidget_statusChanged(QQuickWidget::Status
 //
 void CSceneCardSelectionWidget::on_pQmlWidget_sceneGraphError(QQuickWindow::SceneGraphError error, const QString &message)
 {
+  Q_UNUSED(error)
   qWarning() << message;
 }
 

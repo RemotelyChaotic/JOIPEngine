@@ -404,7 +404,7 @@ namespace
 //
 bool CNodeMock::eventFilter(QObject* pObj, QEvent* pEvt)
 {
-  if (nullptr != pEvt && pEvt->type() == QEvent::Resize)
+  if (nullptr != pObj && nullptr != pEvt && pEvt->type() == QEvent::Resize)
   {
     Resize(QSize{static_cast<qint32>(std::ceil(sizeHint().width() + 2.0*m_iConnectionPointDiameter)),
                  sizeHint().height()});
@@ -429,6 +429,8 @@ void CNodeMock::mouseDoubleClickEvent(QMouseEvent* pEvt)
 //
 void CNodeMock::paintEvent(QPaintEvent* pEvt)
 {
+  Q_UNUSED(pEvt)
+
   // rebuild what NodePainter::paint does but without needing scene or View
   QPainter painter(this);
 
@@ -533,6 +535,8 @@ CNodeDebugNode::CNodeDebugNode(tspProject spProject,
                                QWidget* pParent, QWidget* pView) :
   CNodeMock(GetNodeModel(NodeMockType::eScene), pNode, pParent, pView)
 {
+  Q_UNUSED(sScene)
+
   auto pWidget = dynamic_cast<CSceneNodeModelWidget*>(m_spDataModel->embeddedWidget());
   auto pModel = dynamic_cast<CSceneNodeModel*>(pNode->nodeDataModel());
   if (nullptr != pModel && nullptr != pWidget)
@@ -569,6 +573,8 @@ CNodeDebugError::CNodeDebugError(QString sError, QtMsgType type, QWidget* pParen
                                  QWidget* pView) :
   QFrame(pParent)
 {
+  Q_UNUSED(type)
+
   setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Preferred);
 
   QVBoxLayout* pLayout = new QVBoxLayout(this);
@@ -613,7 +619,7 @@ void CNodeDebugError::PushError(const QString& sError)
 //
 bool CNodeDebugError::eventFilter(QObject* pObj, QEvent* pEvt)
 {
-  if (nullptr != pEvt && pEvt->type() == QEvent::Resize)
+  if (nullptr != pObj && nullptr != pEvt && pEvt->type() == QEvent::Resize)
   {
     QSize s{static_cast<qint32>(std::ceil(sizeHint().width() + 2.0*m_iConnectionPointDiameter)),
             sizeHint().height()};
@@ -846,6 +852,7 @@ void CNodeDebugWidget::NextScene(qint32 iIndex, bool bSkipLastElementcheck)
       else
       {
         QString sUnResolveData = unresolvedData.value();
+        Q_UNUSED(sUnResolveData)
         if (-1 != iIndex)
         {
           m_spNodeResolver->ResolvePossibleScenes(vsScenes, iIndex);

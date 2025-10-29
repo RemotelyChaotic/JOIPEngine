@@ -54,6 +54,7 @@ QWidget* CDialogueEditorDelegate::createEditor(QWidget* pParent,
                                              const QStyleOptionViewItem& option,
                                              const QModelIndex& index) const
 {
+  Q_UNUSED(option)
   if (!index.isValid()) { return nullptr; }
   if (m_bReadOnly) { return nullptr; }
 

@@ -438,8 +438,6 @@ bool CResourceTreeItemModel::setData(const QModelIndex& index, const QVariant& v
 
     return bResult;
   }
-
-  return false;
 }
 
 //----------------------------------------------------------------------------------------

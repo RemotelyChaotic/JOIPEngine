@@ -183,6 +183,7 @@ void CSelectableResourceLabel::OpenSelectResource(const QPoint& createPoint)
   QItemSelectionModel* pSelectionModel = pListView->selectionModel();
   connect(pSelectionModel, &QItemSelectionModel::currentChanged,
           pSelectionModel, [&](const QModelIndex& current, const QModelIndex& previous) {
+            Q_UNUSED(previous)
             QModelIndex idx = pProxyModel->mapToSource(current);
             const QString sName =
                 m_pResourceModel->data(idx, Qt::DisplayRole,

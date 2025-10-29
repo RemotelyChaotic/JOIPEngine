@@ -101,7 +101,7 @@ namespace zipper
 
             QByteArray arr(sb.size, '\0');
             qint64 iRead = zip_fread(pZf, arr.data(), sb.size);
-            if (iRead != sb.size)
+            if (iRead != static_cast<qint64>(sb.size))
             {
               *psErr = QObject::tr("Could not read compressed file %1").arg(sFile);
               zip_fclose(pZf);

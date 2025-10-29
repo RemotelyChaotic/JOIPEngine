@@ -78,7 +78,7 @@ protected slots:
 
 protected:
   virtual void ProjectSetImpl() {}
-  virtual void ResourceItemModelSetImpl(QAbstractItemModel* pModel){}
+  virtual void ResourceItemModelSetImpl(QAbstractItemModel*){}
   virtual void SlotCanStartHereChangedImpl(bool bValue);
   virtual void SlotNameChangedImpl(const QString&);
   virtual void SlotLayoutChangedImpl(const QString&);

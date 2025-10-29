@@ -22,7 +22,7 @@ public:
   ~CFlowView() override;
 
   void SetScene(CFlowScene* pScene);
-  virtual void SetSceneImpl(CFlowScene* pScene) {}
+  virtual void SetSceneImpl(CFlowScene*) {}
   CFlowScene* Scene();
 
   void FitAllNodesInView();
@@ -41,7 +41,7 @@ protected slots:
 protected:
   void contextMenuEvent(QContextMenuEvent* pEvent) override;
 
-  virtual void NodeAboutToBeCreated(const QString& modelName, const QPoint& createPoint){}
+  virtual void NodeAboutToBeCreated(const QString&, const QPoint&){}
 
   bool                     m_bReadOnly;
   std::map<QString, bool>  m_contextMenuItemVisibility;

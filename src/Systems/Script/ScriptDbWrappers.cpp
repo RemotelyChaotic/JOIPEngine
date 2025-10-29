@@ -1096,7 +1096,7 @@ QVariant CDialogueWrapper::tag(const QString& sValue)
 //
 QVariant CDialogueWrapper::tag(qint32 iIndex)
 {
-  if (m_spData->m_tags.size() > iIndex && 0 <= iIndex)
+  if (m_spData->m_tags.size() > static_cast<size_t>(iIndex) && 0 <= iIndex)
   {
     auto itTag = m_spData->m_tags.begin();
     std::advance(itTag, iIndex);

@@ -1173,9 +1173,9 @@ void CSettings::SetWindowMode(const CSettings::WindowMode& mode)
 {
   QMutexLocker locker(&m_settingsMutex);
 
-  quint32 iOldMode = m_spSettings->value(CSettings::c_sWindowMode).toInt();
+  qint32 iOldMode = m_spSettings->value(CSettings::c_sWindowMode).toInt();
 
-  if (iOldMode == mode) { return; }
+  if (iOldMode == static_cast<qint32>(mode)) { return; }
 
   m_spSettings->setValue(CSettings::c_sWindowMode, static_cast<qint32>(mode));
 

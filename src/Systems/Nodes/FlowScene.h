@@ -23,7 +23,7 @@ public:
   QtNodes::Node& restoreNode(QJsonObject const& nodeJson);
 
 protected:
-  virtual void NodeCreatedImpl(QtNodes::Node& node){}
+  virtual void NodeCreatedImpl(QtNodes::Node&){}
 
   std::shared_ptr<CNodeGraphicsObjectProvider> m_spGraphicsObjectProvider;
   bool                     m_bLoading;

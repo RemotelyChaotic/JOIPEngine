@@ -593,6 +593,7 @@ void CSceneNodeModel::SlotScriptChangedImpl(const QString& sName)
 //
 void CSceneNodeModel::SlotTitleResourceChangedImpl(const QString& sOld, const QString& sNew)
 {
+  Q_UNUSED(sOld)
   m_sTitle = sNew;
 }
 
