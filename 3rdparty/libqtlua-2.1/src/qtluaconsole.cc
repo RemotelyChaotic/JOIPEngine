@@ -537,7 +537,7 @@ void Console::keyPressEvent(QKeyEvent * e)
 
 	case Qt::Key_Space: {
 	  QTextCursor	tc = textCursor();
-	  _mark = textCursor().position();
+    _mark = tc.position();
 	  break;
 	}
 	}
@@ -773,10 +773,9 @@ void Console::print_flush()
 QSize Console::sizeHint() const
 {
   QFontMetrics fm(_fmt_normal.font());
-  int left, top, right, bottom;
-  getContentsMargins(&left, &top, &right, &bottom);
-  QSize hint(left + right + fm.width('x') * _text_width,
-	     top + bottom + fm.height() * _text_height);
+  QMargins m = contentsMargins();
+  QSize hint(m.left() + m.right() + fm.horizontalAdvance('x') * _text_width,
+             m.top() + m.bottom() + fm.height() * _text_height);
 
   return hint;
 }

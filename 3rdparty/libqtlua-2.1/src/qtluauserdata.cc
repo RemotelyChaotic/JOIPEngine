@@ -103,7 +103,7 @@ String UserData::get_type_name() const
 
 String UserData::get_value_str() const
 {
-  return QString().sprintf("%p", this);
+  return QString().asprintf("%p", this);
 }
 
 Value UserData::meta_operation(State*, Value::Operation op,

@@ -151,7 +151,7 @@ namespace QtLua {
   ValueRef QObjectIterator::get_value_ref()
   {
     // Not used from lua script
-    std::abort();
+    assert(false);
     return ValueRef(Value(), Value());
   }
 

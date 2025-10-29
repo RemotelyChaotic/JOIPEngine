@@ -117,7 +117,7 @@ namespace QtLua {
     } catch (const String &) {
     }
 
-    qSort(_entries.begin(), _entries.end());
+    std::sort(_entries.begin(), _entries.end());
   }
 
 }
