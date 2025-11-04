@@ -9,6 +9,7 @@
 #include "Utils/MetronomeHelpers.h"
 #include "Utils/MultiEmitterSoundPlayer.h"
 
+#include <QDebug>
 #include <QTimer>
 
 namespace
@@ -115,6 +116,7 @@ CMetronomeManager::CMetronomeManager() :
                                                 // get a choppy metronome
   m_spSettings(CApplication::Instance()->Settings())
 {
+  qRegisterMetaType<CMetronomeManager::tId>();
   qRegisterMetaType<std::shared_ptr<SMetronomeDataBlock>>();
   qRegisterMetaType<std::vector<double>>();
   qRegisterMetaType<ETickTypeFlags>();
@@ -136,38 +138,59 @@ CMetronomeManager::~CMetronomeManager()
 
 //----------------------------------------------------------------------------------------
 //
-void CMetronomeManager::DeregisterUi(const QUuid& sName)
+CMetronomeManager::tId CMetronomeManager::GetNewId(void const* const ptr)
+{
+  return reinterpret_cast<tId>(ptr);
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CMetronomeManager::DeregisterUi(const tId& sName)
 {
   bool bOk = QMetaObject::invokeMethod(this, "SlotDeregisterUiImpl",
                                        Qt::QueuedConnection,
-                                       Q_ARG(QUuid, sName));
+                                       Q_ARG(CMetronomeManager::tId, sName));
   assert(bOk); Q_UNUSED(bOk)
 }
 
 //----------------------------------------------------------------------------------------
 //
-std::shared_ptr<SMetronomeDataBlock> CMetronomeManager::RegisterUi(const QUuid& sName)
+std::shared_ptr<SMetronomeDataBlock> CMetronomeManager::RegisterUi(const tId& id)
 {
-  std::shared_ptr<SMetronomeDataBlock> spRet;
-  bool bOk = QMetaObject::invokeMethod(this, "SlotRegisterUiImpl",
-                                       Qt::BlockingQueuedConnection,
-                                       Q_RETURN_ARG(std::shared_ptr<SMetronomeDataBlock>, spRet),
-                                       Q_ARG(QUuid, sName));
-  assert(bOk); Q_UNUSED(bOk)
-  return spRet;
+  if (QThread::currentThread() == thread())
+  {
+    return SlotRegisterUiImpl(id);
+  }
+  else
+  {
+    std::shared_ptr<SMetronomeDataBlock> spRet;
+    bool bOk = QMetaObject::invokeMethod(this, "SlotRegisterUiImpl",
+                                         Qt::BlockingQueuedConnection,
+                                         Q_RETURN_ARG(std::shared_ptr<SMetronomeDataBlock>, spRet),
+                                         Q_ARG(CMetronomeManager::tId, id));
+    assert(bOk); Q_UNUSED(bOk)
+    return spRet;
+  }
 }
 
 //----------------------------------------------------------------------------------------
 //
-QUuid CMetronomeManager::IdForName(const QString& sName)
+CMetronomeManager::tId CMetronomeManager::IdForName(const QString& sName)
 {
-  QUuid retId;
-  bool bOk = QMetaObject::invokeMethod(this, "SlotIdForNameImpl",
-                                       Qt::BlockingQueuedConnection,
-                                       Q_RETURN_ARG(QUuid, retId),
-                                       Q_ARG(QString, sName));
-  assert(bOk); Q_UNUSED(bOk)
-  return retId;
+  if (QThread::currentThread() == thread())
+  {
+    return SlotIdForNameImpl(sName);
+  }
+  else
+  {
+    tId retId;
+    bool bOk = QMetaObject::invokeMethod(this, "SlotIdForNameImpl",
+                                         Qt::BlockingQueuedConnection,
+                                         Q_RETURN_ARG(CMetronomeManager::tId, retId),
+                                         Q_ARG(QString, sName));
+    assert(bOk); Q_UNUSED(bOk)
+    return retId;
+  }
 }
 
 //----------------------------------------------------------------------------------------
@@ -182,11 +205,11 @@ void CMetronomeManager::SpawnSingleBeat(const QString& sName)
 
 //----------------------------------------------------------------------------------------
 //
-void CMetronomeManager::SpawnSingleBeat(const QUuid& uid)
+void CMetronomeManager::SpawnSingleBeat(const tId& uid)
 {
   bool bOk = QMetaObject::invokeMethod(this, "SlotSpawnSingleBeatImpl",
                                        Qt::QueuedConnection,
-                                       Q_ARG(QUuid, uid));
+                                       Q_ARG(CMetronomeManager::tId, uid));
   assert(bOk); Q_UNUSED(bOk)
 }
 
@@ -227,17 +250,19 @@ void CMetronomeManager::Deinitialize()
 
 //----------------------------------------------------------------------------------------
 //
-QUuid CMetronomeManager::SlotIdForNameImpl(const QString& sName)
+CMetronomeManager::tId CMetronomeManager::SlotIdForNameImpl(const QString& sName)
 {
   auto it = std::find_if(m_metronomeBlocks.begin(), m_metronomeBlocks.end(),
-                         [&sName](const std::pair<QUuid, std::shared_ptr<SMetronomeDataBlockPrivate>>& pair) {
+                         [&sName](const std::pair<tId, std::shared_ptr<SMetronomeDataBlockPrivate>>& pair) {
     return pair.second->m_privateBlock.sUserName == sName;
   });
   if (m_metronomeBlocks.end() != it)
   {
     return it->first;
   }
-  return QUuid();
+  assert(false && "Metronome block not found.");
+  qWarning() << tr("Metronome block not found.");
+  return tId(0);
 }
 
 //----------------------------------------------------------------------------------------
@@ -245,7 +270,7 @@ QUuid CMetronomeManager::SlotIdForNameImpl(const QString& sName)
 void CMetronomeManager::SlotSpawnSingleBeatImpl(const QString& sName)
 {
   auto it = std::find_if(m_metronomeBlocks.begin(), m_metronomeBlocks.end(),
-                         [&sName](const std::pair<QUuid, std::shared_ptr<SMetronomeDataBlockPrivate>>& pair) {
+                         [&sName](const std::pair<tId, std::shared_ptr<SMetronomeDataBlockPrivate>>& pair) {
     return pair.second->m_privateBlock.sUserName == sName;
   });
   if (m_metronomeBlocks.end() != it)
@@ -258,11 +283,15 @@ void CMetronomeManager::SlotSpawnSingleBeatImpl(const QString& sName)
       return pairA.dTimePos < pairB.dTimePos;
     });
   }
+  else
+  {
+    qWarning() << tr("Can't spawn beat. Block not found.");
+  }
 }
 
 //----------------------------------------------------------------------------------------
 //
-void CMetronomeManager::SlotSpawnSingleBeatImpl(const QUuid& uid)
+void CMetronomeManager::SlotSpawnSingleBeatImpl(const tId& uid)
 {
   auto it = m_metronomeBlocks.find(uid);
   if (m_metronomeBlocks.end() != it)
@@ -275,11 +304,15 @@ void CMetronomeManager::SlotSpawnSingleBeatImpl(const QUuid& uid)
       return pairA.dTimePos < pairB.dTimePos;
     });
   }
+  else
+  {
+    qWarning() << tr("Can't spawn beat. Block not found.");
+  }
 }
 
 //----------------------------------------------------------------------------------------
 //
-void CMetronomeManager::SlotStart(const QUuid& id, ETickTypeFlags ticksToPlay)
+void CMetronomeManager::SlotStart(const tId& id, ETickTypeFlags ticksToPlay)
 {
   auto it = m_metronomeBlocks.find(id);
   if (m_metronomeBlocks.end() != it)
@@ -314,11 +347,15 @@ void CMetronomeManager::SlotStart(const QUuid& id, ETickTypeFlags ticksToPlay)
       emit SignalStarted(id);
     }
   }
+  else
+  {
+    qWarning() << tr("Can't start metronome. Block not found.");
+  }
 }
 
 //----------------------------------------------------------------------------------------
 //
-void CMetronomeManager::SlotPause(const QUuid& id)
+void CMetronomeManager::SlotPause(const tId& id)
 {
   auto it = m_metronomeBlocks.find(id);
   if (m_metronomeBlocks.end() != it)
@@ -334,11 +371,15 @@ void CMetronomeManager::SlotPause(const QUuid& id)
       emit SignalPaused(id);
     }
   }
+  else
+  {
+    qWarning() << tr("Can't pause metronome. Block not found.");
+  }
 }
 
 //----------------------------------------------------------------------------------------
 //
-void CMetronomeManager::SlotResume(const QUuid& id)
+void CMetronomeManager::SlotResume(const tId& id)
 {
   auto it = m_metronomeBlocks.find(id);
   if (m_metronomeBlocks.end() != it)
@@ -367,11 +408,15 @@ void CMetronomeManager::SlotResume(const QUuid& id)
       emit SignalResumed(id);
     }
   }
+  else
+  {
+    qWarning() << tr("Can't resume metronome. Block not found.");
+  }
 }
 
 //----------------------------------------------------------------------------------------
 //
-void CMetronomeManager::SlotStop(const QUuid& id)
+void CMetronomeManager::SlotStop(const tId& id)
 {
   auto it = m_metronomeBlocks.find(id);
   if (m_metronomeBlocks.end() != it)
@@ -404,13 +449,17 @@ void CMetronomeManager::SlotStop(const QUuid& id)
       }
     }
   }
+  else
+  {
+    qWarning() << tr("Can't stop metronome. Block not found.");
+  }
 }
 
 //----------------------------------------------------------------------------------------
 //
-void CMetronomeManager::SlotBlockChanged(const QUuid& sName)
+void CMetronomeManager::SlotBlockChanged(const tId& id)
 {
-  auto it = m_metronomeBlocks.find(sName);
+  auto it = m_metronomeBlocks.find(id);
   if (m_metronomeBlocks.end() != it)
   {
     {
@@ -437,26 +486,34 @@ void CMetronomeManager::SlotBlockChanged(const QUuid& sName)
     it->second->m_privateBlock.m_spSoundEmitters->SetVolume(
         it->second->m_privateBlock.m_dVolume * m_dVolume);
   }
-}
-
-//----------------------------------------------------------------------------------------
-//
-void CMetronomeManager::SlotDeregisterUiImpl(const QUuid& sName)
-{
-  auto it = m_metronomeBlocks.find(sName);
-  if (m_metronomeBlocks.end() != it)
+  else
   {
-    SlotStop(sName);
-    m_metronomeBlocks.erase(it);
+    qWarning() << tr("Can't update metronome block. Block not found.");
   }
 }
 
 //----------------------------------------------------------------------------------------
 //
-std::shared_ptr<SMetronomeDataBlock> CMetronomeManager::SlotRegisterUiImpl(const QUuid& sName)
+void CMetronomeManager::SlotDeregisterUiImpl(const tId& id)
 {
-  m_metronomeBlocks[sName] = std::make_shared<SMetronomeDataBlockPrivate>();
-  auto block = m_metronomeBlocks[sName];
+  auto it = m_metronomeBlocks.find(id);
+  if (m_metronomeBlocks.end() != it)
+  {
+    SlotStop(id);
+    m_metronomeBlocks.erase(it);
+  }
+  else
+  {
+    qWarning() << tr("Can't deregister metronome. Block not found.");
+  }
+}
+
+//----------------------------------------------------------------------------------------
+//
+std::shared_ptr<SMetronomeDataBlock> CMetronomeManager::SlotRegisterUiImpl(const tId& id)
+{
+  m_metronomeBlocks[id] = std::make_shared<SMetronomeDataBlockPrivate>();
+  auto& block = m_metronomeBlocks[id];
 
   if (nullptr != m_spSettings)
   {

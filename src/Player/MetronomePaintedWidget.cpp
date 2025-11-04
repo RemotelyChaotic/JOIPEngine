@@ -14,35 +14,35 @@ namespace  {
 CMetronomeCanvasQml::CMetronomeCanvasQml(QQuickItem* pParent) :
   QQuickPaintedItem(pParent),
   m_spMetronomeManager(CApplication::Instance()->System<CMetronomeManager>().lock()),
-  m_id(QUuid::createUuid()),
+  m_id(CMetronomeManager::GetNewId(this)),
   m_tickColor(Qt::white)
 {
   if (nullptr != m_spMetronomeManager)
   {
     m_spDataBlockThread = m_spMetronomeManager->RegisterUi(m_id);
     connect(m_spMetronomeManager.get(), &CMetronomeManager::SignalStarted,
-            this, [this](QUuid id){
+            this, [this](CMetronomeManager::tId id){
       if (m_id == id)
       {
         emit metronomeStateChanged(MetronomeStateChange::Started);
       }
     }, Qt::QueuedConnection);
     connect(m_spMetronomeManager.get(), &CMetronomeManager::SignalPaused,
-            this, [this](QUuid id){
+            this, [this](CMetronomeManager::tId id){
       if (m_id == id)
       {
         emit metronomeStateChanged(MetronomeStateChange::Paused);
       }
     }, Qt::QueuedConnection);
     connect(m_spMetronomeManager.get(), &CMetronomeManager::SignalResumed,
-            this, [this](QUuid id){
+            this, [this](CMetronomeManager::tId id){
       if (m_id == id)
       {
         emit metronomeStateChanged(MetronomeStateChange::Resumed);
       }
     }, Qt::QueuedConnection);
     connect(m_spMetronomeManager.get(), &CMetronomeManager::SignalStopped,
-            this, [this](QUuid id){
+            this, [this](CMetronomeManager::tId id){
       if (m_id == id)
       {
         emit metronomeStateChanged(MetronomeStateChange::Stopped);
@@ -56,6 +56,10 @@ CMetronomeCanvasQml::CMetronomeCanvasQml(QQuickItem* pParent) :
     connect(m_spMetronomeManager.get(), &CMetronomeManager::SignalTickReachedCenter,
             this, &CMetronomeCanvasQml::SlotTickReachedCenter, Qt::QueuedConnection);
   }
+  else
+  {
+    qWarning() << tr("Metronome manager not found during creation of canvas.");
+  }
 }
 
 CMetronomeCanvasQml::~CMetronomeCanvasQml()
@@ -63,6 +67,10 @@ CMetronomeCanvasQml::~CMetronomeCanvasQml()
   if (nullptr != m_spMetronomeManager)
   {
     m_spMetronomeManager->DeregisterUi(m_id);
+  }
+  else
+  {
+    qWarning() << tr("Metronome manager not found during destruction of canvas.");
   }
 }
 
@@ -73,19 +81,17 @@ void CMetronomeCanvasQml::paint(QPainter* pPainter)
   pPainter->save();
   pPainter->setPen(m_tickColor);
 
+  for (const auto& it : m_vdTickmap)
   {
-    QMutexLocker locker(&m_localDataMutex);
-    for (const auto& it : m_vdTickmap)
-    {
-      double dLeftPosition = 0 + width() / 2 * it - c_dTickWidth / 2;
-      pPainter->drawRoundedRect(QRectF(dLeftPosition, 0, c_dTickWidth, height()),
-                                c_dTickWidth / 2, c_dTickWidth / 2, Qt::AbsoluteSize);
+    double dLeftPosition = 0 + width() / 2 * it - c_dTickWidth / 2;
+    pPainter->drawRoundedRect(QRectF(dLeftPosition, 0, c_dTickWidth, height()),
+                              c_dTickWidth / 2, c_dTickWidth / 2, Qt::AbsoluteSize);
 
-      double dRightPosition = width() - width() / 2 * it + c_dTickWidth / 2;
-      pPainter->drawRoundedRect(QRectF(dRightPosition, 0, c_dTickWidth, height()),
-                                c_dTickWidth / 2, c_dTickWidth / 2, Qt::AbsoluteSize);
-    }
+    double dRightPosition = width() - width() / 2 * it + c_dTickWidth / 2;
+    pPainter->drawRoundedRect(QRectF(dRightPosition, 0, c_dTickWidth, height()),
+                              c_dTickWidth / 2, c_dTickWidth / 2, Qt::AbsoluteSize);
   }
+
   pPainter->restore();
 }
 
@@ -97,6 +103,10 @@ QStringList CMetronomeCanvasQml::BeatResources() const
   {
     QMutexLocker l(&m_spDataBlockThread->m_mutex);
     return m_spDataBlockThread->m_sBeatResources;
+  }
+  else
+  {
+    qWarning() << tr("No block in canvas for beatResources getter call.");
   }
   return QStringList();
 }
@@ -111,6 +121,10 @@ void CMetronomeCanvasQml::SetBeatResources(const QStringList& sResource)
     QMutexLocker l(&m_spDataBlockThread->m_mutex);
     sOldResource = m_spDataBlockThread->m_sBeatResources;
     m_spDataBlockThread->m_sBeatResources = sResource;
+  }
+  else
+  {
+    qWarning() << tr("No block in canvas for beatResources setter call.");
   }
 
   if (sOldResource != sResource && nullptr != m_spMetronomeManager)
@@ -167,6 +181,10 @@ bool CMetronomeCanvasQml::Muted() const
     QMutexLocker l(&m_spDataBlockThread->m_mutex);
     return m_spDataBlockThread->m_bMuted;
   }
+  else
+  {
+    qWarning() << tr("No block in canvas for muted getter call.");
+  }
   return false;
 }
 
@@ -180,6 +198,10 @@ void CMetronomeCanvasQml::SetMuted(bool bMuted)
     QMutexLocker l(&m_spDataBlockThread->m_mutex);
     bOldValue = m_spDataBlockThread->m_bMuted;
     m_spDataBlockThread->m_bMuted = bMuted;
+  }
+  else
+  {
+    qWarning() << tr("No block in canvas for muted setter call.");
   }
 
   if (bOldValue != bMuted && nullptr != m_spMetronomeManager)
@@ -236,6 +258,10 @@ double CMetronomeCanvasQml::Volume() const
     QMutexLocker l(&m_spDataBlockThread->m_mutex);
     return m_spDataBlockThread->m_dVolume;
   }
+  else
+  {
+    qWarning() << tr("No block in canvas for volume getter call.");
+  }
   return false;
 }
 
@@ -249,6 +275,10 @@ void CMetronomeCanvasQml::SetVolume(double dValue)
     QMutexLocker l(&m_spDataBlockThread->m_mutex);
     dOldValue = m_spDataBlockThread->m_dVolume;
     m_spDataBlockThread->m_dVolume = dValue;
+  }
+  else
+  {
+    qWarning() << tr("No block in canvas for volume setter call.");
   }
 
   if (!qFuzzyCompare(dOldValue, dValue) && nullptr != m_spMetronomeManager)
@@ -266,6 +296,10 @@ void CMetronomeCanvasQml::pause()
   {
     emit m_spMetronomeManager->SignalPause(m_id);
   }
+  else
+  {
+    qWarning() << tr("No metronome manager for pause call.");
+  }
 }
 
 //----------------------------------------------------------------------------------------
@@ -275,6 +309,10 @@ void CMetronomeCanvasQml::resume()
   if (nullptr != m_spMetronomeManager)
   {
     emit m_spMetronomeManager->SignalResume(m_id);
+  }
+  else
+  {
+    qWarning() << tr("No metronome manager for resume call.");
   }
 }
 
@@ -290,6 +328,10 @@ void CMetronomeCanvasQml::start()
     if (m_metCmdMode.testFlag(EToyMetronomeCommandModeFlag::eRotate)) flags |= ETickType::eRotateTick;
     emit m_spMetronomeManager->SignalStart(m_id, flags);
   }
+  else
+  {
+    qWarning() << tr("No metronome manager for start call.");
+  }
 }
 
 //----------------------------------------------------------------------------------------
@@ -300,6 +342,10 @@ void CMetronomeCanvasQml::stop()
   {
     m_vdTickmap.clear();
     emit m_spMetronomeManager->SignalStop(m_id);
+  }
+  else
+  {
+    qWarning() << tr("No metronome manager for stop call.");
   }
 }
 
@@ -313,11 +359,15 @@ void CMetronomeCanvasQml::registerUi(const QString& sUserName)
     m_spDataBlockThread->sUserName = sUserName;
     emit m_spMetronomeManager->SignalBlockChanged(m_id);
   }
+  else
+  {
+    qWarning() << tr("No metronome manager or block for register call.");
+  }
 }
 
 //----------------------------------------------------------------------------------------
 //
-void CMetronomeCanvasQml::SlotTickReachedCenter(const QUuid& id)
+void CMetronomeCanvasQml::SlotTickReachedCenter(const CMetronomeManager::tId& id)
 {
   if (id != m_id) { return; }
   emit tickReachedCenter();
@@ -325,7 +375,8 @@ void CMetronomeCanvasQml::SlotTickReachedCenter(const QUuid& id)
 
 //----------------------------------------------------------------------------------------
 //
-void CMetronomeCanvasQml::SlotUpdate(const QUuid& id, const std::vector<double>& vdTicks)
+void CMetronomeCanvasQml::SlotUpdate(const CMetronomeManager::tId& id,
+                                     const std::vector<double>& vdTicks)
 {
   if (id != m_id) { return; }
 
@@ -339,7 +390,7 @@ void CMetronomeCanvasQml::SlotUpdate(const QUuid& id, const std::vector<double>&
   }
 
   bool bOk = QMetaObject::invokeMethod(this, "SlotUpdateImpl",
-                                       Q_ARG(const std::vector<double>&, vdTicks));
+                                       Q_ARG(std::vector<double>, vdTicks));
   assert(bOk); Q_UNUSED(bOk)
 }
 
@@ -380,10 +431,14 @@ void CMetronomeCanvasQml::UpdatePattern()
     QMutexLocker locker(&m_spDataBlockThread->m_mutex);
     m_spDataBlockThread->m_vdTickPattern.clear();
     double dDefaultIntervalMs = 60'000.0 / double(m_iBpm);
-    for (double dValue : m_vdPattern)
+    for (double dValue : qAsConst(m_vdPattern))
     {
       m_spDataBlockThread->m_vdTickPattern.push_back(dValue*dDefaultIntervalMs);
     }
     emit m_spMetronomeManager->SignalBlockChanged(m_id);
+  }
+  else
+  {
+    qWarning() << tr("No metronome manager or block for pattern update.");
   }
 }

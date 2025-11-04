@@ -2,6 +2,7 @@
 #define CMETRONOMEPAINTEDWIDGET_H
 
 #include "Systems/DatabaseInterface/ProjectData.h"
+#include "Systems/MetronomeManager.h"
 
 #include <QQuickPaintedItem>
 #include <QMutex>
@@ -78,8 +79,8 @@ signals:
   void volumeChanged();
 
 private slots:
-  void SlotTickReachedCenter(const QUuid& id);
-  void SlotUpdate(const QUuid& id, const std::vector<double>& vdTicks);
+  void SlotTickReachedCenter(const CMetronomeManager::tId& id);
+  void SlotUpdate(const CMetronomeManager::tId& id, const std::vector<double>& vdTicks);
   void SlotUpdateImpl(const std::vector<double>& vdTicks);
 
 private:
@@ -87,7 +88,7 @@ private:
 
   std::shared_ptr<CMetronomeManager>           m_spMetronomeManager;
   std::shared_ptr<SMetronomeDataBlock>         m_spDataBlockThread;
-  QUuid                                        m_id;
+  std::atomic<CMetronomeManager::tId>          m_id;
   QColor                                       m_tickColor;
   qint32                                       m_iBpm = 60;
   EToyMetronomeCommandModeFlags                m_metCmdMode = EToyMetronomeCommandModeFlag::eDefault;

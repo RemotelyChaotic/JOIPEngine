@@ -50,7 +50,7 @@ void CSequenceMetronomeRunner::RunSingleBeat(const QString& sName,
       {
         if (auto spMetronomeManager = m_wpMetronomeManager.lock())
         {
-          QUuid uid = spMetronomeManager->IdForName(sName);
+          CMetronomeManager::tId uid = spMetronomeManager->IdForName(sName);
           spMetronomeManager->SpawnSingleBeat(uid);
           ETickTypeFlags flags = ETickType::eSingle;
           {
