@@ -13,11 +13,14 @@ class CMultiEmitterSoundPlayer
 public:
   static const qint32 c_iDefaultNumAutioEmitters;
 
-  CMultiEmitterSoundPlayer(qint32 iNrSoundEmitters = c_iDefaultNumAutioEmitters);
+  CMultiEmitterSoundPlayer(qint32 iNrSoundEmitters = c_iDefaultNumAutioEmitters,
+                           bool bLoadAsynch = true);
   CMultiEmitterSoundPlayer(qint32 iNrSoundEmitters,
-                           const QString& sSoundEffect);
+                           const QString& sSoundEffect,
+                           bool bLoadAsynch = true);
   CMultiEmitterSoundPlayer(qint32 iNrSoundEmitters,
-                           const QStringList& sSoundEffects);
+                           const QStringList& sSoundEffects,
+                           bool bLoadAsynch = true);
   ~CMultiEmitterSoundPlayer();
 
   void Resize(qint32 iNewNrSoundEmitters);
@@ -46,6 +49,7 @@ private:
   qint32                                       m_iNextSfxToLoad;
   bool                                         m_bMuted;
   double                                       m_dVolume;
+  bool                                         m_bAsynchLoad;
 };
 
 #endif // CMULTIEMITTERSOUNDPLAYER_H

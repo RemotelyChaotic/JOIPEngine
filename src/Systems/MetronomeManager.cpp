@@ -526,7 +526,8 @@ std::shared_ptr<SMetronomeDataBlock> CMetronomeManager::SlotRegisterUiImpl(const
   block->m_privateBlock = *block->m_spPublicBlock;
   block->m_privateBlock.m_spSoundEmitters =
       std::make_unique<CMultiEmitterSoundPlayer>(CMultiEmitterSoundPlayer::c_iDefaultNumAutioEmitters,
-                                                 block->m_spPublicBlock->m_sBeatResources);
+                                                 block->m_spPublicBlock->m_sBeatResources,
+                                                 false /*No need for asynch load, we are already asynch*/);
   return block->m_spPublicBlock;
 }
 

@@ -17,16 +17,20 @@ CUISoundEmitter::CUISoundEmitter(QObject *parent) :
   QObject(parent),
   m_spCklickSoundButton(
     std::make_unique<CMultiEmitterSoundPlayer>(c_iUiSoundEmitterCount,
-                                               ":/resources/sound/menu_click_soft_main.wav")),
+                                               ":/resources/sound/menu_click_soft_main.wav",
+                                               true)),
   m_spHoverSoundButton(
     std::make_unique<CMultiEmitterSoundPlayer>(c_iUiSoundEmitterCount,
-                                               ":/resources/sound/menu_selection_soft.wav")),
+                                               ":/resources/sound/menu_selection_soft.wav",
+                                               true)),
   m_spCklickSoundCheckbox(
     std::make_unique<CMultiEmitterSoundPlayer>(c_iUiSoundEmitterCount,
-                                               ":/resources/sound/menu_selection_soft.wav")),
+                                               ":/resources/sound/menu_selection_soft.wav",
+                                               true)),
   m_spCklickSoundDropBox(
     std::make_unique<CMultiEmitterSoundPlayer>(c_iUiSoundEmitterCount,
-                                               ":/resources/sound/menu_whoosh.wav"))
+                                               ":/resources/sound/menu_whoosh.wav",
+                                               true))
 {
 }
 

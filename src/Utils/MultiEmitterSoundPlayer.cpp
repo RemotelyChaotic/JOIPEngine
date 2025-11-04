@@ -4,24 +4,28 @@
 
 const qint32 CMultiEmitterSoundPlayer::c_iDefaultNumAutioEmitters = 5;
 
-CMultiEmitterSoundPlayer::CMultiEmitterSoundPlayer(qint32 iNrSoundEmitters) :
+CMultiEmitterSoundPlayer::CMultiEmitterSoundPlayer(qint32 iNrSoundEmitters,
+                                                   bool bLoadAsynch) :
   m_vspPlayers(),
   m_iNrSoundEmitters(iNrSoundEmitters),
   m_iCurrentAutioPlayer(-1),
   m_iNextSfxToLoad(0),
-  m_bMuted(false)
+  m_bMuted(false),
+  m_bAsynchLoad(bLoadAsynch)
 {
 }
 CMultiEmitterSoundPlayer::CMultiEmitterSoundPlayer(qint32 iNrSoundEmitters,
-                                                   const QString& sSoundEffect) :
-  CMultiEmitterSoundPlayer(iNrSoundEmitters)
+                                                   const QString& sSoundEffect,
+                                                   bool bLoadAsynch) :
+  CMultiEmitterSoundPlayer(iNrSoundEmitters, bLoadAsynch)
 {
   m_sSoundEffects = QStringList{} << sSoundEffect;
   Initialize();
 }
 CMultiEmitterSoundPlayer::CMultiEmitterSoundPlayer(qint32 iNrSoundEmitters,
-                                                   const QStringList& sSoundEffects) :
-  CMultiEmitterSoundPlayer(iNrSoundEmitters)
+                                                   const QStringList& sSoundEffects,
+                                                   bool bLoadAsynch) :
+  CMultiEmitterSoundPlayer(iNrSoundEmitters, bLoadAsynch)
 {
   m_sSoundEffects = sSoundEffects;
   Initialize();
@@ -177,6 +181,7 @@ void CMultiEmitterSoundPlayer::Initialize()
   {
     m_vspPlayers.push_back(std::make_unique<QtAV::AVPlayer>());
     m_vspPlayers.back()->setRepeat(0);
+    m_vspPlayers.back()->setAsyncLoad(m_bAsynchLoad);
     m_vspPlayers.back()->setFile(m_sSoundEffects[i%m_sSoundEffects.size()]);
     m_vspPlayers.back()->load();
     AdvanceNextSfxToLoad();

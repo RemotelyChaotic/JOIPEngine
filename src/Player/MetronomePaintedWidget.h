@@ -13,7 +13,6 @@
 #include <vector>
 
 class CMetronomeManager;
-class CMultiEmitterSoundPlayer;
 class CSettings;
 struct SMetronomeDataBlock;
 struct SResource;

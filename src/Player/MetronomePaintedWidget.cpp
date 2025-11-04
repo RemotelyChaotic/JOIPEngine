@@ -389,7 +389,7 @@ void CMetronomeCanvasQml::SlotUpdate(const CMetronomeManager::tId& id,
     m_lastUpdate = calltime;
   }
 
-  bool bOk = QMetaObject::invokeMethod(this, "SlotUpdateImpl",
+  bool bOk = QMetaObject::invokeMethod(this, "SlotUpdateImpl", Qt::QueuedConnection,
                                        Q_ARG(std::vector<double>, vdTicks));
   assert(bOk); Q_UNUSED(bOk)
 }
