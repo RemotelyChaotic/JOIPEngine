@@ -3,6 +3,7 @@ Version 1.6.1.0
 =================
 Fixed Bugs:
 - Fixed a potential deadlock in the Metronome.
+- Removed a lot of unessessary SFX reloading in the metronome.
 
 =================
 Version 1.6.0.0

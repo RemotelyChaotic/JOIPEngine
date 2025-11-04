@@ -523,9 +523,16 @@ std::shared_ptr<SMetronomeDataBlock> CMetronomeManager::SlotRegisterUiImpl(const
     block->m_spPublicBlock->m_dVolume = m_dVolume;
   }
 
+  // make sure we don't need to cycle sounds
+  qint32 iEmitterCount = CMultiEmitterSoundPlayer::c_iDefaultNumAutioEmitters;
+  if (iEmitterCount % block->m_spPublicBlock->m_sBeatResources.size() != 0)
+  {
+    iEmitterCount = iEmitterCount + block->m_spPublicBlock->m_sBeatResources.size()
+                    - iEmitterCount % block->m_spPublicBlock->m_sBeatResources.size();
+  }
   block->m_privateBlock = *block->m_spPublicBlock;
   block->m_privateBlock.m_spSoundEmitters =
-      std::make_unique<CMultiEmitterSoundPlayer>(CMultiEmitterSoundPlayer::c_iDefaultNumAutioEmitters,
+      std::make_unique<CMultiEmitterSoundPlayer>(iEmitterCount,
                                                  block->m_spPublicBlock->m_sBeatResources,
                                                  false /*No need for asynch load, we are already asynch*/);
   return block->m_spPublicBlock;

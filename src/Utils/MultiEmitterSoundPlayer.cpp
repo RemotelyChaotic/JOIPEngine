@@ -136,7 +136,7 @@ void CMultiEmitterSoundPlayer::Play()
       m_vspPlayers[m_iCurrentAutioPlayer]->play();
     }
 
-    // cycle sound files
+    // cycle sound files, ideally we don't have to do this, but maybe we do
     if (-1 < iLastPlayer && static_cast<qint32>(m_vspPlayers.size()) > iLastPlayer)
     {
       if (m_vspPlayers[iLastPlayer]->file() != m_sSoundEffects[m_iNextSfxToLoad])
