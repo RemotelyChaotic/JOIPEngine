@@ -1,7 +1,7 @@
 #ifndef CRESOURCEDETAILVIEW_H
 #define CRESOURCEDETAILVIEW_H
 
-#include "Systems/Project.h"
+#include "Systems/Database/Project.h"
 #include <QListView>
 #include <QPixmap>
 #include <map>

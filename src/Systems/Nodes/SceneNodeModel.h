@@ -2,8 +2,8 @@
 #define SCENENODEMODEL_H
 
 #include "NodeModelBase.h"
-#include "Systems/Project.h"
-#include "Systems/Scene.h"
+#include "Systems/Database/Project.h"
+#include "Systems/Database/Scene.h"
 #include <memory>
 
 class CDatabaseManager;

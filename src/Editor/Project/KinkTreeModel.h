@@ -1,7 +1,7 @@
 #ifndef KINKTREEMODEL_H
 #define KINKTREEMODEL_H
 
-#include "Systems/Kink.h"
+#include "Systems/Database/Kink.h"
 #include <QAbstractItemModel>
 #include <memory>
 

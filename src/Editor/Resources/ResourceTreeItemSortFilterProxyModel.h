@@ -1,7 +1,7 @@
 #ifndef RESOURCETREEITEMSORTFILTERPROXYMODEL_H
 #define RESOURCETREEITEMSORTFILTERPROXYMODEL_H
 
-#include "Systems/Project.h"
+#include "Systems/Database/Project.h"
 #include <QCollator>
 #include <QSortFilterProxyModel>
 #include <vector>

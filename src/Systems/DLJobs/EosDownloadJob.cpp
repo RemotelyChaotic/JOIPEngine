@@ -14,9 +14,9 @@
 
 #include "Systems/DatabaseManager.h"
 #include "Systems/EOS/EosHelpers.h"
-#include "Systems/Project.h"
-#include "Systems/Resource.h"
-#include "Systems/ResourceBundle.h"
+#include "Systems/Database/Project.h"
+#include "Systems/Database/Resource.h"
+#include "Systems/Database/ResourceBundle.h"
 #include "Systems/PhysFs/PhysFsFileEngine.h"
 
 #include "Utils/RaiiFunctionCaller.h"

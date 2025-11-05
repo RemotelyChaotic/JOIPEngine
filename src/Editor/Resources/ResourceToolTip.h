@@ -4,7 +4,7 @@
 /*
  * Implementation taken in parts from to qtooltip.cpp
  */
-#include "Systems/Resource.h"
+#include "Systems/Database/Resource.h"
 
 #include <QPointer>
 #include <QWidget>

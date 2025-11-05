@@ -11,7 +11,7 @@
 #include "Systems/Nodes/SceneTranstitionData.h"
 #include "Systems/Nodes/StartNodeModel.h"
 #include "Systems/DatabaseManager.h"
-#include "Systems/Project.h"
+#include "Systems/Database/Project.h"
 
 #include <nodes/Node>
 #include <QGraphicsObject>

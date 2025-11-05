@@ -1,8 +1,10 @@
 #include "DatabaseImageProvider.h"
 #include "Systems/DatabaseManager.h"
-#include "Systems/Project.h"
-#include "Systems/Resource.h"
-#include "Systems/ResourceBundle.h"
+
+#include "Systems/Database/Project.h"
+#include "Systems/Database/Resource.h"
+#include "Systems/Database/ResourceBundle.h"
+
 #include <QtAV/VideoFrameExtractor.h>
 #include <QFileInfo>
 #include <QImageReader>

@@ -18,7 +18,7 @@
 #include "Editor/EditorModel.h"
 
 #include "Systems/HelpFactory.h"
-#include "Systems/Project.h"
+#include "Systems/Database/Project.h"
 
 #include "Widgets/HelpOverlay.h"
 #include "Widgets/PositionalMenu.h"

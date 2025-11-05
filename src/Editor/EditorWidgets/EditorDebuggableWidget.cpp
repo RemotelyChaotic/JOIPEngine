@@ -3,8 +3,8 @@
 #include "Player/SceneMainScreen.h"
 
 #include "Systems/Script/ScriptRunnerSignalEmiter.h"
-#include "Systems/Project.h"
-#include "Systems/Scene.h"
+#include "Systems/Database/Project.h"
+#include "Systems/Database/Scene.h"
 #include "Systems/ScriptRunner.h"
 
 #include <QLayout>

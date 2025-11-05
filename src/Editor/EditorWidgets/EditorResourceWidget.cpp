@@ -17,7 +17,7 @@
 #include "Editor/Tutorial/ResourceTutorialStateSwitchHandler.h"
 #include "Systems/DatabaseManager.h"
 #include "Systems/HelpFactory.h"
-#include "Systems/Project.h"
+#include "Systems/Database/Project.h"
 #include "Utils/UndoRedoFilter.h"
 #include "Widgets/HelpOverlay.h"
 #include "Widgets/ResourceDisplayWidget.h"

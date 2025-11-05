@@ -1,6 +1,7 @@
 #include "DialogueTree.h"
 #include "DatabaseManager.h"
-#include "Project.h"
+
+#include "Database/Project.h"
 
 #include <nlohmann/json-schema.hpp>
 #include <nlohmann/json.hpp>

@@ -1,11 +1,12 @@
 #include "DatabaseIO.h"
 #include "Application.h"
 #include "DatabaseData.h"
-#include "DatabaseManager.h"
 #include "Project.h"
 #include "Resource.h"
-#include "PhysFs/PhysFsFileEngine.h"
 #include "Settings.h"
+
+#include "Systems/DatabaseManager.h"
+#include "Systems/PhysFs/PhysFsFileEngine.h"
 
 #include <QDebug>
 #include <QDirIterator>

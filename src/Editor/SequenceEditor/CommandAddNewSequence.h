@@ -1,7 +1,7 @@
 #ifndef CCOMMANDADDNEWSEQUENCE_H
 #define CCOMMANDADDNEWSEQUENCE_H
 
-#include "Systems/Project.h"
+#include "Systems/Database/Project.h"
 
 #include <QUndoCommand>
 

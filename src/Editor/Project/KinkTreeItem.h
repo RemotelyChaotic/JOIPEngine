@@ -1,7 +1,7 @@
 #ifndef KINKTREEITEM_H
 #define KINKTREEITEM_H
 
-#include "Systems/Kink.h"
+#include "Systems/Database/Kink.h"
 #include <enum.h>
 #include <QVariant>
 #include <QVector>

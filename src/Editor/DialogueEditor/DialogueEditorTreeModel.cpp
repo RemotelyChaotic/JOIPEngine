@@ -4,7 +4,7 @@
 #include "Application.h"
 
 #include "Systems/DialogueTree.h"
-#include "Systems/Resource.h"
+#include "Systems/Database/Resource.h"
 
 #include <QFileInfo>
 #include <QFont>

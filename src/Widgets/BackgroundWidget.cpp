@@ -1,7 +1,7 @@
 #include "BackgroundWidget.h"
 #include "Enums.h"
-#include "Systems/Project.h"
-#include "Systems/Resource.h"
+#include "Systems/Database/Project.h"
+#include "Systems/Database/Resource.h"
 
 #include <QFileInfo>
 #include <QImageReader>

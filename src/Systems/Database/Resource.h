@@ -2,7 +2,7 @@
 #define RESOURCE_H
 
 #include "ISerializable.h"
-#include "DatabaseInterface/ResourceData.h"
+#include "Systems/DatabaseInterface/ResourceData.h"
 #include <enum.h>
 #include <QJSEngine>
 #include <QObject>

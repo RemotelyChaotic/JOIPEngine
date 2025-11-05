@@ -8,9 +8,9 @@
 #include "Editor/Tutorial/SceneNodeWidgetTutorialStateSwitchHandler.h"
 
 #include "Systems/HelpFactory.h"
-#include "Systems/Project.h"
-#include "Systems/Scene.h"
-#include "Systems/Resource.h"
+#include "Systems/Database/Project.h"
+#include "Systems/Database/Scene.h"
+#include "Systems/Database/Resource.h"
 
 #include "Systems/Nodes/SceneNodeModel.h"
 #include "Systems/Nodes/StartNodeModel.h"

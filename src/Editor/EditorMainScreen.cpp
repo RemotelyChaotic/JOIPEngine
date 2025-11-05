@@ -14,7 +14,7 @@
 #include "Systems/DatabaseManager.h"
 #include "Systems/Debug/DebugOverlay.h"
 #include "Systems/NotificationSender.h"
-#include "Systems/Project.h"
+#include "Systems/Database/Project.h"
 
 #include "Tutorial/EditorTutorialOverlay.h"
 #include "Tutorial/ClassicTutorialStateSwitchHandler.h"

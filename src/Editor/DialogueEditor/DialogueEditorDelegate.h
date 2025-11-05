@@ -1,7 +1,7 @@
 #ifndef CDIALOGueEDITORDELEGATE_H
 #define CDIALOGueEDITORDELEGATE_H
 
-#include "Systems/Project.h"
+#include "Systems/Database/Project.h"
 
 #include "Widgets/HtmlViewDelegate.h"
 

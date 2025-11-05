@@ -1,6 +1,6 @@
 #include "ScriptObjectBase.h"
 #include "ScriptRunnerSignalEmiter.h"
-#include "Systems/Project.h"
+#include "Systems/Database/Project.h"
 #include <QtLua/State>
 #include <QEventLoop>
 #include <QThread>

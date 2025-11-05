@@ -3,7 +3,7 @@
 #include "CommandChangeResourceData.h"
 #include "ResourceTreeItem.h"
 #include "Systems/DatabaseManager.h"
-#include "Systems/Resource.h"
+#include "Systems/Database/Resource.h"
 
 #include <QPixmap>
 #include <QUndoStack>

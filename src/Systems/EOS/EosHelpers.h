@@ -1,7 +1,7 @@
 #ifndef EOSHELPERS_H
 #define EOSHELPERS_H
 
-#include "Systems/Project.h"
+#include "Systems/Database/Project.h"
 #include <QString>
 #include <memory>
 

@@ -6,7 +6,7 @@
 
 #include "Systems/DatabaseManager.h"
 #include "Systems/PhysFs/PhysFsFileEngine.h"
-#include "Systems/Resource.h"
+#include "Systems/Database/Resource.h"
 
 #include <QDebug>
 #include <QDirIterator>

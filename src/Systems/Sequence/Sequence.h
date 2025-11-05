@@ -1,7 +1,7 @@
 #ifndef SSEQUENCEFILE_H
 #define SSEQUENCEFILE_H
 
-#include "Systems/ISerializable.h"
+#include "Systems/Database/ISerializable.h"
 
 #include <QColor>
 #include <QString>

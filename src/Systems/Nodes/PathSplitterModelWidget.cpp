@@ -1,6 +1,6 @@
 #include "PathSplitterModelWidget.h"
 #include "ui_PathSplitterModelWidget.h"
-#include "Systems/Scene.h"
+#include "Systems/Database/Scene.h"
 #include "Utils/UndoRedoFilter.h"
 
 #include <QButtonGroup>

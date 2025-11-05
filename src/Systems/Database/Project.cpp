@@ -1,9 +1,11 @@
 #include "Project.h"
 #include "Application.h"
-#include "DatabaseManager.h"
 #include "Kink.h"
 #include "SVersion.h"
 #include "out_Version.h"
+
+#include "Systems/DatabaseManager.h"
+
 #include <QApplication>
 #include <QJsonArray>
 #include <QMutexLocker>

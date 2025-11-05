@@ -1,7 +1,7 @@
 #ifndef CCOMMANDREMOVERESOURCE_H
 #define CCOMMANDREMOVERESOURCE_H
 
-#include "Systems/Project.h"
+#include "Systems/Database/Project.h"
 #include <QPointer>
 #include <QUndoCommand>
 

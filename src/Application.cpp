@@ -25,10 +25,10 @@
 #include "Systems/MetronomeManager.h"
 #include "Systems/NotificationSender.h"
 #include "Systems/OverlayManager.h"
-#include "Systems/Project.h"
+#include "Systems/Database/Project.h"
 #include "Systems/ProjectDownloader.h"
-#include "Systems/Resource.h"
-#include "Systems/Scene.h"
+#include "Systems/Database/Resource.h"
+#include "Systems/Database/Scene.h"
 #include "Systems/ScriptRunner.h"
 #include "Systems/ThreadedSystem.h"
 

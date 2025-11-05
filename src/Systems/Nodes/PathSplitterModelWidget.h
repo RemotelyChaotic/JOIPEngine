@@ -1,7 +1,7 @@
 #ifndef PATHSPLITTERMODELWIDGET_H
 #define PATHSPLITTERMODELWIDGET_H
 
-#include "Systems/Project.h"
+#include "Systems/Database/Project.h"
 
 #include <nodes/Node>
 

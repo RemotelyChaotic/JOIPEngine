@@ -1,6 +1,6 @@
 #include "ResourceDetailViewFetcherThread.h"
 #include "Application.h"
-#include "Systems/DatabaseImageProvider.h"
+#include "Systems/Database/DatabaseImageProvider.h"
 #include "Systems/DatabaseManager.h"
 
 #include <QBuffer>

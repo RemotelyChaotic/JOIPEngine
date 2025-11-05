@@ -1,7 +1,7 @@
 #ifndef CCOMMANDCHANGESOURCE_H
 #define CCOMMANDCHANGESOURCE_H
 
-#include "Systems/Project.h"
+#include "Systems/Database/Project.h"
 #include <QUndoCommand>
 #include <memory>
 

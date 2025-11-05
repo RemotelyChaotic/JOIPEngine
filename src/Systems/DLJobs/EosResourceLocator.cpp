@@ -1,6 +1,6 @@
 #include "EosResourceLocator.h"
 
-#include "Systems/Project.h"
+#include "Systems/Database/Project.h"
 
 #include <QJsonArray>
 #include <QJsonObject>

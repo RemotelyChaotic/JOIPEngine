@@ -4,8 +4,8 @@
 #include "Editor/EditorCommandIds.h"
 
 #include "Systems/DatabaseManager.h"
-#include "Systems/Project.h"
-#include "Systems/SaveData.h"
+#include "Systems/Database/Project.h"
+#include "Systems/Database/SaveData.h"
 
 namespace
 {

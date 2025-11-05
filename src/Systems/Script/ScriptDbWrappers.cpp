@@ -1,7 +1,7 @@
 #include "ScriptDbWrappers.h"
 #include "Application.h"
 
-#include "Systems/Tag.h"
+#include "Systems/Database/Tag.h"
 #include "Utils/MetronomeHelpers.h"
 
 #include <QtLua/State>

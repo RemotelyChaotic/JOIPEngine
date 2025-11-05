@@ -4,7 +4,7 @@
 #include "Editor/EditorCommandIds.h"
 
 #include "Systems/DatabaseManager.h"
-#include "Systems/Tag.h"
+#include "Systems/Database/Tag.h"
 
 //----------------------------------------------------------------------------------------
 //

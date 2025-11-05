@@ -1,7 +1,7 @@
 #ifndef ICODEGENERATOR_H
 #define ICODEGENERATOR_H
 
-#include "Systems/Project.h"
+#include "Systems/Database/Project.h"
 #include "Systems/DatabaseInterface/ResourceData.h"
 
 #include <QString>

@@ -25,9 +25,9 @@
 
 #include "Systems/DatabaseManager.h"
 #include "Systems/HelpFactory.h"
-#include "Systems/Kink.h"
-#include "Systems/Project.h"
-#include "Systems/SaveData.h"
+#include "Systems/Database/Kink.h"
+#include "Systems/Database/Project.h"
+#include "Systems/Database/SaveData.h"
 
 #include "Utils/UndoRedoFilter.h"
 

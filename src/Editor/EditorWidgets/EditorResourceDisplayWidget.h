@@ -3,7 +3,7 @@
 
 #include "EditorWidgetBase.h"
 #include "Enums.h"
-#include "Systems/Resource.h"
+#include "Systems/Database/Resource.h"
 #include "ui_EditorResourceDisplayWidget.h"
 #include "ui_EditorActionBar.h"
 #include <memory>

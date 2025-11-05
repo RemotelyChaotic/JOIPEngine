@@ -5,7 +5,7 @@
 #include "Systems/DatabaseManager.h"
 #include "Systems/EOS/EosHelpers.h"
 #include "Systems/HelpFactory.h"
-#include "Systems/Project.h"
+#include "Systems/Database/Project.h"
 #include "Utils/WidgetHelpers.h"
 #include "Widgets/HelpOverlay.h"
 

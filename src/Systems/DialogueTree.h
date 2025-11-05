@@ -1,8 +1,8 @@
 #ifndef CDIALOGUENODE_H
 #define CDIALOGUENODE_H
 
-#include "Resource.h"
-#include "Tag.h"
+#include "Database/Resource.h"
+#include "Database/Tag.h"
 
 #include <enum.h>
 

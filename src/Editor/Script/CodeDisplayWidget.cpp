@@ -23,7 +23,7 @@
 #include "Editor/Resources/ResourceTreeItemModel.h"
 
 #include "Systems/HelpFactory.h"
-#include "Systems/Project.h"
+#include "Systems/Database/Project.h"
 
 #include "Utils/UndoRedoFilter.h"
 #include "Widgets/HelpOverlay.h"

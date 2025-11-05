@@ -4,7 +4,7 @@
 #include "SceneTranstitionData.h"
 
 #include "Systems/DatabaseManager.h"
-#include "Systems/Project.h"
+#include "Systems/Database/Project.h"
 
 namespace {
   const qint32 c_iInPorts = 1;

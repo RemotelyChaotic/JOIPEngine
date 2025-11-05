@@ -2,7 +2,7 @@
 #include "FlowLayout.h"
 #include "ui_TagsView.h"
 
-#include "Systems/Tag.h"
+#include "Systems/Database/Tag.h"
 
 #include <QDebug>
 #include <QLabel>

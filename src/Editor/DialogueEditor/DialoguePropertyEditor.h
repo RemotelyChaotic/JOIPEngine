@@ -2,7 +2,7 @@
 #define DIALOGPROPERTYEDITOR_H
 
 #include "Systems/DialogueTree.h"
-#include "Systems/Project.h"
+#include "Systems/Database/Project.h"
 
 #include "Widgets/OverlayBase.h"
 

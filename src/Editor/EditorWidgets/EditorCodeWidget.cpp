@@ -14,8 +14,8 @@
 
 #include "Systems/DatabaseManager.h"
 #include "Systems/HelpFactory.h"
-#include "Systems/Project.h"
-#include "Systems/Scene.h"
+#include "Systems/Database/Project.h"
+#include "Systems/Database/Scene.h"
 
 #include "Widgets/HelpOverlay.h"
 

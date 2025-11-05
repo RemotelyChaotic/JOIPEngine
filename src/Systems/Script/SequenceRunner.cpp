@@ -3,7 +3,7 @@
 #include "ScriptRunnerInstanceController.h"
 #include "ScriptRunnerSignalEmiter.h"
 
-#include "Systems/Resource.h"
+#include "Systems/Database/Resource.h"
 #include "Systems/Sequence/ISequenceObjectRunner.h"
 #include "Systems/Sequence/Sequence.h"
 

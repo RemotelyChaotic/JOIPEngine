@@ -1,7 +1,7 @@
 #include "CommandChangeLayout.h"
 #include "Editor/EditorCommandIds.h"
 #include "Editor/EditorWidgetTypes.h"
-#include "Systems/Project.h"
+#include "Systems/Database/Project.h"
 
 CCommandChangeLayout::CCommandChangeLayout(QPointer<QComboBox> pComboBox,
                                            const tspProject& spCurrentProject,

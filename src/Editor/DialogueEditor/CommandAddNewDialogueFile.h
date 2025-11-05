@@ -1,7 +1,7 @@
 #ifndef CCOMMANDADDNEWDIALOGUEFILE_H
 #define CCOMMANDADDNEWDIALOGUEFILE_H
 
-#include "Systems/Project.h"
+#include "Systems/Database/Project.h"
 #include <QPointer>
 #include <QUndoCommand>
 #include <QWidget>

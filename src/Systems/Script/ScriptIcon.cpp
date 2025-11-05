@@ -3,7 +3,7 @@
 #include "CommonScriptHelpers.h"
 #include "ScriptDbWrappers.h"
 #include "Systems/DatabaseManager.h"
-#include "Systems/Project.h"
+#include "Systems/Database/Project.h"
 
 
 CIconSignalEmitter::CIconSignalEmitter() :

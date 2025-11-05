@@ -1,7 +1,7 @@
 #ifndef KINK_H
 #define KINK_H
 
-#include "DatabaseInterface/TagData.h"
+#include "Systems/DatabaseInterface/TagData.h"
 #include <QReadWriteLock>
 #include <QColor>
 #include <QObject>

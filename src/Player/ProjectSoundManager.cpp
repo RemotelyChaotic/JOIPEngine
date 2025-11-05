@@ -1,5 +1,5 @@
 #include "ProjectSoundManager.h"
-#include "Systems/Resource.h"
+#include "Systems/Database/Resource.h"
 #include "Systems/Script/ScriptDbWrappers.h"
 
 #include <QJSEngine>

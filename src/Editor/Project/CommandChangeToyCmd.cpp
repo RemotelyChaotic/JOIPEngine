@@ -1,7 +1,7 @@
 #include "CommandChangeToyCmd.h"
 #include "Editor/EditorCommandIds.h"
 #include "Editor/EditorWidgetTypes.h"
-#include "Systems/Project.h"
+#include "Systems/Database/Project.h"
 
 CCommandChangeToyCmd::CCommandChangeToyCmd(QPointer<QComboBox> pComboBox,
                                            const tspProject& spCurrentProject,

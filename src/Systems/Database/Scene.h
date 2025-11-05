@@ -2,7 +2,7 @@
 #define SCENE_H
 
 #include "ISerializable.h"
-#include "DatabaseInterface/SceneData.h"
+#include "Systems/DatabaseInterface/SceneData.h"
 #include <QPointer>
 #include <QReadWriteLock>
 #include <QSharedPointer>

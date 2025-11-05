@@ -1,7 +1,7 @@
 #include "ProjectSceneManager.h"
 
 #include "Systems/Player/SceneNodeResolver.h"
-#include "Systems/Scene.h"
+#include "Systems/Database/Scene.h"
 
 CProjectSceneManagerWrapper::CProjectSceneManagerWrapper(QObject* pParent) :
   CProjectEventTargetWrapper(pParent),

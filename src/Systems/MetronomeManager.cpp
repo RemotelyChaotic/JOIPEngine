@@ -4,7 +4,7 @@
 
 #include "Systems/DeviceManager.h"
 #include "Systems/Devices/IDevice.h"
-#include "Systems/Resource.h"
+#include "Systems/Database/Resource.h"
 
 #include "Utils/MetronomeHelpers.h"
 #include "Utils/MultiEmitterSoundPlayer.h"

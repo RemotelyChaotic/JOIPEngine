@@ -1,7 +1,7 @@
 #ifndef CCOMMANDCHANGEFONT_H
 #define CCOMMANDCHANGEFONT_H
 
-#include "Systems/Project.h"
+#include "Systems/Database/Project.h"
 #include <QFontComboBox>
 #include <QPointer>
 #include <QUndoCommand>

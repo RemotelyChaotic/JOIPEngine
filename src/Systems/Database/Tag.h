@@ -2,7 +2,7 @@
 #define STAG_H
 
 #include "ISerializable.h"
-#include "DatabaseInterface/TagData.h"
+#include "Systems/DatabaseInterface/TagData.h"
 #include <QReadWriteLock>
 #include <QColor>
 #include <QObject>

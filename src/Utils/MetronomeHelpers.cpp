@@ -2,7 +2,7 @@
 #include "Application.h"
 #include "Settings.h"
 
-#include "Systems/Resource.h"
+#include "Systems/Database/Resource.h"
 
 #include <QDir>
 #include <QDirIterator>

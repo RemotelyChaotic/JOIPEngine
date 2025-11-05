@@ -2,7 +2,7 @@
 #define CCOMMANDCHANGERESOURCEDATA_H
 
 #include "Systems/DatabaseManager.h"
-#include "Systems/Project.h"
+#include "Systems/Database/Project.h"
 #include <QUndoCommand>
 #include <QPointer>
 #include <functional>

@@ -2,7 +2,7 @@
 #include "Application.h"
 #include "Settings.h"
 #include "Systems/PhysFs/PhysFsFileEngine.h"
-#include "Systems/Project.h"
+#include "Systems/Database/Project.h"
 #include "ui_ResourceDisplayWidget.h"
 
 #include <QFileInfo>

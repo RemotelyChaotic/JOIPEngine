@@ -1,7 +1,7 @@
 #ifndef CCOMMANDCHANGETAGS_H
 #define CCOMMANDCHANGETAGS_H
 
-#include "Systems/Project.h"
+#include "Systems/Database/Project.h"
 
 #include <QStringList>
 #include <QUndoCommand>

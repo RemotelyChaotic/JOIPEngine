@@ -1,7 +1,7 @@
 #ifndef DIALOGTAGSEDITOROVERLAY_H
 #define DIALOGTAGSEDITOROVERLAY_H
 
-#include "Systems/Project.h"
+#include "Systems/Database/Project.h"
 #include "Widgets/OverlayBase.h"
 
 #include <QPointer>

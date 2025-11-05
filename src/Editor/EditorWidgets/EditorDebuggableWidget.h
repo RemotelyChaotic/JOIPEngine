@@ -3,7 +3,7 @@
 
 #include "EditorWidgetBase.h"
 
-#include "Systems/Scene.h"
+#include "Systems/Database/Scene.h"
 
 #include <QPointer>
 #include <QPushButton>

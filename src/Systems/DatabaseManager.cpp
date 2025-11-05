@@ -1,11 +1,12 @@
 #include "DatabaseManager.h"
 #include "Application.h"
-#include "DatabaseData.h"
-#include "DatabaseIO.h"
-#include "Project.h"
-#include "Resource.h"
-#include "Scene.h"
 #include "Settings.h"
+
+#include "Database/DatabaseData.h"
+#include "Database/DatabaseIO.h"
+#include "Database/Project.h"
+#include "Database/Resource.h"
+#include "Database/Scene.h"
 
 #include <QDebug>
 #include <QDir>

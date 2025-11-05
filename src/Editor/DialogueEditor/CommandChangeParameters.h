@@ -2,7 +2,7 @@
 #define CCOMMANDCHANGEDialoguePARAMETERS_H
 
 #include "Systems/DialogueTree.h"
-#include "Systems/Project.h"
+#include "Systems/Database/Project.h"
 #include <QPointer>
 #include <QUndoCommand>
 #include <memory>

@@ -2,12 +2,12 @@
 #define SCRIPTDBWRAPPERS_H
 
 #include "Systems/DialogueTree.h"
-#include "Systems/Kink.h"
+#include "Systems/Database/Kink.h"
 #include "Systems/Lockable.h"
-#include "Systems/Project.h"
-#include "Systems/Resource.h"
-#include "Systems/SaveData.h"
-#include "Systems/Scene.h"
+#include "Systems/Database/Project.h"
+#include "Systems/Database/Resource.h"
+#include "Systems/Database/SaveData.h"
+#include "Systems/Database/Scene.h"
 #include <QObject>
 #include <variant>
 

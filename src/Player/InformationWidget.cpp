@@ -1,7 +1,7 @@
 #include "InformationWidget.h"
 #include "Application.h"
 #include "Settings.h"
-#include "Systems/Resource.h"
+#include "Systems/Database/Resource.h"
 #include "Widgets/FlowLayout.h"
 #include "Widgets/ResourceDisplayWidget.h"
 #include "ui_InformationWidget.h"

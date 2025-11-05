@@ -4,7 +4,7 @@
 #include "WindowContext.h"
 #include "Systems/DatabaseManager.h"
 #include "Systems/HelpFactory.h"
-#include "Systems/Project.h"
+#include "Systems/Database/Project.h"
 #include "Systems/ProjectDownloader.h"
 #include "Utils/WidgetHelpers.h"
 #include "Widgets/HelpOverlay.h"

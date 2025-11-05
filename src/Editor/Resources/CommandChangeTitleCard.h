@@ -1,7 +1,7 @@
 #ifndef CCOMMANDCHANGETITLECARD_H
 #define CCOMMANDCHANGETITLECARD_H
 
-#include "Systems/Project.h"
+#include "Systems/Database/Project.h"
 #include <QPointer>
 #include <QUndoCommand>
 #include <functional>

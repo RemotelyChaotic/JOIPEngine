@@ -1,8 +1,8 @@
 #include "EditorEditableFileModel.h"
 #include "Application.h"
 #include "Systems/DatabaseManager.h"
-#include "Systems/Resource.h"
-#include "Systems/Scene.h"
+#include "Systems/Database/Resource.h"
+#include "Systems/Database/Scene.h"
 
 #include <QPushButton>
 #include <QMessageBox>

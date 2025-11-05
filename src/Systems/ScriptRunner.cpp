@@ -1,9 +1,10 @@
 #include "ScriptRunner.h"
 #include "Application.h"
 #include "DatabaseManager.h"
-#include "Project.h"
-#include "Resource.h"
-#include "Scene.h"
+
+#include "Database/Project.h"
+#include "Database/Resource.h"
+#include "Database/Scene.h"
 
 #include "Script/EosScriptRunner.h"
 #include "Script/JsScriptRunner.h"

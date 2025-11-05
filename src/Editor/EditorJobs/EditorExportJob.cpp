@@ -1,10 +1,10 @@
 #include "EditorExportJob.h"
 #include "Application.h"
 
-#include "Systems/ResourceBundle.h"
+#include "Systems/Database/ResourceBundle.h"
 #include "Systems/DatabaseManager.h"
 #include "Systems/PhysFs/PhysFsFileEngine.h"
-#include "Systems/Project.h"
+#include "Systems/Database/Project.h"
 
 #include <rcc.h>
 #include <rcc_options.h>

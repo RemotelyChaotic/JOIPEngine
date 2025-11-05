@@ -12,8 +12,8 @@
 #include "Systems/JSON/JsonInstructionBase.h"
 #include "Systems/JSON/JsonInstructionSetParser.h"
 
-#include "Systems/Project.h"
-#include "Systems/Scene.h"
+#include "Systems/Database/Project.h"
+#include "Systems/Database/Scene.h"
 
 #include <QTimer>
 

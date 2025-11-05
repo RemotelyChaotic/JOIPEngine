@@ -2,8 +2,8 @@
 #define DATABASEMANAGER_H
 
 #include "ThreadedSystem.h"
-#include "Kink.h"
-#include "Resource.h"
+#include "Database/Kink.h"
+#include "Database/Resource.h"
 #include <QAtomicInt>
 #include <QDir>
 #include <QMutex>

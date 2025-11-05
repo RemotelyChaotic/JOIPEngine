@@ -1,7 +1,7 @@
 #ifndef CCOMMANDCHANGEOPENEDSCRIPT_H
 #define CCOMMANDCHANGEOPENEDSCRIPT_H
 
-#include "Systems/Project.h"
+#include "Systems/Database/Project.h"
 #include <QComboBox>
 #include <QUndoCommand>
 #include <QPointer>

@@ -14,8 +14,8 @@
 #include "Systems/JSON/JsonInstructionBase.h"
 #include "Systems/JSON/JsonInstructionSetParser.h"
 
-#include "Systems/Project.h"
-#include "Systems/Resource.h"
+#include "Systems/Database/Project.h"
+#include "Systems/Database/Resource.h"
 
 //----------------------------------------------------------------------------------------
 //

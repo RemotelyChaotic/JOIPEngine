@@ -1,7 +1,7 @@
 #ifndef CTAGCOMPLETER_H
 #define CTAGCOMPLETER_H
 
-#include "Systems/Project.h"
+#include "Systems/Database/Project.h"
 #include <QCompleter>
 
 class CDatabaseManager;

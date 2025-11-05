@@ -15,8 +15,8 @@
 #include "Systems/Nodes/StartNodeModel.h"
 
 #include "Systems/DatabaseManager.h"
-#include "Systems/Project.h"
-#include "Systems/Scene.h"
+#include "Systems/Database/Project.h"
+#include "Systems/Database/Scene.h"
 
 #include <nodes/internal/NodePainter.hpp>
 #include <nodes/internal/StyleCollection.hpp>

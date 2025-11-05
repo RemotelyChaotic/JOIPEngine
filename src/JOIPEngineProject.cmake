@@ -492,25 +492,50 @@ macro(CreateJOIPProject JOIP_PROJECT_NAME)
     ${JOIPSources}/Style.h
     ${JOIPSources}/Systems/BackActionHandler.cpp
     ${JOIPSources}/Systems/BackActionHandler.h
-    ${JOIPSources}/Systems/DatabaseData.cpp
-    ${JOIPSources}/Systems/DatabaseData.h
-    ${JOIPSources}/Systems/DatabaseImageProvider.cpp
-    ${JOIPSources}/Systems/DatabaseImageProvider.h
+    ${JOIPSources}/Systems/DLJobs/DownloadJobRegistry.h
+    ${JOIPSources}/Systems/DLJobs/EosDownloadJob.cpp
+    ${JOIPSources}/Systems/DLJobs/EosDownloadJob.h
+    ${JOIPSources}/Systems/DLJobs/EosDownloadJobWidget.ui
+    ${JOIPSources}/Systems/DLJobs/EosPagesToScenesTransformer.cpp
+    ${JOIPSources}/Systems/DLJobs/EosPagesToScenesTransformer.h
+    ${JOIPSources}/Systems/DLJobs/EosResourceLocator.cpp
+    ${JOIPSources}/Systems/DLJobs/EosResourceLocator.h
+    ${JOIPSources}/Systems/DLJobs/EosResources.qrc
+    ${JOIPSources}/Systems/DLJobs/IDownloadJob.h
+    ${JOIPSources}/Systems/Database/DatabaseData.cpp
+    ${JOIPSources}/Systems/Database/DatabaseData.h
+    ${JOIPSources}/Systems/Database/DatabaseIO.cpp
+    ${JOIPSources}/Systems/Database/DatabaseIO.h
+    ${JOIPSources}/Systems/Database/DatabaseImageProvider.cpp
+    ${JOIPSources}/Systems/Database/DatabaseImageProvider.h
+    ${JOIPSources}/Systems/Database/ISerializable.h
+    ${JOIPSources}/Systems/Database/Kink.cpp
+    ${JOIPSources}/Systems/Database/Kink.h
+    ${JOIPSources}/Systems/Database/Project.cpp
+    ${JOIPSources}/Systems/Database/Project.h
+    ${JOIPSources}/Systems/Database/Resource.cpp
+    ${JOIPSources}/Systems/Database/Resource.h
+    ${JOIPSources}/Systems/Database/ResourceBundle.cpp
+    ${JOIPSources}/Systems/Database/ResourceBundle.h
+    ${JOIPSources}/Systems/Database/SaveData.cpp
+    ${JOIPSources}/Systems/Database/SaveData.h
+    ${JOIPSources}/Systems/Database/Scene.cpp
+    ${JOIPSources}/Systems/Database/Scene.h
+    ${JOIPSources}/Systems/Database/Tag.cpp
+    ${JOIPSources}/Systems/Database/Tag.h
     ${JOIPSources}/Systems/DatabaseInterface/ProjectData.h
     ${JOIPSources}/Systems/DatabaseInterface/ResourceData.h
     ${JOIPSources}/Systems/DatabaseInterface/SaveData.h
     ${JOIPSources}/Systems/DatabaseInterface/SceneData.h
     ${JOIPSources}/Systems/DatabaseInterface/TagData.h
-    ${JOIPSources}/Systems/DatabaseIO.cpp
-    ${JOIPSources}/Systems/DatabaseIO.h
     ${JOIPSources}/Systems/DatabaseManager.cpp
     ${JOIPSources}/Systems/DatabaseManager.h
-    ${JOIPSources}/Systems/Debug/ICustomMessageHandler.h
     ${JOIPSources}/Systems/Debug/DebugInterface.cpp
     ${JOIPSources}/Systems/Debug/DebugInterface.h
     ${JOIPSources}/Systems/Debug/DebugOverlay.cpp
     ${JOIPSources}/Systems/Debug/DebugOverlay.h
     ${JOIPSources}/Systems/Debug/DebugOverlay.ui
+    ${JOIPSources}/Systems/Debug/ICustomMessageHandler.h
     ${JOIPSources}/Systems/Debug/JoipMessageHandler.cpp
     ${JOIPSources}/Systems/Debug/JoipMessageHandler.h
     ${JOIPSources}/Systems/DeviceManager.cpp
@@ -522,16 +547,6 @@ macro(CreateJOIPProject JOIP_PROJECT_NAME)
     ${JOIPSources}/Systems/Devices/IDeviceConnector.h
     ${JOIPSources}/Systems/DialogueTree.cpp
     ${JOIPSources}/Systems/DialogueTree.h
-    ${JOIPSources}/Systems/DLJobs/IDownloadJob.h
-    ${JOIPSources}/Systems/DLJobs/DownloadJobRegistry.h
-    ${JOIPSources}/Systems/DLJobs/EosDownloadJob.cpp
-    ${JOIPSources}/Systems/DLJobs/EosDownloadJob.h
-    ${JOIPSources}/Systems/DLJobs/EosDownloadJobWidget.ui
-    ${JOIPSources}/Systems/DLJobs/EosPagesToScenesTransformer.cpp
-    ${JOIPSources}/Systems/DLJobs/EosPagesToScenesTransformer.h
-    ${JOIPSources}/Systems/DLJobs/EosResourceLocator.cpp
-    ${JOIPSources}/Systems/DLJobs/EosResourceLocator.h
-    ${JOIPSources}/Systems/DLJobs/EosResources.qrc
     ${JOIPSources}/Systems/EOS/CommandEosAudioBase.cpp
     ${JOIPSources}/Systems/EOS/CommandEosAudioBase.h
     ${JOIPSources}/Systems/EOS/CommandEosChoiceBase.cpp
@@ -567,10 +582,17 @@ macro(CreateJOIPProject JOIP_PROJECT_NAME)
     ${JOIPSources}/Systems/EOS/EosHelpers.h
     ${JOIPSources}/Systems/HelpFactory.cpp
     ${JOIPSources}/Systems/HelpFactory.h
-    ${JOIPSources}/Systems/ISerializable.h
     ${JOIPSources}/Systems/IRunnableJob.h
-    ${JOIPSources}/Systems/Kink.cpp
-    ${JOIPSources}/Systems/Kink.h
+    ${JOIPSources}/Systems/JSON/JsonInstructionBase.h
+    ${JOIPSources}/Systems/JSON/JsonInstructionNode.cpp
+    ${JOIPSources}/Systems/JSON/JsonInstructionNode.h
+    ${JOIPSources}/Systems/JSON/JsonInstructionSetParser.cpp
+    ${JOIPSources}/Systems/JSON/JsonInstructionSetParser.h
+    ${JOIPSources}/Systems/JSON/JsonInstructionSetRunner.h
+    ${JOIPSources}/Systems/JSON/JsonInstructionSetRunnerItemModel.cpp
+    ${JOIPSources}/Systems/JSON/JsonInstructionSetRunnerItemModel.h
+    ${JOIPSources}/Systems/JSON/JsonInstructionSetSaxParser.h
+    ${JOIPSources}/Systems/JSON/JsonInstructionTypes.h
     ${JOIPSources}/Systems/Lockable.h
     ${JOIPSources}/Systems/MetronomeManager.cpp
     ${JOIPSources}/Systems/MetronomeManager.h
@@ -612,32 +634,10 @@ macro(CreateJOIPProject JOIP_PROJECT_NAME)
     ${JOIPSources}/Systems/PhysFs/PhysFsQtAVIntegration.h
     ${JOIPSources}/Systems/Player/SceneNodeResolver.cpp
     ${JOIPSources}/Systems/Player/SceneNodeResolver.h
-    ${JOIPSources}/Systems/Project.cpp
-    ${JOIPSources}/Systems/Project.h
     ${JOIPSources}/Systems/ProjectDownloader.cpp
     ${JOIPSources}/Systems/ProjectDownloader.h
     ${JOIPSources}/Systems/ProjectJobWorker.cpp
     ${JOIPSources}/Systems/ProjectJobWorker.h
-    ${JOIPSources}/Systems/Resource.cpp
-    ${JOIPSources}/Systems/Resource.h
-    ${JOIPSources}/Systems/ResourceBundle.cpp
-    ${JOIPSources}/Systems/ResourceBundle.h
-    ${JOIPSources}/Systems/SaveData.cpp
-    ${JOIPSources}/Systems/SaveData.h
-    ${JOIPSources}/Systems/Scene.cpp
-    ${JOIPSources}/Systems/Scene.h
-    ${JOIPSources}/Systems/Tag.cpp
-    ${JOIPSources}/Systems/Tag.h
-    ${JOIPSources}/Systems/JSON/JsonInstructionBase.h
-    ${JOIPSources}/Systems/JSON/JsonInstructionNode.cpp
-    ${JOIPSources}/Systems/JSON/JsonInstructionNode.h
-    ${JOIPSources}/Systems/JSON/JsonInstructionSetParser.cpp
-    ${JOIPSources}/Systems/JSON/JsonInstructionSetParser.h
-    ${JOIPSources}/Systems/JSON/JsonInstructionSetRunner.h
-    ${JOIPSources}/Systems/JSON/JsonInstructionSetRunnerItemModel.cpp
-    ${JOIPSources}/Systems/JSON/JsonInstructionSetRunnerItemModel.h
-    ${JOIPSources}/Systems/JSON/JsonInstructionSetSaxParser.h
-    ${JOIPSources}/Systems/JSON/JsonInstructionTypes.h
     ${JOIPSources}/Systems/Script/CodeGeneratorProvider.cpp
     ${JOIPSources}/Systems/Script/CodeGeneratorProvider.h
     ${JOIPSources}/Systems/Script/CommonCodeGenerator.cpp

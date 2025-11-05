@@ -3,7 +3,7 @@
 #include "ui_SceneCardSelectionWidget.h"
 
 #include "Systems/DatabaseManager.h"
-#include "Systems/DatabaseImageProvider.h"
+#include "Systems/Database/DatabaseImageProvider.h"
 #include "Systems/HelpFactory.h"
 #include "Systems/Script/ScriptDbWrappers.h"
 

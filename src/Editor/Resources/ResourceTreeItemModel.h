@@ -1,7 +1,7 @@
 #ifndef RESOURCETREEITEMMODEL_H
 #define RESOURCETREEITEMMODEL_H
 
-#include "Systems/Project.h"
+#include "Systems/Database/Project.h"
 #include <QAbstractItemModel>
 #include <QImage>
 #include <QModelIndex>
