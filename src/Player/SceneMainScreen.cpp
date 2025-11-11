@@ -187,11 +187,12 @@ void CSceneMainScreen::LoadProject(qint32 iId, const tSceneToLoad& sStartScene)
     }
 
     ConnectAllSignals();
-    LoadQml();
 
     m_runningState = eRunning;
     m_bErrorState = false;
     m_bReachedEndNode = false;
+
+    LoadQml();
   }
 
   if (!m_bBeingDebugged)
@@ -519,19 +520,12 @@ void CSceneMainScreen::SlotSceneSelectReturnValue(int iIndex)
     tspScene spScene = m_spSceneNodeResolver->NextScene(sScenes[iIndex], &bEnd);
     if (nullptr != spScene)
     {
-      // load script
-      QReadLocker lockerScene(&spScene->m_rwLock);
-      QString sScript = spScene->m_sScript;
-      lockerScene.unlock();
-      bool bOk = QMetaObject::invokeMethod(m_spScriptRunner.get(), "LoadScript", Qt::QueuedConnection,
-                                           Q_ARG(tspScene, spScene),
-                                           Q_ARG(tspResource, spDbManager->FindResourceInProject(m_spCurrentProject, sScript)));
-      assert(bOk);
-      if (Q_UNLIKELY(!bOk))
+      QString sScene;
       {
-        qWarning() << tr("LoadScript could not be called.");
-        SlotTerminate();
+        QReadLocker l(&spScene->m_rwLock);
+        sScene = spScene->m_sName;
       }
+      LoadSceneScript(sScene, bEnd, false);
     }
     else
     {
@@ -603,9 +597,21 @@ void CSceneMainScreen::SlotScriptRunFinished(bool bOk, bool bEndReached, const Q
 
 //----------------------------------------------------------------------------------------
 //
-void CSceneMainScreen::SlotStartLoadingSkript()
+void CSceneMainScreen::SlotStartLoadingSkript(const QString& sScene)
 {
-  NextSkript(false);
+  if (eRunning != m_runningState)
+  {
+    return;
+  }
+
+  if (sScene.isEmpty())
+  {
+    NextSkript(false);
+  }
+  else
+  {
+    LoadSceneScript(sScene, false, true);
+  }
 }
 
 //----------------------------------------------------------------------------------------
@@ -662,7 +668,8 @@ void CSceneMainScreen::ConnectAllSignals()
   QQuickItem* pRootObject =  m_spUi->pQmlWidget->rootObject();
   bool bOk = true;
 
-  bOk = connect(pRootObject, SIGNAL(startLoadingSkript()), this, SLOT(SlotStartLoadingSkript()));
+  bOk = connect(pRootObject, SIGNAL(startLoadingSkript(QString)), this,
+                SLOT(SlotStartLoadingSkript(QString)));
   assert(bOk); Q_UNUSED(bOk)
   bOk = connect(pRootObject, SIGNAL(quit()), this, SLOT(SlotTerminate()));
   assert(bOk); Q_UNUSED(bOk)
@@ -691,7 +698,8 @@ void CSceneMainScreen::ConnectAllSignals()
 void CSceneMainScreen::DisconnectAllSignals()
 {
   QQuickItem* pRootObject =  m_spUi->pQmlWidget->rootObject();
-  disconnect(pRootObject, SIGNAL(startLoadingSkript()), this, SLOT(SlotStartLoadingSkript()));
+  disconnect(pRootObject, SIGNAL(startLoadingSkript(QString)), this,
+             SLOT(SlotStartLoadingSkript(QString)));
   disconnect(pRootObject, SIGNAL(quit()), this, SLOT(SlotTerminate()));
 
   auto spSignalEmmiterContext = m_spScriptRunner->SignalEmmitterContext();
@@ -751,6 +759,81 @@ void CSceneMainScreen::LoadQml()
 
 //----------------------------------------------------------------------------------------
 //
+void CSceneMainScreen::LoadSceneScript(const QString& sScene, bool bEnd, bool bSkipLayout)
+{
+  if (auto spDbManager = m_wpDbManager.lock())
+  {
+    tspScene spScene = spDbManager->FindScene(m_spCurrentProject, sScene);
+    if (nullptr != spScene)
+    {
+      // load script
+      QReadLocker lockerScene(&spScene->m_rwLock);
+      QString sScript = spScene->m_sScript;
+      QString sLayout = spScene->m_sSceneLayout;
+      lockerScene.unlock();
+      if (sLayout.isEmpty())
+      {
+        QReadLocker pLocker(&m_spCurrentProject->m_rwLock);
+        sLayout = m_spCurrentProject->m_sPlayerLayout;
+      }
+
+      QQuickItem* pRootObject =  m_spUi->pQmlWidget->rootObject();
+      if (nullptr != pRootObject)
+      {
+        if (sLayout != LoadedLayout() && !bSkipLayout)
+        {
+          bool bOk = QMetaObject::invokeMethod(pRootObject, "onChangeLayout",
+                                               Q_ARG(QVariant, QVariant::fromValue(sLayout)),
+                                               Q_ARG(QVariant, QVariant::fromValue(sScene)));
+          assert(bOk); Q_UNUSED(bOk)
+        }
+        else
+        {
+          bool bOk = QMetaObject::invokeMethod(m_spScriptRunner.get(), "LoadScript", Qt::QueuedConnection,
+                                               Q_ARG(tspScene, spScene),
+                                               Q_ARG(tspResource, spDbManager->FindResourceInProject(m_spCurrentProject, sScript)));
+          assert(bOk); Q_UNUSED(bOk)
+          if (Q_UNLIKELY(!bOk))
+          {
+            qWarning() << tr("LoadScript could not be called.");
+            SlotTerminate();
+          }
+        }
+      }
+      else
+      {
+        qInfo() << tr("Root Qml layout is null.");
+        SlotFinish(false);
+      }
+    }
+    else
+    {
+      qInfo() << tr("Next scene is null or end.");
+      SlotFinish(bEnd);
+    }
+  }
+  else
+  {
+    qWarning() << tr("Db Manager was null unexpectedly.");
+    SlotFinish(false);
+  }
+}
+
+//----------------------------------------------------------------------------------------
+//
+QString CSceneMainScreen::LoadedLayout()
+{
+  QQuickItem* pRootObject =  m_spUi->pQmlWidget->rootObject();
+  if (nullptr != pRootObject)
+  {
+    QVariant var = pRootObject->property("currentlyLoadedLayout");
+    return var.toString();
+  }
+  return QString();
+}
+
+//----------------------------------------------------------------------------------------
+//
 void CSceneMainScreen::NextSkript(bool bMightBeRegex)
 {
   auto spDbManager = m_wpDbManager.lock();
@@ -772,19 +855,12 @@ void CSceneMainScreen::NextSkript(bool bMightBeRegex)
         tspScene spScene = m_spSceneNodeResolver->NextScene(sScenes[0], &bEnd);
         if (nullptr != spScene)
         {
-          // load script
-          QReadLocker lockerScene(&spScene->m_rwLock);
-          QString sScript = spScene->m_sScript;
-          lockerScene.unlock();
-          bool bOk = QMetaObject::invokeMethod(m_spScriptRunner.get(), "LoadScript", Qt::QueuedConnection,
-                                               Q_ARG(tspScene, spScene),
-                                               Q_ARG(tspResource, spDbManager->FindResourceInProject(m_spCurrentProject, sScript)));
-          assert(bOk);
-          if (Q_UNLIKELY(!bOk))
+          QString sScene;
           {
-            qWarning() << tr("LoadScript could not be called.");
-            SlotTerminate();
+            QReadLocker l(&spScene->m_rwLock);
+            sScene = spScene->m_sName;
           }
+          LoadSceneScript(sScene, bEnd, false);
         }
         else
         {
@@ -803,19 +879,12 @@ void CSceneMainScreen::NextSkript(bool bMightBeRegex)
         tspScene spScene = m_spSceneNodeResolver->NextScene(sScenes[iGeneratedIndex], &bEnd);
         if (nullptr != spScene)
         {
-          // load script
-          QReadLocker lockerScene(&spScene->m_rwLock);
-          QString sScript = spScene->m_sScript;
-          lockerScene.unlock();
-          bool bOk = QMetaObject::invokeMethod(m_spScriptRunner.get(), "LoadScript", Qt::QueuedConnection,
-                                               Q_ARG(tspScene, spScene),
-                                               Q_ARG(tspResource, spDbManager->FindResourceInProject(m_spCurrentProject, sScript)));
-          assert(bOk);
-          if (Q_UNLIKELY(!bOk))
+          QString sScene;
           {
-            qWarning() << tr("LoadScript could not be called.");
-            SlotTerminate();
+            QReadLocker l(&spScene->m_rwLock);
+            sScene = spScene->m_sName;
           }
+          LoadSceneScript(sScene, bEnd, false);
         }
         else
         {

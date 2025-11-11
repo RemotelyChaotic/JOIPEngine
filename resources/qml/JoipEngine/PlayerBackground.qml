@@ -146,13 +146,12 @@ Rectangle {
 
     PlayerComponentRegistrator {
         id: registrator
+        name: background.userName
     }
 
     Component.onCompleted: {
         img.source = Settings.styleFolderQml() + "/Background.png";
-        ScriptRunner.registerNewComponent(userName, signalEmitter);
-        registrator.componentLoaded();
-
-        root.registerUIComponent(background.userName, evalAccessor);
+        registrator.registerNewScriptComponent(signalEmitter);
+        registrator.registerNewUiComponent(evalAccessor);
     }
 }

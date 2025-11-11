@@ -102,6 +102,7 @@ Rectangle {
 
     PlayerComponentRegistrator {
         id: registrator
+        name: metronome.userName
     }
 
     MetronomeItem {
@@ -134,9 +135,7 @@ Rectangle {
     }
 
     Component.onCompleted: {
-        ScriptRunner.registerNewComponent(userName, signalEmitter);
-        registrator.componentLoaded();
-
-        root.registerUIComponent(metronome.userName, evalAccessor);
+        registrator.registerNewScriptComponent(signalEmitter);
+        registrator.registerNewUiComponent(evalAccessor);
     }
 }

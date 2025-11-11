@@ -83,7 +83,7 @@ private slots:
   void SlotSceneSelectReturnValue(int iIndex);
   void SlotSceneLoaded(const QString& sScene);
   void SlotScriptRunFinished(bool bOk, bool bEnd, const QString& sRetVal);
-  void SlotStartLoadingSkript();
+  void SlotStartLoadingSkript(const QString& sScene);
   void SlotUnloadFinished();
 
 private:
@@ -92,6 +92,8 @@ private:
   void Finish();
   void InitQmlMain();
   void LoadQml();
+  void LoadSceneScript(const QString& sScene, bool bEnd, bool bSkipLayout);
+  QString LoadedLayout();
   void NextSkript(bool bMightBeRegex);
   void UnloadRunner();
   void UnloadQml(bool bReachedEnd);

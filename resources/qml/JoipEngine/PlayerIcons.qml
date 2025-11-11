@@ -99,6 +99,7 @@ Rectangle {
 
     PlayerComponentRegistrator {
         id: registrator
+        name: icon.userName
     }
 
     ListModel {
@@ -140,9 +141,7 @@ Rectangle {
     }
 
     Component.onCompleted: {
-        ScriptRunner.registerNewComponent(userName, signalEmitter);
-        registrator.componentLoaded();
-
-        root.registerUIComponent(icon.userName, evalAccessor);
+        registrator.registerNewScriptComponent(signalEmitter);
+        registrator.registerNewUiComponent(evalAccessor);
     }
 }

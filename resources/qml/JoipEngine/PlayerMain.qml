@@ -19,14 +19,14 @@ Rectangle {
     property alias soundEffects: playerSoundEffects
 
     property bool debug: false
+    property alias currentlyLoadedLayout: layoutLoader.layout
     property Project currentlyLoadedProject: null
     property PlayerTextBox registeredTextBox: null
     property PlayerMediaPlayer registeredMediaPlayer: null
-    property int numReadyComponents: 0
-    property var componentsRegistered: []
+    property var componentsRegistered: [] // Array[ { string name, obj obj } ]
     property var startTime: new Date()
 
-    signal startLoadingSkript()
+    signal startLoadingSkript(string scene)
     signal unloadFinished()
     signal quit()
 
@@ -53,27 +53,7 @@ Rectangle {
 
             audioPlayer.numberOfSoundEmitters = currentlyLoadedProject.numberOfSoundEmitters;
 
-            var bFoundLayout = false;
-            if (currentlyLoadedProject.playerLayout !== "")
-            {
-                var resource = currentlyLoadedProject.resource(currentlyLoadedProject.playerLayout);
-                if (null !== resource && undefined !== resource)
-                {
-                    var path = resource.path;
-                    layoutLoader.setSource(path);
-                    bFoundLayout = true;
-                }
-                else if (currentlyLoadedProject.playerLayout.startsWith("qrc:/qml"))
-                {
-                    layoutLoader.setSource(currentlyLoadedProject.playerLayout);
-                    bFoundLayout = true;
-                }
-            }
-
-            if (!bFoundLayout)
-            {
-                layoutLoader.setSource("qrc:/qml/resources/qml/JoipEngine/PlayerDefaultLayout.qml");
-            }
+            onChangeLayout(currentlyLoadedProject.playerLayout, "");
         }
         else
         {
@@ -108,11 +88,9 @@ Rectangle {
 
             // TODO: unload registered eval access objects
 
-            numReadyComponents = 0;
             componentsRegistered = [];
 
-            layoutLoader.setSource("");
-            layoutLoader.unload();
+            onChangeLayout("", "");
 
             hoverSound.source = "";
             clickSound.source = "";
@@ -126,6 +104,41 @@ Rectangle {
             gc();
 
             root.unloadFinished();
+        }
+    }
+
+    function onChangeLayout(sLayout, sScene)
+    {
+        layoutLoader.scene = sScene
+
+        var bFoundLayout = false;
+        if ("" === sLayout)
+        {
+            layoutLoader.setSource("");
+            layoutLoader.unload();
+            return;
+        }
+        else if (sLayout !== "")
+        {
+            var resource = currentlyLoadedProject.resource(sLayout);
+            if (null !== resource && undefined !== resource)
+            {
+                var path = resource.path;
+                layoutLoader.setSource(path);
+                layoutLoader.layout = sLayout;
+                bFoundLayout = true;
+            }
+            else if (sLayout.startsWith("qrc:/qml"))
+            {
+                layoutLoader.setSource(sLayout);
+                layoutLoader.layout = sLayout;
+                bFoundLayout = true;
+            }
+        }
+
+        if (!bFoundLayout)
+        {
+            layoutLoader.setSource("qrc:/qml/resources/qml/JoipEngine/PlayerDefaultLayout.qml");
         }
     }
 
@@ -240,9 +253,9 @@ Rectangle {
         onPlaybackFinishedCallback: {
             for (var i = 0; root.componentsRegistered.length > i; ++i)
             {
-                if (null !== root.componentsRegistered[i] && undefined !== root.componentsRegistered[i])
+                if (null !== root.componentsRegistered[i].obj && undefined !== root.componentsRegistered[i].obj)
                 {
-                    root.componentsRegistered[i].soundFinished(resource);
+                    root.componentsRegistered[i].obj.soundFinished(resource);
                 }
             }
         }
@@ -258,9 +271,9 @@ Rectangle {
         onSkippableWait: {
             for (var i = 0; root.componentsRegistered.length > i; ++i)
             {
-                if (null !== root.componentsRegistered[i] && undefined !== root.componentsRegistered[i])
+                if (null !== root.componentsRegistered[i].obj && undefined !== root.componentsRegistered[i].obj)
                 {
-                    root.componentsRegistered[i].setSkippableWait(iTimeS);
+                    root.componentsRegistered[i].obj.setSkippableWait(iTimeS);
                 }
             }
         }
@@ -443,9 +456,9 @@ Rectangle {
     {
         for (var i = 0; root.componentsRegistered.length > i; ++i)
         {
-            if (null !== root.componentsRegistered[i] && undefined !== root.componentsRegistered[i])
+            if (null !== root.componentsRegistered[i].obj && undefined !== root.componentsRegistered[i].obj)
             {
-                root.componentsRegistered[i].skippableWaitFinished();
+                root.componentsRegistered[i].obj.skippableWaitFinished();
             }
         }
         thread.waitSkipped();
@@ -495,6 +508,9 @@ Rectangle {
             asynchronous: true
             active: false
 
+            property string scene: ""
+            property string layout: ""
+
             visible: opacity > 0.0;
             Behavior on opacity {
                 NumberAnimation { duration: 500; easing.type: Easing.InOutQuad }
@@ -510,7 +526,7 @@ Rectangle {
             onLoaded: {
                 if (status === Loader.Ready)
                 {
-                    root.startLoadingSkript();
+                    root.startLoadingSkript(scene);
                 }
             }
             onSourceChanged: {
@@ -621,7 +637,6 @@ Rectangle {
         ScriptRunner.registerNewComponent(storageEmitter.userName, storageEmitter);
         ScriptRunner.registerNewComponent(deviceControllerEmitter.userName, deviceControllerEmitter);
         ScriptRunner.registerNewComponent(evaluator.userName, evaluator);
-        numReadyComponents += 4;
 
         registerUIComponent("teaseStorage", storage);
         registerUIComponent("localStorage", storage);

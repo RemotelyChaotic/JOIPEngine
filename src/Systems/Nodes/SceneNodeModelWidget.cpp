@@ -18,10 +18,6 @@ CSceneNodeModelWidget::CSceneNodeModelWidget(QWidget* pParent) :
   m_spUi->AddLayoutFile->setProperty("styleSmall", true);
   m_spUi->AddScriptFile->setProperty("styleSmall", true);
 
-  m_spUi->AddLayoutFile->hide();
-  m_spUi->pLayoutComboBox->hide();
-  m_spUi->label_2->hide();
-
   new CUndoRedoFilter(m_spUi->pSceneNameLineEdit, nullptr);
 }
 
@@ -55,7 +51,7 @@ void CSceneNodeModelWidget::SetProject(const tspProject& spProject)
   m_spUi->pLayoutComboBox->clear();
 
   m_spUi->pScriptComboBox->addItem("<No Script>", "");
-  m_spUi->pLayoutComboBox->addItem("<Project Layout>", "");
+  m_spUi->pLayoutComboBox->addItem("<Use Project Layout>", "");
 
   for (const auto& [sName, tspResource] : spProject->m_spResourcesMap)
   {

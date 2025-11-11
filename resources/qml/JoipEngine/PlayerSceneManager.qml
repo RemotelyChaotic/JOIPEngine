@@ -69,12 +69,10 @@ Rectangle {
 
     PlayerComponentRegistrator {
         id: registrator
+        name: sceneManager.userName
     }
 
     Component.onCompleted: {
-        ScriptRunner.registerNewComponent(userName, signalEmitter);
-        registrator.componentLoaded();
-
         Player.initObject(sceneManagerPrivate);
 
         // for whatever reason goto is a reserved word
@@ -85,7 +83,7 @@ Rectangle {
         };
         */
 
-        root.registerUIComponent(sceneManager.userName, sceneManagerPrivate);
+        registrator.registerNewScriptComponent(signalEmitter);
         // for compatibility with eos
         root.registerUIComponent("pages", pages);
     }

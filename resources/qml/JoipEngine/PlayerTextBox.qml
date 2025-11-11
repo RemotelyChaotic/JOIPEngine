@@ -373,6 +373,7 @@ Rectangle {
 
     PlayerComponentRegistrator {
         id: registrator
+        name: textBox.userName
 
         onSkippableWait: {
             dataContainer.skippable = true;
@@ -596,14 +597,18 @@ Rectangle {
     }
 
     Component.onCompleted: {
-        ScriptRunner.registerNewComponent(userName, signalEmitter);
+        registrator.registerNewScriptComponent(signalEmitter);
         textBox.clearTextBox();
         if (mainTextBox)
         {
             registrator.registerTextBox(textBox);
         }
-        registrator.componentLoaded();
-
-        root.registerUIComponent(textBox.userName, evalAccessor);
+        registrator.registerNewUiComponent(evalAccessor);
+    }
+    Component.onDestruction: {
+        if (mainTextBox)
+        {
+            registrator.unRegisterTextBox();
+        }
     }
 }

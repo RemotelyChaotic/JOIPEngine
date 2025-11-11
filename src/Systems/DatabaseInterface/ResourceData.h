@@ -187,11 +187,10 @@ Rectangle {
         spacing: parent.spacing
 
         onSetUiVisible: {
-            mediaPlayer.visible = visible;
-            iconRect.visible = visible;
-            timerRect.visible = visible;
-            notificationRect.visible = visible;
-            textBox.visible = visible;
+            iconRect.opacity = visible ? 1.0 : 0.0;
+            timerRect.opacity = visible ? 1.0 : 0.0;
+            notificationRect.opacity = visible ? 1.0 : 0.0;
+            textBox.opacity = visible ? 1.0 : 0.0;
         }
 
         Button {
@@ -199,6 +198,9 @@ Rectangle {
             height: sceneControl.height
             Layout.preferredWidth: 48
             Layout.alignment: Qt.AlignVCenter
+
+            focusPolicy: Qt.NoFocus
+            enabled: textBox.opacity > 0
 
             text: Settings.keyBinding("Tools")
             contentItem: Text {
@@ -217,7 +219,7 @@ Rectangle {
             ToolTip.delay: 1000
             ToolTip.timeout: 5000
             ToolTip.visible: hovered
-            ToolTip.text: qsTr("Show or hide log") + " (" + Settings.keyBinding("Tools") + ")\"
+            ToolTip.text: qsTr("Show or hide log") + " (" + Settings.keyBinding("Tools") + ") "
 
             Image {
                 anchors.centerIn: parent

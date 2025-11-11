@@ -1,4 +1,11 @@
 =================
+Version 1.7.0.0
+=================
+
+New Features:
+- Made different Layouts per Scene possible.
+
+=================
 Version 1.6.1.0
 =================
 Fixed Bugs:

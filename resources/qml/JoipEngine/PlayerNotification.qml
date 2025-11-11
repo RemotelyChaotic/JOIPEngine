@@ -158,6 +158,7 @@ Rectangle {
 
     PlayerComponentRegistrator {
         id: registrator
+        name: notification.userName
     }
 
     // Actual UI
@@ -245,10 +246,9 @@ Rectangle {
 
 
     Component.onCompleted: {
-        ScriptRunner.registerNewComponent(userName, signalEmitter);
-        registrator.componentLoaded();
-
-        root.registerUIComponent(notification.userName, evalAccessor);
+        registrator.registerNewScriptComponent(signalEmitter);
+        registrator.registerNewUiComponent(evalAccessor);
+        // for eos compatibility
         root.registerUIComponent("Notification", NotificationManager);
     }
 }

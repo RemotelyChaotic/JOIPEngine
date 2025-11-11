@@ -135,6 +135,7 @@ Item {
 
     PlayerComponentRegistrator {
         id: registrator
+        name: "Audio"
 
         onVolumeSet: {
             if (sResource === "")
@@ -290,7 +291,6 @@ Item {
     }
 
     Component.onCompleted: {
-        registrator.componentLoaded();
         root.registerUIComponent("Sound", SoundManager);
     }
 }

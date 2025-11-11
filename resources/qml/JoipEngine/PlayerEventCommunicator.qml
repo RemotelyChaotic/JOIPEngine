@@ -23,6 +23,7 @@ Item {
     // no eval acessor object
     PlayerComponentRegistrator {
         id: registrator
+        name: receiver.userName
     }
 
     EventSenderSignalEmitter {
@@ -41,6 +42,5 @@ Item {
 
     Component.onCompleted: {
         ScriptRunner.registerNewComponent(userName, signalEmitter);
-        registrator.componentLoaded();
     }
 }

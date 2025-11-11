@@ -72,6 +72,7 @@ Rectangle {
 
     PlayerComponentRegistrator {
         id: registrator
+        name: timer.userName
     }
 
     // UI
@@ -103,10 +104,8 @@ Rectangle {
     }
 
     Component.onCompleted: {
-        ScriptRunner.registerNewComponent(userName, signalEmitter);
-        registrator.componentLoaded();
-
-        root.registerUIComponent(timer.userName, evalAccessor);
+        registrator.registerNewScriptComponent(signalEmitter);
+        registrator.registerNewUiComponent(evalAccessor);
     }
 
     // handle interrupt

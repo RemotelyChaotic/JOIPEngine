@@ -253,6 +253,7 @@ Rectangle {
 
     PlayerComponentRegistrator {
         id: registrator
+        name: mediaPlayer.userName
 
         onSoundFinished: {
             signalEmitter.playbackFinished(sResource);
@@ -380,11 +381,8 @@ Rectangle {
     }
 
     Component.onCompleted: {
-        ScriptRunner.registerNewComponent(userName, signalEmitter);
-        registrator.componentLoaded();
-
-        root.registerUIComponent(mediaPlayer.userName, evalAccessor);
-        root.registerUIComponent("Sound", SoundManager);
+        registrator.registerNewScriptComponent(signalEmitter);
+        registrator.registerNewUiComponent(evalAccessor);
     }
 
     // Misc components
