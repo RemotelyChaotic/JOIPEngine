@@ -70,6 +70,7 @@ protected slots:
   void SlotLayoutChanged(const QString& sName);
   void SlotScriptChanged(const QString& sName);
   void SlotSceneDataChanged(qint32 iProjId, qint32 iSceneId);
+  void SlotSceneModeChanged(qint32 iMode);
   void SlotSceneRenamed(qint32 iProjId, qint32 iSceneId);
   void SlotResourceAdded(qint32 iProjId, const QString& sName);
   void SlotResourceRenamed(qint32 iProjId, const QString& sOldName, const QString& sName);
@@ -83,6 +84,7 @@ protected:
   virtual void SlotNameChangedImpl(const QString&);
   virtual void SlotLayoutChangedImpl(const QString&);
   virtual void SlotScriptChangedImpl(const QString&);
+  virtual void SlotSceneModeChangedImpl(qint32 iMode);
   virtual void SlotSceneRenamedImpl(const QString&) {}
   virtual void SlotResourceAddedImpl(const QString&, EResourceType) {}
   virtual void SlotResourceRenamedImpl(const QString&, const QString&, EResourceType) {}
@@ -104,6 +106,7 @@ protected:
   QString             m_sLayout;
   QString             m_sTitle;
   bool                m_bCanStartHere = false;
+  ESceneMode          m_sceneMode = ESceneMode::eLinear;
 };
 
 //----------------------------------------------------------------------------------------
@@ -130,6 +133,7 @@ protected:
   void SlotNameChangedImpl(const QString& sName) override;
   void SlotLayoutChangedImpl(const QString& sName) override;
   void SlotScriptChangedImpl(const QString& sName) override;
+  void SlotSceneModeChangedImpl(qint32 iMode) override;
   void SlotSceneRenamedImpl(const QString& sName) override;
   void SlotResourceAddedImpl(const QString& sName, EResourceType type) override;
   void SlotResourceRenamedImpl(const QString& sOldName, const QString& sName, EResourceType type) override;

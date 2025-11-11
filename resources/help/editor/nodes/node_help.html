@@ -57,6 +57,14 @@
         you can assign the associated script <a href="qrc:/resources/help/editor/resources/resource_help.html">Resource</a> file
         (it helps to have the same name as the "Scene" node,
         but it's not neccessary; just make sure it's in the project folder.)<br>
+        A scene can be created with two modes:<br>
+        <ul>
+          <li><b>Linear</b>: In this mode the script runs one instruction after another and
+          skips to the next scene on finish, on return or on <i>sceneManager.gotoScene</i> call.</li>
+          <li><b>Event Driven</b>: In this mode the script runs all instructions and waits
+          for events and doesn't automatically skip to the next scene on finish.
+          Return can also be not called, only a <i>sceneManager.gotoScene</i> call will change scenes.</li>
+        </ul>
         A <a href="qrc:/resources/help/editor/projectsettings/layout_help.html">Layout</a> file can also be
         optionally asigned to a scene. If set, this Scene will load the given layout instead of the project default.<br>
         It is also possible to definte a title resource and set if it is possible to start the tease

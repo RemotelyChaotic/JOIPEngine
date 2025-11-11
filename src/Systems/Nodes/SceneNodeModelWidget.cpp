@@ -15,6 +15,13 @@ CSceneNodeModelWidget::CSceneNodeModelWidget(QWidget* pParent) :
   setAttribute(Qt::WA_NoSystemBackground);
   setAutoFillBackground(false);
 
+  {
+    QSignalBlocker blocker3(m_spUi->pSceneModeComboBox);
+    m_spUi->pSceneModeComboBox->clear();
+    m_spUi->pSceneModeComboBox->addItem("Linear", ESceneMode::eLinear);
+    m_spUi->pSceneModeComboBox->addItem("Event Driven", ESceneMode::eEventDriven);
+  }
+
   m_spUi->AddLayoutFile->setProperty("styleSmall", true);
   m_spUi->AddScriptFile->setProperty("styleSmall", true);
 
@@ -98,6 +105,15 @@ void CSceneNodeModelWidget::SetResourceItemModel(QAbstractItemModel* pModel)
 
 //----------------------------------------------------------------------------------------
 //
+void CSceneNodeModelWidget::SetSceneMode(ESceneMode mode)
+{
+  QSignalBlocker blocker(m_spUi->pSceneModeComboBox);
+  qint32 iIdx = m_spUi->pSceneModeComboBox->findData(mode._to_integral());
+  m_spUi->pSceneModeComboBox->setCurrentIndex(iIdx);
+}
+
+//----------------------------------------------------------------------------------------
+//
 void CSceneNodeModelWidget::SetTileResource(const QString& sName)
 {
   m_spUi->FileIcon->SetCurrentResource(sName);
@@ -177,6 +193,13 @@ void CSceneNodeModelWidget::OnScriptRemoved(const QString& sName)
   {
     m_spUi->pScriptComboBox->removeItem(iIdx);
   }
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CSceneNodeModelWidget::on_pSceneModeComboBox_currentIndexChanged(qint32)
+{
+  emit SignalSceneModeChanged(m_spUi->pSceneModeComboBox->currentData().toInt());
 }
 
 //----------------------------------------------------------------------------------------

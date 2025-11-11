@@ -1665,6 +1665,7 @@
     <p>While not an actual object, this JavaScript language feature is used to "skip"
     to a Scene directly without a normal <a href="qrc:/resources/help/editor/nodes/node_help.html">Scene Transition</a>.
     The value to be returned is the Scene name as a string.<br>
+    Only works on Linear type scenes, on Event Driven scenes this will result in a syntax error.<br>
     <i>Example Usage (JS):</i><br>
     return "SceneB"; // skipps to "SceneB" and terminates current script<br>
     <i>Example Usage (Lua):</i><br>

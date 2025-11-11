@@ -37,6 +37,7 @@ QJsonObject SScene::ToJsonObject()
     { "sSceneLayout", m_sSceneLayout },
     { "vsResourceRefs", resourceRefs },
     { "bCanStartHere", m_bCanStartHere},
+    { "sceneMode", m_sceneMode._to_integral() },
     { "sTitleCard", m_sTitleCard }
   };
 }
@@ -79,6 +80,15 @@ void SScene::FromJsonObject(const QJsonObject& json)
   if (it != json.end())
   {
     m_bCanStartHere = it.value().toBool();
+  }
+  it = json.find("sceneMode");
+  if (it != json.end())
+  {
+    qint32 iVal = it.value().toInt();
+    if (ESceneMode::_is_valid(iVal))
+    {
+      m_sceneMode = ESceneMode::_from_integral(iVal);
+    }
   }
   it = json.find("sTitleCard");
   if (it != json.end())

@@ -8,6 +8,10 @@ BETTER_ENUM(ESceneTransitionType, qint32,
             eRandom = 0,
             eSelection = 1)
 
+BETTER_ENUM(ESceneMode, qint32,
+            eLinear = 0,
+            eEventDriven = 1)
+
 struct SSceneData
 {
   SSceneData() = default;
@@ -18,6 +22,7 @@ struct SSceneData
   QString                   m_sScript;
   QString                   m_sSceneLayout;
   bool                      m_bCanStartHere = false;
+  ESceneMode                m_sceneMode = ESceneMode::eLinear;
   QString                   m_sTitleCard;
 };
 

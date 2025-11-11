@@ -148,6 +148,7 @@ QJsonObject CSceneNodeModel::save() const
   modelJson["sLayout"] = m_sLayout;
   modelJson["sTitle"] = m_sTitle;
   modelJson["bCanStartHere"] = m_bCanStartHere;
+  modelJson["sceneMode"] = m_sceneMode._to_integral();
   return modelJson;
 }
 
@@ -180,6 +181,15 @@ void CSceneNodeModel::restore(QJsonObject const& p)
   if (!v.isUndefined())
   {
     m_bCanStartHere = v.toBool();
+  }
+  v = p["sceneMode"];
+  if (!v.isUndefined())
+  {
+    qint32 iVal = v.toInt();
+    if (ESceneMode::_is_valid(iVal))
+    {
+      m_sceneMode = ESceneMode::_from_integral(iVal);
+    }
   }
 }
 
@@ -425,14 +435,47 @@ void CSceneNodeModel::SlotSceneDataChanged(qint32 iProjId, qint32 iSceneId)
   const QString sLayout = m_spScene->m_sSceneLayout;
   const QString sTitle = m_spScene->m_sTitleCard;
   const bool bCanStartHere = m_spScene->m_bCanStartHere;
+  const ESceneMode sceneMode = m_spScene->m_sceneMode;
   m_spScene->m_rwLock.unlock();
 
   if (iProjId == ProjectId() && iSceneId == iId)
   {
+    SlotSceneModeChangedImpl(sceneMode);
     SlotCanStartHereChangedImpl(bCanStartHere);
     SlotLayoutChangedImpl(sLayout);
     SlotScriptChangedImpl(sScript);
     SlotTitleResourceChangedImpl(QString(), sTitle);
+  }
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CSceneNodeModel::SlotSceneModeChanged(qint32 iMode)
+{
+  auto spDbManager = m_wpDbManager.lock();
+  if (nullptr != spDbManager)
+  {
+    if (nullptr != m_spScene)
+    {
+      qint32 iProjId = -1;
+      m_spProject->m_rwLock.lockForRead();
+      iProjId = m_spProject->m_iId;
+      m_spProject->m_rwLock.unlock();
+
+      bool bChanged = false;
+      qint32 iSceneId = -1;
+      m_spScene->m_rwLock.lockForRead();
+      bChanged = m_spScene->m_sceneMode != iMode;
+      m_spScene->m_sceneMode = ESceneMode::_from_integral(iMode);
+      iSceneId = m_spScene->m_iId;
+      m_spScene->m_rwLock.unlock();
+
+      if (bChanged)
+      {
+        SlotSceneModeChangedImpl(iMode);
+        emit spDbManager->SignalSceneDataChanged(iProjId, iSceneId);
+      }
+    }
   }
 }
 
@@ -591,6 +634,13 @@ void CSceneNodeModel::SlotScriptChangedImpl(const QString& sName)
 
 //----------------------------------------------------------------------------------------
 //
+void CSceneNodeModel::SlotSceneModeChangedImpl(qint32 iMode)
+{
+  m_sceneMode = ESceneMode::_from_integral(iMode);
+}
+
+//----------------------------------------------------------------------------------------
+//
 void CSceneNodeModel::SlotTitleResourceChangedImpl(const QString& sOld, const QString& sNew)
 {
   Q_UNUSED(sOld)
@@ -611,6 +661,8 @@ CSceneNodeModelWithWidget::CSceneNodeModelWithWidget() :
           this, &CSceneNodeModelWithWidget::SlotLayoutChanged);
   connect(m_pWidget, &CSceneNodeModelWidget::SignalScriptChanged,
           this, &CSceneNodeModelWithWidget::SlotScriptChanged);
+  connect(m_pWidget, &CSceneNodeModelWidget::SignalSceneModeChanged,
+          this, &CSceneNodeModelWithWidget::SlotSceneModeChanged);
   connect(m_pWidget, &CSceneNodeModelWidget::SignalTitleResourceChanged,
           this, &CSceneNodeModelWithWidget::SlotTitleResourceChanged);
   connect(m_pWidget, &CSceneNodeModelWidget::SignalAddScriptFileClicked,
@@ -664,6 +716,7 @@ void CSceneNodeModelWithWidget::restore(QJsonObject const& p)
   CSceneNodeModel::restore(p);
   if (nullptr != m_pWidget)
   {
+    m_pWidget->SetSceneMode(m_sceneMode);
     m_pWidget->SetCanStartHere(m_bCanStartHere);
     m_pWidget->SetName(m_sSceneName);
     m_pWidget->SetScript(m_sScript);
@@ -744,6 +797,18 @@ void CSceneNodeModelWithWidget::SlotScriptChangedImpl(const QString& sName)
   if (nullptr != m_pWidget)
   {
     m_pWidget->SetScript(sName);
+  }
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CSceneNodeModelWithWidget::SlotSceneModeChangedImpl(qint32 iMode)
+{
+  CSceneNodeModel::SlotSceneModeChangedImpl(iMode);
+
+  if (nullptr != m_pWidget)
+  {
+    m_pWidget->SetSceneMode(ESceneMode::_from_integral(iMode));
   }
 }
 

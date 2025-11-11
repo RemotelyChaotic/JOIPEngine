@@ -25,6 +25,7 @@ public:
   void SetScript(const QString& sName);
   void SetLayout(const QString& sName);
   void SetResourceItemModel(QAbstractItemModel* pModel);
+  void SetSceneMode(ESceneMode mode);
   void SetTileResource(const QString& sName);
 
   void OnLayoutAdded(const QString& sName);
@@ -41,10 +42,12 @@ signals:
   void SignalAddScriptFileClicked(const QString&);
   void SignalAddLayoutFileClicked(const QString&);
   void SignalNameChanged(const QString& sName);
+  void SignalSceneModeChanged(qint32 iSceneMode);
   void SignalScriptChanged(const QString& sName);
   void SignalLayoutChanged(const QString& sName);
 
 protected slots:
+  void on_pSceneModeComboBox_currentIndexChanged(qint32 iIdx);
   void on_FileIcon_SignalResourcePicked(const QString& sOld, const QString& sNew);
   void on_pCanStartHere_toggled(bool bCanStartHere);
   void on_AddScriptFile_clicked();
