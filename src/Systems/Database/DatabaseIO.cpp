@@ -6,8 +6,10 @@
 #include "Settings.h"
 
 #include "Systems/DatabaseManager.h"
+#include "Systems/EOS/EosHelpers.h"
 #include "Systems/PhysFs/PhysFsFileEngine.h"
 
+#include <QCryptographicHash>
 #include <QDebug>
 #include <QDirIterator>
 #include <QDir>
@@ -86,6 +88,8 @@ protected:
             spProject->m_rwLock.lockForRead();
             qint32 iOldId = spProject->m_iId;
             QString sProjName = spProject->m_sName;
+            SVersion targetVer = spProject->m_iTargetVersion;
+            const QString sUserData = spProject->m_sUserData;
             spProject->m_rwLock.unlock();
             // we need to fix naming collisions again here
             QString sError;
@@ -93,10 +97,29 @@ protected:
             {
               sProjName = ToValidProjectName(sProjName);
             }
+
+            // we need to check for old EOS projects
+            bool bIsOldEos = false;
+            QCryptographicHash hash(QCryptographicHash::Algorithm::Sha256);
+            const QString sKey = eos::c_sKey + eos::GetEOSK();
+            hash.addData(QString(sProjName + sKey).toUtf8());
+            if (sUserData == QString::fromUtf8(hash.result().toBase64()))
+            {
+              bIsOldEos = SVersion(1,7,0) > targetVer;
+            }
+
             qint32 iNewId = (-1 == iOldId) ? m_pManager->FindNewProjectId() : -1;
             spProject->m_rwLock.lockForWrite();
             spProject->m_iId = (-1 == iOldId) ? iNewId : iOldId;
             spProject->m_sName = sProjName;
+            if (bIsOldEos)
+            {
+              for (tspScene& spScene : spProject->m_vspScenes)
+              {
+                QWriteLocker l(&spScene->m_rwLock);
+                spScene->m_sceneMode = ESceneMode::eEventDriven;
+              }
+            }
             spProject->m_rwLock.unlock();
             bOk = true;
           }
