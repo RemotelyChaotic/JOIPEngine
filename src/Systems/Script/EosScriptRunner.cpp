@@ -176,12 +176,15 @@ void CEosScriptRunner::Deinitialize()
 std::shared_ptr<IScriptRunnerInstanceController>
 CEosScriptRunner::LoadScript(const QString& sScript, tspScene spScene, tspResource spResource)
 {
+  ESceneMode sceneMode = ESceneMode::eLinear;
+
   // get scene name
   if (nullptr != spScene)
   {
     QReadLocker locker(&spScene->m_rwLock);
     QMutexLocker lockerScene(&m_sceneMutex);
     m_sSceneName = spScene->m_sName;
+    sceneMode = spScene->m_sceneMode;
   }
 
   // set current Project
@@ -214,14 +217,16 @@ CEosScriptRunner::LoadScript(const QString& sScript, tspScene spScene, tspResour
 
   spEosRunnerMain->setObjectName(c_sMainRunner);
   connect(spEosRunnerMain.get(), &CJsonInstructionSetRunner::CommandRetVal,
-          this, &CEosScriptRunner::SlotCommandRetVal);
+          this, [this, sceneMode](CJsonInstructionSetRunner::tRetVal retVal) {
+    SlotCommandRetVal(retVal, sceneMode);
+  });
   connect(spEosRunnerMain.get(), &CJsonInstructionSetRunner::Fork,
           this, &CEosScriptRunner::SlotFork);
 
   spSignalEmitterContext->SetScriptExecutionStatus(CScriptRunnerSignalEmiter::eRunning);
 
-  QTimer::singleShot(10, this, [this, spEosRunnerMain, sSceneName = m_sSceneName]
-    { SlotRun(spEosRunnerMain, c_sMainRunner, "", sSceneName); });
+  QTimer::singleShot(10, this, [this, spEosRunnerMain, sSceneName = m_sSceneName, sceneMode]
+    { SlotRun(spEosRunnerMain, c_sMainRunner, "", sSceneName, sceneMode); });
 
   return std::make_shared<CEosScriptRunnerInstanceController>(c_sMainRunner, spEosRunnerMain);
 }
@@ -263,7 +268,7 @@ void CEosScriptRunner::RegisterNewComponent(const QString& sName,
                 // we would call SignalOverlayRunAsync here normally,
                 // but this type of script can only use
                 // eos scripts as notifications
-                SlotRun(spRunner->Runner(), sId, sId, QString());
+                SlotRun(spRunner->Runner(), sId, sId, QString(), ESceneMode::eEventDriven);
               }
             });
           }
@@ -321,18 +326,21 @@ CEosScriptRunner::RunAsync(const QString& sId, const QString& sScript,
 
   spEosRunner->setObjectName(sId);
   connect(spEosRunner.get(), &CJsonInstructionSetRunner::CommandRetVal,
-          this, &CEosScriptRunner::SlotCommandRetVal);
+          this, [this](CJsonInstructionSetRunner::tRetVal retVal) {
+    SlotCommandRetVal(retVal, ESceneMode::eEventDriven);
+  });
   connect(spEosRunner.get(), &CJsonInstructionSetRunner::Fork,
           this, &CEosScriptRunner::SlotFork);
 
-  SlotRun(spEosRunner, sId, "", QString());
+  SlotRun(spEosRunner, sId, "", QString(), ESceneMode::eEventDriven);
 
   return std::make_shared<CEosScriptRunnerInstanceController>(sId, spEosRunner);
 }
 
 //----------------------------------------------------------------------------------------
 //
-void CEosScriptRunner::HandleScriptFinish(bool bSuccess, const QVariant& sRetVal)
+void CEosScriptRunner::HandleScriptFinish(bool bSuccess, const QVariant& sRetVal,
+                                          ESceneMode sceneMode)
 {
   const QString sId = sender()->objectName();
 
@@ -343,30 +351,36 @@ void CEosScriptRunner::HandleScriptFinish(bool bSuccess, const QVariant& sRetVal
     return;
   }
 
-  emit SignalRemoveScriptRunner(sId);
-
   if (!bSuccess)
   {
     qWarning() << tr("Error in script or debugger closed, unloading project.");
   }
 
-  if (c_sMainRunner == sId || QVariant::String == sRetVal.type() ||
-      !m_pRunnerParent->HasRunningScripts())
+  // We keep "running" in event driven mode only a gotoScene will change this
+  if (ESceneMode::eLinear == sceneMode._to_integral() ||
+      (QVariant::String == sRetVal.type() && !sRetVal.toString().isEmpty()))
   {
-    if (QVariant::String == sRetVal.type())
+    emit SignalRemoveScriptRunner(sId);
+
+    if (c_sMainRunner == sId || QVariant::String == sRetVal.type() ||
+        !m_pRunnerParent->HasRunningScripts())
     {
-      emit SignalScriptRunFinished(bSuccess, sRetVal.toString());
-    }
-    else
-    {
-      emit SignalScriptRunFinished(bSuccess, QString());
+      if (QVariant::String == sRetVal.type())
+      {
+        emit SignalScriptRunFinished(bSuccess, sRetVal.toString());
+      }
+      else
+      {
+        emit SignalScriptRunFinished(bSuccess, QString());
+      }
     }
   }
 }
 
 //----------------------------------------------------------------------------------------
 //
-void CEosScriptRunner::SlotCommandRetVal(CJsonInstructionSetRunner::tRetVal retVal)
+void CEosScriptRunner::SlotCommandRetVal(CJsonInstructionSetRunner::tRetVal retVal,
+                                         ESceneMode sceneMode)
 {
   if (std::holds_alternative<SJsonException>(retVal))
   {
@@ -378,15 +392,15 @@ void CEosScriptRunner::SlotCommandRetVal(CJsonInstructionSetRunner::tRetVal retV
     // retValCasted.m_bHasMoreCommands
     if (retValCasted.m_retVal.type() == typeid(QString))
     {
-      HandleScriptFinish(true, std::any_cast<QString>(retValCasted.m_retVal));
+      HandleScriptFinish(true, std::any_cast<QString>(retValCasted.m_retVal), sceneMode);
     }
     else if (retValCasted.m_retVal.type() == typeid(SFinishTag))
     {
-      HandleScriptFinish(true, QVariant());
+      HandleScriptFinish(true, QVariant(), sceneMode);
     }
     else
     {
-      HandleScriptFinish(true, QString());
+      HandleScriptFinish(true, QString(), sceneMode);
     }
   }
 }
@@ -409,13 +423,15 @@ void CEosScriptRunner::SlotFork(
 
   spNewRunner->setObjectName(sForkCommandsName);
   connect(spNewRunner.get(), &CJsonInstructionSetRunner::CommandRetVal,
-          this, &CEosScriptRunner::SlotCommandRetVal);
+          this, [this](CJsonInstructionSetRunner::tRetVal retVal) {
+    SlotCommandRetVal(retVal, ESceneMode::eEventDriven);
+  });
   connect(spNewRunner.get(), &CJsonInstructionSetRunner::Fork,
           this, &CEosScriptRunner::SlotFork);
 
   if (bAutoRun)
   {
-    SlotRun(spNewRunner, sForkCommandsName, sForkCommandsName, QString());
+    SlotRun(spNewRunner, sForkCommandsName, sForkCommandsName, QString(), ESceneMode::eEventDriven);
   }
 }
 
@@ -423,8 +439,9 @@ void CEosScriptRunner::SlotFork(
 //
 void CEosScriptRunner::SlotRun(std::shared_ptr<CJsonInstructionSetRunner> spEosRunner,
                                const QString& sRunner, const QString& sCommands,
-                               const QString sSceneName)
+                               const QString sSceneName, ESceneMode sceneMode)
 {
+  Q_UNUSED(sceneMode)
   if (1 != m_bInitialized) { return; }
 
   if (nullptr != spEosRunner)

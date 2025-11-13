@@ -279,6 +279,8 @@ public slots:
   void RunScript(const QString& sScript,
                  tspScene spScene, tspResource spResource) override
   {
+    ESceneMode sceneMode = ESceneMode::eLinear;
+
     // set scene
     if (nullptr != m_pCurrentScene)
     {
@@ -291,6 +293,9 @@ public slots:
       QQmlEngine::setObjectOwnership(m_pCurrentScene, QQmlEngine::CppOwnership);
       QJSValue sceneValue = m_pScriptEngine->newQObject(m_pCurrentScene);
       m_pScriptEngine->globalObject().setProperty("scene", sceneValue);
+
+      QReadLocker locker(&spScene->m_rwLock);
+      sceneMode = spScene->m_sceneMode;
     }
 
     // set current Project
@@ -343,14 +348,28 @@ public slots:
 
     // create wrapper function to make syntax of scripts easier and handle return value
     // and be able to emit signal on finished
-    QString sSkript = QString("(function() { "
-                              "var %1 = function() { %2\n}; "
-                              "var ret = %3(); "
-                              "utils_1337.finishedScript(ret); \n "
-                              "})")
-        .arg(sSceneName)
-        .arg(sScript)
-        .arg(sSceneName);
+    QString sSkript;
+    switch (sceneMode)
+    {
+      case ESceneMode::eLinear:
+        sSkript = QString("(function() { "
+                          "var %1 = function() { %2\n}; "
+                          "var ret = %3(); "
+                          "utils_1337.finishedScript(ret); \n "
+                          "})")
+                      .arg(sSceneName)
+                      .arg(sScript)
+                      .arg(sSceneName);
+        break;
+      case ESceneMode::eEventDriven:
+        sSkript = QString("(function() { "
+                          "function() { %1\n}; "
+                          "%2(); "
+                          "})")
+                      .arg(sScript)
+                      .arg(sSceneName);
+        break;
+    }
     ReplaceImportStatements(sSkript, ::EvalImportReplacer);
     QJSValue runFunction = m_pScriptEngine->evaluate(sSkript);
 
@@ -376,11 +395,12 @@ public slots:
         }
         m_bRunning = 0;
       }
-      else
+      else if (ESceneMode::eLinear == sceneMode._to_integral())
       {
         emit HandleScriptFinish(false, QString());
         m_bRunning = 0;
       }
+      // else wir sind noch am "runnen"
     }
     else
     {

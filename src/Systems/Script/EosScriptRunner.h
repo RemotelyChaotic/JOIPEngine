@@ -77,7 +77,7 @@ public:
        RunAsync(const QString& sId, const QString& sScript,
                 tspResource spResource) override;
 
-  void HandleScriptFinish(bool bSuccess, const QVariant& sRetVal);
+  void HandleScriptFinish(bool bSuccess, const QVariant& sRetVal, ESceneMode sceneMode);
 
 signals:
   void SignalAddScriptRunner(const QString& sId,
@@ -92,10 +92,11 @@ signals:
   void SignalScriptRunFinished(bool bOk, const QString& sRetVal) override;
 
 private slots:
-  void SlotCommandRetVal(CJsonInstructionSetRunner::tRetVal retVal);
+  void SlotCommandRetVal(CJsonInstructionSetRunner::tRetVal retVal, ESceneMode sceneMode);
   void SlotFork(std::shared_ptr<CJsonInstructionSetRunner> spNewRunner, const QString& sForkCommandsName, bool bAutoRun);
   void SlotRun(std::shared_ptr<CJsonInstructionSetRunner> spEosRunnerMain,
-               const QString& sRunner, const QString& sCommands, const QString sSceneName);
+               const QString& sRunner, const QString& sCommands,
+               const QString sSceneName, ESceneMode sceneMode);
 
 private:
   void HandleError(const SJsonException& value);

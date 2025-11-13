@@ -261,6 +261,8 @@ public slots:
   void RunScript(const QString& sScript,
                  tspScene spScene, tspResource spResource) override
   {
+    ESceneMode sceneMode = ESceneMode::eLinear;
+
     // set scene
     if (nullptr != m_pCurrentScene)
     {
@@ -270,6 +272,9 @@ public slots:
     {
       m_pCurrentScene = new CSceneScriptWrapper(m_pLuaState, spScene);
       (*m_pLuaState)["scene"] = QtLua::Value(m_pLuaState, m_pCurrentScene.data(), false, false);
+
+      QReadLocker locker(&spScene->m_rwLock);
+      sceneMode = spScene->m_sceneMode;
     }
 
     // set current Project
@@ -320,12 +325,25 @@ public slots:
     // and be able to emit signal on finished
     QString sScriptEscaped = sScript;
     sScriptEscaped.replace("[[", "\\[\\[").replace("]]", "\\]\\]");
-    QString sSkript = QString("local ret = sandbox.run([[local %1 = function();\n%2\nreturn nil;\nend;\nreturn %3();]], %4);"
-                              "utils_1337:finishedScript(ret);")
-        .arg(sSceneName)
-        .arg(sScriptEscaped)
-        .arg(sSceneName)
-        .arg(GenerateEnvVariableString());
+    QString sSkript;
+    switch (sceneMode)
+    {
+      case ESceneMode::eLinear:
+        sSkript = QString("local ret = sandbox.run([[local %1 = function();\n%2\nreturn nil;\nend;\nreturn %3();]], %4);"
+                          "utils_1337:finishedScript(ret);")
+                      .arg(sSceneName)
+                      .arg(sScriptEscaped)
+                      .arg(sSceneName)
+                      .arg(GenerateEnvVariableString());
+        break;
+      case ESceneMode::eEventDriven:
+        sSkript = QString("sandbox.run([[local %1 = function();\n%2\nreturn nil;\nend;\nreturn %3();]], %4);")
+                      .arg(sSceneName)
+                      .arg(sScriptEscaped)
+                      .arg(sSceneName)
+                      .arg(GenerateEnvVariableString());
+        break;
+    }
 
     try
     {
@@ -339,8 +357,12 @@ public slots:
       {
         emit HandleScriptFinish(false, QString());
       }
-      m_bRunning = 0;
-      m_pLuaState->gc_collect();
+      else if (ESceneMode::eLinear == sceneMode._to_integral())
+      {
+        m_bRunning = 0;
+        m_pLuaState->gc_collect();
+      }
+      // else wir sind noch am "runnen"
     }
     catch (QtLua::String& s)
     {
