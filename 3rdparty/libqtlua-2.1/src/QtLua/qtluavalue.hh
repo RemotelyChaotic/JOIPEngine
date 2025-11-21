@@ -266,5 +266,7 @@ private:
 
 }
 
+Q_DECLARE_METATYPE(QtLua::Value)
+
 #endif
 

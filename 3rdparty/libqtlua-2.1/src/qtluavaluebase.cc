@@ -644,6 +644,11 @@ QVariant ValueBase::to_qvariant() const
       return QVariant::fromValue(to_qmap<QString,QVariant>());
     case TUserData:
       return QVariant::fromValue(to_qobject());
+    case TFunction:
+    case TThread:
+      {
+      return QVariant::fromValue(Value(*dynamic_cast<const Value*>(this)));
+      }
 
     default:
       QTLUA_THROW(QtLua::ValueBase, "Can not convert a `%' lua value to a QVariant.", .arg(type_name()));
