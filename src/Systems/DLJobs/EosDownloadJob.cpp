@@ -62,6 +62,7 @@ namespace
   const QString c_sDataAuthorId = "data-author-id";
   const QString c_sDataTeaseId = "data-tease-id";
   const QString c_sDataKey = "data-key";
+  const QString c_sUserAgent = "User-Agent";
 
   const qint32 c_iResourceLibraryFormatVersion = 3;
   const qint32 c_iMaxResourceBlobSize = 1'000'000'000; // max resource blob size is 1GB to reduce memory usage
@@ -740,8 +741,10 @@ QByteArray CEosDownloadJob::Fetch(const QUrl& url, QString* psError)
 {
   QByteArray arr;
   QEventLoop loop;
+  QNetworkRequest req(url);
+  req.setRawHeader(c_sUserAgent.toUtf8(), CSettings::c_sApplicationName.toUtf8());
   QPointer<QNetworkReply> pReply =
-      m_spNetworkAccessManager->get(QNetworkRequest(url));
+      m_spNetworkAccessManager->get(req);
   connect(pReply, &QNetworkReply::finished,
           this, [pReply, &loop, &arr, &psError](){
     if(nullptr != pReply)
@@ -895,7 +898,7 @@ bool CEosDownloadJob::RequestRemoteScript(const QUrl& url, QString& sTeaseId,
   }
 
   const QUrl sFinalrequest = EncodeForCorsProxy(c_sGetEOSScript,
-                                QString("id=%1%2%3")
+                                QString("id=%1")
                                 .arg(sTeaseId)
                                 .arg(c_FIX_POLLUTION)
                                 .arg("&cacheable&_nc=" + QString::number(iMinutes)));
@@ -908,7 +911,7 @@ bool CEosDownloadJob::RequestRemoteScript(const QUrl& url, QString& sTeaseId,
   QPointer<CEosDownloadJob> pThis(this);
   QByteArray arr = Fetch(sFinalrequest, psError);
   if (nullptr == pThis) { return false; }
-  if (arr.isEmpty())
+  if (arr.isEmpty() || !psError->isEmpty())
   {
     if (nullptr != psError) { *psError = "Fetched resource was empty."; }
     return false;
