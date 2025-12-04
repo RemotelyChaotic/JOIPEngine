@@ -65,6 +65,21 @@ CScriptEventSenderBase::CScriptEventSenderBase(std::weak_ptr<CScriptCommunicator
   if (auto spComm = pCommunicator.lock())
   {
     spComm->RegisterStopCallback(m_spStop);
+    if (auto spSignalEmitter = spComm->LockedEmitter<CEventSenderSignalEmitter>())
+    {
+      connect(spSignalEmitter.Get(), &CEventSenderSignalEmitter::sendReturnValue,
+              spSignalEmitter.Get(),
+          [pEmitter = spSignalEmitter.Get()](QJSValue value, const QString& sRequestEvtRet){
+            QVariant v = value.toVariant();
+            v.detach(); // fixes some crashes with QJSEngine
+            emit pEmitter->SendReturnValuePrivate(v, sRequestEvtRet);
+          }, Qt::DirectConnection);
+
+      connect(spSignalEmitter.Get(), &CEventSenderSignalEmitter::SendReturnValuePrivate,
+              this, [this](QVariant value, const QString& sRequestEvtRet){
+            HandleEventRet(value, sRequestEvtRet);
+          }, Qt::QueuedConnection);
+    }
   }
 }
 CScriptEventSenderBase::CScriptEventSenderBase(std::weak_ptr<CScriptCommunicator> pCommunicator,
@@ -77,6 +92,21 @@ CScriptEventSenderBase::CScriptEventSenderBase(std::weak_ptr<CScriptCommunicator
   if (auto spComm = pCommunicator.lock())
   {
     spComm->RegisterStopCallback(m_spStop);
+    if (auto spSignalEmitter = spComm->LockedEmitter<CEventSenderSignalEmitter>())
+    {
+      connect(spSignalEmitter.Get(), &CEventSenderSignalEmitter::sendReturnValue,
+              spSignalEmitter.Get(),
+          [pEmitter = spSignalEmitter.Get()](QJSValue value, const QString& sRequestEvtRet){
+            QVariant v = value.toVariant();
+            v.detach(); // fixes some crashes with QJSEngine
+            emit pEmitter->SendReturnValuePrivate(v, sRequestEvtRet);
+          }, Qt::DirectConnection);
+
+      connect(spSignalEmitter.Get(), &CEventSenderSignalEmitter::SendReturnValuePrivate,
+          this, [this](QVariant value, const QString& sRequestEvtRet){
+            HandleEventRet(value, sRequestEvtRet);
+          }, Qt::QueuedConnection);
+    }
   }
 }
 
@@ -201,6 +231,55 @@ QVariant CScriptEventSenderJs::sendEventAndWait(const QString& sEvent, QVariant 
 
 //----------------------------------------------------------------------------------------
 //
+void CScriptEventSenderJs::registerEventHandler(const QString& sEvent, QJSValue callback)
+{
+  if (!CheckIfScriptCanRun()) { return; }
+
+  if (callback.isCallable())
+  {
+    m_callbacks[sEvent] = callback;
+  }
+  else
+  {
+    if (auto spComm = m_wpCommunicator.lock())
+    {
+      if (auto spSignalEmitter = spComm->LockedEmitter<CEventSenderSignalEmitter>())
+      {
+        emit spSignalEmitter->showError(tr("Event handler is not a callable."), QtMsgType::QtWarningMsg);
+      }
+    }
+  }
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CScriptEventSenderJs::HandleEventRet(QVariant value, const QString& sRequestRet)
+{
+  if (!CheckIfScriptCanRun()) { return; }
+
+  QString sError;
+  if (nullptr != m_pEngine)
+  {
+    auto it = m_callbacks.find(sRequestRet);
+    if (m_callbacks.end() != it)
+    {
+      if (!script::CallCallback(it->second, QJSValueList() << QJSValue(sRequestRet) << m_pEngine->toScriptValue(value),
+                                &sError))
+      {
+        if (auto spComm = m_wpCommunicator.lock())
+        {
+          if (auto spSignalEmitter = spComm->LockedEmitter<CEventSenderSignalEmitter>())
+          {
+            emit spSignalEmitter->showError(sError, QtMsgType::QtCriticalMsg);
+          }
+        }
+      }
+    }
+  }
+}
+
+//----------------------------------------------------------------------------------------
+//
 QString CScriptEventSenderJs::PrepareInput(const QVariant& data)
 {
   QJSValue valFromJS = data.value<QJSValue>();
@@ -267,6 +346,59 @@ QVariant CScriptEventSenderLua::sendEventAndWait(const QString& sEvent, QVariant
 {
   if (!CheckIfScriptCanRun()) { return QVariant(); }
   return SendEventAndWaitImpl(sEvent, PrepareInput(data));
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CScriptEventSenderLua::registerEventHandler(const QString& sEvent, QVariant callback)
+{
+  if (!CheckIfScriptCanRun()) { return; }
+
+  if (callback.canConvert<QtLua::Value>())
+  {
+    QtLua::Value fn = callback.value<QtLua::Value>();
+    if (fn.type() == QtLua::Value::TFunction)
+    {
+      m_callbacks[sEvent] = fn;
+    }
+  }
+  else
+  {
+    if (auto spComm = m_wpCommunicator.lock())
+    {
+      if (auto spSignalEmitter = spComm->LockedEmitter<CEventSenderSignalEmitter>())
+      {
+        emit spSignalEmitter->showError(tr("Event handler is not a callable."), QtMsgType::QtWarningMsg);
+      }
+    }
+  }
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CScriptEventSenderLua::HandleEventRet(QVariant value, const QString& sRequestRet)
+{
+  if (!CheckIfScriptCanRun()) { return; }
+
+  QString sError;
+  if (nullptr != m_pState)
+  {
+    auto it = m_callbacks.find(sRequestRet);
+    if (m_callbacks.end() != it)
+    {
+      if (!script::CallCallback(it->second, QVariantList() << sRequestRet << value,
+                                &sError))
+      {
+        if (auto spComm = m_wpCommunicator.lock())
+        {
+          if (auto spSignalEmitter = spComm->LockedEmitter<CEventSenderSignalEmitter>())
+          {
+            emit spSignalEmitter->showError(sError, QtMsgType::QtCriticalMsg);
+          }
+        }
+      }
+    }
+  }
 }
 
 //----------------------------------------------------------------------------------------

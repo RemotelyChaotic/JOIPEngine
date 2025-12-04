@@ -59,12 +59,28 @@ CScriptIcon::CScriptIcon(std::weak_ptr<CScriptCommunicator> pCommunicator,
   CJsScriptObjectBase(pCommunicator, pEngine),
   m_wpDbManager(CApplication::Instance()->System<CDatabaseManager>())
 {
+  if (auto spComm = m_wpCommunicator.lock())
+  {
+    if (auto spSignalEmitter = spComm->LockedEmitter<CIconSignalEmitter>())
+    {
+      connect(spSignalEmitter.Get(), &CIconSignalEmitter::iconStateChange, this,
+              &CScriptIcon::HandleIconStateChange, Qt::QueuedConnection);
+    }
+  }
 }
 CScriptIcon::CScriptIcon(std::weak_ptr<CScriptCommunicator> pCommunicator,
                          QtLua::State* pState) :
   CJsScriptObjectBase(pCommunicator, pState),
   m_wpDbManager(CApplication::Instance()->System<CDatabaseManager>())
 {
+  if (auto spComm = m_wpCommunicator.lock())
+  {
+    if (auto spSignalEmitter = spComm->LockedEmitter<CIconSignalEmitter>())
+    {
+      connect(spSignalEmitter.Get(), &CIconSignalEmitter::iconStateChange, this,
+              &CScriptIcon::HandleIconStateChange, Qt::QueuedConnection);
+    }
+  }
 }
 
 CScriptIcon::~CScriptIcon()
@@ -148,6 +164,95 @@ void CScriptIcon::show(QVariant resource)
       else
       {
         emit spSignalEmitter->showError(sError, QtMsgType::QtWarningMsg);
+      }
+    }
+  }
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CScriptIcon::registerIconCallback(const QVariant& resource, QVariant callback)
+{
+  if (!CheckIfScriptCanRun()) { return; }
+
+  if (auto spComm = m_wpCommunicator.lock())
+  {
+    if (auto spSignalEmitter = spComm->LockedEmitter<CIconSignalEmitter>())
+    {
+      auto spDbManager = m_wpDbManager.lock();
+      QString sError;
+      std::optional<QString> optRes =
+          script::ParseResourceFromScriptVariant(resource, m_wpDbManager.lock(),
+                                                 m_spProject,
+                                                 "registerIconCallback", &sError);
+      if (!optRes.has_value())
+      {
+        emit spSignalEmitter->showError(sError, QtMsgType::QtWarningMsg);
+        return;
+      }
+
+      QString resRet = optRes.value();
+
+      if (callback.canConvert<QtLua::Value>())
+      {
+        QtLua::Value fn = callback.value<QtLua::Value>();
+        if (fn.type() == QtLua::Value::TFunction)
+        {
+          m_callbacks[resRet] = fn;
+        }
+      }
+      else if (callback.canConvert<QJSValue>())
+      {
+        QJSValue fn = callback.value<QJSValue>();
+        if (fn.isCallable())
+        {
+          m_callbacks[resRet] = fn;
+        }
+      }
+    }
+  }
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CScriptIcon::HandleIconStateChange(const QString& sResource, bool bShown)
+{
+  if (!CheckIfScriptCanRun()) { return; }
+
+  QString sError;
+  if (nullptr != m_pEngine)
+  {
+    auto it = m_callbacks.find(sResource);
+    if (m_callbacks.end() != it && std::holds_alternative<QJSValue>(it->second))
+    {
+      if (!script::CallCallback(std::get<QJSValue>(it->second), QJSValueList() << QJSValue(sResource) << QJSValue(bShown),
+                                &sError))
+      {
+        if (auto spComm = m_wpCommunicator.lock())
+        {
+          if (auto spSignalEmitter = spComm->LockedEmitter<CIconSignalEmitter>())
+          {
+            emit spSignalEmitter->showError(sError, QtMsgType::QtCriticalMsg);
+          }
+        }
+      }
+    }
+  }
+  else if (nullptr != m_pState)
+  {
+    auto it = m_callbacks.find(sResource);
+    if (m_callbacks.end() != it && std::holds_alternative<QtLua::Value>(it->second))
+    {
+      if (!script::CallCallback(std::get<QtLua::Value>(it->second), QVariantList() << sResource << bShown,
+                                &sError))
+      {
+        if (auto spComm = m_wpCommunicator.lock())
+        {
+          if (auto spSignalEmitter = spComm->LockedEmitter<CIconSignalEmitter>())
+          {
+            emit spSignalEmitter->showError(sError, QtMsgType::QtCriticalMsg);
+          }
+        }
       }
     }
   }

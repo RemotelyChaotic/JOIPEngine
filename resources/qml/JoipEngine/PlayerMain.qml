@@ -289,6 +289,10 @@ Rectangle {
             }
         }
 
+        onValueStored: {
+            storageEmitter.valueStored(sId, value);
+        }
+
         function setItem(sId, value)
         {
             store(sId, value);

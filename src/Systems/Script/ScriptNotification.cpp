@@ -334,6 +334,84 @@ void CScriptNotification::setWidgetColor(QVariant color)
 
 //----------------------------------------------------------------------------------------
 //
+void CScriptNotification::registerClickCallback(const QString& sId, QVariant callback)
+{
+  if (!CheckIfScriptCanRun()) { return; }
+
+  if (auto spComm = m_wpCommunicator.lock())
+  {
+    if (auto spSignalEmitter = spComm->LockedEmitter<CNotificationSignalEmiter>())
+    {
+      if (callback.canConvert<QtLua::Value>())
+      {
+        QtLua::Value fn = callback.value<QtLua::Value>();
+        if (fn.type() == QtLua::Value::TFunction)
+        {
+          m_clickCallbacks[sId] = fn;
+        }
+      }
+      else if (callback.canConvert<QJSValue>())
+      {
+        QJSValue fn = callback.value<QJSValue>();
+        if (fn.isCallable())
+        {
+          m_clickCallbacks[sId] = fn;
+        }
+      }
+    }
+  }
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CScriptNotification::registerTimeouCallback(const QString& sId, QVariant callback)
+{
+  if (!CheckIfScriptCanRun()) { return; }
+
+  if (auto spComm = m_wpCommunicator.lock())
+  {
+    if (auto spSignalEmitter = spComm->LockedEmitter<CNotificationSignalEmiter>())
+    {
+      if (callback.canConvert<QtLua::Value>())
+      {
+        QtLua::Value fn = callback.value<QtLua::Value>();
+        if (fn.type() == QtLua::Value::TFunction)
+        {
+          m_timeoutCallbacks[sId] = fn;
+        }
+      }
+      else if (callback.canConvert<QJSValue>())
+      {
+        QJSValue fn = callback.value<QJSValue>();
+        if (fn.isCallable())
+        {
+          m_timeoutCallbacks[sId] = fn;
+        }
+      }
+    }
+  }
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CScriptNotification::HandleClicked(const QString& sId)
+{
+  if (!CheckIfScriptCanRun()) { return; }
+
+  HandleCallbacks(sId, &m_clickCallbacks);
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CScriptNotification::HandleTimeout(const QString& sId)
+{
+  if (!CheckIfScriptCanRun()) { return; }
+
+  HandleCallbacks(sId, &m_timeoutCallbacks);
+}
+
+//----------------------------------------------------------------------------------------
+//
 void CScriptNotification::Initialize()
 {
   if (auto spComm = m_wpCommunicator.lock())
@@ -359,6 +437,7 @@ void CScriptNotification::Initialize()
             }
             return;
           }
+          HandleClicked(sId);
           emit SignalOverlayRunAsync(sId, sOnEvt);
         }
       }, Qt::QueuedConnection);
@@ -381,6 +460,7 @@ void CScriptNotification::Initialize()
             }
             return;
           }
+          HandleTimeout(sId);
           emit SignalOverlayRunAsync(sId, sOnEvt);
         }
       }, Qt::QueuedConnection);
@@ -437,6 +517,49 @@ QString CScriptNotification::GetResource(const QVariant& resource, const QString
     }
   }
   return QString();
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CScriptNotification::HandleCallbacks(const QString& sId, std::map<QString, script::tCallbackValue>* pCallbacks)
+{
+  QString sError;
+  if (nullptr != m_pEngine)
+  {
+    auto it = pCallbacks->find(sId);
+    if (pCallbacks->end() != it && std::holds_alternative<QJSValue>(it->second))
+    {
+      if (!script::CallCallback(std::get<QJSValue>(it->second), QJSValueList() << QJSValue(sId),
+                                &sError))
+      {
+        if (auto spComm = m_wpCommunicator.lock())
+        {
+          if (auto spSignalEmitter = spComm->LockedEmitter<CNotificationSignalEmiter>())
+          {
+            emit spSignalEmitter->showError(sError, QtMsgType::QtCriticalMsg);
+          }
+        }
+      }
+    }
+  }
+  else if (nullptr != m_pState)
+  {
+    auto it = pCallbacks->find(sId);
+    if (pCallbacks->end() != it && std::holds_alternative<QtLua::Value>(it->second))
+    {
+      if (!script::CallCallback(std::get<QtLua::Value>(it->second), QVariantList() << sId,
+                                &sError))
+      {
+        if (auto spComm = m_wpCommunicator.lock())
+        {
+          if (auto spSignalEmitter = spComm->LockedEmitter<CNotificationSignalEmiter>())
+          {
+            emit spSignalEmitter->showError(sError, QtMsgType::QtCriticalMsg);
+          }
+        }
+      }
+    }
+  }
 }
 
 //----------------------------------------------------------------------------------------

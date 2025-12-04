@@ -14,6 +14,8 @@
 #include "Systems/Database/Resource.h"
 #include "Systems/Database/Scene.h"
 
+#include "Utils/ThreadUtils.h"
+
 #include <QDebug>
 #include <QFile>
 #include <QFileInfo>
@@ -264,6 +266,18 @@ public slots:
       emit SignalInterruptExecution();
       m_pScriptEngine->setInterrupted(true);
     }
+
+    if (m_bRunning)
+    {
+      utils::RunInThread(thread(), [this](){
+        if (m_bHandlingEvents)
+        {
+          emit HandleScriptFinish(false, QString());
+          m_bRunning = 0;
+        }
+      });
+    }
+
     if (thread() == QThread::currentThread())
     {
       while (m_bRunning) QCoreApplication::processEvents();
@@ -363,9 +377,10 @@ public slots:
         break;
       case ESceneMode::eEventDriven:
         sSkript = QString("(function() { "
-                          "function() { %1\n}; "
-                          "%2(); "
+                          "var %1 = function() { %2\n}; "
+                          "%3(); "
                           "})")
+                      .arg(sSceneName)
                       .arg(sScript)
                       .arg(sSceneName);
         break;
@@ -400,7 +415,11 @@ public slots:
         emit HandleScriptFinish(false, QString());
         m_bRunning = 0;
       }
-      // else wir sind noch am "runnen"
+      else
+      {
+        // we are still "running"
+        m_bHandlingEvents = true;
+      }
     }
     else
     {
@@ -538,6 +557,7 @@ private:
            std::shared_ptr<CScriptObjectBase>>   m_objectMap;
   std::vector<QString>                           m_vsObjectToDeleteMap;
   QString                                        m_sName;
+  bool                                           m_bHandlingEvents = false;
 };
 
 //----------------------------------------------------------------------------------------

@@ -25,6 +25,7 @@ Rectangle {
                     "name": pResource.name,
                     "resource": pResource
                 });
+                signalEmitter.iconStateChange(pResource.name, true);
             }
         }
     }
@@ -41,6 +42,7 @@ Rectangle {
                 if (-1 !== iIndex)
                 {
                     iconModel.remove(iIndex);
+                    signalEmitter.iconStateChange(sName, false);
                 }
             }
         }
@@ -48,7 +50,16 @@ Rectangle {
 
     function clearIcons()
     {
+        var icons = [];
+        for (var i = 0; iconModel.count > i; ++i) {
+            icons.push(iconModel.get(i));
+        }
+
         iconModel.clear();
+
+        for (var j = 0; icons.count > j; ++j) {
+            signalEmitter.iconStateChange(icons[j], false);
+        }
     }
 
     // accessor object for eval

@@ -1,10 +1,15 @@
 #ifndef SCRIPTICON_H
 #define SCRIPTICON_H
 
+#include "CommonScriptHelpers.h"
 #include "ScriptObjectBase.h"
 #include "ScriptRunnerSignalEmiter.h"
+
+#include <QtLua/Value>
+
 #include <QJSValue>
 #include <memory>
+#include <map>
 
 class CDatabaseManager;
 struct SResource;
@@ -20,6 +25,7 @@ public:
 
 signals:
   void hideIcon(QString sResource);
+  void iconStateChange(const QString& sResource, bool bShown);
   void showIcon(QString sResource);
 
 protected:
@@ -60,8 +66,14 @@ public slots:
   void hide(QVariant resource);
   void show(QVariant resource);
 
+  void registerIconCallback(const QVariant& resource, QVariant callback);
+
+private slots:
+  void HandleIconStateChange(const QString& sResource, bool bShown);
+
 private:
   std::weak_ptr<CDatabaseManager>  m_wpDbManager;
+  std::map<QString, script::tCallbackValue> m_callbacks;
 };
 
 #endif // SCRIPTICON_H

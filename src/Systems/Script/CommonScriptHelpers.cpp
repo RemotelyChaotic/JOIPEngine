@@ -7,7 +7,6 @@
 #include "Systems/Database/Scene.h"
 
 #include <QDebug>
-#include <QJSValue>
 
 namespace script
 {
@@ -76,6 +75,56 @@ namespace script
       } break;
     }
     return varConverted;
+  }
+
+  //--------------------------------------------------------------------------------------
+  //
+  bool CallCallback(QJSValue& callback, const QJSValueList& args,
+                    QString* psError)
+  {
+    if (callback.isCallable())
+    {
+      callback.call(args);
+      return true;
+    }
+    else
+    {
+      if (nullptr != psError)
+      {
+        *psError = "Cannot call callback. The object is not callable.";
+      }
+      return false;
+    }
+  }
+
+  //--------------------------------------------------------------------------------------
+  //
+  bool CallCallback(QtLua::Value& callback, const QVariantList& args,
+                    QString* psError)
+  {
+    if (callback.type() == QtLua::Value::TFunction && !callback.is_dead())
+    {
+      try {
+        callback.call(args);
+      }
+      catch (QtLua::String& sError)
+      {
+        if (nullptr != psError)
+        {
+          *psError = sError;
+        }
+        return false;
+      }
+      return true;
+    }
+    else
+    {
+      if (nullptr != psError)
+      {
+        *psError = "Cannot call callback. The object is not callable.";
+      }
+      return false;
+    }
   }
 
   //--------------------------------------------------------------------------------------

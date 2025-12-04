@@ -74,6 +74,7 @@ QJSValue CTeaseStorageWrapper::load(const QString& sId, const QString& sContext)
 void CTeaseStorageWrapper::store(const QString& sId, const QJSValue& value)
 {
   m_storage[sId] = value;
+  emit valueStored(sId, value);
 }
 
 //----------------------------------------------------------------------------------------

@@ -59,8 +59,12 @@ Rectangle {
             timerDisplay.start();
         }
         onStopTimer: {
+            var bStartedBefore = timerDisplay.bStarted;
             timerDisplay.stop();
             timerDisplay.bStarted = false;
+            if (bStartedBefore) {
+                signalEmitter.timerFinished();
+            }
         }
         onWaitForTimer: {
             if (!timerDisplay.running)
@@ -88,8 +92,8 @@ Rectangle {
         property bool bStarted: false
 
         onTimeout: {
-            signalEmitter.timerFinished();
             bStarted = false;
+            signalEmitter.timerFinished();
             opacity = 0.0;
         }
 

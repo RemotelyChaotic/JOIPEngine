@@ -9,6 +9,8 @@
 
 #include "Systems/DatabaseManager.h"
 
+#include "Utils/ThreadUtils.h"
+
 extern "C"
 {
   #include "lua.h"
@@ -246,6 +248,19 @@ public slots:
       emit SignalInterruptExecution();
       SetInterrupted(true);
     }
+
+    if (m_bRunning)
+    {
+      utils::RunInThread(thread(), [this](){
+        if (m_bHandlingEvents)
+        {
+          emit HandleScriptFinish(false, QString());
+          m_bRunning = 0;
+          m_pLuaState->gc_collect();
+        }
+      });
+    }
+
     if (thread() == QThread::currentThread())
     {
       while (m_bRunning) QCoreApplication::processEvents();
@@ -329,7 +344,11 @@ public slots:
     switch (sceneMode)
     {
       case ESceneMode::eLinear:
-        sSkript = QString("local ret = sandbox.run([[local %1 = function();\n%2\nreturn nil;\nend;\nreturn %3();]], %4);"
+        sSkript = QString("local ret = sandbox.run([[local %1 = function();\n"
+                          "%2\n"
+                          "return nil;\n"
+                          "end;\n"
+                          "return %3();]], %4);"
                           "utils_1337:finishedScript(ret);")
                       .arg(sSceneName)
                       .arg(sScriptEscaped)
@@ -337,7 +356,11 @@ public slots:
                       .arg(GenerateEnvVariableString());
         break;
       case ESceneMode::eEventDriven:
-        sSkript = QString("sandbox.run([[local %1 = function();\n%2\nreturn nil;\nend;\nreturn %3();]], %4);")
+        sSkript = QString("sandbox.run([[local %1 = function();\n"
+                          "%2\n"
+                          "return nil;\n"
+                          "end;\n"
+                          "return %3();]], %4);")
                       .arg(sSceneName)
                       .arg(sScriptEscaped)
                       .arg(sSceneName)
@@ -362,7 +385,11 @@ public slots:
         m_bRunning = 0;
         m_pLuaState->gc_collect();
       }
-      // else wir sind noch am "runnen"
+      else
+      {
+        // we are still "running"
+        m_bHandlingEvents = true;
+      }
     }
     catch (QtLua::String& s)
     {
@@ -631,6 +658,7 @@ private:
   std::set<QString>                              m_vGlobalValues;
   QString                                        m_sName;
   QAtomicInt                                     m_bInterrupted;
+  bool                                           m_bHandlingEvents = false;
 
 protected:
   bool                                           m_bLoadingInbuiltLibraries;

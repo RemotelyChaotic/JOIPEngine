@@ -1,6 +1,7 @@
 #ifndef SCRIPTSTORAGE_H
 #define SCRIPTSTORAGE_H
 
+#include "CommonScriptHelpers.h"
 #include "ScriptObjectBase.h"
 #include "ScriptRunnerSignalEmiter.h"
 #include <QJSValue>
@@ -23,6 +24,9 @@ signals:
   void removeData(QString sId, QString sContext);
   void store(QString sId, QVariant value, QString sContext);
   void storePersistent(QString sId);
+  void valueStored(QString sId, QJSValue value);
+
+  void ValueStoredPrivate(QString sId, QVariant value);
 
 protected:
   std::shared_ptr<CScriptCommunicator>
@@ -69,6 +73,9 @@ protected:
   void Cleanup_Impl() override;
   QVariant LoadImpl(QString sId, QString sContext);
   void StoreImpl(QString sId, QVariant value, QString sContext);
+  void ValueChanged(QString sId, QVariant value);
+
+  std::map<QString, script::tCallbackValue> m_callbacks;
 
 private:
   std::shared_ptr<std::function<void()>> m_spStop;
@@ -91,6 +98,7 @@ public slots:
   void store(QString sId, QVariant value);
   void storeAchievement(QString sId, QVariant value);
 
+  void registerChangeCallback(const QString& sId, QJSValue callback);
 };
 
 //----------------------------------------------------------------------------------------
@@ -110,6 +118,8 @@ public slots:
   QVariant loadAchievement(QString sId);
   void store(QString sId, QVariant value);
   void storeAchievement(QString sId, QVariant value);
+
+  void registerChangeCallback(const QString& sId, QVariant callback);
 };
 
 #endif // SCRIPTSTORAGE_H

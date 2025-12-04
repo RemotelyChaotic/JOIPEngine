@@ -31,6 +31,7 @@ public slots:
 
 signals:
   void saveManagerChanged();
+  void valueStored(const QString& sId, const QJSValue& value);
 
 private:
   QPointer<CProjectSavegameManager>          m_pSaveManager;

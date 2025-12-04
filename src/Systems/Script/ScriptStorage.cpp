@@ -70,6 +70,21 @@ CScriptStorageBase::CScriptStorageBase(std::weak_ptr<CScriptCommunicator> pCommu
   if (auto spComm = pCommunicator.lock())
   {
     spComm->RegisterStopCallback(m_spStop);
+    if (auto spSignalEmitter = spComm->LockedEmitter<CStorageSignalEmitter>())
+    {
+      connect(spSignalEmitter.Get(), &CStorageSignalEmitter::valueStored,
+          spSignalEmitter.Get(),
+          [pEmitter = spSignalEmitter.Get()](QString sId, QJSValue value){
+            QVariant v = value.toVariant();
+            v.detach(); // fixes some crashes with QJSEngine
+            emit pEmitter->ValueStoredPrivate(sId, v);
+          }, Qt::DirectConnection);
+
+      connect(spSignalEmitter.Get(), &CStorageSignalEmitter::ValueStoredPrivate,
+          this, [this](QString sId, QVariant value){
+            ValueChanged(sId, value);
+          }, Qt::QueuedConnection);
+    }
   }
 }
 CScriptStorageBase::CScriptStorageBase(std::weak_ptr<CScriptCommunicator> pCommunicator,
@@ -82,6 +97,7 @@ CScriptStorageBase::CScriptStorageBase(std::weak_ptr<CScriptCommunicator> pCommu
   if (auto spComm = pCommunicator.lock())
   {
     spComm->RegisterStopCallback(m_spStop);
+
   }
 }
 
@@ -211,6 +227,51 @@ void CScriptStorageBase::StoreImpl(QString sId, QVariant value, QString sContext
 
 //----------------------------------------------------------------------------------------
 //
+void CScriptStorageBase::ValueChanged(QString sId, QVariant value)
+{
+  if (!CheckIfScriptCanRun()) { return; }
+
+  QString sError;
+  if (nullptr != m_pEngine)
+  {
+    auto it = m_callbacks.find(sId);
+    if (m_callbacks.end() != it && std::holds_alternative<QJSValue>(it->second))
+    {
+      if (!script::CallCallback(std::get<QJSValue>(it->second), QJSValueList() << QJSValue(sId) << m_pEngine->toScriptValue(value),
+                                &sError))
+      {
+        if (auto spComm = m_wpCommunicator.lock())
+        {
+          if (auto spSignalEmitter = spComm->LockedEmitter<CStorageSignalEmitter>())
+          {
+            emit spSignalEmitter->showError(sError, QtMsgType::QtCriticalMsg);
+          }
+        }
+      }
+    }
+  }
+  else if (nullptr != m_pState)
+  {
+    auto it = m_callbacks.find(sId);
+    if (m_callbacks.end() != it && std::holds_alternative<QtLua::Value>(it->second))
+    {
+      if (!script::CallCallback(std::get<QtLua::Value>(it->second), QVariantList() << sId << value,
+                                &sError))
+      {
+        if (auto spComm = m_wpCommunicator.lock())
+        {
+          if (auto spSignalEmitter = spComm->LockedEmitter<CStorageSignalEmitter>())
+          {
+            emit spSignalEmitter->showError(sError, QtMsgType::QtCriticalMsg);
+          }
+        }
+      }
+    }
+  }
+}
+
+//----------------------------------------------------------------------------------------
+//
 CScriptStorageJs::CScriptStorageJs(std::weak_ptr<CScriptCommunicator> pCommunicator,
                                    QPointer<QJSEngine> pEngine) :
   CScriptStorageBase(pCommunicator, pEngine)
@@ -278,6 +339,28 @@ void CScriptStorageJs::storeAchievement(QString sId, QVariant value)
 
 //----------------------------------------------------------------------------------------
 //
+void CScriptStorageJs::registerChangeCallback(const QString& sId, QJSValue callback)
+{
+  if (!CheckIfScriptCanRun()) { return; }
+
+  if (callback.isCallable())
+  {
+    m_callbacks[sId] = callback;
+  }
+  else
+  {
+    if (auto spComm = m_wpCommunicator.lock())
+    {
+      if (auto spSignalEmitter = spComm->LockedEmitter<CStorageSignalEmitter>())
+      {
+        emit spSignalEmitter->showError(tr("Event handler is not a callable."), QtMsgType::QtWarningMsg);
+      }
+    }
+  }
+}
+
+//----------------------------------------------------------------------------------------
+//
 CScriptStorageLua::CScriptStorageLua(std::weak_ptr<CScriptCommunicator> pCommunicator,
                                      QtLua::State* pState) :
   CScriptStorageBase(pCommunicator, pState)
@@ -317,4 +400,30 @@ void CScriptStorageLua::storeAchievement(QString sId, QVariant value)
 {
   if (!CheckIfScriptCanRun()) { return ; }
   StoreImpl(sId, script::ConvertLuaVariant(value), save_data::c_sFileAchievements);
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CScriptStorageLua::registerChangeCallback(const QString& sId, QVariant callback)
+{
+  if (!CheckIfScriptCanRun()) { return; }
+
+  if (callback.canConvert<QtLua::Value>())
+  {
+    QtLua::Value fn = callback.value<QtLua::Value>();
+    if (fn.type() == QtLua::Value::TFunction)
+    {
+      m_callbacks[sId] = fn;
+    }
+  }
+  else
+  {
+    if (auto spComm = m_wpCommunicator.lock())
+    {
+      if (auto spSignalEmitter = spComm->LockedEmitter<CStorageSignalEmitter>())
+      {
+        emit spSignalEmitter->showError(tr("Event handler is not a callable."), QtMsgType::QtWarningMsg);
+      }
+    }
+  }
 }

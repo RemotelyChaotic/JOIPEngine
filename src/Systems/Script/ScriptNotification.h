@@ -1,6 +1,7 @@
 #ifndef SCRIPTNOTIFICATION_H
 #define SCRIPTNOTIFICATION_H
 
+#include "CommonScriptHelpers.h"
 #include "ScriptObjectBase.h"
 #include "ScriptRunnerSignalEmiter.h"
 #include <QtCore/qmetaobject.h>
@@ -93,18 +94,28 @@ public slots:
   void setWidgetBackgroundColor(QVariant color);
   void setWidgetColor(QVariant color);
 
+  void registerClickCallback(const QString& sId, QVariant callback);
+  void registerTimeouCallback(const QString& sId, QVariant callback);
+
 signals:
   void SignalOverlayCleared();
   void SignalOverlayClosed(const QString& sId);
   void SignalOverlayRunAsync(const QString& sId, const QString& sScriptResource);
 
+private slots:
+  void HandleClicked(const QString& sId);
+  void HandleTimeout(const QString& sId);
+
 private:
   void Initialize();
   QColor GetColor(const QVariant& color, const QString& sSource);
   QString GetResource(const QVariant& resource, const QString& sSource);
+  void HandleCallbacks(const QString& sId, std::map<QString, script::tCallbackValue>* pCallbacks);
   void Show(QString sId, QString sTitle, QString sButtonText, double dTimeS, QString sOnButton, QString sOnTimeout);
 
   std::weak_ptr<CDatabaseManager>  m_wpDbManager;
+  std::map<QString, script::tCallbackValue> m_clickCallbacks;
+  std::map<QString, script::tCallbackValue> m_timeoutCallbacks;
 };
 
 //----------------------------------------------------------------------------------------

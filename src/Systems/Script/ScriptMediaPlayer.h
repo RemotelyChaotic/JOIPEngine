@@ -1,6 +1,7 @@
 #ifndef SCRIPTMEDIAPLAYER_H
 #define SCRIPTMEDIAPLAYER_H
 
+#include "CommonScriptHelpers.h"
 #include "ScriptObjectBase.h"
 #include "ScriptRunnerSignalEmiter.h"
 #include <QVariant>
@@ -34,8 +35,8 @@ signals:
   void startVideoWait();
   void startSoundWait(const QString& sResource);
   void playbackFinished(const QString& sResource);
-  void videoFinished();
   void soundFinished(const QString& sResource);
+  void videoFinished(const QString& sResource);
 
 protected:
   std::shared_ptr<CScriptCommunicator>
@@ -62,6 +63,13 @@ class CScriptMediaPlayer : public CJsScriptObjectBase
 {
   Q_OBJECT
   Q_DISABLE_COPY(CScriptMediaPlayer)
+
+  enum EStateChange
+  {
+    eMedia,
+    eSound,
+    eVideo,
+  };
 
 public:
   CScriptMediaPlayer(std::weak_ptr<CScriptCommunicator> pCommunicator,
@@ -98,8 +106,15 @@ public slots:
   void waitForSound();
   void waitForSound(QVariant resource);
 
+  void registerMediaCallback(const QVariant& resource, QVariant callback);
+  void registerSoundCallback(const QVariant& resourceOrId, QVariant callback);
+  void registerVideoCallback(const QVariant& resource, QVariant callback);
+
 signals:
   void SignalQuitLoop();
+
+private slots:
+  void HandleMediaStateChange(const QString& sResource, EStateChange bVideo);
 
 private:
   QString GetResourceName(const QVariant& resource, const QString& sMethod,
@@ -109,6 +124,8 @@ private:
 
   std::weak_ptr<CDatabaseManager>  m_wpDbManager;
   std::shared_ptr<std::function<void()>> m_spStop;
+  std::map<QString, script::tCallbackValue> m_callbacksSound;
+  std::map<QString, script::tCallbackValue> m_callbacksVideo;
 };
 
 //----------------------------------------------------------------------------------------

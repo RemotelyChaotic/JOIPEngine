@@ -1,6 +1,7 @@
 #ifndef SCRIPTTIMER_H
 #define SCRIPTTIMER_H
 
+#include "CommonScriptHelpers.h"
 #include "ScriptObjectBase.h"
 #include "ScriptRunnerSignalEmiter.h"
 #include <QJSValue>
@@ -66,11 +67,17 @@ public slots:
   void stop();
   void waitForTimer();
 
+  void registerTimerFinishedCallback(QVariant callback);
+
 signals:
   void SignalQuitLoop();
 
+private slots:
+  void HandleTimerFinished();
+
 private:
   std::shared_ptr<std::function<void()>> m_spStop;
+  script::tCallbackValue m_callback;
 };
 
 //----------------------------------------------------------------------------------------

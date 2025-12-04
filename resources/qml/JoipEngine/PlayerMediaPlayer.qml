@@ -211,14 +211,14 @@ Rectangle {
             if ("" !== sResource)
             {
                 registrator.tryToCallAudio(sResource, "checkIfFinished", sResource,
-                                           function(state, fnFinished) {
+                                           function(state, fnFinished, sRes) {
                                                 return function() {
                                                     if (state === Resource.Null || state === Resource.Error)
                                                     {
-                                                        fnFinished("");
+                                                        fnFinished(sRes);
                                                     }
                                                 }
-                                           }(movieResource.state, signalEmitter.playbackFinished));
+                                           }(movieResource.state, signalEmitter.playbackFinished, sResource));
             }
             if ("" === sResource)
             {
@@ -231,7 +231,7 @@ Rectangle {
         onStartVideoWait: {
             if (movieResource.state === Resource.Null || movieResource.state === Resource.Error)
             {
-                signalEmitter.videoFinished();
+                signalEmitter.videoFinished(null != movieResource.resource ? movieResource.resource.name : "");
             }
         }
         onStartSoundWait: {
@@ -299,8 +299,9 @@ Rectangle {
             visible: movieResource.state === Resource.Loaded
 
             onFinishedPlaying: {
-                signalEmitter.playbackFinished("");
-                signalEmitter.videoFinished();
+                var sRes = null != movieResource.resource ? movieResource.resource.name : "";
+                signalEmitter.playbackFinished(sRes);
+                signalEmitter.videoFinished(sRes);
             }
         }
 

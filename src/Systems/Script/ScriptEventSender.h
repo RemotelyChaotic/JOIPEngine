@@ -3,6 +3,9 @@
 
 #include "ScriptObjectBase.h"
 #include "ScriptRunnerSignalEmiter.h"
+
+#include <QtLua/Value>
+
 #include <QVariant>
 #include <memory>
 
@@ -16,6 +19,8 @@ public:
 signals:
   void sendEvent(const QString& event, const QString& dataJson);
   void sendReturnValue(QJSValue value, QString sRequestEvtRet);
+
+  void SendReturnValuePrivate(QVariant value, const QString& sRequestEvtRet);
 
 protected:
   std::shared_ptr<CScriptCommunicator>
@@ -54,6 +59,8 @@ signals:
   void SignalQuitLoop();
 
 protected:
+  virtual void HandleEventRet(QVariant value, const QString& sRequestRet) = 0;
+
   void SendEventImpl(const QString& sEvent, const QString& sData);
   QVariant SendEventAndWaitImpl(const QString& sEvent, const QString& sData);
 
@@ -79,8 +86,15 @@ public slots:
   QVariant sendEventAndWait(const QString& sEvent);
   QVariant sendEventAndWait(const QString& sEvent, QVariant data);
 
+  void registerEventHandler(const QString& sEvent, QJSValue callback);
+
+protected:
+  void HandleEventRet(QVariant value, const QString& sRequestRet) override;
+
 private:
   QString PrepareInput(const QVariant& data);
+
+  std::map<QString, QJSValue> m_callbacks;
 };
 
 //----------------------------------------------------------------------------------------
@@ -101,8 +115,15 @@ public slots:
   QVariant sendEventAndWait(const QString& sEvent);
   QVariant sendEventAndWait(const QString& sEvent, QVariant data);
 
+  void registerEventHandler(const QString& sEvent, QVariant callback);
+
+protected:
+  void HandleEventRet(QVariant value, const QString& sRequestRet) override;
+
 private:
   QString PrepareInput(const QVariant& data);
+
+  std::map<QString, QtLua::Value> m_callbacks;
 };
 
 #endif // CSCRIPTEVENTSENDER_H
