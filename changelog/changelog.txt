@@ -4,6 +4,17 @@ Version 1.7.0.0
 
 New Features:
 - Made different Layouts per Scene possible.
+- Added an Event Based script mode. Scenes with this mode don't start the next scene
+  automatically after finishing and instead continue listening for events.
+- Added callbacks to PlayerEventCommunicator, PlayerIcons, PlayerMediaPlayer, 
+  PlayerNotification, PlayerStorage, PlayerTimer.
+
+Changes:
+- Downloaded EOS scripts use the new Event Based script mode since that mirrors the 
+  behavior on Milovana.
+
+Fixed Bugs:
+- Fixed Milovana Downloads. They should work again.
 
 =================
 Version 1.6.1.0

@@ -136,6 +136,18 @@
         icon:hide(''); -- hides all icons<br>
         icon:hide('~all'); -- hides all icons<br>
         <br></li>
+
+        <li><b>registerIconCallback ( string | resource, function callback( string, bool ) )</b><br>
+        Register a callback function for whenever an icon changes state. The callback
+        functions needs to accept two arguments: the icon id and the new state.<br>
+        <b>Important:</b>The call can only happen during busy waits or if the script has finished.<br>
+        <i>Example Usage (JS):</i><br>
+        icon.registerIconCallback("test",function(id, state){});<br>
+        <i>Example Usage (Lua):</i><br>
+        function callbackFn (id, state)<br>
+        end<br>
+        icon:registerIconCallback('testEvt',callbackFn);<br>
+        <br></li>
       </ul>
     </p>
 
@@ -358,6 +370,42 @@
         <i>Example Usage (Lua):</i><br>
         mediaPlayer:waitForSound('mySound');<br>
         <br></li>
+
+        <li><b>registerMediaCallback ( string | resource, function callback( string ) )</b><br>
+        Register a callback function for whenever any media finishes playing. The callback
+        functions needs to accept one argument: the string of the resource.<br>
+        <b>Important:</b>The call can only happen during busy waits or if the script has finished.<br>
+        <i>Example Usage (JS):</i><br>
+        mediaPlayer.registerMediaCallback("res",function(res){});<br>
+        <i>Example Usage (Lua):</i><br>
+        function callbackFn (res)<br>
+        end<br>
+        mediaPlayer:registerMediaCallback('res',callbackFn);<br>
+        <br></li>
+
+        <li><b>registerSoundCallback ( string | resource, function callback( string ) )</b><br>
+        Register a callback function for whenever a Sound Resource finishes playing. The callback
+        functions needs to accept one argument: the string of the resource.<br>
+        <b>Important:</b>The call can only happen during busy waits or if the script has finished.<br>
+        <i>Example Usage (JS):</i><br>
+        mediaPlayer.registerSoundCallback("res",function(res){});<br>
+        <i>Example Usage (Lua):</i><br>
+        function callbackFn (res)<br>
+        end<br>
+        mediaPlayer:registerSoundCallback('res',callbackFn);<br>
+        <br></li>
+
+        <li><b>registerVideoCallback ( string | resource, function callback( string ) )</b><br>
+        Register a callback function for whenever a Movie Resource media finishes playing. The callback
+        functions needs to accept one argument: the string of the resource.<br>
+        <b>Important:</b>The call can only happen during busy waits or if the script has finished.<br>
+        <i>Example Usage (JS):</i><br>
+        mediaPlayer.registerVideoCallback("res",function(res){});<br>
+        <i>Example Usage (Lua):</i><br>
+        function callbackFn (res)<br>
+        end<br>
+        mediaPlayer:registerVideoCallback('res',callbackFn);<br>
+        <br></li>
       </ul>
     </p>
 
@@ -522,6 +570,18 @@
         localStorage.removeData("value");<br>
         <i>Example Usage (Lua):</i><br>
         localStorage:removeData('value');<br>
+        <br></li>
+
+        <li><b>registerChangeCallback ( string, function callback( string, object ) )</b><br>
+        Register a callback function for whenever a value in storage changes it's value. The callback
+        functions needs to accept two arguments: the string id and the new value.<br>
+        <b>Important:</b>The call can only happen during busy waits or if the script has finished.<br>
+        <i>Example Usage (JS):</i><br>
+        notification.registerChangeCallback("myId",function(id, value){});<br>
+        <i>Example Usage (Lua):</i><br>
+        function callbackFn (id, value)<br>
+        end<br>
+        notification:registerChangeCallback('myId',callbackFn);<br>
         <br></li>
       </ul>
     </p>
@@ -803,6 +863,18 @@
         <i>Example Usage (Lua):</i><br>
         timer:waitForTimer();<br>
         <br></li>
+
+        <li><b>registerTimerFinishedCallback ( function callback(  ) )</b><br>
+        Register a callback function for whenever the timer times out. The callback
+        function has no arguments and old callbacks will always be overwritten.<br>
+        <b>Important:</b>The call can only happen during busy waits or if the script has finished.<br>
+        <i>Example Usage (JS):</i><br>
+        timer.registerTimerFinishedCallback(function(){});<br>
+        <i>Example Usage (Lua):</i><br>
+        function callbackFn ()<br>
+        end<br>
+        timer:registerTimerFinishedCallback(callbackFn);<br>
+        <br></li>
       </ul>
     </p>
 
@@ -971,6 +1043,30 @@
         In case of two buttons the text color of the first one will be 0% transparent red and the second will be 0% transparent green ]]--<br>
         notification:setWidgetColor({255, 0, 0, 255}); -- same as above example<br>
         notification:setWidgetColor('green'); -- same as above example<br>
+        <br></li>
+
+        <li><b>registerClickCallback ( string, function callback( string ) )</b><br>
+        Register a callback function for whenever a notification is clicked. The callback
+        functions needs to accept one argument: the string id of the notification.<br>
+        <b>Important:</b>The call can only happen during busy waits or if the script has finished.<br>
+        <i>Example Usage (JS):</i><br>
+        notification.registerClickCallback("myId",function(id){});<br>
+        <i>Example Usage (Lua):</i><br>
+        function callbackFn (id)<br>
+        end<br>
+        notification:registerClickCallback('myId',callbackFn);<br>
+        <br></li>
+
+        <li><b>registerTimeouCallback ( string, function callback( string ) )</b><br>
+        Register a callback function for whenever a notification goes into timeout. The callback
+        functions needs to accept one argument: the string id of the notification.<br>
+        <b>Important:</b>The call can only happen during busy waits or if the script has finished.<br>
+        <i>Example Usage (JS):</i><br>
+        notification.registerTimeouCallback("myId",function(id){});<br>
+        <i>Example Usage (Lua):</i><br>
+        function callbackFn (id)<br>
+        end<br>
+        notification:registerTimeouCallback('myId',callbackFn);<br>
         <br></li>
       </ul>
     </p>
@@ -1190,6 +1286,19 @@
         local resp = eventSender:sendEventAndWait("testEvt","bla");<br>
         local resp = eventSender:sendEventAndWait("testEvt", {a = "bla"});<br>
         local resp = eventSender:sendEventAndWait("testEvt");<br>
+        <br></li>
+
+        <li><b>registerEventHandler ( string sEvent, function callback( string, object ) )</b><br>
+        Register a callback function for whenever event sEvent is recieved. The callback
+        functions needs to accept two arguments: a string and an object.<br>
+        The string is the event name and the object is the data of the event.<br>
+        <b>Important:</b>The call can only happen during busy waits or if the script has finished.<br>
+        <i>Example Usage (JS):</i><br>
+        eventSender.registerEventHandler("testEvt",function(evt, data){});<br>
+        <i>Example Usage (Lua):</i><br>
+        function callbackFn (evt, data)<br>
+        end<br>
+        eventSender:registerEventHandler('testEvt',callbackFn);<br>
         <br></li>
       </ul>
     </p>
