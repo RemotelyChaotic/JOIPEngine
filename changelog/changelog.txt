@@ -15,6 +15,7 @@ Changes:
 
 Fixed Bugs:
 - Fixed Milovana Downloads. They should work again.
+- EOS scripts center text again if orientation argument is not given.
 
 =================
 Version 1.6.1.0

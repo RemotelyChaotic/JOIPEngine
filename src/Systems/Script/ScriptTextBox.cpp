@@ -1026,6 +1026,11 @@ public:
           m_pParent->setTextAlignment(TextAlignment::AlignRight);
         }
       }
+      else
+      {
+        // we need this for EOS compatibility
+        m_pParent->setTextAlignment(TextAlignment::AlignCenter);
+      }
 
       CEosScriptTextBox::ESayMode mode = CEosScriptTextBox::eAutoplay;
       if (HasValue(args, "mode") && IsOk<EArgumentType::eString>(itMode))
