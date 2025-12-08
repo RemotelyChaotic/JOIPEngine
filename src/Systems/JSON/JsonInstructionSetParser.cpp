@@ -361,6 +361,8 @@ public:
       while (!m_pThread->isFinished())
       {
         thread()->sleep(1);
+        m_spWorker->m_bInterrupted = true;
+        m_pThread->quit();
       }
     }
   }

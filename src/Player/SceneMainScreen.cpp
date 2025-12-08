@@ -789,7 +789,7 @@ void CSceneMainScreen::LoadSceneScript(const QString& sScene, bool bEnd, bool bS
         }
         else
         {
-          bool bOk = QMetaObject::invokeMethod(m_spScriptRunner.get(), "LoadScript", Qt::QueuedConnection,
+          bool bOk = QMetaObject::invokeMethod(m_spScriptRunner.get(), "LoadScript", Qt::BlockingQueuedConnection,
                                                Q_ARG(tspScene, spScene),
                                                Q_ARG(tspResource, spDbManager->FindResourceInProject(m_spCurrentProject, sScript)));
           assert(bOk); Q_UNUSED(bOk)

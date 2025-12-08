@@ -16,6 +16,8 @@ Changes:
 Fixed Bugs:
 - Fixed Milovana Downloads. They should work again.
 - EOS scripts center text again if orientation argument is not given.
+- Fixed goto in a UI eval call not blocking the Scene until the Scene has switched.
+  This has led to (mostly) EOS scripts not behaving as expected.
 
 =================
 Version 1.6.1.0

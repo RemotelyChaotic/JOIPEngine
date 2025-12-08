@@ -89,6 +89,7 @@ CEosScriptRunnerInstanceController::~CEosScriptRunnerInstanceController()
 //
 void CEosScriptRunnerInstanceController::InterruptExecution()
 {
+  emit SignalInterruptExecution();
   m_spEosRunner->Interrupt();
 }
 
@@ -110,7 +111,7 @@ void CEosScriptRunnerInstanceController::RegisterNewComponent(const QString&,
 //
 void CEosScriptRunnerInstanceController::ResetEngine()
 {
-  m_spEosRunner->Interrupt();
+  InterruptExecution();
 }
 
 //----------------------------------------------------------------------------------------
@@ -228,7 +229,7 @@ CEosScriptRunner::LoadScript(const QString& sScript, tspScene spScene, tspResour
   QTimer::singleShot(10, this, [this, spEosRunnerMain, sSceneName = m_sSceneName, sceneMode]
     { SlotRun(spEosRunnerMain, c_sMainRunner, "", sSceneName, sceneMode); });
 
-  return std::make_shared<CEosScriptRunnerInstanceController>(c_sMainRunner, spEosRunnerMain);
+  return CreateRunnerController(c_sMainRunner, spEosRunnerMain);
 }
 
 //----------------------------------------------------------------------------------------
@@ -247,6 +248,9 @@ void CEosScriptRunner::RegisterNewComponent(const QString& sName,
           spComm->CreateNewScriptObject(m_spEosParser.get()));
       if (nullptr != spObject)
       {
+        connect(this, &CEosScriptRunner::SignalInterruptExecution,
+                spObject.get(), &CScriptObjectBase::SignalInterruptExecution, Qt::QueuedConnection);
+
         if (spObject->thread() != thread())
         {
           spObject->moveToThread(thread());
@@ -334,7 +338,7 @@ CEosScriptRunner::RunAsync(const QString& sId, const QString& sScript,
 
   SlotRun(spEosRunner, sId, "", QString(), ESceneMode::eEventDriven);
 
-  return std::make_shared<CEosScriptRunnerInstanceController>(sId, spEosRunner);
+  return CreateRunnerController(sId, spEosRunner);
 }
 
 //----------------------------------------------------------------------------------------
@@ -418,8 +422,8 @@ void CEosScriptRunner::SlotFork(
   }
 
   emit SignalAddScriptRunner(sForkCommandsName,
-                             std::make_shared<CEosScriptRunnerInstanceController>(
-                                 sForkCommandsName, spNewRunner), EScriptRunnerType::eAsync);
+                             CreateRunnerController(sForkCommandsName, spNewRunner),
+                             EScriptRunnerType::eAsync);
 
   spNewRunner->setObjectName(sForkCommandsName);
   connect(spNewRunner.get(), &CJsonInstructionSetRunner::CommandRetVal,
@@ -463,6 +467,18 @@ void CEosScriptRunner::SlotRun(std::shared_ptr<CJsonInstructionSetRunner> spEosR
   {
     HandleError(SJsonException{"Internal error: Runner unavailable","","",0,0});
   }
+}
+
+//----------------------------------------------------------------------------------------
+//
+std::shared_ptr<CEosScriptRunnerInstanceController>
+CEosScriptRunner::CreateRunnerController(const QString& sName,
+                                         std::shared_ptr<CJsonInstructionSetRunner> spEosRunner)
+{
+  auto spRunner = std::make_shared<CEosScriptRunnerInstanceController>(sName, spEosRunner);
+  connect(spRunner.get(), &CEosScriptRunnerInstanceController::SignalInterruptExecution,
+          this, &CEosScriptRunner::SignalInterruptExecution);
+  return spRunner;
 }
 
 //----------------------------------------------------------------------------------------

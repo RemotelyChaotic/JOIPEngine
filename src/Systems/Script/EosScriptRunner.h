@@ -44,6 +44,7 @@ public:
 
 signals:
   virtual void HandleScriptFinish(const QString& sName, bool bSuccess, const QVariant& sRetVal) override;
+  void SignalInterruptExecution();
 
 private:
   std::shared_ptr<CJsonInstructionSetRunner> m_spEosRunner;
@@ -84,6 +85,7 @@ signals:
                              std::shared_ptr<IScriptRunnerInstanceController> spController,
                              EScriptRunnerType type) override;
   void SignalClearThreads(EScriptRunnerType type) override;
+  void SignalInterruptExecution();
   void SignalKill(const QString& sId) override;
   void SignalRunAsync(tspProject spProject, const QString& sId,
                       const QString& sScriptResource, EScriptRunnerType type) override;
@@ -99,6 +101,9 @@ private slots:
                const QString sSceneName, ESceneMode sceneMode);
 
 private:
+  std::shared_ptr<CEosScriptRunnerInstanceController>
+    CreateRunnerController(const QString& sName,
+                           std::shared_ptr<CJsonInstructionSetRunner> spEosRunner);
   void HandleError(const SJsonException& value);
 
   std::unique_ptr<CJsonInstructionSetParser>     m_spEosParser;
