@@ -922,7 +922,21 @@ public:
 
         qint32 iSiblingToCall = 0;
         qint32 iNumChildrenToCall = -1;
-        qint32 iActualButton = vsOptionMapping[iButton];
+        auto itFoundButt = vsOptionMapping.find(iButton);
+        qint32 iActualButton = vsOptionMapping.end() != itFoundButt ? itFoundButt->second : -1;
+
+        if (0 > iActualButton)
+        {
+          // Any value, it does not matter, this branch is finished.
+          return SRunRetVal<ENextCommandToCall::eFinish>(SRunRetValAnyWrapper{iActualButton});
+        }
+
+        if (viNumChildren.size() > static_cast<size_t>(iActualButton) &&
+            0 == viNumChildren[static_cast<size_t>(iActualButton)])
+        {
+          return SRunRetVal<ENextCommandToCall::eSibling>();
+        }
+
         for (qint32 i = 0; i < iActualButton; ++i)
         {
           iSiblingToCall += viNumChildren[static_cast<size_t>(i)];

@@ -18,6 +18,7 @@ Fixed Bugs:
 - EOS scripts center text again if orientation argument is not given.
 - Fixed goto in a UI eval call not blocking the Scene until the Scene has switched.
   This has led to (mostly) EOS scripts not behaving as expected.
+- Fixed an issue with EOS buttons following the wrong branch if the choice had 0 children.
 
 =================
 Version 1.6.1.0
