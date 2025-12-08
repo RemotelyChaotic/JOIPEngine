@@ -13,6 +13,11 @@ Rectangle {
 
     function showNotification(sId, sTitle, sButtonText, iTimeS, sOnButton, sOnTimeout)
     {
+        if (null != findNotification(sId))
+        {
+            removeNotificaiton(sId);
+        }
+
         widgetModel.append({
             "sId": sId,
             "title": sTitle,

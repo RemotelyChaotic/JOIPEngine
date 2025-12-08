@@ -19,6 +19,8 @@ Fixed Bugs:
 - Fixed goto in a UI eval call not blocking the Scene until the Scene has switched.
   This has led to (mostly) EOS scripts not behaving as expected.
 - Fixed an issue with EOS buttons following the wrong branch if the choice had 0 children.
+- PlayerNotifcation should close open notificaions if a new one with the same id
+  is opened.
 
 =================
 Version 1.6.1.0
