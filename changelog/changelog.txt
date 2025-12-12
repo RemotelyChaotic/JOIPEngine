@@ -26,6 +26,7 @@ Fixed Bugs:
 - PlayerEval scripts now behave like in a browser (root can be referenced via 'window')
 - Fixed script tags in button texts not being evaluated.
 - Default Layout for EOS is the old one again.
+- Fixed teaseStorage.removeItem setting the item to null instead of removing it from storage.
 
 =================
 Version 1.6.1.0

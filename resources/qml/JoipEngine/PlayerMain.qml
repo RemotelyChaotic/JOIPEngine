@@ -312,7 +312,7 @@ Rectangle {
         }
         function removeItem(sId)
         {
-            store(sId, null);
+            store(sId, undefined);
         }
         function removeData(sId)
         {
