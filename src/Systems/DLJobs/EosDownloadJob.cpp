@@ -370,6 +370,8 @@ bool CEosDownloadJob::Run(const QVariantList& args)
       "Downloaded from Milovana on " + QDateTime::currentDateTime().toString() + "";
     QCryptographicHash hash(QCryptographicHash::Algorithm::Sha256);
     hash.addData(QString(metaData.m_sTitle + sKey).toUtf8());
+    // we use the old layout.
+    m_spProject->m_sPlayerLayout = "qrc:/qml/resources/qml/JoipEngine/PlayerDefaultLayoutClassic.qml";
     m_spProject->m_sUserData = QString::fromUtf8(hash.result().toBase64());
   }
   spDbManager->RenameProject(m_iProjId, ToValidProjectName(metaData.m_sTitle));
