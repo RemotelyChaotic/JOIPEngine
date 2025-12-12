@@ -19,6 +19,7 @@ Rectangle {
     property alias soundEffects: playerSoundEffects
 
     property bool debug: false
+    property string globalThisName: "window"
     property alias currentlyLoadedLayout: layoutLoader.layout
     property Project currentlyLoadedProject: null
     property PlayerTextBox registeredTextBox: null
@@ -420,7 +421,7 @@ Rectangle {
         }
         var evExpression = QtApp.decodeHTML(ev.innerHTML).trim();
         if (evExpression.length) {
-          result.push(evaluate(evExpression, context +' <eval>'));
+          result.push(EvalWrapper.globalEval(EvalWrapper.isolate(windowEval(evExpression), context +' <eval>')));
         }
         docstring = afterEv.replace(' xmlns="http://www.w3.org/1999/xhtml"', '');
       }
@@ -440,11 +441,12 @@ Rectangle {
         }
     }
     function evaluate(sScript) {
-        return windowEval(sScript, 'evaluator <' + evaluator.userName + '>');
+        var errString = 'evaluator <' + evaluator.userName + '>';
+        var scriptWrapped = EvalWrapper.isolate(windowEval(sScript), errString);
+        return EvalWrapper.globalEval(scriptWrapped, errString);
     }
-    function windowEval(sScript, errStr) {
-        var window = EvalWrapper.globalEval(EvalWrapper.isolate("window;", "evaluator <windowEval>"));
-        return EvalWrapper.evalInScope(EvalWrapper.isolate(sScript, errStr), window);
+    function windowEval(sScript) {
+        return sScript;
     }
 
     PlayerBackground {
@@ -649,7 +651,8 @@ Rectangle {
         registerUIComponent("teaseStorage", storage);
         registerUIComponent("localStorage", storage);
         registerUIComponent("deviceController", deviceController);
-        EvalWrapper.globalEval(EvalWrapper.isolate("var window = {};", "Component.onCompleted"));
+        // create global object and name it so scripts behave like in a browser
+        EvalWrapper.globalEval(EvalWrapper.isolate("var "+globalThisName+" = (function() { return this; })()","Component.onCompleted"));
     }
 
     // handle interrupt

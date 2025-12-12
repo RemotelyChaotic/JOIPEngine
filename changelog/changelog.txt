@@ -23,6 +23,7 @@ Fixed Bugs:
   is opened.
 - Fixed PlayerEval getting the return value from the wrong script in synchronously
   running eval requests.
+- PlayerEval scripts now behave like in a browser (root can be referenced via 'window')
 
 =================
 Version 1.6.1.0
