@@ -97,7 +97,7 @@ void CSceneMainScreen::Initialize(const std::shared_ptr<CWindowContext>& spWindo
   connect(m_spEventCallbackRegistry.get(), &CProjectEventCallbackRegistry::SignalError,
           this, &CSceneMainScreen::SlotError);
   connect(m_spSceneNodeResolver.get(), &CSceneNodeResolver::SignalChangeSceneRequest,
-          m_spEventCallbackRegistry.get(), [this](const QString&) {
+          m_spEventCallbackRegistry.get(), [this](const QString&, bool) {
     m_spEventCallbackRegistry->Dispatch("CProjectSceneManagerWrapper", "change");
   });
 
@@ -117,8 +117,8 @@ void CSceneMainScreen::Initialize(const std::shared_ptr<CWindowContext>& spWindo
   InitQmlMain();
 
   connect(m_spSceneNodeResolver.get(), &CSceneNodeResolver::SignalChangeSceneRequest,
-          this, [this](const QString& sScene) {
-    SlotScriptRunFinished(true, m_bReachedEndNode, sScene);
+          this, [this](const QString& sScene, bool bIgnoreMissing) {
+    SlotScriptRunFinished(true, m_bReachedEndNode, sScene, bIgnoreMissing);
   });
   connect(m_spSceneNodeResolver.get(), &CSceneNodeResolver::SignalError,
           this, &CSceneMainScreen::SlotError);
@@ -291,7 +291,7 @@ void CSceneMainScreen::SlotFinish(bool bReachedEndNode)
     bool bOk =
         QMetaObject::invokeMethod(this, "SlotScriptRunFinished", Qt::QueuedConnection,
                                   Q_ARG(bool, false), Q_ARG(bool, m_bReachedEndNode),
-                                  Q_ARG(QString, QString()));
+                                  Q_ARG(QString, QString()), Q_ARG(bool, false));
     assert(bOk);
     Q_UNUSED(bOk);
   }
@@ -316,7 +316,7 @@ void CSceneMainScreen::SlotTerminate()
   bool bOk =
       QMetaObject::invokeMethod(this, "SlotScriptRunFinished", Qt::QueuedConnection,
                                 Q_ARG(bool, false), Q_ARG(bool, m_bReachedEndNode),
-                                Q_ARG(QString, QString()));
+                                Q_ARG(QString, QString()), Q_ARG(bool, false));
   assert(bOk);
   Q_UNUSED(bOk);
 }
@@ -448,7 +448,7 @@ void CSceneMainScreen::SlotNextSkript(bool bMightBeRegex)
   if (!m_bInitialized || nullptr == m_spCurrentProject) { return; }
 
   m_spSceneNodeResolver->ResolveScenes();
-  NextSkript(bMightBeRegex);
+  NextSkript(bMightBeRegex, false);
 }
 
 //----------------------------------------------------------------------------------------
@@ -509,7 +509,7 @@ void CSceneMainScreen::SlotSceneSelectReturnValue(int iIndex)
     m_spSceneNodeResolver->ResolvePossibleScenes(sScenes, iIndex);
     // do we still have unresolved scenes?
     sScenes = m_spSceneNodeResolver->PossibleScenes(&unresolvedData);
-    NextSkript(false);
+    NextSkript(false, false);
     return;
   }
 
@@ -552,7 +552,8 @@ void CSceneMainScreen::SlotSceneLoaded(const QString&)
 
 //----------------------------------------------------------------------------------------
 //
-void CSceneMainScreen::SlotScriptRunFinished(bool bOk, bool bEndReached, const QString& sRetVal)
+void CSceneMainScreen::SlotScriptRunFinished(bool bOk, bool bEndReached, const QString& sRetVal,
+                                             bool bIgnoreMissingScenes)
 {
   if (!m_bInitialized || nullptr == m_spCurrentProject) { return; }
 
@@ -574,7 +575,7 @@ void CSceneMainScreen::SlotScriptRunFinished(bool bOk, bool bEndReached, const Q
         else
         {
           m_spSceneNodeResolver->ResolveFindScenes(sRetVal);
-          NextSkript(bMightBeRegex);
+          NextSkript(bMightBeRegex, bIgnoreMissingScenes);
         }
       }
     }
@@ -606,7 +607,7 @@ void CSceneMainScreen::SlotStartLoadingSkript(const QString& sScene)
 
   if (sScene.isEmpty())
   {
-    NextSkript(false);
+    NextSkript(false, false);
   }
   else
   {
@@ -681,7 +682,7 @@ void CSceneMainScreen::ConnectAllSignals()
   m_runFinishedConn =
       connect(m_spScriptRunner.get(), &CScriptRunner::SignalScriptRunFinished,
               this, [this](bool bOk, const QString& sRetVal) {
-                SlotScriptRunFinished(bOk, m_bReachedEndNode, sRetVal);
+                SlotScriptRunFinished(bOk, m_bReachedEndNode, sRetVal, false);
               },
               Qt::QueuedConnection);
 
@@ -834,7 +835,7 @@ QString CSceneMainScreen::LoadedLayout()
 
 //----------------------------------------------------------------------------------------
 //
-void CSceneMainScreen::NextSkript(bool bMightBeRegex)
+void CSceneMainScreen::NextSkript(bool bMightBeRegex, bool bIgnoreMissingScenes)
 {
   auto spDbManager = m_wpDbManager.lock();
   if (nullptr == spDbManager) { return; }
@@ -935,7 +936,7 @@ void CSceneMainScreen::NextSkript(bool bMightBeRegex)
       }
     }
   }
-  else
+  else if(!bIgnoreMissingScenes)
   {
     qInfo() << tr("No more scenes to load.");
     SlotFinish(false);

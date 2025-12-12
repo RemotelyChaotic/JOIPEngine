@@ -638,6 +638,20 @@ void CSceneNodeResolver::UnloadProject()
 
 //----------------------------------------------------------------------------------------
 //
+QStringList CSceneNodeResolver::AllScenes() const
+{
+  QStringList vsRet;
+  QReadLocker lp(&m_spCurrentProject->m_rwLock);
+  for (const auto& spScene : m_spCurrentProject->m_vspScenes)
+  {
+    QReadLocker l(&spScene->m_rwLock);
+    vsRet << spScene->m_sName;
+  }
+  return vsRet;
+}
+
+//----------------------------------------------------------------------------------------
+//
 tspScene CSceneNodeResolver::CurrentScene() const
 {
   return m_spCurrentScene;

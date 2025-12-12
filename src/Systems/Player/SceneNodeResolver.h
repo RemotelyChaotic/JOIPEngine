@@ -75,6 +75,7 @@ public:
   void LoadProject(tspProject spProject, const tspScene& spStartScene);
   void UnloadProject();
 
+  QStringList AllScenes() const;
   tspScene CurrentScene() const;
   void DisableScene(const QString& sScene);
   void EnableScene(const QString& sScene);
@@ -86,7 +87,7 @@ public:
   void ResolveScenes();
 
 signals:
-  void SignalChangeSceneRequest(const QString& sScene);
+  void SignalChangeSceneRequest(const QString& sScene, bool bIgnoreMissing);
   void SignalError(QString sError, QtMsgType type);
 
 private:

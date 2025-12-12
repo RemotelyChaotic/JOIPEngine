@@ -19,6 +19,7 @@ public:
                  std::weak_ptr<CProjectEventCallbackRegistry> wpRegistry);
 
 public slots:
+  bool contains(QString sScene);
   void disable(QString sScene);
   void enable(QString sScene);
   bool isEnabled(QString sScene);

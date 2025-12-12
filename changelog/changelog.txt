@@ -8,6 +8,7 @@ New Features:
   automatically after finishing and instead continue listening for events.
 - Added callbacks to PlayerEventCommunicator, PlayerIcons, PlayerMediaPlayer, 
   PlayerNotification, PlayerStorage, PlayerTimer.
+- pages.contains implemented for EOS teaes.
 
 Changes:
 - Downloaded EOS scripts use the new Event Based script mode since that mirrors the 
@@ -27,6 +28,8 @@ Fixed Bugs:
 - Fixed script tags in button texts not being evaluated.
 - Default Layout for EOS is the old one again.
 - Fixed teaseStorage.removeItem setting the item to null instead of removing it from storage.
+- PlayerSceneManager gotoScene and pages.goto doesn't stop with an error anymore
+  if the Scene doesn't exist.
 
 =================
 Version 1.6.1.0

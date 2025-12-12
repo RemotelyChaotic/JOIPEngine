@@ -25,6 +25,10 @@ Rectangle {
         id: sceneManagerPrivate
     }
     property var pages: {
+        "contains": function(sScene)
+        {
+            return sceneManagerPrivate.contains(sScene);
+        },
         "goto": function(sScene)
         {
             sceneManagerPrivate.gotoScene(sScene);

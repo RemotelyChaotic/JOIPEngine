@@ -43,6 +43,17 @@ void CProjectSceneManagerWrapper::Initalize(std::weak_ptr<CSceneNodeResolver> wp
 
 //----------------------------------------------------------------------------------------
 //
+bool CProjectSceneManagerWrapper::contains(QString sScene)
+{
+  if (auto spResolver = m_wpSceneNodeResolver.lock())
+  {
+    return spResolver->AllScenes().contains(sScene);
+  }
+  return false;
+}
+
+//----------------------------------------------------------------------------------------
+//
 void CProjectSceneManagerWrapper::disable(QString sScene)
 {
   if (auto spResolver = m_wpSceneNodeResolver.lock())
@@ -91,6 +102,6 @@ void CProjectSceneManagerWrapper::gotoScene(QString sScene)
 {
   if (auto spResolver = m_wpSceneNodeResolver.lock())
   {
-    emit spResolver->SignalChangeSceneRequest(sScene);
+    emit spResolver->SignalChangeSceneRequest(sScene, true);
   }
 }
