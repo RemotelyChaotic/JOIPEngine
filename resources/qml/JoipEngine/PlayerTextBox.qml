@@ -324,6 +324,8 @@ Rectangle {
             for (var i = 0; i < vsModifiedPrompts.length; ++i) {
                 if (vsModifiedPrompts[i].startsWith("<html>") && vsModifiedPrompts[i].endsWith("</html>")) {
                     vsModifiedPrompts[i] = root.parseHtmlToJS(vsModifiedPrompts[i],  textBox.userName);
+                    vsModifiedPrompts[i].replace("<html>","").replace("</html>","")
+                                        .replace("<body>", "").replace("</body>", "");
                 }
             }
             textBox.showButtonPrompts(vsModifiedPrompts, sStoreIntoVar, sRequestId,

@@ -868,11 +868,7 @@ public:
             QString sLabel;
             if (HasValue(optionsArg, "label") && IsOk<EArgumentType::eString>(itLabel))
             {
-              sLabel = std::get<QString>(itLabel);
-              if (Qt::mightBeRichText(sLabel))
-              {
-                sLabel = "<html><body>" + sLabel + "</body></html>";
-              }
+              sLabel = "<html><body>" + std::get<QString>(itLabel) + "</body></html>";
             }
             if (HasValue(optionsArg, "commands") && IsOk<EArgumentType::eArray>(itCommands))
             {

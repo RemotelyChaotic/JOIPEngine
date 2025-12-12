@@ -24,6 +24,7 @@ Fixed Bugs:
 - Fixed PlayerEval getting the return value from the wrong script in synchronously
   running eval requests.
 - PlayerEval scripts now behave like in a browser (root can be referenced via 'window')
+- Fixed script tags in button texts not being evaluated.
 
 =================
 Version 1.6.1.0
