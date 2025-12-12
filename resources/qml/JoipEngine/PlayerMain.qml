@@ -420,7 +420,7 @@ Rectangle {
         }
         var evExpression = QtApp.decodeHTML(ev.innerHTML).trim();
         if (evExpression.length) {
-          result.push(EvalWrapper.globalEval(EvalWrapper.isolate(evExpression, context +' <eval>')));
+          result.push(evaluate(evExpression, context +' <eval>'));
         }
         docstring = afterEv.replace(' xmlns="http://www.w3.org/1999/xhtml"', '');
       }
@@ -435,12 +435,16 @@ Rectangle {
         property string userName: "evalRunner"
 
         onEvalQuery: {
-            var retVal = EvalWrapper.globalEval(EvalWrapper.isolate(sScript, 'evaluator <' + userName + '>'));
-            evaluator.evalReturn(retVal);
+            var retVal = evaluate(sScript);
+            evaluator.evalReturn(retVal, sId);
         }
     }
     function evaluate(sScript) {
-        return EvalWrapper.globalEval(EvalWrapper.isolate(sScript, 'evaluator <' + evaluator.userName + '>'));
+        return windowEval(sScript, 'evaluator <' + evaluator.userName + '>');
+    }
+    function windowEval(sScript, errStr) {
+        var window = EvalWrapper.globalEval(EvalWrapper.isolate("window;", "evaluator <windowEval>"));
+        return EvalWrapper.evalInScope(EvalWrapper.isolate(sScript, errStr), window);
     }
 
     PlayerBackground {
@@ -645,7 +649,7 @@ Rectangle {
         registerUIComponent("teaseStorage", storage);
         registerUIComponent("localStorage", storage);
         registerUIComponent("deviceController", deviceController);
-        evaluate("var window = {};");
+        EvalWrapper.globalEval(EvalWrapper.isolate("var window = {};", "Component.onCompleted"));
     }
 
     // handle interrupt

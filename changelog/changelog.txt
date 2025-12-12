@@ -21,6 +21,8 @@ Fixed Bugs:
 - Fixed an issue with EOS buttons following the wrong branch if the choice had 0 children.
 - PlayerNotifcation should close open notificaions if a new one with the same id
   is opened.
+- Fixed PlayerEval getting the return value from the wrong script in synchronously
+  running eval requests.
 
 =================
 Version 1.6.1.0

@@ -15,8 +15,8 @@ public:
   ~CEvalSignalEmiter();
 
 signals:
-  void evalQuery(QString sScript);
-  void evalReturn(QJSValue value);
+  void evalQuery(QString sScript, QString sId);
+  void evalReturn(QJSValue value, QString sId);
 
 protected:
   std::shared_ptr<CScriptCommunicator>

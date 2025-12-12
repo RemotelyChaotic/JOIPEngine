@@ -2,6 +2,8 @@
 
 #include "Systems/Script/ScriptEval.h"
 
+#include <QUuid>
+
 CSequenceEvalRunner::CSequenceEvalRunner(
     std::weak_ptr<CScriptCommunicator> pCommunicator) :
   CScriptObjectBase(pCommunicator),
@@ -25,7 +27,7 @@ void CSequenceEvalRunner::RunSequenceInstruction(const QString&,
       if (const auto& spI = std::dynamic_pointer_cast<SEvalInstruction>(spInstr);
           nullptr != spI)
       {
-        emit spSignalEmitter->evalQuery(spI->m_sScript);
+        emit spSignalEmitter->evalQuery(spI->m_sScript, QUuid::createUuid().toString());
       }
     }
   }

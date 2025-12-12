@@ -14,6 +14,7 @@
 
 #include <QEventLoop>
 #include <QTimer>
+#include <QUuid>
 
 //----------------------------------------------------------------------------------------
 //
@@ -98,12 +99,13 @@ QVariant CScriptEvalBase::EvalImpl(const QString& sScript)
 {
   if (!CheckIfScriptCanRun()) { return QVariant(); }
 
-  QTimer::singleShot(0, this, [this,sScript]() {
+  QString sUid = QUuid::createUuid().toString();
+  QTimer::singleShot(0, this, [this,sScript, sUid]() {
     if (auto spComm = m_wpCommunicator.lock())
     {
       if (auto spSignalEmitter = spComm->LockedEmitter<CEvalSignalEmiter>())
       {
-        emit spSignalEmitter->evalQuery(sScript);
+        emit spSignalEmitter->evalQuery(sScript, sUid);
       }
     }
   });
@@ -125,13 +127,16 @@ QVariant CScriptEvalBase::EvalImpl(const QString& sScript)
     {
       showRetValLoop =
         connect(spSignalEmitter.Get(), &CEvalSignalEmiter::evalReturn,
-                &loop, [spReturnValue, &loop](QJSValue input)
+                &loop, [spReturnValue, &loop, sUid](QJSValue input, const QString sId)
       {
-        *spReturnValue = input.toVariant();
-        spReturnValue->detach(); // fixes some crashes with QJSEngine
-        bool bOk = QMetaObject::invokeMethod(&loop, "quit", Qt::QueuedConnection);
-        assert(bOk); Q_UNUSED(bOk)
-        // direct connection to fix cross thread issues with QString content being deleted
+        if (sUid == sId)
+        {
+          *spReturnValue = input.toVariant();
+          spReturnValue->detach(); // fixes some crashes with QJSEngine
+          bool bOk = QMetaObject::invokeMethod(&loop, "quit", Qt::QueuedConnection);
+          assert(bOk); Q_UNUSED(bOk)
+          // direct connection to fix cross thread issues with QString content being deleted
+        }
       }, Qt::DirectConnection);
     }
   }
@@ -309,12 +314,13 @@ QVariant CEosScriptEval::eval(const QString& sScript)
 {
   if (!CheckIfScriptCanRun()) { return QVariant(); }
 
-  QTimer::singleShot(0, this, [this,sScript]() {
+  QString sUid = QUuid::createUuid().toString();
+  QTimer::singleShot(0, this, [this,sScript,sUid]() {
     if (auto spComm = m_wpCommunicator.lock())
     {
       if (auto spSignalEmitter = spComm->LockedEmitter<CEvalSignalEmiter>())
       {
-        emit spSignalEmitter->evalQuery(sScript);
+        emit spSignalEmitter->evalQuery(sScript, sUid);
       }
     }
   });
@@ -336,13 +342,16 @@ QVariant CEosScriptEval::eval(const QString& sScript)
     {
       showRetValLoop =
         connect(spSignalEmitter.Get(), &CEvalSignalEmiter::evalReturn,
-                &loop, [spReturnValue, &loop](QJSValue input)
+                &loop, [spReturnValue, &loop, sUid](QJSValue input, const QString& sId)
                 {
-                  *spReturnValue = input.toVariant();
-                  spReturnValue->detach(); // fixes some crashes with QJSEngine
-                  bool bOk = QMetaObject::invokeMethod(&loop, "quit", Qt::QueuedConnection);
-                  assert(bOk); Q_UNUSED(bOk)
-                  // direct connection to fix cross thread issues with QString content being deleted
+                  if (sUid == sId)
+                  {
+                    *spReturnValue = input.toVariant();
+                    spReturnValue->detach(); // fixes some crashes with QJSEngine
+                    bool bOk = QMetaObject::invokeMethod(&loop, "quit", Qt::QueuedConnection);
+                    assert(bOk); Q_UNUSED(bOk)
+                    // direct connection to fix cross thread issues with QString content being deleted
+                  }
                 }, Qt::DirectConnection);
     }
   }
