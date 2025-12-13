@@ -93,14 +93,15 @@ public:
                   QPointer<CJsonInstructionSetParser> pParser);
   ~CEosScriptTimer();
 
+  bool canScriptStillRun();
   QString getTimerValue(QString sValue);
   void hide();
   void setTime(double dTimeS);
   void setTimeVisible(bool bVisible);
-  void sleep(qint64 iTimeMs);
+  bool sleep(qint64 iTimeMs);
   void show();
   void start();
-  void waitForTimer();
+  bool waitForTimer();
 
 signals:
   void SignalQuitLoop();

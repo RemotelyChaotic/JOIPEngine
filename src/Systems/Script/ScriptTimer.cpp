@@ -401,14 +401,20 @@ public:
         }
         Q_UNUSED(bIsInThread)
 
+        bool bWaitFinishedNormally = true;
         if (bIsMainClock)
         {
           m_pParent->start();
-          m_pParent->waitForTimer();
+          bWaitFinishedNormally = m_pParent->waitForTimer();
         }
         else
         {
-          m_pParent->sleep(static_cast<double>(iTimeMs) / 1000);
+          bWaitFinishedNormally = m_pParent->sleep(static_cast<double>(iTimeMs) / 1000);
+        }
+
+        if (!m_pParent->canScriptStillRun() || !bWaitFinishedNormally)
+        {
+          return SRunRetVal<ENextCommandToCall::eFinish>(std::any());
         }
 
         const auto& itCommands = GetValue<EArgumentType::eArray>(args, "commands");
@@ -476,6 +482,13 @@ CEosScriptTimer::~CEosScriptTimer()
 
 //----------------------------------------------------------------------------------------
 //
+bool CEosScriptTimer::canScriptStillRun()
+{
+  return CheckIfScriptCanRun();
+}
+
+//----------------------------------------------------------------------------------------
+//
 QString CEosScriptTimer::getTimerValue(QString sValue)
 {
   QVariant var = RequestValue(sValue);
@@ -533,14 +546,15 @@ void CEosScriptTimer::setTimeVisible(bool bVisible)
 
 //----------------------------------------------------------------------------------------
 //
-void CEosScriptTimer::sleep(qint64 iTimeMs)
+bool CEosScriptTimer::sleep(qint64 iTimeMs)
 {
-  if (!CheckIfScriptCanRun()) { return; }
+  if (!CheckIfScriptCanRun()) { return false; }
 
   if (0 < iTimeMs)
   {
     QDateTime lastTime = QDateTime::currentDateTime();
     qint64 iTimeLeft = iTimeMs;
+    bool bOkRet = true;
 
     QPointer<CEosScriptTimer> pThis(this);
     QTimer timer;
@@ -550,10 +564,16 @@ void CEosScriptTimer::sleep(qint64 iTimeMs)
 
     QMetaObject::Connection quitLoop =
       connect(this, &CEosScriptTimer::SignalQuitLoop,
-              &loop, &QEventLoop::quit, Qt::QueuedConnection);
+              &loop, [&loop,&bOkRet](){
+      bOkRet = false;
+      loop.quit();
+    }, Qt::QueuedConnection);
     QMetaObject::Connection interruptThisLoop =
       connect(this, &CScriptObjectBase::SignalInterruptExecution,
-              &loop, &QEventLoop::quit, Qt::QueuedConnection);
+              &loop, [&loop,&bOkRet](){
+      bOkRet = false;
+      loop.quit();
+    }, Qt::QueuedConnection);
 
     // connect lambdas in loop context, so events are processed, but capture timer,
     // to start / stop
@@ -592,7 +612,15 @@ void CEosScriptTimer::sleep(qint64 iTimeMs)
       disconnect(resumeLoop);
       disconnect(timeoutLoop);
     }
+    else
+    {
+      return false;
+    }
+
+    return bOkRet;
   }
+
+  return true;
 }
 
 //----------------------------------------------------------------------------------------
@@ -627,9 +655,9 @@ void CEosScriptTimer::start()
 
 //----------------------------------------------------------------------------------------
 //
-void CEosScriptTimer::waitForTimer()
+bool CEosScriptTimer::waitForTimer()
 {
-  if (!CheckIfScriptCanRun()) { return; }
+  if (!CheckIfScriptCanRun()) { return false; }
 
   QTimer::singleShot(0, this, [this]() {
     if (auto spComm = m_wpCommunicator.lock())
@@ -641,6 +669,7 @@ void CEosScriptTimer::waitForTimer()
     }
   });
 
+  bool bOkRet = true;
   QPointer<CEosScriptTimer> pThis(this);
   QEventLoop loop;
   QMetaObject::Connection timeoutLoop;
@@ -655,10 +684,16 @@ void CEosScriptTimer::waitForTimer()
   }
   QMetaObject::Connection quitLoop =
     connect(this, &CEosScriptTimer::SignalQuitLoop,
-            &loop, &QEventLoop::quit, Qt::QueuedConnection);
+            &loop, [&loop,&bOkRet](){
+    bOkRet = false;
+    loop.quit();
+  }, Qt::QueuedConnection);
   QMetaObject::Connection interruptThisLoop =
     connect(this, &CScriptObjectBase::SignalInterruptExecution,
-            &loop, &QEventLoop::quit, Qt::QueuedConnection);
+            &loop, [&loop,&bOkRet](){
+    bOkRet = false;
+    loop.quit();
+  }, Qt::QueuedConnection);
 
   loop.exec();
   loop.disconnect();
@@ -669,4 +704,10 @@ void CEosScriptTimer::waitForTimer()
     disconnect(interruptThisLoop);
     disconnect(quitLoop);
   }
+  else
+  {
+    return false;
+  }
+
+  return bOkRet;
 }
