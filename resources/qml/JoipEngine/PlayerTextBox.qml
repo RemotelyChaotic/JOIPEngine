@@ -319,6 +319,10 @@ Rectangle {
                 signalEmitter.getDialogueReturnValue(sRequestId, "", -1, false, "", []);
             }
         }
+        onRequestValue: {
+            var value = root.evaluate(sValue);
+            signalEmitter.requestValueRet(value, sId);
+        }
         onShowButtonPrompts: {
             var vsModifiedPrompts = vsLabels;
             for (var i = 0; i < vsModifiedPrompts.length; ++i) {

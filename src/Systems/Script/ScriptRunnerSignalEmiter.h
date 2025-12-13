@@ -3,6 +3,7 @@
 
 #include <QColor>
 #include <qlogging.h>
+#include <QJSValue>
 #include <QMutex>
 #include <QPointer>
 #include <QObject>
@@ -98,6 +99,8 @@ public:
 signals:
   // generic / controll
   void executionError(QString sException, qint32 iLine, QString sStack);
+  void requestValue(const QString sValue, const QString sId);
+  void requestValueRet(QJSValue sValue, const QString sId);
   void showError(QString sError, QtMsgType type);
 
 protected:

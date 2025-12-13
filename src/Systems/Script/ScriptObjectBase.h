@@ -41,14 +41,18 @@ public:
 
 signals:
   void SignalInterruptExecution();
+  void SignalQuitLoopRequest();
 
 protected:
   bool CheckIfScriptCanRun();
+  QVariant RequestValue(const QString& sKey);
 
   virtual void Cleanup_Impl();
 
   tspProject                                 m_spProject;
   std::weak_ptr<CScriptCommunicator>         m_wpCommunicator;
+
+  std::shared_ptr<std::function<void()>>     m_spStopBase;
 };
 
 //----------------------------------------------------------------------------------------

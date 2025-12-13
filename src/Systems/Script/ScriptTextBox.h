@@ -145,6 +145,7 @@ public:
                     QPointer<CJsonInstructionSetParser> pParser);
   ~CEosScriptTextBox();
 
+  QString getTimerValue(const QString& sValue);
   void setTextAlignment(qint32 alignment);
   void setTextColors(const std::vector<QColor>& vColors);
   void setBackgroundColors(const std::vector<QColor>& vColors);

@@ -44,6 +44,10 @@ Rectangle {
         onHideTimer: {
             timerDisplay.opacity = 0.0;
         }
+        onRequestValue: {
+            var value = root.evaluate(sValue);
+            signalEmitter.requestValueRet(value, sId);
+        }
         onSetTime: {
             timerDisplay.timeMs = dTimeS * 1000.0
             timerDisplay.maxTimeMs = timerDisplay.timeMs;

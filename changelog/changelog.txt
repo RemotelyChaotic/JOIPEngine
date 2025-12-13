@@ -13,6 +13,8 @@ New Features:
 Changes:
 - Downloaded EOS scripts use the new Event Based script mode since that mirrors the 
   behavior on Milovana.
+- Some Undocumented timer features of EOS are now supported, where variables in 
+  timeouts are evaluated before parsing.
 
 Fixed Bugs:
 - Fixed Milovana Downloads. They should work again.

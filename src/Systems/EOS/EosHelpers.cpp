@@ -195,25 +195,37 @@ namespace eos
 
   //--------------------------------------------------------------------------------------
   //
-  qint64 ParseEosDuration(const QString& sDuration)
+  std::variant<qint64,QString> ParseEosDuration(const QString& sDuration)
   {
     static const QRegExp matcherPeriod("^[^-]+-");
     qint32 iPos = 0;
+    // check if it's not a "number"
     if ((iPos = matcherPeriod.indexIn(sDuration, iPos)) == -1)
     {
-      QStringList vsDurations = sDuration.split("-");
-      const QString sMin = vsDurations.first();
-      const QString sMax = vsDurations.last();
+      // is it a variable
+      if (sDuration.startsWith("$") && !sDuration.contains(".") && !sDuration.contains(" "))
+      {
+        return sDuration.mid(1);
+      }
+      // we have a rainge or one value?
+      else
+      {
+        QStringList vsDurations = sDuration.split("-");
 
-      qint64 iMin = StringTimeToMs(sMin);
-      qint64 iMax = StringTimeToMs(sMax);
+        const QString sMin = vsDurations.first();
+        const QString sMax = vsDurations.last();
 
-      long unsigned int seed =
-        static_cast<long unsigned int>(std::chrono::high_resolution_clock::now().time_since_epoch().count());
-      std::mt19937 generator(static_cast<long unsigned int>(seed));
-      std::uniform_int_distribution<> dis(iMin, iMax);
-      return dis(generator);
+        qint64 iMin = StringTimeToMs(sMin);
+        qint64 iMax = StringTimeToMs(sMax);
+
+        long unsigned int seed =
+          static_cast<long unsigned int>(std::chrono::high_resolution_clock::now().time_since_epoch().count());
+        std::mt19937 generator(static_cast<long unsigned int>(seed));
+        std::uniform_int_distribution<> dis(iMin, iMax);
+        return dis(generator);
+      }
     }
+    // we found a number (kind of)
     else
     {
       return StringTimeToMs(sDuration);

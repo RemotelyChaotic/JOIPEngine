@@ -93,6 +93,7 @@ public:
                   QPointer<CJsonInstructionSetParser> pParser);
   ~CEosScriptTimer();
 
+  QString getTimerValue(QString sValue);
   void hide();
   void setTime(double dTimeS);
   void setTimeVisible(bool bVisible);

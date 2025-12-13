@@ -661,7 +661,20 @@ public:
         qint64 iTimerDurationMs = -1;
         if (HasValue(args, "timerDuration") && IsOk<EArgumentType::eString>(itTimerDuration))
         {
-          iTimerDurationMs = eos::ParseEosDuration(std::get<QString>(itTimerDuration));
+          auto duration = eos::ParseEosDuration(std::get<QString>(itTimerDuration));
+          if (std::holds_alternative<QString>(duration))
+          {
+            QString sRetVal = m_pParent->GetTimerValue(std::get<QString>(duration));
+            duration = eos::ParseEosDuration(sRetVal);
+            if (!std::holds_alternative<QString>(duration))
+            {
+              iTimerDurationMs = std::get<qint64>(duration);
+            }
+          }
+          else
+          {
+            iTimerDurationMs = std::get<qint64>(duration);
+          }
         }
 
         QString sIdButton;
@@ -802,6 +815,18 @@ CEosScriptNotification::CEosScriptNotification(std::weak_ptr<CScriptCommunicator
 }
 CEosScriptNotification::~CEosScriptNotification()
 {
+}
+
+//----------------------------------------------------------------------------------------
+//
+QString CEosScriptNotification::GetTimerValue(const QString& sValue)
+{
+  QVariant var = RequestValue(sValue);
+  if (var.canConvert(QVariant::String))
+  {
+    return var.toString();
+  }
+  return sValue;
 }
 
 //----------------------------------------------------------------------------------------

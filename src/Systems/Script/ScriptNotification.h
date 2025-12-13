@@ -132,6 +132,7 @@ public:
                          QPointer<CJsonInstructionSetParser> pParser);
   ~CEosScriptNotification();
 
+  QString GetTimerValue(const QString& sValue);
   void Hide(QString sId);
   void Show(QString sId, const QString& sTitle, const QString&  sButtonText,
             double dTimeS, const QString&  sOnButton, const QString&  sOnTimeout);

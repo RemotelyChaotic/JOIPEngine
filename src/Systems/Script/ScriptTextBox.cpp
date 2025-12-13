@@ -1073,7 +1073,20 @@ public:
       qint64 iDurationMs = -1;
       if (HasValue(args, "itDuration") && IsOk<EArgumentType::eString>(itDuration))
       {
-        iDurationMs = eos::ParseEosDuration(std::get<QString>(itDuration));
+        auto duration = eos::ParseEosDuration(std::get<QString>(itDuration));
+        if (std::holds_alternative<QString>(duration))
+        {
+          QString sRetVal = m_pParent->getTimerValue(std::get<QString>(duration));
+          duration = eos::ParseEosDuration(sRetVal);
+          if (!std::holds_alternative<QString>(duration))
+          {
+            iDurationMs = std::get<qint64>(duration);
+          }
+        }
+        else
+        {
+          iDurationMs = std::get<qint64>(duration);
+        }
       }
 
       // based on mode we call things now
@@ -1157,6 +1170,18 @@ CEosScriptTextBox::~CEosScriptTextBox()
     spComm->RemovePauseCallback(m_spPause);
     spComm->RemoveStopCallback(m_spStop);
   }
+}
+
+//----------------------------------------------------------------------------------------
+//
+QString CEosScriptTextBox::getTimerValue(const QString& sValue)
+{
+  QVariant var = RequestValue(sValue);
+  if (var.canConvert(QVariant::String))
+  {
+    return var.toString();
+  }
+  return sValue;
 }
 
 //----------------------------------------------------------------------------------------

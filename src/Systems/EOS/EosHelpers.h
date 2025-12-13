@@ -4,6 +4,7 @@
 #include "Systems/Database/Project.h"
 #include <QString>
 #include <memory>
+#include <variant>
 
 class CDatabaseManager;
 
@@ -66,7 +67,7 @@ namespace eos
                   std::shared_ptr<CDatabaseManager> spDbManager,
                   QString& sResource);
 
-  qint64 ParseEosDuration(const QString& sDuration);
+  std::variant<qint64,QString> ParseEosDuration(const QString& sDuration);
 
   bool VerifyProjectEditable(tspProject& spProject);
 

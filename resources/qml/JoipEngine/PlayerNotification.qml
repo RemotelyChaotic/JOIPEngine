@@ -141,6 +141,10 @@ Rectangle {
                 }
             }
         }
+        onRequestValue: {
+            var value = root.evaluate(sValue);
+            signalEmitter.requestValueRet(value, sId);
+        }
         onShowNotification: {
             notification.showNotification(sId, sTitle, sButtonText, iTimeS, sOnButton, sOnTimeout);
         }
