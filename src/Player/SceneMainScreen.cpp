@@ -109,12 +109,7 @@ void CSceneMainScreen::Initialize(const std::shared_ptr<CWindowContext>& spWindo
   connect(m_spScriptRunner.get(), &CScriptRunner::SignalSceneLoaded,
           this, &CSceneMainScreen::SlotSceneLoaded);
 
-  connect(m_spUi->pQmlWidget->engine(), &QQmlEngine::warnings,
-          this, &CSceneMainScreen::SlotQmlEngineWarning);
-
   m_wpDbManager = CApplication::Instance()->System<CDatabaseManager>();
-
-  InitQmlMain();
 
   connect(m_spSceneNodeResolver.get(), &CSceneNodeResolver::SignalChangeSceneRequest,
           this, [this](const QString& sScene, bool bIgnoreMissing) {
@@ -140,10 +135,23 @@ void CSceneMainScreen::LoadProject(qint32 iId, const tSceneToLoad& sStartScene)
     qWarning() << "Old Project was not unloaded before loading project.";
   }
 
-  m_bCanLoadNewScene = true;
-  m_spUi->pQmlWidget->setSource(QUrl("qrc:/qml/resources/qml/JoipEngine/PlayerMain.qml"));
+  if (nullptr != m_pQmlWidget)
+  {
+    m_spUi->gridLayout->takeAt(0);
+    delete m_pQmlWidget;
+  }
+  m_pQmlWidget = new QQuickWidget(this);
+  m_pQmlWidget->setObjectName(QString::fromUtf8("pQmlWidget"));
+  m_pQmlWidget->setResizeMode(QQuickWidget::SizeRootObjectToView);
+  m_spUi->gridLayout->addWidget(m_pQmlWidget, 0, 0, 1, 1);
+  connect(m_pQmlWidget->engine(), &QQmlEngine::warnings,
+          this, &CSceneMainScreen::SlotQmlEngineWarning);
+  InitQmlMain();
 
-  CApplication::Instance()->DebugInterface()->Register("tease", m_spUi->pQmlWidget->rootObject());
+  m_bCanLoadNewScene = true;
+  m_pQmlWidget->setSource(QUrl("qrc:/qml/resources/qml/JoipEngine/PlayerMain.qml"));
+
+  CApplication::Instance()->DebugInterface()->Register("tease", m_pQmlWidget->rootObject());
 
   auto spDbManager = m_wpDbManager.lock();
   if (nullptr != spDbManager)
@@ -166,7 +174,7 @@ void CSceneMainScreen::LoadProject(qint32 iId, const tSceneToLoad& sStartScene)
         vsPaths << sPath.left(sPath.lastIndexOf("/"));
       }
     }
-    m_spUi->pQmlWidget->engine()->setImportPathList(vsPaths);
+    m_pQmlWidget->engine()->setImportPathList(vsPaths);
 
     CDatabaseManager::LoadProject(m_spCurrentProject);
 
@@ -258,11 +266,11 @@ void CSceneMainScreen::SetDebugging(bool bDebugging)
   {
     m_bBeingDebugged = bDebugging;
 
-    //m_spUi->pQmlWidget->setAttribute(Qt::WA_AlwaysStackOnTop, !m_bBeingDebugged);
-    //m_spUi->pQmlWidget->setAttribute(Qt::WA_TranslucentBackground, !m_bBeingDebugged);
+    //m_pQmlWidget->setAttribute(Qt::WA_AlwaysStackOnTop, !m_bBeingDebugged);
+    //m_pQmlWidget->setAttribute(Qt::WA_TranslucentBackground, !m_bBeingDebugged);
 
     // set size properties manually setzen, since this isn't done automatically
-    QQuickItem* pRootObject =  m_spUi->pQmlWidget->rootObject();
+    QQuickItem* pRootObject =  m_pQmlWidget->rootObject();
     if (nullptr != pRootObject)
     {
       pRootObject->setProperty("debug", QVariant::fromValue(bDebugging));
@@ -338,7 +346,7 @@ void CSceneMainScreen::on_pQmlWidget_statusChanged(QQuickWidget::Status status)
 {
   if (QQuickWidget::Error == status)
   {
-    const auto widgetErrors = m_spUi->pQmlWidget->errors();
+    const auto widgetErrors = m_pQmlWidget->errors();
     for (const QQmlError &error : widgetErrors)
     {
       if (QtMsgType::QtWarningMsg == error.messageType() ||
@@ -422,7 +430,7 @@ void CSceneMainScreen::SlotError(QString sError, QtMsgType type)
     break;
   }
 
-  QQuickItem* pRootObject =  m_spUi->pQmlWidget->rootObject();
+  QQuickItem* pRootObject =  m_pQmlWidget->rootObject();
   QMetaObject::invokeMethod(pRootObject, "showText",
                             Q_ARG(QVariant, QVariant(QString("%1: %2").arg(sPrefix).arg(sError))),
                             Q_ARG(QVariant, QVariant::fromValue(vTextColors)),
@@ -473,17 +481,20 @@ void CSceneMainScreen::SlotQmlEngineWarning(const QList<QQmlError>& vWarnings)
 void CSceneMainScreen::SlotResizeDone()
 {
   // set size properties manually setzen, since this isn't done automatically
-  QQuickItem* pRootObject =  m_spUi->pQmlWidget->rootObject();
-  QSize newSize = size() -
-      QSize(contentsMargins().left() +
-            contentsMargins().right(),
-            contentsMargins().top() +
-            contentsMargins().bottom());
-  if (nullptr != pRootObject)
+  if (nullptr != m_pQmlWidget)
   {
-    pRootObject->setProperty("width", QVariant::fromValue(newSize.width()));
-    pRootObject->setProperty("height",QVariant::fromValue(newSize.height()));
-    QMetaObject::invokeMethod(pRootObject, "onResize");
+    QQuickItem* pRootObject =  m_pQmlWidget->rootObject();
+    QSize newSize = size() -
+        QSize(contentsMargins().left() +
+              contentsMargins().right(),
+              contentsMargins().top() +
+              contentsMargins().bottom());
+    if (nullptr != pRootObject)
+    {
+      pRootObject->setProperty("width", QVariant::fromValue(newSize.width()));
+      pRootObject->setProperty("height",QVariant::fromValue(newSize.height()));
+      QMetaObject::invokeMethod(pRootObject, "onResize");
+    }
   }
 }
 
@@ -624,13 +635,13 @@ void CSceneMainScreen::SlotUnloadFinished()
   m_spEventCallbackRegistry->Clear();
 
   // disconnect this after unloading
-  QQuickItem* pRootObject =  m_spUi->pQmlWidget->rootObject();
+  QQuickItem* pRootObject =  m_pQmlWidget->rootObject();
   disconnect(pRootObject, SIGNAL(unloadFinished()),
              this, SLOT(SlotUnloadFinished()));
 
-  m_spUi->pQmlWidget->engine()->clearComponentCache();
-  m_spUi->pQmlWidget->engine()->collectGarbage();
-  m_spUi->pQmlWidget->setSource(QUrl());
+  m_pQmlWidget->engine()->clearComponentCache();
+  m_pQmlWidget->engine()->collectGarbage();
+  m_pQmlWidget->setSource(QUrl());
 
   delete m_pCurrentProjectWrapper;
   if (!m_bBeingDebugged)
@@ -666,7 +677,7 @@ void CSceneMainScreen::SlotUnloadFinished()
 //
 void CSceneMainScreen::ConnectAllSignals()
 {
-  QQuickItem* pRootObject =  m_spUi->pQmlWidget->rootObject();
+  QQuickItem* pRootObject =  m_pQmlWidget->rootObject();
   bool bOk = true;
 
   bOk = connect(pRootObject, SIGNAL(startLoadingSkript(QString)), this,
@@ -698,7 +709,7 @@ void CSceneMainScreen::ConnectAllSignals()
 //
 void CSceneMainScreen::DisconnectAllSignals()
 {
-  QQuickItem* pRootObject =  m_spUi->pQmlWidget->rootObject();
+  QQuickItem* pRootObject =  m_pQmlWidget->rootObject();
   disconnect(pRootObject, SIGNAL(startLoadingSkript(QString)), this,
              SLOT(SlotStartLoadingSkript(QString)));
   disconnect(pRootObject, SIGNAL(quit()), this, SLOT(SlotTerminate()));
@@ -720,12 +731,12 @@ void CSceneMainScreen::DisconnectAllSignals()
 //
 void CSceneMainScreen::InitQmlMain()
 {
-  //m_spUi->pQmlWidget->setAttribute(Qt::WA_AlwaysStackOnTop, true);
-  //m_spUi->pQmlWidget->setAttribute(Qt::WA_TranslucentBackground, true);
-  //m_spUi->pQmlWidget->setClearColor(Qt::transparent);
-  //m_spUi->pQmlWidget->setStyleSheet("background-color: transparent;");
+  //m_pQmlWidget->setAttribute(Qt::WA_AlwaysStackOnTop, true);
+  //m_pQmlWidget->setAttribute(Qt::WA_TranslucentBackground, true);
+  //m_pQmlWidget->setClearColor(Qt::transparent);
+  //m_pQmlWidget->setStyleSheet("background-color: transparent;");
 
-  QQmlEngine* pEngine = m_spUi->pQmlWidget->engine();
+  QQmlEngine* pEngine = m_pQmlWidget->engine();
   xmldom::RegisterWrapper(pEngine);
 
   m_vsBaseImportPathList = pEngine->importPathList();
@@ -747,10 +758,10 @@ void CSceneMainScreen::InitQmlMain()
 //
 void CSceneMainScreen::LoadQml()
 {
-  QQuickItem* pRootObject =  m_spUi->pQmlWidget->rootObject();
+  QQuickItem* pRootObject =  m_pQmlWidget->rootObject();
   if (nullptr != pRootObject)
   {
-    m_pCurrentProjectWrapper = new CProjectScriptWrapper(m_spUi->pQmlWidget->engine(), m_spCurrentProject);
+    m_pCurrentProjectWrapper = new CProjectScriptWrapper(m_pQmlWidget->engine(), m_spCurrentProject);
     QQmlEngine::setObjectOwnership(m_pCurrentProjectWrapper, QQmlEngine::CppOwnership);
     pRootObject->setProperty("currentlyLoadedProject", QVariant::fromValue(m_pCurrentProjectWrapper.data()));
     pRootObject->setProperty("debug", m_bBeingDebugged);
@@ -778,7 +789,7 @@ void CSceneMainScreen::LoadSceneScript(const QString& sScene, bool bEnd, bool bS
         sLayout = m_spCurrentProject->m_sPlayerLayout;
       }
 
-      QQuickItem* pRootObject =  m_spUi->pQmlWidget->rootObject();
+      QQuickItem* pRootObject =  m_pQmlWidget->rootObject();
       if (nullptr != pRootObject)
       {
         if (sLayout != LoadedLayout() && !bSkipLayout)
@@ -824,7 +835,7 @@ void CSceneMainScreen::LoadSceneScript(const QString& sScene, bool bEnd, bool bS
 //
 QString CSceneMainScreen::LoadedLayout()
 {
-  QQuickItem* pRootObject =  m_spUi->pQmlWidget->rootObject();
+  QQuickItem* pRootObject =  m_pQmlWidget->rootObject();
   if (nullptr != pRootObject)
   {
     QVariant var = pRootObject->property("currentlyLoadedLayout");
@@ -840,7 +851,7 @@ void CSceneMainScreen::NextSkript(bool bMightBeRegex, bool bIgnoreMissingScenes)
   auto spDbManager = m_wpDbManager.lock();
   if (nullptr == spDbManager) { return; }
 
-  QQuickItem* pRootObject =  m_spUi->pQmlWidget->rootObject();
+  QQuickItem* pRootObject =  m_pQmlWidget->rootObject();
   QMetaObject::invokeMethod(pRootObject, "clearTextBox");
 
   std::optional<QString> unresolvedData = std::nullopt;
@@ -955,7 +966,7 @@ void CSceneMainScreen::UnloadRunner()
 //
 void CSceneMainScreen::UnloadQml(bool bReachedEnd)
 {
-  QQuickItem* pRootObject =  m_spUi->pQmlWidget->rootObject();
+  QQuickItem* pRootObject =  m_pQmlWidget->rootObject();
   if (nullptr != pRootObject)
   {
     QMetaObject::invokeMethod(pRootObject, "onUnLoadProject",

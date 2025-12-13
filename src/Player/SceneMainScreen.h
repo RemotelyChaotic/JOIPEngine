@@ -111,6 +111,7 @@ private:
   tspProject                                                  m_spCurrentProject;
   QPointer<CProjectScriptWrapper>                             m_pCurrentProjectWrapper;
   QPointer<CPlayerConsoleError>                               m_pErrorConsole;
+  QPointer<QQuickWidget>                                      m_pQmlWidget;
   std::weak_ptr<CDatabaseManager>                             m_wpDbManager;
   QMetaObject::Connection                                     m_runFinishedConn;
   QStringList                                                 m_vsBaseImportPathList;

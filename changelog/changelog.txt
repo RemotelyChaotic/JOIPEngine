@@ -33,6 +33,7 @@ Fixed Bugs:
 - PlayerSceneManager gotoScene and pages.goto doesn't stop with an error anymore
   if the Scene doesn't exist.
 - If a PlayerTimer in an EOS script is abborted, it should not play the child instructions.
+- Eval script variables were not cleared after restarting a Project.
 
 =================
 Version 1.6.1.0
