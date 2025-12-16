@@ -86,7 +86,7 @@ QImage CDatabaseImageProvider::RequestImage(tspProject spProject,
   {
     QString sPath = ResourceUrlToAbsolutePath(spResource);
 
-    CDatabaseManager::LoadProject(spProject);
+    CDatabaseManager::LoadProject(spProject, false);
     CDatabaseManager::LoadBundle(spProject, sResourceBundleName);
     if (QFileInfo(sPath).exists())
     {
@@ -218,7 +218,7 @@ QImage CDatabaseImageProvider::RequestMovieFrame(tspProject spProject,
   {
     QString sPath = ResourceUrlToAbsolutePath(spResource);
 
-    CDatabaseManager::LoadProject(spProject);
+    CDatabaseManager::LoadProject(spProject, false);
     CDatabaseManager::LoadBundle(spProject, sResourceBundleName);
     if (QFileInfo(sPath).exists())
     {
@@ -231,7 +231,7 @@ QImage CDatabaseImageProvider::RequestMovieFrame(tspProject spProject,
   }
   else
   {
-    CDatabaseManager::LoadProject(spProject);
+    CDatabaseManager::LoadProject(spProject, false);
     spExtractor->setSource(sResourcePath.toString());
   }
 

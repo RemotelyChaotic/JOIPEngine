@@ -13,12 +13,18 @@ typedef std::shared_ptr<struct SResource>      tspResource;
 class CDatabaseIO
 {
 public:
+  using tfnAddProject = std::function<qint32(const QString& /*sDirName*/, quint32 /*iVersion*/,
+                                             bool /*bBundled*/, bool /*bReadOnly*/)>;
+  using tfnAfterLoad = std::function<void(void)>;
+
   static std::unique_ptr<CDatabaseIO> CreateDatabaseIO(CDatabaseManager* pManager,
                                                        std::shared_ptr<CDatabaseData> spData);
   static bool LoadBundle(tspProject& spProject, const QString& sBundle);
-  static bool LoadProject(tspProject& spProject);
+  static bool LoadPlugins(tspProject& spProject);
+  static bool LoadProject(tspProject& spProject, bool bLoadPlugins);
   static bool SetProjectEditing(tspProject& spProject, bool bEnabled);
   static bool UnloadBundle(tspProject& spProject, const QString& sBundle);
+  static bool UnloadPlugins(tspProject& spProject);
   static bool UnloadProject(tspProject& spProject);
 
   static void LoadResource(tspResource& spRes);
@@ -40,8 +46,9 @@ public:
   void SetDbLoaded(bool bLoaded);
 
 protected:
+  virtual QString ContentPath() const = 0;
   virtual bool DeserializeProjectImpl(tspProject& spProject) = 0;
-  virtual void LoadProjects() = 0;
+  virtual void LoadProjects(const QString& sUrl, tfnAddProject fnOnAdd, tfnAfterLoad fnAfter) = 0;
   virtual void LoadKinks() = 0;
   virtual bool PrepareProjectImpl(tspProject& spProject) = 0;
   virtual bool SerializeProjectImpl(tspProject& spProject, bool bForceWriting) = 0;

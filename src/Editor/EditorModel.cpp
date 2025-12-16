@@ -502,7 +502,7 @@ void CEditorModel::InitNewProject(const QString& sNewProjectName, bool bTutorial
       qWarning() << sError;
     }
 
-    qint32 iId = spDbManager->AddProject(QDir(sBaseProjectPath + "/" + sFinalProjName));
+    qint32 iId = spDbManager->AddProject(sBaseProjectPath + "/" + sFinalProjName);
     m_spCurrentProject = spDbManager->FindProject(iId);
     const QString sProjName = PhysicalProjectName(m_spCurrentProject);
 
@@ -562,7 +562,7 @@ void CEditorModel::LoadProject(qint32 iId)
 
     const QString sProjName = PhysicalProjectName(m_spCurrentProject);
     Q_UNUSED(sProjName)
-    CDatabaseManager::LoadProject(m_spCurrentProject);
+    CDatabaseManager::LoadProject(m_spCurrentProject, false);
 
     QReadLocker projectLocker(&m_spCurrentProject->m_rwLock);
     m_bReadOnly = m_spCurrentProject->m_bBundled || m_spCurrentProject->m_bReadOnly;

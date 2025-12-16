@@ -34,6 +34,8 @@ struct SProject : public ISerializable, std::enable_shared_from_this<SProject>,
   tspSaveDataMap            m_vspAchievements;
   QStringList               m_vsMountPoints;          // Archives need to be mounted via physFS to access content
                                                       // WARNING: root is NOT included in this list
+  std::vector<std::shared_ptr<SProject>>
+                            m_vspPlugins; // only populated if the project is loaded
 
   QJsonObject ToJsonObject() override;
   void FromJsonObject(const QJsonObject& json) override;

@@ -242,7 +242,7 @@ namespace eos
     const QString sUserData = spProject->m_sUserData;
     locker.unlock();
 
-    if (!CDatabaseManager::LoadProject(spProject))
+    if (!CDatabaseManager::LoadProject(spProject, false))
     {
       return true;
     }

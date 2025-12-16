@@ -177,7 +177,7 @@ void CSceneMainScreen::LoadProject(qint32 iId, const tSceneToLoad& sStartScene)
     }
     m_pQmlWidget->engine()->setImportPathList(vsPaths);
 
-    CDatabaseManager::LoadProject(m_spCurrentProject);
+    CDatabaseManager::LoadProject(m_spCurrentProject, true);
 
     if (std::holds_alternative<QString>(sStartScene))
     {
@@ -655,6 +655,15 @@ void CSceneMainScreen::SlotUnloadFinished()
     {
       assert(bOk && "Failed to unload project");
       qWarning() << "Failed to unload project";
+    }
+  }
+  else
+  {
+    bool bOk = CDatabaseManager::UnloadPlugins(m_spCurrentProject);
+    if (!bOk)
+    {
+      assert(bOk && "Failed to unload project plugins");
+      qWarning() << "Failed to unload project plugins";
     }
   }
 
