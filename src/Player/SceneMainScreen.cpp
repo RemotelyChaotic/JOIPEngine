@@ -147,6 +147,7 @@ void CSceneMainScreen::LoadProject(qint32 iId, const tSceneToLoad& sStartScene)
   connect(m_pQmlWidget->engine(), &QQmlEngine::warnings,
           this, &CSceneMainScreen::SlotQmlEngineWarning);
   InitQmlMain();
+  SetDebugging(m_bBeingDebugged);
 
   m_bCanLoadNewScene = true;
   m_pQmlWidget->setSource(QUrl("qrc:/qml/resources/qml/JoipEngine/PlayerMain.qml"));
@@ -268,7 +269,10 @@ void CSceneMainScreen::SetDebugging(bool bDebugging)
 
     //m_pQmlWidget->setAttribute(Qt::WA_AlwaysStackOnTop, !m_bBeingDebugged);
     //m_pQmlWidget->setAttribute(Qt::WA_TranslucentBackground, !m_bBeingDebugged);
+  }
 
+  if (nullptr != m_pQmlWidget)
+  {
     // set size properties manually setzen, since this isn't done automatically
     QQuickItem* pRootObject =  m_pQmlWidget->rootObject();
     if (nullptr != pRootObject)
