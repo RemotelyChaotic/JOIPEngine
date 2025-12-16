@@ -40,7 +40,23 @@ public:
 protected:
   //----------------------------------------------------------------------------------------
   //
+  QString ContentPath() const override
+  {
+    return m_spSettings->ContentFolder();
+  }
+
+  //----------------------------------------------------------------------------------------
+  //
   bool DeserializeProjectImpl(tspProject& spProject) override
+  {
+    return DeserializeProjectImplStatic(spProject, false, [this](){ return m_pManager->FindNewProjectId(); });
+  }
+
+  //----------------------------------------------------------------------------------------
+  //
+public:
+  static bool DeserializeProjectImplStatic(tspProject& spProject, bool bLoadPlugins,
+                                           std::function<qint32()> fnFindNewId)
   {
     spProject->m_rwLock.lockForRead();
     const QString sName = spProject->m_sName;
@@ -59,7 +75,7 @@ protected:
       }
     }
 
-    bOk &= LoadProject(spProject);
+    bOk &= LoadProject(spProject, bLoadPlugins);
 
     if (bOk)
     {
@@ -108,7 +124,7 @@ protected:
               bIsOldEos = SVersion(1,7,0) > targetVer;
             }
 
-            qint32 iNewId = (-1 == iOldId) ? m_pManager->FindNewProjectId() : -1;
+            qint32 iNewId = (-1 == iOldId) ? fnFindNewId() : -1;
             spProject->m_rwLock.lockForWrite();
             spProject->m_iId = (-1 == iOldId) ? iNewId : iOldId;
             spProject->m_sName = sProjName;
@@ -152,16 +168,24 @@ protected:
 
   //--------------------------------------------------------------------------------------
   //
-  void LoadProjects() override
+protected:
+  void LoadProjects(const QString& sUrl, tfnAddProject fnOnAdd, tfnAfterLoad fnAfterLoad) override
+  {
+    LoadProjectsStatic(sUrl, fnOnAdd, fnAfterLoad);
+  }
+
+  //--------------------------------------------------------------------------------------
+  //
+public:
+  static void LoadProjectsStatic(const QString& sUrl, tfnAddProject fnOnAdd, tfnAfterLoad fnAfterLoad)
   {
     // load projects
     // first load folders
-    QString sPath = m_spSettings->ContentFolder();
-    QDirIterator it(sPath, QDir::Dirs | QDir::NoDotAndDotDot);
+    QDirIterator it(sUrl, QDir::Dirs | QDir::NoDotAndDotDot);
     while (it.hasNext())
     {
       QString sDirName = QFileInfo(it.next()).absoluteFilePath();
-      m_pManager->AddProject(QDir(sDirName));
+      fnOnAdd(sDirName, 1, false, false);
     }
 
     // next load archives
@@ -170,34 +194,30 @@ protected:
     {
       vsFileEndings << QStringLiteral("*.") + sEnding.toLower();
     }
-    QDirIterator itCompressed(sPath, vsFileEndings,
-                          QDir::Files | QDir::NoDotAndDotDot, QDirIterator::NoIteratorFlags);
+    QDirIterator itCompressed(sUrl, vsFileEndings,
+                              QDir::Files | QDir::NoDotAndDotDot, QDirIterator::NoIteratorFlags);
     while (itCompressed.hasNext())
     {
       QString sFileName = QFileInfo(itCompressed.next()).absoluteFilePath();
-      m_pManager->AddProject(sFileName, 1, false, true);
+      fnOnAdd(sFileName, 1, false, true);
     }
 
     // finally load packed projects
     vsFileEndings = QStringList() << QString("*") + c_sProjectBundleFileEnding;
-    QDirIterator itBundle(sPath, vsFileEndings,
+    QDirIterator itBundle(sUrl, vsFileEndings,
                           QDir::Files | QDir::NoDotAndDotDot, QDirIterator::NoIteratorFlags);
     while (itBundle.hasNext())
     {
       QString sFileName = QFileInfo(itBundle.next()).absoluteFilePath();
-      m_pManager->AddProject(sFileName, 1, true, true);
+      fnOnAdd(sFileName, 1, true, true);
     }
 
-    // store projects
-    QMutexLocker locker(m_spData.get());
-    for (tspProject spProject : m_spData->m_vspProjectDatabase)
-    {
-      DeserializeProject(spProject);
-    }
+    fnAfterLoad();
   }
 
   //--------------------------------------------------------------------------------------
   //
+protected:
   void LoadKinks() override
   {
     QMutexLocker locker(m_spData.get());
@@ -317,7 +337,7 @@ protected:
       spProject->m_rwLock.unlock();
     }
 
-    bOk &= LoadProject(spProject);
+    bOk &= LoadProject(spProject, false);
 
     if (bOk)
     {
@@ -399,13 +419,99 @@ bool CDatabaseIO::LoadBundle(tspProject& spProject, const QString& sBundle)
 
 //----------------------------------------------------------------------------------------
 //
-bool CDatabaseIO::LoadProject(tspProject& spProject)
+bool CDatabaseIO::LoadPlugins(tspProject& spProject)
+{
+  const QString sProjectPath = PhysicalProjectPath(spProject);
+  QWriteLocker locker(&spProject->m_rwLock);
+  bool bOkLoad = true;
+
+  spProject->m_vspPlugins.clear();
+  if (!spProject->m_sPluginFolder.isEmpty())
+  {
+    QFileInfo parentInfo(sProjectPath);
+    QFileInfo childInfo(sProjectPath + "/" +  spProject->m_sPluginFolder);
+
+    QDir parentDir(parentInfo.canonicalFilePath());
+    QDir childDir(childInfo.canonicalFilePath());
+
+    // Check if the folder is actually inside the project, we don't want plugin folders
+    // to be outside.
+    if (childDir.absolutePath().startsWith(parentDir.absolutePath() + "/"))
+    {
+      qint32 iIds = 0;
+      CDatabaseIODefault::LoadProjectsStatic(sProjectPath + "/" +  spProject->m_sPluginFolder,
+          [&](const QString& sDirName, quint32 iVersion,
+              bool bBundled, bool bReadOnly){
+            // TODO: refactor: This does the same as CDatabaseManager::AddProject and
+            // CDatabaseManager::AddProjectPrivate combined
+            QFileInfo info(sDirName);
+
+            qint32 iNewId = iIds++;
+            const QString sBaseName = info.completeBaseName();
+            const QString sProjectPath = info.absolutePath();
+            QString sName = sBaseName;
+            QString sDirNameResolved = sBaseName + "." + info.suffix();
+            QString sError;
+            if (!ProjectNameCheck(sBaseName, &sError))
+            {
+              sName = ToValidProjectName(sBaseName);
+            }
+            else
+            {
+              sName = sBaseName;
+            }
+
+            spProject->m_vspPlugins.push_back(std::make_shared<SProject>());
+            spProject->m_vspPlugins.back()->m_iId = iNewId;
+            spProject->m_vspPlugins.back()->m_sName = sName;
+            spProject->m_vspPlugins.back()->m_sFolderName = sDirNameResolved;
+            spProject->m_vspPlugins.back()->m_sProjectPath = sProjectPath;
+            spProject->m_vspPlugins.back()->m_iVersion = iVersion;
+            spProject->m_vspPlugins.back()->m_bBundled = bBundled;
+            spProject->m_vspPlugins.back()->m_bReadOnly = bReadOnly;
+            spProject->m_vspPlugins.back()->m_sPlayerLayout = "qrc:/qml/resources/qml/JoipEngine/PlayerDefaultLayout.qml";
+            return iNewId;
+          },
+          [&](){
+            for (tspProject spProject : spProject->m_vspPlugins)
+            {
+              CDatabaseIODefault::DeserializeProjectImplStatic(spProject, true, [&](){
+                return iIds;
+              });
+            }
+          });
+
+      for (tspProject& spProj : spProject->m_vspPlugins)
+      {
+        bool bOkLoadLoc = LoadProject(spProj, true);
+        bOkLoad &= bOkLoadLoc;
+        if (!bOkLoadLoc)
+        {
+          QReadLocker l(&spProj->m_rwLock);
+          qWarning() << "Could not load plugin(s)" << spProj->m_sName <<
+              "for Project" << spProject->m_sName;
+        }
+      }
+    }
+    else
+    {
+      bOkLoad = false;
+    }
+  }
+
+  return bOkLoad;
+}
+
+//----------------------------------------------------------------------------------------
+//
+bool CDatabaseIO::LoadProject(tspProject& spProject, bool bLoadPlugins)
 {
   if (nullptr == spProject) { return false; }
 
   const QString sProjectPath = PhysicalProjectPath(spProject);
   QWriteLocker locker(&spProject->m_rwLock);
   bool bLoaded = false;
+  bool bWasLoaded = spProject->m_bLoaded;
   if (spProject->m_bBundled && !spProject->m_bLoaded)
   {
     spProject->m_bLoaded =
@@ -431,7 +537,7 @@ bool CDatabaseIO::LoadProject(tspProject& spProject)
   }
 
   // if loaded, pre-load nessessary resources
-  if (bLoaded)
+  if (!bWasLoaded)
   {
     for (auto& itRes : spProject->m_spResourcesMap)
     {
@@ -440,6 +546,12 @@ bool CDatabaseIO::LoadProject(tspProject& spProject)
       LoadResource(spRes);
       locker.relock();
     }
+  }
+
+  // If load plugins is requested we always load them even if the project was already loaded
+  if (bLoadPlugins)
+  {
+    LoadPlugins(spProject);
   }
 
   return bLoaded;
@@ -497,6 +609,18 @@ bool CDatabaseIO::UnloadBundle(tspProject& spProject, const QString& sBundle)
 
 //----------------------------------------------------------------------------------------
 //
+bool CDatabaseIO::UnloadPlugins(tspProject& spProject)
+{
+  for (tspProject& spProj : spProject->m_vspPlugins)
+  {
+    UnloadProject(spProj);
+  }
+  spProject->m_vspPlugins.clear();
+  return true;
+}
+
+//----------------------------------------------------------------------------------------
+//
 bool CDatabaseIO::UnloadProject(tspProject& spProject)
 {
   if (nullptr == spProject) { return false; }
@@ -505,9 +629,11 @@ bool CDatabaseIO::UnloadProject(tspProject& spProject)
   QWriteLocker locker(&spProject->m_rwLock);
 
 
-  // if loaded, pre-unload nessessary resources
+  // if loaded, unload nessessary resources and plugins
   if (spProject->m_bLoaded)
   {
+    UnloadPlugins(spProject);
+
     for (auto& itRes : spProject->m_spResourcesMap)
     {
       tspResource& spRes = itRes.second;
@@ -726,7 +852,19 @@ bool CDatabaseIO::DeserializeProject(tspProject& spProject)
 //
 void CDatabaseIO::LoadDatabase()
 {
-  LoadProjects();
+  LoadProjects(ContentPath(),
+      [this](const QString& sDirName, quint32 iVersion,
+                                     bool bBundled, bool bReadOnly){
+        return m_pManager->AddProject(sDirName, iVersion, bBundled, bReadOnly);
+      },
+      [this](){
+        // store projects
+        QMutexLocker locker(m_spData.get());
+        for (tspProject spProject : m_spData->m_vspProjectDatabase)
+        {
+          DeserializeProject(spProject);
+        }
+    });
   LoadKinks();
   m_bLoadedDb = 1;
 }

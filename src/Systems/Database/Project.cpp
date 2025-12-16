@@ -109,6 +109,7 @@ QJsonObject SProject::ToJsonObject()
     { "vsMountPoints", mountPoints },
     { "dlState", m_dlState._to_integral() },
     { "sFont", m_sFont },
+    { "sPluginFolder", m_sPluginFolder },
     { "sUserData", m_sUserData }
   };
 }
@@ -318,6 +319,11 @@ void SProject::FromJsonObject(const QJsonObject& json)
   if (it != json.end())
   {
     m_sFont = it.value().toString();
+  }
+  it = json.find("sPluginFolder");
+  if (it != json.end())
+  {
+    m_sPluginFolder = it.value().toString();
   }
   it = json.find("sUserData");
   if (it != json.end())

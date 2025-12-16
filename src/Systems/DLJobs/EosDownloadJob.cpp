@@ -296,7 +296,7 @@ bool CEosDownloadJob::Run(const QVariantList& args)
   const QString sBaseProjectPath = CApplication::Instance()->Settings()->ContentFolder();
 #endif
 
-  m_iProjId = spDbManager->AddProject(QDir(sBaseProjectPath + "/TBD"), 1, false, true, vfnActions);
+  m_iProjId = spDbManager->AddProject(sBaseProjectPath + "/TBD", 1, false, true, vfnActions);
   spDbManager->PrepareNewProject(m_iProjId);
   spDbManager->SerializeProject(m_iProjId, true);
   if (0 > m_iProjId)

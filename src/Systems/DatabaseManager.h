@@ -40,15 +40,14 @@ public:
   ~CDatabaseManager() override;
 
   static bool LoadBundle(tspProject& spProject, const QString& sBundle);
-  static bool LoadProject(tspProject& spProject);
+  static bool LoadPlugins(tspProject& spProject);
+  static bool LoadProject(tspProject& spProject, bool bLoadPlugins);
   static bool SetProjectEditing(tspProject& spProject, bool bEnabled);
   static bool UnloadBundle(tspProject& spProject, const QString& sBundle);
   static bool UnloadProject(tspProject& spProject);
+  static bool UnloadPlugins(tspProject& spProject);
 
   // Project
-  qint32 AddProject(const QDir& dir = QDir("New_Project"), quint32 iVersion = 1,
-                    bool bBundled = false, bool bReadOnly = false,
-                    const tvfnActionsProject& vfnActionsAfterAdding = tvfnActionsProject());
   qint32 AddProject(const QString& sDirName = "New_Project", quint32 iVersion = 1,
                     bool bBundled = false, bool bReadOnly = false,
                     const tvfnActionsProject& vfnActionsAfterAdding = tvfnActionsProject());

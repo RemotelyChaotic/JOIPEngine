@@ -38,9 +38,16 @@ bool CDatabaseManager::LoadBundle(tspProject& spProject, const QString& sBundle)
 
 //----------------------------------------------------------------------------------------
 //
-bool CDatabaseManager::LoadProject(tspProject& spProject)
+bool CDatabaseManager::LoadPlugins(tspProject& spProject)
 {
-  return CDatabaseIO::LoadProject(spProject);
+  return CDatabaseIO::LoadPlugins(spProject);
+}
+
+//----------------------------------------------------------------------------------------
+//
+bool CDatabaseManager::LoadProject(tspProject& spProject, bool bLoadPlugins)
+{
+  return CDatabaseIO::LoadProject(spProject, bLoadPlugins);
 }
 
 //----------------------------------------------------------------------------------------
@@ -66,33 +73,9 @@ bool CDatabaseManager::UnloadProject(tspProject& spProject)
 
 //----------------------------------------------------------------------------------------
 //
-qint32 CDatabaseManager::AddProject(const QDir& dir, quint32 iVersion,
-                                    bool bBundled, bool bReadOnly,
-                                    const tvfnActionsProject& vfnActionsAfterAdding)
+bool CDatabaseManager::UnloadPlugins(tspProject& spProject)
 {
-  if (!IsInitialized()) { return -1; }
-
-  qint32 iNewId = FindNewProjectId();
-  const QString sBaseName = dir.dirName();
-  const QString sProjectPath = QFileInfo(dir.absolutePath()).absolutePath();
-  QString sName = sBaseName;
-  QString sDirNameResolved;
-  QString sError;
-  if (!ProjectNameCheck(sBaseName, &sError))
-  {
-    sName = ToValidProjectName(sBaseName);
-    sDirNameResolved = sName;
-  }
-  else
-  {
-    sName = sBaseName;
-    sDirNameResolved = sBaseName;
-  }
-
-  return AddProjectPrivate(sName, sDirNameResolved, sProjectPath,
-                           iNewId, iVersion,
-                           bBundled, bReadOnly,
-                           vfnActionsAfterAdding);
+  return CDatabaseIO::UnloadPlugins(spProject);
 }
 
 //----------------------------------------------------------------------------------------
@@ -103,11 +86,14 @@ qint32 CDatabaseManager::AddProject(const QString& sDirName, quint32 iVersion,
 {
   if (!IsInitialized()) { return -1; }
 
+  QFileInfo info(sDirName);
+  bool bIsFolder = info.isDir();
+
   qint32 iNewId = FindNewProjectId();
-  const QString sBaseName = QFileInfo(sDirName).completeBaseName();
-  const QString sProjectPath = QFileInfo(sDirName).absolutePath();
+  const QString sBaseName = info.completeBaseName();
+  const QString sProjectPath = info.absolutePath();
   QString sName = sBaseName;
-  QString sDirNameResolved = sBaseName + "." + QFileInfo(sDirName).suffix();
+  QString sDirNameResolved = bIsFolder ? sBaseName : sBaseName + "." + info.suffix();
   QString sError;
   if (!ProjectNameCheck(sBaseName, &sError))
   {
@@ -334,7 +320,7 @@ void CDatabaseManager::RenameProject(qint32 iId, const QString& sNewName)
     spProject->m_sName = sNewName;
     spProject->m_rwLock.unlock();
 
-    if (bLoadedBefore) { LoadProject(spProject); }
+    if (bLoadedBefore) { LoadProject(spProject, false); }
 
     emit SignalProjectRenamed(iId);
   }
@@ -362,7 +348,7 @@ void CDatabaseManager::RenameProject(const QString& sName, const QString& sNewNa
     spProject->m_sName = sNewName;
     spProject->m_rwLock.unlock();
 
-    if (bLoadedBefore) { LoadProject(spProject); }
+    if (bLoadedBefore) { LoadProject(spProject, false); }
 
     emit SignalProjectRenamed(iId);
   }
