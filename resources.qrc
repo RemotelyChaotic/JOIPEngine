@@ -343,6 +343,7 @@
         <file>resources/help/editor/nodes/nodeeditor_step_help.html</file>
         <file>resources/help/editor/images/node_debug.png</file>
         <file>resources/help/editor/images/node_debug_selection.png</file>
+        <file>resources/help/editor/projectsettings/pluginsubfolder_help.html</file>
     </qresource>
     <qresource prefix="/qml">
         <file>resources/qml/JoipEngine/EmptyDummy.qml</file>

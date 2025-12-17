@@ -22,6 +22,7 @@ BETTER_ENUM(EEditorCommandId, qint32,
             eAddAchievement,
             eChangeAchievement,
             eRemoveAchievement,
+            eChangePluginPath,
 
             eAddResource,
             eChangeCurrentResource,
