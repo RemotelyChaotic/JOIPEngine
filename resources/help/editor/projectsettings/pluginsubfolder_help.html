@@ -1,0 +1,58 @@
+<!doctype html>
+<html class="no-js" lang="">
+
+<head>
+  <meta charset="utf-8">
+  <title>Plugin Subfolder</title>
+  <meta name="description" content="">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <style>
+    h1 {
+      text-align: center;
+    }
+    div.container {
+      min-height: 10em;
+      display: table-cell;
+      margin-left: auto;
+      margin-right: auto;
+      width: 0.6em
+    }
+    table.warning {
+      color: black;
+      background-color: #cccc44;
+      border-color: yellow;
+      border-style: solid;
+    }
+  </style>
+</head>
+
+
+<body>
+  <h1>Plugin Subfolder</h1>
+
+  <hr>
+
+  <div class="container">
+    <p>Lets you set the Plugin Subfolder for the
+    <a href="qrc:/resources/help/project/joi_project_help.html">JOI-Project</a>.
+    </p>
+
+    <br>
+
+    <p>Plugins are a list of <a href="qrc:/resources/help/project/joi_project_help.html">JOIP-Projects</a>
+    that are loaded at run-time (not in the editor) additionally to this Project. Any
+    <a href="qrc:/resources/help/editor/resources/resource_help.html">Resources</a>,
+    <a href="qrc:/resources/help/editor/nodes/node_help.html">Scenes</a> and further plugins the Plugin
+    defines can be used in this Project as well. If a name clashes, the last loaded Plugin's item
+    that defines it is used effectively allowing a plugin to overwrite Resources, Scenes, etc.
+    This override does not apply to direct properties of the Project itself (description, layout etc.).
+    Achievements specifically are an exception and <i>can</i> be extended.</p>
+
+    <br>
+
+    <p>Plugins can bring their own Plugins which are loaded recursively.</p>
+  </div>
+</body>
+
+</html>

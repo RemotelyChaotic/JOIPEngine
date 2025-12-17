@@ -14,6 +14,7 @@
 #include "Editor/Project/CommandChangeFetishes.h"
 #include "Editor/Project/CommandChangeFont.h"
 #include "Editor/Project/CommandChangeLayout.h"
+#include "Editor/Project/CommandChangePluginFolder.h"
 #include "Editor/Project/CommandChangeProjectName.h"
 #include "Editor/Project/CommandChangeToyCmd.h"
 #include "Editor/Project/CommandChangeVersion.h"
@@ -30,6 +31,7 @@
 #include "Systems/Database/SaveData.h"
 
 #include "Utils/UndoRedoFilter.h"
+#include "Utils/WidgetHelpers.h"
 
 #include "Widgets/HelpOverlay.h"
 
@@ -53,6 +55,7 @@ namespace
   const QString c_sSoundEmitterCountHelpId ="Editor/SoundEmitterCount";
   const QString c_sMetronomeToyCmdModeId   ="Editor/MetronomeToyCmdMode";
   const QString c_sLayoutHelpId =           "Editor/Layout";
+  const QString c_sPluginSubfolderHelpId =  "Editor/PluginSubfolder";
   const QString c_sCanStartFromAnySceneId = "Editor/CanStartFromAnyScene";
   const QString c_sProjectFontHelpId       ="Editor/ProjectFont";
   const QString c_sProjectDescriptionHelpId="Editor/ProjectDescription";
@@ -112,6 +115,8 @@ void CEditorProjectSettingsWidget::Initialize()
     wpHelpFactory->RegisterHelp(c_sProjectFontHelpId, ":/resources/help/editor/projectsettings/font_help.html");
     m_spUi->pLayoutWidget->setProperty(helpOverlay::c_sHelpPagePropertyName, c_sLayoutHelpId);
     wpHelpFactory->RegisterHelp(c_sLayoutHelpId, ":/resources/help/editor/projectsettings/layout_help.html");
+    m_spUi->pWidgetPluginSubfolder->setProperty(helpOverlay::c_sHelpPagePropertyName, c_sPluginSubfolderHelpId);
+    wpHelpFactory->RegisterHelp(c_sPluginSubfolderHelpId, ":/resources/help/editor/projectsettings/pluginsubfolder_help.html");
     m_spUi->pCanStartFromAnySceneContainer->setProperty(helpOverlay::c_sHelpPagePropertyName, c_sCanStartFromAnySceneId);
     wpHelpFactory->RegisterHelp(c_sCanStartFromAnySceneId, ":/resources/help/editor/projectsettings/canstartfromanyscene_help.html");
     m_spUi->pDescribtionTextEdit->setProperty(helpOverlay::c_sHelpPagePropertyName, c_sProjectDescriptionHelpId);
@@ -300,6 +305,11 @@ void CEditorProjectSettingsWidget::LoadProject(tspProject spProject)
     m_spUi->pDefaultLayoutComboBox->setProperty(editor::c_sPropertyOldValue, m_spCurrentProject->m_sPlayerLayout);
     m_spUi->pDefaultLayoutComboBox->blockSignals(false);
 
+    m_spUi->pPluginFolderLineEdit->blockSignals(true);
+    m_spUi->pPluginFolderLineEdit->setProperty(editor::c_sPropertyOldValue, m_spCurrentProject->m_sPluginFolder);
+    m_spUi->pPluginFolderLineEdit->setText(m_spCurrentProject->m_sPluginFolder);
+    m_spUi->pPluginFolderLineEdit->blockSignals(false);
+
     m_spUi->pCanStartFromAnySceneCheckBox->blockSignals(true);
     m_spUi->pCanStartFromAnySceneCheckBox->setChecked(m_spCurrentProject->m_bCanStartAtAnyScene);
     m_spUi->pCanStartFromAnySceneCheckBox->setProperty(editor::c_sPropertyOldValue, m_spCurrentProject->m_bCanStartAtAnyScene);
@@ -399,6 +409,8 @@ void CEditorProjectSettingsWidget::SaveProject()
   m_spCurrentProject->m_sDescribtion = m_spUi->pDescribtionTextEdit->toPlainText();
 
   m_spCurrentProject->m_sPlayerLayout = m_spUi->pDefaultLayoutComboBox->currentData().toString();
+
+  m_spCurrentProject->m_sPluginFolder = m_spUi->pPluginFolderLineEdit->text();
 
   m_spCurrentProject->m_vsKinks.clear();
   const auto& vspKinks = m_spUi->pFetishListWidget->Tags();
@@ -542,6 +554,77 @@ void CEditorProjectSettingsWidget::on_AddLayoutButton_clicked()
   if (nullptr == m_spCurrentProject) { return; }
 
   EditorModel()->SlotAddNewLayoutFile(QString());
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CEditorProjectSettingsWidget::on_pPluginFolderLineEdit_editingFinished()
+{
+  WIDGET_INITIALIZED_GUARD
+  if (nullptr == m_spCurrentProject) { return; }
+
+  const QString sProjectPath = PhysicalProjectPath(m_spCurrentProject);
+
+  QFileInfo parentInfo(sProjectPath);
+  QFileInfo childInfo(sProjectPath + "/" + m_spUi->pPluginFolderLineEdit->text());
+
+  QDir parentDir(parentInfo.canonicalFilePath());
+  QDir childDir(childInfo.canonicalFilePath());
+
+  if (childDir.absolutePath().startsWith(parentDir.absolutePath() + "/"))
+  {
+    QString sNewString = childDir.absolutePath().replace(parentDir.absolutePath() + "/", "");
+    {
+      QSignalBlocker b(m_spUi->pPluginFolderLineEdit);
+      m_spUi->pPluginFolderLineEdit->setText(sNewString);
+    }
+
+    QPointer<CEditorProjectSettingsWidget> pThis(this);
+    UndoStack()->push(new CCommandChangePluginFolder(m_spUi->pPluginFolderLineEdit,
+                                               [pThis]() {
+                                                 emit pThis->SignalProjectEdited();
+                                                 emit pThis->EditorModel()->SignalProjectPropertiesEdited();
+                                               }));
+  }
+  else
+  {
+    QSignalBlocker b(m_spUi->pPluginFolderLineEdit);
+    QString sOldStr = m_spUi->pPluginFolderLineEdit->property(editor::c_sPropertyOldValue).toString();
+    m_spUi->pPluginFolderLineEdit->setText(sOldStr);
+  }
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CEditorProjectSettingsWidget::on_SelectPluginFolderPushButton_clicked()
+{
+  WIDGET_INITIALIZED_GUARD
+  if (nullptr == m_spCurrentProject) { return; }
+
+  const QString sProjectPath = PhysicalProjectPath(m_spCurrentProject);
+  QPointer<CEditorProjectSettingsWidget> pThis(this);
+  QString dir =
+      widget_helpers::GetExistingDirectory(this, tr("Select Subdirectory"),
+                                           sProjectPath,
+                                           QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks);
+  if (nullptr == pThis) { return; }
+
+  QFileInfo parentInfo(sProjectPath);
+  QFileInfo childInfo(dir);
+
+  QDir parentDir(parentInfo.canonicalFilePath());
+  QDir childDir(childInfo.canonicalFilePath());
+
+  if (childDir.absolutePath().startsWith(parentDir.absolutePath() + "/"))
+  {
+    QString sNewString = childDir.absolutePath().replace(parentDir.absolutePath() + "/", "");
+    {
+      QSignalBlocker b(m_spUi->pPluginFolderLineEdit);
+      m_spUi->pPluginFolderLineEdit->setText(sNewString);
+    }
+
+    on_pPluginFolderLineEdit_editingFinished();
+  }
 }
 
 //----------------------------------------------------------------------------------------
