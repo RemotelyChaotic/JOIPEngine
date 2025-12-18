@@ -1,4 +1,6 @@
 #include "DatabaseImageProvider.h"
+#include "Settings.h"
+
 #include "Systems/DatabaseManager.h"
 
 #include "Systems/Database/Project.h"
@@ -10,6 +12,8 @@
 #include <QImageReader>
 #include <QNetworkAccessManager>
 #include <QNetworkReply>
+
+const QString c_sUserAgent = "User-Agent";
 
 CDatabaseImageProvider::CDatabaseImageProvider(const std::weak_ptr<CDatabaseManager>& wpDatabase) :
   QObject(nullptr),
@@ -48,7 +52,7 @@ QImage CDatabaseImageProvider::requestImage(const QString& id, QSize* pSize,
       {
         QReadLocker locker(&spResource->m_rwLock);
         const QString sResourceName = spResource->m_sName;
-        const QUrl sResourcePath = spResource->m_sPath;
+        const SResourcePath sResourcePath = spResource->m_sPath;
         const QString sResourceBundle = spResource->m_sResourceBundle;
         if (spResource->m_type._to_integral() == EResourceType::eImage)
         {
@@ -77,14 +81,14 @@ QImage CDatabaseImageProvider::RequestImage(tspProject spProject,
                                             std::shared_ptr<CDatabaseManager> spDbManager,
                                             const QString& sResourceName,
                                             const QString& sResourceBundleName,
-                                            const QUrl& sResourcePath,
+                                            const SResourcePath& sResourcePath,
                                             QSize* pSize, const QSize& requestedSize,
                                             bool bLoadedBefore)
 {
   // local file
-  if (IsLocalFile(sResourcePath))
+  if (sResourcePath.IsLocalFile())
   {
-    QString sPath = ResourceUrlToAbsolutePath(spResource);
+    QString sPath = spResource->ResourceToAbsolutePath();
 
     CDatabaseManager::LoadProject(spProject, false);
     CDatabaseManager::LoadBundle(spProject, sResourceBundleName);
@@ -120,7 +124,9 @@ QImage CDatabaseImageProvider::RequestImage(tspProject spProject,
     QImage img;
     QEventLoop loop;
     std::shared_ptr<QNetworkAccessManager> spManager = std::make_shared<QNetworkAccessManager>();
-    QPointer<QNetworkReply> pReply = spManager->get(QNetworkRequest(sResourcePath));
+    QNetworkRequest req(static_cast<QUrl>(sResourcePath));
+    req.setRawHeader(c_sUserAgent.toUtf8(), CSettings::c_sApplicationName.toUtf8());
+    QPointer<QNetworkReply> pReply = spManager->get(req);
     connect(pReply, &QNetworkReply::finished,
             this, [pReply, &spDbManager, &img, &loop](){
       if(nullptr != pReply)
@@ -204,7 +210,7 @@ QImage CDatabaseImageProvider::RequestMovieFrame(tspProject spProject,
                                                  spResource spResource,
                                                  const QString& sResourceName,
                                                  const QString& sResourceBundleName,
-                                                 const QUrl& sResourcePath,
+                                                 const SResourcePath& sResourcePath,
                                                  QSize* pSize, const QSize& requestedSize,
                                                  bool bLoadedBefore)
 {
@@ -214,9 +220,9 @@ QImage CDatabaseImageProvider::RequestMovieFrame(tspProject spProject,
 
   // local file
   bool bOk = true;
-  if (IsLocalFile(sResourcePath))
+  if (sResourcePath.IsLocalFile())
   {
-    QString sPath = ResourceUrlToAbsolutePath(spResource);
+    QString sPath = spResource->ResourceToAbsolutePath();
 
     CDatabaseManager::LoadProject(spProject, false);
     CDatabaseManager::LoadBundle(spProject, sResourceBundleName);
@@ -232,7 +238,7 @@ QImage CDatabaseImageProvider::RequestMovieFrame(tspProject spProject,
   else
   {
     CDatabaseManager::LoadProject(spProject, false);
-    spExtractor->setSource(sResourcePath.toString());
+    spExtractor->setSource(static_cast<QString>(sResourcePath));
   }
 
   QImage img;

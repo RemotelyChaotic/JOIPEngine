@@ -247,7 +247,7 @@ void CEditorEditableFileModel::SerializeProject()
         auto spResource = spDbManager->FindResourceInProject(m_spProject, it->first);
         if (nullptr != spResource)
         {
-          const QString sFilePath = ResourceUrlToAbsolutePath(spResource);
+          const QString sFilePath = spResource->ResourceToAbsolutePath();
           QReadLocker lockerResource(&spResource->m_rwLock);
 
           QFile file(sFilePath);
@@ -713,7 +713,7 @@ void CEditorEditableFileModel::AddResourceTo(tspResource spResource,
 {
   if (nullptr == m_spProject) { return; }
 
-  QString sPath = PhysicalResourcePath(spResource);
+  QString sPath = spResource->PhysicalResourcePath();
   QReadLocker resourceLocker(&spResource->m_rwLock);
   const QString sResourceName = spResource->m_sName;
   if (!CheckResourceTypeSupported(spResource->m_type))
@@ -722,7 +722,7 @@ void CEditorEditableFileModel::AddResourceTo(tspResource spResource,
   }
 
   QString sBundle = spResource->m_sResourceBundle;
-  QUrl sResourcePath = spResource->m_sPath;
+  SResourcePath sResourcePath = spResource->m_sPath;
   resourceLocker.unlock();
   CDatabaseManager::LoadBundle(m_spProject, sBundle);
   resourceLocker.relock();
@@ -742,7 +742,7 @@ void CEditorEditableFileModel::AddResourceTo(tspResource spResource,
       auto& script = mpToAddTo[sResourceName];
       script.m_sId = sResourceName;
       auto itDefinition = SScriptDefinitionData::DefinitionMap().find(
-            QFileInfo(sResourcePath.toString()).suffix());
+            sResourcePath.Suffix());
       if (SScriptDefinitionData::DefinitionMap().end() != itDefinition)
       {
         script.m_sFileType = itDefinition->second.sType;
@@ -798,7 +798,7 @@ void CEditorEditableFileModel::LoadFile(const QString& sName)
       auto spResource = spDbManager->FindResourceInProject(m_spProject, sName);
       if (nullptr != spResource)
       {
-        const QString sFilePath = ResourceUrlToAbsolutePath(spResource);
+        const QString sFilePath = spResource->ResourceToAbsolutePath();
         QReadLocker lockerResource(&spResource->m_rwLock);
 
         QFile file(sFilePath);

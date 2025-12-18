@@ -730,7 +730,7 @@ namespace lua
           type = spResource->m_type;
           sFoundResourceName = spResource->m_sName;
           locker.unlock();
-          file.setFileName(PhysicalResourcePath(spResource));
+          file.setFileName(spResource->PhysicalResourcePath());
         }
         else if (bResourcesAllowed && bInbuiltLoad)
         {

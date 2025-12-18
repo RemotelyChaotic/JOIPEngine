@@ -163,7 +163,7 @@ void CResourceToolTipPrivate::ShowResource(const QPoint& pos, const tspResource&
     if (EResourceType::eImage == type._to_integral() ||
         EResourceType::eMovie == type._to_integral())
     {
-      if (QFileInfo::exists(ResourceUrlToAbsolutePath(spResource)))
+      if (QFileInfo::exists(spResource->ResourceToAbsolutePath()))
       {
         if (ResourceFetcher()->IsLoading())
         {
@@ -278,7 +278,7 @@ QString CResourceToolTipPrivate::GetTipString(const STipData& data,
       "</p>";
 
     sRet = sRet.arg(sFontFace).arg(iFontsize)
-        .arg(QFileInfo(data.spResource->m_sPath.toString()).suffix());
+        .arg(data.spResource->m_sPath.Suffix());
   }
   else if (EResourceType::eFont == data.spResource->m_type._to_integral())
   {

@@ -240,8 +240,7 @@ namespace
     }
 
     // update resources to include the file
-    QUrl url = ResourceUrlFromLocalFile(QString(sRelativePath)
-                                        .replace(sAbsoluteFile.fileName(), "qmldir"));
+    SResourcePath url = joip_resource::CreatePathFromAbsolutePath(sQmlDir, spProject);
     QString sResource = QString("qmldir_%1").arg(sImport);
     tspResource spRes = spDbManager->FindResourceInProject(spProject, sResource);
     if (nullptr == spRes)
@@ -348,13 +347,14 @@ QString CEditorModel::AddNewFileToScene(QPointer<QWidget> pParentForDialog,
         }
         else
         {
-          QString sRelativePath = projectDir.relativeFilePath(info.absoluteFilePath());
-          QUrl sUrlToSave = ResourceUrlFromLocalFile(sRelativePath);
+          SResourcePath sUrlToSave =
+              joip_resource::CreatePathFromAbsoluteUrl(url, m_spCurrentProject);
           QFile scriptFile(info.absoluteFilePath());
           if (scriptFile.open(QIODevice::WriteOnly | QIODevice::Truncate))
           {
             if (EResourceType::eLayout == type._to_integral())
             {
+              QString sRelativePath = projectDir.relativeFilePath(info.absoluteFilePath());
               UpdateQmldir(info, sRelativePath, spDbManager, m_spCurrentProject);
             }
             InitScript(scriptFile, info.suffix(), sCustomInitContent);
@@ -560,8 +560,6 @@ void CEditorModel::LoadProject(qint32 iId)
       return;
     }
 
-    const QString sProjName = PhysicalProjectName(m_spCurrentProject);
-    Q_UNUSED(sProjName)
     CDatabaseManager::LoadProject(m_spCurrentProject, false);
 
     QReadLocker projectLocker(&m_spCurrentProject->m_rwLock);
@@ -583,7 +581,7 @@ void CEditorModel::LoadProject(qint32 iId)
       auto spResource = spDbManager->FindResourceInProject(m_spCurrentProject, sModelName);
       if (nullptr != spResource)
       {
-        QString sPath = ResourceUrlToAbsolutePath(spResource);
+        QString sPath = spResource->ResourceToAbsolutePath();
         QReadLocker resourceLocker(&spResource->m_rwLock);
         QString sBundle = spResource->m_sResourceBundle;
         resourceLocker.unlock();
@@ -680,6 +678,8 @@ void CEditorModel::SaveProject()
   JobWorker()->StopRunningJobs();
   JobWorker()->WaitForFinished();
 
+  QString sPathProj = PhysicalProjectPath(m_spCurrentProject);
+
   // nodes
   QByteArray arr = m_spFlowSceneModel->saveToMemory();
 
@@ -691,7 +691,9 @@ void CEditorModel::SaveProject()
         m_spCurrentProject->m_sSceneModel.isEmpty())
     {
       projectLocker.unlock();
-      spDbManager->AddResource(m_spCurrentProject, ResourceUrlFromLocalFile(joip_resource::c_sSceneModelFile),
+      SResourcePath path = joip_resource::PhysicalResourcePath(sPathProj + "/" + joip_resource::c_sSceneModelFile,
+                                                               m_spCurrentProject);
+      spDbManager->AddResource(m_spCurrentProject, path,
                                EResourceType::eOther, joip_resource::c_sSceneModelFile);
       projectLocker.relock();
       m_spCurrentProject->m_sSceneModel = joip_resource::c_sSceneModelFile;
@@ -700,7 +702,7 @@ void CEditorModel::SaveProject()
     auto spResource = spDbManager->FindResourceInProject(m_spCurrentProject, joip_resource::c_sSceneModelFile);
     if (nullptr != spResource)
     {
-      QString sPath = ResourceUrlToAbsolutePath(spResource);
+      QString sPath = spResource->ResourceToAbsolutePath();
       QReadLocker resourceLocker(&spResource->m_rwLock);
       resourceLocker.unlock();
 
@@ -721,7 +723,7 @@ void CEditorModel::SaveProject()
     for (const auto& it : m_spCurrentProject->m_baseData.m_spResourcesMap)
     {
       QReadLocker resourceLocker(&it.second->m_rwLock);
-      bHasRemoteResources |= !IsLocalFile(it.second->m_sPath);
+      bHasRemoteResources |= !it.second->m_sPath.IsLocalFile();
       bNeedsMedia |= (it.second->m_type._to_integral() == EResourceType::eMovie ||
                       it.second->m_type._to_integral() == EResourceType::eSound);
     }

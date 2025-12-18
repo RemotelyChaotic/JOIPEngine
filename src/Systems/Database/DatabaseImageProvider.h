@@ -1,6 +1,8 @@
 #ifndef CDATABASEIMAGEPROVIDER_H
 #define CDATABASEIMAGEPROVIDER_H
 
+#include "Systems/DatabaseInterface/ResourceData.h"
+
 #include <QObject>
 #include <QQuickImageProvider>
 #include <QReadLocker>
@@ -31,7 +33,7 @@ private:
                       std::shared_ptr<CDatabaseManager> spDbManager,
                       const QString& sResourceName,
                       const QString& sResourceBundleName,
-                      const QUrl& sResourcePath,
+                      const SResourcePath& sResourcePath,
                       QSize* pSize, const QSize& requestedSize,
                       bool bLoadedBefore);
   QImage LoadImage(const QString& sPath);
@@ -39,7 +41,7 @@ private:
                            spResource spResource,
                            const QString& sResourceName,
                            const QString& sResourceBundleName,
-                           const QUrl& sResourcePath,
+                           const SResourcePath& sResourcePath,
                            QSize* pSize, const QSize& requestedSize,
                            bool bLoadedBefore);
 

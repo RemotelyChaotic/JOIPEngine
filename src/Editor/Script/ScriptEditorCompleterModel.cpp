@@ -197,7 +197,7 @@ void CScriptEditorCompleterModel::BuildModel()
         if (EResourceType::eScript == spRes->m_type._to_integral() ||
             EResourceType::eLayout == spRes->m_type._to_integral())
         {
-          const QString sFilePath = ResourceUrlToAbsolutePath(spRes);
+          const QString sFilePath = spRes->ResourceToAbsolutePath();
           QFile file(sFilePath);
           if (file.open(QIODevice::ReadOnly | QIODevice::Text))
           {

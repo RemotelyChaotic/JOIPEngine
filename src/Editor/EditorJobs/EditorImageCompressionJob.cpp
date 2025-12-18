@@ -133,10 +133,10 @@ bool CEditorImageCompressionJob::Run(const QVariantList& args)
         {
           Q_UNUSED(sName)
           QReadLocker resLocker(&spResource->m_rwLock);
-          if (IsLocalFile(spResource->m_sPath) && spResource->m_sResourceBundle.isEmpty() &&
+          if (spResource->m_sPath.IsLocalFile() && spResource->m_sResourceBundle.isEmpty() &&
               EResourceType::eImage == spResource->m_type._to_integral())
           {
-            const QString sSourcePath = PhysicalResourcePath(spResource);
+            const QString sSourcePath = spResource->PhysicalResourcePath();
             QImageReader reader(sSourcePath);
             if (reader.canRead())
             {
@@ -162,11 +162,7 @@ bool CEditorImageCompressionJob::Run(const QVariantList& args)
       QWriteLocker resLocker(&spResource->m_rwLock);
       emit SignalJobMessage(m_iId, JobType(), spResource->m_sName);
 
-      QUrl urlCopy(spResource->m_sPath);
-      urlCopy.setScheme(QString());
-      QString sBasePath = PhysicalProjectPath(spResource->m_spParent);
-      QString sFilePath = QUrl().resolved(urlCopy).toString();
-      QString sSourcePath =  sBasePath + "/" + sFilePath;
+      QString sSourcePath = spResource->PhysicalResourcePath();
 
       // qimage can not handle PhysFS paths because reasons
       QString sDestPathImage = sSourcePath + ".jpeg";
@@ -174,8 +170,7 @@ bool CEditorImageCompressionJob::Run(const QVariantList& args)
       bool bOk = img.save(sDestPathImage, nullptr, iCompression);
       if (bOk)
       {
-        spResource->m_sPath = QUrl::fromLocalFile(sFilePath + ".jpeg");
-        spResource->m_sPath.setScheme(QString(CPhysFsFileEngineHandler::c_sScheme).replace(":/", ""));
+        spResource->m_sPath = joip_resource::CreatePathFromAbsolutePath(sDestPathImage, m_spProject);
         QFile oldImg(sSourcePath);
         if (!oldImg.remove())
         {

@@ -81,11 +81,11 @@ void CBackgroundWidget::SlotBackgroundTextureChanged(tspResource spResource)
     QReadLocker projLocker(&spResource->m_spParent->m_rwLock);
     if (EResourceType::eImage == spResource->m_type._to_integral())
     {
-      if (IsLocalFile(spResource->m_sPath))
+      if (spResource->m_sPath.IsLocalFile())
       {
         locker.unlock();
         projLocker.unlock();
-        SetBackgroundTexture(ResourceUrlToAbsolutePath(spResource));
+        SetBackgroundTexture(spResource->ResourceToAbsolutePath());
       }
       else
       {

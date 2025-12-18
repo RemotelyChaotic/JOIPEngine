@@ -353,7 +353,7 @@ namespace
       {
         QReadLocker l(&spResource->m_rwLock);
         if (EResourceType::eDatabase != spResource->m_type._to_integral()) { continue; }
-        if (QFileInfo(PhysicalResourcePath(spResource)).suffix() != joip_resource::c_sDialogueFileType)
+        if (spResource->m_sPath.Suffix() != joip_resource::c_sDialogueFileType)
         { continue; }
 
         auto item = new QListWidgetItem(pListView);

@@ -773,7 +773,7 @@ QUrl CResourceUrlInterceptor::intercept(const QUrl& url, QQmlAbstractUrlIntercep
       case QQmlAbstractUrlInterceptor::DataType::UrlString:
         if (CPhysFsFileEngineHandler::c_sScheme.contains(url.scheme()))
         {
-          return PhysicalResourcePath(url, m_spProject);
+          return joip_resource::PhysicalResourcePath(url, m_spProject);
         }
         return url;
       case QQmlAbstractUrlInterceptor::DataType::QmlFile:
@@ -818,7 +818,7 @@ QJSValue CScriptRunnerUtilsJs::include(QJSValue resource)
     QReadLocker locker(&spResource->m_rwLock);
     if (EResourceType::eScript == spResource->m_type._to_integral())
     {
-      QString sPath = ResourceUrlToAbsolutePath(spResource);
+      QString sPath = spResource->ResourceToAbsolutePath();
       QFile sciptFile(sPath);
       if (sciptFile.exists() && sciptFile.open(QIODevice::ReadOnly))
       {
@@ -848,7 +848,7 @@ QJSValue CScriptRunnerUtilsJs::import(QJSValue resource)
     QReadLocker locker(&spResource->m_rwLock);
     if (EResourceType::eScript == spResource->m_type._to_integral())
     {
-      QString sPath = ResourceUrlToAbsolutePath(spResource);
+      QString sPath = spResource->ResourceToAbsolutePath();
       QFile fModule(sPath);
       if (sPath.isEmpty() || !fModule.exists())
       {

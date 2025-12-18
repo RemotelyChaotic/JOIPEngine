@@ -17,6 +17,69 @@ namespace  {
 
 //----------------------------------------------------------------------------------------
 //
+void SRuntimeData::Clear()
+{
+  m_vsKinks.clear();
+  m_vspScenes.clear();
+  m_spResourcesMap.clear();
+  m_spResourceBundleMap.clear();
+  m_vspTags.clear();
+  m_vspAchievements.clear();
+}
+
+//----------------------------------------------------------------------------------------
+//
+void SRuntimeData::MergeIntoThis(const SRuntimeData& data, std::shared_ptr<SProject> spProjectParent)
+{
+  m_vsKinks << data.m_vsKinks;
+  m_vsKinks.removeDuplicates();
+
+  for (const tspScene& spScene : data.m_vspScenes)
+  {
+    tspScene spNewScene = std::make_shared<SScene>(*spScene);
+    spNewScene->m_spParent = spProjectParent;
+
+    auto it = std::find_if(m_vspScenes.begin(), m_vspScenes.end(), [&](const tspScene& spSceneComp){
+      return spSceneComp->m_sName == spNewScene->m_sName;
+    });
+    if (m_vspScenes.end() != it)
+    {
+      m_vspScenes.erase(it);
+    }
+    m_vspScenes.push_back(spNewScene);
+  }
+
+  for (const auto& [sName, spReosurce] : data.m_spResourcesMap)
+  {
+    tspResource spNewResource = std::make_shared<SResource>(*spReosurce);
+    spNewResource->m_spParent = spProjectParent;
+    m_spResourcesMap[sName] = spNewResource;
+  }
+
+  for (const auto& [sName, spReosurceBundle] : data.m_spResourceBundleMap)
+  {
+    tspResourceBundle spNewResource = std::make_shared<SResourceBundle>(*spReosurceBundle);
+    spNewResource->m_spParent = spProjectParent;
+    m_spResourceBundleMap[sName] = spNewResource;
+  }
+
+  for (const auto& [sName, spTag] : data.m_vspTags)
+  {
+    tspTag spNewTag = std::make_shared<STag>(*spTag);
+    spNewTag->m_spParent = spProjectParent;
+    m_vspTags[sName] = spNewTag;
+  }
+
+  for (const auto& [sName, spAch] : data.m_vspAchievements)
+  {
+    tspSaveData spNewAch = std::make_shared<SSaveData>(*spAch);
+    spNewAch->m_spParent = spProjectParent;
+    m_vspAchievements[sName] = spNewAch;
+  }
+}
+
+//----------------------------------------------------------------------------------------
+//
 SProject::SProject() :
   SProjectData(),
   m_rwLock(QReadWriteLock::Recursive)

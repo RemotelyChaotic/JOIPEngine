@@ -568,13 +568,12 @@ bool CEosDownloadJob::CreateResourceFiles(const CEosResourceLocator::tGaleryData
           iCollectiveSize += arr.size();
 
           const QString sName = itFile.second->m_data.m_sName;
-          QUrl urlCopy = itFile.second->m_data.m_sPath;
-          const QString sPath = urlCopy.toString();
+          const QString sPath = static_cast<QString>(itFile.second->m_data.m_sPath);
           RCCFileInfo fileInfo(sName, QFileInfo(sPath), QLocale::C,
                                QLocale::AnyCountry, RCCFileInfo::NoFlags);
           fileInfo.m_prefilledContent = arr;
           m_spResourceLib->addFile(sName, fileInfo);
-          sResource = spDbManager->AddResource(m_spProject, urlCopy,
+          sResource = spDbManager->AddResource(m_spProject, itFile.second->m_data.m_sPath,
                                                itFile.second->m_data.m_type, sName);
           spResource = spDbManager->FindResourceInProject(m_spProject, sResource);
           if (nullptr == spResource) { sError = QString("Resource error."); return false; }

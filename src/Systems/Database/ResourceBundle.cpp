@@ -70,7 +70,7 @@ QString ResourceBundleUrlToAbsolutePath(const tspResourceBundle& spResourceBundl
   projectLocker.unlock();
 
   QReadLocker locker(&spResourceBundle->m_rwLock);
-  if (IsLocalFile(spResourceBundle->m_sPath))
+  if (SResourcePath::IsLocalFileP(spResourceBundle->m_sPath))
   {
     if (!bBundled)
     {

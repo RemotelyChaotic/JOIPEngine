@@ -577,7 +577,7 @@ bool CDatabaseManager::AddResourceArchive(tspProject& spProj, const QUrl& sPath)
 
 //----------------------------------------------------------------------------------------
 //
-QString CDatabaseManager::AddResource(tspProject& spProj, const QUrl& sPath,
+QString CDatabaseManager::AddResource(tspProject& spProj, const SResourcePath& sPath,
                                       const EResourceType& type, const QString& sName,
                                       const tvfnActionsResource& vfnActionsAfterAdding)
 {
@@ -586,18 +586,18 @@ QString CDatabaseManager::AddResource(tspProject& spProj, const QUrl& sPath,
   QString sFinalName = sName;
   if (sName.isNull())
   {
-    sFinalName = sPath.fileName();
+    sFinalName = sPath.FileName();
     QFileInfo info(sFinalName);
     qint32 iCounter = 0;
     while (FindResourceInProject(spProj, sFinalName) != nullptr)
     {
-      sFinalName = info.baseName() + QString::number(iCounter) + sPath.fileName().replace(info.baseName(), "");
+      sFinalName = info.baseName() + QString::number(iCounter) + sPath.FileName().replace(info.baseName(), "");
       iCounter++;
     }
   }
 
   QWriteLocker locker(&spProj->m_rwLock);
-  if (!IsLocalFile(sPath))
+  if (!sPath.IsLocalFile())
   {
     spProj->m_bUsesWeb = true;
   }
@@ -618,7 +618,6 @@ QString CDatabaseManager::AddResource(tspProject& spProj, const QUrl& sPath,
   {
     m_spDbIo->LoadResource(spResource);
   }
-
 
   for (auto fn : vfnActionsAfterAdding)
   {

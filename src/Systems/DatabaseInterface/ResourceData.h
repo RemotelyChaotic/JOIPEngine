@@ -3,7 +3,11 @@
 
 #include "TagData.h"
 
+#include "Systems/PhysFs/PhysFsFileEngine.h"
+
 #include <enum.h>
+
+#include <QFileInfo>
 #include <QString>
 #include <QUrl>
 
@@ -22,6 +26,60 @@ BETTER_ENUM(EResourceType, qint32,
             eLayout     = 7,
             eSequence   = 8)
 
+struct SResourcePath
+{
+  SResourcePath(){}
+  SResourcePath(QString sPath) : m_sPath(sPath) { }
+  SResourcePath(QUrl url) : m_sPath(url) { }
+  SResourcePath(const SResourcePath& other) : m_sPath(other.m_sPath) {}
+  SResourcePath& operator=(const SResourcePath& other) { m_sPath = other.m_sPath; return *this; }
+
+  explicit operator QUrl() const
+  {
+    return m_sPath;
+  }
+  explicit operator QString() const
+  {
+    return m_sPath.toString(QUrl::None);
+  }
+
+  QString CompleteBaseName() const
+  {
+    return QFileInfo(static_cast<QString>(*this)).completeBaseName();
+  }
+
+  QString BaseName() const
+  {
+    return QFileInfo(static_cast<QString>(*this)).baseName();
+  }
+
+  QString FileName() const
+  {
+    return QFileInfo(static_cast<QString>(*this)).fileName();
+  }
+
+  bool IsLocalFile() const
+  {
+    return IsLocalFileP(m_sPath);
+  }
+
+  QString Suffix() const
+  {
+    return QFileInfo(static_cast<QString>(*this)).suffix();
+  }
+
+  static bool IsLocalFileP(QUrl url)
+  {
+    return url.scheme().contains("qrc") || url.isLocalFile() ||
+           CPhysFsFileEngineHandler::c_sScheme.contains(url.scheme());
+  }
+
+private:
+  QUrl m_sPath;
+};
+
+//----------------------------------------------------------------------------------------
+//
 struct SResourceData
 {
   SResourceData(EResourceType type = EResourceType::eOther) :
@@ -40,13 +98,15 @@ struct SResourceData
   }
 
   QString                   m_sName;
-  QUrl                      m_sPath;
+  SResourcePath             m_sPath;
   QUrl                      m_sSource;
   EResourceType             m_type = EResourceType::eOther;
   QString                   m_sResourceBundle;
   tvsTags                   m_vsResourceTags;
 };
 
+//----------------------------------------------------------------------------------------
+//
 struct SScriptDefinitionData
 {
   QString sType;

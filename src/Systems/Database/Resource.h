@@ -46,6 +46,11 @@ struct SResource : public ISerializable, public std::enable_shared_from_this<SRe
   {
     return shared_from_this();
   }
+
+  // The actual absolute path as a string as it is wihout PhysFs
+  QString PhysicalResourcePath() const;
+  // the absolute PhysFs path
+  QString ResourceToAbsolutePath(const QString& sResourceScheme = ":") const;
 };
 
 
@@ -60,12 +65,13 @@ Q_DECLARE_METATYPE(tspResource)
 
 //----------------------------------------------------------------------------------------
 //
-bool IsLocalFile(const QUrl& url);
-QString PhysicalResourcePath(const tspResource& spResource);
-QString PhysicalResourcePath(const QUrl& url, const tspProject& spProject,
-                             const QString& sResourceBundle = QString(), const QString& sResourceName = QString());
-QString ResourceUrlToAbsolutePath(const tspResource& spResource, const QString& sResourceScheme = ":");
-QUrl ResourceUrlFromLocalFile(const QString& sPath);
+namespace joip_resource
+{
+  QString PhysicalResourcePath(const QUrl& url, const tspProject& spProject,
+                               const QString& sResourceBundle = QString(), const QString& sResourceName = QString());
+  SResourcePath CreatePathFromAbsolutePath(const QString& sStr, const tspProject& spProject);
+  SResourcePath CreatePathFromAbsoluteUrl(const QUrl& sUrl, const tspProject& spProject);
+}
 
 //----------------------------------------------------------------------------------------
 //

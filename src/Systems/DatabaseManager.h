@@ -79,7 +79,8 @@ public:
 
   // Resource
   bool AddResourceArchive(tspProject& spProj, const QUrl& sPath);
-  QString AddResource(tspProject& spProj, const QUrl& sPath, const EResourceType& type, const QString& sName = QString(),
+  QString AddResource(tspProject& spProj, const SResourcePath& sPath, const EResourceType& type,
+                      const QString& sName = QString(),
                       const tvfnActionsResource& vfnActionsAfterAdding = tvfnActionsResource());
   void ClearResources(tspProject& spProj);
   tspResource FindResourceInProject(tspProject& spProj, const QString& sName);

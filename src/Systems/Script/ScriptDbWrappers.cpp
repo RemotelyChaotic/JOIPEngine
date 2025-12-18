@@ -529,10 +529,10 @@ bool CResourceScriptWrapper::isAnimatedImpl()
   {
     case EResourceType::eImage:
     {
-      if (IsLocalFile(m_spData->m_sPath))
+      if (m_spData->m_sPath.IsLocalFile())
       {
         locker.unlock();
-        QString sPath = ResourceUrlToAbsolutePath(m_spData);
+        QString sPath = m_spData->ResourceToAbsolutePath();
         if (QFileInfo::exists(sPath))
         {
           QImageReader reader(sPath);
@@ -565,7 +565,7 @@ bool CResourceScriptWrapper::isAnimatedImpl()
 bool CResourceScriptWrapper::isLocalPath()
 {
   QReadLocker locker(&m_spData->m_rwLock);
-  return IsLocalFile(m_spData->m_sPath);
+  return m_spData->m_sPath.IsLocalFile();
 }
 
 //----------------------------------------------------------------------------------------
@@ -582,17 +582,17 @@ QUrl CResourceScriptWrapper::getPath()
 {
   if (nullptr == m_spData->m_spParent)
   {
-    return m_spData->m_sPath;
+    return static_cast<QUrl>(m_spData->m_sPath);
   }
 
-  if (IsLocalFile(m_spData->m_sPath))
+  if (m_spData->m_sPath.IsLocalFile())
   {
-    const QString sTruePathName = ResourceUrlToAbsolutePath(m_spData, "qrc:");
+    const QString sTruePathName = m_spData->ResourceToAbsolutePath("qrc:");
     return QUrl(sTruePathName);
   }
   else
   {
-    return m_spData->m_sPath;
+    return static_cast<QUrl>(m_spData->m_sPath);
   }
 }
 
