@@ -133,7 +133,7 @@ void CDialogueEditorDelegate::setEditorData(QWidget* pEditor, const QModelIndex&
         pWidget->setItemData(pWidget->count()-1, false, c_iIdxNewFile);
         //pWidget->addItem("<New Resource>", QString());
         //pWidget->setItemData(pWidget->count()-1, true, c_iIdxNewFile);
-        for (const auto& [sName, spResource] : m_spProject->m_spResourcesMap)
+        for (const auto& [sName, spResource] : m_spProject->m_baseData.m_spResourcesMap)
         {
           QReadLocker l(&spResource->m_rwLock);
           if (EResourceType::eSound != spResource->m_type._to_integral()) { continue; }

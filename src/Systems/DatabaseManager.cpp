@@ -401,16 +401,16 @@ qint32 CDatabaseManager::AddScene(tspProject& spProj, const QString& sName,
   QWriteLocker locker(&spProj->m_rwLock);
   if (0 <= iNewId)
   {
-    spProj->m_vspScenes.push_back(std::make_shared<SScene>());
-    spProj->m_vspScenes.back()->m_iId = iNewId;
-    spProj->m_vspScenes.back()->m_sName = sFinalName;
-    spProj->m_vspScenes.back()->m_spParent = spProj;
+    spProj->m_baseData.m_vspScenes.push_back(std::make_shared<SScene>());
+    spProj->m_baseData.m_vspScenes.back()->m_iId = iNewId;
+    spProj->m_baseData.m_vspScenes.back()->m_sName = sFinalName;
+    spProj->m_baseData.m_vspScenes.back()->m_spParent = spProj;
 
     locker.unlock();
 
     for (auto fn : vfnActionsAfterAdding)
     {
-      if (nullptr != fn) { fn(spProj->m_vspScenes.back()); }
+      if (nullptr != fn) { fn(spProj->m_baseData.m_vspScenes.back()); }
     }
 
     emit SignalSceneAdded(spProj->m_iId, iNewId);
@@ -425,13 +425,13 @@ void CDatabaseManager::ClearScenes(tspProject& spProj)
   if (!IsInitialized() || nullptr == spProj) { return; }
 
   QWriteLocker locker(&spProj->m_rwLock);
-  while (0 < spProj->m_vspScenes.size())
+  while (0 < spProj->m_baseData.m_vspScenes.size())
   {
-    auto it = spProj->m_vspScenes.begin();
+    auto it = spProj->m_baseData.m_vspScenes.begin();
     QReadLocker sceneLocker(&(*it)->m_rwLock);
     qint32 iSceneId = (*it)->m_iId;
     sceneLocker.unlock();
-    spProj->m_vspScenes.erase(it);
+    spProj->m_baseData.m_vspScenes.erase(it);
 
     locker.unlock();
     emit SignalSceneRemoved(spProj->m_iId, iSceneId);
@@ -446,7 +446,7 @@ tspScene CDatabaseManager::FindScene(tspProject& spProj, qint32 iId)
   if (!IsInitialized() || nullptr == spProj) { return nullptr; }
 
   QReadLocker locker(&spProj->m_rwLock);
-  for (tspScene& spScene : spProj->m_vspScenes)
+  for (tspScene& spScene : spProj->m_baseData.m_vspScenes)
   {
     QReadLocker projLocker(&spScene->m_rwLock);
     if (spScene->m_iId == iId)
@@ -464,7 +464,7 @@ tspScene CDatabaseManager::FindScene(tspProject& spProj, const QString& sName)
   if (!IsInitialized() || nullptr == spProj) { return nullptr; }
 
   QReadLocker locker(&spProj->m_rwLock);
-  for (tspScene& spScene : spProj->m_vspScenes)
+  for (tspScene& spScene : spProj->m_baseData.m_vspScenes)
   {
     QReadLocker projLocker(&spScene->m_rwLock);
     if (spScene->m_sName == sName)
@@ -482,14 +482,14 @@ void CDatabaseManager::RemoveScene(tspProject& spProj, qint32 iId)
   if (!IsInitialized() || nullptr == spProj) { return; }
 
   QWriteLocker locker(&spProj->m_rwLock);
-  for (auto it = spProj->m_vspScenes.begin(); spProj->m_vspScenes.end() != it; ++it)
+  for (auto it = spProj->m_baseData.m_vspScenes.begin(); spProj->m_baseData.m_vspScenes.end() != it; ++it)
   {
     QReadLocker sceneLocker(&(*it)->m_rwLock);
     qint32 iSceneId = (*it)->m_iId;
     sceneLocker.unlock();
     if (iSceneId == iId)
     {
-      spProj->m_vspScenes.erase(it);
+      spProj->m_baseData.m_vspScenes.erase(it);
 
       locker.unlock();
       emit SignalSceneRemoved(spProj->m_iId, iSceneId);
@@ -505,7 +505,7 @@ void CDatabaseManager::RemoveScene(tspProject& spProj, const QString& sName)
   if (!IsInitialized() || nullptr == spProj) { return; }
 
   QWriteLocker locker(&spProj->m_rwLock);
-  for (auto it = spProj->m_vspScenes.begin(); spProj->m_vspScenes.end() != it; ++it)
+  for (auto it = spProj->m_baseData.m_vspScenes.begin(); spProj->m_baseData.m_vspScenes.end() != it; ++it)
   {
     QReadLocker sceneLocker(&(*it)->m_rwLock);
     qint32 iSceneId = (*it)->m_iId;
@@ -513,7 +513,7 @@ void CDatabaseManager::RemoveScene(tspProject& spProj, const QString& sName)
     sceneLocker.unlock();
     if (sFoundName == sName)
     {
-      spProj->m_vspScenes.erase(it);
+      spProj->m_baseData.m_vspScenes.erase(it);
 
       locker.unlock();
       emit SignalSceneRemoved(spProj->m_iId, iSceneId);
@@ -611,7 +611,7 @@ QString CDatabaseManager::AddResource(tspProject& spProj, const QUrl& sPath,
   spResource->m_sPath = sPath;
   spResource->m_type = type;
   spResource->m_spParent = spProj;
-  spProj->m_spResourcesMap.insert({sFinalName, spResource});
+  spProj->m_baseData.m_spResourcesMap.insert({sFinalName, spResource});
 
   locker.unlock();
   if (spProj->m_bLoaded)
@@ -637,9 +637,9 @@ void CDatabaseManager::ClearResources(tspProject& spProj)
   if (!IsInitialized() || nullptr == spProj) { return; }
 
   QWriteLocker locker(&spProj->m_rwLock);
-  while (0 < spProj->m_spResourcesMap.size())
+  while (0 < spProj->m_baseData.m_spResourcesMap.size())
   {
-    auto it = spProj->m_spResourcesMap.begin();
+    auto it = spProj->m_baseData.m_spResourcesMap.begin();
     QString sName = it->first;
 
     if (spProj->m_bLoaded)
@@ -647,9 +647,9 @@ void CDatabaseManager::ClearResources(tspProject& spProj)
       m_spDbIo->UnloadResource(it->second);
     }
 
-    spProj->m_spResourcesMap.erase(it);
+    spProj->m_baseData.m_spResourcesMap.erase(it);
 
-    for (tspScene& spScene : spProj->m_vspScenes)
+    for (tspScene& spScene : spProj->m_baseData.m_vspScenes)
     {
       QWriteLocker sceneLocker(&spScene->m_rwLock);
       spScene->m_vsResourceRefs.clear();
@@ -674,8 +674,8 @@ tspResource CDatabaseManager::FindResourceInProject(tspProject& spProj, const QS
   if (!IsInitialized() || nullptr == spProj) { return nullptr; }
 
   QReadLocker locker(&spProj->m_rwLock);
-  auto it = spProj->m_spResourcesMap.find(sName);
-  if (it != spProj->m_spResourcesMap.end())
+  auto it = spProj->m_baseData.m_spResourcesMap.find(sName);
+  if (it != spProj->m_baseData.m_spResourcesMap.end())
   {
     return it->second;
   }
@@ -690,7 +690,7 @@ tvspResource CDatabaseManager::FindResourcesInProject(tspProject& spProj, const 
   if (!IsInitialized() || nullptr == spProj) { return retVal; }
 
   QReadLocker locker(&spProj->m_rwLock);
-  for (auto it = spProj->m_spResourcesMap.begin(); spProj->m_spResourcesMap.end() != it; ++it)
+  for (auto it = spProj->m_baseData.m_spResourcesMap.begin(); spProj->m_baseData.m_spResourcesMap.end() != it; ++it)
   {
     qint32 iPos = 0;
     if ((iPos = rx.indexIn(it->first, iPos)) == -1)
@@ -708,8 +708,8 @@ tspResourceBundle CDatabaseManager::FindResourceBundleInProject(tspProject& spPr
   if (!IsInitialized() || nullptr == spProj) { return nullptr; }
 
   QReadLocker locker(&spProj->m_rwLock);
-  auto it = spProj->m_spResourceBundleMap.find(sName);
-  if (it != spProj->m_spResourceBundleMap.end())
+  auto it = spProj->m_baseData.m_spResourceBundleMap.find(sName);
+  if (it != spProj->m_baseData.m_spResourceBundleMap.end())
   {
     return it->second;
   }
@@ -723,8 +723,8 @@ void CDatabaseManager::RemoveResource(tspProject& spProj, const QString& sName)
   if (!IsInitialized() || nullptr == spProj) { return; }
 
   QWriteLocker locker(&spProj->m_rwLock);
-  auto it = spProj->m_spResourcesMap.find(sName);
-  if (it != spProj->m_spResourcesMap.end())
+  auto it = spProj->m_baseData.m_spResourcesMap.find(sName);
+  if (it != spProj->m_baseData.m_spResourcesMap.end())
   {
     qint32 iId = spProj->m_iId;
 
@@ -733,9 +733,9 @@ void CDatabaseManager::RemoveResource(tspProject& spProj, const QString& sName)
       m_spDbIo->UnloadResource(it->second);
     }
 
-    spProj->m_spResourcesMap.erase(it);
+    spProj->m_baseData.m_spResourcesMap.erase(it);
 
-    for (tspScene& spScene : spProj->m_vspScenes)
+    for (tspScene& spScene : spProj->m_baseData.m_vspScenes)
     {
       QWriteLocker sceneLocker(&spScene->m_rwLock);
       auto refsIt = spScene->m_vsResourceRefs.find(sName);
@@ -750,7 +750,7 @@ void CDatabaseManager::RemoveResource(tspProject& spProj, const QString& sName)
     }
 
     // delete tag references
-    for (auto itTag = spProj->m_vspTags.begin(); spProj->m_vspTags.end() != itTag;)
+    for (auto itTag = spProj->m_baseData.m_vspTags.begin(); spProj->m_baseData.m_vspTags.end() != itTag;)
     {
       QWriteLocker tagLocker(&itTag->second->m_rwLock);
       QString sTagName = itTag->second->m_sName;
@@ -763,7 +763,7 @@ void CDatabaseManager::RemoveResource(tspProject& spProj, const QString& sName)
       if (itTag->second->m_vsResourceRefs.empty())
       {
         tagLocker.unlock();
-        itTag = spProj->m_vspTags.erase(itTag);
+        itTag = spProj->m_baseData.m_vspTags.erase(itTag);
         locker.unlock();
         emit SignalTagRemoved(iId, QString(), sTagName);
       }
@@ -777,7 +777,7 @@ void CDatabaseManager::RemoveResource(tspProject& spProj, const QString& sName)
     }
 
     // rename refs in achievements
-    for (const auto& [sAchName, spAchievements] : spProj->m_vspAchievements)
+    for (const auto& [sAchName, spAchievements] : spProj->m_baseData.m_vspAchievements)
     {
       if (sAchName == sName)
       {
@@ -806,8 +806,8 @@ void CDatabaseManager::RenameResource(tspProject& spProj, const QString& sName, 
     tspResource spResource = FindResourceInProject(spProj, sName);
 
     QWriteLocker locker(&spProj->m_rwLock);
-    auto it = spProj->m_spResourcesMap.find(sName);
-    if (it != spProj->m_spResourcesMap.end())
+    auto it = spProj->m_baseData.m_spResourcesMap.find(sName);
+    if (it != spProj->m_baseData.m_spResourcesMap.end())
     {
       qint32 iProjId = spProj->m_iId;
 
@@ -830,11 +830,11 @@ void CDatabaseManager::RenameResource(tspProject& spProj, const QString& sName, 
         m_spDbIo->UnloadResource(spResource);
       }
 
-      spProj->m_spResourcesMap.erase(it);
+      spProj->m_baseData.m_spResourcesMap.erase(it);
       spResource->m_rwLock.lockForWrite();
       spResource->m_sName = sNewName;
       spResource->m_rwLock.unlock();
-      spProj->m_spResourcesMap.insert({sNewName, spResource});
+      spProj->m_baseData.m_spResourcesMap.insert({sNewName, spResource});
 
       if (spProj->m_bLoaded)
       {
@@ -844,7 +844,7 @@ void CDatabaseManager::RenameResource(tspProject& spProj, const QString& sName, 
       }
 
       // rename refs from scene
-      for (tspScene& spScene : spProj->m_vspScenes)
+      for (tspScene& spScene : spProj->m_baseData.m_vspScenes)
       {
         QWriteLocker sceneLocker(&spScene->m_rwLock);
         auto refsIt = spScene->m_vsResourceRefs.find(sName);
@@ -856,7 +856,7 @@ void CDatabaseManager::RenameResource(tspProject& spProj, const QString& sName, 
       }
 
       // rename refs in tags
-      for (const auto& [_, spTag] : spProj->m_vspTags)
+      for (const auto& [_, spTag] : spProj->m_baseData.m_vspTags)
       {
         QWriteLocker tagLocker(&spTag->m_rwLock);
         auto itResRef = spTag->m_vsResourceRefs.find(sName);
@@ -868,7 +868,7 @@ void CDatabaseManager::RenameResource(tspProject& spProj, const QString& sName, 
       }
 
       // rename refs in achievements
-      for (const auto& [_, spAchievements] : spProj->m_vspAchievements)
+      for (const auto& [_, spAchievements] : spProj->m_baseData.m_vspAchievements)
       {
         QWriteLocker acLocker(&spAchievements->m_rwLock);
         if (spAchievements->m_sResource == sName)
@@ -894,13 +894,13 @@ QString CDatabaseManager::AddTag(tspProject& spProj, const QString& sResource, c
 
   tspTag spTag = nullptr;
   qint32 iId = -1;
-  if (auto tagIt = spProj->m_vspTags.find(sName); spProj->m_vspTags.end() == tagIt)
+  if (auto tagIt = spProj->m_baseData.m_vspTags.find(sName); spProj->m_baseData.m_vspTags.end() == tagIt)
   {
     spTag = std::make_shared<STag>(sCategory, sName, sDescribtion);
 
     QWriteLocker locker(&spProj->m_rwLock);
     spTag->m_spParent = spProj;
-    spProj->m_vspTags.insert({sName, spTag});
+    spProj->m_baseData.m_vspTags.insert({sName, spTag});
     iId = spProj->m_iId;
     bChanged = true;
   }
@@ -942,12 +942,12 @@ void CDatabaseManager::ClearTags(tspProject& spProj)
 
   QWriteLocker locker(&spProj->m_rwLock);
   qint32 iId = spProj->m_iId;
-  while (0 < spProj->m_vspTags.size())
+  while (0 < spProj->m_baseData.m_vspTags.size())
   {
-    auto it = spProj->m_vspTags.begin();
+    auto it = spProj->m_baseData.m_vspTags.begin();
     QString sTag = it->first;
 
-    spProj->m_vspTags.erase(it);
+    spProj->m_baseData.m_vspTags.erase(it);
 
     RemoveLingeringTagReferencesFromResources(spProj, it->second);
 
@@ -964,8 +964,8 @@ tspTag CDatabaseManager::FindTagInProject(tspProject& spProj, QString sName)
   if (!IsInitialized() || nullptr == spProj) { return nullptr; }
 
   QReadLocker locker(&spProj->m_rwLock);
-  auto it = spProj->m_vspTags.find(sName);
-  if (spProj->m_vspTags.end() != it)
+  auto it = spProj->m_baseData.m_vspTags.find(sName);
+  if (spProj->m_baseData.m_vspTags.end() != it)
   {
     return it->second;
   }
@@ -984,11 +984,11 @@ void CDatabaseManager::RemoveTag(tspProject& spProj, const QString& sName)
     QWriteLocker locker(&spProj->m_rwLock);
     iProjId = spProj->m_iId;
 
-    auto it = spProj->m_vspTags.find(sName);
-    if (spProj->m_vspTags.end() != it)
+    auto it = spProj->m_baseData.m_vspTags.find(sName);
+    if (spProj->m_baseData.m_vspTags.end() != it)
     {
       RemoveLingeringTagReferencesFromResources(spProj, it->second);
-      spProj->m_vspTags.erase(it);
+      spProj->m_baseData.m_vspTags.erase(it);
       bRemoved = true;
     }
   }
@@ -1012,8 +1012,8 @@ void CDatabaseManager::RemoveTagFromResource(tspProject& spProj, const QString& 
     QWriteLocker lockerProj(&spProj->m_rwLock);
     iProjId = spProj->m_iId;
 
-    auto it = spProj->m_vspTags.find(sName);
-    if (spProj->m_vspTags.end() != it)
+    auto it = spProj->m_baseData.m_vspTags.find(sName);
+    if (spProj->m_baseData.m_vspTags.end() != it)
     {
       QWriteLocker locker(&it->second->m_rwLock);
       auto itRes = it->second->m_vsResourceRefs.find(sResource);
@@ -1025,12 +1025,12 @@ void CDatabaseManager::RemoveTagFromResource(tspProject& spProj, const QString& 
 
       if (it->second->m_vsResourceRefs.empty())
       {
-        spProj->m_vspTags.erase(it);
+        spProj->m_baseData.m_vspTags.erase(it);
         bRemovedFromProject = true;
       }
 
-      auto itResourse = spProj->m_spResourcesMap.find(sResource);
-      if (spProj->m_spResourcesMap.end() != itResourse)
+      auto itResourse = spProj->m_baseData.m_spResourcesMap.find(sResource);
+      if (spProj->m_baseData.m_spResourcesMap.end() != itResourse)
       {
         QWriteLocker locker(&itResourse->second->m_rwLock);
         auto itRes = itResourse->second->m_vsResourceTags.find(sName);
@@ -1056,7 +1056,7 @@ QStringList CDatabaseManager::TagCategories(const tspProject& spProj)
 
   QStringList res;
   QReadLocker locker(&spProj->m_rwLock);
-  for (const auto& [_, spTag] : spProj->m_vspTags)
+  for (const auto& [_, spTag] : spProj->m_baseData.m_vspTags)
   {
     QReadLocker tagLocker(&spTag->m_rwLock);
     if (!res.contains(spTag->m_sType))
@@ -1148,7 +1148,7 @@ QString CDatabaseManager::AddAchievement(
 
   tspSaveData spAchievement = nullptr;
   qint32 iId = -1;
-  if (auto tagIt = spProj->m_vspAchievements.find(sName); spProj->m_vspAchievements.end() == tagIt)
+  if (auto tagIt = spProj->m_baseData.m_vspAchievements.find(sName); spProj->m_baseData.m_vspAchievements.end() == tagIt)
   {
     spAchievement = std::make_shared<SSaveData>(sName, sDescribtion,
                                                 ESaveDataType::_from_integral(iType),
@@ -1156,7 +1156,7 @@ QString CDatabaseManager::AddAchievement(
 
     QWriteLocker locker(&spProj->m_rwLock);
     spAchievement->m_spParent = spProj;
-    spProj->m_vspAchievements.insert({sName, spAchievement});
+    spProj->m_baseData.m_vspAchievements.insert({sName, spAchievement});
     iId = spProj->m_iId;
     bChanged = true;
   }
@@ -1181,12 +1181,12 @@ void CDatabaseManager::ClearAchievement(tspProject& spProj)
 
   QWriteLocker locker(&spProj->m_rwLock);
   qint32 iId = spProj->m_iId;
-  while (0 < spProj->m_vspAchievements.size())
+  while (0 < spProj->m_baseData.m_vspAchievements.size())
   {
-    auto it = spProj->m_vspAchievements.begin();
+    auto it = spProj->m_baseData.m_vspAchievements.begin();
     QString sName = it->first;
 
-    spProj->m_vspAchievements.erase(it);
+    spProj->m_baseData.m_vspAchievements.erase(it);
 
     locker.unlock();
     emit SignalAchievementRemoved(iId, sName);
@@ -1201,8 +1201,8 @@ tspSaveData CDatabaseManager::FindAchievementInProject(tspProject& spProj, QStri
   if (!IsInitialized() || nullptr == spProj) { return nullptr; }
 
   QReadLocker locker(&spProj->m_rwLock);
-  auto it = spProj->m_vspAchievements.find(sName);
-  if (spProj->m_vspAchievements.end() != it)
+  auto it = spProj->m_baseData.m_vspAchievements.find(sName);
+  if (spProj->m_baseData.m_vspAchievements.end() != it)
   {
     return it->second;
   }
@@ -1221,10 +1221,10 @@ void CDatabaseManager::RemoveAchievement(tspProject& spProj, const QString& sNam
     QWriteLocker locker(&spProj->m_rwLock);
     iProjId = spProj->m_iId;
 
-    auto it = spProj->m_vspAchievements.find(sName);
-    if (spProj->m_vspAchievements.end() != it)
+    auto it = spProj->m_baseData.m_vspAchievements.find(sName);
+    if (spProj->m_baseData.m_vspAchievements.end() != it)
     {
-      spProj->m_vspAchievements.erase(it);
+      spProj->m_baseData.m_vspAchievements.erase(it);
       bRemoved = true;
     }
   }
@@ -1249,15 +1249,15 @@ void CDatabaseManager::RenameAchievement(tspProject& spProj, const QString& sNam
 
     QWriteLocker locker(&spProj->m_rwLock);
     qint32 iProjId = spProj->m_iId;
-    auto it = spProj->m_vspAchievements.find(sName);
-    if (it != spProj->m_vspAchievements.end())
+    auto it = spProj->m_baseData.m_vspAchievements.find(sName);
+    if (it != spProj->m_baseData.m_vspAchievements.end())
     {
-      spProj->m_vspAchievements.erase(it);
+      spProj->m_baseData.m_vspAchievements.erase(it);
       {
         QWriteLocker l(&spAchievement->m_rwLock);
         spAchievement->m_sName = sNewName;
       }
-      spProj->m_vspAchievements[sNewName] = spAchievement;
+      spProj->m_baseData.m_vspAchievements[sNewName] = spAchievement;
 
       locker.unlock();
       emit SignalAchievementRenamed(iProjId, sName, sNewName);
@@ -1370,7 +1370,7 @@ qint32 CDatabaseManager::FindNewSceneId(tspProject& spProj)
 {
   QReadLocker projLocker(&spProj->m_rwLock);
   std::set<qint32, std::less<qint32>> ids;
-  for (tspScene& spScene : spProj->m_vspScenes)
+  for (tspScene& spScene : spProj->m_baseData.m_vspScenes)
   {
     QReadLocker sceneLocker(&spScene->m_rwLock);
     ids.insert(spScene->m_iId);
@@ -1387,8 +1387,8 @@ void CDatabaseManager::RemoveLingeringTagReferencesFromResources(tspProject& spP
   QWriteLocker tagLocker(&spProj->m_rwLock);
   for (const QString& sRes : spTag->m_vsResourceRefs)
   {
-    auto itRes = spProj->m_spResourcesMap.find(sRes);
-    if (spProj->m_spResourcesMap.end() != itRes)
+    auto itRes = spProj->m_baseData.m_spResourcesMap.find(sRes);
+    if (spProj->m_baseData.m_spResourcesMap.end() != itRes)
     {
       QWriteLocker resLocker(&itRes->second->m_rwLock);
       auto itTag = itRes->second->m_vsResourceTags.find(spTag->m_sName);

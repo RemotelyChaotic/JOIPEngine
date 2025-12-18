@@ -247,7 +247,7 @@ void CProjectSavegameManager::AutoloadSaves()
       std::optional<SSettingFile> optAchs =
           m_spPersistence->Read(spData->m_sName, save_data::c_sFileAchievements);
       SSettingFile achs = optAchs.value_or(SSettingFile{save_data::c_sFileAchievements, {}});
-      for (const auto& [sName, spAch] : spData->m_vspAchievements)
+      for (const auto& [sName, spAch] : spData->m_baseData.m_vspAchievements)
       {
         auto it = achs.m_settings.find(sName);
         if (achs.m_settings.end() == it)

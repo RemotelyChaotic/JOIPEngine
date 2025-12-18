@@ -328,23 +328,23 @@ QString CResourceToolTipPrivate::GetTipString(const STipData& data,
   QString sTags = data.spResource->m_vsResourceTags.empty() ? "&lt;no tags&gt;" : "";
   for (const QString& sTag : data.spResource->m_vsResourceTags)
   {
-    QColor colBg = Qt::transparent;
+    QColor colBg = Qt::magenta;
     QColor colText;
-    auto itTag = data.spResource->m_spParent->m_vspTags.find(sTag);
-    if (data.spResource->m_spParent->m_vspTags.end() != itTag)
+    auto itTag = data.spResource->m_spParent->m_baseData.m_vspTags.find(sTag);
+    if (data.spResource->m_spParent->m_baseData.m_vspTags.end() != itTag)
     {
       QReadLocker tagLocker(&itTag->second->m_rwLock);
       colBg = CalculateTagColor(*itTag->second);
+    }
 
-      // calculate foreground / text color
-      double dLuminance = (0.299 * colBg.red() +
-                           0.587 * colBg.green() +
-                           0.114 * colBg.blue()) / 255;
-      colText = Qt::white;
-      if (dLuminance > 0.5)
-      {
-        colText = Qt::black;
-      }
+    // calculate foreground / text color
+    double dLuminance = (0.299 * colBg.red() +
+                         0.587 * colBg.green() +
+                         0.114 * colBg.blue()) / 255;
+    colText = Qt::white;
+    if (dLuminance > 0.5)
+    {
+      colText = Qt::black;
     }
 
     QString sTagFormated = sTag;

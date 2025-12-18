@@ -292,7 +292,7 @@ void CEditorProjectSettingsWidget::LoadProject(tspProject spProject)
     m_spUi->pDefaultLayoutComboBox->clear();
     m_spUi->pDefaultLayoutComboBox->addItem("(In-Built) Old Layout", "qrc:/qml/resources/qml/JoipEngine/PlayerDefaultLayoutClassic.qml");
     m_spUi->pDefaultLayoutComboBox->addItem("(In-Built) 1.4.0 Layout", "qrc:/qml/resources/qml/JoipEngine/PlayerDefaultLayout.qml");
-    for (const auto& [sName, spResource] : m_spCurrentProject->m_spResourcesMap)
+    for (const auto& [sName, spResource] : m_spCurrentProject->m_baseData.m_spResourcesMap)
     {
       QReadLocker resLocker(&spResource->m_rwLock);
       if (EResourceType::eLayout == spResource->m_type._to_integral())
@@ -323,15 +323,15 @@ void CEditorProjectSettingsWidget::LoadProject(tspProject spProject)
     m_spUi->pFetishListWidget->setEnabled(!bReadOnly);
 
 
-    AddKinks(m_spCurrentProject->m_vsKinks);
-    KinkModel()->SetSelections(m_spCurrentProject->m_vsKinks);
+    AddKinks(m_spCurrentProject->m_baseData.m_vsKinks);
+    KinkModel()->SetSelections(m_spCurrentProject->m_baseData.m_vsKinks);
 
     m_spKinkSelectionOverlay->LoadProject(bReadOnly);
 
     m_spUi->pAchievementLineEdit->setEnabled(!bReadOnly);
     m_spUi->AddNewAchievement->setEnabled(!bReadOnly);
     m_spUi->pAchievementList->setEnabled(!bReadOnly);
-    for (const auto& [_, spAch] :m_spCurrentProject->m_vspAchievements)
+    for (const auto& [_, spAch] :m_spCurrentProject->m_baseData.m_vspAchievements)
     {
       QReadLocker l(&spAch->m_rwLock);
       AddAchievement(*spAch, false);
@@ -412,12 +412,12 @@ void CEditorProjectSettingsWidget::SaveProject()
 
   m_spCurrentProject->m_sPluginFolder = m_spUi->pPluginFolderLineEdit->text();
 
-  m_spCurrentProject->m_vsKinks.clear();
+  m_spCurrentProject->m_baseData.m_vsKinks.clear();
   const auto& vspKinks = m_spUi->pFetishListWidget->Tags();
   for (qint32 i = 0; static_cast<qint32>(vspKinks.size()) > i; ++i)
   {
     QReadLocker locker(&vspKinks[static_cast<size_t>(i)]->m_rwLock);
-    m_spCurrentProject->m_vsKinks.push_back(vspKinks[static_cast<size_t>(i)]->m_sName);
+    m_spCurrentProject->m_baseData.m_vsKinks.push_back(vspKinks[static_cast<size_t>(i)]->m_sName);
   }
 }
 

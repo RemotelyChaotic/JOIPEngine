@@ -130,7 +130,7 @@ public:
             spProject->m_sName = sProjName;
             if (bIsOldEos)
             {
-              for (tspScene& spScene : spProject->m_vspScenes)
+              for (tspScene& spScene : spProject->m_baseData.m_vspScenes)
               {
                 QWriteLocker l(&spScene->m_rwLock);
                 spScene->m_sceneMode = ESceneMode::eEventDriven;
@@ -397,8 +397,8 @@ bool CDatabaseIO::LoadBundle(tspProject& spProject, const QString& sBundle)
   const QString sProjectName = PhysicalProjectName(spProject);
   QReadLocker locker(&spProject->m_rwLock);
 
-  const auto& it = spProject->m_spResourceBundleMap.find(sBundle);
-  if (spProject->m_spResourceBundleMap.end() != it)
+  const auto& it = spProject->m_baseData.m_spResourceBundleMap.find(sBundle);
+  if (spProject->m_baseData.m_spResourceBundleMap.end() != it)
   {
     QWriteLocker lockerBundle(&it->second->m_rwLock);
     if (it->second->m_bLoaded) { return true; }
@@ -539,7 +539,7 @@ bool CDatabaseIO::LoadProject(tspProject& spProject, bool bLoadPlugins)
   // if loaded, pre-load nessessary resources
   if (!bWasLoaded)
   {
-    for (auto& itRes : spProject->m_spResourcesMap)
+    for (auto& itRes : spProject->m_baseData.m_spResourcesMap)
     {
       tspResource& spRes = itRes.second;
       locker.unlock();
@@ -587,8 +587,8 @@ bool CDatabaseIO::UnloadBundle(tspProject& spProject, const QString& sBundle)
   const QString sProjectName = PhysicalProjectName(spProject);
   QReadLocker locker(&spProject->m_rwLock);
 
-  const auto& it = spProject->m_spResourceBundleMap.find(sBundle);
-  if (spProject->m_spResourceBundleMap.end() != it)
+  const auto& it = spProject->m_baseData.m_spResourceBundleMap.find(sBundle);
+  if (spProject->m_baseData.m_spResourceBundleMap.end() != it)
   {
     QWriteLocker lockerBundle(&it->second->m_rwLock);
     if (!it->second->m_bLoaded) { return true; }
@@ -634,7 +634,7 @@ bool CDatabaseIO::UnloadProject(tspProject& spProject)
   {
     UnloadPlugins(spProject);
 
-    for (auto& itRes : spProject->m_spResourcesMap)
+    for (auto& itRes : spProject->m_baseData.m_spResourcesMap)
     {
       tspResource& spRes = itRes.second;
       UnloadResource(spRes);
@@ -644,7 +644,7 @@ bool CDatabaseIO::UnloadProject(tspProject& spProject)
   bool bUnloaded = true;
 
   // if loaded unload bundles
-  for (const auto& it : spProject->m_spResourceBundleMap)
+  for (const auto& it : spProject->m_baseData.m_spResourceBundleMap)
   {
     locker.unlock();
     bUnloaded &= UnloadBundle(spProject, it.first);
@@ -821,7 +821,7 @@ bool CDatabaseIO::AddResourceArchive(tspProject& spProj, const QUrl& sPath)
     spResourceBundle->m_spParent = spProj;
     spResourceBundle->m_sName = sName;
     spResourceBundle->m_sPath = sPath;
-    spProj->m_spResourceBundleMap.insert({sName, spResourceBundle});
+    spProj->m_baseData.m_spResourceBundleMap.insert({sName, spResourceBundle});
   }
   // archive
   else

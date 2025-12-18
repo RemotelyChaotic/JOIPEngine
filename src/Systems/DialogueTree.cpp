@@ -221,8 +221,8 @@ namespace
               if (tag.is_string())
               {
                 const QString sTag = QString::fromStdString(tag.get<std::string>());
-                auto itTag = spProj->m_vspTags.find(sTag);
-                if (spProj->m_vspTags.end() != itTag)
+                auto itTag = spProj->m_baseData.m_vspTags.find(sTag);
+                if (spProj->m_baseData.m_vspTags.end() != itTag)
                 {
                   spChild->m_tags.insert({sTag, itTag->second});
                 }
@@ -485,8 +485,8 @@ namespace
       else if (EDialogueTreeNodeType::eDialogueFragment == spNode->m_type._to_integral())
       {
         std::shared_ptr<CDialogueNode> spNodeCopy = spNode->Clone();
-        auto it = spProject->m_spResourcesMap.find(spNodeCopy->m_sFileId);
-        if (spProject->m_spResourcesMap.end() != it)
+        auto it = spProject->m_baseData.m_spResourcesMap.find(spNodeCopy->m_sFileId);
+        if (spProject->m_baseData.m_spResourcesMap.end() != it)
         {
           out[it->second].push_back(spNodeCopy);
         }

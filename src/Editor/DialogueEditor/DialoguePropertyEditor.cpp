@@ -70,7 +70,7 @@ void CDialoguePropertyEditor::SetNode(QStringList vsPath,
   if (nullptr != m_spCurrentProject)
   {
     QReadLocker locker(&m_spCurrentProject->m_rwLock);
-    for (const auto& [sName, spResource] : m_spCurrentProject->m_spResourcesMap)
+    for (const auto& [sName, spResource] : m_spCurrentProject->m_baseData.m_spResourcesMap)
     {
       QReadLocker l(&spResource->m_rwLock);
       if (EResourceType::eDatabase != spResource->m_type._to_integral()) { continue; }

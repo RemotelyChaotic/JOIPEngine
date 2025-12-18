@@ -79,7 +79,7 @@ void CPathSplitterModelWidget::SetProject(const tspProject& spProject)
 
   m_spUi->pLayoutComboBox->addItem("<Transition Layout>", "");
 
-  for (const auto& [sName, tspResource] : spProject->m_spResourcesMap)
+  for (const auto& [sName, tspResource] : spProject->m_baseData.m_spResourcesMap)
   {
     QReadLocker locker(&tspResource->m_rwLock);
     switch (tspResource->m_type)

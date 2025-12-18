@@ -19,27 +19,17 @@ namespace  {
 //
 SProject::SProject() :
   SProjectData(),
-  m_rwLock(QReadWriteLock::Recursive),
-  m_vsKinks(),
-  m_vspScenes(),
-  m_spResourcesMap(),
-  m_spResourceBundleMap(),
-  m_vspTags(),
-  m_vspAchievements(),
-  m_vsMountPoints()
+  m_rwLock(QReadWriteLock::Recursive)
 {
 }
 SProject::SProject(const SProject& other) :
   std::enable_shared_from_this<SProject>(other),
   SProjectData(other),
   m_rwLock(QReadWriteLock::Recursive),
-  m_vsKinks(other.m_vsKinks),
-  m_vspScenes(other.m_vspScenes),
-  m_spResourcesMap(other.m_spResourcesMap),
-  m_spResourceBundleMap(other.m_spResourceBundleMap),
-  m_vspTags(other.m_vspTags),
-  m_vspAchievements(other.m_vspAchievements),
-  m_vsMountPoints(other.m_vsMountPoints)
+  m_baseData(other.m_baseData),
+  m_vsMountPoints(other.m_vsMountPoints),
+  m_vspPlugins(other.m_vspPlugins),
+  m_pluginData(other.m_pluginData)
 {}
 
 SProject::~SProject() {}
@@ -51,32 +41,32 @@ QJsonObject SProject::ToJsonObject()
   QWriteLocker locker(&m_rwLock);
 
   QJsonArray kinks;
-  for (const QString& sKink : m_vsKinks)
+  for (const QString& sKink : m_baseData.m_vsKinks)
   {
     kinks.push_back(sKink);
   }
   QJsonArray scenes;
-  for (auto& spScene : m_vspScenes)
+  for (auto& spScene : m_baseData.m_vspScenes)
   {
     scenes.push_back(spScene->ToJsonObject());
   }
   QJsonArray resources;
-  for (auto& spResource : m_spResourcesMap)
+  for (auto& spResource : m_baseData.m_spResourcesMap)
   {
     resources.push_back(spResource.second->ToJsonObject());
   }
   QJsonArray resourceBundles;
-  for (auto& spResourceBundle : m_spResourceBundleMap)
+  for (auto& spResourceBundle : m_baseData.m_spResourceBundleMap)
   {
     resourceBundles.push_back(spResourceBundle.second->ToJsonObject());
   }
   QJsonArray tags;
-  for (auto& spTag : m_vspTags)
+  for (auto& spTag : m_baseData.m_vspTags)
   {
     tags.push_back(spTag.second->ToJsonObject());
   }
   QJsonArray achievements;
-  for (auto& spAchievement : m_vspAchievements)
+  for (auto& spAchievement : m_baseData.m_vspAchievements)
   {
     achievements.push_back(spAchievement.second->ToJsonObject());
   }
@@ -200,17 +190,17 @@ void SProject::FromJsonObject(const QJsonObject& json)
   }
 
   it = json.find("vsKinks");
-  m_vsKinks.clear();
+  m_baseData.m_vsKinks.clear();
   if (it != json.end())
   {
     for (QJsonValue val : it.value().toArray())
     {
       QString sKink = val.toString();
-      m_vsKinks.push_back(sKink);
+      m_baseData.m_vsKinks.push_back(sKink);
     }
   }
   it = json.find("vspScenes");
-  m_vspScenes.clear();
+  m_baseData.m_vspScenes.clear();
   if (it != json.end())
   {
     for (QJsonValue val : it.value().toArray())
@@ -220,11 +210,11 @@ void SProject::FromJsonObject(const QJsonObject& json)
       locker.unlock();
       spScene->FromJsonObject(val.toObject());
       locker.relock();
-      m_vspScenes.push_back(spScene);
+      m_baseData.m_vspScenes.push_back(spScene);
     }
   }
   it = json.find("vspResources");
-  m_spResourcesMap.clear();
+  m_baseData.m_spResourcesMap.clear();
   if (it != json.end())
   {
     for (QJsonValue val : it.value().toArray())
@@ -234,11 +224,11 @@ void SProject::FromJsonObject(const QJsonObject& json)
       locker.unlock();
       spResource->FromJsonObject(val.toObject());
       locker.relock();
-      m_spResourcesMap.insert({spResource->m_sName, spResource});
+      m_baseData.m_spResourcesMap.insert({spResource->m_sName, spResource});
     }
   }
   it = json.find("vspResourceBundles");
-  m_spResourceBundleMap.clear();
+  m_baseData.m_spResourceBundleMap.clear();
   if (it != json.end())
   {
     for (QJsonValue val : it.value().toArray())
@@ -249,11 +239,11 @@ void SProject::FromJsonObject(const QJsonObject& json)
       locker.unlock();
       spResourceBundle->FromJsonObject(val.toObject());
       locker.relock();
-      m_spResourceBundleMap.insert({spResourceBundle->m_sName, spResourceBundle});
+      m_baseData.m_spResourceBundleMap.insert({spResourceBundle->m_sName, spResourceBundle});
     }
   }
   it = json.find("vspTags");
-  m_vspTags.clear();
+  m_baseData.m_vspTags.clear();
   if (it != json.end())
   {
     for (QJsonValue val : it.value().toArray())
@@ -263,11 +253,11 @@ void SProject::FromJsonObject(const QJsonObject& json)
       locker.unlock();
       spTag->FromJsonObject(val.toObject());
       locker.relock();
-      m_vspTags.insert(std::pair<QString, tspTag>{spTag->m_sName, spTag});
+      m_baseData.m_vspTags.insert(std::pair<QString, tspTag>{spTag->m_sName, spTag});
     }
   }
   it = json.find("vspAchievements");
-  m_vspAchievements.clear();
+  m_baseData.m_vspAchievements.clear();
   if (it != json.end())
   {
     for (QJsonValue val : it.value().toArray())
@@ -277,18 +267,18 @@ void SProject::FromJsonObject(const QJsonObject& json)
       locker.unlock();
       spAchievement->FromJsonObject(val.toObject());
       locker.relock();
-      m_vspAchievements.insert(std::pair<QString, tspSaveData>{spAchievement->m_sName, spAchievement});
+      m_baseData.m_vspAchievements.insert(std::pair<QString, tspSaveData>{spAchievement->m_sName, spAchievement});
     }
   }
 
   // connect tags and resources after both have been loaded
-  for (const auto& [sResource, spResource] : m_spResourcesMap)
+  for (const auto& [sResource, spResource] : m_baseData.m_spResourcesMap)
   {
     QReadLocker resLocker(&spResource->m_rwLock);
     for (const QString& sTag : spResource->m_vsResourceTags)
     {
-      auto it = m_vspTags.find(sTag);
-      if (m_vspTags.end() != it)
+      auto it = m_baseData.m_vspTags.find(sTag);
+      if (m_baseData.m_vspTags.end() != it)
       {
         QReadLocker tagLocker(&it->second->m_rwLock);
         it->second->m_vsResourceRefs.insert(sResource);

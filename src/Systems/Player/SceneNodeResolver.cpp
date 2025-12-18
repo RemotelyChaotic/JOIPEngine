@@ -642,7 +642,7 @@ QStringList CSceneNodeResolver::AllScenes() const
 {
   QStringList vsRet;
   QReadLocker lp(&m_spCurrentProject->m_rwLock);
-  for (const auto& spScene : m_spCurrentProject->m_vspScenes)
+  for (const auto& spScene : m_spCurrentProject->m_baseData.m_vspScenes)
   {
     QReadLocker l(&spScene->m_rwLock);
     vsRet << spScene->m_sName;

@@ -191,7 +191,7 @@ void CScriptEditorCompleterModel::BuildModel()
     if (auto spDbManager = CApplication::Instance()->System<CDatabaseManager>().lock())
     {
       QReadLocker pl(&m_spProject->m_rwLock);
-      for (const auto& [_, spRes] : m_spProject->m_spResourcesMap)
+      for (const auto& [_, spRes] : m_spProject->m_baseData.m_spResourcesMap)
       {
         QReadLocker rl(&spRes->m_rwLock);
         if (EResourceType::eScript == spRes->m_type._to_integral() ||

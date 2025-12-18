@@ -3,6 +3,7 @@
 
 #include <enum.h>
 #include <QString>
+#include <set>
 
 BETTER_ENUM(ESceneTransitionType, qint32,
             eRandom = 0,
@@ -11,6 +12,8 @@ BETTER_ENUM(ESceneTransitionType, qint32,
 BETTER_ENUM(ESceneMode, qint32,
             eLinear = 0,
             eEventDriven = 1)
+
+typedef std::set<QString>        tvsResourceRefs;
 
 struct SSceneData
 {
@@ -24,6 +27,8 @@ struct SSceneData
   bool                      m_bCanStartHere = false;
   ESceneMode                m_sceneMode = ESceneMode::eLinear;
   QString                   m_sTitleCard;
+
+  tvsResourceRefs           m_vsResourceRefs; // unused
 };
 
 #endif // SCENEDATA_H
