@@ -60,7 +60,7 @@ void CSceneNodeModelWidget::SetProject(const tspProject& spProject)
   m_spUi->pScriptComboBox->addItem("<No Script>", "");
   m_spUi->pLayoutComboBox->addItem("<Use Project Layout>", "");
 
-  for (const auto& [sName, tspResource] : spProject->m_spResourcesMap)
+  for (const auto& [sName, tspResource] : spProject->m_baseData.m_spResourcesMap)
   {
     QReadLocker locker(&tspResource->m_rwLock);
     switch (tspResource->m_type)

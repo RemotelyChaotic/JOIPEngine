@@ -40,7 +40,7 @@ void CProjectDialogueManager::LoadProject(const tspProject& spProject)
   std::vector<tspResource> vsResFiles;
   {
     QReadLocker lock(&spProject->m_rwLock);
-    for (const auto& [_, spResource] : spProject->m_spResourcesMap)
+    for (const auto& [_, spResource] : spProject->m_baseData.m_spResourcesMap)
     {
       QReadLocker rLock(&spResource->m_rwLock);
       if (EResourceType::eDatabase == spResource->m_type._to_integral() &&

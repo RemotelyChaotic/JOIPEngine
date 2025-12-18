@@ -181,7 +181,7 @@ bool CEditorExportJob::RunBinaryExport(const QString& sName, const QString& sFol
   outStream.setCodec("UTF-8");
   outStream << "<!DOCTYPE RCC><RCC version=\"1.0\">" << "<qresource prefix=\"/\">";
   m_spProject->m_rwLock.lockForRead();
-  for (auto spResourcePair : m_spProject->m_spResourcesMap)
+  for (auto spResourcePair : m_spProject->m_baseData.m_spResourcesMap)
   {
     const QString sOutPath = ResourceUrlToAbsolutePath(spResourcePair.second);
     spResourcePair.second->m_rwLock.lockForRead();
@@ -283,7 +283,7 @@ bool CEditorExportJob::RunZipExport(const QString& sName, const QString& sFolder
   std::vector<SExportFile> vFiles;
   {
     QReadLocker projLocker(&m_spProject->m_rwLock);
-    for (const auto& [sName, spResource] : m_spProject->m_spResourcesMap)
+    for (const auto& [sName, spResource] : m_spProject->m_baseData.m_spResourcesMap)
     {
       QReadLocker resLocker(&spResource->m_rwLock);
       // only include local files
@@ -303,7 +303,7 @@ bool CEditorExportJob::RunZipExport(const QString& sName, const QString& sFolder
         }
         else
         {
-          auto spBundle = m_spProject->m_spResourceBundleMap[spResource->m_sResourceBundle];
+          auto spBundle = m_spProject->m_baseData.m_spResourceBundleMap[spResource->m_sResourceBundle];
           QReadLocker bundleLocker(&spBundle->m_rwLock);
           auto it = std::find_if(vArchives.begin(), vArchives.end(),
                                  [&spBundle](const SExportFile& file) {

@@ -678,7 +678,7 @@ void CEosCommandWidgetGoto::SetResourceModel(CResourceTreeItemModel* pResourceMo
   m_pCompleterModel->removeRows(0, m_pCompleterModel->rowCount());
   tspProject spProject = pResourceModel->Project();
   QReadLocker locker(&spProject->m_rwLock);
-  for (const tspScene& spScene : spProject->m_vspScenes)
+  for (const tspScene& spScene : spProject->m_baseData.m_vspScenes)
   {
     QReadLocker locker(&spScene->m_rwLock);
     m_pCompleterModel->appendRow(new QStandardItem(spScene->m_sName));
@@ -1331,7 +1331,7 @@ void CEosCommandWidgetScene::SetResourceModel(CResourceTreeItemModel* pResourceM
   m_pCompleterModel->removeRows(0, m_pCompleterModel->rowCount());
   tspProject spProject = pResourceModel->Project();
   QReadLocker locker(&spProject->m_rwLock);
-  for (const tspScene& spScene : spProject->m_vspScenes)
+  for (const tspScene& spScene : spProject->m_baseData.m_vspScenes)
   {
     QReadLocker locker(&spScene->m_rwLock);
     m_pCompleterModel->appendRow(new QStandardItem(spScene->m_sName));

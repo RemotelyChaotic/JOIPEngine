@@ -67,7 +67,7 @@ void CResourceTreeItemModel::InitializeModel(tspProject spProject)
 
     m_spProject = spProject;
     QReadLocker locker(&m_spProject->m_rwLock);
-    for (auto it = m_spProject->m_spResourcesMap.begin(); m_spProject->m_spResourcesMap.end() != it; ++it)
+    for (auto it = m_spProject->m_baseData.m_spResourcesMap.begin(); m_spProject->m_baseData.m_spResourcesMap.end() != it; ++it)
     {
       QReadLocker locker(&it->second->m_rwLock);
       QUrl sPath = it->second->m_sPath;
@@ -257,7 +257,7 @@ QVariant CResourceTreeItemModel::data(const QModelIndex& index, int iRole) const
     CResourceTreeItem* item = static_cast<CResourceTreeItem*>(index.internalPointer());
     QString sName = item->Data(c_iColumnName).toString();
     bool bIsSceneCard = false;
-    for (const tspScene& spScene : m_spProject->m_vspScenes)
+    for (const tspScene& spScene : m_spProject->m_baseData.m_vspScenes)
     {
       QReadLocker l(&spScene->m_rwLock);
       bIsSceneCard |= spScene->m_sTitleCard == sName;
@@ -839,7 +839,7 @@ void CResourceTreeItemModel::SlotSceneDataChanged(qint32 iProjId, qint32 iId)
     m_spProject->m_rwLock.lockForRead();
     qint32 iThisId = m_spProject->m_iId;
     QString sResourceName;
-    for (const tspScene& spScene : m_spProject->m_vspScenes)
+    for (const tspScene& spScene : m_spProject->m_baseData.m_vspScenes)
     {
       QReadLocker l(&spScene->m_rwLock);
       if (spScene->m_iId == iId)

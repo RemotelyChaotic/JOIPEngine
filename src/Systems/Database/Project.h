@@ -18,6 +18,18 @@
 
 class QJSEngine;
 
+struct SRuntimeData
+{
+  QStringList               m_vsKinks;
+  tvspScene                 m_vspScenes;
+  tspResourceMap            m_spResourcesMap;
+  tspResourceBundleMap      m_spResourceBundleMap;
+  tspTagMap                 m_vspTags;
+  tspSaveDataMap            m_vspAchievements;
+};
+
+//----------------------------------------------------------------------------------------
+//
 struct SProject : public ISerializable, std::enable_shared_from_this<SProject>,
                   public SProjectData
 {
@@ -26,16 +38,13 @@ struct SProject : public ISerializable, std::enable_shared_from_this<SProject>,
   ~SProject() override;
 
   mutable QReadWriteLock    m_rwLock;
-  QStringList               m_vsKinks;
-  tvspScene                 m_vspScenes;
-  tspResourceMap            m_spResourcesMap;
-  tspResourceBundleMap      m_spResourceBundleMap;
-  tspTagMap                 m_vspTags;
-  tspSaveDataMap            m_vspAchievements;
+  SRuntimeData              m_baseData;
   QStringList               m_vsMountPoints;          // Archives need to be mounted via physFS to access content
                                                       // WARNING: root is NOT included in this list
+
   std::vector<std::shared_ptr<SProject>>
                             m_vspPlugins; // only populated if the project is loaded
+  SRuntimeData              m_pluginData; // only populated if the project is loaded
 
   QJsonObject ToJsonObject() override;
   void FromJsonObject(const QJsonObject& json) override;

@@ -249,7 +249,7 @@ namespace eos
 
     // load all bundles
     locker.relock();
-    for (auto it : spProject->m_spResourceBundleMap)
+    for (auto it : spProject->m_baseData.m_spResourceBundleMap)
     {
       locker.unlock();
       bool bOk = CDatabaseManager::LoadBundle(spProject, it.first);

@@ -718,7 +718,7 @@ void CEditorModel::SaveProject()
     // check if flags for media or remote are needed
     bool bHasRemoteResources = false;
     bool bNeedsMedia = false;
-    for (const auto& it : m_spCurrentProject->m_spResourcesMap)
+    for (const auto& it : m_spCurrentProject->m_baseData.m_spResourcesMap)
     {
       QReadLocker resourceLocker(&it.second->m_rwLock);
       bHasRemoteResources |= !IsLocalFile(it.second->m_sPath);

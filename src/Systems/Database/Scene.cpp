@@ -8,14 +8,12 @@
 SScene::SScene() :
   SSceneData(),
   m_rwLock(QReadWriteLock::Recursive),
-  m_spParent(nullptr),
-  m_vsResourceRefs()
+  m_spParent(nullptr)
 {}
 SScene::SScene(const SScene& other) :
   SSceneData(other),
   m_rwLock(QReadWriteLock::Recursive),
-  m_spParent(other.m_spParent),
-  m_vsResourceRefs(other.m_vsResourceRefs)
+  m_spParent(other.m_spParent)
 {}
 
 SScene::~SScene() {}

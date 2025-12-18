@@ -13,7 +13,6 @@ class CProjectScriptWrapper;
 class CResourceScriptWrapper;
 class QJSEngine;
 struct SProject;
-typedef std::set<QString>        tvsResourceRefs;
 
 struct SScene : public ISerializable, public SSceneData
 {
@@ -23,7 +22,6 @@ struct SScene : public ISerializable, public SSceneData
 
   mutable QReadWriteLock    m_rwLock;
   std::shared_ptr<SProject> m_spParent;
-  tvsResourceRefs           m_vsResourceRefs;
 
   QJsonObject ToJsonObject() override;
   void FromJsonObject(const QJsonObject& json) override;

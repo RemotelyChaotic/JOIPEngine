@@ -129,7 +129,7 @@ bool CEditorImageCompressionJob::Run(const QVariantList& args)
       QReadLocker projLocker(&m_spProject->m_rwLock);
       if (!m_spProject->m_bBundled)
       {
-        for (const auto& [sName, spResource] : m_spProject->m_spResourcesMap)
+        for (const auto& [sName, spResource] : m_spProject->m_baseData.m_spResourcesMap)
         {
           Q_UNUSED(sName)
           QReadLocker resLocker(&spResource->m_rwLock);

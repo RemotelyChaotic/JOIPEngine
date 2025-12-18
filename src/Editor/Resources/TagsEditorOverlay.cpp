@@ -279,7 +279,7 @@ void CTagsEditorOverlay::Initialize()
     std::vector<std::shared_ptr<SLockableTagData>> vspTagsToAdd;
     {
       QReadLocker pLocker(&m_spCurrentProject->m_rwLock);
-      for (const auto& [sName, spTag] : m_spCurrentProject->m_vspTags)
+      for (const auto& [sName, spTag] : m_spCurrentProject->m_baseData.m_vspTags)
       {
         m_pCompleterModel->appendRow(new QStandardItem(sName));
         if (vsTags.find(sName) != vsTags.end())

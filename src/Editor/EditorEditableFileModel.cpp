@@ -204,7 +204,7 @@ void CEditorEditableFileModel::InitializeModel(tspProject spProject)
   if (nullptr != m_spProject)
   {
     QReadLocker projectLocker(&m_spProject->m_rwLock);
-    for (auto it = m_spProject->m_spResourcesMap.begin(); m_spProject->m_spResourcesMap.end() != it; ++it)
+    for (auto it = m_spProject->m_baseData.m_spResourcesMap.begin(); m_spProject->m_baseData.m_spResourcesMap.end() != it; ++it)
     {
       AddResourceTo(it->second, m_cachedScriptsMap);
     }
@@ -757,7 +757,7 @@ void CEditorEditableFileModel::AddResourceTo(tspResource spResource,
       connect(script.m_spWatcher.get(), &QFileSystemWatcher::fileChanged,
               this, &CEditorEditableFileModel::SlotFileChanged, Qt::UniqueConnection);
 
-      for (const auto& spScene : m_spProject->m_vspScenes)
+      for (const auto& spScene : m_spProject->m_baseData.m_vspScenes)
       {
         QReadLocker sceneLocker(&spScene->m_rwLock);
         if (spScene->m_sScript == sResourceName ||
