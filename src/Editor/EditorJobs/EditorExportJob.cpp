@@ -183,9 +183,9 @@ bool CEditorExportJob::RunBinaryExport(const QString& sName, const QString& sFol
   m_spProject->m_rwLock.lockForRead();
   for (auto spResourcePair : m_spProject->m_baseData.m_spResourcesMap)
   {
-    const QString sOutPath = ResourceUrlToAbsolutePath(spResourcePair.second);
+    const QString sOutPath = spResourcePair.second->ResourceToAbsolutePath();
     spResourcePair.second->m_rwLock.lockForRead();
-    if (IsLocalFile(spResourcePair.second->m_sPath))
+    if (spResourcePair.second->m_sPath.IsLocalFile())
     {
       outStream << QString("<file alias=\"%2\">%1</file>")
                        .arg(sOutPath)
@@ -287,7 +287,7 @@ bool CEditorExportJob::RunZipExport(const QString& sName, const QString& sFolder
     {
       QReadLocker resLocker(&spResource->m_rwLock);
       // only include local files
-      if (IsLocalFile(spResource->m_sPath))
+      if (spResource->m_sPath.IsLocalFile())
       {
         if (spResource->m_sResourceBundle.isEmpty())
         {
@@ -297,7 +297,7 @@ bool CEditorExportJob::RunZipExport(const QString& sName, const QString& sFolder
           });
           if (vFiles.end() == it)
           {
-            QString sPath = PhysicalResourcePath(spResource);
+            QString sPath = spResource->PhysicalResourcePath();
             vFiles.push_back({sName, sPath});
           }
         }
@@ -309,7 +309,7 @@ bool CEditorExportJob::RunZipExport(const QString& sName, const QString& sFolder
                                  [&spBundle](const SExportFile& file) {
             return file.m_sName == spBundle->m_sName;
           });
-          if (vArchives.end() == it && IsLocalFile(spBundle->m_sPath))
+          if (vArchives.end() == it && SResourcePath::IsLocalFileP(spBundle->m_sPath))
           {
             QUrl urlCopy(spBundle->m_sPath);
             urlCopy.setScheme(QString());

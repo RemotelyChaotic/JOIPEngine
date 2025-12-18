@@ -46,7 +46,7 @@ void CDialogueEditorTreeModel::InitializeModel(tspProject spProject)
     {
       QReadLocker rLock(&spResource->m_rwLock);
       if (EResourceType::eDatabase == spResource->m_type._to_integral() &&
-          QFileInfo(PhysicalResourcePath(spResource)).suffix() == joip_resource::c_sDialogueFileType)
+          spResource->m_sPath.Suffix() == joip_resource::c_sDialogueFileType)
       {
         vsResFiles.push_back(spResource);
       }

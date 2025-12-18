@@ -66,13 +66,12 @@ namespace
           }
           else
           {
-            QString sRelativePath = projectDir.relativeFilePath(info.absoluteFilePath());
-            QUrl sUrlToSave = ResourceUrlFromLocalFile(sRelativePath);
+            SResourcePath path = joip_resource::CreatePathFromAbsoluteUrl(url, spProject);
             QFile scriptFile(info.absoluteFilePath());
             if (scriptFile.open(QIODevice::WriteOnly | QIODevice::Truncate))
             {
               InitScript(scriptFile, info.suffix());
-              QString sResource = spDbManager->AddResource(spProject, sUrlToSave,
+              QString sResource = spDbManager->AddResource(spProject, path,
                                                            EResourceType::eSequence,
                                                            QString());
               return spDbManager->FindResourceInProject(spProject, sResource);

@@ -26,6 +26,9 @@ struct SRuntimeData
   tspResourceBundleMap      m_spResourceBundleMap;
   tspTagMap                 m_vspTags;
   tspSaveDataMap            m_vspAchievements;
+
+  void Clear();
+  void MergeIntoThis(const SRuntimeData& data, std::shared_ptr<SProject> spProject);
 };
 
 //----------------------------------------------------------------------------------------

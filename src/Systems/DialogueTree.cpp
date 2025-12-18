@@ -1,5 +1,6 @@
 #include "DialogueTree.h"
 #include "DatabaseManager.h"
+#include "Settings.h""
 
 #include "Database/Project.h"
 
@@ -30,6 +31,8 @@ namespace
 
   const char c_sFileNode[] = "sFileId";
   const char c_sNameNode[] = "sName";
+
+  const char c_sUserAgent[] = "User-Agent";
 }
 
 CDialogueNode::CDialogueNode() :
@@ -393,13 +396,15 @@ namespace
   //--------------------------------------------------------------------------------------
   //
   bool FetchDialogueFile(std::shared_ptr<CDialogueNode>& spRoot,
-                         const QUrl& sPath, const QString& sFileId,
+                         const SResourcePath& sPath, const QString& sFileId,
                          const tspProject& spProj)
   {
     QByteArray arr;
     QEventLoop loop;
     std::shared_ptr<QNetworkAccessManager> spManager = std::make_shared<QNetworkAccessManager>();
-    QPointer<QNetworkReply> pReply = spManager->get(QNetworkRequest(sPath));
+    QNetworkRequest req(static_cast<QUrl>(sPath));
+    req.setRawHeader(c_sUserAgent, CSettings::c_sApplicationName.toUtf8());
+    QPointer<QNetworkReply> pReply = spManager->get(req);
     QObject::connect(pReply, &QNetworkReply::finished,
             &loop, [pReply, &loop, &arr](){
               if(nullptr != pReply)
@@ -571,7 +576,7 @@ namespace
     QJsonDocument doc(root);
 
     QReadLocker locker(&spResource->m_rwLock);
-    QFile f(PhysicalResourcePath(spResource));
+    QFile f(spResource->PhysicalResourcePath());
     if (!f.open(QIODevice::ReadWrite | QIODevice::Truncate))
     {
       return false;
@@ -684,13 +689,13 @@ namespace dialogue_tree
     {
       QReadLocker locker(&spResource->m_rwLock);
       if (EResourceType::eDatabase != spResource->m_type._to_integral()) { continue; }
-      if (QFileInfo(PhysicalResourcePath(spResource)).suffix() != joip_resource::c_sDialogueFileType)
+      if (spResource->m_sPath.Suffix() != joip_resource::c_sDialogueFileType)
       { continue; }
 
-      if (IsLocalFile(spResource->m_sPath))
+      if (spResource->m_sPath.IsLocalFile())
       {
         CDatabaseManager::LoadBundle(spResource->m_spParent, spResource->m_sResourceBundle);
-        QString sPath = ResourceUrlToAbsolutePath(spResource);
+        QString sPath = spResource->ResourceToAbsolutePath();
         bool bOk = ReadFialogFile(spRoot,
                                   sPath,
                                   spResource->m_sName,
@@ -721,7 +726,7 @@ namespace dialogue_tree
     std::shared_ptr<CDialogueNode> spRoot = std::make_shared<CDialogueNode>();
     for (const QUrl& sPathUrl : vsFiles)
     {
-      if (IsLocalFile(sPathUrl))
+      if (SResourcePath::IsLocalFileP(sPathUrl))
       {
         QString sPath = sPathUrl.toLocalFile();
         bool bOk = ReadFialogFile(spRoot,

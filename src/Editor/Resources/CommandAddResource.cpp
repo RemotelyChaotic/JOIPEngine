@@ -13,9 +13,27 @@
 #include <QMessageBox>
 #include <QPushButton>
 
-namespace  {
-//----------------------------------------------------------------------------------------
-//
+namespace
+{
+  //--------------------------------------------------------------------------------------
+  //
+  QUrl ResourceUrlFromLocalFile(const QString& sPath)
+  {
+    QUrl url;
+    if (sPath.startsWith(CPhysFsFileEngineHandler::c_sScheme))
+    {
+      url = QUrl(QString(sPath).replace(CPhysFsFileEngineHandler::c_sScheme, ""));
+    }
+    else
+    {
+      url = QUrl::fromLocalFile(sPath);
+    }
+    url.setScheme(QString(CPhysFsFileEngineHandler::c_sScheme).replace(":/", ""));
+    return url;
+  }
+
+  //--------------------------------------------------------------------------------------
+  //
   tspResourceMap AddFilesToProjectResources(std::shared_ptr<SProject> spCurrentProject,
                                             std::shared_ptr<CSettings> spSettings,
                                             std::weak_ptr<CDatabaseManager> wpDbManager,
@@ -25,7 +43,6 @@ namespace  {
     if (nullptr == spCurrentProject) { return tspResourceMap(); }
 
     // add file to respective category
-    bool bAddedFiles = false;
     QStringList vsNeedsToMove;
     tspResourceMap retMap;
     const QDir projectDir = PhysicalProjectPath(spCurrentProject);
@@ -40,8 +57,9 @@ namespace  {
       }
       else
       {
-        QString sRelativePath = projectDir.relativeFilePath(sFileName);
-        QUrl url = ResourceUrlFromLocalFile(sRelativePath);
+        SResourcePath path = joip_resource::CreatePathFromAbsolutePath(
+            joip_resource::PhysicalResourcePath(QUrl(sFileName), spCurrentProject),
+            spCurrentProject);
         const QString sEnding = "*." + info.suffix();
         auto spDbManager = wpDbManager.lock();
         if (nullptr != spDbManager)
@@ -49,51 +67,44 @@ namespace  {
           QString sResource;
           if (SResourceFormats::ImageFormats().contains(sEnding))
           {
-            sResource = spDbManager->AddResource(spCurrentProject, url, EResourceType::eImage);
-            bAddedFiles = true;
+            sResource = spDbManager->AddResource(spCurrentProject, path, EResourceType::eImage);
           }
           else if (SResourceFormats::VideoFormats().contains(sEnding))
           {
-            sResource = spDbManager->AddResource(spCurrentProject, url, EResourceType::eMovie);
-            bAddedFiles = true;
+            sResource = spDbManager->AddResource(spCurrentProject, path, EResourceType::eMovie);
           }
           else if (SResourceFormats::AudioFormats().contains(sEnding))
           {
-            sResource = spDbManager->AddResource(spCurrentProject, url, EResourceType::eSound);
-            bAddedFiles = true;
+            sResource = spDbManager->AddResource(spCurrentProject, path, EResourceType::eSound);
           }
           else if (SResourceFormats::OtherFormats().contains(sEnding))
           {
-            sResource = spDbManager->AddResource(spCurrentProject, url, EResourceType::eOther);
-            bAddedFiles = true;
+            sResource = spDbManager->AddResource(spCurrentProject, path, EResourceType::eOther);
           }
           else if (SResourceFormats::ScriptFormats().contains(sEnding))
           {
-            sResource = spDbManager->AddResource(spCurrentProject, url, EResourceType::eScript);
-            bAddedFiles = true;
+            sResource = spDbManager->AddResource(spCurrentProject, path, EResourceType::eScript);
           }
           else if (SResourceFormats::DatabaseFormats().contains(sEnding))
           {
-            sResource = spDbManager->AddResource(spCurrentProject, url, EResourceType::eDatabase);
-            bAddedFiles = true;
+            sResource = spDbManager->AddResource(spCurrentProject, path, EResourceType::eDatabase);
           }
           else if (SResourceFormats::FontFormats().contains(sEnding))
           {
-            sResource = spDbManager->AddResource(spCurrentProject, url, EResourceType::eFont);
-            bAddedFiles = true;
+            sResource = spDbManager->AddResource(spCurrentProject, path, EResourceType::eFont);
           }
           else if (SResourceFormats::LayoutFormats().contains(sEnding))
           {
-            sResource = spDbManager->AddResource(spCurrentProject, url, EResourceType::eLayout);
-            bAddedFiles = true;
+            sResource = spDbManager->AddResource(spCurrentProject, path, EResourceType::eLayout);
           }
           else if (SResourceFormats::SequenceFormat().contains(sEnding))
           {
-            sResource = spDbManager->AddResource(spCurrentProject, url, EResourceType::eSequence);
-            bAddedFiles = true;
+            sResource = spDbManager->AddResource(spCurrentProject, path, EResourceType::eSequence);
           }
           else if (SResourceFormats::ArchiveFormats().contains(sEnding))
           {
+            QString sRelativePath = projectDir.relativeFilePath(sFileName);
+            QUrl url = ResourceUrlFromLocalFile(sRelativePath);
             if (spDbManager->AddResourceArchive(spCurrentProject, url))
             {
               QStringList vsCompressedFiles;
@@ -341,7 +352,7 @@ void CCommandAddResource::redo()
     std::map<QUrl, QByteArray> remoteFiles;
     for (const auto& file : qAsConst(m_vsFiles))
     {
-      if (IsLocalFile(file.first))
+      if (SResourcePath::IsLocalFileP(file.first))
       {
         vsLocalFiles << file.first.toString(QUrl::PreferLocalFile);
       }

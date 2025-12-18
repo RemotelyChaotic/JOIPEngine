@@ -70,19 +70,20 @@ void CResourceTreeItemModel::InitializeModel(tspProject spProject)
     for (auto it = m_spProject->m_baseData.m_spResourcesMap.begin(); m_spProject->m_baseData.m_spResourcesMap.end() != it; ++it)
     {
       QReadLocker locker(&it->second->m_rwLock);
-      QUrl sPath = it->second->m_sPath;
+      SResourcePath path = it->second->m_sPath;
       QStringList sPathParts;
-      if (IsLocalFile(sPath))
+      if (path.IsLocalFile())
       {
         locker.unlock();
-        sPathParts = ResourceUrlToAbsolutePath(it->second).split("/");
+        sPathParts = it->second->ResourceToAbsolutePath().split("/");
         sPathParts.removeAt(0); // first element is always the scheme
         locker.relock();
       }
       else
       {
-        sPathParts.push_back(sPath.host());
-        sPathParts << sPath.path().remove(0, 1).split("/");
+        QUrl url = static_cast<QUrl>(path);
+        sPathParts.push_back(url.host());
+        sPathParts << url.path().remove(0, 1).split("/");
       }
 
       if (m_spProject->m_sPlayerLayout == it->first)
@@ -617,7 +618,7 @@ void CResourceTreeItemModel::CheckChildResources(CResourceTreeItem* pParent)
     {
       auto spResource = pChild->Resource();
       QReadLocker l(&spResource->m_rwLock);
-      bool bExists = QFileInfo::exists(ResourceUrlToAbsolutePath(spResource));
+      bool bExists = QFileInfo::exists(spResource->ResourceToAbsolutePath());
       if (!bExists)
       {
         pChild->AddWarning(EWarningType::eMissingResource,
@@ -678,19 +679,20 @@ void CResourceTreeItemModel::SlotResourceAdded(qint32 iProjId, const QString& sN
       tspResource spResource = spDbManager->FindResourceInProject(m_spProject, sName);
       spResource->m_rwLock.lockForRead();
       EResourceType type = spResource->m_type;
-      QUrl sPath = spResource->m_sPath;
+      SResourcePath path = spResource->m_sPath;
       spResource->m_rwLock.unlock();
 
       QStringList sPathParts;
-      if (IsLocalFile(sPath))
+      if (path.IsLocalFile())
       {
-        sPathParts = ResourceUrlToAbsolutePath(spResource).split("/");
+        sPathParts = spResource->ResourceToAbsolutePath().split("/");
         sPathParts.removeAt(0); // first element is always the scheme
       }
       else
       {
-        sPathParts.push_back(sPath.host());
-        sPathParts << sPath.path().remove(0, 1).split("/");
+        QUrl url = static_cast<QUrl>(path);
+        sPathParts.push_back(url.host());
+        sPathParts << url.path().remove(0, 1).split("/");
       }
 
       auto itCategoryItem = m_categoryMap.find(type);

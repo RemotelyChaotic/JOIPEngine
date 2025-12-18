@@ -86,9 +86,9 @@ void CResourceDisplayWidget::LoadResource(tspResource spResource)
   QReadLocker projectLocker(&spProject->m_rwLock);
   SetProjectId(spProject->m_iId);
 
-  QUrl path = m_spResource->m_sPath;
   QString sBundle = m_spResource->m_sResourceBundle;
-  if (IsLocalFile(m_spResource->m_sPath))
+  SResourcePath path = m_spResource->m_sPath;
+  if (path.IsLocalFile())
   {
     projectLocker.unlock();
     CDatabaseManager::LoadBundle(m_spResource->m_spParent, sBundle);
@@ -100,7 +100,7 @@ void CResourceDisplayWidget::LoadResource(tspResource spResource)
       {
         projectLocker.unlock();
         resourceLocker.unlock();
-        QString sPath = ResourceUrlToAbsolutePath(m_spResource);
+        QString sPath = m_spResource->ResourceToAbsolutePath();
         resourceLocker.relock();
         if (QFileInfo(sPath).exists())
         {
@@ -116,7 +116,7 @@ void CResourceDisplayWidget::LoadResource(tspResource spResource)
       case EResourceType::eSound:
       {
         resourceLocker.unlock();
-        QString sPath = ResourceUrlToAbsolutePath(m_spResource);
+        QString sPath = m_spResource->ResourceToAbsolutePath();
         resourceLocker.relock();
         m_spUi->pMediaPlayer->OpenMedia(sPath);
         m_spUi->pStackedWidget->setCurrentIndex(EResourceDisplayType::eLocalMedia);
@@ -137,7 +137,8 @@ void CResourceDisplayWidget::LoadResource(tspResource spResource)
     {
       case EResourceType::eImage:
       {
-        if (path.isValid())
+        QUrl urlPath = static_cast<QUrl>(path);
+        if (urlPath.isValid())
         {
           if (nullptr != m_pResponse)
           {
@@ -146,7 +147,7 @@ void CResourceDisplayWidget::LoadResource(tspResource spResource)
             delete m_pResponse;
             m_pResponse = nullptr;
           }
-          m_pResponse = m_spNAManager->get(QNetworkRequest(path));
+          m_pResponse = m_spNAManager->get(QNetworkRequest(urlPath));
           connect(m_pResponse, QOverload<QNetworkReply::NetworkError>::of(&QNetworkReply::error),
                   this, &CResourceDisplayWidget::SlotNetworkReplyError);
           connect(m_pResponse, &QNetworkReply::finished,
@@ -167,7 +168,7 @@ void CResourceDisplayWidget::LoadResource(tspResource spResource)
       case EResourceType::eSound:
       {
         // Sound is not officially supported yet, but could easilly be
-        m_spUi->pMediaPlayer->OpenMedia(path.toString());
+        m_spUi->pMediaPlayer->OpenMedia(static_cast<QString>(path));
         m_spUi->pStackedWidget->setCurrentIndex(EResourceDisplayType::eLocalMedia);
         m_iLoadState = ELoadState::eFinished;
         break;

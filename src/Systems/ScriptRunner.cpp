@@ -415,7 +415,7 @@ void CScriptRunner::LoadScriptAndCall(tspScene spScene, tspResource spResource,
   QReadLocker projectLocker(&spResource->m_spParent->m_rwLock);
   QReadLocker resourceLocker(&spResource->m_rwLock);
   spProject = spResource->m_spParent;
-  QUrl sResourceUrl = spResource->m_sPath;
+  SResourcePath sResourceUrl = spResource->m_sPath;
   if (spResource->m_type._to_integral() != EResourceType::eScript &&
       spResource->m_type._to_integral() != EResourceType::eSequence)
   {
@@ -427,7 +427,7 @@ void CScriptRunner::LoadScriptAndCall(tspScene spScene, tspResource spResource,
 
   resourceLocker.unlock();
   projectLocker.unlock();
-  QString sPath = ResourceUrlToAbsolutePath(spResource);
+  QString sPath = spResource->ResourceToAbsolutePath();
 
   QFileInfo scriptFileInfo(sPath);
   if (scriptFileInfo.exists())
@@ -437,7 +437,7 @@ void CScriptRunner::LoadScriptAndCall(tspScene spScene, tspResource spResource,
     {
       QString sScript = QString::fromUtf8(scriptFile.readAll());
       // get suffix from the path, as bundles might not have the suffix in the name
-      const QString sSuffix = QFileInfo(sResourceUrl.toString()).suffix();
+      const QString sSuffix = sResourceUrl.Suffix();
       auto it = m_spRunnerFactoryMap.find(sSuffix);
       if (m_spRunnerFactoryMap.end() != it)
       {

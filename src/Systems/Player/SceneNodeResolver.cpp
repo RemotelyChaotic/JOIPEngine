@@ -968,7 +968,7 @@ bool CSceneNodeResolver::LoadFlowScene()
       if (nullptr != spResource)
       {
         QString sResourceBundle;
-        QString sPath = ResourceUrlToAbsolutePath(spResource);
+        QString sPath = spResource->ResourceToAbsolutePath();
         {
           QReadLocker locker(&spResource->m_rwLock);
           sResourceBundle = spResource->m_sResourceBundle;

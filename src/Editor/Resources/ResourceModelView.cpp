@@ -353,7 +353,7 @@ void CResourceModelView::ShowContextMenu(CResourceTreeItemModel* pModel, const Q
           QClipboard* pClipboard = QGuiApplication::clipboard();
           tspResource spResource = item->Resource();
           QReadLocker locker(&spResource->m_rwLock);
-          pClipboard->setText(spResource->m_sPath.toString());
+          pClipboard->setText(static_cast<QString>(spResource->m_sPath));
         }
       });
       menu.addAction(pAction);
@@ -364,7 +364,7 @@ void CResourceModelView::ShowContextMenu(CResourceTreeItemModel* pModel, const Q
         {
           QClipboard* pClipboard = QGuiApplication::clipboard();
           tspResource spResource = item->Resource();
-          pClipboard->setText(PhysicalResourcePath(spResource));
+          pClipboard->setText(spResource->PhysicalResourcePath());
         }
       });
       menu.addAction(pAction);
@@ -406,7 +406,7 @@ void CResourceModelView::ShowContextMenu(CResourceTreeItemModel* pModel, const Q
         if (nullptr != item)
         {
           tspResource spResource = item->Resource();
-          const QString sPath = PhysicalResourcePath(spResource);
+          const QString sPath = spResource->PhysicalResourcePath();
           helpers::ShowInGraphicalShell(QFileInfo(sPath).absoluteFilePath());
         }
       });

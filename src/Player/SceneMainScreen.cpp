@@ -171,7 +171,7 @@ void CSceneMainScreen::LoadProject(qint32 iId, const tSceneToLoad& sStartScene)
       if (nullptr != spRes)
       {
         QReadLocker lRes(&spRes->m_rwLock);
-        QString sPath = spRes->m_sPath.toString();
+        QString sPath = static_cast<QString>(spRes->m_sPath);
         vsPaths << sPath.left(sPath.lastIndexOf("/"));
       }
     }

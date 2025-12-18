@@ -123,7 +123,7 @@ QVariant CResourceTreeItem::Data(qint32 iColumn) const
           case c_iColumnName:
             return m_spResource->m_sName;
           case c_iColumnPath:
-            return m_spResource->m_sPath;
+            return static_cast<QUrl>(m_spResource->m_sPath);
           case c_iColumnType:
             return m_spResource->m_type._to_integral();
           case c_iColumnToolTip:

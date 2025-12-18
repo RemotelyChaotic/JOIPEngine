@@ -82,7 +82,7 @@ public:
       QString sJsonFile;
       if (!bBundled)
       {
-        sJsonFile = CPhysFsFileEngineHandler::c_sScheme + joip_resource::c_sProjectFileName;
+        sJsonFile = CPhysFsFileEngineHandler::c_sScheme + sFolderName + QDir::separator() +  joip_resource::c_sProjectFileName;
       }
       else
       {
@@ -426,6 +426,8 @@ bool CDatabaseIO::LoadPlugins(tspProject& spProject)
   bool bOkLoad = true;
 
   spProject->m_vspPlugins.clear();
+  spProject->m_pluginData.Clear();
+
   if (!spProject->m_sPluginFolder.isEmpty())
   {
     QFileInfo parentInfo(sProjectPath);
@@ -439,7 +441,9 @@ bool CDatabaseIO::LoadPlugins(tspProject& spProject)
     if (childDir.absolutePath().startsWith(parentDir.absolutePath() + "/"))
     {
       qint32 iIds = 0;
-      CDatabaseIODefault::LoadProjectsStatic(sProjectPath + "/" +  spProject->m_sPluginFolder,
+      QString sPluginFolder = spProject->m_sPluginFolder;
+      locker.unlock();
+      CDatabaseIODefault::LoadProjectsStatic(sProjectPath + "/" + sPluginFolder,
           [&](const QString& sDirName, quint32 iVersion,
               bool bBundled, bool bReadOnly){
             // TODO: refactor: This does the same as CDatabaseManager::AddProject and
@@ -461,35 +465,51 @@ bool CDatabaseIO::LoadPlugins(tspProject& spProject)
               sName = sBaseName;
             }
 
+            locker.relock();
             spProject->m_vspPlugins.push_back(std::make_shared<SProject>());
-            spProject->m_vspPlugins.back()->m_iId = iNewId;
-            spProject->m_vspPlugins.back()->m_sName = sName;
-            spProject->m_vspPlugins.back()->m_sFolderName = sDirNameResolved;
-            spProject->m_vspPlugins.back()->m_sProjectPath = sProjectPath;
-            spProject->m_vspPlugins.back()->m_iVersion = iVersion;
-            spProject->m_vspPlugins.back()->m_bBundled = bBundled;
-            spProject->m_vspPlugins.back()->m_bReadOnly = bReadOnly;
-            spProject->m_vspPlugins.back()->m_sPlayerLayout = "qrc:/qml/resources/qml/JoipEngine/PlayerDefaultLayout.qml";
+            tspProject spProjNew = spProject->m_vspPlugins.back();
+            locker.unlock();
+            spProjNew->m_iId = iNewId;
+            spProjNew->m_sName = sName;
+            spProjNew->m_sFolderName = sDirNameResolved;
+            spProjNew->m_sProjectPath = sProjectPath;
+            spProjNew->m_iVersion = iVersion;
+            spProjNew->m_bBundled = bBundled;
+            spProjNew->m_bReadOnly = bReadOnly;
+            spProjNew->m_sPlayerLayout = "qrc:/qml/resources/qml/JoipEngine/PlayerDefaultLayout.qml";
             return iNewId;
           },
           [&](){
+            locker.relock();
             for (tspProject spProject : spProject->m_vspPlugins)
             {
+              locker.unlock();
               CDatabaseIODefault::DeserializeProjectImplStatic(spProject, true, [&](){
                 return iIds;
               });
+              locker.relock();
             }
+            locker.unlock();
           });
 
-      for (tspProject& spProj : spProject->m_vspPlugins)
+      locker.relock();
+      for (tspProject& spProjPlug : spProject->m_vspPlugins)
       {
-        bool bOkLoadLoc = LoadProject(spProj, true);
+        locker.unlock();
+        bool bOkLoadLoc = LoadProject(spProjPlug, true);
         bOkLoad &= bOkLoadLoc;
+        locker.relock();
+
+        QReadLocker l(&spProjPlug->m_rwLock);
         if (!bOkLoadLoc)
         {
-          QReadLocker l(&spProj->m_rwLock);
-          qWarning() << "Could not load plugin(s)" << spProj->m_sName <<
+          qWarning() << "Could not load plugin(s)" << spProjPlug->m_sName <<
               "for Project" << spProject->m_sName;
+        }
+        else
+        {
+          spProject->m_pluginData.MergeIntoThis(spProjPlug->m_baseData, spProject);
+          spProject->m_pluginData.MergeIntoThis(spProjPlug->m_pluginData, spProject);
         }
       }
     }
@@ -549,6 +569,7 @@ bool CDatabaseIO::LoadProject(tspProject& spProject, bool bLoadPlugins)
   }
 
   // If load plugins is requested we always load them even if the project was already loaded
+  locker.unlock();
   if (bLoadPlugins)
   {
     LoadPlugins(spProject);
@@ -611,11 +632,13 @@ bool CDatabaseIO::UnloadBundle(tspProject& spProject, const QString& sBundle)
 //
 bool CDatabaseIO::UnloadPlugins(tspProject& spProject)
 {
+  QWriteLocker l(&spProject->m_rwLock);
   for (tspProject& spProj : spProject->m_vspPlugins)
   {
     UnloadProject(spProj);
   }
   spProject->m_vspPlugins.clear();
+  spProject->m_pluginData.Clear();
   return true;
 }
 
@@ -694,7 +717,7 @@ void CDatabaseIO::LoadResource(tspResource& spRes)
         // load bundle if needed
         CDatabaseManager::LoadBundle(spProject, sBundle);
         // load font
-        qint32 iId = QFontDatabase::addApplicationFont(ResourceUrlToAbsolutePath(spRes));
+        qint32 iId = QFontDatabase::addApplicationFont(spRes->ResourceToAbsolutePath());
         lockerRes.relock();
         if (-1 == iId)
         {
@@ -737,8 +760,14 @@ void CDatabaseIO::UnloadResource(tspResource& spRes)
 //
 bool CDatabaseIO::MountProject(tspProject& spProject)
 {
+  QString sFolderName;
+  {
+    QReadLocker locker(&spProject->m_rwLock);
+    sFolderName = spProject->m_sFolderName;
+  }
   QString sFinalPath = PhysicalProjectPath(spProject);
-  bool bOk = CPhysFsFileEngine::mount(sFinalPath.toStdString().data(), "");
+  bool bOk = CPhysFsFileEngine::mount(sFinalPath.toStdString().data(),
+                                      sFolderName.toStdString().data());
   assert(bOk);
   if (!bOk)
   {

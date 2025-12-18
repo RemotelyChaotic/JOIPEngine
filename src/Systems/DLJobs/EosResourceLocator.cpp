@@ -372,7 +372,7 @@ QByteArray CEosResourceLocator::DownloadResource(
   }
   else if (spResource->m_sLocatorType == c_sSchemeRemote)
   {
-    dowloadUrl = spResource->m_data.m_sPath;
+    dowloadUrl = static_cast<QUrl>(spResource->m_data.m_sPath);
   }
 
   arr = fnFetch(dowloadUrl, psError);
