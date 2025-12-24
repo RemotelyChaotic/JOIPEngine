@@ -74,7 +74,7 @@ void CSoundInstanceWrapper::play()
     QReadLocker locker(&m_spResource->m_rwLock);
     sName = m_spResource->m_sName;
   }
-  emit m_spMsgSender->SignalPlay(m_sId, sName, m_iLoops, m_iStartAt, m_iStartAt);
+  emit m_spMsgSender->SignalPlay(m_sId, sName, m_iLoops, m_iStartAt, m_iEndAt);
 }
 
 //----------------------------------------------------------------------------------------

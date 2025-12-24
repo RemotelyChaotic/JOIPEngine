@@ -57,7 +57,7 @@ Rectangle {
     {
         if (player.seekable)
         {
-            player.fastSeek = true;
+            player.fastSeek = false;
             player.seek(iSeekPos);
         }
     }
@@ -70,11 +70,11 @@ Rectangle {
 
     onResourceChanged: {
         state = Resource.Null;
-        player.stop();
         if (null !== resource && undefined !== resource)
         {
             soundInstance = SoundManager.get(nameId || resource.name);
             state = Resource.Loading;
+            player.stop();
             if (resource.isLocal)
             {
                 player.pauseRequested = false;
@@ -86,11 +86,13 @@ Rectangle {
             else
             {
                 state = Resource.Null;
+                player.stop();
             }
         }
         else
         {
             state = Resource.Null;
+            player.stop();
         }
     }
 

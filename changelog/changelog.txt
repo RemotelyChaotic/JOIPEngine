@@ -34,6 +34,7 @@ Fixed Bugs:
   if the Scene doesn't exist.
 - If a PlayerTimer in an EOS script is abborted, it should not play the child instructions.
 - Eval script variables were not cleared after restarting a Project.
+- Fixed Sound.get commands stopping the Sound immediately.
 
 =================
 Version 1.6.1.0
