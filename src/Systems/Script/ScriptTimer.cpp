@@ -275,14 +275,18 @@ void CScriptTimer::HandleTimerFinished()
   {
     if (std::holds_alternative<QJSValue>(m_callback))
     {
-      if (!script::CallCallback(std::get<QJSValue>(m_callback), QJSValueList(),
-                                &sError))
+      QJSValue val = std::get<QJSValue>(m_callback);
+      if (val.isCallable())
       {
-        if (auto spComm = m_wpCommunicator.lock())
+        if (!script::CallCallback(val, QJSValueList(),
+                                  &sError))
         {
-          if (auto spSignalEmitter = spComm->LockedEmitter<CTimerSignalEmitter>())
+          if (auto spComm = m_wpCommunicator.lock())
           {
-            emit spSignalEmitter->showError(sError, QtMsgType::QtCriticalMsg);
+            if (auto spSignalEmitter = spComm->LockedEmitter<CTimerSignalEmitter>())
+            {
+              emit spSignalEmitter->showError(sError, QtMsgType::QtCriticalMsg);
+            }
           }
         }
       }
@@ -292,14 +296,18 @@ void CScriptTimer::HandleTimerFinished()
   {
     if (std::holds_alternative<QtLua::Value>(m_callback))
     {
-      if (!script::CallCallback(std::get<QtLua::Value>(m_callback), QVariantList(),
-                                &sError))
+      QtLua::Value& val = std::get<QtLua::Value>(m_callback);
+      if (val.type() == QtLua::Value::TFunction && !val.is_dead())
       {
-        if (auto spComm = m_wpCommunicator.lock())
+        if (!script::CallCallback(std::get<QtLua::Value>(m_callback), QVariantList(),
+                                  &sError))
         {
-          if (auto spSignalEmitter = spComm->LockedEmitter<CTimerSignalEmitter>())
+          if (auto spComm = m_wpCommunicator.lock())
           {
-            emit spSignalEmitter->showError(sError, QtMsgType::QtCriticalMsg);
+            if (auto spSignalEmitter = spComm->LockedEmitter<CTimerSignalEmitter>())
+            {
+              emit spSignalEmitter->showError(sError, QtMsgType::QtCriticalMsg);
+            }
           }
         }
       }

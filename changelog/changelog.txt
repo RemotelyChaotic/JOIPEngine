@@ -1,4 +1,11 @@
 =================
+Version 1.7.1.0
+=================
+
+Fixed Bugs:
+- Timer throw errors for missing callback when no callback was registered.
+
+=================
 Version 1.7.0.0
 =================
 
