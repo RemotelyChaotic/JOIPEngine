@@ -1,8 +1,8 @@
 {
-  "latestVersion": "1.7.0",
-  "latestVersionCode": 67073,
+  "latestVersion": "1.7.1",
+  "latestVersionCode": 67329,
   "latestUpdaterVersion": "1.0.0",
-  "latestUpdaterVersionCode": 67328,
+  "latestUpdaterVersionCode": 65536,
   "url": "https://github.com/RemotelyChaotic/JOIPEngine/releases/download",
   "releaseNotes": [
     "- Made different Layouts per Scene possible.",
@@ -24,6 +24,7 @@
 	"- PlayerSceneManager gotoScene and pages.goto doesn't stop with an error anymore if the Scene doesn't exist.",
 	"- If a PlayerTimer in an EOS script is abborted, it should not play the child instructions.",
 	"- Eval script variables were not cleared after restarting a Project.",
-	"- Fixed Sound.get commands stopping the Sound immediately."
+	"- Fixed Sound.get commands stopping the Sound immediately.",
+	"- Timer throw errors for missing callback when no callback was registered."
   ]
 }
