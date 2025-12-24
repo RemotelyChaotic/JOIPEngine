@@ -1,11 +1,29 @@
 {
-  "latestVersion": "1.6.1",
+  "latestVersion": "1.7.0",
   "latestVersionCode": 67073,
   "latestUpdaterVersion": "1.0.0",
-  "latestUpdaterVersionCode": 65536,
+  "latestUpdaterVersionCode": 67328,
   "url": "https://github.com/RemotelyChaotic/JOIPEngine/releases/download",
   "releaseNotes": [
-    "- Fixed a potential deadlock in the Metronome.",
-	"- Removed a lot of unessessary SFX reloading in the metronome."
+    "- Made different Layouts per Scene possible.",
+	"- Added an Event Based script mode. Scenes with this mode don't start the next scene automatically after finishing and instead continue listening for events.",
+	"- Added callbacks to PlayerEventCommunicator, PlayerIcons, PlayerMediaPlayer, PlayerNotification, PlayerStorage, PlayerTimer.",
+	"- pages.contains implemented for EOS teaes.",
+	"- Downloaded EOS scripts use the new Event Based script mode since that mirrors the behavior on Milovana.",
+	"- Some Undocumented timer features of EOS are now supported, where variables in timeouts are evaluated before parsing.".
+	"- Fixed Milovana Downloads. They should work again.",
+	"- EOS scripts center text again if orientation argument is not given.",
+	"- Fixed goto in a UI eval call not blocking the Scene until the Scene has switched. This has led to (mostly) EOS scripts not behaving as expected.",
+	"- Fixed an issue with EOS buttons following the wrong branch if the choice had 0 children.",
+	"- PlayerNotifcation should close open notificaions if a new one with the same id is opened.",
+	"- Fixed PlayerEval getting the return value from the wrong script in synchronously running eval requests.",
+	"- PlayerEval scripts now behave like in a browser (root can be referenced via 'window')",
+	"- Fixed script tags in button texts not being evaluated.",
+	"- Default Layout for EOS is the old one again.",
+	"- Fixed teaseStorage.removeItem setting the item to null instead of removing it from storage.",
+	"- PlayerSceneManager gotoScene and pages.goto doesn't stop with an error anymore if the Scene doesn't exist.",
+	"- If a PlayerTimer in an EOS script is abborted, it should not play the child instructions.",
+	"- Eval script variables were not cleared after restarting a Project.",
+	"- Fixed Sound.get commands stopping the Sound immediately."
   ]
 }
