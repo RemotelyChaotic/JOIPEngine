@@ -10,7 +10,7 @@
 	"- Added callbacks to PlayerEventCommunicator, PlayerIcons, PlayerMediaPlayer, PlayerNotification, PlayerStorage, PlayerTimer.",
 	"- pages.contains implemented for EOS teaes.",
 	"- Downloaded EOS scripts use the new Event Based script mode since that mirrors the behavior on Milovana.",
-	"- Some Undocumented timer features of EOS are now supported, where variables in timeouts are evaluated before parsing.".
+	"- Some Undocumented timer features of EOS are now supported, where variables in timeouts are evaluated before parsing.",
 	"- Fixed Milovana Downloads. They should work again.",
 	"- EOS scripts center text again if orientation argument is not given.",
 	"- Fixed goto in a UI eval call not blocking the Scene until the Scene has switched. This has led to (mostly) EOS scripts not behaving as expected.",
