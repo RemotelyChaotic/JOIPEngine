@@ -31,12 +31,13 @@ public:
   static void UnloadResource(tspResource& spRes);
   static bool MountProject(tspProject& spProject);
   static bool UnmountProject(tspProject& spProject);
+  static bool MountMountPoints(tspProject& spProject);
+  static bool UnmountMountPoints(tspProject& spProject);
 
   CDatabaseIO(CDatabaseManager* pManager,
               std::shared_ptr<CDatabaseData> spData);
   virtual ~CDatabaseIO() {}
 
-  bool AddResourceArchive(tspProject& spProj, const QUrl& sPath);
   bool DeserializeProject(tspProject& spProject);
   void LoadDatabase();
   bool PrepareProject(tspProject& spProject);

@@ -380,7 +380,7 @@ QString CEditorModel::AddNewFileToScene(QPointer<QWidget> pParentForDialog,
             }};
 
             QString sResource = spDbManager->AddResource(m_spCurrentProject, sUrlToSave,
-                                                         type, QString(),
+                                                         type, QString(), QString(),
                                                          vfnActions);
             return sResource;
           }
@@ -524,7 +524,7 @@ void CEditorModel::InitNewProject(const QString& sNewProjectName, bool bTutorial
       spDbManager->SerializeProject(iId);
       // set write dir to allow project to save files
       CPhysFsFileEngine::setWriteDir(
-            QString(sBaseProjectPath + "/" + sProjName).toStdString().data());
+            QString(sBaseProjectPath).toStdString().data());
       // serialize base project again after init (this time including all editor data)
       SerializeProject();
       // save changes (flow, etc)...
@@ -691,8 +691,9 @@ void CEditorModel::SaveProject()
         m_spCurrentProject->m_sSceneModel.isEmpty())
     {
       projectLocker.unlock();
-      SResourcePath path = joip_resource::PhysicalResourcePath(sPathProj + "/" + joip_resource::c_sSceneModelFile,
-                                                               m_spCurrentProject);
+      SResourcePath path =
+          joip_resource::CreatePathFromAbsolutePath(sPathProj + "/" + joip_resource::c_sSceneModelFile,
+                                                    m_spCurrentProject);
       spDbManager->AddResource(m_spCurrentProject, path,
                                EResourceType::eOther, joip_resource::c_sSceneModelFile);
       projectLocker.relock();

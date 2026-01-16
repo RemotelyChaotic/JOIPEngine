@@ -78,9 +78,9 @@ public:
   void RenameScene(tspProject& spProj, const QString& sName, const QString& sNewName);
 
   // Resource
-  bool AddResourceArchive(tspProject& spProj, const QUrl& sPath);
+  bool AddResourceArchive(tspProject& spProj, const SResourcePath& sPath);
   QString AddResource(tspProject& spProj, const SResourcePath& sPath, const EResourceType& type,
-                      const QString& sName = QString(),
+                      const QString& sName = QString(), const QString& sBundle = QString(),
                       const tvfnActionsResource& vfnActionsAfterAdding = tvfnActionsResource());
   void ClearResources(tspProject& spProj);
   tspResource FindResourceInProject(tspProject& spProj, const QString& sName);

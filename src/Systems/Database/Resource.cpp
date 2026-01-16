@@ -10,31 +10,29 @@
 
 //----------------------------------------------------------------------------------------
 //
-namespace
+QString joip_resource::MakePathProjectLocal(const QString& sPath, const QString& sFolderName)
 {
-  QString MakePathProjectLocal(const QString& sPath, const QString& sFolderName)
-  {
-    static QString sPfs = QString(CPhysFsFileEngineHandler::c_sScheme).replace(":/", ":");
-    return QString(sPath).replace(sPfs, sPfs + sFolderName + "/");
-  }
-
-  QString MakePathSerialized(const QString& sPath, const QString& sFolderName)
-  {
-    static QString sPfs = QString(CPhysFsFileEngineHandler::c_sScheme).replace(":/", ":");
-    return QString(sPath).replace(sPfs + sFolderName + "/", sPfs);
-  }
-
-  SResourcePath CreatePathFromString(const QString& sStr, const tspProject& spProject)
-  {
-    if (SResourcePath::IsLocalFileP(QUrl(sStr)))
-    {
-      QReadLocker projectLocker(&spProject->m_rwLock);
-      QString sPath = MakePathProjectLocal(sStr, spProject->m_sFolderName);
-      return SResourcePath(sPath);
-    }
-    return SResourcePath(sStr);
-  }
+  static QString sPfs = QString(CPhysFsFileEngineHandler::c_sScheme).replace(":/", ":");
+  return QString(sPath).replace(sPfs, sPfs + sFolderName + "/");
 }
+
+QString joip_resource::MakePathSerialized(const QString& sPath, const QString& sFolderName)
+{
+  static QString sPfs = QString(CPhysFsFileEngineHandler::c_sScheme).replace(":/", ":");
+  return QString(sPath).replace(sPfs + sFolderName + "/", sPfs);
+}
+
+SResourcePath joip_resource::CreatePathFromString(const QString& sStr, const tspProject& spProject)
+{
+  if (SResourcePath::IsLocalFileP(QUrl(sStr)))
+  {
+    QReadLocker projectLocker(&spProject->m_rwLock);
+    QString sPath = MakePathProjectLocal(sStr, spProject->m_sFolderName);
+    return SResourcePath(sPath);
+  }
+  return SResourcePath(sStr);
+}
+
 
 //----------------------------------------------------------------------------------------
 //
@@ -66,7 +64,7 @@ QJsonObject SResource::ToJsonObject()
   }
   return {
     { "sName", m_sName },
-    { "sPath", MakePathSerialized(static_cast<QString>(m_sPath), m_spParent->m_sFolderName) },
+    { "sPath", joip_resource::MakePathSerialized(static_cast<QString>(m_sPath), m_spParent->m_sFolderName) },
     { "sSource", m_sSource.toString(QUrl::None) },
     { "type", m_type._value },
     { "sResourceBundle", m_sResourceBundle },
@@ -87,7 +85,7 @@ void SResource::FromJsonObject(const QJsonObject& json)
   it = json.find("sPath");
   if (it != json.end())
   {
-    m_sPath = ::CreatePathFromString(it.value().toString(), m_spParent);
+    m_sPath = joip_resource::CreatePathFromString(it.value().toString(), m_spParent);
   }
   it = json.find("sSource");
   if (it != json.end())
@@ -169,8 +167,29 @@ QString SResource::PhysicalResourcePath() const
     return QString();
   }
 
-  return joip_resource::PhysicalResourcePath(static_cast<QUrl>(m_sPath), m_spParent,
-                                             m_sResourceBundle, m_sName);
+  return PhysicalResourcePath(m_sPath, m_spParent, m_sResourceBundle, m_sName);
+}
+
+//----------------------------------------------------------------------------------------
+//
+QString SResource::PhysicalResourcePath(const SResourcePath& sPath, const tspProject& spProj,
+                                        const QString& sResourceBundle, const QString& sResourceName)
+{
+  if ( nullptr == spProj)
+  {
+    return QString();
+  }
+
+  QUrl urlForCall = static_cast<QUrl>(sPath);
+  if (sPath.IsLocalFile())
+  {
+    QReadLocker l(&spProj->m_rwLock);
+    QString sPathSer = joip_resource::MakePathSerialized(static_cast<QString>(sPath), spProj->m_sFolderName);
+    urlForCall = QUrl(sPathSer);
+  }
+
+  return joip_resource::PhysicalResourcePath(urlForCall, spProj,
+                                             sResourceBundle, sResourceName);
 }
 
 //----------------------------------------------------------------------------------------
@@ -178,28 +197,42 @@ QString SResource::PhysicalResourcePath() const
 QString SResource::ResourceToAbsolutePath(const QString& sResourceScheme) const
 {
   QReadLocker locker(&m_rwLock);
-  if (nullptr == m_spParent)
+  return ResourceToAbsolutePath(m_sPath, m_spParent, sResourceScheme, m_sResourceBundle, m_sName);
+}
+
+//----------------------------------------------------------------------------------------
+//
+QString SResource::ResourceToAbsolutePath(const SResourcePath& sPath, const tspProject& spProj,
+                                          const QString& sResourceScheme,
+                                          const QString& sResourceBundle,
+                                          const QString& sName)
+{
+  if (nullptr == spProj)
   {
     return QString();
   }
 
-  QReadLocker projectLocker(&m_spParent->m_rwLock);
-  const QString sTrueProjectName = m_spParent->m_sName;
-  bool bBundled = m_spParent->m_bBundled;
+  QReadLocker projectLocker(&spProj->m_rwLock);
+  const QString sTrueProjectName = spProj->m_sName;
+  bool bProjBundled = spProj->m_bBundled;
   projectLocker.unlock();
 
-  if (m_sPath.IsLocalFile())
+  if (sPath.IsLocalFile())
   {
-    if (!bBundled && m_sResourceBundle.isEmpty())
+    if (!bProjBundled && sResourceBundle.isEmpty())
     {
-      QUrl urlCopy(static_cast<QUrl>(m_sPath));
+      QUrl urlCopy(static_cast<QUrl>(sPath));
       urlCopy.setScheme(QString());
       QString sBasePath = CPhysFsFileEngineHandler::c_sScheme;
       return sBasePath + QUrl().resolved(urlCopy).toString();
     }
+    else if (bProjBundled)
+    {
+      return sResourceScheme + "/" + sTrueProjectName + "/" + sName;
+    }
     else
     {
-      return sResourceScheme + "/" + sTrueProjectName + "/" + m_sName;
+      return static_cast<QString>(sPath).replace("qrc:", ":");
     }
   }
   else
@@ -225,7 +258,7 @@ QStringList SResourceFormats::AudioFormats()
 //
 SResourcePath joip_resource::CreatePathFromAbsolutePath(const QString& sStr, const tspProject& spProject)
 {
-  if (SResourcePath::IsLocalFileP(QUrl(sStr)))
+  if (SResourcePath::IsLocalFileP(QUrl::fromUserInput(sStr)))
   {
     QReadLocker projectLocker(&spProject->m_rwLock);
     QString sFolderName = spProject->m_sFolderName;
@@ -262,7 +295,8 @@ SResourcePath joip_resource::CreatePathFromAbsoluteUrl(const QUrl& sUrl, const t
 //----------------------------------------------------------------------------------------
 //
 QString joip_resource::PhysicalResourcePath(const QUrl& url, const tspProject& spProject,
-                                            const QString& sResourceBundle, const QString& sResourceName)
+                                            const QString& sResourceBundle,
+                                            const QString& sResourceName)
 {
   QReadLocker projectLocker(&spProject->m_rwLock);
   const QString sTrueProjectName = spProject->m_sName;
@@ -274,14 +308,18 @@ QString joip_resource::PhysicalResourcePath(const QUrl& url, const tspProject& s
   {
     if (!bBundled && sResourceBundle.isEmpty())
     {
-      QUrl urlCopy(MakePathProjectLocal(url.toString(QUrl::None), sProjectFolder));
+      QUrl urlCopy(url);
       urlCopy.setScheme(QString());
       QString sBasePath = PhysicalProjectPath(spProject);
       return sBasePath + "/" + QUrl().resolved(urlCopy).toString();
     }
-    else
+    else if (bBundled)
     {
       return ":/" + sTrueProjectName + "/" + sResourceName;
+    }
+    else
+    {
+      return url.toString(QUrl::None);
     }
   }
   return url.toString(QUrl::None);
@@ -297,9 +335,7 @@ QStringList SResourceFormats::ArchiveFormats()
   {
     for (const QString& sFormat : vsFormats) { vsReturn <<  QStringLiteral("*.") + sFormat.toLower(); }
   }
-  // adding this kind of resorce doesn't work, but it can be read and will be created by
-  // the engine itself if needed
-  //vsReturn << ("*." + joip_resource::c_sResourceBundleSuffix);
+  vsReturn << ("*." + joip_resource::c_sResourceBundleSuffix);
   return vsReturn;
 }
 

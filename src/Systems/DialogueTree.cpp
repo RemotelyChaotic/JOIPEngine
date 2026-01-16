@@ -1,6 +1,6 @@
 #include "DialogueTree.h"
 #include "DatabaseManager.h"
-#include "Settings.h""
+#include "Settings.h"
 
 #include "Database/Project.h"
 
@@ -576,7 +576,7 @@ namespace
     QJsonDocument doc(root);
 
     QReadLocker locker(&spResource->m_rwLock);
-    QFile f(spResource->PhysicalResourcePath());
+    QFile f(spResource->ResourceToAbsolutePath());
     if (!f.open(QIODevice::ReadWrite | QIODevice::Truncate))
     {
       return false;

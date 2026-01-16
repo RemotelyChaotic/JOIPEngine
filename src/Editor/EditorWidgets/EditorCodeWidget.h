@@ -58,7 +58,7 @@ protected slots:
 private:
   QString CachedResourceName(qint32 iIndex);
   tSceneToDebug GetScene();
-  void ReloadEditor(qint32 iIndex);
+  void ReloadEditor(const QString& sScript);
 
   std::shared_ptr<Ui::CEditorCodeWidget>                 m_spUi;
   std::shared_ptr<CCodeWidgetTutorialStateSwitchHandler> m_spTutorialStateSwitchHandler;

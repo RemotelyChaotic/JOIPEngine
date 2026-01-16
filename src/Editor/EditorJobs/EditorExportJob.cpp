@@ -309,7 +309,7 @@ bool CEditorExportJob::RunZipExport(const QString& sName, const QString& sFolder
                                  [&spBundle](const SExportFile& file) {
             return file.m_sName == spBundle->m_sName;
           });
-          if (vArchives.end() == it && SResourcePath::IsLocalFileP(spBundle->m_sPath))
+          if (vArchives.end() == it && spBundle->m_sPath.IsLocalFile())
           {
             QUrl urlCopy(spBundle->m_sPath);
             urlCopy.setScheme(QString());

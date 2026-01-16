@@ -1,5 +1,6 @@
 #include "ResourceBundle.h"
 #include "Project.h"
+#include "Resource.h"
 
 #include "Systems/PhysFs/PhysFsFileEngine.h"
 
@@ -34,7 +35,7 @@ QJsonObject SResourceBundle::ToJsonObject()
   QWriteLocker locker(&m_rwLock);
   return {
     { "sName", m_sName },
-    { "sPath", m_sPath.toString(QUrl::None) }
+    { "sPath", joip_resource::MakePathSerialized(static_cast<QString>(m_sPath), m_spParent->m_sFolderName) }
   };
 }
 
@@ -51,7 +52,7 @@ void SResourceBundle::FromJsonObject(const QJsonObject& json)
   it = json.find("sPath");
   if (it != json.end())
   {
-    m_sPath = QUrl(it.value().toString());
+    m_sPath = joip_resource::CreatePathFromString(it.value().toString(), m_spParent);
   }
 }
 
@@ -70,7 +71,7 @@ QString ResourceBundleUrlToAbsolutePath(const tspResourceBundle& spResourceBundl
   projectLocker.unlock();
 
   QReadLocker locker(&spResourceBundle->m_rwLock);
-  if (SResourcePath::IsLocalFileP(spResourceBundle->m_sPath))
+  if (spResourceBundle->m_sPath.IsLocalFile())
   {
     if (!bBundled)
     {

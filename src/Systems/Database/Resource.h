@@ -49,8 +49,17 @@ struct SResource : public ISerializable, public std::enable_shared_from_this<SRe
 
   // The actual absolute path as a string as it is wihout PhysFs
   QString PhysicalResourcePath() const;
+  // The actual absolute path as a string as it is wihout PhysFs
+  static QString PhysicalResourcePath(const SResourcePath& sPath, const tspProject& spProj,
+                                      const QString& sResourceBundle = QString(),
+                                      const QString& sResourceName = QString());
   // the absolute PhysFs path
   QString ResourceToAbsolutePath(const QString& sResourceScheme = ":") const;
+  // the absolute PhysFs path
+  static QString ResourceToAbsolutePath(const SResourcePath& sPath, const tspProject& spProj,
+                                        const QString& sResourceScheme = ":",
+                                        const QString& sResourceBundle = QString(),
+                                        const QString& sName = QString());
 };
 
 
@@ -68,9 +77,14 @@ Q_DECLARE_METATYPE(tspResource)
 namespace joip_resource
 {
   QString PhysicalResourcePath(const QUrl& url, const tspProject& spProject,
-                               const QString& sResourceBundle = QString(), const QString& sResourceName = QString());
+                               const QString& sResourceBundle = QString(),
+                               const QString& sResourceName = QString());
   SResourcePath CreatePathFromAbsolutePath(const QString& sStr, const tspProject& spProject);
   SResourcePath CreatePathFromAbsoluteUrl(const QUrl& sUrl, const tspProject& spProject);
+
+  QString MakePathProjectLocal(const QString& sPath, const QString& sFolderName);
+  QString MakePathSerialized(const QString& sPath, const QString& sFolderName);
+  SResourcePath CreatePathFromString(const QString& sStr, const tspProject& spProject);
 }
 
 //----------------------------------------------------------------------------------------

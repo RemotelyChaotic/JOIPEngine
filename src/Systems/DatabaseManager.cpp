@@ -569,16 +569,61 @@ void CDatabaseManager::RenameScene(tspProject& spProj, const QString& sName, con
 
 //----------------------------------------------------------------------------------------
 //
-bool CDatabaseManager::AddResourceArchive(tspProject& spProj, const QUrl& sPath)
+bool CDatabaseManager::AddResourceArchive(tspProject& spProj, const SResourcePath& sPath)
 {
   if (!IsInitialized() || nullptr == spProj) { return false; }
-  return m_spDbIo->AddResourceArchive(spProj, sPath);
+
+  const QString sFileSuffix = sPath.Suffix();
+  // resource bundle
+  if (joip_resource::c_sResourceBundleSuffix == sFileSuffix)
+  {
+    const QString sName = sPath.CompleteBaseName();
+    tspResourceBundle spResourceBundle = std::make_shared<SResourceBundle>();
+    spResourceBundle->m_spParent = spProj;
+    spResourceBundle->m_sName = sName;
+    spResourceBundle->m_sPath = static_cast<QUrl>(sPath);
+    bool bProjectLoaded = false;
+    {
+      QWriteLocker locker(&spProj->m_rwLock);
+      spProj->m_baseData.m_spResourceBundleMap.insert({sName, spResourceBundle});
+      bProjectLoaded = spProj->m_bLoaded;
+    }
+    if (bProjectLoaded)
+    {
+      return LoadBundle(spProj, sName);
+    }
+  }
+  // archive
+  else
+  {
+    const QString sProjPath = PhysicalProjectPath(spProj);
+    const QString sAbsolutePath = SResource::PhysicalResourcePath(sPath, spProj);
+    QDir projDir(sProjPath);
+    QString sMountPoint = projDir.relativeFilePath(sAbsolutePath);
+    QWriteLocker locker(&spProj->m_rwLock);
+    QString sFolderName = spProj->m_sFolderName;
+    spProj->m_vsMountPoints << sMountPoint;
+    if (spProj->m_bLoaded)
+    {
+      QString sMountPointName = sFolderName + "/" + sMountPoint;
+      bool bOk = CPhysFsFileEngine::mount((sProjPath + "/" + sMountPoint).toStdString().data(),
+                                          (sFolderName + "/" + sMountPoint).toStdString().data());
+      if (!bOk)
+      {
+        qWarning() << QObject::tr("Failed to mount %1: reason: %2").arg(sMountPointName)
+                          .arg(CPhysFsFileEngine::errorString());
+      }
+      return bOk;
+    }
+  }
+  return true;
 }
 
 //----------------------------------------------------------------------------------------
 //
 QString CDatabaseManager::AddResource(tspProject& spProj, const SResourcePath& sPath,
                                       const EResourceType& type, const QString& sName,
+                                      const QString& sBundle,
                                       const tvfnActionsResource& vfnActionsAfterAdding)
 {
   if (!IsInitialized() || nullptr == spProj) { return QString(); }
@@ -610,6 +655,7 @@ QString CDatabaseManager::AddResource(tspProject& spProj, const SResourcePath& s
   spResource->m_sName = sFinalName;
   spResource->m_sPath = sPath;
   spResource->m_type = type;
+  spResource->m_sResourceBundle = sBundle;
   spResource->m_spParent = spProj;
   spProj->m_baseData.m_spResourcesMap.insert({sFinalName, spResource});
 

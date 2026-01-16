@@ -8,7 +8,7 @@
 CCommandChangeOpenedScript::CCommandChangeOpenedScript(QPointer<QComboBox> pResourcesComboBox,
                                                        QPointer<CCodeDisplayWidget> pScriptDisplayWidget,
                                                        QPointer<QWidget> pGuard,
-                                                       const std::function<void(qint32)>& fnReloadEditor,
+                                                       const std::function<void(const QString&)>& fnReloadEditor,
                                                        bool* pbChangingIndexFlag,
                                                        QString* psLastCachedScript,
                                                        const QString& sOldScript,
@@ -96,7 +96,7 @@ void CCommandChangeOpenedScript::DoUndoRedo(const QString& sScriptNext)
 
     if (nullptr != m_fnReloadEditor)
     {
-      m_fnReloadEditor(m_pEditorModel->FileIndex(sScriptNext));
+      m_fnReloadEditor(sScriptNext);
     }
 
     *m_pbChangingIndexFlag = false;

@@ -17,7 +17,7 @@ public:
   CCommandChangeOpenedScript(QPointer<QComboBox> pResourcesComboBox,
                              QPointer<CCodeDisplayWidget> pScriptDisplayWidget,
                              QPointer<QWidget> pGuard,
-                             const std::function<void(qint32)>& fnReloadEditor,
+                             const std::function<void(const QString&)>& fnReloadEditor,
                              bool* pbChangingIndexFlag,
                              QString* psLastCachedScript,
                              const QString& sOldScript,
@@ -37,7 +37,7 @@ protected:
   QPointer<CCodeDisplayWidget> m_pScriptDisplayWidget;
   QPointer<CEditorEditableFileModel> m_pEditorModel;
   QPointer<QWidget> m_pGuard;
-  std::function<void(qint32)> m_fnReloadEditor;
+  std::function<void(const QString&)> m_fnReloadEditor;
   bool* m_pbChangingIndexFlag;
   QString* m_psLastCachedScript;
   QString m_sOldScript;

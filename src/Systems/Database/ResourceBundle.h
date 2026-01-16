@@ -2,6 +2,7 @@
 #define RESOURCEBUNDLE_H
 
 #include "ISerializable.h"
+#include "Systems/DatabaseInterface/ResourceData.h"
 #include <QObject>
 #include <QPointer>
 #include <QReadWriteLock>
@@ -25,7 +26,7 @@ struct SResourceBundle : public ISerializable, public std::enable_shared_from_th
   std::shared_ptr<SProject> m_spParent = nullptr;
 
   QString                   m_sName;
-  QUrl                      m_sPath;
+  SResourcePath             m_sPath;
   bool                      m_bLoaded = false;
 
   QJsonObject ToJsonObject() override;

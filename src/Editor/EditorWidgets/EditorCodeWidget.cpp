@@ -206,7 +206,10 @@ void CEditorCodeWidget::OnHidden()
 void CEditorCodeWidget::OnShown()
 {
   EditableFileModel()->SetReloadFileWithoutQuestion(false);
-  ReloadEditor(m_spUi->pResourceComboBox->currentIndex());
+  ReloadEditor(
+      EditableFileModel()->CachedResourceName(
+          m_pFilteredScriptModel->mapToSource(
+              m_pFilteredScriptModel->index(m_spUi->pResourceComboBox->currentIndex(), 0)).row()));
 }
 
 //----------------------------------------------------------------------------------------
@@ -508,7 +511,7 @@ CEditorCodeWidget::tSceneToDebug CEditorCodeWidget::GetScene()
 
 //----------------------------------------------------------------------------------------
 //
-void CEditorCodeWidget::ReloadEditor(qint32 iIndex)
+void CEditorCodeWidget::ReloadEditor(const QString& sScript)
 {
   m_bChangingIndex = true;
 
@@ -516,7 +519,7 @@ void CEditorCodeWidget::ReloadEditor(qint32 iIndex)
   m_spUi->pCodeEditorView->Clear();
 
   // load new contents
-  m_sLastCachedScript = CachedResourceName(iIndex);
+  m_sLastCachedScript = sScript;
   auto  pScriptItem = EditableFileModel()->CachedFile(m_sLastCachedScript);
   if (nullptr != pScriptItem)
   {

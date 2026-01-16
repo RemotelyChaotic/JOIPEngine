@@ -137,7 +137,10 @@ public:
               }
             }
             spProject->m_rwLock.unlock();
-            bOk = true;
+
+            // we just loaded the mountPoints, mount these so there's no error on
+            // unloading
+            bOk = MountMountPoints(spProject);
           }
           else
           {
@@ -584,7 +587,11 @@ bool CDatabaseIO::SetProjectEditing(tspProject& spProject, bool bEnabled)
 {
   if (nullptr != spProject)
   {
-    const QString sProjPath = PhysicalProjectPath(spProject);
+    QString sProjPath;
+    {
+      QReadLocker locker(&spProject->m_rwLock);
+      sProjPath = spProject->m_sProjectPath;
+    }
     if (bEnabled)
     {
       return CPhysFsFileEngine::setWriteDir(QString(sProjPath).toStdString().data());
@@ -776,18 +783,7 @@ bool CDatabaseIO::MountProject(tspProject& spProject)
   }
   else
   {
-    QReadLocker locker(&spProject->m_rwLock);
-    for (const QString& sMountPoint : qAsConst(spProject->m_vsMountPoints))
-    {
-      bOk &= CPhysFsFileEngine::mount((sFinalPath + "/" + sMountPoint).toStdString().data(), sMountPoint.toStdString().data());
-      assert(bOk);
-      if (!bOk)
-      {
-        qWarning() << QObject::tr("Failed to mount %1: reason: %2").arg(sFinalPath)
-                      .arg(CPhysFsFileEngine::errorString());
-        break;
-      }
-    }
+    bOk &= MountMountPoints(spProject);
   }
   return bOk;
 }
@@ -797,21 +793,7 @@ bool CDatabaseIO::MountProject(tspProject& spProject)
 bool CDatabaseIO::UnmountProject(tspProject& spProject)
 {
   QString sFinalPath = PhysicalProjectPath(spProject);
-  bool bOk = true;
-  {
-    QReadLocker locker(&spProject->m_rwLock);
-    for (const QString& sMountPoint : qAsConst(spProject->m_vsMountPoints))
-    {
-      bOk &= CPhysFsFileEngine::unmount((sFinalPath + "/" + sMountPoint).toStdString().data());
-      assert(bOk);
-      if (!bOk)
-      {
-        qWarning() << QObject::tr("Failed to unmount %1: reason: %2").arg(sFinalPath)
-                      .arg(CPhysFsFileEngine::errorString());
-        break;
-      }
-    }
-  }
+  bool bOk = UnmountMountPoints(spProject);
   if (!bOk) { return bOk; }
 
   bOk &= CPhysFsFileEngine::unmount(sFinalPath.toStdString().data());
@@ -827,47 +809,58 @@ bool CDatabaseIO::UnmountProject(tspProject& spProject)
 
 //----------------------------------------------------------------------------------------
 //
+bool CDatabaseIO::MountMountPoints(tspProject& spProject)
+{
+  bool bOk = true;
+  QString sFinalPath = PhysicalProjectPath(spProject);
+  QReadLocker locker(&spProject->m_rwLock);
+  QString sFolderName = spProject->m_sFolderName;
+  for (const QString& sMountPoint : qAsConst(spProject->m_vsMountPoints))
+  {
+    QString sMountPointName = sFolderName + "/" + sMountPoint;
+    bOk &= CPhysFsFileEngine::mount((sFinalPath + "/" + sMountPoint).toStdString().data(),
+                                    sMountPointName.toStdString().data());
+    assert(bOk);
+    if (!bOk)
+    {
+      qWarning() << QObject::tr("Failed to mount %1: reason: %2").arg(sFinalPath + "/" + sMountPoint)
+                        .arg(CPhysFsFileEngine::errorString());
+      break;
+    }
+  }
+  return bOk;
+}
+
+//----------------------------------------------------------------------------------------
+//
+bool CDatabaseIO::UnmountMountPoints(tspProject& spProject)
+{
+  QString sFinalPath = PhysicalProjectPath(spProject);
+  bool bOk = true;
+  {
+    QReadLocker locker(&spProject->m_rwLock);
+    for (const QString& sMountPoint : qAsConst(spProject->m_vsMountPoints))
+    {
+      bOk &= CPhysFsFileEngine::unmount((sFinalPath + "/" + sMountPoint).toStdString().data());
+      assert(bOk);
+      if (!bOk)
+      {
+        qWarning() << QObject::tr("Failed to unmount %1: reason: %2").arg(sFinalPath + "/" + sMountPoint)
+                          .arg(CPhysFsFileEngine::errorString());
+        break;
+      }
+    }
+  }
+  return bOk;
+}
+
+//----------------------------------------------------------------------------------------
+//
 CDatabaseIO::CDatabaseIO(CDatabaseManager* pManager, std::shared_ptr<CDatabaseData> spData) :
   m_pManager(pManager),
   m_spData(spData),
   m_bLoadedDb(0)
 {
-}
-
-//----------------------------------------------------------------------------------------
-//
-bool CDatabaseIO::AddResourceArchive(tspProject& spProj, const QUrl& sPath)
-{
-  const QString sProjPath = PhysicalProjectPath(spProj);
-  const QString sMountPoint = sPath.path();
-  const QString sFileSuffix = QFileInfo(sPath.fileName()).suffix();
-  QWriteLocker locker(&spProj->m_rwLock);
-  // resource bundle
-  if (joip_resource::c_sResourceBundleSuffix == sFileSuffix)
-  {
-    const QString sName = QFileInfo(sPath.fileName()).completeBaseName();
-    tspResourceBundle spResourceBundle = std::make_shared<SResourceBundle>();
-    spResourceBundle->m_spParent = spProj;
-    spResourceBundle->m_sName = sName;
-    spResourceBundle->m_sPath = sPath;
-    spProj->m_baseData.m_spResourceBundleMap.insert({sName, spResourceBundle});
-  }
-  // archive
-  else
-  {
-    spProj->m_vsMountPoints << sMountPoint;
-    if (spProj->m_bLoaded)
-    {
-      bool bOk = CPhysFsFileEngine::mount((sProjPath + "/" + sMountPoint).toStdString().data(), sMountPoint.toStdString().data());
-      if (!bOk)
-      {
-        qWarning() << QObject::tr("Failed to mount %1: reason: %2").arg(sMountPoint)
-                      .arg(CPhysFsFileEngine::errorString());
-      }
-      return bOk;
-    }
-  }
-  return true;
 }
 
 //----------------------------------------------------------------------------------------
