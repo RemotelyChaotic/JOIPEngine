@@ -167,7 +167,8 @@ bool CEditorExportJob::RunBinaryExport(const QString& sName, const QString& sFol
 {
   emit SignalJobMessage(m_iId, JobType(), tr("Collecting Resources."));
 
-  QFile rccFile(CPhysFsFileEngineHandler::c_sScheme + c_sTempRCCFileName);
+  m_spProject->m_rwLock.lockForRead();
+  QFile rccFile(sFolder + "/" + c_sTempRCCFileName);
   if (!rccFile.open(QIODevice::WriteOnly | QIODevice::Truncate))
   {
     m_sError =  tr("Could not write temporary resource file '%1':\n%2")
@@ -180,7 +181,6 @@ bool CEditorExportJob::RunBinaryExport(const QString& sName, const QString& sFol
   QTextStream outStream(&rccFile);
   outStream.setCodec("UTF-8");
   outStream << "<!DOCTYPE RCC><RCC version=\"1.0\">" << "<qresource prefix=\"/\">";
-  m_spProject->m_rwLock.lockForRead();
   for (auto spResourcePair : m_spProject->m_baseData.m_spResourcesMap)
   {
     const QString sOutPath = spResourcePair.second->ResourceToAbsolutePath();
@@ -196,12 +196,12 @@ bool CEditorExportJob::RunBinaryExport(const QString& sName, const QString& sFol
   m_spProject->m_rwLock.unlock();
   outStream << QString("<file alias=\"%2\">%1</file>")
                    .arg(joip_resource::c_sProjectFileName)
-                   .arg(joip_resource::c_sProjectFileName);
+                   .arg(sFolder + "/" + joip_resource::c_sProjectFileName);
   outStream << "</qresource>" << "</RCC>";
 
   rccFile.close();
 
-  QString sRccFileName = (sFolder + "/" + c_sTempRCCFileName);
+  QString sRccFileName = (rccFile.fileName());
   QString sOutFileName = (sFolder + "/" + sName + ".proj");
   QRcc::SRCCOptions opts {
       sOutFileName,
@@ -278,10 +278,26 @@ bool CEditorExportJob::RunZipExport(const QString& sName, const QString& sFolder
 
   emit SignalJobMessage(m_iId, JobType(), tr("Collecting Resources."));
 
+  auto fnCheckIsInArchive = [](const QString& sPath, const QString& sProjPath,
+                               const QStringList& vsMountPoints,
+                               QString& outMountPoint, QString& sOutMountPath){
+    for (const QString& sMountPoint : vsMountPoints)
+    {
+      if (sPath.startsWith(sProjPath + "/" + sMountPoint))
+      {
+        outMountPoint = sMountPoint;
+        sOutMountPath = sProjPath + "/" + sMountPoint;
+        return true;
+      }
+    }
+    return false;
+  };
+
   // first collect all resources
   std::vector<SExportFile> vArchives;
   std::vector<SExportFile> vFiles;
   {
+    QString sProjPath = PhysicalProjectPath(m_spProject);
     QReadLocker projLocker(&m_spProject->m_rwLock);
     for (const auto& [sName, spResource] : m_spProject->m_baseData.m_spResourcesMap)
     {
@@ -291,31 +307,64 @@ bool CEditorExportJob::RunZipExport(const QString& sName, const QString& sFolder
       {
         if (spResource->m_sResourceBundle.isEmpty())
         {
-          auto it = std::find_if(vFiles.begin(), vFiles.end(),
-                                 [spR = spResource](const SExportFile& file) {
-            return file.m_sName == spR->m_sName;
-          });
-          if (vFiles.end() == it)
+          QString sMountPoint;
+          QString sMountPath;
+          QString sPath = spResource->PhysicalResourcePath();
+          if (!fnCheckIsInArchive(sPath, sProjPath, m_spProject->m_vsMountPoints,
+                                  sMountPoint, sMountPath))
           {
-            QString sPath = spResource->PhysicalResourcePath();
-            vFiles.push_back({sName, sPath});
+            auto it = std::find_if(vFiles.begin(), vFiles.end(),
+                                   [spR = spResource](const SExportFile& file) {
+              return file.m_sName == spR->m_sName;
+            });
+            if (vFiles.end() == it)
+            {
+              vFiles.push_back({sName, sPath});
+            }
+          }
+          else
+          {
+            auto it = std::find_if(vArchives.begin(), vArchives.end(),
+                                   [&sMountPoint](const SExportFile& file) {
+                                     return file.m_sName == sMountPoint;
+                                   });
+            if (vArchives.end() == it)
+            {
+              vArchives.push_back({sMountPoint, sMountPath});
+            }
           }
         }
         else
         {
           auto spBundle = m_spProject->m_baseData.m_spResourceBundleMap[spResource->m_sResourceBundle];
           QReadLocker bundleLocker(&spBundle->m_rwLock);
-          auto it = std::find_if(vArchives.begin(), vArchives.end(),
-                                 [&spBundle](const SExportFile& file) {
-            return file.m_sName == spBundle->m_sName;
-          });
-          if (vArchives.end() == it && spBundle->m_sPath.IsLocalFile())
+
+          QString sMountPoint;
+          QString sMountPath;
+          QString sBundlePath = PhysicalBundlePath(spBundle);
+          if (!fnCheckIsInArchive(sBundlePath, sProjPath, m_spProject->m_vsMountPoints,
+                                  sMountPoint, sMountPath))
           {
-            QUrl urlCopy(spBundle->m_sPath);
-            urlCopy.setScheme(QString());
-            QString sBasePath = PhysicalProjectPath(spBundle->m_spParent);
-            vArchives.push_back({spBundle->m_sName,
-                                 sBasePath + "/" + QUrl().resolved(urlCopy).toString()});
+            auto it = std::find_if(vArchives.begin(), vArchives.end(),
+                                   [&spBundle](const SExportFile& file) {
+              return file.m_sName == spBundle->m_sName;
+            });
+            if (vArchives.end() == it && spBundle->m_sPath.IsLocalFile())
+            {
+
+              vArchives.push_back({spBundle->m_sName, sBundlePath});
+            }
+          }
+          else
+          {
+            auto it = std::find_if(vArchives.begin(), vArchives.end(),
+                                   [&sMountPoint](const SExportFile& file) {
+                                     return file.m_sName == sMountPoint;
+                                   });
+            if (vArchives.end() == it)
+            {
+              vArchives.push_back({sMountPoint, sMountPath});
+            }
           }
         }
       }

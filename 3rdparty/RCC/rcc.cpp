@@ -571,7 +571,7 @@ bool RCCResourceLibrary::interpretResourceFile(QIODevice *inputDevice,
                 alias = QDir::cleanPath(m_resourceRoot) + prefix + alias;
 
                 QString absFileName = fileName;
-                if (absFileName.startsWith("pfs:/"));
+                if (absFileName.startsWith("pfs:"));
                 else if (QDir::isRelativePath(absFileName))
                     absFileName.prepend(currentPath);
                 QFileInfo file(absFileName);

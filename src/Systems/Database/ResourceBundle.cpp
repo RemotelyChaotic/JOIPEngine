@@ -58,6 +58,43 @@ void SResourceBundle::FromJsonObject(const QJsonObject& json)
 
 //----------------------------------------------------------------------------------------
 //
+QString PhysicalBundlePath(const tspResourceBundle& spResourceBundle)
+{
+  QReadLocker bundleLocker(&spResourceBundle->m_rwLock);
+  QUrl urlForCall = static_cast<QUrl>(spResourceBundle->m_sPath);
+  if (spResourceBundle->m_sPath.IsLocalFile())
+  {
+    QReadLocker projectLocker(&spResourceBundle->m_spParent->m_rwLock);
+    QString sPathSer = joip_resource::MakePathSerialized(static_cast<QString>(spResourceBundle->m_sPath),
+                                                         spResourceBundle->m_spParent->m_sFolderName);
+    urlForCall = QUrl(sPathSer);
+  }
+
+  QReadLocker projectLocker(&spResourceBundle->m_spParent->m_rwLock);
+  const QString sTrueProjectName = spResourceBundle->m_spParent->m_sName;
+  const QString sProjectFolder = spResourceBundle->m_spParent->m_sFolderName;
+  bool bBundled = spResourceBundle->m_spParent->m_bBundled;
+  projectLocker.unlock();
+
+  if (spResourceBundle->m_sPath.IsLocalFile())
+  {
+    if (!bBundled)
+    {
+      QUrl urlCopy(urlForCall);
+      urlCopy.setScheme(QString());
+      QString sBasePath = PhysicalProjectPath(spResourceBundle->m_spParent);
+      return sBasePath + "/" + QUrl().resolved(urlCopy).toString();
+    }
+    else
+    {
+      return ":/" + sTrueProjectName + "/" + spResourceBundle->m_sName;
+    }
+  }
+  return urlForCall.toString(QUrl::None);
+}
+
+//----------------------------------------------------------------------------------------
+//
 QString ResourceBundleUrlToAbsolutePath(const tspResourceBundle& spResourceBundle)
 {
   if (nullptr == spResourceBundle || nullptr == spResourceBundle->m_spParent)

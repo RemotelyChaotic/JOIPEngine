@@ -346,9 +346,11 @@ protected:
     {
       QJsonDocument document(spProject->ToJsonObject());
 
-      QFile jsonFile((!bForceWriting ? CPhysFsFileEngineHandler::c_sScheme :
-                                       (sNewProjectFolder + QDir::separator())) +
-                     joip_resource::c_sProjectFileName);
+      QFile jsonFile(
+          (!bForceWriting ? CPhysFsFileEngineHandler::c_sScheme + QDir::separator() +
+                                sNewFolderName + QDir::separator() :
+                            (sNewProjectFolder + QDir::separator())) +
+          joip_resource::c_sProjectFileName);
       if (jsonFile.open(QIODevice::ReadWrite | QIODevice::Truncate))
       {
         jsonFile.write(document.toJson(QJsonDocument::Indented));

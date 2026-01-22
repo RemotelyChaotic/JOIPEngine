@@ -232,7 +232,7 @@ QString SResource::ResourceToAbsolutePath(const SResourcePath& sPath, const tspP
     }
     else
     {
-      return static_cast<QString>(sPath).replace("qrc:", ":");
+      return static_cast<QString>(sPath).replace("qrc:", sResourceScheme);
     }
   }
   else

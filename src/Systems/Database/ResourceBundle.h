@@ -48,6 +48,7 @@ Q_DECLARE_METATYPE(tspResourceBundle)
 
 //----------------------------------------------------------------------------------------
 //
+QString PhysicalBundlePath(const tspResourceBundle& spResourceBundle);
 QString ResourceBundleUrlToAbsolutePath(const tspResourceBundle& spResourceBundle);
 
 #endif // RESOURCEBUNDLE_H
