@@ -187,6 +187,10 @@ bool CEditorExportJob::RunBinaryExport(const QString& sName, const QString& sFol
     spResourcePair.second->m_rwLock.lockForRead();
     if (spResourcePair.second->m_sPath.IsLocalFile())
     {
+      if (!spResourcePair.second->m_sResourceBundle.isEmpty())
+      {
+        CDatabaseManager::LoadBundle(m_spProject, spResourcePair.second->m_sResourceBundle);
+      }
       outStream << QString("<file alias=\"%2\">%1</file>")
                        .arg(sOutPath)
                        .arg(spResourcePair.second->m_sName);
