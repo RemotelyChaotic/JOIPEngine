@@ -2,6 +2,12 @@
 Version 1.8.0.0
 =================
 
+New Features:
+- Implemented a Plugin system. Every Project can declare a plugin folder.
+  JOIP-Projects in that folder will be loaded as Plugins during runtime.
+  Every Resource, Scene, Tag and Achievement of that Plugin can be used 
+  and referenced in the parent Project as you usually would.
+
 Fixed Bugs:
 - Fixed adding Resource bundles and archives to the Resources.
 - Project exports now correctly handle Resource bundles and archives.
