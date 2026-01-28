@@ -513,8 +513,80 @@ bool CDatabaseIO::LoadPlugins(tspProject& spProject)
         }
         else
         {
+          // Re-map scene-Model to not clash with parent
+          auto itSceneModel =
+              spProjPlug->m_baseData.m_spResourcesMap.find(spProjPlug->m_sSceneModel);
+          if (spProjPlug->m_baseData.m_spResourcesMap.end() != itSceneModel)
+          {
+            auto spResource = itSceneModel->second;
+            spProjPlug->m_baseData.m_spResourcesMap.erase(itSceneModel);
+            QReadLocker resLock(&spResource->m_rwLock);
+            spResource->m_sName = spProjPlug->m_sName + "/" + spResource->m_sName;
+            spProjPlug->m_sSceneModel = spResource->m_sName;
+            spProjPlug->m_baseData.m_spResourcesMap.insert({spResource->m_sName, spResource});
+          }
+
+          // merge plugin and base data into plugin data
           spProject->m_pluginData.MergeIntoThis(spProjPlug->m_baseData, spProject);
           spProject->m_pluginData.MergeIntoThis(spProjPlug->m_pluginData, spProject);
+
+          // connect tags and resources after both have been loaded
+          for (const auto& [sResource, spResource] : spProject->m_pluginData.m_spResourcesMap)
+          {
+            QReadLocker resLocker(&spResource->m_rwLock);
+            for (const QString& sTag : spResource->m_vsResourceTags)
+            {
+              auto it = spProject->m_pluginData.m_vspTags.find(sTag);
+              if (spProject->m_pluginData.m_vspTags.end() != it)
+              {
+                QReadLocker tagLocker(&it->second->m_rwLock);
+                it->second->m_vsResourceRefs.insert(sResource);
+              }
+              it = spProject->m_baseData.m_vspTags.find(sTag);
+              if (spProject->m_baseData.m_vspTags.end() != it)
+              {
+                QReadLocker tagLocker(&it->second->m_rwLock);
+                it->second->m_vsResourceRefs.insert(sResource);
+              }
+            }
+          }
+          for (const auto& [sResource, spResource] : spProject->m_baseData.m_spResourcesMap)
+          {
+            QReadLocker resLocker(&spResource->m_rwLock);
+            for (const QString& sTag : spResource->m_vsResourceTags)
+            {
+              auto it = spProject->m_pluginData.m_vspTags.find(sTag);
+              if (spProject->m_pluginData.m_vspTags.end() != it)
+              {
+                QReadLocker tagLocker(&it->second->m_rwLock);
+                it->second->m_vsResourceRefs.insert(sResource);
+              }
+              it = spProject->m_baseData.m_vspTags.find(sTag);
+              if (spProject->m_baseData.m_vspTags.end() != it)
+              {
+                QReadLocker tagLocker(&it->second->m_rwLock);
+                it->second->m_vsResourceRefs.insert(sResource);
+              }
+            }
+          }
+
+          // Remap Scene ids to not clash
+          // 1: find the highest id
+          qint32 iHighestId = 0;
+          for (const tspScene& spScene : spProject->m_baseData.m_vspScenes)
+          {
+            QReadLocker ls(&spScene->m_rwLock);
+            if (spScene->m_iId > iHighestId)
+            {
+              iHighestId = spScene->m_iId;
+            }
+          }
+          // 2: Set a new scene id starting at the found id.
+          for (tspScene& spScene : spProject->m_pluginData.m_vspScenes)
+          {
+            QWriteLocker ls(&spScene->m_rwLock);
+            spScene->m_iId = ++iHighestId;
+          }
         }
       }
     }

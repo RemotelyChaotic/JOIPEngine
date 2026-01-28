@@ -446,6 +446,14 @@ tspScene CDatabaseManager::FindScene(tspProject& spProj, qint32 iId)
   if (!IsInitialized() || nullptr == spProj) { return nullptr; }
 
   QReadLocker locker(&spProj->m_rwLock);
+  for (tspScene& spScene : spProj->m_pluginData.m_vspScenes)
+  {
+    QReadLocker projLocker(&spScene->m_rwLock);
+    if (spScene->m_iId == iId)
+    {
+      return spScene;
+    }
+  }
   for (tspScene& spScene : spProj->m_baseData.m_vspScenes)
   {
     QReadLocker projLocker(&spScene->m_rwLock);
@@ -464,6 +472,14 @@ tspScene CDatabaseManager::FindScene(tspProject& spProj, const QString& sName)
   if (!IsInitialized() || nullptr == spProj) { return nullptr; }
 
   QReadLocker locker(&spProj->m_rwLock);
+  for (tspScene& spScene : spProj->m_pluginData.m_vspScenes)
+  {
+    QReadLocker projLocker(&spScene->m_rwLock);
+    if (spScene->m_sName == sName)
+    {
+      return spScene;
+    }
+  }
   for (tspScene& spScene : spProj->m_baseData.m_vspScenes)
   {
     QReadLocker projLocker(&spScene->m_rwLock);
@@ -719,7 +735,12 @@ tspResource CDatabaseManager::FindResourceInProject(tspProject& spProj, const QS
   if (!IsInitialized() || nullptr == spProj) { return nullptr; }
 
   QReadLocker locker(&spProj->m_rwLock);
-  auto it = spProj->m_baseData.m_spResourcesMap.find(sName);
+  auto it = spProj->m_pluginData.m_spResourcesMap.find(sName);
+  if (it != spProj->m_pluginData.m_spResourcesMap.end())
+  {
+    return it->second;
+  }
+  it = spProj->m_baseData.m_spResourcesMap.find(sName);
   if (it != spProj->m_baseData.m_spResourcesMap.end())
   {
     return it->second;
@@ -735,6 +756,14 @@ tvspResource CDatabaseManager::FindResourcesInProject(tspProject& spProj, const 
   if (!IsInitialized() || nullptr == spProj) { return retVal; }
 
   QReadLocker locker(&spProj->m_rwLock);
+  for (auto it = spProj->m_pluginData.m_spResourcesMap.begin(); spProj->m_pluginData.m_spResourcesMap.end() != it; ++it)
+  {
+    qint32 iPos = 0;
+    if ((iPos = rx.indexIn(it->first, iPos)) == -1)
+    {
+      retVal.push_back(it->second);
+    }
+  }
   for (auto it = spProj->m_baseData.m_spResourcesMap.begin(); spProj->m_baseData.m_spResourcesMap.end() != it; ++it)
   {
     qint32 iPos = 0;
@@ -753,7 +782,12 @@ tspResourceBundle CDatabaseManager::FindResourceBundleInProject(tspProject& spPr
   if (!IsInitialized() || nullptr == spProj) { return nullptr; }
 
   QReadLocker locker(&spProj->m_rwLock);
-  auto it = spProj->m_baseData.m_spResourceBundleMap.find(sName);
+  auto it = spProj->m_pluginData.m_spResourceBundleMap.find(sName);
+  if (it != spProj->m_pluginData.m_spResourceBundleMap.end())
+  {
+    return it->second;
+  }
+  it = spProj->m_baseData.m_spResourceBundleMap.find(sName);
   if (it != spProj->m_baseData.m_spResourceBundleMap.end())
   {
     return it->second;
@@ -1009,7 +1043,12 @@ tspTag CDatabaseManager::FindTagInProject(tspProject& spProj, QString sName)
   if (!IsInitialized() || nullptr == spProj) { return nullptr; }
 
   QReadLocker locker(&spProj->m_rwLock);
-  auto it = spProj->m_baseData.m_vspTags.find(sName);
+  auto it = spProj->m_pluginData.m_vspTags.find(sName);
+  if (spProj->m_pluginData.m_vspTags.end() != it)
+  {
+    return it->second;
+  }
+  it = spProj->m_baseData.m_vspTags.find(sName);
   if (spProj->m_baseData.m_vspTags.end() != it)
   {
     return it->second;
@@ -1073,16 +1112,17 @@ void CDatabaseManager::RemoveTagFromResource(tspProject& spProj, const QString& 
         spProj->m_baseData.m_vspTags.erase(it);
         bRemovedFromProject = true;
       }
+    }
 
-      auto itResourse = spProj->m_baseData.m_spResourcesMap.find(sResource);
-      if (spProj->m_baseData.m_spResourcesMap.end() != itResourse)
+    auto itResourse = spProj->m_baseData.m_spResourcesMap.find(sResource);
+    if (spProj->m_baseData.m_spResourcesMap.end() != itResourse)
+    {
+      QWriteLocker locker(&itResourse->second->m_rwLock);
+      auto itRes = itResourse->second->m_vsResourceTags.find(sName);
+      if (itResourse->second->m_vsResourceTags.end() != itRes)
       {
-        QWriteLocker locker(&itResourse->second->m_rwLock);
-        auto itRes = itResourse->second->m_vsResourceTags.find(sName);
-        if (itResourse->second->m_vsResourceTags.end() != itRes)
-        {
-          itResourse->second->m_vsResourceTags.erase(itRes);
-        }
+        itResourse->second->m_vsResourceTags.erase(itRes);
+        bRemovedFromProject = true;
       }
     }
   }
@@ -1101,6 +1141,14 @@ QStringList CDatabaseManager::TagCategories(const tspProject& spProj)
 
   QStringList res;
   QReadLocker locker(&spProj->m_rwLock);
+  for (const auto& [_, spTag] : spProj->m_pluginData.m_vspTags)
+  {
+    QReadLocker tagLocker(&spTag->m_rwLock);
+    if (!res.contains(spTag->m_sType))
+    {
+      res << spTag->m_sType;
+    }
+  }
   for (const auto& [_, spTag] : spProj->m_baseData.m_vspTags)
   {
     QReadLocker tagLocker(&spTag->m_rwLock);
@@ -1246,7 +1294,12 @@ tspSaveData CDatabaseManager::FindAchievementInProject(tspProject& spProj, QStri
   if (!IsInitialized() || nullptr == spProj) { return nullptr; }
 
   QReadLocker locker(&spProj->m_rwLock);
-  auto it = spProj->m_baseData.m_vspAchievements.find(sName);
+  auto it = spProj->m_pluginData.m_vspAchievements.find(sName);
+  if (spProj->m_pluginData.m_vspAchievements.end() != it)
+  {
+    return it->second;
+  }
+  it = spProj->m_baseData.m_vspAchievements.find(sName);
   if (spProj->m_baseData.m_vspAchievements.end() != it)
   {
     return it->second;

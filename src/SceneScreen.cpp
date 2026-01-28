@@ -233,6 +233,14 @@ tspProject CSceneScreen::GetDataAndProject(qint32 iId, QStringList& vsScenes)
         vsScenes << spScene->m_sName;
       }
     }
+    for (const auto& spScene : spProject->m_pluginData.m_vspScenes)
+    {
+      QReadLocker l(&spScene->m_rwLock);
+      if (spScene->m_bCanStartHere || spProject->m_bCanStartAtAnyScene)
+      {
+        vsScenes << spScene->m_sName;
+      }
+    }
   }
 
   return spProject;

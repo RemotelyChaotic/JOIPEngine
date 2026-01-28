@@ -265,6 +265,24 @@ void CProjectSavegameManager::AutoloadSaves()
           }
         }
       }
+      for (const auto& [sName, spAch] : spData->m_pluginData.m_vspAchievements)
+      {
+        auto it = achs.m_settings.find(sName);
+        if (achs.m_settings.end() == it)
+        {
+          QReadLocker lA(&spAch->m_rwLock);
+          switch (spAch->m_type)
+          {
+            case ESaveDataType::eBool:
+              achs.m_settings[sName] = false;
+              break;
+            case ESaveDataType::eInt:
+              achs.m_settings[sName] = 0;
+              break;
+            default: break;
+          }
+        }
+      }
       m_vSettings[save_data::c_sFileAchievements] = achs;
     }
 
