@@ -532,7 +532,7 @@ void CSceneMainScreen::SlotSceneSelectReturnValue(int iIndex)
   if (0 <= iIndex && sScenes.size() > iIndex)
   {
     bool bEnd = false;
-    tspScene spScene = m_spSceneNodeResolver->NextScene(sScenes[iIndex], &bEnd);
+    tspScene spScene = m_spSceneNodeResolver->NextScene(sScenes[iIndex], &bEnd, &sScenes, &unresolvedData);
     if (nullptr != spScene)
     {
       QString sScene;
@@ -541,6 +541,10 @@ void CSceneMainScreen::SlotSceneSelectReturnValue(int iIndex)
         sScene = spScene->m_sName;
       }
       LoadSceneScript(sScene, bEnd, false);
+    }
+    else if (sScenes.size() > 0)
+    {
+      NextSkript(false, false);
     }
     else
     {
@@ -877,7 +881,7 @@ void CSceneMainScreen::NextSkript(bool bMightBeRegex, bool bIgnoreMissingScenes)
       if (sScenes.size() == 1)
       {
         bool bEnd = false;
-        tspScene spScene = m_spSceneNodeResolver->NextScene(sScenes[0], &bEnd);
+        tspScene spScene = m_spSceneNodeResolver->NextScene(sScenes[0], &bEnd, &sScenes, &unresolvedData);
         if (nullptr != spScene)
         {
           QString sScene;
@@ -886,6 +890,10 @@ void CSceneMainScreen::NextSkript(bool bMightBeRegex, bool bIgnoreMissingScenes)
             sScene = spScene->m_sName;
           }
           LoadSceneScript(sScene, bEnd, false);
+        }
+        else if (sScenes.size() > 0)
+        {
+          NextSkript(false, bIgnoreMissingScenes);
         }
         else
         {
@@ -901,7 +909,7 @@ void CSceneMainScreen::NextSkript(bool bMightBeRegex, bool bIgnoreMissingScenes)
         std::uniform_int_distribution<> dis(0, static_cast<qint32>(sScenes.size() - 1));
         qint32 iGeneratedIndex = dis(generator);
         bool bEnd = false;
-        tspScene spScene = m_spSceneNodeResolver->NextScene(sScenes[iGeneratedIndex], &bEnd);
+        tspScene spScene = m_spSceneNodeResolver->NextScene(sScenes[iGeneratedIndex], &bEnd, &sScenes, &unresolvedData);
         if (nullptr != spScene)
         {
           QString sScene;
@@ -910,6 +918,10 @@ void CSceneMainScreen::NextSkript(bool bMightBeRegex, bool bIgnoreMissingScenes)
             sScene = spScene->m_sName;
           }
           LoadSceneScript(sScene, bEnd, false);
+        }
+        else if (sScenes.size() > 0)
+        {
+          NextSkript(false, bIgnoreMissingScenes);
         }
         else
         {

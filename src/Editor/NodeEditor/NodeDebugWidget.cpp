@@ -102,6 +102,21 @@ public:
 
   //--------------------------------------------------------------------------------------
   //
+  void PopFlow() override
+  {
+    // TODO:
+  }
+
+  //--------------------------------------------------------------------------------------
+  //
+  void PushFlow(const QString& sNewFlow) override
+  {
+    // TODO:
+    Q_UNUSED(sNewFlow)
+  }
+
+  //--------------------------------------------------------------------------------------
+  //
   void PoppUntilNextSelectable()
   {
     if (nullptr == m_spCurrentResolveRoot)
@@ -805,7 +820,7 @@ void CNodeDebugWidget::NextScene(qint32 iIndex, bool bSkipLastElementcheck)
         if (vsScenes.size() == 1)
         {
           bool bEnd = false;
-          tspScene spScene = m_spNodeResolver->NextScene(vsScenes[0], &bEnd);
+          tspScene spScene = m_spNodeResolver->NextScene(vsScenes[0], &bEnd, &vsScenes, &unresolvedData);
           if (nullptr != spScene)
           {
             AddWidget(new CNodeDebugNode(m_spCurrentProject, vsScenes[0],
@@ -813,6 +828,11 @@ void CNodeDebugWidget::NextScene(qint32 iIndex, bool bSkipLastElementcheck)
                                          m_spUi->pScrollAreaWidgetContents,
                                          this));
             m_spNodeResolver->ResolveScenes();
+          }
+          else if (vsScenes.size() > 1)
+          {
+            // maybe add something?
+            NextScene(-1, false);
           }
           else if (bEnd)
           {
@@ -825,7 +845,7 @@ void CNodeDebugWidget::NextScene(qint32 iIndex, bool bSkipLastElementcheck)
         else if (-1 != iIndex)
         {
           bool bEnd = false;
-          tspScene spScene = m_spNodeResolver->NextScene(vsScenes[iIndex], &bEnd);
+          tspScene spScene = m_spNodeResolver->NextScene(vsScenes[iIndex], &bEnd, &vsScenes, &unresolvedData);
           if (nullptr != spScene)
           {
             AddWidget(new CNodeDebugNode(m_spCurrentProject, vsScenes[iIndex],
@@ -833,6 +853,11 @@ void CNodeDebugWidget::NextScene(qint32 iIndex, bool bSkipLastElementcheck)
                                          m_spUi->pScrollAreaWidgetContents,
                                          this));
             m_spNodeResolver->ResolveScenes();
+          }
+          else if (vsScenes.size() > 1)
+          {
+            // maybe add something?
+            NextScene(-1, false);
           }
           else if (bEnd)
           {

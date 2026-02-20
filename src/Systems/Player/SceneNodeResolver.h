@@ -2,10 +2,13 @@
 #define PROJECTRUNNER_H
 
 #include <QObject>
+#include <QUuid>
+
 #include <memory>
 #include <optional>
 #include <random>
 #include <set>
+#include <stack>
 #include <variant>
 
 class CDatabaseManager;
@@ -35,6 +38,8 @@ public:
   virtual std::vector<NodeData*> ChildBlocks(const QtNodes::Node* pNode) const = 0;
   virtual NodeData* DataBlock(const QtNodes::Node* pNode) const = 0;
   virtual void Error(const QString& sError, QtMsgType type) = 0;
+  virtual void PopFlow() = 0;
+  virtual void PushFlow(const QString& sNewFlow) = 0;
   virtual void PushNode(const QtNodes::Node* const pParent, QtNodes::Node* const pNext,
                         NodeData data) = 0;
   virtual void ResolveTo(const QtNodes::Node* const pNode) = 0;
@@ -54,6 +59,17 @@ struct NodeResolveReslt
   qint32 m_iDepth;
   bool m_bNeedsUserResolvement = false;
   QString m_sResolvementData;
+};
+
+//----------------------------------------------------------------------------------------
+//
+struct SSceneFlowBlock
+{
+  QString                                     m_sName;
+  CFlowScene*                                 m_pFlowScene = nullptr;
+  std::vector<NodeResolveReslt>               m_resolveResult;
+  std::map<QString, QtNodes::Node*>           m_nodeMap;
+  QtNodes::Node*                              m_pCurrentNode = nullptr;
 };
 
 //----------------------------------------------------------------------------------------
@@ -80,9 +96,10 @@ public:
   void DisableScene(const QString& sScene);
   void EnableScene(const QString& sScene);
   bool IsSceneEnabled(const QString& sScene) const;
-  tspScene NextScene(const QString sName, bool* bEnd);
+  tspScene NextScene(const QString sName, bool* bEnd, QStringList* pvsPossibleScenes,
+                     std::optional<QString>* pUnresolvedData);
   QStringList PossibleScenes(std::optional<QString>* unresolvedData);
-  void ResolveFindScenes(const QString sName);
+  void ResolveFindScenes(std::variant<QString, QUuid> sceneIdentifier, bool bFindStart = false);
   void ResolvePossibleScenes(const QStringList vsNames, qint32 iIndex);
   void ResolveScenes();
 
@@ -93,8 +110,10 @@ signals:
 private:
   void Error(const QString& sError, QtMsgType type);
   bool GenerateNodesFromResolved();
-  bool Setup(tspProject spProject, const std::variant<QString, QUuid>& start);
-  bool LoadFlowScene();
+  bool PushFlowBlock(const QString& sName);
+  bool PopFlowBlock();
+  bool Setup(tspProject spProject, const std::variant<QString, QUuid>& start, bool bInjectedScene);
+  bool LoadFlowScenes();
   bool ResolveNextScene();
   bool ResolveStart(const std::variant<QString, QUuid>& start);
 
@@ -108,11 +127,9 @@ private:
   tspScene                                    m_spInjectedScene;
   std::weak_ptr<IResolverDebugger>            m_wpDebugger;
   std::weak_ptr<CDatabaseManager>             m_wpDbManager;
-  std::vector<NodeResolveReslt>               m_resolveResult;
-  std::map<QString, QtNodes::Node*>           m_nodeMap;
+  std::vector<SSceneFlowBlock>                m_vLoadedSceneBlocks;
+  std::stack<SSceneFlowBlock>                 m_flowStack;
   std::set<QString>                           m_disabledScenes;
-  CFlowScene*                                 m_pFlowScene;
-  QtNodes::Node*                              m_pCurrentNode;
   std::mt19937                                m_generator;
 };
 
