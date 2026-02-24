@@ -1415,6 +1415,7 @@ CEditorActionBar {
 
 CResourceDetailView {
   qproperty-iconFile: url(:/resources/style/img/FileIcon.png);
+  qproperty-iconFlow: url(:/resources/style/img/ButtonSceneNodeWidget.png);
   qproperty-iconFolder: url(:/resources/style/img/FolderIcon.png);
   qproperty-iconLayout: url(:/resources/style/img/ButtonLayout.png);
   qproperty-iconSequence: url(:/resources/style/img/IconSequence.png);

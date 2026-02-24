@@ -118,7 +118,7 @@ void SResource::FromJsonObject(const QJsonObject& json)
         m_type = EResourceType::eDatabase;
       }
       else if (iValue == EResourceType::eOther &&
-          SResourceFormats::ScriptFormats().contains("*." + sSuffix))
+               SResourceFormats::ScriptFormats().contains("*." + sSuffix))
       {
         m_type = EResourceType::eScript;
       }
@@ -126,6 +126,11 @@ void SResource::FromJsonObject(const QJsonObject& json)
                SResourceFormats::LayoutFormats().contains("*." + sSuffix))
       {
         m_type = EResourceType::eLayout;
+      }
+      else if (iValue == EResourceType::eOther &&
+               SResourceFormats::FlowFormats().contains("*." + sSuffix))
+      {
+        m_type = EResourceType::eFlow;
       }
       else
       {
@@ -350,6 +355,13 @@ QStringList SResourceFormats::DatabaseFormats()
 
 //----------------------------------------------------------------------------------------
 //
+QStringList SResourceFormats::FlowFormats()
+{
+  return QStringList() << "*.flow";
+}
+
+//----------------------------------------------------------------------------------------
+//
 QStringList SResourceFormats::FontFormats()
 {
   return QStringList() << "*.tff" << "*.otf" << "*.otc" << "*.ttf"; // << "*.ttc" << "*.pfa" << "*.pfb" << "*.bdf" << "*.cff" << "*.fnt" << "*.pcf";
@@ -380,7 +392,7 @@ QStringList SResourceFormats::LayoutFormats()
 //
 QStringList SResourceFormats::OtherFormats()
 {
-  static QStringList vsFormats = QStringList() << "*.json" << "*.proj" << "*.flow" << "*qmldir";
+  static QStringList vsFormats = QStringList() << "*.json" << "*.proj" << "*qmldir";
   return vsFormats;
 }
 

@@ -186,6 +186,20 @@ public:
                                           mode,
                                           m_pView->ReadOnly() ? QIcon::Off : QIcon::On);
             } break;
+            case EResourceType::eFlow:
+            {
+              m_pView->IconFile().paint(pPainter,
+                                        rectIcon, opt.displayAlignment,
+                                        mode,
+                                        m_pView->ReadOnly() ? QIcon::Off : QIcon::On);
+              qint32 iXAdjust = (rectIcon.width()-m_pView->iconSize().width()/2)/2;
+              qint32 iYAdjust = (rectIcon.height()-m_pView->iconSize().height()/2)/2;
+              rectIcon.adjust(iXAdjust, iYAdjust, -iXAdjust, -iYAdjust);
+              m_pView->IconFlow().paint(pPainter,
+                                        rectIcon, opt.displayAlignment,
+                                        mode,
+                                        m_pView->ReadOnly() ? QIcon::Off : QIcon::On);
+            } break;
             case EResourceType::eOther: // fallthrough
             case EResourceType::eDatabase:
               m_pView->IconFile().paint(pPainter,
@@ -360,6 +374,20 @@ void CResourceDetailView::SetIconFile(const QIcon& icon)
 const QIcon& CResourceDetailView::IconFile() const
 {
   return m_iconFile;
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CResourceDetailView::SetIconFlow(const QIcon& icon)
+{
+  m_iconFlow = icon;
+}
+
+//----------------------------------------------------------------------------------------
+//
+const QIcon& CResourceDetailView::IconFlow() const
+{
+  return m_iconFlow;
 }
 
 //----------------------------------------------------------------------------------------

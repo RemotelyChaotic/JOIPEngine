@@ -94,6 +94,7 @@ struct SResourceFormats
   static QStringList AudioFormats();
   static QStringList ArchiveFormats();
   static QStringList DatabaseFormats();
+  static QStringList FlowFormats();
   static QStringList FontFormats();
   static QStringList ImageFormats();
   static QStringList LayoutFormats();

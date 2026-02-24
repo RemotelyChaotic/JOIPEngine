@@ -24,7 +24,8 @@ BETTER_ENUM(EResourceType, qint32,
             eDatabase   = 5,
             eFont       = 6,
             eLayout     = 7,
-            eSequence   = 8)
+            eSequence   = 8,
+            eFlow       = 9)
 
 struct SResourcePath
 {

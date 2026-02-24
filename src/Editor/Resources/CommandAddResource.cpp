@@ -106,6 +106,10 @@ namespace
           {
             sResource = spDbManager->AddResource(spCurrentProject, sFileName, EResourceType::eSequence, QString(), sBundleName);
           }
+          else if (SResourceFormats::FlowFormats().contains(sEnding))
+          {
+            sResource = spDbManager->AddResource(spCurrentProject, sFileName, EResourceType::eFlow, QString(), sBundleName);
+          }
           else if (SResourceFormats::ArchiveFormats().contains(sEnding))
           {
             QStringList vsOldArchivedResources;
