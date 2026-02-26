@@ -200,7 +200,7 @@ bool CEditorExportJob::RunBinaryExport(const QString& sName, const QString& sFol
   m_spProject->m_rwLock.unlock();
   outStream << QString("<file alias=\"%2\">%1</file>")
                    .arg(joip_resource::c_sProjectFileName)
-                   .arg(sFolder + "/" + joip_resource::c_sProjectFileName);
+                   .arg(joip_resource::c_sProjectFileName);
   outStream << "</qresource>" << "</RCC>";
 
   rccFile.close();
