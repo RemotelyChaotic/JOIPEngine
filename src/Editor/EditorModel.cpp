@@ -649,7 +649,7 @@ void CEditorModel::SaveProject()
           joip_resource::CreatePathFromAbsolutePath(sPathProj + "/" + joip_resource::c_sSceneModelFile,
                                                     m_spCurrentProject);
       spDbManager->AddResource(m_spCurrentProject, path,
-                               EResourceType::eOther, joip_resource::c_sSceneModelFile);
+                               EResourceType::eFlow, joip_resource::c_sSceneModelFile);
       projectLocker.relock();
       m_spCurrentProject->m_sSceneModel = joip_resource::c_sSceneModelFile;
     }
