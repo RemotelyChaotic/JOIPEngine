@@ -2,9 +2,13 @@
 #include "Application.h"
 
 #include "Editor/EditorActionBar.h"
+#include "Editor/EditorEditableFileModel.h"
 #include "Editor/EditorModel.h"
+#include "Editor/NodeEditor/CommandChangeOpenedFlow.h"
 #include "Editor/NodeEditor/NodeEditorFlowView.h"
 #include "Editor/NodeEditor/NodeEditorFlowScene.h"
+#include "Editor/NodeEditor/UndoPathSplitterModel.h"
+#include "Editor/Resources/ResourceTreeItemModel.h"
 #include "Editor/Tutorial/SceneNodeWidgetTutorialStateSwitchHandler.h"
 
 #include "Systems/HelpFactory.h"
@@ -169,6 +173,8 @@ CEditorSceneNodeWidget::CEditorSceneNodeWidget(QWidget* pParent) :
   m_pFlowView->centerOn(0,0);
 
   pLayout->addWidget(m_pFlowView);
+
+  m_pFilteredScriptModel = new CFilteredEditorEditableFileModel(this);
 }
 
 CEditorSceneNodeWidget::~CEditorSceneNodeWidget()
@@ -187,6 +193,18 @@ void CEditorSceneNodeWidget::Initialize()
 
   m_pFlowView->SetUndoStack(UndoStack());
   m_pFlowView->SetScene(FlowSceneModel());
+
+  m_pFilteredScriptModel->FilterForTypes({SScriptDefinitionData::c_sFileTypeFlow});
+
+  m_spUi->pResourceComboBox->setModel(m_pDummyModel);
+  m_pFilteredScriptModel->setSourceModel(m_pDummyModel);
+
+  connect(EditableFileModel(), &CEditorEditableFileModel::SignalFileChangedExternally,
+          this, &CEditorSceneNodeWidget::SlotFileChangedExternally);
+  connect(FlowSceneModel(), &CFlowScene::nodeCreated,
+          this, &CEditorSceneNodeWidget::SlotNodeCreated);
+  connect(FlowSceneModel(), &CFlowScene::nodeDeleted,
+          this, &CEditorSceneNodeWidget::SlotNodeDeleted);
 
   m_spUi->pDebugView->Initialize(m_pFlowView, FlowSceneModel());
 
@@ -226,6 +244,15 @@ void CEditorSceneNodeWidget::LoadProject(tspProject spCurrentProject)
   m_spCurrentProject = spCurrentProject;
   SlotStyleChanged();
 
+  auto pModel = EditableFileModel();
+  m_pFilteredScriptModel->setSourceModel(pModel);
+  m_spUi->pResourceComboBox->setModel(m_pFilteredScriptModel);
+
+  if (0 < m_pFilteredScriptModel->rowCount())
+  {
+    on_pResourceComboBox_currentIndexChanged(0);
+  }
+
   m_pFlowView->SetReadOnly(EditorModel()->IsReadOnly());
 
   SetLoaded(true);
@@ -247,6 +274,9 @@ void CEditorSceneNodeWidget::UnloadProject()
 
   m_pFlowView->SetReadOnly(false);
 
+  m_spUi->pResourceComboBox->setModel(m_pDummyModel);
+  m_spUi->pResourceComboBox->clear();
+
   SetLoaded(false);
 }
 
@@ -256,6 +286,15 @@ void CEditorSceneNodeWidget::SaveProject()
 {
   WIDGET_INITIALIZED_GUARD
   if (nullptr == m_spCurrentProject) { return; }
+
+  // save current contents
+  auto pScriptItem = EditableFileModel()->CachedFile(
+      CachedResourceName(m_spUi->pResourceComboBox->currentIndex()));
+  if (nullptr != pScriptItem && nullptr != m_sLastCachedFlow)
+  {
+    pScriptItem->m_data = FlowSceneModel()->saveToMemory();
+    EditableFileModel()->SetSceneScriptModifiedFlag(pScriptItem->m_sId, pScriptItem->m_bChanged);
+  }
 }
 
 //----------------------------------------------------------------------------------------
@@ -314,6 +353,96 @@ void CEditorSceneNodeWidget::OnActionBarChanged()
 
 //----------------------------------------------------------------------------------------
 //
+void CEditorSceneNodeWidget::on_pResourceComboBox_currentIndexChanged(qint32 iIndex)
+{
+  WIDGET_INITIALIZED_GUARD
+      if (nullptr == m_spCurrentProject) { return; }
+
+  if (CachedResourceName(iIndex) != m_sLastCachedFlow)
+  {
+    UndoStack()->push(new CCommandChangeOpenedFlow(m_spUi->pResourceComboBox,
+                                                   FlowSceneModel(),
+                                                   this,
+                                                   std::bind(&CEditorSceneNodeWidget::ReloadEditor, this, std::placeholders::_1),
+                                                   &m_bChangingIndex, &m_sLastCachedFlow,
+                                                   m_sLastCachedFlow,
+                                                   CachedResourceName(iIndex)));
+  }
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CEditorSceneNodeWidget::SlotAddNewScriptFileToScene(const QString& sCustomInitContent)
+{
+  if (nullptr == m_spCurrentProject)
+  {
+    qWarning() << "Node created in null-project.";
+    return;
+  }
+
+  auto spDbManager = m_wpDbManager.lock();
+  if (nullptr != spDbManager)
+  {
+    CSceneNodeModel* pSceneModel = dynamic_cast<CSceneNodeModel*>(sender());
+    if (nullptr != pSceneModel)
+    {
+      qint32 iSceneId = pSceneModel->SceneId();
+      auto spScene = spDbManager->FindScene(m_spCurrentProject, iSceneId);
+      EditorModel()->AddNewFileToScene(this, spScene, EResourceType::eScript, sCustomInitContent);
+    }
+  }
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CEditorSceneNodeWidget::SlotAddNewLayoutFileToScene(const QString& sCustomInitContent)
+{
+  if (nullptr == m_spCurrentProject)
+  {
+    qWarning() << "Node created in null-project.";
+    return;
+  }
+
+  auto spDbManager = m_wpDbManager.lock();
+  if (nullptr != spDbManager)
+  {
+    CSceneNodeModel* pSceneModel = dynamic_cast<CSceneNodeModel*>(sender());
+    if (nullptr != pSceneModel)
+    {
+      qint32 iSceneId = pSceneModel->SceneId();
+      auto spScene = spDbManager->FindScene(m_spCurrentProject, iSceneId);
+      EditorModel()->AddNewFileToScene(this, spScene, EResourceType::eLayout, sCustomInitContent);
+    }
+    CPathSplitterModel* pSplitterModel = dynamic_cast<CPathSplitterModel*>(sender());
+    if (nullptr != pSplitterModel)
+    {
+      EditorModel()->AddNewFileToScene(this, nullptr, EResourceType::eLayout, sCustomInitContent);
+    }
+  }
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CEditorSceneNodeWidget::SlotFileChangedExternally(const QString& sName)
+{
+  qint32 index =
+      m_pFilteredScriptModel->mapToSource(
+                                m_pFilteredScriptModel->index(m_spUi->pResourceComboBox->currentIndex(), 0)).row();
+  auto pFlowItem = EditableFileModel()->CachedFile(sName);
+
+  if (index == EditableFileModel()->FileIndex(sName))
+  {
+    m_bChangingIndex = true;
+
+    FlowSceneModel()->clearScene();
+    FlowSceneModel()->loadFromMemory(pFlowItem->m_data);
+
+    m_bChangingIndex = false;
+  }
+}
+
+//----------------------------------------------------------------------------------------
+//
 void CEditorSceneNodeWidget::SlotStartDebugClicked()
 {
   WIDGET_INITIALIZED_GUARD
@@ -362,6 +491,76 @@ void CEditorSceneNodeWidget::SlotStopDebugClicked()
     ActionBar()->m_spUi->NextSceneButton->setEnabled(false);
   }
 }
+
+//----------------------------------------------------------------------------------------
+//
+void CEditorSceneNodeWidget::SlotNodeCreated(Node &n)
+{
+  if (nullptr == m_spCurrentProject)
+  {
+    qWarning() << "Node created in null-project.";
+    return;
+  }
+
+  auto spDbManager = m_wpDbManager.lock();
+  if (nullptr != spDbManager)
+  {
+    m_spCurrentProject->m_rwLock.lockForRead();
+    qint32 iId = m_spCurrentProject->m_iId;
+    m_spCurrentProject->m_rwLock.unlock();
+
+    CSceneNodeModel* pSceneModel = dynamic_cast<CSceneNodeModel*>(n.nodeDataModel());
+    if (nullptr != pSceneModel)
+    {
+      pSceneModel->SetProjectId(iId);
+      pSceneModel->SetResourceItemModel(ResourceTreeModel());
+      connect(pSceneModel, &CSceneNodeModel::SignalAddScriptFileRequested,
+              this, &CEditorSceneNodeWidget::SlotAddNewScriptFileToScene, Qt::UniqueConnection);
+      connect(pSceneModel, &CSceneNodeModel::SignalAddLayoutFileRequested,
+              this, &CEditorSceneNodeWidget::SlotAddNewLayoutFileToScene, Qt::UniqueConnection);
+    }
+    CPathSplitterModel* pPathSplitterModel = dynamic_cast<CPathSplitterModel*>(n.nodeDataModel());
+    if (nullptr != pPathSplitterModel)
+    {
+      pPathSplitterModel->SetProjectId(iId);
+      connect(pPathSplitterModel, &CPathSplitterModel::SignalAddLayoutFileRequested,
+              this, &CEditorSceneNodeWidget::SlotAddNewLayoutFileToScene, Qt::UniqueConnection);
+    }
+
+    if (!FlowSceneModel()->IsLoading())
+    {
+      EditableFileModel()->SetSceneScriptModifiedFlag(m_sLastCachedFlow, true);
+    }
+  }
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CEditorSceneNodeWidget::SlotNodeDeleted(QtNodes::Node &n)
+{
+  if (nullptr == m_spCurrentProject)
+  {
+    qWarning() << "Node created in null-project.";
+    return;
+  }
+
+  auto spDbManager = m_wpDbManager.lock();
+  if (nullptr != spDbManager)
+  {
+    CSceneNodeModel* pSceneModel = dynamic_cast<CSceneNodeModel*>(n.nodeDataModel());
+    if (nullptr != pSceneModel)
+    {
+      qint32 iSceneId = pSceneModel->SceneId();
+      spDbManager->RemoveScene(m_spCurrentProject, iSceneId);
+    }
+
+    if (!FlowSceneModel()->IsLoading())
+    {
+      EditableFileModel()->SetSceneScriptModifiedFlag(m_sLastCachedFlow, true);
+    }
+  }
+}
+
 
 //----------------------------------------------------------------------------------------
 //
@@ -424,5 +623,37 @@ void CEditorSceneNodeWidget::SlotStyleChanged()
                m_hoveredConnectionColor,
                m_warningColor,
                m_errorColor);
+}
+
+//----------------------------------------------------------------------------------------
+//
+QString CEditorSceneNodeWidget::CachedResourceName(qint32 iIndex)
+{
+  return EditableFileModel()->CachedResourceName(
+      m_pFilteredScriptModel->mapToSource(
+                                m_pFilteredScriptModel->index(iIndex, 0)).row());
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CEditorSceneNodeWidget::ReloadEditor(qint32 iIndex)
+{
+  m_bChangingIndex = true;
+
+  // load new contents
+  m_sLastCachedFlow = CachedResourceName(iIndex);
+  auto  pFlowItem = EditableFileModel()->CachedFile(m_sLastCachedFlow);
+  if (nullptr != pFlowItem)
+  {
+    if (nullptr != ActionBar())
+    {
+      ActionBar()->m_spUi->DebugLayoutButton->setEnabled(!m_sLastCachedFlow.isEmpty());
+    }
+
+    FlowSceneModel()->clearScene();
+    FlowSceneModel()->loadFromMemory(pFlowItem->m_data);
+  }
+
+  m_bChangingIndex = false;
 }
 

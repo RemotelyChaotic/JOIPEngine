@@ -78,7 +78,6 @@ void CEditorCodeWidget::Initialize()
   m_spTutorialStateSwitchHandler =
       std::make_shared<CCodeWidgetTutorialStateSwitchHandler>(this, m_spUi);
   EditorModel()->AddTutorialStateSwitchHandler(m_spTutorialStateSwitchHandler);
-  EditableFileModel()->SetReloadFileWithoutQuestion(true);
   m_pFilteredScriptModel->FilterForTypes({SScriptDefinitionData::c_sScriptTypeJs,
                                           SScriptDefinitionData::c_sScriptTypeEos,
                                           SScriptDefinitionData::c_sScriptTypeLua,

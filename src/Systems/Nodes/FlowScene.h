@@ -16,6 +16,8 @@ public:
              QObject* pParent = Q_NULLPTR);
   ~CFlowScene() override;
 
+  bool IsLoading() const { return m_bLoading; }
+
   // shadow
   QtNodes::Node& createNode(std::unique_ptr<QtNodes::NodeDataModel>&& dataModel);
   void loadFromMemory(const QByteArray& data);

@@ -79,8 +79,6 @@ public:
   void SetScriptTypeFilterForNewScripts(const QString& sFilter);
 
 public slots:
-  void SlotNodeCreated(QtNodes::Node &n);
-  void SlotNodeDeleted(QtNodes::Node &n);
   void SlotAddNewScriptFile(const QString& sCustomInitContent);
   void SlotAddNewLayoutFile(const QString& sCustomInitContent);
 
@@ -89,8 +87,6 @@ signals:
   void SignalProjectPropertiesEdited();
 
 private slots:
-  void SlotAddNewScriptFileToScene(const QString& sCustomInitContent);
-  void SlotAddNewLayoutFileToScene(const QString& sCustomInitContent);
   void SlotJobFinished(qint32 iId, QString type);
   void SlotJobStarted(qint32 iId, QString type);
   void SlotJobMessage(qint32 iId, QString type, QString sMsg);

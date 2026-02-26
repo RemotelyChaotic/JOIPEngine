@@ -73,7 +73,6 @@ void CEditorPatternEditorWidget::Initialize()
   m_spUi->pTimeLineWidget->SetResourceModel(ResourceTreeModel());
   m_spUi->pTimeLineWidget->SetUndoStack(UndoStack());
 
-  EditableFileModel()->SetReloadFileWithoutQuestion(true);
   m_pFilteredScriptModel->FilterForTypes({SScriptDefinitionData::c_sFileTypeSequence});
 
   m_spUi->pResourceComboBox->setModel(m_pDummyModel);

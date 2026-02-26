@@ -4,9 +4,13 @@
 #include "EditorWidgetBase.h"
 #include "ui_EditorSceneNodeWidget.h"
 #include "ui_EditorActionBar.h"
+
+#include <QStandardItemModel>
+
 #include <memory>
 
 class CDatabaseManager;
+class CFilteredEditorEditableFileModel;
 class CNodeEditorFlowView;
 class CSceneNodeWidgetTutorialStateSwitchHandler;
 class CSettings;
@@ -67,20 +71,31 @@ protected:
   CNodeEditorFlowView* FlowView() { return m_pFlowView; }
 
 protected slots:
+  void on_pResourceComboBox_currentIndexChanged(qint32 iIndex);
+  void SlotAddNewScriptFileToScene(const QString& sCustomInitContent);
+  void SlotAddNewLayoutFileToScene(const QString& sCustomInitContent);
+  void SlotFileChangedExternally(const QString& sName);
   void SlotStartDebugClicked();
   void SlotStopDebugClicked();
   void SlotNextSceneClicked();
+  void SlotNodeCreated(QtNodes::Node &n);
+  void SlotNodeDeleted(QtNodes::Node &n);
   void SlotAddSceneButtonClicked();
   void SlotRemoveNodeButtonClicked();
   void SlotStyleChanged();
 
 private:
+  QString CachedResourceName(qint32 iIndex);
+  void ReloadEditor(qint32 iIndex);
+
   std::shared_ptr<Ui::CEditorSceneNodeWidget>                 m_spUi;
   std::shared_ptr<CSceneNodeWidgetTutorialStateSwitchHandler> m_spStateSwitchHandler;
   std::shared_ptr<CSettings>                                  m_spSettings;
   tspProject                                                  m_spCurrentProject;
   std::weak_ptr<CDatabaseManager>                             m_wpDbManager;
   CNodeEditorFlowView*                                        m_pFlowView;
+  QPointer<CFilteredEditorEditableFileModel>                  m_pFilteredScriptModel;
+  QPointer<QStandardItemModel>                                m_pDummyModel;
 
   QColor                                                      m_normalBoundaryColor;
   QColor                                                      m_selectedBoundaryColor;
@@ -104,6 +119,9 @@ private:
 
   QColor                                                      m_warningColor;
   QColor                                                      m_errorColor;
+
+  QString                                                     m_sLastCachedFlow;
+  bool                                                        m_bChangingIndex = false;
 };
 
 #endif // SCENENODEWIDGET_H

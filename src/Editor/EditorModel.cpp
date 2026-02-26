@@ -8,7 +8,6 @@
 #include "EditorJobs/IEditorJobStateListener.h"
 
 #include "Editor/NodeEditor/NodeEditorFlowScene.h"
-#include "Editor/NodeEditor/UndoPathSplitterModel.h"
 #include "Editor/NodeEditor/NodeEditorRegistry.h"
 #include "Editor/NodeEditor/UndoSceneNodeModel.h"
 
@@ -20,10 +19,6 @@
 #include "Resources/ResourceTreeItemModel.h"
 
 #include "Systems/DatabaseManager.h"
-#include "Systems/Nodes/EndNodeModel.h"
-#include "Systems/Nodes/PathMergerModel.h"
-#include "Systems/Nodes/SceneTranstitionData.h"
-#include "Systems/Nodes/StartNodeModel.h"
 #include "Systems/PhysFs/PhysFsFileEngine.h"
 #include "Systems/Database/Project.h"
 
@@ -80,10 +75,6 @@ CEditorModel::CEditorModel(QWidget* pParent) :
           this, &CEditorModel::SignalProjectEdited, Qt::DirectConnection);
   connect(m_spEditableFileModel.get(), &CEditorEditableFileModel::SignalProjectEdited,
           this, &CEditorModel::SignalProjectEdited, Qt::DirectConnection);
-  connect(m_spFlowSceneModel.get(), &CFlowScene::nodeCreated,
-          this, &CEditorModel::SlotNodeCreated);
-  connect(m_spFlowSceneModel.get(), &CFlowScene::nodeDeleted,
-          this, &CEditorModel::SlotNodeDeleted);
 
   connect(this, &CEditorModel::SignalProjectPropertiesEdited,
           m_spResourceTreeModel.get(), &CResourceTreeItemModel::SlotProjectPropertiesEdited);
@@ -571,40 +562,6 @@ void CEditorModel::LoadProject(qint32 iId)
       CDatabaseManager::SetProjectEditing(m_spCurrentProject, true);
     }
 
-    // nodes
-    if (!m_spCurrentProject->m_sSceneModel.isNull() &&
-        !m_spCurrentProject->m_sSceneModel.isEmpty())
-    {
-      const QString sModelName = m_spCurrentProject->m_sSceneModel;
-      projectLocker.unlock();
-
-      auto spResource = spDbManager->FindResourceInProject(m_spCurrentProject, sModelName);
-      if (nullptr != spResource)
-      {
-        QString sPath = spResource->ResourceToAbsolutePath();
-        QReadLocker resourceLocker(&spResource->m_rwLock);
-        QString sBundle = spResource->m_sResourceBundle;
-        resourceLocker.unlock();
-
-        CDatabaseManager::LoadBundle(m_spCurrentProject, sBundle);
-
-        QFile modelFile(sPath);
-        if (modelFile.open(QIODevice::ReadOnly))
-        {
-          QByteArray arr = modelFile.readAll();
-          m_spFlowSceneModel->loadFromMemory(arr);
-        }
-        else
-        {
-          qWarning() << tr("Could not open scene model file.");
-        }
-      }
-    }
-    else
-    {
-      projectLocker.unlock();
-    }
-
     m_spEditorCompleterModel->SetProject(m_spCurrentProject);
 
     if (tutorialState._to_integral() == ETutorialState::eUnstarted)
@@ -678,14 +635,11 @@ void CEditorModel::SaveProject()
   JobWorker()->StopRunningJobs();
   JobWorker()->WaitForFinished();
 
-  QString sPathProj = PhysicalProjectPath(m_spCurrentProject);
-
-  // nodes
-  QByteArray arr = m_spFlowSceneModel->saveToMemory();
-
+  // initialise main nodes File if not available
   auto spDbManager = m_wpDbManager.lock();
   if (nullptr != spDbManager)
   {
+    QString sPathProj = PhysicalProjectPath(m_spCurrentProject);
     QReadLocker projectLocker(&m_spCurrentProject->m_rwLock);
     if (m_spCurrentProject->m_sSceneModel.isNull() ||
         m_spCurrentProject->m_sSceneModel.isEmpty())
@@ -710,27 +664,27 @@ void CEditorModel::SaveProject()
       QFile modelFile(sPath);
       if (modelFile.open(QIODevice::WriteOnly | QIODevice::Truncate))
       {
-        modelFile.write(arr);
+        modelFile.write("{}");
       }
       else
       {
         qWarning() << tr("Could not save scene model file.");
       }
     }
-
-    // check if flags for media or remote are needed
-    bool bHasRemoteResources = false;
-    bool bNeedsMedia = false;
-    for (const auto& it : m_spCurrentProject->m_baseData.m_spResourcesMap)
-    {
-      QReadLocker resourceLocker(&it.second->m_rwLock);
-      bHasRemoteResources |= !it.second->m_sPath.IsLocalFile();
-      bNeedsMedia |= (it.second->m_type._to_integral() == EResourceType::eMovie ||
-                      it.second->m_type._to_integral() == EResourceType::eSound);
-    }
-    m_spCurrentProject->m_bUsesWeb = bHasRemoteResources;
-    m_spCurrentProject->m_bNeedsCodecs = bNeedsMedia;
   }
+
+  // check if flags for media or remote are needed
+  bool bHasRemoteResources = false;
+  bool bNeedsMedia = false;
+  for (const auto& it : m_spCurrentProject->m_baseData.m_spResourcesMap)
+  {
+    QReadLocker resourceLocker(&it.second->m_rwLock);
+    bHasRemoteResources |= !it.second->m_sPath.IsLocalFile();
+    bNeedsMedia |= (it.second->m_type._to_integral() == EResourceType::eMovie ||
+                    it.second->m_type._to_integral() == EResourceType::eSound);
+  }
+  m_spCurrentProject->m_bUsesWeb = bHasRemoteResources;
+  m_spCurrentProject->m_bNeedsCodecs = bNeedsMedia;
 }
 
 //----------------------------------------------------------------------------------------
@@ -828,67 +782,6 @@ void CEditorModel::SetScriptTypeFilterForNewScripts(const QString& sFilter)
 
 //----------------------------------------------------------------------------------------
 //
-void CEditorModel::SlotNodeCreated(Node &n)
-{
-  if (nullptr == m_spCurrentProject)
-  {
-    qWarning() << "Node created in null-project.";
-    return;
-  }
-
-  auto spDbManager = m_wpDbManager.lock();
-  if (nullptr != spDbManager)
-  {
-    m_spCurrentProject->m_rwLock.lockForRead();
-    qint32 iId = m_spCurrentProject->m_iId;
-    m_spCurrentProject->m_rwLock.unlock();
-
-    CSceneNodeModel* pSceneModel = dynamic_cast<CSceneNodeModel*>(n.nodeDataModel());
-    if (nullptr != pSceneModel)
-    {
-      pSceneModel->SetProjectId(iId);
-      pSceneModel->SetResourceItemModel(ResourceTreeModel());
-      connect(pSceneModel, &CSceneNodeModel::SignalAddScriptFileRequested,
-              this, &CEditorModel::SlotAddNewScriptFileToScene, Qt::UniqueConnection);
-      connect(pSceneModel, &CSceneNodeModel::SignalAddLayoutFileRequested,
-              this, &CEditorModel::SlotAddNewLayoutFileToScene, Qt::UniqueConnection);
-    }
-    CPathSplitterModel* pPathSplitterModel = dynamic_cast<CPathSplitterModel*>(n.nodeDataModel());
-    if (nullptr != pPathSplitterModel)
-    {
-      pPathSplitterModel->SetProjectId(iId);
-      connect(pPathSplitterModel, &CPathSplitterModel::SignalAddLayoutFileRequested,
-              this, &CEditorModel::SlotAddNewLayoutFileToScene, Qt::UniqueConnection);
-    }
-    emit SignalProjectEdited();
-  }
-}
-
-//----------------------------------------------------------------------------------------
-//
-void CEditorModel::SlotNodeDeleted(QtNodes::Node &n)
-{
-  if (nullptr == m_spCurrentProject)
-  {
-    qWarning() << "Node created in null-project.";
-    return;
-  }
-
-  auto spDbManager = m_wpDbManager.lock();
-  if (nullptr != spDbManager)
-  {
-    CSceneNodeModel* pSceneModel = dynamic_cast<CSceneNodeModel*>(n.nodeDataModel());
-    if (nullptr != pSceneModel)
-    {
-      qint32 iSceneId = pSceneModel->SceneId();
-      spDbManager->RemoveScene(m_spCurrentProject, iSceneId);
-    }
-    emit SignalProjectEdited();
-  }
-}
-
-//----------------------------------------------------------------------------------------
-//
 void CEditorModel::SlotAddNewScriptFile(const QString& sCustomInitContent)
 {
   if (nullptr == m_spCurrentProject)
@@ -911,57 +804,6 @@ void CEditorModel::SlotAddNewLayoutFile(const QString& sCustomInitContent)
   }
 
   AddNewFileToScene(m_pParentWidget, nullptr, EResourceType::eLayout, sCustomInitContent);
-}
-
-//----------------------------------------------------------------------------------------
-//
-void CEditorModel::SlotAddNewScriptFileToScene(const QString& sCustomInitContent)
-{
-  if (nullptr == m_spCurrentProject)
-  {
-    qWarning() << "Node created in null-project.";
-    return;
-  }
-
-  auto spDbManager = m_wpDbManager.lock();
-  if (nullptr != spDbManager)
-  {
-    CSceneNodeModel* pSceneModel = dynamic_cast<CSceneNodeModel*>(sender());
-    if (nullptr != pSceneModel)
-    {
-      qint32 iSceneId = pSceneModel->SceneId();
-      auto spScene = spDbManager->FindScene(m_spCurrentProject, iSceneId);
-      AddNewFileToScene(m_pParentWidget, spScene, EResourceType::eScript, sCustomInitContent);
-    }
-  }
-}
-
-//----------------------------------------------------------------------------------------
-//
-void CEditorModel::SlotAddNewLayoutFileToScene(const QString& sCustomInitContent)
-{
-  if (nullptr == m_spCurrentProject)
-  {
-    qWarning() << "Node created in null-project.";
-    return;
-  }
-
-  auto spDbManager = m_wpDbManager.lock();
-  if (nullptr != spDbManager)
-  {
-    CSceneNodeModel* pSceneModel = dynamic_cast<CSceneNodeModel*>(sender());
-    if (nullptr != pSceneModel)
-    {
-      qint32 iSceneId = pSceneModel->SceneId();
-      auto spScene = spDbManager->FindScene(m_spCurrentProject, iSceneId);
-      AddNewFileToScene(m_pParentWidget, spScene, EResourceType::eLayout, sCustomInitContent);
-    }
-    CPathSplitterModel* pSplitterModel = dynamic_cast<CPathSplitterModel*>(sender());
-    if (nullptr != pSplitterModel)
-    {
-      AddNewFileToScene(m_pParentWidget, nullptr, EResourceType::eLayout, sCustomInitContent);
-    }
-  }
 }
 
 //----------------------------------------------------------------------------------------

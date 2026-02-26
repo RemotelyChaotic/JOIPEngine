@@ -44,6 +44,7 @@ BETTER_ENUM(EEditorCommandId, qint32,
             eMoveNodeItem,
             eChangeNodeItem,
             eRemoveConnecectionItem,
+            eChangeOpenedFlow,
 
             eAddSequence,
             eChangeSequenceProperties,

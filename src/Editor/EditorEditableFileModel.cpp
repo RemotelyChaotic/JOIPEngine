@@ -139,7 +139,7 @@ CEditorEditableFileModel::CEditorEditableFileModel(QWidget* pParent) :
   m_spProject(),
   m_pParentWidget(pParent),
   m_cachedScriptsMap(),
-  m_bReloadFileWithoutQuestion(false)
+  m_bReloadFileWithoutQuestion(true)
 {
   auto spDbManager = m_wpDbManager.lock();
   connect(spDbManager.get(), &CDatabaseManager::SignalResourceAdded,
@@ -351,6 +351,10 @@ QVariant CEditorEditableFileModel::data(const QModelIndex& index, int iRole) con
         if (m_spProject->m_sPlayerLayout == it->first)
         {
           vsScriptAdditions << tr("Layout for Project");
+        }
+        if (m_spProject->m_sSceneModel == it->first)
+        {
+          vsScriptAdditions << tr("Flow for Project");
         }
       }
       for (const tspScene& spScene : it->second.m_vspScenes)
@@ -776,7 +780,8 @@ bool CEditorEditableFileModel::CheckResourceTypeSupported(EResourceType type)
 {
   return type._to_integral() == EResourceType::eScript ||
          type._to_integral() == EResourceType::eLayout ||
-         type._to_integral() == EResourceType::eSequence;
+         type._to_integral() == EResourceType::eSequence ||
+         type._to_integral() == EResourceType::eFlow;
 }
 
 //----------------------------------------------------------------------------------------

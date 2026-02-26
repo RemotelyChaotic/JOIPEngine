@@ -323,6 +323,7 @@ Rectangle {
   constexpr static char c_sScriptTypeQml[] = "qml";
   constexpr static char c_sScriptTypeLayout[] = "layout";
   constexpr static char c_sFileTypeSequence[] = "jseq";
+  constexpr static char c_sFileTypeFlow[] = "flow";
   static inline const std::map<QString, SScriptDefinitionData>& DefinitionMap()
   {
     static std::map<QString, SScriptDefinitionData> c_sFileEngingDefinitionMap = {
@@ -332,7 +333,8 @@ Rectangle {
         { c_sScriptTypeLayout, {c_sScriptTypeQml, "QML", c_sDefaultLayout}},
         { c_sScriptTypeEos, {c_sScriptTypeEos, "JavaScript", "{\n\t\"commands\": [\n\t]\n}"} },
         { c_sScriptTypeLua, {c_sScriptTypeLua, "Lua", "-- insert code to control scene"} },
-        { c_sFileTypeSequence, {c_sFileTypeSequence, "JavaScript", "{}"} }
+        { c_sFileTypeSequence, {c_sFileTypeSequence, "JavaScript", "{}"} },
+        { c_sFileTypeFlow, {c_sFileTypeFlow, "JavaScript", "{}"} }
       };
     return c_sFileEngingDefinitionMap;
   }
