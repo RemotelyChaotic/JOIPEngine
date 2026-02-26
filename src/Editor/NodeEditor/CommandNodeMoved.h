@@ -6,6 +6,8 @@
 #include <QUndoCommand>
 #include <QUuid>
 
+#include <functional>
+
 class CFlowScene;
 class CFlowView;
 
@@ -16,6 +18,7 @@ public:
                     const QUuid& id,
                     const QPointF& from,
                     const QPointF& to,
+                    std::function<void(void)> fnChanged,
                     QUndoCommand* pParent = nullptr);
   ~CCommandNodeMoved();
 
@@ -28,6 +31,7 @@ public:
 protected:
   QPointer<CFlowView>          m_pFlowView;
   QPointer<CFlowScene>         m_pScene;
+  std::function<void(void)>    m_fnChanged;
   QUuid                        m_nodeId;
   QPointF                      m_from;
   QPointF                      m_to;

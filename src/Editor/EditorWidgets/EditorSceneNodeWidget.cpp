@@ -205,6 +205,13 @@ void CEditorSceneNodeWidget::Initialize()
           this, &CEditorSceneNodeWidget::SlotNodeCreated);
   connect(FlowSceneModel(), &CFlowScene::nodeDeleted,
           this, &CEditorSceneNodeWidget::SlotNodeDeleted);
+  connect(FlowSceneModel(), &CNodeEditorFlowScene::SignalFlowModified,
+          this, [this](){
+    if (!FlowSceneModel()->IsLoading())
+    {
+      EditableFileModel()->SetSceneScriptModifiedFlag(m_sLastCachedFlow, true);
+    }
+  });
 
   m_spUi->pDebugView->Initialize(m_pFlowView, FlowSceneModel());
 

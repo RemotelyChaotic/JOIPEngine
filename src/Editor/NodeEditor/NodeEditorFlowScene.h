@@ -8,6 +8,8 @@
 
 class CNodeEditorFlowScene : public CFlowScene
 {
+  Q_OBJECT
+
   const static char* c_sUndoRedoingOperation;
 
 public:
@@ -18,6 +20,9 @@ public:
   void SetUndoStack(QPointer<QUndoStack> pUndoStack);
   void SetUndoOperationInProgress(bool bValue) { m_bUndoRedoOperationInProgress = bValue; }
   QPointer<QUndoStack> UndoStack();
+
+signals:
+  void SignalFlowModified();
 
 protected slots:
   void SlotConnectionCreated(QtNodes::Connection const &c);

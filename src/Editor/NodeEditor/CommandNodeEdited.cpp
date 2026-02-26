@@ -90,6 +90,10 @@ void CCommandNodeEdited::DoUndoRedo(const QJsonObject& obj)
       {
         pModel->restore(obj);
       }
+      if (auto pScene = dynamic_cast<CNodeEditorFlowScene*>(m_pFlowScene.data()))
+      {
+        emit pScene->SignalFlowModified();
+      }
     }
   }
 }

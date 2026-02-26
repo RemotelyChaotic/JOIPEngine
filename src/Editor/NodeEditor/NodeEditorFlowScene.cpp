@@ -99,7 +99,9 @@ void CNodeEditorFlowScene::SlotNodeMoved(QtNodes::Node& node, const QPointF& new
         if (CFlowView* pViewCasted = dynamic_cast<CFlowView*>(pView))
         {
           UndoStack()->push(new CCommandNodeMoved(pViewCasted, node.id(),
-                                                  oldPos, newPosition));
+                                                  oldPos, newPosition, [this](){
+                                                    emit SignalFlowModified();
+                                                  }));
         }
       }
     }

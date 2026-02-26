@@ -11,10 +11,12 @@ CCommandNodeMoved::CCommandNodeMoved(QPointer<CFlowView> pFlowView,
                                      const QUuid& id,
                                      const QPointF& from,
                                      const QPointF& to,
+                                     std::function<void(void)> fnChanged,
                                      QUndoCommand* pParent) :
   QUndoCommand(QString("Node %1 moved -> %2").arg(id.toString()).arg(QString("(x:%1, y:%2)").arg(to.x()).arg(to.y())), pParent),
   m_pFlowView(pFlowView),
   m_pScene(nullptr != pFlowView ? pFlowView->Scene() : nullptr),
+  m_fnChanged(fnChanged),
   m_nodeId(id),
   m_from(from),
   m_to(to)
@@ -84,6 +86,10 @@ void CCommandNodeMoved::DoUndoRedo(const QPointF& point)
         it->second->nodeGraphicsObject().setProperty(editor::c_sPropertyOldValue, point);
         CSceneUndoOperationLocker locker(pScene);
         it->second->nodeGraphicsObject().setPos(point);
+        if (nullptr != m_pScene)
+        {
+          m_fnChanged();
+        }
       }
     }
   }
