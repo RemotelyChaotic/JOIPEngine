@@ -274,6 +274,7 @@ void CEditorSceneNodeWidget::UnloadProject()
   m_spUi->pDebugView->StopDebug();
 
   m_spCurrentProject = nullptr;
+  m_sLastCachedFlow = QString();
 
   m_pFlowView->resetTransform();
   m_pFlowView->scale(0.8, 0.8);
@@ -441,7 +442,10 @@ void CEditorSceneNodeWidget::SlotFileChangedExternally(const QString& sName)
   {
     m_bChangingIndex = true;
 
-    FlowSceneModel()->clearScene();
+    {
+      QSignalBlocker b(FlowSceneModel());
+      FlowSceneModel()->clearScene();
+    }
     FlowSceneModel()->loadFromMemory(pFlowItem->m_data);
 
     m_bChangingIndex = false;
@@ -657,7 +661,10 @@ void CEditorSceneNodeWidget::ReloadEditor(qint32 iIndex)
       ActionBar()->m_spUi->DebugLayoutButton->setEnabled(!m_sLastCachedFlow.isEmpty());
     }
 
-    FlowSceneModel()->clearScene();
+    {
+      QSignalBlocker b(FlowSceneModel());
+      FlowSceneModel()->clearScene();
+    }
     FlowSceneModel()->loadFromMemory(pFlowItem->m_data);
   }
 

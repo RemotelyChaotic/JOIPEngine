@@ -698,7 +698,10 @@ void CEditorModel::UnloadProject()
   m_spDialogueModel->DeInitializeModel();
   m_spEditableFileModel->DeInitializeModel();
   m_spResourceTreeModel->DeInitializeModel();
-  m_spFlowSceneModel->clearScene();
+  {
+    QSignalBlocker b(m_spFlowSceneModel.get());
+    m_spFlowSceneModel->clearScene();
+  }
   m_spUndoStack->clear();
 
   m_spEditorCompleterModel->SetProject(nullptr);
