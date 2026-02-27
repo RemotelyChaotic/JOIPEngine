@@ -498,7 +498,7 @@
       <property name="bottomMargin">
        <number>0</number>
       </property>
-      <item row="1" column="0">
+      <item row="2" column="0">
        <widget class="CShortcutButton" name="AddNodeButton">
         <property name="sizePolicy">
          <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
@@ -515,22 +515,6 @@
        </widget>
       </item>
       <item row="1" column="1">
-       <widget class="CShortcutButton" name="RemoveNodeButton">
-        <property name="sizePolicy">
-         <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-          <horstretch>0</horstretch>
-          <verstretch>0</verstretch>
-         </sizepolicy>
-        </property>
-        <property name="toolTip">
-         <string>Remove</string>
-        </property>
-        <property name="text">
-         <string/>
-        </property>
-       </widget>
-      </item>
-      <item row="0" column="1">
        <widget class="CShortcutButton" name="NextSceneButton">
         <property name="sizePolicy">
          <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
@@ -546,7 +530,23 @@
         </property>
        </widget>
       </item>
-      <item row="0" column="0">
+      <item row="2" column="1">
+       <widget class="CShortcutButton" name="RemoveNodeButton">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="toolTip">
+         <string>Remove</string>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="0">
        <widget class="QStackedWidget" name="pNodeDebugStack">
         <property name="sizePolicy">
          <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
@@ -621,6 +621,22 @@
           </item>
          </layout>
         </widget>
+       </widget>
+      </item>
+      <item row="0" column="0">
+       <widget class="CShortcutButton" name="CreateNewFlow">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="toolTip">
+         <string>Create a new flow resource</string>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
        </widget>
       </item>
      </layout>

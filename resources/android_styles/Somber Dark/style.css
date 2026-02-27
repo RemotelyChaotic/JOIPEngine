@@ -972,6 +972,15 @@ QPushButton#DebugLogButton {
   qproperty-icon: url(ui/ButtonUList.png) off,
                   url(ui/ButtonUList.png) on;
 }
+QPushButton#CreateNewFlow {
+  border-image: url(ui/IconBg.svg) 0 0 0 0 stretch stretch;
+  border-top: 0 transparent;
+  border-bottom: 0 transparent;
+  border-right: 0 transparent;
+  border-left: 0 transparent;
+  qproperty-icon: url(ui/ButtonAddSceneFlow.png) off,
+                  url(ui/ButtonAddSceneFlow.png) on;
+}
 
 QPushButton#AddShowBackgroundCode:hover,
 QPushButton#AddShowIconCode:hover,
@@ -1065,7 +1074,8 @@ QPushButton#AddDialogueFrament:hover,
 QPushButton#AddDialogueCategoryButton:hover,
 QPushButton#EditDialogueContent:hover,
 QPushButton#CliButton:hover,
-QPushButton#DebugLogButton:hover {
+QPushButton#DebugLogButton:hover,
+QPushButton#CreateNewFlow:hover {
   border-image: url(ui/IconBgHover.svg) 0 0 0 0 stretch stretch;
 }
 
@@ -1161,7 +1171,8 @@ QPushButton#AddDialogueFrament:pressed,
 QPushButton#AddDialogueCategoryButton:pressed,
 QPushButton#EditDialogueContent:pressed,
 QPushButton#CliButton:pressed,
-QPushButton#DebugLogButton:pressed {
+QPushButton#DebugLogButton:pressed,
+QPushButton#CreateNewFlow:pressed {
   border-image: url(ui/IconBgPressed.svg) 0 0 0 0 stretch stretch;
 }
 
@@ -1257,7 +1268,8 @@ QPushButton#AddDialogueFrament:disabled,
 QPushButton#AddDialogueCategoryButton:disabled,
 QPushButton#EditDialogueContent:disabled,
 QPushButton#CliButton:disabled,
-QPushButton#DebugLogButton:disabled {
+QPushButton#DebugLogButton:disabled,
+QPushButton#CreateNewFlow:disabled {
   border-image: url(ui/IconBgDisabled.svg) 0 0 0 0 stretch stretch;
 }
 

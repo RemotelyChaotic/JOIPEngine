@@ -32,8 +32,10 @@ namespace QtNodes {
 class QUndoStack;
 struct SScene;
 struct SProject;
+struct SResource;
 typedef std::shared_ptr<SProject> tspProject;
 typedef std::shared_ptr<SScene> tspScene;
+typedef std::shared_ptr<SResource> tspResource;
 
 class CEditorModel : public QObject
 {
@@ -59,6 +61,14 @@ public:
                             EResourceType type,
                             const QString& sCustomInitContent,
                             const QStringList& vsFormats = QStringList());
+
+  typedef std::vector<std::function<void(const tspResource&)>> tvfnActionsResource;
+  static QString AddNewFile(QPointer<QWidget> pParentForDialog, tspProject spProject,
+                            EResourceType type,
+                            const QString& sTitle,
+                            const QString& sCustomInitContent,
+                            const QStringList& vsFormats,
+                            const tvfnActionsResource& vfnActions);
 
   void AddTutorialStateSwitchHandler(std::weak_ptr<ITutorialStateSwitchHandler> wpSwitcher);
   void NextTutorialState();

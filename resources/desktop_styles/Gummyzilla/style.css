@@ -1093,6 +1093,14 @@ QPushButton#DebugLogButton:pressed,
 QPushButton#DebugLogButton:disabled {
   image: url(ui/ButtonUListSelected.png);
 }
+QPushButton#CreateNewFlow {
+  image: url(ui/ButtonAddSceneFlow.png);
+}
+QPushButton#CreateNewFlow:hover,
+QPushButton#CreateNewFlow:pressed,
+QPushButton#CreateNewFlow:disabled {
+  image: url(ui/ButtonAddSceneFlowSelected.png);
+}
 
 
 QPushButton:hover,

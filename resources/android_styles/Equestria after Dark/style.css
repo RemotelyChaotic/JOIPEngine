@@ -647,6 +647,10 @@ QPushButton#DebugLogButton {
   qproperty-icon: url(ui/ButtonUList.png) off,
                   url(ui/ButtonUList.png) on;
 }
+QPushButton#CreateNewFlow {
+  qproperty-icon: url(ui/ButtonAddSceneFlow.png) off,
+                  url(ui/ButtonAddSceneFlow.png) on;
+}
 
 QPushButton:hover,
 QToolButton:hover {

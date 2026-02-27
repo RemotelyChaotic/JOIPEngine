@@ -307,86 +307,124 @@ QString CEditorModel::AddNewFileToScene(QPointer<QWidget> pParentForDialog,
       sSceneName = spScene->m_sName;
     }
 
-    const QString sProjectPath = PhysicalProjectPath(m_spCurrentProject);
-    QDir projectDir(sProjectPath);
-    QPointer<CEditorModel> pThisGuard(this);
     QString sTitle = sSceneName.isEmpty() ? tr("Create File") :
-                                            tr("Create File for %1").arg(sSceneName);
-    QFileDialog* dlg = new QFileDialog(pParentForDialog, sTitle);
-    dlg->setViewMode(QFileDialog::Detail);
-    dlg->setFileMode(QFileDialog::AnyFile);
-    dlg->setAcceptMode(QFileDialog::AcceptSave);
-    dlg->setOptions(QFileDialog::DontUseCustomDirectoryIcons);
-    dlg->setDirectoryUrl(projectDir.absolutePath());
-    dlg->setFilter(QDir::AllDirs);
-    dlg->setNameFilter(QString("Files (%1)").arg(formats.join(" ")));
-    dlg->setDefaultSuffix(formats.first());
-
-    if (dlg->exec())
-    {
-      if (nullptr == pThisGuard) { return QString(); }
-      QList<QUrl> urls = dlg->selectedUrls();
-      delete dlg;
-
-      QUrl url = 1 == urls.size() ? urls[0] : QUrl();
-      if (url.isValid())
-      {
-        QFileInfo info(url.toLocalFile());
-        if (!info.absoluteFilePath().contains(projectDir.absolutePath()))
-        {
-          qWarning() << "File is not in subfolder of Project.";
-        }
-        else
-        {
-          SResourcePath sUrlToSave =
-              joip_resource::CreatePathFromAbsoluteUrl(url, m_spCurrentProject);
-          QFile scriptFile(info.absoluteFilePath());
-          if (scriptFile.open(QIODevice::WriteOnly | QIODevice::Truncate))
+                         tr("Create File for %1").arg(sSceneName);
+    tvfnActionsResource vfnActions =
+        {[&spScene, type, spDbManager](const tspResource& spNewResource){
+          if (nullptr == spScene) { return; }
+          qint32 iProjId = -1;
+          spScene->m_spParent->m_rwLock.lockForRead();
+          iProjId = spScene->m_spParent->m_iId;
+          spScene->m_spParent->m_rwLock.unlock();
+          QWriteLocker locker(&spNewResource->m_rwLock);
+          if (EResourceType::eScript == type._to_integral())
           {
-            if (EResourceType::eLayout == type._to_integral())
-            {
-              QString sRelativePath = projectDir.relativeFilePath(info.absoluteFilePath());
-              UpdateQmldir(info, sRelativePath, spDbManager, m_spCurrentProject);
-            }
-            InitScript(scriptFile, info.suffix(), sCustomInitContent);
+            spScene->m_sScript = spNewResource->m_sName;
+            emit spDbManager->SignalSceneDataChanged(iProjId, spScene->m_iId);
+          }
+          else if (EResourceType::eLayout == type._to_integral())
+          {
+            spScene->m_sSceneLayout = spNewResource->m_sName;
+            emit spDbManager->SignalSceneDataChanged(iProjId, spScene->m_iId);
+          }
+        }};
+    QString sResource = AddNewFile(pParentForDialog, m_spCurrentProject, type, sTitle,
+                                   sCustomInitContent, formats, vfnActions);
 
-            tvfnActionsResource vfnActions =
-                {[&spScene, type, spDbManager](const tspResource& spNewResource){
-              if (nullptr == spScene) { return; }
-              qint32 iProjId = -1;
-              spScene->m_spParent->m_rwLock.lockForRead();
-              iProjId = spScene->m_spParent->m_iId;
-              spScene->m_spParent->m_rwLock.unlock();
-              QWriteLocker locker(&spNewResource->m_rwLock);
-              if (EResourceType::eScript == type._to_integral())
-              {
-                spScene->m_sScript = spNewResource->m_sName;
-                emit spDbManager->SignalSceneDataChanged(iProjId, spScene->m_iId);
-              }
-              else if (EResourceType::eLayout == type._to_integral())
-              {
-                spScene->m_sSceneLayout = spNewResource->m_sName;
-                emit spDbManager->SignalSceneDataChanged(iProjId, spScene->m_iId);
-              }
-            }};
+    if (!sResource.isEmpty())
+    {
+      if (EResourceType::eLayout == type._to_integral())
+      {
+        const QString sProjectPath = PhysicalProjectPath(m_spCurrentProject);
+        QDir projectDir(sProjectPath);
+        tspResource spResource = spDbManager->FindResourceInProject(m_spCurrentProject, sResource);
+        if (nullptr != spResource)
+        {
+          QFileInfo info(static_cast<QUrl>(spResource->m_sPath).toLocalFile());
+          QString sRelativePath = projectDir.relativeFilePath(info.absoluteFilePath());
+          UpdateQmldir(info, sRelativePath, spDbManager, m_spCurrentProject);
+        }
+      }
+    }
 
-            QString sResource = spDbManager->AddResource(m_spCurrentProject, sUrlToSave,
+    return sResource;
+  }
+  return QString();
+}
+
+//----------------------------------------------------------------------------------------
+//
+QString CEditorModel::AddNewFile(QPointer<QWidget> pParentForDialog,
+                                 tspProject spProject,
+                                 EResourceType type,
+                                 const QString& sTitle,
+                                 const QString& sCustomInitContent,
+                                 const QStringList& vsFormats,
+                                 const tvfnActionsResource& vfnActions)
+{
+  if (nullptr == spProject || nullptr == pParentForDialog)
+  {
+    return QString();
+
+  }
+  const QString sProjectPath = PhysicalProjectPath(spProject);
+  QDir projectDir(sProjectPath);
+  QFileDialog* dlg = new QFileDialog(pParentForDialog, sTitle);
+  dlg->setViewMode(QFileDialog::Detail);
+  dlg->setFileMode(QFileDialog::AnyFile);
+  dlg->setAcceptMode(QFileDialog::AcceptSave);
+  dlg->setOptions(QFileDialog::DontUseCustomDirectoryIcons);
+  dlg->setDirectoryUrl(projectDir.absolutePath());
+  dlg->setFilter(QDir::AllDirs);
+  dlg->setNameFilter(QString("Files (%1)").arg(vsFormats.join(" ")));
+  dlg->setDefaultSuffix(vsFormats.first());
+
+  if (dlg->exec())
+  {
+    if (nullptr == pParentForDialog) { return QString(); }
+    QList<QUrl> urls = dlg->selectedUrls();
+    delete dlg;
+
+    QUrl url = 1 == urls.size() ? urls[0] : QUrl();
+    if (url.isValid())
+    {
+      QFileInfo info(url.toLocalFile());
+      if (!info.absoluteFilePath().contains(projectDir.absolutePath()))
+      {
+        qWarning() << "File is not in subfolder of Project.";
+      }
+      else
+      {
+        SResourcePath sUrlToSave =
+            joip_resource::CreatePathFromAbsoluteUrl(url, spProject);
+        QFile scriptFile(info.absoluteFilePath());
+        if (scriptFile.open(QIODevice::WriteOnly | QIODevice::Truncate))
+        {
+          InitScript(scriptFile, info.suffix(), sCustomInitContent);
+
+          if (auto spDbManager = CApplication::Instance()->System<CDatabaseManager>().lock())
+          {
+            QString sResource = spDbManager->AddResource(spProject, sUrlToSave,
                                                          type, QString(), QString(),
                                                          vfnActions);
             return sResource;
           }
           else
           {
-            qWarning() << "Could not write script file.";
+            qWarning() << "Could not fetch Databasemanager.";
           }
+        }
+        else
+        {
+          qWarning() << "Could not write script file.";
         }
       }
     }
-    else
-    {
-      if (nullptr == pThisGuard) { return QString(); }
-      delete dlg;
-    }
+  }
+  else
+  {
+    if (nullptr == pParentForDialog) { return QString(); }
+    delete dlg;
   }
   return QString();
 }
@@ -652,23 +690,23 @@ void CEditorModel::SaveProject()
                                EResourceType::eFlow, joip_resource::c_sSceneModelFile);
       projectLocker.relock();
       m_spCurrentProject->m_sSceneModel = joip_resource::c_sSceneModelFile;
-    }
 
-    auto spResource = spDbManager->FindResourceInProject(m_spCurrentProject, joip_resource::c_sSceneModelFile);
-    if (nullptr != spResource)
-    {
-      QString sPath = spResource->ResourceToAbsolutePath();
-      QReadLocker resourceLocker(&spResource->m_rwLock);
-      resourceLocker.unlock();
+      auto spResource = spDbManager->FindResourceInProject(m_spCurrentProject, joip_resource::c_sSceneModelFile);
+      if (nullptr != spResource)
+      {
+        QString sPath = spResource->ResourceToAbsolutePath();
+        QReadLocker resourceLocker(&spResource->m_rwLock);
+        resourceLocker.unlock();
 
-      QFile modelFile(sPath);
-      if (modelFile.open(QIODevice::WriteOnly | QIODevice::Truncate))
-      {
-        modelFile.write("{}");
-      }
-      else
-      {
-        qWarning() << tr("Could not save scene model file.");
+        QFile modelFile(sPath);
+        if (modelFile.open(QIODevice::WriteOnly | QIODevice::Truncate))
+        {
+          modelFile.write("{}");
+        }
+        else
+        {
+          qWarning() << tr("Could not save scene model file.");
+        }
       }
     }
   }

@@ -4,6 +4,7 @@
 #include "Editor/EditorActionBar.h"
 #include "Editor/EditorEditableFileModel.h"
 #include "Editor/EditorModel.h"
+#include "Editor/NodeEditor/CommandAddNewFlow.h"
 #include "Editor/NodeEditor/CommandChangeOpenedFlow.h"
 #include "Editor/NodeEditor/NodeEditorFlowView.h"
 #include "Editor/NodeEditor/NodeEditorFlowScene.h"
@@ -307,12 +308,31 @@ void CEditorSceneNodeWidget::SaveProject()
 
 //----------------------------------------------------------------------------------------
 //
+void CEditorSceneNodeWidget::OnHidden()
+{
+  EditableFileModel()->SetReloadFileWithoutQuestion(true);
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CEditorSceneNodeWidget::OnShown()
+{
+  EditableFileModel()->SetReloadFileWithoutQuestion(false);
+  ReloadEditor(
+    m_pFilteredScriptModel->mapToSource(
+      m_pFilteredScriptModel->index(m_spUi->pResourceComboBox->currentIndex(), 0)).row());
+}
+
+//----------------------------------------------------------------------------------------
+//
 void CEditorSceneNodeWidget::OnActionBarAboutToChange()
 {
   m_spUi->pDebugView->StopDebug();
 
   if (nullptr != ActionBar())
   {
+    disconnect(ActionBar()->m_spUi->CreateNewFlow, &QPushButton::clicked,
+               this, &CEditorSceneNodeWidget::SlotCreateNewFlowClicked);
     disconnect(ActionBar()->m_spUi->DebugNodeButton, &QPushButton::clicked,
                this, &CEditorSceneNodeWidget::SlotStartDebugClicked);
     disconnect(ActionBar()->m_spUi->StopDebugNodeButton, &QPushButton::clicked,
@@ -324,6 +344,7 @@ void CEditorSceneNodeWidget::OnActionBarAboutToChange()
     disconnect(ActionBar()->m_spUi->RemoveNodeButton, &QPushButton::clicked,
             this, &CEditorSceneNodeWidget::SlotRemoveNodeButtonClicked);
 
+    ActionBar()->m_spUi->CreateNewFlow->setEnabled(true);
     ActionBar()->m_spUi->NextSceneButton->setEnabled(false);
     ActionBar()->m_spUi->AddNodeButton->setEnabled(true);
     ActionBar()->m_spUi->RemoveNodeButton->setEnabled(true);
@@ -339,6 +360,8 @@ void CEditorSceneNodeWidget::OnActionBarChanged()
   {
     ActionBar()->ShowNodeEditorActionBar();
 
+    connect(ActionBar()->m_spUi->CreateNewFlow, &QPushButton::clicked,
+            this, &CEditorSceneNodeWidget::SlotCreateNewFlowClicked);
     connect(ActionBar()->m_spUi->DebugNodeButton, &QPushButton::clicked,
             this, &CEditorSceneNodeWidget::SlotStartDebugClicked);
     connect(ActionBar()->m_spUi->StopDebugNodeButton, &QPushButton::clicked,
@@ -353,6 +376,7 @@ void CEditorSceneNodeWidget::OnActionBarChanged()
     ActionBar()->m_spUi->NextSceneButton->setEnabled(false);
     if (EditorModel()->IsReadOnly())
     {
+      ActionBar()->m_spUi->CreateNewFlow->setEnabled(false);
       ActionBar()->m_spUi->AddNodeButton->setEnabled(false);
       ActionBar()->m_spUi->RemoveNodeButton->setEnabled(false);
     }
@@ -450,6 +474,16 @@ void CEditorSceneNodeWidget::SlotFileChangedExternally(const QString& sName)
 
     m_bChangingIndex = false;
   }
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CEditorSceneNodeWidget::SlotCreateNewFlowClicked()
+{
+  WIDGET_INITIALIZED_GUARD
+  if (nullptr == m_spCurrentProject) { return; }
+
+  UndoStack()->push(new CCommandAddNewFlow(m_spCurrentProject, this));
 }
 
 //----------------------------------------------------------------------------------------

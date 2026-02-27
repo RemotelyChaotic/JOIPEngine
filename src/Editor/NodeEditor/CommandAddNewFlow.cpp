@@ -1,4 +1,4 @@
-#include "CommandAddNewSequence.h"
+#include "CommandAddNewFlow.h"
 #include "Application.h"
 
 #include "Editor/EditorCommandIds.h"
@@ -18,15 +18,15 @@ namespace
 {
   //--------------------------------------------------------------------------------------
   //
-  tspResource AddNewSequenceFile(tspProject spProject,
-                                 std::weak_ptr<CDatabaseManager> m_wpDbManager,
-                                 QPointer<QWidget> pParentForDialog)
+  tspResource AddNewFlowFile(tspProject spProject,
+                             std::weak_ptr<CDatabaseManager> m_wpDbManager,
+                             QPointer<QWidget> pParentForDialog)
   {
 
     QString sResource =
-        CEditorModel::AddNewFile(pParentForDialog, spProject, EResourceType::eSequence,
-                                 QObject::tr("Create Sequence File"), QString(),
-                                 SResourceFormats::SequenceFormat(), {});
+        CEditorModel::AddNewFile(pParentForDialog, spProject, EResourceType::eFlow,
+                                 QObject::tr("Create Flow File"), QString(),
+                                 SResourceFormats::FlowFormats(), {});
     auto spDbManager = m_wpDbManager.lock();
     if (nullptr != spProject && nullptr != spDbManager && !sResource.isEmpty())
     {
@@ -38,21 +38,21 @@ namespace
 
 //----------------------------------------------------------------------------------------
 //
-CCommandAddNewSequence::CCommandAddNewSequence(const tspProject& spProject,
-                                               QPointer<QWidget> pParentForDialog,
-                                               QUndoCommand* pParent) :
-  QUndoCommand("Added sequence file", pParent),
-  m_addedResource(),
-  m_spCurrentProject(spProject),
-  m_wpDbManager(CApplication::Instance()->System<CDatabaseManager>()),
-  m_pParentForDialog(pParentForDialog)
+CCommandAddNewFlow::CCommandAddNewFlow(const tspProject& spProject,
+                                       QPointer<QWidget> pParentForDialog,
+                                       QUndoCommand* pParent) :
+   QUndoCommand("Added flow file", pParent),
+   m_addedResource(),
+   m_spCurrentProject(spProject),
+   m_wpDbManager(CApplication::Instance()->System<CDatabaseManager>()),
+   m_pParentForDialog(pParentForDialog)
 {
 }
-CCommandAddNewSequence::~CCommandAddNewSequence() = default;
+CCommandAddNewFlow::~CCommandAddNewFlow() = default;
 
 //----------------------------------------------------------------------------------------
 //
-void CCommandAddNewSequence::undo()
+void CCommandAddNewFlow::undo()
 {
   if (nullptr != m_addedResource)
   {
@@ -69,12 +69,12 @@ void CCommandAddNewSequence::undo()
 
 //----------------------------------------------------------------------------------------
 //
-void CCommandAddNewSequence::redo()
+void CCommandAddNewFlow::redo()
 {
   if (nullptr == m_addedResource)
   {
     tspResource spResource =
-        AddNewSequenceFile(m_spCurrentProject, m_wpDbManager, m_pParentForDialog);
+        AddNewFlowFile(m_spCurrentProject, m_wpDbManager, m_pParentForDialog);
     m_addedResource = spResource;
   }
   else
@@ -103,21 +103,21 @@ void CCommandAddNewSequence::redo()
 
 //----------------------------------------------------------------------------------------
 //
-int CCommandAddNewSequence::id() const
+int CCommandAddNewFlow::id() const
 {
-  return EEditorCommandId::eAddSequence;
+  return EEditorCommandId::eAddFlow;
 }
 
 //----------------------------------------------------------------------------------------
 //
-bool CCommandAddNewSequence::mergeWith(const QUndoCommand* pOther)
+bool CCommandAddNewFlow::mergeWith(const QUndoCommand* pOther)
 {
   if (nullptr == pOther || id() != pOther->id())
   {
     return false;
   }
 
-  const CCommandAddNewSequence* pOtherCasted = dynamic_cast<const CCommandAddNewSequence*>(pOther);
+  const CCommandAddNewFlow* pOtherCasted = dynamic_cast<const CCommandAddNewFlow*>(pOther);
   if (nullptr == pOtherCasted) { return false; }
 
   return false;

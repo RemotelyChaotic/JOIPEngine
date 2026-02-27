@@ -153,6 +153,8 @@ macro(CreateJOIPProject JOIP_PROJECT_NAME)
     ${JOIPSources}/Editor/EditorWidgets/EditorWidgetBase.h
     ${JOIPSources}/Editor/EditorWidgetRegistry.h
     ${JOIPSources}/Editor/EditorWidgetTypes.h
+    ${JOIPSources}/Editor/NodeEditor/CommandAddNewFlow.cpp
+    ${JOIPSources}/Editor/NodeEditor/CommandAddNewFlow.h
     ${JOIPSources}/Editor/NodeEditor/CommandChangeOpenedFlow.cpp
     ${JOIPSources}/Editor/NodeEditor/CommandChangeOpenedFlow.h
     ${JOIPSources}/Editor/NodeEditor/CommandConnectionAdded.cpp

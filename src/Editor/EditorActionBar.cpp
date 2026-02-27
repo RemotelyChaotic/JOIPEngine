@@ -29,6 +29,7 @@ namespace {
   const QString c_sPauseHelpId =          "Editor/Pause";
   const QString c_sStopHelpId =           "Editor/Stop";
 
+  const QString c_sCreateNodeFlowHelpId = "Editor/CreateFlow";
   const QString c_sDebugNodeHelpId =      "Editor/DebugNode";
   const QString c_sStepNodeHelpId =       "Editor/StepNode";
   const QString c_sAddNodeHelpId =        "Editor/AddNode";
@@ -204,6 +205,8 @@ void CEditorActionBar::Initialize()
     m_spUi->StopButton->setProperty(helpOverlay::c_sHelpPagePropertyName, c_sStopHelpId);
     wpHelpFactory->RegisterHelp(c_sStopHelpId, ":/resources/help/editor/stop_button_help.html");
 
+    m_spUi->CreateNewFlow->setProperty(helpOverlay::c_sHelpPagePropertyName, c_sCreateNodeFlowHelpId);
+    wpHelpFactory->RegisterHelp(c_sCreateNodeFlowHelpId, ":/resources/help/editor/nodes/nodeeditor_create_flow.html");
     m_spUi->pNodeDebugStack->setProperty(helpOverlay::c_sHelpPagePropertyName, c_sDebugNodeHelpId);
     wpHelpFactory->RegisterHelp(c_sDebugNodeHelpId, ":/resources/help/editor/nodes/nodeeditor_debug_help.html");
     m_spUi->NextSceneButton->setProperty(helpOverlay::c_sHelpPagePropertyName, c_sStepNodeHelpId);
@@ -463,11 +466,12 @@ void CEditorActionBar::SlotKeyBindingsChanged()
     m_spUi->PauseButton->SetShortcut(m_spSettings->keyBinding(sKey.arg(2)));
     m_spUi->StopButton->SetShortcut(m_spSettings->keyBinding(sKey.arg(3)));
 
-    m_spUi->DebugNodeButton->SetShortcut(m_spSettings->keyBinding(sKey.arg(1)));
-    m_spUi->StopDebugNodeButton->SetShortcut(m_spSettings->keyBinding(sKey.arg(2)));
-    m_spUi->NextSceneButton->SetShortcut(m_spSettings->keyBinding(sKey.arg(3)));
-    m_spUi->AddNodeButton->SetShortcut(m_spSettings->keyBinding(sKey.arg(4)));
-    m_spUi->RemoveNodeButton->SetShortcut(m_spSettings->keyBinding(sKey.arg(5)));
+    m_spUi->CreateNewFlow->SetShortcut(m_spSettings->keyBinding(sKey.arg(1)));
+    m_spUi->DebugNodeButton->SetShortcut(m_spSettings->keyBinding(sKey.arg(2)));
+    m_spUi->StopDebugNodeButton->SetShortcut(m_spSettings->keyBinding(sKey.arg(3)));
+    m_spUi->NextSceneButton->SetShortcut(m_spSettings->keyBinding(sKey.arg(4)));
+    m_spUi->AddNodeButton->SetShortcut(m_spSettings->keyBinding(sKey.arg(5)));
+    m_spUi->RemoveNodeButton->SetShortcut(m_spSettings->keyBinding(sKey.arg(6)));
 
     m_spUi->DebugButton->SetShortcut(m_spSettings->keyBinding(sKey.arg(1)));
     m_spUi->StopDebugButton->SetShortcut(m_spSettings->keyBinding(sKey.arg(2)));

@@ -40,6 +40,7 @@ BETTER_ENUM(EEditorCommandId, qint32,
             eRemoveEosCommand,
             eUpdateEosCommand,
 
+            eAddFlow,
             eAddNodeItem,
             eMoveNodeItem,
             eChangeNodeItem,

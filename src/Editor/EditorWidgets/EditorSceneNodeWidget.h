@@ -61,8 +61,8 @@ public:
   void LoadProject(tspProject spCurrentProject) override;
   void UnloadProject() override;
   void SaveProject() override;
-  void OnHidden() override {}
-  void OnShown() override {}
+  void OnHidden() override;
+  void OnShown() override;
 
 protected:
   void OnActionBarAboutToChange() override;
@@ -75,6 +75,7 @@ protected slots:
   void SlotAddNewScriptFileToScene(const QString& sCustomInitContent);
   void SlotAddNewLayoutFileToScene(const QString& sCustomInitContent);
   void SlotFileChangedExternally(const QString& sName);
+  void SlotCreateNewFlowClicked();
   void SlotStartDebugClicked();
   void SlotStopDebugClicked();
   void SlotNextSceneClicked();
