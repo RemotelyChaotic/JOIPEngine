@@ -6,6 +6,7 @@
 #include "Systems/Nodes/SceneNodeModel.h"
 #include "Systems/Nodes/SceneTranstitionData.h"
 #include "Systems/Nodes/StartNodeModel.h"
+#include "Systems/Nodes/SubflowNodeModel.h"
 
 #include <nodes/DataModelRegistry>
 
@@ -23,5 +24,6 @@ std::shared_ptr<QtNodes::DataModelRegistry> CNodeEditorRegistryBase::RegisterDat
   ret->registerModel<CEndNodeModel>(CNodeEditorRegistryBase::c_sModelCategoryControl);
   ret->registerModel<CPathMergerModel>(CNodeEditorRegistryBase::c_sModelCategoryPath);
   ret->registerModel<CPathSplitterModel>(CNodeEditorRegistryBase::c_sModelCategoryPath);
+  ret->registerModel<CSubflowNodeModel>(CNodeEditorRegistryBase::c_sModelCategoryScene);
   return ret;
 }

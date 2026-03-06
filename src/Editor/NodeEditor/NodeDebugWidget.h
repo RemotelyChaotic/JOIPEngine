@@ -29,19 +29,26 @@ struct SProject;
 typedef std::shared_ptr<SProject> tspProject;
 typedef std::shared_ptr<SScene> tspScene;
 
+//----------------------------------------------------------------------------------------
+//
+struct STaggedNode
+{
+  qintptr               m_pModel = 0;
+  QtNodes::Node*        m_pNode = nullptr;
+};
 
 //----------------------------------------------------------------------------------------
 //
 class CNodeContainingItem
 {
 public:
-  CNodeContainingItem(QtNodes::Node* pNode);
+  CNodeContainingItem(STaggedNode node);
   virtual ~CNodeContainingItem();
 
-  QtNodes::Node* Node() const;
+  STaggedNode Node() const;
 
 protected:
-  QtNodes::Node*        m_pNode;
+  STaggedNode        m_pNode;
 };
 
 //----------------------------------------------------------------------------------------
@@ -52,7 +59,7 @@ class CNodeMock : public QFrame, public CNodeContainingItem
 
 public:
   explicit CNodeMock(std::unique_ptr<QtNodes::NodeDataModel>&& dataModel,
-                     QtNodes::Node* pNode,
+                     STaggedNode pNode,
                      QWidget* pParent = nullptr, QWidget* pView = nullptr);
   ~CNodeMock();
 
@@ -78,7 +85,7 @@ class CNodeDebugNodeStartEnd : public CNodeMock
   Q_OBJECT
 
 public:
-  explicit CNodeDebugNodeStartEnd(bool bStart, QtNodes::Node* pNode,
+  explicit CNodeDebugNodeStartEnd(bool bStart, STaggedNode pNode,
                                   QWidget* pParent = nullptr, QWidget* pView = nullptr);
   ~CNodeDebugNodeStartEnd();
 
@@ -97,9 +104,24 @@ class CNodeDebugNode : public CNodeMock
 
 public:
   explicit CNodeDebugNode(tspProject spProject, const QString& sScene,
-                          QtNodes::Node* pNode,
+                          STaggedNode pNode,
                           QWidget* pParent = nullptr, QWidget* pView = nullptr);
   ~CNodeDebugNode();
+
+  void paintEvent(QPaintEvent* pEvt) override;
+};
+
+//----------------------------------------------------------------------------------------
+//
+class CNodeDebugSubflow : public CNodeMock
+{
+  Q_OBJECT
+
+public:
+  explicit CNodeDebugSubflow(tspProject spProject, const QString& sName,
+                             STaggedNode pNode,
+                             QWidget* pParent = nullptr, QWidget* pView = nullptr);
+  ~CNodeDebugSubflow();
 
   void paintEvent(QPaintEvent* pEvt) override;
 };
@@ -138,7 +160,7 @@ class CNodeDebugSelection : public CNodeMock
 
 public:
   explicit CNodeDebugSelection(const QStringList& vsScenes,
-                               QtNodes::Node* pNode,
+                               STaggedNode pNode,
                                QWidget* pParent = nullptr,
                                CNodeDebugWidget* pView = nullptr);
   ~CNodeDebugSelection();
@@ -195,7 +217,7 @@ public:
   QColor BackgroundColor() const;
   void SetBackgroundColor(const QColor& col);
 
-  void FocusNode(QtNodes::Node* pNode);
+  void FocusNode(STaggedNode pNode);
 
 protected slots:
   void SlotSceneError(QString sError, QtMsgType type);
@@ -203,11 +225,13 @@ protected slots:
   void SlotUpdateScrollAndScene();
 
 private:
+  void AddSubflow(const QString& sStr);
   void AddWidget(QWidget* pWidget);
   void Clear();
+  void EndSubflow();
   bool IsInErrorState() const;
   QWidget* LastWidget() const;
-  QtNodes::Node* NodeFromScene(QtNodes::Node* pLocalNode);
+  STaggedNode NodeFromScene(QtNodes::Node* pLocalNode);
   void ScrollToEnd();
   void UpdateNodeContainingItemNode(CNodeContainingItem* pItem,
                                     CNodeModelBase::EDebugState state);

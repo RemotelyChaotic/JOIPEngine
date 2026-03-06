@@ -13,6 +13,8 @@
 #include "Systems/Nodes/SceneNodeModel.h"
 #include "Systems/Nodes/SceneNodeModelWidget.h"
 #include "Systems/Nodes/StartNodeModel.h"
+#include "Systems/Nodes/SubflowNodeModel.h"
+#include "Systems/Nodes/SubflowNodeModelWidget.h"
 
 #include "Systems/DatabaseManager.h"
 #include "Systems/Database/Project.h"
@@ -104,15 +106,24 @@ public:
   //
   void PopFlow() override
   {
-    // TODO:
+    if (nullptr == m_spCurrentResolveRoot || nullptr == m_spCurrentResolveRoot->m_pNode)
+    {
+      return;
+    }
+
+    m_pWidget->EndSubflow();
   }
 
   //--------------------------------------------------------------------------------------
   //
   void PushFlow(const QString& sNewFlow) override
   {
-    // TODO:
-    Q_UNUSED(sNewFlow)
+    if (nullptr == m_spCurrentResolveRoot || nullptr == m_spCurrentResolveRoot->m_pNode)
+    {
+      return;
+    }
+
+    m_pWidget->AddSubflow(sNewFlow);
   }
 
   //--------------------------------------------------------------------------------------
@@ -221,7 +232,7 @@ private:
 
 //----------------------------------------------------------------------------------------
 //
-CNodeContainingItem::CNodeContainingItem(QtNodes::Node* pNode) :
+CNodeContainingItem::CNodeContainingItem(STaggedNode pNode) :
   m_pNode(pNode)
 {
 }
@@ -229,14 +240,14 @@ CNodeContainingItem::~CNodeContainingItem() = default;
 
 //----------------------------------------------------------------------------------------
 //
-QtNodes::Node* CNodeContainingItem::Node() const
+STaggedNode CNodeContainingItem::Node() const
 {
   return m_pNode;
 }
 
 //----------------------------------------------------------------------------------------
 //
-CNodeMock::CNodeMock(std::unique_ptr<QtNodes::NodeDataModel>&& dataModel, QtNodes::Node* pNode,
+CNodeMock::CNodeMock(std::unique_ptr<QtNodes::NodeDataModel>&& dataModel, STaggedNode pNode,
                      QWidget* pParent, QWidget* pView) :
   QFrame(pParent),
   CNodeContainingItem(pNode),
@@ -497,7 +508,8 @@ namespace
     eStart,
     eEnd,
     eScene,
-    eSplitter
+    eSplitter,
+    eSubflow
   };
 
   std::unique_ptr<QtNodes::NodeDataModel> GetNodeModel(NodeMockType type)
@@ -508,6 +520,7 @@ namespace
       case NodeMockType::eEnd: return std::make_unique<CEndNodeModel>();
       case NodeMockType::eScene: return std::make_unique<CSceneNodeModelWithWidget>();
       case NodeMockType::eSplitter: return std::make_unique<CPathSplitterModel>();
+      case NodeMockType::eSubflow: return std::make_unique<CSubflowNodeModelWithWidget>();
     }
     return nullptr;
   }
@@ -515,7 +528,7 @@ namespace
 
 //----------------------------------------------------------------------------------------
 //
-CNodeDebugNodeStartEnd::CNodeDebugNodeStartEnd(bool bStart, QtNodes::Node* pNode,
+CNodeDebugNodeStartEnd::CNodeDebugNodeStartEnd(bool bStart, STaggedNode pNode,
                                                QWidget* pParent, QWidget* pView) :
   CNodeMock(GetNodeModel(bStart ? NodeMockType::eStart : NodeMockType::eEnd), pNode,
             pParent, pView),
@@ -546,14 +559,14 @@ QSize CNodeDebugNodeStartEnd::sizeHint() const
 //
 CNodeDebugNode::CNodeDebugNode(tspProject spProject,
                                const QString& sScene,
-                               QtNodes::Node* pNode,
+                               STaggedNode pNode,
                                QWidget* pParent, QWidget* pView) :
   CNodeMock(GetNodeModel(NodeMockType::eScene), pNode, pParent, pView)
 {
   Q_UNUSED(sScene)
 
   auto pWidget = dynamic_cast<CSceneNodeModelWidget*>(m_spDataModel->embeddedWidget());
-  auto pModel = dynamic_cast<CSceneNodeModel*>(pNode->nodeDataModel());
+  auto pModel = dynamic_cast<CSceneNodeModel*>(pNode.m_pNode->nodeDataModel());
   if (nullptr != pModel && nullptr != pWidget)
   {
     pWidget->SetProject(spProject);
@@ -578,6 +591,31 @@ CNodeDebugNode::~CNodeDebugNode() = default;
 //----------------------------------------------------------------------------------------
 //
 void CNodeDebugNode::paintEvent(QPaintEvent* pEvt)
+{
+  CNodeMock::paintEvent(pEvt);
+}
+
+//----------------------------------------------------------------------------------------
+//
+CNodeDebugSubflow::CNodeDebugSubflow(tspProject spProject, const QString& sName,
+                                     STaggedNode pNode,
+                                     QWidget* pParent, QWidget* pView) :
+  CNodeMock(GetNodeModel(NodeMockType::eSubflow), pNode, pParent, pView)
+{
+  auto pWidget = dynamic_cast<CSubflowNodeModelWidget*>(m_spDataModel->embeddedWidget());
+  auto pModel = dynamic_cast<CSubflowNodeModel*>(pNode.m_pNode->nodeDataModel());
+  if (nullptr != pModel && nullptr != pWidget)
+  {
+    pWidget->SetProject(spProject);
+    pWidget->SetNodeName(sName);
+    pWidget->SetFlow(pModel->FlowName());
+  }
+}
+CNodeDebugSubflow::~CNodeDebugSubflow() = default;
+
+//----------------------------------------------------------------------------------------
+//
+void CNodeDebugSubflow::paintEvent(QPaintEvent* pEvt)
 {
   CNodeMock::paintEvent(pEvt);
 }
@@ -679,7 +717,7 @@ QSize CNodeDebugError::sizeHint() const
 
 //----------------------------------------------------------------------------------------
 //
-CNodeDebugSelection::CNodeDebugSelection(const QStringList& vsScenes, QtNodes::Node* pNode,
+CNodeDebugSelection::CNodeDebugSelection(const QStringList& vsScenes, STaggedNode pNode,
                                          QWidget* pParent, CNodeDebugWidget* pView) :
   CNodeMock(GetNodeModel(NodeMockType::eSplitter), pNode, pParent, pView),
   m_vsScenes(vsScenes)
@@ -895,7 +933,7 @@ void CNodeDebugWidget::NextScene(qint32 iIndex, bool bSkipLastElementcheck)
     }
     else
     {
-      AddWidget(new CNodeDebugNodeStartEnd(false, nullptr,
+      AddWidget(new CNodeDebugNodeStartEnd(false, STaggedNode{},
                                            m_spUi->pScrollAreaWidgetContents, this));
     }
   }
@@ -978,18 +1016,21 @@ void CNodeDebugWidget::SetBackgroundColor(const QColor& col)
 
 //----------------------------------------------------------------------------------------
 //
-void CNodeDebugWidget::FocusNode(QtNodes::Node* pNode)
+void CNodeDebugWidget::FocusNode(STaggedNode pNode)
 {
-  if (nullptr != pNode && nullptr != m_pScene && nullptr != m_pFlowView)
+  if (nullptr != m_pScene && nullptr != m_pFlowView)
   {
-    QGraphicsObject& go = pNode->nodeGraphicsObject();
-    QPointF pointCenter = go.sceneBoundingRect().center();
+    if (nullptr != pNode.m_pNode && reinterpret_cast<qintptr>(m_pScene.data()) == pNode.m_pModel)
+    {
+      QGraphicsObject& go = pNode.m_pNode->nodeGraphicsObject();
+      QPointF pointCenter = go.sceneBoundingRect().center();
 
-    QRectF r = m_pScene->sceneRect();
-    r.translate(-r.topLeft());
-    r.translate(pointCenter - QPointF(r.width()/2, r.height()/2));
-    m_pFlowView->setSceneRect(r);
-    m_pFlowView->update();
+      QRectF r = m_pScene->sceneRect();
+      r.translate(-r.topLeft());
+      r.translate(pointCenter - QPointF(r.width()/2, r.height()/2));
+      m_pFlowView->setSceneRect(r);
+      m_pFlowView->update();
+    }
   }
 }
 
@@ -1026,6 +1067,18 @@ void CNodeDebugWidget::SlotUpdateScrollAndScene()
     SlotUpdateScene();
     ScrollToEnd();
   });
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CNodeDebugWidget::AddSubflow(const QString& sStr)
+{
+  AddWidget(new CNodeDebugSubflow(m_spCurrentProject,
+                                  sStr,
+                                  NodeFromScene(m_spNodeDebugger->CurrentNode()),
+                                  m_spUi->pScrollAreaWidgetContents,
+                                  this));
+  SlotUpdateScene();
 }
 
 //----------------------------------------------------------------------------------------
@@ -1078,6 +1131,17 @@ void CNodeDebugWidget::Clear()
 
 //----------------------------------------------------------------------------------------
 //
+void CNodeDebugWidget::EndSubflow()
+{
+  AddWidget(new CNodeDebugNodeStartEnd(false,
+                                       NodeFromScene(m_spNodeDebugger->CurrentNode()),
+                                       m_spUi->pScrollAreaWidgetContents,
+                                       this));
+  SlotUpdateScene();
+}
+
+//----------------------------------------------------------------------------------------
+//
 bool CNodeDebugWidget::IsInErrorState() const
 {
   return dynamic_cast<CNodeDebugError*>(LastWidget()) != nullptr;
@@ -1102,7 +1166,7 @@ QWidget* CNodeDebugWidget::LastWidget() const
 
 //----------------------------------------------------------------------------------------
 //
-QtNodes::Node* CNodeDebugWidget::NodeFromScene(QtNodes::Node* pLocalNode)
+STaggedNode CNodeDebugWidget::NodeFromScene(QtNodes::Node* pLocalNode)
 {
   if (nullptr != pLocalNode && nullptr != m_pScene)
   {
@@ -1111,10 +1175,12 @@ QtNodes::Node* CNodeDebugWidget::NodeFromScene(QtNodes::Node* pLocalNode)
     auto it = nodes.find(id);
     if (nodes.end() != it)
     {
-      return it->second.get();
+      return STaggedNode{reinterpret_cast<qintptr>(m_pScene.data()), it->second.get()};
     }
   }
-  return nullptr;
+
+  return STaggedNode{reinterpret_cast<qintptr>(pLocalNode->nodeGraphicsObject().scene()),
+                     pLocalNode};
 }
 
 //----------------------------------------------------------------------------------------
@@ -1132,13 +1198,13 @@ void CNodeDebugWidget::UpdateNodeContainingItemNode(CNodeContainingItem* pItem,
 {
   if (nullptr != pItem)
   {
-    QtNodes::Node* pNode = pItem->Node();
-    if (nullptr != pNode)
+    STaggedNode pNode = pItem->Node();
+    if (nullptr != pNode.m_pNode && reinterpret_cast<qintptr>(m_pScene.data()) == pNode.m_pModel)
     {
-      if (auto pDebuggableModel = dynamic_cast<CNodeModelBase*>(pNode->nodeDataModel()))
+      if (auto pDebuggableModel = dynamic_cast<CNodeModelBase*>(pNode.m_pNode->nodeDataModel()))
       {
         pDebuggableModel->SetDebuggState(state);
-        pNode->nodeGraphicsObject().update();
+        pNode.m_pNode->nodeGraphicsObject().update();
       }
     }
   }

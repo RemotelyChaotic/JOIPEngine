@@ -2,6 +2,7 @@
 
 #include "Editor/NodeEditor/UndoPathSplitterModel.h"
 #include "Editor/NodeEditor/UndoSceneNodeModel.h"
+#include "Editor/NodeEditor/UndoSubflowNodeModel.h"
 
 #include "Systems/Nodes/EndNodeModel.h"
 #include "Systems/Nodes/PathMergerModel.h"
@@ -22,5 +23,6 @@ std::shared_ptr<DataModelRegistry> CNodeEditorRegistry::RegisterDataModels()
   ret->registerModel<CEndNodeModel>(CNodeEditorRegistryBase::c_sModelCategoryControl);
   ret->registerModel<CPathMergerModel>(CNodeEditorRegistryBase::c_sModelCategoryPath);
   ret->registerModel<CUndoPathSplitterModelWithWidget>(CNodeEditorRegistryBase::c_sModelCategoryPath);
+  ret->registerModel<CUndoSubflowNodeModelWithWidget>(CNodeEditorRegistryBase::c_sModelCategoryScene);
   return ret;
 }

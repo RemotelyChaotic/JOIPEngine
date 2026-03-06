@@ -340,7 +340,6 @@ void CSceneNodeModel::SlotCanStartHereChanged(bool bValue)
 //
 void CSceneNodeModel::SlotNameChanged(const QString& sName)
 {
-  QJsonObject oldState = save();
   auto spDbManager = m_wpDbManager.lock();
   if (nullptr != spDbManager)
   {
@@ -365,7 +364,6 @@ void CSceneNodeModel::SlotNameChanged(const QString& sName)
 //
 void CSceneNodeModel::SlotLayoutChanged(const QString& sName)
 {
-  QJsonObject oldState = save();
   auto spDbManager = m_wpDbManager.lock();
   if (nullptr != spDbManager)
   {
@@ -397,7 +395,6 @@ void CSceneNodeModel::SlotLayoutChanged(const QString& sName)
 //
 void CSceneNodeModel::SlotScriptChanged(const QString& sName)
 {
-  QJsonObject oldState = save();
   auto spDbManager = m_wpDbManager.lock();
   if (nullptr != spDbManager)
   {
@@ -576,7 +573,6 @@ void CSceneNodeModel::SlotResourceRemoved(qint32 iProjId, const QString& sName)
 //
 void CSceneNodeModel::SlotTitleResourceChanged(const QString& sOld, const QString& sNew)
 {
-  QJsonObject oldState = save();
   auto spDbManager = m_wpDbManager.lock();
   if (nullptr != spDbManager)
   {

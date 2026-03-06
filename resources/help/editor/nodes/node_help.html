@@ -95,6 +95,12 @@
         "Path Splitter" and "Path Merger" nodes can be combined and chained freely to create more path alternatives and
         a mix between <i>random</i> and <i>selectable</i> flow.
         Any empty connectors will be ignored during playing and you do not need to worry about them.<br></li>
+
+        <li><b>Subflow</b>: These nodes represent a placeholder for a different Flow.<br>
+        They act like scenes but will run the Flow of a different Flow resource when reached,
+        making it possible to split the Flow into multiple units.<br>
+        The contained subflow will be run from <i>Entry Point<i> to <i>Exit Point<i> as usual, but instead
+        of exiting at the end this Flow will continue running at the exit of this node once the subflow ends.<br></li>
       </tr>
     </p>
 

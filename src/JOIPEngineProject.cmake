@@ -182,6 +182,8 @@ macro(CreateJOIPProject JOIP_PROJECT_NAME)
     ${JOIPSources}/Editor/NodeEditor/NodeEditorGraphicsObjectProvider.h
     ${JOIPSources}/Editor/NodeEditor/NodeEditorRegistry.cpp
     ${JOIPSources}/Editor/NodeEditor/NodeEditorRegistry.h
+    ${JOIPSources}/Editor/NodeEditor/UndoSubflowNodeModel.cpp
+    ${JOIPSources}/Editor/NodeEditor/UndoSubflowNodeModel.h
     ${JOIPSources}/Editor/NodeEditor/UndoPathSplitterModel.cpp
     ${JOIPSources}/Editor/NodeEditor/UndoPathSplitterModel.h
     ${JOIPSources}/Editor/NodeEditor/UndoSceneNodeModel.cpp
@@ -628,6 +630,11 @@ macro(CreateJOIPProject JOIP_PROJECT_NAME)
     ${JOIPSources}/Systems/Nodes/SceneNodeModelWidget.ui
     ${JOIPSources}/Systems/Nodes/SceneTranstitionData.cpp
     ${JOIPSources}/Systems/Nodes/SceneTranstitionData.h
+    ${JOIPSources}/Systems/Nodes/SubflowNodeModel.cpp
+    ${JOIPSources}/Systems/Nodes/SubflowNodeModel.h
+    ${JOIPSources}/Systems/Nodes/SubflowNodeModelWidget.cpp
+    ${JOIPSources}/Systems/Nodes/SubflowNodeModelWidget.h
+    ${JOIPSources}/Systems/Nodes/SubflowNodeModelWidget.ui
     ${JOIPSources}/Systems/Nodes/StartNodeModel.cpp
     ${JOIPSources}/Systems/Nodes/StartNodeModel.h
     ${JOIPSources}/Systems/NotificationSender.cpp

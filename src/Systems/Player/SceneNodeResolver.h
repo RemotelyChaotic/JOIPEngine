@@ -116,6 +116,7 @@ private:
   bool LoadFlowScenes();
   bool ResolveNextScene();
   bool ResolveStart(const std::variant<QString, QUuid>& start);
+  bool ResolveStartImpl(const std::variant<QString, QUuid>& start);
 
 private slots:
   void SlotNodeCreated(QtNodes::Node &n);

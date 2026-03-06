@@ -19,6 +19,7 @@
 
 #include "Systems/Nodes/SceneNodeModel.h"
 #include "Systems/Nodes/StartNodeModel.h"
+#include "Systems/Nodes/SubflowNodeModel.h"
 
 #include "Widgets/HelpOverlay.h"
 
@@ -570,6 +571,13 @@ void CEditorSceneNodeWidget::SlotNodeCreated(Node &n)
       pPathSplitterModel->SetProjectId(iId);
       connect(pPathSplitterModel, &CPathSplitterModel::SignalAddLayoutFileRequested,
               this, &CEditorSceneNodeWidget::SlotAddNewLayoutFileToScene, Qt::UniqueConnection);
+    }
+    CSubflowNodeModel* pSubflowModel = dynamic_cast<CSubflowNodeModel*>(n.nodeDataModel());
+    if (nullptr != pSubflowModel)
+    {
+      pSubflowModel->SetProjectId(iId);
+      connect(pSubflowModel, &CSubflowNodeModel::SignalAddNodeFileRequested,
+              this, &CEditorSceneNodeWidget::SlotCreateNewFlowClicked, Qt::UniqueConnection);
     }
 
     if (!FlowSceneModel()->IsLoading())

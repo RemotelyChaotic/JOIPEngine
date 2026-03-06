@@ -9,6 +9,7 @@
 #include "Systems/Nodes/SceneNodeModel.h"
 #include "Systems/Nodes/SceneTranstitionData.h"
 #include "Systems/Nodes/StartNodeModel.h"
+#include "Systems/Nodes/SubflowNodeModel.h"
 
 #include "Systems/DatabaseManager.h"
 #include "Systems/Database/Project.h"
@@ -74,9 +75,11 @@ void ResolveNextPossibleNodes(qint32 iDepth, Node const * const pNode,
           dynamic_cast<CSceneNodeModel*>(pNextNode->nodeDataModel());
         CEndNodeModel* pEndModel =
           dynamic_cast<CEndNodeModel*>(pNextNode->nodeDataModel());
+        CSubflowNodeModel* pSubflowModel =
+            dynamic_cast<CSubflowNodeModel*>(pNextNode->nodeDataModel());
 
         // we have a scene or end
-        if (nullptr != pSceneModel || nullptr != pEndModel)
+        if (nullptr != pSceneModel || nullptr != pEndModel || nullptr != pSubflowModel)
         {
           // splitter path name or scene name
           // push resolver
@@ -104,6 +107,20 @@ void ResolveNextPossibleNodes(qint32 iDepth, Node const * const pNode,
               spDebugger->PushNode(pNode, pNextNode,
                                    IResolverDebugger::NodeData{true, false,
                                                                c_sEndNode,
+                                                               static_cast<qint32>(i)});
+            }
+          }
+          // push subflow
+          else if(nullptr != pSubflowModel)
+          {
+            vpRet.push_back(NodeResolveReslt{sDefaultTransitionName.isEmpty() ?
+                                                 pSubflowModel->NodeName() : sDefaultTransitionName,
+                                             pNextNode, iDepth, false, QString()});
+            if (nullptr != spDebugger)
+            {
+              spDebugger->PushNode(pNode, pNextNode,
+                                   IResolverDebugger::NodeData{true, false,
+                                                               pSubflowModel->NodeName(),
                                                                static_cast<qint32>(i)});
             }
           }
@@ -263,6 +280,9 @@ void ResolveNextPossibleNodes(qint32 iDepth, Node const * const pNode,
           dynamic_cast<CSceneNodeModel*>(pNextNode->nodeDataModel());
         CEndNodeModel* pEndModel =
           dynamic_cast<CEndNodeModel*>(pNextNode->nodeDataModel());
+        CSubflowNodeModel* pSubflowModel =
+            dynamic_cast<CSubflowNodeModel*>(pNextNode->nodeDataModel());
+
 
         // we found an end model
         if (nullptr != pEndModel)
@@ -273,6 +293,20 @@ void ResolveNextPossibleNodes(qint32 iDepth, Node const * const pNode,
           {
             spDebugger->PushNode(pNode, pNextNode,
                                  IResolverDebugger::NodeData{true, false, c_sEndNode,
+                                                             iValidIndex});
+          }
+        }
+        // we found a subflow
+        else if (nullptr != pSubflowModel)
+        {
+          vpCachedRet.push_back(
+              NodeResolveReslt{pSplitterModel->TransitionLabel(iValidIndex),
+                               pNextNode, iDepth, false, QString()});
+          if (nullptr != spDebugger)
+          {
+            spDebugger->PushNode(pNode, pNextNode,
+                                 IResolverDebugger::NodeData{true, false,
+                                                             pSplitterModel->TransitionLabel(iValidIndex),
                                                              iValidIndex});
           }
         }
@@ -704,6 +738,8 @@ tspScene CSceneNodeResolver::NextScene(const QString sName, bool* bEnd,
         dynamic_cast<CEndNodeModel*>(it->second->nodeDataModel());
     CStartNodeModel* pStartModel =
         dynamic_cast<CStartNodeModel*>(it->second->nodeDataModel());
+    CSubflowNodeModel* pSubFlowModel =
+        dynamic_cast<CSubflowNodeModel*>(it->second->nodeDataModel());
 
     if (nullptr != pSceneModel)
     {
@@ -734,6 +770,42 @@ tspScene CSceneNodeResolver::NextScene(const QString sName, bool* bEnd,
       }
       return nullptr;
     }
+    else if (nullptr != pSubFlowModel)
+    {
+      blockTop.m_pCurrentNode = it->second;
+      if (auto spDebugger = m_wpDebugger.lock())
+      {
+        spDebugger->SetCurrentNode(blockTop.m_pCurrentNode);
+      }
+
+      if (!PushFlowBlock(pSubFlowModel->FlowName()))
+      {
+        return nullptr;
+      }
+
+      if (!ResolveStartImpl(QString()))
+      {
+        return nullptr;
+      }
+
+      if (!ResolveNextScene())
+      {
+        return nullptr;
+      }
+
+      QStringList sScenes = PossibleScenes(pUnresolvedData);
+      if (sScenes.size() == 1)
+      {
+        return NextScene(sScenes[0], bEnd, pvsPossibleScenes, pUnresolvedData);
+      }
+      else
+      {
+        if (nullptr != pvsPossibleScenes)
+        {
+          *pvsPossibleScenes = sScenes;
+        }
+      }
+    }
     else if (nullptr != pEndNodeModel)
     {
       blockTop.m_pCurrentNode = it->second;
@@ -743,7 +815,7 @@ tspScene CSceneNodeResolver::NextScene(const QString sName, bool* bEnd,
       }
 
       // we reched the end, pop stack and check if we can continue
-      if (!PopFlowBlock() || m_flowStack.empty())
+      if (m_flowStack.empty() || !PopFlowBlock())
       {
         if (nullptr != bEnd)
         {
@@ -752,6 +824,7 @@ tspScene CSceneNodeResolver::NextScene(const QString sName, bool* bEnd,
         return nullptr;
       }
 
+      ResolveNextScene();
       QStringList sScenes = PossibleScenes(pUnresolvedData);
       if (sScenes.size() == 1)
       {
@@ -907,6 +980,7 @@ namespace
           CSceneNodeModel* pSceneModel = dynamic_cast<CSceneNodeModel*>(pNode->nodeDataModel());
           CStartNodeModel* pStartModel = dynamic_cast<CStartNodeModel*>(pNode->nodeDataModel());
           CEndNodeModel* pEndNode = dynamic_cast<CEndNodeModel*>(pNode->nodeDataModel());
+          CSubflowNodeModel* pSubModel = dynamic_cast<CSubflowNodeModel*>(pNode->nodeDataModel());
           if (pNode->id() == std::get<QUuid>(sceneIdentifier))
           {
             if (nullptr != pStartModel)
@@ -922,6 +996,11 @@ namespace
             else if (nullptr != pEndNode)
             {
               pNodeMap->insert({c_sEndNode, pNode});
+              bFound = true;
+            }
+            else if (nullptr != pSubModel)
+            {
+              pNodeMap->insert({pSubModel->NodeName(), pNode});
               bFound = true;
             }
           }
@@ -959,18 +1038,21 @@ void CSceneNodeResolver::ResolveFindScenes(std::variant<QString, QUuid> sceneIde
           CheckFlowBlock(block, sceneIdentifier, m_disabledScenes, bFindStart,
                          &nodeMap);
 
-      bool bOk = PushFlowBlock(block.m_sName);
-
-      if (!bOk)
+      if (bFound)
       {
-        QString sError(tr("Internal error."));
-        qWarning() << sError;
-        emit SignalError(sError, QtMsgType::QtCriticalMsg);
-        return;
-      }
+        bool bOk = PushFlowBlock(block.m_sName);
 
-      blockTop = m_flowStack.top();
-      blockTop.m_nodeMap = nodeMap;
+        if (!bOk)
+        {
+          QString sError(tr("Internal error."));
+          qWarning() << sError;
+          emit SignalError(sError, QtMsgType::QtCriticalMsg);
+          return;
+        }
+
+        blockTop = m_flowStack.top();
+        blockTop.m_nodeMap = nodeMap;
+      }
     }
   }
 
@@ -1041,6 +1123,8 @@ bool CSceneNodeResolver::GenerateNodesFromResolved()
         dynamic_cast<CSceneNodeModel*>(pNode.m_pNode->nodeDataModel());
       CEndNodeModel* pEndModel =
         dynamic_cast<CEndNodeModel*>(pNode.m_pNode->nodeDataModel());
+      CSubflowNodeModel* pSubModel =
+          dynamic_cast<CSubflowNodeModel*>(pNode.m_pNode->nodeDataModel());
 
       if (nullptr != pSceneModel)
       {
@@ -1058,6 +1142,10 @@ bool CSceneNodeResolver::GenerateNodesFromResolved()
             }
           }
         }
+      }
+      else if (nullptr != pSubModel)
+      {
+        blockTop.m_nodeMap.insert({pNode.m_sLabel, pNode.m_pNode});
       }
       else if (nullptr != pEndModel)
       {
@@ -1103,6 +1191,7 @@ bool CSceneNodeResolver::PopFlowBlock()
     {
       spDebugger->PopFlow();
     }
+    return true;
   }
   return false;
 }
@@ -1166,13 +1255,7 @@ bool CSceneNodeResolver::LoadFlowScenes()
   auto spDbManager = m_wpDbManager.lock();
   if (nullptr != spDbManager)
   {
-    QReadLocker projectLocker(&m_spCurrentProject->m_rwLock);
-    if (!m_spCurrentProject->m_sSceneModel.isNull() &&
-        !m_spCurrentProject->m_sSceneModel.isEmpty())
-    {
-      const QString sModelName = m_spCurrentProject->m_sSceneModel;
-      projectLocker.unlock();
-
+    auto fnLoadFile = [&](const QString& sModelName) -> bool {
       auto spResource = spDbManager->FindResourceInProject(m_spCurrentProject, sModelName);
       if (nullptr != spResource)
       {
@@ -1198,6 +1281,7 @@ bool CSceneNodeResolver::LoadFlowScenes()
           connect(m_vLoadedSceneBlocks.back().m_pFlowScene, &CFlowScene::nodeCreated, this,
                   &CSceneNodeResolver::SlotNodeCreated);
           m_vLoadedSceneBlocks.back().m_pFlowScene->loadFromMemory(arr);
+          return true;
         }
         else
         {
@@ -1205,18 +1289,55 @@ bool CSceneNodeResolver::LoadFlowScenes()
           return false;
         }
       }
+      return false;
+    };
+
+    bool bLoadOk = true;
+
+    QReadLocker projectLocker(&m_spCurrentProject->m_rwLock);
+    QStringList vsAllFlows;
+    for (const auto& [sName, spRes] : m_spCurrentProject->m_pluginData.m_spResourcesMap)
+    {
+      if (EResourceType::eFlow == spRes->m_type._to_integral())
+      {
+        vsAllFlows << sName;
+      }
+    }
+    for (const auto& [sName, spRes] : m_spCurrentProject->m_baseData.m_spResourcesMap)
+    {
+      if (sName != m_spCurrentProject->m_sSceneModel &&
+          EResourceType::eFlow == spRes->m_type._to_integral() &&
+          !vsAllFlows.contains(sName))
+      {
+        vsAllFlows << sName;
+      }
+    }
+    if (!m_spCurrentProject->m_sSceneModel.isNull() &&
+        !m_spCurrentProject->m_sSceneModel.isEmpty())
+    {
+      const QString sModelName = m_spCurrentProject->m_sSceneModel;
+      projectLocker.unlock();
+      bLoadOk &= fnLoadFile(sModelName);
     }
     else
     {
       Error(tr("Could not open scene model file: scene not found."), QtMsgType::QtWarningMsg);
       return false;
     }
+
+    for (const QString& sFlow : qAsConst(vsAllFlows))
+    {
+      bool bOk = fnLoadFile(sFlow);
+      bLoadOk &= bOk;
+      if (!bOk)
+      {
+        Error(tr("Could not open scene model file %1.").arg(sFlow), QtMsgType::QtWarningMsg);
+      }
+    }
+
+    return bLoadOk;
   }
-  else
-  {
-    return false;
-  }
-  return true;
+  return false;
 }
 
 
@@ -1255,6 +1376,13 @@ bool CSceneNodeResolver::ResolveStart(const std::variant<QString, QUuid>& start)
     return false;
   }
 
+  return ResolveStartImpl(start);
+}
+
+//----------------------------------------------------------------------------------------
+//
+bool CSceneNodeResolver::ResolveStartImpl(const std::variant<QString, QUuid>& start)
+{
   ResolveFindScenes(start, true);
   std::optional<QString> unresolvedData = std::nullopt;
   QStringList vpScenes = PossibleScenes(&unresolvedData);
@@ -1334,6 +1462,11 @@ void CSceneNodeResolver::SlotNodeCreated(QtNodes::Node &n)
     if (nullptr != pPathSplitterModel)
     {
       pPathSplitterModel->SetProjectId(iId);
+    }
+    CSubflowNodeModel* pSubFlowModel = dynamic_cast<CSubflowNodeModel*>(n.nodeDataModel());
+    if (nullptr != pSubFlowModel)
+    {
+      pSubFlowModel->SetProjectId(iId);
     }
   }
 }
