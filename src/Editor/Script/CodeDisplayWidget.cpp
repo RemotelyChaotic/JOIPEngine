@@ -100,6 +100,34 @@ CCodeDisplayWidget::CCodeDisplayWidget(QWidget* pParent) :
 
   connect(m_spUi->pCodeEdit->document(), &QTextDocument::contentsChange,
           this, &CCodeDisplayWidget::SignalContentsChange);
+
+  auto spSettings = CApplication::Instance()->Settings();
+  if (nullptr != spSettings)
+  {
+    m_spUi->pCodeEdit->SlotSettingFontChanged(spSettings->EditorFont());
+    m_spUi->pCodeEdit->SlotSettingShowWhitespaceChanged(spSettings->EditorShowWhitespace());
+    m_spUi->pCodeEdit->SlotSettingCaseInsensitiveSearchChanged(spSettings->EditorCaseInsensitiveSearch());
+
+    connect(spSettings.get(), &CSettings::editorCaseInsensitiveSearchChanged,
+            this, [this, spSettings](){
+      m_spUi->pCodeEdit->SlotSettingCaseInsensitiveSearchChanged(
+          spSettings->EditorCaseInsensitiveSearch());
+    });
+    connect(spSettings.get(), &CSettings::editorFontChanged,
+            this, [this, spSettings](){
+      m_spUi->pCodeEdit->SlotSettingFontChanged(spSettings->EditorFont());
+    });
+    connect(spSettings.get(), &CSettings::editorShowWhitespaceChanged,
+            this, [this, spSettings](){
+      m_spUi->pCodeEdit->SlotSettingShowWhitespaceChanged(
+          spSettings->EditorShowWhitespace());
+    });
+    connect(spSettings.get(), &CSettings::editorThemeChanged,
+            this, [this, spSettings](){
+      m_spUi->pCodeEdit->SlotSettingThemeChanged(spSettings->EditorTheme());
+    });
+  }
+
   connect(m_spUi->pEosEdit, &CEosScriptEditorView::SignalContentsChange,
           this, &CCodeDisplayWidget::SignalContentsChange);
 }

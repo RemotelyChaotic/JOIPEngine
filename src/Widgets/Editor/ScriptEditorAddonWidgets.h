@@ -116,6 +116,12 @@ public:
   void Reset() override;
   void Update(const QRect& rect, qint32 iDy) override;
 
+  void StyleChanged();
+  void UpdateWhitespaceText(bool bWsEnabled);
+
+signals:
+  void SignalShowWhiteSpaceChanged(bool bShowWhitespace);
+
 protected:
   void paintEvent(QPaintEvent* pEvent) override;
 
@@ -124,8 +130,6 @@ private slots:
   void ClearAllErors();
   void ErrorAdded();
   void ToggleErrorList();
-  void StyleChanged();
-  void UpdateWhitespaceText();
   void WhiteSpaceButtonPressed();
   void ZoomChanged(qint32 iZoom);
   void ZoomValueChanged(qint32 iZoom);

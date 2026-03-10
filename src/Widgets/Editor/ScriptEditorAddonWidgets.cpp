@@ -1,12 +1,10 @@
 #include "ScriptEditorAddonWidgets.h"
-#include "Application.h"
-#include "Settings.h"
 #include "ScriptEditorWidget.h"
 #include "ui_ScriptFooterArea.h"
 
-#include "Widgets/Editor/EditorCustomBlockUserData.h"
-#include "Widgets/Editor/EditorHighlighter.h"
-#include "Widgets/Editor/TextEditZoomEnabler.h"
+#include "EditorCustomBlockUserData.h"
+#include "EditorHighlighter.h"
+#include "TextEditZoomEnabler.h"
 
 #include <QLineEdit>
 #include <QPainter>
@@ -632,17 +630,11 @@ CFooterArea::CFooterArea(CScriptEditorWidget* pEditor, CWidgetArea* pWidgetArea)
   m_pWsButtonLabel->setAttribute(Qt::WA_TransparentForMouseEvents);
   m_pWsButtonLabel->setAlignment(Qt::AlignCenter);
   pLayout->addWidget(m_pWsButtonLabel);
-  UpdateWhitespaceText();
+  UpdateWhitespaceText(true);
   connect(m_spUi->WhitespacePushButton, &QPushButton::clicked,
           this, &CFooterArea::WhiteSpaceButtonPressed);
 
   ZoomChanged(m_pCodeEditor->ZoomEnabler()->Zoom());
-
-  CSettings* pSettings = CApplication::Instance()->Settings().get();
-  connect(pSettings, &CSettings::editorShowWhitespaceChanged,
-          this, &CFooterArea::UpdateWhitespaceText);
-  connect(pSettings, &CSettings::styleChanged,
-          this, &CFooterArea::StyleChanged);
 
   connect(m_pCodeEditor->ZoomEnabler(), &CTextEditZoomEnabler::SignalZoomChanged,
           this, &CFooterArea::ZoomChanged);
@@ -779,9 +771,8 @@ void CFooterArea::StyleChanged()
 
 //----------------------------------------------------------------------------------------
 //
-void CFooterArea::UpdateWhitespaceText()
+void CFooterArea::UpdateWhitespaceText(bool bWsEnabled)
 {
-  bool bWsEnabled = CApplication::Instance()->Settings()->EditorShowWhitespace();
   if (bWsEnabled)
   {
     m_pWsButtonLabel->setText("WS");
@@ -796,11 +787,9 @@ void CFooterArea::UpdateWhitespaceText()
 //
 void CFooterArea::WhiteSpaceButtonPressed()
 {
-  auto spSettings = CApplication::Instance()->Settings();
-  if (nullptr != spSettings)
-  {
-    spSettings->SetEditorShowWhitespace(!spSettings->EditorShowWhitespace());
-  }
+  bool bNewValue = !m_pCodeEditor->IsShowWhitespaceEnabled();
+  UpdateWhitespaceText(bNewValue);
+  emit SignalShowWhiteSpaceChanged(bNewValue);
 }
 
 //----------------------------------------------------------------------------------------

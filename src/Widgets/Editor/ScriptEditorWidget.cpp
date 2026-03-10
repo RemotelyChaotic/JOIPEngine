@@ -1,17 +1,15 @@
 #include "ScriptEditorWidget.h"
-#include "Application.h"
+
+#include "EditorCustomBlockUserData.h"
+#include "EditorSearchBar.h"
+#include "EditorHighlighter.h"
 #include "ScriptEditorAddonWidgets.h"
 #include "ScriptEditorCodeToolTip.h"
 #include "ScriptEditorCompleter.h"
 #include "ScriptEditorKeyHandler.h"
-#include "Settings.h"
+#include "HighlightedSearchableTextEdit.h"
+#include "TextEditZoomEnabler.h"
 #include "Themes.h"
-
-#include "Widgets/Editor/EditorCustomBlockUserData.h"
-#include "Widgets/Editor/EditorSearchBar.h"
-#include "Widgets/Editor/EditorHighlighter.h"
-#include "Widgets/Editor/HighlightedSearchableTextEdit.h"
-#include "Widgets/Editor/TextEditZoomEnabler.h"
 
 #include <syntaxhighlighter.h>
 #include <definition.h>
@@ -29,7 +27,6 @@ namespace
 CScriptEditorWidget::CScriptEditorWidget(QWidget* pParent) :
   QPlainTextEdit(pParent),
   m_spRepository(std::make_unique<KSyntaxHighlighting::Repository>()),
-  m_spSettings(CApplication::Instance()->Settings()),
   m_pCompleter(new CScriptEditorCompleter(this)),
   m_pHighlightedSearchableEdit(nullptr),
   m_foldedIcon(":/resources/style/img/ButtonPlay.png"),
@@ -47,7 +44,7 @@ CScriptEditorWidget::CScriptEditorWidget(QWidget* pParent) :
   m_previouslyClickedKey(Qt::Key(0)),
   m_iTabStopWidth(c_iTabStop),
   m_iFontSize(10),
-  m_sFontFamily("Courier New")
+  m_sFontFamily("")
 {
   setAttribute(Qt::WA_NoMousePropagation, false);
   installEventFilter(this);
@@ -56,7 +53,12 @@ CScriptEditorWidget::CScriptEditorWidget(QWidget* pParent) :
 
   m_spRepository->addCustomSearchPath(joip_style::ThemeFolder());
   m_pHighlightedSearchableEdit = new CHighlightedSearchableTextEdit(this);
-  SlotSettingThemeChanged();
+
+  auto vThemes = m_spRepository->themes();
+  if (!vThemes.empty())
+  {
+    SlotSettingThemeChanged(vThemes.first().name());
+  }
 
   m_pZoomEnabler = new CTextEditZoomEnabler(this);
 
@@ -66,9 +68,12 @@ CScriptEditorWidget::CScriptEditorWidget(QWidget* pParent) :
     new CLineNumberArea(this), pWidgetArea, new CFoldBlockArea(this)
   };
   m_fnWidget = std::bind(&CWidgetArea::Widget, pWidgetArea, std::placeholders::_1);
-  m_vpEditorAddonsMap[EScriptEditorAddonPosition::eBottom] = {
-    new CFooterArea(this, pWidgetArea)
-  };
+
+  auto pFooter = new CFooterArea(this, pWidgetArea);
+  m_vpEditorAddonsMap[EScriptEditorAddonPosition::eBottom] = { pFooter };
+
+  connect(pFooter, &CFooterArea::SignalShowWhiteSpaceChanged, this,
+          &CScriptEditorWidget::SlotSettingShowWhitespaceChanged);
 
   // register key handlers
   IScriptEditorKeyHandler::RegisterHandlers(m_vpEditorKeyHandlerMap, this, &m_previouslyClickedKey);
@@ -86,20 +91,11 @@ CScriptEditorWidget::CScriptEditorWidget(QWidget* pParent) :
   UpdateBottomAreaHeight(0);
   HighlightCurrentLine();
 
-  SlotSettingFontChanged();
+  SlotSettingFontChanged("Courier New");
   SetTabStopWidth(c_iTabStop);
 
-  SlotSettingShowWhitespaceChanged();
-  SlotSettingCaseInsensitiveSearchChanged();
-
-  connect(m_spSettings.get(), &CSettings::editorCaseInsensitiveSearchChanged,
-          this, &CScriptEditorWidget::SlotSettingCaseInsensitiveSearchChanged);
-  connect(m_spSettings.get(), &CSettings::editorFontChanged,
-          this, &CScriptEditorWidget::SlotSettingFontChanged);
-  connect(m_spSettings.get(), &CSettings::editorShowWhitespaceChanged,
-          this, &CScriptEditorWidget::SlotSettingShowWhitespaceChanged);
-  connect(m_spSettings.get(), &CSettings::editorThemeChanged,
-          this, &CScriptEditorWidget::SlotSettingThemeChanged);
+  SlotSettingShowWhitespaceChanged(true);
+  SlotSettingCaseInsensitiveSearchChanged(true);
 }
 
 CScriptEditorWidget::~CScriptEditorWidget()
@@ -184,6 +180,46 @@ void CScriptEditorWidget::SetBracketColor3(QColor c)
 
 //----------------------------------------------------------------------------------------
 //
+void CScriptEditorWidget::SetCaseInsensitiveSearch(bool bValue)
+{
+  SlotSettingCaseInsensitiveSearchChanged(bValue);
+}
+
+//----------------------------------------------------------------------------------------
+//
+bool CScriptEditorWidget::IsCaseInsensitiveSearchenabled() const
+{
+  return m_pHighlightedSearchableEdit->IsCaseInsensitiveFindEnabled();
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CScriptEditorWidget::SetFontFamily(const QString& sFont)
+{
+  SlotSettingFontChanged(sFont);
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CScriptEditorWidget::SetLineNumberTextColor(const QColor& color)
+{
+  if (m_lineNumberTextColor != color)
+  {
+    m_lineNumberTextColor = color;
+    for (auto pWidget : m_vpEditorAddonsMap[EScriptEditorAddonPosition::eBottom])
+    {
+      auto pFooter =
+          dynamic_cast<CFooterArea*>(pWidget);
+      if (nullptr != pFooter)
+      {
+        pFooter->StyleChanged();
+      }
+    }
+  }
+}
+
+//----------------------------------------------------------------------------------------
+//
 void CScriptEditorWidget::SetHighlightSearchBackgroundColor(const QColor& color)
 {
   if (m_highlightSearchBackgroundColor != color)
@@ -218,10 +254,16 @@ void CScriptEditorWidget::SetWordHighlightColor(const QColor& color)
 
 //----------------------------------------------------------------------------------------
 //
+void CScriptEditorWidget::SetShowWhitespace(bool bValue)
+{
+  SlotSettingShowWhitespaceChanged(bValue);
+}
+
+//----------------------------------------------------------------------------------------
+//
 void CScriptEditorWidget::SetTheme(const QString& sTheme)
 {
-  m_sTheme = sTheme;
-  SlotSettingThemeChanged();
+  SlotSettingThemeChanged(sTheme);
 }
 
 //----------------------------------------------------------------------------------------
@@ -322,54 +364,6 @@ void CScriptEditorWidget::HighlightCurrentWord()
 
 //----------------------------------------------------------------------------------------
 //
-void CScriptEditorWidget::SlotSettingCaseInsensitiveSearchChanged()
-{
-  m_pHighlightedSearchableEdit->SetCaseInsensitiveFindEnabled(
-      m_spSettings->EditorCaseInsensitiveSearch());
-}
-
-//----------------------------------------------------------------------------------------
-//
-void CScriptEditorWidget::SlotSettingFontChanged()
-{
-  m_sFontFamily = m_spSettings->EditorFont();
-  UpdateFont();
-}
-
-//----------------------------------------------------------------------------------------
-//
-void CScriptEditorWidget::SlotSettingShowWhitespaceChanged()
-{
-  QTextOption option = document()->defaultTextOption();
-  if (m_spSettings->EditorShowWhitespace())
-  {
-    option.setFlags(QTextOption::ShowTabsAndSpaces);
-  }
-  else
-  {
-    option.setFlags(QTextOption::Flag(0x0));
-  }
-  document()->setDefaultTextOption(option);
-  repaint();
-}
-
-//----------------------------------------------------------------------------------------
-//
-void CScriptEditorWidget::SlotSettingThemeChanged()
-{
-  QString sThemeFromSettings = m_spSettings->EditorTheme();
-  if (sThemeFromSettings.isEmpty())
-  {
-    Highlighter()->setTheme(m_spRepository->theme(m_sTheme));
-  }
-  else
-  {
-    Highlighter()->setTheme(m_spRepository->theme(sThemeFromSettings));
-  }
-}
-
-//----------------------------------------------------------------------------------------
-//
 void CScriptEditorWidget::UpdateFont()
 {
   qint32 iZoom = m_pZoomEnabler->Zoom();
@@ -463,6 +457,75 @@ void CScriptEditorWidget::SlotExecutionError(QString sException, qint32 iLine, Q
   QTextCursor cursor(document()->findBlockByLineNumber(iLine));
   moveCursor(QTextCursor::End);
   setTextCursor(cursor);
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CScriptEditorWidget::SlotSettingCaseInsensitiveSearchChanged(bool bCaseInsensitive)
+{
+  m_pHighlightedSearchableEdit->SetCaseInsensitiveFindEnabled(bCaseInsensitive);
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CScriptEditorWidget::SlotSettingFontChanged(const QString& sFontFamily)
+{
+  if (m_sFontFamily != sFontFamily)
+  {
+    m_sFontFamily = sFontFamily;
+    UpdateFont();
+  }
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CScriptEditorWidget::SlotSettingShowWhitespaceChanged(bool bShowWhiteSpace)
+{
+  if (m_bShowWhitespaceEnabled != bShowWhiteSpace)
+  {
+    m_bShowWhitespaceEnabled = bShowWhiteSpace;
+    QTextOption option = document()->defaultTextOption();
+    if (bShowWhiteSpace)
+    {
+      option.setFlags(QTextOption::ShowTabsAndSpaces);
+    }
+    else
+    {
+      option.setFlags(QTextOption::Flag(0x0));
+    }
+
+    for (auto pWidget : m_vpEditorAddonsMap[EScriptEditorAddonPosition::eBottom])
+    {
+      auto pFooter =
+          dynamic_cast<CFooterArea*>(pWidget);
+      if (nullptr != pFooter)
+      {
+        QSignalBlocker b(pFooter);
+        pFooter->UpdateWhitespaceText(bShowWhiteSpace);
+      }
+    }
+
+    document()->setDefaultTextOption(option);
+    repaint();
+  }
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CScriptEditorWidget::SlotSettingThemeChanged(const QString& sTheme)
+{
+  if (m_sTheme != sTheme)
+  {
+    if (sTheme.isEmpty())
+    {
+      Highlighter()->setTheme(m_spRepository->theme(m_sTheme));
+    }
+    else
+    {
+      m_sTheme = sTheme;
+      Highlighter()->setTheme(m_spRepository->theme(sTheme));
+    }
+  }
 }
 
 //----------------------------------------------------------------------------------------

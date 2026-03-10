@@ -61,11 +61,10 @@ namespace
     else if (endChars.end() != itEnd)
     {
       qint32 iRelativeDepth = 0;
-      for (qint32 i = static_cast<qint32>(unmatchedBlockDelimiterStarts.size())-1; 0 <= i; --i)
+      if (unmatchedBlockDelimiterStarts.size() > 0)
       {
-        iRelativeDepth = vLastBlockDelimiters[size_t(i)].m_iRelativeDepth;
-        unmatchedBlockDelimiterStarts.erase(unmatchedBlockDelimiterStarts.begin() + i);
-        break;
+        iRelativeDepth = vLastBlockDelimiters.front().m_iRelativeDepth;
+        unmatchedBlockDelimiterStarts.erase(unmatchedBlockDelimiterStarts.begin());
       }
       const SBlockDelimiter& delim =
         pUserData->AddRegionDelimiterElement(iRelativeDepth, type,

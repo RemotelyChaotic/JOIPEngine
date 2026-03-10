@@ -16,6 +16,12 @@ public:
   CEditorHighlighter(QTextDocument* pParent = nullptr);
   ~CEditorHighlighter() override;
 
+  QString ActiveWordExpression() const { return m_sWord; }
+  std::vector<QColor> BracketColors() const { return m_vBracketColors; }
+  bool IsCaseInsensitiveSearchEnabled() const { return m_bCaseInsensitiveSearch; }
+  bool IsSyntaxHighlightingEnabled() const { return m_bSyntaxHighlightingEnabled; }
+  QString SearchExpression() const { return m_sSearch; }
+
   void SetBracketColors(std::vector<QColor> vColors);
   void SetSearchColors(const QColor& background, const QColor& foreground);
   void SetActiveWordExpression(const QString& sWord);

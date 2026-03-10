@@ -20,7 +20,6 @@ class CFoldBlockArea;
 class CLineNumberArea;
 class CHighlightedSearchableTextEdit;
 class CEditorSearchBar;
-class CSettings;
 class CScriptEditorCompleter;
 class CTextEditZoomEnabler;
 class CWidgetArea;
@@ -35,18 +34,21 @@ class QWidget;
 class CScriptEditorWidget : public QPlainTextEdit
 {
   Q_OBJECT
-  Q_PROPERTY(QColor  bracketColor0             READ BracketColor0             WRITE SetBracketColor0)
-  Q_PROPERTY(QColor  bracketColor1             READ BracketColor1             WRITE SetBracketColor1)
-  Q_PROPERTY(QColor  bracketColor2             READ BracketColor2             WRITE SetBracketColor2)
-  Q_PROPERTY(QColor  bracketColor3             READ BracketColor3             WRITE SetBracketColor3)
-  Q_PROPERTY(QColor  foldAreaBackgroundColor   READ FoldAreaBackgroundColor   WRITE SetFoldAreaBackgroundColor)
-  Q_PROPERTY(QIcon   iconFolded                READ IconFolded                WRITE SetIconFolded)
-  Q_PROPERTY(QIcon   iconUnfolded              READ IconUnfolded              WRITE SetIconUnfolded)
+  Q_PROPERTY(bool    caseInsensitiveSearch     READ IsCaseInsensitiveSearchenabled WRITE SetCaseInsensitiveSearch)
+  Q_PROPERTY(QColor  bracketColor0             READ BracketColor0             WRITE SetBracketColor0            )
+  Q_PROPERTY(QColor  bracketColor1             READ BracketColor1             WRITE SetBracketColor1            )
+  Q_PROPERTY(QColor  bracketColor2             READ BracketColor2             WRITE SetBracketColor2            )
+  Q_PROPERTY(QColor  bracketColor3             READ BracketColor3             WRITE SetBracketColor3            )
+  Q_PROPERTY(QColor  foldAreaBackgroundColor   READ FoldAreaBackgroundColor   WRITE SetFoldAreaBackgroundColor  )
+  Q_PROPERTY(QString fontFamily                READ FontFamily                WRITE SetFontFamily               )
+  Q_PROPERTY(QIcon   iconFolded                READ IconFolded                WRITE SetIconFolded               )
+  Q_PROPERTY(QIcon   iconUnfolded              READ IconUnfolded              WRITE SetIconUnfolded             )
   Q_PROPERTY(QColor  lineNumberBackgroundColor READ LineNumberBackgroundColor WRITE SetLineNumberBackgroundColor)
   Q_PROPERTY(QColor  lineNumberTextColor       READ LineNumberTextColor       WRITE SetLineNumberTextColor      )
   Q_PROPERTY(QColor  highlightLineColor        READ HighlightLineColor        WRITE SetHighlightLineColor       )
   Q_PROPERTY(QColor  highlightSearchBackgroundColor READ HighlightSearchBackgroundColor WRITE SetHighlightSearchBackgroundColor )
   Q_PROPERTY(QColor  highlightSearchColor      READ HighlightSearchColor      WRITE SetHighlightSearchColor     )
+  Q_PROPERTY(bool    showWhitespaceEnabled     READ IsShowWhitespaceEnabled   WRITE SetShowWhitespace           )
   Q_PROPERTY(QString theme                     READ Theme                     WRITE SetTheme                    )
   Q_PROPERTY(QColor  widgetsBackgroundColor    READ WidgetsBackgroundColor    WRITE SetWidgetsBackgroundColor   )
   Q_PROPERTY(QColor  wordHighlightColor        READ WordHighlightColor        WRITE SetWordHighlightColor       )
@@ -79,15 +81,19 @@ public:
   const QColor& BracketColor2() const  { return m_bracketColor2; }
   void SetBracketColor3(QColor c);
   const QColor& BracketColor3() const  { return m_bracketColor3; }
+  void SetCaseInsensitiveSearch(bool bValue);
+  bool IsCaseInsensitiveSearchenabled() const;
   void SetFoldAreaBackgroundColor(const QColor& color) { m_foldAreaBackgroundColor = color; }
   const QColor& FoldAreaBackgroundColor() { return m_foldAreaBackgroundColor; }
+  void SetFontFamily(const QString& sFont);
+  const QString& FontFamily() { return m_sFontFamily; }
   void SetIconFolded(const QIcon &icon) { m_foldedIcon = icon; }
   const QIcon& IconFolded() const { return m_foldedIcon; }
   void SetIconUnfolded(const QIcon &icon) { m_unfoldedIcon = icon; }
   const QIcon& IconUnfolded() const { return m_unfoldedIcon; }
   void SetLineNumberBackgroundColor(const QColor& color) { m_lineNumberBackgroundColor = color; }
   const QColor& LineNumberBackgroundColor() { return m_lineNumberBackgroundColor; }
-  void SetLineNumberTextColor(const QColor& color) { m_lineNumberTextColor = color; }
+  void SetLineNumberTextColor(const QColor& color);
   const QColor& LineNumberTextColor() { return m_lineNumberTextColor; }
   void SetHighlightLineColor(const QColor& color) { m_highlightLineColor = color; }
   const QColor& HighlightLineColor() { return m_highlightLineColor; }
@@ -97,6 +103,8 @@ public:
   const QColor& HighlightSearchColor() { return m_highlightSearchColor; }
   void SetWordHighlightColor(const QColor& color);
   const QColor& WordHighlightColor() { return m_wordhighlightColor; }
+  void SetShowWhitespace(bool bValue);
+  bool IsShowWhitespaceEnabled() const { return m_bShowWhitespaceEnabled; }
   void SetTheme(const QString& sTheme);
   const QString& Theme() { return m_sTheme; }
   void SetWidgetsBackgroundColor(const QColor& color) { m_widgetsBackgroundColor = color; }
@@ -113,6 +121,10 @@ public:
 
 public slots:
   void SlotExecutionError(QString sException, qint32 iLine, QString sStack);
+  void SlotSettingCaseInsensitiveSearchChanged(bool bCaseInsensitive);
+  void SlotSettingFontChanged(const QString& sFontFamily);
+  void SlotSettingShowWhitespaceChanged(bool bShowWhiteSpace);
+  void SlotSettingThemeChanged(const QString& sTheme);
   void SlotUpdateAllAddons(const QRect& rect, qint32 iDy);
 
 protected:
@@ -126,10 +138,6 @@ protected:
 private slots:
   void HighlightCurrentLine();
   void HighlightCurrentWord();
-  void SlotSettingCaseInsensitiveSearchChanged();
-  void SlotSettingFontChanged();
-  void SlotSettingShowWhitespaceChanged();
-  void SlotSettingThemeChanged();
   void UpdateFont();
   void UpdateLeftAreaWidth(qint32 iNewBlockCount);
   void UpdateRightAreaWidth(qint32 iNewBlockCount);
@@ -140,7 +148,6 @@ private:
   QPointer<QLabel> WidgetAreaWidget(qint32 iLine);
 
   std::unique_ptr<KSyntaxHighlighting::Repository> m_spRepository;
-  std::shared_ptr<CSettings>                       m_spSettings;
   QPointer<CScriptEditorCompleter>                 m_pCompleter;
   QPointer<CHighlightedSearchableTextEdit>         m_pHighlightedSearchableEdit;
   QPointer<CTextEditZoomEnabler>                   m_pZoomEnabler;
@@ -168,6 +175,7 @@ private:
   qint32                                           m_iTabStopWidth;
   qint32                                           m_iFontSize;
   QString                                          m_sFontFamily;
+  bool                                             m_bShowWhitespaceEnabled = true;
 };
 
 #endif // SCRIPTEDITORWIDGET_H

@@ -24,6 +24,10 @@ public:
   QPointer<CEditorSearchBar>   SearchBar() const;
 
   QMenu* CreateContextMenu();
+
+  bool IsCaseInsensitiveFindEnabled() const;
+  bool IsSyntaxHighlightingEnabled() const;
+
   void SetSyntaxHighlightingEnabled(bool bEnabled);
   void SetCaseInsensitiveFindEnabled(bool bEnabled);
 

@@ -60,6 +60,20 @@ QMenu* CHighlightedSearchableTextEdit::CreateContextMenu()
 
 //----------------------------------------------------------------------------------------
 //
+bool CHighlightedSearchableTextEdit::IsCaseInsensitiveFindEnabled() const
+{
+  return m_bCaseInsensitive;
+}
+
+//----------------------------------------------------------------------------------------
+//
+bool CHighlightedSearchableTextEdit::IsSyntaxHighlightingEnabled() const
+{
+  return m_pHighlighter->IsSyntaxHighlightingEnabled();
+}
+
+//----------------------------------------------------------------------------------------
+//
 void CHighlightedSearchableTextEdit::SetSyntaxHighlightingEnabled(bool bEnabled)
 {
   m_pHighlighter->SetSyntaxHighlightingEnabled(bEnabled);

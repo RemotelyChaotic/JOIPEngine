@@ -1,5 +1,8 @@
 #include "TimelineSeqeunceInstructionWidgets.h"
 
+#include "Application.h"
+#include "Settings.h"
+
 #include "ui_TimelineSeqeunceInstructionWidgetEval.h"
 #include "ui_TimelineSeqeunceInstructionWidgetLinearToy.h"
 #include "ui_TimelineSeqeunceInstructionWidgetPauseAudio.h"
@@ -1445,6 +1448,33 @@ CTimelineSeqeunceInstructionWidgetEval::CTimelineSeqeunceInstructionWidgetEval(Q
   m_spUi->setupUi(this);
   connect(m_spUi->pScriptEditor, &CScriptEditorWidget::textChanged,
           this, &CTimelineSeqeunceInstructionWidgetEval::EmitPropertiesChanged);
+
+  auto spSettings = CApplication::Instance()->Settings();
+  if (nullptr != spSettings)
+  {
+    m_spUi->pScriptEditor->SlotSettingFontChanged(spSettings->EditorFont());
+    m_spUi->pScriptEditor->SlotSettingShowWhitespaceChanged(spSettings->EditorShowWhitespace());
+    m_spUi->pScriptEditor->SlotSettingCaseInsensitiveSearchChanged(spSettings->EditorCaseInsensitiveSearch());
+
+    connect(spSettings.get(), &CSettings::editorCaseInsensitiveSearchChanged,
+            this, [this, spSettings](){
+              m_spUi->pScriptEditor->SlotSettingCaseInsensitiveSearchChanged(
+                  spSettings->EditorCaseInsensitiveSearch());
+            });
+    connect(spSettings.get(), &CSettings::editorFontChanged,
+            this, [this, spSettings](){
+              m_spUi->pScriptEditor->SlotSettingFontChanged(spSettings->EditorFont());
+            });
+    connect(spSettings.get(), &CSettings::editorShowWhitespaceChanged,
+            this, [this, spSettings](){
+              m_spUi->pScriptEditor->SlotSettingShowWhitespaceChanged(
+                  spSettings->EditorShowWhitespace());
+            });
+    connect(spSettings.get(), &CSettings::editorThemeChanged,
+            this, [this, spSettings](){
+              m_spUi->pScriptEditor->SlotSettingThemeChanged(spSettings->EditorTheme());
+            });
+  }
 }
 CTimelineSeqeunceInstructionWidgetEval::~CTimelineSeqeunceInstructionWidgetEval() = default;
 
