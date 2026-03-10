@@ -1,9 +1,10 @@
 #include "CodeDisplayDefaultEditorImpl.h"
-#include "ScriptEditorCompleter.h"
-#include "ScriptEditorCompleterModel.h"
-#include "ScriptEditorWidget.h"
 
 #include "Editor/EditorModel.h"
+
+#include "Widgets/Editor/ScriptEditorCompleter.h"
+#include "Widgets/Editor/ScriptEditorCompleterModel.h"
+#include "Widgets/Editor/ScriptEditorWidget.h"
 
 #include "ui_EditorActionBar.h"
 

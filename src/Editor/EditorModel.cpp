@@ -11,9 +11,6 @@
 #include "Editor/NodeEditor/NodeEditorRegistry.h"
 #include "Editor/NodeEditor/UndoSceneNodeModel.h"
 
-#include "Script/ScriptCompleterFileProcessors.h"
-#include "Script/ScriptEditorCompleterModel.h"
-
 #include "Project/KinkTreeModel.h"
 
 #include "Resources/ResourceTreeItemModel.h"
@@ -23,6 +20,9 @@
 #include "Systems/Database/Project.h"
 
 #include "Tutorial/ITutorialStateSwitchHandler.h"
+
+#include "Widgets/Editor/ScriptCompleterFileProcessors.h"
+#include "Widgets/Editor/ScriptEditorCompleterModel.h"
 
 #include <nodes/ConnectionStyle>
 #include <nodes/FlowScene>

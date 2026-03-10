@@ -10,11 +10,10 @@
 #include "NotificationSnippetOverlay.h"
 #include "MetronomeSnippetOverlay.h"
 #include "ResourceSnippetOverlay.h"
-#include "ScriptEditorCompleter.h"
-#include "ScriptEditorCompleterModel.h"
 #include "TextSnippetOverlay.h"
 #include "TimerSnippetOverlay.h"
 #include "ThreadSnippetOverlay.h"
+
 #include "ui_CodeDisplayWidget.h"
 #include "ui_EditorActionBar.h"
 
@@ -26,6 +25,9 @@
 #include "Systems/Database/Project.h"
 
 #include "Utils/UndoRedoFilter.h"
+
+#include "Widgets/Editor/ScriptEditorCompleter.h"
+#include "Widgets/Editor/ScriptEditorCompleterModel.h"
 #include "Widgets/HelpOverlay.h"
 
 #include <QUndoStack>

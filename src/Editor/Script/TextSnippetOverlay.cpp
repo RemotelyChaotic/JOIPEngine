@@ -1,11 +1,14 @@
 #include "TextSnippetOverlay.h"
 #include "Application.h"
-#include "ScriptEditorWidget.h"
+
 #include "Editor/Resources/ResourceTreeItem.h"
 #include "Editor/Resources/ResourceTreeItemModel.h"
 #include "Editor/Resources/ResourceTreeItemSortFilterProxyModel.h"
+
 #include "Systems/DatabaseManager.h"
+
 #include "Widgets/ColorPicker.h"
+
 #include "ui_TextSnippetOverlay.h"
 
 #include <QLineEdit>

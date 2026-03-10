@@ -5,7 +5,6 @@
 #include <QColor>
 #include <QPointer>
 
-class CScriptEditorWidget;
 class CResourceTreeItemModel;
 namespace Ui {
   class CBackgroundSnippetOverlay;

@@ -376,7 +376,6 @@ macro(CreateJOIPProject JOIP_PROJECT_NAME)
     ${JOIPSources}/Editor/Script/IconSnippetOverlay.cpp
     ${JOIPSources}/Editor/Script/IconSnippetOverlay.h
     ${JOIPSources}/Editor/Script/IconSnippetOverlay.ui
-    ${JOIPSources}/Editor/Script/IScriptEditorAddons.h
     ${JOIPSources}/Editor/Script/MetronomeSnippetOverlay.cpp
     ${JOIPSources}/Editor/Script/MetronomeSnippetOverlay.h
     ${JOIPSources}/Editor/Script/MetronomeSnippetOverlay.ui
@@ -386,21 +385,6 @@ macro(CreateJOIPProject JOIP_PROJECT_NAME)
     ${JOIPSources}/Editor/Script/ResourceSnippetOverlay.cpp
     ${JOIPSources}/Editor/Script/ResourceSnippetOverlay.h
     ${JOIPSources}/Editor/Script/ResourceSnippetOverlay.ui
-    ${JOIPSources}/Editor/Script/ScriptCompleterFileProcessors.cpp
-    ${JOIPSources}/Editor/Script/ScriptCompleterFileProcessors.h
-    ${JOIPSources}/Editor/Script/ScriptEditorAddonWidgets.cpp
-    ${JOIPSources}/Editor/Script/ScriptEditorAddonWidgets.h
-    ${JOIPSources}/Editor/Script/ScriptEditorCodeToolTip.cpp
-    ${JOIPSources}/Editor/Script/ScriptEditorCodeToolTip.h
-    ${JOIPSources}/Editor/Script/ScriptEditorCompleter.cpp
-    ${JOIPSources}/Editor/Script/ScriptEditorCompleter.h
-    ${JOIPSources}/Editor/Script/ScriptEditorCompleterModel.cpp
-    ${JOIPSources}/Editor/Script/ScriptEditorCompleterModel.h
-    ${JOIPSources}/Editor/Script/ScriptEditorKeyHandler.cpp
-    ${JOIPSources}/Editor/Script/ScriptEditorKeyHandler.h
-    ${JOIPSources}/Editor/Script/ScriptEditorWidget.cpp
-    ${JOIPSources}/Editor/Script/ScriptEditorWidget.h
-    ${JOIPSources}/Editor/Script/ScriptFooterArea.ui
     ${JOIPSources}/Editor/Script/TextSnippetOverlay.cpp
     ${JOIPSources}/Editor/Script/TextSnippetOverlay.h
     ${JOIPSources}/Editor/Script/TextSnippetOverlay.ui
@@ -767,6 +751,22 @@ macro(CreateJOIPProject JOIP_PROJECT_NAME)
     ${JOIPSources}/Widgets/Editor/EditorSearchBar.h
     ${JOIPSources}/Widgets/Editor/HighlightedSearchableTextEdit.cpp
     ${JOIPSources}/Widgets/Editor/HighlightedSearchableTextEdit.h
+    ${JOIPSources}/Widgets/Editor/IScriptEditorAddons.h
+    ${JOIPSources}/Widgets/Editor/ScriptCompleterFileProcessors.cpp
+    ${JOIPSources}/Widgets/Editor/ScriptCompleterFileProcessors.h
+    ${JOIPSources}/Widgets/Editor/ScriptEditorAddonWidgets.cpp
+    ${JOIPSources}/Widgets/Editor/ScriptEditorAddonWidgets.h
+    ${JOIPSources}/Widgets/Editor/ScriptEditorCodeToolTip.cpp
+    ${JOIPSources}/Widgets/Editor/ScriptEditorCodeToolTip.h
+    ${JOIPSources}/Widgets/Editor/ScriptEditorCompleter.cpp
+    ${JOIPSources}/Widgets/Editor/ScriptEditorCompleter.h
+    ${JOIPSources}/Widgets/Editor/ScriptEditorCompleterModel.cpp
+    ${JOIPSources}/Widgets/Editor/ScriptEditorCompleterModel.h
+    ${JOIPSources}/Widgets/Editor/ScriptEditorKeyHandler.cpp
+    ${JOIPSources}/Widgets/Editor/ScriptEditorKeyHandler.h
+    ${JOIPSources}/Widgets/Editor/ScriptEditorWidget.cpp
+    ${JOIPSources}/Widgets/Editor/ScriptEditorWidget.h
+    ${JOIPSources}/Widgets/Editor/ScriptFooterArea.ui
     ${JOIPSources}/Widgets/Editor/SelectableResourceLabel.cpp
     ${JOIPSources}/Widgets/Editor/SelectableResourceLabel.h
     ${JOIPSources}/Widgets/Editor/RichTextEdit.cpp

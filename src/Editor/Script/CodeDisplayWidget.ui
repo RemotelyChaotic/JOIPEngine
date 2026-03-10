@@ -98,7 +98,7 @@
   <customwidget>
    <class>CScriptEditorWidget</class>
    <extends>QTextEdit</extends>
-   <header>Editor/Script/ScriptEditorWidget.h</header>
+   <header>Widgets/Editor/ScriptEditorWidget.h</header>
   </customwidget>
   <customwidget>
    <class>CEosScriptEditorView</class>

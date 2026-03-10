@@ -6,7 +6,6 @@
 
 class CDatabaseManager;
 class CResourceTreeItemModel;
-class CScriptEditorWidget;
 namespace Ui {
   class CResourceSnippetOverlay;
 }

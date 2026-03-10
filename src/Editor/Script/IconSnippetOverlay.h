@@ -4,7 +4,6 @@
 #include "CodeSnippetOverlayBase.h"
 #include <QPointer>
 
-class CScriptEditorWidget;
 class CResourceTreeItemModel;
 namespace Ui {
   class CIconSnippetOverlay;

@@ -29,7 +29,7 @@
   <customwidget>
    <class>CScriptEditorWidget</class>
    <extends>QPlainTextEdit</extends>
-   <header>Editor/Script/ScriptEditorWidget.h</header>
+   <header>Widgets/Editor/ScriptEditorWidget.h</header>
   </customwidget>
  </customwidgets>
  <resources/>

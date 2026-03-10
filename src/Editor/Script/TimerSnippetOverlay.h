@@ -6,7 +6,6 @@
 #include <QTime>
 #include <memory>
 
-class CScriptEditorWidget;
 namespace Ui {
   class CTimerSnippetOverlay;
 }
