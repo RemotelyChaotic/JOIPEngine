@@ -19,7 +19,7 @@
 
 namespace
 {
-  const qint32 c_iTabStop = 2;  // 2 characters
+  [[maybe_unused]] const qint32 c_iTabStop = 2;  // 2 characters
 }
 
 //----------------------------------------------------------------------------------------
@@ -29,8 +29,8 @@ CScriptEditorWidget::CScriptEditorWidget(QWidget* pParent) :
   m_spRepository(std::make_unique<KSyntaxHighlighting::Repository>()),
   m_pCompleter(new CScriptEditorCompleter(this)),
   m_pHighlightedSearchableEdit(nullptr),
-  m_foldedIcon(":/resources/style/img/ButtonPlay.png"),
-  m_unfoldedIcon(":/resources/style/img/ButtonArrowDown.png"),
+  m_foldedIcon(""),
+  m_unfoldedIcon(""),
   m_bracketColor0(237,41,57),
   m_bracketColor1(0, 150, 255),
   m_bracketColor2(255, 191, 0),
@@ -132,6 +132,20 @@ void CScriptEditorWidget::SetText(const QString& sText)
 
 //----------------------------------------------------------------------------------------
 //
+void CScriptEditorWidget::SetTextWhilePreservingCursor(const QString& sText)
+{
+  const INT32 iCurrentCursorPosition = textCursor().position();
+  setPlainText(sText);
+
+  QTextCursor cursor = textCursor();
+  cursor.setPosition(iCurrentCursorPosition);
+  setTextCursor(cursor);
+
+  UpdateFont();
+}
+
+//----------------------------------------------------------------------------------------
+//
 void CScriptEditorWidget::SetBracketColor0(QColor c)
 {
   if (m_bracketColor0 != c)
@@ -190,6 +204,18 @@ void CScriptEditorWidget::SetCaseInsensitiveSearch(bool bValue)
 bool CScriptEditorWidget::IsCaseInsensitiveSearchenabled() const
 {
   return m_pHighlightedSearchableEdit->IsCaseInsensitiveFindEnabled();
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CScriptEditorWidget::SetFontSize(qint32 iFontSize)
+{
+  if (m_iFontSize != iFontSize)
+  {
+    m_iFontSize = iFontSize;
+    bool bOk = QMetaObject::invokeMethod(this, "UpdateFont", Qt::QueuedConnection);
+    assert(bOk); Q_UNUSED(bOk)
+  }
 }
 
 //----------------------------------------------------------------------------------------
@@ -473,7 +499,8 @@ void CScriptEditorWidget::SlotSettingFontChanged(const QString& sFontFamily)
   if (m_sFontFamily != sFontFamily)
   {
     m_sFontFamily = sFontFamily;
-    UpdateFont();
+    bool bOk = QMetaObject::invokeMethod(this, "UpdateFont", Qt::QueuedConnection);
+    assert(bOk); Q_UNUSED(bOk)
   }
 }
 

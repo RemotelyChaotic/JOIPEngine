@@ -1,5 +1,6 @@
 #include "TextEditZoomEnabler.h"
 
+#include <QAction>
 #include <QApplication>
 #include <QGestureEvent>
 #include <QHBoxLayout>
@@ -11,6 +12,8 @@ CTextEditZoomEnabler::CTextEditZoomEnabler(QPointer<QTextEdit> pEditor) :
   COverlayBase(0, pEditor),
   m_pEditor(pEditor)
 {
+  setAttribute(Qt::WA_TranslucentBackground);
+
   QHBoxLayout* pLayout = new QHBoxLayout(this);
   m_pLabel = new QLabel(QString::number(m_iZoomLevel) + " %", this);
   m_pLabel->setAttribute(Qt::WA_TranslucentBackground);
@@ -18,18 +21,34 @@ CTextEditZoomEnabler::CTextEditZoomEnabler(QPointer<QTextEdit> pEditor) :
   pLayout->addWidget(m_pLabel);
   setLayout(pLayout);
 
+  QAction* pResetAction = new QAction(tr("Reset zoom"), pEditor);
+                          pResetAction->setShortcut(QKeySequence(Qt::ControlModifier + Qt::Key_0));
+  pResetAction->setShortcutContext(Qt::WidgetWithChildrenShortcut);
+  connect(pResetAction, &QAction::triggered,
+          this, [this](){ SetZoom(100); });
+  pEditor->addAction(pResetAction);
+
   Climb();
 }
 CTextEditZoomEnabler::CTextEditZoomEnabler(QPointer<QPlainTextEdit> pEditor) :
   COverlayBase(0, pEditor),
   m_pEditor(pEditor)
 {
+  setAttribute(Qt::WA_TranslucentBackground);
+
   QHBoxLayout* pLayout = new QHBoxLayout(this);
   m_pLabel = new QLabel(QString::number(m_iZoomLevel) + " %", this);
   m_pLabel->setAttribute(Qt::WA_TranslucentBackground);
   m_pLabel->setAlignment(Qt::AlignCenter);
   pLayout->addWidget(m_pLabel);
   setLayout(pLayout);
+
+  QAction* pResetAction = new QAction(tr("Reset zoom"), pEditor);
+  pResetAction->setShortcut(QKeySequence(Qt::ControlModifier + Qt::Key_0));
+  pResetAction->setShortcutContext(Qt::WidgetWithChildrenShortcut);
+  connect(pResetAction, &QAction::triggered,
+          this, [this](){ SetZoom(100); });
+  pEditor->addAction(pResetAction);
 
   Climb();
 }

@@ -10,6 +10,7 @@
 #include <variant>
 
 class CEditorHighlighter;
+class CEditorSearchBar;
 
 class CHighlightedSearchableTextEdit : public QObject
 {
@@ -32,9 +33,9 @@ public:
   void SetCaseInsensitiveFindEnabled(bool bEnabled);
 
 protected slots:
-  void SlotShowHideSearchFilter();
   void SlotSearchAreaHidden();
-  void SlotSearchFilterChanged(CEditorSearchBar::ESearhDirection direction, const QString& sText);
+  void SlotSearchAreaShown();
+  void SlotSearchFilterChanged(CEditorSearchBar::ESearchDirection direction, const QString& sText);
 
 protected:
   bool eventFilter(QObject* pObj, QEvent* pEvt) override;

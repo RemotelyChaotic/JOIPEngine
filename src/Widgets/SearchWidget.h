@@ -27,10 +27,10 @@ public:
   void SetFocus();
 
 signals:
-  void SignalFilterChanged(const QString& sText);
+  void SignalFilterChanged(const QString& sText, bool bReturnPressed = false);
 
 protected slots:
-  void on_pFilterLineEdit_editingFinished();
+  void on_pFilterLineEdit_returnPressed();
   void on_pFilterLineEdit_textChanged(const QString& sText);
 
 private:

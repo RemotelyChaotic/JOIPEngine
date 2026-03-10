@@ -92,7 +92,7 @@ void CEosScriptEditorView::SlotCreateContextMenu(QPoint p)
 //----------------------------------------------------------------------------------------
 //
 void CEosScriptEditorView::SlotSearchFilterChanged(
-    CEditorSearchBar::ESearhDirection, const QString& sText)
+    CEditorSearchBar::ESearchDirection, const QString& sText)
 {
   QSortFilterProxyModel* pFilterModel =
       dynamic_cast<QSortFilterProxyModel*>(model());

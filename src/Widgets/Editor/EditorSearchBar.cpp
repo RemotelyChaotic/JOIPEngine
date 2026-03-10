@@ -1,9 +1,12 @@
 #include "EditorSearchBar.h"
 #include "Widgets/SearchWidget.h"
+
+#include <QAction>
 #include <QHBoxLayout>
 #include <QPushButton>
 
-CEditorSearchBar::CEditorSearchBar(QWidget* pParent) :
+CEditorSearchBar::CEditorSearchBar(QWidget* pParent,
+                                   ESearchDisplayElementFlags displayFlags) :
   COverlayBase(0, pParent),
   m_searchDir(eNone)
 {
@@ -13,27 +16,63 @@ CEditorSearchBar::CEditorSearchBar(QWidget* pParent) :
           this, &CEditorSearchBar::SlotFilterChanged);
   pLayout->addWidget(m_pSearchWidget);
 
-  m_pBack = new QPushButton(this);
-  m_pBack->setObjectName("BackButton");
-  m_pBack->setToolTip("Search backwards");
-  connect(m_pBack, &QPushButton::clicked,
-          this, &CEditorSearchBar::SlotBackClicked);
-  pLayout->addWidget(m_pBack);
+  if (displayFlags.testFlag(ESearchDisplayFlag::eBackButton))
+  {
+    m_pBack = new QPushButton(this);
+    m_pBack->setObjectName("BackButton");
+    m_pBack->setToolTip("Search backwards");
+    connect(m_pBack, &QPushButton::clicked,
+            this, &CEditorSearchBar::SlotBackClicked);
+    pLayout->addWidget(m_pBack);
+  }
 
-  m_pForward = new QPushButton(this);
-  m_pForward->setObjectName("ForardButton");
-  m_pForward->setToolTip("Search forwards");
-  connect(m_pForward, &QPushButton::clicked,
-          this, &CEditorSearchBar::SlotForwardClicked);
-  pLayout->addWidget(m_pForward);
+  if (displayFlags.testFlag(ESearchDisplayFlag::eBackButton))
+  {
+    m_pForward = new QPushButton(this);
+    m_pForward->setObjectName("ForardButton");
+    m_pForward->setToolTip("Search forwards");
+    connect(m_pForward, &QPushButton::clicked,
+            this, &CEditorSearchBar::SlotForwardClicked);
+    pLayout->addWidget(m_pForward);
+  }
 
-  m_pCloseButton = new QPushButton(this);
-  m_pCloseButton->setObjectName("CloseButton");
-  m_pForward->setToolTip("Close search");
-  connect(m_pCloseButton, &QPushButton::clicked, this, &CEditorSearchBar::Hide);
-  pLayout->addWidget(m_pCloseButton);
+  if (displayFlags.testFlag(ESearchDisplayFlag::eCloseButton))
+  {
+    m_pCloseButton = new QPushButton(this);
+    m_pCloseButton->setObjectName("CloseButton");
+    m_pForward->setToolTip("Close search");
+    connect(m_pCloseButton, &QPushButton::clicked, this, &CEditorSearchBar::Hide);
+    pLayout->addWidget(m_pCloseButton);
+  }
 
   pParent->metaObject()->className();
+
+  QAction* pSearchAction = new QAction(tr("Search"), pParent);
+  pSearchAction->setShortcut(QKeySequence::Find);
+  pSearchAction->setShortcutContext(Qt::WidgetWithChildrenShortcut);
+  connect(pSearchAction, &QAction::triggered,
+          this, &CEditorSearchBar::SlotShowHideSearchFilter);
+  pParent->addAction(pSearchAction);
+
+  pSearchAction = new QAction(tr("Search backwards"), pParent);
+  pSearchAction->setShortcut(QKeySequence::FindPrevious);
+  pSearchAction->setShortcutContext(Qt::WidgetWithChildrenShortcut);
+  connect(pSearchAction, &QAction::triggered,
+          this, &CEditorSearchBar::SlotBackClicked);
+  pParent->addAction(pSearchAction);
+
+  pSearchAction = new QAction(tr("Search forwards"), pParent);
+  pSearchAction->setShortcut(QKeySequence::FindNext);
+  pSearchAction->setShortcutContext(Qt::WidgetWithChildrenShortcut);
+  connect(pSearchAction, &QAction::triggered,
+          this, &CEditorSearchBar::SlotForwardClicked);
+  pParent->addAction(pSearchAction);
+
+  pSearchAction = new QAction(tr("Close search"), pParent);
+                  pSearchAction->setShortcut(Qt::Key_Escape);
+  pSearchAction->setShortcutContext(Qt::WidgetWithChildrenShortcut);
+  connect(pSearchAction, &QAction::triggered, this, &CEditorSearchBar::Hide);
+  pParent->addAction(pSearchAction);
 }
 
 CEditorSearchBar::~CEditorSearchBar()
@@ -85,27 +124,43 @@ void CEditorSearchBar::Show()
 {
   COverlayBase::Show();
   m_pSearchWidget->SetFocus();
+  emit SignalShown();
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CEditorSearchBar::SlotShowHideSearchFilter()
+{
+  if (isVisible())
+  {
+    Hide();
+  }
+  else
+  {
+    Show();
+  }
 }
 
 //----------------------------------------------------------------------------------------
 //
 void CEditorSearchBar::SlotBackClicked()
 {
-  m_searchDir = ESearhDirection::eBackward;
-  emit SignalFilterChanged(ESearhDirection::eBackward, m_pSearchWidget->Filter());
+  m_searchDir = ESearchDirection::eBackward;
+  emit SignalFilterChanged(m_searchDir, m_pSearchWidget->Filter());
 }
 
 //----------------------------------------------------------------------------------------
 //
 void CEditorSearchBar::SlotForwardClicked()
 {
-  m_searchDir = ESearhDirection::eForward;
-  emit SignalFilterChanged(ESearhDirection::eForward, m_pSearchWidget->Filter());
+  m_searchDir = ESearchDirection::eForward;
+  emit SignalFilterChanged(m_searchDir, m_pSearchWidget->Filter());
 }
 
 //----------------------------------------------------------------------------------------
 //
-void CEditorSearchBar::SlotFilterChanged(const QString& sText)
+void CEditorSearchBar::SlotFilterChanged(const QString& sText, bool bReturnPressed)
 {
-  emit SignalFilterChanged(ESearhDirection::eNone, sText);
+  m_searchDir = bReturnPressed ? ESearchDirection::eForward : ESearchDirection::eNone;
+  emit SignalFilterChanged(m_searchDir, sText);
 }

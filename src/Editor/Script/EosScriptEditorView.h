@@ -24,7 +24,7 @@ signals:
 
 protected slots:
   void SlotCreateContextMenu(QPoint p);
-  void SlotSearchFilterChanged(CEditorSearchBar::ESearhDirection direction,
+  void SlotSearchFilterChanged(CEditorSearchBar::ESearchDirection direction,
                                const QString& sText);
   void SlotModelReset();
   void SlotShowHideSearchFilter();

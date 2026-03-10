@@ -40,6 +40,7 @@ class CScriptEditorWidget : public QPlainTextEdit
   Q_PROPERTY(QColor  bracketColor2             READ BracketColor2             WRITE SetBracketColor2            )
   Q_PROPERTY(QColor  bracketColor3             READ BracketColor3             WRITE SetBracketColor3            )
   Q_PROPERTY(QColor  foldAreaBackgroundColor   READ FoldAreaBackgroundColor   WRITE SetFoldAreaBackgroundColor  )
+  Q_PROPERTY(qint32  fontSize                  READ FontSize                  WRITE SetFontSize               )
   Q_PROPERTY(QString fontFamily                READ FontFamily                WRITE SetFontFamily               )
   Q_PROPERTY(QIcon   iconFolded                READ IconFolded                WRITE SetIconFolded               )
   Q_PROPERTY(QIcon   iconUnfolded              READ IconUnfolded              WRITE SetIconUnfolded             )
@@ -72,6 +73,7 @@ public:
   void SetHighlightDefinition(const QString& sPath);
   void SetTabStopWidth(qint32 iNumSpaces);
   void SetText(const QString& sText);
+  void SetTextWhilePreservingCursor(const QString& sText);
 
   void SetBracketColor0(QColor c);
   const QColor& BracketColor0() const  { return m_bracketColor0; }
@@ -85,6 +87,8 @@ public:
   bool IsCaseInsensitiveSearchenabled() const;
   void SetFoldAreaBackgroundColor(const QColor& color) { m_foldAreaBackgroundColor = color; }
   const QColor& FoldAreaBackgroundColor() { return m_foldAreaBackgroundColor; }
+  void SetFontSize(qint32 iFontSize);
+  qint32 FontSize() const { return m_iFontSize; }
   void SetFontFamily(const QString& sFont);
   const QString& FontFamily() { return m_sFontFamily; }
   void SetIconFolded(const QIcon &icon) { m_foldedIcon = icon; }

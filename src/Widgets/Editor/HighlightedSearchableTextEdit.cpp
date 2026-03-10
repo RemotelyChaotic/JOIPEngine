@@ -53,7 +53,7 @@ QPointer<CEditorSearchBar> CHighlightedSearchableTextEdit::SearchBar() const
 QMenu* CHighlightedSearchableTextEdit::CreateContextMenu()
 {
   QMenu* pMenu = CreateStandardContextMenu();
-  pMenu->addAction(tr("Search"), this, SLOT(SlotShowHideSearchFilter()),
+  pMenu->addAction(tr("Search"), m_pSearchBar, SLOT(SlotShowHideSearchFilter()),
                    QKeySequence::Find);
   return pMenu;
 }
@@ -92,22 +92,6 @@ void CHighlightedSearchableTextEdit::SetCaseInsensitiveFindEnabled(bool bEnabled
 
 //----------------------------------------------------------------------------------------
 //
-void CHighlightedSearchableTextEdit::SlotShowHideSearchFilter()
-{
-  if (m_pSearchBar->isVisible())
-  {
-    m_pSearchBar->Hide();
-  }
-  else
-  {
-    QTextCursor cursor = TextCursor();
-    m_pSearchBar->SetFilter(cursor.selectedText());
-    m_pSearchBar->Show();
-  }
-}
-
-//----------------------------------------------------------------------------------------
-//
 void CHighlightedSearchableTextEdit::SlotSearchAreaHidden()
 {
   m_highlightCursor = QTextCursor();
@@ -118,8 +102,18 @@ void CHighlightedSearchableTextEdit::SlotSearchAreaHidden()
 
 //----------------------------------------------------------------------------------------
 //
+void CHighlightedSearchableTextEdit::SlotSearchAreaShown()
+{
+  QTextCursor cursor = TextCursor();
+  const QString sText = cursor.selectedText();
+  m_pSearchBar->SetFilter(sText);
+  SlotSearchFilterChanged(CEditorSearchBar::ESearchDirection::eNone, sText);
+}
+
+//----------------------------------------------------------------------------------------
+//
 void CHighlightedSearchableTextEdit::SlotSearchFilterChanged(
-    CEditorSearchBar::ESearhDirection direction, const QString& sText)
+    CEditorSearchBar::ESearchDirection direction, const QString& sText)
 {
   QTextDocument* pDocument = Document();
 
@@ -137,14 +131,21 @@ void CHighlightedSearchableTextEdit::SlotSearchFilterChanged(
       m_pHighlighter->SetSearchExpression(sText);
     }
 
+    QTextDocument::FindFlags flags;
+    switch(direction)
+    {
+      case CEditorSearchBar::ESearchDirection::eBackward:
+        flags = QTextDocument::FindBackward;
+        break;
+      case CEditorSearchBar::ESearchDirection::eForward:
+      case CEditorSearchBar::ESearchDirection::eNone:
+        break;
+    }
+
     m_sLastSearch = sText;
 
     if (direction != CEditorSearchBar::eNone)
     {
-      QTextDocument::FindFlags flags =
-          direction == CEditorSearchBar::eForward ?
-            QTextDocument::FindFlags() :
-            QTextDocument::FindBackward;
       if (!m_bCaseInsensitive)
       {
         flags |= QTextDocument::FindCaseSensitively;
@@ -166,22 +167,28 @@ bool CHighlightedSearchableTextEdit::eventFilter(QObject* pTarget, QEvent* pEven
 {
   if (nullptr != pEvent && nullptr != pTarget)
   {
-    if (QEvent::KeyPress == pEvent->type() &&
-        (
-          (std::holds_alternative<QPointer<QTextEdit>>(m_pEditor) &&
-          std::get<QPointer<QTextEdit>>(m_pEditor) == pTarget) ||
-          (std::holds_alternative<QPointer<QPlainTextEdit>>(m_pEditor) &&
-          std::get<QPointer<QPlainTextEdit>>(m_pEditor) == pTarget)
-        ))
+    if (QEvent::KeyPress != pEvent->type() && QEvent::ContextMenu != pEvent->type())
+    {
+      return false;
+    }
+
+    bool bIsWidget = (
+        (std::holds_alternative<QPointer<QTextEdit>>(m_pEditor) &&
+         std::get<QPointer<QTextEdit>>(m_pEditor)->viewport() == pTarget) ||
+        (std::holds_alternative<QPointer<QPlainTextEdit>>(m_pEditor) &&
+         std::get<QPointer<QPlainTextEdit>>(m_pEditor)->viewport() == pTarget)
+        );
+    bool bHasFokus = (
+        (std::holds_alternative<QPointer<QTextEdit>>(m_pEditor) &&
+         std::get<QPointer<QTextEdit>>(m_pEditor)->viewport()->hasFocus()) ||
+        (std::holds_alternative<QPointer<QPlainTextEdit>>(m_pEditor) &&
+         std::get<QPointer<QPlainTextEdit>>(m_pEditor)->viewport()->hasFocus())
+        );
+    if (QEvent::KeyPress == pEvent->type() && (bIsWidget || bHasFokus))
     {
       QKeyEvent* pKeyEvent = static_cast<QKeyEvent*>(pEvent);
-      // Ctrl+F
-      if (pKeyEvent->modifiers().testFlag(Qt::ControlModifier) && pKeyEvent->key() == Qt::Key_F)
-      {
-        SlotShowHideSearchFilter();
-      }
       // Enter
-      else if (pKeyEvent->key() == Qt::Key_Enter || pKeyEvent->key() == Qt::Key_Return)
+      if (pKeyEvent->key() == Qt::Key_Enter)
       {
         if (m_pSearchBar->isVisible() &&
             !m_sLastSearch.isEmpty() &&
@@ -193,13 +200,7 @@ bool CHighlightedSearchableTextEdit::eventFilter(QObject* pTarget, QEvent* pEven
         }
       }
     }
-    if (QEvent::ContextMenu == pEvent->type() &&
-        (
-          (std::holds_alternative<QPointer<QTextEdit>>(m_pEditor) &&
-          std::get<QPointer<QTextEdit>>(m_pEditor)->viewport() == pTarget) ||
-          (std::holds_alternative<QPointer<QPlainTextEdit>>(m_pEditor) &&
-          std::get<QPointer<QPlainTextEdit>>(m_pEditor)->viewport() == pTarget)
-        ))
+    else if (QEvent::ContextMenu == pEvent->type() && bIsWidget)
     {
       QContextMenuEvent* pCEvent = static_cast<QContextMenuEvent*>(pEvent);
 
@@ -262,6 +263,8 @@ void CHighlightedSearchableTextEdit::Initalize(QTextDocument* pDoc, QWidget* pPa
   m_pSearchBar->Resize();
 
   // reset things after closing search bar
+  connect(m_pSearchBar, &CEditorSearchBar::SignalShown,
+          this, &CHighlightedSearchableTextEdit::SlotSearchAreaShown);
   connect(m_pSearchBar, &CEditorSearchBar::SignalHidden,
           this, &CHighlightedSearchableTextEdit::SlotSearchAreaHidden);
   connect(m_pSearchBar, &CEditorSearchBar::SignalFilterChanged,
