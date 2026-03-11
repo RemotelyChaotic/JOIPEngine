@@ -64,6 +64,7 @@ CScriptEditorWidget::CScriptEditorWidget(QWidget* pParent) :
 
   m_pTextEditor->setAttribute(Qt::WA_NoMousePropagation, false);
   m_pTextEditor->installEventFilter(this);
+  m_pTextEditor->setLineWrapMode(QPlainTextEdit::LineWrapMode::NoWrap);
 
   //for (auto def : m_spRepository->definitions()) qDebug() << def.name();
 
@@ -84,7 +85,7 @@ CScriptEditorWidget::CScriptEditorWidget(QWidget* pParent) :
   };
   m_fnWidget = std::bind(&CWidgetArea::Widget, pWidgetArea, std::placeholders::_1);
 
-  auto pFooter = new CFooterArea(this, pWidgetArea);
+  auto pFooter = new CFooterArea(this, m_pTextEditor->horizontalScrollBar(), pWidgetArea);
   m_vpEditorAddonsMap[EScriptEditorAddonPosition::eBottom] = { pFooter };
 
   connect(pFooter, &CFooterArea::SignalShowWhiteSpaceChanged, this,
