@@ -15,6 +15,7 @@ Changes:
 Fixed Bugs:
 - Fixed adding Resource bundles and archives to the Resources.
 - Project exports now correctly handle Resource bundles and archives.
+- Various smaller fixes concerning the code editor.
 
 =================
 Version 1.7.1.0
