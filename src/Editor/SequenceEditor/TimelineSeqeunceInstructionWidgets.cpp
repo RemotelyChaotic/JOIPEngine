@@ -2,6 +2,7 @@
 
 #include "Application.h"
 #include "Settings.h"
+#include "Themes.h"
 
 #include "ui_TimelineSeqeunceInstructionWidgetEval.h"
 #include "ui_TimelineSeqeunceInstructionWidgetLinearToy.h"
@@ -1452,6 +1453,7 @@ CTimelineSeqeunceInstructionWidgetEval::CTimelineSeqeunceInstructionWidgetEval(Q
   auto spSettings = CApplication::Instance()->Settings();
   if (nullptr != spSettings)
   {
+    m_spUi->pScriptEditor->AddCustomThemeSearchPath(joip_style::ThemeFolder());
     m_spUi->pScriptEditor->SlotSettingFontChanged(spSettings->EditorFont());
     m_spUi->pScriptEditor->SlotSettingShowWhitespaceChanged(spSettings->EditorShowWhitespace());
     m_spUi->pScriptEditor->SlotSettingCaseInsensitiveSearchChanged(spSettings->EditorCaseInsensitiveSearch());

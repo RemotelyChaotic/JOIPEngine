@@ -74,6 +74,7 @@ public:
   CScriptEditorWidget(QWidget* pParent = nullptr);
   ~CScriptEditorWidget() override;
 
+  void AddCustomThemeSearchPath(const QString& sCustomSearchPath);
   void Clear();
   QTextDocument* Document() const;
   void InsertText(const QString& sText);

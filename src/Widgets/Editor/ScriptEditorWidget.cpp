@@ -10,7 +10,6 @@
 #include "ScriptEditorKeyHandler.h"
 #include "HighlightedSearchableTextEdit.h"
 #include "TextEditZoomEnabler.h"
-#include "Themes.h"
 
 #include <syntaxhighlighter.h>
 #include <definition.h>
@@ -68,7 +67,6 @@ CScriptEditorWidget::CScriptEditorWidget(QWidget* pParent) :
 
   //for (auto def : m_spRepository->definitions()) qDebug() << def.name();
 
-  m_spRepository->addCustomSearchPath(joip_style::ThemeFolder());
   m_pHighlightedSearchableEdit = new CHighlightedSearchableTextEdit(m_pTextEditor.data());
 
   auto vThemes = m_spRepository->themes();
@@ -120,6 +118,18 @@ CScriptEditorWidget::CScriptEditorWidget(QWidget* pParent) :
 
 CScriptEditorWidget::~CScriptEditorWidget()
 {
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CScriptEditorWidget::AddCustomThemeSearchPath(const QString& sCustomSearchPath)
+{
+  m_spRepository->addCustomSearchPath(sCustomSearchPath);
+
+  // Force reload of Theme
+  QString sTheme = m_sTheme;
+  m_sTheme = QString();
+  SlotSettingThemeChanged(sTheme);
 }
 
 //----------------------------------------------------------------------------------------

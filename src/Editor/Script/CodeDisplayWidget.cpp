@@ -13,6 +13,7 @@
 #include "TextSnippetOverlay.h"
 #include "TimerSnippetOverlay.h"
 #include "ThreadSnippetOverlay.h"
+#include "Themes.h"
 
 #include "ui_CodeDisplayWidget.h"
 #include "ui_EditorActionBar.h"
@@ -104,6 +105,7 @@ CCodeDisplayWidget::CCodeDisplayWidget(QWidget* pParent) :
   auto spSettings = CApplication::Instance()->Settings();
   if (nullptr != spSettings)
   {
+    m_spUi->pCodeEdit->AddCustomThemeSearchPath(joip_style::ThemeFolder());
     m_spUi->pCodeEdit->SlotSettingFontChanged(spSettings->EditorFont());
     m_spUi->pCodeEdit->SlotSettingShowWhitespaceChanged(spSettings->EditorShowWhitespace());
     m_spUi->pCodeEdit->SlotSettingCaseInsensitiveSearchChanged(spSettings->EditorCaseInsensitiveSearch());
