@@ -9,6 +9,7 @@
 
 #include <QLineEdit>
 #include <QPainter>
+#include <QScrollBar>
 #include <QStyle>
 #include <QToolTip>
 
@@ -606,7 +607,7 @@ void CFoldBlockArea::CursorPositionChanged()
 
 //----------------------------------------------------------------------------------------
 //
-CFooterArea::CFooterArea(CScriptEditorWidget* pEditor, CWidgetArea* pWidgetArea) :
+CFooterArea::CFooterArea(CScriptEditorWidget* pEditor, QScrollBar* pBottomScrollBar, CWidgetArea* pWidgetArea) :
   QWidget(pEditor),
   m_spUi(std::make_unique<Ui::CScriptFooterArea>())
 {
@@ -617,6 +618,15 @@ CFooterArea::CFooterArea(CScriptEditorWidget* pEditor, CWidgetArea* pWidgetArea)
   m_pListView->hide();
   m_pCodeEditor = pEditor;
   m_pWidgetArea = pWidgetArea;
+
+  QLayout* pLayoutScroll = m_spUi->pScrollAreaContainer->layout();
+  if (nullptr != pLayoutScroll)
+  {
+    pBottomScrollBar->setParent(m_spUi->pScrollAreaContainer);
+    pLayoutScroll->addWidget(pBottomScrollBar);
+    pEditor->TextEdit()->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+    pBottomScrollBar->show();
+  }
 
   StyleChanged();
 

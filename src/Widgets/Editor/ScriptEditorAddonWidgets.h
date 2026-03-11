@@ -107,7 +107,7 @@ class CFooterArea : public QWidget,
 {
   Q_OBJECT
 public:
-  CFooterArea(CScriptEditorWidget* pEditor, CWidgetArea* pWidgetArea);
+  CFooterArea(CScriptEditorWidget* pEditor, QScrollBar* pBottomScrollBar, CWidgetArea* pWidgetArea);
   ~CFooterArea() override;
 
   QSize sizeHint() const override;
