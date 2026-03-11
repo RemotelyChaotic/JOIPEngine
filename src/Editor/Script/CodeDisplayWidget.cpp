@@ -98,7 +98,7 @@ CCodeDisplayWidget::CCodeDisplayWidget(QWidget* pParent) :
   m_spTimerSnippetOverlay = std::make_unique<CTimerSnippetOverlay>(this);
   m_spThreadSnippetOverlay = std::make_unique<CThreadSnippetOverlay>(this);
 
-  connect(m_spUi->pCodeEdit->document(), &QTextDocument::contentsChange,
+  connect(m_spUi->pCodeEdit->Document(), &QTextDocument::contentsChange,
           this, &CCodeDisplayWidget::SignalContentsChange);
 
   auto spSettings = CApplication::Instance()->Settings();
@@ -214,7 +214,7 @@ void CCodeDisplayWidget::Initialize(QPointer<CEditorModel> pEditorModel,
   CUndoRedoFilter* pFilter =
       new CUndoRedoFilter(m_spUi->pCodeEdit,
                           std::bind(&CScriptEditorWidget::CreateContextMenu, m_spUi->pCodeEdit));
-  connect(m_spUi->pCodeEdit->document(), &QTextDocument::undoCommandAdded,
+  connect(m_spUi->pCodeEdit->Document(), &QTextDocument::undoCommandAdded,
           this, &CCodeDisplayWidget::SlotUndoForScriptContentAdded);
   connect(pFilter, &CUndoRedoFilter::UndoTriggered, this, [this]() { m_pUndoStack->undo(); });
   connect(pFilter, &CUndoRedoFilter::RedoTriggered, this, [this]() { m_pUndoStack->redo(); });
@@ -232,7 +232,7 @@ void CCodeDisplayWidget::LoadProject(tspProject spProject)
   m_spTextSnippetOverlay->LoadProject(spProject);
 
   bool bReadOnly = m_pEditorModel->IsReadOnly();
-  m_spUi->pCodeEdit->setReadOnly(bReadOnly);
+  m_spUi->pCodeEdit->SetReadOnly(bReadOnly);
   m_spUi->pEosEdit->setEditTriggers(QAbstractItemView::NoEditTriggers);
 }
 
@@ -241,12 +241,12 @@ void CCodeDisplayWidget::LoadProject(tspProject spProject)
 void CCodeDisplayWidget::UnloadProject()
 {
   m_spUi->pCodeEdit->blockSignals(true);
-  m_spUi->pCodeEdit->document()->blockSignals(true);
+  m_spUi->pCodeEdit->Document()->blockSignals(true);
   m_spUi->pCodeEdit->ResetAddons();
-  m_spUi->pCodeEdit->clear();
-  m_spUi->pCodeEdit->document()->blockSignals(false);
+  m_spUi->pCodeEdit->Clear();
+  m_spUi->pCodeEdit->Document()->blockSignals(false);
   m_spUi->pCodeEdit->blockSignals(false);
-  m_spUi->pCodeEdit->setReadOnly(false);
+  m_spUi->pCodeEdit->SetReadOnly(false);
 
   m_spResourceSnippetOverlay->UnloadProject();
   m_spMetronomeSnippetOverlay->UnloadProject();
@@ -564,5 +564,5 @@ void CCodeDisplayWidget::SlotInsertGeneratedCode(const QString& sCode)
 void CCodeDisplayWidget::SlotUndoForScriptContentAdded()
 {
   if (!m_pInitialized) { return; }
-  m_pUndoStack->push(new CCommandScriptContentChange(m_spUi->pCodeEdit->document()));
+  m_pUndoStack->push(new CCommandScriptContentChange(m_spUi->pCodeEdit->Document()));
 }

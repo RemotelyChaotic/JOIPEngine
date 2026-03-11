@@ -1,4 +1,5 @@
 #include "ScriptEditorWidget.h"
+#include "ScriptEditorWidgetPrivate.h"
 
 #include "EditorCustomBlockUserData.h"
 #include "EditorSearchBar.h"
@@ -14,8 +15,10 @@
 #include <syntaxhighlighter.h>
 #include <definition.h>
 #include <theme.h>
+
 #include <QtWidgets>
 #include <QFontMetrics>
+#include <QHBoxLayout>
 
 namespace
 {
@@ -24,10 +27,20 @@ namespace
 
 //----------------------------------------------------------------------------------------
 //
-CScriptEditorWidget::CScriptEditorWidget(QWidget* pParent) :
+CScriptEditorWidgetPrivate::CScriptEditorWidgetPrivate(CScriptEditorWidget* pParent) :
   QPlainTextEdit(pParent),
+  m_pParent(pParent)
+{
+}
+CScriptEditorWidgetPrivate::~CScriptEditorWidgetPrivate() = default;
+
+//----------------------------------------------------------------------------------------
+//
+CScriptEditorWidget::CScriptEditorWidget(QWidget* pParent) :
+  QWidget(pParent),
   m_spRepository(std::make_unique<KSyntaxHighlighting::Repository>()),
-  m_pCompleter(new CScriptEditorCompleter(this)),
+  m_pTextEditor(new CScriptEditorWidgetPrivate(this)),
+  m_pCompleter(new CScriptEditorCompleter(m_pTextEditor.data())),
   m_pHighlightedSearchableEdit(nullptr),
   m_foldedIcon(""),
   m_unfoldedIcon(""),
@@ -46,13 +59,17 @@ CScriptEditorWidget::CScriptEditorWidget(QWidget* pParent) :
   m_iFontSize(10),
   m_sFontFamily("")
 {
-  setAttribute(Qt::WA_NoMousePropagation, false);
-  installEventFilter(this);
+  QLayout* pLayout = new QHBoxLayout(this);
+  pLayout->setContentsMargins({0, 0, 0, 0});
+  pLayout->addWidget(m_pTextEditor);
+
+  m_pTextEditor->setAttribute(Qt::WA_NoMousePropagation, false);
+  m_pTextEditor->installEventFilter(this);
 
   //for (auto def : m_spRepository->definitions()) qDebug() << def.name();
 
   m_spRepository->addCustomSearchPath(joip_style::ThemeFolder());
-  m_pHighlightedSearchableEdit = new CHighlightedSearchableTextEdit(this);
+  m_pHighlightedSearchableEdit = new CHighlightedSearchableTextEdit(m_pTextEditor.data());
 
   auto vThemes = m_spRepository->themes();
   if (!vThemes.empty())
@@ -60,7 +77,7 @@ CScriptEditorWidget::CScriptEditorWidget(QWidget* pParent) :
     SlotSettingThemeChanged(vThemes.first().name());
   }
 
-  m_pZoomEnabler = new CTextEditZoomEnabler(this);
+  m_pZoomEnabler = new CTextEditZoomEnabler(m_pTextEditor.data());
 
   // register all addons
   auto pWidgetArea = new CWidgetArea(this);
@@ -76,16 +93,19 @@ CScriptEditorWidget::CScriptEditorWidget(QWidget* pParent) :
           &CScriptEditorWidget::SlotSettingShowWhitespaceChanged);
 
   // register key handlers
-  IScriptEditorKeyHandler::RegisterHandlers(m_vpEditorKeyHandlerMap, this, &m_previouslyClickedKey);
+  IScriptEditorKeyHandler::RegisterHandlers(m_vpEditorKeyHandlerMap, m_pTextEditor, &m_previouslyClickedKey);
 
-  connect(this, &CScriptEditorWidget::blockCountChanged,
+  connect(m_pTextEditor, &CScriptEditorWidgetPrivate::blockCountChanged,
           this, &CScriptEditorWidget::UpdateLeftAreaWidth);
-  connect(this, &CScriptEditorWidget::updateRequest,
+  connect(m_pTextEditor, &CScriptEditorWidgetPrivate::updateRequest,
           this, &CScriptEditorWidget::SlotUpdateAllAddons);
-  connect(this, &CScriptEditorWidget::cursorPositionChanged,
+  connect(m_pTextEditor, &CScriptEditorWidgetPrivate::cursorPositionChanged,
           this, &CScriptEditorWidget::HighlightCurrentLine);
-  connect(this, &CScriptEditorWidget::cursorPositionChanged,
+  connect(m_pTextEditor, &CScriptEditorWidgetPrivate::cursorPositionChanged,
           this, &CScriptEditorWidget::HighlightCurrentWord);
+
+  connect(m_pTextEditor, &CScriptEditorWidgetPrivate::textChanged,
+          this, &CScriptEditorWidget::SignalTextChanged);
 
   UpdateLeftAreaWidth(0);
   UpdateBottomAreaHeight(0);
@@ -104,6 +124,27 @@ CScriptEditorWidget::~CScriptEditorWidget()
 
 //----------------------------------------------------------------------------------------
 //
+void CScriptEditorWidget::Clear()
+{
+  m_pTextEditor->clear();
+}
+
+//----------------------------------------------------------------------------------------
+//
+QTextDocument* CScriptEditorWidget::Document() const
+{
+  return m_pTextEditor->document();
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CScriptEditorWidget::InsertText(const QString& sText)
+{
+  m_pTextEditor->insertPlainText(sText);
+}
+
+//----------------------------------------------------------------------------------------
+//
 void CScriptEditorWidget::SetHighlightDefinition(const QString& sType)
 {
   const auto def = m_spRepository->definitionForName(sType);
@@ -113,12 +154,19 @@ void CScriptEditorWidget::SetHighlightDefinition(const QString& sType)
 
 //----------------------------------------------------------------------------------------
 //
+void CScriptEditorWidget::SetReadOnly(bool bReadOnly)
+{
+  m_pTextEditor->setReadOnly(bReadOnly);
+}
+
+//----------------------------------------------------------------------------------------
+//
 void CScriptEditorWidget::SetTabStopWidth(qint32 iNumSpaces)
 {
   m_iTabStopWidth = iNumSpaces;
 #if QT_VERSION >= QT_VERSION_CHECK(5,10,0)
   QFontMetrics metrics(font());
-  setTabStopDistance(m_iTabStopWidth * metrics.boundingRect(' ').width());
+  m_pTextEditor->setTabStopDistance(m_iTabStopWidth * metrics.boundingRect(' ').width());
 #endif
 }
 
@@ -126,7 +174,7 @@ void CScriptEditorWidget::SetTabStopWidth(qint32 iNumSpaces)
 //
 void CScriptEditorWidget::SetText(const QString& sText)
 {
-  setPlainText(sText);
+  m_pTextEditor->setPlainText(sText);
   UpdateFont();
 }
 
@@ -134,14 +182,21 @@ void CScriptEditorWidget::SetText(const QString& sText)
 //
 void CScriptEditorWidget::SetTextWhilePreservingCursor(const QString& sText)
 {
-  const INT32 iCurrentCursorPosition = textCursor().position();
-  setPlainText(sText);
+  const INT32 iCurrentCursorPosition = m_pTextEditor->textCursor().position();
+  m_pTextEditor->setPlainText(sText);
 
-  QTextCursor cursor = textCursor();
+  QTextCursor cursor = m_pTextEditor->textCursor();
   cursor.setPosition(iCurrentCursorPosition);
-  setTextCursor(cursor);
+  m_pTextEditor->setTextCursor(cursor);
 
   UpdateFont();
+}
+
+//----------------------------------------------------------------------------------------
+//
+QString CScriptEditorWidget::Text() const
+{
+  return m_pTextEditor->toPlainText();
 }
 
 //----------------------------------------------------------------------------------------
@@ -348,25 +403,25 @@ void CScriptEditorWidget::HighlightCurrentLine()
 {
   QList<QTextEdit::ExtraSelection> vExtraSelections;
 
-  if (!isReadOnly())
+  if (!m_pTextEditor->isReadOnly())
   {
     QTextEdit::ExtraSelection selection;
     selection.format.setBackground(m_highlightLineColor);
     selection.format.setProperty(QTextFormat::FullWidthSelection, true);
-    selection.cursor = textCursor();
+    selection.cursor = m_pTextEditor->textCursor();
     selection.cursor.clearSelection();
     vExtraSelections.append(selection);
   }
 
-  setExtraSelections(vExtraSelections);
-  repaint();
+  m_pTextEditor->setExtraSelections(vExtraSelections);
+  m_pTextEditor->repaint();
 }
 
 //----------------------------------------------------------------------------------------
 //
 void CScriptEditorWidget::HighlightCurrentWord()
 {
-  QTextCursor cursor = textCursor();
+  QTextCursor cursor = m_pTextEditor->textCursor();
   if (!cursor.hasSelection())
   {
     cursor.select(QTextCursor::WordUnderCursor);
@@ -401,8 +456,8 @@ void CScriptEditorWidget::UpdateFont()
   font.setPointSizeF(m_iFontSize);
 
   setFont(font);
-  document()->setDefaultFont(font);
-  viewport()->setFont(font);
+  m_pTextEditor->document()->setDefaultFont(font);
+  m_pTextEditor->viewport()->setFont(font);
 
   m_pZoomEnabler->UpdateZoom(iZoom);
 }
@@ -412,13 +467,13 @@ void CScriptEditorWidget::UpdateFont()
 void CScriptEditorWidget::UpdateLeftAreaWidth(qint32 iNewBlockCount)
 {
   Q_UNUSED(iNewBlockCount)
-  QMargins margins = viewportMargins();
+  QMargins margins = m_pTextEditor->viewportMargins();
   qint32 iTotalWidth = 0;
   for (IScriptEditorAddon* pAddon : m_vpEditorAddonsMap[EScriptEditorAddonPosition::eLeft])
   {
     iTotalWidth += pAddon->AreaWidth();
   }
-  setViewportMargins(iTotalWidth, margins.top(), margins.right(), margins.bottom());
+  m_pTextEditor->setViewportMargins(iTotalWidth, margins.top(), margins.right(), margins.bottom());
 }
 
 //----------------------------------------------------------------------------------------
@@ -426,13 +481,13 @@ void CScriptEditorWidget::UpdateLeftAreaWidth(qint32 iNewBlockCount)
 void CScriptEditorWidget::UpdateRightAreaWidth(qint32 iNewBlockCount)
 {
   Q_UNUSED(iNewBlockCount)
-  QMargins margins = viewportMargins();
+  QMargins margins = m_pTextEditor->viewportMargins();
   qint32 iTotalWidth = 0;
   for (IScriptEditorAddon* pAddon : m_vpEditorAddonsMap[EScriptEditorAddonPosition::eRight])
   {
     iTotalWidth += pAddon->AreaWidth();
   }
-  setViewportMargins(margins.left(), margins.top(), iTotalWidth, margins.bottom());
+  m_pTextEditor->setViewportMargins(margins.left(), margins.top(), iTotalWidth, margins.bottom());
 }
 
 //----------------------------------------------------------------------------------------
@@ -440,13 +495,13 @@ void CScriptEditorWidget::UpdateRightAreaWidth(qint32 iNewBlockCount)
 void CScriptEditorWidget::UpdateTopAreaHeight(qint32 iNewBlockCount)
 {
   Q_UNUSED(iNewBlockCount)
-  QMargins margins = viewportMargins();
+  QMargins margins = m_pTextEditor->viewportMargins();
   qint32 iTotalHeight = 0;
   for (IScriptEditorAddon* pAddon : m_vpEditorAddonsMap[EScriptEditorAddonPosition::eTop])
   {
     iTotalHeight += pAddon->AreaHeight();
   }
-  setViewportMargins(margins.left(), iTotalHeight, margins.right(), margins.bottom());
+  m_pTextEditor->setViewportMargins(margins.left(), iTotalHeight, margins.right(), margins.bottom());
 }
 
 //----------------------------------------------------------------------------------------
@@ -454,13 +509,13 @@ void CScriptEditorWidget::UpdateTopAreaHeight(qint32 iNewBlockCount)
 void CScriptEditorWidget::UpdateBottomAreaHeight(qint32 iNewBlockCount)
 {
   Q_UNUSED(iNewBlockCount)
-  QMargins margins = viewportMargins();
+  QMargins margins = m_pTextEditor->viewportMargins();
   qint32 iTotalHeight = 0;
   for (IScriptEditorAddon* pAddon : m_vpEditorAddonsMap[EScriptEditorAddonPosition::eBottom])
   {
     iTotalHeight += pAddon->AreaHeight();
   }
-  setViewportMargins(margins.left(), margins.top(), margins.right(), iTotalHeight);
+  m_pTextEditor->setViewportMargins(margins.left(), margins.top(), margins.right(), iTotalHeight);
 }
 
 //----------------------------------------------------------------------------------------
@@ -480,9 +535,9 @@ void CScriptEditorWidget::SlotExecutionError(QString sException, qint32 iLine, Q
     }
   }
 
-  QTextCursor cursor(document()->findBlockByLineNumber(iLine));
-  moveCursor(QTextCursor::End);
-  setTextCursor(cursor);
+  QTextCursor cursor(m_pTextEditor->document()->findBlockByLineNumber(iLine));
+  m_pTextEditor->moveCursor(QTextCursor::End);
+  m_pTextEditor->setTextCursor(cursor);
 }
 
 //----------------------------------------------------------------------------------------
@@ -511,7 +566,7 @@ void CScriptEditorWidget::SlotSettingShowWhitespaceChanged(bool bShowWhiteSpace)
   if (m_bShowWhitespaceEnabled != bShowWhiteSpace)
   {
     m_bShowWhitespaceEnabled = bShowWhiteSpace;
-    QTextOption option = document()->defaultTextOption();
+    QTextOption option = m_pTextEditor->document()->defaultTextOption();
     if (bShowWhiteSpace)
     {
       option.setFlags(QTextOption::ShowTabsAndSpaces);
@@ -532,8 +587,8 @@ void CScriptEditorWidget::SlotSettingShowWhitespaceChanged(bool bShowWhiteSpace)
       }
     }
 
-    document()->setDefaultTextOption(option);
-    repaint();
+    m_pTextEditor->document()->setDefaultTextOption(option);
+    m_pTextEditor->repaint();
   }
 }
 
@@ -571,6 +626,27 @@ void CScriptEditorWidget::SlotUpdateAllAddons(const QRect& rect, qint32 iDy)
 
 //----------------------------------------------------------------------------------------
 //
+const CScriptEditorWidget::tAdditionsMap& CScriptEditorWidget::AdditionsMap() const
+{
+  return m_vpEditorAddonsMap;
+}
+
+//----------------------------------------------------------------------------------------
+//
+QPointer<CScriptEditorWidgetPrivate> CScriptEditorWidget::TextEdit() const
+{
+  return m_pTextEditor.data();
+}
+
+//----------------------------------------------------------------------------------------
+//
+QPointer<QLabel> CScriptEditorWidget::WidgetAreaWidget(qint32 iLine)
+{
+  return m_fnWidget(iLine);
+}
+
+//----------------------------------------------------------------------------------------
+//
 bool CScriptEditorWidget::eventFilter(QObject* pTarget, QEvent* pEvent)
 {
   if (nullptr != pEvent && this == pTarget)
@@ -595,22 +671,22 @@ bool CScriptEditorWidget::eventFilter(QObject* pTarget, QEvent* pEvent)
       QHelpEvent* helpEvent = static_cast<QHelpEvent*>(pEvent);
       QPoint pos = helpEvent->pos();
 
-      QTextCursor cursor = cursorForPosition(pos);
+      QTextCursor cursor = m_pTextEditor->cursorForPosition(pos);
       if (CCustomBlockUserData* pUserData =
           dynamic_cast<CCustomBlockUserData*>(cursor.block().userData());
           nullptr != pUserData)
       {
-        const QRectF blockRect = blockBoundingRect(cursor.block());
+        const QRectF blockRect = m_pTextEditor->blockBoundingRect(cursor.block());
         qint32 iBlockHeight = static_cast<qint32>(blockRect.height());
         cursor.movePosition(QTextCursor::EndOfBlock, QTextCursor::KeepAnchor);
-        QPoint topLeft = cursorRect(cursor).topLeft();
+        QPoint topLeft = m_pTextEditor->cursorRect(cursor).topLeft();
         QRect blockRectToCheck(topLeft.x(), topLeft.y(),
                               static_cast<qint32>(blockRect.width()) - topLeft.x(),
                               iBlockHeight);
 
         const qint32 iDotWidth = fontMetrics().boundingRect("...").width();
         blockRectToCheck.setWidth(iDotWidth + 10);
-        blockRectToCheck.translate(viewportMargins().left(), viewportMargins().top());
+        blockRectToCheck.translate(m_pTextEditor->viewportMargins().left(), m_pTextEditor->viewportMargins().top());
 
         //qDebug() << pos << cursor.blockNumber() << cursor.block().text() << blockRectToCheck;
 
@@ -619,7 +695,7 @@ bool CScriptEditorWidget::eventFilter(QObject* pTarget, QEvent* pEvent)
             blockRectToCheck.contains(pos))
         {
           CScriptEditorCodeToolTip::showToolTip(
-              mapToGlobal(QPoint(viewportMargins().left(), blockRectToCheck.topLeft().y())),
+              mapToGlobal(QPoint(m_pTextEditor->viewportMargins().left(), blockRectToCheck.topLeft().y())),
               sFoldedContent, Highlighter());
         }
         else
@@ -635,15 +711,15 @@ bool CScriptEditorWidget::eventFilter(QObject* pTarget, QEvent* pEvent)
     }
   }
 
-  return QPlainTextEdit::eventFilter(pTarget, pEvent);
+  return QWidget::eventFilter(pTarget, pEvent);
 }
 
 //----------------------------------------------------------------------------------------
 //
-void CScriptEditorWidget::keyPressEvent(QKeyEvent* pEvt)
+void CScriptEditorWidgetPrivate::keyPressEvent(QKeyEvent* pEvt)
 {
   // needed otherwise completer doesn't work correctly.
-  bool bRet = m_pCompleter->keyPressEvent(pEvt);
+  bool bRet = m_pParent->Completer()->keyPressEvent(pEvt);
   if (bRet)
   {
     return;
@@ -653,19 +729,19 @@ void CScriptEditorWidget::keyPressEvent(QKeyEvent* pEvt)
 
 //----------------------------------------------------------------------------------------
 //
-void CScriptEditorWidget::paintEvent(QPaintEvent* pEvent)
+void CScriptEditorWidgetPrivate::paintEvent(QPaintEvent* pEvent)
 {
   QPlainTextEdit::paintEvent(pEvent);
 
   QPainter painter(viewport());
-  if (!m_foldSelection.isNull())
+  if (!m_pParent->m_foldSelection.isNull())
   {
     painter.save();
     QRect rectToDarkenTop = pEvent->rect();
     QRect rectToDarkenBottom = pEvent->rect();
 
-    rectToDarkenTop.setBottom(m_foldSelection.y());
-    rectToDarkenBottom.setTop(m_foldSelection.y() + m_foldSelection.height());
+    rectToDarkenTop.setBottom(m_pParent->m_foldSelection.y());
+    rectToDarkenBottom.setTop(m_pParent->m_foldSelection.y() + m_pParent->m_foldSelection.height());
 
     painter.fillRect(rectToDarkenTop, QColor(100, 100, 100, 100));
     painter.fillRect(rectToDarkenBottom, QColor(100, 100, 100, 100));
@@ -686,9 +762,9 @@ void CScriptEditorWidget::paintEvent(QPaintEvent* pEvent)
   {
     if (block.isVisible())
     {
-      if (Highlighter()->startsFoldingRegion(block))
+      if (m_pParent->Highlighter()->startsFoldingRegion(block))
       {
-        QTextBlock blockEnd = Highlighter()->findFoldingRegionEnd(block);
+        QTextBlock blockEnd = m_pParent->Highlighter()->findFoldingRegionEnd(block);
         if (blockEnd.previous().isVisible() && blockEnd.isValid())
         {
           static const QRegExp rx("\\S");
@@ -726,9 +802,9 @@ void CScriptEditorWidget::paintEvent(QPaintEvent* pEvent)
     const bool bTopEventOk = iBottom >= pEvent->rect().top();
     if (block.isVisible() && bTopEventOk)
     {
-      if (Highlighter()->startsFoldingRegion(block))
+      if (m_pParent->Highlighter()->startsFoldingRegion(block))
       {
-        QTextBlock blockEnd = Highlighter()->findFoldingRegionEnd(block);
+        QTextBlock blockEnd = m_pParent->Highlighter()->findFoldingRegionEnd(block);
         if (!blockEnd.previous().isVisible())
         {
           QTextCursor cursor(block);
@@ -753,7 +829,7 @@ void CScriptEditorWidget::paintEvent(QPaintEvent* pEvent)
         }
       }
 
-      QPointer<QLabel> pWidget = WidgetAreaWidget(iBlockNumber);
+      QPointer<QLabel> pWidget = m_pParent->WidgetAreaWidget(iBlockNumber);
       if (nullptr != pWidget)
       {
         QTextCursor cursor(block);
@@ -784,7 +860,7 @@ void CScriptEditorWidget::paintEvent(QPaintEvent* pEvent)
       {
         for (const SMatchedWordData& wordData : pUserData->m_vMatchedWordData)
         {
-          QColor colSelect(m_wordhighlightColor);
+          QColor colSelect(m_pParent->WordHighlightColor());
           colSelect.setAlpha(50);
 
           QTextCursor cursor(block);
@@ -816,17 +892,17 @@ void CScriptEditorWidget::paintEvent(QPaintEvent* pEvent)
 
 //----------------------------------------------------------------------------------------
 //
-void CScriptEditorWidget::resizeEvent(QResizeEvent* pEvent)
+void CScriptEditorWidgetPrivate::resizeEvent(QResizeEvent* pEvent)
 {
   QPlainTextEdit::resizeEvent(pEvent);
 
   QMargins margins = viewportMargins();
   QRect cr = contentsRect();
-  for (const auto& [pos, vpAddons] : m_vpEditorAddonsMap)
+  for (const auto& [pos, vpAddons] : m_pParent->AdditionsMap())
   {
     switch (pos)
     {
-      case EScriptEditorAddonPosition::eLeft:
+      case CScriptEditorWidget::EScriptEditorAddonPosition::eLeft:
       {
         qint32 iTotalWidth = 0;
         for (IScriptEditorAddon* pAddon : vpAddons)
@@ -841,7 +917,7 @@ void CScriptEditorWidget::resizeEvent(QResizeEvent* pEvent)
           }
         }
       } break;
-      case EScriptEditorAddonPosition::eRight:
+      case CScriptEditorWidget::EScriptEditorAddonPosition::eRight:
       {
         qint32 iTotalWidth = 0;
         for (IScriptEditorAddon* pAddon : vpAddons)
@@ -856,7 +932,7 @@ void CScriptEditorWidget::resizeEvent(QResizeEvent* pEvent)
           }
         }
       } break;
-      case EScriptEditorAddonPosition::eTop:
+      case CScriptEditorWidget::EScriptEditorAddonPosition::eTop:
       {
         qint32 iTotalHeight = 0;
         for (IScriptEditorAddon* pAddon : vpAddons)
@@ -871,7 +947,7 @@ void CScriptEditorWidget::resizeEvent(QResizeEvent* pEvent)
           }
         }
       } break;
-      case EScriptEditorAddonPosition::eBottom:
+      case CScriptEditorWidget::EScriptEditorAddonPosition::eBottom:
       {
         qint32 iTotalHeight = 0;
         for (IScriptEditorAddon* pAddon : vpAddons)
@@ -893,12 +969,5 @@ void CScriptEditorWidget::resizeEvent(QResizeEvent* pEvent)
                                          cr.top() + margins.top(),
                                          verticalScrollBar()->width(),
                                          cr.height() - margins.top() - margins.bottom()));
-}
-
-//----------------------------------------------------------------------------------------
-//
-QPointer<QLabel> CScriptEditorWidget::WidgetAreaWidget(qint32 iLine)
-{
-  return m_fnWidget(iLine);
 }
 

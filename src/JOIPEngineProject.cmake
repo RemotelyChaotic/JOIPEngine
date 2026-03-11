@@ -766,6 +766,7 @@ macro(CreateJOIPProject JOIP_PROJECT_NAME)
     ${JOIPSources}/Widgets/Editor/ScriptEditorKeyHandler.h
     ${JOIPSources}/Widgets/Editor/ScriptEditorWidget.cpp
     ${JOIPSources}/Widgets/Editor/ScriptEditorWidget.h
+    ${JOIPSources}/Widgets/Editor/ScriptEditorWidgetPrivate.h
     ${JOIPSources}/Widgets/Editor/ScriptFooterArea.ui
     ${JOIPSources}/Widgets/Editor/SelectableResourceLabel.cpp
     ${JOIPSources}/Widgets/Editor/SelectableResourceLabel.h

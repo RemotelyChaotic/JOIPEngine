@@ -1,5 +1,6 @@
 #include "ScriptEditorAddonWidgets.h"
 #include "ScriptEditorWidget.h"
+#include "ScriptEditorWidgetPrivate.h"
 #include "ui_ScriptFooterArea.h"
 
 #include "EditorCustomBlockUserData.h"
@@ -43,7 +44,7 @@ qint32 CLineNumberArea::AreaHeight() const
 qint32 CLineNumberArea::AreaWidth() const
 {
   qint32 iDigits = 1;
-  qint32 iMax = qMax(1, m_pCodeEditor->blockCount());
+  qint32 iMax = qMax(1, m_pCodeEditor->TextEdit()->blockCount());
   while (iMax >= 10)
   {
     iMax /= 10;
@@ -77,7 +78,7 @@ void CLineNumberArea::Update(const QRect& rect, qint32 iDy)
     update(0, rect.y(), width(), rect.height());
   }
 
-  if (rect.contains(m_pCodeEditor->viewport()->rect()))
+  if (rect.contains(m_pCodeEditor->TextEdit()->viewport()->rect()))
   {
     m_pCodeEditor->UpdateArea(CScriptEditorWidget::eLeft, 0);
   }
@@ -93,11 +94,11 @@ void CLineNumberArea::paintEvent(QPaintEvent* pEvent)
 
   painter.fillRect(pEvent->rect(), lineNumberBackgroundColor);
 
-  QTextBlock block = m_pCodeEditor->firstVisibleBlock();
+  QTextBlock block = m_pCodeEditor->TextEdit()->firstVisibleBlock();
   qint32 iBlockNumber = block.blockNumber();
-  qint32 iTop = static_cast<qint32>(m_pCodeEditor->blockBoundingGeometry(block)
-                                        .translated(m_pCodeEditor->contentOffset()).top());
-  qint32 iBottom = iTop + static_cast<qint32>(m_pCodeEditor->blockBoundingRect(block).height());
+  qint32 iTop = static_cast<qint32>(m_pCodeEditor->TextEdit()->blockBoundingGeometry(block)
+                                        .translated(m_pCodeEditor->TextEdit()->contentOffset()).top());
+  qint32 iBottom = iTop + static_cast<qint32>(m_pCodeEditor->TextEdit()->blockBoundingRect(block).height());
 
   while (block.isValid() && iTop <= pEvent->rect().bottom())
   {
@@ -111,7 +112,7 @@ void CLineNumberArea::paintEvent(QPaintEvent* pEvent)
 
     block = block.next();
     iTop = iBottom;
-    iBottom = iTop + static_cast<qint32>(m_pCodeEditor->blockBoundingRect(block).height());
+    iBottom = iTop + static_cast<qint32>(m_pCodeEditor->TextEdit()->blockBoundingRect(block).height());
     ++iBlockNumber;
   }
 }
@@ -168,7 +169,7 @@ void CWidgetArea::Update(const QRect& rect, qint32 iDy)
     update(0, rect.y(), width(), rect.height());
   }
 
-  if (rect.contains(m_pCodeEditor->viewport()->rect()))
+  if (rect.contains(m_pCodeEditor->TextEdit()->viewport()->rect()))
   {
     m_pCodeEditor->UpdateArea(CScriptEditorWidget::eLeft, 0);
   }
@@ -269,11 +270,11 @@ void CWidgetArea::paintEvent(QPaintEvent* pEvent)
 
   painter.fillRect(pEvent->rect(), widgetsBackgroundColor);
 
-  QTextBlock block = m_pCodeEditor->firstVisibleBlock();
+  QTextBlock block = m_pCodeEditor->TextEdit()->firstVisibleBlock();
   qint32 iBlockNumber = block.blockNumber();
-  qint32 iTop = static_cast<qint32>(m_pCodeEditor->blockBoundingGeometry(block)
-                                        .translated(m_pCodeEditor->contentOffset()).top());
-  const QRectF blockRect = m_pCodeEditor->blockBoundingRect(block);
+  qint32 iTop = static_cast<qint32>(m_pCodeEditor->TextEdit()->blockBoundingGeometry(block)
+                                        .translated(m_pCodeEditor->TextEdit()->contentOffset()).top());
+  const QRectF blockRect = m_pCodeEditor->TextEdit()->blockBoundingRect(block);
   qint32 iBlockHeight = static_cast<qint32>(blockRect.height());
   qint32 iBottom = iTop + iBlockHeight;
 
@@ -292,7 +293,7 @@ void CWidgetArea::paintEvent(QPaintEvent* pEvent)
 
     block = block.next();
     iTop = iBottom;
-    iBottom = iTop + static_cast<qint32>(m_pCodeEditor->blockBoundingRect(block).height());
+    iBottom = iTop + static_cast<qint32>(m_pCodeEditor->TextEdit()->blockBoundingRect(block).height());
     ++iBlockNumber;
   }
 }
@@ -305,7 +306,7 @@ CFoldBlockArea::CFoldBlockArea(CScriptEditorWidget* pEditor) :
   m_pCodeEditor = pEditor;
   setMouseTracking(true);
 
-  connect(m_pCodeEditor, &CScriptEditorWidget::cursorPositionChanged,
+  connect(m_pCodeEditor->TextEdit(), &QPlainTextEdit::cursorPositionChanged,
           this, &CFoldBlockArea::CursorPositionChanged);
 }
 CFoldBlockArea::~CFoldBlockArea() = default;
@@ -351,7 +352,7 @@ void CFoldBlockArea::Update(const QRect& rect, qint32 iDy)
     update(0, 0, width(), height());
   }
 
-  if (rect.contains(m_pCodeEditor->viewport()->rect()))
+  if (rect.contains(m_pCodeEditor->TextEdit()->viewport()->rect()))
   {
     m_pCodeEditor->UpdateArea(CScriptEditorWidget::eLeft, 0);
   }
@@ -361,12 +362,12 @@ void CFoldBlockArea::Update(const QRect& rect, qint32 iDy)
 //
 void CFoldBlockArea::mousePressEvent(QMouseEvent* pEvt)
 {
-  QTextBlock block = m_pCodeEditor->firstVisibleBlock();
+  QTextBlock block = m_pCodeEditor->TextEdit()->firstVisibleBlock();
   qint32 iBlockNumber = block.blockNumber();
   qint32 iTop = static_cast<qint32>(
-      m_pCodeEditor->blockBoundingGeometry(block)
-          .translated(m_pCodeEditor->contentOffset()).top());
-  qint32 iBottom = iTop + static_cast<qint32>(m_pCodeEditor->blockBoundingRect(block).height());
+      m_pCodeEditor->TextEdit()->blockBoundingGeometry(block)
+          .translated(m_pCodeEditor->TextEdit()->contentOffset()).top());
+  qint32 iBottom = iTop + static_cast<qint32>(m_pCodeEditor->TextEdit()->blockBoundingRect(block).height());
 
   while (block.isValid() && iTop <= rect().bottom())
   {
@@ -426,8 +427,8 @@ void CFoldBlockArea::mousePressEvent(QMouseEvent* pEvt)
         }
 
         m_pCodeEditor->SlotUpdateAllAddons(
-            QRect(0, m_pCodeEditor->viewport()->rect().y(),
-                   m_pCodeEditor->width(), m_pCodeEditor->viewport()->rect().height()), 0);
+            QRect(0, m_pCodeEditor->TextEdit()->viewport()->rect().y(),
+                   m_pCodeEditor->width(), m_pCodeEditor->TextEdit()->viewport()->rect().height()), 0);
         m_pCodeEditor->repaint();
         update();
       }
@@ -435,7 +436,7 @@ void CFoldBlockArea::mousePressEvent(QMouseEvent* pEvt)
 
     block = block.next();
     iTop = iBottom;
-    iBottom = iTop + static_cast<qint32>(m_pCodeEditor->blockBoundingRect(block).height());
+    iBottom = iTop + static_cast<qint32>(m_pCodeEditor->TextEdit()->blockBoundingRect(block).height());
     ++iBlockNumber;
     Q_UNUSED(iBlockNumber)
   }
@@ -467,11 +468,11 @@ void CFoldBlockArea::paintEvent(QPaintEvent* pEvent)
   QColor selectionColor = dLuminance > 0.5 ? hoverColor.darker() :
                               hoverColor.lighter();
 
-  QTextBlock cursorBlock = m_pCodeEditor->textCursor().block();
-  QTextBlock block = m_pCodeEditor->firstVisibleBlock();
-  qint32 iTop = static_cast<qint32>(m_pCodeEditor->blockBoundingGeometry(block)
-                                        .translated(m_pCodeEditor->contentOffset()).top());
-  qint32 iBottom = iTop + static_cast<qint32>(m_pCodeEditor->blockBoundingRect(block).height());
+  QTextBlock cursorBlock = m_pCodeEditor->TextEdit()->textCursor().block();
+  QTextBlock block = m_pCodeEditor->TextEdit()->firstVisibleBlock();
+  qint32 iTop = static_cast<qint32>(m_pCodeEditor->TextEdit()->blockBoundingGeometry(block)
+                                        .translated(m_pCodeEditor->TextEdit()->contentOffset()).top());
+  qint32 iBottom = iTop + static_cast<qint32>(m_pCodeEditor->TextEdit()->blockBoundingRect(block).height());
   qint32 iTextHeight = fontMetrics().height();
 
   std::set<std::pair<QTextBlock, QTextBlock>> foldingSet;
@@ -485,14 +486,14 @@ void CFoldBlockArea::paintEvent(QPaintEvent* pEvent)
     vAllVisibleBlocks.push_back(block);
     block = block.next();
     iTop = iBottom;
-    iBottom = iTop + static_cast<qint32>(m_pCodeEditor->blockBoundingRect(block).height());
+    iBottom = iTop + static_cast<qint32>(m_pCodeEditor->TextEdit()->blockBoundingRect(block).height());
   }
 
   // set start values
   block = vAllVisibleBlocks.front();
-  iTop = static_cast<qint32>(m_pCodeEditor->blockBoundingGeometry(block)
-                                        .translated(m_pCodeEditor->contentOffset()).top());
-  iBottom = iTop + static_cast<qint32>(m_pCodeEditor->blockBoundingRect(block).height());
+  iTop = static_cast<qint32>(m_pCodeEditor->TextEdit()->blockBoundingGeometry(block)
+                                        .translated(m_pCodeEditor->TextEdit()->contentOffset()).top());
+  iBottom = iTop + static_cast<qint32>(m_pCodeEditor->TextEdit()->blockBoundingRect(block).height());
 
   startFoldingStack.push(block);
   endFoldingStack.push(vAllVisibleBlocks.back());
@@ -516,12 +517,12 @@ void CFoldBlockArea::paintEvent(QPaintEvent* pEvent)
       {
         QTextBlock blockEnd = endFoldingStack.top();
         qint32 iFoldingBlockEnd =
-            static_cast<qint32>(m_pCodeEditor->blockBoundingGeometry(blockEnd)
-                                    .translated(m_pCodeEditor->contentOffset()).top()) +
+            static_cast<qint32>(m_pCodeEditor->TextEdit()->blockBoundingGeometry(blockEnd)
+                                    .translated(m_pCodeEditor->TextEdit()->contentOffset()).top()) +
                                 iTextHeight;
         qint32 iFoldingBlockStart =
-            static_cast<qint32>(m_pCodeEditor->blockBoundingGeometry(startFoldingStack.top())
-                                    .translated(m_pCodeEditor->contentOffset()).top());
+            static_cast<qint32>(m_pCodeEditor->TextEdit()->blockBoundingGeometry(startFoldingStack.top())
+                                    .translated(m_pCodeEditor->TextEdit()->contentOffset()).top());
         QRect foldingBlockRect = QRect(0, iFoldingBlockStart, AreaWidth(), iTextHeight);
         foldingBlockRect.setHeight(iFoldingBlockEnd-iFoldingBlockStart);
         painter.fillRect(foldingBlockRect, hoverColor);
@@ -534,13 +535,13 @@ void CFoldBlockArea::paintEvent(QPaintEvent* pEvent)
       }
     }
     iTop = iBottom;
-    iBottom = iTop + static_cast<qint32>(m_pCodeEditor->blockBoundingRect(currentBlock.next()).height());
+    iBottom = iTop + static_cast<qint32>(m_pCodeEditor->TextEdit()->blockBoundingRect(currentBlock.next()).height());
   }
 
   block = vAllVisibleBlocks.front();
-  iTop = static_cast<qint32>(m_pCodeEditor->blockBoundingGeometry(block)
-                                 .translated(m_pCodeEditor->contentOffset()).top());
-  iBottom = iTop + static_cast<qint32>(m_pCodeEditor->blockBoundingRect(block).height());
+  iTop = static_cast<qint32>(m_pCodeEditor->TextEdit()->blockBoundingGeometry(block)
+                                 .translated(m_pCodeEditor->TextEdit()->contentOffset()).top());
+  iBottom = iTop + static_cast<qint32>(m_pCodeEditor->TextEdit()->blockBoundingRect(block).height());
 
   // iterate over blocks and paint arrows
   for (const QTextBlock& currentBlock : vAllVisibleBlocks)
@@ -565,8 +566,9 @@ void CFoldBlockArea::paintEvent(QPaintEvent* pEvent)
               QTextBlock blockEnd = it->second;
               qint32 iFoldingBlockEnd = 0;
               iFoldingBlockEnd =
-                  static_cast<qint32>(m_pCodeEditor->blockBoundingGeometry(blockEnd)
-                                                         .translated(m_pCodeEditor->contentOffset()).top()) +
+                  static_cast<qint32>(
+                                     m_pCodeEditor->TextEdit()->blockBoundingGeometry(blockEnd)
+                                        .translated(m_pCodeEditor->TextEdit()->contentOffset()).top()) +
                   fontMetrics().height();
               QRect foldingBlockRect = QRect(iconBox);
               foldingBlockRect.setHeight(iFoldingBlockEnd-iTop);
@@ -586,7 +588,7 @@ void CFoldBlockArea::paintEvent(QPaintEvent* pEvent)
     }
 
     iTop = iBottom;
-    iBottom = iTop + static_cast<qint32>(m_pCodeEditor->blockBoundingRect(currentBlock.next()).height());
+    iBottom = iTop + static_cast<qint32>(m_pCodeEditor->TextEdit()->blockBoundingRect(currentBlock.next()).height());
   }
 
   if (bNeedsRepaintOfContent)
@@ -646,7 +648,7 @@ CFooterArea::CFooterArea(CScriptEditorWidget* pEditor, CWidgetArea* pWidgetArea)
           this, &CFooterArea::ClearAllErors);
   connect(m_spUi->ErrorPushButton, &QPushButton::clicked,
           this, &CFooterArea::ToggleErrorList);
-  connect(m_pCodeEditor, &CScriptEditorWidget::cursorPositionChanged,
+  connect(m_pCodeEditor->TextEdit().data(), &QPlainTextEdit::cursorPositionChanged,
           this, &CFooterArea::CursorPositionChanged);
 }
 CFooterArea::~CFooterArea()
@@ -705,7 +707,7 @@ void CFooterArea::paintEvent(QPaintEvent* pEvent)
 //
 void CFooterArea::CursorPositionChanged()
 {
-  QTextCursor cursor = m_pCodeEditor->textCursor();
+  QTextCursor cursor = m_pCodeEditor->TextEdit()->textCursor();
   m_spUi->pCursorLabel->setText(QString("Ln:%1 Ch:%2")
                                     .arg(cursor.block().blockNumber()+1) // start at 1
                                     .arg(cursor.positionInBlock()));

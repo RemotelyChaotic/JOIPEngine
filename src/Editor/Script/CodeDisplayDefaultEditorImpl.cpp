@@ -33,7 +33,7 @@ void CCodeDisplayDefaultEditorImpl::Initialize(CEditorModel* pModel)
 //
 void CCodeDisplayDefaultEditorImpl::Clear()
 {
-  m_pCodeEdit->clear();
+  m_pCodeEdit->Clear();
 }
 
 //----------------------------------------------------------------------------------------
@@ -47,7 +47,7 @@ void CCodeDisplayDefaultEditorImpl::ExecutionError(QString sException, qint32 iL
 //
 void CCodeDisplayDefaultEditorImpl::InsertGeneratedCode(const QString& sCode)
 {
-  m_pCodeEdit->insertPlainText(sCode);
+  m_pCodeEdit->InsertText(sCode);
 }
 
 //----------------------------------------------------------------------------------------
@@ -95,5 +95,5 @@ void CCodeDisplayDefaultEditorImpl::Update()
 //
 QString CCodeDisplayDefaultEditorImpl::GetCurrentText() const
 {
-  return m_pCodeEdit->toPlainText();
+  return m_pCodeEdit->Text();
 }

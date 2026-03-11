@@ -1,5 +1,4 @@
 #include "ScriptEditorKeyHandler.h"
-#include "ScriptEditorWidget.h"
 
 #include <QTextCursor>
 #include <QTextDocumentFragment>
@@ -8,7 +7,7 @@ namespace
 {
   template<typename T>
   void RegisterHandler(std::map<Qt::Key, std::shared_ptr<IScriptEditorKeyHandler>>& handlerMap,
-                       CScriptEditorWidget* pCodeEditor,
+                       QPlainTextEdit* pCodeEditor,
                        Qt::Key* pPreviouslyClickedKey)
   {
     std::shared_ptr<IScriptEditorKeyHandler> spEnterHandler =
@@ -22,7 +21,7 @@ namespace
 
 //----------------------------------------------------------------------------------------
 //
-IScriptEditorKeyHandler::IScriptEditorKeyHandler(CScriptEditorWidget* pCodeEditor,
+IScriptEditorKeyHandler::IScriptEditorKeyHandler(QPlainTextEdit* pCodeEditor,
                                                  Qt::Key* pPreviouslyClickedKey) :
   m_pCodeEditor(pCodeEditor), m_pPreviouslyClickedKey(pPreviouslyClickedKey)
 {}
@@ -30,7 +29,7 @@ IScriptEditorKeyHandler::~IScriptEditorKeyHandler() = default;
 
 void IScriptEditorKeyHandler::RegisterHandlers(
     std::map<Qt::Key, std::shared_ptr<IScriptEditorKeyHandler>>& handlerMap,
-    CScriptEditorWidget* pCodeEditor,
+    QPlainTextEdit* pCodeEditor,
     Qt::Key* pPreviouslyClickedKey)
 {
   RegisterHandler<CScriptEditorEnterHandler>(handlerMap, pCodeEditor, pPreviouslyClickedKey);
@@ -41,7 +40,7 @@ void IScriptEditorKeyHandler::RegisterHandlers(
 
 //----------------------------------------------------------------------------------------
 //
-CScriptEditorEnterHandler::CScriptEditorEnterHandler(CScriptEditorWidget* pCodeEditor,
+CScriptEditorEnterHandler::CScriptEditorEnterHandler(QPlainTextEdit* pCodeEditor,
                                                      Qt::Key* pPreviouslyClickedKey) :
     IScriptEditorKeyHandler(pCodeEditor, pPreviouslyClickedKey)
 {
@@ -101,7 +100,7 @@ std::set<Qt::Key> CScriptEditorEnterHandler::HandledKeys() const
 
 //----------------------------------------------------------------------------------------
 //
-CScriptEditorTabHandler::CScriptEditorTabHandler(CScriptEditorWidget* pCodeEditor,
+CScriptEditorTabHandler::CScriptEditorTabHandler(QPlainTextEdit* pCodeEditor,
                                                  Qt::Key* pPreviouslyClickedKey) :
   IScriptEditorKeyHandler(pCodeEditor, pPreviouslyClickedKey)
 {
@@ -147,7 +146,7 @@ std::set<Qt::Key> CScriptEditorTabHandler::HandledKeys() const
 //----------------------------------------------------------------------------------------
 //
 
-CScriptEditorBracesHandler::CScriptEditorBracesHandler(CScriptEditorWidget* pCodeEditor,
+CScriptEditorBracesHandler::CScriptEditorBracesHandler(QPlainTextEdit* pCodeEditor,
                                                        Qt::Key* pPreviouslyClickedKey) :
   IScriptEditorKeyHandler(pCodeEditor, pPreviouslyClickedKey)
 {
@@ -233,7 +232,7 @@ std::set<Qt::Key> CScriptEditorBracesHandler::HandledKeys() const
 
 //----------------------------------------------------------------------------------------
 //
-CScriptEditorQuotesHandler::CScriptEditorQuotesHandler(CScriptEditorWidget* pCodeEditor,
+CScriptEditorQuotesHandler::CScriptEditorQuotesHandler(QPlainTextEdit* pCodeEditor,
                                                        Qt::Key* pPreviouslyClickedKey) :
     IScriptEditorKeyHandler(pCodeEditor, pPreviouslyClickedKey)
 {

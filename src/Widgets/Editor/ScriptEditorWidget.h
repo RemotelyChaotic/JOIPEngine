@@ -21,6 +21,7 @@ class CLineNumberArea;
 class CHighlightedSearchableTextEdit;
 class CEditorSearchBar;
 class CScriptEditorCompleter;
+class CScriptEditorWidgetPrivate;
 class CTextEditZoomEnabler;
 class CWidgetArea;
 class IScriptEditorKeyHandler;
@@ -31,7 +32,7 @@ class QWidget;
 
 //----------------------------------------------------------------------------------------
 //
-class CScriptEditorWidget : public QPlainTextEdit
+class CScriptEditorWidget : public QWidget
 {
   Q_OBJECT
   Q_PROPERTY(bool    caseInsensitiveSearch     READ IsCaseInsensitiveSearchenabled WRITE SetCaseInsensitiveSearch)
@@ -54,7 +55,9 @@ class CScriptEditorWidget : public QPlainTextEdit
   Q_PROPERTY(QColor  widgetsBackgroundColor    READ WidgetsBackgroundColor    WRITE SetWidgetsBackgroundColor   )
   Q_PROPERTY(QColor  wordHighlightColor        READ WordHighlightColor        WRITE SetWordHighlightColor       )
 
+  friend class CScriptEditorWidgetPrivate;
   friend class CFoldBlockArea;
+  friend class CFooterArea;
   friend class CLineNumberArea;
   friend class CWidgetArea;
 
@@ -66,14 +69,20 @@ public:
     eTop = Qt::AlignTop,
     eBottom = Qt::AlignBottom
   };
+  using tAdditionsMap = std::map<EScriptEditorAddonPosition, std::vector<IScriptEditorAddon*>>;
 
   CScriptEditorWidget(QWidget* pParent = nullptr);
   ~CScriptEditorWidget() override;
 
+  void Clear();
+  QTextDocument* Document() const;
+  void InsertText(const QString& sText);
   void SetHighlightDefinition(const QString& sPath);
+  void SetReadOnly(bool bReadOnly);
   void SetTabStopWidth(qint32 iNumSpaces);
   void SetText(const QString& sText);
   void SetTextWhilePreservingCursor(const QString& sText);
+  QString Text() const;
 
   void SetBracketColor0(QColor c);
   const QColor& BracketColor0() const  { return m_bracketColor0; }
@@ -123,6 +132,9 @@ public:
   void UpdateArea(EScriptEditorAddonPosition pos, qint32 iNewBlockCount);
   void ResetAddons();
 
+signals:
+  void SignalTextChanged();
+
 public slots:
   void SlotExecutionError(QString sException, qint32 iLine, QString sStack);
   void SlotSettingCaseInsensitiveSearchChanged(bool bCaseInsensitive);
@@ -132,10 +144,11 @@ public slots:
   void SlotUpdateAllAddons(const QRect& rect, qint32 iDy);
 
 protected:
+  const tAdditionsMap& AdditionsMap() const;
+  QPointer<CScriptEditorWidgetPrivate> TextEdit() const;
+  QPointer<QLabel> WidgetAreaWidget(qint32 iLine);
+
   bool eventFilter(QObject* pTarget, QEvent* pEvent) override;
-  void keyPressEvent(QKeyEvent* pEvt) override;
-  void paintEvent(QPaintEvent* pEvent) override;
-  void resizeEvent(QResizeEvent* pEvent) override;
 
   QRect                                            m_foldSelection;
 
@@ -149,14 +162,12 @@ private slots:
   void UpdateBottomAreaHeight(qint32 iNewBlockCount);
 
 private:
-  QPointer<QLabel> WidgetAreaWidget(qint32 iLine);
-
   std::unique_ptr<KSyntaxHighlighting::Repository> m_spRepository;
+  QPointer<CScriptEditorWidgetPrivate>             m_pTextEditor;
   QPointer<CScriptEditorCompleter>                 m_pCompleter;
   QPointer<CHighlightedSearchableTextEdit>         m_pHighlightedSearchableEdit;
   QPointer<CTextEditZoomEnabler>                   m_pZoomEnabler;
-  std::map<EScriptEditorAddonPosition, std::vector<IScriptEditorAddon*>>
-                                                   m_vpEditorAddonsMap;
+  tAdditionsMap                                    m_vpEditorAddonsMap;
   std::map<Qt::Key, std::shared_ptr<IScriptEditorKeyHandler>>
                                                    m_vpEditorKeyHandlerMap;
   std::function<QPointer<QLabel>(qint32)>          m_fnWidget;

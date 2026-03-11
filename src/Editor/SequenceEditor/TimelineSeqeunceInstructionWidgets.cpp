@@ -1446,7 +1446,7 @@ CTimelineSeqeunceInstructionWidgetEval::CTimelineSeqeunceInstructionWidgetEval(Q
   m_spUi(std::make_unique<Ui::CTimelineSeqeunceInstructionWidgetEval>())
 {
   m_spUi->setupUi(this);
-  connect(m_spUi->pScriptEditor, &CScriptEditorWidget::textChanged,
+  connect(m_spUi->pScriptEditor, &CScriptEditorWidget::SignalTextChanged,
           this, &CTimelineSeqeunceInstructionWidgetEval::EmitPropertiesChanged);
 
   auto spSettings = CApplication::Instance()->Settings();
@@ -1487,7 +1487,7 @@ void CTimelineSeqeunceInstructionWidgetEval::SetProperties(const std::shared_ptr
   m_sType = spInstr->m_sInstructionType;
 
   auto spInstrCasted = std::dynamic_pointer_cast<SEvalInstruction>(spInstr);
-  m_spUi->pScriptEditor->setPlainText(spInstrCasted->m_sScript);
+  m_spUi->pScriptEditor->SetText(spInstrCasted->m_sScript);
 
   m_bIsInitializing = false;
 }
@@ -1497,6 +1497,6 @@ void CTimelineSeqeunceInstructionWidgetEval::SetProperties(const std::shared_ptr
 std::shared_ptr<SSequenceInstruction> CTimelineSeqeunceInstructionWidgetEval::Properties() const
 {
   QVariantList args;
-  args << m_spUi->pScriptEditor->toPlainText();
+  args << m_spUi->pScriptEditor->Text();
   return sequence::CreateInstruction(m_sType, args);
 }

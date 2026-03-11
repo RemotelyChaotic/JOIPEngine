@@ -2,6 +2,7 @@
 #define CSCRIPTEDITORKEYHANDLER_H
 
 #include <QKeyEvent>
+#include <QPlainTextEdit>
 
 #include <map>
 #include <memory>
@@ -12,7 +13,7 @@ class CScriptEditorWidget;
 class IScriptEditorKeyHandler
 {
 public:
-  IScriptEditorKeyHandler(CScriptEditorWidget* pCodeEditor,
+  IScriptEditorKeyHandler(QPlainTextEdit* pCodeEditor,
                           Qt::Key* pPreviouslyClickedKey);
   virtual ~IScriptEditorKeyHandler();
 
@@ -20,11 +21,11 @@ public:
   virtual std::set<Qt::Key> HandledKeys() const = 0;
 
   static void RegisterHandlers(std::map<Qt::Key, std::shared_ptr<IScriptEditorKeyHandler>>& handlerMap,
-                               CScriptEditorWidget* pCodeEditor,
+                               QPlainTextEdit* pCodeEditor,
                                Qt::Key* pPreviouslyClickedKey);
 
 protected:
-  CScriptEditorWidget*               m_pCodeEditor;
+  QPlainTextEdit*                    m_pCodeEditor;
   Qt::Key*                           m_pPreviouslyClickedKey;
 };
 
@@ -33,7 +34,7 @@ protected:
 class CScriptEditorEnterHandler : public IScriptEditorKeyHandler
 {
 public:
-  CScriptEditorEnterHandler(CScriptEditorWidget* pCodeEditor,
+  CScriptEditorEnterHandler(QPlainTextEdit* pCodeEditor,
                             Qt::Key* pPreviouslyClickedKey);
   ~CScriptEditorEnterHandler() override;
 
@@ -46,8 +47,8 @@ public:
 class CScriptEditorTabHandler : public IScriptEditorKeyHandler
 {
 public:
-  CScriptEditorTabHandler(CScriptEditorWidget* pCodeEditor,
-                            Qt::Key* pPreviouslyClickedKey);
+  CScriptEditorTabHandler(QPlainTextEdit* pCodeEditor,
+                          Qt::Key* pPreviouslyClickedKey);
   ~CScriptEditorTabHandler() override;
 
   bool KeyEvent(QKeyEvent* pKeyEvent) override;
@@ -59,7 +60,7 @@ public:
 class CScriptEditorBracesHandler : public IScriptEditorKeyHandler
 {
 public:
-  CScriptEditorBracesHandler(CScriptEditorWidget* pCodeEditor,
+  CScriptEditorBracesHandler(QPlainTextEdit* pCodeEditor,
                              Qt::Key* pPreviouslyClickedKey);
   ~CScriptEditorBracesHandler() override;
 
@@ -72,7 +73,7 @@ public:
 class CScriptEditorQuotesHandler : public IScriptEditorKeyHandler
 {
 public:
-  CScriptEditorQuotesHandler(CScriptEditorWidget* pCodeEditor,
+  CScriptEditorQuotesHandler(QPlainTextEdit* pCodeEditor,
                              Qt::Key* pPreviouslyClickedKey);
   ~CScriptEditorQuotesHandler() override;
 
