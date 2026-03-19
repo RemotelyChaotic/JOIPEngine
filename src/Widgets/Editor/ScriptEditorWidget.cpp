@@ -660,7 +660,7 @@ QPointer<QLabel> CScriptEditorWidget::WidgetAreaWidget(qint32 iLine)
 //
 bool CScriptEditorWidget::eventFilter(QObject* pTarget, QEvent* pEvent)
 {
-  if (nullptr != pEvent && this == pTarget)
+  if (nullptr != pEvent && pTarget == m_pTextEditor)
   {
     if (QEvent::KeyPress == pEvent->type())
     {
