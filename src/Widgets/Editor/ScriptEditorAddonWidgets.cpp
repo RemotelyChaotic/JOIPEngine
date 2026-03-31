@@ -361,6 +361,15 @@ void CFoldBlockArea::Update(const QRect& rect, qint32 iDy)
 
 //----------------------------------------------------------------------------------------
 //
+void CFoldBlockArea::leaveEvent(QEvent*)
+{
+  m_pCodeEditor->m_foldSelection = QRect();
+  m_pCodeEditor->TextEdit()->viewport()->update();
+  m_pCodeEditor->TextEdit()->repaint();
+}
+
+//----------------------------------------------------------------------------------------
+//
 void CFoldBlockArea::mousePressEvent(QMouseEvent* pEvt)
 {
   QTextBlock block = m_pCodeEditor->TextEdit()->firstVisibleBlock();
@@ -430,7 +439,8 @@ void CFoldBlockArea::mousePressEvent(QMouseEvent* pEvt)
         m_pCodeEditor->SlotUpdateAllAddons(
             QRect(0, m_pCodeEditor->TextEdit()->viewport()->rect().y(),
                    m_pCodeEditor->width(), m_pCodeEditor->TextEdit()->viewport()->rect().height()), 0);
-        m_pCodeEditor->repaint();
+        m_pCodeEditor->TextEdit()->viewport()->update();
+        m_pCodeEditor->TextEdit()->repaint();
         update();
       }
     }
@@ -445,6 +455,83 @@ void CFoldBlockArea::mousePressEvent(QMouseEvent* pEvt)
 
 //----------------------------------------------------------------------------------------
 //
+void CFoldBlockArea::mouseMoveEvent(QMouseEvent* pEvt)
+{
+  bool bNeedsRepaintOfContent = false;
+  if (!m_pCodeEditor->m_foldSelection.isNull())
+  {
+    m_pCodeEditor->m_foldSelection = QRect();
+    bNeedsRepaintOfContent = true;
+  }
+
+  qint32 iTextHeight = fontMetrics().height();
+
+  QRect foldingBlockRect;
+  qint32 iTop = 0;
+  qint32 iBottom = 0;
+  std::vector<QTextBlock> vAllVisibleBlocks;
+  std::set<std::pair<QTextBlock, QTextBlock>> foldingSet;
+
+  GetBlocks(rect(), vAllVisibleBlocks, foldingSet, iTop, iBottom,
+            foldingBlockRect);
+
+  // iterate over blocks and paint arrows
+  for (const QTextBlock& currentBlock : vAllVisibleBlocks)
+  {
+    if (iBottom >= rect().top())
+    {
+      auto it =
+          std::find_if(foldingSet.begin(), foldingSet.end(),
+                       [&currentBlock](const std::pair<QTextBlock, QTextBlock>& pair)
+                       {
+                         return pair.first == currentBlock;
+                       });
+      if (foldingSet.end() != it)
+      {
+        if (currentBlock.isVisible())
+        {
+          if (currentBlock.next().isVisible())
+          {
+            QPoint globalCursorPos = pEvt->globalPos();
+            QRect iconBox = QRect(0, iTop, AreaWidth(), iTextHeight);
+            QPoint localPos = mapFromGlobal(globalCursorPos);
+            if (iconBox.contains(localPos))
+            {
+              QTextBlock blockEnd = it->second;
+              qint32 iFoldingBlockEnd = 0;
+              iFoldingBlockEnd =
+                  static_cast<qint32>(
+                      m_pCodeEditor->TextEdit()
+                          ->blockBoundingGeometry(blockEnd)
+                          .translated(m_pCodeEditor->TextEdit()->contentOffset())
+                          .top()) +
+                  fontMetrics().height();
+              QRect foldingBlockRect = QRect(iconBox);
+              foldingBlockRect.setHeight(iFoldingBlockEnd - iTop);
+              m_pCodeEditor->m_foldSelection = foldingBlockRect;
+              bNeedsRepaintOfContent = true;
+            }
+          }
+        }
+      }
+    }
+
+    iTop = iBottom;
+    iBottom =
+        iTop +
+        static_cast<qint32>(
+            m_pCodeEditor->TextEdit()->blockBoundingRect(currentBlock.next()).height());
+  }
+
+  if (bNeedsRepaintOfContent)
+  {
+    m_pCodeEditor->TextEdit()->viewport()->update();
+    m_pCodeEditor->TextEdit()->repaint();
+  }
+}
+
+//----------------------------------------------------------------------------------------
+//
 void CFoldBlockArea::paintEvent(QPaintEvent* pEvent)
 {
   QPainter painter(this);
@@ -453,48 +540,108 @@ void CFoldBlockArea::paintEvent(QPaintEvent* pEvent)
 
   painter.fillRect(pEvent->rect(), foldAreaBackgroundColor);
 
-  bool bNeedsRepaintOfContent = false;
-  if (!m_pCodeEditor->m_foldSelection.isNull())
-  {
-    m_pCodeEditor->m_foldSelection = QRect();
-    bNeedsRepaintOfContent = true;
-  }
-
   double dLuminance = (0.299 * foldAreaBackgroundColor.red() +
                        0.587 * foldAreaBackgroundColor.green() +
                        0.114 * foldAreaBackgroundColor.blue()) / 255;
 
   QColor hoverColor = dLuminance > 0.5 ? lineNumberBackgroundColor.darker() :
-                         lineNumberBackgroundColor.lighter();
+                          lineNumberBackgroundColor.lighter();
   QColor selectionColor = dLuminance > 0.5 ? hoverColor.darker() :
                               hoverColor.lighter();
+  qint32 iTextHeight = fontMetrics().height();
+
+  QRect foldingBlockRect;
+  qint32 iTop = 0;
+  qint32 iBottom = 0;
+  std::vector<QTextBlock> vAllVisibleBlocks;
+  std::set<std::pair<QTextBlock, QTextBlock>> foldingSet;
+
+  GetBlocks(pEvent->rect(), vAllVisibleBlocks, foldingSet, iTop, iBottom,
+            foldingBlockRect);
+
+
+  if (!foldingBlockRect.isNull())
+  {
+    painter.fillRect(foldingBlockRect, hoverColor);
+  }
+
+  // iterate over blocks and paint arrows
+  for (const QTextBlock& currentBlock : vAllVisibleBlocks)
+  {
+    if (iBottom >= pEvent->rect().top())
+    {
+      auto it = std::find_if(foldingSet.begin(), foldingSet.end(),
+                             [&currentBlock](const std::pair<QTextBlock, QTextBlock>& pair) {
+                               return pair.first == currentBlock;
+                             });
+      if (foldingSet.end() != it)
+      {
+        if (currentBlock.isVisible())
+        {
+          QRect iconBox = QRect(0, iTop, AreaWidth(), iTextHeight);
+          if (currentBlock.next().isVisible())
+          {
+            m_pCodeEditor->IconUnfolded().paint(&painter, iconBox);
+          }
+          else
+          {
+            m_pCodeEditor->IconFolded().paint(&painter, iconBox);
+          }
+        }
+      }
+    }
+
+    iTop = iBottom;
+    iBottom = iTop + static_cast<qint32>(m_pCodeEditor->TextEdit()->blockBoundingRect(currentBlock.next()).height());
+  }
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CFoldBlockArea::CursorPositionChanged()
+{
+  repaint();
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CFoldBlockArea::GetBlocks(const QRect& rect,
+                               std::vector<QTextBlock>& vAllVisibleBlocks,
+                               std::set<std::pair<QTextBlock, QTextBlock>>& foldingSet,
+                               qint32& iTop, qint32& iBottom, QRect& foldingBlockRect)
+{
+  std::stack<QTextBlock> startFoldingStack;
+  std::stack<QTextBlock> endFoldingStack;
 
   QTextBlock cursorBlock = m_pCodeEditor->TextEdit()->textCursor().block();
   QTextBlock block = m_pCodeEditor->TextEdit()->firstVisibleBlock();
-  qint32 iTop = static_cast<qint32>(m_pCodeEditor->TextEdit()->blockBoundingGeometry(block)
-                                        .translated(m_pCodeEditor->TextEdit()->contentOffset()).top());
-  qint32 iBottom = iTop + static_cast<qint32>(m_pCodeEditor->TextEdit()->blockBoundingRect(block).height());
+  iTop =
+      static_cast<qint32>(m_pCodeEditor->TextEdit()
+                             ->blockBoundingGeometry(block)
+                             .translated(m_pCodeEditor->TextEdit()->contentOffset())
+                             .top());
+  iBottom = iTop + static_cast<qint32>(
+                m_pCodeEditor->TextEdit()->blockBoundingRect(block).height());
   qint32 iTextHeight = fontMetrics().height();
 
-  std::set<std::pair<QTextBlock, QTextBlock>> foldingSet;
-  std::stack<QTextBlock> startFoldingStack;
-  std::stack<QTextBlock> endFoldingStack;
-  std::vector<QTextBlock> vAllVisibleBlocks;
-
   // first find all visible blocks
-  while (block.isValid() && iTop <= pEvent->rect().bottom())
+  while (block.isValid() && iTop <= rect.bottom())
   {
     vAllVisibleBlocks.push_back(block);
     block = block.next();
     iTop = iBottom;
-    iBottom = iTop + static_cast<qint32>(m_pCodeEditor->TextEdit()->blockBoundingRect(block).height());
+    iBottom = iTop + static_cast<qint32>(
+                  m_pCodeEditor->TextEdit()->blockBoundingRect(block).height());
   }
 
   // set start values
   block = vAllVisibleBlocks.front();
-  iTop = static_cast<qint32>(m_pCodeEditor->TextEdit()->blockBoundingGeometry(block)
-                                        .translated(m_pCodeEditor->TextEdit()->contentOffset()).top());
-  iBottom = iTop + static_cast<qint32>(m_pCodeEditor->TextEdit()->blockBoundingRect(block).height());
+  iTop = static_cast<qint32>(m_pCodeEditor->TextEdit()
+                                ->blockBoundingGeometry(block)
+                                .translated(m_pCodeEditor->TextEdit()->contentOffset())
+                                .top());
+  iBottom = iTop + static_cast<qint32>(
+                m_pCodeEditor->TextEdit()->blockBoundingRect(block).height());
 
   startFoldingStack.push(block);
   endFoldingStack.push(vAllVisibleBlocks.back());
@@ -502,14 +649,14 @@ void CFoldBlockArea::paintEvent(QPaintEvent* pEvent)
   // iterate over blocks and find current block
   for (const QTextBlock& currentBlock : vAllVisibleBlocks)
   {
-    if (iBottom >= pEvent->rect().top())
+    if (iBottom >= rect.top())
     {
       if (m_pCodeEditor->Highlighter()->startsFoldingRegion(currentBlock))
       {
         QTextBlock blockStartFolding = currentBlock;
         QTextBlock endBlockFolding =
             m_pCodeEditor->Highlighter()->findFoldingRegionEnd(blockStartFolding);
-        foldingSet.insert({currentBlock, endBlockFolding});
+        foldingSet.insert({ currentBlock, endBlockFolding });
         startFoldingStack.push(currentBlock);
         endFoldingStack.push(endBlockFolding);
       }
@@ -518,15 +665,17 @@ void CFoldBlockArea::paintEvent(QPaintEvent* pEvent)
       {
         QTextBlock blockEnd = endFoldingStack.top();
         qint32 iFoldingBlockEnd =
-            static_cast<qint32>(m_pCodeEditor->TextEdit()->blockBoundingGeometry(blockEnd)
-                                    .translated(m_pCodeEditor->TextEdit()->contentOffset()).top()) +
-                                iTextHeight;
+            static_cast<qint32>(m_pCodeEditor->TextEdit()
+                                   ->blockBoundingGeometry(blockEnd)
+                                   .translated(m_pCodeEditor->TextEdit()->contentOffset())
+                                   .top()) + iTextHeight;
         qint32 iFoldingBlockStart =
-            static_cast<qint32>(m_pCodeEditor->TextEdit()->blockBoundingGeometry(startFoldingStack.top())
-                                    .translated(m_pCodeEditor->TextEdit()->contentOffset()).top());
-        QRect foldingBlockRect = QRect(0, iFoldingBlockStart, AreaWidth(), iTextHeight);
-        foldingBlockRect.setHeight(iFoldingBlockEnd-iFoldingBlockStart);
-        painter.fillRect(foldingBlockRect, hoverColor);
+            static_cast<qint32>(m_pCodeEditor->TextEdit()
+                                   ->blockBoundingGeometry(startFoldingStack.top())
+                                   .translated(m_pCodeEditor->TextEdit()->contentOffset())
+                                   .top());
+        foldingBlockRect = QRect(0, iFoldingBlockStart, AreaWidth(), iTextHeight);
+        foldingBlockRect.setHeight(iFoldingBlockEnd - iFoldingBlockStart);
       }
 
       if (endFoldingStack.top() == currentBlock)
@@ -536,73 +685,19 @@ void CFoldBlockArea::paintEvent(QPaintEvent* pEvent)
       }
     }
     iTop = iBottom;
-    iBottom = iTop + static_cast<qint32>(m_pCodeEditor->TextEdit()->blockBoundingRect(currentBlock.next()).height());
+    iBottom =
+        iTop +
+        static_cast<qint32>(
+            m_pCodeEditor->TextEdit()->blockBoundingRect(currentBlock.next()).height());
   }
 
   block = vAllVisibleBlocks.front();
-  iTop = static_cast<qint32>(m_pCodeEditor->TextEdit()->blockBoundingGeometry(block)
-                                 .translated(m_pCodeEditor->TextEdit()->contentOffset()).top());
-  iBottom = iTop + static_cast<qint32>(m_pCodeEditor->TextEdit()->blockBoundingRect(block).height());
-
-  // iterate over blocks and paint arrows
-  for (const QTextBlock& currentBlock : vAllVisibleBlocks)
-  {
-    if (iBottom >= pEvent->rect().top())
-    {
-      auto it = std::find_if(foldingSet.begin(), foldingSet.end(),
-                             [&currentBlock](const std::pair<QTextBlock, QTextBlock>& pair) {
-        return pair.first == currentBlock;
-      });
-      if (foldingSet.end() != it)
-      {
-        if (currentBlock.isVisible())
-        {
-          if (currentBlock.next().isVisible())
-          {
-            QPoint globalCursorPos = QCursor::pos();
-            QRect iconBox = QRect(0, iTop, AreaWidth(), iTextHeight);
-            QPoint localPos = mapFromGlobal(globalCursorPos);
-            if (iconBox.contains(localPos))
-            {
-              QTextBlock blockEnd = it->second;
-              qint32 iFoldingBlockEnd = 0;
-              iFoldingBlockEnd =
-                  static_cast<qint32>(
-                                     m_pCodeEditor->TextEdit()->blockBoundingGeometry(blockEnd)
-                                        .translated(m_pCodeEditor->TextEdit()->contentOffset()).top()) +
-                  fontMetrics().height();
-              QRect foldingBlockRect = QRect(iconBox);
-              foldingBlockRect.setHeight(iFoldingBlockEnd-iTop);
-              painter.fillRect(foldingBlockRect, selectionColor);
-              m_pCodeEditor->m_foldSelection = foldingBlockRect;
-              bNeedsRepaintOfContent = true;
-            }
-            m_pCodeEditor->IconUnfolded().paint(&painter, iconBox);
-          }
-          else
-          {
-            m_pCodeEditor->IconFolded().paint(&painter,
-                                              QRect(0, iTop, AreaWidth(), AreaWidth()));
-          }
-        }
-      }
-    }
-
-    iTop = iBottom;
-    iBottom = iTop + static_cast<qint32>(m_pCodeEditor->TextEdit()->blockBoundingRect(currentBlock.next()).height());
-  }
-
-  if (bNeedsRepaintOfContent)
-  {
-    m_pCodeEditor->update();
-  }
-}
-
-//----------------------------------------------------------------------------------------
-//
-void CFoldBlockArea::CursorPositionChanged()
-{
-  repaint();
+  iTop = static_cast<qint32>(m_pCodeEditor->TextEdit()
+                                ->blockBoundingGeometry(block)
+                                .translated(m_pCodeEditor->TextEdit()->contentOffset())
+                                .top());
+  iBottom = iTop + static_cast<qint32>(
+                m_pCodeEditor->TextEdit()->blockBoundingRect(block).height());
 }
 
 //----------------------------------------------------------------------------------------

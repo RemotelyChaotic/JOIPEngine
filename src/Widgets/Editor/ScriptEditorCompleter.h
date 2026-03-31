@@ -25,6 +25,7 @@ public:
   void SetCompleterColumn(qint32 column);
   void SetEndOfwordFunction(std::function<bool(QString)> fn);
   void SetModel(QAbstractItemModel* pModel);
+  void SetMemberDelimiterCharacters(const QStringList& vsChars);
 
   bool keyPressEvent(QKeyEvent* pEvt);
 
@@ -48,6 +49,7 @@ private:
   QPointer<QPlainTextEdit>      m_pEditorPlain;
   QTimer                        m_changedTimer;
   std::function<bool(const QString&)> m_fnEndOfWord;
+  QStringList                         m_vsMemberDelimiterChars;
 };
 
 #endif // CSCRIPTEDITORCOMPLETER_H

@@ -425,6 +425,7 @@ void CScriptEditorWidget::HighlightCurrentLine()
   }
 
   m_pTextEditor->setExtraSelections(vExtraSelections);
+  m_pTextEditor->viewport()->update();
   m_pTextEditor->repaint();
 }
 
@@ -625,13 +626,18 @@ void CScriptEditorWidget::SlotSettingThemeChanged(const QString& sTheme)
 //
 void CScriptEditorWidget::SlotUpdateAllAddons(const QRect& rect, qint32 iDy)
 {
-  for (auto [pos, vpAddons] : m_vpEditorAddonsMap)
+  if (!m_bRecursionBlock)
   {
-    Q_UNUSED(pos)
-    for (IScriptEditorAddon* pAddon : vpAddons)
+    m_bRecursionBlock = true;
+    for (auto [pos, vpAddons] : m_vpEditorAddonsMap)
     {
-      pAddon->Update(rect, iDy);
+      Q_UNUSED(pos)
+      for (IScriptEditorAddon* pAddon : vpAddons)
+      {
+        pAddon->Update(rect, iDy);
+      }
     }
+   m_bRecursionBlock = false;
   }
 }
 

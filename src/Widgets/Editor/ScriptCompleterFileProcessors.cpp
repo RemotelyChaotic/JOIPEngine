@@ -19,7 +19,7 @@
 #include <QDomDocument>
 #include <QFile>
 
-namespace
+namespace file_processor
 {
   //--------------------------------------------------------------------------------------
   //
@@ -28,7 +28,10 @@ namespace
     static const QString sEowDefault("~!@#$%^&*()+{}|:\"<>?,./;'[]\\-=");
     return sEowDefault.contains(c) || c.isSpace();
   }
+}
 
+namespace
+{
   //--------------------------------------------------------------------------------------
   //
   bool StringIsNumber(const QString& sStr)
@@ -163,7 +166,11 @@ CScriptCompleterFileProcessorJs::CScriptCompleterFileProcessorJs() :
         auto attrs = node.attributes();
         if (attrs.contains("name"))
         {
-          m_vsInbuiltKeywords.insert(attrs.namedItem("name").toElement().text());
+          auto sName = attrs.namedItem("name").toElement().text();
+          if (!sName.isEmpty())
+          {
+            m_vsInbuiltKeywords.insert(sName);
+          }
         }
         QDomNodeList itemNodes = node.toElement().elementsByTagName("item");
         for(qint32 j = 0; itemNodes.count() > j; ++j)
@@ -171,7 +178,11 @@ CScriptCompleterFileProcessorJs::CScriptCompleterFileProcessorJs() :
           QDomNode itemNode = itemNodes.at(j);
           if (itemNode.isElement())
           {
-            m_vsInbuiltKeywords.insert(node.toElement().text());
+            auto sNode = node.toElement().text();
+            if (!sNode.isEmpty())
+            {
+              m_vsInbuiltKeywords.insert(sNode);
+            }
           }
         }
       }
@@ -197,7 +208,7 @@ CScriptCompleterFileProcessorJs::~CScriptCompleterFileProcessorJs() = default;
 //
 bool CScriptCompleterFileProcessorJs::IsEndOfWordChar(QChar c) const
 {
-  return IsEowCharDefault(c);
+  return file_processor::IsEowCharDefault(c);
 }
 
 //----------------------------------------------------------------------------------------
@@ -236,7 +247,11 @@ CScriptCompleterFileProcessorLua::CScriptCompleterFileProcessorLua() :
         auto attrs = node.attributes();
         if (attrs.contains("name"))
         {
-          m_vsInbuiltKeywords.insert(attrs.namedItem("name").toElement().text());
+          auto sName = attrs.namedItem("name").toElement().text();
+          if (!sName.isEmpty())
+          {
+            m_vsInbuiltKeywords.insert(sName);
+          }
         }
         QDomNodeList itemNodes = node.toElement().elementsByTagName("item");
         for(qint32 j = 0; itemNodes.count() > j; ++j)
@@ -248,7 +263,10 @@ CScriptCompleterFileProcessorLua::CScriptCompleterFileProcessorLua() :
             QStringList vs = s.split(".");
             for (const QString& sVal : vs)
             {
-              m_vsInbuiltKeywords.insert(sVal);
+              if (!sVal.isEmpty())
+              {
+                m_vsInbuiltKeywords.insert(sVal);
+              }
             }
           }
         }
@@ -274,7 +292,7 @@ CScriptCompleterFileProcessorLua::~CScriptCompleterFileProcessorLua() = default;
 //
 bool CScriptCompleterFileProcessorLua::IsEndOfWordChar(QChar c) const
 {
-  return IsEowCharDefault(c);
+  return file_processor::IsEowCharDefault(c);
 }
 
 //----------------------------------------------------------------------------------------
@@ -312,7 +330,11 @@ CScriptCompleterFileProcessorQml::CScriptCompleterFileProcessorQml() :
           auto attrs = node.attributes();
           if (attrs.contains("name"))
           {
-            m_vsInbuiltKeywords.insert(attrs.namedItem("name").toElement().text());
+            auto sName = attrs.namedItem("name").toElement().text();
+            if (!sName.isEmpty())
+            {
+              m_vsInbuiltKeywords.insert(sName);
+            }
           }
           QDomNodeList itemNodes = node.toElement().elementsByTagName("item");
           for(qint32 j = 0; itemNodes.count() > j; ++j)
@@ -320,7 +342,11 @@ CScriptCompleterFileProcessorQml::CScriptCompleterFileProcessorQml() :
             QDomNode itemNode = itemNodes.at(j);
             if (itemNode.isElement())
             {
-              m_vsInbuiltKeywords.insert(node.toElement().text());
+              auto sNode = node.toElement().text();
+              if (!sNode.isEmpty())
+              {
+                m_vsInbuiltKeywords.insert(sNode);
+              }
             }
           }
         }
@@ -344,7 +370,7 @@ CScriptCompleterFileProcessorQml::~CScriptCompleterFileProcessorQml() = default;
 //
 bool CScriptCompleterFileProcessorQml::IsEndOfWordChar(QChar c) const
 {
-  return IsEowCharDefault(c);
+  return file_processor::IsEowCharDefault(c);
 }
 
 //----------------------------------------------------------------------------------------

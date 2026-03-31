@@ -6,9 +6,11 @@
 #include <QLabel>
 #include <QListWidget>
 #include <QPointer>
+#include <QTextBlock>
 #include <QWidget>
 
 #include <functional>
+#include <set>
 
 class CScriptEditorWidget;
 namespace Ui {
@@ -90,13 +92,19 @@ public:
   void Update(const QRect& rect, qint32 iDy) override;
 
 protected:
+  void leaveEvent(QEvent* pEvt) override;
   void mousePressEvent(QMouseEvent* pEvt) override;
+  void mouseMoveEvent(QMouseEvent* pEvt) override;
   void paintEvent(QPaintEvent *event) override;
 
 protected slots:
   void CursorPositionChanged();
 
 private:
+  void GetBlocks(const QRect& rect, std::vector<QTextBlock>& vAllVisibleBlocks,
+                 std::set<std::pair<QTextBlock, QTextBlock>>& foldingSet, qint32& iTop,
+                 qint32& iBottom, QRect& foldingBlockRect);
+
   CScriptEditorWidget*               m_pCodeEditor = nullptr;
 };
 

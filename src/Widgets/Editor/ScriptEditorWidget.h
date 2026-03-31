@@ -191,7 +191,8 @@ private:
   qint32                                           m_iTabStopWidth;
   qint32                                           m_iFontSize;
   QString                                          m_sFontFamily;
-  bool                                             m_bShowWhitespaceEnabled = true;
+  bool                                             m_bShowWhitespaceEnabled = false;
+  bool                                             m_bRecursionBlock = false;
 };
 
 #endif // SCRIPTEDITORWIDGET_H

@@ -1,5 +1,6 @@
 #include "ScriptEditorCompleter.h"
 #include "ScriptEditorWidget.h"
+#include "ScriptCompleterFileProcessors.h"
 
 #include <QAbstractItemView>
 #include <QScrollBar>
@@ -263,6 +264,13 @@ void CScriptEditorCompleter::SetModel(QAbstractItemModel* pModel)
 
 //----------------------------------------------------------------------------------------
 //
+void CScriptEditorCompleter::SetMemberDelimiterCharacters(const QStringList& vsChars)
+{
+  m_vsMemberDelimiterChars = vsChars;
+}
+
+//----------------------------------------------------------------------------------------
+//
 bool CScriptEditorCompleter::keyPressEvent(QKeyEvent* pKeyEvt)
 {
   qint32 k = pKeyEvt->key();
@@ -310,19 +318,36 @@ bool CScriptEditorCompleter::keyPressEvent(QKeyEvent* pKeyEvt)
 
   const bool bHasModifier = (pKeyEvt->modifiers() != Qt::NoModifier) && !bCtrlOrShift;
   QString sCompletionPrefix = TextUnderCursor(pKeyEvt);
+  QString sOldCompletionPrefix = m_pCompleter->completionPrefix();
+  bool bBelowLengthThresh = sCompletionPrefix.length() < 3;
+  bool bIsCompleterOpen = IsCompleterOpen();
 
-  if (bHasModifier || pKeyEvt->text().isEmpty() || sCompletionPrefix.length() < 3 ||
-      (nullptr != m_fnEndOfWord && m_fnEndOfWord(pKeyEvt->text().right(1))) )
+  if (m_vsMemberDelimiterChars.empty() ||
+      !m_vsMemberDelimiterChars.contains(pKeyEvt->text()))
   {
-    m_pCompleter->setCompletionPrefix(QString());
-    m_pCompleter->popup()->hide();
-    return false;
+    if (bHasModifier || pKeyEvt->text().isEmpty() ||
+        (nullptr != m_fnEndOfWord && m_fnEndOfWord(pKeyEvt->text().right(1))))
+    {
+      m_pCompleter->setCompletionPrefix(QString());
+      m_pCompleter->popup()->hide();
+      return false;
+    }
+    else if (bBelowLengthThresh && !bIsCompleterOpen)
+    {
+      m_pCompleter->setCompletionPrefix(QString());
+      return false;
+    }
+  }
+  else
+  {
+    sCompletionPrefix = QString();
   }
 
-  if (sCompletionPrefix != m_pCompleter->completionPrefix())
+  if (sCompletionPrefix != sOldCompletionPrefix)
   {
     m_pCompleter->setCompletionPrefix(sCompletionPrefix);
-    m_pCompleter->popup()->setCurrentIndex(m_pCompleter->completionModel()->index(0, 0));
+    m_pCompleter->popup()->setCurrentIndex(
+        m_pCompleter->completionModel()->index(0, m_pCompleter->completionColumn()));
   }
   QRect cr;
   if (nullptr != m_pEditor)
@@ -461,8 +486,9 @@ void CScriptEditorCompleter::Init(QWidget* pWidget)
   m_pCompleter->setCompletionMode(QCompleter::PopupCompletion);
   m_pModelWrapper = new CEditorModelWrapper(m_pCompleter);
   m_pCompleter->setModel(m_pModelWrapper);
-  m_pCompleter->setModelSorting(QCompleter::CaseInsensitivelySortedModel);
+  m_pCompleter->setModelSorting(QCompleter::CaseSensitivelySortedModel);
   m_pCompleter->setCaseSensitivity(Qt::CaseInsensitive);
+  m_pCompleter->setFilterMode(Qt::MatchContains);
   m_pCompleter->setWrapAround(false);
   QObject::connect(m_pCompleter, QOverload<const QString &>::of(&QCompleter::activated),
                    this, &CScriptEditorCompleter::SlotInsertCompletion);
@@ -470,6 +496,15 @@ void CScriptEditorCompleter::Init(QWidget* pWidget)
   m_changedTimer.setInterval(c_iTimerInterval);
   m_changedTimer.setSingleShot(true);
   connect(&m_changedTimer, &QTimer::timeout, this, [this]() { SlotTimeoutInteraction(); });
+
+  m_fnEndOfWord = [](const QString& s)
+  {
+    if (s.size() > 0)
+    {
+      return file_processor::IsEowCharDefault(s[0]);
+    }
+    return false;
+  };
 }
 
 //----------------------------------------------------------------------------------------

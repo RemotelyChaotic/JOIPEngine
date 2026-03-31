@@ -27,7 +27,7 @@ public:
   virtual void ProcessLine(int destRole, const QString& sLine, SCompleterModelData* pOutData) = 0;
 
 protected:
-  ~IScriptCompleterFileProcessor();
+  virtual ~IScriptCompleterFileProcessor();
 };
 
 //----------------------------------------------------------------------------------------

@@ -3,11 +3,16 @@
 
 #include "ScriptEditorCompleterModel.h"
 
+namespace file_processor
+{
+  bool IsEowCharDefault(QChar c);
+}
+
 class CScriptCompleterFileProcessorJs : public IScriptCompleterFileProcessor
 {
 public:
   CScriptCompleterFileProcessorJs();
-  virtual ~CScriptCompleterFileProcessorJs();
+  ~CScriptCompleterFileProcessorJs() override;
 
   bool IsEndOfWordChar(QChar c) const override;
   void ProcessFile(int destRole, QTextStream& data, SCompleterModelData* pOutData) override;
@@ -21,7 +26,7 @@ class CScriptCompleterFileProcessorLua : public IScriptCompleterFileProcessor
 {
 public:
   CScriptCompleterFileProcessorLua();
-  virtual ~CScriptCompleterFileProcessorLua();
+  ~CScriptCompleterFileProcessorLua() override;
 
   bool IsEndOfWordChar(QChar c) const override;
   void ProcessFile(int destRole, QTextStream& data, SCompleterModelData* pOutData) override;
@@ -35,7 +40,7 @@ class CScriptCompleterFileProcessorQml : public IScriptCompleterFileProcessor
 {
 public:
   CScriptCompleterFileProcessorQml();
-  virtual ~CScriptCompleterFileProcessorQml();
+  ~CScriptCompleterFileProcessorQml() override;
 
   bool IsEndOfWordChar(QChar c) const override;
   void ProcessFile(int destRole, QTextStream& data, SCompleterModelData* pOutData) override;
