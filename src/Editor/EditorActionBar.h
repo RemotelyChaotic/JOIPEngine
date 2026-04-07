@@ -36,7 +36,7 @@ public:
   void EditedProject() override {}
   void Initialize() override;
   void LoadProject(tspProject spProject) override { Q_UNUSED(spProject) }
-  void LoadResource(tspResource spResource) override { Q_UNUSED(spResource) }
+  void LoadResource(tspResource spResource, bool bSpontanious) override { Q_UNUSED(spResource) Q_UNUSED(bSpontanious) }
   void UnloadProject() override {}
   void SaveProject() override {}
   std::vector<EResourceType> SupportedDisplayingResources() override { return {}; }

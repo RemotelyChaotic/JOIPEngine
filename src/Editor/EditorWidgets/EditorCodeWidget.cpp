@@ -153,10 +153,11 @@ void CEditorCodeWidget::LoadProject(tspProject spProject)
 
 //----------------------------------------------------------------------------------------
 //
-void CEditorCodeWidget::LoadResource(tspResource spResource)
+void CEditorCodeWidget::LoadResource(tspResource spResource, bool bSpontanious)
 {
   WIDGET_INITIALIZED_GUARD
-      if (nullptr == m_spCurrentProject) { return; }
+  if (nullptr == m_spCurrentProject) { return; }
+  if (bSpontanious) { return; }
 
   spResource->m_rwLock.lockForRead();
   const QString sName = spResource->m_sName;
@@ -165,6 +166,7 @@ void CEditorCodeWidget::LoadResource(tspResource spResource)
   qint32 index = EditableFileModel()->FileIndex(sName);
   if (-1 != index)
   {
+    index = m_pFilteredScriptModel->mapFromSource(EditableFileModel()->index(index, 0)).row();
     m_spUi->pResourceComboBox->setCurrentIndex(index);
     on_pResourceComboBox_currentIndexChanged(index);
   }

@@ -331,6 +331,7 @@ void CResourceModelView::ShowContextMenu(CResourceTreeItemModel* pModel, const Q
     CResourceTreeItem* item = static_cast<CResourceTreeItem*>(idx.internalPointer());
     if (nullptr != item && nullptr != item->Resource())
     {
+      QPointer<CResourceModelView> pThis(this);
       QMenu menu(this);
 
       QAction* pAction = new QAction("Copy Name", &menu);
@@ -398,6 +399,22 @@ void CResourceModelView::ShowContextMenu(CResourceTreeItemModel* pModel, const Q
       menu.addMenu(pSubMenu);
 
       menu.addSeparator();
+
+      pAction = new QAction("Show in Editor", &menu);
+      connect(pAction, &QAction::triggered, pModel, [idx, pThis]() {
+        CResourceTreeItem* item = static_cast<CResourceTreeItem*>(idx.internalPointer());
+        if (nullptr != item && nullptr != pThis)
+        {
+          tspResource spResource = item->Resource();
+          QReadLocker locker(&spResource->m_rwLock);
+          QString sName;
+          {
+            sName = spResource->m_sName;
+          }
+          emit pThis->SignalResourceSelected(sName, false);
+        }
+      });
+      menu.addAction(pAction);
 
 #if defined(Q_OS_WIN) || defined(Q_OS_LINUX)
       pAction = new QAction("Show in Explorer", &menu);
@@ -625,7 +642,7 @@ void CResourceModelView::SlotCurrentChanged(const QModelIndex& current,
       if (nullptr != pThis)
       {
         m_spUi->pDetailView->RequestResource(current);
-        emit SignalResourceSelected(sName);
+        emit SignalResourceSelected(sName, true);
       }
     }));
   }

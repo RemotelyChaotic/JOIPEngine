@@ -48,8 +48,9 @@ void CEditorResourceDisplayWidget::UnloadProject()
 
 //----------------------------------------------------------------------------------------
 //
-void CEditorResourceDisplayWidget::LoadResource(tspResource spResource)
+void CEditorResourceDisplayWidget::LoadResource(tspResource spResource, bool bSpontanious)
 {
+  Q_UNUSED(bSpontanious)
   UnloadResource();
   m_spUi->pResourceDisplay->LoadResource(spResource);
   if (nullptr != ActionBar())

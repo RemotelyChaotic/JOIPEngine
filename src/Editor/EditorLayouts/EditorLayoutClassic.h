@@ -39,7 +39,7 @@ public:
 protected slots:
   void on_pLeftComboBox_currentIndexChanged(qint32 iIndex);
   void on_pRightComboBox_currentIndexChanged(qint32 iIndex);
-  void SlotDisplayResource(const QString& sName);
+  void SlotDisplayResource(const QString& sName, bool bSpontanious);
   void SlotKeyBindingsChanged();
 
 protected:

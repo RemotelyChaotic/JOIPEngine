@@ -33,7 +33,7 @@ public:
   void EditedProject() override {}
   void Initialize() override;
   void LoadProject(tspProject spCurrentProject) override;
-  void LoadResource(tspResource) override {};
+  void LoadResource(tspResource, bool) override {};
   void UnloadProject() override;
   void SaveProject() override {}
   std::vector<EResourceType> SupportedDisplayingResources() override { return {}; }
@@ -41,7 +41,7 @@ public:
   void OnShown() override {}
 
 signals:
-  void SignalResourceSelected(const QString& sName);
+  void SignalResourceSelected(const QString& sName, bool bSpontanious);
 
 protected:
   void OnActionBarAboutToChange() override;
@@ -67,7 +67,7 @@ protected slots:
   void SlotWebSourceSelected(const QString& sResource);
   void SlotNetworkReplyError(QNetworkReply::NetworkError code);
   void SlotNetworkReplyFinished();
-  void SlotViewResourceSelected(const QString& sResource);
+  void SlotViewResourceSelected(const QString& sResource, bool bSpontanious);
 
 private:
   void HandleResize(bool bForceUpdate);

@@ -81,7 +81,7 @@ signals:
   void SignalLayoutIconChanged();
   void SignalIconSizeChanged();
   void SignalProjectEdited();
-  void SignalResourceSelected(const QString& sName);
+  void SignalResourceSelected(const QString& sName, bool bSpontanious);
 
 protected slots:
   void SlotExpanded(const QModelIndex& index);

@@ -245,7 +245,7 @@ void CEditorLayoutClassic::on_pRightComboBox_currentIndexChanged(qint32 iIndex)
 
 //----------------------------------------------------------------------------------------
 //
-void CEditorLayoutClassic::SlotDisplayResource(const QString& sName)
+void CEditorLayoutClassic::SlotDisplayResource(const QString& sName, bool bSpontanious)
 {
   if (!IsInitialized() && nullptr != m_spCurrentProject) { return; }
 
@@ -264,23 +264,51 @@ void CEditorLayoutClassic::SlotDisplayResource(const QString& sName)
     qint32 iLeftEnumValue = LeftComboBox()->currentData(Qt::UserRole).toInt();
     qint32 iRightEnumValue = RightComboBox()->currentData(Qt::UserRole).toInt();
 
-    QPointer<CEditorWidgetBase> pWidget = GetWidget(EEditorWidget::_from_integral(iLeftEnumValue));
-    if (nullptr != pWidget)
-    {
-      auto vResTypes = pWidget->SupportedDisplayingResources();
-      if (std::find(vResTypes.begin(), vResTypes.end(), type) != vResTypes.end())
-      {
-        pWidget->LoadResource(spResource);
-      }
-    }
+    bool bShown = false;
 
-    pWidget = GetWidget(EEditorWidget::_from_integral(iRightEnumValue));
-    if (nullptr != pWidget)
-    {
-      auto vResTypes = pWidget->SupportedDisplayingResources();
-      if (std::find(vResTypes.begin(), vResTypes.end(), type) != vResTypes.end())
+    auto fnShow = [this, &bShown, type, &spResource, bSpontanious](qint32 iLeftEnumValue, qint32 iRightEnumValue){
+      QPointer<CEditorWidgetBase> pWidget = GetWidget(EEditorWidget::_from_integral(iLeftEnumValue));
+      if (nullptr != pWidget)
       {
-        pWidget->LoadResource(spResource);
+        auto vResTypes = pWidget->SupportedDisplayingResources();
+        if (std::find(vResTypes.begin(), vResTypes.end(), type) != vResTypes.end())
+        {
+          pWidget->LoadResource(spResource, bSpontanious);
+          bShown = true;
+        }
+      }
+
+      pWidget = GetWidget(EEditorWidget::_from_integral(iRightEnumValue));
+      if (nullptr != pWidget)
+      {
+        auto vResTypes = pWidget->SupportedDisplayingResources();
+        if (std::find(vResTypes.begin(), vResTypes.end(), type) != vResTypes.end())
+        {
+          pWidget->LoadResource(spResource, bSpontanious);
+          bShown = true;
+        }
+      }
+    };
+
+    fnShow(iLeftEnumValue, iRightEnumValue);
+
+    // if we explicitely requested it and it was not shown, so we switch the view
+    if (!bShown && !bSpontanious)
+    {
+      for (qint32 i = 0; RightComboBox()->count() > i; ++i)
+      {
+        iRightEnumValue = RightComboBox()->itemData(i, Qt::UserRole).toInt();
+        QPointer<CEditorWidgetBase> pWidget = GetWidget(EEditorWidget::_from_integral(iRightEnumValue));
+        if (nullptr != pWidget)
+        {
+          auto vResTypes = pWidget->SupportedDisplayingResources();
+          if (std::find(vResTypes.begin(), vResTypes.end(), type) != vResTypes.end())
+          {
+            RightComboBox()->setCurrentIndex(i);
+            fnShow(iLeftEnumValue, iRightEnumValue);
+            break;
+          }
+        }
       }
     }
   }

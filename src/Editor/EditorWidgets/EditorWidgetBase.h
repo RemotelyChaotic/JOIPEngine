@@ -37,7 +37,7 @@ public:
   void Initialize() override = 0;
   virtual void EditedProject() = 0;
   virtual void LoadProject(tspProject spProject) = 0;
-  virtual void LoadResource(tspResource spResource) = 0;
+  virtual void LoadResource(tspResource spResource, bool bSpontanious) = 0;
   virtual void UnloadProject() = 0;
   virtual void SaveProject() = 0;
   virtual std::vector<EResourceType> SupportedDisplayingResources() = 0;

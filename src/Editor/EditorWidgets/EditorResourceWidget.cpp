@@ -598,7 +598,7 @@ void CEditorResourceWidget::SlotNetworkReplyFinished()
 
 //----------------------------------------------------------------------------------------
 //
-void CEditorResourceWidget::SlotViewResourceSelected(const QString& sResource)
+void CEditorResourceWidget::SlotViewResourceSelected(const QString& sResource, bool bSpontanious)
 {
   auto spDbManager = m_wpDbManager.lock();
   if (nullptr != spDbManager)
@@ -608,7 +608,7 @@ void CEditorResourceWidget::SlotViewResourceSelected(const QString& sResource)
     m_spUi->pResourceDisplayWidget->LoadResource(spResource);
   }
 
-  emit SignalResourceSelected(sResource);
+  emit SignalResourceSelected(sResource, bSpontanious);
 }
 
 //----------------------------------------------------------------------------------------
