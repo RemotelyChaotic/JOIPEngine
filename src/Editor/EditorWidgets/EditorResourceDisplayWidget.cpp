@@ -50,7 +50,19 @@ void CEditorResourceDisplayWidget::UnloadProject()
 //
 void CEditorResourceDisplayWidget::LoadResource(tspResource spResource)
 {
+  UnloadResource();
   m_spUi->pResourceDisplay->LoadResource(spResource);
+  if (nullptr != ActionBar())
+  {
+    UpdateActionBar();
+  }
+}
+
+//----------------------------------------------------------------------------------------
+//
+std::vector<EResourceType> CEditorResourceDisplayWidget::SupportedDisplayingResources()
+{
+  return { EResourceType::eImage, EResourceType::eMovie, EResourceType::eSound };
 }
 
 //----------------------------------------------------------------------------------------

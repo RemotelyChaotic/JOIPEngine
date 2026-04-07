@@ -153,6 +153,25 @@ void CEditorCodeWidget::LoadProject(tspProject spProject)
 
 //----------------------------------------------------------------------------------------
 //
+void CEditorCodeWidget::LoadResource(tspResource spResource)
+{
+  WIDGET_INITIALIZED_GUARD
+      if (nullptr == m_spCurrentProject) { return; }
+
+  spResource->m_rwLock.lockForRead();
+  const QString sName = spResource->m_sName;
+  spResource->m_rwLock.unlock();
+
+  qint32 index = EditableFileModel()->FileIndex(sName);
+  if (-1 != index)
+  {
+    m_spUi->pResourceComboBox->setCurrentIndex(index);
+    on_pResourceComboBox_currentIndexChanged(index);
+  }
+}
+
+//----------------------------------------------------------------------------------------
+//
 void CEditorCodeWidget::UnloadProjectImpl()
 {
   WIDGET_INITIALIZED_GUARD
@@ -195,6 +214,13 @@ void CEditorCodeWidget::SaveProject()
 
 //----------------------------------------------------------------------------------------
 //
+std::vector<EResourceType> CEditorCodeWidget::SupportedDisplayingResources()
+{
+  return { EResourceType::eScript, EResourceType::eLayout };
+}
+
+//----------------------------------------------------------------------------------------
+//
 void CEditorCodeWidget::OnHidden()
 {
   EditableFileModel()->SetReloadFileWithoutQuestion(true);
@@ -209,25 +235,6 @@ void CEditorCodeWidget::OnShown()
       EditableFileModel()->CachedResourceName(
           m_pFilteredScriptModel->mapToSource(
               m_pFilteredScriptModel->index(m_spUi->pResourceComboBox->currentIndex(), 0)).row()));
-}
-
-//----------------------------------------------------------------------------------------
-//
-void CEditorCodeWidget::LoadResource(tspResource spResource)
-{
-  WIDGET_INITIALIZED_GUARD
-  if (nullptr == m_spCurrentProject) { return; }
-
-  spResource->m_rwLock.lockForRead();
-  const QString sName = spResource->m_sName;
-  spResource->m_rwLock.unlock();
-
-  qint32 index = EditableFileModel()->FileIndex(sName);
-  if (-1 != index)
-  {
-    m_spUi->pResourceComboBox->setCurrentIndex(index);
-    on_pResourceComboBox_currentIndexChanged(index);
-  }
 }
 
 //----------------------------------------------------------------------------------------

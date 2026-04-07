@@ -4,9 +4,7 @@
 #include "Editor/EditorActionBar.h"
 #include "Editor/EditorModel.h"
 #include "Editor/EditorWidgetTypes.h"
-#include "Editor/EditorWidgets/EditorCodeWidget.h"
 #include "Editor/EditorWidgets/EditorResourceWidget.h"
-#include "Editor/EditorWidgets/EditorResourceDisplayWidget.h"
 #include "Editor/Tutorial/ClassicTutorialStateSwitchHandler.h"
 #include "Systems/HelpFactory.h"
 #include "Widgets/HelpOverlay.h"
@@ -251,9 +249,8 @@ void CEditorLayoutClassic::SlotDisplayResource(const QString& sName)
 {
   if (!IsInitialized() && nullptr != m_spCurrentProject) { return; }
 
-  CEditorResourceDisplayWidget* pWidget = GetWidget<CEditorResourceDisplayWidget>();
   auto spDbManager = m_wpDbManager.lock();
-  if (nullptr != spDbManager && nullptr != pWidget)
+  if (nullptr != spDbManager)
   {
     // get resource type
     auto spResource = spDbManager->FindResourceInProject(m_spCurrentProject, sName);
@@ -264,21 +261,26 @@ void CEditorLayoutClassic::SlotDisplayResource(const QString& sName)
       type = spResource->m_type;
     }
 
-    // script selected?
-    if (EResourceType::eScript == type._to_integral())
+    qint32 iLeftEnumValue = LeftComboBox()->currentData(Qt::UserRole).toInt();
+    qint32 iRightEnumValue = RightComboBox()->currentData(Qt::UserRole).toInt();
+
+    QPointer<CEditorWidgetBase> pWidget = GetWidget(EEditorWidget::_from_integral(iLeftEnumValue));
+    if (nullptr != pWidget)
     {
-      CEditorCodeWidget* pCodeWidget = GetWidget<CEditorCodeWidget>();
-      pCodeWidget->LoadResource(spResource);
-    }
-    // normal resource, just show in resource viewer
-    else
-    {
-      pWidget->UnloadResource();
-      pWidget->LoadResource(spResource);
-      if (m_spUi->pRightComboBox->itemData(m_spUi->pRightComboBox->currentIndex(), Qt::UserRole).toInt() == EEditorWidget::eResourceDisplay ||
-          m_spUi->pLeftComboBox->itemData(m_spUi->pLeftComboBox->currentIndex(), Qt::UserRole).toInt() == EEditorWidget::eResourceDisplay)
+      auto vResTypes = pWidget->SupportedDisplayingResources();
+      if (std::find(vResTypes.begin(), vResTypes.end(), type) != vResTypes.end())
       {
-        pWidget->UpdateActionBar();
+        pWidget->LoadResource(spResource);
+      }
+    }
+
+    pWidget = GetWidget(EEditorWidget::_from_integral(iRightEnumValue));
+    if (nullptr != pWidget)
+    {
+      auto vResTypes = pWidget->SupportedDisplayingResources();
+      if (std::find(vResTypes.begin(), vResTypes.end(), type) != vResTypes.end())
+      {
+        pWidget->LoadResource(spResource);
       }
     }
   }

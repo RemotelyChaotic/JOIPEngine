@@ -2,7 +2,11 @@
 #define EDITORWIDGETBASE_H
 
 #include "Widgets/IWidgetBaseInterface.h"
+
 #include "Editor/EditorWidgetRegistry.h"
+
+#include "Systems/DatabaseInterface/ResourceData.h"
+
 #include <QIcon>
 #include <QPointer>
 #include <QWidget>
@@ -18,6 +22,8 @@ class CEditorEditableFileModel;
 class QUndoStack;
 struct SProject;
 typedef std::shared_ptr<SProject> tspProject;
+struct SResource;
+typedef std::shared_ptr<SResource> tspResource;
 
 class CEditorWidgetBase : public QWidget, public IWidgetBaseInterface
 {
@@ -31,8 +37,10 @@ public:
   void Initialize() override = 0;
   virtual void EditedProject() = 0;
   virtual void LoadProject(tspProject spProject) = 0;
+  virtual void LoadResource(tspResource spResource) = 0;
   virtual void UnloadProject() = 0;
   virtual void SaveProject() = 0;
+  virtual std::vector<EResourceType> SupportedDisplayingResources() = 0;
   virtual void OnHidden() = 0;
   virtual void OnShown() = 0;
 

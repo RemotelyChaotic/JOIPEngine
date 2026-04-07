@@ -24,12 +24,13 @@ public:
   void EditedProject() override {}
   void Initialize() override;
   void LoadProject(tspProject spProject) override { Q_UNUSED(spProject); SetLoaded(true); }
+  void LoadResource(tspResource spResource) override;
   void UnloadProject() override;
   void SaveProject() override {}
+  std::vector<EResourceType> SupportedDisplayingResources() override;
   void OnHidden() override {}
   void OnShown() override {}
 
-  void LoadResource(tspResource spResource);
   ELoadState LoadState() const;
   void UnloadResource();
   void UpdateActionBar();

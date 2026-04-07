@@ -30,8 +30,8 @@
        <rect>
         <x>0</x>
         <y>0</y>
-        <width>329</width>
-        <height>856</height>
+        <width>332</width>
+        <height>891</height>
        </rect>
       </property>
       <layout class="QGridLayout" name="gridLayout_2">
@@ -250,6 +250,9 @@
        </item>
        <item row="8" column="0" colspan="2">
         <widget class="QLabel" name="label_10">
+         <property name="toolTip">
+          <string>Makes the &quot;Start from Scene&quot; show every possible scene.</string>
+         </property>
          <property name="text">
           <string>Can Start from any Scene</string>
          </property>
@@ -293,7 +296,7 @@
            <rect>
             <x>0</x>
             <y>0</y>
-            <width>327</width>
+            <width>330</width>
             <height>248</height>
            </rect>
           </property>
@@ -303,6 +306,9 @@
        </item>
        <item row="18" column="0" colspan="2">
         <widget class="QLabel" name="label_9">
+         <property name="toolTip">
+          <string>The possible achievements of this Project.</string>
+         </property>
          <property name="text">
           <string>Achievements</string>
          </property>
@@ -640,6 +646,9 @@ Saving will overwrite old target version.</string>
            <horstretch>1</horstretch>
            <verstretch>0</verstretch>
           </sizepolicy>
+         </property>
+         <property name="toolTip">
+          <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;The plugin subfolder.&lt;/p&gt;&lt;p&gt;JOIP Projects in this subfolder will be loaded as plugins of this Project before starting playing the project.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
          </property>
          <property name="text">
           <string>Plugin Subfolder</string>
