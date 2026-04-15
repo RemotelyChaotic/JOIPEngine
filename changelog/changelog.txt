@@ -11,6 +11,9 @@ New Features:
 
 Changes:
 - Node Editor lets you select which Flow to edit and debug.
+- Implemented "Show in Editor" in Resource View for quick navigation
+  for Scripts, Layouts, flows and Sequences which will open the respective
+  editor.
 
 Fixed Bugs:
 - Fixed adding Resource bundles and archives to the Resources.
