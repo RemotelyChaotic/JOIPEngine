@@ -29,10 +29,10 @@ public:
   void EditedProject() override {}
   void Initialize() override;
   void LoadProject(tspProject spProject) override;
-  void LoadResource(tspResource, bool) override {}
+  void LoadResource(tspResource spResource, bool bSpontanious) override;
   void UnloadProjectImpl() override;
   void SaveProject() override;
-  std::vector<EResourceType> SupportedDisplayingResources() override { return {}; }
+  std::vector<EResourceType> SupportedDisplayingResources() override;
   void OnHidden() override;
   void OnShown() override;
 

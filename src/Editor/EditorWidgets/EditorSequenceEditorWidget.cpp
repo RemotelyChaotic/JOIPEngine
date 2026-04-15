@@ -121,6 +121,27 @@ void CEditorPatternEditorWidget::LoadProject(tspProject spProject)
 
 //----------------------------------------------------------------------------------------
 //
+void CEditorPatternEditorWidget::LoadResource(tspResource spResource, bool bSpontanious)
+{
+  WIDGET_INITIALIZED_GUARD
+  if (nullptr == m_spCurrentProject) { return; }
+  if (bSpontanious) { return; }
+
+  spResource->m_rwLock.lockForRead();
+  const QString sName = spResource->m_sName;
+  spResource->m_rwLock.unlock();
+
+  qint32 index = EditableFileModel()->FileIndex(sName);
+  if (-1 != index)
+  {
+    index = m_pFilteredScriptModel->mapFromSource(EditableFileModel()->index(index, 0)).row();
+    m_spUi->pResourceComboBox->setCurrentIndex(index);
+    on_pResourceComboBox_currentIndexChanged(index);
+  }
+}
+
+//----------------------------------------------------------------------------------------
+//
 void CEditorPatternEditorWidget::UnloadProjectImpl()
 {
   WIDGET_INITIALIZED_GUARD
@@ -157,6 +178,13 @@ void CEditorPatternEditorWidget::SaveProject()
     pScriptItem->m_data = doc.toJson(QJsonDocument::Indented);
     EditableFileModel()->SetSceneScriptModifiedFlag(pScriptItem->m_sId, pScriptItem->m_bChanged);
   }
+}
+
+//----------------------------------------------------------------------------------------
+//
+std::vector<EResourceType> CEditorPatternEditorWidget::SupportedDisplayingResources()
+{
+  return { EResourceType::eSequence };
 }
 
 //----------------------------------------------------------------------------------------
