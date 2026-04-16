@@ -128,7 +128,7 @@ void CResourceTreeItemModel::InitializeModel(tspProject spProject)
             {
               CResourceTreeItem* pNewItem =
                 new CResourceTreeItem(EResourceTreeItemType::eFolder,
-                                      std::nullopt,
+                                      categoryIt->first,
                                       sDisplayFolderName, nullptr, pItem);
               pItem->AppendChild(pNewItem);
               pItem = pNewItem;
@@ -138,7 +138,7 @@ void CResourceTreeItemModel::InitializeModel(tspProject spProject)
 
         pItem->AppendChild(
               new CResourceTreeItem(EResourceTreeItemType::eResource,
-                                    std::nullopt,
+                                    categoryIt->first,
                                     QString(), it->second, pItem));
       }
     }
