@@ -73,6 +73,16 @@ QCheckBox::indicator:checked {
   image: url(ui/ButtonCheckBox.png);
 }
 
+QTreeView::indicator:checked:hover,
+QTableView::indicator::checked:hover,
+QListView::indicator::checked:hover,
+QRadioButton::indicator:checked:hover,
+QGroupBox::indicator:checked:hover,
+QCheckBox::indicator:checked:hover {
+  color: white;
+  image: url(ui/ButtonCheckBox.png);
+}
+
 QTreeView::indicator:checked:pressed,
 QTableView::indicator::checked:pressed,
 QListView::indicator::checked:pressed,
@@ -83,6 +93,15 @@ QCheckBox::indicator:checked:pressed {
   image: url(ui/ButtonCheckBox.png);
 }
 
+QTreeView::indicator:indeterminate,
+QTableView::indicator::indeterminate,
+QListView::indicator::indeterminate,
+QRadioButton::indicator:indeterminate,
+QGroupBox::indicator:indeterminate,
+QCheckBox::indicator:indeterminate {
+  image: url(ui/ButtonCheckBoxIntermediate.png);
+}
+
 QTreeView::indicator:indeterminate:hover,
 QTableView::indicator::indeterminate:hover,
 QListView::indicator::indeterminate:hover,
@@ -90,7 +109,7 @@ QRadioButton::indicator:indeterminate:hover,
 QGroupBox::indicator:indeterminate:hover,
 QCheckBox::indicator:indeterminate:hover {
   color: white;
-  image: url(ui/ButtonCheckBox.png);
+  image: url(ui/ButtonCheckBoxIntermediate.png);
 }
 
 QTreeView::indicator:indeterminate:pressed,
@@ -100,7 +119,7 @@ QRadioButton::indicator:indeterminate:pressed,
 QGroupBox::indicator:indeterminate:pressed,
 QCheckBox::indicator:indeterminate:pressed {
   color: white;
-  image: url(ui/ButtonCheckBox.png);
+  image: url(ui/ButtonCheckBoxIntermediate.png);
 }
 
 

@@ -10,6 +10,8 @@
 
 #include <QImageReader>
 
+Q_DECLARE_METATYPE(std::set<QString>)
+
 CEditorImageCompressionJob::CEditorImageCompressionJob(QObject* pParent) :
   IEditorJob(pParent),
   m_spProject(nullptr),
@@ -82,7 +84,6 @@ QString CEditorImageCompressionJob::ReturnValue() const
 
 //----------------------------------------------------------------------------------------
 //
-#include <thread>
 bool CEditorImageCompressionJob::Run(const QVariantList& args)
 {
   m_bHasError = false;
@@ -93,8 +94,8 @@ bool CEditorImageCompressionJob::Run(const QVariantList& args)
     m_bFinished = !WasStopped();
   });
 
-  assert(3 == args.size());
-  if (3 != args.size())
+  assert(4 == args.size());
+  if (4 != args.size())
   {
     m_sError = QString("1 argument was expected, got %1.").arg(args.size());
     m_bHasError = true;
@@ -106,6 +107,7 @@ bool CEditorImageCompressionJob::Run(const QVariantList& args)
     m_iId = args[0].toInt();
     const QString sProject = args[1].toString();
     qint32 iCompression = args[2].toInt();
+    std::set<QString> resources = args[3].value<std::set<QString>>();
 
     emit SignalStarted(m_iId);
 
@@ -131,7 +133,8 @@ bool CEditorImageCompressionJob::Run(const QVariantList& args)
       {
         for (const auto& [sName, spResource] : m_spProject->m_baseData.m_spResourcesMap)
         {
-          Q_UNUSED(sName)
+          if (resources.find(sName) == resources.end()) { continue; }
+
           QReadLocker resLocker(&spResource->m_rwLock);
           if (spResource->m_sPath.IsLocalFile() && spResource->m_sResourceBundle.isEmpty() &&
               EResourceType::eImage == spResource->m_type._to_integral())

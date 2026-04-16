@@ -494,7 +494,7 @@ void CResourceModelView::ToolTriggered(const QString& sTool)
 {
   if (sTool == QString(c_sCompressAllResources))
   {
-    m_pCompressJobOverlay->Show();
+    m_pCompressJobOverlay->Show(m_spCurrentProject, m_pEditorModel->ResourceTreeModel());
   }
 }
 
@@ -662,6 +662,7 @@ void CResourceModelView::SlotJobSettingsConfirmed(
       args << m_spCurrentProject->m_sName;
     }
     args << settings.m_iCompression;
+    args << QVariant::fromValue(settings.m_resources);
     m_pEditorModel->JobWorker()->CreateNewEditorJob<CEditorImageCompressionJob>(args);
   }
 }

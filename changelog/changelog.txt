@@ -8,6 +8,8 @@ New Features:
   Every Resource, Scene, Tag and Achievement of that Plugin can be used 
   and referenced in the parent Project as you usually would.
 - New Node type: Subflow for modular Scene Flows
+- Image compression tool can now convert a selectable subset of all images
+  in a Project instead of always converting all.
 
 Changes:
 - Node Editor lets you select which Flow to edit and debug.
@@ -19,6 +21,7 @@ Fixed Bugs:
 - Fixed adding Resource bundles and archives to the Resources.
 - Project exports now correctly handle Resource bundles and archives.
 - Various smaller fixes concerning the code editor.
+- Filtered Resource views did not correctly filter folders.
 
 =================
 Version 1.7.1.0
