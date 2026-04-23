@@ -12,11 +12,18 @@ macro(FindRequiredQtPackages)
     Qml
     Quick
     QuickControls2
+    QuickParticles
+    QuickShapes
     QuickWidgets
     Svg
     Widgets
     WebChannel
-    Xml REQUIRED)
+    Xml
+    3DCore
+    3DRender
+    3DInput
+    3DExtras
+    3DLogic REQUIRED)
   find_package(Qt${QT_VERSION_MAJOR} COMPONENTS
     Core
     Multimedia
@@ -25,11 +32,18 @@ macro(FindRequiredQtPackages)
     Qml
     Quick
     QuickControls2
+    QuickParticles
+    QuickShapes
     QuickWidgets
     Svg
     Widgets
     WebChannel
-    Xml REQUIRED)
+    Xml
+    3DCore
+    3DRender
+    3DInput
+    3DExtras
+    3DLogic REQUIRED)
 
   if (KDE_DEBUG)
     find_package(QT NAMES Qt6 Qt5 COMPONENTS Test REQUIRED)
@@ -963,12 +977,19 @@ macro(JOIPProjectSettings JOIP_PROJECT_NAME)
       Qt${QT_VERSION_MAJOR}::Qml
       Qt${QT_VERSION_MAJOR}::Quick
       Qt${QT_VERSION_MAJOR}::QuickControls2
+      Qt${QT_VERSION_MAJOR}::QuickParticles
+      Qt${QT_VERSION_MAJOR}::QuickShapes
       Qt${QT_VERSION_MAJOR}::QuickWidgets
       Qt${QT_VERSION_MAJOR}::Svg
       Qt${QT_VERSION_MAJOR}::Widgets
       #Qt${QT_VERSION_MAJOR}::WidgetsPrivate
       Qt${QT_VERSION_MAJOR}::WebChannel
       Qt${QT_VERSION_MAJOR}::Xml
+      Qt${QT_VERSION_MAJOR}::3DCore
+      Qt${QT_VERSION_MAJOR}::3DRender
+      Qt${QT_VERSION_MAJOR}::3DInput
+      Qt${QT_VERSION_MAJOR}::3DExtras
+      Qt${QT_VERSION_MAJOR}::3DLogic
       Qt::AV
       Qt::AVWidgets
       Qt::Rcc_static

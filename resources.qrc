@@ -379,8 +379,6 @@
         <file>resources/qml/JoipEngine/TextBoxTextDelegate.qml</file>
         <file>resources/qml/JoipEngine/TextItemFormated.qml</file>
         <file>resources/qml/JoipEngine/TimedItem.qml</file>
-        <file>resources/qml/JoipEngine/WebResourceComponent.qml</file>
-        <file>resources/qml/JoipEngine/WebResourceView.qml</file>
         <file>resources/qml/JoipEngine/MetronomeRippleItem.qml</file>
         <file>resources/qml/JoipEngine/PlayerTansition.qml</file>
         <file>resources/qml/JoipEngine/PlayerAudioPlayer.qml</file>
@@ -392,5 +390,6 @@
         <file>resources/qml/JoipEngine/SceneCardSelection.qml</file>
         <file>resources/qml/JoipEngine/SceneCardDelegate.qml</file>
         <file>resources/qml/JoipEngine/TitleCard.qml</file>
+        <file>resources/qml/JoipEngine/ImportDummyFile.qml</file>
     </qresource>
 </RCC>
