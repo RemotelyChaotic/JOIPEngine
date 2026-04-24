@@ -66,36 +66,36 @@ public:
   bool SerializeProject(const QString& sName, bool bForceWriting = false);
 
   // Scene
-  qint32 AddScene(tspProject& spProj, const QString& sName = "New_Scene",
+  static qint32 AddScene(tspProject& spProj, const QString& sName = "New_Scene",
                   const tvfnActionsScene& vfnActionsAfterAdding = tvfnActionsScene());
-  void ClearScenes(tspProject& spProj);
-  tspScene FindScene(tspProject& spProj, qint32 iId);
-  tspScene FindScene(tspProject& spProj, const QString& sName);
-  void RemoveScene(tspProject& spProj, qint32 iId);
-  void RemoveScene(tspProject& spProj, const QString& sName);
-  void RenameScene(tspProject& spProj, qint32 iId, const QString& sNewName);
-  void RenameScene(tspProject& spProj, const QString& sName, const QString& sNewName);
+  static void ClearScenes(tspProject& spProj);
+  static tspScene FindScene(const tspProject& spProj, qint32 iId);
+  static tspScene FindScene(const tspProject& spProj, const QString& sName);
+  static void RemoveScene(tspProject& spProj, qint32 iId);
+  static void RemoveScene(tspProject& spProj, const QString& sName);
+  static void RenameScene(tspProject& spProj, qint32 iId, const QString& sNewName);
+  static void RenameScene(tspProject& spProj, const QString& sName, const QString& sNewName);
 
   // Resource
-  bool AddResourceArchive(tspProject& spProj, const SResourcePath& sPath);
-  QString AddResource(tspProject& spProj, const SResourcePath& sPath, const EResourceType& type,
-                      const QString& sName = QString(), const QString& sBundle = QString(),
-                      const tvfnActionsResource& vfnActionsAfterAdding = tvfnActionsResource());
-  void ClearResources(tspProject& spProj);
-  tspResource FindResourceInProject(const tspProject& spProj, const QString& sName);
-  tvspResource FindResourcesInProject(const tspProject& spProj, const QRegExp& rx);
-  tspResourceBundle FindResourceBundleInProject(tspProject& spProj, const QString& sName);
-  void RemoveResource(tspProject& spProj, const QString& sName);
-  void RenameResource(tspProject& spProj, const QString& sName, const QString& sNewName);
+  static bool AddResourceArchive(tspProject& spProj, const SResourcePath& sPath);
+  static QString AddResource(tspProject& spProj, const SResourcePath& sPath, const EResourceType& type,
+                             const QString& sName = QString(), const QString& sBundle = QString(),
+                             const tvfnActionsResource& vfnActionsAfterAdding = tvfnActionsResource());
+  static void ClearResources(tspProject& spProj);
+  static tspResource FindResourceInProject(const tspProject& spProj, const QString& sName);
+  static tvspResource FindResourcesInProject(const tspProject& spProj, const QRegExp& rx);
+  static tspResourceBundle FindResourceBundleInProject(const tspProject& spProj, const QString& sName);
+  static void RemoveResource(tspProject& spProj, const QString& sName);
+  static void RenameResource(tspProject& spProj, const QString& sName, const QString& sNewName);
 
   // Tags
-  QString AddTag(tspProject& spProj, const QString& sResource, const QString& sCategory,
-                 const QString& sName, const QString& sDescribtion);
-  void ClearTags(tspProject& spProj);
-  tspTag FindTagInProject(tspProject& spProj, QString sName);
-  void RemoveTag(tspProject& spProj, const QString& sName);
-  void RemoveTagFromResource(tspProject& spProj, const QString& sResource, const QString& sName);
-  QStringList TagCategories(const tspProject& spProj);
+  static QString AddTag(tspProject& spProj, const QString& sResource, const QString& sCategory,
+                        const QString& sName, const QString& sDescribtion);
+  static void ClearTags(tspProject& spProj);
+  static tspTag FindTagInProject(const tspProject& spProj, QString sName);
+  static void RemoveTag(tspProject& spProj, const QString& sName);
+  static void RemoveTagFromResource(tspProject& spProj, const QString& sResource, const QString& sName);
+  static QStringList TagCategories(const tspProject& spProj);
 
   // Kinks
   tspKink FindKink(QString sName);
@@ -104,12 +104,12 @@ public:
   QStringList KinkCategories();
 
   // Achievements
-  QString AddAchievement(tspProject& spProj, const QString& sName, const QString& sDescribtion,
-                         qint32 iType, const QString& sResource, const QVariant& data);
-  void ClearAchievement(tspProject& spProj);
-  tspSaveData FindAchievementInProject(tspProject& spProj, QString sName);
-  void RemoveAchievement(tspProject& spProj, const QString& sName);
-  void RenameAchievement(tspProject& spProj, const QString& sName, const QString& sNewName);
+  static QString AddAchievement(tspProject& spProj, const QString& sName, const QString& sDescribtion,
+                                qint32 iType, const QString& sResource, const QVariant& data);
+  static void ClearAchievement(tspProject& spProj);
+  static tspSaveData FindAchievementInProject(const tspProject& spProj, QString sName);
+  static void RemoveAchievement(tspProject& spProj, const QString& sName);
+  static void RenameAchievement(tspProject& spProj, const QString& sName, const QString& sNewName);
 
   qint32 FindNewProjectId();
   bool IsDbLoaded() const;
@@ -141,7 +141,7 @@ signals:
 private slots:
   void SlotContentFolderChanged();
 
-private:
+protected:
   qint32 AddProjectPrivate(const QString& sName,
                            const QString& sDirNameResolved,
                            const QString& sProjectPath,
@@ -151,8 +151,8 @@ private:
                            const tvfnActionsProject& vfnActionsAfterAdding);
   qint32 FindNewIdFromSet(const std::set<qint32, std::less<qint32>>& ids);
   qint32 FindNewSceneId(tspProject& spProj);
-  void RemoveLingeringTagReferencesFromResources(tspProject& spProj,
-                                                 tspTag& spTag);
+  static void RemoveLingeringTagReferencesFromResources(tspProject& spProj,
+                                                        tspTag& spTag);
 
   std::unique_ptr<CDatabaseIO>           m_spDbIo;
   std::shared_ptr<CSettings>             m_spSettings;
