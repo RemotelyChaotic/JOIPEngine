@@ -4,6 +4,7 @@
 #include "Application.h"
 
 #include "Systems/DialogueTree.h"
+#include "Systems/Database/DatabaseNotifier.h"
 #include "Systems/Database/Resource.h"
 
 #include <QFileInfo>
@@ -20,10 +21,14 @@ CDialogueEditorTreeModel::CDialogueEditorTreeModel(QObject* pParent) :
 {
   Q_UNUSED(pParent)
   auto spDbManager = m_wpDbManager.lock();
-  connect(spDbManager.get(), &CDatabaseManager::SignalResourceAdded,
-          this, &CDialogueEditorTreeModel::SlotResourceAdded, Qt::QueuedConnection);
-  connect(spDbManager.get(), &CDatabaseManager::SignalResourceRemoved,
-          this, &CDialogueEditorTreeModel::SlotResourceRemoved, Qt::QueuedConnection);
+  if (Q_LIKELY(nullptr != spDbManager))
+  {
+    auto notifier = spDbManager->Notifier();
+    connect(notifier.Get(), &CDatabaseNotifier::SignalResourceAdded,
+            this, &CDialogueEditorTreeModel::SlotResourceAdded, Qt::QueuedConnection);
+    connect(notifier.Get(), &CDatabaseNotifier::SignalResourceRemoved,
+            this, &CDialogueEditorTreeModel::SlotResourceRemoved, Qt::QueuedConnection);
+  }
 }
 
 CDialogueEditorTreeModel::~CDialogueEditorTreeModel()

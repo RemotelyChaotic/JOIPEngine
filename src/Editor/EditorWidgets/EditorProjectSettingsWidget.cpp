@@ -26,6 +26,7 @@
 
 #include "Systems/DatabaseManager.h"
 #include "Systems/HelpFactory.h"
+#include "Systems/Database/DatabaseNotifier.h"
 #include "Systems/Database/Kink.h"
 #include "Systems/Database/Project.h"
 #include "Systems/Database/SaveData.h"
@@ -136,15 +137,16 @@ void CEditorProjectSettingsWidget::Initialize()
   }
 
   auto spDataBaseManager = CApplication::Instance()->System<CDatabaseManager>().lock();
-  if (nullptr != spDataBaseManager)
+  if (Q_LIKELY(nullptr != spDataBaseManager))
   {
-    connect(spDataBaseManager.get(), &CDatabaseManager::SignalProjectRenamed,
+    auto notifier = spDataBaseManager->Notifier();
+    connect(notifier.Get(), &CDatabaseNotifier::SignalProjectRenamed,
             this, &CEditorProjectSettingsWidget::SlotProjectRenamed, Qt::QueuedConnection);
-    connect(spDataBaseManager.get(), &CDatabaseManager::SignalResourceAdded,
+    connect(notifier.Get(), &CDatabaseNotifier::SignalResourceAdded,
             this, &CEditorProjectSettingsWidget::SlotResourceAdded, Qt::QueuedConnection);
-    connect(spDataBaseManager.get(), &CDatabaseManager::SignalResourceRemoved,
+    connect(notifier.Get(), &CDatabaseNotifier::SignalResourceRemoved,
             this, &CEditorProjectSettingsWidget::SlotResourceRemoved, Qt::QueuedConnection);
-    connect(spDataBaseManager.get(), &CDatabaseManager::SignalResourceRenamed,
+    connect(notifier.Get(), &CDatabaseNotifier::SignalResourceRenamed,
             this, &CEditorProjectSettingsWidget::SlotResourceRenamed, Qt::QueuedConnection);
   }
 

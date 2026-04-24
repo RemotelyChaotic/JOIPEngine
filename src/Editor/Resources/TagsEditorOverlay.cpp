@@ -7,6 +7,7 @@
 #include "Editor/CommandChangeTag.h"
 
 #include "Systems/DatabaseManager.h"
+#include "Systems/Database/DatabaseNotifier.h"
 
 #include "Widgets/TagCompleter.h"
 
@@ -83,9 +84,10 @@ void CTagsEditorOverlay::Hide()
 {
   if (auto spDbManager = m_wpDbManager.lock())
   {
-    disconnect(spDbManager.get(), &CDatabaseManager::SignalTagAdded,
+    auto notifier = spDbManager->Notifier();
+    disconnect(notifier.Get(), &CDatabaseNotifier::SignalTagAdded,
             this, &CTagsEditorOverlay::SlotTagAdded);
-    disconnect(spDbManager.get(), &CDatabaseManager::SignalTagRemoved,
+    disconnect(notifier.Get(), &CDatabaseNotifier::SignalTagRemoved,
             this, &CTagsEditorOverlay::SlotTagRemoved);
   }
 
@@ -100,9 +102,10 @@ void CTagsEditorOverlay::Show()
 
   if (auto spDbManager = m_wpDbManager.lock())
   {
-    connect(spDbManager.get(), &CDatabaseManager::SignalTagAdded,
+    auto notifier = spDbManager->Notifier();
+    connect(notifier.Get(), &CDatabaseNotifier::SignalTagAdded,
             this, &CTagsEditorOverlay::SlotTagAdded, Qt::UniqueConnection);
-    connect(spDbManager.get(), &CDatabaseManager::SignalTagRemoved,
+    connect(notifier.Get(), &CDatabaseNotifier::SignalTagRemoved,
             this, &CTagsEditorOverlay::SlotTagRemoved, Qt::UniqueConnection);
   }
 

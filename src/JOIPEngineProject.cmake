@@ -514,6 +514,8 @@ macro(CreateJOIPProject JOIP_PROJECT_NAME)
     ${JOIPSources}/Systems/Database/DatabaseIO.h
     ${JOIPSources}/Systems/Database/DatabaseImageProvider.cpp
     ${JOIPSources}/Systems/Database/DatabaseImageProvider.h
+    ${JOIPSources}/Systems/Database/DatabaseNotifier.cpp
+    ${JOIPSources}/Systems/Database/DatabaseNotifier.h
     ${JOIPSources}/Systems/Database/ISerializable.h
     ${JOIPSources}/Systems/Database/Kink.cpp
     ${JOIPSources}/Systems/Database/Kink.h
@@ -726,6 +728,7 @@ macro(CreateJOIPProject JOIP_PROJECT_NAME)
     ${JOIPSources}/Themes.h
     ${JOIPSources}/UISoundEmitter.cpp
     ${JOIPSources}/UISoundEmitter.h
+    ${JOIPSources}/Utils/LockedType.h
     ${JOIPSources}/Utils/MetronomeHelpers.cpp
     ${JOIPSources}/Utils/MetronomeHelpers.h
     ${JOIPSources}/Utils/MultiEmitterSoundPlayer.cpp

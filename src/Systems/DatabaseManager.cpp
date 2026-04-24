@@ -4,6 +4,7 @@
 
 #include "Database/DatabaseData.h"
 #include "Database/DatabaseIO.h"
+#include "Database/DatabaseNotifier.h"
 #include "Database/Project.h"
 #include "Database/Resource.h"
 #include "Database/Scene.h"
@@ -30,13 +31,21 @@ CDatabaseManager::CDatabaseManager() :
   CSystemBase(),
   m_spDbIo(),
   m_spSettings(CApplication::Instance()->Settings()),
-  m_spData(std::make_shared<CDatabaseData>())
+  m_spData(std::make_shared<CDatabaseData>()),
+  m_spNotifier()
 {
   m_spDbIo = CDatabaseIO::CreateDatabaseIO(this, m_spData);
 }
 
 CDatabaseManager::~CDatabaseManager()
 {
+}
+
+//----------------------------------------------------------------------------------------
+//
+LockedTypeAutoLocker<CDatabaseNotifier> CDatabaseManager::Notifier() const
+{
+  return m_spNotifier.Locked();
 }
 
 //----------------------------------------------------------------------------------------
@@ -141,7 +150,7 @@ void CDatabaseManager::ClearProjects()
 
     locker.unlock();
 
-    emit SignalProjectRemoved(iId);
+    emit Notifier()->SignalProjectRemoved(iId);
     locker.relock();
   }
 
@@ -277,7 +286,7 @@ void CDatabaseManager::RemoveProject(qint32 iId)
 
       locker.unlock();
 
-      emit SignalProjectRemoved(iFoundId);
+      emit Notifier()->SignalProjectRemoved(iFoundId);
       break;
     }
   }
@@ -303,7 +312,7 @@ void CDatabaseManager::RemoveProject(const QString& sName)
 
       locker.unlock();
 
-      emit SignalProjectRemoved(iFoundId);
+      emit Notifier()->SignalProjectRemoved(iFoundId);
       break;
     }
   }
@@ -332,7 +341,7 @@ void CDatabaseManager::RenameProject(qint32 iId, const QString& sNewName)
 
     if (bLoadedBefore) { LoadProject(spProject, false); }
 
-    emit SignalProjectRenamed(iId);
+    emit Notifier()->SignalProjectRenamed(iId);
   }
 }
 
@@ -360,7 +369,7 @@ void CDatabaseManager::RenameProject(const QString& sName, const QString& sNewNa
 
     if (bLoadedBefore) { LoadProject(spProject, false); }
 
-    emit SignalProjectRenamed(iId);
+    emit Notifier()->SignalProjectRenamed(iId);
   }
 }
 
@@ -424,7 +433,7 @@ qint32 CDatabaseManager::AddScene(tspProject& spProj, const QString& sName,
       if (nullptr != fn) { fn(spProj->m_baseData.m_vspScenes.back()); }
     }
 
-    emit spDbManager->SignalSceneAdded(spProj->m_iId, iNewId);
+    emit spDbManager->Notifier()->SignalSceneAdded(spProj->m_iId, iNewId);
   }
   return iNewId;
 }
@@ -446,7 +455,7 @@ void CDatabaseManager::ClearScenes(tspProject& spProj)
     spProj->m_baseData.m_vspScenes.erase(it);
 
     locker.unlock();
-    emit spDbManager->SignalSceneRemoved(spProj->m_iId, iSceneId);
+    emit spDbManager->Notifier()->SignalSceneRemoved(spProj->m_iId, iSceneId);
     locker.relock();
   }
 }
@@ -521,7 +530,7 @@ void CDatabaseManager::RemoveScene(tspProject& spProj, qint32 iId)
       spProj->m_baseData.m_vspScenes.erase(it);
 
       locker.unlock();
-      emit spDbManager->SignalSceneRemoved(spProj->m_iId, iSceneId);
+      emit spDbManager->Notifier()->SignalSceneRemoved(spProj->m_iId, iSceneId);
       break;
     }
   }
@@ -546,7 +555,7 @@ void CDatabaseManager::RemoveScene(tspProject& spProj, const QString& sName)
       spProj->m_baseData.m_vspScenes.erase(it);
 
       locker.unlock();
-      emit spDbManager->SignalSceneRemoved(spProj->m_iId, iSceneId);
+      emit spDbManager->Notifier()->SignalSceneRemoved(spProj->m_iId, iSceneId);
       break;
     }
   }
@@ -571,7 +580,7 @@ void CDatabaseManager::RenameScene(tspProject& spProj, qint32 iId, const QString
     spScene->m_sName = sNewName;
     spScene->m_rwLock.unlock();
 
-    emit spDbManager->SignalSceneRenamed(iProjId, iId);
+    emit spDbManager->Notifier()->SignalSceneRenamed(iProjId, iId);
   }
 }
 
@@ -595,7 +604,7 @@ void CDatabaseManager::RenameScene(tspProject& spProj, const QString& sName, con
     qint32 iId = spScene->m_iId;
     spScene->m_rwLock.unlock();
 
-    emit spDbManager->SignalSceneRenamed(iProjId, iId);
+    emit spDbManager->Notifier()->SignalSceneRenamed(iProjId, iId);
   }
 }
 
@@ -703,7 +712,7 @@ QString CDatabaseManager::AddResource(tspProject& spProj, const SResourcePath& s
     if (nullptr != fn) { fn(spResource); }
   }
 
-  emit spDbManager->SignalResourceAdded(spProj->m_iId, sFinalName);
+  emit spDbManager->Notifier()->SignalResourceAdded(spProj->m_iId, sFinalName);
 
   return sFinalName;
 }
@@ -739,7 +748,7 @@ void CDatabaseManager::ClearResources(tspProject& spProj)
     }
 
     locker.unlock();
-    emit spDbManager->SignalResourceRemoved(spProj->m_iId, sName);
+    emit spDbManager->Notifier()->SignalResourceRemoved(spProj->m_iId, sName);
     locker.relock();
   }
 
@@ -863,14 +872,14 @@ void CDatabaseManager::RemoveResource(tspProject& spProj, const QString& sName)
         tagLocker.unlock();
         itTag = spProj->m_baseData.m_vspTags.erase(itTag);
         locker.unlock();
-        emit spDbManager->SignalTagRemoved(iId, QString(), sTagName);
+        emit spDbManager->Notifier()->SignalTagRemoved(iId, QString(), sTagName);
       }
       else
       {
         ++itTag;
         tagLocker.unlock();
         locker.unlock();
-        emit spDbManager->SignalTagRemoved(iId, sName, sTagName);
+        emit spDbManager->Notifier()->SignalTagRemoved(iId, sName, sTagName);
       }
     }
 
@@ -883,12 +892,12 @@ void CDatabaseManager::RemoveResource(tspProject& spProj, const QString& sName)
           QWriteLocker acLocker(&spAchievements->m_rwLock);
           spAchievements->m_sResource = QString();
         }
-        emit spDbManager->SignalAchievementDataChanged(iId, sAchName);
+        emit spDbManager->Notifier()->SignalAchievementDataChanged(iId, sAchName);
       }
     }
 
     locker.unlock();
-    emit spDbManager->SignalResourceRemoved(iId, sName);
+    emit spDbManager->Notifier()->SignalResourceRemoved(iId, sName);
   }
 }
 
@@ -977,7 +986,7 @@ void CDatabaseManager::RenameResource(tspProject& spProj, const QString& sName, 
       }
 
       locker.unlock();
-      emit spDbManager->SignalResourceRenamed(iProjId, sName, sNewName);
+      emit spDbManager->Notifier()->SignalResourceRenamed(iProjId, sName, sNewName);
     }
   }
 }
@@ -1028,7 +1037,7 @@ QString CDatabaseManager::AddTag(tspProject& spProj, const QString& sResource, c
 
   if (bChanged)
   {
-    emit spDbManager->SignalTagAdded(iId, sResource, sName);
+    emit spDbManager->Notifier()->SignalTagAdded(iId, sResource, sName);
   }
 
   return sName;
@@ -1053,7 +1062,7 @@ void CDatabaseManager::ClearTags(tspProject& spProj)
     RemoveLingeringTagReferencesFromResources(spProj, it->second);
 
     locker.unlock();
-    emit spDbManager->SignalTagRemoved(iId, QString(), sTag);
+    emit spDbManager->Notifier()->SignalTagRemoved(iId, QString(), sTag);
     locker.relock();
   }
 }
@@ -1102,7 +1111,7 @@ void CDatabaseManager::RemoveTag(tspProject& spProj, const QString& sName)
 
   if (bRemoved)
   {
-    emit spDbManager->SignalTagRemoved(iProjId, QString(), sName);
+    emit spDbManager->Notifier()->SignalTagRemoved(iProjId, QString(), sName);
   }
 }
 
@@ -1153,7 +1162,7 @@ void CDatabaseManager::RemoveTagFromResource(tspProject& spProj, const QString& 
 
   if (bRemoved)
   {
-    emit spDbManager->SignalTagRemoved(iProjId, bRemovedFromProject ? QString() : sResource, sName);
+    emit spDbManager->Notifier()->SignalTagRemoved(iProjId, bRemovedFromProject ? QString() : sResource, sName);
   }
 }
 
@@ -1283,7 +1292,7 @@ QString CDatabaseManager::AddAchievement(
 
   if (bChanged)
   {
-    emit spDbManager->SignalAchievementAdded(iId, sName);
+    emit spDbManager->Notifier()->SignalAchievementAdded(iId, sName);
   }
 
   return sName;
@@ -1306,7 +1315,7 @@ void CDatabaseManager::ClearAchievement(tspProject& spProj)
     spProj->m_baseData.m_vspAchievements.erase(it);
 
     locker.unlock();
-    emit spDbManager->SignalAchievementRemoved(iId, sName);
+    emit spDbManager->Notifier()->SignalAchievementRemoved(iId, sName);
     locker.relock();
   }
 }
@@ -1354,7 +1363,7 @@ void CDatabaseManager::RemoveAchievement(tspProject& spProj, const QString& sNam
 
   if (bRemoved)
   {
-    emit spDbManager->SignalAchievementRemoved(iProjId, sName);
+    emit spDbManager->Notifier()->SignalAchievementRemoved(iProjId, sName);
   }
 }
 
@@ -1384,7 +1393,7 @@ void CDatabaseManager::RenameAchievement(tspProject& spProj, const QString& sNam
       spProj->m_baseData.m_vspAchievements[sNewName] = spAchievement;
 
       locker.unlock();
-      emit spDbManager->SignalAchievementRenamed(iProjId, sName, sNewName);
+      emit spDbManager->Notifier()->SignalAchievementRenamed(iProjId, sName, sNewName);
     }
   }
 }
@@ -1411,6 +1420,8 @@ void CDatabaseManager::Initialize()
   connect(m_spSettings.get(), &CSettings::contentFolderChanged,
           this, &CDatabaseManager::SlotContentFolderChanged, Qt::QueuedConnection);
 
+  m_spNotifier.Reset(new CDatabaseNotifier());
+
   SetInitialized(true);
 
   SlotContentFolderChanged();
@@ -1423,6 +1434,8 @@ void CDatabaseManager::Deinitialize()
   disconnect(m_spSettings.get(), &CSettings::contentFolderChanged,
           this, &CDatabaseManager::SlotContentFolderChanged);
 
+  m_spNotifier.Reset(nullptr);
+
   ClearProjects();
 
   SetInitialized(false);
@@ -1432,10 +1445,10 @@ void CDatabaseManager::Deinitialize()
 //
 void CDatabaseManager::SlotContentFolderChanged()
 {
-  emit SignalReloadStarted();
+  emit Notifier()->SignalReloadStarted();
   ClearProjects();
   m_spDbIo->LoadDatabase();
-  emit SignalReloadFinished();
+  emit Notifier()->SignalReloadFinished();
 }
 
 //----------------------------------------------------------------------------------------
@@ -1467,7 +1480,7 @@ qint32 CDatabaseManager::AddProjectPrivate(const QString& sName,
       if (nullptr != fn) { fn(m_spData->m_vspProjectDatabase.back()); }
     }
 
-    emit SignalProjectAdded(iNewId);
+    emit Notifier()->SignalProjectAdded(iNewId);
   }
 
   return iNewId;

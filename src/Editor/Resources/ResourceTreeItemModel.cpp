@@ -2,7 +2,9 @@
 #include "Application.h"
 #include "CommandChangeResourceData.h"
 #include "ResourceTreeItem.h"
+
 #include "Systems/DatabaseManager.h"
+#include "Systems/Database/DatabaseNotifier.h"
 #include "Systems/Database/Resource.h"
 
 #include <QPixmap>
@@ -26,13 +28,17 @@ CResourceTreeItemModel::CResourceTreeItemModel(QPointer<QUndoStack> pUndoStack,
   m_cardIcon(),
   m_iIconSize(16)
 {
-  auto spDbManager = m_wpDbManager.lock();
-  connect(spDbManager.get(), &CDatabaseManager::SignalResourceAdded,
-          this, &CResourceTreeItemModel::SlotResourceAdded, Qt::QueuedConnection);
-  connect(spDbManager.get(), &CDatabaseManager::SignalResourceRemoved,
-          this, &CResourceTreeItemModel::SlotResourceRemoved, Qt::QueuedConnection);
-  connect(spDbManager.get(), &CDatabaseManager::SignalSceneDataChanged,
-          this, &CResourceTreeItemModel::SlotSceneDataChanged, Qt::QueuedConnection);
+
+  if (auto spDbManager = m_wpDbManager.lock(); Q_LIKELY(nullptr != spDbManager))
+  {
+    auto notifier = spDbManager->Notifier();
+    connect(notifier.Get(), &CDatabaseNotifier::SignalResourceAdded,
+            this, &CResourceTreeItemModel::SlotResourceAdded, Qt::QueuedConnection);
+    connect(notifier.Get(), &CDatabaseNotifier::SignalResourceRemoved,
+            this, &CResourceTreeItemModel::SlotResourceRemoved, Qt::QueuedConnection);
+    connect(notifier.Get(), &CDatabaseNotifier::SignalSceneDataChanged,
+            this, &CResourceTreeItemModel::SlotSceneDataChanged, Qt::QueuedConnection);
+  }
 
   m_resourcecheckTimer.setSingleShot(false);
   m_resourcecheckTimer.setInterval(c_iResourceTimerIntervalMs);

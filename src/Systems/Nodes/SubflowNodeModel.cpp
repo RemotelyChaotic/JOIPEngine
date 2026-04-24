@@ -4,6 +4,7 @@
 #include "SubflowNodeModelWidget.h"
 
 #include "Systems/DatabaseManager.h"
+#include "Systems/Database/DatabaseNotifier.h"
 #include "Systems/Database/Project.h"
 
 namespace {
@@ -21,13 +22,14 @@ CSubflowNodeModel::CSubflowNodeModel() :
     m_modelValidationError(QString(tr("Missing or incorrect inputs or output")))
 {
   auto spDbManager = m_wpDbManager.lock();
-  if (nullptr != spDbManager)
+  if (Q_LIKELY(nullptr != spDbManager))
   {
-    connect(spDbManager.get(), &CDatabaseManager::SignalResourceAdded,
+    auto notifier = spDbManager->Notifier();
+    connect(notifier.Get(), &CDatabaseNotifier::SignalResourceAdded,
             this, &CSubflowNodeModel::SlotResourceAdded);
-    connect(spDbManager.get(), &CDatabaseManager::SignalResourceRenamed,
+    connect(notifier.Get(), &CDatabaseNotifier::SignalResourceRenamed,
             this, &CSubflowNodeModel::SlotResourceRenamed);
-    connect(spDbManager.get(), &CDatabaseManager::SignalResourceRemoved,
+    connect(notifier.Get(), &CDatabaseNotifier::SignalResourceRemoved,
             this, &CSubflowNodeModel::SlotResourceRemoved);
   }
 }

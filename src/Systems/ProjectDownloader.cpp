@@ -82,19 +82,19 @@ void CProjectDownloader::JobFinishedImpl(qint32 iId, tspRunnableJob spJob)
       if (spJob->HasError())
       {
         qWarning() << "Download could not finish properly: " << spJob->Error();
-        Notifier()->SendNotification(QString("%1 Download").arg(spJob->JobType()),
+        NotificationSender()->SendNotification(QString("%1 Download").arg(spJob->JobType()),
                                      QString("Download of %1 could not finish properly:\n%2")
                                          .arg(spJob->JobName()).arg(spJob->Error()));
       }
       else
       {
-        Notifier()->SendNotification(QString("%1 Download").arg(spJob->JobType()),
+        NotificationSender()->SendNotification(QString("%1 Download").arg(spJob->JobType()),
                                      QString("Download of %1 finished.").arg(spJob->JobName()));
       }
     }
     else
     {
-      Notifier()->SendNotification(QString("%1 Download").arg(spJob->JobType()),
+      NotificationSender()->SendNotification(QString("%1 Download").arg(spJob->JobType()),
                                    "Download stopped.");
     }
 
@@ -132,7 +132,7 @@ void CProjectDownloader::JobPostRunImpl(qint32 iId, bool bOk, tspRunnableJob spJ
     if (!spJob->WasStopped())
     {
       qWarning() << "Download could not finish properly: " << spJob->Error();
-      Notifier()->SendNotification(QString("%1 Download").arg(spJob->JobType()),
+      NotificationSender()->SendNotification(QString("%1 Download").arg(spJob->JobType()),
                                    QString("Download of %1 could not finish properly:\n%2")
                                        .arg(spJob->JobName()).arg(spJob->Error()));
     }
@@ -145,7 +145,7 @@ void CProjectDownloader::JobStartedImpl(qint32 iId, tspRunnableJob spJob)
 {
   if (nullptr != spJob)
   {
-    Notifier()->SendNotification(QString("%1 Download").arg(spJob->JobType()),
+    NotificationSender()->SendNotification(QString("%1 Download").arg(spJob->JobType()),
                                  QString("%1 download started.").arg(spJob->JobName()));
     emit SignalJobStarted(iId);
   }

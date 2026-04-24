@@ -2,15 +2,22 @@
 #define DATABASEMANAGER_H
 
 #include "ThreadedSystem.h"
+
 #include "Database/Kink.h"
 #include "Database/Resource.h"
+
+#include "Utils/LockedType.h"
+
 #include <QAtomicInt>
 #include <QDir>
 #include <QMutex>
+#include <QPointer>
+
 #include <set>
 
 class CDatabaseData;
 class CDatabaseIO;
+class CDatabaseNotifier;
 class CProjectScriptWrapper;
 class CSceneScriptWrapper;
 class CSettings;
@@ -37,6 +44,8 @@ class CDatabaseManager : public CSystemBase
 public:
   CDatabaseManager();
   ~CDatabaseManager() override;
+
+  LockedTypeAutoLocker<CDatabaseNotifier> Notifier() const;
 
   static bool LoadBundle(tspProject& spProject, const QString& sBundle);
   static bool LoadPlugins(tspProject& spProject);
@@ -118,26 +127,6 @@ public slots:
   void Initialize() override;
   void Deinitialize() override;
 
-signals:
-  void SignalProjectAdded(qint32 iId);
-  void SignalProjectRenamed(qint32 iId);
-  void SignalProjectRemoved(qint32 iId);
-  void SignalSceneAdded(qint32 iProjId, qint32 iId);
-  void SignalSceneDataChanged(qint32 iProjId, qint32 iId);
-  void SignalSceneRenamed(qint32 iProjId, qint32 iId);
-  void SignalSceneRemoved(qint32 iProjId, qint32 iId);
-  void SignalReloadFinished();
-  void SignalReloadStarted();
-  void SignalResourceAdded(qint32 iProjId, const QString& sName);
-  void SignalResourceRenamed(qint32 iProjId, const QString& sOldName, const QString& sName);
-  void SignalResourceRemoved(qint32 iProjId, const QString& sName);
-  void SignalTagAdded(qint32 iProjId, const QString& sResource, const QString& sName);
-  void SignalTagRemoved(qint32 iProjId, const QString& sResource, const QString& sName);
-  void SignalAchievementAdded(qint32 iProjId, const QString& sName);
-  void SignalAchievementRemoved(qint32 iProjId, const QString& sName);
-  void SignalAchievementDataChanged(qint32 iProjId, const QString& sName);
-  void SignalAchievementRenamed(qint32 iProjId, const QString& sOldName, const QString& sName);
-
 private slots:
   void SlotContentFolderChanged();
 
@@ -157,6 +146,7 @@ protected:
   std::unique_ptr<CDatabaseIO>           m_spDbIo;
   std::shared_ptr<CSettings>             m_spSettings;
   std::shared_ptr<CDatabaseData>         m_spData;
+  LockedType<CDatabaseNotifier>          m_spNotifier;
 };
 
 #endif // DATABASEMANAGER_H

@@ -5,6 +5,7 @@
 #include "SceneTranstitionData.h"
 
 #include "Systems/DatabaseManager.h"
+#include "Systems/Database/DatabaseNotifier.h"
 
 #include <QJsonArray>
 
@@ -29,13 +30,14 @@ CPathSplitterModel::CPathSplitterModel() :
   }
 
   auto spDbManager = m_wpDbManager.lock();
-  if (nullptr != spDbManager)
+  if (Q_LIKELY(nullptr != spDbManager))
   {
-    connect(spDbManager.get(), &CDatabaseManager::SignalResourceAdded,
+    auto notifier = spDbManager->Notifier();
+    connect(notifier.Get(), &CDatabaseNotifier::SignalResourceAdded,
             this, &CPathSplitterModel::SlotResourceAdded);
-    connect(spDbManager.get(), &CDatabaseManager::SignalResourceRenamed,
+    connect(notifier.Get(), &CDatabaseNotifier::SignalResourceRenamed,
             this, &CPathSplitterModel::SlotResourceRenamed);
-    connect(spDbManager.get(), &CDatabaseManager::SignalResourceRemoved,
+    connect(notifier.Get(), &CDatabaseNotifier::SignalResourceRemoved,
             this, &CPathSplitterModel::SlotResourceRemoved);
   }
 }

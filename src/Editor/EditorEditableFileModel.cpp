@@ -1,6 +1,7 @@
 #include "EditorEditableFileModel.h"
 #include "Application.h"
 #include "Systems/DatabaseManager.h"
+#include "Systems/Database/DatabaseNotifier.h"
 #include "Systems/Database/Resource.h"
 #include "Systems/Database/Scene.h"
 
@@ -142,19 +143,23 @@ CEditorEditableFileModel::CEditorEditableFileModel(QWidget* pParent) :
   m_bReloadFileWithoutQuestion(true)
 {
   auto spDbManager = m_wpDbManager.lock();
-  connect(spDbManager.get(), &CDatabaseManager::SignalResourceAdded,
-          this, &CEditorEditableFileModel::SlotResourceAdded, Qt::QueuedConnection);
-  connect(spDbManager.get(), &CDatabaseManager::SignalResourceRemoved,
-          this, &CEditorEditableFileModel::SlotResourceRemoved, Qt::QueuedConnection);
-  connect(spDbManager.get(), &CDatabaseManager::SignalResourceRenamed,
-          this, &CEditorEditableFileModel::SlotResourceRenamed, Qt::QueuedConnection);
+  if (Q_LIKELY(nullptr != spDbManager))
+  {
+    auto notifier = spDbManager->Notifier();
+    connect(notifier.Get(), &CDatabaseNotifier::SignalResourceAdded,
+            this, &CEditorEditableFileModel::SlotResourceAdded, Qt::QueuedConnection);
+    connect(notifier.Get(), &CDatabaseNotifier::SignalResourceRemoved,
+            this, &CEditorEditableFileModel::SlotResourceRemoved, Qt::QueuedConnection);
+    connect(notifier.Get(), &CDatabaseNotifier::SignalResourceRenamed,
+            this, &CEditorEditableFileModel::SlotResourceRenamed, Qt::QueuedConnection);
 
-  connect(spDbManager.get(), &CDatabaseManager::SignalSceneDataChanged,
-          this, &CEditorEditableFileModel::SlotSceneDatachanged, Qt::QueuedConnection);
-  connect(spDbManager.get(), &CDatabaseManager::SignalSceneRemoved,
-          this, &CEditorEditableFileModel::SlotSceneRemoved, Qt::QueuedConnection);
-  connect(spDbManager.get(), &CDatabaseManager::SignalSceneRenamed,
-          this, &CEditorEditableFileModel::SlotSceneRenamed, Qt::QueuedConnection);
+    connect(notifier.Get(), &CDatabaseNotifier::SignalSceneDataChanged,
+            this, &CEditorEditableFileModel::SlotSceneDatachanged, Qt::QueuedConnection);
+    connect(notifier.Get(), &CDatabaseNotifier::SignalSceneRemoved,
+            this, &CEditorEditableFileModel::SlotSceneRemoved, Qt::QueuedConnection);
+    connect(notifier.Get(), &CDatabaseNotifier::SignalSceneRenamed,
+            this, &CEditorEditableFileModel::SlotSceneRenamed, Qt::QueuedConnection);
+  }
 }
 
 CEditorEditableFileModel::~CEditorEditableFileModel()

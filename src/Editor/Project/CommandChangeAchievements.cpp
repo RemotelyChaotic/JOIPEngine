@@ -4,6 +4,7 @@
 #include "Editor/EditorCommandIds.h"
 
 #include "Systems/DatabaseManager.h"
+#include "Systems/Database/DatabaseNotifier.h"
 #include "Systems/Database/Project.h"
 #include "Systems/Database/SaveData.h"
 
@@ -183,7 +184,7 @@ void CCommandChangeAchievements::ChangeAchievement(SSaveDataData oldData, SSaveD
         {
           spDbManager->RenameAchievement(spProj, oldData.m_sName, newData.m_sName);
         }
-        emit spDbManager->SignalAchievementDataChanged(iId, newData.m_sName);
+        emit spDbManager->Notifier()->SignalAchievementDataChanged(iId, newData.m_sName);
         if (nullptr != m_fnChange)
         {
           m_fnChange(oldData, newData);

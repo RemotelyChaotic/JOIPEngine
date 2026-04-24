@@ -1,7 +1,9 @@
 #include "KinkTreeModel.h"
 #include "Application.h"
 #include "KinkTreeItem.h"
+
 #include "Systems/DatabaseManager.h"
+#include "Systems/Database/DatabaseNotifier.h"
 
 namespace  {
   const qint32 c_iNumberCols = 1;
@@ -15,7 +17,7 @@ CKinkTreeModel::CKinkTreeModel(QObject* pParent) :
 {
   if (auto spDbManager = m_wpDbManager.lock())
   {
-    connect(spDbManager.get(), &CDatabaseManager::SignalReloadFinished,
+    connect(spDbManager->Notifier().Get(), &CDatabaseNotifier::SignalReloadFinished,
             this, &CKinkTreeModel::SlotDbReloadFinished, Qt::QueuedConnection);
     InitializeModel();
   }

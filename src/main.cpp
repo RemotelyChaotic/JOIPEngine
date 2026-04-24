@@ -124,7 +124,7 @@ int main(int argc, char *argv[])
   spW->show();
   spW->OnShow();
 
-  Notifier()->SetMainWindow(dynamic_cast<CMainWindow*>(spW.get()));
+  NotificationSender()->SetMainWindow(dynamic_cast<CMainWindow*>(spW.get()));
 
   qint32 iRetVal = app.exec();
 

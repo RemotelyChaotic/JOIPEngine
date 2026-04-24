@@ -4,6 +4,7 @@
 #include "SceneTranstitionData.h"
 
 #include "Systems/DatabaseManager.h"
+#include "Systems/Database/DatabaseNotifier.h"
 #include "Systems/Database/Project.h"
 
 namespace {
@@ -22,17 +23,18 @@ CSceneNodeModel::CSceneNodeModel() :
   m_modelValidationError(QString(tr("Missing or incorrect inputs or output")))
 {
   auto spDbManager = m_wpDbManager.lock();
-  if (nullptr != spDbManager)
+  if (Q_LIKELY(nullptr != spDbManager))
   {
-    connect(spDbManager.get(), &CDatabaseManager::SignalSceneDataChanged,
+    auto notifier = spDbManager->Notifier();
+    connect(notifier.Get(), &CDatabaseNotifier::SignalSceneDataChanged,
             this, &CSceneNodeModel::SlotSceneDataChanged);
-    connect(spDbManager.get(), &CDatabaseManager::SignalSceneRenamed,
+    connect(notifier.Get(), &CDatabaseNotifier::SignalSceneRenamed,
             this, &CSceneNodeModel::SlotSceneRenamed);
-    connect(spDbManager.get(), &CDatabaseManager::SignalResourceAdded,
+    connect(notifier.Get(), &CDatabaseNotifier::SignalResourceAdded,
             this, &CSceneNodeModel::SlotResourceAdded);
-    connect(spDbManager.get(), &CDatabaseManager::SignalResourceRenamed,
+    connect(notifier.Get(), &CDatabaseNotifier::SignalResourceRenamed,
             this, &CSceneNodeModel::SlotResourceRenamed);
-    connect(spDbManager.get(), &CDatabaseManager::SignalResourceRemoved,
+    connect(notifier.Get(), &CDatabaseNotifier::SignalResourceRemoved,
             this, &CSceneNodeModel::SlotResourceRemoved);
   }
 }
@@ -330,7 +332,7 @@ void CSceneNodeModel::SlotCanStartHereChanged(bool bValue)
       if (bChanged)
       {
         SlotCanStartHereChangedImpl(bValue);
-        emit spDbManager->SignalSceneDataChanged(iProjId, iSceneId);
+        emit spDbManager->Notifier()->SignalSceneDataChanged(iProjId, iSceneId);
       }
     }
   }
@@ -385,7 +387,7 @@ void CSceneNodeModel::SlotLayoutChanged(const QString& sName)
       if (bChanged)
       {
         SlotLayoutChangedImpl(sName);
-        emit spDbManager->SignalSceneDataChanged(iProjId, iSceneId);
+        emit spDbManager->Notifier()->SignalSceneDataChanged(iProjId, iSceneId);
       }
     }
   }
@@ -416,7 +418,7 @@ void CSceneNodeModel::SlotScriptChanged(const QString& sName)
       if (bChanged)
       {
         SlotScriptChangedImpl(sName);
-        emit spDbManager->SignalSceneDataChanged(iProjId, iSceneId);
+        emit spDbManager->Notifier()->SignalSceneDataChanged(iProjId, iSceneId);
       }
     }
   }
@@ -470,7 +472,7 @@ void CSceneNodeModel::SlotSceneModeChanged(qint32 iMode)
       if (bChanged)
       {
         SlotSceneModeChangedImpl(iMode);
-        emit spDbManager->SignalSceneDataChanged(iProjId, iSceneId);
+        emit spDbManager->Notifier()->SignalSceneDataChanged(iProjId, iSceneId);
       }
     }
   }
@@ -594,7 +596,7 @@ void CSceneNodeModel::SlotTitleResourceChanged(const QString& sOld, const QStrin
       if (bChanged)
       {
         SlotTitleResourceChangedImpl(sOld, sNew);
-        emit spDbManager->SignalSceneDataChanged(iProjId, iSceneId);
+        emit spDbManager->Notifier()->SignalSceneDataChanged(iProjId, iSceneId);
       }
     }
   }

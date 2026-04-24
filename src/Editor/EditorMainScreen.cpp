@@ -14,6 +14,7 @@
 #include "Systems/DatabaseManager.h"
 #include "Systems/Debug/DebugOverlay.h"
 #include "Systems/NotificationSender.h"
+#include "Systems/Database/DatabaseNotifier.h"
 #include "Systems/Database/Project.h"
 
 #include "Tutorial/EditorTutorialOverlay.h"
@@ -220,7 +221,7 @@ void CEditorMainScreen::Initialize(const std::shared_ptr<CWindowContext>& spWind
   auto spDataBaseManager = m_wpDbManager.lock();
   if (nullptr != spDataBaseManager)
   {
-    connect(spDataBaseManager.get(), &CDatabaseManager::SignalProjectRenamed,
+    connect(spDataBaseManager->Notifier().Get(), &CDatabaseNotifier::SignalProjectRenamed,
             this, &CEditorMainScreen::SlotProjectRenamed, Qt::QueuedConnection);
   }
 
@@ -543,7 +544,7 @@ void CEditorMainScreen::JobFinished(qint32 iId)
     QReadLocker locker(&m_spCurrentProject->m_rwLock);
     sProjectName = m_spCurrentProject->m_sName;
   }
-  Notifier()->SendNotification(sProjectName + " Export", m_spPushNotificator->Message(), true);
+  NotificationSender()->SendNotification(sProjectName + " Export", m_spPushNotificator->Message(), true);
 }
 
 //----------------------------------------------------------------------------------------

@@ -17,6 +17,7 @@
 
 #include "Systems/DatabaseManager.h"
 #include "Systems/PhysFs/PhysFsFileEngine.h"
+#include "Systems/Database/DatabaseNotifier.h"
 #include "Systems/Database/Project.h"
 
 #include "Tutorial/ITutorialStateSwitchHandler.h"
@@ -92,7 +93,7 @@ CEditorModel::CEditorModel(QWidget* pParent) :
 
   if (auto spDbManager = m_wpDbManager.lock())
   {
-    connect(spDbManager.get(), &CDatabaseManager::SignalSceneDataChanged,
+    connect(spDbManager->Notifier().Get(), &CDatabaseNotifier::SignalSceneDataChanged,
             this, &CEditorModel::SignalProjectEdited, Qt::DirectConnection);
   }
 }
@@ -317,15 +318,16 @@ QString CEditorModel::AddNewFileToScene(QPointer<QWidget> pParentForDialog,
           iProjId = spScene->m_spParent->m_iId;
           spScene->m_spParent->m_rwLock.unlock();
           QWriteLocker locker(&spNewResource->m_rwLock);
+          auto notifier = spDbManager->Notifier();
           if (EResourceType::eScript == type._to_integral())
           {
             spScene->m_sScript = spNewResource->m_sName;
-            emit spDbManager->SignalSceneDataChanged(iProjId, spScene->m_iId);
+            emit notifier->SignalSceneDataChanged(iProjId, spScene->m_iId);
           }
           else if (EResourceType::eLayout == type._to_integral())
           {
             spScene->m_sSceneLayout = spNewResource->m_sName;
-            emit spDbManager->SignalSceneDataChanged(iProjId, spScene->m_iId);
+            emit notifier->SignalSceneDataChanged(iProjId, spScene->m_iId);
           }
         }};
     QString sResource = AddNewFile(pParentForDialog, m_spCurrentProject, type, sTitle,

@@ -11,6 +11,7 @@
 #include "Systems/Nodes/StartNodeModel.h"
 
 #include "Systems/DatabaseManager.h"
+#include "Systems/Database/DatabaseNotifier.h"
 
 #include <nodes/Node>
 #include <QMouseEvent>
@@ -111,10 +112,10 @@ void CSceneNodeWidgetTutorialStateSwitchHandler::OnStateSwitch(ETutorialState ne
                   this, &CSceneNodeWidgetTutorialStateSwitchHandler::SlotNodeCreated);
 
       auto spDbManager = CApplication::Instance()->System<CDatabaseManager>().lock();
-      if (nullptr != spDbManager)
+      if (Q_LIKELY(nullptr != spDbManager))
       {
         m_resourceAddedConnection =
-            connect(spDbManager.get(), &CDatabaseManager::SignalResourceAdded,
+            connect(spDbManager->Notifier().Get(), &CDatabaseNotifier::SignalResourceAdded,
                     this, &CSceneNodeWidgetTutorialStateSwitchHandler::SlotResourceAdded);
       }
       m_pParentWidget->FlowView()->installEventFilter(this);

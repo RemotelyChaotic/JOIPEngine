@@ -4,7 +4,7 @@
 #include <QObject>
 #include <QPointer>
 
-#define Notifier() CNotificationSender::Instance()
+#define NotificationSender() CNotificationSender::Instance()
 
 class CMainWindow;
 class CSettings;

@@ -1,14 +1,17 @@
 #include "ProjectCardSelectionWidget.h"
 #include "Application.h"
 #include "Constants.h"
+#include "ui_ProjectCardSelectionWidget.h"
+
 #include "Systems/DatabaseManager.h"
 #include "Systems/Database/DatabaseImageProvider.h"
+#include "Systems/Database/DatabaseNotifier.h"
 #include "Systems/HelpFactory.h"
 #include "Systems/Database/Project.h"
 #include "Systems/ProjectDownloader.h"
 #include "Systems/Script/ScriptDbWrappers.h"
+
 #include "Widgets/HelpOverlay.h"
-#include "ui_ProjectCardSelectionWidget.h"
 
 #include <QObject>
 #include <QQmlContext>
@@ -241,11 +244,12 @@ void CProjectCardSelectionWidget::SlotLoadProjectsPrivate(EDownLoadStateFlags fl
 
   m_bLoadedQml = true;
 
-  if (auto spDbManager = m_wpDbManager.lock())
+  if (auto spDbManager = m_wpDbManager.lock(); Q_LIKELY(nullptr != spDbManager))
   {
-    connect(spDbManager.get(), &CDatabaseManager::SignalProjectAdded,
+    auto notifier = spDbManager->Notifier();
+    connect(notifier.Get(), &CDatabaseNotifier::SignalProjectAdded,
             this, &CProjectCardSelectionWidget::SlotProjectAdded);
-    connect(spDbManager.get(), &CDatabaseManager::SignalProjectRemoved,
+    connect(notifier.Get(), &CDatabaseNotifier::SignalProjectRemoved,
             this, &CProjectCardSelectionWidget::SlotProjectRemoved);
   }
 }
@@ -405,11 +409,12 @@ void CProjectCardSelectionWidget::resizeEvent(QResizeEvent* pEvent)
 //
 void CProjectCardSelectionWidget::FinishUnloadPrivate()
 {
-  if (auto spDbManager = m_wpDbManager.lock())
+  if (auto spDbManager = m_wpDbManager.lock(); Q_LIKELY(nullptr != spDbManager))
   {
-    disconnect(spDbManager.get(), &CDatabaseManager::SignalProjectAdded,
+    auto notifier = spDbManager->Notifier();
+    disconnect(notifier.Get(), &CDatabaseNotifier::SignalProjectAdded,
             this, &CProjectCardSelectionWidget::SlotProjectAdded);
-    disconnect(spDbManager.get(), &CDatabaseManager::SignalProjectRemoved,
+    disconnect(notifier.Get(), &CDatabaseNotifier::SignalProjectRemoved,
             this, &CProjectCardSelectionWidget::SlotProjectRemoved);
   }
 
