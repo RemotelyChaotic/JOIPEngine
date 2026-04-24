@@ -109,7 +109,7 @@ qint32 CDatabaseManager::AddProject(const QString& sDirName, quint32 iVersion,
   bool bIsFolder = info.isDir();
 
   qint32 iNewId = FindNewProjectId();
-  const QString sBaseName = info.completeBaseName();
+  const QString sBaseName = bIsFolder ? info.fileName() : info.completeBaseName();
   const QString sProjectPath = info.absolutePath();
   QString sName = sBaseName;
   QString sDirNameResolved = bIsFolder ? sBaseName : sBaseName + "." + info.suffix();
