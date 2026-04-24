@@ -444,6 +444,6 @@ void CProjectCardSelectionWidget::InitQmlMain()
   QQmlEngine::setObjectOwnership(m_spUi->pQmlWidget->engine(), QQmlEngine::CppOwnership);
 
   // engine will always take owership of this object
-  CDatabaseImageProvider* pProvider = new CDatabaseImageProvider(m_wpDbManager);
+  CDatabaseImageProvider* pProvider = new CDatabaseImageProvider(std::make_shared<CProjectProvider>());
   m_spUi->pQmlWidget->engine()->addImageProvider("DataBaseImageProivider", pProvider);
 }

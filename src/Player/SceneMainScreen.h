@@ -1,6 +1,8 @@
 #ifndef SCENEMAINSCREEN_H
 #define SCENEMAINSCREEN_H
 
+#include "Systems/Database/DatabaseImageProvider.h"
+
 #include <QPointer>
 #include <QQuickWidget>
 #include <QWidget>
@@ -29,6 +31,22 @@ typedef std::shared_ptr<SScene> tspScene;
 namespace player {
   extern const char* c_sMainPlayerProperty;
 }
+
+//----------------------------------------------------------------------------------------
+//
+class CPlayerProjectProvider : public CProjectProvider
+{
+public:
+  CPlayerProjectProvider();
+  ~CPlayerProjectProvider() override;
+
+  void SetCurrentProject(const tspProject& spProject);
+
+  tspProject FindProject(qint32 iId) override;
+
+private:
+  tspProject m_spCurrentProject;
+};
 
 //----------------------------------------------------------------------------------------
 //
@@ -108,6 +126,7 @@ private:
   std::shared_ptr<CThreadedSystem>                            m_spScriptRunnerSystem;
   std::shared_ptr<CScriptRunner>                              m_spScriptRunner;
   std::shared_ptr<CSettings>                                  m_spSettings;
+  std::shared_ptr<CPlayerProjectProvider>                     m_spProjectProivider;
   tspProject                                                  m_spCurrentProject;
   QPointer<CProjectScriptWrapper>                             m_pCurrentProjectWrapper;
   QPointer<CPlayerConsoleError>                               m_pErrorConsole;

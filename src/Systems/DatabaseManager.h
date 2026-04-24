@@ -20,7 +20,6 @@ struct SScene;
 struct SResourceBundle;
 struct STag;
 typedef std::shared_ptr<SProject>       tspProject;
-typedef std::vector<tspProject>         tvspProject;
 typedef std::shared_ptr<SResourceBundle>tspResourceBundle;
 typedef std::shared_ptr<SSaveData>      tspSaveData;
 typedef std::shared_ptr<SScene>         tspScene;
@@ -83,8 +82,8 @@ public:
                       const QString& sName = QString(), const QString& sBundle = QString(),
                       const tvfnActionsResource& vfnActionsAfterAdding = tvfnActionsResource());
   void ClearResources(tspProject& spProj);
-  tspResource FindResourceInProject(tspProject& spProj, const QString& sName);
-  tvspResource FindResourcesInProject(tspProject& spProj, const QRegExp& rx);
+  tspResource FindResourceInProject(const tspProject& spProj, const QString& sName);
+  tvspResource FindResourcesInProject(const tspProject& spProj, const QRegExp& rx);
   tspResourceBundle FindResourceBundleInProject(tspProject& spProj, const QString& sName);
   void RemoveResource(tspProject& spProj, const QString& sName);
   void RenameResource(tspProject& spProj, const QString& sName, const QString& sNewName);

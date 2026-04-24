@@ -9,8 +9,7 @@
 #include <vector>
 
 struct SProject;
-typedef std::shared_ptr<SProject>       tspProject;
-typedef std::vector<tspProject>         tvspProject;
+typedef std::vector<std::shared_ptr<SProject>>         tvspProject;
 
 class CDatabaseData : public QMutex
 {

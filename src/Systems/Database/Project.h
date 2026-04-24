@@ -61,7 +61,6 @@ struct SProject : public ISerializable, std::enable_shared_from_this<SProject>,
 //----------------------------------------------------------------------------------------
 //
 typedef std::shared_ptr<SProject> tspProject;
-typedef std::vector<tspProject>   tvspProject;
 
 Q_DECLARE_METATYPE(tspProject)
 

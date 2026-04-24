@@ -730,7 +730,7 @@ void CDatabaseManager::ClearResources(tspProject& spProj)
 
 //----------------------------------------------------------------------------------------
 //
-tspResource CDatabaseManager::FindResourceInProject(tspProject& spProj, const QString& sName)
+tspResource CDatabaseManager::FindResourceInProject(const tspProject& spProj, const QString& sName)
 {
   if (!IsInitialized() || nullptr == spProj) { return nullptr; }
 
@@ -750,7 +750,7 @@ tspResource CDatabaseManager::FindResourceInProject(tspProject& spProj, const QS
 
 //----------------------------------------------------------------------------------------
 //
-tvspResource CDatabaseManager::FindResourcesInProject(tspProject& spProj, const QRegExp& rx)
+tvspResource CDatabaseManager::FindResourcesInProject(const tspProject& spProj, const QRegExp& rx)
 {
   tvspResource retVal;
   if (!IsInitialized() || nullptr == spProj) { return retVal; }

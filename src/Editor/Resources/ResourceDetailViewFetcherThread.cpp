@@ -58,7 +58,7 @@ bool CResourceDetailViewFetcherThread::IsLoading() const
 void CResourceDetailViewFetcherThread::Initialize()
 {
   m_spDbImageProvider.reset(
-        new CDatabaseImageProvider(CApplication::Instance()->System<CDatabaseManager>()));
+        new CDatabaseImageProvider(std::make_shared<CProjectProvider>()));
   m_bLoading = false;
   SetInitialized(true);
 }

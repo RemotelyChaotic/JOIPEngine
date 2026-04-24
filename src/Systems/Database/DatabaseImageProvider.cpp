@@ -1,3 +1,4 @@
+#include "Application.h"
 #include "DatabaseImageProvider.h"
 #include "Settings.h"
 
@@ -15,10 +16,48 @@
 
 const QString c_sUserAgent = "User-Agent";
 
-CDatabaseImageProvider::CDatabaseImageProvider(const std::weak_ptr<CDatabaseManager>& wpDatabase) :
+//----------------------------------------------------------------------------------------
+//
+CProjectProvider::CProjectProvider() :
+  m_wpDatabase(CApplication::Instance()->System<CDatabaseManager>())
+{
+}
+
+CProjectProvider::~CProjectProvider()
+{
+}
+
+//----------------------------------------------------------------------------------------
+//
+tspProject CProjectProvider::FindProject(qint32 iId)
+{
+  if (auto spDbManager = m_wpDatabase.lock())
+  {
+    auto spProject = spDbManager->FindProject(iId);
+    return spProject;
+  }
+  return nullptr;
+}
+
+//----------------------------------------------------------------------------------------
+//
+tspResource CProjectProvider::FindResourceInProject(const tspProject& spProject,
+                                                    const QString& sName)
+{
+  if (auto spDbManager = m_wpDatabase.lock())
+  {
+    auto spReosurce = spDbManager->FindResourceInProject(spProject, sName);
+    return spReosurce;
+  }
+  return nullptr;
+}
+
+//----------------------------------------------------------------------------------------
+//
+CDatabaseImageProvider::CDatabaseImageProvider(const std::shared_ptr<CProjectProvider>& spProjectProvider) :
   QObject(nullptr),
   QQuickImageProvider(QQuickImageProvider::Image, QQmlImageProviderBase::ForceAsynchronousImageLoading),
-  m_wpDatabase(wpDatabase)
+  m_spProjectProvider(spProjectProvider)
 {
 }
 
@@ -35,39 +74,36 @@ QImage CDatabaseImageProvider::requestImage(const QString& id, QSize* pSize,
   QStringList vsParts = id.split("/");
   if (2 == vsParts.length())
   {
-    if (auto spDbManager = m_wpDatabase.lock())
+    auto spProject = m_spProjectProvider->FindProject(vsParts[0].toInt());
+    if (nullptr == spProject)
     {
-      auto spProject = spDbManager->FindProject(vsParts[0].toInt());
-      if (nullptr == spProject)
+      return QImage();
+    }
+
+    QReadLocker projLocker(&spProject->m_rwLock);
+    bool bLoadedBefore = spProject->m_bLoaded;
+    projLocker.unlock();
+
+    auto spResource = m_spProjectProvider->FindResourceInProject(spProject, vsParts[1]);
+    if (nullptr != spResource)
+    {
+      QReadLocker locker(&spResource->m_rwLock);
+      const QString sResourceName = spResource->m_sName;
+      const SResourcePath sResourcePath = spResource->m_sPath;
+      const QString sResourceBundle = spResource->m_sResourceBundle;
+      if (spResource->m_type._to_integral() == EResourceType::eImage)
       {
-        return QImage();
+        locker.unlock();
+        return RequestImage(spProject, spResource,
+                            sResourceName, sResourceBundle, sResourcePath,
+                            pSize, requestedSize, bLoadedBefore);
       }
-
-      QReadLocker projLocker(&spProject->m_rwLock);
-      bool bLoadedBefore = spProject->m_bLoaded;
-      projLocker.unlock();
-
-      auto spResource = spDbManager->FindResourceInProject(spProject, vsParts[1]);
-      if (nullptr != spResource)
+      else if (spResource->m_type._to_integral() == EResourceType::eMovie)
       {
-        QReadLocker locker(&spResource->m_rwLock);
-        const QString sResourceName = spResource->m_sName;
-        const SResourcePath sResourcePath = spResource->m_sPath;
-        const QString sResourceBundle = spResource->m_sResourceBundle;
-        if (spResource->m_type._to_integral() == EResourceType::eImage)
-        {
-          locker.unlock();
-          return RequestImage(spProject, spResource, spDbManager,
-                              sResourceName, sResourceBundle, sResourcePath,
-                              pSize, requestedSize, bLoadedBefore);
-        }
-        else if (spResource->m_type._to_integral() == EResourceType::eMovie)
-        {
-          locker.unlock();
-          return RequestMovieFrame(spProject, spResource,
-                                   sResourceName, sResourceBundle, sResourcePath,
-                                   pSize, requestedSize, bLoadedBefore);
-        }
+        locker.unlock();
+        return RequestMovieFrame(spProject, spResource,
+                                 sResourceName, sResourceBundle, sResourcePath,
+                                 pSize, requestedSize, bLoadedBefore);
       }
     }
   }
@@ -77,8 +113,7 @@ QImage CDatabaseImageProvider::requestImage(const QString& id, QSize* pSize,
 //----------------------------------------------------------------------------------------
 //
 QImage CDatabaseImageProvider::RequestImage(tspProject spProject,
-                                            spResource spResource,
-                                            std::shared_ptr<CDatabaseManager> spDbManager,
+                                            tspResource spResource,
                                             const QString& sResourceName,
                                             const QString& sResourceBundleName,
                                             const SResourcePath& sResourcePath,
@@ -128,7 +163,7 @@ QImage CDatabaseImageProvider::RequestImage(tspProject spProject,
     req.setRawHeader(c_sUserAgent.toUtf8(), CSettings::c_sApplicationName.toUtf8());
     QPointer<QNetworkReply> pReply = spManager->get(req);
     connect(pReply, &QNetworkReply::finished,
-            this, [pReply, &spDbManager, &img, &loop](){
+            this, [pReply, &img, &loop](){
       if(nullptr != pReply)
       {
         QUrl url = pReply->url();
@@ -139,18 +174,16 @@ QImage CDatabaseImageProvider::RequestImage(tspProject spProject,
         QString sFormat = "*" + sFileName.mid(iLastIndex, sFileName.size() - iLastIndex);
 
         QStringList imageFormatsList = SResourceFormats::ImageFormats();
-        if (nullptr != spDbManager)
+        if (imageFormatsList.contains(sFormat))
         {
-          if (imageFormatsList.contains(sFormat))
+          QPixmap mPixmap;
+          mPixmap.loadFromData(arr);
+          if (!mPixmap.isNull())
           {
-            QPixmap mPixmap;
-            mPixmap.loadFromData(arr);
-            if (!mPixmap.isNull())
-            {
-              img = mPixmap.toImage();
-            }
+            img = mPixmap.toImage();
           }
         }
+
         bool bOk = QMetaObject::invokeMethod(&loop, "quit", Qt::QueuedConnection);
         assert(bOk); Q_UNUSED(bOk)
       }
@@ -207,7 +240,7 @@ QImage CDatabaseImageProvider::LoadImage(const QString& sPath)
 //----------------------------------------------------------------------------------------
 //
 QImage CDatabaseImageProvider::RequestMovieFrame(tspProject spProject,
-                                                 spResource spResource,
+                                                 tspResource spResource,
                                                  const QString& sResourceName,
                                                  const QString& sResourceBundleName,
                                                  const SResourcePath& sResourcePath,

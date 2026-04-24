@@ -39,6 +39,37 @@ const char* player::c_sMainPlayerProperty = "MainPlayer";
 
 //----------------------------------------------------------------------------------------
 //
+CPlayerProjectProvider::CPlayerProjectProvider()
+{
+
+}
+CPlayerProjectProvider::~CPlayerProjectProvider() {}
+
+//----------------------------------------------------------------------------------------
+//
+void CPlayerProjectProvider::SetCurrentProject(const tspProject& spProject)
+{
+  m_spCurrentProject = spProject;
+}
+
+//----------------------------------------------------------------------------------------
+//
+tspProject CPlayerProjectProvider::FindProject(qint32 iId)
+{
+  if (nullptr != m_spCurrentProject)
+  {
+    // we can only ever return the current project
+    QReadLocker l(&m_spCurrentProject->m_rwLock);
+    if (m_spCurrentProject->m_iId == iId)
+    {
+      return m_spCurrentProject;
+    }
+  }
+  return nullptr;
+}
+
+//----------------------------------------------------------------------------------------
+//
 CSceneMainScreen::CSceneMainScreen(QWidget* pParent) :
   QWidget(pParent),
   m_spUi(std::make_unique<Ui::CSceneMainScreen>()),
@@ -49,6 +80,7 @@ CSceneMainScreen::CSceneMainScreen(QWidget* pParent) :
   m_spScriptRunnerSystem(std::make_shared<CThreadedSystem>("ScriptRunner")),
   m_spScriptRunner(nullptr),
   m_spSettings(CApplication::Instance()->Settings()),
+  m_spProjectProivider(std::make_shared<CPlayerProjectProvider>()),
   m_spCurrentProject(nullptr),
   m_pCurrentProjectWrapper(nullptr),
   m_wpDbManager(),
@@ -159,6 +191,8 @@ void CSceneMainScreen::LoadProject(qint32 iId, const tSceneToLoad& sStartScene)
   {
     m_spCurrentProject = spDbManager->FindProject(iId);
     if (nullptr == m_spCurrentProject) { return; }
+
+    m_spProjectProivider->SetCurrentProject(m_spCurrentProject);
 
     QStringList vsPaths = m_vsBaseImportPathList;
     vsPaths << "qrc:/qml/resources/qml/";
@@ -676,6 +710,7 @@ void CSceneMainScreen::SlotUnloadFinished()
     CScriptCacheFileEngineHandler::ClearFiles(m_spCurrentProject->m_iId);
   }
 
+  m_spProjectProivider->SetCurrentProject(nullptr);
   m_spCurrentProject = nullptr;
 
   if (nullptr != m_spWindowContext && !m_bBeingDebugged)
@@ -763,7 +798,7 @@ void CSceneMainScreen::InitQmlMain()
   QQmlEngine::setObjectOwnership(pEngine, QQmlEngine::CppOwnership);
 
   // engine will always take owership of this object
-  CDatabaseImageProvider* pProvider = new CDatabaseImageProvider(m_wpDbManager);
+  CDatabaseImageProvider* pProvider = new CDatabaseImageProvider(m_spProjectProivider);
   pEngine->addImageProvider("DataBaseImageProivider", pProvider);
 
   // for eos compatibility
