@@ -24,7 +24,7 @@ public:
   CSubflowNodeModel();
   ~CSubflowNodeModel() override {}
 
-  virtual void SetProjectId(qint32 iId);
+  virtual void SetProject(const tspProject& spProj);
   qint32 ProjectId();
 
   QString FlowName() const { return m_sFlow; }
@@ -97,7 +97,7 @@ public:
   CSubflowNodeModelWithWidget();
   ~CSubflowNodeModelWithWidget() override;
 
-  void SetProjectId(qint32 iId) override;
+  void SetProject(const tspProject& spProj) override;
 
   void restore(QJsonObject const& p) override;
 

@@ -36,14 +36,10 @@ CSubflowNodeModel::CSubflowNodeModel() :
 
 //----------------------------------------------------------------------------------------
 //
-void CSubflowNodeModel::SetProjectId(qint32 iId)
+void CSubflowNodeModel::SetProject(const tspProject& spProj)
 {
-  auto spDbManager = m_wpDbManager.lock();
-  if (nullptr != spDbManager)
-  {
-    m_spProject = spDbManager->FindProject(iId);
-    ProjectSetImpl();
-  }
+  m_spProject = spProj;
+  ProjectSetImpl();
 }
 
 //----------------------------------------------------------------------------------------
@@ -324,9 +320,9 @@ CSubflowNodeModelWithWidget::~CSubflowNodeModelWithWidget()
 
 //----------------------------------------------------------------------------------------
 //
-void CSubflowNodeModelWithWidget::SetProjectId(qint32 iId)
+void CSubflowNodeModelWithWidget::SetProject(const tspProject& spProj)
 {
-  CSubflowNodeModel::SetProjectId(iId);
+  CSubflowNodeModel::SetProject(spProj);
   if (nullptr != m_pWidget)
   {
     m_pWidget->SetNodeName(m_sNodeName);

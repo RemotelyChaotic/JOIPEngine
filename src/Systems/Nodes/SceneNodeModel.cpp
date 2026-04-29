@@ -41,7 +41,7 @@ CSceneNodeModel::CSceneNodeModel() :
 
 //----------------------------------------------------------------------------------------
 //
-void CSceneNodeModel::SetProjectId(qint32 iId)
+void CSceneNodeModel::SetProject(const tspProject& spProj)
 {
   auto spDbManager = m_wpDbManager.lock();
   if (nullptr != spDbManager)
@@ -57,7 +57,7 @@ void CSceneNodeModel::SetProjectId(qint32 iId)
           m_spScene->m_rwLock.unlock();
         }
     };
-    m_spProject = spDbManager->FindProject(iId);
+    m_spProject = spProj;
     if (m_sSceneName.isNull() || m_sSceneName.isEmpty())
     {
       fnAddScene();
@@ -675,9 +675,9 @@ CSceneNodeModelWithWidget::~CSceneNodeModelWithWidget()
 
 //----------------------------------------------------------------------------------------
 //
-void CSceneNodeModelWithWidget::SetProjectId(qint32 iId)
+void CSceneNodeModelWithWidget::SetProject(const tspProject& spProj)
 {
-  CSceneNodeModel::SetProjectId(iId);
+  CSceneNodeModel::SetProject(spProj);
   if (nullptr != m_pWidget)
   {
     m_pWidget->SetName(m_sSceneName);

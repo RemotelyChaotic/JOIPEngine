@@ -654,7 +654,7 @@ bool CEosDownloadJob::CreateScriptFiles(const QJsonDocument& entireScript,
   for (const auto& scenePage : vScenes)
   {
     tspScene spScene =
-        sceneTransformer.AddPageToScene(m_iProjId, m_spProject, scenePage);
+        sceneTransformer.AddPageToScene(m_spProject, scenePage);
     if (nullptr == spScene) { sError = QString("Scene error."); return false; }
 
     const QString sName = scenePage.m_sName;

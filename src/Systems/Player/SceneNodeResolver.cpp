@@ -1446,27 +1446,19 @@ bool CSceneNodeResolver::ResolveStartImpl(const std::variant<QString, QUuid>& st
 //
 void CSceneNodeResolver::SlotNodeCreated(QtNodes::Node &n)
 {
-  auto spDbManager = m_wpDbManager.lock();
-  if (nullptr != spDbManager)
+  CSceneNodeModel* pSceneModel = dynamic_cast<CSceneNodeModel*>(n.nodeDataModel());
+  if (nullptr != pSceneModel)
   {
-    m_spCurrentProject->m_rwLock.lockForRead();
-    qint32 iId = m_spCurrentProject->m_iId;
-    m_spCurrentProject->m_rwLock.unlock();
-
-    CSceneNodeModel* pSceneModel = dynamic_cast<CSceneNodeModel*>(n.nodeDataModel());
-    if (nullptr != pSceneModel)
-    {
-      pSceneModel->SetProjectId(iId);
-    }
-    CPathSplitterModel* pPathSplitterModel = dynamic_cast<CPathSplitterModel*>(n.nodeDataModel());
-    if (nullptr != pPathSplitterModel)
-    {
-      pPathSplitterModel->SetProjectId(iId);
-    }
-    CSubflowNodeModel* pSubFlowModel = dynamic_cast<CSubflowNodeModel*>(n.nodeDataModel());
-    if (nullptr != pSubFlowModel)
-    {
-      pSubFlowModel->SetProjectId(iId);
-    }
+    pSceneModel->SetProject(m_spCurrentProject);
+  }
+  CPathSplitterModel* pPathSplitterModel = dynamic_cast<CPathSplitterModel*>(n.nodeDataModel());
+  if (nullptr != pPathSplitterModel)
+  {
+    pPathSplitterModel->SetProject(m_spCurrentProject);
+  }
+  CSubflowNodeModel* pSubFlowModel = dynamic_cast<CSubflowNodeModel*>(n.nodeDataModel());
+  if (nullptr != pSubFlowModel)
+  {
+    pSubFlowModel->SetProject(m_spCurrentProject);
   }
 }

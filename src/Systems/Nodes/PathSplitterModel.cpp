@@ -51,14 +51,10 @@ std::optional<QString> CPathSplitterModel::CustomTransition() const
 
 //----------------------------------------------------------------------------------------
 //
-void CPathSplitterModel::SetProjectId(qint32 iId)
+void CPathSplitterModel::SetProject(const tspProject& spProj)
 {
-  auto spDbManager = m_wpDbManager.lock();
-  if (nullptr != spDbManager)
-  {
-    m_spProject = spDbManager->FindProject(iId);
-    OnProjectSetImpl();
-  }
+  m_spProject = spProj;
+  OnProjectSetImpl();
 }
 
 //----------------------------------------------------------------------------------------
@@ -358,9 +354,9 @@ CPathSplitterModelWithWidget::~CPathSplitterModelWithWidget()
 
 //----------------------------------------------------------------------------------------
 //
-void CPathSplitterModelWithWidget::SetProjectId(qint32 iId)
+void CPathSplitterModelWithWidget::SetProject(const tspProject& spProj)
 {
-  CPathSplitterModel::SetProjectId(iId);
+  CPathSplitterModel::SetProject(spProj);
   if (nullptr != m_pWidget)
   {
     m_pWidget->SetTransitionType(m_transitonType._to_integral());

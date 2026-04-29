@@ -56,8 +56,7 @@ CEosPagesToScenesTransformer::~CEosPagesToScenesTransformer()
 
 //----------------------------------------------------------------------------------------
 //
-tspScene CEosPagesToScenesTransformer::AddPageToScene(const qint32 iProjectId,
-                                                      tspProject spProject,
+tspScene CEosPagesToScenesTransformer::AddPageToScene(tspProject spProject,
                                                       const SPageScene& page)
 {
   tspScene spScene = nullptr;
@@ -101,7 +100,7 @@ tspScene CEosPagesToScenesTransformer::AddPageToScene(const qint32 iProjectId,
           dynamic_cast<CSceneNodeModel*>(pSceneNode->nodeDataModel());
       if (nullptr != pSceneModel)
       {
-        pSceneModel->SetProjectId(iProjectId);
+        pSceneModel->SetProject(spProject);
         qint32 iSceneId = pSceneModel->SceneId();
         spScene = spDbManager->FindScene(spProject, iSceneId);
         pSceneModel->SetSceneName(page.m_sName);
@@ -110,7 +109,7 @@ tspScene CEosPagesToScenesTransformer::AddPageToScene(const qint32 iProjectId,
           dynamic_cast<CPathSplitterModel*>(pSceneNode->nodeDataModel());
       if (nullptr != pSplitterModel)
       {
-        pSceneModel->SetProjectId(iProjectId);
+        pSceneModel->SetProject(spProject);
       }
     }
   }

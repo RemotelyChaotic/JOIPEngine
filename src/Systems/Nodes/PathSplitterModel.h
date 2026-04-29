@@ -29,7 +29,7 @@ public:
    ~CPathSplitterModel() override {}
 
   std::optional<QString> CustomTransition() const;
-  virtual void SetProjectId(qint32 iId);
+  virtual void SetProject(const tspProject& spProj);
   qint32 ProjectId();
   ESceneTransitionType TransitionType() { return m_transitonType; }
   QString TransitionLabel(PortIndex port);
@@ -99,7 +99,7 @@ public:
   CPathSplitterModelWithWidget();
   ~CPathSplitterModelWithWidget() override;
 
-  void SetProjectId(qint32 iId) override;
+  void SetProject(const tspProject& spProj) override;
 
   void restore(QJsonObject const& p) override;
 

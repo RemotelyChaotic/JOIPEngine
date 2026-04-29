@@ -576,42 +576,34 @@ void CEditorSceneNodeWidget::SlotNodeCreated(Node &n)
     return;
   }
 
-  auto spDbManager = m_wpDbManager.lock();
-  if (nullptr != spDbManager)
+  CSceneNodeModel* pSceneModel = dynamic_cast<CSceneNodeModel*>(n.nodeDataModel());
+  if (nullptr != pSceneModel)
   {
-    m_spCurrentProject->m_rwLock.lockForRead();
-    qint32 iId = m_spCurrentProject->m_iId;
-    m_spCurrentProject->m_rwLock.unlock();
+    pSceneModel->SetProject(m_spCurrentProject);
+    pSceneModel->SetResourceItemModel(ResourceTreeModel());
+    connect(pSceneModel, &CSceneNodeModel::SignalAddScriptFileRequested,
+            this, &CEditorSceneNodeWidget::SlotAddNewScriptFileToScene, Qt::UniqueConnection);
+    connect(pSceneModel, &CSceneNodeModel::SignalAddLayoutFileRequested,
+            this, &CEditorSceneNodeWidget::SlotAddNewLayoutFileToScene, Qt::UniqueConnection);
+  }
+  CPathSplitterModel* pPathSplitterModel = dynamic_cast<CPathSplitterModel*>(n.nodeDataModel());
+  if (nullptr != pPathSplitterModel)
+  {
+    pPathSplitterModel->SetProject(m_spCurrentProject);
+    connect(pPathSplitterModel, &CPathSplitterModel::SignalAddLayoutFileRequested,
+            this, &CEditorSceneNodeWidget::SlotAddNewLayoutFileToScene, Qt::UniqueConnection);
+  }
+  CSubflowNodeModel* pSubflowModel = dynamic_cast<CSubflowNodeModel*>(n.nodeDataModel());
+  if (nullptr != pSubflowModel)
+  {
+    pSubflowModel->SetProject(m_spCurrentProject);
+    connect(pSubflowModel, &CSubflowNodeModel::SignalAddNodeFileRequested,
+            this, &CEditorSceneNodeWidget::SlotCreateNewFlowClicked, Qt::UniqueConnection);
+  }
 
-    CSceneNodeModel* pSceneModel = dynamic_cast<CSceneNodeModel*>(n.nodeDataModel());
-    if (nullptr != pSceneModel)
-    {
-      pSceneModel->SetProjectId(iId);
-      pSceneModel->SetResourceItemModel(ResourceTreeModel());
-      connect(pSceneModel, &CSceneNodeModel::SignalAddScriptFileRequested,
-              this, &CEditorSceneNodeWidget::SlotAddNewScriptFileToScene, Qt::UniqueConnection);
-      connect(pSceneModel, &CSceneNodeModel::SignalAddLayoutFileRequested,
-              this, &CEditorSceneNodeWidget::SlotAddNewLayoutFileToScene, Qt::UniqueConnection);
-    }
-    CPathSplitterModel* pPathSplitterModel = dynamic_cast<CPathSplitterModel*>(n.nodeDataModel());
-    if (nullptr != pPathSplitterModel)
-    {
-      pPathSplitterModel->SetProjectId(iId);
-      connect(pPathSplitterModel, &CPathSplitterModel::SignalAddLayoutFileRequested,
-              this, &CEditorSceneNodeWidget::SlotAddNewLayoutFileToScene, Qt::UniqueConnection);
-    }
-    CSubflowNodeModel* pSubflowModel = dynamic_cast<CSubflowNodeModel*>(n.nodeDataModel());
-    if (nullptr != pSubflowModel)
-    {
-      pSubflowModel->SetProjectId(iId);
-      connect(pSubflowModel, &CSubflowNodeModel::SignalAddNodeFileRequested,
-              this, &CEditorSceneNodeWidget::SlotCreateNewFlowClicked, Qt::UniqueConnection);
-    }
-
-    if (!FlowSceneModel()->IsLoading())
-    {
-      EditableFileModel()->SetSceneScriptModifiedFlag(m_sLastCachedFlow, true);
-    }
+  if (!FlowSceneModel()->IsLoading())
+  {
+    EditableFileModel()->SetSceneScriptModifiedFlag(m_sLastCachedFlow, true);
   }
 }
 

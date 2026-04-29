@@ -27,8 +27,7 @@ public:
   CEosPagesToScenesTransformer(const QJsonDocument& script);
   ~CEosPagesToScenesTransformer();
 
-  tspScene AddPageToScene(const qint32 iProjectId,
-                          tspProject spProject,
+  tspScene AddPageToScene(tspProject spProject,
                           const SPageScene& page);
   bool CollectScenes(QString* psError);
   QByteArray CompileScenes();

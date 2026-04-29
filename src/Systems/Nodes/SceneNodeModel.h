@@ -27,7 +27,7 @@ public:
   ~CSceneNodeModel() override {}
 
 public:
-  virtual void SetProjectId(qint32 iId);
+  virtual void SetProject(const tspProject& spProj);
   qint32 ProjectId();
   qint32 SceneId();
 
@@ -119,7 +119,7 @@ public:
   CSceneNodeModelWithWidget();
   ~CSceneNodeModelWithWidget() override;
 
-  void SetProjectId(qint32 iId) override;
+  void SetProject(const tspProject& spProj) override;
   void SetSceneName(const QString& sScene) override;
 
   void restore(QJsonObject const& p) override;
