@@ -120,12 +120,12 @@ namespace
   {
     InsertMetaObjectMethods(vsInbuiltKeywords, CScriptBackground::staticMetaObject);
     vsInbuiltKeywords.insert("background");
-    InsertMetaObjectMethods(vsInbuiltKeywords, CProjectScriptWrapper::staticMetaObject);
-    InsertMetaObjectMethods(vsInbuiltKeywords, CResourceScriptWrapper::staticMetaObject);
-    InsertMetaObjectMethods(vsInbuiltKeywords, CSceneScriptWrapper::staticMetaObject);
+    InsertMetaObjectMethods(vsInbuiltKeywords, CProjectScriptWrapperReadOnly::staticMetaObject);
+    InsertMetaObjectMethods(vsInbuiltKeywords, CResourceScriptWrapperReadOnly::staticMetaObject);
+    InsertMetaObjectMethods(vsInbuiltKeywords, CSceneScriptWrapperReadOnly::staticMetaObject);
     vsInbuiltKeywords.insert("scene");
-    InsertMetaObjectMethods(vsInbuiltKeywords, CKinkWrapper::staticMetaObject);
-    InsertMetaObjectMethods(vsInbuiltKeywords, CTagWrapper::staticMetaObject);
+    InsertMetaObjectMethods(vsInbuiltKeywords, CKinkWrapperReadOnly::staticMetaObject);
+    InsertMetaObjectMethods(vsInbuiltKeywords, CTagWrapperReadOnly::staticMetaObject);
     InsertMetaObjectMethods(vsInbuiltKeywords, CScriptDeviceController::staticMetaObject);
     vsInbuiltKeywords.insert("deviceController");
     InsertMetaObjectMethods(vsInbuiltKeywords, CScriptIcon::staticMetaObject);

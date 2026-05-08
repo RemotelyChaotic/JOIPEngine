@@ -302,7 +302,7 @@ public slots:
     }
     if (nullptr != spScene)
     {
-      m_pCurrentScene = new CSceneScriptWrapper(m_pScriptEngine, spScene);
+      m_pCurrentScene = new CSceneScriptWrapperReadOnly(m_pScriptEngine, spScene);
       // we need to change ownership
       QQmlEngine::setObjectOwnership(m_pCurrentScene, QQmlEngine::CppOwnership);
       QJSValue sceneValue = m_pScriptEngine->newQObject(m_pCurrentScene);
@@ -325,7 +325,7 @@ public slots:
 
       if (nullptr == spScene)
       {
-        m_pCurrentProject = new CProjectScriptWrapper(m_pScriptEngine, m_spProject);
+        m_pCurrentProject = new CProjectScriptWrapperReadOnly(m_pScriptEngine, m_spProject);
         // we need to change ownership
         QQmlEngine::setObjectOwnership(m_pCurrentProject, QQmlEngine::CppOwnership);
         QJSValue projectValue = m_pScriptEngine->newQObject(m_pCurrentProject);
@@ -551,8 +551,8 @@ private:
   QPointer<QQmlEngine>                           m_pScriptEngine;
   QPointer<CScriptRunnerUtilsJs>                 m_pScriptUtils;
   CResourceUrlInterceptor*                       m_pUrlInterceptor;
-  QPointer<CSceneScriptWrapper>                  m_pCurrentScene;
-  QPointer<CProjectScriptWrapper>                m_pCurrentProject;
+  QPointer<CSceneScriptWrapperReadOnly>                  m_pCurrentScene;
+  QPointer<CProjectScriptWrapperReadOnly>                m_pCurrentProject;
   std::map<QString /*name*/,
            std::shared_ptr<CScriptObjectBase>>   m_objectMap;
   std::vector<QString>                           m_vsObjectToDeleteMap;
@@ -896,7 +896,7 @@ tspResource CScriptRunnerUtilsJs::GetResource(QJSValue resource)
     }
     else if (resource.isQObject())
     {
-      CResourceScriptWrapper* pResource = dynamic_cast<CResourceScriptWrapper*>(resource.toQObject());
+      CResourceScriptWrapperReadOnly* pResource = dynamic_cast<CResourceScriptWrapperReadOnly*>(resource.toQObject());
       if (nullptr != pResource)
       {
         if (nullptr != pResource->Data())

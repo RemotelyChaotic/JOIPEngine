@@ -813,7 +813,7 @@ void CSceneMainScreen::LoadQml()
   QQuickItem* pRootObject =  m_pQmlWidget->rootObject();
   if (nullptr != pRootObject)
   {
-    m_pCurrentProjectWrapper = new CProjectScriptWrapper(m_pQmlWidget->engine(), m_spCurrentProject);
+    m_pCurrentProjectWrapper = new CProjectScriptWrapperReadOnly(m_pQmlWidget->engine(), m_spCurrentProject);
     QQmlEngine::setObjectOwnership(m_pCurrentProjectWrapper, QQmlEngine::CppOwnership);
     pRootObject->setProperty("currentlyLoadedProject", QVariant::fromValue(m_pCurrentProjectWrapper.data()));
     pRootObject->setProperty("debug", m_bBeingDebugged);

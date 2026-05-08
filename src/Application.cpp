@@ -312,11 +312,11 @@ void CApplication::RegisterQmlTypes()
   qRegisterMetaType<QtMsgType>();
   qRegisterMetaType<Qt::ApplicationState>();
 
-  qRegisterMetaType<CResourceScriptWrapper*>();
+  qRegisterMetaType<CResourceScriptWrapperReadOnly*>();
   qRegisterMetaType<tspResource>();
-  qRegisterMetaType<CSceneScriptWrapper*>();
+  qRegisterMetaType<CSceneScriptWrapperReadOnly*>();
   qRegisterMetaType<tspScene>();
-  qRegisterMetaType<CProjectScriptWrapper*>();
+  qRegisterMetaType<CProjectScriptWrapperReadOnly*>();
   qRegisterMetaType<tspProject>();
 
   qRegisterMetaType<QQmlWebChannel*>();
@@ -503,13 +503,13 @@ void CApplication::RegisterQmlTypes()
     return nullptr;
   });
 
-  qmlRegisterUncreatableType<CKinkWrapper>("JOIP.db", 1, 1, "Kink", "");
-  qmlRegisterUncreatableType<CProjectScriptWrapper>("JOIP.db", 1, 1, "Project", "");
-  qmlRegisterUncreatableType<CSceneScriptWrapper>("JOIP.db", 1, 1, "Scene", "");
-  qmlRegisterUncreatableType<CResourceScriptWrapper>("JOIP.db", 1, 1, "Resource", "");
-  qmlRegisterUncreatableType<CDialogueWrapper>("JOIP.db", 1, 5, "Dialogue", "");
-  qmlRegisterUncreatableType<CDialogueDataWrapper>("JOIP.db", 1, 5, "DialogueData", "");
-  qmlRegisterUncreatableType<CSaveDataWrapper>("JOIP.db", 1, 5, "SaveData", "");
+  qmlRegisterUncreatableType<CKinkWrapperReadOnly>("JOIP.db", 1, 1, "Kink", "");
+  qmlRegisterUncreatableType<CProjectScriptWrapperReadOnly>("JOIP.db", 1, 1, "Project", "");
+  qmlRegisterUncreatableType<CSceneScriptWrapperReadOnly>("JOIP.db", 1, 1, "Scene", "");
+  qmlRegisterUncreatableType<CResourceScriptWrapperReadOnly>("JOIP.db", 1, 1, "Resource", "");
+  qmlRegisterUncreatableType<CDialogueWrapperReadOnly>("JOIP.db", 1, 5, "Dialogue", "");
+  qmlRegisterUncreatableType<CDialogueDataWrapperReadOnly>("JOIP.db", 1, 5, "DialogueData", "");
+  qmlRegisterUncreatableType<CSaveDataWrapperReadOnly>("JOIP.db", 1, 5, "SaveData", "");
 
   qmlRegisterType<CBackgroundSignalEmitter>("JOIP.script", 1, 1, "BackgroundSignalEmitter");
   qmlRegisterType<CDeviceControllerSignalEmitter>("JOIP.script", 1, 3, "DeviceControllerSignalEmitter");

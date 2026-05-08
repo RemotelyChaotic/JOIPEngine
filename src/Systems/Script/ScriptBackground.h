@@ -7,7 +7,7 @@
 #include <memory>
 
 class CDatabaseManager;
-class CResourceScriptWrapper;
+class CResourceScriptWrapperReadOnly;
 
 class CBackgroundSignalEmitter : public CScriptRunnerSignalEmiter
 {

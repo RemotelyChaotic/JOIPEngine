@@ -10,7 +10,7 @@
 
 class CDatabaseImageProvider;
 class CDatabaseManager;
-class CProjectScriptWrapper;
+class CProjectScriptWrapperReadOnly;
 namespace Ui {
   class CProjectCardSelectionWidget;
 }
@@ -63,7 +63,7 @@ private:
 
   std::unique_ptr<Ui::CProjectCardSelectionWidget> m_spUi;
   std::weak_ptr<CDatabaseManager>                  m_wpDbManager;
-  std::vector<QPointer<CProjectScriptWrapper>>     m_vpProjects;
+  std::vector<QPointer<CProjectScriptWrapperReadOnly>>     m_vpProjects;
   EDownLoadStateFlags                              m_flags;
   QColor                                           m_selectionColor;
   qint32                                           m_iSelectedProjectId;

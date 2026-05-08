@@ -11,7 +11,7 @@
 #include <memory>
 #include <optional>
 
-class CProjectScriptWrapper;
+class CProjectScriptWrapperReadOnly;
 class CSceneMainScreen;
 
 class IProjectSavegamePersistance
@@ -35,14 +35,14 @@ protected:
 class CProjectSavegameManager : public QObject
 {
   Q_OBJECT
-  Q_PROPERTY(CProjectScriptWrapper* project READ Project WRITE SetProject NOTIFY projectChanged)
+  Q_PROPERTY(CProjectScriptWrapperReadOnly* project READ Project WRITE SetProject NOTIFY projectChanged)
 
 public:
   explicit CProjectSavegameManager(QObject* pParent = nullptr);
   ~CProjectSavegameManager() override;
 
-  CProjectScriptWrapper* Project() const;
-  void SetProject(CProjectScriptWrapper* pProj);
+  CProjectScriptWrapperReadOnly* Project() const;
+  void SetProject(CProjectScriptWrapperReadOnly* pProj);
 
 public slots:
   QVariant load(const QString& sId, const QString& sContext);
@@ -57,7 +57,7 @@ private:
   void AutoloadSaves();
 
   std::shared_ptr<IProjectSavegamePersistance>                 m_spPersistence;
-  QPointer<CProjectScriptWrapper>                              m_pProject;
+  QPointer<CProjectScriptWrapperReadOnly>                      m_pProject;
   std::map<QString, IProjectSavegamePersistance::SSettingFile> m_vSettings;
 };
 

@@ -315,11 +315,11 @@ namespace script
   namespace
   {
     template<typename T> struct SWraperToType : public std::false_type {};
-    template<> struct SWraperToType<SResource> { using type = CResourceScriptWrapper;
+    template<> struct SWraperToType<SResource> { using type = CResourceScriptWrapperReadOnly;
                                                  static constexpr char c_sName[] = "Resource"; };
-    template<> struct SWraperToType<SScene> { using type = CSceneScriptWrapper;
+    template<> struct SWraperToType<SScene> { using type = CSceneScriptWrapperReadOnly;
                                               static constexpr char c_sName[] = "Scene";};
-    template<> struct SWraperToType<STag> { using type = CTagWrapper;
+    template<> struct SWraperToType<STag> { using type = CTagWrapperReadOnly;
                                             static constexpr char c_sName[] = "Tag";};
 
     template<typename T> std::shared_ptr<T> FindInProject(

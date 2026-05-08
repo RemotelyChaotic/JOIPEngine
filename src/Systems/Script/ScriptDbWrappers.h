@@ -20,11 +20,11 @@ using tEngineType = std::variant<QJSEngine*, QtLua::State*>;
 
 //----------------------------------------------------------------------------------------
 //
-class CProjectScriptWrapper : public QObject, public CLockable
+class CProjectScriptWrapperReadOnly : public QObject, public CLockable
 {
   Q_OBJECT
-  Q_DISABLE_COPY(CProjectScriptWrapper)
-  CProjectScriptWrapper() = delete;
+  Q_DISABLE_COPY(CProjectScriptWrapperReadOnly)
+  CProjectScriptWrapperReadOnly() = delete;
   Q_PROPERTY(qint32         id                READ getId                CONSTANT)
   Q_PROPERTY(qint32         version           READ getVersion           CONSTANT)
   Q_PROPERTY(QString        versionText       READ getVersionText       CONSTANT)
@@ -69,8 +69,8 @@ public:
   };
   Q_ENUM(ToyMetronomeCommandMode)
 
-  explicit CProjectScriptWrapper(tEngineType pEngine, const std::shared_ptr<SProject>& spProject);
-  ~CProjectScriptWrapper();
+  explicit CProjectScriptWrapperReadOnly(tEngineType pEngine, const std::shared_ptr<SProject>& spProject);
+  ~CProjectScriptWrapperReadOnly();
 
   qint32 getId();
   qint32 getVersion();
@@ -122,18 +122,18 @@ public:
 
   std::shared_ptr<SProject> Data() { return m_spData; }
 
-private:
+protected:
   std::shared_ptr<SProject>              m_spData;
   tEngineType                            m_pEngine;
 };
 
 //----------------------------------------------------------------------------------------
 //
-class CResourceScriptWrapper : public QObject, public CLockable
+class CResourceScriptWrapperReadOnly : public QObject, public CLockable
 {
   Q_OBJECT
-  Q_DISABLE_COPY(CResourceScriptWrapper)
-  CResourceScriptWrapper() = delete;
+  Q_DISABLE_COPY(CResourceScriptWrapperReadOnly)
+  CResourceScriptWrapperReadOnly() = delete;
   Q_PROPERTY(bool          isAnimated     READ isAnimatedImpl CONSTANT)
   Q_PROPERTY(bool          isLocal        READ isLocalPath CONSTANT)
   Q_PROPERTY(QString       name           READ getName CONSTANT)
@@ -162,8 +162,8 @@ public:
   };
   Q_ENUM(ResourceLoadState)
 
-  explicit CResourceScriptWrapper(tEngineType pEngine, const std::shared_ptr<SResource>& spResource);
-  ~CResourceScriptWrapper();
+  explicit CResourceScriptWrapperReadOnly(tEngineType pEngine, const std::shared_ptr<SResource>& spResource);
+  ~CResourceScriptWrapperReadOnly();
 
   bool isAnimatedImpl();
   bool isLocalPath();
@@ -183,7 +183,7 @@ public:
 
   std::shared_ptr<SResource> Data() { return m_spData; }
 
-private:
+protected:
   std::shared_ptr<SResource>    m_spData;
   tEngineType                   m_pEngine;
 };
@@ -191,11 +191,11 @@ private:
 
 //----------------------------------------------------------------------------------------
 //
-class CSceneScriptWrapper : public QObject, public CLockable
+class CSceneScriptWrapperReadOnly : public QObject, public CLockable
 {
   Q_OBJECT
-  Q_DISABLE_COPY(CSceneScriptWrapper)
-  CSceneScriptWrapper() = delete;
+  Q_DISABLE_COPY(CSceneScriptWrapperReadOnly)
+  CSceneScriptWrapperReadOnly() = delete;
   Q_PROPERTY(qint32  id               READ getId     CONSTANT)
   Q_PROPERTY(QString name             READ getName   CONSTANT)
   Q_PROPERTY(QString script           READ getScript CONSTANT)
@@ -204,8 +204,8 @@ class CSceneScriptWrapper : public QObject, public CLockable
   Q_PROPERTY(QString titleCard        READ getTitleCard CONSTANT)
 
 public:
-  explicit CSceneScriptWrapper(tEngineType pEngine, const std::shared_ptr<SScene>& spScene);
-  ~CSceneScriptWrapper();
+  explicit CSceneScriptWrapperReadOnly(tEngineType pEngine, const std::shared_ptr<SScene>& spScene);
+  ~CSceneScriptWrapperReadOnly();
 
   qint32 getId();
   QString getName();
@@ -222,26 +222,26 @@ public:
 
   std::shared_ptr<SScene> Data() { return m_spData; }
 
-private:
+protected:
   std::shared_ptr<SScene>                m_spData;
   tEngineType                            m_pEngine;
 };
 
 //----------------------------------------------------------------------------------------
 //
-class CKinkWrapper : public QObject
+class CKinkWrapperReadOnly : public QObject
 {
   Q_OBJECT
-  Q_DISABLE_COPY(CKinkWrapper)
-  CKinkWrapper() {}
+  Q_DISABLE_COPY(CKinkWrapperReadOnly)
+  CKinkWrapperReadOnly() {}
   Q_PROPERTY(qint32   idForOrdering              READ getIdForOrdering     CONSTANT)
   Q_PROPERTY(QString  type                       READ getType              CONSTANT)
   Q_PROPERTY(QString  name                       READ getName              CONSTANT)
   Q_PROPERTY(QString  describtion                READ getDescribtion       CONSTANT)
 
 public:
-  explicit CKinkWrapper(tEngineType pEngine, const std::shared_ptr<SKink>& spKink);
-  ~CKinkWrapper();
+  explicit CKinkWrapperReadOnly(tEngineType pEngine, const std::shared_ptr<SKink>& spKink);
+  ~CKinkWrapperReadOnly();
 
   qint32 getIdForOrdering();
   QString getType();
@@ -252,25 +252,25 @@ public:
 
   std::shared_ptr<SKink> Data() { return m_spData; }
 
-private:
+protected:
   std::shared_ptr<SKink>              m_spData;
   tEngineType                         m_pEngine;
 };
 
 //----------------------------------------------------------------------------------------
 //
-class CTagWrapper : public QObject
+class CTagWrapperReadOnly : public QObject
 {
   Q_OBJECT
-  Q_DISABLE_COPY(CTagWrapper)
-  CTagWrapper() {}
+  Q_DISABLE_COPY(CTagWrapperReadOnly)
+  CTagWrapperReadOnly() {}
   Q_PROPERTY(QString  type                       READ getType              CONSTANT)
   Q_PROPERTY(QString  name                       READ getName              CONSTANT)
   Q_PROPERTY(QString  describtion                READ getDescribtion       CONSTANT)
 
 public:
-  explicit CTagWrapper(tEngineType pEngine, const std::shared_ptr<STag>& spTag);
-  ~CTagWrapper();
+  explicit CTagWrapperReadOnly(tEngineType pEngine, const std::shared_ptr<STag>& spTag);
+  ~CTagWrapperReadOnly();
 
   QString getType();
   QString getName();
@@ -283,24 +283,24 @@ public:
 
   std::shared_ptr<STag> Data() { return m_spData; }
 
-private:
+protected:
   std::shared_ptr<STag>               m_spData;
   tEngineType                         m_pEngine;
 };
 
 //----------------------------------------------------------------------------------------
 //
-class CDialogueWrapperBase : public QObject
+class CDialogueWrapperBaseReadOnly : public QObject
 {
   Q_OBJECT
-  Q_DISABLE_COPY(CDialogueWrapperBase)
-  CDialogueWrapperBase() = delete;
+  Q_DISABLE_COPY(CDialogueWrapperBaseReadOnly)
+  CDialogueWrapperBaseReadOnly() = delete;
   Q_PROPERTY(QString  resource                READ getResource       CONSTANT)
   Q_PROPERTY(QString  name                    READ getName           CONSTANT)
 
 public:
-  explicit CDialogueWrapperBase(tEngineType pEngine, const std::shared_ptr<CDialogueNode>& spData);
-  ~CDialogueWrapperBase();
+  explicit CDialogueWrapperBaseReadOnly(tEngineType pEngine, const std::shared_ptr<CDialogueNode>& spData);
+  ~CDialogueWrapperBaseReadOnly();
 
   QString getResource() const;
   QString getName() const;
@@ -309,23 +309,21 @@ public:
 
 protected:
   tEngineType                         m_pEngine;
-
-private:
   std::shared_ptr<CDialogueNode>        m_spData;
 };
 
 //----------------------------------------------------------------------------------------
 //
-class CDialogueWrapper : public CDialogueWrapperBase
+class CDialogueWrapperReadOnly : public CDialogueWrapperBaseReadOnly
 {
   Q_OBJECT
-  Q_DISABLE_COPY(CDialogueWrapper)
-  CDialogueWrapper() = delete;
+  Q_DISABLE_COPY(CDialogueWrapperReadOnly)
+  CDialogueWrapperReadOnly() = delete;
   Q_PROPERTY(QString  hasCondition            READ getHasCondition   CONSTANT)
 
 public:
-  explicit CDialogueWrapper(tEngineType pEngine, const std::shared_ptr<CDialogueNodeDialogue>& spData);
-  ~CDialogueWrapper();
+  explicit CDialogueWrapperReadOnly(tEngineType pEngine, const std::shared_ptr<CDialogueNodeDialogue>& spData);
+  ~CDialogueWrapperReadOnly();
 
   bool getHasCondition() const;
 
@@ -341,17 +339,17 @@ public:
 
   std::shared_ptr<CDialogueNodeDialogue> Data() { return m_spData; }
 
-private:
+protected:
   std::shared_ptr<CDialogueNodeDialogue>  m_spData;
 };
 
 //----------------------------------------------------------------------------------------
 //
-class CDialogueDataWrapper : public CDialogueWrapperBase
+class CDialogueDataWrapperReadOnly : public CDialogueWrapperBaseReadOnly
 {
   Q_OBJECT
-  Q_DISABLE_COPY(CDialogueDataWrapper)
-  CDialogueDataWrapper() = delete;
+  Q_DISABLE_COPY(CDialogueDataWrapperReadOnly)
+  CDialogueDataWrapperReadOnly() = delete;
   Q_PROPERTY(QString  condition               READ getCondition      CONSTANT)
   Q_PROPERTY(QString  string                  READ getString         CONSTANT)
   Q_PROPERTY(QString  soundResource           READ getSoundResource  CONSTANT)
@@ -359,8 +357,8 @@ class CDialogueDataWrapper : public CDialogueWrapperBase
   Q_PROPERTY(bool     skipable                READ getSkipable       CONSTANT)
 
 public:
-  explicit CDialogueDataWrapper(tEngineType pEngine, const std::shared_ptr<CDialogueData>& spData);
-  ~CDialogueDataWrapper();
+  explicit CDialogueDataWrapperReadOnly(tEngineType pEngine, const std::shared_ptr<CDialogueData>& spData);
+  ~CDialogueDataWrapperReadOnly();
 
   QString getCondition() const;
   QString getString() const;
@@ -370,17 +368,17 @@ public:
 
   std::shared_ptr<CDialogueData> Data() { return m_spData; }
 
-private:
+protected:
   std::shared_ptr<CDialogueData>        m_spData;
 };
 
 //----------------------------------------------------------------------------------------
 //
-class CSaveDataWrapper : public QObject
+class CSaveDataWrapperReadOnly : public QObject
 {
   Q_OBJECT
-  Q_DISABLE_COPY(CSaveDataWrapper)
-  CSaveDataWrapper() = delete;
+  Q_DISABLE_COPY(CSaveDataWrapperReadOnly)
+  CSaveDataWrapperReadOnly() = delete;
   Q_PROPERTY(QString      name               READ getName           CONSTANT)
   Q_PROPERTY(QString      describtion        READ getDescribtion    CONSTANT)
   Q_PROPERTY(SaveDataType type               READ getType           CONSTANT)
@@ -402,8 +400,8 @@ public:
   };
   Q_ENUM(SaveDataType)
 
-  explicit CSaveDataWrapper(tEngineType pEngine, const std::shared_ptr<SSaveData>& spData);
-  ~CSaveDataWrapper();
+  explicit CSaveDataWrapperReadOnly(tEngineType pEngine, const std::shared_ptr<SSaveData>& spData);
+  ~CSaveDataWrapperReadOnly();
 
   QString getName() const;
   QString getDescribtion() const;
@@ -413,21 +411,21 @@ public:
 
   const std::shared_ptr<SSaveData>& Data() { return m_spData; }
 
-private:
+protected:
   std::shared_ptr<SSaveData>          m_spData;
   tEngineType                         m_pEngine;
 };
 
 //----------------------------------------------------------------------------------------
 //
-Q_DECLARE_METATYPE(CResourceScriptWrapper*)
-Q_DECLARE_METATYPE(CProjectScriptWrapper*)
-Q_DECLARE_METATYPE(CSceneScriptWrapper*)
-Q_DECLARE_METATYPE(CKinkWrapper*)
-Q_DECLARE_METATYPE(CTagWrapper*)
-Q_DECLARE_METATYPE(CDialogueWrapperBase*)
-Q_DECLARE_METATYPE(CDialogueWrapper*)
-Q_DECLARE_METATYPE(CDialogueDataWrapper*)
-Q_DECLARE_METATYPE(CSaveDataWrapper*)
+Q_DECLARE_METATYPE(CResourceScriptWrapperReadOnly*)
+Q_DECLARE_METATYPE(CProjectScriptWrapperReadOnly*)
+Q_DECLARE_METATYPE(CSceneScriptWrapperReadOnly*)
+Q_DECLARE_METATYPE(CKinkWrapperReadOnly*)
+Q_DECLARE_METATYPE(CTagWrapperReadOnly*)
+Q_DECLARE_METATYPE(CDialogueWrapperBaseReadOnly*)
+Q_DECLARE_METATYPE(CDialogueWrapperReadOnly*)
+Q_DECLARE_METATYPE(CDialogueDataWrapperReadOnly*)
+Q_DECLARE_METATYPE(CSaveDataWrapperReadOnly*)
 
 #endif // SCRIPTDBWRAPPERS_H

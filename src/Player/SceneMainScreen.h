@@ -14,7 +14,7 @@ class CDatabaseManager;
 class CPlayerConsoleError;
 class CProjectDialogueManager;
 class CProjectEventCallbackRegistry;
-class CProjectScriptWrapper;
+class CProjectScriptWrapperReadOnly;
 class CSceneNodeResolver;
 class CScriptRunner;
 class CSettings;
@@ -128,7 +128,7 @@ private:
   std::shared_ptr<CSettings>                                  m_spSettings;
   std::shared_ptr<CPlayerProjectProvider>                     m_spProjectProivider;
   tspProject                                                  m_spCurrentProject;
-  QPointer<CProjectScriptWrapper>                             m_pCurrentProjectWrapper;
+  QPointer<CProjectScriptWrapperReadOnly>                             m_pCurrentProjectWrapper;
   QPointer<CPlayerConsoleError>                               m_pErrorConsole;
   QPointer<QQuickWidget>                                      m_pQmlWidget;
   std::weak_ptr<CDatabaseManager>                             m_wpDbManager;

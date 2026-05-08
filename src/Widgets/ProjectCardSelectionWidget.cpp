@@ -300,7 +300,7 @@ void CProjectCardSelectionWidget::SlotProjectAdded(qint32 iId)
 
       if (bDisplay)
       {
-        CProjectScriptWrapper* pValue = new CProjectScriptWrapper(pEngine, spProject);
+        CProjectScriptWrapperReadOnly* pValue = new CProjectScriptWrapperReadOnly(pEngine, spProject);
         m_spUi->pQmlWidget->rootObject()->setProperty("currentlyAddedProject", QVariant::fromValue(pValue));
         bool bOk = QMetaObject::invokeMethod(pRootObject, "onAddProject");
         assert(bOk);
@@ -332,7 +332,7 @@ void CProjectCardSelectionWidget::SlotProjectDownloadProgressChanged(qint32 iPro
 
   // add project to view if not already present
   auto it = std::find_if(m_vpProjects.begin(), m_vpProjects.end(),
-                         [iProjId](const QPointer<CProjectScriptWrapper>& pProj) {
+                         [iProjId](const QPointer<CProjectScriptWrapperReadOnly>& pProj) {
     return pProj->getId() == iProjId;
   });
   if (m_vpProjects.end() == it)
@@ -426,7 +426,7 @@ void CProjectCardSelectionWidget::FinishUnloadPrivate()
   assert(status == QQuickWidget::Null);
   Q_UNUSED(status);
 
-  for (CProjectScriptWrapper* pProject : qAsConst(m_vpProjects))
+  for (CProjectScriptWrapperReadOnly* pProject : qAsConst(m_vpProjects))
   {
     if (!pProject->isLoaded())
     {

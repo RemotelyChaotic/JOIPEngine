@@ -208,8 +208,8 @@ void CProjectSoundManager::registerId(QString sId, QJSValue sound,
   auto it = m_registry.find(sId);
   if (m_registry.end() == it && sound.isObject())
   {
-    CResourceScriptWrapper* pResource =
-        dynamic_cast<CResourceScriptWrapper*>(sound.toQObject());
+    CResourceScriptWrapperReadOnly* pResource =
+        dynamic_cast<CResourceScriptWrapperReadOnly*>(sound.toQObject());
     if (nullptr != pResource)
     {
       m_registry.insert({sId, {pResource->Data(), iLoops, iStartAt, iEndAt}});

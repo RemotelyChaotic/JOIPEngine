@@ -285,7 +285,7 @@ public slots:
     }
     if (nullptr != spScene)
     {
-      m_pCurrentScene = new CSceneScriptWrapper(m_pLuaState, spScene);
+      m_pCurrentScene = new CSceneScriptWrapperReadOnly(m_pLuaState, spScene);
       (*m_pLuaState)["scene"] = QtLua::Value(m_pLuaState, m_pCurrentScene.data(), false, false);
 
       QReadLocker locker(&spScene->m_rwLock);
@@ -304,7 +304,7 @@ public slots:
 
       if (nullptr == spScene)
       {
-        m_pCurrentProject = new CProjectScriptWrapper(m_pLuaState, m_spProject);
+        m_pCurrentProject = new CProjectScriptWrapperReadOnly(m_pLuaState, m_spProject);
         (*m_pLuaState)["project"] = QtLua::Value(m_pLuaState, m_pCurrentProject.data(), false, false);
       }
     }
@@ -650,8 +650,8 @@ private:
   tspProject                                     m_spProject;
   QPointer<QtLua::State>                         m_pLuaState;
   QPointer<CScriptRunnerUtilsLua>                m_pScriptUtils;
-  QPointer<CSceneScriptWrapper>                  m_pCurrentScene;
-  QPointer<CProjectScriptWrapper>                m_pCurrentProject;
+  QPointer<CSceneScriptWrapperReadOnly>                  m_pCurrentScene;
+  QPointer<CProjectScriptWrapperReadOnly>                m_pCurrentProject;
   std::map<QString /*name*/,
            std::shared_ptr<CScriptObjectBase>>   m_objectMap;
   std::vector<QString>                           m_vsObjectToDeleteMap;

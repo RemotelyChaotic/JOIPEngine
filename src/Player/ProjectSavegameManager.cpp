@@ -118,8 +118,8 @@ CProjectSavegameManager::~CProjectSavegameManager() = default;
 
 //----------------------------------------------------------------------------------------
 //
-CProjectScriptWrapper* CProjectSavegameManager::Project() const { return m_pProject; }
-void CProjectSavegameManager::SetProject(CProjectScriptWrapper* pProj)
+CProjectScriptWrapperReadOnly* CProjectSavegameManager::Project() const { return m_pProject; }
+void CProjectSavegameManager::SetProject(CProjectScriptWrapperReadOnly* pProj)
 {
   if (m_pProject != pProj)
   {

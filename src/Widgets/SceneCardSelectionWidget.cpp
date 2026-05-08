@@ -194,7 +194,7 @@ void CSceneCardSelectionWidget::SlotLoadScenesPrivate(qint32 iId, const QStringL
       for (const QString& sScene : qAsConst(vsScenes))
       {
         tspScene spScene = spDbManager->FindScene(spProject, sScene);
-        CSceneScriptWrapper* pValue = new CSceneScriptWrapper(pEngine, spScene);
+        CSceneScriptWrapperReadOnly* pValue = new CSceneScriptWrapperReadOnly(pEngine, spScene);
         bool bOk = QMetaObject::invokeMethod(pRootObject, "onAddScene",
                                              Q_ARG(QVariant, QVariant::fromValue(pValue)));
         assert(bOk);

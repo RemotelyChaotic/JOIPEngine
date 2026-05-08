@@ -98,7 +98,7 @@ void CScriptMetronome::setBeatResource(QVariant resource)
     if (auto spSignalEmitter = spComm->LockedEmitter<CMetronomeSignalEmitter>())
     {
       // the input can either be a string, a bytearray, null, a resource...
-      CResourceScriptWrapper* pItemWrapper = dynamic_cast<CResourceScriptWrapper*>(resource.value<QObject*>());
+      CResourceScriptWrapperReadOnly* pItemWrapper = dynamic_cast<CResourceScriptWrapperReadOnly*>(resource.value<QObject*>());
       if (resource.type() == QVariant::String || resource.type() == QVariant::ByteArray ||
           resource.isNull() || nullptr != pItemWrapper)
       {

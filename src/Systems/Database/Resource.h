@@ -12,7 +12,7 @@
 #include <memory>
 #include <set>
 
-class CProjectScriptWrapper;
+class CProjectScriptWrapperReadOnly;
 class QJSEngine;
 struct SProject;
 typedef std::shared_ptr<SProject>      tspProject;

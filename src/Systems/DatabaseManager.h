@@ -18,8 +18,8 @@
 class CDatabaseData;
 class CDatabaseIO;
 class CDatabaseNotifier;
-class CProjectScriptWrapper;
-class CSceneScriptWrapper;
+class CProjectScriptWrapperReadOnly;
+class CSceneScriptWrapperReadOnly;
 class CSettings;
 struct SProject;
 struct SSaveData;

@@ -140,8 +140,8 @@ QJSValue CProjectDialogueManagerWrapper::dialogue(const QString& sId)
     auto spDial = spInst->FindDialogue(sId);
     if (nullptr != spDial)
     {
-      CDialogueWrapper* pWrapper =
-          new CDialogueWrapper(m_pEngine, spDial);
+      CDialogueWrapperReadOnly* pWrapper =
+          new CDialogueWrapperReadOnly(m_pEngine, spDial);
       return m_pEngine->newQObject(pWrapper);
     }
   }
@@ -159,8 +159,8 @@ QJSValue CProjectDialogueManagerWrapper::dialogueFromRx(const QString& sId)
     int iIndex = 0;
     for (const auto& spDial : vspDial)
     {
-      CDialogueWrapper* pWrapper =
-          new CDialogueWrapper(m_pEngine, spDial);
+      CDialogueWrapperReadOnly* pWrapper =
+          new CDialogueWrapperReadOnly(m_pEngine, spDial);
       val.setProperty(iIndex++, m_pEngine->newQObject(pWrapper));
     }
     return val;
@@ -179,8 +179,8 @@ QJSValue CProjectDialogueManagerWrapper::dialogueFromTags(const QStringList& vsI
     int iIndex = 0;
     for (const auto& spDial : vspDial)
     {
-      CDialogueWrapper* pWrapper =
-          new CDialogueWrapper(m_pEngine, spDial);
+      CDialogueWrapperReadOnly* pWrapper =
+          new CDialogueWrapperReadOnly(m_pEngine, spDial);
       val.setProperty(iIndex++, m_pEngine->newQObject(pWrapper));
     }
     return val;

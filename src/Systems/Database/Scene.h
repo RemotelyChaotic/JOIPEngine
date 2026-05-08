@@ -9,8 +9,8 @@
 #include <memory>
 #include <set>
 
-class CProjectScriptWrapper;
-class CResourceScriptWrapper;
+class CProjectScriptWrapperReadOnly;
+class CResourceScriptWrapperReadOnly;
 class QJSEngine;
 struct SProject;
 
