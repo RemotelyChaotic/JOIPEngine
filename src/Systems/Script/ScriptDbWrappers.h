@@ -11,6 +11,9 @@
 #include <QObject>
 #include <variant>
 
+class CResourceScriptWrapperReadOnly;
+class CSaveDataWrapperReadOnly;
+class CSceneScriptWrapperReadOnly;
 class QJSEngine;
 namespace QtLua {
   class State;
@@ -70,7 +73,7 @@ public:
   Q_ENUM(ToyMetronomeCommandMode)
 
   explicit CProjectScriptWrapperReadOnly(tEngineType pEngine, const std::shared_ptr<SProject>& spProject);
-  ~CProjectScriptWrapperReadOnly();
+  ~CProjectScriptWrapperReadOnly() override;
 
   qint32 getId();
   qint32 getVersion();
@@ -123,8 +126,57 @@ public:
   std::shared_ptr<SProject> Data() { return m_spData; }
 
 protected:
+  virtual CResourceScriptWrapperReadOnly* CreateReosurceWrapper(const std::shared_ptr<SResource>& spResource) const;
+  virtual CSaveDataWrapperReadOnly* CreateSaveDataWrapper(const std::shared_ptr<SSaveData>& spSaveData) const;
+  virtual CSceneScriptWrapperReadOnly* CreateSceneWrapper(const std::shared_ptr<SScene>& spScene) const;
+
   std::shared_ptr<SProject>              m_spData;
   tEngineType                            m_pEngine;
+};
+
+//----------------------------------------------------------------------------------------
+//
+class CProjectScriptWrapperReadWrite : public CProjectScriptWrapperReadOnly
+{
+  Q_OBJECT
+  Q_DISABLE_COPY(CProjectScriptWrapperReadWrite)
+  CProjectScriptWrapperReadWrite() = delete;
+  Q_PROPERTY(qint32         version           READ getVersion           WRITE setVersion)
+  Q_PROPERTY(QString        versionText       READ getVersionText       WRITE setVersionText)
+  Q_PROPERTY(qint32         targetVersion     READ getTargetVersion     WRITE setTargetVersion)
+  Q_PROPERTY(QString        targetVersionText READ getTargetVersionText WRITE setTargetVersionText)
+  Q_PROPERTY(QString        describtion       READ getDescribtion       WRITE setDescribtion)
+  Q_PROPERTY(QString        titleCard         READ getTitleCard         WRITE setTitleCard)
+  Q_PROPERTY(QString        map               READ getMap               WRITE setMap)
+  Q_PROPERTY(QString        sceneModel        READ getSceneModel        WRITE setSceneModel)
+  Q_PROPERTY(QString        playerLayout      READ getPlayerLayout      WRITE setPlayerLayout)
+  Q_PROPERTY(qint32         numberOfSoundEmitters READ getNumberOfSoundEmitters WRITE setNumberOfSoundEmitters)
+  Q_PROPERTY(qint32         metCmdMode        READ getMetCmdMode        WRITE setMetCmdMode)
+  Q_PROPERTY(QString        font              READ getFont              WRITE setFont)
+  Q_PROPERTY(QString        userData          READ getUserData          WRITE setUserData)
+
+public:
+  explicit CProjectScriptWrapperReadWrite(tEngineType pEngine, const std::shared_ptr<SProject>& spProject);
+  ~CProjectScriptWrapperReadWrite() override;
+
+  void setVersion(qint32 iValue);
+  void setVersionText(const QString& sValue);
+  void setTargetVersion(qint32 iValue);
+  void setTargetVersionText(const QString& sValue);
+  void setDescribtion(const QString& sValue);
+  void setTitleCard(const QString& sValue);
+  void setMap(const QString& sValue);
+  void setSceneModel(const QString& sValue);
+  void setPlayerLayout(const QString& sValue);
+  void setNumberOfSoundEmitters(qint32 iValue);
+  void setMetCmdMode(qint32 iValue);
+  void setFont(const QString& sValue);
+  void setUserData(const QString& sValue);
+
+protected:
+  CResourceScriptWrapperReadOnly* CreateReosurceWrapper(const std::shared_ptr<SResource>& spResource) const override;
+  CSaveDataWrapperReadOnly* CreateSaveDataWrapper(const std::shared_ptr<SSaveData>& spSaveData) const override;
+  CSceneScriptWrapperReadOnly* CreateSceneWrapper(const std::shared_ptr<SScene>& spScene) const override;
 };
 
 //----------------------------------------------------------------------------------------
@@ -163,7 +215,7 @@ public:
   Q_ENUM(ResourceLoadState)
 
   explicit CResourceScriptWrapperReadOnly(tEngineType pEngine, const std::shared_ptr<SResource>& spResource);
-  ~CResourceScriptWrapperReadOnly();
+  ~CResourceScriptWrapperReadOnly() override;
 
   bool isAnimatedImpl();
   bool isLocalPath();
@@ -184,10 +236,31 @@ public:
   std::shared_ptr<SResource> Data() { return m_spData; }
 
 protected:
+  virtual CProjectScriptWrapperReadOnly* CreateProjectWrapper(const std::shared_ptr<SProject>& spProject) const;
+
   std::shared_ptr<SResource>    m_spData;
   tEngineType                   m_pEngine;
 };
 
+//----------------------------------------------------------------------------------------
+//
+class CResourceScriptWrapperReadWrite : public CResourceScriptWrapperReadOnly
+{
+  Q_OBJECT
+  Q_DISABLE_COPY(CResourceScriptWrapperReadWrite)
+  CResourceScriptWrapperReadWrite() = delete;
+
+public:
+  explicit CResourceScriptWrapperReadWrite(tEngineType pEngine, const std::shared_ptr<SResource>& spResource);
+  ~CResourceScriptWrapperReadWrite() override;
+
+  Q_INVOKABLE void addTag(const QString& sName, const QString& sCategory, const QString& sDescription);
+  Q_INVOKABLE void removeTag(const QString& sValue);
+  Q_INVOKABLE void removeTag(qint32 iIndex);
+
+protected:
+  CProjectScriptWrapperReadOnly* CreateProjectWrapper(const std::shared_ptr<SProject>& spProject) const override;
+};
 
 //----------------------------------------------------------------------------------------
 //
@@ -205,7 +278,7 @@ class CSceneScriptWrapperReadOnly : public QObject, public CLockable
 
 public:
   explicit CSceneScriptWrapperReadOnly(tEngineType pEngine, const std::shared_ptr<SScene>& spScene);
-  ~CSceneScriptWrapperReadOnly();
+  ~CSceneScriptWrapperReadOnly() override;
 
   qint32 getId();
   QString getName();
@@ -223,8 +296,38 @@ public:
   std::shared_ptr<SScene> Data() { return m_spData; }
 
 protected:
+  virtual CProjectScriptWrapperReadOnly* CreateProjectWrapper(const std::shared_ptr<SProject>& spProject) const;
+  virtual CResourceScriptWrapperReadOnly* CreateReosurceWrapper(const std::shared_ptr<SResource>& spResource) const;
+
   std::shared_ptr<SScene>                m_spData;
   tEngineType                            m_pEngine;
+};
+
+//----------------------------------------------------------------------------------------
+//
+class CSceneScriptWrapperReadWrite : public CSceneScriptWrapperReadOnly
+{
+  Q_OBJECT
+  Q_DISABLE_COPY(CSceneScriptWrapperReadWrite)
+  CSceneScriptWrapperReadWrite() = delete;
+  Q_PROPERTY(QString script           READ getScript WRITE setScript)
+  Q_PROPERTY(QString sceneLayout      READ getSceneLayout WRITE setSceneLayout)
+  Q_PROPERTY(QString titleCard        READ getTitleCard WRITE setTitleCard)
+
+public:
+  explicit CSceneScriptWrapperReadWrite(tEngineType pEngine, const std::shared_ptr<SScene>& spScene);
+  ~CSceneScriptWrapperReadWrite() override;
+
+  void setScript(const QString& sValue);
+  void setSceneLayout(const QString& sValue);
+  void setTitleCard(const QString& sValue);
+
+  Q_INVOKABLE void addResource(const QString& sName);
+  Q_INVOKABLE void removeResource(const QString& sValue);
+
+protected:
+  CProjectScriptWrapperReadOnly* CreateProjectWrapper(const std::shared_ptr<SProject>& spProject) const override;
+  CResourceScriptWrapperReadOnly* CreateReosurceWrapper(const std::shared_ptr<SResource>& spResource) const override;
 };
 
 //----------------------------------------------------------------------------------------
@@ -401,7 +504,7 @@ public:
   Q_ENUM(SaveDataType)
 
   explicit CSaveDataWrapperReadOnly(tEngineType pEngine, const std::shared_ptr<SSaveData>& spData);
-  ~CSaveDataWrapperReadOnly();
+  ~CSaveDataWrapperReadOnly() override;
 
   QString getName() const;
   QString getDescribtion() const;
@@ -418,14 +521,38 @@ protected:
 
 //----------------------------------------------------------------------------------------
 //
+class CSaveDataWrapperReadWrite : public CSaveDataWrapperReadOnly
+{
+  Q_OBJECT
+  Q_DISABLE_COPY(CSaveDataWrapperReadWrite)
+  CSaveDataWrapperReadWrite() = delete;
+  Q_PROPERTY(QString      describtion        READ getDescribtion WRITE setDescribtion)
+  Q_PROPERTY(QString      resource           READ getResource    WRITE setResource)
+  Q_PROPERTY(QVariant     data               READ getData        WRITE setData)
+
+public:
+  explicit CSaveDataWrapperReadWrite(tEngineType pEngine, const std::shared_ptr<SSaveData>& spData);
+  ~CSaveDataWrapperReadWrite() override;
+
+  void setDescribtion(const QString& sValue) const;
+  void setResource(const QString& sRes) const;
+  void setData(const QVariant& var) const;
+};
+
+//----------------------------------------------------------------------------------------
+//
 Q_DECLARE_METATYPE(CResourceScriptWrapperReadOnly*)
+Q_DECLARE_METATYPE(CResourceScriptWrapperReadWrite*)
 Q_DECLARE_METATYPE(CProjectScriptWrapperReadOnly*)
+Q_DECLARE_METATYPE(CProjectScriptWrapperReadWrite*)
 Q_DECLARE_METATYPE(CSceneScriptWrapperReadOnly*)
+Q_DECLARE_METATYPE(CSceneScriptWrapperReadWrite*)
 Q_DECLARE_METATYPE(CKinkWrapperReadOnly*)
 Q_DECLARE_METATYPE(CTagWrapperReadOnly*)
 Q_DECLARE_METATYPE(CDialogueWrapperBaseReadOnly*)
 Q_DECLARE_METATYPE(CDialogueWrapperReadOnly*)
 Q_DECLARE_METATYPE(CDialogueDataWrapperReadOnly*)
 Q_DECLARE_METATYPE(CSaveDataWrapperReadOnly*)
+Q_DECLARE_METATYPE(CSaveDataWrapperReadWrite*)
 
 #endif // SCRIPTDBWRAPPERS_H
