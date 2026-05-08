@@ -387,6 +387,59 @@ void SProject::FromJsonObject(const QJsonObject& json)
 
 //----------------------------------------------------------------------------------------
 //
+std::shared_ptr<SProject> SProject::DeepCopy() const
+{
+  std::shared_ptr<SProject> out = std::make_shared<SProject>(*this);
+  out->m_baseData.Clear();
+  out->m_vspPlugins.clear();
+  out->m_pluginData.Clear();
+
+  auto fnCopyData = [](SRuntimeData& to, const SRuntimeData& from, const std::shared_ptr<SProject>& out) {
+    to.m_vsKinks = from.m_vsKinks;
+    for (const auto& spScene : from.m_vspScenes)
+    {
+      std::shared_ptr<SScene> spCopy = std::make_shared<SScene>(*spScene);
+      spCopy->m_spParent = out;
+      to.m_vspScenes.push_back(spCopy);
+    }
+    for (const auto& [sName, spRes] : from.m_spResourcesMap)
+    {
+      std::shared_ptr<SResource> spCopy = std::make_shared<SResource>(*spRes);
+      spCopy->m_spParent = out;
+      to.m_spResourcesMap.insert({sName, spCopy});
+    }
+    for (const auto& [sName, spRes] : from.m_spResourceBundleMap)
+    {
+      std::shared_ptr<SResourceBundle> spCopy = std::make_shared<SResourceBundle>(*spRes);
+      spCopy->m_spParent = out;
+      to.m_spResourceBundleMap.insert({sName, spCopy});
+    }
+    for (const auto& [sName, spTag] : from.m_vspTags)
+    {
+      std::shared_ptr<STag> spCopy = std::make_shared<STag>(*spTag);
+      spCopy->m_spParent = out;
+      to.m_vspTags.insert({sName, spCopy});
+    }
+    for (const auto& [sName, spAch] : from.m_vspAchievements)
+    {
+      std::shared_ptr<SSaveData> spCopy = std::make_shared<SSaveData>(*spAch);
+      spCopy->m_spParent = out;
+      to.m_vspAchievements.insert({sName, spCopy});
+    }
+  };
+
+  fnCopyData(out->m_baseData, m_baseData, out);
+  for (const auto& spPlugin : m_vspPlugins)
+  {
+    out->m_vspPlugins.push_back(spPlugin->DeepCopy());
+  }
+  fnCopyData(out->m_pluginData, m_pluginData, out);
+
+  return out;
+}
+
+//----------------------------------------------------------------------------------------
+//
 QString PhysicalProjectName(const tspProject& spProject)
 {
   QReadLocker locker(&spProject->m_rwLock);

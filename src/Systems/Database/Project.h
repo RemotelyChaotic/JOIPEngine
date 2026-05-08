@@ -56,6 +56,8 @@ struct SProject : public ISerializable, std::enable_shared_from_this<SProject>,
   {
     return shared_from_this();
   }
+
+  std::shared_ptr<SProject> DeepCopy() const;
 };
 
 //----------------------------------------------------------------------------------------
