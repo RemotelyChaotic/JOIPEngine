@@ -953,19 +953,19 @@ namespace
             }
           }
         }
+      }
 
-        if (bFindStartScene && !bFound)
+      if (bFindStartScene && !bFound)
+      {
+        for (auto pNode : vpNodes)
         {
-          for (auto pNode : vpNodes)
+          if (!bFound)
           {
-            if (!bFound)
+            CStartNodeModel* pStartModel = dynamic_cast<CStartNodeModel*>(pNode->nodeDataModel());
+            if (nullptr != pStartModel)
             {
-              CStartNodeModel* pStartModel = dynamic_cast<CStartNodeModel*>(pNode->nodeDataModel());
-              if (nullptr != pStartModel)
-              {
-                pNodeMap->insert({c_sStartNode, pNode});
-                bFound = true;
-              }
+              pNodeMap->insert({c_sStartNode, pNode});
+              bFound = true;
             }
           }
         }
