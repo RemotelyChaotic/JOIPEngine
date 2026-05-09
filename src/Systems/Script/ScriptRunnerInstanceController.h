@@ -20,7 +20,7 @@ class CScriptRunnerInstanceWorkerBase : public QObject
 {
   Q_OBJECT
 public:
-  CScriptRunnerInstanceWorkerBase(const QString& sName,
+  CScriptRunnerInstanceWorkerBase(const QString& sName, bool bReadOnlyWrappers,
                                   std::weak_ptr<CScriptRunnerSignalContext> wpSignalEmitterContext);
   ~CScriptRunnerInstanceWorkerBase();
 
@@ -54,6 +54,7 @@ protected:
   std::map<QString /*name*/,
            std::shared_ptr<CScriptObjectBase>>   m_objectMap;
   QString                                        m_sName;
+  bool                                           m_bReadOnlyWrappers = true;
 };
 
 //----------------------------------------------------------------------------------------

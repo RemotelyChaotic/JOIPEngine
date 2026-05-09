@@ -2,6 +2,8 @@
 #define CJSSCRIPTRUNNER_H
 
 #include "IScriptRunner.h"
+#include "ScriptRunnerInstanceController.h"
+
 #include <QObject>
 #include <QPointer>
 #include <QQmlAbstractUrlInterceptor>
@@ -11,11 +13,14 @@
 #include <functional>
 #include <map>
 #include <memory>
+#include <vector>
 
+class CProjectScriptWrapperReadOnly;
 class CScriptRunnerInstanceController;
 class CScriptRunnerUtils;
 class CScriptRunnerSignalContext;
 class CScriptRunnerSignalEmiter;
+class CSceneScriptWrapperReadOnly;
 
 class CJsScriptRunner : public QObject, public IScriptRunnerFactory
 {
@@ -120,6 +125,42 @@ private:
   std::shared_ptr<CScriptRunnerSignalContext>     m_spSignalEmiterContext;
   tspProject                                      m_spProject;
   QPointer<QQmlEngine>                            m_pEngine;
+};
+
+//----------------------------------------------------------------------------------------
+//
+class CJsScriptRunnerInstanceWorker : public CScriptRunnerInstanceWorkerBase
+{
+  Q_OBJECT
+public:
+  CJsScriptRunnerInstanceWorker(const QString& sName, bool bReadOnlyWrappers,
+                                std::weak_ptr<CScriptRunnerSignalContext> wpSignalEmitterContext);
+  ~CJsScriptRunnerInstanceWorker();
+
+public slots:
+  void HandleError(QJSValue& value);
+  void Init() override;
+  void Deinit() override;
+  void InterruptExecution() override;
+  void RunScript(const QString& sScript,
+                 tspScene spScene, tspResource spResource) override;
+  void RegisterNewComponent(const QString& sName,
+                            std::weak_ptr<CScriptCommunicator> wpCommunicator) override;
+  void ResetEngine() override;
+  void UnregisterComponent(const QString& sName) override;
+
+private:
+  tspProject                                     m_spProject;
+  QPointer<QQmlEngine>                           m_pScriptEngine;
+  QPointer<CScriptRunnerUtilsJs>                 m_pScriptUtils;
+  CResourceUrlInterceptor*                       m_pUrlInterceptor;
+  QPointer<CSceneScriptWrapperReadOnly>          m_pCurrentScene;
+  QPointer<CProjectScriptWrapperReadOnly>        m_pCurrentProject;
+  std::map<QString /*name*/,
+           std::shared_ptr<CScriptObjectBase>>   m_objectMap;
+  std::vector<QString>                           m_vsObjectToDeleteMap;
+  QString                                        m_sName;
+  bool                                           m_bHandlingEvents = false;
 };
 
 #endif // CJSSCRIPTRUNNER_H

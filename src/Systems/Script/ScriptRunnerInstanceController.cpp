@@ -4,12 +4,13 @@
 #include <QThread>
 
 CScriptRunnerInstanceWorkerBase::CScriptRunnerInstanceWorkerBase(
-    const QString& sName,
+    const QString& sName, bool bReadOnlyWrappers,
     std::weak_ptr<CScriptRunnerSignalContext> wpSignalEmitterContext) :
   QObject(),
   m_wpSignalEmiterContext(wpSignalEmitterContext),
   m_objectMap(),
-  m_sName(sName)
+  m_sName(sName),
+  m_bReadOnlyWrappers(bReadOnlyWrappers)
 {}
 CScriptRunnerInstanceWorkerBase::~CScriptRunnerInstanceWorkerBase()
 {

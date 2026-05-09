@@ -65,6 +65,7 @@ struct SProjectData
   QString                   m_sMap;
   QString                   m_sSceneModel;
   QString                   m_sPlayerLayout;
+  QString                   m_sPreLoadScript;
   ETutorialState            m_tutorialState = ETutorialState::eFinished;
   qint32                    m_iNumberOfSoundEmitters = 5;
   qint32                    m_metCmdMode = EToyMetronomeCommandMode::eDefault;

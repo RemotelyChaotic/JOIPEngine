@@ -147,6 +147,7 @@ QJsonObject SProject::ToJsonObject()
     { "sMap", m_sMap },
     { "sSceneModel", m_sSceneModel },
     { "sPlayerLayout", m_sPlayerLayout },
+    { "sPreLoadScript", m_sPreLoadScript },
     { "tutorialState", m_tutorialState._to_integral() },
     { "iNumberOfSoundEmitters", m_iNumberOfSoundEmitters },
     { "metCmdMode", m_metCmdMode },
@@ -216,6 +217,11 @@ void SProject::FromJsonObject(const QJsonObject& json)
     {
       m_sPlayerLayout = "qrc:/qml/resources/qml/JoipEngine/PlayerDefaultLayoutClassic.qml";
     }
+  }
+  it = json.find("sPreLoadScript");
+  if (it != json.end())
+  {
+    m_sPreLoadScript = it.value().toString();
   }
   it = json.find("tutorialState");
   if (it != json.end())

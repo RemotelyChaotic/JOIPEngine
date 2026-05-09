@@ -41,7 +41,7 @@ class CSequenceRunnerInstanceWorker : public CScriptRunnerInstanceWorkerBase
 public:
   CSequenceRunnerInstanceWorker(const QString& sName,
                                 std::weak_ptr<CScriptRunnerSignalContext> wpSignalEmitterContext) :
-      CScriptRunnerInstanceWorkerBase(sName, wpSignalEmitterContext),
+      CScriptRunnerInstanceWorkerBase(sName, true, wpSignalEmitterContext),
       m_sName(sName)
   {
     if (auto spSignalEmitter = wpSignalEmitterContext.lock())

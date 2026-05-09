@@ -4,7 +4,6 @@
 #include "ScriptNotification.h"
 #include "ScriptTextBox.h"
 #include "ScriptThread.h"
-#include "ScriptRunnerInstanceController.h"
 #include "ScriptRunnerSignalEmiter.h"
 
 #include "Systems/DatabaseManager.h"
@@ -93,7 +92,6 @@ namespace
 namespace lua
 {
   void LUAHookAbort(lua_State* pL, lua_Debug* pAr);
-  int LUACustomSearcher(lua_State* pL);
   int LUAPrint(lua_State* pL);
 
   static const struct luaL_Reg printlib [] = {
@@ -112,557 +110,531 @@ namespace lua
 
 //----------------------------------------------------------------------------------------
 //
-class CLuaScriptRunnerInstanceWorker : public CScriptRunnerInstanceWorkerBase
+CLuaScriptRunnerInstanceWorker::CLuaScriptRunnerInstanceWorker(
+    const QString& sName, bool bReadOnlyWrappers,
+    std::weak_ptr<CScriptRunnerSignalContext> wpSignalEmitterContext) :
+  CScriptRunnerInstanceWorkerBase(sName, bReadOnlyWrappers, wpSignalEmitterContext),
+  m_pLuaState(nullptr),
+  m_pScriptUtils(nullptr),
+  m_pCurrentScene(nullptr),
+  m_pCurrentProject(nullptr),
+  m_bLoadingInbuiltLibraries(false)
+{}
+CLuaScriptRunnerInstanceWorker::~CLuaScriptRunnerInstanceWorker()
 {
-  Q_OBJECT
-  friend int lua::LUACustomSearcher(lua_State* pL);
+}
 
-public:
-  CLuaScriptRunnerInstanceWorker(const QString& sName,
-                                std::weak_ptr<CScriptRunnerSignalContext> wpSignalEmitterContext) :
-    CScriptRunnerInstanceWorkerBase(sName, wpSignalEmitterContext),
-    m_pLuaState(nullptr),
-    m_pScriptUtils(nullptr),
-    m_pCurrentScene(nullptr),
-    m_pCurrentProject(nullptr),
-    m_bLoadingInbuiltLibraries(false)
-  {}
-  ~CLuaScriptRunnerInstanceWorker()
+//----------------------------------------------------------------------------------------
+//
+void CLuaScriptRunnerInstanceWorker::HandleError(QtLua::String& sError)
+{
+  m_bRunning = 0;
+
+  auto spSignalEmitterContext = m_wpSignalEmiterContext.lock();
+
+  qint32 iLineNr = 0;
+
+  QRegExp rxLine(":[0-9]+:");
+  qint32 iPos = -1;
+  if ((iPos = rxLine.lastIndexIn(sError, iPos)) != -1)
   {
+    bool bOk = false;
+    iLineNr = sError.mid(iPos+1, rxLine.matchedLength()-2).toInt(&bOk) - 2;
+    if (!bOk)
+    {
+      iLineNr = 0;
+    }
   }
 
-public slots:
-  //----------------------------------------------------------------------------------------
-  //
-  void HandleError(QtLua::String& sError)
+  QString sStack;
+  QString sErrorFormated = "Uncaught Lua exception: " + sError;
+  qCritical() << sErrorFormated;
+
+  if (nullptr != spSignalEmitterContext)
   {
-    m_bRunning = 0;
-
-    auto spSignalEmitterContext = m_wpSignalEmiterContext.lock();
-    if (nullptr == spSignalEmitterContext)
-    {
-      qCritical() << "SignalEmitter is null";
-      return;
-    }
-
-    qint32 iLineNr = 0;
-
-    QRegExp rxLine(":[0-9]+:");
-    qint32 iPos = -1;
-    if ((iPos = rxLine.lastIndexIn(sError, iPos)) != -1)
-    {
-      bool bOk = false;
-      iLineNr = sError.mid(iPos+1, rxLine.matchedLength()-2).toInt(&bOk) - 2;
-      if (!bOk)
-      {
-        iLineNr = 0;
-      }
-    }
-
-    QString sStack;
-    QString sErrorFormated = "Uncaught Lua exception: " + sError;
-    qCritical() << sErrorFormated;
-
     emit spSignalEmitterContext->showError(sErrorFormated, QtMsgType::QtCriticalMsg);
     emit spSignalEmitterContext->executionError(sError, iLineNr, sStack);
   }
+}
 
-  //--------------------------------------------------------------------------------------
-  //
-  void Init() override
+//--------------------------------------------------------------------------------------
+//
+void CLuaScriptRunnerInstanceWorker::Init()
+{
+  m_pLuaState = new QtLua::State();
+  m_pLuaState->enable_qdebug_print(true);
+
+  auto pInternalState = m_pLuaState->get_lua_state();
+  RegisterAbortHook(pInternalState);
+
+  bool bOk = true;
+  bOk &= m_pLuaState->openlib(QtLua::BaseLib);
+  bOk &= m_pLuaState->openlib(QtLua::CoroutineLib);
+  bOk &= m_pLuaState->openlib(QtLua::PackageLib);
+  bOk &= m_pLuaState->openlib(QtLua::StringLib);
+  bOk &= m_pLuaState->openlib(QtLua::TableLib);
+  bOk &= m_pLuaState->openlib(QtLua::MathLib);
+  bOk &= m_pLuaState->openlib(QtLua::IoLib);
+  bOk &= m_pLuaState->openlib(QtLua::OsLib);
+  bOk &= m_pLuaState->openlib(QtLua::DebugLib);
+  //bOk &= m_pLuaState->openlib(QtLua::Bit32Lib);
+  //bOk &= m_pLuaState->openlib(QtLua::JitLib);
+  //bOk &= m_pLuaState->openlib(QtLua::FfiLib);
+  //bOk &= m_pLuaState->openlib(QtLua::QtLuaLib);
+  //bOk &= m_pLuaState->openlib(QtLua::QtLib);
+
+  RegisterCustomPackageSearcher(pInternalState);
+  lua::LuaopenLUAPrintlib(pInternalState);
+
+  m_bLoadingInbuiltLibraries = true;
+  bOk &= OpenFileLibrary(m_pLuaState, "sandbox", ":/lua_sandbox/sandbox.lua");
+  bOk &= OpenFileLibrary(m_pLuaState, "json", ":/lua_json/json.lua");
+  m_bLoadingInbuiltLibraries = false;
+
+  if (!bOk)
   {
-    m_pLuaState = new QtLua::State();
-    m_pLuaState->enable_qdebug_print(true);
-
-    auto pInternalState = m_pLuaState->get_lua_state();
-    RegisterAbortHook(pInternalState);
-
-    bool bOk = true;
-    bOk &= m_pLuaState->openlib(QtLua::BaseLib);
-    bOk &= m_pLuaState->openlib(QtLua::CoroutineLib);
-    bOk &= m_pLuaState->openlib(QtLua::PackageLib);
-    bOk &= m_pLuaState->openlib(QtLua::StringLib);
-    bOk &= m_pLuaState->openlib(QtLua::TableLib);
-    bOk &= m_pLuaState->openlib(QtLua::MathLib);
-    bOk &= m_pLuaState->openlib(QtLua::IoLib);
-    bOk &= m_pLuaState->openlib(QtLua::OsLib);
-    bOk &= m_pLuaState->openlib(QtLua::DebugLib);
-    //bOk &= m_pLuaState->openlib(QtLua::Bit32Lib);
-    //bOk &= m_pLuaState->openlib(QtLua::JitLib);
-    //bOk &= m_pLuaState->openlib(QtLua::FfiLib);
-    //bOk &= m_pLuaState->openlib(QtLua::QtLuaLib);
-    //bOk &= m_pLuaState->openlib(QtLua::QtLib);
-
-    RegisterCustomPackageSearcher(pInternalState);
-    lua::LuaopenLUAPrintlib(pInternalState);
-
-    m_bLoadingInbuiltLibraries = true;
-    bOk &= OpenFileLibrary(m_pLuaState, "sandbox", ":/lua_sandbox/sandbox.lua");
-    bOk &= OpenFileLibrary(m_pLuaState, "json", ":/lua_json/json.lua");
-    m_bLoadingInbuiltLibraries = false;
-
-    if (!bOk)
-    {
-      qWarning() << "Could not load an inbuilt Lua library.";
-    }
-
-    m_pScriptUtils = new CScriptRunnerUtilsLua(this, m_pLuaState,
-                                               m_wpSignalEmiterContext.lock());
-    connect(m_pScriptUtils, &CScriptRunnerUtilsLua::finishedScriptSignal,
-            this, &CLuaScriptRunnerInstanceWorker::FinishedScript);
-
-    (*m_pLuaState)["utils_1337"] = QtLua::Value(m_pLuaState, m_pScriptUtils.data(), false, false);
-
-    RegisterEnum(m_pLuaState, IconAlignment::staticMetaObject, "IconAlignment", &m_vGlobalValues);
-    RegisterEnum(m_pLuaState, TextAlignment::staticMetaObject, "TextAlignment", &m_vGlobalValues);
+    qWarning() << "Could not load an inbuilt Lua library.";
   }
 
-  //--------------------------------------------------------------------------------------
-  //
-  void Deinit() override
+  m_pScriptUtils = new CScriptRunnerUtilsLua(this, m_pLuaState,
+                                             m_wpSignalEmiterContext.lock());
+  connect(m_pScriptUtils, &CScriptRunnerUtilsLua::finishedScriptSignal,
+          this, &CLuaScriptRunnerInstanceWorker::FinishedScript);
+
+  (*m_pLuaState)["utils_1337"] = QtLua::Value(m_pLuaState, m_pScriptUtils.data(), false, false);
+
+  RegisterEnum(m_pLuaState, IconAlignment::staticMetaObject, "IconAlignment", &m_vGlobalValues);
+  RegisterEnum(m_pLuaState, TextAlignment::staticMetaObject, "TextAlignment", &m_vGlobalValues);
+}
+
+//--------------------------------------------------------------------------------------
+//
+void CLuaScriptRunnerInstanceWorker::Deinit()
+{
+  InterruptExecution();
+
+  ResetEngine();
+
+  if (nullptr != m_pLuaState)
   {
-    InterruptExecution();
+    m_pLuaState->gc_collect();
+  }
 
-    ResetEngine();
+  delete m_pScriptUtils;
+  m_pScriptUtils = nullptr;
 
-    if (nullptr != m_pLuaState)
+  if (nullptr != m_pLuaState)
+  {
+    m_pLuaState->deleteLater();
+  }
+}
+
+//--------------------------------------------------------------------------------------
+//
+void CLuaScriptRunnerInstanceWorker::InterruptExecution()
+{
+  if (nullptr != m_pLuaState)
+  {
+    emit SignalInterruptExecution();
+    SetInterrupted(true);
+  }
+
+  if (m_bRunning)
+  {
+    utils::RunInThread(thread(), [this](){
+      if (m_bHandlingEvents)
+      {
+        emit HandleScriptFinish(false, QString());
+        m_bRunning = 0;
+        m_pLuaState->gc_collect();
+      }
+    });
+  }
+
+  if (thread() == QThread::currentThread())
+  {
+    while (m_bRunning) QCoreApplication::processEvents();
+  }
+  else
+  {
+    while (m_bRunning) QThread::sleep(1);
+  }
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CLuaScriptRunnerInstanceWorker::RunScript(
+    const QString& sScript, tspScene spScene, tspResource spResource)
+{
+  ESceneMode sceneMode = ESceneMode::eLinear;
+
+  // set scene
+  if (nullptr != m_pCurrentScene)
+  {
+    delete m_pCurrentScene;
+  }
+  if (nullptr != spScene)
+  {
+    m_pCurrentScene = m_bReadOnlyWrappers ?
+        new CSceneScriptWrapperReadOnly(m_pLuaState, spScene) :
+        new CSceneScriptWrapperReadWrite(m_pLuaState, spScene);;
+    (*m_pLuaState)["scene"] = QtLua::Value(m_pLuaState, m_pCurrentScene.data(), false, false);
+
+    QReadLocker locker(&spScene->m_rwLock);
+    sceneMode = spScene->m_sceneMode;
+  }
+
+  // set current Project
+  {
+    QReadLocker scriptLocker(&spResource->m_rwLock);
+    m_spProject = spResource->m_spParent;
+    for (auto it = m_objectMap.begin(); m_objectMap.end() != it; ++it)
     {
+      it->second->SetCurrentProject(spResource->m_spParent);
+    }
+    m_pScriptUtils->SetCurrentProject(spResource->m_spParent);
+
+    if (nullptr == spScene)
+    {
+      m_pCurrentProject = m_bReadOnlyWrappers ?
+          new CProjectScriptWrapperReadOnly(m_pLuaState, m_spProject) :
+          new CProjectScriptWrapperReadWrite(m_pLuaState, m_spProject);
+      (*m_pLuaState)["project"] = QtLua::Value(m_pLuaState, m_pCurrentProject.data(), false, false);
+    }
+  }
+
+  // resume engine if interrupetd
+  SetInterrupted(false);
+  m_bRunning = 1;
+
+  auto spSignalEmitterContext = m_wpSignalEmiterContext.lock();
+  if (nullptr != spSignalEmitterContext)
+  {
+    spSignalEmitterContext->SetScriptExecutionStatus(CScriptRunnerSignalEmiter::eRunning);
+  }
+
+  // get scene name and set it as function, so error messages show the scene name in the error
+
+  QString sSceneName = QString();
+  {
+    QReadLocker locker(&spResource->m_rwLock);
+    sSceneName = QString(spResource->m_sName).replace(QRegExp("\\W"), "_");
+  }
+  if (nullptr != spScene)
+  {
+    QReadLocker locker(&spScene->m_rwLock);
+    sSceneName = QString(spScene->m_sName).replace(QRegExp("\\W"), "_");
+  }
+
+  // create wrapper function to make syntax of scripts easier and handle return value
+  // and be able to emit signal on finished
+  QString sScriptEscaped = sScript;
+  sScriptEscaped.replace("[[", "\\[\\[").replace("]]", "\\]\\]");
+  QString sSkript;
+  switch (sceneMode)
+  {
+    case ESceneMode::eLinear:
+      sSkript = QString("local ret = sandbox.run([[local %1 = function();\n"
+                        "%2\n"
+                        "return nil;\n"
+                        "end;\n"
+                        "return %3();]], %4);"
+                        "utils_1337:finishedScript(ret);")
+                    .arg(sSceneName)
+                    .arg(sScriptEscaped)
+                    .arg(sSceneName)
+                    .arg(GenerateEnvVariableString());
+      break;
+    case ESceneMode::eEventDriven:
+      sSkript = QString("sandbox.run([[local %1 = function();\n"
+                        "%2\n"
+                        "return nil;\n"
+                        "end;\n"
+                        "return %3();]], %4);")
+                    .arg(sSceneName)
+                    .arg(sScriptEscaped)
+                    .arg(sSceneName)
+                    .arg(GenerateEnvVariableString());
+      break;
+  }
+
+  try
+  {
+    if (!sSceneName.isEmpty())
+    {
+      emit SignalSceneLoaded(sSceneName);
+    }
+
+    m_pLuaState->exec_statements(sSkript);
+    if (IsInterrupted())
+    {
+      emit HandleScriptFinish(false, QString());
+    }
+    else if (ESceneMode::eLinear == sceneMode._to_integral())
+    {
+      m_bRunning = 0;
       m_pLuaState->gc_collect();
-    }
-
-    delete m_pScriptUtils;
-    m_pScriptUtils = nullptr;
-
-    if (nullptr != m_pLuaState)
-    {
-      m_pLuaState->deleteLater();
-    }
-  }
-
-  //--------------------------------------------------------------------------------------
-  //
-  void InterruptExecution() override
-  {
-    if (nullptr != m_pLuaState)
-    {
-      emit SignalInterruptExecution();
-      SetInterrupted(true);
-    }
-
-    if (m_bRunning)
-    {
-      utils::RunInThread(thread(), [this](){
-        if (m_bHandlingEvents)
-        {
-          emit HandleScriptFinish(false, QString());
-          m_bRunning = 0;
-          m_pLuaState->gc_collect();
-        }
-      });
-    }
-
-    if (thread() == QThread::currentThread())
-    {
-      while (m_bRunning) QCoreApplication::processEvents();
     }
     else
     {
-      while (m_bRunning) QThread::sleep(1);
+      // we are still "running"
+      m_bHandlingEvents = true;
     }
   }
-
-  //----------------------------------------------------------------------------------------
-  //
-  void RunScript(const QString& sScript,
-                 tspScene spScene, tspResource spResource) override
+  catch (QtLua::String& s)
   {
-    ESceneMode sceneMode = ESceneMode::eLinear;
-
-    // set scene
-    if (nullptr != m_pCurrentScene)
+    if (!IsInterrupted())
     {
-      delete m_pCurrentScene;
-    }
-    if (nullptr != spScene)
-    {
-      m_pCurrentScene = new CSceneScriptWrapperReadOnly(m_pLuaState, spScene);
-      (*m_pLuaState)["scene"] = QtLua::Value(m_pLuaState, m_pCurrentScene.data(), false, false);
-
-      QReadLocker locker(&spScene->m_rwLock);
-      sceneMode = spScene->m_sceneMode;
-    }
-
-    // set current Project
-    {
-      QReadLocker scriptLocker(&spResource->m_rwLock);
-      m_spProject = spResource->m_spParent;
-      for (auto it = m_objectMap.begin(); m_objectMap.end() != it; ++it)
-      {
-        it->second->SetCurrentProject(spResource->m_spParent);
-      }
-      m_pScriptUtils->SetCurrentProject(spResource->m_spParent);
-
-      if (nullptr == spScene)
-      {
-        m_pCurrentProject = new CProjectScriptWrapperReadOnly(m_pLuaState, m_spProject);
-        (*m_pLuaState)["project"] = QtLua::Value(m_pLuaState, m_pCurrentProject.data(), false, false);
-      }
-    }
-
-    // resume engine if interrupetd
-    SetInterrupted(false);
-    m_bRunning = 1;
-
-    auto spSignalEmitterContext = m_wpSignalEmiterContext.lock();
-    if (nullptr == spSignalEmitterContext)
-    {
-      QtLua::String sDummy;
-      HandleError(sDummy);
-      return;
-    }
-
-    spSignalEmitterContext->SetScriptExecutionStatus(CScriptRunnerSignalEmiter::eRunning);
-
-    // get scene name and set it as function, so error messages show the scene name in the error
-
-    QString sSceneName = QString();
-    {
-      QReadLocker locker(&spResource->m_rwLock);
-      sSceneName = QString(spResource->m_sName).replace(QRegExp("\\W"), "_");
-    }
-    if (nullptr != spScene)
-    {
-      QReadLocker locker(&spScene->m_rwLock);
-      sSceneName = QString(spScene->m_sName).replace(QRegExp("\\W"), "_");
-    }
-
-    // create wrapper function to make syntax of scripts easier and handle return value
-    // and be able to emit signal on finished
-    QString sScriptEscaped = sScript;
-    sScriptEscaped.replace("[[", "\\[\\[").replace("]]", "\\]\\]");
-    QString sSkript;
-    switch (sceneMode)
-    {
-      case ESceneMode::eLinear:
-        sSkript = QString("local ret = sandbox.run([[local %1 = function();\n"
-                          "%2\n"
-                          "return nil;\n"
-                          "end;\n"
-                          "return %3();]], %4);"
-                          "utils_1337:finishedScript(ret);")
-                      .arg(sSceneName)
-                      .arg(sScriptEscaped)
-                      .arg(sSceneName)
-                      .arg(GenerateEnvVariableString());
-        break;
-      case ESceneMode::eEventDriven:
-        sSkript = QString("sandbox.run([[local %1 = function();\n"
-                          "%2\n"
-                          "return nil;\n"
-                          "end;\n"
-                          "return %3();]], %4);")
-                      .arg(sSceneName)
-                      .arg(sScriptEscaped)
-                      .arg(sSceneName)
-                      .arg(GenerateEnvVariableString());
-        break;
-    }
-
-    try
-    {
-      if (!sSceneName.isEmpty())
-      {
-        emit SignalSceneLoaded(sSceneName);
-      }
-
-      m_pLuaState->exec_statements(sSkript);
-      if (IsInterrupted())
-      {
-        emit HandleScriptFinish(false, QString());
-      }
-      else if (ESceneMode::eLinear == sceneMode._to_integral())
-      {
-        m_bRunning = 0;
-        m_pLuaState->gc_collect();
-      }
-      else
-      {
-        // we are still "running"
-        m_bHandlingEvents = true;
-      }
-    }
-    catch (QtLua::String& s)
-    {
-      if (!IsInterrupted())
-      {
-        HandleError(s);
-        m_pLuaState->gc_collect();
-        m_bRunning = 0;
-      }
-      else
-      {
-        emit HandleScriptFinish(false, QString());
-        m_bRunning = 0;
-      }
+      HandleError(s);
       m_pLuaState->gc_collect();
-      return;
+      m_bRunning = 0;
     }
-  }
-
-  //--------------------------------------------------------------------------------------
-  //
-  void RegisterNewComponent(const QString& sName,
-                            std::weak_ptr<CScriptCommunicator> wpCommunicator) override
-  {
-    auto it = m_objectMap.find(sName);
-    if (m_objectMap.end() == it)
+    else
     {
-      if (auto spComm = wpCommunicator.lock())
-      {
-        std::shared_ptr<CScriptObjectBase> spObject =
-            std::shared_ptr<CScriptObjectBase>(
-            spComm->CreateNewScriptObject(m_pLuaState));
-        if (nullptr != spObject)
-        {
-          connect(this, &CLuaScriptRunnerInstanceWorker::SignalInterruptExecution,
-                  spObject.get(), &CScriptObjectBase::SignalInterruptExecution, Qt::QueuedConnection);
-
-          if (spObject->thread() != thread())
-          {
-            assert(false && "Thread of Object not correct.");
-            qWarning() << tr("Thread of Object %1 not correct.").arg(sName);
-            spObject->moveToThread(thread());
-          }
-          m_objectMap.insert({ sName, spObject });
-
-          if (auto pNotification = dynamic_cast<CScriptNotification*>(spObject.get()))
-          {
-            connect(pNotification, &CScriptNotification::SignalOverlayCleared,
-                    this, [this](){
-              emit SignalClearThreads(EScriptRunnerType::eOverlay);
-            });
-            connect(pNotification, &CScriptNotification::SignalOverlayClosed,
-                    this, &CLuaScriptRunnerInstanceWorker::SignalKill);
-            connect(pNotification, &CScriptNotification::SignalOverlayRunAsync,
-                    this, [this](const QString& sId, const QString& sScriptResource){
-              emit SignalRunAsync(m_spProject, sId, sScriptResource, EScriptRunnerType::eOverlay);
-            });
-          }
-          else if (auto pThread = dynamic_cast<CScriptThread*>(spObject.get()))
-          {
-            connect(pThread, &CScriptThread::SignalKill,
-                    this, &CLuaScriptRunnerInstanceWorker::SignalKill);
-            connect(pThread, &CScriptThread::SignalOverlayRunAsync,
-                    this, [this](const QString& sId, const QString& sScriptResource){
-              emit SignalRunAsync(m_spProject, sId, sScriptResource,
-                                  EScriptRunnerType::eAsync);
-            });
-          }
-
-          (*m_pLuaState)[sName] = QtLua::Value(m_pLuaState, spObject.get(), false, false);
-        }
-      }
+      emit HandleScriptFinish(false, QString());
+      m_bRunning = 0;
     }
-  }
-
-  //--------------------------------------------------------------------------------------
-  //
-  void ResetEngine() override
-  {
-    m_pScriptUtils->SetCurrentProject(nullptr);
-
-    for (auto it = m_objectMap.begin(); m_objectMap.end() != it; ++it)
-    {
-      it->second->Cleanup();
-      it->second->SetCurrentProject(nullptr);
-    }
-
-    for (const QString& sToDelete : m_vsObjectToDeleteMap)
-    {
-      auto it = m_objectMap.find(sToDelete);
-      if (m_objectMap.end() != it)
-      {
-        m_objectMap.erase(it);
-      }
-    }
-
-    m_vsObjectToDeleteMap.clear();
-
     m_pLuaState->gc_collect();
-
-    if (nullptr != m_pCurrentScene)
-    {
-      delete m_pCurrentScene;
-    }
-    if (nullptr != m_pCurrentProject)
-    {
-      delete m_pCurrentProject;
-    }
+    return;
   }
+}
 
-  //--------------------------------------------------------------------------------------
-  //
-  void UnregisterComponent(const QString& sName) override
+//--------------------------------------------------------------------------------------
+//
+void CLuaScriptRunnerInstanceWorker::RegisterNewComponent(
+    const QString& sName, std::weak_ptr<CScriptCommunicator> wpCommunicator)
+{
+  auto it = m_objectMap.find(sName);
+  if (m_objectMap.end() == it)
   {
-    auto it = std::find(m_vsObjectToDeleteMap.begin(), m_vsObjectToDeleteMap.end(), sName);
-    if (m_vsObjectToDeleteMap.end() == it)
+    if (auto spComm = wpCommunicator.lock())
     {
-      m_vsObjectToDeleteMap.push_back(sName);
-    }
-  }
+      std::shared_ptr<CScriptObjectBase> spObject =
+          std::shared_ptr<CScriptObjectBase>(
+          spComm->CreateNewScriptObject(m_pLuaState));
+      if (nullptr != spObject)
+      {
+        connect(this, &CLuaScriptRunnerInstanceWorker::SignalInterruptExecution,
+                spObject.get(), &CScriptObjectBase::SignalInterruptExecution, Qt::QueuedConnection);
 
-  //--------------------------------------------------------------------------------------
-  //
-  bool IsInterrupted() const
-  {
-    return m_bInterrupted == 1;
-  }
-
-  //--------------------------------------------------------------------------------------
-  //
-  tspProject CurrentProject() const
-  {
-    return m_spProject;
-  }
-
-private:
-  //--------------------------------------------------------------------------------------
-  //
-  QString GenerateEnvVariableString()
-  {
-    QString sEnvVar = "{ env = { json = json, scene = scene, utils_1337 = utils_1337, sandbox = { run = sandbox.run } %1 } }";
-    QStringList vsBindings;
-    for (auto it = m_objectMap.begin(); m_objectMap.end() != it; ++it)
-    {
-      vsBindings << QString("%1 = %2").arg(it->first).arg(it->first);
-    }
-    QVariantMap globalMap;
-    for (const QString& sGlobal : m_vGlobalValues)
-    {
-      QStringList vsGlobalElems = sGlobal.split(".");
-      std::function<void(const QStringList&, QVariantMap&)> fnBla =
-          [&fnBla](const QStringList& vsGlobalElems, QVariantMap& insertInto) {
-        if (vsGlobalElems.size() == 0)
+        if (spObject->thread() != thread())
         {
-          return;
+          assert(false && "Thread of Object not correct.");
+          qWarning() << tr("Thread of Object %1 not correct.").arg(sName);
+          spObject->moveToThread(thread());
         }
-        if (vsGlobalElems.size() == 1)
+        m_objectMap.insert({ sName, spObject });
+
+        if (auto pNotification = dynamic_cast<CScriptNotification*>(spObject.get()))
         {
-          const QString sKey = vsGlobalElems.front();
-          insertInto[sKey] = sKey;
+          connect(pNotification, &CScriptNotification::SignalOverlayCleared,
+                  this, [this](){
+            emit SignalClearThreads(EScriptRunnerType::eOverlay);
+          });
+          connect(pNotification, &CScriptNotification::SignalOverlayClosed,
+                  this, &CLuaScriptRunnerInstanceWorker::SignalKill);
+          connect(pNotification, &CScriptNotification::SignalOverlayRunAsync,
+                  this, [this](const QString& sId, const QString& sScriptResource){
+            emit SignalRunAsync(m_spProject, sId, sScriptResource, EScriptRunnerType::eOverlay);
+          });
+        }
+        else if (auto pThread = dynamic_cast<CScriptThread*>(spObject.get()))
+        {
+          connect(pThread, &CScriptThread::SignalKill,
+                  this, &CLuaScriptRunnerInstanceWorker::SignalKill);
+          connect(pThread, &CScriptThread::SignalOverlayRunAsync,
+                  this, [this](const QString& sId, const QString& sScriptResource){
+            emit SignalRunAsync(m_spProject, sId, sScriptResource,
+                                EScriptRunnerType::eAsync);
+          });
+        }
+
+        (*m_pLuaState)[sName] = QtLua::Value(m_pLuaState, spObject.get(), false, false);
+      }
+    }
+  }
+}
+
+//--------------------------------------------------------------------------------------
+//
+void CLuaScriptRunnerInstanceWorker::ResetEngine()
+{
+  m_pScriptUtils->SetCurrentProject(nullptr);
+
+  for (auto it = m_objectMap.begin(); m_objectMap.end() != it; ++it)
+  {
+    it->second->Cleanup();
+    it->second->SetCurrentProject(nullptr);
+  }
+
+  for (const QString& sToDelete : m_vsObjectToDeleteMap)
+  {
+    auto it = m_objectMap.find(sToDelete);
+    if (m_objectMap.end() != it)
+    {
+      m_objectMap.erase(it);
+    }
+  }
+
+  m_vsObjectToDeleteMap.clear();
+
+  m_pLuaState->gc_collect();
+
+  if (nullptr != m_pCurrentScene)
+  {
+    delete m_pCurrentScene;
+  }
+  if (nullptr != m_pCurrentProject)
+  {
+    delete m_pCurrentProject;
+  }
+}
+
+//--------------------------------------------------------------------------------------
+//
+void CLuaScriptRunnerInstanceWorker::UnregisterComponent(const QString& sName)
+{
+  auto it = std::find(m_vsObjectToDeleteMap.begin(), m_vsObjectToDeleteMap.end(), sName);
+  if (m_vsObjectToDeleteMap.end() == it)
+  {
+    m_vsObjectToDeleteMap.push_back(sName);
+  }
+}
+
+//--------------------------------------------------------------------------------------
+//
+bool CLuaScriptRunnerInstanceWorker::IsInterrupted() const
+{
+  return m_bInterrupted == 1;
+}
+
+//--------------------------------------------------------------------------------------
+//
+tspProject CLuaScriptRunnerInstanceWorker::CurrentProject() const
+{
+  return m_spProject;
+}
+
+//--------------------------------------------------------------------------------------
+//
+QString CLuaScriptRunnerInstanceWorker::GenerateEnvVariableString()
+{
+  QString sEnvVar = "{ env = { json = json, scene = scene, utils_1337 = utils_1337, sandbox = { run = sandbox.run } %1 } }";
+  QStringList vsBindings;
+  for (auto it = m_objectMap.begin(); m_objectMap.end() != it; ++it)
+  {
+    vsBindings << QString("%1 = %2").arg(it->first).arg(it->first);
+  }
+  QVariantMap globalMap;
+  for (const QString& sGlobal : m_vGlobalValues)
+  {
+    QStringList vsGlobalElems = sGlobal.split(".");
+    std::function<void(const QStringList&, QVariantMap&)> fnBla =
+        [&fnBla](const QStringList& vsGlobalElems, QVariantMap& insertInto) {
+      if (vsGlobalElems.size() == 0)
+      {
+        return;
+      }
+      if (vsGlobalElems.size() == 1)
+      {
+        const QString sKey = vsGlobalElems.front();
+        insertInto[sKey] = sKey;
+      }
+      else
+      {
+        const QString sKey = vsGlobalElems.front();
+        QStringList vsElemsMinOne = vsGlobalElems.mid(1);
+        if (vsElemsMinOne.size() == 1)
+        {
+          QVariant var = insertInto[sKey];
+          QStringList vsElems = var.toStringList() << vsElemsMinOne[0];
+          insertInto[sKey] = vsElems;
         }
         else
         {
-          const QString sKey = vsGlobalElems.front();
-          QStringList vsElemsMinOne = vsGlobalElems.mid(1);
-          if (vsElemsMinOne.size() == 1)
-          {
-            QVariant var = insertInto[sKey];
-            QStringList vsElems = var.toStringList() << vsElemsMinOne[0];
-            insertInto[sKey] = vsElems;
-          }
-          else
-          {
-            QVariantMap childMap;
-            fnBla(vsElemsMinOne, childMap);
-            insertInto[sKey] = childMap;
-          }
+          QVariantMap childMap;
+          fnBla(vsElemsMinOne, childMap);
+          insertInto[sKey] = childMap;
         }
-      };
-      fnBla(vsGlobalElems, globalMap);
-    }
-    QStringList vsGlobalsBindings = GetGlobalValues(QStringList(), globalMap);
-    if (!vsGlobalsBindings.isEmpty())
-    {
-      vsBindings << vsGlobalsBindings;
-    }
-    return sEnvVar.arg(vsBindings.empty() ? "" : QString(",") + vsBindings.join(","));
-  }
-
-  //--------------------------------------------------------------------------------------
-  //
-  void RegisterAbortHook(lua_State* pState)
-  {
-    // pointer to this
-    lua_pushlightuserdata(pState, &CScriptRunnerUtilsLua::sKeyThis);
-    lua_pushlightuserdata(pState, this);
-    lua_rawset(pState, LUA_REGISTRYINDEX);
-    // register abort hook
-    lua_sethook(pState, lua::LUAHookAbort, LUA_MASKLINE, 0);
-  }
-
-  //--------------------------------------------------------------------------------------
-  //
-  bool RegisterCustomPackageSearcher(lua_State* pState)
-  {
-    constexpr qint32 c_iNbrSearchers = 5;
-
-    // hack: override all searchers with custom searcher, to remove possibility to load
-    // from file directly
-    for (qint32 i = 1; i < c_iNbrSearchers+1; ++i)
-    {
-      lua_getglobal(pState, LUA_LOADLIBNAME);
-      if (!lua_istable(pState, -1))
-      {
-        return false;
       }
-
-      lua_getfield(pState, -1, "searchers");
-      if (!lua_istable(pState, -1))
-      {
-        return false;
-      }
-
-      lua_pushvalue(pState, -2);
-
-      lua_pushcclosure(pState, lua::LUACustomSearcher, 1);
-      lua_rawseti(pState, -2, i);
-
-      lua_setfield(pState, -2, "searchers");
-    }
-
-    return true;
+    };
+    fnBla(vsGlobalElems, globalMap);
   }
-
-  //--------------------------------------------------------------------------------------
-  //
-  bool OpenFileLibrary(QtLua::State* pState, const QString& sGlobal, const QString& sFile)
+  QStringList vsGlobalsBindings = GetGlobalValues(QStringList(), globalMap);
+  if (!vsGlobalsBindings.isEmpty())
   {
-    try
+    vsBindings << vsGlobalsBindings;
+  }
+  return sEnvVar.arg(vsBindings.empty() ? "" : QString(",") + vsBindings.join(","));
+}
+
+//--------------------------------------------------------------------------------------
+//
+void CLuaScriptRunnerInstanceWorker::RegisterAbortHook(lua_State* pState)
+{
+  // pointer to this
+  lua_pushlightuserdata(pState, &CScriptRunnerUtilsLua::sKeyThis);
+  lua_pushlightuserdata(pState, this);
+  lua_rawset(pState, LUA_REGISTRYINDEX);
+  // register abort hook
+  lua_sethook(pState, lua::LUAHookAbort, LUA_MASKLINE, 0);
+}
+
+//--------------------------------------------------------------------------------------
+//
+bool CLuaScriptRunnerInstanceWorker::RegisterCustomPackageSearcher(lua_State* pState)
+{
+  constexpr qint32 c_iNbrSearchers = 5;
+
+  // hack: override all searchers with custom searcher, to remove possibility to load
+  // from file directly
+  for (qint32 i = 1; i < c_iNbrSearchers+1; ++i)
+  {
+    lua_getglobal(pState, LUA_LOADLIBNAME);
+    if (!lua_istable(pState, -1))
     {
-      pState->exec_statements(QString("%1 = require '%2';").arg(sGlobal).arg(sFile));
-    }
-    catch (QtLua::String& s)
-    {
-      qWarning() << tr("Could not load %1 library:").arg(sGlobal) << s;
       return false;
     }
-    return true;
+
+    lua_getfield(pState, -1, "searchers");
+    if (!lua_istable(pState, -1))
+    {
+      return false;
+    }
+
+    lua_pushvalue(pState, -2);
+
+    lua_pushcclosure(pState, lua::LUACustomSearcher, 1);
+    lua_rawseti(pState, -2, i);
+
+    lua_setfield(pState, -2, "searchers");
   }
 
-  //--------------------------------------------------------------------------------------
-  //
-  void SetInterrupted(bool bInterrupted)
+  return true;
+}
+
+//--------------------------------------------------------------------------------------
+//
+bool CLuaScriptRunnerInstanceWorker::OpenFileLibrary(QtLua::State* pState, const QString& sGlobal, const QString& sFile)
+{
+  try
   {
-    m_bInterrupted = bInterrupted ? 1 : 0;
+    pState->exec_statements(QString("%1 = require '%2';").arg(sGlobal).arg(sFile));
   }
+  catch (QtLua::String& s)
+  {
+    qWarning() << tr("Could not load %1 library:").arg(sGlobal) << s;
+    return false;
+  }
+  return true;
+}
 
-  tspProject                                     m_spProject;
-  QPointer<QtLua::State>                         m_pLuaState;
-  QPointer<CScriptRunnerUtilsLua>                m_pScriptUtils;
-  QPointer<CSceneScriptWrapperReadOnly>                  m_pCurrentScene;
-  QPointer<CProjectScriptWrapperReadOnly>                m_pCurrentProject;
-  std::map<QString /*name*/,
-           std::shared_ptr<CScriptObjectBase>>   m_objectMap;
-  std::vector<QString>                           m_vsObjectToDeleteMap;
-  std::set<QString>                              m_vGlobalValues;
-  QString                                        m_sName;
-  QAtomicInt                                     m_bInterrupted;
-  bool                                           m_bHandlingEvents = false;
-
-protected:
-  bool                                           m_bLoadingInbuiltLibraries;
-};
+//--------------------------------------------------------------------------------------
+//
+void CLuaScriptRunnerInstanceWorker::SetInterrupted(bool bInterrupted)
+{
+  m_bInterrupted = bInterrupted ? 1 : 0;
+}
 
 //----------------------------------------------------------------------------------------
 //
@@ -964,7 +936,7 @@ std::shared_ptr<CScriptRunnerInstanceController> CLuaScriptRunner::CreateRunner(
       std::make_shared<CScriptRunnerInstanceController>(
                            sId,
                            std::make_shared<CLuaScriptRunnerInstanceWorker>(
-                             sId, m_wpSignalEmitterContext),
+                             sId, true, m_wpSignalEmitterContext),
                            m_wpSignalEmitterContext);
   spRunner->setObjectName(sId);
   connect(spRunner.get(), &CScriptRunnerInstanceController::HandleScriptFinish,
@@ -1025,5 +997,3 @@ void CScriptRunnerUtilsLua::finishedScript(const QVariant& retVal)
 {
   emit finishedScriptSignal(retVal);
 }
-
-#include "LuaScriptRunner.moc"
