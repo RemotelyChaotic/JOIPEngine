@@ -217,12 +217,12 @@ macro(CreateJOIPProject JOIP_PROJECT_NAME)
     ${JOIPSources}/Editor/Project/CommandChangeFetishes.h
     ${JOIPSources}/Editor/Project/CommandChangeFont.cpp
     ${JOIPSources}/Editor/Project/CommandChangeFont.h
-    ${JOIPSources}/Editor/Project/CommandChangeLayout.cpp
-    ${JOIPSources}/Editor/Project/CommandChangeLayout.h
     ${JOIPSources}/Editor/Project/CommandChangePluginFolder.cpp
     ${JOIPSources}/Editor/Project/CommandChangePluginFolder.h
     ${JOIPSources}/Editor/Project/CommandChangeProjectName.cpp
     ${JOIPSources}/Editor/Project/CommandChangeProjectName.h
+    ${JOIPSources}/Editor/Project/CommandChangeResourceCombobox.cpp
+    ${JOIPSources}/Editor/Project/CommandChangeResourceCombobox.h
     ${JOIPSources}/Editor/Project/CommandChangeToyCmd.cpp
     ${JOIPSources}/Editor/Project/CommandChangeToyCmd.h
     ${JOIPSources}/Editor/Project/CommandChangeVersion.cpp
@@ -669,6 +669,8 @@ macro(CreateJOIPProject JOIP_PROJECT_NAME)
     ${JOIPSources}/Systems/Script/LuaCodeGenerator.h
     ${JOIPSources}/Systems/Script/LuaScriptRunner.cpp
     ${JOIPSources}/Systems/Script/LuaScriptRunner.h
+    ${JOIPSources}/Systems/Script/PreloadScripts.cpp
+    ${JOIPSources}/Systems/Script/PreloadScripts.h
     ${JOIPSources}/Systems/Script/ScriptBackground.cpp
     ${JOIPSources}/Systems/Script/ScriptBackground.h
     ${JOIPSources}/Systems/Script/ScriptCacheFileEngine.cpp

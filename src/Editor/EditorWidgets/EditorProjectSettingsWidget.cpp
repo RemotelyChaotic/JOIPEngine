@@ -13,9 +13,9 @@
 #include "Editor/Project/CommandChangeEmitterCount.h"
 #include "Editor/Project/CommandChangeFetishes.h"
 #include "Editor/Project/CommandChangeFont.h"
-#include "Editor/Project/CommandChangeLayout.h"
 #include "Editor/Project/CommandChangePluginFolder.h"
 #include "Editor/Project/CommandChangeProjectName.h"
+#include "Editor/Project/CommandChangeResourceCombobox.h"
 #include "Editor/Project/CommandChangeToyCmd.h"
 #include "Editor/Project/CommandChangeVersion.h"
 #include "Editor/Project/KinkCompleter.h"
@@ -30,6 +30,7 @@
 #include "Systems/Database/Kink.h"
 #include "Systems/Database/Project.h"
 #include "Systems/Database/SaveData.h"
+#include "Systems/Script/PreloadScripts.h"
 
 #include "Utils/UndoRedoFilter.h"
 #include "Utils/WidgetHelpers.h"
@@ -47,6 +48,7 @@ DECLARE_EDITORWIDGET(CEditorProjectSettingsWidget, EEditorWidget::eProjectSettin
 namespace
 {
   const qint32 c_iCurrentDefaultLayout = 1;
+  const qint32 c_iCurrentDefaultPreloadScript = 0;
 
   const char c_sKinkRootWidgetProperty[] = "KinkRootWidget";
 
@@ -307,6 +309,24 @@ void CEditorProjectSettingsWidget::LoadProject(tspProject spProject)
     m_spUi->pDefaultLayoutComboBox->setProperty(editor::c_sPropertyOldValue, m_spCurrentProject->m_sPlayerLayout);
     m_spUi->pDefaultLayoutComboBox->blockSignals(false);
 
+    m_spUi->pPreloadScriptComboBox->blockSignals(true);
+    m_spUi->pPreloadScriptComboBox->clear();
+    m_spUi->pPreloadScriptComboBox->addItem("<none>", QString());
+    for (const auto& [sName, spResource] : m_spCurrentProject->m_baseData.m_spResourcesMap)
+    {
+      QReadLocker resLocker(&spResource->m_rwLock);
+      QString sSuffix = spResource->m_sPath.Suffix();
+      if (EResourceType::eScript == spResource->m_type._to_integral() &&
+          preload_scripts::AvailableScriptSuffixes().contains(sSuffix))
+      {
+        m_spUi->pPreloadScriptComboBox->addItem(sName, sName);
+      }
+    }
+    qint32 iScript = m_spUi->pDefaultLayoutComboBox->findData(m_spCurrentProject->m_sPreLoadScript);
+    m_spUi->pPreloadScriptComboBox->setCurrentIndex(0 > iScript ? 1 : iScript);
+    m_spUi->pPreloadScriptComboBox->setProperty(editor::c_sPropertyOldValue, m_spCurrentProject->m_sPreLoadScript);
+    m_spUi->pPreloadScriptComboBox->blockSignals(false);
+
     m_spUi->pPluginFolderLineEdit->blockSignals(true);
     m_spUi->pPluginFolderLineEdit->setProperty(editor::c_sPropertyOldValue, m_spCurrentProject->m_sPluginFolder);
     m_spUi->pPluginFolderLineEdit->setText(m_spCurrentProject->m_sPluginFolder);
@@ -411,6 +431,8 @@ void CEditorProjectSettingsWidget::SaveProject()
   m_spCurrentProject->m_sDescribtion = m_spUi->pDescribtionTextEdit->toPlainText();
 
   m_spCurrentProject->m_sPlayerLayout = m_spUi->pDefaultLayoutComboBox->currentData().toString();
+
+  m_spCurrentProject->m_sPreLoadScript = m_spUi->pPreloadScriptComboBox->currentData().toString();
 
   m_spCurrentProject->m_sPluginFolder = m_spUi->pPluginFolderLineEdit->text();
 
@@ -533,6 +555,23 @@ void CEditorProjectSettingsWidget::on_pDefaultLayoutComboBox_currentIndexChanged
 
 //----------------------------------------------------------------------------------------
 //
+void CEditorProjectSettingsWidget::on_pPreloadScriptComboBox_currentIndexChanged(qint32 iIdx)
+{
+  WIDGET_INITIALIZED_GUARD
+  if (nullptr == m_spCurrentProject) { return; }
+  Q_UNUSED(iIdx)
+
+  QPointer<CEditorProjectSettingsWidget> pThis(this);
+  UndoStack()->push(new CCommandChangePreloadScript(m_spUi->pPreloadScriptComboBox,
+                                             m_spCurrentProject,
+                                             [pThis]() {
+                                               emit pThis->SignalProjectEdited();
+                                               emit pThis->EditorModel()->SignalProjectPropertiesEdited();
+                                             }));
+}
+
+//----------------------------------------------------------------------------------------
+//
 void CEditorProjectSettingsWidget::on_pToyCommandComboBox_currentIndexChanged(qint32 iIdx)
 {
   WIDGET_INITIALIZED_GUARD
@@ -556,6 +595,16 @@ void CEditorProjectSettingsWidget::on_AddLayoutButton_clicked()
   if (nullptr == m_spCurrentProject) { return; }
 
   EditorModel()->SlotAddNewLayoutFile(QString());
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CEditorProjectSettingsWidget::on_AddScriptFile_clicked()
+{
+  WIDGET_INITIALIZED_GUARD
+  if (nullptr == m_spCurrentProject) { return; }
+
+  EditorModel()->SlotAddNewScriptFile(QString());
 }
 
 //----------------------------------------------------------------------------------------
@@ -867,9 +916,15 @@ void CEditorProjectSettingsWidget::SlotResourceAdded(qint32 iProjId, const QStri
     if (nullptr != spResource)
     {
       QReadLocker resLocker(&spResource->m_rwLock);
+      QString sSuffix = spResource->m_sPath.Suffix();
       if (EResourceType::eLayout == spResource->m_type._to_integral())
       {
         m_spUi->pDefaultLayoutComboBox->addItem(spResource->m_sName,spResource->m_sName);
+      }
+      else if (EResourceType::eScript == spResource->m_type._to_integral() &&
+               preload_scripts::AvailableScriptSuffixes().contains(sSuffix))
+      {
+        m_spUi->pPreloadScriptComboBox->addItem(spResource->m_sName, spResource->m_sName);
       }
     }
   }
@@ -890,12 +945,30 @@ void CEditorProjectSettingsWidget::SlotResourceRemoved(qint32 iProjId, const QSt
   qint32 iIdx = m_spUi->pDefaultLayoutComboBox->findData(sName);
   if (-1 != iIdx)
   {
+    bool bWasCurrent = m_spUi->pDefaultLayoutComboBox->currentIndex() == iIdx;
     m_spUi->pDefaultLayoutComboBox->removeItem(iIdx);
-    if (m_spUi->pDefaultLayoutComboBox->currentIndex() == iIdx)
+    if (bWasCurrent)
     {
       m_spUi->pDefaultLayoutComboBox->setCurrentIndex(c_iCurrentDefaultLayout);
       QPointer<CEditorProjectSettingsWidget> pThis(this);
       UndoStack()->push(new CCommandChangeLayout(m_spUi->pDefaultLayoutComboBox,
+                                                 m_spCurrentProject,
+                                                 [pThis]() {
+                                                   emit pThis->SignalProjectEdited();
+                                                   emit pThis->EditorModel()->SignalProjectPropertiesEdited();
+                                                 }));
+    }
+  }
+  iIdx = m_spUi->pPreloadScriptComboBox->findData(sName);
+  if (-1 != iIdx)
+  {
+    bool bWasCurrent = m_spUi->pPreloadScriptComboBox->currentIndex() == iIdx;
+    m_spUi->pPreloadScriptComboBox->removeItem(iIdx);
+    if (bWasCurrent)
+    {
+      m_spUi->pPreloadScriptComboBox->setCurrentIndex(c_iCurrentDefaultPreloadScript);
+      QPointer<CEditorProjectSettingsWidget> pThis(this);
+      UndoStack()->push(new CCommandChangePreloadScript(m_spUi->pPreloadScriptComboBox,
                                                  m_spCurrentProject,
                                                  [pThis]() {
                                                    emit pThis->SignalProjectEdited();
@@ -925,12 +998,21 @@ void CEditorProjectSettingsWidget::SlotResourceRenamed(qint32 iProjId, const QSt
     if (nullptr != spResource)
     {
       QReadLocker resLocker(&spResource->m_rwLock);
+      QString sSuffix = spResource->m_sPath.Suffix();
       if (EResourceType::eLayout == spResource->m_type._to_integral())
       {
         qint32 iIdx = m_spUi->pDefaultLayoutComboBox->findData(spResource->m_sName);
         m_spUi->pDefaultLayoutComboBox->removeItem(iIdx);
         m_spUi->pDefaultLayoutComboBox->addItem(spResource->m_sName,spResource->m_sName);
         m_spUi->pDefaultLayoutComboBox->setCurrentIndex(m_spUi->pDefaultLayoutComboBox->count());
+      }
+      else if (EResourceType::eScript == spResource->m_type._to_integral() &&
+               preload_scripts::AvailableScriptSuffixes().contains(sSuffix))
+      {
+        qint32 iIdx = m_spUi->pPreloadScriptComboBox->findData(spResource->m_sName);
+        m_spUi->pPreloadScriptComboBox->removeItem(iIdx);
+        m_spUi->pPreloadScriptComboBox->addItem(spResource->m_sName,spResource->m_sName);
+        m_spUi->pPreloadScriptComboBox->setCurrentIndex(m_spUi->pPreloadScriptComboBox->count());
       }
     }
   }

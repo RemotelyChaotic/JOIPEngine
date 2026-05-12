@@ -42,8 +42,10 @@ protected slots:
   void on_pSoundEmitterCount_valueChanged(qint32 iValue);
   void on_pFontComboBox_currentFontChanged(const QFont& font);
   void on_pDefaultLayoutComboBox_currentIndexChanged(qint32 iIdx);
+  void on_pPreloadScriptComboBox_currentIndexChanged(qint32 iIdx);
   void on_pToyCommandComboBox_currentIndexChanged(qint32 iIdx);
   void on_AddLayoutButton_clicked();
+  void on_AddScriptFile_clicked();
   void on_pPluginFolderLineEdit_editingFinished();
   void on_SelectPluginFolderPushButton_clicked();
   void on_pCanStartFromAnySceneCheckBox_toggled(bool bChecked);

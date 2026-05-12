@@ -17,12 +17,11 @@
 #include "Systems/Player/SceneNodeResolver.h"
 #include "Systems/Database/Project.h"
 #include "Systems/ScriptRunner.h"
-#include "Systems/Script/JsScriptRunner.h"
-#include "Systems/Script/LuaScriptRunner.h"
+#include "Systems/Script/PreloadScripts.h"
 #include "Systems/Script/ScriptCacheFileEngine.h"
 #include "Systems/Script/ScriptDbWrappers.h"
 #include "Systems/Script/ScriptRunnerSignalEmiter.h"
-#include "Systems/Script/ScriptRunnerInstanceController.h"
+
 #include "Systems/ThreadedSystem.h"
 
 #include "Widgets/BackgroundWidget.h"
@@ -163,66 +162,6 @@ void CSceneMainScreen::Initialize(const std::shared_ptr<CWindowContext>& spWindo
 
 //----------------------------------------------------------------------------------------
 //
-namespace
-{
-  void RunPreLoadScript(const tspProject& spProject)
-  {
-    static std::map<QString, std::function<std::unique_ptr<CScriptRunnerInstanceWorkerBase>(const QString&)>> m_creatorMap = {
-        {SScriptDefinitionData::c_sScriptTypeJs, [](const QString& sName){
-          return std::make_unique<CJsScriptRunnerInstanceWorker>(sName, false, std::weak_ptr<CScriptRunnerSignalContext>{});
-        }},
-        {SScriptDefinitionData::c_sScriptTypeLua, [](const QString& sName){
-          return std::make_unique<CLuaScriptRunnerInstanceWorker>(sName, false, std::weak_ptr<CScriptRunnerSignalContext>{});
-        }},
-    };
-
-    QReadLocker l(&spProject->m_rwLock);
-    if (!spProject->m_sPreLoadScript.isEmpty())
-    {
-      auto spRes = CDatabaseManager::FindResourceInProject(spProject, spProject->m_sPreLoadScript);
-      if (nullptr != spRes)
-      {
-        QReadLocker resLocker(&spRes->m_rwLock);
-        const QString sSuffix = spRes->m_sPath.Suffix();
-        QString sPath = spRes->ResourceToAbsolutePath();
-        resLocker.unlock();
-
-        QFileInfo scriptFileInfo(sPath);
-        if (scriptFileInfo.exists())
-        {
-          QFile scriptFile(sPath);
-          if (scriptFile.open(QIODevice::ReadOnly))
-          {
-            QString sScript = QString::fromUtf8(scriptFile.readAll());
-            auto it = m_creatorMap.find(sSuffix);
-            if (m_creatorMap.end() != it)
-            {
-              auto spRunner = it->second("Preload");
-              spRunner->Init();
-              spRunner->RunScript(sScript, nullptr, spRes);
-              spRunner->Deinit();
-            }
-          }
-          else
-          {
-            QString sError = QObject::tr("Script resource file could not be opened.");
-            qWarning() << sError;
-            return;
-          }
-        }
-        else
-        {
-          QString sError = QObject::tr("Script resource file does not exist.");
-          qWarning() << sError;
-          return;
-        }
-      }
-    }
-  }
-}
-
-//----------------------------------------------------------------------------------------
-//
 void CSceneMainScreen::LoadProject(qint32 iId, const tSceneToLoad& sStartScene)
 {
   if (!m_bInitialized) { return; }
@@ -260,7 +199,7 @@ void CSceneMainScreen::LoadProject(qint32 iId, const tSceneToLoad& sStartScene)
     // we work on a copy so we can modify it
     m_spCurrentProject = spProjGotten->DeepCopy();
 
-    RunPreLoadScript(m_spCurrentProject);
+    preload_scripts::RunPreLoadScript(m_spCurrentProject);
 
     m_spProjectProivider->SetCurrentProject(m_spCurrentProject);
 
