@@ -377,6 +377,7 @@ void CCodeDisplayWidget::SetScriptType(const QString& sScriptType)
   auto spCompleterProcessor = m_pEditorModel->EditorCompleterModel()->FileProcessor(sScriptType);
   if (nullptr != spCompleterProcessor)
   {
+    m_spUi->pCodeEdit->Completer()->SetMemberDelimiterCharacters(spCompleterProcessor->MemberDelimiters());
     m_spUi->pCodeEdit->Completer()->SetEndOfwordFunction([spCompleterProcessor](const QString& s) {
       if (s.size() > 0)
       {
@@ -392,6 +393,7 @@ void CCodeDisplayWidget::SetScriptType(const QString& sScriptType)
   }
   else
   {
+    m_spUi->pCodeEdit->Completer()->SetMemberDelimiterCharacters(QStringList());
     m_spUi->pCodeEdit->Completer()->SetEndOfwordFunction([](QString s) {
       static QString sEow("~!@#$%^&*()+{}|:\"<>?,./;'[]\\-=");
       return sEow.contains(s);

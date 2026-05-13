@@ -17,6 +17,7 @@ public:
   bool IsEndOfWordChar(QChar c) const override;
   void ProcessFile(int destRole, QTextStream& data, SCompleterModelData* pOutData) override;
   void ProcessLine(int destRole, const QString& sLine, SCompleterModelData* pOutData) override;
+  QStringList MemberDelimiters() const override  { return QStringList() << "."; }
 
 private:
   std::set<QString> m_vsInbuiltKeywords;
@@ -31,6 +32,7 @@ public:
   bool IsEndOfWordChar(QChar c) const override;
   void ProcessFile(int destRole, QTextStream& data, SCompleterModelData* pOutData) override;
   void ProcessLine(int destRole, const QString& sLine, SCompleterModelData* pOutData) override;
+  QStringList MemberDelimiters() const override  { return QStringList() << "." << ":"; }
 
 private:
   std::set<QString> m_vsInbuiltKeywords;
@@ -45,6 +47,7 @@ public:
   bool IsEndOfWordChar(QChar c) const override;
   void ProcessFile(int destRole, QTextStream& data, SCompleterModelData* pOutData) override;
   void ProcessLine(int destRole, const QString& sLine, SCompleterModelData* pOutData) override;
+  QStringList MemberDelimiters() const override { return QStringList() << "."; }
 
 private:
   std::set<QString> m_vsInbuiltKeywords;

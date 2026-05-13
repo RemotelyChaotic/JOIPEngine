@@ -25,6 +25,7 @@ public:
   virtual bool IsEndOfWordChar(QChar c) const = 0;
   virtual void ProcessFile(int destRole, QTextStream& data, SCompleterModelData* pOutData) = 0;
   virtual void ProcessLine(int destRole, const QString& sLine, SCompleterModelData* pOutData) = 0;
+  virtual QStringList MemberDelimiters() const = 0;
 
 protected:
   virtual ~IScriptCompleterFileProcessor();
