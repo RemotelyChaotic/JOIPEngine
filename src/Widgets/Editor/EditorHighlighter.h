@@ -22,7 +22,7 @@ public:
   bool IsSyntaxHighlightingEnabled() const { return m_bSyntaxHighlightingEnabled; }
   QString SearchExpression() const { return m_sSearch; }
 
-  void SetBracketColors(std::vector<QColor> vColors);
+  void SetBracketColors(const std::vector<QColor>& vColors);
   void SetSearchColors(const QColor& background, const QColor& foreground);
   void SetActiveWordExpression(const QString& sWord);
   void SetCaseInsensitiveSearchEnabled(bool bEnabled);

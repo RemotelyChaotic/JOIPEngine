@@ -10,6 +10,8 @@
 #include <QWidget>
 
 #include <functional>
+#include <map>
+#include <memory>
 #include <set>
 
 class CScriptEditorWidget;

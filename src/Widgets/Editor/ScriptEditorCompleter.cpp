@@ -6,6 +6,8 @@
 #include <QScrollBar>
 #include <QTextDocumentFragment>
 
+#include <vector>
+
 namespace
 {
   constexpr qint32 c_iTimerInterval = 2000;
@@ -36,56 +38,10 @@ public:
 
     if (nullptr != m_pSource)
     {
-      disconnect(m_pSource, &QAbstractItemModel::dataChanged,
-                 this, &CEditorModelWrapper::dataChanged);
-
-      disconnect(m_pSource, &QAbstractItemModel::headerDataChanged,
-                 this, &CEditorModelWrapper::headerDataChanged);
-
-      disconnect(m_pSource, &QAbstractItemModel::rowsAboutToBeInserted,
-                 this, &CEditorModelWrapper::rowsAboutToBeInserted);
-
-      disconnect(m_pSource, &QAbstractItemModel::rowsInserted,
-                 this, &CEditorModelWrapper::rowsInserted);
-
-      disconnect(m_pSource, &QAbstractItemModel::columnsAboutToBeInserted,
-                 this, &CEditorModelWrapper::columnsAboutToBeInserted);
-
-      disconnect(m_pSource, &QAbstractItemModel::columnsInserted,
-                 this, &CEditorModelWrapper::columnsInserted);
-
-      disconnect(m_pSource, &QAbstractItemModel::rowsAboutToBeRemoved,
-                 this, &CEditorModelWrapper::rowsAboutToBeRemoved);
-
-      disconnect(m_pSource, &QAbstractItemModel::rowsRemoved,
-                 this, &CEditorModelWrapper::rowsRemoved);
-
-      disconnect(m_pSource, &QAbstractItemModel::columnsAboutToBeRemoved,
-                 this, &CEditorModelWrapper::columnsAboutToBeRemoved);
-
-      disconnect(m_pSource, &QAbstractItemModel::columnsRemoved,
-                 this, &CEditorModelWrapper::columnsRemoved);
-
-      disconnect(m_pSource, &QAbstractItemModel::rowsAboutToBeMoved,
-                 this, &CEditorModelWrapper::rowsAboutToBeMoved);
-
-      disconnect(m_pSource, &QAbstractItemModel::rowsMoved,
-                 this, &CEditorModelWrapper::rowsMoved);
-
-      disconnect(m_pSource, &QAbstractItemModel::columnsAboutToBeMoved,
-                 this, &CEditorModelWrapper::columnsAboutToBeMoved);
-
-      disconnect(m_pSource, &QAbstractItemModel::columnsMoved,
-                 this, &CEditorModelWrapper::columnsMoved);
-
-      disconnect(m_pSource, &QAbstractItemModel::layoutAboutToBeChanged,
-                 this, &CEditorModelWrapper::layoutAboutToBeChanged);
-
-      disconnect(m_pSource, &QAbstractItemModel::layoutChanged,
-                 this, &CEditorModelWrapper::layoutChanged);
-
-      disconnect(m_pSource, &QAbstractItemModel::modelAboutToBeReset, this, &CEditorModelWrapper::modelAboutToBeReset);
-      disconnect(m_pSource, &QAbstractItemModel::modelReset, this, &CEditorModelWrapper::modelReset);
+      for (const auto& conn : m_vConns)
+      {
+        disconnect(conn);
+      }
     }
 
     m_pSource = pSource;
@@ -95,56 +51,56 @@ public:
       return;
     }
 
-    connect(m_pSource, &QAbstractItemModel::dataChanged,
-            this, &CEditorModelWrapper::dataChanged);
+    m_vConns.push_back(connect(m_pSource, &QAbstractItemModel::dataChanged,
+                               this, &CEditorModelWrapper::dataChanged));
 
-    connect(m_pSource, &QAbstractItemModel::headerDataChanged,
-            this, &CEditorModelWrapper::headerDataChanged);
+    m_vConns.push_back(connect(m_pSource, &QAbstractItemModel::headerDataChanged,
+                               this, &CEditorModelWrapper::headerDataChanged));
 
-    connect(m_pSource, &QAbstractItemModel::rowsAboutToBeInserted,
-            this, &CEditorModelWrapper::rowsAboutToBeInserted);
+    m_vConns.push_back(connect(m_pSource, &QAbstractItemModel::rowsAboutToBeInserted,
+                               this, &CEditorModelWrapper::rowsAboutToBeInserted));
 
-    connect(m_pSource, &QAbstractItemModel::rowsInserted,
-            this, &CEditorModelWrapper::rowsInserted);
+    m_vConns.push_back(connect(m_pSource, &QAbstractItemModel::rowsInserted,
+                               this, &CEditorModelWrapper::rowsInserted));
 
-    connect(m_pSource, &QAbstractItemModel::columnsAboutToBeInserted,
-            this, &CEditorModelWrapper::columnsAboutToBeInserted);
+    m_vConns.push_back(connect(m_pSource, &QAbstractItemModel::columnsAboutToBeInserted,
+                               this, &CEditorModelWrapper::columnsAboutToBeInserted));
 
-    connect(m_pSource, &QAbstractItemModel::columnsInserted,
-            this, &CEditorModelWrapper::columnsInserted);
+    m_vConns.push_back(connect(m_pSource, &QAbstractItemModel::columnsInserted,
+                               this, &CEditorModelWrapper::columnsInserted));
 
-    connect(m_pSource, &QAbstractItemModel::rowsAboutToBeRemoved,
-            this, &CEditorModelWrapper::rowsAboutToBeRemoved);
+    m_vConns.push_back(connect(m_pSource, &QAbstractItemModel::rowsAboutToBeRemoved,
+                               this, &CEditorModelWrapper::rowsAboutToBeRemoved));
 
-    connect(m_pSource, &QAbstractItemModel::rowsRemoved,
-            this, &CEditorModelWrapper::rowsRemoved);
+    m_vConns.push_back(connect(m_pSource, &QAbstractItemModel::rowsRemoved,
+                               this, &CEditorModelWrapper::rowsRemoved));
 
-    connect(m_pSource, &QAbstractItemModel::columnsAboutToBeRemoved,
-            this, &CEditorModelWrapper::columnsAboutToBeRemoved);
+    m_vConns.push_back(connect(m_pSource, &QAbstractItemModel::columnsAboutToBeRemoved,
+                               this, &CEditorModelWrapper::columnsAboutToBeRemoved));
 
-    connect(m_pSource, &QAbstractItemModel::columnsRemoved,
-            this, &CEditorModelWrapper::columnsRemoved);
+    m_vConns.push_back(connect(m_pSource, &QAbstractItemModel::columnsRemoved,
+                               this, &CEditorModelWrapper::columnsRemoved));
 
-    connect(m_pSource, &QAbstractItemModel::rowsAboutToBeMoved,
-            this, &CEditorModelWrapper::rowsAboutToBeMoved);
+    m_vConns.push_back(connect(m_pSource, &QAbstractItemModel::rowsAboutToBeMoved,
+                               this, &CEditorModelWrapper::rowsAboutToBeMoved));
 
-    connect(m_pSource, &QAbstractItemModel::rowsMoved,
-            this, &CEditorModelWrapper::rowsMoved);
+    m_vConns.push_back(connect(m_pSource, &QAbstractItemModel::rowsMoved,
+                               this, &CEditorModelWrapper::rowsMoved));
 
-    connect(m_pSource, &QAbstractItemModel::columnsAboutToBeMoved,
-            this, &CEditorModelWrapper::columnsAboutToBeMoved);
+    m_vConns.push_back(connect(m_pSource, &QAbstractItemModel::columnsAboutToBeMoved,
+                               this, &CEditorModelWrapper::columnsAboutToBeMoved));
 
-    connect(m_pSource, &QAbstractItemModel::columnsMoved,
-            this, &CEditorModelWrapper::columnsMoved);
+    m_vConns.push_back(connect(m_pSource, &QAbstractItemModel::columnsMoved,
+                               this, &CEditorModelWrapper::columnsMoved));
 
-    connect(m_pSource, &QAbstractItemModel::layoutAboutToBeChanged,
-            this, &CEditorModelWrapper::layoutAboutToBeChanged);
+    m_vConns.push_back(connect(m_pSource, &QAbstractItemModel::layoutAboutToBeChanged,
+                               this, &CEditorModelWrapper::layoutAboutToBeChanged));
 
-    connect(m_pSource, &QAbstractItemModel::layoutChanged,
-            this, &CEditorModelWrapper::layoutChanged);
+    m_vConns.push_back(connect(m_pSource, &QAbstractItemModel::layoutChanged,
+                               this, &CEditorModelWrapper::layoutChanged));
 
-    connect(m_pSource, &QAbstractItemModel::modelAboutToBeReset, this, &CEditorModelWrapper::modelAboutToBeReset);
-    connect(m_pSource, &QAbstractItemModel::modelReset, this, &CEditorModelWrapper::modelReset);
+    m_vConns.push_back(connect(m_pSource, &QAbstractItemModel::modelAboutToBeReset, this, &CEditorModelWrapper::modelAboutToBeReset));
+    m_vConns.push_back(connect(m_pSource, &QAbstractItemModel::modelReset, this, &CEditorModelWrapper::modelReset));
 
     endResetModel();
   }
@@ -206,6 +162,7 @@ public:
   }
 
 private:
+  std::vector<QMetaObject::Connection> m_vConns;
   QPointer<QAbstractItemModel> m_pSource;
   qint32 m_iCurrentColumn = -1;
 };

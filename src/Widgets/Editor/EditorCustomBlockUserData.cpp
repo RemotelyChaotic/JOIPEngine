@@ -48,7 +48,7 @@ void CCustomBlockUserData::ClearRegionDelimiters()
   m_allRegionDelimiters.clear();
 }
 
-qint32 CCustomBlockUserData::EndingRelatvieDepth()
+qint32 CCustomBlockUserData::EndingRelativeDepth()
 {
   if (m_allRegionDelimiters.size() > 0)
   {

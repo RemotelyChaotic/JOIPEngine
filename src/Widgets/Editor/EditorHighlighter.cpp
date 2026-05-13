@@ -24,7 +24,7 @@ namespace
   const SBlockDelimiter& ParseCharAndCreateBrackets(
       QChar c, qint32 iPos, ERegionType type,
       std::vector<SBlockDelimiter>& vLastBlockDelimiters,
-      std::vector<SBlockDelimiter>& unmatchedBlockDelimiterStarts,
+      std::vector<SBlockDelimiter>& vUnmatchedBlockDelimiterStarts,
       CCustomBlockUserData* pUserData)
   {
     static const std::set<QChar> startChars = {
@@ -55,16 +55,16 @@ namespace
                                                KSyntaxHighlighting::FoldingRegion::Type::Begin,
                                                iPos);
       vLastBlockDelimiters.push_back(delim);
-      unmatchedBlockDelimiterStarts.push_back(delim);
+      vUnmatchedBlockDelimiterStarts.push_back(delim);
       return delim;
     }
     else if (endChars.end() != itEnd)
     {
       qint32 iRelativeDepth = 0;
-      if (unmatchedBlockDelimiterStarts.size() > 0)
+      if (vUnmatchedBlockDelimiterStarts.size() > 0)
       {
         iRelativeDepth = vLastBlockDelimiters.front().m_iRelativeDepth;
-        unmatchedBlockDelimiterStarts.erase(unmatchedBlockDelimiterStarts.begin());
+        vUnmatchedBlockDelimiterStarts.erase(vUnmatchedBlockDelimiterStarts.begin());
       }
       const SBlockDelimiter& delim =
         pUserData->AddRegionDelimiterElement(iRelativeDepth, type,
@@ -95,7 +95,7 @@ CEditorHighlighter::~CEditorHighlighter()
 
 //----------------------------------------------------------------------------------------
 //
-void CEditorHighlighter::SetBracketColors(std::vector<QColor> vColors)
+void CEditorHighlighter::SetBracketColors(const std::vector<QColor>& vColors)
 {
   m_vBracketColors = vColors;
 }
@@ -196,34 +196,29 @@ void CEditorHighlighter::highlightBlock(const QString& sText)
   if (m_bSyntaxHighlightingEnabled)
   {
     pUserData->ClearRegionDelimiters();
-    std::vector<QTextBlock> blocks;
     QTextBlock block = currentBlock();
 
     qint32 iTotalDepthOfPreviousBlocks = 0;
     while (block.previous().isValid())
     {
       block = block.previous();
-      blocks.push_back(block);
-    }
-    for (const QTextBlock& b : blocks)
-    {
       CCustomBlockUserData* pUserData =
-          dynamic_cast<CCustomBlockUserData*>(b.userData());
+          dynamic_cast<CCustomBlockUserData*>(block.userData());
       if (nullptr != pUserData)
       {
-        iTotalDepthOfPreviousBlocks += pUserData->EndingRelatvieDepth();
+        iTotalDepthOfPreviousBlocks += pUserData->EndingRelativeDepth();
       }
     }
 
-    std::vector<SBlockDelimiter> lastBlockDelimiters;
-    std::vector<SBlockDelimiter> unmatchedBlockDelimiterStarts;
+    std::vector<SBlockDelimiter> vLastBlockDelimiters;
+    std::vector<SBlockDelimiter> vUnmatchedBlockDelimiterStarts;
     for (qint32 i = 0; sText.size() > i; ++i)
     {
       QChar c = sText[i];
       ERegionType type = RegionTypeFromChar(c);
       const SBlockDelimiter& delim =
-          ParseCharAndCreateBrackets(c, i, type, lastBlockDelimiters,
-                                     unmatchedBlockDelimiterStarts, pUserData);
+          ParseCharAndCreateBrackets(c, i, type, vLastBlockDelimiters,
+                                     vUnmatchedBlockDelimiterStarts, pUserData);
       if (ERegionType::eNone != type)
       {
         FormatBasedOnDepth(iTotalDepthOfPreviousBlocks + delim.m_iRelativeDepth, i);
@@ -274,6 +269,9 @@ void CEditorHighlighter::applyFormat(int offset, int length, const KSyntaxHighli
 //
 void CEditorHighlighter::FormatBasedOnDepth(qint32 iDepth, qint32 iAt)
 {
-  qint32 iNumColors = static_cast<qint32>(m_vBracketColors.size());
-  setFormat(iAt, 1, m_vBracketColors[std::abs(iDepth%iNumColors)]);
+  if (m_vBracketColors.size() > 0)
+  {
+    qint32 iNumColors = static_cast<qint32>(m_vBracketColors.size());
+    setFormat(iAt, 1, m_vBracketColors[std::abs(iDepth%iNumColors)]);
+  }
 }

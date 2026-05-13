@@ -8,8 +8,8 @@
 //
 struct SMatchedWordData
 {
-  qint32 m_iStart;
-  qint32 m_iLength;
+  qint32 m_iStart = -1;
+  qint32 m_iLength = -1;
 };
 
 //----------------------------------------------------------------------------------------
@@ -52,7 +52,7 @@ public:
       KSyntaxHighlighting::FoldingRegion::Type delimiterType,
       qint32 iAtPosition);
   void ClearRegionDelimiters();
-  qint32 EndingRelatvieDepth();
+  qint32 EndingRelativeDepth();
 
   std::vector<SMatchedWordData> m_vMatchedWordData;
 

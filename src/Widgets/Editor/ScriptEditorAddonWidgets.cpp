@@ -634,7 +634,10 @@ void CFoldBlockArea::GetBlocks(const QRect& rect,
                   m_pCodeEditor->TextEdit()->blockBoundingRect(block).height());
   }
 
-  if (vAllVisibleBlocks.empty()) { return; }
+  if (vAllVisibleBlocks.empty())
+  {
+    return;
+  }
 
   // set start values
   block = vAllVisibleBlocks.front();

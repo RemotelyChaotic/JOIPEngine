@@ -85,7 +85,6 @@ namespace
     QString sLine;
     do {
       sLine = data.readLine();
-      QString sLine = data.readLine();
       HandleLineGeneric(pProcessor, destRole, sLine, pOutData);
     } while (!sLine.isNull());
     pOutData->m_vsAllData[destRole].insert(vsInbuiltKeywords.begin(), vsInbuiltKeywords.end());

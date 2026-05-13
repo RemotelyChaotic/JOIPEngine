@@ -3,6 +3,8 @@
 
 #include <QComboBox>
 
+#include <vector>
+
 class CZoomComboBox : public QComboBox
 {
   Q_OBJECT
