@@ -246,6 +246,52 @@ private:
   const std::map<QString, QKeySequence> c_sDefaultKeyBindings;
 };
 
+//----------------------------------------------------------------------------------------
+//
+class CSettingsReadOnly : public CSettings
+{
+  Q_OBJECT
+  Q_PROPERTY(bool autoUpdate READ AutoUpdate NOTIFY autoUpdateChanged)
+  Q_PROPERTY(bool connectToHWOnStartup READ ConnectToHWOnStartup NOTIFY connectToHWOnStartupChanged)
+  Q_PROPERTY(QString contentFolder READ ContentFolder NOTIFY contentFolderChanged)
+  Q_PROPERTY(bool debugOverlayEnabled READ DebugOverlayEnabled NOTIFY debugOverlayEnabledChanged)
+  Q_PROPERTY(DominantHand::EDominantHand dominantHand READ GetDominantHand NOTIFY dominantHandChanged)
+  Q_PROPERTY(bool editorCaseInsensitiveSearch READ EditorCaseInsensitiveSearch NOTIFY editorCaseInsensitiveSearchChanged)
+  Q_PROPERTY(QString editorFont READ EditorFont NOTIFY editorFontChanged)
+  Q_PROPERTY(bool editorShowWhitespace READ EditorShowWhitespace NOTIFY editorShowWhitespaceChanged)
+  Q_PROPERTY(QString editorTheme READ EditorTheme NOTIFY editorThemeChanged)
+  Q_PROPERTY(QString font READ Font NOTIFY fontChanged)
+  Q_PROPERTY(bool fullscreen READ Fullscreen NOTIFY fullscreenChanged)
+  Q_PROPERTY(QStringList keyBindings READ KeyBindings CONSTANT)
+  Q_PROPERTY(int hideSettingsTimeout READ HideSettingsTimeout NOTIFY hideSettingsTimeoutChanged)
+  Q_PROPERTY(int metronomeDefaultCommands READ MetronomeDefCommands NOTIFY metronomeDefaultCommandsChanged)
+  Q_PROPERTY(QString metronomeSfx READ MetronomeSfx NOTIFY metronomeSfxChanged)
+  Q_PROPERTY(double metronomeSizeRel READ MetronomeSizeRel NOTIFY metronomeSizeRelChanged)
+  Q_PROPERTY(int metronomeSizeMin READ MetronomeSizeMin NOTIFY metronomeSizeMinChanged)
+  Q_PROPERTY(double metronomeVolume READ MetronomeVolume NOTIFY metronomeSizeMinChanged)
+  Q_PROPERTY(bool muted READ Muted NOTIFY mutedChanged)
+  Q_PROPERTY(bool offline READ Offline NOTIFY offlineChanged)
+  Q_PROPERTY(bool pauseWhenInactive READ PauseWhenInactive NOTIFY pauseWhenInactiveChanged)
+  Q_PROPERTY(QString platform READ Platform CONSTANT)
+  Q_PROPERTY(bool playerAntialiasing READ PlayerAntialiasing NOTIFY playerAntialiasingChanged)
+  Q_PROPERTY(bool playerDropShadow READ PlayerDropShadow NOTIFY playerDropShadowChanged)
+  Q_PROPERTY(bool playerImageMipMap READ PlayerImageMipMap NOTIFY playerImageMipMapChanged)
+  Q_PROPERTY(bool playerImageSmooth READ PlayerImageSmooth NOTIFY playerImageSmoothChanged)
+  Q_PROPERTY(EditorType preferedEditorLayout READ PreferedEditorLayout NOTIFY preferedEditorLayoutChanged)
+  Q_PROPERTY(bool pushNotifications READ PushNotifications NOTIFY pushNotificationsChanged)
+  Q_PROPERTY(QSize resolution READ Resolution NOTIFY resolutionChanged)
+  Q_PROPERTY(QString style READ Style NOTIFY styleChanged)
+  Q_PROPERTY(bool styleHotLoad READ StyleHotLoad NOTIFY styleHotLoadChanged)
+  Q_PROPERTY(qint32 version READ Version CONSTANT)
+  Q_PROPERTY(double volume READ Volume NOTIFY volumeChanged)
+  Q_PROPERTY(WindowMode windowMode READ GetWindowMode NOTIFY windowModeChanged)
+
+public:
+  explicit CSettingsReadOnly(QObject* pParent = nullptr);
+  ~CSettingsReadOnly() override;
+};
+
 Q_DECLARE_METATYPE(CSettings*)
+Q_DECLARE_METATYPE(CSettingsReadOnly*)
 
 #endif // CSETTINGS_H

@@ -205,6 +205,9 @@ void CLuaScriptRunnerInstanceWorker::Init()
 
   RegisterEnum(m_pLuaState, IconAlignment::staticMetaObject, "IconAlignment", &m_vGlobalValues);
   RegisterEnum(m_pLuaState, TextAlignment::staticMetaObject, "TextAlignment", &m_vGlobalValues);
+
+  CSettingsReadOnly* pSettings = new CSettingsReadOnly(this);
+  (*m_pLuaState)["Settings"] = QtLua::Value(m_pLuaState, pSettings, true, true);
 }
 
 //--------------------------------------------------------------------------------------

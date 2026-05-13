@@ -1478,3 +1478,8 @@ void CSettings::GenerateSettingsIfNotExists()
     m_spSettings->sync();
   }
 }
+
+//----------------------------------------------------------------------------------------
+//
+CSettingsReadOnly::CSettingsReadOnly(QObject* pParent) : CSettings(pParent) {}
+CSettingsReadOnly::~CSettingsReadOnly() = default;

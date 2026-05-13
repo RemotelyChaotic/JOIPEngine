@@ -354,11 +354,11 @@ void CApplication::RegisterQmlTypes()
       Q_UNUSED(scriptEngine)
       if (nullptr != engine)
       {
-        return new CSettings(engine);
+        return new CSettingsReadOnly(engine);
       }
       else if (nullptr != scriptEngine)
       {
-        return new CSettings(scriptEngine);
+        return new CSettingsReadOnly(scriptEngine);
       }
       return nullptr;
   });

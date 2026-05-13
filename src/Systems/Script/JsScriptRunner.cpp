@@ -211,6 +211,11 @@ void CJsScriptRunnerInstanceWorker::Init()
   QJSValue enumTextObjectValue = m_pScriptEngine->newQMetaObject(&TextAlignment::staticMetaObject);
   m_pScriptEngine->globalObject().setProperty("TextAlignment", enumTextObjectValue);
 
+  CSettingsReadOnly* pSettings = new CSettingsReadOnly();
+  QQmlEngine::setObjectOwnership(m_pScriptUtils, QQmlEngine::JavaScriptOwnership);
+  QJSValue settingsObj = m_pScriptEngine->newQObject(pSettings);
+  m_pScriptEngine->globalObject().setProperty("Settings", settingsObj);
+
   // create wrapper function to make syntax of including scripts easier
   QString sSkript = QString("(function() { "
                             "include = function(resource) { "
