@@ -89,8 +89,8 @@ public:
   void SetScriptTypeFilterForNewScripts(const QString& sFilter);
 
 public slots:
-  void SlotAddNewScriptFile(const QString& sCustomInitContent);
-  void SlotAddNewLayoutFile(const QString& sCustomInitContent);
+  void SlotAddNewScriptFile(const QString& sCustomInitContent, const QStringList& vsformats = QStringList());
+  void SlotAddNewLayoutFile(const QString& sCustomInitContent, const QStringList& vsformats = QStringList());
 
 signals:
   void SignalProjectEdited();

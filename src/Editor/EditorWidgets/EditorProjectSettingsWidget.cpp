@@ -604,7 +604,13 @@ void CEditorProjectSettingsWidget::on_AddScriptFile_clicked()
   WIDGET_INITIALIZED_GUARD
   if (nullptr == m_spCurrentProject) { return; }
 
-  EditorModel()->SlotAddNewScriptFile("// TODO: modify project here");
+  QStringList vsFormats = preload_scripts::AvailableScriptSuffixes();
+  for (auto& sFormat : vsFormats)
+  {
+    sFormat.prepend("*.");
+  }
+
+  EditorModel()->SlotAddNewScriptFile("// TODO: modify project here", vsFormats);
 }
 
 //----------------------------------------------------------------------------------------

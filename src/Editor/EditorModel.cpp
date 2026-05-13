@@ -825,7 +825,7 @@ void CEditorModel::SetScriptTypeFilterForNewScripts(const QString& sFilter)
 
 //----------------------------------------------------------------------------------------
 //
-void CEditorModel::SlotAddNewScriptFile(const QString& sCustomInitContent)
+void CEditorModel::SlotAddNewScriptFile(const QString& sCustomInitContent, const QStringList& vsformats)
 {
   if (nullptr == m_spCurrentProject)
   {
@@ -833,12 +833,12 @@ void CEditorModel::SlotAddNewScriptFile(const QString& sCustomInitContent)
     return;
   }
 
-  AddNewFileToScene(m_pParentWidget, nullptr, EResourceType::eScript, sCustomInitContent);
+  AddNewFileToScene(m_pParentWidget, nullptr, EResourceType::eScript, sCustomInitContent, vsformats);
 }
 
 //----------------------------------------------------------------------------------------
 //
-void CEditorModel::SlotAddNewLayoutFile(const QString& sCustomInitContent)
+void CEditorModel::SlotAddNewLayoutFile(const QString& sCustomInitContent, const QStringList& vsformats)
 {
   if (nullptr == m_spCurrentProject)
   {
@@ -846,7 +846,7 @@ void CEditorModel::SlotAddNewLayoutFile(const QString& sCustomInitContent)
     return;
   }
 
-  AddNewFileToScene(m_pParentWidget, nullptr, EResourceType::eLayout, sCustomInitContent);
+  AddNewFileToScene(m_pParentWidget, nullptr, EResourceType::eLayout, sCustomInitContent, vsformats);
 }
 
 //----------------------------------------------------------------------------------------
