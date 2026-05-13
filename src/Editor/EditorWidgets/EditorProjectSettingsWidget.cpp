@@ -305,7 +305,7 @@ void CEditorProjectSettingsWidget::LoadProject(tspProject spProject)
       }
     }
     qint32 iLayout = m_spUi->pDefaultLayoutComboBox->findData(m_spCurrentProject->m_sPlayerLayout);
-    m_spUi->pDefaultLayoutComboBox->setCurrentIndex(0 > iLayout ? 1 : iLayout);
+    m_spUi->pDefaultLayoutComboBox->setCurrentIndex(0 > iLayout ? c_iCurrentDefaultLayout : iLayout);
     m_spUi->pDefaultLayoutComboBox->setProperty(editor::c_sPropertyOldValue, m_spCurrentProject->m_sPlayerLayout);
     m_spUi->pDefaultLayoutComboBox->blockSignals(false);
 
@@ -322,8 +322,8 @@ void CEditorProjectSettingsWidget::LoadProject(tspProject spProject)
         m_spUi->pPreloadScriptComboBox->addItem(sName, sName);
       }
     }
-    qint32 iScript = m_spUi->pDefaultLayoutComboBox->findData(m_spCurrentProject->m_sPreLoadScript);
-    m_spUi->pPreloadScriptComboBox->setCurrentIndex(0 > iScript ? 1 : iScript);
+    qint32 iScript = m_spUi->pPreloadScriptComboBox->findData(m_spCurrentProject->m_sPreLoadScript);
+    m_spUi->pPreloadScriptComboBox->setCurrentIndex(0 > iScript ? c_iCurrentDefaultPreloadScript : iScript);
     m_spUi->pPreloadScriptComboBox->setProperty(editor::c_sPropertyOldValue, m_spCurrentProject->m_sPreLoadScript);
     m_spUi->pPreloadScriptComboBox->blockSignals(false);
 
@@ -604,7 +604,7 @@ void CEditorProjectSettingsWidget::on_AddScriptFile_clicked()
   WIDGET_INITIALIZED_GUARD
   if (nullptr == m_spCurrentProject) { return; }
 
-  EditorModel()->SlotAddNewScriptFile(QString());
+  EditorModel()->SlotAddNewScriptFile("// TODO: modify project here");
 }
 
 //----------------------------------------------------------------------------------------

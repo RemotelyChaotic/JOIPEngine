@@ -692,7 +692,7 @@ Saving will overwrite old target version.</string>
        <item row="7" column="0">
         <widget class="QLabel" name="label_12">
          <property name="toolTip">
-          <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;The preload script Resource used before loading the Project.&lt;br/&gt;Can use a .js or .lua file.&lt;/p&gt;&lt;p&gt;This script can modify certain properties of the Project before&lt;/p&gt;&lt;p&gt;loading.&lt;/p&gt;&lt;p&gt;Click the button to create a new layout file.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+          <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;The preload script Resource used before loading the Project.&lt;br/&gt;Can use a .js or .lua file.&lt;/p&gt;&lt;p&gt;This script can modify certain properties of the Project before loading.&lt;/p&gt;&lt;p&gt;Click the button to create a new script file.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
          </property>
          <property name="text">
           <string>Preload Script</string>

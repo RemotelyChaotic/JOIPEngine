@@ -69,6 +69,8 @@ namespace preload_scripts
             auto it = creatorMap.find(sSuffix);
             if (creatorMap.end() != it)
             {
+              resLocker.unlock();
+              l.unlock();
               auto spRunner = it->second("Preload");
               spRunner->Init();
               spRunner->RunScript(sScript, nullptr, spRes);
