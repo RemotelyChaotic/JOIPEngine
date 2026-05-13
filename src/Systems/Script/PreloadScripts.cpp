@@ -8,7 +8,7 @@
 
 #include <map>
 
-using tWorkerFactoryMap = std::map<QString, std::function<std::unique_ptr<CScriptRunnerInstanceWorkerBase>(const QString&)>>;
+using tWorkerFactoryMap = std::map<QString, std::function<std::unique_ptr<CScriptRunnerInstanceWorkerBase>(const QString&,std::weak_ptr<CScriptRunnerSignalContext>)>>;
 
 namespace
 {
@@ -16,10 +16,10 @@ namespace
   {
     static tWorkerFactoryMap creatorMap =
         {
-         {SScriptDefinitionData::c_sScriptTypeJs, [](const QString& sName){
+         {SScriptDefinitionData::c_sScriptTypeJs, [](const QString& sName, std::weak_ptr<CScriptRunnerSignalContext> wpSignalEmitterContext){
             return std::make_unique<CJsScriptRunnerInstanceWorker>(sName, false, std::weak_ptr<CScriptRunnerSignalContext>{});
           }},
-         {SScriptDefinitionData::c_sScriptTypeLua, [](const QString& sName){
+         {SScriptDefinitionData::c_sScriptTypeLua, [](const QString& sName, std::weak_ptr<CScriptRunnerSignalContext> wpSignalEmitterContext){
             return std::make_unique<CLuaScriptRunnerInstanceWorker>(sName, false, std::weak_ptr<CScriptRunnerSignalContext>{});
           }},
          };
@@ -44,7 +44,7 @@ namespace preload_scripts
 
   //--------------------------------------------------------------------------------------
   //
-  void RunPreLoadScript(const tspProject& spProject)
+  void RunPreLoadScript(const tspProject& spProject, std::weak_ptr<CScriptRunnerSignalContext> wpSignalEmitterContext)
   {
     const tWorkerFactoryMap& creatorMap = GetWorkerFactory();
 
@@ -71,7 +71,7 @@ namespace preload_scripts
             {
               resLocker.unlock();
               l.unlock();
-              auto spRunner = it->second("Preload");
+              auto spRunner = it->second("Preload", wpSignalEmitterContext);
               spRunner->Init();
               spRunner->RunScript(sScript, nullptr, spRes);
               spRunner->Deinit();

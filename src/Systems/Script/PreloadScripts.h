@@ -5,10 +5,14 @@
 
 #include <QStringList>
 
+#include <memory>
+
+class CScriptRunnerSignalContext;
+
 namespace preload_scripts
 {
   QStringList AvailableScriptSuffixes();
-  void RunPreLoadScript(const tspProject& spProject);
+  void RunPreLoadScript(const tspProject& spProject, std::weak_ptr<CScriptRunnerSignalContext> wpSignalEmitterContext);
 }
 
 #endif // PRELOADSCRIPTS_H

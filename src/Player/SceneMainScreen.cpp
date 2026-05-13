@@ -41,6 +41,37 @@
 
 const char* player::c_sMainPlayerProperty = "MainPlayer";
 
+namespace
+{
+  QString FormatedMessage(const QString& sError, QtMsgType type, std::vector<QColor>& vBgColors,
+                          std::vector<QColor>& vTextColors)
+  {
+    QString sPrefix;
+    switch(type)
+    {
+      case QtMsgType::QtInfoMsg:
+      case QtMsgType::QtDebugMsg:
+        sPrefix = QObject::tr("Info");
+        vTextColors.push_back({QColor(WHITE)});
+        vBgColors.push_back({QColor(BLACK)});
+        break;
+      case QtMsgType::QtWarningMsg:
+        sPrefix = QObject::tr("Warning");
+        vTextColors.push_back({QColor(YELLOW)});
+        vBgColors.push_back({QColor(BLACK)});
+        break;
+      case QtMsgType::QtCriticalMsg:
+      case QtMsgType::QtFatalMsg:
+        sPrefix = QObject::tr("Error");
+        vTextColors.push_back({QColor(RED)});
+        vBgColors.push_back({QColor(BLACK)});
+        break;
+    }
+
+    return QString("%1: %2").arg(sPrefix).arg(sError);
+  }
+}
+
 //----------------------------------------------------------------------------------------
 //
 CPlayerProjectProvider::CPlayerProjectProvider()
@@ -199,7 +230,36 @@ void CSceneMainScreen::LoadProject(qint32 iId, const tSceneToLoad& sStartScene)
     // we work on a copy so we can modify it
     m_spCurrentProject = spProjGotten->DeepCopy();
 
-    preload_scripts::RunPreLoadScript(m_spCurrentProject);
+    // we execute the preloadscript
+    {
+      auto fnShowError = [](QString sError, QtMsgType type){
+        std::vector<QColor> vBgColors;
+        std::vector<QColor> vTextColors;
+        QString sMessage = FormatedMessage(sError, type, vBgColors, vTextColors);
+        switch (type)
+        {
+          case QtMsgType::QtInfoMsg:
+          case QtMsgType::QtDebugMsg:
+            qInfo() << sMessage;
+            break;
+          case QtMsgType::QtWarningMsg:
+            qWarning() << sMessage;
+            break;
+          case QtMsgType::QtCriticalMsg:
+          case QtMsgType::QtFatalMsg:
+            qCritical() << sMessage;
+            break;
+        }
+      };
+      std::shared_ptr<CScriptRunnerSignalContext> spLocalContext =
+          std::make_shared<CScriptRunnerSignalContext>();
+      connect(spLocalContext.get(), &CScriptRunnerSignalContext::executionError, this,
+              [fnShowError](QString sException, qint32 iLine, QString sStack){
+                fnShowError(QString(tr("%1 on line %2 (%3)")).arg(sException).arg(iLine).arg(sStack), QtMsgType::QtCriticalMsg);
+              });
+      connect(spLocalContext.get(), &CScriptRunnerSignalContext::showError, this, fnShowError);
+      preload_scripts::RunPreLoadScript(m_spCurrentProject, spLocalContext);
+    }
 
     m_spProjectProivider->SetCurrentProject(m_spCurrentProject);
 
@@ -454,32 +514,11 @@ void CSceneMainScreen::SlotError(QString sError, QtMsgType type)
 
   std::vector<QColor> vBgColors;
   std::vector<QColor> vTextColors;
-
-  QString sPrefix;
-  switch(type)
-  {
-  case QtMsgType::QtInfoMsg:
-  case QtMsgType::QtDebugMsg:
-    sPrefix = tr("Info");
-    vTextColors.push_back({QColor(WHITE)});
-    vBgColors.push_back({QColor(BLACK)});
-    break;
-  case QtMsgType::QtWarningMsg:
-    sPrefix = tr("Warning");
-    vTextColors.push_back({QColor(YELLOW)});
-    vBgColors.push_back({QColor(BLACK)});
-    break;
-  case QtMsgType::QtCriticalMsg:
-  case QtMsgType::QtFatalMsg:
-    sPrefix = tr("Error");
-    vTextColors.push_back({QColor(RED)});
-    vBgColors.push_back({QColor(BLACK)});
-    break;
-  }
+  QString sMessage = FormatedMessage(sError, type, vBgColors, vTextColors);
 
   QQuickItem* pRootObject =  m_pQmlWidget->rootObject();
   QMetaObject::invokeMethod(pRootObject, "showText",
-                            Q_ARG(QVariant, QVariant(QString("%1: %2").arg(sPrefix).arg(sError))),
+                            Q_ARG(QVariant, QVariant(sMessage)),
                             Q_ARG(QVariant, QVariant::fromValue(vTextColors)),
                             Q_ARG(QVariant, QVariant::fromValue(vBgColors)));
 }
