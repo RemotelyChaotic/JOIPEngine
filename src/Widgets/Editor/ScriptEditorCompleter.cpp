@@ -42,6 +42,7 @@ public:
       {
         disconnect(conn);
       }
+      m_vConns.clear();
     }
 
     m_pSource = pSource;
