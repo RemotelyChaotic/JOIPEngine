@@ -40,6 +40,7 @@ class CProjectScriptWrapperReadOnly : public QObject, public CLockable
   Q_PROPERTY(QString        map               READ getMap               CONSTANT)
   Q_PROPERTY(QString        sceneModel        READ getSceneModel        CONSTANT)
   Q_PROPERTY(QString        playerLayout      READ getPlayerLayout      CONSTANT)
+  Q_PROPERTY(QString        preLoadScript     READ getPreLoadScript     CONSTANT)
   Q_PROPERTY(qint32         numberOfSoundEmitters READ getNumberOfSoundEmitters CONSTANT)
   Q_PROPERTY(qint32         metCmdMode        READ getMetCmdMode        CONSTANT)
   Q_PROPERTY(bool           canStartAtAnyScene READ getCanStartAtAnyScene CONSTANT)
@@ -87,6 +88,7 @@ public:
   QString getMap();
   QString getSceneModel();
   QString getPlayerLayout();
+  QString getPreLoadScript();
   qint32 getNumberOfSoundEmitters();
   qint32 getMetCmdMode();
   bool getCanStartAtAnyScene();

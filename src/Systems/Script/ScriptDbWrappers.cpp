@@ -157,6 +157,14 @@ QString CProjectScriptWrapperReadOnly::getPlayerLayout()
 
 //----------------------------------------------------------------------------------------
 //
+QString CProjectScriptWrapperReadOnly::getPreLoadScript()
+{
+  QReadLocker locker(&m_spData->m_rwLock);
+  return m_spData->m_sPreLoadScript;
+}
+
+//----------------------------------------------------------------------------------------
+//
 qint32 CProjectScriptWrapperReadOnly::getNumberOfSoundEmitters()
 {
   QReadLocker locker(&m_spData->m_rwLock);
