@@ -1,0 +1,736 @@
+<!doctype html>
+<html class="no-js" lang="">
+
+<head>
+  <meta charset="utf-8">
+  <title>Preload Script</title>
+  <meta name="description" content="">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <style>
+    h1 {
+      text-align: center;
+    }
+    div.container {
+      min-height: 10em;
+      display: table-cell;
+      margin-left: auto;
+      margin-right: auto;
+      width: 0.6em
+    }
+    table.warning {
+      color: black;
+      background-color: #cccc44;
+      border-color: yellow;
+      border-style: solid;
+    }
+  </style>
+</head>
+
+
+<body>
+  <h1>Preload Script</h1>
+
+  <hr>
+
+  <div class="container">
+    <p>Lets you set a Script that is executed before loading the
+    <a href="qrc:/resources/help/project/joi_project_help.html">JOI-Project</a> by the
+    <a href="qrc:/resources/help/play_button_help.html">Player</a>. The script can be a
+    <a href="qrc:/resources/help/editor/resources/resource_help.html">Script Resource</a> of type
+    <i>js</i> or <i>lua</i>. This Script allows you to modify the Project before loading it.
+    </p>
+
+    <br>
+
+    <p>Clicking the button will open an interface to add a new Script file.</p>
+
+    <br>
+
+    <p>This Preload Scipt is useful for example if properties like the
+    <a href="qrc:/resources/help/layout/layout_help.html">Project Layout</a> need to be
+    <a href="qrc:/resources/help/editor/projectsettings/engineversion_help.html">Engine Version</a> dependant
+    because of underlying QML API incompatibilities.</p>
+
+    <br>
+
+    <p>The following objects and properties can be accessed in this script:</p>
+
+    <br>
+
+    <h2>Project (name: <i>project</i>)</h2>
+
+    <br>
+
+    <p>A reference to the current Project to be loaded. This object is automatically registered by the JOIP-Engine on loading the
+    Script. This object can be used to retrieve and modify resources and data of
+    the current <a href="qrc:/resources/help/project/joi_project_help.html">JOI-Project</a>.<br>
+      <ul>
+        <li><b>id: int: (r)</b><br>
+        This property lets you read the internal Project id.<br>
+        <br></li>
+
+        <li><b>version: int: (r/w)</b><br>
+        This reads the project version. Useful, if you need to have your scripts be compatible
+        with different JOIP-Engine versions. The version is a number with bits 16-23
+        being major, bits 8-15 being minor and the last eight being the patch version (0x00MMmmPP).<br>
+        <i>Example Usage (JS):</i><br>
+        var major = (project.version &amp; 0x00ff0000) &gt;&gt; 16; /* read major version */<br>
+        var minor = (project.version &amp; 0x0000ff00) &gt;&gt; 8; /* read minor version */<br>
+        var path = project.version &amp; 0x000000ff; /* read path version */<br>
+        <i>Example Usage (Lua):</i><br>
+        local major = (project.version &amp; 0x00ff0000) &gt;&gt; 16; -- read major version<br>
+        local minor = (project.version &amp; 0x0000ff00) &gt;&gt; 8; -- read minor version<br>
+        local path = project.version &amp; 0x000000ff; -- read path version<br>
+        <br></li>
+
+        <li><b>versionText: string: (r/w)</b><br>
+        This property reads the project version as a formated user-readable string.<br></li>
+
+        <li><b>targetVersion: int: (r/w)</b><br>
+        This reads the target engine version. Useful, if you need to have your scripts be compatible
+        with different JOIP-Engine versions. The version is a number with bits 16-23
+        being major, bits 8-15 being minor and the last eight being the patch version (0x00MMmmPP).<br>
+        <i>Example Usage:</i><br>
+        var major = (project.version &amp; 0x00ff0000) &gt;&gt; 16; /* read major version */<br>
+        var minor = (project.version &amp; 0x0000ff00) &gt;&gt; 8; /* read minor version */<br>
+        var path = project.version &amp; 0x000000ff; /* read path version */<br></li>
+
+        <li><b>targetVersionText: string: (r/w)</b><br>
+        This property reads the target engine version as a formated user-readable string.<br>
+        <br></li>
+
+        <li><b>name: string: (r)</b><br>
+        This property lets you read the Project name.<br>
+        <br></li>
+
+        <li><b>folderName: string: (r)</b><br>
+        This property lets you read the Project's folder name.<br>
+        <br></li>
+
+        <li><b>description: string: (r/w)</b><br>
+        This property lets you read the Project's description.<br>
+        <br></li>
+
+        <li><b>titleCard: string: (r/w)</b><br>
+        This property lets you read the <a href="qrc:/resources/help/editor/resources/resource_help.html">Resources</a>
+        name representing the title card of the
+        <a href="qrc:/resources/help/project/joi_project_help.html">JOI-Project</a>.<br>
+        <i>Example Usage (JS):</i><br>
+        mediaPlayer.show(project.titleCard);<br>
+        <i>Example Usage (Lua):</i><br>
+        mediaPlayer:show(project.titleCard);<br>
+        <br></li>
+
+        <li><b>map: string: (r/w)</b><br>
+        This property lets you read the <a href="qrc:/resources/help/editor/resources/resource_help.html">Resources</a>
+        name representing the map of the
+        <a href="qrc:/resources/help/project/joi_project_help.html">JOI-Project</a>.
+        Because this is a currently unused and not fully implemented functionality,
+        this property shouldn't be accessed.<br>
+        <br></li>
+
+        <li><b>sceneModel: string: (r/w)</b><br>
+        This property lets you read the <a href="qrc:/resources/help/editor/resources/resource_help.html">Resources</a>
+        name representing the scene model of the
+        <a href="qrc:/resources/help/project/joi_project_help.html">JOI-Project</a>.
+        This property is only useful for manually parsing the file.<br>
+        <br></li>
+
+        <li><b>playerLayout: string: (r/w)</b><br>
+        This property lets you read the <a href="qrc:/resources/help/editor/resources/resource_help.html">Resources</a>
+        name representing the <a href="qrc:/resources/help/layout/layout_help.html">Layout</a> file of the
+        <a href="qrc:/resources/help/project/joi_project_help.html">JOI-Project</a>.<br>
+        <br></li>
+
+        <li><b>preLoadScript: string (r):</b><br>
+        This property lets you read the <a href="qrc:/resources/help/editor/resources/resource_help.html">Resource</a>
+        name representing this Preload Script file of the
+        <a href="qrc:/resources/help/project/joi_project_help.html">JOI-Project</a>.<br>
+        <br></li>
+
+        <li><b>numberOfSoundEmitters: int (r/w):</b><br>
+        This property lets you read the
+        <a href="qrc:/resources/help/editor/projectsettings/number_soundemitters_help.html">Number of Sound Emitters</a>
+        instaced by the Engine.
+        <br></li>
+
+        <li><b>metCmdMode: int (r/w)</b><br>
+        The <a href="qrc:/resources/help/settings/metdefcommand_setting_help.html">Metronome Commands</a>
+        sent to the DeviceController by the PlayerMetronome.
+        Possible flag values are the following (flag values may be OR-ed together):<br>
+          <ul>
+            <li>0: No commands are sent</li>
+            <li>1: Send the vibrate command</li>
+            <li>2: Send the linear command</li>
+            <li>4: Send the rotate command</li>
+            <li>7: Send all commands</li>
+          </ul><br>
+        <br></li>
+
+        <li><b>canStartAtAnyScene: bool (r)</b><br>
+        This property lets you read the canStartAtAnyScene-flag that can be set to indicate, if the project
+        can be started at any Scene.<br>
+        <br></li>
+
+        <li><b>isUsingWeb: bool: (r)</b><br>
+        This property lets you read the using-web-flag that is set, if the project
+        contains any remote <a href="qrc:/resources/help/editor/resources/resource_help.html">Resources</a>.<br>
+        <br></li>
+
+        <li><b>isUsingCodecs: bool: (r)</b><br>
+        This property lets you read the using-codecs-flag that is set, if the project
+        contains any video or sound <a href="qrc:/resources/help/editor/resources/resource_help.html">Resources</a>.<br>
+        <br></li>
+
+        <li><b>isBundled: bool: (r)</b><br>
+        This property lets you read the bundled-flag that is set, if the project
+        was <a href="qrc:/resources/help/editor/exportproject_button_help.html">exported</a>
+        and is thus read-only.<br>
+        <br></li>
+
+        <li><b>isReadOnly: bool: (r)</b><br>
+        This property lets you read the read-only-flag that is set if the project
+        was loaded as read-only due to being an archive.<br>
+        <br></li>
+
+        <li><b>dlState: DownloadState: (r)</b><br>
+        This property lets you read the download-state of the project. The download states are
+        <b>Unstarted</b>, <b>DownloadRunning</b>, <b>Finished</b>. A playable project will
+        always have this set to Finished and you will probably never need to check this property.<br>
+        <br></li>
+
+        <li><b>numKinks (  ): int: (r)</b><br>
+        This property lets you read the number of kinks, that the application has been tagged with.<br>
+        <br></li>
+
+        <li><b>kinks: string[]: (r)</b><br>
+        This property lets you read the kinks, that the application has been tagged with.<br>
+        <br></li>
+
+        <li><b>kink ( string name ): Kink: (r)</b><br>
+        Returns a Kink object with the name <i>name</i>. Useful if you
+        need to read Kink specific properties.<br>
+        <i>Example Usage (JS):</i><br>
+        var myScene = project.kink("Vaginal Sex (Giving)");<br>
+        <i>Example Usage (Lua):</i><br>
+        local myScene = project:kink('Vaginal Sex (Giving)');<br>
+        <br></li>
+
+        <li><b>numScenes (  ): int: (r)</b><br>
+        Returns the number of scenes in the project. Usefull for iteration.<br>
+        <br></li>
+
+        <li><b>scenes (  ): string[]: (r)</b><br>
+        Returns all scene names. Useful for iteration.<br>
+        <br></li>
+
+        <li><b>scene ( int index | string name ): Scene: (r)</b><br>
+        Returns a Scene object at index index or with the name <i>name</i>. Useful if you
+        need to read scene specific properties.<br>
+        <i>Example Usage (JS):</i><br>
+        var myScene = project.scene("myScene");<br>
+        var myScene = project.scene(0);<br>
+        <i>Example Usage (Lua):</i><br>
+        local myScene = project:scene('myScene');<br>
+        local myScene = project:scene(0);<br>
+        <br></li>
+
+        <li><b>numResources (  ): int: (r)</b><br>
+        Returns the number of Resources in the project. Usefull for iteration.<br>
+        <br></li>
+
+        <li><b>resources (  ): string[]: (r)</b><br>
+        Returns all Resource names. Useful for iteration.<br>
+        <br></li>
+
+        <li><b>resource ( int index | string name ): Resource: (r)</b><br>
+        Returns a Resource object at index index or with the name <i>name</i>. Useful if you
+        need to read Resource specific properties.<br>
+        <i>Example Usage (JS):</i><br>
+        var myResource = project.resource("myScene");<br>
+        var myResource = project.resource(0);<br>
+        <i>Example Usage (Lua):</i><br>
+        local myResource = project:resource('myScene');<br>
+        local myResource = project:resource(0);<br>
+        <br></li>
+
+        <li><b>numTags (  ): int: (r)</b><br>
+        Returns the number of Tags in the project. Usefull for iteration.<br>
+        <br></li>
+
+        <li><b>tags (  ): string[]: (r)</b><br>
+        Returns all Tag names. Useful for iteration.<br>
+        <br></li>
+
+        <li><b>tag ( string name | int index ): Tag: (r)</b><br>
+        Returns a Tag object at index index or with the name <i>name</i>. Useful if you
+        need to use the Tag for custom logic.<br>
+        <br></li>
+
+        <li><b>numAchievements (  ): int: (r)</b><br>
+        Returns the number of Achievements in the project. Usefull for iteration.<br>
+        <br></li>
+
+        <li><b>achievements (  ): string[]: (r)</b><br>
+        Returns all Achievements names. Useful for iteration.<br>
+        <br></li>
+
+        <li><b>achievement ( string name | int index ): SaveData: (r)</b><br>
+        Returns a SaveData object representing an achievement at index index or with the name
+        <i>name</i>. Useful if you need to use the Achievement for custom logic.<br>
+        <br></li>
+
+        <li><b>font: string: (r/w)</b><br>
+        Returns the font used in the player. Mainly in the PlayerTextBox.<br>
+        <br></li>
+      </ul>
+    </p>
+
+    <br>
+
+    <h2>Settings (name: <i>Settings</i>)</h2>
+
+    <br>
+
+    <p>A global property of the script set by the Engine that allows access to the Engine
+    settings. All of its properties are read-only.<br>
+      <ul>
+        <li><b>autoUpdate: bool</b><br>
+        Checks if autoupdates are enabled.<br>
+        <br></li>
+
+        <li><b>connectToHWOnStartup: bool</b><br>
+        Flag that tells the engine to connect to hardware interfaces on startup.<br>
+        <br></li>
+
+        <li><b>contentFolder: string</b><br>
+        The <a href="qrc:/resources/help/settings/datafolder_setting_help.html">Data Folder</a> of the engine.
+        Basically unusable since System paths can not be accessed directly.<br>
+        <br></li>
+
+        <li><b>debugOverlayEnabled: bool</b><br>
+        checks if the <a href="qrc:/resources/help/settings/debugoverlay_setting_help.html">Debug Overlay</a> is enabled.<br>
+        <br></li>
+
+        <li><b>dominantHand: int</b><br>
+        the <a href="qrc:/resources/help/settings/dominanthand_setting_help.html">Dominant Hand</a> setting.
+        Possible values are:<br>
+          <ul>
+            <li>0: No dominant hand set</li>
+            <li>1: Left handed use</li>
+            <li>2: Right handed use</li>
+          </ul><br>
+        <br></li>
+
+        <li><b>editorCaseInsensitiveSearch: bool</b><br>
+        Denotes if editor search in case in-sensitive or case-sensitive
+        (caution: the property is true if the case is <i>in</i>-sensitive.
+        See: <a href="qrc:/resources/help/settings/editorsettings_setting_help.html">Editor Settings</a>.<br>
+        <br></li>
+
+        <li><b>editorFont: string</b><br>
+        The Font of the editor.
+        See: <a href="qrc:/resources/help/settings/editorsettings_setting_help.html">Editor Settings</a>.<br>
+        <br></li>
+
+        <li><b>editorShowWhitespace: bool</b><br>
+        Flag if whitespace is visualised in the editor.
+        See: <a href="qrc:/resources/help/settings/editorsettings_setting_help.html">Editor Settings</a>.<br>
+        <br></li>
+
+        <li><b>editorTheme: string</b><br>
+        Theme of the editor.
+        See: <a href="qrc:/resources/help/settings/editorsettings_setting_help.html">Editor Settings</a>.<br>
+        <br></li>
+
+        <li><b>font: string</b><br>
+        The used Engine <a href="qrc:/resources/help/settings/font_setting_help.html">Font</a>.<br>
+        <br></li>
+
+        <li><b>keyBindings: Array [ string ]</b><br>
+        The list of keybinding roles of the editor.<br>
+        <br></li>
+
+        <li><b>keyBinding( string ): string</b><br>
+        The keybinding of a given keybinding role.<br>
+        <br></li>
+
+        <li><b>hideSettingsTimeout: int</b><br>
+        The <a href="qrc:/resources/help/settings/timeouttextboxhide_setting_help.html">Timeout</a> in ms
+        for automatically hiding the textBox in the Player.<br>
+        <br></li>
+
+        <li><b>metronomeDefaultCommands: int</b><br>
+        The <a href="qrc:/resources/help/settings/metdefcommand_setting_help.html">Default Metronome Commands</a>
+        sent to the DeviceController by the PlayerMetronome.
+        Possible flag values are the following (flag values may be OR-ed together):<br>
+          <ul>
+            <li>0: No commands are sent</li>
+            <li>1: Send the vibrate command</li>
+            <li>2: Send the linear command</li>
+            <li>4: Send the rotate command</li>
+            <li>7: Send all commands</li>
+          </ul><br>
+        <br></li>
+
+        <li><b>metronomeSfx: string</b><br>
+        The default audio file id for the metronome.
+        See <a href="qrc:/resources/help/settings/metronome_setting_help.html">Metronome Settings</a><br>
+        <br></li>
+
+        <li><b>metronomeSizeRel: real</b><br>
+        The relative size of the metronome to the Player frame.
+        See <a href="qrc:/resources/help/settings/metronomesize_setting_help.html">Metronome Size Settings</a><br>
+        <br></li>
+
+        <li><b>metronomeSizeMin: int</b><br>
+        the absolute minimal height of the metronome in pixels.
+        See <a href="qrc:/resources/help/settings/metronomesize_setting_help.html">Metronome Size Settings</a><br>
+        <br></li>
+
+        <li><b>metronomeVolume: real</b><br>
+        the metronome volume from 0 to 1.
+        See <a href="qrc:/resources/help/settings/metronome_setting_help.html">Metronome Settings</a><br>
+        <br></li>
+
+        <li><b>muted: bool</b><br>
+        The <a href="qrc:/resources/help/settings/mute_setting_help.html">Muted</a> Engine setting flag.<br>
+        <br></li>
+
+        <li><b>offline: bool</b><br>
+        The <a href="qrc:/resources/help/settings/offline_setting_help.html">Offline Mode</a> Engine setting flag.
+        In offline mode, remote Resources will not be loaded.<br>
+        <br></li>
+
+        <li><b>pauseWhenInactive: bool</b><br>
+        The <a href="qrc:/resources/help/settings/pausewheninactive_setting_help.html">Pause Player when app is not active</a> Engine setting flag.<br>
+        <br></li>
+
+        <li><b>platform: string</b><br>
+        The platform string the Engine is running on crrently.
+        Is one of:<br>
+          <ul>
+            <li>Android: Running on Android devices</li>
+            <li>Windows: Running on Windows OS</li>
+            <li>Linux: Running on any Linux OS except Android</li>
+          </ul><br>
+        <br></li>
+
+        <li><b>playerAntialiasing: bool</b><br>
+        Flag if anti-aliasing in the player is active.
+        See <a href="qrc:/resources/help/settings/playersettings_setting_help.html">Player Settings</a><br>
+        <br></li>
+
+        <li><b>playerDropShadow: bool</b><br>
+        Flag if drop-shadows in the player are active.
+        See <a href="qrc:/resources/help/settings/playersettings_setting_help.html">Player Settings</a><br>
+        <br></li>
+
+        <li><b>playerImageMipMap: bool</b><br>
+        Flag if mip-mapping for Images in the player is active.
+        See <a href="qrc:/resources/help/settings/playersettings_setting_help.html">Player Settings</a><br>
+        <br></li>
+
+        <li><b>playerImageSmooth: bool</b><br>
+        Flag if smooth scaling for Images in the player is active.
+        See <a href="qrc:/resources/help/settings/playersettings_setting_help.html">Player Settings</a><br>
+        <br></li>
+
+        <li><b>preferedEditorLayout: int</b><br>
+        The currently set <a href="qrc:/resources/help/settings/editorsettings_setting_help.html">Editor Layout</a>.
+        Is one of:<br>
+          <ul>
+            <li>eNone (0): Not set yet. The default (eModern) is used.</li>
+            <li>eClassic (1): The old Layout split into two sides.</li>
+            <li>eModern (2): The new Layout split into two sides with the Resource Manager always at the bottom.</li>
+            <li>eCompact (3): the compact mobile layout with only one open view.</li>
+          </ul><br>
+        <br></li>
+
+        <li><b>pushNotifications: bool</b><br>
+        Checks if <a href="qrc:/resources/help/settings/push_notification_setting_help.html">Push Notifications</a> are active.<br>
+        <br></li>
+
+        <li><b>resolution: size</b><br>
+        The <a href="qrc:/resources/help/settings/resolution_setting_help.html">Window Resolution</a> of the Engine.<br>
+        <br></li>
+
+        <li><b>style: string</b><br>
+        The <a href="qrc:/resources/help/settings/style_setting_help.html">Style</a> of the Engine.<br>
+        <br></li>
+
+        <li><b>styleHotLoad: bool</b><br>
+        The <a href="qrc:/resources/help/settings/hotloadstyle_setting_help.html">Style Hotload</a> flag.<br>
+        <br></li>
+
+        <li><b>version: int</b><br>
+        The <a href="qrc:/resources/help/editor/projectsettings/engineversion_help.html">Engine Version</a>.<br>
+        <br></li>
+
+        <li><b>volume: real</b><br>
+        The global <a href="qrc:/resources/help/settings/volume_setting_help.html">Volume</a> of the Engine.<br>
+        <br></li>
+
+        <li><b>windowMode: int</b><br>
+        the Engine window's <a href="qrc:/resources/help/settings/window_mode_setting_help.html">Window Mode</a>.<br>
+        Is one of:<br>
+          <ul>
+            <li>eFullscreen (0): Application fills a screen.</li>
+            <li>eBorderless (1): Application respects the selected <a href="qrc:/resources/help/settings/resolution_setting_help.html">Resolution</a> but is displayed without a header.</li>
+            <li>eWindowed (2): Application is shown as moveable, resizable window and respects the selected <a href="qrc:/resources/help/settings/resolution_setting_help.html">Resolution</a>.</li>
+          </ul><br>
+        <br></li>
+      </ul>
+    </p>
+
+    <br>
+
+    <h2>Scene</h2>
+
+    <br>
+
+    <p>This type of object can be returned by a Project object and contains information
+    about the Scene.<br>
+      <ul>
+        <li><b>id: int (r)</b><br>
+        This property lets you read the internal Scene id.<br>
+        <br></li>
+
+        <li><b>name: string (r):</b><br>
+        This property lets you read the Scene name.<br>
+        <br></li>
+
+        <li><b>script: string (r/w)</b><br>
+        Gets the script file name that is associated with the scene.<br>
+        <br></li>
+
+        <li><b>sceneLayout: string (r/w)</b><br>
+        Gets the <a href="qrc:/resources/help/layout/layout_help.html">Layout</a> resource file that
+        should be set when the scene is loaded.<br> This is not yet implemented,
+        but planned for future versions.</li>
+
+        <li><b>numResources (  ): int:</b><br>
+        Returns the number of Resources in the project. Currently unused and will always return 0
+        unless scenes have been added manually.<br>
+        <br></li>
+
+        <li><b>resources (  ): string[]:</b><br>
+        Returns all Resource names. Currently unused and will always return an empty list unless scenes have been
+        added manually.<br>
+        <br></li>
+
+        <li><b>resource ( string name ): Resource:</b><br>
+        Returns a Resource object with the name <i>name</i>.
+        Currently unused and will always return <i>undefined</i> unless scenes have been
+        added manually.<br>
+        <br></li>
+
+        <li><b>addResource ( string name ):</b><br>
+        Adds a Resource with the name <i>name</i> to the scene to be retrieved later.<br>
+        <br></li>
+
+        <li><b>removeResource ( string name ):</b><br>
+        Removes a resource with the name <i>name</i> from the scene.
+        Currently unused and will not work unless scenes have been added manually.<br>
+        <br></li>
+
+        <li><b>project (  ): Project:</b><br>
+        Returns the Project object that contains this Scene. Useful for getting information
+        about the Project itself, or about Resources.<br>
+        <i>Example Usage (JS):</i><br>
+        var project = scene.project();<br>
+        <i>Example Usage (Lua):</i><br>
+        local project = scene:project();<br>
+        <br></li>
+      </ul>
+    </p>
+
+    <br>
+
+    <h2>Resource</h2>
+
+    <br>
+
+    <p>This type of object can be returned by a Project object and contains information
+    about the <a href="qrc:/resources/help/editor/resources/resource_help.html">Resource</a>.
+      <ul>
+        <li><b>isAnimated: bool (r):</b><br>
+        This property lets you read if the resource is animated (gif image or video
+        <a href="qrc:/resources/help/editor/resources/resource_help.html">Resource</a>).
+        An animated Resource can be played or paused and video Resources
+        can be waited on with <i>waitForVideo</i> or <i>waitForPlayback</i>.<br></li>
+
+        <li><b>isLocal: bool (r):</b><br>
+        This property lets you read if the Resource is local or online.
+        For online resources, the <i>path</i> points to the image or video url directly and for
+        local resources it contains the local file relave to the
+        <a href="qrc:/resources/help/project/joi_project_help.html">JOI-Project</a>
+        root folder.<br></li>
+
+        <li><b>name: string (r):</b><br>
+        This property lets you read the Resource name. This also serves as the Resource identifier.<br>
+
+        <li><b>path: url (r):</b><br>
+        This property lets you read the path to the Resource.For online resources,
+        the <i>path</i> points to the image or video url directly and for
+        local resources it contains the local file relave to the
+        <a href="qrc:/resources/help/project/joi_project_help.html">JOI-Project</a>
+        root folder.<br></li>
+
+        <li><b>source: url (r):</b><br>
+        This property lets you read the source of the Resource.<br>
+        This is not the file path, but the origin where the resource was found (for credit purposes).</li>
+
+        <li><b>type: ResourceType (r):</b><br>
+        This property lets you read the resource type. The values are:<br>
+        <i>ResourceType.Image (0)</i>: Image Resource<br>
+        <i>ResourceType.Movie (1)</i>: Movie Resource<br>
+        <i>ResourceType.Sound (2)</i>: Sound Resource<br>
+        <i>ResourceType.Other (3)</i>: Flow file, <a href="qrc:/resources/help/project/joi_project_help.html">Project</a> file,
+        <a href="qrc:/resources/help/editor/nodes/node_help.html">Scene Script</a> files and <a href="qrc:/resources/help/layout/layout_help.html">Layout</a> file<br>
+        </li>
+
+        <li><b>numTags (  ): int:</b><br>
+        Returns the number of Tags of the Resource. Usefull for iteration.<br>
+        <br></li>
+
+        <li><b>tags (  ): string[]:</b><br>
+        Returns all Tag names of the Resource. Useful for iteration.<br>
+        <br></li>
+
+        <li><b>tag ( string name | int index ): Tag:</b><br>
+        Returns a Tag object at index index or with the name <i>name</i>. Useful if you
+        need to use the Tag for custom logic.<br>
+        <br></li>
+
+        <li><b>addTag ( string name, string category, string description ):</b><br>
+        Adds a new Tag object at with the <i>name</i>, <i>category</i> and <i>description</i> given.
+        Useful if you need to use the Tag for custom logic.<br>
+        <br></li>
+
+        <li><b>removeTag ( string name | int index ):</b><br>
+        Removes a Tag object at index <i>index</i> or with the name <i>name</i>. Useful if you
+        need to use the Tag for custom logic.<br>
+        <br></li>
+
+        <li><b>project (  ): Project:</b><br>
+        Returns the Project object that contains this Resource. Useful for getting information
+        about the Project itself, or about other Resources or Scenes.<br>
+        <i>Example Usage (JS):</i><br>
+        var project = resource.project();<br>
+        <i>Example Usage (Lua):</i><br>
+        local project = resource:project();<br>
+        <br></li>
+      </ul>
+    </p>
+
+    <br>
+
+    <h2>Tag</h2>
+
+    <br>
+
+    <p>This type of object can be returned by a Project object and contains information
+    about the specific Tag registered in the database.<br>
+      <ul>
+        <li><b>type: string (r):</b><br>
+        This property lets you read the Tag category.<br></li>
+
+        <li><b>name: string (r):</b><br>
+        This property lets you read the Tag name. This also serves as the Tag identifier.<br>
+
+        <li><b>description: string (r):</b><br>
+        This property lets you read the description of the Tag.<br></li>
+
+        <li><b>color ( ): color (r):</b><br>
+        This property lets you read the color of the Tag that is used in the UI.
+        The red green and blue values are generated from an MD4 Hash of the category where
+        red is the first byte green the second and blue the third.<br>
+        </li>
+
+        <li><b>numResources ( ): int</b><br>
+        The number of resources that are assigned with this tag.<br>
+        </li>
+
+        <li><b>resources ( ): string[]</b><br>
+        The resource names that are assigned with this tag.<br></li>
+      </ul>
+    </p>
+
+    <br>
+
+    <h2>SaveData</h2>
+
+    <br>
+
+    <p>This type of object can be returned by a Project object and contains information
+    about an Achievement. The type name is SaveData, because this is a generic persistent
+    Data wrapper.<br>
+      <ul>
+        <li><b>name: string (r):</b><br>
+        This property lets you read the name / ID of the element.
+        This serves as the identifier in the project and in any persistent file.<br>
+
+        <li><b>description: string (r/w):</b><br>
+        This property lets you read the description of the SaveData if there is any.<br></li>
+
+        <li><b>type: string (r):</b><br>
+        This property lets you read the SaveData type. Only Bool and Int are supported by Achievements. The possible types are:<br>
+        <ul>
+          <li><b>SaveDataType.Bool</b>: Contains a boolean value.</li>
+          <li><b>SaveDataType.Int</b>: Contains an integer 32bit value.</li>
+          <li><b>SaveDataType.Double</b>: Contains a double (real) 64bit value.</li>
+          <li><b>SaveDataType.String</b>: Contains a string object.</li>
+          <li><b>SaveDataType.Regexp</b>: Contains a regular expression.</li>
+          <li><b>SaveDataType.Date</b>: Contains a Date object.</li>
+          <li><b>SaveDataType.Url</b>: Contains an Url object.</li>
+          <li><b>SaveDataType.Array</b>: Contains an array of elements.</li>
+          <li><b>SaveDataType.Object</b>: Contains a complex JSON object.</li>
+          <li><b>SaveDataType.Null</b>: Contains a null object.</li>
+        </ul>
+        </li>
+
+        <li><b>resource: string (r/w):</b><br>
+        The number of resource that is assigned to this SaveData element. In case of an
+        Achievement this is the icon.
+        </li>
+
+        <li><b>data: var (r/w):</b><br>
+        The resource data. Type depends on the type of the SaveData.<br></li>
+      </ul>
+    </p>
+
+    <br>
+
+    <h2>Kink</h2>
+
+    <br>
+
+    <p>This type of object can be returned by a Project object and contains information
+    about the specific Kink registered in the database. It is used internally to visualize the kinks
+    associated with a Project.<br>
+      <ul>
+        <li><b>idForOrdering: int (r):</b><br>
+        This property lets you read the internal index of the Kink, which is used for sorting.<br></li>
+
+        <li><b>type: string (r):</b><br>
+        This property lets you read the kink category.<br></li>
+
+        <li><b>name: string (r):</b><br>
+        This property lets you read the Kink name. This also serves as the Kink identifier.<br>
+
+        <li><b>description: string (r):</b><br>
+        This property lets you read the description of the Kink.<br></li>
+
+        <li><b>color ( ): color</b><br>
+        This property lets you read the color of the Kink that is used in the UI.
+        The red green and blue values are generated from an MD4 Hash of the category where
+        red is the first byte green the second and blue the third.<br>
+        </li>
+      </ul>
+    </p>
+  </div>
+</body>
+
+</html>

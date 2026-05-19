@@ -10,6 +10,10 @@ New Features:
 - New Node type: Subflow for modular Scene Flows
 - Image compression tool can now convert a selectable subset of all images
   in a Project instead of always converting all.
+- Possibility to configure a Preload Script (js / lua) that is ran before
+  a Project is loaded by the player. This script can change Project
+  properties before the Project is loaded to make compatibility with
+  multiple engine versions easier.
 
 Changes:
 - Node Editor lets you select which Flow to edit and debug.
@@ -22,6 +26,7 @@ Fixed Bugs:
 - Project exports now correctly handle Resource bundles and archives.
 - Various smaller fixes concerning the code editor.
 - Filtered Resource views did not correctly filter folders.
+- Fixed possible Script Editor crashes.
 
 =================
 Version 1.7.1.0

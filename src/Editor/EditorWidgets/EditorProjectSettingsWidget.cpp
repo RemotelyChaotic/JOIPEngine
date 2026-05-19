@@ -58,6 +58,7 @@ namespace
   const QString c_sSoundEmitterCountHelpId ="Editor/SoundEmitterCount";
   const QString c_sMetronomeToyCmdModeId   ="Editor/MetronomeToyCmdMode";
   const QString c_sLayoutHelpId =           "Editor/Layout";
+  const QString c_sPreloadScriptHelpId =    "Editor/PreloadScript";
   const QString c_sPluginSubfolderHelpId =  "Editor/PluginSubfolder";
   const QString c_sCanStartFromAnySceneId = "Editor/CanStartFromAnyScene";
   const QString c_sProjectFontHelpId       ="Editor/ProjectFont";
@@ -118,6 +119,8 @@ void CEditorProjectSettingsWidget::Initialize()
     wpHelpFactory->RegisterHelp(c_sProjectFontHelpId, ":/resources/help/editor/projectsettings/font_help.html");
     m_spUi->pLayoutWidget->setProperty(helpOverlay::c_sHelpPagePropertyName, c_sLayoutHelpId);
     wpHelpFactory->RegisterHelp(c_sLayoutHelpId, ":/resources/help/editor/projectsettings/layout_help.html");
+    m_spUi->pPreloadScriptWidget->setProperty(helpOverlay::c_sHelpPagePropertyName, c_sPreloadScriptHelpId);
+    wpHelpFactory->RegisterHelp(c_sPreloadScriptHelpId, ":/resources/help/editor/projectsettings/preload_script.html");
     m_spUi->pWidgetPluginSubfolder->setProperty(helpOverlay::c_sHelpPagePropertyName, c_sPluginSubfolderHelpId);
     wpHelpFactory->RegisterHelp(c_sPluginSubfolderHelpId, ":/resources/help/editor/projectsettings/pluginsubfolder_help.html");
     m_spUi->pCanStartFromAnySceneContainer->setProperty(helpOverlay::c_sHelpPagePropertyName, c_sCanStartFromAnySceneId);

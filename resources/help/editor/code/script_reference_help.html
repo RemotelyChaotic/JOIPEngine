@@ -1388,9 +1388,39 @@
         <br></li>
 
         <li><b>playerLayout: string:</b><br>
-        This property lets you read the <a href="qrc:/resources/help/editor/resources/resource_help.html">Resources</a>
+        This property lets you read the <a href="qrc:/resources/help/editor/resources/resource_help.html">Resource</a>
         name representing the <a href="qrc:/resources/help/layout/layout_help.html">Layout</a> file of the
         <a href="qrc:/resources/help/project/joi_project_help.html">JOI-Project</a>.<br>
+        <br></li>
+
+        <li><b>preLoadScript: string:</b><br>
+        This property lets you read the <a href="qrc:/resources/help/editor/resources/resource_help.html">Resource</a>
+        name representing the <a href="qrc:/resources/help/editor/projectsettings/preload_script.html">Preload Script</a> file of the
+        <a href="qrc:/resources/help/project/joi_project_help.html">JOI-Project</a>.<br>
+        <br></li>
+
+        <li><b>numberOfSoundEmitters: int:</b><br>
+        This property lets you read the
+        <a href="qrc:/resources/help/editor/projectsettings/number_soundemitters_help.html">Number of Sound Emitters</a>
+        instaced by the Engine.
+        <br></li>
+
+        <li><b>metCmdMode: int</b><br>
+        The <a href="qrc:/resources/help/settings/metdefcommand_setting_help.html">Metronome Commands</a>
+        sent to the DeviceController by the PlayerMetronome.
+        Possible flag values are the following (flag values may be OR-ed together):<br>
+          <ul>
+            <li>0: No commands are sent</li>
+            <li>1: Send the vibrate command</li>
+            <li>2: Send the linear command</li>
+            <li>4: Send the rotate command</li>
+            <li>7: Send all commands</li>
+          </ul><br>
+        <br></li>
+
+        <li><b>canStartAtAnyScene: bool:</b><br>
+        This property lets you read the canStartAtAnyScene-flag that can be set to indicate, if the project
+        can be started at any Scene.<br>
         <br></li>
 
         <li><b>isUsingWeb: bool:</b><br>
@@ -1536,16 +1566,19 @@
         but planned for future versions.</li>
 
         <li><b>numResources (  ): int:</b><br>
-        Returns the number of Resources in the project. Currently unused and will always return 0.<br>
+        Returns the number of Resources in the project. Currently unused and will always return 0
+        unless scenes have been added manually via <a href="qrc:/resources/help/editor/projectsettings/preload_script.html">Preload Script</a>.<br>
         <br></li>
 
         <li><b>resources (  ): string[]:</b><br>
-        Returns all Resource names. Currently unused and will always return an empty list.<br>
+        Returns all Resource names. Currently unused and will always return an empty list unless scenes have been
+        added manually via <a href="qrc:/resources/help/editor/projectsettings/preload_script.html">Preload Script</a>.<br>
         <br></li>
 
         <li><b>resource ( string name ): Resource:</b><br>
         Returns a Resource object with the name <i>name</i>.
-        Currently unused and will always return <i>undefined</i>.<br>
+        Currently unused and will always return <i>undefined</i> unless scenes have been
+        added manually via <a href="qrc:/resources/help/editor/projectsettings/preload_script.html">Preload Script</a>.<br>
         <br></li>
 
         <li><b>project (  ): Project:</b><br>
@@ -1733,6 +1766,204 @@
         The red green and blue values are generated from an MD4 Hash of the category where
         red is the first byte green the second and blue the third.<br>
         </li>
+      </ul>
+    </p>
+
+    <br>
+
+
+    <h2>Settings (name: <i>Settings</i>)</h2>
+
+    <br>
+
+    <p>A global property of the script set by the Engine that allows access to the Engine
+    settings. All of its properties are read-only.<br>
+      <ul>
+        <li><b>autoUpdate: bool</b><br>
+        Checks if autoupdates are enabled.<br>
+        <br></li>
+
+        <li><b>connectToHWOnStartup: bool</b><br>
+        Flag that tells the engine to connect to hardware interfaces on startup.<br>
+        <br></li>
+
+        <li><b>contentFolder: string</b><br>
+        The <a href="qrc:/resources/help/settings/datafolder_setting_help.html">Data Folder</a> of the engine.
+        Basically unusable since System paths can not be accessed directly.<br>
+        <br></li>
+
+        <li><b>debugOverlayEnabled: bool</b><br>
+        checks if the <a href="qrc:/resources/help/settings/debugoverlay_setting_help.html">Debug Overlay</a> is enabled.<br>
+        <br></li>
+
+        <li><b>dominantHand: int</b><br>
+        the <a href="qrc:/resources/help/settings/dominanthand_setting_help.html">Dominant Hand</a> setting.
+        Possible values are:<br>
+          <ul>
+            <li>0: No dominant hand set</li>
+            <li>1: Left handed use</li>
+            <li>2: Right handed use</li>
+          </ul><br>
+        <br></li>
+
+        <li><b>editorCaseInsensitiveSearch: bool</b><br>
+        Denotes if editor search in case in-sensitive or case-sensitive
+        (caution: the property is true if the case is <i>in</i>-sensitive.
+        See: <a href="qrc:/resources/help/settings/editorsettings_setting_help.html">Editor Settings</a>.<br>
+        <br></li>
+
+        <li><b>editorFont: string</b><br>
+        The Font of the editor.
+        See: <a href="qrc:/resources/help/settings/editorsettings_setting_help.html">Editor Settings</a>.<br>
+        <br></li>
+
+        <li><b>editorShowWhitespace: bool</b><br>
+        Flag if whitespace is visualised in the editor.
+        See: <a href="qrc:/resources/help/settings/editorsettings_setting_help.html">Editor Settings</a>.<br>
+        <br></li>
+
+        <li><b>editorTheme: string</b><br>
+        Theme of the editor.
+        See: <a href="qrc:/resources/help/settings/editorsettings_setting_help.html">Editor Settings</a>.<br>
+        <br></li>
+
+        <li><b>font: string</b><br>
+        The used Engine <a href="qrc:/resources/help/settings/font_setting_help.html">Font</a>.<br>
+        <br></li>
+
+        <li><b>keyBindings: Array [ string ]</b><br>
+        The list of keybinding roles of the editor.<br>
+        <br></li>
+
+        <li><b>keyBinding( string ): string</b><br>
+        The keybinding of a given keybinding role.<br>
+        <br></li>
+
+        <li><b>hideSettingsTimeout: int</b><br>
+        The <a href="qrc:/resources/help/settings/timeouttextboxhide_setting_help.html">Timeout</a> in ms
+        for automatically hiding the textBox in the Player.<br>
+        <br></li>
+
+        <li><b>metronomeDefaultCommands: int</b><br>
+        The<a href="qrc:/resources/help/settings/metdefcommand_setting_help.html">Default Metronome Commands</a>
+        sent to the DeviceController by the PlayerMetronome.
+        Possible flag values are the following (flag values may be OR-ed together):<br>
+          <ul>
+            <li>0: No commands are sent</li>
+            <li>1: Send the vibrate command</li>
+            <li>2: Send the linear command</li>
+            <li>4: Send the rotate command</li>
+            <li>7: Send all commands</li>
+          </ul><br>
+        <br></li>
+
+        <li><b>metronomeSfx: string</b><br>
+        The default audio file id for the metronome.
+        See <a href="qrc:/resources/help/settings/metronome_setting_help.html">Metronome Settings</a><br>
+        <br></li>
+
+        <li><b>metronomeSizeRel: real</b><br>
+        The relative size of the metronome to the Player frame.
+        See <a href="qrc:/resources/help/settings/metronomesize_setting_help.html">Metronome Size Settings</a><br>
+        <br></li>
+
+        <li><b>metronomeSizeMin: int</b><br>
+        the absolute minimal height of the metronome in pixels.
+        See <a href="qrc:/resources/help/settings/metronomesize_setting_help.html">Metronome Size Settings</a><br>
+        <br></li>
+
+        <li><b>metronomeVolume: real</b><br>
+        the metronome volume from 0 to 1.
+        See <a href="qrc:/resources/help/settings/metronome_setting_help.html">Metronome Settings</a><br>
+        <br></li>
+
+        <li><b>muted: bool</b><br>
+        The <a href="qrc:/resources/help/settings/mute_setting_help.html">Muted</a> Engine setting flag.<br>
+        <br></li>
+
+        <li><b>offline: bool</b><br>
+        The <a href="qrc:/resources/help/settings/offline_setting_help.html">Offline Mode</a> Engine setting flag.
+        In offline mode, remote Resources will not be loaded.<br>
+        <br></li>
+
+        <li><b>pauseWhenInactive: bool</b><br>
+        The <a href="qrc:/resources/help/settings/pausewheninactive_setting_help.html">Pause Player when app is not active</a> Engine setting flag.<br>
+        <br></li>
+
+        <li><b>platform: string</b><br>
+        The platform string the Engine is running on crrently.
+        Is one of:<br>
+          <ul>
+            <li>Android: Running on Android devices</li>
+            <li>Windows: Running on Windows OS</li>
+            <li>Linux: Running on any Linux OS except Android</li>
+          </ul><br>
+        <br></li>
+
+        <li><b>playerAntialiasing: bool</b><br>
+        Flag if anti-aliasing in the player is active.
+        See <a href="qrc:/resources/help/settings/playersettings_setting_help.html">Player Settings</a><br>
+        <br></li>
+
+        <li><b>playerDropShadow: bool</b><br>
+        Flag if drop-shadows in the player are active.
+        See <a href="qrc:/resources/help/settings/playersettings_setting_help.html">Player Settings</a><br>
+        <br></li>
+
+        <li><b>playerImageMipMap: bool</b><br>
+        Flag if mip-mapping for Images in the player is active.
+        See <a href="qrc:/resources/help/settings/playersettings_setting_help.html">Player Settings</a><br>
+        <br></li>
+
+        <li><b>playerImageSmooth: bool</b><br>
+        Flag if smooth scaling for Images in the player is active.
+        See <a href="qrc:/resources/help/settings/playersettings_setting_help.html">Player Settings</a><br>
+        <br></li>
+
+        <li><b>preferedEditorLayout: int</b><br>
+        The currently set <a href="qrc:/resources/help/settings/editorsettings_setting_help.html">Editor Layout</a>.
+        Is one of:<br>
+          <ul>
+            <li>eNone (0): Not set yet. The default (eModern) is used.</li>
+            <li>eClassic (1): The old Layout split into two sides.</li>
+            <li>eModern (2): The new Layout split into two sides with the Resource Manager always at the bottom.</li>
+            <li>eCompact (3): the compact mobile layout with only one open view.</li>
+          </ul><br>
+        <br></li>
+
+        <li><b>pushNotifications: bool</b><br>
+        Checks if <a href="qrc:/resources/help/settings/push_notification_setting_help.html">Push Notifications</a> are active.<br>
+        <br></li>
+
+        <li><b>resolution: size</b><br>
+        The <a href="qrc:/resources/help/settings/resolution_setting_help.html">Window Resolution</a> of the Engine.<br>
+        <br></li>
+
+        <li><b>style: string</b><br>
+        The <a href="qrc:/resources/help/settings/style_setting_help.html">Style</a> of the Engine.<br>
+        <br></li>
+
+        <li><b>styleHotLoad: bool</b><br>
+        The <a href="qrc:/resources/help/settings/hotloadstyle_setting_help.html">Style Hotload</a> flag.<br>
+        <br></li>
+
+        <li><b>version: int</b><br>
+        The <a href="qrc:/resources/help/editor/projectsettings/engineversion_help.html">Engine Version</a>.<br>
+        <br></li>
+
+        <li><b>volume: real</b><br>
+        The global <a href="qrc:/resources/help/settings/volume_setting_help.html">Volume</a> of the Engine.<br>
+        <br></li>
+
+        <li><b>windowMode: int</b><br>
+        the Engine window's <a href="qrc:/resources/help/settings/window_mode_setting_help.html">Window Mode</a>.<br>
+        Is one of:<br>
+          <ul>
+            <li>eFullscreen (0): Application fills a screen.</li>
+            <li>eBorderless (1): Application respects the selected <a href="qrc:/resources/help/settings/resolution_setting_help.html">Resolution</a> but is displayed without a header.</li>
+            <li>eWindowed (2): Application is shown as moveable, resizable window and respects the selected <a href="qrc:/resources/help/settings/resolution_setting_help.html">Resolution</a>.</li>
+          </ul><br>
+        <br></li>
       </ul>
     </p>
 
