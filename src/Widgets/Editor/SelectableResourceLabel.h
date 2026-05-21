@@ -24,11 +24,11 @@ public:
 
   void SetCurrentProject(const tspProject& spProj);
   void SetResourceModel(QPointer<QAbstractItemModel> pResourceModel);
+  void SetResourceFetcher(CResourceDetailViewFetcherThread* pFetcher);
   QString CurrentResource() const;
   void SetCurrentResource(const QString& sResource);
   const QIcon& UnsetIcon() const;
   void SetUnsetIcon(const QIcon& icon);
-  std::shared_ptr<CResourceDetailViewFetcherThread> ResourceFetcher() const;
 
 signals:
   void SignalResourcePicked(const QString& sOld, const QString& sNew);
@@ -39,14 +39,13 @@ protected slots:
 
 protected:
   bool eventFilter(QObject* pObj, QEvent* pEvt) override;
-  void CreateResourceFetcher();
   void OpenSelectResource(const QPoint& createPoint);
   void UpdateResource();
 
 private:
-  std::unique_ptr<CThreadedSystem> m_spThreadedLoader;
   tspProject                       m_spCurrentProject;
   QPointer<CResourceTreeItemModel> m_pResourceModel;
+  QPointer<CResourceDetailViewFetcherThread>m_pFetcher = nullptr;
   QIcon                            m_unsetIcon;
   QString                          m_sCurrentResource;
 };

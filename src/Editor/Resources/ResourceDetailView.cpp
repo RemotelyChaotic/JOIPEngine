@@ -304,7 +304,6 @@ private:
 //
 CResourceDetailView::CResourceDetailView(QWidget* pParent) :
   QListView(pParent),
-  m_spThreadedLoader(std::make_unique<CThreadedSystem>("ResourceDetailViewFetcher")),
   m_spProject(nullptr),
   m_imageCache(),
   m_bReadOnly(false),
@@ -313,8 +312,6 @@ CResourceDetailView::CResourceDetailView(QWidget* pParent) :
   m_iconLayout(":/resources/style/img/ButtonLayout.png"),
   m_iconSequence(":/resources/style/img/IconSequence.png")
 {
-  m_spThreadedLoader->RegisterObject<CResourceDetailViewFetcherThread>();
-
   setWrapping(true);
   setBatchSize(10);
   setLayoutMode(QListView::Batched);
@@ -325,14 +322,6 @@ CResourceDetailView::CResourceDetailView(QWidget* pParent) :
 
   setItemDelegate(new CResourceDetailViewDelegate(this));
   connect(this, &QListView::doubleClicked, this, &CResourceDetailView::SlotDoubleClicked);
-
-  connect(ResourceFetcher().get(), &CResourceDetailViewFetcherThread::LoadStarted,
-          this, [this](){
-    dynamic_cast<CResourceDetailViewDelegate*>(itemDelegate())->StartLoading();
-  }, Qt::QueuedConnection);
-  connect(ResourceFetcher().get(),
-          qOverload<const QString&, const QPixmap&>(&CResourceDetailViewFetcherThread::LoadFinished),
-          this, &CResourceDetailView::SlotResourceLoadFinished, Qt::QueuedConnection);
 }
 
 CResourceDetailView::~CResourceDetailView()
@@ -342,11 +331,22 @@ CResourceDetailView::~CResourceDetailView()
 
 //----------------------------------------------------------------------------------------
 //
-void CResourceDetailView::Initialize(tspProject spProject)
+void CResourceDetailView::Initialize(tspProject spProject, QPointer<CResourceDetailViewFetcherThread> pFetcher)
 {
+  m_pResourceFetcher = pFetcher;
   m_spProject = spProject;
-  bool bOk = QMetaObject::invokeMethod(ResourceFetcher().get(), "Initialize", Qt::BlockingQueuedConnection);
-  assert(bOk); Q_UNUSED(bOk);
+
+
+  if (nullptr != m_pResourceFetcher)
+  {
+    m_vResourceConns.push_back(connect(m_pResourceFetcher, &CResourceDetailViewFetcherThread::LoadStarted,
+            this, [this](){
+              dynamic_cast<CResourceDetailViewDelegate*>(itemDelegate())->StartLoading();
+            }, Qt::QueuedConnection));
+    m_vResourceConns.push_back(connect(m_pResourceFetcher,
+            qOverload<const QString&, const QPixmap&>(&CResourceDetailViewFetcherThread::LoadFinished),
+            this, &CResourceDetailView::SlotResourceLoadFinished, Qt::QueuedConnection));
+  }
 }
 
 //----------------------------------------------------------------------------------------
@@ -354,10 +354,16 @@ void CResourceDetailView::Initialize(tspProject spProject)
 void CResourceDetailView::DeInitilaze()
 {
   // reset model
-  ResourceFetcher()->AbortLoading();
+  if (nullptr != m_pResourceFetcher)
+  {
+    m_pResourceFetcher->AbortLoading();
+    for (const auto& conn : m_vResourceConns)
+    {
+      disconnect(conn);
+    }
+    m_vResourceConns.clear();
+  }
   m_imageCache.clear();
-  bool bOk = QMetaObject::invokeMethod(ResourceFetcher().get(), "Deinitialize", Qt::BlockingQueuedConnection);
-  assert(bOk); Q_UNUSED(bOk);
   setRootIndex(QModelIndex());
   m_spProject = nullptr;
 }
@@ -484,7 +490,10 @@ void CResourceDetailView::RequestResource(const QModelIndex& index)
       qint32 type = varType.toInt();
       if (EResourceType::eImage == type || EResourceType::eMovie == type)
       {
-        ResourceFetcher()->RequestResources(iProject, {pModel->data(idxName).toString()}, iconSize());
+        if (nullptr != m_pResourceFetcher)
+        {
+          m_pResourceFetcher->RequestResources(iProject, {pModel->data(idxName).toString()}, iconSize());
+        }
       }
     }
   }
@@ -558,7 +567,7 @@ void CResourceDetailView::SlotDoubleClicked(const QModelIndex& index)
 //
 void CResourceDetailView::SlotResourceLoadFinished(const QString& sResource, const QPixmap& pixmap)
 {
-  if (!ResourceFetcher()->IsLoading())
+  if (nullptr != m_pResourceFetcher && !m_pResourceFetcher->IsLoading())
   {
     dynamic_cast<CResourceDetailViewDelegate*>(itemDelegate())->StopLoading();
   }
@@ -602,7 +611,10 @@ void CResourceDetailView::dataChanged(const QModelIndex& topLeft,
     }
   }
 
-  ResourceFetcher()->RequestResources(iProject, vsResourcesToRequest, iconSize());
+  if (nullptr != m_pResourceFetcher)
+  {
+    m_pResourceFetcher->RequestResources(iProject, vsResourcesToRequest, iconSize());
+  }
 }
 
 //----------------------------------------------------------------------------------------
@@ -620,7 +632,10 @@ bool CResourceDetailView::edit(const QModelIndex& index, EditTrigger trigger, QE
 //
 void CResourceDetailView::RequestResourcesFromCurrentFolder()
 {
-  ResourceFetcher()->AbortLoading();
+  if (nullptr != m_pResourceFetcher)
+  {
+    m_pResourceFetcher->AbortLoading();
+  }
   m_imageCache.clear();
 
   qint32 iProject = -1;
@@ -653,15 +668,11 @@ void CResourceDetailView::RequestResourcesFromCurrentFolder()
       }
     }
 
-    ResourceFetcher()->RequestResources(iProject, vsResourcesToRequest, iconSize());
+    if (nullptr != m_pResourceFetcher)
+    {
+      m_pResourceFetcher->RequestResources(iProject, vsResourcesToRequest, iconSize());
+    }
   }
-}
-
-//----------------------------------------------------------------------------------------
-//
-std::shared_ptr<CResourceDetailViewFetcherThread> CResourceDetailView::ResourceFetcher() const
-{
-  return std::static_pointer_cast<CResourceDetailViewFetcherThread>(m_spThreadedLoader->Get());
 }
 
 // private class CResourceDetailViewDelegate

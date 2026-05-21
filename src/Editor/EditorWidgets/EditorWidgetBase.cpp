@@ -7,6 +7,7 @@
 #include "Editor/DialogueEditor/DialogueEditorTreeModel.h"
 #include "Editor/NodeEditor/NodeEditorFlowScene.h"
 #include "Editor/Project/KinkTreeModel.h"
+#include "Editor/Resources/ResourceDetailViewFetcherThread.h"
 #include "Editor/Resources/ResourceTreeItemModel.h"
 
 #include <QUndoStack>
@@ -89,6 +90,13 @@ QPointer<CNodeEditorFlowScene> CEditorWidgetBase::FlowSceneModel() const
 QPointer<CKinkTreeModel> CEditorWidgetBase::KinkModel() const
 {
   return  m_pEditorModel->KinkTreeModel();
+}
+
+//----------------------------------------------------------------------------------------
+//
+QPointer<CResourceDetailViewFetcherThread> CEditorWidgetBase::ResourceFetcher() const
+{
+  return m_pEditorModel->ResourceFetcher();
 }
 
 //----------------------------------------------------------------------------------------

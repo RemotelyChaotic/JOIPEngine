@@ -7,6 +7,8 @@
 
 #include "EditorJobs/IEditorJobStateListener.h"
 
+#include "Editor/Resources/ResourceDetailViewFetcherThread.h"
+
 #include "Editor/NodeEditor/NodeEditorFlowScene.h"
 #include "Editor/NodeEditor/NodeEditorRegistry.h"
 #include "Editor/NodeEditor/UndoSceneNodeModel.h"
@@ -54,6 +56,7 @@ CEditorModel::CEditorModel(QWidget* pParent) :
   m_spSettings(CApplication::Instance()->Settings()),
   m_spJobWorkerSystem(std::make_shared<CThreadedSystem>("EditorJobWorker")),
   m_spDialogueModel(std::make_shared<CDialogueEditorTreeModel>(pParent)),
+  m_spThreadedResourceLoader(std::make_unique<CThreadedSystem>("EditorResourceFetcher")),
   m_spCurrentProject(nullptr),
   m_wpDbManager(CApplication::Instance()->System<CDatabaseManager>()),
   m_vwpTutorialStateSwitchHandlers(),
@@ -63,6 +66,10 @@ CEditorModel::CEditorModel(QWidget* pParent) :
   m_bReadOnly(false)
 {
   m_spJobWorkerSystem->RegisterObject<CEditorJobWorker>();
+  m_spThreadedResourceLoader->RegisterObject<CResourceDetailViewFetcherThread>();
+
+  bool bOk = QMetaObject::invokeMethod(ResourceFetcher(), "Initialize", Qt::BlockingQueuedConnection);
+  assert(bOk); Q_UNUSED(bOk);
 
   m_spEditorCompleterModel->RegisterFileProcessor<CScriptCompleterFileProcessorJs>(
       SScriptDefinitionData::c_sScriptTypeJs);
@@ -100,6 +107,8 @@ CEditorModel::CEditorModel(QWidget* pParent) :
 
 CEditorModel::~CEditorModel()
 {
+  bool bOk = QMetaObject::invokeMethod(ResourceFetcher(), "Deinitialize", Qt::BlockingQueuedConnection);
+  assert(bOk); Q_UNUSED(bOk);
 }
 
 //----------------------------------------------------------------------------------------
@@ -163,6 +172,13 @@ CEditorEditableFileModel* CEditorModel::EditableFileModel() const
 CScriptEditorCompleterModel* CEditorModel::EditorCompleterModel() const
 {
   return m_spEditorCompleterModel.get();
+}
+
+//----------------------------------------------------------------------------------------
+//
+CResourceDetailViewFetcherThread* CEditorModel::ResourceFetcher() const
+{
+  return std::static_pointer_cast<CResourceDetailViewFetcherThread>(m_spThreadedResourceLoader->Get()).get();
 }
 
 //----------------------------------------------------------------------------------------

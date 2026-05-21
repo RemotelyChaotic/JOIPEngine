@@ -7,6 +7,7 @@
 #include <memory>
 
 class QAbstractItemModel;
+class CResourceDetailViewFetcherThread;
 namespace Ui {
   class CSceneNodeModelWidget;
 }
@@ -25,6 +26,7 @@ public:
   void SetScript(const QString& sName);
   void SetLayout(const QString& sName);
   void SetResourceItemModel(QAbstractItemModel* pModel);
+  void SetResourceFetcher(CResourceDetailViewFetcherThread* pFetcher);
   void SetSceneMode(ESceneMode mode);
   void SetTileResource(const QString& sName);
 

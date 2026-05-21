@@ -12,6 +12,7 @@
 #include <QWidget>
 
 class CShortcutButton;
+class CResourceDetailViewFetcherThread;
 class CResourceTreeItemModel;
 class CSelectableResourceLabel;
 typedef std::shared_ptr<struct SProject> tspProject;
@@ -22,6 +23,7 @@ class CAchievementWidget : public QFrame
 
 public:
   explicit CAchievementWidget(const tspProject& spProj, QPointer<QAbstractItemModel> pResourceModel,
+                              QPointer<CResourceDetailViewFetcherThread> pFetcher,
                               QWidget *parent = nullptr);
   ~CAchievementWidget() override;
 

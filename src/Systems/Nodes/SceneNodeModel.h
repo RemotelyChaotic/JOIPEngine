@@ -7,6 +7,7 @@
 #include <memory>
 
 class CDatabaseManager;
+class CResourceDetailViewFetcherThread;
 class CSceneTranstitionData;
 class CSceneNodeModelWidget;
 
@@ -35,6 +36,7 @@ public:
   QString SceneName() { return m_sSceneName; }
 
   void SetResourceItemModel(QAbstractItemModel* pModel);
+  void SetResourceFetcher(CResourceDetailViewFetcherThread* pFetcher);
 
   static QString Name() { return staticCaption(); }
   static QString staticCaption() { return QStringLiteral("Scene"); }
@@ -80,6 +82,7 @@ protected slots:
 protected:
   virtual void ProjectSetImpl() {}
   virtual void ResourceItemModelSetImpl(QAbstractItemModel*){}
+  virtual void ResourceFetcherSetImpl(CResourceDetailViewFetcherThread*){}
   virtual void SlotCanStartHereChangedImpl(bool bValue);
   virtual void SlotNameChangedImpl(const QString&);
   virtual void SlotLayoutChangedImpl(const QString&);
@@ -129,6 +132,7 @@ public:
 protected:
   void ProjectSetImpl() override;
   void ResourceItemModelSetImpl(QAbstractItemModel* pModel) override;
+  void ResourceFetcherSetImpl(CResourceDetailViewFetcherThread* pFetcher) override;
   void SlotCanStartHereChangedImpl(bool bValue) override;
   void SlotNameChangedImpl(const QString& sName) override;
   void SlotLayoutChangedImpl(const QString& sName) override;

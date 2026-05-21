@@ -17,6 +17,7 @@ class CDialogueEditorTreeModel;
 class CNodeEditorFlowScene;
 class CEditorModel;
 class CKinkTreeModel;
+class CResourceDetailViewFetcherThread;
 class CResourceTreeItemModel;
 class CEditorEditableFileModel;
 class QUndoStack;
@@ -64,6 +65,7 @@ protected:
   QPointer<CEditorModel> EditorModel() const;
   QPointer<CNodeEditorFlowScene> FlowSceneModel() const;
   QPointer<CKinkTreeModel> KinkModel() const;
+  QPointer<CResourceDetailViewFetcherThread> ResourceFetcher() const;
   QPointer<CResourceTreeItemModel> ResourceTreeModel() const;
   QPointer<CEditorEditableFileModel> EditableFileModel() const;
   QPointer<QUndoStack> UndoStack() const;

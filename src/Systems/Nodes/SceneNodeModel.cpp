@@ -128,6 +128,13 @@ void CSceneNodeModel::SetResourceItemModel(QAbstractItemModel* pModel)
 
 //----------------------------------------------------------------------------------------
 //
+void CSceneNodeModel::SetResourceFetcher(CResourceDetailViewFetcherThread* pFetcher)
+{
+  ResourceFetcherSetImpl(pFetcher);
+}
+
+//----------------------------------------------------------------------------------------
+//
 QString CSceneNodeModel::caption() const
 {
   return staticCaption();
@@ -747,6 +754,16 @@ void CSceneNodeModelWithWidget::ResourceItemModelSetImpl(QAbstractItemModel* pMo
   if (nullptr != m_pWidget)
   {
     m_pWidget->SetResourceItemModel(pModel);
+  }
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CSceneNodeModelWithWidget::ResourceFetcherSetImpl(CResourceDetailViewFetcherThread* pFetcher)
+{
+  if (nullptr != m_pWidget)
+  {
+    m_pWidget->SetResourceFetcher(pFetcher);
   }
 }
 

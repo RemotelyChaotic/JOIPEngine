@@ -19,6 +19,7 @@ class CDialogueEditorTreeModel;
 class CEditorJobWorker;
 class CKinkTreeModel;
 class CResourceTreeItemModel;
+class CResourceDetailViewFetcherThread;
 class CScriptEditorCompleterModel;
 class CEditorEditableFileModel;
 class CSettings;
@@ -53,6 +54,7 @@ public:
   CResourceTreeItemModel* ResourceTreeModel() const;
   CEditorEditableFileModel* EditableFileModel() const;
   CScriptEditorCompleterModel* EditorCompleterModel() const;
+  CResourceDetailViewFetcherThread* ResourceFetcher() const;
   QString ScriptTypeFilterForNewScripts() const;
   QUndoStack* UndoStack() const;
 
@@ -112,6 +114,7 @@ private:
   std::shared_ptr<CSettings>                                  m_spSettings;
   std::shared_ptr<CThreadedSystem>                            m_spJobWorkerSystem;
   std::shared_ptr<CDialogueEditorTreeModel>                   m_spDialogueModel;
+  std::unique_ptr<CThreadedSystem>                            m_spThreadedResourceLoader;
   tspProject                                                  m_spCurrentProject;
   std::weak_ptr<CDatabaseManager>                             m_wpDbManager;
   std::vector<std::weak_ptr<ITutorialStateSwitchHandler>>     m_vwpTutorialStateSwitchHandlers;

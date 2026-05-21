@@ -1,10 +1,10 @@
 #include "SelectableResourceLabel.h"
 #include "Application.h"
 
+#include "Editor/Resources/ResourceDetailViewFetcherThread.h"
 #include "Editor/Resources/ResourceTreeItem.h"
 #include "Editor/Resources/ResourceTreeItemModel.h"
 #include "Editor/Resources/ResourceTreeItemSortFilterProxyModel.h"
-#include "Editor/Resources/ResourceDetailViewFetcherThread.h"
 
 #include "Systems/DatabaseManager.h"
 
@@ -19,8 +19,7 @@
 #include <QWidgetAction>
 
 CSelectableResourceLabel::CSelectableResourceLabel(QWidget* pParent) :
-  QLabel{pParent},
-  m_spThreadedLoader(nullptr)
+  QLabel{pParent}
 {
   installEventFilter(this);
   setScaledContents(false);
@@ -43,6 +42,25 @@ void CSelectableResourceLabel::SetCurrentProject(const tspProject& spProj)
 void CSelectableResourceLabel::SetResourceModel(QPointer<QAbstractItemModel> pResourceModel)
 {
   m_pResourceModel = dynamic_cast<CResourceTreeItemModel*>(pResourceModel.data());
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CSelectableResourceLabel::SetResourceFetcher(CResourceDetailViewFetcherThread* pFetcher)
+{
+  if (nullptr != m_pFetcher)
+  {
+    disconnect(m_pFetcher,
+            qOverload<const QString&,const QPixmap&>(&CResourceDetailViewFetcherThread::LoadFinished),
+            this, &CSelectableResourceLabel::SlotResourceLoadFinished);
+  }
+  m_pFetcher = pFetcher;
+  if (nullptr != m_pFetcher)
+  {
+    connect(m_pFetcher,
+            qOverload<const QString&,const QPixmap&>(&CResourceDetailViewFetcherThread::LoadFinished),
+            this, &CSelectableResourceLabel::SlotResourceLoadFinished);
+  }
 }
 
 //----------------------------------------------------------------------------------------
@@ -81,26 +99,13 @@ void CSelectableResourceLabel::SetUnsetIcon(const QIcon& icon)
 
 //----------------------------------------------------------------------------------------
 //
-std::shared_ptr<CResourceDetailViewFetcherThread> CSelectableResourceLabel::ResourceFetcher() const
-{
-  if (nullptr != m_spThreadedLoader)
-  {
-    return std::static_pointer_cast<CResourceDetailViewFetcherThread>(m_spThreadedLoader->Get());
-  }
-  return nullptr;
-}
-
-//----------------------------------------------------------------------------------------
-//
 void CSelectableResourceLabel::SlotResourceLoadFinished(const QString& sName,
                                                         const QPixmap& pixmap)
 {
-  Q_UNUSED(sName)
-  if (!pixmap.isNull())
+  if (!pixmap.isNull() && m_sCurrentResource == sName)
   {
     setPixmap(pixmap);
   }
-  m_spThreadedLoader = nullptr;
 }
 
 //----------------------------------------------------------------------------------------
@@ -119,17 +124,6 @@ bool CSelectableResourceLabel::eventFilter(QObject* pObj, QEvent* pEvt)
     }
   }
   return false;
-}
-
-//----------------------------------------------------------------------------------------
-//
-void CSelectableResourceLabel::CreateResourceFetcher()
-{
-  m_spThreadedLoader = std::make_unique<CThreadedSystem>("ResourceToolTipFetcher");
-  m_spThreadedLoader->RegisterObject<CResourceDetailViewFetcherThread>();
-  connect(ResourceFetcher().get(),
-          qOverload<const QString&,const QPixmap&>(&CResourceDetailViewFetcherThread::LoadFinished),
-          this, &CSelectableResourceLabel::SlotResourceLoadFinished);
 }
 
 //----------------------------------------------------------------------------------------
@@ -223,17 +217,15 @@ void CSelectableResourceLabel::UpdateResource()
 
   if (-1 != iId && !m_sCurrentResource.isEmpty())
   {
-    if (!ResourceFetcher())
+    if (nullptr != m_pFetcher)
     {
-      CreateResourceFetcher();
+      if (m_pFetcher->IsLoading())
+      {
+        m_pFetcher->AbortLoading();
+      }
+      m_pFetcher->RequestResources(iId, QStringList() << m_sCurrentResource,
+                                   size());
     }
-
-    if (ResourceFetcher()->IsLoading())
-    {
-      ResourceFetcher()->AbortLoading();
-    }
-    ResourceFetcher()->RequestResources(iId, QStringList() << m_sCurrentResource,
-                                        size());
     return;
   }
 

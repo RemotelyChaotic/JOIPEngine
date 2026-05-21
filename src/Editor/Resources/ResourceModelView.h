@@ -14,6 +14,7 @@
 class CCompressJobSettingsOverlay;
 class CEditorModel;
 class CProgressBar;
+class CResourceDetailViewFetcherThread;
 class CResourceTreeItemModel;
 class CResourceTreeItemSortFilterProxyModel;
 namespace Ui {
@@ -45,7 +46,8 @@ public:
   explicit CResourceModelView(QWidget *parent = nullptr);
   ~CResourceModelView();
 
-  void Initialize(CEditorModel* pEditorModel, QUndoStack* pStack, CResourceTreeItemModel* pModel);
+  void Initialize(CEditorModel* pEditorModel, QUndoStack* pStack, CResourceTreeItemModel* pModel,
+                  QPointer<CResourceDetailViewFetcherThread> pFetcher);
   void ProjectLoaded(tspProject spCurrentProject, bool bReadOnly);
   void ProjectUnloaded();
   void CdUp();
@@ -100,6 +102,7 @@ private:
   QPointer<CProgressBar>                          m_pProgressBar;
   QPointer<CCompressJobSettingsOverlay>           m_pCompressJobOverlay;
   QPointer<CEditorModel>                          m_pEditorModel;
+  QPointer<CResourceDetailViewFetcherThread>      m_pFetcher;
   QPointer<CResourceTreeItemSortFilterProxyModel> m_pProxy;
   QPointer<CResourceTreeItemModel>                m_pModel;
   QPointer<QUndoStack>                            m_pStack;

@@ -9,6 +9,7 @@
 #include "Editor/NodeEditor/NodeEditorFlowView.h"
 #include "Editor/NodeEditor/NodeEditorFlowScene.h"
 #include "Editor/NodeEditor/UndoPathSplitterModel.h"
+#include "Editor/Resources/ResourceDetailViewFetcherThread.h"
 #include "Editor/Resources/ResourceTreeItemModel.h"
 #include "Editor/Tutorial/SceneNodeWidgetTutorialStateSwitchHandler.h"
 
@@ -581,6 +582,7 @@ void CEditorSceneNodeWidget::SlotNodeCreated(Node &n)
   {
     pSceneModel->SetProject(m_spCurrentProject);
     pSceneModel->SetResourceItemModel(ResourceTreeModel());
+    pSceneModel->SetResourceFetcher(ResourceFetcher());
     connect(pSceneModel, &CSceneNodeModel::SignalAddScriptFileRequested,
             this, &CEditorSceneNodeWidget::SlotAddNewScriptFileToScene, Qt::UniqueConnection);
     connect(pSceneModel, &CSceneNodeModel::SignalAddLayoutFileRequested,

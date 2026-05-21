@@ -105,6 +105,13 @@ void CSceneNodeModelWidget::SetResourceItemModel(QAbstractItemModel* pModel)
 
 //----------------------------------------------------------------------------------------
 //
+void CSceneNodeModelWidget::SetResourceFetcher(CResourceDetailViewFetcherThread* pFetcher)
+{
+  m_spUi->FileIcon->SetResourceFetcher(pFetcher);
+}
+
+//----------------------------------------------------------------------------------------
+//
 void CSceneNodeModelWidget::SetSceneMode(ESceneMode mode)
 {
   QSignalBlocker blocker(m_spUi->pSceneModeComboBox);

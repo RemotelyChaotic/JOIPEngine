@@ -1056,6 +1056,7 @@ void CEditorProjectSettingsWidget::AddAchievement(const SSaveDataData& saveData,
   }
 
   CAchievementWidget* pRoot = new CAchievementWidget(m_spCurrentProject, ResourceTreeModel().data(),
+                                                     ResourceFetcher(),
                                                      m_spUi->pAchievementList);
   pRoot->SetAchievementData(saveData);
   connect(pRoot, &CAchievementWidget::SignalAchievementChanged, this,

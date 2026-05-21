@@ -23,7 +23,7 @@ public:
   explicit CResourceDetailView(QWidget* pParent = nullptr);
   ~CResourceDetailView();
 
-  void Initialize(tspProject spProject);
+  void Initialize(tspProject spProject, QPointer<CResourceDetailViewFetcherThread> pFetcher);
   void DeInitilaze();
 
   void SetIconFile(const QIcon& icon);
@@ -61,10 +61,10 @@ protected:
 
 private:
   void RequestResourcesFromCurrentFolder();
-  std::shared_ptr<CResourceDetailViewFetcherThread> ResourceFetcher() const;
 
-  std::unique_ptr<CThreadedSystem>            m_spThreadedLoader;
   tspProject                                  m_spProject;
+  QPointer<CResourceDetailViewFetcherThread>  m_pResourceFetcher;
+  std::vector<QMetaObject::Connection>        m_vResourceConns;
   std::map<QString, QPixmap>                  m_imageCache;
   bool                                        m_bReadOnly;
   QIcon                                       m_iconFile;

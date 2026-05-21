@@ -77,7 +77,8 @@ CResourceModelView::~CResourceModelView()
 //
 void CResourceModelView::Initialize(CEditorModel* pEditorModel,
                                     QUndoStack* pStack,
-                                    CResourceTreeItemModel* pModel)
+                                    CResourceTreeItemModel* pModel,
+                                    QPointer<CResourceDetailViewFetcherThread> pFetcher)
 {
   m_bInitializing = true;
 
@@ -91,6 +92,7 @@ void CResourceModelView::Initialize(CEditorModel* pEditorModel,
   m_pEditorModel = pEditorModel;
   m_pStack = pStack;
   m_pModel = pModel;
+  m_pFetcher = pFetcher;
 
   m_pProxy->sort(resource_item::c_iColumnName, Qt::AscendingOrder);
   m_pProxy->setFilterRegExp(QRegExp(".*", Qt::CaseInsensitive, QRegExp::RegExp));
@@ -153,7 +155,7 @@ void CResourceModelView::ProjectLoaded(tspProject spCurrentProject, bool bReadOn
           bReadOnly ? QAbstractItemView::NoEditTriggers :
                       QAbstractItemView::DoubleClicked | QAbstractItemView::EditKeyPressed);
     m_spUi->pDetailView->SetReadOnly(bReadOnly);
-    m_spUi->pDetailView->Initialize(m_spCurrentProject);
+    m_spUi->pDetailView->Initialize(m_spCurrentProject, m_pFetcher);
   }
 }
 

@@ -1,5 +1,7 @@
 #include "AchievementWidget.h"
 
+#include "Editor/Resources/ResourceDetailViewFetcherThread.h"
+
 #include "Systems/Database/Project.h"
 
 #include "Utils/UndoRedoFilter.h"
@@ -25,6 +27,7 @@ const char CAchievementWidget::c_sAchievementItemRootWidgetProperty[] = "Achieve
 //
 CAchievementWidget::CAchievementWidget(const tspProject& spProj,
                                        QPointer<QAbstractItemModel> pResourceModel,
+                                       QPointer<CResourceDetailViewFetcherThread> pFetcher,
                                        QWidget *parent) :
   QFrame{parent},
   m_spCurrentProject(spProj)
@@ -44,6 +47,7 @@ CAchievementWidget::CAchievementWidget(const tspProject& spProj,
   m_pButtonIcon->setToolTip(tr("Add resource icon"));
   m_pButtonIcon->SetCurrentProject(spProj);
   m_pButtonIcon->SetResourceModel(pResourceModel);
+  m_pButtonIcon->SetResourceFetcher(pFetcher);
   connect(m_pButtonIcon, &CSelectableResourceLabel::SignalResourcePicked, this,
           [this](const QString& /*sOld*/, const QString& sNew){
             m_pButtonIcon->SetCurrentResource(sNew);

@@ -105,7 +105,8 @@ void CEditorResourceWidget::Initialize()
 
   m_wpDbManager = CApplication::Instance()->System<CDatabaseManager>();
 
-  m_spUi->pResourceModelView->Initialize(EditorModel(), UndoStack(), ResourceTreeModel());
+  m_spUi->pResourceModelView->Initialize(EditorModel(), UndoStack(), ResourceTreeModel(),
+                                         ResourceFetcher());
 
   m_spWebOverlay->Hide();
   m_spTagsOverlay->Hide();
