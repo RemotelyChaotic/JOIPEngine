@@ -17,7 +17,7 @@ class CDatabaseManager;
 class CSettings;
 class CTagsEditorOverlay;
 class CWebResourceOverlay;
-class QNetworkAccessManager;
+class CWebResourceDownloadManager;
 struct SProject;
 typedef std::shared_ptr<SProject> tspProject;
 
@@ -63,10 +63,7 @@ protected slots:
   void SlotTitleCardButtonClicked();
   void SlotTagsButtonClicked();
   void SlotMapButtonClicked();
-  void SlotWebResourceSelected(const QString& sResource);
   void SlotWebSourceSelected(const QString& sResource);
-  void SlotNetworkReplyError(QNetworkReply::NetworkError code);
-  void SlotNetworkReplyFinished();
   void SlotViewResourceSelected(const QString& sResource, bool bSpontanious);
 
 private:
@@ -74,14 +71,13 @@ private:
 
   std::unique_ptr<CWebResourceOverlay>                 m_spSourceOverlay;
   std::unique_ptr<CWebResourceOverlay>                 m_spWebOverlay;
-  std::unique_ptr<QNetworkAccessManager>               m_spNAManager;
   std::unique_ptr<CTagsEditorOverlay>                  m_spTagsOverlay;
   std::shared_ptr<Ui::CEditorResourceWidget>           m_spUi;
+  std::shared_ptr<CWebResourceDownloadManager>         m_spDownloadManager;
   std::shared_ptr<CResourceTutorialStateSwitchHandler> m_spTutorialStateSwitchHandler;
   std::shared_ptr<CSettings>                           m_spSettings;
   tspProject                                           m_spCurrentProject;
   std::weak_ptr<CDatabaseManager>                      m_wpDbManager;
-  QPointer<QNetworkReply>                              m_pResponse;
 };
 
 #endif // EDITORRESOURCEWIDGET_H

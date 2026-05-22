@@ -1,8 +1,10 @@
 #include "EditorResourceWidget.h"
 #include "Application.h"
+
 #include "Editor/EditorActionBar.h"
 #include "Editor/EditorModel.h"
 #include "Editor/EditorWidgetTypes.h"
+
 #include "Editor/Resources/CommandAddResource.h"
 #include "Editor/Resources/CommandChangeCurrentResource.h"
 #include "Editor/Resources/CommandChangeFilter.h"
@@ -13,12 +15,17 @@
 #include "Editor/Resources/ResourceTreeItemModel.h"
 #include "Editor/Resources/ResourceTreeItemSortFilterProxyModel.h"
 #include "Editor/Resources/TagsEditorOverlay.h"
+#include "Editor/Resources/WebResourceDownloadManager.h"
 #include "Editor/Resources/WebResourceOverlay.h"
+
 #include "Editor/Tutorial/ResourceTutorialStateSwitchHandler.h"
+
 #include "Systems/DatabaseManager.h"
 #include "Systems/HelpFactory.h"
 #include "Systems/Database/Project.h"
+
 #include "Utils/UndoRedoFilter.h"
+
 #include "Widgets/HelpOverlay.h"
 #include "Widgets/ResourceDisplayWidget.h"
 
@@ -57,13 +64,12 @@ CEditorResourceWidget::CEditorResourceWidget(QWidget* pParent) :
   CEditorWidgetBase(pParent),
   m_spSourceOverlay(std::make_unique<CWebResourceOverlay>(this)),
   m_spWebOverlay(std::make_unique<CWebResourceOverlay>(this)),
-  m_spNAManager(std::make_unique<QNetworkAccessManager>()),
   m_spTagsOverlay(std::make_unique<CTagsEditorOverlay>(this)),
   m_spUi(std::make_shared<Ui::CEditorResourceWidget>()),
+  m_spDownloadManager(std::make_shared<CWebResourceDownloadManager>(this)),
   m_spTutorialStateSwitchHandler(nullptr),
   m_spSettings(CApplication::Instance()->Settings()),
-  m_spCurrentProject(nullptr),
-  m_pResponse(nullptr)
+  m_spCurrentProject(nullptr)
 {
   m_spUi->setupUi(this);
   connect(m_spUi->pResourceModelView, &CResourceModelView::SignalResourceSelected,
@@ -72,22 +78,12 @@ CEditorResourceWidget::CEditorResourceWidget(QWidget* pParent) :
           this, &CEditorResourceWidget::SignalProjectEdited);
   connect(m_spSourceOverlay.get(), &CWebResourceOverlay::SignalResourceSelected,
           this, &CEditorResourceWidget::SlotWebSourceSelected);
-  connect(m_spWebOverlay.get(), &CWebResourceOverlay::SignalResourceSelected,
-          this, &CEditorResourceWidget::SlotWebResourceSelected);
   connect(m_spTagsOverlay.get(), &CTagsEditorOverlay::SignalTagsChanged,
           this, &CEditorResourceWidget::SignalProjectEdited);
 }
 
 CEditorResourceWidget::~CEditorResourceWidget()
 {
-  if (nullptr != m_pResponse)
-  {
-    m_pResponse->abort();
-    m_pResponse->disconnect();
-    delete m_pResponse;
-    m_pResponse = nullptr;
-  }
-
   if (nullptr != m_spWebOverlay) m_spWebOverlay.reset();
   if (nullptr != m_spSourceOverlay) m_spSourceOverlay.reset();
   if (nullptr != m_spTagsOverlay) m_spTagsOverlay.reset();
@@ -109,9 +105,13 @@ void CEditorResourceWidget::Initialize()
                                          ResourceFetcher());
 
   m_spWebOverlay->Hide();
+  m_spSourceOverlay->Hide();
   m_spTagsOverlay->Hide();
 
   m_spTagsOverlay->SetUndoStack(UndoStack());
+  m_spDownloadManager->SetUndostack(UndoStack());
+
+  m_spWebOverlay->SetDownloadManager(m_spDownloadManager);
 
   setAcceptDrops(true);
 
@@ -146,6 +146,8 @@ void CEditorResourceWidget::LoadProject(tspProject spCurrentProject)
   }
 
   m_spCurrentProject = spCurrentProject;
+
+  m_spDownloadManager->SetCurrentProject(spCurrentProject);
   m_spTagsOverlay->SetProject(spCurrentProject);
   m_spUi->pResourceModelView->ProjectLoaded(m_spCurrentProject,
                                             EditorModel()->IsReadOnly());
@@ -364,7 +366,7 @@ void CEditorResourceWidget::SlotAddWebButtonClicked()
 {
   WIDGET_INITIALIZED_GUARD
   if (nullptr == m_spCurrentProject) { return; }
-  m_spWebOverlay->Show();
+  m_spWebOverlay->Show(true);
 }
 
 //----------------------------------------------------------------------------------------
@@ -428,7 +430,7 @@ void CEditorResourceWidget::SlotSetSourceButtonClicked()
     {
       QString sName = m_spUi->pResourceModelView->SelectedResources()[0];
       m_spSourceOverlay->setProperty(c_sProperty, sName);
-      m_spSourceOverlay->Show();
+      m_spSourceOverlay->Show(false);
     }
   }
 }
@@ -510,33 +512,6 @@ void CEditorResourceWidget::SlotMapButtonClicked()
 
 //----------------------------------------------------------------------------------------
 //
-void CEditorResourceWidget::SlotWebResourceSelected(const QString& sResource)
-{
-  m_spWebOverlay->Hide();
-  QUrl url(sResource);
-  if (url.isValid())
-  {
-    if (nullptr != m_pResponse)
-    {
-      m_pResponse->abort();
-      m_pResponse->disconnect();
-      delete m_pResponse;
-      m_pResponse = nullptr;
-    }
-    m_pResponse = m_spNAManager->get(QNetworkRequest(url));
-    connect(m_pResponse, QOverload<QNetworkReply::NetworkError>::of(&QNetworkReply::error),
-            this, &CEditorResourceWidget::SlotNetworkReplyError);
-    connect(m_pResponse, &QNetworkReply::finished,
-            this, &CEditorResourceWidget::SlotNetworkReplyFinished);
-  }
-  else
-  {
-    qWarning() << "Non-valid url.";
-  }
-}
-
-//----------------------------------------------------------------------------------------
-//
 void CEditorResourceWidget::SlotWebSourceSelected(const QString& sResource)
 {
   QString sName = m_spSourceOverlay->property(c_sProperty).toString();
@@ -561,39 +536,6 @@ void CEditorResourceWidget::SlotWebSourceSelected(const QString& sResource)
         }
       }));
     }
-  }
-}
-
-//----------------------------------------------------------------------------------------
-//
-void CEditorResourceWidget::SlotNetworkReplyError(QNetworkReply::NetworkError code)
-{
-  QNetworkReply* pReply = dynamic_cast<QNetworkReply*>(sender());
-  assert(nullptr != pReply);
-  if (nullptr != pReply)
-  {
-    qWarning() << code << pReply->errorString();
-  }
-}
-
-//----------------------------------------------------------------------------------------
-//
-void CEditorResourceWidget::SlotNetworkReplyFinished()
-{
-  QNetworkReply* pReply = dynamic_cast<QNetworkReply*>(sender());
-  assert(nullptr != pReply);
-  if (nullptr != pReply)
-  {
-    QUrl url = pReply->url();
-    QByteArray arr = pReply->readAll();
-
-    if (nullptr != m_pResponse)
-    {
-      m_pResponse->disconnect();
-      m_pResponse->deleteLater();
-    }
-
-    UndoStack()->push(new CCommandAddResource(m_spCurrentProject, this, {{url, arr}}));
   }
 }
 

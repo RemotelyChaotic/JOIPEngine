@@ -252,11 +252,14 @@ macro(CreateJOIPProject JOIP_PROJECT_NAME)
     ${JOIPSources}/Editor/Resources/CommandChangeTags.h
     ${JOIPSources}/Editor/Resources/CommandChangeTitleCard.cpp
     ${JOIPSources}/Editor/Resources/CommandChangeTitleCard.h
+    ${JOIPSources}/Editor/Resources/CommonRemoteResourceAdder.cpp
+    ${JOIPSources}/Editor/Resources/CommonRemoteResourceAdder.h
     ${JOIPSources}/Editor/Resources/CommandRemoveResource.cpp
     ${JOIPSources}/Editor/Resources/CommandRemoveResource.h
     ${JOIPSources}/Editor/Resources/CompressJobSettingsOverlay.cpp
     ${JOIPSources}/Editor/Resources/CompressJobSettingsOverlay.h
     ${JOIPSources}/Editor/Resources/CompressJobSettingsOverlay.ui
+    ${JOIPSources}/Editor/Resources/IRemoteResourceAdder.h
     ${JOIPSources}/Editor/Resources/ResourceDetailView.cpp
     ${JOIPSources}/Editor/Resources/ResourceDetailView.h
     ${JOIPSources}/Editor/Resources/ResourceDetailViewFetcherThread.cpp
@@ -278,6 +281,8 @@ macro(CreateJOIPProject JOIP_PROJECT_NAME)
     ${JOIPSources}/Editor/Resources/TagsEditorOverlay.cpp
     ${JOIPSources}/Editor/Resources/TagsEditorOverlay.h
     ${JOIPSources}/Editor/Resources/TagsEditorOverlay.ui
+    ${JOIPSources}/Editor/Resources/WebResourceDownloadManager.cpp
+    ${JOIPSources}/Editor/Resources/WebResourceDownloadManager.h
     ${JOIPSources}/Editor/Resources/WebResourceOverlay.cpp
     ${JOIPSources}/Editor/Resources/WebResourceOverlay.h
     ${JOIPSources}/Editor/Resources/WebResourceOverlay.ui

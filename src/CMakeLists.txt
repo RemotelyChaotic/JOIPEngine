@@ -3,7 +3,20 @@ cmake_minimum_required(VERSION 3.5)
 project(JOIPEngineApp VERSION ${JOIP_VERSION_MAJOR}.${JOIP_VERSION_MINOR}.${JOIP_VERSION_PATCH} LANGUAGES CXX)
 include(JOIPEngineProject.cmake)
 
+find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Core)
+find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Core)
+
 CreateJOIPProject(${PROJECT_NAME})
+
+target_link_libraries(JOIPEngineApp PRIVATE Qt${QT_VERSION_MAJOR}::Core)
+target_link_libraries(JOIPEngineApp PRIVATE Qt${QT_VERSION_MAJOR}::Core)
+
+target_sources(JOIPEngineApp
+  PRIVATE
+    Editor/Resources/IRemoteResourceAdder.h
+    Editor/Resources/WebResourceDownloadManager.h Editor/Resources/WebResourceDownloadManager.cpp
+    Editor/Resources/CommonRemoteResourceAdder.h Editor/Resources/CommonRemoteResourceAdder.cpp
+)
 JOIPProjectSettings(${PROJECT_NAME})
 
 if (WIN32)

@@ -1,4 +1,5 @@
 #include "WebResourceOverlay.h"
+#include "WebResourceDownloadManager.h"
 #include "ui_WebResourceOverlay.h"
 
 CWebResourceOverlay::CWebResourceOverlay(QWidget* pParent) :
@@ -14,9 +15,33 @@ CWebResourceOverlay::~CWebResourceOverlay()
 
 //----------------------------------------------------------------------------------------
 //
+void CWebResourceOverlay::SetDownloadManager(std::weak_ptr<CWebResourceDownloadManager> wpDownloadManager)
+{
+  m_wpDownloadManager = wpDownloadManager;
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CWebResourceOverlay::Show(bool bAllowDownloading)
+{
+  COverlayBase::Show();
+  m_bDownloadMode = bAllowDownloading;
+  m_spUi->pAddAsLocalCheckBox->setVisible(bAllowDownloading);
+}
+
+//----------------------------------------------------------------------------------------
+//
 void CWebResourceOverlay::Climb()
 {
   ClimbToFirstInstanceOf("CEditorMainScreen", false);
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CWebResourceOverlay::Hide()
+{
+  m_bDownloadMode = false;
+  COverlayBase::Hide();
 }
 
 //----------------------------------------------------------------------------------------
@@ -33,10 +58,32 @@ void CWebResourceOverlay::Resize()
 
 //----------------------------------------------------------------------------------------
 //
+void CWebResourceOverlay::on_pUrlLineEdit_textChanged(const QString &text)
+{
+  if (auto spDownloadManager = m_wpDownloadManager.lock();
+      nullptr != spDownloadManager && m_bDownloadMode)
+  {
+    m_spUi->pAddAsLocalCheckBox->setEnabled(
+        spDownloadManager->CanDownloadAndSaveAsFile(QUrl::fromUserInput(text)));
+  }
+}
+
+//----------------------------------------------------------------------------------------
+//
 void CWebResourceOverlay::on_pConfirmButton_clicked()
 {
   const QString sResource = m_spUi->pUrlLineEdit->text();
-  emit SignalResourceSelected(sResource);
+  bool bDownload = m_spUi->pAddAsLocalCheckBox->isChecked();
+
+  if (auto spDownloadManager = m_wpDownloadManager.lock();
+      nullptr != spDownloadManager && m_bDownloadMode)
+  {
+    spDownloadManager->AddResource(sResource, bDownload);
+  }
+  else
+  {
+    emit SignalResourceSelected(sResource);
+  }
 }
 
 //----------------------------------------------------------------------------------------
