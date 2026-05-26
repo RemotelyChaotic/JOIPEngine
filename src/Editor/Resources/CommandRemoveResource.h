@@ -22,7 +22,7 @@ public:
   bool mergeWith(const QUndoCommand* pOther) override;
 
 protected:
-  tspResourceMap     m_removedResources;
+  std::map<QString, SResourceData> m_removedResources;
   tspProject         m_spCurrentProject;
   std::weak_ptr<CDatabaseManager> m_wpDbManager;
   QStringList        m_vsResources;

@@ -1,6 +1,8 @@
 #ifndef IREMOTERESOURCEADDER_H
 #define IREMOTERESOURCEADDER_H
 
+#include "Systems/DatabaseInterface/ResourceData.h"
+
 #include <QUrl>
 
 class IRemoteResourceAdder
@@ -18,7 +20,7 @@ public:
   virtual bool CanHandleUrl(const QUrl& url) const = 0;
 
 //signals:
-  virtual void SignalNewResourceFile(const QUrl& url, const QByteArray& ba, bool bAddAsFile) = 0;
+  virtual void SignalNewResourceFile(const SResourceData& res, const QByteArray& ba, bool bAddAsFile) = 0;
 
 protected:
   IRemoteResourceAdder(){}

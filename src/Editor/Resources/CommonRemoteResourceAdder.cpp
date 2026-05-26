@@ -1,7 +1,12 @@
 #include "CommonRemoteResourceAdder.h"
+#include "Application.h"
 #include "Settings.h"
+#include "WebResourceDownloadManager.h"
 
+#include "Systems/Database/DatabaseNotifier.h"
 #include "Systems/Database/Resource.h"
+#include "Systems/DatabaseManager.h"
+
 
 CCommonRemoteResourceAdder::CCommonRemoteResourceAdder(QObject *pParent)
     : QObject{pParent}, IRemoteResourceAdder()
@@ -103,7 +108,16 @@ void CCommonRemoteResourceAdder::SlotNetworkReplyFinished()
     QByteArray arr = pReply->readAll();
     bool bAddAsFile = pReply->property(c_sDownloadProperty).toBool();
 
-    emit SignalNewResourceFile(pReply->url(), arr, bAddAsFile);
+    auto optRes = CWebResourceDownloadManager::RemoteUrlToResource(url, arr);
+
+    if (optRes.has_value())
+    {
+      emit SignalNewResourceFile(optRes.value(), arr, bAddAsFile);
+    }
+    else
+    {
+      qWarning() << tr("Remote file %1 is not valid for adding.").arg(url.toString());
+    }
 
     auto it = std::find(m_vpResponses.begin(), m_vpResponses.end(), pReply);
     if (m_vpResponses.end() != it)

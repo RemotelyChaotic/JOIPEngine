@@ -1,10 +1,14 @@
 #include "CommandAddResource.h"
 #include "Application.h"
-#include "Editor/EditorCommandIds.h"
 #include "Settings.h"
+
+#include "Editor/EditorCommandIds.h"
+
 #include "Systems/DatabaseManager.h"
 #include "Systems/PhysFs/PhysFsFileEngine.h"
 #include "Systems/Database/Resource.h"
+
+#include "Utils/WidgetHelpers.h"
 
 #include <QDebug>
 #include <QDirIterator>
@@ -230,8 +234,8 @@ namespace
       if (msgBox.clickedButton() == pMove)
       {
         // Move the Files
-        const QString sDirToMoveTo = QFileDialog::getExistingDirectory(pParentForDialog,
-            QObject::tr("Select Destination"), projectDir.absolutePath());
+        const QString sDirToMoveTo = widget_helpers::GetExistingDirectory(pParentForDialog,
+            QObject::tr("Select Destination"), projectDir.absolutePath(), QFileDialog::ShowDirsOnly);
         for (const SResourcePath& sFileName : vsFiles)
         {
           QFileInfo info(SResource::PhysicalResourcePath(sFileName, spCurrentProject));
@@ -258,8 +262,8 @@ namespace
       else if (msgBox.clickedButton() == pCopy)
       {
         // copy the Files
-        const QString sDirToCopyTo = QFileDialog::getExistingDirectory(pParentForDialog,
-            QObject::tr("Select Destination"), projectDir.absolutePath());
+        const QString sDirToCopyTo = widget_helpers::GetExistingDirectory(pParentForDialog,
+            QObject::tr("Select Destination"), projectDir.absolutePath(), QFileDialog::ShowDirsOnly);
         for (const SResourcePath& sFileName : vsFiles)
         {
           QFileInfo info(SResource::PhysicalResourcePath(sFileName, spCurrentProject));
@@ -307,70 +311,16 @@ namespace
 
 //----------------------------------------------------------------------------------------
 //
-  tspResourceMap AddUrlsToProjectResources(std::shared_ptr<SProject> spCurrentProject,
-                                           std::weak_ptr<CDatabaseManager> wpDbManager,
-                                           const std::map<QUrl, QByteArray>& remoteFiles)
-  {
-    tspResourceMap retVal;
-    for (const auto& it : remoteFiles)
-    {
-      const QUrl& url = it.first;
-      const QByteArray& arr = it.second;
-
-      QStringList imageFormatsList = SResourceFormats::ImageFormats();
-      QStringList videoFormatsList = SResourceFormats::VideoFormats();
-
-      qint32 iLastIndex = url.fileName().lastIndexOf('.');
-      const QString sFileName = url.fileName();
-      QString sFormat = "*" + sFileName.mid(iLastIndex, sFileName.size() - iLastIndex);
-      auto spDbManager = wpDbManager.lock();
-      if (nullptr != spDbManager)
-      {
-        if (imageFormatsList.contains(sFormat))
-        {
-          QPixmap mPixmap;
-          mPixmap.loadFromData(arr);
-          if (!mPixmap.isNull())
-          {
-            QString sName =
-              spDbManager->AddResource(spCurrentProject, url, EResourceType::eImage);
-            tspResource spResource = spDbManager->FindResourceInProject(spCurrentProject, sName);
-            if (nullptr != spResource)
-            {
-              QWriteLocker locker(&spResource->m_rwLock);
-              spResource->m_sSource = url;
-            }
-          }
-        }
-        else if (videoFormatsList.contains(sFormat))
-        {
-          // TODO: check video
-          QString sName =
-              spDbManager->AddResource(spCurrentProject, url, EResourceType::eMovie);
-          tspResource spResource = spDbManager->FindResourceInProject(spCurrentProject, sName);
-          if (nullptr != spResource)
-          {
-            QWriteLocker locker(&spResource->m_rwLock);
-            spResource->m_sSource = url;
-          }
-        }
-      }
-    }
-    return retVal;
-  }
-
-//----------------------------------------------------------------------------------------
-//
-  QString CommandTextForFiles(const std::map<QUrl, QByteArray>& files)
+  QString CommandTextForFiles(const std::set<QUrl>& files)
   {
     if (0 == files.size()) { return QString("Adding 0 resources."); }
     else if (1 == files.size())
     {
-      return QString("Adding resource file %1.").arg(QFileInfo(files.begin()->first.toString()).fileName());
+      return QString("Adding resource file %1.").arg(QFileInfo(files.begin()->toString()).fileName());
     }
     else { return QString("Adding %1 resources.").arg(files.size()); }
   }
-  QString CommandTextForResources(const tspResourceMap& files)
+  QString CommandTextForResources(const std::map<QString, SResourceData>& files)
   {
     if (0 == files.size()) { return QString("Adding 0 resources."); }
     else if (1 == files.size())
@@ -385,7 +335,7 @@ namespace
 //
 CCommandAddResource::CCommandAddResource(const tspProject& spProject,
                                          QPointer<QWidget> pParentForDialog,
-                                         const std::map<QUrl, QByteArray>& vsFiles,
+                                         const std::set<QUrl> vsFiles,
                                          QUndoCommand* pParent) :
   QUndoCommand(CommandTextForFiles(vsFiles), pParent),
   m_addedResources(),
@@ -395,7 +345,19 @@ CCommandAddResource::CCommandAddResource(const tspProject& spProject,
   m_pParentForDialog(pParentForDialog),
   m_vsFiles(vsFiles)
 {
-
+}
+CCommandAddResource::CCommandAddResource(const tspProject& spProject,
+                                         QPointer<QWidget> pParentForDialog,
+                                         const std::map<QString, SResourceData>& resData,
+                                         QUndoCommand* pParent) :
+  QUndoCommand(CommandTextForResources(resData), pParent),
+  m_addedResources(resData),
+  m_spCurrentProject(spProject),
+  m_spSettings(CApplication::Instance()->Settings()),
+  m_wpDbManager(CApplication::Instance()->System<CDatabaseManager>()),
+  m_pParentForDialog(pParentForDialog),
+  m_vsFiles()
+{
 }
 CCommandAddResource::~CCommandAddResource()
 {
@@ -426,29 +388,29 @@ void CCommandAddResource::redo()
   if (m_addedResources.empty())
   {
     std::vector<SResourcePath> vsLocalFiles;
-    std::map<QUrl, QByteArray> remoteFiles;
-    for (const auto& file : qAsConst(m_vsFiles))
+    std::set<QUrl> remoteFiles;
+    for (const auto& sFile : qAsConst(m_vsFiles))
     {
-      if (SResourcePath::IsLocalFileP(file.first))
+      if (SResourcePath::IsLocalFileP(sFile))
       {
-        vsLocalFiles.push_back(joip_resource::CreatePathFromAbsoluteUrl(file.first, m_spCurrentProject));
+        vsLocalFiles.push_back(joip_resource::CreatePathFromAbsoluteUrl(sFile, m_spCurrentProject));
       }
-      else { remoteFiles.insert(file); }
+      else { remoteFiles.insert(sFile); }
     }
 
     // first insertion, remember resources
-    m_addedResources = AddFilesToProjectResources(m_spCurrentProject, m_wpDbManager,
-                                                  m_pParentForDialog, vsLocalFiles);
-    tspResourceMap remoteResources = AddUrlsToProjectResources(m_spCurrentProject,
-                                                               m_wpDbManager,
-                                                               remoteFiles);
-    m_addedResources.insert(remoteResources.begin(), remoteResources.end());
+    tspResourceMap addedRes = AddFilesToProjectResources(m_spCurrentProject, m_wpDbManager,
+                                                         m_pParentForDialog, vsLocalFiles);
+
+    assert(remoteFiles.empty() && "Why do we have remote Resources in here? Use the other constructor.");
+
+    for (const auto& [sName, spRes] : addedRes)
+    {
+      m_addedResources.insert({sName, SResourceData(*spRes)});
+    }
 
     // clear byearrays to not use too much memory if not nesseccary
-    for (auto& file : m_vsFiles)
-    {
-      file.second.clear();
-    }
+    m_vsFiles.clear();
   }
   else
   {
@@ -459,18 +421,20 @@ void CCommandAddResource::redo()
       for (auto& resourceIt : m_addedResources)
       {
         const QString sName = spDbManager->AddResource(m_spCurrentProject,
-                                                       QUrl(resourceIt.second->m_sPath),
-                                                       resourceIt.second->m_type,
-                                                       resourceIt.first);
+                                                       QUrl(resourceIt.second.m_sPath),
+                                                       resourceIt.second.m_type,
+                                                       resourceIt.first,
+                                                       resourceIt.second.m_sResourceBundle);
         tspResource spAdded = spDbManager->FindResourceInProject(m_spCurrentProject, sName);
         if (nullptr != spAdded)
         {
           // set old data manually
           spAdded->m_rwLock.lockForWrite();
-          spAdded->CopyFrom(*resourceIt.second);
+          spAdded->CopyFrom(resourceIt.second);
+          tvsTags vsTags = spAdded->m_vsResourceTags;
           spAdded->m_rwLock.unlock();
           // store a copy
-          resourceIt.second.reset(new SResource(*spAdded));
+          resourceIt.second = *spAdded;
         }
       }
     }

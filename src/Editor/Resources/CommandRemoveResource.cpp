@@ -15,7 +15,7 @@ namespace
     }
     else { return QString("Removing %1 resources.").arg(files.size()); }
   }
-  QString CommandTextForResources(const tspResourceMap& files)
+  QString CommandTextForResources(const std::map<QString, SResourceData>& files)
   {
     if (0 == files.size()) { return QString("Removing 0 resources."); }
     else if (1 == files.size())
@@ -54,18 +54,19 @@ void CCommandRemoveResource::undo()
     for (auto& resourceIt : m_removedResources)
     {
       const QString sName = spDbManager->AddResource(m_spCurrentProject,
-                                                     QUrl(resourceIt.second->m_sPath),
-                                                     resourceIt.second->m_type,
-                                                     resourceIt.first);
+                                                     QUrl(resourceIt.second.m_sPath),
+                                                     resourceIt.second.m_type,
+                                                     resourceIt.first,
+                                                     resourceIt.second.m_sResourceBundle);
       tspResource spAdded = spDbManager->FindResourceInProject(m_spCurrentProject, sName);
       if (nullptr != spAdded)
       {
         // set source by hand
         spAdded->m_rwLock.lockForWrite();
-        spAdded->m_sSource = resourceIt.second->m_sSource;
+        spAdded->m_sSource = resourceIt.second.m_sSource;
         spAdded->m_rwLock.unlock();
         // store a copy
-        resourceIt.second.reset(new SResource(*spAdded));
+        resourceIt.second = *spAdded;
       }
     }
   }
@@ -86,7 +87,7 @@ void CCommandRemoveResource::redo()
         if (nullptr != spResource)
         {
           // store a copy
-          m_removedResources.insert({sResource, std::make_shared<SResource>(*spResource)});
+          m_removedResources.insert({sResource, *spResource});
         }
       }
     }

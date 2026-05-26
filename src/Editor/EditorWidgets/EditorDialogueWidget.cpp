@@ -293,14 +293,17 @@ void CEditorDialogueWidget::dropEvent(QDropEvent* pEvent)
   {
     QStringList vsFileNames;
     QList<QUrl> vUrlList = pMimeData->urls();
-    std::map<QUrl, QByteArray> vsFiles;
+    std::set<QUrl> vsFiles;
     for (const QUrl& sPath : qAsConst(vUrlList))
     {
-      // Try to read first to see if there are errros.
-      bool bOk = true;
-      if (nullptr != dialogue_tree::LoadDialoguesFromSource({sPath}, m_spCurrentProject, &bOk) && bOk)
+      if (SResourcePath::IsLocalFileP(sPath))
       {
-        vsFiles.insert({sPath, QByteArray()});
+        // Try to read first to see if there are errros.
+        bool bOk = true;
+        if (nullptr != dialogue_tree::LoadDialoguesFromSource({sPath}, m_spCurrentProject, &bOk) && bOk)
+        {
+          vsFiles.insert({sPath});
+        }
       }
     }
 

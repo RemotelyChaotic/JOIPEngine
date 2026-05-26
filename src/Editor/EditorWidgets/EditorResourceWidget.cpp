@@ -293,9 +293,44 @@ void CEditorResourceWidget::dropEvent(QDropEvent* pEvent)
   {
     QStringList vsFileNames;
     QList<QUrl> vUrlList = pMimeData->urls();
-    std::map<QUrl, QByteArray> vsFiles;
-    for (const QUrl& sPath : qAsConst(vUrlList)) { vsFiles.insert({sPath, QByteArray()}); }
-    UndoStack()->push(new CCommandAddResource(m_spCurrentProject, this, vsFiles));
+    std::set<QUrl> vsFilesLocal;
+    std::vector<std::pair<QUrl, bool>> vsFilesRemote;
+
+    bool bDownloadAndSaveAny = false;
+    for (const QUrl& sPath : qAsConst(vUrlList))
+    {
+      if (SResourcePath::IsLocalFileP(sPath))
+      {
+        vsFilesLocal.insert({sPath});
+      }
+      else
+      {
+        bool bCanDownloadAndSave = m_spDownloadManager->CanDownloadAndSaveAsFile(sPath);
+        bDownloadAndSaveAny |= bCanDownloadAndSave;
+        vsFilesRemote.push_back({sPath, bCanDownloadAndSave});
+      }
+    }
+    UndoStack()->push(new CCommandAddResource(m_spCurrentProject, this, vsFilesLocal));
+
+    if (bDownloadAndSaveAny)
+    {
+      QPointer<CEditorResourceWidget> pThis(this);
+      QMessageBox::StandardButton but =
+          QMessageBox::question(this, tr("Download files?"),
+                                tr("Attempt to download remote files and add as local Resources,\n"
+                                   "or just add as remote Resources?"));
+      bDownloadAndSaveAny = QMessageBox::StandardButton::Yes == but;
+      if (nullptr == pThis)
+      {
+        return;
+      }
+    }
+
+    for (const auto& [url, bDownloadable] : vsFilesRemote)
+    {
+      m_spDownloadManager->AddResource(url, bDownloadable && bDownloadAndSaveAny);
+    }
+
     emit SignalProjectEdited();
   }
 }
@@ -351,10 +386,10 @@ void CEditorResourceWidget::SlotAddButtonClicked()
   QStringList  vsFileNames = QFileDialog::getOpenFileNames(this,
       tr("Add File"), sCurrentFolder, SResourceFormats::JoinedFormatsForFilePicker());
 
-  std::map<QUrl, QByteArray> vsFiles;
+  std::set<QUrl> vsFiles;
   for (const QString& sPath : qAsConst(vsFileNames))
   {
-    vsFiles.insert({ QUrl::fromLocalFile(sPath), QByteArray()});
+    vsFiles.insert({ QUrl::fromLocalFile(sPath)});
   }
   UndoStack()->push(new CCommandAddResource(m_spCurrentProject, this, vsFiles));
   emit SignalProjectEdited();

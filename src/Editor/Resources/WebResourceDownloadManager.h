@@ -9,9 +9,11 @@
 #include <QUndoStack>
 
 #include <memory>
+#include <optional>
 #include <vector>
 
 struct SProject;
+struct SResourceData;
 typedef std::shared_ptr<SProject> tspProject;
 
 class CWebResourceDownloadManager : public QObject
@@ -27,8 +29,12 @@ public:
   void SetCurrentProject(const tspProject& spProject);
   void SetUndostack(QPointer<QUndoStack> pStack);
 
+  static std::optional<SResourceData>
+  RemoteUrlToResource(const QUrl& sUrl,
+                      const QByteArray& remoteFile);
+
 protected slots:
-  void SlotNewResourceFile(const QUrl& url, const QByteArray& ba, bool bAddAsFile);
+  void SlotNewResourceFile(const SResourceData& res, const QByteArray& ba, bool bAddAsFile);
 
 private:
   std::vector<std::shared_ptr<IRemoteResourceAdder>> m_vspResourceAdders;

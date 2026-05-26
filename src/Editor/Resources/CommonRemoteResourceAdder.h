@@ -25,7 +25,7 @@ public:
   void SetNetworkAccessManager(QNetworkAccessManager* pNAManager);
 
 signals:
-  void SignalNewResourceFile(const QUrl& url, const QByteArray& ba, bool bAddAsFile) override;
+  void SignalNewResourceFile(const SResourceData& res, const QByteArray& ba, bool bAddAsFile) override;
 
 private slots:
   void SlotNetworkReplyError(QNetworkReply::NetworkError code);
