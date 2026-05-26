@@ -16,6 +16,7 @@
 #include <QFileInfo>
 #include <QMessageBox>
 #include <QPushButton>
+#include <QStorageInfo>
 
 namespace
 {
@@ -60,8 +61,14 @@ namespace
     const QDir projectDir = PhysicalProjectPath(spCurrentProject);
     for (const SResourcePath& sFileName : vsFiles)
     {
-      QFileInfo info(SResource::PhysicalResourcePath(sFileName, spCurrentProject, sBundleName));
-      if (!info.absoluteFilePath().contains(projectDir.absolutePath()) &&
+      QString sSourcePys = SResource::PhysicalResourcePath(sFileName, spCurrentProject, true, sBundleName);
+      QString sDestPathPhys = projectDir.absolutePath();
+      QFileInfo info(sSourcePys);
+      if ((!info.absoluteFilePath().contains(sDestPathPhys)
+#ifdef Q_OS_WIN
+           || QStorageInfo(sSourcePys).rootPath() != QStorageInfo(sDestPathPhys).rootPath()
+#endif
+           ) &&
           !static_cast<QString>(sFileName).startsWith(CPhysFsFileEngineHandler::c_sScheme) &&
           !static_cast<QString>(sFileName).startsWith("qrc:/"+sProjName))
       {

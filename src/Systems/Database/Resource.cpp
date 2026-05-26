@@ -6,6 +6,8 @@
 #include <QImageReader>
 #include <QJsonArray>
 #include <QMutexLocker>
+#include <QStorageInfo>
+
 #include <cassert>
 
 //----------------------------------------------------------------------------------------
@@ -172,12 +174,13 @@ QString SResource::PhysicalResourcePath() const
     return QString();
   }
 
-  return PhysicalResourcePath(m_sPath, m_spParent, m_sResourceBundle, m_sName);
+  return PhysicalResourcePath(m_sPath, m_spParent, false, m_sResourceBundle, m_sName);
 }
 
 //----------------------------------------------------------------------------------------
 //
 QString SResource::PhysicalResourcePath(const SResourcePath& sPath, const tspProject& spProj,
+                                        bool bAllowAbsoluteResourcePath,
                                         const QString& sResourceBundle, const QString& sResourceName)
 {
   if ( nullptr == spProj)
@@ -193,7 +196,7 @@ QString SResource::PhysicalResourcePath(const SResourcePath& sPath, const tspPro
     urlForCall = QUrl(sPathSer);
   }
 
-  return joip_resource::PhysicalResourcePath(urlForCall, spProj,
+  return joip_resource::PhysicalResourcePath(urlForCall, spProj, bAllowAbsoluteResourcePath,
                                              sResourceBundle, sResourceName);
 }
 
@@ -202,12 +205,13 @@ QString SResource::PhysicalResourcePath(const SResourcePath& sPath, const tspPro
 QString SResource::ResourceToAbsolutePath(const QString& sResourceScheme) const
 {
   QReadLocker locker(&m_rwLock);
-  return ResourceToAbsolutePath(m_sPath, m_spParent, sResourceScheme, m_sResourceBundle, m_sName);
+  return ResourceToAbsolutePath(m_sPath, m_spParent, false, sResourceScheme, m_sResourceBundle, m_sName);
 }
 
 //----------------------------------------------------------------------------------------
 //
 QString SResource::ResourceToAbsolutePath(const SResourcePath& sPath, const tspProject& spProj,
+                                          bool bAllowAbsoluteResourcePath,
                                           const QString& sResourceScheme,
                                           const QString& sResourceBundle,
                                           const QString& sName)
@@ -229,6 +233,10 @@ QString SResource::ResourceToAbsolutePath(const SResourcePath& sPath, const tspP
       QUrl urlCopy(static_cast<QUrl>(sPath));
       urlCopy.setScheme(QString());
       QString sBasePath = CPhysFsFileEngineHandler::c_sScheme;
+      if (bAllowAbsoluteResourcePath && QFileInfo(urlCopy.path()).isAbsolute())
+      {
+        return urlCopy.path();
+      }
       return sBasePath + QUrl().resolved(urlCopy).toString();
     }
     else if (bProjBundled)
@@ -300,6 +308,7 @@ SResourcePath joip_resource::CreatePathFromAbsoluteUrl(const QUrl& sUrl, const t
 //----------------------------------------------------------------------------------------
 //
 QString joip_resource::PhysicalResourcePath(const QUrl& url, const tspProject& spProject,
+                                            bool bAllowAbsoluteResourcePath,
                                             const QString& sResourceBundle,
                                             const QString& sResourceName)
 {
@@ -316,6 +325,10 @@ QString joip_resource::PhysicalResourcePath(const QUrl& url, const tspProject& s
       QUrl urlCopy(url);
       urlCopy.setScheme(QString());
       QString sBasePath = PhysicalProjectPath(spProject);
+      if (bAllowAbsoluteResourcePath && QFileInfo(urlCopy.path()).isAbsolute())
+      {
+        return urlCopy.path();
+      }
       return sBasePath + "/" + QUrl().resolved(urlCopy).toString();
     }
     else if (bBundled)
