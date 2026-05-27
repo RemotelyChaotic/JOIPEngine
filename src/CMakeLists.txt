@@ -16,6 +16,7 @@ target_sources(JOIPEngineApp
     Editor/Resources/IRemoteResourceAdder.h
     Editor/Resources/WebResourceDownloadManager.h Editor/Resources/WebResourceDownloadManager.cpp
     Editor/Resources/CommonRemoteResourceAdder.h Editor/Resources/CommonRemoteResourceAdder.cpp
+    Editor/Resources/PhilomenaRemoteResourceAdder.h Editor/Resources/PhilomenaRemoteResourceAdder.cpp
 )
 JOIPProjectSettings(${PROJECT_NAME})
 

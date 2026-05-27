@@ -7,6 +7,7 @@ CWebResourceOverlay::CWebResourceOverlay(QWidget* pParent) :
   m_spUi(new Ui::CWebResourceOverlay)
 {
   m_spUi->setupUi(this);
+  m_preferredSize = size();
 }
 
 CWebResourceOverlay::~CWebResourceOverlay()
@@ -27,6 +28,7 @@ void CWebResourceOverlay::Show(bool bAllowDownloading)
   COverlayBase::Show();
   m_bDownloadMode = bAllowDownloading;
   m_spUi->pAddAsLocalCheckBox->setVisible(bAllowDownloading);
+  m_spUi->pFetcherLabel->setVisible(bAllowDownloading);
 }
 
 //----------------------------------------------------------------------------------------
@@ -53,7 +55,7 @@ void CWebResourceOverlay::Resize()
       QPoint(width() / 2, height() / 2);
 
   move(newPos.x(), newPos.y());
-  resize(width(), height());
+  resize(m_preferredSize);
 }
 
 //----------------------------------------------------------------------------------------
@@ -63,8 +65,10 @@ void CWebResourceOverlay::on_pUrlLineEdit_textChanged(const QString &text)
   if (auto spDownloadManager = m_wpDownloadManager.lock();
       nullptr != spDownloadManager && m_bDownloadMode)
   {
-    m_spUi->pAddAsLocalCheckBox->setEnabled(
-        spDownloadManager->CanDownloadAndSaveAsFile(QUrl::fromUserInput(text)));
+    auto [bCanDownload, sFetcher] =
+        spDownloadManager->CanDownloadAndSaveAsFile(QUrl::fromUserInput(text));
+    m_spUi->pAddAsLocalCheckBox->setEnabled(bCanDownload);
+    m_spUi->pFetcherLabel->setText(tr("Resource fetcher: %1").arg(sFetcher.isEmpty() ? "<None>" : sFetcher));
   }
 }
 

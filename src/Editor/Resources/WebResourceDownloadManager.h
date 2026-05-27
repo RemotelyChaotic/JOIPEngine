@@ -24,7 +24,7 @@ public:
   ~CWebResourceDownloadManager() override;
 
   void AddResource(const QUrl& sPath, bool bDownloadAndAddAsFile = false);
-  bool CanDownloadAndSaveAsFile(const QUrl& url) const;
+  std::pair<bool, QString> CanDownloadAndSaveAsFile(const QUrl& url) const;
 
   void SetCurrentProject(const tspProject& spProject);
   void SetUndostack(QPointer<QUndoStack> pStack);
@@ -33,8 +33,9 @@ public:
   RemoteUrlToResource(const QUrl& sUrl,
                       const QByteArray& remoteFile);
 
-protected slots:
-  void SlotNewResourceFile(const SResourceData& res, const QByteArray& ba, bool bAddAsFile);
+public slots:
+  void SlotNewResourceFile(const SResourceData& res, const std::vector<STagData>& vsTags,
+                           const QByteArray& ba, bool bAddAsFile);
 
 private:
   std::vector<std::shared_ptr<IRemoteResourceAdder>> m_vspResourceAdders;

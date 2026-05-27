@@ -1,5 +1,4 @@
 #include "CommonRemoteResourceAdder.h"
-#include "Application.h"
 #include "Settings.h"
 #include "WebResourceDownloadManager.h"
 
@@ -112,7 +111,7 @@ void CCommonRemoteResourceAdder::SlotNetworkReplyFinished()
 
     if (optRes.has_value())
     {
-      emit SignalNewResourceFile(optRes.value(), arr, bAddAsFile);
+      emit SignalNewResourceFile(optRes.value(), {}, arr, bAddAsFile);
     }
     else
     {

@@ -22,10 +22,13 @@ public:
 
   bool CanHandleUrl(const QUrl& url) const override;
 
+  QString Name() const override { return "Generic Downloader"; };
+
   void SetNetworkAccessManager(QNetworkAccessManager* pNAManager);
 
 signals:
-  void SignalNewResourceFile(const SResourceData& res, const QByteArray& ba, bool bAddAsFile) override;
+  void SignalNewResourceFile(const SResourceData& res, const std::vector<STagData>& vsTags,
+                             const QByteArray& ba, bool bAddAsFile) override;
 
 private slots:
   void SlotNetworkReplyError(QNetworkReply::NetworkError code);

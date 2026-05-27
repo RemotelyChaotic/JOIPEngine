@@ -38,6 +38,7 @@ protected slots:
 private:
   std::unique_ptr<Ui::CWebResourceOverlay> m_spUi;
   std::weak_ptr<CWebResourceDownloadManager> m_wpDownloadManager;
+  QSize                                      m_preferredSize;
   bool                                       m_bDownloadMode = false;
 };
 

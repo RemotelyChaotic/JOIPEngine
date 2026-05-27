@@ -19,8 +19,11 @@ public:
 
   virtual bool CanHandleUrl(const QUrl& url) const = 0;
 
+  virtual QString Name() const = 0;
+
 //signals:
-  virtual void SignalNewResourceFile(const SResourceData& res, const QByteArray& ba, bool bAddAsFile) = 0;
+  virtual void SignalNewResourceFile(const SResourceData& res, const std::vector<STagData>& vsTags,
+                                     const QByteArray& ba, bool bAddAsFile) = 0;
 
 protected:
   IRemoteResourceAdder(){}

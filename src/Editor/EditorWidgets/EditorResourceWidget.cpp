@@ -305,7 +305,7 @@ void CEditorResourceWidget::dropEvent(QDropEvent* pEvent)
       }
       else
       {
-        bool bCanDownloadAndSave = m_spDownloadManager->CanDownloadAndSaveAsFile(sPath);
+        auto [bCanDownloadAndSave,_] = m_spDownloadManager->CanDownloadAndSaveAsFile(sPath);
         bDownloadAndSaveAny |= bCanDownloadAndSave;
         vsFilesRemote.push_back({sPath, bCanDownloadAndSave});
       }

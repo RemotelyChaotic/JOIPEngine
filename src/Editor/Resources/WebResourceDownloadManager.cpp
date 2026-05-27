@@ -1,26 +1,41 @@
 #include "WebResourceDownloadManager.h"
 #include "CommonRemoteResourceAdder.h"
+#include "PhilomenaRemoteResourceAdder.h"
 
 #include "Editor/Resources/CommandAddResource.h"
+#include "Editor/Resources/CommandChangeTags.h"
 
 #include "Utils/WidgetHelpers.h"
 
 #include <QWidget>
 
 Q_DECLARE_METATYPE(SResourceData)
+Q_DECLARE_METATYPE(std::vector<STagData>)
 
+template< typename T>
+void AddResourceAdder(CWebResourceDownloadManager* pManager,
+                      QNetworkAccessManager* pNaManager,
+                      std::vector<std::shared_ptr<IRemoteResourceAdder>>& vspAdders)
+{
+  auto spAdder = std::make_shared<T>();
+  QObject::connect(spAdder.get(), &T::SignalNewResourceFile,
+                   pManager, &CWebResourceDownloadManager::SlotNewResourceFile);
+  spAdder->SetNetworkAccessManager(pNaManager);
+  vspAdders.push_back(spAdder);
+}
+
+//----------------------------------------------------------------------------------------
+//
 CWebResourceDownloadManager::CWebResourceDownloadManager(QWidget* pParent)
   : QObject{pParent},
     m_spNAManager(std::make_unique<QNetworkAccessManager>()),
     m_pParent(pParent)
 {
   qRegisterMetaType<SResourceData>();
+  qRegisterMetaType<std::vector<STagData>>();
 
-  auto spCommonAdder = std::make_shared<CCommonRemoteResourceAdder>();
-  connect(spCommonAdder.get(), &CCommonRemoteResourceAdder::SignalNewResourceFile,
-          this, &CWebResourceDownloadManager::SlotNewResourceFile);
-  spCommonAdder->SetNetworkAccessManager(m_spNAManager.get());
-  m_vspResourceAdders.push_back(spCommonAdder);
+  AddResourceAdder<CPhilomenaRemoteResourceAdder>(this, m_spNAManager.get(), m_vspResourceAdders);
+  AddResourceAdder<CCommonRemoteResourceAdder>(this, m_spNAManager.get(), m_vspResourceAdders);
 }
 
 CWebResourceDownloadManager::~CWebResourceDownloadManager() = default;
@@ -41,16 +56,16 @@ void CWebResourceDownloadManager::AddResource(const QUrl& sPath, bool bDownloadA
 
 //----------------------------------------------------------------------------------------
 //
-bool CWebResourceDownloadManager::CanDownloadAndSaveAsFile(const QUrl& url) const
+std::pair<bool, QString> CWebResourceDownloadManager::CanDownloadAndSaveAsFile(const QUrl& url) const
 {
   for (const auto& spAdder : m_vspResourceAdders)
   {
     if (spAdder->CanHandleUrl(url))
     {
-      return spAdder->CanDownloadAndSaveAsFile();
+      return { spAdder->CanDownloadAndSaveAsFile(), spAdder->Name() };
     }
   }
-  return false;
+  return { false, QString() };
 }
 
 //----------------------------------------------------------------------------------------
@@ -113,7 +128,9 @@ CWebResourceDownloadManager::RemoteUrlToResource(const QUrl& url,
 
 //----------------------------------------------------------------------------------------
 //
-void CWebResourceDownloadManager::SlotNewResourceFile(const SResourceData& res, const QByteArray& ba, bool bAddAsFile)
+void CWebResourceDownloadManager::SlotNewResourceFile(const SResourceData& res,
+                                                      const std::vector<STagData>& vsTags,
+                                                      const QByteArray& ba, bool bAddAsFile)
 {
   if (nullptr != m_pUndoStack)
   {
@@ -151,5 +168,18 @@ void CWebResourceDownloadManager::SlotNewResourceFile(const SResourceData& res, 
     }
 
     m_pUndoStack->push(new CCommandAddResource(m_spCurrentProject, m_pParent, {{resToAdd.m_sName, resToAdd}}));
+
+    QString sProject;
+    {
+      QReadLocker l(&m_spCurrentProject->m_rwLock);
+      sProject = m_spCurrentProject->m_sName;
+    }
+    for (const auto& tag : vsTags)
+    {
+      m_pUndoStack->push(new CCommandAddTag(sProject, resToAdd.m_sName,
+                                            std::make_shared<STag>(tag.m_sType,
+                                                                   tag.m_sName,
+                                                                   tag.m_sDescribtion)));
+    }
   }
 }
