@@ -142,7 +142,7 @@ void CWebResourceDownloadManager::SlotNewResourceFile(const SResourceData& res, 
 
         f.write(ba);
 
-        resToAdd.m_sPath = joip_resource::CreatePathFromAbsoluteUrl(sFinalPath, m_spCurrentProject);
+        resToAdd.m_sPath = joip_resource::CreatePathFromAbsolutePath(sFinalPath, m_spCurrentProject);
       }
       else
       {

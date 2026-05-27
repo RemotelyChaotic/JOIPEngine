@@ -310,7 +310,11 @@ void CEditorResourceWidget::dropEvent(QDropEvent* pEvent)
         vsFilesRemote.push_back({sPath, bCanDownloadAndSave});
       }
     }
-    UndoStack()->push(new CCommandAddResource(m_spCurrentProject, this, vsFilesLocal));
+
+    if (!vsFilesLocal.empty())
+    {
+      UndoStack()->push(new CCommandAddResource(m_spCurrentProject, this, vsFilesLocal));
+    }
 
     if (bDownloadAndSaveAny)
     {
