@@ -6,7 +6,9 @@
 #include "ui_EditorActionBar.h"
 #include <QNetworkReply>
 #include <QPointer>
+
 #include <memory>
+#include <optional>
 
 
 class CResourceTutorialStateSwitchHandler;
@@ -78,6 +80,7 @@ private:
   QPointer<CWebResourceOverlay>                        m_spSourceOverlay;
   QPointer<CWebResourceOverlay>                        m_spWebOverlay;
   QPointer<CTagsEditorOverlay>                         m_spTagsOverlay;
+  std::optional<bool>                                  m_optbDownloadDroppedFiles = std::nullopt;
 };
 
 #endif // EDITORRESOURCEWIDGET_H

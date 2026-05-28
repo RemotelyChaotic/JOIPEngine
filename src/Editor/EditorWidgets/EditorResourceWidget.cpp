@@ -32,6 +32,7 @@
 // Testing
 //#include <QtTest/QAbstractItemModelTester>
 
+#include <QCheckBox>
 #include <QDebug>
 #include <QDomDocument>
 #include <QDragEnterEvent>
@@ -161,6 +162,7 @@ void CEditorResourceWidget::UnloadProject()
 {
   WIDGET_INITIALIZED_GUARD
 
+  m_optbDownloadDroppedFiles = std::nullopt;
   m_spCurrentProject = nullptr;
 
   m_spUi->pResourceDisplayWidget->UnloadResource();
@@ -318,15 +320,38 @@ void CEditorResourceWidget::dropEvent(QDropEvent* pEvent)
 
     if (bDownloadAndSaveAny)
     {
-      QPointer<CEditorResourceWidget> pThis(this);
-      QMessageBox::StandardButton but =
-          QMessageBox::question(this, tr("Download files?"),
-                                tr("Attempt to download remote files and add as local Resources,\n"
-                                   "or just add as remote Resources?"));
-      bDownloadAndSaveAny = QMessageBox::StandardButton::Yes == but;
-      if (nullptr == pThis)
+      if (!m_optbDownloadDroppedFiles.has_value())
       {
-        return;
+        bool bRemember = false;
+        QPointer<CEditorResourceWidget> pThis(this);
+        QMessageBox msgBox(QMessageBox::Icon::Question, tr("Download files?"),
+                           tr("Attempt to download remote files and add as local Resources,\n"
+                              "or just add as remote Resources?"));
+        QPushButton* pDownload = msgBox.addButton(QObject::tr("Download"), QMessageBox::AcceptRole);
+        msgBox.addButton(QObject::tr("Only Add"), QMessageBox::ActionRole);
+        msgBox.setDefaultButton(pDownload);
+        msgBox.setModal(true);
+        QCheckBox *cb = new QCheckBox(tr("Remember for this session"));
+        QObject::connect(cb, &QCheckBox::toggled, [&bRemember](bool bState){
+          bRemember = bState;
+        });
+        msgBox.setCheckBox(cb);
+
+        if (nullptr == pThis)
+        {
+          return;
+        }
+
+        msgBox.exec();
+        bDownloadAndSaveAny = msgBox.clickedButton() == pDownload;
+        if (bRemember)
+        {
+          m_optbDownloadDroppedFiles = bDownloadAndSaveAny;
+        }
+      }
+      else
+      {
+        bDownloadAndSaveAny = m_optbDownloadDroppedFiles.value();
       }
     }
 
