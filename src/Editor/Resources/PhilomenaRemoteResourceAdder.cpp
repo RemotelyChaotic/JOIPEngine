@@ -283,7 +283,7 @@ void CPhilomenaRemoteResourceAdder::HandleResponseJson(const QUrl& url, bool bDo
   auto it = imgObj.find(c_sJSONElementId);
   if (imgObj.end() != it)
   {
-    res.m_sName = sProvider + "_" + it.value().toString();
+    res.m_sName = sProvider + "_" + it.value().toVariant().toString();
   }
   it = imgObj.find(c_sJSONElementSourceUrl);
   if (imgObj.end() != it)
@@ -341,7 +341,7 @@ void CPhilomenaRemoteResourceAdder::HandleResponseJson(const QUrl& url, bool bDo
             auto vsParts = sTagFull.split(":");
             if (vsParts.size() > 1)
             {
-              vTags.push_back({vsParts[0], vsParts[1], QString()});
+              vTags.push_back({vsParts[0], sTagFull, QString()});
               res.m_vsResourceTags.insert(sTagFull);
             }
             break;
@@ -351,7 +351,7 @@ void CPhilomenaRemoteResourceAdder::HandleResponseJson(const QUrl& url, bool bDo
     }
   }
 
-  AddResourceImpl(res.m_sSource, bDownloadAndAddAsFile, ERequestType::eImage, res, vTags);
+  AddResourceImpl(static_cast<QUrl>(res.m_sPath), bDownloadAndAddAsFile, ERequestType::eImage, res, vTags);
 }
 
 //----------------------------------------------------------------------------------------
