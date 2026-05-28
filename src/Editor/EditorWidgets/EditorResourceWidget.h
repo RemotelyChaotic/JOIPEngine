@@ -69,15 +69,15 @@ protected slots:
 private:
   void HandleResize(bool bForceUpdate);
 
-  std::unique_ptr<CWebResourceOverlay>                 m_spSourceOverlay;
-  std::unique_ptr<CWebResourceOverlay>                 m_spWebOverlay;
-  std::unique_ptr<CTagsEditorOverlay>                  m_spTagsOverlay;
   std::shared_ptr<Ui::CEditorResourceWidget>           m_spUi;
   std::shared_ptr<CWebResourceDownloadManager>         m_spDownloadManager;
   std::shared_ptr<CResourceTutorialStateSwitchHandler> m_spTutorialStateSwitchHandler;
   std::shared_ptr<CSettings>                           m_spSettings;
   tspProject                                           m_spCurrentProject;
   std::weak_ptr<CDatabaseManager>                      m_wpDbManager;
+  QPointer<CWebResourceOverlay>                        m_spSourceOverlay;
+  QPointer<CWebResourceOverlay>                        m_spWebOverlay;
+  QPointer<CTagsEditorOverlay>                         m_spTagsOverlay;
 };
 
 #endif // EDITORRESOURCEWIDGET_H

@@ -62,31 +62,31 @@ namespace
 //
 CEditorResourceWidget::CEditorResourceWidget(QWidget* pParent) :
   CEditorWidgetBase(pParent),
-  m_spSourceOverlay(std::make_unique<CWebResourceOverlay>(this)),
-  m_spWebOverlay(std::make_unique<CWebResourceOverlay>(this)),
-  m_spTagsOverlay(std::make_unique<CTagsEditorOverlay>(this)),
   m_spUi(std::make_shared<Ui::CEditorResourceWidget>()),
   m_spDownloadManager(std::make_shared<CWebResourceDownloadManager>(this)),
   m_spTutorialStateSwitchHandler(nullptr),
   m_spSettings(CApplication::Instance()->Settings()),
-  m_spCurrentProject(nullptr)
+  m_spCurrentProject(nullptr),
+  m_spSourceOverlay(new CWebResourceOverlay(this)),
+  m_spWebOverlay(new CWebResourceOverlay(this)),
+  m_spTagsOverlay(new CTagsEditorOverlay(this))
 {
   m_spUi->setupUi(this);
   connect(m_spUi->pResourceModelView, &CResourceModelView::SignalResourceSelected,
           this, &CEditorResourceWidget::SlotViewResourceSelected);
   connect(m_spUi->pResourceModelView, &CResourceModelView::SignalProjectEdited,
           this, &CEditorResourceWidget::SignalProjectEdited);
-  connect(m_spSourceOverlay.get(), &CWebResourceOverlay::SignalResourceSelected,
+  connect(m_spSourceOverlay, &CWebResourceOverlay::SignalResourceSelected,
           this, &CEditorResourceWidget::SlotWebSourceSelected);
-  connect(m_spTagsOverlay.get(), &CTagsEditorOverlay::SignalTagsChanged,
+  connect(m_spTagsOverlay, &CTagsEditorOverlay::SignalTagsChanged,
           this, &CEditorResourceWidget::SignalProjectEdited);
 }
 
 CEditorResourceWidget::~CEditorResourceWidget()
 {
-  if (nullptr != m_spWebOverlay) m_spWebOverlay.reset();
-  if (nullptr != m_spSourceOverlay) m_spSourceOverlay.reset();
-  if (nullptr != m_spTagsOverlay) m_spTagsOverlay.reset();
+  if (nullptr != m_spWebOverlay) delete m_spWebOverlay;
+  if (nullptr != m_spSourceOverlay) delete m_spSourceOverlay;
+  if (nullptr != m_spTagsOverlay) delete m_spTagsOverlay;
 }
 
 //----------------------------------------------------------------------------------------

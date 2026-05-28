@@ -222,10 +222,10 @@ void CEditorEditableFileModel::InitializeModel(tspProject spProject)
 //
 void CEditorEditableFileModel::DeInitializeModel()
 {
+  m_spProject = nullptr;
   beginResetModel();
   m_cachedScriptsMap.clear();
   endResetModel();
-  m_spProject = nullptr;
   m_sOldProjectLayoutResource = QString();
 }
 

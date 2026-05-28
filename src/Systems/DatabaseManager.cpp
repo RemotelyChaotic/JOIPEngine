@@ -1434,9 +1434,13 @@ void CDatabaseManager::Deinitialize()
   disconnect(m_spSettings.get(), &CSettings::contentFolderChanged,
           this, &CDatabaseManager::SlotContentFolderChanged);
 
-  m_spNotifier.Reset(nullptr);
+  {
+    QSignalBlocker b(m_spNotifier.Locked().Get());
 
-  ClearProjects();
+    ClearProjects();
+  }
+
+  m_spNotifier.Reset(nullptr);
 
   SetInitialized(false);
 }
