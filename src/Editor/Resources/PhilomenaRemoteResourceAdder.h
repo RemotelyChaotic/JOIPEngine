@@ -40,7 +40,7 @@ public:
 
   bool CanHandleUrl(const QUrl& url) const override;
 
-  QString Name() const override { return "Philomena Downloader"; };
+  QString Name() const override { return "Philomena API"; };
 
   void SetNetworkAccessManager(QNetworkAccessManager* pNAManager);
 
@@ -58,7 +58,6 @@ private:
                        ERequestType type,
                        std::optional<SResourceData> res,
                        std::optional<std::vector<STagData>> optvTags);
-  qint32 GetImageId(const QUrl& url) const;
   void HandleResponseJson(const QUrl& url, bool bDownloadAndAddAsFile, const QByteArray& arr);
   void HandleResponseImage(const SRequestItem& item, const QByteArray& arr);
   void PushRequest(const SRequestItem& item);

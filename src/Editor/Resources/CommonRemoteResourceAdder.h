@@ -22,7 +22,7 @@ public:
 
   bool CanHandleUrl(const QUrl& url) const override;
 
-  QString Name() const override { return "Generic Downloader"; };
+  QString Name() const override { return "Generic"; };
 
   void SetNetworkAccessManager(QNetworkAccessManager* pNAManager);
 

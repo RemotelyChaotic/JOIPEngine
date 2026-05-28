@@ -22,13 +22,21 @@ namespace
   // Documented block duration is 15 minutes
   constexpr std::chrono::seconds c_requestBlockTime = 15min + 1s;
   // Get sequest API path
-  constexpr char c_sImageGetPath[] = "/api/v1/json/images/";
+  constexpr char c_sImageGetPathV1[] = "/api/v1/json/images/";
+  constexpr char c_sImageGetPathV3[] = "/api/v3/posts/";
   // Known pages that support Philomena-Syntax
+  // order of the items is important
   constexpr char* c_sAllowedSites[] = { "derpibooru",
                                        "tantabus",
                                        "manebooru",
                                        "twibooru",
                                        "furbooru" };
+  constexpr char* c_sAllowedCdnSites[] = { "derpicdn",
+                                           "tantabuscdn",
+                                           "manebooru",
+                                           "cdn.twibooru",
+                                           "furrycdn" };
+  static_assert(std::size(c_sAllowedSites) == std::size(c_sAllowedCdnSites));
   // The https: protocol must be specified on all URLs.
   constexpr char c_sRequiredProtocol[] = "https";
 
@@ -51,6 +59,150 @@ namespace
   //constexpr char c_sJSONElementAnimated[] = "animated";
 
   constexpr char c_sPropertyReqData[] = "RequestData";
+
+  //--------------------------------------------------------------------------------------
+  //
+  QString GetAPIHostName(const QUrl& url)
+  {
+    static_assert(5 == std::size(c_sAllowedSites));
+    static const std::map<QString, QString> c_map =
+        {
+         {QString(c_sAllowedSites[0]), QString("derpibooru.org")},
+         {QString(c_sAllowedSites[1]), QString("tantabus.ai")},
+         {QString(c_sAllowedSites[2]), QString("manebooru.art")},
+         {QString(c_sAllowedSites[3]), QString("twibooru.org")},
+         {QString(c_sAllowedSites[4]), QString("furbooru.org")},
+         {QString(c_sAllowedCdnSites[0]), QString("derpibooru.org")},
+         {QString(c_sAllowedCdnSites[1]), QString("tantabus.ai")},
+         //{QString(c_sAllowedCdnSites[2]), QString("manebooru.art")}, manebooru has the same hostname
+         {QString(c_sAllowedCdnSites[3]), QString("twibooru.org")},
+         {QString(c_sAllowedCdnSites[4]), QString("furbooru.org")},
+         };
+
+    for (size_t i = 0; std::size(c_sAllowedSites) > i; ++i)
+    {
+      if(url.host().contains(c_sAllowedSites[i]))
+      {
+        return c_map.find(c_sAllowedSites[i])->second;
+      }
+    }
+
+    for (size_t i = 0; std::size(c_sAllowedCdnSites) > i; ++i)
+    {
+      if(url.host().contains(c_sAllowedCdnSites[i]))
+      {
+        return c_map.find(c_sAllowedCdnSites[i])->second;
+      }
+    }
+
+    return QString();
+  }
+
+  //--------------------------------------------------------------------------------------
+  //
+  QString GetAPIImagePath(const QUrl& url)
+  {
+    static_assert(5 == std::size(c_sAllowedSites));
+    static const std::map<QString, QString> c_map =
+    {
+      {QString(c_sAllowedSites[0]), QString(c_sImageGetPathV1)},
+      {QString(c_sAllowedSites[1]), QString(c_sImageGetPathV1)},
+      {QString(c_sAllowedSites[2]), QString(c_sImageGetPathV1)},
+      {QString(c_sAllowedSites[3]), QString(c_sImageGetPathV3)}, // Twibooru uses a different syntax
+      {QString(c_sAllowedSites[4]), QString(c_sImageGetPathV1)},
+    };
+
+    assert(c_map.size() == std::size(c_sAllowedSites));
+
+    for (size_t i = 0; std::size(c_sAllowedSites) > i; ++i)
+    {
+      if(url.host().contains(c_sAllowedSites[i]))
+      {
+        return c_map.find(c_sAllowedSites[i])->second;
+      }
+    }
+
+    for (size_t i = 0; std::size(c_sAllowedCdnSites) > i; ++i)
+    {
+      if(url.host().contains(c_sAllowedCdnSites[i]))
+      {
+        return c_map.find(c_sAllowedSites[i])->second;
+      }
+    }
+
+    return QString(c_sImageGetPathV1);
+  }
+
+  //--------------------------------------------------------------------------------------
+  //
+  qint32 GetImageId(const QUrl& url)
+  {
+    QString sActualFileName = url.fileName();
+    if (!sActualFileName.contains("."))
+    {
+      sActualFileName = QString();
+    }
+
+    if (sActualFileName.isEmpty())
+    {
+      // link in the form
+      // https://derpibooru.org/images/3826319
+      QStringList vsPathElems = url.path().split("/");
+      if (vsPathElems.size() > 0)
+      {
+        bool bOk = false;
+        qint32 iId = vsPathElems.last().toInt(&bOk);
+        if (!bOk)
+        {
+          return -1;
+        }
+        return iId;
+      }
+    }
+    else
+    {
+      // link in any of the forms below. The id is the last number in the path
+      // or the fist number in the filename:
+      // https://furrycdn.org/img/view/2020/4/24/2.png
+      // https://static.manebooru.art/img/2020/10/19/2/large.gif
+      // https://tantabuscdn.net/img/view/2020/7/15/100__safe_ai+generated_automatically+imported_derpibooru+import_generator-colon-thisponydoesnotexist_oc_oc+only_pony_generation+errors_solo.jpg
+      QStringList vsPathElems = url.path().split("/");
+      qint32 iBackMostInt = -1;
+      qint32 iNumberOfIntsInPath = 0;
+      for (qint32 i = vsPathElems.size()-1; 0 <= i; --i)
+      {
+        bool bOk = false;
+        qint32 iPathValInt = vsPathElems[i].toInt(&bOk);
+        if (bOk)
+        {
+          if (0 == iNumberOfIntsInPath)
+          {
+            iBackMostInt = iPathValInt;
+          }
+          ++iNumberOfIntsInPath;
+        }
+      }
+
+      // we have a date and an id in the path
+      if (4 == iNumberOfIntsInPath)
+      {
+        return iBackMostInt;
+      }
+      // the id is in the file
+      else
+      {
+        QStringList vsParts = sActualFileName.split(QRegExp("\\.|_"));
+        // id must be the first element
+        if (vsParts.size() > 0)
+        {
+          bool bOk = false;
+          qint32 iId = vsParts[0].toInt(&bOk);
+          return bOk ? iId : -1;
+        }
+      }
+    }
+    return -1;
+  }
 }
 
 //----------------------------------------------------------------------------------------
@@ -113,6 +265,10 @@ bool CPhilomenaRemoteResourceAdder::CanHandleUrl(const QUrl& url) const
   for (size_t i = 0; std::size(c_sAllowedSites) > i; ++i)
   {
     bHasAnOfSupportedHosts |= url.host().contains(c_sAllowedSites[i]);
+  }
+  for (size_t i = 0; std::size(c_sAllowedCdnSites) > i; ++i)
+  {
+    bHasAnOfSupportedHosts |= url.host().contains(c_sAllowedCdnSites[i]);
   }
   return url.scheme().contains(c_sRequiredProtocol) && bHasAnOfSupportedHosts &&
          GetImageId(url) > -1;
@@ -223,24 +379,6 @@ void CPhilomenaRemoteResourceAdder::AddResourceImpl(
   {
     m_waitingQueue.push({url, bDownloadAndAddAsFile, type, res, optvTags});
   }
-}
-
-//----------------------------------------------------------------------------------------
-//
-qint32 CPhilomenaRemoteResourceAdder::GetImageId(const QUrl& url) const
-{
-  QStringList vsPathElems = url.path().split("/");
-  if (vsPathElems.size() > 0)
-  {
-    bool bOk = false;
-    qint32 iId = vsPathElems.last().toInt(&bOk);
-    if (!bOk)
-    {
-      return -1;
-    }
-    return iId;
-  }
-  return -1;
 }
 
 //----------------------------------------------------------------------------------------
@@ -389,7 +527,8 @@ void CPhilomenaRemoteResourceAdder::PushRequest(const SRequestItem& item)
   QUrl copy = item.url;
   if (ERequestType::eJson == item.reqType)
   {
-    copy.setPath(c_sImageGetPath + QString::number(GetImageId(item.url)));
+    copy.setHost(GetAPIHostName(item.url));
+    copy.setPath(GetAPIImagePath(item.url) + QString::number(GetImageId(item.url)));
     copy.setQuery(QString());
   }
 
