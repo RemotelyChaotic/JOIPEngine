@@ -107,7 +107,7 @@ void CDanbooruResourceAdder::HandleResponseJson(const QUrl& url, bool bDownloadA
   QJsonDocument doc = QJsonDocument::fromJson(arr, &err);
   if (QJsonParseError::NoError != err.error)
   {
-    qWarning() << tr("Could not parse Philomena response.");
+    qWarning() << tr("Could not parse Danbooru response.");
     return;
   }
 
@@ -199,7 +199,7 @@ void CDanbooruResourceAdder::HandleResponseImage(const SRequestItem& item, const
 {
   if (!item.res.has_value())
   {
-    qWarning() << tr("Internal response error in Philomena request.");
+    qWarning() << tr("Internal response error in Danbooru request.");
     return;
   }
 

@@ -1,6 +1,7 @@
 #include "WebResourceDownloadManager.h"
 #include "CommonRemoteResourceAdder.h"
 #include "DanbooruResourceAdder.h"
+#include "E6xBooruResourceAdder.h"
 #include "PhilomenaRemoteResourceAdder.h"
 
 #include "Editor/Resources/CommandAddResource.h"
@@ -36,6 +37,7 @@ CWebResourceDownloadManager::CWebResourceDownloadManager(QWidget* pParent)
   qRegisterMetaType<std::vector<STagData>>();
 
   AddResourceAdder<CPhilomenaRemoteResourceAdder>(this, m_spNAManager.get(), m_vspResourceAdders);
+  AddResourceAdder<CE6xBooruResourceAdder>(this, m_spNAManager.get(), m_vspResourceAdders);
   AddResourceAdder<CDanbooruResourceAdder>(this, m_spNAManager.get(), m_vspResourceAdders);
   AddResourceAdder<CCommonRemoteResourceAdder>(this, m_spNAManager.get(), m_vspResourceAdders);
 }

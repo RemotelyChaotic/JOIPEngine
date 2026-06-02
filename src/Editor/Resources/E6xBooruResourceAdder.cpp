@@ -108,7 +108,7 @@ void CE6xBooruResourceAdder::HandleResponseJson(const QUrl& url, bool bDownloadA
   QJsonDocument doc = QJsonDocument::fromJson(arr, &err);
   if (QJsonParseError::NoError != err.error)
   {
-    qWarning() << tr("Could not parse Philomena response.");
+    qWarning() << tr("Could not parse eXXX Danbooru API response.");
     return;
   }
 
@@ -222,7 +222,7 @@ void CE6xBooruResourceAdder::HandleResponseImage(const SRequestItem& item, const
 {
   if (!item.res.has_value())
   {
-    qWarning() << tr("Internal response error in Philomena request.");
+    qWarning() << tr("Internal response error in eXXX Danbooru API request.");
     return;
   }
 
