@@ -261,6 +261,8 @@ macro(CreateJOIPProject JOIP_PROJECT_NAME)
     ${JOIPSources}/Editor/Resources/CompressJobSettingsOverlay.cpp
     ${JOIPSources}/Editor/Resources/CompressJobSettingsOverlay.h
     ${JOIPSources}/Editor/Resources/CompressJobSettingsOverlay.ui
+    ${JOIPSources}/Editor/Resources/DanbooruResourceAdder.cpp
+    ${JOIPSources}/Editor/Resources/DanbooruResourceAdder.h
     ${JOIPSources}/Editor/Resources/IRemoteResourceAdder.h
     ${JOIPSources}/Editor/Resources/PhilomenaRemoteResourceAdder.cpp
     ${JOIPSources}/Editor/Resources/PhilomenaRemoteResourceAdder.h

@@ -20,6 +20,7 @@ target_sources(JOIPEngineApp
     Editor/Resources/CommonRemoteResourceAdder.h Editor/Resources/CommonRemoteResourceAdder.cpp
     Editor/Resources/PhilomenaRemoteResourceAdder.h Editor/Resources/PhilomenaRemoteResourceAdder.cpp
     Editor/Resources/BooruResourceAdder.h Editor/Resources/BooruResourceAdder.cpp
+    Editor/Resources/DanbooruResourceAdder.h Editor/Resources/DanbooruResourceAdder.cpp
 )
 JOIPProjectSettings(${PROJECT_NAME})
 
