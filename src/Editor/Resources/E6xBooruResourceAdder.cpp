@@ -1,4 +1,4 @@
-#include "DanbooruResourceAdder.h"
+#include "E6xBooruResourceAdder.h"
 #include "WebResourceDownloadManager.h"
 
 #include "Systems/Database/Resource.h"
@@ -13,33 +13,31 @@ namespace
   // Documented rate limit is 30 per 5s per normal request and 20 per API search Path
   // (/api/v1/json/search*) so we make sure we do not surpass either
   constexpr std::chrono::seconds c_requestRefreshInterval = 2s;
-  constexpr qint32 c_iRequestLimit = 10;
+  constexpr qint32 c_iRequestLimit = 2;
   // Get sequest API path
   constexpr char c_sImageGetPath[] = "/posts/";
   // Known pages that support Philomena-Syntax
   // order of the items is important
-  constexpr char* c_sAllowedSites[] = { "danbooru",
-                                       "sonohara",
-                                       "hijiribe",
-                                       "safebooru",
-                                       "yukkuri", // service not available anymore
-                                       "dorkbooru", // closed
-                                       "bronibooru", // service not available anymore
-                                       "miya.nipah" // service not available anymore
-                                       };
+  constexpr char* c_sAllowedSites[] = { "e621",
+                                        "e926",
+                                        "e6ai"
+                                      };
   // The https: protocol must be specified on all URLs.
   constexpr char c_sRequiredProtocol[] = "https";
 
-  constexpr QNetworkReply::NetworkError c_errThrottled = QNetworkReply::NetworkError(429);
+  constexpr QNetworkReply::NetworkError c_errThrottled = QNetworkReply::NetworkError(503);
 
   // JSON elements to parse
+  constexpr char c_sJSONElementPost[] = "post";
   constexpr char c_sJSONElementId[] = "id";
-  constexpr char c_sJSONElementSourceUrl[] = "source";
-  constexpr char c_sJSONElementFileUrl[] = "file_url";
-  constexpr char c_sJSONElementFileExt[] = "file_ext";
-  constexpr char c_sJSONElementTags[] = "tag_string";
-  constexpr char c_sJSONElementTagArtist[] = "tag_string_artist";
-  constexpr char c_sTagArtist[] = "artist";
+  constexpr char c_sJSONElementSourcesUrl[] = "sources";
+  constexpr char c_sJSONElementFile[] = "file";
+  constexpr char c_sJSONElementFileUrl[] = "url";
+  constexpr char c_sJSONElementFileExt[] = "ext";
+  constexpr char c_sJSONElementTags[] = "tags";
+  constexpr char c_sJSONElementTagArtist[] = "artist";
+  constexpr char c_sJSONElementTagDirector[] = "director";
+  constexpr char c_sJSONElementTagPrompter[] = "prompter";
 
   //--------------------------------------------------------------------------------------
   //
@@ -68,16 +66,19 @@ namespace
   }
 }
 
-CDanbooruResourceAdder::CDanbooruResourceAdder(QObject* pParent) :
+//----------------------------------------------------------------------------------------
+//
+CE6xBooruResourceAdder::CE6xBooruResourceAdder(QObject* pParent) :
     CBooruResourceAdder{pParent, c_requestRefreshInterval, c_iRequestLimit}
 {}
-CDanbooruResourceAdder::~CDanbooruResourceAdder()
+
+CE6xBooruResourceAdder::~CE6xBooruResourceAdder()
 {
 }
 
 //----------------------------------------------------------------------------------------
 //
-bool CDanbooruResourceAdder::CanHandleUrl(const QUrl& url) const
+bool CE6xBooruResourceAdder::CanHandleUrl(const QUrl& url) const
 {
   bool bHasAnOfSupportedHosts = false;
   for (size_t i = 0; std::size(c_sAllowedSites) > i; ++i)
@@ -90,7 +91,7 @@ bool CDanbooruResourceAdder::CanHandleUrl(const QUrl& url) const
 
 //----------------------------------------------------------------------------------------
 //
-QUrl CDanbooruResourceAdder::GetRequestUrl(const QUrl& url)
+QUrl CE6xBooruResourceAdder::GetRequestUrl(const QUrl& url)
 {
   QUrl copy = url;
   copy.setPath(c_sImageGetPath + QString::number(GetImageId(url)) + ".json");
@@ -100,7 +101,7 @@ QUrl CDanbooruResourceAdder::GetRequestUrl(const QUrl& url)
 
 //----------------------------------------------------------------------------------------
 //
-void CDanbooruResourceAdder::HandleResponseJson(const QUrl& url, bool bDownloadAndAddAsFile,
+void CE6xBooruResourceAdder::HandleResponseJson(const QUrl& url, bool bDownloadAndAddAsFile,
                                                 const QByteArray& arr)
 {
   QJsonParseError err;
@@ -110,8 +111,6 @@ void CDanbooruResourceAdder::HandleResponseJson(const QUrl& url, bool bDownloadA
     qWarning() << tr("Could not parse Philomena response.");
     return;
   }
-
-  QJsonObject root = doc.object();
 
   QString sProvider;
   for (size_t i = 0; std::size(c_sAllowedSites) > i; ++i)
@@ -123,69 +122,93 @@ void CDanbooruResourceAdder::HandleResponseJson(const QUrl& url, bool bDownloadA
     }
   }
 
+  QJsonObject root = doc.object();
+  auto itPost = root.find(c_sJSONElementPost);
+  if (root.end() == itPost || !itPost->isObject())
+  {
+    qWarning() << tr("%1 response has unexpected format.").arg(sProvider);
+    return;
+  }
+
   std::vector<STagData> vTags;
   SResourceData res;
   res.m_sName = sProvider + "_" + QString::number(GetImageId(url));
   res.m_sSource = url;
 
-  auto it = root.find(c_sJSONElementId);
-  if (root.end() != it)
+  auto post = itPost->toObject();
+  auto it = post.find(c_sJSONElementId);
+  if (post.end() != it)
   {
     res.m_sName = sProvider + "_" + it.value().toVariant().toString();
   }
-  it = root.find(c_sJSONElementSourceUrl);
-  if (root.end() != it)
+  it = post.find(c_sJSONElementSourcesUrl);
+  if (post.end() != it && it->isArray())
   {
-    res.m_sSource = QUrl(it.value().toString());
-  }
-  it = root.find(c_sJSONElementFileExt);
-  if (root.end() != it)
-  {
-    QString sFormat = it.value().toString();
-
-    QStringList imageFormatsList = SResourceFormats::ImageFormats();
-    QStringList videoFormatsList = SResourceFormats::VideoFormats();
-
-    if (!sFormat.isEmpty())
+    QJsonArray arr = it.value().toArray();
+    if (arr.size() > 0)
     {
-      if (imageFormatsList.contains("*." + sFormat))
-      {
-        res.m_type = EResourceType::eImage;
-      }
-      else if (videoFormatsList.contains("*." + sFormat))
-      {
-        res.m_type = EResourceType::eMovie;
-      }
-      else
-      {
-        res.m_type = EResourceType::eImage;
-      }
+      res.m_sSource = QUrl(arr.at(0).toString());
     }
   }
-  it = root.find(c_sJSONElementFileUrl);
-  if (root.end() != it)
+
+  it = post.find(c_sJSONElementFile);
+  if (post.end() != it && it->isObject())
   {
-    res.m_sPath = SResourcePath(QUrl(it.value().toString()));
-  }
-  it = root.find(c_sJSONElementTagArtist);
-  if (root.end() != it)
-  {
-    vTags.push_back({c_sTagArtist,
-                     QString("%1:%2").arg(c_sTagArtist).arg(it.value().toString()),
-                     QString()});
-  }
-  it = root.find(c_sJSONElementTags);
-  if (root.end() != it)
-  {
-    QString sTags = it.value().toString();
-    QStringList vsTags = sTags.split(QRegExp("\\s"));
-    if (!vsTags.empty())
+    QJsonObject objFile = it->toObject();
+    it = objFile.find(c_sJSONElementFileExt);
+    if (objFile.end() != it)
     {
-      for (qint32 i = 0; vsTags.size() > i; ++i)
+      QString sFormat = it.value().toString();
+
+      QStringList imageFormatsList = SResourceFormats::ImageFormats();
+      QStringList videoFormatsList = SResourceFormats::VideoFormats();
+
+      if (!sFormat.isEmpty())
       {
-        Q_UNUSED(vsTags)
-        Q_UNUSED(i)
-        // TODO:
+        if (imageFormatsList.contains("*." + sFormat))
+        {
+          res.m_type = EResourceType::eImage;
+        }
+        else if (videoFormatsList.contains("*." + sFormat))
+        {
+          res.m_type = EResourceType::eMovie;
+        }
+        else
+        {
+          res.m_type = EResourceType::eImage;
+        }
+      }
+    }
+    it = objFile.find(c_sJSONElementFileUrl);
+    if (objFile.end() != it)
+    {
+      res.m_sPath = SResourcePath(QUrl(it.value().toString()));
+    }
+  }
+  it = post.find(c_sJSONElementTags);
+  if (post.end() != it)
+  {
+    QJsonObject objTags = it->toObject();
+    it = objTags.find(c_sJSONElementTagArtist);
+    if (objTags.end() != it && it->isArray())
+    {
+      QJsonArray arr = it.value().toArray();
+      if (arr.size() > 0)
+      {
+        vTags.push_back({c_sJSONElementTagArtist,
+                         QString("%1:%2").arg(c_sJSONElementTagArtist).arg(it.value().toString()),
+                         QString()});
+      }
+    }
+    it = objTags.find(c_sJSONElementTagDirector);
+    if (objTags.end() != it && it->isArray())
+    {
+      QJsonArray arr = it.value().toArray();
+      if (arr.size() > 0)
+      {
+        vTags.push_back({c_sJSONElementTagPrompter,
+                         QString("%1:%2").arg(c_sJSONElementTagPrompter).arg(it.value().toString()),
+                         QString()});
       }
     }
   }
@@ -195,7 +218,7 @@ void CDanbooruResourceAdder::HandleResponseJson(const QUrl& url, bool bDownloadA
 
 //----------------------------------------------------------------------------------------
 //
-void CDanbooruResourceAdder::HandleResponseImage(const SRequestItem& item, const QByteArray& arr)
+void CE6xBooruResourceAdder::HandleResponseImage(const SRequestItem& item, const QByteArray& arr)
 {
   if (!item.res.has_value())
   {
@@ -221,7 +244,7 @@ void CDanbooruResourceAdder::HandleResponseImage(const SRequestItem& item, const
 
 //----------------------------------------------------------------------------------------
 //
-void CDanbooruResourceAdder::NetworkReplyErrorImpl(QNetworkReply::NetworkError code)
+void CE6xBooruResourceAdder::NetworkReplyErrorImpl(QNetworkReply::NetworkError code)
 {
   if (c_errThrottled == code)
   {
