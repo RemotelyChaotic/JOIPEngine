@@ -1,15 +1,10 @@
 #include "PhilomenaRemoteResourceAdder.h"
-#include "Settings.h"
 #include "WebResourceDownloadManager.h"
 
-#include "Systems/Database/DatabaseNotifier.h"
 #include "Systems/Database/Resource.h"
-#include "Systems/DatabaseManager.h"
 
 #include <QJsonDocument>
 #include <QJsonArray>
-
-Q_DECLARE_METATYPE(CPhilomenaRemoteResourceAdder::SRequestItem)
 
 using namespace std::chrono_literals;
 
@@ -57,8 +52,6 @@ namespace
   constexpr char c_sJSONElementTagPrompter[] = "prompter";
   constexpr char c_sJSONElementFormat[] = "format";
   //constexpr char c_sJSONElementAnimated[] = "animated";
-
-  constexpr char c_sPropertyReqData[] = "RequestData";
 
   //--------------------------------------------------------------------------------------
   //
@@ -208,53 +201,11 @@ namespace
 //----------------------------------------------------------------------------------------
 //
 CPhilomenaRemoteResourceAdder::CPhilomenaRemoteResourceAdder(QObject* pParent) :
-  QObject{pParent}, IRemoteResourceAdder(),
-  m_timer(),
-  m_lastTimePointReset(std::chrono::steady_clock::now()),
-  m_resetTime(c_requestRefreshInterval),
-  m_iAllowedRequests(c_iRequestLimit)
+  CBooruResourceAdder{pParent, c_requestRefreshInterval, c_iRequestLimit}
 {
-  qRegisterMetaType<CPhilomenaRemoteResourceAdder::SRequestItem>();
-
-  m_timer.setInterval(1s);
-  m_timer.setSingleShot(false);
-  connect(&m_timer, &QTimer::timeout, this, &CPhilomenaRemoteResourceAdder::SlotTimeoutCheck);
-  m_timer.start();
 }
 CPhilomenaRemoteResourceAdder::~CPhilomenaRemoteResourceAdder()
 {
-  while(!m_waitingQueue.empty()) { m_waitingQueue.pop(); }
-  m_timer.stop();
-  for (auto pResponse : m_vpResponses)
-  {
-    pResponse->abort();
-    pResponse->disconnect();
-    delete pResponse;
-  }
-}
-
-//----------------------------------------------------------------------------------------
-//
-void CPhilomenaRemoteResourceAdder::AddResource(const QUrl& url, bool bDownloadAndAddAsFile)
-{
-  if (nullptr != m_pNAManager)
-  {
-    if (url.isValid())
-    {
-      AddResourceImpl(url, bDownloadAndAddAsFile, ERequestType::eJson, std::nullopt, std::nullopt);
-    }
-    else
-    {
-      qWarning() << "Non-valid url.";
-    }
-  }
-}
-
-//----------------------------------------------------------------------------------------
-//
-bool CPhilomenaRemoteResourceAdder::CanDownloadAndSaveAsFile() const
-{
-  return true;
 }
 
 //----------------------------------------------------------------------------------------
@@ -276,109 +227,13 @@ bool CPhilomenaRemoteResourceAdder::CanHandleUrl(const QUrl& url) const
 
 //----------------------------------------------------------------------------------------
 //
-void CPhilomenaRemoteResourceAdder::SetNetworkAccessManager(QNetworkAccessManager* pNAManager)
+QUrl CPhilomenaRemoteResourceAdder::GetRequestUrl(const QUrl& url)
 {
-  m_pNAManager = pNAManager;
-}
-
-//----------------------------------------------------------------------------------------
-//
-void CPhilomenaRemoteResourceAdder::SlotNetworkReplyError(QNetworkReply::NetworkError code)
-{
-  QPointer<QNetworkReply> pReply = dynamic_cast<QNetworkReply*>(sender());
-  assert(nullptr != pReply);
-  if (nullptr != pReply)
-  {
-    qWarning() << code << pReply->errorString();
-  }
-
-  auto it = std::find(m_vpResponses.begin(), m_vpResponses.end(), pReply);
-  if (m_vpResponses.end() != it)
-  {
-    m_vpResponses.erase(it);
-    pReply->disconnect();
-    pReply->deleteLater();
-  }
-
-  if (pReply->error() == c_errBlocked)
-  {
-    m_iAllowedRequests = 0;
-    m_lastTimePointReset = std::chrono::steady_clock::now();
-    m_resetTime = c_requestBlockTime;
-  }
-  else if (pReply->error() == c_errMiddleWareChallange)
-  {
-    m_iAllowedRequests = 0;
-    m_lastTimePointReset = std::chrono::steady_clock::now();
-    m_resetTime = c_requestRefreshInterval;
-  }
-}
-
-//----------------------------------------------------------------------------------------
-//
-void CPhilomenaRemoteResourceAdder::SlotNetworkReplyFinished()
-{
-  QPointer<QNetworkReply> pReply = dynamic_cast<QNetworkReply*>(sender());
-  assert(nullptr != pReply);
-  if (nullptr != pReply)
-  {
-    QUrl url = pReply->url();
-    QByteArray arr = pReply->readAll();
-    bool bAddAsFile = pReply->property(c_sDownloadProperty).toBool();
-    SRequestItem reqItem = pReply->property(c_sPropertyReqData).value<CPhilomenaRemoteResourceAdder::SRequestItem>();
-
-    {
-      auto it = std::find(m_vpResponses.begin(), m_vpResponses.end(), pReply);
-      if (m_vpResponses.end() != it)
-      {
-        m_vpResponses.erase(it);
-        pReply->disconnect();
-        pReply->deleteLater();
-      }
-    }
-
-    switch (reqItem.reqType)
-    {
-      case ERequestType::eJson:
-        HandleResponseJson(url, bAddAsFile, arr);
-        break;
-      case ERequestType::eImage:
-        HandleResponseImage(reqItem, arr);
-        break;
-    }
-  }
-}
-
-//----------------------------------------------------------------------------------------
-//
-void CPhilomenaRemoteResourceAdder::SlotTimeoutCheck()
-{
-  auto now = std::chrono::steady_clock::now();
-  if (std::chrono::duration_cast<std::chrono::seconds>(now - m_lastTimePointReset) >= m_resetTime)
-  {
-    m_iAllowedRequests = c_iRequestLimit;
-    m_lastTimePointReset = std::chrono::steady_clock::now();
-    m_resetTime = c_requestRefreshInterval;
-
-    ProcessQueue();
-  }
-}
-
-//----------------------------------------------------------------------------------------
-//
-void CPhilomenaRemoteResourceAdder::AddResourceImpl(
-    const QUrl& url, bool bDownloadAndAddAsFile, ERequestType type,
-    std::optional<SResourceData> res,
-    std::optional<std::vector<STagData>> optvTags)
-{
-  if (m_iAllowedRequests > 0)
-  {
-    PushRequest({url, bDownloadAndAddAsFile, type, res, optvTags});
-  }
-  else
-  {
-    m_waitingQueue.push({url, bDownloadAndAddAsFile, type, res, optvTags});
-  }
+  QUrl copy = url;
+  copy.setHost(GetAPIHostName(url));
+  copy.setPath(GetAPIImagePath(url) + QString::number(GetImageId(url)));
+  copy.setQuery(QString());
+  return copy;
 }
 
 //----------------------------------------------------------------------------------------
@@ -520,47 +375,18 @@ void CPhilomenaRemoteResourceAdder::HandleResponseImage(const SRequestItem& item
 
 //----------------------------------------------------------------------------------------
 //
-void CPhilomenaRemoteResourceAdder::PushRequest(const SRequestItem& item)
+void CPhilomenaRemoteResourceAdder::NetworkReplyErrorImpl(QNetworkReply::NetworkError code)
 {
-  m_iAllowedRequests--;
-
-  QUrl copy = item.url;
-  if (ERequestType::eJson == item.reqType)
+  if (c_errBlocked == code)
   {
-    copy.setHost(GetAPIHostName(item.url));
-    copy.setPath(GetAPIImagePath(item.url) + QString::number(GetImageId(item.url)));
-    copy.setQuery(QString());
+    m_iAllowedRequests = 0;
+    m_lastTimePointReset = std::chrono::steady_clock::now();
+    m_resetTime = c_requestBlockTime;
   }
-
-  QNetworkRequest req(copy);
-  req.setRawHeader(IRemoteResourceAdder::c_sUserAgent,
-                   CSettings::c_sApplicationName.toUtf8());
-  auto pResponse = m_pNAManager->get(req);
-  pResponse->setProperty(c_sDownloadProperty, item.bDownloadAndAddAsFile);
-  pResponse->setProperty(c_sPropertyReqData, QVariant::fromValue(item));
-  connect(pResponse, QOverload<QNetworkReply::NetworkError>::of(&QNetworkReply::error),
-          this, &CPhilomenaRemoteResourceAdder::SlotNetworkReplyError);
-  connect(pResponse, &QNetworkReply::finished,
-          this, &CPhilomenaRemoteResourceAdder::SlotNetworkReplyFinished);
-  m_vpResponses.push_back(pResponse);
-}
-
-//----------------------------------------------------------------------------------------
-//
-void CPhilomenaRemoteResourceAdder::ProcessQueue()
-{
-  if (m_waitingQueue.empty())
+  else if (c_errMiddleWareChallange == code)
   {
-    return;
+    m_iAllowedRequests = 0;
+    m_lastTimePointReset = std::chrono::steady_clock::now();
+    m_resetTime = c_requestRefreshInterval;
   }
-
-  if (m_iAllowedRequests <= 0)
-  {
-    return;
-  }
-
-  auto elem = m_waitingQueue.front();
-  m_waitingQueue.pop();
-
-  PushRequest(elem);
 }

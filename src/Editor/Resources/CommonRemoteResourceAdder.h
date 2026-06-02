@@ -24,7 +24,7 @@ public:
 
   QString Name() const override { return "Generic"; };
 
-  void SetNetworkAccessManager(QNetworkAccessManager* pNAManager);
+  void SetNetworkAccessManager(QNetworkAccessManager* pNAManager) override;
 
 signals:
   void SignalNewResourceFile(const SResourceData& res, const std::vector<STagData>& vsTags,

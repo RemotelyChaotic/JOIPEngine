@@ -5,9 +5,11 @@ include(JOIPEngineProject.cmake)
 
 find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Core)
 find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Core)
+find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Core)
 
 CreateJOIPProject(${PROJECT_NAME})
 
+target_link_libraries(JOIPEngineApp PRIVATE Qt${QT_VERSION_MAJOR}::Core)
 target_link_libraries(JOIPEngineApp PRIVATE Qt${QT_VERSION_MAJOR}::Core)
 target_link_libraries(JOIPEngineApp PRIVATE Qt${QT_VERSION_MAJOR}::Core)
 
@@ -17,6 +19,7 @@ target_sources(JOIPEngineApp
     Editor/Resources/WebResourceDownloadManager.h Editor/Resources/WebResourceDownloadManager.cpp
     Editor/Resources/CommonRemoteResourceAdder.h Editor/Resources/CommonRemoteResourceAdder.cpp
     Editor/Resources/PhilomenaRemoteResourceAdder.h Editor/Resources/PhilomenaRemoteResourceAdder.cpp
+    Editor/Resources/BooruResourceAdder.h Editor/Resources/BooruResourceAdder.cpp
 )
 JOIPProjectSettings(${PROJECT_NAME})
 

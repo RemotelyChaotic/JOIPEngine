@@ -238,6 +238,8 @@ macro(CreateJOIPProject JOIP_PROJECT_NAME)
     ${JOIPSources}/Editor/Project/KinkTreeModel.h
     ${JOIPSources}/Editor/Project/KinkTreeSortFilterProxyModel.cpp
     ${JOIPSources}/Editor/Project/KinkTreeSortFilterProxyModel.h
+    ${JOIPSources}/Editor/Resources/BooruResourceAdder.cpp
+    ${JOIPSources}/Editor/Resources/BooruResourceAdder.h
     ${JOIPSources}/Editor/Resources/CommandAddResource.cpp
     ${JOIPSources}/Editor/Resources/CommandAddResource.h
     ${JOIPSources}/Editor/Resources/CommandChangeCurrentResource.cpp

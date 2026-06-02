@@ -3,6 +3,7 @@
 
 #include "Systems/DatabaseInterface/ResourceData.h"
 
+#include <QNetworkAccessManager>
 #include <QUrl>
 
 class IRemoteResourceAdder
@@ -20,6 +21,8 @@ public:
   virtual bool CanHandleUrl(const QUrl& url) const = 0;
 
   virtual QString Name() const = 0;
+
+  virtual void SetNetworkAccessManager(QNetworkAccessManager* pNAManager) = 0;
 
 //signals:
   virtual void SignalNewResourceFile(const SResourceData& res, const std::vector<STagData>& vsTags,
