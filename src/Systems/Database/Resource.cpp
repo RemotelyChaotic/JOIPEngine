@@ -29,7 +29,13 @@ SResourcePath joip_resource::CreatePathFromString(const QString& sStr, const tsp
   if (SResourcePath::IsLocalFileP(QUrl(sStr)))
   {
     QReadLocker projectLocker(&spProject->m_rwLock);
-    QString sPath = MakePathProjectLocal(sStr, spProject->m_sFolderName);
+    // If the path string is empty, we need to asume it's just in the root
+    QString sPath = MakePathProjectLocal(sStr.isEmpty() ?
+                                             CPhysFsFileEngineHandler::c_sScheme :
+                                             sStr,
+                                         spProject->m_sFolderName);
+    // we may have double slashes in there still...
+    sPath.replace("//", "/").replace("\\\\", "\\");
     return SResourcePath(sPath);
   }
   return SResourcePath(sStr);
@@ -84,10 +90,24 @@ void SResource::FromJsonObject(const QJsonObject& json)
   {
     m_sName = it.value().toString();
   }
+  it = json.find("sResourceBundle");
+  if (it != json.end())
+  {
+    m_sResourceBundle = it.value().toString();
+  }
   it = json.find("sPath");
   if (it != json.end())
   {
-    m_sPath = joip_resource::CreatePathFromString(it.value().toString(), m_spParent);
+    QString sPath = it.value().toString();
+    // Compatibility with old Milovana teases that left the path empty.
+    if (sPath.isEmpty() && !m_sResourceBundle.isEmpty())
+    {
+      // Try to fix resource paths to point to the bundle root which in case of empty
+      // was meant to lead to the project root
+      QReadLocker projectLocker(&m_spParent->m_rwLock);
+      sPath = "qrc:/" + m_spParent->m_sName + "/" + m_sName;
+    }
+    m_sPath = joip_resource::CreatePathFromString(sPath, m_spParent);
   }
   it = json.find("sSource");
   if (it != json.end())
@@ -143,11 +163,6 @@ void SResource::FromJsonObject(const QJsonObject& json)
     {
       m_type = EResourceType::eOther;
     }
-  }
-  it = json.find("sResourceBundle");
-  if (it != json.end())
-  {
-    m_sResourceBundle = it.value().toString();
   }
   it = json.find("vsResourceTags");
   m_vsResourceTags.clear();
