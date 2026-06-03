@@ -3,7 +3,7 @@
 
 <head>
   <meta charset="utf-8">
-  <title>Template</title>
+  <title>Add Online Resource</title>
   <meta name="description" content="">
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
@@ -44,9 +44,20 @@
     <br>
 
     <p>Only image and video type <a href="qrc:/resources/help/editor/resources/resource_help.html">Online Resources</a>
-    can be handled, and the link must point to the image or video url directly. Links gated behind
-    logins will not work. These <a href="qrc:/resources/help/editor/resources/resource_help.html">Resources</a>
-    will <i>not</i> be saved on your disk and instead (down-)loaded into memory and displayed when needed.</p>
+    can be handled, and the link must either point to the image or video url directly or to a weblink with a
+    registered Resource Fetcher. Links gated behind logins will not work.<br>
+    Registered Resource Fetchers are currently:<br>
+    <ul>
+      <li><i>Philomena API</i>: Handles: Derpibooru, Tantabus, Manebooru, Twibooru and Furbooru links.</li>
+      <li><i>Danbooru API:</i>: Handles Danbooru links.</li>
+      <li><i>eXXX Danbooru API</i>:Handles: e621, e926 and e6ai links (static image links
+      will fall back to the generic fetcher).</li>
+    </ul> <br>
+    These <a href="qrc:/resources/help/editor/resources/resource_help.html">Resources</a>
+    will <i>not</i> be saved on your disk and instead (down-)loaded into memory and displayed when needed unless
+    "Add as local file" is checked. If checked you will be prompted to store it in a folder
+    in the project and the file will be downloaded. The source link will always be added and
+    the image / video will possibly be tagged with the artist.</p>
 
     <br>
 

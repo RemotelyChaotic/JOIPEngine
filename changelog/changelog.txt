@@ -14,6 +14,15 @@ New Features:
   a Project is loaded by the player. This script can change Project
   properties before the Project is loaded to make compatibility with
   multiple engine versions easier.
+- Resource fetchers added that allow downloading resources and adding
+  them as local resources instead of remote ones, adding source link and
+  possible artist tags. All that's needed is the post link.
+  The following APIs and sites are supported for now:
+  Danbooru: danbooru, sonohara, hijiribe, safebooru
+  Danbooru (defunct, but mirror links might work):
+           yukkuri, dorkbooru, bronibooru, miya.nipah
+  Danbooru (eXXX) version: e621, e926, e6ai
+  Philomena: derpibooru, tantabus, manebooru, twibooru, furbooru
 
 Changes:
 - Node Editor lets you select which Flow to edit and debug.
@@ -28,6 +37,7 @@ Fixed Bugs:
 - Various smaller fixes concerning the code editor.
 - Filtered Resource views did not correctly filter folders.
 - Fixed possible Script Editor crashes.
+- Fixed adding a resource from a different drive on Windows.
 
 =================
 Version 1.7.1.0
