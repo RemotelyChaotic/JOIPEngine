@@ -30,6 +30,9 @@ Changes:
   for Scripts, Layouts, flows and Sequences which will open the respective
   editor.
 - The Editor uses way less threads and for loading Resources than before.
+- The image compression tool now lets you select which images to compress.
+- Scripts can now access the application settings via global "Settings"
+  object.
 
 Fixed Bugs:
 - Fixed adding Resource bundles and archives to the Resources.
