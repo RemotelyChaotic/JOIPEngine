@@ -18,6 +18,8 @@ Rectangle {
     property bool isHovered: false
     property string errorText: ""
 
+    property alias desaturation: desaturateEffect.desaturation
+
     color: "transparent"
     layer.enabled: card.isSelected
     layer.effect: Glow {

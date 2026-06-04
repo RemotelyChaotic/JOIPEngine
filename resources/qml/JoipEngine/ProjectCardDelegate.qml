@@ -529,7 +529,7 @@ Rectangle {
         if (dto.isUsingWeb)
         {
             iconUsesWebRect.visible = true;
-            desaturateEffect.desaturation = (Settings.offline && dto.isUsingWeb) ? 0.9 : 0.0;
+            card.desaturation = (Settings.offline && dto.isUsingWeb) ? 0.9 : 0.0;
         }
 
         describtionDelegate.progress = iProgress;
