@@ -43,9 +43,9 @@ namespace
   const qint32 c_iIndexScriptLayout = 1;
 
   const QString c_sSciptEditorHelpId =      "Editor/SciptEditor";
-  const QString c_sSciptAPIHelpId =         "Editor/SciptAPI/Editor";
+  const QString c_sSciptAPIHelpId =         "Editor/SciptAPI/API";
   const QString c_sEOSSciptEditorHelpId =   "Editor/EOS/SciptEditor";
-  const QString c_sEvalSciptAPIHelpId =     "Editor/SciptAPI/Editor";
+  const QString c_sEvalSciptAPIHelpId =     "Editor/SciptAPI/EvalAPI";
 
   //--------------------------------------------------------------------------------------
   //

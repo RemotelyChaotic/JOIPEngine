@@ -68,6 +68,60 @@ QPointer<CHelpOverlay> CHelpOverlay::m_pHelpOverlay = nullptr;
 
 //----------------------------------------------------------------------------------------
 //
+CHelpTreeSortFilterProxyModel::CHelpTreeSortFilterProxyModel(QObject* pParent) :
+    QSortFilterProxyModel(pParent)
+{
+
+}
+CHelpTreeSortFilterProxyModel::~CHelpTreeSortFilterProxyModel() = default;
+
+//----------------------------------------------------------------------------------------
+//
+bool CHelpTreeSortFilterProxyModel::filterAcceptsRow(int iSourceRow,
+                                                     const QModelIndex& sourceParent) const
+{
+  const QAbstractItemModel* pSourceModel = sourceModel();
+  if (nullptr != pSourceModel)
+  {
+    QModelIndex sourceIndex = pSourceModel->index(iSourceRow, filterKeyColumn(), sourceParent);
+    if(sourceIndex.isValid())
+    {
+      if(!filterRegExp().isEmpty())
+      {
+        QString key = pSourceModel->data(sourceIndex, filterRole()).toString();
+        bool bOk = key.contains(filterRegExp());
+
+        // if any of children matches the filter, then current index matches the filter as well
+        qint32 iNb = pSourceModel->rowCount(sourceIndex) ;
+        for(qint32 i = 0; i < iNb; ++i)
+        {
+          if(filterAcceptsRow(i, sourceIndex))
+          {
+            return true;
+          }
+        }
+
+        return bOk;
+      }
+      else
+      {
+        qint32 iNb = pSourceModel->rowCount(sourceIndex) ;
+        for(qint32 i = 0; i < iNb; ++i)
+        {
+          if(filterAcceptsRow(i, sourceIndex))
+          {
+            return true;
+          }
+        }
+      }
+    }
+  }
+
+  return QSortFilterProxyModel::filterAcceptsRow(iSourceRow, sourceParent);
+}
+
+//----------------------------------------------------------------------------------------
+//
 CHelpOverlayBackGround::CHelpOverlayBackGround(QWidget* pParent) :
   QWidget(pParent),
   m_bOpened(false),
@@ -342,7 +396,7 @@ CHelpOverlay::CHelpOverlay(QPointer<CHelpButtonOverlay> pHelpButton, QWidget* pP
   m_spUi->pHtmlBrowserBox->raise();
 
   QStandardItemModel* pModel = new QStandardItemModel(m_spUi->pHelpSearchTree);
-  QSortFilterProxyModel* pProxy = new QSortFilterProxyModel(m_spUi->pHelpSearchTree);
+  CHelpTreeSortFilterProxyModel* pProxy = new CHelpTreeSortFilterProxyModel(m_spUi->pHelpSearchTree);
   pProxy->setSourceModel(pModel);
   m_spUi->pHelpSearchTree->setModel(pProxy);
   pModel->setColumnCount(1);
@@ -482,6 +536,23 @@ void CHelpOverlay::SlotKeyBindingsChanged()
   m_spUi->BackButton->SetShortcut(m_spSettings->keyBinding("Backward"));
   m_spUi->HomeButton->SetShortcut(m_spSettings->keyBinding("Help"));
   m_spUi->ForardButton->SetShortcut(m_spSettings->keyBinding("Forward"));
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CHelpOverlay::on_pSearchWidget_SignalFilterChanged(const QString& sText, bool)
+{
+  if (auto pProxyModel = dynamic_cast<QSortFilterProxyModel*>(m_spUi->pHelpSearchTree->model()))
+  {
+    if (sText.isNull() || sText.isEmpty())
+    {
+      pProxyModel->setFilterRegExp(QRegExp(".*", Qt::CaseInsensitive, QRegExp::RegExp));
+    }
+    else
+    {
+      pProxyModel->setFilterRegExp(QRegExp(sText, Qt::CaseInsensitive, QRegExp::RegExp));
+    }
+  }
 }
 
 //----------------------------------------------------------------------------------------

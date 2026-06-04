@@ -2,9 +2,11 @@
 #define HELPOVERLAY_H
 
 #include "OverlayButton.h"
+
 #include <QAction>
 #include <QPaintEvent>
 #include <QPointer>
+#include <QSortFilterProxyModel>
 #include <QTimer>
 #include <QTextCursor>
 #include <QWidget>
@@ -27,6 +29,17 @@ class QTextBrowser;
 namespace helpOverlay {
   extern const char* const c_sHelpPagePropertyName;
 }
+
+class CHelpTreeSortFilterProxyModel : public QSortFilterProxyModel
+{
+  Q_OBJECT
+public:
+  explicit CHelpTreeSortFilterProxyModel(QObject* pParent = nullptr);
+  ~CHelpTreeSortFilterProxyModel() override;
+
+protected:
+  bool filterAcceptsRow(int iSourceRow, const QModelIndex& sourceParent) const override;
+};
 
 //----------------------------------------------------------------------------------------
 //
@@ -100,6 +113,7 @@ protected slots:
   void Show() override;
   void SlotCircleAnimationFinished();
   void SlotKeyBindingsChanged();
+  void on_pSearchWidget_SignalFilterChanged(const QString& sText, bool bReturnPressed);
   void on_pHtmlBrowser_backwardAvailable(bool bAvailable);
   void on_pHtmlBrowser_forwardAvailable(bool bAvailable);
   void on_BackButton_clicked();
