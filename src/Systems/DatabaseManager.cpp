@@ -57,16 +57,18 @@ bool CDatabaseManager::LoadBundle(tspProject& spProject, const QString& sBundle)
 
 //----------------------------------------------------------------------------------------
 //
-bool CDatabaseManager::LoadPlugins(tspProject& spProject)
+bool CDatabaseManager::LoadPlugins(tspProject& spProject,
+                                   std::function<void(const tspProject&)> fnOnLoad)
 {
-  return CDatabaseIO::LoadPlugins(spProject);
+  return CDatabaseIO::LoadPlugins(spProject, fnOnLoad);
 }
 
 //----------------------------------------------------------------------------------------
 //
-bool CDatabaseManager::LoadProject(tspProject& spProject, bool bLoadPlugins)
+bool CDatabaseManager::LoadProject(tspProject& spProject, bool bLoadPlugins,
+                                   std::function<void(const tspProject&)> fnOnLoad)
 {
-  return CDatabaseIO::LoadProject(spProject, bLoadPlugins);
+  return CDatabaseIO::LoadProject(spProject, bLoadPlugins, fnOnLoad);
 }
 
 //----------------------------------------------------------------------------------------

@@ -231,7 +231,8 @@ void CSceneMainScreen::LoadProject(qint32 iId, const tSceneToLoad& sStartScene)
     m_spCurrentProject = spProjGotten->DeepCopy();
 
     // we execute the preloadscript
-    {
+    auto fnRunPreload = [this](const tspProject& spProj){
+      Q_UNUSED(this)
       auto fnShowError = [](QString sError, QtMsgType type){
         std::vector<QColor> vBgColors;
         std::vector<QColor> vTextColors;
@@ -253,15 +254,18 @@ void CSceneMainScreen::LoadProject(qint32 iId, const tSceneToLoad& sStartScene)
       };
       std::shared_ptr<CScriptRunnerSignalContext> spLocalContext =
           std::make_shared<CScriptRunnerSignalContext>();
-      connect(spLocalContext.get(), &CScriptRunnerSignalContext::executionError, this,
+      QObject::connect(spLocalContext.get(), &CScriptRunnerSignalContext::executionError, spLocalContext.get(),
               [fnShowError](QString sException, qint32 iLine, QString sStack){
                 fnShowError(QString(tr("%1 on line %2 (%3)")).arg(sException).arg(iLine).arg(sStack), QtMsgType::QtCriticalMsg);
               });
-      connect(spLocalContext.get(), &CScriptRunnerSignalContext::showError, this, fnShowError);
-      preload_scripts::RunPreLoadScript(m_spCurrentProject, spLocalContext);
-    }
+      QObject::connect(spLocalContext.get(), &CScriptRunnerSignalContext::showError, spLocalContext.get(), fnShowError);
+      preload_scripts::RunPreLoadScript(spProj, spLocalContext);
+    };
 
     m_spProjectProivider->SetCurrentProject(m_spCurrentProject);
+
+    // Load project with plugins so we can run the scripts
+    CDatabaseManager::LoadProject(m_spCurrentProject, true, fnRunPreload);
 
     QStringList vsPaths = m_vsBaseImportPathList;
     vsPaths << "qrc:/qml/resources/qml/";
@@ -279,8 +283,6 @@ void CSceneMainScreen::LoadProject(qint32 iId, const tSceneToLoad& sStartScene)
       }
     }
     m_pQmlWidget->engine()->setImportPathList(vsPaths);
-
-    CDatabaseManager::LoadProject(m_spCurrentProject, true);
 
     if (std::holds_alternative<QString>(sStartScene))
     {

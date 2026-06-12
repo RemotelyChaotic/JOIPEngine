@@ -48,8 +48,10 @@ public:
   LockedTypeAutoLocker<CDatabaseNotifier> Notifier() const;
 
   static bool LoadBundle(tspProject& spProject, const QString& sBundle);
-  static bool LoadPlugins(tspProject& spProject);
-  static bool LoadProject(tspProject& spProject, bool bLoadPlugins);
+  static bool LoadPlugins(tspProject& spProject,
+                          std::function<void(const tspProject&)> fnOnLoad = nullptr);
+  static bool LoadProject(tspProject& spProject, bool bLoadPlugins,
+                          std::function<void(const tspProject&)> fnOnLoad = nullptr);
   static bool SetProjectEditing(tspProject& spProject, bool bEnabled);
   static bool UnloadBundle(tspProject& spProject, const QString& sBundle);
   static bool UnloadProject(tspProject& spProject);

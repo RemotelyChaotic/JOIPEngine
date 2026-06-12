@@ -75,7 +75,7 @@ public:
       }
     }
 
-    bOk &= LoadProject(spProject, bLoadPlugins);
+    bOk &= LoadProject(spProject, bLoadPlugins, nullptr);
 
     if (bOk)
     {
@@ -340,7 +340,7 @@ protected:
       spProject->m_rwLock.unlock();
     }
 
-    bOk &= LoadProject(spProject, false);
+    bOk &= LoadProject(spProject, false, nullptr);
 
     if (bOk)
     {
@@ -424,7 +424,8 @@ bool CDatabaseIO::LoadBundle(tspProject& spProject, const QString& sBundle)
 
 //----------------------------------------------------------------------------------------
 //
-bool CDatabaseIO::LoadPlugins(tspProject& spProject)
+bool CDatabaseIO::LoadPlugins(tspProject& spProject,
+                              std::function<void(const tspProject&)> fnOnLoad)
 {
   const QString sProjectPath = PhysicalProjectPath(spProject);
   QWriteLocker locker(&spProject->m_rwLock);
@@ -501,7 +502,7 @@ bool CDatabaseIO::LoadPlugins(tspProject& spProject)
       for (tspProject& spProjPlug : spProject->m_vspPlugins)
       {
         locker.unlock();
-        bool bOkLoadLoc = LoadProject(spProjPlug, true);
+        bool bOkLoadLoc = LoadProject(spProjPlug, true, fnOnLoad);
         bOkLoad &= bOkLoadLoc;
         locker.relock();
 
@@ -601,13 +602,14 @@ bool CDatabaseIO::LoadPlugins(tspProject& spProject)
 
 //----------------------------------------------------------------------------------------
 //
-bool CDatabaseIO::LoadProject(tspProject& spProject, bool bLoadPlugins)
+bool CDatabaseIO::LoadProject(tspProject& spProject, bool bLoadPlugins,
+                              std::function<void(const tspProject&)> fnOnLoad)
 {
   if (nullptr == spProject) { return false; }
 
   const QString sProjectPath = PhysicalProjectPath(spProject);
   QWriteLocker locker(&spProject->m_rwLock);
-  bool bLoaded = false;
+  bool bLoaded = spProject->m_bLoaded;
   bool bWasLoaded = spProject->m_bLoaded;
   if (spProject->m_bBundled && !spProject->m_bLoaded)
   {
@@ -634,7 +636,7 @@ bool CDatabaseIO::LoadProject(tspProject& spProject, bool bLoadPlugins)
   }
 
   // if loaded, pre-load nessessary resources
-  if (!bWasLoaded)
+  if (!bWasLoaded && bLoaded)
   {
     for (auto& itRes : spProject->m_baseData.m_spResourcesMap)
     {
@@ -645,11 +647,16 @@ bool CDatabaseIO::LoadProject(tspProject& spProject, bool bLoadPlugins)
     }
   }
 
-  // If load plugins is requested we always load them even if the project was already loaded
+  // If load plugins is requested or we have an onload function
+  // we always load them even if the project was already loaded
   locker.unlock();
+  if (bLoaded && nullptr != fnOnLoad)
+  {
+    fnOnLoad(spProject);
+  }
   if (bLoadPlugins)
   {
-    LoadPlugins(spProject);
+    LoadPlugins(spProject, fnOnLoad);
   }
 
   return bLoaded;

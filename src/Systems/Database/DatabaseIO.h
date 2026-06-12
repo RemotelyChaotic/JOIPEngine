@@ -20,8 +20,9 @@ public:
   static std::unique_ptr<CDatabaseIO> CreateDatabaseIO(CDatabaseManager* pManager,
                                                        std::shared_ptr<CDatabaseData> spData);
   static bool LoadBundle(tspProject& spProject, const QString& sBundle);
-  static bool LoadPlugins(tspProject& spProject);
-  static bool LoadProject(tspProject& spProject, bool bLoadPlugins);
+  static bool LoadPlugins(tspProject& spProject, std::function<void(const tspProject&)> fnOnLoad);
+  static bool LoadProject(tspProject& spProject, bool bLoadPlugins,
+                          std::function<void(const tspProject&)> fnOnLoad);
   static bool SetProjectEditing(tspProject& spProject, bool bEnabled);
   static bool UnloadBundle(tspProject& spProject, const QString& sBundle);
   static bool UnloadPlugins(tspProject& spProject);
