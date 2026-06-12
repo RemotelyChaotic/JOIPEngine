@@ -35,6 +35,16 @@ void CTeaseStorageWrapper::SetSaveManager(CProjectSavegameManager* pManager)
 
 //----------------------------------------------------------------------------------------
 //
+void CTeaseStorageWrapper::LoadFromOtherStorage(CTeaseStorageWrapper* pOther)
+{
+  for (const auto& [sName, item] : pOther->m_storage)
+  {
+    m_storage[sName] = item;
+  }
+}
+
+//----------------------------------------------------------------------------------------
+//
 void CTeaseStorageWrapper::clear()
 {
   m_storage.clear();

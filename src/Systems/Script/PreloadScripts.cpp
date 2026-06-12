@@ -44,7 +44,8 @@ namespace preload_scripts
 
   //--------------------------------------------------------------------------------------
   //
-  void RunPreLoadScript(const tspProject& spProject, std::weak_ptr<CScriptRunnerSignalContext> wpSignalEmitterContext)
+  void RunPreLoadScript(const tspProject& spProject, std::weak_ptr<CScriptRunnerSignalContext> wpSignalEmitterContext,
+                        const std::map<QString, std::weak_ptr<CScriptCommunicator>>& objToRegister)
   {
     const tWorkerFactoryMap& creatorMap = GetWorkerFactory();
 
@@ -73,6 +74,10 @@ namespace preload_scripts
               l.unlock();
               auto spRunner = it->second("Preload", wpSignalEmitterContext);
               spRunner->Init();
+              for (const auto& [sName , wpComm] : objToRegister)
+              {
+                spRunner->RegisterNewComponent(sName, wpComm);
+              }
               spRunner->RunScript(sScript, nullptr, spRes);
               spRunner->Deinit();
             }

@@ -19,6 +19,8 @@ public:
   CProjectSavegameManager* GetSaveManager() const;
   void SetSaveManager(CProjectSavegameManager* pManager);
 
+  void LoadFromOtherStorage(CTeaseStorageWrapper* pOther);
+
 public slots:
   void clear();
   QJSValue load(const QString& sId);
@@ -33,7 +35,7 @@ signals:
   void saveManagerChanged();
   void valueStored(const QString& sId, const QJSValue& value);
 
-private:
+protected:
   QPointer<CProjectSavegameManager>          m_pSaveManager;
   std::map<QString, QJSValue>                m_storage;
 };

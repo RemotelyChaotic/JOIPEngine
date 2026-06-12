@@ -5,6 +5,7 @@
 #include "ProjectEventTarget.h"
 #include "ProjectSceneManager.h"
 #include "Settings.h"
+#include "TeaseStorage.h"
 #include "WindowContext.h"
 #include "ui_SceneMainScreen.h"
 
@@ -21,6 +22,7 @@
 #include "Systems/Script/ScriptCacheFileEngine.h"
 #include "Systems/Script/ScriptDbWrappers.h"
 #include "Systems/Script/ScriptRunnerSignalEmiter.h"
+#include "Systems/Script/ScriptStorage.h"
 
 #include "Systems/ThreadedSystem.h"
 
@@ -118,6 +120,7 @@ CSceneMainScreen::CSceneMainScreen(QWidget* pParent) :
   m_spProjectProivider(std::make_shared<CPlayerProjectProvider>()),
   m_spCurrentProject(nullptr),
   m_pCurrentProjectWrapper(nullptr),
+  m_pPreLoadStorage(new CTeaseStorageWrapper(this)),
   m_wpDbManager(),
   m_lastScriptExecutionStatus(static_cast<qint32>(CScriptRunnerSignalEmiter::ScriptExecStatus::eRunning)),
   m_bInitialized(false),
@@ -193,6 +196,62 @@ void CSceneMainScreen::Initialize(const std::shared_ptr<CWindowContext>& spWindo
 
 //----------------------------------------------------------------------------------------
 //
+namespace
+{
+  void PreLoadScriptFunction(const tspProject& spProj,
+                             QPointer<CTeaseStorageWrapper> pStorage,
+                             QPointer<QQmlEngine> pEngine)
+  {
+    auto fnShowError = [](QString sError, QtMsgType type){
+      std::vector<QColor> vBgColors;
+      std::vector<QColor> vTextColors;
+      QString sMessage = FormatedMessage(sError, type, vBgColors, vTextColors);
+      switch (type)
+      {
+        case QtMsgType::QtInfoMsg:
+        case QtMsgType::QtDebugMsg:
+          qInfo() << sMessage;
+          break;
+        case QtMsgType::QtWarningMsg:
+          qWarning() << sMessage;
+          break;
+        case QtMsgType::QtCriticalMsg:
+        case QtMsgType::QtFatalMsg:
+          qCritical() << sMessage;
+          break;
+      }
+    };
+
+    std::shared_ptr<CScriptRunnerSignalContext> spLocalContext =
+        std::make_shared<CScriptRunnerSignalContext>();
+
+    CStorageSignalEmitter storageMock;
+    storageMock.Initialize(spLocalContext);
+    auto wpstorageMockCommunicator = storageMock.Communicator();
+
+    QObject::connect(spLocalContext.get(), &CScriptRunnerSignalContext::executionError, spLocalContext.get(),
+                     [fnShowError](QString sException, qint32 iLine, QString sStack){
+                       fnShowError(QString(QObject::tr("%1 on line %2 (%3)")).arg(sException).arg(iLine).arg(sStack), QtMsgType::QtCriticalMsg);
+                     });
+    QObject::connect(spLocalContext.get(), &CScriptRunnerSignalContext::showError, spLocalContext.get(), fnShowError);
+
+    QObject::connect(&storageMock, &CStorageSignalEmitter::load, pStorage,
+                     [&storageMock, pStorage](QString sId, QString sRequestId, QString sContext){
+                      auto retVal = pStorage->load(sId, sContext);
+                      storageMock.loadReturnValue(retVal, sRequestId);
+                     });
+    QObject::connect(&storageMock, &CStorageSignalEmitter::store, pStorage,
+                     [pStorage, pEngine](QString sId, QVariant value, QString sContext) {
+                      pStorage->store(sId, pEngine->toScriptValue(value), sContext);
+                     });
+
+    preload_scripts::RunPreLoadScript(spProj, spLocalContext,
+                                      {{"localStorage", wpstorageMockCommunicator}});
+  }
+}
+
+//----------------------------------------------------------------------------------------
+//
 void CSceneMainScreen::LoadProject(qint32 iId, const tSceneToLoad& sStartScene)
 {
   if (!m_bInitialized) { return; }
@@ -230,42 +289,13 @@ void CSceneMainScreen::LoadProject(qint32 iId, const tSceneToLoad& sStartScene)
     // we work on a copy so we can modify it
     m_spCurrentProject = spProjGotten->DeepCopy();
 
-    // we execute the preloadscript
-    auto fnRunPreload = [this](const tspProject& spProj){
-      Q_UNUSED(this)
-      auto fnShowError = [](QString sError, QtMsgType type){
-        std::vector<QColor> vBgColors;
-        std::vector<QColor> vTextColors;
-        QString sMessage = FormatedMessage(sError, type, vBgColors, vTextColors);
-        switch (type)
-        {
-          case QtMsgType::QtInfoMsg:
-          case QtMsgType::QtDebugMsg:
-            qInfo() << sMessage;
-            break;
-          case QtMsgType::QtWarningMsg:
-            qWarning() << sMessage;
-            break;
-          case QtMsgType::QtCriticalMsg:
-          case QtMsgType::QtFatalMsg:
-            qCritical() << sMessage;
-            break;
-        }
-      };
-      std::shared_ptr<CScriptRunnerSignalContext> spLocalContext =
-          std::make_shared<CScriptRunnerSignalContext>();
-      QObject::connect(spLocalContext.get(), &CScriptRunnerSignalContext::executionError, spLocalContext.get(),
-              [fnShowError](QString sException, qint32 iLine, QString sStack){
-                fnShowError(QString(tr("%1 on line %2 (%3)")).arg(sException).arg(iLine).arg(sStack), QtMsgType::QtCriticalMsg);
-              });
-      QObject::connect(spLocalContext.get(), &CScriptRunnerSignalContext::showError, spLocalContext.get(), fnShowError);
-      preload_scripts::RunPreLoadScript(spProj, spLocalContext);
-    };
-
     m_spProjectProivider->SetCurrentProject(m_spCurrentProject);
 
     // Load project with plugins so we can run the scripts
-    CDatabaseManager::LoadProject(m_spCurrentProject, true, fnRunPreload);
+    // We also execute the preloadscript
+    CDatabaseManager::LoadProject(m_spCurrentProject, true, [this](const tspProject& spProj){
+      ::PreLoadScriptFunction(spProj, m_pPreLoadStorage, m_pQmlWidget->engine());
+    });
 
     QStringList vsPaths = m_vsBaseImportPathList;
     vsPaths << "qrc:/qml/resources/qml/";
@@ -360,6 +390,7 @@ void CSceneMainScreen::UnloadProject()
   if (!m_bInitialized) { return; }
 
   m_runningState = eShuttingDown;
+  m_pPreLoadStorage->clear();
   m_spDialogueManager->UnloadProject();
   m_spScriptRunner->InterruptExecution();
 }
@@ -867,6 +898,13 @@ void CSceneMainScreen::LoadQml()
     QQmlEngine::setObjectOwnership(m_pCurrentProjectWrapper, QQmlEngine::CppOwnership);
     pRootObject->setProperty("currentlyLoadedProject", QVariant::fromValue(m_pCurrentProjectWrapper.data()));
     pRootObject->setProperty("debug", m_bBeingDebugged);
+
+    auto pStorage = pRootObject->findChild<CTeaseStorageWrapper*>();
+    if (nullptr != pStorage)
+    {
+      pStorage->LoadFromOtherStorage(m_pPreLoadStorage);
+    }
+
     QMetaObject::invokeMethod(pRootObject, "onLoadProject");
   }
 }

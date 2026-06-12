@@ -18,6 +18,7 @@ class CProjectScriptWrapperReadOnly;
 class CSceneNodeResolver;
 class CScriptRunner;
 class CSettings;
+class CTeaseStorageWrapper;
 class CThreadedSystem;
 class CWindowContext;
 namespace Ui {
@@ -131,6 +132,7 @@ private:
   QPointer<CProjectScriptWrapperReadOnly>                             m_pCurrentProjectWrapper;
   QPointer<CPlayerConsoleError>                               m_pErrorConsole;
   QPointer<QQuickWidget>                                      m_pQmlWidget;
+  QPointer<CTeaseStorageWrapper>                              m_pPreLoadStorage;
   std::weak_ptr<CDatabaseManager>                             m_wpDbManager;
   QMetaObject::Connection                                     m_runFinishedConn;
   QStringList                                                 m_vsBaseImportPathList;

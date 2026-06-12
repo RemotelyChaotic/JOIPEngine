@@ -38,7 +38,8 @@
     <a href="qrc:/resources/help/project/joi_project_help.html">JOI-Project</a> by the
     <a href="qrc:/resources/help/play_button_help.html">Player</a>. The script can be a
     <a href="qrc:/resources/help/editor/resources/resource_help.html">Script Resource</a> of type
-    <i>js</i> or <i>lua</i>. This Script allows you to modify the Project before loading it.
+    <i>js</i> or <i>lua</i>. This Script allows you to modify the Project and localStorage before loading
+    the Project.
     </p>
 
     <br>
@@ -54,7 +55,43 @@
 
     <br>
 
+    <p> The script is also useful for
+    <a href="qrc:/resources/help/editor/projectsettings/pluginsubfolder_help.html">Plugin</a>
+    registration logic as the Preload Script of every plugin will be called before loading the Plugin.</p>
+
+    <br>
+
     <p>The following objects and properties can be accessed in this script:</p>
+
+    <br>
+
+    <h2>PlayerStorage (name: <i>localStorage</i>)</h2>
+
+    <br>
+
+    <p>This object is automatically registered by the JOIP-Engine and stores values that
+    can be retrieved at any time. The storage and the values within will remain until the currently running
+    <a href="qrc:/resources/help/project/joi_project_help.html">JOI-Project</a> finishes
+    playing. The preload script only allows for loading and storing values all other
+    functions of the storage will do nothing.<br>
+      <ul>
+        <li><b>store ( string id, var value ):</b><br>
+        Stores a value with the given id in the storage. Any value can be stored and loaded, even complex objects.<br>
+        <i>Example Usage (JS):</i><br>
+        localStorage.store("value", 5);<br>
+        <i>Example Usage (Lua):</i><br>
+        localStorage:store('value', 5);<br>
+        <br></li>
+
+        <li><b>load ( string id ): value:</b><br>
+        Loads a value with the given id from the storage. Any value can be stored and loaded, even complex objects.<br>
+        <i>Example Usage (JS):</i><br>
+        var value = localStorage.load("value");<br>
+        <i>Example Usage (Lua):</i><br>
+        local value = localStorage:load('value');<br>
+        <br></li>
+      </ul>
+    </p>
 
     <br>
 
