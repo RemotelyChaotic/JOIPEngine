@@ -15,7 +15,10 @@
 QString joip_resource::MakePathProjectLocal(const QString& sPath, const QString& sFolderName)
 {
   static QString sPfs = QString(CPhysFsFileEngineHandler::c_sScheme).replace(":/", ":");
-  return QString(sPath).replace(sPfs, sPfs + sFolderName + "/");
+  const QString sNewPath = sPfs + sFolderName + "/";
+  return QString(sPath)
+    .replace("file:", sPfs) // compatibility with very old projects (<=1.2) before pfs, using file:
+    .replace(sPfs, sNewPath); // compatibility with pre-1.8 Projects
 }
 
 QString joip_resource::MakePathSerialized(const QString& sPath, const QString& sFolderName)
