@@ -42,6 +42,7 @@ Fixed Bugs:
 - Filtered Resource views did not correctly filter folders.
 - Fixed possible Script Editor crashes.
 - Fixed adding a resource from a different drive on Windows.
+- Fixed Project name fixing with special characters in the project name.
 
 =================
 Version 1.7.1.0

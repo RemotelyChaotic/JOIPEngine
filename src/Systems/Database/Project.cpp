@@ -13,6 +13,7 @@
 
 namespace  {
   const QRegExp c_rxExcludedNames("^(LPT1|LPT2|LPT3|LPT4|LPT5|LPT6|LPT7|LPT8|LPT9|COM1|COM2|COM3|COM4|COM5|COM6|COM7|COM8|COM9|PRN|AUX|NUL|CON|CLOCK\\$|\\.|\\.\\.)$");
+  const QRegExp c_rxSpecialCharsNotAllowed("\"|\\\\|\\/|:|\\||\\<|\\>|\\*|\\?|&|\\(|\\)|\\+|\\[|\\]|;");
 }
 
 //----------------------------------------------------------------------------------------
@@ -501,7 +502,7 @@ bool ProjectNameCheck(const QString& sProjectName, QString* sErrorText,
     }
     return false;
   }
-  else if (sProjectName.contains(QRegExp("\"|\\\\|\\/|:|\\||\\<|\\>|\\*|\\?|&|\\(|\\)|\\+|\\[|\\]|;")))
+  else if (sProjectName.contains(c_rxSpecialCharsNotAllowed))
   {
     if (nullptr != sErrorText)
     {
@@ -605,7 +606,8 @@ QString ToValidProjectName(const QString& sProjectName)
   {
     QChar c = sFinalName[i];
     if (0x1f > c.unicode() || 0x80 <= c.unicode() ||
-        !(c.isLetterOrNumber() || c.isSymbol() || c.isMark() || c.isSpace() || c.isPunct()))
+        !(c.isLetterOrNumber() || c.isSymbol() || c.isMark() || c.isSpace() || c.isPunct()) ||
+        QString(c).contains(c_rxSpecialCharsNotAllowed))
     {
       sFinalName.replace(i, 1, '0');
     }
