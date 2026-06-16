@@ -205,7 +205,8 @@ QLabel#PlayButton {
 QLabel#ExitButton {
   border-image: url(:/resources/style/img/ButtonExit.png);
 }
-QLabel#WarningIcon {
+QLabel#WarningIcon,
+QLabel#WarningIcon_2 {
   border-image: url(:/resources/style/img/WarningIcon.png);
 }
 QLabel#ErrorIcon {

@@ -9,7 +9,14 @@
 class CCommandChangeVersion : public QUndoCommand
 {
 public:
-  CCommandChangeVersion(QPointer<QSpinBox> pProjectMajorVersion,
+  enum EVersionType
+  {
+    eProject,
+    eEngine
+  };
+
+  CCommandChangeVersion(EVersionType versionType,
+                        QPointer<QSpinBox> pProjectMajorVersion,
                         QPointer<QSpinBox> pProjectMinorVersion,
                         QPointer<QSpinBox> pProjectPatchVersion,
                         const std::function<void(void)>& fnOnUndoRedo,
@@ -31,6 +38,7 @@ protected:
   std::function<void(void)> m_fnOnUndoRedo;
   SVersion           m_originalVersion;
   SVersion           m_newVersion;
+  EVersionType       m_versionType;
 };
 
 #endif // CCOMMANDCHANGEVERSION_H

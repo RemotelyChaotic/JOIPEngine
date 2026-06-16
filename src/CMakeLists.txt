@@ -22,6 +22,7 @@ target_sources(JOIPEngineApp
     Editor/Resources/BooruResourceAdder.h Editor/Resources/BooruResourceAdder.cpp
     Editor/Resources/DanbooruResourceAdder.h Editor/Resources/DanbooruResourceAdder.cpp
     Editor/Resources/E6xBooruResourceAdder.h Editor/Resources/E6xBooruResourceAdder.cpp
+    Editor/Project/CommandChangeCustomEngineVersion.h Editor/Project/CommandChangeCustomEngineVersion.cpp
 )
 JOIPProjectSettings(${PROJECT_NAME})
 

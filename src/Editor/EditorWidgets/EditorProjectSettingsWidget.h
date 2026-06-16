@@ -39,6 +39,10 @@ protected slots:
   void on_pProjectMajorVersion_valueChanged(qint32 iValue);
   void on_pProjectMinorVersion_valueChanged(qint32 iValue);
   void on_pProjectPatchVersion_valueChanged(qint32 iValue);
+  void on_pEngineMajorVersion_valueChanged(qint32 iValue);
+  void on_pEngineMinorVersion_valueChanged(qint32 iValue);
+  void on_pEnginePatchVersion_valueChanged(qint32 iValue);
+  void on_pOverrideEngineVersionCheckBox_toggled(bool bChecked);
   void on_pSoundEmitterCount_valueChanged(qint32 iValue);
   void on_pFontComboBox_currentFontChanged(const QFont& font);
   void on_pDefaultLayoutComboBox_currentIndexChanged(qint32 iIdx);

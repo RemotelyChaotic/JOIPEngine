@@ -9,6 +9,7 @@
 #include "Editor/Project/AchievementWidget.h"
 #include "Editor/Project/CommandChangeAchievements.h"
 #include "Editor/Project/CommandChangeCanStartFromAnyScene.h"
+#include "Editor/Project/CommandChangeCustomEngineVersion.h"
 #include "Editor/Project/CommandChangeDescribtion.h"
 #include "Editor/Project/CommandChangeEmitterCount.h"
 #include "Editor/Project/CommandChangeFetishes.h"
@@ -55,6 +56,7 @@ namespace
   const QString c_sRenameProjectHelpId =    "Editor/RenameProject";
   const QString c_sProjectVersionHelpId =   "Editor/ProjectVersion";
   const QString c_sEngineVersionHelpId =    "Editor/EngineVersion";
+  const QString c_sCustomEngineVersionHelpId ="Editor/CustomEngineVersion";
   const QString c_sSoundEmitterCountHelpId ="Editor/SoundEmitterCount";
   const QString c_sMetronomeToyCmdModeId   ="Editor/MetronomeToyCmdMode";
   const QString c_sLayoutHelpId =           "Editor/Layout";
@@ -111,6 +113,8 @@ void CEditorProjectSettingsWidget::Initialize()
     wpHelpFactory->RegisterHelp(c_sProjectVersionHelpId, ":/resources/help/editor/projectsettings/projectversion_help.html");
     m_spUi->pEngineVersionContainer->setProperty(helpOverlay::c_sHelpPagePropertyName, c_sEngineVersionHelpId);
     wpHelpFactory->RegisterHelp(c_sEngineVersionHelpId, ":/resources/help/editor/projectsettings/engineversion_help.html");
+    m_spUi->pOverrideEngineVersionContainer->setProperty(helpOverlay::c_sHelpPagePropertyName, c_sCustomEngineVersionHelpId);
+    wpHelpFactory->RegisterHelp(c_sCustomEngineVersionHelpId, ":/resources/help/editor/projectsettings/custom_engineversion_help.html");
     m_spUi->pSoundEmitterCount->setProperty(helpOverlay::c_sHelpPagePropertyName, c_sSoundEmitterCountHelpId);
     wpHelpFactory->RegisterHelp(c_sSoundEmitterCountHelpId, ":/resources/help/editor/projectsettings/number_soundemitters_help.html");
     m_spUi->pSoundEmitterCount->setProperty(helpOverlay::c_sHelpPagePropertyName, c_sMetronomeToyCmdModeId);
@@ -199,6 +203,7 @@ void CEditorProjectSettingsWidget::Initialize()
   m_spUi->pEngineMinorVersion->setValue(version.m_iMinor);
   m_spUi->pEnginePatchVersion->setValue(version.m_iPatch);
   m_spUi->WarningIcon->setVisible(false);
+  m_spUi->WarningIcon_2->setVisible(false);
 
   new CUndoRedoFilter(m_spUi->pTitleLineEdit, nullptr);
   new CUndoRedoFilter(m_spUi->pProjectMajorVersion, nullptr);
@@ -252,10 +257,30 @@ void CEditorProjectSettingsWidget::LoadProject(tspProject spProject)
 
     SVersion targetVersion(m_spCurrentProject->m_iTargetVersion);
     SVersion engineVersion(VERSION_XYZ);
+    m_spUi->pEngineMajorVersion->blockSignals(true);
+    m_spUi->pEngineMinorVersion->blockSignals(true);
+    m_spUi->pEnginePatchVersion->blockSignals(true);
+    m_spUi->pEngineMajorVersion->setProperty(editor::c_sPropertyOldValue, static_cast<qint32>(targetVersion.m_iMajor));
+    m_spUi->pEngineMinorVersion->setProperty(editor::c_sPropertyOldValue, static_cast<qint32>(targetVersion.m_iMinor));
+    m_spUi->pEnginePatchVersion->setProperty(editor::c_sPropertyOldValue, static_cast<qint32>(targetVersion.m_iPatch));
     m_spUi->pEngineMajorVersion->setValue(static_cast<qint32>(targetVersion.m_iMajor));
     m_spUi->pEngineMinorVersion->setValue(static_cast<qint32>(targetVersion.m_iMinor));
     m_spUi->pEnginePatchVersion->setValue(static_cast<qint32>(targetVersion.m_iPatch));
+    m_spUi->pEngineMajorVersion->setEnabled(!bReadOnly && m_spCurrentProject->m_bCustomEngineVersion);
+    m_spUi->pEngineMinorVersion->setEnabled(!bReadOnly && m_spCurrentProject->m_bCustomEngineVersion);
+    m_spUi->pEnginePatchVersion->setEnabled(!bReadOnly && m_spCurrentProject->m_bCustomEngineVersion);
+    m_spUi->pEngineMajorVersion->blockSignals(false);
+    m_spUi->pEngineMinorVersion->blockSignals(false);
+    m_spUi->pEnginePatchVersion->blockSignals(false);
+
+    m_spUi->pOverrideEngineVersionCheckBox->blockSignals(true);
+    m_spUi->pOverrideEngineVersionCheckBox->setEnabled(!bReadOnly);
+    m_spUi->pOverrideEngineVersionCheckBox->setProperty(editor::c_sPropertyOldValue, m_spCurrentProject->m_bCustomEngineVersion);
+    m_spUi->pOverrideEngineVersionCheckBox->setChecked(m_spCurrentProject->m_bCustomEngineVersion);
+    m_spUi->pOverrideEngineVersionCheckBox->blockSignals(false);
+
     m_spUi->WarningIcon->setVisible(targetVersion != engineVersion);
+    m_spUi->WarningIcon_2->setVisible(m_spCurrentProject->m_bCustomEngineVersion);
 
     SVersion projVersion(m_spCurrentProject->m_iVersion);
     m_spUi->pProjectMajorVersion->blockSignals(true);
@@ -377,13 +402,25 @@ void CEditorProjectSettingsWidget::UnloadProject()
   m_spUi->pTitleLineEdit->setReadOnly(false);
 
   SVersion version(VERSION_XYZ);
+  m_spUi->pEngineMajorVersion->blockSignals(true);
+  m_spUi->pEngineMinorVersion->blockSignals(true);
+  m_spUi->pEnginePatchVersion->blockSignals(true);
+  m_spUi->pEngineMajorVersion->setEnabled(true);
+  m_spUi->pEngineMinorVersion->setEnabled(true);
+  m_spUi->pEnginePatchVersion->setEnabled(true);
   m_spUi->pEngineMajorVersion->setValue(version.m_iMajor);
   m_spUi->pEngineMinorVersion->setValue(version.m_iMinor);
   m_spUi->pEnginePatchVersion->setValue(version.m_iPatch);
+  m_spUi->pEngineMajorVersion->blockSignals(false);
+  m_spUi->pEngineMinorVersion->blockSignals(false);
+  m_spUi->pEnginePatchVersion->blockSignals(false);
+
   m_spUi->pProjectMajorVersion->setEnabled(true);
   m_spUi->pProjectMinorVersion->setEnabled(true);
   m_spUi->pProjectPatchVersion->setEnabled(true);
+
   m_spUi->WarningIcon->setVisible(false);
+  m_spUi->WarningIcon_2->setVisible(false);
 
   m_spUi->pDescribtionTextEdit->clearSource();
   m_spUi->pDescribtionTextEdit->setReadOnly(false);
@@ -414,14 +451,21 @@ void CEditorProjectSettingsWidget::SaveProject()
                                             static_cast<quint32>(m_spUi->pProjectMinorVersion->value()),
                                             static_cast<quint32>(m_spUi->pProjectPatchVersion->value()));
 
-  SVersion version(VERSION_XYZ);
-  m_spUi->pEngineMajorVersion->setValue(version.m_iMajor);
-  m_spUi->pEngineMinorVersion->setValue(version.m_iMinor);
-  m_spUi->pEnginePatchVersion->setValue(version.m_iPatch);
+  SVersion engineVersion(VERSION_XYZ);
+  bool bCustomEngineVersion = m_spUi->pOverrideEngineVersionCheckBox->isChecked();
+  if (!bCustomEngineVersion)
+  {
+    m_spUi->pEngineMajorVersion->setValue(engineVersion.m_iMajor);
+    m_spUi->pEngineMinorVersion->setValue(engineVersion.m_iMinor);
+    m_spUi->pEnginePatchVersion->setValue(engineVersion.m_iPatch);
+  }
   m_spCurrentProject->m_iTargetVersion = SVersion(static_cast<quint32>(m_spUi->pEngineMajorVersion->value()),
                                                   static_cast<quint32>(m_spUi->pEngineMinorVersion->value()),
                                                   static_cast<quint32>(m_spUi->pEnginePatchVersion->value()));
-  m_spUi->WarningIcon->setVisible(false);
+  m_spCurrentProject->m_bCustomEngineVersion = bCustomEngineVersion;
+
+  m_spUi->WarningIcon->setVisible(engineVersion != m_spCurrentProject->m_iTargetVersion);
+  m_spUi->WarningIcon_2->setVisible(bCustomEngineVersion);
 
   m_spCurrentProject->m_iNumberOfSoundEmitters = m_spUi->pSoundEmitterCount->value();
 
@@ -467,7 +511,8 @@ void CEditorProjectSettingsWidget::on_pProjectMajorVersion_valueChanged(qint32 i
   Q_UNUSED(iValue)
 
   QPointer<CEditorProjectSettingsWidget> pThis(this);
-  UndoStack()->push(new CCommandChangeVersion(m_spUi->pProjectMajorVersion,
+  UndoStack()->push(new CCommandChangeVersion(CCommandChangeVersion::eProject,
+                                              m_spUi->pProjectMajorVersion,
                                               m_spUi->pProjectMinorVersion,
                                               m_spUi->pProjectPatchVersion,
                                               [pThis]() {
@@ -484,7 +529,8 @@ void CEditorProjectSettingsWidget::on_pProjectMinorVersion_valueChanged(qint32 i
   Q_UNUSED(iValue)
 
   QPointer<CEditorProjectSettingsWidget> pThis(this);
-  UndoStack()->push(new CCommandChangeVersion(m_spUi->pProjectMajorVersion,
+  UndoStack()->push(new CCommandChangeVersion(CCommandChangeVersion::eProject,
+                                              m_spUi->pProjectMajorVersion,
                                               m_spUi->pProjectMinorVersion,
                                               m_spUi->pProjectPatchVersion,
                                               [pThis]() {
@@ -501,12 +547,89 @@ void CEditorProjectSettingsWidget::on_pProjectPatchVersion_valueChanged(qint32 i
   Q_UNUSED(iValue)
 
   QPointer<CEditorProjectSettingsWidget> pThis(this);
-  UndoStack()->push(new CCommandChangeVersion(m_spUi->pProjectMajorVersion,
+  UndoStack()->push(new CCommandChangeVersion(CCommandChangeVersion::eProject,
+                                              m_spUi->pProjectMajorVersion,
                                               m_spUi->pProjectMinorVersion,
                                               m_spUi->pProjectPatchVersion,
                                               [pThis]() {
                                                 emit pThis->SignalProjectEdited();
                                               }));
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CEditorProjectSettingsWidget::on_pEngineMajorVersion_valueChanged(qint32 iValue)
+{
+  WIDGET_INITIALIZED_GUARD
+  if (nullptr == m_spCurrentProject) { return; }
+  Q_UNUSED(iValue)
+
+  QPointer<CEditorProjectSettingsWidget> pThis(this);
+  UndoStack()->push(new CCommandChangeVersion(CCommandChangeVersion::eEngine,
+                                              m_spUi->pEngineMajorVersion,
+                                              m_spUi->pEngineMinorVersion,
+                                              m_spUi->pEnginePatchVersion,
+                                              [pThis]() {
+                                                emit pThis->SignalProjectEdited();
+                                              }));
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CEditorProjectSettingsWidget::on_pEngineMinorVersion_valueChanged(qint32 iValue)
+{
+  WIDGET_INITIALIZED_GUARD
+  if (nullptr == m_spCurrentProject) { return; }
+  Q_UNUSED(iValue)
+
+  QPointer<CEditorProjectSettingsWidget> pThis(this);
+  UndoStack()->push(new CCommandChangeVersion(CCommandChangeVersion::eEngine,
+                                              m_spUi->pEngineMajorVersion,
+                                              m_spUi->pEngineMinorVersion,
+                                              m_spUi->pEnginePatchVersion,
+                                              [pThis]() {
+                                                emit pThis->SignalProjectEdited();
+                                              }));
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CEditorProjectSettingsWidget::on_pEnginePatchVersion_valueChanged(qint32 iValue)
+{
+  WIDGET_INITIALIZED_GUARD
+  if (nullptr == m_spCurrentProject) { return; }
+  Q_UNUSED(iValue)
+
+  QPointer<CEditorProjectSettingsWidget> pThis(this);
+  UndoStack()->push(new CCommandChangeVersion(CCommandChangeVersion::eEngine,
+                                              m_spUi->pEngineMajorVersion,
+                                              m_spUi->pEngineMinorVersion,
+                                              m_spUi->pEnginePatchVersion,
+                                              [pThis]() {
+                                                emit pThis->SignalProjectEdited();
+                                              }));
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CEditorProjectSettingsWidget::on_pOverrideEngineVersionCheckBox_toggled(bool bChecked)
+{
+  WIDGET_INITIALIZED_GUARD
+  if (nullptr == m_spCurrentProject) { return; }
+  Q_UNUSED(bChecked)
+
+  QPointer<CEditorProjectSettingsWidget> pThis(this);
+  UndoStack()->push(new CCommandChangeCustomEngineVersion(
+                                                  m_spUi->pOverrideEngineVersionCheckBox,
+                                                  m_spUi->WarningIcon_2,
+                                                  {
+                                                    m_spUi->pEngineMajorVersion,
+                                                    m_spUi->pEngineMinorVersion,
+                                                    m_spUi->pEnginePatchVersion,
+                                                  },
+                                                  [pThis]() {
+                                                    emit pThis->SignalProjectEdited();
+                                                  }));
 }
 
 //----------------------------------------------------------------------------------------

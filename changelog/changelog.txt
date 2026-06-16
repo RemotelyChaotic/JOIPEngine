@@ -23,6 +23,7 @@ New Features:
            yukkuri, dorkbooru, bronibooru, miya.nipah
   Danbooru (eXXX) version: e621, e926, e6ai
   Philomena: derpibooru, tantabus, manebooru, twibooru, furbooru
+- Added the ability to set a custom engine version for Projects.
 
 Changes:
 - Node Editor lets you select which Flow to edit and debug.

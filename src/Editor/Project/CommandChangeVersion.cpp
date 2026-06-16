@@ -2,14 +2,17 @@
 #include "Editor/EditorCommandIds.h"
 #include "Editor/EditorWidgetTypes.h"
 
-CCommandChangeVersion::CCommandChangeVersion(QPointer<QSpinBox> pProjectMajorVersion,
+CCommandChangeVersion::CCommandChangeVersion(EVersionType versionType,
+                                             QPointer<QSpinBox> pProjectMajorVersion,
                                              QPointer<QSpinBox> pProjectMinorVersion,
                                              QPointer<QSpinBox> pProjectPatchVersion,
                                              const std::function<void(void)>& fnOnUndoRedo,
                                              QUndoCommand* pParent) :
-  QUndoCommand("Version -> " + static_cast<QString>(SVersion(pProjectMajorVersion->value(),
-                                                             pProjectMinorVersion->value(),
-                                                             pProjectPatchVersion->value())), pParent),
+  QUndoCommand(QString("%1 Version -> ").arg(versionType == eProject ? "Project" : "Engine") +
+                      static_cast<QString>(SVersion(pProjectMajorVersion->value(),
+                                                    pProjectMinorVersion->value(),
+                                                    pProjectPatchVersion->value())),
+               pParent),
   m_pProjectMajorVersion(pProjectMajorVersion),
   m_pProjectMinorVersion(pProjectMinorVersion),
   m_pProjectPatchVersion(pProjectPatchVersion),
@@ -19,7 +22,8 @@ CCommandChangeVersion::CCommandChangeVersion(QPointer<QSpinBox> pProjectMajorVer
                     pProjectPatchVersion->property(editor::c_sPropertyOldValue).toInt()),
   m_newVersion(pProjectMajorVersion->value(),
                pProjectMinorVersion->value(),
-               pProjectPatchVersion->value())
+               pProjectPatchVersion->value()),
+  m_versionType(versionType)
 {
 }
 CCommandChangeVersion::~CCommandChangeVersion()
@@ -43,7 +47,15 @@ void CCommandChangeVersion::redo()
 //
 int CCommandChangeVersion::id() const
 {
-  return EEditorCommandId::eChangeVersion;
+  switch(m_versionType)
+  {
+    case EVersionType::eProject:
+      return EEditorCommandId::eChangeVersionProject;
+    case EVersionType::eEngine:
+      return EEditorCommandId::eChangeVersionEngine;
+  }
+
+  return EEditorCommandId::eChangeVersionProject;
 }
 
 //----------------------------------------------------------------------------------------
@@ -59,7 +71,7 @@ bool CCommandChangeVersion::mergeWith(const QUndoCommand* pOther)
   if (nullptr == pOtherCasted) { return false; }
 
   m_newVersion = pOtherCasted->m_newVersion;
-  setText("Version -> " + static_cast<QString>(m_newVersion));
+  setText(QString("%1 Version -> ").arg(m_versionType == eProject ? "Project" : "Engine") + static_cast<QString>(m_newVersion));
   return true;
 }
 

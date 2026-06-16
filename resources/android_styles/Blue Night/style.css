@@ -199,7 +199,8 @@ QLabel#SearchIcon {
   max-width: 20px;
   max-height: 20px;
 }
-QLabel#WarningIcon {
+QLabel#WarningIcon,
+QLabel#WarningIcon_2 {
   border-image: url(ui/WarningIcon.png);
 }
 QLabel#ErrorIcon {

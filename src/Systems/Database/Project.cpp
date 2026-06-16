@@ -142,6 +142,7 @@ QJsonObject SProject::ToJsonObject()
   return {
     { "iVersion", static_cast<qint32>(static_cast<quint32>(m_iVersion)) },
     { "iTargetVersion", static_cast<qint32>(static_cast<quint32>(m_iTargetVersion)) },
+    { "bCustomEngineVersion", m_bCustomEngineVersion },
     { "sName", m_sName },
     { "sDescribtion", m_sDescribtion },
     { "sTitleCard", m_sTitleCard },
@@ -183,6 +184,11 @@ void SProject::FromJsonObject(const QJsonObject& json)
   if (it != json.end())
   {
     m_iTargetVersion = static_cast<quint32>(it.value().toInt());
+  }
+  it = json.find("bCustomEngineVersion");
+  if (it != json.end())
+  {
+    m_bCustomEngineVersion = it.value().toBool();
   }
   it = json.find("sName");
   if (it != json.end())

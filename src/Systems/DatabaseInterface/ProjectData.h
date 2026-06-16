@@ -57,6 +57,7 @@ struct SProjectData
   qint32                    m_iId = -1;
   SVersion                  m_iVersion = SVersion(1, 0, 0);
   SVersion                  m_iTargetVersion = SVersion(VERSION_XYZ);
+  bool                      m_bCustomEngineVersion = false;
   QString                   m_sName;
   QString                   m_sFolderName;
   QString                   m_sProjectPath;
