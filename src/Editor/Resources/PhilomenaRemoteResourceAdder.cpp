@@ -50,6 +50,7 @@ namespace
   constexpr char c_sJSONElementTagArtist[] = "artist";
   constexpr char c_sJSONElementTagEditor[] = "editor";
   constexpr char c_sJSONElementTagPrompter[] = "prompter";
+  constexpr char c_sJSONElementTagCreator[] = "creator";
   constexpr char c_sJSONElementFormat[] = "format";
   //constexpr char c_sJSONElementAnimated[] = "animated";
 
@@ -321,7 +322,7 @@ void CPhilomenaRemoteResourceAdder::HandleResponseJson(const QUrl& url, bool bDo
     if (it.value().isArray())
     {
       static QStringList vsInterestedTags = {
-        c_sJSONElementTagArtist, c_sJSONElementTagPrompter, c_sJSONElementTagEditor
+        c_sJSONElementTagArtist, c_sJSONElementTagPrompter, c_sJSONElementTagEditor, c_sJSONElementTagCreator
       };
       QJsonArray arr = it.value().toArray();
       for (qint32 i = 0; arr.size() > i; ++i)
