@@ -423,7 +423,7 @@ QStringList SResourceFormats::LayoutFormats()
 //
 QStringList SResourceFormats::OtherFormats()
 {
-  static QStringList vsFormats = QStringList() << "*.json" << "*.proj" << "*qmldir";
+  static QStringList vsFormats = QStringList() << "*.proj" << "*qmldir";
   return vsFormats;
 }
 
