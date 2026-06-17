@@ -83,6 +83,7 @@ void CResourceTreeItemModel::InitializeModel(tspProject spProject)
         locker.unlock();
         sPathParts = it->second->ResourceToAbsolutePath().split("/");
         sPathParts.removeAt(0); // first element is always the scheme
+        sPathParts.removeAt(0); // second element is always the project
         locker.relock();
       }
       else
@@ -693,6 +694,7 @@ void CResourceTreeItemModel::SlotResourceAdded(qint32 iProjId, const QString& sN
       {
         sPathParts = spResource->ResourceToAbsolutePath().split("/");
         sPathParts.removeAt(0); // first element is always the scheme
+        sPathParts.removeAt(0); // second element is always the project
       }
       else
       {
