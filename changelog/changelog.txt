@@ -35,6 +35,7 @@ Changes:
 - Scripts can now access the application settings via global "Settings"
   object.
 - Added a search filter to the help topic tree in the help overlay.
+- The global script function: include allows for loading Databse files.
 
 Fixed Bugs:
 - Fixed adding Resource bundles and archives to the Resources.

@@ -101,6 +101,7 @@ public:
   static char sKeyThis;
 
 public slots:
+  QVariant include(const QString resource);
   void finishedScript(const QVariant& retVal);
 
 signals:

@@ -18,8 +18,11 @@ extern "C"
 }
 
 #include <QtLua/State>
+
 #include <QDebug>
+#include <QDomDocument>
 #include <QFile>
+#include <QJsonDocument>
 
 #include <set>
 
@@ -337,7 +340,8 @@ void CLuaScriptRunnerInstanceWorker::RunScript(
   switch (sceneMode)
   {
     case ESceneMode::eLinear:
-      sSkript = QString("local ret = sandbox.run([[local %1 = function();\n"
+      sSkript = QString("local ret = sandbox.run([[local %1 = function();"
+                        "local include = function(f); utils_1337:include(f) end;\n"
                         "%2\n"
                         "return nil;\n"
                         "end;\n"
@@ -349,7 +353,8 @@ void CLuaScriptRunnerInstanceWorker::RunScript(
                     .arg(GenerateEnvVariableString());
       break;
     case ESceneMode::eEventDriven:
-      sSkript = QString("sandbox.run([[local %1 = function();\n"
+      sSkript = QString("sandbox.run([[local %1 = function();"
+                        "local include = function(f); utils_1337:include(f) end;\n"
                         "%2\n"
                         "return nil;\n"
                         "end;\n"
@@ -992,6 +997,148 @@ CScriptRunnerUtilsLua::~CScriptRunnerUtilsLua()
 void CScriptRunnerUtilsLua::SetCurrentProject(tspProject spProject)
 {
   m_spProject = spProject;
+}
+
+//----------------------------------------------------------------------------------------
+//
+namespace
+{
+  QVariant JsonToLuaValue(const QString& sContent, const QString& sResName)
+  {
+    QJsonParseError error;
+
+    QJsonDocument doc = QJsonDocument::fromJson(
+        sContent.toUtf8(),
+        &error);
+
+    if (error.error != QJsonParseError::NoError)
+    {
+      qWarning() << QObject::tr("Error reading json %1: %2")
+                        .arg(sResName).arg(error.errorString());
+      return QVariant();
+    }
+
+    return doc.toVariant();
+  }
+
+  //----------------------------------------------------------------------------------------
+  //
+  QVariant XmlToLuaValue(const QString& sContent, const QString& sResName)
+  {
+    QString sErrorMsg;
+    qint32 iErrorLine = -1;
+    qint32 iErrorCol = -1;
+    QDomDocument doc;
+    if (!doc.setContent(sContent, &sErrorMsg, &iErrorLine, &iErrorCol))
+    {
+      QString sErr = QObject::tr("Error reading xml Database file %1: %2 at: %3:%4")
+      .arg(sResName).arg(sErrorMsg).arg(iErrorLine).arg(iErrorCol);
+      qWarning() << sErr;
+      return QVariant();
+    }
+
+    std::function<QVariant(QDomElement)> fnConvert =
+        [&](QDomElement element) -> QVariant  {
+      QVariantMap map;
+
+      // Attributes
+      QDomNamedNodeMap attrs = element.attributes();
+      for (qint32 i = 0; i < attrs.count(); ++i)
+      {
+        QDomAttr attr = attrs.item(i).toAttr();
+        map.insert(attr.name(), attr.value());
+      }
+
+      // Children
+      QMap<QString, QVariantList> childGroups;
+
+      QDomNodeList children = element.childNodes();
+
+      for (int i = 0; i < children.count(); ++i)
+      {
+        QDomNode node = children.at(i);
+
+        if (node.isElement())
+        {
+          QDomElement child = node.toElement();
+          childGroups[child.tagName()].append(fnConvert(child));
+        }
+        else if (node.isText())
+        {
+          QString text = node.nodeValue().trimmed();
+          if (!text.isEmpty())
+          {
+            map.insert("value", text);
+          }
+        }
+      }
+
+      // Merge children
+      for (auto it = childGroups.begin(); it != childGroups.end(); ++it)
+      {
+        if (it.value().size() == 1)
+        {
+          map.insert(it.key(), it.value().first());
+        }
+        else
+        {
+          map.insert(it.key(), it.value());
+        }
+      }
+
+      return map;
+    };
+
+    return fnConvert(doc.documentElement());
+  }
+
+  //----------------------------------------------------------------------------------------
+  //
+  const std::map<QString, std::function<QVariant(const QString&,const QString&)>>&
+  DataBaseImporters()
+  {
+    static std::map<QString, std::function<QVariant(const QString&,const QString&)>> fnMap = {
+      {"json", ::JsonToLuaValue},
+      {"xml", ::XmlToLuaValue}
+    };
+    return fnMap;
+  }
+}
+
+//----------------------------------------------------------------------------------------
+//
+QVariant CScriptRunnerUtilsLua::include(const QString resource)
+{
+  if (auto spDbManager = CApplication::Instance()->System<CDatabaseManager>().lock())
+  {
+    QString sError;
+    std::optional<QString> optRes =
+        script::ParseResourceFromScriptVariant(resource, spDbManager,
+                                               m_spProject,
+                                               "include", &sError);
+    if (!optRes.has_value())
+    {
+      qWarning() << sError;
+      return QVariant();
+    }
+
+    auto spResource = spDbManager->FindResourceInProject(m_spProject, optRes.value());
+    if (nullptr != spResource)
+    {
+      if (EResourceType::eDatabase == spResource->m_type._to_integral())
+      {
+        auto it = DataBaseImporters().find(spResource->m_sPath.Suffix());
+        QString sPath = spResource->ResourceToAbsolutePath();
+        QFile sciptFile(sPath);
+        if (DataBaseImporters().end() != it && sciptFile.exists() && sciptFile.open(QIODevice::ReadOnly))
+        {
+          QString sScript = QString::fromUtf8(sciptFile.readAll());
+          return it->second(sScript, spResource->m_sName);
+        }
+      }
+    }
+  }
+  return QVariant();
 }
 
 //----------------------------------------------------------------------------------------

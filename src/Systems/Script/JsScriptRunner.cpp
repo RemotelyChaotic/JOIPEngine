@@ -16,6 +16,7 @@
 #include "Utils/ThreadUtils.h"
 
 #include <QDebug>
+#include <QDomDocument>
 #include <QFile>
 #include <QFileInfo>
 #include <QQmlEngine>
@@ -795,6 +796,104 @@ void CScriptRunnerUtilsJs::SetCurrentProject(tspProject spProject)
 
 //----------------------------------------------------------------------------------------
 //
+namespace
+{
+  QJSValue XmlToJsValue(const QString& sContent, const QString& sResName, QQmlEngine* pEngine)
+  {
+    QString sErrorMsg;
+    qint32 iErrorLine = -1;
+    qint32 iErrorCol = -1;
+    QDomDocument doc;
+    if (!doc.setContent(sContent, &sErrorMsg, &iErrorLine, &iErrorCol))
+    {
+      QString sErr = QObject::tr("Error reading xml Database file %1: %2 at: %3:%4")
+                         .arg(sResName).arg(sErrorMsg).arg(iErrorLine).arg(iErrorCol);
+      qWarning() << sErr;
+      return pEngine->newErrorObject(QJSValue::ErrorType::SyntaxError, sErr);
+    }
+
+    std::function<QJSValue(QDomElement)> fnConvert =
+        [&](QDomElement element) -> QJSValue {
+      QJSValue obj = pEngine->newObject();
+
+      QDomNamedNodeMap attrs = element.attributes();
+      for (qint32 i = 0; i < attrs.count(); ++i)
+      {
+        QDomAttr attr = attrs.item(i).toAttr();
+        obj.setProperty(attr.name(), attr.value());
+      }
+
+      QDomNodeList children = element.childNodes();
+
+      for (qint32 i = 0; i < children.count(); ++i)
+      {
+        QDomNode node = children.at(i);
+
+        if (node.isElement())
+        {
+          QDomElement child = node.toElement();
+
+          QJSValue childValue = fnConvert(child);
+
+          QString sName = child.tagName();
+
+          if (obj.hasProperty(sName))
+          {
+            // Convert duplicate tags into arrays
+            QJSValue existing = obj.property(sName);
+
+            if (!existing.isArray())
+            {
+              QJSValue array = pEngine->newArray();
+              array.setProperty(0, existing);
+              array.setProperty(1, childValue);
+              obj.setProperty(sName, array);
+            }
+            else
+            {
+              existing.setProperty(
+                  existing.property("length").toInt(),
+                  childValue);
+            }
+          }
+          else
+          {
+            obj.setProperty(sName, childValue);
+          }
+        }
+        else if (node.isText())
+        {
+          QString sText = node.nodeValue().trimmed();
+          if (!sText.isEmpty())
+          {
+            obj.setProperty("value", sText);
+          }
+        }
+      }
+
+      return obj;
+    };
+
+    return fnConvert(doc.documentElement());
+  }
+
+  //----------------------------------------------------------------------------------------
+  //
+  const std::map<QString, std::function<QJSValue(const QString&,const QString&, QQmlEngine*)>>&
+  DataBaseImporters()
+  {
+    static std::map<QString, std::function<QJSValue(const QString&,const QString&, QQmlEngine*)>> fnMap = {
+      {"json", [](const QString& sScript, const QString& sResName, QQmlEngine* pEngine) -> QJSValue {
+        return pEngine->evaluate("(" + sScript + ")", sResName);
+      }},
+      {"xml", ::XmlToJsValue}
+    };
+    return fnMap;
+  }
+}
+
+//----------------------------------------------------------------------------------------
+//
 QJSValue CScriptRunnerUtilsJs::include(QJSValue resource)
 {
   tspResource spResource = GetResource(resource);
@@ -817,6 +916,17 @@ QJSValue CScriptRunnerUtilsJs::include(QJSValue resource)
         {
           return sScript;
         }
+      }
+    }
+    else if (EResourceType::eDatabase == spResource->m_type._to_integral())
+    {
+      auto it = DataBaseImporters().find(spResource->m_sPath.Suffix());
+      QString sPath = spResource->ResourceToAbsolutePath();
+      QFile sciptFile(sPath);
+      if (DataBaseImporters().end() != it && sciptFile.exists() && sciptFile.open(QIODevice::ReadOnly))
+      {
+        QString sScript = QString::fromUtf8(sciptFile.readAll());
+        return it->second(sScript, spResource->m_sName, m_pEngine);
       }
     }
   }

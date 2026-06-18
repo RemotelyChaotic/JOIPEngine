@@ -1969,14 +1969,25 @@
 
     <br>
 
-    <h2>include( string | Resource ): var   !DEPRECATED!</h2>
+    <h2>include( string | Resource ): var</h2>
+
+    <br>
+
+    <p>This is a global function that allows loading Databse files in Lua and Js scripts and
+    script files in case of JS Scripts. It accepts a string to a Resource or a Resource
+    object of type Script or Database. In case of Databse it can handle json and xml type
+    files and will return a converted object.<br>
+    JSON files will simply be converted into an object.<br>
+    XML files will have their attributes converted to object properties and text values of nodes
+    will be converted to a property with the key: "value".</p>
 
     <div class="container">
       <table width="100%" class="warning">
         <tr>
           <td width="10%"><img src="qrc:/resources/help/icons/WarningIcon.png" width="64" height="64" alt="Warning"></td>
-          <td width="90%"><br>This function should not be used, use JS modules instead. The function
-          is provided to ensure compatibility with old projects.</td>
+          <td width="90%"><br>This function should not be used to include scripts,
+          use JS modules instead. The function is provided to ensure compatibility with old
+          projects and for including database files.</td>
         </tr>
       </table>
     </div>
