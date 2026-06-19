@@ -288,11 +288,11 @@ void CJsScriptRunnerInstanceWorker::InterruptExecution()
 
   if (thread() == QThread::currentThread())
   {
-    while (m_bRunning) QCoreApplication::processEvents();
+    while (m_bRunning == 1) QCoreApplication::processEvents();
   }
   else
   {
-    while (m_bRunning) QThread::sleep(1);
+    while (m_bRunning == 1) QThread::sleep(1);
   }
 }
 
@@ -427,6 +427,7 @@ void CJsScriptRunnerInstanceWorker::RunScript(
     else
     {
       // we are still "running"
+      m_bRunning = 2;
       m_bHandlingEvents = true;
     }
   }

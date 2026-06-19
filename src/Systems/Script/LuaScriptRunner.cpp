@@ -259,11 +259,11 @@ void CLuaScriptRunnerInstanceWorker::InterruptExecution()
 
   if (thread() == QThread::currentThread())
   {
-    while (m_bRunning) QCoreApplication::processEvents();
+    while (m_bRunning == 1) QCoreApplication::processEvents();
   }
   else
   {
-    while (m_bRunning) QThread::sleep(1);
+    while (m_bRunning == 1) QThread::sleep(1);
   }
 }
 
@@ -386,6 +386,7 @@ void CLuaScriptRunnerInstanceWorker::RunScript(
     else
     {
       // we are still "running"
+      m_bRunning = 0;
       m_bHandlingEvents = true;
     }
   }
