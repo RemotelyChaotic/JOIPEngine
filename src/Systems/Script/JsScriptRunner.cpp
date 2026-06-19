@@ -20,6 +20,7 @@
 #include <QFile>
 #include <QFileInfo>
 #include <QQmlEngine>
+#include <QJSValueIterator>
 #include <QTimer>
 
 #include <functional>
@@ -28,7 +29,8 @@
 enum EImportMode
 {
   eModuleName,
-  eVariableName
+  eVariableName,
+  eProperties
 };
 struct SReplaceExpModule
 {
@@ -91,7 +93,11 @@ namespace  {
         }
         qint32 iBegin = match.capturedStart();
         qint32 iNum = match.capturedEnd() - iBegin;
-        if (sExp.contains("import")) { sExp = QString(); }
+        if (sExp.contains("import"))
+        {
+          mode = eProperties;
+          sExp = QString();
+        }
 
         std::vector<SReplaceExpModule> sExps;
         if (!sExp.isEmpty())
@@ -129,23 +135,28 @@ namespace  {
   //
   QString EvalImportReplacer(const SReplaceExp& exp)
   {
-    QString sNewExp = QString("utils_1337.import(\"%1\");").arg(exp.m_sModule);
+    bool bImportToRoot = exp.m_mode == eProperties;
+    QString sNewExp = QString("utils_1337.import(\"%1\",%3);").arg(exp.m_sModule);
     if (exp.m_vsExps.size() > 0)
     {
-      if (eModuleName == exp.m_mode)
+      switch (exp.m_mode)
       {
-        sNewExp.prepend(QString("var %1 = ").arg(exp.m_vsExps.front().m_sTo));
-      }
-      else
-      {
-        sNewExp.prepend(QString("var _var_temp_dont_asign = "));
-        for (auto& exp : exp.m_vsExps)
+        case eProperties: [[fallthrough]];
+        case eModuleName:
         {
-          sNewExp.append(QString("var %2 = _var_temp_dont_asign.%1;").arg(exp.m_sFrom).arg(exp.m_sTo));
-        }
+          sNewExp.prepend(QString("var %1 = ").arg(exp.m_vsExps.front().m_sTo));
+        } break;
+        case eVariableName:
+        {
+          sNewExp.prepend(QString("var _var_temp_dont_asign = "));
+          for (auto& exp : exp.m_vsExps)
+          {
+            sNewExp.append(QString("var %2 = _var_temp_dont_asign.%1;").arg(exp.m_sFrom).arg(exp.m_sTo));
+          }
+        } break;
       }
     }
-    return sNewExp;
+    return sNewExp.arg(bImportToRoot ? "true" : "false");
   }
 }
 
@@ -935,7 +946,7 @@ QJSValue CScriptRunnerUtilsJs::include(QJSValue resource)
 
 //----------------------------------------------------------------------------------------
 //
-QJSValue CScriptRunnerUtilsJs::import(QJSValue resource)
+QJSValue CScriptRunnerUtilsJs::import(QJSValue resource, bool bImportToRoot)
 {
   tspResource spResource = GetResource(resource);
   if (nullptr != spResource)
@@ -963,8 +974,22 @@ QJSValue CScriptRunnerUtilsJs::import(QJSValue resource)
         iProjId = m_spProject->m_iId;
       }
       CScriptCacheFileEngineHandler::RegisterFile(iProjId, spResource->m_sName, sScript);
-      return m_pEngine->importModule(CScriptCacheFileEngineHandler::c_sScheme +
-                                     QString::number(iProjId) + "/" + spResource->m_sName);
+      QJSValue nsObj = m_pEngine->importModule(CScriptCacheFileEngineHandler::c_sScheme +
+                                               QString::number(iProjId) + "/" + spResource->m_sName);
+      if (bImportToRoot)
+      {
+        QJSValueIterator it(nsObj);
+        while (it.hasNext())
+        {
+          it.next();
+          m_pEngine->globalObject().setProperty(it.name(), it.value());
+        }
+        return QJSValue();
+      }
+      else
+      {
+        return nsObj;
+      }
     }
   }
   return QJSValue();

@@ -47,6 +47,7 @@ Fixed Bugs:
 - Fixed Project name fixing with special characters in the project name.
 - Removed json from the list of "Other" Resources to be able to add them 
   as Database resources.
+- Fixed "Side effect import" statements in JS
 
 =================
 Version 1.7.1.0

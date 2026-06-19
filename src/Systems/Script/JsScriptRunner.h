@@ -114,7 +114,7 @@ public:
 
 public slots:
   QJSValue include(QJSValue resource);
-  QJSValue import(QJSValue resource);
+  QJSValue import(QJSValue resource, bool bImportToRoot);
 
 signals:
   void finishedScript(const QVariant& sRetVal);
