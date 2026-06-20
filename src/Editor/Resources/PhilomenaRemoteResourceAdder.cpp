@@ -21,12 +21,14 @@ namespace
   constexpr char c_sImageGetPathV3[] = "/api/v3/posts/";
   // Known pages that support Philomena-Syntax
   // order of the items is important
-  constexpr char* c_sAllowedSites[] = { "derpibooru",
+  constexpr const char* c_sAllowedSites[] =
+                                     { "derpibooru",
                                        "tantabus",
                                        "manebooru",
                                        "twibooru",
                                        "furbooru" };
-  constexpr char* c_sAllowedCdnSites[] = { "derpicdn",
+  constexpr const char* c_sAllowedCdnSites[] =
+                                         { "derpicdn",
                                            "tantabuscdn",
                                            "manebooru",
                                            "cdn.twibooru",

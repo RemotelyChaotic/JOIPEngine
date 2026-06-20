@@ -16,7 +16,7 @@ typedef std::shared_ptr<struct SProject> tspProject;
 class CSelectableResourceLabel : public QLabel
 {
   Q_OBJECT
-  Q_PROPERTY(QIcon unsetIcon READ UnsetIcon WRITE SetUnsetIcon NOTIFY SignalUnsetIconChanged);
+  Q_PROPERTY(QIcon unsetIcon READ UnsetIcon WRITE SetUnsetIcon NOTIFY SignalUnsetIconChanged)
 
 public:
   explicit CSelectableResourceLabel(QWidget* pParent = nullptr);
@@ -45,7 +45,7 @@ protected:
 private:
   tspProject                       m_spCurrentProject;
   QPointer<CResourceTreeItemModel> m_pResourceModel;
-  QPointer<CResourceDetailViewFetcherThread>m_pFetcher = nullptr;
+  QPointer<CResourceDetailViewFetcherThread>m_pFetcher;
   QIcon                            m_unsetIcon;
   QString                          m_sCurrentResource;
 };

@@ -193,7 +193,7 @@ void CScriptEditorWidget::SetText(const QString& sText)
 //
 void CScriptEditorWidget::SetTextWhilePreservingCursor(const QString& sText)
 {
-  const INT32 iCurrentCursorPosition = m_pTextEditor->textCursor().position();
+  const qint32 iCurrentCursorPosition = m_pTextEditor->textCursor().position();
   m_pTextEditor->setPlainText(sText);
 
   QTextCursor cursor = m_pTextEditor->textCursor();

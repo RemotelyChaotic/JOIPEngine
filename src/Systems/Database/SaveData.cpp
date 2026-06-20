@@ -47,7 +47,7 @@ SSaveData& SSaveData::operator=(const SSaveData& other)
 SSaveData::~SSaveData() {
   int i = 0;
   Q_UNUSED(i)
-};
+}
 
 //----------------------------------------------------------------------------------------
 //

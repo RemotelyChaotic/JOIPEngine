@@ -15,7 +15,7 @@ BETTER_ENUM(EDialogueTreeNodeType, qint32,
             eRoot            = 0,
             eCategory        = 1,
             eDialogue        = 2,
-            eDialogueFragment= 3);
+            eDialogueFragment= 3)
 
 namespace dialogue_tree
 {

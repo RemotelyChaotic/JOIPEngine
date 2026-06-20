@@ -18,7 +18,8 @@ namespace
   constexpr char c_sImageGetPath[] = "/posts/";
   // Known pages that support Philomena-Syntax
   // order of the items is important
-  constexpr char* c_sAllowedSites[] = { "danbooru",
+  constexpr const char* c_sAllowedSites[] =
+                                     { "danbooru",
                                        "sonohara",
                                        "hijiribe",
                                        "safebooru",

@@ -1,4 +1,4 @@
-#include "CommandChangeResourceComboBox.h"
+#include "CommandChangeResourceCombobox.h"
 #include "Editor/EditorCommandIds.h"
 #include "Editor/EditorWidgetTypes.h"
 #include "Systems/Database/Project.h"
