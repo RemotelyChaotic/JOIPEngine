@@ -415,6 +415,7 @@ void CScriptRunner::LoadScriptAndCall(tspScene spScene, tspResource spResource,
   QReadLocker projectLocker(&spResource->m_spParent->m_rwLock);
   QReadLocker resourceLocker(&spResource->m_rwLock);
   spProject = spResource->m_spParent;
+  const QString sSubType = spResource->m_sSubType;
   SResourcePath sResourceUrl = spResource->m_sPath;
   QString sResourceName = spResource->m_sName;
   if (spResource->m_type._to_integral() != EResourceType::eScript &&
@@ -437,9 +438,7 @@ void CScriptRunner::LoadScriptAndCall(tspScene spScene, tspResource spResource,
     if (scriptFile.open(QIODevice::ReadOnly))
     {
       QString sScript = QString::fromUtf8(scriptFile.readAll());
-      // get suffix from the path, as bundles might not have the suffix in the name
-      const QString sSuffix = sResourceUrl.Suffix();
-      auto it = m_spRunnerFactoryMap.find(sSuffix);
+      auto it = m_spRunnerFactoryMap.find(sSubType);
       if (m_spRunnerFactoryMap.end() != it)
       {
         fn(it->second, sScript, spScene, spResource);

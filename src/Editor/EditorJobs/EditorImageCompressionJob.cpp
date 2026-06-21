@@ -174,6 +174,7 @@ bool CEditorImageCompressionJob::Run(const QVariantList& args)
       if (bOk)
       {
         spResource->m_sPath = joip_resource::CreatePathFromAbsolutePath(sDestPathImage, m_spProject);
+        spResource->m_sSubType = "jpeg";
         QFile oldImg(sSourcePath);
         if (!oldImg.remove())
         {

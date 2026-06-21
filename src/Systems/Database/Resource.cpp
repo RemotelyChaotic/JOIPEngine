@@ -78,6 +78,7 @@ QJsonObject SResource::ToJsonObject()
     { "sPath", joip_resource::MakePathSerialized(static_cast<QString>(m_sPath), m_spParent->m_sFolderName) },
     { "sSource", m_sSource.toString(QUrl::None) },
     { "type", m_type._value },
+    { "sSubType", m_sSubType },
     { "sResourceBundle", m_sResourceBundle },
     { "vsResourceTags", resourceTags }
   };
@@ -98,24 +99,35 @@ void SResource::FromJsonObject(const QJsonObject& json)
   {
     m_sResourceBundle = it.value().toString();
   }
+  bool bOverridenSubtype = false;
   it = json.find("sPath");
   if (it != json.end())
   {
     QString sPath = it.value().toString();
+    m_sSubType = QFileInfo(sPath).suffix();
+
     // Compatibility with old Milovana teases that left the path empty.
     if (sPath.isEmpty() && !m_sResourceBundle.isEmpty())
     {
       // Try to fix resource paths to point to the bundle root which in case of empty
       // was meant to lead to the project root
       QReadLocker projectLocker(&m_spParent->m_rwLock);
+      m_sSubType = QFileInfo(m_sName).suffix();
+      bOverridenSubtype = true;
       sPath = "qrc:/" + m_spParent->m_sName + "/" + m_sName;
     }
     // compatibility with old eos teases: Fix the path mess
     if (!m_sResourceBundle.isEmpty() && sPath.startsWith("qrc:" + m_sResourceBundle + "/"))
     {
+      bOverridenSubtype = true;
       sPath = "qrc:/" + m_spParent->m_sName + "/" + m_sName;
     }
     m_sPath = joip_resource::CreatePathFromString(sPath, m_spParent);
+  }
+  it = json.find("sSubType");
+  if (it != json.end() && !bOverridenSubtype)
+  {
+    m_sSubType = it.value().toString();
   }
   it = json.find("sSource");
   if (it != json.end())
@@ -135,30 +147,27 @@ void SResource::FromJsonObject(const QJsonObject& json)
       bBundled = m_spParent->m_bBundled;
     }
     Q_UNUSED(bBundled)
-    locker.unlock();
-    const QString sSuffix = m_sPath.Suffix();
-    locker.relock();
 
     qint32 iValue = it.value().toInt();
     if (EResourceType::_size() > static_cast<size_t>(iValue))
     {
       if (iValue == EResourceType::eOther &&
-          SResourceFormats::DatabaseFormats().contains("*." + sSuffix))
+          SResourceFormats::DatabaseFormats().contains("*." + m_sSubType))
       {
         m_type = EResourceType::eDatabase;
       }
       else if (iValue == EResourceType::eOther &&
-               SResourceFormats::ScriptFormats().contains("*." + sSuffix))
+               SResourceFormats::ScriptFormats().contains("*." + m_sSubType))
       {
         m_type = EResourceType::eScript;
       }
       else if (iValue == EResourceType::eOther &&
-               SResourceFormats::LayoutFormats().contains("*." + sSuffix))
+               SResourceFormats::LayoutFormats().contains("*." + m_sSubType))
       {
         m_type = EResourceType::eLayout;
       }
       else if (iValue == EResourceType::eOther &&
-               SResourceFormats::FlowFormats().contains("*." + sSuffix))
+               SResourceFormats::FlowFormats().contains("*." + m_sSubType))
       {
         m_type = EResourceType::eFlow;
       }

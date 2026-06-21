@@ -343,9 +343,9 @@ void CEditorProjectSettingsWidget::LoadProject(tspProject spProject)
     for (const auto& [sName, spResource] : m_spCurrentProject->m_baseData.m_spResourcesMap)
     {
       QReadLocker resLocker(&spResource->m_rwLock);
-      QString sSuffix = spResource->m_sPath.Suffix();
+      QString sSubType = spResource->m_sSubType;
       if (EResourceType::eScript == spResource->m_type._to_integral() &&
-          preload_scripts::AvailableScriptSuffixes().contains(sSuffix))
+          preload_scripts::AvailableScriptSuffixes().contains(sSubType))
       {
         m_spUi->pPreloadScriptComboBox->addItem(sName, sName);
       }
@@ -1048,13 +1048,13 @@ void CEditorProjectSettingsWidget::SlotResourceAdded(qint32 iProjId, const QStri
     if (nullptr != spResource)
     {
       QReadLocker resLocker(&spResource->m_rwLock);
-      QString sSuffix = spResource->m_sPath.Suffix();
+      QString sSubType = spResource->m_sSubType;
       if (EResourceType::eLayout == spResource->m_type._to_integral())
       {
         m_spUi->pDefaultLayoutComboBox->addItem(spResource->m_sName,spResource->m_sName);
       }
       else if (EResourceType::eScript == spResource->m_type._to_integral() &&
-               preload_scripts::AvailableScriptSuffixes().contains(sSuffix))
+               preload_scripts::AvailableScriptSuffixes().contains(sSubType))
       {
         m_spUi->pPreloadScriptComboBox->addItem(spResource->m_sName, spResource->m_sName);
       }
@@ -1130,7 +1130,7 @@ void CEditorProjectSettingsWidget::SlotResourceRenamed(qint32 iProjId, const QSt
     if (nullptr != spResource)
     {
       QReadLocker resLocker(&spResource->m_rwLock);
-      QString sSuffix = spResource->m_sPath.Suffix();
+      QString sSubType = spResource->m_sSubType;
       if (EResourceType::eLayout == spResource->m_type._to_integral())
       {
         qint32 iIdx = m_spUi->pDefaultLayoutComboBox->findData(spResource->m_sName);
@@ -1139,7 +1139,7 @@ void CEditorProjectSettingsWidget::SlotResourceRenamed(qint32 iProjId, const QSt
         m_spUi->pDefaultLayoutComboBox->setCurrentIndex(m_spUi->pDefaultLayoutComboBox->count());
       }
       else if (EResourceType::eScript == spResource->m_type._to_integral() &&
-               preload_scripts::AvailableScriptSuffixes().contains(sSuffix))
+               preload_scripts::AvailableScriptSuffixes().contains(sSubType))
       {
         qint32 iIdx = m_spUi->pPreloadScriptComboBox->findData(spResource->m_sName);
         m_spUi->pPreloadScriptComboBox->removeItem(iIdx);

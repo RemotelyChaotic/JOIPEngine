@@ -932,7 +932,7 @@ QJSValue CScriptRunnerUtilsJs::include(QJSValue resource)
     }
     else if (EResourceType::eDatabase == spResource->m_type._to_integral())
     {
-      auto it = DataBaseImporters().find(spResource->m_sPath.Suffix());
+      auto it = DataBaseImporters().find(spResource->m_sSubType);
       QString sPath = spResource->ResourceToAbsolutePath();
       QFile sciptFile(sPath);
       if (DataBaseImporters().end() != it && sciptFile.exists() && sciptFile.open(QIODevice::ReadOnly))

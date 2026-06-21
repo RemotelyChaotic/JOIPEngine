@@ -699,7 +699,7 @@ namespace dialogue_tree
     {
       QReadLocker locker(&spResource->m_rwLock);
       if (EResourceType::eDatabase != spResource->m_type._to_integral()) { continue; }
-      if (spResource->m_sPath.Suffix() != joip_resource::c_sDialogueFileType)
+      if (spResource->m_sSubType != joip_resource::c_sDialogueFileType)
       { continue; }
 
       if (spResource->m_sPath.IsLocalFile())

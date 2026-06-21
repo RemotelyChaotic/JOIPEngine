@@ -732,6 +732,7 @@ void CEditorEditableFileModel::AddResourceTo(tspResource spResource,
 
   QString sBundle = spResource->m_sResourceBundle;
   SResourcePath sResourcePath = spResource->m_sPath;
+  QString sSubtype = spResource->m_sSubType;
   resourceLocker.unlock();
   CDatabaseManager::LoadBundle(m_spProject, sBundle);
   resourceLocker.relock();
@@ -750,8 +751,7 @@ void CEditorEditableFileModel::AddResourceTo(tspResource spResource,
       mpToAddTo.insert({sResourceName, SCachedMapItem()});
       auto& script = mpToAddTo[sResourceName];
       script.m_sId = sResourceName;
-      auto itDefinition = SScriptDefinitionData::DefinitionMap().find(
-            sResourcePath.Suffix());
+      auto itDefinition = SScriptDefinitionData::DefinitionMap().find(sSubtype);
       if (SScriptDefinitionData::DefinitionMap().end() != itDefinition)
       {
         script.m_sFileType = itDefinition->second.sType;

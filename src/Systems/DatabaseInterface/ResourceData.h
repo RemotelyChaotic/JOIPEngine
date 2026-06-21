@@ -94,6 +94,7 @@ struct SResourceData
     m_sPath = other.m_sPath;
     m_sSource = other.m_sSource;
     m_type = other.m_type;
+    m_sSubType = other.m_sSubType;
     m_sResourceBundle = other.m_sResourceBundle;
     m_vsResourceTags = other.m_vsResourceTags;
   }
@@ -102,6 +103,7 @@ struct SResourceData
   SResourcePath             m_sPath;
   QUrl                      m_sSource;
   EResourceType             m_type = EResourceType::eOther;
+  QString                   m_sSubType;
   QString                   m_sResourceBundle;
   tvsTags                   m_vsResourceTags;
 };

@@ -278,7 +278,7 @@ QString CResourceToolTipPrivate::GetTipString(const STipData& data,
       "</p>";
 
     sRet = sRet.arg(sFontFace).arg(iFontsize)
-        .arg(data.spResource->m_sPath.Suffix());
+        .arg(data.spResource->m_sSubType);
   }
   else if (EResourceType::eFont == data.spResource->m_type._to_integral())
   {

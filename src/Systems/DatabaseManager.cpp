@@ -701,6 +701,7 @@ QString CDatabaseManager::AddResource(tspProject& spProj, const SResourcePath& s
   spResource->m_sName = sFinalName;
   spResource->m_sPath = sPath;
   spResource->m_type = type;
+  spResource->m_sSubType = sPath.Suffix();
   spResource->m_sResourceBundle = sBundle;
   spResource->m_spParent = spProj;
   spProj->m_baseData.m_spResourcesMap.insert({sFinalName, spResource});

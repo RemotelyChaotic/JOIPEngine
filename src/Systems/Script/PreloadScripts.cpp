@@ -56,7 +56,7 @@ namespace preload_scripts
       if (nullptr != spRes)
       {
         QReadLocker resLocker(&spRes->m_rwLock);
-        const QString sSuffix = spRes->m_sPath.Suffix();
+        const QString sSubType = spRes->m_sSubType;
         QString sPath = spRes->ResourceToAbsolutePath();
         resLocker.unlock();
 
@@ -67,7 +67,7 @@ namespace preload_scripts
           if (scriptFile.open(QIODevice::ReadOnly))
           {
             QString sScript = QString::fromUtf8(scriptFile.readAll());
-            auto it = creatorMap.find(sSuffix);
+            auto it = creatorMap.find(sSubType);
             if (creatorMap.end() != it)
             {
               resLocker.unlock();
