@@ -110,6 +110,11 @@ void SResource::FromJsonObject(const QJsonObject& json)
       QReadLocker projectLocker(&m_spParent->m_rwLock);
       sPath = "qrc:/" + m_spParent->m_sName + "/" + m_sName;
     }
+    // compatibility with old eos teases: Fix the path mess
+    if (!m_sResourceBundle.isEmpty() && sPath.startsWith("qrc:" + m_sResourceBundle + "/"))
+    {
+      sPath = "qrc:/" + m_spParent->m_sName + "/" + m_sName;
+    }
     m_sPath = joip_resource::CreatePathFromString(sPath, m_spParent);
   }
   it = json.find("sSource");

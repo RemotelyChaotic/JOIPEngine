@@ -416,6 +416,15 @@ bool CDatabaseIO::LoadBundle(tspProject& spProject, const QString& sBundle)
         QResource::registerResource(sPath, QDir::separator() + spProject->m_sName);
     //assert(it->second->m_bLoaded); // remove for download testing
 
+    // Debug
+    /*
+    QDirIterator dirIt(":/" + spProject->m_sName, QDir::Files);
+    while (dirIt.hasNext())
+    {
+      qDebug() << dirIt.next();
+    }
+    */
+
     bLoaded = it->second->m_bLoaded;
   }
 
