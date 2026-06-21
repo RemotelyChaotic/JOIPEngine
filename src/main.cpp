@@ -17,12 +17,14 @@
 
 #include <QApplication>
 #include <QImageReader>
+#include <QLibraryInfo>
 #include <QtAVWidgets>
 #include <QtAV_Global.h>
 #include <QOpenGLContext>
 #if defined(QT_QML_DEBUG)
 #include <QQmlDebuggingEnabler>
 #endif
+#include <QSettings>
 #include <QSslSocket>
 #include <QStandardPaths>
 //#include <QtWebEngine>
@@ -97,12 +99,6 @@ int main(int argc, char *argv[])
 
   CJoipMessageHandler::InstallMsgHandler();
 
-  qDebug() << "SSL suport:" << QSslSocket::supportsSsl() <<
-              "- SLL Build version:" << QSslSocket::sslLibraryBuildVersionString() <<
-              "- SLL Library version:" << QSslSocket::sslLibraryVersionString();
-  qDebug() << "Supported image formats:" << QImageReader::supportedImageFormats();
-  qDebug() << "Supported archive formats:" << CPhysFsFileEngineHandler::SupportedFileTypes();
-
   SetQmlCache();
 
   CApplication app(argc, argv);
@@ -114,6 +110,15 @@ int main(int argc, char *argv[])
 #endif
 
   app.Initialize();
+
+  qDebug() << "Prefix Path:" << QLibraryInfo::location(QLibraryInfo::PrefixPath);
+  qDebug() << "Plugins Path:" << QLibraryInfo::location(QLibraryInfo::PluginsPath);
+  qDebug() << "SSL suport:" << QSslSocket::supportsSsl() <<
+    "- SLL Build version:" << QSslSocket::sslLibraryBuildVersionString() <<
+    "- SLL Library version:" << QSslSocket::sslLibraryVersionString();
+  qDebug() << "Supported image formats:" << QImageReader::supportedImageFormats();
+  qDebug() << "Supported archive formats:" << CPhysFsFileEngineHandler::SupportedFileTypes();
+  qDebug() << "Library Paths:" << QCoreApplication::libraryPaths();
 
   // bugfix on certain machines
   QOpenGLContext context;
