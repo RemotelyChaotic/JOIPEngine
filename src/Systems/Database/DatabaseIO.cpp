@@ -6,6 +6,7 @@
 #include "Settings.h"
 
 #include "Systems/DatabaseManager.h"
+#include "Systems/DLJobs/EosPagesToScenesTransformer.h"
 #include "Systems/EOS/EosHelpers.h"
 #include "Systems/PhysFs/PhysFsFileEngine.h"
 
@@ -133,7 +134,14 @@ public:
               for (tspScene& spScene : spProject->m_baseData.m_vspScenes)
               {
                 QWriteLocker l(&spScene->m_rwLock);
-                spScene->m_sceneMode = ESceneMode::eEventDriven;
+                if (spScene->m_sName == CEosPagesToScenesTransformer::c_sInitKeyWord)
+                {
+                  spScene->m_sceneMode = ESceneMode::eLinear;
+                }
+                else
+                {
+                  spScene->m_sceneMode = ESceneMode::eEventDriven;
+                }
               }
             }
             spProject->m_rwLock.unlock();

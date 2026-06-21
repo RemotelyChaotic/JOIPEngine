@@ -671,7 +671,14 @@ bool CEosDownloadJob::CreateScriptFiles(const QJsonDocument& entireScript,
     {
       QWriteLocker sceneLocker(&spScene->m_rwLock);
       spScene->m_sScript = sResource;
-      spScene->m_sceneMode = ESceneMode::eEventDriven; // do not end on finish
+      if (spScene->m_sName == CEosPagesToScenesTransformer::c_sInitKeyWord)
+      {
+        spScene->m_sceneMode = ESceneMode::eLinear;
+      }
+      else
+      {
+        spScene->m_sceneMode = ESceneMode::eEventDriven;  // do not end on finish
+      }
     }
 
     {

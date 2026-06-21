@@ -18,6 +18,8 @@ typedef std::shared_ptr<struct SScene> tspScene;
 class CEosPagesToScenesTransformer
 {
 public:
+  static QString c_sInitKeyWord;
+
   struct SPageScene
   {
     QString       m_sName;

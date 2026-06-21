@@ -20,7 +20,6 @@
 namespace
 {
   const QString c_sPagesKeyWord = "pages";
-  const QString c_sInitKeyWord = "init";
 
   const QString c_sStartPageKeyWord = "start";
 
@@ -32,6 +31,8 @@ namespace
 
   const double c_dNodeOffset = 500.0;
 }
+
+QString CEosPagesToScenesTransformer::c_sInitKeyWord = "init";
 
 //----------------------------------------------------------------------------------------
 //
