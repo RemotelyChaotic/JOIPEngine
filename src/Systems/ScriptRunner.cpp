@@ -416,6 +416,7 @@ void CScriptRunner::LoadScriptAndCall(tspScene spScene, tspResource spResource,
   QReadLocker resourceLocker(&spResource->m_rwLock);
   spProject = spResource->m_spParent;
   SResourcePath sResourceUrl = spResource->m_sPath;
+  QString sResourceName = spResource->m_sName;
   if (spResource->m_type._to_integral() != EResourceType::eScript &&
       spResource->m_type._to_integral() != EResourceType::eSequence)
   {
@@ -443,10 +444,19 @@ void CScriptRunner::LoadScriptAndCall(tspScene spScene, tspResource spResource,
       {
         fn(it->second, sScript, spScene, spResource);
       }
+      else
+      {
+        QString sError = tr("Could not find an appropriate runner for %1: %2.")
+          .arg(sResourceName).arg(static_cast<QString>(sResourceUrl));
+        qCritical() << sError;
+        emit m_spSignalEmitterContext->showError(sError, QtMsgType::QtCriticalMsg);
+        return;
+      }
     }
     else
     {
-      QString sError = tr("Script resource file could not be opened.");
+      QString sError = tr("Script resource file %1: %2 could not be opened.")
+        .arg(sResourceName).arg(static_cast<QString>(sResourceUrl));
       qCritical() << sError;
       emit m_spSignalEmitterContext->showError(sError, QtMsgType::QtCriticalMsg);
       return;
@@ -454,7 +464,8 @@ void CScriptRunner::LoadScriptAndCall(tspScene spScene, tspResource spResource,
   }
   else
   {
-    QString sError = tr("Script resource file does not exist.");
+    QString sError = tr("Script resource file %1: %2 does not exist.")
+      .arg(sResourceName).arg(static_cast<QString>(sResourceUrl));
     qCritical() << sError;
     emit m_spSignalEmitterContext->showError(sError, QtMsgType::QtCriticalMsg);
     return;
