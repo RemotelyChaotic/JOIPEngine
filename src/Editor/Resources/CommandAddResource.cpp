@@ -3,6 +3,7 @@
 #include "Settings.h"
 
 #include "Editor/EditorCommandIds.h"
+#include "Editor/EditorModel.h"
 
 #include "Systems/DatabaseManager.h"
 #include "Systems/PhysFs/PhysFsFileEngine.h"
@@ -112,6 +113,8 @@ namespace
           else if (SResourceFormats::LayoutFormats().contains(sEnding))
           {
             sResource = spDbManager->AddResource(spCurrentProject, sFileName, EResourceType::eLayout, QString(), sBundleName);
+            tspResource spRes = spDbManager->FindResourceInProject(spCurrentProject, sResource);
+            CEditorModel::UpdateQmldirFile(spRes);
           }
           else if (SResourceFormats::SequenceFormat().contains(sEnding))
           {

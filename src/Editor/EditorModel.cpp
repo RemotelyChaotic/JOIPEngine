@@ -34,6 +34,7 @@
 #include <nodes/NodeDataModel>
 
 #include <QDebug>
+#include <QDirIterator>
 #include <QFileDialog>
 #include <QTextStream>
 #include <QUndoStack>
@@ -199,60 +200,117 @@ QUndoStack* CEditorModel::UndoStack() const
 //
 namespace
 {
+  struct SQmlModule
+  {
+    QString sModuleName;
+    QString sVersion;
+    QString sResource;
+  };
+
+  struct SQmlDirfile
+  {
+    QString sImport;
+    std::vector<SQmlModule> vModules;
+  };
+
+  //--------------------------------------------------------------------------------------
+  //
+  QString CreateImport(const QString& sRelativePath)
+  {
+    QString sImport;
+    QString sContent;
+    qint32 iPos = sRelativePath.lastIndexOf("/");
+    if (-1 != iPos)
+    {
+      sImport = sRelativePath.left(iPos).replace("/", ".").replace("\\", ".");
+    }
+    return sImport;
+  }
+
+  //--------------------------------------------------------------------------------------
+  //
+  std::optional<SQmlDirfile> BuildDirfile(const QString& sRelativePath,
+                                          const tspResource& spResource)
+  {
+    const QString sImport = CreateImport(sRelativePath);
+    if (sImport.isEmpty())
+    {
+      qWarning() << QObject::tr("Could not get qmldir folder.");
+      return std::nullopt;
+    }
+
+    SQmlDirfile dirFile;
+    dirFile.sImport = sImport;
+
+    QReadLocker lP(&spResource->m_spParent->m_rwLock);
+
+    QDirIterator it(QFileInfo(spResource->ResourceToAbsolutePath()).absolutePath(), QStringList() << "*.qml",
+                    QDir::NoDotAndDotDot | QDir::Files, QDirIterator::NoIteratorFlags);
+    while (it.hasNext())
+    {
+      QFileInfo qmlFile(it.next());
+      dirFile.vModules.push_back(
+          SQmlModule{qmlFile.baseName(),
+                     QString("%1.%2").arg(spResource->m_spParent->m_iVersion.m_iMajor,
+                                          spResource->m_spParent->m_iVersion.m_iMinor),
+                     qmlFile.fileName()});
+    }
+
+    return dirFile;
+  }
+
+  //--------------------------------------------------------------------------------------
+  //
+  QString GetFileContent(const SQmlDirfile& file)
+  {
+    QString sContent = QString("module %1").arg(file.sImport);
+    for (const SQmlModule& module : file.vModules)
+    {
+      sContent + QString("\n%1 %2 %3")
+                     .arg(module.sModuleName)
+                     .arg(module.sVersion)
+                     .arg(module.sResource);
+    }
+    return sContent;
+  }
+
+  //--------------------------------------------------------------------------------------
+  //
   void UpdateQmldir(const QFileInfo& sAbsoluteFile, const QString& sRelativePath,
-                    tspProject spProject)
+                    const tspResource& spResource)
   {
     const QString sQmlDir = sAbsoluteFile.absolutePath() + "/qmldir";
-    QString sImport;
+
+    QReadLocker l(&spResource->m_rwLock);
+    std::optional<SQmlDirfile> optFile =
+        BuildDirfile(sRelativePath, spResource);
+    if (!optFile.has_value())
     {
-      QString sContent;
-      qint32 iPos = sRelativePath.lastIndexOf("/");
-      if (-1 != iPos)
-      {
-        sImport = sRelativePath.left(iPos).replace("/", ".").replace("\\", ".");
-      }
+      qWarning() << QObject::tr("Could not update qmldir file.");
+      return;
     }
 
-    if (sImport.isEmpty()) { return; }
+    QString sContent = GetFileContent(optFile.value());
 
     // if qmldir does not exist, create it
-    if (!QFileInfo(sQmlDir).exists())
-    {
-      QFile qmldirFile(sQmlDir);
-      if (qmldirFile.open(QIODevice::ReadWrite))
-      {
-        QString sContent = QString("module %1").arg(sImport);
-        qmldirFile.write(sContent.toUtf8());
-      }
-      else
-      {
-        qWarning() << QObject::tr("Could not create qmldir for new Layout file.");
-        return;
-      }
-    }
-
-    // update qmldir file
     QFile qmldirFile(sQmlDir);
-    if (qmldirFile.open(QIODevice::ReadWrite | QIODevice::Append))
+    if (qmldirFile.open(QIODevice::ReadWrite))
     {
-      QString sNewModule = "\n%1 1.0 %2";
-      QString sModule = sNewModule.arg(sAbsoluteFile.baseName())
-                                   .arg(sAbsoluteFile.fileName());
-      qmldirFile.write(sModule.toUtf8());
+      qmldirFile.write(sContent.toUtf8());
     }
     else
     {
-      qWarning() << QObject::tr("Could not update qmldir with new Layout file.");
+      qWarning() << QObject::tr("Could not update qmldir for new Layout file.");
       return;
     }
 
     // update resources to include the file
-    SResourcePath url = joip_resource::CreatePathFromAbsolutePath(sQmlDir, spProject);
-    QString sResource = QString("qmldir_%1").arg(sImport);
-    tspResource spRes = CDatabaseManager::FindResourceInProject(spProject, sResource);
+    SResourcePath url = joip_resource::CreatePathFromAbsolutePath(sQmlDir, spResource->m_spParent);
+    QString sResource = QString("qmldir_%1").arg(optFile->sImport);
+    tspResource spRes = CDatabaseManager::FindResourceInProject(spResource->m_spParent, sResource);
     if (nullptr == spRes)
     {
-      CDatabaseManager::AddResource(spProject, url, EResourceType::eOther, sResource);
+      CDatabaseManager::AddResource(spResource->m_spParent, url, EResourceType::eOther, sResource);
     }
   }
 
@@ -447,11 +505,11 @@ void CEditorModel::UpdateQmldirFile(const tspResource& spLayoutResource)
     {
       const QString sProjectPath = PhysicalProjectPath(spLayoutResource->m_spParent);
       QDir projectDir(sProjectPath);
-      QFileInfo info(static_cast<QUrl>(spLayoutResource->m_sPath).toLocalFile());
+      QFileInfo info(spLayoutResource->PhysicalResourcePath());
       QString sRelativePath = projectDir.relativeFilePath(info.absoluteFilePath());
 
       lRes.unlock();
-      UpdateQmldir(info, sRelativePath, spLayoutResource->m_spParent);
+      UpdateQmldir(info, sRelativePath, spLayoutResource);
     }
   }
 }

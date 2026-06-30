@@ -6,6 +6,7 @@ Fixed Bugs:
 - Fixed Flow Editor not opening flows correctly.
 - Fixed a crash with iterating an empty directory.
 - Fixed PhysFS file name component fetching.
+- Fixed updating of qmldir file when adding Layout Resources.
 
 =================
 Version 1.8.0.0
