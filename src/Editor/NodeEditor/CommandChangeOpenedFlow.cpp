@@ -13,7 +13,7 @@
 CCommandChangeOpenedFlow::CCommandChangeOpenedFlow(QPointer<QComboBox> pResourcesComboBox,
                                                    QPointer<CNodeEditorFlowScene> pScene,
                                                    QPointer<QWidget> pGuard,
-                                                   const std::function<void(qint32)>& fnReloadEditor,
+                                                   const std::function<void(const QModelIndex&)>& fnReloadEditor,
                                                    bool* pbChangingIndexFlag,
                                                    QString* psLastCachedScript,
                                                    const QString& sOldFlow,
@@ -101,7 +101,7 @@ void CCommandChangeOpenedFlow::DoUndoRedo(const QString& sSequenceNext)
 
     if (nullptr != m_fnReloadEditor)
     {
-      m_fnReloadEditor(m_pEditorModel->FileIndex(sSequenceNext));
+      m_fnReloadEditor(m_pEditorModel->index(m_pEditorModel->FileIndex(sSequenceNext), 0));
     }
 
     *m_pbChangingIndexFlag = false;

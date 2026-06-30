@@ -17,7 +17,7 @@ public:
   CCommandChangeOpenedFlow(QPointer<QComboBox> pResourcesComboBox,
                            QPointer<CNodeEditorFlowScene> pScene,
                            QPointer<QWidget> pGuard,
-                           const std::function<void(qint32)>& fnReloadEditor,
+                           const std::function<void(const QModelIndex&)>& fnReloadEditor,
                            bool* pbChangingIndexFlag,
                            QString* psLastCachedScript,
                            const QString& sOldFlow,
@@ -39,7 +39,7 @@ protected:
   QPointer<CNodeEditorFlowScene> m_pScene;
   QPointer<CEditorEditableFileModel> m_pEditorModel;
   QPointer<QWidget> m_pGuard;
-  std::function<void(qint32)> m_fnReloadEditor;
+  std::function<void(const QModelIndex&)> m_fnReloadEditor;
   bool* m_pbChangingIndexFlag;
   QString* m_psLastCachedScript;
   QString m_sOldFlow;

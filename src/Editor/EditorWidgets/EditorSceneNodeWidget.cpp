@@ -321,7 +321,7 @@ void CEditorSceneNodeWidget::SaveProject()
 
   // save current contents
   auto pScriptItem = EditableFileModel()->CachedFile(
-      CachedResourceName(m_spUi->pResourceComboBox->currentIndex()));
+      CachedResourceName(m_spUi->pResourceComboBox->model()->index(m_spUi->pResourceComboBox->currentIndex(), 0)));
   if (nullptr != pScriptItem && nullptr != m_sLastCachedFlow)
   {
     pScriptItem->m_data = FlowSceneModel()->saveToMemory();
@@ -350,7 +350,7 @@ void CEditorSceneNodeWidget::OnShown()
   EditableFileModel()->SetReloadFileWithoutQuestion(false);
   ReloadEditor(
     m_pFilteredScriptModel->mapToSource(
-      m_pFilteredScriptModel->index(m_spUi->pResourceComboBox->currentIndex(), 0)).row());
+      m_pFilteredScriptModel->index(m_spUi->pResourceComboBox->currentIndex(), 0)));
 }
 
 //----------------------------------------------------------------------------------------
@@ -418,9 +418,10 @@ void CEditorSceneNodeWidget::OnActionBarChanged()
 void CEditorSceneNodeWidget::on_pResourceComboBox_currentIndexChanged(qint32 iIndex)
 {
   WIDGET_INITIALIZED_GUARD
-      if (nullptr == m_spCurrentProject) { return; }
+  if (nullptr == m_spCurrentProject) { return; }
 
-  if (CachedResourceName(iIndex) != m_sLastCachedFlow)
+  QModelIndex idx = m_spUi->pResourceComboBox->model()->index(iIndex, 0);
+  if (CachedResourceName(idx) != m_sLastCachedFlow)
   {
     UndoStack()->push(new CCommandChangeOpenedFlow(m_spUi->pResourceComboBox,
                                                    FlowSceneModel(),
@@ -428,7 +429,7 @@ void CEditorSceneNodeWidget::on_pResourceComboBox_currentIndexChanged(qint32 iIn
                                                    std::bind(&CEditorSceneNodeWidget::ReloadEditor, this, std::placeholders::_1),
                                                    &m_bChangingIndex, &m_sLastCachedFlow,
                                                    m_sLastCachedFlow,
-                                                   CachedResourceName(iIndex)));
+                                                   CachedResourceName(idx)));
   }
 }
 
@@ -702,21 +703,27 @@ void CEditorSceneNodeWidget::SlotStyleChanged()
 
 //----------------------------------------------------------------------------------------
 //
-QString CEditorSceneNodeWidget::CachedResourceName(qint32 iIndex)
+QString CEditorSceneNodeWidget::CachedResourceName(const QModelIndex& index)
 {
-  return EditableFileModel()->CachedResourceName(
-      m_pFilteredScriptModel->mapToSource(
-                                m_pFilteredScriptModel->index(iIndex, 0)).row());
+  if (index.model() != EditableFileModel())
+  {
+    return EditableFileModel()->CachedResourceName(
+        m_pFilteredScriptModel->mapToSource(index).row());
+  }
+  else
+  {
+    return EditableFileModel()->CachedResourceName(index.row());
+  }
 }
 
 //----------------------------------------------------------------------------------------
 //
-void CEditorSceneNodeWidget::ReloadEditor(qint32 iIndex)
+void CEditorSceneNodeWidget::ReloadEditor(const QModelIndex& index)
 {
   m_bChangingIndex = true;
 
   // load new contents
-  m_sLastCachedFlow = CachedResourceName(iIndex);
+  m_sLastCachedFlow = CachedResourceName(index);
   auto  pFlowItem = EditableFileModel()->CachedFile(m_sLastCachedFlow);
   if (nullptr != pFlowItem)
   {

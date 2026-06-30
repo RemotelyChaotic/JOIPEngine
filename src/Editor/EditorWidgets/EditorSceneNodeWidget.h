@@ -88,8 +88,8 @@ protected slots:
   void SlotStyleChanged();
 
 private:
-  QString CachedResourceName(qint32 iIndex);
-  void ReloadEditor(qint32 iIndex);
+  QString CachedResourceName(const QModelIndex& index);
+  void ReloadEditor(const QModelIndex& index);
 
   std::shared_ptr<Ui::CEditorSceneNodeWidget>                 m_spUi;
   std::shared_ptr<CSceneNodeWidgetTutorialStateSwitchHandler> m_spStateSwitchHandler;
