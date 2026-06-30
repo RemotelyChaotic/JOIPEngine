@@ -200,7 +200,6 @@ QUndoStack* CEditorModel::UndoStack() const
 namespace
 {
   void UpdateQmldir(const QFileInfo& sAbsoluteFile, const QString& sRelativePath,
-                    std::shared_ptr<CDatabaseManager> spDbManager,
                     tspProject spProject)
   {
     const QString sQmlDir = sAbsoluteFile.absolutePath() + "/qmldir";
@@ -250,10 +249,10 @@ namespace
     // update resources to include the file
     SResourcePath url = joip_resource::CreatePathFromAbsolutePath(sQmlDir, spProject);
     QString sResource = QString("qmldir_%1").arg(sImport);
-    tspResource spRes = spDbManager->FindResourceInProject(spProject, sResource);
+    tspResource spRes = CDatabaseManager::FindResourceInProject(spProject, sResource);
     if (nullptr == spRes)
     {
-      spDbManager->AddResource(spProject, url, EResourceType::eOther, sResource);
+      CDatabaseManager::AddResource(spProject, url, EResourceType::eOther, sResource);
     }
   }
 
@@ -351,18 +350,8 @@ QString CEditorModel::AddNewFileToScene(QPointer<QWidget> pParentForDialog,
 
     if (!sResource.isEmpty())
     {
-      if (EResourceType::eLayout == type._to_integral())
-      {
-        const QString sProjectPath = PhysicalProjectPath(m_spCurrentProject);
-        QDir projectDir(sProjectPath);
-        tspResource spResource = spDbManager->FindResourceInProject(m_spCurrentProject, sResource);
-        if (nullptr != spResource)
-        {
-          QFileInfo info(static_cast<QUrl>(spResource->m_sPath).toLocalFile());
-          QString sRelativePath = projectDir.relativeFilePath(info.absoluteFilePath());
-          UpdateQmldir(info, sRelativePath, spDbManager, m_spCurrentProject);
-        }
-      }
+      UpdateQmldirFile(
+          CDatabaseManager::FindResourceInProject(m_spCurrentProject, sResource));
     }
 
     return sResource;
@@ -447,6 +436,25 @@ QString CEditorModel::AddNewFile(QPointer<QWidget> pParentForDialog,
   return QString();
 }
 
+//----------------------------------------------------------------------------------------
+//
+void CEditorModel::UpdateQmldirFile(const tspResource& spLayoutResource)
+{
+  if (nullptr != spLayoutResource)
+  {
+    QReadLocker lRes(&spLayoutResource->m_rwLock);
+    if (EResourceType::eLayout == spLayoutResource->m_type._to_integral())
+    {
+      const QString sProjectPath = PhysicalProjectPath(spLayoutResource->m_spParent);
+      QDir projectDir(sProjectPath);
+      QFileInfo info(static_cast<QUrl>(spLayoutResource->m_sPath).toLocalFile());
+      QString sRelativePath = projectDir.relativeFilePath(info.absoluteFilePath());
+
+      lRes.unlock();
+      UpdateQmldir(info, sRelativePath, spLayoutResource->m_spParent);
+    }
+  }
+}
 
 //----------------------------------------------------------------------------------------
 //

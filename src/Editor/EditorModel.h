@@ -71,6 +71,7 @@ public:
                             const QString& sCustomInitContent,
                             const QStringList& vsFormats,
                             const tvfnActionsResource& vfnActions);
+  static void UpdateQmldirFile(const tspResource& spLayoutResource);
 
   void AddTutorialStateSwitchHandler(std::weak_ptr<ITutorialStateSwitchHandler> wpSwitcher);
   void NextTutorialState();
