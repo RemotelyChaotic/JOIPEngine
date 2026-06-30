@@ -230,12 +230,38 @@ CPhysFsFileEngine::FileFlags CPhysFsFileEngine::fileFlags(FileFlags type) const
 
 QString CPhysFsFileEngine::fileName(FileName file) const
 {
-  if (file == CPhysFsFileEngine::AbsolutePathName)
+  qint32 iLastSeparator = m_sFilename.lastIndexOf(QRegExp("\\\\|\\/"));
+  switch (file)
   {
-    return PHYSFS_getWriteDir();
+    case DefaultName: [[fallthrough]];
+    case AbsoluteName: [[fallthrough]];
+    case CanonicalName:
+      return CPhysFsFileEngineHandler::c_sScheme + m_sFilename;
+    case BaseName:
+    {
+      qint32 iFirstDot = m_sFilename.indexOf(".", iLastSeparator);
+      return iLastSeparator < 0
+                 ? m_sFilename :
+                 m_sFilename.mid(iLastSeparator, iFirstDot - iLastSeparator);
+    } break;
+    case PathName: [[fallthrough]];
+    case AbsolutePathName: [[fallthrough]];
+    case CanonicalPathName:
+    {
+      if (-1 != iLastSeparator)
+      {
+        return CPhysFsFileEngineHandler::c_sScheme + m_sFilename.mid(0, iLastSeparator);
+      }
+      return CPhysFsFileEngineHandler::c_sScheme + m_sFilename;
+    }
+    case LinkName: [[fallthrough]];
+    case BundleName:
+      return QString();
+    case NFileNames:
+      break;
   }
 
-  return CPhysFsFileEngineHandler::c_sScheme + m_sFilename;
+  return PHYSFS_getWriteDir();
 }
 
 QDateTime CPhysFsFileEngine::fileTime(FileTime time) const
