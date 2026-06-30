@@ -7,6 +7,7 @@ Fixed Bugs:
 - Fixed a crash with iterating an empty directory.
 - Fixed PhysFS file name component fetching.
 - Fixed updating of qmldir file when adding Layout Resources.
+- Fixed QML import paths not correctly being added.
 
 =================
 Version 1.8.0.0

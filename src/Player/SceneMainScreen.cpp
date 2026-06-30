@@ -299,19 +299,24 @@ void CSceneMainScreen::LoadProject(qint32 iId, const tSceneToLoad& sStartScene)
 
     QStringList vsPaths = m_vsBaseImportPathList;
     vsPaths << "qrc:/qml/resources/qml/";
-    vsPaths << CPhysFsFileEngineHandler::c_sScheme;
     {
       QReadLocker l(&m_spCurrentProject->m_rwLock);
-      tspResource spRes =
-          spDbManager->FindResourceInProject(m_spCurrentProject,
-                                             m_spCurrentProject->m_sPlayerLayout);
-      if (nullptr != spRes)
+      vsPaths << CPhysFsFileEngineHandler::c_sScheme + m_spCurrentProject->m_sFolderName;
+
+      for (const auto& [sName, spRes] : m_spCurrentProject->m_baseData.m_spResourcesMap)
       {
         QReadLocker lRes(&spRes->m_rwLock);
-        QString sPath = static_cast<QString>(spRes->m_sPath);
-        vsPaths << sPath.left(sPath.lastIndexOf("/"));
+        if (spRes->m_type._to_integral() == EResourceType::eLayout ||
+            (spRes->m_type._to_integral() == EResourceType::eOther &&
+             spRes->m_sName.startsWith("qmldir")))
+        {
+          QString sPath = static_cast<QString>(spRes->m_sPath);
+          sPath = sPath.left(sPath.lastIndexOf("/"));
+          vsPaths << sPath.left(sPath.lastIndexOf("/"));
+        }
       }
     }
+    vsPaths.removeDuplicates();
     m_pQmlWidget->engine()->setImportPathList(vsPaths);
 
     if (std::holds_alternative<QString>(sStartScene))
