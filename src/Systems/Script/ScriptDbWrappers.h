@@ -9,6 +9,7 @@
 #include "Systems/Database/SaveData.h"
 #include "Systems/Database/Scene.h"
 #include <QObject>
+#include <unordered_set>
 #include <variant>
 
 class CResourceScriptWrapperReadOnly;
@@ -134,6 +135,11 @@ protected:
 
   std::shared_ptr<SProject>              m_spData;
   tEngineType                            m_pEngine;
+  // cache to make lookup faster
+  std::unordered_set<QString>            m_vsScenes;
+  std::unordered_set<QString>            m_vsResources;
+  std::unordered_set<QString>            m_vsTags;
+  std::unordered_set<QString>            m_vsAchievements;
 };
 
 //----------------------------------------------------------------------------------------

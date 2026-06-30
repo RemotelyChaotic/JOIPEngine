@@ -53,6 +53,47 @@ CProjectScriptWrapperReadOnly::CProjectScriptWrapperReadOnly(tEngineType pEngine
 {
   assert(nullptr != spProject);
   assert(CheckEngineNotNull(pEngine));
+
+  QReadLocker locker(&m_spData->m_rwLock);
+
+  // cache stuff
+  for (const auto& spScene : m_spData->m_pluginData.m_vspScenes)
+  {
+    QReadLocker l(&spScene->m_rwLock);
+    m_vsScenes.insert(spScene->m_sName);
+  }
+  for (const auto& spScene : m_spData->m_baseData.m_vspScenes)
+  {
+    QReadLocker l(&spScene->m_rwLock);
+    m_vsScenes.insert(spScene->m_sName);
+  }
+
+  for (const auto& [sName, _] : m_spData->m_pluginData.m_spResourcesMap)
+  {
+    m_vsResources.insert(sName);
+  }
+  for (const auto& [sName, _] : m_spData->m_baseData.m_spResourcesMap)
+  {
+    m_vsResources.insert(sName);
+  }
+
+  for (const auto& [sName, _] : m_spData->m_pluginData.m_vspTags)
+  {
+    m_vsTags.insert(sName);
+  }
+  for (const auto& [sName, _] : m_spData->m_baseData.m_vspTags)
+  {
+    m_vsTags.insert(sName);
+  }
+
+  for (const auto& [sName, _] : m_spData->m_pluginData.m_vspAchievements)
+  {
+    m_vsAchievements.insert(sName);
+  }
+  for (const auto& [sName, _] : m_spData->m_baseData.m_vspAchievements)
+  {
+    m_vsAchievements.insert(sName);
+  }
 }
 
 CProjectScriptWrapperReadOnly::~CProjectScriptWrapperReadOnly()
@@ -315,38 +356,14 @@ QVariant CProjectScriptWrapperReadOnly::kink(const QString& sName)
 //
 qint32 CProjectScriptWrapperReadOnly::numScenes()
 {
-  QReadLocker locker(&m_spData->m_rwLock);
-  std::set<QString> vScenes;
-  for (const auto& spScene : m_spData->m_pluginData.m_vspScenes)
-  {
-    QReadLocker l(&spScene->m_rwLock);
-    vScenes.insert(spScene->m_sName);
-  }
-  for (const auto& spScene : m_spData->m_baseData.m_vspScenes)
-  {
-    QReadLocker l(&spScene->m_rwLock);
-    vScenes.insert(spScene->m_sName);
-  }
-  return static_cast<qint32>(vScenes.size());
+  return static_cast<qint32>(m_vsScenes.size());
 }
 
 //----------------------------------------------------------------------------------------
 //
 QStringList CProjectScriptWrapperReadOnly::scenes()
 {
-  QStringList outList;
-  QReadLocker locker(&m_spData->m_rwLock);
-  for (qint32 iIndex = 0; m_spData->m_pluginData.m_vspScenes.size() > static_cast<size_t>(iIndex); ++iIndex)
-  {
-    QReadLocker sceneLocker(&m_spData->m_pluginData.m_vspScenes[static_cast<size_t>(iIndex)]->m_rwLock);
-    outList << m_spData->m_pluginData.m_vspScenes[static_cast<size_t>(iIndex)]->m_sName;
-  }
-  for (qint32 iIndex = 0; m_spData->m_baseData.m_vspScenes.size() > static_cast<size_t>(iIndex); ++iIndex)
-  {
-    QReadLocker sceneLocker(&m_spData->m_baseData.m_vspScenes[static_cast<size_t>(iIndex)]->m_rwLock);
-    outList << m_spData->m_baseData.m_vspScenes[static_cast<size_t>(iIndex)]->m_sName;
-  }
-  outList.removeDuplicates();
+  QStringList outList(m_vsScenes.begin(), m_vsScenes.end());
   return outList;
 }
 
@@ -380,61 +397,28 @@ QVariant CProjectScriptWrapperReadOnly::scene(const QString& sName)
 //
 QVariant CProjectScriptWrapperReadOnly::scene(qint32 iIndex)
 {
-  QReadLocker locker(&m_spData->m_rwLock);
-  if (0 <= iIndex && m_spData->m_pluginData.m_vspScenes.size() > static_cast<size_t>(iIndex))
+  if (0 > iIndex || m_vsScenes.size() <= iIndex)
   {
-    QReadLocker sceneLocker(&m_spData->m_pluginData.m_vspScenes[static_cast<size_t>(iIndex)]->m_rwLock);
-    QString sName = m_spData->m_pluginData.m_vspScenes[static_cast<size_t>(iIndex)]->m_sName;
-    sceneLocker.unlock();
-
-    CSceneScriptWrapperReadOnly* pScene = CreateSceneWrapper(m_spData->m_pluginData.m_vspScenes[static_cast<size_t>(iIndex)]);
-    return CreateScriptObject(pScene, m_pEngine);
+    return QVariant();
   }
-  if (0 <= iIndex && m_spData->m_baseData.m_vspScenes.size() > static_cast<size_t>(iIndex))
-  {
-    QReadLocker sceneLocker(&m_spData->m_baseData.m_vspScenes[static_cast<size_t>(iIndex)]->m_rwLock);
-    QString sName = m_spData->m_baseData.m_vspScenes[static_cast<size_t>(iIndex)]->m_sName;
-    sceneLocker.unlock();
-
-    CSceneScriptWrapperReadOnly* pScene = CreateSceneWrapper(m_spData->m_baseData.m_vspScenes[static_cast<size_t>(iIndex)]);
-    return CreateScriptObject(pScene, m_pEngine);
-  }
-  return QVariant();
+  auto it = m_vsScenes.begin();
+  std::advance(it, static_cast<size_t>(iIndex));
+  return scene(*it);
 }
 
 //----------------------------------------------------------------------------------------
 //
 qint32 CProjectScriptWrapperReadOnly::numResources()
 {
-  QReadLocker locker(&m_spData->m_rwLock);
-  std::set<QString> vResources;
-  for (const auto& [sName, _] : m_spData->m_pluginData.m_spResourcesMap)
-  {
-    vResources.insert(sName);
-  }
-  for (const auto& [sName, _] : m_spData->m_baseData.m_spResourcesMap)
-  {
-    vResources.insert(sName);
-  }
-  return static_cast<qint32>(vResources.size());
+  return static_cast<qint32>(m_vsResources.size());
 }
 
 //----------------------------------------------------------------------------------------
 //
 QStringList CProjectScriptWrapperReadOnly::resources()
 {
-  QReadLocker locker(&m_spData->m_rwLock);
-  QStringList ret;
-  for (auto it = m_spData->m_pluginData.m_spResourcesMap.begin(); m_spData->m_pluginData.m_spResourcesMap.end() != it; ++it)
-  {
-    ret << it->first;
-  }
-  for (auto it = m_spData->m_baseData.m_spResourcesMap.begin(); m_spData->m_baseData.m_spResourcesMap.end() != it; ++it)
-  {
-    ret << it->first;
-  }
-  ret.removeDuplicates();
-  return ret;
+  QStringList outList(m_vsResources.begin(), m_vsResources.end());
+  return outList;
 }
 
 //----------------------------------------------------------------------------------------
@@ -461,63 +445,28 @@ QVariant CProjectScriptWrapperReadOnly::resource(const QString& sValue)
 //
 QVariant CProjectScriptWrapperReadOnly::resource(qint32 iIndex)
 {
-  QReadLocker locker(&m_spData->m_rwLock);
-  auto it = m_spData->m_pluginData.m_spResourcesMap.begin();
-  if (0 <= iIndex && m_spData->m_pluginData.m_spResourcesMap.size() > static_cast<size_t>(iIndex))
+  if (0 > iIndex || m_vsResources.size() <= iIndex)
   {
-    std::advance(it, iIndex);
-    if (m_spData->m_pluginData.m_spResourcesMap.end() != it)
-    {
-      CResourceScriptWrapperReadOnly* pResource = CreateReosurceWrapper(it->second);
-      return CreateScriptObject(pResource, m_pEngine);
-    }
+    return QVariant();
   }
-  it = m_spData->m_baseData.m_spResourcesMap.begin();
-  if (0 <= iIndex && m_spData->m_baseData.m_spResourcesMap.size() > static_cast<size_t>(iIndex))
-  {
-    std::advance(it, iIndex);
-    if (m_spData->m_baseData.m_spResourcesMap.end() != it)
-    {
-      CResourceScriptWrapperReadOnly* pResource = CreateReosurceWrapper(it->second);
-      return CreateScriptObject(pResource, m_pEngine);
-    }
-  }
-  return QVariant();
+  auto it = m_vsResources.begin();
+  std::advance(it, static_cast<size_t>(iIndex));
+  return resource(*it);
 }
 
 //----------------------------------------------------------------------------------------
 //
 qint32 CProjectScriptWrapperReadOnly::numTags()
 {
-  QReadLocker locker(&m_spData->m_rwLock);
-  std::set<QString> vTags;
-  for (const auto& [sName, _] : m_spData->m_pluginData.m_vspTags)
-  {
-    vTags.insert(sName);
-  }
-  for (const auto& [sName, _] : m_spData->m_baseData.m_vspTags)
-  {
-    vTags.insert(sName);
-  }
-  return static_cast<qint32>(vTags.size());
+  return static_cast<qint32>(m_vsTags.size());
 }
 
 //----------------------------------------------------------------------------------------
 //
 QStringList CProjectScriptWrapperReadOnly::tags()
 {
-  QReadLocker locker(&m_spData->m_rwLock);
-  QStringList ret;
-  for (auto it = m_spData->m_pluginData.m_vspTags.begin(); m_spData->m_pluginData.m_vspTags.end() != it; ++it)
-  {
-    ret << it->second->m_sName;
-  }
-  for (auto it = m_spData->m_baseData.m_vspTags.begin(); m_spData->m_baseData.m_vspTags.end() != it; ++it)
-  {
-    ret << it->second->m_sName;
-  }
-  ret.removeDuplicates();
-  return ret;
+  QStringList outList(m_vsTags.begin(), m_vsTags.end());
+  return outList;
 }
 
 //----------------------------------------------------------------------------------------
@@ -546,65 +495,28 @@ QVariant CProjectScriptWrapperReadOnly::tag(const QString& sValue)
 //
 QVariant CProjectScriptWrapperReadOnly::tag(qint32 iIndex)
 {
-  QReadLocker locker(&m_spData->m_rwLock);
-  auto it = m_spData->m_pluginData.m_vspTags.begin();
-  if (0 <= iIndex && m_spData->m_pluginData.m_vspTags.size() > static_cast<size_t>(iIndex))
+  if (0 > iIndex || m_vsTags.size() <= iIndex)
   {
-    std::advance(it, iIndex);
-    if (m_spData->m_pluginData.m_vspTags.end() != it)
-    {
-      CTagWrapperReadOnly* pTag =
-          new CTagWrapperReadOnly(m_pEngine, std::make_shared<STag>(*it->second));
-      return CreateScriptObject(pTag, m_pEngine);
-    }
+    return QVariant();
   }
-  it = m_spData->m_baseData.m_vspTags.begin();
-  if (0 <= iIndex && m_spData->m_baseData.m_vspTags.size() > static_cast<size_t>(iIndex))
-  {
-    std::advance(it, iIndex);
-    if (m_spData->m_baseData.m_vspTags.end() != it)
-    {
-      CTagWrapperReadOnly* pTag =
-          new CTagWrapperReadOnly(m_pEngine, std::make_shared<STag>(*it->second));
-      return CreateScriptObject(pTag, m_pEngine);
-    }
-  }
-  return QVariant();
+  auto it = m_vsTags.begin();
+  std::advance(it, static_cast<size_t>(iIndex));
+  return tag(*it);
 }
 
 //----------------------------------------------------------------------------------------
 //
 qint32 CProjectScriptWrapperReadOnly::numAchievements()
 {
-  QReadLocker locker(&m_spData->m_rwLock);
-  std::set<QString> vAchs;
-  for (const auto& [sName, _] : m_spData->m_pluginData.m_vspAchievements)
-  {
-    vAchs.insert(sName);
-  }
-  for (const auto& [sName, _] : m_spData->m_baseData.m_vspAchievements)
-  {
-    vAchs.insert(sName);
-  }
-  return static_cast<qint32>(vAchs.size());
+  return static_cast<qint32>(m_vsAchievements.size());
 }
 
 //----------------------------------------------------------------------------------------
 //
 QStringList CProjectScriptWrapperReadOnly::achievements()
 {
-  QReadLocker locker(&m_spData->m_rwLock);
-  QStringList ret;
-  for (auto it = m_spData->m_pluginData.m_vspAchievements.begin(); m_spData->m_pluginData.m_vspAchievements.end() != it; ++it)
-  {
-    ret << it->second->m_sName;
-  }
-  for (auto it = m_spData->m_baseData.m_vspAchievements.begin(); m_spData->m_baseData.m_vspAchievements.end() != it; ++it)
-  {
-    ret << it->second->m_sName;
-  }
-  ret.removeDuplicates();
-  return ret;
+  QStringList outList(m_vsAchievements.begin(), m_vsAchievements.end());
+  return outList;
 }
 
 //----------------------------------------------------------------------------------------
@@ -631,28 +543,13 @@ QVariant CProjectScriptWrapperReadOnly::achievement(const QString& sValue)
 //
 QVariant CProjectScriptWrapperReadOnly::achievement(qint32 iIndex)
 {
-  QReadLocker locker(&m_spData->m_rwLock);
-  auto it = m_spData->m_pluginData.m_vspAchievements.begin();
-  if (0 <= iIndex && m_spData->m_pluginData.m_vspAchievements.size() > static_cast<size_t>(iIndex))
+  if (0 > iIndex || m_vsAchievements.size() <= iIndex)
   {
-    std::advance(it, iIndex);
-    if (m_spData->m_pluginData.m_vspAchievements.end() != it)
-    {
-      CSaveDataWrapperReadOnly* pTag = CreateSaveDataWrapper(it->second);
-      return CreateScriptObject(pTag, m_pEngine);
-    }
+    return QVariant();
   }
-  it = m_spData->m_baseData.m_vspAchievements.begin();
-  if (0 <= iIndex && m_spData->m_baseData.m_vspAchievements.size() > static_cast<size_t>(iIndex))
-  {
-    std::advance(it, iIndex);
-    if (m_spData->m_baseData.m_vspAchievements.end() != it)
-    {
-      CSaveDataWrapperReadOnly* pTag = CreateSaveDataWrapper(it->second);
-      return CreateScriptObject(pTag, m_pEngine);
-    }
-  }
-  return QVariant();
+  auto it = m_vsAchievements.begin();
+  std::advance(it, static_cast<size_t>(iIndex));
+  return achievement(*it);
 }
 
 //----------------------------------------------------------------------------------------

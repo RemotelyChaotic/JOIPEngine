@@ -8,6 +8,7 @@ Fixed Bugs:
 - Fixed PhysFS file name component fetching.
 - Fixed updating of qmldir file when adding Layout Resources.
 - Fixed QML import paths not correctly being added.
+- Project objects cache plugin and base data for faster access.
 
 =================
 Version 1.8.0.0
