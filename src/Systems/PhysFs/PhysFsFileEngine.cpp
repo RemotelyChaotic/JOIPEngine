@@ -14,7 +14,14 @@ CPhysFsFileEngineIterator::CPhysFsFileEngineIterator(const QString& sPath, QDir:
   vsEntries(CPhysFsFileEngine::entryListStatic(sPath, filters, vsNameFilters)),
   iCurent(0)
 {
-  nextInfo = QFileInfo(vsEntries[iCurent]);
+  if (vsEntries.size() > 0)
+  {
+    nextInfo = QFileInfo(vsEntries[iCurent]);
+  }
+  else
+  {
+    nextInfo = QFileInfo();
+  }
 }
 CPhysFsFileEngineIterator::~CPhysFsFileEngineIterator()
 {
