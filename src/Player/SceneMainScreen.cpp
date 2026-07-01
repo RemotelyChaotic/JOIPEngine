@@ -312,6 +312,7 @@ void CSceneMainScreen::LoadProject(qint32 iId, const tSceneToLoad& sStartScene)
         {
           QString sPath = static_cast<QString>(spRes->m_sPath);
           sPath = sPath.left(sPath.lastIndexOf("/"));
+          vsPaths << sPath;
           vsPaths << sPath.left(sPath.lastIndexOf("/"));
         }
       }
