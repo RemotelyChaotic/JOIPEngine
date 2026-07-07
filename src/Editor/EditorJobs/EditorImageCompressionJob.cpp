@@ -162,10 +162,10 @@ bool CEditorImageCompressionJob::Run(const QVariantList& args)
     qint32 iResourceNr = 0;
     for (const tspResource& spResource : vspResourcesToConvert)
     {
+      QString sSourcePath = spResource->PhysicalResourcePath();
+
       QWriteLocker resLocker(&spResource->m_rwLock);
       emit SignalJobMessage(m_iId, JobType(), spResource->m_sName);
-
-      QString sSourcePath = spResource->PhysicalResourcePath();
 
       // qimage can not handle PhysFS paths because reasons
       QString sDestPathImage = sSourcePath + ".jpeg";
