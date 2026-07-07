@@ -5,6 +5,7 @@ Version 1.8.2.0
 Fixed Bugs:
 - Added the qmldir directory to the QML import path as well.
 - Fixed a deadlock in the image compress Tool.
+- Fixed a crash with the tag overlay if no Resources are selected
 
 =================
 Version 1.8.1.0

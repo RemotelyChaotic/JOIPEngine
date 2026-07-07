@@ -540,9 +540,10 @@ void CEditorResourceWidget::SlotTagsButtonClicked()
   auto spDbManager = m_wpDbManager.lock();
   if (nullptr != spDbManager)
   {
-    if (!m_spUi->pResourceModelView->SelectedResources().isEmpty())
+    QStringList vsRes = m_spUi->pResourceModelView->SelectedResources();
+    if (vsRes.size() > 0)
     {
-      QString sName = m_spUi->pResourceModelView->SelectedResources()[0];
+      QString sName = vsRes[0];
       m_spTagsOverlay->SetResource(sName);
       m_spTagsOverlay->Show();
     }
