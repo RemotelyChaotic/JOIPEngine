@@ -1,6 +1,7 @@
 module JoipEngine
 CenteredFlow 1.3 CenteredFlow.qml
 ImageResourceView 1.3 ImageResourceView.qml
+IconResourceDelegate 1.8 IconResourceDelegate.qml
 MetronomeItem 1.3 MetronomeItem.qml
 MovieResourceView 1.3 MovieResourceView.qml
 PlayerAchievementView 1.5 PlayerAchievementView.qml
