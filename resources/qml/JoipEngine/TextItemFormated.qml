@@ -12,6 +12,7 @@ Rectangle {
     property real maximumWidth: 1000000
     property string text: ""
     property var textColor: "#ffffff"
+    property int pointSize: 14
 
     property bool isHtml: text.startsWith("<html>") && text.endsWith("</html>")
     property string textFormated: {
@@ -38,7 +39,7 @@ Rectangle {
 
         font.family: null != root.currentlyLoadedProject ?
                          root.currentlyLoadedProject.font : "Arial"
-        font.pointSize: 14
+        font.pointSize: textItemRoot.pointSize
         font.hintingPreference: Font.PreferNoHinting
 
         text: QtApp.decodeHTML(textItemRoot.text)
@@ -56,7 +57,7 @@ Rectangle {
 
         font.family: null != root.currentlyLoadedProject ?
                          root.currentlyLoadedProject.font : "Arial"
-        font.pointSize: 14
+        font.pointSize: textItemRoot.pointSize
         font.hintingPreference: Font.PreferNoHinting
 
         text: textItemRoot.textFormated
