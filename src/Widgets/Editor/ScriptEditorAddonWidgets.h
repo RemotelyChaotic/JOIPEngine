@@ -139,6 +139,7 @@ private slots:
   void CursorPositionChanged();
   void ClearAllErors();
   void ErrorAdded();
+  void ErrorSelected(QListWidgetItem* pItem);
   void ToggleErrorList();
   void WhiteSpaceButtonPressed();
   void ZoomChanged(qint32 iZoom);

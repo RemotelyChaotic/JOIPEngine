@@ -177,7 +177,7 @@ CScriptCompleterFileProcessorJs::CScriptCompleterFileProcessorJs() :
           QDomNode itemNode = itemNodes.at(j);
           if (itemNode.isElement())
           {
-            auto sNode = node.toElement().text();
+            auto sNode = itemNode.toElement().text();
             if (!sNode.isEmpty())
             {
               m_vsInbuiltKeywords.insert(sNode);
@@ -258,7 +258,7 @@ CScriptCompleterFileProcessorLua::CScriptCompleterFileProcessorLua() :
           QDomNode itemNode = itemNodes.at(j);
           if (itemNode.isElement())
           {
-            QString s = node.toElement().text();
+            QString s = itemNode.toElement().text();
             QStringList vs = s.split(".");
             for (const QString& sVal : vs)
             {
@@ -341,7 +341,7 @@ CScriptCompleterFileProcessorQml::CScriptCompleterFileProcessorQml() :
             QDomNode itemNode = itemNodes.at(j);
             if (itemNode.isElement())
             {
-              auto sNode = node.toElement().text();
+              auto sNode = itemNode.toElement().text();
               if (!sNode.isEmpty())
               {
                 m_vsInbuiltKeywords.insert(sNode);

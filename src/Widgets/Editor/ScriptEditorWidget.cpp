@@ -465,7 +465,7 @@ void CScriptEditorWidget::UpdateFont()
   font.setFamily(m_sFontFamily);
   font.setStyleHint(QFont::Monospace);
   font.setFixedPitch(true);
-  font.setPointSizeF(m_iFontSize);
+  font.setPointSizeF(m_iFontSize * iZoom / 100);
 
   setFont(font);
   m_pTextEditor->document()->setDefaultFont(font);

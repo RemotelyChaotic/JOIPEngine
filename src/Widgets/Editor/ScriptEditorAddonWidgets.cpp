@@ -402,12 +402,17 @@ void CFoldBlockArea::mousePressEvent(QMouseEvent* pEvt)
         bool bWasVisible = true;
         QStringList vsFoldedData;
         QTextBlock current = block;
+        bool bFirstBlock = true;
         while (blockEnd != current.next())
         {
           current = current.next();
+          if (bFirstBlock)
+          {
+            bFirstBlock = false;
+            bWasVisible = current.isVisible();
+          }
           vsFoldedData << current.text();
-          bWasVisible &= current.isVisible();
-          current.setVisible(!current.isVisible());
+          current.setVisible(!bWasVisible);
         }
 
         // set fold userdata
@@ -715,9 +720,13 @@ CFooterArea::CFooterArea(CScriptEditorWidget* pEditor, QScrollBar* pBottomScroll
   m_pListView = new QListWidget(pEditor);
   m_pListView->setSizePolicy(QSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed));
   m_pListView->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+  m_pListView->setFrameShadow(QFrame::Shadow::Raised);
+  m_pListView->setFrameShape(QFrame::Shape::Box);
   m_pListView->hide();
   m_pCodeEditor = pEditor;
   m_pWidgetArea = pWidgetArea;
+
+  connect(m_pListView, &QListWidget::itemClicked, this, &CFooterArea::ErrorSelected);
 
   QLayout* pLayoutScroll = m_spUi->pScrollAreaContainer->layout();
   if (nullptr != pLayoutScroll)
@@ -839,8 +848,9 @@ void CFooterArea::ErrorAdded()
   qint32 iErrs = 0;
   qint32 iSize = 0;
   m_pWidgetArea->ForEach([&iErrs, &iSize, this](qint32 iLine, QPointer<QLabel> pLbl) mutable {
-    Q_UNUSED(iLine)
     m_pListView->addItem(pLbl->toolTip());
+    m_pListView->model()->setData(m_pListView->model()->index(iLine, 0), iLine,
+                                  Qt::UserRole);
     iSize += m_pListView->sizeHintForRow(iErrs);
     iErrs++;
   });
@@ -848,6 +858,19 @@ void CFooterArea::ErrorAdded()
   m_spUi->ErrorPushButton->setProperty("value", iErrs);
   m_pListView->setFixedSize(m_pListView->sizeHintForColumn(0) + 10, std::min(iSize + 10, 400));
   m_pListView->updateGeometry();
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CFooterArea::ErrorSelected(QListWidgetItem* pItem)
+{
+  qint32 iLine = pItem->data(Qt::UserRole).toInt();
+  QTextBlock b = m_pCodeEditor->TextEdit()->document()->findBlockByNumber(iLine);
+  if (b.isValid())
+  {
+    QTextCursor cursor(b);
+    m_pCodeEditor->TextEdit()->setTextCursor(cursor);
+  }
 }
 
 //----------------------------------------------------------------------------------------
