@@ -107,6 +107,7 @@ Rectangle {
         borderWidth: root.style.timerDisplay.borderWidth
         groveWidth: root.style.timerDisplay.groveWidth
 
+        decorationVisible: true
         timeMsMax: timedItem.maxTimeMs
         timeMsCurrent: timedItem.timeMs
         updateCounter: counter.updateCounter

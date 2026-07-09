@@ -14,6 +14,7 @@ class QSvgRenderer;
 class CTimerCanvasQml : public QQuickPaintedItem
 {
   Q_OBJECT
+  Q_PROPERTY(bool decorationVisible MEMBER m_bDecorationVisible NOTIFY decorationVisibleChanged)
   Q_PROPERTY(QColor primaryColor READ PrimaryColor WRITE SetPrimaryColor NOTIFY primaryColorChanged)
   Q_PROPERTY(QColor secondaryColor READ SecondaryColor WRITE SetSecondaryColor NOTIFY secondaryColorChanged)
   Q_PROPERTY(QColor tertiaryColor READ TertiaryColor WRITE SetTertiaryColor NOTIFY tertiaryColorColorChanged)
@@ -38,6 +39,7 @@ public:
   const QColor& TertiaryColor();
 
 signals:
+  void decorationVisibleChanged();
   void primaryColorChanged();
   void secondaryColorChanged();
   void tertiaryColorColorChanged();
@@ -57,6 +59,7 @@ private:
   qint32                    m_iTimeMsMax;
   qint32                    m_iTimeMsCurrent;
   qint32                    m_iUpdateCounter;
+  bool                      m_bDecorationVisible;
   bool                      m_bVisibleCounter;
 };
 

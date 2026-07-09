@@ -21,6 +21,7 @@ CTimerCanvasQml::CTimerCanvasQml(QQuickItem* pParent) :
   m_tertiaryColor(Qt::white),
   m_iTimeMsMax(0),
   m_iTimeMsCurrent(0),
+  m_bDecorationVisible(true),
   m_bVisibleCounter(true)
 {
 }
@@ -39,7 +40,7 @@ void CTimerCanvasQml::paint(QPainter* pPainter)
                 m_iBorderWidth, m_iGroveWidth,
                 width(), height(), QRect({0,0}, textureSize()),
                 m_iTimeMsMax, m_iTimeMsMax - m_iTimeMsCurrent, m_iUpdateCounter, m_bVisibleCounter,
-                true, true);
+                m_bDecorationVisible, true);
   pPainter->restore();
 }
 
