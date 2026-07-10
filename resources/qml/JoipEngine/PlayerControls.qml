@@ -50,7 +50,7 @@ Rectangle {
             ToolTip.delay: 1000
             ToolTip.timeout: 5000
             ToolTip.visible: hovered
-            ToolTip.text: qsTr("Exit tease") + " (" + Settings.keyBinding("Exit") + ")"
+            ToolTip.text: qsTr("Exit tease")
 
             function quit()
             {
@@ -110,7 +110,7 @@ Rectangle {
             ToolTip.delay: 1000
             ToolTip.timeout: 5000
             ToolTip.visible: hovered
-            ToolTip.text: qsTr("Pause or resume execution") + " (" + Settings.keyBinding("Pause") + ")"
+            ToolTip.text: qsTr("Pause or resume execution")
 
             property bool paused: false
             function pausePlayScene()
@@ -180,7 +180,7 @@ Rectangle {
             ToolTip.delay: 1000
             ToolTip.timeout: 5000
             ToolTip.visible: hovered
-            ToolTip.text: qsTr("Show or hide UI") + " (" + Settings.keyBinding("ToggleUI") + ")"
+            ToolTip.text: qsTr("Show or hide UI")
 
             property bool visibleUi: true
 
@@ -241,7 +241,7 @@ Rectangle {
             ToolTip.delay: 1000
             ToolTip.timeout: 5000
             ToolTip.visible: hovered
-            ToolTip.text: qsTr("Show device list") + " (" + Settings.keyBinding("Devices") + ")"
+            ToolTip.text: qsTr("Show device list")
 
             Image {
                 anchors.centerIn: parent
