@@ -6,7 +6,10 @@
 #include "Systems/EOS/EosHelpers.h"
 #include "Systems/HelpFactory.h"
 #include "Systems/Database/Project.h"
+
+#include "Utils/PlatformHelpers.h"
 #include "Utils/WidgetHelpers.h"
+
 #include "Widgets/HelpOverlay.h"
 
 namespace
@@ -32,6 +35,15 @@ CEditorChoiceScreen::CEditorChoiceScreen(QWidget* pParent) :
 {
   m_spUi->setupUi(this);
   m_spUi->pEnableTutorialCheckBox->hide();
+
+  m_spUi->OpenExplorerButton->setProperty("styleSmall", true);
+  m_spUi->ReloadProjectButton->setProperty("styleSmall", true);
+
+#ifdef Q_OS_ANDROID
+  m_spUi->OpenExplorerButton->hide();
+  m_spUi->ReloadProjectButton->hide();
+#endif
+
   Initialize();
 }
 
@@ -200,5 +212,45 @@ void CEditorChoiceScreen::on_pOpenExistingProjectButton_clicked()
   if (bOk)
   {
     m_spUi->pStackedWidget->SlideInIdx(c_iPageIndexChoice);
+  }
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CEditorChoiceScreen::on_OpenExplorerButton_clicked()
+{
+  if (!m_bInitialized) { return; }
+
+  qint32 iId = m_spUi->pProjectCardSelectionWidget->SelectedId();
+  tspProject spProject = nullptr;
+  auto spDbManager = m_wpDbManager.lock();
+  if (nullptr != spDbManager)
+  {
+    spProject = spDbManager->FindProject(iId);
+  }
+
+  if (-1 == iId || nullptr == spProject)
+  {
+    QString sFolder = CApplication::Instance()->Settings()->ContentFolder();
+    helpers::ShowInGraphicalShell(QFileInfo(sFolder).absoluteFilePath());
+  }
+  else
+  {
+    QString sFolder = PhysicalProjectPath(spProject);
+    helpers::ShowInGraphicalShell(QFileInfo(sFolder).absoluteFilePath());
+  }
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CEditorChoiceScreen::on_ReloadProjectButton_clicked()
+{
+  if (!m_bInitialized) { return; }
+
+  if (auto spManager = m_wpDbManager.lock(); nullptr != spManager)
+  {
+    bool bOk = QMetaObject::invokeMethod(spManager.get(), "SlotContentFolderChanged",
+                                         Qt::QueuedConnection);
+    assert(bOk); Q_UNUSED(bOk);
   }
 }

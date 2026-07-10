@@ -153,6 +153,9 @@
       </sizepolicy>
      </property>
      <layout class="QGridLayout" name="gridLayout">
+      <item row="3" column="0" colspan="4">
+       <widget class="QLineEdit" name="pUrlLineEdit"/>
+      </item>
       <item row="3" column="4">
        <widget class="QPushButton" name="pDownloadButton">
         <property name="text">
@@ -160,7 +163,51 @@
         </property>
        </widget>
       </item>
-      <item row="1" column="0" colspan="5">
+      <item row="3" column="5">
+       <widget class="QWidget" name="widget_2" native="true">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <layout class="QHBoxLayout" name="horizontalLayout_2">
+         <property name="leftMargin">
+          <number>0</number>
+         </property>
+         <property name="topMargin">
+          <number>0</number>
+         </property>
+         <property name="rightMargin">
+          <number>0</number>
+         </property>
+         <property name="bottomMargin">
+          <number>0</number>
+         </property>
+         <item>
+          <widget class="QPushButton" name="OpenExplorerButton">
+           <property name="toolTip">
+            <string>Show in Explorer</string>
+           </property>
+           <property name="text">
+            <string/>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QPushButton" name="ReloadProjectButton">
+           <property name="toolTip">
+            <string>Reload Projects</string>
+           </property>
+           <property name="text">
+            <string/>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </widget>
+      </item>
+      <item row="1" column="0" colspan="6">
        <widget class="CProjectCardSelectionWidget" name="pProjectCardSelectionWidget" native="true">
         <property name="sizePolicy">
          <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
@@ -170,10 +217,7 @@
         </property>
        </widget>
       </item>
-      <item row="3" column="0" colspan="4">
-       <widget class="QLineEdit" name="pUrlLineEdit"/>
-      </item>
-      <item row="2" column="0" colspan="5">
+      <item row="2" column="0" colspan="6">
        <widget class="QLabel" name="label">
         <property name="sizePolicy">
          <sizepolicy hsizetype="Preferred" vsizetype="Fixed">

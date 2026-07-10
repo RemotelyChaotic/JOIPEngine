@@ -34,6 +34,8 @@ protected slots:
   void on_pOpenExistingProjectAtSceneButton_clicked();
   void on_pCancelButton_clicked();
   void on_pProjectCardSelectionWidget_SingalSelected(qint32 iId);
+  void on_OpenExplorerButton_clicked();
+  void on_ReloadProjectButton_clicked();
   void SlotCardsUnloadFinished();
   void SlotExitClicked();
   void SlotSceneUnloadFinished();

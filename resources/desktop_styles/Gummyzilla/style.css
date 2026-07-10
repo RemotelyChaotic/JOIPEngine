@@ -1120,6 +1120,31 @@ QPushButton#CreateNewFlow:pressed,
 QPushButton#CreateNewFlow:disabled {
   image: url(ui/ButtonAddSceneFlowSelected.png);
 }
+QPushButton#OpenExplorerButton,
+QPushButton#ReloadProjectButton {
+  padding: 0px;
+  min-width: 24px;
+  min-height: 24px;
+  max-width: 24px;
+  max-height: 24px;
+  qproperty-iconSize: 24px;
+}
+QPushButton#OpenExplorerButton {
+  image: url(ui/FolderIcon.png);
+}
+QPushButton#OpenExplorerButton:hover,
+QPushButton#OpenExplorerButton:pressed,
+QPushButton#OpenExplorerButton:disabled {
+  image: url(ui/FolderIconSelected.png);
+}
+QPushButton#ReloadProjectButton {
+  image: url(ui/ButtonUndo.png);
+}
+QPushButton#ReloadProjectButton:hover,
+QPushButton#ReloadProjectButton:pressed,
+QPushButton#ReloadProjectButton:disabled {
+  image: url(ui/ButtonUndoSelected.png);
+}
 
 
 QPushButton:hover,

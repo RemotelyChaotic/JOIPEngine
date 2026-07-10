@@ -8,6 +8,7 @@
 #include "Systems/HelpFactory.h"
 #include "Systems/Database/Project.h"
 
+#include "Utils/PlatformHelpers.h"
 #include "Utils/WidgetHelpers.h"
 
 #include "Widgets/HelpOverlay.h"
@@ -57,6 +58,14 @@ void CSceneScreen::Initialize()
   m_spUi->pMainSceneScreen->Initialize(m_spWindowContext, false);
 
   m_spUi->pStackedWidgetSelection->SetSlideDirection(CSlidingWidget::ESlideDirection::eBottom2Top);
+
+  m_spUi->OpenExplorerButton->setProperty("styleSmall", true);
+  m_spUi->ReloadProjectButton->setProperty("styleSmall", true);
+
+#ifdef Q_OS_ANDROID
+  m_spUi->OpenExplorerButton->hide();
+  m_spUi->ReloadProjectButton->hide();
+#endif
 
   m_wpDbManager = CApplication::Instance()->System<CDatabaseManager>();
 
@@ -131,6 +140,7 @@ void CSceneScreen::on_pOpenExistingProjectAtSceneButton_clicked()
       m_spUi->pOpenExistingProjectButton->setEnabled(false);
       m_spUi->pSceneCardSelectionWidget->LoadScenes(iId, vsScenes);
       m_spUi->pStackedWidgetSelection->SlideInIdx(c_iPageIndexScenes);
+      m_spUi->ReloadProjectButton->setEnabled(false);
     }
     else
     {
@@ -156,6 +166,7 @@ void CSceneScreen::on_pCancelButton_clicked()
     m_spUi->pOpenExistingProjectButton->setEnabled(true);
     m_spUi->pSceneCardSelectionWidget->UnloadScenes();
     m_spUi->pStackedWidgetSelection->SlideInIdx(c_iPageIndexProjects);
+    m_spUi->ReloadProjectButton->setEnabled(true);
   }
 }
 
@@ -182,6 +193,42 @@ void CSceneScreen::on_pProjectCardSelectionWidget_SingalSelected(qint32 iId)
   {
     m_spUi->pOpenExistingProjectButton->setEnabled(false);
     m_spUi->pOpenExistingProjectAtSceneButton->setEnabled(false);
+  }
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CSceneScreen::on_OpenExplorerButton_clicked()
+{
+  WIDGET_INITIALIZED_GUARD
+
+  QStringList vsScenes;
+  qint32 iId = m_spUi->pProjectCardSelectionWidget->SelectedId();
+  tspProject spProject =
+      GetDataAndProject(m_spUi->pProjectCardSelectionWidget->SelectedId(), vsScenes);
+  if (-1 == iId || nullptr == spProject)
+  {
+    QString sFolder = CApplication::Instance()->Settings()->ContentFolder();
+    helpers::ShowInGraphicalShell(QFileInfo(sFolder).absoluteFilePath());
+  }
+  else
+  {
+    QString sFolder = PhysicalProjectPath(spProject);
+    helpers::ShowInGraphicalShell(QFileInfo(sFolder).absoluteFilePath());
+  }
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CSceneScreen::on_ReloadProjectButton_clicked()
+{
+  WIDGET_INITIALIZED_GUARD
+
+  if (auto spManager = CApplication::Instance()->System<CDatabaseManager>().lock(); nullptr != spManager)
+  {
+    bool bOk = QMetaObject::invokeMethod(spManager.get(), "SlotContentFolderChanged",
+                                         Qt::QueuedConnection);
+    assert(bOk); Q_UNUSED(bOk);
   }
 }
 

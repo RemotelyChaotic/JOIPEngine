@@ -674,6 +674,23 @@ QPushButton#CreateNewFlow {
   qproperty-icon: url(ui/ButtonAddSceneFlow.png) off,
                   url(ui/ButtonAddSceneFlow.png) on;
 }
+QPushButton#OpenExplorerButton,
+QPushButton#ReloadProjectButton {
+  padding: 0px;
+  min-width: 24px;
+  min-height: 24px;
+  max-width: 24px;
+  max-height: 24px;
+  qproperty-iconSize: 24px;
+}
+QPushButton#OpenExplorerButton {
+  qproperty-icon: url(ui/FolderIcon.png) off,
+                  url(ui/FolderIcon.png) on;
+}
+QPushButton#ReloadProjectButton {
+  qproperty-icon: url(ui/ButtonUndo.png) off,
+                  url(ui/ButtonUndo.png) on;
+}
 
 QPushButton:hover,
 QToolButton:hover {

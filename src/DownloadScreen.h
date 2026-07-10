@@ -30,6 +30,8 @@ signals:
 
 protected slots:
   void on_pDownloadButton_clicked();
+  void on_OpenExplorerButton_clicked();
+  void on_ReloadProjectButton_clicked();
   void on_pCancelButton_clicked();
   void SlotCardsUnloadFinished();
   void SlotExitClicked();

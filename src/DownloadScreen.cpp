@@ -2,13 +2,17 @@
 #include "Application.h"
 #include "Settings.h"
 #include "WindowContext.h"
+#include "ui_DownloadScreen.h"
+
 #include "Systems/DatabaseManager.h"
 #include "Systems/HelpFactory.h"
 #include "Systems/Database/Project.h"
 #include "Systems/ProjectDownloader.h"
+
+#include "Utils/PlatformHelpers.h"
 #include "Utils/WidgetHelpers.h"
+
 #include "Widgets/HelpOverlay.h"
-#include "ui_DownloadScreen.h"
 
 #include <QUrl>
 
@@ -36,6 +40,14 @@ CDownloadScreen::~CDownloadScreen()
 void CDownloadScreen::Initialize()
 {
   m_bInitialized = false;
+
+  m_spUi->OpenExplorerButton->setProperty("styleSmall", true);
+  m_spUi->ReloadProjectButton->setProperty("styleSmall", true);
+
+#ifdef Q_OS_ANDROID
+  m_spUi->OpenExplorerButton->hide();
+  m_spUi->ReloadProjectButton->hide();
+#endif
 
   m_wpDbManager = CApplication::Instance()->System<CDatabaseManager>();
 
@@ -81,6 +93,46 @@ void CDownloadScreen::on_pDownloadButton_clicked()
   if (auto spDownloader = wpDownloader.lock())
   {
     spDownloader->CreateNewDownloadJob(url.host(), QVariantList() << url);
+  }
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CDownloadScreen::on_OpenExplorerButton_clicked()
+{
+  WIDGET_INITIALIZED_GUARD
+
+  qint32 iId = m_spUi->pProjectCardSelectionWidget->SelectedId();
+  tspProject spProject = nullptr;
+  auto spDbManager = m_wpDbManager.lock();
+  if (nullptr != spDbManager)
+  {
+    spProject = spDbManager->FindProject(iId);
+  }
+
+  if (-1 == iId || nullptr == spProject)
+  {
+    QString sFolder = CApplication::Instance()->Settings()->ContentFolder();
+    helpers::ShowInGraphicalShell(QFileInfo(sFolder).absoluteFilePath());
+  }
+  else
+  {
+    QString sFolder = PhysicalProjectPath(spProject);
+    helpers::ShowInGraphicalShell(QFileInfo(sFolder).absoluteFilePath());
+  }
+}
+
+//----------------------------------------------------------------------------------------
+//
+void CDownloadScreen::on_ReloadProjectButton_clicked()
+{
+  WIDGET_INITIALIZED_GUARD
+
+  if (auto spManager = m_wpDbManager.lock(); nullptr != spManager)
+  {
+    bool bOk = QMetaObject::invokeMethod(spManager.get(), "SlotContentFolderChanged",
+                                         Qt::QueuedConnection);
+    assert(bOk); Q_UNUSED(bOk);
   }
 }
 

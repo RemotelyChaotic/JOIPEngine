@@ -37,6 +37,9 @@ protected slots:
 
   void on_pOpenExistingProjectButton_clicked();
 
+  void on_OpenExplorerButton_clicked();
+  void on_ReloadProjectButton_clicked();
+
 private:
   std::unique_ptr<Ui::CEditorChoiceScreen> m_spUi;
   std::weak_ptr<CDatabaseManager>          m_wpDbManager;
