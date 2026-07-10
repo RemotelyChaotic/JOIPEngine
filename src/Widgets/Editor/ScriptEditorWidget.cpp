@@ -183,31 +183,51 @@ void CScriptEditorWidget::SetTabStopWidth(qint32 iNumSpaces)
 
 //----------------------------------------------------------------------------------------
 //
+namespace
+{
+  QString Normalize(QString s)
+  {
+    s.replace("\r\n", "\n");
+    s.replace('\r', '\n');
+    return s;
+  }
+} // namespace
+
+//----------------------------------------------------------------------------------------
+//
 void CScriptEditorWidget::SetText(const QString& sText)
 {
-  m_pTextEditor->setPlainText(sText);
-  UpdateFont();
+  QString sNewText = Normalize(sText);
+  if (Text() != sNewText)
+  {
+    m_pTextEditor->setPlainText(sNewText);
+    UpdateFont();
+  }
 }
 
 //----------------------------------------------------------------------------------------
 //
 void CScriptEditorWidget::SetTextWhilePreservingCursor(const QString& sText)
 {
-  const qint32 iCurrentCursorPosition = m_pTextEditor->textCursor().position();
-  m_pTextEditor->setPlainText(sText);
+  QString sNewText = Normalize(sText);
+  if (Text() != sNewText)
+  {
+    const INT32 iCurrentCursorPosition = m_pTextEditor->textCursor().position();
+    m_pTextEditor->setPlainText(sNewText);
 
-  QTextCursor cursor = m_pTextEditor->textCursor();
-  cursor.setPosition(iCurrentCursorPosition);
-  m_pTextEditor->setTextCursor(cursor);
+    QTextCursor cursor = m_pTextEditor->textCursor();
+    cursor.setPosition(iCurrentCursorPosition);
+    m_pTextEditor->setTextCursor(cursor);
 
-  UpdateFont();
+    UpdateFont();
+  }
 }
 
 //----------------------------------------------------------------------------------------
 //
 QString CScriptEditorWidget::Text() const
 {
-  return m_pTextEditor->toPlainText();
+  return m_pTextEditor->document()->toPlainText();
 }
 
 //----------------------------------------------------------------------------------------

@@ -18,6 +18,7 @@ Fixed Bugs:
 - Multiple small code editor fixes concerning completion, zoom, folding
   and error list.
 - Fixed broken PlayerControls tooltips.
+- More code editor fixes.
 
 =================
 Version 1.8.1.0
