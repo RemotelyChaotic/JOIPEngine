@@ -19,6 +19,7 @@ Fixed Bugs:
   and error list.
 - Fixed broken PlayerControls tooltips.
 - More code editor fixes.
+- Fixed issues with accidentally interrupting Sounds when not intended.
 
 =================
 Version 1.8.1.0

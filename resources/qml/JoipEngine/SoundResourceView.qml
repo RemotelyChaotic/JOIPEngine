@@ -9,7 +9,14 @@ Rectangle {
 
     property Resource resource: null
     property int state: Resource.Null
-    property int playbackState: player.playbackState
+    property int playbackState: {
+        switch(player.playbackState) {
+        case AVPlayer.StoppedState: console.log("StoppedState: " + (resource != null ? resource.name : "null")); return MediaPlayer.StoppedState;
+        case AVPlayer.PlayingState: console.log("PlayingState: " + (resource != null ? resource.name : "null")); return MediaPlayer.PlayingState;
+        case AVPlayer.PausedState: console.log("PausedState: " + (resource != null ? resource.name : "null")); return MediaPlayer.PausedState;
+        }
+    }
+
     property int loops: 1
     property int startAt: 0
     property int endAt: -1
@@ -47,6 +54,11 @@ Rectangle {
 
     function stop()
     {
+        if (null != resource && resource.name === "seduction-jazz")
+        {
+            console.log("stop")
+        }
+
         player.pauseRequested = false;
         player.stoppedTargetState = true;
         player.volume = Settings.muted ? 0.0 : (Settings.volume * mediaPlayer.volume);
@@ -74,6 +86,10 @@ Rectangle {
         {
             soundInstance = SoundManager.get(nameId || resource.name);
             state = Resource.Loading;
+            if (null != resource && resource.name === "seduction-jazz")
+            {
+                console.log("stop")
+            }
             player.stop();
             if (resource.isLocal)
             {
@@ -87,12 +103,20 @@ Rectangle {
             {
                 state = Resource.Null;
                 player.stop();
+                if (null != resource && resource.name === "seduction-jazz")
+                {
+                    console.log("stop")
+                }
             }
         }
         else
         {
             state = Resource.Null;
             player.stop();
+            if (null != resource && resource.name === "seduction-jazz")
+            {
+                console.log("stop")
+            }
         }
     }
 
@@ -158,19 +182,23 @@ Rectangle {
 
 
         onStatusChanged: {
-            if (status === MediaPlayer.Loading)
+            if (status === AVPlayer.Loading)
             {
                 mediaPlayer.state = Resource.Loading;
             }
-            else if (status === MediaPlayer.EndOfMedia)
+            else if (status === AVPlayer.EndOfMedia)
             {
                 currentLoop++;
-                if (currentLoop >= loops)
+                if (currentLoop >= loops && -1 !== mediaPlayer.loops)
                 {
                     player.stop();
+                    if (null != resource && resource.name === "seduction-jazz")
+                    {
+                        console.log("stop")
+                    }
                 }
             }
-            else if (status === MediaPlayer.InvalidMedia)
+            else if (status === AVPlayer.InvalidMedia)
             {
                 mediaPlayer.state = Resource.Error;
             }

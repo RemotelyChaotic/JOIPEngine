@@ -51,7 +51,7 @@ Item {
             {
                 if (null !== player.resource &&
                     (player.nameId !== "" && player.nameId === sResource ||
-                     player.nameId === "" && player.resource.name === sResource))
+                     player.resource.name === "" && player.resource.name === sResource))
                 {
                     return player;
                 }
@@ -72,7 +72,7 @@ Item {
             {
                 if (player.state === Resource.Null ||
                     player.state === Resource.Error ||
-                    player.playbackState === MediaPlayer.StoppedState && player.state === Resource.Loaded)
+                    player.playbackState === MediaPlayer.StoppedState)
                 {
                     return player;
                 }
@@ -88,7 +88,7 @@ Item {
             var player2 = soundRepeater.itemAt(j);
             if (null !== player2 && undefined !== player2)
             {
-                if (player2.playbackState === MediaPlayer.PausedState && player2.state === Resource.Loaded)
+                if (player2.playbackState !== MediaPlayer.PlayingState)
                 {
                     return player2;
                 }
@@ -116,7 +116,7 @@ Item {
                 return true;
             }
         }
-        if ("" === sResource || null === player)
+        else if ("" === sResource)
         {
             for (var i = 0; soundRepeater.count > i; ++i)
             {
