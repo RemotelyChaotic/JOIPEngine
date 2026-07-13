@@ -14,7 +14,7 @@ Item {
             undefined !== registrator.currentlyLoadedProject)
         {
             var pResource = registrator.currentlyLoadedProject.resource(sName);
-            if (null !== pResource && undefined !== pResource &&
+            if (null != pResource &&
                 Resource.Sound === pResource.type && pResource.isLocal)
             {
                 var soundPlayer = findFirstIdleSoundView();
@@ -51,7 +51,7 @@ Item {
             {
                 if (null !== player.resource &&
                     (player.nameId !== "" && player.nameId === sResource ||
-                     player.resource.name === "" && player.resource.name === sResource))
+                     player.resource.name !== "" && player.resource.name === sResource))
                 {
                     return player;
                 }
@@ -72,7 +72,8 @@ Item {
             {
                 if (player.state === Resource.Null ||
                     player.state === Resource.Error ||
-                    player.playbackState === MediaPlayer.StoppedState)
+                    (player.playbackState === MediaPlayer.StoppedState &&
+                     Resource.Loading !== player.state))
                 {
                     return player;
                 }
@@ -88,7 +89,8 @@ Item {
             var player2 = soundRepeater.itemAt(j);
             if (null !== player2 && undefined !== player2)
             {
-                if (player2.playbackState !== MediaPlayer.PlayingState)
+                if (player2.playbackState !== MediaPlayer.PlayingState &&
+                    Resource.Loading !== player2.state)
                 {
                     return player2;
                 }
@@ -179,8 +181,7 @@ Item {
             var player = findSoundView(sId);
             if (null !== player && player.state === Resource.Loaded)
             {
-                if (null !== player.resource &&
-                    sId === player.nameId)
+                if (null !== player.resource && sId === player.nameId)
                 {
                     player.play();
                 }

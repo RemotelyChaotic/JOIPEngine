@@ -54,11 +54,6 @@ Rectangle {
 
     function stop()
     {
-        if (null != resource && resource.name === "seduction-jazz")
-        {
-            console.log("stop")
-        }
-
         player.pauseRequested = false;
         player.stoppedTargetState = true;
         player.volume = Settings.muted ? 0.0 : (Settings.volume * mediaPlayer.volume);
@@ -86,10 +81,6 @@ Rectangle {
         {
             soundInstance = SoundManager.get(nameId || resource.name);
             state = Resource.Loading;
-            if (null != resource && resource.name === "seduction-jazz")
-            {
-                console.log("stop")
-            }
             player.stop();
             if (resource.isLocal)
             {
@@ -103,20 +94,12 @@ Rectangle {
             {
                 state = Resource.Null;
                 player.stop();
-                if (null != resource && resource.name === "seduction-jazz")
-                {
-                    console.log("stop")
-                }
             }
         }
         else
         {
             state = Resource.Null;
             player.stop();
-            if (null != resource && resource.name === "seduction-jazz")
-            {
-                console.log("stop")
-            }
         }
     }
 
@@ -192,10 +175,6 @@ Rectangle {
                 if (currentLoop >= loops && -1 !== mediaPlayer.loops)
                 {
                     player.stop();
-                    if (null != resource && resource.name === "seduction-jazz")
-                    {
-                        console.log("stop")
-                    }
                 }
             }
             else if (status === AVPlayer.InvalidMedia)
