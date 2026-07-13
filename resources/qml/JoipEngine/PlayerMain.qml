@@ -270,11 +270,13 @@ Rectangle {
         property string userName: "thread"
 
         onSkippableWait: {
-            for (var i = 0; root.componentsRegistered.length > i; ++i)
-            {
-                if (null !== root.componentsRegistered[i].obj && undefined !== root.componentsRegistered[i].obj)
+            if (0 < iTimeS) {
+                for (var i = 0; root.componentsRegistered.length > i; ++i)
                 {
-                    root.componentsRegistered[i].obj.setSkippableWait(iTimeS);
+                    if (null !== root.componentsRegistered[i].obj && undefined !== root.componentsRegistered[i].obj)
+                    {
+                        root.componentsRegistered[i].obj.setSkippableWait(iTimeS);
+                    }
                 }
             }
         }

@@ -4,6 +4,8 @@ Version 1.8.3.0
 
 Fixed Bugs:
 - More audio fixes that fix what the previous fix broke.
+- thread.sleep should not affect other threads when the wait 
+  is not skippable.
 
 =================
 Version 1.8.2.0
