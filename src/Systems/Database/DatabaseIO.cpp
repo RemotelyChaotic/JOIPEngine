@@ -765,7 +765,9 @@ bool CDatabaseIO::UnloadProject(tspProject& spProject)
     for (auto& itRes : spProject->m_baseData.m_spResourcesMap)
     {
       tspResource& spRes = itRes.second;
+      locker.unlock();
       UnloadResource(spRes);
+      locker.relock();
     }
   }
 
