@@ -397,7 +397,7 @@ QVariant CProjectScriptWrapperReadOnly::scene(const QString& sName)
 //
 QVariant CProjectScriptWrapperReadOnly::scene(qint32 iIndex)
 {
-  if (0 > iIndex || m_vsScenes.size() <= iIndex)
+  if (0 > iIndex || m_vsScenes.size() <= static_cast<size_t>(iIndex))
   {
     return QVariant();
   }
@@ -445,7 +445,7 @@ QVariant CProjectScriptWrapperReadOnly::resource(const QString& sValue)
 //
 QVariant CProjectScriptWrapperReadOnly::resource(qint32 iIndex)
 {
-  if (0 > iIndex || m_vsResources.size() <= iIndex)
+  if (0 > iIndex || m_vsResources.size() <= static_cast<size_t>(iIndex))
   {
     return QVariant();
   }
@@ -495,7 +495,7 @@ QVariant CProjectScriptWrapperReadOnly::tag(const QString& sValue)
 //
 QVariant CProjectScriptWrapperReadOnly::tag(qint32 iIndex)
 {
-  if (0 > iIndex || m_vsTags.size() <= iIndex)
+  if (0 > iIndex || m_vsTags.size() <= static_cast<size_t>(iIndex))
   {
     return QVariant();
   }
@@ -543,7 +543,7 @@ QVariant CProjectScriptWrapperReadOnly::achievement(const QString& sValue)
 //
 QVariant CProjectScriptWrapperReadOnly::achievement(qint32 iIndex)
 {
-  if (0 > iIndex || m_vsAchievements.size() <= iIndex)
+  if (0 > iIndex || m_vsAchievements.size() <= static_cast<size_t>(iIndex))
   {
     return QVariant();
   }
