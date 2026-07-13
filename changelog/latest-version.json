@@ -1,15 +1,20 @@
 {
-  "latestVersion": "1.8.1",
-  "latestVersionCode": 67585,
+  "latestVersion": "1.8.2",
+  "latestVersionCode": 67586,
   "latestUpdaterVersion": "1.0.0",
   "latestUpdaterVersionCode": 65536,
   "url": "https://github.com/RemotelyChaotic/JOIPEngine/releases/download",
   "releaseNotes": [
-    "- Fixed Flow Editor not opening flows correctly.",
-    "- Fixed a crash with iterating an empty directory.",
-    "- Fixed PhysFS file name component fetching.",
-    "- Fixed updating of qmldir file when adding Layout Resources.",
-    "- Fixed QML import paths not correctly being added.",
-    "- Project objects cache plugin and base data for faster access."
+    "- Added a button to open the project folder and reload all projects to relevant views.",
+    "- Added IconResourceDelegate to qmldir file.",
+    "- Text size of TextItemFormated can be changed.",
+    "- Added the possibility to turn TimerDisplay decorations on or off.",
+    "- Added the qmldir directory to the QML import path as well.",
+    "- Fixed a deadlock in the image compress Tool.",
+    "- Fixed a crash with the tag overlay if no Resources are selected.",
+    "- Multiple small code editor fixes concerning completion, zoom, folding and error list.",
+    "- Fixed broken PlayerControls tooltips.",
+    "- More code editor fixes.",
+    "- Fixed issues with accidentally interrupting Sounds when not intended."
   ]
 }
