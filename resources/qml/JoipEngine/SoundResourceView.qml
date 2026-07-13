@@ -11,9 +11,9 @@ Rectangle {
     property int state: Resource.Null
     property int playbackState: {
         switch(player.playbackState) {
-        case AVPlayer.StoppedState: console.log("StoppedState: " + (resource != null ? resource.name : "null")); return MediaPlayer.StoppedState;
-        case AVPlayer.PlayingState: console.log("PlayingState: " + (resource != null ? resource.name : "null")); return MediaPlayer.PlayingState;
-        case AVPlayer.PausedState: console.log("PausedState: " + (resource != null ? resource.name : "null")); return MediaPlayer.PausedState;
+        case AVPlayer.StoppedState: return MediaPlayer.StoppedState;
+        case AVPlayer.PlayingState: return MediaPlayer.PlayingState;
+        case AVPlayer.PausedState: return MediaPlayer.PausedState;
         }
     }
 
