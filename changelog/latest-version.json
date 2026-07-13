@@ -5,16 +5,7 @@
   "latestUpdaterVersionCode": 65536,
   "url": "https://github.com/RemotelyChaotic/JOIPEngine/releases/download",
   "releaseNotes": [
-    "- Added a button to open the project folder and reload all projects to relevant views.",
-    "- Added IconResourceDelegate to qmldir file.",
-    "- Text size of TextItemFormated can be changed.",
-    "- Added the possibility to turn TimerDisplay decorations on or off.",
-    "- Added the qmldir directory to the QML import path as well.",
-    "- Fixed a deadlock in the image compress Tool.",
-    "- Fixed a crash with the tag overlay if no Resources are selected.",
-    "- Multiple small code editor fixes concerning completion, zoom, folding and error list.",
-    "- Fixed broken PlayerControls tooltips.",
-    "- More code editor fixes.",
-    "- Fixed issues with accidentally interrupting Sounds when not intended."
+    "- More audio fixes that fix what the previous fix broke.",
+    "- thread.sleep should not affect other threads when the wait is not skippable."
   ]
 }
