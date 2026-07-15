@@ -349,7 +349,6 @@
         <file>resources/help/editor/projectsettings/custom_engineversion_help.html</file>
     </qresource>
     <qresource prefix="/qml">
-        <file>resources/qml/JoipEngine/EmptyDummy.qml</file>
         <file>resources/qml/JoipEngine/ErrorResourceView.qml</file>
         <file>resources/qml/JoipEngine/EvalWrapper.js</file>
         <file>resources/qml/JoipEngine/IconResourceDelegate.qml</file>

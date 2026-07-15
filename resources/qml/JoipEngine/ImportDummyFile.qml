@@ -3,6 +3,7 @@ import QtQuick.Controls 2.14
 import QtQuick.Layouts 1.14
 import QtQuick.Particles 2.14
 import QtQuick.Shapes 1.14
+import QtQml 1.14
 import Qt3D.Core 2.14
 import Qt3D.Render 2.14
 import Qt3D.Input 2.14
