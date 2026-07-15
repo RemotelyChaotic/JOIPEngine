@@ -1,11 +1,10 @@
 {
-  "latestVersion": "1.8.3",
-  "latestVersionCode": 67587,
+  "latestVersion": "1.8.4",
+  "latestVersionCode": 67588,
   "latestUpdaterVersion": "1.0.0",
   "latestUpdaterVersionCode": 65536,
   "url": "https://github.com/RemotelyChaotic/JOIPEngine/releases/download",
   "releaseNotes": [
-    "- More audio fixes that fix what the previous fix broke.",
-    "- thread.sleep should not affect other threads when the wait is not skippable."
+    "- Fixed Linux build not deploying needed QML modules."
   ]
 }
